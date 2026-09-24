@@ -1,0 +1,12 @@
+{
+  "env": { "AG3S_ROLE": "verifier" },
+  "permissions": {
+    "deny": [
+      "Edit(//mnt/dev/work/benchmark/**/*.py)",
+      "Edit(//mnt/dev/work/tests/**)",
+      "Edit(//mnt/dev/work/benchmark/ag3s/docs/*.md)",
+      "Edit(//mnt/dev/work/benchmark/ag3s/docs/handoff/*.impl.md)",
+      "Edit(//mnt/dev/work/papers/**)"
+    ]
+  }
+}

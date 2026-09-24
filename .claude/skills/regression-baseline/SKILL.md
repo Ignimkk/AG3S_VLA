@@ -1,0 +1,49 @@
+---
+name: regression-baseline
+description: AG3S 16D 회귀 기준선을 돌리고 판정한다. 코드를 고치기 전/후에 "이 숫자가 그대로인가" 를 확인할 때, 측정을 시작하기 전에 환경이 성한지 볼 때 쓴다.
+---
+
+# 회귀 기준선 (16D)
+
+**이 숫자가 다르면 코드를 고치기 전에 원인부터 찾는다.**
+
+```bash
+MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/work /mnt/dev/work/.venv-ag3s/bin/python -m \
+  benchmark.trajopt.experiments.esdf_rollout --records run_16d_ep1800 \
+  --attention benchmark/ag3s/asset/data/attention_16d_ep1800.npz \
+  --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all \
+  --support-surfaces field --constraint-links arms --out-json /tmp/base.json
+```
+
+## 판정
+
+```
+위반으로 시작 15/15 · 해소 13 · 개선 15 · feasible 13 · violated 2
+```
+
+- **개수만 인용한다.** 프레임별 clearance 와 SQP 반복 수는 기준선이 아니다.
+  `sqp.time_budget_ms` 는 벽시계 **마감**이라(`benchmark/trajopt/sqp.py:159`) 기계 부하에 따라
+  반복이 하나씩 달라진다. 4 회 실행에서 위 개수는 전부 같았고, 프레임 13·14 의
+  `clearance_after` 가 4.19 ↔ 4.97 mm 로 흔들렸다.
+- **`--cameras all` 이 필수다.** head 한 대만 쓰면 에피소드 기반 씬에서 시작 위반이 0/15 라
+  TO 가 고칠 것이 없어 기준선 구실을 못 한다. 세 대는 서빙 경로와 같은 진입점이기도 하다.
+
+## 이 기준선이 재지 **않는** 것
+
+**attention → target grounding 을 재지 않는다.** 두 카메라 구성 모두 `has_target` 이 15/15
+프레임에서 false 다. live 경로는 같은 에피소드에서 성공하는데, 차이는 오프라인이 고정된
+attention 셀 선택을 쓰고 그 셀이 14D 모델에서 정해졌다는 것이다.
+재는 범위는 `depth → 자기 필터 → 필드 → SQP → QP` 다.
+
+## 은퇴한 기준선
+
+**14D(`run_0004` · 해소 14 / feasible 8, violated 7)는 2026-09-24 에 은퇴했다.**
+`wire.ACTION_WIDTH` 가 16 이 되어 14 열 기록으로는 아예 돌지 않는다
+(*"chunk has 14 columns but the layout needs at least 16"*).
+`run_0004` 와 `attention_step1_run0004.npz` 는 14D 기록을 읽는 과거 실험 스크립트용으로 남긴다.
+
+## 용어
+
+- **violated** — 그 프레임의 궤적이 여유거리(clearance) 제약을 하나라도 어긴 상태.
+- **feasible** — 최적화가 끝난 뒤 모든 제약을 만족하는 상태.
+- **해소** — violated 로 시작해 feasible 로 끝난 프레임 수. **개선** — 어긋난 양이 줄어든 프레임 수.

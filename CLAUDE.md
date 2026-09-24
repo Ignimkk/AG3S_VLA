@@ -75,6 +75,33 @@ ESDF/TSDF, 복셀, 청크, 지평, 로봇 구, eikonal, swept volume, carving �
 > 막으려던 실패("어느 쪽이 최신인가")를 피하기 위해 셋을 같이 했다: 옛 파일에 표지, 용어
 > 표를 새 파일로 이동, 그리고 이 규칙과 위 "읽는 순서" 갱신. **다음에 또 나누지 않는다.**
 
+## 병렬 세션 — 누가 무엇을 쓰나
+
+창을 여러 개 띄울 때는 **파일 소유권으로 자른다.** 같은 파일을 둘이 쓰면 한쪽이 덮는다.
+
+| 역할 | 세션 시작 | **쓴다** | 안 쓴다 |
+|---|---|---|---|
+| **A0 lead** | `claude` | `docs/handoff/*.task.md` · `AG3S_REVIEW_PLAN.md` | — |
+| **A1 구현** | `claude --agent ag3s-implementer --settings .claude/roles/implementer.settings.json` | `benchmark/**/*.py` · `tests/**` · `*.impl.md` | docs · figures · papers |
+| **A2 검증** | `claude --agent ag3s-verifier --settings .claude/roles/verifier.settings.json` | `docs/figures/**` · `*.verify.json` · `outputs/verify/**` | 코드(읽기만) · docs · papers |
+| **A3 기록** | `claude --agent ag3s-scribe --settings .claude/roles/scribe.settings.json` | `docs/*.md` · `papers/**` | 코드 · figures · handoff 산출물 |
+
+**`AG3S_T0T6_LOG.md` 의 writer 는 A3 하나다** (규칙 D). 나머지는 `docs/handoff/` 로 넘긴다.
+
+**A1 과 A2 를 분리하는 이유**: 고친 사람이 스스로 재면 기대한 것이 보인다. C2(*"33 mm 대
+2 mm"* — 옛 측정법이 대역폭을 잰 것)와 D2(*"미세 계층은 값어치를 안 한다"* — 미세 창이
+로봇을 안 덮은 한 프레임만 본 것)가 그렇게 뒤집혔다.
+
+**A3 의 철칙**: `<STEP>.verify.json` 의 `numbers` 에 없는 숫자는 쓰지 않는다. 필요하면
+A2 에게 측정을 요청한다. 이것이 *"추측을 기록에 남기지 않는다"* 를 구조로 만든다.
+
+세션끼리는 `ListAgents` → `SendMessage` 로 연락한다. 자세한 것은
+`benchmark/ag3s/docs/handoff/README.md` 와 `.claude/roles/README.md`.
+
+절차는 skill 로 빠져 있다 (필요할 때만 로드된다): `regression-baseline`(회귀 기준선),
+`make-figure`(규칙 A 의 figure 3종), `curobo-esdf`(함정 5개 · eikonal 자가진단).
+경로별 규칙은 `.claude/rules/` — 해당 파일을 만질 때만 들어온다.
+
 ## 진행 방식
 
 각 스텝은 `설명 → 사용자 질문(여기서 멈춤) → 공동 판정 → 확정된 것만 수정+검증 → 기록`.
