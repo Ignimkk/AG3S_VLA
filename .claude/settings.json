@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/mnt/dev/work/.claude/hooks/ag3s-rules.sh",
+            "timeout": 10,
+            "statusMessage": "AG3S 규칙 주입"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+# 화이트리스트 방식이다. pi05_TO_hybrid/ 하나가 249 GB 라서
+# "전부 무시하고 추적할 것만 되살린다" 가 아니면 사고가 난다.
+/*
+
+!/.gitignore
+!/CLAUDE.md
+!/COMMIT_MESSAGES.md
+!/.claude/
+!/papers/
+!/tests/
+
+# benchmark/ 는 자기 repo 를 갖는다 (origin: VLA_Benchmark). 여기서 겹쳐 추적하지 않는다.
+
+# 어디에 있든 추적하지 않는 것
+__pycache__/
+*.py[cod]
+*.npz
+*.tgz
+*.pt
+*.ckpt
+.pytest_cache/
