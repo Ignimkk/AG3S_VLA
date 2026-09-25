@@ -18,8 +18,19 @@ MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/work /mnt/dev/work/.venv-ag3s/bin/python -m
 ## 판정
 
 ```
-위반으로 시작 15/15 · 해소 13 · 개선 15 · feasible 13 · violated 2
+위반으로 시작 15/15 · 해소 13 · 개선 15 · feasible 13 · violated 2 · has_target 9/15
 ```
+
+**단독으로 돌린다. 다른 실행과 겹치면 숫자가 바뀐다.** `sqp.time_budget_ms` 는 벽시계
+마감이라(`sqp.py:159`) 부하가 걸리면 같은 50 ms 안에 반복을 덜 돌고 더 나쁜 iterate 를
+돌려준다. 2026-09-25 에 pytest 전체 · 다른 rollout 과 같이 돌렸더니 **`feasible 9 / violated 6`**
+이 나왔다 — 뒤집힌 프레임 5·9·10 은 반복이 2 → 1 로 줄었고 clearance 가 +4.35 → −6.77 mm 까지
+갔다. 단독으로 다시 돌리니 위 숫자가 한 자리도 안 틀리고 재현됐다.
+**개수가 다르면 코드를 의심하기 전에 무엇이 같이 돌고 있었는지부터 본다.**
+
+`feasible` 은 **clearance 만 세는 숫자가 아니다** (X3, 2026-09-25). `status` 는 clearance 와
+**기하 인증**(`geometry_certified` — AG3S 가 그 프레임 씬을 빠짐없이 설명했다고 보증하는가)을
+함께 본다. `sqp.py:287-293` 은 모든 제약을 통과한 궤적도 인증이 없으면 `VIOLATED` 로 내린다.
 
 - **개수만 인용한다.** 프레임별 clearance 와 SQP 반복 수는 기준선이 아니다.
   `sqp.time_budget_ms` 는 벽시계 **마감**이라(`benchmark/trajopt/sqp.py:159`) 기계 부하에 따라

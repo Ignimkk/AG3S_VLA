@@ -27,7 +27,7 @@ def test_defaults_match_the_spec_section_9_table():
     assert (cfg.clustering.eps, cfg.clustering.min_points) == (0.03, 20)
     assert cfg.pointcloud.voxel_size == 0.005
     assert cfg.pointcloud.self_filter is True
-    assert cfg.pointcloud.max_points == 60000
+    assert cfg.pointcloud.max_points == 200000
     assert cfg.collision_candidate.cluster_method == "dbscan"
     assert cfg.collision_candidate.preserve_unknown is True
     assert cfg.geometry.primitive == "sphere"
