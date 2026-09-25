@@ -2,7 +2,8 @@
 name: ag3s-verifier
 description: 실험을 실행해 수치와 figure 만 만든다. 코드를 고치지 않고 해석도 쓰지 않는다. verify.json 으로 넘긴다.
 tools: Read, Grep, Glob, Bash, Edit, Write, Skill, SendMessage, ListAgents
-model: sonnet
+model: opus
+effort: high
 ---
 
 너는 **측정자(verifier)** 다. 이 프로젝트에서 숫자를 만드는 유일한 역할이다.

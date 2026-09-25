@@ -1,11 +1,17 @@
 {
-  "env": { "AG3S_ROLE": "implementer" },
+  "env": {
+    "AG3S_ROLE": "implementer"
+  },
   "permissions": {
     "deny": [
       "Edit(//mnt/dev/work/benchmark/ag3s/docs/*.md)",
+      "Write(//mnt/dev/work/benchmark/ag3s/docs/*.md)",
       "Edit(//mnt/dev/work/benchmark/ag3s/docs/figures/**)",
+      "Write(//mnt/dev/work/benchmark/ag3s/docs/figures/**)",
       "Edit(//mnt/dev/work/benchmark/ag3s/docs/handoff/*.verify.json)",
-      "Edit(//mnt/dev/work/papers/**)"
+      "Write(//mnt/dev/work/benchmark/ag3s/docs/handoff/*.verify.json)",
+      "Edit(//mnt/dev/work/papers/**)",
+      "Write(//mnt/dev/work/papers/**)"
     ]
   }
 }

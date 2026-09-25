@@ -15,10 +15,21 @@ MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/work /mnt/dev/work/.venv-ag3s/bin/python -m
   --support-surfaces field --constraint-links arms --out-json /tmp/base.json
 ```
 
-## 판정
+## 판정 (2026-09-25 갱신 — 재현되는 것만 기준으로 삼는다)
+
+**`feasible`/`violated`/`해소` 는 기준이 아니다.** `sqp.time_budget_ms` 가 벽시계 마감이라
+같은 명령·같은 코드에서 `12/3/11` ↔ `14/1/13` 으로 흔들린다. 옛 기준값(`13/2/13`)이 그 폭
+안에 들어 있어 기준 구실을 못 했다. 아래 셋은 **SQP 이전 값**이라 소수점까지 재현된다.
+
+**왜 15/15 에서 14/15 로 내려갔나 — 결함이 제거된 것이지 기준선이 흔들린 것이 아니다.**
+자기 필터가 로봇 밑동을 놓쳐 `base` 픽셀 5,758 개가 ESDF 에 **76~99 % 점유**로 들어가 있었다.
+frame 0 에서 팔이 그 **유령 장애물**과 29 mm 겹쳤다고 보고했고, 그것이 옛 "시작 위반 15/15"
+중 하나였다. `self_filter_inflation` 0.02 → 0.05 m 와 `UNCOVERED_LINKS` 보완(자기 필터 구
+194 → 218) 뒤 `frame0 clearance_before` 가 **−29.031 → +0.157 mm** 로 올라왔다.
+
 
 ```
-위반으로 시작 15/15 · 해소 13 · 개선 15 · feasible 13 · violated 2 · has_target 9/15
+위반으로 시작 14/15 · has_target 9/15 · frame0 clearance_before +0.157 mm
 ```
 
 **단독으로 돌린다. 다른 실행과 겹치면 숫자가 바뀐다.** `sqp.time_budget_ms` 는 벽시계

@@ -1,12 +1,19 @@
 {
-  "env": { "AG3S_ROLE": "verifier" },
+  "env": {
+    "AG3S_ROLE": "verifier"
+  },
   "permissions": {
     "deny": [
       "Edit(//mnt/dev/work/benchmark/**/*.py)",
+      "Write(//mnt/dev/work/benchmark/**/*.py)",
       "Edit(//mnt/dev/work/tests/**)",
+      "Write(//mnt/dev/work/tests/**)",
       "Edit(//mnt/dev/work/benchmark/ag3s/docs/*.md)",
+      "Write(//mnt/dev/work/benchmark/ag3s/docs/*.md)",
       "Edit(//mnt/dev/work/benchmark/ag3s/docs/handoff/*.impl.md)",
-      "Edit(//mnt/dev/work/papers/**)"
+      "Write(//mnt/dev/work/benchmark/ag3s/docs/handoff/*.impl.md)",
+      "Edit(//mnt/dev/work/papers/**)",
+      "Write(//mnt/dev/work/papers/**)"
     ]
   }
 }
