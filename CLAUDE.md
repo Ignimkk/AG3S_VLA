@@ -74,9 +74,16 @@
 |---|---|---|
 | `.venv-ag3s` (py3.11, numpy 2.4.6) | mujoco · casadi · osqp · scipy | AG3S 파이프라인, trajopt, 그림 |
 | `.venv-curobo` (py3.10, numpy 1.26.4) | torch · curobo · warp | TSDF/ESDF 생산만 |
+| **`.venv-openpi-live`** (py3.11, numpy 1.26.4) | **mujoco 3.11 · casadi · osqp · torch 2.7.1 · curobo 0.8.0 · warp** | **둘이 같이 필요한 것 전부** |
 
-**numpy 버전 때문에 합칠 수 없다.** 그래서 **생산(curobo) → npz → 소비(ag3s)** 로 나눈다.
+**앞의 둘은 numpy 버전 때문에 합칠 수 없어** 그때는 **생산(curobo) → npz → 소비(ag3s)** 로 나눴다.
 거리장 어댑터는 순수 numpy 라 양쪽에서 돈다.
+
+**세 번째가 그 분리를 푼다** (2026-09-25 실측 확인). openpi venv 복제본에 `warp-lang`·`curobo` 를
+더한 것이고, **mujoco 와 curobo 가 한 프로세스에서 같이 돈다.** 정책·MuJoCo·AG3S·cuRobo·SQP 를
+한 번에 돌려야 하는 것(I1 이 연 경로, live 검증 스크립트 대부분)은 **여기서 돌린다.**
+`.venv-ag3s` 에서 `import torch` 하면 즉사하고, `.venv-curobo` 에는 mujoco 가 없다 —
+**`broken` 의 상당수가 실은 venv 선택이다.**
 
 **MuJoCo 는 이 서버에서 돈다** — OSMesa 소프트웨어 렌더링. 느릴 뿐 동작한다
 (3 대 캡처 × 15 프레임이 약 5 분). GPU 는 H200 한 장이고 `.venv-curobo` 작업이 쓴다.
@@ -88,7 +95,7 @@
 → `rby1_description/` 꼬리를 `src` → `pi05_TO_hybrid` → `.` 에 붙여 보기. 자산을 옮기려면
 링크 대신 `AG3S_ASSET_ROOT` 를 쓴다.
 
-**회귀 기준선**: `위반으로 시작 15/15 · 해소 13 · 개선 15 · feasible 13 · violated 2`.
+**회귀 기준선**: `위반으로 시작 15/15 · 해소 13 · 개선 15 · feasible 13 · violated 2` · **`has_target` 9/15**.
 **이 숫자가 다르면 코드를 고치기 전에 원인부터 찾는다.** 명령과 판정 요령(개수만 인용하는
 이유, `--cameras all` 이 필요한 이유, 이 기준선이 재지 **않는** 것)은 `regression-baseline` skill 에.
 

@@ -23,7 +23,9 @@ description: cuRobo 로 ESDF/TSDF 를 만들 때의 함정 5개와 eikonal 자�
 
 ## venv 경계
 
-**생산(`.venv-curobo`) → npz → 소비(`.venv-ag3s`)** 로 나눈다. 둘은 numpy 버전 때문에
+셋이다. **`.venv-openpi-live`**(py3.11, numpy 1.26.4)에 **mujoco 3.11 · casadi · osqp · torch 2.7.1 · curobo 0.8.0 · warp 가 전부** 있다 (2026-09-25 실측) — mujoco 와 curobo 가 **한 프로세스에서 같이 필요한 것은 여기서 돌린다.**
+
+나머지 둘은 분리 경로다: **생산(`.venv-curobo`) → npz → 소비(`.venv-ag3s`)**. 둘은 numpy 버전 때문에
 합칠 수 없다 — `.venv-curobo` 는 py3.10 / numpy 1.26.4 (torch·curobo·warp),
 `.venv-ag3s` 는 py3.11 / numpy 2.4.6 (mujoco·casadi·osqp·scipy).
 `.venv-curobo` 에서 `benchmark` 임포트는 되지만 mujoco/casadi/osqp 가 없다.

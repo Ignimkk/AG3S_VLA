@@ -28,12 +28,20 @@ MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/work /mnt/dev/work/.venv-ag3s/bin/python -m
 - **`--cameras all` 이 필수다.** head 한 대만 쓰면 에피소드 기반 씬에서 시작 위반이 0/15 라
   TO 가 고칠 것이 없어 기준선 구실을 못 한다. 세 대는 서빙 경로와 같은 진입점이기도 하다.
 
-## 이 기준선이 재지 **않는** 것
+## 범위가 넓어졌다 (2026-09-25) — 이제 grounding 도 잰다
 
-**attention → target grounding 을 재지 않는다.** 두 카메라 구성 모두 `has_target` 이 15/15
-프레임에서 false 다. live 경로는 같은 에피소드에서 성공하는데, 차이는 오프라인이 고정된
-attention 셀 선택을 쓰고 그 셀이 14D 모델에서 정해졌다는 것이다.
-재는 범위는 `depth → 자기 필터 → 필드 → SQP → QP` 다.
+옛 주석은 *"이 기준선은 attention → target grounding 을 재지 않는다 (`has_target` 15/15 false).
+차이는 오프라인이 고정된 attention 셀 선택을 쓰는 것"* 이었다. **그 원인 진단이 틀렸다.**
+
+셀이 아니라 **배선**이었다. 오프라인은 attention 맵을 `zed_left` 한 대에만 붙이고 live 는
+세 대에 각각 붙였다. 같은 셀·같은 기록에서 배선만 live 와 맞추니 **`has_target` 이
+0/15 → 9/15** 로 섰고 **개수 넷은 그대로**였다 (회귀 없음, 2026-09-25 실측).
+
+그래서 지금 기준선이 재는 범위는 `depth → 자기 필터 → attention 배선 → grounding → 필드
+→ SQP → QP` 다. **`has_target` 9/15 도 함께 본다** — 거기서 떨어지면 배선이나 grounding 쪽이다.
+
+전수 근거: 1296 조합(layer 18 × head 8 × denoise 3 × agg 3) 어느 것도 `cam_high` 에서
+사과를 못 맞혔다. 셀 축에 답이 없다는 뜻이고, 답은 카메라 축에 있었다.
 
 ## 은퇴한 기준선
 
