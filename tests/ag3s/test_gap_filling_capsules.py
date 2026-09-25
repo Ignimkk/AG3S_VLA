@@ -10,9 +10,13 @@
 그래서 MuJoCo 이름을 틀리면 **조용히 캡슐 0 개**가 나오고, 자기 필터에는 아무도 모르는 구멍이
 남는다. URDF 는 `ee_left`, MJCF 는 `EE_BODY_L` 로 같은 부품을 다르게 부른다.
 
-여기서 고정하는 것은 세 가지다: 목록의 **모든** 이름이 실제로 캡슐을 내놓는가 ·
+여기서 고정하는 것은 네 가지다: 목록의 **모든** 이름이 실제로 캡슐을 내놓는가 ·
 그 캡슐이 `UrdfSphereChain` 에 붙는 URDF 링크 이름을 다는가 · 치수가 손으로 고른 값이 아니라
-MJCF 메시에서 나왔는가(= 메시 정점을 전부 담는가).
+MJCF 메시에서 나왔는가(= 메시 정점을 전부 담는가) · 그리고 **그럼에도 0 개가 나면 말이 나가는가**.
+
+마지막 것이 2026-09-25 에 더해졌다. 위의 첫 번째 테스트는 `UNCOVERED_LINKS` 에 **적혀 있는**
+이름만 지킨다. 목록 자체가 틀렸을 때(= 손바닥이 아예 없었을 때)는 아무도 울리지 않았다.
+그 자리를 메우는 것이 아래 "조용한 0 개" 절이다 — 삼킴은 유지하고, 경고로 크게 말한다.
 """
 
 from __future__ import annotations
@@ -138,3 +142,83 @@ def test_palm_capsule_dimensions_come_from_the_mesh_and_contain_it(model, link):
         inside |= np.linalg.norm(local - t[:, None] * axis, axis=1) <= cap.radius + 1e-9
         assert 0.0 < cap.radius <= half_width, f"{cap.radius} out of range for {link}"
     assert inside.all(), f"{(~inside).sum()} of {points.shape[0]} mesh vertices uncovered"
+
+
+# --------------------------------------------------------- 조용한 0 개를 크게 말하게 만들었나
+
+
+@pytest.fixture(autouse=True)
+def _forget_previous_warnings():
+    """경고는 프로세스당 한 번만 나간다 — 그 중복 제거가 다음 테스트를 조용하게 만들지 않도록."""
+    from benchmark.ag3s.experiments.sources import mujoco_source
+
+    mujoco_source._WARNED_NO_CAPSULES.clear()
+    yield
+    mujoco_source._WARNED_NO_CAPSULES.clear()
+
+
+def test_the_ft_sensor_case_would_be_caught_today(model, caplog):
+    """`FT_sensor_L` 은 **지금 걸리는 함정이다**. 목록에 넣으면 즉시 보이는가.
+
+    URDF 는 `FT_sensor_L`, MJCF 는 `FT_SENSOR_L` 이다. 대소문자만 다르고 `MJCF_BODY_ALIASES`
+    에는 없다. `UNCOVERED_LINKS` 에 없으니 오늘은 아무것도 이것에 기대지 않지만, 누가 넣는
+    순간 손바닥과 똑같이 조용히 캡슐 0 개가 났을 것이다. 여기서 못박는 것은 그때 **말이 나간다**
+    는 것이다.
+    """
+    assert _body_id(model, "FT_sensor_L") < 0, "URDF 철자가 MJCF 에 그대로 있으면 함정이 아니다"
+    assert _body_id(model, "FT_SENSOR_L") >= 0, "MJCF 쪽 철자는 실재해야 함정이 성립한다"
+
+    with caplog.at_level("WARNING"):
+        out = gap_filling_capsules(model, ["FT_sensor_L"])
+
+    assert out == []  # 삼킴은 유지된다 — 죽지 않는다
+    assert len(caplog.records) == 1
+    message = caplog.records[0].getMessage()
+    assert caplog.records[0].levelname == "WARNING"
+    assert "FT_sensor_L" in message
+    # 진단의 핵심: **어느 철자로 찾았는지**. URDF 이름을 그대로 썼다면 별칭이 빠진 것이다.
+    assert "no MJCF_BODY_ALIASES entry" in message
+    assert "MJCF_BODY_ALIASES" in message  # 무엇을 고치면 되는지
+    assert "self-filter" in message and "hole" in message  # 무엇이 남는지
+
+
+def test_an_aliased_name_that_is_wrong_says_it_looked_under_the_mjcf_name(
+    model, caplog, monkeypatch
+):
+    """별칭이 있는데도 0 개면 원인이 반대쪽이다 — 그 구별이 메시지에 실려야 한다."""
+    from benchmark.ag3s.experiments.sources import mujoco_source
+
+    monkeypatch.setitem(mujoco_source.MJCF_BODY_ALIASES, "ee_left", "EE_BODY_TYPO")
+    with caplog.at_level("WARNING"):
+        out = gap_filling_capsules(model, ["ee_left"])
+
+    assert out == []
+    message = caplog.records[0].getMessage()
+    assert "MJCF spelling 'EE_BODY_TYPO' from MJCF_BODY_ALIASES" in message
+    assert "mj_name2id found no such body" in message
+
+
+def test_the_warning_counts_how_many_of_the_listed_links_came_back_empty(model, caplog):
+    """"크게" 의 일부는 규모다. 목록 중 몇 개가 빈 채로 돌아왔는지 센다."""
+    with caplog.at_level("WARNING"):
+        out = gap_filling_capsules(model, ["base", "FT_sensor_L", "FT_sensor_R"])
+
+    assert out, "성한 링크(`base`)는 그대로 캡슐을 내야 한다"
+    assert len(caplog.records) == 2
+    for record in caplog.records:
+        assert "2 of 3 listed links produced no capsule" in record.getMessage()
+
+
+def test_a_healthy_list_stays_quiet(model, caplog):
+    """거짓 경보를 내지 않는다. 늘 울리는 경고는 아무도 읽지 않는다."""
+    with caplog.at_level("WARNING"):
+        assert gap_filling_capsules(model, UNCOVERED_LINKS)
+    assert [r.getMessage() for r in caplog.records] == []
+
+
+def test_a_rebuilt_robot_model_does_not_repeat_the_same_warning(model, caplog):
+    """sweep 은 설정마다 로봇 모델을 다시 만든다. 같은 말을 반복하면 읽지 않게 된다."""
+    with caplog.at_level("WARNING"):
+        gap_filling_capsules(model, ["FT_sensor_L"])
+        gap_filling_capsules(model, ["FT_sensor_L"])
+    assert len(caplog.records) == 1

@@ -493,3 +493,76 @@ def test_grounding_degrades_gracefully_under_depth_noise(noise_std):
     error = float(np.linalg.norm(result.target.centroid - scene.visible_centroid(LABEL_SPHERE)))
     assert iou > 0.97, f"noise {noise_std * 1000:.0f} mm: IoU {iou:.4f}"
     assert error < 0.01, f"noise {noise_std * 1000:.0f} mm: centroid off {error * 100:.2f} cm"
+
+
+# ------------------------------------------- the runner-up score the grasp latch reads (2026-09-25)
+#
+# `trajopt/safe_policy.py` passes `metrics["runner_up_score"]` into `GraspLatch.update`, which locks
+# a target only on frames where `score >= score_ratio * max(runner_up, 1e-9)`. The key was missing
+# from this stage's `metrics`, so `.get(..., 0.0)` handed the latch 0.0 on every frame: the threshold
+# became 1.3e-9 and *every* grounded frame read as unambiguous. These tests hold the key in place and
+# fix what its two branches mean.
+
+
+def test_metrics_carry_the_runner_up_score_the_latch_reads(grounded):
+    """The key exists, and it is the second-best candidate's score — not a placeholder."""
+    _, apc, _, table = grounded
+    result = ground_target(apc, CFG.clustering, seed_percentile=95.0, exclude_mask=table)
+
+    assert len(result.clusters) > 1, "this fixture must have a runner-up for the test to mean anything"
+    runner_up = result.target.metrics["runner_up_score"]
+    assert runner_up == pytest.approx(result.clusters[1].target_score)
+    # The vacuous-threshold regression, stated as the inequality that failed: a real second candidate
+    # must not arrive at the latch as "no competitor".
+    assert runner_up > 1e-9
+    assert result.target.confidence == result.clusters[0].target_score > runner_up
+
+    # The other side of the change: a genuinely dominant target must still read as confident, or the
+    # fix would trade a useless test for a latch that never locks.
+    from benchmark.trajopt.grasp_latch import LatchConfig
+
+    assert result.target.confidence >= LatchConfig().score_ratio * runner_up
+
+
+def test_a_single_candidate_reports_no_runner_up(grounded):
+    """One cluster has no second score. 0.0 is the value, and it is unambiguous.
+
+    A scored cluster can never *reach* 0.0 — `_score_cluster` mixes mean attention with two strictly
+    positive `exp(-d/scale)` terms — so a reader can tell "there was no competitor" from "the
+    competitor scored nothing". The 2D ablation is the cheapest real path with exactly one candidate:
+    the seed set is taken whole, so there is nothing to come second.
+    """
+    _, apc, _, table = grounded
+    result = ground_target(
+        apc, dataclasses.replace(CFG.clustering, use_3d_connectivity=False),
+        seed_percentile=95.0, exclude_mask=table,
+    )
+    assert result.status is GroundingStatus.OK and len(result.clusters) == 1
+    assert result.target.metrics["runner_up_score"] == 0.0
+
+
+def test_two_equally_good_candidates_are_reported_as_ambiguous():
+    """What the fix buys: a contested frame now says so.
+
+    Two identical blobs sit symmetrically about the attention peak, which is a lone point midway
+    between them (too far from either to join a cluster, but still the peak). Same size, same
+    attention, same distance — so their scores are within a few percent and neither dominates. Before
+    the fix this frame reached the latch as `runner_up=0.0`, i.e. perfectly confident.
+    """
+    rng = np.random.default_rng(4)
+    blob = rng.normal(0.0, 0.008, (200, 3))
+    points = np.vstack([blob - [0.10, 0, 0], blob + [0.10, 0, 0], [[0.0, 0.0, 0.0]]])
+    attention = np.concatenate([np.full(400, 0.9, np.float32), [1.0]])
+    apc = AttentionPointCloud(PointCloud(points), attention)
+
+    result = ground_target(apc, CFG.clustering, seed_threshold=0.5)
+    assert result.status is GroundingStatus.OK and len(result.clusters) == 2
+
+    score = result.target.confidence
+    runner_up = result.target.metrics["runner_up_score"]
+    assert runner_up > 0.0
+    # Deliberately no hard-coded margin: the claim is that the two are close enough that the latch's
+    # ratio test rejects the frame, which is exactly the comparison `_Confirm.update` makes.
+    from benchmark.trajopt.grasp_latch import LatchConfig
+
+    assert score < LatchConfig().score_ratio * runner_up, f"{score:.4f} vs {runner_up:.4f}"
