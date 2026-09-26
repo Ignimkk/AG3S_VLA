@@ -223,6 +223,73 @@ def test_the_metadata_key_is_untouched():
     assert "shadow" not in _safe_policy().metadata
 
 
+def _captured(fn, *args):
+    """`serve_safe` logger 로 나간 메시지 전부. `caplog` 을 쓰지 않는 이유는 이 파일이 두 함수의
+    **출력이 서로 모순되지 않는가** 를 보므로 둘을 따로 잡아야 하기 때문이다."""
+    import logging as _logging
+
+    records: list = []
+    handler = _logging.Handler()
+    handler.emit = records.append
+    log = _logging.getLogger(serve_safe.__name__)
+    log.addHandler(handler)
+    previous = log.level
+    log.setLevel(_logging.INFO)
+    try:
+        fn(*args)
+    finally:
+        log.removeHandler(handler)
+        log.setLevel(previous)
+    return "\n".join(r.getMessage() for r in records)
+
+
+def test_the_data_line_names_the_key_and_claims_no_mode():
+    """데이터를 설명하는 줄이 모드를 단정하면 모드 줄과 반대를 말할 수 있다 — 실제로 그랬다."""
+    text = _captured(serve_safe.announce_reference_payload)
+    assert wire.ACTIONS_REFERENCE in text, "이 줄은 그 키에 **대한** 줄이다"
+    assert "BOTH modes" in text
+    # 모드를 단정하지 않는다. 처음 문구는 여기서 "the robot still executes the refined chunk"
+    # 라고 적었고, `--shadow` 서버에서 그 문장은 거짓이다.
+    assert "executes the refined" not in text
+    assert "NOT shadow mode" not in text
+
+
+def test_the_startup_mode_line_does_not_name_the_data_key():
+    """**키 이름이 모드를 설명하는 자리에 나오면 겸직이 로그에서 되살아난다.**
+
+    T9 직후 이 자리가 실제로 거짓이었다: closed loop 분기가
+    *"the response carries the refined chunk only (no 'actions_reference' key)"* 라고 적었는데
+    T9 부터 원본은 두 모드 모두 실린다 — 같은 시작 로그 안에서 두 줄이 반대를 말했다.
+
+    문자열 전체를 박지 않는다 (문구는 바뀔 수 있다). 박는 것은 **세 사실이 갈려 있는가** 와
+    **모드 설명에 데이터 키 이름이 없는가** 둘이다.
+    """
+    for shadow, executes, other in ((False, "REFINED", "POLICY"), (True, "POLICY", "REFINED")):
+        text = _captured(serve_safe.announce_execution_mode, shadow)
+        # 1. 로봇이 무엇을 실행하는가.
+        assert f"executes the {executes}" in text
+        assert f"executes the {other}" not in text
+        # 2. 모드는 `shadow` 로만 말한다 — 데이터 키 이름은 여기 없다.
+        assert f"{wire.SHADOW}={shadow}" in text
+        assert wire.ACTIONS_REFERENCE not in text, "키 이름이 모드를 설명하면 안 된다"
+        # 3. 짝 검사는 두 모드 모두에서 언급된다.
+        assert "--safe-shadow" in text
+        # 그리고 **원본이 실리는 것이 모드의 특징이 아니라는 것**을 말한다.
+        assert "either mode" in text or "every response" in text
+
+
+def test_main_uses_that_function_rather_than_inlining_the_strings():
+    """문구가 두 곳에 있으면 한 곳만 고쳐지고, 그 한 곳이 T9 에서 거짓이 된 자리다."""
+    import inspect
+
+    src = inspect.getsource(serve_safe.main)
+    assert "announce_execution_mode(" in src
+    assert "announce_reference_payload(" in src
+    assert "closed-loop mode" not in src, "문구는 함수 안에만 있어야 한다"
+    assert "SHADOW mode" not in src
+    assert "response carries" not in src
+
+
 # --- 4. 목적함수 가중치 CLI ------------------------------------------------------------
 
 
