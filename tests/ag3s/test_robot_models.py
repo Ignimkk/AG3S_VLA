@@ -267,8 +267,10 @@ def test_the_sphere_chain_actually_covers_each_capsule():
     """
     robot = load_rby1()
     for cap in robot.capsules:
-        centres, radius = robot._capsule_sphere_centres(cap)  # noqa: SLF001
+        centres, radius, required = robot._capsule_sphere_centres(cap)  # noqa: SLF001
         assert radius >= cap.radius - 1e-12
+        # 기본 설정에서는 '필요한 반지름' 과 '쓴 반지름' 이 같다 — 덮개를 잃는 설정이 아니다.
+        assert radius == pytest.approx(required)
 
         # Sample the capsule's cylindrical surface in the capsule frame, then map to the link frame.
         t = np.linspace(-cap.length / 2.0, cap.length / 2.0, 40)

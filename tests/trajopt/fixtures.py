@@ -19,6 +19,7 @@ import dataclasses
 import numpy as np
 
 from benchmark.ag3s.robot_models import DEFAULT_RBY1_JOINTS, load_rby1
+from benchmark.trajopt import wire
 from benchmark.trajopt.config import TrajOptConfig
 from benchmark.trajopt.limits import build_limits
 from benchmark.trajopt.linearize import CollisionLinearizer, SceneSnapshot
@@ -165,10 +166,16 @@ def make_scenario(horizon: int = 10, penetration: float = 0.03, **config_overrid
     scene = near_miss_scene(linearizer, reference, Q_HOME, penetration=penetration)
 
     # Recognisable values in every column the optimizer must not touch.
+    #
+    # **그리퍼 열은 레이아웃에서 유도한다.** 예전에는 6 과 13 으로 박혀 있었는데 그것은 14D 배치이고,
+    # 16D 에서 열 6 은 `left_arm_6`(손목), 13 은 `right_arm_5` 다 — 즉 fixture 가 최적화 대상 열에
+    # 0.7 을 써 넣고 그것을 "그리퍼" 라고 부르면서, 실제 그리퍼 열은 0 으로 두고 있었다.
+    # `wire.gripper_columns` 하나에서 가져오면 차원을 바꿀 때 조용히 갈라지지 않는다.
+    left_gripper, right_gripper = wire.gripper_columns(layout.nq_opt // 2)
     chunk = np.zeros((horizon, layout.action_dim))
     chunk[:, layout.action_columns] = reference.T
-    chunk[:, 6] = 0.7  # left gripper
-    chunk[:, 13] = -0.3  # right gripper
+    chunk[:, left_gripper] = 0.7
+    chunk[:, right_gripper] = -0.3
     chunk[:, layout.n_valid :] = np.arange(horizon)[:, None] * 0.01  # padding
 
     return Scenario(
