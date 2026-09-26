@@ -57,12 +57,20 @@ def test_build_ag3s_defaults_to_no_exclusion():
 
 
 def test_the_default_constraint_link_set_is_pinned():
-    """`ARM_LINKS` 자체를 글자로 박는다. flag 를 더하면서 기본 집합이 흔들리면 여기서 걸린다."""
+    """`ARM_LINKS` 자체를 글자로 박는다. flag 를 더하면서 기본 집합이 흔들리면 여기서 걸린다.
+
+    **2026-09-26 (T8b): 손바닥 `ee_left`/`ee_right` 가 들어왔다.** 그 전까지 손바닥은 제약
+    모델에 없었고, `link_*_arm_5` 의 URDF capsule (r 75 mm · L 250 mm, 축이 link frame 에서
+    z ∈ [−0.225, +0.025]) 이 손목·손바닥·그리퍼를 통째로 삼켜 티가 나지 않았다. 그 capsule 을
+    `--capsule-extent-link` 로 자르는 순간 손바닥이 제약에서 사라지므로 둘은 같이 와야 한다.
+    geometry 는 이미 있었다 — self-filter 는 2026-09-25 부터 같은 gap-filling capsule 을 쓴다.
+    """
     assert ARM_LINKS == (
         "link_left_arm_0", "link_left_arm_1", "link_left_arm_2", "link_left_arm_3",
         "link_left_arm_4", "link_left_arm_5", "link_left_arm_6",
         "link_right_arm_0", "link_right_arm_1", "link_right_arm_2", "link_right_arm_3",
         "link_right_arm_4", "link_right_arm_5", "link_right_arm_6",
+        "ee_left", "ee_right",
         "ee_finger_l1", "ee_finger_l2", "ee_finger_r1", "ee_finger_r2")
 
 

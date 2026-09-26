@@ -192,10 +192,15 @@ def test_policy_failure_propagates():
 # (b) **안 켰을 때**: 응답이 T0 때와 키 하나도 다르지 않다 — 회귀 기준선과 T0 기록이 그것에
 # 달려 있다.
 
-#: 안 켰을 때의 응답 키. 여기에 무엇이 더 생기면 T0 기록과 갈라진다.
+#: 모든 응답에 있는 키. 여기에 무엇이 더 생기면 T0 기록과 갈라진다.
+#:
+#: **2026-09-26 (T9): `shadow` 가 들어왔다.** 모드가 `actions_reference` 의 있음/없음으로
+#: 추론되던 자리다. 그 겸직 때문에 closed loop 이 원본 청크를 실을 수 없었고 (실으면 로컬이
+#: "서버가 shadow" 로 읽고 즉시 죽는다), *"TO 가 청크를 얼마나 바꿨나"* 를 닫힌 고리에서 잴 수
+#: 없었다 — 같은 결핍에 다섯 번 막혔다. 지금은 모드가 이 키로 **명시**된다.
 BASE_RESPONSE_KEYS = {"actions", "seq", "timing_ms", "field", "ag3s_status",
                       "geometry_certified", "trajopt_status", "max_violation_m",
-                      "safe", "notes"}
+                      "safe", "notes", "shadow"}
 
 
 def _verdict(safe=True):
@@ -207,8 +212,9 @@ def test_response_without_a_reference_is_what_it_always_was():
     out = wire.pack_response(np.zeros((H, DOF)), _verdict(), seq=3, timing_ms={"total": 1.0})
 
     assert set(out) == BASE_RESPONSE_KEYS
-    # 키가 **없는 것** 자체가 "이 서버는 shadow 가 아니다" 라는 신호다.
+    # 없음은 **데이터의 부재**다 (T9). 모드는 `shadow` 키가 따로 말한다.
     assert wire.unpack_actions_reference(out) is None
+    assert wire.unpack_shadow(out) is False
 
 
 def test_reference_roundtrips_and_actions_stay_refined():
@@ -256,21 +262,26 @@ def test_shadow_carries_the_policy_chunk_next_to_the_refined_one():
                                    rtol=0, atol=1e-6)
 
 
-def test_without_shadow_no_reference_key_is_added():
-    """플래그가 없으면 `actions_reference` 가 없다.
+def test_closed_loop_also_carries_the_reference_but_declares_itself_not_shadow():
+    """**T9 에서 뒤집힌 동작이다.** 예전에는 이 프레임에 `actions_reference` 가 없었다.
 
-    키 집합이 `BASE + policy_extra + ag3s` 인 것은 이 합성 씬의 `ag3s_status` 가 `ok` 가
-    아니기 때문이다 (카메라가 없으므로 `no_geometry`). **`ok` 인 응답이 T0 과 같다**는 쪽은
-    `test_an_ok_frame_carries_no_ag3s_block` 이 `pack_response` 수준에서 지킨다 — 합성 씬으로
-    `ok` 를 만들 수 없으므로 그쪽을 와이어에서 고정하는 것이 맞다.
+    닫힌 고리에서도 원본 청크가 실린다 — 충돌 제약이 하나도 활성이 아닌 판에서도 TO 가 청크를
+    고치므로(실행 창 안 중앙값 2.6°, 최대 8.8°), 남은 변형이 목적함수에서 온 것인지 재려면
+    `actions`(refined) 옆에 원본이 있어야 한다. **모드는 따로 말한다**: `shadow` 가 `False`
+    이므로 로컬은 refined 를 실행한다.
+
+    키 집합이 `BASE + policy_extra + ag3s + actions_reference` 인 것은 이 합성 씬의
+    `ag3s_status` 가 `ok` 가 아니기 때문이다 (카메라가 없으므로 `no_geometry`).
     """
     sp = _shadow_policy(np.zeros((H, DOF)))
     out = sp.infer({"state": np.zeros(DOF), wire.PREFIX + "cameras": []})
 
     assert sp.shadow is False
-    assert wire.ACTIONS_REFERENCE not in out
+    assert wire.unpack_shadow(out) is False, "모드는 명시돼야 한다"
+    assert wire.unpack_actions_reference(out) is not None, "원본이 기록을 위해 실린다"
     # 정책이 낸 다른 키(`policy_extra`)는 예전처럼 그대로 실린다.
-    assert set(out) == BASE_RESPONSE_KEYS | {"policy_extra", wire.AG3S_BLOCK}
+    assert set(out) == BASE_RESPONSE_KEYS | {
+        "policy_extra", wire.AG3S_BLOCK, wire.ACTIONS_REFERENCE}
 
 
 def test_metadata_advertises_shadow_only_when_it_is_on():
