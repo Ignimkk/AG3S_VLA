@@ -26,7 +26,22 @@ paths:
 - **규칙 C** — 새 용어는 그 자리에서 풀어 쓰고 로그의 **"용어"** 절에 추가한다.
 - **규칙 G** — 발견 ID 를 그냥 쓰지 않는다. `E3(쥔 물체가 optimizer 에 도달하지 않는다)` 처럼
   그 자리에서 한 줄로 푼다. 스텝 번호도 같다.
-- **규칙 I** — 기술 용어는 영어로 쓴다: `violated`, `feasible`, `clearance`, `swept volume`,
-  `eikonal`, `carving`, `coarse/fine layer`.
+- **규칙 I** — 기술 용어는 영어로 쓴다. **이 문서의 옛 줄들이 한국어 번역어를 쓰고 있어도
+  새로 쓰는 문장은 따라가지 않는다.** 옛 줄을 고치러 다니지는 말되, 새 문장에는 아래 왼쪽을
+  쓰지 않는다:
+
+  | 쓰지 않는다 | 쓴다 |
+  |---|---|
+  | 문턱 · 점수 문턱 | `threshold` · `score threshold` |
+  | 여유거리 | `clearance` |
+  | 미세 계층 · 거친 계층 | `fine layer` · `coarse layer` |
+  | 화소 | `pixel` |
+  | 무게중심 | `centroid` |
+  | 복셀 | `voxel` |
+  | 잠금 | `latch` |
+  | 덩어리 | `cluster` |
+
+  그 밖에도 같은 원칙이다: `violated` · `feasible` · `swept volume` · `eikonal` · `carving` ·
+  `grounding` · `attention` · `chunk`. **사용자가 여러 번 지시한 규칙이고 세 번 어겼다.**
 - **규칙 F** — 수행한 내용은 `AG3S_REVIEW_PLAN.md` 의 계획에도 반영한다.
 - 갈림길에서 고르지 않은 선택지는 **"되돌아올 지점"** 절에 전환 신호와 함께 남긴다.

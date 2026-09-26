@@ -29,7 +29,7 @@ frame 0 에서 팔이 그 **유령 장애물**과 29 mm 겹쳤다고 보고했�
 
 
 ```
-위반으로 시작 14/15 · has_target 9/15 · frame0 clearance_before +0.157 mm
+위반으로 시작 14/15 · has_target **15/15** · frame0 clearance_before +0.157 mm
 ```
 
 **단독으로 돌린다. 다른 실행과 겹치면 숫자가 바뀐다.** `sqp.time_budget_ms` 는 벽시계
@@ -59,8 +59,14 @@ frame 0 에서 팔이 그 **유령 장애물**과 29 mm 겹쳤다고 보고했�
 세 대에 각각 붙였다. 같은 셀·같은 기록에서 배선만 live 와 맞추니 **`has_target` 이
 0/15 → 9/15** 로 섰고 **개수 넷은 그대로**였다 (회귀 없음, 2026-09-25 실측).
 
+**2026-09-26 갱신 — `has_target` 은 9/15 가 아니라 `15/15` 다** (사용자 판정). `T5e` 가
+`clustering.target_score_threshold` 기본값을 `0.25 → 0.0` 으로 내리고 target 을 **rank 1 +
+`target_confirm_frames = 3`** 으로 고르게 바꿨다. 9/15 는 그 threshold 가 만들던 값이었다.
+**나머지 둘(`위반으로 시작 14/15` · frame0 `clearance_before +0.15718632962849477 mm`)은
+소수점까지 그대로다** — `T5f` 실측.
+
 그래서 지금 기준선이 재는 범위는 `depth → 자기 필터 → attention 배선 → grounding → 필드
-→ SQP → QP` 다. **`has_target` 9/15 도 함께 본다** — 거기서 떨어지면 배선이나 grounding 쪽이다.
+→ SQP → QP` 다. **`has_target` 15/15 도 함께 본다** — 거기서 떨어지면 배선이나 grounding 쪽이다.
 
 전수 근거: 1296 조합(layer 18 × head 8 × denoise 3 × agg 3) 어느 것도 `cam_high` 에서
 사과를 못 맞혔다. 셀 축에 답이 없다는 뜻이고, 답은 카메라 축에 있었다.
