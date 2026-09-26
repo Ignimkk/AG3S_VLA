@@ -183,3 +183,174 @@ def test_policy_failure_propagates():
     sp = _safe_policy(_Broken())
     with pytest.raises(RuntimeError, match="checkpoint gone"):
         sp.infer({"state": np.zeros(DOF), wire.PREFIX + "cameras": []})
+
+
+# --- shadow (T5) — 서버는 전부 돌고, 응답에 원본 청크를 **선택 키**로 더한다 ------------------
+#
+# shadow 가 지켜야 하는 두 가지가 여기서 갈린다. (a) **켰을 때**: 로컬이 원본을 실행할 수 있도록
+# `actions_reference` 가 실리고, `actions` 는 **여전히 refined** 다 (서버가 거짓말하지 않는다).
+# (b) **안 켰을 때**: 응답이 T0 때와 키 하나도 다르지 않다 — 회귀 기준선과 T0 기록이 그것에
+# 달려 있다.
+
+#: 안 켰을 때의 응답 키. 여기에 무엇이 더 생기면 T0 기록과 갈라진다.
+BASE_RESPONSE_KEYS = {"actions", "seq", "timing_ms", "field", "ag3s_status",
+                      "geometry_certified", "trajopt_status", "max_violation_m",
+                      "safe", "notes"}
+
+
+def _verdict(safe=True):
+    return wire.SafetyVerdict(ag3s_status="ok", geometry_certified=True,
+                              trajopt_status="optimal", max_violation_m=0.0, safe=safe)
+
+
+def test_response_without_a_reference_is_what_it_always_was():
+    out = wire.pack_response(np.zeros((H, DOF)), _verdict(), seq=3, timing_ms={"total": 1.0})
+
+    assert set(out) == BASE_RESPONSE_KEYS
+    # 키가 **없는 것** 자체가 "이 서버는 shadow 가 아니다" 라는 신호다.
+    assert wire.unpack_actions_reference(out) is None
+
+
+def test_reference_roundtrips_and_actions_stay_refined():
+    refined, reference = np.full((H, DOF), 2.0), np.full((H, DOF), 1.0)
+    out = wire.pack_response(refined, _verdict(), seq=3, timing_ms={},
+                             actions_reference=reference)
+
+    assert set(out) == BASE_RESPONSE_KEYS | {wire.ACTIONS_REFERENCE}
+    np.testing.assert_allclose(out["actions"], refined)       # 서버는 자기가 계산한 것을 말한다
+    np.testing.assert_allclose(wire.unpack_actions_reference(out), reference)
+    # 전송은 msgpack_numpy 다 — `actions` 와 같은 float32 ndarray 여야 그대로 건너간다.
+    assert isinstance(out[wire.ACTIONS_REFERENCE], np.ndarray)
+    assert out[wire.ACTIONS_REFERENCE].dtype == np.float32
+
+
+def test_a_reference_of_a_different_shape_is_refused_at_pack_time():
+    """로컬이 둘 중 하나를 골라 실행한다. 모양이 어긋나면 한 칸씩 밀린 청크가 실행된다."""
+    with pytest.raises(ValueError, match="actions_reference"):
+        wire.pack_response(np.zeros((H, DOF)), _verdict(), seq=0, timing_ms={},
+                           actions_reference=np.zeros((H - 1, DOF)))
+
+
+def _shadow_policy(chunk, refine_offset=0.5, **kw):
+    """`refined != reference` 인 SafePolicy. 합성 씬에서는 refiner 가 청크를 그대로 통과시켜
+    둘이 같아지므로, 그 상태로는 "무엇이 실렸나" 를 구별할 수 없다."""
+    sp = _safe_policy(_StubPolicy(chunk), **kw)
+    sp.refiner.refine = lambda c, context=None: np.asarray(c, np.float64) + refine_offset
+    return sp
+
+
+def test_shadow_carries_the_policy_chunk_next_to_the_refined_one():
+    rng = np.random.default_rng(1)
+    chunk = rng.normal(size=(H, DOF)) * 0.1
+    sp = _shadow_policy(chunk, shadow=True)
+    out = sp.infer({"state": np.zeros(DOF), wire.PREFIX + "cameras": []})
+
+    assert sp.shadow is True
+    reference = wire.unpack_actions_reference(out)
+    np.testing.assert_allclose(reference, chunk, rtol=0, atol=1e-6)
+    # `actions` 는 여전히 refined 다 — 그리퍼 열만 정책 값으로 되돌려진다.
+    for col in range(DOF):
+        if col in wire.GRIPPER_COLUMNS:
+            continue
+        np.testing.assert_allclose(out["actions"][:, col], chunk[:, col] + 0.5,
+                                   rtol=0, atol=1e-6)
+
+
+def test_without_shadow_no_reference_key_is_added():
+    """플래그가 없으면 `actions_reference` 가 없다.
+
+    키 집합이 `BASE + policy_extra + ag3s` 인 것은 이 합성 씬의 `ag3s_status` 가 `ok` 가
+    아니기 때문이다 (카메라가 없으므로 `no_geometry`). **`ok` 인 응답이 T0 과 같다**는 쪽은
+    `test_an_ok_frame_carries_no_ag3s_block` 이 `pack_response` 수준에서 지킨다 — 합성 씬으로
+    `ok` 를 만들 수 없으므로 그쪽을 와이어에서 고정하는 것이 맞다.
+    """
+    sp = _shadow_policy(np.zeros((H, DOF)))
+    out = sp.infer({"state": np.zeros(DOF), wire.PREFIX + "cameras": []})
+
+    assert sp.shadow is False
+    assert wire.ACTIONS_REFERENCE not in out
+    # 정책이 낸 다른 키(`policy_extra`)는 예전처럼 그대로 실린다.
+    assert set(out) == BASE_RESPONSE_KEYS | {"policy_extra", wire.AG3S_BLOCK}
+
+
+def test_metadata_advertises_shadow_only_when_it_is_on():
+    """로컬이 접속 즉시 짝을 볼 수 있어야 한다. 꺼졌을 때 키가 없는 것은 메타데이터도
+    T0 때와 같게 두기 위해서다."""
+    assert "shadow" not in _safe_policy().metadata
+    assert _safe_policy(shadow=True).metadata["shadow"] is True
+
+
+def test_continuity_anchors_on_the_chunk_the_robot_actually_flew():
+    """`_continuity_reference` 는 "앞 스텝은 이미 실행됐다" 를 전제로 꼬리를 쓴다. shadow 에서
+    실행된 것은 reference 이므로 그것을 물려줘야 한다 — refined 를 물려주면 SQP 가 날아간 적
+    없는 궤적에서 이어지는 것으로 계획하고, 그 오차는 어디에도 안 찍힌다."""
+    chunk = np.full((H, DOF), 0.2)
+    obs = {"state": np.zeros(DOF), wire.PREFIX + "cameras": []}
+
+    closed = _shadow_policy(chunk)
+    closed.infer(obs)
+    np.testing.assert_allclose(closed._previous_chunk, chunk + 0.5)
+
+    shadow = _shadow_policy(chunk, shadow=True)
+    shadow.infer(obs)
+    np.testing.assert_allclose(shadow._previous_chunk, chunk)
+
+
+# --- T5b: `degraded` 의 사유가 와이어에 실린다 --------------------------------------------
+#
+# 첫 live smoke 에서 2 청크 중 1 개가 `max_violation_m = 0.0` 인데 `degraded` 로 HOLD 됐고,
+# **왜인지가 응답에도 서버 로그에도 없었다.** 사유는 줄곧 `CollisionConstraintSet.notes` 에
+# 있었고 나가는 길이 없었을 뿐이다 (응답의 `notes` 는 최적화기 쪽이다).
+
+
+def test_an_ok_frame_carries_no_ag3s_block():
+    """**요구사항 1.** 정상 프레임의 응답이 T0 때와 한 바이트도 달라지면 기준선이 재현되지 않는다."""
+    out = wire.pack_response(np.zeros((H, DOF)), _verdict(), seq=1, timing_ms={}, ag3s=None)
+
+    assert set(out) == BASE_RESPONSE_KEYS
+    assert wire.AG3S_BLOCK not in out
+    assert wire.unpack_ag3s(out) == {}
+
+
+def test_the_ag3s_block_roundtrips_with_its_reasons():
+    from benchmark.ag3s.runtime import degradation
+
+    block = {"status": "degraded", "validity": "degraded", "grounding_status": "ok",
+             "reasons": degradation.reasons(
+                 [degradation.reason("camera_missing", "camera(s) ['left_wrist'] did not report")]),
+             "notes": ["camera_missing: camera(s) ['left_wrist'] did not report"]}
+    out = wire.pack_response(np.zeros((H, DOF)), _verdict(safe=False), seq=1, timing_ms={},
+                             ag3s=block)
+
+    assert set(out) == BASE_RESPONSE_KEYS | {wire.AG3S_BLOCK}
+    got = wire.unpack_ag3s(out)
+    assert got["reasons"] == [{"code": "camera_missing",
+                               "detail": "camera(s) ['left_wrist'] did not report"}]
+    assert got["grounding_status"] == "ok"
+
+
+def test_the_ag3s_block_and_the_shadow_reference_do_not_collide():
+    """T5a 와 T5b 의 선택 키 둘이 같은 응답에 함께 실릴 수 있어야 한다 — shadow 실행의 unsafe
+    프레임이 정확히 그 조합이고, 그것이 T5 에서 보려는 프레임이다."""
+    out = wire.pack_response(
+        np.full((H, DOF), 2.0), _verdict(safe=False), seq=1, timing_ms={},
+        actions_reference=np.full((H, DOF), 1.0),
+        ag3s={"status": "degraded", "validity": "degraded", "grounding_status": "ok",
+              "reasons": [], "notes": []})
+
+    assert set(out) == BASE_RESPONSE_KEYS | {wire.ACTIONS_REFERENCE, wire.AG3S_BLOCK}
+    np.testing.assert_allclose(wire.unpack_actions_reference(out), 1.0)
+    assert wire.unpack_ag3s(out)["status"] == "degraded"
+
+
+def test_a_non_ok_frame_explains_itself_on_the_wire():
+    """서버 밖에서 `degraded` 의 이유를 알 수 있어야 한다. 이 STEP 의 합격 조건이다."""
+    sp = _safe_policy()
+    out = sp.infer({"state": np.zeros(DOF), wire.PREFIX + "cameras": [], wire.PREFIX + "seq": 2})
+
+    assert out["ag3s_status"] != "ok"
+    block = wire.unpack_ag3s(out)
+    assert block["status"] == out["ag3s_status"]        # 블록만 보고도 짝을 확인할 수 있다
+    # 카메라가 하나도 없으면 제약 집합 자체가 없다. 그 사실과 **왜 지각이 안 돌았는지**를
+    # 말해야 한다 — `status: no_geometry` 만 나가면 이유는 다시 서버 안에 남는다.
+    assert block["notes"] and "no constraint set" in block["notes"][0]

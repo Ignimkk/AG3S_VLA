@@ -246,19 +246,29 @@ def test_grounding_is_stable_across_attention_normalizations(scene, grounded):
 # ---------------------------------------------------------------------------- support surface
 
 
-def test_without_the_support_surface_removed_grounding_declines(grounded):
-    """The reason the pipeline fits planes before grounding.
+def test_without_the_support_surface_removed_the_flood_becomes_the_target(grounded):
+    """The reason the pipeline fits planes before grounding — and **the only** reason since T5e.
 
     The target stands on the table, so connectivity floods from it across the whole tabletop and out
-    to every other object. The important part is what happens next: the flood is so un-compact that
-    scoring rejects it, so the stage returns `LOW_SCORE` rather than a wrong target.
+    to every other object. Until T5e this test asserted `LOW_SCORE`: the flood was so un-compact that
+    the score gate rejected it, which read as a second line of defence. It was never a reliable one —
+    the same gate was rejecting 35 of 51 correctly-identified chunks on ep1807 — and with the gate off
+    by default the flood is now *named*. `exclude_mask` is what prevents this, not the score.
     """
     _, apc, labels, _ = grounded
     result = ground_target(apc, CFG.clustering, seed_percentile=95.0)
-    assert result.target is None and result.status is GroundingStatus.LOW_SCORE
+    assert result.status is GroundingStatus.OK
     flooded = result.clusters[0]
     assert flooded.point_count > 10_000
     assert flooded.spatial_compactness < 0.01
+    # It is the flood that was named, not a plausible object that happened to survive it.
+    assert result.target.point_indices.size == flooded.point_count
+    # The gate still exists for a caller that wants it: above the flood's score it rejects as before.
+    gated = ground_target(
+        apc, dataclasses.replace(CFG.clustering, target_score_threshold=0.25),
+        seed_percentile=95.0,
+    )
+    assert gated.target is None and gated.status is GroundingStatus.LOW_SCORE
 
 
 # ------------------------------------------------------------------------------ failure modes

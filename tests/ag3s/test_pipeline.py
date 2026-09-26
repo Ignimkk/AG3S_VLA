@@ -156,6 +156,44 @@ def test_track_age_accumulates_across_frames(scene, arm):
     assert ag3s.frame_index == 0
 
 
+def test_the_target_needs_three_consecutive_frames_to_move_to_another_object(scene, arm):
+    """T5e end to end: the hysteresis is wired into the pipeline, not just available to it.
+
+    Same geometry every frame; only the attention map moves, from the sphere to the box. Frame-
+    independent grounding would follow it immediately — that is the ep1807 flicker, where a single
+    chunk of pear or apple interrupted an otherwise stable run. Here the box has to lead three frames
+    in a row, and the two frames before that are reported as holds.
+    """
+    on_box = make_scene(robot_model=arm, robot_state=DEFAULT_ARM_Q, target_label=LABEL_BOX)
+    ag3s = AG3S(CFG, robot_model=arm)
+    sphere = ag3s.process(**_inputs(scene)).target.centroid
+
+    for frame in (1, 2):
+        held = ag3s.process(**_inputs(scene, attention_map=on_box.attention_grid))
+        assert np.allclose(held.target.centroid, sphere), f"switched after {frame} frame(s)"
+        assert any(f"target hold (rank 1, challenger at {frame}/3" in n for n in held.notes)
+
+    switch = ag3s.process(**_inputs(scene, attention_map=on_box.attention_grid))
+    assert not np.allclose(switch.target.centroid, sphere)
+    assert any("target switch" in n for n in switch.notes)
+
+    settled = ag3s.process(**_inputs(scene, attention_map=on_box.attention_grid))
+    assert np.allclose(settled.target.centroid, switch.target.centroid)
+    assert not any(n.startswith("target ") for n in settled.notes), (
+        "once the target agrees with the leader there is nothing to report"
+    )
+
+
+def test_reset_clears_the_grounding_hysteresis_with_the_rest_of_the_episode(scene, arm):
+    """A new episode must not defend the previous episode's target."""
+    on_box = make_scene(robot_model=arm, robot_state=DEFAULT_ARM_Q, target_label=LABEL_BOX)
+    ag3s = AG3S(CFG, robot_model=arm)
+    sphere = ag3s.process(**_inputs(scene)).target.centroid
+    ag3s.reset()
+    first = ag3s.process(**_inputs(scene, attention_map=on_box.attention_grid)).target
+    assert not np.allclose(first.centroid, sphere), "the first frame of an episode has nothing to hold"
+
+
 # ---------------------------------------------------------------------------- degradation
 
 
