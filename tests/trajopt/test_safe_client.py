@@ -53,12 +53,15 @@ class _Server:
     """
 
     def __init__(self, *, safe=True, seq_offset=0, delay=0.0, raises=None,
-                 actions=None, reference=None, metadata=None, ag3s=None, **verdict):
+                 actions=None, reference=None, metadata=None, ag3s=None, pair=None,
+                 **verdict):
         self.safe, self.seq_offset, self.delay, self.raises = safe, seq_offset, delay, raises
         self.actions = actions
         self.reference = reference
         self.metadata = metadata
         self.ag3s = ag3s
+        #: `max_violation_pair` — 위반을 만든 행의 신원. `None` 이면 키가 안 실린다 (옛 서버).
+        self.pair = pair
         self.verdict = verdict
         self.requests = []
         if metadata is not None:
@@ -86,6 +89,8 @@ class _Server:
             out[wire.ACTIONS_REFERENCE] = np.asarray(self.reference)
         if self.ag3s is not None:
             out[wire.AG3S_BLOCK] = dict(self.ag3s)
+        if self.pair is not None:
+            out[wire.VIOLATION_PAIR] = dict(self.pair)
         return out
 
 
@@ -448,3 +453,87 @@ def test_a_response_with_no_block_does_not_inherit_the_previous_frame_reason():
     server.raises = ConnectionError("socket closed")
     client.infer({"state": np.zeros(DOF)})
     assert client.last_ag3s == {}
+
+
+# --- 8. T6a — 두 청크와 위반 행의 신원을 기록에 넘긴다 ----------------------------------------
+#
+# `T5c` 는 `refined` 대 `reference` 여유거리 비교를, `T5f` 는 *"violated 가 어느 제약인가"* 를
+# 각각 미측정으로 닫았다. 둘 다 클라이언트가 그 값을 붙들지 않아 기록에 넘길 것이 없었기
+# 때문이다. 여기서 고정하는 것은 **모드가 달라도 `last_actions_refined` 의 뜻이 하나**라는
+# 것이다 — shadow 에서 `infer` 의 반환값은 `actions` 자리에 reference 를 싣는다.
+
+_PAIR = {"block": "esdf", "clearance_m": -0.031, "step": 12, "query": 5,
+         "link": "ee_finger_r1", "slot": None, "candidate_id": None,
+         "obstacle": "apple", "point_m": [0.51, 0.09, 0.84]}
+
+
+def test_closed_loop_carries_the_refined_chunk_and_no_reference():
+    refined = np.full((H, DOF), 0.25)
+    client = _client(_Server(safe=True, actions=refined, pair=_PAIR))
+    client.infer({"state": np.zeros(DOF)})
+
+    np.testing.assert_allclose(client.last_actions_refined, refined)
+    # reference 없음은 **shadow 가 아니다** 라는 뜻이다.
+    assert client.last_actions_reference is None
+    assert client.last_violation_pair == _PAIR
+
+
+def test_shadow_keeps_both_chunks_apart():
+    """`infer` 의 반환값은 reference 를 실행하지만, 기록에는 둘이 따로 남아야 한다."""
+    refined = np.full((H, DOF), 0.25)
+    reference = np.full((H, DOF), 0.75)
+    client = _client(_Server(safe=True, actions=refined, reference=reference,
+                             metadata={"shadow": True}, pair=_PAIR), shadow=True)
+    out = client.infer({"state": np.zeros(DOF)})
+
+    # 로봇이 받는 것은 reference 다 (기존 계약).
+    np.testing.assert_allclose(out["actions"], reference)
+    # 기록이 받는 것은 둘 다이고, `last_actions_refined` 는 **서버가 계산한** 쪽이다.
+    np.testing.assert_allclose(client.last_actions_refined, refined)
+    np.testing.assert_allclose(client.last_actions_reference, reference)
+    assert client.last_executed_chunk == "reference"
+
+
+def test_an_old_server_without_the_pair_leaves_it_none():
+    """키 없음은 "신원을 낼 수 없는 서버" 다. 지어내지 않는다."""
+    client = _client(_Server(safe=False, trajopt_status="violated", max_violation_m=0.031))
+    client.infer({"state": np.zeros(DOF)})
+
+    assert client.last_violation_pair is None
+    # 숫자는 그대로 온다 — 신원이 없어도 판정은 바뀌지 않는다.
+    assert client.last_verdict["max_violation_m"] == 0.031
+
+
+def test_a_hold_with_a_response_still_records_what_the_server_computed():
+    """왜 거부됐는지는 무엇이 제안됐는지 없이 읽을 수 없다 (timeout 도 마찬가지다)."""
+    refined = np.full((H, DOF), 0.25)
+    client = _client(_Server(safe=True, actions=refined, delay=0.05, pair=_PAIR),
+                     timeout_s=0.01)
+    client.infer({"state": np.zeros(DOF)})
+
+    assert client.last_ipc == "timeout"
+    np.testing.assert_allclose(client.last_actions_refined, refined)
+    assert client.last_violation_pair == _PAIR
+
+
+def test_no_response_clears_the_chunks_and_the_pair():
+    """지난 프레임 것을 남기면 이 프레임이 그것 때문에 멈춘 것처럼 읽힌다."""
+    server = _Server(safe=True, actions=np.full((H, DOF), 0.25), pair=_PAIR)
+    client = _client(server)
+    client.infer({"state": np.zeros(DOF)})
+    assert client.last_actions_refined is not None
+
+    server.raises = ConnectionError("socket closed")
+    client.infer({"state": np.zeros(DOF)})
+    assert client.last_actions_refined is None
+    assert client.last_actions_reference is None
+    assert client.last_violation_pair is None
+
+
+def test_the_verdict_key_set_is_untouched_by_the_pair():
+    """신원은 `last_verdict` 에 들어가지 않는다 — 그 키 집합이 T0 기록의 `verdict` 다."""
+    client = _client(_Server(safe=True, pair=_PAIR))
+    client.infer({"state": np.zeros(DOF)})
+
+    assert set(client.last_verdict) == {"ag3s_status", "geometry_certified", "trajopt_status",
+                                        "max_violation_m", "timing_ms", "notes"}
