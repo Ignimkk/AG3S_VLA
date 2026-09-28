@@ -80,8 +80,10 @@ def test_the_key_set_is_fixed():
     s = make_scenario(horizon=6)
     _, pair = s.linearizer.worst_row(s.reference, s.q_now, s.scene)
 
+    # T21 이 `tier`·`authorized_rows` 를 더했다 — 어느 계층이 답했는가 / 권한 행의 검증 가능 여부.
+    # 두 키는 **모든 행에 항상** 실린다 (값이 없으면 None) — 키 집합이 프레임마다 고정이라는 취지는 그대로다.
     assert set(pair) == {"block", "clearance_m", "step", "query", "link", "slot",
-                         "candidate_id", "obstacle", "point_m"}
+                         "candidate_id", "obstacle", "point_m", "tier", "authorized_rows"}
 
 
 # --- 3. 없으면 없다고 한다 ---------------------------------------------------------------

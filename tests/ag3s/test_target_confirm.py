@@ -215,18 +215,26 @@ def test_confirm_frames_one_is_the_old_frame_independent_behaviour():
     assert _ground(_frame(0.3, 0.9), confirm).target.centroid == pytest.approx(B, abs=1e-9)
 
 
-def test_a_held_object_that_is_not_in_the_frame_cannot_be_held():
-    """We do not name geometry that is not there.
+def test_a_held_object_that_is_not_in_the_frame_is_occluded_not_replaced():
+    """T20 turned this test around. It was `..._cannot_be_held`: the leader was used at once.
 
-    If the held object produces no cluster this frame, the leader is used — but the switch count
-    keeps running, so an object that is simply gone hands the target over on schedule rather than at
-    once.
+    That was the T14 seq 12 failure — the apple went behind the fingers, the crate led at score
+    0.015, and the crate became the target for fine window, exclusion and contact permission. Now
+    the held object is returned as `occluded` with its **last observed** geometry. The switch count
+    still runs, so an object that is simply gone hands over on schedule (third frame) rather than
+    at once — the part of the old test that still holds.
     """
     confirm = TargetConfirm(CFG)
     _ground(_frame(0.9, 0.3), confirm)
     result = _ground(_frame(0.9, centres=(B,)), confirm)  # only B survives reconstruction
-    assert result.target.centroid == pytest.approx(B, abs=1e-9)
-    assert confirm.last.mode == "unobserved" and confirm.last.streak == 1
+    assert result.target.centroid == pytest.approx(A, abs=1e-9)
+    assert confirm.last.mode == "occluded" and confirm.last.streak == 1
+    assert confirm.last.cluster is None
+    _ground(_frame(0.9, centres=(B,)), confirm)
+    assert confirm.last.mode == "occluded" and confirm.last.streak == 2
+    switched = _ground(_frame(0.9, centres=(B,)), confirm)
+    assert confirm.last.mode == "switch"
+    assert switched.target.centroid == pytest.approx(B, abs=1e-9)
 
 
 def test_the_held_centroid_follows_its_object_as_it_moves():
