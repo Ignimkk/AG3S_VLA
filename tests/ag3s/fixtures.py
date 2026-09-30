@@ -420,6 +420,17 @@ class PlanarTwoLinkArm:
     def nq(self) -> int:
         return len(self.link_lengths)
 
+    #: T26: the mock's "gripper" inner opening (m). A planar two-link arm has no fingers, so the
+    #: number is the fixture's own statement — wide enough that every `DEFAULT_OBJECTS` member
+    #: (80 mm sphere, 90 mm box, 70 mm cylinder) is graspable, as the pre-T26 tests assumed.
+    MOCK_MAX_OPENING = 0.12
+
+    def gripper_openings(self) -> list[dict]:
+        """`RobotCollisionModel` T26 extension (`UrdfSphereChain.gripper_openings` is the real one)."""
+        return [{"parent_link": "link_1", "fingers": [FINGERTIP_LINK],
+                 "joints": {}, "origin_gap_m": self.MOCK_MAX_OPENING,
+                 "inner_gap_m": self.MOCK_MAX_OPENING, "geometry": "PlanarTwoLinkArm mock"}]
+
     @property
     def n_spheres(self) -> int:
         return self.nq * self.spheres_per_link

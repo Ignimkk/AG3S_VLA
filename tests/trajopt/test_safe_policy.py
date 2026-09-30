@@ -52,7 +52,12 @@ def _safe_policy(policy=None, **kw):
     # **attached 슬롯을 예약한다.** 실제 경로와 같아야 한다 — 슬롯은 AG3S 생성 시점에 고정되고
     # `attach()` 가 나중에 늘릴 수 없다. 이것 없이 지으면 `SafePolicy` 가 생성자에서 거절한다
     # (2026-09-18: 예약을 빠뜨리면 파지 다음 프레임부터 파이프라인이 조용히 멈췄다).
-    ag3s = AG3S(AG3SConfig.from_dict({"collision_backend": "esdf"}),
+    # T26: this model has no finger links, so it cannot say how wide the gripper opens and AG3S
+    # would admit nothing (fail-closed) — `attach` would refuse every object. The RB-Y1 value the
+    # full model computes (finger spheres' inner gap at the joint limit, 71.5 mm) is given here
+    # as config, the documented route for a model without fingers.
+    ag3s = AG3S(AG3SConfig.from_dict({"collision_backend": "esdf",
+                                      "clustering": {"gripper_max_opening": 0.0715}}),
                 robot_model=model, constraint_robot_model=model,
                 attached_parent_links=grasp_parent_links())
     return SafePolicy(policy or _StubPolicy(), ag3s=ag3s, **kw)

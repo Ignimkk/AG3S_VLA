@@ -10,8 +10,8 @@ What is pinned here:
    The switch count keeps running; a challenger switches only after `target_confirm_frames` frames
    running at `target_switch_min_score` or above. After `target_lost_frames` it is `lost` — no
    target, `GroundingStatus.LOST`, and never the leader either.
-2. Defaults: `target_switch_min_score = 0.0`, `target_lost_frames = None` (never lost). The switch
-   schedule is then the T5e one exactly; only the unobserved frames' *answer* changed.
+2. Defaults: `target_switch_min_score = 0.1` (T26, user ruling 2026-09-28 — was 0.0 in T20),
+   `target_lost_frames = None` (never lost). At 0.0 the switch schedule is the T5e one exactly.
 3. Consumers read the manipulated object: `build_constraint_set(manipulated_geometry=...)` for
    contact permission and target exclusion; `AG3S` passes it to `_build_esdf` and the guard.
 4. Record: `metrics["manipulated"]` and the chunk summary's `manipulated`.
@@ -100,13 +100,28 @@ def test_unobserved_returns_no_cluster_and_the_same_id_as_occluded():
     assert d1.cluster is None and d1.rank == -1
     assert (d1.mode, d1.state, d1.manipulated_id, d1.age_frames) == ("occluded", OCCLUDED, 0, 1)
     d2 = confirm.select(crate_only)
-    assert (d2.mode, d2.age_frames, d2.streak) == ("occluded", 2, 2)
+    # T26: the default minimum is 0.1, so a crate at 0.015 does not even start a run (streak 0).
+    # Under T20's 0.0 it counted (streak 2) — `test_the_t5e_schedule_at_min_score_zero` keeps that.
+    assert (d2.mode, d2.age_frames, d2.streak) == ("occluded", 2, 0)
     np.testing.assert_array_equal(confirm.held_centroid, APPLE)
 
 
-def test_the_default_switch_schedule_is_the_t5e_one():
-    """min_score 0.0 filters nothing: an object that stays gone still hands over on frame 3."""
+def test_the_default_keeps_the_apple_against_a_low_scoring_crate():
+    """T26 default (min 0.1, never lost): the crate at 0.015 never takes over — the reverse of the
+    T20 default test, which pinned the hand-over on frame 3 at min 0.0."""
     confirm = TargetConfirm(CFG)
+    assert confirm.switch_min_score == 0.1 and confirm.lost_frames is None
+    confirm.select(_ranked((APPLE, 0.46),))
+    modes = [confirm.select(_ranked((CRATE, 0.015),)).mode for _ in range(10)]
+    assert modes == ["occluded"] * 10
+    m = confirm.manipulated
+    assert (m.id, m.state, m.age_frames) == (0, OCCLUDED, 10)
+    np.testing.assert_array_equal(m.centroid, APPLE)
+
+
+def test_the_t5e_schedule_at_min_score_zero():
+    """min_score 0.0 filters nothing: an object that stays gone still hands over on frame 3."""
+    confirm = TargetConfirm(CFG, switch_min_score=0.0)
     assert confirm.switch_min_score == 0.0 and confirm.lost_frames is None
     confirm.select(_ranked((APPLE, 0.46),))
     modes = [confirm.select(_ranked((CRATE, 0.015),)).mode for _ in range(3)]
@@ -258,9 +273,16 @@ def test_record_is_json_ready():
     _ground(_frame((APPLE, 0.9)), confirm)
     rec = confirm.manipulated.record()
     json.dumps(rec)
+    # T30: `association` (the pre-grasp association test of this frame) and `anchor` (the geometry
+    # as the pre-grasp anchor) — both None-able, both JSON.
+    # T31b: `split` (this frame's attention-split decisions; None-able, JSON).
+    # T32b: `hand` (the hand spheres' gap to the standing geometry; None without a hand).
     assert set(rec) == {"id", "state", "age_frames", "centroid", "radius", "n_points",
-                        "last_seen_frame", "switched_from", "frame"}
+                        "last_seen_frame", "switched_from", "frame", "admissibility",
+                        "association", "anchor", "split", "hand"}
     assert rec["n_points"] == 27 and rec["state"] == "visible" and rec["radius"] > 0.0
+    assert rec["association"] is None                  # first frame: nothing to associate with
+    assert rec["anchor"]["manipulated_id"] == 0 and rec["anchor"]["source"] == "first"
 
 
 # ------------------------------------------------------------------------------- config
@@ -268,7 +290,7 @@ def test_record_is_json_ready():
 
 def test_config_defaults_and_round_trip():
     cfg = AG3SConfig()
-    assert cfg.clustering.target_switch_min_score == 0.0
+    assert cfg.clustering.target_switch_min_score == 0.1       # T26 (was 0.0 in T20)
     assert cfg.clustering.target_lost_frames is None
     over = AG3SConfig.from_dict({"clustering": {"target_switch_min_score": 0.1,
                                                 "target_lost_frames": 8}})

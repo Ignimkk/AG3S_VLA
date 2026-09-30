@@ -314,16 +314,22 @@ def test_without_a_confirm_object_grounding_is_still_frame_independent():
 def test_select_reads_only_the_ranking_and_the_centroids():
     """A unit test on the rule itself, with no point cloud in the way.
 
-    The scores here would have failed the retired gate on every frame; the decision must not depend
-    on their level at all.
+    The scores here would have failed the retired gate on every frame; with no switch minimum
+    (`switch_min_score=0.0`, T20's default) the decision must not depend on their level at all.
+    T26 made 0.1 the default minimum, and then the same sequence never switches — pinned below.
     """
-    confirm = TargetConfirm(CFG)
+    confirm = TargetConfirm(CFG, switch_min_score=0.0)
     assert confirm.select(_ranked((A, 0.02), (B, 0.01))).mode == "first"
     first = confirm.select(_ranked((A, 0.01), (B, 0.02)))
     assert first.mode == "hold" and first.cluster.centroid == pytest.approx(A)
     assert confirm.select(_ranked((A, 0.01), (B, 0.02))).mode == "hold"
     third = confirm.select(_ranked((A, 0.01), (B, 0.02)))
     assert third.mode == "switch" and third.cluster.centroid == pytest.approx(B)
+
+    default = TargetConfirm(CFG)          # T26: min 0.1 — a 0.02 challenger never counts
+    default.select(_ranked((A, 0.02), (B, 0.01)))
+    modes = [default.select(_ranked((A, 0.01), (B, 0.02))).mode for _ in range(5)]
+    assert modes == ["hold"] * 5 and default.held_centroid == pytest.approx(A)
 
 
 def test_the_nearer_cluster_is_the_same_object_when_two_are_within_tolerance():

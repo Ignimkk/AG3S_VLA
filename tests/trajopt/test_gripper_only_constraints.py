@@ -67,7 +67,9 @@ def finger_capsules():
 
 def test_default_argv_keeps_every_new_switch_off():
     args = serve_safe.build_parser().parse_args(BASE_ARGV)
-    assert args.links == "arms"
+    # T27: `--links` 기본이 `arms` → `gripper` (사용자 판정 2026-09-28: "거리장 충돌제약은 gripper
+    # 에만"). 나머지 스위치는 여전히 꺼져 있다.
+    assert args.links == "gripper"
     assert args.no_self_collision is False
     assert tuple(args.capsule_radius_scale_link) == ()
     # 새 손잡이가 `sphere_options` 를 비어 있지 않게 만들면 `--no-safe` 검사가 오작동한다.
@@ -93,9 +95,12 @@ def test_the_per_link_scale_defaults_to_nothing(urdf):
 
 
 def test_the_default_links_choice_still_resolves_to_the_pinned_arm_set():
+    """`arms` 는 옵션으로 남고 같은 집합을 가리킨다. **기본은 T27 부터 `gripper`** (첫 항목)."""
     assert serve_safe.constraint_link_filter("arms") == ARM_LINKS
     assert serve_safe.constraint_link_filter("all") is None
-    assert "arms" in serve_safe.LINK_GROUPS and serve_safe.LINK_GROUPS[0] == "arms"
+    assert "arms" in serve_safe.LINK_GROUPS
+    assert serve_safe.LINK_GROUPS[0] == serve_safe.DEFAULT_LINKS == "gripper"
+    assert serve_safe.constraint_link_filter(serve_safe.DEFAULT_LINKS) == GRIPPER_LINKS
 
 
 # --- 손가락만 남는다 ----------------------------------------------------------------
@@ -381,23 +386,36 @@ def test_the_diagnostic_flags_pass_the_check_on_a_plain_run():
 
 
 def test_a_default_run_says_nothing_new(caplog):
-    with caplog.at_level(logging.WARNING, logger=serve_safe.__name__):
-        serve_safe.announce_diagnostic_scope(
-            links="arms", self_collision=True, link_scales={},
-            constraint_links=ARM_LINKS, filter_spheres=61)
-    assert caplog.text == ""
-
-
-def test_the_startup_log_shouts_about_the_gripper_only_scope(caplog):
+    # T27: 기본 범위가 `gripper` 다. 기본 실행은 warning 을 내지 않는다 (범위는 info 한 줄).
     with caplog.at_level(logging.WARNING, logger=serve_safe.__name__):
         serve_safe.announce_diagnostic_scope(
             links="gripper", self_collision=True, link_scales={},
             constraint_links=GRIPPER_LINKS, filter_spheres=61)
+    assert caplog.text == ""
+
+
+def test_the_default_scope_is_still_named_in_the_startup_log(caplog):
+    """조용하다고 말이 없는 것은 아니다 — 어느 link 에 걸렸고 무엇이 빠졌는지 info 로 남는다."""
+    with caplog.at_level(logging.INFO, logger=serve_safe.__name__):
+        serve_safe.announce_diagnostic_scope(
+            links="gripper", self_collision=True, link_scales={},
+            constraint_links=GRIPPER_LINKS, filter_spheres=61)
+    assert "ee_finger_l1" in caplog.text and "아무도 막지 않습니다" in caplog.text
+
+
+@pytest.mark.parametrize("links", ["arms", "all"])
+def test_the_startup_log_shouts_about_a_non_default_scope(caplog, links):
+    """T27 에서 **방향이 뒤집혔다.** 예전에는 `gripper` 가 비기본이라 크게 말했고, 이제는 `arms` ·
+    `all` 이 비기본이다 — 팔뚝·손목(·몸통)까지 제약이 걸려 파지 접근이 그 행에 밀릴 수 있다."""
+    with caplog.at_level(logging.WARNING, logger=serve_safe.__name__):
+        serve_safe.announce_diagnostic_scope(
+            links=links, self_collision=True, link_scales={},
+            constraint_links=ARM_LINKS, filter_spheres=61)
     text = caplog.text
-    assert "CONSTRAINT SCOPE IS GRIPPER" in text
-    assert "ee_finger_l1" in text
-    # 왜 위험한지도 같이 나가야 한다 — 빼는 것이 위험을 지우지 않는다.
-    assert "아무도 막지 않습니다" in text
+    assert f"CONSTRAINT SCOPE IS {links.upper()}" in text
+    assert "NOT THE DEFAULT 'gripper'" in text
+    assert "link_left_arm_5" in text or "(전신)" in text
+    assert "gripper" in text
 
 
 def test_the_startup_log_shouts_when_self_collision_is_off(caplog):

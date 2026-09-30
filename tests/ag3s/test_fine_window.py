@@ -486,7 +486,9 @@ def test_the_exclusion_ball_does_not_grow_with_the_window(monkeypatch):
     ball_b = b._esdf_builder.calls[-1]["target_free_ball"]
     np.testing.assert_array_equal(ball_a.centre, ball_b.centre)
     assert ball_a.radius == ball_b.radius
-    np.testing.assert_array_equal(ball_a.centre, _apple_geometry().points.mean(axis=0))
+    # T32 S1: the centre is the sphere fitted to the observed surface — here the true apple centre
+    # (the points are an exact sphere), not their centroid (which sits on the seen side).
+    np.testing.assert_allclose(ball_a.centre, APPLE, atol=1e-6)
 
 
 def test_authorized_queries_are_counted_by_tier_and_resolved_when_the_window_covers(monkeypatch):

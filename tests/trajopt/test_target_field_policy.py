@@ -608,7 +608,8 @@ def test_the_server_flag_defaults_to_relax_and_says_nothing(caplog):
     assert resolve_target_field_policy(args.target_field_policy) == "relax"
     assert target_field_policy_choices() == ("relax", "exclude-authorized", "exclude-all")
     with caplog.at_level(logging.WARNING):
-        announce_diagnostic_scope(links="arms", self_collision=True, link_scales={})
+        # T27: 기본 범위가 `gripper` 다 — "기본 실행은 조용하다" 는 그 범위로 잰다.
+        announce_diagnostic_scope(links="gripper", self_collision=True, link_scales={})
     assert caplog.text == ""
 
 

@@ -36,8 +36,10 @@ def test_every_kind_has_a_default_action_and_the_split_is_as_documented():
     assert set(wire.GATE_DEFAULT) == set(wire.REASON_KINDS)
     execute = {k for k, v in wire.GATE_DEFAULT.items() if v == "execute"}
     assert execute == {"allowed_contact", "budget_only", "occluded_target", "uncertified_waived"}
+    # T27: `no_perception` (`serve_safe --no-perception`) 이 HOLD 쪽에 더해졌다 — 검사되지 않은
+    # 청크이고, 실행하려면 로컬이 `--safe-gate off` 로 명시해야 한다.
     assert {k for k, v in wire.GATE_DEFAULT.items() if v == "hold"} == {
-        "collision", "uncertified", "unverified", "comms"}
+        "collision", "uncertified", "unverified", "comms", "no_perception"}
 
 
 def test_make_reason_refuses_an_unregistered_kind():

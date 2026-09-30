@@ -49,7 +49,9 @@ def constraint_model(urdf):
 def test_default_argv_excludes_nothing():
     args = serve_safe.build_parser().parse_args(BASE_ARGV)
     assert args.exclude_links == ()
-    assert args.links == "arms"
+    # T27: 기본 범위가 `arms` → `gripper` (사용자 판정 2026-09-28). 이 테스트의 요점(아무것도 안
+    # 뺀다)은 그대로다.
+    assert args.links == "gripper"
 
 
 def test_build_ag3s_defaults_to_no_exclusion():

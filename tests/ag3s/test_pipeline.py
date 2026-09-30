@@ -31,7 +31,12 @@ from tests.ag3s.fixtures import (
     make_scene,
 )
 
-CFG = AG3SConfig()
+#: T26: the pipeline's default self-filter inflation is 0.0 (sphere radius itself). This fixture
+#: renders the mock robot **as its own spheres**, so at 0.0 its surface sits exactly on the filter
+#: boundary and ~2/3 of it survives on floating-point noise (T19 measured 6,355 / 9,714 px) — a
+#: synthetic artifact, not a property of a mesh covered by spheres. These tests are about scene
+#: decomposition, so they keep the pre-T26 margin explicitly.
+CFG = AG3SConfig.from_dict({"pointcloud": {"self_filter_inflation": 0.05}})
 
 
 @pytest.fixture(scope="module")
@@ -225,13 +230,23 @@ def test_an_empty_depth_frame_reports_no_geometry(arm):
 
 
 def test_without_a_robot_model_perception_still_runs(scene):
-    """Debuggable on a machine with no robot description; constraints are simply absent."""
+    """Debuggable on a machine with no robot description; constraints are simply absent.
+
+    T26: without a robot model nobody knows the gripper's opening, so **nothing is graspable** and
+    no target is named (fail-closed) — unless `clustering.gripper_max_opening` says it. Before T26
+    this test asserted a target with no model; the reverse is now the contract.
+    """
     ag3s = AG3S(CFG)
     constraint_set = ag3s.process(**_inputs(scene))
     assert ag3s.builder is None
     assert constraint_set.constraints is None
-    assert constraint_set.target is not None and len(constraint_set.candidates) >= 3
+    assert constraint_set.target is None
+    assert constraint_set.grounding_status is GroundingStatus.NO_ADMISSIBLE
+    assert len(constraint_set.candidates) >= 3
     assert any("no robot model" in note for note in constraint_set.notes)
+    told = AG3S(CFG.with_overrides({"clustering": {"gripper_max_opening": 0.12}}))
+    constraint_set = told.process(**_inputs(scene))
+    assert constraint_set.target is not None and len(constraint_set.candidates) >= 3
 
 
 def test_slot_overflow_is_reported_as_degraded(scene, arm):

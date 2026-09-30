@@ -136,9 +136,10 @@ RBY1_LIKE = (
 
 
 def test_groups_expand_and_the_more_specific_key_wins_whatever_the_dict_order():
-    a = PointCloudConfig(self_filter_inflation_by_link={
+    # T26: the default global is 0.0 now; a non-zero global keeps "unlisted → global" visible.
+    a = PointCloudConfig(self_filter_inflation=0.05, self_filter_inflation_by_link={
         "ee_finger_l1": 0.0, "gripper": 0.01, "arms": 0.03})
-    b = PointCloudConfig(self_filter_inflation_by_link={
+    b = PointCloudConfig(self_filter_inflation=0.05, self_filter_inflation_by_link={
         "arms": 0.03, "gripper": 0.01, "ee_finger_l1": 0.0})
     for cfg in (a, b):
         infl = resolve_self_filter_inflation(RBY1_LIKE, cfg)
@@ -153,7 +154,8 @@ def test_groups_expand_and_the_more_specific_key_wins_whatever_the_dict_order():
 
 
 def test_the_array_is_per_sphere_in_sphere_order():
-    cfg = PointCloudConfig(self_filter_inflation_by_link={"ee_finger_l1": 0.004})
+    cfg = PointCloudConfig(self_filter_inflation=0.05,  # T26: explicit (default is 0.0)
+                           self_filter_inflation_by_link={"ee_finger_l1": 0.004})
     infl = resolve_self_filter_inflation(RBY1_LIKE, cfg)
     assert infl.shape == (len(RBY1_LIKE),)
     for name, value in zip(RBY1_LIKE, infl):
@@ -292,7 +294,8 @@ def test_on_the_rendered_scene_the_guard_leaks_only_exact_surface_points(arm, sc
     cloud = backproject(scene.depth, scene.camera_intrinsics, scene.T_base_cam)
     labels = scene.labels[cloud.uv[:, 1], cloud.uv[:, 0]]
     centres, radii = arm.sphere_centers_numeric(DEFAULT_ARM_Q)
-    cfg = PointCloudConfig(self_filter_target_guard_radius=10.0)
+    # T26: the default inflation is 0.0 now — the guard/no-guard contrast needs the old margin.
+    cfg = PointCloudConfig(self_filter_inflation=0.05, self_filter_target_guard_radius=10.0)
     out, stats = filter_robot_points(cloud, arm, DEFAULT_ARM_Q, cfg, guard_centre=arm.base)
     assert stats["guard_active"] is True and stats["guard_radius"] == 10.0
     assert stats["guard_centroid"] == pytest.approx(arm.base.tolist())
@@ -306,7 +309,8 @@ def test_on_the_rendered_scene_the_guard_leaks_only_exact_surface_points(arm, sc
     assert stats["n_guard_protected"] == stats["n_out"] - old_kept
 
     # guard 를 끄면 같은 장면에서 로봇은 예전처럼 지워진다.
-    plain, _ = filter_robot_points(cloud, arm, DEFAULT_ARM_Q, PointCloudConfig())
+    plain, _ = filter_robot_points(cloud, arm, DEFAULT_ARM_Q,
+                                   PointCloudConfig(self_filter_inflation=0.05))
     plain_robot = int((scene.labels[plain.uv[:, 1], plain.uv[:, 0]] == LABEL_ROBOT).sum())
     assert plain_robot == 0
 
@@ -412,11 +416,12 @@ def test_self_filter_settings_report_the_effective_table(arm):
                      self_filter_target_guard_radius=0.06), robot_model=arm)
     s = ag3s.self_filter_settings()
     assert s["enabled"] is True and s["n_spheres"] == arm.n_spheres
-    assert s["inflation_default"] == 0.05
-    assert s["inflation_effective"] == {"link_0": 0.05, "link_1": 0.05, FINGERTIP_LINK: 0.0}
+    # T26: the default is the sphere radius itself (0.0; it was 0.05 until 2026-09-28).
+    assert s["inflation_default"] == 0.0
+    assert s["inflation_effective"] == {"link_0": 0.0, "link_1": 0.0, FINGERTIP_LINK: 0.0}
     assert s["target_guard_radius"] == 0.06
     plain = AG3S(AG3SConfig(), robot_model=arm).self_filter_settings()
-    assert set(plain["inflation_effective"].values()) == {0.05}
+    assert set(plain["inflation_effective"].values()) == {0.0}
     assert AG3S(AG3SConfig()).self_filter_settings()["enabled"] is False
 
 
@@ -444,7 +449,8 @@ def test_group_names_land_on_the_real_self_filter_model(rby1_filter_model):
 
     names = rby1_filter_model.sphere_link_names
     assert set(GRIPPER_LINKS) <= set(names) and set(ARM_LINKS) <= set(names)
-    cfg = PointCloudConfig(self_filter_inflation_by_link={"gripper": 0.0})
+    cfg = PointCloudConfig(self_filter_inflation=0.05,  # T26: explicit (default is 0.0)
+                           self_filter_inflation_by_link={"gripper": 0.0})
     table = inflation_table(names, resolve_self_filter_inflation(names, cfg))
     assert {link for link, v in table.items() if v == 0.0} == set(GRIPPER_LINKS)
     assert table["base"] == cfg.self_filter_inflation  # base 누수(T1) 를 막는 값은 그대로
@@ -523,7 +529,9 @@ def test_start_log_default_is_one_line_and_says_yaml_does_not_reach(arm, caplog)
     msgs = [r for r in caplog.records if r.name == serve_safe.__name__]
     assert len(msgs) == 1 and msgs[0].levelno == logging.INFO
     text = msgs[0].getMessage()
-    assert f"{arm.n_spheres} 구" in text and "50.0 mm" in text and "guard 끔" in text
+    # T26: default inflation 0.0 mm (sphere radius itself; was 50.0 mm).
+    assert f"{arm.n_spheres} 구" in text and "0.0 mm" in text and "50.0 mm" not in text
+    assert "guard 끔" in text
     assert "닿지 않는다" in text and "코드 기본값" in text
 
 
@@ -539,6 +547,6 @@ def test_start_log_prints_the_effective_table_when_overridden(arm, caplog):
     assert len(rec) == 1 and rec[0].levelno == logging.WARNING
     text = rec[0].getMessage()
     assert "NOT THE SINGLE-VALUE DEFAULT" in text and "60.0 mm" in text
-    assert f"0.0 mm :  1 link — {FINGERTIP_LINK}" in text
-    assert "50.0 mm :  2 link — link_0, link_1" in text
+    # T26: with the global at 0.0 the override equals it — every link reads 0.0 mm.
+    assert f"0.0 mm :  3 link — link_0, link_1, {FINGERTIP_LINK}" in text
     assert "CLI" in text

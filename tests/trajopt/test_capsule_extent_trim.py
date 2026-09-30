@@ -144,8 +144,11 @@ def test_the_server_flag_defaults_to_nothing():
 
 def test_the_default_startup_log_says_nothing_about_the_sphere_model(caplog):
     with caplog.at_level(logging.WARNING, logger=serve_safe.__name__):
+        # T27: `--links` 기본이 `arms` → `gripper`. 이 테스트가 박는 것은 "기본 실행은 구 모델에
+        # 대해 조용하다" 이므로 **기본 범위**(이제 gripper)로 부른다 — `arms` 는 이제 비기본이라
+        # 범위 경고가 따로 나간다 (`test_gripper_only_constraints`).
         serve_safe.announce_diagnostic_scope(
-            links="arms", self_collision=True, link_scales={}, link_extents={},
+            links=serve_safe.DEFAULT_LINKS, self_collision=True, link_scales={}, link_extents={},
             radius_by_link="link_left_arm_5=5×81.25 mm", filter_spheres=218)
     assert caplog.text == ""
 

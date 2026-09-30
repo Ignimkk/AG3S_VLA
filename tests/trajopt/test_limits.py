@@ -50,11 +50,13 @@ def test_a_missing_limit_raises_rather_than_defaulting(robot):
         action_dim=4, n_valid=4, action_to_q=((0, 0), (1, 1)), fixed_q=(), passthrough=(2, 3),
         nq_model=2,
     )
+    # T31: position 범위의 기본 출처는 MJCF 인데 이 가짜 로봇(관절 a·b)은 어느 MJCF 에도 없다.
+    # 이 시험의 요점은 **속도** 기본값이므로 position 은 모델 자신(`source="urdf"`)에서 읽는다.
     with pytest.raises(ValueError, match="no velocity_limits"):
-        build_limits(Incomplete(), layout, dt=DT)
+        build_limits(Incomplete(), layout, dt=DT, config=LimitsConfig(source="urdf"))
     limits = build_limits(
         Incomplete(), layout, dt=DT,
-        config=LimitsConfig(default_velocity=1.0, default_acceleration=2.0),
+        config=LimitsConfig(source="urdf", default_velocity=1.0, default_acceleration=2.0),
     )
     assert limits.max_step[0] == pytest.approx(1.0 * 0.9 * DT)
 
@@ -75,13 +77,24 @@ def test_limits_are_converted_into_step_units_once(robot, layout):
     )
 
 
-def test_the_position_margin_keeps_the_optimizer_off_the_hard_stop(robot, layout):
-    lower_all, upper_all = robot.joint_limits()
+@pytest.mark.parametrize("source", ["model_xml", "urdf"])
+def test_the_position_margin_keeps_the_optimizer_off_the_hard_stop(robot, layout, source):
+    """margin 은 **설정된 출처의** 범위에서 잰다 (T31 G1).
+
+    T31 전에는 `robot.joint_limits()` (URDF) 와 비교했다. 이제 기본 출처는 제어 대상 MJCF 이고
+    — MJCF 의 `arm_1` 하한(−0.05)은 URDF(−0.0175)보다 넓다 — URDF 와 비교하면 margin 이 아니라
+    두 파일의 차이를 재게 된다. 출처마다 그 출처의 범위를 기준으로 같은 성질을 확인한다.
+    """
+    from benchmark.trajopt.limits import resolve_position_ranges
+
+    config = LimitsConfig(source=source, position_margin=0.05)
+    lower_all, upper_all, _ = resolve_position_ranges(robot, config, index=layout.q_indices)
     index = layout.q_indices
-    tight = build_limits(robot, layout, dt=DT, config=LimitsConfig(position_margin=0.05))
+    tight = build_limits(robot, layout, dt=DT, config=config)
     assert np.all(tight.lower > lower_all[index])
     assert np.all(tight.upper < upper_all[index])
     assert np.allclose(tight.lower - lower_all[index], 0.05)
+    assert np.allclose(upper_all[index] - tight.upper, 0.05)
 
 
 def test_an_absurd_margin_is_refused_rather_than_producing_an_empty_box(robot, layout):

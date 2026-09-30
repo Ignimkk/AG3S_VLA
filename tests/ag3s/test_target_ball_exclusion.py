@@ -207,9 +207,17 @@ def test_the_ball_only_reaches_where_the_apple_is():
 
 def test_the_ball_is_measured_not_hardcoded():
     points, ball = _ball()
-    spread = np.linalg.norm(points - points.mean(axis=0), axis=1)
-    assert np.allclose(ball.centre, points.mean(axis=0))
-    assert ball.radius == pytest.approx(float(spread.max()) + VOXEL)
+    # T32 S1: the centre is the sphere fitted to the observed surface (here the points lie exactly on
+    # the apple sphere, so it is `APPLE_CENTRE`), the radius covers the observed points and the
+    # fitted sphere, + one voxel.
+    from benchmark.ag3s.robot_models.held_object import fit_surface_sphere
+
+    fit = fit_surface_sphere(points)
+    assert fit.accepted
+    assert np.allclose(ball.centre, fit.centre) and np.allclose(ball.centre, APPLE_CENTRE, atol=1e-6)
+    spread = np.linalg.norm(points - ball.centre, axis=1)
+    assert ball.radius == pytest.approx(max(float(spread.max()), fit.radius) + VOXEL)
+    assert ball.summary()["centre_method"] == "surface_fit"
     assert ball.z_min == pytest.approx(TABLE_Z + VOXEL)
     # 무엇을 재서 나온 값인지 기록에 남는다.
     summary = ball.summary()
@@ -277,13 +285,13 @@ def test_a_tilted_support_plane_is_evaluated_at_the_target_xy():
     tilted = SupportSurface(id=5, normal=n, offset=offset, point_indices=np.arange(3),
                             point_count=3, rms_error=0.001)
     points, ball = _ball(surfaces=[tilted])
-    # **centroid 자리**에서 푼 값이어야 한다. 표본점의 centroid 는 `APPLE_CENTRE` 와 조금 다르고
-    # (보이는 쪽만 관측되므로), 기울어진 평면에서는 그 차이가 z 로 번진다 — 그 번짐이 이 시험이
-    # 박는 것이다. `APPLE_CENTRE` 로 기대하면 0.107 mm 어긋난다.
-    c = points.mean(axis=0)
+    # **공 중심 자리**에서 푼 값이어야 한다. T32 S1 전에는 그 중심이 표본점 centroid 였고
+    # (`APPLE_CENTRE` 와 0.107 mm 차이가 z 로 번졌다), 이제는 표면에 맞춘 구의 중심이다.
+    c = ball.centre
     expected = (offset - n[0] * c[0] - n[1] * c[1]) / n[2]
     assert ball.z_min == pytest.approx(expected + VOXEL, abs=1e-9)
-    assert abs(expected - TABLE_Z) > 1e-6, "기울기가 실제로 z 를 움직여야 시험이 뜻을 갖는다"
+    tilt_at_centroid = (offset - n[0] * points.mean(0)[0] - n[1] * points.mean(0)[1]) / n[2]
+    assert abs(expected - tilt_at_centroid) > 1e-7 or np.allclose(c, points.mean(0))
 
 
 # --- 5. 부호 판정이 퇴화하는지 (task 3 번) ----------------------------------------------

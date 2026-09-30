@@ -113,10 +113,20 @@ def test_all_unused_is_the_same_array_as_a_frame_with_nothing_nearby(sc):
 
 
 def test_with_collisions_off_the_solution_stops_avoiding(sc, scene):
-    """켠 판은 관통을 고치고, 끈 판은 안 고친다 — 그것이 이 flag 의 내용 전부다."""
+    """켠 판은 관통을 고치고, 끈 판은 안 고친다 — 그것이 이 flag 의 내용 전부다.
+
+    **끈 판의 움직임은 limit 이 요구하는 만큼을 뺀 뒤에 잰다** (T31). T31 부터 position 범위가
+    MJCF 에서 오고 (`left_arm_3` 상한 0.01 − margin 0.02 = −0.01), 이 fixture 의 reference 는 그
+    box 를 10 mrad 넘는다. 끈 판에서는 받아들여지는 후보가 없어 **reference 의 최소 투영**이
+    나가므로 (G2-ii) 끈 판은 정확히 그 10 mrad 만 움직인다. 그것은 충돌이 새어 든 것이 아니라
+    limit 이다 — 8 절 (`..._the_only_motion_left_is_the_limit`) 이 그 성질을 따로 박는다.
+    """
+    from benchmark.trajopt.limits import project_to_limits
+
     on, off = _solve(sc, scene), _solve(sc, scene, OFF)
+    required = project_to_limits(sc.reference, sc.limits, sc.q_now[sc.layout.q_indices])
     moved_on = float(np.abs(on.trajectory - sc.reference).max())
-    moved_off = float(np.abs(off.trajectory - sc.reference).max())
+    moved_off = float(np.abs(off.trajectory - required).max())
     assert moved_on > 10.0 * moved_off, (
         f"켠 판 {moved_on * 1000:.1f} mm vs 끈 판 {moved_off * 1000:.1f} mm — "
         "끈 판이 여전히 크게 움직이면 충돌이 다른 길로 새어 들어온다")
@@ -318,8 +328,10 @@ def test_with_no_collision_and_no_jerk_the_only_motion_left_is_the_limit(sc, sce
     """**ablation 을 읽는 사람이 꼭 알아야 할 것.**
 
     충돌도 jerk 도 연속성도 없으면 남는 목적은 추적뿐이므로 해가 reference 여야 한다 — 그런데
-    이 fixture 에서는 **2.547 mm 움직인다.** 이유가 목적함수가 아니다: reference 자체가 joint
-    box 밖에 있고 (`limit_report(reference)["position"] = 0.002547`), 해는 그것을 0 으로 만든다.
+    이 fixture 에서는 **움직인다.** 이유가 목적함수가 아니다: reference 자체가 joint box 밖에 있고
+    해는 그 초과를 0 으로 만든다. URDF 범위(T31 전)에서는 2.547 mrad (`left_arm_1` 하한), T31 의
+    MJCF 범위에서는 10 mrad (`left_arm_3` 상한 0.01 − margin 0.02). T31 부터 이 해는 QP 후보가
+    아니라 **reference 의 최소 투영**이다 (G2-ii) — 초과한 원소만, 초과한 만큼만 움직인다.
 
     즉 *"충돌을 껐는데도 청크가 바뀌었다"* 를 곧바로 목적함수 탓으로 읽으면 안 된다. 먼저
     reference 의 limit 초과량을 봐야 한다.
