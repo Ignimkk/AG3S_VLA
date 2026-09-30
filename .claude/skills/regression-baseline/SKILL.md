@@ -29,8 +29,24 @@ frame 0 에서 팔이 그 **유령 장애물**과 29 mm 겹쳤다고 보고했�
 
 
 ```
-위반으로 시작 13/15 · has_target **15/15** · frame0 clearance_before +0.185978 mm
+[legacy]  위반으로 시작 14/15 · has_target 15/15 · frame0 clearance_before −29.031048280806342 mm
+[cuRobo]  위반으로 시작 10/15 · has_target 15/15 · frame0 clearance_before −9.171877401271193 mm
 ```
+
+**2026-09-30 갱신 — 기준선이 둘이다** (사용자 판정 B, 근거 `ag3s/docs/handoff/T36.baseline.verify.json`).
+
+- **legacy** = 위 명령 그대로 (`esdf_rollout` 기본 `--esdf-backend legacy`, numpy ESDF). 옛 값 13/15 · +0.185978 은
+  self-filter inflation 0.05 가 **왼손 옆 실제 crate 점**(frame0 wrist_l 2,787 · wrist_r 569 px)을 지운 장면의 값이었다.
+  T26 에서 inflation 0 이 되자 crate 가 남아 `link_left_arm_5` 구(r 81.2 mm) ↔ crate 가 +21.2 − margin 50 ≈ −29.03 mm.
+  로봇 누수는 0 / 836,762 px (T30b · T32 H4). **옛 값으로 되돌리려고 inflation 을 올리지 마라** — 실제 물체를 지운다
+  (T14 에서 사과를 지운 것과 같은 기전). T31diag · T32 H4 · T33 · T34 · T35 · T36 에서 소수점까지 재현.
+- **cuRobo** = 위 명령 + `--esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005`, **`.venv-openpi-live`** 로
+  (ag3s 쪽 python 에서는 curobo import 불가). 2026-09-30 단독 4 회 비트 단위 재현 (15 프레임 clearance_before sha1 동일,
+  필드 tier 배열 sha1 도 15/15 동일). 서버와 같은 거리장 경로(분리된 fine TSDF · fine truncation 0.030 m)를 탄다.
+- **cuRobo 기준선이 덮지 않는 것** (esdf_rollout 에 flag 가 없다): 제약 범위 gripper (rollout 은 arms) ·
+  `--target-field-policy exclude-authorized` (target-free 층 0 개) · `--esdf-margin 0` (0.05 로 잰다) ·
+  `--no-self-collision` · 구 옵션 · 쥔 물체(attached 0 · held freeing 0). **이 경로들은 폐루프 E3 실행으로만 검증된다.**
+- 둘 중 하나라도 바뀌면 코드를 의심하기 전에 무엇이 같이 돌았는지부터 본다 (아래 "단독으로" 절).
 
 **2026-09-28 갱신 — 14/15 · +0.157 은 `plan_horizon = 32` 시절 값이다.** `5c5291e` (T6f, TO 를
 실행 창 8 스텝에만 걸기) 뒤의 HEAD 는 **13/15 · +0.18597810857728936 mm** 이고, T7a 가 그렇게
