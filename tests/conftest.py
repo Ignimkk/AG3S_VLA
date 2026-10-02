@@ -9,3 +9,8 @@ bug. A test that checks the production behaviour (refuse + record) passes `stric
 import os
 
 os.environ.setdefault("AG3S_STRICT_INVARIANTS", "1")
+
+
+def pytest_configure(config):
+    # SUBTASK-c: the GPU test (checkpoint + JAX) is marked `slow` and opt-in (`AG3S_GPU_TESTS=1`).
+    config.addinivalue_line("markers", "slow: needs a GPU and the checkpoint; opt-in")
