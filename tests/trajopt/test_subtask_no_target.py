@@ -215,7 +215,11 @@ OTHER_GROUNDINGS = [g for g in GroundingStatus
 
 @pytest.mark.parametrize("grounding", OTHER_GROUNDINGS, ids=lambda g: g.value)
 def test_iii_any_other_no_target_stays_uncertified(gated, grounding):
-    cs = _replace(gated["released"], grounding_status=grounding)
+    # SUBTASK-f: `no_admissible` on the `released` frame (gate on, home, PLACED seen) is now the
+    # widened exception (tests/trajopt/test_subtask_no_admissible_home.py); here it is taken on
+    # the `first` frame (label place, nothing placed), where it still holds.
+    base = gated["first"] if grounding is GroundingStatus.NO_ADMISSIBLE else gated["released"]
+    cs = _replace(base, grounding_status=grounding)
     assert not subtask_no_target(cs) and geometry_certified(cs) is False
     sp = _policy()
     _wire(sp, cs, "violated")
@@ -242,7 +246,11 @@ def test_iv_gate_off_never_reaches_the_exception(ungated):
 def test_iv_without_subtask_gated_the_predicate_is_the_old_status_ok(gated, grounding, status,
                                                                     validity):
     cs = _replace(gated["released"], grounding_status=grounding, status=status, validity=validity)
-    assert geometry_certified(cs) is (status is PipelineStatus.OK)
+    # SUBTASK-f: this frame is gate on ∧ home ∧ PLACED seen, so `no_admissible` + no_target + valid
+    # is the one other combination that is certified (gate off: test_subtask_no_admissible_home).
+    placed_home = (grounding is GroundingStatus.NO_ADMISSIBLE
+                   and status is PipelineStatus.NO_TARGET and validity is ConstraintValidity.VALID)
+    assert geometry_certified(cs) is (status is PipelineStatus.OK or placed_home)
 
 
 def _verdict_snapshot(cs, trajopt_status, policy, monkeypatch, *, old_rule):
