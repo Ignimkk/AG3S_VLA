@@ -826,10 +826,16 @@ def main():
     ap.add_argument(
         "--obstacle-profile",
         default="clear",
-        help="static obstacle profile from pick_place_obstacles.json; use a fruit_* "
-             "profile with --model rby1_transport_14d",
+        help="static obstacle profile from pick_place_obstacles.json (or --obstacle-config); "
+             "'clear' (default) = no obstacle, the unmodified scene. Fruit-scene profiles "
+             "go with --model rby1_transport_14d or rby1_randomized_pick_place_16d",
     )
-    ap.add_argument("--obstacle-config", type=pathlib.Path, default=None)
+    ap.add_argument(
+        "--obstacle-config", type=pathlib.Path, default=None,
+        help="per-run obstacle JSON (format: docstring of "
+             "rby1_manipulation/simulation/pick_place_obstacles.py; hurdle_0 takes "
+             "position, yaw and bar_height)",
+    )
     ap.add_argument("--obstacle-stop-distance", type=float, default=0.02)
     ap.add_argument(
         "--fruit-layout-index",
@@ -1023,7 +1029,10 @@ def main():
 
     if args.obstacle_profile == "clear":
         model_xml = mcfg.get("model_xml", MODEL_XML)
-    elif args.model == "rby1_transport_14d":
+    elif mcfg.get("model_xml") == MODEL_XML_TRANSPORT:
+        # Fruit/crate models (rby1_transport_14d, rby1_randomized_pick_place_16d):
+        # model_transport.xml + parked obstacle slots. The block-scene XML has no
+        # apple_free/crate_free (T40 A: `apple_free missing`).
         model_xml = MODEL_XML_TRANSPORT_PICK_PLACE_OBSTACLES
     else:
         model_xml = MODEL_XML_PICK_PLACE_OBSTACLES

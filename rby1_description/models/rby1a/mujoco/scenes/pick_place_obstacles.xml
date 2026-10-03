@@ -80,4 +80,71 @@
           type="box" size="0.030 0.040 0.006" pos="0.085 0 0.006"
           rgba="0.30 0.33 0.36 1"/>
   </body>
+
+  <!-- hurdle_0 (T40 E): a horizontal bar on two posts that the carried fruit
+       has to pass over.  Capsules and cylinders only - MuJoCo 3.11
+       mj_geomDistance is wrong for some box pairs (T40 A), and the obstacle
+       stop / reset clearance checks call it.
+
+       Adjustable bar height without touching the model: the prop is two
+       mocap bodies that telescope.
+         pick_obstacle_hurdle_0      at the table surface: two feet and two
+                                     fixed sleeves (z 0.012 .. 0.180)
+         pick_obstacle_hurdle_0_bar  at the bar centre: the bar and two
+                                     sliding posts that reach 0.150 m down
+                                     into the sleeves
+       PickPlaceObstacleManager puts the second body at position + bar_height
+       (bar centre above the table, 0.20 .. 0.32 m), same yaw.  Over that range
+       the sliding post bottom (bar_height - 0.150) stays inside the sleeve
+       (0.012 .. 0.180), so the posts always look and collide as continuous.
+       Mocap bodies are welded to the world, so the two bodies never collide
+       with each other or with the table.
+       Bar along local x: capsule r 0.012, fromto x -0.12 .. 0.12 (0.264 m end
+       to end).  Collision geoms have exactly the visual sizes. -->
+  <body name="pick_obstacle_hurdle_0" mocap="true" pos="11 8 2">
+    <geom class="prop_collision" name="pick_obstacle_hurdle_0_collision_foot_left"
+          type="cylinder" size="0.035 0.006" pos="-0.12 0 0.006"/>
+    <geom class="prop_collision" name="pick_obstacle_hurdle_0_collision_foot_right"
+          type="cylinder" size="0.035 0.006" pos="0.12 0 0.006"/>
+    <geom class="prop_collision" name="pick_obstacle_hurdle_0_collision_sleeve_left"
+          type="cylinder" size="0.014 0.084" pos="-0.12 0 0.096"/>
+    <geom class="prop_collision" name="pick_obstacle_hurdle_0_collision_sleeve_right"
+          type="cylinder" size="0.014 0.084" pos="0.12 0 0.096"/>
+    <geom class="prop_visual" name="pick_obstacle_hurdle_0_foot_left"
+          type="cylinder" size="0.035 0.006" pos="-0.12 0 0.006"
+          rgba="0.12 0.14 0.16 1"/>
+    <geom class="prop_visual" name="pick_obstacle_hurdle_0_foot_right"
+          type="cylinder" size="0.035 0.006" pos="0.12 0 0.006"
+          rgba="0.12 0.14 0.16 1"/>
+    <geom class="prop_visual" name="pick_obstacle_hurdle_0_sleeve_left"
+          type="cylinder" size="0.014 0.084" pos="-0.12 0 0.096"
+          rgba="0.30 0.33 0.36 1"/>
+    <geom class="prop_visual" name="pick_obstacle_hurdle_0_sleeve_right"
+          type="cylinder" size="0.014 0.084" pos="0.12 0 0.096"
+          rgba="0.30 0.33 0.36 1"/>
+  </body>
+
+  <body name="pick_obstacle_hurdle_0_bar" mocap="true" pos="11 8 2.26">
+    <geom class="prop_collision" name="pick_obstacle_hurdle_0_collision_bar"
+          type="capsule" size="0.012" fromto="-0.12 0 0 0.12 0 0"/>
+    <geom class="prop_collision" name="pick_obstacle_hurdle_0_collision_post_left"
+          type="cylinder" size="0.010 0.075" pos="-0.12 0 -0.075"/>
+    <geom class="prop_collision" name="pick_obstacle_hurdle_0_collision_post_right"
+          type="cylinder" size="0.010 0.075" pos="0.12 0 -0.075"/>
+    <geom class="prop_visual" name="pick_obstacle_hurdle_0_bar"
+          type="capsule" size="0.012" fromto="-0.12 0 0 0.12 0 0"
+          rgba="0.92 0.22 0.12 1"/>
+    <geom class="prop_visual" name="pick_obstacle_hurdle_0_bar_band_left"
+          type="cylinder" size="0.0125 0.015" pos="-0.05 0 0" zaxis="1 0 0"
+          rgba="0.96 0.96 0.94 1"/>
+    <geom class="prop_visual" name="pick_obstacle_hurdle_0_bar_band_right"
+          type="cylinder" size="0.0125 0.015" pos="0.05 0 0" zaxis="1 0 0"
+          rgba="0.96 0.96 0.94 1"/>
+    <geom class="prop_visual" name="pick_obstacle_hurdle_0_post_left"
+          type="cylinder" size="0.010 0.075" pos="-0.12 0 -0.075"
+          rgba="0.72 0.75 0.78 1"/>
+    <geom class="prop_visual" name="pick_obstacle_hurdle_0_post_right"
+          type="cylinder" size="0.010 0.075" pos="0.12 0 -0.075"
+          rgba="0.72 0.75 0.78 1"/>
+  </body>
 </mujocoinclude>
