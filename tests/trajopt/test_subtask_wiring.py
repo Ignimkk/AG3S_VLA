@@ -5,7 +5,9 @@
 2. `set_placed` is True exactly in latch phase PLACED — not after a revoked false attach (T34
    leaves the latch LATCHED), not while closing / held (B3).
 3. `serve_safe --subtask-gate` / `--subtask-probe` → `clustering.subtask_gate` /
-   `subtask_probe_path`; default = the config untouched; impossible combinations are refused.
+   `subtask_probe_path`; impossible combinations are refused. SUBTASK-g: the gate is on by default
+   and `main` always writes it into the config (on or off); `--no-subtask-gate` turns it off
+   (`tests/trajopt/test_subtask_gate_default.py`).
 4. the constraint record carries `metrics["subtask"]`.
 """
 
@@ -133,9 +135,12 @@ def _args(*extra):
     return ap, ap.parse_args(BASE_ARGV + list(extra))
 
 
-def test_flags_default_off():
+def test_flags_default():
+    """SUBTASK-g: no flag parses to None (= "not given"), which `resolve_subtask_gate` makes on.
+    (SUBTASK-c: `False` — the default was off.)"""
     _, args = _args()
-    assert args.subtask_gate is False and args.subtask_probe is None
+    assert args.subtask_gate is None and args.subtask_probe is None
+    assert serve_safe.resolve_subtask_gate(args) is None and args.subtask_gate is True
 
 
 @pytest.mark.parametrize("extra", [["--subtask-gate", "--no-safe"],
@@ -153,10 +158,11 @@ def test_gate_flag_is_accepted():
     serve_safe.reject_bad_flag_combinations(ap, args)
 
 
-def test_build_ag3s_puts_the_gate_in_the_config_only_when_asked():
+def test_build_ag3s_puts_the_gate_in_the_config():
+    """SUBTASK-g: the fragment comes from `subtask_config_section` (the gate always, when `main`
+    gives a bool); SUBTASK-c inlined it and wrote the gate only when on."""
     src = inspect.getsource(serve_safe.build_ag3s)
-    assert '"subtask_gate": True} if subtask_gate' in src
-    assert "if (subtask_gate or subtask_probe_path) else {}" in src
+    assert "**subtask_config_section(subtask_gate, subtask_probe_path)" in src
     main = inspect.getsource(serve_safe.main)
     assert "subtask_gate=args.subtask_gate" in main
     assert 'subtask_probe=args.subtask_probe or "default"' in main
@@ -164,18 +170,20 @@ def test_build_ag3s_puts_the_gate_in_the_config_only_when_asked():
 
 
 def test_the_config_shape_build_ag3s_produces():
-    """The dict fragment `build_ag3s` adds, reproduced and loaded — default is no key at all."""
+    """The dict fragment `build_ag3s` adds, loaded. SUBTASK-g: a bool gate is always written (off
+    too — SUBTASK-c wrote nothing for off, the then default); None = no key = the config default,
+    which is now on (SUBTASK-c: off)."""
     from benchmark.ag3s.config import AG3SConfig
 
-    def fragment(gate, path):
-        return ({"clustering": {**({"subtask_gate": True} if gate else {}),
-                                **({"subtask_probe_path": str(path)} if path else {})}}
-                if (gate or path) else {})
-
-    assert fragment(False, None) == {}
+    fragment = serve_safe.subtask_config_section
+    assert fragment(None, None) == {}
+    assert fragment(False, None) == {"clustering": {"subtask_gate": False}}
+    assert fragment(True, None) == {"clustering": {"subtask_gate": True}}
     cfg = AG3SConfig.from_dict({"collision_backend": "esdf", **fragment(True, "p.npz")})
     assert cfg.clustering.subtask_gate is True and cfg.clustering.subtask_probe_path == "p.npz"
-    assert AG3SConfig.from_dict({"collision_backend": "esdf"}).clustering.subtask_gate is False
+    off = AG3SConfig.from_dict({"collision_backend": "esdf", **fragment(False, None)})
+    assert off.clustering.subtask_gate is False and off.clustering.subtask_probe_path is None
+    assert AG3SConfig.from_dict({"collision_backend": "esdf"}).clustering.subtask_gate is True
 
 
 def test_constraint_record_carries_the_subtask_metrics():

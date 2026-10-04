@@ -154,8 +154,10 @@ def test_gate_off_decisions_do_not_depend_on_the_labels():
     assert "first" in modes and "switch" in modes, "the script must exercise first and switch"
 
 
-def test_gate_off_is_the_config_default_and_records_what_it_would_have_blocked():
-    assert ClusteringConfig().subtask_gate is False
+def test_gate_off_records_what_it_would_have_blocked_and_on_is_the_config_default():
+    # SUBTASK-g: the default is on (SUBTASK-c: off — then this asserted `is False`). The gate-off
+    # shadow record below is unchanged; `_confirm()` sets the gate off explicitly.
+    assert ClusteringConfig().subtask_gate is True
     assert ClusteringConfig().subtask_confirm_frames is None
     assert ClusteringConfig().subtask_probe_path is None
     c = _confirmed(_confirm(), "place")
