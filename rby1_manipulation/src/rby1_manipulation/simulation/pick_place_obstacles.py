@@ -33,9 +33,9 @@ A per-run config is a JSON object::
   ``table_surface_z``).
 * ``yaw`` (rad) rotates the prop about world z.  For ``hurdle_0`` the bar lies
   along the prop's local x axis, so ``yaw = 0`` puts the bar along world x.
-* ``bar_height`` (``hurdle_*`` slots only, metres, default 0.26) is the height
-  of the bar *centre* above ``position[2]``, in [0.20, 0.32].  Any other slot
-  rejects the key.
+* ``bar_height`` (``hurdle_0``, metres, default 0.26) is the height of the bar
+  *centre* above ``position[2]``, in [0.20, 0.32].  ``fence_0`` / ``overbar_0``
+  take it too, with their own ranges (below); any other slot rejects the key.
 
 Slots: ``bollard_0``/``bollard_1`` (cylinder posts), ``divider_0`` (boxes;
 MuJoCo 3.11 ``mj_geomDistance`` is wrong for some box pairs, T40 A) and
@@ -44,6 +44,50 @@ The hurdle is two mocap bodies, ``pick_obstacle_hurdle_0`` (feet + sleeves on
 the table) and ``pick_obstacle_hurdle_0_bar`` (bar + sliding posts, placed at
 ``position + [0, 0, bar_height]``): the height is set with mocap positions only,
 so no compiled model quantity (geom size, bounding sphere, AABB, BVH) changes.
+
+Black obstacles for the pick and the place phase (T42-2)
+--------------------------------------------------------
+Every obstacle's visual geoms are black by default (``BLACK_RGBA``; the scene
+XML colour).  Any obstacle entry may set ``"rgba": [r, g, b, a]`` (each in
+[0, 1]); it recolours that slot's visual geoms only (``model.geom_rgba``), never
+a collision geom, and ``park_all`` / the next ``activate`` restore black.
+
+New slots, capsules and cylinders only (``SLOT_PARAMS`` lists ranges/defaults):
+
+==============  =====  ====================================================  =============================
+slot            phase  shape                                                 size keys (m)
+==============  =====  ====================================================  =============================
+``post_0``      pick   vertical cylinder beside the fruit                    ``height``, ``radius``
+``fence_0``     pick   low capsule rail on two short legs (r 7 mm)          ``bar_height``, ``length``,
+                                                                             ``radius`` (rail)
+``overbar_0``   pick   capsule bar above the fruit on two legs (r 12 mm)    ``bar_height``, ``length``,
+                                                                             ``radius`` (bar)
+``hurdle_0``    place  T40 E hurdle                                          ``bar_height``
+``crate_post_0`` place vertical cylinder beside the crate rim               ``height``, ``radius``
+==============  =====  ====================================================  =============================
+
+``position`` is the footprint centre on the table for all of them; ``yaw``
+turns the bar (local x) of ``fence_0`` / ``overbar_0``, whose legs stand at
+``position +- R(yaw) [length/2, 0, 0]``.  ``bar_height`` is the bar *centre*
+above the table, ``height`` the post top above the table, ``length`` the
+distance between the legs (= the bar's axis segment; the capsule adds its
+radius at each end).  A size key on a slot that does not take it is an error.
+
+Each of these slots is one mocap body per collision geom (+ a visual twin of the
+same size), with an explicit inertial frame, so a size only changes
+``geom_size`` and the quantities MuJoCo derives from it: ``geom_rbound``,
+``geom_aabb`` and the body's one-node BVH (``bvh_aabb``).  :meth:`activate`
+writes all four; ``park_all`` restores the compiled values (= the defaults).
+``tests/sim/test_t42_obstacles.py`` checks the result equals a model compiled
+with the same sizes.  Several slots may be active in one profile (e.g. a pick
+obstacle and a place obstacle); every active slot's collision geoms go through
+:meth:`PickPlaceObstacleManager.pair_distance` (T40 H) in the reset clearance
+and the run-time stop checks.  Example (one pick + one place obstacle)::
+
+    "ep1828_post_and_crate_post": {"scene": "fruit", "obstacles": [
+      {"slot": "post_0", "position": [0.625, 0.30, 0.82], "height": 0.20, "radius": 0.02},
+      {"slot": "crate_post_0", "position": [0.64, 0.17, 0.82], "height": 0.26,
+       "rgba": [0.02, 0.02, 0.02, 1.0]}]}
 """
 from __future__ import annotations
 
@@ -59,16 +103,50 @@ import numpy as np
 from rby1_manipulation.paths import PICK_PLACE_OBSTACLE_CONFIG
 from rby1_manipulation.simulation.convex_distance import GeomSupport, certify, gjk_distance
 DEFAULT_CONFIG = PICK_PLACE_OBSTACLE_CONFIG
-SLOTS = ("bollard_0", "bollard_1", "divider_0", "hurdle_0")
+SLOTS = (
+    "bollard_0", "bollard_1", "divider_0", "hurdle_0",
+    "post_0", "fence_0", "overbar_0", "crate_post_0",
+)
 HURDLE_SLOTS = ("hurdle_0",)
 HURDLE_BAR_HEIGHT_RANGE = (0.20, 0.32)
 HURDLE_DEFAULT_BAR_HEIGHT = 0.26
-# Mocap bodies per slot.  The first body sits at the profile position; a hurdle's
-# second body (the bar) sits bar_height above it.
-SLOT_BODIES = {
-    slot: (f"pick_obstacle_{slot}",) + ((f"pick_obstacle_{slot}_bar",) if slot in HURDLE_SLOTS else ())
-    for slot in SLOTS
+#: T42-2 slots: one cylinder, one mocap body
+POST_SLOTS = ("post_0", "crate_post_0")
+#: T42-2 slots: a capsule bar (local x) on two cylinder legs, three mocap bodies
+FRAME_SLOTS = ("fence_0", "overbar_0")
+FRAME_LEG_RADIUS = {"fence_0": 0.007, "overbar_0": 0.012}
+#: which task phase a slot is meant for (documentation / reports only; placement is the config's)
+SLOT_PHASE = {
+    "bollard_0": "any", "bollard_1": "any", "divider_0": "any",
+    "post_0": "pick", "fence_0": "pick", "overbar_0": "pick",
+    "hurdle_0": "place", "crate_post_0": "place",
 }
+SIZE_KEYS = ("bar_height", "height", "radius", "length")
+#: slot -> size key -> (low, high, default), metres.  The defaults are the scene XML's compiled sizes.
+SLOT_PARAMS: dict[str, dict[str, tuple[float, float, float]]] = {
+    "hurdle_0": {"bar_height": (*HURDLE_BAR_HEIGHT_RANGE, HURDLE_DEFAULT_BAR_HEIGHT)},
+    "post_0": {"height": (0.05, 0.40, 0.22), "radius": (0.010, 0.045, 0.020)},
+    "crate_post_0": {"height": (0.05, 0.40, 0.26), "radius": (0.010, 0.045, 0.020)},
+    "fence_0": {"bar_height": (0.03, 0.15, 0.07), "length": (0.08, 0.30, 0.18),
+                "radius": (0.005, 0.020, 0.008)},
+    "overbar_0": {"bar_height": (0.12, 0.45, 0.24), "length": (0.16, 0.50, 0.34),
+                  "radius": (0.008, 0.030, 0.012)},
+}
+BLACK_RGBA = (0.02, 0.02, 0.02, 1.0)
+
+
+def _slot_bodies(slot: str) -> tuple[str, ...]:
+    base = f"pick_obstacle_{slot}"
+    if slot in HURDLE_SLOTS:
+        return (base, f"{base}_bar")
+    if slot in FRAME_SLOTS:
+        return (base, f"{base}_leg_left", f"{base}_leg_right")
+    return (base,)
+
+
+# Mocap bodies per slot.  The first body is the slot's main body; a hurdle's
+# second body (the bar) sits bar_height above it; a frame's legs follow its bar.
+SLOT_BODIES = {slot: _slot_bodies(slot) for slot in SLOTS}
 MOVABLE_OBJECT_BODIES = (
     "red_block", "green_block", "blue_block",
     "apple", "banana", "orange", "pear", "crate",
@@ -78,7 +156,39 @@ PARKING_POSITIONS = {
     "bollard_1": np.array([9.0, 8.0, 2.0]),
     "divider_0": np.array([10.0, 8.0, 2.0]),
     "hurdle_0": np.array([11.0, 8.0, 2.0]),
+    "post_0": np.array([12.0, 8.0, 2.0]),
+    "fence_0": np.array([13.0, 8.0, 2.0]),
+    "overbar_0": np.array([14.0, 8.0, 2.0]),
+    "crate_post_0": np.array([15.0, 8.0, 2.0]),
 }
+
+
+def slot_sizes(slot: str, sizes: dict | None = None) -> dict[str, float]:
+    """The slot's size keys: the defaults of ``SLOT_PARAMS`` updated with ``sizes``."""
+    out = {key: spec[2] for key, spec in SLOT_PARAMS.get(slot, {}).items()}
+    out.update({key: float(value) for key, value in (sizes or {}).items() if key in out})
+    return out
+
+
+def slot_layout(slot: str, sizes: dict | None = None) -> tuple[tuple[np.ndarray, tuple[float, float] | None], ...]:
+    """Per mocap body of ``slot`` (``SLOT_BODIES`` order): its offset from the footprint in the
+    slot frame (before yaw) and, for resizable bodies, the (radius, half-length) of its geoms."""
+    p = slot_sizes(slot, sizes)
+    zero = np.zeros(3)
+    if slot in HURDLE_SLOTS:
+        return ((zero, None), (np.array([0.0, 0.0, p["bar_height"]]), None))
+    if slot in POST_SLOTS:
+        half = p["height"] / 2.0
+        return ((np.array([0.0, 0.0, half]), (p["radius"], half)),)
+    if slot in FRAME_SLOTS:
+        bar_height, half_length = p["bar_height"], p["length"] / 2.0
+        leg = (FRAME_LEG_RADIUS[slot], bar_height / 2.0)
+        return (
+            (np.array([0.0, 0.0, bar_height]), (p["radius"], half_length)),
+            (np.array([-half_length, 0.0, bar_height / 2.0]), leg),
+            (np.array([half_length, 0.0, bar_height / 2.0]), leg),
+        )
+    return ((zero, None),)
 
 
 def validate_pick_place_obstacle_config(raw: dict) -> dict:
@@ -130,16 +240,24 @@ def validate_pick_place_obstacle_config(raw: dict) -> dict:
             if not np.isfinite(yaw):
                 raise ValueError(f"{label}.yaw must be finite")
             obstacle["yaw"] = yaw
-            if slot in HURDLE_SLOTS:
-                bar_height = float(obstacle.get("bar_height", HURDLE_DEFAULT_BAR_HEIGHT))
-                low, high = HURDLE_BAR_HEIGHT_RANGE
-                if not np.isfinite(bar_height) or not low <= bar_height <= high:
-                    raise ValueError(
-                        f"{label}.bar_height must be finite and in [{low:.2f}, {high:.2f}] m"
-                    )
-                obstacle["bar_height"] = bar_height
-            elif "bar_height" in obstacle:
-                raise ValueError(f"{label}.bar_height is only valid for slots {HURDLE_SLOTS}")
+            params = SLOT_PARAMS.get(slot, {})
+            for key in SIZE_KEYS:
+                if key in params:
+                    low, high, default = params[key]
+                    value = float(obstacle.get(key, default))
+                    if not np.isfinite(value) or not low <= value <= high:
+                        raise ValueError(
+                            f"{label}.{key} must be finite and in [{low:.3f}, {high:.3f}] m"
+                        )
+                    obstacle[key] = value
+                elif key in obstacle:
+                    takes = tuple(name for name in SLOTS if key in SLOT_PARAMS.get(name, {}))
+                    raise ValueError(f"{label}.{key} is only valid for slots {takes}")
+            if "rgba" in obstacle:
+                rgba = np.asarray(obstacle["rgba"], dtype=float)
+                if rgba.shape != (4,) or not np.isfinite(rgba).all() or (rgba < 0).any() or (rgba > 1).any():
+                    raise ValueError(f"{label}.rgba must be 4 values in [0, 1]")
+                obstacle["rgba"] = rgba.tolist()
     return config
 
 
@@ -202,6 +320,17 @@ def capsule_box_distance(
     return best - radius
 
 
+def _rotated_extent(quat: np.ndarray, extent: np.ndarray) -> np.ndarray:
+    """Half extents of the axis-aligned box around a centred box of half extents ``extent`` rotated by
+    ``quat``.  Corners rotated with ``mju_rotVecQuat``, then half of max - min: the order of operations
+    that reproduces the MuJoCo 3.11 compiler's ``bvh_aabb`` bit for bit (``|R| @ extent`` is 1-3 ulp off)."""
+    corners = np.empty((8, 3))
+    for index in range(8):
+        signs = np.array([1.0 if index & bit else -1.0 for bit in (1, 2, 4)])
+        mujoco.mju_rotVecQuat(corners[index], signs * extent, quat)
+    return 0.5 * (corners.max(axis=0) - corners.min(axis=0))
+
+
 def _is_descendant(model: mujoco.MjModel, body_id: int, ancestor_id: int) -> bool:
     while body_id > 0:
         if body_id == ancestor_id:
@@ -221,13 +350,17 @@ class PickPlaceObstacleManager:
         self.model = model
         self.data = data
         self.config = validate_pick_place_obstacle_config(config)
-        # slot -> mocap id of its first (table-level) body; _slot_mocap_ids has all of them.
+        # slot -> mocap id of its first (main) body; _slot_mocap_ids has all of them.
         self._mocap_ids: dict[str, int] = {}
         self._slot_mocap_ids: dict[str, tuple[int, ...]] = {}
+        self._slot_body_ids: dict[str, tuple[int, ...]] = {}
         self._collision_geoms: dict[str, tuple[int, ...]] = {}
+        self._visual_geoms: dict[str, tuple[int, ...]] = {}
         for slot in SLOTS:
             mocap_ids: list[int] = []
+            body_ids: list[int] = []
             geom_ids: list[int] = []
+            visual_ids: list[int] = []
             for body_name in SLOT_BODIES[slot]:
                 body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, body_name)
                 body_geoms = [
@@ -245,10 +378,24 @@ class PickPlaceObstacleManager:
                 if mocap_id < 0:
                     raise RuntimeError(f"pick obstacle body {body_name!r} is not a mocap body")
                 mocap_ids.append(mocap_id)
+                body_ids.append(body_id)
                 geom_ids.extend(body_geoms)
+                visual_ids.extend(
+                    geom_id for geom_id in range(model.ngeom)
+                    if int(model.geom_bodyid[geom_id]) == body_id
+                    and not (model.geom_contype[geom_id] or model.geom_conaffinity[geom_id])
+                )
             self._mocap_ids[slot] = mocap_ids[0]
             self._slot_mocap_ids[slot] = tuple(mocap_ids)
+            self._slot_body_ids[slot] = tuple(body_ids)
             self._collision_geoms[slot] = tuple(geom_ids)
+            self._visual_geoms[slot] = tuple(visual_ids)
+        # colour: the scene XML's (black) is the default; an entry's "rgba" overrides it
+        self._default_rgba = {
+            slot: model.geom_rgba[list(geoms)].copy() for slot, geoms in self._visual_geoms.items()
+        }
+        self._init_resizable()
+        self._footprints: dict[str, np.ndarray] = {}
 
         arm_root_ids = (
             mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "link_left_arm_0"),
@@ -291,16 +438,130 @@ class PickPlaceObstacleManager:
         self.active_slots = ()
         for slot, position in PARKING_POSITIONS.items():
             self._place(slot, position, 0.0, HURDLE_DEFAULT_BAR_HEIGHT)
+            self.model.geom_rgba[list(self._visual_geoms[slot])] = self._default_rgba[slot]
+        self._restore_compiled_sizes()
+        self._footprints = {}
         mujoco.mj_forward(self.model, self.data)
 
-    def _place(self, slot: str, position, yaw: float, bar_height: float | None) -> None:
+    # ------------------------------------------------------------------ resizable slots (T42-2)
+
+    _RESIZED_FIELDS = ("geom_size", "geom_rbound", "geom_aabb")
+
+    def _init_resizable(self) -> None:
+        """Snapshot the compiled sizes of every resizable body and check the layout matches them.
+
+        A resizable body (``POST_SLOTS`` / ``FRAME_SLOTS``) holds exactly one collision geom,
+        centred on the body origin, plus visual twins of the same type and size, and has an
+        explicit inertial frame equal to the body frame (so its BVH is one node in the body frame
+        and no inertial quantity depends on the size).  The scene XML's sizes must be the
+        ``SLOT_PARAMS`` defaults: then :meth:`_resize_body` with the defaults reproduces the
+        compiled arrays bit for bit, which is checked here.
+        """
+        m = self.model
+        self._resizable: dict[int, tuple[tuple[int, ...], int]] = {}  # body -> (geoms, bvh node)
+        for slot in (*POST_SLOTS, *FRAME_SLOTS):
+            for body_id, (_, size) in zip(self._slot_body_ids[slot], slot_layout(slot)):
+                geoms = tuple(g for g in range(m.ngeom) if int(m.geom_bodyid[g]) == body_id)
+                colliding = [g for g in geoms if m.geom_contype[g] or m.geom_conaffinity[g]]
+                kinds = {int(m.geom_type[g]) for g in geoms}
+                if (
+                    len(colliding) != 1 or int(m.body_bvhnum[body_id]) != 1
+                    or not kinds <= {int(mujoco.mjtGeom.mjGEOM_CYLINDER), int(mujoco.mjtGeom.mjGEOM_CAPSULE)}
+                    or len(kinds) != 1
+                    or any(np.any(m.geom_pos[g] != 0.0) for g in geoms)
+                    or np.any(m.body_ipos[body_id] != 0.0)
+                    or np.any(m.body_iquat[body_id] != (1.0, 0.0, 0.0, 0.0))
+                ):
+                    raise RuntimeError(
+                        f"obstacle body {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_BODY, body_id)!r} "
+                        "is not a resizable slot body (one centred capsule/cylinder collision geom, "
+                        "explicit inertial at the body origin)"
+                    )
+                self._resizable[body_id] = (geoms, int(m.body_bvhadr[body_id]))
+                if not np.array_equal(m.geom_size[geoms[0], :2], np.asarray(size)):
+                    raise RuntimeError(
+                        f"geom size of {SLOT_BODIES[slot]} is not the SLOT_PARAMS default: the scene "
+                        "XML changed, or another PickPlaceObstacleManager left this model resized "
+                        "(call its park_all() first)"
+                    )
+        self._compiled_sizes = {
+            body: (
+                {field: getattr(m, field)[list(geoms)].copy() for field in self._RESIZED_FIELDS},
+                m.bvh_aabb[node].copy(),
+            )
+            for body, (geoms, node) in self._resizable.items()
+        }
+        for body in self._resizable:  # the derived formulas reproduce the compiler
+            geoms, node = self._resizable[body]
+            fields, bvh = self._compiled_sizes[body]
+            self._resize_body(body, *m.geom_size[geoms[0], :2])
+            if not (all(np.array_equal(getattr(m, f)[list(geoms)], v) for f, v in fields.items())
+                    and np.array_equal(m.bvh_aabb[node], bvh)):
+                self._restore_compiled_sizes()
+                raise RuntimeError("geom bounds recomputed from geom_size differ from the compiled model")
+
+    def _restore_compiled_sizes(self) -> None:
+        m = self.model
+        for body, (fields, bvh) in self._compiled_sizes.items():
+            geoms, node = self._resizable[body]
+            for field, value in fields.items():
+                getattr(m, field)[list(geoms)] = value
+            m.bvh_aabb[node] = bvh
+
+    def _resize_body(self, body_id: int, radius: float, half: float) -> None:
+        """Set (radius, half-length) of every geom of a resizable body and what MuJoCo derives from it.
+
+        Same formulas as the MuJoCo 3.11 compiler: ``geom_rbound`` = r + h (capsule) /
+        sqrt(r^2 + h^2) (cylinder); ``geom_aabb`` = centre 0, half extents (r, r, h + r) / (r, r, h)
+        in the geom frame; the body's single BVH node = that box in the body frame (geom at the
+        origin, rotated by ``geom_quat``).
+        """
+        m = self.model
+        geoms, node = self._resizable[body_id]
+        radius, half = float(radius), float(half)
+        capsule = int(m.geom_type[geoms[0]]) == mujoco.mjtGeom.mjGEOM_CAPSULE
+        extent = np.array([radius, radius, half + radius if capsule else half])
+        rbound = radius + half if capsule else math.sqrt(radius * radius + half * half)
+        for geom in geoms:
+            m.geom_size[geom, 0] = radius
+            m.geom_size[geom, 1] = half
+            m.geom_rbound[geom] = rbound
+            m.geom_aabb[geom, :3] = 0.0
+            m.geom_aabb[geom, 3:] = extent
+        m.bvh_aabb[node, :3] = 0.0
+        m.bvh_aabb[node, 3:] = _rotated_extent(np.array(m.geom_quat[geoms[0]]), extent)
+
+    def _place(
+        self, slot: str, position, yaw: float, bar_height: float | None = None,
+        sizes: dict | None = None,
+    ) -> None:
+        """Put ``slot`` at footprint ``position`` / ``yaw`` with the given sizes (defaults otherwise).
+
+        ``bar_height`` is the T40 E positional argument and applies to ``HURDLE_SLOTS`` only;
+        every other size goes in ``sizes`` (keys of ``SLOT_PARAMS[slot]``).
+        """
+        sizes = dict(sizes or {})
+        if bar_height is not None and slot in HURDLE_SLOTS:
+            sizes.setdefault("bar_height", bar_height)
         quat = (math.cos(yaw / 2.0), 0.0, 0.0, math.sin(yaw / 2.0))
+        cos_yaw, sin_yaw = math.cos(yaw), math.sin(yaw)
         base = np.asarray(position, dtype=float)
-        for index, mocap_id in enumerate(self._slot_mocap_ids[slot]):
-            # index 0: the prop at the table; index 1 (hurdles only): the bar body.
-            offset = np.array([0.0, 0.0, bar_height if index == 1 else 0.0])
-            self.data.mocap_pos[mocap_id] = base + offset
+        layout = slot_layout(slot, sizes)
+        for mocap_id, body_id, (offset, size) in zip(
+            self._slot_mocap_ids[slot], self._slot_body_ids[slot], layout
+        ):
+            if offset[0] == 0.0 and offset[1] == 0.0:  # on the vertical axis (T40 E bodies: exactly as before)
+                self.data.mocap_pos[mocap_id] = base + np.array([0.0, 0.0, offset[2]])
+            else:
+                self.data.mocap_pos[mocap_id] = base + np.array([
+                    cos_yaw * offset[0] - sin_yaw * offset[1],
+                    sin_yaw * offset[0] + cos_yaw * offset[1],
+                    offset[2],
+                ])
             self.data.mocap_quat[mocap_id] = quat
+            if size is not None:
+                self._resize_body(body_id, *size)
+        self._footprints[slot] = base.copy()
 
     def activate(self, profile_name: str) -> None:
         profiles = self.config["profiles"]
@@ -315,8 +576,10 @@ class PickPlaceObstacleManager:
                 slot,
                 obstacle["position"],
                 float(obstacle["yaw"]),
-                obstacle.get("bar_height", HURDLE_DEFAULT_BAR_HEIGHT),
+                sizes={key: obstacle[key] for key in SLOT_PARAMS.get(slot, {}) if key in obstacle},
             )
+            if obstacle.get("rgba") is not None:
+                self.model.geom_rgba[list(self._visual_geoms[slot])] = obstacle["rgba"]
             active.append(slot)
         self.active_slots = tuple(active)
         self.profile_name = profile_name
@@ -331,10 +594,8 @@ class PickPlaceObstacleManager:
         }
 
     def positions(self) -> dict[str, np.ndarray]:
-        return {
-            slot: self.data.mocap_pos[self._mocap_ids[slot]].copy()
-            for slot in self.active_slots
-        }
+        """Footprint position of each active slot (the config ``position``)."""
+        return {slot: self._footprints[slot].copy() for slot in self.active_slots}
 
     def _minimum_distance(self, other_geom_ids: Iterable[int], max_distance: float) -> float:
         """Smallest :meth:`pair_distance` over (active obstacle geom, other geom), capped.

@@ -1,8 +1,11 @@
 <mujocoinclude>
   <!-- Static, table-mounted obstacles for block and fruit pick-and-place evaluation.
 
-       These are deliberately composed props rather than bare debug boxes:
-       two safety bollards and one low acrylic divider.  Each complete prop is
+       These are deliberately composed props rather than bare debug boxes.
+       Every visual geom is black (rgba 0.02 0.02 0.02 1) by default (T42-2);
+       an obstacle entry of a profile can recolour its slot with "rgba"
+       (PickPlaceObstacleManager writes model.geom_rgba of that slot's visual
+       geoms only; collision geoms are never touched).  Each complete prop is
        a mocap body, so a profile can place it without adding qpos, joints, or
        actuators.  Collision geoms are hidden in group 3; visible geoms are
        non-colliding and use group 2 like the rest of the scene. -->
@@ -14,19 +17,19 @@
           type="cylinder" size="0.045 0.010" pos="0 0 0.010"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_0_foot"
           type="cylinder" size="0.045 0.010" pos="0 0 0.010"
-          rgba="0.12 0.14 0.16 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_0_post"
           type="cylinder" size="0.025 0.125" pos="0 0 0.135"
-          rgba="0.95 0.68 0.08 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_0_band_low"
           type="cylinder" size="0.026 0.014" pos="0 0 0.080"
-          rgba="0.10 0.11 0.12 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_0_band_high"
           type="cylinder" size="0.026 0.014" pos="0 0 0.190"
-          rgba="0.10 0.11 0.12 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_0_cap"
           type="sphere" size="0.027" pos="0 0 0.260"
-          rgba="0.95 0.68 0.08 1"/>
+          rgba="0.02 0.02 0.02 1"/>
   </body>
 
   <body name="pick_obstacle_bollard_1" mocap="true" pos="9 8 2">
@@ -36,19 +39,19 @@
           type="cylinder" size="0.045 0.010" pos="0 0 0.010"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_1_foot"
           type="cylinder" size="0.045 0.010" pos="0 0 0.010"
-          rgba="0.12 0.14 0.16 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_1_post"
           type="cylinder" size="0.025 0.125" pos="0 0 0.135"
-          rgba="0.95 0.68 0.08 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_1_band_low"
           type="cylinder" size="0.026 0.014" pos="0 0 0.080"
-          rgba="0.10 0.11 0.12 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_1_band_high"
           type="cylinder" size="0.026 0.014" pos="0 0 0.190"
-          rgba="0.10 0.11 0.12 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_bollard_1_cap"
           type="sphere" size="0.027" pos="0 0 0.260"
-          rgba="0.95 0.68 0.08 1"/>
+          rgba="0.02 0.02 0.02 1"/>
   </body>
 
   <body name="pick_obstacle_divider_0" mocap="true" pos="10 8 2">
@@ -60,25 +63,25 @@
           type="box" size="0.030 0.040 0.006" pos="0.085 0 0.006"/>
     <geom class="prop_visual" name="pick_obstacle_divider_0_panel"
           type="box" size="0.090 0.007 0.030" pos="0 0 0.045"
-          rgba="0.18 0.76 0.92 0.50"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_divider_0_frame_left"
           type="box" size="0.006 0.012 0.040" pos="-0.098 0 0.040"
-          rgba="0.68 0.72 0.76 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_divider_0_frame_right"
           type="box" size="0.006 0.012 0.040" pos="0.098 0 0.040"
-          rgba="0.68 0.72 0.76 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_divider_0_rail_top"
           type="box" size="0.100 0.012 0.005" pos="0 0 0.080"
-          rgba="0.68 0.72 0.76 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_divider_0_rail_bottom"
           type="box" size="0.100 0.018 0.007" pos="0 0 0.007"
-          rgba="0.30 0.33 0.36 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_divider_0_foot_left"
           type="box" size="0.030 0.040 0.006" pos="-0.085 0 0.006"
-          rgba="0.30 0.33 0.36 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_divider_0_foot_right"
           type="box" size="0.030 0.040 0.006" pos="0.085 0 0.006"
-          rgba="0.30 0.33 0.36 1"/>
+          rgba="0.02 0.02 0.02 1"/>
   </body>
 
   <!-- hurdle_0 (T40 E): a horizontal bar on two posts that the carried fruit
@@ -112,16 +115,16 @@
           type="cylinder" size="0.014 0.084" pos="0.12 0 0.096"/>
     <geom class="prop_visual" name="pick_obstacle_hurdle_0_foot_left"
           type="cylinder" size="0.035 0.006" pos="-0.12 0 0.006"
-          rgba="0.12 0.14 0.16 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_hurdle_0_foot_right"
           type="cylinder" size="0.035 0.006" pos="0.12 0 0.006"
-          rgba="0.12 0.14 0.16 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_hurdle_0_sleeve_left"
           type="cylinder" size="0.014 0.084" pos="-0.12 0 0.096"
-          rgba="0.30 0.33 0.36 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_hurdle_0_sleeve_right"
           type="cylinder" size="0.014 0.084" pos="0.12 0 0.096"
-          rgba="0.30 0.33 0.36 1"/>
+          rgba="0.02 0.02 0.02 1"/>
   </body>
 
   <body name="pick_obstacle_hurdle_0_bar" mocap="true" pos="11 8 2.26">
@@ -133,18 +136,106 @@
           type="cylinder" size="0.010 0.075" pos="0.12 0 -0.075"/>
     <geom class="prop_visual" name="pick_obstacle_hurdle_0_bar"
           type="capsule" size="0.012" fromto="-0.12 0 0 0.12 0 0"
-          rgba="0.92 0.22 0.12 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_hurdle_0_bar_band_left"
           type="cylinder" size="0.0125 0.015" pos="-0.05 0 0" zaxis="1 0 0"
-          rgba="0.96 0.96 0.94 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_hurdle_0_bar_band_right"
           type="cylinder" size="0.0125 0.015" pos="0.05 0 0" zaxis="1 0 0"
-          rgba="0.96 0.96 0.94 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_hurdle_0_post_left"
           type="cylinder" size="0.010 0.075" pos="-0.12 0 -0.075"
-          rgba="0.72 0.75 0.78 1"/>
+          rgba="0.02 0.02 0.02 1"/>
     <geom class="prop_visual" name="pick_obstacle_hurdle_0_post_right"
           type="cylinder" size="0.010 0.075" pos="0.12 0 -0.075"
-          rgba="0.72 0.75 0.78 1"/>
+          rgba="0.02 0.02 0.02 1"/>
+  </body>
+
+  <!-- T42-2: resizable black slots, capsules and cylinders only (no box:
+       MuJoCo 3.11 box distances are wrong, T40 A; every obstacle distance goes
+       through PickPlaceObstacleManager.pair_distance = mj_geomDistance checked by
+       convex_distance, T40 H).
+
+       One collision geom per mocap body, centred on the body origin, plus a
+       visual twin of the same size.  Each body has an explicit <inertial>, so
+       its inertial frame is the body frame and does not depend on the geom
+       size.  The manager sets the sizes from the config at activate() and
+       updates every compiled quantity that depends on them (geom_size,
+       geom_rbound, geom_aabb and the body's one-node BVH, bvh_aabb); park_all()
+       restores the compiled sizes below, which are the config defaults.
+       tests/sim/test_t42_obstacles.py pins this against a model compiled with
+       the same sizes, array for array.
+
+         pick phase
+           post_0        vertical cylinder beside the fruit: height, radius
+           fence_0       low capsule rail on two short cylinder legs:
+                         bar_height, length, radius (rail); legs r 7 mm
+           overbar_0     capsule bar above the fruit on two cylinder legs:
+                         bar_height, length, radius (bar); legs r 12 mm
+         place phase
+           hurdle_0      (above, T40 E)
+           crate_post_0  vertical cylinder beside the crate rim: height, radius
+
+       The bar axis is the body's local x (zaxis="1 0 0"), so yaw = 0 puts it
+       along world x; legs stand at local x = -length/2, +length/2. -->
+
+  <body name="pick_obstacle_post_0" mocap="true" pos="12 8 2.110">
+    <inertial pos="0 0 0" mass="0.1" diaginertia="1e-4 1e-4 1e-4"/>
+    <geom class="prop_collision" name="pick_obstacle_post_0_collision"
+          type="cylinder" size="0.020 0.110"/>
+    <geom class="prop_visual" name="pick_obstacle_post_0_post"
+          type="cylinder" size="0.020 0.110" rgba="0.02 0.02 0.02 1"/>
+  </body>
+
+  <body name="pick_obstacle_fence_0" mocap="true" pos="13 8 2.070">
+    <inertial pos="0 0 0" mass="0.1" diaginertia="1e-4 1e-4 1e-4"/>
+    <geom class="prop_collision" name="pick_obstacle_fence_0_collision_bar"
+          type="capsule" size="0.008 0.090" zaxis="1 0 0"/>
+    <geom class="prop_visual" name="pick_obstacle_fence_0_bar"
+          type="capsule" size="0.008 0.090" zaxis="1 0 0" rgba="0.02 0.02 0.02 1"/>
+  </body>
+  <body name="pick_obstacle_fence_0_leg_left" mocap="true" pos="12.910 8 2.035">
+    <inertial pos="0 0 0" mass="0.1" diaginertia="1e-4 1e-4 1e-4"/>
+    <geom class="prop_collision" name="pick_obstacle_fence_0_collision_leg_left"
+          type="cylinder" size="0.007 0.035"/>
+    <geom class="prop_visual" name="pick_obstacle_fence_0_leg_left"
+          type="cylinder" size="0.007 0.035" rgba="0.02 0.02 0.02 1"/>
+  </body>
+  <body name="pick_obstacle_fence_0_leg_right" mocap="true" pos="13.090 8 2.035">
+    <inertial pos="0 0 0" mass="0.1" diaginertia="1e-4 1e-4 1e-4"/>
+    <geom class="prop_collision" name="pick_obstacle_fence_0_collision_leg_right"
+          type="cylinder" size="0.007 0.035"/>
+    <geom class="prop_visual" name="pick_obstacle_fence_0_leg_right"
+          type="cylinder" size="0.007 0.035" rgba="0.02 0.02 0.02 1"/>
+  </body>
+
+  <body name="pick_obstacle_overbar_0" mocap="true" pos="14 8 2.240">
+    <inertial pos="0 0 0" mass="0.1" diaginertia="1e-4 1e-4 1e-4"/>
+    <geom class="prop_collision" name="pick_obstacle_overbar_0_collision_bar"
+          type="capsule" size="0.012 0.170" zaxis="1 0 0"/>
+    <geom class="prop_visual" name="pick_obstacle_overbar_0_bar"
+          type="capsule" size="0.012 0.170" zaxis="1 0 0" rgba="0.02 0.02 0.02 1"/>
+  </body>
+  <body name="pick_obstacle_overbar_0_leg_left" mocap="true" pos="13.830 8 2.120">
+    <inertial pos="0 0 0" mass="0.1" diaginertia="1e-4 1e-4 1e-4"/>
+    <geom class="prop_collision" name="pick_obstacle_overbar_0_collision_leg_left"
+          type="cylinder" size="0.012 0.120"/>
+    <geom class="prop_visual" name="pick_obstacle_overbar_0_leg_left"
+          type="cylinder" size="0.012 0.120" rgba="0.02 0.02 0.02 1"/>
+  </body>
+  <body name="pick_obstacle_overbar_0_leg_right" mocap="true" pos="14.170 8 2.120">
+    <inertial pos="0 0 0" mass="0.1" diaginertia="1e-4 1e-4 1e-4"/>
+    <geom class="prop_collision" name="pick_obstacle_overbar_0_collision_leg_right"
+          type="cylinder" size="0.012 0.120"/>
+    <geom class="prop_visual" name="pick_obstacle_overbar_0_leg_right"
+          type="cylinder" size="0.012 0.120" rgba="0.02 0.02 0.02 1"/>
+  </body>
+
+  <body name="pick_obstacle_crate_post_0" mocap="true" pos="15 8 2.130">
+    <inertial pos="0 0 0" mass="0.1" diaginertia="1e-4 1e-4 1e-4"/>
+    <geom class="prop_collision" name="pick_obstacle_crate_post_0_collision"
+          type="cylinder" size="0.020 0.130"/>
+    <geom class="prop_visual" name="pick_obstacle_crate_post_0_post"
+          type="cylinder" size="0.020 0.130" rgba="0.02 0.02 0.02 1"/>
   </body>
 </mujocoinclude>
