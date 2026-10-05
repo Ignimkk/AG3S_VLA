@@ -57,6 +57,7 @@ import mujoco
 import numpy as np
 
 from rby1_manipulation.paths import PICK_PLACE_OBSTACLE_CONFIG
+from rby1_manipulation.simulation.convex_distance import GeomSupport, certify, gjk_distance
 DEFAULT_CONFIG = PICK_PLACE_OBSTACLE_CONFIG
 SLOTS = ("bollard_0", "bollard_1", "divider_0", "hurdle_0")
 HURDLE_SLOTS = ("hurdle_0",)
@@ -273,6 +274,7 @@ class PickPlaceObstacleManager:
             if int(model.geom_bodyid[geom_id]) in payload_body_ids
             and (model.geom_contype[geom_id] or model.geom_conaffinity[geom_id])
         )
+        self._support = GeomSupport(model, data)
         self.active_slots: tuple[str, ...] = ()
         self.profile_name = "clear"
         self.reset_metrics()
@@ -335,37 +337,49 @@ class PickPlaceObstacleManager:
         }
 
     def _minimum_distance(self, other_geom_ids: Iterable[int], max_distance: float) -> float:
+        """Smallest :meth:`pair_distance` over (active obstacle geom, other geom), capped.
+
+        Pairs go in order of their bounding-sphere gap (a lower bound on their distance), each
+        with ``distmax`` = the smallest checked distance so far, and the sweep stops at the first
+        pair whose sphere gap exceeds it.  Every value that lowers the minimum has passed
+        :meth:`_checked_distance` (T40 H), so a false 0.0 can no longer become the minimum.
+        """
         if not self.active_slots:
             return float("inf")
-        minimum = float(max_distance)
-        from_to = np.zeros(6, dtype=np.float64)
+        best = float(max_distance)
+        obstacles = np.fromiter(sorted(self.collision_geom_ids), dtype=np.int64)
         others = np.fromiter(other_geom_ids, dtype=np.int64)
+        if not len(others):
+            return best
         xpos, rbound = self.data.geom_xpos, self.model.geom_rbound
-        for obstacle_geom in self.collision_geom_ids:
-            # Bounding-sphere prefilter (vectorised): a pair whose spheres are more than
-            # max_distance apart cannot change the capped minimum.  rbound 0 = plane: keep.
-            gap = (
-                np.linalg.norm(xpos[others] - xpos[obstacle_geom], axis=1)
-                - rbound[others] - rbound[obstacle_geom]
+        gap = (
+            np.linalg.norm(xpos[others][None, :, :] - xpos[obstacles][:, None, :], axis=2)
+            - rbound[others][None, :] - rbound[obstacles][:, None]
+        )
+        gap[:, rbound[others] <= 0.0] = -np.inf  # rbound 0 = plane: no bound
+        near = np.flatnonzero(gap <= best)
+        from_to = np.zeros(6, dtype=np.float64)
+        for index in near[np.argsort(gap.flat[near], kind="stable")]:
+            if gap.flat[index] > best:
+                break
+            row, col = divmod(int(index), len(others))
+            # distmax stays > 0: mj_geomDistance only measures depth with a positive cut-off
+            distance = self.pair_distance(
+                int(obstacles[row]), int(others[col]), max(best, 1e-6), from_to
             )
-            near = others[(gap <= max_distance) | (rbound[others] <= 0.0)]
-            for other_geom in near:
-                distance = self.pair_distance(obstacle_geom, int(other_geom), max_distance, from_to)
-                minimum = min(minimum, distance)
-        return minimum
+            best = min(best, distance)
+        return best
 
-    def pair_distance(
-        self, geom1: int, geom2: int, max_distance: float, from_to: np.ndarray | None = None
-    ) -> float:
-        """Distance of two geoms, capped at max_distance like mj_geomDistance.
-
-        Capsule-box pairs use :func:`capsule_box_distance` (mj_geomDistance is
-        wrong for some overlapping capsule-box pairs in MuJoCo 3.11); every other
-        pair keeps mj_geomDistance, which T40 E checked against an independent
-        GJK for the hurdle's cylinder-mesh, cylinder-box and capsule-mesh pairs.
-        """
+    def _exact_pair(self, geom1: int, geom2: int) -> bool:
         types = (int(self.model.geom_type[geom1]), int(self.model.geom_type[geom2]))
-        if types in _CAPSULE_BOX:
+        return types in _CAPSULE_BOX
+
+    def _raw_distance(
+        self, geom1: int, geom2: int, max_distance: float, from_to: np.ndarray | None
+    ) -> float:
+        """capsule-box: exact (:func:`capsule_box_distance`); else ``mj_geomDistance``."""
+        if self._exact_pair(geom1, geom2):
+            types = (int(self.model.geom_type[geom1]), int(self.model.geom_type[geom2]))
             capsule, box = (geom1, geom2) if types[0] == mujoco.mjtGeom.mjGEOM_CAPSULE else (geom2, geom1)
             centre_gap = float(np.linalg.norm(self.data.geom_xpos[capsule] - self.data.geom_xpos[box]))
             if centre_gap - self.model.geom_rbound[capsule] - self.model.geom_rbound[box] > max_distance:
@@ -376,6 +390,46 @@ class PickPlaceObstacleManager:
         return float(mujoco.mj_geomDistance(
             self.model, self.data, geom1, geom2, max_distance, from_to
         ))
+
+    def _checked_distance(
+        self, geom1: int, geom2: int, raw: float, max_distance: float, from_to: np.ndarray
+    ) -> float:
+        """T40 H: keep a raw ``mj_geomDistance`` value only if it is consistent.
+
+        ``>= max_distance``: MuJoCo's cut-off exit (a separating plane) -- kept.  Positive and
+        :func:`certify` passes: kept.  Otherwise (a false 0.0, a claimed overlap, an
+        inconsistent witness) the exact :func:`gjk_distance` decides: separated -> that
+        distance, overlapping -> ``min(raw, 0)`` (MuJoCo's depth when it has one).
+        Geom types without a support function keep the raw value (old behaviour).
+        """
+        if raw >= max_distance:
+            return float(max_distance)
+        support = self._support
+        if not (support.supported(geom1) and support.supported(geom2)):
+            return raw
+        if certify(support, geom1, geom2, raw, from_to):
+            return raw
+        exact = gjk_distance(support, geom1, geom2)
+        if exact <= 0.0:
+            return min(raw, 0.0)
+        return min(float(max_distance), exact)
+
+    def pair_distance(
+        self, geom1: int, geom2: int, max_distance: float, from_to: np.ndarray | None = None
+    ) -> float:
+        """Distance of two geoms, capped at max_distance like mj_geomDistance; <= 0 on overlap.
+
+        Capsule-box pairs use :func:`capsule_box_distance` (mj_geomDistance is wrong for some
+        overlapping capsule-box pairs in MuJoCo 3.11, T40 E).  Every other pair is
+        mj_geomDistance checked by :meth:`_checked_distance` (MuJoCo 3.11 returns a false 0.0
+        for some separated cylinder-mesh / box pairs, T40 H).
+        """
+        if self._exact_pair(geom1, geom2):
+            return self._raw_distance(geom1, geom2, max_distance, None)
+        if from_to is None:
+            from_to = np.zeros(6, dtype=np.float64)
+        raw = self._raw_distance(geom1, geom2, max_distance, from_to)
+        return self._checked_distance(geom1, geom2, raw, max_distance, from_to)
 
     def robot_clearance(self, max_distance: float = 0.25) -> float:
         clearance = self._minimum_distance(self.robot_geom_ids, max_distance)
