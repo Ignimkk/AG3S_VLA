@@ -757,11 +757,13 @@ def main():
                          "청크가 도착하지 않은 경우(comms)뿐이고 크게 찍힌다. planning 기록의 "
                          "gate.would_hold 가 게이트가 켜져 있었다면의 결정이다. --safe-shadow 와 "
                          "같이 쓸 수 없다 (shadow 는 reference 를 실행한다)")
-    ap.add_argument("--safe-hold-mode", choices=("fixed", "legacy"), default="fixed",
+    ap.add_argument("--safe-hold-mode", choices=("fixed", "legacy", "measured"), default="fixed",
                     help="HOLD 동안의 목표 (T23). fixed(기본): HOLD 에 들어갈 때 직전 스텝에 "
                          "명령한 팔 목표(d.ctrl)를 q_hold 로 한 번 잡아 유지하고, gripper 는 마지막 "
                          "명령을 유지한다(열지도 닫지도 않는다). legacy: 매 스텝 측정 관절·개도 "
-                         "(rby1_state) — T23 전 동작")
+                         "(rby1_state) — T23 전 동작. measured (T41 c): HOLD 에 들어가는 순간의 "
+                         "측정 팔 관절을 q_hold 로 한 번 잡아 그 자리에 선다(직전 명령 쪽으로 가지 "
+                         "않는다); gripper 는 fixed 와 같이 마지막 명령")
     ap.add_argument("--safe-max-hold-chunks", type=int, default=None, metavar="N",
                     help="연속 HOLD 청크가 N 을 넘으면 실행을 중단하고 사유를 보고한다 (T23). "
                          "기본 없음 = 무한 (값은 측정으로 정한다)")
@@ -882,6 +884,22 @@ def main():
         help="manifest.json + frames.jsonl + completeness.json 을 여기 쓴다. "
              "observation / planning / control 프레임마다 한 줄 (T0 의 요구)",
     )
+    # T42 — avoidance arrow overlay. **Visual only**: it changes pixels of the --record mp4 and
+    # the live viewer, nothing else (physics, actions, records, server requests, RNG).
+    ap.add_argument(
+        "--viz-avoidance-arrow", action="store_true",
+        help="(T42) draw an arrow at the active TCP along TCP(refined) - TCP(policy reference) "
+             "of the action applied at each step (FK of the commanded joint targets): green = "
+             "execute, red = HOLD (q_hold - reference, or a red marker without a reference). "
+             "Only with --safe-remote; E0 has no pair and draws nothing. Visual only")
+    ap.add_argument("--viz-arrow-threshold-mm", type=float, default=5.0, metavar="MM",
+                    help="(T42) draw only when |TCP(refined) - TCP(reference)| > MM (default 5)")
+    ap.add_argument("--viz-arrow-scale", type=float, default=8.0, metavar="X",
+                    help="(T42) drawn arrow length = X * |vector| (default 8: 10 mm -> 80 mm; "
+                         "capped at 0.40 m, the caption then says 'clipped')")
+    ap.add_argument("--viz-obstacle-normal", action="store_true",
+                    help="(T42) with --viz-avoidance-arrow: also a blue arrow along the obstacle "
+                         "normal at the gripper's closest point (MuJoCo ground truth, within 10 cm)")
     args = ap.parse_args()
 
     if args.start_delay < 0:
@@ -1010,6 +1028,18 @@ def main():
                  f"(obs_format in {AG3S_OBS_FORMATS}), got {mcfg['obs_format']!r}")
     if args.record_constraints and not args.trajopt:
         ap.error("--record-constraints only does something together with --trajopt")
+    if args.viz_avoidance_arrow:
+        if args.headless and not args.record:
+            ap.error("--viz-avoidance-arrow draws into --record or the viewer; with --headless "
+                     "and no --record there is nothing to draw on")
+        if mcfg["action_format"] not in ("rby1", "rby1_16d"):
+            ap.error("--viz-avoidance-arrow needs an RB-Y1 action format (rby1 / rby1_16d)")
+        if not np.isfinite(args.viz_arrow_threshold_mm) or args.viz_arrow_threshold_mm < 0:
+            ap.error("--viz-arrow-threshold-mm must be a finite value >= 0")
+        if not np.isfinite(args.viz_arrow_scale) or args.viz_arrow_scale <= 0:
+            ap.error("--viz-arrow-scale must be a finite value > 0")
+    if args.viz_obstacle_normal and not args.viz_avoidance_arrow:
+        ap.error("--viz-obstacle-normal only does something together with --viz-avoidance-arrow")
     # These files are only written once the rollout finishes. Create their
     # directories now so a missing parent does not discard a completed run.
     for output_path in (args.record, args.trajectory_out):
@@ -1212,6 +1242,33 @@ def main():
     if args.view != "free":
         recording_camera = mujoco.MjvCamera()
         configure_view_camera(recording_camera, args.view)
+
+    #: T42 — avoidance arrow overlay (visual only). `None` unless --viz-avoidance-arrow: with the
+    #: flag off, nothing below is imported, built or called.
+    arrow_viz = None
+    if args.viz_avoidance_arrow:
+        bringup_dir = str(pathlib.Path(__file__).resolve().parent)
+        if bringup_dir not in sys.path:
+            sys.path.insert(0, bringup_dir)
+        import avoidance_arrow
+
+        # Active arm: the episode's arm (16-D), else a single --safe-manipulators arm, else both
+        # (each step then shows the arm with the larger deflection).
+        _arms = tuple(a for a in ((randomized_episode or {}).get("used_arm"),) if a in ("left", "right"))
+        if not _arms:
+            _arms = tuple(a for a in args.safe_manipulators if a in ("left", "right")) or ("left", "right")
+        arrow_viz = avoidance_arrow.AvoidanceArrows(
+            m, action_format=mcfg["action_format"], arms=_arms,
+            threshold_m=args.viz_arrow_threshold_mm / 1000.0, scale=args.viz_arrow_scale,
+            arm6_hold={"left": act["left_arm6_hold"], "right": act["right_arm6_hold"]},
+            obstacle_geom_ids=(sorted(obstacle_manager.collision_geom_ids)
+                               if obstacle_manager is not None else ()),
+            obstacle_normal=args.viz_obstacle_normal)
+        print(f"[viz] avoidance arrow on (visual only): arms={_arms} "
+              f"threshold={args.viz_arrow_threshold_mm:g} mm scale={args.viz_arrow_scale:g}x "
+              f"obstacle_normal={args.viz_obstacle_normal}"
+              + ("" if args.safe_remote else " — no --safe-remote: no refined/reference pair, "
+                 "nothing will be drawn"))
 
     policy = load_remote_policy(args.remote) if args.remote else load_local_policy(mcfg)
     print(f"Prompt: {args.prompt!r}")
@@ -1866,6 +1923,7 @@ def main():
                 # 예전(`legacy`)에는 매 스텝 `rby1_state()` — 측정 관절과 측정 개도를 다시
                 # 목표로 줘서 닫힘 명령이 사라지고 팔이 흘렀다 (T16, 지침 §8.2). `applied_ctrl()`
                 # 은 이번 `apply_action` **전**의 `d.ctrl` = 직전 스텝의 명령이다.
+                # T41 c `measured`: 팔 `q_hold` 는 진입 순간의 `rby1_state()` (측정), gripper 는 같다.
                 action = hold_ctl.hold_action(last_command=applied_ctrl(),
                                               measured=rby1_state())
                 if chunk_step == 0:
@@ -1937,6 +1995,21 @@ def main():
                             obstacle_manager.hold_robot()
                             obstacle_stopped = True
                             break
+            arrow_overlay = None
+            if arrow_viz is not None and safe_client is not None:
+                # T42 — visual only: reads `d` and the client's last chunks, writes nothing back.
+                def _row(chunk_arr):
+                    if chunk_arr is None or len(chunk_arr) <= chunk_step:
+                        return None
+                    return np.asarray(chunk_arr[chunk_step], dtype=np.float64)
+
+                arrow_overlay = arrow_viz.step(
+                    d, executed=bool(safe_client.should_execute),
+                    refined_row=_row(safe_client.last_actions_refined),
+                    reference_row=_row(safe_client.last_actions_reference),
+                    applied_row=action)
+                if ctx is not None:
+                    avoidance_arrow.draw_user_scene(ctx, arrow_overlay.items)
             if ctx is not None:
                 ctx.sync()
 
@@ -1952,7 +2025,14 @@ def main():
                     next_action_deadline = time.monotonic()
             if args.record:
                 renderer_rec.update_scene(d, camera=recording_camera)
-                video_frames.append(renderer_rec.render())
+                if arrow_overlay is not None:
+                    avoidance_arrow.draw(renderer_rec.scene, arrow_overlay.items)
+                    video_frames.append(avoidance_arrow.caption(
+                        renderer_rec.render(),
+                        arrow_overlay.caption(arrow_viz.scale, arrow_viz.threshold_m),
+                        avoidance_arrow.overlay_colour(arrow_overlay)))
+                else:
+                    video_frames.append(renderer_rec.render())
             if args.trajectory_out:
                 executed_actions.append(action.copy())
                 measured_states.append(rby1_state())
