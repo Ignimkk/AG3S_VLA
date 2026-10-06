@@ -171,3 +171,27 @@ def test_cli_rejects_t43t_flags_without_their_layer(extra):
     with pytest.raises(SystemExit):
         args = ap.parse_args(A.BASE_ARGV + extra)
         serve_safe.reject_bad_flag_combinations(ap, args)
+
+
+def test_server_asserts_the_ag3s_config_it_asked_for():
+    """T43 T2 bug guard: `assert_ag3s_config` raises when the backend (or a flag's clustering key)
+    is not what the server asked for — `build_ag3s` calls it before and after building AG3S."""
+    import inspect
+
+    from benchmark.ag3s.config import AG3SConfig
+    from benchmark.trajopt import serve_safe
+
+    ok = AG3SConfig.from_dict({"collision_backend": "esdf", "esdf": {"backend": "curobo"}})
+    serve_safe.assert_ag3s_config(ok, collision_backend="esdf", esdf_backend="curobo")
+    ok2 = ok.with_overrides({"clustering": {"latched_identity_hold": True}})
+    serve_safe.assert_ag3s_config(ok2, collision_backend="esdf", esdf_backend="curobo",
+                                  clustering={"latched_identity_hold": True})
+    with pytest.raises(RuntimeError, match="collision_backend"):
+        serve_safe.assert_ag3s_config(AG3SConfig(), collision_backend="esdf", esdf_backend="legacy")
+    with pytest.raises(RuntimeError, match="esdf.backend"):
+        serve_safe.assert_ag3s_config(ok, collision_backend="esdf", esdf_backend="legacy")
+    with pytest.raises(RuntimeError, match="clustering.closing_keep_geometry"):
+        serve_safe.assert_ag3s_config(ok, collision_backend="esdf", esdf_backend="curobo",
+                                      clustering={"closing_keep_geometry": True})
+    src = inspect.getsource(serve_safe.build_ag3s)
+    assert src.count("assert_ag3s_config(") == 2
