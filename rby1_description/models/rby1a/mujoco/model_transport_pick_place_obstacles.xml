@@ -7,6 +7,15 @@
        teleop pose. -->
   <option timestep="0.002" solver="CG" iterations="30" tolerance="1e-6" impratio="10" />
   <size nuserdata="144" />
+  <!-- T43 X: drawing statistics pinned to model_transport.xml's compiled values.  Without
+       this the parked slots (x = 8-15 m) widen the compiler's scene bounding box
+       (transport: extent 22.6 -> 26.1, centre x 0.3 -> 2.06), which moves znear /
+       zfar / shadow clip and changed ~115-170 policy-image values with no slot
+       placed.  extent / center only feed rendering (and the free-camera default);
+       meanmass / meaninertia / meansize are left to the compiler.  With every slot
+       parked this scene now renders pixel-identically to model_transport.xml
+       (tests/sim/test_t43x_policy_hidden.py). -->
+  <statistic extent="22.62741708635787" center="0.3000000000000007 -0.3000000000000007 0" />
 
   <include file="./defaults_common.xml" />
   <include file="./rby1.xml" />

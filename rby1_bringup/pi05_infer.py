@@ -1,4 +1,5 @@
 import argparse
+import contextlib
 import json
 import os
 import pathlib
@@ -181,6 +182,36 @@ def configure_view_camera(camera, view):
     camera.distance = 1.7
     camera.azimuth = 180.0
     camera.elevation = -18.0
+
+
+#: T43 X — geom group the obstacle visual geoms are moved to while the **policy** cameras are
+#: rendered with `--obstacle-policy-hidden`. Groups 3-5 are off in MuJoCo's default `mjvOption`
+#: (`geomgroup = 1 1 1 0 0 0`), which is what `render_cam` uses; no geom of the RB-Y1 scenes is in 5.
+POLICY_HIDDEN_GEOMGROUP = 5
+
+
+@contextlib.contextmanager
+def hidden_from_policy_render(model, geom_ids):
+    """`--obstacle-policy-hidden` (T43 X): take `geom_ids` out of every scene built inside the block.
+
+    The geoms' `geom_group` is set to `POLICY_HIDDEN_GEOMGROUP` on entry and restored on exit, so
+    `mjv_updateScene` with the default option skips them: no draw, no shadow, no reflection (they are
+    not in the `mjvScene` at all). Wrap the policy render only. Everything else renders with the
+    model as compiled: AG3S depth (`TransportScene.capture`, its own renderer, called after this block),
+    the third-person `--record` renderer and the viewer. Collision is untouched — `geom_group` is a
+    visualisation field (contacts come from `contype`/`conaffinity`), and the hidden geoms are the
+    non-colliding visual twins anyway. Empty `geom_ids` (the default): the model is not touched.
+    """
+    ids = np.asarray(sorted(int(g) for g in geom_ids), dtype=np.int64)
+    if ids.size == 0:
+        yield
+        return
+    saved = model.geom_group[ids].copy()
+    model.geom_group[ids] = POLICY_HIDDEN_GEOMGROUP
+    try:
+        yield
+    finally:
+        model.geom_group[ids] = saved
 
 
 def render_cam(model, data, renderer, cam_name, size=224, *, match_rby1_dataset=False):
@@ -840,6 +871,13 @@ def main():
     )
     ap.add_argument("--obstacle-stop-distance", type=float, default=0.02)
     ap.add_argument(
+        "--obstacle-policy-hidden", action="store_true",
+        help="(T43 X) policy-blind obstacle: the obstacle visual geoms are left out of the "
+             "policy RGB renders (head + both wrists, the observation images) only. AG3S depth, "
+             "the --record video and the viewer still show them; collision is unchanged. "
+             "Off (default) = bit-identical to before. No-op with --obstacle-profile clear",
+    )
+    ap.add_argument(
         "--fruit-layout-index",
         type=int,
         default=None,
@@ -1208,6 +1246,19 @@ def main():
             f"{initial_object_clearance:.3f} m)"
         )
 
+    #: T43 X — visual geoms of every obstacle slot (placed and parked), left out of the policy RGB
+    #: renders with --obstacle-policy-hidden. Empty when the flag is off: then nothing is touched.
+    policy_hidden_geoms = ()
+    if args.obstacle_policy_hidden:
+        if not mujoco.MjvOption().geomgroup[POLICY_HIDDEN_GEOMGROUP] == 0:
+            raise RuntimeError(f"geom group {POLICY_HIDDEN_GEOMGROUP} is drawn by default")
+        if obstacle_manager is not None:
+            policy_hidden_geoms = tuple(sorted(obstacle_manager.visual_geom_ids))
+            if np.any(m.geom_group == POLICY_HIDDEN_GEOMGROUP):
+                raise RuntimeError(f"geom group {POLICY_HIDDEN_GEOMGROUP} is already used by the model")
+        print(f"  policy-blind: {len(policy_hidden_geoms)} obstacle visual geoms hidden from the "
+              "policy RGB (AG3S depth / --record / viewer still show them)")
+
     # Build joint / actuator index maps once (used by build_obs and apply_action).
     idx = {
         "right_q":       [m.jnt_qposadr[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, j)]
@@ -1381,6 +1432,12 @@ def main():
                        (randomized_episode or {}).get("non_target_fruits") or ()),
                    "episode_task_type": (randomized_episode or {}).get("task_type"),
                    "obstacle_profile": args.obstacle_profile,
+                   # T43 X — only when on (off: the manifest is the one from before).
+                   **({"obstacle_policy_hidden": True,
+                       "obstacle_policy_hidden_geoms": [
+                           mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g)
+                           for g in policy_hidden_geoms]}
+                      if args.obstacle_policy_hidden else {}),
                    "fruit_layout_index": args.fruit_layout_index,
                    "fruit_slot_order": list(args.fruit_slot_order or ()),
                    "fruit_preloaded": list(args.fruit_preloaded or ()),
@@ -1538,6 +1595,7 @@ def main():
                 "ctrl_hz": CTRL_HZ,
                 "open_loop_horizon": OPEN_LOOP_HORIZON,
                 "obstacle_profile": args.obstacle_profile,
+                **({"obstacle_policy_hidden": True} if args.obstacle_policy_hidden else {}),
                 "fruit_layout_index": args.fruit_layout_index,
                 "fruit_slot_order": args.fruit_slot_order,
                 "argv": sys.argv,
@@ -1660,7 +1718,8 @@ def main():
                 # 끝이고, 다음 `mj_step` 은 이 청크의 첫 스텝 뒤다. 그 사이의 렌더(정책 RGB 셋 ·
                 # AG3S depth 셋)는 모두 이 순간의 씬을 찍는다 — 촬영 시각은 이것 하나다.
                 sim_clock["frozen_at"] = time.monotonic()
-                obs = build_obs(mcfg["obs_format"], m, d, renderer_pol, idx, args.prompt)
+                with hidden_from_policy_render(m, policy_hidden_geoms):
+                    obs = build_obs(mcfg["obs_format"], m, d, renderer_pol, idx, args.prompt)
                 if mcfg["obs_format"] == "rby1":
                     validate_rby1_observation(obs, log=(t_step == 0))
                 if args.record_inputs:
@@ -2126,6 +2185,9 @@ def main():
                    if args.policy_seed is not None else {}),
                 **({"warmup_steps": np.asarray(args.warmup_steps, dtype=np.int64)}
                    if args.warmup_steps is not None else {}),
+                # T43 X — only when on.
+                **({"obstacle_policy_hidden": np.asarray(True)}
+                   if args.obstacle_policy_hidden else {}),
             )
             print(f"saving trajectory ({len(executed_actions)} executed steps) -> {trajectory_path}")
 

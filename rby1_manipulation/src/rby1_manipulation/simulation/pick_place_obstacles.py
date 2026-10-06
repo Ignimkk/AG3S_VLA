@@ -593,6 +593,12 @@ class PickPlaceObstacleManager:
             for geom_id in self._collision_geoms[slot]
         }
 
+    @property
+    def visual_geom_ids(self) -> set[int]:
+        """Non-colliding visual geoms of **every** slot, placed or parked (T43 X: the geoms
+        ``pi05_infer --obstacle-policy-hidden`` leaves out of the policy RGB renders)."""
+        return {geom_id for geoms in self._visual_geoms.values() for geom_id in geoms}
+
     def positions(self) -> dict[str, np.ndarray]:
         """Footprint position of each active slot (the config ``position``)."""
         return {slot: self._footprints[slot].copy() for slot in self.active_slots}
