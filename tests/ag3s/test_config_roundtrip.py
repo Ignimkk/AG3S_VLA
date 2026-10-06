@@ -37,6 +37,7 @@ BASES = [
 OVERRIDES = [
     {"clustering": {"latched_identity_hold": True}},
     {"clustering": {"closing_keep_geometry": True, "supported_max_bottom": 0.06}},
+    {"clustering": {"held_slip_detach": True}},
     {"profiling": {"enabled": True, "warmup_frames": 1}},
     {"esdf": {"voxel_size": 0.01}},
     {"frame_id": "base_link"},
