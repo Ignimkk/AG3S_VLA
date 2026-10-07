@@ -89,10 +89,13 @@ def test_trajopt_config_with_overrides_keeps_every_field():
     from benchmark.trajopt.config import _SECTIONS as TS, TrajOptConfig
 
     assert all(f.name in TS for f in dataclasses.fields(TrajOptConfig))      # no top-level scalars
-    cfg = TrajOptConfig.from_dict({"collision": {"backend": "esdf", "obstacle_margin": 0.01},
+    cfg = TrajOptConfig.from_dict({"collision": {"backend": "esdf", "obstacle_margin": 0.01,
+                                                 "held_obstacle_margin": True},
                                    "limits": {"servo_model": True},
                                    "safety": {"require_certified_geometry": False}})
     assert cfg.with_overrides({}) == cfg
+    assert TrajOptConfig.from_dict(cfg.to_dict()) == cfg            # T43 HM: the held switch survives
+    assert cfg.to_dict()["collision"]["held_obstacle_margin"] is True
     new = cfg.with_overrides({"sqp": {"max_iterations": 7}})
     assert new.sqp.max_iterations == 7
     assert dataclasses.replace(new, sqp=cfg.sqp) == cfg
