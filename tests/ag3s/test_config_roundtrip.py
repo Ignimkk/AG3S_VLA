@@ -99,3 +99,14 @@ def test_trajopt_config_with_overrides_keeps_every_field():
     new = cfg.with_overrides({"sqp": {"max_iterations": 7}})
     assert new.sqp.max_iterations == 7
     assert dataclasses.replace(new, sqp=cfg.sqp) == cfg
+    # T43 TA: A (look-ahead + gate) · B (deflection rate) · C (servo accel) · QP accuracy survive
+    ta = TrajOptConfig.from_dict({
+        "collision": {"backend": "esdf"},
+        "horizon": {"plan_horizon": 16, "lookahead": "obstacles", "lookahead_gate": 0.02},
+        "cost": {"w_deflection_rate": 20.0}, "qp": {"eps_abs": 1e-4, "eps_rel": 1e-4},
+        "limits": {"servo_accel": "relaxed", "servo_accel_tolerance": 0.0175,
+                   "servo_accel_weight": 0.01}})
+    assert ta.with_overrides({}) == ta and TrajOptConfig.from_dict(ta.to_dict()) == ta
+    assert ta.to_dict()["horizon"]["lookahead_gate"] == 0.02
+    ungated = ta.with_overrides({"horizon": {"lookahead_gate": None}})
+    assert TrajOptConfig.from_dict(ungated.to_dict()).horizon.lookahead_gate is None
