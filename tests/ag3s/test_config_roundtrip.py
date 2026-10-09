@@ -110,3 +110,16 @@ def test_trajopt_config_with_overrides_keeps_every_field():
     assert ta.to_dict()["horizon"]["lookahead_gate"] == 0.02
     ungated = ta.with_overrides({"horizon": {"lookahead_gate": None}})
     assert TrajOptConfig.from_dict(ungated.to_dict()).horizon.lookahead_gate is None
+    # T43 TP: the compute-time options survive (all default off)
+    tp = ta.with_overrides({"collision": {"esdf_host_mirror": True},
+                            "sqp": {"fast_eval": True, "warm_start_lookahead": True},
+                            "horizon": {"lookahead_stride": 2},
+                            "qp": {"warm_start_iterate": True, "eps_after_first": 1e-3,
+                                   "max_iter": 1000, "accept_max_iter": True}})
+    assert tp.with_overrides({}) == tp and TrajOptConfig.from_dict(tp.to_dict()) == tp
+    assert tp.to_dict()["qp"]["eps_after_first"] == 1e-3 and tp.to_dict()["sqp"]["fast_eval"] is True
+    assert tp.with_overrides({"collision": {"esdf_host_mirror": False},
+                              "sqp": {"fast_eval": False, "warm_start_lookahead": False},
+                              "horizon": {"lookahead_stride": 1},
+                              "qp": {"warm_start_iterate": False, "eps_after_first": None,
+                                     "max_iter": 4000, "accept_max_iter": False}}) == ta
