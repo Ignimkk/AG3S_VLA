@@ -46,3 +46,4 @@ effort: high
 - 프레임별 여유거리와 SQP 반복 수는 기준선이 아니다. `sqp.time_budget_ms` 가 벽시계
   마감이라(`trajopt/sqp.py:159`) 기계 부하에 따라 달라진다. **개수만 인용한다.**
 - GPU 는 H200 한 장이다. `.venv-curobo` 작업은 서로 겹치지 않게 순서대로 돌린다.
+- **왼손 손가락 이름이 MJCF 와 URDF 에서 서로 바뀌어 있다** (T43 OC, 2026-10-07): MJCF `ee_finger_l2` (geom 1086) = URDF `ee_finger_l1`, MJCF `ee_finger_l1` (geom 1079) = URDF `ee_finger_l2`. 오른손 (`r1`/`r2`) 은 같다. MuJoCo 접촉 · 재생 (MJCF 이름) 과 TO 구 · server 기록 (URDF 이름) 을 이름으로 짝지으면 틀린다 — 위치로 대조하거나 이 표로 바꿔 쓴다. (TK 가 이것으로 +57/67 mm 를 잘못 보고했다.)
