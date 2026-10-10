@@ -777,6 +777,60 @@ def t43t_identity_section(args) -> dict:
     return out
 
 
+# T44 I1 (A1) — begin
+def target_exclusion_section(args) -> dict:
+    """T44 I1 — `esdf` keys for the given flags only (`--target-exclusion ball` and no `--owned-*` =
+    `{}`, the config as is — the default `ball` server builds the same `AG3SConfig` as before)."""
+    out: dict = {}
+    if getattr(args, "target_exclusion", "ball") not in (None, "ball"):
+        out["target_exclusion"] = str(args.target_exclusion).replace("-", "_")
+    for flag, key in (("owned_tie_voxels", "owned_tie_voxels"),
+                      ("owned_max_dist_voxels", "owned_max_dist_voxels"),
+                      ("owned_unowned", "owned_unowned")):
+        v = getattr(args, flag, None)
+        if v is not None:
+            out[key] = v
+    return out
+# T44 I1 (A1) — end
+
+
+# T44c A5 — begin
+def target_free_coarse_section(args) -> dict:
+    """T44c A5 — `--target-free-coarse` → `{"target_free_coarse": True}` (안 줬으면 `{}`, config 그대로).
+    `build_ag3s(target_exclusion=...)` 에 합쳐 넘긴다 — 그 block 이 키가 살아남았는지 확인한다."""
+    return {"target_free_coarse": True} if getattr(args, "target_free_coarse", False) else {}
+# T44c A5 — end
+
+
+# T44c A6 — begin
+def target_free_coarse_sign_section(args) -> dict:
+    """T44c A6 — `--target-free-coarse-sign-floor {guard,plane}` → `{"target_free_coarse_sign_floor": v}`
+    (안 줬으면 `{}`, config 기본값 그대로). A5 block 과 함께 `build_ag3s(target_exclusion=...)` 에 합친다."""
+    v = getattr(args, "target_free_coarse_sign_floor", None)
+    return {} if v is None else {"target_free_coarse_sign_floor": str(v)}
+# T44c A6 — end
+
+
+# T44b A4 — begin
+def split_identity_section(args) -> dict:
+    """T44b A4 — `clustering` keys of the attention split, for the given flags only (none = `{}`,
+    config as is). Merged into `build_ag3s(identity=...)` so `assert_ag3s_config` checks them."""
+    out: dict = {}
+    if getattr(args, "attention_split_radius_mm", None) is not None:
+        out["attention_split_radius"] = float(args.attention_split_radius_mm) / 1000.0
+    if getattr(args, "attention_split_ratio_source", None) is not None:
+        out["attention_split_ratio_source"] = str(args.attention_split_ratio_source)
+    return out
+
+
+def held_permission_overrides(args) -> dict:
+    """T44b A4 (I2b CLI) — `--held-permission-parent-links N` → `collision.held_permission_parent_links`.
+    안 줬으면 `{}` (config 기본 1 = 사용자 판정)."""
+    n = getattr(args, "held_permission_parent_links", None)
+    return {} if n is None else {"held_permission_parent_links": int(n)}
+# T44b A4 — end
+
+
 def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                backend: str = "legacy", fine_voxel: float | None = None,
                tsdf_voxel: float | None = None,
@@ -795,7 +849,8 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                subtask_probe_path: str | None = None,
                held_body_cover: bool = False,
                identity: dict | None = None,
-               held_free_observed_pad: float | None = None):
+               held_free_observed_pad: float | None = None,
+               target_exclusion: dict | None = None):
     """서버가 쓸 AG3S. 자기 필터는 전신, 제약은 `links` (T27 부터 기본 `gripper` — 손바닥 + 손가락).
 
     **두 모델은 일부러 다르다.** 자기 필터는 바퀴·베이스까지 있어야 한다 — 머리 카메라가 자기
@@ -895,6 +950,9 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
     if backend == "curobo":
         esdf["fine_voxel_size"] = fine_voxel or None
         esdf["tsdf_voxel_size"] = tsdf_voxel or None
+    if target_exclusion:
+        # T44 I1 (A1) — `target_exclusion_section(args)`: only the keys a flag gave.
+        esdf.update(target_exclusion)
     timing = {} if max_field_age_sec is None else {
         "max_field_age_sec": max_field_age_sec}
     config = AG3SConfig.from_dict({
@@ -972,6 +1030,17 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                 attached_parent_links=parents)
     assert_ag3s_config(ag3s.config, collision_backend="esdf", esdf_backend=backend,
                        clustering=dict(identity or {}))
+    if target_exclusion:
+        # T44 I1 (A1) — the keys a flag gave must have survived into the AG3S the server runs.
+        lost = {k: getattr(ag3s.config.esdf, k) for k, v in target_exclusion.items()
+                if getattr(ag3s.config.esdf, k) != v}
+        if lost:
+            raise RuntimeError(f"AG3S esdf config is not what the server asked for: {lost}, "
+                               f"asked {target_exclusion}")
+        e = ag3s.config.esdf
+        logging.warning("AG3S target_exclusion = %s (tie %.2f · max_dist %.2f voxels · unowned %s) "
+                        "— T44 I1", e.target_exclusion, e.owned_tie_voxels,
+                        e.owned_max_dist_voxels, e.owned_unowned)
     # 생성 **뒤에** 찍는다 — 모르는 link 이름은 생성자가 거절하므로, 여기 도달한 표는 실제로
     # `robot_sphere_mask` 에 들어가는 값이다.
     announce_self_filter(ag3s.self_filter_settings(), cli=dict(self_filter or {}))
@@ -1129,6 +1198,26 @@ def build_parser() -> argparse.ArgumentParser:
                          "제외 (T34 J1), 쥔 물체 자신의 잔상 (attach 때 비운 부피 + 2 voxel 안의 "
                          "표면) 도 제외, 목적지 규칙은 그대로 (겹치면 큰 값). --obstacle-margin M (> 0) "
                          "과 함께. 기본 off")
+    # T44 I2 (A2) — begin
+    ap.add_argument("--target-permission-strict", action="store_true",
+                    help="T44 I2 — target 예외 (look-ahead tail drop · --obstacle-margin 면제 · sweep 경로 "
+                         "행 제외) 를 target 에 닿아도 되는 link 의 행 (권한 행: exclude_authorized 의 "
+                         "mask · exclude_all 의 exempt · relax 의 완화 마진 행) 에만 준다. AG3S 가 "
+                         "ball_owned 로 지웠으면 target 판정은 공 대신 d_free − d_main > voxel. 기본 off")
+    # T44 I2 (A2) — end
+    # T44b A4 — begin
+    ap.add_argument("--held-permission-parent-links", type=int, default=None, metavar="N",
+                    help="T44 I2b — --target-permission-strict 에서 쥐고 있을 때 권한 행 = 쥔 손의 "
+                         "contact link + gripper 위로 N 개 link (collision.held_permission_parent_links). "
+                         "0 = gripper 만. 안 주면 config 기본 1")
+    ap.add_argument("--attention-split-radius-mm", type=float, default=None, metavar="MM",
+                    help="T44b A4 — attention split 의 재군집 반경 (clustering.attention_split_radius, "
+                         "mm). 안 주면 config 기본 15 mm. T44M: 12 mm")
+    ap.add_argument("--attention-split-ratio-source", choices=("normalized", "raw"), default=None,
+                    help="T44b A4 — split ratio gate 가 읽는 attention. normalized (config 기본) = "
+                         "정규화 attention, raw = 정규화 전 attention (AttentionPointCloud.raw_attention). "
+                         "target 후보 선택은 둘 다 정규화 attention 질량")
+    # T44b A4 — end
     ap.add_argument("--obstacle-margin-support", action="store_true",
                     help="T41 a — 지지면(테이블·바닥)에도 --obstacle-margin 을 건다. 기본은 "
                          "제외 (파지하려면 손가락이 테이블 가까이 가야 한다). ablation 용")
@@ -1327,6 +1416,33 @@ def build_parser() -> argparse.ArgumentParser:
                          "(몸통·전완·반대팔에게도 사과가 사라진다). 어느 쪽이든 table·crate 는 "
                          "그 계층에도 있으므로 보호가 유지되고, 쥔 뒤에는 정책이 돌지 않는다 "
                          "(그때 target 은 crate 이고 crate 는 빼면 안 된다)")
+    # T44 I1 (A1) — begin
+    ap.add_argument("--target-exclusion", choices=("ball", "ball-owned"), default="ball",
+                    help="T44 I1 — target 없는 계층에서 공 안의 무엇을 지우나. ball (기본) = T13 그대로 "
+                         "(공 안 seed 전부). ball-owned = 공을 외곽 상한으로 두고 공 안 seed 마다 가장 "
+                         "가까운 target 점 / non-target 관측점 거리를 비교해 non-target 쪽 seed 를 "
+                         "보존한다 (이웃 과일). --target-field-policy exclude-* 와 함께")
+    ap.add_argument("--owned-tie-voxels", type=float, default=None, metavar="V",
+                    help="T44 I1 — ball-owned: |d_t − d_o| ≤ V 복셀이면 ambiguous (보존). 기본 1.0")
+    ap.add_argument("--owned-max-dist-voxels", type=float, default=None, metavar="V",
+                    help="T44 I1 — ball-owned: 두 거리 모두 V 복셀보다 멀면 unowned. 기본 2.0")
+    ap.add_argument("--owned-unowned", choices=("remove", "keep"), default=None,
+                    help="T44 I1 — ball-owned: unowned seed 를 지우나 (remove, 기본) 두나 (keep)")
+    # T44 I1 (A1) — end
+    # T44c A5 — begin
+    ap.add_argument("--target-free-coarse", action="store_true",
+                    help="T44c — target 을 지운 거친 계층 (coarse_no_target) 을 한 겹 더 만들어 target-free "
+                         "질의의 창 안 합성에 넣는다: min(f, 정적, max(c_free, d), max(d, b)). 같은 공 · 같은 "
+                         "--target-exclusion 을 m 단위로 적용하고 non-target 과 공유한 거친 voxel 은 보존. "
+                         "기본 off (예전 식 그대로). --target-field-policy exclude-* 와 함께만")
+    # T44c A5 — end
+    # T44c A6 — begin
+    ap.add_argument("--target-free-coarse-sign-floor", choices=("guard", "plane"), default=None,
+                    help="T44c A6 — coarse_no_target 의 부호 교정 아래 한계. plane = seed 는 그대로 두고 부호 "
+                         "교정만 공의 z_min (지원면 + 여유, 미세 계층과 같은 m) 까지 · guard = seed 제거 "
+                         "guard (지원면 + 20 mm) 위만 (A5, 비교용). 기본: config "
+                         "esdf.target_free_coarse_sign_floor (= plane, T44c A7). --target-free-coarse 와 함께만")
+    # T44c A6 — end
     ap.add_argument("--max-sphere-radius", type=float, default=None, metavar="R",
                     help="제약 모델 구 반지름의 **절대 상한** (m). 팽창까지 끝난 값에 걸린다 "
                          "(팔뚝 기본값 81.2 mm). `--capsule-radius-scale` 과 같은 성질이고, "
@@ -1572,6 +1688,45 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         if not args.fine_voxel:
             ap.error("--target-field-policy 는 미세 계층 한 겹으로 만들어집니다. "
                      "--fine-voxel 0 은 단일 계층이므로 정책이 아무 일도 하지 않습니다")
+    # T44 I1 (A1) — begin
+    owned_given = [flag for flag, v in (("--owned-tie-voxels", args.owned_tie_voxels),
+                                        ("--owned-max-dist-voxels", args.owned_max_dist_voxels),
+                                        ("--owned-unowned", args.owned_unowned)) if v is not None]
+    if owned_given and args.target_exclusion != "ball-owned":
+        ap.error(f"{', '.join(owned_given)} 는 --target-exclusion ball-owned 에서만 읽힙니다 — "
+                 "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    if args.target_exclusion != "ball" and args.target_field_policy == "relax":
+        ap.error("--target-exclusion ball-owned 는 target 없는 계층에서 동작합니다 — "
+                 "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오")
+    # T44 I1 (A1) — end
+    # T44c A5 — begin
+    if args.target_free_coarse and args.target_field_policy == "relax":
+        ap.error("--target-free-coarse 는 target 없는 계층에서 동작합니다 — "
+                 "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오")
+    # T44c A5 — end
+    # T44c A6 — begin
+    if args.target_free_coarse_sign_floor is not None and not args.target_free_coarse:
+        ap.error("--target-free-coarse-sign-floor 는 --target-free-coarse 의 거친 target-free 계층에만 "
+                 "걸립니다 — 함께 주십시오")
+    # T44c A6 — end
+    # T44b A4 — begin
+    if getattr(args, "held_permission_parent_links", None) is not None:
+        if args.held_permission_parent_links < 0:
+            ap.error(f"--held-permission-parent-links 는 0 이상의 link 수입니다 "
+                     f"(받은 값 {args.held_permission_parent_links})")
+        if not getattr(args, "target_permission_strict", False):
+            ap.error("--held-permission-parent-links 는 --target-permission-strict 에서만 읽힙니다 — "
+                     "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    rr = getattr(args, "attention_split_radius_mm", None)
+    if rr is not None and not (math.isfinite(rr) and rr > 0.0):
+        ap.error(f"--attention-split-radius-mm 는 양의 mm 입니다 (받은 값 {rr})")
+    a4_ag3s = [f for f, on in (("--attention-split-radius-mm", rr is not None),
+                               ("--attention-split-ratio-source",
+                                getattr(args, "attention_split_ratio_source", None) is not None)) if on]
+    if a4_ag3s and (args.no_safe or getattr(args, "no_perception", False)):
+        ap.error(f"{', '.join(a4_ag3s)} 는 AG3S target grounding 의 flag 입니다 (--no-safe · "
+                 "--no-perception 은 그것을 안 만듭니다) — 빼고 띄우십시오")
+    # T44b A4 — end
     t43t_ag3s = [name for name, on in (
         ("--closing-keep-geometry", getattr(args, "closing_keep_geometry", False)),
         ("--target-volume-exempt", getattr(args, "target_volume_exempt", False)),
@@ -1837,6 +1992,14 @@ def obstacle_overrides(args) -> dict:
     return out
 
 
+# T44 I2 (A2) — begin
+def permission_overrides(args) -> dict:
+    """`--target-permission-strict` → `collision.target_permission_strict` (T44 I2). 안 줬으면 `{}`."""
+    return {"target_permission_strict": True} if getattr(args, "target_permission_strict",
+                                                         False) else {}
+# T44 I2 (A2) — end
+
+
 def rest_start_overrides(args) -> dict:
     """`--rest-start` · `--rest-start-tolerance` → `limits` 의 키 (T41 b). 안 줬으면 `{}`."""
     out: dict = {}
@@ -2044,6 +2207,10 @@ def trajopt_config_from_args(args):
                       **obstacle_overrides(args),
                       # T43 TP — 준 것만.
                       **tp_collision_overrides(args),
+                      # T44 I2 (A2) — 준 것만.
+                      **permission_overrides(args),
+                      # T44b A4 (I2b CLI) — 준 것만.
+                      **held_permission_overrides(args),
                       # **기본값을 여기 다시 적지 않는다.** 켠 경우에는 키가 아예 없다.
                       **({"enabled": False} if no_collision else {})},
         **({"cost": weights} if weights else {}),
@@ -2296,6 +2463,13 @@ def main() -> None:
                 "TO held_obstacle_margin: ON — 쥔 물체 행도 같은 분류: 장애물이 최근접이면 %.1f mm "
                 "(목적지 규칙과 겹치면 큰 값). 지지면 · 쥔 물체 자신의 잔상 (attach 부피 + 2 voxel) "
                 "은 제외 (T43 HM)", to_config.collision.obstacle_margin * 1000)
+        # T44 I2 (A2) — begin
+        if getattr(to_config.collision, "target_permission_strict", False):
+            logging.warning(
+                "TO target_permission_strict: ON — target 예외 (look-ahead · obstacle_margin · sweep) "
+                "는 target 에 닿아도 되는 link 의 행만. ball_owned 필드면 target 판정은 "
+                "d_free − d_main > voxel (T44 I2)")
+        # T44 I2 (A2) — end
         if getattr(to_config.limits, "rest_start", False):
             tol = to_config.limits.rest_start_tolerance
             logging.warning(
@@ -2336,7 +2510,13 @@ def main() -> None:
                             subtask_gate=args.subtask_gate,
                             subtask_probe_path=args.subtask_probe,
                             held_body_cover=args.held_body_cover,
-                            identity=t43t_identity_section(args) or None,
+                            # T44b A4 — split keys join the identity keys (checked by assert_ag3s_config).
+                            identity={**t43t_identity_section(args),
+                                      **split_identity_section(args)} or None,
+                            target_exclusion=({**target_exclusion_section(args),   # T44 I1 (A1)
+                                               **target_free_coarse_section(args),  # T44c A5
+                                               **target_free_coarse_sign_section(args)}  # T44c A6
+                                              or None),
                             held_free_observed_pad=(
                                 None if args.held_free_observed_mm is None
                                 else float(args.held_free_observed_mm) / 1000.0)),

@@ -220,8 +220,9 @@ class ConstraintRecordWriter:
         # 이번 프레임 cluster 들의 admissibility — 기록 키 추가만 (T20 의 `manipulated` 와 같은 방식).
         # T29: `finger_joints` — 이 프레임의 FK 가 쓴 손가락 관절값과 그 출처.
         # SUBTASK-c: `subtask` — label (p · argmax · 확정) · gate · blocked · released · placed_seen.
+        # T44 I0: `target_permission` — authorized links + per-row target-free permission vector.
         for key in ("exclusion", "destination", "invariant_violation", "admissibility",
-                    "gripper_max_opening", "finger_joints", "subtask"):
+                    "gripper_max_opening", "finger_joints", "subtask", "target_permission"):
             summary[key] = (getattr(constraint_set, "metrics", None) or {}).get(key)
         target = getattr(constraint_set, "target", None)
         if target is not None:
@@ -236,6 +237,7 @@ class ConstraintRecordWriter:
         field = getattr(constraint_set, "esdf", None)
         if field is not None:
             summary.update(self._write_field(field, payload, occupancy))
+            summary.update(self._write_exclusion_trace(field, payload))
 
         # --- 제약 행 -------------------------------------------------------------------
         if sphere_centres is not None:
@@ -425,6 +427,10 @@ class ConstraintRecordWriter:
             out.append((f"coarse{i}" if len(layers) > 2 else "coarse", layer))
         for i, layer in enumerate(getattr(field, "target_free_layers", ()) or ()):
             out.append((f"free{i}" if i else "free", layer))
+        # T44c A5: target 을 지운 거친 계층 → `esdf_free_coarse_*` (없으면 키도 없다).
+        coarse_free = getattr(field, "target_free_coarse_layer", None)
+        if coarse_free is not None:
+            out.append(("free_coarse", coarse_free))
         return out
 
     @classmethod
@@ -494,6 +500,52 @@ class ConstraintRecordWriter:
             info["esdf_occupancy_reason"] = (
                 "이 backend 는 3 상태 점유 배열을 내놓지 않습니다 (block-sparse TSDF). "
                 "거리장 자체를 보려면 --record-constraints-esdf full 을 쓰십시오")
+        return info
+
+    #: T44 I0 — chunk npz keys of the target-free exclusion trace (`field.exclusion_trace`).
+    EXCLUSION_TRACE_KEYS = ("removed_ijk", "nontarget_kept_ijk", "ambiguous_ijk", "unowned_kept_ijk")
+
+    @classmethod
+    def _write_exclusion_trace(cls, field, payload: dict[str, Any]) -> dict[str, Any]:
+        """T44 I0 — which seeds the target-free tier **actually** removed (voxel ijk of that tier) and,
+        with `ball_owned`, which it kept as non-target / ambiguous / unowned.
+
+        npz keys `target_free_<name>` (int16 `(N, 3)`, `<name>` in `EXCLUSION_TRACE_KEYS`) +
+        `target_free_trace_origin` (first voxel **centre**, m) + `target_free_trace_voxel_size`:
+        voxel centre = origin + ijk · voxel_size. Summary key `target_exclusion` = the
+        `stats["target_free"]` counts as real JSON (the `esdf_stats` copy is a repr string).
+        Nothing is written when the frame had no ball (`exclusion_trace is None`).
+        """
+        tf = dict((getattr(field, "stats", None) or {}).get("target_free") or {})
+        info: dict[str, Any] = {}
+        if tf:
+            keep = ("mode", "exclusion_method", "n_seeds_in_ball", "n_removed", "n_kept_nontarget",
+                    "n_ambiguous", "n_unowned_removed", "n_unowned_kept", "n_target_owned",
+                    "n_sign_candidates", "n_sign_candidates_nonseed", "owned", "classify_ms",
+                    "n_ball_seeds_excluded", "build_ms", "geometry_version", "nontarget",
+                    "coarse")
+            info["target_exclusion"] = json.loads(json.dumps(
+                {k: tf[k] for k in keep if k in tf}, default=_scalar))
+        trace = getattr(field, "exclusion_trace", None)
+        if not trace:
+            return info
+        for name in cls.EXCLUSION_TRACE_KEYS:
+            arr = trace.get(name)
+            if arr is not None:
+                payload[f"target_free_{name}"] = np.asarray(arr, np.int16).reshape(-1, 3)
+        payload["target_free_trace_origin"] = np.asarray(trace["origin"], np.float64)
+        payload["target_free_trace_voxel_size"] = np.float64(trace["voxel_size"])
+        info.setdefault("target_exclusion", {})["trace_tier"] = trace.get("tier")
+        # T44c A5: the target-free **coarse** tier's trace — `target_free_coarse_removed_ijk` ·
+        # `target_free_coarse_shared_kept_ijk` (ijk of that tier) + its origin / voxel size.
+        ctrace = getattr(field, "coarse_exclusion_trace", None)
+        if ctrace:
+            for name in ("removed_ijk", "shared_kept_ijk"):
+                arr = ctrace.get(name)
+                if arr is not None:
+                    payload[f"target_free_coarse_{name}"] = np.asarray(arr, np.int16).reshape(-1, 3)
+            payload["target_free_coarse_trace_origin"] = np.asarray(ctrace["origin"], np.float64)
+            payload["target_free_coarse_trace_voxel_size"] = np.float64(ctrace["voxel_size"])
         return info
 
     def _thin(self, arr: np.ndarray) -> np.ndarray:

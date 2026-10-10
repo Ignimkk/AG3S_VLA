@@ -248,6 +248,22 @@ class SceneSnapshot:
     #: pre-grasp place). A held row whose nearest surface point lies inside it (+ 2 fine voxels)
     #: is the object's own remnant. `None` = not known; every non-support held row is an obstacle.
     held_capture_spheres: Optional[np.ndarray] = None
+    #: **T44 I2** — `(S,)` bool: may this robot sphere touch the manipulated object (the contact
+    #: permission, `scene_from_constraint_set`: `target_free_mask` under `exclude_authorized`,
+    #: `target_free_exempt` under `exclude_all`, `manipulated_link_margin < max` otherwise). `None`
+    #: when nothing is manipulated. Read only with `target_permission_strict`. **T44b I2b:** holding
+    #: with strict, the holding hand + `held_permission_parent_links` links above its gripper
+    #: (`held_contact_rows_of`).
+    target_contact_rows: Optional[np.ndarray] = None
+    #: **T44 I2** (`collision.target_permission_strict`) — the target tests of the look-ahead tail,
+    #: the obstacle-margin classes and the sweep path rows hold only for `target_contact_rows`.
+    #: `False` (default) = they hold for every robot row, as before.
+    target_permission_strict: bool = False
+    #: **T44 I2** — how `in_target_volume` decides target membership: `"ball"` (default, the
+    #: carve-out ball) or `"layer_diff"` (`d_free − d_main > voxel`: a surface only the target-free
+    #: layer lost — AG3S `ball_owned`, where the ball also holds kept non-target seeds). Set to
+    #: `"layer_diff"` only with `target_permission_strict` and `exclusion_method == "ball_owned"`.
+    target_membership: str = "ball"
 
     @property
     def has_esdf(self) -> bool:
@@ -992,6 +1008,11 @@ class CollisionLinearizer:
             tail[~keep] = np.inf
             self._last_lookahead = {"from": start, "n_tail_rows": int(keep.size),
                                     "n_tail_dropped": int((~keep).sum())}
+            kept = getattr(self, "_lookahead_permission_kept", None)
+            if kept is not None:
+                # T44 I2 (strict only) — robot tail rows a target test named but whose link may
+                # not touch the target: not dropped for the target.
+                self._last_lookahead["n_tail_target_unauthorized"] = kept
         return clear[..., None]
 
     def _lookahead_keep(self, d: np.ndarray, centres: np.ndarray, scene: SceneSnapshot,
@@ -1018,10 +1039,23 @@ class CollisionLinearizer:
         n = self.n_spheres
         robot = np.zeros(shape, bool)
         robot[:, :n] = True
+        # T44 I2 — with `target_permission_strict` only the rows that may touch the target drop
+        # for it; off, `target_ok` is `robot` (the same expression as before).
+        contact = self.target_contact(scene, shape[1])
+        target_ok = robot if contact is None else robot & contact[None, :]
+        is_target = np.zeros(shape, bool) if contact is not None else None
         if d_object is not None:
-            keep &= ~(robot & (np.abs(d - d_object) <= coarse))
+            hit = np.abs(d - d_object) <= coarse
+            keep &= ~(target_ok & hit)
+            if is_target is not None:
+                is_target |= robot & hit
         if getattr(scene, "target_volume", None) is not None:
-            keep &= ~(robot & self.in_target_volume(d, flat, scene))
+            inside = self.in_target_volume(d, flat, scene)
+            keep &= ~(target_ok & inside)
+            if is_target is not None:
+                is_target |= robot & inside
+        self._lookahead_permission_kept = (None if is_target is None
+                                           else int((is_target & ~target_ok).sum()))
         planes = getattr(scene, "support_planes", None)
         if planes is not None:
             planes = np.asarray(planes, np.float64).reshape(-1, 4)
@@ -1081,11 +1115,19 @@ class CollisionLinearizer:
         """
         tol = float(scene.esdf.grid.voxel_size)
         cls = np.full(d.shape, _OBSTACLE, np.int8)
+        # T44 I2 — with `target_permission_strict` a row is `target` only if its link may touch the
+        # target (`target_contact`); off, `None` and the two tests below are unchanged.
+        contact = self.target_contact(scene, d.shape[1])
         if d_object is not None:
-            cls[np.abs(d - d_object) <= tol] = _TARGET
+            hit = np.abs(d - d_object) <= tol
+            if contact is not None:
+                hit &= contact[None, :]
+            cls[hit] = _TARGET
         if getattr(scene, "target_volume", None) is not None:
             # T43 T step 2 — nearest surface point inside the carve-out ball: target too.
             inside = self.in_target_volume(d, flat, scene)
+            if contact is not None:
+                inside &= contact[None, :]
             cls[inside & (cls == _OBSTACLE)] = _TARGET
         planes = getattr(scene, "support_planes", None)
         if planes is not None and not getattr(scene, "obstacle_margin_support", False):
@@ -1175,7 +1217,15 @@ class CollisionLinearizer:
     def in_target_volume(self, d: np.ndarray, flat: np.ndarray, scene: SceneSnapshot) -> np.ndarray:
         """T43 T step 2 — `(H, n_query)` bool: the row's nearest field surface point ``p − d·∇d``
         (the direction from the same layer as the value, `_esdf_directions`) lies inside
-        `scene.target_volume` (ball, above its `z_min`). Robot spheres only; never the held points."""
+        `scene.target_volume` (ball, above its `z_min`). Robot spheres only; never the held points.
+
+        **T44 I2** — with `scene.target_membership == "layer_diff"` (strict + AG3S `ball_owned`) the
+        ball is not the test: under `ball_owned` the ball also holds the non-target seeds AG3S kept,
+        so "nearest surface inside the ball" would call a neighbouring fruit the target. Then a row
+        is target when `target_free_distance − distance > voxel` at its query point — the main
+        layer's nearest surface is one the target-free layer lost (`_layer_membership`)."""
+        if getattr(scene, "target_membership", "ball") == "layer_diff":
+            return self._layer_membership(flat, scene, d.shape)
         vol = np.asarray(scene.target_volume, np.float64).reshape(5)
         shape = d.shape
         n_query = shape[1]
@@ -1191,6 +1241,41 @@ class CollisionLinearizer:
         inside = inside.reshape(shape)
         inside[:, self.n_spheres:] = False
         return inside
+
+    def _layer_membership(self, flat: np.ndarray, scene: SceneSnapshot,
+                          shape: tuple) -> np.ndarray:
+        """T44 I2 — `(H, n_query)` bool: `target_free_distance(p) − distance(p) > voxel` (fine
+        voxel). Outside the fine window the target-free layer answers the composite, so the two
+        agree and nothing is target there. A field without the target-free layer names nothing
+        (fail closed: no row is exempted). Robot spheres only."""
+        free = getattr(scene.esdf, "target_free_distance", None)
+        inside = np.zeros(shape, bool)
+        if free is None:
+            return inside
+        d_main = np.asarray(scene.esdf.distance(flat), np.float64).reshape(-1)
+        d_free = np.asarray(free(flat), np.float64).reshape(-1)
+        tol = float(scene.esdf.grid.voxel_size)
+        inside = ((d_free - d_main) > tol).reshape(shape)
+        inside[:, self.n_spheres:] = False
+        return inside
+
+    @staticmethod
+    def target_contact(scene: SceneSnapshot, n_query: int) -> Optional[np.ndarray]:
+        """T44 I2 — `(n_query,)` bool: the rows a target test may exempt, or `None` when
+        `target_permission_strict` is off (every robot row, as before).
+
+        On: `scene.target_contact_rows`, padded with `False` for the held query points (they are
+        handled by their own rules). No permission vector (nothing manipulated) = no row — fail
+        closed: a row that cannot be shown to be allowed to touch the target is checked.
+        """
+        if not getattr(scene, "target_permission_strict", False):
+            return None
+        out = np.zeros(n_query, bool)
+        rows = getattr(scene, "target_contact_rows", None)
+        if rows is not None:
+            rows = np.asarray(rows, bool).reshape(-1)[:n_query]
+            out[:rows.shape[0]] = rows
+        return out
 
     def _clearances_from(self, centres: np.ndarray, scene: SceneSnapshot):
         """``(candidate[H, S, M], plane[H, S, K], distance[H, S, M])`` — no ``delta`` array.
@@ -1872,6 +1957,79 @@ def support_planes_of(constraint_set) -> np.ndarray:
     return np.asarray(rows, np.float64).reshape(-1, 4)
 
 
+def target_contact_rows_of(target_free_mask: Optional[np.ndarray],
+                           target_free_exempt: Optional[np.ndarray],
+                           manipulated_link_margin: Optional[np.ndarray],
+                           target_field_policy: str, *, manipulated: bool) -> Optional[np.ndarray]:
+    """T44 I2 — `(S,)` bool: the robot spheres whose link may touch the manipulated object.
+
+    The same permission the rest of the stack already holds, read from where it lives:
+
+    | case | rows |
+    |---|---|
+    | `target_free_mask` and `exclude_all` | `target_free_exempt` (the mask holds every sphere; the authorized ones are the relaxed-margin rows). `None` there (no per-link margin) = no row |
+    | `target_free_mask` (`exclude_authorized`) | the mask — built from `ClearancePolicy.authorized_links` (`to_adapter`) |
+    | no mask (`relax`, or holding) | `manipulated_link_margin < max − 1e-12` — the authorized links get the phase margin, the rest `full_margin(TARGET)` (the array's maximum). All equal (TRANSIT, scale 1.0) = no row |
+
+    **Holding with `target_permission_strict` (T44b I2b)** the caller replaces this with
+    `held_contact_rows_of` (holding hand + `held_permission_parent_links` links above the gripper):
+    in carry the margins are all equal, so the last row of the table names nothing.
+
+    `None` when nothing is manipulated (no object points / spheres).
+    """
+    if not manipulated:
+        return None
+    if target_free_mask is not None:
+        mask = np.asarray(target_free_mask, bool).reshape(-1)
+        if target_field_policy == "exclude_all":
+            if target_free_exempt is None:
+                return np.zeros_like(mask)
+            return np.asarray(target_free_exempt, bool).reshape(-1).copy()
+        return mask.copy()
+    if manipulated_link_margin is None:
+        return None
+    per_link = np.asarray(manipulated_link_margin, np.float64).reshape(-1)
+    if not per_link.size:
+        return per_link.astype(bool)
+    return per_link < float(per_link.max()) - 1e-12
+
+
+def held_permission_of(constraint_set) -> Optional[dict]:
+    """T44b I2b — AG3S's holding-hand record (`metrics["target_permission"]["held"]`, written by
+    `to_adapter._held_permission_record`), `None` when nothing is held or the set predates it."""
+    metrics = getattr(constraint_set, "metrics", None)
+    perm = metrics.get("target_permission") if isinstance(metrics, dict) else None
+    held = perm.get("held") if isinstance(perm, dict) else None
+    return held if isinstance(held, dict) else None
+
+
+def held_contact_rows_of(held: Optional[dict], n_parent: int, n_rows: int) -> Optional[np.ndarray]:
+    """T44b I2b — `(S,)` bool: the rows that may touch the **held** object's target tests.
+
+    `held["depth"]` (per robot sphere): 0 = the holding hand's contact links (palm + fingers),
+    k ≥ 1 = the k-th link above the gripper on the hold chain, −1 = anything else. Permitted =
+    `0 ≤ depth ≤ n_parent` (`collision.held_permission_parent_links`). The other hand, the forearm
+    and the torso stay checked. `None` when there is no record (the caller keeps the I2 rule).
+    """
+    if held is None or held.get("depth") is None:
+        return None
+    depth = np.asarray(held["depth"], np.int64).reshape(-1)
+    if depth.shape[0] != int(n_rows):
+        raise ValueError(
+            f"held permission record has {depth.shape[0]} rows but {n_rows} robot radii were "
+            "given; the optimizer and AG3S must share one constraint model")
+    return (depth >= 0) & (depth <= int(n_parent))
+
+
+def exclusion_method_of(field) -> Optional[str]:
+    """T44 — AG3S's target-free exclusion method (`field.stats["target_free"]["exclusion_method"]`,
+    `"ball"` | `"ball_owned"`), `None` when the field does not say (pre-T44 fields: the ball)."""
+    stats = getattr(field, "stats", None) if field is not None else None
+    tf = (stats or {}).get("target_free") if isinstance(stats, dict) else None
+    method = tf.get("exclusion_method") if isinstance(tf, dict) else None
+    return None if method is None else str(method)
+
+
 def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
                              config, held_capture=None) -> Optional[SceneSnapshot]:
     """AG3S 의 `CollisionConstraintSet` -> 이 optimizer 가 실제로 쓸 `SceneSnapshot`.
@@ -1965,6 +2123,30 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
     # 기본 off 의 스냅샷이 필드 하나까지 예전과 같다.
     collision_cfg = getattr(config, "collision", None)
     obstacle = {}
+    # T44 I2 — the contact permission per robot sphere, and (strict only) whether the target
+    # tests read it. Nothing reads `target_contact_rows` unless `target_permission_strict`.
+    contact_rows = target_contact_rows_of(
+        target_free_mask, target_free_exempt, manipulated_link_margin,
+        str(getattr(constraint_set, "target_field_policy", "") or ""),
+        manipulated=(man_points is not None and len(man_points) > 0)
+        or (man_spheres is not None and len(man_spheres) > 0))
+    strict = bool(getattr(collision_cfg, "target_permission_strict", False))
+    if strict and attached is not None:
+        # T44b I2b — holding: the margins are all equal in carry, so the rule above names no row
+        # (V-I2-3). The permission is the holding hand + `held_permission_parent_links` links above
+        # its gripper, as AG3S recorded them. No record (pre-T44b set) = the rule above.
+        held_rows = held_contact_rows_of(
+            held_permission_of(constraint_set),
+            int(getattr(collision_cfg, "held_permission_parent_links", 1)), radii.size)
+        if held_rows is not None:
+            contact_rows = held_rows
+    if contact_rows is not None:
+        obstacle["target_contact_rows"] = contact_rows
+    if strict:
+        obstacle["target_permission_strict"] = True
+        if attached is None and exclusion_method_of(getattr(constraint_set, "esdf", None)) \
+                == "ball_owned":
+            obstacle["target_membership"] = "layer_diff"
     # T43 T step 2 — the carve-out ball, only with the option on and nothing held.
     if (bool(getattr(collision_cfg, "target_volume_exempt", False)) and attached is None
             and getattr(constraint_set, "esdf", None) is not None):
@@ -1976,7 +2158,10 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
                  -np.inf if ball.get("z_min_m") is None else float(ball["z_min_m"])], np.float64)
     obstacle_margin = float(getattr(collision_cfg, "obstacle_margin", 0.0) or 0.0)
     if obstacle_margin > 0.0:
-        obstacle = dict(
+        # T44 I2 (P3) — `update`, not a new dict: a new dict dropped the `target_volume` set just
+        # above whenever `obstacle_margin > 0`. With `target_volume_exempt` off (V11AB) the dict is
+        # empty here, so the snapshot is the same as before.
+        obstacle.update(
             obstacle_margin=obstacle_margin,
             obstacle_margin_support=bool(getattr(collision_cfg, "obstacle_margin_support", False)),
             support_planes=support_planes_of(constraint_set))

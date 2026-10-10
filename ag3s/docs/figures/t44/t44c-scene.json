@@ -1,0 +1,191 @@
+{
+ "row1_frame": "demo_ep0060_f104",
+ "row1_selection": "demo gt_label frame with most distractor-interior points with ball|off > 0 at depth >= 10 mm",
+ "row2_frame": "demo_ep0022_f104",
+ "row2_selection": "demo grasp_close_start frame with the largest authorized-sphere decrease off-on (ball)",
+ "row1_ball|off_slab_counts": {
+  "neg": 16,
+  "zero": 19,
+  "pos": 123
+ },
+ "row1_ball|off_frame_counts": {
+  "n": 1329,
+  "positive": 955,
+  "clearance_ge_margin": 422
+ },
+ "row1_ball|on_slab_counts": {
+  "neg": 39,
+  "zero": 13,
+  "pos": 106
+ },
+ "row1_ball|on_frame_counts": {
+  "n": 1329,
+  "positive": 854,
+  "clearance_ge_margin": 390
+ },
+ "row2_target_ball|off_slab_counts": {
+  "neg": 0,
+  "zero": 0,
+  "pos": 147
+ },
+ "row2_target_ball|off_frame_counts": {
+  "n": 1319,
+  "negative": 10
+ },
+ "row2_target_ball|on_slab_counts": {
+  "neg": 16,
+  "zero": 0,
+  "pos": 131
+ },
+ "row2_target_ball|on_frame_counts": {
+  "n": 1319,
+  "negative": 133
+ },
+ "row2_spheres": [
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 3.31,
+   "gt_target_minus_r_mm": -1.11,
+   "off_minus_r_mm": 5.31,
+   "on_minus_r_mm": 5.31,
+   "oracle_on_minus_r_mm": 7.62,
+   "oracle_off_minus_r_mm": 7.62
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 6.5,
+   "gt_target_minus_r_mm": -0.87,
+   "off_minus_r_mm": 11.18,
+   "on_minus_r_mm": 11.18,
+   "oracle_on_minus_r_mm": 0.76,
+   "oracle_off_minus_r_mm": 0.76
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.19,
+   "gt_target_minus_r_mm": -0.56,
+   "off_minus_r_mm": 6.87,
+   "on_minus_r_mm": 6.87,
+   "oracle_on_minus_r_mm": 3.1,
+   "oracle_off_minus_r_mm": 3.1
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 6.5,
+   "gt_target_minus_r_mm": 0.2,
+   "off_minus_r_mm": 6.88,
+   "on_minus_r_mm": 6.88,
+   "oracle_on_minus_r_mm": 6.1,
+   "oracle_off_minus_r_mm": 6.1
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.19,
+   "gt_target_minus_r_mm": 0.56,
+   "off_minus_r_mm": 14.16,
+   "on_minus_r_mm": 14.16,
+   "oracle_on_minus_r_mm": 1.4,
+   "oracle_off_minus_r_mm": 1.4
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.0,
+   "gt_target_minus_r_mm": 1.82,
+   "off_minus_r_mm": 11.45,
+   "on_minus_r_mm": 11.45,
+   "oracle_on_minus_r_mm": 1.08,
+   "oracle_off_minus_r_mm": 1.08
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.19,
+   "gt_target_minus_r_mm": 1.92,
+   "off_minus_r_mm": 9.97,
+   "on_minus_r_mm": 9.97,
+   "oracle_on_minus_r_mm": 1.37,
+   "oracle_off_minus_r_mm": 1.37
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.18,
+   "gt_target_minus_r_mm": 2.33,
+   "off_minus_r_mm": 3.73,
+   "on_minus_r_mm": 3.73,
+   "oracle_on_minus_r_mm": 3.72,
+   "oracle_off_minus_r_mm": 3.72
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 4.41,
+   "gt_target_minus_r_mm": 2.45,
+   "off_minus_r_mm": 19.79,
+   "on_minus_r_mm": 19.79,
+   "oracle_on_minus_r_mm": 7.82,
+   "oracle_off_minus_r_mm": 7.82
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.19,
+   "gt_target_minus_r_mm": 2.58,
+   "off_minus_r_mm": 6.98,
+   "on_minus_r_mm": 6.98,
+   "oracle_on_minus_r_mm": 4.71,
+   "oracle_off_minus_r_mm": 4.71
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.2,
+   "gt_target_minus_r_mm": 2.95,
+   "off_minus_r_mm": 19.06,
+   "on_minus_r_mm": 19.06,
+   "oracle_on_minus_r_mm": 6.21,
+   "oracle_off_minus_r_mm": 6.21
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 5.0,
+   "gt_target_minus_r_mm": 3.01,
+   "off_minus_r_mm": 3.73,
+   "on_minus_r_mm": 3.73,
+   "oracle_on_minus_r_mm": 3.73,
+   "oracle_off_minus_r_mm": 3.73
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.19,
+   "gt_target_minus_r_mm": 3.06,
+   "off_minus_r_mm": 6.59,
+   "on_minus_r_mm": 6.59,
+   "oracle_on_minus_r_mm": 4.98,
+   "oracle_off_minus_r_mm": 4.98
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.2,
+   "gt_target_minus_r_mm": 3.78,
+   "off_minus_r_mm": 14.85,
+   "on_minus_r_mm": 14.85,
+   "oracle_on_minus_r_mm": 4.39,
+   "oracle_off_minus_r_mm": 4.39
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 6.5,
+   "gt_target_minus_r_mm": 5.08,
+   "off_minus_r_mm": 7.29,
+   "on_minus_r_mm": 7.29,
+   "oracle_on_minus_r_mm": 7.29,
+   "oracle_off_minus_r_mm": 7.29
+  },
+  {
+   "link": "ee_finger_r1",
+   "r_mm": 7.19,
+   "gt_target_minus_r_mm": 5.57,
+   "off_minus_r_mm": 23.73,
+   "on_minus_r_mm": 23.73,
+   "oracle_on_minus_r_mm": 11.0,
+   "oracle_off_minus_r_mm": 11.0
+  }
+ ],
+ "row2_max_decrease_mm": 43.3
+}

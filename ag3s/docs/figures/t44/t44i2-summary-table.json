@@ -1,0 +1,56 @@
+{
+ "kind": "table",
+ "rows": [
+  [
+   "V-I2-1",
+   "\uc804\uccb4 pytest (tests/trajopt tests/ag3s)",
+   "2569 passed, 3 skipped, 1422 warnings in 971.07s (0:16:11)",
+   "\uc2e4\ud328 0"
+  ],
+  [
+   "V-I2-2",
+   "HEAD 498f713 \ub300 working tree(flag off), V11AB \uc124\uc815 replay",
+   "1006 chunks / 14 runs; refined differs 0 / 0; status differs 0",
+   "\ucc28\uc774 0"
+  ],
+  [
+   "V-I2-2b",
+   "\uac19\uc740 \ube44\uad50, sweep \uc124\uc815 (lookahead off + sweep_check)",
+   "refined differs 0 / 0; status differs 0",
+   "\ucc38\uace0"
+  ],
+  [
+   "V-I2-3",
+   "strict on: look-ahead tail \ud589",
+   "changed rows 4328 in 43 chunks; n_tail_target_unauthorized sum 3721 in 33 chunks",
+   "\ubcf4\uace0"
+  ],
+  [
+   "V-I2-3",
+   "strict on: refined chunk / verdict",
+   "refined changed 10 chunks, max 0.585 deg; status changes 0; HOLD changes 0",
+   "\ubcf4\uace0"
+  ],
+  [
+   "V-I2-4",
+   "sweep: \ube44\uad8c\ud55c \ud589 \uc81c\uc678 (off -> strict)",
+   "68 -> 0 (same traj 68 -> 0)",
+   "on \uc5d0\uc11c 0"
+  ],
+  [
+   "V-I2-4",
+   "sweep: \uad8c\ud55c \ud589 \uc81c\uc678 (off -> strict)",
+   "477 -> 477 (same traj 476 -> 476)",
+   "\uc720\uc9c0"
+  ],
+  [
+   "V-I2-4",
+   "sweep: \uc0c8 path violation / strict \uac00 \ub0a8\uae34 \ube44\uad8c\ud55c \ud589",
+   "0 (same traj; 27 -> 27); kept rows 552 in 26 chunks; solve status changes 1",
+   "\ubcf4\uace0"
+  ]
+ ],
+ "figure": "t44i2-summary-table.png",
+ "split": "test (episodes 1807-1995, recorded V11AB H runs)",
+ "source": "outputs/verify/T44/I2/agg.json, per_chunk.json, split_auth.json"
+}
