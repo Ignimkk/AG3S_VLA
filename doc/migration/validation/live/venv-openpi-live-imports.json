@@ -1,0 +1,42 @@
+{
+  "mode": "imports",
+  "python": "3.11.16 (main, Sep  1 2026, 14:18:37) [Clang 22.1.3 ]",
+  "executable": "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/bin/python",
+  "prefix": "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live",
+  "origins": {
+    "AG3S.ag3s": "/mnt/dev/AG3S_VLA-benchmark/AG3S/ag3s/__init__.py",
+    "AG3S.trajopt": "/mnt/dev/AG3S_VLA-benchmark/AG3S/trajopt/__init__.py",
+    "curobo": "/mnt/dev/AG3S_VLA-benchmark/third_party/curobo/curobo/__init__.py",
+    "torch": "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/torch/__init__.py",
+    "numpy": "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/numpy/__init__.py",
+    "mujoco": "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/mujoco/__init__.py",
+    "openpi": "/mnt/dev/AG3S_VLA-benchmark/third_party/openpi/src/openpi/__init__.py",
+    "openpi_client": "/mnt/dev/AG3S_VLA-benchmark/third_party/openpi/packages/openpi-client/src/openpi_client/__init__.py",
+    "jax": "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/jax/__init__.py",
+    "lerobot": "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/lerobot/__init__.py",
+    "mink": "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/mink/__init__.py"
+  },
+  "versions": {
+    "torch": "2.7.1",
+    "numpy": "1.26.4",
+    "mujoco": "3.11.0",
+    "nvidia-curobo": "0.8.0.post1.dev43",
+    "jax": "0.5.3",
+    "jaxlib": "0.5.3",
+    "flax": "0.10.2",
+    "orbax-checkpoint": "0.11.13"
+  },
+  "native_libraries": [
+    "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12",
+    "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/nvidia/cudnn/lib/libcudnn.so.9",
+    "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/torch/lib/libc10.so",
+    "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/torch/lib/libc10_cuda.so",
+    "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/torch/lib/libtorch.so",
+    "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/torch/lib/libtorch_cpu.so",
+    "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/torch/lib/libtorch_cuda.so",
+    "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/torch/lib/libtorch_global_deps.so",
+    "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/torch/lib/libtorch_python.so",
+    "/usr/lib/x86_64-linux-gnu/libcuda.so.1"
+  ],
+  "pass": true
+}

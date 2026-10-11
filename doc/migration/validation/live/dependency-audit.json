@@ -1,0 +1,51 @@
+{
+  "at": "2026-10-12T01:36:45.178409+09:00",
+  "old_processes": [
+    {
+      "pid": 1631540,
+      "cwd": "/root/.vscode-server/extensions/ms-python.vscode-pylance-2026.4.1/dist",
+      "exe": "/mnt/dev/work/.python/cpython-3.11.16-linux-x86_64-gnu/bin/python3.11",
+      "argv0": "/root/.local/bin/python3.11",
+      "old_in_command": false,
+      "python_discovery": true
+    },
+    {
+      "pid": 3277586,
+      "cwd": "/root/.vscode-server/extensions/ms-python.vscode-pylance-2026.4.1/dist",
+      "exe": "/mnt/dev/work/.python/cpython-3.11.16-linux-x86_64-gnu/bin/python3.11",
+      "argv0": "/root/.local/bin/python3.11",
+      "old_in_command": false,
+      "python_discovery": true
+    },
+    {
+      "pid": 3580744,
+      "cwd": "/mnt/dev/work",
+      "exe": "/mnt/dev/work/.python/cpython-3.11.16-linux-x86_64-gnu/bin/python3.11",
+      "argv0": "/mnt/dev/work/.venv-ag3s/bin/python",
+      "old_in_command": true,
+      "python_discovery": true
+    }
+  ],
+  "inherited_old_environment": {},
+  "old_source_imports": [],
+  "missing_dataset_aliases": [
+    "/mnt/dev/AG3S_VLA-storage/datasets/lerobot-atomic/local/rby1_atomic_basket_14d_v2",
+    "/mnt/dev/AG3S_VLA-storage/datasets/lerobot-transport/local/rby1_dataset_v1"
+  ],
+  "hurdle_configs": [
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1807_s18071.json",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1834_s18341.json",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1925_s19251.json",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1967_s19672.json",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1982_s19822.json",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1995_s19952.json"
+  ],
+  "remaining_postprocessing_helpers": [
+    "T43/CT/p/replay_ct.py",
+    "T43/W/p/analyze_t39.py",
+    "T43/W/p/hurdle_metrics.py",
+    "T43/W/p/hold_w.py",
+    "T43/DX/p/dx_common.py"
+  ]
+}

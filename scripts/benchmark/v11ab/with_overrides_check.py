@@ -1,9 +1,11 @@
 """V11 snapshot check (V8 check + TA flags: serve_safe CLI -> TrajOptConfig -> to_dict round trip, announce_ta log lines for all three arms): collision_backend after with_overrides + new flags survive AG3SConfig round trip + CLI -> clustering section."""
 import sys, json, types
-sys.path.insert(0, "${AG3S_PROJECT_ROOT}-t43v11")
+from common.workspace import PROJECT_ROOT
+from pathlib import Path
+sys.path.insert(0, str(PROJECT_ROOT))
 import AG3S.ag3s.config as C
 print("config file", C.__file__)
-assert C.__file__.startswith("${AG3S_PROJECT_ROOT}-t43v11/")
+assert Path(C.__file__).resolve().is_relative_to(PROJECT_ROOT)
 cls = C.AG3SConfig
 base = cls.from_dict({"collision_backend": "esdf"})
 print("from_dict esdf:", base.collision_backend)
@@ -38,11 +40,11 @@ TA_A = "--plan-horizon 16 --lookahead obstacles --lookahead-gate-mm 20 --qp-eps 
 TA_B = "--w-deflection-rate 20".split()
 TA_C = "--servo-accel relaxed --servo-accel-tolerance-deg 1 --servo-accel-weight 0.01".split()
 ap = ss.build_parser()
-base_args = ap.parse_args(["--config", "x", "--checkpoint", "y", "--model-xml", "${AG3S_PROJECT_ROOT}-t43v11/robots/rby1/description/models/rby1a/mujoco/model_transport.xml"] + V8)
+base_args = ap.parse_args(["--config", "x", "--checkpoint", "y", "--model-xml", str(PROJECT_ROOT / "robots/rby1/description/models/rby1a/mujoco/model_transport.xml")] + V8)
 base_cfg = ss.trajopt_config_from_args(base_args)
 print("V8 args servo_model:", getattr(base_args, "servo_model", None), "held_obstacle_margin:", getattr(base_args, "held_obstacle_margin", None))
 for arm, extra in (("V11A", TA_A), ("V11AB", TA_A + TA_B), ("V11ABC", TA_A + TA_B + TA_C)):
-    a = ap.parse_args(["--config", "x", "--checkpoint", "y", "--model-xml", "${AG3S_PROJECT_ROOT}-t43v11/robots/rby1/description/models/rby1a/mujoco/model_transport.xml"] + V8 + extra)
+    a = ap.parse_args(["--config", "x", "--checkpoint", "y", "--model-xml", str(PROJECT_ROOT / "robots/rby1/description/models/rby1a/mujoco/model_transport.xml")] + V8 + extra)
     cfg = ss.trajopt_config_from_args(a)
     d = cfg.to_dict()
     rt = TrajOptConfig.from_dict(d)

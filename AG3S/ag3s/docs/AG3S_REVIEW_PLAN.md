@@ -2315,3 +2315,13 @@ pick 을 위한 것인지 place 를 위한 것인지 알 수 있나.
 - `--obstacle-stop-distance` 0.0 (T40 G 의 값, 근거가 기록에 없다) 을 바꿀 것인가, E3b 의 `--links` 범위를 넓힐 것인가.
 - ep1828 의 허들 run 은 없다 (재측정 대기 19).
 - main (subtask gate 기본 on) 으로 같은 시연을 다시 할 것인가 — 이때는 `--no-subtask-gate` 를 명시해야 T40 과 같은 조건이다.
+
+
+## Benchmark environment/storage 운영 상태 — 2026-10-12 KST
+
+paired-v2 V11AB benchmark checkout에서 독립 OpenPI live/cuRobo 환경, own-root imports,
+GPU CUDA/ESDF와 실제 29999 checkpoint loading 및 새 run output 보호를 검증했다.
+검증 source·숫자·figure는 [T0T6 로그](AG3S_T0T6_LOG.md)의 같은 날짜 항목과
+[live 보고서](../../../doc/migration/LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md)에 보존한다.
+이 운영 작업은 algorithm 단계의 재판정이 아니다. 다음 작업은 기존 V11AB Panda adapter와
+LIBERO 계열 평가 gate, archived postprocessing helper 복원이다. Closed-loop rollout은 아직 수행하지 않았다.

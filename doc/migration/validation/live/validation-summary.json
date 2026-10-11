@@ -1,0 +1,36 @@
+{
+  "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T011257_1803e318e831_live-validation",
+  "branch": "feature/panda-benchmark",
+  "validation_head": "1803e318e8311bf5cb4195be7ed4e1dbb4a0867e",
+  "numbers": {
+    "python": "3.11.16",
+    "storage_input_roots": 35,
+    "artifact_checksums": 8,
+    "torch_gpu_sum": 140.0,
+    "jax_gpu_sum": 140.0,
+    "checkpoint_load_seconds": 10.376966661773622,
+    "checkpoint_files_hashed": 16,
+    "checkpoint_bytes_hashed": 6335650235,
+    "esdf_shape": [
+      128,
+      128,
+      128
+    ],
+    "kernel_backend": "cuda_core",
+    "pytest_passed": 73,
+    "pytest_warnings": 77,
+    "openpi_metadata_conflicts": 1,
+    "curobo_metadata_conflicts": 0
+  },
+  "pending": [
+    "Panda adapter and LIBERO rollouts",
+    "Historical V11 analysis/replay helper restoration"
+  ],
+  "limitations": [
+    "Python audit is not a native syscall filesystem sandbox",
+    "gym-aloha metadata requires MuJoCo < 3; validated live environment uses 3.11.0",
+    "No inference action sample or websocket rollout executed"
+  ],
+  "validated_source_patch_sha256": "ded15703ebc0b258e2bd31ca1ade32303168d57b17e62d45f723072a7a581a44",
+  "validated_source_patch": "validated-source.patch"
+}

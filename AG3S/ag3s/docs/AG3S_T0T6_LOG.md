@@ -6345,3 +6345,27 @@ H 14 run 의 V9 분류 (XM): 성공 2 · 허들 근처에서 낙하 2 · 허들�
 - **figure**: `figures/t43/` — `t43w-*` · `t43y-*` · `t43z-*` · `t43z3v-*` · `t43z5-*` · `t43ct-*` · `t43v7g-*` · `t43gd-*` · `t43v8-*` · `t43dx-*` · `t43tk-*` · `t43oc-*` · `t43hx-*` · `t43v9-*` · `t43sv-*` · `t43v10-*` · `t43xm-*` · `t43v11a-*` · `t43v11ab-*` · `t43v11abc-*`. 각각 `.json` sidecar 가 있다.
 - **영상**: `outputs/verify/T43/gate_demo/gd_{1968_s19683,1995_s19953,1925_s19251}.mp4` (gate off 대 on).
 
+
+
+## Benchmark checkout environment/storage 검증 — 2026-10-12 KST
+
+이 항목은 paired-v2 V11AB branch의 환경·경로 검증이다. 과거 단계의 algorithm 결과를 갱신하지 않는다.
+현재 source의 Python algorithm은 변경하지 않았으며 개발 branch 전체 merge를 수행하지 않았다.
+상세 결과와 미완료 항목은 [live environment 보고서](../../../doc/migration/LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md)에 있다.
+
+| 검증 | 확인한 결과 |
+|---|---|
+| 독립 venv | OpenPI live / cuRobo producer 모두 자기 Python 3.11.16, 자기 source origin |
+| CUDA | GPU 유휴 확인 후 H200에서 Torch/JAX 계산 모두 140.0 |
+| checkpoint | randomized-pick-place 16D LoRA 29999 Policy loading 성공, 10.377 s |
+| cuRobo | 두 venv에서 실제 depth integrate/ESDF 정상; producer cuda_core, finite 128×128×128 |
+| input/output | storage input 35개·artifact checksum 8개 정상; 새 benchmark run만 output destination |
+| regression | old-checkout Python read denial 아래 73 passed; 77 dependency deprecation warnings |
+| 보호 | 기존 policy_records/step/log overwrite 거부, 다른 session process 종료 없음 |
+
+![Synthetic depth, CUDA ESDF 및 검증 표](figures/environment-storage-validation-20261012.png)
+
+Raw 숫자는 storage의 `results/benchmark/20261012T011257_1803e318e831_live-validation/validation-summary.json`과
+각 JSON/log에 보존했다. 기존 old-Python discovery/old-cwd Node process는 남아 있다.
+Panda/LIBERO rollout, action sampling/websocket closed-loop, archived postprocessing helper 복원은 미완료다.
+이번 검증은 synthetic GPU scene 및 checkpoint loading 범위이며 benchmark success 결과가 아니다.

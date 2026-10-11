@@ -5,6 +5,7 @@
 # skips a run with OUTDIR/NAME.done; a partial run dir is moved to OUTDIR/failed/ first.
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 C=$1; PORT=$2; OUT=$3; EP=$4; SEED=$5; OCFG=$6; OPROF=$7; NAME=${C}_ep${EP}_s${SEED}; RUN=$OUT/$NAME
+"$AG3S_PROJECT_ROOT/.venv-ag3s/bin/python" -m common.run_artifacts --validate-output "$OUT" >/dev/null || exit 2
 port_ok $PORT || { echo "port $PORT not allowed"; exit 2; }
 [ -f $OUT/$NAME.done ] && { echo "skip $NAME (done)"; exit 0; }
 SIDE=$(side_of $EP)
@@ -16,7 +17,9 @@ case $C in
 esac
 OBST="--obstacle-stop-distance $OBST_STOP"
 if [ -n "$OCFG" ]; then OBST="$OBST --obstacle-config $OCFG --obstacle-profile $OPROF"; fi
-mkdir -p $OUT
+"$AG3S_PROJECT_ROOT/.venv-ag3s/bin/python" -m common.run_artifacts --checkpoint "$CKPT" --settings-json "{\"role\":\"client\",\"arm\":\"$C\",\"episode\":$EP,\"seed\":$SEED,\"output\":\"$RUN\"}" --command \
+  timeout "$CLIENT_TIMEOUT_S" "$PY" -u "$O1/integration/rby1/bringup/pi05_infer.py" --model rby1_randomized_pick_place_16d --remote "localhost:$PORT" --episode-index "$EP" --max-steps 600 --headless --warmup-steps 1000 --policy-seed "$SEED" --record-frames "$RUN" --record "$RUN/third_person_front.mp4" --view front --trajectory-out "$RUN/traj.npz" --viz-avoidance-arrow $OBST $SAFE >/dev/null || exit 2
+mkdir -p "$OUT"
 if [ -e $RUN ] || [ -e $OUT/$NAME.client.log ]; then
   TS=$(date +%Y%m%dT%H%M%S); mkdir -p $OUT/failed
   for f in $RUN $OUT/$NAME.client.log $OUT/$NAME.start $OUT/$NAME.end $OUT/$NAME.check.json; do [ -e $f ] && mv $f $OUT/failed/$(basename $f).$TS; done

@@ -118,7 +118,7 @@ class PolicyRecorder(_base_policy.BasePolicy):
 
         logging.info(f"Dumping policy records to: {record_dir}")
         self._record_dir = pathlib.Path(record_dir)
-        self._record_dir.mkdir(parents=True, exist_ok=True)
+        self._record_dir.mkdir(parents=True, exist_ok=False)
         self._record_step = 0
 
     @override
@@ -131,5 +131,6 @@ class PolicyRecorder(_base_policy.BasePolicy):
         output_path = self._record_dir / f"step_{self._record_step}"
         self._record_step += 1
 
-        np.save(output_path, np.asarray(data))
+        with output_path.with_suffix(".npy").open("xb") as stream:
+            np.save(stream, np.asarray(data))
         return results

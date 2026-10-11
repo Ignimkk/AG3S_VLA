@@ -1,0 +1,28 @@
+{
+  "root": "/mnt/dev/AG3S_VLA-benchmark",
+  "branch": "feature/panda-benchmark",
+  "head": "1803e318e8311bf5cb4195be7ed4e1dbb4a0867e",
+  "origin": "https://github.com/Ignimkk/AG3S_VLA.git",
+  "profile": "v11ab",
+  "modules": {
+    "AG3S.ag3s": [
+      "/mnt/dev/AG3S_VLA-benchmark/AG3S/ag3s/__init__.py"
+    ],
+    "AG3S.trajopt": [
+      "/mnt/dev/AG3S_VLA-benchmark/AG3S/trajopt/__init__.py"
+    ],
+    "Baseline.seam_vla": [
+      "/mnt/dev/AG3S_VLA-benchmark/Baseline/seam_vla/__init__.py"
+    ],
+    "Baseline.knows_vla": [
+      "/mnt/dev/AG3S_VLA-benchmark/Baseline/knows_vla/__init__.py"
+    ],
+    "rby1_manipulation": [
+      "/mnt/dev/AG3S_VLA-benchmark/integration/rby1/manipulation/src/rby1_manipulation/__init__.py"
+    ],
+    "openpi": [
+      "/mnt/dev/AG3S_VLA-benchmark/third_party/openpi/src/openpi/__init__.py"
+    ]
+  },
+  "dependency_count": 5
+}

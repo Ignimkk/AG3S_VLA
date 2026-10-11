@@ -5,7 +5,7 @@
 # Same guards as p/run_chain.sh; resumable (.done).
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 ARM=$1; is_arm $ARM || { echo "unknown ARM $ARM"; exit 2; }
-R=$V/runs; L=($(cat $P/lists/hurdle.txt)); B="$(cat $P/lists/clear.txt)"
+R=$V/runs; L=($(sed "s|storage://|$AG3S_STORAGE_ROOT/|g" "$P/lists/hurdle.txt")); B="$(cat $P/lists/clear.txt)"
 LA="${L[*]:0:7}"; LB="${L[*]:7:7}"
 echo "launch wait $ARM $(date -Iseconds)"
 echo "serve_safe procs now (read-only): $(pgrep -fc AG3S.trajopt.serve_safe)"

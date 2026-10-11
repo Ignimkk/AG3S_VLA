@@ -4,6 +4,7 @@
 #   V5 = V4 (a + c + --held-body-cover) + --closing-keep-geometry --latched-identity-hold --supported-max-bottom-mm 60   (V6 dropped by lead)
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 C=$1; PORT=$2; RECDIR=$3
+"$AG3S_PROJECT_ROOT/.venv-ag3s/bin/python" -m common.run_artifacts --validate-output "$RECDIR" >/dev/null || exit 2
 port_ok $PORT || { echo "port $PORT not allowed (8280-8289 only, never 8123)"; exit 2; }
 E3B="--esdf-backend curobo --voxel 0.020 --fine-voxel 0.005 --tsdf-voxel 0.005 --links gripper --target-field-policy exclude-authorized \
 --esdf-margin 0 --no-self-collision --capsule-radius-scale 0.05 --sphere-spacing 0.4 --max-spheres-per-capsule 32"   # V5 flags minus --no-subtask-gate (gate ON, main default)
@@ -12,7 +13,10 @@ case $C in
   V11A|V11AB|V11ABC) FLAGS="$E3B --obstacle-margin 0.010 --held-body-cover $T2 --held-slip-detach --held-cover-cap-mm 10 --hold-follow-to 3 --finger-cover both $(ta_flags $C)"; REC="--record-constraints $RECDIR/server_constraints";;
   *) echo "unknown ARM $C (p serves V11A V11AB V11ABC)"; exit 2;;
 esac
-mkdir -p $RECDIR
+export XLA_FLAGS="$XLA"
+"$AG3S_PROJECT_ROOT/.venv-ag3s/bin/python" -m common.run_artifacts --checkpoint "$CKPT" --settings-json "{\"role\":\"server\",\"arm\":\"$C\"}" --command \
+  "$PY" -m AG3S.trajopt.serve_safe --config pi05_rby1_randomized_pick_place_16d_lora --checkpoint "$CKPT" --model-xml "$MODEL_XML" --port "$PORT" $FLAGS $REC >/dev/null || exit 2
+mkdir -p "$RECDIR"
 cd $O1 && OPENPI_DATA_HOME="$OPENPI_DATA_HOME" XLA_FLAGS="$XLA" XLA_PYTHON_CLIENT_PREALLOCATE=false \
   PYTHONUNBUFFERED=1 PYTHONPATH="$PYTHONPATH" exec $PY -m AG3S.trajopt.serve_safe \
   --config pi05_rby1_randomized_pick_place_16d_lora --checkpoint $CKPT --model-xml $MODEL_XML --port $PORT $FLAGS $REC

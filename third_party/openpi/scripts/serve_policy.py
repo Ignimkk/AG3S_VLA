@@ -1,7 +1,10 @@
 import dataclasses
 import enum
+import json
 import logging
 import socket
+
+from common.run_artifacts import ensure_run, output_path
 
 import tyro
 
@@ -50,6 +53,8 @@ class Args:
     port: int = 8000
     # Record the policy's behavior for debugging.
     record: bool = False
+    # Optional destination below this run; defaults to policy_records.
+    record_dir: str | None = None
 
     # Specifies how to load the policy. If not provided, the default policy for the environment will be used.
     policy: Checkpoint | Default = dataclasses.field(default_factory=Default)
@@ -97,12 +102,21 @@ def create_policy(args: Args) -> _policy.Policy:
 
 
 def main(args: Args) -> None:
+    settings = json.loads(json.dumps(dataclasses.asdict(args), default=lambda value: value.value))
+    checkpoint = args.policy if isinstance(args.policy, Checkpoint) else DEFAULT_CHECKPOINT[args.env]
+    run = ensure_run(settings=settings, checkpoint=checkpoint.dir)
+    log_handler = logging.FileHandler(output_path(run / "logs" / f"serve_policy_{args.port}.log"), mode="x")
+    log_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    logging.getLogger().addHandler(log_handler)
+    record_dir = output_path(args.record_dir) if args.record_dir else run / "policy_records"
+    if not record_dir.is_relative_to(run):
+        raise ValueError("--record-dir must be inside the selected AG3S_RUN_DIR")
     policy = create_policy(args)
     policy_metadata = policy.metadata
 
     # Record the policy's behavior.
     if args.record:
-        policy = _policy.PolicyRecorder(policy, "policy_records")
+        policy = _policy.PolicyRecorder(policy, str(record_dir))
 
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)

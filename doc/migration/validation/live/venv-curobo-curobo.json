@@ -1,0 +1,36 @@
+{
+  "mode": "curobo",
+  "python": "3.11.16 (main, Sep  1 2026, 14:18:37) [Clang 22.1.3 ]",
+  "executable": "/mnt/dev/AG3S_VLA-benchmark/.venv-curobo/bin/python",
+  "prefix": "/mnt/dev/AG3S_VLA-benchmark/.venv-curobo",
+  "resource_preflight": {
+    "compute_apps_before": "",
+    "gpu": "NVIDIA H200 NVL, 0 MiB, 140000 MiB, 0 %"
+  },
+  "origins": {
+    "AG3S.ag3s": "/mnt/dev/AG3S_VLA-benchmark/AG3S/ag3s/__init__.py",
+    "AG3S.trajopt": "/mnt/dev/AG3S_VLA-benchmark/AG3S/trajopt/__init__.py",
+    "curobo": "/mnt/dev/AG3S_VLA-benchmark/third_party/curobo/curobo/__init__.py",
+    "torch": "/mnt/dev/AG3S_VLA-benchmark/.venv-curobo/lib/python3.11/site-packages/torch/__init__.py",
+    "numpy": "/mnt/dev/AG3S_VLA-benchmark/.venv-curobo/lib/python3.11/site-packages/numpy/__init__.py",
+    "mujoco": "/mnt/dev/AG3S_VLA-benchmark/.venv-curobo/lib/python3.11/site-packages/mujoco/__init__.py"
+  },
+  "versions": {
+    "torch": "2.7.1",
+    "numpy": "1.26.4",
+    "mujoco": "3.11.0",
+    "nvidia-curobo": "0.8.0.post1.dev43"
+  },
+  "mapper_type": "<class 'curobo._src.perception.mapper.mapper.Mapper'>",
+  "esdf_type": "<class 'curobo._src.geom.types.VoxelGrid'>",
+  "kernel_backend": "cuda_core",
+  "esdf_shape": [
+    128,
+    128,
+    128
+  ],
+  "esdf_finite": true,
+  "esdf_min": 0.0,
+  "esdf_max": 4.1875,
+  "pass": true
+}

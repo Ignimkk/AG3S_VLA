@@ -33,3 +33,13 @@ not linked across the two environments. Source `scripts/setup/env.sh` before tes
 Robot assets·submodule·대형 input을 wheel에 포함하지 않으므로 이 프로젝트는
 `uv pip install --python .venv-ag3s/bin/python --no-deps -e .`로 개발 checkout에서 사용한다.
 ROS manipulation/OpenPI 실행 경로는 `source scripts/setup/env.sh`가 설정한다.
+
+## Verified benchmark live environments (2026-10-12 KST)
+
+`bash scripts/setup/create_live_env.sh` creates this checkout's `.venv-openpi-live`;
+pass `.venv-curobo` for a separate producer. Both use own-root Python 3.11.16 and
+copied wheel installations without system-site-packages. Historical inventory constraints
+and validated transitive constraints are committed separately. The one documented
+metadata exception is gym-aloha's MuJoCo <3 requirement; live MuJoCo is 3.11.0.
+See `doc/migration/LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md` for checks and limits.
+The development checkout's environment was not modified.

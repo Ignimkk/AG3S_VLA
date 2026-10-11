@@ -2,12 +2,16 @@
 AG3S_V11_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AG3S_V11_PROJECT_ROOT="$(git -C "$AG3S_V11_SCRIPT_DIR" rev-parse --show-toplevel)"
 source "$AG3S_V11_PROJECT_ROOT/scripts/setup/env.sh"
-V="${AG3S_V11_OUTPUT_DIR:-$AG3S_PROJECT_ROOT/outputs/legacy-v11}"
 P="$AG3S_V11_SCRIPT_DIR"
 O1=${AG3S_PROJECT_ROOT}                                # V11 snapshot: benchmark 3ca1b21 (git archive), pi05_TO_hybrid rby1_* == work-t43w3 (fce4af8)
 PY=${AG3S_OPENPI_PYTHON:-${AG3S_PROJECT_ROOT}/.venv-openpi-live/bin/python}
 CKPT=${AG3S_CHECKPOINT_ROOT}/rby1/pi05_rby1_randomized_pick_place_16d_lora/rby1_randomized_pick_place_16d_30k_xla_retry_20260923/29999
 MODEL_XML=$O1/robots/rby1/description/models/rby1a/mujoco/model_transport.xml   # server robot model, as T39/T40/T41
+# One immutable run root inherited by all server/client subprocesses.
+if [ -n "${AG3S_V11_OUTPUT_DIR:-}" ]; then export AG3S_RUN_DIR="$AG3S_V11_OUTPUT_DIR"; fi
+export AG3S_RUN_DIR="$("$AG3S_PROJECT_ROOT/.venv-ag3s/bin/python" -m common.run_artifacts --checkpoint "$CKPT" --settings-json '{"launcher":"v11ab","algorithm":"paired-v2","settings_source":"scripts/benchmark/v11ab/start_server.sh; exact argv in executions"}')" || return 1
+export AG3S_V11_OUTPUT_DIR="$AG3S_RUN_DIR"
+V="$AG3S_RUN_DIR"
 XLA="--xla_gpu_enable_command_buffer= --xla_gpu_autotune_level=0"   # as T39-T41 (autotune 0)
 PARTIAL=$V/partial.json
 GPU_BUDGET_GB=${GPU_BUDGET_GB:-130}                   # used + EST(new server) <= 130 GB

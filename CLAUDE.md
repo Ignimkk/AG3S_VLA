@@ -8,7 +8,8 @@ feature/ag3s-development는 v2 이후 전체 개선 이력과 현재 WIP를 포�
 개선 branch 전체를 benchmark branch에 merge하면 V11AB 평가 대상이 바뀐다.
 기존 /mnt/dev/work의 Claude session은 새 코드 작업에 resume하지 말고 새 세션을 시작한다.
 공유 input은 별도 AG3S_VLA-storage에 있다. 기존 /mnt/dev/work는 현재 실행에 필요하지 않은 이전 checkout이다.
-새 코드·새 output은 자기 checkout에서만 수정/생성한다. source scripts/setup/env.sh로 경로를 설정한다.
+새 코드는 자기 checkout에서 수정한다. 새 benchmark output은
+AG3S_VLA-storage/results/benchmark/<날짜_commit_run-id>/에 격리한다. source scripts/setup/env.sh로 경로를 설정한다.
 아래에 남은 과거 진행 기록은 source-manifest와 실제 branch를 기준으로 해석한다.
 Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았다.
 
@@ -51,7 +52,8 @@ Sub-agent의 상세 역할과 작업 범위는 `.claude/agents/`의 정의를 �
 
 각 checkout은 별도 `.python/`·`.venv-ag3s`·output·cache를 사용한다.
 `source scripts/setup/env.sh` 후 `.venv-ag3s/bin/python`으로 CPU 검증을 실행한다.
-GPU/OpenPI·cuRobo 환경과 로컬 PC 환경은 아직 이번 구조로 설치하지 않았다.
+이 benchmark checkout의 독립 `.venv-openpi-live`·`.venv-curobo`는 설치·GPU·checkpoint loading
+검증을 완료했다. Development checkout과 로컬 PC의 설치 상태는 별도로 확인한다.
 기존 workspace의 venv를 복사하거나 새 Python code의 import 경로로 사용하지 않는다.
 Checkpoint·dataset·녹화 자료는 `AG3S_STORAGE_ROOT`(기본: checkout 옆 `AG3S_VLA-storage`)에서 읽는다.
 `AG3S_LEGACY_STORAGE`는 그 아래 `legacy-inputs`를 가리키는 호환 alias다.
@@ -61,7 +63,12 @@ OpenPI fork는 `third_party/openpi/`에 직접 추적된다.
 
 GPU 실행 시 `OPENPI_DATA_HOME`은 자기 checkout의 `.cache/openpi`,
 `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 사용한다.
-실제 VLA 환경·체크포인트·robot/camera adapter 검증은 다음 단계다.
+이 benchmark checkout의 VLA 환경·checkpoint loading은 검증했다. Action sampling·closed-loop
+rollout과 Panda robot/camera adapter는 다음 단계다.
 최초 Migration 기록은 `doc/migration/IMPLEMENTATION_REPORT.md`, 후속 storage 경로 분리 결과는
 `doc/migration/STORAGE_IMPLEMENTATION_REPORT.md`에 기록한다. 현재 경로/환경은 후속 문서가 우선한다.
 기존 단계 로그는 그 로그의 source 기준과 실제 branch가 일치할 때만 이어 쓴다.
+
+Benchmark live 최신 검증: `doc/migration/LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md`.
+기존 `/mnt/dev/work` process는 보고만 하고 종료하지 않는다. Archived V11 postprocessing
+helper는 아직 미복원이며 online 환경 검증을 전체 평가 완료로 해석하지 않는다.

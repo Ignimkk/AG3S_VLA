@@ -2,11 +2,13 @@
 (copy of T39/p/update_partial.py). Keeps every other top-level key. Safe to call from several chains at once (flock).
 Scans outputs/verify/T40/G/runs/<COND>/<STAGE>/<COND>_ep<EP>_s<SEED>.start ; STAGE = H (T43 P hurdle) | B (no obstacle); status = done (NAME.done, check_run passed) | failed (.end without .done) | running (.start only).
 wall_s = .end - .start. check_run mode (full | obstacle_stop) from NAME.check.json."""
-from common.workspace import workspace_path as _ag3s_workspace_path
+from common.run_artifacts import output_path
+import os
 import fcntl, json, pathlib, re, datetime
-G = pathlib.Path(_ag3s_workspace_path('outputs/verify/T43/V11/runs'))
-PARTIAL = pathlib.Path(_ag3s_workspace_path('outputs/verify/T43/V11/partial.json'))
-LOCK = pathlib.Path(_ag3s_workspace_path('outputs/verify/T43/V11/p/.partial.lock'))
+RUN = output_path(os.environ['AG3S_RUN_DIR'])
+G = RUN / 'runs'
+PARTIAL = RUN / 'partial.json'
+LOCK = RUN / '.partial.lock'
 PAT = re.compile(r"^(V11A|V11AB|V11ABC)_ep(\d+)_s(\d+)\.start$")
 
 

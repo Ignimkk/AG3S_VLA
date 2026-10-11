@@ -5,14 +5,16 @@
 # - resumable: runs with OUTDIR/NAME.done are skipped; if every run is done no server is started.
 # - preflight (logged to OUTDIR/chain_PORT.log, files OUTDIR/preflight_PORT_TS.*): nvidia-smi + free, GPU budget
 #   (GPU memory.used now + EST_GB <= GPU_BUDGET_GB (130), re-checked every 60 s up to GPU_WAIT_MAX_S, then exit 3;
-#   launchers stagger chains by 240 s so an earlier server has done its first-request JIT and grown before the next check), port free, code md5 == p/code_md5_v11.txt (else exit 4 unless
-#   ALLOW_MD5_DIFF=1), import check server + client from ${AG3S_PROJECT_ROOT}-t43v11 (CPU only, else exit 5).
+#   launchers stagger chains by 240 s so an earlier server has done its first-request JIT and grown before the next check), port free, current source fingerprint and committed method/adapter source,
+#   import check server + client from this checkout (CPU only, else exit 5).
 # - server log must say "XLA autotuning off" (else kill, exit 6).
 # - a failed run is retried once if the server is still alive; if the server died the chain stops (exit 7).
 # - T43W.verify.partial.json is rebuilt (update_partial.py, flock) after every run.
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 C=$1; PORT=$2; OUT=$3; LIST=$4; EST_GB=${EST_GB:-30}
+LIST=${LIST//storage:\/\//$AG3S_STORAGE_ROOT/}
 is_arm $C || { echo "unknown ARM $C"; exit 2; }
+"$AG3S_PROJECT_ROOT/.venv-ag3s/bin/python" -m common.run_artifacts --validate-output "$OUT" >/dev/null || exit 2
 port_ok $PORT || { echo "port $PORT not allowed (8280-8289 only, never 8123)"; exit 2; }
 mkdir -p $OUT; CL=$OUT/chain_$PORT.log; TS=$(date +%Y%m%dT%H%M%S); PF=$OUT/preflight_${PORT}_$TS
 log() { echo "$* $(date -Iseconds)" >> $CL; }
@@ -36,11 +38,12 @@ done
 echo $USED_MIB > $PF.gpu_used_before_mib
 if ! python3 -c "import socket; s=socket.socket(); s.bind(('0.0.0.0', $PORT)); s.close()" 2>/dev/null; then log "REFUSED port $PORT in use"; exit 3; fi
 $P/code_md5.sh > $PF.code_md5.txt 2>&1
-if ! cmp -s $PF.code_md5.txt $P/code_md5_v11.txt; then
-  diff $P/code_md5_v11.txt $PF.code_md5.txt > $PF.code_md5.diff
-  log "code md5 DIFFERS from V11-0 ($(grep -c '^[<>]' $PF.code_md5.diff) lines, $PF.code_md5.diff)"
-  [ "$ALLOW_MD5_DIFF" = 1 ] || { log "REFUSED code md5"; exit 4; }
-else log "code md5 == V11-0"; fi
+if ! git -C "$AG3S_PROJECT_ROOT" diff --quiet HEAD -- 'AG3S/**/*.py' 'Baseline/**/*.py' 'integration/**/*.py' 'robots/**'; then
+  log "REFUSED uncommitted method/adapter changes; commit the intended source before evaluation"; exit 4
+fi
+# This branch's paired-v2 method tree and exact source revisions are recorded in
+# run_manifest.json. Keep an execution fingerprint without a missing old snapshot.
+log "current checkout source fingerprint saved: $PF.code_md5.txt"
 ( cd $O1 && JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH="$PYTHONPATH" OPENPI_DATA_HOME="$OPENPI_DATA_HOME" \
   timeout 600 $PY -c "import sys; sys.argv=['-c','server']; exec(open('$P/import_check.py').read())" ) > $PF.import_server.json 2> $PF.import_server.err
 ( cd "$O1" && JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH="$PYTHONPATH" \
@@ -48,12 +51,12 @@ else log "code md5 == V11-0"; fi
 for s in server client; do
   grep -q '"all_benchmark_under_snapshot": true' $PF.import_$s.json || { log "REFUSED import check $s ($PF.import_$s.json)"; exit 5; }
 done
-log "import check server+client: all under ${AG3S_PROJECT_ROOT}-t43v11"
+log "import check server+client: all under $AG3S_PROJECT_ROOT"
 # --- start guard (T43W): under an exclusive lock shared by our chains, re-check right before the start:
 #     GPU used + EST_GB <= 130 GB, working set + EST_RSS_SERVER (8 GiB) <= 64 GiB, youngest serve_safe (anyone's) >= 120 s.
 #     The lock is held until our server process exists, so our other chain then sees it as the youngest server.
 EST_RSS_SERVER=${EST_RSS_SERVER:-8589934592}
-exec 8>$P/.server_start.lock; flock 8
+exec 8>$AG3S_PROJECT_ROOT/.runtime/v11-server-start.lock; flock 8
 tw=$(date +%s)
 while :; do
   USED_MIB=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1 | tr -d ' ')
@@ -70,7 +73,7 @@ date -Iseconds > $RECDIR/server.start
 echo $USED_MIB > $RECDIR/gpu_used_before_mib
 nohup $P/start_server.sh $C $PORT $RECDIR > $SL 2>&1 8>&- &
 SPID=$!; echo $SPID > $RECDIR/server.pid
-for i in $(seq 1 30); do pgrep -f "serve_safe.*--port $PORT" >/dev/null && break; sleep 1; done; flock -u 8; exec 8>&-
+for i in $(seq 1 30); do kill -0 "$SPID" 2>/dev/null && break; sleep 1; done; flock -u 8; exec 8>&-
 # GPU total used every 2 s while the server lives (peak delta vs gpu_used_before_mib = this server's footprint
 # when no other process changes its usage; other sessions' pids are not attributable)
 ( while kill -0 $SPID 2>/dev/null; do echo "$(date +%s) $(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1 | tr -d ' ')"; sleep 2; done ) > $RECDIR/gpu_samples.txt 2>/dev/null &
@@ -85,8 +88,8 @@ log "server up arm=$C pid=$SPID rec=$RECDIR startup_s=$(( $(date +%s) - t0 ))"
     crss=0; for q in $cpid; do r=$(ps -o rss= -p $q 2>/dev/null | tr -d ' '); crss=$(( crss + ${r:-0} )); done
     echo "$(date +%s) $(ps -o rss= -p $SPID | tr -d ' ') $crss $(cat /sys/fs/cgroup/memory.current)"; sleep 5; done ) > $RECDIR/rss_samples.txt 2>/dev/null &
 { echo "cwd=$(readlink /proc/$SPID/cwd)"; tr '\0' '\n' < /proc/$SPID/environ | grep -E '^(XLA_FLAGS|PYTHONPATH|XLA_PYTHON_CLIENT_PREALLOCATE|OPENPI_DATA_HOME|PYTHONUNBUFFERED)='; tr '\0' ' ' < /proc/$SPID/cmdline; echo; } > $RECDIR/server_proc.txt
-if ! grep -q "XLA autotuning off" $SL; then log "REFUSED server log lacks 'XLA autotuning off'"; kill $SPID; sleep 5; pkill -f "serve_safe.*--port $PORT"; exit 6; fi
-refuse() { log "REFUSED server log: $1"; kill $SPID; sleep 5; pkill -f "serve_safe.*--port $PORT"; exit 9; }
+if ! grep -q "XLA autotuning off" $SL; then log "REFUSED server log lacks 'XLA autotuning off'"; kill $SPID; sleep 5; exit 6; fi
+refuse() { log "REFUSED server log: $1"; kill $SPID; sleep 5; exit 9; }
 grep -q "TO obstacle_margin: 10.0 mm" $SL || refuse "lacks 'TO obstacle_margin: 10.0 mm'"
 grep -qF "gripper cover (T43 R)" $SL && refuse "gripper cover line present (R is not used in T43W)"
 grep -qF "body cover (T43 R2)" $SL || refuse "$C lacks 'body cover (T43 R2)'"
@@ -147,12 +150,12 @@ for RK in $LIST; do item $RK
     upd
     # T43W (after the T2 collision_backend incident): the newest server chunk must carry an ESDF (esdf_stats), else stop the chain
     if ! $PY -c "import glob,json,sys,numpy as np; f=sorted(glob.glob('$RECDIR/server_constraints/run_*/chunk_*.npz'))[-1]; s=json.loads(str(np.load(f,allow_pickle=True)['summary_json'])); sys.exit(0 if s.get('esdf_stats') else 1)"; then
-      log "REFUSED newest server chunk has no esdf_stats (AG3S without ESDF)"; kill $SPID; sleep 5; pkill -f "serve_safe.*--port $PORT"; exit 10; fi
+      log "REFUSED newest server chunk has no esdf_stats (AG3S without ESDF)"; kill $SPID; sleep 5; exit 10; fi
     [ -f $RO/$NAME.done ] && break
     if ! kill -0 $SPID 2>/dev/null; then log "server died, chain stops"; exit 7; fi
   done
 done
-kill $SPID; sleep 5; pkill -f "serve_safe.*--port $PORT"; sleep 3
+kill $SPID; sleep 5; sleep 3
 log "server killed alive=$(pgrep -f "serve_safe.*--port $PORT" | wc -l)"
 date -Iseconds > $RECDIR/server.end
 upd

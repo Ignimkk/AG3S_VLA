@@ -1,6 +1,7 @@
 # Shared storage and Python interpreter
 
-현재 정본: 2026-10-11. 현재 실행은 이전 `/mnt/dev/work` source·input·tool에 의존하지 않는다.
+현재 정본: 2026-10-12. Benchmark live 설치/검증 결과는
+`doc/migration/LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md`를 함께 읽는다. 현재 실행은 이전 `/mnt/dev/work` source·input·tool에 의존하지 않는다.
 과거 log·recording의 절대경로와 Git source SHA는 provenance로 보존하며 현재 실행 주소가 아니다.
 
 ## Storage layout
@@ -31,7 +32,9 @@ Historical client를 로드한 replay harness는 input 위치만 `bind_historica
 Frozen Git source와 algorithm은 수정하지 않는다.
 
 Checkpoint·dataset·이전 결과는 읽기 전용 input으로 취급한다. 새 training checkpoint·rollout·log는
-자기 checkout의 ignored `outputs/`에 쓴다. cache·LIBERO config·venv도 각 checkout에서 독립적으로 관리한다.
+benchmark run은 `results/benchmark/<날짜_commit_run-id>/`에,
+그 외 새 training output은 자기 checkout의 ignored `outputs/`에 쓴다.
+`common/run_artifacts.py`가 benchmark run manifest와 고유 저장 위치를 만든다. cache·LIBERO config·venv도 각 checkout에서 독립적으로 관리한다.
 이전 자료 경로에는 새 storage로 향하는 backlink를 남겼으므로 이전 도구의 data 접근은 유지된다.
 새 checkout의 artifact link와 runtime 기본값은 이 backlink를 거치지 않는다.
 OpenPI의 `assets`와 `policy_records`도 외부 storage를 직접 가리키는 ignored link로 연결한다.
@@ -97,11 +100,15 @@ bash scripts/setup/create_cpu_env.sh
 source .venv-ag3s/bin/activate
 ```
 
-GPU/OpenPI/cuRobo 환경은 이번 경로 전환에서 설치하지 않았다. CPU venv를 VLA inference 환경으로
+최초 경로 전환에서는 GPU/OpenPI/cuRobo를 설치하지 않았다. 이후 benchmark checkout에
+독립 `.venv-openpi-live`와 `.venv-curobo`(둘 다 Python 3.11.16)를 설치하고
+Torch/JAX GPU, cuRobo ESDF kernel, randomized-pick-place 16D checkpoint loading을 검증했다.
+Development checkout의 GPU 환경 설치 상태는 이번 작업에서 변경하지 않았다. CPU venv를 VLA inference 환경으로
 간주하지 않는다. 이전 환경 package snapshot은 `environments/legacy-python/`에 보존한다.
 그 파일은 inventory이며 GPU 환경의 검증된 재설치 lockfile이 아니다. 복사한 venv는 absolute path·
 editable source·CUDA extension 경로를 계속 가리킬 수 있으므로 새 checkout에서 재생성해야 한다.
-향후 OpenPI 환경은 자기 `.venv-openpi-live`에 만들고 `third_party/openpi`와 `third_party/curobo`를
+`bash scripts/setup/create_live_env.sh`와
+`bash scripts/setup/create_live_env.sh .venv-curobo`로 자기 환경을 재생성한다. OpenPI 환경은 자기 `.venv-openpi-live`에 만들고 `third_party/openpi`와 `third_party/curobo`를
 자기 checkout에서 설치한 뒤 import origin, CUDA, checkpoint loading을 검증한다.
 Training launcher의 `AG3S_OPENPI_PYTHON` 기본값도 자기 `.venv-openpi-live/bin/python`이다.
 
@@ -123,3 +130,11 @@ Storage와 interpreter의 symlink·Git fixture 경로 검사는 `check_storage.p
 Sources: [VS Code Python environments](https://code.visualstudio.com/docs/python/environments),
 [uv environment activation](https://docs.astral.sh/uv/pip/environments/),
 [uv Python storage and existing environments](https://docs.astral.sh/uv/reference/storage/).
+
+## Benchmark output protection
+
+새 영상·log·policy record는 `$AG3S_STORAGE_ROOT/results/benchmark/<KST 날짜시간_commit_run-id>/`
+아래 저장한다. `AG3S_RUN_DIR` 또는 `AG3S_V11_OUTPUT_DIR`로 선택할 때는 이 helper가 생성한
+동일 checkout/commit의 run을 지정한다. Shared input·기존 recordings는 output으로 사용하지 않는다.
+OpenPI `--record`는 새 run을 사용하며 기존 directory/step/log가 있으면 덮어쓰지 않고 거부한다.
+상세 사용법·metadata 예외·archived helper 미완료 항목은 최신 live 보고서를 따른다.

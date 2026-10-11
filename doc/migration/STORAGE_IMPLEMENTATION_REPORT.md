@@ -1,5 +1,9 @@
 # Storage 경로 분리 실행 결과
 
+후속 benchmark live 환경·새 result namespace 검증(2026-10-12)은
+[LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md](LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md)를 따른다.
+아래 수치는 최초 storage 이관 시점의 기록이다.
+
 완료 기록: **2026-10-11 23:58 KST**. 현재 경로 및 환경 안내의 정본은 이 문서와
 `doc/SHARED_STORAGE_AND_PYTHON.md`다. 이전 `IMPLEMENTATION_REPORT.md`는 최초 통합 당시 기록이다.
 사용자가 이전 통합 commit과 원본 보존 refs를 push했다고 확인했다. 이번 후속 commit은 아직 push하지 않았다.

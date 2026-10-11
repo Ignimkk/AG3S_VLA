@@ -1,0 +1,14 @@
+old-checkout read denial active
+........................................................................ [ 98%]
+.                                                                        [100%]
+=============================== warnings summary ===============================
+tests/trajopt/test_t43ta_path_shape.py: 16 warnings
+  /mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/osqp/interface.py:290: DeprecationWarning: "polish" is deprecated. Please use "polishing" instead.
+    warnings.warn(
+
+tests/trajopt/test_t43ta_path_shape.py: 61 warnings
+  /mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/lib/python3.11/site-packages/osqp/interface.py:405: PendingDeprecationWarning: The default value of raise_error will change to True in the future.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+73 passed, 77 warnings in 38.71s
