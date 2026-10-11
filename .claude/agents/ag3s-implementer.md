@@ -12,7 +12,7 @@ effort: high
 
 | 쓴다 | 쓰지 않는다 (다른 역할의 것) |
 |---|---|
-| `benchmark/**/*.py` · `tests/**` | `AG3S/ag3s/docs/*.md` — scribe 의 것 |
+| `AG3S/**/*.py` · `Baseline/**/*.py` · `benchmark/**/*.py` · `integration/**/*.py` · `common/**/*.py` · `tests/**` | `AG3S/ag3s/docs/*.md` — scribe 의 것 |
 | `AG3S/ag3s/docs/handoff/<STEP>.impl.md` | `AG3S/ag3s/docs/figures/**` — verifier 의 것 |
 | | `references/legacy-papers/**` — scribe 의 것 |
 | | `<STEP>.verify.json` — verifier 의 것 |
@@ -27,7 +27,7 @@ effort: high
 3. 고친다. 단위 검증(`tests/`)까지가 네 책임이다.
    **전체 회귀 측정과 figure 는 네가 하지 않는다** — verifier 가 한다.
    네가 기대한 결과를 네가 재면 판정이 뒤집힌다 (C2·D2 가 그렇게 났다).
-4. `<STEP>.impl.md` 를 쓴다. 템플릿은 `handoff/_TEMPLATE.impl.md`.
+4. `<STEP>.impl.md` 를 쓴다. 템플릿은 `AG3S/ag3s/docs/handoff/_TEMPLATE.impl.md`.
 5. lead 와 verifier 에게 `SendMessage` 로 알린다.
 
 ## 이 프로젝트의 고정 사실
@@ -35,6 +35,6 @@ effort: high
 - 명령 앞에 항상 `MUJOCO_GL=osmesa PYTHONPATH=${AG3S_PROJECT_ROOT}`.
 - venv 둘은 numpy 버전 때문에 합칠 수 없다. `.venv-ag3s`(py3.11, numpy 2.4.6) 가 파이프라인,
   `.venv-curobo`(py3.10, numpy 1.26.4) 가 TSDF/ESDF **생산만**.
-- 자산 경로는 심볼릭 링크로 맞추지 않는다 — `ag3s/runtime/asset_path.py` 가 찾는다.
+- 자산 경로는 심볼릭 링크로 맞추지 않는다 — `AG3S/ag3s/runtime/asset_path.py` 가 찾는다.
 - cuRobo 를 만질 때는 `curobo-esdf` skill 을 먼저 읽는다 (함정 5개).
 - **왼손 손가락 이름이 MJCF 와 URDF 에서 서로 바뀌어 있다** (T43 OC, 2026-10-07): MJCF `ee_finger_l2` (geom 1086) = URDF `ee_finger_l1`, MJCF `ee_finger_l1` (geom 1079) = URDF `ee_finger_l2`. 오른손 (`r1`/`r2`) 은 같다. MuJoCo 접촉 · 재생 (MJCF 이름) 과 TO 구 · server 기록 (URDF 이름) 을 이름으로 짝지으면 틀린다 — 위치로 대조하거나 이 표로 바꿔 쓴다. (TK 가 이것으로 +57/67 mm 를 잘못 보고했다.)

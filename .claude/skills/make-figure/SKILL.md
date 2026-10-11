@@ -1,6 +1,6 @@
 ---
 name: make-figure
-description: AG3S 규칙 A 의 figure 3종(실제 씬·그래프·표)을 프로젝트 스타일로 만든다. matplotlib 으로 그림을 그리거나 docs/figures 에 저장할 때 쓴다.
+description: AG3S 규칙 A 의 figure 3종(실제 씬·그래프·표)을 프로젝트 스타일로 만든다. matplotlib 으로 그림을 그리거나 AG3S/ag3s/docs/figures 에 저장할 때 쓴다.
 ---
 
 # 규칙 A — figure 3종
@@ -42,7 +42,7 @@ figstyle.style_axes(fig, axes) # 표면색·눈금·spine 을 한 번에
 
 ## 저장과 전달
 
-- 경로: `AG3S/ag3s/docs/figures/` (live-test 계열은 `figures/live-test/`).
+- 경로: `AG3S/ag3s/docs/figures/` (live-test 계열은 `AG3S/ag3s/docs/figures/live-test/`).
 - **같은 이름의 `.json` sidecar 에 그 그림이 쓴 숫자를 남긴다.**
   기존 관례: `a1-static-wiring.png` ↔ `a1-static-wiring.json`. 그림만 있고 숫자가 없으면 재현이 안 된다.
 - 만든 그림은 **`SendUserFile` 로 사용자에게 보낸다.** 로그에서는 경로로 링크한다.

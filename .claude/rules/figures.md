@@ -32,10 +32,10 @@ paths:
 그 자리에서 링크하는 **증거**다 — 덮어쓰면 본문은 옛 숫자를 말하는데 그림은 새 숫자를
 보여 준다. 규칙 D 가 기록에서 막으려는 *"어느 쪽이 최신인가"* 가 그림에서 재현되는 것이다.
 
-실제로 났다: 16D 재측정이 `figures/curobo-ground-truth.png` 을 덮어썼는데, 그 그림은
+실제로 났다: 16D 재측정이 `AG3S/ag3s/docs/figures/curobo-ground-truth.png` 을 덮어썼는데, 그 그림은
 archive `AG3S_REVIEW_LOG.md:1822` 가 **14D 원 측정의 증거로** 링크하는 것이었다.
 
-- 16D 재측정(R 국면)의 figure 는 **`figures/r-16d/`** 아래에 쓴다. sidecar `.json` 도 같다.
+- 16D 재측정(R 국면)의 figure 는 **`AG3S/ag3s/docs/figures/r-16d/`** 아래에 쓴다. sidecar `.json` 도 같다.
 - 출력 경로가 코드에 박혀 있어 바꿀 수 없으면 **그 스크립트를 돌리지 않는다.** 경로를
   인자로 빼는 것은 구현(A1)의 일이다.
 - 그림을 쓰기 전에 그 이름이 이미 있는지 본다. 있으면 멈추고 새 이름을 정한다.

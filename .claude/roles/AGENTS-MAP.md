@@ -16,9 +16,9 @@ A0 lead ──<G>.task.md──► A1 ──<G>.impl.md──► A2 ──<G>.ve
 | 역할 | 모델 · effort | 산출 | 절대 안 하는 것 |
 |---|---|---|---|
 | **A0** lead | opus · high | `<G>.task.md` · PLAN · 판정 진행 · **긴 실행 직접 기동** | 코드·문서·figure 를 직접 고치기 |
-| **A1** 구현 | opus · high | `benchmark/**/*.py` · `tests/**` · `<G>.impl.md` | 측정, 로그 쓰기 |
-| **A2** 검증 | opus · high | `docs/figures/**` · `<G>.verify.json` · `outputs/verify/**` | 코드 수정, 해석·판정 쓰기 |
-| **A3** 기록 | sonnet · high | `docs/*.md` · `references/legacy-papers/**` | 코드, 실험, figure |
+| **A1** 구현 | opus · high | `AG3S/**/*.py` · `Baseline/**/*.py` · `benchmark/**/*.py` · `integration/**/*.py` · `common/**/*.py` · `tests/**` · `<G>.impl.md` | 측정, 로그 쓰기 |
+| **A2** 검증 | opus · high | `AG3S/ag3s/docs/figures/**` · `<G>.verify.json` · `outputs/verify/**` | 코드 수정, 해석·판정 쓰기 |
+| **A3** 기록 | sonnet · high | `AG3S/ag3s/docs/*.md` · `references/legacy-papers/**` | 코드, 실험, figure |
 
 ## 남은 게이트 — 누가 붙나
 
@@ -44,7 +44,7 @@ A0 lead ──<G>.task.md──► A1 ──<G>.impl.md──► A2 ──<G>.ve
   겹치면 안 되는 실행(무거운 테스트·MuJoCo 측정)은 **A0 가 순서를 잡아 준다.**
 - agent 가 중간에 판정을 받아야 하면 **거기서 멈추고 보고하게** 한다. 그 다음은 A0 가
   `SendMessage` 로 이어 붙인다 (A0 → agent 방향은 된다).
-- agent 끼리도 서로 못 부른다. 산출물은 **파일로** 넘긴다 (`handoff/`).
+- agent 끼리도 서로 못 부른다. 산출물은 **파일로** 넘긴다 (`AG3S/ag3s/docs/handoff/`).
 
 ## 규칙 — 오늘까지 값을 치르고 배운 것
 
@@ -120,4 +120,4 @@ agent 가 안에서 80k 를 읽었어도 돌려주는 것은 **산출 파일 경
 | 09-25 | **A1 과 A2 가 같은 tree 를 동시에 쓸 때는 `md5sum` 지문으로 조건 분리를 증명한다** | A1 의 `runner_up_score` 수정이 latch 의 `confident` 를 바꿔 A2 의 attach frame 측정을 오염시킬 수 있었다. run 전후 지문이 다르면 그 run 을 버린다 |
 | 09-25 | **measurement 가 끝났는데 로그에 안 들어간 상태**가 세션 경계에서 제일 자주 생긴다 | T2 의 nine events 가 14:17 에 나왔는데 로그는 *"측정 진행 중 — 수치 쓰지 마라"* 로 남아 있었다. 다음 세션이 그것을 보고 재측정할 뻔했다 |
 | 09-25 | **`verify.json` 의 `not_measured` 가 `task.md` 의 합격 조건을 다 덮는지 lead 가 대조한다** — 빠진 항목은 `numbers` 에도 `not_measured` 에도 없이 **조용히 사라진다** | T2 합격 조건 *"attach 후 held object 가 collision geometry 에 들어가고 obstacle field 에서 빠진다"* 가 `T2.verify.json` 에 아예 없었다. lead 가 그것을 `not_measured` 에 있는 줄 알고 브리핑에 썼고, **A3 가 "json 에 없다" 며 거부해 드러났다** |
-| 09-25 | **루트에서 `grep -r` 하면 `pi05_TO_hybrid/` 가 안 보인다** — 루트 repo 가 화이트리스트 gitignore 라 검색 도구가 그 트리를 건너뛴다. 그 안을 찾을 때는 경로를 **명시**한다 | `SafeRemoteClient` 를 쓰는 곳이 없다고 결론 낼 뻔했다. 실제로는 `integration/rby1/bringup/pi05_infer.py:1155` 가 쓰고 있었다 — 아키텍처 판정이 정반대로 갈 자리였다 |
+| 09-25 | **이전 workspace의 화이트리스트 gitignore가 integration source 검색을 누락했다** — 현재 monorepo에서는 `integration/rby1/`을 검색한다 | `SafeRemoteClient` 를 쓰는 곳이 없다고 결론 낼 뻔했다. 실제로는 `integration/rby1/bringup/pi05_infer.py:1155` 가 쓰고 있었다 — 아키텍처 판정이 정반대로 갈 자리였다 |
