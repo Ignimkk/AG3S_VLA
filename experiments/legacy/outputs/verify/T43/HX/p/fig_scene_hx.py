@@ -19,7 +19,7 @@ from AG3S.ag3s.experiments.common import figstyle  # noqa: E402
 
 out_png = pathlib.Path(sys.argv[1]); arm, key = sys.argv[2], sys.argv[3]; tc, tr = int(sys.argv[4]), int(sys.argv[5])
 assert not out_png.exists(), f"{out_png} exists"
-RAW = json.load(open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T43/HX/raw/hx_{arm}.json"))["runs"][key]
+RAW = json.load(open(f"{_ag3s_workspace_path()}/outputs/verify/T43/HX/raw/hx_{arm}.json"))["runs"][key]
 rows = {r["t"]: r for r in RAW["rows"]}
 cl = HW.load_client(); kor = figstyle.use_korean()
 BLUE, ORANGE, GREEN = figstyle.CATEGORICAL[0], figstyle.CATEGORICAL[1], figstyle.CATEGORICAL[2]

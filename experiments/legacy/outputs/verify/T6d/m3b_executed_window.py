@@ -41,7 +41,7 @@ out['exec8_delta'] = {'tip_delta_mm': [float(v) for v in a], 'clear_delta_mm': [
 
 for run in ['local_t6_from_pc', 'local_shadow_from_pc', 'local_grasp_from_pc']:
     act, ref, qg = [], [], []
-    with open(f'${AG3S_PROJECT_ROOT}/outputs/live_test/{run}/frames.jsonl') as f:
+    with open(f'{_ag3s_workspace_path()}/outputs/live_test/{run}/frames.jsonl') as f:
         for l in f:
             d = json.loads(l)
             if d.get('kind') == 'planning':

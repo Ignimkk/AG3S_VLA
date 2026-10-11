@@ -115,7 +115,7 @@ def main():
         per.append(e)
         print(t, e["fine_n_occupied"], e["fine_class_counts"], e.get("coarse_class_counts", ""), flush=True)
     res["chunks"] = per
-    pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T31diag/d4/voxels_{run}{'_all' if do_all else ''}.json").write_text(json.dumps(res, indent=1, default=float))
+    pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T31diag/d4/voxels_{run}{'_all' if do_all else ''}.json").write_text(json.dumps(res, indent=1, default=float))
 
 
 if __name__ == "__main__":

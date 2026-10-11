@@ -28,7 +28,7 @@ import AG3S.trajopt.experiments.fixed_input_ablation as T  # noqa: E402
 from AG3S.ag3s.robot_models.gripper_state import FingerJointMap  # noqa: E402
 
 COND = sys.argv[1]
-REC = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T33/{COND}_rec")
+REC = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T33/{COND}_rec")
 V = pathlib.Path(_ag3s_workspace_path('outputs/verify/T33/p'))
 ANA = json.loads((V / (sys.argv[2] if len(sys.argv) > 2 else f"{COND}_analysis.json")).read_text())
 OUTNAME = f"{COND}_analysis_extra.json" if len(sys.argv) <= 2 else f"{COND}_analysis_extra_partial.json"

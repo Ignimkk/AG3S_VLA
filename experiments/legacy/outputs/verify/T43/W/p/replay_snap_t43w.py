@@ -70,7 +70,7 @@ if __name__ == "__main__":
         print(run, R["prof"], "rows", R["nrows"], "last_t", R["last_t"], "spa", R["spa"], "qpos mismatched rows", R["qpos_mismatch_rows"], f"{time.time()-t0:.0f}s")
         if R["stop"]:
             t, s, c, q, v = R["stop"]; print("  STOP at t", t, "substep", s, "clearance", c)
-            np.savez(f"${AG3S_PROJECT_ROOT}/outputs/verify/T43/W/replay/replay_stop_{run.replace('/','_')}.npz", qpos_kin=q, geom_xpos=v, t=t, s=s)
+            np.savez(f"{_ag3s_workspace_path()}/outputs/verify/T43/W/replay/replay_stop_{run.replace('/','_')}.npz", qpos_kin=q, geom_xpos=v, t=t, s=s)
             ft = np.zeros(6)
             for o in sorted(mg.collision_geom_ids):
                 for g in mg.robot_geom_ids:

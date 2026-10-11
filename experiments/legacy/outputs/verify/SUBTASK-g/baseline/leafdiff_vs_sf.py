@@ -1,4 +1,5 @@
 """SUBTASK-g: leaf-level diff of baseline/{legacy,curobo}.json vs SUBTASK-f baseline (frames[*] every leaf). Output: leafdiff_vs_sf.json"""
+from common.workspace import workspace_path as _ag3s_workspace_path
 import json
 def flat(x, pre=""):
     if isinstance(x, dict):
@@ -6,7 +7,7 @@ def flat(x, pre=""):
     else: yield pre[:-1], x
 out = {}
 for b in ("legacy", "curobo"):
-    A = json.load(open(f"${AG3S_PROJECT_ROOT}/outputs/verify/SUBTASK-f/baseline/{b}.json")); B = json.load(open(f"{b}.json"))
+    A = json.load(open(f"{_ag3s_workspace_path()}/outputs/verify/SUBTASK-f/baseline/{b}.json")); B = json.load(open(f"{b}.json"))
     fa, fb = A["frames"], B["frames"]; diff = {}
     for i, (x, y) in enumerate(zip(fa, fb)):
         dx, dy = dict(flat(x)), dict(flat(y))

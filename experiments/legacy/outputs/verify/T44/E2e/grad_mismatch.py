@@ -5,7 +5,7 @@ import glob, json, numpy as np
 out = {}
 recs = []
 for d in ("raw_demo", "raw_lb"):
-    for f in sorted(glob.glob(f"${AG3S_PROJECT_ROOT}/outputs/verify/T44/E2e/{d}/*.json")):
+    for f in sorted(glob.glob(f"{_ag3s_workspace_path()}/outputs/verify/T44/E2e/{d}/*.json")):
         recs.append((json.load(open(f)), f[:-5] + ".npz"))
 for m in ("ball", "bo_d3"):
     for v in ("guard", "keep", "exclude", "exclude_target"):

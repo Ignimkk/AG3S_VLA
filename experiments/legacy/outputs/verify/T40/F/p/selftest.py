@@ -30,4 +30,4 @@ for (x, y, yaw, h) in [(0.68, 0.23, 0.0, 0.26), (0.62, 0.12, 0.3, 0.22), (0.56, 
     res[str((x, y, yaw, h))] = {"reset_check": rc, "max_abs_cached_vs_direct_m": mx, "max_abs_vs_gjk_sep_m(AB, separated rows)": mxg,
                                 "t_set_ms": 1e3 * ta, "t_reset_ms": 1e3 * tb, "t_series_ms_per_row": 1e3 * tc / len(rows)}
     print(res[str((x, y, yaw, h))], flush=True)
-json.dump(res, open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T40/F/raw/selftest_{sys.argv[1]}.json", "w"), indent=1)
+json.dump(res, open(f"{_ag3s_workspace_path()}/outputs/verify/T40/F/raw/selftest_{sys.argv[1]}.json", "w"), indent=1)

@@ -21,7 +21,7 @@ RUNS = {"t14": _ag3s_workspace_path('outputs/live_test/20260928_t14/execute_ep18
         "t17": _ag3s_workspace_path('outputs/live_test/20260928_t17/shadow_ep1807/frames.jsonl')}
 CAMS = ("zed_left", "wrist_cam_l", "wrist_cam_r")
 run = sys.argv[1]
-OUT = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T28/p3/off_0e_raw_{run}.jsonl")
+OUT = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T28/p3/off_0e_raw_{run}.jsonl")
 m = mujoco.MjModel.from_xml_path(XML)
 robot = build_robot_model(TransportScene.attach(m, mujoco.MjData(m)))
 d = mujoco.MjData(m); scene = TransportScene.attach(m, d)

@@ -17,7 +17,7 @@ import analyze_t42 as AN  # noqa: E402
 def runs_of(ep):
     out = {}
     for cond in ("E0", "E3b"):
-        for root in (f"${AG3S_PROJECT_ROOT}/outputs/verify/T39/runs/{cond}", f"${AG3S_PROJECT_ROOT}/outputs/verify/T42/1/runs/{cond}/noobs"):
+        for root in (f"{_ag3s_workspace_path()}/outputs/verify/T39/runs/{cond}", f"{_ag3s_workspace_path()}/outputs/verify/T42/1/runs/{cond}/noobs"):
             for d in sorted(glob.glob(f"{root}/{cond}_ep{ep}_s*")):
                 if os.path.isdir(d) and os.path.exists(d + ".done"):
                     out.setdefault(pathlib.Path(d).name, d)

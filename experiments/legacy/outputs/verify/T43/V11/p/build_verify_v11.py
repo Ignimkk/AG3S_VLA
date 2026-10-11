@@ -59,4 +59,4 @@ out = {"_comment": f"ag3s-verifier T43 {ARM} (first online round of A -> A+B -> 
                         "Z4 / CT rules, hurdle contacts and crossing metrics are H-stage only (stage B has no hurdle, no B replays)",
                         "palm path for sharpness is the FK of the commanded joints with every other joint fixed at the run's control row 0 qpos; boundaries next to a HOLD chunk excluded",
                         "pod working set / loadavg are pod totals (other sessions included)"]}
-p = pathlib.Path(f"${AG3S_PROJECT_ROOT}/AG3S/ag3s/docs/handoff/{name}.verify.json"); assert not p.exists(); p.write_text(json.dumps(out, indent=1, default=float, ensure_ascii=False)); print(p, len(p.read_text()))
+p = pathlib.Path(f"{_ag3s_workspace_path()}/AG3S/ag3s/docs/handoff/{name}.verify.json"); assert not p.exists(); p.write_text(json.dumps(out, indent=1, default=float, ensure_ascii=False)); print(p, len(p.read_text()))

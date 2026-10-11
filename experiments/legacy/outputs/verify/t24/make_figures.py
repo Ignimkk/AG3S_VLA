@@ -149,7 +149,7 @@ figstyle.style_axes(fig, axes.ravel())
 side = {}
 for row, k in enumerate(SC):
     c = chunks[k]
-    z = np.load(f"${AG3S_PROJECT_ROOT}/outputs/live_test/20260928_t17/server_constraints/run_0000/chunk_{k:05d}.npz", allow_pickle=True)
+    z = np.load(f"{_ag3s_workspace_path()}/outputs/live_test/20260928_t17/server_constraints/run_0000/chunk_{k:05d}.npz", allow_pickle=True)
     cloud = np.asarray(z['filtered_cloud'], float); tgt = np.asarray(z['target_points'], float)
     paths = {"reference": np.asarray(c['reference']['fingertip_path_m']),
              "recorded refined (server)": np.asarray(c['recorded_refined_vs_reference']['fingertip_path_m']),

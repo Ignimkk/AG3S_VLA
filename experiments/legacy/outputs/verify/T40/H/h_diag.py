@@ -8,8 +8,8 @@ m=mujoco.MjModel.from_xml_path(XML); d=mujoco.MjData(m)
 cases={"E3b_C_E3b_ep1995_s19952":("t40f_ep1995_s19952_r1","foot_left",856),"E3b_D_E3b_ep1967_s19672":("t40f_ep1967_s19672_r2","foot_right",1085),
 "E3b_D_E3b_ep1982_s19822":("t40f_ep1982_s19822_r2","foot_right",1085),"E3b_D_E3b_ep1995_s19952":("t40f_ep1995_s19952_r2","foot_right",904),"E0_D_E0_ep1967_s19672":("t40f_ep1967_s19672_r2","foot_right",1086)}
 for k,(prof,foot,g) in cases.items():
-    cfg=PPO.load_pick_place_obstacle_config(f"${AG3S_PROJECT_ROOT}/outputs/verify/T40/F/configs/{prof}.json"); mg=PPO.PickPlaceObstacleManager(m,d,cfg); mg.activate(prof)
-    z=np.load(f"${AG3S_PROJECT_ROOT}/outputs/verify/T40/H/stop_{k}.npz"); d.qpos[:]=z["qpos_kin"]; mujoco.mj_kinematics(m,d); print("xpos bit-equal", np.array_equal(d.geom_xpos, z["geom_xpos"]))
+    cfg=PPO.load_pick_place_obstacle_config(f"{_ag3s_workspace_path()}/outputs/verify/T40/F/configs/{prof}.json"); mg=PPO.PickPlaceObstacleManager(m,d,cfg); mg.activate(prof)
+    z=np.load(f"{_ag3s_workspace_path()}/outputs/verify/T40/H/stop_{k}.npz"); d.qpos[:]=z["qpos_kin"]; mujoco.mj_kinematics(m,d); print("xpos bit-equal", np.array_equal(d.geom_xpos, z["geom_xpos"]))
     o=mujoco.mj_name2id(m,mujoco.mjtObj.mjOBJ_GEOM,f"pick_obstacle_hurdle_0_collision_{foot}")
     ft=np.zeros(6); ref=gjk.gjk_dist(gjk.make_support(m,d,o),gjk.make_support(m,d,g),d.geom_xpos[g]-d.geom_xpos[o]+1e-9)
     a=mujoco.mj_geomDistance(m,d,o,g,0.25,ft); w=ft.copy()

@@ -13,7 +13,7 @@ PY = _ag3s_workspace_path('legacy/.venv-openpi-live/bin/python')
 v = {
  "step": "T44M", "date": "2026-10-10",
  "runs": [
-  {"id": "baseline_curobo", "command": f"MUJOCO_GL=osmesa PYTHONPATH=${AG3S_PROJECT_ROOT} XLA_PYTHON_CLIENT_PREALLOCATE=false {PY} -m AG3S.trajopt.experiments.esdf_rollout --records run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005",
+  {"id": "baseline_curobo", "command": f"MUJOCO_GL=osmesa PYTHONPATH={_ag3s_workspace_path()} XLA_PYTHON_CLIENT_PREALLOCATE=false {PY} -m AG3S.trajopt.experiments.esdf_rollout --records run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005",
    "venv": ".venv-openpi-live", "raw_output": "outputs/verify/T44/merge/baseline/base_curobo.json", "stdout_log": "outputs/verify/T44/merge/baseline/base_curobo.log"},
   {"id": "dump_gt", "command": "outputs/verify/T44/merge/run_dump.sh {0,1} 2 gt (dump_frames.py --attention gt; 2 shards, nice 19, 2 threads each)",
    "venv": ".venv-openpi-live", "frames": "outputs/verify/T44/E2/e2_demo_posed_frames.json (64, same as V-E2)",

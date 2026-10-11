@@ -69,7 +69,7 @@ out = {
   "counts": counts, "runs": runs},
  "figures": [fig(f"t42-2-scene-{ep}-place", "scene") for ep in placements] + [fig("t42-2-distance-place", "graph"), fig("t42-2-table-place", "table")],
  "baseline_check": {"matched": bool(bl["legacy"]["matched"] and bl["curobo"]["matched"]),
-                    "note": f'legacy {bl["legacy"]["violated_start"]} / {bl["legacy"]["has_target"]} / {bl["legacy"]["frame0_clearance_before_mm"]}; cuRobo {bl["curobo"]["violated_start"]} / {bl["curobo"]["has_target"]} / {bl["curobo"]["frame0_clearance_before_mm"]}; snapshot ${AG3S_PROJECT_ROOT}-t42c'},
+                    "note": f'legacy {bl["legacy"]["violated_start"]} / {bl["legacy"]["has_target"]} / {bl["legacy"]["frame0_clearance_before_mm"]}; cuRobo {bl["curobo"]["violated_start"]} / {bl["curobo"]["has_target"]} / {bl["curobo"]["frame0_clearance_before_mm"]}; snapshot {_ag3s_workspace_path()}-t42c'},
  "verdict": "baseline matched; 12/12 place-phase runs complete (check_run); executed actions differ from the no-obstacle run of the same seed from control step 0-1 in 12/12",
  "not_measured": ["pick-phase obstacles (post_0, fence_0, overbar_0) runs", "combined pick + place runs", "seeds rep 2-3 with obstacles",
                   "E3b with --obstacle-margin 0.010 --safe-hold-mode measured", "source of the step-0 divergence (camera image vs model XML vs physics) not separated"],

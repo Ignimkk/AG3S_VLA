@@ -25,7 +25,7 @@ AN = json.loads((V3 / f"{cond}_analysis.json").read_text())["runs"][run]
 s = AN["summary"]
 seq = int(sys.argv[3]) if len(sys.argv) > 3 else max(e["seq"] for e in AN["chunks"] if e["t"] <= (s["t_first_close_cmd"] or 10 ** 9))
 e = next(x for x in AN["chunks"] if x["seq"] == seq)
-OUT = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T33/{cond}_rec")
+OUT = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T33/{cond}_rec")
 rows = {json.loads(l)["seq"]: json.loads(l) for l in open(OUT / run / "frames.jsonl") if '"planning"' in l}
 pr = rows[seq]
 m = mujoco.MjModel.from_xml_path(XML); d = mujoco.MjData(m); scene = TransportScene.attach(m, d)

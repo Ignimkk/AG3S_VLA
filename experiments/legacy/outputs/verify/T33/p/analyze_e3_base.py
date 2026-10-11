@@ -38,7 +38,7 @@ import analyze_e0 as A
 import p12_records as P
 
 COND = sys.argv[1]
-OUT = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T33/{COND}_rec")
+OUT = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T33/{COND}_rec")
 ARM = list(range(0, 7)) + list(range(8, 15))
 CENTRES = ("apple", "banana", "orange", "pear", "crate")
 

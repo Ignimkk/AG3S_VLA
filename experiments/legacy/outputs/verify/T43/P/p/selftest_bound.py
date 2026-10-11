@@ -7,7 +7,7 @@ sys.path.insert(0, _ag3s_workspace_path('outputs/verify/T43/P/p'))
 import flib as F, psearch as S
 out = {"vs_old_f": {}, "brute": []}
 for tag in F.TAGS:
-    old = json.load(open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T43/P/raw/old_f_{tag}.json"))
+    old = json.load(open(f"{_ag3s_workspace_path()}/outputs/verify/T43/P/raw/old_f_{tag}.json"))
     P = S.PCtx(tag); t0 = time.time(); e = P.evaluate(old["x"], old["y"], old["yaw"], old["h"]); dt = time.time() - t0
     diffs = {k: abs(e[k] - old[k]) for k in e if isinstance(e[k], float) and isinstance(old.get(k), float) and old[k] < S.CAP}
     out["vs_old_f"][tag] = {"n_compared": len(diffs), "max_abs_diff": max(diffs.values()), "eval_s": dt}

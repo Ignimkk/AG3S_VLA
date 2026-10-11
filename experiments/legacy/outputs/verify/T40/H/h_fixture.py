@@ -16,7 +16,7 @@ out={"_comment":"T40 H: the 5 T40 G obstacle stops with client clearance exactly
  "config = outputs/verify/T40/F/configs/<profile>.json. Source: implementer T40 H, 2026-10-05.", "runs":{}}
 for run,(prof,ep,seed) in runs.items():
     k=run.replace("/","_"); z=np.load(S+f"stop_{k}.npz")
-    cfgp=f"${AG3S_PROJECT_ROOT}/outputs/verify/T40/F/configs/{prof}.json"; cfg=json.load(open(cfgp))
+    cfgp=f"{_ag3s_workspace_path()}/outputs/verify/T40/F/configs/{prof}.json"; cfg=json.load(open(cfgp))
     mg=PPO.PickPlaceObstacleManager(m,d,PPO.load_pick_place_obstacle_config(cfgp)); mg.activate(prof)
     d.qpos[:]=z["qpos_kin"]; mujoco.mj_kinematics(m,d); assert np.array_equal(d.geom_xpos,z["geom_xpos"])
     pairs=[]

@@ -8,7 +8,7 @@ import json, sys, pathlib, dataclasses
 import numpy as np
 sys.path.insert(0, _ag3s_workspace_path(''))
 COND, PORT, RUN, N, OUTP = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), sys.argv[5]
-REC = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T34/{COND}_rec")
+REC = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T34/{COND}_rec")
 files = sorted((REC / f"server_{PORT}/server_constraints").glob("run_*/chunk_*.npz"))
 out = {"run": RUN, "n_chunk_files": len(files), "chunks": [], "attach": None, "held_after_attach": []}
 try:

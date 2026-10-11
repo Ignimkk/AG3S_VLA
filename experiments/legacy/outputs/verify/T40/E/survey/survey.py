@@ -51,7 +51,7 @@ for trial in range(NT):
                 st["n_overlap"] += 1
                 if mj > 1e-4:
                     st["bad"] += 1; worst.append((key, mj, gj))
-                    np.savez(f"${AG3S_PROJECT_ROOT}/outputs/verify/T40/E/survey/bad_{len(worst)}.npz", g=g, o=o, qpos=d.qpos, mpos=d.mocap_pos, mquat=d.mocap_quat)
+                    np.savez(f"{_ag3s_workspace_path()}/outputs/verify/T40/E/survey/bad_{len(worst)}.npz", g=g, o=o, qpos=d.qpos, mpos=d.mocap_pos, mquat=d.mocap_quat)
                 continue
             err = abs(mj - gj) * 1e3; st["maxerr_mm"] = max(st["maxerr_mm"], err)
             if err > 0.1: st["bad"] += 1; worst.append((key, mj, gj, mujoco.mj_id2name(m, 1, g), mujoco.mj_id2name(m, 1, o)))

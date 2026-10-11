@@ -25,7 +25,7 @@ from AG3S.ag3s.robot_models.gripper_state import FingerJointMap  # noqa: E402
 
 COND = sys.argv[1]
 SRC = sys.argv[2] if len(sys.argv) > 2 else "T37"
-V = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/{SRC}")
+V = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/{SRC}")
 OUTV = pathlib.Path(_ag3s_workspace_path('outputs/verify/T37/p'))
 PORT = {"E3a": 8204, "E3b": 8206}
 

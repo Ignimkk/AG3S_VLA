@@ -45,7 +45,7 @@ c1982 = {w: {"outcome": outcome["C_ep1982"].get(w), "holds": holds["C_ep1982"].g
          for w in SETS if w in outcome.get("C_ep1982", {})}
 
 srv = sorted((V / "c/runs/E3b").glob("server_8270_*"))
-head = lambda repo: subprocess.run(["git", "-C", f"${AG3S_PROJECT_ROOT}/{repo}", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+head = lambda repo: subprocess.run(["git", "-C", f"{_ag3s_workspace_path()}/{repo}", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
 replay_log = (V / "c/replay/replay_snapshot.log").read_text().splitlines()
 out = {
     "_comment": "ag3s-verifier. numbers and paths only; no interpretation.",

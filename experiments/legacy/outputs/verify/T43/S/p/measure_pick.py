@@ -256,7 +256,7 @@ def one(key):
                 path.append({"t": t, "rel_mm": (g["finger_mid"] - g["fruit_pos"]) * 1e3, "tilt_deg": g["tilt_deg"]})
         out["approach_path"] = path
     if cond == "E3b":
-        ix = IDX.get(f"${AG3S_PROJECT_ROOT}/outputs/verify/T42/1/runs/E3b/noobs/{name}")
+        ix = IDX.get(f"{_ag3s_workspace_path()}/outputs/verify/T42/1/runs/E3b/noobs/{name}")
         if ix is None: out["server"] = None; return jl(out)
         out["pairing_refined_vs_actions_max_abs"] = ix["refined_vs_actions_max_abs"]
         out["audit"] = audit_run(ix["chunks"], arm)

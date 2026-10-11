@@ -44,7 +44,7 @@ for p in sorted(pathlib.Path(_ag3s_workspace_path('outputs/verify/T28/E2_rec')).
         RUNS[p.name] = ("E2", p)
 for tag in ("T30", "T33"):
     for cond in ("E3a", "E3b"):
-        for p in sorted(pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/{tag}/{cond}_rec").glob(f"{cond}_ep*")):
+        for p in sorted(pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/{tag}/{cond}_rec").glob(f"{cond}_ep*")):
             if p.is_dir() and (p / "frames.jsonl").exists():
                 RUNS[f"{tag}_{p.name}"] = (f"{tag}_{cond}", p)
 

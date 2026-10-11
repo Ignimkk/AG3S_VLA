@@ -72,7 +72,7 @@ out = {
   "per_episode": compact},
  "figures": [fig("t42-1-table", "table"), fig("t42-1-screening", "graph")] + [fig(f"t42-1-scene-{s['episode']}", "scene") for s in selected],
  "baseline_check": {"matched": bool(bl["legacy"]["matched"] and bl["curobo"]["matched"]),
-                    "note": f'legacy {bl["legacy"]["violated_start"]} / {bl["legacy"]["has_target"]} / {bl["legacy"]["frame0_clearance_before_mm"]}; cuRobo {bl["curobo"]["violated_start"]} / {bl["curobo"]["has_target"]} / {bl["curobo"]["frame0_clearance_before_mm"]}; snapshot ${AG3S_PROJECT_ROOT}-t42'},
+                    "note": f'legacy {bl["legacy"]["violated_start"]} / {bl["legacy"]["has_target"]} / {bl["legacy"]["frame0_clearance_before_mm"]}; cuRobo {bl["curobo"]["violated_start"]} / {bl["curobo"]["has_target"]} / {bl["curobo"]["frame0_clearance_before_mm"]}; snapshot {_ag3s_workspace_path()}-t42'},
  "verdict": "baseline matched (legacy and cuRobo); E3b and E0 ep1828 s18281 bit-identical to T39 and T40 G B",
  "not_measured": ["banana: no episode with E3b robust (B) 3/3 among 20 screened (test 6, train/val 14); counts in numbers.per_episode",
                   "E0 rep 1-2 of apple + left episodes on this snapshot (T39 runs used)",

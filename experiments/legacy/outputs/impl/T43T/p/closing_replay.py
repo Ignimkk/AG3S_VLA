@@ -29,7 +29,7 @@ def run_dir_of(key):
         return _ag3s_workspace_path('outputs/verify/T41/a/runs/E3b/') + key[len("T41/a/"):]
     if key.startswith("T43/V/H/"):
         name = key.split("/")[-1]; v = name.split("_")[0]
-        return f"${AG3S_PROJECT_ROOT}/outputs/verify/T43/V/runs/{v}/H/{name}"
+        return f"{_ag3s_workspace_path()}/outputs/verify/T43/V/runs/{v}/H/{name}"
     raise KeyError(key)
 
 

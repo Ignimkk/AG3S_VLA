@@ -26,6 +26,6 @@ for e in S.candidates(c, slot):
     e.update(reset_robot=rr, reset_object=ro, pick_min=pm, pick_min_both=min(v["min"] for v in pm.values()))
     out.append(e)
 out.sort(key=lambda e: -e["pick_min_both"])
-pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T42/2/raw/diag/diag_f_{ep}_{slot}.json").write_text(json.dumps({"definitions": __doc__, "n": len(out), "top": out[:50]}, default=float))
+pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T42/2/raw/diag/diag_f_{ep}_{slot}.json").write_text(json.dumps({"definitions": __doc__, "n": len(out), "top": out[:50]}, default=float))
 print(ep, slot, "n(a,b,c)", len(out), "top", [(round(e["pick_min_both"], 4), [round(v, 3) for v in e["position"][:2]], e.get("bar_height", e.get("height")),
                                               {k: (v["t"], v["pair"]) for k, v in e["pick_min"].items()}) for e in out[:5]])

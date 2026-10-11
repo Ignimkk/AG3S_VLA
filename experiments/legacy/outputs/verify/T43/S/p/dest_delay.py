@@ -10,7 +10,7 @@ RUNS = json.loads((RAW / "t42_runs_frozen.json").read_text()); IDX = json.loads(
 res = {}
 for key, r in sorted(RUNS.items()):
     if not key.startswith("E3b/"): continue
-    ix = IDX[f"${AG3S_PROJECT_ROOT}/outputs/verify/T42/1/runs/E3b/noobs/{key.split('/')[1]}"]
+    ix = IDX[f"{_ag3s_workspace_path()}/outputs/verify/T42/1/runs/E3b/noobs/{key.split('/')[1]}"]
     att = None; dest = None; src = None; held_nodest = 0; held = 0; subtask = {}
     for s in sorted(ix["chunks"], key=int):
         with np.load(ix["chunks"][s]["npz"]) as z: summ = json.loads(str(z["summary_json"]))

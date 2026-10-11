@@ -9,7 +9,7 @@ m = mujoco.MjModel.from_xml_path(XML); d = mujoco.MjData(m)
 bid = lambda n: mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, n)
 out = {}
 for run in ("t16", "t14"):
-    R = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/live_test/20260928_{run}")
+    R = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/live_test/20260928_{run}")
     rows = {json.loads(l)["seq"]: json.loads(l) for l in open(R / "execute_ep1807/frames.jsonl") if '"planning"' in l}
     res = []
     for k in (0, 9, 12, 16, 22):

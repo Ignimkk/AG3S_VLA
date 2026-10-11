@@ -16,7 +16,7 @@ for name, t0 in picks:
     cam.lookat[:] = p["point_world"]; cam.distance = 0.32; cam.azimuth = 200; cam.elevation = -25
     opt = mujoco.MjvOption()
     r.update_scene(C.D, cam, opt); img = r.render()
-    np.save(f"${AG3S_PROJECT_ROOT}/outputs/verify/T45/render_{name}_t{p['t']}.npy", img)
+    np.save(f"{_ag3s_workspace_path()}/outputs/verify/T45/render_{name}_t{p['t']}.npy", img)
     out[f"{name}_t{p['t']}"] = {"lookat": p["point_world"], "geom": p["mesh"], "body": p["mjcf_body"], "fruit_geom": p["fruit_geom"], "dist_mm": p["dist_mm"]}
     print(name, p["t"], img.shape)
 json.dump(out, open(_ag3s_workspace_path('outputs/verify/T45/render_meta.json'), "w"), indent=1)

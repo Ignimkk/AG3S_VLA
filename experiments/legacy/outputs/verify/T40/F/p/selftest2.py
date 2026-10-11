@@ -16,4 +16,4 @@ for i in range(200):
 out["fast_vs_exact_reset_max_abs_m_200"] = mx
 c.set_hurdle(0.68, 0.23, 0.0, 0.26, exact=True); out["smoke_placement_reset"] = c.reset_check()
 out["peak_rss_mb"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
-print(json.dumps(out)); json.dump(out, open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T40/F/raw/selftest2_{sys.argv[1]}.json", "w"), indent=1)
+print(json.dumps(out)); json.dump(out, open(f"{_ag3s_workspace_path()}/outputs/verify/T40/F/raw/selftest2_{sys.argv[1]}.json", "w"), indent=1)

@@ -102,5 +102,5 @@ frag = {"scripts": ["outputs/verify/T30/p/run_chain_e3.sh", "start_server_e3.sh"
         "condition_summary_distinct": {"n_runs": len(distinct), "n_success": sum(runs[n]["summary"]["success"] for n in distinct),
                                        "n_grasp": sum(runs[n]["summary"]["grasp"] for n in distinct)},
         "runs": runs, "mp4": sorted(r["summary"]["mp4"] for r in runs.values())}
-json.dump(frag, open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T30/frag/{c}.json", "w"), default=float)
+json.dump(frag, open(f"{_ag3s_workspace_path()}/outputs/verify/T30/frag/{c}.json", "w"), default=float)
 print(c, "ok", len(runs), frag["condition_summary_distinct"])

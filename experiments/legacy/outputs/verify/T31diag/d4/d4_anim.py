@@ -25,10 +25,10 @@ R = FC.Run(run)
 D1 = json.loads(pathlib.Path(_ag3s_workspace_path('outputs/verify/T31diag/d1/d1_oscillation.json')).read_text())["runs"][run]
 g, rel = D1["grasp_t"], D1["release_t"]
 trail = np.array(D1["windows"]["all"]["fingertip_path_world"]); t0 = D1["windows"]["all"]["t_first"]
-VID = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T31diag/d4/video_{run}"); VID.mkdir(exist_ok=True)
+VID = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T31diag/d4/video_{run}"); VID.mkdir(exist_ok=True)
 if not any(VID.iterdir()):
     subprocess.run(["ffmpeg", "-loglevel", "error", "-i", str(R.run_dir / "third_person_front.mp4"), "-start_number", "0", str(VID / "f%04d.png")], check=True)
-FR = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T31diag/d4/frames_{run}"); shutil.rmtree(FR, ignore_errors=True); FR.mkdir()
+FR = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T31diag/d4/frames_{run}"); shutil.rmtree(FR, ignore_errors=True); FR.mkdir()
 nframe = [0]
 rows_ctrl = {}
 for l in (R.run_dir / "frames.jsonl").read_text().splitlines():

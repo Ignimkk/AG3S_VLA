@@ -41,5 +41,5 @@ for cond, R in c.runs.items():
                         cnt[(c2, body(g))] += 1
                 res.append(e)
 out = {"tag": tag, "n": len(res), "counts_run_body": {f"{a}|{b}": v for (a, b), v in cnt.most_common()}, "cands": res}
-json.dump(out, open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T40/F/raw/diag_d_{tag}.json", "w"), indent=1, default=str)
+json.dump(out, open(f"{_ag3s_workspace_path()}/outputs/verify/T40/F/raw/diag_d_{tag}.json", "w"), indent=1, default=str)
 print(tag, len(res), cnt.most_common(12))

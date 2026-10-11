@@ -62,7 +62,7 @@ def capture_reset(ep):
 
     cfg = {"version": 1, "table_surface_z": TABLE_Z, "profiles": {"clear": {"scene": "any", "obstacles": []},
            "cap": {"scene": "fruit", "obstacles": [{"slot": "hurdle_0", "position": [0.80, -0.30, TABLE_Z], "yaw": 0.0}]}}}
-    tmp = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T43/P/raw/capture/cap_cfg_{os.getpid()}.json"); tmp.parent.mkdir(parents=True, exist_ok=True)
+    tmp = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T43/P/raw/capture/cap_cfg_{os.getpid()}.json"); tmp.parent.mkdir(parents=True, exist_ok=True)
     tmp.write_text(json.dumps(cfg))
     orig_mgr, orig_lrp, argv = P.PickPlaceObstacleManager, P.load_remote_policy, sys.argv
     P.PickPlaceObstacleManager = Park; P.load_remote_policy = stub

@@ -28,7 +28,7 @@ def add_path(scn, P, col, w=0.004):
 
 
 for tag in sys.argv[1:]:
-    s = json.loads(pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T43/P/raw/select_p_{tag}.json").read_text())
+    s = json.loads(pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T43/P/raw/select_p_{tag}.json").read_text())
     e = {"main": s.get("chosen"), "relaxed": s.get("chosen_relaxed"), "tradeoff": (s["tradeoff"].get("d_best_given_abc") or {})}.get(KIND) or None
     if not e:
         print(tag, "no placement", KIND); continue

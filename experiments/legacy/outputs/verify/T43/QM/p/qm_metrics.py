@@ -143,7 +143,7 @@ def iso(p):
 
 def tp_runs(field):
     o = {}
-    for f in sorted(glob.glob(f"${AG3S_PROJECT_ROOT}/outputs/impl/T43TP/timing/{field}/V8_V8_*.json")):
+    for f in sorted(glob.glob(f"{_ag3s_workspace_path()}/outputs/impl/T43TP/timing/{field}/V8_V8_*.json")):
         j = json.load(open(f)); st_, nm = j["key"].split("/")[1], j["key"].split("/")[2]
         ch = [c for c in j["chunks"] if c.get("variants")][1:]
         o[f"{st_}:{nm.split('_ep')[1]}"] = {v: [float(np.median(c["variants"][v]["wall_ms"])) for c in ch] for v in ARMS}
@@ -152,7 +152,7 @@ def tp_runs(field):
 
 
 TP = {"cuda": tp_runs("cuda"), "cpu": tp_runs("cpu")}
-TPAGG = {f: json.load(open(f"${AG3S_PROJECT_ROOT}/outputs/impl/T43TP/agg/timing_{f}.json")) for f in ("cuda", "cpu")}
+TPAGG = {f: json.load(open(f"{_ag3s_workspace_path()}/outputs/impl/T43TP/agg/timing_{f}.json")) for f in ("cuda", "cpu")}
 
 
 def runs_true(mask):

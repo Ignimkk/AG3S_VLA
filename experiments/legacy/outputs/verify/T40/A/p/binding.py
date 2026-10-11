@@ -69,4 +69,4 @@ if __name__ == "__main__":
         print(tag, {m: (r["n_blocking_not_in_crate"], r["n_t0_min_gt_mm"], r["smallest_item_counts"],
                         r["max_t0_clearance_candidate"] and round(1e3 * min(r["max_t0_clearance_candidate"]["t0_gjk_min_by_item_m"].values()), 1))
                     for m, r in res.items()}, flush=True)
-        json.dump(res, open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T40/A/raw/binding_{tag}.json", "w"), indent=1)
+        json.dump(res, open(f"{_ag3s_workspace_path()}/outputs/verify/T40/A/raw/binding_{tag}.json", "w"), indent=1)

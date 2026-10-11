@@ -18,7 +18,7 @@ for name, seq in cases:
     run = sd.run
     inp, why = run.inputs(seq)
     scene = sd.scene(inp)
-    npz = np.load(f"${AG3S_PROJECT_ROOT}/outputs/verify/T45/V/raw/cmp/{name}.cmp.npz")
+    npz = np.load(f"{_ag3s_workspace_path()}/outputs/verify/T45/V/raw/cmp/{name}.cmp.npz")
     own = npz[f"s{seq}_PC_own"]
     traj = run.layout.chunk_to_trajectory(own)[:, :V.K]
     cfg = run.base_cfg

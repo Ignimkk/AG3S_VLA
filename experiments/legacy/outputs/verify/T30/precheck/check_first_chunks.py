@@ -12,7 +12,7 @@ import AG3S.trajopt.experiments.fixed_input_ablation as T
 from AG3S.ag3s.robot_models.gripper_state import FingerJointMap
 
 COND, PORT, RUN, N = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])
-REC = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T30/{COND}_rec")
+REC = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T30/{COND}_rec")
 run_dir = REC / RUN
 from AG3S.trajopt.limits import build_limits
 from AG3S.trajopt.types import ChunkLayout
@@ -63,4 +63,4 @@ for k in range(N):
     lin.set_joint_parameter_path(None)
     print(json.dumps(out["chunks"][-1]))
 print(json.dumps(out["observations"]))
-pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T30/precheck/first_chunks_{COND}_{PORT}_{RUN}.json").write_text(json.dumps(out, indent=1, default=float))
+pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T30/precheck/first_chunks_{COND}_{PORT}_{RUN}.json").write_text(json.dumps(out, indent=1, default=float))

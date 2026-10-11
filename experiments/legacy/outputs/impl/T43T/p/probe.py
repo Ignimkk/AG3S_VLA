@@ -11,7 +11,7 @@ RUNS = {"T42_R1908": _ag3s_workspace_path('outputs/verify/T42/1/runs/E3b/noobs/E
 out = {}
 for key, seq in (("T42_R1908", 16), ("T42_R1908", 24), ("T42_L1992", 16), ("T42_L1992", 24)):
     rd = RUNS[key]; f = IX[rd]["chunks"][str(seq)]["npz"]
-    q = json.load(open(f"${AG3S_PROJECT_ROOT}/outputs/impl/T43T/qnow_{key[4:]}.json"))[str(seq)]
+    q = json.load(open(f"{_ag3s_workspace_path()}/outputs/impl/T43T/qnow_{key[4:]}.json"))[str(seq)]
     plan = [json.loads(l) for l in open(pathlib.Path(rd) / "frames.jsonl") if '"planning"' in l[:40]]
     poses = [p for p in plan if p["seq"] == seq][0]["object_poses"]
     man = json.load(open(pathlib.Path(rd) / "manifest.json"))["scene"]["episode_target_fruit"]

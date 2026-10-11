@@ -3,10 +3,11 @@ From the server records (server_<PORT>/server_constraints/run_*/chunk_*.npz, fir
   to.metrics keys continuity_active / continuity_reason / continuity_off_by present; exec_continuity.{source, off_by}; grasp.state
 From the local frames.jsonl of RUN (planning rows): the response 'to' block keys continuity_active / continuity_reason.
 From the server log serve_safe_<PORT>.log: every line containing 'continuity term' (gate OFF / back ON lines), with line number."""
+from common.workspace import workspace_path as _ag3s_workspace_path
 import json, sys, pathlib
 import numpy as np
 COND, PORT, RUN, N, OUTP = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), sys.argv[5]
-REC = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T37/{COND}_rec")
+REC = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T37/{COND}_rec")
 files = sorted((REC / f"server_{PORT}/server_constraints").glob("run_*/chunk_*.npz"))
 KEYS = ("continuity_active", "continuity_reason", "continuity_off_by")
 out = {"cond": COND, "port": PORT, "run": RUN, "n_chunk_files": len(files), "first_chunks": [], "all_chunks_keys_present": None,

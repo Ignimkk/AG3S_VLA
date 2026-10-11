@@ -60,7 +60,7 @@ def cloud_hits(rd, cfg, prof, segs):
 
 out = {"definitions": __doc__, "runs": {}, "offline_probe": {}}
 for ep in (1830, 983, 1215, 1834):
-    pr = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T42/2/raw/invis/probe_{ep}.json")
+    pr = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T42/2/raw/invis/probe_{ep}.json")
     if pr.exists():
         out["offline_probe"][ep] = json.loads(pr.read_text())
 segs = {c: A2.segments(R / c) for c in ("E3b",)}

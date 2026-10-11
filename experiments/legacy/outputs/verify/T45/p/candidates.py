@@ -26,7 +26,7 @@ def _palm_body_model(overflow_mm):
         surf = link_surface(sc.model, base, palm, spacing=0.001)
         h = hashlib.sha1(np.ascontiguousarray(surf.points).tobytes()).hexdigest()
         t0 = time.time()
-        fn = f"${AG3S_PROJECT_ROOT}/outputs/verify/T45/palm_body_o{overflow_mm:g}_{h[:12]}.npz"
+        fn = f"{_ag3s_workspace_path()}/outputs/verify/T45/palm_body_o{overflow_mm:g}_{h[:12]}.npz"
         if h not in cache:
             import os, pickle
             if os.path.exists(fn):

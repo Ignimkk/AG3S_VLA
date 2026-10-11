@@ -33,7 +33,7 @@ KEEP = ("tip_dz_mm", "tip_dxy_mm", "tip_spread_mm", "tilt_deg", "approach_yaw_de
 def policy_runs(ep):
     out = []
     for cond in ("E0", "E3b"):
-        for root in (f"${AG3S_PROJECT_ROOT}/outputs/verify/T42/1/runs/{cond}/noobs", f"${AG3S_PROJECT_ROOT}/outputs/verify/T39/runs/{cond}"):
+        for root in (f"{_ag3s_workspace_path()}/outputs/verify/T42/1/runs/{cond}/noobs", f"{_ag3s_workspace_path()}/outputs/verify/T39/runs/{cond}"):
             for d in sorted(glob.glob(f"{root}/{cond}_ep{ep}_s*")):
                 if os.path.isdir(d) and os.path.exists(d + ".done"):
                     out.append((cond, d))

@@ -1,7 +1,7 @@
 from common.workspace import workspace_path as _ag3s_workspace_path
 import json, sys
 d = json.load(open(_ag3s_workspace_path('outputs/verify/T44/CLA/diverge_C1a_C1b.json')))
-def L(name): return {r["seq"]: r for r in map(json.loads, open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T44/CLA/chunks/{name}.jsonl"))}
+def L(name): return {r["seq"]: r for r in map(json.loads, open(f"{_ag3s_workspace_path()}/outputs/verify/T44/CLA/chunks/{name}.jsonl"))}
 for k, r in d.items():
     A = L("C1a_" + k); B = L("C1b_" + k)
     print("==", k, r["failure_mode"], r["grasp_t"])

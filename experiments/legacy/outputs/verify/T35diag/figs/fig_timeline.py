@@ -25,7 +25,7 @@ C = F.CATEGORICAL
 for run in RUNS:
     cond = run.split("_")[0]
     r = A[f"{cond}_rec/{run}"]; st = ST[f"{cond}_rec/{run}"]
-    an = json.load(open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T34/p/{cond}_analysis.json"))["runs"][run]["chunks"]
+    an = json.load(open(f"{_ag3s_workspace_path()}/outputs/verify/T34/p/{cond}_analysis.json"))["runs"][run]["chunks"]
     tc = r["t_close"]; t0, t1 = tc - 40, tc + 70
     tl = [e for e in r["timeline"] if t0 <= e["t"] <= t1]
     t = np.array([e["t"] for e in tl])

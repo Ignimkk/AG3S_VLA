@@ -54,4 +54,4 @@ if x is not None:
            "overflow_sampled_mm": GC._sampled_overflow(Cs, Rs, surf.hulls, surf.points) * 1e3,
            "inner_x_mm": float((Cs[:, 0] - Rs).min() * 1e3)}
     print(json.dumps(out), flush=True)
-    json.dump(out, open(f"${AG3S_PROJECT_ROOT}/outputs/impl/T43FR/proto_ilp_{sys.argv[1]}_g{gp*1e3:g}_tl{int(tl)}.json", "w"), indent=1)
+    json.dump(out, open(f"{_ag3s_workspace_path()}/outputs/impl/T43FR/proto_ilp_{sys.argv[1]}_g{gp*1e3:g}_tl{int(tl)}.json", "w"), indent=1)

@@ -1,9 +1,10 @@
 """T33 precheck — first N chunk records of the first run (+ local observation rows) for the settings the task lists.
 usage: precheck_chunks.py COND PORT RUN N OUT.json"""
+from common.workspace import workspace_path as _ag3s_workspace_path
 import json, sys, pathlib
 import numpy as np
 COND, PORT, RUN, N, OUTP = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), sys.argv[5]
-REC = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T33/{COND}_rec")
+REC = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T33/{COND}_rec")
 rows = [json.loads(l) for l in (REC / RUN / "frames.jsonl").read_text().splitlines() if l.strip()]
 obs = [r for r in rows if r["kind"] == "observation"]
 out = {"run": RUN, "chunks": [], "observations": [{"t": o.get("t_step"), "stamp_mode": o.get("stamp_mode"), "camera_skew_sec": o.get("camera_skew_sec"),

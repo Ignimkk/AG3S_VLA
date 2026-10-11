@@ -12,7 +12,7 @@ for name, seq in cases:
     sd = V.Side(name, entry, ns, V.PC_ARGS); run = sd.run
     inp, _ = run.inputs(seq); scene = sd.scene(inp)
     z = inp["z"]
-    own = np.load(f"${AG3S_PROJECT_ROOT}/outputs/verify/T45/V/raw/cmp/{name}.cmp.npz")[f"s{seq}_PC_own"]
+    own = np.load(f"{_ag3s_workspace_path()}/outputs/verify/T45/V/raw/cmp/{name}.cmp.npz")[f"s{seq}_PC_own"]
     traj = run.layout.chunk_to_trajectory(own)[:, :V.K]
     lin = run.meter(V.K); lin.set_joint_parameter_path(run.finger_path(inp["summary"], inp["ref_chunk"], V.K))
     centres = lin.sphere_states(traj, inp["q_now"])[0]

@@ -66,7 +66,7 @@ for k, r in runs.items():
                             "T40_record_obstacle_rows_lt10mm_by_T41a_rule": (r.get("T40_TO_rows_classified_by_T41a_rule") or {}).get("chunks_with_obstacle_lt10mm"),
                             "divergence_vs_T40G": r.get("B_vs_T40G_bit_identity")}
 
-head = lambda repo: subprocess.run(["git", "-C", f"${AG3S_PROJECT_ROOT}/{repo}", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
+head = lambda repo: subprocess.run(["git", "-C", f"{_ag3s_workspace_path()}/{repo}", "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
 out = {
     "_comment": "ag3s-verifier. numbers and paths only; no interpretation.",
     "step": "T41a",

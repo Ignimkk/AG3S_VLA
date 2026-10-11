@@ -15,7 +15,7 @@ def hull_pts(V, n=4000, rng=np.random.default_rng(0)):
 out = []
 for rec in S:
     name, seq = rec["run"], rec["seq"]
-    rows = [json.loads(l) for l in open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T44/CL/runs/C1a/R/{name}/frames.jsonl") if l.strip()]
+    rows = [json.loads(l) for l in open(f"{_ag3s_workspace_path()}/outputs/verify/T44/CL/runs/C1a/R/{name}/frames.jsonl") if l.strip()]
     row = next(r for r in rows if r["kind"] == "planning" and int(r["seq"]) == seq)
     D.qpos[:] = np.asarray(row["qpos"], float); D.qvel[:] = 0; mujoco.mj_forward(M, D)
     q = np.asarray(rec["nearest_surface_pt"])

@@ -1,8 +1,9 @@
 """Build phase3.<COND> fragment: condition summary, per-run summary, compact per-chunk table, mp4 list."""
+from common.workspace import workspace_path as _ag3s_workspace_path
 import json, sys
 c = sys.argv[1]
-A = json.load(open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T28/p3/{c}_analysis.json"))
-S = json.load(open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T28/p3/{c}_summary.json"))
+A = json.load(open(f"{_ag3s_workspace_path()}/outputs/verify/T28/p3/{c}_analysis.json"))
+S = json.load(open(f"{_ag3s_workspace_path()}/outputs/verify/T28/p3/{c}_summary.json"))
 cols = ["t", "seq", "phase", "executed", "gate_kinds", "manip_id", "manip_state", "manip_nearest", "manip_to_apple_mm", "manip_narrowest_mm",
         "manip_admissible_reason", "dest_id", "exclusion_source", "ball_radius_mm", "ball_centre_nearest", "invariant_violation",
         "finger_model_left", "finger_measured_left", "worst_link", "worst_tier", "worst_obstacle_label", "worst_clearance_mm", "worst_nearest_body",
@@ -32,5 +33,5 @@ frag = {"scripts": ["outputs/verify/T28/p3/run_chain_e3.sh", "start_server_e3.sh
         "definitions": {"analyze": A["definitions"], "summarize": S["definitions"]},
         "condition_summary": S["condition_summary"], "runs": runs,
         "mp4": sorted(r["mp4"] for r in S["runs"].values())}
-json.dump(frag, open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T28/p3/frag_{c}.json", "w"), default=float)
+json.dump(frag, open(f"{_ag3s_workspace_path()}/outputs/verify/T28/p3/frag_{c}.json", "w"), default=float)
 print(c, "ok", len(runs))

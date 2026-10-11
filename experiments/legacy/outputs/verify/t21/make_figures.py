@@ -39,7 +39,7 @@ def scene():
     d, _ = load("t14")
     c = [x for x in d["chunks"] if x["chunk"] == 12][0]
     import AG3S.trajopt.experiments.fixed_input_ablation as T  # noqa: F401 (same env)
-    rec = np.load(f"${AG3S_PROJECT_ROOT}/outputs/live_test/20260928_t14/server_constraints/run_0000/chunk_00012.npz")
+    rec = np.load(f"{_ag3s_workspace_path()}/outputs/live_test/20260928_t14/server_constraints/run_0000/chunk_00012.npz")
     cloud = rec["filtered_cloud"].astype(float)
     hand = np.asarray(c["hand_centres_m"])
     radii = np.asarray(c["hand_radii_m"])

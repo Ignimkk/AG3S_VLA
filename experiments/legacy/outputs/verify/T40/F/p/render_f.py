@@ -27,7 +27,7 @@ def add_path(scn, P, col, w=0.004):
 
 
 for tag in sys.argv[1:]:
-    s = json.loads((F.RAW if hasattr(F, "RAW") else pathlib.Path(_ag3s_workspace_path('outputs/verify/T40/F/raw'))).joinpath(f"select_{tag}.json").read_text()) if False else json.loads(pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T40/F/raw/{SEL}_{tag}.json").read_text())
+    s = json.loads((F.RAW if hasattr(F, "RAW") else pathlib.Path(_ag3s_workspace_path('outputs/verify/T40/F/raw'))).joinpath(f"select_{tag}.json").read_text()) if False else json.loads(pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T40/F/raw/{SEL}_{tag}.json").read_text())
     if not s.get("chosen"):
         continue
     e = s["chosen"]; c = F.Ctx(tag)

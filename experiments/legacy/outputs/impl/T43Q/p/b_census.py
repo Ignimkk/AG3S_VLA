@@ -23,4 +23,4 @@ for seq in seqs:
                dev_on_deg=round(float(np.degrees(np.abs(on['trajectory'] - ref).max())), 2),
                max_sweep_mm=p['max_sweep_mm'], pieces=sum(p['pieces_per_step']), ms_off=round(off['result'].solve_time_ms), ms_on=round(on['result'].solve_time_ms))
     rows.append(row); print(row, flush=True)
-json.dump(rows, open(f'${AG3S_PROJECT_ROOT}/outputs/impl/T43Q/census_{name}_{sys.argv[2]}_{sys.argv[3]}.json', 'w'), indent=1)
+json.dump(rows, open(f'{_ag3s_workspace_path()}/outputs/impl/T43Q/census_{name}_{sys.argv[2]}_{sys.argv[3]}.json', 'w'), indent=1)

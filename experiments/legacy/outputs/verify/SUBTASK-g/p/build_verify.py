@@ -30,7 +30,7 @@ out = {
  "_comment": "ag3s-verifier. numbers and paths only; no interpretation.",
  "step": "SUBTASK-g", "date": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
  "runs": [
-  {"id": "baseline", "command": f"{R}/baseline/run_baseline.sh (cwd ${AG3S_PROJECT_ROOT}-sg, PYTHONPATH=${AG3S_PROJECT_ROOT}-sg, .venv-openpi-live, XLA_PYTHON_CLIENT_PREALLOCATE=false, esdf_rollout --records ${AG3S_PROJECT_ROOT}/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms [--esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005]); legacy then cuRobo, serial, alone on the GPU",
+  {"id": "baseline", "command": f"{R}/baseline/run_baseline.sh (cwd {_ag3s_workspace_path()}-sg, PYTHONPATH={_ag3s_workspace_path()}-sg, .venv-openpi-live, XLA_PYTHON_CLIENT_PREALLOCATE=false, esdf_rollout --records {_ag3s_workspace_path()}/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms [--esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005]); legacy then cuRobo, serial, alone on the GPU",
    "venv": ".venv-openpi-live (.venv-ag3s not used)", "raw_output": [f"{R}/baseline/legacy.json", f"{R}/baseline/curobo.json"],
    "stdout_log": [f"{R}/baseline/legacy.log", f"{R}/baseline/curobo.log"], "judge": f"{R}/baseline/judge.json",
    "leafdiff_vs_SUBTASK_f": f"{R}/baseline/leafdiff_vs_sf.json", "concurrent_processes_at_start": f"{R}/baseline/concurrent_at_start.txt",
@@ -43,7 +43,7 @@ out = {
    "chain_log": f"{R}/runs/E3bN/chain_8231.log"},
   {"id": "compare", "command": f"{R}/p/compare_all.sh (p/compare_v0.py, CPU) then p/summarize.py {R}/analysis/summary.json",
    "raw_output": [f"{R}/compare/", f"{R}/analysis/summary.json"], "stdout_log": [f"{R}/compare/compare_all.out", f"{R}/analysis/summary.log"]},
-  {"id": "flag_matrix", "command": f"cwd ${AG3S_PROJECT_ROOT}-sg, PYTHONPATH=${AG3S_PROJECT_ROOT}-sg, JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES=: .venv-openpi-live/bin/python {R}/flags/flag_matrix.py {R}/flags/flag_matrix.json",
+  {"id": "flag_matrix", "command": f"cwd {_ag3s_workspace_path()}-sg, PYTHONPATH={_ag3s_workspace_path()}-sg, JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES=: .venv-openpi-live/bin/python {R}/flags/flag_matrix.py {R}/flags/flag_matrix.json",
    "raw_output": f"{R}/flags/flag_matrix.json", "stdout_log": f"{R}/flags/flag_matrix.log"},
   {"id": "pytest_gate_files", "command": "cwd ${AG3S_PROJECT_ROOT}: JAX_PLATFORMS=cpu XLA_PYTHON_CLIENT_PREALLOCATE=false CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=${AG3S_PROJECT_ROOT} third_party/openpi/.venv/bin/python -m pytest tests/trajopt/test_subtask_gate_default.py tests/ag3s/test_subtask_gate.py tests/trajopt/test_subtask_wiring.py tests/trajopt/test_subtask_no_target.py tests/trajopt/test_subtask_no_admissible_home.py -q -p no:cacheprovider",
    "venv": "third_party/openpi/.venv (CPU)", "stdout_log": f"{R}/pytest/pytest.log"},

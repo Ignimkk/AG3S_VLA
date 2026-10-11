@@ -5,7 +5,7 @@ import json, numpy as np
 out = {"definitions": __doc__}
 old = json.load(open(_ag3s_workspace_path('outputs/verify/T28/P1-3/p13b_selffilter_summary.json')))
 for run in ("t14", "t17"):
-    R = [json.loads(l) for l in open(f"${AG3S_PROJECT_ROOT}/outputs/verify/T28/p3/off_0e_raw_{run}.jsonl")]
+    R = [json.loads(l) for l in open(f"{_ag3s_workspace_path()}/outputs/verify/T28/p3/off_0e_raw_{run}.jsonl")]
     seqs = sorted({r["seq"] for r in R})
     dz = {r["seq"]: r["apple_dz_mm"] for r in R}
     g = next((s for s in seqs if dz[s] >= 50), None)

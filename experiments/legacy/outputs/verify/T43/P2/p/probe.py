@@ -8,7 +8,7 @@ out = {}
 for tag in F.TAGS:
     c = F.Ctx(tag); m, d = c.m, c.d; c.restore()
     r = {"arm": c.arm, "target": c.episode.get("target_fruit")}
-    old = F.pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/T43/P/raw/capture/{tag}_reset.npz")
+    old = F.pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/T43/P/raw/capture/{tag}_reset.npz")
     if old.exists():
         z = np.load(old); r["reset_qpos_maxabs_vs_T43P"] = float(np.abs(z["qpos"] - c.q_reset).max())
     bc = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, "crate")

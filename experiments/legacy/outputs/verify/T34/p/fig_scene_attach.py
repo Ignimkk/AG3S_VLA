@@ -37,7 +37,7 @@ def world_to_base(pw):
 
 
 def load(tag, cond, run, t):
-    V = pathlib.Path(f"${AG3S_PROJECT_ROOT}/outputs/verify/{tag}")
+    V = pathlib.Path(f"{_ag3s_workspace_path()}/outputs/verify/{tag}")
     A = json.loads((V / "p" / f"{cond}_analysis.json").read_text())["runs"][run]
     rows = {int(x["seq"]): x for x in (json.loads(l) for l in (V / f"{cond}_rec" / run / "frames.jsonl").read_text().splitlines() if l.strip())
             if x.get("kind") == "planning"}
