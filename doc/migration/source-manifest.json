@@ -28,33 +28,34 @@
   "dependencies": {
     "benchmark/LIBERO": {
       "commit": "f78abd68ee283de9f9be3c8f7e2a9ad60246e95c",
-      "url": "https://github.com/Lifelong-Robot-Learning/LIBERO.git",
-      "local": "/mnt/dev/work/pi05_TO_hybrid/openpi/third_party/libero"
+      "url": "https://github.com/Lifelong-Robot-Learning/LIBERO.git"
     },
     "third_party/aloha": {
       "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
-      "url": "https://github.com/Physical-Intelligence/aloha.git",
-      "local": "/mnt/dev/work/pi05_TO_hybrid/openpi/third_party/aloha"
+      "url": "https://github.com/Physical-Intelligence/aloha.git"
     },
     "third_party/curobo": {
       "commit": "78fd485fa82d9b9a063fb4985e371814587e666a",
-      "url": "https://github.com/NVlabs/curobo.git",
-      "local": "/mnt/dev/work/curobo_src"
+      "url": "https://github.com/NVlabs/curobo.git"
     },
     "benchmark/SafeLIBERO": {
       "commit": "2457feed5968ae803926e178c8ce8243b9ecdcf9",
-      "url": "https://github.com/THU-RCSCT/vlsa-aegis.git",
-      "local": "/tmp/ag3s-upstreams/SafeLIBERO"
+      "url": "https://github.com/THU-RCSCT/vlsa-aegis.git"
     },
     "benchmark/LIBERO-Safety": {
       "commit": "19ec8df23eedfbb9265bafd3e56495fcebfcfcd0",
-      "url": "https://github.com/LIBERO-SAFETY/LIBERO-Safety.git",
-      "local": "/tmp/ag3s-upstreams/LIBERO-Safety"
+      "url": "https://github.com/LIBERO-SAFETY/LIBERO-Safety.git"
     }
   },
   "backup_scope": "All Git metadata and tracked files; all nonignored untracked files; ignored source/docs/launchers. Large datasets, checkpoints, cache, recordings and virtual environments remain untouched at original paths and are not duplicated.",
   "original_working_trees_preserved": true,
   "workspace_v2_selection": "last first-parent workspace commit before benchmark/v2 committer time; no workspace v2 tag exists",
   "v11ab_launchers": "legacy untracked outputs/verify/T43/V11/p scripts; no rollout result claimed",
-  "external_artifact_manifest": "experiments/manifests/legacy-artifacts.json"
+  "external_artifact_manifest": "experiments/manifests/legacy-artifacts.json",
+  "historical_test_helpers": {
+    "path": "scripts/testing/t43t",
+    "source": "original untracked T43T/T43R2 helpers captured before migration",
+    "policy": "original numerical helper code; only imports and input/model paths migrated"
+  },
+  "python_package_policy": "editable development checkout; dependencies pinned separately; metadata version is not AG3S release"
 }
