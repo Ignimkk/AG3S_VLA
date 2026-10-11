@@ -24,7 +24,7 @@ import pathlib
 import numpy as np
 import pytest
 
-V = pathlib.Path(_ag3s_workspace_path('experiments/legacy/outputs/verify/T33'))
+V = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T33'))
 PORT = {"E3a": 8204, "E3b": 8206}
 MODEL = pathlib.Path(
     _ag3s_workspace_path('robots/rby1/description/models/rby1a/mujoco/model_transport.xml'))

@@ -49,7 +49,7 @@ HYBRID = pathlib.Path(_ag3s_workspace_path('legacy/pi05_TO_hybrid'))
 MJCF = HYBRID / "rby1_description" / "models" / "rby1a" / "mujoco"
 TRANSPORT_OBSTACLE_XML = MJCF / "model_transport_pick_place_obstacles.xml"
 PI05_INFER = HYBRID / "rby1_bringup" / "pi05_infer.py"
-T40 = pathlib.Path(_ag3s_workspace_path('experiments/legacy/outputs/verify/T40'))
+T40 = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T40'))
 STOP_STATES = pathlib.Path(__file__).parent / "data" / "t40h_stop_states.json"
 CAP = 0.25
 TOL = 1e-4  # T40 H requirement: client distance = GJK within 0.1 mm

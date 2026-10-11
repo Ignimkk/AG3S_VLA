@@ -36,7 +36,7 @@ import pytest
 from AG3S.ag3s.robot_models.held_object import held_spheres_of
 from AG3S.ag3s.types import SupportSurface
 
-V = pathlib.Path(_ag3s_workspace_path('experiments/legacy/outputs/verify'))
+V = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify'))
 S_RAW = V / "T43/S/raw"
 VERIFY = pathlib.Path(_ag3s_workspace_path('AG3S/ag3s/docs/handoff/T43S.verify.json'))
 _have = (S_RAW / "chunk_index_t40t41.json").exists() and (S_RAW / "held_runs_all.json").exists() \

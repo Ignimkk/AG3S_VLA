@@ -26,7 +26,7 @@ from typing import Optional
 
 import numpy as np
 
-W = pathlib.Path(_ag3s_workspace_path('experiments/legacy/outputs/verify/T43/W'))
+W = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T43/W'))
 ANALYSIS = W / "analysis/analysis.json"
 Y_METRICS = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T43/Y/raw/y_metrics.json'))
 

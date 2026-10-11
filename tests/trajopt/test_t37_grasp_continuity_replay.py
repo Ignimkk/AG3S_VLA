@@ -25,7 +25,7 @@ import pathlib
 import numpy as np
 import pytest
 
-V = pathlib.Path(_ag3s_workspace_path('experiments/legacy/outputs/verify/T34'))
+V = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T34'))
 REC = V / "E3b_rec"
 CH = REC / "server_8206/server_constraints/run_0000"
 MODEL = pathlib.Path(

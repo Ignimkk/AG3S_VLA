@@ -22,7 +22,7 @@ import pathlib
 import numpy as np
 import pytest
 
-T28 = pathlib.Path(_ag3s_workspace_path('experiments/legacy/outputs/verify/T28'))
+T28 = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T28'))
 ANALYSIS = T28 / "p3/E3a_analysis.json"
 T14 = pathlib.Path(_ag3s_workspace_path('legacy/outputs/live_test/20260928_t14'))
 MODEL = pathlib.Path(
