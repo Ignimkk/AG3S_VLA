@@ -1,0 +1,24 @@
+{
+ "schema_version": 1,
+ "purpose": "Panda/LIBERO benchmark inputs added after migration (new inputs; not legacy aliases)",
+ "inputs": [
+  {
+   "name": "pi05_libero",
+   "storage_relative_path": "checkpoints/panda/pi05_libero",
+   "source": "gs://openpi-assets/checkpoints/pi05_libero/",
+   "fetched_utc": "2026-10-11T19:21:40.173397+00:00",
+   "fetch_script": "scripts/setup/fetch_pi05_libero.py",
+   "openpi_config": "pi05_libero",
+   "files": 16,
+   "total_bytes": 12439085481,
+   "aggregate_sha256": "1cb098d84bde409fb4b3931ed676195b80b0755c6ee60177e3d6c96508f1d891",
+   "aggregate_rule": "sha256 of concatenated '<sha256>  <path>\\n' lines, records sorted by path (rule text corrected 2026-10-12; value unchanged)",
+   "norm_stats": {
+    "path": "assets/physical-intelligence/libero/norm_stats.json",
+    "sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84"
+   },
+   "per_file_checksums": "<storage>/checkpoints/panda/pi05_libero/CHECKSUMS.json",
+   "mode": "read-only (0444/0555)"
+  }
+ ]
+}
