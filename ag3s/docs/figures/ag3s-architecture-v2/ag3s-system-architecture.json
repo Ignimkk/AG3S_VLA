@@ -1,0 +1,178 @@
+{
+  "figure": "ag3s-system-architecture.png",
+  "generator": "make_ag3s_system_architecture.py",
+  "slide": {
+    "size_in": [
+      13.333,
+      7.5
+    ],
+    "aspect": "16:9",
+    "font_pt": {
+      "section": 14,
+      "title": 11.5,
+      "body": 10,
+      "label": 9.5,
+      "note": 7.5,
+      "caption": 6.5,
+      "tick": 5.5
+    }
+  },
+  "numbers": {
+    "euler_steps": {
+      "value": 10,
+      "src": "benchmark/trajopt/attention_policy.py:55 (num_denoise_steps=10)"
+    },
+    "attention_cell": {
+      "value": {
+        "denoise_step": 0,
+        "layer": 8,
+        "head": 2,
+        "agg": "last"
+      },
+      "src": "benchmark/trajopt/attention_policy.py:30-33"
+    },
+    "attention_grid": {
+      "value": [
+        16,
+        16
+      ],
+      "src": "benchmark/trajopt/attention_policy.py:51"
+    },
+    "action_horizon": {
+      "value": 50,
+      "src": "benchmark/trajopt/config.py:40 / openpi pi0_config.py:26"
+    },
+    "action_dim_robot": {
+      "value": 16,
+      "src": "16D policy pi05_rby1_randomized_pick_place_16d_lora"
+    },
+    "gripper_columns": {
+      "value": [
+        7,
+        15
+      ],
+      "src": "benchmark/trajopt/safe_policy.py:666"
+    },
+    "execution_length_K": {
+      "value": 8,
+      "src": "benchmark/trajopt/config.py:41"
+    },
+    "control_hz": {
+      "value": 15.0,
+      "src": "benchmark/trajopt/config.py:42"
+    },
+    "chunk_period_ms": {
+      "value": 533.3,
+      "src": "outputs/live_test/20260928_t16/execute_ep1807/manifest.json timing"
+    },
+    "sqp_max_iterations": {
+      "value": 3,
+      "src": "benchmark/trajopt/config.py:315"
+    },
+    "cost_weights": {
+      "value": {
+        "w_track": 1.0,
+        "w_smooth": 0.05,
+        "w_continuity": 0.5,
+        "w_slack": 1000.0
+      },
+      "src": "benchmark/trajopt/config.py:146-157"
+    },
+    "seed_percentile": {
+      "value": 95.0,
+      "src": "benchmark/ag3s/config.py:45"
+    },
+    "w_attention/w_geometry": {
+      "value": [
+        0.7,
+        0.3
+      ],
+      "src": "benchmark/ag3s/config.py:169-170"
+    },
+    "target_confirm_frames": {
+      "value": 3,
+      "src": "benchmark/ag3s/config.py:113"
+    },
+    "esdf_coarse_voxel_m": {
+      "value": 0.02,
+      "src": "benchmark/trajopt/serve_safe.py:889 (--voxel)"
+    },
+    "esdf_fine_voxel_m": {
+      "value": 0.005,
+      "src": "benchmark/trajopt/serve_safe.py:1040 (--fine-voxel)"
+    },
+    "tsdf_voxel_m": {
+      "value": 0.005,
+      "src": "benchmark/trajopt/serve_safe.py:1042 (--tsdf-voxel)"
+    },
+    "esdf_grid": {
+      "value": 128,
+      "src": "chunk summary_json esdf_layers"
+    },
+    "esdf_margin_m": {
+      "value": 0.05,
+      "src": "benchmark/trajopt/serve_safe.py:903 (--esdf-margin)"
+    },
+    "destination_margin_m": {
+      "value": 0.02,
+      "src": "benchmark/ag3s/config.py:897"
+    },
+    "depth_hw": {
+      "value": [
+        480,
+        640
+      ],
+      "src": "run meta.json depth_hw"
+    },
+    "cameras_policy": {
+      "value": [
+        "cam_high",
+        "cam_left_wrist",
+        "cam_right_wrist"
+      ],
+      "src": "benchmark/trajopt/serve_safe.py:838-840"
+    },
+    "cameras_mujoco": {
+      "value": [
+        "zed_left",
+        "wrist_cam_l",
+        "wrist_cam_r"
+      ],
+      "src": "benchmark/trajopt/serve_safe.py:838-840"
+    },
+    "prompt_ep1807": {
+      "value": "Pick up the apple and place it in the basket.",
+      "src": "outputs/live_test/20260925_ep1807/run_0000/meta.json"
+    }
+  },
+  "thumbnails": {
+    "scene": {
+      "episode": 1807,
+      "policy_call": 1,
+      "rgb_record": "outputs/live_test/20260925_ep1807/run_0000/step_00000.npz",
+      "server_chunk": "outputs/live_test/20260928_t17/server_constraints/run_0000/chunk_00000.npz"
+    },
+    "target_centroid_m": [
+      0.5612,
+      0.3184,
+      0.8674
+    ],
+    "target_n_points": 111,
+    "esdf_slice": {
+      "z_m": 0.8674343799115299,
+      "k_index": 63,
+      "voxel_m": 0.005,
+      "fine_occupied_voxels_in_slice": 1079,
+      "target_free_occupied_voxels_in_slice": 941
+    },
+    "sphere_clearance_min_mm": 64.13812935352325,
+    "n_spheres": 122,
+    "to": {
+      "status": "feasible",
+      "sqp_iterations": 1,
+      "solve_ms": 105.30567215755582,
+      "time_budget_hit": true
+    },
+    "refined_minus_reference_left_arm_max_abs_mrad": 2.84382700920105
+  }
+}

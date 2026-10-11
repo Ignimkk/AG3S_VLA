@@ -1,0 +1,162 @@
+{
+  "rm-scene-16d": {
+    "src": "benchmark/ag3s/docs/figures/live-test/i1-venv-field.png",
+    "crop": [
+      [
+        0,
+        0.055,
+        1,
+        0.505
+      ]
+    ],
+    "size": [
+      2408,
+      920
+    ]
+  },
+  "tg-pregrasp": {
+    "src": "benchmark/ag3s/docs/figures/t30/t30-scene-pregrasp-E3b-E3b_ep1807_r1.png",
+    "crop": [
+      [
+        0.02,
+        0.125,
+        0.335,
+        0.99
+      ],
+      [
+        0.7,
+        0.235,
+        0.995,
+        0.815
+      ]
+    ],
+    "size": [
+      1651,
+      675
+    ]
+  },
+  "esdf-voxels3d": {
+    "src": "benchmark/ag3s/docs/figures/t31/t31-d4-voxels3d-E3b_ep1807_r1-t240.png",
+    "crop": [
+      [
+        0,
+        0.08,
+        1,
+        1
+      ]
+    ],
+    "size": [
+      1471,
+      726
+    ]
+  },
+  "trajopt-solve": {
+    "src": "benchmark/ag3s/docs/figures/to-design-solve.png",
+    "crop": [
+      [
+        0,
+        0.065,
+        1,
+        1
+      ]
+    ],
+    "size": [
+      2278,
+      684
+    ]
+  },
+  "future-oscillation": {
+    "src": "benchmark/ag3s/docs/figures/t31/t31-d1-oscillation-timeline.png",
+    "crop": [
+      [
+        0,
+        0.05,
+        1,
+        0.2
+      ],
+      [
+        0,
+        0.365,
+        1,
+        0.523
+      ]
+    ],
+    "size": [
+      1760,
+      626
+    ]
+  },
+  "ap-attention-16d": {
+    "n_points_drawn": 6426,
+    "n_points_total": 34853,
+    "attention_raw_max": {
+      "attention_head": 0.00096893310546875,
+      "attention_left_wrist": 0.37890625,
+      "attention_right_wrist": 3.1948089599609375e-05
+    }
+  },
+  "tg-grounding-16d": {
+    "n_seeds": 151,
+    "n_target_points": 111,
+    "n_support_points": 31130,
+    "target_centroid_m": [
+      0.5612,
+      0.3184,
+      0.8674
+    ]
+  },
+  "adapter-16d": {
+    "slice_y_m": 0.3183723095108755,
+    "n_spheres": 122,
+    "n_spheres_in_slice": 15,
+    "esdf_margin_m": 0.01,
+    "margin_source": "outputs/live_test/20260928_t17/serve_safe.log",
+    "clearance_min_mm": 64.34699892997742,
+    "sphere_radius_mm": [
+      3.602361073717475,
+      8.91753751784563
+    ]
+  },
+  "esdf-tiers-16d": {
+    "target_centroid_m": [
+      0.5612,
+      0.3184,
+      0.8674
+    ],
+    "esdf_coarse_distance": {
+      "voxel_m": 0.02,
+      "k_index": 67,
+      "occupied_voxels_in_slice": 156
+    },
+    "esdf_distance": {
+      "voxel_m": 0.005,
+      "k_index": 63,
+      "occupied_voxels_in_slice": 1079
+    },
+    "esdf_free_distance": {
+      "voxel_m": 0.005,
+      "k_index": 63,
+      "occupied_voxels_in_slice": 941
+    }
+  },
+  "esdf-anim-ep1807": {
+    "src": "benchmark/ag3s/docs/figures/t31/t31-d4-anim-E3b_ep1807_r1.mp4",
+    "masked": [
+      "drawbox=x=0:y=0:w=iw:h=32:color=0xFCFCFB:t=fill",
+      "drawbox=x=950:y=80:w=490:h=22:color=0xFCFCFB:t=fill"
+    ]
+  },
+  "_scene": {
+    "rgb": "outputs/live_test/20260925_ep1807/run_0000/step_00000.npz",
+    "chunk": "outputs/live_test/20260928_t17/server_constraints/run_0000/chunk_00000.npz"
+  },
+  "rm-scene-ep1807": {
+    "src": "benchmark/ag3s/docs/figures/ppt-0930/rm-onoff-16d.png",
+    "crop": [
+      0.008,
+      0.105,
+      0.63,
+      0.468
+    ]
+  }
+}

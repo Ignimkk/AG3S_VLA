@@ -1,0 +1,194 @@
+{
+  "rm-scene": {
+    "src": "benchmark/ag3s/docs/archive/14d-era-20260923/figures/ppt/ppt-rm-01-scene.png",
+    "crop": [
+      0,
+      0.05,
+      1,
+      0.86
+    ],
+    "masked": [],
+    "size": [
+      2080,
+      631
+    ]
+  },
+  "rm-onoff": {
+    "src": "benchmark/ag3s/docs/archive/14d-era-20260923/figures/ppt/ppt-rm-04-beforeafter.png",
+    "crop": [
+      0,
+      0,
+      1,
+      1
+    ],
+    "masked": [
+      [
+        0.6,
+        0.872,
+        0.905,
+        0.9
+      ]
+    ],
+    "size": [
+      2080,
+      1170
+    ]
+  },
+  "ap-attention": {
+    "src": "benchmark/ag3s/docs/archive/14d-era-20260923/figures/ppt/ppt-ap-01-attention.png",
+    "crop": [
+      0,
+      0.17,
+      1,
+      0.94
+    ],
+    "masked": [],
+    "size": [
+      2080,
+      841
+    ]
+  },
+  "tg-method": {
+    "src": "benchmark/ag3s/docs/archive/14d-era-20260923/figures/ppt/ppt-tg-01-method.png",
+    "crop": [
+      0,
+      0.085,
+      1,
+      1
+    ],
+    "masked": [],
+    "size": [
+      2080,
+      1023
+    ]
+  },
+  "esdf-role": {
+    "src": "benchmark/ag3s/docs/archive/14d-era-20260923/figures/doc-curobo-role.png",
+    "crop": [
+      0,
+      0.035,
+      1,
+      0.47
+    ],
+    "masked": [],
+    "size": [
+      1987,
+      587
+    ]
+  },
+  "adapter-top": {
+    "src": "benchmark/ag3s/docs/archive/14d-era-20260923/figures/doc-stage-field-adapter.png",
+    "crop": [
+      0,
+      0.04,
+      1,
+      0.47
+    ],
+    "masked": [],
+    "size": [
+      1956,
+      575
+    ]
+  },
+  "x-selffilter": {
+    "src": "benchmark/ag3s/docs/figures/t14/t14-selffilter-erases-target.png",
+    "crop": [
+      0,
+      0.2,
+      0.745,
+      0.87
+    ],
+    "masked": [],
+    "size": [
+      1925,
+      523
+    ]
+  },
+  "x-target-drift": {
+    "src": "benchmark/ag3s/docs/figures/t5d/t5d-topcluster-band-and-score.png",
+    "crop": [
+      0.08,
+      0.086,
+      1,
+      0.527
+    ],
+    "masked": [],
+    "size": [
+      2221,
+      870
+    ]
+  },
+  "x-eikonal": {
+    "src": "benchmark/ag3s/docs/archive/14d-era-20260923/figures/doc-curobo-role.png",
+    "crop": [
+      0.337,
+      0.52,
+      0.63,
+      0.995
+    ],
+    "masked": [],
+    "size": [
+      582,
+      642
+    ]
+  },
+  "x-two-tier": {
+    "src": "benchmark/ag3s/docs/archive/14d-era-20260923/figures/curobo-ground-truth.png",
+    "crop": [
+      0.37,
+      0.06,
+      1,
+      0.52
+    ],
+    "masked": [],
+    "size": [
+      1280,
+      503
+    ]
+  },
+  "x-dest-margin": {
+    "src": "benchmark/ag3s/docs/archive/14d-era-20260923/figures/destination-margin.png",
+    "crop": [
+      0,
+      0,
+      0.335,
+      1
+    ],
+    "masked": [],
+    "size": [
+      879,
+      824
+    ]
+  },
+  "x-hold-vs-shadow": {
+    "src": "benchmark/ag3s/docs/figures/t14/t16-t17-hold-vs-shadow.png",
+    "crop": [
+      0,
+      0.065,
+      1,
+      0.62
+    ],
+    "masked": [],
+    "size": [
+      2160,
+      916
+    ]
+  },
+  "esdf-target-free": {
+    "src": "outputs/live_test/20260928_t17/server_constraints/run_0000/chunk_00000.npz",
+    "target_centroid_m": [
+      0.5612,
+      0.3184,
+      0.8674
+    ],
+    "voxel_m": 0.005,
+    "esdf_distance": {
+      "k_index": 63,
+      "occupied_voxels_in_slice": 1079
+    },
+    "esdf_free_distance": {
+      "k_index": 63,
+      "occupied_voxels_in_slice": 941
+    }
+  }
+}

@@ -1,0 +1,137 @@
+[
+ {
+  "episode": "ep1807",
+  "frame": 8,
+  "t_step": 64,
+  "camera": "cam_high",
+  "target": "apple",
+  "target_px_640x480": 413.0,
+  "kept": true,
+  "argmax_rc": [
+   9,
+   5
+  ],
+  "target_cov_at_argmax": 0.24990521371364594,
+  "peak_hit": true
+ },
+ {
+  "episode": "ep1807",
+  "frame": 8,
+  "t_step": 64,
+  "camera": "cam_left_wrist",
+  "target": "apple",
+  "target_px_640x480": 3392.0,
+  "kept": true,
+  "argmax_rc": [
+   13,
+   7
+  ],
+  "target_cov_at_argmax": 0.637349545955658,
+  "peak_hit": true
+ },
+ {
+  "episode": "ep1807",
+  "frame": 8,
+  "t_step": 64,
+  "camera": "cam_right_wrist",
+  "target": "apple",
+  "target_px_640x480": 0.0,
+  "kept": false,
+  "argmax_rc": [
+   15,
+   9
+  ],
+  "target_cov_at_argmax": 0.0,
+  "peak_hit": false
+ },
+ {
+  "episode": "ep1850",
+  "frame": 5,
+  "t_step": 40,
+  "camera": "cam_high",
+  "target": "banana",
+  "target_px_640x480": 243.0,
+  "kept": true,
+  "argmax_rc": [
+   9,
+   5
+  ],
+  "target_cov_at_argmax": 0.09992867708206177,
+  "peak_hit": true
+ },
+ {
+  "episode": "ep1850",
+  "frame": 5,
+  "t_step": 40,
+  "camera": "cam_left_wrist",
+  "target": "banana",
+  "target_px_640x480": 2018.0,
+  "kept": true,
+  "argmax_rc": [
+   13,
+   7
+  ],
+  "target_cov_at_argmax": 0.010183645412325859,
+  "peak_hit": false
+ },
+ {
+  "episode": "ep1850",
+  "frame": 5,
+  "t_step": 40,
+  "camera": "cam_right_wrist",
+  "target": "banana",
+  "target_px_640x480": 0.0,
+  "kept": false,
+  "argmax_rc": [
+   12,
+   1
+  ],
+  "target_cov_at_argmax": 0.0,
+  "peak_hit": false
+ },
+ {
+  "episode": "ep1900",
+  "frame": 9,
+  "t_step": 72,
+  "camera": "cam_high",
+  "target": "pear",
+  "target_px_640x480": 478.0,
+  "kept": true,
+  "argmax_rc": [
+   10,
+   5
+  ],
+  "target_cov_at_argmax": 0.33309707045555115,
+  "peak_hit": true
+ },
+ {
+  "episode": "ep1900",
+  "frame": 9,
+  "t_step": 72,
+  "camera": "cam_left_wrist",
+  "target": "pear",
+  "target_px_640x480": 3893.0,
+  "kept": true,
+  "argmax_rc": [
+   13,
+   7
+  ],
+  "target_cov_at_argmax": 0.12687267363071442,
+  "peak_hit": true
+ },
+ {
+  "episode": "ep1900",
+  "frame": 9,
+  "t_step": 72,
+  "camera": "cam_right_wrist",
+  "target": "pear",
+  "target_px_640x480": 0.0,
+  "kept": false,
+  "argmax_rc": [
+   12,
+   1
+  ],
+  "target_cov_at_argmax": 0.0,
+  "peak_hit": false
+ }
+]
