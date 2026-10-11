@@ -172,7 +172,8 @@ def test_recorded_c1a_command_line_is_off_and_appending_the_flag_turns_it_on():
     from AG3S.trajopt import serve_safe
 
     line = [ln for ln in proc.read_text().splitlines() if "serve_safe" in ln][0]
-    argv = line.split("AG3S.trajopt.serve_safe", 1)[1].split()
+    module = "AG3S.trajopt.serve_safe" if "AG3S.trajopt.serve_safe" in line else "benchmark.trajopt.serve_safe"
+    argv = line.split(module, 1)[1].split()
     p = serve_safe.build_parser()
     assert serve_safe.palm_cover_options(p.parse_args(argv)) is None
     assert serve_safe.palm_cover_options(p.parse_args(argv + ["--palm-cover", "on"])) == \
