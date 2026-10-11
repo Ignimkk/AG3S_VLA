@@ -1087,12 +1087,6 @@
   },
   {
     "source": "workspace",
-    "original": "paper/tools/bin/tectonic",
-    "target": "paper/tools/bin/tectonic",
-    "sha256": "a98aa59ad5c1df39a6c9e56cbfc5088f2b11d6c179c0130b97998e4bd46a46da"
-  },
-  {
-    "source": "workspace",
     "original": "paper/tools/latex/build.py",
     "target": "paper/tools/latex/build.py",
     "sha256": "d3da7bc7fe0b77fb683a1ffeabf46f95c692ad120393fd4325e2cf6337365870"
@@ -2092,48 +2086,6 @@
     "original": "ag3s/__init__.py",
     "target": "AG3S/ag3s/__init__.py",
     "sha256": "21ea963843078c60244b6386217d295ca47785c58870cf0819fa9b82eafba7be"
-  },
-  {
-    "source": "benchmark",
-    "original": "ag3s/asset/data/attention_16d_ep1800.npz",
-    "target": "AG3S/ag3s/asset/data/attention_16d_ep1800.npz",
-    "sha256": "0b7a9b8a4c456bc65ffe4d05cb86bfdde56483c8867fe8ef35fbe89a9709e73b"
-  },
-  {
-    "source": "benchmark",
-    "original": "ag3s/asset/data/attention_16d_ep1807.npz",
-    "target": "AG3S/ag3s/asset/data/attention_16d_ep1807.npz",
-    "sha256": "8f145ae930c4b6237a555730c407aa7e0929dbebf57b9fe7a409a47e2f43f2a6"
-  },
-  {
-    "source": "benchmark",
-    "original": "ag3s/asset/data/attention_16d_ep1850.npz",
-    "target": "AG3S/ag3s/asset/data/attention_16d_ep1850.npz",
-    "sha256": "795c916bba620977afde620a414f231fb8307b9482d33d723aa8f342d079cda6"
-  },
-  {
-    "source": "benchmark",
-    "original": "ag3s/asset/data/attention_16d_ep1900.npz",
-    "target": "AG3S/ag3s/asset/data/attention_16d_ep1900.npz",
-    "sha256": "789f53f6d21c3f6c81d75430e3a5c7c06432516207359327e2386b1750d2a3a0"
-  },
-  {
-    "source": "benchmark",
-    "original": "ag3s/asset/data/attention_16d_headfix.npz",
-    "target": "AG3S/ag3s/asset/data/attention_16d_headfix.npz",
-    "sha256": "58446f4eac31f47979bbff684c6de80ffc07d64b76203fa9f6a520c80f0b126f"
-  },
-  {
-    "source": "benchmark",
-    "original": "ag3s/asset/data/attention_16d_long.npz",
-    "target": "AG3S/ag3s/asset/data/attention_16d_long.npz",
-    "sha256": "f4b400d9a3a2331015729c00c16255711489d9192516da5040f15c2cb21eda3b"
-  },
-  {
-    "source": "benchmark",
-    "original": "ag3s/asset/data/attention_16d_t2.npz",
-    "target": "AG3S/ag3s/asset/data/attention_16d_t2.npz",
-    "sha256": "698337faa6da53fde92a76888024d90d8e8f6b61d70e57d0af3483986b92ebb5"
   },
   {
     "source": "benchmark",
