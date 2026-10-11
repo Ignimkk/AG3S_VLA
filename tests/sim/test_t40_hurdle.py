@@ -21,6 +21,7 @@ CPU only: `JAX_PLATFORMS=cpu XLA_PYTHON_CLIENT_PREALLOCATE=false CUDA_VISIBLE_DE
 
 from __future__ import annotations
 from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import bind_historical_client_inputs as _bind_legacy_inputs
 
 import contextlib
 import hashlib
@@ -123,6 +124,7 @@ def _load_client(path: pathlib.Path, name: str):
     mod = importlib.util.module_from_spec(spec)
     try:
         spec.loader.exec_module(mod)
+        _bind_legacy_inputs(mod)
     except ImportError as exc:  # the client needs its own venv (mink, PIL): .venv-openpi-live has them
         pytest.skip(f"pi05_infer.py dependencies missing in this interpreter: {exc}")
     return mod

@@ -56,7 +56,7 @@ def resolve_asset(path: str | os.PathLike, *, what: str = "asset") -> pathlib.Pa
     if ASSET_MARKER in marker_parts:
         suffix = pathlib.Path(*marker_parts[marker_parts.index(ASSET_MARKER) + 1:])
         canonical = pathlib.Path(__file__).resolve().parents[3] / "robots" / "rby1" / "description" / suffix
-        if canonical.exists() and (not p.exists() or str(p).startswith("/mnt/dev/work/") or str(p).startswith("src/")):
+        if canonical.exists() and (str(p).startswith("/mnt/dev/work/") or str(p).startswith("src/") or not p.exists()):
             return canonical.resolve()
     if p.exists():
         return p if p.is_absolute() else p.resolve()

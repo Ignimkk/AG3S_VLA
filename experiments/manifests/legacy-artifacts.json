@@ -1,6 +1,6 @@
 {
-  "legacy_storage_default": "/mnt/dev/work",
-  "policy": "External unchanged inputs; not source version and not new evaluation results",
+  "legacy_storage_default": "/mnt/dev/AG3S_VLA-storage/legacy-inputs",
+  "policy": "Inputs in separate shared storage; historic relative names are compatibility aliases, not active source trees",
   "files": [
     {
       "legacy_relative_path": "paper/tools/bin/tectonic",
@@ -58,5 +58,6 @@
       "sha256": "698337faa6da53fde92a76888024d90d8e8f6b61d70e57d0af3483986b92ebb5",
       "kind": "raw-attention-recording"
     }
-  ]
+  ],
+  "storage_root_environment": "AG3S_STORAGE_ROOT"
 }

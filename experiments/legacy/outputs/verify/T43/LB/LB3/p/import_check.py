@@ -8,6 +8,7 @@ client: run as a script placed next to pi05_infer.py is NOT done (snapshot is im
         benchmark-importing branch of main() does (REPO_ROOT.parent) is applied."""
 import json, os, sys, pathlib, importlib, importlib.util
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
+from common.workspace import PROJECT_ROOT
 mode = sys.argv[1]
 MODS = ["benchmark", "AG3S.trajopt.wire", "AG3S.trajopt.client", "AG3S.trajopt.policy_seed",
         "AG3S.trajopt.safe_policy", "AG3S.trajopt.serve_safe", "AG3S.ag3s.stages.device_recon",
@@ -57,8 +58,8 @@ try:
     out["openpi"] = openpi.__file__; out["openpi_client"] = openpi_client.__file__
 except Exception as e:
     out["openpi"] = f"ERR {e!r}"
-bad = [m for m in MODS if not str(out[m]).startswith("${AG3S_PROJECT_ROOT}-t43v11/")]
+bad = [m for m in MODS if not str(out[m]).startswith(str(PROJECT_ROOT) + "/")]
 if mode == "client":
-    bad += [k for k in ("rby1_manipulation", "pick_place_obstacles") if not str(out[k]).startswith("${AG3S_PROJECT_ROOT}-t43v11/")]
+    bad += [k for k in ("rby1_manipulation", "pick_place_obstacles") if not str(out[k]).startswith(str(PROJECT_ROOT) + "/")]
 out["all_benchmark_under_snapshot"] = not bad; out["not_under_snapshot"] = bad
 print(json.dumps(out, indent=1))

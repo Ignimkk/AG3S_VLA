@@ -21,6 +21,7 @@ What this file pins (unit level; the MuJoCo drift is `tests/sim/test_t41c_hold_d
 
 from __future__ import annotations
 from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import bind_historical_client_inputs as _bind_legacy_inputs
 
 import ast
 import importlib.util
@@ -56,6 +57,7 @@ def old_client(tmp_path_factory):
     spec = importlib.util.spec_from_file_location("_client_e13292d", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    _bind_legacy_inputs(mod)
     assert mod.HOLD_MODES == ("fixed", "legacy")
     return mod
 

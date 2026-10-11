@@ -2,8 +2,9 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 UV="${AG3S_UV:-$(command -v uv || true)}"
-if [ -z "$UV" ] && [ -x "${AG3S_LEGACY_STORAGE:-/mnt/dev/work}/.setup-tools/bin/uv" ]; then
-  UV="${AG3S_LEGACY_STORAGE:-/mnt/dev/work}/.setup-tools/bin/uv"
+STORAGE="${AG3S_STORAGE_ROOT:-$(dirname "$ROOT")/AG3S_VLA-storage}"
+if [ -z "$UV" ] && [ -x "$STORAGE/tools/uv" ]; then
+  UV="$STORAGE/tools/uv"
 fi
 [ -n "$UV" ] || { echo 'Install uv or set AG3S_UV to its executable.' >&2; exit 1; }
 export UV_CACHE_DIR="${UV_CACHE_DIR:-$ROOT/.cache/uv}"

@@ -22,7 +22,7 @@ if [ -e $RUN ] || [ -e $OUT/$NAME.client.log ]; then
   for f in $RUN $OUT/$NAME.client.log $OUT/$NAME.start $OUT/$NAME.end $OUT/$NAME.check.json; do [ -e $f ] && mv $f $OUT/failed/$(basename $f).$TS; done
 fi
 date -Iseconds > $OUT/$NAME.start; echo "port=$PORT" >> $OUT/$NAME.start; echo "obstacle=$OCFG:$OPROF" >> $OUT/$NAME.start
-cd $O1/pi05_TO_hybrid && MUJOCO_GL=osmesa PYTHONPATH=$O1 timeout $CLIENT_TIMEOUT_S $PY -u rby1_bringup/pi05_infer.py \
+cd "$O1" && MUJOCO_GL=osmesa PYTHONPATH="$PYTHONPATH" timeout $CLIENT_TIMEOUT_S $PY -u "$O1/integration/rby1/bringup/pi05_infer.py" \
   --model rby1_randomized_pick_place_16d --remote localhost:$PORT --episode-index $EP --max-steps 600 --headless \
   --warmup-steps 1000 --policy-seed $SEED \
   --record-frames $RUN --record $RUN/third_person_front.mp4 --view front --trajectory-out $RUN/traj.npz --viz-avoidance-arrow \

@@ -2,6 +2,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 EVENT="${1:-UserPromptSubmit}"
+STORAGE="${AG3S_STORAGE_ROOT:-$(dirname "$ROOT")/AG3S_VLA-storage}"
 BRANCH="$(git -C "$ROOT" branch --show-current)"
 HEAD_SHA="$(git -C "$ROOT" rev-parse HEAD)"
 case "$BRANCH" in
@@ -13,6 +14,7 @@ esac
 {
   printf 'AG3S_VLA checkout: %s\nbranch: %s\nHEAD: %s\n목적: %s\n' "$ROOT" "$BRANCH" "$HEAD_SHA" "$PURPOSE"
   printf 'AG3S/ag3s·AG3S/trajopt / Baseline / benchmark / integration / robots / third_party가 현재 구조다.\n'
-  printf 'CLAUDE.md, .claude/project-context.md, doc/BRANCHES.md와 migration manifest를 읽는다. 기존 /mnt/dev/work는 legacy input storage이며 코드 편집 대상이 아니다.\n'
+  printf 'CLAUDE.md, .claude/project-context.md, doc/BRANCHES.md와 migration manifest를 읽는다. doc/SHARED_STORAGE_AND_PYTHON.md를 읽는다. Input은 AG3S_STORAGE_ROOT가 선택한 별도 AG3S_VLA-storage에 있으며 이전 checkout에 의존하지 않는다.\n'
+  printf 'Shared input storage: %s\nCPU interpreter: %s/.venv-ag3s/bin/python\n' "$STORAGE" "$ROOT"
   cat "$ROOT/.claude/ag3s-rules-brief.md"
 } | jq -Rs --arg event "$EVENT" '{suppressOutput:true,hookSpecificOutput:{hookEventName:$event,additionalContext:.}}'

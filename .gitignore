@@ -37,3 +37,7 @@ dist/
 /paper/tools/bin/
 core
 core.*
+
+# External OpenPI input aliases; restored by prepare_legacy_artifacts.py.
+/third_party/openpi/assets
+/third_party/openpi/policy_records

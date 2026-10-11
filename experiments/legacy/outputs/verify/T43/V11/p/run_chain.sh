@@ -41,9 +41,9 @@ if ! cmp -s $PF.code_md5.txt $P/code_md5_v11.txt; then
   log "code md5 DIFFERS from V11-0 ($(grep -c '^[<>]' $PF.code_md5.diff) lines, $PF.code_md5.diff)"
   [ "$ALLOW_MD5_DIFF" = 1 ] || { log "REFUSED code md5"; exit 4; }
 else log "code md5 == V11-0"; fi
-( cd $O1 && JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=$O1 OPENPI_DATA_HOME=${AG3S_PROJECT_ROOT}/pi05_TO_hybrid/cache/openpi \
+( cd $O1 && JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH="$PYTHONPATH" OPENPI_DATA_HOME="$OPENPI_DATA_HOME" \
   timeout 600 $PY -c "import sys; sys.argv=['-c','server']; exec(open('$P/import_check.py').read())" ) > $PF.import_server.json 2> $PF.import_server.err
-( cd $O1/pi05_TO_hybrid && JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=$O1 \
+( cd "$O1" && JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH="$PYTHONPATH" \
   timeout 600 $PY $P/import_check.py client $O1/integration/rby1/bringup/pi05_infer.py ) > $PF.import_client.json 2> $PF.import_client.err
 for s in server client; do
   grep -q '"all_benchmark_under_snapshot": true' $PF.import_$s.json || { log "REFUSED import check $s ($PF.import_$s.json)"; exit 5; }

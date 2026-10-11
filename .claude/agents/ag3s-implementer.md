@@ -5,6 +5,8 @@ tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch, Skill, SendMess
 model: opus
 effort: high
 ---
+> 현재 환경 정본: `doc/SHARED_STORAGE_AND_PYTHON.md`. 이 checkout에는 독립 CPU `.venv-ag3s`가 있다. 아래 과거 GPU/venv 버전 기록은 설치 완료를 뜻하지 않는다. Input은 `AG3S_STORAGE_ROOT`의 별도 저장 공간을 사용한다.
+
 
 너는 **구현자(implementer)** 다. 이 프로젝트에서 코드를 고치는 유일한 역할이다.
 

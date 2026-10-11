@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-project=${AG3S_PROJECT_ROOT}/pi05_TO_hybrid
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../setup" && pwd)/env.sh"
+project="$AG3S_PROJECT_ROOT"
+python_bin="${AG3S_OPENPI_PYTHON:-$project/.venv-openpi-live/bin/python}"
+[ -x "$python_bin" ] || { echo "Configure an independent OpenPI environment; see doc/SHARED_STORAGE_AND_PYTHON.md" >&2; exit 1; }
+mkdir -p "$project/outputs/rby1-training/logs" "$project/outputs/checkpoints"
 norm_session=rby1_transport_norm
 train_session=rby1_pi05_lora_30k
-norm_log="$project/logs/rby1_transport_norm_20260812.log"
-guard_log="$project/logs/rby1_training_guard_20260812.log"
-norm_file="$project/assets/pi05_rby1_lora/local/rby1_dataset_v1/norm_stats.json"
-train_log="$project/logs/pi05_rby1_lora_30k_20260812.log"
+norm_log="$AG3S_STORAGE_ROOT/results/rby1-logs/rby1_transport_norm_20260812.log"
+guard_log="$project/outputs/rby1-training/logs/rby1_training_guard_20260812.log"
+norm_file="$project/integration/rby1/assets/pi05_rby1_lora/local/rby1_dataset_v1/norm_stats.json"
+train_log="$project/outputs/rby1-training/logs/pi05_rby1_lora_30k_20260812.log"
 experiment=rby1_transport_14d_30k_20260812
-checkpoint_dir="$project/checkpoints/pi05_rby1_lora/$experiment"
+checkpoint_dir="$project/outputs/checkpoints/pi05_rby1_lora/$experiment"
 
 exec >>"$guard_log" 2>&1
 echo "$(date -Is) waiting for $norm_session"
@@ -29,7 +33,7 @@ if [[ ! -s "$norm_file" ]]; then
   echo "$(date -Is) ERROR: missing or empty $norm_file"
   exit 1
 fi
-"$project/openpi/.venv/bin/python" -m json.tool "$norm_file" >/dev/null
+"$python_bin" -m json.tool "$norm_file" >/dev/null
 if [[ -e "$checkpoint_dir" ]]; then
   echo "$(date -Is) ERROR: checkpoint destination already exists: $checkpoint_dir"
   exit 1
@@ -41,5 +45,5 @@ fi
 
 echo "$(date -Is) norm stats validated; starting $train_session"
 tmux new-session -d -s "$train_session" \
-  "cd '$project' && export HF_DATASETS_CACHE='$project/.cache/hf_datasets_rby1_corrected_20260812' HF_LEROBOT_HOME='$project/lerobot_transport' WANDB_MODE=disabled && exec openpi/.venv/bin/python openpi/scripts/train.py pi05_rby1_lora --exp-name '$experiment' --assets-base-dir '$project/assets' --checkpoint-base-dir '$project/checkpoints' --num-train-steps 30000 --no-wandb-enabled 2>&1 | tee '$train_log'"
+  "cd '$project' && export HF_DATASETS_CACHE='$project/.cache/hf_datasets_rby1_corrected_20260812' HF_LEROBOT_HOME='$AG3S_STORAGE_ROOT/datasets/lerobot-transport' WANDB_MODE=disabled && exec '$python_bin' third_party/openpi/scripts/train.py pi05_rby1_lora --exp-name '$experiment' --assets-base-dir '$project/integration/rby1/assets' --checkpoint-base-dir '$project/outputs/checkpoints' --num-train-steps 30000 --no-wandb-enabled 2>&1 | tee '$train_log'"
 echo "$(date -Is) started $train_session; checkpoints: $checkpoint_dir"
