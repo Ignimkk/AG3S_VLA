@@ -1,5 +1,8 @@
 # AG3S_VLA 통합 실행 및 인수인계 결과
 
+> 이 문서는 최초 통합 당시 기록입니다. 후속 storage 경로 분리 및 현재 Python 안내는
+> `STORAGE_IMPLEMENTATION_REPORT.md`와 `../SHARED_STORAGE_AND_PYTHON.md`가 우선합니다.
+
 - 갱신: 2026-10-11 12:25 UTC
 - 상태: 로컬 통합·경로 전환·checkpoint 및 branch commit 완료. **Push는 미실행**.
 - 원격 설정: `git@github.com:Ignimkk/AG3S_VLA.git`. 기존 원격 owner를 기준으로 설정했다.

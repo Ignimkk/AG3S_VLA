@@ -62,5 +62,6 @@ OpenPI fork는 `third_party/openpi/`에 직접 추적된다.
 GPU 실행 시 `OPENPI_DATA_HOME`은 자기 checkout의 `.cache/openpi`,
 `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 사용한다.
 실제 VLA 환경·체크포인트·robot/camera adapter 검증은 다음 단계다.
-Migration 검증과 인수인계는 `doc/migration/IMPLEMENTATION_REPORT.md`에 기록한다.
+최초 Migration 기록은 `doc/migration/IMPLEMENTATION_REPORT.md`, 후속 storage 경로 분리 결과는
+`doc/migration/STORAGE_IMPLEMENTATION_REPORT.md`에 기록한다. 현재 경로/환경은 후속 문서가 우선한다.
 기존 단계 로그는 그 로그의 source 기준과 실제 branch가 일치할 때만 이어 쓴다.

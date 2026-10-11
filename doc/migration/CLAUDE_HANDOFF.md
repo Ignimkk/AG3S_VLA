@@ -7,7 +7,8 @@
 | `/mnt/dev/AG3S_VLA-development` | `feature/ag3s-development` |
 | `/mnt/dev/AG3S_VLA-benchmark` | `feature/panda-benchmark` |
 
-두 clone의 origin: `git@github.com:Ignimkk/AG3S_VLA.git`. 이관 과정에서 push하지 않았다.
+두 clone의 origin: `https://github.com/Ignimkk/AG3S_VLA.git`. 사용자가 최초 통합 commit과
+legacy refs를 push했다고 확인했다. 이번 storage 경로 분리의 후속 commit은 사용자가 push한다.
 현재 main은 원본 v2 tag SHA 자체가 아니라 paired v2 source와 공통 경로 수정을 통합한 commit이다.
 원본 tag와 모든 원본 branch는 `legacy/*`로 보존한다. 원본 workspace에는 v2 tag가 없었다.
 개선 branch는 latest benchmark/workspace checkpoint와 원본 후속 commit을 포함한다.
@@ -19,7 +20,9 @@ working tree는 그대로 두었다. 원본 dirty 상태를 새 clone에 다시 
 ```text
 AG3S_VLA 통합과 폴더 전환이 완료되었습니다. 현재 열린 checkout에서만 개발합니다.
 CLAUDE.md, .claude/project-context.md, doc/BRANCHES.md,
-doc/migration/source-manifest.json, doc/migration/IMPLEMENTATION_REPORT.md를 먼저 읽으세요.
+doc/migration/source-manifest.json, doc/SHARED_STORAGE_AND_PYTHON.md,
+doc/migration/STORAGE_IMPLEMENTATION_REPORT.md를 먼저 읽으세요.
+Input은 /mnt/dev/AG3S_VLA-storage이며 자기 .venv-ag3s/bin/python을 선택하세요.
 첫 응답에는 cwd, Git root, branch/HEAD, origin, 사용할 Python과 module __file__을 보고하세요.
 개선 branch와 V11AB 평가 branch의 source 기준을 혼합하지 마세요.
 기존 /mnt/dev/work의 Python source나 venv로 되돌아가지 마세요.

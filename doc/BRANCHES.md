@@ -11,7 +11,9 @@
 `legacy/*` refs에 그대로 보존한다. Workspace의 v2 대응 테스트는 benchmark/v2 commit
 시간 이전의 마지막 first-parent commit을 사용했으며 manifest에 정확한 SHA를 기록한다.
 
-두 개발 branch는 공통 `main`의 후손이다. 개선 branch에만 최신 checkpoint를 추가한다.
+두 개발 branch는 최초 통합 `main`을 공통 조상으로 갖는다. 이후 공통 경로 변경은
+각 branch에 cherry-pick할 수 있으므로 최신 main의 후손 관계가 항상 성립하는 것은 아니다.
+개선 branch에만 최신 checkpoint를 추가한다.
 `feature/ag3s-development`를 benchmark branch나 main에 통째로 merge하면 V11AB 기능
 기준이 바뀐다. V11AB 평가 기간에는 구조·경로 공통 수정만 작은 commit으로 전달하고,
 기능 개선은 명시적인 새 실험 버전으로 평가한다. 원본 이력 이관에는 squash/rebase를
@@ -29,12 +31,12 @@
 
 - `/mnt/dev/AG3S_VLA-development`: `feature/ag3s-development`, VS Code 창과 Claude 세션 하나.
 - `/mnt/dev/AG3S_VLA-benchmark`: `feature/panda-benchmark`, 별도 VS Code 창과 Claude 세션.
-- `/mnt/dev/work`: 기존 실행 환경·dataset·checkpoint·raw evidence의 legacy storage.
-  새 코드 개발은 여기서 재개하지 않는다. 기존 자료는 삭제하지 않았다.
+- `/mnt/dev/AG3S_VLA-storage`: checkpoint·dataset·raw evidence의 독립 공유 input storage.
+- `/mnt/dev/work`: 원본 code/Git 보존과 이동한 input의 backlink. 새 코드 개발은 여기서 재개하지 않는다.
 
 각 checkout의 venv·새 output·cache는 별도로 관리한다. `scripts/setup/env.sh`는 자신의
 checkout 코드만 PYTHONPATH에 추가한다. Dataset/checkpoint 등 기존 input은
-`AG3S_LEGACY_STORAGE`로 선택한다. 기존 venv를 새 폴더로 복사하거나 공유하지 않는다.
+`AG3S_STORAGE_ROOT`로 선택한다. `AG3S_LEGACY_STORAGE`는 그 아래 `legacy-inputs`의 파생 alias다. 기존 venv를 새 폴더로 복사하거나 공유하지 않는다.
 
 ## Claude 재시작
 
@@ -84,6 +86,9 @@ CPU simulation test dependencies are pinned in `environments/testing/requirement
 ## Latest handoff
 
 `doc/migration/CLAUDE_HANDOFF.md`에 새 세션의 첫 확인과 남은 benchmark 작업을 기록한다.
-`scripts/setup/prepare_legacy_artifacts.py --storage /mnt/dev/work`는 manifest의
+`scripts/setup/prepare_legacy_artifacts.py --relink`는 manifest의
 SHA-256을 확인한 뒤 ignored input link만 복원한다. 다른 checkout의 source는 연결하지 않는다.
 `pyproject.toml` editable package와 환경 requirements는 알고리즘 release 기준과 구분한다.
+
+현재 storage와 Python 정본: `doc/SHARED_STORAGE_AND_PYTHON.md`,
+`doc/migration/STORAGE_IMPLEMENTATION_REPORT.md`.
