@@ -1,0 +1,31 @@
+old-checkout read denial active
+{
+ "mode": "server",
+ "cwd": "/mnt/dev/AG3S_VLA-development",
+ "argv0": "/mnt/dev/AG3S_VLA-development/experiments/legacy/outputs/verify/T43/V11/p/import_check.py",
+ "PYTHONPATH": "/mnt/dev/AG3S_VLA-development/.runtime/no-legacy-audit:/mnt/dev/AG3S_VLA-development:/mnt/dev/AG3S_VLA-development:/mnt/dev/AG3S_VLA-development/integration/rby1/manipulation/src:/mnt/dev/AG3S_VLA-development/third_party/openpi/src:/mnt/dev/AG3S_VLA-development/third_party/openpi/packages/openpi-client/src",
+ "serve_safe_repo": "/mnt/dev/AG3S_VLA-development",
+ "gripper_client_script": "/mnt/dev/AG3S_VLA-development/integration/rby1/bringup/pi05_infer.py",
+ "asset_model_transport": "/mnt/dev/AG3S_VLA-development/robots/rby1/description/models/rby1a/mujoco/model_transport.xml",
+ "sys_path_head": [
+  "/mnt/dev/AG3S_VLA-development",
+  "/mnt/dev/AG3S_VLA-development/.runtime/no-legacy-audit",
+  "/mnt/dev/AG3S_VLA-development",
+  "/mnt/dev/AG3S_VLA-development/integration/rby1/manipulation/src",
+  "/mnt/dev/AG3S_VLA-development/third_party/openpi/src",
+  "/mnt/dev/AG3S_VLA-development/third_party/openpi/packages/openpi-client/src"
+ ],
+ "benchmark": "/mnt/dev/AG3S_VLA-development/benchmark/__init__.py",
+ "AG3S.trajopt.wire": "/mnt/dev/AG3S_VLA-development/AG3S/trajopt/wire.py",
+ "AG3S.trajopt.client": "/mnt/dev/AG3S_VLA-development/AG3S/trajopt/client.py",
+ "AG3S.trajopt.policy_seed": "/mnt/dev/AG3S_VLA-development/AG3S/trajopt/policy_seed.py",
+ "AG3S.trajopt.safe_policy": "/mnt/dev/AG3S_VLA-development/AG3S/trajopt/safe_policy.py",
+ "AG3S.trajopt.serve_safe": "/mnt/dev/AG3S_VLA-development/AG3S/trajopt/serve_safe.py",
+ "AG3S.ag3s.stages.device_recon": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/stages/device_recon.py",
+ "AG3S.ag3s.runtime.frame_record": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/runtime/frame_record.py",
+ "AG3S.ag3s.robot_models.gripper_state": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/robot_models/gripper_state.py",
+ "openpi": "/mnt/dev/AG3S_VLA-development/third_party/openpi/src/openpi/__init__.py",
+ "openpi_client": "/mnt/dev/AG3S_VLA-development/third_party/openpi/packages/openpi-client/src/openpi_client/__init__.py",
+ "all_benchmark_under_snapshot": true,
+ "not_under_snapshot": []
+}

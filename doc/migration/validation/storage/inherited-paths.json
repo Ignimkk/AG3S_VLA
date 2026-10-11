@@ -1,0 +1,7 @@
+{
+  "AG3S_STORAGE_ROOT": "/mnt/dev/AG3S_VLA-storage",
+  "AG3S_LEGACY_STORAGE": "/mnt/dev/AG3S_VLA-storage/legacy-inputs",
+  "OPENPI_DATA_HOME": "/mnt/dev/AG3S_VLA-benchmark/.cache/openpi",
+  "HF_LEROBOT_HOME": "/mnt/dev/AG3S_VLA-storage/datasets/rby1",
+  "AG3S_OPENPI_PYTHON": "/mnt/dev/AG3S_VLA-benchmark/.venv-openpi-live/bin/python"
+}

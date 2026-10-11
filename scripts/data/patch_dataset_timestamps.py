@@ -18,7 +18,7 @@ unchanged.
 Idempotent: safe to run multiple times. Backups optional.
 
 Usage:
-    python patch_dataset_timestamps.py --dataset ${AG3S_PROJECT_ROOT}/pi05_TO_hybrid/data/rby1_dataset_v1
+    python patch_dataset_timestamps.py --dataset ${AG3S_STORAGE_ROOT}/datasets/rby1/rby1_dataset_v1
     python patch_dataset_timestamps.py --dataset ... --no-backup
     python patch_dataset_timestamps.py --dataset ... --dry-run   # preview first
 """

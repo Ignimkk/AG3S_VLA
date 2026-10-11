@@ -1,0 +1,18 @@
+old-checkout read denial active
+.....................................................................s.. [ 48%]
+........................................................................ [ 96%]
+.....                                                                    [100%]
+=============================== warnings summary ===============================
+tests/trajopt/test_t31_e3b_chunk310.py: 3 warnings
+tests/trajopt/test_t41b_rest_start.py: 23 warnings
+  /mnt/dev/AG3S_VLA-development/.venv-ag3s/lib/python3.11/site-packages/osqp/interface.py:290: DeprecationWarning: "polish" is deprecated. Please use "polishing" instead.
+    warnings.warn(
+
+tests/trajopt/test_t31_e3b_chunk310.py: 7 warnings
+tests/trajopt/test_t41b_rest_start.py: 99 warnings
+  /mnt/dev/AG3S_VLA-development/.venv-ag3s/lib/python3.11/site-packages/osqp/interface.py:405: PendingDeprecationWarning: The default value of raise_error will change to True in the future.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: /mnt/dev/AG3S_VLA-development/doc/migration/validation/storage/development-paths.xml -
+148 passed, 1 skipped, 5 deselected, 132 warnings in 76.93s (0:01:16)

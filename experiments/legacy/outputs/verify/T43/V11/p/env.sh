@@ -1,6 +1,7 @@
 # T43V11 common settings (copy of T43/V8/p/env.sh; snapshot ${AG3S_PROJECT_ROOT}-t43v11 = benchmark 3ca1b21 T43 TA; arms V11A / V11AB / V11ABC)
 AG3S_V11_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$AG3S_V11_SCRIPT_DIR/../../setup/env.sh"
+AG3S_V11_PROJECT_ROOT="$(git -C "$AG3S_V11_SCRIPT_DIR" rev-parse --show-toplevel)"
+source "$AG3S_V11_PROJECT_ROOT/scripts/setup/env.sh"
 V="${AG3S_V11_OUTPUT_DIR:-$AG3S_PROJECT_ROOT/outputs/legacy-v11}"
 P="$AG3S_V11_SCRIPT_DIR"
 O1=${AG3S_PROJECT_ROOT}                                # V11 snapshot: benchmark 3ca1b21 (git archive), pi05_TO_hybrid rby1_* == work-t43w3 (fce4af8)

@@ -7,7 +7,7 @@ __pycache__/
 .runtime/
 .cache/
 /outputs/
-storage/
+/storage/
 .vscode/
 build/
 dist/

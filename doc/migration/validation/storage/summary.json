@@ -1,0 +1,72 @@
+{
+  "completed_kst": "2026-10-11 23:58 KST",
+  "storage": "/mnt/dev/AG3S_VLA-storage",
+  "source_profiles": {
+    "main": "paired-v2/v11ab",
+    "feature/panda-benchmark": "paired-v2/v11ab",
+    "feature/ag3s-development": "v2-followup-and-WIP"
+  },
+  "source_tag_objects": {
+    "legacy/benchmark/v2": "183bb5e5185048453656c57893d57787f1e2ee8a",
+    "legacy/pi05_TO_hybrid/v2": "c1d304fabea9da0caca286ae8d69ba9980e9cd07"
+  },
+  "code_commits": {
+    "benchmark": "8bd5ec7d99fa2e553d89dab7433d1faa287250fa",
+    "development": "cbcdf91ec7324ccd1ea22bd45bc5c7047ece9529"
+  },
+  "input_roots": 35,
+  "verified_files": 108984,
+  "unchanged_size_mtime_files": 108983,
+  "initial_input_bytes": 387934541053,
+  "volatile_files": [
+    {
+      "path": "results/workspace/verify/T43/LB/LB3/runs/loadavg_samples.txt",
+      "before_size": 196924,
+      "observed_size": 197784,
+      "inode_unchanged": true,
+      "reason": "Existing load-average sampler continues to append once per minute; migration did not write its content"
+    }
+  ],
+  "preexisting_broken_links": [
+    {
+      "path": "datasets/lerobot-atomic/local/rby1_atomic_basket_14d_v2",
+      "target": "../../rby1/rby1_atomic_basket_14d_v2"
+    },
+    {
+      "path": "datasets/lerobot-transport/local/rby1_dataset_v1",
+      "target": "../../rby1/rby1_transport_14d"
+    }
+  ],
+  "external_storage_links": [],
+  "historical_source_archive": {
+    "path": "/mnt/dev/AG3S_VLA-storage/archive/source-snapshot-20261011",
+    "hashed_files": 8972,
+    "reason": "Immutable referenced source for old experiment runroots; not active project code"
+  },
+  "backup": {
+    "path": "/mnt/dev/AG3S_VLA-storage-migration-backup-20261011T132205Z",
+    "created_before_mutation": true,
+    "type": "verified git bundles, tracked archives, settings metadata, input hardlink namespace snapshots",
+    "independent_content_backup": false,
+    "removed_after_verification": true,
+    "removed_utc": "2026-10-11T14:57:39.876807+00:00"
+  },
+  "runtime_checks": {
+    "benchmark": {
+      "passed": 148,
+      "skipped": 1,
+      "deselected": 5,
+      "old_python_file_reads_denied": true
+    },
+    "development": {
+      "passed": 148,
+      "skipped": 1,
+      "deselected": 5,
+      "old_python_file_reads_denied": true
+    }
+  },
+  "cpu_python": "3.11.16",
+  "gpu_environment_or_benchmark_rollout_run": false,
+  "push_performed_by_assistant": false,
+  "raw_validation_heads": "Captured before the final commit; retained as execution evidence"
+}
