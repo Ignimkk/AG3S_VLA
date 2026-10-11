@@ -1,0 +1,17 @@
+{
+  "env": {
+    "AG3S_ROLE": "implementer"
+  },
+  "permissions": {
+    "deny": [
+      "Edit(/AG3S/ag3s/docs/*.md)",
+      "Write(/AG3S/ag3s/docs/*.md)",
+      "Edit(/AG3S/ag3s/docs/figures/**)",
+      "Write(/AG3S/ag3s/docs/figures/**)",
+      "Edit(/AG3S/ag3s/docs/handoff/*.verify.json)",
+      "Write(/AG3S/ag3s/docs/handoff/*.verify.json)",
+      "Edit(/references/legacy-papers/**)",
+      "Write(/references/legacy-papers/**)"
+    ]
+  }
+}

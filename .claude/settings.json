@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/ag3s-rules.sh\" SessionStart",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/ag3s-rules.sh\" UserPromptSubmit",
+            "timeout": 10,
+            "statusMessage": "AG3S_VLA branch·경로·규칙 확인"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,12 +1,22 @@
+# Code, metadata and small regression fixtures are tracked explicitly.
 __pycache__/
 *.py[cod]
-*.so
-*.egg-info/
 .pytest_cache/
-.mypy_cache/
+.ruff_cache/
+.venv*/
+.runtime/
+.cache/
+outputs/
+storage/
 .vscode/
-.idea/
-.DS_Store
-
-# GPU 서버에서 재생성 가능한 attention 원자료 (63MB/run)
-ag3s/asset/data/*.npz
+build/
+dist/
+*.egg-info/
+.claude/settings.local.json
+.claude/roles/*.local.settings.json
+*.pt
+*.pth
+*.safetensors
+*.ckpt
+*.tgz
+*.whl

@@ -1,0 +1,27 @@
+{
+  "env": {
+    "AG3S_ROLE": "scribe"
+  },
+  "permissions": {
+    "deny": [
+      "Edit(/AG3S/**/*.py)",
+      "Edit(/Baseline/**/*.py)",
+      "Edit(/benchmark/**/*.py)",
+      "Edit(/integration/**/*.py)",
+      "Edit(/common/**/*.py)",
+      "Write(/AG3S/**/*.py)",
+      "Write(/Baseline/**/*.py)",
+      "Write(/benchmark/**/*.py)",
+      "Write(/integration/**/*.py)",
+      "Write(/common/**/*.py)",
+      "Edit(/tests/**)",
+      "Write(/tests/**)",
+      "Edit(/AG3S/ag3s/docs/figures/**)",
+      "Write(/AG3S/ag3s/docs/figures/**)",
+      "Edit(/AG3S/ag3s/docs/handoff/*.verify.json)",
+      "Write(/AG3S/ag3s/docs/handoff/*.verify.json)",
+      "Edit(/AG3S/ag3s/docs/handoff/*.impl.md)",
+      "Write(/AG3S/ag3s/docs/handoff/*.impl.md)"
+    ]
+  }
+}

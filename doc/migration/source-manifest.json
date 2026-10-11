@@ -1,0 +1,59 @@
+{
+  "created_utc": "2026-10-11T10:45:46.549111+00:00",
+  "profile": "v11ab",
+  "sources": {
+    "benchmark": "498f713b20bf9b75b4b065cd9bcdd508d7cdaecf",
+    "pi05_TO_hybrid": "f62ab814e867912af3cecea52519d00c470d39e3",
+    "workspace": "9bf5bcdaf883bb1bcd74d26989f4fed549381462",
+    "openpi": "df127613c06c82567bec65f6e7e2b401dff8fa59"
+  },
+  "checkpoint_sources": {
+    "workspace": "971f814c48af67f0369aa7a3b8e99ab2d8173eae",
+    "benchmark": "e055aa25f6e5ddda6aefaa035384e123dea33f81",
+    "pi05_TO_hybrid": "f62ab814e867912af3cecea52519d00c470d39e3",
+    "openpi": "df127613c06c82567bec65f6e7e2b401dff8fa59",
+    "libero": "f78abd68ee283de9f9be3c8f7e2a9ad60246e95c",
+    "aloha": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+    "curobo": "78fd485fa82d9b9a063fb4985e371814587e666a"
+  },
+  "original_heads": {
+    "workspace": "83591f77e54dccc75a63e19f6de5a4beba777d6a",
+    "benchmark": "f3fdb70e4bb740fc8da4c83d51bbc24b1231e252",
+    "pi05_TO_hybrid": "f62ab814e867912af3cecea52519d00c470d39e3",
+    "openpi": "df127613c06c82567bec65f6e7e2b401dff8fa59",
+    "libero": "f78abd68ee283de9f9be3c8f7e2a9ad60246e95c",
+    "aloha": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+    "curobo": "78fd485fa82d9b9a063fb4985e371814587e666a"
+  },
+  "dependencies": {
+    "benchmark/LIBERO": {
+      "commit": "f78abd68ee283de9f9be3c8f7e2a9ad60246e95c",
+      "url": "https://github.com/Lifelong-Robot-Learning/LIBERO.git",
+      "local": "/mnt/dev/work/pi05_TO_hybrid/openpi/third_party/libero"
+    },
+    "third_party/aloha": {
+      "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+      "url": "https://github.com/Physical-Intelligence/aloha.git",
+      "local": "/mnt/dev/work/pi05_TO_hybrid/openpi/third_party/aloha"
+    },
+    "third_party/curobo": {
+      "commit": "78fd485fa82d9b9a063fb4985e371814587e666a",
+      "url": "https://github.com/NVlabs/curobo.git",
+      "local": "/mnt/dev/work/curobo_src"
+    },
+    "benchmark/SafeLIBERO": {
+      "commit": "2457feed5968ae803926e178c8ce8243b9ecdcf9",
+      "url": "https://github.com/THU-RCSCT/vlsa-aegis.git",
+      "local": "/tmp/ag3s-upstreams/SafeLIBERO"
+    },
+    "benchmark/LIBERO-Safety": {
+      "commit": "19ec8df23eedfbb9265bafd3e56495fcebfcfcd0",
+      "url": "https://github.com/LIBERO-SAFETY/LIBERO-Safety.git",
+      "local": "/tmp/ag3s-upstreams/LIBERO-Safety"
+    }
+  },
+  "backup_scope": "All Git metadata and tracked files; all nonignored untracked files; ignored source/docs/launchers. Large datasets, checkpoints, cache, recordings and virtual environments remain untouched at original paths and are not duplicated.",
+  "original_working_trees_preserved": true,
+  "workspace_v2_selection": "last first-parent workspace commit before benchmark/v2 committer time; no workspace v2 tag exists",
+  "v11ab_launchers": "legacy untracked outputs/verify/T43/V11/p scripts; no rollout result claimed"
+}

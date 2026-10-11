@@ -1,0 +1,41 @@
+{
+  "workspace": {
+    "papers": "references/legacy-papers",
+    "develope_PLAN.md": "doc/plans/develope_PLAN.md",
+    "develope_PLAN_SUMMARY.md": "doc/plans/develope_PLAN_SUMMARY.md",
+    "ag3s_pipeline_architecture.svg": "AG3S/docs/figures/architecture/ag3s_pipeline_architecture.svg",
+    "ag3s_pipeline_architecture.png": "AG3S/docs/figures/architecture/ag3s_pipeline_architecture.png",
+    "scripts": "scripts/data"
+  },
+  "benchmark": {
+    "ag3s": "AG3S/ag3s",
+    "trajopt": "AG3S/trajopt",
+    "knows_vla": "Baseline/knows_vla",
+    "seam_vla": "Baseline/seam_vla",
+    "docs": "AG3S/docs",
+    "requirements-ag3s.txt": "environments/ag3s/requirements.txt",
+    "requirements-curobo.txt": "environments/curobo/requirements.txt",
+    ".gitignore": "doc/migration/legacy/benchmark.gitignore",
+    "__init__.py": "benchmark/__init__.py"
+  },
+  "pi05_TO_hybrid": {
+    "rby1_bringup": "integration/rby1/bringup",
+    "rby1_manipulation": "integration/rby1/manipulation",
+    "rby1_description": "robots/rby1/description",
+    "scripts": "scripts/rby1",
+    "docs": "integration/rby1/docs",
+    "assets": "integration/rby1/assets",
+    "logs": "experiments/legacy/pi05_TO_hybrid/logs",
+    "realsense-ros": "third_party/ros/realsense-ros",
+    "zed-ros2-description": "third_party/ros/zed-ros2-description",
+    ".gitignore": "doc/migration/legacy/pi05_TO_hybrid.gitignore",
+    ".gitmodules": "doc/migration/legacy/pi05_TO_hybrid.gitmodules"
+  },
+  "openpi": "third_party/openpi",
+  "dependencies": {
+    "libero": "benchmark/LIBERO",
+    "aloha": "third_party/aloha",
+    "curobo": "third_party/curobo"
+  },
+  "legacy_storage": "/mnt/dev/work"
+}

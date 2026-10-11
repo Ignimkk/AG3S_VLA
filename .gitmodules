@@ -1,0 +1,15 @@
+[submodule "benchmark/LIBERO"]
+	path = benchmark/LIBERO
+	url = https://github.com/Lifelong-Robot-Learning/LIBERO.git
+[submodule "third_party/aloha"]
+	path = third_party/aloha
+	url = https://github.com/Physical-Intelligence/aloha.git
+[submodule "third_party/curobo"]
+	path = third_party/curobo
+	url = https://github.com/NVlabs/curobo.git
+[submodule "benchmark/SafeLIBERO"]
+	path = benchmark/SafeLIBERO
+	url = https://github.com/THU-RCSCT/vlsa-aegis.git
+[submodule "benchmark/LIBERO-Safety"]
+	path = benchmark/LIBERO-Safety
+	url = https://github.com/LIBERO-SAFETY/LIBERO-Safety.git
