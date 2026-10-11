@@ -1,0 +1,322 @@
+{
+ "_comment": "ag3s-verifier 가 쓴다. 숫자와 경로만.",
+ "step": "SL0",
+ "date": "2026-10-12",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T045129_6ba81024d243_sl0-pi05only-t0e0",
+ "runs": [
+  {
+   "id": "baseline_16d_legacy",
+   "command": "cd /mnt/dev/AG3S_VLA-benchmark && source scripts/setup/env.sh && MUJOCO_GL=osmesa PYTHONPATH=${AG3S_PROJECT_ROOT} ${AG3S_PROJECT_ROOT}/.venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records /mnt/dev/AG3S_VLA-storage/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --out-json outputs/verify/SL0/baseline_16d_legacy.json",
+   "venv": ".venv-ag3s",
+   "raw_output": "outputs/verify/SL0/baseline_16d_legacy.json",
+   "stdout_log": "outputs/verify/SL0/baseline_16d_legacy.log"
+  },
+  {
+   "id": "baseline_16d_curobo",
+   "command": "cd /mnt/dev/AG3S_VLA-benchmark && source scripts/setup/env.sh && MUJOCO_GL=osmesa PYTHONPATH=${AG3S_PROJECT_ROOT} ${AG3S_PROJECT_ROOT}/.venv-openpi-live/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records /mnt/dev/AG3S_VLA-storage/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005 --out-json outputs/verify/SL0/baseline_16d_curobo.json",
+   "venv": ".venv-openpi-live",
+   "raw_output": "outputs/verify/SL0/baseline_16d_curobo.json",
+   "stdout_log": "outputs/verify/SL0/baseline_16d_curobo.log"
+  },
+  {
+   "id": "checkpoint_rehash",
+   "command": "cd /mnt/dev/AG3S_VLA-benchmark && source scripts/setup/env.sh && .venv-ag3s/bin/python -I outputs/verify/SL0/scripts/rehash_checkpoint.py /mnt/dev/AG3S_VLA-storage/checkpoints/panda/pi05_libero outputs/verify/SL0/checkpoint_rehash.json",
+   "venv": ".venv-ag3s",
+   "raw_output": "outputs/verify/SL0/checkpoint_rehash.json",
+   "stdout_log": "outputs/verify/SL0/checkpoint_rehash.log"
+  },
+  {
+   "id": "env_origin",
+   "command": "env -u PYTHONPATH [LD_LIBRARY_PATH without */site-packages/*,*/dist-packages/* for the sanitized libero run] <venv>/bin/python outputs/verify/SL0/scripts/env_origin.py <venv> <modules>",
+   "venv": ".venv-libero, .venv-openpi-live, .venv-ag3s",
+   "raw_output": [
+    "outputs/verify/SL0/env_origin_libero.json",
+    "outputs/verify/SL0/env_origin_libero_sanitized.json",
+    "outputs/verify/SL0/env_origin_openpi_live.json",
+    "outputs/verify/SL0/env_origin_ag3s.json"
+   ],
+   "stdout_log": [
+    "outputs/verify/SL0/env_origin_libero.err",
+    "outputs/verify/SL0/env_origin_libero_sanitized.err"
+   ]
+  },
+  {
+   "id": "pytest_regression73",
+   "command": "cd /mnt/dev/AG3S_VLA-benchmark && source scripts/setup/env.sh && .venv-openpi-live/bin/python scripts/setup/run_without_legacy.py -m pytest -q -p no:cacheprovider tests/test_run_artifacts.py tests/test_policy_recorder_destination.py tests/ag3s/test_record_timing.py tests/ag3s/test_frame_record.py tests/trajopt/test_t43ta_path_shape.py",
+   "venv": ".venv-openpi-live",
+   "stdout_log": "outputs/verify/SL0/pytest_regression73_openpi_live.log",
+   "note_scope": "exact argv of the 73-test run is not recorded in doc/migration/validation/live or the live-validation run; file set reconstructed by collected-count 4+2+23+6+38=73 and warning source (t43ta 16+61=77)"
+  },
+  {
+   "id": "pytest_tests_benchmark",
+   "command": "cd /mnt/dev/AG3S_VLA-benchmark && source scripts/setup/env.sh && .venv-ag3s/bin/python scripts/setup/run_without_legacy.py -m pytest -q -p no:cacheprovider -rs tests/benchmark",
+   "venv": ".venv-ag3s",
+   "stdout_log": "outputs/verify/SL0/pytest_tests_benchmark_ag3s.log"
+  },
+  {
+   "id": "pytest_benchmark_plus_artifacts",
+   "command": "cd /mnt/dev/AG3S_VLA-benchmark && source scripts/setup/env.sh && .venv-ag3s/bin/python scripts/setup/run_without_legacy.py -m pytest -q -p no:cacheprovider -rs tests/benchmark tests/test_run_artifacts.py tests/test_policy_recorder_destination.py",
+   "venv": ".venv-ag3s",
+   "stdout_log": "outputs/verify/SL0/pytest_benchmark_plus_artifacts_ag3s.log"
+  },
+  {
+   "id": "launcher_dry_run",
+   "command": "cd /mnt/dev/AG3S_VLA-benchmark && source scripts/setup/env.sh && .venv-ag3s/bin/python benchmark/runners/launch_libero_pi05_only.py --task-suite-name libero_spatial --task-ids 0 --episode-ids 0 --seed 7 --run-id sl0-pi05only-t0e0 --dry-run",
+   "venv": ".venv-ag3s",
+   "stdout_log": "outputs/verify/SL0/launcher_dry_run.txt"
+  },
+  {
+   "id": "episode_t0e0",
+   "command": "cd /mnt/dev/AG3S_VLA-benchmark && source scripts/setup/env.sh && .venv-ag3s/bin/python benchmark/runners/launch_libero_pi05_only.py --task-suite-name libero_spatial --task-ids 0 --episode-ids 0 --seed 7 --run-id sl0-pi05only-t0e0",
+   "venv": ".venv-ag3s (launcher) -> .venv-openpi-live (server) + .venv-libero (client)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T045129_6ba81024d243_sl0-pi05only-t0e0",
+   "stdout_log": [
+    "outputs/verify/SL0/launcher_stdout.txt",
+    "outputs/verify/SL0/launcher_stderr.txt",
+    "outputs/verify/SL0/launcher_rc.txt"
+   ],
+   "resource_monitor": "outputs/verify/SL0/resource_monitor.csv"
+  },
+  {
+   "id": "run_analysis",
+   "command": ".venv-ag3s/bin/python outputs/verify/SL0/scripts/analyze_run.py <run_dir> outputs/verify/SL0/run_analysis.json && .venv-ag3s/bin/python outputs/verify/SL0/scripts/build_numbers.py outputs/verify/SL0 <run_dir>",
+   "venv": ".venv-ag3s",
+   "raw_output": [
+    "outputs/verify/SL0/run_analysis.json",
+    "outputs/verify/SL0/numbers.json",
+    "outputs/verify/SL0/record_completeness.json"
+   ]
+  },
+  {
+   "id": "input_snapshot",
+   "command": "find <storage> (results pruned) | stat %n|%s|%Y|%a|%F before/after; checkpoint dir with ns mtime; ls results/benchmark before/after",
+   "raw_output": [
+    "outputs/verify/SL0/storage_inputs_before.txt",
+    "outputs/verify/SL0/storage_inputs_after.txt",
+    "outputs/verify/SL0/pi05_ckpt_before.txt",
+    "outputs/verify/SL0/pi05_ckpt_after.txt",
+    "outputs/verify/SL0/diff_pi05_ckpt.txt",
+    "outputs/verify/SL0/diff_storage_inputs.txt",
+    "outputs/verify/SL0/results_benchmark_before.txt",
+    "outputs/verify/SL0/results_benchmark_after.txt"
+   ]
+  }
+ ],
+ "code_state": {
+  "repo": "/mnt/dev/AG3S_VLA-benchmark",
+  "branch": "feature/panda-benchmark",
+  "head": "6ba81024",
+  "dirty_files": []
+ },
+ "numbers": {
+  "run_dir": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T045129_6ba81024d243_sl0-pi05only-t0e0",
+  "env_python_libero": "3.8.20",
+  "env_python_openpi_live": "3.11.16",
+  "env_python_ag3s": "3.11.16",
+  "env_interpreter_realpath_libero": "/mnt/dev/AG3S_VLA-benchmark/.python/cpython-3.8.20-linux-x86_64-gnu/bin/python3.8",
+  "env_interpreter_realpath_openpi_live": "/mnt/dev/AG3S_VLA-benchmark/.python/cpython-3.11.16-linux-x86_64-gnu/bin/python3.11",
+  "env_interpreter_realpath_ag3s": "/mnt/dev/AG3S_VLA-benchmark/.python/cpython-3.11.16-linux-x86_64-gnu/bin/python3.11",
+  "env_work_path_hits": {
+   "libero_sanitized": 0,
+   "openpi_live": 0,
+   "ag3s": 0,
+   "libero_unsanitized_ld": 0
+  },
+  "env_work_path_hits_total": 0,
+  "env_libero_torch_import_with_pod_LD_LIBRARY_PATH": "ImportError('/usr/local/lib/python3.10/dist-packages/torch/lib/libtorch_python.so: undefined symbol: PyObject_GET_WEAKREFS_LISTPTR')",
+  "env_libero_torch_version_sanitized_ld": "1.11.0+cu113",
+  "run_text_files_work_path_hits": 0,
+  "ckpt_files_hashed": 16,
+  "ckpt_bytes_hashed": 12439085481,
+  "ckpt_aggregate_recomputed_path_sorted": "1cb098d84bde409fb4b3931ed676195b80b0755c6ee60177e3d6c96508f1d891",
+  "ckpt_aggregate_recomputed_line_sorted": "baffa4ca988dbe5719654f3dadf93222753f879dc398e399de6c2e02c569b5a2",
+  "ckpt_aggregate_recorded": "1cb098d84bde409fb4b3931ed676195b80b0755c6ee60177e3d6c96508f1d891",
+  "ckpt_aggregate_match": true,
+  "ckpt_per_file_mismatch": 0,
+  "ckpt_norm_stats_sha256": "b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84",
+  "ckpt_rehash_seconds": 163.86755204200745,
+  "official_success": true,
+  "status": "success",
+  "error": null,
+  "env_steps_including_wait": 113,
+  "env_steps_excluding_wait": 103,
+  "wait_steps": 10,
+  "max_steps": 220,
+  "policy_calls": 21,
+  "done_step_index": [
+   112
+  ],
+  "video_frames": 103,
+  "video_fps": 10,
+  "video_size": [
+   224,
+   224
+  ],
+  "video_file": [
+   "libero_spatial_t0_e0_success.mp4"
+  ],
+  "server_ready_seconds": 58.03409901726991,
+  "orbax_restore_seconds_from_log": 30.44,
+  "client_seconds": 90.41993497591466,
+  "client_returncode": 0,
+  "server_returncode": -2,
+  "port": 24038,
+  "latency_first_call_ms_jit": 36497.705857269466,
+  "latency_rest_n": 20,
+  "latency_rest_p50_ms": 88.55559816583991,
+  "latency_rest_p95_ms": 220.55058474652475,
+  "latency_rest_max_ms": 305.59167824685574,
+  "server_infer_first_ms": 36493.876149877906,
+  "server_infer_rest_p50_ms": 85.7551353983581,
+  "server_infer_rest_p95_ms": 182.85236456431457,
+  "server_infer_rest_max_ms": 303.62169817090034,
+  "policy_infer_first_ms": 35366.19983520359,
+  "policy_infer_rest_p50_ms": 46.79296212270856,
+  "policy_infer_rest_p95_ms": 121.57883550971746,
+  "policy_infer_rest_max_ms": 126.05980131775141,
+  "policy_records_files": 21,
+  "policy_records_actions_match_npz_chunks": 21,
+  "executed_vs_chunk_mismatch_steps": 0,
+  "wait_actions_equal_dummy": true,
+  "npz_action_chunks_shape": [
+   21,
+   10,
+   7
+  ],
+  "input_ckpt_stat_diff_lines": 0,
+  "input_storage_non_results_stat_diff_lines": 0,
+  "input_storage_non_results_entries": 21026,
+  "results_benchmark_new_dirs": [
+   "20261012T045129_6ba81024d243_sl0-pi05only-t0e0"
+  ],
+  "results_benchmark_new_dir_count": 1,
+  "results_benchmark_removed_dirs": 0,
+  "pytest_regression73_openpi_live": {
+   "passed": 73,
+   "skipped": 0,
+   "warnings": 77
+  },
+  "pytest_tests_benchmark_ag3s": {
+   "passed": 16,
+   "skipped": 0,
+   "warnings": 0
+  },
+  "pytest_benchmark_plus_artifacts_ag3s": {
+   "passed": 20,
+   "skipped": 1,
+   "warnings": 0
+  },
+  "baseline_16d_legacy": {
+   "violated_start": 14,
+   "has_target": 15,
+   "frames": 15,
+   "frame0_clearance_before_mm": -29.031048280806342
+  },
+  "baseline_16d_curobo": {
+   "violated_start": 10,
+   "has_target": 15,
+   "frames": 15,
+   "frame0_clearance_before_mm": -9.171877401271193
+  },
+  "pod_working_set_max_gib_during_run": 61.403,
+  "gpu_total_used_max_mib_during_run": 44948,
+  "own_server_gpu_max_mib_sampled": 8812,
+  "monitor_samples": 70,
+  "record_manifest_required_missing": [
+   "protected_authorized_links",
+   "phase",
+   "level",
+   "runtime_schedule"
+  ],
+  "record_episodes_fields_missing": [],
+  "record_npz_arrays_missing": []
+ },
+ "record_completeness": {
+  "episodes_jsonl_fields_missing": [],
+  "npz_arrays_missing": [],
+  "mp4_present": true,
+  "policy_records_present": 21,
+  "server_logs_present": [
+   "logs/libero_client.log",
+   "logs/serve_policy_24038.log",
+   "logs/server_console.log"
+  ],
+  "manifest_required_present": {
+   "original_v2_sha": true,
+   "monorepo_sha": true,
+   "dirty": true,
+   "dependency_pin": true,
+   "checkpoint_identity_checksum": true,
+   "norm_stats": true,
+   "method_variant": true,
+   "protected_authorized_links": false,
+   "privileged_input": true,
+   "camera_robot_config": true,
+   "controller": true,
+   "phase": false,
+   "action_settings": true,
+   "suite_task": true,
+   "level": false,
+   "initial_state_seed": true,
+   "horizon": true,
+   "metric_definition": true,
+   "runtime_schedule": false,
+   "output_paths": true
+  },
+  "manifest_required_missing": [
+   "protected_authorized_links",
+   "phase",
+   "level",
+   "runtime_schedule"
+  ],
+  "manifest_observations": {
+   "executions[serve_policy self].settings.env": "aloha_sim",
+   "executions[serve_policy self].settings.record_dir": null,
+   "storage.rollouts_exists": false,
+   "purpose": "evaluation/layout",
+   "profile": "v11ab",
+   "source_patch_bytes": 0,
+   "dirty": false,
+   "contact_event_or_metrics_file": [],
+   "server_console_has_KeyboardInterrupt_traceback": true
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/sl0-scene.png",
+   "sidecar": "AG3S/ag3s/docs/figures/sl0-scene.json",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/sl0-trend.png",
+   "sidecar": "AG3S/ag3s/docs/figures/sl0-trend.json",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/sl0-table.png",
+   "sidecar": "AG3S/ag3s/docs/figures/sl0-table.json",
+   "kind": "table"
+  }
+ ],
+ "figure_script": "outputs/verify/SL0/scripts/make_figures.py",
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy 14/15 · has_target 15/15 · frame0 -29.031048280806342 mm; cuRobo 10/15 · 15/15 · -9.171877401271193 mm (skill 기준값과 같음)"
+ },
+ "verdict": "기준선 일치 (legacy·cuRobo). status=success, official_success=true. checkpoint aggregate 일치. input stat diff 0, 새 results dir 1. 73 passed / tests/benchmark 16 passed.",
+ "not_measured": [
+  "renderer 차이 (osmesa vs 공식 EGL) 의 pixel 영향",
+  "성공률 (episode 1개)",
+  "launcher --verify-checksums 경로 자체 (독립 rehash script 로 대신 재계산)",
+  "다른 task/episode"
+ ],
+ "notes_facts": [
+  ".venv-libero: pod LD_LIBRARY_PATH (/usr/local/lib/python3.10/dist-packages/torch/lib) 그대로면 torch import 실패 (undefined symbol PyObject_GET_WEAKREFS_LISTPTR); site/dist-packages 항목 제거 후 torch 1.11.0+cu113 import, process 종료 시 'free(): invalid pointer' abort (env_origin_libero_sanitized.err). launcher client env 는 같은 제거를 적용 (manifest executions[client].settings.environment.LD_LIBRARY_PATH).",
+  "server_returncode -2; logs/server_console.log 에 KeyboardInterrupt traceback (launcher 종료 신호).",
+  "manifest executions[serve_policy self].settings.env = 'aloha_sim' (serve_policy Args 기본값 기록, policy:checkpoint 경로), record_dir = null.",
+  "manifest storage.rollouts (<run>/runs) 경로 미생성. purpose='evaluation/layout', profile='v11ab'.",
+  "CHECKSUMS.json aggregate: path 순 정렬 1cb098d8… = 기록값, line 문자열 정렬 baffa4ca….",
+  "pod working set (memory.current - inactive_file) 실행 중 최대 61.403 GiB; GPU 전체 최대 44948 MiB (외부 2 process 36136 MiB 포함). 측정 전 checkpoint page cache 를 posix_fadvise DONTNEED 로 비움 (파일 내용·mtime 불변, diff 0).",
+  "load average 실행 직전 68-92 (256 core, 공유)."
+ ]
+}

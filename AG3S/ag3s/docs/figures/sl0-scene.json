@@ -1,0 +1,30 @@
+{
+ "source_npz": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T045129_6ba81024d243_sl0-pi05only-t0e0/episodes/libero_spatial_t0_e0.npz",
+ "obs_indices": [
+  0,
+  10,
+  61,
+  113
+ ],
+ "columns": [
+  "reset (obs 0)",
+  "first policy call (obs 10)",
+  "mid (obs 61)",
+  "end, done=True (obs 113)"
+ ],
+ "rows": [
+  "obs_agentview_image",
+  "obs_robot0_eye_in_hand_image"
+ ],
+ "frame_shape": [
+  256,
+  256,
+  3
+ ],
+ "orientation": "raw render (npz stores frames before [::-1, ::-1])",
+ "n_obs": 114,
+ "official_success": true,
+ "status": "success",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T045129_6ba81024d243_sl0-pi05only-t0e0",
+ "script": "outputs/verify/SL0/scripts/make_figures.py"
+}

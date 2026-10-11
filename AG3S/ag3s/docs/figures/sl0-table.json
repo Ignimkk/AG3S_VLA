@@ -1,0 +1,155 @@
+{
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T045129_6ba81024d243_sl0-pi05only-t0e0",
+ "rows": [
+  [
+   "protocol",
+   "suite / task / episode (init state)",
+   "libero_spatial / [0] / [0] (init 0)"
+  ],
+  [
+   "protocol",
+   "task description",
+   "pick up the black bowl between the plate and the ramekin and place it on the plate"
+  ],
+  [
+   "protocol",
+   "seed, num_steps_wait, replan_steps",
+   "7, 10, 5"
+  ],
+  [
+   "protocol",
+   "resize / render / max_steps",
+   "224 / 256 / 220"
+  ],
+  [
+   "protocol",
+   "dummy action, success",
+   "[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0], done from env.step()"
+  ],
+  [
+   "checkpoint",
+   "path",
+   "/mnt/dev/AG3S_VLA-storage/checkpoints/panda/pi05_libero"
+  ],
+  [
+   "checkpoint",
+   "files / bytes rehashed",
+   "16 / 12,439,085,481  (163.9 s)"
+  ],
+  [
+   "checkpoint",
+   "aggregate (path-sorted) recomputed",
+   "1cb098d84bde409fb4b3931ed676195b80b0755c6ee60177e3d6c96508f1d891"
+  ],
+  [
+   "checkpoint",
+   "aggregate recorded",
+   "1cb098d84bde409fb4b3931ed676195b80b0755c6ee60177e3d6c96508f1d891  match=True"
+  ],
+  [
+   "checkpoint",
+   "per-file mismatch / norm_stats SHA-256",
+   "0 / b3a44bb2810436fb62917decaea58bd4d9110255df527dea21e8fd40c960bd84"
+  ],
+  [
+   "environment",
+   "commit / dirty / branch",
+   "6ba81024d243 / False / feature/panda-benchmark"
+  ],
+  [
+   "environment",
+   ".venv-libero",
+   "py 3.8.20, robosuite 1.4.1, mujoco 3.2.3, numpy 1.22.4, torch 1.11.0+cu113"
+  ],
+  [
+   "environment",
+   ".venv-openpi-live",
+   "py 3.11.16, jax 0.5.3, flax 0.10.2, openpi 0.1.0, orbax 0.11.13"
+  ],
+  [
+   "environment",
+   ".venv-ag3s (launcher)",
+   "py 3.11.16"
+  ],
+  [
+   "environment",
+   "/mnt/dev/work hits (3 venv origins + run text files)",
+   "0 + 0"
+  ],
+  [
+   "environment",
+   "MUJOCO_GL / port / GPU (own server, sampled peak)",
+   "osmesa / 24038 / 8812 MiB"
+  ],
+  [
+   "result",
+   "official_success / status",
+   "True / success"
+  ],
+  [
+   "result",
+   "env steps incl. / excl. wait, policy calls",
+   "113 / 103, 21"
+  ],
+  [
+   "result",
+   "server ready (load) / orbax restore",
+   "58.03 s / 30.44 s"
+  ],
+  [
+   "result",
+   "first call (JIT) client round-trip",
+   "36,497.7 ms"
+  ],
+  [
+   "result",
+   "calls 2-21 client p50 / p95 / max",
+   "88.6 / 220.6 / 305.6 ms"
+  ],
+  [
+   "result",
+   "calls 2-21 policy infer p50 / p95 / max",
+   "46.8 / 121.6 / 126.1 ms"
+  ],
+  [
+   "result",
+   "policy_records / mp4 frames",
+   "21 / 103 @ 10 fps"
+  ],
+  [
+   "input",
+   "checkpoint stat diff / storage (non-results) stat diff",
+   "0 / 0 lines (21026 entries)"
+  ],
+  [
+   "input",
+   "new results/benchmark dirs",
+   "1: 20261012T045129_6ba81024d243_sl0-pi05only-t0e0"
+  ],
+  [
+   "regression",
+   "73-test range (.venv-openpi-live)",
+   "73 passed, 77 warnings"
+  ],
+  [
+   "regression",
+   "tests/benchmark (.venv-ag3s)",
+   "16 passed, 0 skipped"
+  ],
+  [
+   "regression",
+   "16D legacy: violated start / has_target / frame0",
+   "14/15 / 15/15 / -29.031048280806342 mm"
+  ],
+  [
+   "regression",
+   "16D cuRobo: violated start / has_target / frame0",
+   "10/15 / 15/15 / -9.171877401271193 mm"
+  ]
+ ],
+ "sources": [
+  "outputs/verify/SL0/numbers.json",
+  "outputs/verify/SL0/checkpoint_rehash.json",
+  "outputs/verify/SL0/run_analysis.json"
+ ]
+}
