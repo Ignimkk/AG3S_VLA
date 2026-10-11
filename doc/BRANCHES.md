@@ -92,3 +92,9 @@ SHA-256을 확인한 뒤 ignored input link만 복원한다. 다른 checkout의 
 
 현재 storage와 Python 정본: `doc/SHARED_STORAGE_AND_PYTHON.md`,
 `doc/migration/STORAGE_IMPLEMENTATION_REPORT.md`.
+
+## Legacy checkout retirement 후속 기록
+
+원본 Git·잔여 자료의 permanent archive와 역사적 sibling link/임시 worktree 정리는
+`doc/migration/LEGACY_RETIREMENT_REPORT.md`를 따른다. 이전 `/mnt/dev/work` 자체는 삭제하지 않았다.
+이 정리는 main·benchmark branch와 AG3S algorithm을 변경하지 않는다.

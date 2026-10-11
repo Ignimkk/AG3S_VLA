@@ -24,7 +24,8 @@ Input은 별도 `AG3S_VLA-storage`에 있고 `AG3S_STORAGE_ROOT`로 선택한다
 CPU 회귀는 `.venv-ag3s`, cuRobo producer는 `.venv-curobo`로 분리한다. 세 환경 모두 자기 Python 3.11.16이다.
 새 output은 `$AG3S_STORAGE_ROOT/results/development/<날짜_commit_run-id>/`, cache는 자기 checkout 아래다.
 OpenPI `--record`의 상대경로는 run 안에서 해석하고 시작마다 새 session 디렉터리를 만든다.
-현재 GPU·checkpoint 검증과 `/mnt/dev/work` 삭제 조건은 `doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`를 따른다.
+현재 GPU·checkpoint 검증은 `doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`,
+최신 `/mnt/dev/work` 정리·삭제 조건은 `doc/migration/LEGACY_RETIREMENT_REPORT.md`를 따른다.
 Panda benchmark 환경과 end-to-end 평가는 별도 작업이다.
 
 개선 branch를 평가 branch에 통째로 merge하면 V11AB 기준이 바뀐다.

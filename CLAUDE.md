@@ -70,6 +70,8 @@ GPU 검증은 다른 checkout과 동시에 실행하지 않는다. `/tmp/ag3s-vl
 `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 유지한다.
 
 현재 storage·interpreter 설정의 정본은 `doc/SHARED_STORAGE_AND_PYTHON.md`이며 설치·검증·삭제 조건은
-`doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`를 읽는다. 이전 보고서는 그 시점 기록으로 보존한다.
-AG3S algorithm과 기존 개선 이력은 유지한다. `/mnt/dev/work`는 삭제하지 않았고 실행 process 및
-역사적 sibling link/worktree의 정리가 남아 있다. 실제 검증 범위는 보고서의 결과 표를 따른다.
+`doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`를 읽는다. Legacy 정리의 최신 판정은
+`doc/migration/LEGACY_RETIREMENT_REPORT.md`를 따른다. 이전 보고서는 그 시점 기록으로 보존한다.
+AG3S algorithm과 기존 개선 이력은 유지한다. `/mnt/dev/work`는 삭제하지 않았고 process를 종료하지 않는다.
+원본 Git·잔여 자료의 permanent archive, 역사적 sibling link 전환 및 clean 임시 worktree 정리는
+retirement 보고서의 검증 결과를 따른다. 실제 삭제 직전 live process 참조를 다시 확인한다.

@@ -122,6 +122,9 @@ Figure: [실제 policy 입력](../../AG3S/ag3s/docs/figures/env-output/recorded-
 
 ## `/mnt/dev/work` 삭제 가능 여부
 
+아래는 이 보고서 작성 시점의 판정이다. 이후 승인된 archive·link·임시 worktree 정리와
+최신 live process 상태는 [LEGACY_RETIREMENT_REPORT.md](LEGACY_RETIREMENT_REPORT.md)를 따른다.
+
 **현재 삭제 불가. 새 development 실행은 독립적으로 검증됐지만 외부 사용 흔적이 남아 있다.**
 삭제·process 종료·기존 input 변경·다른 checkout 수정은 수행하지 않았다.
 

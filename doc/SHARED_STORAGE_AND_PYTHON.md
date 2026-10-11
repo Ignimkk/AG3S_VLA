@@ -2,7 +2,8 @@
 
 현재 정본: **2026-10-12 KST**, `feature/ag3s-development`.
 Development는 자기 source와 독립 환경을 사용한다. Benchmark checkout의 GPU 설치 상태는 별도다.
-최신 설치·검증 근거와 legacy 삭제 조건은 [GPU_OUTPUT_IMPLEMENTATION_REPORT.md](migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md)에 있다.
+설치·GPU 검증 근거는 [GPU_OUTPUT_IMPLEMENTATION_REPORT.md](migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md),
+최신 legacy 정리·삭제 조건은 [LEGACY_RETIREMENT_REPORT.md](migration/LEGACY_RETIREMENT_REPORT.md)에 있다.
 이전 v1.4 관리 문서 원본은 [보존 manifest](migration/legacy-management-v1.4/manifest.json)에 기록한다.
 
 ## Shared input와 새 result
@@ -152,3 +153,12 @@ main·benchmark branch는 변경하지 않는다. 공통 경로 변경의 전달
 Compatibility references: [JAX installation](https://docs.jax.dev/en/latest/installation.html),
 [cuRobo runtime configuration](https://nvlabs.github.io/curobo/latest/reference/runtime_configuration.html).
 실제 source 요구사항은 pinned `third_party/curobo/pyproject.toml`, 실행 결과는 최신 validation artifact가 기준이다.
+
+## Legacy retirement archive
+
+원본 Git bundle·잔여 자료·관리 문서와 clean detached worktree는
+`$AG3S_STORAGE_ROOT/archive/legacy-retirement-20261012T013141+0900-d1699459`에 영구 보존한다.
+Historical sibling source는 동일 내용의 `archive/source-snapshot-20261011`에 연결하며,
+기존 shared input·과거 result backlink는 원래 storage 경로에 직접 연결한다.
+새 result는 계속 `results/development/<날짜_commit_run-id>` 아래에 생성한다.
+`/mnt/dev/work` 삭제·다른 process 종료는 수행하지 않았다. 실제 process 참조와 삭제 조건은 최신 retirement 보고서를 확인한다.
