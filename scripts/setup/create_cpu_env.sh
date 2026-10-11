@@ -10,8 +10,11 @@ export UV_CACHE_DIR="${UV_CACHE_DIR:-$ROOT/.cache/uv}"
 export UV_PYTHON_INSTALL_DIR="$ROOT/.python"
 "$UV" python install --no-bin --install-dir "$ROOT/.python" 3.11.16
 PYTHON_BIN="$("$UV" python find --managed-python 3.11.16)"
-"$UV" venv --python "$PYTHON_BIN" "$ROOT/.venv-ag3s"
+if [ ! -x "$ROOT/.venv-ag3s/bin/python" ]; then
+  "$UV" venv --python "$PYTHON_BIN" "$ROOT/.venv-ag3s"
+fi
 "$UV" pip install --link-mode copy --python "$ROOT/.venv-ag3s/bin/python" -r "$ROOT/environments/ag3s/requirements.txt"
 "$UV" pip install --link-mode copy --python "$ROOT/.venv-ag3s/bin/python" -r "$ROOT/environments/testing/requirements.txt"
+"$UV" pip install --link-mode copy --python "$ROOT/.venv-ag3s/bin/python" --no-deps -e "$ROOT"
 source "$ROOT/scripts/setup/env.sh"
 "$ROOT/.venv-ag3s/bin/python" "$ROOT/scripts/setup/check_workspace.py"
