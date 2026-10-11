@@ -1,0 +1,16 @@
+{
+  "root": "/mnt/dev/AG3S_VLA-benchmark",
+  "profile": "v11ab",
+  "source_commit": "498f713b20bf9b75b4b065cd9bcdd508d7cdaecf",
+  "checks": {
+    "AG3SConfig": {
+      "top_level_fields": 13,
+      "defaults_equal_after_path_mapping": true
+    },
+    "TrajOptConfig": {
+      "top_level_fields": 8,
+      "defaults_equal_after_path_mapping": true
+    }
+  },
+  "legacy_aliases_share_canonical_modules": true
+}

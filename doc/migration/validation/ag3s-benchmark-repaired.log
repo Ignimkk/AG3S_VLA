@@ -1,0 +1,137 @@
+Collected 2676 remaining/repaired 152
+.................................................s....F......FF......... [ 47%]
+........................................................................ [ 94%]
+........                                                                 [100%]
+=================================== FAILURES ===================================
+_______________ test_off_is_bit_identical_to_the_pre_fix_commit ________________
+
+harness = (<module 'ground_replay' from '/mnt/dev/AG3S_VLA-benchmark/scripts/testing/t43t/ground_replay.py'>, <module 'recov_rep...esting/t43t/recov_replay.py'>, <module 'identity' from '/mnt/dev/AG3S_VLA-benchmark/scripts/testing/t43t/identity.py'>)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-342/test_off_is_bit_identical_to_t0')
+
+    def test_off_is_bit_identical_to_the_pre_fix_commit(harness, tmp_path):
+        _, _, I = harness
+        out = tmp_path / "work.npz"
+        I.main(str(out))
+        a, b = np.load(HEAD_NPZ), np.load(out)
+        assert sorted(a.files) == sorted(b.files)
+        for k in a.files:
+            if k == "meta":
+                continue
+>           assert np.array_equal(a[k], b[k]), k
+E           AssertionError: to_T42_L1992_16
+E           assert False
+E            +  where False = <function array_equal at 0x7629aa3e23b0>(array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\n         1.00086689]]), array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\n         1.00086689]]))
+E            +    where <function array_equal at 0x7629aa3e23b0> = np.array_equal
+
+tests/trajopt/test_t43t_replay.py:59: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  AG3S.ag3s.robot_models.urdf_sphere_chain:urdf_sphere_chain.py:680 !!! THIS SPHERE MODEL DOES NOT COVER THE ROBOT !!!
+    18 of 18 capsule(s) are thinner than the URDF says, worst by 27.3 mm (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none).
+    빼는 것과 같은 성질의 flag 다 — 이 capsule 이 무엇에 부딪혀도 그만큼은 아무도 막지 않는다. 기준은 **URDF capsule** 이고, URDF 자체가 mesh 보다 두꺼울 수 있다.
+    - ee_left: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_left: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_left: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_right: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_right: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_right: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_r2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    지금 모델: 구 122 개 · capsule 18 개 (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none)
+    link 별 유효 반지름: ee_finger_l1=19×3.25 mm, ee_finger_l2=19×3.25 mm, ee_finger_r1=19×3.25 mm, ee_finger_r2=19×3.25 mm, ee_left=23×6.22 mm, ee_right=23×6.22 mm
+WARNING  AG3S.ag3s.robot_models.urdf_sphere_chain:urdf_sphere_chain.py:680 !!! THIS SPHERE MODEL DOES NOT COVER THE ROBOT !!!
+    18 of 18 capsule(s) are thinner than the URDF says, worst by 27.3 mm (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none).
+    빼는 것과 같은 성질의 flag 다 — 이 capsule 이 무엇에 부딪혀도 그만큼은 아무도 막지 않는다. 기준은 **URDF capsule** 이고, URDF 자체가 mesh 보다 두꺼울 수 있다.
+    - ee_left: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_left: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_left: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_right: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_right: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_right: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_r2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    지금 모델: 구 122 개 · capsule 18 개 (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none)
+    link 별 유효 반지름: ee_finger_l1=19×3.25 mm, ee_finger_l2=19×3.25 mm, ee_finger_r1=19×3.25 mm, ee_finger_r2=19×3.25 mm, ee_left=23×6.22 mm, ee_right=23×6.22 mm
+_ test_step2_closing_chunk_no_deflection_away_from_the_apple[T41/a/D/E3b_ep1807_s18071-16] _
+
+key = 'T41/a/D/E3b_ep1807_s18071', seq = 16
+
+    @pytest.mark.parametrize("key,seq", [("T41/a/D/E3b_ep1807_s18071", 16),
+                                         ("T41/a/B/E3b_ep1995_s19952", 19)])
+    def test_step2_closing_chunk_no_deflection_away_from_the_apple(key, seq):
+        """Closing chunks where the recorded TO pushed the fingertips away from the apple (U): with the
+        pre-closing geometry carved (emulated target-free layer) the push is gone, and no robot row on
+        the recorded main field goes below 0 against anything outside the carve ball."""
+        sys.path.insert(0, str(P))
+        import closing_replay as C  # noqa: E402
+>       r = C.one((key, seq, "apple", "left"))
+
+tests/trajopt/test_t43t_replay.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/testing/t43t/closing_replay.py:96: in one
+    G = setup(rd); FIA = G["FIA"]; st = G["st"]; robot = G["robot"]; layout = G["layout"]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rd = '/mnt/dev/work/outputs/verify/T41/a/runs/E3bD/E3b_ep1807_s18071'
+
+    def setup(rd):
+        from AG3S.trajopt.experiments import fixed_input_ablation as FIA
+        from AG3S.trajopt.types import ChunkLayout
+        from AG3S.ag3s.robot_models.gripper_state import FingerJointMap
+>       ix = IX[rd]
+E       KeyError: '/mnt/dev/work/outputs/verify/T41/a/runs/E3bD/E3b_ep1807_s18071'
+
+scripts/testing/t43t/closing_replay.py:60: KeyError
+_ test_step2_closing_chunk_no_deflection_away_from_the_apple[T41/a/B/E3b_ep1995_s19952-19] _
+
+key = 'T41/a/B/E3b_ep1995_s19952', seq = 19
+
+    @pytest.mark.parametrize("key,seq", [("T41/a/D/E3b_ep1807_s18071", 16),
+                                         ("T41/a/B/E3b_ep1995_s19952", 19)])
+    def test_step2_closing_chunk_no_deflection_away_from_the_apple(key, seq):
+        """Closing chunks where the recorded TO pushed the fingertips away from the apple (U): with the
+        pre-closing geometry carved (emulated target-free layer) the push is gone, and no robot row on
+        the recorded main field goes below 0 against anything outside the carve ball."""
+        sys.path.insert(0, str(P))
+        import closing_replay as C  # noqa: E402
+>       r = C.one((key, seq, "apple", "left"))
+
+tests/trajopt/test_t43t_replay.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/testing/t43t/closing_replay.py:96: in one
+    G = setup(rd); FIA = G["FIA"]; st = G["st"]; robot = G["robot"]; layout = G["layout"]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rd = '/mnt/dev/work/outputs/verify/T41/a/runs/E3bB/E3b_ep1995_s19952'
+
+    def setup(rd):
+        from AG3S.trajopt.experiments import fixed_input_ablation as FIA
+        from AG3S.trajopt.types import ChunkLayout
+        from AG3S.ag3s.robot_models.gripper_state import FingerJointMap
+>       ix = IX[rd]
+E       KeyError: '/mnt/dev/work/outputs/verify/T41/a/runs/E3bB/E3b_ep1995_s19952'
+
+scripts/testing/t43t/closing_replay.py:60: KeyError
+------------- generated xml file: /tmp/ag3s-benchmark-repaired.xml -------------
+=========================== short test summary info ============================
+SKIPPED [1] tests/trajopt/test_t39_policy_seed.py:433: could not import 'jax': No module named 'jax'
+3 failed, 148 passed, 1 skipped, 69 warnings in 419.03s (0:06:59)

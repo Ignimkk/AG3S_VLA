@@ -1,0 +1,168 @@
+{
+  "utc": "2026-10-11T12:21:08.156913+00:00",
+  "regression": {
+    "development": {
+      "passed": 2812,
+      "failed": 1,
+      "skipped": 12,
+      "errors": 0,
+      "unique_cases": 2825,
+      "failed_cases": [
+        {
+          "class": "tests.trajopt.test_t43t_replay",
+          "name": "test_off_is_bit_identical_to_the_pre_fix_commit",
+          "reason": "AssertionError: to_T42_L1992_16\nassert False\n +  where False = <function array_equal at 0x70eedaf92470>(array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\\n         1.00086689]]), array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\\n         1.00086689]]))\n +    where <function array_equal at 0x70eedaf92470> = np.array_equal",
+          "type": "failure"
+        }
+      ],
+      "skipped_cases": [
+        {
+          "class": "",
+          "name": "tests.ag3s.test_t32_fine_truncation_curobo",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.ag3s.test_t44_target_exclusion_owned",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.ag3s.test_t44c_a6_sign_floor",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.ag3s.test_t44c_a7_default_plane",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.ag3s.test_t44c_target_free_coarse",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.ag3s.test_t44e_a8_coarse_support",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.ag3s.test_t44e_a8b_coarse_support_footprint",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "tests.ag3s.test_subtask_gate",
+          "name": "test_gpu_attention_sampler_kv_l4_matches_subtask_b",
+          "reason": "GPU + checkpoint; opt in with AG3S_GPU_TESTS=1"
+        },
+        {
+          "class": "tests.trajopt.test_t39_policy_seed",
+          "name": "test_jax_seed_zero_reproduces_a_fresh_server_and_seeds_pair_runs",
+          "reason": "could not import 'jax': No module named 'jax'"
+        },
+        {
+          "class": "tests.trajopt.test_t43tp_fast_to",
+          "name": "test_host_mirror_reads_the_same_values[200]",
+          "reason": "could not import 'torch': No module named 'torch'"
+        },
+        {
+          "class": "tests.trajopt.test_t43tp_fast_to",
+          "name": "test_host_mirror_reads_the_same_values[3000]",
+          "reason": "could not import 'torch': No module named 'torch'"
+        },
+        {
+          "class": "tests.trajopt.test_t43tp_fast_to",
+          "name": "test_host_mirror_on_the_optimizer_is_bit_identical",
+          "reason": "could not import 'torch': No module named 'torch'"
+        }
+      ],
+      "collected_cases": 2818,
+      "missing_cases": []
+    },
+    "benchmark": {
+      "passed": 2670,
+      "failed": 1,
+      "skipped": 6,
+      "errors": 0,
+      "unique_cases": 2677,
+      "failed_cases": [
+        {
+          "class": "tests.trajopt.test_t43t_replay",
+          "name": "test_off_is_bit_identical_to_the_pre_fix_commit",
+          "reason": "AssertionError: to_T42_L1992_16\nassert False\n +  where False = <function array_equal at 0x7629aa3e23b0>(array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\\n         1.00086689]]), array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\\n         1.00086689]]))\n +    where <function array_equal at 0x7629aa3e23b0> = np.array_equal",
+          "type": "failure"
+        }
+      ],
+      "skipped_cases": [
+        {
+          "class": "",
+          "name": "tests.ag3s.test_t32_fine_truncation_curobo",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "tests.ag3s.test_subtask_gate",
+          "name": "test_gpu_attention_sampler_kv_l4_matches_subtask_b",
+          "reason": "GPU + checkpoint; opt in with AG3S_GPU_TESTS=1"
+        },
+        {
+          "class": "tests.trajopt.test_t39_policy_seed",
+          "name": "test_jax_seed_zero_reproduces_a_fresh_server_and_seeds_pair_runs",
+          "reason": "could not import 'jax': No module named 'jax'"
+        },
+        {
+          "class": "tests.trajopt.test_t43tp_fast_to",
+          "name": "test_host_mirror_reads_the_same_values[200]",
+          "reason": "could not import 'torch': No module named 'torch'"
+        },
+        {
+          "class": "tests.trajopt.test_t43tp_fast_to",
+          "name": "test_host_mirror_reads_the_same_values[3000]",
+          "reason": "could not import 'torch': No module named 'torch'"
+        },
+        {
+          "class": "tests.trajopt.test_t43tp_fast_to",
+          "name": "test_host_mirror_on_the_optimizer_is_bit_identical",
+          "reason": "could not import 'torch': No module named 'torch'"
+        }
+      ],
+      "collected_cases": 2676,
+      "missing_cases": []
+    }
+  },
+  "checkouts": {
+    "development": {
+      "root": "/mnt/dev/AG3S_VLA-development",
+      "branch": "feature/ag3s-development",
+      "validated_head": "556a5572abde811d3023d8f5f48139d203f6e2dd",
+      "main": "b672b7e0701b71b767f30c205f521492357d5f8b",
+      "origin": "git@github.com:Ignimkk/AG3S_VLA.git",
+      "dependencies_pinned_and_independent": true,
+      "own_source_paths_and_defaults_verified": true
+    },
+    "benchmark": {
+      "root": "/mnt/dev/AG3S_VLA-benchmark",
+      "branch": "feature/panda-benchmark",
+      "validated_head": "b672b7e0701b71b767f30c205f521492357d5f8b",
+      "main": "b672b7e0701b71b767f30c205f521492357d5f8b",
+      "origin": "git@github.com:Ignimkk/AG3S_VLA.git",
+      "dependencies_pinned_and_independent": true,
+      "own_source_paths_and_defaults_verified": true
+    }
+  },
+  "backup_removal_allowed": true,
+  "known_original_failure": {
+    "test": "test_off_is_bit_identical_to_the_pre_fix_commit",
+    "array": "to_T42_L1992_16",
+    "original_reproduction_log": "ag3s-original-regression-local.log"
+  },
+  "cuda_vla_benchmark_rollout_executed": false,
+  "temporary_migration_backup_removed": true,
+  "original_workspace_retained": true,
+  "intentional_legacy_notice_changes": [
+    "CLAUDE.md",
+    ".claude/ag3s-rules-brief.md",
+    "doc/PROJECT_FOLDER_AND_GIT_MANAGEMENT_FINAL.md",
+    "MIGRATION_NOTICE.md"
+  ]
+}

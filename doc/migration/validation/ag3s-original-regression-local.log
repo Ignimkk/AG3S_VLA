@@ -1,0 +1,336 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  7%]
+........................................................................ [ 10%]
+........................................................................ [ 12%]
+........................................................................ [ 15%]
+........................................................................ [ 17%]
+........................................................................ [ 20%]
+........................................................................ [ 22%]
+........................................................................ [ 25%]
+........................................................................ [ 28%]
+................................s....................................... [ 30%]
+........................................................................ [ 33%]
+........................................................................ [ 35%]
+.......................................
+  IPOPT status         : Solve_Succeeded
+  rows                 : 1360
+  active slots         : 1
+  min h at solution    : -9.177e-09   (>= 0 required)
+  |q* - q_ref|         : 0.2300 rad
+....
+  frame 1: Solve_Succeeded, active slots 1
+  frame 2: Solve_Succeeded, active slots 2  (same solver object, parameters only)
+  min h frame 2        : -9.433e-09
+............................. [ 38%]
+........................................................................ [ 40%]
+..........................................s............................. [ 43%]
+........................................................................ [ 45%]
+........................................................................ [ 48%]
+........................................................................ [ 51%]
+........................................................................ [ 53%]
+........................................................................ [ 56%]
+........................................................................ [ 58%]
+........................................................................ [ 61%]
+........................................................................ [ 63%]
+........................................................................ [ 66%]
+........................................................................ [ 68%]
+.....................................................................ss. [ 71%]
+........................s............................................... [ 74%]
+........................................................................ [ 76%]
+........................................................................ [ 79%]
+....................................F................................... [ 81%]
+..................................................................sss... [ 84%]
+........................................................................ [ 86%]
+........................................................................ [ 89%]
+........................................................................ [ 91%]
+.................................................................s...... [ 94%]
+...........s......................sssss....s....sssss............ssss... [ 97%]
+................................................................sEFFF..s [ 99%]
+ssssssssss                                                               [100%]
+==================================== ERRORS ====================================
+___ ERROR at setup of test_the_model_predicts_mujoco_from_rest_after_a_hold ____
+
+    @pytest.fixture(scope="module")
+    def c1807_t216():
+        name, seq = "T40C1807", 28
+        t0 = int(RP._setup(name)["rows"][seq]["t_step"])
+        assert t0 == 216
+>       return E.load(RP.RUNS[name][1], t0)
+
+tests/sim/test_t43q_servo_sim.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/sim/_t43q_exec.py:34: in load
+    client = H.load_client()
+tests/sim/_hold_replay.py:45: in load_client
+    spec.loader.exec_module(mod)
+<frozen importlib._bootstrap_external>:940: in exec_module
+    ???
+<frozen importlib._bootstrap>:241: in _call_with_frames_removed
+    ???
+pi05_TO_hybrid/rby1_bringup/pi05_infer.py:35: in <module>
+    from rby1_manipulation.control.ik import left_arm_handles, right_arm_handles
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """IK helpers shared by scripted demo-collection scenarios.
+    
+    Design decisions (learned during smoke testing, see follow_mocap.py header):
+    
+    * mink solves over ALL model DoFs by default. RBY1 has a planar base
+      (joint_x/y/th) and a 6-DoF torso. If we let mink use those, kinematic IK
+      reports convergence but the sim EE never reaches the target — the position
+      actuators only drive the arms directly. So every IK call must be masked
+      down to the arm DoFs we actually control.
+    
+    * Joint damping is set to 50 in the default class. Position tracking is
+      therefore slow (~1-2 s per waypoint). For scripted trajectories we run
+      IK once per waypoint to get a target joint config, then interpolate ctrl
+      linearly between waypoints so the actuators receive a smooth ramp.
+    
+    * For each waypoint we also want a stable "hold" period after the ramp so
+      the arm actually settles at the commanded pose before we move on. This is
+      what makes reliable grasp/release timing possible.
+    """
+    from __future__ import annotations
+    
+    from dataclasses import dataclass, field
+    from typing import List, Sequence
+    
+    import mujoco
+>   import mink
+E   ModuleNotFoundError: No module named 'mink'
+
+pi05_TO_hybrid/rby1_manipulation/src/rby1_manipulation/control/ik.py:26: ModuleNotFoundError
+=================================== FAILURES ===================================
+_______________ test_off_is_bit_identical_to_the_pre_fix_commit ________________
+
+harness = (<module 'ground_replay' from '/mnt/dev/work/outputs/impl/T43T/p/ground_replay.py'>, <module 'recov_replay' from '/mnt/dev/work/outputs/impl/T43T/p/recov_replay.py'>, <module 'identity' from '/mnt/dev/work/outputs/impl/T43T/p/identity.py'>)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-334/test_off_is_bit_identical_to_t0')
+
+    def test_off_is_bit_identical_to_the_pre_fix_commit(harness, tmp_path):
+        _, _, I = harness
+        out = tmp_path / "work.npz"
+        I.main(str(out))
+        a, b = np.load(HEAD_NPZ), np.load(out)
+        assert sorted(a.files) == sorted(b.files)
+        for k in a.files:
+            if k == "meta":
+                continue
+>           assert np.array_equal(a[k], b[k]), k
+E           AssertionError: to_T42_L1992_16
+E           assert False
+E            +  where False = <function array_equal at 0x75a68f600630>(array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\n         1.00086689]]), array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\n         1.00086689]]))
+E            +    where <function array_equal at 0x75a68f600630> = np.array_equal
+
+tests/trajopt/test_t43t_replay.py:58: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  benchmark.ag3s.robot_models.urdf_sphere_chain:urdf_sphere_chain.py:687 !!! THIS SPHERE MODEL DOES NOT COVER THE ROBOT !!!
+    18 of 18 capsule(s) are thinner than the URDF says, worst by 27.3 mm (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none).
+    빼는 것과 같은 성질의 flag 다 — 이 capsule 이 무엇에 부딪혀도 그만큼은 아무도 막지 않는다. 기준은 **URDF capsule** 이고, URDF 자체가 mesh 보다 두꺼울 수 있다.
+    - ee_left: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_left: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_left: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_right: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_right: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_right: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_r2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    지금 모델: 구 122 개 · capsule 18 개 (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none)
+    link 별 유효 반지름: ee_finger_l1=19×3.25 mm, ee_finger_l2=19×3.25 mm, ee_finger_r1=19×3.25 mm, ee_finger_r2=19×3.25 mm, ee_left=23×6.22 mm, ee_right=23×6.22 mm
+WARNING  benchmark.ag3s.robot_models.urdf_sphere_chain:urdf_sphere_chain.py:687 !!! THIS SPHERE MODEL DOES NOT COVER THE ROBOT !!!
+    18 of 18 capsule(s) are thinner than the URDF says, worst by 27.3 mm (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none).
+    빼는 것과 같은 성질의 flag 다 — 이 capsule 이 무엇에 부딪혀도 그만큼은 아무도 막지 않는다. 기준은 **URDF capsule** 이고, URDF 자체가 mesh 보다 두꺼울 수 있다.
+    - ee_left: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_left: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_left: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_right: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_right: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_right: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_r2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    지금 모델: 구 122 개 · capsule 18 개 (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none)
+    link 별 유효 반지름: ee_finger_l1=19×3.25 mm, ee_finger_l2=19×3.25 mm, ee_finger_r1=19×3.25 mm, ee_finger_r2=19×3.25 mm, ee_left=23×6.22 mm, ee_right=23×6.22 mm
+_________________ test_the_model_predicts_mujoco_while_moving __________________
+
+    @records
+    def test_the_model_predicts_mujoco_while_moving():
+        name, seq = "T40C1807", 20                     # the fastest capture of the run (0.77 rad/s)
+        t0 = int(RP._setup(name)["rows"][seq]["t_step"])
+>       client, local, _ = E.load(RP.RUNS[name][1], t0)
+
+tests/sim/test_t43q_servo_sim.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/sim/_t43q_exec.py:34: in load
+    client = H.load_client()
+tests/sim/_hold_replay.py:45: in load_client
+    spec.loader.exec_module(mod)
+<frozen importlib._bootstrap_external>:940: in exec_module
+    ???
+<frozen importlib._bootstrap>:241: in _call_with_frames_removed
+    ???
+pi05_TO_hybrid/rby1_bringup/pi05_infer.py:35: in <module>
+    from rby1_manipulation.control.ik import left_arm_handles, right_arm_handles
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """IK helpers shared by scripted demo-collection scenarios.
+    
+    Design decisions (learned during smoke testing, see follow_mocap.py header):
+    
+    * mink solves over ALL model DoFs by default. RBY1 has a planar base
+      (joint_x/y/th) and a 6-DoF torso. If we let mink use those, kinematic IK
+      reports convergence but the sim EE never reaches the target — the position
+      actuators only drive the arms directly. So every IK call must be masked
+      down to the arm DoFs we actually control.
+    
+    * Joint damping is set to 50 in the default class. Position tracking is
+      therefore slow (~1-2 s per waypoint). For scripted trajectories we run
+      IK once per waypoint to get a target joint config, then interpolate ctrl
+      linearly between waypoints so the actuators receive a smooth ramp.
+    
+    * For each waypoint we also want a stable "hold" period after the ramp so
+      the arm actually settles at the commanded pose before we move on. This is
+      what makes reliable grasp/release timing possible.
+    """
+    from __future__ import annotations
+    
+    from dataclasses import dataclass, field
+    from typing import List, Sequence
+    
+    import mujoco
+>   import mink
+E   ModuleNotFoundError: No module named 'mink'
+
+pi05_TO_hybrid/rby1_manipulation/src/rby1_manipulation/control/ik.py:26: ModuleNotFoundError
+___ test_the_resolved_contact_chunk_does_not_touch_the_bar[T40C1807-28-0.0] ____
+
+name = 'T40C1807', seq = 28, margin = 0.0
+
+    @records
+    @pytest.mark.parametrize("name, seq, margin", [("T40C1807", 28, 0.0), ("T41aC1807", 35, None)])
+    def test_the_resolved_contact_chunk_does_not_touch_the_bar(name, seq, margin):
+        t0 = int(RP._setup(name)["rows"][seq]["t_step"])
+>       client, local, _ = E.load(RP.RUNS[name][1], t0)
+
+tests/sim/test_t43q_servo_sim.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/sim/_t43q_exec.py:34: in load
+    client = H.load_client()
+tests/sim/_hold_replay.py:45: in load_client
+    spec.loader.exec_module(mod)
+<frozen importlib._bootstrap_external>:940: in exec_module
+    ???
+<frozen importlib._bootstrap>:241: in _call_with_frames_removed
+    ???
+pi05_TO_hybrid/rby1_bringup/pi05_infer.py:35: in <module>
+    from rby1_manipulation.control.ik import left_arm_handles, right_arm_handles
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """IK helpers shared by scripted demo-collection scenarios.
+    
+    Design decisions (learned during smoke testing, see follow_mocap.py header):
+    
+    * mink solves over ALL model DoFs by default. RBY1 has a planar base
+      (joint_x/y/th) and a 6-DoF torso. If we let mink use those, kinematic IK
+      reports convergence but the sim EE never reaches the target — the position
+      actuators only drive the arms directly. So every IK call must be masked
+      down to the arm DoFs we actually control.
+    
+    * Joint damping is set to 50 in the default class. Position tracking is
+      therefore slow (~1-2 s per waypoint). For scripted trajectories we run
+      IK once per waypoint to get a target joint config, then interpolate ctrl
+      linearly between waypoints so the actuators receive a smooth ramp.
+    
+    * For each waypoint we also want a stable "hold" period after the ramp so
+      the arm actually settles at the commanded pose before we move on. This is
+      what makes reliable grasp/release timing possible.
+    """
+    from __future__ import annotations
+    
+    from dataclasses import dataclass, field
+    from typing import List, Sequence
+    
+    import mujoco
+>   import mink
+E   ModuleNotFoundError: No module named 'mink'
+
+pi05_TO_hybrid/rby1_manipulation/src/rby1_manipulation/control/ik.py:26: ModuleNotFoundError
+__ test_the_resolved_contact_chunk_does_not_touch_the_bar[T41aC1807-35-None] ___
+
+name = 'T41aC1807', seq = 35, margin = None
+
+    @records
+    @pytest.mark.parametrize("name, seq, margin", [("T40C1807", 28, 0.0), ("T41aC1807", 35, None)])
+    def test_the_resolved_contact_chunk_does_not_touch_the_bar(name, seq, margin):
+        t0 = int(RP._setup(name)["rows"][seq]["t_step"])
+>       client, local, _ = E.load(RP.RUNS[name][1], t0)
+
+tests/sim/test_t43q_servo_sim.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/sim/_t43q_exec.py:34: in load
+    client = H.load_client()
+tests/sim/_hold_replay.py:45: in load_client
+    spec.loader.exec_module(mod)
+<frozen importlib._bootstrap_external>:940: in exec_module
+    ???
+<frozen importlib._bootstrap>:241: in _call_with_frames_removed
+    ???
+pi05_TO_hybrid/rby1_bringup/pi05_infer.py:35: in <module>
+    from rby1_manipulation.control.ik import left_arm_handles, right_arm_handles
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """IK helpers shared by scripted demo-collection scenarios.
+    
+    Design decisions (learned during smoke testing, see follow_mocap.py header):
+    
+    * mink solves over ALL model DoFs by default. RBY1 has a planar base
+      (joint_x/y/th) and a 6-DoF torso. If we let mink use those, kinematic IK
+      reports convergence but the sim EE never reaches the target — the position
+      actuators only drive the arms directly. So every IK call must be masked
+      down to the arm DoFs we actually control.
+    
+    * Joint damping is set to 50 in the default class. Position tracking is
+      therefore slow (~1-2 s per waypoint). For scripted trajectories we run
+      IK once per waypoint to get a target joint config, then interpolate ctrl
+      linearly between waypoints so the actuators receive a smooth ramp.
+    
+    * For each waypoint we also want a stable "hold" period after the ramp so
+      the arm actually settles at the commanded pose before we move on. This is
+      what makes reliable grasp/release timing possible.
+    """
+    from __future__ import annotations
+    
+    from dataclasses import dataclass, field
+    from typing import List, Sequence
+    
+    import mujoco
+>   import mink
+E   ModuleNotFoundError: No module named 'mink'
+
+pi05_TO_hybrid/rby1_manipulation/src/rby1_manipulation/control/ik.py:26: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/trajopt/test_t43t_replay.py::test_off_is_bit_identical_to_the_pre_fix_commit
+FAILED tests/sim/test_t43q_servo_sim.py::test_the_model_predicts_mujoco_while_moving
+FAILED tests/sim/test_t43q_servo_sim.py::test_the_resolved_contact_chunk_does_not_touch_the_bar[T40C1807-28-0.0]
+FAILED tests/sim/test_t43q_servo_sim.py::test_the_resolved_contact_chunk_does_not_touch_the_bar[T41aC1807-35-None]
+ERROR tests/sim/test_t43q_servo_sim.py::test_the_model_predicts_mujoco_from_rest_after_a_hold
+4 failed, 2776 passed, 44 skipped, 1398 warnings, 1 error in 831.68s (0:13:51)
