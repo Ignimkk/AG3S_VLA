@@ -10,5 +10,6 @@ export LIBERO_CONFIG_PATH="${LIBERO_CONFIG_PATH:-$AG3S_PROJECT_ROOT/.runtime/lib
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export XLA_FLAGS="${XLA_FLAGS:---xla_gpu_enable_command_buffer=}"
 export PYTHONUNBUFFERED=1
+export MUJOCO_GL="${MUJOCO_GL:-osmesa}"
 mkdir -p "$LIBERO_CONFIG_PATH" "$AG3S_PROJECT_ROOT/outputs"
 cd "$AG3S_PROJECT_ROOT"
