@@ -344,7 +344,7 @@ def test_off_replay_of_recorded_chunks_is_bit_identical_to_the_pre_t41b_code(tmp
     subprocess.run(["tar", "-x", "-C", str(root / "benchmark")], input=archive, check=True)
     expose_legacy_benchmark(root)
     out = tmp_path / "head.npz"
-    env = {**os.environ, "PYTHONPATH": f"{root}:{_ag3s_workspace_path('')}"}
+    env = {**os.environ, "AG3S_ASSET_ROOT": _ag3s_workspace_path("legacy/pi05_TO_hybrid"), "AG3S_CLIENT_SCRIPT": _ag3s_workspace_path("integration/rby1/bringup/pi05_infer.py"), "PYTHONPATH": f"{root}:{_ag3s_workspace_path('')}"}
     proc = subprocess.run([sys.executable, str(pathlib.Path(RP.__file__)), str(out)], env=env,
                           cwd=_ag3s_workspace_path(''), capture_output=True, text=True, timeout=1200)
     assert proc.returncode == 0, proc.stderr[-3000:]
