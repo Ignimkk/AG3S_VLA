@@ -1,0 +1,105 @@
+% !TEX root = ../main.tex
+% Draft 10: evaluation skeleton aligned to the revised claim; no new experiment has been run.
+\section{Experiments}
+\label{sec:experiments}
+The evaluation is organized around five questions:
+\textbf{Q1}, how task completion and forbidden contact change;
+\textbf{Q2}, what attention contributes to target identity and geometric extent;
+\textbf{Q3}, what phase information adds beyond grasp-state rules;
+\textbf{Q4}, which contact representation matters under a fixed controller; and
+\textbf{Q5}, what the complete system costs at run time.
+\tbd{Finalize the evaluation protocol and replace this skeleton with registered results.}
+
+\subsection{Experimental setup}
+\paragraph{Tasks and policy.}
+The existing implementation uses a $\pi_{0.5}$ checkpoint fine-tuned for dual-arm pick-and-place in MuJoCo~\cite{todorov2012mujoco},
+with one supplied active manipulator per episode. The diagnostic scenes place distractors near the grasp target and
+obstacles along the carrying path. Simulation uses rendered depth and waits for the inference server.
+\tbd{Fix the evaluated snapshot, scene conditions, episodes, seeds, and training/tuning/test separation.}
+SafeLIBERO~\cite{hu2026vlsa} is the planned primary benchmark, while the RB-Y1 simulation supports baseline comparisons
+and component ablations. A real RB-Y1 demonstration is planned to assess execution feasibility, without a comparative
+performance claim. \tbd{Complete the SafeLIBERO observation/action adapter, fix its checkpoint and evaluation suites,
+and document whether phase handling uses HSR or a grasp-state rule. Keep robot demonstrations marked pending until recorded.}
+
+\paragraph{Comparisons.}
+On SafeLIBERO, we plan direct runs of $\pi_{0.5}$ alone and with \sys, and comparisons with two or three of VLSA,
+KNOWS, and WBAG~\cite{hu2026vlsa,park2026knows,zhen2026wbag}. Published values retain their source metric definitions;
+incompatible checkpoints, scenarios, or metrics require separate reporting blocks. On RB-Y1, available baseline code
+will be adapted, or a reimplementation explicitly identified, prioritizing KNOWS and VLSA. Component comparisons
+instead retain our controller and replace one target source, phase rule, or contact representation at a time.
+\tbd{Confirm baseline versions, reported versus rerun provenance, input parity, and tuning budgets.}
+
+\paragraph{Metrics.}
+We will report task success, the fraction of trials containing a forbidden contact, and their joint metric,
+\emph{safe success}. Allowed contacts must be specified by object pair, robot link, and task stage; the target and
+destination are not blanket exclusions. Contact scoring uses simulator records independently of the ESDF being tested.
+\tbd{Freeze success/release criteria, the allowed-contact table, sampled-time coverage, and treatment of stops and
+incomplete trials before evaluation.} Safe success is computed per trial, not by multiplying aggregate rates.
+We also report target identity accuracy, extent quality and obstacle retention, stop frequency, and end-to-end latency.
+\tbd{Specify sample counts, aggregation units, and paired confidence intervals.}
+
+\begin{table*}[t]
+\centering\small
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xllccc@{}}
+\toprule
+Method & Result source & Query coverage & Success $\uparrow$ & Contact $\downarrow$ & Safe $\uparrow$ \\
+\midrule
+$\pi_{0.5}$ only & planned rerun & no added filter & -- & -- & -- \\
+\sys\ (ours) & planned rerun & \tbd{final links} & -- & -- & -- \\
+\midrule
+VLSA~\cite{hu2026vlsa} & \tbd{reported/rerun} & end effector & -- & -- & -- \\
+KNOWS~\cite{park2026knows} & \tbd{reported/rerun} & end effector & -- & -- & -- \\
+WBAG~\cite{zhen2026wbag} & \tbd{reported/rerun} & whole body + attached & -- & -- & -- \\
+\bottomrule
+\end{tabularx}
+\caption{SafeLIBERO main-comparison skeleton. The lower block lists baseline candidates, not completed runs.
+Values can share metric columns only after definitions and conditions are matched; incompatible published metrics
+must receive separate labeled blocks. Privileged simulator input in WBAG must be identified in the final comparison.
+\tbd{Select baselines; insert suite/level, sample counts, exact metrics, result sources, and uncertainty.}}
+\label{tab:main}
+\end{table*}
+
+\begin{table}[t]
+\centering\small
+\begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}Xccc@{}}
+\toprule
+Change from full system & Success $\uparrow$ & Contact $\downarrow$ & Safe $\uparrow$ \\
+\midrule
+Geometry-only target selection & -- & -- & -- \\
+External-segmenter target & -- & -- & -- \\
+No phase gate & -- & -- & -- \\
+No target exemption & -- & -- & -- \\
+Global rather than link-specific exclusion & -- & -- & -- \\
+No attached-object queries & -- & -- & -- \\
+Grasp-state rule rather than HSR & -- & -- & -- \\
+Full system & -- & -- & -- \\
+\bottomrule
+\end{tabularx}
+\caption{Matched-controller ablation skeleton. Each row changes one factor with other settings fixed.
+\tbd{Finalize source/gate definitions, hold attachment settings fixed in the HSR comparison, and insert measured results.}}
+\label{tab:ablation}
+\end{table}
+
+\subsection{Results and analysis}
+\paragraph{Q1: task completion and forbidden contact.}
+\tbd{Use Table~\ref{tab:main} to state the supported task/contact trade-off. Explain baseline failures using recorded
+contact events and matched rollouts; do not infer physical safety from fewer stops. Add a separate RB-Y1 simulation
+comparison table once baseline adapters are fixed, and a real-robot demonstration panel if execution is completed.}
+
+\paragraph{Q2: target identity and extent.}
+\tbd{Compare ATS with geometry-only selection and an external segmenter under the same contact rules and CCR.
+Measure target identity separately from observed extent and wrongly excluded obstacle geometry.
+Figure~\ref{fig:fig03_attention_to_3d} should connect these measurements to changed constraints and execution.}
+
+\paragraph{Q3: phase-dependent target handling.}
+\tbd{Compare HSR with a grasp-state/history rule using the same ATS, attachment logic, and controller.
+Report downstream errors such as stale exceptions and erroneous target switching, with task/contact outcomes.
+Use independently defined phase labels; determine whether the benefit supports a main-text or supplementary claim.}
+
+\paragraph{Q4: contact representation.}
+\tbd{Use Table~\ref{tab:ablation} to separate global exclusion, link-specific queries, and attached geometry.
+Pair each supported effect with a recorded failure mechanism; retain only comparisons needed for the central claim.}
+
+\paragraph{Q5: computational cost.}
+\tbd{Report policy serving, separate attention extraction, probe, ATS, field construction, CCR, and communication time.
+Measure end-to-end latency against the nominal 533 ms execution horizon; provide the detailed breakdown in Appendix D.}

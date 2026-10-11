@@ -1,0 +1,18 @@
+{
+  "artifact_id": "T02",
+  "status": "PLANNED_PLACEHOLDER",
+  "claim_ids": [
+    "C005"
+  ],
+  "plan_ids": [
+    "P004"
+  ],
+  "result_ids": [],
+  "numeric_values": null,
+  "is_measured_result": false,
+  "render_source": "paper/tables/table02_generalization/table.tex",
+  "caption_scope": "Unmeasured layout placeholder.",
+  "render_source_sha256": "344e10aca9450b79ac2639c9f9f8ea08c199f62e622f504c69a59116a134040b",
+  "input_sha256": {},
+  "updated_at": "2026-10-05 20:56 KST"
+}

@@ -1,0 +1,23 @@
+% Separate supplementary PDF; never appended to the main submission by default.
+\documentclass[10pt,twocolumn,letterpaper]{article}
+% T1 selects the official Times font metrics with XeTeX/Tectonic as well as pdfLaTeX.
+\usepackage[T1]{fontenc}
+\usepackage[review]{cvpr}
+\input{../latex/preamble}
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+\input{../latex/metadata}
+\begin{document}
+\maketitlesupplementary
+\begin{center}\textbf{DRAFT --- EVIDENCE PENDING}\end{center}
+\section{Scope and status}
+This separate document is a supplementary scaffold.
+It contains no additional experimental result or improved method.
+Essential contributions, main results, and required ablations must remain
+understandable in the main paper.
+\input{experiments/protocol}
+\section{Additional artifacts}
+Additional qualitative records, failure analyses, and timing details may be added
+only after their source and anonymity have been audited.
+No external demo or code link is supplied by this scaffold.
+\end{document}

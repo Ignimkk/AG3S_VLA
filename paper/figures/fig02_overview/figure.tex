@@ -1,0 +1,41 @@
+% F02: Draft 10 conceptual data flow; separate serving and extraction passes are explicit.
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+  x=1cm,y=1cm,font=\scriptsize,>={Stealth[length=1.6mm]},
+  box/.style={draw,rounded corners=1.5pt,align=center,inner sep=3pt,text width=23mm,minimum height=9mm},
+  pol/.style={box,fill=blue!8}, geo/.style={box,fill=green!9},
+  tgt/.style={box,fill=orange!14}, opt/.style={box,fill=violet!10},
+  every path/.style={line width=0.5pt}]
+\node[box] (obs) at (0,3) {RGB + instruction\\+ proprioception};
+\node[pol] (pi) at (3.3,3) {Frozen VLA\\serving pass};
+\node[pol] (chunk) at (6.6,3) {Nominal\\action chunk};
+\node[opt] (sqp) at (9.9,3) {\textbf{CCR}\\executed-horizon SQP};
+\node[opt] (gate) at (13.2,3) {Post-check + gate\\execute / hold};
+\node[pol] (extract) at (3.3,1.4) {Same checkpoint\\additional extraction pass};
+\node[tgt] (ats) at (6.6,1.4) {\textbf{ATS}\\attention + 3D geometry};
+\node[tgt] (lte) at (9.9,1.4) {\textbf{LTE}\\link-specific queries};
+\node[tgt] (grasp) at (13.2,1.4) {Grasp state\\attached geometry};
+\node[box] (depth) at (0,-0.4) {Calibrated depth\\+ capture state};
+\node[tgt] (hsr) at (3.3,-0.4) {\textbf{HSR}\\trained linear probe};
+\node[geo] (field) at (6.6,-0.4) {Self-filtered depth\\TSDF / ESDF};
+\draw[->] (obs)--(pi); \draw[->] (pi)--(chunk); \draw[->] (chunk)--(sqp); \draw[->] (sqp)--(gate);
+\draw[->] (obs.south) |- (extract.west);
+\draw[->] (extract)--node[above,font=\tiny]{attention}(ats);
+\draw[->] (extract)--node[right,font=\tiny]{prefix features}(hsr);
+\draw[->] (hsr.east)--(4.9,-0.4)--(4.9,0.7)--([xshift=-7mm]ats.south);
+\draw[->] (ats)--node[above,font=\tiny]{target}(lte);
+\draw[->] (ats.north)--(6.6,2.15)--node[above,font=\tiny]{target geometry}(13.2,2.15)--(grasp.north);
+\draw[->] (depth.south)--(0,-1.2)--(6.6,-1.2)--(field.south);
+\draw[->] (depth.north)--(0,0.45)--(5.45,0.45)--([xshift=-11mm]ats.south);
+\draw[->] (field.east)-|(lte.south);
+\draw[->] (lte)--(sqp);
+\draw[->] (grasp)--(lte);
+\draw[->,dashed] (gate)--node[right,font=\tiny,align=left]{execution\\feedback}(grasp);
+\end{tikzpicture}
+\caption{\textbf{System overview.} The VLA serving pass produces the nominal chunk. A separate pass of the same frozen
+checkpoint supplies attention for ATS and cached features for the trained HSR probe. Target geometry, phase-dependent
+identity updates, and grasp state configure the link-specific queries used by CCR. Dashed feedback denotes recorded
+execution information. The diagram describes the method, not measured performance.}
+\label{fig:overview}
+\end{figure*}

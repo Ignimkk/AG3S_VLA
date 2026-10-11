@@ -1,5 +1,9 @@
 ## AG3S 검토 — 매 턴 자가 점검 (하네스가 주입한 것)
 
+**적용 범위**: 아래 규칙은 AG3S 연구 구현·실행·검증 작업에 적용한다.
+`paper/`의 논문 준비·작성 작업은 `.claude/rules/cvpr-workspace.md`와
+`paper/SETUP_PLAN.md`를 따른다. 논문 작업만을 위해 연구 실행 로그를 수정하지 않는다.
+
 **기록**: `benchmark/ag3s/docs/AG3S_T0T6_LOG.md` 에 **이어 쓴다.** 새 기록 파일을 만들지 않는다.
 (옛 `AG3S_REVIEW_LOG.md` 는 모듈 검토 국면의 archive — 2026-09-24 부터 이어 쓰지 않는다.)
 

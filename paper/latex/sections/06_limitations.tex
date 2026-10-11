@@ -1,0 +1,10 @@
+% !TEX root = ../main.tex
+\paragraph{Limitations.}
+\label{sec:limitations}
+ATS depends on the selected attention head and the separability of objects in depth. Its geometric exclusion region
+can include nearby obstacle surfaces, and its graspability and destination heuristics are tailored to the current
+pick-and-place setting. HSR uses a closed three-class label set. The present query geometry covers gripper links and
+attached-object approximations, with no self-collision checking. Waypoint checks and observed geometry do not cover
+all intermediate motion or unseen surfaces. The current implementation uses an additional attention-extraction pass;
+end-to-end latency and behavior under sensor noise require evaluation. \tbd{Add a source-linked failure example
+and measured operating limits after the final evaluation.}

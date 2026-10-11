@@ -1,0 +1,25 @@
+{
+  "artifact_id": "F05",
+  "status": "PLANNED_PLACEHOLDER",
+  "claim_ids": [
+    "C007"
+  ],
+  "plan_ids": [
+    "P005"
+  ],
+  "result_ids": [],
+  "source_notes": [
+    "paper/notes/PAPER_STORY.md",
+    "paper/evidence/FIGURES_TABLES.md"
+  ],
+  "render_source": "paper/figures/fig05_analysis/figure.tex",
+  "numeric_values": null,
+  "is_measured_result": false,
+  "caption_scope": "Registered failure and timing analyses are pending.",
+  "render_source_sha256": "8adcb808adeccb08083f043bd298d6a35e10cba6e740871a81a15ade6b643b90",
+  "input_sha256": {
+    "paper/notes/PAPER_STORY.md": "2abe32df6226dbeeb6afd12fed4fda985e01212076ee182f3d02293f7365e6ac",
+    "paper/evidence/FIGURES_TABLES.md": "fc9a41403b8bcbdb73c1cbb70d550300bce902691cdab61bf43e3882153ca049"
+  },
+  "updated_at": "2026-10-05 20:56 KST"
+}

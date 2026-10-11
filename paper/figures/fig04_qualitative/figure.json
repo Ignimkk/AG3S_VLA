@@ -1,0 +1,25 @@
+{
+  "artifact_id": "F04",
+  "status": "PLANNED_PLACEHOLDER",
+  "claim_ids": [
+    "C004"
+  ],
+  "plan_ids": [
+    "P001"
+  ],
+  "result_ids": [],
+  "source_notes": [
+    "paper/notes/PAPER_STORY.md",
+    "paper/evidence/FIGURES_TABLES.md"
+  ],
+  "render_source": "paper/figures/fig04_qualitative/figure.tex",
+  "numeric_values": null,
+  "is_measured_result": false,
+  "caption_scope": "Matched trajectories and independent contact outcomes are pending.",
+  "render_source_sha256": "3386dcd37dd9501d6582057f0ba1409f59dd5fda869773f053f4069fe29dd935",
+  "input_sha256": {
+    "paper/notes/PAPER_STORY.md": "2abe32df6226dbeeb6afd12fed4fda985e01212076ee182f3d02293f7365e6ac",
+    "paper/evidence/FIGURES_TABLES.md": "fc9a41403b8bcbdb73c1cbb70d550300bce902691cdab61bf43e3882153ca049"
+  },
+  "updated_at": "2026-10-05 20:56 KST"
+}

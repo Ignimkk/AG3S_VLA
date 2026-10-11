@@ -1,0 +1,23 @@
+{
+  "artifact_id": "F06",
+  "status": "SCHEMATIC_NOT_MEASURED",
+  "claim_ids": [
+    "C003"
+  ],
+  "plan_ids": [
+    "P003"
+  ],
+  "result_ids": [],
+  "source_notes": [
+    "paper/notes/METHOD_FACTS_DRAFT1.md"
+  ],
+  "render_source": "paper/figures/fig06_exemption/figure.tex",
+  "numeric_values": null,
+  "is_measured_result": false,
+  "caption_scope": "Schematic of querier-dependent exemption; not data.",
+  "render_source_sha256": "6607e8f158980db5a80fd74f441aaa713bd472ae2c89bfd161a422b085e9fe37",
+  "input_sha256": {
+    "paper/notes/METHOD_FACTS_DRAFT1.md": "722b327f0fd64bb10107fb981ab821d24237b6b7c323d7420bdc0ab54c906ee6"
+  },
+  "updated_at": "2026-10-06 KST"
+}

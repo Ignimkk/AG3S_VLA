@@ -1,0 +1,21 @@
+% F01: Draft 10 storyboard; no measured scene or result is depicted.
+\begin{figure*}[t]
+\centering
+\begin{tabularx}{\textwidth}{@{}XXX@{}}
+\toprule
+\textbf{(a) Ground the task target} & \textbf{(b) Permit contact selectively} & \textbf{(c) Update the object's role} \\
+\midrule
+VLA attention + depth identify the observed target geometry without an external segmenter.
+& Contact links use a target-excluded query; other modeled links retain the scene query.
+& A confirmed grasp transfers the target into attached geometry; detachment returns it to scene reconstruction. \\
+\midrule
+\tbd{RGB/attention and target point cloud from one recorded episode.}
+& \tbd{Same scene: no exemption, global exclusion, and link-specific queries.}
+& \tbd{Carry/release frames with attached geometry and contact events.} \\
+\bottomrule
+\end{tabularx}
+\caption{\textbf{From visual relevance to contact constraints.} \sys\ connects an attention-derived 3D target to
+link-specific contact handling and attached-object queries. This storyboard specifies the intended real-scene teaser;
+measured images and comparisons are pending.}
+\label{fig:teaser}
+\end{figure*}
