@@ -203,9 +203,11 @@ def server_args(chunk_dir: pathlib.Path, extra: tuple = ()):
     from AG3S.trajopt import serve_safe
 
     proc = chunk_dir.parent.parent / "server_proc.txt"
-    line = next(x for x in proc.read_text().splitlines() if "AG3S.trajopt.serve_safe" in x)
+    modules = ("AG3S.trajopt.serve_safe", "benchmark.trajopt.serve_safe")
+    line = next(x for x in proc.read_text().splitlines() if any(name in x for name in modules))
     tokens = shlex.split(line)
-    argv = tokens[tokens.index("AG3S.trajopt.serve_safe") + 1:] + list(extra)
+    module = next(name for name in modules if name in tokens)
+    argv = tokens[tokens.index(module) + 1:] + list(extra)
     return serve_safe.build_parser().parse_args(argv), " ".join(argv)
 
 
