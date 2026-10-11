@@ -22,7 +22,7 @@ effort: high
 
 | 쓴다 | 쓰지 않는다 |
 |---|---|
-| `AG3S/ag3s/docs/*.md` (로그·계획서) | `benchmark/**/*.py` |
+| `AG3S/ag3s/docs/*.md` (로그·계획서) | `AG3S/**/*.py` · `Baseline/**/*.py` · `benchmark/**/*.py` · `integration/**/*.py` · `common/**/*.py` |
 | `references/legacy-papers/**` | `AG3S/ag3s/docs/figures/**` — verifier 가 만든다. 너는 **링크만** 한다 |
 | | `<STEP>.verify.json` · `<STEP>.impl.md` |
 

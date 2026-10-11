@@ -30,3 +30,10 @@ dist/
 /AG3S/ag3s/asset/data/attention_16d_headfix.npz
 /AG3S/ag3s/asset/data/attention_16d_long.npz
 /AG3S/ag3s/asset/data/attention_16d_t2.npz
+
+# New large inputs and installed binaries are external artifacts.
+/AG3S/ag3s/asset/data/*.npz
+/AG3S/ag3s/asset/data/*.npy
+/paper/tools/bin/
+core
+core.*

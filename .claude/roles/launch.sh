@@ -21,10 +21,10 @@ source "$ROOT/scripts/setup/env.sh"
 case "${1:-lead}" in
   lead)        exec "$CLI" ;;
   implementer|impl|a1)
-    exec "$CLI" --agent ag3s-implementer --settings "$ROOT/.claude/roles/implementer.settings.json" "${@:2}" ;;
+    exec "$CLI" --agent ag3s-implementer --settings "$(python3 "$ROOT/scripts/setup/materialize_role_settings.py" implementer)" "${@:2}" ;;
   verifier|verify|a2)
-    exec "$CLI" --agent ag3s-verifier    --settings "$ROOT/.claude/roles/verifier.settings.json" "${@:2}" ;;
+    exec "$CLI" --agent ag3s-verifier    --settings "$(python3 "$ROOT/scripts/setup/materialize_role_settings.py" verifier)" "${@:2}" ;;
   scribe|a3)
-    exec "$CLI" --agent ag3s-scribe      --settings "$ROOT/.claude/roles/scribe.settings.json" "${@:2}" ;;
+    exec "$CLI" --agent ag3s-scribe      --settings "$(python3 "$ROOT/scripts/setup/materialize_role_settings.py" scribe)" "${@:2}" ;;
   *) echo "알 수 없는 역할: $1  (lead|implementer|verifier|scribe)" >&2; exit 2 ;;
 esac

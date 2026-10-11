@@ -47,38 +47,18 @@ Sub-agent의 상세 역할과 작업 범위는 `.claude/agents/`의 정의를 �
 새로운 session을 시작하면 `.claude/agents/`를 확인하고, 작업 성격에 맞는 sub-agent를 사용하여
 구현, 검증, 기록을 수행한다. 각 sub-agent는 자신에게 정의된 file ownership과 작업 범위를 지킨다.
 
-## 환경
+## 현재 환경
 
-현재 접속한 `${AG3S_PROJECT_ROOT}`는 공동 작업 공간이자 GPU server이다. 이곳에서는 주로 model inference,
-AG3S, cuRobo 및 trajopt를 수행한다.
+각 checkout은 별도 `.python/`·`.venv-ag3s`·output·cache를 사용한다.
+`source scripts/setup/env.sh` 후 `.venv-ag3s/bin/python`으로 CPU 검증을 실행한다.
+GPU/OpenPI·cuRobo 환경과 로컬 PC 환경은 아직 이번 구조로 설치하지 않았다.
+기존 workspace의 venv를 복사하거나 새 Python code의 import 경로로 사용하지 않는다.
+Checkpoint·dataset·녹화 자료만 `AG3S_LEGACY_STORAGE`(기본 `/mnt/dev/work`)에서 읽는다.
+기존 “OpenPI submodule 내부의 venv를 쓴다”는 지침은 현재 통합 구조에 적용하지 않는다.
+OpenPI fork는 `third_party/openpi/`에 직접 추적된다.
 
-`~/dev_ws/vla/pi0_TO_ws`는 local PC의 작업 공간이다. 현재는 이 local PC에서 SSH를 통해 GPU server에
-접속하고 있다. MuJoCo는 local PC에서 실행하며, GPU server에 input을 전달하고 output을 받아
-simulation을 수행한다.
-
-### GPU server에서 model 실행 시 주의사항
-
-GPU server에서 model을 실행할 때는 다음 environment variable을 반드시 설정한다.
-
-```bash
-OPENPI_DATA_HOME=${AG3S_PROJECT_ROOT}/.cache/openpi \
-XLA_FLAGS="--xla_gpu_enable_command_buffer=" \
-XLA_PYTHON_CLIENT_PREALLOCATE=false \
-PYTHONUNBUFFERED=1 \
-.venv/bin/python <실행할_script.py> [arguments]
-```
-
-### Local PC에서 MuJoCo client 실행 시 주의사항
-
-Local PC(`~/dev_ws/vla/pi0_TO_ws`)에서 client를 실행할 때는 **`third_party/openpi/.venv/bin/python`을 쓴다.**
-system python이나 workspace 최상위의 다른 venv가 아니다 — openpi가 vendored submodule이고
-그 안의 venv에만 필요한 dependency가 들어 있다.
-
-```bash
-cd ~/dev_ws/vla/pi0_TO_ws
-third_party/openpi/.venv/bin/python -u integration/rby1/bringup/pi05_infer.py [arguments]
-```
-
-GPU server 쪽 경로(`${AG3S_PROJECT_ROOT}/.venv-openpi-live/bin/python`)와 **다르다.** 양쪽이 다른
-interpreter를 쓰므로, server용 명령을 그대로 local에 옮겨 적으면 실행되지 않는다.
-
+GPU 실행 시 `OPENPI_DATA_HOME`은 자기 checkout의 `.cache/openpi`,
+`XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 사용한다.
+실제 VLA 환경·체크포인트·robot/camera adapter 검증은 다음 단계다.
+Migration 검증과 인수인계는 `doc/migration/IMPLEMENTATION_REPORT.md`에 기록한다.
+기존 단계 로그는 그 로그의 source 기준과 실제 branch가 일치할 때만 이어 쓴다.

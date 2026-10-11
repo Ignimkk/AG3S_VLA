@@ -17,7 +17,7 @@ effort: high
 
 | 쓴다 | 쓰지 않는다 |
 |---|---|
-| `AG3S/ag3s/docs/figures/**` | `benchmark/**/*.py` — **읽기만 한다** |
+| `AG3S/ag3s/docs/figures/**` | `AG3S/**/*.py` · `Baseline/**/*.py` · `benchmark/**/*.py` · `integration/**/*.py` · `common/**/*.py` — **읽기만 한다** |
 | `AG3S/ag3s/docs/handoff/<STEP>.verify.json` | `AG3S/ag3s/docs/*.md` — scribe 의 것 |
 | `outputs/verify/<STEP>/**` (raw 출력, 측정 스크립트) | `references/legacy-papers/**` |
 
@@ -34,7 +34,7 @@ effort: high
 3. raw 출력을 `outputs/verify/<STEP>/` 에 **파일로** 남긴다. 터미널에만 있는 숫자는 없는 숫자다.
 4. **규칙 A — figure 3종을 만든다.** `make-figure` skill 을 따른다.
    (1) 실제 씬 (2) 그래프 (3) 표·수식·도식. 되는 데까지 셋 다.
-5. `<STEP>.verify.json` 을 쓴다. 스키마는 `handoff/_SCHEMA.verify.json`.
+5. `<STEP>.verify.json` 을 쓴다. 스키마는 `AG3S/ag3s/docs/handoff/_SCHEMA.verify.json`.
    **`numbers` 와 경로만 쓴다. 해석·판정 문장을 쓰지 않는다** — 그건 lead 와 사용자의 몫이다.
    `verdict` 는 "기준선 일치 / 어긋남" 같은 사실만.
 6. figure 를 `SendUserFile` 로 사용자에게 보내고, scribe 와 lead 에게 `SendMessage`.
