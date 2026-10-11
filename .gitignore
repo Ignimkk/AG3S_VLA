@@ -6,7 +6,7 @@ __pycache__/
 .venv*/
 .runtime/
 .cache/
-outputs/
+/outputs/
 storage/
 .vscode/
 build/
@@ -22,3 +22,11 @@ dist/
 *.whl
 .python/
 .setup-tools/
+/paper/tools/bin/tectonic
+/AG3S/ag3s/asset/data/attention_16d_ep1800.npz
+/AG3S/ag3s/asset/data/attention_16d_ep1807.npz
+/AG3S/ag3s/asset/data/attention_16d_ep1850.npz
+/AG3S/ag3s/asset/data/attention_16d_ep1900.npz
+/AG3S/ag3s/asset/data/attention_16d_headfix.npz
+/AG3S/ag3s/asset/data/attention_16d_long.npz
+/AG3S/ag3s/asset/data/attention_16d_t2.npz

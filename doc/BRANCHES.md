@@ -64,3 +64,12 @@ module objects in this checkout; new code uses `AG3S.*` and `Baseline.*` directl
 Run `bash scripts/setup/create_cpu_env.sh` to create an independent CPU environment
 and Python installation in each checkout. GPU/VLA and benchmark environments are
 separate setup tasks; this migration does not claim an end-to-end rollout result.
+
+## External artifacts
+
+Ignored raw attention recordings and the installed paper tool binary are stored
+outside Git. `experiments/manifests/legacy-artifacts.json` records their original
+paths and SHA-256. Local ignored links resolve only these immutable inputs, not
+another checkout's Python source. None of the newly committed checkpoint blobs
+exceeds GitHub's 100 MiB limit. Original commit objects and original tags remain
+unchanged; only unpublished migration checkpoints were corrected before push.

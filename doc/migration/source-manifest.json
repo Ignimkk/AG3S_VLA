@@ -8,8 +8,8 @@
     "openpi": "df127613c06c82567bec65f6e7e2b401dff8fa59"
   },
   "checkpoint_sources": {
-    "workspace": "971f814c48af67f0369aa7a3b8e99ab2d8173eae",
-    "benchmark": "e055aa25f6e5ddda6aefaa035384e123dea33f81",
+    "workspace": "a5dca644b7676d4cd4feafb1506de9f518aeb420",
+    "benchmark": "dd0ddff4d0dd4415c1ae2c5774bc0260d354d943",
     "pi05_TO_hybrid": "f62ab814e867912af3cecea52519d00c470d39e3",
     "openpi": "df127613c06c82567bec65f6e7e2b401dff8fa59",
     "libero": "f78abd68ee283de9f9be3c8f7e2a9ad60246e95c",
@@ -55,5 +55,6 @@
   "backup_scope": "All Git metadata and tracked files; all nonignored untracked files; ignored source/docs/launchers. Large datasets, checkpoints, cache, recordings and virtual environments remain untouched at original paths and are not duplicated.",
   "original_working_trees_preserved": true,
   "workspace_v2_selection": "last first-parent workspace commit before benchmark/v2 committer time; no workspace v2 tag exists",
-  "v11ab_launchers": "legacy untracked outputs/verify/T43/V11/p scripts; no rollout result claimed"
+  "v11ab_launchers": "legacy untracked outputs/verify/T43/V11/p scripts; no rollout result claimed",
+  "external_artifact_manifest": "experiments/manifests/legacy-artifacts.json"
 }
