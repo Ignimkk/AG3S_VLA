@@ -13,6 +13,7 @@
 """
 
 from __future__ import annotations
+from common.workspace import workspace_path as _ag3s_workspace_path
 
 import argparse
 import json
@@ -55,7 +56,7 @@ def main() -> None:
     frame_path = pathlib.Path(args.frame)
     if not frame_path.exists():
         raise SystemExit(f"{frame_path} 가 없다. curobo/export_frame.py 로 먼저 구워라:\n"
-                         f"  MUJOCO_GL=osmesa PYTHONPATH=${AG3S_PROJECT_ROOT} "
+                         f"  MUJOCO_GL=osmesa PYTHONPATH={_ag3s_workspace_path('')} "
                          f".venv-openpi-live/bin/python -m "
                          f"AG3S.ag3s.experiments.curobo.export_frame "
                          f"--records <기록> --step <n> --out {frame_path}")

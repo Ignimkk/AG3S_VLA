@@ -73,3 +73,9 @@ paths and SHA-256. Local ignored links resolve only these immutable inputs, not
 another checkout's Python source. None of the newly committed checkpoint blobs
 exceeds GitHub's 100 MiB limit. Original commit objects and original tags remain
 unchanged; only unpublished migration checkpoints were corrected before push.
+
+The fixture setup also materializes this branch's original benchmark source under
+`.runtime/legacy-benchmark` for Git-history comparisons. Archived numerical
+references expose canonical package entry points, ensuring the reference runs
+its archived algorithm instead of accidentally importing the current method.
+CPU simulation test dependencies are pinned in `environments/testing/requirements.txt`.

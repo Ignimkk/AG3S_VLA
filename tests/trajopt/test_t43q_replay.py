@@ -10,6 +10,7 @@ The executed outcome (MuJoCo, true mesh) is in `tests/sim/test_t43q_servo_sim.py
 """
 
 from __future__ import annotations
+from scripts.setup.reference_layout import expose_legacy_benchmark
 from common.workspace import workspace_path as _ag3s_workspace_path
 
 import json
@@ -58,6 +59,7 @@ def _reverted_tree(root: pathlib.Path) -> pathlib.Path:
         text = subprocess.run(["git", "-C", str(src), "show", f"{PRE_T43}:trajopt/{name}"],
                               capture_output=True, check=True, text=True).stdout
         (traj / name).write_text(text)
+    expose_legacy_benchmark(root)
     return root
 
 
@@ -66,7 +68,7 @@ def _reverted_tree(root: pathlib.Path) -> pathlib.Path:
 def test_off_replay_of_recorded_chunks_is_bit_identical_to_the_pre_t43_code(tmp_path):
     root = _reverted_tree(tmp_path / "head")
     out = tmp_path / "head.npz"
-    env = {**os.environ, "PYTHONPATH": f"{root}:${AG3S_PROJECT_ROOT}"}
+    env = {**os.environ, "PYTHONPATH": f"{root}:{_ag3s_workspace_path('')}"}
     proc = subprocess.run([sys.executable, str(pathlib.Path(RP.__file__)), str(out)], env=env,
                           cwd=_ag3s_workspace_path(''), capture_output=True, text=True, timeout=1800)
     assert proc.returncode == 0, proc.stderr[-3000:]

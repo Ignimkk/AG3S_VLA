@@ -20,6 +20,7 @@ T40 I (C1807 seq 28): HOLD 세 청크 뒤 계획의 첫 스텝이 q_now 에서 1
 """
 
 from __future__ import annotations
+from scripts.setup.reference_layout import expose_legacy_benchmark
 from common.workspace import workspace_path as _ag3s_workspace_path
 
 import json
@@ -341,8 +342,9 @@ def test_off_replay_of_recorded_chunks_is_bit_identical_to_the_pre_t41b_code(tmp
     archive = subprocess.run(["git", "-C", _ag3s_workspace_path('legacy/benchmark'), "archive", BASELINE, "--", ".",
                               ":(exclude)ag3s/docs"], capture_output=True, check=True).stdout
     subprocess.run(["tar", "-x", "-C", str(root / "benchmark")], input=archive, check=True)
+    expose_legacy_benchmark(root)
     out = tmp_path / "head.npz"
-    env = {**os.environ, "PYTHONPATH": f"{root}:${AG3S_PROJECT_ROOT}"}
+    env = {**os.environ, "PYTHONPATH": f"{root}:{_ag3s_workspace_path('')}"}
     proc = subprocess.run([sys.executable, str(pathlib.Path(RP.__file__)), str(out)], env=env,
                           cwd=_ag3s_workspace_path(''), capture_output=True, text=True, timeout=1200)
     assert proc.returncode == 0, proc.stderr[-3000:]

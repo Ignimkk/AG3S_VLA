@@ -1,27 +1,20 @@
-"""Materialize the original pi05/v2 for tests that compare historical Git snapshots.
-
-Only the ignored .runtime directory is written. The object store is shared with
-this same checkout, never with the other development checkout or /mnt/dev/work.
-This frozen fixture is not the current integration client under test.
-"""
+"""Frozen pi05 and benchmark snapshots for historical comparison tests, local to this checkout."""
 from pathlib import Path
 import json
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
-DEST = ROOT / ".runtime/legacy-pi05"
 MANIFEST = json.loads((ROOT / "doc/migration/source-manifest.json").read_text())
-PIN = MANIFEST["original_heads"]["pi05_TO_hybrid"]
+PINS = {"pi05": MANIFEST["original_heads"]["pi05_TO_hybrid"],
+        "benchmark": MANIFEST["sources"]["benchmark"]}
 
-def run(*args):
-    subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
-
-if not DEST.exists():
-    DEST.parent.mkdir(parents=True, exist_ok=True)
-    run("git", "clone", "--shared", "--no-checkout", str(ROOT), str(DEST))
-    run("git", "-C", str(DEST), "checkout", "--detach", PIN)
-    run("git", "-C", str(DEST), "remote", "set-url", "origin", "git@github.com:Ignimkk/AG3S_VLA.git")
-else:
-    actual = subprocess.check_output(["git", "-C", str(DEST), "rev-parse", "HEAD"], text=True).strip()
-    assert actual == PIN, (actual, PIN)
-print(DEST)
+for name, pin in PINS.items():
+    dest = ROOT / (".runtime/legacy-" + name)
+    if not dest.exists():
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        subprocess.run(["git", "clone", "--shared", "--no-checkout", str(ROOT), str(dest)], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "-C", str(dest), "checkout", "--detach", pin], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "-C", str(dest), "remote", "set-url", "origin", "git@github.com:Ignimkk/AG3S_VLA.git"], check=True)
+    actual = subprocess.check_output(["git", "-C", str(dest), "rev-parse", "HEAD"], text=True).strip()
+    assert actual == pin, (actual, pin)
+    print(dest)
