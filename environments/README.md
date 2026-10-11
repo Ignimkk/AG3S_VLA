@@ -21,3 +21,13 @@ inside archived documentation and verification JSON were preserved, not falsifie
 CPU bootstrap: `bash scripts/setup/create_cpu_env.sh` installs Python 3.11.16 and
 the recorded CPU pins into `.venv-ag3s` of this checkout. Package files are copied,
 not linked across the two environments. Source `scripts/setup/env.sh` before tests.
+
+
+## Editable package
+
+`pyproject.toml`은 직접 관리 Python package만 editable 설치한다.
+버전 `0.0.0`은 package 메타데이터용이며 AG3S release나 실험 버전이 아니다.
+수치 dependency는 각 environment requirements/기존 OpenPI lockfile을 사용한다.
+Robot assets·submodule·대형 input을 wheel에 포함하지 않으므로 이 프로젝트는
+`uv pip install --python .venv-ag3s/bin/python --no-deps -e .`로 개발 checkout에서 사용한다.
+ROS manipulation/OpenPI 실행 경로는 `source scripts/setup/env.sh`가 설정한다.

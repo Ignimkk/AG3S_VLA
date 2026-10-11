@@ -79,3 +79,11 @@ The fixture setup also materializes this branch's original benchmark source unde
 references expose canonical package entry points, ensuring the reference runs
 its archived algorithm instead of accidentally importing the current method.
 CPU simulation test dependencies are pinned in `environments/testing/requirements.txt`.
+
+
+## Latest handoff
+
+`doc/migration/CLAUDE_HANDOFF.md`에 새 세션의 첫 확인과 남은 benchmark 작업을 기록한다.
+`scripts/setup/prepare_legacy_artifacts.py --storage /mnt/dev/work`는 manifest의
+SHA-256을 확인한 뒤 ignored input link만 복원한다. 다른 checkout의 source는 연결하지 않는다.
+`pyproject.toml` editable package와 환경 requirements는 알고리즘 release 기준과 구분한다.

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=75,<81", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ag3s-vla-workspace"
+version = "0.0.0"
+description = "Editable development checkout for AG3S VLA integration"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["AG3S", "AG3S.*", "Baseline", "Baseline.*", "common", "common.*", "benchmark"]
+exclude = ["*.docs", "*.docs.*", "*.experiments", "*.experiments.*", "*.asset.data"]
+namespaces = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "integration/rby1/manipulation/src"]
