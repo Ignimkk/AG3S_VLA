@@ -4,7 +4,7 @@ import os
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-def workspace_path(relative: str) -> str:
+def workspace_path(relative: str = "") -> str:
     if relative in {"legacy/pi05_TO_hybrid", "legacy/benchmark"}:
         name = "pi05" if relative.endswith("pi05_TO_hybrid") else "benchmark"
         fixture = PROJECT_ROOT / (".runtime/legacy-" + name)
