@@ -38,3 +38,10 @@ SessionStart/UserPromptSubmit hook은 실제 root·branch·HEAD·목적을 주�
 SafeLIBERO Spatial Level I/II pilot → 전체 SafeLIBERO → LIBERO-Safety 추가 평가.
 아직 Panda adapter 기능과 benchmark rollout을 구현/실행하지 않았다.
 GPU/VLA dependency 및 checkpoint, Panda geometry/camera calibration, 평가 protocol을 먼저 확정한다.
+
+## V11AB benchmark 실험 계획 — 2026-10-12 개정
+
+최신 실행 계획은 [develope_PLAN_SUMMARY.md](../develope_PLAN_SUMMARY.md)를 읽는다.
+평가 대상은 paired-v2 **V11AB**로 고정한다. V7g/V8 선정 및 strong-rule/EE optimizer의 묵시적 대체 지침은 적용하지 않는다.
+Panda adapter → LIBERO Spatial → SafeLIBERO Spatial I/II pilot → 전체 SafeLIBERO → LIBERO-Safety 순서로 진행한다.
+Variant·공식 metric·통과 gate·고유 run 저장 규칙은 새 계획을 따른다. 이번 문서 개정은 rollout 수행 결과가 아니다.
