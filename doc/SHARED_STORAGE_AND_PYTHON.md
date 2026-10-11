@@ -76,6 +76,9 @@ python -c 'import sys; print(sys.executable); print(sys.version)'
 python scripts/setup/check_workspace.py
 ```
 
+User-level `/root/.local/bin/python3.11` shim은 아직 이전 workspace의 `.python`을 가리킨다(전역 파일이라 수정하지 않음).
+`env.sh`는 bare `python3.11`이 이전 workspace로 해석될 때만 ignored `.runtime/bin/python3.11`(자기 `.python`)을 PATH 앞에 둔다.
+이미 활성화한 venv의 `python3.11`은 그대로 우선한다.
 두 새 CPU 환경의 Python은 3.11.16이다. 기존 editable install 또는 venv를 두 branch가 공유하지 않는다.
 현재 확인한 이전 환경은 다음과 같다. 이 표는 재현 참고이며 새 실행 경로가 아니다.
 

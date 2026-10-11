@@ -33,4 +33,14 @@ export XLA_FLAGS="${XLA_FLAGS:---xla_gpu_enable_command_buffer=}"
 export PYTHONUNBUFFERED=1
 export MUJOCO_GL="${MUJOCO_GL:-osmesa}"
 mkdir -p "$LIBERO_CONFIG_PATH" "$AG3S_PROJECT_ROOT/outputs"
+# A user-level python3.11 shim may still resolve into the retired workspace.
+# Shadow only that name with this checkout's interpreter; an active venv keeps precedence.
+case "$(readlink -f "$(command -v python3.11 2>/dev/null)" 2>/dev/null)" in
+  /mnt/dev/work/*)
+    if [ -x "$AG3S_PROJECT_ROOT/.python/cpython-3.11-linux-x86_64-gnu/bin/python3.11" ]; then
+      mkdir -p "$AG3S_PROJECT_ROOT/.runtime/bin"
+      ln -sfn "$AG3S_PROJECT_ROOT/.python/cpython-3.11-linux-x86_64-gnu/bin/python3.11" "$AG3S_PROJECT_ROOT/.runtime/bin/python3.11"
+      export PATH="$AG3S_PROJECT_ROOT/.runtime/bin:$PATH"
+    fi ;;
+esac
 cd "$AG3S_PROJECT_ROOT"
