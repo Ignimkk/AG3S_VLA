@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "storage_root_environment": "AG3S_STORAGE_ROOT",
+  "default_storage_root": "sibling AG3S_VLA-storage directory",
+  "legacy_namespace": "legacy-inputs",
+  "policy": "Shared immutable inputs; each checkout owns writable caches, environments and new outputs",
+  "inputs": [
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/checkpoints",
+      "storage_relative_path": "checkpoints/rby1"
+    },
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/data",
+      "storage_relative_path": "datasets/rby1"
+    },
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/lerobot_atomic_20260825",
+      "storage_relative_path": "datasets/lerobot-atomic"
+    },
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/lerobot_transport",
+      "storage_relative_path": "datasets/lerobot-transport"
+    },
+    {
+      "legacy_relative_path": "data",
+      "storage_relative_path": "datasets/workspace"
+    },
+    {
+      "legacy_relative_path": "records",
+      "storage_relative_path": "recordings/records"
+    },
+    {
+      "legacy_relative_path": "run_0004",
+      "storage_relative_path": "recordings/run_0004"
+    },
+    {
+      "legacy_relative_path": "run_0005",
+      "storage_relative_path": "recordings/run_0005"
+    },
+    {
+      "legacy_relative_path": "run_16d_ep1800",
+      "storage_relative_path": "recordings/run_16d_ep1800"
+    },
+    {
+      "legacy_relative_path": "outputs",
+      "storage_relative_path": "results/workspace"
+    },
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/outputs",
+      "storage_relative_path": "results/rby1"
+    },
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/logs",
+      "storage_relative_path": "results/rby1-logs"
+    },
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/backups",
+      "storage_relative_path": "backups/rby1"
+    },
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/cache",
+      "storage_relative_path": "cache/rby1"
+    },
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/openpi/assets",
+      "storage_relative_path": "assets/openpi"
+    },
+    {
+      "legacy_relative_path": "pi05_TO_hybrid/openpi/policy_records",
+      "storage_relative_path": "recordings/policy_records"
+    },
+    {
+      "legacy_relative_path": "paper/tools/bin/tectonic",
+      "storage_relative_path": "tools/tectonic"
+    },
+    {
+      "legacy_relative_path": ".setup-tools/bin/uv",
+      "storage_relative_path": "tools/uv"
+    },
+    {
+      "legacy_relative_path": "attention_step1_run0002.npz",
+      "storage_relative_path": "assets/attention/attention_step1_run0002.npz"
+    },
+    {
+      "legacy_relative_path": "attention_step1_run0002_seeds012.npz",
+      "storage_relative_path": "assets/attention/attention_step1_run0002_seeds012.npz"
+    },
+    {
+      "legacy_relative_path": "attention_step1_run0004.npz",
+      "storage_relative_path": "assets/attention/attention_step1_run0004.npz"
+    },
+    {
+      "legacy_relative_path": "attention_step1_run0005.npz",
+      "storage_relative_path": "assets/attention/attention_step1_run0005.npz"
+    },
+    {
+      "legacy_relative_path": "benchmark/ag3s/asset/data/attention_16d_ep1800.npz",
+      "storage_relative_path": "assets/attention/attention_16d_ep1800.npz"
+    },
+    {
+      "legacy_relative_path": "benchmark/ag3s/asset/data/attention_16d_ep1807.npz",
+      "storage_relative_path": "assets/attention/attention_16d_ep1807.npz"
+    },
+    {
+      "legacy_relative_path": "benchmark/ag3s/asset/data/attention_16d_ep1850.npz",
+      "storage_relative_path": "assets/attention/attention_16d_ep1850.npz"
+    },
+    {
+      "legacy_relative_path": "benchmark/ag3s/asset/data/attention_16d_ep1900.npz",
+      "storage_relative_path": "assets/attention/attention_16d_ep1900.npz"
+    },
+    {
+      "legacy_relative_path": "benchmark/ag3s/asset/data/attention_16d_headfix.npz",
+      "storage_relative_path": "assets/attention/attention_16d_headfix.npz"
+    },
+    {
+      "legacy_relative_path": "benchmark/ag3s/asset/data/attention_16d_long.npz",
+      "storage_relative_path": "assets/attention/attention_16d_long.npz"
+    },
+    {
+      "legacy_relative_path": "benchmark/ag3s/asset/data/attention_16d_t2.npz",
+      "storage_relative_path": "assets/attention/attention_16d_t2.npz"
+    },
+    {
+      "legacy_relative_path": "state_138.npy",
+      "storage_relative_path": "recordings/states/state_138.npy"
+    },
+    {
+      "legacy_relative_path": "state_216.npy",
+      "storage_relative_path": "recordings/states/state_216.npy"
+    },
+    {
+      "legacy_relative_path": "state_311.npy",
+      "storage_relative_path": "recordings/states/state_311.npy"
+    },
+    {
+      "legacy_relative_path": "state_314.npy",
+      "storage_relative_path": "recordings/states/state_314.npy"
+    },
+    {
+      "legacy_relative_path": "ag3s_records.tgz",
+      "storage_relative_path": "recordings/ag3s_records.tgz"
+    },
+    {
+      "legacy_relative_path": "h_prof2.out",
+      "storage_relative_path": "recordings/h_prof2.out"
+    }
+  ],
+  "preexisting_missing_inputs": [
+    {
+      "path": "datasets/lerobot-atomic/local/rby1_atomic_basket_14d_v2",
+      "target": "../../rby1/rby1_atomic_basket_14d_v2"
+    },
+    {
+      "path": "datasets/lerobot-transport/local/rby1_dataset_v1",
+      "target": "../../rby1/rby1_transport_14d"
+    }
+  ],
+  "checkout_links": [
+    {
+      "target": "third_party/openpi/assets",
+      "storage_relative_path": "assets/openpi"
+    },
+    {
+      "target": "third_party/openpi/policy_records",
+      "storage_relative_path": "recordings/policy_records"
+    }
+  ]
+}

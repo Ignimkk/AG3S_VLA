@@ -7,7 +7,7 @@ main은 paired v2 기반 V11AB, feature/panda-benchmark는 그 benchmark 평가,
 feature/ag3s-development는 v2 이후 전체 개선 이력과 현재 WIP를 포함한다.
 개선 branch 전체를 benchmark branch에 merge하면 V11AB 평가 대상이 바뀐다.
 기존 /mnt/dev/work의 Claude session은 새 코드 작업에 resume하지 말고 새 세션을 시작한다.
-기존 /mnt/dev/work는 dataset·checkpoint·raw evidence·기존 환경의 legacy storage다.
+공유 input은 별도 AG3S_VLA-storage에 있다. 기존 /mnt/dev/work는 현재 실행에 필요하지 않은 이전 checkout이다.
 새 코드·새 output은 자기 checkout에서만 수정/생성한다. source scripts/setup/env.sh로 경로를 설정한다.
 아래에 남은 과거 진행 기록은 source-manifest와 실제 branch를 기준으로 해석한다.
 Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았다.
@@ -53,7 +53,9 @@ Sub-agent의 상세 역할과 작업 범위는 `.claude/agents/`의 정의를 �
 `source scripts/setup/env.sh` 후 `.venv-ag3s/bin/python`으로 CPU 검증을 실행한다.
 GPU/OpenPI·cuRobo 환경과 로컬 PC 환경은 아직 이번 구조로 설치하지 않았다.
 기존 workspace의 venv를 복사하거나 새 Python code의 import 경로로 사용하지 않는다.
-Checkpoint·dataset·녹화 자료만 `AG3S_LEGACY_STORAGE`(기본 `/mnt/dev/work`)에서 읽는다.
+Checkpoint·dataset·녹화 자료는 `AG3S_STORAGE_ROOT`(기본: checkout 옆 `AG3S_VLA-storage`)에서 읽는다.
+`AG3S_LEGACY_STORAGE`는 그 아래 `legacy-inputs`를 가리키는 호환 alias다.
+`doc/SHARED_STORAGE_AND_PYTHON.md`가 현재 storage·interpreter 설정의 정본이다.
 기존 “OpenPI submodule 내부의 venv를 쓴다”는 지침은 현재 통합 구조에 적용하지 않는다.
 OpenPI fork는 `third_party/openpi/`에 직접 추적된다.
 

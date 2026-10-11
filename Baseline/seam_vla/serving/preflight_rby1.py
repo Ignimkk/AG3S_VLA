@@ -5,7 +5,7 @@ delta compensation and guided-dim choices can be confirmed against the server-on
 serving. Does NOT load the model weights.
 
     python -m Baseline.seam_vla.serving.preflight_rby1 --config pi05_rby1_lora \
-        --dir ${AG3S_PROJECT_ROOT}/pi05_TO_hybrid/checkpoints/pi05_rby1_lora/full_run_30k/29999 \
+        --dir ${AG3S_STORAGE_ROOT}/checkpoints/rby1/pi05_rby1_lora/full_run_30k/29999 \
         --seam-config Baseline/seam_vla/configs/seam_rby1.yaml
 """
 

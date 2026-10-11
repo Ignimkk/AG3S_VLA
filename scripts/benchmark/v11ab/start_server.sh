@@ -13,6 +13,6 @@ case $C in
   *) echo "unknown ARM $C (p serves V11A V11AB V11ABC)"; exit 2;;
 esac
 mkdir -p $RECDIR
-cd $O1 && OPENPI_DATA_HOME=${AG3S_PROJECT_ROOT}/pi05_TO_hybrid/cache/openpi XLA_FLAGS="$XLA" XLA_PYTHON_CLIENT_PREALLOCATE=false \
-  PYTHONUNBUFFERED=1 PYTHONPATH=$O1 exec $PY -m AG3S.trajopt.serve_safe \
+cd $O1 && OPENPI_DATA_HOME="$OPENPI_DATA_HOME" XLA_FLAGS="$XLA" XLA_PYTHON_CLIENT_PREALLOCATE=false \
+  PYTHONUNBUFFERED=1 PYTHONPATH="$PYTHONPATH" exec $PY -m AG3S.trajopt.serve_safe \
   --config pi05_rby1_randomized_pick_place_16d_lora --checkpoint $CKPT --model-xml $MODEL_XML --port $PORT $FLAGS $REC

@@ -19,7 +19,7 @@ By default backups are written next to the dataset root, never inside its
 ``data/`` tree, so dataset loaders cannot mistake them for training shards.
 
 Usage:
-    python patch_dataset_timestamps.py --dataset /root/work/pi05_TO_hybrid/data/rby1_dataset_v1
+    python patch_dataset_timestamps.py --dataset ${AG3S_STORAGE_ROOT}/datasets/rby1/rby1_dataset_v1
     python patch_dataset_timestamps.py --dataset ... --no-backup
     python patch_dataset_timestamps.py --dataset ... --dry-run   # preview first
 """

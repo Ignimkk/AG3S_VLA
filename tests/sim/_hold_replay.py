@@ -15,6 +15,7 @@ Used by ``tests/sim/test_t41c_hold_drift.py`` and ``outputs/impl/T41c/p/measure_
 
 from __future__ import annotations
 from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import bind_historical_client_inputs as _bind_legacy_inputs
 
 import contextlib
 import copy
@@ -44,6 +45,7 @@ def load_client():
     spec = importlib.util.spec_from_file_location("_t41c_pi05_infer", PI05_INFER)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    _bind_legacy_inputs(mod)
     return mod
 
 

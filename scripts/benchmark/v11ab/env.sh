@@ -5,7 +5,7 @@ V="${AG3S_V11_OUTPUT_DIR:-$AG3S_PROJECT_ROOT/outputs/legacy-v11}"
 P="$AG3S_V11_SCRIPT_DIR"
 O1=${AG3S_PROJECT_ROOT}                                # V11 snapshot: benchmark 3ca1b21 (git archive), pi05_TO_hybrid rby1_* == work-t43w3 (fce4af8)
 PY=${AG3S_OPENPI_PYTHON:-${AG3S_PROJECT_ROOT}/.venv-openpi-live/bin/python}
-CKPT=${AG3S_LEGACY_STORAGE}/pi05_TO_hybrid/checkpoints/pi05_rby1_randomized_pick_place_16d_lora/rby1_randomized_pick_place_16d_30k_xla_retry_20260923/29999
+CKPT=${AG3S_CHECKPOINT_ROOT}/rby1/pi05_rby1_randomized_pick_place_16d_lora/rby1_randomized_pick_place_16d_30k_xla_retry_20260923/29999
 MODEL_XML=$O1/robots/rby1/description/models/rby1a/mujoco/model_transport.xml   # server robot model, as T39/T40/T41
 XLA="--xla_gpu_enable_command_buffer= --xla_gpu_autotune_level=0"   # as T39-T41 (autotune 0)
 PARTIAL=$V/partial.json
