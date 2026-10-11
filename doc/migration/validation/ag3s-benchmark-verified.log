@@ -1,0 +1,822 @@
+........................................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  8%]
+........................................................................ [ 10%]
+........................................................................ [ 13%]
+........................................................................ [ 16%]
+........................................................................ [ 18%]
+........................................................................ [ 21%]
+..............................................F......................... [ 24%]
+........................................................................ [ 26%]
+........................................................................ [ 29%]
+................................s....................................... [ 32%]
+........................................................................ [ 34%]
+........................................................................ [ 37%]
+........
+  IPOPT status         : Solve_Succeeded
+  rows                 : 1360
+  active slots         : 1
+  min h at solution    : -9.177e-09   (>= 0 required)
+  |q* - q_ref|         : 0.2300 rad
+....
+  frame 1: Solve_Succeeded, active slots 1
+  frame 2: Solve_Succeeded, active slots 2  (same solver object, parameters only)
+  min h frame 2        : -9.433e-09
+............................................................ [ 40%]
+........................................................................ [ 43%]
+...........s............................................................ [ 45%]
+........................................................................ [ 48%]
+........................................................................ [ 51%]
+........................................................................ [ 53%]
+........................................................................ [ 56%]
+........................................................................ [ 59%]
+........................................................................ [ 61%]
+........................................................................ [ 64%]
+........................................................................ [ 67%]
+........................................................................ [ 69%]
+........................................................................ [ 72%]
+......................................ss...............F.........s...... [ 75%]
+........................................................................ [ 78%]
+........................................................................ [ 80%]
+........................................................................ [ 83%]
+.....F.................................................................. [ 86%]
+...................................sss.................................. [ 88%]
+........................................................................ [ 91%]
+........................................................................ [ 94%]
+...................................................................EE
+==================================== ERRORS ====================================
+_____ ERROR at setup of test_the_scenario_exercises_execute_hold_and_comms _____
+
+tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=<pluggy._tracing.TagTracerSub object at 0x7ede4a2233d0>, _basetemp=PosixPath('/tmp/pytest-of-root/pytest-340'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def runs(tmp_path_factory):
+        try:
+            import PIL  # noqa: F401
+            import imageio  # noqa: F401
+            from AG3S.trajopt import wire  # noqa: F401
+        except ImportError as exc:  # pragma: no cover
+            pytest.skip(f"missing: {exc}")
+        tmp = tmp_path_factory.mktemp("t42_arrow")
+        cfg = tmp / "hurdle.json"
+        cfg.write_text(json.dumps(HURDLE_CONFIG))
+        # HEAD's pi05_infer.py, inside a mirror of pi05_TO_hybrid (REPO_ROOT = parents[1] of the file)
+        head_root = tmp / "mirror_of_head"  # not a prefix-sibling of the run dirs (path normalisation)
+        (head_root / "rby1_bringup").mkdir(parents=True)
+        for entry in HYBRID.iterdir():
+            if entry.name not in ("rby1_bringup", ".git"):
+                (head_root / entry.name).symlink_to(entry)
+        head_src = _pre_arrow_source()
+        (head_root / "rby1_bringup" / "pi05_infer_head.py").write_bytes(head_src)
+        head = _load_client(head_root / "rby1_bringup" / "pi05_infer_head.py", "_t42_arrow_pi05_infer_head")
+        new = _load_client(PI05_INFER, "_t42_arrow_pi05_infer_new")
+        return {
+            "head_root": head_root,
+>           "head": _run_main(head, tmp / "head", cfg),
+            "off": _run_main(new, tmp / "off", cfg),
+            "off2": _run_main(new, tmp / "off2", cfg),
+            "on": _run_main(new, tmp / "on", cfg, ("--viz-avoidance-arrow", "--viz-obstacle-normal")),
+        }
+
+tests/sim/test_t42_avoidance_arrow.py:623: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/sim/test_t42_avoidance_arrow.py:495: in _run_main
+    client.main()
+/tmp/pytest-of-root/pytest-340/t42_arrow0/mirror_of_head/rby1_bringup/pi05_infer_head.py:1986: in main
+    imageio.mimsave(args.record, video_frames, fps=CTRL_HZ)
+.venv-ag3s/lib/python3.11/site-packages/imageio/v2.py:494: in mimwrite
+    with imopen(uri, "wI", **imopen_args) as file:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+uri = '/tmp/pytest-of-root/pytest-340/t42_arrow0/head/third_person_front.mp4'
+io_mode = 'wI', plugin = None, extension = None, format_hint = None
+legacy_mode = True, kwargs = {}
+request = <imageio.core.request.Request object at 0x7eda3b7df590>
+source = '/tmp/pytest-of-root/pytest-340/t42_arrow0/head/third_person_front.mp4'
+
+    def imopen(
+        uri,
+        io_mode,
+        *,
+        plugin=None,
+        extension=None,
+        format_hint=None,
+        legacy_mode=False,
+        **kwargs,
+    ):
+        """Open an ImageResource.
+    
+        .. warning::
+            This warning is for pypy users. If you are not using a context manager,
+            remember to deconstruct the returned plugin to avoid leaking the file
+            handle to an unclosed file.
+    
+        Parameters
+        ----------
+        uri : str or pathlib.Path or bytes or file or Request
+            The :doc:`ImageResource <../../user_guide/requests>` to load the
+            image from.
+        io_mode : str
+            The mode in which the file is opened. Possible values are::
+    
+                ``r`` - open the file for reading
+                ``w`` - open the file for writing
+    
+            Depreciated since v2.9:
+            A second character can be added to give the reader a hint on what
+            the user expects. This will be ignored by new plugins and will
+            only have an effect on legacy plugins. Possible values are::
+    
+                ``i`` for a single image,
+                ``I`` for multiple images,
+                ``v`` for a single volume,
+                ``V`` for multiple volumes,
+                ``?`` for don't care
+    
+        plugin : str, Plugin, or None
+            The plugin to use. If set to None imopen will perform a
+            search for a matching plugin. If not None, this takes priority over
+            the provided format hint.
+        extension : str
+            If not None, treat the provided ImageResource as if it had the given
+            extension. This affects the order in which backends are considered, and
+            when writing this may also influence the format used when encoding.
+        format_hint : str
+            Deprecated. Use `extension` instead.
+        legacy_mode : bool
+            If true use the v2 behavior when searching for a suitable
+            plugin. This will ignore v3 plugins and will check ``plugin``
+            against known extensions if no plugin with the given name can be found.
+        **kwargs : Any
+            Additional keyword arguments will be passed to the plugin upon
+            construction.
+    
+        Notes
+        -----
+        Registered plugins are controlled via the ``known_plugins`` dict in
+        ``imageio.config``.
+    
+        Passing a ``Request`` as the uri is only supported if ``legacy_mode``
+        is ``True``. In this case ``io_mode`` is ignored.
+    
+        Using the kwarg ``format_hint`` does not enforce the given format. It merely
+        provides a `hint` to the selection process and plugin. The selection
+        processes uses this hint for optimization; however, a plugin's decision how
+        to read a ImageResource will - typically - still be based on the content of
+        the resource.
+    
+    
+        Examples
+        --------
+    
+        >>> import imageio.v3 as iio
+        >>> with iio.imopen("/path/to/image.png", "r") as file:
+        >>>     im = file.read()
+    
+        >>> with iio.imopen("/path/to/output.jpg", "w") as file:
+        >>>     file.write(im)
+    
+        """
+    
+        if isinstance(uri, Request) and legacy_mode:
+            warnings.warn(
+                "`iio.core.Request` is a low-level object and using it"
+                " directly as input to `imopen` is discouraged. This will raise"
+                " an exception in ImageIO v3.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+    
+            request = uri
+            uri = request.raw_uri
+            io_mode = request.mode.io_mode
+            request.format_hint = format_hint
+        else:
+            request = Request(uri, io_mode, format_hint=format_hint, extension=extension)
+    
+        source = "<bytes>" if isinstance(uri, bytes) else uri
+    
+        # fast-path based on plugin
+        # (except in legacy mode)
+        if plugin is not None:
+            if isinstance(plugin, str):
+                try:
+                    config = known_plugins[plugin]
+                except KeyError:
+                    request.finish()
+                    raise ValueError(
+                        f"`{plugin}` is not a registered plugin name."
+                    ) from None
+    
+                def loader(request, **kwargs):
+                    return config.plugin_class(request, **kwargs)
+    
+            else:
+    
+                def loader(request, **kwargs):
+                    return plugin(request, **kwargs)
+    
+            try:
+                return loader(request, **kwargs)
+            except InitializationError as class_specific:
+                err_from = class_specific
+                err_type = RuntimeError if legacy_mode else IOError
+                err_msg = f"`{plugin}` can not handle the given uri."
+            except ImportError:
+                err_from = None
+                err_type = ImportError
+                err_msg = (
+                    f"The `{config.name}` plugin is not installed. "
+                    f"Use `pip install imageio[{config.install_name}]` to install it."
+                )
+            except Exception as generic_error:
+                err_from = generic_error
+                err_type = IOError
+                err_msg = f"An unknown error occurred while initializing plugin `{plugin}`."
+    
+            request.finish()
+            raise err_type(err_msg) from err_from
+    
+        # fast-path based on format_hint
+        if request.format_hint is not None:
+            for candidate_format in known_extensions[format_hint]:
+                for plugin_name in candidate_format.priority:
+                    config = known_plugins[plugin_name]
+    
+                    try:
+                        candidate_plugin = config.plugin_class
+                    except ImportError:
+                        # not installed
+                        continue
+    
+                    try:
+                        plugin_instance = candidate_plugin(request, **kwargs)
+                    except InitializationError:
+                        # file extension doesn't match file type
+                        continue
+    
+                    return plugin_instance
+            else:
+                resource = (
+                    "<bytes>" if isinstance(request.raw_uri, bytes) else request.raw_uri
+                )
+                warnings.warn(f"`{resource}` can not be opened as a `{format_hint}` file.")
+    
+        # fast-path based on file extension
+        if request.extension in known_extensions:
+            for candidate_format in known_extensions[request.extension]:
+                for plugin_name in candidate_format.priority:
+                    config = known_plugins[plugin_name]
+    
+                    try:
+                        candidate_plugin = config.plugin_class
+                    except ImportError:
+                        # not installed
+                        continue
+    
+                    try:
+                        plugin_instance = candidate_plugin(request, **kwargs)
+                    except InitializationError:
+                        # file extension doesn't match file type
+                        continue
+    
+                    return plugin_instance
+    
+        # error out for read-only special targets
+        # this is hacky; can we come up with a better solution for this?
+        if request.mode.io_mode == IOMode.write:
+            if isinstance(uri, str) and uri.startswith(SPECIAL_READ_URIS):
+                request.finish()
+                err_type = ValueError if legacy_mode else IOError
+                err_msg = f"`{source}` is read-only."
+                raise err_type(err_msg)
+    
+        # error out for directories
+        # this is a bit hacky and should be cleaned once we decide
+        # how to gracefully handle DICOM
+        if request._uri_type == URI_FILENAME and Path(request.raw_uri).is_dir():
+            request.finish()
+            err_type = ValueError if legacy_mode else IOError
+            err_msg = (
+                "ImageIO does not generally support reading folders. "
+                "Limited support may be available via specific plugins. "
+                "Specify the plugin explicitly using the `plugin` kwarg, e.g. `plugin='DICOM'`"
+            )
+            raise err_type(err_msg)
+    
+        # close the current request here and use fresh/new ones while trying each
+        # plugin This is slow (means potentially reopening a resource several
+        # times), but should only happen rarely because this is the fallback if all
+        # else fails.
+        request.finish()
+    
+        # fallback option: try all plugins
+        for config in known_plugins.values():
+            # each plugin gets its own request
+            request = Request(uri, io_mode, format_hint=format_hint)
+    
+            try:
+                plugin_instance = config.plugin_class(request, **kwargs)
+            except InitializationError:
+                continue
+            except ImportError:
+                continue
+            else:
+                return plugin_instance
+    
+        err_type = ValueError if legacy_mode else IOError
+        err_msg = f"Could not find a backend to open `{source}`` with iomode `{io_mode}`."
+    
+        # check if a missing plugin could help
+        if request.extension in known_extensions:
+            missing_plugins = list()
+    
+            formats = known_extensions[request.extension]
+            plugin_names = [
+                plugin for file_format in formats for plugin in file_format.priority
+            ]
+            for name in plugin_names:
+                config = known_plugins[name]
+    
+                try:
+                    config.plugin_class
+                    continue
+                except ImportError:
+                    missing_plugins.append(config)
+    
+            if len(missing_plugins) > 0:
+                install_candidates = "\n".join(
+                    [
+                        (
+                            f"  {config.name}:  "
+                            f"pip install imageio[{config.install_name}]"
+                        )
+                        for config in missing_plugins
+                    ]
+                )
+                err_msg += (
+                    "\nBased on the extension, the following plugins might add capable backends:\n"
+                    f"{install_candidates}"
+                )
+    
+        request.finish()
+>       raise err_type(err_msg)
+E       ValueError: Could not find a backend to open `/tmp/pytest-of-root/pytest-340/t42_arrow0/head/third_person_front.mp4`` with iomode `wI`.
+E       Based on the extension, the following plugins might add capable backends:
+E         FFMPEG:  pip install imageio[ffmpeg]
+E         pyav:  pip install imageio[pyav]
+
+.venv-ag3s/lib/python3.11/site-packages/imageio/core/imopen.py:281: ValueError
+___________ ERROR at setup of test_flag_off_is_bit_identical_to_head ___________
+
+tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=<pluggy._tracing.TagTracerSub object at 0x7ede4a2233d0>, _basetemp=PosixPath('/tmp/pytest-of-root/pytest-340'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def runs(tmp_path_factory):
+        try:
+            import PIL  # noqa: F401
+            import imageio  # noqa: F401
+            from AG3S.trajopt import wire  # noqa: F401
+        except ImportError as exc:  # pragma: no cover
+            pytest.skip(f"missing: {exc}")
+        tmp = tmp_path_factory.mktemp("t42_arrow")
+        cfg = tmp / "hurdle.json"
+        cfg.write_text(json.dumps(HURDLE_CONFIG))
+        # HEAD's pi05_infer.py, inside a mirror of pi05_TO_hybrid (REPO_ROOT = parents[1] of the file)
+        head_root = tmp / "mirror_of_head"  # not a prefix-sibling of the run dirs (path normalisation)
+        (head_root / "rby1_bringup").mkdir(parents=True)
+        for entry in HYBRID.iterdir():
+            if entry.name not in ("rby1_bringup", ".git"):
+                (head_root / entry.name).symlink_to(entry)
+        head_src = _pre_arrow_source()
+        (head_root / "rby1_bringup" / "pi05_infer_head.py").write_bytes(head_src)
+        head = _load_client(head_root / "rby1_bringup" / "pi05_infer_head.py", "_t42_arrow_pi05_infer_head")
+        new = _load_client(PI05_INFER, "_t42_arrow_pi05_infer_new")
+        return {
+            "head_root": head_root,
+>           "head": _run_main(head, tmp / "head", cfg),
+            "off": _run_main(new, tmp / "off", cfg),
+            "off2": _run_main(new, tmp / "off2", cfg),
+            "on": _run_main(new, tmp / "on", cfg, ("--viz-avoidance-arrow", "--viz-obstacle-normal")),
+        }
+
+tests/sim/test_t42_avoidance_arrow.py:623: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/sim/test_t42_avoidance_arrow.py:495: in _run_main
+    client.main()
+/tmp/pytest-of-root/pytest-340/t42_arrow0/mirror_of_head/rby1_bringup/pi05_infer_head.py:1986: in main
+    imageio.mimsave(args.record, video_frames, fps=CTRL_HZ)
+.venv-ag3s/lib/python3.11/site-packages/imageio/v2.py:494: in mimwrite
+    with imopen(uri, "wI", **imopen_args) as file:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+uri = '/tmp/pytest-of-root/pytest-340/t42_arrow0/head/third_person_front.mp4'
+io_mode = 'wI', plugin = None, extension = None, format_hint = None
+legacy_mode = True, kwargs = {}
+request = <imageio.core.request.Request object at 0x7eda3b7df590>
+source = '/tmp/pytest-of-root/pytest-340/t42_arrow0/head/third_person_front.mp4'
+
+    def imopen(
+        uri,
+        io_mode,
+        *,
+        plugin=None,
+        extension=None,
+        format_hint=None,
+        legacy_mode=False,
+        **kwargs,
+    ):
+        """Open an ImageResource.
+    
+        .. warning::
+            This warning is for pypy users. If you are not using a context manager,
+            remember to deconstruct the returned plugin to avoid leaking the file
+            handle to an unclosed file.
+    
+        Parameters
+        ----------
+        uri : str or pathlib.Path or bytes or file or Request
+            The :doc:`ImageResource <../../user_guide/requests>` to load the
+            image from.
+        io_mode : str
+            The mode in which the file is opened. Possible values are::
+    
+                ``r`` - open the file for reading
+                ``w`` - open the file for writing
+    
+            Depreciated since v2.9:
+            A second character can be added to give the reader a hint on what
+            the user expects. This will be ignored by new plugins and will
+            only have an effect on legacy plugins. Possible values are::
+    
+                ``i`` for a single image,
+                ``I`` for multiple images,
+                ``v`` for a single volume,
+                ``V`` for multiple volumes,
+                ``?`` for don't care
+    
+        plugin : str, Plugin, or None
+            The plugin to use. If set to None imopen will perform a
+            search for a matching plugin. If not None, this takes priority over
+            the provided format hint.
+        extension : str
+            If not None, treat the provided ImageResource as if it had the given
+            extension. This affects the order in which backends are considered, and
+            when writing this may also influence the format used when encoding.
+        format_hint : str
+            Deprecated. Use `extension` instead.
+        legacy_mode : bool
+            If true use the v2 behavior when searching for a suitable
+            plugin. This will ignore v3 plugins and will check ``plugin``
+            against known extensions if no plugin with the given name can be found.
+        **kwargs : Any
+            Additional keyword arguments will be passed to the plugin upon
+            construction.
+    
+        Notes
+        -----
+        Registered plugins are controlled via the ``known_plugins`` dict in
+        ``imageio.config``.
+    
+        Passing a ``Request`` as the uri is only supported if ``legacy_mode``
+        is ``True``. In this case ``io_mode`` is ignored.
+    
+        Using the kwarg ``format_hint`` does not enforce the given format. It merely
+        provides a `hint` to the selection process and plugin. The selection
+        processes uses this hint for optimization; however, a plugin's decision how
+        to read a ImageResource will - typically - still be based on the content of
+        the resource.
+    
+    
+        Examples
+        --------
+    
+        >>> import imageio.v3 as iio
+        >>> with iio.imopen("/path/to/image.png", "r") as file:
+        >>>     im = file.read()
+    
+        >>> with iio.imopen("/path/to/output.jpg", "w") as file:
+        >>>     file.write(im)
+    
+        """
+    
+        if isinstance(uri, Request) and legacy_mode:
+            warnings.warn(
+                "`iio.core.Request` is a low-level object and using it"
+                " directly as input to `imopen` is discouraged. This will raise"
+                " an exception in ImageIO v3.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+    
+            request = uri
+            uri = request.raw_uri
+            io_mode = request.mode.io_mode
+            request.format_hint = format_hint
+        else:
+            request = Request(uri, io_mode, format_hint=format_hint, extension=extension)
+    
+        source = "<bytes>" if isinstance(uri, bytes) else uri
+    
+        # fast-path based on plugin
+        # (except in legacy mode)
+        if plugin is not None:
+            if isinstance(plugin, str):
+                try:
+                    config = known_plugins[plugin]
+                except KeyError:
+                    request.finish()
+                    raise ValueError(
+                        f"`{plugin}` is not a registered plugin name."
+                    ) from None
+    
+                def loader(request, **kwargs):
+                    return config.plugin_class(request, **kwargs)
+    
+            else:
+    
+                def loader(request, **kwargs):
+                    return plugin(request, **kwargs)
+    
+            try:
+                return loader(request, **kwargs)
+            except InitializationError as class_specific:
+                err_from = class_specific
+                err_type = RuntimeError if legacy_mode else IOError
+                err_msg = f"`{plugin}` can not handle the given uri."
+            except ImportError:
+                err_from = None
+                err_type = ImportError
+                err_msg = (
+                    f"The `{config.name}` plugin is not installed. "
+                    f"Use `pip install imageio[{config.install_name}]` to install it."
+                )
+            except Exception as generic_error:
+                err_from = generic_error
+                err_type = IOError
+                err_msg = f"An unknown error occurred while initializing plugin `{plugin}`."
+    
+            request.finish()
+            raise err_type(err_msg) from err_from
+    
+        # fast-path based on format_hint
+        if request.format_hint is not None:
+            for candidate_format in known_extensions[format_hint]:
+                for plugin_name in candidate_format.priority:
+                    config = known_plugins[plugin_name]
+    
+                    try:
+                        candidate_plugin = config.plugin_class
+                    except ImportError:
+                        # not installed
+                        continue
+    
+                    try:
+                        plugin_instance = candidate_plugin(request, **kwargs)
+                    except InitializationError:
+                        # file extension doesn't match file type
+                        continue
+    
+                    return plugin_instance
+            else:
+                resource = (
+                    "<bytes>" if isinstance(request.raw_uri, bytes) else request.raw_uri
+                )
+                warnings.warn(f"`{resource}` can not be opened as a `{format_hint}` file.")
+    
+        # fast-path based on file extension
+        if request.extension in known_extensions:
+            for candidate_format in known_extensions[request.extension]:
+                for plugin_name in candidate_format.priority:
+                    config = known_plugins[plugin_name]
+    
+                    try:
+                        candidate_plugin = config.plugin_class
+                    except ImportError:
+                        # not installed
+                        continue
+    
+                    try:
+                        plugin_instance = candidate_plugin(request, **kwargs)
+                    except InitializationError:
+                        # file extension doesn't match file type
+                        continue
+    
+                    return plugin_instance
+    
+        # error out for read-only special targets
+        # this is hacky; can we come up with a better solution for this?
+        if request.mode.io_mode == IOMode.write:
+            if isinstance(uri, str) and uri.startswith(SPECIAL_READ_URIS):
+                request.finish()
+                err_type = ValueError if legacy_mode else IOError
+                err_msg = f"`{source}` is read-only."
+                raise err_type(err_msg)
+    
+        # error out for directories
+        # this is a bit hacky and should be cleaned once we decide
+        # how to gracefully handle DICOM
+        if request._uri_type == URI_FILENAME and Path(request.raw_uri).is_dir():
+            request.finish()
+            err_type = ValueError if legacy_mode else IOError
+            err_msg = (
+                "ImageIO does not generally support reading folders. "
+                "Limited support may be available via specific plugins. "
+                "Specify the plugin explicitly using the `plugin` kwarg, e.g. `plugin='DICOM'`"
+            )
+            raise err_type(err_msg)
+    
+        # close the current request here and use fresh/new ones while trying each
+        # plugin This is slow (means potentially reopening a resource several
+        # times), but should only happen rarely because this is the fallback if all
+        # else fails.
+        request.finish()
+    
+        # fallback option: try all plugins
+        for config in known_plugins.values():
+            # each plugin gets its own request
+            request = Request(uri, io_mode, format_hint=format_hint)
+    
+            try:
+                plugin_instance = config.plugin_class(request, **kwargs)
+            except InitializationError:
+                continue
+            except ImportError:
+                continue
+            else:
+                return plugin_instance
+    
+        err_type = ValueError if legacy_mode else IOError
+        err_msg = f"Could not find a backend to open `{source}`` with iomode `{io_mode}`."
+    
+        # check if a missing plugin could help
+        if request.extension in known_extensions:
+            missing_plugins = list()
+    
+            formats = known_extensions[request.extension]
+            plugin_names = [
+                plugin for file_format in formats for plugin in file_format.priority
+            ]
+            for name in plugin_names:
+                config = known_plugins[name]
+    
+                try:
+                    config.plugin_class
+                    continue
+                except ImportError:
+                    missing_plugins.append(config)
+    
+            if len(missing_plugins) > 0:
+                install_candidates = "\n".join(
+                    [
+                        (
+                            f"  {config.name}:  "
+                            f"pip install imageio[{config.install_name}]"
+                        )
+                        for config in missing_plugins
+                    ]
+                )
+                err_msg += (
+                    "\nBased on the extension, the following plugins might add capable backends:\n"
+                    f"{install_candidates}"
+                )
+    
+        request.finish()
+>       raise err_type(err_msg)
+E       ValueError: Could not find a backend to open `/tmp/pytest-of-root/pytest-340/t42_arrow0/head/third_person_front.mp4`` with iomode `wI`.
+E       Based on the extension, the following plugins might add capable backends:
+E         FFMPEG:  pip install imageio[ffmpeg]
+E         pyav:  pip install imageio[pyav]
+
+.venv-ag3s/lib/python3.11/site-packages/imageio/core/imopen.py:281: ValueError
+=================================== FAILURES ===================================
+___________ test_visualization_imports_lazily_and_writes_every_panel ___________
+
+scene = SyntheticScene(depth=array([[0.        , 0.        , 0.        , ..., 0.        , 0.        ,
+        0.        ],
+   ...e_z=0.75, robot_state=array([-0.6, -0.6]), robot_model=<tests.ag3s.fixtures.PlanarTwoLinkArm object at 0x7edcf3fc2010>)
+arm = <tests.ag3s.fixtures.PlanarTwoLinkArm object at 0x7edcf3fc2010>
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-340/test_visualization_imports_laz0')
+
+    def test_visualization_imports_lazily_and_writes_every_panel(scene, arm, tmp_path):
+        """Core must import without matplotlib, and the dumps must index the right cloud.
+    
+        The index basis matters: `point_indices` refer to the post-self-filter cloud, so plotting them
+        against the raw cloud silently scatters every cluster across the scene.
+        """
+        import sys
+    
+        import AG3S.ag3s  # noqa: F401  - importing the package must not pull matplotlib in
+    
+        assert "AG3S.ag3s.runtime.visualization" not in sys.modules
+    
+        from AG3S.ag3s.runtime.visualization import dump_from_pipeline
+    
+>       ag3s = AG3S(CFG, robot_model=arm)
+E       TypeError: 'module' object is not callable
+
+tests/ag3s/test_pipeline.py:444: TypeError
+___________ test_serve_safe_wraps_the_bare_policy_and_logs_the_entry ___________
+
+    def test_serve_safe_wraps_the_bare_policy_and_logs_the_entry():
+>       src = SERVE_SAFE.read_text()
+
+tests/trajopt/test_t39_policy_seed.py:245: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/mnt/dev/AG3S_VLA-benchmark/benchmark/trajopt/serve_safe.py')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileNotFoundError: [Errno 2] No such file or directory: '/mnt/dev/AG3S_VLA-benchmark/benchmark/trajopt/serve_safe.py'
+
+.python/cpython-3.11.16-linux-x86_64-gnu/lib/python3.11/pathlib.py:1044: FileNotFoundError
+_______________ test_off_is_bit_identical_to_the_pre_fix_commit ________________
+
+harness = (<module 'ground_replay' from '/mnt/dev/work/outputs/impl/T43T/p/ground_replay.py'>, <module 'recov_replay' from '/mnt/dev/work/outputs/impl/T43T/p/recov_replay.py'>, <module 'identity' from '/mnt/dev/work/outputs/impl/T43T/p/identity.py'>)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-340/test_off_is_bit_identical_to_t0')
+
+    def test_off_is_bit_identical_to_the_pre_fix_commit(harness, tmp_path):
+        _, _, I = harness
+        out = tmp_path / "work.npz"
+        I.main(str(out))
+        a, b = np.load(HEAD_NPZ), np.load(out)
+        assert sorted(a.files) == sorted(b.files)
+        for k in a.files:
+            if k == "meta":
+                continue
+>           assert np.array_equal(a[k], b[k]), k
+E           AssertionError: to_T42_L1992_16
+E           assert False
+E            +  where False = <function array_equal at 0x7ede4a0fda30>(array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\n         1.00086689]]), array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\n         1.00086689]]))
+E            +    where <function array_equal at 0x7ede4a0fda30> = np.array_equal
+
+tests/trajopt/test_t43t_replay.py:59: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  AG3S.ag3s.robot_models.urdf_sphere_chain:urdf_sphere_chain.py:680 !!! THIS SPHERE MODEL DOES NOT COVER THE ROBOT !!!
+    18 of 18 capsule(s) are thinner than the URDF says, worst by 27.3 mm (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none).
+    빼는 것과 같은 성질의 flag 다 — 이 capsule 이 무엇에 부딪혀도 그만큼은 아무도 막지 않는다. 기준은 **URDF capsule** 이고, URDF 자체가 mesh 보다 두꺼울 수 있다.
+    - ee_left: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_left: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_left: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_right: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_right: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_right: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_r2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    지금 모델: 구 122 개 · capsule 18 개 (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none)
+    link 별 유효 반지름: ee_finger_l1=19×3.25 mm, ee_finger_l2=19×3.25 mm, ee_finger_r1=19×3.25 mm, ee_finger_r2=19×3.25 mm, ee_left=23×6.22 mm, ee_right=23×6.22 mm
+WARNING  AG3S.ag3s.robot_models.urdf_sphere_chain:urdf_sphere_chain.py:680 !!! THIS SPHERE MODEL DOES NOT COVER THE ROBOT !!!
+    18 of 18 capsule(s) are thinner than the URDF says, worst by 27.3 mm (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none).
+    빼는 것과 같은 성질의 flag 다 — 이 capsule 이 무엇에 부딪혀도 그만큼은 아무도 막지 않는다. 기준은 **URDF capsule** 이고, URDF 자체가 mesh 보다 두꺼울 수 있다.
+    - ee_left: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_left: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_left: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_right: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_right: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_right: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_r2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    지금 모델: 구 122 개 · capsule 18 개 (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none)
+    link 별 유효 반지름: ee_finger_l1=19×3.25 mm, ee_finger_l2=19×3.25 mm, ee_finger_r1=19×3.25 mm, ee_finger_r2=19×3.25 mm, ee_left=23×6.22 mm, ee_right=23×6.22 mm
+------------- generated xml file: /tmp/ag3s-benchmark-verified.xml -------------
+=========================== short test summary info ============================
+SKIPPED [1] tests/ag3s/test_t32_fine_truncation_curobo.py:18: could not import 'torch': No module named 'torch'
+SKIPPED [1] tests/ag3s/test_subtask_gate.py:444: GPU + checkpoint; opt in with AG3S_GPU_TESTS=1
+SKIPPED [1] tests/trajopt/test_exec_feedback.py:72: could not import 'msgpack': No module named 'msgpack'
+SKIPPED [2] tests/trajopt/test_t39_policy_seed.py:80: could not import 'msgpack': No module named 'msgpack'
+SKIPPED [1] tests/trajopt/test_t39_policy_seed.py:433: could not import 'jax': No module named 'jax'
+SKIPPED [3] tests/trajopt/test_t43tp_fast_to.py:615: could not import 'torch': No module named 'torch'
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+3 failed, 2576 passed, 9 skipped, 1399 warnings, 2 errors in 938.46s (0:15:38)

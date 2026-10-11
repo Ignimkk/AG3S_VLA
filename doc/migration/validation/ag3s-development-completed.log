@@ -1,0 +1,224 @@
+Collected 2818 remaining/repaired 553
+...F..FFFFFF............................................................ [ 13%]
+.................................sss.................................... [ 26%]
+........................................................................ [ 39%]
+..................F..................................................... [ 52%]
+........................................................................ [ 65%]
+........................................................................ [ 78%]
+........................................................................ [ 91%]
+.................................................                        [100%]
+=================================== FAILURES ===================================
+_______________ test_off_is_bit_identical_to_the_pre_fix_commit ________________
+
+harness = (<module 'ground_replay' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/ground_replay.py'>, <module 'recov_r...ting/t43t/recov_replay.py'>, <module 'identity' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/identity.py'>)
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-341/test_off_is_bit_identical_to_t0')
+
+    def test_off_is_bit_identical_to_the_pre_fix_commit(harness, tmp_path):
+        _, _, I = harness
+        out = tmp_path / "work.npz"
+        I.main(str(out))
+        a, b = np.load(HEAD_NPZ), np.load(out)
+        assert sorted(a.files) == sorted(b.files)
+        for k in a.files:
+            if k == "meta":
+                continue
+>           assert np.array_equal(a[k], b[k]), k
+E           AssertionError: to_T42_L1992_16
+E           assert False
+E            +  where False = <function array_equal at 0x76cac494ecf0>(array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\n         1.00086689]]), array([[-0.15321686,  0.30362578,  0.18510765, -1.28202627,  0.85768918,\n         0.86463136, -2.45605623,  0.00828927....29453701, -0.41444859,\n         0.00317262, -1.97086227, -0.33733428,  1.51360822, -1.57333207,\n         1.00086689]]))
+E            +    where <function array_equal at 0x76cac494ecf0> = np.array_equal
+
+tests/trajopt/test_t43t_replay.py:59: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  AG3S.ag3s.robot_models.urdf_sphere_chain:urdf_sphere_chain.py:687 !!! THIS SPHERE MODEL DOES NOT COVER THE ROBOT !!!
+    18 of 18 capsule(s) are thinner than the URDF says, worst by 27.3 mm (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none).
+    빼는 것과 같은 성질의 flag 다 — 이 capsule 이 무엇에 부딪혀도 그만큼은 아무도 막지 않는다. 기준은 **URDF capsule** 이고, URDF 자체가 mesh 보다 두꺼울 수 있다.
+    - ee_left: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_left: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_left: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_right: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_right: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_right: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_r2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    지금 모델: 구 122 개 · capsule 18 개 (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none)
+    link 별 유효 반지름: ee_finger_l1=19×3.25 mm, ee_finger_l2=19×3.25 mm, ee_finger_r1=19×3.25 mm, ee_finger_r2=19×3.25 mm, ee_left=23×6.22 mm, ee_right=23×6.22 mm
+WARNING  AG3S.ag3s.robot_models.urdf_sphere_chain:urdf_sphere_chain.py:687 !!! THIS SPHERE MODEL DOES NOT COVER THE ROBOT !!!
+    18 of 18 capsule(s) are thinner than the URDF says, worst by 27.3 mm (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none).
+    빼는 것과 같은 성질의 flag 다 — 이 capsule 이 무엇에 부딪혀도 그만큼은 아무도 막지 않는다. 기준은 **URDF capsule** 이고, URDF 자체가 mesh 보다 두꺼울 수 있다.
+    - ee_left: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_left: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_left: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_right: 구 8 개 × 6.2 mm, 덮으려면 33.5 mm 필요 (27.3 mm 부족; URDF capsule r=33.0 L=84.0 mm)
+    - ee_right: 구 7 개 × 5.7 mm, 덮으려면 28.9 mm 필요 (23.2 mm 부족; URDF capsule r=28.4 L=66.3 mm)
+    - ee_right: 구 8 개 × 6.1 mm, 덮으려면 33.3 mm 필요 (27.2 mm 부족; URDF capsule r=32.8 L=82.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_r2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_r2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_r2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l1: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l1: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l1: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    - ee_finger_l2: 구 7 개 × 2.8 mm, 덮으려면 14.7 mm 필요 (11.9 mm 부족; URDF capsule r=14.4 L=32.7 mm)
+    - ee_finger_l2: 구 7 개 × 2.6 mm, 덮으려면 13.2 mm 필요 (10.6 mm 부족; URDF capsule r=13.0 L=30.0 mm)
+    - ee_finger_l2: 구 5 개 × 3.3 mm, 덮으려면 17.9 mm 필요 (14.6 mm 부족; URDF capsule r=17.6 L=25.1 mm)
+    지금 모델: 구 122 개 · capsule 18 개 (sphere_spacing=0.4, max_spheres_per_capsule=32, capsule_radius_scale=0.05, max_sphere_radius=none)
+    link 별 유효 반지름: ee_finger_l1=19×3.25 mm, ee_finger_l2=19×3.25 mm, ee_finger_r1=19×3.25 mm, ee_finger_r2=19×3.25 mm, ee_left=23×6.22 mm, ee_right=23×6.22 mm
+_ test_step2_attach_snapshot_from_the_pre_closing_geometry_leaves_the_held_deadlock[T42_R1908-16] _
+
+harness = (<module 'ground_replay' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/ground_replay.py'>, <module 'recov_r...ting/t43t/recov_replay.py'>, <module 'identity' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/identity.py'>)
+key = 'T42_R1908', seq = 16
+
+    @pytest.mark.parametrize("key,seq", [("T42_R1908", 16), ("T42_L1992", 16)])
+    def test_step2_attach_snapshot_from_the_pre_closing_geometry_leaves_the_held_deadlock(harness, key, seq):
+        """`closing_keep_geometry`: AG3S.attach rebuilt on the recorded inputs with the last latched chunk's
+        points (114 / 112) instead of the closing cap (33 / 34); its held volume freed (emulated held_free).
+        The rebuild on the recorded inputs reproduces the recorded spheres (fidelity)."""
+        sys.path.insert(0, str(P))
+>       import familyA_step2 as F  # noqa: E402
+E       ModuleNotFoundError: No module named 'familyA_step2'
+
+tests/trajopt/test_t43t_replay.py:93: ModuleNotFoundError
+_ test_step2_attach_snapshot_from_the_pre_closing_geometry_leaves_the_held_deadlock[T42_L1992-16] _
+
+harness = (<module 'ground_replay' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/ground_replay.py'>, <module 'recov_r...ting/t43t/recov_replay.py'>, <module 'identity' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/identity.py'>)
+key = 'T42_L1992', seq = 16
+
+    @pytest.mark.parametrize("key,seq", [("T42_R1908", 16), ("T42_L1992", 16)])
+    def test_step2_attach_snapshot_from_the_pre_closing_geometry_leaves_the_held_deadlock(harness, key, seq):
+        """`closing_keep_geometry`: AG3S.attach rebuilt on the recorded inputs with the last latched chunk's
+        points (114 / 112) instead of the closing cap (33 / 34); its held volume freed (emulated held_free).
+        The rebuild on the recorded inputs reproduces the recorded spheres (fidelity)."""
+        sys.path.insert(0, str(P))
+>       import familyA_step2 as F  # noqa: E402
+E       ModuleNotFoundError: No module named 'familyA_step2'
+
+tests/trajopt/test_t43t_replay.py:93: ModuleNotFoundError
+_ test_fix2_frees_the_pre_grasp_observation_and_leaves_the_deadlock[T42_R1908-16] _
+
+harness = (<module 'ground_replay' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/ground_replay.py'>, <module 'recov_r...ting/t43t/recov_replay.py'>, <module 'identity' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/identity.py'>)
+key = 'T42_R1908', seq = 16
+
+    @pytest.mark.parametrize("key,seq", [("T42_R1908", 16), ("T42_L1992", 16)])
+    def test_fix2_frees_the_pre_grasp_observation_and_leaves_the_deadlock(harness, key, seq):
+        RR = harness[1]
+        run = RR.Run(key)
+>       r = run.solve(seq, free_obs_pad=0.015)
+
+tests/trajopt/test_t43t_replay.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/testing/t43t/recov_replay.py:57: in solve
+    s, refc, rec_refined, qn, scene, held = self.inputs(seq, free_obs_pad)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <recov_replay.Run object at 0x76c96f867450>, seq = 16
+free_obs_pad = 0.015
+
+    def inputs(self, seq, free_obs_pad=None):
+        G = self.G
+        with np.load(self.ix["chunks"][str(seq)]["npz"], allow_pickle=False) as zz:
+            z = {k: zz[k] for k in zz.files}
+        s = json.loads(str(z["summary_json"]))
+        refc = np.asarray(z["reference_chunk"], float)
+        rec_refined = np.asarray(z["refined_chunk"], float)
+        qn = FIA.q_now_from_qpos(np.asarray(self.plan[seq]["qpos"], float), G["qadr"])
+        zf = _Z(z)
+        if free_obs_pad is not None:
+>           import body_emul as BE
+E           ModuleNotFoundError: No module named 'body_emul'
+
+scripts/testing/t43t/recov_replay.py:46: ModuleNotFoundError
+_ test_fix2_frees_the_pre_grasp_observation_and_leaves_the_deadlock[T42_L1992-16] _
+
+harness = (<module 'ground_replay' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/ground_replay.py'>, <module 'recov_r...ting/t43t/recov_replay.py'>, <module 'identity' from '/mnt/dev/AG3S_VLA-development/scripts/testing/t43t/identity.py'>)
+key = 'T42_L1992', seq = 16
+
+    @pytest.mark.parametrize("key,seq", [("T42_R1908", 16), ("T42_L1992", 16)])
+    def test_fix2_frees_the_pre_grasp_observation_and_leaves_the_deadlock(harness, key, seq):
+        RR = harness[1]
+        run = RR.Run(key)
+>       r = run.solve(seq, free_obs_pad=0.015)
+
+tests/trajopt/test_t43t_replay.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/testing/t43t/recov_replay.py:57: in solve
+    s, refc, rec_refined, qn, scene, held = self.inputs(seq, free_obs_pad)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <recov_replay.Run object at 0x76c96fd47990>, seq = 16
+free_obs_pad = 0.015
+
+    def inputs(self, seq, free_obs_pad=None):
+        G = self.G
+        with np.load(self.ix["chunks"][str(seq)]["npz"], allow_pickle=False) as zz:
+            z = {k: zz[k] for k in zz.files}
+        s = json.loads(str(z["summary_json"]))
+        refc = np.asarray(z["reference_chunk"], float)
+        rec_refined = np.asarray(z["refined_chunk"], float)
+        qn = FIA.q_now_from_qpos(np.asarray(self.plan[seq]["qpos"], float), G["qadr"])
+        zf = _Z(z)
+        if free_obs_pad is not None:
+>           import body_emul as BE
+E           ModuleNotFoundError: No module named 'body_emul'
+
+scripts/testing/t43t/recov_replay.py:46: ModuleNotFoundError
+_ test_step2_closing_chunk_no_deflection_away_from_the_apple[T41/a/D/E3b_ep1807_s18071-16] _
+
+key = 'T41/a/D/E3b_ep1807_s18071', seq = 16
+
+    @pytest.mark.parametrize("key,seq", [("T41/a/D/E3b_ep1807_s18071", 16),
+                                         ("T41/a/B/E3b_ep1995_s19952", 19)])
+    def test_step2_closing_chunk_no_deflection_away_from_the_apple(key, seq):
+        """Closing chunks where the recorded TO pushed the fingertips away from the apple (U): with the
+        pre-closing geometry carved (emulated target-free layer) the push is gone, and no robot row on
+        the recorded main field goes below 0 against anything outside the carve ball."""
+        sys.path.insert(0, str(P))
+>       import closing_replay as C  # noqa: E402
+E       ModuleNotFoundError: No module named 'closing_replay'
+
+tests/trajopt/test_t43t_replay.py:146: ModuleNotFoundError
+_ test_step2_closing_chunk_no_deflection_away_from_the_apple[T41/a/B/E3b_ep1995_s19952-19] _
+
+key = 'T41/a/B/E3b_ep1995_s19952', seq = 19
+
+    @pytest.mark.parametrize("key,seq", [("T41/a/D/E3b_ep1807_s18071", 16),
+                                         ("T41/a/B/E3b_ep1995_s19952", 19)])
+    def test_step2_closing_chunk_no_deflection_away_from_the_apple(key, seq):
+        """Closing chunks where the recorded TO pushed the fingertips away from the apple (U): with the
+        pre-closing geometry carved (emulated target-free layer) the push is gone, and no robot row on
+        the recorded main field goes below 0 against anything outside the carve ball."""
+        sys.path.insert(0, str(P))
+>       import closing_replay as C  # noqa: E402
+E       ModuleNotFoundError: No module named 'closing_replay'
+
+tests/trajopt/test_t43t_replay.py:146: ModuleNotFoundError
+___ test_recorded_c1a_command_line_is_off_and_appending_the_flag_turns_it_on ___
+
+    def test_recorded_c1a_command_line_is_off_and_appending_the_flag_turns_it_on():
+        """`ta_offline.server_args` 처럼 기록 명령줄을 서버 parser 로 읽으면 off, `--palm-cover on` 을 붙이면 on."""
+        proc = C1A / "server_proc.txt"
+        if not proc.exists():
+            pytest.skip("T44d C1a server_proc.txt 가 없다")
+        from AG3S.trajopt import serve_safe
+    
+        line = [ln for ln in proc.read_text().splitlines() if "serve_safe" in ln][0]
+>       argv = line.split("AG3S.trajopt.serve_safe", 1)[1].split()
+E       IndexError: list index out of range
+
+tests/trajopt/test_t45a10_palm_cover.py:175: IndexError
+----------- generated xml file: /tmp/ag3s-development-completed.xml ------------
+=========================== short test summary info ============================
+SKIPPED [3] tests/trajopt/test_t43tp_fast_to.py:615: could not import 'torch': No module named 'torch'
+8 failed, 542 passed, 3 skipped, 569 warnings in 758.52s (0:12:38)
