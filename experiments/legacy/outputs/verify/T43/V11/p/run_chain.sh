@@ -10,7 +10,7 @@
 # - server log must say "XLA autotuning off" (else kill, exit 6).
 # - a failed run is retried once if the server is still alive; if the server died the chain stops (exit 7).
 # - T43W.verify.partial.json is rebuilt (update_partial.py, flock) after every run.
-source ${AG3S_PROJECT_ROOT}/outputs/verify/T43/V11/p/env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 C=$1; PORT=$2; OUT=$3; LIST=$4; EST_GB=${EST_GB:-30}
 is_arm $C || { echo "unknown ARM $C"; exit 2; }
 port_ok $PORT || { echo "port $PORT not allowed (8280-8289 only, never 8123)"; exit 2; }

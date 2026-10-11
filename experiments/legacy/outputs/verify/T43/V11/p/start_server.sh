@@ -2,7 +2,7 @@
 # T43V11 server = exactly the V8 flags (T43/V8/p/start_server.sh; no --held-obstacle-margin, no --servo-model) + TA flags per arm. snapshot ${AG3S_PROJECT_ROOT}-t43v11 = benchmark 3ca1b21.
 # usage: start_server.sh V11A|V11AB|V11ABC PORT RECDIR
 #   V5 = V4 (a + c + --held-body-cover) + --closing-keep-geometry --latched-identity-hold --supported-max-bottom-mm 60   (V6 dropped by lead)
-source ${AG3S_PROJECT_ROOT}/outputs/verify/T43/V11/p/env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 C=$1; PORT=$2; RECDIR=$3
 port_ok $PORT || { echo "port $PORT not allowed (8280-8289 only, never 8123)"; exit 2; }
 E3B="--esdf-backend curobo --voxel 0.020 --fine-voxel 0.005 --tsdf-voxel 0.005 --links gripper --target-field-policy exclude-authorized \

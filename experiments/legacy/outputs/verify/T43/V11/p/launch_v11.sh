@@ -3,7 +3,7 @@
 # Two chains (ports 8286 / 8287), no other GPU round of ours runs; the chains' start guard staggers servers.
 #   chain E (8286): hurdle items 1-7 -> no-obstacle 5     chain F (8287): hurdle items 8-14
 # Same guards as p/run_chain.sh; resumable (.done).
-source ${AG3S_PROJECT_ROOT}/outputs/verify/T43/V11/p/env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 ARM=$1; is_arm $ARM || { echo "unknown ARM $ARM"; exit 2; }
 R=$V/runs; L=($(cat $P/lists/hurdle.txt)); B="$(cat $P/lists/clear.txt)"
 LA="${L[*]:0:7}"; LB="${L[*]:7:7}"
