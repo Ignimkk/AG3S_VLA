@@ -3,7 +3,7 @@
 # run dir = OUTDIR/{ARM}_ep{EP}_s{SEED}; without OBST_* = no obstacle. Always: --obstacle-stop-distance 0 --viz-avoidance-arrow + recording.
 #   E0: no safe flags.  V0: --safe-hold-mode fixed (T34 E3b).  V1 / V2: --safe-hold-mode measured (T41c).
 # skips a run with OUTDIR/NAME.done; a partial run dir is moved to OUTDIR/failed/ first.
-source ${AG3S_PROJECT_ROOT}/outputs/verify/T43/V11/p/env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 C=$1; PORT=$2; OUT=$3; EP=$4; SEED=$5; OCFG=$6; OPROF=$7; NAME=${C}_ep${EP}_s${SEED}; RUN=$OUT/$NAME
 port_ok $PORT || { echo "port $PORT not allowed"; exit 2; }
 [ -f $OUT/$NAME.done ] && { echo "skip $NAME (done)"; exit 0; }
