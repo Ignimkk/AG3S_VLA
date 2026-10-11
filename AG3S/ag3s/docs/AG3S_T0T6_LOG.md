@@ -8575,3 +8575,73 @@ T44d 의 C0 · C1a · C1b 기록 replay 에서 hand–fruit 접촉 event 24 개 
 ![T45 scene](figures/t45/t45-scene.png)
 
 [`t45-scene.png`](figures/t45/t45-scene.png) — 왼쪽은 MuJoCo 의 `C1a_ep54_s542` t157 palm (`EE_BODY_R`) – orange 접촉 장면, 오른쪽은 palm body frame 의 x–z (위) · y–z (아래) 투영이다. 회색 점 = MJCF collision hull 표면, 빨강 = palm 접촉점 (8 event), 파랑 원 = 구의 투영이다. 열은 서버 구 (23 개, r 5.7–6.2 mm) · 후보 palm scale 1.0 (23 개) · 후보 palm body cover 2.5 mm (445 개) 이다 (5 mm 후보 (b) 는 이 그림에 없다). 서버 구는 표면의 가장자리를 따라 작은 원이 늘어서 있고 접촉점은 그 아래 모서리의 구 밖에 있다.
+
+
+## ENV_OUTPUT — checkout 독립 환경 · output 분리 · legacy 삭제 조건 (2026-10-12 00:44 KST)
+
+**사용자 요청 범위의 infrastructure 구현과 검증을 lead가 확정했다.** 구현은
+[`ENV_OUTPUT.impl.md`](handoff/ENV_OUTPUT.impl.md), 측정은
+[`ENV_OUTPUT.verify.json`](handoff/ENV_OUTPUT.verify.json)의 `numbers`와 raw artifact를 기준으로 한다.
+환경 구성·실행 방법·보존 목록은
+[`GPU_OUTPUT_IMPLEMENTATION_REPORT.md`](../../../doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md)에 기록한다.
+기존 AG3S algorithm 개선 이력과 앞선 실험 판정은 계속 유지한다.
+
+### 독립 환경과 GPU · checkpoint 검증
+
+`.venv-openpi-live`를 자기 checkout의 Python과 source로 구성했다. `openpi` · `openpi_client` ·
+`AG3S` · `common`의 import origin은 모두 `/mnt/dev/AG3S_VLA-development` 아래다.
+cuRobo는 `.venv-curobo`에서 자기 checkout의 `third_party/curobo`를 사용한다.
+기존 environment를 복사하거나 `/mnt/dev/work` source를 editable import로 사용하지 않았다.
+
+| 환경 · 검증 항목 | 측정 결과 (`ENV_OUTPUT.verify.json`의 `numbers`) |
+|---|---|
+| OpenPI 환경 | Python **3.11.16** · OpenPI / OpenPI Client **0.1.0** · JAX / jaxlib **0.5.3** · Torch **2.7.1+cu126** (package metadata **2.7.1**) |
+| 별도 cuRobo 환경 | cuRobo **0.8.0.post1.dev43** · CUDA runtime **12.6** · `cuda-core` **1.2.0** · Warp **1.17.0** |
+| legacy import 의존성 | 현재 environment의 legacy symlink / editable **0 / 0**, cuRobo environment도 **0 / 0** |
+| GPU 실행 | GPU 검증 process **2개를 순서대로 실행**. Torch · JAX GPU matrix sum 각각 **3680.0** |
+| 기존 checkpoint | step **29999** 로딩 후 inference **2회**, action shape **50 × 16**, finite output **2 / 2**. checkpoint file **28개 불변** |
+| cuRobo Mapper | synthetic depth의 surface voxel **3,528개**, ESDF **2,097,152개 전부 finite** |
+| 독립 CPU regression | 최종 output · policy recorder · record timing 검증 **43 passed** |
+
+![기존 policy input](figures/env-output/recorded-policy-input.png)
+
+기존 녹화 observation을 읽어 checkpoint inference에 사용했다.
+[`checkpoint-action-chunks.png`](figures/env-output/checkpoint-action-chunks.png)는 그 action output의 graph,
+[`curobo-synthetic-esdf.png`](figures/env-output/curobo-synthetic-esdf.png)는 별도 환경에서 계산한 synthetic depth와 ESDF,
+[`gpu-validation-table.png`](figures/env-output/gpu-validation-table.png)는 GPU 검증 표다.
+이 검증은 physical robot/camera 실행, full closed-loop rollout, benchmark episode 또는 training 검증을 포함하지 않는다.
+
+### 새 output과 과거 기록 보존
+
+새 video · policy record · log · checkpoint는
+`/mnt/dev/AG3S_VLA-storage/results/development/<날짜_commit_run-id>/`를 명시적으로 선택한다.
+Server · client · training process는 `AG3S_RUN_DIR`를 공유하며 relative writable argument는 run 기준으로 해석한다.
+Normalization statistics output도 run 아래로 분리하여 공유 input에 기록하지 않도록 보호했다.
+OpenPI `--record`는 run 아래의 unique recorder session에 기록한다.
+기존 cwd의 상대 `policy_records` 사용과 recorder restart 시 `step_0` overwrite를 막았다.
+
+| 검증 항목 | 측정 결과 |
+|---|---|
+| recorder 분리 | session **3개**, 실제 policy record **2개**, concurrent record **8개**, 첫 record 불변 |
+| 과거 policy record | file **114개**의 전체 SHA-256 대조: 변경 **0개**, 추가 **0개** |
+| 공유 input archive | file **8,972개**의 SHA-256 error **0개** |
+| 새로 보존한 legacy file | **40개**의 source / destination hash error **0 / 0** |
+| 기존 checkout에 없는 Git object | **2개**를 bundle로 보존, bundle verify return code **0** |
+
+![directory와 output 분리](figures/env-output/directory-scene.png)
+
+[`legacy-file-counts.png`](figures/env-output/legacy-file-counts.png)는 archive · legacy file 분포 graph,
+[`legacy-audit-table.png`](figures/env-output/legacy-audit-table.png)는 보존 및 의존성 audit 표다.
+최신 관리 문서 원본은 checkout에 보존했고, 공유 input과 기존 기록은 수정하지 않았다.
+
+### `/mnt/dev/work` 삭제 조건 — 아직 남아 있다
+
+| 남은 의존성 (audit 시점) | 측정 결과 · 필요한 조치 |
+|---|---|
+| live process | `/mnt/dev/work`에 의존하는 process **4개**. 해당 사용자가 새 checkout으로 전환한 뒤 재점검 |
+| sibling checkout의 과거 경로 | directory **22개**에 incoming legacy symlink **202개**. 참조를 shared storage로 전환하거나 필요한 원본을 보존한 뒤 재점검 |
+| 등록된 legacy worktree | **1개**. 사용자가 Git worktree 상태를 정리한 뒤 재점검 |
+
+따라서 이 audit 시점에는 `/mnt/dev/work`를 삭제할 조건이 충족되지 않았다.
+실제 삭제와 다른 process 종료는 수행하지 않았다. 다음 환경 작업은 위 의존성 해소 후 read-only 재점검이다.
+Algorithm 관련 다음 단계와 미결 판정은 기존 계획을 따른다.

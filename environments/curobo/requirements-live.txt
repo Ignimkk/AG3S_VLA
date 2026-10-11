@@ -1,0 +1,7 @@
+# Independent Python 3.11.16 producer, no system-site-packages.
+# cuRobo source is installed from this checkout by create_gpu_env.sh.
+torch==2.7.1
+numpy==1.26.4
+cuda-core[cu12]==1.2.0
+warp-lang==1.17.0
+pytest==8.3.5

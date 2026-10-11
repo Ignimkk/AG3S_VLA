@@ -2,6 +2,9 @@ import dataclasses
 import enum
 import logging
 import socket
+import pathlib
+
+from common.run_output import allocate_run_dir, configure_run_logging, resolve_output_path
 
 import tyro
 
@@ -50,6 +53,10 @@ class Args:
     port: int = 8000
     # Record the policy's behavior for debugging.
     record: bool = False
+    # Shared run directory for server/client; defaults to a unique storage result run.
+    run_dir: pathlib.Path | None = None
+    # Subdirectory within run_dir; never the historical shared input recordings.
+    record_dir: pathlib.Path | None = None
 
     # Specifies how to load the policy. If not provided, the default policy for the environment will be used.
     policy: Checkpoint | Default = dataclasses.field(default_factory=Default)
@@ -97,12 +104,18 @@ def create_policy(args: Args) -> _policy.Policy:
 
 
 def main(args: Args) -> None:
+    run_dir = allocate_run_dir(args.run_dir)
+    configure_run_logging(f"serve_policy_{args.port}")
+    if args.record_dir is not None and not args.record:
+        raise ValueError("--record-dir requires --record")
+    # Validate writable paths before loading the model.
+    record_dir = resolve_output_path(args.record_dir, run_dir=run_dir, default_name="policy_records")
     policy = create_policy(args)
     policy_metadata = policy.metadata
 
     # Record the policy's behavior.
     if args.record:
-        policy = _policy.PolicyRecorder(policy, "policy_records")
+        policy = _policy.PolicyRecorder(policy, record_dir, run_dir=run_dir)
 
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)

@@ -34,7 +34,7 @@
 - `/mnt/dev/AG3S_VLA-storage`: checkpoint·dataset·raw evidence의 독립 공유 input storage.
 - `/mnt/dev/work`: 원본 code/Git 보존과 이동한 input의 backlink. 새 코드 개발은 여기서 재개하지 않는다.
 
-각 checkout의 venv·새 output·cache는 별도로 관리한다. `scripts/setup/env.sh`는 자신의
+각 checkout의 venv·cache는 독립적이다. Development 새 output은 공유 storage의 `results/development/<날짜_commit_run-id>/`에서 실행별로 관리한다. `scripts/setup/env.sh`는 자신의
 checkout 코드만 PYTHONPATH에 추가한다. Dataset/checkpoint 등 기존 input은
 `AG3S_STORAGE_ROOT`로 선택한다. `AG3S_LEGACY_STORAGE`는 그 아래 `legacy-inputs`의 파생 alias다. 기존 venv를 새 폴더로 복사하거나 공유하지 않는다.
 
@@ -64,8 +64,8 @@ Recorded clients may still import `benchmark.ag3s` or `benchmark.trajopt`.
 module objects in this checkout; new code uses `AG3S.*` and `Baseline.*` directly.
 
 Run `bash scripts/setup/create_cpu_env.sh` to create an independent CPU environment
-and Python installation in each checkout. GPU/VLA and benchmark environments are
-separate setup tasks; this migration does not claim an end-to-end rollout result.
+and Python installation in each checkout. Development GPU/OpenPI and independent cuRobo setup is now documented in
+`doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`; benchmark setup and end-to-end rollout remain separate.
 
 ## External artifacts
 

@@ -1,5 +1,10 @@
 # Storage 경로 분리 실행 결과
 
+> **2026-10-12 후속 정본:** Development의 GPU 환경 및 새 output 저장 위치는
+> [GPU_OUTPUT_IMPLEMENTATION_REPORT.md](GPU_OUTPUT_IMPLEMENTATION_REPORT.md)와
+> [SHARED_STORAGE_AND_PYTHON.md](../SHARED_STORAGE_AND_PYTHON.md)를 따른다.
+> 아래는 2026-10-11 storage 이관 당시 기록이며 CPU 기본 interpreter/output 안내는 후속 문서에서 갱신됐다.
+
 완료 기록: **2026-10-11 23:58 KST**. 현재 경로 및 환경 안내의 정본은 이 문서와
 `doc/SHARED_STORAGE_AND_PYTHON.md`다. 이전 `IMPLEMENTATION_REPORT.md`는 최초 통합 당시 기록이다.
 사용자가 이전 통합 commit과 원본 보존 refs를 push했다고 확인했다. 이번 후속 commit은 아직 push하지 않았다.

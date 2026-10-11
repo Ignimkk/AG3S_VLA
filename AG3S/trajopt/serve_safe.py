@@ -43,6 +43,7 @@ import math
 import pathlib
 import sys
 from collections.abc import Sequence
+from common.run_output import add_run_dir_argument, configure_run_logging, prepare_run_outputs
 
 
 def constraint_links_minus(present: Sequence[str], exclude: Sequence[str],
@@ -1233,6 +1234,7 @@ def build_parser() -> argparse.ArgumentParser:
     """
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    add_run_dir_argument(ap)
     ap.add_argument("--config", required=True, help="openpi train config 이름")
     ap.add_argument("--checkpoint", required=True, help="체크포인트 디렉터리")
     ap.add_argument("--model-xml", required=True,
@@ -2423,6 +2425,11 @@ def main() -> None:
     reject_bad_flag_combinations(ap, args)
 
     logging.basicConfig(level=logging.INFO, force=True)
+    try:
+        prepare_run_outputs(args, {"record_constraints": "constraints"})
+        configure_run_logging("serve_safe")
+    except (ValueError, OSError) as exc:
+        ap.error(str(exc))
     # SUBTASK-g — 기본 on 인 gate 를 bool 로 확정한다. 이 아래는 전부 bool 만 본다.
     gate_note = resolve_subtask_gate(args)
     if gate_note:

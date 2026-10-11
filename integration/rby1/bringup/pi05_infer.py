@@ -1,4 +1,5 @@
 from common.workspace import workspace_path as _ag3s_workspace_path
+from common.run_output import add_run_dir_argument, configure_run_logging, prepare_run_outputs
 import argparse
 import contextlib
 import json
@@ -728,6 +729,7 @@ def build_seam_session(policy, mcfg, seam_config_path):
 
 def main():
     ap = argparse.ArgumentParser()
+    add_run_dir_argument(ap)
     ap.add_argument("--model", choices=list(MODELS.keys()), default="droid",
                     help="which pi0.5 variant to load")
     ap.add_argument("--prompt", default=DEFAULT_PROMPT,
@@ -938,6 +940,17 @@ def main():
                     help="(T42) with --viz-avoidance-arrow: also a blue arrow along the obstacle "
                          "normal at the gripper's closest point (MuJoCo ground truth, within 10 cm)")
     args = ap.parse_args()
+    try:
+        prepare_run_outputs(args, {
+            "record": "videos/rollout.mp4", "trajectory_out": "trajectories/rollout.npz",
+            "record_inputs": "policy_inputs", "record_ag3s": "ag3s_records",
+            "trace": "logs/trace", "record_constraints": "constraints",
+            "record_frames": "frames",
+        })
+        configure_run_logging("pi05_infer")
+    except (ValueError, OSError) as exc:
+        ap.error(str(exc))
+    print(f"run outputs: {args.run_dir}")
 
     if args.start_delay < 0:
         ap.error("--start-delay must be non-negative")

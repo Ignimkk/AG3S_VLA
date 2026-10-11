@@ -1,125 +1,154 @@
 # Shared storage and Python interpreter
 
-현재 정본: 2026-10-11. 현재 실행은 이전 `/mnt/dev/work` source·input·tool에 의존하지 않는다.
-과거 log·recording의 절대경로와 Git source SHA는 provenance로 보존하며 현재 실행 주소가 아니다.
+현재 정본: **2026-10-12 KST**, `feature/ag3s-development`.
+Development는 자기 source와 독립 환경을 사용한다. Benchmark checkout의 GPU 설치 상태는 별도다.
+최신 설치·검증 근거와 legacy 삭제 조건은 [GPU_OUTPUT_IMPLEMENTATION_REPORT.md](migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md)에 있다.
+이전 v1.4 관리 문서 원본은 [보존 manifest](migration/legacy-management-v1.4/manifest.json)에 기록한다.
 
-## Storage layout
+## Shared input와 새 result
 
 ```text
-/mnt/dev/
-├── AG3S_VLA-development/     # feature/ag3s-development: v2 이후 개선
-├── AG3S_VLA-benchmark/       # feature/panda-benchmark: paired v2 평가
-└── AG3S_VLA-storage/         # Git 외부의 실제 input 저장 공간
-    ├── checkpoints/rby1/
-    ├── datasets/{rby1,lerobot-atomic,lerobot-transport,workspace}/
-    ├── recordings/{records,run_0004,run_0005,run_16d_ep1800,policy_records,states}/
-    ├── assets/{attention,openpi}/
-    ├── results/{workspace,rby1,rby1-logs}/
-    ├── backups/rby1/
-    ├── cache/rby1/           # 기존 다운로드 자료 보존
-    ├── tools/{uv,tectonic}
-    └── legacy-inputs/       # 위 자료로 연결하는 relative-path 호환 namespace
+/mnt/dev/AG3S_VLA-storage/
+├── checkpoints/rby1/          # 기존 checkpoint: 읽기 전용 input
+├── datasets/                  # 기존 dataset: 읽기 전용 input
+├── recordings/                # 기존 video·policy_records: 읽기 전용 input
+├── assets/                    # 기존 attention·OpenPI asset
+├── results/
+│   ├── workspace/             # 과거 evidence, 수정하지 않음
+│   ├── rby1/                  # 과거 evidence, 수정하지 않음
+│   ├── rby1-logs/             # 과거 log, 수정하지 않음
+│   └── development/
+│       └── <KST-date_commit_run-id>/
+│           ├── run_manifest.json
+│           ├── videos/
+│           ├── policy_records/session_<unique>/step_N.npy
+│           ├── logs/          # Python log와 W&B local files
+│           └── checkpoints/   # 새 training checkpoint
+├── cache/rby1/                # 이전 다운로드 input 보존
+├── tools/{uv,tectonic}
+└── legacy-inputs/             # input용 relative alias, source repository가 아님
 ```
 
-`AG3S_STORAGE_ROOT`의 기본값은 checkout 옆 `AG3S_VLA-storage`다. 다른 host에서는 이 변수로
-실제 저장 위치를 지정한다. `AG3S_LEGACY_STORAGE`는 `source scripts/setup/env.sh`가 설정하는
-`$AG3S_STORAGE_ROOT/legacy-inputs` 호환 alias다. 기존 변수만 설정해서 input 저장 위치를 바꾸지 않는다.
-`legacy-inputs/pi05_TO_hybrid`와 `legacy-inputs/benchmark`는 input alias용 디렉터리이며 source repository가 아니다.
-`workspace_path('legacy/pi05_TO_hybrid')`와 `workspace_path('legacy/benchmark')`처럼 역사적 코드
-비교가 필요한 호출은 자기 checkout의 `.runtime/legacy-*` frozen Git fixture를 사용한다.
-Historical client를 로드한 replay harness는 input 위치만 `bind_historical_client_inputs`로 재설정한다.
-Frozen Git source와 algorithm은 수정하지 않는다.
+`AG3S_STORAGE_ROOT`는 기본적으로 checkout 옆 `AG3S_VLA-storage`다.
+`env.sh`는 `AG3S_LEGACY_STORAGE=$AG3S_STORAGE_ROOT/legacy-inputs`와
+`AG3S_RESULTS_ROOT=$AG3S_STORAGE_ROOT/results/development`를 설정한다.
+`common.run_output`은 결과 root를 독립 검증하고 KST 날짜·source commit·UUID로 run을 생성한다.
+기존 `outputs/` 폴더는 현재 writer의 기본 저장 위치로 사용하지 않는다.
+과거 Git source 비교는 자기 `.runtime/legacy-*` frozen fixture를 사용한다.
+Checkpoint·dataset과 과거 결과의 절대경로·SHA는 provenance로 그대로 보존한다.
 
-Checkpoint·dataset·이전 결과는 읽기 전용 input으로 취급한다. 새 training checkpoint·rollout·log는
-자기 checkout의 ignored `outputs/`에 쓴다. cache·LIBERO config·venv도 각 checkout에서 독립적으로 관리한다.
-이전 자료 경로에는 새 storage로 향하는 backlink를 남겼으므로 이전 도구의 data 접근은 유지된다.
-새 checkout의 artifact link와 runtime 기본값은 이 backlink를 거치지 않는다.
-OpenPI의 `assets`와 `policy_records`도 외부 storage를 직접 가리키는 ignored link로 연결한다.
-이전 terminal에서 상속된 cache·dataset·interpreter 경로가 이전 checkout을 가리키면 `env.sh`가 새 기본값으로 전환한다.
-새 Git clone만으로 storage의 대형 자료와 installed tool이 복원되지는 않는다. `experiments/manifests/shared-storage.json`을
-기준으로 외부 storage를 준비한 뒤 checksum artifact를 연결한다.
+OpenPI의 기존 `third_party/openpi/policy_records` input link는 development에서 제거했다.
+과거 기록을 읽을 때는 `$AG3S_STORAGE_ROOT/recordings/policy_records`를 명시한다.
+`prepare_legacy_artifacts.py`는 이 link를 다시 만들지 않는다. `assets` input link는 유지한다.
+Input inventory는 `experiments/manifests/shared-storage.json`, attention/tool SHA는 `legacy-artifacts.json`이다.
+이관 전부터 없었던 atomic/transport dataset alias 두 개는 여전히 missing input이다.
+
+## 실행별 output 설정
+
+서버와 client를 같은 run으로 묶을 때 launching shell에서 다음을 한 번 실행한다.
+새 실험을 시작할 때 기존 `AG3S_RUN_DIR`을 unset한다. 각 terminal에서 독립적으로 생성하면 서로 다른 run이 된다.
 
 ```bash
-cd /mnt/dev/AG3S_VLA-development  # 또는 /mnt/dev/AG3S_VLA-benchmark
+cd /mnt/dev/AG3S_VLA-development
 source scripts/setup/env.sh
-.venv-ag3s/bin/python scripts/setup/prepare_legacy_artifacts.py --relink
-.venv-ag3s/bin/python scripts/setup/check_workspace.py
-.venv-ag3s/bin/python scripts/setup/check_storage.py --hash-artifacts
+source .venv-openpi-live/bin/activate
+unset AG3S_RUN_DIR
+export AG3S_RUN_DIR="$(python -m common.run_output)"
+echo "$AG3S_RUN_DIR"
 ```
 
-전체 input 위치 목록은 `experiments/manifests/shared-storage.json`, attention/tool SHA-256은
-`experiments/manifests/legacy-artifacts.json`에 있다. 기존 atomic/transport LeRobot alias의 dataset
-두 개는 이관 전부터 없었다. 이동 작업으로 새로 생성하거나 복구한 dataset으로 간주하지 않는다.
-
-## Interpreter selection in VS Code
-
-두 checkout을 각각 다른 VS Code 창으로 연다. Python extension을 사용하고 `Ctrl+Shift+P` →
-`Python: Select Interpreter`에서 해당 창의 `.venv-ag3s/bin/python`을 선택한다.
-목록에 없으면 interpreter 경로를 직접 지정한다.
-
-| 창 | 선택할 interpreter |
-|---|---|
-| development | `/mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python` |
-| benchmark | `/mnt/dev/AG3S_VLA-benchmark/.venv-ag3s/bin/python` |
-
-로컬 `.vscode/settings.json`은 `${workspaceFolder}/.venv-ag3s/bin/python`을 기본값으로 설정했다.
-이미 선택된 interpreter가 있으면 위 명령으로 명시적으로 다시 선택한다.
-이 설정은 shell의 `python`을 자동 변경하는 것과 별개다. 새 terminal에서 다음을 실행한다.
+OpenPI server는 `--run-dir`와 `--record-dir`를 지원한다.
+`--record`의 기본값은 `$AG3S_RUN_DIR/policy_records/session_<unique>/step_N.npy`다.
+같은 run으로 서버를 재시작하거나 둘 이상 시작해도 서로 다른 session에 기록하므로 `step_0`을 덮어쓰지 않는다.
+각 파일은 exclusive creation으로 생성한다. 별도의 상대 `--record-dir`도 run 안에서 해석한다.
 
 ```bash
-source scripts/setup/env.sh
-source .venv-ag3s/bin/activate
-python -c 'import sys; print(sys.executable); print(sys.version)'
-python scripts/setup/check_workspace.py
+python third_party/openpi/scripts/serve_policy.py \
+  --record --run-dir "$AG3S_RUN_DIR" --record-dir policy_records \
+  policy:checkpoint \
+  --policy.config pi05_rby1_randomized_pick_place_16d_lora \
+  --policy.dir "$AG3S_STORAGE_ROOT/checkpoints/rby1/pi05_rby1_randomized_pick_place_16d_lora/rby1_randomized_pick_place_16d_30k_xla_retry_20260923/29999"
 ```
 
-두 새 CPU 환경의 Python은 3.11.16이다. 기존 editable install 또는 venv를 두 branch가 공유하지 않는다.
-현재 확인한 이전 환경은 다음과 같다. 이 표는 재현 참고이며 새 실행 경로가 아니다.
+Bringup의 `pi05_infer.py`, `pi05_ex_infer.py`와 `AG3S.trajopt.serve_safe`도 `--run-dir`를 지원한다.
+예: `--record videos/rollout.mp4 --record-inputs videos/policy_inputs --record-ag3s ag3s_records`.
+활성화한 output 인자는 run 안으로 해석하며 run 밖 절대경로, `..` escape와 input을 향하는 symlink를 거부한다.
+`--record-inputs`, `--record-ag3s` 등 기존 recording 옵션은 지정했을 때만 활성화한다.
+Atomic/grid evaluation 기본 결과도 run 아래로 저장한다. 알고리즘·모델 입력·평가 판정은 바꾸지 않는다.
 
-| 이전 환경 | 확인 결과/역할 |
-|---|---|
-| `/mnt/dev/work/.venv-ag3s/bin/python` | Python 3.11 환경 명세; interpreter 확인 명령이 15초 timeout. 새 CPU 환경 사용 권장 |
-| `/mnt/dev/work/.venv-openpi-live/bin/python` | Python 3.11.16; numpy 1.26.4, JAX/JAXlib 0.5.3, Torch 2.7.1, MuJoCo 3.11.0 |
-| `/mnt/dev/work/.venv-curobo/bin/python` | Python 3.10.12; numpy 1.26.4, system-site-packages 사용 |
-| `/mnt/dev/work/pi05_TO_hybrid/openpi/.venv/bin/python` | Python 3.11.16; 이전 OpenPI 전용 환경 |
+OpenPI training의 `checkpoint_base_dir` 기본값은 run의 `checkpoints`다.
+명시적인 `--checkpoint-base-dir`도 같은 run 안이어야 한다. Resume할 때는 기존 run의 `AG3S_RUN_DIR`을 지정한다.
+기존 공유 checkpoint는 policy loader/weight loader로 읽으며 training resume의 writable destination으로 사용하지 않는다.
+Training launcher 두 개는 guard/train log와 새 checkpoint를 run 안에 둔다.
+Norm stats 생성은 `--output-dir`로 별도 destination을 지정하고 기본값은 run/assets다.
+Training에서 새 stats를 사용할 때는 해당 run/assets를 `--assets-base-dir`로 전달한다.
+Python logging은 unique log file, W&B local files는 `logs/wandb`를 사용한다.
+Bringup의 일반 `print`/native stderr까지 저장하려면 shell에서 run 아래 파일로 redirect한다.
+예: `... > "$AG3S_RUN_DIR/logs/client-console.log" 2>&1`.
+새 CLI는 결과 저장을 검증하지만 임의의 외부 script·shell redirect까지 강제하는 filesystem sandbox는 아니다.
+과거 `experiments/legacy` launcher는 archive로 취급하며 새 실험을 위해 그대로 실행하지 않는다.
 
-이전 환경을 잠시 선택해야 한다면 동일한 `Python: Select Interpreter`에서 그 경로를 지정할 수 있다.
-이는 이전 workspace를 계속 사용하는 경우의 방법이며 새 두 checkout의 권장 interpreter가 아니다.
+## Interpreter와 독립 재설치
 
-## Recreate the CPU environment
+| Development 환경 | 실제 설치 | 용도 |
+|---|---|---|
+| `.venv-openpi-live` | Python 3.11.16, OpenPI 0.1.0, JAX/JAXlib 0.5.3, Torch 2.7.1+cu126, numpy 1.26.4, MuJoCo 3.11.0 | VS Code 주 interpreter, OpenPI GPU inference |
+| `.venv-curobo` | Python 3.11.16, cuRobo 0.8.0.post1.dev43, Torch 2.7.1+cu126, cuda-core 1.2.0, Warp 1.17.0, numpy 1.26.4 | 별도 TSDF/ESDF producer |
+| `.venv-ag3s` | Python 3.11.16, numpy 2.4.6 | 기존 CPU 회귀·거리장 소비 |
+| Benchmark `.venv-ag3s` | 기존 독립 CPU 환경 | 이 작업에서 변경하지 않음 |
 
-현재 두 환경은 이미 준비되어 있다. 새 장비에서 재생성할 때만 아래를 실행한다.
-`uv`가 PATH에 없으면 외부 storage의 `tools/uv`를 사용한다. `AG3S_UV`로 다른 설치를 지정할 수도 있다.
+주 interpreter는 tracked `.vscode/settings.json`의 `${workspaceFolder}/.venv-openpi-live/bin/python`이다.
+이미 선택된 interpreter는 설정 변경만으로 전환되지 않을 수 있으므로 VS Code에서
+`Python: Select Interpreter` → `/mnt/dev/AG3S_VLA-development/.venv-openpi-live/bin/python`을 선택한다.
+Shell activation은 별도다. CPU 회귀에서는 `.venv-ag3s`, producer에서는 `.venv-curobo`를 activate한다.
+
+기존 `/mnt/dev/work/.venv-openpi-live`를 metadata로 직접 점검하고 snapshot과 비교했다.
+기존 Python 3.10 cuRobo system-site environment를 복사하지 않고 현재 pin의 `requires-python >=3.10`과
+Torch/CUDA 요구사항에 따라 독립 Python 3.11 producer를 새로 만들었다.
+모든 venv는 system-site-packages를 사용하지 않으며 Python executable은 자기 `.python`에 속한다.
+OpenPI/client/workspace/cuRobo editable source는 자기 checkout에만 연결한다.
+LeRobot은 기존 고정 Git commit `0cf864870cf29f4738d3ade893e6fd13fbd7cdb5`에서 새 wheel로 설치한다.
+cuRobo package version은 기존 inventory와 맞추고 source SHA는 `78fd485fa82d9b9a063fb4985e371814587e666a`를 유지한다.
+Torch transformer patch는 자기 vendored fork에서 자기 venv 안에만 적용한다.
 
 ```bash
+# 새 장비 또는 새 checkout에서 재생성할 때 사용
 source scripts/setup/env.sh
+bash scripts/setup/create_gpu_env.sh --with-curobo
+# CPU는 별도 유지
 bash scripts/setup/create_cpu_env.sh
-source .venv-ag3s/bin/activate
 ```
 
-GPU/OpenPI/cuRobo 환경은 이번 경로 전환에서 설치하지 않았다. CPU venv를 VLA inference 환경으로
-간주하지 않는다. 이전 환경 package snapshot은 `environments/legacy-python/`에 보존한다.
-그 파일은 inventory이며 GPU 환경의 검증된 재설치 lockfile이 아니다. 복사한 venv는 absolute path·
-editable source·CUDA extension 경로를 계속 가리킬 수 있으므로 새 checkout에서 재생성해야 한다.
-향후 OpenPI 환경은 자기 `.venv-openpi-live`에 만들고 `third_party/openpi`와 `third_party/curobo`를
-자기 checkout에서 설치한 뒤 import origin, CUDA, checkpoint loading을 검증한다.
-Training launcher의 `AG3S_OPENPI_PYTHON` 기본값도 자기 `.venv-openpi-live/bin/python`이다.
+`environments/openpi-live/requirements.txt`는 관찰된 live distribution 버전의 재설치 명세다.
+`--no-deps`로 기존 버전을 재현하고 source package를 별도로 설치하므로 새 dependency resolution lockfile로 주장하지 않는다.
+`environments/curobo/requirements-live.txt`와 `openpi-live/constraints.txt`는 producer dependency resolution에 사용한다.
+검증된 producer의 전체 snapshot도 `environments/curobo/resolved.txt`에 보존한다.
+OpenPI `uv pip check`는 이전 환경과 같은 **gym-aloha의 MuJoCo <3 제약 1건**을 보고한다.
+요청된 MuJoCo 3.11.0과 OpenPI/JAX/Torch 버전을 유지하며 실제 RBY1 checkpoint inference를 별도로 검증한다.
+ALOHA 전체 호환성이나 신규 training 완료를 주장하지 않는다.
 
-## Verify without the previous checkout
+## Cache와 GPU 직렬 검증
+
+`env.sh`는 자기 checkout의 `.cache/openpi`, `.cache/huggingface`, `.cache/cuda`, `.cache/warp`,
+`.cache/jax`, `.cache/torch-extensions`를 설정한다. 이전 terminal의 `/mnt/dev/work` 기본값은 제거한다.
+`XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 유지한다.
+
+GPU 검증 전 `nvidia-smi` compute process를 확인하고 양쪽 checkout이 같은 advisory lock을 사용한다.
+현재 H200 한 장에서는 OpenPI와 cuRobo 검증을 순서대로 실행한다.
+Lock을 사용하지 않는 외부 실행을 통제하거나 기존 process를 종료하지 않는다.
+검증 command·raw output·input identity는 최신 보고서와 verify manifest에 기록한다.
 
 ```bash
 source scripts/setup/env.sh
+.venv-ag3s/bin/python scripts/setup/check_workspace.py
+.venv-openpi-live/bin/python scripts/setup/check_storage.py --hash-artifacts
 .venv-ag3s/bin/python scripts/setup/run_without_legacy.py -m pytest tests/ag3s/test_record_timing.py -q
 ```
 
-이 launcher는 Python 파일 open·directory listing·chdir에서 이전 checkout과 그 alias 접근을
-거부하며 Python subprocess에도 같은 audit hook을 주입한다. 첫 probe에서 차단 동작을 확인한다.
-Native library나 Python 이외 프로세스의 모든 syscall을 차단하는 filesystem sandbox는 아니다.
-Storage와 interpreter의 symlink·Git fixture 경로 검사는 `check_storage.py`가 수행한다.
+`run_without_legacy.py`는 Python audit hook으로 이전 checkout의 파일 접근을 거부한다.
+Native library나 모든 subprocess syscall을 차단하는 완전한 filesystem sandbox는 아니다.
+main·benchmark branch는 변경하지 않는다. 공통 경로 변경의 전달과 push는 사용자가 판단한다.
 
-공통 storage/path 변경만 양쪽 branch에 전달한다. main의 paired v2 source 기준과 두 원본 v2 tag는
-유지하며 AG3S algorithm 개선을 benchmark branch에 섞지 않는다. Push는 사용자가 수행한다.
-
-Sources: [VS Code Python environments](https://code.visualstudio.com/docs/python/environments),
-[uv environment activation](https://docs.astral.sh/uv/pip/environments/),
-[uv Python storage and existing environments](https://docs.astral.sh/uv/reference/storage/).
+Compatibility references: [JAX installation](https://docs.jax.dev/en/latest/installation.html),
+[cuRobo runtime configuration](https://nvlabs.github.io/curobo/latest/reference/runtime_configuration.html).
+실제 source 요구사항은 pinned `third_party/curobo/pyproject.toml`, 실행 결과는 최신 validation artifact가 기준이다.

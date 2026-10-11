@@ -1,0 +1,24 @@
+{
+  "preserved_at": "2026-10-12 KST",
+  "version": "1.4",
+  "files": [
+    {
+      "source": "/mnt/dev/work/doc/PROJECT_FOLDER_AND_GIT_MANAGEMENT_FINAL.md",
+      "target": "doc/migration/legacy-management-v1.4/PROJECT_FOLDER_AND_GIT_MANAGEMENT_FINAL.md",
+      "size": 76783,
+      "sha256": "fe31cc77188094c65cd77af756b4aadb7c466ee2907c97e04ccd7224b0b5d20f"
+    },
+    {
+      "source": "/mnt/dev/work/doc/SHARED_STORAGE_AND_PYTHON.md",
+      "target": "doc/migration/legacy-management-v1.4/SHARED_STORAGE_AND_PYTHON.md",
+      "size": 7798,
+      "sha256": "b0ce6edb353b5a8a85fef4dd8887abde167fdcc45fb8ef36379025ad3df448af"
+    },
+    {
+      "source": "/mnt/dev/work/doc/STORAGE_IMPLEMENTATION_REPORT.md",
+      "target": "doc/migration/legacy-management-v1.4/STORAGE_IMPLEMENTATION_REPORT.md",
+      "size": 6470,
+      "sha256": "36966dfd1837ca53037cd9083c8050160fcbcd5c60cd72b5540ef45751312164"
+    }
+  ]
+}

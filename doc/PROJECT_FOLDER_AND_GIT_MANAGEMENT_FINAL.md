@@ -2,10 +2,11 @@
 
 - 작성: **2026-10-11 18:47 KST**
 - 대상: `/mnt/dev/work`의 프로젝트 코드, Git 이력, 외부 dependency, 실험 자료, 문서 및 실행 환경
-- 갱신: **2026-10-11 12:25 UTC**
-- 문서 버전: **1.3**
-- 상태: **로컬 통합·두 clone·branch·경로 전환 완료 / push 미실행**
-- 실행 결과 정본: 각 새 clone의 `doc/migration/IMPLEMENTATION_REPORT.md`와 `doc/BRANCHES.md`. 아래 1–21절은 설계 및 작성 시점의 준비 절차이며, 실행 여부는 22절이 우선한다.
+- 갱신: **2026-10-11 23:58 KST**
+- 문서 버전: **1.4**
+- 상태: **최초 통합 push 사용자 확인 / 독립 storage 전환 완료 / 후속 commit push는 사용자 수행**
+- 최신 경로·환경 정본: `SHARED_STORAGE_AND_PYTHON.md`, `STORAGE_IMPLEMENTATION_REPORT.md` 및 아래 23절.
+- 최초 통합 실행 결과 정본: 각 새 clone의 `doc/migration/IMPLEMENTATION_REPORT.md`와 `doc/BRANCHES.md`. 아래 1–21절은 설계 및 작성 시점의 준비 절차이며, 실행 여부는 22절이 우선한다.
 - 원칙: 현재 AG3S 개선 작업의 코드와 미커밋 변경을 유지한다. 기존 `v2`를 checkout하거나 현재 working tree에 복원하지 않는다.
 
 ## 1. 최종 판정
@@ -1014,3 +1015,35 @@ git push origin --tags
 Force push나 `--mirror`는 사용하지 않는다. 보존 branch/tag push도 필요하다.
 원격 반영 후 각 창에서 `git fetch origin`하여 최신 ref를 확인한다.
 새 장비에서 clone할 때 `git submodule update --init --recursive`로 고정 dependency를 가져온다.
+
+
+## 23. 독립 storage 전환 후 현재 상태 (2026-10-11 23:58 KST)
+
+최초 통합 이후 사용자가 `Ignimkk/AG3S_VLA`에 양쪽 개발 branch와 원본 보존 refs를
+push했다고 확인했다. 실제 origin은 `https://github.com/Ignimkk/AG3S_VLA.git`이다.
+이 절 및 [현재 storage·Python 안내](SHARED_STORAGE_AND_PYTHON.md),
+[후속 실행 결과](STORAGE_IMPLEMENTATION_REPORT.md)가 이전 절의 현재 경로/환경 설명보다 우선한다.
+이전 절의 commit·실험·backup 기록은 당시의 증거로 보존한다.
+
+Checkpoint·dataset·raw attention·기존 결과·설치된 uv/tectonic은 이제
+`/mnt/dev/AG3S_VLA-storage`에 있다. `AG3S_STORAGE_ROOT`로 이 위치를 선택한다.
+`AG3S_LEGACY_STORAGE` 기본값은 그 아래 `legacy-inputs`다. 기존 `/mnt/dev/work` input
+경로는 storage로 향하는 backlink이며 현재 실행에 필요한 root가 아니다.
+원본 코드/Git/기존 venv는 보존하며 새 개발은 두 독립 clone에서 한다.
+
+두 새 CPU interpreter는 각 checkout의 `.venv-ag3s/bin/python` (Python 3.11.16)이다.
+VS Code의 `Python: Select Interpreter`로 현재 창의 경로를 명시적으로 선택한다.
+GPU/OpenPI/cuRobo 환경 재설치와 Panda/benchmark rollout은 다음 작업이다.
+
+main과 benchmark는 paired v2 source를 유지하고 이번 공통 storage 변경을 적용한다.
+개선 branch는 기존 v2 이후 commit과 WIP를 유지한다. 개선 branch 전체를 main/평가
+branch에 merge하지 않는다. 공통 변경을 각 branch에 전달한 commit SHA는 다를 수 있다.
+원본 legacy tag/branch와 base ref는 rewrite하지 않는다.
+
+수정 전 백업을 먼저 확보했고 108,984개 input inode 보존을 검증했다. 그 중 108,983개는
+size/mtime도 일치하며 1개는 기존 loadavg sampler가 계속 append하는 log다.
+양쪽 각각 선택한 회귀 148 passed / 1 skipped / 5 deselected, artifact SHA 및 own-root import
+검증을 완료했다. 이 작업의 임시 백업은 검증 후 제거했다. 사용자 다른 backup과 이전 코드는 보존한다.
+
+후속 commit push 명령과 Claude 재시작 문구는 새 실행 결과와 새 clone의
+`doc/migration/CLAUDE_HANDOFF.md`를 따른다.

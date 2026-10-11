@@ -1,0 +1,15 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv-openpi-live/bin/python",
+  "python.analysis.extraPaths": [
+    ".",
+    "integration/rby1/manipulation/src",
+    "third_party/openpi/src",
+    "third_party/openpi/packages/openpi-client/src"
+  ],
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.venv*/**": true,
+    "**/.python/**": true,
+    "**/.runtime/**": true
+  }
+}

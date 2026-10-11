@@ -8,7 +8,7 @@ feature/ag3s-development는 v2 이후 전체 개선 이력과 현재 WIP를 포�
 개선 branch 전체를 benchmark branch에 merge하면 V11AB 평가 대상이 바뀐다.
 기존 /mnt/dev/work의 Claude session은 새 코드 작업에 resume하지 말고 새 세션을 시작한다.
 공유 input은 별도 AG3S_VLA-storage에 있다. 기존 /mnt/dev/work는 현재 실행에 필요하지 않은 이전 checkout이다.
-새 코드·새 output은 자기 checkout에서만 수정/생성한다. source scripts/setup/env.sh로 경로를 설정한다.
+새 코드는 자기 checkout에서 수정한다. 새 output은 별도 storage의 results/development/<날짜_commit_run-id>/에 생성한다. source scripts/setup/env.sh로 경로를 설정한다.
 아래에 남은 과거 진행 기록은 source-manifest와 실제 branch를 기준으로 해석한다.
 Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았다.
 
@@ -49,19 +49,27 @@ Sub-agent의 상세 역할과 작업 범위는 `.claude/agents/`의 정의를 �
 
 ## 현재 환경
 
-각 checkout은 별도 `.python/`·`.venv-ag3s`·output·cache를 사용한다.
-`source scripts/setup/env.sh` 후 `.venv-ag3s/bin/python`으로 CPU 검증을 실행한다.
-GPU/OpenPI·cuRobo 환경과 로컬 PC 환경은 아직 이번 구조로 설치하지 않았다.
-기존 workspace의 venv를 복사하거나 새 Python code의 import 경로로 사용하지 않는다.
-Checkpoint·dataset·녹화 자료는 `AG3S_STORAGE_ROOT`(기본: checkout 옆 `AG3S_VLA-storage`)에서 읽는다.
-`AG3S_LEGACY_STORAGE`는 그 아래 `legacy-inputs`를 가리키는 호환 alias다.
-`doc/SHARED_STORAGE_AND_PYTHON.md`가 현재 storage·interpreter 설정의 정본이다.
-기존 “OpenPI submodule 내부의 venv를 쓴다”는 지침은 현재 통합 구조에 적용하지 않는다.
-OpenPI fork는 `third_party/openpi/`에 직접 추적된다.
+이 development checkout의 VS Code 주 interpreter는 `.venv-openpi-live/bin/python`이다.
+Python 3.11.16 / OpenPI 0.1.0 / JAX·JAXlib 0.5.3 / Torch 2.7.1을 독립 재설치했다.
+OpenPI와 openpi-client는 자기 `third_party/openpi` source에 editable install한다.
+CPU 회귀는 기존 독립 `.venv-ag3s`(Python 3.11.16, numpy 2.4.6)를 유지한다.
+cuRobo producer는 별도 `.venv-curobo`(Python 3.11.16, numpy 1.26.4, Torch 2.7.1,
+CUDA 12.6, cuda-core 1.2.0, cuRobo 0.8.0.post1.dev43)를 사용하며 system packages를 공유하지 않는다.
+Benchmark checkout의 GPU 환경 설치 상태는 이 문서의 development 결과로 추정하지 않는다.
 
-GPU 실행 시 `OPENPI_DATA_HOME`은 자기 checkout의 `.cache/openpi`,
-`XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 사용한다.
-실제 VLA 환경·체크포인트·robot/camera adapter 검증은 다음 단계다.
-최초 Migration 기록은 `doc/migration/IMPLEMENTATION_REPORT.md`, 후속 storage 경로 분리 결과는
-`doc/migration/STORAGE_IMPLEMENTATION_REPORT.md`에 기록한다. 현재 경로/환경은 후속 문서가 우선한다.
-기존 단계 로그는 그 로그의 source 기준과 실제 branch가 일치할 때만 이어 쓴다.
+`source scripts/setup/env.sh` 후 목적에 맞는 venv를 activate한다. Checkpoint·dataset·과거 기록은
+`AG3S_STORAGE_ROOT`에서 읽고 기존 input은 수정하지 않는다. `AG3S_LEGACY_STORAGE`는 파생 input alias다.
+새 video·policy record·log·training checkpoint는 `$AG3S_STORAGE_ROOT/results/development`의
+KST 날짜·commit·UUID run 아래로 저장한다. 서버와 client가 같은 run을 사용할 때는
+`export AG3S_RUN_DIR="$(.venv-openpi-live/bin/python -m common.run_output)"`를 한 번 실행한다.
+OpenPI `--record`는 run의 `policy_records/session_*/step_N.npy`에 쓰며 과거 recording link를 사용하지 않는다.
+
+GPU 검증은 다른 checkout과 동시에 실행하지 않는다. `/tmp/ag3s-vla-gpu-validation.lock`을
+공유하고 `nvidia-smi`에서 기존 compute process가 없는지 확인한 뒤 시작한다.
+`OPENPI_DATA_HOME`·CUDA/Warp/JAX/Torch cache는 자기 checkout 아래다.
+`XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 유지한다.
+
+현재 storage·interpreter 설정의 정본은 `doc/SHARED_STORAGE_AND_PYTHON.md`이며 설치·검증·삭제 조건은
+`doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`를 읽는다. 이전 보고서는 그 시점 기록으로 보존한다.
+AG3S algorithm과 기존 개선 이력은 유지한다. `/mnt/dev/work`는 삭제하지 않았고 실행 process 및
+역사적 sibling link/worktree의 정리가 남아 있다. 실제 검증 범위는 보고서의 결과 표를 따른다.

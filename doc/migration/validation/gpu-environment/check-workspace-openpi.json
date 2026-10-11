@@ -1,0 +1,28 @@
+{
+  "root": "/mnt/dev/AG3S_VLA-development",
+  "branch": "feature/ag3s-development",
+  "head": "4292882ef3054a16c67c03d3fd6261ef8644a7e7",
+  "origin": "https://github.com/Ignimkk/AG3S_VLA.git",
+  "profile": "ag3s-development",
+  "modules": {
+    "AG3S.ag3s": [
+      "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/__init__.py"
+    ],
+    "AG3S.trajopt": [
+      "/mnt/dev/AG3S_VLA-development/AG3S/trajopt/__init__.py"
+    ],
+    "Baseline.seam_vla": [
+      "/mnt/dev/AG3S_VLA-development/Baseline/seam_vla/__init__.py"
+    ],
+    "Baseline.knows_vla": [
+      "/mnt/dev/AG3S_VLA-development/Baseline/knows_vla/__init__.py"
+    ],
+    "rby1_manipulation": [
+      "/mnt/dev/AG3S_VLA-development/integration/rby1/manipulation/src/rby1_manipulation/__init__.py"
+    ],
+    "openpi": [
+      "/mnt/dev/AG3S_VLA-development/third_party/openpi/src/openpi/__init__.py"
+    ]
+  },
+  "dependency_count": 5
+}

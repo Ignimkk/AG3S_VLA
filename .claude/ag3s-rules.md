@@ -23,7 +23,7 @@
 **병렬 세션 소유권** — 같은 파일을 둘이 쓰면 한쪽이 덮는다. 내 역할의 것만 쓴다.
 | A0 lead | A1 구현 | A2 검증 | A3 기록 |
 |---|---|---|---|
-| `AG3S/ag3s/docs/handoff/*.task.md` · PLAN | `AG3S/**/*.py` · `Baseline/**/*.py` · `benchmark/**/*.py` · `integration/**/*.py` · `common/**/*.py` · `tests/**` | `AG3S/ag3s/docs/figures/**` · `*.verify.json` · `outputs/verify/**` | `AG3S/ag3s/docs/*.md` · `references/legacy-papers/**` |
+| `AG3S/ag3s/docs/handoff/*.task.md` · PLAN | `AG3S/**/*.py` · `Baseline/**/*.py` · `benchmark/**/*.py` · `integration/**/*.py` · `common/**/*.py` · `tests/**` | `AG3S/ag3s/docs/figures/**` · `*.verify.json` · `${AG3S_RUN_DIR}/verify/**` | `AG3S/ag3s/docs/*.md` · `references/legacy-papers/**` |
 
 **`AG3S_T0T6_LOG.md` 의 writer 는 A3 하나다.** 나머지는 `AG3S/ag3s/docs/handoff/` 로 넘긴다.
 **A3 는 `verify.json` 의 `numbers` 에 없는 숫자를 쓰지 않는다** — 없으면 A2 에게 측정을 요청한다.

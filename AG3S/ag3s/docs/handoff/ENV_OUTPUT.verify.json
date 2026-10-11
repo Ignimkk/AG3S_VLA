@@ -1,0 +1,231 @@
+{
+  "step": "ENV_OUTPUT",
+  "date": "2026-10-12",
+  "runs": [
+    {
+      "id": "legacy-read-only-audit",
+      "command": "python3 /mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/audit.py",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/summary.json"
+    },
+    {
+      "id": "independent-cpu-output-record-timing",
+      "command": "MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development .venv-ag3s/bin/python -m pytest tests/test_run_output.py tests/ag3s/test_record_timing.py -q",
+      "venv": ".venv-ag3s",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/cpu-junit.xml",
+      "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/cpu-pytest.log"
+    },
+    {
+      "id": "own-openpi-h200-existing-checkpoint",
+      "command": "source scripts/setup/env.sh; MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development .venv-openpi-live/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/openpi_gpu.py",
+      "venv": ".venv-openpi-live",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/openpi-gpu.json",
+      "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/openpi-gpu.log"
+    },
+    {
+      "id": "own-curobo-h200-depth-esdf",
+      "command": "source scripts/setup/env.sh; MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development .venv-curobo/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/curobo_gpu.py",
+      "venv": ".venv-curobo",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/curobo-gpu.json",
+      "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/curobo-gpu.log"
+    },
+    {
+      "id": "independent-final-cpu-regressions",
+      "command": "MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development JAX_PLATFORMS=cpu .venv-openpi-live/bin/python -m pytest tests/test_run_output.py tests/test_policy_record_output.py tests/ag3s/test_record_timing.py -q",
+      "venv": ".venv-openpi-live",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/final-cpu-junit.xml",
+      "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/final-cpu-pytest.log"
+    },
+    {
+      "id": "lead-cpu-policy-output-regressions",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/policy-output-tests.log"
+    },
+    {
+      "id": "independent-final-writer-cpu-regressions",
+      "command": "MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development JAX_PLATFORMS=cpu .venv-openpi-live/bin/python -m pytest tests/test_run_output.py tests/test_policy_record_output.py tests/ag3s/test_record_timing.py -q",
+      "venv": ".venv-openpi-live",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/final-final-cpu-result.json",
+      "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/final-final-cpu-pytest.log",
+      "junit": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/final-final-cpu-junit.xml"
+    }
+  ],
+  "code_state": {
+    "repo": "/mnt/dev/AG3S_VLA-development",
+    "head": "4292882ef3054a16c67c03d3fd6261ef8644a7e7"
+  },
+  "numbers": {
+    "archive_files": 8972,
+    "archive_hash_errors": 0,
+    "legacy_files_matching_archive": 8970,
+    "legacy_files_changed_since_archive": 2,
+    "legacy_nonarchive_files": 56,
+    "legacy_nonarchive_bytes": 10764773,
+    "legacy_git_refs": 58,
+    "refs_with_missing_objects": 3,
+    "unique_missing_objects": 2,
+    "incoming_legacy_symlinks": 0,
+    "legacy_dependent_live_processes": 4,
+    "storage_cwd_processes": 2,
+    "current_environment_legacy_links": 0,
+    "current_environment_legacy_editables": 0,
+    "independent_cpu_tests_passed": 32,
+    "preserved_files_checked": 40,
+    "preserved_source_hash_errors": 0,
+    "preserved_destination_hash_errors": 0,
+    "missing_git_objects_preserved_in_bundle": 2,
+    "git_bundle_verify_returncode": 0,
+    "historical_sibling_legacy_links": 202,
+    "historical_sibling_directories": 22,
+    "registered_extra_legacy_worktrees": 1,
+    "python_version": "3.11.16",
+    "openpi_version": "0.1.0",
+    "openpi_client_version": "0.1.0",
+    "jax_version": "0.5.3",
+    "jaxlib_version": "0.5.3",
+    "torch_version": "2.7.1",
+    "numpy_version": "1.26.4",
+    "mujoco_version": "3.11.0",
+    "curobo_version": "0.8.0.post1.dev43",
+    "cuda_runtime_version": "12.6",
+    "cuda_core_version": "1.2.0",
+    "warp_version": "1.17.0",
+    "torch_gpu_matrix_sum": 3680.0,
+    "jax_gpu_matrix_sum": 3680.0,
+    "checkpoint_step": 29999,
+    "checkpoint_files_unchanged": 28,
+    "checkpoint_load_seconds": 38.405814772471786,
+    "checkpoint_inference_outputs": 2,
+    "checkpoint_action_horizon": 50,
+    "checkpoint_action_dimension": 16,
+    "checkpoint_finite_outputs": 2,
+    "recorder_sessions": 3,
+    "recorder_real_policy_records": 2,
+    "recorder_concurrent_records": 8,
+    "recorder_first_record_unchanged": true,
+    "historical_policy_record_files": 114,
+    "historical_policy_record_bytes": 52225743,
+    "historical_policy_record_changed_files": 0,
+    "historical_policy_record_new_files": 0,
+    "transformer_patch_files_sha_matched": 5,
+    "curobo_legacy_environment_symlinks": 0,
+    "curobo_legacy_editables": 0,
+    "curobo_surface_voxels": 3528,
+    "curobo_tsdf_blocks": 110,
+    "curobo_esdf_values": 2097152,
+    "curobo_finite_esdf_values": 2097152,
+    "curobo_esdf_negative_values": 3872,
+    "curobo_esdf_clone_unchanged": true,
+    "independent_final_cpu_tests_passed": 43,
+    "lead_policy_output_cpu_tests_passed": 16,
+    "new_visualization_video_frames": 15,
+    "new_visualization_video_bytes": 11251,
+    "new_visualization_video_fps": 5,
+    "gpu_measurement_processes_run_serially": 2,
+    "torch_build_version": "2.7.1+cu126",
+    "final_code_hashes_matched": 16,
+    "final_code_hash_mismatches": 0,
+    "lead_openpi_snapshot_versions_matched": 279,
+    "lead_openpi_snapshot_version_mismatches": 0
+  },
+  "figures": [
+    {
+      "path": "AG3S/ag3s/docs/figures/env-output/directory-scene.png",
+      "kind": "directory-scene"
+    },
+    {
+      "path": "AG3S/ag3s/docs/figures/env-output/legacy-file-counts.png",
+      "kind": "graph"
+    },
+    {
+      "path": "AG3S/ag3s/docs/figures/env-output/legacy-audit-table.png",
+      "kind": "table"
+    },
+    {
+      "path": "AG3S/ag3s/docs/figures/env-output/recorded-policy-input.png",
+      "kind": "recorded-camera-scene"
+    },
+    {
+      "path": "AG3S/ag3s/docs/figures/env-output/checkpoint-action-chunks.png",
+      "kind": "graph"
+    },
+    {
+      "path": "AG3S/ag3s/docs/figures/env-output/curobo-synthetic-esdf.png",
+      "kind": "synthetic-depth-scene-and-esdf"
+    },
+    {
+      "path": "AG3S/ag3s/docs/figures/env-output/gpu-validation-table.png",
+      "kind": "table"
+    }
+  ],
+  "baseline_check": {
+    "matched": true,
+    "record_timing_tests_passed": 23
+  },
+  "verdict": "43 independent final CPU tests passed; own H200 JAX/Torch, checkpoint inference and cuRobo ESDF executed; historical record SHA-256 unchanged 114/114; legacy dependent live processes 4",
+  "not_measured": [
+    "Physical robot/camera execution",
+    "Full closed-loop rollout or benchmark episode",
+    "Training and newly trained checkpoint",
+    "Complete global filesystem syscall exclusion of legacy access",
+    "Other users outside inspected process/filesystem namespace"
+  ],
+  "artifacts": {
+    "video": {
+      "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/videos/recorded-policy-input.mp4",
+      "size": 11251,
+      "source_frames": 15,
+      "fps": 5,
+      "kind": "recorded input visualization"
+    },
+    "openpi_origins": {
+      "openpi": "/mnt/dev/AG3S_VLA-development/third_party/openpi/src/openpi/__init__.py",
+      "openpi_client": "/mnt/dev/AG3S_VLA-development/third_party/openpi/packages/openpi-client/src/openpi_client/__init__.py",
+      "AG3S": "/mnt/dev/AG3S_VLA-development/AG3S/__init__.py",
+      "common": "/mnt/dev/AG3S_VLA-development/common/__init__.py"
+    },
+    "curobo_origin": "/mnt/dev/AG3S_VLA-development/third_party/curobo/curobo/__init__.py",
+    "checkpoint_input": "/mnt/dev/AG3S_VLA-storage/checkpoints/rby1/pi05_rby1_randomized_pick_place_16d_lora/rby1_randomized_pick_place_16d_30k_xla_retry_20260923/29999",
+    "observation_input": {
+      "source": "/mnt/dev/AG3S_VLA-storage/recordings/run_16d_ep1800/step_00000.npz",
+      "sha256": "619f429c8a28245297f5c2862514018b1490805d58fc671e2df2ceb00230d641",
+      "prompt": "Place the apple into the basket.",
+      "state_shape": [
+        16
+      ],
+      "images": {
+        "cam_high": {
+          "shape": [
+            3,
+            224,
+            224
+          ],
+          "dtype": "uint8"
+        },
+        "cam_left_wrist": {
+          "shape": [
+            3,
+            224,
+            224
+          ],
+          "dtype": "uint8"
+        },
+        "cam_right_wrist": {
+          "shape": [
+            3,
+            224,
+            224
+          ],
+          "dtype": "uint8"
+        }
+      }
+    },
+    "historical_record_validation": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/historical-records-validation.json",
+    "transformer_patch_validation": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/transformer-patch-validation.json",
+    "curobo_env_path_validation": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/curobo-env-path-validation.json",
+    "preservation_validation": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/preservation-validation.json",
+    "sibling_dependency_validation": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/sibling-work-paths.json",
+    "torch_build_validation": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/torch-build.json",
+    "final_code_hash_validation": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/final-code-hash-validation.json",
+    "lead_openpi_snapshot_version_inventory": "doc/migration/validation/gpu-environment/development-openpi-inventory.json",
+    "legacy_git_bundle_inventory": "doc/migration/validation/gpu-environment/legacy-bundle.json"
+  }
+}

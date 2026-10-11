@@ -1,0 +1,7 @@
+{
+  "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/work-all-refs.bundle",
+  "bytes": 146605138,
+  "sha256": "1c4189d81d02f3a1bb5966bc2260186beebf3a575b98f6fa968287b4a8aa5a7e",
+  "verify_complete": true,
+  "scope": "Original workspace --all refs; no original refs or other branch modified."
+}

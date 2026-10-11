@@ -2,6 +2,10 @@ from collections.abc import Sequence
 import logging
 import pathlib
 import time
+import tempfile
+import threading
+
+from common.run_output import allocate_run_dir, resolve_output_path
 from typing import Any, TypeAlias
 
 import flax
@@ -113,13 +117,31 @@ class Policy(BasePolicy):
 class PolicyRecorder(_base_policy.BasePolicy):
     """Records the policy's behavior to disk."""
 
-    def __init__(self, policy: _base_policy.BasePolicy, record_dir: str):
+    def __init__(
+        self,
+        policy: _base_policy.BasePolicy,
+        record_dir: str | pathlib.Path | None = None,
+        *,
+        run_dir: str | pathlib.Path | None = None,
+    ):
         self._policy = policy
 
-        logging.info(f"Dumping policy records to: {record_dir}")
-        self._record_dir = pathlib.Path(record_dir)
-        self._record_dir.mkdir(parents=True, exist_ok=True)
+        run_root = allocate_run_dir(run_dir)
+        record_root = resolve_output_path(record_dir, run_dir=run_root, default_name="policy_records")
+        record_root.mkdir(parents=True, exist_ok=True)
+        # Each server start owns a new directory, including restarts in the same run.
+        self._record_dir = pathlib.Path(tempfile.mkdtemp(prefix="session_", dir=record_root))
+        logging.info("Dumping policy records to: %s", self._record_dir)
         self._record_step = 0
+        self._record_lock = threading.Lock()
+
+    @property
+    def record_dir(self) -> pathlib.Path:
+        return self._record_dir
+
+    @property
+    def metadata(self) -> dict[str, Any]:
+        return self._policy.metadata
 
     @override
     def infer(self, obs: dict) -> dict:  # type: ignore[misc]
@@ -128,8 +150,10 @@ class PolicyRecorder(_base_policy.BasePolicy):
         data = {"inputs": obs, "outputs": results}
         data = flax.traverse_util.flatten_dict(data, sep="/")
 
-        output_path = self._record_dir / f"step_{self._record_step}"
-        self._record_step += 1
-
-        np.save(output_path, np.asarray(data))
+        with self._record_lock:
+            output_path = self._record_dir / f"step_{self._record_step}.npy"
+            self._record_step += 1
+        # Exclusive creation is a final guard against accidental overwrite.
+        with output_path.open("xb") as stream:
+            np.save(stream, np.asarray(data))
         return results
