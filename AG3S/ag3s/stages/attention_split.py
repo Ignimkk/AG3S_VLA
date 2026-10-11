@@ -34,6 +34,17 @@ the obstacle with the VLA's attention is the project's purpose, so the split is 
 4. The other components stay in the frame as **their own clusters** — obstacles, scored like any
    other cluster (and, like any other cluster, challengers under the T26 switch rule).
 
+**Which attention the ratio reads (T44b A4, 2026-10-10).** `clustering.attention_split_ratio_source`:
+`"normalized"` (default, T31b) — the ratio in step 3 is on the normalised attention the cloud
+carries; `"raw"` — on the attention **before** normalisation (`AttentionPointCloud.raw_attention`,
+the fused per-point max of the adapter output, `runtime/multiview.py` `fuse`). The target candidate
+is chosen by normalised attention mass in both modes; only the gate changes. Why: percentile
+normalisation saturates the top of the map at 1.0, so two fruits that both reach the saturated band
+read as equal (T44M, VLA attention, 34 merged demo frames: target fraction saturated 0.57 vs
+neighbour 0.07, yet 6 frames failed the gate on normalised attention). With the split radius at 12 mm
+and the ratio on raw attention, 24 of the 34 merged clusters became the target alone (precision ≥ 0.95,
+recall ≥ 0.90) against 20 at the default; the 30 non-merged frames stayed 30/30, no wrong pick.
+
 Evidence for the radius (E3 T28+T30 records, T14, T17 — 12 + 15 + 2 runs; `T31b.impl.md`): a single
 apple never re-clusters into two ≥ 20-point components at 15 mm before the grasp (0 of 139 triggered
 apple-only clusters, uneven attention included), because its own surface is connected at ≤ 17 mm
@@ -63,6 +74,10 @@ SPLIT = "split"
 ONE_COMPONENT = "one_component"
 ATTENTION_NOT_DISCRIMINATIVE = "attention_not_discriminative"
 SPLIT_REASONS = (SPLIT, ONE_COMPONENT, ATTENTION_NOT_DISCRIMINATIVE)
+#: `clustering.attention_split_ratio_source` vocabulary (T44b A4): which attention the ratio reads.
+RATIO_NORMALIZED = "normalized"
+RATIO_RAW = "raw"
+RATIO_SOURCES = (RATIO_NORMALIZED, RATIO_RAW)
 
 _EPS = 1e-12
 
@@ -76,15 +91,27 @@ class SplitComponent:
     attention_mass: float
     mean_attention: float
     centroid: np.ndarray
+    #: T44b A4: mean of the attention the ratio read, when that is not `attention`
+    #: (`ratio_source="raw"`); None otherwise (the record then has no key — T31b record as is).
+    mean_ratio_attention: Optional[float] = None
 
     def record(self) -> dict[str, Any]:
-        return {
+        out = {
             "n_points": int(len(self.indices)),
             "extents_mm": [round(float(v) * 1000.0, 1) for v in self.extents_m],
             "attention_mass": round(float(self.attention_mass), 4),
             "mean_attention": round(float(self.mean_attention), 4),
             "centroid": [round(float(v), 5) for v in np.asarray(self.centroid).reshape(3)],
         }
+        if self.mean_ratio_attention is not None:
+            out["mean_ratio_attention"] = float(self.mean_ratio_attention)
+        return out
+
+    @property
+    def gate_attention(self) -> float:
+        """The mean the ratio gate reads (`mean_ratio_attention`, else `mean_attention`)."""
+        return (self.mean_attention if self.mean_ratio_attention is None
+                else self.mean_ratio_attention)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -109,6 +136,9 @@ class SplitDecision:
     #: None with fewer than two components; inf when every other component has zero attention.
     ratio: Optional[float] = None
     method: str = SPLIT_METHOD
+    #: T44b A4: which attention `ratio` was computed on (`RATIO_SOURCES`). Only a non-default
+    #: value is written to the record, so the default record is the T31b one key for key.
+    ratio_source: str = RATIO_NORMALIZED
 
     @property
     def accepted(self) -> bool:
@@ -150,6 +180,8 @@ class SplitDecision:
                                                / max(self.parent_attention_mass, _EPS)), 4),
             },
             "components": [c.record() for c in self.components],
+            **({} if self.ratio_source == RATIO_NORMALIZED
+               else {"ratio_source": str(self.ratio_source)}),
         }
 
 
@@ -171,11 +203,16 @@ def split_by_attention(
     min_points: int,
     min_ratio: float,
     extents: Optional[np.ndarray] = None,
+    ratio_attention: Optional[np.ndarray] = None,
 ) -> Optional[SplitDecision]:
     """Decide whether the cluster `members` (indices into `points`) is split (module doc).
 
     Returns None when the cluster is not triggered (it is one cluster, and there is nothing to
     record), else the decision. Pure: the same cloud and attention always give the same answer.
+
+    `ratio_attention` (T44b A4): per-point values aligned with `points` (the pre-normalisation
+    attention) that the ratio gate reads instead of `attention`. The target candidate is still the
+    component with the largest `attention` mass. None (default) = the T31b decision, bit for bit.
     """
     from scipy.spatial import cKDTree
 
@@ -189,9 +226,16 @@ def split_by_attention(
     if max_opening is None or not triggered(ext, max_opening):
         return None
     att = att_all[members]
+    gate = None
+    if ratio_attention is not None:
+        gate_all = np.asarray(ratio_attention, np.float64).reshape(-1)
+        if gate_all.shape != att_all.shape:
+            raise ValueError(f"ratio_attention has {gate_all.size} values for {att_all.size} points")
+        gate = gate_all[members]
     base = dict(parent_indices=members, parent_extents_m=tuple(float(v) for v in ext),
                 parent_attention_mass=float(att.sum()), max_opening_m=float(max_opening),
-                radius_m=float(radius), min_points=int(min_points), min_ratio=float(min_ratio))
+                radius_m=float(radius), min_points=int(min_points), min_ratio=float(min_ratio),
+                ratio_source=RATIO_NORMALIZED if gate is None else RATIO_RAW)
 
     labels = connected_components_3d(pts, float(radius))
     ids, counts = np.unique(labels, return_counts=True)
@@ -217,11 +261,12 @@ def split_by_attention(
             indices=members[local],
             extents_m=tuple(float(v) for v in principal_extents(pts[local])),
             attention_mass=float(a.sum()), mean_attention=float(a.mean()),
-            centroid=pts[local].mean(axis=0)))
+            centroid=pts[local].mean(axis=0),
+            mean_ratio_attention=None if gate is None else float(gate[local].mean())))
     # Largest attention mass first; ties by the lowest member index (deterministic).
     comps.sort(key=lambda c: (-c.attention_mass, int(c.indices.min())))
-    top = comps[0].mean_attention
-    rest = max(c.mean_attention for c in comps[1:])
+    top = comps[0].gate_attention
+    rest = max(c.gate_attention for c in comps[1:])
     if top <= _EPS:
         ratio = 0.0
     elif rest <= _EPS:
@@ -235,6 +280,9 @@ def split_by_attention(
 __all__ = [
     "ATTENTION_NOT_DISCRIMINATIVE",
     "ONE_COMPONENT",
+    "RATIO_NORMALIZED",
+    "RATIO_RAW",
+    "RATIO_SOURCES",
     "SPLIT",
     "SPLIT_METHOD",
     "SPLIT_REASONS",

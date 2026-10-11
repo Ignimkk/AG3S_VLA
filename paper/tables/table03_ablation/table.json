@@ -1,0 +1,20 @@
+{
+  "artifact_id": "T03",
+  "status": "PLANNED_PLACEHOLDER",
+  "claim_ids": [
+    "C002",
+    "C003",
+    "C004"
+  ],
+  "plan_ids": [
+    "P003"
+  ],
+  "result_ids": [],
+  "numeric_values": null,
+  "is_measured_result": false,
+  "render_source": "paper/tables/table03_ablation/table.tex",
+  "caption_scope": "Unmeasured layout placeholder.",
+  "render_source_sha256": "650c0ab5b5478f037ee4de61dcb981a7a5c807cbe7b2b885259b31fd13aecd3c",
+  "input_sha256": {},
+  "updated_at": "2026-10-05 20:56 KST"
+}

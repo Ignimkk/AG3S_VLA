@@ -1,0 +1,32 @@
+% Local CVPR 2027 draft based on a pinned PROVISIONAL_2026 kit.
+% This is a scaffold, not an official 2027 template or a submission-ready paper.
+\documentclass[10pt,twocolumn,letterpaper]{article}
+% T1 selects the official Times font metrics with XeTeX/Tectonic as well as pdfLaTeX.
+\usepackage[T1]{fontenc}
+\usepackage[review]{cvpr}
+\input{preamble}
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+\input{metadata}
+\begin{document}
+\maketitle
+\begin{center}
+\textbf{DRAFT --- EVIDENCE PENDING}\\
+Provisional 2026 style; working target: CVPR 2027.
+\end{center}
+\input{sections/00_abstract}
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_method}
+\input{sections/04_experiments}
+\input{sections/05_conclusion}
+\input{sections/06_limitations}
+\ifhasverifiedreferences
+{\small
+\bibliographystyle{ieeenat_fullname}
+\bibliography{references}}
+\else
+\section*{References}
+\textit{Verified bibliography pending. No citation entries have been fabricated.}
+\fi
+\end{document}

@@ -1,0 +1,18 @@
+% Project additions; no margin, font-size, or spacing overrides.
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,calc,backgrounds}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\newif\ifhasverifiedreferences
+\hasverifiedreferencestrue % Draft 1: 19 entries; each copied from a local PDF or a publisher page.
+\newcommand{\draftnote}[1]{\par\noindent\textbf{Draft status:} #1\par}
+\newcommand{\notmeasured}{\textit{n/m}}
+% Pending content is shown in red and must be resolved or removed before submission.
+\newcommand{\tbd}[1]{{\color{red}[TBD: #1]}}
+\newcommand{\sys}{AG3S VLA}% method name as in the working title
+\newcommand{\dmain}{d}
+\newcommand{\dfree}{d^{\star}}

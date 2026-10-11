@@ -240,7 +240,7 @@ def test_without_a_field_the_plane_alone_is_cleared_and_a_given_clearance_wins(r
 # T33 기록 재구성 — attach 9 건
 # =============================================================================================
 
-V = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T33'))
+V = pathlib.Path(_ag3s_workspace_path('experiments/legacy/outputs/verify/T33'))
 PORT = {"E3a": 8204, "E3b": 8206}
 EVENTS = [("E3a", "E3a_ep1800_r1", 144), ("E3a", "E3a_ep1800_r2", 152),
           ("E3a", "E3a_ep1807_r1", 104), ("E3a", "E3a_ep1807_r2", 120),

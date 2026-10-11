@@ -1,0 +1,55 @@
+% !TEX root = ../main.tex
+% Draft 10: claim/source map in notes/DRAFT10_REVISION.md. Performance claims remain pending.
+\section{Introduction}
+\label{sec:introduction}
+\input{../figures/fig01_teaser/figure}
+
+A robot reaching for an apple must distinguish two geometrically similar events: its fingers touching the apple and its
+wrist striking a nearby object. The distinction depends on the instruction, the robot link, and the stage of manipulation.
+After grasping, the apple itself becomes moving geometry that must clear the environment; after release, it becomes part
+of the scene again. This changing role of the same visible surface is a central difficulty in connecting
+vision-language-action (VLA) policies to geometric collision avoidance.
+
+VLAs such as $\pi_0$, $\pi_{0.5}$, and GR00T N1 generate action chunks from visual observations and language
+instructions~\cite{black2024pi0,intelligence2025pi05,nvidia2025gr00t}. Their task-conditioned behavior makes them a useful
+source of manipulation proposals, but successful task completion alone does not establish collision-free
+execution~\cite{fan2026safevlabench}. Depth-based distance fields provide an explicit account of surrounding surfaces
+for motion generation~\cite{sundaralingam2023curobo,sundaralingam2026curobov2}. Geometry alone, however, does not specify
+which of those surfaces a particular link may touch. Treating the target as an obstacle can prevent the grasp; removing
+it from a shared collision field also removes it for links that should still avoid it. The missing connection is from
+\emph{visual task relevance} to \emph{spatially and temporally selective contact constraints}.
+
+Prior work provides several parts of this connection. VLSA uses external visual grounding to configure a safety
+filter~\cite{hu2026vlsa}, and MoManipVLA excludes a segmented target from its distance-field reconstruction in its
+real-world pipeline~\cite{wu2025momanipvla}. KNOWS uses VLA attention to select a target among objects supplied by a
+segmentation model~\cite{park2026knows}. Thus, attention-based target selection and target exclusion are established
+ideas. What remains to be addressed here is how to recover the target's spatial extent directly from VLA signals and
+depth, and use that geometry to determine contact permissions for individual links as manipulation proceeds.
+
+Our approach separates the roles of attention and geometry: \emph{attention selects a candidate object, while depth
+defines its observed extent}. We present \sys, which grounds action-to-image attention in a multi-view point cloud
+without an external detector or segmentation network. Attention seeds geometric clustering rather than masking the
+collision map, so weakly attended surfaces remain available as obstacles. The selected target then defines a local
+contact exception for the active hand. Other modeled links continue to query the scene field containing the target.
+When a grasp is confirmed, the target is represented as geometry attached to the hand and checked against the
+environment. This couples object grounding to the geometric consequences of interaction (Fig.~\ref{fig:overview}).
+
+To control when target identities may change and when an exception should end, we also train a lightweight linear
+sub-task probe on frozen VLA features. Its predictions supplement a grasp state machine driven by execution feedback;
+the state machine determines attachment and detachment. An optimization layer uses the resulting constraints to
+refine the portion of each action chunk that will be executed. The VLA remains frozen after embodiment fine-tuning:
+\emph{no additional VLA training for collision avoidance is required}. The probe is trained separately, and the current
+implementation reads attention through an additional pass of the same checkpoint.
+
+The contribution is the connection from internally derived target geometry to phase- and link-specific constraints.
+We develop it through:
+\begin{itemize}
+\item An attention-to-geometry procedure that extracts an observed 3D target from a frozen VLA and calibrated depth,
+without an external segmentation model or a separately supplied target name.
+\item A contact representation that uses this target geometry for link-specific distance queries, manages its lifetime
+with sub-task and grasp-state information, and transfers grasped geometry to the robot's collision queries.
+\item \tbd{A controlled evaluation: insert verified task success, forbidden-contact and safe-success results, then state
+what target grounding and link-specific handling add under the same refinement controller.}
+\end{itemize}
+The evaluation separates target identity, geometric extent, and contact handling so that improved execution can be
+attributed to the information supplied to the controller rather than to a change of controller alone.

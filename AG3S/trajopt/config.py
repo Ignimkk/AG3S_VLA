@@ -808,6 +808,24 @@ class CollisionBackendConfig:
     #: 32/33 obstacle runs; V3: 9/13 binding path rows nearest the apple). Nothing held only. Waypoint
     #: rows keep their own margins. False (default) = bit-identical.
     target_volume_exempt: bool = False
+    #: **T44 I2 — the target exception follows the contact permission.** True = a robot row is a
+    #: target row (look-ahead tail drop · `obstacle_margin` exemption · sweep path exclusion) only
+    #: when its link may touch the target (`SceneSnapshot.target_contact_rows`: `target_free_mask`
+    #: under `exclude_authorized`, `target_free_exempt` under `exclude_all`, the relaxed
+    #: `manipulated_link_margin` rows otherwise). Without it those three tests (`|d − d_object| ≤
+    #: voxel`, `target_volume`) carry no link filter, so a forearm next to the apple is exempted like
+    #: a finger. Also: with AG3S's `ball_owned` exclusion (`stats["target_free"]["exclusion_method"]`)
+    #: target membership is `d_free − d_main > voxel` instead of the ball. False (default) =
+    #: bit-identical.
+    target_permission_strict: bool = False
+    #: **T44b I2b — while holding, how far above the gripper the permission reaches** (read only
+    #: with `target_permission_strict`). Holding, the permitted rows are the holding hand's contact
+    #: links (palm + fingers, AG3S `ContactConfig.contact_links` of the hold link's side) plus the
+    #: first N sphere-carrying links above the gripper on the URDF hold chain (RB-Y1:
+    #: 1 = `link_<side>_arm_6`) — the held object's query spheres can reach past the gripper. 0 =
+    #: the gripper only. Before the grasp the permission is unchanged (`exclude_authorized` mask).
+    #: User verdict 2026-10-10: 1.
+    held_permission_parent_links: int = 1
     #: **충돌 제약을 최적화기에 보이는가.** `True` 가 기본이고 그것이 지금까지의 TO 다.
     #:
     #: `False` 는 사용자가 요청한 ablation 이다 (*"TO 에 가장 기본적인 jerk 목적함수만 포함하고
@@ -850,6 +868,14 @@ class CollisionBackendConfig:
         if not isinstance(self.esdf_host_mirror, bool):
             raise ValueError(
                 f"collision.esdf_host_mirror must be a bool, got {self.esdf_host_mirror!r}")
+        if not isinstance(self.target_permission_strict, bool):
+            raise ValueError("collision.target_permission_strict must be a bool, got "
+                             f"{self.target_permission_strict!r}")
+        if (isinstance(self.held_permission_parent_links, bool)
+                or not isinstance(self.held_permission_parent_links, int)
+                or self.held_permission_parent_links < 0):
+            raise ValueError("collision.held_permission_parent_links must be an int >= 0, got "
+                             f"{self.held_permission_parent_links!r}")
         if self.held_obstacle_margin and not self.obstacle_margin > 0.0:
             raise ValueError(
                 "collision.held_obstacle_margin needs collision.obstacle_margin > 0 — it gives the "

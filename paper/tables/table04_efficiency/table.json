@@ -1,0 +1,18 @@
+{
+  "artifact_id": "T04",
+  "status": "PLANNED_PLACEHOLDER",
+  "claim_ids": [
+    "C007"
+  ],
+  "plan_ids": [
+    "P005"
+  ],
+  "result_ids": [],
+  "numeric_values": null,
+  "is_measured_result": false,
+  "render_source": "paper/tables/table04_efficiency/table.tex",
+  "caption_scope": "Unmeasured layout placeholder.",
+  "render_source_sha256": "a705a950a9e016a7000ea624cf5373c6b968fcaffd53cf606431145c78d45a00",
+  "input_sha256": {},
+  "updated_at": "2026-10-05 20:56 KST"
+}

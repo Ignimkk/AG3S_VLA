@@ -52,7 +52,9 @@ __all__ = ["layer_from_curobo", "layer_from_arrays", "CuroboEsdfField", "Rollout
 #: | `target_free` | target 없는 미세 계층 — 조작 대상을 뺀 답 |
 #: | `window_edge` | target 없는 창 **안**이지만 창 경계까지의 거리 `b` 가 답했다 (하한 — 안전 쪽이나 미해결) |
 #: | `static` | 해석적 정적 기하 |
-ANSWER_TIERS = ("outside", "coarse", "fine", "target_free", "window_edge", "static")
+#: | `target_free_coarse` | target 없는 창 **안**에서 target 을 뺀 **거친** 계층 `c_free` 가 답했다 (T44c — `esdf.target_free_coarse`). 거친 해상도의 답이라 `coarse` 처럼 미해결 |
+ANSWER_TIERS = ("outside", "coarse", "fine", "target_free", "window_edge", "static",
+                "target_free_coarse")
 #: 미세 해상도(또는 해석적)로 **풀린** 답. 이 밖의 답은 접촉 허용 판정의 근거가 못 된다 —
 #: 창 밖을 자유 공간으로 읽거나 coarse fallback 을 성공한 접촉 허용으로 기록하지 않는다 (지침 §5.3).
 RESOLVED_TIERS = ("fine", "target_free", "static")
@@ -62,6 +64,8 @@ def unresolved_rows(tiers, clearance) -> tuple[np.ndarray, np.ndarray]:
     """`(unresolved, bounded)` — 둘 다 `(N,)` bool. **검증 불가의 정의가 여기 하나다** (T21).
 
     * `coarse` · `outside` → 언제나 미해결. 창 밖 답은 자유 공간도 접촉 허용도 아니다 (지침 §5.3).
+    * `target_free_coarse` (T44c) → 언제나 미해결. 창 안이지만 답은 거친 해상도다 — 본 합성에서 창
+      안의 `coarse` 승리를 미해결로 적는 것과 같은 규칙.
     * `window_edge` → 답은 창 경계 거리 `b` (참값의 하한). 그 하한만으로 `clearance ≥ 0`
       (= `b − r − margin ≥ 0`) 이면 **그 행은 풀린 것이다** (`bounded`) — 참 거리가 그보다 크다.
       음수면 위반이 창 경계가 만든 것일 수 있으므로 미해결이다.
@@ -71,7 +75,7 @@ def unresolved_rows(tiers, clearance) -> tuple[np.ndarray, np.ndarray]:
     c = np.broadcast_to(np.asarray(clearance, np.float64).reshape(-1), t.shape)
     edge = t == "window_edge"
     bounded = edge & (c >= 0.0)
-    unresolved = np.isin(t, ("coarse", "outside")) | (edge & ~bounded)
+    unresolved = np.isin(t, ("coarse", "outside", "target_free_coarse")) | (edge & ~bounded)
     return unresolved, bounded
 
 
@@ -193,6 +197,11 @@ class CuroboEsdfField:
     #: 그 메서드의 docstring 에 있다 (거친 격자에서 라벨과 값이 어긋나는 자리가 하필 파지하는
     #: 자리다).
     target_label: Optional[str] = None
+    #: **T44c A5 — target 을 지운 거친 계층** (`curobo_builder` `coarse_no_target`, `esdf.target_free_coarse`).
+    #: `None` (기본) 이면 `target_free_distance` · `_answer` 가 예전 식 그대로 돈다 (비트 동일).
+    #: 있으면 target-free 창 **안**의 합성에 한 항으로 들어간다 (`target_free_distance` docstring).
+    #: 작업공간 전체를 덮지만 창 밖에서는 읽지 않는다 — 이유는 같은 docstring.
+    target_free_coarse_layer: Optional[EsdfField] = None
 
     def __post_init__(self) -> None:
         self.layers = tuple(self.layers)
@@ -212,6 +221,11 @@ class CuroboEsdfField:
         # 사라지므로, 창 밖 처리는 `target_free_distance` 가 target 이 든 합성으로 되돌린다.
         for f in self.target_free_layers:
             f.outside_distance = None
+        if self.target_free_coarse_layer is not None:
+            # 해석적 채널은 합성 수준에서 한 번 (위와 같은 이유). 격자 밖은 `_covers` 로 걸러 읽지
+            # 않으므로 가장자리 클램프 값이 답이 되는 일이 없다.
+            self.target_free_coarse_layer.static_shapes = ()
+            self.target_free_coarse_layer.outside_distance = None
         named = [f.label_names for f in self.layers if f.label_names]
         if named and len({tuple(n) for n in named}) != 1:
             raise ValueError(
@@ -301,7 +315,9 @@ class CuroboEsdfField:
         once; later reads stay on the host, with the same values. Host layers are left alone.
         Returns how many layers were mirrored."""
         n = 0
-        for layer in tuple(self.layers) + tuple(self.target_free_layers):
+        extra = (() if self.target_free_coarse_layer is None
+                 else (self.target_free_coarse_layer,))
+        for layer in tuple(self.layers) + tuple(self.target_free_layers) + extra:
             fn = getattr(layer, "mirror_to_host", None)
             if fn is not None:
                 fn()
@@ -369,11 +385,33 @@ class CuroboEsdfField:
         20 mm 격자의 라벨이 "테이블" 이라고 답하는데 값은 사과에서 온다. 실측으로 잡혔다
         (테이블 위 4 mm, 사과 밑면 안쪽에서 라벨 판정이 완화를 껐다). 위 식은 라벨의 정확도에
         기대지 않는다.
+
+        **T44c — target 을 지운 거친 계층 `c` 가 있으면** (`target_free_coarse_layer`, 기본 없음) 창 안은
+
+            창 안:  min(f, max(c, d), max(d, b))        (정적 채널이 있으면 그것도 min 의 한 항)
+            창 밖:  d                                    (예전 그대로)
+
+        * **`c` 를 넣는 이유.** `f` 는 미세 TSDF (truncation 30 mm) 가 못 본 물체 내부에서 0 이상이고,
+          `max(d, b)` 는 창 안에서 보통 `b` 라 거친 계층의 음수를 버린다 — distractor 내부의 손가락
+          구가 clearance ≥ margin 을 받았다 (`T44E2b.verify.json`). `c` 는 그 음수를 다시 들인다.
+          `c` 는 **target 을 지운** 거친 계층이다 — 본 거친 계층을 넣으면 target 이 장애물로 되살아난다.
+        * **`max(d, b)` 를 남기는 이유.** `c` 가 창 밖의 non-target 표면을 직접 알므로 그 하한의 원래
+          역할 (창 밖 표면) 은 `c` 가 맡는다. 그래도 남기는 것은 (1) 창 경계에서 값이 `d` 로 이어져
+          (`b → 0`) 창 밖 답과 끊기지 않고, (2) 새 식이 예전 식보다 **덜 보수적이 되는 점이 없게**
+          하기 때문이다: 예전 식에 항 하나를 더한 `min` 이므로 `새 ≤ 예전` 이 모든 점에서 성립한다.
+        * **`c` 항을 `d` 로 하한하는 이유 (`max(c, d)`).** 표면을 빼서 거리가 줄 수는 없다 — target-free
+          참값 ≥ 전체 참값. `c` 가 `d` 아래로 내려가는 것은 seed 를 지운 뒤 부호가 그대로 남은 자리
+          (지운 표면보다 먼 거리에 음수 — 공유 영역의 target 내부) 뿐이고 새 증거가 아니다. 그 항이
+          본 합성보다 target 을 더 장애물로 만들지 못하게 한다 (사용자 판정 1-6). `f` 의 같은 잔여는
+          예전과 같이 둔다 (새 항만 묶는다) — 그래서 `min(예전, d) ≤ 새 ≤ 예전`.
+        * **창 밖은 `d` 다.** 창 밖 답은 미해결이고 접촉 허용의 근거가 못 된다 (지침 §5.3) — 그곳에서
+          `c` 로 target 을 빼면 거친 해상도로 접촉을 허용하는 셈이다. `c` 가 격자 밖인 점은 `c = ∞`.
         """
         pts = np.asarray(points, np.float64).reshape(-1, 3)
         d = np.asarray(self.distance(pts), np.float64).copy()
         if not self.target_free_layers or not len(pts):
             return d
+        coarse = self.target_free_coarse_layer
         for layer in self.target_free_layers:
             inside = self._covers(layer.grid, pts)
             if not inside.any():
@@ -385,8 +423,25 @@ class CuroboEsdfField:
                 from AG3S.ag3s.fields.esdf import analytic_distance
                 free = np.minimum(free, analytic_distance(here, self.static_shapes))
             bound = self._boundary_distance(layer.grid, here)
-            d[inside] = np.minimum(free, np.maximum(d[inside], bound))
+            if coarse is None:
+                d[inside] = np.minimum(free, np.maximum(d[inside], bound))
+                continue
+            # T44c: 같은 식을 `_answer` 가 분기와 함께 따라간다 (값 · 계층 · 기울기가 한 분기).
+            base = d[inside]
+            free = np.minimum(free, np.maximum(self._coarse_free_values(here), base))
+            d[inside] = np.minimum(free, np.maximum(base, bound))
         return d
+
+    def _coarse_free_values(self, pts: np.ndarray) -> np.ndarray:
+        """`(N,)` — target 을 지운 거친 계층의 값. 그 격자 밖 (`_covers` 거짓) 은 `+inf` (항이 없다)."""
+        out = np.full(len(pts), np.inf)
+        layer = self.target_free_coarse_layer
+        if layer is None or not len(pts):
+            return out
+        cov = self._covers(layer.grid, pts)
+        if cov.any():
+            out[cov] = np.asarray(layer.distance(pts[cov]), np.float64)
+        return out
 
     def answer_tier(self, points: np.ndarray, *, target_free=False) -> np.ndarray:
         """`(N,)` str — 그 질의점의 답을 **어느 계층이** 냈나 (`ANSWER_TIERS`, T21).
@@ -408,7 +463,8 @@ class CuroboEsdfField:
         | `target_free` | target 없는 계층 `f` | 그 계층의 기울기 |
         | `static` (창 안) | 해석적 정적 기하 | 그 도형의 기울기 |
         | `window_edge` | 창 경계까지의 거리 `b` (하한) | `b` 의 기울기 — 가장 가까운 창 면에서 안쪽으로 |
-        | `fine` · `coarse` · `outside` (창 밖, 또는 `b ≤ d < f`) | 본 합성 `d` | 본 합성의 기울기 (`gradient`) |
+        | `target_free_coarse` (T44c, 창 안) | target 을 지운 거친 계층 `c` | **그 계층의** 기울기 |
+        | `fine` · `coarse` · `outside` (창 밖, 또는 `b ≤ d < f`, 또는 T44c 의 `max(c, d)` 가 `d` 를 고름) | 본 합성 `d` | 본 합성의 기울기 (`gradient`) |
 
         **왜 필요한가.** `target_free_distance` 로 값을 받은 행을 `gradient`(사과가 든 본 합성)로
         선형화하면, 사과 옆에서 값은 테이블 거리인데 방향은 사과 법선이다 — SQP 가 손가락을 사과
@@ -444,6 +500,8 @@ class CuroboEsdfField:
         flags = np.broadcast_to(np.asarray(target_free, bool), (n,))
         if not flags.any() or not self.target_free_layers:
             return d, out, grad
+        if self.target_free_coarse_layer is not None:
+            return self._answer_with_coarse(pts, flags, d, out, grad, analytic)
         for layer in self.target_free_layers:
             inside = flags & self._covers(layer.grid, pts)
             if not inside.any():
@@ -480,6 +538,71 @@ class CuroboEsdfField:
                 # 나머지 (`b ≤ d < f`) 는 본 합성 `d` 가 답했으므로 본 합성의 기울기 그대로.
                 grad[inside] = g
             d[inside] = np.minimum(free, alt)
+        return d, out, grad
+
+    def _answer_with_coarse(self, pts, flags, d, out, grad, analytic):
+        """T44c 분기 — `target_free_distance` 의 `min(f, 정적, max(c, d), max(d, b))` 를 승자와 함께.
+
+        승자 규칙 (동률은 앞쪽): `f`·정적 → `max(c, d)` (엄격히 작을 때만) → `max(d, b)`.
+
+        | 이긴 항 | 계층 이름 | 기울기 |
+        |---|---|---|
+        | `f` | `target_free` | target 없는 미세 계층 |
+        | 정적 (`a ≤ f`) | `static` | 그 도형 |
+        | `max(c, d)` 이고 `c ≥ d` | `target_free_coarse` | **target 없는 거친 계층** |
+        | `max(c, d)` 이고 `c < d` (하한이 묶음) | 본 합성의 계층 | 본 합성 |
+        | `b` (`b > d`) | `window_edge` | 창 경계 |
+        | `d` (`b ≤ d`) | 본 합성의 계층 | 본 합성 |
+        """
+        coarse = self.target_free_coarse_layer
+        out = out.astype("<U18")            # "target_free_coarse" 가 `<U11` 에서 잘리지 않게 (off 는 그대로)
+        for layer in self.target_free_layers:
+            inside = flags & self._covers(layer.grid, pts)
+            if not inside.any():
+                continue
+            here = pts[inside]
+            free_vox = np.asarray(layer.distance(here), np.float64)
+            free = free_vox
+            static_wins = np.zeros(len(here), bool)
+            if analytic is not None:
+                free = np.minimum(free_vox, analytic[inside])
+                static_wins = analytic[inside] <= free_vox + 1e-12
+            base = d[inside]
+            cval = self._coarse_free_values(here)
+            clamp = cval < base                       # `c` 항의 하한 `d` 가 묶는다 → 본 합성이 답
+            c_eff = np.maximum(cval, base)
+            use_c = c_eff < free
+            free2 = np.where(use_c, c_eff, free)
+            bound = self._boundary_distance(layer.grid, here)
+            alt = np.maximum(base, bound)
+            use_free = free2 <= alt
+            edge = ~use_free & (bound > base)
+            value = np.minimum(free2, alt)
+            use_free &= ~(use_c & clamp)              # 그 행은 본 합성의 계층 · 기울기 그대로
+            tier = out[inside].copy()
+            tier[edge] = "window_edge"
+            tier[use_free & ~use_c] = "target_free"
+            tier[use_free & ~use_c & static_wins] = "static"
+            tier[use_free & use_c] = "target_free_coarse"
+            out[inside] = tier
+            if grad is not None:
+                g = grad[inside]
+                layer_rows = use_free & ~use_c & ~static_wins
+                if layer_rows.any():
+                    g[layer_rows] = np.asarray(layer.gradient(here[layer_rows]), np.float64)
+                shape_rows = use_free & ~use_c & static_wins
+                if shape_rows.any():
+                    from AG3S.ag3s.fields.esdf import analytic_gradient
+                    g[shape_rows] = np.asarray(
+                        analytic_gradient(here[shape_rows], self.static_shapes), np.float64)
+                coarse_rows = use_free & use_c
+                if coarse_rows.any():
+                    g[coarse_rows] = np.asarray(coarse.gradient(here[coarse_rows]), np.float64)
+                if edge.any():
+                    g[edge] = self._boundary_gradient(layer.grid, here[edge])
+                # 나머지 (`b ≤ d`, `c < d` 하한) 는 본 합성 `d` 가 답했으므로 본 합성의 기울기 그대로.
+                grad[inside] = g
+            d[inside] = value
         return d, out, grad
 
     @staticmethod

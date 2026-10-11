@@ -1,0 +1,45 @@
+{
+  "experiment_id": "EXP001",
+  "status": "PASS_WITH_LIMITED_SCOPE",
+  "recorded_at": "2026-10-05T19:36:42+09:00",
+  "scope": "File identity, 16-D array headers, metadata, completion and source pointers; not a rerun of the scientific experiment.",
+  "verified_run_count": 96,
+  "verified_pair_count": 48,
+  "verified_episode_count": 24,
+  "state_dimension": 16,
+  "action_dimension": 16,
+  "array_shapes": {
+    "executed_actions.npy": [
+      600,
+      16
+    ],
+    "inference_states.npy": [
+      75,
+      16
+    ],
+    "predicted_chunks.npy": [
+      75,
+      50,
+      16
+    ]
+  },
+  "conditions": {
+    "E0": 48,
+    "E3b": 48
+  },
+  "verify_path": "benchmark/ag3s/docs/handoff/T39.verify.json",
+  "verify_sha256": "74a172b64af191f71b94557952678bb9bafc2604a43fcded14d9712832b8a78d",
+  "research_log_section": "## T39 — O1 큰 N: E0 (VLA 단독) 대 E3b (AG3S + cuRobo ESDF + TO, gate · HOLD) 를 같은 noise 로 짝지어 (2026-10-02)",
+  "analysis_2x2_matches_verify": true,
+  "sources_hashed": 7,
+  "run_assets_hashed": 384,
+  "limitations": [
+    "Only recorded task outcomes for the T39 snapshot and clear-scene test episodes are registered.",
+    "No collision-rate, safe-success, full-body safety, grounding accuracy, latency or real-robot evidence is registered here.",
+    "The reported exact McNemar p-value does not establish equivalence or non-inferiority.",
+    "Two seeds from an episode are nested observations, not independent task instances.",
+    "The test split label is recorded metadata; independence from training/tuning has not been audited.",
+    "Checkpoint identity is recorded from the execution config; a content hash of the model weights has not been audited.",
+    "Physical contacts and geometry have not been recomputed in this paper setup step."
+  ]
+}

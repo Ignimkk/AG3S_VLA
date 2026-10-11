@@ -1,0 +1,79 @@
+{
+ "source": {
+  "run": "C1b_ep123_s1231",
+  "seq": 17,
+  "t": 128,
+  "server_chunk": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/server_8281_20261010T191355/server_constraints/run_0000/chunk_00016.npz",
+  "frames": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep123_s1231/frames.jsonl"
+ },
+ "slice": {
+  "plane": "x-z",
+  "y_m": -0.2646245984555214,
+  "x_range_m": [
+   0.44793838613565273,
+   0.6264383861356528
+  ],
+  "z_range_m": [
+   0.7913496303648918,
+   0.9503496303648861
+  ],
+  "step_m": 0.0015
+ },
+ "support_plane_z_m": 0.8213496303648918,
+ "ball_centre_m": [
+  0.5041990544029417,
+  -0.3078259271246864,
+  0.8588019456094566
+ ],
+ "ball_radius_mm": 89.015,
+ "worst_row": {
+  "row": 3,
+  "point_m": [
+   0.5379383861356527,
+   -0.2646245984555214,
+   0.8300198893395245
+  ],
+  "radius_mm": 7.183088764199393,
+  "clearance_on_mm": -7.163207099329156,
+  "clearance_off_mm": 0.05524353047821513,
+  "tier_on": "target_free_coarse",
+  "tier_off": "target_free",
+  "bottom_above_support_mm": 1.4871702104333195,
+  "gt_gap_target_mm": 10.846731011816583
+ },
+ "hand_mid_row7_ref_m": [
+  0.5447659225225735,
+  -0.3119456028008724,
+  0.8666865675773032
+ ],
+ "hand_mid_row7_refined_m": [
+  0.5536976435148792,
+  -0.3014403438665129,
+  0.8783444202328888
+ ],
+ "hand_mid_row7_dz_mm": 11.65785265558561,
+ "authorized_active_rows_0_7": {
+  "min_on_mm": -7.163207099329156,
+  "min_off_mm": 0.05524353047821513,
+  "n_cross10": 24,
+  "n": 1080
+ },
+ "slice_cells_tier_target_free_coarse": 7148,
+ "slice_cells": 12840,
+ "slice_off_minus_on_mm_max": 18.654365707370662,
+ "verdict_reasons": [
+  [
+   "budget_only",
+   "execute"
+  ]
+ ],
+ "hold": false,
+ "to_status": "feasible",
+ "script": "outputs/verify/T44/CLA/p/fig_scene.py",
+ "support_zero_level_above_plane_mm": {
+  "on_median": 8.999999999998565,
+  "off_median": 1.4999999999988356,
+  "definition": "per slice column x: lowest z >= support plane where the target-free distance > 0, minus support z; median over columns"
+ },
+ "note": "the slice passes through the worst finger sphere (y0), beside the target; the GT target hull is not cut by this plane unless an orange contour shows"
+}

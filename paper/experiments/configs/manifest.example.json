@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "experiment_id": "EXP999",
+  "title": "Example candidate; never evidence",
+  "status": "CANDIDATE",
+  "paper_eligible": false,
+  "evidence_scope": "NOT_REGISTERED",
+  "action_dimension": 16,
+  "state_dimension": 16,
+  "limitations": [
+    "Expected dimension only; no actual arrays or verified results are registered."
+  ]
+}

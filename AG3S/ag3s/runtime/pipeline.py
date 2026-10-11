@@ -1672,6 +1672,25 @@ class AG3S:
                 cameras = self._depth_cameras_from(
                     observations, depth, camera_intrinsics, T_base_cam, robot_state)
                 self._frame_depth_masks = []
+                # T44 I1: the non-target evidence `ball_owned` compares against — computed only
+                # when that exclusion is on (the default `ball` never builds it: same calls as before).
+                # T44c A5: the target-free coarse tier reads the same evidence (shared coarse voxels
+                # keep their obstacle seeds) — with `ball` too.
+                nontarget = None
+                if (cfg.esdf.backend == "curobo"
+                        and (getattr(cfg.esdf, "target_exclusion", "ball") == "ball_owned"
+                             or bool(getattr(cfg.esdf, "target_free_coarse", False)))
+                        and manipulated_geometry is not None
+                        and self.config.constraint.excludes_target_from_field):
+                    nontarget = self._nontarget_points(cloud, support_mask, manipulated_geometry)
+                # T44e A8: the support plane's inlier points the target-free coarse tier removes its
+                # seeds by — only with `target_free_coarse_support == "exclude"` (default `keep`: same call).
+                support_cloud = None
+                # T44e A8b: `exclude_target` reads the same evidence.
+                if (nontarget is not None and bool(getattr(cfg.esdf, "target_free_coarse", False))
+                        and getattr(cfg.esdf, "target_free_coarse_support", "keep")
+                        in ("exclude", "exclude_target")):
+                    support_cloud = np.asarray(cloud.points, np.float64)
                 with profiler.stage("esdf"):
                     esdf_field, esdf_notes = self._build_esdf(
                         # T20: the manipulated object's geometry (last observed when occluded) —
@@ -1695,7 +1714,9 @@ class AG3S:
                         observed_at=(max(float(o.timestamp) for o in observations)
                                      if observations else ts),
                         frame_id=self.config.frame_id,
-                        frame_index=self.frame_index)
+                        frame_index=self.frame_index,
+                        **({} if nontarget is None else {"nontarget": nontarget}),
+                        **({} if support_cloud is None else {"support_cloud": support_cloud}))
                 notes.extend(esdf_notes)
                 self._last_esdf_field = esdf_field     # T34 J1: the field band `attach()` measures
                 if esdf_field is not None:
@@ -2453,8 +2474,14 @@ class AG3S:
     def _build_esdf(self, depth_cameras, target, *, support_surfaces=(), support_points=None,
                     destination_points=None, static_geometry=None, robot_state=None,
                     observed_at=None, frame_id="", frame_index=-1, contact_context=None,
-                    execution_path=None):
+                    execution_path=None, nontarget=None, support_cloud=None):
         """Integrate this frame into the ESDF and return `(field, notes)`.
+
+        `support_cloud` (T44e A8) — the fused cloud the support surfaces were fitted on, given only with
+        `esdf.target_free_coarse_support == "exclude"`; the plane under the target ball and its inlier
+        points go to the builder as `support_seed_evidence` (`_support_seed_evidence`).
+        T44e A8b: also with `"exclude_target"` — then the evidence carries `inlier_threshold_m`
+        (`support_surface.distance_threshold`, the footprint evidence's minimum height above the plane).
 
         `target` is the **manipulated object's** geometry since T20 (`AG3S.manipulated`; the last
         observed one while it is `occluded`, None when `lost`), not the frame's attention target.
@@ -2549,6 +2576,7 @@ class AG3S:
         # `None` 이고 프레임 비용이 예전과 같다.
         policy = self.config.constraint.target_field_policy
         target_free_points = None
+        target_free_ball = None
         if (self.config.constraint.excludes_target_from_field and nothing_held
                 and points is not None and len(points)):
             if cfg.backend != "curobo":
@@ -2604,6 +2632,14 @@ class AG3S:
         if cfg.backend == "curobo":
             window_request = self._fine_window_request(
                 robot_state, execution_path, contact_context, points)
+        support_evidence = (None if support_cloud is None or target_free_ball is None
+                            else self._support_seed_evidence(support_cloud, support_surfaces,
+                                                             target_free_ball))
+        if (support_evidence is not None
+                and getattr(cfg, "target_free_coarse_support", "keep") == "exclude_target"):
+            # T44e A8b: points within the RANSAC inlier threshold of the plane are not footprint evidence.
+            support_evidence["inlier_threshold_m"] = float(
+                self.config.support_surface.distance_threshold)
         field = self._esdf_builder.update(depth_cameras, target_points=points,
                                           exclude_target=False,
                                           **({} if window_request is None
@@ -2627,7 +2663,21 @@ class AG3S:
                                           # monotonic 은 프로세스마다 원점이 달라 클라이언트가
                                           # 자기 시계와 견줄 수 없다.
                                           observed_at=observed_at,
-                                          frame_id=frame_id, frame_index=frame_index)
+                                          frame_id=frame_id, frame_index=frame_index,
+                                          # T44 I1: only `ball_owned` with a ball reads it — the
+                                          # default `ball` call is the same call as before.
+                                          # T44c A5: and the target-free coarse tier (any method).
+                                          **({"nontarget_points": (None if nontarget is None
+                                                                   else nontarget["points"])}
+                                             if target_free_ball is not None
+                                             and (getattr(cfg, "target_exclusion", "ball")
+                                                  == "ball_owned"
+                                                  or bool(getattr(cfg, "target_free_coarse",
+                                                                  False))) else {}),
+                                          # T44e A8: only with `target_free_coarse_support == "exclude"`.
+                                          **({"support_seed_evidence": support_evidence}
+                                             if support_evidence is not None else {}))
+        self._record_geometry_version(field, target, frame_index, nontarget)
         notes = []
         if window_request is not None:
             notes = self._window_query_report(
@@ -2636,6 +2686,77 @@ class AG3S:
                 and bool(getattr(field, "has_target_free", False)),
                 margin=self._fine_window_pads()[0])
         return field, notes
+
+    def _nontarget_points(self, cloud, support_mask, geometry) -> dict:
+        """T44 I1 — the observed **non-target** points `ball_owned` compares against.
+
+        `cloud` (the fused, self-filtered cloud grounding ran on) minus the target's points minus the
+        support surface. The robot is already out (self-filter). Which target points to drop:
+
+        | `source` | when | how |
+        |---|---|---|
+        | `indices` | `geometry.point_indices` index **this** cloud (checked: `cloud[idx] == points`) | drop those indices |
+        | `proximity` | the geometry is an older frame's (`occluded`) — its indices mean nothing here | drop cloud points within one fine voxel of a target point |
+
+        Returns `{"points": (N, 3), "source", "n_cloud", "n_target_dropped", "n_support_dropped"}`.
+        """
+        pts = np.asarray(getattr(cloud, "points", cloud), np.float64).reshape(-1, 3)
+        n = len(pts)
+        keep = np.ones(n, bool)
+        n_support = 0
+        if support_mask is not None and len(support_mask) == n:
+            sm = np.asarray(support_mask, bool)
+            n_support = int(sm.sum())
+            keep &= ~sm
+        tp = np.asarray(geometry.points, np.float64).reshape(-1, 3)
+        idx = np.asarray(getattr(geometry, "point_indices", ()), np.int64).reshape(-1)
+        source = "proximity"
+        if (len(idx) == len(tp) and len(idx) and int(idx.min()) >= 0 and int(idx.max()) < n
+                and np.allclose(pts[idx], tp, rtol=0.0, atol=1e-9)):
+            source = "indices"
+            drop = np.zeros(n, bool)
+            drop[idx] = True
+        else:
+            cfg = self.config.esdf
+            radius = float(getattr(cfg, "fine_voxel_size", 0.0) or cfg.voxel_size)
+            drop = np.zeros(n, bool)
+            if len(tp) and n:
+                from scipy.spatial import cKDTree
+
+                d, _ = cKDTree(tp).query(pts, k=1)
+                drop = d <= radius
+        n_target = int((drop & keep).sum())
+        keep &= ~drop
+        return {"points": pts[keep], "source": source, "n_cloud": int(n),
+                "n_target_dropped": n_target, "n_support_dropped": n_support}
+
+    def _record_geometry_version(self, field, target, frame_index, nontarget) -> None:
+        """T44 I0 — `stats["target_free"]["geometry_version"]`: which request and which observed
+        geometry the target-free layer was built from (`request_seq` = this AG3S call's
+        `frame_index`, `point_indices_sha1` = first 12 hex of the target's `point_indices`), and
+        where `ball_owned`'s non-target evidence came from. Recorded in every mode."""
+        stats = getattr(field, "stats", None)
+        if not isinstance(stats, dict) or not isinstance(stats.get("target_free"), dict):
+            return
+        import hashlib
+
+        ident = getattr(self, "_gated_manipulated", None)
+        idx = (None if target is None
+               else np.asarray(getattr(target, "point_indices", ()), np.int64).reshape(-1))
+        stats["target_free"]["geometry_version"] = {
+            "request_seq": int(frame_index),
+            "manipulated_id": None if ident is None else int(ident.id),
+            "manipulated_state": None if ident is None else str(ident.state),
+            "observed_frame": (None if ident is None
+                               else int(getattr(ident, "last_seen_frame", -1))),
+            "n_points": 0 if idx is None else int(len(idx)),
+            "point_indices_sha1": (None if idx is None
+                                   else hashlib.sha1(idx.tobytes()).hexdigest()[:12]),
+        }
+        if nontarget is not None:
+            stats["target_free"]["nontarget"] = {
+                k: v for k, v in nontarget.items() if k != "points"} | {
+                "n_points": int(len(nontarget["points"]))}
 
     def _held_seed_points(self, robot_state, support_surfaces) -> Optional[np.ndarray]:
         """The held spheres' **volume** as fine-voxel grid points (base) — what the field's seed
@@ -2928,6 +3049,46 @@ class AG3S:
                 "support_plane_z_m": float(plane_z),
                 "voxel_mm": round(float(voxel) * 1000.0, 3),
             })
+
+    @classmethod
+    def _support_seed_evidence(cls, cloud_points, support_surfaces, ball) -> Optional[dict]:
+        """T44e A8 — the support surface **under the target ball** and its inlier points, or `None`.
+
+        The surface is picked by the same rule as `_support_plane_z` (horizontal, `|n_z| > 0.9`, below the
+        ball centre, the highest) — the one whose z made the ball's `z_min`. Its points are
+        `cloud_points[surface.point_indices]` (the cloud `fit_support_surfaces` ran on). Other planes (a
+        crate floor, the floor) are not support evidence here: the target-free coarse tier keeps them.
+        `{"points": (P, 3), "plane": [n_x, n_y, n_z, offset], "surface_id", "z_at_centre_m"}`.
+        """
+        surface = cls._support_surface_under(support_surfaces, ball.centre)
+        if surface is None:
+            return None
+        pts = np.asarray(cloud_points, np.float64).reshape(-1, 3)
+        idx = np.asarray(getattr(surface, "point_indices", ()), np.int64).reshape(-1)
+        idx = idx[(idx >= 0) & (idx < len(pts))]
+        n = np.asarray(surface.normal, np.float64).reshape(3)
+        c = np.asarray(ball.centre, np.float64).reshape(3)
+        z = (float(surface.offset) - n[0] * c[0] - n[1] * c[1]) / float(n[2])
+        return {"points": pts[idx], "plane": np.r_[n, float(surface.offset)],
+                "surface_id": int(getattr(surface, "id", -1)), "z_at_centre_m": float(z)}
+
+    @staticmethod
+    def _support_surface_under(support_surfaces, point):
+        """T44e A8 — the surface `_support_plane_z` would take its z from (same rule, same order), or `None`."""
+        p = np.asarray(point, np.float64).reshape(3)
+        best, best_z = None, None
+        for surface in support_surfaces or ():
+            n = np.asarray(getattr(surface, "normal", ()), np.float64).reshape(-1)
+            if n.size != 3 or abs(float(n[2])) <= 0.9:
+                continue
+            nz = float(n[2])
+            z = (float(getattr(surface, "offset", 0.0)) - float(n[0]) * p[0]
+                 - float(n[1]) * p[1]) / nz
+            if not np.isfinite(z) or z > p[2]:
+                continue
+            if best_z is None or z > best_z:
+                best, best_z = surface, z
+        return best
 
     @staticmethod
     def _support_plane_z(support_surfaces, point) -> Optional[float]:

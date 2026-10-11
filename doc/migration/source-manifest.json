@@ -1,10 +1,10 @@
 {
   "created_utc": "2026-10-11T10:45:46.549111+00:00",
-  "profile": "v11ab",
+  "profile": "ag3s-development",
   "sources": {
-    "benchmark": "498f713b20bf9b75b4b065cd9bcdd508d7cdaecf",
+    "workspace": "a5dca644b7676d4cd4feafb1506de9f518aeb420",
+    "benchmark": "dd0ddff4d0dd4415c1ae2c5774bc0260d354d943",
     "pi05_TO_hybrid": "f62ab814e867912af3cecea52519d00c470d39e3",
-    "workspace": "9bf5bcdaf883bb1bcd74d26989f4fed549381462",
     "openpi": "df127613c06c82567bec65f6e7e2b401dff8fa59"
   },
   "checkpoint_sources": {
@@ -56,5 +56,6 @@
   "original_working_trees_preserved": true,
   "workspace_v2_selection": "last first-parent workspace commit before benchmark/v2 committer time; no workspace v2 tag exists",
   "v11ab_launchers": "legacy untracked outputs/verify/T43/V11/p scripts; no rollout result claimed",
+  "v11ab_base": "e60e1f47abffe08ffc43fe39e88901e8dbe9f75c",
   "external_artifact_manifest": "experiments/manifests/legacy-artifacts.json"
 }

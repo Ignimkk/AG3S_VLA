@@ -436,6 +436,9 @@ class PathChecker:
         Measured why (B1968 seq 18, `outputs/impl/T43Q/`): the fingers' predicted path entered the
         20 mm APPROACH margin to the apple by 12 mm on a chunk of a run that grasped successfully.
         """
+        # T44 I2 — record only under strict (0 until a target test names an unauthorized row).
+        self.target_rows_unauthorized = (
+            0 if self.lin.target_contact(scene, centres.shape[1]) is not None else None)
         if scene.esdf is None:
             return None
         n, n_query = centres.shape[0], centres.shape[1]
@@ -454,6 +457,13 @@ class PathChecker:
             is_target |= self.lin.in_target_volume(d_row_of(self.lin, pts, scene, n, n_query),
                                                    pts, scene)
         is_target[:, self.lin.n_spheres:] = False
+        contact = self.lin.target_contact(scene, n_query)
+        if contact is not None:
+            # T44 I2 — strict: only a link that may touch the target is left out of the path check
+            # for it. Without this the E1 test (`&= ~free` above) drops the authorized rows and
+            # keeps exempting the others — a forearm beside the apple.
+            self.target_rows_unauthorized = int((is_target & ~contact[None, :]).sum())
+            is_target &= contact[None, :]
         width = self._floor.shape[0]
         out = np.zeros((n, width), bool)
         out[:, width - n_query:] = is_target
@@ -476,6 +486,11 @@ class PathChecker:
             "worst": None,
             "max_sweep_mm": None,
         }
+        unauthorized = getattr(self, "target_rows_unauthorized", None)
+        if unauthorized is not None:
+            # T44 I2 (strict only) — rows a target test named whose link may not touch the target:
+            # kept in the check.
+            out["target_rows_unauthorized_kept"] = int(unauthorized)
         if self._state is not None:
             out["servo_state"] = self._state.record()
         if where is None:

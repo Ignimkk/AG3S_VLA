@@ -353,6 +353,115 @@ cuRobo 이관 과정, I1~I4. 아래 **"물려받은 결정"** 표가 그 자리�
 | **HM (`--held-obstacle-margin`)** | held row 를 최근접 표면으로 분류해 (지지면 · 사과 자신의 잔상 제외) 장애물이면 obstacle margin 10 mm 를 주는 flag. 사용자 보류 (2026-10-07) |
 | **exact McNemar p** | 같은 (episode, seed) 로 짝지은 두 arm 에서 성공 · 실패가 갈린 쌍만 보는 exact 검정 |
 
+### T44 target exclusion (2026-10-10 추가)
+
+| 용어 | 뜻 |
+|---|---|
+| **`ball` (기존)** | target-free layer 에서 target 을 지우는 기존 방식. fitted sphere + pad 로 만든 exclusion ball 안의 seed 를 (support guard `c_z ≥ z_min` 위에서) 전부 지운다. T44 의 **비교 기준(baseline)** 이며 값은 바뀌지 않았다 |
+| **`ball_owned` (I1)** | ball 을 **외곽 상한**으로 두고, ball 안 seed 마다 가장 가까운 target 점 거리 `d_t` 와 가장 가까운 non-target 관측점 거리 `d_o` 를 비교해 **non-target 쪽 seed 는 보존**하는 방식. flag `--target-exclusion ball-owned`, 기본 off |
+| **target_owned / nontarget_owned / ambiguous / unowned (seed)** | `ball_owned` 의 분류. target_owned = `d_t < d_o` (제거), nontarget_owned = `d_o < d_t` (보존), **ambiguous** = `\|d_t − d_o\| ≤ owned_tie_voxels·voxel` (보존하고 기록), **unowned** = `min(d_t, d_o) > owned_max_dist_voxels·voxel` (어느 쪽 관측점도 가깝지 않다 → `unowned` 설정대로 제거/보존) |
+| **`owned_tie_voxels` · `owned_max_dist_voxels` · `owned_unowned`** | 위 분류의 파라미터. 기본 1.0 voxel · 2.0 voxel · `remove`. `remove` 는 unowned seed 를 지우고 `keep` 은 남긴다. 이 STEP 은 기본 파라미터에서만 쟀다 |
+| **`ball_owned_remove` / `ball_owned_keep`** | E2 에서 `ball_owned` 를 `owned_unowned = remove` / `keep` 으로 돌린 두 arm |
+| **sign correction set** | 제거한 seed 주변의 TSDF 부호를 target 쪽(내부 양수)으로 바로잡는 voxel 집합. `ball` 은 ball 안 voxel **전부**, `ball_owned` 는 **제거된 seed ∪ target 쪽이 확실한 non-seed voxel** (`d_t < d_o − tie`) 로 구현했다 (사용자 판정 대기 2) |
+| **I0 trace** | 어느 seed 를 왜 지웠는지 사후에 추적하게 하는 기록: `stats["target_free"]` 의 수 (`exclusion_method` · `n_seeds_in_ball` · `n_removed` · `n_kept_nontarget` · `n_ambiguous` · `n_unowned_*`), chunk npz 의 voxel ijk, `geometry_version`, 행별 권한 vector |
+| **`geometry_version`** | 그 field 가 어느 request 와 어느 target 점 집합으로 지어졌는지의 도장: `request_seq` · manipulated id/state · `n_points` · `point_indices_sha1[:12]` |
+| **P1–P4** | `T44.task.md` 가 **코드를 읽어** 적은 약점 넷 (측정으로 확정한 것이 아니다). P1 = sweep 의 path 행 target 제외에 authorized link 필터가 없다 · P2 = look-ahead tail drop 과 `obstacle_margin` 면제도 같다 · P3 = `obstacle_margin > 0` 이 `target_volume` 을 지운다 · P4 = builder 가 target 점과 ball 만 받아 이웃 물체 seed 를 가를 정보가 없다 |
+| **`target_permission_strict` (I2)** | waypoint margin 밖의 target 예외 세 곳 (look-ahead tail drop · `obstacle_margin` 면제 class · sweep path 행 제외) 을 **target 에 닿아도 되는 link 의 행**에만 적용하는 flag. 기본 off, `--target-permission-strict` |
+| **`target_contact_rows`** | `SceneSnapshot` 의 `(S,)` bool. robot sphere 행마다 "target 예외를 받아도 되는가". `exclude_authorized` 는 `target_free_mask`, `exclude_all` 은 `target_free_exempt`, `relax` / mask 없음 (쥔 뒤) 은 `manipulated_link_margin < max`, manipulated 가 없으면 `None` |
+| **`layer_diff` membership** | `ball_owned` 일 때 target membership 을 ball 판정 대신 `d_free − d_main > voxel` (target-free layer 에서만 사라진 표면) 로 보는 판정 (strict 와 함께, 쥔 것 없음일 때) |
+| **E2 (offline exclusion 측정)** | 같은 frame · 같은 TSDF integrator 에서 `ball` / `ball_owned_remove` / `ball_owned_keep` / `oracle` 네 target-free layer 를 만들어 seed · query 를 비교하는 **기하 진단**. 정책을 실행하지 않는다 |
+| **E2-demo / E2-lb** | E2 의 입력 둘. **E2-demo** = train split demonstration 자세 (붐비는 장면, 16 episode × 4 frame = 64), **E2-lb** = T43 LB 의 성공 E0 run 의 기록 frame (덜 붐비는 장면, 12 episode × 4 frame = 48, 회귀 대조) |
+| **identity mode (`gt` · `gt_label` · `gt_cluster_only`)** | E2 가 target identity 를 **진단용으로 GT 에 맞춰 강제**하는 방식. `gt_label` = GT label 로 target 점 전부 (완전한 identity), `gt` = 가장 가까운 grounded cluster 를 쓰되 그 cluster 가 GT target 80 % 미만이면 `gt_label` 로 대체, `gt_cluster_only` = `gt` 중 cluster 로 정해진 frame 만 |
+| **oracle / oracle'** | E2 의 reference. **oracle** = ROI 안에서 GT target label seed 만 지운 field. **oracle'** = oracle 에 더해 GT 가 설명하지 못하는 `unlabelled` seed 도 지운 field |
+| **ROI (E2)** | exclusion ball + 20 mm shell. E2 의 seed 집계 범위 (용어 절의 기존 ROI 와 다르다) |
+| **target removal recall** | ROI 안의 GT target seed 중 제거된 몫 |
+| **distractor seed loss** | ROI 안의 이웃 과일 seed 중 제거된 수. 이웃이 장애물로 남지 못한 양이다 |
+| **ball-hit frame** | `ball` 이 distractor seed 를 1 개 이상 지운 frame. 기준 ① 은 이 frame 에서만 정의된다 |
+| **falsely feasible / falsely infeasible (E2)** | 질의 구 하나에서 `clearance = d − r` 를 margin (10 mm) 과 비교할 때, oracle 은 `< margin` 인데 방법은 `≥ margin` 이면 falsely feasible, 반대면 falsely infeasible. 질의는 authorized 구 (q = frame 의 q 에서의 구 중심, grid = 구 중심 ± 20 mm 를 10 mm 간격으로 5×5×5) |
+| **cluster merge** | grounding 이 고른 target cluster 가 target 과 이웃 물체의 점을 함께 담는 것. E2 는 `target_cluster_target_fraction < 0.8` 로 센다 |
+| **V-I0** | contact event → 그 시각을 실행한 chunk → 그 chunk 의 제거 seed · 권한 행 순으로 거슬러 가는 추적 표 |
+
+**T44b (2026-10-10 추가)** — 위 T44 소절에 이어지는 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **carry** | 물체를 쥔 뒤 옮기는 단계 (held chunk). 이 단계에서는 `manipulated_link_margin` 이 모든 link 에서 같다 |
+| **`held_permission_parent_links` (I2b)** | `collision.held_permission_parent_links: int = 1`. strict 이고 쥐고 있을 때, 쥔 손의 contact link 에 더해 그 손의 URDF chain 에서 gripper 위로 몇 개의 link (구를 가진 것만 센다) 까지 target 예외를 줄지. 0 = gripper 만, 1 = `link_<side>_arm_6`, 2 = arm_5 (forearm). CLI `--held-permission-parent-links` |
+| **hold link · held record · depth** | hold link = 쥔 물체를 붙인 link (기본 `ee_left` / `ee_right`). held record = `metrics["target_permission"]["held"]` = `{hold_link, side, contact_links, parent_links, depth}`. depth 는 행마다 0 = 쥔 손 contact link, k = gripper 위 k 번째 link, −1 = 나머지 (fail closed) |
+| **`link_<side>_arm_6` · `link_<side>_arm_5` · `FT_sensor_<L/R>`** | 손목 link (gripper 와 fixed joint 로 연결, 구 15 개) · forearm (회전 관절 너머, 구 5 개) · 센서 frame (URDF 직속 parent 이나 구가 없어 행 0, 세지 않는다) |
+| **`--links gripper` · `--links arms`** | constraint model 에 넣는 link 범위. V11AB 서버는 `gripper` (270 구, `link_*_arm_*` 구 없음). `arms` 는 보조 측정에서만 쓴 422 구 모델 |
+| **`i2` · `i2s` · `b0` · `b1` (V-I2b arm)** | `i2` = V-I2 replay 규칙 (접근 단계 margin 행), `i2s` = 서버 carry 에서 권한 행이 0 이라는 가정 (live server 로 검증 안 함), `b0` · `b1` = I2b parent=0 · 1 |
+| **tail 행 · other gripper** | look-ahead 창의 뒤쪽 행. other gripper = 쥔 손의 반대 손 gripper 행 (I2b 에서도 검사 대상) |
+| **unowned 원인 class** | unowned distractor seed 마다 임계 (`d × voxel`) 안에 관측점이 있는지를 위에서부터 보는 waterfall: `raw_far` (raw depth pixel 도 없다) → `percam_far_raw_near` → `fused_far_percam_near` (per-camera 점은 가깝고 fused 에서 멀다, fusion 이 원인) → `evidence_far_fused_near` |
+| **`fusion_voxel_size`** | 다 카메라 점을 한 cloud 로 합칠 때의 voxel (실행 설정 0.01 m). TSDF fine voxel (5 mm) 과 다르다 |
+| **main composite · fine layer · coarse layer** | main field 의 질의 = `min(coarse, fine)`. fine layer 는 5 mm · truncation 30 mm, coarse layer 는 20 mm · truncation 60 mm |
+| **target-free 질의 합성 `min(f, max(d, b))`** | `curobo_field.target_free_distance`. `d` = main 의 답, `f` = target-free layer 의 답, `b` = 그 layer 창 경계까지의 거리. 창 안에서 `b` 가 크면 답은 `f` 이고 coarse 의 음수는 버려진다 |
+| **`none` (D-sign)** | 제외 없이 `only="fine"` 으로 target-free fine tier 를 다시 만든 진단용 방법 |
+| **zero voxel** | TSDF seed voxel 의 값이 정확히 0 (또는 `\|v\| ≤ 1e-6 m`). `< 0` 비율에 세지 않는다 |
+| **D-sign · D-merge · V-I2b** | T44b 의 세 측정: `owned_max_dist` 재측정과 부호 진단 · cluster merge 원인 분해 · I2b 재생 검증 |
+| **parent cluster · pure&complete (D-merge)** | parent = GT target 점을 가장 많이 가진 split 전 grounding cluster. pure&complete = 선택된 segment 의 precision ≥ 0.95 · recall ≥ 0.90 |
+| **`attention_split_ratio_source` (A4)** | `clustering.attention_split_ratio_source` (`normalized` 기본 \| `raw`). ratio gate 가 읽는 attention 을 정규화 전 값으로 바꾼다. target 후보 선택은 정규화 attention 질량 그대로 |
+| **raw attention** | 정규화 전 attention (`AttentionPointCloud.raw_attention`). fusion 에서 voxel 마다 관측 raw 의 max |
+
+**T44c (2026-10-10 추가)** — 위 T44b 소절에 이어지는 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **target-free coarse tier (A5)** | target 을 지운 coarse layer (`coarse_no_target`). fine target-free layer 와 같은 target identity · 같은 exclusion 의미를 metre 단위로 coarse voxel (20 mm) 에 적용해 만든다. 켜는 flag `esdf.target_free_coarse` (기본 off), CLI `--target-free-coarse`. 이 tier 는 target 이 없는 frame (ball 이 없는 frame) 에서는 만들지 않는다 (`skipped_no_ball`) |
+| **새 target-free 질의 합성** | 창 안 `min(f, a, max(c, d), max(d, b))`. `c` = target-free coarse 의 답, `a` = static shape, 나머지는 위 `min(f, max(d, b))` 와 같다. 값을 `max(c, d)` 로 하한해 target 이 main 합성보다 더 장애물이 되지 못하게 한다 |
+| **`target_free_coarse` (answer tier)** | 새 합성에서 `c` 가 이긴 질의의 `answer_tier` 이름. `coarse` 와 같이 미해결 tier 로 센다 |
+| **shared voxel · `n_shared_kept`** | 한 coarse voxel 에 target 과 non-target 관측이 함께 있는 것. 그 voxel 의 seed 는 지우지 않고 부호 교정에서도 뺀다. `n_shared_kept` = 방식이 지우라고 했는데 공유라 보존한 seed 수 |
+| **seed band · support guard** | seed band = coarse seed voxel 이 표면에서 떨어질 수 있는 거리 (20 mm voxel 에서 18 mm). support guard = coarse tier 가 seed 를 지우기 시작하는 높이 (support plane + 20 mm). table seed 를 지키려고 fine 의 +5 mm 보다 높다 |
+| **sign floor `guard` · `plane` (A6)** | coarse tier 가 TSDF 부호를 target 쪽 양수로 고치기 시작하는 높이. `guard` (기본, A5 그대로) = support guard 높이, `plane` = ball 의 `z_min` (support plane + 5 mm). plane 은 seed 를 더 지우지 않고 부호만 고친다. config `esdf.target_free_coarse_sign_floor`, CLI `--target-free-coarse-sign-floor {guard,plane}` |
+| **target 바닥 잔류** | A5 (guard) 에서 support + 20 mm 아래 target 바닥 voxel 의 음수가 남아 target 내부 점이 target-free 질의에서 음수가 되는 것 (사용자 조건 6 위반) |
+| **target interior negative** | GT target hull 안 fine lattice 점에서 target-free 질의가 음수인 점의 수. target 이 장애물로 살아났는지의 지표 |
+| **TB band · TA band (V-A6)** | TB = support plane 아래 0–30 mm 의 table 내부 점 (낙관 뒤집힘 검사), TA = support plane 위 0–10 mm 이고 GT hull 밖인 점 (table 위 자유 공간, 차단이 늘었는지 검사) |
+| **cross (margin 교차)** | authorized 구에서 coarse off 는 `clearance ≥ margin` 이었는데 on 에서 `< margin` 이 된 query. 마지막 2 frame (`demo_last2`) 은 grasp close 직전 두 frame |
+| **optimistic flip** | off 에서 음수 (막힘) 였던 점이 on 에서 0 이상 (비막힘) 이 되는 것 |
+| **D-sign2 · V-A6 · S1 (T44c)** | T44c 의 측정 셋: A5 tier 의 안전 · contact · gradient · build 시간 측정 · A6 의 완료 조건 여섯 개 재측정 · closed-loop 용 붐비는 train episode 의 E0 screening |
+| **`bo_d3`** | 표에서 `ball_owned` remove, `owned_max_dist_voxels` 3, `owned_tie_voxels` 1.0 의 약칭 |
+| **E0 screening (S1)** | VLA 단독 (`--no-safe`, 장애물 없음) 을 seed 2 개로 돌려 두 seed 모두 success 이고 robust grasp (LB 규칙 B) 인 episode 만 통과시키는 선별 |
+
+**T44d (2026-10-10 추가)** — 위 T44c 소절에 이어지는 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **arm C0 · C1a · C1b · C2 (T44d)** | closed-loop 의 4 조건. **C0** = V11AB 그대로 (`ball` exclusion, 기존 split 설정) + `--to-fast-eval --esdf-host-mirror`. **C1a** = C0 + `ball_owned` d=3 + split 12 mm (raw ratio) + `--target-permission-strict`. **C1b** = C1a + `--target-free-coarse` (sign floor 기본 `plane`, A7). **C2** = C1b + `--links arms` (forearm · arm link 구 포함, 구 422 개). C1a 대 C1b 가 coarse tier 의 효과, C1b 대 C2 가 arm link 구의 효과다 |
+| **CL-run · CL-analysis** | T44d 의 두 verifier 작업. CL-run = 72 run 의 실행 · 대기 · 집계 (`T44d.verify.json`), CL-analysis = 갈린 짝의 원인 분석 (`T44dA.verify.json`, CPU 재분석만, 서버 · GPU 실행 없음) |
+| **CT success (T44d)** | T43 의 접촉 포함 성공을 target 과일 일반으로 넓힌 것: task success ∧ release 규칙 (Z4) 성공 ∧ **release 이전에** `hand–fruit_other` · `robot_other–target` · `robot_other–fruit_other` 접촉이 0. 허들은 없고 이웃 과일이 장애물이다 |
+| **접촉 class (T44d)** | `hand–fruit_other` = 쓰는 팔의 손 (`EE_BODY` 하위 + 두 손가락) 과 target 이 아닌 과일 3 개의 contact. `robot_other–target` = 그 손이 아닌 로봇 geom (반대 손 포함) 과 target. `robot_other–fruit_other` · `hand–target` 도 같은 식. 접촉은 MuJoCo replay 로 센다 |
+| **table lift (support surface lift)** | coarse tier 가 table 표면을 target-free 질의에서 위로 밀어 올린 효과. "support plane 에서 시작해 target-free 거리가 처음 양수가 되는 가장 낮은 z" (**zero level**) 가 off 에서는 support plane 에 있는데, on 에서는 그 위 수 mm 에 있다. 그 높이 아래가 장애물처럼 읽혀 손이 위로 들린다. 원인 후보로 확인된 것은 T44d Q1 |
+| **zero level** | support plane z 보다 위에서 target-free 거리가 > 0 인 가장 낮은 z 에서 support z 를 뺀 값 (mm). 0 이면 table 표면이 제 자리에 있다는 뜻 |
+| **dz7 · push7** | dz7 = chunk 행 7 에서 쓰는 손가락 구 평균의 z (TO refined − reference, 위로 +; mm). 정책이 낸 경로를 TO 가 위로 얼마나 옮겼는지다. push7 은 같은 행의 이동량을 나타내는 key 이고 verify.json 에 정의가 따로 없다 |
+| **dz_c8** | close 명령 8 control row 뒤 (손가락 중점 z − target body origin z) (mm). 손이 target 중심보다 얼마나 높게 잡았는지의 지표 |
+| **approach chunk (T44dA)** | 첫 close 명령 (replay `grip_cmd < 0.5`) 직전 4 planning chunk. run 18 개 × 4 = 72 chunk 가 arm 마다의 표본이다 |
+| **coarse OFF re-query** | 기록된 C1b float16 grid 에서 coarse layer 만 `None` 으로 빼고 (= C1a 의 합성) 같은 sphere 로 다시 질의한 것. 같은 상태에서 coarse 의 기여만 분리한다 (닫힌 루프의 counterfactual 이 아니다) |
+| **first material divergence (`first_material_seq`)** | C1a 와 C1b 의 refined chunk 가 처음으로 arm 관절에서 0.01 rad 넘게 달라지는 seq |
+| **close-time HOLD** | 권한 손가락 (`authorized`) 의 target-free tier 위반으로 grasp 상태가 `closing` 일 때 난 HOLD. 원인 class `authorized_target_free_close` |
+| **ambiguous seed 보존** | `ball_owned` 가 target 과 non-target 의 거리 차이가 tie 이내인 seed 를 지우지 않고 장애물로 두는 것. 손가락이 target 표면에 닿으려 하면 그 seed 에 대한 clearance 가 음수가 될 수 있다 |
+| **implied margin** | 위반 행의 `d_main − r − clearance` 로 거꾸로 구한 margin (mm). 비권한 link 가 target 에 받는 full margin 이 50 mm 임을 확인하는 데 썼다 |
+| **palm sphere (EE_BODY)** | 손바닥 (`ee_left` / `ee_right`) 을 덮는 constraint 구. 반지름 6.2 mm 이고 URDF capsule 은 33.0 mm 이다 (서버 log 27.3 mm short) |
+
+**T44e · T45 (2026-10-11 추가)** — 위 T44d 소절에 이어지는 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **support seed** | TSDF seed voxel 중 지원면 (table 윗면) 의 관측 점에서 생긴 것. coarse target-free tier 가 이것을 근거로 table 을 장애물로 읽는다. 정의: 공 아래에서 가장 높은 수평 지원면의 inlier 점이 근처 (seed 띠 + 반 칸 = 28 mm) 에 있고 non-target 점이 18 mm 안에 없는 seed |
+| **coarse support mode (A8 · A8b)** | `esdf.target_free_coarse_support`, CLI `--target-free-coarse-support`. `keep` (기본, A5–A7 그대로) · `exclude` (support seed 를 coarse target-free tier 에서 전부 제거) · `exclude_target` (target 발자국 안이고 non-target 발자국 밖인 것만 제거). 이름 주의: 옛 키 `esdf.exclude_target` (`auto\|always\|never`) 과 무관하다 |
+| **footprint (support footprint)** | support plane 위에 투영한 물체의 그림자. target footprint = 공 (반지름 + D) 과 target 점 (D) 의 합집합, non-target footprint = non-target 관측점 (D). 평면 위 8 mm (`h_min`) 이하의 점은 증거로 세지 않는다. `D = √2 · 거친 voxel` = 28.3 mm (trilinear 로 읽히는 voxel 중심의 평면 방향 최대 거리) |
+| **overlap kept (겹침 보존)** | `exclude_target` 에서 target 발자국과 non-target 발자국이 겹치는 support seed 는 지우지 않는 규칙 (`n_overlap_kept`). 공 안에서도 공 규칙이 지울 것을 막는다 (`protect`) |
+| **offline re-query (T44e)** | T44d 의 갈린 chunk (first material divergence) 의 같은 q · 같은 finger 구로 field 를 다시 짓고 coarse 변형만 바꿔 조회한 것. 닫힌 루프의 counterfactual 이 아니다. keep 재구성이 기록과 어긋나므로 방향만 읽는다 |
+| **implied lift** | `clearance(off) − clearance(변형)` 를 변형의 최악 행에서 잰 값 (mm). coarse 가 계획을 위로 얼마나 들어야 하게 만드는지 |
+| **`nonauthorized_target_margin` (A9)** | `contact.nonauthorized_target_margin`, CLI `--nonauthorized-target-margin`. `full` (기본) = 접촉 권한이 없는 link 가 target 에 full margin (50 mm) · `obstacle` = 일반 obstacle 행과 같은 clearance (V11AB 에서 `max(esdf_margin 0, obstacle_margin 10 mm)` = 10 mm). 접촉 금지 (`unauthorized_link` collision) 는 둘 다 같다 |
+| **V-E2e · A8 · A8b · A9 · A10** | T44e 의 offline 재측정 (verifier) · coarse support `exclude` 구현 · `exclude_target` 구현 · 비권한 target margin 구현 · palm cover 구현 (T45) |
+| **C1b′ · C2′ (CL2 계획)** | C1b′ = C1a + coarse tier + support 처리 (방식은 사용자 판정 대기). C2′ = C1b′ + `--links arms` + `--nonauthorized-target-margin obstacle`. 아직 실행하지 않았다 |
+| **frac_out · gap (T45 audit)** | frac_out = MJCF collision hull 표면 점 중 구 합집합 밖에 있는 비율. gap = `min_i \|p − c_i\| − r_i` (> 0 이 구 밖) |
+| **palm cover (A10)** | 손바닥 (`ee_left` / `ee_right`) 의 구를 손가락 몸통 구 (T43 FC) 와 같은 계산으로 mesh 겉면에 다시 만드는 옵션. `--palm-cover {off,on}` (기본 off). 켜면 구 270 → 466 (palm 23 → 121 each), link 이름은 그대로 `ee_<side>` 라 권한 행이 그대로 걸린다 |
+| **overflow (palm cover)** | 구가 mesh 밖으로 나가도 되는 최대 거리. 기본 5.0 mm (`--palm-cover-overflow`). 실측 넘침 5.118 mm, 후보 2.5 mm 는 445 구 / palm |
+| **channel (손가락 통로)** | palm 에서 손가락 끝 방향으로 두 손가락 사이를 따라 가장 멀리 나간 구 · mesh 의 범위. palm 구가 통로로 얼마나 튀어나왔는지의 지표 (mesh 73.7 mm 대 서버 69.3 · cover 5 mm 78.8 · scale 1.0 107.4 mm) |
+| **V-T45 · pre-grasp chunk** | T45 의 offline replay 검증. pre-grasp chunk = 각 run 의 close 직전 8 planning chunk × 18 run = 144 chunk |
+| **self-filter 잔여 (가설)** | 로봇 자신의 표면이 관측 point cloud 에 남아 field 장애물로 들어간 것. T45 새 HOLD 의 원인 후보로 lead 가 제기했고 **확인하지 않았다** |
+
 ---
 
 > **갈림길에서 안 고른 선택지** — 맨 아래 **"선택한 것과 안 고른 것 — 되돌아올 지점"** 절.
@@ -406,6 +515,8 @@ cuRobo 이관 과정, I1~I4. 아래 **"물려받은 결정"** 표가 그 자리�
 | ↳ T43 TK · OC · HX | 계획 대 실제 손의 차이 | 계획 = 명령 (P − C = 0), 차이는 명령 → 측정 (servo lag ≈ 2 행, E0 도 같음). 가림 가설 지지 안 됨 (막대 14/14 보임). 허들 margin 미달 순간 234 중 232 가 servo lag. **TK 정정**: 왼손 손가락 MJCF/URDF 이름 교환 — "ESDF 가 +57/67 mm 멀게 본다" 철회 |
 | ↳ T43 V9 · SV · V10 · XM | servo 모델 TO 투입 / 쥔 사과 margin (HM) / TO 개입 정량화 | V9 파지 H 14 → 5 (servo-after-placed 는 사용자가 철회), V10 (HM) 은 성공 13 → 10 · HOLD 6 → 52 로 보류. XM: V5–V8 TO 는 margin 위 1.5–4.7 mm 만 비킴, 명령 18–21 mm 인데 실제 2–4 mm |
 | ↳ T43 TA · V11A / AB / ABC | 긴 계획 창(A) · 편향 변화율(B) · 가속도(C) | 접촉 포함 성공 8 → 8 → **12** → 6, 운반 중 사과 접촉 5 → 2 → 0 → 1, release 뒤 손가락 접촉 9 → 4 → 0 → 0, 허들 위 실제 간격 중앙 3.8 → 6.7 → 13.6 → 8.1 mm |
+| **T44** target exclusion 첫 묶음: I0 trace · I1 `ball_owned` · I2 permission 일관성 | 올바른 target 의 필요한 contact 는 허용하고 주변 obstacle 과 non-contact link 의 보호는 유지하는가 | **측정 완료 (2026-10-10, 사용자 판정 대기, 미커밋)** — 전체 pytest 2569 passed · 0 failed. I2 flag off 는 1006 chunk 에서 refined chunk · verdict 차이 0. E2-demo (64 frame) 에서 `ball_owned_remove` 는 distractor seed 손실 833 → 434 (감소율 0.479, 기준 ① 0.5 미달), recall 중앙 0.936 = ball. closed loop 미측정. 절 "T44" |
+| **T44b** 사용자 판정 후속: I2b carry 권한 · `owned_max_dist` 3 · 4 · cluster merge 진단 · target-free 부호 진단 · A4 split 옵션 | carry 에서 쥔 손 + gripper 바로 위 link 만 target 예외를 받는가 · unowned 가 fusion 때문인가 · merge 는 기존 split 설정으로 풀리는가 · target-free 내부 부호는 어디서 오는가 | **측정 완료 (2026-10-10, 사용자 판정 대기, 미커밋)** — I2b: strict off 1006 chunk 차이 0, main 모델에서 `parent=1` = `parent=0` (arm_6 구 없음), arms 모델 보조에서 arm_6 예외 유지. D-sign: `gt` · `gt_label` 에서 ①–④ 를 모두 통과하는 것은 d=3 뿐, unowned distractor 422 중 fusion 원인 12. 부호: 0.27 (target-free fine tier) 과 0.80 (main composite) 은 다른 layer 이고 제외 방식과 무관. D-merge: VLA attention 에서 기존 split 20 / 34, 12 mm + raw ratio 24 / 34. 절 "T44b" |
 
 ### 이 국면에서 쓰는 자산
 
@@ -6345,3 +6456,2122 @@ H 14 run 의 V9 분류 (XM): 성공 2 · 허들 근처에서 낙하 2 · 허들�
 - **figure**: `figures/t43/` — `t43w-*` · `t43y-*` · `t43z-*` · `t43z3v-*` · `t43z5-*` · `t43ct-*` · `t43v7g-*` · `t43gd-*` · `t43v8-*` · `t43dx-*` · `t43tk-*` · `t43oc-*` · `t43hx-*` · `t43v9-*` · `t43sv-*` · `t43v10-*` · `t43xm-*` · `t43v11a-*` · `t43v11ab-*` · `t43v11abc-*`. 각각 `.json` sidecar 가 있다.
 - **영상**: `outputs/verify/T43/gate_demo/gd_{1968_s19683,1995_s19953,1925_s19251}.mp4` (gate off 대 on).
 
+
+---
+
+## T44 — Target exclusion 첫 작업 묶음: I0 trace · I1 ball_owned · I2 permission (2026-10-09 ~ 2026-10-10)
+
+**이 절이 답하는 물음.** 올바르게 선택한 target 의 **필요한 contact 는 허용**하고 주변 obstacle 과 non-contact link 의 **보호는 유지**하는가. 구체적으로 두 가지를 쟀다. (a) 같은 correct identity 에서 `ball_owned` 가 target 제거를 유지하면서 기존 `ball` 보다 이웃 물체를 더 보존하는가 (E2). (b) non-contact link 가 모든 검사 경로 (waypoint · look-ahead · sweep · final verdict) 에서 target 예외를 받지 않는가 (I2).
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `handoff/T44I2.verify.json` 과 `handoff/T44E2.verify.json` 의 `numbers` 에서만 왔다. 구현 내용 · 단위 test 수 · 구현자의 GPU 자체 점검은 `T44I0I1.impl.md` · `T44I2.impl.md` 가 보고한 것이고 표에 **(구현자)** 라고 밝혔다. P1–P4 와 고정 기준 ①–④ 는 `handoff/T44.task.md` 에서 왔다.
+- **범위.** 사용자 지시 (2026-10-09): I0 → I1 → I2 를 첫 묶음으로 진행하고, **기존 ball 은 비교 기준으로 보존**한다. HSR (phase 판정) · denoising · L1/L2 는 이번 범위 밖이다. 새 동작은 전부 flag 기본 off 이고 off 에서 bit-identical 이다. **미커밋 상태다.**
+- 근거 문서: [`benchmark/docs/AG3S_PHASE_DENOISING_PLAN.md`](../../docs/AG3S_PHASE_DENOISING_PLAN.md) §2.2 (코드에서 확인한 약점) · §2.3 (target identity 를 exclusion 으로 연결) · §2.4 (geometry → query → contact 측정 정의) · §8 (구현 인계). 이 절은 그 내용을 옮기지 않는다.
+- 이 절은 **무엇이 어떻게 측정됐는지만** 적는다. 해석은 verify.json 과 impl.md 가 적은 범위로 제한하고, 원인을 단정하지 않는다. 확정되지 않은 것은 맨 끝 §10 에 둔다.
+- 시각은 UTC 이다. 파일 시각은 해당 파일의 마지막 수정 시각 (`ls --time-style`) 이고 측정 시작 시각이 아니다.
+- 그림은 `figures/t44/` 에 있고 각 그림 옆에 `.json` sidecar 가 있다. 그림은 verifier 가 만들었고 scribe 는 링크만 한다.
+- 새 용어는 위 **용어 → "T44 target exclusion"** 표에 있다.
+
+### 1. 코드로 확인한 약점 P1–P4 와, 측정 전에 고정한 기준 ①–④
+
+아래 P1–P4 는 `T44.task.md` 가 **코드를 읽어** 적은 것이고, 실행 영향은 측정하기 전에는 확정 bug 로 다루지 않았다.
+
+| ID | 무엇 | 위치 | V11AB 에서 |
+|---|---|---|---|
+| P1 | `PathChecker._target_rows` 가 E1 test (`\|d − d_object\| ≤ voxel`) 와 `in_target_volume` 으로 path 행을 제외하는데 authorized link 와 교집합이 없다. `&= ~free` 때문에 오히려 authorized 행은 E1 제외에서 빠지고 non-authorized 행이 target 근처에서 빠진다 | `trajopt/sweep.py:427-460` | 비활성 (`sweep_check` · `servo_model` off) |
+| P2 | `_lookahead_keep` (tail 행 drop) · `_obstacle_rows` (obstacle_margin 면제) 도 같은 판정을 link 필터 없이 쓴다 | `trajopt/linearize.py:1021-1024, 1084-1089` | `--lookahead obstacles` on 이라 **살아 있을 수 있다** |
+| P3 | `obstacle_margin > 0` 이면 `obstacle = dict(...)` 로 다시 만들어 앞서 넣은 `target_volume` 이 사라진다 | `trajopt/linearize.py:1969-1982` | `target_volume_exempt` off 라 비활성 |
+| P4 | builder 는 target `(M,3)` 점과 ball 만 받는다. ball 안 seed 가 target 것인지 이웃 물체 것인지 가를 정보가 없다 | `ag3s/runtime/pipeline.py:2607-2630`, `ag3s/fields/curobo_builder.py:1277` | — |
+
+V-E2 의 통과 기준은 측정 전에 아래처럼 고정했다 (`T44.task.md` "측정에 요청하는 것"). verifier 도 이 기준을 측정 전에 고정했다고 보고했다 (한계는 §9).
+
+| # | 기준 | 어떤 숫자로 |
+|---|---|---|
+| ① | `ball` 이 distractor seed 를 1 개 이상 지운 frame (ball-hit frame) 에서 distractor seed 손실이 **50 % 이상 감소** | 손실 감소율 (pooled) |
+| ② | target removal recall 중앙값이 **ball − 5 pp 이상** | recall 중앙값 |
+| ③ | authorized 구 query 의 falsely feasible 수 **≤ ball** | oracle 대비 falsely feasible query 수 |
+| ④ | build time p90 증가 **≤ 10 ms** | ms |
+
+I2 쪽은 V-I2-1 (전체 pytest 실패 0) · V-I2-2 (flag off 에서 기록된 V11AB chunk replay 가 HEAD `498f713` 과 **차이 0**) · V-I2-3 (flag on 에서 바뀐 look-ahead 행 · chunk · verdict 를 **보고**) · V-I2-4 (`--sweep-check` replay 에서 target 근처 제외된 non-authorized 행이 on 에서 0 이고 authorized finger 예외가 유지되는가) 이다.
+
+### 2. 타임라인
+
+| 시각 (UTC) | 무엇 | 출처 |
+|---|---|---|
+| 2026-10-09 | task 작성: I0 → I1 → I2 순서, 기존 ball 보존, HSR · denoising · L1/L2 제외 | `T44.task.md` 머리말 |
+| 2026-10-10 00:05 | 사전 verifier 결과 `e2_frames.json`: LB 의 성공 E0 run 은 최근접 다른 과일이 모두 0.108–0.121 m 라 "이웃 < 0.10 m" 목록이 비었다 | `outputs/verify/T44/p/e2_frames.json` (파일 시각) |
+| 2026-10-10 00:21 | lead 가 **E2 입력 결정** 을 task 에 추가 — 붐비는 장면은 train split demonstration 자세로 대신한다 (§6) | `T44.task.md` (파일 시각) |
+| 2026-10-10 00:23 | **I2** (A2) 구현 보고 | `T44I2.impl.md` (파일 시각) |
+| 2026-10-10 01:03 | **I0 + I1** (A1) 구현 보고 | `T44I0I1.impl.md` (파일 시각) |
+| 2026-10-10 01:10 · 01:40 | I2 figure 2 장 · I2 summary table. **V-I2** 측정 (`T44I2.verify.json` 01:40) | figure · verify.json (파일 시각) |
+| 2026-10-10 01:51 – 02:07 | E2 figure 3 장 | figure (파일 시각) |
+| 2026-10-10 02:08 | **V-E2 · V-I0** 측정 (`T44E2.verify.json`) | verify.json (파일 시각) |
+
+### 3. 무엇을 구현했나 (구현자 보고)
+
+#### 3-1. I0 — 오류 분리 trace (구현자, `T44I0I1.impl.md`)
+
+기본 (`ball`) 에서 바뀌는 것은 **기록뿐** 이다.
+
+| 기록 | 내용 |
+|---|---|
+| `stats["target_free"]` 새 키 | `exclusion_method` (`ball` \| `ball_owned`) · `n_seeds_in_ball` · `n_removed` · `n_kept_nontarget` · `n_ambiguous` · `n_unowned_removed` · `n_unowned_kept` (+ `ball_owned`: `n_target_owned` · `n_sign_candidates[_nonseed]` · `owned{}` · `classify_ms`). `ball` 에서는 `n_removed == n_seeds_in_ball` 이고 나머지는 0 이다. 기존 `n_ball_seeds_excluded` 는 그대로다 |
+| `geometry_version` | `{request_seq, manipulated_id/state, observed_frame, n_points, point_indices_sha1[:12]}` + `nontarget{source, n_points, …}` |
+| chunk npz (`--record-constraints`) | `target_free_removed_ijk` (실제로 지운 seed voxel ijk, int16 (N,3)) · `target_free_nontarget_kept_ijk` · `target_free_ambiguous_ijk` · `target_free_unowned_kept_ijk` · `target_free_trace_origin` · `target_free_trace_voxel_size` (voxel 중심 = origin + ijk · voxel) |
+| summary | `target_exclusion` (counts · geometry_version · nontarget · trace_tier), `target_permission` (`authorized_links` · 행별 권한 vector `target_field_exclude` · `n_rows` · `n_rows_excluded` · `excluded_links`) |
+
+#### 3-2. I1 — `ball_owned` (구현자)
+
+`ball_owned` 는 ball 을 **외곽 상한** 으로 유지한다. sparse point exclusion 에서 target seed 가 남는 문제를 고치려고 ball 이 도입됐으므로 그 recall 을 잃지 않으려는 것이다. 그 안에서 **관측된 non-target 표면에 더 가까운 seed 만 보존** 해 이웃 물체 문제만 고친다. support guard · sign correction · fine window 경로는 그대로 재사용한다.
+
+| 항목 | 값 |
+|---|---|
+| 분류 (ball 안, `c_z ≥ z_min` 인 seed voxel 중심마다) | `min(d_t, d_o) > owned_max_dist_voxels · vs` → **unowned** (`owned_unowned` 에 따라 제거/보존) → `\|d_t − d_o\| ≤ owned_tie_voxels · vs` → **ambiguous** (보존, 기록) → `d_t < d_o` target_owned (제거) / `d_o < d_t` nontarget_owned (보존) |
+| 기본 파라미터 | `owned_tie_voxels` 1.0 · `owned_max_dist_voxels` 2.0 · `owned_unowned` `remove` (V11AB 의 fine voxel 은 5 mm) |
+| non-target evidence | fused cloud − `target.point_indices` − `support_mask`. `point_indices` 가 현재 cloud 를 가리키지 않으면 (occluded · 옛 frame 기하) target 점 1 fine voxel 안을 빼는 `proximity` 로 대체 |
+| 모호 · 결측 | ball 로 넓혀 fallback 하지 **않는다** (ball 이 이미 상한이다). 원인은 stats 로 남긴다 |
+| config (`EsdfConfig`) | `target_exclusion` (`ball` 기본) · `owned_tie_voxels` · `owned_max_dist_voxels` · `owned_unowned` + validation |
+| CLI (`trajopt/serve_safe.py`) | `--target-exclusion {ball,ball-owned}` · `--owned-tie-voxels` · `--owned-max-dist-voxels` · `--owned-unowned {remove,keep}`. owned 플래그를 `ball-owned` 없이 주거나 `ball-owned` 를 `relax` 와 같이 주면 `ap.error` |
+| sign correction set | **제거된 seed ∪ target 쪽이 확실한 non-seed voxel (`d_t < d_o − tie`)**. task 문구는 "실제로 제거된 index 에만" 이었으나, 그렇게 하면 target 내부 (TSDF < 0, seed 아님) 가 "다음 표면까지의 음수 거리" 로 남아 손가락이 target 안에서 큰 음수를 본다. 이웃 물체 내부는 교정하지 않는다 (단위 test 가 음수 유지를 본다). **사용자 판정 대기 2** |
+| 같은 integrator 의 bit-identity (구현자 GPU 점검) | 실제 cuRobo 로 HEAD builder 와 대조: 새 `ball` 은 coarse · fine · fine_no_target 이 **동일**. 새 `ball_owned` 는 coarse · fine 동일, fine_no_target 만 다름 (의도). `ball` 에서 `n_seeds_in_ball` 642 = `n_removed` 642 = `n_ball_seeds_excluded` |
+
+offline E2 harness `ag3s/experiments/live/exclusion_e2.py` (신규): 기록 frame (`--run`) · demonstration 자세 (`--demo-episodes`) · posed-frame JSON 에서 같은 integrator 로 `ball` / `ball_owned_remove` / `ball_owned_keep` / `oracle` 를 만든다.
+
+#### 3-3. I2 — `target_permission_strict` (구현자, `T44I2.impl.md`)
+
+waypoint margin 밖의 target 예외 세 곳 (look-ahead tail drop · `obstacle_margin` 면제 class · sweep path 행 제외) 에 link 필터가 없었다 (P1 · P2). 새 flag `collision.target_permission_strict` (기본 off, `--target-permission-strict`) 를 켜면 그 세 곳의 target 판정이 **target 에 닿아도 되는 link 의 행** (`SceneSnapshot.target_contact_rows`) 에만 적용된다. 같은 자리의 forearm 은 검사를 받고 finger 는 예외를 유지한다.
+
+| 항목 | 내용 |
+|---|---|
+| 권한 vector | `exclude_authorized` → `target_free_mask` · `exclude_all` → `target_free_exempt` · `relax` / mask 없음 (쥔 뒤) → `manipulated_link_margin < max − 1e-12` · manipulated 가 없으면 `None`. strict off 에서도 snapshot 에 실리지만 아무도 읽지 않는다 |
+| 소비자 | `_lookahead_keep` · `_obstacle_rows` · `PathChecker._target_rows` 가 `& contact` 를 쓴다. held 행은 기존대로 |
+| `target_contact` | strict off → `None` (기존 식 그대로). on → 권한 vector, 쥔 물체 행은 False, vector 없음 → 전부 False (fail closed) |
+| **P3 수정 (flag 무관)** | `obstacle = dict(...)` → `obstacle.update(...)`. `obstacle_margin` 과 `target_volume_exempt` 를 **함께** 켠 설정에서만 동작이 바뀐다. V11AB 는 `target_volume_exempt` off 라 해당 없다 |
+| `layer_diff` membership | strict + AG3S 가 `ball_owned` 로 지웠다고 stats 가 말할 때 (쥔 것 없음), target membership 을 ball 대신 `d_free − d_main > voxel` 로 본다. 실제로 보려면 `--target-permission-strict --target-volume-exempt` + AG3S `--target-exclusion ball-owned` |
+| 새 기록 키 (strict 에서만) | look-ahead 기록의 `n_tail_target_unauthorized` (target 판정에 걸렸으나 권한이 없어 drop 안 된 tail 행 수) · `path_check` 의 `target_rows_unauthorized_kept` (같은 뜻, sweep 쪽) |
+| CLI | `--target-permission-strict` · `permission_overrides(args)` · 시작 시 WARNING 한 줄 |
+
+`safe_policy.py` 와 `ag3s/**` 는 I2 가 건드리지 않았다.
+
+#### 3-4. 단위 test
+
+| 묶음 | test 수 | 고정하는 것 |
+|---|---:|---|
+| `tests/ag3s/test_t44_target_exclusion_owned.py` | 21 (구현자) | ball 안 distractor seed 보존 · ambiguous 보존 + 기록 · sparse target (점 5 개) 에서 target seed 전부 제거 · support guard · unowned remove/keep · `ball` 모드 `_build_tiers` 값 = T13 알고리즘 `torch.equal` · config 왕복 · CLI · `ap.error` · `_nontarget_points` · geometry_version · `target_permission` · (GPU) 실제 cuRobo |
+| `tests/ag3s/test_t44_exclusion_e2.py` | 6 (구현자) | demo frame 규칙 · posed-frame 장면 · GT voxel label · GT attention 카메라 거름 |
+| `tests/trajopt/test_t44_target_permission.py` | 29 (구현자) | 같은 자리의 finger (권한) · forearm (비권한) 에서 waypoint · look-ahead · sweep · final verdict · flag off = 같은 값 · P3 · `layer_diff` · 기록 chunk. mutation 확인: `target_contact` 를 늘 `None` 으로 바꾸면 strict · ball_owned test 10 개가 실패한다 |
+
+**전체 pytest (verifier, V-I2-1): 2569 passed · 3 skipped · 0 failed · 971.07 s** (`tests/trajopt tests/ag3s`, CPU). 2026-10-09 기준 2514 passed 에서 신규 test 가 더해진 값이다.
+
+### 4. 회귀 기준선
+
+| 기준선 | 측정 | 기준값 | 일치 |
+|---|---|---|---|
+| legacy (`T44I2`) | 시작 시 violated 14/15 · frame 0 `clearance_before` −29.031048280806342 mm · feasible 15 | T36 의 legacy 기준 14/15 · −29.031048280806342 mm | 일치 (마지막 자리까지) |
+| cuRobo (`T44E2`) | 시작 시 violated 10/15 · has_target 15/15 · frame 0 `clearance_before` −9.171877401271193 mm | T36 의 cuRobo 기준 10/15 · 15/15 · −9.171877401271193 mm | 일치 |
+
+두 기준선 모두 **working tree (A1 의 미커밋 변경 포함)** 에서 돌렸다. 이 기준선이 target-free ball 경로를 덮는지는 verify.json 이 말하지 않는다.
+
+### 5. I2 측정 — flag off 는 차이 0, flag on 은 carry chunk 의 비권한 행만 바뀐다 (V-I2-2 · 3 · 4, 2026-10-10 01:40)
+
+**입력.** 기록된 V11AB H run 14 개 (episode 1807–1995) 의 server chunk **1006 개**. split 은 **test** (episode ≥ 1600) 이고 **회귀 확인 전용** 이다. TO 입력을 `ta_offline.Run` 으로 복원해 open loop 로 arm 마다 다시 풀었다 (arm 마다 refiner reset). 모든 arm 과 두 tree (HEAD `498f713` 의 `git archive` 사본 · working tree) 에서 `sqp.time_budget_ms = 1e6` 으로 올렸다 (wall-clock 예산은 bit 재현 입력이 아니다).
+
+| arm | 설정 |
+|---|---|
+| `off` | V11AB config, scene 은 `ta_offline` 이 만든 대로 (권한 vector 없음) — HEAD · working tree 둘 다 |
+| `offR` | 같은 config, scene 에 `target_contact_rows` 를 싣고 strict False (working tree 만) |
+| `strict` | `offR` + `target_permission_strict = True` |
+| `sw` / `swR` / `swS` | look-ahead off + `plan_horizon` = 실행 창 (8) + `sweep_check` on. `sw` = 권한 vector 없음, `swR` = 싣고 strict False, `swS` = 싣고 strict True |
+
+**sweep arm 은 V11AB 의 look-ahead 설정이 아니다.** `reduction.sweep_check` 가 `horizon.lookahead` off 를 요구한다 (`config.py:948` validation). 그래서 sweep 쪽 결과 (V-I2-4) 는 V11AB 의 실제 구성이 아니라 sweep 을 켠 별도 구성에서의 값이다.
+
+#### 5-1. V-I2-2 — flag off: HEAD 와 차이 0 (기준 통과)
+
+| 비교 | chunk | refined chunk 차이 | trajectory 차이 | status 차이 | hold 차이 | 최대 joint 차이 | collision 행 수 차이 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| HEAD `off` 대 working tree `off` | 1006 | 0 | 0 | 0 | 0 | 0.0 deg | 0 |
+| HEAD `off` 대 working tree `offR` | 1006 | 0 | 0 | 0 | 0 | 0.0 deg | 0 |
+| HEAD `sw` 대 working tree `sw` | 1006 | 0 | 0 | 0 | 0 | 0.0 deg | 0 |
+| HEAD `sw` 대 working tree `swR` | 1006 | 0 | 0 | 0 | 0 | 0.0 deg | 0 |
+
+권한 vector 를 snapshot 에 실어도 (`offR` · `swR`) strict 가 off 이면 값이 같다는 것까지 보였다.
+
+#### 5-2. V-I2-3 — strict on: look-ahead tail 행 (보고)
+
+| 항목 | 값 |
+|---|---:|
+| chunk | 1006 |
+| 권한 vector 가 만들어진 chunk | 539 |
+| `n_tail_target_unauthorized > 0` 인 chunk · 그 합 (target 판정에 걸렸으나 권한이 없어 drop 안 된 tail 행) | 33 chunk · 3721 행 |
+| 바뀐 look-ahead 행 — reference trajectory 기준 | 4328 행 · 43 chunk |
+| 바뀐 look-ahead 행 — `off` 의 refined 결과 기준 | 4172 행 · 43 chunk |
+| refined chunk 가 바뀐 수 · 최대 joint 차이 | 10 chunk · 0.585 deg |
+| status 변화 · HOLD 변화 | 0 · 0 (`hold_candidate` off 8 대 strict 8) |
+
+바뀐 43 chunk 는 **전부 쥔 물체 (held, carry) chunk** 이고 held 가 아닌 chunk 에서는 0 이다 (`chunks_with_changed_rows_held` 43 · `chunks_with_changed_rows_not_held` 0). ~~바뀐 행의 link 별 수 (reference trajectory 기준): `ee_right` 234 · `ee_left` 50 · `ee_finger_l1` 40 · `ee_finger_r2` 16 · `ee_finger_l2` 7.~~ (T44b V-I2-defect: 이 link 별 집계는 합이 347 이라 4328 행을 다 세지 못했다. 바른 분류는 아래 T44b §2-3 — 바뀐 4328 행은 전부 쥔 손의 반대 손 gripper 행이다.) 같은 chunk 에서 **쥐고 있는 손의 반대 손 · 손가락** 의 tail 행이 target 근처라는 이유로 예전에는 drop 됐고 strict 에서는 남는다.
+
+#### 5-3. V-I2-4 — strict on: sweep path 행 (sweep 구성)
+
+| 항목 | off | strict |
+|---|---:|---:|
+| target 근처로 path 검사에서 제외된 행 합 (`target_rows_excluded_total`) · chunk | 9353 · 179 chunk | 8791 · 178 chunk |
+| 같은 trajectory 에서 (539 chunk) 제외된 행 합 | 9353 | 8789 |
+| **권한 없는 (non-authorized) 행** 의 제외 (`V-I2-4_split_by_authorization`) | **68** (26 chunk) | **0** |
+| **권한 있는 (authorized) 행** 의 제외 | 477 | **477** (유지) |
+| strict 가 검사에 남긴 비권한 행 (`target_rows_unauthorized_kept`) | — | 552 행 · 26 chunk (같은 trajectory 에서 564) |
+| 새 path violation (같은 trajectory) · path violation 수 | — | **0** · 27 → 27 |
+| refined chunk 가 바뀐 수 · 최대 joint 차이 | — | 4 chunk · 1.594 deg |
+| solve status 변화 | — | **1** (아래) |
+
+- 비권한 행의 제외가 일어난 26 chunk 는 전부 held chunk 이고 (`all_such_chunks_held` true), 제외된 link 는 `ee_left` 17 · `ee_finger_l1` 14 · `ee_right` 37 이다 (합 68). **기준 "on 에서 제외 0, authorized finger 예외 유지" 는 숫자로 충족됐다.** `target_rows_excluded_total` (9353) 과 `V-I2-4_split_by_authorization.totals` (477 + 68) 는 집계 단위가 다르다고 보이는데 verify.json 이 그 차이를 정의하지 않는다.
+- **status 가 뒤집힌 chunk 하나.** `V11AB_H_V11AB_ep1834_s18341` seq 34: off `feasible` → strict `violated`. strict 의 window violation 1.3657 mm · strict path clearance 1.122 mm (off 6.169 mm). `n_collision_rows_both` 0. off 에서 target 근처로 제외됐던 행은 `ee_left` 8 · `ee_right` 1 · `ee_finger_l1` 2 이고 strict 가 검사에 남긴 비권한 행은 67 이다. 이 chunk 의 verdict 가 맞는지 (strict 가 진짜 위반을 잡은 것인지) 는 **측정하지 않았다.**
+
+**Figure.**
+
+![I2 scene](figures/t44/t44i2-scene-strict-tail.png)
+
+[`t44i2-scene-strict-tail.png`](figures/t44/t44i2-scene-strict-tail.png) — 실제 장면 (`V11AB_H_V11AB_ep1834_s18341` chunk 35, test split). 위 (xy) · 옆 (xz) · 앞 (yz) 세 방향에서 본 robot sphere 의 위치. 파랑 = 권한 행 (쥔 손 `ee_right` · `ee_finger_r1/r2`), 회색 = 비권한 행의 첫 행, 빨강 = strict 가 look-ahead 에 **남긴** 비권한 tail 행, 주황 = 쥔 사과 (held 구 2 개, 반지름 38.471 mm). 바뀐 tail 행은 576 개 (`ee_finger_l1` 448 · `ee_left` 128), 권한 행은 135 개. 반대 손이 쥔 사과 곁을 지나는 행이 예전에는 target 근처라는 이유로 drop 됐다.
+
+![I2 per chunk](figures/t44/t44i2-per-chunk-rows.png)
+
+[`t44i2-per-chunk-rows.png`](figures/t44/t44i2-per-chunk-rows.png) — 14 run 을 이어 붙인 1006 chunk 별 값 (test split). 위: 바뀐 look-ahead tail 행 수. 가운데: off 에서 비권한 행이 path 검사에서 제외된 수 (strict 는 전부 0). 아래: V11AB 설정과 sweep 설정에서 refined chunk 의 최대 joint 차이 (deg). 세 그래프 모두 **몇 개의 carry chunk 에 몰려 있다.**
+
+![I2 table](figures/t44/t44i2-summary-table.png)
+
+[`t44i2-summary-table.png`](figures/t44/t44i2-summary-table.png) — V-I2-1 ~ 4 요약 표.
+
+### 6. E2 — 입력과 측정 방법
+
+**입력이 바뀐 이유 (lead 결정, 2026-10-10 00:21).** 사전 verifier 가 LB 의 성공 E0 run 을 보니 모두 덜 붐비는 episode 로 골라져 있어 (최근접 다른 과일 0.108–0.121 m) "이웃 < 0.10 m" 목록이 비었다. 그래서 E2 의 입력을 둘로 나눴다. **정책 실행이 없는 기하 진단 전용** 이고, closed-loop episode 는 사용자 판정 뒤 새 E0 screening 으로 고른다.
+
+| 세트 | 무엇 | 규모 |
+|---|---|---|
+| **E2-demo (주)** | train split (episode < 1600) 의 demonstration 자세. `initial_fruit_poses` (grasp 전이라 과일은 제자리) + 16D `observation.state` 를 `pregrasp_start_frame` ~ `grasp_close_start_frame` 구간에서 균등 4 frame (모든 episode 에서 frame 68 · 80 · 92 · 104) | 16 episode × 4 = **64 frame** |
+| **E2-lb (대조)** | LB 의 성공 E0 run 기록 frame, 이웃 과일 0.109–0.117 m. 덜 붐비는 장면에서 두 방식이 같은지 (회귀) | 12 episode × 4 = **48 frame** |
+
+E2-demo episode 선택 규칙 (측정 전 고정): train split · `success` true · 최근접 다른 과일 xy 거리 (초기 pose) 로 두 bin `< 0.08 m` · `0.08–0.10 m` · (target 과일 4 × used arm 2) 의 8 group × 2 bin 에서 episode index 가 가장 작은 것. 후보 수는 `< 0.08` 231 · `0.08–0.10` 972 · train 이 아니라 제외된 400. **16 칸이 모두 채워졌다.** 칸마다 episode (최근접 이웃 과일 · xy mm):
+
+| target · arm | `< 0.08 m` | `0.08–0.10 m` |
+|---|---|---|
+| apple · left | 12 (orange 79.8) | 2 (banana 91.6) |
+| apple · right | 22 (orange 79.5) | 30 (pear 89.6) |
+| orange · left | 67 (pear 74.9) | 0 (apple 94.9) |
+| orange · right | 3 (banana 77.2) | 15 (apple 95.1) |
+| pear · left | 100 (orange 75.2) | 1 (apple 86.9) |
+| pear · right | 60 (apple 74.1) | 11 (orange 81.7) |
+| banana · left | 27 (apple 77.7) | 5 (apple 87.4) |
+| banana · right | 26 (pear 78.0) | 58 (orange 94.5) |
+
+**측정 정의 (측정 전 고정).**
+
+- query model = V11AB 구성: links gripper · `capsule_radius_scale` 0.05 · `sphere_spacing` 0.4 · `max_spheres_per_capsule` 32 · finger cover both → 구 270 개, authorized = 사용 팔의 `ee` + 손가락 2 → 135 개. margin 10 mm (V11AB `--obstacle-margin 0.010`, `--esdf-margin 0`). `clearance = d − r`.
+- query 는 둘이다: **q** = 그 frame 의 q 에서 authorized 구 중심, **grid** = 구 중심 ± 20 mm 를 10 mm 간격으로 (구마다 125 점). ROI 안의 구만 센다 (`|c − ball 중심| − r ≤ ball 반지름 + 20 mm`).
+- falsely feasible = `clearance_oracle < margin` 이고 `clearance_method ≥ margin`.
+- sign check = 이웃 과일 convex hull 안 voxel 에서 음수인 몫, 이웃 mesh 10–20 mm 밖 voxel 에서 `|∇d|`.
+- harness 의 attention: GT Gaussian 을 **target 을 보는 카메라에만** 싣는다 (구현자). 모든 카메라에 실으면 target 이 화면 밖인 카메라의 map 이 정규화로 전부 ≈ 1 이 되어 그 카메라 점 전체가 seed 가 된다.
+- E2-lb 의 일부 frame (`gt` 에서 12 frame) 은 pipeline geometry 의 `point_indices` 가 현재 cloud 를 가리키지 않아 non-target evidence 가 `proximity` 로 대체됐다 (아래 §7-2 의 E2-lb 표 아래).
+
+### 7. E2 결과 (V-E2-1 · 2 · 3, 2026-10-10 02:08)
+
+세 identity mode 로 쟀다. **`gt_label`** = 완전한 identity (target 점 전부), **`gt`** = 가장 가까운 grounded cluster 를 쓰되 GT target 80 % 미만이면 `gt_label` 로 대체, **`gt_cluster_only`** = `gt` 중 cluster 로 정해진 frame. demo 64 frame 에서 `gt` 의 identity 결정은 `gt_label` 34 · `pipeline` 17 · `nearest_cluster` 13 이다. E2 가 어느 identity mode 를 주로 볼지는 구현자가 판정 요청으로 남겼다 (impl.md 의 판정 필요 2).
+
+#### 7-1. 기준 ①–④ (demo 64 frame, 방법 vs `ball`)
+
+| identity | frame | ball-hit frame | 방법 | ① distractor 손실 감소 (≥ 0.5) | ② recall 중앙 (ball 0.936 ± 5 pp) | ③ falsely feasible q (≤ ball 67) | ④ p90 증가 (≤ 10 ms, 전용 측정) |
+|---|---:|---:|---|---|---|---|---|
+| `gt_label` | 64 | 23 | `ball_owned_remove` | **0.479 (미달)** | 0.936 (통과) | 65 (통과) | 4.745 (통과) |
+| `gt_label` | 64 | 23 | `ball_owned_keep` | 0.9856 (통과) | **0.548 (미달)** | 5 (통과) | 4.845 (통과) |
+| `gt` | 64 | 23 | `ball_owned_remove` | **0.479 (미달)** | 0.935 (통과) | 65 (통과) | 〃 |
+| `gt` | 64 | 23 | `ball_owned_keep` | 0.9856 (통과) | **0.547 (미달)** | 5 (통과) | 〃 |
+| `gt_cluster_only` | 30 | 3 | `ball_owned_remove` | **0.2951 (미달)** | 0.932 vs 0.936 (통과) | 28 vs 28 (통과) | 〃 |
+| `gt_cluster_only` | 30 | 3 | `ball_owned_keep` | 1.0 (통과) | **0.524 (미달)** | 0 vs 28 (통과) | 〃 |
+
+- ④ 는 **단독 프로세스 전용 timing pass** 의 값이다 (§7-3). 측정 pass 의 값은 2 shard 동시 실행 + pod 부하로 3.259–66.553 ms 에서 흔들려 판정에 쓰지 않았다.
+- **고정 기준 ①–④ 를 모두 만족하는 arm 은 없다.** `ball_owned_remove` 는 ① 이 0.5 에 못 미치고 (0.479), `ball_owned_keep` 은 ② 가 5 pp 보다 훨씬 아래다.
+- ball-hit frame 은 demo 64 frame 중 23 이다 (`< 0.08` bin 15 · `0.08–0.10` bin 8). E2-lb 는 **0 frame** 이라 ① 이 정의되지 않는다 (`null`).
+
+bin 별 (`gt_label`, `ball_owned_remove`):
+
+| bin | frame | ball-hit frame | ① 감소 | ② recall 중앙 (ball) | ③ falsely feasible q (ball) |
+|---|---:|---:|---|---|---|
+| `< 0.08 m` | 32 | 15 | 0.4495 (미달) | 0.929 (0.929) | 39 (41) |
+| `0.08–0.10 m` | 32 | 8 | **0.5729 (통과)** | 0.947 (0.947) | 26 (26) |
+
+#### 7-2. seed 와 query 의 수 (demo 64 frame, `gt_label`)
+
+| 방법 | recall 중앙 (p10 · min) | ball 안 distractor seed 중 제거된 수 (총 833) | ambiguous | unowned 제거 / 보존 | falsely feasible q (grid) | falsely infeasible q |
+|---|---|---:|---:|---|---|---:|
+| `ball` | 0.936 (0.698 · 0.6197) | **833** | — | — | 67 (5936) | 11 |
+| `ball_owned_remove` | 0.936 (0.689 · 0.6197) | **434** | 39 | 15452 / 0 | 65 (5824) | 11 |
+| `ball_owned_keep` | 0.548 (0.49 · 0.4325) | **12** | 39 | 0 / 15452 | 5 (441) | **99** |
+| `oracle` | 1.0 | 0 | 0 | — | 0 | — |
+
+- ROI 안 seed 의 전체 (`n_seeds_in_ball_sum`) 는 37567 이고 그 중 **unowned 로 분류된 것이 15452** 다 (`gt` 에서 15447). E2-lb 는 36897 중 20225 다.
+- `ball_owned_remove` 가 잃은 distractor seed 434 개 중 **unowned 로 제거된 것이 422** 다 (`ball_owned_remove_distractor_lost_unowned_only_sum`; `gt` 도 422 / 434). 감소율 0.479 는 frame 중앙값으로는 0.727 이고 ball-hit 23 frame 중 13 frame 이 50 % 이상 감소했다.
+- `ball_owned_keep` 은 손실을 833 → 12 로 거의 없애지만 target recall 이 0.936 → 0.548 로 내려간다. falsely feasible 은 5 로 줄지만 **falsely infeasible 이 11 → 99 로 늘어** 손가락이 필요한 contact 를 못 하게 하는 방향의 오차가 커진다 (③ 은 falsely feasible 만 센다). q 의 `over` (oracle 대비 distance overestimation) 중앙은 ball · remove 0.0 mm, keep −2.846 mm 이다.
+- oracle' (unlabelled seed 도 제거) 기준으로는 falsely feasible q 가 ball 60 · remove 58 · keep 5 이고 falsely infeasible q 는 31 · 31 · 126 이다. `unlabelled` seed (GT 가 설명 못 하는 seed) 는 ROI 에 16781 개 있고 `ball` 이 659 개, `ball_owned_remove` 가 656 개 지운다 (oracle 은 장애물로 남긴다).
+- recall 중앙값이 **`ball` 에서도 1.0 이 아니라 0.936** 이다 (oracle 1.0). `ball_owned_remove` 는 이 값을 유지한다. ball 이 놓치는 target seed 가 무엇인지는 측정하지 않았다 (§10).
+- sign check: 이웃 과일 내부 voxel 중 음수인 몫의 frame 중앙값은 ~~main layer 0.795~~ (T44b D-sign: 이 값은 main fine layer 가 아니라 main composite = min(coarse, fine) 의 값이다. main fine layer 는 0.3184, coarse layer 는 0.7318 — T44b §4) · `ball` 0.273 · `ball_owned_remove` 0.272 · `ball_owned_keep` 0.272 · oracle 0.272, `|∇d|` (eikonal) 의 frame 중앙값의 중앙은 main 0.965 · 나머지 방법 0.967. 방법 사이의 차이는 0.001 이다.
+
+E2-lb (덜 붐비는 장면, 48 frame, ball-hit 0):
+
+| identity | 방법 | recall 중앙 (ball) | falsely feasible q (ball) | distractor seed 손실 |
+|---|---|---|---|---:|
+| `gt_label` | `ball_owned_remove` | 0.927 (0.927) 통과 | 125 (125) 통과 | 0 |
+| `gt_label` | `ball_owned_keep` | 0.425 (0.927) 미달 | 9 (125) | 0 |
+| `gt` (= `gt_cluster_only`) | `ball_owned_remove` | **0.896** (0.927) 통과 | 114 (138) 통과 | 0 |
+| `gt` | `ball_owned_keep` | 0.4 (0.927) 미달 | 5 (138) | 0 |
+
+`gt` 의 48 frame 중 12 frame 은 non-target evidence 가 `proximity` 로 대체됐고 (`point_indices` 가 현재 cloud 를 가리키지 않아 `identity_completeness` 가 0.0 으로 읽힌다) 이 12 frame 에서 recall 중앙은 `ball` 0.941 대 `ball_owned_remove` 0.839 다. 같은 frame 을 완전한 identity (`gt_label`) 로 돌리면 `ball_owned_remove` 는 `ball` 과 같다 (0.927 = 0.927). 즉 구현자가 impl.md 에서 알린 **"`ball_owned` 는 identity 의 완전성에 민감하다"** 와 같은 방향이다.
+
+#### 7-3. build time (V-E2-3, 전용 timing pass)
+
+`e2_timing.py`: 단일 프로세스, frame 112 × 10 회 interleaved (방법마다 n = 1120). pod load 1 분 평균 중앙 32.68 (최대 394.54), cgroup throttle 중앙 0.0, GPU 사용률 중앙 0 (최대 100 %).
+
+| 방법 | median (ms) | p90 (ms) | p90 − ball (ms) | 쌍 차이 중앙 · p90 (ms) | p99 · max (ms) |
+|---|---:|---:|---:|---|---|
+| `ball` | 4.835 | 6.254 | — | — | 36.372 · 65.325 |
+| `ball_owned_remove` | 6.941 | 10.999 | **4.745** | 2.135 · 5.184 | 40.755 · 91.851 |
+| `ball_owned_keep` | 6.848 | 11.099 | **4.845** | 2.106 · 5.327 | 39.771 · 46.648 |
+
+분류 시간 (`classify_ms`, remove): median 3.349 · p90 6.88. non-target 점 계산 (`nontarget_points_ms`) median 0.156 · p90 0.282. 세트별 p90 증가: demo 4.596 (remove) · lb 5.244 (remove). **기준 ④ (≤ 10 ms) 는 통과했다.** 측정 pass 의 build ms 는 2 shard 동시 실행 + pod 부하 (loadavg1 최대 373.09, cgroup throttle 중앙 5.462 s/frame) 라 판정에 쓰지 않았다.
+
+#### 7-4. 붐비는 장면의 cluster merge
+
+target 을 고르는 grounding cluster 가 target 과 이웃 과일 점을 **함께** 담는 frame 이 demo 64 frame 중 **34** 이다 (`target_cluster_target_fraction < 0.8`; 전체 중앙 0.637). bin 별로는 `< 0.08` 20 frame (중앙 0.559) · `0.08–0.10` 14 frame 이다. 그래서 E2 는 identity 를 진단용으로 GT 에 맞췄고 (`gt_label`), cluster 만으로 identity 가 정해진 30 frame (`gt_cluster_only`) 에서는 ball-hit 가 3 frame 뿐이라 ① 은 0.2951 (distractor seed 손실 122 → 86) 이다. **실제 VLA attention 으로 pipeline 이 고르는 identity 로는 측정하지 않았다** (§9).
+
+**Figure.**
+
+![E2 scatter](figures/t44/t44e2-scatter.png)
+
+[`t44e2-scatter.png`](figures/t44/t44e2-scatter.png) — frame 마다 한 점. x = target removal recall (ROI), y = 제거된 distractor seed 수 (y 는 방법별로 ±0.2 어긋나게 흩뜨렸다). 파랑 `ball`, 주황 `ball_owned_remove`, 초록 `ball_owned_keep`, 노랑 oracle. 위 행 = `gt`, 아래 행 = `gt_label`, 왼쪽 = demo (n = 64), 오른쪽 = lb (n = 48). demo 에서 `ball` 은 한 frame 에서 최대 130 개 이상의 distractor seed 를 지우고, `ball_owned_remove` 는 그 중 많은 frame 을 낮추지만 일부 frame (높은 손실 쪽) 은 그대로 남는다. 초록 점은 손실이 거의 0 이지만 recall 이 0.43–0.62 에 몰려 있다.
+
+![E2 scene](figures/t44/t44e2-scene.png)
+
+[`t44e2-scene.png`](figures/t44/t44e2-scene.png) — 실제 장면 (E2-demo, `gt_label`). 왼쪽 열은 `zed_left` 카메라 영상, 오른쪽은 ROI (ball + 20 mm shell) seed 를 **x–z 옆면에서, ball 중심의 `|y − y_ball| ≤ 10 mm` slab** 로 자른 것이다 (점선 = ball). 채운 점 = 보존 (obstacle), 빈 점 = 제거. 위 행은 중앙값에 가까운 frame `demo_ep0001_f068` (pear target, 최근접 apple 87.1 mm): `ball` distractor 손실 31 → `ball_owned_remove` 3, recall 은 둘 다 0.9205, `ball_owned_keep` 은 손실 0 · recall 0.5936. 아래 행은 그림이 최악으로 고른 frame `demo_ep0060_f068` (pear target, 최근접 apple 74.3 mm): 손실 131 → 87, recall 0.9584 → 0.9554, `ball_owned_keep` 은 손실 4 · recall 0.572.
+
+![E2 table](figures/t44/t44e2-table.png)
+
+[`t44e2-table.png`](figures/t44/t44e2-table.png) — set × identity × 방법 전체 표 (위) 와 기준 ①–④ 의 pass/fail (아래, P/F 표시).
+
+### 8. V-I0 — contact event → chunk → 제거 seed · 권한 행
+
+기록 run `V11AB_ep1807_s18071` (test split, 기록은 T44 코드 이전) 에서 contact event 를 실행한 chunk 로 거슬러 올라갔다 (`chunk_k` ↔ local `seq k+1`). 이 run 의 manipulated 는 id 0 이고 authorized link 는 `ee_finger_l1` · `ee_finger_l2` · `ee_left` (270 구 중 135 행), ball 은 `ball` 모드 · 반지름 54.239 mm · target 점 117 이다.
+
+| contact class | 처음 나온 chunk (`seq_local`) | t (step) | 최소 거리 · 최대 힘 |
+|---|---|---|---|
+| apple–table | 0 (1) | 0–7 | −0.034 mm · 1.01 N |
+| apple–hand · hand–target | **14 (15)** | 117–119 | −1.934 mm · 126.6 N |
+| apple–crate | 30 (31) | 245–247 | −7.963 mm · 17.65 N |
+
+(`hand-crate` · `robot_other-crate` · `apple-fruit_other` · `apple-obstacle` · `crate-obstacle` · `hand-obstacle` · `robot_other-obstacle` · `hand-fruit_other` · `robot_other-target` · `robot_other-fruit_other` 는 이 run 에서 0 건이다.) 손과 target 의 첫 contact 직전·직후 chunk:
+
+| chunk_k | seq_local | 그 chunk 에서 실행된 contact | `grasp_active` | `n_ball_seeds_excluded` | `n_target_points` | carved surface voxel (proxy) |
+|---:|---:|---|---|---:|---:|---:|
+| 11 | 12 | apple–table | False | 1265 | 117 | 1203 |
+| 12 | 13 | apple–table | False | 1130 | 117 | 1066 |
+| 13 | 14 | apple–table | False | 1058 | 117 | 975 |
+| 14 | 15 | apple–hand · apple–table · hand–target | False | 1126 | 117 | 1055 |
+| 15 | 16 | apple–hand · apple–table · hand–target | True | 1267 | 117 | 1202 |
+
+**추적은 부분적으로만 됐다.** contact 시각 → chunk → 그 chunk 의 ball seed 수 · authorized link 와 행 수까지는 이어진다. 그러나 이 기록은 T44 이전이라 `target_free_removed_ijk` 등 새 npz 키와 summary 의 `target_permission` · `target_exclusion` 이 **없다** (`has_new_T44_keys` 전부 False). 그래서 "실제로 제거된 seed 의 ijk" 대신 **carved surface voxel proxy** (`d_free − d_main` 로 carve 된 voxel 중 `|d_main| ≤ voxel`) 를 썼다. T44 코드로 서버를 돌려 기록한 run 은 아직 없다.
+
+### 9. 측정의 한계
+
+| 항목 | 내용 |
+|---|---|
+| I2 replay 는 test split · open loop | episode 1807–1995 (전부 ≥ 1600), 회귀 확인 전용. 기록된 field 를 재사용하므로 GPU field · live server 경로는 거치지 않았다 |
+| working tree 가 측정 중 움직였다 | A1 이 `ag3s/**` 를 고치는 중에 replay 와 pytest 를 돌렸다. replay 의 trajopt 경로가 `ag3s.config` · `ClearancePolicy` · robot model builder 를 working tree 에서 import 한다. 핵심 파일 md5 는 `outputs/verify/T44/I2/wt_md5.txt` |
+| HEAD 대 HEAD determinism 대조 미실행 | bit 동일은 wall-clock 예산을 올린 뒤에 얻었다 |
+| strict 의 `layer_diff` 미측정 | A1 의 stats 키가 기록 chunk 에 없다. V11AB 는 `target_volume_exempt` off 라 P3 도 replay 에서 움직이지 않았다. 둘 다 단위 test 만 있다 |
+| B profile 미측정 | V11AB B profile (5 run, 300 chunk) 는 replay 하지 않았다 |
+| E2 verifier 의 사전 지식 | **verifier 가 impl.md 의 "내가 기대하는 결과" 절을 측정 전에 읽었다** (파일 전체를 한 번에 출력). 목록 · 기준 · margin · query 정의는 task.md 에서 측정 전에 고정했다고 보고했다 |
+| E2 build ms 측정 pass | 2 shard 동시 실행으로 흔들려 기준 ④ 는 전용 timing pass 로 판정 |
+| E2 identity | GT Gaussian attention 을 target 을 보는 카메라에만 싣고 identity 를 GT 로 강제했다. **실제 VLA attention 으로 pipeline 이 고르는 identity** 에서의 효과는 측정하지 않았다 |
+| E2 closed loop | 정책 실행이 없다 (E2-demo 는 demonstration 자세). closed-loop 효과 없음 |
+| V-I0 | 기록이 pre-T44 라 새 trace 키가 없고 proxy 로 대신했다 |
+| 미커밋 | 위 모든 코드는 미커밋이다 |
+
+### 10. 사용자 판정 대기 · 아직 모르는 것 · 되돌아올 지점 · 산출물
+
+#### 10-1. 사용자 판정 대기
+
+아래는 **판정이 필요한 항목** 과 그 근거 측정, 그리고 그 항목에서 아직 모르는 것이다. 어느 것도 scribe 가 정하지 않았다.
+
+| # | 판정할 것 | 근거 (verify.json · impl.md) | 아직 모르는 것 |
+|---|---|---|---|
+| 1 | **`ball_owned` 채택 여부와 `owned_unowned` / `owned_max_dist_voxels` 값** | E2-demo (`gt_label`, 64 frame): `ball_owned_remove` 는 ① 0.479 (미달; `< 0.08` bin 0.4495 미달 · `0.08–0.10` bin 0.5729 통과) · ② 0.936 = ball · ③ 65 ≤ 67 · ④ +4.745 ms 이고, `ball_owned_keep` 은 ① 0.9856 · ② **0.548 미달** · ③ 5 이지만 falsely infeasible 99 (ball 11). **고정 기준 ①–④ 를 모두 만족하는 arm 은 없다.** E2-lb 에서는 ball-hit frame 0 이라 ① 이 정의되지 않고 `gt_label` recall 이 ball 과 같다 (0.927). unowned 가 ROI 안 seed 37567 개 중 15452 개 (E2-lb 는 36897 중 20225) | ~~기본값 (`owned_tie_voxels` 1.0 · `owned_max_dist_voxels` 2.0 · `remove`) 외의 값은 **측정하지 않았다.**~~ (T44b §3-1 에서 `owned_max_dist_voxels` 3 · 4 를 같은 frame 으로 쟀다. `owned_tie_voxels` 1.0 · `remove` 는 그대로다) ~~**(lead 가 세운 검증하지 않은 가설)** unowned 가 많은 것은 fused cloud 간격 (`fusion_voxel_size` 0.012 m — lead 가 전달한 설정값이며 verify.json 에 없다) 이 `owned_max_dist_voxels` 2 × 5 mm 보다 커서일 수 있다 — **미측정.** 이 가설이 맞는지는 측정이 없다~~ (T44b D-sign 에서 측정됨: 실행 설정의 `fusion_voxel_size` 는 0.01 m 이고, unowned distractor seed 422 개 중 fusion 이 원인인 것은 12 개이다 — T44b §3-2. 가설은 반박됐다) |
+| 2 | **A1 의 sign correction 집합** (제거 seed + target 쪽 non-seed voxel `d_t < d_o − tie`) | task 문구는 "실제로 제거된 index 에만" 이었으나 A1 이 target 내부 음수 잔존을 막으려고 non-seed 를 더했다 (impl.md 판정 필요 1). 단위 test 가 이웃 내부의 음수 유지 · target 내부 양수를 본다. E2 sign check 는 방법 사이 차이 0.001 (§7-2) | task 문구대로 "제거된 seed 에만" 적용했을 때 target 내부 음수가 손가락 query 에 어떻게 나타나는지는 **측정하지 않았다** |
+| 3 | ~~**I2 strict 의 carry 동작.** 쥐고 있는 동안 권한이 `margin < max` 로 정해져 권한 행이 0 이 된다 (lead 확인)~~ (T44b: 사용자 판정 3 으로 carry 권한 규칙이 I2b 로 바뀌었다 — T44b §2. "서버 carry 에서 권한 행 0" 이라는 전제는 live server 로 검증된 적이 없다) | impl.md 판정 필요 3: mask 가 없는 경우 (`relax` · 쥔 뒤) 권한 = `manipulated_link_margin < max − 1e-12` 이라 모든 구가 권한 link 이거나 TRANSIT (scale 1.0) 이면 strict 에서 target 예외 0. replay 의 strict 효과: look-ahead 바뀐 행 4328 (43 chunk, 전부 held), sweep 에서 비권한 제외 68 → 0 · 권한 제외 477 유지 · 새 path violation 0, **status 변화 1 건** (`ep1834_s18341` seq 34, `feasible` → `violated`, window violation 1.3657 mm) | replay 는 `exclude_authorized` 의 `target_free_mask` 경로로 권한 vector 를 주입했으므로 (`strict_wiring`) **`margin < max` 경로는 replay 에서 실행되지 않았다.** status 가 뒤집힌 chunk 의 verdict 가 옳은지, closed loop 에서 HOLD · 성공에 미치는 영향은 측정하지 않았다 |
+| 4 | **`layer_diff` 를 ball 판정 대신 쓸지, ball 과 교집합으로 쓸지** | 현재는 task 문구대로 ball 판정을 **대체** (`ball ∧ membership` 아님). 이론상 membership ⊂ 제거 seed ⊂ ball 이라 차이는 계층 간 수치 차이뿐 (impl.md 판정 필요 4). 교집합은 한 줄 변경 | **측정하지 않았다.** A1 의 stats 키가 기록 chunk 에 없어 replay 로 못 본다. `layer_diff` 가 query 점에서 두 계층 거리를 한 번 더 읽는 시간도 측정하지 않았다 |
+| 5 | **붐비는 장면의 cluster merge 대응** (demo 34 / 64 frame; 원인 진단은 T44b §5 에서 했다) | 64 frame 중 34 frame 에서 target cluster 에 이웃 과일 점이 섞인다 (target fraction < 0.8, 전체 중앙 0.637; `< 0.08` bin 20 · `0.08–0.10` bin 14). E2 는 identity 를 GT 로 강제해서 쟀다 | 실제 pipeline identity 에서 `ball_owned` 가 어떻게 되는지 **측정하지 않았다.** cluster 만으로 정해진 30 frame 에서는 ball-hit 가 3 frame 뿐이다 |
+| 6 | **closed-loop 진행 여부** | 새 동작은 전부 flag 기본 off · off bit-identical (I2 replay 1006 chunk 차이 0). closed-loop episode 는 사용자 판정 뒤 새 E0 screening 으로 고른다 (task) | T44 코드로 기록한 server run 이 없다. closed-loop 효과 전부 미측정 |
+
+#### 10-2. 그 밖에 아직 모르는 것
+
+| 항목 | 상태 |
+|---|---|
+| `ball` 의 recall 이 1.0 이 아니라 중앙 0.936 인 이유 | oracle 은 1.0 이다 (E2-demo, `gt_label`). `ball_owned_remove` 도 같은 0.936 을 유지한다. ball 이 놓치는 target seed 가 무엇인지는 측정하지 않았다 |
+| E2 의 기하 차이가 실행 결과로 이어지는가 | plan §2.4 의 Execution 층위 (grasp success · non-contact link contact · distractor contact) 는 측정하지 않았다. E2 는 seed 와 query 까지다 |
+| `ball_owned` 의 identity 완전성 민감성 | E2-lb `gt` 에서 recall 중앙 0.896 (ball 0.927), 그 중 12 frame (`proximity` evidence) 은 0.839 (ball 0.941). 완전한 identity (`gt_label`) 에서는 같다. 어느 identity mode 를 판정 기준으로 삼을지는 구현자가 판정 요청으로 남겼다 (impl.md 판정 필요 2) |
+| I2 strict 가 V11AB 의 실제 look-ahead 구성에서 verdict 를 바꾸는가 | V11AB (look-ahead) 구성의 replay 에서 status 변화 0 · HOLD 변화 0 · refined chunk 10 개 (최대 0.585 deg). status 변화 1 건은 sweep 구성 (look-ahead off) 에서 나왔다 |
+| P3 가 실제로 영향을 주는 설정 | `obstacle_margin` 과 `target_volume_exempt` 를 함께 켠 설정만이다. V11AB 는 해당 없고 replay 는 그 조합을 실행하지 않았다 (단위 test 만) |
+| E2 의 ② 기준에서 `ball_owned_remove` 의 recall 이 `ball` 과 같은 이유 | 기준은 통과했지만 두 방법이 같은 target seed 를 지운다는 뜻인지는 frame 별로 확인하지 않았다 (중앙값만 비교) |
+
+#### 10-3. 되돌아올 지점 — 고르지 않은 선택지
+
+| 안 고른 것 | 왜 | 전환 신호 (task 가 적은 것은 그대로, **측정으로 본 것은 verify.json 에서**) |
+|---|---|---|
+| dense pixel-level target lift (`observed_seed_mask` 원안) | ball 외곽 + ownership 이 더 작은 변경 | task: "E2 에서 recall 이 ball − 5 pp 아래로 떨어지거나 unowned 가 지배적일 때". 측정: recall 은 ball 과 같다 (`gt_label` 0.936 = 0.936, `gt` 0.935 대 0.936, E2-lb `gt` 0.896 대 0.927 = −3.1 pp). unowned 는 ROI 안 seed 37567 중 15452. **"지배적" 인지는 사용자 판정 1** |
+| ball radius 축소 | 근거 문서 §8.2 가 금지 (원인 대신 증상 조정) | — |
+| I2 flag 기본 on | 사용자 판정 전 | task: V-I2-3/4 와 closed-loop 결과 뒤. V-I2-3/4 는 §5, closed-loop 는 없다 |
+| `ball_owned_keep` (unowned 를 보존) | recall 이 0.548 (ball 0.936), 기준 ② 가 5 pp 보다 훨씬 아래 | `owned_max_dist_voxels` 를 키워 unowned 를 줄인 측정이 있을 때 (~~측정 없음~~ → T44b §3-1 에서 측정됨) |
+| `layer_diff` 와 ball 의 교집합 | 현재는 ball 판정을 대체 (task 문구) | 사용자 판정 4 |
+
+#### 10-4. 이 STEP 의 산출물
+
+- **코드 (benchmark repo, 모두 미커밋, 새 동작 flag 기본 off)**: `ag3s/config.py` · `ag3s/fields/curobo_builder.py` · `ag3s/runtime/pipeline.py` · `ag3s/constraints/to_adapter.py` · `ag3s/experiments/sources/constraint_record.py` · `ag3s/experiments/live/exclusion_e2.py` (신규) · `trajopt/config.py` · `trajopt/linearize.py` · `trajopt/sweep.py` · `trajopt/serve_safe.py` · `tests/ag3s/test_t44_target_exclusion_owned.py` · `tests/ag3s/test_t44_exclusion_e2.py` · `tests/trajopt/test_t44_target_permission.py` (신규).
+- **측정**: `handoff/T44I2.verify.json` · `handoff/T44E2.verify.json`. 원자료: `outputs/verify/T44/I2/` (`agg.json` · `per_chunk.json` · `split_auth.json` · `raw/`) · `outputs/verify/T44/E2/` (`agg_e2.json` · `raw_demo/` · `raw_lb/` · `timing/agg_timing.json` · `vi0/vi0_table.json` · `e2_demo_frames.json`).
+- **구현 · 설계**: `handoff/T44I0I1.impl.md` · `handoff/T44I2.impl.md` · `handoff/T44.task.md`.
+- **figure**: `figures/t44/` — `t44i2-scene-strict-tail` · `t44i2-per-chunk-rows` · `t44i2-summary-table` · `t44e2-scene` · `t44e2-scatter` · `t44e2-table`. 각각 `.json` sidecar 가 있다.
+
+
+---
+
+## T44b — 사용자 판정 (2026-10-10) 후속: carry 권한 · ball_owned 거리 · cluster merge · target-free 부호
+
+**이 절이 답하는 물음.** 위 T44 절 §10-1 의 사용자 판정 대기 항목에 사용자가 2026-10-10 에 답했고 (`T44b.task.md`), 그 답이 가리킨 네 가지를 다시 쟀다. (1) 파지 중 (carry) 에 쥔 손의 link 에만 target contact 를 허용하면 `target_permission_strict` 가 의도대로 동작하는가 (I2b). (2) unowned seed 가 `owned_max_dist_voxels` 를 3 · 4 로 키우면 기준 ①–④ 를 통과하는가, 그리고 unowned 의 원인이 fusion voxel 인가 (D-sign 전반). (3) 붐비는 장면의 cluster merge (demo 34/64 frame) 는 기존 split 설정으로 풀리는가, 새 분할 알고리즘이 필요한가 (D-merge · A4). (4) target-free layer 의 distractor 내부 음수 비율이 0.27 인 이유와 finger query 에 미치는 영향 (D-sign 부호 진단).
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `handoff/T44I2b.verify.json` · `T44E2b.verify.json` · `T44M.verify.json` 의 `numbers` 에서만 왔다. 구현 내용과 구현자의 단위 test 수 · smoke 는 `T44I2b.impl.md` · `T44A4.impl.md` 가 보고한 것이고 표에 **(구현자)** 라고 밝혔다. 사용자 판정 4 개는 `T44b.task.md` 에서 왔다.
+- 해석은 verify.json 의 `verdict` 와 impl.md 가 적은 범위로 제한한다. 원인을 단정하지 않고, 측정하지 않은 것은 §8 에 둔다.
+- 시각은 UTC 이고 파일 시각 (마지막 수정) 이다. 측정 시작 시각이 아니다. 그림은 verifier 가 만들었고 `figures/t44/` 에 `.json` sidecar 와 함께 있다. scribe 는 링크만 한다.
+- 새 동작은 전부 flag 기본 off 이고 **미커밋** 이다. T44 의 기본 `ball` 은 그대로 비교 기준이다.
+- 위 T44 절의 낡은 줄 일곱 곳에 취소선 (~~ ~~) 과 이 절로의 포인터를 달았다 (§5-2 의 link 별 수, §7-2 의 `main layer 0.795`, §10-1 의 1 · 3 · 5 행, §10-3 의 한 줄). 지울지는 사용자가 정한다.
+
+### 1. 사용자 판정 네 가지와 타임라인
+
+| # | 질문 | 사용자 판정 (2026-10-10) | 이 절에서 |
+|---|---|---|---|
+| 1 | `ball_owned` 의 다음 단계 | `owned_max_dist_voxels` 3 · 4 로 offline 재측정 (코드 변경 없음) | §3 |
+| 2 | 붐비는 장면 cluster merge (demo 34/64) | closed-loop 전에 원인 진단. 새 분할 알고리즘이 필요하거나 좋은 알고리즘이 있으면 알리고 구현 | §5 · §6 |
+| 3 | I2 strict 의 carry 권한 | 파지 중에는 물체를 잡고 있는 손의 link 에만 접촉 허용. gripper 뿐 아니라 gripper 바로 이전 link 도 허용 (held 물체의 충돌 구가 gripper 를 넘어갈 수 있다) | §2 |
+| 4 | target-free layer 의 distractor 내부 음수 비율 0.27 (oracle 포함) 대 main 0.80 | 지금 진단 (수정이 아니다) | §4 |
+
+| 시각 (UTC) | 무엇 | 출처 |
+|---|---|---|
+| 2026-10-10 06:16–06:17 | **D-merge** 측정 · figure 3 장 (`T44M.verify.json` 06:17) | verify.json · figure (파일 시각) |
+| 06:17 | **I2b** (A3) 구현 보고 | `T44I2b.impl.md` (파일 시각) |
+| 06:18 | 판정 4 개를 담은 task 파일 | `T44b.task.md` (파일 시각) |
+| 06:51 | **A4** 구현 보고 (split 옵션 · CLI) | `T44A4.impl.md` (파일 시각) |
+| 06:53–06:54 | **D-sign** (`owned_max_dist` 3 · 4 · 부호 진단) figure 3 장 · `T44E2b.verify.json` | verify.json · figure (파일 시각) |
+| 08:20–08:22 | **V-I2b** (I2b 의 재생 검증) figure 3 장 · `T44I2b.verify.json` | verify.json · figure (파일 시각) |
+
+회귀 기준선은 세 verify.json 모두 일치했다.
+
+| 기준선 | 측정 | 기준값 | 일치 |
+|---|---|---|---|
+| legacy (`T44I2b`) | 시작 시 violated 14/15 · frame 0 `clearance_before` −29.031048280806342 mm · feasible 15 | T36 legacy 기준과 같음 | 일치 |
+| cuRobo (`T44E2b` · `T44M`) | 시작 시 violated 10/15 · has_target 15/15 · frame 0 `clearance_before` −9.171877401271193 mm | T36 cuRobo 기준과 같음 | 일치 |
+
+### 2. I2b — carry 권한 = 쥔 손의 gripper + gripper 바로 위 link (A3 구현 · V-I2b 검증)
+
+#### 2-1. 무엇을 구현했나 (구현자, `T44I2b.impl.md`)
+
+T44 의 I2 strict 는 쥐고 있을 때 (carry) 권한을 `manipulated_link_margin < max` 로 정했는데, carry 에서는 margin 이 모든 link 에서 같아 **권한 행이 0 개** 였다. 그래서 strict 가 쥔 손의 손가락 행까지 held 잔상 (쥔 물체 근처) 에 대해 검사했다. I2b 는 strict 이고 쥐고 있을 때의 권한 행을 다음으로 정한다.
+
+| 항목 | 내용 |
+|---|---|
+| 권한 행 (carry, strict on) | 쥔 손의 contact link (`ee_<side>` · `ee_finger_<side>1` · `ee_finger_<side>2`, depth 0) + 그 손의 URDF chain 에서 gripper 위로 `N` 개 link (depth 1..N). 반대 손 · forearm · 나머지는 권한 없음 |
+| config | `collision.held_permission_parent_links: int = 1` (0 = gripper 만, 기본 1 = 사용자 판정). CLI `--held-permission-parent-links N` 은 A4 가 `serve_safe.py` 에 넣었다 (strict 와 함께만) |
+| 기록 | AG3S `to_adapter._held_permission_record` 가 `metrics["target_permission"]["held"]` = `{hold_link, side, contact_links, parent_links, depth}` 를 행마다 기록하고, trajopt `held_contact_rows_of` 가 `0 ≤ depth ≤ N` 으로 읽는다. 측을 못 찾으면 `side: None` 이고 depth 가 전부 −1 (fail closed) |
+| 쥔 손을 아는 경로 | `SafePolicy._grasp_hand` → `ag3s.attach(hold_link=…)` → `CollisionConstraintSet.attached.parent_link` → hold link 를 담는 `ContactConfig.contact_links` 측 |
+| 그대로인 것 | strict off (bit-identical) · 쥐기 전 (approach) 의 `exclude_authorized` mask · relax (mask 없음 + 쥐지 않음) 의 `margin < max` 규칙. 기록이 없는 옛 constraint set 은 I2 규칙으로 돌아간다 |
+
+**"gripper 바로 이전 link" 의 해석이 구현에서 하나로 정해졌다 (구현자).** URDF 에서 `ee_left` 의 직속 parent 는 `FT_sensor_L` (fixed joint 의 센서 frame) 이고 제약 모델에 구가 없어 행이 0 이다. 그래서 **구를 가진 link 만 센다**: N=1 은 `link_<side>_arm_6` (손목, gripper 와 fixed joint 로 강체 연결), N=2 는 `link_<side>_arm_5` (forearm, 회전 관절 너머) 까지다. 구현자가 확인한 URDF chain: `ee_left` ←(fixed)— `FT_sensor_L` ←(fixed)— `link_left_arm_6` ←(revolute)— `link_left_arm_5` (오른쪽 대칭). 두 손가락은 URDF 에서 `ee_<side>` 의 자식이고 둘 다 depth 0 이다 (이름은 전부 URDF 이름이라 MJCF 의 l1/l2 혼동이 권한에 영향을 주지 않는다).
+
+단위 test (구현자): 신규 17 개 (`tests/trajopt/test_t44_target_permission.py` 29 → 46). 전체 `tests/trajopt tests/ag3s` 는 **2586 passed · 3 skipped · 0 failed** (구현자 실행, 직전 2569 + 17). mutation 확인: `held_contact_rows_of` 를 늘 `None` 으로 바꾸면 8 개가 실패한다.
+
+#### 2-2. V-I2b 의 입력과 변형 (verifier)
+
+**입력.** T44 §5 와 같은 기록된 V11AB H run 14 개 (episode 1807–1995, test split, 회귀 확인 전용) 의 server chunk **1006 개** 이고 그 중 쥔 물체 (held, carry) chunk 는 **194 개** 이다 (쥔 손 `ee_left` 158 · `ee_right` 36). 쥔 손 측과 manifest 의 hand 가 어긋난 chunk 는 0 이다. open loop 로 arm 마다 다시 풀었다 (`sqp.time_budget_ms = 1e6`).
+
+| arm | 권한 행의 정의 |
+|---|---|
+| `i2` (V-I2 driver) | T44 §5 의 replay 규칙 그대로 — `target_contact_rows_of(target_free_mask, …, exclude_authorized)`, 접근 단계 margin 행 |
+| `i2s` (서버 carry, 권한 행 0) | T44b.task 가 서술한 **실제 서버 carry** — margin 이 모두 같아 권한 행 0. held chunk 만. **live server 로 검증한 것이 아니다** (아래 한계) |
+| `b1` / `b0` | I2b `parent=1` / `parent=0`. `to_adapter._held_permission_record` 를 hold link 로 직접 불러 만든 record → `held_contact_rows_of` |
+
+**constraint model 이 둘이다.** V11AB 서버는 `--links gripper` 라 constraint model 이 **270 구이고 `link_*_arm_*` 구가 없다.** 그래서 main 실행에서 parent link 는 모델에서 찾아지지 않는다 (`parent_links_found_in_model` 이 194 chunk 모두 빈 값). 비권한 행은 **반대 손 gripper** 뿐이다. 따라서 **main 모델에서는 N=0 과 N=1 이 같다.** 보조 측정은 `--links arms` 로 constraint model 을 다시 만들어 (422 구) arm_6 · forearm 구를 갖게 한 것이고, held chunk 194 개만 돌렸다 (V11AB 서버의 실제 모델이 아니다).
+
+#### 2-3. 결과
+
+**V-I2b-1 · 2 (회귀).**
+
+| 항목 | 값 |
+|---|---|
+| 전체 pytest | 2582 passed · **4 failed** · 3 skipped (893.72 s). 4 개는 전부 `inspect.getsource(serve_safe.build_ag3s/main)` 를 쓰는 test 이고, 측정 중 다른 세션이 `serve_safe.py` 를 고쳐 (mtime 06:22:41, pytest 구간 06:16–06:31 안) source 줄이 어긋났다. **단독으로 다시 돌리면 4 passed (0.52 s)** |
+| strict off 대 HEAD `498f713` · 대 T44 의 working tree (V-I2) | `off` · `offR` · `sw` · `swR` 모두 1006 chunk 에서 refined chunk · trajectory · status · HOLD · collision 행 수 차이 **0**, 최대 joint 차이 0.0 deg (HEAD 대 4 비교, T44 의 V-I2 working tree 대 6 비교 — strict `i2` 와 sweep strict `swS_i2` 포함) |
+| I2b 대 V-I2 replay (`b1` 대 `i2`, main 모델) | refined chunk 차이 0 · status 차이 0 · 최대 joint 차이 0.0 deg |
+| `b0` 대 `b1` (main 모델) | 달라진 행 0 · chunk 0 · refined chunk 0 |
+
+**V-I2b-3 · main 모델 — look-ahead tail 행 (reference trajectory 기준, held 194 chunk).**
+
+| arm | 바뀐 tail 행 (chunk) | 바뀐 행의 class | refined chunk 변화 (최대 joint) | status · HOLD 변화 |
+|---|---|---|---|---|
+| `i2s` 서버 carry (권한 0) | **55938** (187) | held gripper 51610 · 반대 손 gripper 4328 | 108 (11.416 deg) | 1 · 1 |
+| `i2` V-I2 replay | 4328 (43) | 반대 손 gripper 4328 | 10 (0.585 deg) | 0 · 0 |
+| `b1` I2b parent=1 | 4328 (43) | 반대 손 gripper 4328 | 10 (0.585 deg) | 0 · 0 |
+
+(`i2` · `b1` 의 refined chunk · status 는 1006 chunk 기준이고 `i2s` 는 194 chunk 기준이다.) 쥔 손 gripper 의 tail 행 51914 개는 off 에서 drop 되었고 I2b 에서도 drop 이 유지된다 (예외 유지). `i2s` 에서는 이 중 304 행만 drop 이 유지된다 — 즉 **서버 carry 에서 권한 행이 0 이면 strict 가 쥔 손의 tail 행을 거의 전부 검사 대상으로 되돌린다.** I2b 는 그것을 V-I2 replay 와 같은 값으로 돌려놓는다.
+
+**V-I2b-3 · arms 모델 보조 (held 194 chunk) — tail 행이 off 에서 drop 된 수 → strict 에서 drop 된 수.**
+
+| class | off | `i2s` 서버 carry | `b0` (gripper 만) | **`b1` (gripper + arm_6)** |
+|---|---:|---:|---:|---:|
+| 쥔 손 gripper | 51914 | 304 | 51914 | 51914 |
+| 쥔 팔 `link_*_arm_6` (parent 1) | 12119 | 263 | 263 | **12119** |
+| 쥔 팔 arm_5 이상 (forearm 이상) | 8509 | 507 | 507 | 507 |
+| 반대 팔 나머지 | 20694 | 4536 | 4536 | 4536 |
+| 반대 손 gripper | 4328 | 0 | 0 | 0 |
+
+`b1` 이 의도대로다: arm_6 행의 예외가 유지되고 (12119 → 12119) forearm 이상 · 반대 팔 · 반대 손은 검사 대상이다. `b0` 와 `b1` 은 달라진 행이 5626 개 (194 chunk) 이고 그 행은 모두 arm_6 (`link_left_arm_6` 4582 · `link_right_arm_6` 1044) 이다. refined chunk 는 `b0` 108 (최대 13.206 deg) · `b1` 103 (최대 12.587 deg) · `i2s` 125 (최대 11.618 deg) 이고, `b1` 대 `b0` 로 달라진 chunk 가 78 (최대 3.658 deg) 이다. status · HOLD 변화는 `b0` · `b1` 0 · 0, `i2s` 2 · 2 이다.
+
+**V-I2b-5 · sweep path 행 (sweep 구성: look-ahead off + `sweep_check` on. V11AB 의 실제 구성이 아니다).**
+
+| 구성 | 비권한 행 제외 (off → strict) | 권한 행 제외 | status 변화 | 새 path violation (path violation 수) | refined chunk (최대 joint) |
+|---|---|---|---|---|---|
+| main, `i2` (1006 chunk) | 68 → **0** | 477 → 477 | 1 | 0 (27 → 27) | 4 (1.594 deg) |
+| main, `b1` (1006 chunk) | 68 → **0** | 477 → 477 | 1 | 0 (27 → 27) | 4 (1.594 deg) |
+| main, `i2s` 서버 carry (194 held) | 68 → 0 | 477 → **0** | 6 | **6** (16 → 22) | 108 (16.607 deg) |
+| arms 모델, `i2` (194 held) | 1458 → 0 | — | 1 | 1 (16 → 17) | 48 (1.594 deg) |
+| arms 모델, `b1` (194 held) | 1458 → 0 | — | 1 | 1 (16 → 17) | 39 (1.594 deg) |
+| arms 모델, `i2s` 서버 carry (194 held) | 1458 → 0 | — | 6 | 8 (16 → 24) | 118 (16.623 deg) |
+
+(arms 모델의 "권한 행 제외" 는 권한 link 집합이 arm_6 까지 달라 `i2`/`b1` 사이에 같은 정의로 비교하지 않았다.) 서버 carry (`i2s`) 에서는 **권한 행 제외가 477 → 0** 이다: 쥔 손 finger 의 예외도 사라진다.
+
+**`ep1834_s18341` seq 34 의 status 뒤집힘은 I2b 에서도 남아 있다.** 쥔 손은 `ee_right` 이다. off 에서 target 근처라는 이유로 제외됐던 행은 `ee_left` 8 · `ee_right` 1 · `ee_finger_l1` 2 였고, strict (`i2` · `b1` 모두) 에서 `ee_left` · `ee_finger_l1` 의 행 (**쥔 손의 반대 손 gripper**) 이 검사 대상이 되어 `feasible` → `violated` 가 된다 (main 모델: window violation 1.3657 mm, path clearance 6.169 → 1.122 mm, 검사에 남은 비권한 행 67). arms 모델 `b1` 에서도 같은 chunk 가 `violated` 이다 (window violation 2.101 mm, 검사에 남은 비권한 행 183). **이 verdict 가 맞는지 (strict 가 진짜 위반을 잡은 것인지) 는 측정하지 않았다.** `ep1807_s18071` seq 17 은 `i2s` sweep 에서 `feasible` → `violated` (window violation 11.166 mm) 로 뒤집힌 chunk 의 하나다.
+
+**Figure.**
+
+![I2b scene](figures/t44/t44i2b-scene-carry-permission.png)
+
+[`t44i2b-scene-carry-permission.png`](figures/t44/t44i2b-scene-carry-permission.png) — 실제 장면 (`V11AB_H_V11AB_ep1834_s18341` chunk 35, test split, constraint model = `--links arms`, 쥔 손 right). 위 (xy) · 옆 (xz) · 앞 (yz) 세 방향에서 본 robot sphere 의 위치. 파랑 = 권한: 쥔 손 (`ee_right` · `ee_finger_r1/r2`), 초록 = 권한: gripper 위 1 link (`link_right_arm_6`), 회색 = 비권한 (반대 손 · forearm · 나머지) 의 행, 빨강 = strict 가 look-ahead 에 **남긴** tail 행 (984 개), 주황 = 쥔 사과 (held 구 2 개). 권한 행은 파랑 135 + 초록 29 이고 (`ee_finger_r1` 56 · `ee_finger_r2` 56 · `ee_right` 23 · `link_right_arm_6` 29), 검사되는 행은 258 개다. 빨강으로 바뀐 행은 `ee_finger_l1` 448 · `ee_left` 128 · `link_left_arm_6` 216 · `link_left_arm_5` 80 · `link_left_arm_4` 64 · `link_left_arm_3` 32 · `link_right_arm_5` 16 이다.
+
+![I2b per chunk](figures/t44/t44i2b-per-chunk-rows.png)
+
+[`t44i2b-per-chunk-rows.png`](figures/t44/t44i2b-per-chunk-rows.png) — carry chunk 194 개를 이어 붙인 chunk 별 "strict 가 off 보다 더 남긴 tail 행 수" (reference trajectory 기준). 위: V11AB 기록 모델 (`--links gripper`), 아래: 보조 `--links arms` 모델. 주황 = `i2s` 서버 carry (권한 행 0), 노랑 = V-I2 replay (접근 단계 margin 행), 파랑 = I2b `parent=1`. main 모델 (위) 에서 파랑과 노랑은 같은 값이다. 아래 (arms) 에서 파랑은 노랑 · 주황보다 낮다.
+
+![I2b table](figures/t44/t44i2b-summary-table.png)
+
+[`t44i2b-summary-table.png`](figures/t44/t44i2b-summary-table.png) — V-I2b-1 ~ 5 요약 표.
+
+**T44 §5-2 정정 (V-I2-defect).** V-I2 의 `replay_i2.py` 는 link 별 변경 수를 link 이름 하나당 한 열로 기록해서, T44 §5-2 의 "link 별 수" (`ee_right` 234 · `ee_left` 50 · … 합 347) 가 바뀐 행 4328 개를 다 세지 못한 집계였다. 이 STEP 은 열별 합으로 다시 집계했다 (위 표). 기록된 held chunk 194 개의 서버 `authorized_links` 는 쥔 손의 ee 와 손가락 둘 (왼손 158 · 오른손 36) 과 같다.
+
+### 3. D-sign (1) — `owned_max_dist_voxels` 2 · 3 · 4 재측정과 unowned 의 원인
+
+**입력과 설정.** T44 §6 과 같은 frame (E2-demo 64 · E2-lb 48), 같은 identity mode (`gt` · `gt_label` · `gt_cluster_only`), 같은 margin (10 mm), 같은 고정 기준 ①–④. `owned_tie_voxels` 1.0 · `owned_unowned` `remove` 고정. d=2 의 결과는 T44E2 raw 와 **frame 별로 불일치 0** 이다 (demo 64 · lb 48 frame 의 recall · distractor 손실 · unowned 제거 · 제거 수). 실행 설정 (`run_settings`): `fusion_voxel_size` **0.01 m** · `pointcloud_voxel_size` 0.005 m · fine truncation 0.03 m · coarse truncation 0.06 m · `seeding_method` gather · TSDF voxel 0.005 m. (위 T44 §10-1 의 0.012 m 는 lead 가 전달한 값이었고 verify.json 의 실행 설정은 0.01 m 이다.)
+
+#### 3-1. 기준 ①–④ (방법 대 `ball`)
+
+demo (`gt_label`, 64 frame, ball-hit 23 frame):
+
+| 지표 | `ball` | d=2 | **d=3** | d=4 |
+|---|---:|---:|---:|---:|
+| ① distractor 손실 감소 (pooled, ≥ 0.5) | — | 0.479 (미달) | **0.587 (통과)** | 0.7479 (통과) |
+| ball 안 distractor seed 중 제거된 수 (833 중) | 833 | 434 | 344 | 210 |
+| 손실 감소율 frame 중앙 · 50 % 이상 감소한 ball-hit frame | — | 0.7273 · 13 | 0.9333 · 15 | 1.0 · 19 |
+| ② target recall 중앙 (≥ ball − 5 pp) | 0.936 | 0.936 (통과) | 0.9345 (통과) | 0.9257 (통과) |
+| ③ falsely feasible q (≤ ball) | 67 | 65 (통과) | 64 (통과) | 62 (통과) |
+| ④ build time p90 증가 (≤ 10 ms, 전용 timing pass) | — | +4.116 (통과) | +4.229 (통과) | +4.057 (통과) |
+| unowned 로 제거된 seed (전체) | 0 | 15452 | 12044 | 7150 |
+| ambiguous (보존) · kept nontarget | 0 · 0 | 39 · 388 | 103 · 488 | 330 · 632 |
+| falsely infeasible q (ball 11) | 11 | 11 | 11 | 11 |
+
+`gt` mode (같은 64 frame) 도 같은 방향이다: ① 0.479 · 0.587 · 0.7479, ② 0.935 · 0.9336 · 0.922 (ball 0.936), ③ 65 · 64 · 62 (ball 67). 모두 ①–④ 판정이 `gt_label` 과 같다.
+
+lb (덜 붐비는 장면, 48 frame, ball-hit 0 이라 ① 은 정의되지 않는다):
+
+| identity | 지표 | `ball` | d=2 | d=3 | d=4 |
+|---|---|---:|---:|---:|---:|
+| `gt_label` | ② recall 중앙 | 0.927 | 0.927 (통과) | 0.927 (통과) | 0.9245 (통과) |
+| `gt_label` | ③ falsely feasible q | 125 | 125 | 115 | 115 (전부 통과) |
+| `gt` | ② recall 중앙 | 0.927 | 0.896 (통과) | 0.8859 (통과) | **0.8495 (미달)** |
+| `gt` | ③ falsely feasible q | 138 | 114 | 114 | 114 (전부 통과) |
+| `gt` | falsely infeasible q | 20 | 56 | 56 | 56 |
+
+demo 에서 cluster 만으로 identity 가 정해진 30 frame (`gt_cluster_only`, ball-hit **3 frame**): ① 은 d=2 0.2951 (미달) · d=3 0.3361 (미달) · d=4 0.5738 (통과), 나머지 ②–④ 는 통과. 이 부분집합은 ball-hit 가 3 frame 뿐이라 표본이 작다.
+
+**판정 요약 (verify.json 의 criteria 에서).** `gt_label` 과 `gt` 두 identity mode 에서 demo 와 lb 를 합쳐 ①–④ 를 모두 통과하는 값은 **d=3 뿐이다.** d=2 는 demo 에서 ① 이 미달이고, d=4 는 lb `gt` 의 ② 가 미달 (0.8495, ball 0.927 − 5 pp = 0.877 아래) 이다. `gt_cluster_only` 에서는 d=3 의 ① 이 미달이다 (위). 즉 이 결론은 identity mode 와 부분집합에 따라 갈린다.
+
+timing (전용 pass, 단일 프로세스, 112 frame × 10 회 interleaved, 방법마다 n = 1120): `ball` median 3.942 · p90 5.278 ms, d=2 median 6.13 · p90 9.394, d=3 median 6.174 · p90 9.507, d=4 median 6.098 · p90 9.335 ms. 분류 시간 (`classify_ms`) median 3.096 / 3.039 / 3.003 ms. pod load 1 분 평균 중앙 22.15 (최대 364.08), cgroup throttle 중앙 0.0. 측정 pass 의 build ms 는 2 shard 동시 실행이라 판정에 쓰지 않았다. 첫 timing 시도는 구현자의 pytest 가 겹쳐 1 frame 만에 중단하고 다시 돌렸는데, 다시 돌린 구간에도 구현자의 pytest (~110 % CPU) 와 I2b replay 가 돌고 있었다 (verify.json `deviations`).
+
+#### 3-2. unowned seed 의 원인 — fusion voxel 이 아니다
+
+demo (`gt_label`, d=2) 에서 unowned 로 분류된 seed 는 15452 개이고 라벨은 target 13811 · unlabelled 604 · support 601 · **distractor 422** · robot 13 · shared 1 이다. 즉 unowned 의 대부분은 target 쪽 seed 이고 (제거해도 되는 쪽), 손실로 세는 것은 distractor 422 개 (15 frame) 다. 이 422 개의 "가장 가까운 관측점 거리" 를 관측 수준별로 쟀다 (mm, d=2).
+
+| 거리 기준 | median | p10 | p90 | ≤ 10 mm 인 몫 |
+|---|---:|---:|---:|---:|
+| raw depth pixel (non-robot) | 16.2386 | 11.5614 | 22.1302 | 0.0569 |
+| per-camera 점 (fusion 전, 최소) | 16.3911 | 11.6145 | 22.1362 | 0.0498 |
+| fused cloud | 17.0157 | 11.9491 | 22.7295 | 0.0213 |
+| non-target evidence (fused − support − target) | 19.7518 | 13.2307 | 27.4713 | 0.0 |
+| `d_t` (가장 가까운 target 점) | 23.8034 | 15.0869 | 30.0247 | 0.0 |
+| GT distractor mesh | 3.8941 | 0.8302 | 9.6579 | 0.9028 |
+
+원인 분해 (waterfall: 임계 = `d × 5 mm`, 위에서부터 먼저 해당하는 것):
+
+| 원인 class | 뜻 | d=2 (임계 10 mm) | d=3 (15 mm) | d=4 (20 mm) |
+|---|---|---:|---:|---:|
+| `raw_far` | raw depth pixel 조차 임계 안에 없다 | **398** | 258 | 88 |
+| `percam_far_raw_near` | raw 는 가깝지만 per-camera 점은 멀다 | 3 | 6 | 2 |
+| `fused_far_percam_near` | per-camera 점은 가깝지만 fused cloud 에서 멀다 (**fusion 이 원인**) | **12** | 14 | 10 |
+| `evidence_far_fused_near` | fused 는 가깝지만 non-target evidence 에서 멀다 | 9 | 25 | 31 |
+| 합 (unowned distractor seed) | | 422 | 303 | 131 |
+
+verify.json 의 결론 (`반박된 것`): "unowned distractor seed 가 `fusion_voxel_size` (10 mm) 때문이다" 는 **반박됐다.** d=2 의 422 개 중 raw depth pixel 조차 10 mm 안에 없는 것이 398 개이고, per-camera 점이 10 mm 안에 있는데 fused 에서 멀어진 것은 12 개다. 이 seed 들은 GT distractor mesh 에서 median 3.9 mm 로 가깝다 (표면 위의 seed 인데 관측점이 없다). **그 seed 를 TSDF 가 어떻게 만들었는지 (gather dilation · truncation boundary seed · 뒷면 중 무엇인지) 는 분리하지 않았다.** 거리 3 · 4 voxel 로 키우면 unowned distractor seed 가 422 → 303 → 131 로 줄어든다 (§3-1 의 distractor 손실 감소와 같은 방향).
+
+**Figure.**
+
+![D-sign graph](figures/t44/t44e2b-graph.png)
+
+[`t44e2b-graph.png`](figures/t44/t44e2b-graph.png) — 왼쪽: `owned_max_dist_voxels` (2 · 3 · 4, x 축은 × 5 mm) 에 따른 기준 ① (≥ 0.5 점선) 과 ② (recall 중앙 − ball ≥ −0.05 점선). 위쪽 두 선이 demo (`gt` · `gt_label`) 의 ① 이고 거의 겹친다. 가운데: demo `gt_label` d=2 에서 unowned 로 분류된 distractor seed 422 개의 최근접 관측점 거리 CDF (파랑 raw depth · 주황 per-camera 최소 · 초록 fused · 노랑 non-target evidence · 분홍 GT distractor mesh, 점선 = d=2 · 3 · 4 의 임계 10 · 15 · 20 mm). 오른쪽: §4 의 layer 별 부호 구성.
+
+![D-sign table](figures/t44/t44e2b-table.png)
+
+[`t44e2b-table.png`](figures/t44/t44e2b-table.png) — set (demo 를 `< 0.08 m` · `0.08–0.10 m` bin 으로 나눈 것 포함) × identity × 방법 (d=2 · 3 · 4 · oracle) 의 전체 표와 기준 ①–④ 의 P/F.
+
+### 4. D-sign (2) — target-free layer 의 distractor 내부 부호 (진단만, 수정 아님)
+
+**측정 정의.** 각 frame 에서 GT distractor 의 convex hull 안에 있고 ball 중심 ± (반지름 + 60 mm) 안인 fine lattice voxel 중심 (demo 65,445 점 · 64 hull, lb 24,519 점 · 48 hull) 에서 layer 별 부호를 읽었다. 그림에서 말하는 layer 는 다섯 가지다. **main fine layer** (5 mm, truncation 30 mm) · **coarse layer** (20 mm, truncation 60 mm) · **main composite** = `min(coarse, fine)` (main field 의 질의) · **target-free fine tier** (`ball` · `ball_owned` · oracle · 제외 없음 `none` 의 raw voxel 값) · **target-free 질의** = `curobo_field.target_free_distance` 의 합성 `min(f, max(d, b))` (`d` 본 field 의 답, `f` target-free layer 의 답, `b` 그 layer 창 경계까지의 거리). `none` 은 `only="fine"` 으로 제외 없이 tier 를 다시 만든 것이다. 비율은 frame 별 hull 안 `< 0` 비율의 중앙값이다 (pooled 는 따로 표시). 값이 정확히 0 인 voxel (TSDF seed voxel 의 값) 은 `< 0` 에 세지 않는다. **두 가지 읽기가 있다**: §4-1 · §4-3 의 표는 `value < 0` 이고 (질의로 보간한 값의 −1e-6 ~ 0 은 음수에 든다), 그림의 "부호 구성" 막대 · 단면 panel 의 (neg / pos / zero) 는 `|v| ≤ 1e-6 m` 를 zero 로 따로 센 3-way 구분이다 (그래서 같은 layer 의 neg 몫이 두 곳에서 다르다).
+
+#### 4-1. 0.27 과 0.80 은 서로 다른 layer 를 잰 값이다
+
+| layer (demo, hull 중앙) | `< 0` 비율 | pooled |
+|---|---:|---:|
+| `none` (제외 없음, raw) | 0.2724 | 0.253 |
+| `ball` (raw) | 0.2728 | 0.2543 |
+| `ball_owned` d=2 · 3 · 4 (raw) | 0.2724 · 0.2724 · 0.2724 | 0.255 · 0.2546 · 0.2534 |
+| oracle (raw) | 0.2724 | 0.253 |
+| main fine layer | 0.3184 | 0.3114 |
+| coarse layer | 0.7318 | 0.631 |
+| main composite = `min(coarse, fine)` | **0.7955** | 0.7004 |
+| target-free 질의 (`ball` tier 를 합성으로 읽음) | 0.3217 | 0.3121 |
+
+lb 는 `none` · `ball` · `ball_owned` · oracle 이 모두 0.3413 (hull 중앙), main fine layer 0.5018, coarse layer 0.7643, main composite 0.8507, target-free 질의 0.5018 이다.
+
+- E2 의 **0.27** (T44 §7-2 의 방법 비교) 은 target-free fine tier 의 raw voxel 값이고, **0.80** (main) 은 main composite (`min(coarse, fine)`) 의 값이다. 같은 frame · 같은 정의로 재면 main **fine** layer 는 0.3184, coarse layer 는 0.7318 이다. 즉 0.27 과 0.80 의 차이는 거의 coarse layer 가 만든다.
+- raw 값 (`none` 0.2724) 과 질의로 읽은 main fine layer (0.3184) 의 차이는 값 0 voxel 이 보간되어 −1e-6 ~ 0 의 음수가 된 점 3823 개에서 온다 (verify (e)).
+- 제외 방식과 무관하다: `none` (제외 없음) 0.2724 · `ball` 0.2728 · `ball_owned` 0.2724 · oracle 0.2724. 그래서 **ball / owned 고유의 문제가 아니다.** oracle 이 같다는 T44 의 관찰을 확인한다.
+
+#### 4-2. 분해 (a)–(e)
+
+| 요소 | 확인한 것 (demo 65,445 점) |
+|---|---|
+| (a) TSDF 관측 상태 | fine layer 의 부호는 fine TSDF (truncation 30 mm) 를 따른다. observed `sdf < 0` 인 점은 값이 음수 (16559) 또는 0 (21072) 이고 양수가 0 개, unobserved (`w ≤ 0.1`) 인 점은 값이 양수 (19546) 또는 0 (3476) 이고 음수가 0 개. fine TSDF 상태 수: observed `sdf < 0` 37631 · observed `sdf ≥ 0` 4007 · unobserved 23022 · unallocated 785 (unobserved + unallocated = 23,807). coarse TSDF (truncation 60 mm) 는 observed `< 0` 51536 · observed `≥ 0` 3966 · unobserved 9158 · unallocated 785 (unobserved + unallocated = 9,943) |
+| (b) sign correction (`_force_sign_on_pure_voxels`) | distractor 내부를 음 → 양으로 바꾼 점: `ball` **226** · `ball_owned` d=2 **46** (65,445 점 중, demo), lb 0. seed 제거로 바뀐 부호 (`flipped_by_removal`) 는 0 |
+| (c) target-free 질의 합성 | 내부 **전 점** 에서 target-free layer 가 답했다 (`answer_tier` 가 `target_free` 65,445, `window_edge` 0). 창 경계 거리 `b` 의 median 215 mm (min 155 mm) 라 `max(d, b)` 가 `b` 쪽이고, 그 결과 coarse 의 음수 `d` 는 버려진다. main composite 가 `< 0` 인데 target-free 질의가 `≥ 0` 인 점이 **25493** 개이고 그 중 coarse 가 `< 0` 인 것이 25436 개다 |
+| (d) ball 안 · 밖 | distractor 내부 점 중 ball 안은 906 / 65,445 (demo), lb 0. `< 0` 비율은 ball 안 0.2627 대 밖 0.2529 (`none`) |
+| (e) tier 를 다시 만드는 과정 (`only="fine"`) | 112 frame (64 + 48) 의 ROI box 전체에서 main fine layer 와 값 차이 최대 **0.0 mm**, origin · shape 동일. 부호가 다르게 잡힌 점은 값 0 voxel 의 보간 결과 (−1e-6 m 이상의 음수) 다. main fine layer 의 내부 값은 strict 음수 (`< −1e-6`) 16559 · 미세 음수 (−1e-6 ~ 0) 3823 · raw 값 0 인 점 27363 |
+
+depth (GT mesh 표면에서 안쪽으로의 거리) 별 `< 0` 비율 (demo, `none` / coarse / main composite / fine TSDF unobserved 몫):
+
+| depth | 점 수 | `none` | coarse | main composite | fine TSDF unobserved |
+|---|---:|---:|---:|---:|---:|
+| 0–5 mm | 33271 | 0.1762 | 0.5056 | 0.5882 | 0.3251 |
+| 5–10 mm | 15639 | 0.3647 | 0.7245 | 0.8019 | 0.3959 |
+| 10–20 mm | 14264 | 0.3338 | 0.7955 | 0.8336 | 0.4129 |
+| 20–100 mm | 2271 | 0.1026 | 0.793 | 0.8089 | 0.4003 |
+
+#### 4-3. 안전 영향 — authorized finger 구를 distractor 내부에 둘 때
+
+query: 사용 팔의 authorized finger 구 반지름의 median (6.8 mm) 구를 위 voxel 중심 (distractor hull 안) 에 놓고 `clearance = d − r` 를 margin 10 mm 와 비교했다. "양수" 는 query 값 `d > 0` 인 점이다. depth ≥ 10 mm 인 점은 demo 에서 16535 개다.
+
+| query (demo, 65,445 점 · 64 frame) | 양수 점 (몫) | 양수인 frame | 양수 · depth ≥ 10 mm 점 (frame) | `clearance ≥ margin` 점 (frame) | 최대 값 |
+|---|---|---:|---|---|---:|
+| main composite | 11577 (0.1769) | 64 | 2471 (23) | 2700 (**17**) | 36.63 mm |
+| target-free, `ball` | 24960 (0.3814) | 64 | 6334 (56) | 3895 (**54**) | 43.0 mm |
+| target-free, `ball_owned` d=2 · 3 · 4 | 24736 · 24714 · 24714 | 64 | 6334 · 6334 · 6339 (56) | 3866 · 3847 · 3842 (54) | 43.0 mm |
+| target-free, oracle | 24699 (0.3774) | 64 | 6340 (56) | 3845 (54) | 43.0 mm |
+| target-free, 제외 없음 `none` | 24699 (0.3774) | 64 | 6340 (56) | 3836 (54) | 39.06 mm |
+
+lb (24,519 점 · 48 frame, depth ≥ 10 mm 6015 점): main composite 양수 647 점 (0.0264), depth ≥ 10 mm 에서 **0**, `clearance ≥ margin` 0. target-free (모든 제외 방식 동일) 양수 3984 점 (0.1625), depth ≥ 10 mm 1153 점 (26 frame), `clearance ≥ margin` 2 점 (2 frame).
+
+- finger 구 중심이 distractor 내부 voxel 에 있을 때 target-free query 가 `clearance ≥ margin` 으로 읽는 frame 은 demo 에서 **54 / 64** 이다 (main 은 17 / 64).
+- **제외 방식과 무관하다.** oracle (GT target seed 만 제거) · 제외 없음 · `ball` · `ball_owned` 가 비슷한 값 (24699 ~ 24960) 이다. 즉 이것은 `ball` (T44 이전 방식) 에도 있는 target-free 질의 합성의 성질이고, T44 이전부터 있었다. `ball_owned` 가 새로 만든 것이 아니다.
+- 이 점들은 GT distractor 의 convex hull 안의 voxel 중심이라 finger 가 실제로 그 위치에 오는지는 말하지 않는다.
+
+**Figure.**
+
+![D-sign scene](figures/t44/t44e2b-scene.png)
+
+[`t44e2b-scene.png`](figures/t44/t44e2b-scene.png) — 실제 장면 (E2-demo, `gt_label`, `demo_ep0060_f104`, pear target 과 nearest apple 74.3 mm). 이 frame 은 "target-free (`ball`) 양수 내부점 중 depth ≥ 10 mm 가 가장 많은 frame" 으로 **그림이 고른 최악 frame** 이라 대표값이 아니다. 왼쪽 위 `zed_left` 영상, 그 옆 위에서 본 배치도 (주황 = distractor mesh 의 점, 파랑 = target mesh, 점선 = ball, 검은 선 = 자른 면 y = −0.310 m) 이고, 나머지 여섯 패널은 그 선에서 x–z 로 자른 distractor 내부 voxel (hull 내부 점 1329 개 중 slab 안 158 개) 의 부호다. 회색 곡선은 distractor mesh 의 단면. 패널별 (neg / pos / zero): fine TSDF 상태 (observed `sdf < 0` 34 · unobserved 124) · main fine layer (16 / 123 / 19) · coarse layer (24 / 128 / 6) · main composite (39 / 106 / 13) · target-free tier `ball` raw (16 / 123 / 19) · target-free 질의 (16 / 123 / 19). 이 slab 에서 대부분 voxel 이 fine TSDF 에서 unobserved 이고 양수다.
+
+(오른쪽 그래프) `t44e2b-graph.png` 의 세 번째 패널은 layer 별 부호 구성 (pooled, 파랑 `< 0` · 보라 `= 0` · 주황 `> 0`) 이다: demo `none` 0.253 / 0.4181 / 0.3289 · `coarse_layer` 0.631 / 0.0047 / 0.3643 · `main_composite` 0.6841 / 0.1534 / 0.1625 · `composed_ball` 0.2543 / 0.4118 / 0.334.
+
+**verify.json 의 결론 (`verdict`).**
+
+| 구분 | 내용 |
+|---|---|
+| 확인된 것 | E2 의 0.27 은 target-free fine tier 의 raw voxel 값이고 0.80 은 main 합성 질의 (`min(coarse, fine)`) 의 값이다 · (e) `only="fine"` 재생성은 main fine layer 와 값이 같다 · (b) 부호 교정이 음 → 양으로 바꾼 점은 `ball` 226 · d=2 46 / 65,445 · (c) target-free 질의는 내부 전 점에서 target-free layer 가 답했다 (`window_edge` 0) · oracle 도 0.2724 로 같다 — 부호 손실은 제외 방식과 무관하다 |
+| 반박된 것 | "target-free 내부 부호 손실이 `ball` / `ball_owned` 의 seed 제외 또는 부호 교정에서 온다" — 제외 없음 재생성이 같은 비율이다 · "unowned distractor seed 가 `fusion_voxel_size` 때문이다" (§3-2) |
+| 모르는 것 | fine truncation 을 늘리거나 target-free 질의에 coarse 를 섞을 때의 효과 (재지 않았다, 코드 수정 금지) · unowned distractor seed 398 개 (raw depth 10 mm 밖, distractor mesh median 3.9 mm) 를 만든 TSDF 기전 · closed-loop 에서 finger 구가 distractor 내부에 들어가는 빈도 |
+
+### 5. D-merge — 붐비는 장면 cluster merge 의 원인 분해
+
+**입력.** E2-demo 64 frame 중 pipeline 의 grounding cluster 가 target 과 이웃 과일을 합친 **34 frame** (T44 §7-4 의 `merge` 기록; 새 dump 로 재현해 64/64 일치) 과 합치지 않은 30 frame (대조). 같은 장면 · 같은 pipeline 에서 **attention 출처만** 바꿨다: (i) **GT Gaussian attention** (E2 harness 의 합성) 과 (ii) **실제 VLA attention** (policy model `pi05_rby1_randomized_pick_place_16d_lora` 의 한 cell: denoise step 0 · agg last · layer 8 · head 2, `noise_seed` 0 · `num_steps` 10; 입력은 posed 장면의 렌더 이미지와 episode prompt, GPU 한 개 · 서버 없이 offline). 지표: parent = GT target 점을 가장 많이 가진 split 전 grounding cluster, pure&complete = 선택된 segment 의 precision ≥ 0.95 · recall ≥ 0.90, oracle 선택 = 분할의 상한 (GT target 점이 가장 많은 성분).
+
+**task 와 실제 설정이 달랐다 (verifier 가 기록).** task 는 "fusion voxel 12 mm, connectivity at fusion voxel" 을 가정했으나 실행은 `fusion_voxel_size` **0.01 m**, `clustering.method` **dbscan eps 0.03 m** (`min_points` 20, grow_region radius = eps), `attention_split_radius` 0.015 · `attention_split_ratio` 2.0, `max_opening_m` 0.07146 m 였다.
+
+#### 5-1. 단계별 분해
+
+| 단계 · 값 | GT Gaussian attention | **실제 VLA attention** |
+|---|---|---|
+| merged frame (V-E2 정의) | 34 / 64 | 34 / 64 |
+| 관측 점 틈 (fused cloud, merged 34) | median 22.235 mm, min 8.85 · max 28.98 — **전부 DBSCAN eps 30 mm 미만** (< 10 mm 1 · < 15 mm 8) | 같은 geometry |
+| GT mesh 틈 (merged 34) | median 14.74 mm, min 4.63 · max 22.65 (< 5 mm 4 · < 10 mm 10 · < 15 mm 19) | 같은 geometry |
+| 합치지 않은 30 frame 의 가장 가까운 이웃 과일 mesh 틈 | median 15.61 mm (min 6.91 · max 29.46) | 같음 |
+| split trigger (narrowest ≤ 71.5 mm < largest) | 34 / 34 | 34 / 34 |
+| 15 mm 재군집이 ≥ 2 성분 (oracle 로 모두 순수 · 완전) | 26 / 34 | 26 / 34 |
+| 정규화 attention ratio ≥ 2 (그 26 중) | **0 / 26** (median 1.0355, max 1.609) | **20 / 26** (median 4.966, max 6373.626) |
+| 기존 split 로 해결 | **0 / 34** | **20 / 34** |
+| 남은 원인: 15 mm 에서 깨끗한 성분이 1 개 (`one_component`, 틈 < split radius) | 8 | 8 |
+| 남은 원인: 성분은 갈리나 ratio < 2 (`attention_not_discriminative`) | 26 | 6 |
+| target 과 이웃 사이 정규화 attention ratio median · raw ratio median | 1.1995 · 1.272 | 3.988 · 8.8825 |
+| raw ratio ≥ 2 인 merged frame | 2 | 29 |
+| chosen cluster = target 쪽 cluster (64 frame 중) | 51 | 62 |
+
+trigger 의 `triggered` 는 34 / 34 이므로 **trigger 조건이 임계를 못 넘은 것이 아니다.** 병합의 직접 원인은 연결 (DBSCAN eps 30 mm) 이 관측 점 틈 (최대 28.98 mm) 보다 넓다는 것이고, 병합 34 frame 중 틈이 15 mm 미만이라 split 의 15 mm 재군집도 한 성분으로 남는 것이 8 frame (`one_component`) 이다. 나머지 26 frame 은 15 mm 재군집으로는 갈리고, 그 뒤 attention ratio gate 가 GT 합성 attention 에서는 모두 2 미만 (0 / 26), VLA attention 에서는 20 / 26 이 통과한다.
+
+**attention 출처의 차이 (image-level).** 카메라별로 target 과 이웃 과일이 둘 다 보이는 frame 에서 pixel 당 attention 비율 (target ÷ 이웃) median 과 ratio ≥ 2 인 frame 수 (`n_both_visible` 중):
+
+| 카메라 | GT: ratio median · ≥ 2 | VLA: ratio median · ≥ 2 | argmax 가 target 위 (target 가시 frame 중) GT · VLA |
+|---|---|---|---|
+| `zed_left` (head 쪽) | 1.235 · 0 / 58 | 2.378 · 31 / 58 | 0 / 58 · 0 / 58 |
+| `wrist_cam_l` | 22.792 · 16 / 16 | 22.017 · 15 / 16 | 32 / 32 · 1 / 32 |
+| `wrist_cam_r` | 21.654 · 16 / 16 | 10.098 · 12 / 16 | 30 / 32 · 1 / 32 |
+
+(`zed_left` 의 target 위 attention 질량 몫 median 은 GT 0.0039 · VLA 0.0024 이다.) GT Gaussian 은 target 을 보는 카메라에만 싣고 target 위에 둔 합성이라 wrist 에서 argmax 가 target 에 있지만, 실제 VLA attention 의 argmax 는 wrist 에서 target 위에 거의 오지 않는다 (1 / 32). 그런데 pipeline 이 쓰는 ratio 는 3 카메라 fusion 후 3D 성분 단위의 값이라 위 pixel 단위 비교가 곧 gate 결과를 설명하지는 않는다 (verify.json 이 연결하지 않았다).
+
+**원인 class (merged 34).**
+
+| class | GT attention | VLA attention |
+|---|---:|---:|
+| 기존 split 로 해결 | 0 | 20 |
+| attention: 성분은 갈리나 ratio < 2 | 26 | 6 |
+| 기하: 15 mm 에서 깨끗한 성분 없음 (틈 < split radius) | 8 | 8 |
+
+merged 의 이웃 과일: orange 12 · apple 10 · banana 8 · pear 4 (두 attention 출처 동일).
+
+**결론 (T44b.task 의 A4 근거 서술과 lead 의 대조에서).** E2 harness 의 `gt` identity 에서 merged 34 frame 중 split 이 해결한 것이 0 건이었던 것은 **GT 합성 attention 의 ratio 가 2 에 못 미친 탓**이고 (`attention_not_discriminative` 26), 실제 VLA attention 에서는 기존 split 이 20 / 34 를 해결한다. T44 §7-4 · §9 가 "실제 VLA attention 으로 pipeline 이 고르는 identity 는 측정하지 않았다" 고 한 것 중 **cluster merge 원인 부분은 이 측정이 메웠다.** `ball_owned` 의 recall · 손실을 VLA attention 으로 고른 identity 에서 다시 잰 것은 아니다 (§8).
+
+#### 5-2. 후보 시험값 (offline, merged 34 frame 중 pure&complete 가 된 수)
+
+`att` = pipeline 규칙 (정규화 attention 질량이 가장 큰 성분 선택), VLA oracle = 같은 분할에서 GT target 점이 가장 많은 성분 선택 (분할의 상한). 오선택 = split 이 일어났는데 선택된 segment 의 precision < 0.5 인 merged frame. 비병합 유지 = 합치지 않았던 30 frame 이 그대로 pure&complete.
+
+| 후보 | GT: att | **VLA: att** | VLA: oracle | VLA 오선택 | 비병합 유지 (VLA) |
+|---|---:|---:|---:|---:|---|
+| 현재 (15 mm · ratio 2 · 정규화 attention) | 0 | **20** | 26 | 0 | 30 / 30 |
+| (a) 12 mm · ratio 2 · 정규화 | 0 | 22 | 28 | 0 | 30 / 30 |
+| (a) 15 mm · ratio 2 · raw attention | 0 | 22 | 26 | 0 | 30 / 30 |
+| **(a) 12 mm · ratio 2 · raw attention** | 0 | **24** | 28 | 0 | 30 / 30 |
+| (a) 10 mm · ratio 2 · 정규화 | 0 | 19 | 23 | 0 | 29 / 30 |
+| (a) DBSCAN eps 20 mm | 9 | 18 | 20 | 2 | 30 / 30 |
+| (b) convexity (LCCP 류) + raw ratio gate | 0 | 22 | 26 | 0 | 30 / 30 |
+| (b) sphere RANSAC (크기 prior) + raw ratio gate | 0 | 22 | 27 | 0 | 30 / 30 |
+| (b) 색 region (ΔE 20) + raw ratio gate | 1 | 24 | 29 | 0 | 30 / 30 |
+| (b) attention min-cut (raw) | 1 | 0 | 0 | 2 | 23 / 30 |
+| (a+b) 12 mm ∪ 색 region + raw ratio gate | 1 | **26** | 31 | 0 | 30 / 30 |
+
+ratio gate 를 아예 빼면 (12 mm, no gate) `att` 선택에서 24 / 34 이지만 오선택이 4 건이다 (raw ratio gate 를 쓴 (a) 12 mm · raw 는 24 / 34 · 오선택 0). 즉 gate 는 오선택을 막는 역할이다.
+
+- **(a) 설정 조정 (12 mm radius + raw ratio) 이 현재 대비 +4 (20 → 24) 이고 비병합 30 / 30 · 오선택 0 이다.** 새 분할 알고리즘 후보 중 가장 높은 것은 색 region 을 12 mm 와 합친 것 (26 / 34, +2) 이다. T44b.task 의 A4 절은 이 근거로 "새 분할 알고리즘은 +2 뿐이라 이번에 구현하지 않는다" 고 적었다 (lead 판단).
+- 남는 10 frame 은 15 mm 근방 틈으로 성분이 안 갈리는 `one_component` 와 ratio < 2 인 frame 이다 (A4 smoke: `one_component` 6 + `attention_not_discriminative` 4).
+- 후보 시험은 offline numpy / networkx 이고 지연은 재지 않았다. 색 region 은 simulator 렌더 색 기준이고 같은 색의 과일 쌍은 시험하지 않았다. 실제 pipeline 은 외부 segmenter 를 쓰지 않는다는 전제로 시험했다.
+- `pipeline_cluster_merged` 의 pure&complete 는 VLA attention 에서 19 / 34 로 적혀 있고 (target 비율 median 1.0), 위 표의 `현재` 20 과 1 건 다르다. verify.json 은 이 차이의 정의를 적지 않았다. A4 smoke (§6) 는 pipeline 의 `ground_target` 경로에서 20 / 34 를 재현했다.
+
+**Figure.**
+
+![D-merge scene](figures/t44/t44m-scene.png)
+
+[`t44m-scene.png`](figures/t44/t44m-scene.png) — 실제 장면 (E2-demo, `zed_left` / head 카메라 영상). 행마다 한 frame, 열은 (1) 원 영상에서 target (파랑 윤곽) 과 이웃 과일 (주황 윤곽), (2) GT Gaussian attention 을 얹은 것, (3) 실제 VLA attention (L8 H2, step 0, last) 을 얹은 것 (각 위에 split 결과와 ratio), (4) GT attention 으로 만든 parent cluster 의 위에서 본 (xy) 점 분포. 위: `demo_ep0012_f068` (target apple, 이웃 orange, mesh 틈 15.61 mm · 관측 점 틈 25.93 mm) — GT 에서는 `attention_not_discriminative` (ratio 0.91), VLA 에서는 split 이 해결 (ratio 3139.306). 가운데: `demo_ep0022_f104` (apple, orange, 14.74 mm · 28.53 mm) — 둘 다 `attention_not_discriminative` (0.929 · 0.967), VLA attention 이 이웃에 걸친다. 아래: `demo_ep0027_f068` (banana, apple, 4.63 mm · 8.85 mm) — 둘 다 `one_component` (기하 원인).
+
+![D-merge graph](figures/t44/t44m-graph.png)
+
+[`t44m-graph.png`](figures/t44/t44m-graph.png) — (a) x = GT mesh 의 target–최근접 과일 최소 틈, y = 관측 점 틈 (주황 = 합쳐진 34, 파랑 = 합쳐지지 않은 30; 점선 = fusion voxel 10 · split radius 15 · DBSCAN eps 30 mm). 합쳐진 점은 모두 eps 30 mm 아래다. (b) 합쳐진 frame 의 split ratio (target 성분 / 다른 성분 평균 attention, log) — 주황 = GT 합성 (0 / 26 이 2 이상), 파랑 = VLA (20 / 26 이 2 이상), 왼쪽 음영 8 개는 15 mm 재군집이 1 성분인 frame. (c) 후보별 merged 34 중 pure&complete 수 (진한 막대 = pipeline 규칙 `att`, 연한 막대 = oracle 선택 상한).
+
+![D-merge table](figures/t44/t44m-table.png)
+
+[`t44m-table.png`](figures/t44/t44m-table.png) — 위: §5-1 의 단계별 분해 표 (GT 대 VLA). 아래: §5-2 의 후보 시험 표.
+
+### 6. A4 — split 옵션 · CLI (구현자, `T44A4.impl.md`)
+
+D-merge 의 결론 (a) 를 flag 로 구현했다 (기본 off · bit-identical).
+
+| 항목 | 내용 |
+|---|---|
+| 새 config | `clustering.attention_split_ratio_source: str = "normalized"` (`"normalized"` \| `"raw"`). `raw` 이면 ratio gate 가 **정규화 전** attention (`AttentionPointCloud.raw_attention`) 의 성분 평균으로 계산된다. **target 후보 선택은 두 모드 모두 정규화 attention 질량 그대로**다 (raw 는 gate 만 바꾼다) |
+| CLI (`serve_safe.py`) | `--attention-split-radius-mm MM` (`attention_split_radius` = MM/1000, 기본 0.015) · `--attention-split-ratio-source {normalized,raw}` · `--held-permission-parent-links N` (I2b, strict 와 함께만). 효과 없는 조합 (`--no-safe` · `--no-perception` 과 split flag 등) 은 `ap.error` |
+| 권고 설정 | `--attention-split-radius-mm 12 --attention-split-ratio-source raw` (T44M) |
+| 기록 | `raw` 일 때만 split record 에 `ratio_source` · component `mean_ratio_attention`. 기본 record 는 T31b 와 키까지 같다 |
+| 단위 test | 신규 25 (`tests/ag3s/test_t44_split_ratio_source.py`). 전체 `tests/trajopt tests/ag3s` **2611 passed · 3 skipped · 0 failed** (구현자 실행, 직전 2586 + 25) |
+
+**smoke — D-merge 의 offline 수치를 pipeline 의 `ground_target` 경로로 재현 (구현자, CPU).** 입력은 D-merge 의 VLA attention dump 64 frame (AG3S `process_multi_debug` 가 만든 fused cloud · 정규화 / raw attention · support mask 그대로).
+
+| 설정 | merged pure&complete | 오선택 (merged / non-merged) | non-merged pure&complete | T44M offline |
+|---|---:|---|---:|---:|
+| 15 mm · normalized (기본) | 20 / 34 | 0 / 0 | 30 / 30 | 20 |
+| 12 mm · normalized | 22 / 34 | 0 / 0 | 30 / 30 | 22 |
+| 15 mm · raw | 22 / 34 | 0 / 0 | 30 / 30 | 22 |
+| **12 mm · raw** | **24 / 34** | 0 / 0 | **30 / 30** | **24** |
+
+네 설정이 모두 T44M offline 수치와 같다. 기본 → 12 mm · raw 로 바뀐 merged frame 은 4 개 (`demo_ep0003_f068` · `f104` orange 는 `one_component` → split, `demo_ep0022_f068` apple · `demo_ep0067_f092` orange 는 `attention_not_discriminative` → split) 이고 모두 precision 1.0 · recall 1.0 이다. 기본 설정의 출력은 HEAD 와 **바이트 동일** 이다 (64 frame, JSON md5 `6ed1ecba…`).
+
+**이 smoke 는 구현자의 것이고 verifier 가 독립으로 다시 재지 않았다.** grounding 단계만이다 (AG3S 전체 · cuRobo field · closed-loop 는 돌리지 않았다).
+
+### 7. 측정의 한계
+
+| 항목 | 내용 |
+|---|---|
+| I2b replay 는 test split · open loop | episode 1807–1995 (전부 ≥ 1600), 회귀 확인 전용. 기록된 field 를 재사용하므로 GPU field · live server 경로 · `scene_from_constraint_set` 은 거치지 않았다. held record 는 hold link 로 `_held_permission_record` 를 직접 불러 만들었다 |
+| "서버 carry 의 권한 행 0" 전제 | `i2s` arm 은 T44b.task 의 서술에 따른 가정이고 live server 에서 검증하지 않았다. 다만 기록된 held chunk 의 `exclusion.authorized_links` 는 쥔 손의 ee + 손가락과 같다 (194 chunk) |
+| main 모델에 arm_6 · forearm 구가 없다 | V11AB 서버가 `--links gripper` (270 구) 라 `parent=1` 효과는 main 에서 보이지 않는다. arms 모델 보조는 held chunk 194 개만, 다시 만든 constraint model 로 돌렸다 (V11AB 서버 모델이 아니다) |
+| 측정 중 working tree 가 움직였다 | 다른 세션이 `trajopt/serve_safe.py` · `ag3s/config.py` 를 고쳤다 (A4). replay 는 그 뒤에 시작했고 pytest 는 구간 중간에 걸쳤다. pytest 4 failed 는 이 때문이고 단독 재실행에서 통과했다 |
+| B-profile · HEAD 대 HEAD determinism | B profile (5 run, 300 chunk) 은 replay 하지 않았다. HEAD 대 HEAD 대조도 하지 않았다 |
+| sweep 구성은 V11AB 가 아니다 | `sweep_check` 가 look-ahead off 를 요구한다 (T44 §5 와 같다) |
+| D-sign 의 identity | GT Gaussian attention 과 identity 강제 (`gt_label` · `gt`). 실제 VLA attention 으로 고른 identity 에서 `ball_owned` 를 다시 재지 않았다 |
+| D-sign timing | 첫 시도 중단 후 재실행, 재실행 구간에도 구현자 pytest 와 I2b replay 가 돌았다. pod load 는 `agg_timing.json` 에 기록 |
+| D-merge 입력 | demonstration 자세 (policy rollout 아님), VLA attention 은 posed 장면의 offline 렌더 (299x224 → 224x224) 로 만든 것이다. 색 region 후보는 simulator 렌더 색이고 지연 미측정. E2-lb 48 frame 은 merge 분석 대상이 아니다 |
+| D-merge 의 점별 GT label | 가장 가까운 GT depth pixel 10 mm 안으로 정했다 (V-E2 는 class label 3 mm). merged set 은 64 / 64 일치 |
+| 구현자 사전 지식 | verifier 가 T44I0I1 impl.md 의 "내가 기대하는 결과" 절을 앞서 읽었다 (`T44M.verify.json` deviations; I1 에 관한 것이고 merge 와 무관) |
+| 미커밋 | 위 모든 코드는 미커밋이다 |
+
+### 8. 사용자 판정 대기 · 아직 모르는 것 · 되돌아올 지점 · 산출물
+
+#### 8-1. 사용자 판정 대기
+
+아래는 판정이 필요한 항목과 그 근거 측정, 그리고 아직 모르는 것이다. 어느 것도 scribe 가 정하지 않았다.
+
+| # | 판정할 것 | 근거 (verify.json · impl.md) | 아직 모르는 것 |
+|---|---|---|---|
+| 1 | **`ball_owned` 채택과 `owned_max_dist_voxels` = 3** | §3-1: `gt_label` · `gt` 두 identity mode 에서 demo + lb 의 ①–④ 를 모두 통과하는 것은 d=3 뿐 (demo ① 0.587 · ② 0.9345 · ③ 64 ≤ 67 · ④ +4.229 ms; lb `gt` ② 0.8859). d=2 는 ① 0.479 미달, d=4 는 lb `gt` ② 0.8495 미달. `gt_cluster_only` (ball-hit 3 frame) 에서는 d=3 의 ① 이 0.3361 로 미달. falsely infeasible q 는 demo 에서 ball 과 같고 (11) lb `gt` 는 ball 20 대 d=2–4 56 | 실제 VLA attention 으로 pipeline 이 고르는 identity 에서의 recall · 손실. closed-loop 효과. lb `gt` 의 falsely infeasible 56 (ball 20) 이 손가락 contact 에 미치는 영향 |
+| 2 | ~~**target-free 질의 합성 (coarse 의 음수를 버리는 것) 의 수정 여부와 방식**~~ → 사용자가 2026-10-10 에 target-free coarse tier 추가로 판정했다 (아래 T44c 절 §1) | §4: `min(f, max(d, b))` 에서 `b` (median 215 mm) 가 커서 coarse 의 음수 `d` 가 버려지고, finger 구 중심을 distractor 내부에 두면 demo 54 / 64 frame 에서 target-free query 가 `clearance ≥ margin` 으로 읽는다 (main 17 / 64). oracle · 제외 없음 · `ball` · `ball_owned` 모두 비슷하다 (24699 ~ 24960 양수 점) — T44 이전부터 있던 성질이고 `ball_owned` 와 무관 | fine truncation 을 늘리거나 coarse 를 섞을 때의 효과 (재지 않음). closed-loop 에서 finger 구가 distractor 내부에 들어가는 빈도. 이 안전 영향이 실행 결과 (distractor contact) 로 이어지는가 |
+| 3 | **split 옵션 (12 mm · raw ratio) 의 기본값화** | §5 · §6: VLA attention 에서 merged 34 중 현재 20 → 12 mm · raw 24, 비병합 30 / 30 · 오선택 0. A4 smoke 가 pipeline 코드 경로로 24 / 34 를 재현 (구현자). 기본은 `normalized` · 15 mm 로 유지 (bit-identical) | closed-loop / E3 replay 에서의 효과. 12 mm 에서 단일 과일이 둘로 쪼개지는가 (30 / 30 외 미확인; T31b 의 근거는 15 mm). raw 문턱 2.0 의 근거는 이 64 frame 뿐. release split (`split_anchor_on_release`) 은 정규화 attention 그대로라 raw 모드에서 frame split 과 gate 값이 다르다 (A4 impl.md 판정 필요 1). 새 분할 알고리즘 (색 region + 12 mm: 26 / 34, +2) 은 구현하지 않았다 |
+| 4 | ~~**`held_permission_parent_links` 의 뜻: `arm_6` (고정) 인가 `arm_5` (forearm) 인가**~~ → 사용자 판정: `arm_6` (N=1, 현재) (T44c 절 §1) | I2b 구현은 "구를 가진 link 만 센다" 로 N=1 = `link_<side>_arm_6` (gripper 와 fixed joint 로 강체 연결). 사용자가 첫 회전 관절 너머 link (forearm) 를 의도했다면 N=2 (구현자). arms 모델에서 `b1` 은 arm_6 행의 예외를 유지하고 (12119 → 12119) forearm 이상은 검사한다 (8509 → 507) | forearm (arm_5) 까지 허용했을 때의 효과는 재지 않았다 (`parent=2` 미측정). arm_6 행이 잔상 아닌 장애물 근처에서 E1 test 를 통과하는 경우가 있는지는 replay 로 보이지 않았다 (구현자 남은 결함 5) |
+| 5 | **`--links gripper` 라서 forearm 이 아예 검사되지 않는 현 기본 구성** | V11AB 서버의 constraint model 은 270 구이고 `link_*_arm_*` 구가 없다 (`parent_links_found_in_model` 이 194 chunk 모두 빈 값). 따라서 main 에서 N=0 과 N=1 이 같고 (달라진 행 0), arm_6 · forearm 은 target 에 대한 예외 여부 이전에 **검사 대상이 아니다**. 보조 `--links arms` (422 구) 에서는 arm 행이 존재하고, 그때 strict 는 그 행들의 target 예외를 걸러낸다 (sweep 의 비권한 행 제외 1458 → 0) | `--links arms` 로 실행한 closed-loop 의 효과 · 비용 (미측정). `ep1834_s18341` seq 34 의 뒤집힘 (쥔 손의 반대 손 gripper 가 검사된 결과) 이 진짜 위반인지 |
+| 6 | **closed-loop 진행** | 새 동작은 전부 flag 기본 off · off bit-identical (HEAD 대 새 tree 1006 chunk 차이 0). T44 코드로 기록한 server run 이 아직 없다. D-merge 는 closed-loop 전에 원인 진단하라는 판정 2 를 마쳤다 (기존 split 설정으로 24 / 34) | closed-loop 효과 전부 미측정 |
+
+#### 8-2. 그 밖에 아직 모르는 것
+
+| 항목 | 상태 |
+|---|---|
+| unowned distractor seed 398 개를 만든 TSDF 기전 | raw depth 10 mm 밖이고 distractor mesh 에서 median 3.9 mm. gather dilation · truncation-boundary seed · 뒷면 중 무엇인지 분리하지 않았다 |
+| `ep1834_s18341` seq 34 의 `feasible` → `violated` 가 진짜 위반인가 | I2b 에서도 남아 있다 (window violation 1.3657 mm). verdict 의 옳음은 측정하지 않았다 |
+| pytest 4 failed 의 재현 | 동시 편집 때문이라고 verify.json 이 적었다. 단독 재실행은 통과. 같은 편집이 없는 상태의 전체 재실행은 하지 않았다 |
+| `pipeline_cluster_merged` 19 대 candidates `현재` 20 | verify.json 이 차이의 정의를 적지 않았다. A4 smoke 는 20 / 34 |
+| 실제 VLA attention 에서 `ball_owned` 의 recall · 손실 | identity 를 GT 로 강제한 E2 만 있다. pipeline 이 고르는 identity (VLA attention) 로는 재지 않았다 |
+| I2 sweep 의 `target_rows_excluded_total` (9353) 과 split 합 (477 + 68) 의 집계 단위 | T44 §5-3 에서 이어진다. verify.json 이 정의하지 않았다 |
+| `.venv-ag3s` interpreter 의 NFS page 멈춤 | A4 구현자가 환경 문제로 보고했다. `.venv-openpi-live` 로 돌렸다 |
+
+#### 8-3. 되돌아올 지점 — 고르지 않은 선택지
+
+| 안 고른 것 | 왜 | 전환 신호 |
+|---|---|---|
+| 새 분할 알고리즘 (색 region · LCCP 류 · sphere RANSAC · attention min-cut) 구현 | 후보 중 최고가 (a+b) 26 / 34 로 (a) 24 / 34 대비 +2 (T44b.task A4 의 판단). min-cut 은 0 / 34 · 오선택 2 · 비병합 23 / 30 | 12 mm · raw 로도 남는 10 frame (한 성분 · ratio < 2) 이 closed-loop 실패 원인으로 드러날 때. 색이 같은 과일 쌍에서 시험이 필요하다 |
+| DBSCAN eps 를 20 mm 로 줄이는 것 | GT attention 에서 9 · VLA 에서 18 / 34 로 현재 (20) 보다 낮고 오선택 2 | — (측정에서 열세) |
+| `owned_max_dist_voxels` 4 | demo 에서 ①–④ 모두 통과 (① 0.7479) 지만 lb `gt` ② 0.8495 미달, recall 이 떨어지는 방향 | demo 의 distractor 손실을 더 줄여야 하고 lb 같은 덜 붐비는 장면의 recall 손실을 받아들일 때 |
+| `held_permission_parent_links` 2 (forearm 까지) | 사용자 판정은 1 이고 구현은 N=1 = arm_6 | 사용자가 "gripper 바로 이전" 을 forearm 으로 정의할 때 (판정 4) |
+| ~~부호 문제 수정 (fine truncation · target-free 합성 변경)~~ | ~~이번 요청은 진단이었다 (수정 아님)~~ | ~~판정 2 가 수정을 요청할 때~~ → 수정이 요청되어 T44c 절에서 구현·측정했다 (fine truncation 은 늘리지 않고 target-free coarse tier 를 더했다) |
+| `owned_unowned = keep` | T44 의 recall 0.548 (keep) 은 d=2 측정이었다. d=3 · 4 의 keep 은 재지 않았다 | d 를 키운 keep 의 recall 이 필요하면 새 측정 |
+
+#### 8-4. 이 STEP 의 산출물
+
+- **코드 (benchmark repo, 모두 미커밋, flag 기본 off)**: I2b — `trajopt/config.py` · `trajopt/linearize.py` · `ag3s/constraints/to_adapter.py` · `tests/trajopt/test_t44_target_permission.py` (+17). A4 — `ag3s/stages/attention_split.py` · `ag3s/config.py` · `ag3s/stages/target_grounding.py` · `trajopt/serve_safe.py` · `tests/ag3s/test_t44_split_ratio_source.py` (신규 25).
+- **측정**: `handoff/T44I2b.verify.json` · `T44E2b.verify.json` · `T44M.verify.json`. 원자료: `outputs/verify/T44/I2b/` (`agg.json` · `per_chunk_main.json` · `per_chunk_arms.json` · `raw/`) · `outputs/verify/T44/E2b/` (`agg_e2b.json` · `raw_demo/` · `raw_lb/` · `sign_comp_*.json` · `timing/`) · `outputs/verify/T44/merge/` (`merge_gt.json` · `merge_vla.json` · `agg_merge.json` · `raw_vla/` · `vla_attention.npz`).
+- **구현 · 설계**: `handoff/T44I2b.impl.md` · `T44A4.impl.md` · `T44b.task.md`. A4 의 smoke 산출물: `outputs/impl/T44A4/`.
+- **figure**: `figures/t44/` — `t44i2b-scene-carry-permission` · `t44i2b-per-chunk-rows` · `t44i2b-summary-table` · `t44e2b-scene` · `t44e2b-graph` · `t44e2b-table` · `t44m-scene` · `t44m-graph` · `t44m-table`. 각각 `.json` sidecar 가 있다.
+
+
+---
+
+## T44c — target-free coarse tier (부호 보존) · A6 바닥 잔류 수정 · closed-loop 용 E0 screening (2026-10-10)
+
+**이 절이 답하는 물음.** 위 T44b §4 는 "finger 구 중심이 distractor(이웃 과일) 내부에 있어도 target-free 질의가 `clearance ≥ margin` 으로 읽는다 (demo 54/64 frame, main composite 는 17/64)" 는 사실을 보였고, 사용자는 2026-10-10 에 그것을 **target 을 지운 coarse layer 를 하나 더 만들어** 고치라고 판정했다 (`T44c.task.md`). 이 절은 네 가지를 기록한다. (1) 그 tier (A5) 가 distractor 내부의 낙관적 답을 없앴는가, 그리고 target contact 를 과도하게 막지는 않는가 (D-sign2). (2) 사용자 조건 6(target 이 다시 장애물로 살아나지 않는다) 을 지켰는가 — 지키지 못했고, 그 원인을 고친 A6 (sign floor `plane`) 이 무엇을 고쳤고 무엇을 남겼는가 (V-A6). (3) closed-loop 에 쓸 붐비는 train episode 가 몇 개인가 (S1). (4) 사용자가 정할 것은 무엇인가.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `handoff/T44c.verify.json` (D-sign2) 과 `handoff/T44c-A6.verify.json` (V-A6) 의 `numbers` 에서만 왔다. **S1 은 verify.json 이 없다.** S1 의 수치는 `outputs/verify/T44/LB2/` 의 `candidates.json` · `passed.json` · `agg.json` 에서만 왔고 아래에서 그렇게 밝혔다. 구현 내용과 구현자의 단위 test 수 · smoke 는 `T44c.impl.md` 의 보고이고 표에 **(구현자)** 라고 밝혔다. 사용자 판정과 조건은 `T44c.task.md` 에서 왔다.
+- 해석은 verify.json 의 `verdict` · `not_measured` 가 허용하는 범위로 제한한다. 원인을 단정하지 않는다.
+- 시각은 UTC 이고 파일 시각 (마지막 수정) 이다. 측정 시작 시각이 아니다. 그림은 verifier 가 만들었고 `figures/t44/` 에 `.json` sidecar 와 함께 있다. scribe 는 링크만 한다.
+- 새 동작은 전부 flag 기본 off 이다 (`esdf.target_free_coarse = False`, `esdf.target_free_coarse_sign_floor = "guard"`). 아래 "guard" 는 A5 그대로의 동작이고 "plane" 이 A6 이다.
+- 표의 **off / guard / plane** 은 같은 frame · 같은 fine layer 에서 target-free 질의를 세 가지로 합성한 것이다. **off** = coarse tier 없음 (예전 식), **guard** = A5 (coarse target-free tier on, 부호 교정을 seed 제거 guard 높이에서 시작), **plane** = A6 (같은 tier, 부호 교정을 support plane 에서 시작).
+- **`ball`** · **`bo_d3`** 는 target 을 지우는 방식이다 (`ball` = 기존, `bo_d3` = `ball_owned` 에서 `owned_max_dist_voxels` 3 · `owned_tie_voxels` 1.0 · `owned_unowned remove`). 두 방식의 정의는 위 T44 절 용어에 있다.
+
+### 1. 사용자 판정 (두 번째) · 조건 여섯 개 · 타임라인
+
+| # | 질문 | 판정 (2026-10-10, 두 번째) | 이 절에서 |
+|---|---|---|---|
+| 1 | target-free 질의가 coarse 의 음수를 버린다 (demo 54/64 frame) | **target-free coarse tier 추가.** 아래 조건 전부 | §2 · §3 · §4 |
+| 2 | 채택할 target exclusion | **`ball_owned` d=3 과 split (12 mm + raw ratio) 둘 다 closed-loop arm 에.** 기본값은 그대로 | §7-1 판정 4 |
+| 3 | carry 권한 parent link | **`arm_6` (N=1, 현재)** | §7-1 판정 4 |
+| 4 | `--links gripper` (forearm 미검사) | **기본은 유지, closed-loop 에 `--links arms` arm 을 추가해 비교** | §7-1 판정 4 |
+
+**판정 1 의 조건 (사용자 원문 요지).**
+
+| # | 조건 | 어디서 확인했나 |
+|---|---|---|
+| 1 | fine 과 coarse 가 **같은 target identity 와 같은 exclusion 의미** 를 쓴다. voxel index 나 voxel 단위 threshold 를 그대로 복사하지 않는다 (ball 반경 · `z_min` · ownership 거리는 metre 로 정의하고 각 tier 의 voxel 에 맞게 적용) | §2-2 (구현자) |
+| 2 | 유효한 공통 영역에서 target-free fine 과 target-free coarse 를 합성하되, 기존 static obstacle 처리와 window 경계 처리를 유지한다 | §2-1 (구현자) |
+| 3 | 거리를 고른 layer 의 gradient 를 함께 쓴다 (값과 gradient 가 같은 branch) | §2-3 (구현자) · §3-4 · §4-4 (verifier) |
+| 4 | target 과 obstacle 이 coarse voxel 을 공유하면 obstacle evidence 를 보존한다. 그 때문에 **target contact 가 과도하게 막히는지 측정한다** | §3-2 · §3-3 |
+| 5 | flag 를 두고 기존 방식과 동일 입력으로 비교한다 | §2 · §3 (off 대 on) |
+| 6 | 추가하는 것은 **target 을 제거한 coarse** 다. main coarse 를 그대로 min 에 넣으면 target 이 다시 장애물로 살아나 grasp 를 방해한다 — 금지 | §3-3 (위반) · §4 (A6) |
+
+| 시각 (UTC) | 무엇 | 출처 |
+|---|---|---|
+| 2026-10-10 10:06 | **S1** 후보 24 episode 를 실행 전에 고정 | `LB2/candidates.json` (파일 시각) |
+| 10:39 | **A5** (target-free coarse tier) 구현 진행 기록 마지막 | `T44c.progress.md` (파일 시각) |
+| 11:19–11:21 | **D-sign2** 측정 · figure 3 장 · `T44c.verify.json` | verify.json · figure (파일 시각) |
+| 11:22 | 사용자 판정 두 번째 · A6 지시를 담은 task 파일 | `T44c.task.md` (파일 시각) |
+| 11:29 | **S1** 집계 · figure 1 장 | `LB2/agg.json` · `passed.json` · `t44c-lb2-table.png` (파일 시각) |
+| 11:50 | **A6** (sign floor `plane`) 구현 보고 | `T44c.impl.md` · `T44c-A6.progress.md` (파일 시각) |
+| 12:14 | **V-A6** 측정 · figure 3 장 · `T44c-A6.verify.json` | verify.json · figure (파일 시각) |
+
+회귀 기준선은 두 verify.json 모두 일치했다.
+
+| 기준선 | 측정 | 일치 |
+|---|---|---|
+| cuRobo (`T44c` · `T44c-A6`) | 시작 시 violated 10/15 · has_target 15/15 · frame 0 `clearance_before` −9.171877401271193 mm | 일치 (T36 cuRobo 기준과 같음) |
+
+### 2. A5 — target-free coarse tier (구현자, `T44c.impl.md`)
+
+#### 2-1. 무엇을 만들었나
+
+target-free 질의는 그동안 창 안에서 `min(f, max(d, b))` 였다 (`d` = main composite 의 답, `f` = target-free fine layer 의 답, `b` = 그 layer 창 경계까지의 거리). `b` 가 크면 coarse 가 아는 distractor 내부의 음수 `d` 가 버려진다. A5 는 **target 을 지운 coarse layer `c`** (`coarse_no_target`) 를 하나 더 만들어 그 질의에 넣는다. 새 식은 다음이다.
+
+```
+창 안 (target-free fine 창 ∩ target-free coarse 격자):  v = min( f, a, max(c, d), max(d, b) )
+창 안이지만 coarse target-free 격자 밖:                  v = min( f, a, max(d, b) )      (예전 그대로)
+창 밖:                                                    v = d                           (예전 그대로)
+   f = target-free fine · c = target-free coarse · a = static shape (없으면 ∞) · d = main composite · b = 창 경계까지
+```
+
+| 설계 선택 | 내용과 근거 (구현자) |
+|---|---|
+| `max(c, d)` 로 하한 | 표면을 빼서 거리가 줄 수는 없다. `c < d` 는 seed 를 지운 뒤 부호가 남은 자리뿐이므로, 그 자리에서 새 항이 target 을 main 보다 더 장애물로 만들지 못하게 한다 (조건 6). 첫 안 `max(d, min(f, c, max(d, b)))` 는 GPU smoke 에서 `f < d` 인 점 13/2000 (최대 4.1 mm) 에서 예전보다 덜 보수적이어서 버렸다 |
+| 성질 `min(old, d) ≤ new ≤ old` | old 보다 덜 막는 점이 없고, 새 항 때문에 main 합성 아래로 내려가는 점도 없다. test 와 §4-3 의 verifier 측정으로 확인 |
+| 창 경계 `b` 를 남김 | `b → 0` 에서 값이 `d` 로 이어진다 (SQP 가 창 경계를 넘을 때 값이 뛰지 않는다). 예전 식에 항 하나를 더한 `min` 이라 `new ≤ old` 가 모든 점에서 선다 |
+| 창 밖은 `d` | 창 밖 답은 미해결이고 접촉 허용의 근거가 못 된다. 그곳에서 `c` 로 target 을 빼면 coarse 해상도로 target 접촉을 허용하는 셈이다 |
+| target 이 없는 frame | ball 이 없는 frame (점 제외로 물러난 frame) 은 target 을 못 지우므로 tier 를 만들지 않는다 (`coarse.mode = "skipped_no_ball"`) |
+
+#### 2-2. 해상도 간 metre 환산 (조건 1)
+
+fine voxel 기준으로 정의된 값을 metre 로 바꾼 뒤 coarse voxel 에서 다시 나눈다. 같은 함수에 fine voxel 을 넣으면 fine layer 가 지금 쓰는 값이 그대로 나온다 (test). D-sign2 가 실제로 쓴 값 (`ball_owned` d=3, coarse voxel 20 mm, fine voxel 5 mm): `band_m` 0.018 · `max_dist_m_effective` 0.018 · `tie_m` 0.005 · `sign_threshold_m` 0.0075 · `z_min` = support z + 0.020 m (`T44c.verify.json` `settings`).
+
+| 값 | fine 정의 | coarse (20 mm) 에서 | 왜 (구현자) |
+|---|---|---|---|
+| seed band | cuRobo `\|tsdf\| ≤ 0.9 vs` | 18 mm | 한 seed voxel 중심에서 그 seed 를 만든 표면까지의 거리 |
+| support guard `z_min` | support z + 5 mm | **support z + max(5 mm, voxel) = +20 mm** | support 는 중심이 band 안인 coarse voxel 을 seed 로 심는다. fine `z_min` (+5 mm) 을 쓰면 table seed 를 지운다 (table 구멍, T13) |
+| unowned 거리 (`ball_owned`) | `owned_max_dist_voxels · vs` | max(그것, band) = 18 mm | coarse seed 중심은 표면에서 최대 18 mm 떨어질 수 있다 |
+| 공유 판정 | (coarse 에만) | non-target 점이 seed 중심 18 mm 안 | 그 점이 이 coarse seed 를 심었을 수 있다 |
+
+**공유 voxel (shared voxel) 보존.** coarse voxel 하나에 target 과 non-target 관측이 함께 있으면 그 seed 를 지우지 않고 (`n_shared_kept`), 그 영역은 부호 교정에서도 뺀다 (조건 4).
+
+#### 2-3. 값과 gradient 가 같은 branch (조건 3)
+
+| 이긴 항 | `answer_tier` | 값 | 기울기 |
+|---|---|---|---|
+| `f` | `target_free` | `f` | target-free fine layer |
+| `a` | `static` | `a` | 그 shape |
+| `max(c, d)` 에서 `c ≥ d` 이고 `c < min(f, a)` | **`target_free_coarse`** (새) | `c` | **target-free coarse layer** |
+| `max(c, d)` 에서 `c < d` | main 합성의 layer | `d` | main 합성 |
+| `max(d, b)` 에서 `b > d` | `window_edge` | `b` | 창 경계의 안쪽 법선 |
+
+`linearize` · `sweep` · `safe_policy` 는 모두 `field.target_free_distance` / `target_free_gradient` 로만 묻는다. 그래서 `trajopt/linearize.py` 는 바꾸지 않았다 (구현자의 test 3 개가 hot path 를 직접 부른다). `target_free_coarse` 는 `coarse` 와 같이 **미해결 tier** 로 센다 (기록 전용).
+
+**단위 검증 (구현자).** A5 신규 test 29 (`tests/ag3s/test_t44c_target_free_coarse.py` 26 · `tests/trajopt/test_t44c_target_free_coarse_branch.py` 3). 전체 CPU `tests/trajopt tests/ag3s` **2639 passed · 4 skipped · 0 failed**. 구현자의 GPU smoke (harness, demo ep 677) 는 공 안 coarse seed 8–17 · 공유 보존 2–4 · build 3.5–4.7 ms 를 보고했다. verifier 가 같은 frame 집합으로 다시 쟀다 (§3).
+
+### 3. D-sign2 — 새 tier 의 측정 (A5, sign floor `guard`)
+
+**입력.** 같은 frame (E2-demo 64 frame · E2-lb 48 frame), identity `gt` · `gt_label`, 방법 `ball` · `bo_d3` · oracle, coarse off/on. 판정은 `gt_label` 에서 읽는다 (`gt` 도 같은 방향이다). 설정: margin 10 mm · coarse voxel 20 mm · fine voxel 5 mm · coarse truncation 60 mm · fine truncation 30 mm. query 는 V11AB 모델 (`gripper` link, finger cover both) 의 authorized 구 (`DEFAULT_CONTACT_LINKS[arm]`) 이고, 정의는 T44b §4 와 같다. **off 재현:** coarse off 의 target-free 값이 T44E2b raw 와 같은 frame 에서 distractor 내부 점 180,970 점 × 방식 3 의 `max |diff|` 0.0 m, authorized 구 · grid 는 최대 5.07e-7 m 였다.
+
+**Figure.**
+
+![D-sign2 scene](figures/t44/t44c-scene.png)
+
+[`t44c-scene.png`](figures/t44/t44c-scene.png) — 실제 장면 (E2-demo, `gt_label`, `ball`). 위 행: `demo_ep0060_f104` (target pear, 오른팔) 의 distractor 내부 fine lattice 점을 5 mm 두께 x–z slab (y = −0.310 m, 위에서 본 배치도에 파란 선으로 표시) 로 자른 부호. 왼쪽부터 off (`min(f, max(d, b))`, neg 16 · zero 19 · pos 123) 와 on (`min(f, max(c, d), max(d, b))`, neg 39 · zero 13 · pos 106). off 에서 대부분 양수이던 distractor 내부가 on 에서 일부 음수로 돌아온다. 아래 행: `demo_ep0022_f104` (grasp close 직전 frame) 의 authorized 구 (색 = off − on 의 거리 감소, colorbar) 와 target 내부 점 (slab y = −0.318 m) 의 부호. on 의 target 내부에서 neg 16 이 support + 20 mm (점선) 아래 오른쪽 가장자리에 모여 있다 — §3-3 의 위반이 이 그림에 이미 보인다. 맨 오른쪽: target 에 가장 가까운 authorized 구 16 개의 `clearance = d − r` (GT target 표면 대 target-free off · on · oracle on).
+
+![D-sign2 graph](figures/t44/t44c-graph.png)
+
+[`t44c-graph.png`](figures/t44/t44c-graph.png) — (a) authorized 구의 target-free 거리 감소 (off − on) ECDF, (b) demo 마지막 2 frame 의 authorized 구 clearance off 대 on, (c) distractor 내부 finger 구의 frame 수 (양수가 하나라도 있는 frame 대 `clearance ≥ margin` frame), (d) target 내부 점의 `< 0` 비율을 support plane 위 높이별로 (노랑 점선 = coarse `z_min` = support + 20 mm).
+
+![D-sign2 table](figures/t44/t44c-table.png)
+
+[`t44c-table.png`](figures/t44/t44c-table.png) — set × identity × 방법의 전체 표 (demo · lb · `demo_last2` · `demo_last1`).
+
+#### 3-1. 안전 — distractor 내부의 낙관적 답은 사라졌다
+
+query = authorized finger 구 (반지름 median 6.8 mm) 를 distractor 의 convex hull 안 fine lattice 점 (demo 65,445 점 · 64 frame) 에 놓고 `clearance = d − r` 를 margin 과 비교 (T44b §4-3 의 정의 그대로).
+
+| demo, `gt_label` | main composite | target-free off (`ball`) | **on (`ball`)** | off (`bo_d3`) | **on (`bo_d3`)** | oracle off | oracle on |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 양수 점 | 11,577 | 24,960 | 12,027 | 24,714 | 11,608 | 24,699 | 11,610 |
+| `clearance ≥ margin` 점 (frame) | 2,700 (**17**) | 3,895 (**54**) | 2,701 (**17**) | 3,847 (**54**) | 2,701 (**17**) | 3,845 (**54**) | 2,707 (**17**) |
+| 양수 · depth ≥ 10 mm 점 (frame) | 2,471 (23) | 6,334 (56) | 2,533 (27) | 6,334 (56) | 2,476 (23) | 6,340 (56) | 2,476 (23) |
+| 최대 값 (mm) | 36.63 | 43.0 | 38.81 | 43.0 | 38.81 | 43.0 | 38.81 |
+
+- coarse tier 를 켜면 `clearance ≥ margin` frame 이 **54 → 17** 이 되어 main composite 의 17 과 같아진다 (`ball` · `bo_d3` · oracle 모두).
+- lb (덜 붐비는 장면, 48 frame): main composite 는 양수 647 점 · `clearance ≥ margin` 0, target-free off 는 양수 3,984 점 · `clearance ≥ margin` 2 점 (2 frame), on 은 양수 647 점 · 0 이다 — main composite 와 같다.
+- 질의가 어느 layer 에서 답했나 (on, `ball`, demo 의 distractor 내부 점): `target_free_coarse` 36,836 · `target_free` 28,486 · `coarse` 123 (`bo_d3` 는 37,054 · 28,268 · 123).
+- 공유 voxel 보존을 끄면 (`ball|on_ns`) demo 의 `clearance ≥ margin` 은 2,726 점 · 19 frame 으로 늘고, 켜면 2,701 점 · 17 frame 이다.
+
+#### 3-2. target contact 는 과도하게 막히는가 (조건 4)
+
+grasp 직전 자세에서 authorized 구가 target 표면까지 갖는 target-free 거리가 coarse tier 때문에 얼마나 줄었는가. 줄어든 query = off 값 > on 값. **cross** = off 에서 `clearance ≥ margin` 이었는데 on 에서 `< margin` 이 된 것. (`n_on_gt_off` = on 이 off 보다 큰 query = 덜 막는 query 는 전 set 에서 0 이다.)
+
+| (authorized 구, `gt_label`) | demo 64 frame · 8,640 query `ball` | `bo_d3` | oracle | demo 마지막 2 frame (32) · 4,320 query `ball` | lb 48 frame · 6,480 query `ball` | `bo_d3` |
+|---|---:|---:|---:|---:|---:|---:|
+| 거리가 줄어든 query | 3,291 | 3,249 | 2,837 | 1,995 | 2,694 | 2,685 |
+| 줄어든 frame | 62 | 62 | 57 | 32 | 46 | 46 |
+| 감소량 median / p95 / max (mm) | 3.749 / 11.866 / 43.3 | 3.74 / 11.896 / 43.3 | 3.849 / 18.724 / 36.659 | 3.948 / 12.325 / 43.3 (`ball`) | 3.736 / 13.812 / 42.717 | 3.729 / 13.813 / 42.717 |
+| **cross** query (frame) | **82 (15)** | 82 (15) | 91 (16) | **62 (13)** | 85 (20) | 81 (20) |
+| margin 아래 query: off → on | 170 → 252 | 173 → 255 | 226 → 317 | 157 → 219 | 264 → 349 | 274 → 355 |
+| 공유 voxel 때문에 줄어든 query | 129 | 5 | — | 2 | 0 | 0 |
+| 값이 음수인 query: off → on | 1 → 3 | 1 → 3 | 0 → 3 | 1 → 3 | 0 → 24 | 0 → 24 |
+
+- 거리가 줄어든 query 는 demo 의 약 3분의 1 이지만 (3,291 / 8,640) 감소량 median 은 3.7 mm 이고, margin (10 mm) 을 넘어 내려가 cross 가 된 query 는 82 개 (15 frame) 다. 마지막 2 frame 만 보면 62 개 (13 frame) 다. 이것이 "grasp 직전 margin 교차" 의 기준값이고 A6 이 줄이려는 값이다.
+- 줄어든 query 중 main composite 와 1 mm 안에서 같아진 것은 797 개 (`ball`) 다 — 거리 감소의 일부는 target-free 답이 main 의 답으로 돌아간 것이다 (verify.json 은 그 의미를 해석하지 않았다).
+- 공유 voxel 로 인한 감소: `ball` 129 query, `bo_d3` 5 query. cross 중 공유 voxel 때문인 것은 둘 다 0 이다. grid ROI (365,106 query, `ball`) 에서는 cross 9,413 (44 frame) 중 공유 voxel 때문인 것이 111 이다.
+
+**coarse tier 의 seed 통계 (demo, `gt_label`, 64 frame 합).**
+
+| | `ball` | `bo_d3` | 공유 보존 끔 (`ball_ns`) |
+|---|---:|---:|---:|
+| ball 안 coarse seed | 655 | 655 | 655 |
+| 제거 | 625 | 625 | 655 |
+| 공유 보존 (`n_shared_kept`, frame) | 30 (15) | 8 (6) | 0 |
+| 공유 영역 seed | 30 | 30 | 0 |
+| distractor seed 손실 (20 개 중) | **3** | 3 | **19** |
+| target recall median (p10) | 0.6771 (0.5071) | 0.6771 (0.5071) | 0.7 (0.5071) |
+
+공유 voxel 보존은 coarse tier 에서 ball 이 지울 뻔한 distractor seed 20 개 중 16 개를 되살린다 (손실 19 → 3). 반면 coarse tier 의 target recall 은 fine 보다 낮다 (fine `ball` 의 median 0.936 · `bo_d3` 0.9345 대 coarse 0.6771). 이 낮은 recall 이 §3-3 의 원인으로 이어진다.
+
+#### 3-3. 조건 6 위반 — target 내부 음수가 늘었다
+
+target 내부 (GT target hull 안 fine lattice 점, demo 67,361 점) 에서 target-free 질의가 음수를 답하는 점은 **target 이 장애물로 다시 살아났다** 는 뜻이다.
+
+| demo, `gt_label` | off | **on (`ball`)** | on (`bo_d3`) | oracle on |
+|---|---:|---:|---:|---:|
+| target 내부 음수 점 (67,361 중) | 2,021 | **11,180** | 11,331 | 14,396 |
+| 그 점의 frame 수 | — | 64 / 64 | 64 / 64 | 64 / 64 |
+| off 에서 음수가 아니던 점 | — | 9,159 | 9,074 | 13,459 |
+| 높이 < 20 mm 인 점 (support plane 위) | — | 11,057 | 11,065 | 10,301 |
+| 높이 ≥ 20 mm | — | 123 | 266 | 4,095 |
+| 공 안 | — | 8,592 | 8,743 | 12,406 |
+| 답한 layer = `target_free_coarse` | — | 10,086 | 10,031 | 8,492 |
+
+(off 열의 `bo_d3` 는 2,257. main composite 에서는 target 내부 67,361 점 중 40,231 이 음수다 — main 에서는 target 이 장애물이기 때문이다. `n_on_gt_off` 는 0.) 높이 < 20 mm 인 target 내부 점은 21,613 개이고 그중 11,057 이 음수다. 즉 **음수 11,180 점 중 11,057 점이 support plane + 20 mm (coarse 의 seed 제거 guard 높이) 아래 target 바닥 부분에 있고**, 10,086 점은 `target_free_coarse` 가 답했다. coarse tier 는 support + 20 mm 위의 target seed 만 지우기 때문에 target 바닥 띠가 남는다. 사용자 조건 6 을 지키지 못했다 → A6 (§4).
+
+#### 3-4. 값–gradient 일치 · eikonal · build 시간
+
+| 항목 | 값 |
+|---|---|
+| `_answer` 의 값 대 `target_free_distance` 의 최대 차 (`ball` · `bo_d3`, demo · lb) | 0.0 m |
+| gradient 의 layer 가 값의 layer 와 다른 점 | 2,517,905 점 검사에서 **6 점** (전부 \|v\| ≤ 1.2e-9 m = seed voxel; `bo_d3` 2 · oracle 4 · `ball` 0) |
+| gradient 방향 cos, demo `gt_label` `ball` (`target_free_coarse` 답, 245,062 점) | 전체 median 0.9882 (p5 0.6186) · \|v\| ≥ 20 mm 의 smooth 영역 median 0.9924 (p5 0.8774) · 같은 점에서 main coarse layer 단독은 0.9809 |
+| eikonal \|∇d\| (finite difference), 같은 점 | 전체 median 0.9813 · smooth 영역 0.9687 · main coarse layer 단독 0.9631 |
+| frame 의 `D` 집합 (distractor 내부) 에서 cos median | 0.8632 (p5 −0.1833) — 표면 가까이에서 gradient 가 흔들린다 |
+
+timing (전용 pass, 단일 프로세스, 112 frame × 10 회 interleaved, n = 1120). 단 verifier S1 (serve_safe 2 · pi05_infer client 2) 이 겹쳐 돌았다.
+
+| build ms (fine tier 만 = off, fine + coarse = on) | median | p90 |
+|---|---:|---:|
+| `ball` off | 4.726 | 6.206 |
+| `ball` on | 9.573 | 12.886 |
+| `bo_d3` off | 6.905 | 11.252 |
+| `bo_d3` on | 11.77 | 16.919 |
+| coarse tier 단독 (`ball` · `bo_d3`) | 4.365 · 4.617 | 5.641 · 6.054 |
+| non-target 점 계산 (`ball` 에서 새로 필요) | 0.325 | 0.386 |
+
+p90 증가 (on − off): `ball` +6.68 ms, `bo_d3` +5.667 ms. 기준 ④ (`bo_d3` on 대 `ball` on 의 p90 증가 ≤ 10 ms) = **+4.033 ms, 통과**. pod load 1 분 평균 median 41.52 (최대 355.3).
+
+#### 3-5. 기준 ①–④ 재평가 (coarse on, `bo_d3` 대 `ball`, demo `gt_label`)
+
+| 기준 | coarse on 의 값 | 판정 |
+|---|---|---|
+| ① distractor 손실 감소 | coarse tier 에서 `ball` 의 distractor seed 손실이 이미 3 (공유 보존) 이라 `bo_d3` 도 3 → 감소율 0.0 (손실 발생 frame 2). fine tier 에서는 0.587 (T44b §3) | coarse tier 에서는 의미가 없다 (둘 다 거의 잃지 않는다) |
+| ② target recall median (≥ `ball` − 5 pp) | coarse 0.6771 대 0.6771 | 통과 (fine 은 0.9345 대 0.936 통과 그대로) |
+| ③ falsely feasible q (≤ `ball`, oracle with coarse on 기준) | `bo_d3` 73 ≤ `ball` 76 | 통과 |
+| ④ build p90 증가 | +4.033 ms (≤ 10) | 통과 |
+
+lb `gt_label` 도 ② (0.6408 대 0.6408) · ③ (119 ≤ 125) · ④ 가 같은 방향으로 통과한다. **D-sign2 의 verdict**: 기준선 일치 · off 재현 일치. 단 위 §3-3 이 조건 6 위반이므로 A5 단독은 채택할 수 없다.
+
+### 4. A6 — coarse target-free 의 target 바닥 잔류 수정 (sign floor `plane`)
+
+#### 4-1. 원인과 수정
+
+**원인 (lead 가설).** (a) 가 그 잔류를 줄인 것은 V-A6 에서 확인됐지만 원인 자체를 독립 측정으로 분리한 것은 아니다. A5 의 coarse tier 는 seed 를 지우는 높이 (support + 20 mm, table seed 를 지키는 **guard**) 와 TSDF 부호를 target 쪽 양수로 고치는 높이를 한 값으로 묶었다. table 과 target 바닥은 같은 coarse voxel 을 공유하므로 table seed 는 지켜야 하지만, support plane **위** ball 안의 음수 (target 내부) 는 target 것이다.
+
+**수정 (구현자, `T44c.impl.md` A6).** seed 제거 guard 는 그대로 두고 **부호 교정만** ball 의 `z_min` (fine layer 와 같은 metre 값 = support + 5 mm) 까지 내린다. guard 와 plane 사이의 띠 (band) 에서는 seed 를 하나도 지우지 않고, non-seed 이고 공유 영역 밖이며 target 쪽인 voxel 의 부호만 `|d|` 로 바꾼다. support plane 아래는 후보가 아니다. config `esdf.target_free_coarse_sign_floor` (`"guard"` 기본 = A5 그대로, `"plane"` = A6), CLI `--target-free-coarse-sign-floor {guard,plane}`. 합성식 · 값–gradient branch (`curobo_field`) 는 바꾸지 않았다 — `coarse_no_target` layer 의 값만 바뀐다. `n_removed` 는 같고 부호 교정 voxel 만 늘었다 (demo `ball` 2,204 → 2,688, `bo_d3` 2,138 → 2,603; `n_removed` 625 · `n_shared_kept` 30 / 8 불변; V-A6 `coarse_counts`).
+
+**후보 비교 (구현자 smoke, 같은 64 demo frame · `gt_label`, `ball`).** 구현자가 세 후보를 같은 frame 에서 비교했다 (verifier 가 다시 재지 않은 것은 (b)·(ab)).
+
+| 완료 조건 | off | a5 (guard) | **(a) plane** | (b) fine 이 못 본 곳에서만 coarse | (a)+(b) |
+|---|---:|---:|---:|---:|---:|
+| 1 target 내부 음수 점 | 2,021 | 11,180 | **2,302** | 8,416 | 2,272 |
+| 2 distractor 내부 `clearance ≥ margin` frame | 54 | 17 | **17** | **19** | **19** |
+| 4 grasp 직전 (마지막 2 frame) cross query / frame | — | 62 / 13 | **59 / 10** | 59 / 11 | 58 / 10 |
+
+(b) 와 (a)+(b) 는 distractor 내부 frame 이 17 → 19 로 는다 (미세 TSDF 가 관측한 distractor 내부라도 ball 이 지운 자리의 fine 값이 양수라서). 또 (b) 는 "fine 이 관측했는가" 마스크 경계에서 값이 뛴다. 그래서 구현자는 (a) 를 골랐다. (b) 는 코드로 넣지 않고 에뮬레이션했다 (구현자 보고).
+
+단위 test (구현자): A6 신규 14 (`tests/ag3s/test_t44c_a6_sign_floor.py`, GPU 1). 전체 CPU `tests/trajopt tests/ag3s` **2652 passed · 5 skipped · 0 failed**.
+
+#### 4-2. V-A6 — 완료 조건 여섯 개 (verifier, 같은 frame · 같은 정의)
+
+**Figure.**
+
+![A6 scene](figures/t44/t44c-a6-scene.png)
+
+[`t44c-a6-scene.png`](figures/t44/t44c-a6-scene.png) — 실제 장면 (E2-demo, `gt_label`, `ball`, `demo_ep0030_f092`, target apple · 오른팔). "target 내부 음수가 guard 에서 가장 많이 늘어난 frame" 으로 골랐으므로 **대표값이 아니라 최악 frame** 이다 (target 내부 음수 점: off 2 · guard 272 · plane 2). 위 행 = ball 중심을 지나는 x–z 단면 (y = −0.340 m), 아래 행 = support plane + 10 mm 의 수평 단면 (x–y). 열은 off · guard (A5) · plane (A6) 이고 빨강 = 음수, 파랑 = target-free 거리, 검은 실선 = GT target hull, 점선 원 = target ball, 노랑 = support plane. 단면을 자른 위치는 왼쪽 아래 배치도에 표시했다. x–z 단면의 target hull 안 음수 cell: off 0 / 621 · guard 126 / 621 · plane 0 / 621, x–y 단면: off 7 / 392 · guard 374 / 392 · plane 7 / 392. guard 에서 target 바닥을 덮던 음수 띠가 plane 에서 사라지고, table 내부 (support plane 아래) 의 음수는 그대로다.
+
+![A6 graph](figures/t44/t44c-a6-graph.png)
+
+[`t44c-a6-graph.png`](figures/t44/t44c-a6-graph.png) — (a) 조건 1: target 내부 음수 점 (demo · lb × `ball` · `bo_d3`), (b) frame 별 coarse off 대 on 음수 수 (점선 아래 = on 이 더 낫다), (c) 음수의 높이 분포, (d) 조건 2: distractor 내부 낙관 frame, (e) 조건 4: 마지막 2 frame 의 cross, (f) build p90.
+
+![A6 table](figures/t44/t44c-a6-table.png)
+
+[`t44c-a6-table.png`](figures/t44/t44c-a6-table.png) — 조건 1–5 와 값–gradient · build 시간 요약 표.
+
+**완료 조건 판정 (demo 64 frame, `gt_label`; 괄호는 `bo_d3`).** TB = support plane 아래 0–30 mm 의 table 내부 점 (762,720 점), TA = support plane 위 0–10 mm 이고 GT hull 밖인 점 (239,024 점) — 정의는 구현자 smoke 와 같다 (`deviations`). `new > old` = coarse on 의 값이 off 보다 큰 (덜 막는) 점.
+
+| 조건 | off | a5 (guard) | **plane (A6)** | 완료 조건 | 판정 |
+|---|---:|---:|---:|---|---|
+| 1 target 내부 음수 점 (67,361 중) | 2,021 (2,257) | 11,180 (11,331) | **2,302 (2,694)** | ≤ off 수준 | **부분** — off 보다 +281 (+437) |
+| 1 — 높이 < 20 mm 의 음수 (`ball`) | 1,954 | 11,057 | 2,221 | | |
+| 1 — 음수가 있는 frame (`ball`) | 59 | 64 | 60 | | |
+| 2 distractor 내부 `clearance ≥ margin` frame (점) | 54 (3,895) | 17 (2,701) | **17 (2,701)** | ≤ 17 | 충족 |
+| 3 table 내부 (TB) 낙관 뒤집힘 (off < 0 → ≥ 0) | — | 0 | **0** | 0 | 충족 |
+| 3 TB 에서 off 보다 큰 점 | — | 0 | **0** | 0 | 충족 |
+| 3 TA (table 위 10 mm) 에서 off 보다 큰 점 | — | 0 | **0** | 0 | 충족 |
+| 4 마지막 2 frame (32) 의 cross query / frame | 0 / 0 | 62 / 13 | **59 / 10** | 줄어듦 | 충족 (값 보고) |
+| 4 — 64 frame 전체 cross query / frame | 0 / 0 | 82 / 15 | 79 / 12 | | |
+| 5 `new > old` · `new < min(old, d)` (demo + lb 전 set) | — | 0 · 0 | **0 · 0** | 0 | 충족 |
+| 6 guard 재실행 대 D-sign2 (demo `gt_label`, 1,221,446 값) | | max \|diff\| 0.0 | | 비트 동일 | 충족 |
+
+**남은 것 (미충족 항목은 그대로 적는다).**
+
+| 항목 | 값 | 비고 |
+|---|---|---|
+| 조건 1 잔여 | off 대비 **+281 (`ball`) / +437 (`bo_d3`)** 점 (+14 % / +19 %) | 원인은 구현자 진단: 잔여 점의 삼선형 stencil 꼭짓점 중 음수가 **support + 8 mm 층의 ball 밖 voxel** 이다 (ep0001 f092 에서 음수 꼭짓점 112 개 전부 `inball = False`). ball 은 외곽 상한이라는 규칙 (T44) 을 지켜 ball 안만 고쳤다. **verifier 가 이 진단을 따로 재지 않았다** |
+| **TA band 음수** | off **2,609** (`bo_d3` 2,603) → guard 32,501 → **plane 20,944** (`bo_d3` 21,559) | table 위 0–10 mm · hull 밖 점인데 target-free 거리가 음수가 된 점이 8 배가 된다. 값은 off 보다 커지지 않았으므로 (`new > old` 0) 낙관 방향은 아니고 **차단이 늘어나는 방향** 이다. 이 점들이 main composite 에서도 음수인지는 재지 않았다 |
+| TB 음수 (table 내부) | off 332,286 → guard 480,021 → plane 470,954 | 낙관으로 뒤집힌 점은 0 이다. 음수가 늘어난 것은 table 내부를 더 장애물로 읽는 방향이다 |
+| lb 에서 조건 1 | `ball` off 1,872 → guard 10,615 → plane 2,279, `bo_d3` 2,124 → 10,805 → 2,814 | demo 와 같은 방향. lb 의 distractor `clearance ≥ margin` frame 은 off 2 → guard 0 → plane 0 |
+| identity `gt` 에서 조건 1 | demo `ball` 2,027 → 11,196 → 2,569, `bo_d3` 2,371 → 11,605 → 3,261 | `bo_d3` 의 증가가 더 크다 |
+
+#### 4-3. 값–gradient · build 시간 (plane)
+
+| 항목 | guard | plane |
+|---|---:|---:|
+| 값 대 `target_free_distance` 의 최대 차 (demo `gt_label` `ball`, 256,000 점) | 0.0 m | 0.0 m |
+| gradient 방향 cos median (같은 branch) | 0.9797 | 0.9812 |
+| eikonal (finite difference) median (같은 branch) | 0.9939 | 0.9906 |
+| 값의 layer 와 gradient 의 layer 가 다른 점, D + T + grid (`ball`) | 2 | **0** |
+| 같은 점, TB · TA (`ball`, plane 의 TB 87 / 302,529 · TA 16,948 / 106,278) | 108 · 15,948 | 87 · 16,948 |
+
+(`bo_d3` plane 은 D 2, T 0, grid 0, TB 102, TA 17,296.) verifier 의 주석: 불일치 점은 table 위 band 에서 값이 정확히 0 인 점이고, 값이 0 이 아닌 불일치는 plane 에서 `ball` 5 · `bo_d3` 6 점이다.
+
+| coarse tier build p90 (ms, 전용 pass, 112 frame × 10 회) | fine tier 만 (off) | coarse guard | **coarse plane** | plane − guard (paired median · p90) | p90 증가 (plane − off) |
+|---|---:|---:|---:|---|---:|
+| `ball` | 5.416 | 4.778 | 5.561 | 0.526 · 1.626 | +5.352 |
+| `bo_d3` | 9.593 | 5.251 | 6.071 | 0.753 · 1.843 | +5.671 |
+
+pod load 1 분 평균 median 41.05 (최대 356.21, nproc 256), GPU 에는 시작 시 다른 job 이 없었다.
+
+**V-A6 의 verdict (verify.json).** 기준선 일치. guard 재실행이 D-sign2 와 비트 동일 (demo · lb · 두 identity · 두 방법의 모든 값에서 max \|diff\| 0.0), off 도 D-sign2 의 off 와 비트 동일.
+
+#### 4-4. 조건 6 에 대한 현재 판정 상태
+
+| 조건 | 상태 |
+|---|---|
+| 6 (target 이 다시 장애물로 살아나지 않는다) | A5 (guard): **위반** (target 내부 음수 2,021 → 11,180, 64/64 frame). A6 (plane): 성질 위반은 0 (`new > old` 0, `new < min(old, d)` 0, TB 낙관 0) 이고 target 내부 음수는 2,302 로 off 에 가깝다. **off 수준에 완전히 같지는 않다 (+281).** 이것을 받을지는 §7-1 판정 1 이다 |
+
+### 5. S1 — closed-loop 용 붐비는 train episode 의 E0 screening
+
+이 절의 수치는 verify.json 이 아니라 `outputs/verify/T44/LB2/` 의 `candidates.json` · `passed.json` · `agg.json` 에서 왔다 (S1 은 verifier 가 verify.json 을 쓰지 않았다).
+
+**규칙 (실행 전에 고정, `candidates.json`).** pool = train split (episode < 1600) · `success` true · 최근접 **다른** 과일 xy 거리 < 0.10 m (n_pool 1,203). 거리 bin 은 `< 0.08` · `0.08–0.10`, 16 cell = 과일 4 (apple · orange · pear · banana) × 팔 2 × bin 2. pass 1 은 각 cell 의 가장 작은 episode index 16 개, pass 2 는 더 붐비는 `< 0.08` 8 cell 의 두 번째로 작은 episode 8 개 (합 24). E2-demo 와 겹치는 것은 16 episode 이다. seed = 10 · episode + rep (rep = 1, 2; LB · T42 규칙). **통과 = 두 seed 모두** E0 (VLA 단독, `--no-safe`, 장애물 없음) 에서 success (grasp + place) **이고** robust grasp (LB 의 규칙 B) 인 episode (`passed.json` rule). 48 run 을 모두 돌렸다 (`n_runs_done` 48 / 48, pending 0).
+
+**Figure.**
+
+![S1 table](figures/t44/t44c-lb2-table.png)
+
+[`t44c-lb2-table.png`](figures/t44/t44c-lb2-table.png) — 24 episode 의 과일 · 팔 · bin · 최근접 과일 거리 (mm) · E2-demo 겹침 · seed 별 결과 (ok 또는 실패 mode) · PASS / FAIL.
+
+**결과.**
+
+| | 값 |
+|---|---|
+| 후보 · run | 24 episode · 48 run |
+| **통과** | **9 episode** — 12 · 30 · 0 · 3 · 11 · 54 · 123 · 104 · 110 |
+| 탈락 | 15 episode |
+| run 의 mode | ok 27 · no_grasp 12 · slip_in_transport 4 · slip_at_lift 3 · regrasp 2 |
+| episode 탈락 사유 (한 episode 가 둘일 수 있다) | no_grasp 10 · slip_in_transport 3 · slip_at_lift 3 · regrasp 2 |
+
+| 구분 | 통과 / 후보 |
+|---|---|
+| apple | 3 / 6 |
+| orange | 3 / 6 |
+| pear | 3 / 6 |
+| **banana** | **0 / 6** |
+| 왼팔 · 오른팔 | 3 / 12 · 6 / 12 |
+| bin `< 0.08` · `0.08–0.10` | 6 / 16 · 3 / 8 |
+| E2-demo 와 겹침 · 안 겹침 | 5 / 16 · 4 / 8 |
+
+탈락 15 episode 중 **9 episode 는 두 seed 중 한 seed 만 실패**했고 (2 · 22 · 15 · 1 · 60 · 27 · 58 · 74 · 66) **6 episode 는 두 seed 모두 실패**했다 (67 · 100 · 5 · 26 · 152 · 50). banana 는 6 episode 가 모두 탈락했다 (한 seed 만 실패 3, 둘 다 실패 3). 통과한 episode 에도 `drift_mm_max` 가 200 mm 를 넘는 seed 가 있다 (episode 12 의 seed 122 가 228.4 mm, episode 0 의 seed 1 이 222.3 mm; 규칙 B 가 그것을 허용했다 — `passed.json`). 이 drift 의 의미는 `grasp_robust.py` 의 정의를 따로 읽어야 하고 이 절에서 해석하지 않는다.
+
+### 6. 측정의 한계
+
+| 항목 | 내용 |
+|---|---|
+| closed-loop 효과 | 전부 미측정. A5 · A6 의 모든 측정은 demonstration 자세 (policy rollout 이 아니다) 와 기록된 frame 위의 offline 기하 측정이다 |
+| identity | GT Gaussian attention + identity 강제 (`gt` · `gt_label`). 실제 VLA attention 으로 pipeline 이 고르는 identity 에서는 재지 않았다 (`not_measured`) |
+| `safe_policy` 의 verdict 분류 | `trajopt/safe_policy.py` 의 `_NOT_TARGET_TIERS = ("target_free", "static")` 에 `target_free_coarse` 가 없다. 그 tier 가 답한 권한 행의 위반이 `answer_excludes_target` 대신 거리 일치 검사로 가서 `collision` 또는 `unresolved_tier:target_free_coarse` (HOLD) 가 된다. 어느 쪽이든 멈추는 쪽 (fail-closed) 이지만 사유가 다르다 (구현자, verifier `not_measured`). §7-1 판정 3 |
+| target 바깥 0–10 mm shell | target 표면 바깥 0–10 mm 점을 별도 집합으로 재지 않았다. authorized 구와 grid offset 만 쟀다 (D-sign2 `not_measured`) |
+| coarse 이산화 편향 | 새 식은 창 안 권한 행에 `c` 를 넣으므로 table · crate · 이웃 과일 근처에서 권한 구의 target-free 거리가 줄 수 있다 (구현자 smoke 의 최대 감소 2–7 mm). verifier 는 §3-2 의 감소량 분포 (median 3.7 mm, p95 11.9 mm, max 43.3 mm) 를 쟀지만 그 원인 분해를 하지 않았다 |
+| build 시간 | 공유 pod 의 측정이다. D-sign2 timing pass 는 verifier S1 (serve_safe 2 · client 2) 과 겹쳐 돌았다 (load median 41.52). V-A6 는 load median 41.05 · 최대 356.21. idle pod 의 build ms 는 미측정 |
+| oracle coarse | harness 에 coarse oracle 이 없어 verifier 가 정의했다 (GT target label seed 를 ball + 20 mm 안에서 제거, z 제한 없음, 공유 voxel 보존 없음). 표의 "oracle" 열은 이 정의다 (`deviations`) |
+| 집합 정의 | TB · TA 는 구현자 smoke 의 정의를 따랐다. `gtNT` 기반 과소평가 count 는 off 에서도 켜지므로 쓰지 않았다 (D-sign2 `deviations`) |
+| verifier 의 사전 지식 | V-A6 는 구현자 A6 smoke 숫자를 측정 후에 비교했다 (측정 전에 읽지 않았다, `not_measured`) |
+| gradient pool | V-A6 의 gradient pool 은 D-sign2 와 다르다 (TB · TA 가 추가됨). 값–gradient layer 불일치는 TA band 의 값 0 점에 모여 있다 |
+| coarse tier 의 recall | coarse target recall median 0.6771 (fine 0.936) — coarse 가 target 을 덜 지운다는 것이 §3-3 의 원인과 같은 방향이다. 이것이 closed-loop contact 에 미치는 영향은 측정하지 않았다 |
+| S1 | verify.json 이 없고 `agg.json` 이 출처다. E0 는 장애물 없는 VLA 단독이라 target exclusion 과 무관하다. 통과 판정은 2 seed 이고 한 seed 만 실패한 episode 9 개는 seed 를 늘리면 통과할 수 있는지 알 수 없다 |
+| 코드 상태 | D-sign2 는 HEAD 498f713 + 변경 파일 (md5 는 `T44c.verify.json` `code_state`), V-A6 는 HEAD 9bf5bcd 에 관련 변경 파일 없음 (`T44c-A6.verify.json` `code_state`). 이 절을 쓰면서 커밋하지 않았다 |
+
+### 7. 사용자 판정 대기 · 아직 모르는 것 · 되돌아올 지점 · 산출물
+
+#### 7-1. 사용자 판정 대기
+
+아래는 판정이 필요한 항목과 그 근거 측정이다. 어느 것도 scribe 가 정하지 않았다.
+
+| # | 판정할 것 | 근거 (verify.json · impl.md) | 아직 모르는 것 |
+|---|---|---|---|
+| 1 | **A6 잔여를 수용할지** — (1) 조건 1 의 target 내부 음수가 off 보다 `ball` +281 · `bo_d3` +437 점이다 (2,302 / 2,694 대 2,021 / 2,257). (2) TA band (support 위 0–10 mm · hull 밖) 의 음수가 2,609 → 20,944 로 늘어 차단이 늘어난다 (낙관 방향은 0). 수용하지 않으면 ball 밖 voxel 까지 부호 교정을 넓혀야 하고, 그것은 "ball = 외곽 상한" 규칙 (T44) 을 coarse 에 한해 완화하는 것이다 (구현하지 않았다) | §4-2: 조건 2 · 3 · 4 · 5 · 6 충족, 조건 1 부분 충족. 잔여의 원인은 구현자 진단 (support + 8 mm 층의 ball 밖 voxel, verifier 미확인) | TA band 의 음수 점이 main composite 에서도 음수인지 · closed-loop 에서 table 근처 접촉을 얼마나 막는지 · ball 밖으로 넓힐 때 target 내부 음수가 off 이하로 가는지 |
+| 2 | **coarse 가 on 일 때 `plane` 을 기본으로 할지** — 지금은 `--target-free-coarse` 만 주면 A5 (guard) 다. `plane` 은 `--target-free-coarse --target-free-coarse-sign-floor plane` 이어야 한다. guard 는 조건 6 을 위반하므로 비교 말고는 쓸 이유가 없다 (구현자) | §3-3 (guard 11,180) · §4-2 (plane 2,302) | guard 를 closed-loop arm 의 비교로 남길 필요가 있는지 |
+| 3 | **`_NOT_TARGET_TIERS` 에 `target_free_coarse` 를 추가할지** (`trajopt/safe_policy.py`, 구현자 소유 밖) — 안 하면 그 tier 가 답한 권한 행의 위반이 `collision` 또는 `unresolved_tier:target_free_coarse` (HOLD) 로 분류된다 (fail-closed, 사유만 다르다). 하면 `answer_excludes_target` 으로 분류된다 | §6 (구현자 보고, verifier `not_measured`). §3-1 에서 `target_free_coarse` 가 답한 점이 distractor 내부 점의 절반 이상 (36,836 점, `ball`) 이다 | 분류를 바꿨을 때 closed-loop 의 HOLD · collision 수 |
+| 4 | **closed-loop arm 구성과 착수** — 사용자 판정 (두 번째) 2 · 3 · 4 의 구성: `ball_owned` d=3 과 split (12 mm + raw ratio) 둘 다를 arm 에 (기본값 유지) · carry 권한 N=1 (`arm_6`) · `--links gripper` (기본) 에 `--links arms` arm 추가. 거기에 coarse off / on (`plane`) 을 어떻게 짝지을지, 어느 episode 로 돌릴지 (S1 통과 9 episode, banana 0) | §1 (판정) · §5 (S1) | arm 수와 episode 수의 곱 (비용), banana 를 빼고 돌릴지, S1 의 한 seed 만 실패한 9 episode 를 후보에 넣을지 |
+
+#### 7-2. 그 밖에 아직 모르는 것
+
+| 항목 | 상태 |
+|---|---|
+| ball 밖 voxel 을 포함한 부호 교정 (거친 voxel 정육면체가 ball 과 겹치면 후보) | 구현하지 않았다. 효과 미측정 |
+| coarse tier 의 build 시간이 closed-loop 의 시간 예산에 주는 영향 | p90 +5.4 ~ +5.7 ms (offline 전용 pass) 만 안다. server 의 chunk 시간에 미치는 영향은 미측정 |
+| S1 통과 episode 에서 E0 가 아닌 arm (장애물 없음 + AG3S) 의 거동 | 미측정 |
+| `drift_mm_max` 200 mm 이상인 통과 seed 의 의미 | `grasp_robust.py` 정의를 따로 읽어야 한다 |
+| target 내부 음수의 frame 수 60 대 59 (off) | plane 에서 음수가 한 frame 더 생겼다. 그 frame 의 정체는 확인하지 않았다 |
+
+#### 7-3. 되돌아올 지점 — 고르지 않은 선택지
+
+| 안 고른 것 | 왜 | 전환 신호 |
+|---|---|---|
+| (b) 창 안에서 coarse 는 fine 이 관측하지 못한 voxel 에서만 합성 | 구현자 smoke 에서 distractor 내부 frame 이 17 → 19 로 늘었다 (조건 2 위반). 마스크 경계에서 값이 뛴다 (구현자) | 조건 2 의 기준이 완화되고 불연속 값이 허용될 때 |
+| (a)+(b) 조합 | 같은 이유 (19 frame). 조건 1 은 (a) 보다 30 / 39 점만 더 줄인다 (구현자) | 위와 같다 |
+| 하한 `max(d, min(f, c, max(d, b)))` (첫 안) | `f < d` 인 점 13/2000 에서 예전보다 덜 보수적이었다 (구현자 GPU smoke) | — (측정에서 열세) |
+| `c` 를 음수일 때만 쓰는 변형 `min(f, min(c, 0), …)` | coarse 이산화 편향이 클 때의 대안이지만 불연속이 생긴다 (구현자 판정 필요 2) | §3-2 의 거리 감소가 closed-loop contact 를 막는 것으로 드러날 때 |
+| A5 (sign floor `guard`) 를 기본으로 | 조건 6 위반 (target 내부 음수 11,180) | — |
+
+#### 7-4. 이 STEP 의 산출물
+
+- **코드 (benchmark repo, flag 기본 off)**: A5 — `ag3s/fields/curobo_builder.py` · `curobo_field.py` · `ag3s/config.py` · `ag3s/runtime/pipeline.py` · `ag3s/experiments/sources/constraint_record.py` · `trajopt/serve_safe.py` · `ag3s/experiments/live/exclusion_e2.py` · `tests/ag3s/test_t44c_target_free_coarse.py` (26) · `tests/trajopt/test_t44c_target_free_coarse_branch.py` (3). A6 — `curobo_builder.py` · `ag3s/config.py` · `trajopt/serve_safe.py` · `exclusion_e2.py` · `tests/ag3s/test_t44c_a6_sign_floor.py` (14).
+- **측정**: `handoff/T44c.verify.json` (D-sign2) · `handoff/T44c-A6.verify.json` (V-A6). 원자료: `outputs/verify/T44/E2c/` (`agg_e2c.json` · `raw_demo/` · `raw_lb/` · `timing/` · `repro_vs_e2b.json`) · `outputs/verify/T44/E2d/` (`agg_e2d.json` · `raw_demo/` · `raw_lb/` · `timing/`). S1: `outputs/verify/T44/LB2/` (`candidates.json` · `passed.json` · `agg.json` · `runs/`).
+- **구현 · 설계**: `handoff/T44c.task.md` · `T44c.impl.md` (A5 · A6 두 절) · `T44c.progress.md` · `T44c-A6.progress.md`. A6 smoke: `outputs/impl/T44/A6/` (`a6_agg.json` 외).
+- **figure**: `figures/t44/` — `t44c-scene` · `t44c-graph` · `t44c-table` (D-sign2) · `t44c-a6-scene` · `t44c-a6-graph` · `t44c-a6-table` (V-A6) · `t44c-lb2-table` (S1). 각각 `.json` sidecar 가 있다.
+
+---
+
+## T44d — closed-loop 4 arm (C0 · C1a · C1b · C2) 와 원인 분석 (2026-10-10)
+
+**이 절이 답하는 물음.** T44 · T44b · T44c 의 측정은 모두 offline 이었다 (기록 frame 과 demonstration 자세 위의 기하 측정). 이 절은 그 변경 — `ball_owned` exclusion · split 12 mm · `--target-permission-strict` (C1a), 거기에 target-free coarse tier (C1b), 거기에 `--links arms` (C2) — 이 **붐비는 train episode 의 closed-loop 에서 이웃 과일 · 비권한 link 접촉을 줄이면서 grasp · task 성공과 HOLD 를 악화시키지 않는가** 를 쟀다 (`T44d.task.md`). 완료 조건은 제거량이나 offline 지표가 아니라 실제 접촉 · 파지 · 성공이다 (근거 문서 §2.3).
+
+**한 줄 결과.** 4 arm 을 같은 18 (episode, seed) 에 돌렸고 72 run 이 모두 첫 시도에 끝났다 (인프라 재실행 0 · timeout 0 · 통신 실패 0). task success 는 **C0 14 · C1a 15 · C1b 7 · C2 0** /18, CT success 는 **13 · 12 · 4 · 0** /18 이다. **coarse tier 를 켠 C1b 에서 성공이 반으로 줄었고, `--links arms` 를 더한 C2 는 한 run 도 grasp 하지 못했다.** CL-analysis 는 두 하락의 원인을 각각 찾았다. C1b 는 coarse tier 가 table 표면을 위로 들어 올려 손이 높게 잡은 것 (Q1), C2 는 `link_*_arm_5` 가 비권한 link 라 target 에 full margin 50 mm 를 받아 손이 target 에서 50 mm 이상 멀리 유지된 것이다 (Q2). 배선 오류는 찾지 못했다. n = 18 이라 아래 검정은 기술적 (descriptive) 결과로만 읽는다.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `handoff/T44d.verify.json` (CL-run, 이하 **CL-run**) 과 `handoff/T44dA.verify.json` (CL-analysis, 이하 **CL-analysis**) 의 `numbers` 에서만 왔다. 표 머리에 어느 쪽인지 밝혔다. 두 verify.json 의 숫자에서 덧셈 · 뺄셈 · 개수 세기로 구한 값은 "(산출)" 이라고 표시했다. 사용자 판정과 arm 정의는 `T44d.task.md`, A7 의 구현 내용은 `T44c.impl.md` A7 절 (구현자 보고) 에서 왔다.
+- 해석은 두 verify.json 의 `verdict` · `not_measured` 가 허용하는 범위로 제한한다. **CL-analysis 의 arm 간 원인 귀속은 관찰적이다.** 같은 상태에서 C1a 와 C1b 를 다시 돌린 closed-loop counterfactual 은 하지 않았다 (`not_measured`).
+- 시각은 UTC 이고 파일 시각 (마지막 수정) 이다. 그림 · 영상은 verifier 가 만들었고 `figures/t44/` 에 sidecar `.json` 과 함께 있다. scribe 는 링크만 한다.
+- 코드는 benchmark `f891abe` (git archive 를 `/mnt/dev/work-t44cl/benchmark` 에 풀어 서버를 거기서 띄웠다. 작업 트리 변경이 실행에 섞이지 않는다), 루트 tests `45e79cb`. `code_state.dirty_files` 는 비어 있고 모든 chain 이 "code md5 == CL-0" 로 확인됐다.
+- **이 절에 나오는 "수정 후보" 는 CL-analysis 가 제시한 것이고 구현하지 않았다.** 해당 자리에 그렇게 표시했다.
+
+### 1. 사용자 판정 (세 번째) · arm · 타임라인
+
+| # | 질문 | 판정 (2026-10-10, 세 번째) | 이 절에서 |
+|---|---|---|---|
+| 1 | closed-loop 구성 | **4 arm** — coarse 를 따로 떼어 grasp 에 해가 되는지 가른다 | §2 · §3 |
+| 2 | coarse on 일 때 sign floor 기본 · 분류 | **`plane` 이 기본, `target_free_coarse` 를 `_NOT_TARGET_TIERS` 에** (A7, `T44c.impl.md`) | §2 (C1b · C2 의 서버 시작 확인) |
+
+| arm | server flag (V11AB 기준 위에) |
+|---|---|
+| **C0** | V11AB 그대로 (`T43/V11/p/start_server.sh V11AB` 의 flag) + `--to-fast-eval --esdf-host-mirror` (V11AB 와 출력 bit-identical, 시간만 단축) |
+| **C1a** | C0 + `--target-exclusion ball-owned --owned-max-dist-voxels 3 --attention-split-radius-mm 12 --attention-split-ratio-source raw --target-permission-strict` (`--held-permission-parent-links` 기본 1 = `arm_6`) |
+| **C1b** | C1a + `--target-free-coarse` (sign floor 기본 `plane`) |
+| **C2** | C1b + `--links arms` (forearm · arm link 구 포함) |
+
+| 시각 (UTC) | 무엇 | 출처 |
+|---|---|---|
+| 2026-10-10 16:46 | A7 구현 보고 (sign floor 기본 `plane` · `_NOT_TARGET_TIERS`) | `T44c.impl.md` (파일 시각) |
+| 16:47–16:48 | benchmark `f891abe` · 루트 tests `45e79cb` 커밋 | `git log` (커밋 시각) |
+| 16:47 | T44d task (4 arm · 18 짝 · 측정 6 항목) | `T44d.task.md` (파일 시각) |
+| 16:54–18:03 | **block 1** 실행 (pod load 미샘플) | `numbers.pod_load_during_runs` |
+| 18:11–20:25 | block 2 · 3 실행 (pod load 60 s 간격 133 샘플) | 같은 곳 |
+| 20:31–20:33 | CL-run 집계 · figure 3 장 · mp4 2 개 · `T44d.verify.json` | verify.json · figure (파일 시각) |
+| 21:12–21:15 | **CL-analysis** figure 3 장 · `T44dA.verify.json` | verify.json · figure (파일 시각) |
+
+회귀 기준선: 두 verify.json 모두 **실행하지 않았다** (`regression_baseline` "not run (CL-run: execute and aggregate only)" · CL-analysis `baseline_check.matched` null). CL-analysis 는 기록된 raw 의 CPU 재분석이라 코드를 돌리지 않았고, 대신 FK 와 field re-query 가 기록값과 같은지 확인했다 (§4-1).
+
+### 2. 설정
+
+| 항목 | 내용 (CL-run `design`) |
+|---|---|
+| episode | `LB2/passed.json` 의 **9 episode** (train split, 최근접 다른 과일 < 0.10 m, E0 두 seed 성공) — 12 · 30 · 0 · 3 · 11 · 54 · 123 · 104 · 110. seed 2 개 (10·ep+1, 10·ep+2, S1 과 같다). **18 짝 · arm 당 18 run · 총 72 run** |
+| target 과일 | apple 3 (12 · 30 · 54) · orange 3 (0 · 3 · 123) · pear 3 (11 · 104 · 110). **banana 는 LB2 에서 통과 0 이라 없다** |
+| 팔 | 왼팔 episode 12 · 0 · 104, 오른팔 30 · 3 · 11 · 54 · 123 · 110. 최근접 이웃 xy 거리 0.0753–0.0949 m 범위 (episode 마다 `episodes_info`) |
+| client | `--safe-remote --safe-timeout 120 --safe-phase approach --safe-manipulators <side> --safe-gate reasons --safe-hold-mode measured --obstacle-stop-distance 0 --viz-avoidance-arrow --max-steps 600 --warmup-steps 1000`. **장애물 (허들) 없음** — 이웃 과일이 비교 대상이다. 서버는 `--record-constraints` |
+| 순서 | 6 짝씩 3 block. round 1 은 두 arm 을 두 서버 (포트 8280 · 8281) 에서 병렬, round 2 는 나머지 두 arm. 짝 (C0, C1b) · (C1a, C2). block 2 는 round 순서를 바꿨다 |
+| 서버 시작 확인 | 12 번 모든 서버 시작에서 guard 통과: TO `target_permission_strict` ON · AG3S `target_exclusion = ball_owned tie 1.00 max_dist 3.00` · `attention_split_radius=0.012 ratio_source=raw` · finger cover 122→270 (C0 · C1a · C1b) 또는 274→422 + `CONSTRAINT SCOPE IS ARMS` (C2). C0 에는 `ball_owned` · strict 가 없다 |
+| coarse 확인 | 서버 시작 log 에는 coarse 줄이 없고 첫 frame 에 `T44c TARGET-FREE COARSE TIER IS ON ... sign_floor plane` 이 찍힌다. C1b · C2 에는 있고 C0 · C1a 에는 없다 (chain log "coarse check ok") |
+| 성공 정의 | task success = grasp (target z ≥ z0 + 50 mm) ∧ place (마지막 planning 행에서 target 중심이 crate 안). CT success = 위 용어 (**CT success (T44d)**). 접촉 replay 에서 qpos 불일치 0 행 (72 replay) |
+| 집계 | 실패 · timeout · HOLD run 도 분모에 넣었다. 인프라 재실행 규칙은 있었지만 쓰지 않았다 (`n_done_first_attempt` 72, `infra_reruns` 0) |
+
+### 3. CL-run 결과 (`T44d.verify.json`)
+
+#### 3-1. 성공 · grasp
+
+![T44d table](figures/t44/t44d-table.png)
+
+[`t44d-table.png`](figures/t44/t44d-table.png) — arm 별 지표 요약 표 (성공 · grasp · 접촉 · HOLD · 시간). [`t44d-graph.png`](figures/t44/t44d-graph.png) 는 같은 지표의 graph.
+
+![T44d graph](figures/t44/t44d-graph.png)
+
+| 지표 (n/18) | C0 | C1a | C1b | C2 |
+|---|---|---|---|---|
+| **task success** | **14** | **15** | **7** | **0** |
+| **CT success** | **13** | **12** | **4** | **0** |
+| success_rel (Z4 release) | 14 | 15 | 7 | 0 |
+| grasp (final) | 14 | 15 | 10 | 0 |
+| first grasp ok (regrasp 없음) | 12 | 14 | 9 | 0 |
+| regrasp run | 2 | 1 | 1 | 0 |
+| slip run (규칙 B) | 0 | 1 | 2 | 0 |
+| robust grasp | 12 | 13 | 7 | 0 |
+| place | 14 | 15 | 7 | 0 |
+
+| run 의 failure mode | C0 | C1a | C1b | C2 |
+|---|---|---|---|---|
+| ok | 12 | 13 | 7 | 0 |
+| no_grasp | 4 | 3 | 8 | 18 |
+| regrasp | 2 | 1 | 1 | 0 |
+| slip_in_transport | 0 | 1 | 1 | 0 |
+| slip_at_lift | 0 | 0 | 1 | 0 |
+
+C1b 는 grasp (final) 10 인데 place 가 7 이다. 쥐었으나 놓는 곳까지 못 간 run 이 3 개 (산출) 라는 뜻이다.
+
+target 과 손가락의 최소 거리와 target 의 최대 들림 (`per_run` 에서 산출):
+
+| arm | run 별 `min_finger_target_mm` (최소 / 중앙 / 최대) | `target_dz_max_mm` > 5 mm 인 run |
+|---|---|---|
+| C0 | 34.9 / 38.8 / 41.0 | 16 / 18 |
+| C1a | 33.9 / 36.9 / 41.5 | 17 / 18 |
+| C1b | 30.9 / 39.3 / 44.3 | 11 / 18 |
+| **C2** | **50.4 / 95.4 / 106.6** | **0 / 18** (최대 0.6 mm) |
+
+C2 의 18 run 은 모두 `no_grasp` 이고, 손가락이 target 에 50.4 mm 보다 가까이 간 적이 없으며 target 은 움직이지 않았다 (`C2_min_finger_target_mm_range` [50, 107], `C2_runs_target_dz_max_gt_5mm` 0). C2 의 원인은 §4-2.
+
+#### 3-2. 짝지은 비교 (McNemar exact, 양측, n = 18 짝)
+
+두 arm 의 성공 · 실패가 갈린 짝만 쓰는 검정이다 (용어: **exact McNemar p**). 5 개 arm 쌍을 모두 봤고 **다중 비교 보정은 하지 않았다.** 18 짝이라 p 는 방향의 일관성을 보는 참고값이다.
+
+| 비교 (A 대 B) | 지표 | A만 성공 | B만 성공 | 둘 다 | p |
+|---|---|---|---|---|---|
+| C0 대 C1a | CT success | 2 (ep30_s301 · ep54_s541) | 1 (ep11_s111) | 11 | 1.0 |
+| | task success | 0 | 1 (ep11_s111) | 14 | 1.0 |
+| **C0 대 C1b** | **CT success** | **9** | **0** | 4 | **0.0039** |
+| | task success | 7 | 0 | 7 | 0.0156 |
+| C0 대 C2 | CT success | 13 | 0 | 0 | 0.00024 |
+| | task success | 14 | 0 | 0 | 0.00012 |
+| C1a 대 C1b | CT success | 9 | 1 (ep30_s301) | 3 | 0.0215 |
+| | **task success** | **8** | **0** | 7 | **0.0078** |
+| C1b 대 C2 | CT success | 4 | 0 | 0 | 0.125 |
+| | task success | 7 | 0 | 0 | 0.0156 |
+
+- C0 대 C1a 는 갈린 짝이 3 개뿐이고 방향이 한쪽으로 쏠리지 않았다 (CT success 13 → 12, task success 14 → 15). C1a 가 C0 에 비해 **성공을 해쳤다는 증거는 없고 개선했다는 증거도 없다.**
+- C1a 대 C1b 에서 C1b 만 성공한 짝은 CT success 의 ep30_s301 하나뿐이다. task success 는 **C1a 만 성공한 짝이 8 개이고 C1b 만 성공한 짝이 0 개**다. 갈린 짝 8 개 (ep0_s1 · ep11_s111 · ep11_s112 · ep12_s122 · ep104_s1042 · ep110_s1101 · ep123_s1231 · ep123_s1232) 가 **coarse tier 를 켠 뒤의 하락**이다.
+- C0 대 C1b 에서 task success 를 C1b 만 이긴 짝은 0 개다. ep11_s111 은 C0 · C1b 모두 task 실패이고 C1a 만 성공한다.
+
+#### 3-3. 접촉
+
+접촉 class 는 위 용어. `release_t` 이전 (pre-release) 만이 CT success 를 깎는다.
+
+| class | 지표 | C0 | C1a | C1b | C2 |
+|---|---|---|---|---|---|
+| **hand–fruit_other** | run | 3 | 5 | 5 | 2 |
+| | 접촉 행 (control row) | 74 | 50 | 19 | 41 |
+| | 이 run | ep3_s31 · ep3_s32 · ep54_s542 | ep30_s301 · ep3_s31 · ep3_s32 · ep54_s541 · ep54_s542 | ep30_s302 · ep3_s31 · ep3_s32 · ep54_s541 · ep54_s542 | ep3_s31 · ep110_s1101 |
+| robot_other–target | run / 행 | 0 / 0 | 0 / 0 | 1 / 3 (ep110_s1101, pre-release 0) | 0 / 0 |
+| robot_other–fruit_other | run / 행 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| hand–target | run | 18 | 18 | 18 | 4 |
+| | 접촉 행 | 2,644 | 2,227 | 1,784 | 41 |
+| 새 class 접촉이 있는 run | | 3 | 5 | 6 | 2 |
+
+- **hand–fruit_other 의 run 수는 줄지 않았다** (3 → 5 → 5 → 2). 접촉 행은 74 → 50 → 19 로 줄었지만 같은 순서로 hand–target 행도 2,644 → 2,227 → 1,784 로 줄었다. 접촉 행의 감소를 exclusion 의 효과로 읽을 수 없다. 원인은 §4-4.
+- C0 대 C1a 에서 C1a 에만 새로 생긴 pre-release 접촉 run 은 ep30_s301 · ep54_s541 (둘 다 CT success 를 잃은 짝) 이다. C0 · C1a 모두 접촉이 있는 run 은 ep3_s31 · ep3_s32 · ep54_s542 다.
+
+#### 3-4. HOLD · timeout
+
+| 지표 | C0 | C1a | C1b | C2 |
+|---|---|---|---|---|
+| HOLD chunk | 140 | 54 | 154 | 20 |
+| HOLD run | 5 | 14 | 12 | 8 |
+| run 당 HOLD chunk (중앙 / 최대) | 0 / 63 | 1 / 34 | 1 / 38 | 0 / 5 |
+| 끝에 걸린 (trailing) HOLD run | 3 | 1 | 3 | 0 |
+| HOLD kind: collision | 66 | 19 | 46 | 20 |
+| HOLD kind: uncertified | 74 | 34 | 107 | 0 |
+| HOLD kind: unverified | 46 | 1 | 3 | 0 |
+| timeout · 통신 실패 · obstacle stop | 0 | 0 | 0 | 0 |
+| `to_status` violated chunk | 140 | 56 | 157 | 21 |
+| run wall (s, 중앙 / p90) | 292.5 / 315.6 | 313.5 / 330.0 | 290.5 / 304.9 | 310.0 / 337.8 |
+
+(HOLD kind 의 합이 HOLD chunk 수와 다른 arm 이 있다 — C0 186 대 140, C1b 156 대 154. 표는 `hold_kinds` 를 그대로 옮겼고 불일치의 원인은 verify.json 에 없다.)
+
+C1a 에서 HOLD chunk 는 줄었지만 HOLD 가 있는 **run 은 5 → 14** 로 늘었다. 이것이 Q3 이다 (§4-3). C0 의 140 chunk 중 63 은 한 run 에 몰려 있다.
+
+#### 3-5. 시간
+
+| ms (chunk, n = 1,332 / arm, 중앙 / p90) | C0 | C1a | C1b | C2 |
+|---|---|---|---|---|
+| TO (server trajopt) | 167 / 534 | 196 / 526 | 195 / 533 | **483 / 806** |
+| AG3S (server) | 310 / 548 | 341 / 626 | 316 / 499 | 352 / 561 |
+| server total | 1,108 / 1,533 | 1,167 / 1,657 | 1,123 / 1,558 | 1,433 / 1,910 |
+| client round trip | 1,399 / 1,860 | 1,481 / 2,003 | 1,390 / 1,891 | 1,783 / 2,249 |
+| exclusion classify (run 중앙값의 중앙) | 2.4 | 7.2 | 6.6 | 6.6 |
+| coarse build (run 중앙값의 중앙) | — | — | 6.4 | 6.4 |
+
+- **round trip 이 chunk period 533 ms 를 넘은 chunk 는 arm 마다 1,332 / 1,332 다.** policy inference 가 round trip 안에 들어 있어 4 arm 모두 같다 (`round_trip_gt_533ms`). 이것은 arm 간 차이가 아니다.
+- C2 의 TO 중앙값은 C1b 의 약 2.5 배이다 (산출: 483 / 195). §4-2 의 arm_5 행이 최악 행이었던 chunk 가 많은 것과 같은 방향이지만 시간 분해는 하지 않았다.
+- **공유 pod 의 측정이다.** 실행 중 pod 전체 load 1 분 평균 중앙값 32.22 (최소 14.3 · 최대 370.15), working set 최대 28.2 GiB, GPU 최대 36,142 MiB. block 1 (16:54–18:03) 은 샘플이 없다. arm 간 시간 차이는 (C0, C1b) · (C1a, C2) 병렬 짝으로 부하를 맞췄지만 **idle pod 의 시간이 아니다.**
+
+#### 3-6. server trace (T44 I0 trace 의 run 합, 18 run 합)
+
+| 키 | C0 | C1a | C1b | C2 |
+|---|---|---|---|---|
+| ball 이 있었던 chunk (`ball_chunks`) | 547 | 528 | 943 | 1,350 |
+| split 발화 chunk (`split_fired_chunks`) | 186 | 239 | 290 | 558 |
+| split 성분 수 | 400 | 544 | 645 | 1,382 |
+| split 이 발화한 run | 17 | 18 | 18 | 18 |
+| ball 안 seed (합) | 518,457 | 471,242 | 836,908 | 1,640,582 |
+| 제거 seed (`n_removed`) | 518,457 | 429,712 | 700,250 | 1,425,136 |
+| 보존 non-target seed (`n_kept_nontarget`) | 0 | 13,392 | 41,246 | 37,892 |
+| **ambiguous seed (`n_ambiguous`)** | 0 | 28,138 | 95,412 | 177,554 |
+| 제거된 unowned seed | 0 | 180,686 | 306,822 | 598,626 |
+| non-target 이 보존된 chunk | 0 | 369 | 772 | 1,158 |
+| coarse chunk | 0 | 0 | 943 | 1,350 |
+| coarse `n_shared_kept` (합) · 있었던 chunk | 0 · 0 | 0 · 0 | 1,574 · 485 | 4,575 · 1,069 |
+| coarse 가 제거한 seed (`coarse_n_removed`) | 0 | 0 | 6,695 | 14,735 |
+| permission 으로 제외한 행 (`perm_n_rows_excluded_max`) | 135 | 135 | 135 | 135 |
+
+- C0 는 `ball` 이라 `n_removed` = `n_seeds_in_ball` 이고 나머지 칸이 0 이다 (T44 trace 의 정의). `ball_owned` 를 켠 arm 부터 보존 · ambiguous · unowned 가 생긴다.
+- **`target_rows_unauthorized_kept` 는 이 표에 없다.** CL-run 에서 0 으로 집계됐지만 그 키는 `PathChecker` 만 쓰고 이 실행에서는 `sweep_check` 가 모든 arm 에서 꺼져 있다 — **측정값 0 이 아니라 기록되지 않은 것**이다 (`not_measured`).
+- ball 이 있었던 chunk 수와 split 발화 chunk 수는 arm 마다 크게 다르다 (C2 1,350 · 558, C0 547 · 186). 이 차이의 원인은 분해하지 않았다. arm 간 합 비교는 run 길이와 접근 단계 체류 시간의 영향을 받는다.
+
+### 4. CL-analysis — 원인 (`T44dA.verify.json`)
+
+arm 간 결과가 갈린 (episode, seed) 짝마다 **첫 갈림 chunk** 를 찾고, 그 chunk 의 T44 trace (제거 seed · 권한 행 · 답 tier · split) 와 접촉 event 를 이었다. 질문 네 개와 verifier 의 verdict 는 다음이다.
+
+| Q | 질문 | CL-analysis verdict (`verdict`) |
+|---|---|---|
+| **Q1** | C1b 가 왜 C1a 보다 grasp 에 실패하는가 — HOLD 인가, coarse 인가 | **coarse tier 가 원인.** support surface 의 zero level 이 ball 아래에서 0 → 11.5 mm 로 올라가 손이 위로 들렸다. HOLD 가 첫 갈림 원인인 짝은 0 / 7 |
+| **Q2** | C2 가 왜 0 / 18 인가 — 배선 오류인가 | **배선 오류 없음.** permission mask 는 비어 있지 않다 (135 행). `link_*_arm_5` 가 비권한 link 라 target 에 full margin 50 mm 를 받는다 |
+| **Q3** | C1a 의 HOLD run 이 5 → 14 로 는 이유 | close 시점에 `ball_owned` 가 ambiguous seed 를 보존해서 권한 손가락 위반이 난다 |
+| **Q4** | hand–fruit_other 접촉이 줄지 않은 이유 | exclusion 효과가 아니다. palm 구 반지름 · 추적 오차 · banana 의 관측 부족 |
+
+![T44dA graph](figures/t44/t44da-graph.png)
+
+[`t44da-graph.png`](figures/t44/t44da-graph.png) — Q1 의 dz7 분포 · zero level · close+8 의 dz. [`t44da-scene.png`](figures/t44/t44da-scene.png) 는 coarse on / off 의 x–z 단면 (아래 그림), [`t44da-table.png`](figures/t44/t44da-table.png) 는 짝별 · Q 별 요약 표.
+
+#### 4-1. Q1 — C1b 의 하락은 coarse tier (table lift) 다
+
+**(1) field 에서 직접 보이는 것.** C1b 의 기록된 float16 grid 에서 coarse layer 만 빼고 (= C1a 합성) 같은 sphere 로 다시 질의했다 (**coarse OFF re-query**). 재질의가 기록값을 재현하는지 먼저 확인했다 — C1b_ep12_s122 의 TO 최악 행 4 개를 재질의하면 d − r 이 9.30 · 1.88 · −7.18 · 3.65 mm 이고 기록값은 −0.7 · −8.1 · −7.18 · −6.38 mm 이다 (fp16 에 obstacle margin 10 mm 를 뺀 뒤 같다, seq 49 행은 margin 0). constraint sphere 모델은 FK 가 기록된 sphere 중심과 최대 4.3e-7 m 로 일치한다.
+
+| 지표 (approach 72 chunk = 18 run × 4) | C0 | C1a | **C1b** | C2 |
+|---|---|---|---|---|
+| **dz7 중앙값 (mm)** | 0.0 | 0.0 | **1.95** | 4.70 |
+| dz7 p90 (mm) | 3.92 | 4.76 | 11.07 | 40.68 |
+| dz7 > 3 mm 인 chunk 비율 | 0.139 | 0.167 | **0.417** | 0.556 |
+| `frac_dq_gt_0.01` (key 이름, 정의 없음) | 0.167 | 0.181 | 0.417 | 0.931 |
+| `frac_mvp_tier_tfc` (key 이름, 정의 없음; 최악 행 tier 가 `target_free_coarse` 인 chunk 비율) | 0 | 0 | 0.569 | 0.181 |
+| target 까지 gap, `gapT_ref` → `gapT_fin` 중앙값 (mm; 정의는 verify.json 에 없음) | 9.67 → 9.73 | 9.36 → 9.29 | 8.72 → 10.61 | 44.45 → 50.91 |
+
+| coarse on 대 off (C1b, approach 72 chunk) | 값 |
+|---|---|
+| 권한 행 최소 clearance, on / off 중앙값 (mm) | 1.94 / 6.70 |
+| off − on 중앙값 (mm) | **4.08** |
+| 최악 행이 `target_free_coarse` 인 chunk | **50 / 72** (0.694) |
+| 그 행의 구 바닥이 support 위에 있는 높이 (중앙값, p10 / p90) | 7.5 mm (1.5 / 39.8) |
+| 그 행의 구 바닥 < 20 mm · < 12 mm 인 비율 | 0.88 · 0.78 |
+| 그 행이 ball 안인 비율 · ball 안 또는 바닥 < 20 mm | 0.64 · 0.90 |
+| 그 행의 GT target gap (중앙값, p10 / p90) | 15.0 mm (5.8 / 33.9) |
+| 그 행의 이웃 과일까지 gap (중앙값) | 57.6 mm (< 20 mm 인 비율 0.16) |
+| `field_frac_cross10` · `field_frac_cross0` (T44c 의 cross 정의 — off 에서 통과, on 에서 미달 — 를 margin 10 mm 와 0 을 기준으로 센 chunk 비율) | 0.653 · 0.375 |
+
+**support surface 의 zero level (mm, C1b / C2, 72 chunk):**
+
+| 위치 | coarse off | coarse on |
+|---|---|---|
+| ball 중심 column (C1b · C2) | 0.0 · 0.0 | **11.5 · 11.0** |
+| ball 둘레 ring (`ringfit`, C1b · C2) | 4.0 · 5.0 | 9.0 · 9.0 |
+| ball 둘레 ring (`ringout`, C1b · C2) | 4.0 · 4.0 | 9.0 · 9.0 |
+
+![T44dA scene](figures/t44/t44da-scene.png)
+
+[`t44da-scene.png`](figures/t44/t44da-scene.png) — C1b_ep123_s1231 의 seq 17 (t = 128) chunk 에서 가장 위험한 손가락 구를 지나는 x–z 단면 (y = −0.2646 m, cell 간격 1.5 mm). support plane z = 0.8213 m. 이 구의 반지름 7.18 mm, 바닥이 support 위 1.49 mm, **coarse on clearance −7.16 mm (tier `target_free_coarse`) 대 off 0.06 mm (tier `target_free`)**, GT target gap 10.85 mm. 이 chunk 에서 TO 는 손가락 구 평균을 행 7 에서 11.66 mm 위로 옮겼다. 단면에서 `target_free_coarse` 가 답한 cell 은 12,840 중 7,148 이고 on − off 의 최대 차이는 18.65 mm, 이 단면의 zero level 중앙값은 on 9.0 mm 대 off 1.5 mm. 이 chunk 는 HOLD 가 아니고 `execute` 다 (verdict reasons `budget_only`).
+
+즉 coarse tier 가 table 표면 위로 수 mm 를 장애물로 되살려서, 손가락 구의 바닥이 table 에서 몇 mm 인 접근 단계에서 TO 가 위로 비키게 만든다 (**table lift**). 이 chunk 의 GT target gap 은 10.85 mm 라 target 과 닿는 것도 아니다.
+
+**(2) 짝별로 이어 본 것 (7 쌍).** CL-analysis 가 분석한 7 짝은 C1a 가 성공하고 C1b 가 실패한 짝이다. §3-2 에서 task success 가 C1a 만 성공한 8 짝 중 **ep11_s111 은 분석 대상에 없다** (이유는 verify.json 에 없다). 접촉만 갈린 짝 (ep30_s301 · ep30_s302 · ep54_s541) 도 없다. 값은 `Q1_C1b_vs_C1a.pairs` 에서 읽거나 (산출) 했다.
+
+| 짝 | C1a / C1b 결과 | 첫 차이 seq (`first_fin` · `first_ref`) | **first material (>0.01 rad)** | first HOLD 차이 | 그 seq 의 C1b 최악 행 tier | close 직전 3 chunk 중 최악 행 tfc | 그 3 chunk 의 최대 dz7 (mm) | **close+8 의 dz (mm) C1a → C1b** | close seq C1a / C1b |
+|---|---|---|---|---|---|---|---|---|---|
+| ep12_s122 | ok / slip_at_lift | 2 · 3 | 8 | 17 | coarse | 1/3 | 8.5 | 34.3 → 42.8 (**+8.4**) | 15 / 15 |
+| ep0_s1 | ok / no_grasp | 12 · 13 | 14 | 15 | target_free_coarse | 1/3 | 1.4 | 40.8 → 46.7 (**+5.8**) | 14 / 14 |
+| ep11_s112 | ok / no_grasp | 5 · 5 | 13 | 17 | target_free_coarse | 3/3 | 11.1 | 29.8 → 32.5 (**+2.6**) | 16 / 19 |
+| ep123_s1231 | ok / no_grasp | 2 · 3 | 11 | 없음 | target_free_coarse | 3/3 | 19.0 | 27.5 → 53.9 (**+26.4**) | 12 / 20 |
+| ep123_s1232 | ok / regrasp | 3 · 4 | 14 | 15 | target_free_coarse | 1/3 | 9.1 | 34.3 → 42.5 (**+8.2**) | 14 / 14 |
+| ep104_s1042 | regrasp / no_grasp | 8 · 9 | 12 | 15 | target_free_coarse | 2/3 | 14.4 | 34.4 → 36.1 (**+1.7**) | 15 / 14 |
+| ep110_s1101 | ok / slip_in_transport | 11 · 12 | 17 | 18 | target_free_coarse | 1/3 | 3.4 | 29.4 → 35.7 (**+6.4**) | 17 / 17 |
+
+- **7 / 7 에서 C1b 가 C1a 보다 높게 잡았다** (close+8 의 dz 차 C1b − C1a = +1.7 ~ +26.4 mm, 산출). 가장 큰 +26.4 mm 는 C1b 가 close 를 12 가 아닌 20 seq 에 한 짝 (ep123_s1231) 이다. 이 짝의 `close_geom_c8` 은 C1b 가 `open` 0.30 · `n_ht` 0, C1a 가 0.69 · 33 이다 (두 key 의 정의는 verify.json 에 없다).
+- **첫 갈림 chunk 에서 HOLD 인 짝은 0 / 7** (`C1b_at_first_material.hold` 가 7 개 모두 false, verdict `execute`). first HOLD 차이는 first material 보다 항상 뒤다 (6 짝에서 1–9 seq 뒤, ep123_s1231 은 HOLD 차이 자체가 없다). **HOLD 기전 가설 (C1b 의 HOLD 가 grasp 를 막았다) 은 반박됐다.**
+- 7 쌍 중 6 쌍은 first material 의 C1b 최악 행이 `target_free_coarse` 다. **예외는 ep12_s122** — seq 8 의 최악 행은 `coarse` tier (clearance 40.26 mm) 이고 권한 행 중 tfc 는 0 개였다. 이 짝에서 tfc 가 close 시 (seq 15) 권한 행 135 개 중 51 개를 답한다 (최악 행 clearance C1a 8.01 mm 대 C1b 0.51 mm, 손 이동 13.79 mm). first material 이 seq 8 인 이유는 이 표로 설명되지 않는다.
+- 높이와 결과의 관계 (관찰적): close+8 의 dz 가 **38 mm 를 넘은 run 중 first grasp ok 인 수** 는 C0 0 / 3 · C1a 1 / 2 · C1b 1 / 7 이다 (`dz_c8_gt_38mm_firstok`). **38 mm 라는 임계는 verifier 가 고른 값이고, 사전에 고정했는지는 verify.json 에 없다.**
+
+**(3) HOLD 와 first grasp ok** (`hold_after_close_x_first_grasp_ok`, close 이후 HOLD 유무 × first grasp ok 인 run 수; 합 18).
+
+| arm | HOLD 없음 · fail | HOLD 없음 · ok | HOLD 있음 · fail | HOLD 있음 · ok |
+|---|---|---|---|---|
+| C0 | 4 | 12 | 2 | 0 |
+| C1a | 1 | 3 | 3 | 11 |
+| **C1b** | **8** | 2 | 1 | 7 |
+
+C1b 에서 first grasp ok 가 아닌 run 9 개 중 **8 개는 close 이후 HOLD 가 없었다.** HOLD 에 걸려 실패한 run 보다 HOLD 없이 실패한 run 이 대부분이다.
+
+**Q1 verdict:** coarse tier 가 원인으로 확인됐다. 근거는 (a) zero level 0 → 11.5 mm (ball 아래) · 4 → 9 mm (바깥 ring), (b) 최악 행이 `target_free_coarse` 인 approach chunk 50 / 72, (c) TO 가 손을 위로 든 양 (dz7 중앙값 1.95 대 0.0 mm), (d) 7 / 7 짝에서 C1b 가 +1.7 ~ +26.4 mm 높게 잡은 것, (e) 첫 갈림 chunk 의 HOLD 0 / 7 이다. 반증하지 못한 것: 이것은 짝별 관찰이고 같은 상태의 counterfactual closed-loop 가 아니다 (`not_measured`).
+
+#### 4-2. Q2 — C2 0 / 18 은 arm_5 의 target margin 이다
+
+**배선 확인.** C2 의 constraint 모델은 구 422 개 (`sphere_links`: `ee_finger_*` 56 × 4 · `ee_left` / `ee_right` 23 · `link_*_arm_6` 29 · `arm_1` 11 · `arm_5` 10 · `arm_3` 9 · `arm_4` 8 · `arm_2` 5 · `arm_0` 4, per side) 이고, `n_spheres_gripper_arms` 270 은 C0 · C1a · C1b 의 구 수와 같다. permission 정책은 `exclude_authorized`, 제외 행 135 개, 권한 link 는 `ee_finger_l1` · `ee_finger_l2` · `ee_left` 다 (예: C2_ep12_s122 chunk 15). **마스크는 비어 있지 않고, 권한 link 는 예상한 손가락 · palm 이다.** 배선 오류의 증거는 찾지 못했다.
+
+**원인.**
+
+| 지표 (C2) | 값 |
+|---|---|
+| TO 의 최악 행이 `link_*_arm_5` 인 chunk · run | **153 chunk · 17 run** (`link_left_arm_5` 32 · `link_right_arm_5` 121) |
+| 그 행의 clearance (p10 / 중앙값 / p90, mm) | 4.9 / 11.2 / 36.0 |
+| 그 행의 main field 답 − 반지름 `d_main − r` (p10 / 중앙값 / p90, mm) | 38.9 / **59.3** / 85.8 |
+| 그 행의 **implied margin** (중앙값) | **50.0 mm** |
+| 그 행의 GT target gap (p10 / 중앙값 / p90, mm) | 51.2 / 76.3 / 96.3 |
+| 그 행의 구 바닥 높이 (중앙값, mm) | 129.5 (p10 84.8 / p90 151.3), 반지름 14.4 mm |
+| clearance < 10 mm 인 원자료 행 (1,350 chunk 중) | 843 행 — 대상 class `target` 831 · table/other 11 · fruit_other 1; link 별 `link_right_arm_5` 718 · `link_left_arm_5` 124 · `link_right_arm_6` 1 |
+| margin 의 출처 | `ag3s/constraints/clearance.py:261 margin_matrix` — 비권한 link 는 target 에도 full margin 을 유지 (`to_adapter.py:201 manipulated_link_margin`) |
+| TO lift dz7 (approach, 중앙값 / p90) | 4.70 / 40.68 mm |
+| HOLD | 20 chunk — 권한 손가락 target-free 위반 15 (8 run) · 비권한 link (strict · arm link) 5 (3 run) |
+| close+8 의 dz 중앙값 | 148.9 mm |
+| 예 (C2_ep12_s122) | seq 12–15 의 최악 행 `link_left_arm_5` (fine, target), push7 11.2 / 31.5 / 15.0 / 0.0 mm, HOLD seq 14–17 |
+
+해석: 접근 단계의 권한 link 는 `ee_finger_l1` · `ee_finger_l2` · `ee_left` 뿐이라 forearm `arm_5` 는 target 에 full margin 50 mm 를 받는다 (`margin_source`). 이 행이 153 chunk 에서 TO 의 최악 행이었고 (clearance 중앙 11.2 mm, `d_main − r` 중앙 59.3 mm), 손가락이 target 에 50.4 mm 보다 가까이 간 run 이 없다. 두 사실은 같은 방향이지만 **arm_5 margin 을 낮춘 반사실 실행은 없다.** `hand–target` 접촉이 있는 run 은 4 / 18 (41 행) 이다 (C0 – C1b 는 18 / 18). `min_finger_target_mm` ≥ 50.4 mm 와 이 4 run 의 접촉이 어떻게 양립하는지 (두 지표의 정의 차이일 수 있다) 는 verify.json 에 없다. C2 는 C1b 의 **coarse table lift 도 함께 가진다** (zero level 11.0 / 9.0 mm) — C2 의 하락이 `--links arms` 만의 효과는 아니다. C1b 대 C2 는 `--links arms` 의 추가분 (task success 7 → 0) 을 가르지만 coarse 를 끈 `--links arms` arm 은 없다. 그 조합은 측정하지 않았다.
+
+#### 4-3. Q3 — C1a 의 HOLD 증가는 close 시점의 ambiguous seed 다
+
+C1a 의 HOLD chunk 는 54 로 C0 (140) 보다 적지만 HOLD run 은 14 로 C0 (5) 보다 많다. 원인별 chunk (`Q3_C1a_hold`):
+
+| HOLD 원인 class | C0 | C1a | C1b |
+|---|---|---|---|
+| `authorized_target_free_close` (권한 손가락, target-free tier, closing) | 1 | **15** (14 run) | 8 |
+| `authorized_target_free_pre_close` | 0 | 1 | 3 |
+| `authorized_target_free_post_close` | 0 | 0 | 33 |
+| `held_object_rows` | 50 | 1 | 2 |
+| `uncertified_after_place` | 74 | 34 | 107 |
+| `strict_unauthorized_link` | 0 | 2 | 0 |
+| `other:*` | 15 | 1 | 1 |
+
+C1a 의 close-time HOLD 15 chunk (14 run) 은 `close_hold_nearest_seed` 로 다음이 확인됐다.
+
+| 지표 | 값 |
+|---|---|
+| 위반 행의 label | target 12 / 15 (나머지 3 은 label 없음) |
+| 위반 clearance | −0.84 ~ −16.36 mm |
+| 그 chunk 의 `n_ambiguous` 범위 | **77 ~ 233** |
+| 가장 가까운 보존 seed 가 ambiguous 인 chunk | **14 / 15** (ambiguous 까지 중앙 11.5 mm, p10–p90 5.3–31.2 mm; 보존된 non-target 까지는 중앙 27.4 mm) |
+| split 이 쪼갠 수 (`split_n_split`) | 0 |
+| strict (비권한 link) HOLD | 2 chunk (ep123_s1232 · ep12_s121) |
+
+해석: `ball_owned` 는 target 과 non-target 의 거리 차이가 tie 안인 seed 를 **지우지 않고 장애물로 둔다.** 손가락이 target 표면에 닫히는 순간 그 seed 들이 손가락 구 가까이에 있어 target-free 질의가 음수 clearance 를 내고, 권한 손가락의 `target_free` 위반이라 close-time HOLD 가 된다. split 은 0 번 발동해 이 seed 들을 target 쪽으로 나누지 못했다.
+
+**이 HOLD 가 grasp 를 해쳤는가.** 해치지 않았다 — close 이후 HOLD 가 있는 C1a run 14 개 중 **11 개가 첫 시도에 파지했다** (위 §4-1 의 표 `HOLD 있음 · ok` 11; C0 는 HOLD 가 있는 2 run 이 모두 fail). C1a 의 first grasp ok 는 14 / 18 로 C0 의 12 / 18 보다 높다. HOLD 가 늘었지만 run 당 HOLD 는 중앙 1 chunk 이다. 이 HOLD 는 grasp 실패의 원인으로 보이지 않는다 (11 / 14). 다만 **ambiguous seed 가 실제로 target 표면인지는 GT 로 확인하지 않았다** (numbers 에 없다) — 그 seed 가 target 이라면 이 HOLD 는 보수적 오경보이고, 이웃 과일이라면 정당한 정지다.
+
+#### 4-4. Q4 — hand–fruit_other 접촉이 줄지 않은 것은 exclusion 효과가 아니다
+
+pre-release 의 hand–fruit_other event 를 하나씩 풀어 `events_pre_release` 로 분류했다 (event 수는 산출). 각 event 에서 distractor 정점 중 field 거리 < 7.5 mm 인 비율을 target-free field (`tf`) 와 main field 로 쟀고, 계획 · 실제 GT gap 은 MuJoCo mesh 의 convex hull 거리다 (바깥 거리는 하한).
+
+| arm · 접촉 부위 · 이웃 | event (run) | distractor 정점 중 field 에 있는 비율, tf / main | TO 예측 최소 tf clearance (mm) | 계획 GT gap (mm) | 실제 GT gap (mm) | servo 오차 (mm) |
+|---|---|---|---|---|---|---|
+| C0 · finger · banana | 6 (ep3_s31 · s32) | 0.20–0.40 / 0.40–0.575 | −9.15 ~ 6.84 | −13.7 ~ 0.5 | −20.0 ~ −2.0 | 4.4–30.9 |
+| C0 · **palm (EE_BODY)** · orange | 2 (ep54_s542) | **0.19–0.23** / 1.0 | 8.5–9.5 | 18.8–19.7 | 8.8–11.8 | 10.5–18.7 |
+| C1a · finger · banana | 6 (ep3_s31 · s32) | 0.35–0.475 / 0.35–0.475 | 4.5–16.3 | −10.5 ~ 4.7 | −4.9 ~ −0.65 | 10.3–29.1 |
+| C1a · **palm** · pear / orange | 3 (ep30_s301 · ep54_s541 · s542) | **0.905–0.93** / 1.0 | −1.15 ~ 6.7 | 16.7–23.3 | 8.9–15.8 | 7.4–14.9 |
+| C1b · finger · banana | 4 (ep3_s31 · s32) | 0.45–0.50 / 0.45–0.50 | 5.2–19.3 | 3.4–11.0 | −1.2 ~ 3.1 | 22.5–31.1 |
+| C1b · **palm** · pear / orange | 3 (ep30_s302 · ep54_s541 · s542) | **1.0** / 1.0 | −1.4 ~ 8.4 | 15.1–22.3 | 9.1–14.9 | 10.8–16.1 |
+
+(C2 의 hand–fruit_other 2 run 은 이 분석의 event 에 없다. C1a 의 banana event 는 `verdict` 가 5 건이라 쓰지만 `events_pre_release` 의 항목은 6 개 — ep3_s31 5 개 + ep3_s32 1 개이다.)
+
+1. **palm 접촉.** exclusion 은 field 에 한해서는 의도대로 작동했다 — palm 접촉 event 에서 이웃 과일의 field 포함 비율이 C0 0.19–0.23 에서 C1a 0.905–0.93 · C1b 1.0 으로 올라갔다 (`ball` 이 이웃 seed 를 모두 지우던 것을 `ball_owned` 가 보존 — §3-6 의 trace 와 같은 방향). 그런데 접촉은 그대로 일어난다. 이웃이 field 에 **있는데도** palm 이 닿았고, 그때 실제 GT gap 은 8.9–15.8 mm (양수) 이다. **palm 을 덮는 구의 반지름은 6.2 mm 이고 URDF capsule 은 33.0 mm 라 27.3 mm 모자란다** (서버 log). 계획 gap 15–23 mm 와 실제 gap 9–16 mm 가 모두 이 27.3 mm 보다 작다 — 접촉은 구 모델의 반지름 부족과 같은 방향이다. 단, mesh 수준의 손 geometry 는 TO 예측에 넣어 쟀지 않았다 (`not_measured`) — 이 설명은 구 반지름 부족에서의 추론이다.
+2. **finger–banana 접촉.** banana 정점이 field 에 있는 비율이 0.35–0.50 뿐이고 target-free field 와 main field 가 같다 (C1a · C1b). 나머지 정점은 field 에 반영되지 않았다 — banana 의 관측되지 않은 부분으로 해석한다 (가림 · 카메라 시야 같은 원인은 분해하지 않았다). 계획 GT gap 이 음수인 event 도 있어 (C1a −10.5 ~ 4.7 mm) TO 는 이미 겹치는 경로를 계획하고 있다. exclusion 이 지울 seed 가 아니라 **원래 field 에 없던** 물체의 접촉이다.
+3. **추적 오차.** event 의 손 servo 오차가 4–31 mm 이다. TO 가 예측한 clearance 가 양수여도 (예: C1b banana 5.2–19.3 mm) 실제 손은 그 계획을 따라가지 못해 닿는다.
+
+종합하면 hand–fruit_other 접촉은 (palm 구 coverage) + (추적 오차) + (banana 미관측) 이 원인이고, `ball_owned` / split / strict / coarse 가 이웃 접촉을 줄이는지 · 늘리는지는 이 18 짝의 접촉으로는 분리되지 않는다.
+
+#### 4-5. 수정 후보 — CL-analysis 가 제시했고 **구현하지 않았다**
+
+| 후보 | 대상 | 근거 | 상태 |
+|---|---|---|---|
+| **support-seed-free coarse tier** | Q1 (table lift) | coarse 가 table seed 를 근거로 zero level 을 올린다. support seed 를 coarse 합성에서 빼면 table lift 가 없어질 수 있다 | **구현 · 측정 없음** (`not_measured`) |
+| **fine-unobserved-only coarse** | Q1 | fine window 안에서 coarse 를 fine 이 관측하지 못한 voxel 에서만 합성. T44c §7-3 에서 이미 한 번 검토 · 보류한 (b) 안과 같다 (그때 구현자 smoke 에서 distractor 내부 frame 이 17 → 19 로 늘고 마스크 경계에서 값이 뛰었다) | **구현 · 측정 없음** |
+| arm link 의 target margin | Q2 | `link_*_arm_5` 의 full margin 50 mm. 어떻게 줄일지 · 어느 단계에서 줄일지는 정하지 않았다 | 후보 방향만 (CL-analysis 에 수정안 없음) |
+| ambiguous seed 처리 | Q3 | close-time HOLD 의 원인 seed. 처리 방식은 정하지 않았다 | 후보 방향만 |
+| palm 구 coverage | Q4 | 6.2 mm 대 33.0 mm | 후보 방향만 |
+
+### 5. 측정의 한계
+
+| 항목 | 내용 |
+|---|---|
+| 표본 | 18 짝 · 9 episode · banana 0 · arm 당 18 run. McNemar p 는 방향의 일관성을 보는 참고값이다. 5 개 arm 쌍을 보았고 보정하지 않았다 |
+| 원인 귀속 | CL-analysis 의 C1a 대 C1b 귀속은 **관찰적**이다. 같은 상태에서 coarse 를 켜고 끄는 closed-loop counterfactual 을 돌리지 않았다 (`not_measured`) |
+| 시간 | 공유 pod. load 1 분 평균 중앙 32.22 · 최대 370.15. block 1 (16:54–18:03) 샘플 없음. idle pod 시간이 아니다. 모든 chunk 가 533 ms period 를 넘는다 (policy inference 포함) |
+| `target_rows_unauthorized_kept` | `sweep_check` 가 꺼져 있어 기록되지 않았다. 0 이라는 측정이 아니다 (`not_measured`) |
+| mesh 수준 손 geometry | TO 예측에는 sphere model 만 있다. palm 접촉의 원인 설명은 구 반지름 부족 (서버 log) 에서의 추론이다 (`not_measured`) |
+| GT gap | MuJoCo collision mesh 의 convex hull 거리이고 바깥 거리는 하한이다 (`not_measured`) |
+| 위치 통계 | chunk 당 가장 나쁜 권한 행 하나의 위치만 있다. 행 단위 분포는 `lower_loc` 중앙값만 있다 (`not_measured`) |
+| ambiguous seed 의 GT 소속 | numbers 에 없다. close-time HOLD 가 정당한 정지인지 보수적 오경보인지 모른다 |
+| first material 의 원인 | ep12_s122 는 first material (seq 8) 의 최악 행이 tfc 가 아니다. 이 짝의 seq 8 갈림은 이 표로 설명되지 않는다 |
+| C2 | coarse 를 끈 `--links arms` arm 이 없어 `--links arms` 단독 효과를 못 가른다. `min_finger_target_mm` ≥ 50.4 mm 인데 `hand–target` 접촉이 4 run 에 있다 — 지표 정의 차이로 보이나 확인하지 않았다 |
+| Q4 의 범위 | event 분석은 C0 · C1a · C1b 이다. C2 의 hand–fruit_other 2 run (ep3_s31 · ep110_s1101) 은 분석에 없다 |
+| 회귀 기준선 | 두 verify.json 모두 실행하지 않았다 (CL-analysis 는 field re-query 와 FK 일치로 대신) |
+| 코드 상태 | benchmark `f891abe` snapshot, 작업 트리와 분리. 이 절을 쓰면서 커밋하지 않았다 |
+
+### 6. 사용자 판정 대기 · 아직 모르는 것 · 되돌아올 지점 · 산출물
+
+#### 6-1. 사용자 판정 대기
+
+> **갱신 (2026-10-11).** 아래 4 항목은 사용자 판정이 끝났다 — 1 은 A8 · A8b (coarse tier 에서 support seed 제거), 2 는 A9 (비권한 link target margin = obstacle), 3 은 현 상태 유지, 4 는 T45 (palm cover). 구현 · 측정은 아래 "T44e" · "T45" 절. §4-5 의 "구현하지 않았다" 도 같은 뜻으로 낡았다.
+
+아래는 lead 가 사용자에게 물은 항목과 그 근거 측정이다. 어느 것도 scribe 가 정하지 않았다.
+
+| # | 판정할 것 | 근거 | 아직 모르는 것 |
+|---|---|---|---|
+| 1 | **coarse tier 를 어떻게 고칠지** — (a) support-seed-free coarse (support seed 를 coarse 합성에서 제외), (b) fine-unobserved-only coarse (fine 이 못 본 voxel 에서만 합성). 지금 상태 (C1b) 는 task success 7 / 18 로 C1a 15 / 18 보다 낮다 | §4-1 (zero level 0 → 11.5 mm · 7 / 7 짝 · HOLD 0 / 7), §4-5. (b) 는 T44c §7-3 에서 구현자 smoke 가 distractor 내부 frame 17 → 19 를 보여 한 번 보류했다 | 두 후보가 T44c 의 안전 지표 (distractor 내부 낙관 frame 54 → 17) 를 얼마나 유지하는지, closed-loop 성공을 복구하는지 — 모두 미구현 · 미측정 |
+| 2 | **arm link (`link_*_arm_5`) 의 target margin** — `--links arms` 를 계속 쓸지, 쓴다면 비권한 arm link 가 target 에 받는 full margin 50 mm 를 어떻게 할지 | §4-2 (153 chunk · 17 run 의 최악 행, implied margin 50.0 mm, 손–target 최소 거리 50.4 mm) | margin 을 줄였을 때 arm link 가 target 에 닿는 빈도, coarse 를 끈 `--links arms` 의 단독 결과 |
+| 3 | **ambiguous seed 의 처리** — close-time HOLD (C1a 15 chunk · 14 run) 를 어떻게 다룰지. 현재는 ambiguous 를 장애물로 보존 | §4-3 (n_ambiguous 77–233, 가장 가까운 seed 가 ambiguous 14 / 15, split 0 발동, 그래도 11 / 14 가 첫 시도에 파지) | ambiguous seed 가 실제 target 표면인지 (GT 소속), close 시점에만 완화했을 때 이웃 접촉이 느는지 |
+| 4 | **palm 구 coverage** — palm (`ee_left` / `ee_right`) 구 반지름이 6.2 mm 이고 URDF capsule 은 33.0 mm 다 | §4-4 (palm event 8 건: C0 2 · C1a 3 · C1b 3, 계획 gap 15–23 mm 인데 닿음) | 반지름을 키웠을 때 접근 · grasp 가 막히는지, mesh 수준 geometry 에서의 실제 gap |
+
+#### 6-2. 그 밖에 아직 모르는 것
+
+| 항목 | 상태 |
+|---|---|
+| banana 를 target 으로 한 closed-loop | LB2 통과 episode 0 이라 측정하지 않았다 |
+| banana 가 이웃일 때 field 에 0.35–0.50 만 있는 이유 | 관측 부족으로 보이나 원인 분해는 없다 (§4-4) |
+| 한 seed 만 실패한 S1 episode 9 개 | 후보에 넣지 않았다 |
+| A7 이전 (guard) 과 plane 의 closed-loop 차이 | 측정하지 않았다 (A7 이후 기본이 plane) |
+| 시간 | C2 의 TO 483 ms 중앙값의 분해 · coarse build 6.4 ms 가 chunk 시간에 주는 영향 (공유 pod 라 분리 불가) |
+| 이웃 접촉 감소 효과 | 이 18 짝에서는 palm · 추적 오차 · 관측 부족이 지배해 `ball_owned` / strict 의 접촉 감소 효과를 분리하지 못했다. 허들 없이 이웃 과일만 있는 장면에서 palm 구를 고친 뒤 다시 재야 한다 |
+
+#### 6-3. 되돌아올 지점 — 고르지 않은 선택지
+
+| 안 고른 것 | 왜 | 전환 신호 |
+|---|---|---|
+| T44c §7-3 의 (b) fine-unobserved-only coarse | 보류됨 (distractor 내부 frame 17 → 19, 마스크 경계에서 값이 뜀) | 사용자 판정 1 에서 (b) 가 선택되고 불연속이 허용될 때 |
+
+#### 6-4. 이 STEP 의 산출물
+
+- **측정**: `handoff/T44d.verify.json` (CL-run) · `handoff/T44dA.verify.json` (CL-analysis). 원자료: `outputs/verify/T44/CL/` (`agg.json` · `runs/` · `replay/` · `analysis/` · `p/` 스크립트 · `p/code_md5_cl.txt`), `outputs/verify/T44/CLA/` (`chunks/` · `field/` · `diverge_C1a_C1b.json` · `close_geom.json` · `approach_stats.json` · `table_lift.json` · `pairs_table.json` · `c2_armrows.json` · `q3_hold.json` · `q4_contacts.json`).
+- **설계 · 구현**: `handoff/T44d.task.md` · `T44c.impl.md` (A7 절). 코드: benchmark `f891abe`, 루트 tests `45e79cb`.
+- **figure**: `figures/t44/` — CL-run `t44d-scene` · `t44d-graph` · `t44d-table`, CL-analysis `t44da-scene` · `t44da-graph` · `t44da-table` (각각 `.json` sidecar 있음).
+- **영상**: [`t44d-ep0-s1-C0-vs-C1b.mp4`](figures/t44/t44d-ep0-s1-C0-vs-C1b.mp4) (episode 0 · seed 1: C0 성공, C1b `no_grasp`) · [`t44d-ep12-s122-C0-vs-C1b.mp4`](figures/t44/t44d-ep12-s122-C0-vs-C1b.mp4) (episode 12 · seed 122: C0 성공, C1b `slip_at_lift`). 실제 scene [`t44d-scene.png`](figures/t44/t44d-scene.png) 는 두 run (첫 hand–target 접촉 · C0 release · run 끝) 과 ep30_s302 (C1b 의 첫 hand–fruit_other 접촉 전 20 step · 접촉 · 30 step 뒤) 를 C0 대 C1b 로 나란히 놓았다.
+
+![T44d scene](figures/t44/t44d-scene.png)
+
+
+## T44e — coarse support 처리 (keep / exclude / exclude_target) · 비권한 link target margin = obstacle (2026-10-11)
+
+**이 절이 답하는 물음.** T44d 는 두 가지를 보였다. (1) target-free coarse tier (C1b) 를 켜면 task success 가 15 → 7 / 18 로 반이 된다 — coarse tier 가 table 표면을 위로 들어 올려 (table lift) 손이 높게 잡았다 (T44dA Q1). (2) `--links arms` 를 더한 C2 는 0 / 18 이다 — 접촉 권한이 없는 `link_*_arm_5` 가 target 에 full margin 50 mm 를 받아 손이 target 에서 50 mm 이상 멀리 유지됐다 (T44dA Q2). 이 절은 사용자 판정 (2026-10-10 ~ 11, 네 번째) 에 따라 **A8 / A8b** (coarse tier 에서 support seed 를 빼는 두 방식) 와 **A9** (비권한 link 의 target margin 을 일반 obstacle 과 같게) 를 구현하고, A8 계열을 offline 으로 다시 쟀다 (**V-E2e**). 물음은 "table 을 coarse 에서 빼면 distractor 내부 안전 이득을 유지하면서 table lift 가 사라지는가" 이다. closed-loop 재실행 (CL2) 은 이 절에서 하지 않았다.
+
+**한 줄 결과.** 3 가지 coarse support 처리 중 **`exclude_target` (target 발자국 아래 support seed 만 제거) 이 table lift 를 없애면서 (zero level 3 mm, off 와 같음) distractor 내부 낙관 frame 을 keep 과 같은 17 / 64 로 유지했다.** grasp 직전 margin 교차는 47 query / 5 frame 으로 keep (59 / 10) 의 절반 안팎이다. 반면 `exclude` (support seed 전부 제거) 는 grasp 직전 교차가 46 / 4 로 가장 적지만 distractor 내부 낙관 frame 이 32 로 늘었다 (off 54, keep 17). 모든 변형에서 성질 `min(old, d) ≤ new ≤ old` 위반은 **0** 이다. 단 T44d 의 갈린 chunk 7 짝을 다시 조회한 결과는 **불완전하다** — `exclude_target` 은 7 짝 중 완전 회복 1 · 부분 회복 3 · 회복 없음 1 · 해당 없음 2 이고, 이 재조회는 keep 을 재구성한 값이 기록과 median 0–7.6 mm 어긋난다. **A9 는 구현과 단위 test 만 있고 verifier 측정 · closed-loop 가 없다.**
+
+**읽는 법과 출처 규약.**
+
+- 측정 수치는 `handoff/T44e.verify.json` (V-E2e) 의 `numbers` 에서만 왔다. 표 머리에 출처를 밝혔다. 같은 파일 숫자에서 덧셈 · 개수 세기로 구한 값은 "(산출)" 이다.
+- `handoff/T44e.impl.md` 의 숫자 (구현 파일:줄 · test 개수 · 구현 smoke) 는 **"(구현자 smoke)"** 또는 "(구현자 보고)" 로 표시했다. 구현자 smoke 는 측정이 아니다. V-E2e 가 같은 frame · 같은 정의로 다시 쟀고, 겹치는 지표 (D frame 54 / 17 / 32 / 17 · grasp 직전 교차 59 / 10 · 46 / 4 · 47 / 5 · target 내부 음수 점) 는 두 쪽이 같은 값이다.
+- **verifier 의 독립성 한계.** V-E2e 의 `not_measured` 는 verifier 가 실수로 `T44e.impl.md` A8 절 전체 (A8 smoke 표 포함) 를 측정 시작 전에 읽었다고 적었다. A8b smoke 숫자는 읽지 않았다.
+- 시각은 UTC 이고 파일 시각이다. 그림은 verifier 가 만들었고 `figures/t44/` 에 sidecar `.json` 과 함께 있다. scribe 는 링크만 한다.
+- 코드는 benchmark `f891abe` 위의 **미커밋 작업 트리** (A8 / A8b / A9 구현이 같은 트리에 있다. `T44e.verify.json` `code_state`) 이고 루트 tests `45e79cb` 이다. 이 절을 쓰면서 커밋하지 않았다.
+- 회귀 기준선 (`regression-baseline` skill) 은 **실행하지 않았다.** 대신 `off` · `guard` (A5) · `keep` (A7) 의 배열이 T44c-A6 / E2d 의 `off` · `guard` · `plane` 배열과 112 frame · 두 identity · 두 method 에서 비트로 같음을 확인했다 (최대 절대차 0.0, 비교한 값 3,664,338 개, demo gt_label ball 기준).
+
+### 1. 사용자 판정 (네 번째) · 타임라인
+
+| # | 질문 | 판정 (2026-10-10 ~ 11) | 이 절에서 |
+|---|---|---|---|
+| 1 | coarse tier 가 table 을 finger 앞에 되살려 파지 실패 (C1b 7 / 18, T44dA Q1) | **coarse target-free 에서 support (table) seed 를 빼고 만든다.** table 보호는 fine 이 맡는다. offline 재측정 뒤 C1a 대 C1b closed-loop 재실행 | A8 · §3 |
+| 1b | A8 smoke 에서 `exclude` 가 distractor 바닥 띠를 되돌렸다 (distractor 내부 frame 17 → 32) | **"이웃 과일 아래 support 만 남김"** (2026-10-11 추가 판정) | A8b · §3 |
+| 2 | `--links arms` 에서 비권한 arm_5 가 target full margin 50 mm (C2 0 / 18, T44dA Q2) | **비권한 link 는 target 을 일반 obstacle 과 같은 margin 으로 피한다** (접촉은 여전히 금지) | A9 · §2-3 |
+| 3 | C1a 의 ambiguous seed 보존 → close HOLD (5 → 14 run, 11 / 14 첫 시도 파지) | **현 상태 유지** (기록만) | 바꾸지 않았다 |
+| 4 | palm 구 6.2 mm 대 URDF capsule 33 mm | **별도 STEP (T45) 으로 수행** | 아래 T45 절 |
+
+| 시각 (UTC) | 무엇 | 출처 |
+|---|---|---|
+| 2026-10-11 04:54 | T44e task (A8 · A9 · A8b · V-E2e · CL2 정의) | `T44e.task.md` (파일 시각) |
+| 05:23 | A8 · A8b · A9 구현 보고 | `T44e.impl.md` (파일 시각) |
+| 06:18–06:20 | V-E2e figure 3 장 · `T44e.verify.json` | figure · verify.json (파일 시각) |
+
+### 2. 구현 (구현자 보고 · `T44e.impl.md`)
+
+세 변경 모두 **기본값이 기존과 비트로 같다** (flag 기본 off). 구현자 보고에 따르면 기본 상태에서 바뀌는 것은 `cfg.to_dict()` 의 두 키 (`esdf.target_free_coarse_support: "keep"` · `contact.nonauthorized_target_margin: "full"`) 뿐이다.
+
+#### 2-1. A8 — `target_free_coarse_support = exclude`
+
+coarse target-free tier (`coarse_no_target`) 를 만들 때 공 아래 지원면 (table) 의 **support seed** 를 지운다. 지우는 seed 는 세 조건을 모두 만족하는 것뿐이다 — (1) 그 면에서 seed 띠 + 반 칸 (28 mm) 안, (2) 그 면의 inlier 점 (관측 근거) 이 28 mm 안, (3) non-target 관측점이 18 mm 안에 없다 (A5 의 shared voxel 규칙 그대로 — distractor · crate 와 voxel 을 나누면 보존). table seed 가 없으니 공의 seed guard 는 지킬 것이 없어 공의 `z_min` (fine 과 같은 support + 5 mm) 으로 내렸다. 합성식 `min(f, a, max(c, d), max(d, b))` 은 그대로다.
+
+| 파일:줄 (구현자 보고) | 무엇 |
+|---|---|
+| `ag3s/config.py:1098-1109, 1185-1188` | `EsdfConfig.target_free_coarse_support` (기본 `"keep"`) · validation |
+| `ag3s/fields/curobo_builder.py:1855-1862, 1941-2018` | `_coarse_ball_exclusion` 이 지원면 seed 를 먼저 지우고 (`_coarse_support_exclusion`) 그 voxel 을 부호 교정 집합에 합친다 |
+| `ag3s/runtime/pipeline.py:3044-3083` | `_support_seed_evidence` · `_support_surface_under` — 면 선택은 `_support_plane_z` 와 같은 규칙 (수평 `\|n_z\| > 0.9`, 공 중심 아래, 가장 높은 것) |
+| `trajopt/serve_safe.py:814-822, 1478-1484, 1758-1762` | CLI `--target-free-coarse-support {keep,exclude}` (`--target-free-coarse` 없이 주면 `ap.error`) |
+
+- **덜 보수적이 되는 점** (task A8-3): 합성식 때문에 구조적으로 `min(old, d) ≤ new ≤ old` 이다 (`old` = coarse off). 구현자 smoke 는 64 frame × 점 집합 2,223,190 점에서 `new > off` 0 · `new < min(off, d)` 0 이었다 (구현자 smoke). 이 성질은 V-E2e 가 다시 쟀다 (§3-2).
+- **sign floor (`plane`) 와의 관계** (task A8-4): exclude 에서는 seed guard 가 공의 `z_min` 으로 내려가 `sign_z_min_m == z_min_m` 이라 plane 띠가 비고, plane 과 guard 가 같은 계층이 된다 (test `test_sign_floor_is_moot_under_exclude`). 그래서 exclude 에서 plane floor 는 필요 없다 — 값을 바꾸지 않았다 (구현자 보고).
+
+#### 2-2. A8b — `target_free_coarse_support = exclude_target`
+
+`exclude` 가 지우는 같은 support seed 중에서 **target 발자국 (footprint) 안이고 non-target 발자국 밖**인 것만 지운다. 이웃 과일 · 기타 물체 아래와 그 밖의 table seed 는 keep 처럼 남는다. 두 발자국이 겹치는 seed 는 남긴다 (obstacle evidence 보존 — 판정 1 조건 4 와 같은 원칙).
+
+| 발자국 | 증거 | seed 중심이 안 | 파일:줄 (구현자 보고) |
+|---|---|---|---|
+| target | 공 (pad 포함) + target 점 (평면 위 `h_min` 초과) | 평면 거리 ≤ `r + D` 또는 최근접 target 점까지 ≤ `D` | `curobo_builder.py:2113-2163` (`_coarse_support_footprints`) |
+| non-target | non-target 관측점 (fused cloud − target − 지원면 inlier, 평면 위 `h_min` 초과) | 최근접 점까지 ≤ `D` | 같은 곳 |
+
+- **`D = √2 · 거친 voxel` = 28.3 mm.** 거친 계층은 trilinear 로 읽혀서 한 query 가 읽는 voxel 중심이 평면 방향으로 최대 대각 `√2 · vs` 떨어져 있다. target 은 그만큼까지 지우고 (공 아래 query 가 table seed 를 안 읽도록), non-target 은 그만큼까지 남긴다 (이웃 아래 query 가 keep 과 같은 seed 를 읽도록). 같은 팽창이다.
+- **`h_min` = `support_surface.distance_threshold` (8 mm).** RANSAC inlier 문턱 안의 점은 table 과 구별되지 않는다. 안 두면 inlier 에 못 든 table 잡음이 target 둘레 전부를 non-target 발자국으로 덮는다 (test).
+- 겹침 seed 는 공 규칙이 지울 것도 남긴다 (`protect`, 공 안 겹침 보호 47 개 — 구현자 smoke).
+- `keep` · `exclude` 경로는 바뀌지 않았다. off · keep · exclude 의 npz 배열 4,032 개가 A8 raw 와 `np.array_equal` (구현자 smoke).
+- 이름 주의: `EsdfConfig` 에는 이와 무관한 옛 키 `esdf.exclude_target` (`auto|always|never`) 가 있다. 이번 것은 `target_free_coarse_support` 의 **값**이다.
+
+#### 2-3. A9 — `contact.nonauthorized_target_margin = obstacle`
+
+`ClearancePolicy.lookup` (`ag3s/constraints/clearance.py:247-253`) 은 접촉 권한이 없는 link 에 `full_margin(TARGET)` (= `safety_margin` 0.05 m) 을 준다. `"obstacle"` 이면 AG3S 가 권한 없는 구를 `CollisionConstraintSet.nonauthorized_target_rows` 로 싣고, trajopt 는 그 행을 margin 의 target 판정 두 곳에서 뺀다. 그러면 그 행의 여유는 obstacle 행과 **같은 식**에서 나온다.
+
+**"일반 obstacle 행이 실제로 받는 clearance"** — 활성 설정 (V11AB / C2) 의 코드 경로 (구현자 보고):
+
+| 단계 | 파일:줄 | V11AB 값 |
+|---|---|---|
+| CLI → trajopt config | `trajopt/serve_safe.py:2255` (`esdf_margin`), `:2024-2028` (`obstacle_overrides`) | `--esdf-margin 0` · `--obstacle-margin 0.010` (`T43/V11/p/start_server.sh:9,12`) |
+| ESDF 행 기본 여유 | `trajopt/linearize.py:943` `margin = esdf_margin` | 0 |
+| target 행 (`\|d − d_object\| ≤ voxel`) | `linearize.py:981` `is_object` → `:997` `margin = manipulated_link_margin[row]` | 권한 행: phase 여유 · **비권한 행: 0.05** |
+| AG3S 쪽 그 값 | `ag3s/constraints/clearance.py:287` `full_margin(TARGET)` = `safety_margin` (`ag3s/config.py:761`), `to_adapter.py:203` | 0.05 |
+| obstacle class | `linearize.py:1001-1003` `max(margin, obstacle_margin)` (합이 아니라 max) | **max(0, 0.010) = 10 mm** |
+| 최종 | `linearize.py:1007` `clear = d − r − margin` | |
+
+즉 **obstacle clearance 는 10 mm** 이고, 비권한 target 행은 50 mm → 10 mm 가 된다. AG3S `safety_margin` 50 mm 는 ESDF 경로에서 이 비권한 target 칸에만 쓰인다.
+
+| 파일:줄 (구현자 보고) | 무엇 |
+|---|---|
+| `ag3s/config.py:1293-1312` | `ContactConfig.nonauthorized_target_margin` (기본 `"full"`) |
+| `ag3s/types.py:952-957` · `ag3s/constraints/to_adapter.py:252-266` | 권한 없는 구 mask (권한 집합과 같은 이름 규칙) |
+| `trajopt/linearize.py:992-996` | `_esdf_clearance_core`: `is_object &= ~nonauth` — 그 행은 `manipulated_link_margin` 을 받지 않는다 (이중 적용 없음) |
+| `linearize.py:1134-1138` | `_obstacle_rows`: `contact &= ~nonauth` — obstacle class 로 들어간다 (strict off 에서도 `obstacle_margin` 을 받는다, 누락 없음) |
+| `trajopt/serve_safe.py:825-832, 1485-1491` | CLI `--nonauthorized-target-margin {full,obstacle}` |
+
+**바꾸지 않은 것.** 권한 link 의 phase margin · I2 / I2b strict 권한 · carry 규칙 · 접촉 금지 (`allowed_contact` 의 `unauthorized_link` collision) 는 그대로다. `--links gripper` (V11AB) 에서는 비권한 행이 반대손 `ee_<other>` · `ee_finger_<other>1/2` 셋뿐이고 (test), `--links arms` 에서는 거기에 양팔 `link_*_arm_*` 가 더해진다 (구현자 보고).
+
+#### 2-4. 단위 검증 (구현자 보고)
+
+| 항목 | 결과 |
+|---|---|
+| A8 파일 `test_t44e_a8_coarse_support.py` | CPU 17 passed · 1 skipped (CUDA) / GPU 18 passed |
+| A8b 파일 `test_t44e_a8b_coarse_support_footprint.py` | CPU 12 passed · 1 skipped / GPU 13 passed |
+| A9 파일 `test_t44e_a9_nonauthorized_target_margin.py` | 25 passed |
+| 전체 `tests/trajopt tests/ag3s` (GPU 허용, 2026-10-11, A8b 시점) | **2764 passed · 1 skipped · 0 failed** (다른 세션의 미커밋 변경이 같은 트리에 있는 상태) |
+
+기본 비트 동일 · 근거 없으면 keep 으로 fail-closed · 지운 seed 가 target 발자국 안 · non-target 발자국 밖 · 성질 `min(off, d) ≤ new ≤ off` · distractor 내부 음수 유지 · 비권한 행 = 같은 점의 obstacle 행 · V11AB 에서 50 → 10 mm · `allowed_contact` 불변 · config / CLI 왕복 등을 test 로 박았다 (구현자 보고).
+
+### 3. V-E2e — offline 재측정 (`T44e.verify.json`)
+
+**설정.** `T44c-A6.verify.json` 과 같은 frame (demo 64 frame · lb 48 frame · grasp 직전 `demo_last2` 32 frame) · 같은 정의 (E2d 스크립트를 따른 `e2e_measure.py`). identity 는 `gt` 와 `gt_label` 둘이고 이 절의 표는 **`gt_label`, method `bo_d3`** (`ball_owned` remove, tie 1.0, d = 3) 기준이다. ball method 의 값도 같은 방향이고 verify.json 에 있다. 변형은 5 가지 — `off` (coarse 없음) · `guard` (A5) · `keep` (A7 = C1b) · `exclude` (A8) · `exclude_target` (A8b). margin 10 mm.
+
+#### 3-1. 한 표로
+
+![T44e table](figures/t44/t44e-table.png)
+
+[`t44e-table.png`](figures/t44/t44e-table.png) 는 전체 표 (ball · bo_d3 두 method, lb 포함) 다. [`t44e-graph.png`](figures/t44/t44e-graph.png) 는 8 panel graph 이고 [`t44e-scene.png`](figures/t44/t44e-scene.png) 는 §3-3 에서 설명한다.
+
+![T44e graph](figures/t44/t44e-graph.png)
+
+| 지표 (`gt_label` · `bo_d3`, demo 64 frame) | off | guard (A5) | keep (A7, C1b) | exclude (A8) | **exclude_target (A8b)** |
+|---|---:|---:|---:|---:|---:|
+| zero level 중앙 mm — 공 중심 / ring fit / ring r+10 | 0 / 0.25 / 3 | 16 / 10 / 9 | 0 / 1.5 / **8** | 0 / 1.0 / **3** | 0 / 1.0 / **3** |
+| grasp 직전 (last2, 32 frame) margin 교차 query / frame | 0 / 0 | 62 / 13 | 59 / 10 | **46 / 4** | 47 / 5 |
+| 64 frame 전체 교차 query / frame | 0 / 0 | 82 / 15 | 79 / 12 | 66 / 6 | 67 / 7 |
+| distractor 내부 clearance ≥ margin — frame (/64) | 54 | 17 | 17 | **32** | **17** |
+| 　점 (합) | 3,847 | 2,701 | 2,701 | 2,881 | 2,715 |
+| 　지원면 위 0–15 mm 띠 — 점 / frame | 1,133 / 54 | 172 / 14 | 172 / 14 | 333 / 29 | 182 / 14 |
+| 　지원면 위 15 mm 초과 — 점 / frame | 2,687 / 26 | 2,529 / 17 | 2,529 / 17 | 2,546 / 17 | 2,533 / 17 |
+| distractor 내부 clearance ≥ margin — frame (lb, /48) | 2 | 0 | 0 | 0 | 0 |
+| target 내부 음수 점 (demo) | 2,257 | 11,331 | 2,694 | 2,550 | 2,568 |
+| TB (support 아래 0–30 mm) optimistic flip (demo + lb) | 0 | 0 | 0 | 0 | 0 |
+| TA (support 위 0–10 mm, 물체 밖) 음수 점 (demo) | 2,603 | 32,496 | 21,559 | 8,756 | 18,904 |
+| TA 평균 값 − off (mm, demo) | 0.0 | −2.68 | −2.14 | −0.46 | −1.64 |
+| 성질 위반 `new > old` / `new < min(old, d)` | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+
+(`T44e.verify.json` `numbers.gt_label.bo_d3`.) zero level 은 T44dA 의 table lift 지표와 같은 정의다 — support plane 위에서 target-free 거리가 처음 양수가 되는 가장 낮은 z 에서 support z 를 뺀 mm 의 64 frame 중앙값이고, 세 열은 공 중심 · 평면에 맞춘 ring (`ringfit`) · 반지름 + 10 mm ring (`ringout`) 아래의 column 이다. lb 48 frame 의 grasp 직전 교차 (bo_d3, query / frame) 는 guard 81 / 20 · keep 77 / 20 · exclude 3 / 2 · exclude_target 10 / 3 이다 (off 0 / 0).
+
+#### 3-2. 재현과 성질
+
+- **재현.** `off` · `guard` · `keep` 의 D · T · q · grid 배열이 E2d 의 `off` · `guard` · `plane` 과 비트로 같다 (최대 절대차 0.0, 비교한 값 3,664,338 개). 즉 A8 / A8b / A9 구현이 기존 경로의 값을 바꾸지 않았다.
+- **성질.** 모든 변형 · 모든 점 집합 (D · T · TB · TA · q · grid) 에서 `new > old` 0 · `new < min(old, d)` 0 이다. **value answer 가 `target_free_distance` 와 같다** (최대 절대차 0.0, 모든 변형).
+- `exclude` 가 지운 support seed (ball method, 64 frame 합) 는 113,021 / 121,842 이고 `exclude_target` 이 지운 것은 2,819 개다 (산출: exclude 의 약 2.5 %). `exclude_target` 발자국 집계 (64 frame 합) — 띠 seed 123,571 · target 발자국 안 3,515 · 겹침 보존 696 · target 밖 보존 109,506.
+
+#### 3-3. 해석 — 세 처리의 차이
+
+**(a) table lift 는 둘 다 없앤다.** keep 은 ring r+10 의 zero level 이 8 mm (off 3) 로 올라가 있고, `exclude` · `exclude_target` 은 3 mm 로 off 와 같다. grasp 직전 교차는 keep 59 / 10 → exclude 46 / 4 · exclude_target 47 / 5 로 줄었다 (query 약 20 % 감소, frame 은 절반). guard (A5) 는 공 중심의 zero level 이 16 mm 로 가장 높다.
+
+**(b) 두 처리의 갈림은 distractor 바닥 띠다.** `exclude` 는 distractor 내부 낙관 frame 이 17 → 32 로 늘었고 늘어난 몫은 지원면 위 0–15 mm 띠다 (띠 점 172 → 333, frame 14 → 29; 15 mm 초과는 2,546 점 · 17 frame 으로 keep 과 같다). keep 은 이 distractor 바닥 띠를 **table seed 로 덮고** 있었고 — 구현자 보고는 이것이 파지를 막던 바로 그 기전이라 해석한다 — exclude 는 그 덮개까지 제거한다. `exclude_target` 은 이웃 아래 seed 를 남겨 띠 점이 182 · frame 이 14 로 keep 수준 (17 frame) 을 유지한다.
+
+![T44e scene](figures/t44/t44e-scene.png)
+
+[`t44e-scene.png`](figures/t44/t44e-scene.png) 는 demo frame `demo_ep0027_f092` (target banana, 왼팔, 가장 가까운 다른 과일 xy 78 mm) 의 **support plane + 10 mm 수평 단면 (위에서 본 그림)** 이다. 왼쪽 위가 MuJoCo 장면, 그 옆이 배치도 (검정 = target hull, 주황 = 이웃 과일 hull, 점선 = target ball), 나머지가 coarse off · keep · exclude · exclude_target 의 target-free 거리 (빨강 = 음수) 와 두 변형의 차이 (exclude − exclude_target, exclude_target − keep) 다. 이 단면에서 exclude 는 이웃 과일 hull 안의 막힘이 일부 사라졌고 (빨강이 이웃 hull 의 일부만 덮는다) exclude_target 은 keep 처럼 이웃 hull 을 빨강으로 덮는다. 셀 수는 sidecar [`t44e-scene.json`](figures/t44/t44e-scene.json) 에 있다. 이 frame 은 "exclude 와 exclude_target 의 차이가 가장 큰" 조건으로 고른 것이라 대표성은 주장하지 않는다.
+
+**(c) 대가.** `exclude_target` 의 TA 음수 점 (18,904) 은 exclude (8,756) 의 두 배 이상이고 keep (21,559) 보다 적다. TA 는 target 발자국 밖 table 위를 포함하므로 (구현자 보고) 이 차이는 "발자국 밖 table seed 를 남긴 몫" 으로 읽는다 — 이 분해는 verify.json 에 없다. 즉 exclude_target 은 파지 쪽 지표를 exclude 수준으로 올리면서 TA 차단을 exclude 만큼 줄이지는 못한다.
+
+#### 3-4. offline re-query — T44d 의 갈린 chunk 7 짝
+
+T44dA 가 C1a 와 C1b 의 refined chunk 가 처음 갈린 chunk (first material divergence) 를 짝마다 하나씩 기록했다. 그 chunk 의 같은 q · 같은 권한 손 finger 구로 field 를 다시 짓고 (history 3 행을 다시 render, target identity 는 기록된 target points), coarse 변형만 바꿔 **refined chunk 행 0–7 의 finger 최악 행 clearance** (min `d − r`, mm) 를 조회했다. "implied lift" = `clearance(off) − clearance(변형)` 이다 (계획이 위로 들려야 하는 양).
+
+| 짝 (C1b / C1a 결과) | off | keep | exclude | exclude_target | exclude_target 판정 (산출) |
+|---|---:|---:|---:|---:|---|
+| ep0_s1 (no_grasp / ok) | 9.32 | 5.91 | 9.32 | 7.32 | 부분 |
+| ep104_s1042 (no_grasp / regrasp) | 7.25 | 7.25 | 7.25 | 7.25 | 해당 없음 (keep 도 off 와 같다) |
+| ep110_s1101 (slip_in_transport / ok) | 11.01 | 4.95 | 11.01 | 11.01 | **완전** |
+| ep11_s112 (no_grasp / ok) | 10.57 | 6.21 | 9.77 | 9.05 | 부분 |
+| ep123_s1231 (no_grasp / ok) | 9.74 | 5.07 | 9.74 | 8.01 | 부분 |
+| ep123_s1232 (regrasp / ok) | 12.56 | 4.97 | 12.56 | 5.47 | **없음** (keep 4.97 → 5.47) |
+| ep12_s122 (slip_at_lift / ok) | 79.24 | 77.39 | 77.39 | 77.39 | 해당 없음 (finger 가 target 에서 먼 행, 차이 1.85 mm) |
+
+판정 규칙 (산출): 변형의 최악 행이 off 와 같으면 "완전", keep 과 off 사이면 "부분", keep 과 거의 같으면 "없음", keep 이 이미 off 와 같거나 target 에서 멀면 "해당 없음". 위 표로 `exclude_target` 은 **7 짝 중 완전 1 · 부분 3 · 없음 1 · 해당 없음 2** 이고, `exclude` 는 4 짝 (ep0_s1 · ep110_s1101 · ep123_s1231 · ep123_s1232) 에서 off 와 같은 값으로 돌아오고 ep11_s112 는 부분 회복이다.
+
+- **margin 10 mm 교차 행 수** (행 0–7, 권한 손 구 전체, 산출): keep 114 (19 · 0 · 29 · 23 · 18 · 25 · 0) · exclude 1 · exclude_target 42 (16 · 0 · 0 · 5 · 2 · 19 · 0). 짝 순서는 위 표와 같다.
+- **ring r+10 의 zero level** 은 7 짝 모두에서 keep 이 9 mm 이고 exclude · exclude_target 은 off 와 같은 3–6 mm 다. 반면 공 중심 열은 일부 짝에서 돌아오지 않았다 — ep0_s1 은 keep · exclude 31 mm (exclude_target 8, off 0), ep11_s112 는 keep · exclude_target 37 mm (exclude 7, off 0).
+- **ep123_s1232 에서 exclude_target 이 회복하지 못한 이유는 이 측정으로 확인하지 못했다.** 그 짝에서 footprint 겹침 보존 seed 가 35 개 (`n_overlap_kept`) 이고 non-target 점은 69 개, 공 r + 30 mm 안의 non-target 점의 GT label 은 distractor 4 · support 6 · target 1 이다. 겹침 보존이 table seed 를 남겼을 **가설**이지만 seed 단위로 확인하지 않았다. ep0_s1 은 공 r + 30 mm 안의 non-target 점 6 개의 GT label 이 전부 target 이다 (이것과 이 짝의 부분 회복의 인과는 확인하지 않았다).
+
+**이 재조회는 완전한 재현이 아니다.** (verify.json `not_measured`) 짝마다 chunk 하나 · finger 행만이고, 다시 지은 keep 이 **기록된 keep** 과 행 0–7 에서 어긋난다 — 짝별 절대차 median 은 1.08 · 0.89 · 1.08 · **7.63** · 2.99 · **0.0** · 3.02 mm (순서는 위 표), max 는 3.7 – 41.0 mm. TSDF history 가 live server 보다 짧고, 기록된 target points 는 더 이른 frame 의 것이라 현재 cloud 의 2 mm 안에 있는 것이 117 – 169 개 중 11 – 69 개뿐이다 (짝마다 다름). 그래서 이 표의 값은 "C1a 쪽으로 돌아오는 방향인가" 를 보는 용도이고 절대 clearance 를 closed-loop 에 대입하지 않는다.
+
+#### 3-5. build 시간
+
+| ms (coarse tier build, 112 frame × 10 rep, 중앙 / p90) | guard | keep | exclude | exclude_target |
+|---|---:|---:|---:|---:|
+| ball | 3.87 / 5.01 | 4.33 / 5.60 | 8.68 / 10.26 | 9.00 / 10.65 |
+| bo_d3 | 4.13 / 5.26 | 4.94 / 6.29 | 8.91 / 10.56 | 9.32 / 10.92 |
+
+fine · coarse · support evidence 합의 p90 (bo_d3) 은 guard 14.4 · keep 15.3 · exclude 19.5 · exclude_target 20.0 ms 이고, keep 대비 paired 중앙 차이는 exclude +3.9 · exclude_target +4.3 ms (bo_d3), support seed evidence 추출은 중앙 0.185 · p90 0.228 ms 다. **공유 pod 에서 쟀다** — loadavg1 중앙 20.98 · 최대 369.07 이라 idle 시간이 아니다 (verify.json `caveat`).
+
+### 4. 측정의 한계
+
+| 항목 | 내용 |
+|---|---|
+| closed-loop | **CL2 를 하지 않았다.** offline 지표가 closed-loop 성공을 예측하는지는 모른다 (T44d 에서 offline 안전 이득과 closed-loop 성공이 갈렸다) |
+| A9 | verifier 측정이 없다. 구현자 보고의 단위 test 와 코드 경로 추적뿐이다. `--links arms` 에서 비권한 link 가 target 과 닿는 빈도 · TO 시간은 미측정 |
+| 파이프라인 일치 | gt_label · 기록된 target points 를 썼다. 실제 VLA attention 으로 만든 identity 와의 일치는 미측정 |
+| re-query | chunk 1 개 · finger 행만 · keep 재구성이 기록과 median 0–7.6 mm 어긋남 (§3-4). GT gap 은 다시 계산하지 않았다 |
+| build 시간 | 공유 pod (loadavg1 중앙 21 · 최대 369). 첫 `compute_esdf` JIT 는 포함하지 않았다 |
+| 독립성 | verifier 가 `T44e.impl.md` A8 절을 측정 전에 읽었다 (§읽는 법) |
+| 회귀 기준선 | `regression-baseline` 미실행. E2d 배열과의 비트 일치로 대신했다 |
+| 기본값 | coarse on 의 기본을 exclude / exclude_target 으로 바꿀지는 정하지 않았다 (구현은 `keep` 기본) |
+| 구현자가 언급한 미결 | 비권한 행에 strict 가 꺼져 있으면 look-ahead tail 에서 빠지는 동작이 남는다 (C1a 계열은 strict on 이라 해당 없음). 겹침 보존이 남기는 차단 (이웃이 target 에 붙은 경우) 은 판정 1 조건 4 와 같은 원칙이라 그대로 두었다 |
+
+### 5. 사용자 판정 대기 · 산출물
+
+#### 5-1. 사용자 판정 대기
+
+아래는 lead 가 사용자에게 물을 항목이다. 어느 것도 scribe 가 정하지 않았다.
+
+| # | 판정할 것 | 근거 | 아직 모르는 것 |
+|---|---|---|---|
+| 1 | **CL2 의 C1b′ (coarse + support 처리) 를 어느 방식으로 할지** — (a) `exclude` (A8), (b) `exclude_target` (A8b), (c) 둘 다 arm 으로. C2′ (= C1b′ + `--links arms` + `--nonauthorized-target-margin obstacle`) 의 C1b′ 도 같이 정해진다 | §3-1: 파지 쪽 지표는 (a) = (b) 수준 (zero level 3 mm · grasp 직전 교차 46 / 4 대 47 / 5), distractor 내부 frame 은 (a) 32 대 (b) 17 (keep 17, off 54). §3-4: 재조회에서 (a) 가 4 짝 완전 회복, (b) 는 1 짝 완전 · 3 짝 부분 | closed-loop 성공 (C1a 15 / 18 수준으로 돌아오는지), (b) 의 겹침 보존이 만드는 차단, TA 차단 증가 (b 18,904 대 a 8,756) 의 실제 영향 |
+
+기본값 (coarse on 일 때 support 처리의 기본) 과 A9 의 look-ahead · sweep 묶음 (strict 없이 `obstacle` 을 쓸 일이 있는지) 은 CL2 뒤의 판정으로 남겨 두었다.
+
+#### 5-2. 이 STEP 의 산출물
+
+- **측정**: `handoff/T44e.verify.json` (V-E2e). 원자료: `outputs/verify/T44/E2e/` (`agg_e2e.json` · `raw_demo` · `raw_lb` · `requery/` · `timing/` · `grad_mismatch.json`, 스크립트 `e2e_measure.py` · `agg_e2e.py` · `requery.py`).
+- **구현**: `handoff/T44e.impl.md` (A8 · A8b · A9). 새 test 파일 `tests/ag3s/test_t44e_a8_coarse_support.py` · `tests/ag3s/test_t44e_a8b_coarse_support_footprint.py` · `tests/trajopt/test_t44e_a9_nonauthorized_target_margin.py`.
+- **figure**: `figures/t44/t44e-scene` · `t44e-graph` · `t44e-table` (각각 `.json` sidecar 있음).
+- **새 flag (모두 기본 off)**: `--target-free-coarse-support {keep,exclude,exclude_target}` (`--target-free-coarse` 와 함께만) · `--nonauthorized-target-margin {full,obstacle}` · harness `exclusion_e2 --coarse-support`.
+
+
+## T45 — 손 충돌 구 coverage audit · palm cover 5 mm (2026-10-11)
+
+**이 절이 답하는 물음.** T44d 의 hand–fruit_other 접촉 분석 (T44dA Q4) 에서, C1a 의 palm–이웃 과일 접촉 3 event 는 이웃 과일이 field 에 남아 있었고 (표면 91–93 %) TO 가 예측한 clearance 는 −1.1 ~ 6.7 mm 였지만 실제 sphere 모델 gap 은 9–16 mm 였다. palm 구 반지름이 6.2 mm 이고 URDF capsule 은 33 mm 라는 서버 log 의 수치와 함께, 접촉을 막지 못한 원인 일부가 exclusion 이 아니라 **로봇 손 기하의 과소 근사**일 수 있다는 가설이 나왔다. 사용자는 이것을 별도 STEP (T45) 으로 분리했다 — audit 먼저, 필요한 수정만. 이 절은 (1) 손 충돌 구의 coverage audit, (2) 사용자 판정에 따른 palm cover 5 mm 구현 (A10), (3) offline 으로 TO 시간 · grasp 영향을 잰 V-T45 를 기록한다.
+
+**한 줄 결과.** **손가락 구는 coverage 문제가 없고 (MJCF 표면 점 중 구 밖 비율 0.001 이하), palm 구는 표면의 0.94 가 구 밖이다** — T44d 의 palm–과일 접촉 8 event 의 접촉점 35 / 35 가 palm 구 밖 24.1–43.4 mm 에 있었다. palm 에 손가락 몸통 구 (T43 FC) 와 같은 계산을 적용한 **palm cover 5 mm** 는 구를 270 → 466 개로 늘리고 접촉점 35 / 35 를 덮는다 (구현자 smoke · audit 값과 같다). offline replay (T44d C1a 기록 18 run) 에서 **TO p90 이 63.1 → 91.0 ms (+27.9 ms)** 로 늘고, grasp 직전 (8 chunk × 18 run = 144 chunk) **새 HOLD 가 6 chunk** 생겼다 (해소 1). 새 HOLD 중 최악 4 건을 파 보니 위반 palm 행의 가장 가까운 field 표면은 기록된 어떤 점군 (table · target · 기타) 에서도 15–45 mm 떨어져 있고 palm MJCF hull 에서는 3–7 mm 였다. **이것을 로봇 자신의 표면이 field 에 남은 self-filter 잔여로 보는 것은 가설이며 확인하지 않았다.** 5 mm 돌출이 closed-loop 에서 target 접근을 막는지는 측정하지 않았다.
+
+**읽는 법과 출처 규약.**
+
+- audit 수치는 `handoff/T45.verify.json` (이하 **audit**), V-T45 수치는 `handoff/T45V.verify.json` (이하 **V-T45**) 의 `numbers` 에서만 왔다. `handoff/T45A10.impl.md` 의 숫자는 **"(구현자 smoke)"** · "(구현자 보고)" 로 표시했다. 덧셈 · 비교로 구한 값은 "(산출)".
+- 시각은 UTC 파일 시각이다. 그림은 verifier 가 만들었고 `figures/t45/` 에 sidecar 와 있다.
+- 코드는 audit 가 T44d CL 서버 snapshot (`/mnt/dev/work-t44cl`, benchmark `f891abe`) 위에서, V-T45 가 `f891abe` 위의 **미커밋 작업 트리** (T45 A10 · T44e A8 / A9 가 기본 off 로 같이 있다) 에서 돌았다. 이 절을 쓰면서 커밋하지 않았다.
+- `regression-baseline` (`.venv-ag3s`) 은 V-T45 에서 **금지되어 실행하지 않았다.** 대신 off replay 의 HOLD 후보 chunk 수가 기록과 같음 (pre8 + close 162 chunk 에서 14 = 기록된 HOLD chunk 14), off replay 와 기록 refined chunk 의 최대 관절 차 1.09° (pre8), cmp 재실행 sha1 일치 (base 75 / 75 · PC 75 / 75) 를 확인했다. audit 는 CPU 전용 (서버 · GPU 미사용) 이다.
+
+### 1. 사용자 판정 · 타임라인
+
+| # | 판정 | 출처 |
+|---|---|---|
+| 1 | T44d 의 palm 구 문제는 별도 STEP — **audit 후 필요한 수정만** (2026-10-11) | `T45.task.md` |
+| 2 | **"Palm 은 5 mm cover 를 기본 off 옵션으로 구현하고, 기존 coverage 생성 코드를 재사용해주세요. 구 수는 전체 466 개인지 확인하고 TO 시간 · grasp 영향을 offline 으로 먼저 검증해주세요. 통과하면 CL2 에 C1b′ + palm cover 를 추가해 C1b′ 와 같은 episode / seed 로 비교해주세요. 2.5 mm cover 는 5 mm 돌출로 인한 실행 문제가 확인될 때만 검토해주세요."** (audit 뒤) | `T45.task.md` |
+
+| 시각 (UTC) | 무엇 | 출처 |
+|---|---|---|
+| 2026-10-11 04:45–04:46 | audit figure · `T45.verify.json` | figure · verify.json (파일 시각) |
+| 04:53 | T45 task (audit · A10 · V-T45 정의, 통과 기준 측정 전 고정) | `T45.task.md` (파일 시각) |
+| 05:25 | A10 구현 보고 | `T45A10.impl.md` (파일 시각) |
+| 06:04 | V-T45 figure · `T45V.verify.json` | figure · verify.json (파일 시각) |
+
+**통과 기준 (측정 전 고정, `T45.task.md`).** TO p90 증가가 실시간 예산 안 (V11AB TP 기준 p90 69 ms 대비 보고, 사용자 판정 대상) · grasp 직전 HOLD / verdict 악화가 없음 (C1a 기록 기준 새 HOLD 0 이 이상적, 수를 보고).
+
+### 2. audit — 손 구의 coverage (`T45.verify.json`)
+
+**설정.** 서버 constraint model 은 T44d CL 서버의 flag (`--links gripper --finger-cover both --capsule-radius-scale 0.05 --sphere-spacing 0.4 --max-spheres-per-capsule 32`, `outputs/verify/T44/CL/runs/C1a/.../server_proc.txt`) 로 짓는다. MJCF collision geom 은 MuJoCo 가 실제 접촉을 계산하는 기하이고, 한 qpos 의 MuJoCo world frame 에 URDF 구와 같이 놓았다 (URDF FK frame 과 MuJoCo world 의 원점 차 0.09 mm · 회전 차 0.0004°). 표면 점은 collision mesh 의 convex hull (MuJoCo 가 mesh 를 convex hull 로 충돌시킨다) 에서 0.5 mm² 당 1 개 샘플했고, 같은 body 의 다른 piece 에 0.2 mm 넘게 묻힌 점과 rigid 로 붙은 이웃 body (palm 윗면의 `link_*_arm_6` · FT sensor) 에 0.5 mm 안인 점은 뺐다. 왼손 finger 는 MJCF 와 URDF 의 이름이 바뀌어 있어 (`ee_finger_l1` ↔ MJCF `ee_finger_l2`) 위치로 짝지었다. 지표 `frac_out` = 구 합집합 밖에 있는 표면 점의 비율, `gap` = `min_i |p − c_i| − r_i` (> 0 이 구 밖).
+
+#### 2-1. 서버 구 모델과 생성 경로
+
+| link | 구 수 | 반지름 mm | role |
+|---|---:|---|---|
+| `ee_right` / `ee_left` (palm) | 23 | 5.7 – 6.22 | `collision` |
+| `ee_finger_r1/r2/l1/l2` (finger) | 56 | 2.54 – 8.44 | `finger_body` |
+| 모델 전체 | gripper **270** · arms 422 | | |
+
+손 link 의 구는 `--links gripper` 와 `--links arms` 에서 같다. palm 구는 capsule 3 개 (반지름 33.0 / 28.4 / 32.8 mm, 길이 84.0 / 66.3 / 82.7 mm; URDF 파일 자체에는 손 link 의 collision capsule 이 0 개이고 MJCF mesh 정점에 맞춘 bounding capsule 이 원천이다) 에서 8 + 7 + 8 구로 만들어지고, 반지름은 `sqrt((0.05 r)² + (spacing / 2)²)` = 5.7 – 6.2 mm 다 (서버 log 의 "27.3 mm short" 와 같은 양). 경로 (audit `code_path`):
+
+| 단계 | 파일:줄 |
+|---|---|
+| CLI | `trajopt/serve_safe.py:1201` (`--links`) · `:1350 / 1355 / 1358` (`--sphere-spacing` · `--max-spheres-per-capsule` · `--capsule-radius-scale`) · `:1505` (`--finger-cover`) |
+| 옵션 전달 | `serve_safe.py:489-500` `sphere_options` → `:2553` → `build_ag3s` `:834` → `build_constraint_robot_model` (~`:901`) |
+| 모델 생성 | `ag3s/experiments/reports/grounding_report.py:146-228` (`gap_filling_capsules` → `UrdfSphereChain(extra_capsules=…)`, finger cover 는 finger capsule 자리를 대체 `:195-228`) |
+| capsule 원천 | `ag3s/experiments/sources/mujoco_source.py:565` `gap_filling_capsules` → `:365` `bounding_capsules`; 왼손 finger 이름 swap `:487-494` |
+| 반지름 배율 | `ag3s/robot_models/urdf_sphere_chain.py:869-876` `scale_for_link`, `:878-923` `_capsule_sphere_centres` (`:919-920` 반지름), `:1039-1048` `_effective_radius` |
+
+#### 2-2. coverage (열린 손가락)
+
+![T45 graph](figures/t45/t45-graph.png)
+
+[`t45-graph.png`](figures/t45/t45-graph.png) — ① link 별 구 밖 비율 ② 구 밖 거리 p95 / max ③ T44d 접촉 24 event 의 접촉점이 손 전체 구 합집합 밖에 있는 거리 (event 중앙값). [`t45-table.png`](figures/t45/t45-table.png) 는 같은 값의 표다.
+
+| (열린 손가락) | 구 밖 비율 | 밖 거리 median / p95 / max mm | 서버 구 대신 capsule 반지름 1.0 인 경우의 구 밖 비율 · max |
+|---|---:|---|---|
+| `ee_right` palm | **0.9386** | 14.76 / 39.65 / 54.37 | 0.2053 · 27.67 mm |
+| `ee_left` palm | **0.9385** | 14.79 / 39.62 / 54.32 | 0.2051 · 27.66 mm |
+| finger 4 개 (`r1 r2 l1 l2`) | 0.0007 – 0.0010 | 0.034 – 0.047 / 0.07 – 0.097 / max 0.075 – 0.119 | 0.0143 – 0.0165 · 1.09 – 1.11 mm |
+
+- 손 전체 구 합집합 (finger 구 포함) 으로 봐도 palm 표면의 0.925 – 0.928 이 밖이고 (`ee_right`, open / half / closed) 최대 거리는 50.6 / 37.05 / 33.2 mm 다.
+- 손가락의 구 밖 비율 0.001 은 표본 간격 수준이다 (최대 0.12 mm). **손가락은 coverage 문제가 없다.**
+- palm 구는 MJCF 표면의 0.94 를 덮지 못하고, 동시에 구 합집합이 geom 밖으로 나간 부피도 8.2 cm³ (구 합집합 부피의 0.389, 최대 돌출 8.59 mm) 다 — 구가 작지만 덮는 곳이 어긋나 있다.
+
+#### 2-3. T44d 접촉 event 와 coverage
+
+T44d 의 C0 · C1a · C1b 기록 replay 에서 hand–fruit 접촉 event 24 개 (palm 8 · finger 16) 를 MuJoCo qpos 로 추적해 접촉 geom 과 접촉점을 구했다 (접촉점 = hand geom–fruit geom 쌍의 `mj_geomDistance ≤ 1 mm` 인 지점, 침투 중이면 contact.pos).
+
+| event class | event 수 | 접촉 geom | 접촉점이 구 coverage 안인가 |
+|---|---|---|---|
+| **palm** | 8 (C0 2 · C1a 3 · C1b 3) | 전부 MJCF `EE_BODY_R` 의 `EE_BODY_collision_2` (geom 731) — body frame x −42 ~ −16, y −28, z −73 ~ −52 mm (palm 아랫 모서리, −y 쪽) | **0 / 35** 가 자기 palm 구 안. 자기 palm 구 밖 24.1 – 43.4 mm, 손 전체 합집합 밖 10.2 – 24.1 mm |
+| finger | 16 (C0 6 · C1a 6 · C1b 4) | `EE_FINGER_collision_2` (geom 765 · 758) | 179 / 179 점이 안 (gap −2.41 ~ −0.09 mm) |
+
+**해석 (audit `verdict`).** 손가락은 sphere fix 가 필요 없고, palm 은 구 모델의 기하 부족이 확인된다 — palm 접촉 8 event 모두 구 coverage 밖에서 일어났다. 이것은 T44d §4-4 의 "palm 접촉은 구 반지름 부족과 같은 방향" 이라는 추론 (당시 `not_measured`) 을 **mesh 수준 접촉점으로 확인**한 것이다. 접촉이 일어난 8 event 에서 접촉을 막지 못한 원인을 모두 palm 으로 돌릴 수 있는지, 추적 오차 (7–15 mm) 가 얼마나 기여했는지는 이 audit 로 분리하지 않았다.
+
+#### 2-4. `--capsule-radius-scale 0.05` 의 유래 (audit `A4_history`)
+
+| 시점 | 내용 |
+|---|---|
+| T6f | knob 도입, 기본 1.0 |
+| T28 (2026-09-28) 사용자 Q5 | "gripper capsule 구가 너무 커서인가 — 최대한 작게 구성해서 진행" (`handoff/T28.task.md:15`). 0.2 · 0.1 · 0.05 를 비교, E3 서버가 0.05 를 씀 |
+| T28 P1-3a 측정 | scale 1.0 에서 왼손 finger 구 안쪽 gap −28.5 mm (두 finger 구가 겹침), 0.2 에서 −0.57 mm, 0.1 에서 +1.67 mm, 0.05 에서 +2.35 mm |
+| 0.05 가 줄인 것 | capsule 사슬의 모든 반지름: palm 33 → 6.2 mm, finger 13 – 17.6 → 2.6 – 3.3 mm. 목적은 두 finger 사이 공간을 열어 grasp 를 가능하게 하는 것 + Q5 의 "최소로" |
+| T43 FC | finger 를 finger body 구 (mesh 를 덮음, overflow 2.5 mm) 로 대체 (구 122 → 270). **palm 은 0.05 사슬 그대로** |
+
+즉 palm 의 6.2 mm 는 finger 사이 공간 확보라는 이유로 만든 것이었고, T43 FC 가 finger 만 실제 기하로 되돌리면서 palm 은 남았다. 이 이력은 audit 의 인용이고 원 로그 줄은 audit `A4_history` 에 있다.
+
+#### 2-5. 후보와 audit 결론
+
+| 후보 (offline, 구현 안 함) | 구 수 (전체 / palm 하나) | palm 구 밖 비율 · max | 접촉점 안 | 손가락 통로 방향 돌출 | ESDF query 행 / chunk |
+|---|---|---|---|---|---:|
+| 서버 (현재) | 270 / 23 | 0.9386 · 54.37 mm | 0 / 35 | 69.3 mm (mesh 73.7) | 4,320 |
+| (a) palm `capsule-radius-scale-link ee_left=1 ee_right=1` | 270 / 23 | 0.2003 · 27.13 mm | 11 / 35 | **107.4 mm** (mesh 73.7) | 4,320 |
+| **(b) palm body cover, overflow 5 mm** | **466 / 121** | 0.0004 · 0.17 mm | **35 / 35** | 78.8 mm (+5.1 mm) | 7,456 |
+| (c) palm body cover, overflow 2.5 mm | 1,114 / 445 | 0.0009 · 0.33 mm | 35 / 35 | 76.3 mm | 17,824 |
+| (d) `--gripper-cover both` (T43R 인용, audit 가 다시 계산하지 않음) | 1,594 | — | — | — | — |
+
+(b) 의 build 는 CPU 에서 24.3 s (palm 하나, audit 측정), (c) 는 63.8 s 였다. **audit 결론:** palm 에 한해 수정이 필요하다. (a) 는 구 수는 늘지 않지만 palm 구가 손가락 통로 쪽으로 33.7 mm 더 나가고 (107.4 대 73.7 mm) 손바닥 접촉점의 11 / 35 만 덮는다. (b) · (c) 가 접촉점 35 / 35 를 덮고 (b) 가 구 수가 가장 적다. 사용자는 (b) 를 골랐다 (§1 판정 2). TO 시간 · 최종 grasp 영향은 audit 에서 미측정이었다 (`not_measured`).
+
+### 3. A10 — palm cover 5 mm 구현 (구현자 보고 · `T45A10.impl.md`)
+
+사용자 판정에 따라 `finger_body_spheres` (T43 FC 의 손가락 몸통 구 계산) 를 palm 겉면에 **그대로** 적용했다. 새 coverage 알고리즘은 없다. 표본 1 mm · 후보 격자 2 mm · union_eps 1 mm 이고 audit 후보 (b) 와 같은 값이다 (손가락 기본값 0.5 / 0.5 mm 와 다르다).
+
+| 항목 | 값 (구현자 보고) |
+|---|---|
+| flag | `--palm-cover {off,on}` (기본 `off`) · `--palm-cover-overflow MM` (기본 5.0, 상수 `gripper_cover.PALM_COVER_OVERFLOW`) |
+| off | 모델이 비트로 같다 (T44d C1a 서버 기록의 구 이름 · 반지름과 float32 비트가 같다) |
+| 구 수 (`--links gripper --finger-cover both`) | **270 → 466** (palm 23 → 121 each, +196 = 2 × 121 − 2 × 23). `--links arms` 는 422 → 618 |
+| palm 구 반지름 | 5.000 – 28.966 mm, 대상 표본 35,287 개 (1 mm, 겉면) 전부 구 안, 넘침 실측 5.118 mm |
+| audit (b) 와 대조 | 구 수 466 · palm 121 같다. 중심은 `array_equal`, 반지름은 최대 차 3.5e-18 m (overflow 의 `5.0 * 1e-3` 대 상수 `0.005` 표기 차) |
+| T44d palm–과일 접촉점 35 개 | **35 / 35 안**, gap −3.74 ~ −0.52 mm (audit 값과 0.15 mm 안). off 의 palm 구로는 35 / 35 가 20 mm 넘게 밖 |
+| link 이름 · 권한 | link 이름이 그대로 `ee_<side>` 라 권한 행 · target-free 조회 · 마진 완화가 palm 구 121 개 전부에 그대로 걸린다. 실제 466 구 모델로 `ConstraintBuilder` + `to_adapter.build_constraint_set` 을 돌려 `target_field_exclude` 가 `ee_right` 121 · `ee_finger_r1` 56 · `ee_finger_r2` 56 뿐이고 `ee_left` 는 0 임을 확인 (test) |
+| 서버 시작 | 켜면 WARNING `constraint palm cover (T45 A10): 구 270 → 466 …`, client metadata `palm_cover`. palm 풀이 CPU 10.7 s (양손, 1 thread, pytest 와 동시) 가 프로세스당 1 회 늘어난다 |
+| 새 test | `tests/trajopt/test_t45a10_palm_cover.py` 28 passed. 기존 FC · FR · R test 69 개 포함 96 passed. 전체 `tests/trajopt tests/ag3s` 2764 passed · 1 skipped · 0 failed (GPU 허용, T44e 와 같은 트리) |
+
+주요 파일 (구현자 보고): `benchmark/ag3s/robot_models/urdf_sphere_chain.py:222-230` (`PALM_BODY_ROLE`, 반지름 배율 · 간격 inflation 에서 제외) · `benchmark/ag3s/experiments/sources/gripper_cover.py:852-944` (`_body_capsules` 로 FC 루프를 함수로 빼고 `palm_body_capsules` 추가) · `benchmark/ag3s/experiments/reports/grounding_report.py:146-168, 172, 210-217, 256-283` · `benchmark/trajopt/serve_safe.py:608-643, 1567-1574, 1916-1920` · `benchmark/trajopt/experiments/ta_offline.py:143-144, 179-180, 228-230` (variant `PC`).
+
+**npz 열 순서 주의 (구현자 보고).** palm 이 gripper 모델에서 맨 앞이다. off 는 앞 46 열이 palm 이고 on 은 **앞 242 열** (121 + 121) 이다. 열은 `summary_json.sphere_link_names` 로 골라야 한다. 구현자가 짚은 미결 항목은 §5 에 옮겼다.
+
+### 4. V-T45 — offline replay (`T45V.verify.json`)
+
+**설정.** T44d C1a 기록 **18 run** (index `outputs/verify/T45/V/index_c1a.json`) 의 chunk 를 CPU / GPU 로 replay 해 같은 chunk 를 palm cover off (기록 서버 flag 그대로, 270 구) 와 on (variant `PC`, 서버 flag + `--palm-cover on`, 466 구) 으로 풀었다. 시간은 두 variant 를 번갈아 (alternating) 쟀고 2 pass (replicate) 다. scene 은 `ta_offline` + strict `target_contact_rows` + `layer_diff` 이다.
+
+#### 4-1. TO 시간
+
+![V-T45 graph](figures/t45/t45v-graph.png)
+
+[`t45v-graph.png`](figures/t45/t45v-graph.png) — (a) TO 시간 CDF (b) 단계별 평균 (c) ESDF 질의 행 수 (d) grasp 직전 refined 변화 (e) palm 구의 표면 최소 거리 (f) verdict 변화. [`t45v-table.png`](figures/t45/t45v-table.png) 는 같은 수치의 표다.
+
+| TO wall time (ms, n = 1,332 chunk) | off | on | on − off |
+|---|---:|---:|---:|
+| median | 37.8 | 49.6 | +11.8 |
+| p90 | **63.1** | **91.0** | **+27.9** |
+| p95 | 72.1 | 112.6 | +40.4 (산출) |
+| p99 | 176.6 | 232.7 | +56.1 |
+| CPU p90 (process time) | 65.9 | 96.6 | +30.7 |
+| p90 − V11AB TP p90 69.2 ms | −6.1 | **+21.8** | |
+| 구 수 S / 행 per eval (S × 16) | 270 / 4,320 | 466 / 7,456 | ×1.73 |
+| solve 당 core 행 (평균) | 13,883 | 24,174 | ×1.74 |
+| solve 당 field 점 (평균) | 38,726 | 66,748 | ×1.72 |
+| SQP iteration 평균 · time budget hit | 2.78 · 0 | 2.76 · 0 | |
+| status violated chunk | 21 | 28 | |
+
+| 단계 평균 ms | fk | esdf | clearance | linearize | qp_build | osqp | other |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| off | 6.5 | 13.0 | 3.0 | 0.81 | 4.0 | 9.5 | 6.9 |
+| on | 10.7 | 19.7 | 4.6 | 0.90 | 4.0 | 11.9 | 7.4 |
+
+- paired (같은 chunk 의 차이, verify.json `paired`): wall 차이 median 11.2 · p90 28.1 ms, **on 이 느린 chunk 비율 0.968**, p90 비 1.44 · median 비 1.31.
+- **replicate (pass 2):** off p90 62.1 · on p90 89.1 → +27.1 ms, median 차 +11.2 ms. pass 1 과 같다.
+- **pod load.** load1 중앙 22.3 · p90 215 · 최대 340.6 (공유 pod). load 층별 p90 (off / on): load1 < 40 → 62.4 / 90.5, 40–100 → 62.8 / 86.0, ≥ 100 → 64.2 / 91.9. 층별로 off 와 on 의 간격이 같은 방향이다.
+- grasp state 별 p90 (off → on, ms): closing 208.2 → 240.7 (n = 67) · held 74.9 → 93.1 (238) · latched 65.3 → 110.7 (309) · placed 46.9 → 64.4 (700) · searching 69.2 → 92.8 (18).
+- 시간이 늘어난 곳은 구 수에 비례하는 fk · esdf · clearance 와 osqp (평균 9.5 → 11.9 ms) 이고, 실제 QP 반복 평균은 288 → 366 (p90 525 → 700) 로 늘었다. qp_build · linearize 는 거의 같다.
+- **서버 시간이 아니라 server-equivalent offline replay 의 TO 시간이다.** online GPU 서버에서의 시간은 미측정이고, 1,332 chunk 라는 n 은 18 run × 75 chunk = 1,350 과 18 차이가 나는데 verify.json 이 그 18 의 이유를 적지 않았다.
+
+**통과 기준 대조 (측정 전 고정한 기준, 판정이 아니다).** TO p90 은 V11AB TP 기준 69.2 ms 를 **21.8 ms 넘는다** (off 는 6.1 ms 아래). grasp 직전 새 HOLD 는 이상적이었던 0 이 아니라 **6** 이다 (§4-2). 이 두 수치가 "통과" 인지는 lead 와 사용자 판정 대상이다 (verify.json `verdict`).
+
+#### 4-2. grasp 직전 영향 (pre-grasp 8 chunk × 18 run = 144 chunk)
+
+| 지표 (pre-grasp 144 chunk) | off | on | 변화 |
+|---|---:|---:|---|
+| refined chunk 최대 관절 차 (°) median / p90 / max | | | **0.10 / 2.35 / 13.13** |
+| 　on 과 off 의 refined 가 같은 chunk (sha1) · 1° 초과 · 3° 초과 | | | 7 · 23 · 10 |
+| 기록 대비 재현 차 (°) median / p90 / max | 0.077 / 0.371 / 1.089 | 0.209 / 2.648 / 13.125 | |
+| HOLD 후보 chunk (`n_collision > 0`) | 1 | **6** | **새 HOLD 6 · 해소 1** |
+| status violated chunk | 1 | 6 | 악화 6 · 개선 1 |
+| collision row 합 | 7 | 471 | |
+| palm 이 최악 행인 chunk | 10 | 54 | |
+| palm 구 TO 최소 clearance, chunk 별 중앙 mm | 28.1 | 9.4 | min 4.96 → **−17.78** |
+| palm 구 – target 점 최소 gap, chunk 최소 mm | 17.4 | **−13.5** | |
+| palm 구 – target 점 gap < 0 / < 10 / < 20 mm 인 query | 0 / 0 / 18 (of 26,496) | 1,847 / 5,795 / 13,393 (of 139,392) | |
+| palm 구 – table 최소 gap mm | 43.4 | 27.5 | < 10 mm query 0 (둘 다) |
+| palm 구 – 기타 장애물 점 최소 gap mm | 24.9 | 7.0 | < 10 mm query 0 → 38 |
+| palm 행이 target-free layer 를 읽는 chunk | 144 / 144 | 144 / 144 | palm margin 20 mm (둘 다) |
+
+새 HOLD 6 chunk: `C1a_ep0_s2:13` · `C1a_ep104_s1041:15` · `C1a_ep123_s1231:11` · `C1a_ep12_s121:13` · `C1a_ep30_s302:14` · `C1a_ep3_s31:28` (`run:seq`).
+
+![V-T45 scene](figures/t45/t45v-scene.png)
+
+[`t45v-scene.png`](figures/t45/t45v-scene.png) — 같은 run 의 close 직전 chunk 에서 on 의 refined 8 번째 step 자세에 **off 의 palm 구 (파랑, 23 개) 와 on 의 palm 구 (주황, 121 개)** 를 얹은 그림이다. 위 행은 새 HOLD 가 난 `C1a_ep3_s31` seq 28 (on 에서 palm −17.8 mm), 아래 행은 palm 이 최악 행인데 HOLD 가 없는 `C1a_ep0_s1` seq 14 다. 오른쪽 두 panel 은 palm 구 중심 ±12 cm 의 기록 point cloud (지지면 · 기타 · target) 와 palm 구의 투영 (x–y, x–z) 이다.
+
+**palm 구가 target 과 겹치는 것은 권한 때문에 문제가 아니다.** palm 행 144 chunk 전부가 target-free layer 를 읽고 (`target_free_mask_palm_all_true_chunks` 144) target contact rows 에서도 palm 이 전부 true 라 (`target_contact_rows_palm_all_true_chunks` 144), target 과의 gap 이 −13.5 mm 까지 내려가도 그 자체가 위반은 아니다. 새 HOLD 의 원인은 §4-3 의 진단 대상이고, 최악 4 건에서는 `d_free` 와 `d_main` 이 같아 target 이 원인이 아니다.
+
+#### 4-3. 새 HOLD 의 원인 — 진단 결과와 가설
+
+`diag_hold.json` · `diag_surface.json` · `diag_self.json` 의 최악 4 건 (V-T45 `new_hold_palm_row_diagnosis`):
+
+| 항목 | 값 |
+|---|---|
+| 위반 palm 행의 가장 가까운 field 표면 → 기록된 어떤 점군 (table · target · 기타) 의 점까지 | **15–45 mm** |
+| 같은 표면 → palm MJCF hull (q_now) 까지 | **3–7 mm** |
+| `d_free` 와 `d_main` | 같다 (target 이 아니다) |
+| 그 표면의 정체 | **확인하지 못했다** |
+
+- 사실로 말할 수 있는 것: 위반을 만든 field 표면이 table · target · 기타 관측점 어느 것에서도 멀고 palm 자신의 hull 에서 가깝다.
+- **가설 (미검증): 이것은 로봇 자신의 표면이 관측 point cloud 에 남아 field 에 들어간 것, 즉 self-filter 가 지우지 못한 잔여일 수 있다.** palm 구가 작을 때는 그 잔여와 겹치지 않았다가 palm 구가 mesh 를 실제 크기로 덮으면서 겹치게 되었다는 설명이다. 이 가설을 확인한 측정은 없다 (`not_measured`: "identity of the field surface behind the new palm violations"). 다른 설명 (예: 그 자세에서 palm 이 실제로 주변 점에 가까움을 점군이 담지 못한 경우) 도 배제하지 못했다.
+- 이 4 건은 새 HOLD 6 chunk 중의 최악 사례이고 6 chunk 전부의 분포가 아니다.
+
+#### 4-4. 그 밖의 chunk
+
+| 범위 | HOLD 후보 off → on | 새 HOLD · 해소 | palm 이 최악 행인 chunk off → on |
+|---|---:|---|---:|
+| pre-grasp 8 chunk × 18 (144) | 1 → 6 | 6 · 1 | 10 → 54 |
+| close chunk (18) | 13 → 13 | 2 · 2 (refined 변화 median 3.52° · p90 7.64° · max 8.59°) | 1 → 5 |
+| pre8 + close (162) | 14 → 19 | 8 · 3 (기록 HOLD chunk 14) | |
+| run 전체 (1,350) | 18 → 25 | 10 · 3 (기록 HOLD chunk 19) | 30 → 147 |
+
+- 경로가 아니라 모델이 반응한다는 단서 (이름 그대로 옮김; verify.json 에 정의 설명이 없다): `cross_hold_base_traj_under_PC_model` 43 · `cross_hold_PC_traj_under_base_model` 2.
+- close chunk 는 off 에서도 13 / 18 이 violated 이고 on 도 13 이다. 합은 같지만 새 HOLD 2 · 해소 2 로 chunk 의 구성은 바뀌었다. 이 13 이 T44d 의 close-time HOLD (ambiguous seed 보존) 와 같은 chunk 인지는 분해하지 않았다.
+
+### 5. 측정의 한계
+
+| 항목 | 내용 |
+|---|---|
+| closed-loop | **MuJoCo 접촉에서 palm 5 mm 돌출이 target 과 물리적으로 닿는지 미측정.** replay 의 refined 변화는 계획의 변화일 뿐이다 |
+| 시간 | offline replay (server-equivalent). **online GPU 서버 시간 미측정.** 공유 pod (load1 중앙 22 · 최대 341) |
+| n | 시간 n = 1,332 (기록은 1,350 chunk). 18 의 차이는 verify.json 에 설명이 없다 |
+| 새 HOLD 의 정체 | field 표면의 정체 미확인 (§4-3). self-filter 잔여는 가설 |
+| 홀드 · carry chunk | close + 1 이후 held / carry chunk 의 palm 기하는 미측정 |
+| 회귀 기준선 | `.venv-ag3s` 금지로 미실행. 대체 확인은 §읽는 법 |
+| 접촉 위치 | audit 는 row 시작 qpos 만 (sub-step 해상도 아님), 접촉점은 거리 ≤ 1 mm 이거나 침투 중인 점 |
+| coverage 해상도 | palm cover 를 손가락 기본값 (0.5 / 0.5 mm) 으로 풀면 구 수가 달라진다 (미측정) |
+| palm 윗면 | FT sensor · `link_*_arm_6` 에 묻힌 palm 윗면 (`LinkSurface.hidden`) 도 덮는 대상에 포함된다 (구현자 보고: audit (b) 와 같게 하려고 그대로 둠). 빼면 구가 줄 수 있고 재지 않았다 |
+| 손가락 통로 | on 은 손가락 사이 통로 방향으로 +5.1 mm 돌출한다 (78.8 대 mesh 73.7 mm). 파지 면도 덮는다. target 접근을 막는지는 closed-loop 에서만 알 수 있다 |
+| CLI | `{off,on}` (양손) 만 있다. 한 손만 켜는 것은 함수 인자 `hands` 로만 가능 |
+
+### 6. 사용자 판정 대기 · 산출물
+
+#### 6-1. 사용자 판정 대기
+
+아래는 lead 가 사용자에게 물을 항목이다. 어느 것도 scribe 가 정하지 않았다.
+
+| # | 판정할 것 | 근거 | 아직 모르는 것 |
+|---|---|---|---|
+| 2 | **palm cover 5 mm 를 CL2 에 넣을지, 그리고 그 전에 새 HOLD 의 field 표면 (self-filter 잔여 가설) 을 먼저 진단할지** | §4-1: TO p90 +27.9 ms (V11AB TP 69.2 ms 를 21.8 ms 넘음). §4-2: 새 HOLD 6 / 144, palm 이 최악 행인 chunk 10 → 54. §4-3: 최악 4 건의 위반 표면이 기록 점군에서 15–45 mm · palm hull 에서 3–7 mm | 그 표면의 정체, palm 5 mm 돌출이 closed-loop 접근에서 target 에 닿는지, online GPU 시간. self-filter 잔여가 사실이면 palm cover 를 켜기 전에 그 잔여부터 정리해야 하는지 |
+
+사용자 판정 1 (§1) 은 "통과하면 CL2 에 C1b′ + palm cover arm 을 추가" 였다. 이 절의 offline 검증은 두 통과 기준 모두에서 이상적인 값 (새 HOLD 0 · TP 예산 안) 이 아니었으므로 판정은 사용자 몫이다. 2.5 mm cover (445 구 / palm, 총 1,114) 는 "5 mm 돌출로 인한 실행 문제가 확인될 때만" 검토하기로 했고, 그 문제는 closed-loop 를 하지 않아 아직 확인된 바 없어 검토하지 않았다. 새 HOLD 가 돌출 크기에서 오는지도 §4-3 의 진단 전에는 모른다.
+
+#### 6-2. 산출물
+
+- **측정**: `handoff/T45.verify.json` (audit) · `handoff/T45V.verify.json` (V-T45). 원자료: `outputs/verify/T45/` (`coverage.json` · `events.json` · `events_cands.json` · `candidates.json` · `palm_body_o*.npz` · `align.json`, 스크립트 `p/`), `outputs/verify/T45/V/` (`raw/timing` · `raw/timing_rep` · `raw/cmp` · `raw/det` · `agg_*.json` · `diag_hold.json` · `diag_surface.json` · `diag_self.json`).
+- **구현**: `handoff/T45A10.impl.md` (A10). 새 test `tests/trajopt/test_t45a10_palm_cover.py`. 원자료 `outputs/impl/T45A10/`.
+- **figure**: `figures/t45/` — audit `t45-scene` · `t45-graph` · `t45-table`, V-T45 `t45v-scene` · `t45v-graph` · `t45v-table` (각각 `.json` sidecar 있음). audit 실제 scene:
+
+![T45 scene](figures/t45/t45-scene.png)
+
+[`t45-scene.png`](figures/t45/t45-scene.png) — 왼쪽은 MuJoCo 의 `C1a_ep54_s542` t157 palm (`EE_BODY_R`) – orange 접촉 장면, 오른쪽은 palm body frame 의 x–z (위) · y–z (아래) 투영이다. 회색 점 = MJCF collision hull 표면, 빨강 = palm 접촉점 (8 event), 파랑 원 = 구의 투영이다. 열은 서버 구 (23 개, r 5.7–6.2 mm) · 후보 palm scale 1.0 (23 개) · 후보 palm body cover 2.5 mm (445 개) 이다 (5 mm 후보 (b) 는 이 그림에 없다). 서버 구는 표면의 가장자리를 따라 작은 원이 늘어서 있고 접촉점은 그 아래 모서리의 구 밖에 있다.

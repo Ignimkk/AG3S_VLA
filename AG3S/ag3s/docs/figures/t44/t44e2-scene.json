@@ -1,0 +1,127 @@
+{
+ "used": [
+  {
+   "row": "median",
+   "key": "demo_ep0001_f068",
+   "method": "ball",
+   "target_recall": 0.9205,
+   "distractor_seeds_lost": 31,
+   "unlabelled_removed": 4,
+   "n_slab_seeds": 810,
+   "ball_centre": [
+    0.468080887044403,
+    0.3129067932171607,
+    0.8610977139918545
+   ],
+   "ball_radius_m": 0.058499338278186076
+  },
+  {
+   "row": "median",
+   "key": "demo_ep0001_f068",
+   "method": "ball_owned_remove",
+   "target_recall": 0.9205,
+   "distractor_seeds_lost": 3,
+   "unlabelled_removed": 4,
+   "n_slab_seeds": 810,
+   "ball_centre": [
+    0.468080887044403,
+    0.3129067932171607,
+    0.8610977139918545
+   ],
+   "ball_radius_m": 0.058499338278186076
+  },
+  {
+   "row": "median",
+   "key": "demo_ep0001_f068",
+   "method": "ball_owned_keep",
+   "target_recall": 0.5936,
+   "distractor_seeds_lost": 0,
+   "unlabelled_removed": 0,
+   "n_slab_seeds": 810,
+   "ball_centre": [
+    0.468080887044403,
+    0.3129067932171607,
+    0.8610977139918545
+   ],
+   "ball_radius_m": 0.058499338278186076
+  },
+  {
+   "row": "median",
+   "key": "demo_ep0001_f068",
+   "method": "oracle",
+   "target_recall": 1.0,
+   "distractor_seeds_lost": 0,
+   "unlabelled_removed": 0,
+   "n_slab_seeds": 810,
+   "ball_centre": [
+    0.468080887044403,
+    0.3129067932171607,
+    0.8610977139918545
+   ],
+   "ball_radius_m": 0.058499338278186076
+  },
+  {
+   "row": "worst",
+   "key": "demo_ep0060_f068",
+   "method": "ball",
+   "target_recall": 0.9584,
+   "distractor_seeds_lost": 131,
+   "unlabelled_removed": 26,
+   "n_slab_seeds": 745,
+   "ball_centre": [
+    0.5343023784403075,
+    -0.31531180174671086,
+    0.8599735818393887
+   ],
+   "ball_radius_m": 0.05910718062780695
+  },
+  {
+   "row": "worst",
+   "key": "demo_ep0060_f068",
+   "method": "ball_owned_remove",
+   "target_recall": 0.9554,
+   "distractor_seeds_lost": 87,
+   "unlabelled_removed": 25,
+   "n_slab_seeds": 745,
+   "ball_centre": [
+    0.5343023784403075,
+    -0.31531180174671086,
+    0.8599735818393887
+   ],
+   "ball_radius_m": 0.05910718062780695
+  },
+  {
+   "row": "worst",
+   "key": "demo_ep0060_f068",
+   "method": "ball_owned_keep",
+   "target_recall": 0.572,
+   "distractor_seeds_lost": 4,
+   "unlabelled_removed": 8,
+   "n_slab_seeds": 745,
+   "ball_centre": [
+    0.5343023784403075,
+    -0.31531180174671086,
+    0.8599735818393887
+   ],
+   "ball_radius_m": 0.05910718062780695
+  },
+  {
+   "row": "worst",
+   "key": "demo_ep0060_f068",
+   "method": "oracle",
+   "target_recall": 1.0,
+   "distractor_seeds_lost": 0,
+   "unlabelled_removed": 0,
+   "n_slab_seeds": 745,
+   "ball_centre": [
+    0.5343023784403075,
+    -0.31531180174671086,
+    0.8599735818393887
+   ],
+   "ball_radius_m": 0.05910718062780695
+  }
+ ],
+ "identity": "gt_label",
+ "selection": "frames with ball distractor loss >= 1 (demo, gt_label): ball_owned_remove loss closest to median, and max (tie: lower recall)",
+ "source": "/mnt/dev/work/outputs/verify/T44/E2/raw_demo"
+}

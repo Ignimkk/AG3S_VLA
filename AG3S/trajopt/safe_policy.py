@@ -1841,8 +1841,12 @@ VERDICT_POLICIES = ("reasons", "legacy")
 #: **들어 있는** 것 (`fine`). `target_free` 는 대상을 뺀 답이고 `static` 은 해석적 정적 기하라,
 #: 그 답이 만든 위반은 정의상 대상과의 접촉이 아니다. `None` 은 계층을 말하지 못하는 필드
 #: (단일 격자 — 계층이 하나뿐이다).
+#: T44c A7: `target_free_coarse` (T44c A5 의 `coarse_no_target` 이 답한 target-free 질의) 도 대상을 뺀
+#: 답이다 — `target_free` 와 같은 사유 (`answer_excludes_target`) 로 간다. 예전에는 이 tier 가
+#: `_NOT_TARGET_TIERS` 에 없어 대상 판정으로 내려가 `unresolved_tier:target_free_coarse` 가 될 수 있었다.
 _CONTACT_TIERS = ("fine", None)
-_NOT_TARGET_TIERS = ("target_free", "static")
+_TARGET_EXCLUDED_TIERS = ("target_free", "target_free_coarse")
+_NOT_TARGET_TIERS = _TARGET_EXCLUDED_TIERS + ("static",)
 
 
 #: T37 (K1) — continuity 항을 끄는 grasp latch 상태. 닫힘 시도(`closing`)와 파지 확인(`held`).
@@ -1916,7 +1920,7 @@ def classify_violations(linearizer, trajectory: np.ndarray, q_now: np.ndarray, s
     ESDF 행 하나가 `allowed_contact` 인 조건 (전부):
 
     1. 질의점이 로봇 구이고 그 link 가 `authorized_links` 에 있다 (쥔 물체의 점은 권한 대상이 아니다).
-    2. 답한 계층이 조작 대상을 뺀 것이 아니다 (`target_free` · `static` 이면 대상이 아닌 무엇과의 위반).
+    2. 답한 계층이 조작 대상을 뺀 것이 아니다 (`target_free` · `target_free_coarse` · `static` 이면 대상이 아닌 무엇과의 위반).
     3. **그 행의 최근접 장애물이 조작 대상이다.** 판정 근거는 있는 것 중 첫째:
        `distance` — `_esdf_clearance` 와 같은 검사 (`|d_field − d_object| ≤ voxel`, 대상 점군/구로),
        `label` — 라벨 층이 `TARGET_LABEL`, `centroid` — T20 기록의 centroid 공
@@ -2103,7 +2107,7 @@ def _classify_esdf_rows(hits, values, centres, radii, scene, name, n_spheres, au
             row.update({"class": "collision", "why": "no_manipulated"})
         elif tier in _NOT_TARGET_TIERS:
             row.update({"class": "collision",
-                        "why": ("answer_excludes_target" if tier == "target_free"
+                        "why": ("answer_excludes_target" if tier in _TARGET_EXCLUDED_TIERS
                                 else "static_geometry")})
         else:
             if d_obj is not None and d_row is not None and voxel > 0.0:

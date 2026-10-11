@@ -1724,7 +1724,10 @@ def ground_target(
     # so the components compete — and are excluded or kept — as the separate objects they are.
     members, splits = _split_groups(
         [idx for _, idx in sorted(groups.items())], points, attention, cfg, confirm,
-        enabled=cfg.use_3d_connectivity)
+        enabled=cfg.use_3d_connectivity,
+        # T44b A4: the ratio gate on the pre-normalisation attention (`raw` only; default None).
+        ratio_attention=(attention_cloud.raw_attention
+                         if cfg.attention_split_ratio_source == "raw" else None))
 
     clusters = [
         dataclasses.replace(
@@ -1835,12 +1838,17 @@ def ground_target(
     )
 
 
-def _split_groups(groups, points, attention, cfg, confirm, *, enabled):
+def _split_groups(groups, points, attention, cfg, confirm, *, enabled, ratio_attention=None):
     """T31b: split the triggered clusters of this frame (`stages/attention_split.py`).
 
     Returns `([(member_indices, ClusterInfo.split), ...], splits)` — the parents in their grown
     order, each replaced by its components (target first) when the split was taken — and reports
     the frame's record to `confirm`.
+
+    `ratio_attention` (T44b A4): the pre-normalisation attention the ratio gate reads when
+    `clustering.attention_split_ratio_source` is `raw`; None = the normalised attention (T31b).
+    With `raw` asked and no raw attention on the cloud the gate falls back to the normalised one
+    and the frame's record says `ratio_source: "normalized_fallback"`.
     """
     if confirm is not None:
         opening, skipped = confirm.split_opening(cfg)
@@ -1856,7 +1864,8 @@ def _split_groups(groups, points, attention, cfg, confirm, *, enabled):
     for idx in groups:
         dec = None if opening is None else split_by_attention(
             points, attention, idx, max_opening=opening, radius=float(cfg.attention_split_radius),
-            min_points=int(cfg.min_points), min_ratio=float(cfg.attention_split_ratio))
+            min_points=int(cfg.min_points), min_ratio=float(cfg.attention_split_ratio),
+            ratio_attention=ratio_attention)
         if dec is None:
             out.append((idx, None))
             continue
@@ -1881,6 +1890,9 @@ def _split_groups(groups, points, attention, cfg, confirm, *, enabled):
             "n_triggered": len(decisions),
             "n_split": sum(1 for d in decisions if d.accepted),
             "decisions": [d.record() for d in decisions],
+            # T44b A4: only when the config asks for raw (the default record is T31b's).
+            **({} if cfg.attention_split_ratio_source != "raw" else {
+                "ratio_source": "raw" if ratio_attention is not None else "normalized_fallback"}),
         })
     return out, tuple(decisions)
 

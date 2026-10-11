@@ -1,0 +1,27 @@
+{
+  "artifact_id": "F01",
+  "status": "STORYBOARD_PENDING_EVIDENCE",
+  "claim_ids": [
+    "C001"
+  ],
+  "plan_ids": [
+    "P001"
+  ],
+  "result_ids": [],
+  "source_notes": [
+    "paper/notes/PAPER_STORY.md",
+    "paper/evidence/FIGURES_TABLES.md",
+    "paper/notes/DRAFT10_REVISION.md"
+  ],
+  "render_source": "paper/figures/fig01_teaser/figure.tex",
+  "numeric_values": null,
+  "is_measured_result": false,
+  "caption_scope": "Teaser storyboard connecting observed target geometry to contact constraints; no measured panels.",
+  "render_source_sha256": "29a0b5ce2d20de2960b46399fcb86978408c30e973b280c7cc882c5037baae7d",
+  "input_sha256": {
+    "paper/notes/PAPER_STORY.md": "2abe32df6226dbeeb6afd12fed4fda985e01212076ee182f3d02293f7365e6ac",
+    "paper/evidence/FIGURES_TABLES.md": "fc9a41403b8bcbdb73c1cbb70d550300bce902691cdab61bf43e3882153ca049",
+    "paper/notes/DRAFT10_REVISION.md": "604fa5a59dc9e02b3b8d3d149fca251338f15e055a9a5acbec89b6f5284e7182"
+  },
+  "updated_at": "2026-10-08 KST"
+}

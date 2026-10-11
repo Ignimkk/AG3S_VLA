@@ -90,7 +90,8 @@ from AG3S.ag3s.fields.esdf import CameraDepth, VoxelGrid, default_bounds
 from AG3S.ag3s.fields.observation import probe_from_cameras
 from AG3S.ag3s.fields.provenance import FieldProvenance
 
-__all__ = ["CuroboFieldBuilder", "TargetBall", "ATTACHED_LABEL", "unpack_site_linear",
+__all__ = ["CuroboFieldBuilder", "TargetBall", "OwnedEvidence", "OWNED_CLASSES", "ATTACHED_LABEL", "unpack_site_linear",
+           "CoarseFreeSpec", "CUROBO_SEED_BAND_VOXELS", "coarse_exclusion_params", "COARSE_SIGN_FLOORS",
            "FineWindowRequest", "FineWindow", "place_fine_window", "WINDOW_BASES",
            "WINDOW_PLACEMENTS"]
 
@@ -181,6 +182,274 @@ class TargetBall:
                 "radius_mm": round(float(self.radius) * 1000.0, 3),
                 "z_min_m": float(self.z_min),
                 **{k: v for k, v in self.provenance.items()}}
+
+
+@dataclasses.dataclass(frozen=True)
+class OwnedEvidence:
+    """T44 I1 — `ball_owned` 가 공 안 seed 의 **주인**을 가르는 재료.
+
+    공(`TargetBall`)은 그대로 **외곽 상한**이다. 공 안 seed voxel 중심 `c` 마다
+    `d_t` = 가장 가까운 target 점, `d_o` = 가장 가까운 non-target 관측점까지의 거리를 재서
+
+    | 조건 (순서대로) | 분류 | 처리 |
+    |---|---|---|
+    | `min(d_t, d_o) > max_dist_voxels·vs` | unowned | `unowned` 대로 (`remove` · `keep`) |
+    | `|d_t − d_o| ≤ tie_voxels·vs` | ambiguous | **보존** · 기록 |
+    | `d_t < d_o` | target | 제거 |
+    | 그 밖 | non-target | **보존** |
+
+    non-target 점이 없으면 (`None` · 빈 배열) `d_o = ∞` 다 — 공 밖으로 넓히는 fallback 은 없다.
+
+    | 필드 | 무엇 |
+    |---|---|
+    | `target_points` | target 점 (`TargetGeometry.points` — pipeline 의 `target_free_points`) |
+    | `nontarget_points` | fused cloud − target `point_indices` − support (pipeline `_nontarget_points`) |
+    """
+
+    target_points: np.ndarray
+    nontarget_points: Optional[np.ndarray] = None
+    tie_voxels: float = 1.0
+    max_dist_voxels: float = 2.0
+    unowned: str = "remove"
+
+    def __post_init__(self) -> None:
+        tp = np.asarray(self.target_points, np.float64).reshape(-1, 3)
+        object.__setattr__(self, "target_points", tp)
+        nt = self.nontarget_points
+        object.__setattr__(self, "nontarget_points",
+                           np.zeros((0, 3)) if nt is None
+                           else np.asarray(nt, np.float64).reshape(-1, 3))
+        if self.unowned not in ("remove", "keep"):
+            raise ValueError(f"unowned 는 'remove' 또는 'keep' 이어야 합니다: {self.unowned!r}")
+        if float(self.tie_voxels) < 0.0 or not float(self.max_dist_voxels) > 0.0:
+            raise ValueError("tie_voxels ≥ 0, max_dist_voxels > 0 이어야 합니다")
+
+
+#: cuRobo 가 ESDF voxel 을 표면 seed 로 심는 띠 — `|tsdf(중심)| ≤ 0.9 · vs` (`builder_esdf.py:302-305`,
+#: `T44E2b.verify.json` code_state). **계층마다 m 로는 다르다** (5 mm → 4.5 mm, 20 mm → 18 mm): 한 seed
+#: voxel 의 중심에서 그 seed 를 만든 표면까지가 이 거리 안이다. T44c 의 거친 계층 제외가 이 값으로
+#: "이 voxel 을 심을 수 있었던 증거" 의 범위를 정한다.
+CUROBO_SEED_BAND_VOXELS = 0.9
+#: T44c A6 — `CoarseFreeSpec.sign_floor` 의 선택지 (`EsdfConfig.target_free_coarse_sign_floor` 와 같은 목록).
+COARSE_SIGN_FLOORS = ("guard", "plane")
+#: T44e A8 — `CoarseFreeSpec.support` 의 선택지 (`EsdfConfig.target_free_coarse_support` 와 같은 목록).
+COARSE_SUPPORT_MODES = ("keep", "exclude", "exclude_target")
+#: T44e A8b — 지원면 seed 를 실제로 지우는 선택지 (근거 = 지원면 inlier 점 · 평면이 필요하다).
+COARSE_SUPPORT_REMOVING = ("exclude", "exclude_target")
+#: T44e A8b — `"exclude_target"` 발자국의 팽창 (거친 voxel 단위, 지원면 위 평면 거리). 거친 계층은 trilinear 로
+#: 읽힌다 — 한 query 는 축마다 한 칸 안의 voxel 중심 8 개를 읽고, 그 중심은 query 에서 평면 방향으로 최대
+#: `√2 · vs` (대각) 떨어져 있다. 그래서 발자국 (공 원판 · 관측점) 안의 어떤 query 가 읽는 지원면 voxel 은 모두
+#: 발자국에서 `√2 · vs` 안이다: target 발자국은 그 voxel 까지 지우고 (공 아래 query 가 테이블 seed 를 읽지 않게),
+#: non-target 발자국은 그 voxel 까지 남긴다 (이웃 과일 아래 query 가 keep 과 같은 seed 를 읽게). 둘이 같은 팽창이다.
+COARSE_SUPPORT_FOOTPRINT_DILATION_VOXELS = float(np.sqrt(2.0))
+#: T44e A8b — 관측점이 "지원면 위 물체" 의 발자국 증거가 되는 최소 높이 (m, 평면 법선 방향) 의 기본값.
+#: `SupportSurfaceConfig.distance_threshold` (RANSAC inlier 문턱, 8 mm) 와 같다 — 그 안의 점은 같은 규칙으로는 테이블과
+#: 구별되지 않는다. pipeline 은 활성 config 값을 `support_seed_evidence["inlier_threshold_m"]` 로 넘긴다.
+COARSE_SUPPORT_FOOTPRINT_MIN_HEIGHT_M = 0.008
+#: T44e A8 — 지원면 seed 판정의 여유 (거친 voxel 단위, seed 띠 `0.9 · vs` 에 더한다). 두 거리에 쓴다:
+#: (1) seed 중심에서 지원면 평면까지 — 테이블의 TSDF 영교차는 맞춘 평면보다 몇 mm 위에 서므로
+#: (`linearize._obstacle_rows` docstring: 20 mm 계층 중앙 8.7 mm) 띠만으로는 위쪽 seed 를 놓친다;
+#: (2) seed 중심에서 가장 가까운 그 면의 inlier 점까지 — 점구름은 voxel 로 성겨서 (5 mm) 발 밑 점이 반 칸 옆에 있을 수 있다.
+COARSE_SUPPORT_REACH_EXTRA_VOXELS = 0.5
+
+
+@dataclasses.dataclass(frozen=True)
+class CoarseFreeSpec:
+    """T44c A5 — target 없는 **거친** 계층 (`coarse_no_target`) 의 제외 재료. **전부 m 단위다.**
+
+    미세 계층의 제외 (`TargetBall` + `target_exclusion`) 와 **같은 identity · 같은 의미**를 거친 voxel 에
+    적용하기 위한 것이다. voxel 단위 값 (`owned_*_voxels`, `attached_sign_threshold_voxels`,
+    `target_ball_pad_voxels`) 은 **미세 voxel 로 정의된 것**이므로 여기서 m 로 바꿔 싣는다
+    (`coarse_exclusion_params`). 거친 voxel 로 다시 나누는 것은 `_coarse_ball_exclusion` 한 곳이다.
+
+    | 필드 | 무엇 |
+    |---|---|
+    | `owned` | `ball_owned` 이면 그 증거 (target 점 · non-target 점). `None` = `ball` |
+    | `nontarget_points` | 공유 판정의 non-target 관측점 (`ball` 에서도 쓴다). 없으면 공유 판정 없음 |
+    | `tie_m` · `max_dist_m` | `ball_owned` 의 tie · unowned 거리 (미세 voxel × 값) |
+    | `sign_threshold_m` | 부호 교정의 순수 판정 임계 (`attached_sign_threshold_voxels` × 미세 voxel) |
+    | `support_plane_z` · `support_pad_m` | 공의 `z_min` 을 만든 지원면 z 와 여유 (`TargetBall.provenance`) |
+    | `sign_floor` | (T44c A6) 부호 교정의 아래 한계. `"plane"` (기본, A7) = 공의 `z_min` (미세 계층과 같은 m 값 = 지원면 + 여유) · `"guard"` = seed 제거 guard 와 같은 높이 (A5, 비교용) |
+    | `target_points` | (T44c A6) target 점 — `"plane"` 띠에서 "target 쪽" 을 가르는 `d_t`. 없으면 (`ball`) 공유 판정만 |
+    | `support` · `support_points` · `support_plane` | (T44e A8) `"exclude"` 면 공 아래 지원면의 seed 를 지운다 (`_coarse_support_exclusion`) — 그 면의 inlier 점 · 평면이 근거. 공의 seed guard 는 공의 `z_min` 으로 내려간다 (`coarse_exclusion_params`) |
+    | `support="exclude_target"` · `support_min_height_m` | (T44e A8b) 지원면 seed 중 **target 발자국 안 · non-target 발자국 밖** 의 것만 지운다 (`_coarse_support_footprints`). `support_min_height_m` = 관측점이 발자국 증거가 되는 평면 위 최소 높이 |
+
+    **`sign_floor` (T44c A6).** 거친 계층의 seed 제거 guard (지원면 + max(여유, 거친 voxel) = +20 mm) 는
+    테이블 seed 를 지키려는 것이다. A5 는 부호 교정도 같은 높이에서 끊어, 그 아래의 target 바닥 내부
+    (seed 가 아닌 음수 voxel) 가 장애물로 남았다 (`T44c.verify.json`: target 내부 음수 11,180 / 67,361,
+    그중 11,057 이 지원면 + 20 mm 아래). `"plane"` 은 **seed 는 그대로 두고** (테이블 seed 보존) 부호
+    교정만 미세 계층과 같은 m 높이 (공의 `z_min`) 까지 내린다 — 그 띠에서도 공유 영역은 빼고, target
+    쪽 (non-target 관측이 더 가깝지 않은) non-seed voxel 만.
+    """
+
+    owned: Optional["OwnedEvidence"] = None
+    nontarget_points: Optional[np.ndarray] = None
+    tie_m: float = 0.0
+    max_dist_m: float = 0.0
+    sign_threshold_m: float = 0.0
+    support_plane_z: Optional[float] = None
+    support_pad_m: float = 0.0
+    fine_voxel_m: float = 0.0
+    sign_floor: str = "plane"           # T44c A7: 기본 plane (EsdfConfig 와 같다)
+    target_points: Optional[np.ndarray] = None
+    #: T44e A8 — `"keep"` (기본, A5–A7 그대로) · `"exclude"` (지원면 seed 를 이 계층에서 지운다,
+    #: `_coarse_support_exclusion`). `"exclude"` 는 아래 두 근거가 있어야 한다.
+    support: str = "keep"
+    #: T44e A8 — 공 아래 지원면의 **inlier 점** (`SupportSurface.point_indices` 의 cloud 점) `(P, 3)`.
+    support_points: Optional[np.ndarray] = None
+    #: T44e A8 — 그 면 `[n_x, n_y, n_z, offset]` (단위 법선, 자유쪽 `n·p ≥ offset`).
+    support_plane: Optional[np.ndarray] = None
+    #: T44e A8b — `"exclude_target"` 의 발자국 증거 최소 높이 (m). 기본 = RANSAC inlier 문턱 기본값.
+    support_min_height_m: float = COARSE_SUPPORT_FOOTPRINT_MIN_HEIGHT_M
+
+    def __post_init__(self) -> None:
+        nt = self.nontarget_points
+        object.__setattr__(self, "nontarget_points",
+                           np.zeros((0, 3)) if nt is None
+                           else np.asarray(nt, np.float64).reshape(-1, 3))
+        tp = self.target_points
+        object.__setattr__(self, "target_points",
+                           None if tp is None else np.asarray(tp, np.float64).reshape(-1, 3))
+        if self.sign_floor not in COARSE_SIGN_FLOORS:
+            raise ValueError(f"sign_floor 는 {COARSE_SIGN_FLOORS} 중 하나여야 합니다: "
+                             f"{self.sign_floor!r}")
+        if self.support not in COARSE_SUPPORT_MODES:
+            raise ValueError(f"support 는 {COARSE_SUPPORT_MODES} 중 하나여야 합니다: {self.support!r}")
+        sp = self.support_points
+        object.__setattr__(self, "support_points",
+                           None if sp is None else np.asarray(sp, np.float64).reshape(-1, 3))
+        pl = self.support_plane
+        object.__setattr__(self, "support_plane",
+                           None if pl is None else np.asarray(pl, np.float64).reshape(4))
+        if self.support in COARSE_SUPPORT_REMOVING and (self.support_points is None
+                                                        or self.support_plane is None):
+            raise ValueError(f"support={self.support!r} 는 support_points 와 support_plane 이 있어야 합니다 — "
+                             "근거 없이 지원면 seed 를 지우지 않는다 (`_coarse_free_spec` 이 근거가 없으면 keep 으로 둔다)")
+
+
+def coarse_support_spec_fields(mode: str, evidence: Optional[dict]) -> dict:
+    """T44e A8/A8b — `CoarseFreeSpec` 의 `support*` 인자 (builder `_coarse_support_fields` · harness 가 같이 쓴다).
+
+    `mode` 가 지우는 선택지 (`COARSE_SUPPORT_REMOVING`) 가 아니거나 근거 (`points` · `plane`) 가 없으면 `{}` (= keep —
+    근거 없이 지우지 않는 쪽으로 닫힌다). `exclude_target` 이면 `evidence["inlier_threshold_m"]` (있으면) 을
+    `support_min_height_m` 로 싣는다.
+    """
+    mode = str(mode)
+    if mode not in COARSE_SUPPORT_REMOVING:
+        return {}
+    if not evidence or evidence.get("points") is None or evidence.get("plane") is None:
+        return {}
+    out = {"support": mode,
+           "support_points": np.asarray(evidence["points"], np.float64).reshape(-1, 3),
+           "support_plane": np.asarray(evidence["plane"], np.float64).reshape(4)}
+    if mode == "exclude_target" and evidence.get("inlier_threshold_m") is not None:
+        out["support_min_height_m"] = float(evidence["inlier_threshold_m"])
+    return out
+
+
+def coarse_exclusion_params(ball: "TargetBall", voxel_size: float, spec: CoarseFreeSpec) -> dict:
+    """미세 voxel 로 정의된 제외 파라미터 → **이 계층 voxel (`voxel_size`)** 에서 쓸 값 (T44c A5).
+
+    순수 함수다 (CPU 단위 검증이 이것을 본다). 미세 voxel 에 넣으면 미세 계층이 지금 쓰는 값이 그대로
+    나온다 — 같은 규칙을 해상도만 바꿔 적용한다는 것을 그렇게 보인다.
+
+    | 값 | 식 | 왜 |
+    |---|---|---|
+    | `band_m` | `0.9 · vs` | 이 계층에서 한 seed voxel 을 심을 수 있는 표면까지의 거리 (`CUROBO_SEED_BAND_VOXELS`) |
+    | `z_min` | `max(ball.z_min, 지원면 z + max(pad_m, vs))` | 지원면이 이 계층의 voxel 을 심을 수 있는 높이 (`0.9 · vs` 안) 위만 지운다 — 미세 (5 mm) 에서는 `z + 5 mm` 로 지금 값과 같고, 거친 (20 mm) 에서는 `z + 20 mm` 다. 테이블 seed 를 지우면 테이블에 구멍이 난다 (T13) |
+    | `tie_voxels` | `tie_m / vs` | tie 는 두 m 거리의 비교라 해상도와 무관하다 — m 그대로 |
+    | `max_dist_voxels` | `max(max_dist_m, band_m) / vs` | unowned = "이 seed 를 설명하는 관측점이 없다". 이 계층에서는 `band_m` 안의 점이 seed 를 설명한다 — `max_dist_m` 이 띠보다 작으면 (d=3: 15 mm < 18 mm) 표면에서 15–18 mm 떨어진 거친 seed 중심이 증거가 있는데도 unowned 가 된다. 그래서 띠까지 넓힌다 |
+    | (T44e A8, `support="exclude"`) `z_min` | `ball.z_min` (guard 를 올리지 않는다) · `support_reach_m = band + 0.5 · vs` | 테이블 seed 는 지원면 규칙이 지우므로 guard 가 지킬 것이 없다 |
+    | `sign_threshold_voxels` | `sign_threshold_m / vs` | 순수 판정 "지운 뒤 `|d|` 가 이 m 보다 크면 다른 표면이 없다" 를 m 로 유지한다. 거친 계층에서는 7.5 mm < 20 mm 라 "seed 자신 (값 0) 만 보호" 와 같다 — 표면이 7.5 mm 안이면 그 voxel 이 seed 이기 때문이다. 공유 증거가 있는 voxel 은 아예 교정 집합에서 뺀다 (`_coarse_ball_exclusion`) |
+    """
+    vs = float(voxel_size)
+    band = CUROBO_SEED_BAND_VOXELS * vs
+    z_min = float(ball.z_min)
+    # T44e A8b: `exclude_target` 도 같은 guard 규칙 — 공 원판은 target 발자국 안이라 공 안의 테이블 seed 는 지원면
+    # 규칙이 지우거나 (non-target 발자국 밖) 보호 집합으로 남긴다 (`_coarse_ball_exclusion` 의 `protect`).
+    exclude_support = getattr(spec, "support", "keep") in COARSE_SUPPORT_REMOVING
+    if (not exclude_support and spec.support_plane_z is not None
+            and np.isfinite(float(spec.support_plane_z))):
+        # T44e A8: `exclude` 에서는 guard 를 올리지 않는다 — guard 는 테이블 seed 를 지키려는 것이고 (T13),
+        # 그 seed 는 `exclude` 에서 어차피 지원면 규칙이 지운다. 공 안 seed 제거 높이 = 공의 `z_min` (미세와 같은 m).
+        z_min = max(z_min, float(spec.support_plane_z) + max(float(spec.support_pad_m), vs))
+    out = {"voxel_m": vs, "band_m": band, "z_min_m": z_min,
+           "tie_voxels": float(spec.tie_m) / vs,
+           "max_dist_voxels": max(float(spec.max_dist_m), band) / vs,
+           "max_dist_m_effective": max(float(spec.max_dist_m), band),
+           "sign_threshold_voxels": float(spec.sign_threshold_m) / vs}
+    if spec.sign_floor == "plane":
+        # T44c A6: 부호 교정의 아래 한계 = 공의 `z_min` (미세 계층이 쓰는 그 m 값). seed guard 는 그대로.
+        out["sign_z_min_m"] = min(float(ball.z_min), z_min)
+    if exclude_support:
+        # T44e A8 — 키는 exclude 일 때만 (keep 의 params 는 A7 그대로).
+        out["support"] = str(spec.support)
+        out["support_reach_m"] = band + COARSE_SUPPORT_REACH_EXTRA_VOXELS * vs
+        if spec.support == "exclude_target":
+            # T44e A8b — 발자국 팽창 (trilinear 의 평면 방향 대각 도달) · 증거 최소 높이.
+            out["footprint_dilation_m"] = COARSE_SUPPORT_FOOTPRINT_DILATION_VOXELS * vs
+            out["footprint_min_height_m"] = float(spec.support_min_height_m)
+    return out
+
+
+#: `ball_owned` 분류 이름 — `_ball_owned_split` 의 키, 기록의 ijk 키 접미와 같다.
+OWNED_CLASSES = ("target", "nontarget", "ambiguous", "unowned")
+
+
+def _nearest(points: np.ndarray, queries: np.ndarray) -> np.ndarray:
+    """`queries` 마다 가장 가까운 `points` 까지 거리. 점이 없으면 `inf`."""
+    if not len(points) or not len(queries):
+        return np.full(len(queries), np.inf)
+    from scipy.spatial import cKDTree
+
+    d, _ = cKDTree(points).query(queries, k=1)
+    return np.asarray(d, np.float64)
+
+
+def _ball_owned_split(centres: np.ndarray, is_seed: np.ndarray, ball: "TargetBall",
+                      owned: OwnedEvidence, voxel_size: float) -> dict:
+    """공 안 voxel (`centres`, `is_seed`) 을 가른다 — 순수 numpy (CPU 단위 검증이 이것을 본다).
+
+    돌려주는 것 (전부 `centres` 와 같은 길이의 bool, `d_t`·`d_o` 는 float):
+
+    - `target` · `nontarget` · `ambiguous` · `unowned` — **seed 에 대한** 분류 (`OwnedEvidence` 의 표)
+    - `removed` — 지울 seed = target ∪ (unowned if `remove`)
+    - `sign` — 부호 교정 후보 = `removed` ∪ **non-seed 중 target 쪽** (`d_t < d_o − tie`)
+
+    **왜 non-seed 를 sign 에 넣나.** `ball` 의 부호 교정 집합은 공 안 voxel 전부다 (`_clear_seeds`
+    가 seed 아닌 cand 까지 돌려준다) — target 내부 (seed 아님, TSDF < 0) 의 음수 부호를 그것이
+    고친다. `removed` 만 고치면 target 내부가 "다음 표면까지의 음수 거리" 로 남는다. 반대로 공 안
+    전부를 고치면 이웃 물체 내부의 음수를 양수로 바꾼다 (관통을 숨긴다). 그래서 non-seed 는 거리
+    비교로 **target 쪽이 확실한 것**만 (tie 밖) 넣는다. `_force_sign_on_pure_voxels` 의 순수 판정
+    (`|d| > 1.5 vs`) 은 그대로 그 위에 걸린다 — 보존된 seed 곁의 voxel 은 손대지 않는다.
+
+    non-target 점은 공 중심에서 `r + R + vs` 안의 것만 쓴다 (`R` = 공 안 점에서 target 점까지의
+    상한 + tie). 그 밖의 점은 `d_o ≥ R ≥ d_t + tie` 라 분류를 바꾸지 못한다 — 결과는 전체 점과 같다.
+    """
+    vs = float(voxel_size)
+    c = np.asarray(centres, np.float64).reshape(-1, 3)
+    seed = np.asarray(is_seed, bool).reshape(-1)
+    tp = owned.target_points
+    r = float(ball.radius)
+    t_reach = float(np.max(np.linalg.norm(tp - ball.centre[None, :], axis=1))) if len(tp) else 0.0
+    tie = float(owned.tie_voxels) * vs
+    reach = r + (r + t_reach + tie) + vs
+    nt = owned.nontarget_points
+    if len(nt):
+        nt = nt[np.linalg.norm(nt - ball.centre[None, :], axis=1) <= reach]
+    d_t = _nearest(tp, c)
+    d_o = _nearest(nt, c)
+    max_d = float(owned.max_dist_voxels) * vs
+    unowned = np.minimum(d_t, d_o) > max_d
+    ambiguous = ~unowned & (np.abs(d_t - d_o) <= tie)
+    decided = ~unowned & ~ambiguous
+    tgt = decided & (d_t < d_o)
+    ntg = decided & ~tgt
+    removed = seed & (tgt | (unowned & (owned.unowned == "remove")))
+    sign = removed | (~seed & (d_t < d_o - tie))
+    return {"target": seed & tgt, "nontarget": seed & ntg, "ambiguous": seed & ambiguous,
+            "unowned": seed & unowned, "removed": removed, "sign": sign,
+            "d_t": d_t, "d_o": d_o, "n_nontarget_near": int(len(nt))}
 
 
 #: `stats["window"]["basis"]` 의 값. 창이 **무엇을 근거로** 놓였나 (T21).
@@ -652,7 +921,9 @@ class CuroboFieldBuilder:
                observed_at: Optional[float] = None,
                frame_id: str = "", frame_index: int = -1,
                fine_window: Optional["FineWindowRequest"] = None,
-               held_free_points: Optional[np.ndarray] = None) -> CuroboEsdfField:
+               held_free_points: Optional[np.ndarray] = None,
+               nontarget_points: Optional[np.ndarray] = None,
+               support_seed_evidence: Optional[dict] = None) -> CuroboEsdfField:
         """`EsdfBuilder.update` 와 같은 계약. 돌려주는 것은 `CuroboEsdfField` 다.
 
         `exclude_target` 는 **지원하지 않는다.** E1 이 그것을 폐기했다 — 필드는 익명이라
@@ -668,6 +939,20 @@ class CuroboFieldBuilder:
         `fine_window` (T21) 는 미세 창(과 target 없는 창)을 **어디에** 놓을지의 재료다 —
         `place_fine_window` 가 권한 link 의 swept AABB 와 manipulated AABB 로 놓는다. `None` 이면
         T21 이전 규칙(`target_points` 평균)이다. 어느 쪽이든 결과는 `stats["window"]` 에 실린다.
+
+        `nontarget_points` (T44 I1) 는 `esdf.target_exclusion == "ball_owned"` 이고 공이 올 때만
+        읽는다 — 공 안 seed 중 그 점들에 더 가까운 것을 보존한다 (`OwnedEvidence`). `ball` (기본)
+        에서는 무시한다 (값 비트 동일). 어느 쪽이든 공 제외의 trace 가 `stats["target_free"]`
+        (수) 와 `field.exclusion_trace` (ijk) 에 실린다.
+
+        `esdf.target_free_coarse` (T44c A5) 가 켜져 있고 공이 오면 target 을 지운 **거친** 계층
+        (`coarse_no_target`) 을 한 겹 더 만들어 `field.target_free_coarse_layer` 에 싣는다. 그 계층은
+        `nontarget_points` 를 방식과 무관하게 읽는다 (공유 voxel 보존). 수는 `stats["target_free"]["coarse"]`,
+        ijk 는 `field.coarse_exclusion_trace`.
+
+        `support_seed_evidence` (T44e A8) 는 `esdf.target_free_coarse_support` 가 `"exclude"` · (A8b) `"exclude_target"` 일 때만 읽는다 —
+        공 아래 지원면의 `{"points": (P, 3) inlier 점, "plane": [n, offset]}` (pipeline `_support_seed_evidence`).
+        없으면 지원면 seed 를 지우지 않고 (keep 과 같음) 그 사실을 `stats["target_free"]["coarse"]["support"]` 에 남긴다.
         """
         # **인자 검증을 torch 앞에 둔다.** 이 계약은 CUDA 를 필요로 하지 않으므로, torch 가 없는
         # 프로세스(`.venv-ag3s`)의 테스트가 이것을 실제로 받아 볼 수 있어야 한다 (T7b 의
@@ -771,12 +1056,67 @@ class CuroboFieldBuilder:
                     else np.asarray(attached, np.float64).reshape(-1, 3))
             remove = held if target_free_ball is not None else (
                 free_points if held is None else np.vstack([held, free_points]))
+            owned = None
+            if (target_free_ball is not None
+                    and str(getattr(cfg, "target_exclusion", "ball")) == "ball_owned"):
+                owned = OwnedEvidence(
+                    target_points=free_points, nontarget_points=nontarget_points,
+                    tie_voxels=float(getattr(cfg, "owned_tie_voxels", 1.0)),
+                    max_dist_voxels=float(getattr(cfg, "owned_max_dist_voxels", 2.0)),
+                    unowned=str(getattr(cfg, "owned_unowned", "remove")))
             free_tiers = self._build_tiers(itg, remove, dev, torch, only="fine",
                                            tier_name="fine_no_target",
-                                           ball=target_free_ball, itg_fine=itg_fine)
+                                           ball=target_free_ball, itg_fine=itg_fine,
+                                           owned=owned)
             free_ms = (time.monotonic() - t0) * 1e3
             self._announce_target_free_cost(free_ms, len(free_points), free_tiers,
                                             ball=target_free_ball)
+
+        # **T44c A5 — target 을 지운 거친 계층.** `esdf.target_free_coarse` 일 때만, 그리고 **공이 있을
+        # 때만** 만든다 — 점 제외로 물러난 프레임 (`mode == "points"`) 은 target 을 못 지우므로 (T13)
+        # 그 거친 계층은 target 이 그대로 든 main coarse 와 같고, 그것을 합성에 넣는 것이 금지된
+        # 일이다 (사용자 판정 1-6). 미세 target-free 계층 **뒤에** 만든다 (같은 버퍼 — 함정 4).
+        coarse_free_tier = None
+        coarse_stats: dict = {"mode": "off"}
+        if bool(getattr(cfg, "target_free_coarse", False)) and free_tiers:
+            if target_free_ball is None:
+                coarse_stats = {"mode": "skipped_no_ball",
+                                "why": "target-free 미세 계층이 점 제외로 물러났다 — 거친 계층은 "
+                                       "점으로 target 을 못 지운다 (T13)"}
+            else:
+                t0c = time.monotonic()
+                spec = self._coarse_free_spec(target_free_ball, owned, nontarget_points,
+                                              target_points=free_points,
+                                              support_evidence=support_seed_evidence)
+                built = self._build_tiers(itg, held, dev, torch, only="coarse",
+                                          tier_name="coarse_no_target", ball=target_free_ball,
+                                          itg_fine=itg_fine, coarse_free=spec)
+                coarse_free_tier = built[0] if built else None
+                c_ms = (time.monotonic() - t0c) * 1e3
+                ex = dict((coarse_free_tier.extra.get("exclusion") or {})
+                          if coarse_free_tier is not None else {})
+                req_support = str(getattr(cfg, "target_free_coarse_support", "keep"))
+                if req_support in COARSE_SUPPORT_REMOVING and "support" not in ex:
+                    # T44e A8: exclude 를 요청했는데 근거 (지원면 inlier 점 · 평면) 가 없어 keep 으로 지었다.
+                    ex["support"] = {"mode": req_support, "applied": False,
+                                     "why": "no support evidence (support_seed_evidence)"}
+                coarse_stats = {"mode": ex.get("exclusion_method"), "build_ms": round(c_ms, 3),
+                                "name": "coarse_no_target",
+                                **{k: v for k, v in ex.items() if k != "exclusion_method"},
+                                "sign": {k: coarse_free_tier.extra.get(k) for k in
+                                         ("n_attached_voxels", "n_sign_forced",
+                                          "n_shared_left_alone", "threshold_voxels",
+                                          "threshold_m")} if coarse_free_tier is not None else None}
+                if not getattr(self, "_announced_coarse_free", False):
+                    self._announced_coarse_free = True
+                    logging.getLogger(__name__).warning(
+                        "!!! T44c TARGET-FREE COARSE TIER IS ON (esdf.target_free_coarse) !!! "
+                        "coarse_no_target 첫 프레임 %.2f ms · %s · sign_floor %s · 공 안 seed %s 중 제거 %s "
+                        "· 공유 보존 %s",
+                        c_ms, coarse_stats.get("mode"),
+                        getattr(cfg, "target_free_coarse_sign_floor", "plane"),
+                        coarse_stats.get("n_seeds_in_ball"),
+                        coarse_stats.get("n_removed"), coarse_stats.get("n_shared_kept"))
 
         layers = []
         # 씨앗 KD-tree 는 **update 당 한 번** 짓는다 (T38 B3). 예전에는 계층마다 같은 점으로
@@ -799,6 +1139,12 @@ class CuroboFieldBuilder:
                             for t in free_tiers)
         for t in free_tiers:
             t.site_linear = None
+        coarse_free_layer = None
+        if coarse_free_tier is not None:
+            # 라벨 없음 — target 없는 미세 계층과 같은 이유.
+            coarse_free_layer = layer_from_device(coarse_free_tier.values, coarse_free_tier.origin,
+                                                  coarse_free_tier.voxel_size)
+            coarse_free_tier.site_linear = None
 
         # 격자 밖은 격자 안의 UNKNOWN 과 같은 것이므로 같은 정책을 따른다 (E4).
         outside = (cfg.max_distance if cfg.unknown_policy == "free"
@@ -840,10 +1186,15 @@ class CuroboFieldBuilder:
             "ball": None if target_free_ball is None else target_free_ball.summary(),
             "n_ball_seeds_excluded": sum(
                 int(t.extra.get("n_ball_seeds_excluded", 0)) for t in free_tiers),
+            # T44 I0: 공 제외의 분해 (`_ball_exclusion`). `ball` 에서는 n_removed == n_seeds_in_ball
+            # 이고 나머지는 0; 공이 없는 프레임은 method None · 전부 0.
+            **self._exclusion_counts(free_tiers),
             "tiers": [{"name": t.name, "voxel_size": t.voxel_size,
                        "shape": [int(v) for v in t.values.shape],
                        "n_seeds_excluded": int(t.extra.get("n_attached_seeds_excluded", 0))}
                       for t in free_tiers],
+            # T44c A5: target 을 지운 거친 계층 (`mode`: off · skipped_no_ball · ball · ball_owned).
+            "coarse": coarse_stats,
         }
         if probe is not None:
             lower, upper = self._bounds
@@ -852,12 +1203,19 @@ class CuroboFieldBuilder:
                 lower, upper, voxel_size=self.coarse_voxel, stride=2)
         field = CuroboEsdfField(tuple(layers), outside_distance=outside, stats=stats,
                                 target_free_layers=free_layers,
-                                target_label=(target_free_label if free_layers else None))
+                                target_label=(target_free_label if free_layers else None),
+                                target_free_coarse_layer=coarse_free_layer)
         field.label_names = label_names
         field.static_shapes = tuple(static_geometry or ())
         field.observation = probe
         field.attached_query_points = (None if attached is None or not len(attached)
                                        else attached)
+        # T44 I0: target-free 계층에서 **실제로** 지운 seed 의 ijk (+ 그 계층의 origin/voxel) —
+        # `--record-constraints` 가 chunk npz 에 싣는다. 공이 없으면 None.
+        field.exclusion_trace = self._exclusion_trace(free_tiers)
+        # T44c A5: 거친 target-free 계층의 trace (지운 seed · 공유로 보존한 seed 의 ijk). 없으면 None.
+        field.coarse_exclusion_trace = (None if coarse_free_tier is None
+                                        else self._exclusion_trace([coarse_free_tier]))
         # 출처는 **필드와 함께 나간다.** 거리값만 보면 이것이 방금 만들어진 것인지 낡은
         # 것인지 알 방법이 없다 — 2026-09-18 의 조용한 정지가 그래서 14 프레임 동안 안 보였다.
         field.provenance = FieldProvenance(
@@ -871,6 +1229,44 @@ class CuroboFieldBuilder:
         return field
 
     # -- 조각들 ------------------------------------------------------------------------
+    def _coarse_free_spec(self, ball: "TargetBall", owned: Optional["OwnedEvidence"],
+                          nontarget_points, target_points=None,
+                          support_evidence: Optional[dict] = None) -> CoarseFreeSpec:
+        """T44c — 미세 voxel 로 정의된 설정값을 **m 로** 바꿔 `CoarseFreeSpec` 에 싣는다.
+
+        미세 계층의 identity · 방식과 같은 것: `owned` (= 미세 계층이 쓴 `OwnedEvidence`, `ball` 이면
+        None) · 같은 공. m 환산의 기준 voxel 은 그 값들이 정의된 **미세 voxel** (`fine_voxel_size`) 이다.
+        """
+        cfg = self.config
+        fine = float(self.fine_voxel or cfg.voxel_size)
+        prov = dict(getattr(ball, "provenance", {}) or {})
+        plane = prov.get("support_plane_z_m")
+        pad_mm = prov.get("pad_mm")
+        pad_m = (float(pad_mm) / 1000.0 if pad_mm is not None
+                 else float(getattr(cfg, "target_ball_pad_voxels", 1.0)) * fine)
+        return CoarseFreeSpec(
+            owned=owned,
+            nontarget_points=nontarget_points,
+            tie_m=float(getattr(cfg, "owned_tie_voxels", 1.0)) * fine,
+            max_dist_m=float(getattr(cfg, "owned_max_dist_voxels", 2.0)) * fine,
+            sign_threshold_m=float(getattr(cfg, "attached_sign_threshold_voxels", 1.5)) * fine,
+            support_plane_z=None if plane is None else float(plane),
+            support_pad_m=pad_m, fine_voxel_m=fine,
+            # T44c A6: 부호 교정의 아래 한계와 그 띠의 target 쪽 판정 재료.
+            sign_floor=str(getattr(cfg, "target_free_coarse_sign_floor", "plane")),
+            target_points=target_points,
+            # T44e A8: exclude 는 근거가 있을 때만 (없으면 keep — 지우지 않는 쪽으로 닫힌다).
+            **self._coarse_support_fields(support_evidence))
+
+    def _coarse_support_fields(self, evidence: Optional[dict]) -> dict:
+        """T44e A8 — `CoarseFreeSpec` 의 `support*` 인자. config 가 `keep` 이거나 근거가 없으면 `{}` (= keep).
+
+        T44e A8b: `"exclude_target"` 도 같은 근거를 쓰고, 발자국 증거 최소 높이를 `evidence["inlier_threshold_m"]`
+        (pipeline 이 활성 `support_surface.distance_threshold` 를 싣는다) 에서 읽는다 — 없으면 기본 8 mm.
+        """
+        mode = str(getattr(self.config, "target_free_coarse_support", "keep"))
+        return coarse_support_spec_fields(mode, evidence)
+
     def _check_target_free_request(self, target_free_points, target_points) -> None:
         """target 없는 계층을 **실제로** 만들 수 있는지 미리 본다. 못 만들면 여기서 죽는다.
 
@@ -1005,7 +1401,9 @@ class CuroboFieldBuilder:
         비용이 두 배가 되고, 권한 있는 link 은 손 근처(=미세 창 안)에 있으므로 얻는 것이 없다.
         """
         if only is None or only == "coarse":
-            yield "coarse", None, self.coarse_voxel
+            # T44c: `only="coarse"` 에 이름을 주면 (`coarse_no_target`) 그 이름으로. 거친 계층의 표지는
+            # 이름이 아니라 `origin_override is None` 이다 (`_build_tiers`).
+            yield ((tier_name or "coarse") if only == "coarse" else "coarse"), None, self.coarse_voxel
         if only == "coarse":
             return
         fine = self.fine_voxel
@@ -1015,7 +1413,9 @@ class CuroboFieldBuilder:
     def _build_tiers(self, itg_coarse, attached, dev, torch, *, only: Optional[str] = None,
                      tier_name: Optional[str] = None,
                      ball: Optional["TargetBall"] = None,
-                     itg_fine=None) -> list[_Tier]:
+                     itg_fine=None,
+                     owned: Optional["OwnedEvidence"] = None,
+                     coarse_free: Optional[CoarseFreeSpec] = None) -> list[_Tier]:
         """계층마다 seed -> (제외) -> propagate -> 복사.
 
         `Mapper.compute_esdf` 를 부르지 않는다 — 그쪽은 CUDA graph 로 seed·propagate·distance
@@ -1033,13 +1433,17 @@ class CuroboFieldBuilder:
         `ball` 은 `target_free` 계층에서만 오므로 **주 계층은 한 복셀도 안 바뀐다.**
 
         부호 교정은 **지운 복셀 집합 전체**에 걸린다 — 두 경로의 인덱스를 합쳐 넘긴다.
+
+        `coarse_free` (T44c) 가 오면 공 제외는 `_coarse_ball_exclusion` (m 단위 규칙 + 공유 voxel 보존) 이
+        하고 부호 교정 임계도 m 로 바꾼 값을 쓴다. `only="coarse"` 와 함께만 쓴다.
         """
         centre = getattr(self, "_fine_centre", None)  # update() 가 정한다
         tiers: list[_Tier] = []
         for name, origin_override, vs in self._tier_specs(centre, only=only,
                                                           tier_name=tier_name):
-            # T32 H4-fix: fine tiers from the fine-truncation TSDF when there is one.
-            itg = itg_coarse if (name == "coarse" or itg_fine is None) else itg_fine
+            # T32 H4-fix: fine tiers from the fine-truncation TSDF when there is one. 거친 계층의 표지는
+            # `origin_override is None` 이다 (T44c — `coarse_no_target` 도 거친 TSDF 에서).
+            itg = itg_coarse if (origin_override is None or itg_fine is None) else itg_fine
             itg._esdf_voxel_size.copy_(
                 torch.tensor([float(vs)], device=dev, dtype=torch.float32))
             origin = (itg._origin if origin_override is None
@@ -1056,8 +1460,21 @@ class CuroboFieldBuilder:
                 n_excluded, att_idx = self._exclude_seed_points(
                     itg, attached, org, vs, shape)
             n_ball = 0
-            if ball is not None:
-                n_ball, ball_idx = self._exclude_ball_seeds(itg, ball, org, vs, shape)
+            excl = None
+            sign_thr_voxels = float(getattr(self.config, "attached_sign_threshold_voxels", 1.5))
+            if ball is not None and coarse_free is not None:
+                # T44c A5: 같은 공 · 같은 방식을 **m 로** 이 계층 voxel 에 적용 + 공유 voxel 보존.
+                n_ball, ball_idx, excl = self._coarse_ball_exclusion(itg, ball, org, vs, shape,
+                                                                     coarse_free)
+                sign_thr_voxels = excl["params"]["sign_threshold_voxels"]
+                if ball_idx is not None:
+                    att_idx = (ball_idx if att_idx is None
+                               else np.unique(np.vstack([att_idx, ball_idx]), axis=0))
+            elif ball is not None:
+                # T44 I0/I1: `ball` 은 예전 `_exclude_ball_seeds` 와 같은 cand · 같은 순서로 지운다
+                # (값 비트 동일). 달라지는 것은 trace (지운 seed 의 ijk) 를 함께 돌려주는 것뿐이다.
+                n_ball, ball_idx, excl = self._ball_exclusion(itg, ball, org, vs, shape,
+                                                              owned=owned)
                 # 부호 교정은 **지운 복셀 전체**에 걸려야 한다. 한쪽만 넘기면 나머지 복셀의
                 # 음수 부호가 그대로 남고, 그것이 `_force_sign_on_pure_voxels` 가 막는 실패다.
                 if ball_idx is not None:
@@ -1074,9 +1491,7 @@ class CuroboFieldBuilder:
                 memory_format=torch.contiguous_format)
             site_linear = unpack_site_linear(itg._site_index.detach(), tuple(values.shape))
             sign = self._force_sign_on_pure_voxels(
-                values, att_idx, vs,
-                threshold_voxels=float(getattr(
-                    self.config, "attached_sign_threshold_voxels", 1.5)))
+                values, att_idx, vs, threshold_voxels=sign_thr_voxels)
             tier = _Tier(name=name, values=values, site_linear=site_linear,
                          origin=org, voxel_size=float(vs))
             tier.extra["tsdf_truncation_m"] = (self.coarse_truncation if itg is itg_coarse
@@ -1085,9 +1500,48 @@ class CuroboFieldBuilder:
             tier.extra["n_ball_seeds_excluded"] = n_ball
             if ball is not None:
                 tier.extra["ball"] = ball.summary()
+            if excl is not None:
+                # T44 I0: counts → stats, ijk 배열 → `field.exclusion_trace` (기록만 읽는다).
+                tier.extra["exclusion"] = excl["counts"]
+                tier.extra["exclusion_trace"] = excl["trace"]
             tier.extra.update(sign)
             tiers.append(tier)
         return tiers
+
+    @staticmethod
+    def _exclusion_counts(free_tiers) -> dict:
+        """`stats["target_free"]` 에 펼칠 T44 I0 키. 계층이 여럿이면 수를 더한다 (지금은 하나)."""
+        keys = ("n_seeds_in_ball", "n_removed", "n_kept_nontarget", "n_ambiguous",
+                "n_unowned_removed", "n_unowned_kept")
+        out: dict = {"exclusion_method": None, **{k: 0 for k in keys}}
+        for t in free_tiers:
+            ex = t.extra.get("exclusion")
+            if not ex:
+                continue
+            out["exclusion_method"] = ex.get("exclusion_method")
+            for k in keys:
+                out[k] += int(ex.get(k, 0))
+            for k in ("n_target_owned", "n_sign_candidates", "n_sign_candidates_nonseed"):
+                if k in ex:
+                    out[k] = out.get(k, 0) + int(ex[k])
+            if "owned" in ex:
+                out["owned"] = dict(ex["owned"])
+            out["classify_ms"] = round(out.get("classify_ms", 0.0) + float(ex.get("classify_ms", 0.0)), 3)
+        return out
+
+    @staticmethod
+    def _exclusion_trace(free_tiers) -> Optional[dict]:
+        """`field.exclusion_trace` — 마지막 (유일한) 공 제외 계층의 ijk 배열 + origin/voxel."""
+        for t in reversed(free_tiers):
+            tr = t.extra.get("exclusion_trace")
+            if tr is None:
+                continue
+            ex = t.extra.get("exclusion") or {}
+            return {"tier": t.name, "method": ex.get("exclusion_method"),
+                    "origin": np.asarray(t.origin, np.float64).copy(),
+                    "voxel_size": float(t.voxel_size),
+                    **{k: np.asarray(v, np.int64).reshape(-1, 3) for k, v in tr.items()}}
+        return None
 
     def _announce_target_free_cost(self, ms: float, n_points: int, tiers, *,
                                    ball: Optional["TargetBall"] = None) -> None:
@@ -1122,6 +1576,14 @@ class CuroboFieldBuilder:
             log.warning("    제외 방식 = **공** %s · seed %d 개 제외 (테이블 면 z 위만).",
                         ball.summary(),
                         sum(int(t.extra.get("n_ball_seeds_excluded", 0)) for t in tiers))
+            ex = self._exclusion_counts(tiers)
+            if ex.get("exclusion_method") == "ball_owned":
+                log.warning(
+                    "    T44 I1 target_exclusion = **ball_owned** (%s) — 공 안 seed %d 중 제거 %d · "
+                    "non-target 보존 %d · ambiguous 보존 %d · unowned 제거 %d / 보존 %d.",
+                    ex.get("owned"), ex["n_seeds_in_ball"], ex["n_removed"],
+                    ex["n_kept_nontarget"], ex["n_ambiguous"], ex["n_unowned_removed"],
+                    ex["n_unowned_kept"])
 
     @staticmethod
     def _free_tsdf_points(itg, points: np.ndarray, truncation: float) -> int:
@@ -1291,6 +1753,16 @@ class CuroboFieldBuilder:
         범위를 **복셀 중심**으로 판정한다 (`floor(...+0.5)` 와 같은 규약). 중심이 공 안이면 그
         복셀의 seed 를 지운다 — 표면 복셀이 공 껍질에 걸쳐 있을 때 반 칸의 차이로 남는 것을 줄인다.
         """
+        cand = self._ball_candidates(ball, origin, voxel_size, shape)
+        if cand is None:
+            return 0, None
+        return self._clear_seeds(itg, cand, shape)
+
+    @staticmethod
+    def _ball_candidates(ball: "TargetBall", origin: np.ndarray, voxel_size: float,
+                         shape) -> Optional[np.ndarray]:
+        """공 안 (`z ≥ z_min`) 복셀 인덱스 `(K, 3)` int64, 없으면 `None`. 순서는 meshgrid `ij` 순서다
+        (T13 그대로 — `_exclude_ball_seeds` 와 `_ball_exclusion` 이 같은 배열을 쓴다)."""
         nx, ny, nz = (int(v) for v in shape)
         r = float(ball.radius)
         lo = np.floor((ball.centre - r - origin) / float(voxel_size) + 0.5).astype(np.int64)
@@ -1298,7 +1770,7 @@ class CuroboFieldBuilder:
         lo = np.maximum(lo, 0)
         hi = np.minimum(hi + 1, np.array([nx, ny, nz]))
         if np.any(hi <= lo):
-            return 0, None
+            return None
         # AABB 안만 본다 — 격자 전체를 훑으면 2 백만 복셀이고 프레임 예산에 들어오지 않는다.
         ax = [np.arange(int(lo[i]), int(hi[i]), dtype=np.int64) for i in range(3)]
         grid = np.stack(np.meshgrid(*ax, indexing="ij"), axis=-1).reshape(-1, 3)
@@ -1306,9 +1778,448 @@ class CuroboFieldBuilder:
         inside = np.linalg.norm(centres - ball.centre[None, :], axis=1) <= r
         inside &= centres[:, 2] >= float(ball.z_min)   # **테이블 위만**
         cand = grid[inside]
+        return cand if len(cand) else None
+
+    @staticmethod
+    def _seed_mask(itg, cand: np.ndarray) -> np.ndarray:
+        """`cand` 복셀 중 지금 seed 인 것 (host bool). `site_index` 는 **읽기만** 한다."""
+        import torch
+
+        t = torch.as_tensor(cand, device=itg._site_index.device, dtype=torch.long)
+        m = itg._site_index[t[:, 0], t[:, 1], t[:, 2]] >= 0
+        if hasattr(m, "detach"):
+            m = m.detach().cpu().numpy()
+        return np.asarray(m, bool).reshape(-1)
+
+    def _ball_exclusion(self, itg, ball: "TargetBall", origin: np.ndarray, voxel_size: float,
+                        shape, *, owned: Optional[OwnedEvidence] = None):
+        """target-free 계층의 공 제외 + trace (T44 I0/I1). `(n_removed, sign_idx | None, excl)`.
+
+        `owned is None` → **`ball`**: `_exclude_ball_seeds` 와 같은 `cand` 를 같은 순서로
+        `_clear_seeds` 에 넘긴다 (지우는 seed · 부호 교정 집합 · 값 모두 예전과 비트 동일). 지우기
+        **전에** cand 의 seed 표시를 읽어 trace (지운 seed 의 ijk) 만 더 만든다.
+
+        `owned` → **`ball_owned`**: 같은 `cand` 를 `_ball_owned_split` 로 가르고 `removed` 만 지운다.
+        부호 교정은 `sign` (지운 seed ∪ target 쪽 non-seed) 에만 건다.
+
+        `excl = {"counts": {...}, "trace": {ijk 배열}}` — counts 는 `stats["target_free"]` 로,
+        trace 는 `field.exclusion_trace` 로 간다.
+        """
+        t0 = time.monotonic()
+        method = "ball" if owned is None else "ball_owned"
+        empty = np.zeros((0, 3), np.int64)
+        counts = {"exclusion_method": method, "n_seeds_in_ball": 0, "n_removed": 0,
+                  "n_kept_nontarget": 0, "n_ambiguous": 0, "n_unowned_removed": 0,
+                  "n_unowned_kept": 0}
+        trace = {"removed_ijk": empty, "nontarget_kept_ijk": empty, "ambiguous_ijk": empty,
+                 "unowned_kept_ijk": empty}
+        cand = self._ball_candidates(ball, origin, voxel_size, shape)
+        if cand is None:
+            counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return 0, None, {"counts": counts, "trace": trace}
+        seed = self._seed_mask(itg, cand)
+        counts["n_seeds_in_ball"] = int(seed.sum())
+        if owned is None:
+            n, idx = self._clear_seeds(itg, cand, shape)
+            counts["n_removed"] = int(n)
+            trace["removed_ijk"] = cand[seed]
+            counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return n, idx, {"counts": counts, "trace": trace}
+        centres = origin[None, :] + cand.astype(np.float64) * float(voxel_size)
+        split = _ball_owned_split(centres, seed, ball, owned, voxel_size)
+        removed = cand[split["removed"]]
+        n = 0
+        if len(removed):
+            n, _ = self._clear_seeds(itg, removed, shape)
+        sign_idx = cand[split["sign"]]
+        keep_unowned = owned.unowned == "keep"
+        counts.update({
+            "n_removed": int(n),
+            "n_target_owned": int(split["target"].sum()),
+            "n_kept_nontarget": int(split["nontarget"].sum()),
+            "n_ambiguous": int(split["ambiguous"].sum()),
+            "n_unowned_removed": 0 if keep_unowned else int(split["unowned"].sum()),
+            "n_unowned_kept": int(split["unowned"].sum()) if keep_unowned else 0,
+            "n_sign_candidates": int(len(sign_idx)),
+            "n_sign_candidates_nonseed": int((split["sign"] & ~seed).sum()),
+            "owned": {"tie_voxels": float(owned.tie_voxels),
+                      "max_dist_voxels": float(owned.max_dist_voxels),
+                      "unowned": owned.unowned,
+                      "n_target_points": int(len(owned.target_points)),
+                      "n_nontarget_points": int(len(owned.nontarget_points)),
+                      "n_nontarget_near": split["n_nontarget_near"]},
+        })
+        trace["removed_ijk"] = removed
+        trace["nontarget_kept_ijk"] = cand[split["nontarget"]]
+        trace["ambiguous_ijk"] = cand[split["ambiguous"]]
+        if keep_unowned:
+            trace["unowned_kept_ijk"] = cand[split["unowned"]]
+        counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+        return n, (sign_idx if len(sign_idx) else None), {"counts": counts, "trace": trace}
+
+    def _coarse_ball_exclusion(self, itg, ball: "TargetBall", origin: np.ndarray,
+                               voxel_size: float, shape, spec: CoarseFreeSpec):
+        """T44c A5 — `coarse_no_target` 의 공 제외. `(n_removed, sign_idx | None, excl)`.
+
+        미세 계층 (`_ball_exclusion`) 과 **같은 공 (중심 · 반지름 m) · 같은 `target_exclusion`** 을 쓴다.
+        다른 것은 해상도 때문에 생기는 셋뿐이고, 셋 다 m 로 정의해 이 voxel 에 적용한다
+        (`coarse_exclusion_params`):
+
+        1. **지원면 guard** `z_min` — 지원면이 이 계층 voxel 을 심을 수 있는 높이 위만.
+        2. **공유 voxel 보존** — seed 중심에서 `band_m` (= 0.9 · vs, 이 voxel 을 심을 수 있는 표면 거리)
+           안에 non-target 관측점이 있으면 그 seed 를 **지우지 않는다** (사용자 판정 1-4: target 과
+           obstacle 이 거친 voxel 을 공유하면 obstacle 증거 보존). 거친 voxel 하나에는 target 과 이웃
+           과일이 함께 들기 쉽다 (20 mm). 같은 영역의 non-seed voxel 은 부호 교정에서도 뺀다 — 그
+           voxel 의 음수가 이웃 물체의 것일 수 있다.
+        3. **`ball_owned` 의 거리** — tie 는 m 그대로, unowned 거리는 띠까지 (`coarse_exclusion_params`).
+
+        부호 교정 집합 = 지운 seed ∪ target 쪽 non-seed (`ball`: 공 안 전부, `ball_owned`: `split["sign"]`)
+        **− 공유 영역**. 기록: `n_shared_kept` (공유라 안 지운 seed — `ball` 이면 지웠을 것, `ball_owned`
+        면 분류가 지우라고 한 것) · `n_seeds_shared` (공유 영역의 seed 전부) · `n_shared_cell` (non-target
+        점이 **그 voxel 정육면체 안**에 있는 seed — 문자 그대로의 "같은 voxel").
+        """
+        t0 = time.monotonic()
+        vs = float(voxel_size)
+        params = coarse_exclusion_params(ball, vs, spec)
+        method = "ball" if spec.owned is None else "ball_owned"
+        empty = np.zeros((0, 3), np.int64)
+        counts = {"exclusion_method": method, "n_seeds_in_ball": 0, "n_removed": 0,
+                  "n_shared_kept": 0, "n_seeds_shared": 0, "n_shared_cell": 0,
+                  "n_kept_nontarget": 0, "n_ambiguous": 0, "n_unowned_removed": 0,
+                  "n_unowned_kept": 0, "n_sign_candidates": 0,
+                  "n_nontarget_points": int(len(spec.nontarget_points)),
+                  "params": {k: (round(v, 6) if isinstance(v, float) else v)
+                             for k, v in params.items()}}
+        trace = {"removed_ijk": empty, "shared_kept_ijk": empty}
+        ball_c = TargetBall(centre=ball.centre, radius=ball.radius, z_min=params["z_min_m"],
+                            provenance=dict(ball.provenance))
+        support_idx = None
+        protect_idx = None
+        if spec.support in COARSE_SUPPORT_REMOVING:
+            # T44e A8: 지원면 seed 를 **먼저** 지운다 — 아래 공 제외 · 띠 부호 교정이 읽는 seed 표시는 그 뒤의 것이다.
+            # 지운 지원면 seed 도 부호 교정 집합에 든다 (순수 판정) — 안 그러면 seed 를 지워도 테이블 윗면 바로 아래
+            # voxel 의 음수 (−먼 seed 거리) 와 위 voxel 의 양수 사이 보간이 평면 근처에 영교차를 다시 만든다.
+            # T44e A8b (`exclude_target`): target 발자국 안 · non-target 발자국 밖만 지운다. 두 발자국이 겹쳐 남긴
+            # 지원면 seed 는 `protect` — 아래 공 규칙 (guard 가 공의 z_min 으로 내려갔다) 도 지우지 않는다.
+            sup_out: dict = {}
+            support_idx = self._coarse_support_exclusion(itg, origin, vs, shape, spec, params, counts,
+                                                         ball=ball, out=sup_out)
+            trace["support_removed_ijk"] = support_idx
+            support_idx = support_idx if len(support_idx) else None
+            if spec.support == "exclude_target":
+                protect_idx = sup_out.get("protect_ijk", empty)
+                trace["support_overlap_kept_ijk"] = protect_idx
+                protect_idx = protect_idx if len(protect_idx) else None
+        # T44c A6 (`sign_floor="plane"`): guard 아래 · 공의 z_min 위 띠의 부호 교정. seed 를 지우기 **전에**
+        # 읽는다 (띠의 seed 는 지우지 않지만, 읽는 순서를 한 곳에 고정한다). "guard" 면 None — A5 그대로.
+        plane_idx = self._coarse_plane_band_sign(itg, ball, ball_c, origin, vs, shape, spec,
+                                                 params, counts)
+        cand = self._ball_candidates(ball_c, origin, vs, shape)
+        if cand is None:
+            counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return 0, self._join_sign(plane_idx, support_idx), {"counts": counts, "trace": trace,
+                                                                 "params": params}
+        seed = self._seed_mask(itg, cand)
+        counts["n_seeds_in_ball"] = int(seed.sum())
+        centres = origin[None, :] + cand.astype(np.float64) * vs
+        band = float(params["band_m"])
+        nt = spec.nontarget_points
+        if len(nt):
+            # 공 중심에서 r + band 밖의 점은 어느 cand 의 band 안에도 들 수 없다 — 결과는 전체 점과 같다.
+            nt = nt[np.linalg.norm(nt - ball.centre[None, :], axis=1)
+                    <= float(ball.radius) + band + vs]
+        shared_region = np.zeros(len(cand), bool)
+        shared_cell = np.zeros(len(cand), bool)
+        if len(nt):
+            from scipy.spatial import cKDTree
+
+            tree = cKDTree(nt)
+            d_o, _ = tree.query(centres, k=1)
+            shared_region = np.asarray(d_o, np.float64) <= band
+            d_inf, _ = tree.query(centres, k=1, p=np.inf)
+            shared_cell = np.asarray(d_inf, np.float64) <= 0.5 * vs
+        if spec.owned is None:
+            want_removed = seed
+            want_sign = np.ones(len(cand), bool)
+        else:
+            owned_c = OwnedEvidence(
+                target_points=spec.owned.target_points, nontarget_points=spec.owned.nontarget_points,
+                tie_voxels=float(params["tie_voxels"]),
+                max_dist_voxels=float(params["max_dist_voxels"]),
+                unowned=spec.owned.unowned)
+            split = _ball_owned_split(centres, seed, ball_c, owned_c, vs)
+            want_removed = split["removed"]
+            want_sign = split["sign"]
+            keep_unowned = owned_c.unowned == "keep"
+            # 공유 판정 **뒤**의 분류 수 (공유로 보존된 seed 는 아래 n_shared_kept 로 따로 센다).
+            free = ~shared_region
+            counts.update({
+                "n_target_owned": int((split["target"] & free).sum()),
+                "n_kept_nontarget": int((split["nontarget"] & free).sum()),
+                "n_ambiguous": int((split["ambiguous"] & free).sum()),
+                "n_unowned_removed": 0 if keep_unowned else int((split["unowned"] & free).sum()),
+                "n_unowned_kept": int((split["unowned"] & free).sum()) if keep_unowned else 0,
+            })
+        keep_region = shared_region
+        if protect_idx is not None:
+            # T44e A8b — 겹침으로 남긴 지원면 seed 는 공유 영역처럼 다룬다 (지우지 않고 부호도 고치지 않는다).
+            # 기존 카운트 (`n_shared_kept` 등) 는 공유 판정만 센다 — 이것은 따로 센다.
+            dims = np.asarray(shape, np.int64)
+            lin = lambda a: (a[:, 0] * dims[1] + a[:, 1]) * dims[2] + a[:, 2]  # noqa: E731
+            prot = np.isin(lin(cand), lin(protect_idx))
+            counts["n_support_protected_in_ball"] = int((want_removed & prot & ~shared_region).sum())
+            keep_region = shared_region | prot
+        removed_mask = want_removed & ~keep_region
+        sign_mask = want_sign & ~keep_region
+        removed = cand[removed_mask]
+        n = 0
+        if len(removed):
+            n, _ = self._clear_seeds(itg, removed, shape)
+        sign_idx = cand[sign_mask]
+        counts.update({
+            "n_removed": int(n),
+            "n_shared_kept": int((want_removed & shared_region).sum()),
+            "n_seeds_shared": int((seed & shared_region).sum()),
+            "n_shared_cell": int((seed & shared_cell).sum()),
+            "n_sign_candidates": int(len(sign_idx)),
+        })
+        if plane_idx is not None:
+            # 띠는 guard 위 cand 와 겹치지 않는다 (z 로 가른다) — 그냥 잇는다.
+            sign_idx = np.vstack([sign_idx, plane_idx])
+        if support_idx is not None:
+            # T44e A8: 공 cand 와 겹칠 수 있다 — 중복 없이 합친다 (keep 에서는 이 줄을 지나지 않는다).
+            sign_idx = self._join_sign(sign_idx if len(sign_idx) else None, support_idx)
+            sign_idx = np.zeros((0, 3), np.int64) if sign_idx is None else sign_idx
+        trace["removed_ijk"] = removed
+        trace["shared_kept_ijk"] = cand[want_removed & shared_region]
+        counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+        return n, (sign_idx if len(sign_idx) else None), {"counts": counts, "trace": trace,
+                                                          "params": params}
+
+    @staticmethod
+    def _join_sign(a: Optional[np.ndarray], b: Optional[np.ndarray]) -> Optional[np.ndarray]:
+        """T44e A8 — 두 부호 교정 ijk 집합의 합집합 (`None` = 빈 집합). 하나가 비면 다른 하나를 그대로."""
+        if a is None or not len(a):
+            return b
+        if b is None or not len(b):
+            return a
+        return np.unique(np.vstack([a, b]), axis=0)
+
+    def _coarse_support_exclusion(self, itg, origin: np.ndarray, vs: float, shape,
+                                  spec: CoarseFreeSpec, params: dict, counts: dict,
+                                  ball: Optional["TargetBall"] = None,
+                                  out: Optional[dict] = None) -> np.ndarray:
+        """T44e A8 — `coarse_no_target` 에서 **지원면 seed** 를 지운다. 지운 voxel ijk `(K, 3)` 를 돌려준다.
+
+        지원면 seed = 다음을 모두 만족하는 seed voxel (중심 `c`):
+
+        | # | 조건 | 왜 |
+        |---|---|---|
+        | 1 | `|n·c − offset| ≤ reach` (`reach = 0.9·vs + 0.5·vs`) | 그 면이 이 voxel 을 seed 로 심을 수 있는 높이. TSDF 영교차가 맞춘 평면보다 몇 mm 위라 띠에 반 칸을 더한다 |
+        | 2 | 그 면의 inlier 점이 `reach` 안 | **관측 근거**. 면의 무한 연장 (테이블 밖 · 다른 물체 밑) 을 지원면으로 읽지 않는다 |
+        | 3 | non-target 관측점이 `band` (`0.9·vs`) 안에 **없다** | A5 의 공유 규칙 그대로 — distractor · crate 와 voxel 을 나누면 장애물 증거를 보존한다 |
+        | 4 | (A8b, `"exclude_target"` 만) target 발자국 안 · non-target 발자국 밖 (`_coarse_support_footprints`) | 이웃 과일 · 기타 물체 아래의 지원면 seed 는 남긴다 (사용자 판정 2026-10-11). 겹치면 남긴다 |
+
+        면은 공 아래 그 면 하나다 (`AG3S._support_plane_z` 와 같은 규칙으로 pipeline 이 고른다) — 그래서 crate 바닥 등
+        다른 평면은 건드리지 않는다. 지운 seed 는 호출자가 부호 교정 집합에 넣는다 (순수 판정, `_coarse_ball_exclusion`) —
+        seed 띠 밖 (테이블 속 더 깊은 층) 의 음수는 그대로라 이 계층의 영교차는 평면 아래로 내려간다. 테이블은 미세 `f`
+        와 본 합성 `d` 가 답한다 (`max(c, d) ≥ d` — 새 값은 언제나 `min(old, d) ≤ new ≤ old`).
+
+        `"exclude_target"` 이면 `out["protect_ijk"]` 에 **두 발자국이 겹치는** 띠 안 seed (조건 1 + 4 의 겹침, 조건 2
+        는 보지 않는다 — 보존에는 근거가 필요 없다) 를 싣는다. 호출자의 공 규칙이 이것을 지우지 않는다.
+        """
+        t0 = time.monotonic()
+        band = float(params["band_m"])
+        reach = float(params["support_reach_m"])
+        P = spec.support_points
+        plane = spec.support_plane
+        target_mode = spec.support == "exclude_target"
+        rec = {"mode": str(spec.support), "applied": True, "n_support_points": int(len(P)),
+               "band_m": round(band, 6), "reach_m": round(reach, 6),
+               "plane": [round(float(v), 6) for v in plane],
+               "n_seeds": 0, "n_shared_kept": 0, "n_removed": 0}
+        if target_mode:
+            rec["footprint"] = {"dilation_m": round(float(params["footprint_dilation_m"]), 6),
+                                "min_height_m": round(float(params["footprint_min_height_m"]), 6),
+                                "n_band_seeds": 0, "n_in_target": 0, "n_overlap_kept": 0,
+                                "n_outside_target_kept": 0, "n_target_points": 0,
+                                "n_nontarget_points": 0}
+        counts["support"] = rec
+        empty = np.zeros((0, 3), np.int64)
+        if out is not None and target_mode:
+            out["protect_ijk"] = empty
+        if not len(P):
+            rec["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return empty
+        dims = np.asarray(shape, np.int64)
+        # 후보 = 근거 점의 AABB (± reach) 안 voxel 전부 — 거의 수평인 면이라 z 로 몇 층뿐이다. 그 안에서 평면 띠 →
+        # seed → 근거 점 거리 순으로 줄인다 (팽창 · unique 없이; 지원면 하나에 수 ms).
+        lo = np.maximum(np.floor((P.min(axis=0) - reach - origin) / vs + 0.5).astype(np.int64), 0)
+        hi = np.minimum(np.floor((P.max(axis=0) + reach - origin) / vs + 0.5).astype(np.int64) + 1, dims)
+        if np.any(hi <= lo):
+            rec["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return empty
+        ax = [np.arange(int(lo[i]), int(hi[i]), dtype=np.int64) for i in range(3)]
+        cand = np.stack(np.meshgrid(*ax, indexing="ij"), axis=-1).reshape(-1, 3)
+        centres = origin[None, :] + cand.astype(np.float64) * vs
+        n, off = plane[:3], float(plane[3])
+        near_plane = np.abs(centres @ n - off) <= reach
+        cand, centres = cand[near_plane], centres[near_plane]
+        if len(cand):
+            seed = self._seed_mask(itg, cand)
+            cand, centres = cand[seed], centres[seed]
+        in_t = in_n = None
+        if target_mode and len(cand):
+            # A8b 조건 4 — 띠 안 seed 전부에 대해 (근거 조건 2 앞): 겹침 보존은 근거 없이도 한다.
+            in_t, in_n, fp = self._coarse_support_footprints(centres, spec, params, ball)
+            rec["footprint"].update(fp)
+            rec["footprint"]["n_band_seeds"] = int(len(cand))
+            if out is not None:
+                out["protect_ijk"] = cand[in_t & in_n]
+        if len(cand):
+            near_pts = _nearest(P, centres) <= reach
+            cand, centres = cand[near_pts], centres[near_pts]
+            if in_t is not None:
+                in_t, in_n = in_t[near_pts], in_n[near_pts]
+        rec["n_seeds"] = int(len(cand))
         if not len(cand):
-            return 0, None
-        return self._clear_seeds(itg, cand, shape)
+            rec["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return empty
+        shared = np.zeros(len(cand), bool)
+        nt = spec.nontarget_points
+        if len(nt):
+            # 후보 상자 (± band) 밖의 점은 어느 후보의 band 안에도 들 수 없다 — 결과는 전체 점과 같다.
+            clo, chi = centres.min(axis=0) - band, centres.max(axis=0) + band
+            nt = nt[np.all((nt >= clo[None, :]) & (nt <= chi[None, :]), axis=1)]
+        if len(nt):
+            shared = _nearest(nt, centres) <= band
+        rec["n_shared_kept"] = int(shared.sum())
+        drop = ~shared
+        if in_t is not None:
+            # 조건 4: target 발자국 안 · non-target 발자국 밖만. 기록은 근거 (조건 1–3) 를 통과한 seed 기준.
+            fp = rec["footprint"]
+            fp["n_in_target"] = int((in_t & ~shared).sum())
+            fp["n_overlap_kept"] = int((in_t & in_n & ~shared).sum())
+            fp["n_outside_target_kept"] = int((~in_t & ~shared).sum())
+            drop &= in_t & ~in_n
+        remove = cand[drop]
+        if len(remove):
+            nr, _ = self._clear_seeds(itg, remove, shape)
+            rec["n_removed"] = int(nr)
+        rec["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+        return remove if len(remove) else empty
+
+    @staticmethod
+    def _coarse_support_footprints(centres: np.ndarray, spec: CoarseFreeSpec, params: dict,
+                                   ball: Optional["TargetBall"]):
+        """T44e A8b — 지원면 seed 중심마다 (target 발자국 안, non-target 발자국 안) bool 두 개와 기록.
+
+        **발자국** = 지원면에 수직으로 내린 그림자 (평면 위 거리, m). 둘 다 같은 팽창 `D = √2 · vs` (거친 voxel 대각,
+        `COARSE_SUPPORT_FOOTPRINT_DILATION_VOXELS` 의 근거) 를 쓴다.
+
+        | 발자국 | 증거 | seed 중심 `c` 가 안이다 |
+        |---|---|---|
+        | target | 공 (중심 · 반지름 — 미세 계층이 지운 바로 그 공, pad 포함) + target 점 (평면 위 `h_min` 초과) | 평면 거리 (`c`, 공 중심) ≤ `r + D` 또는 (`c`, 가장 가까운 target 점) ≤ `D` |
+        | non-target | non-target 관측점 (fused cloud − target − 지원면 inlier, 평면 위 `h_min` 초과) | 평면 거리 (`c`, 가장 가까운 점) ≤ `D` |
+
+        `h_min` (`support_min_height_m`, 기본 8 mm = RANSAC inlier 문턱) 아래 점은 같은 규칙으로 테이블과 구별되지 않아
+        발자국 증거가 아니다 — 안 그러면 inlier 에 못 든 테이블 점이 target 둘레를 모두 non-target 발자국으로 덮는다.
+        공이 없으면 (`ball=None`) target 발자국은 target 점만이다.
+        """
+        plane = spec.support_plane
+        n, off = plane[:3], float(plane[3])
+        dil = float(params["footprint_dilation_m"])
+        hmin = float(params["footprint_min_height_m"])
+
+        def onto(p):
+            p = np.asarray(p, np.float64).reshape(-1, 3)
+            return p - (p @ n - off)[:, None] * n[None, :]
+
+        def above(p):
+            if p is None or not len(p):
+                return np.zeros((0, 3))
+            return p[(p @ n - off) > hmin]
+
+        cq = onto(centres)
+        in_t = np.zeros(len(cq), bool)
+        if ball is not None:
+            bc = onto(np.asarray(ball.centre, np.float64))[0]
+            in_t |= np.linalg.norm(cq - bc[None, :], axis=1) <= float(ball.radius) + dil
+        tp = above(spec.target_points)
+        if len(tp):
+            in_t |= _nearest(onto(tp), cq) <= dil
+        in_n = np.zeros(len(cq), bool)
+        nt = above(spec.nontarget_points)
+        n_nt = 0
+        if len(nt) and in_t.any():
+            # target 발자국 안 seed 만 본다 (밖은 어차피 남는다). 그 상자 ± D 밖의 점은 볼 필요가 없다.
+            q = cq[in_t]
+            ntp = onto(nt)
+            clo, chi = q.min(axis=0) - dil, q.max(axis=0) + dil
+            ntp = ntp[np.all((ntp >= clo[None, :]) & (ntp <= chi[None, :]), axis=1)]
+            n_nt = int(len(ntp))
+            if n_nt:
+                in_n[np.flatnonzero(in_t)] = _nearest(ntp, q) <= dil
+        return in_t, in_n, {"n_target_points": int(len(tp)), "n_nontarget_points": n_nt}
+
+    def _coarse_plane_band_sign(self, itg, ball: "TargetBall", ball_c: "TargetBall",
+                                origin: np.ndarray, vs: float, shape, spec: CoarseFreeSpec,
+                                params: dict, counts: dict) -> Optional[np.ndarray]:
+        """T44c A6 — `sign_floor="plane"` 의 **부호 교정 띠**. `(K, 3)` ijk 또는 None (`"guard"` · 빈 띠).
+
+        띠 = 공 안이고 `sign_z_min_m ≤ z < z_min_m` 인 거친 voxel (공의 z_min 은 미세 계층과 같은 m 값,
+        guard 는 거친 voxel 때문에 높인 값). 여기서는 **seed 를 하나도 지우지 않는다** — 테이블 seed 가
+        이 높이에 있다 (guard 의 이유). 부호만 고친다:
+
+        * **non-seed 만** — seed 는 값이 0 이라 `_force_sign_on_pure_voxels` 가 어차피 건드리지 않지만,
+          집합에서도 뺀다 (기록이 "고칠 수 있었던 것" 만 세게).
+        * **공유 영역은 뺀다** — seed 중심 `band_m` 안에 non-target 관측점이 있는 voxel (A5 와 같은 규칙).
+        * **target 쪽만** — `ball_owned` 는 그 분류의 non-seed 규칙 (`d_t < d_o − tie`), `ball` 은
+          `d_t ≤ d_o` (non-target 관측이 더 가깝지 않다). `ball` 에 target 점이 없으면 공유 판정만.
+
+        지원면 아래 (`z < sign_z_min_m`) 는 후보가 아니다 — 테이블 내부의 음수는 그대로다.
+        """
+        z_lo = params.get("sign_z_min_m")
+        if spec.sign_floor != "plane" or z_lo is None or not float(z_lo) < float(params["z_min_m"]):
+            return None
+        ball_p = TargetBall(centre=ball.centre, radius=ball.radius, z_min=float(z_lo),
+                            provenance=dict(ball.provenance))
+        cand = self._ball_candidates(ball_p, origin, vs, shape)
+        rec = {"n_plane_band": 0, "n_plane_band_seeds": 0, "n_plane_band_shared": 0,
+               "n_plane_band_nontarget_side": 0, "n_plane_band_sign": 0}
+        counts["plane_band"] = rec
+        if cand is None:
+            return None
+        centres = origin[None, :] + cand.astype(np.float64) * vs
+        cand = cand[centres[:, 2] < float(ball_c.z_min)]
+        centres = centres[centres[:, 2] < float(ball_c.z_min)]
+        if not len(cand):
+            return None
+        seed = self._seed_mask(itg, cand)
+        band = float(params["band_m"])
+        nt = spec.nontarget_points
+        if len(nt):
+            nt = nt[np.linalg.norm(nt - ball.centre[None, :], axis=1)
+                    <= float(ball.radius) + band + vs]
+        d_o = _nearest(nt, centres)
+        shared = d_o <= band
+        if spec.owned is not None:
+            owned_c = OwnedEvidence(
+                target_points=spec.owned.target_points, nontarget_points=spec.owned.nontarget_points,
+                tie_voxels=float(params["tie_voxels"]),
+                max_dist_voxels=float(params["max_dist_voxels"]),
+                unowned=spec.owned.unowned)
+            target_side = _ball_owned_split(centres, seed, ball_c, owned_c, vs)["sign"]
+        elif spec.target_points is not None and len(spec.target_points):
+            target_side = _nearest(spec.target_points, centres) <= d_o
+        else:
+            target_side = np.ones(len(cand), bool)
+        sign = ~seed & ~shared & target_side
+        rec.update({"n_plane_band": int(len(cand)), "n_plane_band_seeds": int(seed.sum()),
+                    "n_plane_band_shared": int((~seed & shared).sum()),
+                    "n_plane_band_nontarget_side": int((~seed & ~shared & ~target_side).sum()),
+                    "n_plane_band_sign": int(sign.sum())})
+        return cand[sign] if sign.any() else None
 
     def _clear_seeds(self, itg, cand: np.ndarray, shape):
         """`site_index` 의 seed 를 지우고 `(지운 수, 복셀 인덱스)` 를 돌려준다.

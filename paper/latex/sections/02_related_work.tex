@@ -1,0 +1,42 @@
+% !TEX root = ../main.tex
+% Scoped primary-source checks and remaining verification: notes/DRAFT10_REVISION.md.
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{VLA policies and geometric action refinement.}
+Flow-based VLAs generate action chunks conditioned on visual and language features~\cite{black2024pi0,intelligence2025pi05,nvidia2025gr00t}.
+Their outputs can serve as references for geometric optimization. MoManipVLA transfers VLA-generated end-effector
+trajectories to mobile manipulation through optimization with scene geometry~\cite{wu2025momanipvla}. More generally,
+cuRobo and cuRoboV2 provide GPU-accelerated motion generation, including collision queries and depth-fused distance
+fields~\cite{sundaralingam2023curobo,sundaralingam2026curobov2}. These works motivate our use of a frozen policy and a
+geometric refinement layer. Our focus is the information supplied to that layer: how a visually identified target
+changes the collision constraints of particular robot links.
+
+\paragraph{Grounding from internal visual representations.}
+Selected attention heads in frozen vision-language models can localize referred objects~\cite{kang2025fewheads}.
+KNOWS brings this idea to manipulation by using VLA attention to rank objects produced by a fine-tuned YOLOE
+segmenter, then applying an ellipsoid-based safety filter~\cite{park2026knows}. It is the closest precedent for using
+internal attention to select a contact target. Our target geometry is instead constructed by lifting attention into
+depth and growing regions in the observed 3D cloud. This avoids requiring a segmentation model to enumerate candidate
+objects and supplies a geometric region for link-specific distance queries. Attention is used as a selection cue;
+the quality of the resulting extent must be assessed separately from target identity.
+
+\paragraph{Task-dependent collision geometry.}
+VLSA uses a vision-language model and visual grounding to identify obstacles for action
+filtering~\cite{hu2026vlsa}. Lan-o3dp combines language-guided object decomposition and segmentation with
+collision-aware diffusion-policy execution~\cite{li2025lano3dp}. MoManipVLA's real-world pipeline excludes the target
+mask from ESDF construction~\cite{wu2025momanipvla}. Stage-dependent geometry is also used in AutoMoMa, which generates
+whole-body trajectories in known scenes and incorporates manipulated objects into the robot's kinematic
+representation~\cite{niu2026automoma}. WBAG explicitly models whole-body and grasp-dependent attached geometry for
+VLA filtering~\cite{zhen2026wbag}. We build on the need for such contact-dependent representations. Our distinction is
+to construct the contact target from VLA attention and observed depth, retain separate distance queries for contact
+and non-contact links, and manage these queries during chunk refinement. The current robot query model covers
+gripper links and attached-object approximations; it does not provide whole-body coverage.
+
+\paragraph{Reading task state from frozen policies.}
+$\pi_{0.5}$ and LoHoVLA incorporate sub-task prediction into their learned policy
+structure~\cite{intelligence2025pi05,yang2025lohovla}. Probing studies also recover task progress and success-related
+signals from frozen VLA representations~\cite{bhardwaj2026progress,zhang2026frozenvlas}. We use a supervised linear probe
+for three manipulation phases and apply its output to target adoption and exception termination. The probe supports
+the contact representation; it neither modifies the VLA weights nor generates the policy's action sequence.
+Its value beyond a grasp-state rule is an empirical question addressed by a matched-controller comparison.

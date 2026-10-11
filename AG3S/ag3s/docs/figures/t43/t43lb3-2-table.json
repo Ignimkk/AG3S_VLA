@@ -1,0 +1,53 @@
+{
+ "columns": [
+  "group",
+  "tried LB",
+  "tried LB3",
+  "rep1 ok (LB3)",
+  "3/3 (LB3 new)",
+  "tried total",
+  "rep1 ok total",
+  "3/3 total",
+  "3/3 episodes",
+  "failure modes, all LB3 runs"
+ ],
+ "rows": [
+  [
+   "banana left",
+   10,
+   30,
+   10,
+   0,
+   40,
+   12,
+   0,
+   "-",
+   "ok 11, no_grasp 17, regrasp 2, slip_at_lift 9, slip_in_transport 2"
+  ],
+  [
+   "banana right",
+   10,
+   30,
+   15,
+   1,
+   40,
+   20,
+   1,
+   "1175",
+   "ok 21, no_grasp 3, regrasp 1, slip_at_lift 13, slip_in_transport 12"
+  ],
+  [
+   "pear left",
+   10,
+   20,
+   7,
+   1,
+   30,
+   8,
+   2,
+   "1440, 880",
+   "ok 12, no_grasp 12, slip_at_lift 1, slip_in_transport 2"
+  ]
+ ],
+ "source": "/mnt/dev/work/benchmark/ag3s/docs/handoff/T43LB3.verify.json"
+}

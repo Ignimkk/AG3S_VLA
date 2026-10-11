@@ -1,0 +1,259 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">AG3S Pipeline System Architecture</title>
+  <desc id="desc">Inputs feed a pi zero point five VLA. VLA attention enters AG3S attention lifting and target grounding, while the VLA action chunk initializes external TrajOpt. Robot-masked RGB-D is converted by external cuRobo from TSDF to ESDF, adapted using grounded attention, and used as TrajOpt distance constraints.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#EEF2FF"/>
+    </linearGradient>
+    <linearGradient id="vlaHead" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#5B21B6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="ag3sHead" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#075985"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrowSlate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <marker id="arrowPurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6D28D9"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0369A1"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#047857"/>
+    </marker>
+    <style>
+      .sans { font-family: Inter, Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif; }
+      .title { font-size: 31px; font-weight: 750; fill: #0F172A; letter-spacing: -0.4px; }
+      .subtitle { font-size: 14px; font-weight: 500; fill: #64748B; }
+      .section { font-size: 19px; font-weight: 760; fill: #FFFFFF; letter-spacing: 0.3px; }
+      .box-title { font-size: 17px; font-weight: 740; fill: #0F172A; }
+      .box-sub { font-size: 13px; font-weight: 520; fill: #475569; }
+      .small { font-size: 12px; font-weight: 530; fill: #475569; }
+      .arrow-label { font-size: 12px; font-weight: 650; fill: #334155; paint-order: stroke; stroke: #F8FAFC; stroke-width: 5px; stroke-linejoin: round; }
+      .arrow-label-purple { font-size: 12px; font-weight: 700; fill: #6D28D9; paint-order: stroke; stroke: #F8FAFC; stroke-width: 5px; stroke-linejoin: round; }
+      .arrow-label-blue { font-size: 12px; font-weight: 700; fill: #0369A1; paint-order: stroke; stroke: #F8FAFC; stroke-width: 5px; stroke-linejoin: round; }
+      .arrow-label-green { font-size: 12px; font-weight: 700; fill: #047857; paint-order: stroke; stroke: #F8FAFC; stroke-width: 5px; stroke-linejoin: round; }
+      .step-num { font-size: 13px; font-weight: 800; fill: #FFFFFF; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <text x="60" y="58" class="sans title">AG3S Pipeline System Architecture</text>
+  <text x="60" y="84" class="sans subtitle">VLA attention-guided distance field adaptation and trajectory optimization</text>
+
+  <!-- INPUT -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="125" width="235" height="790" rx="18" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+    <path d="M50 143 Q50 125 68 125 H267 Q285 125 285 143 V181 H50 Z" fill="#334155"/>
+    <text x="168" y="160" text-anchor="middle" class="sans section">INPUT</text>
+
+    <g>
+      <rect x="76" y="220" width="183" height="100" rx="13" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5"/>
+      <circle cx="105" cy="251" r="13" fill="#E2E8F0"/>
+      <path d="M99 246 h12 M99 251 h12 M99 256 h8" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+      <text x="127" y="255" class="sans box-title">Instruction</text>
+      <text x="168" y="289" text-anchor="middle" class="sans small">Language task command</text>
+    </g>
+
+    <g>
+      <rect x="76" y="350" width="183" height="100" rx="13" fill="#EFF6FF" stroke="#60A5FA" stroke-width="1.5"/>
+      <circle cx="105" cy="381" r="13" fill="#DBEAFE"/>
+      <circle cx="105" cy="381" r="6" fill="none" stroke="#2563EB" stroke-width="2"/>
+      <text x="127" y="386" class="sans box-title">RGB ×3</text>
+      <text x="168" y="419" text-anchor="middle" class="sans small">Three camera views</text>
+    </g>
+
+    <g>
+      <rect x="76" y="480" width="183" height="100" rx="13" fill="#ECFDF5" stroke="#34D399" stroke-width="1.5"/>
+      <circle cx="105" cy="511" r="13" fill="#D1FAE5"/>
+      <path d="M98 514 l5 -7 5 4 4 -6" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="127" y="516" class="sans box-title">RGB-D ×3</text>
+      <text x="168" y="549" text-anchor="middle" class="sans small">Color + depth views</text>
+    </g>
+
+    <g>
+      <rect x="76" y="610" width="183" height="100" rx="13" fill="#FFF7ED" stroke="#FB923C" stroke-width="1.5"/>
+      <circle cx="105" cy="641" r="13" fill="#FFEDD5"/>
+      <path d="M99 647 v-9 l6 -4 6 4 v9 M102 641 h6" fill="none" stroke="#EA580C" stroke-width="2" stroke-linejoin="round"/>
+      <text x="127" y="646" class="sans box-title">Robot State</text>
+      <text x="168" y="679" text-anchor="middle" class="sans small">Joint / proprioception</text>
+    </g>
+  </g>
+
+  <!-- VLA -->
+  <g filter="url(#shadow)">
+    <rect x="340" y="125" width="360" height="790" rx="18" fill="#FFFFFF" stroke="#C4B5FD" stroke-width="2"/>
+    <path d="M340 143 Q340 125 358 125 H682 Q700 125 700 143 V181 H340 Z" fill="url(#vlaHead)"/>
+    <text x="520" y="159" text-anchor="middle" class="sans section">VLA (π0.5)</text>
+    <text x="520" y="204" text-anchor="middle" class="sans box-sub">Vision–Language–Action policy</text>
+
+    <rect x="390" y="245" width="260" height="92" rx="14" fill="#F5F3FF" stroke="#A78BFA" stroke-width="1.5"/>
+    <text x="520" y="279" text-anchor="middle" class="sans box-title">Multimodal Tokens</text>
+    <text x="520" y="307" text-anchor="middle" class="sans box-sub">instruction · images · robot state</text>
+
+    <path d="M520 337 V382" fill="none" stroke="#6D28D9" stroke-width="2.5" marker-end="url(#arrowPurple)"/>
+    <text x="536" y="366" class="sans arrow-label-purple">token sequence</text>
+
+    <rect x="390" y="390" width="260" height="108" rx="14" fill="#EDE9FE" stroke="#8B5CF6" stroke-width="2"/>
+    <text x="520" y="430" text-anchor="middle" class="sans box-title">Attention</text>
+    <text x="520" y="456" text-anchor="middle" class="sans box-sub">cross-modal attention blocks</text>
+    <text x="520" y="479" text-anchor="middle" class="sans small">→ attention maps / features</text>
+
+    <path d="M520 498 V545" fill="none" stroke="#6D28D9" stroke-width="2.5" marker-end="url(#arrowPurple)"/>
+    <text x="536" y="527" class="sans arrow-label-purple">action update vθ</text>
+
+    <rect x="390" y="553" width="260" height="117" rx="14" fill="#FAF5FF" stroke="#A855F7" stroke-width="2"/>
+    <text x="520" y="591" text-anchor="middle" class="sans box-title">Euler Step</text>
+    <text x="520" y="620" text-anchor="middle" class="sans box-sub">action denoising / integration</text>
+    <text x="520" y="648" text-anchor="middle" class="sans small">aₜ₋Δₜ = aₜ + Δt · vθ</text>
+
+    <path d="M650 610 C681 610 680 444 652 444" fill="none" stroke="#A78BFA" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrowPurple)"/>
+    <text x="666" y="530" text-anchor="middle" transform="rotate(-90 666 530)" class="sans arrow-label-purple">iterative steps</text>
+
+    <rect x="390" y="732" width="260" height="86" rx="14" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+    <text x="520" y="767" text-anchor="middle" class="sans box-title">Action Chunk</text>
+    <text x="520" y="794" text-anchor="middle" class="sans box-sub">initial joint trajectory</text>
+    <path d="M520 670 V726" fill="none" stroke="#6D28D9" stroke-width="2.5" marker-end="url(#arrowPurple)"/>
+    <text x="536" y="704" class="sans arrow-label-purple">denoised actions</text>
+  </g>
+
+  <!-- INPUT → VLA bus -->
+  <path d="M259 270 H318 V291 H384" fill="none" stroke="#334155" stroke-width="2.2" marker-end="url(#arrowSlate)"/>
+  <path d="M259 400 H318 V291" fill="none" stroke="#334155" stroke-width="2.2"/>
+  <path d="M259 530 H318 V291" fill="none" stroke="#334155" stroke-width="2.2"/>
+  <path d="M259 660 H318 V291" fill="none" stroke="#334155" stroke-width="2.2"/>
+  <circle cx="318" cy="291" r="4" fill="#334155"/>
+  <text x="309" y="228" text-anchor="middle" class="sans arrow-label">Instruction + RGB ×3</text>
+  <text x="309" y="247" text-anchor="middle" class="sans arrow-label">+ RGB-D ×3 + Robot State</text>
+
+  <!-- AG3S -->
+  <g filter="url(#shadow)">
+    <rect x="755" y="125" width="795" height="790" rx="18" fill="#FFFFFF" stroke="#7DD3FC" stroke-width="2"/>
+    <path d="M755 143 Q755 125 773 125 H1532 Q1550 125 1550 143 V181 H755 Z" fill="url(#ag3sHead)"/>
+    <text x="1153" y="159" text-anchor="middle" class="sans section">AG3S</text>
+  </g>
+
+  <!-- Step 1 -->
+  <g>
+    <rect x="790" y="230" width="205" height="128" rx="15" fill="#F0F9FF" stroke="#38BDF8" stroke-width="1.8"/>
+    <circle cx="818" cy="255" r="17" fill="#0284C7"/>
+    <text x="818" y="260" text-anchor="middle" class="sans step-num">1</text>
+    <text x="845" y="261" class="sans box-title">Robot Mask</text>
+    <text x="893" y="298" text-anchor="middle" class="sans box-sub">remove robot geometry</text>
+    <text x="893" y="323" text-anchor="middle" class="sans box-sub">from observed depth</text>
+  </g>
+
+  <!-- Step 2 -->
+  <g>
+    <rect x="1030" y="230" width="215" height="128" rx="15" fill="#F0F9FF" stroke="#38BDF8" stroke-width="1.8"/>
+    <circle cx="1058" cy="255" r="17" fill="#0284C7"/>
+    <text x="1058" y="260" text-anchor="middle" class="sans step-num">2</text>
+    <text x="1085" y="261" class="sans box-title">Attention Lifting</text>
+    <text x="1138" y="298" text-anchor="middle" class="sans box-sub">2D attention + depth</text>
+    <text x="1138" y="323" text-anchor="middle" class="sans box-sub">→ 3D attention field</text>
+  </g>
+
+  <!-- Step 3 -->
+  <g>
+    <rect x="1280" y="230" width="235" height="128" rx="15" fill="#F0F9FF" stroke="#38BDF8" stroke-width="1.8"/>
+    <circle cx="1308" cy="255" r="17" fill="#0284C7"/>
+    <text x="1308" y="260" text-anchor="middle" class="sans step-num">3</text>
+    <text x="1335" y="261" class="sans box-title">Target Grounding</text>
+    <text x="1398" y="298" text-anchor="middle" class="sans box-sub">localize task-relevant</text>
+    <text x="1398" y="323" text-anchor="middle" class="sans box-sub">3D target region</text>
+  </g>
+
+  <!-- AG3S row 1 arrows -->
+  <path d="M995 294 H1024" fill="none" stroke="#0369A1" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+  <text x="1010" y="279" text-anchor="middle" class="sans arrow-label-blue">masked</text>
+  <text x="1010" y="294" text-anchor="middle" class="sans arrow-label-blue">RGB-D</text>
+  <path d="M1245 294 H1274" fill="none" stroke="#0369A1" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+  <text x="1260" y="279" text-anchor="middle" class="sans arrow-label-blue">3D attention</text>
+  <text x="1260" y="294" text-anchor="middle" class="sans arrow-label-blue">field</text>
+
+  <!-- External cuRobo module -->
+  <g>
+    <rect x="790" y="442" width="455" height="183" rx="17" fill="#F8FAFC" stroke="#64748B" stroke-width="2" stroke-dasharray="9 6"/>
+    <rect x="810" y="426" width="174" height="31" rx="15" fill="#475569"/>
+    <text x="897" y="447" text-anchor="middle" class="sans" font-size="12" font-weight="750" fill="#FFFFFF">EXTERNAL MODULE · cuRobo</text>
+    <circle cx="830" cy="486" r="17" fill="#0284C7"/>
+    <text x="830" y="491" text-anchor="middle" class="sans step-num">4</text>
+    <text x="858" y="492" class="sans box-title">TSDF → ESDF</text>
+
+    <rect x="827" y="521" width="155" height="70" rx="12" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1.5"/>
+    <text x="905" y="550" text-anchor="middle" class="sans box-title">TSDF Fusion</text>
+    <text x="905" y="574" text-anchor="middle" class="sans small">scene geometry</text>
+    <path d="M982 556 H1046" fill="none" stroke="#334155" stroke-width="2.2" marker-end="url(#arrowSlate)"/>
+    <text x="1014" y="544" text-anchor="middle" class="sans arrow-label">TSDF</text>
+    <rect x="1052" y="521" width="155" height="70" rx="12" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1.5"/>
+    <text x="1130" y="550" text-anchor="middle" class="sans box-title">ESDF</text>
+    <text x="1130" y="574" text-anchor="middle" class="sans small">signed distance field</text>
+  </g>
+
+  <!-- Step 5 -->
+  <g>
+    <rect x="1280" y="442" width="235" height="183" rx="15" fill="#ECFDF5" stroke="#34D399" stroke-width="2"/>
+    <circle cx="1308" cy="474" r="17" fill="#059669"/>
+    <text x="1308" y="479" text-anchor="middle" class="sans step-num">5</text>
+    <text x="1335" y="480" class="sans box-title">Distance Field</text>
+    <text x="1335" y="503" class="sans box-title">Adapter</text>
+    <text x="1398" y="548" text-anchor="middle" class="sans box-sub">inject grounded target</text>
+    <text x="1398" y="573" text-anchor="middle" class="sans box-sub">into distance representation</text>
+    <text x="1398" y="599" text-anchor="middle" class="sans small">→ target-aware distance field</text>
+  </g>
+
+  <!-- row 1 → row 2 -->
+  <path d="M892 358 V416 H895 V515" fill="none" stroke="#0369A1" stroke-width="2.4" marker-end="url(#arrowBlue)"/>
+  <text x="908" y="399" class="sans arrow-label-blue">robot-free depth</text>
+  <path d="M1398 358 V436" fill="none" stroke="#047857" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+  <text x="1415" y="399" class="sans arrow-label-green">grounded target region</text>
+  <path d="M1245 556 H1274" fill="none" stroke="#047857" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+  <text x="1260" y="544" text-anchor="middle" class="sans arrow-label-green">ESDF</text>
+
+  <!-- External TrajOpt -->
+  <g>
+    <rect x="955" y="710" width="420" height="160" rx="17" fill="#F8FAFC" stroke="#64748B" stroke-width="2" stroke-dasharray="9 6"/>
+    <rect x="975" y="694" width="184" height="31" rx="15" fill="#475569"/>
+    <text x="1067" y="715" text-anchor="middle" class="sans" font-size="12" font-weight="750" fill="#FFFFFF">EXTERNAL MODULE · TrajOpt</text>
+    <circle cx="995" cy="760" r="17" fill="#0284C7"/>
+    <text x="995" y="765" text-anchor="middle" class="sans step-num">6</text>
+    <text x="1023" y="766" class="sans box-title">Trajectory Optimization</text>
+    <rect x="993" y="791" width="342" height="52" rx="11" fill="#E0F2FE" stroke="#38BDF8" stroke-width="1.5"/>
+    <text x="1164" y="814" text-anchor="middle" class="sans box-sub">initial trajectory + distance constraints</text>
+    <text x="1164" y="834" text-anchor="middle" class="sans small">→ optimized collision-aware trajectory</text>
+  </g>
+
+  <!-- Adapter → TrajOpt -->
+  <path d="M1398 625 V665 H1284 V704" fill="none" stroke="#047857" stroke-width="2.8" marker-end="url(#arrowGreen)"/>
+  <text x="1392" y="654" text-anchor="end" class="sans arrow-label-green">target-aware distance field</text>
+  <text x="1392" y="673" text-anchor="end" class="sans arrow-label-green">→ distance constraints</text>
+
+  <!-- VLA Attention → AG3S Attention Lifting -->
+  <path d="M650 444 H728 V209 H1138 V224" fill="none" stroke="#6D28D9" stroke-width="3" marker-end="url(#arrowPurple)"/>
+  <text x="887" y="201" text-anchor="middle" class="sans arrow-label-purple">VLA attention maps / features</text>
+
+  <!-- Inputs to Robot Mask directly -->
+  <path d="M285 530 H315 V940 H735 V294 H784" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#arrowSlate)"/>
+  <path d="M285 660 H315" fill="none" stroke="#334155" stroke-width="2"/>
+  <circle cx="315" cy="660" r="4" fill="#334155"/>
+  <text x="548" y="933" text-anchor="middle" class="sans arrow-label">RGB-D ×3 + Robot State → depth &amp; robot geometry</text>
+
+  <!-- VLA action chunk → TrajOpt -->
+  <path d="M650 775 H904 V788 H949" fill="none" stroke="#6D28D9" stroke-width="3" marker-end="url(#arrowPurple)"/>
+  <text x="800" y="765" text-anchor="middle" class="sans arrow-label-purple">VLA action chunk</text>
+  <text x="800" y="784" text-anchor="middle" class="sans arrow-label-purple">→ initial trajectory</text>
+
+  <!-- AG3S final output -->
+  <path d="M1375 817 H1408" fill="none" stroke="#0369A1" stroke-width="3" marker-end="url(#arrowBlue)"/>
+  <rect x="1414" y="787" width="109" height="60" rx="12" fill="#FFFFFF" stroke="#0284C7" stroke-width="2"/>
+  <text x="1469" y="811" text-anchor="middle" class="sans box-sub">OUTPUT</text>
+  <text x="1469" y="831" text-anchor="middle" class="sans small">optimized trajectory</text>
+</svg>

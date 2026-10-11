@@ -1,0 +1,1697 @@
+"""AG3S orchestration. **No algorithm lives here.**
+
+Every stage is implemented and unit-tested in its own module; this file only decides what runs in
+what order, times it, and assembles the result. That constraint is worth stating because it is easy
+to erode: the first "just a small special case" added here is the point at which a stage stops being
+independently testable.
+
+The order differs from the spec's section numbering in one place, deliberately. Spec §3.4 introduces
+support-surface fitting after §3.3's target grounding, but the plane fit does not depend on the
+target, and grounding *does* depend on the plane: objects stand on the table within any usable `eps`,
+so Euclidean connectivity floods from the target across the whole surface unless the plane is already
+identified (measured: one 41,745-point cluster swallowing the entire scene). So planes are fitted
+first and the inlier mask is handed to grounding. Nothing about the method changes — only when it
+runs.
+
+Full order:
+
+    1. scene reconstruction     depth or point cloud -> filtered cloud in the base frame
+    2. robot self-filter        remove the robot's own body via the injected collision model
+    3. support surface          RANSAC planes; the mask feeds stages 5 and 6
+    4. attention lifting        A(u, v) -> per-point attention, nothing dropped
+    5. target grounding         seeds -> 3D connectivity -> clusters -> score, or a failure status
+    6. collision candidates     residual clustering, unknown geometry, phase rules, tracking
+    7. primitive fitting        (inside 6; timed separately, see `collision_candidates`)
+    8. constraint generation    fixed-slot CasADi parameters
+
+Phase is an injected argument at every level. AG3S never infers it.
+"""
+
+from __future__ import annotations
+
+import dataclasses
+import time
+from typing import Any, Optional, Sequence
+
+import numpy as np
+
+from AG3S.ag3s.stages.attention_lifting import lift, make_adapter
+from AG3S.ag3s.constraints.clearance import ClearancePolicy
+from AG3S.ag3s.stages.collision_candidates import CandidateTracker, generate_candidates
+from AG3S.ag3s.config import AG3SConfig
+from AG3S.ag3s.runtime.profiler import StageProfiler
+from AG3S.ag3s.stages.reconstruction import reconstruct
+from AG3S.ag3s.stages.robot_filter import (
+    filter_robot_points,
+    inflation_table,
+    resolve_self_filter_inflation,
+    self_filter_mask,
+)
+from AG3S.ag3s.runtime.multiview import fuse_observations
+from AG3S.ag3s.stages.support_surface import fit_support_surfaces
+from AG3S.ag3s.stages.target_grounding import (
+    LOST,
+    GroundingResult,
+    ManipulatedIdentity,
+    TargetConfirm,
+    ground_target,
+)
+from AG3S.ag3s.constraints.to_adapter import build_constraint_set
+from AG3S.ag3s.runtime.degradation import ensure_reason, reason
+from AG3S.ag3s.types import (
+    DESTINATION_LABEL,
+    TARGET_LABEL,
+    AttachedCollisionGeometry,
+    AttentionPointCloud,
+    CameraObservation,
+    TargetGeometry,
+    CollisionConstraintSet,
+    ConstraintValidity,
+    ContactPolicyContext,
+    GroundingStatus,
+    Phase,
+    PipelineStatus,
+    PointCloud,
+    RobotCollisionModel,
+    SourceType,
+)
+
+
+class AG3S:
+    """The pipeline object. One instance per camera/robot session.
+
+    State held across frames, and why:
+
+    * `CandidateTracker` — stable candidate ids, which TO warm-starting depends on.
+    * `ConstraintBuilder` — the symbolic NLP structure, built once. Rebuilding it per frame would
+      make warm-starting impossible, which is the whole reason for fixed slots.
+    * `StageProfiler` — accumulated latency.
+
+    `robot_model` is optional. Without it the self-filter is skipped and no constraints are emitted
+    (there is no robot to write them against); the rest of the pipeline still runs, which is what
+    makes perception debuggable on a machine with no robot description.
+
+    `constraint_robot_model` exists because the two uses of a robot model want different things, and
+    on a real robot they diverge sharply:
+
+    * the **self-filter** must cover everything a camera can see of the robot — base, wheels,
+      grippers, the lot — or the leftovers cluster into a phantom obstacle attached to the robot;
+    * the **constraints** only need the links that move and can hit something, and every extra
+      sphere multiplies the row count by `horizon * max_candidates`.
+
+    On RB-Y1 the full visible body is 194 spheres and the arm chain is 61, which at H=20 and 32 slots
+    is the difference between ~132k rows and ~41k. Defaults to `robot_model`, so a caller who does
+    not care sees no change.
+    """
+
+    def __init__(
+        self,
+        config: AG3SConfig | None = None,
+        *,
+        robot_model: Optional[RobotCollisionModel] = None,
+        constraint_robot_model: Optional[RobotCollisionModel] = None,
+        attention_adapter: Any = None,
+        max_support_surfaces: Optional[int] = None,
+        attached_parent_links: Sequence[str] = (),
+    ):
+        self.config = config or AG3SConfig()
+        self.robot_model = robot_model
+        self.constraint_robot_model = constraint_robot_model or robot_model
+        self.attention_adapter = attention_adapter
+        self.tracker = CandidateTracker(self.config.collision_candidate)
+        #: The only cross-frame state grounding has (T5e). `ground_target` still decides from one
+        #: frame; this decides whether a *different* object has led long enough to take the target
+        #: over. It lives here because the episode lives here — `reset()` is the episode boundary.
+        self._target_confirm = TargetConfirm(self.config.clustering)
+        #: The **manipulated object** after the latest frame (T20): id, observation state
+        #: (`visible | occluded | lost`) and last observed geometry, as `TargetConfirm` left it.
+        #: Contact permission (`manipulated_link_margin`), target exclusion (`target_field_exclude`,
+        #: target-free layer, `_target_ball`), the fine-window centre, the `TARGET_LABEL` points and
+        #: the T19 self-filter guard all read *this*, not the frame's attention target. Before a
+        #: grasp the two coincide; they part when the object is hidden or attention moves on.
+        self._manipulated: Optional[ManipulatedIdentity] = None
+        #: The self-filter margin, resolved **once** from `pointcloud.self_filter_inflation[_by_link]`
+        #: and the self-filter model's link names (T19). A float when there is no per-link override
+        #: (the pre-T19 value itself), else one value per sphere. The cloud filter and the depth
+        #: robot mask are both handed *this object*, so they cannot disagree on the robot.
+        #: Resolving here also means a mistyped link name stops construction, not frame 1.
+        self._self_filter_inflation = self._resolve_self_filter_inflation()
+        #: This frame's target-guard centroid (`None` = no guard), fixed at the start of `_run`
+        #: from the **manipulated object's** centroid *before* this frame's grounding (T20; it was
+        #: `TargetConfirm.held_centroid`, which is the same point), and read by `_robot_mask_for`
+        #: later in the same frame — after grounding may already have moved it.
+        self._frame_guard_centre: Optional[np.ndarray] = None
+        #: This frame's **effective** guard radius (T21, user ruling 2026-09-28): the configured
+        #: `self_filter_target_guard_radius` when it is non-zero, otherwise the manipulated object's
+        #: radius + one fine voxel (`_guard_radius_for`). 0.0 = no guard this frame.
+        self._frame_guard_radius: float = 0.0
+        #: `self.config` with `pointcloud.self_filter_target_guard_radius` set to the effective
+        #: radius — handed to the self-filter call sites (cloud filter, fused path, depth robot
+        #: mask) so `stages/robot_filter` reads one radius without being changed. It *is*
+        #: `self.config` whenever the two radii agree.
+        self._frame_filter_config: AG3SConfig = self.config
+        #: Pixels the guard kept out of this frame's depth robot masks, one entry per mask built.
+        self._mask_guard_px: list[int] = []
+        #: Kept across frames so the ESDF's local update has something to be incremental against.
+        self._esdf_builder = None
+        self.profiler = StageProfiler(
+            enabled=self.config.profiling.enabled,
+            warmup_frames=self.config.profiling.warmup_frames,
+        )
+        self.frame_index = 0
+        # Set only by an explicit `attach()` and cleared only by an explicit `detach()`. Perception
+        # failure never touches it: the object is still in the gripper whatever the cameras can see.
+        self._attached: Optional[AttachedCollisionGeometry] = None
+        self._max_support_surfaces = (
+            self.config.support_surface.max_planes
+            if max_support_surfaces is None
+            else int(max_support_surfaces)
+        )
+        self._builder = None
+        if self.constraint_robot_model is not None:
+            from AG3S.ag3s.constraints.constraint_builder import ConstraintBuilder
+
+            self._builder = ConstraintBuilder(
+                self.constraint_robot_model,
+                self.config.constraint,
+                self.config.geometry,
+                max_support_surfaces=self._max_support_surfaces,
+                clearance_policy=ClearancePolicy.from_config(
+                    self.config.contact, self.config.geometry, self.config.support_surface
+                ),
+                attached_parent_links=attached_parent_links,
+            )
+
+    @property
+    def builder(self):
+        """The `ConstraintBuilder`, or None when no robot model was injected."""
+        return self._builder
+
+    # ------------------------------------------------------------------ self-filter settings
+    def _resolve_self_filter_inflation(self):
+        cfg = self.config.pointcloud
+        if self.robot_model is None:
+            return None
+        names = (getattr(self.robot_model, "sphere_link_names", None)
+                 if cfg.self_filter_inflation_by_link else None)
+        return resolve_self_filter_inflation(names, cfg)
+
+    def self_filter_settings(self) -> dict[str, Any]:
+        """What the self-filter will **actually** apply — for the start log and the run record.
+
+        `inflation_effective` is the per-link table after group expansion and precedence, not the
+        config as written: the point is to show the value that reaches `robot_sphere_mask`, which is
+        what guide §3.2 found missing (a YAML value that never reached the live path).
+        """
+        cfg = self.config.pointcloud
+        model = self.robot_model
+        names = None if model is None else getattr(model, "sphere_link_names", None)
+        n_spheres = None
+        if model is not None:
+            n_spheres = getattr(model, "n_spheres", None)
+            if n_spheres is None and names is not None:
+                n_spheres = len(names)
+        infl = self._self_filter_inflation
+        return {
+            "enabled": bool(cfg.self_filter and model is not None),
+            "n_spheres": None if n_spheres is None else int(n_spheres),
+            "inflation_default": float(cfg.self_filter_inflation),
+            "inflation_by_link": dict(cfg.self_filter_inflation_by_link),
+            "inflation_effective": ({} if infl is None else inflation_table(names, infl)),
+            "target_guard_radius": float(cfg.self_filter_target_guard_radius),
+            # T21: 0 no longer means "off" — it means "per object" (`_guard_radius_for`).
+            "target_guard_rule": ("fixed" if cfg.self_filter_target_guard_radius > 0.0
+                                  else "manipulated_radius_plus_voxel"),
+            "target_guard_pad_m": self._guard_pad(),
+        }
+
+    def reset(self) -> None:
+        """Clear cross-frame state. Call between episodes, never mid-episode.
+
+        This *does* drop an attached object, because an episode boundary is an explicit statement
+        that the previous task is over. Mid-episode there is no path from perception to detachment.
+        """
+        self.tracker.reset()
+        self.profiler.reset()
+        self._target_confirm.reset()
+        self._manipulated = None
+        self.frame_index = 0
+        self._attached = None
+        self._esdf_builder = None
+
+    @property
+    def manipulated(self) -> Optional[ManipulatedIdentity]:
+        """The manipulated object after the latest frame (T20), or None before one is confirmed."""
+        return self._manipulated
+
+    # ------------------------------------------------------- explicit grasp state, injected
+    @property
+    def attached(self) -> Optional[AttachedCollisionGeometry]:
+        """The object AG3S believes is in the gripper, or None."""
+        return self._attached
+
+    def attach(
+        self,
+        geometry: AttachedCollisionGeometry | TargetGeometry,
+        *,
+        robot_state: Optional[np.ndarray] = None,
+        parent_link: Optional[str] = None,
+        allowed_contact_links: Any = (),
+        label: str = "attached_object",
+        timestamp: Optional[float] = None,
+        reach: Optional[float] = None,
+    ) -> AttachedCollisionGeometry:
+        """Record an externally confirmed grasp. **AG3S never calls this itself.**
+
+        Pass an `AttachedCollisionGeometry` to attach a known shape, or a `TargetGeometry` together
+        with `robot_state` and `parent_link` to snapshot what perception last fitted. Either way the
+        result is a snapshot: from here on the object's existence is a fact about the gripper, not a
+        claim about what the cameras can see.
+
+        There is deliberately no grasp detector behind this. AG3S cannot tell a closed gripper
+        holding a cup from a closed gripper holding nothing, and guessing would mean either an
+        invisible object or a phantom one attached to the hand.
+
+        **It does refuse the impossible (T22).** `reach` (m) bounds the distance between the parent
+        link's origin and the object's centroid; beyond it the call raises `AttachRejected` with the
+        measured distance and changes nothing. This is the last gate behind whoever decided the
+        grasp: T14 seq 26 snapshotted a cluster 636 mm from `ee_finger_l1` and the phantom then
+        violated −3.1 mm at the grasp instant. `SafePolicy` always passes `LatchConfig.reach`
+        (default `attached.DEFAULT_ATTACH_REACH_M`, provisional — see there).
+
+        `reach=None` (the default for direct callers) skips the check, so existing callers keep
+        their behaviour: `trajopt/experiments/grasp_damage.py` attaches MuJoCo's true apple to
+        `link_left_arm_6`, whose origin is ~270 mm from the apple (T17 FK), and a hand-sized default
+        would refuse it. A limit only means something relative to a parent link.
+
+        The attach frame is the given `parent_link`. With a finger link (the default grasp links are
+        `ee_finger_l1`/`ee_finger_r1`) the snapshot rides on that finger, so any later change of the
+        gripper opening moves the object with that finger rather than with the hand — callers should
+        attach only once the opening has settled (the T22 latch does).
+        """
+        from AG3S.ag3s.constraints.attached import (
+            AttachRejected,
+            attach_from_target,
+            attached_reach,
+            parent_reach,
+        )
+
+        if isinstance(geometry, AttachedCollisionGeometry):
+            if reach is not None:
+                dist = attached_reach(geometry)
+                if dist is not None and dist > float(reach):
+                    raise AttachRejected(
+                        f"reach: attached geometry centroid is {dist * 1000.0:.1f} mm from "
+                        f"{geometry.parent_link!r}'s origin, over the {float(reach) * 1000.0:.0f} mm "
+                        "limit", reach_m=dist, limit_m=float(reach),
+                        parent_link=geometry.parent_link)
+            self._attached = geometry
+            return self._attached
+        if robot_state is None or parent_link is None:
+            raise ValueError(
+                "attaching a TargetGeometry needs the robot_state the grasp closed in and the "
+                "parent_link it closed on; a later state would bake in however far the arm has moved"
+            )
+        if self.constraint_robot_model is None:
+            raise ValueError("attaching needs a robot model to invert the parent link's pose")
+
+        if reach is not None:
+            centroid = getattr(geometry, "centroid", None)
+            if centroid is None and getattr(geometry, "points", None) is not None \
+                    and len(geometry.points):
+                centroid = np.asarray(geometry.points, np.float64).reshape(-1, 3).mean(axis=0)
+            if centroid is None:
+                raise AttachRejected("reach: the target has neither a centroid nor points, so "
+                                     "its distance to the hand cannot be checked",
+                                     limit_m=float(reach), parent_link=str(parent_link))
+            dist = parent_reach(self.constraint_robot_model, robot_state, str(parent_link),
+                                centroid)
+            if dist > float(reach):
+                raise AttachRejected(
+                    f"reach: target centroid is {dist * 1000.0:.1f} mm from {parent_link!r}'s "
+                    f"origin, over the {float(reach) * 1000.0:.0f} mm limit",
+                    reach_m=dist, limit_m=float(reach), parent_link=str(parent_link))
+
+        self._attached = attach_from_target(
+            geometry,
+            robot_model=self.constraint_robot_model,
+            robot_state=robot_state,
+            parent_link=parent_link,
+            allowed_contact_links=allowed_contact_links,
+            label=label,
+            timestamp=time.time() if timestamp is None else float(timestamp),
+        )
+        return self._attached
+
+    def detach(self) -> Optional[AttachedCollisionGeometry]:
+        """Record an externally confirmed release. Returns what was let go, or None.
+
+        The only way an attached object leaves. Grounding failure, occlusion and camera dropout all
+        deliberately have no path here: the robot does not put an object down because it stopped
+        being able to see it.
+        """
+        released, self._attached = self._attached, None
+        return released
+
+    # ------------------------------------------------------------------------------------
+    def process(self, **kwargs: Any) -> CollisionConstraintSet:
+        """Run one frame. Returns the `CollisionConstraintSet` a TO consumes.
+
+        Exactly one of `depth` or `pointcloud` is required. `attention_map` may be omitted, in which
+        case grounding reports `NO_ATTENTION` and every piece of geometry is treated as a
+        conservative collision candidate — which is the correct degradation, not an error.
+        """
+        return self._run(**kwargs)[0]
+
+    def process_multi(
+        self,
+        observations: Sequence[CameraObservation],
+        **kwargs: Any,
+    ) -> CollisionConstraintSet:
+        """Run one frame from several cameras, fused into a single base-frame scene.
+
+        Each observation carries its own capture timestamp and its own `robot_state`, and is placed
+        with the kinematics of that instant. There is no `robot_state` argument here on purpose: a
+        single current `q` applied to three cameras is the bug this method exists to prevent.
+
+        `robot_state` for the *constraints* — the configuration the TO plans from — is taken from the
+        newest observation, since that is the freshest thing AG3S has been told about the robot.
+        """
+        return self.process_multi_debug(observations, **kwargs)[0]
+
+    def process_multi_debug(
+        self,
+        observations: Sequence[CameraObservation],
+        **kwargs: Any,
+    ) -> tuple[CollisionConstraintSet, dict[str, Any]]:
+        """`process_multi`, plus the fusion result and the intermediate clouds."""
+        observations = list(observations)
+        kwargs.setdefault(
+            "robot_state",
+            max(observations, key=lambda o: o.timestamp).robot_state if observations else None,
+        )
+        kwargs.setdefault(
+            "timestamp", max((o.timestamp for o in observations), default=None) or None
+        )
+        return self._run(observations=observations, **kwargs)
+
+    def process_debug(self, **kwargs: Any) -> tuple[CollisionConstraintSet, dict[str, Any]]:
+        """`process`, plus the intermediate artifacts.
+
+        Exists for `visualization` and for tests that need to see a stage's input as well as its
+        output. Kept separate so the production path never pays to retain clouds it will not use.
+        """
+        return self._run(**kwargs)
+
+    def _run(
+        self,
+        *,
+        attention_map: Any = None,
+        depth: Optional[np.ndarray] = None,
+        pointcloud: Optional[np.ndarray] = None,
+        camera_intrinsics: Optional[np.ndarray] = None,
+        T_base_cam: Optional[np.ndarray] = None,
+        robot_state: Optional[np.ndarray] = None,
+        phase: Phase | str = Phase.TRANSIT,
+        image_hw: Optional[tuple[int, int]] = None,
+        uv: Optional[np.ndarray] = None,
+        timestamp: Optional[float] = None,
+        active_manipulators: Any = None,
+        contact_context: Optional[ContactPolicyContext] = None,
+        observations: Optional[Sequence[CameraObservation]] = None,
+        destination_points: Optional[np.ndarray] = None,
+        static_geometry: Optional[Sequence[Any]] = None,
+        execution_path: Optional[np.ndarray] = None,
+    ) -> tuple[CollisionConstraintSet, dict[str, Any]]:
+        """The single implementation behind `process`, `process_debug` and `process_multi`.
+
+        `execution_path` (T21): the robot states — same vector as `robot_state`, one row per step —
+        the policy's reference chunk will pass through during the **executed** window (K steps).
+        Only the fine-window placement reads it (`_build_esdf`); without it the window is placed
+        from `robot_state` alone and `esdf.stats["window"]["hand_source"]` says `q_now`.
+
+        With `observations`, stages 1, 2 and 4 are replaced by the multi-camera front end in
+        `multiview`; stages 3, 5, 6 and 8 are byte-for-byte the same code operating on the fused
+        cloud. That is the point of `FusedPointCloud.as_pointcloud()` — fusion is a change to where
+        the points come from, not to what happens to them.
+        """
+        cfg = self.config
+        phase = Phase.parse(phase)
+        # Phase alone does not say which hand is grasping, and AG3S must not guess. With no
+        # manipulator named, the context authorizes nobody and every link keeps full clearance.
+        context = contact_context or ContactPolicyContext.make(phase, active_manipulators)
+        ts = time.time() if timestamp is None else float(timestamp)
+        profiler = self.profiler
+        notes: list[str] = []
+        # T19 target guard: the manipulated object's centroid *before* this frame (T20 — the object
+        # being grasped, not whatever attention led with), frozen for the whole frame so the cloud
+        # filter (stage 2) and the depth robot mask (stage 8, after grounding) use the same one.
+        # Any state, `lost` included: the guard asserts nothing about the object, it only keeps
+        # the fingers' margin from erasing it where it was last seen, which is how it can re-appear.
+        # T21 (user ruling 2026-09-28): the radius is the configured one when non-zero, otherwise
+        # this object's radius + one fine voxel — set per object, no number baked in.
+        self._frame_guard_radius = self._guard_radius_for(self._manipulated)
+        self._frame_guard_centre = (
+            self._manipulated.centroid.copy()
+            if self._frame_guard_radius > 0.0 and self._manipulated is not None else None)
+        self._frame_filter_config = self._config_with_guard_radius(self._frame_guard_radius)
+        self._mask_guard_px = []
+
+        fusion = None
+        if observations is not None:
+            # 1 + 2 + 4, fused. Each camera is reconstructed and self-filtered at its own capture
+            # instant, then merged on a base-frame voxel grid with provenance retained.
+            with profiler.stage("scene_reconstruction"):
+                fusion = fuse_observations(
+                    observations,
+                    # `cfg` with this frame's effective guard radius (T21) — identical otherwise.
+                    self._frame_filter_config,
+                    robot_model=self.robot_model,
+                    attention_adapter=self.attention_adapter,
+                    now=timestamp,
+                    self_filter_inflation=self._self_filter_inflation,
+                    self_filter_guard_centre=self._frame_guard_centre,
+                )
+            cloud = fusion.pointcloud
+            recon_stats = self._fused_recon_stats(fusion)
+            filter_enabled = cfg.pointcloud.self_filter and self.robot_model is not None
+            filter_stats = {
+                "n_in": fusion.metrics["n_points_before_fusion"] + fusion.metrics["n_self_filtered"],
+                "n_removed": fusion.metrics["n_self_filtered"],
+                "n_out": fusion.metrics["n_points_before_fusion"],
+                "enabled": filter_enabled,
+                **self._guard_stats(
+                    filter_enabled,
+                    sum(fusion.metrics.get("n_self_filter_guard_protected", {}).values())),
+            }
+            profiler.record("robot_self_filter", 0.0)  # timed inside the fusion stage
+            notes.extend(fusion.notes)
+        else:
+            # 1. scene reconstruction -----------------------------------------------------
+            with profiler.stage("scene_reconstruction"):
+                cloud, recon_stats = reconstruct(
+                    depth=depth,
+                    pointcloud=pointcloud,
+                    camera_intrinsics=camera_intrinsics,
+                    T_base_cam=T_base_cam,
+                    uv=uv,
+                    config=cfg.pointcloud,
+                    frame_id=cfg.frame_id,
+                )
+        validity = ConstraintValidity.VALID if fusion is None else fusion.validity
+        if recon_stats["capped"]:
+            notes.append(reason(
+                "pointcloud_capped",
+                f"point cloud capped at max_points={cfg.pointcloud.max_points} "
+                f"(from {recon_stats['n_voxel']}); voxel grown to "
+                f"{recon_stats['final_voxel_size'] * 1000:.1f} mm in "
+                f"{recon_stats['n_growth_steps']} step(s)",
+            ))
+            # Coarser is not incomplete: growing the voxel keeps a representative in every occupied
+            # cell, so nothing physical went unobserved. Index selection makes no such promise.
+            validity = ConstraintValidity.worst(validity, ConstraintValidity.DEGRADED)
+        if not recon_stats["covered"]:
+            notes.append(
+                "the point cloud could not be reduced to max_points while preserving spatial "
+                "coverage; some geometry is unrepresented"
+            )
+            validity = ConstraintValidity.worst(validity, ConstraintValidity.INCOMPLETE)
+
+        # 2. robot self-filter ------------------------------------------------------------
+        raw_cloud = cloud
+        if fusion is None:
+            with profiler.stage("robot_self_filter"):
+                cloud, filter_stats = filter_robot_points(
+                    cloud, self.robot_model, robot_state, self._frame_filter_config.pointcloud,
+                    inflation=self._self_filter_inflation,
+                    guard_centre=self._frame_guard_centre,
+                )
+
+        # 3. support surfaces -------------------------------------------------------------
+        with profiler.stage("support_surface"):
+            surfaces, support_mask = fit_support_surfaces(cloud, cfg.support_surface, timestamp=ts)
+
+        # 4. attention lifting ------------------------------------------------------------
+        with profiler.stage("attention_lifting"):
+            if fusion is not None:
+                # Already lifted per camera and aggregated by max over each fused point's
+                # observations. Rebuilding it here from a single map would need a single camera.
+                attention_cloud = AttentionPointCloud(cloud, fusion.attention, fusion.raw_attention)
+            else:
+                # `image_hw` 를 주지 않으면 `lift` 는 **걸러지고 남은 클라우드의 uv 최댓값**으로
+                # 해상도를 추정한다. 클라우드는 깊이 유효성·`range_max`·로봇 자기 필터를 이미
+                # 거친 뒤라 이미지 경계에 못 닿는 일이 흔하고, 그러면 attention 맵이 틀린 크기로
+                # 펼쳐진다 (F9). 실측에서 최대 57 픽셀 — attention 셀 한 칸(40 px)이 넘는다 —
+                # 어긋났고, run_0004 의 두 프레임에서 **target 물체 자체가 바뀌었다**.
+                #
+                # 그런데 그 참값은 여기 이미 있다. `depth` 가 바로 attention 맵이 대응하는 그
+                # 이미지다. 걸러진 점들에서 되짚는 것보다 언제나 옳다.
+                hw = image_hw
+                if hw is None and depth is not None:
+                    hw = tuple(int(x) for x in np.asarray(depth).shape[:2])
+                attention_cloud = self._lift(
+                    cloud, attention_map, hw, camera_intrinsics, T_base_cam
+                )
+
+        # 5. target grounding -------------------------------------------------------------
+        with profiler.stage("target_grounding"):
+            grounding = ground_target(
+                attention_cloud,
+                cfg.clustering,
+                seed_percentile=cfg.attention.seed_percentile,
+                seed_threshold=cfg.attention.seed_threshold,
+                exclude_mask=support_mask,
+                min_radius=cfg.geometry.min_radius,
+                timestamp=ts,
+                confirm=self._target_confirm,
+            )
+        if fusion is not None and grounding.target is not None:
+            grounding = dataclasses.replace(
+                grounding,
+                target=self._with_camera_provenance(grounding.target, fusion, attention_cloud),
+            )
+        # T20: what the consumers below refer to. `geometry` is this frame's observation when
+        # `visible`, the last one when `occluded`; `lost` (or nothing confirmed yet) means none.
+        self._manipulated = manipulated = self._target_confirm.manipulated
+        manipulated_geometry = (manipulated.geometry
+                                if manipulated is not None and manipulated.usable else None)
+        if manipulated is not None and manipulated.state == LOST:
+            # The reason code T20 asks for, distinct from `no_seed`: *which* object and for how long.
+            notes.append(
+                f"lost(id={manipulated.id}, age={manipulated.age_frames}): the manipulated object "
+                f"has been unobserved for {manipulated.age_frames} frame(s) "
+                f"(> clustering.target_lost_frames={self._target_confirm.lost_frames}); "
+                "no challenger is named in its place"
+            )
+        if grounding.target is None:
+            notes.append(
+                f"no target ({grounding.status.value}); all geometry held at full clearance"
+            )
+            if manipulated_geometry is not None:
+                notes.append(
+                    f"manipulated object id={manipulated.id} {manipulated.state} "
+                    f"({manipulated.age_frames} frame(s) unobserved): contact permission and "
+                    "target exclusion keep its last observed geometry"
+                )
+        else:
+            decision = self._target_confirm.last
+            if decision is not None and decision.mode in ("hold", "switch", "occluded"):
+                # Said out loud only when the hysteresis did something, because a frame where it
+                # overruled the highest-scoring cluster is otherwise indistinguishable from one
+                # where it agreed. Not a `reason(...)`: nothing is degraded — the target is named
+                # with full geometry either way.
+                notes.append(
+                    f"target {decision.mode} (rank {decision.rank}, challenger at "
+                    f"{decision.streak}/{decision.frames} frames"
+                    + (f"; id={decision.manipulated_id} unobserved {decision.age_frames} "
+                       "frame(s), last observed geometry stands in"
+                       if decision.mode == "occluded" else "")
+                    + ")"
+                )
+
+        # 6 + 7. collision candidates and primitive fitting -------------------------------
+        # Skipped entirely when the field is the only thing the optimizer will read. See
+        # `EsdfConfig.emit_candidates` for why that is the default rather than an optimisation.
+        primitive_path = (cfg.collision_backend != "esdf") or cfg.esdf.emit_candidates
+        if not primitive_path:
+            candidates, candidate_stats = [], {}
+            notes.append(
+                "collision_backend=esdf: the primitive candidate set was not built; the collision "
+                "constraint comes from the ESDF and the target is named by grounding "
+                "(esdf.emit_candidates turns it back on)"
+            )
+        if primitive_path:
+              with profiler.stage("collision_candidates"):
+                candidates, candidate_stats = generate_candidates(
+                    cloud,
+                    phase=phase,
+                    target=grounding.target,
+                    support_surfaces=surfaces,
+                    support_mask=support_mask,
+                    config=cfg.collision_candidate,
+                    geometry_config=cfg.geometry,
+                    contact_config=cfg.contact,
+                    tracker=self.tracker,
+                    timestamp=ts,
+                )
+        if primitive_path:
+            profiler.record("primitive_fitting", candidate_stats.get("primitive_fit_ms", 0.0))
+        if candidate_stats.get("n_overflow"):
+            notes.append(reason(
+                "candidate_overflow",
+                f"{candidate_stats['n_overflow_points']} point(s) beyond "
+                f"max_clusters={cfg.collision_candidate.max_clusters} / "
+                f"unknown_min_points={cfg.collision_candidate.unknown_min_points} were folded into "
+                f"{candidate_stats['n_overflow']} conservative aggregate(s)",
+            ))
+            validity = ConstraintValidity.worst(validity, ConstraintValidity.DEGRADED)
+        if candidate_stats.get("n_unassigned_points"):
+            # The only path that actually loses points, and only under `overflow_groups: 0`.
+            notes.append(
+                f"{candidate_stats['n_unassigned_points']} point(s) were discarded: "
+                "collision_candidate.overflow_groups is 0, so there was no aggregate to hold them"
+            )
+            validity = ConstraintValidity.worst(validity, ConstraintValidity.INCOMPLETE)
+
+        # 8. constraint generation --------------------------------------------------------
+        with profiler.stage("constraint_generation"):
+            # 8b. ESDF backend ------------------------------------------------------------
+            # Built here, before the constraint set is assembled, because this is the only scope
+            # that still has the raw depth. It runs *after* candidate generation on purpose:
+            # whether the target is carved out of the field follows the same contact rule the
+            # clearance policy uses, and that rule needs the grounded target to already exist.
+            esdf_field = None
+            if cfg.collision_backend in ("esdf", "both"):
+                cameras = self._depth_cameras_from(
+                    observations, depth, camera_intrinsics, T_base_cam, robot_state)
+                with profiler.stage("esdf"):
+                    esdf_field, esdf_notes = self._build_esdf(
+                        # T20: the manipulated object's geometry (last observed when occluded) —
+                        # fine-window centre, target-free layer, `_target_ball`, `TARGET_LABEL`.
+                        cameras, manipulated_geometry,
+                        # 지원면은 **테이블에 구멍을 내지 않기 위해** 필요하다 (T13). AG3S 가
+                        # 이미 뽑아 둔 평면을 쓴다 — 여기서 z 를 추측하지 않는다.
+                        support_surfaces=surfaces,
+                        support_points=(cloud.points[support_mask]
+                                        if cfg.esdf.exclude_support_surfaces
+                                        and support_mask is not None else None),
+                        destination_points=destination_points,
+                        static_geometry=static_geometry,
+                        robot_state=robot_state,
+                        # T21: the fine window follows the authorized links' swept volume.
+                        contact_context=context,
+                        execution_path=execution_path,
+                        # age 의 기준은 **적분한 관측 중 가장 최신의 촬영 시각**이다.
+                        # `q_now` 를 고르는 규칙(`safe_policy._scene_fn`)과 같게 둔다 —
+                        # 둘이 어긋나면 "이 자세에서 이 필드" 라는 짝이 깨진다.
+                        observed_at=(max(float(o.timestamp) for o in observations)
+                                     if observations else ts),
+                        frame_id=self.config.frame_id,
+                        frame_index=self.frame_index)
+                notes.extend(esdf_notes)
+                if esdf_field is not None:
+                    # G2 (`docs/AG3S_REVIEW_LOG.md` Step 4): an unobserved field used to produce a
+                    # *note* and nothing else, so a frame whose collision field was entirely empty
+                    # still reported `validity: valid` / `geometry_certified: True` — and in
+                    # `collision_backend: esdf` the field is the only obstacle source. This is
+                    # verbatim the failure `ConstraintValidity`'s own docstring names: "an empty
+                    # VALID set means AG3S looked and there is nothing there, while INCOMPLETE means
+                    # AG3S cannot tell you what is there. Rendering the second as the first is how a
+                    # robot drives into an unmodelled wall."
+                    stats = esdf_field.stats
+                    # block-sparse backend 에서 "아무것도 안 봤다" 의 직접 신호는 할당된
+                    # 블록이 0 개인 것이다. dense 의 `n_free`/`n_occupied` 는 그쪽에 없다.
+                    nothing_observed = int(stats.get("n_active_blocks", -1)) == 0
+                    if nothing_observed or (int(stats.get("n_free", 0)) == 0
+                                            and int(stats.get("n_occupied", 0)) == 0):
+                        # Not one voxel was observed either way: the integration produced no
+                        # information at all. A genuinely empty workspace still yields FREE voxels
+                        # along the rays that passed through it, so this only fires on failure —
+                        # wrong depth units, wrong extrinsics, a bounds box the cameras cannot see.
+                        notes.append(
+                            "the ESDF integrated no observations at all (every voxel unknown); the "
+                            "collision field is empty and cannot be certified — check the depth "
+                            "units (pointcloud.depth_scale), the extrinsics and esdf.bounds_*"
+                        )
+                        validity = ConstraintValidity.worst(
+                            validity, ConstraintValidity.INCOMPLETE)
+                    elif esdf_field.unknown_fraction is None:
+                        # **"모른다" 를 0 으로 읽지 않는다.** block-sparse TSDF 는 "보고 지나간
+                        # 자유 공간" 과 "한 번도 안 본 곳" 을 구분하지 못하므로 legacy 의
+                        # per-voxel UNKNOWN 비율에 대응하는 값이 없다 (F16 — 블록-스파스가
+                        # 만드는 새 안전 질문). 지금은 보수적으로 `DEGRADED` 로 두고 그 이유를
+                        # 노트에 싣는다. **이 정책은 미정이다** — 매 프레임 인증이 내려가면
+                        # 안전 게이트가 통째로 막히므로, 대안(절두체 기반 관측 부피 측정 /
+                        # 질의점 단위 판정)을 재고 정한다.
+                        # **노트만 남기고 인증은 내리지 않는다** (2026-09-22 판정). 전역
+                        # 비율은 block-sparse 에 대응하는 값이 없고, 있어도 이 씬에서는 격자의
+                        # 대부분이 팔이 닿지 못하는 허공이라 판정 기준이 되기에 부적절하다.
+                        # 인증은 아래 `_esdf_coverage` 가 **로봇 구와 쥔 물체가 지나가는 곳**의
+                        # 관측 여부로 한다.
+                        fo = stats.get("frustum_observation") or {}
+                        seen = fo.get("observed_fraction")
+                        notes.append(
+                            "this backend has no dense per-voxel UNKNOWN count (a block-sparse "
+                            "TSDF leaves 'seen through, free' and 'never looked at' both "
+                            f"unallocated); {int(stats.get('n_active_blocks', -1))} block(s) "
+                            "allocated"
+                            + ("" if seen is None else
+                               f", frustum estimate {seen:.1%} of the workspace box observed")
+                            + ". Certification comes from the swept-volume observation check "
+                              "instead of a global fraction"
+                        )
+                    elif esdf_field.unknown_fraction >= cfg.esdf.unknown_report_threshold:
+                        notes.append(reason(
+                            "esdf_unknown_fraction",
+                            f"{esdf_field.unknown_fraction:.1%} of the ESDF volume was never "
+                            f"observed (threshold "
+                            f"{cfg.esdf.unknown_report_threshold:.1%}) and is treated as "
+                            f"{cfg.esdf.unknown_policy} by esdf.unknown_policy",
+                        ))
+                        # "represented, but ... partially observed" — the enum's own words for
+                        # DEGRADED. Still usable; no longer certified.
+                        validity = ConstraintValidity.worst(
+                            validity, ConstraintValidity.DEGRADED)
+                    # G3/G4 — the two *partial* failures G2 cannot see, because a field that is
+                    # wrong is not the same as a field that is empty.
+                    cover_notes, cover_validity = self._esdf_coverage(esdf_field, robot_state)
+                    notes.extend(cover_notes)
+                    validity = ConstraintValidity.worst(validity, cover_validity)
+
+            constraint_set = self._constraints(
+                esdf=esdf_field,
+                destination_points=destination_points,
+                # Planes still live in the spec, so it is built whenever a support surface survived.
+                # In pure-field mode there is neither a candidate nor a plane to pack.
+                build_spec=primitive_path or bool(surfaces),
+                candidates=candidates,
+                surfaces=surfaces,
+                grounding=grounding,
+                manipulated_geometry=manipulated_geometry,
+                robot_state=robot_state,
+                phase=phase,
+                timestamp=ts,
+                notes=notes,
+                context=context,
+                validity=validity,
+                metrics={
+                    **(fusion.metrics if fusion is not None else {}),
+                    "n_points_raw": recon_stats["n_raw"],
+                    "n_points_voxel": recon_stats["n_voxel"],
+                    "n_points_final": recon_stats["n_final"],
+                    "final_voxel_size_m": recon_stats["final_voxel_size"],
+                    **({} if esdf_field is None else
+                       {"esdf": {k: v for k, v in esdf_field.stats.items()
+                                 if k != "per_camera"}}),
+                    "n_points_self_filtered": filter_stats["n_removed"],
+                    "self_filter_enabled": filter_stats["enabled"],
+                    "self_filter": self._self_filter_frame_stats(filter_stats),
+                    "n_support_points": int(support_mask.sum()),
+                    "target_grounding_status": grounding.status.value,
+                    # T20 §3: `{id, state, age_frames, centroid, radius, n_points,
+                    # last_seen_frame, switched_from, frame}` or None. The only way to tell,
+                    # after the fact, whether contact permission was alive on an occluded frame.
+                    "manipulated": None if manipulated is None else manipulated.record(),
+                    "target_confidence": (
+                        0.0 if grounding.target is None else float(grounding.target.confidence)
+                    ),
+                    "n_object": candidate_stats.get("n_object", 0),
+                    "n_unknown": candidate_stats.get("n_unknown", 0),
+                    "n_overflow": candidate_stats.get("n_overflow", 0),
+                    "n_overflow_points": candidate_stats.get("n_overflow_points", 0),
+                    "n_unassigned_points": candidate_stats.get("n_unassigned_points", 0),
+                    "overflow_containment_rate": candidate_stats.get(
+                        "overflow_containment_rate", 1.0
+                    ),
+                    "overflow_excess_volume_ratio": candidate_stats.get(
+                        "overflow_excess_volume_ratio", 0.0
+                    ),
+                    **self._clearance_metrics(context, grounding.target is not None),
+                },
+            )
+
+        profiler.end_frame()
+        self.frame_index += 1
+        object.__setattr__(constraint_set, "profile", profiler.last_frame_ms())
+        object.__setattr__(
+            constraint_set,
+            "notes",
+            constraint_set.notes + self._stat_notes(recon_stats, filter_stats, candidate_stats),
+        )
+        debug = {
+            "raw_cloud": raw_cloud,
+            "filtered_cloud": cloud,
+            "attention_cloud": attention_cloud,
+            "seed_indices": grounding.seed_indices,
+            "support_mask": support_mask,
+            "grounding": grounding,
+            "reconstruction_stats": recon_stats,
+            "self_filter_stats": filter_stats,
+            "candidate_stats": candidate_stats,
+            "fusion": fusion,
+        }
+        return constraint_set, debug
+
+    # --- helpers, kept thin on purpose ---------------------------------------------------
+    def _lift(self, cloud, attention_map, image_hw, camera_intrinsics, T_base_cam):
+        if attention_map is None or cloud.is_empty:
+            # A frame with no attention still has geometry, and that geometry still has to be
+            # avoided. Zero attention makes grounding report NO_ATTENTION and stage 6 fall back to
+            # treating everything conservatively.
+            return AttentionPointCloud(cloud, np.zeros(len(cloud), np.float32))
+        adapter = self.attention_adapter or make_adapter(attention_map, self.config.attention)
+        return lift(
+            cloud,
+            attention_map,
+            self.config.attention,
+            adapter=adapter,
+            image_hw=image_hw,
+            camera_intrinsics=camera_intrinsics,
+            T_base_cam=T_base_cam,
+        )
+
+    def _constraints(
+        self, *, candidates, surfaces, grounding, robot_state, phase, timestamp, notes, context,
+        validity=ConstraintValidity.VALID, metrics=None, esdf=None, build_spec=True,
+        destination_points=None, manipulated_geometry=None,
+    ):
+        # 목적지 마진은 `ClearancePolicy` 에서 나온다 — 마진이 나오는 곳은 하나여야 하고,
+        # 소비 쪽(trajopt)은 그 값을 다시 계산하지 않고 읽기만 한다.
+        has_destination = destination_points is not None and len(destination_points) > 0
+        destination_label = DESTINATION_LABEL if has_destination else None
+        destination_margin = None
+        if has_destination:
+            policy = getattr(self._builder, "clearance_policy", None)
+            if policy is None:
+                policy = ClearancePolicy.from_config(
+                    self.config.contact, self.config.geometry, self.config.support_surface)
+            destination_margin = float(policy.full_margin(SourceType.DESTINATION))
+        if self._builder is None:
+            return CollisionConstraintSet(
+                constraints=None,
+                candidates=list(candidates),
+                target=grounding.target,
+                support_surfaces=list(surfaces),
+                robot_state=np.zeros(0) if robot_state is None else robot_state,
+                phase=phase,
+                timestamp=timestamp,
+                frame_id=self.config.frame_id,
+                status=(
+                    PipelineStatus.NO_GEOMETRY
+                    if not candidates and not surfaces
+                    else PipelineStatus.DEGRADED
+                ),
+                grounding_status=grounding.status,
+                frame_index=self.frame_index,
+                # `build_constraint_set` 을 거치지 않는 유일한 경로이므로 마지막 관문도
+                # 여기서 한 번 더 지난다 — 관문이 한 곳뿐이면 이 분기가 그 밖에 남는다.
+                notes=ensure_reason(
+                    notes + [reason(
+                        "no_robot_model",
+                        f"no robot model injected; {len(list(candidates))} candidate(s) and "
+                        f"{len(list(surfaces))} support surface(s) were found but no constraints "
+                        "were generated against them")],
+                    degraded=True),
+                # There is geometry but nothing to write constraints against. That is not a certified
+                # scene, and calling it VALID would let a caller read "no constraints" as "clear".
+                validity=ConstraintValidity.worst(validity, ConstraintValidity.DEGRADED),
+                contact_context=context,
+                metrics=dict(metrics or {}),
+                attached=self._attached,
+                esdf=esdf,
+                destination_label=destination_label,
+                destination_margin=destination_margin,
+            )
+        return build_constraint_set(
+            self._builder,
+            candidates=candidates,
+            support_surfaces=surfaces,
+            target=grounding.target,
+            robot_state=np.zeros(self._builder.nq) if robot_state is None else robot_state,
+            phase=phase,
+            grounding_status=grounding.status,
+            frame_id=self.config.frame_id,
+            frame_index=self.frame_index,
+            timestamp=timestamp,
+            notes=notes,
+            contact_context=context,
+            validity=validity,
+            metrics=metrics,
+            attached=self._attached,
+            esdf=esdf,
+            build_spec=build_spec,
+            destination_label=destination_label,
+            destination_margin=destination_margin,
+            manipulated_geometry=manipulated_geometry,
+        )
+
+    def _esdf_coverage(self, field, robot_state):
+        """`(notes, validity)` — does the field actually cover what it is asked about?
+
+        G2 catches a field that observed *nothing*. These two catch a field that is populated but
+        does not cover the question being asked, which reports as a perfectly healthy frame
+        (`docs/AG3S_REVIEW_LOG.md` Step 4).
+
+        **G3 — a camera that contributed nothing.** Measured on a healthy RB-Y1 frame every camera
+        writes 13k-150k voxels, so `n_updated == 0` is not a quiet frame, it is a broken one: wrong
+        extrinsics, a dead driver, depth entirely outside `esdf.depth_min/max`. This check only
+        became possible once E5 was fixed — before that all three cameras collapsed onto the key
+        `"camera"` and overwrote each other, so a dead camera was not merely unreported but
+        unobservable.
+
+        **G4 — a robot sphere outside the grid.** `EsdfField.distance` answers `outside_distance`
+        for any query beyond the grid, so a sphere out there reads as free space no matter what is
+        actually next to it (E4). AG3S knows the constraint model and this frame's `q`, so it can
+        say so *before* the optimizer plans, which is worth more than the query-time counter
+        `EsdfField.outside_query_fraction` that only trajopt would ever see. Measured over the whole
+        `run_0004` rollout: the `arms` constraint model (120 spheres, the default) never leaves the
+        default grid, so this does not fire on the healthy path; the whole-body model has 25 spheres
+        permanently outside — `base`, `wheel_l`, `wheel_r`, `link_torso_0`, all below the grid floor
+        — which is true, is the documented reason `--constraint-links arms` is the default, and is
+        exactly the sort of thing that should be said out loud rather than left implicit.
+        """
+        notes: list[str] = []
+        validity = ConstraintValidity.VALID
+
+        per_camera = field.stats.get("per_camera", {}) or {}
+        dead = sorted(n for n, s in per_camera.items() if int(s.get("n_updated", 0)) == 0)
+        if dead and len(dead) < len(per_camera):
+            notes.append(reason(
+                "esdf_dead_camera",
+                f"camera(s) {', '.join(dead)} contributed no voxels to the ESDF this frame "
+                f"({len(dead)} of {len(per_camera)}); the field is built from the remaining "
+                "view(s) only — check their extrinsics and depth range",
+            ))
+            validity = ConstraintValidity.worst(validity, ConstraintValidity.DEGRADED)
+
+        model = self.constraint_robot_model
+        if model is not None and robot_state is not None:
+            centres, radii = model.sphere_centers_numeric(np.asarray(robot_state, np.float64))
+            centres = np.asarray(centres, np.float64).reshape(-1, 3)
+            radii = np.asarray(radii, np.float64).reshape(-1)
+            # **관측 판정은 여기서 하지 않는다 — 지평이 여기 없다.**
+            #
+            # 2026-09-22 판정은 "로봇 구와 attached object 가 실제로 지나가는 swept volume 의
+            # 관측 여부를 안전 게이트로 쓴다" 였다. 그 판정은 맞지만 **이 자리가 아니다.**
+            # AG3S 는 현재 프레임의 `q` 만 알고, 현재 자세의 구 중심은 **정의상 로봇 안에**
+            # 있다. 그것을 관측 판정하면 미지 장애물 부피가 아니라 self-occlusion 을 잰다.
+            #
+            # 실측 (seed 101, 구 120 개): 구 중심을 판정하면 63 개가 미관측으로 나오는데,
+            # 그 구들은 첫 표면보다 **중앙 87.2 mm 뒤**에 있고 반지름은 중앙 26 mm 다 —
+            # 자기 몸이나 다른 로봇 부위에 가려진 것이다 (관측된 구는 뒤 깊이 중앙 28.5 mm).
+            # 마스킹한 depth 로 재면 113/120 까지 갔는데 그것은 더 심한 동어반복이었다
+            # (로봇이 자기를 지웠으니 자기가 안 보인다).
+            #
+            # 그래서 필드는 `observation` probe 를 **들고 나가고**, 판정은 지평의 미래 스텝
+            # 구 위치에서 한다 — 그 자리는 trajopt 이고, T4 의 합격 조건 "전체 계획 지평의
+            # 로봇 구와 attached point 가 coarse coverage 안에 있다" 와 같은 곳이다.
+            # **거친 계층의 범위를 본다.** 2계층 필드에서 `field.grid` 는 *가장 미세한* 계층
+            # 이고 (그쪽이 E1 의 target 판정 허용오차에 맞는 선택이다), 미세 창은 관심 영역만
+            # 덮으므로 팔 구 대부분이 당연히 그 밖에 있다. 그것을 G4(로봇 구가 격자 밖이면
+            # 무조건 자유로 읽히는데 아무도 경고 안 한다)로 세면 **매 프레임 degraded** 가
+            # 나고 안전 게이트가 통째로 막힌다 — F14(하네스가 만든 가짜 카메라 지연)와 같은
+            # 모양의 오진이다. `CuroboEsdfField` 가 이 경로를 위해 `coverage_grid` 를 따로
+            # 두고 있고, 여기가 그것을 읽는 자리다.
+            cover = getattr(field, "coverage_grid", None) or field.grid
+            lower, upper = cover.origin, cover.upper
+            outside = np.any(
+                (centres - radii[:, None] < lower) | (centres + radii[:, None] > upper), axis=1
+            )
+            if outside.any():
+                names = getattr(model, "sphere_link_names", None)
+                where = (f" ({', '.join(sorted(set(str(names[i]) for i in np.flatnonzero(outside))))})"
+                         if names is not None and len(names) == outside.size else "")
+                notes.append(reason(
+                    "spheres_outside_grid",
+                    f"{int(outside.sum())} of {outside.size} constraint sphere(s) lie outside the "
+                    f"ESDF grid{where}; the field answers "
+                    f"{field.outside_distance:+.2f} m for them regardless of what is there, so they "
+                    "are not constrained by it — widen esdf.bounds_lower/upper or exclude those "
+                    "links",
+                ))
+                validity = ConstraintValidity.worst(validity, ConstraintValidity.DEGRADED)
+        return notes, validity
+
+    def _robot_mask_for(self, depth, K, T_base_cam, robot_state):
+        """`(H, W)` True where a depth pixel is the robot itself, or `None` when unknowable.
+
+        The point cloud is already self-filtered by `robot_filter`; the ESDF integrates raw depth
+        and so needs the same exclusion applied in image space. Without it the arm is written into
+        the obstacle field and every frame reports the robot colliding with itself — measured at
+        130 of 194 spheres in violation before this existed.
+
+        The masked rays become **unobserved**, not free. What is behind the arm this frame is not
+        something the camera saw.
+        """
+        from AG3S.ag3s.stages.reconstruction import backproject
+
+        model = self.robot_model
+        if model is None or robot_state is None:
+            return None
+        cfg = self.config.pointcloud
+        if not cfg.self_filter:
+            return None
+        cloud = backproject(depth, K, T_base_cam, cfg)
+        if cloud.uv is None or len(cloud) == 0:
+            return None
+        # Same decision as the cloud filter (T19): the inflation object resolved at construction
+        # and this frame's guard centroid, both through `self_filter_mask`.
+        inside, guard = self_filter_mask(
+            cloud.points, model, np.asarray(robot_state, np.float64),
+            self._frame_filter_config.pointcloud,
+            inflation=self._self_filter_inflation, guard_centre=self._frame_guard_centre)
+        self._mask_guard_px.append(int(guard["n_guard_protected"]))
+        mask = np.zeros(np.asarray(depth).shape, bool)
+        uv = cloud.uv[inside]
+        mask[uv[:, 1], uv[:, 0]] = True
+        return mask
+
+    def _guard_pad(self) -> float:
+        """One **fine** voxel (m) — the same voxel `_target_ball` pads with (T21 guard rule)."""
+        esdf = self.config.esdf
+        return float(getattr(esdf, "fine_voxel_size", None) or esdf.voxel_size)
+
+    def _guard_radius_for(self, manipulated: Optional[ManipulatedIdentity]) -> float:
+        """The T19 guard radius for this frame (T21, user ruling 2026-09-28).
+
+        `pointcloud.self_filter_target_guard_radius` when it is non-zero; when it is 0, the
+        manipulated object's radius (`ManipulatedIdentity.radius`, bounding sphere of its last
+        observation) + one fine voxel, so it is set **per object** rather than as a number.
+        No manipulated object (or one with no geometry) → 0.0, no guard.
+        """
+        configured = float(self.config.pointcloud.self_filter_target_guard_radius)
+        if configured > 0.0:
+            return configured
+        if manipulated is None or manipulated.geometry is None:
+            return 0.0
+        radius = float(manipulated.radius)
+        if not np.isfinite(radius) or radius <= 0.0:
+            return 0.0
+        return radius + self._guard_pad()
+
+    def _config_with_guard_radius(self, radius: float) -> AG3SConfig:
+        """`self.config` with the effective guard radius, or `self.config` itself if unchanged."""
+        pc = self.config.pointcloud
+        if float(pc.self_filter_target_guard_radius) == float(radius):
+            return self.config
+        return dataclasses.replace(
+            self.config,
+            pointcloud=dataclasses.replace(pc, self_filter_target_guard_radius=float(radius)))
+
+    def _guard_stats(self, enabled: bool, n_protected: int) -> dict[str, Any]:
+        """The guard fields of `filter_robot_points`' stats, for the fused path that has no call."""
+        radius = float(self._frame_guard_radius)
+        active = bool(enabled and radius > 0.0 and self._frame_guard_centre is not None)
+        return {
+            "guard_enabled": radius > 0.0,
+            "guard_active": active,
+            "guard_radius": radius,
+            "guard_centroid": (None if not active
+                               else [float(x) for x in self._frame_guard_centre.reshape(3)]),
+            "n_guard_protected": int(n_protected) if active else 0,
+        }
+
+    def _self_filter_frame_stats(self, filter_stats: dict[str, Any]) -> dict[str, Any]:
+        """`metrics["self_filter"]`: the margin applied and what the target guard did this frame.
+
+        `n_guard_protected_points` counts cloud points (per camera before fusion), and
+        `n_guard_protected_depth_px` depth pixels kept out of the TSDF robot masks — two views of
+        the same decision, reported separately because they are counted on different inputs.
+        """
+        cfg = self.config.pointcloud
+        return {
+            "inflation_default": float(cfg.self_filter_inflation),
+            "inflation_by_link": dict(cfg.self_filter_inflation_by_link),
+            "guard_enabled": bool(filter_stats.get("guard_enabled", False)),
+            "guard_active": bool(filter_stats.get("guard_active", False)),
+            "guard_radius": float(filter_stats.get("guard_radius", 0.0)),
+            # T21: where the radius came from — "fixed" (config) or "manipulated" (radius + voxel).
+            "guard_radius_rule": ("fixed" if cfg.self_filter_target_guard_radius > 0.0
+                                  else "manipulated_radius_plus_voxel"),
+            "guard_centroid": filter_stats.get("guard_centroid"),
+            "n_guard_protected_points": int(filter_stats.get("n_guard_protected", 0)),
+            "n_depth_masks": len(self._mask_guard_px),
+            "n_guard_protected_depth_px": int(sum(self._mask_guard_px)),
+        }
+
+    def _depth_cameras_from(self, observations, depth, camera_intrinsics, T_base_cam,
+                            robot_state=None):
+        """`CameraDepth` list from whichever front end this frame used. Empty when depth is absent.
+
+        A caller that supplied a bare point cloud has no depth image, and the projective TSDF needs
+        one — it decides *free* space from what a ray passed through, which a point cloud cannot
+        say. That case returns nothing and the pipeline notes it rather than silently building a
+        field out of surface points alone, which would mark everything else unobserved.
+
+        **`pointcloud.depth_scale` is applied here** (G1, `docs/AG3S_REVIEW_LOG.md` Step 4). The
+        depth image's units are a property of the *input*, not of whoever consumes it, so both
+        consumers must decode them the same way: `reconstruction.backproject` scales, and until this
+        was fixed the TSDF did not. With the documented `depth_scale: 0.001` for uint16-millimetre
+        depth — what a real sensor and `--record-depth` both deliver — the cloud came out in metres
+        while the field integrated the raw millimetre numbers, every ray fell outside
+        `esdf.depth_max`, and the collision field ended up **entirely empty while the frame still
+        reported `status: ok`**. `_robot_mask_for` is deliberately given the *unscaled* depth: it
+        goes through `backproject`, which applies the scale itself.
+        """
+        from AG3S.ag3s.fields.esdf import CameraDepth
+
+        scale = float(self.config.pointcloud.depth_scale)
+        out = []
+        if observations:
+            for obs in observations:
+                d = getattr(obs, "depth", None)
+                if d is None:
+                    continue
+                K = np.asarray(obs.camera_intrinsics, np.float64)
+                # `self.robot_model` 를 반드시 넘겨야 한다. 손목 카메라는 `T_base_cam` 대신
+                # `mount_link` + `T_link_cam` 으로 오고, 그 조합은 FK 없이는 풀리지 않는다.
+                # 인자를 빼면 head/wrist 관측에서 ESDF 경로 전체가 예외로 죽는다.
+                T = (np.asarray(obs.resolve_T_base_cam(self.robot_model), np.float64)
+                     if hasattr(obs, "resolve_T_base_cam")
+                     else np.asarray(obs.T_base_cam, np.float64))
+                d = np.asarray(d, np.float64)
+                mask = getattr(obs, "robot_mask", None)
+                if mask is None:
+                    # Each observation carries the `q` it was captured at, so the mask is built
+                    # with *that* configuration — the same rule the fused cloud follows.
+                    mask = self._robot_mask_for(d, K, T, getattr(obs, "robot_state", None))
+                # E5 (`docs/AG3S_REVIEW_LOG.md` Step 2): `CameraObservation` names itself via
+                # `camera_id`, not `camera`/`name` — those two never existed on it, so all three
+                # real cameras fell back to the same literal `"camera"` and silently overwrote each
+                # other in `EsdfField.stats["per_camera"]`. `camera_id` is tried first now; the old
+                # fallbacks stay for any duck-typed observation that only has those.
+                cam_id = getattr(obs, "camera_id", None)
+                name = (cam_id.value if cam_id is not None
+                        else str(getattr(obs, "camera", getattr(obs, "name", "camera"))))
+                out.append(CameraDepth(
+                    name=name, depth=d * scale, camera_intrinsics=K, T_base_cam=T,
+                    robot_mask=mask))
+        elif depth is not None and camera_intrinsics is not None and T_base_cam is not None:
+            d = np.asarray(depth, np.float64)
+            K = np.asarray(camera_intrinsics, np.float64)
+            T = np.asarray(T_base_cam, np.float64)
+            out.append(CameraDepth("camera", d * scale, K, T,
+                                   robot_mask=self._robot_mask_for(d, K, T, robot_state)))
+        return out
+
+    def _build_esdf(self, depth_cameras, target, *, support_surfaces=(), support_points=None,
+                    destination_points=None, static_geometry=None, robot_state=None,
+                    observed_at=None, frame_id="", frame_index=-1, contact_context=None,
+                    execution_path=None):
+        """Integrate this frame into the ESDF and return `(field, notes)`.
+
+        `target` is the **manipulated object's** geometry since T20 (`AG3S.manipulated`; the last
+        observed one while it is `occluded`, None when `lost`), not the frame's attention target.
+        It decides what the target-free layer removes (`_target_ball`) — and only that.
+
+        **Where** the fine / target-free window sits is decided by the hand (T21, guide §5.1): the
+        contact-authorized links' spheres at `robot_state` and along `execution_path`, padded by
+        radius + margin + interpolation voxels, unioned with the manipulated object's box when that
+        fits (`_fine_window_request` → `curobo_builder.place_fine_window`). The result, and which
+        tier answered the authorized links' query points, is in `field.stats["window"]`.
+
+        The builder is kept on the instance rather than rebuilt: that is the only way the local
+        update means anything, since a fresh grid has nothing to be incremental against.
+        """
+        cfg = self.config.esdf
+        if not depth_cameras:
+            return None, ["esdf backend requested but no camera depth was supplied; "
+                          "the field was not built and the primitive candidates stand alone"]
+        if self._esdf_builder is None:
+            # **필드 구현만 갈아탄다.** 아래의 정책은 backend 와 무관하게 그대로다 — E1 이
+            # 금지한 target carving, 목적지 라벨(F18), 쥔 물체(A2), 해석적 기하(N2) 의 결정은
+            # 여기서 내려지고 builder 는 그것을 받는 쪽이다.
+            #
+            # `curobo` 일 때 `EsdfBuilder` 를 **만들지 않는다.** 만들면 legacy 가 조용히
+            # 도는 것이고, `AG3S_TOTAL_TEST_Prompt.md` 의 T0 은 그것을 즉시 실패 조건으로
+            # 둔다. 조용히 흐르는 것을 막으려면 갈림길이 여기 하나여야 한다.
+            if cfg.backend == "curobo":
+                from AG3S.ag3s.fields.curobo_builder import CuroboFieldBuilder
+                self._esdf_builder = CuroboFieldBuilder(cfg)
+            else:
+                from AG3S.ag3s.fields.esdf import EsdfBuilder
+                self._esdf_builder = EsdfBuilder(cfg)
+
+        if cfg.backend == "curobo":
+            # **프레임마다 본다.** 위 갈림길은 첫 프레임에 한 번만 지나가므로, 거기서만 확인하면
+            # 그 뒤에 다른 경로가 legacy 를 만들어도 모른다. 출처 도장은 *쓰인* 필드가 무엇인지
+            # 말해 주지만 만들어만 놓은 것은 안 잡는다 — 그래서 생성 횟수를 따로 센다.
+            from AG3S.ag3s.fields.esdf import EsdfBuilder
+            if EsdfBuilder.instances_created:
+                raise RuntimeError(
+                    f"esdf.backend='curobo' 인데 legacy EsdfBuilder 가 이 프로세스에서 "
+                    f"{EsdfBuilder.instances_created} 번 만들어졌다. T0 의 즉시 실패 조건이다 — "
+                    "누가 만들었는지 찾아 없앤다. 두 backend 가 한 프로세스에 공존하면 어느 "
+                    "필드가 판정에 쓰였는지 기록만 보고는 되짚을 수 없다.")
+
+        # 예전엔 여기서 `contact.rule_for(phase).contact_permission`을 보고 target을 필드에서
+        # 통째로 carve() 했다 (E1, `docs/AG3S_REVIEW_LOG.md` Step 2). 문제: 필드는 익명이라
+        # "누가 묻는지"를 모른다 — GRASP phase가 되면 그 물체는 잡는 손끝뿐 아니라 몸통·전완·
+        # 반대팔에게도 사라졌다. 대신 필드는 **항상** target을 그대로 담아 두고,
+        # `to_adapter.build_constraint_set`가 채우는 `manipulated_link_margin` (구별 마진, 권한 있는
+        # 링크만 완화)이 trajopt의 `_esdf_clearance`에서 그 구별을 한다 — MoveIt의 Allowed
+        # Collision Matrix, cuRobo의 attached-object 패턴과 같은 "지우지 말고 질의 쪽에서
+        # 봐준다" 방식. `cfg.exclude_target`는 이제 이 경로에서 쓰이지 않는다 (config.py 참고).
+        points = None if target is None else np.asarray(target.points, np.float64)
+        # 목적지는 **주입**이다. AG3S 는 과제를 모르므로 어느 물체가 목적지인지 알 수 없다 —
+        # phase 와 같은 계약이다. 라벨을 달아 두면 필드가 "가장 가까운 표면이 목적지인가" 를
+        # 답할 수 있고, 그래야 그 표면에만 얇은 마진을 걸 수 있다 (F18).
+        labelled = None
+        if destination_points is not None and len(destination_points):
+            labelled = {DESTINATION_LABEL: np.asarray(destination_points, np.float64)}
+        # **target 도 라벨로 싣는다** (T8b) — `destination` 과 같은 규약이다. 라벨은 target 을
+        # 필드에서 빼지 **않는다.** "지금 가장 가까운 표면이 target 인가" 를 물을 수 있게 할
+        # 뿐이고, 그것은 진단용이다 (어느 로봇 구가 사과 때문에 막혀 있는지 — T8a 가 묻는 질문).
+        # 완화 판정 자체는 라벨에 기대지 않는다: 거친 격자에서 값(삼선형)과 라벨(최근접 격자점)이
+        # 어긋나는 자리가 하필 파지하는 자리다 (`CuroboEsdfField.target_free_distance`).
+        #
+        # **쥔 것이 없을 때만 싣는다.** 쥔 뒤에는 attention 의 target 이 목적지(crate)이고,
+        # crate 는 그 안에 넣어야 하므로 필드에서 빠지면 안 된다.
+        nothing_held = self._attached is None
+        if nothing_held and points is not None and len(points):
+            labelled = dict(labelled or {})
+            labelled[TARGET_LABEL] = np.asarray(points, np.float64)
+        # target 없는 계층은 **정책이 요구할 때만** 만든다. 기본(`relax`)에서는 이 인자가
+        # `None` 이고 프레임 비용이 예전과 같다.
+        policy = self.config.constraint.target_field_policy
+        target_free_points = None
+        if (self.config.constraint.excludes_target_from_field and nothing_held
+                and points is not None and len(points)):
+            if cfg.backend != "curobo":
+                raise ValueError(
+                    f"constraint.target_field_policy={policy!r} 는 target 없는 계층을 요구하고, "
+                    "그 계층은 cuRobo backend 만 만듭니다 (`CuroboFieldBuilder`). legacy "
+                    "EsdfBuilder 로는 정책을 켰다고 믿은 채 아무 일도 일어나지 않으므로 여기서 "
+                    "멈춥니다 — esdf.backend='curobo' 로 두거나 정책을 'relax' 로 두십시오")
+            if not getattr(cfg, "fine_voxel_size", None):
+                raise ValueError(
+                    f"constraint.target_field_policy={policy!r} 는 미세 계층을 요구합니다 "
+                    "(target 없는 계층은 그 한 겹으로 만들어집니다). "
+                    "esdf.fine_voxel_size 가 비어 있어 단일 계층으로 돌고 있으므로, 켠 정책이 "
+                    "아무 일도 하지 않습니다 — 값을 주거나 정책을 'relax' 로 두십시오")
+            target_free_points = np.asarray(points, np.float64)
+            # **점이 아니라 기하 범위로 지운다** (T13, 사용자 판정 "중심 + 반지름, 다만 테이블 면
+            # 위로만"). 점으로는 사과를 **한 voxel도 지우지 못했다** — 표본점 112 개(그중 seed
+            # 72 개)에 표면이 2,203 voxel 이고, 거리장은 성긴 제거에 꿈쩍하지 않는다.
+            target_free_ball = self._target_ball(
+                target_free_points, support_surfaces,
+                voxel=float(getattr(cfg, "fine_voxel_size", 0.0) or cfg.voxel_size))
+        # 쥔 물체는 **양쪽에 동시에 있으면 안 된다** (A2). 파지가 닫히는 순간 그 물체는
+        # 로봇 쪽 질의점이 되므로 (E3 — 쥔 물체가 optimizer 에 도달하지 않는다), 장애물 쪽에서는
+        # 빠져야 한다. 안 빼면 자기 자신에게 부딪히고 그 행은 **어떤 해로도 못 푼다**.
+        #
+        # **E1(조작 대상을 필드에서 파내면 손끝뿐 아니라 전신에게 사라진다)과 다른 경우다.**
+        # E1 이 금지한 것은 *아직 안 쥔* target 을 파내는 것이었다. 쥔 뒤에는 로봇의 일부이고,
+        # 로봇을 depth 에서 지우는 것과 같은 처리다. 그래서 `attach()` 가 불린 뒤에만 돈다.
+        attached_points = None
+        if (self._attached is not None and robot_state is not None
+                and self.constraint_robot_model is not None):
+            from AG3S.ag3s.constraints.attached import attached_points_in_base
+            # **`attach()` 가 쓴 것과 같은 모델이어야 한다.** 점은 그 모델의 parent link 프레임에
+            # 스냅샷돼 있고, 다른 모델로 되돌리면 물체가 조용히 엉뚱한 자리에서 파인다.
+            attached_points = attached_points_in_base(
+                self._attached, robot_model=self.constraint_robot_model,
+                robot_state=robot_state)
+        # **창의 배치 (T21)** — 손이 정한다. 제외(`target_free_ball`)는 위에서 manipulated 가
+        # 정했고 여기서 넓히지 않는다 (지침 §5.3-3: 창 확대 ≠ 제외 영역 확대).
+        window_request = None
+        if cfg.backend == "curobo":
+            window_request = self._fine_window_request(
+                robot_state, execution_path, contact_context, points)
+        field = self._esdf_builder.update(depth_cameras, target_points=points,
+                                          exclude_target=False,
+                                          **({} if window_request is None
+                                             else {"fine_window": window_request}),
+                                          # 파내는 것이 아니라 **한 겹 더 만드는 것**이다 (T8b).
+                                          # 본 계층은 한 복셀도 바뀌지 않는다.
+                                          **({} if target_free_points is None else {
+                                              "target_free_points": target_free_points,
+                                              "target_free_label": TARGET_LABEL,
+                                              "target_free_ball": target_free_ball}),
+                                          support_points=support_points,
+                                          attached_points=attached_points,
+                                          labelled_points=labelled,
+                                          # 아는 정적 기하 — **주입**이다. AG3S 는 무엇이 벽이고
+                                          # 무엇이 선반인지 알 수 없다 (phase·목적지와 같은 계약).
+                                          static_geometry=static_geometry,
+                                          # 출처. age 의 기준은 **관측 시각**이다 — 서버
+                                          # monotonic 은 프로세스마다 원점이 달라 클라이언트가
+                                          # 자기 시계와 견줄 수 없다.
+                                          observed_at=observed_at,
+                                          frame_id=frame_id, frame_index=frame_index)
+        notes = []
+        if window_request is not None:
+            notes = self._window_query_report(
+                field, window_request,
+                target_free=target_free_points is not None
+                and bool(getattr(field, "has_target_free", False)),
+                margin=self._fine_window_pads()[0])
+        return field, notes
+
+    def _authorized_links(self, contact_context) -> frozenset:
+        """Contact-authorized links for this frame — the **same** set the target-free mask and the
+        contact margin use (`ClearancePolicy.authorized_links`), so "the hand the window follows"
+        and "the links that may pass through the object" cannot part."""
+        if contact_context is None:
+            return frozenset()
+        if self._builder is not None:
+            return frozenset(self._builder.clearance_policy.authorized_links(contact_context))
+        links: set[str] = set()
+        for manipulator in contact_context.active_manipulators:
+            links.update(self.config.contact.links_for(manipulator))
+        return frozenset(links)
+
+    def _fine_window_pads(self) -> tuple[float, float]:
+        """`(margin, interpolation pad)` in metres for the fine window (T21).
+
+        margin = `esdf.fine_window_margin`, or `geometry.safety_margin` when that is null — the
+        clearance the ESDF rows demand, so no second number; interpolation pad =
+        `esdf.fine_window_pad_voxels` × the fine voxel.
+        """
+        cfg = self.config.esdf
+        fine = float(getattr(cfg, "fine_voxel_size", None) or cfg.voxel_size)
+        margin = (float(self.config.geometry.safety_margin) if cfg.fine_window_margin is None
+                  else float(cfg.fine_window_margin))
+        return margin, float(cfg.fine_window_pad_voxels) * fine
+
+    def _fine_window_request(self, robot_state, execution_path, contact_context, points):
+        """`FineWindowRequest` for this frame (T21). Pure numpy — FK through
+        `constraint_robot_model.sphere_centers_numeric`, no cuRobo.
+
+        Hand = the contact-authorized links' spheres at `robot_state` (step 0) then at each row
+        of `execution_path` (priority order: now → executed steps). Missing any of robot state,
+        model or authorized links leaves the hand empty and the window falls back to the
+        manipulated centroid (`basis="manipulated"`) — recorded, not silent.
+
+        The hand is computed under `placement="target_centroid"` too: the old rule ignores it for
+        placement, but the record still says where the hand was relative to the window — that is
+        the before/after comparison T21 is judged on.
+        """
+        from AG3S.ag3s.fields.curobo_builder import FineWindowRequest
+
+        cfg = self.config.esdf
+        margin, interp = self._fine_window_pads()
+        placement = str(cfg.fine_window_placement)
+        base = dict(manipulated_points=points, manipulated_pad=interp, placement=placement,
+                    hand_pad=margin + interp)
+        model = self.constraint_robot_model
+        links = self._authorized_links(contact_context)
+        if model is None or robot_state is None or not links:
+            return FineWindowRequest(**base, hand_source="none", links=tuple(sorted(links)))
+        names = [str(n) for n in getattr(model, "sphere_link_names", ()) or ()]
+        idx = np.asarray([i for i, n in enumerate(names) if n in links], np.int64)
+        if not idx.size:
+            return FineWindowRequest(**base, hand_source="none", links=tuple(sorted(links)))
+        nq = int(model.nq)
+        states = [np.asarray(robot_state, np.float64).reshape(-1)]
+        if execution_path is not None:
+            path = np.asarray(execution_path, np.float64)
+            path = path.reshape(-1, path.shape[-1]) if path.size else path.reshape(0, nq)
+            states.extend(path)
+        for i, q in enumerate(states):
+            if q.shape[0] != nq:
+                # 조용히 버리면 창이 손을 놓친 채 "hand_swept" 로 기록된다.
+                raise ValueError(
+                    f"fine window: {'robot_state' if i == 0 else f'execution_path[{i - 1}]'} has "
+                    f"{q.shape[0]} entries but the constraint model expects nq={nq}")
+        centres, radii = [], None
+        for q in states:
+            c, r = model.sphere_centers_numeric(q)
+            centres.append(np.asarray(c, np.float64)[idx])
+            if radii is None:
+                radii = np.asarray(r, np.float64).reshape(-1)[idx]
+        return FineWindowRequest(
+            **base, hand_centres=np.stack(centres), hand_radii=radii,
+            hand_source="q_now" if len(states) == 1 else "q_now+path",
+            links=tuple(names[i] for i in idx))
+
+    @staticmethod
+    def _window_query_report(field, request, *, target_free: bool,
+                             margin: float = 0.0) -> list[str]:
+        """Which tier answered the authorized links' query points (T21 §2·§3). Returns notes.
+
+        Adds `field.stats["window"]["authorized_query"]`. A query point answered by `coarse` or
+        `outside` is **not** a fine-resolution answer: it is recorded and noted, never read as
+        free space or as a successful contact permission (guide §5.3). A `window_edge` answer is
+        a lower bound (`b`, distance to the window boundary); it settles the row only when the
+        bound alone already clears `radius + margin` (`n_bounded`), otherwise it is unresolved too.
+        """
+        from AG3S.ag3s.fields.curobo_field import count_tiers, unresolved_rows
+
+        stats = getattr(field, "stats", None)
+        window = None if stats is None else stats.get("window")
+        # 미세 계층이 없는 설정(단일 계층)에는 "창 밖" 이 없다 — 보고할 것이 없다.
+        if window is None or window.get("basis") is None or request.hand_centres is None:
+            return []
+        tier_of = getattr(field, "answer_tier", None)
+        if tier_of is None:
+            return []
+        centres = request.hand_centres
+        n_steps, n_spheres = centres.shape[:2]
+        pts = centres.reshape(-1, 3)
+        tiers = np.asarray(tier_of(pts, target_free=target_free))
+        inside = np.zeros(len(pts), bool)
+        if window.get("lower_m") is not None:
+            lo = np.asarray(window["lower_m"], np.float64)
+            hi = np.asarray(window["upper_m"], np.float64)
+            inside = np.all((pts >= lo) & (pts <= hi), axis=1)
+        value = (field.target_free_distance(pts) if target_free else field.distance(pts))
+        radii = np.tile(np.asarray(request.hand_radii, np.float64), n_steps)
+        unresolved, bounded = unresolved_rows(tiers, np.asarray(value) - radii - float(margin))
+        now = slice(0, n_spheres)
+        window["authorized_query"] = {
+            "n_points": int(len(pts)),
+            "n_steps": int(n_steps),
+            "n_spheres": int(n_spheres),
+            "target_free": bool(target_free),
+            "fraction_in_window": float(inside.mean()) if len(pts) else None,
+            "fraction_in_window_now": float(inside[now].mean()) if n_spheres else None,
+            "by_tier": count_tiers(tiers),
+            "by_tier_now": count_tiers(tiers[now]),
+            "n_unresolved": int(unresolved.sum()),
+            "n_bounded": int(bounded.sum()),
+            "margin_m": float(margin),
+        }
+        notes = []
+        if window.get("basis") == "overflow":
+            notes.append(
+                f"fine window overflow ({window.get('overflow')}): the hand's swept box ∪ the "
+                f"manipulated box does not fit {window.get('extent_m')} m; placed hand-first, "
+                f"{window.get('n_steps_covered')}/{window.get('n_steps')} step(s) covered, "
+                f"manipulated covered={window.get('manipulated_covered')}")
+        if unresolved.any():
+            by = {k: v for k, v in count_tiers(tiers[unresolved]).items() if v}
+            notes.append(
+                f"fine window: {int(unresolved.sum())}/{len(pts)} authorized-link query point(s) "
+                f"({request.hand_source}, links {', '.join(request.links)}) are answered by "
+                f"{by} — not at fine resolution"
+                + (" and not by the target-free layer" if target_free else "")
+                + "; these rows are unverified, not free space and not a contact permission")
+        return notes
+
+    def _target_ball(self, points, support_surfaces, *, voxel: float):
+        """target 점구름 → `TargetBall`, 또는 **`None`** (안전하게 물러난다).
+
+        사용자 판정이 *"중심 + 반지름, 다만 테이블 면 위로만"* 이다. 이 함수는 그 셋을 **재서**
+        정한다 — 숫자를 박지 않는다. 사과·오렌지·배가 다 다르고, 무엇을 썼는지는 시작 로그와
+        기록(`stats["target_free"]["ball"]`)에 그대로 실린다.
+
+        | 값 | 어떻게 |
+        |---|---|
+        | 중심 | 점구름의 centroid |
+        | 반지름 | centroid 까지 거리의 `esdf.target_ball_quantile` 분위수 + 여유 `pad × voxel` |
+        | `z_min` | **지원면** 평면 z (centroid 의 x·y 에서) + 여유 `pad × voxel` |
+
+        **`z_min` 을 못 얻으면 `None` 을 돌려준다.** 그러면 호출자는 지금 동작(점 제외)으로
+        물러난다 — 사과는 안 지워지지만 **테이블에 구멍이 나지 않는다.** 조용히 물러나지 않는다:
+        builder 의 시작 로그가 "제외 방식 = 점" 을 크게 적고, 기록의 `mode` 가 `"points"` 로 남는다.
+        테이블을 지우는 쪽이 최악이기 때문에 이 방향으로 닫는다 — 팔이 테이블을 통과해도 아무도
+        막지 않는 것보다, 사과를 못 잡는 것이 낫다.
+
+        지원면을 **평면으로** 읽는 이유: AG3S 는 테이블을 반평면으로 뽑는다 (`SupportSurface`,
+        `n · p = d`). 점구름의 최소 z 를 쓰면 사과 밑면의 관측 노이즈가 그대로 절단면이 된다.
+        """
+        from AG3S.ag3s.fields.curobo_builder import TargetBall
+
+        pts = np.asarray(points, np.float64).reshape(-1, 3)
+        if not len(pts):
+            return None
+        centre = pts.mean(axis=0)
+        cfg = self.config.esdf
+        quantile = float(getattr(cfg, "target_ball_quantile", 1.0))
+        pad = float(getattr(cfg, "target_ball_pad_voxels", 1.0)) * float(voxel)
+        spread = np.linalg.norm(pts - centre[None, :], axis=1)
+        radius = float(np.quantile(spread, np.clip(quantile, 0.0, 1.0))) + pad
+        plane_z = self._support_plane_z(support_surfaces, centre)
+        if plane_z is None or not np.isfinite(radius) or radius <= 0.0:
+            return None
+        if plane_z >= centre[2] + radius:
+            # 평면이 공보다 위에 있다 = 그 평면은 이 target 의 받침이 아니다. 지울 것이 없으므로
+            # 물러난다 — 엉뚱한 평면으로 자르면 공 전체가 살거나 전체가 지워진다.
+            return None
+        return TargetBall(
+            centre=centre, radius=radius, z_min=float(plane_z) + pad,
+            provenance={
+                "n_points": int(len(pts)),
+                "radius_quantile": quantile,
+                "radius_raw_mm": round(float(np.quantile(spread, np.clip(quantile, 0.0, 1.0)))
+                                       * 1000.0, 3),
+                "pad_mm": round(pad * 1000.0, 3),
+                "support_plane_z_m": float(plane_z),
+                "voxel_mm": round(float(voxel) * 1000.0, 3),
+            })
+
+    @staticmethod
+    def _support_plane_z(support_surfaces, point) -> Optional[float]:
+        """`point` 의 x·y 에서 **그 점 아래** 가장 높은 수평 지원면의 z. 없으면 `None`.
+
+        수평 판정은 법선의 z 성분으로 한다 (`|n_z| > 0.9`) — 벽이나 선반 옆면을 받침으로 쓰면
+        절단면이 엉뚱한 곳에 생긴다. 여러 개면 **가장 높은 것**을 고른다: 테이블 위에 놓인
+        물건의 받침은 바닥이 아니라 테이블이다.
+        """
+        p = np.asarray(point, np.float64).reshape(3)
+        best = None
+        for surface in support_surfaces or ():
+            n = np.asarray(getattr(surface, "normal", ()), np.float64).reshape(-1)
+            if n.size != 3 or abs(float(n[2])) <= 0.9:
+                continue
+            nz = float(n[2])
+            # `n · p = d` 를 z 로 풀어 (x, y) 에서의 평면 높이를 얻는다.
+            z = (float(getattr(surface, "offset", 0.0)) - float(n[0]) * p[0]
+                 - float(n[1]) * p[1]) / nz
+            if not np.isfinite(z) or z > p[2]:
+                continue  # 점 위에 있는 면은 받침이 아니다
+            best = z if best is None else max(best, z)
+        return best
+
+    @staticmethod
+    def _with_camera_provenance(target, fusion, attention_cloud):
+        """Record which cameras saw the target, and which one carried its attention peak.
+
+        The peak is read off the pre-normalization signal for the reason `AttentionPointCloud`
+        explains — percentile clipping ties hundreds of points at 1.0, and `argmax` over ties picks
+        an arbitrary one, which here would credit an arbitrary camera.
+        """
+        fused = fusion.cloud
+        indices = np.asarray(target.point_indices, np.int64)
+        supporting: set = set()
+        for i in indices:
+            supporting |= fused.cameras_of(int(i))
+
+        seed_camera = None
+        if indices.size:
+            peak_signal = attention_cloud.peak_signal[indices]
+            peak_point = int(indices[int(np.argmax(peak_signal))])
+            block = fused.observation_slice(peak_point)
+            local = fused.obs_attention[block]
+            if local.size:
+                seed_camera = fused.cameras[int(fused.obs_camera[block][int(np.argmax(local))])]
+
+        return dataclasses.replace(
+            target,
+            seed_camera=seed_camera,
+            supporting_cameras=tuple(sorted(supporting, key=lambda c: c.value)),
+        )
+
+    @staticmethod
+    def _fused_recon_stats(fusion) -> dict[str, Any]:
+        """Present the fused front end in the shape the single-camera stats block already uses.
+
+        Keeping one shape means the notes, the metrics and `_stat_notes` need no branch, and a reader
+        comparing a fused frame against a single-camera one is comparing the same fields.
+        """
+        capped = any(r.stats.get("capped", False) for r in fusion.per_camera)
+        return {
+            "n_raw": sum(int(r.stats.get("n_raw", 0)) for r in fusion.per_camera),
+            "n_voxel": fusion.metrics["n_points_before_fusion"],
+            "n_final": fusion.metrics["n_points_fused"],
+            "capped": capped,
+            "covered": all(r.stats.get("covered", True) for r in fusion.per_camera),
+            "final_voxel_size": max(
+                (float(r.stats.get("final_voxel_size", 0.0)) for r in fusion.per_camera),
+                default=0.0,
+            ),
+            "n_growth_steps": max(
+                (int(r.stats.get("n_growth_steps", 0)) for r in fusion.per_camera), default=0
+            ),
+        }
+
+    def _clearance_metrics(self, context, target_grounded: bool) -> dict[str, Any]:
+        """What the contact policy authorized this frame, flattened for logs.
+
+        Recorded per frame rather than derived on demand because "which links were relaxed, against
+        what" is the question any incident review starts from, and the context that produced it is
+        gone by then.
+        """
+        if self._builder is None:
+            return {}
+        record = self._builder.clearance_policy.describe(context, target_grounded=target_grounded)
+        return {f"clearance_{k}": v for k, v in record.items()}
+
+    @staticmethod
+    def _stat_notes(recon_stats, filter_stats, candidate_stats) -> list[str]:
+        notes = [
+            f"points: {recon_stats['n_raw']} raw -> {recon_stats['n_voxel']} voxel -> "
+            f"{filter_stats['n_out']} after self-filter"
+            + ("" if filter_stats["enabled"] else " (self-filter off)"),
+        ]
+        # `candidate_stats` is empty when the primitive path did not run at all. Report nothing
+        # rather than a row of zeros, which would read as "clustering found nothing" — a very
+        # different and much more alarming statement than "clustering was not asked to run".
+        if candidate_stats:
+            notes.append(
+                f"candidates: {candidate_stats['n_object']} object, "
+                f"{candidate_stats['n_unknown']} unknown, "
+                f"{candidate_stats['n_target']} target, {candidate_stats['n_support']} support"
+            )
+        return notes
+
+
+# ------------------------------------------------------------------------------------ CLI
+
+
+def main(argv: Optional[list[str]] = None) -> int:
+    """Smoke-run the pipeline on the synthetic fixture and print the latency table.
+
+    The fixture lives in `tests/ag3s/` because it is test data, so this entry point imports it
+    lazily and only for the demo. Nothing in `AG3S/ag3s/` depends on it.
+    """
+    import argparse
+    import json
+
+    parser = argparse.ArgumentParser(description="AG3S end-to-end smoke run")
+    parser.add_argument("--config", default="AG3S/ag3s/configs/default.yaml")
+    parser.add_argument("--frames", type=int, default=5)
+    parser.add_argument("--phase", default="approach")
+    parser.add_argument("--profile", action="store_true", help="print the per-stage latency table")
+    parser.add_argument("--json", default=None, help="write the constraint-set summary here")
+    args = parser.parse_args(argv)
+
+    try:
+        from tests.ag3s.fixtures import DEFAULT_ARM_Q, PlanarTwoLinkArm, make_scene
+    except ImportError as exc:  # pragma: no cover - demo path
+        print(f"the demo scene lives in tests/ag3s/fixtures.py; run from the workspace root ({exc})")
+        return 1
+
+    from AG3S.ag3s.constraints.to_adapter import summary
+
+    config = AG3SConfig.from_yaml(args.config)
+    # One warm-up frame: the first pass pays for scipy's KD-tree import and CasADi's first symbolic
+    # build, which is not steady-state latency.
+    config = config.with_overrides({"profiling": {"enabled": True, "warmup_frames": 1}})
+
+    arm = PlanarTwoLinkArm()
+    ag3s = AG3S(config, robot_model=arm)
+    scene = make_scene(robot_model=arm, robot_state=DEFAULT_ARM_Q)
+
+    constraint_set = None
+    for _ in range(max(args.frames, 2)):
+        constraint_set = ag3s.process(
+            attention_map=scene.attention_grid,
+            depth=scene.depth,
+            camera_intrinsics=scene.camera_intrinsics,
+            T_base_cam=scene.T_base_cam,
+            robot_state=DEFAULT_ARM_Q,
+            phase=args.phase,
+            image_hw=scene.hw,
+        )
+
+    digest = summary(constraint_set)
+    print(json.dumps(digest, indent=2, default=str))
+    for note in constraint_set.notes:
+        print(f"  note: {note}")
+    if args.profile:
+        print()
+        print(ag3s.profiler.to_table())
+    if args.json:
+        import pathlib
+
+        pathlib.Path(args.json).write_text(json.dumps(digest, indent=2, default=str))
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
+
+
+__all__ = ["AG3S", "main"]

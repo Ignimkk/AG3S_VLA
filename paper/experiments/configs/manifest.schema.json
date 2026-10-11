@@ -1,0 +1,432 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cvpr-paper:experiment-manifest:1",
+  "title": "16-D paper evidence manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "title",
+    "status",
+    "paper_eligible",
+    "evidence_scope",
+    "action_dimension",
+    "state_dimension",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "experiment_id": {
+      "type": "string",
+      "pattern": "^EXP[0-9]{3}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "PLANNED",
+        "CANDIDATE",
+        "REGISTERED",
+        "DEPRECATED"
+      ]
+    },
+    "paper_eligible": {
+      "type": "boolean"
+    },
+    "evidence_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_dimension": {
+      "const": 16
+    },
+    "state_dimension": {
+      "const": 16
+    },
+    "policy": {
+      "type": "object"
+    },
+    "conditions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "condition_id",
+          "baseline_id",
+          "label"
+        ],
+        "properties": {
+          "condition_id": {
+            "type": "string"
+          },
+          "baseline_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "design": {
+      "type": "object",
+      "required": [
+        "mode",
+        "unit",
+        "paired",
+        "pair_count",
+        "run_count"
+      ],
+      "properties": {
+        "paired": {
+          "type": "boolean"
+        },
+        "pair_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "run_count": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "code_state": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/asset"
+      }
+    },
+    "runs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/run"
+      }
+    },
+    "measurements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/measurement"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "audit": {
+      "type": "object",
+      "required": [
+        "kind",
+        "recorded_at",
+        "path",
+        "scope"
+      ],
+      "properties": {
+        "kind": {
+          "const": "READ_ONLY_SOURCE_AUDIT"
+        },
+        "recorded_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "required": [
+        "role",
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "hash_scope": {
+          "enum": [
+            "section"
+          ]
+        },
+        "section_heading": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "required": [
+          "hash_scope"
+        ]
+      },
+      "then": {
+        "required": [
+          "section_heading"
+        ]
+      }
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "run_id",
+        "condition_id",
+        "baseline_id",
+        "episode_id",
+        "policy_seed",
+        "raw_directory",
+        "assets",
+        "dimension_evidence"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "condition_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "episode_id": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "policy_seed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "raw_directory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assets": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "$ref": "#/$defs/asset"
+          }
+        },
+        "dimension_evidence": {
+          "type": "object",
+          "required": [
+            "executed_actions.npy",
+            "inference_states.npy",
+            "predicted_chunks.npy"
+          ],
+          "properties": {
+            "executed_actions.npy": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "const": 16
+                }
+              ],
+              "items": false
+            },
+            "inference_states.npy": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "const": 16
+                }
+              ],
+              "items": false
+            },
+            "predicted_chunks.npy": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "const": 16
+                }
+              ],
+              "items": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "measurement": {
+      "type": "object",
+      "required": [
+        "result_id",
+        "metric_id",
+        "condition_id",
+        "source_path",
+        "source_sha256",
+        "json_pointer",
+        "value",
+        "denominator"
+      ],
+      "properties": {
+        "result_id": {
+          "type": "string",
+          "pattern": "^R[0-9]{3}$"
+        },
+        "metric_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "condition_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "json_pointer": {
+          "type": "string",
+          "pattern": "^/numbers/"
+        },
+        "value": {},
+        "denominator": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "json_pointer",
+                "value"
+              ],
+              "properties": {
+                "json_pointer": {
+                  "type": "string",
+                  "pattern": "^/numbers/"
+                },
+                "value": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "REGISTERED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "policy",
+          "conditions",
+          "design",
+          "code_state",
+          "sources",
+          "runs",
+          "measurements",
+          "audit"
+        ],
+        "properties": {
+          "paper_eligible": {
+            "const": true
+          },
+          "sources": {
+            "contains": {
+              "properties": {
+                "role": {
+                  "const": "verify"
+                }
+              },
+              "required": [
+                "role"
+              ]
+            },
+            "minContains": 1
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "paper_eligible": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
+}
