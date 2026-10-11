@@ -15,3 +15,8 @@ def workspace_path(relative: str = "") -> str:
         storage = Path(os.environ.get("AG3S_LEGACY_STORAGE", "/mnt/dev/work"))
         return str(storage / relative.removeprefix("legacy/"))
     return str(PROJECT_ROOT / relative)
+
+
+def legacy_input_path(relative: str) -> Path:
+    """Read-only recording/dataset input selected from the legacy storage root."""
+    return Path(workspace_path("legacy/" + relative))
