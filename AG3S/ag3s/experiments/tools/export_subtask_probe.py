@@ -35,7 +35,7 @@ import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]  # ${AG3S_PROJECT_ROOT}
 SRC = ROOT / "outputs" / "verify" / "SUBTASK-b"
-OUT = ROOT / "benchmark" / "ag3s" / "asset" / "subtask_probe"
+OUT = ROOT / "AG3S" / "ag3s" / "asset" / "subtask_probe"
 FEATURE = "kv_L4"
 NAME = "kv_L4_v1"
 CLASSES = ["pick", "place", "home"]
@@ -44,7 +44,7 @@ TOL = 0.002
 
 def _probe_module():
     """`stages/subtask_probe.py` by path — this venv need not import the whole `AG3S.ag3s`."""
-    path = ROOT / "benchmark" / "ag3s" / "stages" / "subtask_probe.py"
+    path = ROOT / "AG3S" / "ag3s" / "stages" / "subtask_probe.py"
     spec = importlib.util.spec_from_file_location("_subtask_probe", path)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = mod

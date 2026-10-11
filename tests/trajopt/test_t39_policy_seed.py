@@ -33,7 +33,7 @@ from tests.trajopt.test_safe_client import DOF, H, _client, _Server
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PI05_INFER = ROOT / "integration" / "rby1" / "bringup" / "pi05_infer.py"
 OPENPI_POLICY = ROOT / "third_party" / "openpi" / "src" / "openpi" / "policies" / "policy.py"
-SERVE_SAFE = ROOT / "benchmark" / "trajopt" / "serve_safe.py"
+SERVE_SAFE = ROOT / "AG3S" / "trajopt" / "serve_safe.py"
 
 SEED = 18071
 

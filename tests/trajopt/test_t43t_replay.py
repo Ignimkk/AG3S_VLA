@@ -25,7 +25,7 @@ import sys
 import numpy as np
 import pytest
 
-P = pathlib.Path(_ag3s_workspace_path('legacy/outputs/impl/T43T/p'))
+P = pathlib.Path(_ag3s_workspace_path('scripts/testing/t43t'))
 HEAD_NPZ = pathlib.Path(_ag3s_workspace_path('legacy/outputs/impl/T43T/identity_head.npz'))
 C1982 = _ag3s_workspace_path('legacy/outputs/verify/T41/c/runs/E3b/C/E3b_ep1982_s19822')
 D1982 = _ag3s_workspace_path('legacy/outputs/verify/T41/c/runs/E3b/D/E3b_ep1982_s19822')

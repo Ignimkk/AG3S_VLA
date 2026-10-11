@@ -435,7 +435,7 @@ def test_visualization_imports_lazily_and_writes_every_panel(scene, arm, tmp_pat
     """
     import sys
 
-    import AG3S.ag3s  # noqa: F401  - importing the package must not pull matplotlib in
+    import AG3S.ag3s as ag3s_package  # noqa: F401  - importing the package must not pull matplotlib in
 
     assert "AG3S.ag3s.runtime.visualization" not in sys.modules
 
