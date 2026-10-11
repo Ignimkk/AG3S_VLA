@@ -61,7 +61,7 @@ simulation을 수행한다.
 GPU server에서 model을 실행할 때는 다음 environment variable을 반드시 설정한다.
 
 ```bash
-OPENPI_DATA_HOME=${AG3S_PROJECT_ROOT}/pi05_TO_hybrid/cache/openpi \
+OPENPI_DATA_HOME=${AG3S_PROJECT_ROOT}/.cache/openpi \
 XLA_FLAGS="--xla_gpu_enable_command_buffer=" \
 XLA_PYTHON_CLIENT_PREALLOCATE=false \
 PYTHONUNBUFFERED=1 \

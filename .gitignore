@@ -20,3 +20,5 @@ dist/
 *.ckpt
 *.tgz
 *.whl
+.python/
+.setup-tools/

@@ -23,5 +23,11 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "deny": [
+      "Edit(//mnt/dev/work/**)",
+      "Write(//mnt/dev/work/**)"
+    ]
   }
 }

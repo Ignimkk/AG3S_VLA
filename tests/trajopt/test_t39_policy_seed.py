@@ -31,8 +31,8 @@ from AG3S.trajopt.client import SafeRemoteClient
 from tests.trajopt.test_safe_client import DOF, H, _client, _Server
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PI05_INFER = ROOT / "pi05_TO_hybrid" / "rby1_bringup" / "pi05_infer.py"
-OPENPI_POLICY = ROOT / "pi05_TO_hybrid" / "openpi" / "src" / "openpi" / "policies" / "policy.py"
+PI05_INFER = ROOT / "integration" / "rby1" / "bringup" / "pi05_infer.py"
+OPENPI_POLICY = ROOT / "third_party" / "openpi" / "src" / "openpi" / "policies" / "policy.py"
 SERVE_SAFE = ROOT / "benchmark" / "trajopt" / "serve_safe.py"
 
 SEED = 18071
@@ -78,7 +78,7 @@ def _golden_request(**kw):
 
 def _msgpack_numpy():
     pytest.importorskip("msgpack")
-    path = (ROOT / "pi05_TO_hybrid" / "openpi" / "packages" / "openpi-client" / "src" /
+    path = (ROOT / "third_party" / "openpi" / "packages" / "openpi-client" / "src" /
             "openpi_client" / "msgpack_numpy.py")
     if not path.exists():  # pragma: no cover
         pytest.skip(f"{path} not found")

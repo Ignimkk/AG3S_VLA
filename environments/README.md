@@ -17,3 +17,7 @@ Model weights and additional upstream assets are not downloaded as part of repos
 Shared legacy inputs default to `/mnt/dev/work` via `AG3S_LEGACY_STORAGE`. New caches,
 LIBERO configuration and outputs default to the current checkout. Historical evidence paths
 inside archived documentation and verification JSON were preserved, not falsified as new runs.
+
+CPU bootstrap: `bash scripts/setup/create_cpu_env.sh` installs Python 3.11.16 and
+the recorded CPU pins into `.venv-ag3s` of this checkout. Package files are copied,
+not linked across the two environments. Source `scripts/setup/env.sh` before tests.

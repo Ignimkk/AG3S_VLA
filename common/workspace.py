@@ -5,6 +5,11 @@ import os
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 def workspace_path(relative: str) -> str:
+    if relative == "legacy/pi05_TO_hybrid":
+        fixture = PROJECT_ROOT / ".runtime/legacy-pi05"
+        if not fixture.is_dir():
+            raise FileNotFoundError("Run python scripts/setup/prepare_legacy_test_fixture.py for historical comparison tests.")
+        return str(fixture)
     if relative.startswith("legacy/"):
         storage = Path(os.environ.get("AG3S_LEGACY_STORAGE", "/mnt/dev/work"))
         return str(storage / relative.removeprefix("legacy/"))

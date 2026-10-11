@@ -46,3 +46,21 @@ checkout 코드만 PYTHONPATH에 추가한다. Dataset/checkpoint 등 기존 inp
 
 처음에는 cwd·Git root·branch/HEAD·origin·module __file__·남은 WIP를 보고한다.
 코드 복사로 branch를 동기화하지 않는다. Push/fetch 후 필요한 commit을 선택한다.
+
+## Historical comparison tests and legacy imports
+
+Some existing simulation tests intentionally compare original pi05 Git snapshots.
+Run `python scripts/setup/prepare_legacy_test_fixture.py` to materialize the frozen
+pi05/v2 under this checkout's ignored `.runtime/legacy-pi05`; these tests no longer
+load the old `/mnt/dev/work/pi05_TO_hybrid` source tree. The fixture's Git objects
+refer only to this checkout's object store. It is not another development branch.
+Current integration imports/assets are separately checked at `integration/rby1`
+and `robots/rby1/description`. Future adapter tests should use those current paths.
+
+Recorded clients may still import `benchmark.ag3s` or `benchmark.trajopt`.
+`benchmark/__init__.py` provides a compatibility bridge to the same canonical
+module objects in this checkout; new code uses `AG3S.*` and `Baseline.*` directly.
+
+Run `bash scripts/setup/create_cpu_env.sh` to create an independent CPU environment
+and Python installation in each checkout. GPU/VLA and benchmark environments are
+separate setup tasks; this migration does not claim an end-to-end rollout result.

@@ -70,7 +70,7 @@ def test_pack_strip_unpack_keeps_every_key():
 
 def _msgpack_numpy():
     pytest.importorskip("msgpack")
-    path = (pathlib.Path(__file__).resolve().parents[2] / "pi05_TO_hybrid" / "openpi" /
+    path = (pathlib.Path(__file__).resolve().parents[2] / "third_party" / "openpi" /
             "packages" / "openpi-client" / "src" / "openpi_client" / "msgpack_numpy.py")
     if not path.exists():
         pytest.skip(f"{path} not found")

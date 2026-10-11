@@ -34,7 +34,7 @@ from AG3S.trajopt import wire
 from AG3S.trajopt.client import SafeRemoteClient
 from tests.trajopt.test_safe_client import DOF, _Server
 
-PI05_INFER = pathlib.Path(__file__).resolve().parents[2] / "pi05_TO_hybrid" / "rby1_bringup" \
+PI05_INFER = pathlib.Path(__file__).resolve().parents[2] / "integration" / "rby1" / "bringup" \
     / "pi05_infer.py"
 
 CAMERAS = wire.DEFAULT_CAMERAS

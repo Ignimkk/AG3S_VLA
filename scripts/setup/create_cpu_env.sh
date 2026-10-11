@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+UV="${AG3S_UV:-$(command -v uv || true)}"
+if [ -z "$UV" ] && [ -x "${AG3S_LEGACY_STORAGE:-/mnt/dev/work}/.setup-tools/bin/uv" ]; then
+  UV="${AG3S_LEGACY_STORAGE:-/mnt/dev/work}/.setup-tools/bin/uv"
+fi
+[ -n "$UV" ] || { echo 'Install uv or set AG3S_UV to its executable.' >&2; exit 1; }
+export UV_CACHE_DIR="${UV_CACHE_DIR:-$ROOT/.cache/uv}"
+export UV_PYTHON_INSTALL_DIR="$ROOT/.python"
+"$UV" python install --no-bin --install-dir "$ROOT/.python" 3.11.16
+PYTHON_BIN="$("$UV" python find --managed-python 3.11.16)"
+"$UV" venv --python "$PYTHON_BIN" "$ROOT/.venv-ag3s"
+"$UV" pip install --link-mode copy --python "$ROOT/.venv-ag3s/bin/python" -r "$ROOT/environments/ag3s/requirements.txt"
+source "$ROOT/scripts/setup/env.sh"
+"$ROOT/.venv-ag3s/bin/python" "$ROOT/scripts/setup/check_workspace.py"

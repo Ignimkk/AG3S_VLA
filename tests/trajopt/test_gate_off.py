@@ -27,7 +27,7 @@ from AG3S.trajopt.client import GATE_MODES, ExecutionLog, SafeRemoteClient, gate
 from tests.trajopt.test_hold_gate import ALLOWED, COLLISION, _ReasonServer
 from tests.trajopt.test_safe_client import DOF, H, _client, _Server
 
-PI05_INFER = pathlib.Path(__file__).resolve().parents[2] / "pi05_TO_hybrid" / "rby1_bringup" \
+PI05_INFER = pathlib.Path(__file__).resolve().parents[2] / "integration" / "rby1" / "bringup" \
     / "pi05_infer.py"
 
 REFINED = np.full((H, DOF), 0.25)
