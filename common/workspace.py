@@ -4,6 +4,10 @@ import os
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
+def _path_string(path: Path, relative: str) -> str:
+    value = str(path)
+    return value + "/" if relative.endswith("/") and not value.endswith("/") else value
+
 def workspace_path(relative: str = "") -> str:
     if relative in {"legacy/pi05_TO_hybrid", "legacy/benchmark"}:
         name = "pi05" if relative.endswith("pi05_TO_hybrid") else "benchmark"
@@ -13,8 +17,8 @@ def workspace_path(relative: str = "") -> str:
         return str(fixture)
     if relative.startswith("legacy/"):
         storage = Path(os.environ.get("AG3S_LEGACY_STORAGE", "/mnt/dev/work"))
-        return str(storage / relative.removeprefix("legacy/"))
-    return str(PROJECT_ROOT / relative)
+        return _path_string(storage / relative.removeprefix("legacy/"), relative)
+    return _path_string(PROJECT_ROOT / relative, relative)
 
 
 def legacy_input_path(relative: str) -> Path:
