@@ -12,6 +12,7 @@
 """
 
 from __future__ import annotations
+from common.workspace import legacy_input_path as _ag3s_legacy_input
 
 import json
 import pathlib
@@ -26,8 +27,8 @@ from AG3S.ag3s.experiments.sources.policy_record import (
     require_same_record)
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-RUN_14D = ROOT / "run_0004"
-RUN_16D = ROOT / "outputs/live_test/20260924_long16d/run_0000"
+RUN_14D = _ag3s_legacy_input('run_0004')
+RUN_16D = _ag3s_legacy_input('outputs/live_test/20260924_long16d/run_0000')
 
 
 def _synthetic(width: int, n: int, *, stride: int = 8, close_at: int | None = None,
