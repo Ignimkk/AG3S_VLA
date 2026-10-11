@@ -605,6 +605,44 @@ def finger_cover_options(args) -> dict | None:
     return out
 
 
+# --- T45 A10 palm cover (block start) ---------------------------------------------------------
+def announce_palm_cover(report: dict | None) -> None:
+    """T45 A10 — 손바닥 몸통 구를 켰을 때만 (WARNING): 구 수 · 손바닥마다 반지름 · 못 덮은 표본 · 넘친 양."""
+    if not report:
+        return
+    per = ", ".join(
+        f"{link} {r['n_spheres']} 구 (r {r['radius_mm'][0]:.1f}–{r['radius_mm'][1]:.1f} mm, 미달 표본 "
+        f"{r['n_uncovered']}/{r['n_targets']}, 넘침 실측 {r['overflow_sampled_mm']:.2f} mm)"
+        if r.get("radius_mm") else f"{link} 0 구" for link, r in report["links"].items())
+    logging.warning(
+        "constraint palm cover (T45 A10): 구 %d → %d — 손바닥 collision mesh 전부를 담는 몸통 구 "
+        "(손가락 몸통 구와 같은 계산, 넘침 ≤ %.1f mm, 손 %s): %s. ESDF 질의 · FK 비용이 구 수에 비례한다",
+        report["n_spheres_before"], report["n_spheres_after"],
+        1e3 * float(report["options"]["overflow"]), report["options"]["hands"], per)
+
+
+def palm_cover_options(args) -> dict | None:
+    """`--palm-cover {off,on}` · `--palm-cover-overflow MM` → `build_constraint_robot_model` 의
+    `palm_cover` (T45 A10). `off` (기본) 이면 `None` — 제약 모델이 예전과 글자 그대로 같다.
+    `on` = 두 손바닥. overflow 를 안 주면 키가 없다 (= `gripper_cover.PALM_COVER_OVERFLOW` 5 mm)."""
+    mode = getattr(args, "palm_cover", None) or "off"
+    overflow_mm = getattr(args, "palm_cover_overflow", None)
+    if mode == "off":
+        if overflow_mm is not None:
+            raise SystemExit("--palm-cover-overflow 는 --palm-cover on 과 함께 줘야 합니다 — "
+                             "혼자서는 아무 일도 하지 않습니다")
+        return None
+    if mode != "on":
+        raise SystemExit(f"--palm-cover 는 off · on 중 하나: {mode!r}")
+    out: dict = {"hands": "both"}
+    if overflow_mm is not None:
+        if not (math.isfinite(float(overflow_mm)) and float(overflow_mm) > 0):
+            raise SystemExit(f"--palm-cover-overflow 는 0 보다 커야 합니다 (mm): {overflow_mm}")
+        out["overflow"] = float(overflow_mm) * 1e-3
+    return out
+# --- T45 A10 palm cover (block end) -----------------------------------------------------------
+
+
 def parse_self_filter_inflation(pairs: Sequence[str]) -> dict[str, float]:
     """`["gripper=0.01"]` → `{"gripper": 0.01}` (T19). 빈 입력이면 빈 dict (예전과 같은 필터).
 
@@ -811,6 +849,24 @@ def target_free_coarse_sign_section(args) -> dict:
 # T44c A6 — end
 
 
+# T44e A8 — begin
+def target_free_coarse_support_section(args) -> dict:
+    """T44e A8 — `--target-free-coarse-support {keep,exclude}` → `{"target_free_coarse_support": v}`
+    (안 줬으면 `{}`, config 기본 keep 그대로). A5/A6 block 과 함께 `build_ag3s(target_exclusion=...)` 에 합친다."""
+    v = getattr(args, "target_free_coarse_support", None)
+    return {} if v is None else {"target_free_coarse_support": str(v)}
+# T44e A8 — end
+
+
+# T44e A9 — begin
+def nonauthorized_target_margin_section(args) -> dict:
+    """T44e A9 — `--nonauthorized-target-margin {full,obstacle}` → AG3S `contact` 키
+    (안 줬으면 `{}`, config 기본 full 그대로). `build_ag3s(contact=...)` 가 키 생존을 확인한다."""
+    v = getattr(args, "nonauthorized_target_margin", None)
+    return {} if v is None else {"nonauthorized_target_margin": str(v)}
+# T44e A9 — end
+
+
 # T44b A4 — begin
 def split_identity_section(args) -> dict:
     """T44b A4 — `clustering` keys of the attention split, for the given flags only (none = `{}`,
@@ -840,6 +896,7 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                constraint_sphere_options: dict | None = None,
                gripper_cover: dict | None = None,
                finger_cover: dict | None = None,
+               palm_cover: dict | None = None,
                self_collision: bool = True,
                target_field_policy: str = "relax",
                plan_horizon_steps: int | None = None,
@@ -850,7 +907,8 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                held_body_cover: bool = False,
                identity: dict | None = None,
                held_free_observed_pad: float | None = None,
-               target_exclusion: dict | None = None):
+               target_exclusion: dict | None = None,
+               contact: dict | None = None):
     """서버가 쓸 AG3S. 자기 필터는 전신, 제약은 `links` (T27 부터 기본 `gripper` — 손바닥 + 손가락).
 
     **두 모델은 일부러 다르다.** 자기 필터는 바퀴·베이스까지 있어야 한다 — 머리 카메라가 자기
@@ -900,6 +958,9 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
     # T43 FC — 손가락 몸통 구도 같은 규약 (`None` 이면 키가 없다).
     if finger_cover:
         cover["finger_cover"] = finger_cover
+    # T45 A10 — 손바닥 몸통 구도 같은 규약 (`None` 이면 키가 없다).
+    if palm_cover:
+        cover["palm_cover"] = palm_cover
     constraint_robot = build_constraint_robot_model(
         scene, link_filter=constraint_link_filter(links), sphere_options=spheres, **cover)
     # **기본이 아닌 범위·자기충돌·굵기로 떠 있으면 여기서 크게 말한다.** 제약 모델을 만든
@@ -968,6 +1029,8 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
         # SUBTASK-g — gate 는 bool 이면 켜든 끄든 명시 (위 docstring). probe 경로는 SUBTASK-c
         # 규약 그대로: 줄 때만.
         **subtask_config_section(subtask_gate, subtask_probe_path),
+        # T44e A9 — `contact` 키는 flag 가 준 것만 (없으면 키가 없다 = 예전 dict 그대로).
+        **({"contact": dict(contact)} if contact else {}),
     })
     if identity:
         # T43 T — the identity / closing-geometry keys, only when a flag gave them.
@@ -981,6 +1044,7 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                  filter_robot.n_spheres, constraint_robot.n_spheres, links_label)
     announce_gripper_cover(getattr(constraint_robot, "gripper_cover_report", None))
     announce_finger_cover(getattr(constraint_robot, "finger_cover_report", None))
+    announce_palm_cover(getattr(constraint_robot, "palm_cover_report", None))  # T45 A10
     # **구 개수와 행 개수를 갈라 찍는다.** 구를 촘촘하게 만들면 구는 늘지만 QP 행은 안 늘고,
     # 그 구분이 없으면 "구를 늘렸다" 가 "실시간을 잃었다" 로 읽힌다.
     announce_row_budget(n_constraint_spheres=constraint_robot.n_spheres,
@@ -1041,6 +1105,17 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
         logging.warning("AG3S target_exclusion = %s (tie %.2f · max_dist %.2f voxels · unowned %s) "
                         "— T44 I1", e.target_exclusion, e.owned_tie_voxels,
                         e.owned_max_dist_voxels, e.owned_unowned)
+    # T44e A9 — begin
+    if contact:
+        lost = {k: getattr(ag3s.config.contact, k) for k, v in contact.items()
+                if getattr(ag3s.config.contact, k) != v}
+        if lost:
+            raise RuntimeError(f"AG3S contact config is not what the server asked for: {lost}, "
+                               f"asked {contact}")
+        logging.warning("AG3S contact.nonauthorized_target_margin = %s — T44e A9 (비권한 link 의 "
+                        "target 여유 = 일반 obstacle 행과 같은 여유, 접촉 금지는 그대로)",
+                        ag3s.config.contact.nonauthorized_target_margin)
+    # T44e A9 — end
     # 생성 **뒤에** 찍는다 — 모르는 link 이름은 생성자가 거절하므로, 여기 도달한 표는 실제로
     # `robot_sphere_mask` 에 들어가는 값이다.
     announce_self_filter(ag3s.self_filter_settings(), cli=dict(self_filter or {}))
@@ -1443,6 +1518,20 @@ def build_parser() -> argparse.ArgumentParser:
                          "guard (지원면 + 20 mm) 위만 (A5, 비교용). 기본: config "
                          "esdf.target_free_coarse_sign_floor (= plane, T44c A7). --target-free-coarse 와 함께만")
     # T44c A6 — end
+    # T44e A8 — begin
+    ap.add_argument("--target-free-coarse-support", choices=("keep", "exclude", "exclude_target"), default=None,
+                    help="T44e A8 — coarse_no_target 에 지원면 (table) seed 를 넣는가. exclude = 공 아래 지원면의 "
+                         "inlier 점 근거가 있고 non-target 관측과 공유하지 않는 지원면 seed 를 지운다 (테이블은 미세 계층과 "
+                         "창 밖 본 합성이 답한다). 기본: config esdf.target_free_coarse_support (= keep). "
+                         "--target-free-coarse 와 함께만")
+    # T44e A8 — end
+    # T44e A9 — begin
+    ap.add_argument("--nonauthorized-target-margin", choices=("full", "obstacle"), default=None,
+                    help="T44e A9 — 접촉 권한이 없는 link 이 target 을 피하는 여유. full = 지금 (safety_margin 50 mm) · "
+                         "obstacle = 일반 obstacle 행이 실제로 받는 여유 (esdf_margin, obstacle_margin > 0 이면 "
+                         "max(esdf_margin, obstacle_margin)). 접촉 금지 (unauthorized_link) 는 그대로. "
+                         "기본: config contact.nonauthorized_target_margin (= full)")
+    # T44e A9 — end
     ap.add_argument("--max-sphere-radius", type=float, default=None, metavar="R",
                     help="제약 모델 구 반지름의 **절대 상한** (m). 팽창까지 끝난 값에 걸린다 "
                          "(팔뚝 기본값 81.2 mm). `--capsule-radius-scale` 과 같은 성질이고, "
@@ -1475,6 +1564,14 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--finger-cover-max-spheres", type=int, default=None, metavar="N",
                     help="T43 FR — 손가락마다 몸통 구 최대 N 개 (greedy 를 N 개에서 멈춤; 덮임 보장 없음). "
                          "기본 제한 없음. --finger-cover 와 함께만")
+    # T45 A10 — palm cover (block)
+    ap.add_argument("--palm-cover", default="off", choices=("off", "on"),
+                    help="T45 A10 — 제약 모델의 손바닥 (ee_left/right) 구를 손바닥 collision mesh 전부를 "
+                         "담는 몸통 구로 바꾼다 (--finger-cover 와 같은 계산, 넘침 ≤ --palm-cover-overflow). "
+                         "기본 off = 예전 모델 그대로. on: 손바닥 23 → 121 구씩 (T45A10.impl)")
+    ap.add_argument("--palm-cover-overflow", type=float, default=None, metavar="MM",
+                    help="T45 A10 — 손바닥 몸통 구가 mesh 밖으로 나가는 최대 거리 (mm, 기본 5.0). "
+                         "--palm-cover on 과 함께만")
     # --- 목적함수 가중치 (T9) ------------------------------------------------------------
     # **제약이 하나도 활성이 아닌 판에서도 TO 가 청크를 고친다** (실행되는 8 step 안에서 중앙값
     # 2.6°, 최대 8.8°). 그러면 남은 변형은 전부 이 넷이 만든 것이므로, 훑을 수 있어야 한다.
@@ -1709,6 +1806,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ap.error("--target-free-coarse-sign-floor 는 --target-free-coarse 의 거친 target-free 계층에만 "
                  "걸립니다 — 함께 주십시오")
     # T44c A6 — end
+    # T44e A8 — begin
+    if args.target_free_coarse_support is not None and not args.target_free_coarse:
+        ap.error("--target-free-coarse-support 는 --target-free-coarse 의 거친 target-free 계층에만 "
+                 "걸립니다 — 함께 주십시오")
+    # T44e A8 — end
     # T44b A4 — begin
     if getattr(args, "held_permission_parent_links", None) is not None:
         if args.held_permission_parent_links < 0:
@@ -1809,6 +1911,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
                  "있었다고 믿게 됩니다")
     if finger_cover_options(args) and (args.no_safe or args.no_perception):
         ap.error("--finger-cover 는 제약 모델의 손가락 구를 바꾸는 flag 입니다 (--no-safe · "
+                 "--no-perception 서버에는 그 모델의 충돌 행이 없습니다). 그대로 띄우면 효과가 "
+                 "있었다고 믿게 됩니다")
+    # T45 A10 — palm cover: 같은 규율.
+    if palm_cover_options(args) and (args.no_safe or args.no_perception):
+        ap.error("--palm-cover on 은 제약 모델의 손바닥 구를 바꾸는 flag 입니다 (--no-safe · "
                  "--no-perception 서버에는 그 모델의 충돌 행이 없습니다). 그대로 띄우면 효과가 "
                  "있었다고 믿게 됩니다")
     # **self-filter flag 의 형식 오류도 여기서 죽는다** (T19). 모르는 link 이름은 모델이 있어야
@@ -2409,6 +2516,9 @@ def main() -> None:
                       # T43 FC — 켰을 때만 키가 생긴다.
                       **({"finger_cover": finger_cover_options(args)}
                          if finger_cover_options(args) else {}),
+                      # T45 A10 — 켰을 때만 키가 생긴다.
+                      **({"palm_cover": palm_cover_options(args)}
+                         if palm_cover_options(args) else {}),
                       **({"self_filter": self_filter_options(args)}
                          if self_filter_options(args) else {}),
                       # SUBTASK-c — **항상 남긴다**: 이 키가 없는 기록은 SUBTASK-c 전이다.
@@ -2502,6 +2612,7 @@ def main() -> None:
                             constraint_sphere_options=sphere_options(args),
                             gripper_cover=gripper_cover_options(args),
                             finger_cover=finger_cover_options(args),
+                            palm_cover=palm_cover_options(args),  # T45 A10
                             self_collision=not args.no_self_collision,
                             target_field_policy=args.target_field_policy,
                             plan_horizon_steps=horizon.planned,
@@ -2515,8 +2626,10 @@ def main() -> None:
                                       **split_identity_section(args)} or None,
                             target_exclusion=({**target_exclusion_section(args),   # T44 I1 (A1)
                                                **target_free_coarse_section(args),  # T44c A5
-                                               **target_free_coarse_sign_section(args)}  # T44c A6
+                                               **target_free_coarse_sign_section(args),  # T44c A6
+                                               **target_free_coarse_support_section(args)}  # T44e A8
                                               or None),
+                            contact=nonauthorized_target_margin_section(args) or None,  # T44e A9
                             held_free_observed_pad=(
                                 None if args.held_free_observed_mm is None
                                 else float(args.held_free_observed_mm) / 1000.0)),

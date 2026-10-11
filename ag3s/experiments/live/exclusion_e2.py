@@ -484,7 +484,7 @@ def build_free_tier(builder, ball, *, owned=None, exclusion=None):
 
 
 def build_coarse_free_tier(builder, ball, *, owned=None, nontarget=None, target=None,
-                           sign_floor=None):
+                           sign_floor=None, support=None, support_evidence=None):
     """T44c A5 — 같은 integrator 에서 target 을 지운 **거친** 계층 (`coarse_no_target`). `(tier, ms)`.
 
     `CuroboFieldBuilder.update` 가 `esdf.target_free_coarse` 에서 만드는 것과 같은 호출이다
@@ -495,6 +495,10 @@ def build_coarse_free_tier(builder, ball, *, owned=None, nontarget=None, target=
     T44c A6: `target` = target 점 (`plane` 띠의 target 쪽 판정, pipeline 은 `target_free_points` 를 넘긴다),
     `sign_floor` = `"guard"` (A5) · `"plane"` — None 이면 builder config (`esdf.target_free_coarse_sign_floor`,
     기본 `"plane"` — T44c A7).
+
+    T44e A8: `support` = `"keep"` · `"exclude"` · (A8b) `"exclude_target"` (None 이면 builder config `esdf.target_free_coarse_support`,
+    기본 keep), `support_evidence` = `AG3S._support_seed_evidence(cloud, surfaces, ball)` (exclude 의 근거 —
+    pipeline 이 builder 에 넘기는 것과 같은 dict). exclude 인데 근거가 없으면 keep 으로 짓는다 (builder 와 같다).
     """
     import dataclasses as _dc
 
@@ -503,9 +507,22 @@ def build_coarse_free_tier(builder, ball, *, owned=None, nontarget=None, target=
     itg = builder._mapper.integrator
     itg_fine = None if builder._fine_mapper is None else builder._fine_mapper.integrator
     dev = builder._mapper._device if hasattr(builder._mapper, "_device") else "cuda:0"
-    spec = builder._coarse_free_spec(ball, owned, nontarget, target_points=target)
+    spec = builder._coarse_free_spec(ball, owned, nontarget, target_points=target,
+                                     **({} if support_evidence is None
+                                        else {"support_evidence": support_evidence}))
     if sign_floor is not None:
         spec = _dc.replace(spec, sign_floor=str(sign_floor))
+    if support is not None:
+        # T44e A8b: the builder's own rule (`coarse_support_spec_fields`) — `exclude_target` also reads
+        # `support_evidence["inlier_threshold_m"]` (the footprint evidence's minimum height).
+        from benchmark.ag3s.fields.curobo_builder import CoarseFreeSpec, coarse_support_spec_fields
+
+        fields = coarse_support_spec_fields(str(support), support_evidence)
+        if fields:
+            spec = _dc.replace(spec, **fields)
+        else:
+            spec = _dc.replace(spec, support="keep", support_points=None, support_plane=None,
+                               support_min_height_m=CoarseFreeSpec.support_min_height_m)
     _sync()
     t0 = time.perf_counter()
     (tier,) = builder._build_tiers(itg, None, dev, torch, only="coarse",
@@ -766,6 +783,14 @@ def run_frame(ctx: dict, item: dict, args) -> dict:
     coarse_layers = {}
     if getattr(args, "target_free_coarse", False):
         build_coarse_free_tier(builder, ball, nontarget=nontarget["points"])     # warm-up
+        # T44e A8: the support plane under the ball and its inlier points (exclude only).
+        # T44e A8b: `exclude_target` too, with the footprint evidence's minimum height (as the pipeline).
+        sup_mode = getattr(args, "coarse_support", None)
+        sup_ev = (ag3s._support_seed_evidence(np.asarray(debug.get("filtered_cloud").points),
+                                              surfaces, ball)
+                  if sup_mode in ("exclude", "exclude_target") else None)
+        if sup_ev is not None and sup_mode == "exclude_target":
+            sup_ev["inlier_threshold_m"] = float(ag3s.config.support_surface.distance_threshold)
         crec = {}
         for m in args.methods:
             if m == "oracle":
@@ -776,7 +801,9 @@ def run_frame(ctx: dict, item: dict, args) -> dict:
                                                   nontarget=nontarget["points"],
                                                   target=geom.points,
                                                   sign_floor=getattr(args, "coarse_sign_floor",
-                                                                     None))
+                                                                     None),
+                                                  support=getattr(args, "coarse_support", None),
+                                                  support_evidence=sup_ev)
                 runs.append(t)
             coarse_layers[m] = layer_from_device(ctier.values, ctier.origin, ctier.voxel_size)
             ex = dict(ctier.extra.get("exclusion") or {})
@@ -895,6 +922,10 @@ def _parser() -> argparse.ArgumentParser:
     ap.add_argument("--coarse-sign-floor", choices=("guard", "plane"), default=None,
                     help="T44c A6 — `--target-free-coarse` 의 부호 교정 아래 한계 (기본: config "
                          "`esdf.target_free_coarse_sign_floor` = plane, T44c A7)")
+    ap.add_argument("--coarse-support", choices=("keep", "exclude", "exclude_target"), default=None,
+                    help="T44e A8 — `--target-free-coarse` 의 거친 계층에 지원면 seed 를 넣는가 (기본: config "
+                         "`esdf.target_free_coarse_support` = keep). exclude = 공 아래 지원면 seed 를 지운다 · "
+                         "exclude_target (A8b) = target 발자국 안 · non-target 발자국 밖의 지원면 seed 만 지운다")
     ap.add_argument("--shell", type=float, default=0.020, help="ROI = 공 + 이 껍질 (m)")
     ap.add_argument("--margin", type=float, default=0.0,
                     help="falsely-feasible 판정의 clearance 기준 (m): d − r ≥ margin")

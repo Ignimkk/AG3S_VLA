@@ -1,0 +1,2151 @@
+{
+ "_comment": "ag3s-verifier (audit, Opus). 해석을 쓰지 않는다 — 숫자와 경로만. verdict 는 lead 지시에 따라 수정 필요 여부 · 후보를 사실로 적는다.",
+ "step": "T45",
+ "date": "2026-10-11",
+ "runs": [
+  {
+   "id": "align",
+   "command": "cd /mnt/dev/work && MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/work nice -n 19 .venv-openpi-live/bin/python outputs/verify/T45/p/align.py",
+   "venv": ".venv-openpi-live",
+   "raw_output": "outputs/verify/T45/align.json",
+   "stdout_log": null
+  },
+  {
+   "id": "coverage",
+   "command": "... outputs/verify/T45/p/coverage.py (gripper + arms, open/half/closed)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "outputs/verify/T45/coverage.json",
+   "stdout_log": "outputs/verify/T45/coverage.log"
+  },
+  {
+   "id": "events",
+   "command": "... outputs/verify/T45/p/events.py [cands]",
+   "venv": ".venv-openpi-live",
+   "raw_output": "outputs/verify/T45/events.json · outputs/verify/T45/events_cands.json",
+   "stdout_log": "outputs/verify/T45/events.log · events_cands.log"
+  },
+  {
+   "id": "candidates",
+   "command": "... outputs/verify/T45/p/candidates.py",
+   "venv": ".venv-openpi-live",
+   "raw_output": "outputs/verify/T45/candidates.json · palm_body_o*.npz",
+   "stdout_log": "outputs/verify/T45/candidates.log"
+  },
+  {
+   "id": "figures",
+   "command": "... outputs/verify/T45/p/render_event.py ; outputs/verify/T45/p/figs.py",
+   "venv": ".venv-openpi-live",
+   "raw_output": "benchmark/ag3s/docs/figures/t45/*.json",
+   "stdout_log": "outputs/verify/T45/figs.log"
+  }
+ ],
+ "code_state": {
+  "repo": "benchmark",
+  "head": "f891abe (snapshot /mnt/dev/work-t44cl, the T44d CL server code); urdf_sphere_chain.py · grounding_report.py · gripper_cover.py · serve_safe.py identical to /mnt/dev/work/benchmark at audit time",
+  "dirty_files": [
+   "(working tree, not used) ag3s/config.py ag3s/fields/curobo_builder.py trajopt/linearize.py trajopt/serve_safe.py ..."
+  ],
+  "env": "CPU only (JAX_PLATFORMS=cpu, CUDA_VISIBLE_DEVICES=), nice 19, 1 worker, no server, GPU not used"
+ },
+ "definitions": {
+  "frame": "all geometry in the MuJoCo world frame at one recorded qpos (C1a_ep3_s31 control t 224); URDF FK frame == MuJoCo world (link origin offset 0.09 mm, rot 0.0004 deg, align.json)",
+  "pairing": "URDF link -> MJCF body by nearest sphere-centre-to-mesh-vertex (align.json): ee_finger_l1 -> MJCF ee_finger_l2, ee_finger_l2 -> MJCF ee_finger_l1 (swap confirmed by position)",
+  "mjcf_surface": "area-uniform samples (1 per 0.5 mm^2) on the convex hull of every collision mesh geom of the body (MuJoCo collides meshes as convex hulls); samples buried >0.2 mm in another piece of the same body dropped; samples within 0.5 mm of a rigidly attached neighbour body's hull (palm top under link_*_arm_6 / FT sensor) dropped",
+  "gap": "min_i |p - c_i| - r_i ; >0 = outside the sphere union. frac_out = fraction of samples with gap>0; out_* = statistics over outside samples only",
+  "openings": "finger qpos = open value x {1, 0.5, 0} (open: r1/l1 -0.05, r2/l2 +0.05)",
+  "source_capsules": "the capsules the server spheres are generated from (mujoco_source.gap_filling_capsules = bounding capsules fitted to MJCF mesh vertices; fingers: the same before --finger-cover) at radius scale 1.0. The URDF file itself has 0 collision capsules on the 6 hand links",
+  "excess": "1 mm voxels inside the link's own sphere union and outside every collision hull of that body; protrusion = max distance of such voxels to the hull surface samples",
+  "contact_points": "recorded control-row qpos t_first..t_last+1 (replay qpos_mismatch_rows 0); for each (hand geom, fruit geom) pair of the event: mj_geomDistance <=1 mm (fromto hand point) or, when penetrating, the MuJoCo contact.pos of that pair",
+  "channel": "palm frame along the tip direction (palm origin -> finger mid, perpendicular to the finger axis u): tip-most extent of palm spheres with |u.(c-mid)| < finger inner half gap + r, vs palm mesh samples in the same channel",
+  "candidates": "offline only, nothing implemented: palm_scale1 = capsule_radius_scale_by_link {ee_left:1, ee_right:1}; palm_body_oX = gripper_cover.finger_body_spheres applied to the palm link_surface (spacing 1 mm, candidate grid 2 mm, union_eps 1 mm; not the finger defaults 0.5/0.5 mm), overflow X mm, replacing the palm gap-filling capsules"
+ },
+ "numbers": {
+  "A1_sphere_model": {
+   "server_flags": "--links gripper --finger-cover both --capsule-radius-scale 0.05 --sphere-spacing 0.4 --max-spheres-per-capsule 32 (outputs/verify/T44/CL/runs/C1a/server_8280_20261010T194812/server_proc.txt)",
+   "n_spheres_total": {
+    "gripper": 270,
+    "arms": 422
+   },
+   "hand_spheres_identical_gripper_vs_arms": {
+    "ee_right": true,
+    "ee_finger_r1": true,
+    "ee_finger_r2": true,
+    "ee_left": true,
+    "ee_finger_l1": true,
+    "ee_finger_l2": true
+   },
+   "per_link": {
+    "ee_right": {
+     "n": 23,
+     "r_mm": [
+      5.7,
+      6.22
+     ],
+     "role": [
+      "collision"
+     ]
+    },
+    "ee_finger_r1": {
+     "n": 56,
+     "r_mm": [
+      2.54,
+      8.44
+     ],
+     "role": [
+      "finger_body"
+     ]
+    },
+    "ee_finger_r2": {
+     "n": 56,
+     "r_mm": [
+      2.54,
+      8.44
+     ],
+     "role": [
+      "finger_body"
+     ]
+    },
+    "ee_left": {
+     "n": 23,
+     "r_mm": [
+      5.7,
+      6.22
+     ],
+     "role": [
+      "collision"
+     ]
+    },
+    "ee_finger_l1": {
+     "n": 56,
+     "r_mm": [
+      2.54,
+      8.44
+     ],
+     "role": [
+      "finger_body"
+     ]
+    },
+    "ee_finger_l2": {
+     "n": 56,
+     "r_mm": [
+      2.54,
+      8.44
+     ],
+     "role": [
+      "finger_body"
+     ]
+    }
+   },
+   "palm_capsules": "3 per palm, r 33.0 / 28.4 / 32.8 mm, L 84.0 / 66.3 / 82.7 mm; 8+7+8 spheres; r = sqrt((0.05 r)^2 + (spacing/2)^2) = 5.7-6.2 mm (server log: 27.3 mm short)",
+   "sphere_positions_link_frame": "outputs/verify/T45/coverage.json models.<gripper|arms>.per_link.<link>.spheres_link_frame",
+   "code_path": [
+    "trajopt/serve_safe.py:1201 (--links) · 1350/1355/1358 (--sphere-spacing / --max-spheres-per-capsule / --capsule-radius-scale) · 1505 (--finger-cover)",
+    "trajopt/serve_safe.py:489-500 sphere_options(args) -> constraint_sphere_options (2553) -> build_ag3s 834 -> build_constraint_robot_model call (~901); constraint_link_filter 128-145 (gripper = GRIPPER_LINKS, arms = ARM_LINKS)",
+    "ag3s/experiments/reports/grounding_report.py:146-228 build_constraint_robot_model: gap_filling_capsules -> UrdfSphereChain(extra_capsules=gap, **sphere_options); finger_cover replaces the finger gap capsules (195-228)",
+    "ag3s/experiments/sources/mujoco_source.py:565 gap_filling_capsules -> 365 bounding_capsules (palm/finger capsules fitted to MJCF mesh vertices); 487-494 MJCF_BODY_ALIASES (left finger swap)",
+    "ag3s/robot_models/urdf_sphere_chain.py:869-876 scale_for_link; 878-923 _capsule_sphere_centres (radius = _effective_radius(cap.radius * scale) at 919-920; EXACT roles skip the scale 891-899); 1039-1048 _effective_radius",
+    "ag3s/experiments/sources/gripper_cover.py:852-888 finger_body_capsules (FC finger body spheres, overflow 2.5 mm)"
+   ]
+  },
+  "A2_coverage_open": {
+   "ee_right": {
+    "mjcf_body_by_position": "EE_BODY_R",
+    "n_spheres": 23,
+    "r_mm": [
+     5.7,
+     6.22
+    ],
+    "n_surface_samples": 141217,
+    "own_spheres_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.9386,
+     "frac_out_gt1mm": 0.9037,
+     "frac_out_gt2p5mm": 0.8481,
+     "frac_out_gt5mm": 0.7666,
+     "out_median_mm": 14.7619,
+     "out_p95_mm": 39.6488,
+     "out_max_mm": 54.373,
+     "all_p95_mm": 39.1905
+    },
+    "hand_union_vs_mjcf_out_frac_max_mm": {
+     "open": [
+      0.9251,
+      50.6
+     ],
+     "half": [
+      0.9276,
+      37.05
+     ],
+     "closed": [
+      0.9281,
+      33.2
+     ]
+    },
+    "source_capsules_r_mm": [
+     33.0,
+     28.4,
+     32.8
+    ],
+    "source_capsules_scale1_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.2053,
+     "frac_out_gt1mm": 0.1908,
+     "frac_out_gt2p5mm": 0.1701,
+     "frac_out_gt5mm": 0.1381,
+     "out_median_mm": 7.9148,
+     "out_p95_mm": 20.7063,
+     "out_max_mm": 27.6681,
+     "all_p95_mm": 12.9879
+    },
+    "own_spheres_vs_source_capsule_surface_out_max_mm": 27.3,
+    "excess_union_outside_geom_cm3": 8.22,
+    "excess_frac": 0.389,
+    "protrusion_max_mm": 8.59
+   },
+   "ee_finger_r1": {
+    "mjcf_body_by_position": "ee_finger_r1",
+    "n_spheres": 56,
+    "r_mm": [
+     2.54,
+     8.44
+    ],
+    "n_surface_samples": 15355,
+    "own_spheres_vs_mjcf": {
+     "n": 15355,
+     "frac_out": 0.001,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.0371,
+     "out_p95_mm": 0.0699,
+     "out_max_mm": 0.0747,
+     "all_p95_mm": -0.4413
+    },
+    "hand_union_vs_mjcf_out_frac_max_mm": {
+     "open": [
+      0.001,
+      0.07
+     ],
+     "half": [
+      0.001,
+      0.07
+     ],
+     "closed": [
+      0.0004,
+      0.06
+     ]
+    },
+    "source_capsules_r_mm": [
+     14.4,
+     13.0,
+     17.6
+    ],
+    "source_capsules_scale1_vs_mjcf": {
+     "n": 15355,
+     "frac_out": 0.0165,
+     "frac_out_gt1mm": 0.001,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.39,
+     "out_p95_mm": 1.0182,
+     "out_max_mm": 1.1099,
+     "all_p95_mm": -1.3432
+    },
+    "own_spheres_vs_source_capsule_surface_out_max_mm": 17.28,
+    "excess_union_outside_geom_cm3": 8.533,
+    "excess_frac": 0.329,
+    "protrusion_max_mm": 2.55
+   },
+   "ee_finger_r2": {
+    "mjcf_body_by_position": "ee_finger_r2",
+    "n_spheres": 56,
+    "r_mm": [
+     2.54,
+     8.44
+    ],
+    "n_surface_samples": 15349,
+    "own_spheres_vs_mjcf": {
+     "n": 15349,
+     "frac_out": 0.0007,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.0338,
+     "out_p95_mm": 0.0789,
+     "out_max_mm": 0.0895,
+     "all_p95_mm": -0.4598
+    },
+    "hand_union_vs_mjcf_out_frac_max_mm": {
+     "open": [
+      0.0007,
+      0.09
+     ],
+     "half": [
+      0.0007,
+      0.09
+     ],
+     "closed": [
+      0.0005,
+      0.05
+     ]
+    },
+    "source_capsules_r_mm": [
+     14.4,
+     13.0,
+     17.6
+    ],
+    "source_capsules_scale1_vs_mjcf": {
+     "n": 15349,
+     "frac_out": 0.0155,
+     "frac_out_gt1mm": 0.0007,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.379,
+     "out_p95_mm": 0.9689,
+     "out_max_mm": 1.0935,
+     "all_p95_mm": -1.3638
+    },
+    "own_spheres_vs_source_capsule_surface_out_max_mm": 17.28,
+    "excess_union_outside_geom_cm3": 8.548,
+    "excess_frac": 0.329,
+    "protrusion_max_mm": 2.56
+   },
+   "ee_left": {
+    "mjcf_body_by_position": "EE_BODY_L",
+    "n_spheres": 23,
+    "r_mm": [
+     5.7,
+     6.22
+    ],
+    "n_surface_samples": 141009,
+    "own_spheres_vs_mjcf": {
+     "n": 141009,
+     "frac_out": 0.9385,
+     "frac_out_gt1mm": 0.904,
+     "frac_out_gt2p5mm": 0.8495,
+     "frac_out_gt5mm": 0.7687,
+     "out_median_mm": 14.7872,
+     "out_p95_mm": 39.6166,
+     "out_max_mm": 54.3214,
+     "all_p95_mm": 39.1293
+    },
+    "hand_union_vs_mjcf_out_frac_max_mm": {
+     "open": [
+      0.9254,
+      50.72
+     ],
+     "half": [
+      0.9267,
+      37.15
+     ],
+     "closed": [
+      0.9283,
+      33.2
+     ]
+    },
+    "source_capsules_r_mm": [
+     33.0,
+     28.4,
+     32.8
+    ],
+    "source_capsules_scale1_vs_mjcf": {
+     "n": 141009,
+     "frac_out": 0.2051,
+     "frac_out_gt1mm": 0.1904,
+     "frac_out_gt2p5mm": 0.1695,
+     "frac_out_gt5mm": 0.138,
+     "out_median_mm": 7.9565,
+     "out_p95_mm": 20.7043,
+     "out_max_mm": 27.6618,
+     "all_p95_mm": 12.9932
+    },
+    "own_spheres_vs_source_capsule_surface_out_max_mm": 27.3,
+    "excess_union_outside_geom_cm3": 8.283,
+    "excess_frac": 0.391,
+    "protrusion_max_mm": 8.66
+   },
+   "ee_finger_l1": {
+    "mjcf_body_by_position": "ee_finger_l2",
+    "n_spheres": 56,
+    "r_mm": [
+     2.54,
+     8.44
+    ],
+    "n_surface_samples": 15357,
+    "own_spheres_vs_mjcf": {
+     "n": 15357,
+     "frac_out": 0.0008,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.0391,
+     "out_p95_mm": 0.0968,
+     "out_max_mm": 0.1191,
+     "all_p95_mm": -0.4479
+    },
+    "hand_union_vs_mjcf_out_frac_max_mm": {
+     "open": [
+      0.0008,
+      0.12
+     ],
+     "half": [
+      0.0009,
+      0.12
+     ],
+     "closed": [
+      0.0005,
+      0.12
+     ]
+    },
+    "source_capsules_r_mm": [
+     14.4,
+     13.0,
+     17.6
+    ],
+    "source_capsules_scale1_vs_mjcf": {
+     "n": 15357,
+     "frac_out": 0.0143,
+     "frac_out_gt1mm": 0.0008,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.3911,
+     "out_p95_mm": 1.0173,
+     "out_max_mm": 1.0942,
+     "all_p95_mm": -1.3844
+    },
+    "own_spheres_vs_source_capsule_surface_out_max_mm": 17.28,
+    "excess_union_outside_geom_cm3": 8.512,
+    "excess_frac": 0.328,
+    "protrusion_max_mm": 2.56
+   },
+   "ee_finger_l2": {
+    "mjcf_body_by_position": "ee_finger_l1",
+    "n_spheres": 56,
+    "r_mm": [
+     2.54,
+     8.44
+    ],
+    "n_surface_samples": 15364,
+    "own_spheres_vs_mjcf": {
+     "n": 15364,
+     "frac_out": 0.0007,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.0466,
+     "out_p95_mm": 0.0938,
+     "out_max_mm": 0.1142,
+     "all_p95_mm": -0.4528
+    },
+    "hand_union_vs_mjcf_out_frac_max_mm": {
+     "open": [
+      0.0007,
+      0.11
+     ],
+     "half": [
+      0.0007,
+      0.11
+     ],
+     "closed": [
+      0.0003,
+      0.07
+     ]
+    },
+    "source_capsules_r_mm": [
+     14.4,
+     13.0,
+     17.6
+    ],
+    "source_capsules_scale1_vs_mjcf": {
+     "n": 15364,
+     "frac_out": 0.0147,
+     "frac_out_gt1mm": 0.001,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.3817,
+     "out_p95_mm": 1.0388,
+     "out_max_mm": 1.1107,
+     "all_p95_mm": -1.4105
+    },
+    "own_spheres_vs_source_capsule_surface_out_max_mm": 17.28,
+    "excess_union_outside_geom_cm3": 8.583,
+    "excess_frac": 0.331,
+    "protrusion_max_mm": 2.59
+   }
+  },
+  "A2_note_left_right": "left and right identical within sampling (ee_left 0.938 / ee_right 0.939); gripper and arms models identical on hand links",
+  "A3_contacts": {
+   "n_events": 24,
+   "n_palm_events": 8,
+   "n_finger_events": 16,
+   "palm_events_by_arm": {
+    "C0": 2,
+    "C1a": 3,
+    "C1b": 3
+   },
+   "finger_events_by_arm": {
+    "C0": 6,
+    "C1a": 6,
+    "C1b": 4
+   },
+   "palm_contact_geom": "all 8 palm events: MJCF EE_BODY_R geom EE_BODY_collision_2 (geom 731), body-frame point x -42..-16, y -28, z -73..-52 mm (palm lower edge, -y side)",
+   "finger_contact_geom": "all 16 finger events: EE_FINGER_collision_2 (geom 765 ee_finger_r2 / 758 ee_finger_r1)",
+   "server_palm_points_outside_own_spheres_mm_range": [
+    24.1,
+    43.4
+   ],
+   "server_palm_points_outside_hand_union_mm_range": [
+    10.2,
+    24.1
+   ],
+   "server_palm_points_inside_hand_union": [
+    0,
+    35
+   ],
+   "server_finger_points_inside_hand_union": [
+    179,
+    179
+   ],
+   "server_finger_points_gap_hand_mm_range": [
+    -2.41,
+    -0.09
+   ],
+   "source_capsule_scale1_gap_at_palm_points_mm_median_per_event": [
+    4.1,
+    3.9,
+    -2.7,
+    4.7,
+    16.2,
+    -2.5,
+    5.3,
+    4.8
+   ],
+   "events": [
+    {
+     "arm": "C0",
+     "name": "C0_ep3_s31",
+     "t_first": 234,
+     "t_last": 237,
+     "max_force_N": 8.38,
+     "fruit": "banana",
+     "grasp_state": "placed",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 5,
+     "server_gap_own_mm_min_med_max": [
+      -1.53,
+      -1.44,
+      -1.37
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -1.53,
+      -1.44,
+      -1.37
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -1.53,
+      -1.44,
+      -1.37
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -1.53,
+      -1.44,
+      -1.37
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.53,
+      -1.44,
+      -1.37
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.53,
+      -1.44,
+      -1.37
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.53,
+      -1.44,
+      -1.37
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.53,
+      -1.44,
+      -1.37
+     ]
+    },
+    {
+     "arm": "C0",
+     "name": "C0_ep3_s31",
+     "t_first": 240,
+     "t_last": 244,
+     "max_force_N": 2.62,
+     "fruit": "banana",
+     "grasp_state": "placed",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 5,
+     "server_gap_own_mm_min_med_max": [
+      -1.64,
+      -1.53,
+      -1.5
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -1.64,
+      -1.53,
+      -1.5
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -1.64,
+      -1.53,
+      -1.5
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -1.64,
+      -1.53,
+      -1.5
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.64,
+      -1.53,
+      -1.5
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.64,
+      -1.53,
+      -1.5
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.64,
+      -1.53,
+      -1.5
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.64,
+      -1.53,
+      -1.5
+     ]
+    },
+    {
+     "arm": "C0",
+     "name": "C0_ep3_s31",
+     "t_first": 247,
+     "t_last": 279,
+     "max_force_N": 9.07,
+     "fruit": "banana",
+     "grasp_state": "placed",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 57,
+     "server_gap_own_mm_min_med_max": [
+      -2.41,
+      -2.08,
+      -0.73
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -2.41,
+      -2.08,
+      -0.73
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -2.41,
+      -2.08,
+      -0.73
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -2.41,
+      -2.08,
+      -0.73
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -2.41,
+      -2.08,
+      -0.73
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -2.41,
+      -2.08,
+      -0.73
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -2.41,
+      -2.08,
+      -0.73
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -2.41,
+      -2.08,
+      -0.73
+     ]
+    },
+    {
+     "arm": "C0",
+     "name": "C0_ep3_s31",
+     "t_first": 281,
+     "t_last": 292,
+     "max_force_N": 96.74,
+     "fruit": "banana",
+     "grasp_state": "placed",
+     "mjcf_bodies": [
+      "ee_finger_r1",
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 24,
+     "server_gap_own_mm_min_med_max": [
+      -2.31,
+      -2.11,
+      -0.72
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -2.31,
+      -2.11,
+      -0.72
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -2.31,
+      -2.11,
+      -0.72
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -2.31,
+      -2.11,
+      -0.72
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -2.31,
+      -2.11,
+      -0.72
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -2.31,
+      -2.11,
+      -0.72
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -2.31,
+      -2.11,
+      -0.72
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -2.31,
+      -2.11,
+      -0.72
+     ]
+    },
+    {
+     "arm": "C0",
+     "name": "C0_ep3_s31",
+     "t_first": 295,
+     "t_last": 303,
+     "max_force_N": 78.68,
+     "fruit": "banana",
+     "grasp_state": "placed",
+     "mjcf_bodies": [
+      "ee_finger_r1",
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 36,
+     "server_gap_own_mm_min_med_max": [
+      -2.08,
+      -1.34,
+      -0.63
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -2.08,
+      -1.34,
+      -0.63
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -2.08,
+      -1.34,
+      -0.63
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -2.08,
+      -1.34,
+      -0.63
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -2.08,
+      -1.34,
+      -0.63
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -2.08,
+      -1.34,
+      -0.63
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -2.08,
+      -1.34,
+      -0.63
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -2.08,
+      -1.34,
+      -0.63
+     ]
+    },
+    {
+     "arm": "C0",
+     "name": "C0_ep3_s32",
+     "t_first": 211,
+     "t_last": 217,
+     "max_force_N": 6.34,
+     "fruit": "banana",
+     "grasp_state": "latched",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 6,
+     "server_gap_own_mm_min_med_max": [
+      -1.86,
+      -1.17,
+      -0.35
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -1.86,
+      -1.17,
+      -0.35
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -1.86,
+      -1.17,
+      -0.35
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -1.86,
+      -1.17,
+      -0.35
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.86,
+      -1.17,
+      -0.35
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.86,
+      -1.17,
+      -0.35
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.86,
+      -1.17,
+      -0.35
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.86,
+      -1.17,
+      -0.35
+     ]
+    },
+    {
+     "arm": "C0",
+     "name": "C0_ep54_s542",
+     "t_first": 133,
+     "t_last": 133,
+     "max_force_N": 0.97,
+     "fruit": "orange",
+     "grasp_state": "latched",
+     "mjcf_bodies": [
+      "EE_BODY_R"
+     ],
+     "mjcf_meshes": [
+      "EE_BODY_collision_2"
+     ],
+     "n_contact_points": 2,
+     "server_gap_own_mm_min_med_max": [
+      30.75,
+      30.81,
+      30.86
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      15.18,
+      15.25,
+      15.31
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      3.56,
+      3.62,
+      3.67
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      3.56,
+      3.62,
+      3.67
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -0.26,
+      -0.25,
+      -0.25
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -0.26,
+      -0.25,
+      -0.25
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.68,
+      -1.59,
+      -1.5
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.68,
+      -1.59,
+      -1.5
+     ],
+     "contact_point_body_mm_mean": [
+      -33.8,
+      -27.9,
+      -73.2
+     ]
+    },
+    {
+     "arm": "C0",
+     "name": "C0_ep54_s542",
+     "t_first": 138,
+     "t_last": 140,
+     "max_force_N": 3.97,
+     "fruit": "orange",
+     "grasp_state": "latched",
+     "mjcf_bodies": [
+      "EE_BODY_R"
+     ],
+     "mjcf_meshes": [
+      "EE_BODY_collision_2"
+     ],
+     "n_contact_points": 4,
+     "server_gap_own_mm_min_med_max": [
+      30.58,
+      30.58,
+      30.66
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      10.29,
+      10.3,
+      10.33
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      3.39,
+      3.4,
+      3.47
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      3.39,
+      3.4,
+      3.47
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -0.27,
+      -0.25,
+      -0.24
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -0.27,
+      -0.25,
+      -0.24
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.33,
+      -1.26,
+      -1.21
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.33,
+      -1.26,
+      -1.21
+     ],
+     "contact_point_body_mm_mean": [
+      -34.1,
+      -27.9,
+      -73.2
+     ]
+    },
+    {
+     "arm": "C1a",
+     "name": "C1a_ep30_s301",
+     "t_first": 107,
+     "t_last": 112,
+     "max_force_N": 3.81,
+     "fruit": "pear",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "EE_BODY_R"
+     ],
+     "mjcf_meshes": [
+      "EE_BODY_collision_2"
+     ],
+     "n_contact_points": 6,
+     "server_gap_own_mm_min_med_max": [
+      24.09,
+      24.12,
+      24.14
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      23.55,
+      23.66,
+      24.12
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -3.1,
+      -3.06,
+      -3.04
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -3.1,
+      -3.06,
+      -3.04
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.9,
+      -1.72,
+      -1.61
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.9,
+      -1.72,
+      -1.61
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.69,
+      -1.61,
+      -1.39
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.69,
+      -1.61,
+      -1.39
+     ],
+     "contact_point_body_mm_mean": [
+      -41.6,
+      -28.1,
+      -52.0
+     ]
+    },
+    {
+     "arm": "C1a",
+     "name": "C1a_ep3_s31",
+     "t_first": 224,
+     "t_last": 224,
+     "max_force_N": 5.91,
+     "fruit": "banana",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 2,
+     "server_gap_own_mm_min_med_max": [
+      -0.9,
+      -0.82,
+      -0.73
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -0.9,
+      -0.82,
+      -0.73
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -0.9,
+      -0.82,
+      -0.73
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -0.9,
+      -0.82,
+      -0.73
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -0.9,
+      -0.82,
+      -0.73
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -0.9,
+      -0.82,
+      -0.73
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -0.9,
+      -0.82,
+      -0.73
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -0.9,
+      -0.82,
+      -0.73
+     ]
+    },
+    {
+     "arm": "C1a",
+     "name": "C1a_ep3_s31",
+     "t_first": 233,
+     "t_last": 244,
+     "max_force_N": 3.39,
+     "fruit": "banana",
+     "grasp_state": "held",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 13,
+     "server_gap_own_mm_min_med_max": [
+      -1.33,
+      -0.84,
+      -0.81
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -1.33,
+      -0.84,
+      -0.81
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -1.33,
+      -0.84,
+      -0.81
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -1.33,
+      -0.84,
+      -0.81
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.33,
+      -0.84,
+      -0.81
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.33,
+      -0.84,
+      -0.81
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.33,
+      -0.84,
+      -0.81
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.33,
+      -0.84,
+      -0.81
+     ]
+    },
+    {
+     "arm": "C1a",
+     "name": "C1a_ep3_s31",
+     "t_first": 256,
+     "t_last": 259,
+     "max_force_N": 5.68,
+     "fruit": "banana",
+     "grasp_state": "held",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 5,
+     "server_gap_own_mm_min_med_max": [
+      -1.26,
+      -0.84,
+      -0.82
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -1.26,
+      -0.84,
+      -0.82
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -1.26,
+      -0.84,
+      -0.82
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -1.26,
+      -0.84,
+      -0.82
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.26,
+      -0.84,
+      -0.82
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.26,
+      -0.84,
+      -0.82
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.26,
+      -0.84,
+      -0.82
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.26,
+      -0.84,
+      -0.82
+     ]
+    },
+    {
+     "arm": "C1a",
+     "name": "C1a_ep3_s31",
+     "t_first": 261,
+     "t_last": 262,
+     "max_force_N": 0.36,
+     "fruit": "banana",
+     "grasp_state": "held",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 3,
+     "server_gap_own_mm_min_med_max": [
+      -0.48,
+      -0.2,
+      -0.15
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -0.48,
+      -0.2,
+      -0.15
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -0.48,
+      -0.2,
+      -0.15
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -0.48,
+      -0.2,
+      -0.15
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -0.48,
+      -0.2,
+      -0.15
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -0.48,
+      -0.2,
+      -0.15
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -0.48,
+      -0.2,
+      -0.15
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -0.48,
+      -0.2,
+      -0.15
+     ]
+    },
+    {
+     "arm": "C1a",
+     "name": "C1a_ep3_s31",
+     "t_first": 264,
+     "t_last": 270,
+     "max_force_N": 6.31,
+     "fruit": "banana",
+     "grasp_state": "latched",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 8,
+     "server_gap_own_mm_min_med_max": [
+      -1.11,
+      -0.96,
+      -0.09
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -1.11,
+      -0.96,
+      -0.09
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -1.11,
+      -0.96,
+      -0.09
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -1.11,
+      -0.96,
+      -0.09
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.11,
+      -0.96,
+      -0.09
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.11,
+      -0.96,
+      -0.09
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.11,
+      -0.96,
+      -0.09
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.11,
+      -0.96,
+      -0.09
+     ]
+    },
+    {
+     "arm": "C1a",
+     "name": "C1a_ep3_s32",
+     "t_first": 356,
+     "t_last": 362,
+     "max_force_N": 14.77,
+     "fruit": "banana",
+     "grasp_state": "placed",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 8,
+     "server_gap_own_mm_min_med_max": [
+      -0.81,
+      -0.36,
+      -0.13
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -0.81,
+      -0.36,
+      -0.13
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -0.81,
+      -0.36,
+      -0.13
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -0.81,
+      -0.36,
+      -0.13
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -0.81,
+      -0.36,
+      -0.13
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -0.81,
+      -0.36,
+      -0.13
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -0.81,
+      -0.36,
+      -0.13
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -0.81,
+      -0.36,
+      -0.13
+     ]
+    },
+    {
+     "arm": "C1a",
+     "name": "C1a_ep54_s541",
+     "t_first": 123,
+     "t_last": 128,
+     "max_force_N": 6.96,
+     "fruit": "orange",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "EE_BODY_R"
+     ],
+     "mjcf_meshes": [
+      "EE_BODY_collision_2"
+     ],
+     "n_contact_points": 6,
+     "server_gap_own_mm_min_med_max": [
+      31.2,
+      31.34,
+      31.41
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      10.21,
+      10.23,
+      10.6
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      4.01,
+      4.15,
+      4.22
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      4.01,
+      4.15,
+      4.22
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -0.69,
+      -0.22,
+      -0.2
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -0.69,
+      -0.22,
+      -0.2
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -2.73,
+      -2.64,
+      -2.57
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -2.73,
+      -2.64,
+      -2.57
+     ],
+     "contact_point_body_mm_mean": [
+      -32.7,
+      -27.9,
+      -72.9
+     ]
+    },
+    {
+     "arm": "C1a",
+     "name": "C1a_ep54_s542",
+     "t_first": 156,
+     "t_last": 160,
+     "max_force_N": 18.13,
+     "fruit": "orange",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "EE_BODY_R"
+     ],
+     "mjcf_meshes": [
+      "EE_BODY_collision_2"
+     ],
+     "n_contact_points": 5,
+     "server_gap_own_mm_min_med_max": [
+      43.08,
+      43.21,
+      43.36
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      19.36,
+      19.53,
+      19.73
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      15.89,
+      16.02,
+      16.17
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      15.89,
+      16.02,
+      16.17
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.06,
+      -0.97,
+      -0.77
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.06,
+      -0.97,
+      -0.77
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -0.64,
+      -0.63,
+      -0.52
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -0.64,
+      -0.63,
+      -0.52
+     ],
+     "contact_point_body_mm_mean": [
+      -15.9,
+      -27.8,
+      -73.2
+     ]
+    },
+    {
+     "arm": "C1b",
+     "name": "C1b_ep30_s302",
+     "t_first": 114,
+     "t_last": 117,
+     "max_force_N": 5.13,
+     "fruit": "pear",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "EE_BODY_R"
+     ],
+     "mjcf_meshes": [
+      "EE_BODY_collision_2"
+     ],
+     "n_contact_points": 5,
+     "server_gap_own_mm_min_med_max": [
+      24.2,
+      24.22,
+      24.38
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      21.78,
+      22.62,
+      23.53
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -2.98,
+      -2.97,
+      -2.81
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -2.98,
+      -2.97,
+      -2.81
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.93,
+      -1.44,
+      -1.31
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.93,
+      -1.44,
+      -1.31
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -2.61,
+      -2.17,
+      -1.73
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -2.61,
+      -2.17,
+      -1.73
+     ],
+     "contact_point_body_mm_mean": [
+      -41.3,
+      -28.2,
+      -53.3
+     ]
+    },
+    {
+     "arm": "C1b",
+     "name": "C1b_ep3_s31",
+     "t_first": 192,
+     "t_last": 193,
+     "max_force_N": 2.26,
+     "fruit": "banana",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 2,
+     "server_gap_own_mm_min_med_max": [
+      -1.66,
+      -1.36,
+      -1.06
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -1.66,
+      -1.36,
+      -1.06
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -1.66,
+      -1.36,
+      -1.06
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -1.66,
+      -1.36,
+      -1.06
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.66,
+      -1.36,
+      -1.06
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.66,
+      -1.36,
+      -1.06
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.66,
+      -1.36,
+      -1.06
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.66,
+      -1.36,
+      -1.06
+     ]
+    },
+    {
+     "arm": "C1b",
+     "name": "C1b_ep3_s31",
+     "t_first": 203,
+     "t_last": 204,
+     "max_force_N": 0.66,
+     "fruit": "banana",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 2,
+     "server_gap_own_mm_min_med_max": [
+      -1.8,
+      -1.19,
+      -0.57
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -1.8,
+      -1.19,
+      -0.57
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -1.8,
+      -1.19,
+      -0.57
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -1.8,
+      -1.19,
+      -0.57
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.8,
+      -1.19,
+      -0.57
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.8,
+      -1.19,
+      -0.57
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.8,
+      -1.19,
+      -0.57
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.8,
+      -1.19,
+      -0.57
+     ]
+    },
+    {
+     "arm": "C1b",
+     "name": "C1b_ep3_s32",
+     "t_first": 238,
+     "t_last": 239,
+     "max_force_N": 1.11,
+     "fruit": "banana",
+     "grasp_state": "latched",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 2,
+     "server_gap_own_mm_min_med_max": [
+      -2.07,
+      -1.83,
+      -1.6
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -2.07,
+      -1.83,
+      -1.6
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -2.07,
+      -1.83,
+      -1.6
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -2.07,
+      -1.83,
+      -1.6
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -2.07,
+      -1.83,
+      -1.6
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -2.07,
+      -1.83,
+      -1.6
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -2.07,
+      -1.83,
+      -1.6
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -2.07,
+      -1.83,
+      -1.6
+     ]
+    },
+    {
+     "arm": "C1b",
+     "name": "C1b_ep3_s32",
+     "t_first": 250,
+     "t_last": 251,
+     "max_force_N": 1.14,
+     "fruit": "banana",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "ee_finger_r2"
+     ],
+     "mjcf_meshes": [
+      "EE_FINGER_collision_2"
+     ],
+     "n_contact_points": 1,
+     "server_gap_own_mm_min_med_max": [
+      -1.52,
+      -1.52,
+      -1.52
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      -1.52,
+      -1.52,
+      -1.52
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      -1.52,
+      -1.52,
+      -1.52
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      -1.52,
+      -1.52,
+      -1.52
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -1.52,
+      -1.52,
+      -1.52
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -1.52,
+      -1.52,
+      -1.52
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -1.52,
+      -1.52,
+      -1.52
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -1.52,
+      -1.52,
+      -1.52
+     ]
+    },
+    {
+     "arm": "C1b",
+     "name": "C1b_ep54_s541",
+     "t_first": 125,
+     "t_last": 128,
+     "max_force_N": 7.23,
+     "fruit": "orange",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "EE_BODY_R"
+     ],
+     "mjcf_meshes": [
+      "EE_BODY_collision_2"
+     ],
+     "n_contact_points": 4,
+     "server_gap_own_mm_min_med_max": [
+      31.91,
+      31.93,
+      31.94
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      10.75,
+      10.8,
+      10.81
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      4.72,
+      4.74,
+      4.76
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      4.72,
+      4.74,
+      4.76
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -0.44,
+      -0.42,
+      -0.4
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -0.44,
+      -0.42,
+      -0.4
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -3.74,
+      -3.7,
+      -3.69
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -3.74,
+      -3.7,
+      -3.69
+     ],
+     "contact_point_body_mm_mean": [
+      -31.8,
+      -28.1,
+      -72.4
+     ]
+    },
+    {
+     "arm": "C1b",
+     "name": "C1b_ep54_s542",
+     "t_first": 150,
+     "t_last": 152,
+     "max_force_N": 4.79,
+     "fruit": "orange",
+     "grasp_state": "closing",
+     "mjcf_bodies": [
+      "EE_BODY_R"
+     ],
+     "mjcf_meshes": [
+      "EE_BODY_collision_2"
+     ],
+     "n_contact_points": 3,
+     "server_gap_own_mm_min_med_max": [
+      31.32,
+      31.42,
+      31.47
+     ],
+     "server_gap_hand_mm_min_med_max": [
+      10.32,
+      10.67,
+      10.7
+     ],
+     "palm_scale1_gap_own_mm_min_med_max": [
+      4.14,
+      4.24,
+      4.28
+     ],
+     "palm_scale1_gap_hand_mm_min_med_max": [
+      4.14,
+      4.24,
+      4.28
+     ],
+     "palm_body_o2.5_gap_own_mm_min_med_max": [
+      -0.63,
+      -0.61,
+      -0.17
+     ],
+     "palm_body_o2.5_gap_hand_mm_min_med_max": [
+      -0.63,
+      -0.61,
+      -0.17
+     ],
+     "palm_body_o5_gap_own_mm_min_med_max": [
+      -2.91,
+      -2.76,
+      -2.69
+     ],
+     "palm_body_o5_gap_hand_mm_min_med_max": [
+      -2.91,
+      -2.76,
+      -2.69
+     ],
+     "contact_point_body_mm_mean": [
+      -32.7,
+      -28.0,
+      -72.7
+     ]
+    }
+   ]
+  },
+  "A4_history": {
+   "T6f": "knob introduced, default 1.0 (AG3S_T0T6_LOG.md:2825-2830, :217)",
+   "T28_user_Q5_2026-09-28": "'gripper capsule 구가 너무 커서인가 — 최대한 작게 구성해서 진행' (handoff/T28.task.md:15); P1-3a asked 0.2 (live: finger 4.7 · palm 8.9 mm) vs 0.1 / 0.05 (T28.task.md:63); E3 server line uses 0.05 (T28.task.md:90, LOG:3012)",
+   "T28_P1-3a_measured": "scale 1.0: left finger sphere inner gap -28.5 mm (fingers' spheres overlap), palm vertices inside 1.0; 0.2: -0.57 mm, palm 0.233; 0.1: +1.67 mm, 0.136; 0.05: +2.35 mm, palm 0.106 (T28.verify.partial.json P1-3a, pose E0_ep1807 t0, fingers pinned closed pre-T29)",
+   "what_0.05_reduced": "every capsule-chain radius: palm 33 -> 6.2 mm, finger 13-17.6 -> 2.6-3.3 mm; purpose = open the space between the fingers (grasp) and be minimal per Q5",
+   "T8e": "palm in the constraint set (pre-T27 trajectory): (ee_left, crate) 18 rows / 3 chunks -6.07 mm remain regardless of finger scale; palm r_crit 29.76 mm (T8e.verify.json:12323)",
+   "T40I_T43R": "fingers covered 4.3 % / palm 16.5 % of surface within 2.5 mm; --gripper-cover both = 1594 spheres (palm 567 each), palm surface <=2.5 mm 0.9988, max 3.94 mm, server start +8-19 s (T43R.impl.md:53-56)",
+   "T43FC": "fingers replaced by finger body spheres (122 -> 270 spheres); TO CPU wall median 43.7/39.7 -> 72.7/56.7 ms (x1.4-1.7, implementer self-measure, pre-TP) (LOG:5907-5921). Palm left as the 0.05 chain",
+   "impact_target": "authorized rows (active arm ee_<side> + 2 fingers, 135 rows) query the target-free layer (server log C1a: authorized = ee_finger_l1/l2/r1/r2, ee_left, ee_right) -> the target itself is excluded for palm spheres of any size; table, crate, neighbour fruit and kept/ambiguous seeds near the target are not (not measured here)",
+   "impact_channel_open": {
+    "server": [
+     69.3,
+     73.7
+    ],
+    "palm_scale1": [
+     107.4,
+     73.7
+    ],
+    "palm_body_o2.5": [
+     76.3,
+     73.7
+    ],
+    "palm_body_o5": [
+     78.8,
+     73.7
+    ]
+   },
+   "impact_rows": {
+    "server": 4320,
+    "palm_scale1": 4320,
+    "palm_body_o2.5": 17824,
+    "palm_body_o5": 7456
+   },
+   "impact_TO_time": "not measured (no server, no TO run)"
+  },
+  "A5_candidates": {
+   "server": {
+    "n_spheres_total": 270,
+    "n_palm_each": 23,
+    "palm_r_mm": [
+     5.7,
+     6.22
+    ],
+    "palm_frac_out": 0.9386,
+    "palm_out_p95_mm": 39.65,
+    "palm_out_max_mm": 54.37,
+    "palm_protrusion_max_mm": 8.59,
+    "palm_union_outside_geom_cm3": 8.22,
+    "channel_tipmost_spheres_vs_mesh_mm_open": [
+     69.3,
+     73.7
+    ],
+    "fingertip_tipmost_mm": 133.8,
+    "lateral_reach_spheres_vs_mesh_mm": [
+     65.6,
+     63.7
+    ],
+    "palm_contact_points_inside_hand_union": [
+     0,
+     35
+    ],
+    "palm_events_all_points_inside": 0,
+    "esdf_query_rows_per_chunk_16xN": 4320,
+    "build_report": null
+   },
+   "palm_scale1": {
+    "n_spheres_total": 270,
+    "n_palm_each": 23,
+    "palm_r_mm": [
+     28.89,
+     33.53
+    ],
+    "palm_frac_out": 0.2003,
+    "palm_out_p95_mm": 20.33,
+    "palm_out_max_mm": 27.13,
+    "palm_protrusion_max_mm": 35.37,
+    "palm_union_outside_geom_cm3": 743.392,
+    "channel_tipmost_spheres_vs_mesh_mm_open": [
+     107.4,
+     73.7
+    ],
+    "fingertip_tipmost_mm": 133.8,
+    "lateral_reach_spheres_vs_mesh_mm": [
+     92.9,
+     63.7
+    ],
+    "palm_contact_points_inside_hand_union": [
+     11,
+     35
+    ],
+    "palm_events_all_points_inside": 2,
+    "esdf_query_rows_per_chunk_16xN": 4320,
+    "build_report": null
+   },
+   "palm_body_o2.5": {
+    "n_spheres_total": 1114,
+    "n_palm_each": 445,
+    "palm_r_mm": [
+     2.51,
+     26.43
+    ],
+    "palm_frac_out": 0.0009,
+    "palm_out_p95_mm": 0.17,
+    "palm_out_max_mm": 0.33,
+    "palm_protrusion_max_mm": 2.6,
+    "palm_union_outside_geom_cm3": 46.243,
+    "channel_tipmost_spheres_vs_mesh_mm_open": [
+     76.3,
+     73.7
+    ],
+    "fingertip_tipmost_mm": 133.8,
+    "lateral_reach_spheres_vs_mesh_mm": [
+     66.2,
+     63.7
+    ],
+    "palm_contact_points_inside_hand_union": [
+     35,
+     35
+    ],
+    "palm_events_all_points_inside": 8,
+    "esdf_query_rows_per_chunk_16xN": 17824,
+    "build_report": {
+     "ee_right": {
+      "n": 445,
+      "r_mm": [
+       2.507033941957217,
+       26.4253663191991
+      ],
+      "build_s": 63.77346110343933,
+      "n_spheres": 445,
+      "overflow_mm": 2.5,
+      "n_targets": 35287,
+      "n_uncovered": 0,
+      "max_gap_mm": 0.0,
+      "overflow_sampled_mm": 2.7331386783034675
+     },
+     "ee_left": {
+      "n": 445,
+      "r_mm": [
+       2.507033941957217,
+       26.4253663191991
+      ],
+      "build_s": 2.9325485229492188e-05,
+      "n_spheres": 445,
+      "overflow_mm": 2.5,
+      "n_targets": 35287,
+      "n_uncovered": 0,
+      "max_gap_mm": 0.0,
+      "overflow_sampled_mm": 2.7331386783034675
+     }
+    }
+   },
+   "palm_body_o5": {
+    "n_spheres_total": 466,
+    "n_palm_each": 121,
+    "palm_r_mm": [
+     5.0,
+     28.97
+    ],
+    "palm_frac_out": 0.0004,
+    "palm_out_p95_mm": 0.16,
+    "palm_out_max_mm": 0.17,
+    "palm_protrusion_max_mm": 5.04,
+    "palm_union_outside_geom_cm3": 95.794,
+    "channel_tipmost_spheres_vs_mesh_mm_open": [
+     78.8,
+     73.7
+    ],
+    "fingertip_tipmost_mm": 133.8,
+    "lateral_reach_spheres_vs_mesh_mm": [
+     67.8,
+     63.7
+    ],
+    "palm_contact_points_inside_hand_union": [
+     35,
+     35
+    ],
+    "palm_events_all_points_inside": 8,
+    "esdf_query_rows_per_chunk_16xN": 7456,
+    "build_report": {
+     "ee_right": {
+      "n": 121,
+      "r_mm": [
+       5.000448389365512,
+       28.965807088528997
+      ],
+      "build_s": 24.31385374069214,
+      "n_spheres": 121,
+      "overflow_mm": 5.0,
+      "n_targets": 35287,
+      "n_uncovered": 0,
+      "max_gap_mm": 0.0,
+      "overflow_sampled_mm": 5.118223476175807
+     },
+     "ee_left": {
+      "n": 121,
+      "r_mm": [
+       5.000448389365512,
+       28.965807088528997
+      ],
+      "build_s": 4.124641418457031e-05,
+      "n_spheres": 121,
+      "overflow_mm": 5.0,
+      "n_targets": 35287,
+      "n_uncovered": 0,
+      "max_gap_mm": 0.0,
+      "overflow_sampled_mm": 5.118223476175807
+     }
+    }
+   }
+  }
+ },
+ "figures": [
+  {
+   "path": "benchmark/ag3s/docs/figures/t45/t45-scene.png",
+   "kind": "scene"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t45/t45-graph.png",
+   "kind": "graph"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t45/t45-table.png",
+   "kind": "table"
+  }
+ ],
+ "baseline_check": {
+  "matched": null,
+  "note": "regression-baseline not run: audit is read-only offline geometry on the T44d snapshot, no server / no code change. Sphere model reproduced: 270 spheres, palm 23 x 6.22 mm, finger 56 x 2.5-8.4 mm = server log serve_safe.log:62-84; T43R palm surface <=2.5 mm 0.165 / max 53.2 / p95 37.5 vs here frac_out_gt2p5mm 0.848 (i.e. 0.152 within) / max 54.4 / p95 39.6"
+ },
+ "verdict": "Fingers: server finger spheres contain the MJCF finger hulls (frac out 0.001, max 0.1 mm = sampling); all 16 finger-fruit contact events lie inside the finger spheres (gap -2.4..-0.09 mm) -> no sphere fix indicated for fingers. Palm: 0.939 of the exposed palm surface is outside the palm spheres (p95 39.6, max 54.4 mm; whole-hand union max 33-51 mm); all 8 palm-fruit events (C0 2, C1a 3, C1b 3) touched EE_BODY_collision_2 at points 24-43 mm outside the palm spheres and 10-24 mm outside the whole-hand union -> palm under-approximation is a geometry gap: fix indicated for the palm only. Candidates (offline, not implemented): (a) palm scale 1.0 via existing --capsule-radius-scale-link ee_left=1 ee_right=1: 0 extra spheres, but palm frac out 0.200 (max 27.1 mm), 11/35 palm contact points inside, and spheres extend 33.7 mm further tip-ward into the finger channel and 29.2 mm beyond the mesh along the finger axis; (b) palm body cover (FC algorithm applied to the palm, new code path) overflow 5 mm: +98 spheres per palm (466 total, ESDF rows 7456/chunk), frac out 0.000, max protrusion 5.0 mm, channel +5.1 mm, 35/35 palm contact points inside; (c) same with overflow 2.5 mm: +422 per palm (1114 total, 17824 rows/chunk), protrusion 2.6 mm, 35/35 inside; (d) existing --gripper-cover both: 1594 spheres (T43R). TO-time impact of (b)/(c) not measured.",
+ "not_measured": [
+  "TO wall time with candidate palm models (no server / TO run)",
+  "closed-loop effect of any candidate",
+  "contact location at sub-step resolution (row-start qpos only; points with dist <= 1 mm or penetrating)",
+  "effect of larger palm spheres on table / crate / ambiguous seeds near the target during grasp",
+  "--gripper-cover recomputed here (cited from T43R.impl.md)",
+  "palm body cover with the finger defaults grid 0.5 mm (used 2 mm grid / 1 mm surface)"
+ ]
+}

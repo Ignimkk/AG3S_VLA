@@ -143,8 +143,33 @@ FINGER_COVER_HANDS = {
 }
 
 
+#: T45 A10 — `palm_cover={"hands": ...}` 이 몸통 구로 바꿀 손바닥 link.
+PALM_COVER_HANDS = {
+    "both": PALM_LINKS,
+    "left": ("ee_left",),
+    "right": ("ee_right",),
+}
+
+
+def _replace_link_capsules(gap: list, body: list) -> list:
+    """`gap` 에서 `body` 가 가진 link 의 capsule 을 지우고, 그 link 의 첫 capsule 자리에 `body` 의 그 link
+    구를 넣는다 — 다른 link 의 순서 · 값은 그대로 (T43 FC 손가락 · T45 A10 손바닥 몸통 구)."""
+    by_link: dict = {}
+    for cap in body:
+        by_link.setdefault(cap.link, []).append(cap)
+    new_gap, placed = [], set()
+    for cap in gap:
+        if cap.link in by_link:
+            if cap.link not in placed:
+                new_gap.extend(by_link[cap.link])
+                placed.add(cap.link)
+            continue
+        new_gap.append(cap)
+    return new_gap
+
+
 def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options=None,
-                                 gripper_cover=None, finger_cover=None):
+                                 gripper_cover=None, finger_cover=None, palm_cover=None):
     """제약에 쓰는 모델. 자기 필터 모델과 **일부러 다르다**.
 
     제약 행은 최적화기가 실제로 움직일 수 있는 구에만 의미가 있다. RB-Y1 의 결정 변수는 양팔
@@ -181,6 +206,15 @@ def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options
     collision mesh 전부 (파지 면 포함) 를 담고 `overflow` (기본 2.5 mm) 넘게 나가지 않는다. 손바닥 ·
     다른 link 의 구는 순서 · 값 그대로 (손가락 구는 원래 손가락 capsule 이 있던 자리에 들어간다).
     결과는 `model.finger_cover_report`. `gripper_cover` 와 같이 주면 덮개는 바뀐 모델 위에서 만든다.
+
+    `palm_cover` (T45 A10, 기본 `None` = 꺼짐): `None`/`False`/`{}` 면 위 모델 그대로 (이 인자가 없던 때와 글자
+    그대로 같다). `True` 또는 `dict` (`hands` = `PALM_COVER_HANDS` 의 키, `overflow` = m, 기본
+    `gripper_cover.PALM_COVER_OVERFLOW` 5 mm) 이면 손바닥 link 의 gap-filling capsule 사슬을 **손바닥 몸통 구**
+    (`gripper_cover.palm_body_capsules` = 손가락 몸통 구와 같은 계산) 로 바꾼다 — 손바닥 collision mesh 전부를
+    담고 `overflow` 넘게 나가지 않는다. 손바닥 구는 원래 손바닥 capsule 이 있던 자리 (모델 맨 앞) 에 들어가고
+    다른 link 의 구는 순서 · 값 그대로다. link 이름은 그대로 `ee_<side>` 이므로 접촉 권한 (`contact_links`) ·
+    target-free 조회는 손바닥 구 전부에 그대로 걸린다. 결과는 `model.palm_cover_report`. `finger_cover` 와
+    같이 주면 둘 다 바꾸고, `gripper_cover` 는 바뀐 모델 위에서 만든다.
     """
     from benchmark.ag3s.experiments.sources.mujoco_source import HEAD_JOINTS, gap_filling_capsules
     from benchmark.ag3s.robot_models import RBY1_URDF, UrdfSphereChain, parse_urdf
@@ -209,19 +243,8 @@ def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options
         f_links = [n for n in FINGER_COVER_HANDS[f_hands] if n in set(model.sphere_link_names)]
         body, per_link = finger_body_capsules(scene.model, model, f_links, overflow=overflow,
                                               **reduce)
-        by_link: dict = {}
-        for cap in body:
-            by_link.setdefault(cap.link, []).append(cap)
         # 손가락 capsule 이 있던 자리에 그 손가락의 몸통 구를 넣는다 — 앞의 손바닥 구 순서가 그대로다.
-        new_gap, placed = [], set()
-        for cap in gap:
-            if cap.link in by_link:
-                if cap.link not in placed:
-                    new_gap.extend(by_link[cap.link])
-                    placed.add(cap.link)
-                continue
-            new_gap.append(cap)
-        gap = new_gap
+        gap = _replace_link_capsules(gap, body)
         n_before = model.n_spheres
         model = UrdfSphereChain(urdf, extra_capsules=gap,
                                 fixed_joint_values=head, link_filter=link_filter,
@@ -230,6 +253,36 @@ def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options
                          "n_spheres_before": n_before, "n_spheres_after": model.n_spheres,
                          "links": per_link}
         model.finger_cover_report = finger_report
+    palm_report = None
+    if palm_cover:
+        import math
+
+        from benchmark.ag3s.experiments.sources.gripper_cover import (
+            PALM_COVER_OVERFLOW, palm_body_capsules)
+
+        p_opts = dict(palm_cover) if isinstance(palm_cover, dict) else {}
+        p_hands = str(p_opts.pop("hands", "both"))
+        if p_hands not in PALM_COVER_HANDS:
+            raise ValueError(
+                f"palm_cover hands 는 {sorted(PALM_COVER_HANDS)} 중 하나: {p_hands!r}")
+        p_overflow = float(p_opts.pop("overflow", PALM_COVER_OVERFLOW))
+        if not (math.isfinite(p_overflow) and p_overflow > 0.0):
+            raise ValueError(f"palm_cover overflow 는 0 보다 커야 합니다 (m): {p_overflow}")
+        if p_opts:
+            raise ValueError(f"palm_cover 의 모르는 키: {sorted(p_opts)}")
+        p_links = [n for n in PALM_COVER_HANDS[p_hands] if n in set(model.sphere_link_names)]
+        body, per_link = palm_body_capsules(scene.model, model, p_links, overflow=p_overflow)
+        gap = _replace_link_capsules(gap, body)
+        n_before = model.n_spheres
+        model = UrdfSphereChain(urdf, extra_capsules=gap,
+                                fixed_joint_values=head, link_filter=link_filter,
+                                **dict(sphere_options or {}))
+        palm_report = {"options": {"hands": p_hands, "overflow": p_overflow},
+                       "n_spheres_before": n_before, "n_spheres_after": model.n_spheres,
+                       "links": per_link}
+        model.palm_cover_report = palm_report
+        if finger_report is not None:
+            model.finger_cover_report = finger_report
     if not gripper_cover:
         return model
     from benchmark.ag3s.experiments.sources.gripper_cover import outer_cover_capsules
@@ -248,6 +301,8 @@ def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options
                                     "n_cover_spheres": len(cover), "links": report}
     if finger_report is not None:
         covered.finger_cover_report = finger_report
+    if palm_report is not None:
+        covered.palm_cover_report = palm_report
     return covered
 
 

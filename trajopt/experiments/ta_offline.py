@@ -140,6 +140,8 @@ _CAP = lambda n: {"qp": {"max_iter": int(n), "accept_max_iter": True}}  # noqa: 
 _IT2 = {"sqp": {"max_iterations": 2, "min_iterations": 2}}
 _ILP = {"_server_args": ["--finger-cover-solver", "ilp"]}
 _HM = {"collision": {"esdf_host_mirror": True}}
+#: T45 A10 — palm body spheres (`--palm-cover on`) on the solver's own robot model.
+_PC = {"_server_args": ["--palm-cover", "on"]}
 
 #: T43 TP — compute-time candidates, each on top of V11AB (`A16qB20`). `fe` (`sqp.fast_eval`) is
 #: bit-identical, so it is in every candidate below `TPfe` only to make the offline pass faster.
@@ -174,6 +176,8 @@ VARIANTS.update({
     "TPwi_e3n_cap1k_hm": _tp(_FE, _WI, _E3N, _CAP(1000), _HM),
     "TPwi_e3n_cap1k_wl2_hm": _tp(_FE, _WI, _E3N, _CAP(1000), _IT2, _HM,
                                  {"sqp": {"warm_start_lookahead": True}}),
+    # T45 A10 — the recorded server config with `--palm-cover on` (V-T45 offline TO time / grasp)
+    "PC": dict(_PC),
 })
 
 
@@ -221,6 +225,9 @@ def build_robot(args):
     fc = serve_safe.finger_cover_options(args)
     if fc:
         cover["finger_cover"] = fc
+    pc = serve_safe.palm_cover_options(args)            # T45 A10 (off → no key)
+    if pc:
+        cover["palm_cover"] = pc
     robot = build_constraint_robot_model(
         scene, link_filter=serve_safe.constraint_link_filter(args.links),
         sphere_options=serve_safe.sphere_options(args), **cover)

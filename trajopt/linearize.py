@@ -264,6 +264,14 @@ class SceneSnapshot:
     #: layer lost — AG3S `ball_owned`, where the ball also holds kept non-target seeds). Set to
     #: `"layer_diff"` only with `target_permission_strict` and `exclusion_method == "ball_owned"`.
     target_membership: str = "ball"
+    #: **T44e A9** — `(S,)` bool, AG3S `CollisionConstraintSet.nonauthorized_target_rows`
+    #: (`contact.nonauthorized_target_margin == "obstacle"`, nothing held): a robot row marked here is never a
+    #: target row for the **margin** — `_esdf_clearance_core` does not give it `manipulated_link_margin`
+    #: (`is_object`) and `_obstacle_rows` does not call it `target`, so it gets exactly what an obstacle row
+    #: gets (`esdf_margin`, or `max(esdf_margin, obstacle_margin)` with `obstacle_margin > 0`). `None`
+    #: (default) = as before. The look-ahead tail and sweep target tests are not touched (they follow
+    #: `target_permission_strict`); the verdict still calls any violation of such a row `unauthorized_link`.
+    nonauthorized_target_rows: Optional[np.ndarray] = None
 
     @property
     def has_esdf(self) -> bool:
@@ -981,6 +989,11 @@ class CollisionLinearizer:
                     per_link = np.concatenate(
                         [per_link, np.full(n_query - per_link.shape[0], float(scene.esdf_margin))]
                     )
+                nonauth = self._nonauthorized_target_rows(scene, n_query)
+                if nonauth is not None:
+                    # T44e A9 — a row whose link may not touch the target is not a target row here:
+                    # it keeps the obstacle rule below (the same clearance as any obstacle row).
+                    is_object &= ~nonauth[None, :]
                 margin = np.where(is_object, per_link[None, :], margin)
         if obstacle_margin > 0.0:
             # T41 a — target 이 아닌 장애물에만 여유. 위의 어느 규칙과도 행이 겹치지 않는다:
@@ -1118,6 +1131,11 @@ class CollisionLinearizer:
         # T44 I2 — with `target_permission_strict` a row is `target` only if its link may touch the
         # target (`target_contact`); off, `None` and the two tests below are unchanged.
         contact = self.target_contact(scene, d.shape[1])
+        nonauth = self._nonauthorized_target_rows(scene, d.shape[1])
+        if nonauth is not None:
+            # T44e A9 — the same restriction for the margin classes, strict or not: a row that may not
+            # touch the target is an obstacle row next to it (`nonauthorized_target_rows`).
+            contact = ~nonauth if contact is None else contact & ~nonauth
         if d_object is not None:
             hit = np.abs(d - d_object) <= tol
             if contact is not None:
@@ -1258,6 +1276,22 @@ class CollisionLinearizer:
         inside = ((d_free - d_main) > tol).reshape(shape)
         inside[:, self.n_spheres:] = False
         return inside
+
+    @staticmethod
+    def _nonauthorized_target_rows(scene: SceneSnapshot, n_query: int) -> Optional[np.ndarray]:
+        """T44e A9 — `(n_query,)` bool: robot rows whose link may **not** touch the target, or `None`
+        when `scene.nonauthorized_target_rows` is `None` (as before).
+
+        On: `scene.nonauthorized_target_rows` on the robot rows; the held query points are `False` (their
+        own rules — AG3S sets the vector only when nothing is held).
+        """
+        rows = getattr(scene, "nonauthorized_target_rows", None)
+        if rows is None:
+            return None
+        rows = np.asarray(rows, bool).reshape(-1)[:n_query]
+        out = np.zeros(n_query, bool)
+        out[:rows.shape[0]] = rows
+        return out
 
     @staticmethod
     def target_contact(scene: SceneSnapshot, n_query: int) -> Optional[np.ndarray]:
@@ -2142,6 +2176,17 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
             contact_rows = held_rows
     if contact_rows is not None:
         obstacle["target_contact_rows"] = contact_rows
+    # T44e A9 — AG3S `contact.nonauthorized_target_margin == "obstacle"`: the rows whose link may not touch
+    # the target avoid it with the obstacle rows' clearance. AG3S sends the vector only when nothing is
+    # held (carry rules unchanged); checked again here.
+    nonauth_rows = getattr(constraint_set, "nonauthorized_target_rows", None)
+    if nonauth_rows is not None and attached is None:
+        nonauth_rows = np.asarray(nonauth_rows, bool).reshape(-1)
+        if nonauth_rows.shape[0] != radii.size:
+            raise ValueError(
+                f"nonauthorized_target_rows has {nonauth_rows.shape[0]} entries but {radii.size} "
+                "robot radii were given; the optimizer and AG3S must share one constraint model")
+        obstacle["nonauthorized_target_rows"] = nonauth_rows
     if strict:
         obstacle["target_permission_strict"] = True
         if attached is None and exclusion_method_of(getattr(constraint_set, "esdf", None)) \

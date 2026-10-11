@@ -219,8 +219,15 @@ EXACT_SPHERE_ROLE = "gripper_outer_cover"
 #: geometry (the grasp face included), so `gripper_openings` and `grasp_limits` read them.
 FINGER_BODY_ROLE = "finger_body"
 
+#: T45 A10 — `UrdfCapsule.role` of the **palm body spheres** (`gripper_cover.palm_body_capsules`,
+#: `serve_safe --palm-cover on`). Same construction as `FINGER_BODY_ROLE` applied to the palm
+#: (`ee_left` / `ee_right`, MJCF `EE_BODY_*` collision meshes): they *replace* the palm's
+#: gap-filling capsule chain and their union contains the palm mesh, leaving it by at most the
+#: palm overflow (5 mm). Exact radius for the same reason.
+PALM_BODY_ROLE = "palm_body"
+
 #: Roles whose sphere radius is used as is (no `capsule_radius_scale`, no spacing inflation).
-EXACT_SPHERE_ROLES = frozenset({EXACT_SPHERE_ROLE, FINGER_BODY_ROLE})
+EXACT_SPHERE_ROLES = frozenset({EXACT_SPHERE_ROLE, FINGER_BODY_ROLE, PALM_BODY_ROLE})
 
 
 @dataclasses.dataclass(frozen=True)

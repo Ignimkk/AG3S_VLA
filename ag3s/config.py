@@ -1095,6 +1095,24 @@ class EsdfConfig:
     #: A5 기록 (이 키 없이 coarse on) 을 다시 돌릴 때는 `"guard"` 를 명시해야 같다.
     target_free_coarse_sign_floor: str = "plane"
     TARGET_FREE_COARSE_SIGN_FLOORS = ("guard", "plane")
+    #: **T44e A8 — `coarse_no_target` 에 지원면 (table) seed 를 넣는가** (`target_free_coarse` 가 켜졌을 때만 쓴다).
+    #:
+    #: | 값 | 뜻 |
+    #: |---|---|
+    #: | `"keep"` (기본) | T44c A5–A7 그대로 — 테이블 seed 가 거친 계층에 남는다 (seed guard = 지원면 + 20 mm) |
+    #: | `"exclude"` | 공 아래 지원면 (`AG3S._support_plane_z` 가 고르는 면) 의 seed 를 거친 계층에서 지운다 — 그 면의 inlier 점 근거가 있고 (`curobo_builder._coarse_support_exclusion`), 면에서 seed 띠 (0.9 · 거친 voxel) 안이며, non-target 관측점이 띠 안에 없는 seed. 공의 seed guard 는 공의 `z_min` (미세와 같은 m 값) 으로 내린다 — guard 는 테이블 seed 를 지키려던 것이다. 테이블은 미세 `f` 와 창 밖 `d` 가 답한다 |
+    #:
+    #: 왜 (사용자 판정 2026-10-11, `T44dA.verify.json` Q1): 거친 계층의 테이블 seed (표면 ±18 mm 가 값 0) 가 공 아래
+    #: target-free 거리의 zero level 을 0 → 11.5 mm 로 들어 올려 TO 가 손을 들었다 (C1b 파지 7/18).
+    #: 기본 `"keep"` 은 비트 동일이다 — `target_free_coarse` off 이거나 keep 이면 이 값은 아무것도 바꾸지 않는다.
+    #:
+    #: **T44e A8b — `"exclude_target"`** (사용자 판정 2026-10-11 "이웃 과일 아래 support 만 남김"): `"exclude"` 와 같은 지원면
+    #: seed 중 **target 발자국 안 · non-target 발자국 밖** 의 것만 지운다 (`curobo_builder._coarse_support_footprints`).
+    #: 발자국 = 지원면 위 그림자 — target 은 공 원판 (반지름 + 팽창) ∪ target 점, non-target 은 지원면 위
+    #: `support_surface.distance_threshold` 초과 관측점; 팽창은 둘 다 `√2 · 거친 voxel` (trilinear 읽기의 평면 대각 도달).
+    #: 겹치면 남긴다. 그 밖의 지원면 seed 도 남는다. A8 smoke: `"exclude"` 는 distractor 바닥 띠 (지원면 위 0–15 mm) 를 off 수준으로 풀었다.
+    target_free_coarse_support: str = "keep"
+    TARGET_FREE_COARSE_SUPPORTS = ("keep", "exclude", "exclude_target")
 
     #: 미세 창(과 target 없는 창)을 **어디에** 놓나 (T21, 지침 §5.1). cuRobo 의 ESDF 격자 shape 이
     #: 계층마다 같아서 창의 **크기**는 고정이다 (128³ × `fine_voxel_size`) — 정하는 것은 위치다.
@@ -1170,6 +1188,10 @@ class EsdfConfig:
             raise AG3SConfigError(
                 f"esdf.target_free_coarse_sign_floor 는 {self.TARGET_FREE_COARSE_SIGN_FLOORS} 중 하나여야 "
                 f"합니다: {self.target_free_coarse_sign_floor!r}")
+        if self.target_free_coarse_support not in self.TARGET_FREE_COARSE_SUPPORTS:
+            raise AG3SConfigError(
+                f"esdf.target_free_coarse_support 는 {self.TARGET_FREE_COARSE_SUPPORTS} 중 하나여야 "
+                f"합니다: {self.target_free_coarse_support!r}")
         for name in ("fine_voxel_size", "tsdf_voxel_size"):
             v = getattr(self, name)
             if v is not None and float(v) <= 0.0:
@@ -1274,8 +1296,26 @@ class ContactConfig:
     phase_rules: dict[str, PhaseRule] = dataclasses.field(
         default_factory=lambda: dict(DEFAULT_TARGET_PHASE_RULES)
     )
+    #: **T44e A9 — 접촉 권한이 없는 link 이 manipulated target 을 피하는 여유 (ESDF 경로).**
+    #:
+    #: | 값 | 뜻 |
+    #: |---|---|
+    #: | `"full"` (기본) | 지금 그대로 — 그 행의 최근접 표면이 target 이면 (`|d − d_object| ≤ voxel`) `manipulated_link_margin` 의 그 행 값 `full_margin(TARGET)` (= `geometry.safety_margin`, 50 mm) |
+    #: | `"obstacle"` | target 을 **일반 obstacle 과 같은 여유**로 피한다 — trajopt 가 그 행을 target 판정 (`is_object` · `_obstacle_rows` 의 target class) 에서 빼므로 obstacle 행과 같은 규칙 (`esdf_margin`, `obstacle_margin > 0` 이면 `max(esdf_margin, obstacle_margin)`) 을 받는다 |
+    #:
+    #: 접촉 금지는 어느 쪽이든 그대로다 (`safe_policy` verdict 의 `unauthorized_link`). 권한 link 의 phase 여유,
+    #: `collision.target_permission_strict`, 쥔 뒤 (carry) 의 규칙은 바꾸지 않는다 — 쥔 물체가 있으면 이 값은 읽히지 않는다.
+    #: primitive 경로 (`margin_matrix`) 는 이미 같다: 비권한 link 의 TARGET 칸 = `OBJECT` 칸 = `safety_margin`.
+    #: 왜 (사용자 판정 2026-10-11, `T44dA.verify.json` Q2): `--links arms` 에서 `link_*_arm_5` 가 target 앞 50 mm 를 요구해
+    #: 손이 target 에 못 갔다 (C2 0/18).
+    nonauthorized_target_margin: str = "full"
+    NONAUTHORIZED_TARGET_MARGINS = ("full", "obstacle")
 
     def validate(self) -> None:
+        if self.nonauthorized_target_margin not in self.NONAUTHORIZED_TARGET_MARGINS:
+            raise AG3SConfigError(
+                f"contact.nonauthorized_target_margin 은 {self.NONAUTHORIZED_TARGET_MARGINS} 중 하나여야 "
+                f"합니다: {self.nonauthorized_target_margin!r}")
         for name, rule in self.phase_rules.items():
             Phase.parse(name)  # raises on an unknown phase name
             rule.validate(name)

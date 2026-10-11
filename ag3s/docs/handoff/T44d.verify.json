@@ -1,0 +1,7058 @@
+{
+ "_comment": "ag3s-verifier. numbers and paths only.",
+ "step": "T44d",
+ "date": "2026-10-10",
+ "runs": [
+  {
+   "id": "CL-closed-loop-72",
+   "command": "outputs/verify/T44/CL/p/launch_all.sh (3 blocks x 2 rounds x 2 servers, ports 8280/8281; p/run_client.sh, p/start_server.sh); then p/run_replays_cl.sh, p/analyze_cl.py, p/agg_cl.py, p/fig_cl.py (MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/work-t44cl, .venv-openpi-live)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "outputs/verify/T44/CL/agg.json",
+   "stdout_log": "outputs/verify/T44/CL/runs/launch_all.out"
+  }
+ ],
+ "code_state": {
+  "repo": "benchmark",
+  "head": "f891abe (git archive -> /mnt/dev/work-t44cl/benchmark)",
+  "pi05_rby1_trees": "copied from /mnt/dev/work-t43v11 (== work-t43w3 fce4af8, same as LB2 E0 runs)",
+  "code_md5": "outputs/verify/T44/CL/p/code_md5_cl.txt (every chain: 'code md5 == CL-0')",
+  "dirty_files": []
+ },
+ "design": {
+  "arms": {
+   "C0": "V11AB flags + --to-fast-eval --esdf-host-mirror",
+   "C1a": "C0 + --target-exclusion ball-owned --owned-max-dist-voxels 3 --attention-split-radius-mm 12 --attention-split-ratio-source raw --target-permission-strict",
+   "C1b": "C1a + --target-free-coarse (sign floor default plane)",
+   "C2": "C1b + --links arms"
+  },
+  "episodes": [
+   12,
+   30,
+   0,
+   3,
+   11,
+   54,
+   123,
+   104,
+   110
+  ],
+  "episodes_info": {
+   "12": {
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "bin": "lt_0.08",
+    "nn_xy_m": 0.07975949592399645,
+    "nn_other_fruit": "orange",
+    "seeds": [
+     121,
+     122
+    ]
+   },
+   "30": {
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "bin": "0.08_0.10",
+    "nn_xy_m": 0.08957848180322106,
+    "nn_other_fruit": "pear",
+    "seeds": [
+     301,
+     302
+    ]
+   },
+   "0": {
+    "target_fruit": "orange",
+    "used_arm": "left",
+    "bin": "0.08_0.10",
+    "nn_xy_m": 0.09491559140415239,
+    "nn_other_fruit": "apple",
+    "seeds": [
+     1,
+     2
+    ]
+   },
+   "3": {
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "bin": "lt_0.08",
+    "nn_xy_m": 0.07717512979010793,
+    "nn_other_fruit": "banana",
+    "seeds": [
+     31,
+     32
+    ]
+   },
+   "11": {
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "bin": "0.08_0.10",
+    "nn_xy_m": 0.08166679784128922,
+    "nn_other_fruit": "orange",
+    "seeds": [
+     111,
+     112
+    ]
+   },
+   "54": {
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "bin": "lt_0.08",
+    "nn_xy_m": 0.07592284424763074,
+    "nn_other_fruit": "orange",
+    "seeds": [
+     541,
+     542
+    ]
+   },
+   "123": {
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "bin": "lt_0.08",
+    "nn_xy_m": 0.07529288850356324,
+    "nn_other_fruit": "banana",
+    "seeds": [
+     1231,
+     1232
+    ]
+   },
+   "104": {
+    "target_fruit": "pear",
+    "used_arm": "left",
+    "bin": "lt_0.08",
+    "nn_xy_m": 0.07861132824218145,
+    "nn_other_fruit": "apple",
+    "seeds": [
+     1041,
+     1042
+    ]
+   },
+   "110": {
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "bin": "lt_0.08",
+    "nn_xy_m": 0.07561270032613576,
+    "nn_other_fruit": "banana",
+    "seeds": [
+     1101,
+     1102
+    ]
+   }
+  },
+  "banana": "0 passed episodes in LB2 passed.json -> none",
+  "n_runs": 72,
+  "n_done_first_attempt": 72,
+  "infra_reruns": 0,
+  "schedule": "3 blocks of 6 (ep,seed) pairs; round 1 = two arms in parallel (ports 8280/8281), round 2 = the other two arms on the same pairs; arm pairs (C0,C1b) and (C1a,C2); block 2 round order swapped",
+  "client_flags": "--safe-remote --safe-timeout 120 --safe-phase approach --safe-manipulators <used_arm> --safe-gate reasons --safe-hold-mode measured --obstacle-stop-distance 0 --viz-avoidance-arrow --max-steps 600 --warmup-steps 1000; no obstacle; --record-constraints on server",
+  "server_start_checks": "run_chain.sh guards passed on all 12 server starts: cmdline flags and log lines (TO target_permission_strict ON; AG3S target_exclusion = ball_owned tie 1.00 max_dist 3.00; attention_split_radius=0.012 ratio_source=raw; TP compute options; finger cover 122->270 (C0,C1a,C1b) or 274->422 plus 'CONSTRAINT SCOPE IS ARMS' (C2); none of ball_owned / strict in C0)",
+  "coarse_check": "server start log has no coarse-tier line; '!!! T44c TARGET-FREE COARSE TIER IS ON ... sign_floor plane' is printed at the first frame. Chain checked after the first run: present with sign_floor plane in C1b and C2, absent in C0 and C1a (chain_*.log 'coarse check ok')"
+ },
+ "definitions": "T44d CL aggregation (verifier, CPU only, numbers only). usage: agg_cl.py OUT_JSON\nInputs: CL/analysis/<NAME>.json (analyze_cl.py), CL/replay/<ARM>_R_<NAME>.{json,npz} (replay_contacts.py), LB2/passed.json.\n\nDefinitions\n  task success      : analyze_t42 success = grasp (target z >= z0 + 50 mm) and place (target centre in the crate interior at the last planning row)\n  Z4 release rule   : T43 CT z4 rule generalised to the episode's target fruit (replay state target_pos instead of apple_pos, contact class hand-target instead of apple-hand):\n                      release_t = (last row with a hand-target contact sub-step) + 1 (must be before the run's end and grasp true); sep_threshold = d(target, finger midpoint at grasp_t) + 30 mm;\n                      sep_kept = d > threshold on every row from the first row >= release_t with d > threshold to the end; released = release_t and sep_kept; success_rel = grasp and released and target in crate at end\n  new contact classes (replay_contacts.py): hand-fruit_other, robot_other-target, robot_other-fruit_other, hand-target (hand = subtree EE_BODY + both fingers of the active arm; robot_other = every other robot geom\n                      incl. the inactive hand; fruit_other = the other three fruit bodies; target = the episode's target fruit)\n  pre-release       : control rows t <= release_t (release_t None: every row)\n  CT success (success_ct) = success and success_rel and no pre-release contact in {hand-fruit_other, robot_other-target, robot_other-fruit_other}   (V11 CT rule, obstacle := neighbour fruit / non-hand link on the target)\n  success_ct_fruit  = same but only {hand-fruit_other, robot_other-fruit_other}\n  grasp (final)     : analyze_t42 grasp ; first grasp ok = grasp and no regrasp (one close before the lift) ; regrasp = >= 2 close commands before the lift (grasp_robust) ; slip = slip_B (rule B)\n  robust grasp      : grasp and not slip_B and not regrasp (grasp_robust robust_grasp), the LB2 selection criterion\nMcNemar exact two-sided: min(b, c) binomial, p = min(1, 2 P) on (episode, seed) pairs.\n",
+ "numbers": {
+  "arms": {
+   "C0": {
+    "t1_success": {
+     "n_runs": 18,
+     "n_with_replay": 18,
+     "task_success": 14,
+     "success_rel": 14,
+     "success_ct": 13,
+     "success_ct_fruit": 13
+    },
+    "t2_grasp": {
+     "grasp_final": 14,
+     "first_grasp_ok": 12,
+     "regrasp_runs": 2,
+     "slip_runs": 0,
+     "robust_grasp": 12,
+     "place": 14,
+     "failure_modes": {
+      "ok": 12,
+      "regrasp": 2,
+      "no_grasp": 4
+     }
+    },
+    "t3_contacts": {
+     "hand-fruit_other": {
+      "runs_any": 3,
+      "contact_rows": 74,
+      "contact_substeps": 1192,
+      "runs_pre_release": 3,
+      "rows_pre_release": 74,
+      "runs_keys": [
+       "ep3_s31",
+       "ep3_s32",
+       "ep54_s542"
+      ]
+     },
+     "robot_other-target": {
+      "runs_any": 0,
+      "contact_rows": 0,
+      "contact_substeps": 0,
+      "runs_pre_release": 0,
+      "rows_pre_release": 0,
+      "runs_keys": []
+     },
+     "robot_other-fruit_other": {
+      "runs_any": 0,
+      "contact_rows": 0,
+      "contact_substeps": 0,
+      "runs_pre_release": 0,
+      "rows_pre_release": 0,
+      "runs_keys": []
+     },
+     "hand-target": {
+      "runs_any": 18,
+      "contact_rows": 2644,
+      "contact_substeps": 85974,
+      "runs_pre_release": 18,
+      "rows_pre_release": 2644,
+      "runs_keys": [
+       "ep12_s121",
+       "ep12_s122",
+       "ep30_s301",
+       "ep30_s302",
+       "ep0_s1",
+       "ep0_s2",
+       "ep3_s31",
+       "ep3_s32",
+       "ep11_s111",
+       "ep11_s112",
+       "ep54_s541",
+       "ep54_s542",
+       "ep123_s1231",
+       "ep123_s1232",
+       "ep104_s1041",
+       "ep104_s1042",
+       "ep110_s1101",
+       "ep110_s1102"
+      ]
+     },
+     "any_new_class_contact_runs": 3
+    },
+    "t4_hold": {
+     "hold_chunks_total": 140,
+     "hold_runs": 5,
+     "hold_chunks_per_run_median": 0.0,
+     "hold_chunks_per_run_max": 63,
+     "trailing_hold_runs": 3,
+     "ipc_unsafe_chunks": 140,
+     "comms_fail_runs (ipc timeout|stale|error)": 0,
+     "comms_fail_chunks": 0,
+     "ipc_other_chunks": 0,
+     "run_timeouts (client exit != 0 / incomplete)": 0,
+     "obstacle_stop_runs": 0,
+     "hold_kinds": {
+      "unverified": 46,
+      "collision": 66,
+      "uncertified": 74
+     },
+     "run_wall_s": {
+      "n": 18,
+      "median": 292.5,
+      "p90": 315.6,
+      "mean": 294.77777777777777,
+      "max": 319.0
+     }
+    },
+    "t5_timing": {
+     "to_ms_server_trajopt_pooled": {
+      "n": 1332,
+      "median": 167.07799956202507,
+      "p90": 534.1247263364497,
+      "mean": 249.5545907080308,
+      "max": 1284.163936972618
+     },
+     "ag3s_ms_server_ag3s_pooled": {
+      "n": 1332,
+      "median": 310.1379405707121,
+      "p90": 548.3234397135675,
+      "mean": 363.2177073108564,
+      "max": 1365.5939912423491
+     },
+     "server_total_ms_pooled": {
+      "n": 1332,
+      "median": 1107.7846447005868,
+      "p90": 1533.4087788127365,
+      "mean": 1137.5911510444607,
+      "max": 2987.402400933206
+     },
+     "server_infer_ms_pooled": {
+      "n": 1332,
+      "median": 468.57381565496325,
+      "p90": 685.618098732084,
+      "mean": 522.8351790768405,
+      "max": 1250.3156568855047
+     },
+     "client_round_trip_ms_pooled": {
+      "n": 1332,
+      "median": 1399.0834951400757,
+      "p90": 1860.1753473281863,
+      "mean": 1437.0752302733986,
+      "max": 3902.6153087615967
+     },
+     "to_solve_ms_chunks_pooled": {
+      "n": 1332,
+      "median": 129.2090816423297,
+      "p90": 512.383450102061,
+      "mean": 219.10437842825422,
+      "max": 1273.806287907064
+     },
+     "run_medians_trajopt_ms": {
+      "n": 18,
+      "median": 162.36345027573407,
+      "p90": 224.2669354192913,
+      "mean": 199.29768535722462,
+      "max": 667.9630111902952
+     },
+     "run_medians_ag3s_ms": {
+      "n": 18,
+      "median": 310.99671055562794,
+      "p90": 394.24714487977326,
+      "mean": 327.93417096965845,
+      "max": 409.6147515811026
+     },
+     "round_trip_gt_533ms_chunks": 1332,
+     "n_chunks_excl_first": 1332
+    },
+    "t6_trace": {
+     "n_runs_with_server_trace": 18,
+     "split_ran_chunks": 470,
+     "split_triggered_chunks": 394,
+     "split_fired_chunks": 186,
+     "split_decisions_accepted": 197,
+     "split_components": 400,
+     "manipulated_from_split_chunks": 269,
+     "ball_chunks": 547,
+     "n_seeds_in_ball_sum": 518457,
+     "n_removed_sum": 518457,
+     "n_kept_nontarget_sum": 0,
+     "n_ambiguous_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "n_unowned_kept_sum": 0,
+     "chunks_with_kept_nontarget": 0,
+     "coarse_chunks": 0,
+     "coarse_n_shared_kept_sum": 0,
+     "coarse_n_removed_sum": 0,
+     "coarse_n_seeds_in_ball_sum": 0,
+     "coarse_chunks_shared_kept": 0,
+     "perm_chunks_with_exclusion": 547,
+     "path_target_rows_unauthorized_kept_sum": 0,
+     "time_budget_hit_chunks": 0,
+     "runs_with_split_fired": 17,
+     "path_target_rows_unauthorized_kept_present_in_runs": 0,
+     "perm_n_rows_excluded_max": 135,
+     "classify_ms_pooled_run_medians": {
+      "n": 18,
+      "median": 2.37225,
+      "p90": 5.7379000000000016,
+      "mean": 3.244888888888889,
+      "max": 7.7715
+     },
+     "coarse_build_ms_run_medians": null,
+     "to_status_counts": {
+      "feasible": 860,
+      "optimal": 350,
+      "violated": 140
+     }
+    }
+   },
+   "C1a": {
+    "t1_success": {
+     "n_runs": 18,
+     "n_with_replay": 18,
+     "task_success": 15,
+     "success_rel": 15,
+     "success_ct": 12,
+     "success_ct_fruit": 12
+    },
+    "t2_grasp": {
+     "grasp_final": 15,
+     "first_grasp_ok": 14,
+     "regrasp_runs": 1,
+     "slip_runs": 1,
+     "robust_grasp": 13,
+     "place": 15,
+     "failure_modes": {
+      "ok": 13,
+      "slip_in_transport": 1,
+      "no_grasp": 3,
+      "regrasp": 1
+     }
+    },
+    "t3_contacts": {
+     "hand-fruit_other": {
+      "runs_any": 5,
+      "contact_rows": 50,
+      "contact_substeps": 1031,
+      "runs_pre_release": 5,
+      "rows_pre_release": 50,
+      "runs_keys": [
+       "ep30_s301",
+       "ep3_s31",
+       "ep3_s32",
+       "ep54_s541",
+       "ep54_s542"
+      ]
+     },
+     "robot_other-target": {
+      "runs_any": 0,
+      "contact_rows": 0,
+      "contact_substeps": 0,
+      "runs_pre_release": 0,
+      "rows_pre_release": 0,
+      "runs_keys": []
+     },
+     "robot_other-fruit_other": {
+      "runs_any": 0,
+      "contact_rows": 0,
+      "contact_substeps": 0,
+      "runs_pre_release": 0,
+      "rows_pre_release": 0,
+      "runs_keys": []
+     },
+     "hand-target": {
+      "runs_any": 18,
+      "contact_rows": 2227,
+      "contact_substeps": 71951,
+      "runs_pre_release": 18,
+      "rows_pre_release": 2227,
+      "runs_keys": [
+       "ep12_s121",
+       "ep12_s122",
+       "ep30_s301",
+       "ep30_s302",
+       "ep0_s1",
+       "ep0_s2",
+       "ep3_s31",
+       "ep3_s32",
+       "ep11_s111",
+       "ep11_s112",
+       "ep54_s541",
+       "ep54_s542",
+       "ep123_s1231",
+       "ep123_s1232",
+       "ep104_s1041",
+       "ep104_s1042",
+       "ep110_s1101",
+       "ep110_s1102"
+      ]
+     },
+     "any_new_class_contact_runs": 5
+    },
+    "t4_hold": {
+     "hold_chunks_total": 54,
+     "hold_runs": 14,
+     "hold_chunks_per_run_median": 1.0,
+     "hold_chunks_per_run_max": 34,
+     "trailing_hold_runs": 1,
+     "ipc_unsafe_chunks": 54,
+     "comms_fail_runs (ipc timeout|stale|error)": 0,
+     "comms_fail_chunks": 0,
+     "ipc_other_chunks": 0,
+     "run_timeouts (client exit != 0 / incomplete)": 0,
+     "obstacle_stop_runs": 0,
+     "hold_kinds": {
+      "collision": 19,
+      "unverified": 1,
+      "uncertified": 34
+     },
+     "run_wall_s": {
+      "n": 18,
+      "median": 313.5,
+      "p90": 330.0,
+      "mean": 313.6111111111111,
+      "max": 331.0
+     }
+    },
+    "t5_timing": {
+     "to_ms_server_trajopt_pooled": {
+      "n": 1332,
+      "median": 196.37350691482425,
+      "p90": 526.3315533287824,
+      "mean": 267.6551288263677,
+      "max": 1341.045773588121
+     },
+     "ag3s_ms_server_ag3s_pooled": {
+      "n": 1332,
+      "median": 340.71267442777753,
+      "p90": 626.2678832747042,
+      "mean": 395.10532172659674,
+      "max": 1552.3036774247885
+     },
+     "server_total_ms_pooled": {
+      "n": 1332,
+      "median": 1167.1237237751484,
+      "p90": 1656.8785066716375,
+      "mean": 1212.7834899692207,
+      "max": 3113.2968543097377
+     },
+     "server_infer_ms_pooled": {
+      "n": 1332,
+      "median": 535.273608751595,
+      "p90": 711.4353826269509,
+      "mean": 547.7296320054479,
+      "max": 1469.0712932497263
+     },
+     "client_round_trip_ms_pooled": {
+      "n": 1332,
+      "median": 1480.5750846862793,
+      "p90": 2003.0866384506228,
+      "mean": 1526.7367855206624,
+      "max": 4511.206150054932
+     },
+     "to_solve_ms_chunks_pooled": {
+      "n": 1332,
+      "median": 154.3350531719625,
+      "p90": 500.9417783468962,
+      "mean": 234.79940664993637,
+      "max": 1327.8107177466154
+     },
+     "run_medians_trajopt_ms": {
+      "n": 18,
+      "median": 207.2622429113835,
+      "p90": 253.98859456181526,
+      "mean": 203.30541640416615,
+      "max": 324.3672507815063
+     },
+     "run_medians_ag3s_ms": {
+      "n": 18,
+      "median": 341.01178776472807,
+      "p90": 440.33133131451905,
+      "mean": 355.269661742366,
+      "max": 531.0011017136276
+     },
+     "round_trip_gt_533ms_chunks": 1332,
+     "n_chunks_excl_first": 1332
+    },
+    "t6_trace": {
+     "n_runs_with_server_trace": 18,
+     "split_ran_chunks": 461,
+     "split_triggered_chunks": 404,
+     "split_fired_chunks": 239,
+     "split_decisions_accepted": 256,
+     "split_components": 544,
+     "manipulated_from_split_chunks": 282,
+     "ball_chunks": 528,
+     "n_seeds_in_ball_sum": 471242,
+     "n_removed_sum": 429712,
+     "n_kept_nontarget_sum": 13392,
+     "n_ambiguous_sum": 28138,
+     "n_unowned_removed_sum": 180686,
+     "n_unowned_kept_sum": 0,
+     "chunks_with_kept_nontarget": 369,
+     "coarse_chunks": 0,
+     "coarse_n_shared_kept_sum": 0,
+     "coarse_n_removed_sum": 0,
+     "coarse_n_seeds_in_ball_sum": 0,
+     "coarse_chunks_shared_kept": 0,
+     "perm_chunks_with_exclusion": 528,
+     "path_target_rows_unauthorized_kept_sum": 0,
+     "time_budget_hit_chunks": 0,
+     "runs_with_split_fired": 18,
+     "path_target_rows_unauthorized_kept_present_in_runs": 0,
+     "perm_n_rows_excluded_max": 135,
+     "classify_ms_pooled_run_medians": {
+      "n": 18,
+      "median": 7.1690000000000005,
+      "p90": 23.362000000000005,
+      "mean": 11.472638888888888,
+      "max": 39.200500000000005
+     },
+     "coarse_build_ms_run_medians": null,
+     "to_status_counts": {
+      "feasible": 985,
+      "optimal": 309,
+      "violated": 56
+     }
+    }
+   },
+   "C1b": {
+    "t1_success": {
+     "n_runs": 18,
+     "n_with_replay": 18,
+     "task_success": 7,
+     "success_rel": 7,
+     "success_ct": 4,
+     "success_ct_fruit": 4
+    },
+    "t2_grasp": {
+     "grasp_final": 10,
+     "first_grasp_ok": 9,
+     "regrasp_runs": 1,
+     "slip_runs": 2,
+     "robust_grasp": 7,
+     "place": 7,
+     "failure_modes": {
+      "ok": 7,
+      "slip_at_lift": 1,
+      "no_grasp": 8,
+      "regrasp": 1,
+      "slip_in_transport": 1
+     }
+    },
+    "t3_contacts": {
+     "hand-fruit_other": {
+      "runs_any": 5,
+      "contact_rows": 19,
+      "contact_substeps": 294,
+      "runs_pre_release": 5,
+      "rows_pre_release": 19,
+      "runs_keys": [
+       "ep30_s302",
+       "ep3_s31",
+       "ep3_s32",
+       "ep54_s541",
+       "ep54_s542"
+      ]
+     },
+     "robot_other-target": {
+      "runs_any": 1,
+      "contact_rows": 3,
+      "contact_substeps": 54,
+      "runs_pre_release": 0,
+      "rows_pre_release": 0,
+      "runs_keys": [
+       "ep110_s1101"
+      ]
+     },
+     "robot_other-fruit_other": {
+      "runs_any": 0,
+      "contact_rows": 0,
+      "contact_substeps": 0,
+      "runs_pre_release": 0,
+      "rows_pre_release": 0,
+      "runs_keys": []
+     },
+     "hand-target": {
+      "runs_any": 18,
+      "contact_rows": 1784,
+      "contact_substeps": 57060,
+      "runs_pre_release": 18,
+      "rows_pre_release": 1784,
+      "runs_keys": [
+       "ep12_s121",
+       "ep12_s122",
+       "ep30_s301",
+       "ep30_s302",
+       "ep0_s1",
+       "ep0_s2",
+       "ep3_s31",
+       "ep3_s32",
+       "ep11_s111",
+       "ep11_s112",
+       "ep54_s541",
+       "ep54_s542",
+       "ep123_s1231",
+       "ep123_s1232",
+       "ep104_s1041",
+       "ep104_s1042",
+       "ep110_s1101",
+       "ep110_s1102"
+      ]
+     },
+     "any_new_class_contact_runs": 6
+    },
+    "t4_hold": {
+     "hold_chunks_total": 154,
+     "hold_runs": 12,
+     "hold_chunks_per_run_median": 1.0,
+     "hold_chunks_per_run_max": 38,
+     "trailing_hold_runs": 3,
+     "ipc_unsafe_chunks": 154,
+     "comms_fail_runs (ipc timeout|stale|error)": 0,
+     "comms_fail_chunks": 0,
+     "ipc_other_chunks": 0,
+     "run_timeouts (client exit != 0 / incomplete)": 0,
+     "obstacle_stop_runs": 0,
+     "hold_kinds": {
+      "collision": 46,
+      "uncertified": 107,
+      "unverified": 3
+     },
+     "run_wall_s": {
+      "n": 18,
+      "median": 290.5,
+      "p90": 304.9,
+      "mean": 288.3333333333333,
+      "max": 316.0
+     }
+    },
+    "t5_timing": {
+     "to_ms_server_trajopt_pooled": {
+      "n": 1332,
+      "median": 194.81463683769107,
+      "p90": 532.6336979866029,
+      "mean": 269.7596495842432,
+      "max": 1423.031355254352
+     },
+     "ag3s_ms_server_ag3s_pooled": {
+      "n": 1332,
+      "median": 315.5145086348057,
+      "p90": 499.1138694807887,
+      "mean": 352.2896187019174,
+      "max": 2077.604272402823
+     },
+     "server_total_ms_pooled": {
+      "n": 1332,
+      "median": 1122.817506082356,
+      "p90": 1558.3780363202097,
+      "mean": 1149.828920414246,
+      "max": 2715.7259676605463
+     },
+     "server_infer_ms_pooled": {
+      "n": 1332,
+      "median": 468.50658347830176,
+      "p90": 682.4012429453433,
+      "mean": 523.8928360257622,
+      "max": 1001.9038897007704
+     },
+     "client_round_trip_ms_pooled": {
+      "n": 1332,
+      "median": 1390.4649019241333,
+      "p90": 1890.7525300979617,
+      "mean": 1433.9382582240635,
+      "max": 2955.021619796753
+     },
+     "to_solve_ms_chunks_pooled": {
+      "n": 1332,
+      "median": 147.59673411026597,
+      "p90": 516.6935279965401,
+      "mean": 238.18281408002204,
+      "max": 1405.2062993869185
+     },
+     "run_medians_trajopt_ms": {
+      "n": 18,
+      "median": 198.86573357507586,
+      "p90": 274.0757232997567,
+      "mean": 219.82412948273122,
+      "max": 569.4373110309243
+     },
+     "run_medians_ag3s_ms": {
+      "n": 18,
+      "median": 321.4615872129798,
+      "p90": 358.722939202562,
+      "mean": 320.28840026921694,
+      "max": 411.4559944719076
+     },
+     "round_trip_gt_533ms_chunks": 1332,
+     "n_chunks_excl_first": 1332
+    },
+    "t6_trace": {
+     "n_runs_with_server_trace": 18,
+     "split_ran_chunks": 630,
+     "split_triggered_chunks": 521,
+     "split_fired_chunks": 290,
+     "split_decisions_accepted": 318,
+     "split_components": 645,
+     "manipulated_from_split_chunks": 448,
+     "ball_chunks": 943,
+     "n_seeds_in_ball_sum": 836908,
+     "n_removed_sum": 700250,
+     "n_kept_nontarget_sum": 41246,
+     "n_ambiguous_sum": 95412,
+     "n_unowned_removed_sum": 306822,
+     "n_unowned_kept_sum": 0,
+     "chunks_with_kept_nontarget": 772,
+     "coarse_chunks": 943,
+     "coarse_n_shared_kept_sum": 1574,
+     "coarse_n_removed_sum": 6695,
+     "coarse_n_seeds_in_ball_sum": 10611,
+     "coarse_chunks_shared_kept": 485,
+     "perm_chunks_with_exclusion": 943,
+     "path_target_rows_unauthorized_kept_sum": 0,
+     "time_budget_hit_chunks": 0,
+     "runs_with_split_fired": 18,
+     "path_target_rows_unauthorized_kept_present_in_runs": 0,
+     "perm_n_rows_excluded_max": 135,
+     "classify_ms_pooled_run_medians": {
+      "n": 18,
+      "median": 6.6475,
+      "p90": 19.755300000000002,
+      "mean": 9.324694444444443,
+      "max": 29.243
+     },
+     "coarse_build_ms_run_medians": {
+      "n": 18,
+      "median": 6.3895,
+      "p90": 7.2655,
+      "mean": 6.717194444444445,
+      "max": 12.327
+     },
+     "to_status_counts": {
+      "feasible": 934,
+      "optimal": 259,
+      "violated": 157
+     }
+    }
+   },
+   "C2": {
+    "t1_success": {
+     "n_runs": 18,
+     "n_with_replay": 18,
+     "task_success": 0,
+     "success_rel": 0,
+     "success_ct": 0,
+     "success_ct_fruit": 0
+    },
+    "t2_grasp": {
+     "grasp_final": 0,
+     "first_grasp_ok": 0,
+     "regrasp_runs": 0,
+     "slip_runs": 0,
+     "robust_grasp": 0,
+     "place": 0,
+     "failure_modes": {
+      "no_grasp": 18
+     }
+    },
+    "t3_contacts": {
+     "hand-fruit_other": {
+      "runs_any": 2,
+      "contact_rows": 41,
+      "contact_substeps": 816,
+      "runs_pre_release": 2,
+      "rows_pre_release": 41,
+      "runs_keys": [
+       "ep3_s31",
+       "ep110_s1101"
+      ]
+     },
+     "robot_other-target": {
+      "runs_any": 0,
+      "contact_rows": 0,
+      "contact_substeps": 0,
+      "runs_pre_release": 0,
+      "rows_pre_release": 0,
+      "runs_keys": []
+     },
+     "robot_other-fruit_other": {
+      "runs_any": 0,
+      "contact_rows": 0,
+      "contact_substeps": 0,
+      "runs_pre_release": 0,
+      "rows_pre_release": 0,
+      "runs_keys": []
+     },
+     "hand-target": {
+      "runs_any": 4,
+      "contact_rows": 41,
+      "contact_substeps": 1038,
+      "runs_pre_release": 4,
+      "rows_pre_release": 41,
+      "runs_keys": [
+       "ep3_s31",
+       "ep123_s1232",
+       "ep110_s1101",
+       "ep110_s1102"
+      ]
+     },
+     "any_new_class_contact_runs": 2
+    },
+    "t4_hold": {
+     "hold_chunks_total": 20,
+     "hold_runs": 8,
+     "hold_chunks_per_run_median": 0.0,
+     "hold_chunks_per_run_max": 5,
+     "trailing_hold_runs": 0,
+     "ipc_unsafe_chunks": 20,
+     "comms_fail_runs (ipc timeout|stale|error)": 0,
+     "comms_fail_chunks": 0,
+     "ipc_other_chunks": 0,
+     "run_timeouts (client exit != 0 / incomplete)": 0,
+     "obstacle_stop_runs": 0,
+     "hold_kinds": {
+      "collision": 20
+     },
+     "run_wall_s": {
+      "n": 18,
+      "median": 310.0,
+      "p90": 337.8,
+      "mean": 313.6111111111111,
+      "max": 357.0
+     }
+    },
+    "t5_timing": {
+     "to_ms_server_trajopt_pooled": {
+      "n": 1332,
+      "median": 482.69784823060036,
+      "p90": 805.5967481806877,
+      "mean": 518.3132321331874,
+      "max": 1290.6962055712938
+     },
+     "ag3s_ms_server_ag3s_pooled": {
+      "n": 1332,
+      "median": 352.3165611550212,
+      "p90": 560.7107589021325,
+      "mean": 395.45228995533813,
+      "max": 1377.0681098103523
+     },
+     "server_total_ms_pooled": {
+      "n": 1332,
+      "median": 1433.2836428657174,
+      "p90": 1910.3858003392816,
+      "mean": 1453.9944184098013,
+      "max": 2769.20036226511
+     },
+     "server_infer_ms_pooled": {
+      "n": 1332,
+      "median": 511.38102961704135,
+      "p90": 699.1204291582108,
+      "mean": 536.951221042528,
+      "max": 952.3215442895889
+     },
+     "client_round_trip_ms_pooled": {
+      "n": 1332,
+      "median": 1783.4947109222412,
+      "p90": 2249.4313716888432,
+      "mean": 1797.33331246419,
+      "max": 3126.6839504241943
+     },
+     "to_solve_ms_chunks_pooled": {
+      "n": 1332,
+      "median": 397.1429062075913,
+      "p90": 769.7511211037637,
+      "mean": 465.17334496896075,
+      "max": 1202.4582084268332
+     },
+     "run_medians_trajopt_ms": {
+      "n": 18,
+      "median": 490.3381147887558,
+      "p90": 559.9318959284574,
+      "mean": 481.17202512609464,
+      "max": 673.2551767490804
+     },
+     "run_medians_ag3s_ms": {
+      "n": 18,
+      "median": 360.98441295325756,
+      "p90": 418.87026079930365,
+      "mean": 362.768337647948,
+      "max": 439.8812474682927
+     },
+     "round_trip_gt_533ms_chunks": 1332,
+     "n_chunks_excl_first": 1332
+    },
+    "t6_trace": {
+     "n_runs_with_server_trace": 18,
+     "split_ran_chunks": 899,
+     "split_triggered_chunks": 829,
+     "split_fired_chunks": 558,
+     "split_decisions_accepted": 675,
+     "split_components": 1382,
+     "manipulated_from_split_chunks": 593,
+     "ball_chunks": 1350,
+     "n_seeds_in_ball_sum": 1640582,
+     "n_removed_sum": 1425136,
+     "n_kept_nontarget_sum": 37892,
+     "n_ambiguous_sum": 177554,
+     "n_unowned_removed_sum": 598626,
+     "n_unowned_kept_sum": 0,
+     "chunks_with_kept_nontarget": 1158,
+     "coarse_chunks": 1350,
+     "coarse_n_shared_kept_sum": 4575,
+     "coarse_n_removed_sum": 14735,
+     "coarse_n_seeds_in_ball_sum": 23760,
+     "coarse_chunks_shared_kept": 1069,
+     "perm_chunks_with_exclusion": 1350,
+     "path_target_rows_unauthorized_kept_sum": 0,
+     "time_budget_hit_chunks": 0,
+     "runs_with_split_fired": 18,
+     "path_target_rows_unauthorized_kept_present_in_runs": 0,
+     "perm_n_rows_excluded_max": 135,
+     "classify_ms_pooled_run_medians": {
+      "n": 18,
+      "median": 6.6495,
+      "p90": 20.581200000000006,
+      "mean": 10.268277777777778,
+      "max": 27.313
+     },
+     "coarse_build_ms_run_medians": {
+      "n": 18,
+      "median": 6.401,
+      "p90": 7.1298,
+      "mean": 6.538388888888889,
+      "max": 7.55
+     },
+     "to_status_counts": {
+      "feasible": 864,
+      "optimal": 465,
+      "violated": 21
+     }
+    }
+   }
+  },
+  "pairs": {
+   "C0_vs_C1a": {
+    "success_ct": {
+     "n_pairs": 18,
+     "both": 11,
+     "A_only": 2,
+     "B_only": 1,
+     "neither": 4,
+     "A_total": 13,
+     "B_total": 12,
+     "A": "C0",
+     "B": "C1a",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep30_s301",
+      "ep54_s541"
+     ],
+     "B_only_keys": [
+      "ep11_s111"
+     ]
+    },
+    "success": {
+     "n_pairs": 18,
+     "both": 14,
+     "A_only": 0,
+     "B_only": 1,
+     "neither": 3,
+     "A_total": 14,
+     "B_total": 15,
+     "A": "C0",
+     "B": "C1a",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep11_s111"
+     ]
+    },
+    "robust_grasp": {
+     "n_pairs": 18,
+     "both": 11,
+     "A_only": 1,
+     "B_only": 2,
+     "neither": 4,
+     "A_total": 12,
+     "B_total": 13,
+     "A": "C0",
+     "B": "C1a",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep30_s301"
+     ],
+     "B_only_keys": [
+      "ep0_s1",
+      "ep11_s111"
+     ]
+    },
+    "first_grasp_ok": {
+     "n_pairs": 18,
+     "both": 12,
+     "A_only": 0,
+     "B_only": 2,
+     "neither": 4,
+     "A_total": 12,
+     "B_total": 14,
+     "A": "C0",
+     "B": "C1a",
+     "mcnemar_exact_p": 0.5,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep0_s1",
+      "ep11_s111"
+     ]
+    },
+    "grasp": {
+     "n_pairs": 18,
+     "both": 14,
+     "A_only": 0,
+     "B_only": 1,
+     "neither": 3,
+     "A_total": 14,
+     "B_total": 15,
+     "A": "C0",
+     "B": "C1a",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep11_s111"
+     ]
+    },
+    "pre_release_new_contact": {
+     "n_pairs": 18,
+     "both": 3,
+     "A_only": 0,
+     "B_only": 2,
+     "neither": 13,
+     "A_total": 3,
+     "B_total": 5,
+     "A": "C0",
+     "B": "C1a",
+     "mcnemar_exact_p": 0.5,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep30_s301",
+      "ep54_s541"
+     ]
+    },
+    "any_new_contact": {
+     "n_pairs": 18,
+     "both": 3,
+     "A_only": 0,
+     "B_only": 2,
+     "neither": 13,
+     "A_total": 3,
+     "B_total": 5,
+     "A": "C0",
+     "B": "C1a",
+     "mcnemar_exact_p": 0.5,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep30_s301",
+      "ep54_s541"
+     ]
+    }
+   },
+   "C0_vs_C1b": {
+    "success_ct": {
+     "n_pairs": 18,
+     "both": 4,
+     "A_only": 9,
+     "B_only": 0,
+     "neither": 5,
+     "A_total": 13,
+     "B_total": 4,
+     "A": "C0",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.00390625,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s112",
+      "ep12_s122",
+      "ep30_s302",
+      "ep54_s541",
+      "ep104_s1042",
+      "ep110_s1101",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "success": {
+     "n_pairs": 18,
+     "both": 7,
+     "A_only": 7,
+     "B_only": 0,
+     "neither": 4,
+     "A_total": 14,
+     "B_total": 7,
+     "A": "C0",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.015625,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s112",
+      "ep12_s122",
+      "ep104_s1042",
+      "ep110_s1101",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "robust_grasp": {
+     "n_pairs": 18,
+     "both": 7,
+     "A_only": 5,
+     "B_only": 0,
+     "neither": 6,
+     "A_total": 12,
+     "B_total": 7,
+     "A": "C0",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.0625,
+     "A_only_keys": [
+      "ep11_s112",
+      "ep12_s122",
+      "ep110_s1101",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "first_grasp_ok": {
+     "n_pairs": 18,
+     "both": 9,
+     "A_only": 3,
+     "B_only": 0,
+     "neither": 6,
+     "A_total": 12,
+     "B_total": 9,
+     "A": "C0",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.25,
+     "A_only_keys": [
+      "ep11_s112",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "grasp": {
+     "n_pairs": 18,
+     "both": 10,
+     "A_only": 4,
+     "B_only": 0,
+     "neither": 4,
+     "A_total": 14,
+     "B_total": 10,
+     "A": "C0",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.125,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s112",
+      "ep104_s1042",
+      "ep123_s1231"
+     ],
+     "B_only_keys": []
+    },
+    "pre_release_new_contact": {
+     "n_pairs": 18,
+     "both": 3,
+     "A_only": 0,
+     "B_only": 2,
+     "neither": 13,
+     "A_total": 3,
+     "B_total": 5,
+     "A": "C0",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.5,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep30_s302",
+      "ep54_s541"
+     ]
+    },
+    "any_new_contact": {
+     "n_pairs": 18,
+     "both": 3,
+     "A_only": 0,
+     "B_only": 3,
+     "neither": 12,
+     "A_total": 3,
+     "B_total": 6,
+     "A": "C0",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.25,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep30_s302",
+      "ep54_s541",
+      "ep110_s1101"
+     ]
+    }
+   },
+   "C0_vs_C2": {
+    "success_ct": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 13,
+     "B_only": 0,
+     "neither": 5,
+     "A_total": 13,
+     "B_total": 0,
+     "A": "C0",
+     "B": "C2",
+     "mcnemar_exact_p": 0.000244140625,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s112",
+      "ep12_s121",
+      "ep12_s122",
+      "ep30_s301",
+      "ep30_s302",
+      "ep54_s541",
+      "ep104_s1041",
+      "ep104_s1042",
+      "ep110_s1101",
+      "ep110_s1102",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "success": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 14,
+     "B_only": 0,
+     "neither": 4,
+     "A_total": 14,
+     "B_total": 0,
+     "A": "C0",
+     "B": "C2",
+     "mcnemar_exact_p": 0.0001220703125,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s112",
+      "ep12_s121",
+      "ep12_s122",
+      "ep30_s301",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep104_s1042",
+      "ep110_s1101",
+      "ep110_s1102",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "robust_grasp": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 12,
+     "B_only": 0,
+     "neither": 6,
+     "A_total": 12,
+     "B_total": 0,
+     "A": "C0",
+     "B": "C2",
+     "mcnemar_exact_p": 0.00048828125,
+     "A_only_keys": [
+      "ep11_s112",
+      "ep12_s121",
+      "ep12_s122",
+      "ep30_s301",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1101",
+      "ep110_s1102",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "first_grasp_ok": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 12,
+     "B_only": 0,
+     "neither": 6,
+     "A_total": 12,
+     "B_total": 0,
+     "A": "C0",
+     "B": "C2",
+     "mcnemar_exact_p": 0.00048828125,
+     "A_only_keys": [
+      "ep11_s112",
+      "ep12_s121",
+      "ep12_s122",
+      "ep30_s301",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1101",
+      "ep110_s1102",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "grasp": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 14,
+     "B_only": 0,
+     "neither": 4,
+     "A_total": 14,
+     "B_total": 0,
+     "A": "C0",
+     "B": "C2",
+     "mcnemar_exact_p": 0.0001220703125,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s112",
+      "ep12_s121",
+      "ep12_s122",
+      "ep30_s301",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep104_s1042",
+      "ep110_s1101",
+      "ep110_s1102",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "pre_release_new_contact": {
+     "n_pairs": 18,
+     "both": 1,
+     "A_only": 2,
+     "B_only": 1,
+     "neither": 14,
+     "A_total": 3,
+     "B_total": 2,
+     "A": "C0",
+     "B": "C2",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep3_s32",
+      "ep54_s542"
+     ],
+     "B_only_keys": [
+      "ep110_s1101"
+     ]
+    },
+    "any_new_contact": {
+     "n_pairs": 18,
+     "both": 1,
+     "A_only": 2,
+     "B_only": 1,
+     "neither": 14,
+     "A_total": 3,
+     "B_total": 2,
+     "A": "C0",
+     "B": "C2",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep3_s32",
+      "ep54_s542"
+     ],
+     "B_only_keys": [
+      "ep110_s1101"
+     ]
+    }
+   },
+   "C1a_vs_C1b": {
+    "success_ct": {
+     "n_pairs": 18,
+     "both": 3,
+     "A_only": 9,
+     "B_only": 1,
+     "neither": 5,
+     "A_total": 12,
+     "B_total": 4,
+     "A": "C1a",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.021484375,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s111",
+      "ep11_s112",
+      "ep12_s122",
+      "ep30_s302",
+      "ep104_s1042",
+      "ep110_s1101",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": [
+      "ep30_s301"
+     ]
+    },
+    "success": {
+     "n_pairs": 18,
+     "both": 7,
+     "A_only": 8,
+     "B_only": 0,
+     "neither": 3,
+     "A_total": 15,
+     "B_total": 7,
+     "A": "C1a",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.0078125,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s111",
+      "ep11_s112",
+      "ep12_s122",
+      "ep104_s1042",
+      "ep110_s1101",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "robust_grasp": {
+     "n_pairs": 18,
+     "both": 6,
+     "A_only": 7,
+     "B_only": 1,
+     "neither": 4,
+     "A_total": 13,
+     "B_total": 7,
+     "A": "C1a",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.0703125,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s111",
+      "ep11_s112",
+      "ep12_s122",
+      "ep110_s1101",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": [
+      "ep30_s301"
+     ]
+    },
+    "first_grasp_ok": {
+     "n_pairs": 18,
+     "both": 9,
+     "A_only": 5,
+     "B_only": 0,
+     "neither": 4,
+     "A_total": 14,
+     "B_total": 9,
+     "A": "C1a",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.0625,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s111",
+      "ep11_s112",
+      "ep123_s1231",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "grasp": {
+     "n_pairs": 18,
+     "both": 10,
+     "A_only": 5,
+     "B_only": 0,
+     "neither": 3,
+     "A_total": 15,
+     "B_total": 10,
+     "A": "C1a",
+     "B": "C1b",
+     "mcnemar_exact_p": 0.0625,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep11_s111",
+      "ep11_s112",
+      "ep104_s1042",
+      "ep123_s1231"
+     ],
+     "B_only_keys": []
+    },
+    "pre_release_new_contact": {
+     "n_pairs": 18,
+     "both": 4,
+     "A_only": 1,
+     "B_only": 1,
+     "neither": 12,
+     "A_total": 5,
+     "B_total": 5,
+     "A": "C1a",
+     "B": "C1b",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep30_s301"
+     ],
+     "B_only_keys": [
+      "ep30_s302"
+     ]
+    },
+    "any_new_contact": {
+     "n_pairs": 18,
+     "both": 4,
+     "A_only": 1,
+     "B_only": 2,
+     "neither": 11,
+     "A_total": 5,
+     "B_total": 6,
+     "A": "C1a",
+     "B": "C1b",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep30_s301"
+     ],
+     "B_only_keys": [
+      "ep30_s302",
+      "ep110_s1101"
+     ]
+    }
+   },
+   "C1b_vs_C2": {
+    "success_ct": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 4,
+     "B_only": 0,
+     "neither": 14,
+     "A_total": 4,
+     "B_total": 0,
+     "A": "C1b",
+     "B": "C2",
+     "mcnemar_exact_p": 0.125,
+     "A_only_keys": [
+      "ep12_s121",
+      "ep30_s301",
+      "ep104_s1041",
+      "ep110_s1102"
+     ],
+     "B_only_keys": []
+    },
+    "success": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 7,
+     "B_only": 0,
+     "neither": 11,
+     "A_total": 7,
+     "B_total": 0,
+     "A": "C1b",
+     "B": "C2",
+     "mcnemar_exact_p": 0.015625,
+     "A_only_keys": [
+      "ep12_s121",
+      "ep30_s301",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1102"
+     ],
+     "B_only_keys": []
+    },
+    "robust_grasp": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 7,
+     "B_only": 0,
+     "neither": 11,
+     "A_total": 7,
+     "B_total": 0,
+     "A": "C1b",
+     "B": "C2",
+     "mcnemar_exact_p": 0.015625,
+     "A_only_keys": [
+      "ep12_s121",
+      "ep30_s301",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1102"
+     ],
+     "B_only_keys": []
+    },
+    "first_grasp_ok": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 9,
+     "B_only": 0,
+     "neither": 9,
+     "A_total": 9,
+     "B_total": 0,
+     "A": "C1b",
+     "B": "C2",
+     "mcnemar_exact_p": 0.00390625,
+     "A_only_keys": [
+      "ep12_s121",
+      "ep12_s122",
+      "ep30_s301",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1101",
+      "ep110_s1102"
+     ],
+     "B_only_keys": []
+    },
+    "grasp": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 10,
+     "B_only": 0,
+     "neither": 8,
+     "A_total": 10,
+     "B_total": 0,
+     "A": "C1b",
+     "B": "C2",
+     "mcnemar_exact_p": 0.001953125,
+     "A_only_keys": [
+      "ep12_s121",
+      "ep12_s122",
+      "ep30_s301",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1101",
+      "ep110_s1102",
+      "ep123_s1232"
+     ],
+     "B_only_keys": []
+    },
+    "pre_release_new_contact": {
+     "n_pairs": 18,
+     "both": 1,
+     "A_only": 4,
+     "B_only": 1,
+     "neither": 12,
+     "A_total": 5,
+     "B_total": 2,
+     "A": "C1b",
+     "B": "C2",
+     "mcnemar_exact_p": 0.375,
+     "A_only_keys": [
+      "ep3_s32",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542"
+     ],
+     "B_only_keys": [
+      "ep110_s1101"
+     ]
+    },
+    "any_new_contact": {
+     "n_pairs": 18,
+     "both": 2,
+     "A_only": 4,
+     "B_only": 0,
+     "neither": 12,
+     "A_total": 6,
+     "B_total": 2,
+     "A": "C1b",
+     "B": "C2",
+     "mcnemar_exact_p": 0.125,
+     "A_only_keys": [
+      "ep3_s32",
+      "ep30_s302",
+      "ep54_s541",
+      "ep54_s542"
+     ],
+     "B_only_keys": []
+    }
+   }
+  },
+  "discordant_all_arms": [
+   {
+    "episode": 12,
+    "seed": 121,
+    "target": "apple",
+    "used_arm": "left",
+    "nn_xy_m": 0.07975949592399645,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 215,
+      "run_dir": "outputs/verify/T44/CL/runs/C0/R/C0_ep12_s121",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep12_s121.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 103
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 3,
+      "failure_mode": "ok",
+      "release_t": 238,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep12_s121",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep12_s121.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 128
+      }
+     },
+     "C1b": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 2,
+      "failure_mode": "ok",
+      "release_t": 224,
+      "run_dir": "outputs/verify/T44/CL/runs/C1b/R/C1b_ep12_s121",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep12_s121.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 107
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep12_s121",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep12_s121.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 12,
+    "seed": 122,
+    "target": "apple",
+    "used_arm": "left",
+    "nn_xy_m": 0.07975949592399645,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 222,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep12_s122",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep12_s122.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 105
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 2,
+      "failure_mode": "ok",
+      "release_t": 230,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep12_s122",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep12_s122.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 119
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 4,
+      "failure_mode": "slip_at_lift",
+      "release_t": 418,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep12_s122",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep12_s122.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 21
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 4,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep12_s122",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep12_s122.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 30,
+    "seed": 301,
+    "target": "apple",
+    "used_arm": "right",
+    "nn_xy_m": 0.08957848180322106,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok",
+     "pre_release_new_contact"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 37,
+      "failure_mode": "ok",
+      "release_t": 214,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep30_s301",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep30_s301.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 114
+      }
+     },
+     "C1a": {
+      "success_ct": false,
+      "success": true,
+      "robust_grasp": false,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 1,
+      "failure_mode": "slip_in_transport",
+      "release_t": 207,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep30_s301",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep30_s301.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 6,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 107
+      }
+     },
+     "C1b": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 34,
+      "failure_mode": "ok",
+      "release_t": 230,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep30_s301",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep30_s301.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 110
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep30_s301",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep30_s301.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 30,
+    "seed": 302,
+    "target": "apple",
+    "used_arm": "right",
+    "nn_xy_m": 0.08957848180322106,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok",
+     "pre_release_new_contact"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 200,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep30_s302",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep30_s302.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 90
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 206,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep30_s302",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep30_s302.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 96
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 38,
+      "failure_mode": "ok",
+      "release_t": 214,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep30_s302",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep30_s302.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 4,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 104
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep30_s302",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep30_s302.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 0,
+    "seed": 1,
+    "target": "orange",
+    "used_arm": "left",
+    "nn_xy_m": 0.09491559140415239,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": false,
+      "grasp": true,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "regrasp",
+      "release_t": 430,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep0_s1",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep0_s1.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 82
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "ok",
+      "release_t": 214,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep0_s1",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep0_s1.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 110
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep0_s1",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep0_s1.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 10
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep0_s1",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep0_s1.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 3,
+    "seed": 32,
+    "target": "orange",
+    "used_arm": "right",
+    "nn_xy_m": 0.07717512979010793,
+    "differ_in": [
+     "pre_release_new_contact"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep3_s32",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep3_s32.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 7,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 95
+      }
+     },
+     "C1a": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 2,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep3_s32",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep3_s32.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 7,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 184
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 2,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep3_s32",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep3_s32.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 4,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 143
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 2,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep3_s32",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep3_s32.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 11,
+    "seed": 111,
+    "target": "pear",
+    "used_arm": "right",
+    "nn_xy_m": 0.08166679784128922,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 63,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep11_s111",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep11_s111.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 514
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 3,
+      "failure_mode": "ok",
+      "release_t": 191,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep11_s111",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep11_s111.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 105
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 2,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep11_s111",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep11_s111.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 89
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep11_s111",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep11_s111.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 11,
+    "seed": 112,
+    "target": "pear",
+    "used_arm": "right",
+    "nn_xy_m": 0.08166679784128922,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 38,
+      "failure_mode": "ok",
+      "release_t": 221,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep11_s112",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep11_s112.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 123
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 34,
+      "failure_mode": "ok",
+      "release_t": 237,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep11_s112",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep11_s112.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 139
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep11_s112",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep11_s112.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 80
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep11_s112",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep11_s112.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 54,
+    "seed": 541,
+    "target": "apple",
+    "used_arm": "right",
+    "nn_xy_m": 0.07592284424763074,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok",
+     "pre_release_new_contact"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 248,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep54_s541",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep54_s541.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 135
+      }
+     },
+     "C1a": {
+      "success_ct": false,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 1,
+      "failure_mode": "ok",
+      "release_t": 221,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep54_s541",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep54_s541.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 6,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 108
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 38,
+      "failure_mode": "ok",
+      "release_t": 218,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep54_s541",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep54_s541.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 4,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 105
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep54_s541",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep54_s541.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 54,
+    "seed": 542,
+    "target": "apple",
+    "used_arm": "right",
+    "nn_xy_m": 0.07592284424763074,
+    "differ_in": [
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok",
+     "pre_release_new_contact"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": false,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 337,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep54_s542",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep54_s542.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 4,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 200
+      }
+     },
+     "C1a": {
+      "success_ct": false,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 254,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep54_s542",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep54_s542.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 5,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 107
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 1,
+      "failure_mode": "ok",
+      "release_t": 240,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep54_s542",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep54_s542.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 3,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 103
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep54_s542",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep54_s542.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 123,
+    "seed": 1231,
+    "target": "orange",
+    "used_arm": "right",
+    "nn_xy_m": 0.07529288850356324,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "ok",
+      "release_t": 248,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep123_s1231",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep123_s1231.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 153
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 232,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep123_s1231",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep123_s1231.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 137
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep123_s1231",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep123_s1231.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 41
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 3,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep123_s1231",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep123_s1231.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 123,
+    "seed": 1232,
+    "target": "orange",
+    "used_arm": "right",
+    "nn_xy_m": 0.07529288850356324,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 271,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep123_s1232",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep123_s1232.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 163
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 2,
+      "failure_mode": "ok",
+      "release_t": 278,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep123_s1232",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep123_s1232.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 170
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": true,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "regrasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep123_s1232",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep123_s1232.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 86
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep123_s1232",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep123_s1232.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 11
+      }
+     }
+    }
+   },
+   {
+    "episode": 104,
+    "seed": 1041,
+    "target": "pear",
+    "used_arm": "left",
+    "nn_xy_m": 0.07861132824218145,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 247,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep104_s1041",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep104_s1041.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 141
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "ok",
+      "release_t": 237,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep104_s1041",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep104_s1041.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 123
+      }
+     },
+     "C1b": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 232,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep104_s1041",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep104_s1041.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 124
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep104_s1041",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep104_s1041.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 104,
+    "seed": 1042,
+    "target": "pear",
+    "used_arm": "left",
+    "nn_xy_m": 0.07861132824218145,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "grasp"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": false,
+      "grasp": true,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "regrasp",
+      "release_t": 221,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep104_s1042",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep104_s1042.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 121
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": false,
+      "grasp": true,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "regrasp",
+      "release_t": 192,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep104_s1042",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep104_s1042.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 94
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep104_s1042",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep104_s1042.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 34
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep104_s1042",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep104_s1042.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 0
+      }
+     }
+    }
+   },
+   {
+    "episode": 110,
+    "seed": 1101,
+    "target": "pear",
+    "used_arm": "right",
+    "nn_xy_m": 0.07561270032613576,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok",
+     "pre_release_new_contact"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 295,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep110_s1101",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep110_s1101.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 165
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "ok",
+      "release_t": 287,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep110_s1101",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep110_s1101.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 158
+      }
+     },
+     "C1b": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 30,
+      "failure_mode": "slip_in_transport",
+      "release_t": 442,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep110_s1101",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep110_s1101.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 3,
+       "robot_other-fruit_other": 0,
+       "hand-target": 311
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": true,
+      "n_hold_chunks": 5,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep110_s1101",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep110_s1101.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 36,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 2
+      }
+     }
+    }
+   },
+   {
+    "episode": 110,
+    "seed": 1102,
+    "target": "pear",
+    "used_arm": "right",
+    "nn_xy_m": 0.07561270032613576,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "per_arm": {
+     "C0": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 0,
+      "failure_mode": "ok",
+      "release_t": 289,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep110_s1102",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep110_s1102.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 168
+      }
+     },
+     "C1a": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "ok",
+      "release_t": 280,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep110_s1102",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep110_s1102.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 159
+      }
+     },
+     "C1b": {
+      "success_ct": true,
+      "success": true,
+      "robust_grasp": true,
+      "grasp": true,
+      "first_grasp_ok": true,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "ok",
+      "release_t": 285,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep110_s1102",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep110_s1102.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 163
+      }
+     },
+     "C2": {
+      "success_ct": false,
+      "success": false,
+      "robust_grasp": false,
+      "grasp": false,
+      "first_grasp_ok": false,
+      "pre_release_new_contact": false,
+      "n_hold_chunks": 1,
+      "failure_mode": "no_grasp",
+      "release_t": null,
+      "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep110_s1102",
+      "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep110_s1102.json",
+      "new_contact_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-target": 0,
+       "robot_other-fruit_other": 0,
+       "hand-target": 6
+      }
+     }
+    }
+   }
+  ],
+  "discordant_excluding_C2": [
+   {
+    "episode": 12,
+    "seed": 122,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep12_s122",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep12_s122",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep12_s122"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep12_s122.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep12_s122.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep12_s122.json"
+    }
+   },
+   {
+    "episode": 30,
+    "seed": 301,
+    "differ_in": [
+     "success_ct",
+     "robust_grasp",
+     "pre_release_new_contact"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": false,
+     "C1b": true
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": true
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep30_s301",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep30_s301",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep30_s301"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep30_s301.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep30_s301.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep30_s301.json"
+    }
+   },
+   {
+    "episode": 30,
+    "seed": 302,
+    "differ_in": [
+     "success_ct",
+     "pre_release_new_contact"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": true
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep30_s302",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep30_s302",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep30_s302"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep30_s302.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep30_s302.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep30_s302.json"
+    }
+   },
+   {
+    "episode": 0,
+    "seed": 1,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep0_s1",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep0_s1",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep0_s1"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep0_s1.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep0_s1.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep0_s1.json"
+    }
+   },
+   {
+    "episode": 11,
+    "seed": 111,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "arms_success_ct": {
+     "C0": false,
+     "C1a": true,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": false,
+     "C1a": true,
+     "C1b": false
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep11_s111",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep11_s111",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep11_s111"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep11_s111.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep11_s111.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep11_s111.json"
+    }
+   },
+   {
+    "episode": 11,
+    "seed": 112,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep11_s112",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep11_s112",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep11_s112"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep11_s112.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep11_s112.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep11_s112.json"
+    }
+   },
+   {
+    "episode": 54,
+    "seed": 541,
+    "differ_in": [
+     "success_ct",
+     "pre_release_new_contact"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": false,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": true
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep54_s541",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep54_s541",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep54_s541"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep54_s541.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep54_s541.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep54_s541.json"
+    }
+   },
+   {
+    "episode": 123,
+    "seed": 1231,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "grasp",
+     "first_grasp_ok"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep123_s1231",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep123_s1231",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep123_s1231"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep123_s1231.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep123_s1231.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep123_s1231.json"
+    }
+   },
+   {
+    "episode": 123,
+    "seed": 1232,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp",
+     "first_grasp_ok"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep123_s1232",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep123_s1232",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep123_s1232"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep123_s1232.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep123_s1232.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep123_s1232.json"
+    }
+   },
+   {
+    "episode": 104,
+    "seed": 1042,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "grasp"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep104_s1042",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep104_s1042",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep104_s1042"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep104_s1042.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep104_s1042.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep104_s1042.json"
+    }
+   },
+   {
+    "episode": 110,
+    "seed": 1101,
+    "differ_in": [
+     "success_ct",
+     "success",
+     "robust_grasp"
+    ],
+    "arms_success_ct": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "arms_success": {
+     "C0": true,
+     "C1a": true,
+     "C1b": false
+    },
+    "run_dirs": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep110_s1101",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep110_s1101",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep110_s1101"
+    },
+    "replay_json": {
+     "C0": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep110_s1101.json",
+     "C1a": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep110_s1101.json",
+     "C1b": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep110_s1101.json"
+    }
+   }
+  ],
+  "per_run": {
+   "C0_ep12_s121": {
+    "episode": 12,
+    "seed": 121,
+    "arm": "C0",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 215,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 315.0,
+    "min_finger_target_mm": 39.45966552641619,
+    "target_dz_max_mm": 240.3812443554043,
+    "run_dir": "outputs/verify/T44/CL/runs/C0/R/C0_ep12_s121",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 103
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 103
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep12_s121.json",
+    "trace": {
+     "split_fired_chunks": 12,
+     "n_removed_sum": 17952,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep12_s121": {
+    "episode": 12,
+    "seed": 121,
+    "arm": "C1a",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 238,
+    "n_hold_chunks": 3,
+    "hold_kinds": {
+     "collision": 2,
+     "unverified": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 321.0,
+    "min_finger_target_mm": 34.75945457398776,
+    "target_dz_max_mm": 243.61140078625377,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep12_s121",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 128
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 128
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep12_s121.json",
+    "trace": {
+     "split_fired_chunks": 14,
+     "n_removed_sum": 17082,
+     "n_kept_nontarget_sum": 27,
+     "n_unowned_removed_sum": 7144,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep12_s121": {
+    "episode": 12,
+    "seed": 121,
+    "arm": "C1b",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 224,
+    "n_hold_chunks": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "n_comms_fail": 0,
+    "wall_s": 304.0,
+    "min_finger_target_mm": 39.3188523167801,
+    "target_dz_max_mm": 243.37846076605075,
+    "run_dir": "outputs/verify/T44/CL/runs/C1b/R/C1b_ep12_s121",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 107
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 107
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep12_s121.json",
+    "trace": {
+     "split_fired_chunks": 13,
+     "n_removed_sum": 17532,
+     "n_kept_nontarget_sum": 11,
+     "n_unowned_removed_sum": 7186,
+     "coarse_n_shared_kept_sum": 15
+    }
+   },
+   "C2_ep12_s121": {
+    "episode": 12,
+    "seed": 121,
+    "arm": "C2",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 336.0,
+    "min_finger_target_mm": 103.39150788134414,
+    "target_dz_max_mm": 0.002854003922969639,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep12_s121",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep12_s121.json",
+    "trace": {
+     "split_fired_chunks": 50,
+     "n_removed_sum": 79160,
+     "n_kept_nontarget_sum": 294,
+     "n_unowned_removed_sum": 34182,
+     "coarse_n_shared_kept_sum": 90
+    }
+   },
+   "C0_ep12_s122": {
+    "episode": 12,
+    "seed": 122,
+    "arm": "C0",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 222,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 290.0,
+    "min_finger_target_mm": 38.18501940516055,
+    "target_dz_max_mm": 242.01306927250155,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep12_s122",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 105
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 105
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep12_s122.json",
+    "trace": {
+     "split_fired_chunks": 14,
+     "n_removed_sum": 19187,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep12_s122": {
+    "episode": 12,
+    "seed": 122,
+    "arm": "C1a",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 230,
+    "n_hold_chunks": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "n_comms_fail": 0,
+    "wall_s": 307.0,
+    "min_finger_target_mm": 36.311741478063304,
+    "target_dz_max_mm": 245.17500738657327,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep12_s122",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 119
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 119
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep12_s122.json",
+    "trace": {
+     "split_fired_chunks": 16,
+     "n_removed_sum": 18372,
+     "n_kept_nontarget_sum": 27,
+     "n_unowned_removed_sum": 7650,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep12_s122": {
+    "episode": 12,
+    "seed": 122,
+    "arm": "C1b",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "success": false,
+    "grasp": true,
+    "place": false,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": true,
+    "robust_grasp": false,
+    "failure_mode": "slip_at_lift",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": 418,
+    "n_hold_chunks": 4,
+    "hold_kinds": {
+     "collision": 4
+    },
+    "n_comms_fail": 0,
+    "wall_s": 300.0,
+    "min_finger_target_mm": 40.28785618840202,
+    "target_dz_max_mm": 55.97821659400937,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep12_s122",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 21
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 21
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep12_s122.json",
+    "trace": {
+     "split_fired_chunks": 46,
+     "n_removed_sum": 39651,
+     "n_kept_nontarget_sum": 2887,
+     "n_unowned_removed_sum": 24907,
+     "coarse_n_shared_kept_sum": 29
+    }
+   },
+   "C2_ep12_s122": {
+    "episode": 12,
+    "seed": 122,
+    "arm": "C2",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 4,
+    "hold_kinds": {
+     "collision": 4
+    },
+    "n_comms_fail": 0,
+    "wall_s": 309.0,
+    "min_finger_target_mm": 94.72204321439253,
+    "target_dz_max_mm": 0.002854003922969639,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep12_s122",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep12_s122.json",
+    "trace": {
+     "split_fired_chunks": 53,
+     "n_removed_sum": 79111,
+     "n_kept_nontarget_sum": 501,
+     "n_unowned_removed_sum": 34444,
+     "coarse_n_shared_kept_sum": 170
+    }
+   },
+   "C0_ep30_s301": {
+    "episode": 30,
+    "seed": 301,
+    "arm": "C0",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 214,
+    "n_hold_chunks": 37,
+    "hold_kinds": {
+     "unverified": 1,
+     "collision": 1,
+     "uncertified": 36
+    },
+    "n_comms_fail": 0,
+    "wall_s": 274.0,
+    "min_finger_target_mm": 39.63043562027719,
+    "target_dz_max_mm": 248.49328574667618,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep30_s301",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 114
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 114
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep30_s301.json",
+    "trace": {
+     "split_fired_chunks": 4,
+     "n_removed_sum": 15285,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep30_s301": {
+    "episode": 30,
+    "seed": 301,
+    "arm": "C1a",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": true,
+    "robust_grasp": false,
+    "failure_mode": "slip_in_transport",
+    "success_rel": true,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": 207,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 296.0,
+    "min_finger_target_mm": 38.323152398616266,
+    "target_dz_max_mm": 250.19360530156166,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep30_s301",
+    "contacts_rows": {
+     "hand-fruit_other": 6,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 107
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 6,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 107
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep30_s301.json",
+    "trace": {
+     "split_fired_chunks": 4,
+     "n_removed_sum": 14947,
+     "n_kept_nontarget_sum": 33,
+     "n_unowned_removed_sum": 5856,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep30_s301": {
+    "episode": 30,
+    "seed": 301,
+    "arm": "C1b",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 230,
+    "n_hold_chunks": 34,
+    "hold_kinds": {
+     "collision": 1,
+     "uncertified": 33
+    },
+    "n_comms_fail": 0,
+    "wall_s": 264.0,
+    "min_finger_target_mm": 34.93231346205495,
+    "target_dz_max_mm": 238.5205563753219,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep30_s301",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 110
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 110
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep30_s301.json",
+    "trace": {
+     "split_fired_chunks": 4,
+     "n_removed_sum": 17524,
+     "n_kept_nontarget_sum": 79,
+     "n_unowned_removed_sum": 6764,
+     "coarse_n_shared_kept_sum": 38
+    }
+   },
+   "C2_ep30_s301": {
+    "episode": 30,
+    "seed": 301,
+    "arm": "C2",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 314.0,
+    "min_finger_target_mm": 96.14198812330831,
+    "target_dz_max_mm": 0.006105368623332552,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep30_s301",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep30_s301.json",
+    "trace": {
+     "split_fired_chunks": 4,
+     "n_removed_sum": 75441,
+     "n_kept_nontarget_sum": 568,
+     "n_unowned_removed_sum": 31987,
+     "coarse_n_shared_kept_sum": 211
+    }
+   },
+   "C0_ep30_s302": {
+    "episode": 30,
+    "seed": 302,
+    "arm": "C0",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 200,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 277.0,
+    "min_finger_target_mm": 40.97853393289079,
+    "target_dz_max_mm": 236.77380485034848,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep30_s302",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 90
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 90
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep30_s302.json",
+    "trace": {
+     "split_fired_chunks": 5,
+     "n_removed_sum": 16364,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep30_s302": {
+    "episode": 30,
+    "seed": 302,
+    "arm": "C1a",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 206,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 300.0,
+    "min_finger_target_mm": 41.46822367488379,
+    "target_dz_max_mm": 246.06551774103445,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep30_s302",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 96
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 96
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep30_s302.json",
+    "trace": {
+     "split_fired_chunks": 5,
+     "n_removed_sum": 16095,
+     "n_kept_nontarget_sum": 16,
+     "n_unowned_removed_sum": 6455,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep30_s302": {
+    "episode": 30,
+    "seed": 302,
+    "arm": "C1b",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": 214,
+    "n_hold_chunks": 38,
+    "hold_kinds": {
+     "collision": 1,
+     "uncertified": 37
+    },
+    "n_comms_fail": 0,
+    "wall_s": 271.0,
+    "min_finger_target_mm": 40.425628459572124,
+    "target_dz_max_mm": 246.85218325937709,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep30_s302",
+    "contacts_rows": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 104
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 104
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep30_s302.json",
+    "trace": {
+     "split_fired_chunks": 5,
+     "n_removed_sum": 15826,
+     "n_kept_nontarget_sum": 17,
+     "n_unowned_removed_sum": 6240,
+     "coarse_n_shared_kept_sum": 32
+    }
+   },
+   "C2_ep30_s302": {
+    "episode": 30,
+    "seed": 302,
+    "arm": "C2",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 298.0,
+    "min_finger_target_mm": 102.14213479259297,
+    "target_dz_max_mm": 0.006105368623332552,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep30_s302",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep30_s302.json",
+    "trace": {
+     "split_fired_chunks": 6,
+     "n_removed_sum": 74488,
+     "n_kept_nontarget_sum": 961,
+     "n_unowned_removed_sum": 31862,
+     "coarse_n_shared_kept_sum": 283
+    }
+   },
+   "C0_ep0_s1": {
+    "episode": 0,
+    "seed": 1,
+    "arm": "C0",
+    "target_fruit": "orange",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": false,
+    "regrasp": true,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "regrasp",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 430,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 291.0,
+    "min_finger_target_mm": 40.61745170253761,
+    "target_dz_max_mm": 233.3757816361316,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep0_s1",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 82
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 82
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep0_s1.json",
+    "trace": {
+     "split_fired_chunks": 27,
+     "n_removed_sum": 17159,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep0_s1": {
+    "episode": 0,
+    "seed": 1,
+    "arm": "C1a",
+    "target_fruit": "orange",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 214,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 304.0,
+    "min_finger_target_mm": 40.49208978442013,
+    "target_dz_max_mm": 234.13718005320604,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep0_s1",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 110
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 110
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep0_s1.json",
+    "trace": {
+     "split_fired_chunks": 7,
+     "n_removed_sum": 11142,
+     "n_kept_nontarget_sum": 70,
+     "n_unowned_removed_sum": 3979,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep0_s1": {
+    "episode": 0,
+    "seed": 1,
+    "arm": "C1b",
+    "target_fruit": "orange",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 290.0,
+    "min_finger_target_mm": 44.27818310594683,
+    "target_dz_max_mm": 0.0017695495164726793,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep0_s1",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 10
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 10
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep0_s1.json",
+    "trace": {
+     "split_fired_chunks": 39,
+     "n_removed_sum": 51333,
+     "n_kept_nontarget_sum": 648,
+     "n_unowned_removed_sum": 21054,
+     "coarse_n_shared_kept_sum": 205
+    }
+   },
+   "C2_ep0_s1": {
+    "episode": 0,
+    "seed": 1,
+    "arm": "C2",
+    "target_fruit": "orange",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 308.0,
+    "min_finger_target_mm": 92.78818516753432,
+    "target_dz_max_mm": 5.120630697241779e-06,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep0_s1",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep0_s1.json",
+    "trace": {
+     "split_fired_chunks": 35,
+     "n_removed_sum": 55140,
+     "n_kept_nontarget_sum": 145,
+     "n_unowned_removed_sum": 20979,
+     "coarse_n_shared_kept_sum": 177
+    }
+   },
+   "C0_ep0_s2": {
+    "episode": 0,
+    "seed": 2,
+    "arm": "C0",
+    "target_fruit": "orange",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 285.0,
+    "min_finger_target_mm": 39.635224543464126,
+    "target_dz_max_mm": 10.05348970676656,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep0_s2",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 23
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 23
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep0_s2.json",
+    "trace": {
+     "split_fired_chunks": 37,
+     "n_removed_sum": 21689,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep0_s2": {
+    "episode": 0,
+    "seed": 2,
+    "arm": "C1a",
+    "target_fruit": "orange",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 317.0,
+    "min_finger_target_mm": 39.44389470147697,
+    "target_dz_max_mm": 16.526630049376934,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep0_s2",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 15
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 15
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep0_s2.json",
+    "trace": {
+     "split_fired_chunks": 35,
+     "n_removed_sum": 46300,
+     "n_kept_nontarget_sum": 5905,
+     "n_unowned_removed_sum": 21038,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep0_s2": {
+    "episode": 0,
+    "seed": 2,
+    "arm": "C1b",
+    "target_fruit": "orange",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 268.0,
+    "min_finger_target_mm": 43.17960521207401,
+    "target_dz_max_mm": 5.120630697241779e-06,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep0_s2",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 49
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 49
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep0_s2.json",
+    "trace": {
+     "split_fired_chunks": 33,
+     "n_removed_sum": 48095,
+     "n_kept_nontarget_sum": 796,
+     "n_unowned_removed_sum": 21437,
+     "coarse_n_shared_kept_sum": 217
+    }
+   },
+   "C2_ep0_s2": {
+    "episode": 0,
+    "seed": 2,
+    "arm": "C2",
+    "target_fruit": "orange",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 289.0,
+    "min_finger_target_mm": 88.63706427495602,
+    "target_dz_max_mm": 5.120630697241779e-06,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep0_s2",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep0_s2.json",
+    "trace": {
+     "split_fired_chunks": 27,
+     "n_removed_sum": 53196,
+     "n_kept_nontarget_sum": 518,
+     "n_unowned_removed_sum": 21074,
+     "coarse_n_shared_kept_sum": 202
+    }
+   },
+   "C0_ep3_s31": {
+    "episode": 3,
+    "seed": 31,
+    "arm": "C0",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 308.0,
+    "min_finger_target_mm": 36.23775244837936,
+    "target_dz_max_mm": 13.713407856774328,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep3_s31",
+    "contacts_rows": {
+     "hand-fruit_other": 63,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 149
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 63,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 149
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep3_s31.json",
+    "trace": {
+     "split_fired_chunks": 6,
+     "n_removed_sum": 36314,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep3_s31": {
+    "episode": 3,
+    "seed": 31,
+    "arm": "C1a",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": null,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 327.0,
+    "min_finger_target_mm": 33.92902322556738,
+    "target_dz_max_mm": 12.151879258730958,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep3_s31",
+    "contacts_rows": {
+     "hand-fruit_other": 26,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 168
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 26,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 168
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep3_s31.json",
+    "trace": {
+     "split_fired_chunks": 16,
+     "n_removed_sum": 41463,
+     "n_kept_nontarget_sum": 581,
+     "n_unowned_removed_sum": 17399,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep3_s31": {
+    "episode": 3,
+    "seed": 31,
+    "arm": "C1b",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 299.0,
+    "min_finger_target_mm": 39.2118986162789,
+    "target_dz_max_mm": 1.4289559069485813,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep3_s31",
+    "contacts_rows": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 104
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 104
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep3_s31.json",
+    "trace": {
+     "split_fired_chunks": 4,
+     "n_removed_sum": 91197,
+     "n_kept_nontarget_sum": 4521,
+     "n_unowned_removed_sum": 30703,
+     "coarse_n_shared_kept_sum": 243
+    }
+   },
+   "C2_ep3_s31": {
+    "episode": 3,
+    "seed": 31,
+    "arm": "C2",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": null,
+    "n_hold_chunks": 3,
+    "hold_kinds": {
+     "collision": 3
+    },
+    "n_comms_fail": 0,
+    "wall_s": 342.0,
+    "min_finger_target_mm": 55.37588506624035,
+    "target_dz_max_mm": 0.6282705800551014,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep3_s31",
+    "contacts_rows": {
+     "hand-fruit_other": 5,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 22
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 5,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 22
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep3_s31.json",
+    "trace": {
+     "split_fired_chunks": 17,
+     "n_removed_sum": 85657,
+     "n_kept_nontarget_sum": 993,
+     "n_unowned_removed_sum": 34003,
+     "coarse_n_shared_kept_sum": 637
+    }
+   },
+   "C0_ep3_s32": {
+    "episode": 3,
+    "seed": 32,
+    "arm": "C0",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 283.0,
+    "min_finger_target_mm": 36.115903812679974,
+    "target_dz_max_mm": 1.819968209711642,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep3_s32",
+    "contacts_rows": {
+     "hand-fruit_other": 7,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 95
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 7,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 95
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep3_s32.json",
+    "trace": {
+     "split_fired_chunks": 2,
+     "n_removed_sum": 116271,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep3_s32": {
+    "episode": 3,
+    "seed": 32,
+    "arm": "C1a",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": null,
+    "n_hold_chunks": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "n_comms_fail": 0,
+    "wall_s": 307.0,
+    "min_finger_target_mm": 34.896978979863384,
+    "target_dz_max_mm": 4.801483961483721,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep3_s32",
+    "contacts_rows": {
+     "hand-fruit_other": 7,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 184
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 7,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 184
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep3_s32.json",
+    "trace": {
+     "split_fired_chunks": 20,
+     "n_removed_sum": 53951,
+     "n_kept_nontarget_sum": 933,
+     "n_unowned_removed_sum": 26555,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep3_s32": {
+    "episode": 3,
+    "seed": 32,
+    "arm": "C1b",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": null,
+    "n_hold_chunks": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "n_comms_fail": 0,
+    "wall_s": 273.0,
+    "min_finger_target_mm": 35.16155030926956,
+    "target_dz_max_mm": 1.2817243132084988,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep3_s32",
+    "contacts_rows": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 143
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 143
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep3_s32.json",
+    "trace": {
+     "split_fired_chunks": 5,
+     "n_removed_sum": 64209,
+     "n_kept_nontarget_sum": 6888,
+     "n_unowned_removed_sum": 27597,
+     "coarse_n_shared_kept_sum": 105
+    }
+   },
+   "C2_ep3_s32": {
+    "episode": 3,
+    "seed": 32,
+    "arm": "C2",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "n_comms_fail": 0,
+    "wall_s": 310.0,
+    "min_finger_target_mm": 58.114569943671796,
+    "target_dz_max_mm": 0.006827859289848526,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep3_s32",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep3_s32.json",
+    "trace": {
+     "split_fired_chunks": 33,
+     "n_removed_sum": 92313,
+     "n_kept_nontarget_sum": 541,
+     "n_unowned_removed_sum": 37094,
+     "coarse_n_shared_kept_sum": 400
+    }
+   },
+   "C0_ep11_s111": {
+    "episode": 11,
+    "seed": 111,
+    "arm": "C0",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 63,
+    "hold_kinds": {
+     "collision": 63,
+     "unverified": 45
+    },
+    "n_comms_fail": 0,
+    "wall_s": 315.0,
+    "min_finger_target_mm": 37.22540130459072,
+    "target_dz_max_mm": 0.2884296015291943,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep11_s111",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 514
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 514
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep11_s111.json",
+    "trace": {
+     "split_fired_chunks": 10,
+     "n_removed_sum": 12553,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep11_s111": {
+    "episode": 11,
+    "seed": 111,
+    "arm": "C1a",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 191,
+    "n_hold_chunks": 3,
+    "hold_kinds": {
+     "collision": 2,
+     "uncertified": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 305.0,
+    "min_finger_target_mm": 37.47018229680382,
+    "target_dz_max_mm": 242.79458911263464,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep11_s111",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 105
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 105
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep11_s111.json",
+    "trace": {
+     "split_fired_chunks": 11,
+     "n_removed_sum": 12239,
+     "n_kept_nontarget_sum": 310,
+     "n_unowned_removed_sum": 4404,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep11_s111": {
+    "episode": 11,
+    "seed": 111,
+    "arm": "C1b",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 2,
+    "hold_kinds": {
+     "unverified": 2,
+     "collision": 2
+    },
+    "n_comms_fail": 0,
+    "wall_s": 291.0,
+    "min_finger_target_mm": 30.937810147140073,
+    "target_dz_max_mm": 1.3828378017182175,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep11_s111",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 89
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 89
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep11_s111.json",
+    "trace": {
+     "split_fired_chunks": 14,
+     "n_removed_sum": 25341,
+     "n_kept_nontarget_sum": 2180,
+     "n_unowned_removed_sum": 11002,
+     "coarse_n_shared_kept_sum": 24
+    }
+   },
+   "C2_ep11_s111": {
+    "episode": 11,
+    "seed": 111,
+    "arm": "C2",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 300.0,
+    "min_finger_target_mm": 102.11672930513508,
+    "target_dz_max_mm": 0.0016194246622580621,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep11_s111",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep11_s111.json",
+    "trace": {
+     "split_fired_chunks": 41,
+     "n_removed_sum": 69541,
+     "n_kept_nontarget_sum": 2167,
+     "n_unowned_removed_sum": 27091,
+     "coarse_n_shared_kept_sum": 106
+    }
+   },
+   "C0_ep11_s112": {
+    "episode": 11,
+    "seed": 112,
+    "arm": "C0",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 221,
+    "n_hold_chunks": 38,
+    "hold_kinds": {
+     "collision": 1,
+     "uncertified": 37
+    },
+    "n_comms_fail": 0,
+    "wall_s": 277.0,
+    "min_finger_target_mm": 34.872577319587734,
+    "target_dz_max_mm": 240.01671179798078,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep11_s112",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 123
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 123
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep11_s112.json",
+    "trace": {
+     "split_fired_chunks": 14,
+     "n_removed_sum": 18148,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep11_s112": {
+    "episode": 11,
+    "seed": 112,
+    "arm": "C1a",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 237,
+    "n_hold_chunks": 34,
+    "hold_kinds": {
+     "collision": 1,
+     "uncertified": 33
+    },
+    "n_comms_fail": 0,
+    "wall_s": 292.0,
+    "min_finger_target_mm": 34.79522738436866,
+    "target_dz_max_mm": 243.50540145889266,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep11_s112",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 139
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 139
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep11_s112.json",
+    "trace": {
+     "split_fired_chunks": 14,
+     "n_removed_sum": 17196,
+     "n_kept_nontarget_sum": 485,
+     "n_unowned_removed_sum": 6333,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep11_s112": {
+    "episode": 11,
+    "seed": 112,
+    "arm": "C1b",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "unverified": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 293.0,
+    "min_finger_target_mm": 33.63998536662204,
+    "target_dz_max_mm": 5.340889245241565,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep11_s112",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 80
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 80
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep11_s112.json",
+    "trace": {
+     "split_fired_chunks": 12,
+     "n_removed_sum": 21408,
+     "n_kept_nontarget_sum": 4810,
+     "n_unowned_removed_sum": 8212,
+     "coarse_n_shared_kept_sum": 12
+    }
+   },
+   "C2_ep11_s112": {
+    "episode": 11,
+    "seed": 112,
+    "arm": "C2",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 313.0,
+    "min_finger_target_mm": 106.59920668871113,
+    "target_dz_max_mm": 0.0016194246622580621,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep11_s112",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep11_s112.json",
+    "trace": {
+     "split_fired_chunks": 45,
+     "n_removed_sum": 68843,
+     "n_kept_nontarget_sum": 1779,
+     "n_unowned_removed_sum": 26489,
+     "coarse_n_shared_kept_sum": 120
+    }
+   },
+   "C0_ep54_s541": {
+    "episode": 54,
+    "seed": 541,
+    "arm": "C0",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 248,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 294.0,
+    "min_finger_target_mm": 39.78913908481759,
+    "target_dz_max_mm": 239.48810775735774,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep54_s541",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 135
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 135
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep54_s541.json",
+    "trace": {
+     "split_fired_chunks": 6,
+     "n_removed_sum": 31626,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep54_s541": {
+    "episode": 54,
+    "seed": 541,
+    "arm": "C1a",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": 221,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 324.0,
+    "min_finger_target_mm": 41.13562969719384,
+    "target_dz_max_mm": 239.052307809284,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep54_s541",
+    "contacts_rows": {
+     "hand-fruit_other": 6,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 108
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 6,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 108
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep54_s541.json",
+    "trace": {
+     "split_fired_chunks": 13,
+     "n_removed_sum": 18014,
+     "n_kept_nontarget_sum": 351,
+     "n_unowned_removed_sum": 7631,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep54_s541": {
+    "episode": 54,
+    "seed": 541,
+    "arm": "C1b",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": 218,
+    "n_hold_chunks": 38,
+    "hold_kinds": {
+     "collision": 1,
+     "uncertified": 37
+    },
+    "n_comms_fail": 0,
+    "wall_s": 283.0,
+    "min_finger_target_mm": 39.46661204634975,
+    "target_dz_max_mm": 238.40662688784363,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep54_s541",
+    "contacts_rows": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 105
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 105
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep54_s541.json",
+    "trace": {
+     "split_fired_chunks": 13,
+     "n_removed_sum": 17203,
+     "n_kept_nontarget_sum": 353,
+     "n_unowned_removed_sum": 7083,
+     "coarse_n_shared_kept_sum": 18
+    }
+   },
+   "C2_ep54_s541": {
+    "episode": 54,
+    "seed": 541,
+    "arm": "C2",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 315.0,
+    "min_finger_target_mm": 101.33575544939272,
+    "target_dz_max_mm": 5.312474793406352e-06,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep54_s541",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep54_s541.json",
+    "trace": {
+     "split_fired_chunks": 51,
+     "n_removed_sum": 78696,
+     "n_kept_nontarget_sum": 1842,
+     "n_unowned_removed_sum": 36444,
+     "coarse_n_shared_kept_sum": 158
+    }
+   },
+   "C0_ep54_s542": {
+    "episode": 54,
+    "seed": 542,
+    "arm": "C0",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": 337,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 308.0,
+    "min_finger_target_mm": 40.41806384987661,
+    "target_dz_max_mm": 243.07246438909104,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep54_s542",
+    "contacts_rows": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 200
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 4,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 200
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep54_s542.json",
+    "trace": {
+     "split_fired_chunks": 6,
+     "n_removed_sum": 38006,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep54_s542": {
+    "episode": 54,
+    "seed": 542,
+    "arm": "C1a",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": 254,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 314.0,
+    "min_finger_target_mm": 37.56029920130281,
+    "target_dz_max_mm": 244.26138526452047,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep54_s542",
+    "contacts_rows": {
+     "hand-fruit_other": 5,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 107
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 5,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 107
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep54_s542.json",
+    "trace": {
+     "split_fired_chunks": 15,
+     "n_removed_sum": 22289,
+     "n_kept_nontarget_sum": 467,
+     "n_unowned_removed_sum": 9322,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep54_s542": {
+    "episode": 54,
+    "seed": 542,
+    "arm": "C1b",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": 240,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 285.0,
+    "min_finger_target_mm": 39.863195275392584,
+    "target_dz_max_mm": 239.40946962565468,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep54_s542",
+    "contacts_rows": {
+     "hand-fruit_other": 3,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 103
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 3,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 103
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep54_s542.json",
+    "trace": {
+     "split_fired_chunks": 15,
+     "n_removed_sum": 20770,
+     "n_kept_nontarget_sum": 450,
+     "n_unowned_removed_sum": 8506,
+     "coarse_n_shared_kept_sum": 30
+    }
+   },
+   "C2_ep54_s542": {
+    "episode": 54,
+    "seed": 542,
+    "arm": "C2",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 307.0,
+    "min_finger_target_mm": 104.0945780623452,
+    "target_dz_max_mm": 5.312474793406352e-06,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep54_s542",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep54_s542.json",
+    "trace": {
+     "split_fired_chunks": 32,
+     "n_removed_sum": 74595,
+     "n_kept_nontarget_sum": 2563,
+     "n_unowned_removed_sum": 36338,
+     "coarse_n_shared_kept_sum": 142
+    }
+   },
+   "C0_ep123_s1231": {
+    "episode": 123,
+    "seed": 1231,
+    "arm": "C0",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 248,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "uncertified": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 319.0,
+    "min_finger_target_mm": 40.48332485477575,
+    "target_dz_max_mm": 241.84456631012173,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep123_s1231",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 153
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 153
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep123_s1231.json",
+    "trace": {
+     "split_fired_chunks": 3,
+     "n_removed_sum": 20688,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep123_s1231": {
+    "episode": 123,
+    "seed": 1231,
+    "arm": "C1a",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 232,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 330.0,
+    "min_finger_target_mm": 38.96339832218736,
+    "target_dz_max_mm": 247.95891175988473,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep123_s1231",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 137
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 137
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep123_s1231.json",
+    "trace": {
+     "split_fired_chunks": 11,
+     "n_removed_sum": 22858,
+     "n_kept_nontarget_sum": 14,
+     "n_unowned_removed_sum": 11181,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep123_s1231": {
+    "episode": 123,
+    "seed": 1231,
+    "arm": "C1b",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 307.0,
+    "min_finger_target_mm": 40.07447984091128,
+    "target_dz_max_mm": 0.6881002410931147,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep123_s1231",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 41
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 41
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep123_s1231.json",
+    "trace": {
+     "split_fired_chunks": 17,
+     "n_removed_sum": 94629,
+     "n_kept_nontarget_sum": 5015,
+     "n_unowned_removed_sum": 43801,
+     "coarse_n_shared_kept_sum": 373
+    }
+   },
+   "C2_ep123_s1231": {
+    "episode": 123,
+    "seed": 1231,
+    "arm": "C2",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 3,
+    "hold_kinds": {
+     "collision": 3
+    },
+    "n_comms_fail": 0,
+    "wall_s": 357.0,
+    "min_finger_target_mm": 50.37134080131446,
+    "target_dz_max_mm": 0.002913533507453714,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep123_s1231",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep123_s1231.json",
+    "trace": {
+     "split_fired_chunks": 13,
+     "n_removed_sum": 102206,
+     "n_kept_nontarget_sum": 870,
+     "n_unowned_removed_sum": 43640,
+     "coarse_n_shared_kept_sum": 388
+    }
+   },
+   "C0_ep123_s1232": {
+    "episode": 123,
+    "seed": 1232,
+    "arm": "C0",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 271,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 303.0,
+    "min_finger_target_mm": 40.01768602714678,
+    "target_dz_max_mm": 242.96750934975975,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep123_s1232",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 163
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 163
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep123_s1232.json",
+    "trace": {
+     "split_fired_chunks": 17,
+     "n_removed_sum": 37707,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep123_s1232": {
+    "episode": 123,
+    "seed": 1232,
+    "arm": "C1a",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 278,
+    "n_hold_chunks": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "n_comms_fail": 0,
+    "wall_s": 322.0,
+    "min_finger_target_mm": 37.977979817914296,
+    "target_dz_max_mm": 237.44616476718116,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep123_s1232",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 170
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 170
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep123_s1232.json",
+    "trace": {
+     "split_fired_chunks": 21,
+     "n_removed_sum": 28698,
+     "n_kept_nontarget_sum": 76,
+     "n_unowned_removed_sum": 14439,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep123_s1232": {
+    "episode": 123,
+    "seed": 1232,
+    "arm": "C1b",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": true,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": true,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "regrasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 286.0,
+    "min_finger_target_mm": 43.14539299395612,
+    "target_dz_max_mm": 243.86754295739522,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep123_s1232",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 86
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 86
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep123_s1232.json",
+    "trace": {
+     "split_fired_chunks": 4,
+     "n_removed_sum": 47546,
+     "n_kept_nontarget_sum": 3479,
+     "n_unowned_removed_sum": 25800,
+     "coarse_n_shared_kept_sum": 50
+    }
+   },
+   "C2_ep123_s1232": {
+    "episode": 123,
+    "seed": 1232,
+    "arm": "C2",
+    "target_fruit": "orange",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 313.0,
+    "min_finger_target_mm": 61.049151616742115,
+    "target_dz_max_mm": 0.004204783315753247,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep123_s1232",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 11
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 11
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep123_s1232.json",
+    "trace": {
+     "split_fired_chunks": 4,
+     "n_removed_sum": 98518,
+     "n_kept_nontarget_sum": 1195,
+     "n_unowned_removed_sum": 42838,
+     "coarse_n_shared_kept_sum": 369
+    }
+   },
+   "C0_ep104_s1041": {
+    "episode": 104,
+    "seed": 1041,
+    "arm": "C0",
+    "target_fruit": "pear",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 247,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 272.0,
+    "min_finger_target_mm": 34.933497394534896,
+    "target_dz_max_mm": 239.63561358348883,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep104_s1041",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 141
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 141
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep104_s1041.json",
+    "trace": {
+     "split_fired_chunks": 11,
+     "n_removed_sum": 20846,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep104_s1041": {
+    "episode": 104,
+    "seed": 1041,
+    "arm": "C1a",
+    "target_fruit": "pear",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 237,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 305.0,
+    "min_finger_target_mm": 35.25524541474043,
+    "target_dz_max_mm": 240.9364273671778,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep104_s1041",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 123
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 123
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep104_s1041.json",
+    "trace": {
+     "split_fired_chunks": 13,
+     "n_removed_sum": 16905,
+     "n_kept_nontarget_sum": 921,
+     "n_unowned_removed_sum": 4773,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep104_s1041": {
+    "episode": 104,
+    "seed": 1041,
+    "arm": "C1b",
+    "target_fruit": "pear",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 232,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 277.0,
+    "min_finger_target_mm": 37.05898997795195,
+    "target_dz_max_mm": 237.36128306805904,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep104_s1041",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 124
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 124
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep104_s1041.json",
+    "trace": {
+     "split_fired_chunks": 12,
+     "n_removed_sum": 16717,
+     "n_kept_nontarget_sum": 920,
+     "n_unowned_removed_sum": 4591,
+     "coarse_n_shared_kept_sum": 10
+    }
+   },
+   "C2_ep104_s1041": {
+    "episode": 104,
+    "seed": 1041,
+    "arm": "C2",
+    "target_fruit": "pear",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 296.0,
+    "min_finger_target_mm": 102.1686385548959,
+    "target_dz_max_mm": 0.0022954238740879873,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep104_s1041",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep104_s1041.json",
+    "trace": {
+     "split_fired_chunks": 53,
+     "n_removed_sum": 66488,
+     "n_kept_nontarget_sum": 3232,
+     "n_unowned_removed_sum": 21506,
+     "coarse_n_shared_kept_sum": 176
+    }
+   },
+   "C0_ep104_s1042": {
+    "episode": 104,
+    "seed": 1042,
+    "arm": "C0",
+    "target_fruit": "pear",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": false,
+    "regrasp": true,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "regrasp",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 221,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 280.0,
+    "min_finger_target_mm": 35.23791673241064,
+    "target_dz_max_mm": 236.66514940818607,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep104_s1042",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 121
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 121
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep104_s1042.json",
+    "trace": {
+     "split_fired_chunks": 11,
+     "n_removed_sum": 17823,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep104_s1042": {
+    "episode": 104,
+    "seed": 1042,
+    "arm": "C1a",
+    "target_fruit": "pear",
+    "used_arm": "left",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": false,
+    "regrasp": true,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "regrasp",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 192,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 313.0,
+    "min_finger_target_mm": 36.34742567313527,
+    "target_dz_max_mm": 233.55887936737406,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep104_s1042",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 94
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 94
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep104_s1042.json",
+    "trace": {
+     "split_fired_chunks": 13,
+     "n_removed_sum": 16771,
+     "n_kept_nontarget_sum": 971,
+     "n_unowned_removed_sum": 5379,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep104_s1042": {
+    "episode": 104,
+    "seed": 1042,
+    "arm": "C1b",
+    "target_fruit": "pear",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 291.0,
+    "min_finger_target_mm": 36.52142528591915,
+    "target_dz_max_mm": 4.135698807521626,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep104_s1042",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 34
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 34
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep104_s1042.json",
+    "trace": {
+     "split_fired_chunks": 34,
+     "n_removed_sum": 34668,
+     "n_kept_nontarget_sum": 5853,
+     "n_unowned_removed_sum": 20799,
+     "coarse_n_shared_kept_sum": 17
+    }
+   },
+   "C2_ep104_s1042": {
+    "episode": 104,
+    "seed": 1042,
+    "arm": "C2",
+    "target_fruit": "pear",
+    "used_arm": "left",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 300.0,
+    "min_finger_target_mm": 100.1543416388918,
+    "target_dz_max_mm": 0.0022954238740879873,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep104_s1042",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 0
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep104_s1042.json",
+    "trace": {
+     "split_fired_chunks": 58,
+     "n_removed_sum": 68988,
+     "n_kept_nontarget_sum": 3322,
+     "n_unowned_removed_sum": 23719,
+     "coarse_n_shared_kept_sum": 190
+    }
+   },
+   "C0_ep110_s1101": {
+    "episode": 110,
+    "seed": 1101,
+    "arm": "C0",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 295,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 317.0,
+    "min_finger_target_mm": 34.91555828261358,
+    "target_dz_max_mm": 243.35981849919085,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep110_s1101",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 165
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 165
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep110_s1101.json",
+    "trace": {
+     "split_fired_chunks": 0,
+     "n_removed_sum": 32067,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep110_s1101": {
+    "episode": 110,
+    "seed": 1101,
+    "arm": "C1a",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 287,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 330.0,
+    "min_finger_target_mm": 34.20146058995051,
+    "target_dz_max_mm": 244.40681911458927,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep110_s1101",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 158
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 158
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep110_s1101.json",
+    "trace": {
+     "split_fired_chunks": 5,
+     "n_removed_sum": 29229,
+     "n_kept_nontarget_sum": 1152,
+     "n_unowned_removed_sum": 11582,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep110_s1101": {
+    "episode": 110,
+    "seed": 1101,
+    "arm": "C1b",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": false,
+    "grasp": true,
+    "place": false,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": true,
+    "robust_grasp": false,
+    "failure_mode": "slip_in_transport",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": 442,
+    "n_hold_chunks": 30,
+    "hold_kinds": {
+     "collision": 30
+    },
+    "n_comms_fail": 0,
+    "wall_s": 316.0,
+    "min_finger_target_mm": 38.936730117104766,
+    "target_dz_max_mm": 269.2545696376908,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep110_s1101",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 3,
+     "robot_other-fruit_other": 0,
+     "hand-target": 311
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 311
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep110_s1101.json",
+    "trace": {
+     "split_fired_chunks": 14,
+     "n_removed_sum": 48945,
+     "n_kept_nontarget_sum": 1227,
+     "n_unowned_removed_sum": 19891,
+     "coarse_n_shared_kept_sum": 101
+    }
+   },
+   "C2_ep110_s1101": {
+    "episode": 110,
+    "seed": 1101,
+    "arm": "C2",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": true,
+    "release_t": null,
+    "n_hold_chunks": 5,
+    "hold_kinds": {
+     "collision": 5
+    },
+    "n_comms_fail": 0,
+    "wall_s": 328.0,
+    "min_finger_target_mm": 77.702049309234,
+    "target_dz_max_mm": 0.010318803986386627,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep110_s1101",
+    "contacts_rows": {
+     "hand-fruit_other": 36,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 2
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 36,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 2
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep110_s1101.json",
+    "trace": {
+     "split_fired_chunks": 17,
+     "n_removed_sum": 97636,
+     "n_kept_nontarget_sum": 8894,
+     "n_unowned_removed_sum": 49961,
+     "coarse_n_shared_kept_sum": 400
+    }
+   },
+   "C0_ep110_s1102": {
+    "episode": 110,
+    "seed": 1102,
+    "arm": "C0",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 289,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "n_comms_fail": 0,
+    "wall_s": 298.0,
+    "min_finger_target_mm": 36.20698609740853,
+    "target_dz_max_mm": 242.1307078275251,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep110_s1102",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 168
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 168
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C0_R_C0_ep110_s1102.json",
+    "trace": {
+     "split_fired_chunks": 1,
+     "n_removed_sum": 28772,
+     "n_kept_nontarget_sum": 0,
+     "n_unowned_removed_sum": 0,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1a_ep110_s1102": {
+    "episode": 110,
+    "seed": 1102,
+    "arm": "C1a",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 280,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 331.0,
+    "min_finger_target_mm": 35.48426368661067,
+    "target_dz_max_mm": 247.67343756015515,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1a/R/C1a_ep110_s1102",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 159
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 159
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1a_R_C1a_ep110_s1102.json",
+    "trace": {
+     "split_fired_chunks": 6,
+     "n_removed_sum": 26161,
+     "n_kept_nontarget_sum": 1053,
+     "n_unowned_removed_sum": 9566,
+     "coarse_n_shared_kept_sum": 0
+    }
+   },
+   "C1b_ep110_s1102": {
+    "episode": 110,
+    "seed": 1102,
+    "arm": "C1b",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": true,
+    "grasp": true,
+    "place": true,
+    "first_grasp_ok": true,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": true,
+    "failure_mode": "ok",
+    "success_rel": true,
+    "success_ct": true,
+    "success_ct_fruit": true,
+    "pre_release_new_contact": false,
+    "release_t": 285,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 292.0,
+    "min_finger_target_mm": 36.26998292204948,
+    "target_dz_max_mm": 259.4670196948771,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep110_s1102",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 163
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 163
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C1b_R_C1b_ep110_s1102.json",
+    "trace": {
+     "split_fired_chunks": 6,
+     "n_removed_sum": 27656,
+     "n_kept_nontarget_sum": 1112,
+     "n_unowned_removed_sum": 11249,
+     "coarse_n_shared_kept_sum": 55
+    }
+   },
+   "C2_ep110_s1102": {
+    "episode": 110,
+    "seed": 1102,
+    "arm": "C2",
+    "target_fruit": "pear",
+    "used_arm": "right",
+    "success": false,
+    "grasp": false,
+    "place": false,
+    "first_grasp_ok": false,
+    "regrasp": false,
+    "slip_B": false,
+    "robust_grasp": false,
+    "failure_mode": "no_grasp",
+    "success_rel": false,
+    "success_ct": false,
+    "success_ct_fruit": false,
+    "pre_release_new_contact": false,
+    "release_t": null,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "n_comms_fail": 0,
+    "wall_s": 310.0,
+    "min_finger_target_mm": 94.7312364191097,
+    "target_dz_max_mm": 0.011952995370378972,
+    "run_dir": "/mnt/dev/work/outputs/verify/T44/CL/runs/C2/R/C2_ep110_s1102",
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 6
+    },
+    "contacts_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 6
+    },
+    "replay_json": "/mnt/dev/work/outputs/verify/T44/CL/replay/C2_R_C2_ep110_s1102.json",
+    "trace": {
+     "split_fired_chunks": 19,
+     "n_removed_sum": 105119,
+     "n_kept_nontarget_sum": 7507,
+     "n_unowned_removed_sum": 44975,
+     "coarse_n_shared_kept_sum": 356
+    }
+   }
+  },
+  "pod_load_during_runs": {
+   "n_samples": 133,
+   "first": "2026-10-10T18:11:55+00:00",
+   "last": "2026-10-10T20:25:07+00:00",
+   "load1_min": 14.3,
+   "load1_median": 32.22,
+   "load1_max": 370.15,
+   "working_set_gib_max": 28.164241790771484,
+   "gpu_mib_max": 36142,
+   "note": "pod-wide (other sessions included); sampled every 60 s from 18:11 UTC (block 1 ran 16:54-18:03 unsampled)"
+  },
+  "regression_baseline": "not run (CL-run: execute and aggregate only)",
+  "replay_qpos_mismatch_rows_all_runs": 0,
+  "n_replays": 72,
+  "C2_min_finger_target_mm_range": [
+   50,
+   107
+  ],
+  "C2_runs_target_dz_max_gt_5mm": 0,
+  "round_trip_gt_533ms": "all 1332 chunks per arm (policy inference is inside the round trip)"
+ },
+ "figures": [
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44d-scene.png",
+   "kind": "scene"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44d-graph.png",
+   "kind": "graph"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44d-table.png",
+   "kind": "table"
+  }
+ ],
+ "videos": [
+  "benchmark/ag3s/docs/figures/t44/t44d-ep0-s1-C0-vs-C1b.mp4",
+  "benchmark/ag3s/docs/figures/t44/t44d-ep12-s122-C0-vs-C1b.mp4"
+ ],
+ "baseline_check": {
+  "matched": null,
+  "note": "regression-baseline not run in this step"
+ },
+ "verdict": "72/72 runs completed on first attempt (0 infra reruns, 0 timeouts, 0 comms failures); per-arm outcomes in numbers.arms.",
+ "not_measured": [
+  "banana (no passed episode)",
+  "target_rows_unauthorized_kept (emitted only by PathChecker; sweep_check off in all arms)",
+  "first-divergence chunk per discordant pair (CL-analysis)"
+ ]
+}

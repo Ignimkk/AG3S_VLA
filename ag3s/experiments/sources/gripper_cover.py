@@ -860,6 +860,21 @@ def finger_body_capsules(model, robot_model, links: Sequence[str], *,
     link frame 에서 mesh 가 같아 한 번만 푼다 (캐시 키 = 표본 digest). `gap` · `max_spheres` · `solver`
     는 T43 FR 의 구 수 선택지 (`finger_body_spheres`; 기본값 = FC 그대로).
     """
+    return _body_capsules(
+        model, robot_model, links, role=FINGER_BODY_ROLE, spacing=grid,
+        key=("finger_body", float(overflow), float(grid), float(gap),
+             None if max_spheres is None else int(max_spheres), str(solver)),
+        solve=lambda surf: finger_body_spheres(surf, overflow=overflow, grid=grid, gap=gap,
+                                               max_spheres=max_spheres, solver=solver))
+
+
+def _body_capsules(model, robot_model, links: Sequence[str], *, role: str, spacing: float,
+                   key: tuple, solve) -> tuple[list, dict]:
+    """`(capsules, report)` — link 마다 `solve(link_surface(..., spacing))` 의 구를 길이 0 `UrdfCapsule`
+    (`role`) 로. 손가락 (T43 FC) · 손바닥 (T45 A10) 몸통 구가 같이 쓴다.
+
+    캐시 키 = `(key[0], 표본 digest, *key[1:])` — link 이름은 넣지 않는다 (왼손 · 오른손은 link frame 에서
+    mesh 가 같아 한 번만 푼다)."""
     import hashlib
 
     from benchmark.ag3s.robot_models.urdf_sphere_chain import UrdfCapsule
@@ -867,22 +882,64 @@ def finger_body_capsules(model, robot_model, links: Sequence[str], *,
     out: list = []
     report: dict = {}
     for link in links:
-        surf = link_surface(model, robot_model, link, spacing=grid)
+        surf = link_surface(model, robot_model, link, spacing=spacing)
         h = hashlib.sha1()
         for a in (surf.points, surf.normals):
             h.update(np.ascontiguousarray(a).tobytes())
-        key = ("finger_body", h.hexdigest(), float(overflow), float(grid), float(gap),
-               None if max_spheres is None else int(max_spheres), str(solver))
-        hit = _CACHE.get(key)
+        cache_key = (key[0], h.hexdigest(), *key[1:])
+        hit = _CACHE.get(cache_key)
         if hit is None:
-            hit = finger_body_spheres(surf, overflow=overflow, grid=grid, gap=gap,
-                                      max_spheres=max_spheres, solver=solver)
-            _CACHE[key] = hit
+            hit = solve(surf)
+            _CACHE[cache_key] = hit
         centres, radii, rep = hit
         report[link] = {**rep, "mujoco_body": surf.body}
         for c, r in zip(centres, radii):
             origin = np.eye(4)
             origin[:3, 3] = c
             out.append(UrdfCapsule(link=link, origin=origin, radius=float(r), length=0.0,
-                                   role=FINGER_BODY_ROLE))
+                                   role=role))
     return out, report
+
+
+# =============================================================================================
+# T45 A10 — 손바닥 몸통 구 (`serve_safe --palm-cover on`, 기본 꺼짐)
+# =============================================================================================
+#
+# 사용자 판정 (2026-10-11, T45 audit 뒤): "Palm 은 5 mm cover 를 기본 off 옵션으로 구현하고, 기존 coverage
+# 생성 코드를 재사용". 손바닥 (`ee_left/right`, MJCF `EE_BODY_*`) 은 gap-filling capsule 3 개 (r 33.0 /
+# 28.4 / 32.8 mm) 의 축선 사슬 × 배율 0.05 = 반지름 5.7–6.2 mm 구 23 개라, 손바닥 collision 겉면의 93.9 %
+# 가 구 밖이다 (최대 54.4 mm, `T45.verify.json` A2). T44d 의 손바닥–이웃 과일 접촉 8 event 전부가 구 밖
+# 24–43 mm 의 손바닥 아래 모서리였다.
+#
+# 새 알고리즘은 없다: **손가락 몸통 구 (`finger_body_spheres`) 를 손바닥 겉면에 그대로** 쓴다 (후보 = mesh
+# 안 격자점, 반지름 = 깊이 + overflow, greedy set cover 로 대상 전부 담음, 넘침 ≤ overflow). 손가락과 다른
+# 것은 표본 · 격자 간격뿐이다 — 손바닥 mesh 는 손가락의 ~8 배라 0.5 mm 격자는 너무 크다. 값은 T45 audit
+# 후보 (b) (`outputs/verify/T45/p/candidates.py`) 와 같다: 겉면 1 mm · 후보 격자 2 mm · union_eps 1 mm.
+# 결과는 손바닥 gap-filling capsule 자리에 들어간다 (손가락 몸통 구처럼 **대신한다**).
+
+from benchmark.ag3s.robot_models.urdf_sphere_chain import PALM_BODY_ROLE  # noqa: E402
+
+#: 넘친 양 (m). 사용자 판정 5 mm (2.5 mm 는 손바닥 하나 445 구 — 5 mm 돌출로 실행 문제가 확인될 때만).
+PALM_COVER_OVERFLOW = 0.005
+#: 손바닥 collision 겉면 표본 간격 (m) — `link_surface(spacing=)`.
+PALM_COVER_SPACING = 0.001
+#: 후보 중심 격자 간격 (m) — `finger_body_spheres(grid=)`.
+PALM_COVER_GRID = 0.002
+#: 겉면 표본까지 거리로 잰 깊이에서 빼는 여유 (m) — 표본 간격 1 mm 를 흡수 (`finger_body_spheres(union_eps=)`).
+PALM_COVER_UNION_EPS = 0.001
+
+
+def palm_body_capsules(model, robot_model, links: Sequence[str], *,
+                       overflow: float = PALM_COVER_OVERFLOW,
+                       spacing: float = PALM_COVER_SPACING,
+                       grid: float = PALM_COVER_GRID,
+                       union_eps: float = PALM_COVER_UNION_EPS) -> tuple[list, dict]:
+    """`(capsules, report)` — 손바닥 link 마다 몸통 구 (길이 0 `UrdfCapsule`, role `PALM_BODY_ROLE`).
+
+    `finger_body_spheres` 를 손바닥 겉면 (`link_surface(..., spacing)`) 에 그대로 적용한다 (위 머리말).
+    왼손 · 오른손은 link frame 에서 mesh 가 같아 한 번만 푼다 (CPU ~25 s)."""
+    return _body_capsules(
+        model, robot_model, links, role=PALM_BODY_ROLE, spacing=spacing,
+        key=("palm_body", float(overflow), float(spacing), float(grid), float(union_eps)),
+        solve=lambda surf: finger_body_spheres(surf, overflow=overflow, grid=grid,
+                                               union_eps=union_eps))

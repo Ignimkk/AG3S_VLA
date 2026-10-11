@@ -540,7 +540,8 @@ class ConstraintRecordWriter:
         # `target_free_coarse_shared_kept_ijk` (ijk of that tier) + its origin / voxel size.
         ctrace = getattr(field, "coarse_exclusion_trace", None)
         if ctrace:
-            for name in ("removed_ijk", "shared_kept_ijk"):
+            # T44e A8: + `support_removed_ijk` (only with `target_free_coarse_support == "exclude"`).
+            for name in ("removed_ijk", "shared_kept_ijk", "support_removed_ijk"):
                 arr = ctrace.get(name)
                 if arr is not None:
                     payload[f"target_free_coarse_{name}"] = np.asarray(arr, np.int16).reshape(-1, 3)

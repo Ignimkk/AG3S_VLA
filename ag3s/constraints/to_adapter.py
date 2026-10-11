@@ -249,6 +249,21 @@ def build_constraint_set(
     # hold link) and to its hold chain above the gripper (URDF parent relation). Record only here;
     # trajopt reads it with `collision.target_permission_strict` (`linearize.held_contact_rows_of`).
     metrics["target_permission"]["held"] = _held_permission_record(builder, attached)
+    # T44e A9 — 비권한 link 이 target 을 일반 obstacle 과 같은 여유로 피한다 (`"obstacle"`). 권한 집합은 위와 같은
+    # `authorized_links(ctx)` (이름 규칙 하나). 쥔 것이 있으면 (carry) 싣지 않는다. 기본 `full` 은 기록 키도 없다.
+    nonauth_margin = str(getattr(getattr(builder.clearance_policy, "contact", None),
+                                 "nonauthorized_target_margin", "full") or "full")
+    nonauthorized_target_rows = None
+    if nonauth_margin != "full":
+        if manipulated_link_margin is not None and attached is None:
+            authorized = builder.clearance_policy.authorized_links(ctx)
+            nonauthorized_target_rows = np.asarray(
+                [str(n) not in authorized for n in builder.sphere_link_names], bool)
+        metrics["target_permission"]["nonauthorized_target_margin"] = {
+            "mode": nonauth_margin,
+            "n_rows": (0 if nonauthorized_target_rows is None
+                       else int(nonauthorized_target_rows.sum())),
+            "applied": nonauthorized_target_rows is not None}
 
     # **여기가 사유의 마지막 관문이다.** 이 함수가 모든 정상 경로의 `validity` 를 확정하므로,
     # degraded 인데 코드 달린 사유가 하나도 없으면 그 사실 자체를 사유로 남긴다 — 새 DEGRADED
@@ -291,6 +306,7 @@ def build_constraint_set(
         manipulated=manipulated,
         target_field_exclude=target_field_exclude,
         target_field_policy=target_field_policy,
+        nonauthorized_target_rows=nonauthorized_target_rows,
     )
 
 

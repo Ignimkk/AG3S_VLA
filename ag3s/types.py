@@ -949,6 +949,12 @@ class CollisionConstraintSet:
     #: 위 마스크를 만든 정책 이름 (`"relax"` · `"exclude_authorized"` · `"exclude_all"`).
     #: 기록에 남는다 — 어느 정책으로 돈 프레임인지 모르는 기록은 다른 실행과 비교할 수 없다.
     target_field_policy: str = "relax"
+    #: **T44e A9** — `(n_constraint_spheres,)` bool: 접촉 권한이 **없는** link 의 구 (`ClearancePolicy.authorized_links`
+    #: 밖 — 권한 집합과 같은 이름 규칙). `contact.nonauthorized_target_margin == "obstacle"` 이고, 조작 대상이 있고,
+    #: 쥔 것이 없을 때만 싣는다 — 그 밖에는 언제나 `None` (= 지금 동작). trajopt 는 이 행을 target 판정에서 빼서
+    #: target 을 일반 obstacle 과 같은 여유로 피하게 한다 (`linearize.SceneSnapshot.nonauthorized_target_rows`).
+    #: `manipulated_link_margin` 의 값은 바꾸지 않는다 — 권한 행 판정 (`target_contact_rows_of`) 이 그 값을 읽는다.
+    nonauthorized_target_rows: Optional[np.ndarray] = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "robot_state", np.asarray(self.robot_state, np.float64).reshape(-1))
