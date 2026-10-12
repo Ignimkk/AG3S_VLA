@@ -113,6 +113,26 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **decision rule (사전 고정)** | LoRA 에서 ② 가 C0 ≥ 0.95 이고 C1_instr ≥ 0.80 이면 representation 에 있음 → 원인은 (a) probe 학습. 아니면 (b) representation 또는 (c) fine-tuning. base 에서 기준을 넘고 LoRA 에서 넘지 못하면 (c), 둘 다 넘지 못하면 fine-tuning 탓이 아니다. 0.95 · 0.80 은 episode 별 정확도의 median 에 적용 (lead 가 결과 전 고정) |
 | **T50 · T50a · T50b** | T50 = HSR 의 instruction 둔감이 probe 학습 · representation · fine-tuning 중 어디서 오는지 가르는 STEP. T50a = LoRA feature 위 ① 민감도 · ② probe (CPU). T50b = base feature 를 GPU 로 뽑아 같은 표 (+ train split C1) |
 
+**T46b · T46c (2026-10-12 추가)** — F1 을 켠 뒤 늘어난 close 이후 HOLD 의 진단과 F1 채택의 용어. (T46 의 F1 · F2 · C1a · CL3 · HOLD kind · `ball_owned` · SUBTASK-f 의 원 정의는 [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md) 의 "용어" 절.)
+
+| 용어 | 뜻 |
+|---|---|
+| **arm 이름 (C0 · C1a · C1aF1 · C1aF1F2)** | C0 = V11AB (기본 ball 제거, CL2 의 첫 arm). C1a = `ball_owned` (ball 안 seed 를 target 소유 / non-target 소유로 나눠 non-target 을 보존). C1aF1 = C1a + F1 (`--nontarget-evidence surface`, non-target 근거에서 target 자신의 표면 점을 뺌). C1aF1F2 = C1aF1 + F2 (`--owned-ambiguous remove`, ambiguous seed 도 제거). 같은 18 (episode, seed) 쌍 |
+| **window (pre8 + close)** | grasp 직전 구간: close 가 시작된 chunk 이전 8 chunk 부터 close chunk 까지 (CL3 정의, 18 run 합쳐 162 chunk). **close 이후** = 그 뒤 모든 chunk |
+| **phase (closing · lift · carry · placed)** | close 이후를 recorded `grasp.state` 로 나눈 것. closing = gripper 가 닫히는 중, lift = 쥐고 target 이 처음 높이 (z0 + 50 mm) 에 이르기 전, carry = 그 이후, **placed = 과일을 놓은 뒤** (release 이후의 place · home) |
+| **seed · support mask** | seed = VLA attention 상위 5 % 점 (`seed_percentile` 95). support mask = 테이블 · 바닥 등 지지면으로 분류된 점의 mask. grounding 은 seed 에서 support mask 안의 것을 지운 뒤 clustering 한다 |
+| **`no_seed` (grounding status)** | support mask 를 지운 뒤 남은 seed 가 0 개라 cluster 가 하나도 없는 상태 (`n_clusters = 0`). target 이 없는 것과 같은 결과지만 "gate 가 일부러 비운 것 (`subtask_gated`)" 이나 "후보가 있었으나 admissible 하지 않음 (`no_admissible`)" 과 구분된다 |
+| **`geometry_certified` (인증 술어)** | server 가 chunk 의 기하를 믿어도 되는지 판정하는 술어: grounding 이 `ok` 이거나, `subtask_no_target` 예외 (gate 가 의도적으로 target 을 비웠음) 에 해당. False 이면 위반 행이 없어도 TO verdict 가 `violated` 로 내려가 chunk 가 HOLD (`uncertified` kind) 된다 |
+| **certification gap (인증 공백)** | 인증 술어의 예외 목록 (`subtask_gated` · `no_admissible`) 에 `no_seed` 가 없어서, placed · home 에서 위반이 없는데도 HOLD 가 되는 규칙상 빈틈. SUBTASK-f (놓은 뒤 home 이면 `no_admissible` 도 인증, 2026-10-03) 가 `no_admissible` 만 추가하고 `no_seed` 를 남겼다 ([T0T6 SUBTASK 절 되돌아올 지점](AG3S_T0T6_LOG.md)) |
+| **trailing HOLD** | episode 가 끝날 때까지 이어진 HOLD (한 번 걸리면 풀리지 않음) |
+| **W1 (A12)** | placed · home 의 `no_seed` 를 SUBTASK-f 인증 조건 (gate on ∧ label home ∧ `placed_seen` ∧ valid ∧ carve 없음) 아래서 `no_admissible` 과 같이 인증하도록 인증 술어를 넓히는 수정안. 기본 off 의 flag. 위반 행이 있으면 HOLD 는 그대로다 (인증은 "설명 안 됨" 만 해소). T46b 에서는 기록 chunk 위 offline what-if 로만 계산했다 |
+| **phase-gated F1** | F1 을 grasp 전 phase (pre-grasp · approach) 에만 적용하고 close 이후에는 끄는 변형안 |
+| **첫 궤적 분기 (first divergence)** | 같은 (episode, seed) 의 두 arm 에서 실행 action 이 처음 1e-6 이상 달라지는 control step. 그 step 이 속한 server chunk 의 phase 를 본다 |
+| **McNemar exact p** | 같은 pair 안에서 두 arm 의 이분 결과 (예: run 에 placed `no_seed` 가 있는가) 가 어긋난 pair 수 (한쪽만 · 반대쪽만) 로 계산하는 정확 검정의 p 값 |
+| **extent method adoption (extent 방법 채택)** | develope_PLAN §0.10.1-3 의 "경계 보존 방법 하나" 로 F1 을 정한 것 (T46c, 사용자 판정). 같은 identity 에서 extent 처리만 바꾼 비교가 근거이고, 한계 L1–L9 를 함께 기록한다. "성공률을 올린다" 는 채택 근거가 아니다 |
+| **L1–L9 (F1 한계)** | T46c §2 의 한계 표 번호. 각 한계는 논문 주장 범위의 제약을 짝으로 갖는다 |
+| **PA-1 / DT-02 / DT-03 / DT-05A** | develope_PLAN 의 논문 설계 단위. PA-1 = 논문 설계와 evidence 선별, DT-02 = identity source 와 고정 identity 의 extent 비교 표, DT-03 = identity · extent · contact handling 의 핵심 contrast (closed-loop), DT-05A = field policy (no exemption · global exclusion · LTE) 별 contact · success · stop |
+
 ---
 
 ## 진행 현황 — T47 이후
@@ -127,6 +147,8 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **T50** HSR 의 instruction 둔감은 fine-tuning 탓인가 (T50a LoRA feature CPU + T50b `pi05_base` GPU) | probe 학습 · representation · fine-tuning 중 원인 분리 | **측정 완료 (2026-10-12).** 사전 고정 decision rule 의 출력: LoRA · base 모두 counterfactual probe 가 기준 (C0 ≥ 0.95 ∧ C1_instr ≥ 0.80, episode median) 미달 → **"fine-tuning 탓이 아니다"** (규칙이 정한 문구). feature 민감도 r (full, episode median) 은 LoRA 0.611 · base 0.999. 아래 "T50" 절 |
 | **T51** attention head 선택 protocol 공식화 (RB-Y1 sim + 실물용 grasp-event label + LIBERO) | head · layer 를 하나로 고정하는 선택의 당위성 | **진행 중 (2026-10-12)** — task: [`handoff/T51.task.md`](handoff/T51.task.md). 아직 기록할 측정 없음 |
 | **T51b** head 선택 protocol 에 명사 query 행 추가 | action query 와 명사 query 를 같은 기준으로 비교 | **진행 중 (2026-10-12)** — task: [`handoff/T51b.task.md`](handoff/T51b.task.md). 아직 기록할 측정 없음 |
+| **T46b** F1 을 켠 뒤 늘어난 close 이후 uncertified HOLD 의 원인 (진단, CPU offline, T46 의 후속) | F1 이 grasp 이후 처리와 충돌해서 HOLD 가 늘었는가, 아니면 다른 원인인가 — F1 을 develope_PLAN §0.10.1-3 의 방법으로 채택할 수 있는가 | **측정 완료 (2026-10-12).** close 이후 uncertified HOLD 는 전부 **placed phase** (C1a 37 / 37 · C1aF1 130 / 130 · C1aF1F2 118 / 118 chunk) 이고, 실패 항목은 grounding `no_seed` (C1a 37 · C1aF1 129 · C1aF1F2 116 chunk, `n_clusters = 0`). 그 HOLD chunk 의 F1 기록은 0 / 130. 가설 (a) F1 이 grasp 이후 처리와 충돌 · (b) non-target 근거 감소 · (c) 분모 효과는 **반박**, (d) placed 뒤 `no_seed` 인증 공백은 **확인**. 같은 HOLD 가 F1 이 없는 CL2 에도 있다 (C0 73 · C1bp 70). F1 이 `no_seed` run 을 계통적으로 늘렸는지는 **모름** (3 / 0 / 1, p = 0.25). 아래 "T46b" 절 |
+| **T46c** F1 채택 (한계 L1–L9 명시) · W1 (A12) 구현 · PA-1 ablation 초안 | F1 을 현재 extent 방법으로 채택하는가, close 이후 HOLD 를 어떻게 다루는가, ablation 을 어떻게 구성하는가 | **F1 채택 (사용자 판정, 2026-10-12) — 한계 L1–L9 를 함께 기록.** W1 구현은 **진행 중 (결과 없음)**. PA-1 ablation 구성은 **사용자 판정 대기**. 아래 "T46c" 절 |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -149,6 +171,10 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | T50 — decision rule 의 출력은 "fine-tuning 탓이 아니다" (LoRA · base 모두 기준 미달) | **사전 고정 규칙의 출력이다 (사용자 판정이 아니다).** 규칙을 어떻게 읽고 무엇을 하는지는 사용자 판정 대기 (T50 절 §7) | 16D |
 | (**제안, 판정 대기 — 미측정 해석 포함**) HSR 을 phase source 의 **보조 구성 요소** 로 둔다 | 검토 문서 §6 의 채택 기준 ("HSR 이 strong rule 보다 실행상 도움이 없으면 보조 구성 요소로 남긴다"). T48a (C1 둔감), T48b (E1 `place` 유지 12/13), T50 (counterfactual probe 도 기준 미달) 은 이 방향과 같은 쪽이나, **실제 strong rule 과의 비교와 gate on/off 실행 이득은 측정하지 않았다** (미측정 해석) | 16D |
 | (**제안, 판정 대기 — 미측정 해석 포함**) **명사 query 로 identity · destination 을, L8H2 로 3D seed 를 얻는** 결합 | T49: 명사 query 가 2D peak · 분리 · prompt 교체에서 앞서고 L8H2 가 3D `identity_correct` · purity · non-target 손실에서 앞섰다. 그 결합이 실제로 3D 를 개선하는지는 **돌리지 않았다** (미측정 해석). 공식 비교는 T51b | 16D |
+| T46c — **F1 (`--nontarget-evidence surface`) 을 develope_PLAN §0.10.1-3 의 현재 extent 방법으로 채택한다. 한계 L1–L9 는 명확하게 기록한다. F1 이 close 이후 HOLD 를 늘린 원인도 기록한다** | 사용자 판정 (2026-10-12): "권장하는 A 로 진행. 한계는 명확하게 작성하고 넘어갈 것. F1 이 grasp 이후 HOLD 를 늘린 원인을 작성할 것." 근거와 한계는 T46c 절 §1 · §2, 원인은 T46b · T46c §3 | 16D (pilot 규모, 18 쌍) |
+| T46c — F2 (`--owned-ambiguous remove`) 는 채택하지 않고 대조 arm 으로만 남긴다 | **lead 의 정리 (T46c.task.md §1, 사용자 판정 문장에 직접 나오지 않음).** 이유: 이웃 과일 seed 를 지운다 (offline held-out 에서 잃은 이웃 seed 2,463) | 16D |
+| T46c — close 이후 HOLD 의 고칠 곳은 F1 이 아니라 인증 규칙 (W1), W1 은 모든 arm 에 같이 적용한다 | **lead 의 설계 결정 (T46c.task.md §3 · §4).** W1 구현 (A12) 은 진행 중이고 결과가 없다. 사용자 판정이 아니다 | 16D |
+| (**제안, 판정 대기**) PA-1 ablation 구성 — DT-02 extent (주) · identity · DT-05A contact handling | **lead 의 초안 (T46c.task.md §5).** 판정 필요: (a) visible-target oracle extent arm 을 만들지, (b) DT-05A 용 비권한 link 범위, (c) 표본 수 (18 쌍 유지 · 확대) | 16D |
 
 ---
 
@@ -171,6 +197,11 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 10 | (T49 가 추가) **grasp latch 를 포함한 e2e · cuRobo ESDF backend · held-out 4 record 보다 큰 표본** (T47 의 1 · 2 번과 같은 한계) | T49 e2e 는 legacy ESDF, grasp latch 없음, held-out 4 record × 15 frame. cuRobo 기준선은 GPU 미사용 지시로 돌리지 않음 (`T49.verify.json not_measured`) | **측정 안 됨** |
 | 11 | (T50 이 추가) **base · LoRA 모두 `kv_L4` 위 counterfactual probe 가 기준 미달인 이유** — 다른 layer · 다른 feature · contrastive objective 에서는 어떤가 | T50 은 `kv_L4_v1` 의 feature 정의 (layer 4 · V · head 0, text · image 평균) 와 LogReg 만 시험했다 | **측정 안 됨** |
 | 12 | (T50 이 추가) **실제 gate on / off 실행 이득과 실제 strong rule 비교** (HSR 위치 판정의 근거) | T48a · T48b · T50 모두 offline 이다 | **측정 안 됨** |
+| 13 (T0T6 T46-1) | (T46b 가 닫음 · T46c 가 추가) **close 이후 uncertified HOLD 증가의 원인** — 이전 로그의 T46-1 ("원인 미측정") 에 대한 답 | T46b: placed phase 의 grounding `no_seed` 인증 공백 (C1a 37 · C1aF1 130 · C1aF1F2 118 중 `no_seed` 37 · 129 · 116). F1 이 직접 만든 것이 아니다. 이전 로그의 T46-1 행은 그대로 남아 있다 (이 STEP 에서 수정하지 않음) | **원인 확인 (d). `no_seed` 가 왜 생기는지는 미확정 (#14)** |
+| 14 | (T46b 가 추가) **placed 뒤 attention 상위 5 % seed 가 전부 support mask 안에 놓이는 이유** | 그 chunk 에서 seed 가 전부 support mask 에 있음은 측정했다 (`no_seed` 129 chunk 모두 min 1.0). 왜 그렇게 되는지는 중단 기준에 따라 추적하지 않았다 | **원인 미확정** |
+| 15 | (T46b 가 추가) **F1 이 placed `no_seed` run 을 계통적으로 늘리는가** | F1 만 3 · C1a 만 0 · 둘 다 1 (15 pair, McNemar exact p = 0.25). 연결은 궤적 분기를 통해서만 있고 (F1 기록 0 / 130), 표본이 작다 | **모름** |
+| 16 | (T46b 가 추가) **W1 · phase-gated F1 의 closed-loop 효과, 그리고 placed HOLD 가 completion time · safe success 에 주는 영향** | W1 수치는 기록 chunk 위 per-chunk what-if 이고, HOLD 가 풀리면 이후 궤적이 달라진다. F1 의 `no_seed` run 4 개는 모두 task success 이고 `no_seed` 시작이 place 이후다. 홈 복귀까지의 시간은 재지 않았다 (`T46b.verify.json not_measured`) | **측정 안 됨** (W1 구현은 T46c A12 진행 중) |
+| 17 | (T46c 가 추가) **F1 한계 L1–L9 를 줄이는 측정** — 표본 확대 · banana · 비구형 물체 · 실물 · 다른 checkpoint · real-time | T46c §2 의 한계 표. 이 중 F1 의 closed-loop 효과는 18 쌍 pilot 이다 | **측정 안 됨** |
 
 ---
 
@@ -1580,3 +1611,396 @@ frame 합산 (보고만): LoRA valcv 0.766 · 0.662, trainval 0.825 · 0.708. ba
 - **figure** (각각 `.json` sidecar 있음): [`scene`](figures/t50/t50a-scene-c1-response.png) · [`graph (T50a)`](figures/t50/t50a-sensitivity-probe-graph.png) · [`graph (T50b)`](figures/t50/t50b-base-vs-lora-graph.png) · [`table (T50a)`](figures/t50/t50a-decision-rule-table.png) · [`table (T50b)`](figures/t50/t50b-decision-rule-table.png).
 - **구현**: `AG3S/ag3s/experiments/studies/t50_{core,extract,hsr_rep}.py` · `tests/ag3s/test_t50_hsr_rep.py` (T50a 시점 19 passed · 1 skipped). `handoff/T50.impl.md`.
 - commit 은 하지 않았다.
+
+
+---
+
+## T46b — F1 을 켠 뒤 늘어난 close 이후 HOLD 는 어디서 왔는가 (진단, 2026-10-12 KST)
+
+**이 절이 답하는 물음 (목적).** T46 의 closed-loop 비교 (CL3) 에서 F1 (non-target 근거에서 target 자신의 표면 점을 빼는 extent 후보) 은 grasp 직전 HOLD run 을 12 → 6 으로 줄였지만, **close 이후** HOLD 는 107 → 183 chunk 로 늘었고 그중 `uncertified` (기하를 인증하지 못해 막은 HOLD) 가 37 → 130 이었다. develope_PLAN §0.10.1 은 "target identity 와 extent 를 분리하고 필요한 target 접촉은 허용하되 인접 장애물 경계를 보존하는 3D 방법 **하나**" 를 집중 개발하라고 하고, §1.2 DC-1 · DC-4 는 그 방법이 잘못된 접촉 허용 · 차단을 줄이면서 task 와 forbidden contact 의 trade-off 를 해치지 않을 것을 요구한다. 늘어난 stop 은 safe success 와 completion time 을 해친다. 그래서 이 STEP 은 **F1 을 그 방법으로 채택할 수 있는가** 에 답하는 데 필요한 진단만 한다 (코드 수정 없음, 새 closed-loop 없음).
+
+**한 줄 결과 (before → after).**
+
+- **before.** close 이후 uncertified HOLD 가 F1 때문에 늘었는지, F1 과 무관한 규칙의 문제인지 가려져 있지 않았다 (이전 로그 T46-1 "원인 미측정").
+- **after.** 늘어난 uncertified HOLD 는 **전부 placed phase (과일을 놓은 뒤)** 에 있다 — closing · lift · carry 에서는 세 arm 모두 0 이다 (C1a 37 · C1aF1 130 · C1aF1F2 118 chunk 가 모두 placed). 실패한 인증 항목은 grounding `no_seed` (`n_clusters = 0`) 이고, 그 chunk 에서 **F1 기록은 0 / 130** 이다.
+- **원인은 F1 이 아니라 인증 규칙의 공백이다.** placed · home 에서 `no_seed` 는 인증 예외 목록에 없어서, 위반 행이 0 이어도 chunk 가 HOLD 된다. **같은 HOLD 가 F1 이 없는 CL2 에도 있다** (C0 73 · C1bp 70 chunk).
+- **F1 의 역할은 간접이다.** F1 은 grasp 직전 field 를 바꿔 18 쌍 중 12 쌍의 궤적을 grasp 직전 window 에서 처음 갈라놓았다. 궤적이 다르면 놓은 뒤 attention 도 달라지고, placed `no_seed` 가 생긴 run 은 F1 만 3 · C1a 만 0 · 둘 다 1 이다 (15 pair, McNemar exact p = 0.25) — **F1 이 계통적으로 늘린다고 말할 수 없다 (모름).**
+- **가설 판정.** (a) F1 이 grasp 이후 처리와 충돌 = 반박, (b) F1 이 non-target 근거를 줄여 인증 실패 = 반박, (c) 분모 효과 = 반박, (d) placed 뒤 `no_seed` 인증 공백 = **확인**, (d′) F1 이 `no_seed` 를 계통적으로 늘림 = **모름**.
+- **offline what-if (closed-loop 아님).** `no_seed` 를 SUBTASK-f 조건 아래서 인증하면 (W1) 기록 chunk 중 execute 로 바뀌는 것이 37 / 129 / 116 개이고, close 이후 uncertified HOLD 는 0 / 1 / 2 chunk 로 줄어든다. phase-gated F1 (close 이후 F1 off) 은 그 uncertified chunk 130 개 중 0 개에만 F1 기록이 있어 이 HOLD 에 효과가 없다.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 [`T46b.verify.json`](handoff/T46b.verify.json) 의 `numbers` · `hypotheses` · `not_measured` 에서만 왔다. CL3 의 pair 통계 · 성공 지표 · 시간 지표는 [`T46-CL3.verify.json`](handoff/T46-CL3.verify.json), offline 충돌 행 · seed 손실은 [`T46.verify.json`](handoff/T46.verify.json) 에서 왔고 그 자리에 적었다. 같은 파일 숫자의 덧셈 · 뺄셈은 "(산출)" 로 적었다.
+- **해석의 출처를 가른다.** 사용자 판정은 "(사용자 판정)", lead 가 task 문서에 쓴 것은 "(lead)", 측정으로 확인하지 않은 해석은 "(미측정 해석)" 이다.
+- **arm 과 지표.** C0 · C1a · C1aF1 · C1aF1F2 는 용어 절. `HOLD` · `uncertified` 의 정의는 [이전 로그 용어](AG3S_T0T6_LOG.md). phase 는 recorded `grasp.state` 로 정했다 (`design.phase_definition`). HOLD 는 client 가 planning row 의 control row 를 모두 실행하지 않은 chunk 다.
+- **환경.** CPU offline, `.venv-ag3s` (legacy ESDF), CL3 run 의 snapshot `218229ac` 코드를 PYTHONPATH 에 올려 읽기 전용으로 분석했다. 회귀 기준선 (legacy): start_violated 14 / 15 · has_target 15 / 15 · frame0 clearance −29.031048 mm 일치. cuRobo 기준선은 GPU 가 없어 **돌리지 않았다**. snapshot 의 6 파일은 당시 HEAD `ec2e79fe` 와 같다 (`code_state.snapshot_vs_head_identical_files`); 아래 file:line 은 그 코드 기준이다 (지금 working tree 는 다른 session 이 수정 중이라 줄 번호가 달라질 수 있다).
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+KST 는 pod 에 tzdata 가 없어 UTC 에 +9 h 를 더해 환산했다 (run 디렉터리 이름의 `+0900` 은 그대로 읽음; 파일 시각은 mtime, commit 시각은 `git log`).
+
+| # | 판정 · 사건 (2026-10-12) | 이 절에서 |
+|---|---|---|
+| 1 | **(사용자 판정)** "추천 단계로 진행. **develope_PLAN.md 가 진행 방향이므로 방향성을 잃지 않도록.**" — F1 의 close 이후 HOLD 원인만 진단하고 원인 추적을 넓히지 않는다 | 전체 |
+| 2 | **(lead, 측정 전 고정 · [`T46b.task.md`](handoff/T46b.task.md))** 중단 기준: CPU offline, verifier 한 번, 새 closed-loop 없음. 원인이 (a)–(c) 로 설명되지 않으면 추가 추적 없이 "모름" 으로 닫고 사용자 판정 (F1 을 grasp 직전 효과로만 주장, limitation 기록) | §6 |
+
+| 시각 (KST) | 무엇 | 출처 |
+|---|---|---|
+| 22:05 | T46b task 작성 (lead) | `T46b.task.md` mtime 13:05Z |
+| 22:07:12 | verifier run 시작 | run 디렉터리 `20261012T220712+0900_de2042e9be89_ead5f3483344` |
+| 22:16 | figure 3 종 생성 | `t46b-*.png` mtime 13:16Z |
+| 22:17 | `T46b.verify.json` 작성 | mtime 13:17Z |
+| 22:19:42 | T46b 진단 commit `ed47b976` | `git log` |
+
+### 2. 어디서 늘었나 — phase × HOLD kind (§1 of task)
+
+CL3 의 18 쌍 × 3 arm 의 recorded chunk (4050 server chunk) 를 phase 별로 나눴다. 칸의 값은 HOLD chunk / 그 phase 의 chunk 수 (괄호 = kind). 위반 행이 있어서 막은 것은 `collision`, 인증이 없어서 막은 것은 `uncertified`.
+
+| phase | 도달 run (C1a · C1aF1 · C1aF1F2) | C1a | C1aF1 | C1aF1F2 |
+|---|---|---|---|---|
+| pre-grasp (window 이전) | 18 · 18 · 18 | 0 / 134 | 0 / 133 | 0 / 133 |
+| **window (pre8 + close)** | 18 · 18 · 18 | 12 / 162 (collision 12) | **6 / 162** (collision 6) | **2 / 162** (collision 2) |
+| closing | 3 · 5 · 6 | 50 / 77 (collision) | 50 / 100 (collision) | 1 / 82 (collision) |
+| lift | 18 · 18 · 18 | 0 / 77 | 0 / 113 | 0 / 105 |
+| carry | 16 · 16 · 16 | 2 / 211 (collision) | 3 / 201 (collision) | 3 / 222 (collision) |
+| **placed (놓은 뒤)** | 16 · 15 · 15 | 55 / 689 (collision 18 · **uncertified 37**) | **130 / 641** (**uncertified 130**) | **118 / 646** (**uncertified 118**) |
+| **close 이후 합** | | **107** (uncertified 37) | **183** (uncertified 130) | **122** (uncertified 118) |
+
+(출처: `numbers.phase_table`, `numbers.after_close_hold`. closing 은 도달 run 수가 arm 마다 다르다 (3 · 5 · 6).)
+
+- close 이후 HOLD 중 `uncertified` 가 아닌 것 (= collision) 은 C1a 70 · C1aF1 53 · C1aF1F2 4 chunk 다 (산출: 107 − 37, 183 − 130, 122 − 118). **F1 은 close 이후 collision HOLD 를 오히려 줄였고 (70 → 53), 늘어난 것은 placed 의 uncertified 뿐이다.**
+- closing · lift · carry 의 uncertified 는 세 arm 모두 **0** 이다 (`numbers.phase_table` 의 `uncertified_by_grounding` 이 비어 있음).
+
+![T46b 그래프: close 이후 HOLD 의 phase × kind, placed 의 grounding 시계열, CL2 base rate](figures/t46/t46b-graph.png)
+
+[`t46b-graph.png`](figures/t46/t46b-graph.png) (sidecar [`.json`](figures/t46/t46b-graph.json)) — (a) close 이후 HOLD 를 phase × kind 로 쌓은 막대 (진한 색 = uncertified, 연한 색 = collision; 라벨 = HOLD / 그 phase chunk). placed 에서만 uncertified 막대가 솟는다. (b) 같은 (episode, seed) 의 C1a 와 C1aF1 의 placed chunk 별 `grounding_status` 띠 (세로 눈금 = HOLD). F1 쪽 띠가 `no_seed` (빨강) 로 이어지고 HOLD 가 끝까지 찍힌 run 이 보인다. (c) placed `no_seed` HOLD chunk 수를 CL2 의 arm (F1 없음) 과 CL3 의 arm 에 걸쳐 놓은 막대 (§6).
+
+### 3. 직접 원인 — 인증 규칙의 공백 (certification gap)
+
+**placed · home 에서 `no_seed` 가 일어나는 경로 (file:line, snapshot `218229ac` = 당시 HEAD 와 같은 파일).**
+
+| 단계 | 일어나는 일 | 위치 |
+|---|---|---|
+| 1 | grounding 이 attention 상위 5 % 를 seed 로 뽑고 `~exclude_mask` 를 곱한다. `exclude_mask` 는 pipeline 이 support mask 로 넘긴다. 남은 seed 가 0 이면 곧바로 `NO_SEED` 를 돌려준다 (admissibility · subtask gate 판정 이전) | `AG3S/ag3s/stages/target_grounding.py:1679-1686` (gate 는 `:1124-1136`), `AG3S/ag3s/runtime/pipeline.py:1513-1519` |
+| 2 | 놓은 뒤 home 에서 server 는 subtask 인증 `subtask_no_target` 을 쓴다. 이 술어는 grounding 이 `subtask_gated` 이거나, `no_admissible` 이면서 (gate on ∧ label home ∧ `placed_seen`) 일 때만 참이다. **`no_seed` 는 목록에 없다** | `AG3S/ag3s/types.py:1069-1113` (`_placed_home` gate: `:1061-1066`) |
+| 3 | 인증 술어 `geometry_certified = status ok ∨ subtask_no_target` 가 거짓이면 reason `uncertified` | `AG3S/trajopt/safe_policy.py:1853-1866`, reason 기록 `:1513-1517` · `:1583` |
+| 4 | safe status 이면서 인증이 요구되고 인증이 없으면 TO verdict 를 `violated` 로 강등 → HOLD | `AG3S/trajopt/sqp.py:922` |
+
+- **인증 술어를 chunk 마다 다시 계산한 결과가 기록된 reason 과 일치한다**: 세 arm 모두 **1350 / 1350** chunk (`numbers.certification_replay`). 즉 위 술어 서술이 실제 판정과 같다.
+- **seed 를 offline 으로 다시 뽑은 결과도 일치한다**: placed chunk 에서 "남은 seed = 0 이면 `no_seed`" 의 예측이 기록과 C1a 689 / 689 · C1aF1 641 / 641 · C1aF1F2 646 / 646 이다 (`numbers.offline_seed_requery`). `no_seed` chunk 에서 attention 상위 5 % seed 중 support mask 안에 있는 비율은 **전부 1.0** (최솟값 1.0; 37 · 129 · 116 chunk). destination AABB 안의 seed 비율 중앙값은 `no_seed` chunk 에서 0.0, 그 밖의 placed chunk 에서 0.093 · 0.148 · 0.151 이다.
+- 그 HOLD chunk 의 증거 필드: `n_clusters` 0 (C1a 37 · C1aF1 129 · C1aF1F2 116), 위반 행 > 0 인 chunk **0**, `has_target` true **0**, TO status 는 전부 `violated` (강등), 그 chunk 의 subtask gate · label · `placed_seen` 는 `home | True | True` (C1aF1 129 chunk; 나머지 1 chunk 는 label `pick` · grounding `no_admissible`, C1aF1F2 는 2 chunk).
+- **위반 행이 없는데 막혔다.** 이 chunk 들은 collision 이 아니라 "설명되지 않음" 으로 막힌 것이다. 인증은 collision 이 아니라 "target 이 없는 이유" 를 요구한다.
+
+**같은 seq 에서 C1a 는 통과하고 F1 은 막힌 chunk.** 93 chunk (`numbers.paired_C1a_execute_vs_C1aF1_uncertified_same_seq`): ep11_s111 40 · ep30_s301 36 · ep54_s542 15 · ep104_s1042 1 · ep54_s541 1, phase 는 모두 placed. 그 chunk 에서 C1a 의 grounding 은 `subtask_gated` 19 · `no_admissible` 74 (둘 다 인증 예외 목록에 있다), C1aF1 은 `no_seed` 92 · `no_admissible` 1 이다. 같은 episode · 같은 seq 라도 attention 이 어디에 떨어지느냐에 따라 예외 목록 안 / 밖으로 갈린다.
+
+![T46b 대표 장면: 같은 episode/seed 의 같은 seq 에서 C1a 는 execute, C1aF1 은 no_seed 로 uncertified HOLD](figures/t46/t46b-scene.png)
+
+[`t46b-scene.png`](figures/t46/t46b-scene.png) (sidecar [`.json`](figures/t46/t46b-scene.json)) — ep11_s111, seq 36 (control step t = 280–287, video frame 284), grasp.state 는 `placed`, subtask label 은 `home`. 위쪽은 같은 시각의 MuJoCo 장면, 아래쪽은 table 영역 top view 에 attention 상위 5 % seed 를 올린 것 (파랑 = support 밖 seed, 주황 = support 위라 제외된 seed, 초록 사각형 = destination AABB, 보라 원 = 로봇 구 중심).
+
+| 같은 seq 36 (ep11_s111) | C1a | C1aF1 |
+|---|---|---|
+| attention 상위 5 % seed | 1803 | 1812 |
+| 그중 support 밖 seed | **7** | **0** |
+| `n_clusters` | 3 | **0** |
+| grounding_status | `subtask_gated` | **`no_seed`** |
+| subtask label · `placed_seen` | home · True | home · True |
+| 서버 판정 | execute (TO `optimal`) | **HOLD** (`uncertified` + `budget_only`, TO `violated`) |
+| 이 chunk 의 F1 기록 | 없음 | **없음** |
+
+(출처: `numbers.representative_scene`. 이 장면은 boundary · contact 장면이 아니다 — F1 의 경계 효과가 아니라 HOLD 의 원인을 보인다. develope_PLAN Figure 3 의 경계 장면은 CL3 의 [`t46-cl3-scene.png`](figures/t46/t46-cl3-scene.png), 이 STEP 의 장면은 §7 참조.)
+
+### 4. F1 과의 연결 — 직접이 아니라 간접이다
+
+**F1 은 그 HOLD chunk 에서 돌지 않았다.**
+
+| phase (C1aF1) | chunk | F1 기록 있음 | F1 적용 | F1 이 뺀 점 (합) |
+|---|---|---|---|---|
+| pre-grasp | 133 | 133 | 76 | 16 (2 chunk) |
+| window | 162 | 162 | 108 | 444 (76 chunk) |
+| closing | 100 | 100 | 99 | 1148 (93 chunk) |
+| lift | 113 | 71 | 71 | 1391 (63 chunk) |
+| carry | 201 | 1 | 1 | 0 |
+| **placed** | 641 | 92 | 41 | 4 (4 chunk) |
+| **placed 중 uncertified HOLD 130 chunk** | 130 | **0** | **0** | — |
+
+(출처: `numbers.f1_activity_by_phase`, `numbers.uncertified_hold_evidence`. F1 이 close 이후 closing · lift 에서는 동작했지만 그 phase 의 uncertified 는 0 이다. 같은 HOLD chunk 에 F1 기록이 없는 것은 C1aF1F2 도 같다: 0 / 118.)
+
+**F1 이 바꾼 것은 grasp 직전이다.**
+
+| 지표 | C1aF1 | C1aF1F2 |
+|---|---|---|
+| C1a 와 실행 action 이 끝까지 같은 pair | 6 | 0 |
+| 첫 궤적 분기가 있는 pair | **12** | **18** |
+| 그 분기가 window 안 · pre-grasp | 12 · 0 | 17 · 1 |
+| 분기 chunk 에서 F1 적용 · 뺀 점 > 0 | 12 · 12 | 12 · 12 |
+
+(출처: `numbers.divergence_summary`. 분기 pair 수는 [CL3 verify](handoff/T46-CL3.verify.json) 의 `executed_actions_identity` (C1a 대 C1aF1 같음 6 / 18, C1aF1F2 같음 0 / 18) 와 일치한다.)
+
+- 궤적이 갈라지면 놓은 뒤 자세와 attention 도 달라진다. 그 결과 placed `no_seed` 가 생긴 run 은 **F1 만 3, C1a 만 0, 둘 다 1** (placed 에 둘 다 도달한 15 pair, McNemar exact p = 0.25; C1aF1F2 도 3 · 0 · 1, p = 0.25). run 수로는 C1a 1 → C1aF1 4 · C1aF1F2 4 (산출).
+- **이 연결은 궤적 분기를 통한 간접이다.** F1 기록 0 / 130 이므로 F1 이 `no_seed` 를 직접 만든 증거는 없다. 계통적으로 늘린다는 증거도 없다 (p = 0.25, 표본 15 pair) — **모름**.
+- `no_seed` 가 시작된 시점은 모두 place 이후다:
+
+| run | arm | 첫 `no_seed` seq · t | place_t | `no_seed` 연속 chunk | episode 끝까지 | task success |
+|---|---|---|---|---|---|---|
+| ep11_s111 | C1aF1 · C1aF1F2 | 36 · 280 | 184 | 40 | 예 (trailing HOLD 40) | 예 |
+| ep30_s301 | C1aF1 · C1aF1F2 | 40 · 312 | 224 | 36 | 예 (36) | 예 |
+| ep54_s541 | C1a | 39 · 304 | 224 | 37 | 예 (37) | 예 |
+| ep54_s541 | C1aF1 · C1aF1F2 | 38 · 296 | 216 | 38 | 예 (38) | 예 |
+| ep54_s542 | C1aF1 | 41 · 320 | 240 | 14 + 1 | 아니오 (풀림) | 예 |
+| ep54_s542 | C1aF1F2 | 41 · 320 | 240 | 1 + 1 | 아니오 (풀림) | 예 |
+
+(출처: `numbers.no_seed_onset_vs_place`. **정정 메모:** T46c task 문서 §3 은 "두 run (ep11_s111 · ep30_s301) 이 episode 끝까지 HOLD" 라고 쓰지만 verify.json 은 C1aF1 의 끝까지 HOLD 가 세 run (ep11_s111 · ep30_s301 · ep54_s541) 이다. ep54_s541 은 C1a 도 같은 모양이라, **F1 이 새로 만든** 끝까지 HOLD 는 앞의 두 run 이다 (산출: C1a 에서는 ep11_s111 · ep30_s301 이 `no_seed` 를 겪지 않음 — 위 F1 만 3 중 두 개).)
+
+### 5. 가설 판정 (측정 전 고정한 후보 → 측정 결과)
+
+![T46b 표: close 이후 HOLD 의 출처 · 실패 항목 · offline what-if, 가설 판정](figures/t46/t46b-table.png)
+
+[`t46b-table.png`](figures/t46/t46b-table.png) (sidecar [`.json`](figures/t46/t46b-table.json)) — 위 표의 수치와 가설 판정을 한 장에 모았다.
+
+| 가설 (task 문서가 측정 전 세운 후보) | 판정 | 근거 (`T46b.verify.json`) |
+|---|---|---|
+| **(a)** close 이후 target 이 held object 가 되는데 F1 이 grasp 이후에도 동작해 held / target 표면 처리와 충돌한다 | **반박** | uncertified HOLD 가 closing · lift · carry 에서 0 · 0 · 0. 그 HOLD chunk 의 F1 기록 0 / 130, `has_target` true 0 / 130. F1 은 closing 99 chunk · lift 71 chunk 에서 동작했지만 uncertified 를 만들지 않았다 |
+| **(b)** F1 이 non-target 근거를 줄여 "설명되지 않은 표면" 이 늘어 인증이 실패한다 | **반박** | 실패 항목은 grounding `no_seed` (129 chunk) 와 `no_admissible` + label `pick` (1 chunk). `n_clusters` 0 이 129 chunk, 위반 행 > 0 인 chunk 0. `no_seed` 129 chunk 모두 상위 5 % seed 가 전부 support mask 안 (최솟값 1.0) — field 는 관여하지 않았다 |
+| **(c)** 같은 run 이 C1a 에서는 더 일찍 실패해 close 이후에 도달하지 않는다 (분모 효과) | **반박** | placed 도달 run C1a 16 · C1aF1 15 · C1aF1F2 15, placed chunk 689 · 641 · 646. 분모는 C1a 가 오히려 같거나 크다. placed chunk 당 `no_seed` HOLD 는 37 / 689 · 129 / 641 · 116 / 646 |
+| **(d)** 그 밖: placed 뒤 `no_seed` 인증 공백 + 고착 HOLD | **확인** | `no_seed` HOLD C1a 37 · C1aF1 129 · C1aF1F2 116. CL2 (F1 없음) 에도 C0 73 · C1bp 70. 인증 술어 재생이 1350 / 1350 일치. W1 가정 시 129 / 129 chunk 가 execute |
+| **(d′)** F1 이 placed `no_seed` run 을 계통적으로 늘린다 | **모름** | F1 만 3 · C1a 만 0 · 둘 다 1 (15 pair), McNemar exact p = 0.25. 연결은 궤적 분기 (§4) 를 통해서만 있다 |
+
+### 6. 같은 HOLD 가 F1 이 없는 arm 에도 있다 (CL2 base rate) · offline what-if
+
+**CL2 (F1 없음) 의 placed `no_seed`.** 같은 18 쌍 harness 의 이전 closed-loop (CL2, 별도 run · snapshot `f14ae3e6`) 에서 읽었다. CL3 의 C1a 는 CL2 의 C1a 와 18 / 18 쌍에서 실행 action 이 같다 (`CL3 verify` `executed_actions_identity`).
+
+| arm | placed 도달 run | placed chunk | placed HOLD | placed `no_seed` | 그중 HOLD | `no_seed` 가 있는 run (chunk) |
+|---|---|---|---|---|---|---|
+| **CL2 C0 (V11AB)** | 14 | 608 | 73 | 78 | **73** | ep11_s112 (37) · ep30_s301 (36) · ep3_s32 (5) |
+| CL2 C1a | 16 | 689 | 55 | 37 | 37 | ep54_s541 (37) |
+| CL2 C1bp | 13 | 540 | 70 | 70 | **70** | ep11_s112 (35) · ep54_s541 (1) · ep54_s542 (34) |
+| CL2 C2p | 2 | 35 | 0 | 0 | 0 | — |
+| CL3 C1aF1 | 15 | 641 | 130 | 129 | 129 | 4 run (§4 표) |
+| CL3 C1aF1F2 | 15 | 646 | 118 | 116 | 116 | 4 run |
+
+(출처: `numbers.cl2_base_rate_placed_no_seed`, `hypotheses.d_other_post_place_no_seed_certification_gap`. CL2 의 C1bp · C2p 는 같은 CL2 의 다른 arm 이고 정의는 [이전 로그 T44e-CL2 절](AG3S_T0T6_LOG.md) 에 있다. CL2 의 uncertified HOLD 총합은 C0 73 · C1a 37 · C1bp 70 · C2p 0 chunk, 전체 HOLD 는 101 · 119 · 87 · 40.)
+
+- **V11AB (C0) 에도 이 HOLD 가 73 chunk 있다.** 인증 공백은 F1 이전부터 있던 규칙의 문제다. F1 arm 의 129 chunk 가 가장 크기는 하지만 run 수가 3 – 4 개 단위라 크기 차이를 F1 탓으로 읽을 수 없다 (§4 의 p = 0.25).
+- 이 공백은 이미 한 번 마주쳤고 남겨둔 것이다: SUBTASK-f (2026-10-03) 가 `no_admissible` 만 인증하고 `no_seed` 는 "사용자 판정 — 그대로 둔다" 로 남겼다. 그때 적은 **되돌아올 신호가 "`no_seed` 가 다른 run 에서도 놓은 뒤 길게 이어질 때"** 였고 ([이전 로그 SUBTASK 절 되돌아올 지점](AG3S_T0T6_LOG.md)), 이 STEP 이 그 신호를 충족했다 (§8).
+
+**phase-gated F1 (close 이후 F1 off) — offline.** 기록 chunk 에서 "그 chunk 가 F1 기록을 가진 uncertified HOLD" 를 센다 (그 chunk 만 바뀔 수 있다): C1aF1 **0 / 130**, C1aF1F2 **0 / 118**. 즉 이 변형은 close 이후 uncertified HOLD 를 한 chunk 도 바꾸지 못한다. 궤적을 통한 closed-loop 효과는 offline 으로 계산할 수 없다 (`design.phase_gated_F1_offline`). closing · lift 에서 F1 이 동작한 chunk 가 있으므로 (99 · 71) F1 을 끄면 그 구간의 collision 처리 효과를 포기한다 — 그 크기는 재지 않았다.
+
+**W1 offline what-if (closed-loop 아님).** `no_seed` chunk 의 grounding_status 를 `no_admissible` 로 바꿔 (= SUBTASK-f 조건: gate on ∧ label home ∧ `placed_seen` ∧ valid ∧ carve 없음) 인증을 다시 계산하고, 다른 hold-action reason 이 기록에 없을 때 execute 로 센 값이다 (`design.W1_what_if`).
+
+| | C1a | C1aF1 | C1aF1F2 |
+|---|---|---|---|
+| `no_seed` 인데 W1 인증 → execute 로 바뀌는 chunk | 37 | 129 | 116 |
+| 그 chunk 의 phase | placed 37 / 37 | placed 129 / 129 | placed 116 / 116 |
+| close 이후 HOLD 합 (W1 가정) | 70 | 54 | 6 |
+| 그중 uncertified (W1 가정) | **0** | **1** | **2** |
+| (기록 그대로) close 이후 HOLD 합 · uncertified | 107 · 37 | 183 · 130 | 122 · 118 |
+
+(출처: `numbers.W1_execute_chunks`, `numbers.certification_replay`, `numbers.after_close_hold_under_W1_per_chunk`. 남는 uncertified chunk 수 1 · 2 는 실패 항목 `no_admissible` + label `pick` 의 chunk 수 (C1aF1 1 · C1aF1F2 2) 와 같다. label 이 `pick` 이라 SUBTASK-f 조건에 맞지 않는다 (산출: 개수 일치로 읽음).) 이 값은 **기록된 chunk 를 per-chunk 로 다시 판정한 것**이다. HOLD 가 execute 로 바뀌면 이후 궤적이 달라지므로 실제 closed-loop 의 HOLD 수가 아니다.
+
+### 7. develope_PLAN 의 어느 표 · 그림이 이 결과를 쓰는가
+
+| 계획서 단위 | 이 STEP 이 주는 것 | 주의 |
+|---|---|---|
+| **Ablation DT-02 (extent block)** · DT-03 (closed-loop 핵심 contrast) 의 contact handling 행 | grasp 직전 HOLD chunk C1a 12 · C1aF1 6 · C1aF1F2 2 (출처 `T46-CL3.verify.json numbers.arms.*.t7_pre_grasp.hold_chunks_pre8_close`) | close 이후 uncertified HOLD (37 · 130 · 118) 는 **F1 의 경계 효과와 같은 열에 넣지 않는다** — 별도 열 (원인이 인증 규칙) 로 분리하고, W1 이 끝나면 모든 arm 에 같이 적용한 뒤 다시 잰다 (T46c §4) |
+| **Figure 3 B (같은 identity 의 ball / 제안 extent / 관측 oracle)** | 경계 장면은 CL3 의 [`t46-cl3-scene.png`](figures/t46/t46-cl3-scene.png) (pre-grasp contact 장면). [`t46b-scene.png`](figures/t46/t46b-scene.png) 는 verifier 가 "post-place, boundary · contact 장면 아님" 이라고 표시한 **HOLD 원인 장면** (`paper_mapping_numbers.figure3_candidate_scene`) | 이 장면을 Figure 3 의 경계 보존 근거로 쓰지 않는다. 한계 L8 (close 이후 HOLD) 의 설명 · supplementary 후보다 |
+
+### 8. 읽을 때의 한계 · 측정하지 않은 것 · 중단 기준 · 되돌아올 지점
+
+| 한계 | 내용 |
+|---|---|
+| **진단은 offline 이다** | W1 · phase-gated F1 의 수치는 기록 chunk 위 per-chunk what-if 다. closed-loop 효과는 측정하지 않았다 (중단 기준: 새 closed-loop 없음) |
+| **표본이 작다** | 18 쌍, placed `no_seed` run 은 arm 당 1 – 4 개. (d′) 의 p = 0.25 는 "F1 이 늘린다 / 늘리지 않는다" 를 가르지 못한다 |
+| **`manipulated_link_margin` 은 기록에 없다** | 인증 술어 재생은 그 값을 `None` 으로 가정했고 1350 / 1350 일치했다 |
+| **왜 attention 이 support 에 몰리는지는 추적하지 않았다** | 중단 기준에 따라 실패한 인증 항목 (`no_seed`) 까지만 측정했다 (`not_measured`) |
+| **HOLD 가 task 결과에 주는 영향** | F1 의 `no_seed` run 4 개는 모두 task success 이고 `no_seed` 가 place 이후에 시작됐다. 홈으로 돌아오는 시간 · safe success 영향은 재지 않았다 (`not_measured`) |
+| **grasp 직전 HOLD 감소의 유의성은 집계 기준에 민감하다** | CL3 의 C1a vs C1aF1 의 grasp 직전 HOLD (12 → 6, paired 6 / 0, p = 0.03125, 18 pair) 는 foreign GPU 겹침이 있던 두 pair (ep12_s121 · ep30_s301; 겹친 run 은 보충 재실행으로 executed_actions 가 원본과 같음을 확인 — CL3 verdict) 를 뺀 16 pair 에서 11 → 6, paired 5 / 0, p = 0.0625 다 (`T46-CL3.verify.json numbers.pair_hold.no_overlap`). 이 STEP 의 진단 자체는 server 기록 chunk 를 쓰므로 겹침의 영향을 받지 않는다고 확인하지는 않았다 (미측정) |
+
+**측정하지 않은 것 (`T46b.verify.json not_measured`).** W1 · phase-gated F1 의 closed-loop 효과 (per-chunk what-if 만) · placed 뒤 attention 이 support 에 몰리는 이유 · `manipulated_link_margin` · cuRobo 회귀 기준선 (GPU) · HOLD 의 completion time / safe success 영향.
+
+**되돌아올 지점.**
+
+| 안 고른 것 | 왜 | 되돌아올 신호 |
+|---|---|---|
+| **phase-gated F1** (close 이후 F1 off) | 0 / 130 · 0 / 118 chunk 만 건드려 HOLD 에 효과가 없다 | closing · lift 의 F1 동작이 collision HOLD 를 만들거나 held object 처리를 해치는 측정이 나올 때 |
+| `no_seed` HOLD 를 그대로 둔다 (SUBTASK-f 의 이전 사용자 판정) | 그때는 1 run 의 현상이었다 | **신호 충족:** 다른 run 에서도 놓은 뒤 길게 이어짐 — C1aF1 4 run (끝까지 3), CL2 C0 3 run · C1bp 3 run. T46c 의 W1 (A12) 이 이 판정을 바꾸는 구현이다 (T46c §4 · §6) |
+| 원인 추적을 더 넓힘 (attention 이 support 에 몰리는 이유) | 중단 기준 | W1 이 막는 `no_seed` 외에 같은 모양의 HOLD 가 다른 phase 에서 나타날 때 |
+
+**산출물.**
+
+- **측정**: [`handoff/T46b.verify.json`](handoff/T46b.verify.json). 원자료는 run 디렉터리 `/mnt/dev/AG3S_VLA-storage/results/development/20261012T220712+0900_de2042e9be89_ead5f3483344/verify/T46b/` (`raw/diagnosis.json` · `raw/chunks.jsonl` · `raw/cl2_base_rate.json` · `baseline/legacy_base.json`). 입력 CL3 run 은 `.../20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/` (읽기 전용).
+- **figure** (각각 `.json` sidecar 있음): [`scene`](figures/t46/t46b-scene.png) · [`graph`](figures/t46/t46b-graph.png) · [`table`](figures/t46/t46b-table.png).
+- **스크립트** (verify.json `code_state.scripts_md5`): `build_verify.py` · `cl2_base_rate.py` · `diagnose.py` · `extract_chunks.py` · `fig_t46b.py`. 코드 수정 없음.
+- 요청 문서: [`handoff/T46b.task.md`](handoff/T46b.task.md). commit `ed47b976`.
+
+
+---
+
+## T46c — F1 채택 (한계 L1–L9 를 함께 기록) · close 이후 HOLD 원인 · W1 구현 (진행 중) · PA-1 ablation 초안 (2026-10-12 KST)
+
+**이 절이 답하는 물음 (목적).** T46b 의 진단 뒤에 정할 것이 셋이다. (1) F1 (non-target 근거에서 target 자신의 표면 점을 빼는 surface 근거) 을 develope_PLAN §0.10.1-3 의 **"경계 보존 방법 하나"** 로 현재 범위에서 채택할 것인가. (2) 채택하면서 close 이후 HOLD 증가를 어떻게 기록할 것인가. (3) 그 방법을 논문의 ablation 에 어떻게 넣을 것인가. 이 절은 (1) 과 (2) 의 판정을 기록하고, 그 판정이 요구한 구현 (W1) 이 **진행 중임** 과 (3) 의 초안이 **판정 대기임** 을 적는다. **W1 의 결과는 아직 없다.**
+
+**한 줄 결과 (before → after).**
+
+- **before.** F1 은 grasp 직전 경계 효과를 보였지만 (HOLD run 12 → 6, 이웃 과일 접촉 run 4 → 1) 성공률은 같았고 (task 14 → 13) close 이후 HOLD 가 107 → 183 chunk 로 늘어, 채택 여부와 논문 주장 범위가 정해지지 않았다.
+- **after (사용자 판정, 2026-10-12).** **F1 을 현재 extent 방법으로 채택한다.** "권장하는 A 로 진행. **한계는 명확하게 작성하고 넘어갈 것.** F1 이 grasp 이후 HOLD 를 늘린 원인을 작성할 것." 한계 9 개 (L1–L9) 는 §3 에 논문 주장 범위의 제약과 함께 적었다. 채택 근거는 성공률이 아니라 **같은 identity 에서 extent 처리만 바꿨을 때 grasp 직전 충돌 행 887 → 401 (offline), HOLD run 12 → 6 (closed-loop), 잃은 이웃 과일 seed 0 → 0** 이다.
+- **close 이후 HOLD 의 원인** 은 F1 이 아니라 placed 뒤 `no_seed` 인증 공백이다 (T46b). 늘어난 uncertified HOLD 130 chunk 에서 F1 기록은 0 이고, F1 이 없는 V11AB (C0) 에도 73 chunk 가 있다.
+- **고칠 곳은 인증 규칙이다 (lead).** W1 (placed · home 의 `no_seed` 를 인증) 을 구현 중이다. **결과 없음.**
+- **PA-1 ablation 구성** (extent 를 주 block 으로) 은 **판정 대기** 다.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 [`T46.verify.json`](handoff/T46.verify.json) (offline) · [`T46-CL3.verify.json`](handoff/T46-CL3.verify.json) (closed-loop) · [`T46b.verify.json`](handoff/T46b.verify.json) (HOLD 진단) 의 `numbers` 에서 왔다. **세 파일 어디에도 없는 내용은 "(task 문서)" 로 표시했다** — 그것은 lead 가 [`T46c.task.md`](handoff/T46c.task.md) 에 쓴 서술이고 verifier 가 재지 않았다. 이 절의 한계 표 (§3) 의 "논문 표현에 주는 제약" 열은 전부 lead 의 문장이다.
+- 판정의 출처: **(사용자 판정)** = 위 인용, **(lead)** = task 문서의 결정 · 초안, **(산출)** = 같은 파일 숫자의 뺄셈 · 나눗셈.
+- **C0 비교의 한계.** C0 (V11AB) 수치는 CL2 (같은 18 쌍 harness 의 이전 run) 에서 왔고, C1a · C1aF1 은 CL3 다. CL3 의 C1a 와 CL2 의 C1a 는 18 / 18 쌍에서 실행 action 이 같아 (`CL3 verify` `executed_actions_identity`) CL2 의 C0 를 같은 기준으로 놓았지만, C0 와 F1 은 같은 run 이 아니다.
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+| # | 판정 · 사건 (2026-10-12) | 이 절에서 |
+|---|---|---|
+| 1 | **(사용자 판정)** "권장하는 A 로 진행. 한계는 명확하게 작성하고 넘어갈 것. F1 이 grasp 이후 HOLD 를 늘린 원인을 작성할 것." | §2 · §3 · §4 |
+| 2 | **(lead)** F2 (`--owned-ambiguous remove`) 는 채택하지 않고 대조 arm 으로만 남긴다 — 이웃 과일 seed 를 지워 §0.10 의 "인접 장애물 보존" 목적과 어긋난다 | §2 |
+| 3 | **(lead)** W1 (A12) 구현 → offline 재현 (verifier) → 사용자 보고. 병행: 이 기록. PA-1 판정 뒤 ablation closed-loop task | §5 · §6 |
+
+| 시각 (KST) | 무엇 | 출처 |
+|---|---|---|
+| 23:02 | T46c task 작성 (lead) | `T46c.task.md` mtime 14:02Z |
+| 23:03:13 | T46c task commit `6d134a69` | `git log` |
+
+(pod 에 tzdata 가 없어 UTC + 9 h 로 환산했다.)
+
+### 2. F1 채택의 근거 — 같은 identity 에서 extent 처리만 바꾼 비교 (before → after)
+
+**offline (grasp 직전 window, held-out 162 chunk, CL2 C1a 의 기록 chunk 를 재분류).** 대조는 C1a (`ball_owned`) 하나이고 C0 는 이 offline 에 없다. 숫자 앞의 `off` 는 F1 · F2 를 끈 기록과 bit 단위로 같다 (162 / 162 chunk, 최대 차이 0.0 mm).
+
+| 지표 | C1a (`off`) | **C1a + F1** | (참고) F2 | (참고) F1 + F2 | (상한) F1GT |
+|---|---|---|---|---|---|
+| 충돌 행 (grasp 직전 162 chunk) | 887 | **401** | 136 | 107 | 113 |
+| 충돌 행이 남은 chunk (14 개 중) | 14 | **8** | 8 | 6 | 6 |
+| 충돌 행 0 이 된 chunk | 0 | **6** | 6 | 8 | 8 |
+| 충돌 행 0 이 된 recorded HOLD chunk (12 개 중) | 0 | **5** | 4 | 6 | 6 |
+| 새로 충돌이 생긴 chunk | — | **0** | 0 | 0 | 0 |
+| **잃은 이웃 과일 seed (전 chunk)** | 0 | **0** | **2463** | 2463 | 48 |
+
+(출처: `T46.verify.json numbers.3_4_5_heldout.variants`. F1GT = GT target 점을 non-target 근거에서 빼는 상한 대조로, GT 는 대조 · 평가에만 쓴다. F2 는 이웃 과일 seed 2463 개를 잃어 채택하지 않는다.)
+
+**closed-loop (CL3, 18 쌍).** 18 쌍 = 9 episode × 2 seed (산출: `per_run` key). 각 칸은 run 수 (또는 chunk 수), 괄호는 C1a 대 C1aF1 의 paired 결과 (한쪽만 / 반대쪽만, McNemar exact p).
+
+| 지표 | V11AB (C0, CL2) | C1a | **C1a + F1** | 비교 (C1a 대 F1) |
+|---|---|---|---|---|
+| grasp 직전 (window) HOLD run | 1 | 12 | **6** | 6 / 0, **p = 0.031** |
+| grasp 직전 HOLD chunk | 1 | 12 | **6** | |
+| pre-release 새 접촉 run (hand–이웃 과일 · 비손 link–target · 비손 link–이웃 과일) | 4 | 4 | **1** | 3 / 0, p = 0.25 |
+| task success | 14 | 14 | 13 | 1 / 0, p = 1.0 |
+| CT success (task + 접촉 없음) | 12 | 11 | 12 | 1 / 2, p = 1.0 |
+| grasp (final) | 16 | 17 | 16 | 1 / 0, p = 1.0 |
+| HOLD 전체 chunk | 101 | 119 | 189 | |
+| 그중 uncertified | 73 | 37 | 130 | (원인은 §4) |
+
+(출처: `T46-CL3.verify.json numbers.pairs` · `numbers.pair_hold` · `numbers.arms.*` · `numbers.reproducibility_vs_CL2` (C0 열). `pre_release_new_contact` 의 class 정의는 CL3 verify `definitions`. window HOLD 는 C1aF1F2 가 2 chunk 다.)
+
+![T46 CL3 대표 장면 (pre-grasp contact)](figures/t46/t46-cl3-scene.png)
+
+[`t46-cl3-scene.png`](figures/t46/t46-cl3-scene.png) — 이 채택의 경계 효과를 보이는 CL3 의 pre-grasp 장면 (CL3 verifier 가 만든 그림, 상세는 [이전 로그 T46 절](AG3S_T0T6_LOG.md)). [`t46-cl3-graph.png`](figures/t46/t46-cl3-graph.png) · [`t46-cl3-table.png`](figures/t46/t46-cl3-table.png) 는 같은 비교의 그래프 · 표다.
+
+**이 표를 읽는 법 — 채택이 주장하는 것과 주장하지 않는 것.**
+
+- 주장하는 것: F1 은 같은 identity · 같은 controller 에서 extent 처리만 바꿨을 때 **grasp 직전 충돌 행 · HOLD · 이웃 과일 접촉을 줄이고 이웃 seed 를 잃지 않는다**. 이는 §0.10.1-3 의 "잘못된 접촉 차단을 줄이면서 인접 장애물 경계를 보존한다" 와 같은 방향이다 (DC-1).
+- **주장하지 않는 것: 성공률 향상.** task success 는 14 → 13 으로 같은 수준이다 (유의하지 않음, §3 L1).
+- **추가 관찰 (scribe 정리, 위 표의 수치에서).** V11AB (C0) 의 grasp 직전 HOLD 는 1 chunk 라 F1 의 6 chunk 보다 적다. F1 의 12 → 6 은 `ball_owned` (C1a) 가 늘린 grasp 직전 HOLD 를 **일부** 되돌린 것이지 C0 보다 줄인 것이 아니다. 같은 표에서 이웃 과일 접촉 run 은 C0 4 · C1a 4 · F1 1 이다. "F1 이 V11AB 보다 grasp 직전 HOLD 를 줄인다" 는 주장은 이 근거로는 성립하지 않는다 (이 trade-off 의 해석은 DC-4 의 몫이고 아직 정하지 않았다).
+- 12 → 6 의 p = 0.031 은 18 pair 의 값이고, foreign GPU 겹침 pair 를 뺀 16 pair 에서는 11 → 6, paired 5 / 0, p = 0.0625 다 (`numbers.pair_hold.no_overlap`). 유의성은 집계 기준에 민감하다.
+
+### 3. F1 의 한계 L1–L9 (채택과 함께 기록, 논문 주장 범위를 정한다)
+
+(사용자 지시: "한계는 명확하게 작성하고 넘어갈 것.") **"논문 표현에 주는 제약" 열은 lead 의 문장이다 (task 문서 §2).** "근거" 열은 verify.json 의 수치이고, 그렇지 않은 것은 "(task 문서)" 로 표시했다.
+
+| # | 한계 | 근거 | 논문 표현에 주는 제약 (lead) |
+|---|---|---|---|
+| **L1** | **task success 를 개선하지 못했다** | task success 14 → 13, CT success 11 → 12, grasp 17 → 16 (C1a 대 F1, 18 쌍, 모두 McNemar p = 1.0) | "성공률 향상" 을 주장하지 않는다. grasp 직전 불필요한 정지 · 이웃 접촉 감소로만 쓴다 |
+| **L2** | **표본이 작다** | 18 쌍 = 9 episode × 2 seed (`per_run` key 에서 산출). train split · 이웃 과일 < 0.10 m 장면 · apple / orange / pear · banana 0 은 (task 문서); banana 는 CL3 verify `not_measured` 에 "no passed episode in LB2" | 효과 크기와 p 값을 같이 쓰고 일반화를 주장하지 않는다. 주 평가 (SafeLIBERO) 결과 전에는 보조 근거 |
+| **L3** | **표면 구 맞춤이 물러나면 F1 이 동작하지 않는다** | CL3 에서 F1 이 적용된 chunk 396 / 559, 적용되지 않은 163 chunk 의 이유는 모두 `no_surface_fit` (163 / 559 = 29.2 %, 산출). offline 에서는 충돌 chunk 14 개 중 6 개, 전체 162 chunk 중 54 개가 fit 물러남. 그 6 개는 target 점에 이웃 과일 점이 섞인 경우다 (task 문서) | 이웃과 맞붙은 · 점이 섞인 경우의 경계 오류는 남는다 (F3 = target 점 오염 · identity / split 쪽 과제) |
+| **L4** | **잔여를 다 지우지 못한다** | offline 충돌 행 887 → 401, GT 상한 (F1GT) 113 | "잔여 제거" 가 아니라 "감소" 로 쓴다 |
+| **L5** | **구형 가정** | F1 은 ball 이 맞춘 표면 구 + 껍질 10 mm (task 문서; 껍질 기본값은 [이전 로그 용어](AG3S_T0T6_LOG.md)) | 비구형 물체 (banana · 상자 · 길쭉한 물체) 는 검증하지 않았다 |
+| **L6** | **설계에 GT 를 본 chunk 가 있다** | 구현자가 D-TF (target-free 층의 target 잔여) 17 chunk 의 GT 라벨을 보고 설계했다 (task 문서). 판정은 held-out 162 chunk 로만 했다 | design set 수치는 근거로 쓰지 않는다 |
+| **L7** | **비권한 link (C2′) 문제를 풀지 못한다** | C2′ (= C1b′ + `--links arms` + `--nonauthorized-target-margin obstacle`, [이전 로그 정의](AG3S_T0T6_LOG.md)) window 206 chunk 의 단일 chunk 재풀이 (closed-loop 아님) 에서 row 7 중앙값 69.70 → 68.45 mm (task 문서는 이를 손가락–target 거리로 부른다), 짝지은 차의 중앙 0.0 mm, status `violated` 34 → 28 | DX-04 (link 별 예외) 의 근거로 쓰지 않는다 |
+| **L8** | **close 이후 HOLD 가 늘었다 (간접 영향)** | close 이후 HOLD 107 → 183 chunk, uncertified 37 → 130 (§4) | W1 적용 전 수치를 그대로 쓰면 safe success · stop 에 불리하게 보인다. W1 은 모든 arm 에 같이 적용한다 |
+| **L9** | **시뮬레이션 · 단일 checkpoint · 실시간 아님** | RB-Y1 MuJoCo · 16D LoRA 30k (task 문서). 시간: TO solve p90 599.9 (C1a) · 586.0 (F1) ms, client round trip 중앙값 1053.2 · 1057.8 ms · p90 1674.8 · 1662.8 ms (chunk 1332 개씩, 18 run) — F1 이 시간을 늘리지 않았다 | 실물 · 다른 checkpoint · real-time 을 주장하지 않는다 |
+
+(출처: L1 `T46-CL3.verify.json numbers.pairs` · L3 `numbers.arms.C1aF1.t8_t46` 와 `T46.verify.json numbers.3_4_5_heldout` · L4 `T46.verify.json` · L7 `numbers.6_c2p_row7` · L8 `numbers.after_close_hold` (`T46b.verify.json`) · L9 `T46-CL3.verify.json numbers.arms.*.t5_timing`. F1 의 offline 추가 비용은 evidence 단계 p90 증가 0.20 ms (`T46.verify.json numbers.7_build_ms`, 36 frame).)
+
+### 4. F1 이 grasp 이후 HOLD 를 늘린 원인 (`T46b.verify.json`, 사용자 지시 "원인을 작성할 것")
+
+자세한 근거는 위 "T46b" 절의 §2 – §6. 여기서는 사용자 지시에 맞춰 원인을 한 곳에 모은다.
+
+1. **늘어난 곳.** 늘어난 uncertified HOLD 는 전부 **과일을 놓은 뒤 (placed phase, subtask label `home`)** 다. closing · lift · carry 에서는 0 이다 (C1a 37 · C1aF1 130 · C1aF1F2 118 chunk 가 모두 placed).
+2. **직접 원인 — 인증 규칙의 공백 (F1 이전부터 있었다).**
+   - 놓은 뒤 VLA attention 상위 5 % seed 가 모두 support mask 안에 있어 (`no_seed` chunk 마다 최솟값 1.0) support mask 로 지우면 seed 가 0 → grounding `no_seed` (`AG3S/ag3s/stages/target_grounding.py:1679-1686`, `AG3S/ag3s/runtime/pipeline.py:1513-1519`).
+   - placed · home 의 인증 `subtask_no_target` (`AG3S/ag3s/types.py:1069-1113`) 은 `subtask_gated` 와 `no_admissible` 만 인증하고 **`no_seed` 는 목록에 없다**.
+   - 그래서 위반 행이 0 인데도 "기하 인증 없음" 으로 TO verdict 가 `violated` 로 강등되고 (`AG3S/trajopt/sqp.py:922`) HOLD 가 난다. episode 끝까지 HOLD 가 이어진 run 은 C1aF1 에서 3 개 (ep11_s111 · ep30_s301 · ep54_s541) 이고 그중 ep54_s541 은 C1a 도 같다 (T46b §4 의 정정 메모).
+   - 같은 HOLD 가 F1 이 없는 CL2 에도 있다: C0 73 · C1a 37 · C1bp 70 chunk.
+3. **F1 의 역할 — 간접.**
+   - 그 HOLD chunk 130 개에서 F1 경로는 한 번도 돌지 않았다 (F1 기록 0 / 130).
+   - F1 은 grasp 직전 field 를 바꿔 (점 1–12 개 제외 — task 문서; verify.json 은 window 의 뺀 점 합 444) 18 쌍 중 12 쌍의 궤적이 grasp 직전 window 에서 처음 갈라졌다.
+   - 궤적이 달라지면 놓은 뒤 자세 · attention 도 달라지고, 그중 `no_seed` 가 생긴 run 은 F1 만 3 · C1a 만 0 · 둘 다 1 이었다 (15 pair, p = 0.25) — **F1 이 계통적으로 늘린다고 말할 수 없다.**
+4. **고칠 곳.** F1 이 아니라 인증 규칙. **phase-gated F1 (close 이후 F1 off) 은 0 / 130 chunk 만 바꿔 효과가 없다.**
+
+| 원인 후보 | 판정 | 요약 |
+|---|---|---|
+| (a) F1 이 grasp 이후 held / target 처리와 충돌 | 반박 | uncertified 는 closing · lift · carry 에서 0 |
+| (b) F1 이 non-target 근거를 줄여 설명되지 않은 표면이 늘어남 | 반박 | 실패 항목은 `no_seed` (seed 가 전부 support 안) |
+| (c) C1a 가 일찍 실패해 분모가 작음 | 반박 | placed 도달 run 16 대 15, chunk 689 대 641 |
+| (d) placed 뒤 `no_seed` 인증 공백 | **확인** | CL2 C0 73 · C1bp 70 (F1 없음) |
+| (d′) F1 이 `no_seed` 를 계통적으로 늘림 | 모름 | 3 / 0 / 1, p = 0.25 |
+
+### 5. W1 (A12) — placed `no_seed` 인증 공백의 구현 (**진행 중, 결과 없음**)
+
+**목적 (lead).** F1 채택과 함께 close 이후 HOLD 증가를 인증 규칙 쪽에서 해소하고, 모든 arm 에 같은 수정을 적용해 비교 대상에서 뺀다.
+
+| 항목 | 내용 (task 문서 §4, lead) |
+|---|---|
+| **무엇** | placed · home 의 `no_seed` 를 기존 SUBTASK-f 인증 조건 (gate on ∧ label home ∧ `placed_seen` ∧ valid ∧ carve 없음) 아래서 `no_admissible` 과 같이 인증한다. 위치: `AG3S/ag3s/types.py:1069-1113` (`subtask_no_target`) 와 그 소비자. 기준 술어는 `T46b.verify.json` 의 `certification_replay` |
+| **flag** | 기본 off (예: `--placed-no-seed-certify` / config 필드). off 에서 bit-identical. 켜도 placed 이전 phase · label `pick` 의 동작은 바뀌지 않음을 test 로 확인 |
+| **안전 조건 (test)** | `no_seed` 라도 위반 행이 있으면 HOLD 유지 (인증은 "설명 안 됨" 만 해소, collision 은 그대로). `placed_seen` 이 없거나 label 이 `pick` 이면 인증하지 않음 |
+| **offline 재현 목표** | CL3 기록 chunk 에서 variant `W1` · `F1W1` 로 T46b 의 W1 수치가 재현되는지: execute 로 바뀌는 chunk 37 / 129 / 116, close 이후 uncertified 0 / 1 / 2 chunk (C1a · C1aF1 · C1aF1F2). 이 목표 수치는 `T46b.verify.json` (`W1_execute_chunks` · `after_close_hold_under_W1_per_chunk`) 에서 왔다 |
+| **손대지 않을 것** | F1 · F2 · ball_owned · coarse · permission 로직, T47 session 파일 |
+| **절차** | implementer 구현 + 단위 test + 전체 pytest (GPU 는 공용 lock) → `T46c.impl.md` → verifier 의 offline 재현 → 사용자 보고 |
+
+- **상태.** 이 기록을 쓰는 시점에 `T46c.impl.md` · `T46c.verify.json` 이 없다. **W1 수치는 아직 측정된 것이 없으며** 위 목표 수치는 T46b 의 per-chunk what-if 다 (closed-loop 아님).
+- **주의 (lead 확인 필요).** W1 은 SUBTASK 절 되돌아올 지점 표의 "`no_seed` HOLD 를 인증 — **사용자 판정: 그대로 둔다**" 를 바꾸는 구현이다 ([이전 로그](AG3S_T0T6_LOG.md)). 그 표가 적은 전환 신호 (`no_seed` 가 다른 run 에서도 놓은 뒤 길게 이어짐) 는 T46b 에서 충족됐다. 사용자 문장 "권장하는 A 로 진행" 이 W1 구현을 명시적으로 포함하는지는 이 로그에 근거가 없어 **적지 않는다** — T46c task 문서는 W1 을 지시했으나 "이전 판정을 번복한다" 는 사용자 확인은 기록돼 있지 않다.
+
+### 6. PA-1 — Ablation 구성 초안 (**판정 대기**, lead 초안)
+
+develope_PLAN DX-01 (identity / extent 분리) · DX-04 (contact handling) · DT-02 · DT-05A 에 맞춘 초안이다. 모든 arm 에 W1 을 같이 적용한다 (공통 인증 수정은 비교 대상이 아니다).
+
+| block | 고정 | 바꾸는 것 (arm) | 측정 | 비고 |
+|---|---|---|---|---|
+| **DT-02 extent (주)** | identity = ATS, LTE, controller | ball (C0) · `ball_owned` (C1a) · **`ball_owned` + F1 (제안)** · visible-target oracle | extent leakage (이웃 seed 손실) · retention (target 잔여) · grasp 직전 HOLD · task / safe success · forbidden contact | oracle arm 은 새 구현 필요 (GT 관측 mask) — 범위 판정 필요 |
+| DT-02 identity | extent = 제안 | ATS · geometry / proximity rule · oracle identity | identity error · false exemption · 실행 | geometry rule arm 의 구현 상태 확인 필요 |
+| **DT-05A contact handling** | identity · extent = 제안 | no exemption · global exclusion · LTE | 비권한 link–target contact · grasp · stop | **선행 조건 (DX-04):** query set 에 비권한 link 가 있어야 한다. `--links gripper` 는 퇴화 (task 문서), `--links arms` (C2′) 는 "1 / 18" (task 문서; 이유를 적지 않았다 — 이전 로그의 CL2 C2′ task success 1 / 18 과 같은 수로 보인다). 범위 판정 필요 |
+| 공통 | 같은 18 쌍 (또는 확대), 같은 snapshot · W1 on | — | episode 단위 paired 비교 · CI | 주 평가 SafeLIBERO 는 benchmark branch (별도) |
+
+**지금까지 이 초안의 DT-02 extent 열에 이미 들어갈 수 있는 값** (ball · `ball_owned` · F1 은 §2 의 표, oracle 은 없음):
+
+| arm | extent leakage (이웃 seed 손실, offline) | grasp 직전 HOLD run (closed-loop) | task success | 출처 |
+|---|---|---|---|---|
+| ball (C0) | 측정 안 됨 (offline 대조 없음) | 1 | 14 | `T46-CL3.verify.json` (CL2 열) |
+| `ball_owned` (C1a) | 0 | 12 | 14 | `T46.verify.json` · `T46-CL3.verify.json` |
+| `ball_owned` + F1 | 0 | 6 | 13 | 같음 |
+| visible-target oracle | 구현 없음 | 구현 없음 | 구현 없음 | — |
+
+**판정이 필요한 것 (lead, task 문서 §5).** (a) visible-target oracle extent arm 을 만들지 (GT 관측 mask 신규 구현), (b) DT-05A 를 위한 비권한 link 범위 (wrist 만 추가 등 §0.10.1-1 의 "최소 범위"), (c) 표본 수 (18 쌍 유지 · 확대).
+
+### 7. 되돌아올 지점 · 판정 대기
+
+| 안 고른 것 | 왜 | 되돌아올 신호 |
+|---|---|---|
+| F1 을 "grasp 직전 효과로만 주장" 하고 채택하지 않음 (T46b 중단 기준의 대안) | 사용자가 채택 (A) 을 택했다 | F1 의 한계 L3 · L5 · L7 이 주 평가 (SafeLIBERO) 에서 지배적인 실패 원인으로 나타날 때 |
+| F2 채택 | 이웃 과일 seed 2463 개 손실 | 이웃 과일 보존이 문제가 되지 않는 장면에서 F2 의 추가 감소 (충돌 행 401 → 107, F1 + F2) 가 실행 이득으로 이어진다는 측정이 나올 때 |
+| phase-gated F1 | 0 / 130 chunk 만 바꾼다 | T46b §8 |
+
+**판정 대기.** (1) PA-1 의 (a) – (c) (§6). (2) W1 이 SUBTASK 절의 이전 사용자 판정을 바꾸는 점을 사용자가 확인했는지 (§5 주의). (3) W1 구현 · offline 재현 뒤 close 이후 HOLD 를 모든 arm 에 W1 을 켠 상태로 다시 잴 것인가 (closed-loop 은 새 task).
+
+**산출물.**
+
+- **측정 (이 절이 인용)**: `handoff/T46.verify.json` · `handoff/T46-CL3.verify.json` · `handoff/T46b.verify.json`. **T46c 자체의 verify.json 은 아직 없다** (W1 결과 없음).
+- **figure**: 새로 만든 것 없음 — [`t46-cl3-*`](figures/t46/) (CL3) · [`t46b-*`](figures/t46/) (T46b) 를 링크했다.
+- 요청 문서: [`handoff/T46c.task.md`](handoff/T46c.task.md) (commit `6d134a69`). commit 은 하지 않았다.
