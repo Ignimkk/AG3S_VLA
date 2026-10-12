@@ -24,9 +24,18 @@ Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았�
 
 ## 진행내용 파악
 
-1. `AG3S/ag3s/docs/AG3S_T0T6_LOG.md` — **정본.** 16D 모델 위의 T0→T6 실행 기록.
-   맨 위의 **용어 · 진행 현황 · 물려받은 결정 · 재측정 대기** 네 표를 먼저 읽으면 현재 위치를 알 수 있다.
-2. `AG3S/ag3s/docs/AG3S_CUROBO_LIVE_TEST_PLAN.md` — T0~T6 실행 계획과 gate별 판정 항목.
+기록은 두 파일로 나뉜다. **최신 → 오래된 순**으로 읽는다 (2026-10-12 사용자 지시로 개편).
+
+| 순서 | 파일 | 상태 | 범위 · 언제 읽나 |
+|---|---|---|---|
+| 1 | `AG3S/ag3s/docs/AG3S_T47_LOG.md` | **최신 · 이어 쓰는 정본** | **T47 이후 모든 STEP** (attention head 재선택 T47·T47b, HSR counterfactual T48a·T48b, 명사 token query T49 …). 맨 위 표 (문서 상태 · 용어 · 진행 현황 · 물려받은 결정 · 재측정 대기) 를 먼저 읽는다 |
+| 2 | `AG3S/ag3s/docs/AG3S_T0T6_LOG.md` | **이전 정본 · T46 까지만** | 16D 모델 위의 T0→T46 실행 기록. 이미 진행 중이던 T46 (V-T46 · CL3) 은 여기서 마무리하고, **T47 번호부터는 새로 쓰지 않는다.** T46 이전 결정 · 발견 ID 의 출처를 찾을 때 읽는다 |
+
+- T46 (V-T46 · CL3) 를 제외한 2026-10-12 이후의 모든 새 STEP — T46 의 후속 접미사 STEP (`T46b`, `T46c` …) 포함 — 은 `AG3S_T47_LOG.md` 에 쓴다. 새 STEP **번호** 는 쓰기 전에 다른 세션에 알려 예약한다 (번호 충돌 방지).
+- 새 STEP 의 판단 근거가 옛 로그에 있으면 그 줄을 **링크**하고 내용을 새 로그에 다시 옮겨 적지 않는다.
+- 옛 로그의 수치와 새 로그의 수치가 다르면 **새 로그가 우선**한다 (모델 · 배선 · 기준이 바뀌었을 수 있다 — 그 차이를 새 로그에 적는다).
+- `AG3S/ag3s/docs/AG3S_CUROBO_LIVE_TEST_PLAN.md` — T0~T6 실행 계획과 gate별 판정 항목 (이전 국면 계획).
+- `doc/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md` — T47 이후 연구 방향 (Kang et al. localization head · Bhardwaj et al. progress probe 와의 비교, 실험 순서와 채택 기준).
 
 ## 반드시 지켜야 할 규칙
 

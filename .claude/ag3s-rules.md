@@ -4,13 +4,16 @@
 `paper/`의 논문 준비·작성 작업은 `.claude/rules/cvpr-workspace.md`와
 `paper/SETUP_PLAN.md`를 따른다. 논문 작업만을 위해 연구 실행 로그를 수정하지 않는다.
 
-**기록**: `AG3S/ag3s/docs/AG3S_T0T6_LOG.md` 에 **이어 쓴다.** 새 기록 파일을 만들지 않는다.
-(옛 `AG3S_REVIEW_LOG.md` 는 모듈 검토 국면의 archive — 2026-09-24 부터 이어 쓰지 않는다.)
+**기록** (2026-10-12 사용자 지시로 개편 — 읽을 때는 최신 → 오래된 순):
+- `AG3S/ag3s/docs/AG3S_T47_LOG.md` — **최신 정본.** STEP 번호 T47 이상은 여기에 **이어 쓴다.**
+- `AG3S/ag3s/docs/AG3S_T0T6_LOG.md` — 이전 정본 (T0 ~ T46). T46 (V-T46 · CL3) 마무리만 쓰고, T47 이후는 쓰지 않는다.
+T46 (V-T46 · CL3) 를 제외한 2026-10-12 이후의 모든 새 STEP — T46 의 후속 접미사 STEP (`T46b`, `T46c` …) 포함 — 은 `AG3S_T47_LOG.md` 에 쓴다. 새 STEP **번호** 는 쓰기 전에 다른 세션에 알려 예약한다 (번호 충돌 방지).
+그 밖의 새 기록 파일은 만들지 않는다. 옛 로그 근거는 링크하고 옮겨 적지 않는다.
 
 - **규칙 A · 시각화** — 구현/검증 단계마다 **실제 씬 + 그래프 + 표**를 되는 데까지 **다** 만든다.
   그림은 `AG3S/ag3s/docs/figures/` 에 저장하고 로그에서 링크한다.
   **숫자를 문장에 흩어 놓는 것은 시각화가 아니다.** 만든 그림은 SendUserFile 로 보낸다.
-- **규칙 C · 용어** — 새 용어를 쓰면 **그 답변 안에서 풀어 쓰고** `AG3S_T0T6_LOG.md` 의 "용어" 절에 추가한다.
+- **규칙 C · 용어** — 새 용어를 쓰면 **그 답변 안에서 풀어 쓰고** 해당 로그 (T47 이후는 `AG3S_T47_LOG.md`) 의 "용어" 절에 추가한다.
   `violated`/`feasible`, 거친 계층/미세 계층/2계층, 여유거리, ESDF, 청크 … 를 설명 없이 쓰지 않는다.
 - **규칙 G · 발견 번호를 그냥 쓰지 않는다** — `E3`, `F11`, `G2`, `C5`, `X1` 같은 발견 ID 를
   말할 때는 **그 자리에서 무슨 내용인지 한 줄로 풀어 쓴다.** 번호만 던지면 읽는 쪽이 로그를
@@ -25,7 +28,7 @@
 |---|---|---|---|
 | `AG3S/ag3s/docs/handoff/*.task.md` · PLAN | `AG3S/**/*.py` · `Baseline/**/*.py` · `benchmark/**/*.py` · `integration/**/*.py` · `common/**/*.py` · `tests/**` | `AG3S/ag3s/docs/figures/**` · `*.verify.json` · `${AG3S_RUN_DIR}/verify/**` | `AG3S/ag3s/docs/*.md` · `references/legacy-papers/**` |
 
-**`AG3S_T0T6_LOG.md` 의 writer 는 A3 하나다.** 나머지는 `AG3S/ag3s/docs/handoff/` 로 넘긴다.
+**로그 (`AG3S_T47_LOG.md` · `AG3S_T0T6_LOG.md`) 의 writer 는 A3 하나다.** 나머지는 `AG3S/ag3s/docs/handoff/` 로 넘긴다.
 **A3 는 `verify.json` 의 `numbers` 에 없는 숫자를 쓰지 않는다** — 없으면 A2 에게 측정을 요청한다.
 
 **진행 방식**: `설명 → 사용자 질문(여기서 멈춤) → 공동 판정 → 확정된 것만 수정+검증 → 기록`.

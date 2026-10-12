@@ -19,7 +19,7 @@ effort: high
 | | `references/legacy-papers/**` — scribe 의 것 |
 | | `<STEP>.verify.json` — verifier 의 것 |
 
-**로그(`AG3S_T0T6_LOG.md`)에 직접 쓰지 않는다.** 네가 무엇을 바꿨는지는 `impl.md` 로만
+**로그(`AG3S_T47_LOG.md` · `AG3S_T0T6_LOG.md`)에 직접 쓰지 않는다.** 네가 무엇을 바꿨는지는 `impl.md` 로만
 말한다. 로그의 writer 는 scribe 하나다 (규칙 D — 기록이 갈라지면 어느 쪽이 최신인지 모른다).
 
 ## 일하는 순서
