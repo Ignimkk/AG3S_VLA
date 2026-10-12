@@ -27,6 +27,7 @@ Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았�
 
 1. `AG3S/ag3s/docs/AG3S_T0T6_LOG.md` — **정본.** 16D 모델 위의 T0→T6 실행 기록.
    맨 위의 **용어 · 진행 현황 · 물려받은 결정 · 재측정 대기** 네 표를 먼저 읽으면 현재 위치를 알 수 있다.
+   Panda/LIBERO 계열 benchmark 진행 기록은 `AG3S/ag3s/docs/AG3S_BENCHMARK_LOG.md` (2026-10-12 신설, SL-0부터).
 2. `AG3S/ag3s/docs/AG3S_CUROBO_LIVE_TEST_PLAN.md` — T0~T6 실행 계획과 gate별 판정 항목.
 
 ## 반드시 지켜야 할 규칙

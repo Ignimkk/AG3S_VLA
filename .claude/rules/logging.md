@@ -6,6 +6,7 @@ paths:
 # 기록 규칙 — 이 파일들을 만질 때만 들어온다
 
 **`AG3S_T0T6_LOG.md` 가 정본이다. 여기에 이어 쓴다. 새 기록 파일을 만들지 않는다** (규칙 D).
+단, Panda/LIBERO 계열 benchmark 단계(SL-0~, P1~)는 사용자 지시(2026-10-12)로 `AG3S/ag3s/docs/AG3S_BENCHMARK_LOG.md` 가 정본이다.
 옛 `AG3S_REVIEW_LOG.md` 는 모듈 검토 국면의 archive 다 — 2026-09-24 부터 이어 쓰지 않는다.
 발견 번호(`E3`·`F19`·`C5`·`N2` …)의 **원 측정**을 찾을 때만 그리로 간다.
 

@@ -6,6 +6,7 @@
 
 **기록**: `AG3S/ag3s/docs/AG3S_T0T6_LOG.md` 에 **이어 쓴다.** 새 기록 파일을 만들지 않는다.
 (옛 `AG3S_REVIEW_LOG.md` 는 모듈 검토 국면의 archive — 2026-09-24 부터 이어 쓰지 않는다.)
+Panda/LIBERO → SafeLIBERO → LIBERO-Safety benchmark 단계(SL-0~, P1~)는 사용자 지시(2026-10-12)로 `AG3S/ag3s/docs/AG3S_BENCHMARK_LOG.md` 에 이어 쓴다.
 
 - **규칙 A · 시각화** — 구현/검증 단계마다 **실제 씬 + 그래프 + 표**를 되는 데까지 **다** 만든다.
   그림은 `AG3S/ag3s/docs/figures/` 에 저장하고 로그에서 링크한다.
