@@ -120,9 +120,14 @@ def main(argv=None):
             f = 0.5 * 256 / np.tan(np.deg2rad(fovy) / 2)
             K = frame["K"]
             assert abs(K[0, 0] - f) < 1e-9 and abs(K[1, 1] - f) < 1e-9, (K, f)
-            assert K[0, 2] == 128.0 and K[1, 2] == 128.0 and K[2, 2] == 1.0 and K[0, 1] == 0 and K[1, 0] == 0
-            ref = reference["get_camera_intrinsic_matrix"](sim, source, 256, 256)
-            assert np.array_equal(K, np.asarray(ref, np.float64)), (K, ref)
+            assert K[0, 2] == 127.5 and K[1, 2] == 127.5 and K[2, 2] == 1.0 and K[0, 1] == 0 and K[1, 0] == 0
+            ref = np.asarray(reference["get_camera_intrinsic_matrix"](sim, source, 256, 256), np.float64)
+            # SL2: pixel-centre principal point = robosuite's W/2, H/2 minus 0.5 px; focal length identical.
+            assert np.array_equal(camera.intrinsic_matrix(fovy, 256, 256), ref), ref
+            shifted = ref.copy()
+            shifted[0, 2] -= 0.5
+            shifted[1, 2] -= 0.5
+            assert np.array_equal(K, shifted), (K, ref)
             info[wire] = {"fovy_deg": fovy, "f_px": float(K[0, 0])}
         return info
 
@@ -160,6 +165,42 @@ def main(argv=None):
             local = camera.capture(env, step_obs)
         assert worst["orth"] < 1e-9 and worst["det"] < 1e-9 and worst["compose"] < 1e-9, worst
         return worst
+
+    @check(results, "robot_state_is_image_instant")
+    def _():
+        # SL2 item 0.2: FK of the recorded robot_state (9 robot qpos) reproduces the recorded wrist T_world_cam;
+        # FK of obs robot0_joint_pos/gripper_qpos (data.qpos at the sampling substep) does not, while moving.
+        import mujoco
+
+        m = sim.model._model
+        work = mujoco.MjData(m)
+        cam_id = sim.model.camera_name2id("robot0_eye_in_hand")
+        idx = camera.robot_qpos_indexes(env)
+        worst_image, worst_data, sources = 0.0, [], []
+        local_obs = env.set_init_state(client_mod_init_state())
+        for step in range(10):
+            frames_now = camera.capture(env, local_obs)
+            frame = frames_now["left_wrist"]
+            sources.append(int(frame["qpos_image_source"]))
+            for label, q9 in (("image", frame["robot_state"]),
+                              ("data", np.concatenate([local_obs["robot0_joint_pos"], local_obs["robot0_gripper_qpos"]]))):
+                work.qpos[:] = frame["sim_state"][1:1 + m.nq]
+                work.qpos[idx] = q9
+                mujoco.mj_kinematics(m, work)
+                mujoco.mj_comPos(m, work)
+                mujoco.mj_camlight(m, work)  # cam_xpos / cam_xmat are not part of mj_kinematics
+                T = camera.world_camera_pose_opencv(work.cam_xpos[cam_id], work.cam_xmat[cam_id])
+                err = float(np.max(np.abs(T - frame["T_world_cam"])))
+                if label == "image":
+                    worst_image = max(worst_image, err)
+                else:
+                    worst_data.append(err)
+            action = [0.5, -0.4, 0.3, 0.0, 0.0, 0.5, -1.0] if step >= 1 else client_mod.LIBERO_DUMMY_ACTION
+            local_obs, _, _, _ = env.step(action)
+        assert worst_image < 1e-12, worst_image
+        assert max(worst_data) > 1e-7, worst_data
+        return {"max_abs_T_world_cam_fk_robot_state": worst_image,
+                "max_abs_T_world_cam_fk_obs_joint_pos": max(worst_data), "qpos_image_source": sources}
 
     @check(results, "depth_row_order_table_plane")
     def _():
@@ -209,16 +250,25 @@ def main(argv=None):
             raw = np.stack(rec.obs[source + "_image"])
             assert np.array_equal(np.stack([f[wire]["rgb"] for f in geometry.frames]), raw[:, ::-1])
             assert arrays["depth_mm/" + wire].shape == (n_obs, 256, 256) and arrays["depth_mm/" + wire].dtype == np.uint16
-            assert np.array_equal(arrays["robot_state/" + wire][:, :7], np.stack(rec.obs["robot0_joint_pos"]))
-            assert np.array_equal(arrays["robot_state/" + wire][:, 7:], np.stack(rec.obs["robot0_gripper_qpos"]))
+            # SL2: robot_state is the image-instant qpos, not obs robot0_joint_pos (= data.qpos, one substep later).
+            idx = arrays["robot_qpos_indexes"]
+            assert np.array_equal(arrays["robot_state/" + wire], arrays["sim_state_image"][:, 1:][:, idx])
+            assert np.array_equal(arrays["robot_state/" + wire][0, :7], rec.obs["robot0_joint_pos"][0])
         dt = [float(r[0] - f["head"]["stamp"]) for f, r in zip(geometry.frames, geometry.sim_state_at_return)]
         dq = [float(np.max(np.abs(f["head"]["sim_state"][1:] - r[1:])))
               for f, r in zip(geometry.frames, geometry.sim_state_at_return)]
         assert dt[0] == 0.0 and dq[0] == 0.0  # set_init_state: forced sample at the current state
+        source = arrays["qpos_image_source"].tolist()
+        residual = arrays["qpos_image_residual_m"]
+        # Initial obs: forced sample after mj_forward -> current qpos; every env.step obs: integrated back.
+        assert source[0] == camera.QPOS_IMAGE_CURRENT and set(source[1:]) == {camera.QPOS_IMAGE_INTEGRATED_BACK}, source
+        assert float(np.max(np.min(residual, axis=1))) <= camera.QPOS_IMAGE_TOLERANCE_M, residual
         inner = client_mod._geometry_adapter()[0]._inner(env)
         return {"frames": n_obs, "keys": sorted(arrays), "return_minus_capture_time_s": dt,
                 "max_abs_state_return_minus_capture": dq, "control_timestep_s": float(inner.control_timestep),
-                "model_timestep_s": float(inner.model_timestep)}
+                "model_timestep_s": float(inner.model_timestep), "qpos_image_source": source,
+                "qpos_image_residual_chosen_max_m": float(np.max(np.min(residual, axis=1))),
+                "qpos_image_residual_other_min_m": float(np.min(np.max(residual[1:], axis=1)))}
 
     # Fixture for the 3.11 side: initial observation of task 0 / init state 0.
     restored = env.set_init_state(client_mod_init_state())

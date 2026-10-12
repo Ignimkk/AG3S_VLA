@@ -172,9 +172,16 @@ def test_conventions_and_camera_table():
     for _, wire_name in camera.CAMERA_TABLE:
         CameraID.parse(wire_name)  # only names AG3S accepts
     json.dumps(camera.conventions())
-    K = camera.intrinsic_matrix(45.0, 256, 256)
+    K = camera.intrinsic_matrix(45.0, 256, 256)  # robosuite restatement (reference)
     assert K[0, 0] == K[1, 1] == pytest.approx(128 / math.tan(math.radians(22.5)))
     assert (K[0, 2], K[1, 2]) == (128.0, 128.0)
+    # SL2: the adapter writes the pixel-centre principal point.
+    Kp = camera.pixel_centre_intrinsic_matrix(45.0, 256, 256)
+    assert camera.K_CONVENTION == "pixel_centre" and camera.conventions()["K_convention"] == "pixel_centre"
+    assert (Kp[0, 2], Kp[1, 2]) == (127.5, 127.5) and Kp[0, 0] == K[0, 0] and Kp[1, 1] == K[1, 1]
+    Kr = camera.pixel_centre_intrinsic_matrix(60.0, 240, 320)
+    assert (Kr[0, 2], Kr[1, 2]) == (159.5, 119.5)
+    assert camera.MANIPULATOR_SIDE == "left" and camera.conventions()["manipulator_side"]["panda"] == "left"
 
 
 # --- .venv-libero adapter checks (subprocess) + fixture round trip ---------------------------------
@@ -192,7 +199,8 @@ def py38_checks(tmp_path_factory):
 
 @pytest.mark.parametrize("name", ["camera_table_and_keys", "K_matches_fovy_formula_and_robosuite",
                                   "T_world_cam_and_depth_match_robosuite", "T_base_cam_orthonormal_over_steps",
-                                  "depth_row_order_table_plane", "client_episode_geometry_alignment"])
+                                  "depth_row_order_table_plane", "client_episode_geometry_alignment",
+                                  "robot_state_is_image_instant"])
 def test_py38_adapter_checks(py38_checks, name):
     _, results = py38_checks
     assert results["_python"].startswith("3.8.")
@@ -394,6 +402,8 @@ def test_replay_launcher_dry_run(fake_source_run, monkeypatch, capsys):
     assert cmd[0] == str(PROJECT_ROOT / ".venv-libero/bin/python") and cmd[1].endswith("benchmark/runners/libero_replay.py")
     parsed = libero_replay.build_parser().parse_args(cmd[2:])
     assert parsed.capture_geometry and not parsed.capture_segmentation and parsed.source_run_dir == str(source.resolve())
+    assert settings["geometry_capture"]["robot_model"]["manipulator_side"] == "left"
+    assert settings["geometry_capture"]["conventions"]["K_convention"] == "pixel_centre"
     assert settings["geometry_capture"]["conventions"]["camera_table"][1] == {"robosuite": "robot0_eye_in_hand",
                                                                               "wire": "left_wrist"}
     assert settings["runtime_schedule"]["control_freq_hz"] == 20

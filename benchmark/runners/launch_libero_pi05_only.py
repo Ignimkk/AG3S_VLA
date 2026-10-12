@@ -347,10 +347,13 @@ def geometry_settings(args) -> dict:
     flags = {name: bool(getattr(args, name, False)) for name in GEOMETRY_FLAGS}
     if not flags["capture_geometry"]:
         return {**flags, "conventions": None}
+    from AG3S.adapters.panda import model as panda_model
     from benchmark.adapters.libero_panda import camera
 
     return {**flags, "env_camera_depths": True, "npz": "episodes/<suite>_t<task>_e<episode>_geom.npz",
-            "conventions": camera.conventions()}
+            "conventions": camera.conventions(),
+            # SL2: the Panda robot model AG3S reads this geometry with (URDF / spheres / cover / side).
+            "robot_model": panda_model.manifest_entry()}
 
 
 # --- Process control -----------------------------------------------------------------------------

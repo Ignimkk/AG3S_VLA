@@ -241,6 +241,7 @@ class _GeometryRecorder:
         self.cameras = [wire for _, wire in self.camera.CAMERA_TABLE]
         self.frames, self.T_world_base, self.tables, self.static = [], [], None, None
         self.sim_state, self.sim_state_at_return = [], []
+        self.sim_state_image, self.qpos_image_source, self.qpos_image_residual = [], [], []
 
     def observe(self, env, obs):
         frames = self.camera.capture(env, obs, segmentation=self.segmentation)
@@ -252,8 +253,13 @@ class _GeometryRecorder:
                 self.static["fovy_deg/" + cam] = frames[cam]["fovy_deg"]
         self.frames.append(frames)
         self.T_world_base.append(frames[self.cameras[0]]["T_world_base"])
-        # sim_state: the image instant (capture observable); at_return: env.sim when step returned.
+        # sim_state: simulator state at the image substep (capture observable); at_return: env.sim when
+        # step returned.
         self.sim_state.append(np.asarray(frames[self.cameras[0]]["sim_state"], dtype=np.float64))
+        # SL2: the kinematic state the images show (robot_state is read from it).
+        self.sim_state_image.append(np.asarray(frames[self.cameras[0]]["sim_state_image"], dtype=np.float64))
+        self.qpos_image_source.append(int(frames[self.cameras[0]]["qpos_image_source"]))
+        self.qpos_image_residual.append(np.asarray(frames[self.cameras[0]]["qpos_image_residual_m"], np.float64))
         self.sim_state_at_return.append(np.array(env.sim.get_state().flatten(), dtype=np.float64))
 
     def arrays(self):
@@ -264,6 +270,9 @@ class _GeometryRecorder:
                "T_world_base": np.stack(self.T_world_base),
                "sim_state": np.stack(self.sim_state),
                "sim_state_at_return": np.stack(self.sim_state_at_return),
+               "sim_state_image": np.stack(self.sim_state_image),
+               "qpos_image_source": np.asarray(self.qpos_image_source, dtype=np.int64),
+               "qpos_image_residual_m": np.stack(self.qpos_image_residual),
                "depth_scale_mm": np.array(self.wire_pack.DEPTH_SCALE_MM),
                "conventions_json": np.array(json.dumps(self.camera.conventions(), ensure_ascii=False))}
         for key, value in (self.static or {}).items():
