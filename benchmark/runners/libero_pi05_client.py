@@ -9,6 +9,11 @@ the selectable subset of task/episode ids; see SL0.impl.md for the full diff lis
 Heavy simulator / client imports are deferred into the functions that need them so the module
 (protocol constants, ``_quat2axisangle``, run-dir rules) can be imported by CPU unit tests under
 .venv-ag3s without LIBERO installed.
+
+SL1: ``--capture-geometry`` (default off) creates the env with ``camera_depths=True`` and records, per
+observation, the V11AB camera geometry of ``benchmark/adapters/libero_panda`` in
+``episodes/<stem>_geom.npz``. With the flag off the code path, env arguments and every output are
+those of SL0 (no geometry import, no extra file, no extra jsonl key).
 """
 from __future__ import annotations
 
@@ -20,6 +25,7 @@ import logging
 import math
 import os
 import pathlib
+import sys
 import time
 import traceback
 import uuid
@@ -145,6 +151,20 @@ def _get_libero_env(task, resolution, seed):
     return env, task_description
 
 
+def _get_libero_env_with_depth(task, resolution, seed):
+    """``_get_libero_env`` with ``camera_depths=True`` (SL1 geometry capture); nothing else differs."""
+    from libero.libero import get_libero_path
+    from libero.libero.envs import OffScreenRenderEnv
+
+    task_description = task.language
+    task_bddl_file = pathlib.Path(get_libero_path("bddl_files")) / task.problem_folder / task.bddl_file
+    env_args = {"bddl_file_name": task_bddl_file, "camera_heights": resolution, "camera_widths": resolution,
+                "camera_depths": True}
+    env = OffScreenRenderEnv(**env_args)
+    env.seed(seed)  # IMPORTANT: seed seems to affect object positions even when using fixed initial state
+    return env, task_description
+
+
 def _quat2axisangle(quat):
     """
     Copied from robosuite: https://github.com/ARISE-Initiative/robosuite/blob/eafb81f54ffc104f905ee48a16bb15f059176ad3/robosuite/utils/transform_utils.py#L490C1-L512C55
@@ -199,8 +219,75 @@ class _Recorder:
         return out
 
 
-def run_episode(env, initial_states, episode_idx, task_description, client, args, max_steps):
-    """One episode with the official loop. Returns (summary dict, recorder, replay_images)."""
+def _geometry_adapter():
+    """Import ``benchmark.adapters.libero_panda`` from this checkout (only when geometry is captured).
+
+    The checkout root is *appended* to ``sys.path`` so it can never shadow an installed package.
+    """
+    root = str(pathlib.Path(__file__).resolve().parents[2])
+    if root not in sys.path:
+        sys.path.append(root)
+    from benchmark.adapters.libero_panda import camera, wire_pack
+
+    return camera, wire_pack
+
+
+class _GeometryRecorder:
+    """Per-observation camera geometry (SL1), aligned 1:1 with ``_Recorder.obs`` (``obs_index``)."""
+
+    def __init__(self, segmentation=False, float_depth=False):
+        self.camera, self.wire_pack = _geometry_adapter()
+        self.segmentation, self.float_depth = bool(segmentation), bool(float_depth)
+        self.cameras = [wire for _, wire in self.camera.CAMERA_TABLE]
+        self.frames, self.T_world_base, self.tables, self.static = [], [], None, None
+        self.sim_state, self.sim_state_at_return = [], []
+
+    def observe(self, env, obs):
+        frames = self.camera.capture(env, obs, segmentation=self.segmentation)
+        if self.tables is None:
+            self.tables = self.camera.model_tables(env)
+            first = frames[self.cameras[0]]
+            self.static = {"depth_near_m": first["near_m"], "depth_far_m": first["far_m"]}
+            for cam in self.cameras:
+                self.static["fovy_deg/" + cam] = frames[cam]["fovy_deg"]
+        self.frames.append(frames)
+        self.T_world_base.append(frames[self.cameras[0]]["T_world_base"])
+        # sim_state: the image instant (capture observable); at_return: env.sim when step returned.
+        self.sim_state.append(np.asarray(frames[self.cameras[0]]["sim_state"], dtype=np.float64))
+        self.sim_state_at_return.append(np.array(env.sim.get_state().flatten(), dtype=np.float64))
+
+    def arrays(self):
+        out = {"cameras": np.array(self.cameras, dtype=str),
+               "source_cameras": np.array([source for source, _ in self.camera.CAMERA_TABLE], dtype=str),
+               "stamp_mode": np.array(self.camera.STAMP_MODE),
+               "obs_index": np.arange(len(self.frames), dtype=np.int64),
+               "T_world_base": np.stack(self.T_world_base),
+               "sim_state": np.stack(self.sim_state),
+               "sim_state_at_return": np.stack(self.sim_state_at_return),
+               "depth_scale_mm": np.array(self.wire_pack.DEPTH_SCALE_MM),
+               "conventions_json": np.array(json.dumps(self.camera.conventions(), ensure_ascii=False))}
+        for key, value in (self.static or {}).items():
+            out[key] = np.array(value, dtype=np.float64)
+        out.update(self.tables or {})
+        for cam in self.cameras:
+            series = [frames[cam] for frames in self.frames]
+            out["depth_mm/" + cam] = np.stack([self.wire_pack.depth_to_mm(f["depth_m"]) for f in series])
+            for key in ("K", "T_base_cam", "T_world_cam", "robot_state"):
+                out[key + "/" + cam] = np.stack([f[key] for f in series])
+            out["stamp/" + cam] = np.array([f["stamp"] for f in series], dtype=np.float64)
+            if self.float_depth:
+                out["depth_m/" + cam] = np.stack([f["depth_m"] for f in series])
+            if self.segmentation:
+                out["segmentation_geom/" + cam] = np.stack([f["segmentation_geom"] for f in series])
+        return out
+
+
+def run_episode(env, initial_states, episode_idx, task_description, client, args, max_steps, observer=None):
+    """One episode with the official loop. Returns (summary dict, recorder, replay_images).
+
+    ``observer(env, obs)`` (SL1 geometry) is called right after every ``rec.observe(obs)``; it reads
+    the env and the observation only. ``None`` = SL0 behaviour.
+    """
     from openpi_client import image_tools
 
     rec = _Recorder()
@@ -216,6 +303,8 @@ def run_episode(env, initial_states, episode_idx, task_description, client, args
     # Set initial states
     obs = env.set_init_state(initial_states[episode_idx])
     rec.observe(obs)
+    if observer is not None:
+        observer(env, obs)
 
     # Setup
     t = 0
@@ -229,6 +318,8 @@ def run_episode(env, initial_states, episode_idx, task_description, client, args
                 obs, reward, done, info = env.step(LIBERO_DUMMY_ACTION)
                 rec.step(LIBERO_DUMMY_ACTION, reward, done, True)
                 rec.observe(obs)
+                if observer is not None:
+                    observer(env, obs)
                 t += 1
                 continue
 
@@ -284,6 +375,8 @@ def run_episode(env, initial_states, episode_idx, task_description, client, args
             obs, reward, done, info = env.step(action.tolist())
             rec.step(action, reward, done, False)
             rec.observe(obs)
+            if observer is not None:
+                observer(env, obs)
             if done:
                 break
             t += 1
@@ -321,7 +414,7 @@ def run_episode(env, initial_states, episode_idx, task_description, client, args
     return summary, rec, replay_images
 
 
-def _save_npz(rec: _Recorder, final: pathlib.Path) -> None:
+def _save_npz(rec, final: pathlib.Path) -> None:
     tmp = _tmp_sibling(final, ".npz")
     with open(str(tmp), "xb") as stream:
         np.savez_compressed(stream, **rec.arrays())
@@ -353,7 +446,23 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--resize-size", type=int, default=DEFAULT_RESIZE_SIZE)
     parser.add_argument("--replan-steps", type=int, default=DEFAULT_REPLAN_STEPS)
     parser.add_argument("--num-steps-wait", type=int, default=DEFAULT_NUM_STEPS_WAIT)
+    add_geometry_arguments(parser)
     return parser
+
+
+def add_geometry_arguments(parser):
+    """SL1 flags (all default off; off = SL0 behaviour and outputs)."""
+    parser.add_argument("--capture-geometry", action="store_true",
+                        help="camera_depths=True env; per-observation depth(mm)/K/T/robot_state -> episodes/<stem>_geom.npz")
+    parser.add_argument("--capture-segmentation", action="store_true",
+                        help="with --capture-geometry: also render per-pixel geom ids (one extra render per camera)")
+    parser.add_argument("--capture-float-depth", action="store_true",
+                        help="with --capture-geometry: also store float32 metric depth (larger files)")
+
+
+def check_geometry_arguments(args):
+    if (args.capture_segmentation or args.capture_float_depth) and not args.capture_geometry:
+        raise ValueError("--capture-segmentation/--capture-float-depth require --capture-geometry")
 
 
 def require_libero_config() -> pathlib.Path:
@@ -367,6 +476,7 @@ def require_libero_config() -> pathlib.Path:
 
 def eval_libero(args) -> int:
     run_dir = validate_run_dir(args.run_dir)
+    check_geometry_arguments(args)
     require_libero_config()
     from libero.libero import benchmark
 
@@ -393,57 +503,86 @@ def eval_libero(args) -> int:
     client, connector = make_policy_client(args.host, args.port)
     logging.info("Policy client connector: %s", connector)
 
-    total_episodes, total_successes, errors = 0, 0, 0
     with jsonl:
-        for task_id in args.task_ids:
-            # Get task
-            task = task_suite.get_task(task_id)
-
-            # Get default LIBERO initial states
-            initial_states = task_suite.get_task_init_states(task_id)
-
-            # Initialize LIBERO environment and task description
-            env, task_description = _get_libero_env(task, LIBERO_ENV_RESOLUTION, args.seed)
-
-            for episode_idx in args.episode_ids:
-                if not 0 <= episode_idx < len(initial_states):
-                    raise ValueError("episode id {} outside {} init states".format(episode_idx, len(initial_states)))
-                logging.info("\nTask: %s", task_description)
-                summary, rec, replay_images = run_episode(
-                    env, initial_states, episode_idx, task_description, client, args, max_steps
-                )
-                stem = episode_stem(args.task_suite_name, task_id, episode_idx)
-                suffix = "success" if summary["official_success"] else "failure"
-                npz_path = episodes_dir / (stem + ".npz")
-                video_path = videos_dir / "{}_{}.mp4".format(stem, suffix)
-                _save_npz(rec, npz_path)
-                _save_video(replay_images, video_path)
-                row = {
-                    "suite": args.task_suite_name,
-                    "task_id": task_id,
-                    "task_description": str(task_description),
-                    "episode_idx": episode_idx,
-                    "init_state_index": episode_idx,
-                    "seed": args.seed,
-                }
-                row.update(summary)
-                row.update({
-                    "npz": str(npz_path.relative_to(run_dir)),
-                    "video": str(video_path.relative_to(run_dir)),
-                    "server_metadata": _jsonable(client.get_server_metadata()),
-                    "client_connector": connector,
-                })
-                jsonl.write(json.dumps(row, ensure_ascii=False) + "\n")
-                jsonl.flush()
-                os.fsync(jsonl.fileno())
-
-                total_episodes += 1
-                total_successes += int(summary["official_success"])
-                errors += int(summary["status"] == "execution_error")
-                logging.info("Success: %s (status=%s)", summary["official_success"], summary["status"])
-                logging.info("# episodes completed so far: %d", total_episodes)
-                logging.info("# successes: %d", total_successes)
+        errors = run_tasks(args, run_dir, jsonl, task_suite, max_steps, lambda task_id, episode_idx: (client, connector, {}))
     return 1 if errors else 0
+
+
+def run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for) -> int:
+    """Task/episode loop of the official example. ``policy_for(task_id, episode_idx)`` returns
+    ``(policy, connector name, extra jsonl fields)``. Returns the number of execution errors."""
+    episodes_dir = run_dir / "episodes"
+    videos_dir = run_dir / "videos"
+    make_env = _get_libero_env_with_depth if args.capture_geometry else _get_libero_env
+    total_episodes, total_successes, errors = 0, 0, 0
+    for task_id in args.task_ids:
+        # Get task
+        task = task_suite.get_task(task_id)
+
+        # Get default LIBERO initial states
+        initial_states = task_suite.get_task_init_states(task_id)
+
+        # Initialize LIBERO environment and task description
+        env, task_description = make_env(task, LIBERO_ENV_RESOLUTION, args.seed)
+        if args.capture_geometry:
+            # Read-only snapshot observable sampled with the cameras; installed before run_episode's env.reset().
+            _geometry_adapter()[0].install_capture_observable(env)
+
+        for episode_idx in args.episode_ids:
+            if not 0 <= episode_idx < len(initial_states):
+                raise ValueError("episode id {} outside {} init states".format(episode_idx, len(initial_states)))
+            client, connector, extra = policy_for(task_id, episode_idx)
+            geometry = (_GeometryRecorder(args.capture_segmentation, args.capture_float_depth)
+                        if args.capture_geometry else None)
+            logging.info("\nTask: %s", task_description)
+            summary, rec, replay_images = run_episode(
+                env, initial_states, episode_idx, task_description, client, args, max_steps,
+                observer=None if geometry is None else geometry.observe,
+            )
+            stem = episode_stem(args.task_suite_name, task_id, episode_idx)
+            suffix = "success" if summary["official_success"] else "failure"
+            npz_path = episodes_dir / (stem + ".npz")
+            video_path = videos_dir / "{}_{}.mp4".format(stem, suffix)
+            _save_npz(rec, npz_path)
+            _save_video(replay_images, video_path)
+            row = {
+                "suite": args.task_suite_name,
+                "task_id": task_id,
+                "task_description": str(task_description),
+                "episode_idx": episode_idx,
+                "init_state_index": episode_idx,
+                "seed": args.seed,
+            }
+            row.update(summary)
+            row.update({
+                "npz": str(npz_path.relative_to(run_dir)),
+                "video": str(video_path.relative_to(run_dir)),
+                "server_metadata": _jsonable(client.get_server_metadata()),
+                "client_connector": connector,
+            })
+            if geometry is not None:
+                geom_path = episodes_dir / (stem + "_geom.npz")
+                _save_npz(geometry, geom_path)
+                row["geometry"] = {
+                    "npz": str(geom_path.relative_to(run_dir)),
+                    "frames": len(geometry.frames),
+                    "cameras": [{"robosuite": source, "wire": wire} for source, wire in geometry.camera.CAMERA_TABLE],
+                    "segmentation": geometry.segmentation,
+                    "float_depth": geometry.float_depth,
+                    "env_camera_depths": True,
+                }
+            row.update(extra)
+            jsonl.write(json.dumps(row, ensure_ascii=False) + "\n")
+            jsonl.flush()
+            os.fsync(jsonl.fileno())
+
+            total_episodes += 1
+            total_successes += int(summary["official_success"])
+            errors += int(summary["status"] == "execution_error")
+            logging.info("Success: %s (status=%s)", summary["official_success"], summary["status"])
+            logging.info("# episodes completed so far: %d", total_episodes)
+            logging.info("# successes: %d", total_successes)
+    return errors
 
 
 def _jsonable(value):

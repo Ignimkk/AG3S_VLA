@@ -104,6 +104,12 @@ def create_policy(args: Args) -> _policy.Policy:
 def main(args: Args) -> None:
     settings = json.loads(json.dumps(dataclasses.asdict(args), default=lambda value: value.value))
     checkpoint = args.policy if isinstance(args.policy, Checkpoint) else DEFAULT_CHECKPOINT[args.env]
+    # Record the policy actually served. `env` only selects a Default policy; with policy:checkpoint
+    # its Args default ("aloha_sim") is unused and must not appear as if it were the environment.
+    if isinstance(args.policy, Checkpoint):
+        settings["env"] = None
+    settings["policy"] = {"source": "checkpoint" if isinstance(args.policy, Checkpoint) else "default",
+                          "config": checkpoint.config, "dir": checkpoint.dir}
     run = ensure_run(settings=settings, checkpoint=checkpoint.dir)
     log_handler = logging.FileHandler(output_path(run / "logs" / f"serve_policy_{args.port}.log"), mode="x")
     log_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))

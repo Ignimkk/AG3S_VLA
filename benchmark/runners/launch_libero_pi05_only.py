@@ -8,10 +8,15 @@ without allocating a run or starting anything.
 
 The policy path is ``serve_policy.py policy:checkpoint`` -- plain OpenPI inference; no AG3S
 safety layer / trajectory-optimisation wrapper is involved (condition ``pi0.5-only``).
+
+SL1: ``--capture-geometry`` (and ``--capture-segmentation`` / ``--capture-float-depth``) are passed to
+the client; the manifest also records the V11AB items that do not apply to pi0.5-only and the
+runtime schedule read from the LIBERO source.
 """
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import http.client
 import json
@@ -40,6 +45,8 @@ CLIENT_THREADS = 4
 THREAD_LIMIT_KEYS = ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMBA_NUM_THREADS",
                      "LP_NUM_THREADS")
 OBSERVATION_KEYS = ("observation/image", "observation/wrist_image", "observation/state", "prompt")
+LIBERO_ENV_WRAPPER = PROJECT_ROOT / "benchmark/LIBERO/libero/libero/envs/env_wrapper.py"
+GEOMETRY_FLAGS = ("capture_geometry", "capture_segmentation", "capture_float_depth")
 
 
 def default_checkpoint() -> Path:
@@ -197,12 +204,16 @@ def server_command(python: Path, port: int, checkpoint: Path) -> list[str]:
             "policy:checkpoint", "--policy.config", POLICY_CONFIG, "--policy.dir", str(checkpoint)]
 
 
+def geometry_flags(args) -> list[str]:
+    return ["--" + name.replace("_", "-") for name in GEOMETRY_FLAGS if getattr(args, name, False)]
+
+
 def client_command(python: Path, run_dir: str, port: int, args) -> list[str]:
     return [str(python), str(CLIENT_SCRIPT), "--run-dir", str(run_dir), "--host", args.host, "--port", str(port),
             "--task-suite-name", args.task_suite_name,
             "--task-ids", ",".join(map(str, args.task_ids)),
             "--episode-ids", ",".join(map(str, args.episode_ids)),
-            "--seed", str(args.seed)]
+            "--seed", str(args.seed)] + geometry_flags(args)
 
 
 def sanitize_library_path(value: str | None) -> str:
@@ -259,9 +270,51 @@ def protocol_settings(args) -> dict:
     }
 
 
-def build_settings(args, port: int, checkpoint: dict, server_cmd, client_cmd, *, probe: bool = True) -> dict:
+def libero_control_freq(path: Path = LIBERO_ENV_WRAPPER) -> int:
+    """``control_freq`` default of LIBERO ``ControlEnv.__init__``, read from the source (AST).
+
+    ``_get_libero_env`` passes no ``control_freq`` and ``OffScreenRenderEnv`` does not override it,
+    so this default is the control rate of every evaluated episode.
+    """
+    tree = ast.parse(Path(path).read_text())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and node.name == "ControlEnv":
+            init = next(item for item in node.body if isinstance(item, ast.FunctionDef) and item.name == "__init__")
+            names = [a.arg for a in init.args.args]
+            defaults = dict(zip(names[len(names) - len(init.args.defaults):], init.args.defaults))
+            return int(ast.literal_eval(defaults["control_freq"]))
+    raise ValueError(f"ControlEnv.__init__ control_freq not found in {path}")
+
+
+def runtime_schedule(args) -> dict:
+    hz = libero_control_freq()
+    replan = client_mod.DEFAULT_REPLAN_STEPS
     return {
-        "step": "SL0",
+        "control_freq_hz": hz,
+        "control_freq_source": f"{LIBERO_ENV_WRAPPER.relative_to(PROJECT_ROOT)} ControlEnv.__init__ default "
+                               "(not passed by _get_libero_env)",
+        "control_period_s": 1.0 / hz,
+        "replan_steps": replan,
+        "policy_call_period_env_steps": replan,
+        "policy_call_period_sim_s": replan / hz,
+        "num_steps_wait": client_mod.DEFAULT_NUM_STEPS_WAIT,
+        "first_policy_call_env_step": client_mod.DEFAULT_NUM_STEPS_WAIT,
+        "clock": "simulation is stepped synchronously; env.step waits for the policy (no wall-clock deadline)",
+    }
+
+
+def not_applicable_items() -> dict:
+    reason = ("condition pi0.5-only: serve_policy policy:checkpoint, no AG3S safety layer / TO wrapper; "
+              "the V11AB request fields are neither produced nor consumed")
+    return {"reason": reason,
+            "items": {name: "n/a" for name in ("protected_links", "authorized_links", "active_manipulators",
+                                               "phase", "level", "ag3s_seq", "exec_feedback", "policy_seed")}}
+
+
+def build_settings(args, port: int, checkpoint: dict, server_cmd, client_cmd, *, probe: bool = True) -> dict:
+    geometry = bool(getattr(args, "capture_geometry", False))
+    return {
+        "step": "SL1" if geometry else "SL0",
         "condition": CONDITION,
         "ag3s": {"enabled": False,
                  "path": "serve_policy.py policy:checkpoint (plain OpenPI policy; no AG3S safety layer, no TO wrapper)"},
@@ -274,6 +327,9 @@ def build_settings(args, port: int, checkpoint: dict, server_cmd, client_cmd, *,
         "camera": {"names": ["agentview", "robot0_eye_in_hand"], "height": client_mod.LIBERO_ENV_RESOLUTION,
                    "width": client_mod.LIBERO_ENV_RESOLUTION},
         "robot": {"name": "Panda", "controller": "OSC_POSE (LIBERO ControlEnv default)"},
+        "runtime_schedule": runtime_schedule(args),
+        "not_applicable": not_applicable_items(),
+        "geometry_capture": geometry_settings(args),
         "interpreters": {
             "libero": interpreter_info(libero_python(), LIBERO_PACKAGES) if probe else str(libero_python()),
             "openpi_live": interpreter_info(openpi_python(), OPENPI_PACKAGES) if probe else str(openpi_python()),
@@ -285,6 +341,16 @@ def build_settings(args, port: int, checkpoint: dict, server_cmd, client_cmd, *,
                            ["XLA_FLAGS", "XLA_PYTHON_CLIENT_PREALLOCATE", "OPENPI_DATA_HOME", "AG3S_STORAGE_ROOT"]}},
         "commands": {"server": server_cmd, "client": client_cmd},
     }
+
+
+def geometry_settings(args) -> dict:
+    flags = {name: bool(getattr(args, name, False)) for name in GEOMETRY_FLAGS}
+    if not flags["capture_geometry"]:
+        return {**flags, "conventions": None}
+    from benchmark.adapters.libero_panda import camera
+
+    return {**flags, "env_camera_depths": True, "npz": "episodes/<suite>_t<task>_e<episode>_geom.npz",
+            "conventions": camera.conventions()}
 
 
 # --- Process control -----------------------------------------------------------------------------
@@ -395,6 +461,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--verify-checksums", action="store_true",
                         help="re-hash every checkpoint file before launching (slow, ~12 GB)")
     parser.add_argument("--dry-run", action="store_true", help="print commands and settings; allocate nothing")
+    client_mod.add_geometry_arguments(parser)
     return parser
 
 
@@ -409,6 +476,7 @@ def dry_run(args) -> dict:
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
+    client_mod.check_geometry_arguments(args)
     if args.dry_run:
         print(json.dumps(dry_run(args), indent=2, ensure_ascii=False))
         return 0
