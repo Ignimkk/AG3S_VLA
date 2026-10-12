@@ -30,6 +30,7 @@ import sys
 import time
 
 from common.workspace import PROJECT_ROOT, shared_storage_root
+from benchmark.adapters.libero_panda import client_env
 from benchmark.runners import libero_pi05_client as client_mod
 
 CONDITION = "pi0.5-only"
@@ -41,9 +42,10 @@ SERVER_SCRIPT = PROJECT_ROOT / "third_party/openpi/scripts/serve_policy.py"
 LIBERO_PACKAGES = ("robosuite", "mujoco", "numpy", "torch", "imageio", "imageio-ffmpeg", "opencv-python",
                    "openpi-client", "libero", "websockets", "bddl")
 OPENPI_PACKAGES = ("jax", "jaxlib", "flax", "openpi", "openpi-client", "numpy", "websockets", "orbax-checkpoint")
-CLIENT_THREADS = 4
-THREAD_LIMIT_KEYS = ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMBA_NUM_THREADS",
-                     "LP_NUM_THREADS")
+# SL3 0.2: the py3.8 environment rules live in client_env (stdlib, py3.8) so robot_geometry.py's CLI can
+# apply the same rules to itself; the names stay here for existing callers.
+CLIENT_THREADS = client_env.CLIENT_THREADS
+THREAD_LIMIT_KEYS = client_env.THREAD_LIMIT_KEYS
 OBSERVATION_KEYS = ("observation/image", "observation/wrist_image", "observation/state", "prompt")
 LIBERO_ENV_WRAPPER = PROJECT_ROOT / "benchmark/LIBERO/libero/libero/envs/env_wrapper.py"
 GEOMETRY_FLAGS = ("capture_geometry", "capture_segmentation", "capture_float_depth")
@@ -221,30 +223,14 @@ def sanitize_library_path(value: str | None) -> str:
 
     The pod exports e.g. /usr/local/lib/python3.10/dist-packages/torch/lib, which makes the venv's
     torch 1.11 load a foreign libtorch_python.so (undefined symbol). Driver/CUDA entries are kept.
+    (``client_env.sanitize_library_path`` with this checkout as the project root.)
     """
-    kept = []
-    for entry in (value or "").split(":"):
-        if not entry:
-            continue
-        foreign = ("/site-packages/" in entry + "/" or "/dist-packages/" in entry + "/") and not (
-            entry + "/").startswith(str(PROJECT_ROOT) + "/")
-        if not foreign:
-            kept.append(entry)
-    return ":".join(kept)
+    return client_env.sanitize_library_path(value, PROJECT_ROOT)
 
 
 def client_environment(base: dict | None = None) -> dict:
-    env = dict(os.environ if base is None else base)
-    # The py3.8 client relies on its own editable installs; the checkout PYTHONPATH (py3.11 sources) is dropped.
-    env.pop("PYTHONPATH", None)
-    if "LD_LIBRARY_PATH" in env:
-        env["LD_LIBRARY_PATH"] = sanitize_library_path(env["LD_LIBRARY_PATH"])
-    env["MUJOCO_GL"] = env.get("MUJOCO_GL") or "osmesa"
-    # Shared CPU pod: cap BLAS/torch/numba/llvmpipe(OSMesa) worker threads unless already set.
-    for key in THREAD_LIMIT_KEYS:
-        env.setdefault(key, str(CLIENT_THREADS))
-    env.setdefault("LIBERO_CONFIG_PATH", str(PROJECT_ROOT / ".runtime/libero"))
-    return env
+    """``client_env.client_environment``: PYTHONPATH dropped, foreign torch libs dropped, 4 threads."""
+    return client_env.client_environment(base, PROJECT_ROOT)
 
 
 def protocol_settings(args) -> dict:

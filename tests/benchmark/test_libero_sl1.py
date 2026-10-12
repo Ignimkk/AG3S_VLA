@@ -200,7 +200,7 @@ def py38_checks(tmp_path_factory):
 @pytest.mark.parametrize("name", ["camera_table_and_keys", "K_matches_fovy_formula_and_robosuite",
                                   "T_world_cam_and_depth_match_robosuite", "T_base_cam_orthonormal_over_steps",
                                   "depth_row_order_table_plane", "client_episode_geometry_alignment",
-                                  "robot_state_is_image_instant"])
+                                  "robot_state_is_image_instant", "bddl_target_matches_libero_parser"])
 def test_py38_adapter_checks(py38_checks, name):
     _, results = py38_checks
     assert results["_python"].startswith("3.8.")

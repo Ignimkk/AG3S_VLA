@@ -16,9 +16,11 @@ This module builds the Panda equivalents:
 * constraint spheres -- cuRobo ``franka.yml`` ``collision_spheres`` (61 on 11 links), each a
   zero-length `UrdfCapsule` in ``extra_capsules`` (the Panda URDF has mesh collisions only, which
   `parse_urdf` does not read: 0 URDF capsules);
-* self-filter covers -- ``robots/panda/description/libero_panda_self_filter_cover.json``, fitted by
-  V11AB's own `self_filter_covering_capsules` on the robosuite Panda meshes (``cover.py``), with role
-  `COVER_ROLE`; never in the constraint model;
+* self-filter covers -- ``robots/panda/description/libero_panda_self_filter_cover_<variant>.json``,
+  fitted by V11AB's own `self_filter_covering_capsules` on the robosuite Panda meshes (``cover.py``),
+  with role `COVER_ROLE`; never in the constraint model. Default variant ``confined_hand_mount``
+  (hand + mount fitted with V11AB's confined rule; SL3 0.1, user decision 2026-10-12), ``unconfined``
+  (the SL2 default) kept for comparison (:data:`PANDA_SELF_FILTER_COVERS`);
 * finger opening -- the two finger joints are `UrdfSphereChain` *parameter* joints (T29), set from
   the adapter ``robot_state`` (:func:`set_finger_parameters`).
 
@@ -54,8 +56,14 @@ PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[3]
 DESCRIPTION_DIR = PROJECT_ROOT / "robots/panda/description"
 #: Adapter URDF (kinematics only).
 PANDA_URDF = DESCRIPTION_DIR / "panda_libero.urdf"
-#: Self-filter covering capsules, fitted by ``cover.py`` (generated; provenance inside).
-PANDA_SELF_FILTER_COVER = DESCRIPTION_DIR / "libero_panda_self_filter_cover.json"
+#: Self-filter covering capsule variants, fitted by ``cover.py`` (generated; provenance + digests inside).
+#: ``unconfined`` is the SL2 default file, renamed unchanged (SL3 0.1).
+PANDA_SELF_FILTER_COVERS: dict[str, pathlib.Path] = {
+    name: DESCRIPTION_DIR / f"libero_panda_self_filter_cover_{name}.json"
+    for name in ("confined_hand_mount", "unconfined")}
+#: Default self-filter cover (SL3 0.1, user decision 2026-10-12: confined hand + mount).
+DEFAULT_SELF_FILTER_COVER = "confined_hand_mount"
+PANDA_SELF_FILTER_COVER = PANDA_SELF_FILTER_COVERS[DEFAULT_SELF_FILTER_COVER]
 #: cuRobo robot config whose ``collision_spheres`` are the constraint geometry (submodule, read only).
 CUROBO_FRANKA_YML = PROJECT_ROOT / "third_party/curobo/curobo/content/configs/robot/franka.yml"
 #: cuRobo URDF the adapter URDF was derived from (only its arm joints are reused verbatim).
@@ -166,11 +174,21 @@ def franka_sphere_capsules(urdf_links: Sequence[str], path: str | pathlib.Path =
     return capsules
 
 
+def self_filter_cover_path(cover: str | pathlib.Path = DEFAULT_SELF_FILTER_COVER) -> pathlib.Path:
+    """A variant name of :data:`PANDA_SELF_FILTER_COVERS` or a path -> the cover JSON path."""
+    if isinstance(cover, str) and cover in PANDA_SELF_FILTER_COVERS:
+        return PANDA_SELF_FILTER_COVERS[cover]
+    path = pathlib.Path(cover)
+    if path.suffix != ".json":
+        raise ValueError(f"cover must be one of {sorted(PANDA_SELF_FILTER_COVERS)} or a .json path, got {cover!r}")
+    return path
+
+
 def load_self_filter_cover(path: str | pathlib.Path = PANDA_SELF_FILTER_COVER) -> tuple[list, dict]:
-    """``(capsules, document)`` of the committed cover file (role `COVER_ROLE`)."""
+    """``(capsules, document)`` of a committed cover file (role `COVER_ROLE`); variant name or path."""
     from AG3S.adapters.panda.cover import read_cover_json
 
-    return read_cover_json(path)
+    return read_cover_json(self_filter_cover_path(path))
 
 
 # --- link sets --------------------------------------------------------------------------------------
@@ -211,6 +229,9 @@ def build_panda_bare_model(urdf=None, **sphere_options):
 def build_panda_self_filter_model(cover_path: str | pathlib.Path = PANDA_SELF_FILTER_COVER, urdf=None):
     """Self-filter model: every link's ``franka.yml`` spheres + the committed covering capsules.
 
+    ``cover_path``: a variant name of :data:`PANDA_SELF_FILTER_COVERS` or a JSON path; default
+    :data:`DEFAULT_SELF_FILTER_COVER` (``confined_hand_mount``).
+
     No sphere options -- like RB-Y1 ``build_robot_model``, a thinner filter leaks robot points as
     obstacles. Finger joints are parameters (:func:`set_finger_parameters`).
     """
@@ -221,6 +242,7 @@ def build_panda_self_filter_model(cover_path: str | pathlib.Path = PANDA_SELF_FI
     model = UrdfSphereChain(urdf, PANDA_ARM_JOINTS,
                             extra_capsules=franka_sphere_capsules(urdf.links) + list(cover))
     model.panda_cover_document = document
+    model.panda_cover_path = self_filter_cover_path(cover_path)
     return model
 
 
@@ -291,9 +313,32 @@ def sphere_counts(model) -> dict[str, dict[str, int]]:
     return out
 
 
+def cover_manifest_entry(cover: str | pathlib.Path = DEFAULT_SELF_FILTER_COVER, *, with_spheres: bool = True) -> dict:
+    """Manifest record of one cover variant: name, file SHA-256, capsule count, sphere counts, digests.
+
+    ``with_spheres`` builds the self-filter model to count the spheres `UrdfSphereChain` makes of the
+    capsules (``cover_spheres``) and in total (``self_filter_spheres`` = franka.yml 61 + cover).
+    """
+    path = self_filter_cover_path(cover)
+    document = json.loads(path.read_text())
+    prov = document["provenance"]
+    name = next((k for k, v in PANDA_SELF_FILTER_COVERS.items() if v == path), prov.get("cover_name", "custom"))
+    entry = {"name": name, "path": str(path.relative_to(PROJECT_ROOT)) if path.is_relative_to(PROJECT_ROOT) else str(path),
+             "sha256": file_sha256(path), "count": len(document["capsules"]),
+             "confined_bodies": list(prov.get("confined_bodies", [])),
+             "geometry_digest": prov["geometry_digest"], "capsule_digest": prov.get("capsule_digest")}
+    if with_spheres:
+        from AG3S.ag3s.robot_models.urdf_sphere_chain import COVER_ROLE
+
+        model = build_panda_self_filter_model(path)
+        entry["cover_spheres"] = int(sum(1 for role in model.sphere_roles if role == COVER_ROLE))
+        entry["self_filter_spheres"] = int(model.n_spheres)
+    return entry
+
+
 def manifest_entry() -> dict:
     """What the run manifest records about the Panda robot model (JSON-able)."""
-    cover = json.loads(PANDA_SELF_FILTER_COVER.read_text()) if PANDA_SELF_FILTER_COVER.exists() else None
+    cover = cover_manifest_entry(DEFAULT_SELF_FILTER_COVER) if PANDA_SELF_FILTER_COVER.exists() else None
     spheres = franka_collision_spheres()
     return {
         "urdf": {"path": str(PANDA_URDF.relative_to(PROJECT_ROOT)), "sha256": file_sha256(PANDA_URDF),
@@ -302,10 +347,10 @@ def manifest_entry() -> dict:
                                "sha256": file_sha256(CUROBO_FRANKA_YML),
                                "count": sum(len(v) for v in spheres.values()),
                                "per_link": {k: len(v) for k, v in spheres.items()}},
-        "self_filter_cover": None if cover is None else {
-            "path": str(PANDA_SELF_FILTER_COVER.relative_to(PROJECT_ROOT)),
-            "sha256": file_sha256(PANDA_SELF_FILTER_COVER), "count": len(cover["capsules"]),
-            "geometry_digest": cover["provenance"]["geometry_digest"]},
+        "self_filter_cover": cover,
+        "self_filter_cover_alternatives": {
+            name: {"path": str(path.relative_to(PROJECT_ROOT)), "sha256": file_sha256(path)}
+            for name, path in PANDA_SELF_FILTER_COVERS.items() if name != DEFAULT_SELF_FILTER_COVER and path.exists()},
         "joint_map": [{"robot_state": a, "urdf": b, "sign": s} for a, b, s in JOINT_MAP],
         "manipulator_side": MANIPULATOR_SIDE,
         "link_sets": {"palm": list(PANDA_PALM_LINKS), "finger": list(PANDA_FINGER_LINKS),
@@ -328,11 +373,11 @@ def build_panda_models(constraint_links: str = "gripper") -> PandaModels:
 
 
 __all__ = [
-    "BODY_TO_LINK", "CAMERA_TO_LINK", "CUROBO_FRANKA_YML", "JOINT_MAP", "LINK_SET_TABLE", "MANIPULATOR_SIDE",
+    "BODY_TO_LINK", "CAMERA_TO_LINK", "CUROBO_FRANKA_YML", "DEFAULT_SELF_FILTER_COVER", "JOINT_MAP", "LINK_SET_TABLE", "MANIPULATOR_SIDE",
     "PANDA_ALL_LINKS", "PANDA_ARM_JOINTS", "PANDA_ARM_LINKS", "PANDA_CONTACT_LINKS", "PANDA_FINGER_JOINTS",
     "PANDA_FINGER_LINKS", "PANDA_GRIPPER_LINKS", "PANDA_LINK_GROUPS", "PANDA_PALM_LINKS", "PANDA_SELF_FILTER_COVER",
-    "PANDA_URDF", "PandaModels", "SITE_TO_LINK", "build_panda_bare_model", "build_panda_constraint_model",
-    "build_panda_models", "build_panda_self_filter_model", "check_link_set", "franka_collision_spheres",
+    "PANDA_SELF_FILTER_COVERS", "PANDA_URDF", "PandaModels", "SITE_TO_LINK", "build_panda_bare_model", "build_panda_constraint_model",
+    "build_panda_models", "build_panda_self_filter_model", "check_link_set", "cover_manifest_entry", "franka_collision_spheres",
     "franka_sphere_capsules", "manifest_entry", "panda_constraint_link_filter", "panda_depth_robot_mask",
-    "set_finger_parameters", "split_robot_state", "sphere_counts",
+    "self_filter_cover_path", "set_finger_parameters", "split_robot_state", "sphere_counts",
 ]

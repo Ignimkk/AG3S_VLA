@@ -270,6 +270,41 @@ def main(argv=None):
                 "qpos_image_residual_chosen_max_m": float(np.max(np.min(residual, axis=1))),
                 "qpos_image_residual_other_min_m": float(np.min(np.max(residual[1:], axis=1)))}
 
+    @check(results, "bddl_target_matches_libero_parser")
+    def _():
+        """SL3: task_target's BDDL parse / task order == LIBERO's parser and benchmark, all LIBERO Spatial tasks;
+        the live env's objects of interest and object root bodies agree with the segmentation link rule."""
+        from libero.libero import benchmark as libero_benchmark
+        from libero.libero.envs.bddl_utils import robosuite_parse_problem
+        from benchmark.adapters.libero_panda import task_target as tt
+
+        suite = libero_benchmark.get_benchmark_dict()["libero_spatial"]()
+        rows = []
+        for i in range(suite.get_num_tasks()):
+            path = suite.get_task_bddl_file_path(i)
+            assert os.path.realpath(path) == os.path.realpath(str(tt.bddl_path("libero_spatial", i))), (i, path)
+            ours, ref = tt.parse_bddl(pathlib.Path(path)), robosuite_parse_problem(path)
+            assert ours["obj_of_interest"] == ref["obj_of_interest"], i
+            assert ours["goal"] == ref["goal_state"], i
+            assert ours["language"] == " ".join(ref["language_instruction"]), i
+            assert ours["objects"] == ref["objects"] and ours["fixtures"] == ref["fixtures"], i
+            target = tt.task_target("libero_spatial", i)
+            assert target["task_name"] == suite.get_task(i).name, i
+            rows.append({"task_id": i, "target": target["target"], "destination": target["destination"],
+                         "obj_of_interest": target["obj_of_interest"]})
+        inner = env.env
+        target0 = tt.task_target("libero_spatial", 0)
+        assert list(inner.obj_of_interest) == target0["obj_of_interest"], inner.obj_of_interest
+        roots = {name: obj.root_body for name, obj in inner.objects_dict.items()}
+        assert all(root == name + "_main" for name, root in roots.items()), roots
+        model = env.sim.model  # the current sim (a reset may have replaced the one captured above)
+        body_names = [model.body_id2name(b) for b in range(model.nbody)]
+        geom_bodyid = [int(b) for b in model.geom_bodyid]
+        for name in roots:
+            ids = tt.instance_geom_ids(name, geom_bodyid, body_names)
+            assert ids and all(body_names[geom_bodyid[g]].startswith(name + "_") for g in ids), name
+        return {"tasks": rows, "task0_root_bodies": roots}
+
     # Fixture for the 3.11 side: initial observation of task 0 / init state 0.
     restored = env.set_init_state(client_mod_init_state())
     local = camera.capture(env, restored)

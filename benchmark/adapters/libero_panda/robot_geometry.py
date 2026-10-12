@@ -20,7 +20,9 @@ Two sources, same tables:
   empty world. ~1 s instead of ~20 s; the unit test checks that its kinematic tables equal the
   committed ``libero`` export.
 
-CLI (``.venv-libero``; ``MUJOCO_GL=osmesa``, no ``PYTHONPATH``)::
+CLI (``.venv-libero``, from the default shell after ``source scripts/setup/env.sh``; the entry point
+re-executes itself with ``client_env.client_environment`` -- foreign ``LD_LIBRARY_PATH`` entries and
+``PYTHONPATH`` dropped, ``MUJOCO_GL=osmesa``, 4 threads -- SL3 0.2)::
 
     python benchmark/adapters/libero_panda/robot_geometry.py export --source libero --out X.npz
     python benchmark/adapters/libero_panda/robot_geometry.py fk --source robosuite --out Y.npz
@@ -33,6 +35,14 @@ import json
 import os
 import pathlib
 import sys
+
+if __name__ == "__main__":
+    # SL3 0.2: under the pod / env.sh environment (foreign torch libs on LD_LIBRARY_PATH, checkout on
+    # PYTHONPATH) LIBERO's torch import fails. Re-exec once with the launcher's client environment
+    # before numpy / mujoco / LIBERO are loaded (the loader reads LD_LIBRARY_PATH at process start).
+    import client_env  # this script's directory is sys.path[0]
+
+    client_env.reexec_with_client_environment()
 
 import numpy as np
 

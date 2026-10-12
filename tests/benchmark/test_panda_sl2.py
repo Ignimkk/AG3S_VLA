@@ -101,12 +101,14 @@ def test_hand_yaw_is_the_robosuite_quaternion():
     np.testing.assert_allclose(R, expected, atol=1e-15)
 
 
-def test_geometry_export_is_the_one_the_committed_cover_was_fitted_from(mujoco_robot):
+@pytest.mark.parametrize("variant", sorted(pm.PANDA_SELF_FILTER_COVERS))
+def test_geometry_export_is_the_one_the_committed_cover_was_fitted_from(mujoco_robot, variant):
     from benchmark.adapters.libero_panda import robot_geometry  # py3.8-compatible module, numpy only at import
 
     export = mujoco_robot["export"]
-    _, document = pm.load_self_filter_cover()
+    _, document = pm.load_self_filter_cover(variant)
     prov = document["provenance"]
+    assert prov["confined_bodies"] == list(cover.COVER_VARIANTS[variant])
     assert prov["geometry_export"]["source"] == "libero" and prov["surfaces"] == list(cover.DEFAULT_SURFACES)
     # robosuite-only robot == the LIBERO env's robot (kinematics and every mesh), base placement aside.
     assert str(export["geometry_digest"]) == prov["geometry_digest"]
@@ -116,25 +118,72 @@ def test_geometry_export_is_the_one_the_committed_cover_was_fitted_from(mujoco_r
     assert prov["franka_yml_sha256"] == pm.file_sha256(pm.CUROBO_FRANKA_YML)
 
 
-def test_cover_refits_to_the_committed_capsules(mujoco_robot):
-    capsules, per_body = cover.fit_self_filter_cover(mujoco_robot["export"], pm.build_panda_bare_model())
-    committed, document = pm.load_self_filter_cover()
+# SL3 0.1: default = confined hand + mount (1036 capsules, ~30 s to refit); SL2's unconfined cover kept (51).
+COVER_COUNTS = {"confined_hand_mount": 1036, "unconfined": 51}
+
+
+@pytest.mark.parametrize("variant", sorted(COVER_COUNTS))
+def test_cover_refits_to_the_committed_capsules(mujoco_robot, variant):
+    capsules, per_body = cover.fit_self_filter_cover(mujoco_robot["export"], pm.build_panda_bare_model(),
+                                                     confined=cover.COVER_VARIANTS[variant])
+    committed, document = pm.load_self_filter_cover(variant)
     assert per_body == document["per_body"]
-    assert len(capsules) == len(committed) == 51
+    assert len(capsules) == len(committed) == COVER_COUNTS[variant]
+    if "capsule_digest" in document["provenance"]:  # the renamed SL2 file predates the digest
+        assert cover.capsule_digest(capsules) == document["provenance"]["capsule_digest"]
+        assert document["provenance"]["cover_name"] == variant
     for a, b in zip(capsules, committed):
         assert (a.link, a.role) == (b.link, b.role)
         np.testing.assert_allclose(a.origin, b.origin, atol=1e-12)
         assert a.radius == pytest.approx(b.radius, abs=1e-12) and a.length == pytest.approx(b.length, abs=1e-12)
 
 
-def test_cover_contains_every_collision_and_visual_surface_sample(mujoco_robot):
+def _worst_outside(pts, centres, radii, chunk=20000, max_exact=100_000):
+    """max over ``pts`` of min over spheres of ``|p - c| - r`` (<= 0: every point inside some sphere).
+
+    Points inside a sphere are found with a KD-tree ball query (as the V11AB fitter marks them); the
+    distance is computed only for the rest. If more than ``max_exact`` points are outside, an evenly
+    strided subset of them is measured (the value is then a lower bound of the exact maximum)."""
+    from scipy.spatial import cKDTree
+
+    inside = np.zeros(len(pts), bool)
+    tree = cKDTree(pts)
+    for c, r in zip(centres, radii):
+        hits = tree.query_ball_point(c, float(r))
+        if hits:
+            inside[hits] = True
+    rest = pts[~inside]
+    if len(rest) > max_exact:
+        rest = rest[:: -(-len(rest) // max_exact)]
+    worst = 0.0 if inside.any() else -np.inf
+    for k in range(0, len(rest), chunk):
+        d = np.linalg.norm(rest[k:k + chunk, None, :] - centres[None], axis=2) - radii[None]
+        worst = max(worst, float(d.min(axis=1).max()))
+    return worst
+
+
+#: SL3 0.1: every variant contains every body's *collision* surface (what it is fitted to). The visual
+#: surface is fully contained by the unconfined cover (SL2); the confined rule keeps each hand / mount
+#: capsule inside the body's collision-surface box, so these visual meshes poke out (exact maxima,
+#: 4 mm samples, measured 2026-10-12): hand 0.880 mm, mount torso 34.448 mm, mount pedestal 93.215 mm.
+#: Bounds = measured + 0.1 mm; the pedestal's 3.5 M samples are measured on a strided subset in the test
+#: (92.70 mm), so the "still real" check below allows 1 mm under the bound.
+VISUAL_EXCESS_M = {"confined_hand_mount": {"gripper0_right_gripper": 0.98e-3, "mount0_torso": 34.55e-3,
+                                           "mount0_pedestal": 93.32e-3},
+                   "unconfined": {}}
+
+
+@pytest.mark.parametrize("variant", sorted(pm.PANDA_SELF_FILTER_COVERS))
+def test_cover_contains_every_collision_and_visual_surface_sample(mujoco_robot, variant):
     """The self-filter model (spheres + cover) contains the sampled robosuite surfaces of every body,
-    collision and visual (4 mm sampling, link frames; what the V11AB fitter guarantees, re-checked)."""
+    collision and visual (4 mm sampling, link frames; what the V11AB fitter guarantees, re-checked);
+    documented exceptions: :data:`VISUAL_EXCESS_M`."""
     import mujoco
 
     from AG3S.ag3s.experiments.sources import mujoco_source as ms
 
-    model = pm.build_panda_self_filter_model()
+    model = pm.build_panda_self_filter_model(variant)
+    worst = {}
     for surfaces in (("collision",), ("visual",)):
         mj, geoms = cover.build_mujoco_model(mujoco_robot["export"], surfaces)
         for body in geoms:
@@ -142,11 +191,14 @@ def test_cover_contains_every_collision_and_visual_surface_sample(mujoco_robot):
             pts = ms._body_surface_points(mj, mujoco.mj_name2id(mj, mujoco.mjtObj.mjOBJ_BODY, body))
             pts = pts @ T[:3, :3].T + T[:3, 3]
             c, r = model.local_spheres(link)
-            worst = -np.inf
-            for k in range(0, len(pts), 20000):
-                d = np.linalg.norm(pts[k:k + 20000, None, :] - c[None], axis=2) - r[None]
-                worst = max(worst, float(d.min(axis=1).max()))
-            assert worst <= 1e-9, (surfaces, body, worst)
+            worst[(surfaces[0], body)] = _worst_outside(pts, c, r)
+    allowed = VISUAL_EXCESS_M[variant]
+    bad = {k: v for k, v in worst.items()
+           if v > (allowed.get(k[1], 1e-9) if k[0] == "visual" else 1e-9)}
+    assert not bad, bad
+    # The documented excess is real (not a stale allowance).
+    for body, bound in allowed.items():
+        assert bound - 1.0e-3 < worst[("visual", body)] <= bound, (body, worst[("visual", body)])
 
 
 # --- sphere models -------------------------------------------------------------------------------------
@@ -273,11 +325,19 @@ def test_manifest_entry_and_camera_conventions_agree():
     json.dumps(entry)
     assert entry["manipulator_side"] == camera.MANIPULATOR_SIDE == "left"
     assert [row["robot_state"] for row in entry["joint_map"]] == list(camera.ROBOT_STATE_LAYOUT)
-    assert entry["constraint_spheres"]["count"] == 61 and entry["self_filter_cover"]["count"] == 51
+    assert entry["constraint_spheres"]["count"] == 61
+    # SL3 0.1: the default cover is confined hand + mount; name and sphere counts are in the manifest.
+    sf = entry["self_filter_cover"]
+    assert (sf["name"], sf["count"], sf["cover_spheres"], sf["self_filter_spheres"]) == (
+        "confined_hand_mount", 1036, 4210, 4271)
+    assert sf["sha256"] == pm.file_sha256(pm.PANDA_SELF_FILTER_COVER) and pm.DEFAULT_SELF_FILTER_COVER == sf["name"]
+    assert list(entry["self_filter_cover_alternatives"]) == ["unconfined"]
+    assert pm.cover_manifest_entry("unconfined")["self_filter_spheres"] == 245
     assert camera.conventions()["manipulator_side"]["panda"] == pm.MANIPULATOR_SIDE
 
 
 def test_py38_sources_parse_as_python38():
     for path in ("benchmark/adapters/libero_panda/robot_geometry.py", "benchmark/adapters/libero_panda/camera.py",
+                 "benchmark/adapters/libero_panda/client_env.py", "benchmark/adapters/libero_panda/task_target.py",
                  "tests/benchmark/libero_py38_checks.py"):
         ast.parse((PROJECT_ROOT / path).read_text(), feature_version=(3, 8))
