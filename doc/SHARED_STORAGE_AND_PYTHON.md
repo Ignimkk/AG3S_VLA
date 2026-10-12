@@ -142,6 +142,14 @@ ALOHA 전체 호환성이나 신규 training 완료를 주장하지 않는다.
 GPU 검증 전 `nvidia-smi` compute process를 확인하고 양쪽 checkout이 같은 advisory lock을 사용한다.
 현재 H200 한 장에서는 OpenPI와 cuRobo 검증을 순서대로 실행한다.
 Lock을 사용하지 않는 외부 실행을 통제하거나 기존 process를 종료하지 않는다.
+
+```bash
+# 올바른 형태 (둘 중 하나)
+flock -w 600 /tmp/ag3s-vla-gpu-validation.lock CMD ...
+( flock -w 600 9 || exit 13; CMD ... ) 9>/tmp/ag3s-vla-gpu-validation.lock
+# 잘못된 형태: `flock -w 600 9 CMD ... 9>/tmp/...` — flock 이 `9` 를 파일 이름으로 읽어 cwd 의 ./9 를 잠근다
+# 확인: lock 을 잡은 상태에서 다른 shell 의 `flock -n /tmp/ag3s-vla-gpu-validation.lock true` 가 실패해야 한다
+```
 검증 command·raw output·input identity는 최신 보고서와 verify manifest에 기록한다.
 
 ```bash
