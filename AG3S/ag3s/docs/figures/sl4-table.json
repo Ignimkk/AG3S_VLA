@@ -1,0 +1,519 @@
+{
+ "overrides": [
+  [
+   "config",
+   "contact.contact_links",
+   "{\"right\": [\"ee_right\", \"ee_finger_r1\", \"ee_finger_r2\"], \"left\": [\"ee_l",
+   "{\"left\": [\"panda_hand\", \"panda_leftfinger\", \"panda_rightfinger\"]}",
+   "RB-Y1 link names (ee_left/ee_finger_l1/l2, ee_right/...) do not exist on the Pan"
+  ],
+  [
+   "config",
+   "esdf.bounds_lower",
+   "[-0.3, -0.8999999999999999, 0.0]",
+   "[-0.3, -0.8999999999999999, -0.1]",
+   "z only: V11AB default_bounds() floor is base z 0.0 (RB-Y1 table well above its b"
+  ],
+  [
+   "constructor",
+   "robot_model (self-filter)",
+   "\"grounding_report.build_robot_model(TransportScene(model_xml))\"",
+   "\"model.build_panda_self_filter_model() (cover confined_hand_mount)\"",
+   "robot geometry (SL2/SL3)"
+  ],
+  [
+   "constructor",
+   "constraint_robot_model",
+   "\"build_constraint_robot_model(links='gripper')\"",
+   "\"model.build_panda_constraint_model(panda_constraint_link_filter('grip",
+   "robot geometry; same link group name (SL2 link-set table)"
+  ],
+  [
+   "constructor",
+   "attached_parent_links",
+   "[\"ee_left\", \"ee_right\"]",
+   "[\"panda_hand\"]",
+   "the palm a held object attaches to (T32 H2), Panda link name"
+  ],
+  [
+   "constructor",
+   "constraint_sphere_options (not applied)",
+   "{\"sphere_spacing\": 0.4, \"max_spheres_per_capsule\": 32, \"capsule_radius",
+   "null",
+   "RB-Y1 capsule-thinning knobs; franka.yml spheres are zero-length role-collision "
+  ],
+  [
+   "constructor",
+   "finger_cover (not applied)",
+   "{\"hands\": \"both\"}",
+   "null",
+   "RB-Y1 finger-body cover (gripper_cover.finger_body_capsules); the Panda fingers "
+  ],
+  [
+   "constructor",
+   "gripper_cover",
+   "null",
+   "null",
+   "not set in V11AB either"
+  ],
+  [
+   "constructor",
+   "contact links read by the start-up log",
+   "{\"right\": [\"ee_right\", \"ee_finger_r1\", \"ee_finger_r2\"], \"left\": [\"ee_l",
+   "{\"left\": [\"panda_hand\", \"panda_leftfinger\", \"panda_rightfinger\"]}",
+   "log only in build_ag3s; the config row is the decision"
+  ],
+  [
+   "verifier raw diff",
+   "to_dict leaves (149)",
+   "panda box: ['contact.contact_links.left', 'contact.contact_links.right', 'esdf.bounds_lower', 'esdf.bounds_upper']",
+   "v11ab box: ['contact.contact_links.left', 'contact.contact_links.right']",
+   "bounds_upper raw None -> explicit default (1.2, 0.9, 1.6)"
+  ]
+ ],
+ "baselines": [
+  [
+   "legacy 16D (CPU)",
+   14,
+   15,
+   "-29.0310482808063",
+   "14 / 15 / -29.0310482808063",
+   "True"
+  ],
+  [
+   "cuRobo 16D (GPU, alone, lock)",
+   10,
+   15,
+   "-9.17187740127119",
+   "10 / 15 / -9.17187740127119",
+   "True"
+  ],
+  [
+   "core diff AG3S/ag3s + AG3S/trajopt",
+   "-",
+   "-",
+   "0 lines, 0 untracked",
+   "0",
+   "True"
+  ],
+  [
+   "CPU regression",
+   "-",
+   "-",
+   "A 73 passed / B 92 passed / C 90 passed 2 skipped",
+   "exit 0",
+   "True"
+  ],
+  [
+   "SL0 path (flags-off replay t0e0)",
+   "-",
+   "-",
+   "npz keys all equal True; success [True, True]; steps [113, 113]",
+   "-",
+   "True"
+  ]
+ ],
+ "ats": [
+  [
+   "un-mirror (default)",
+   "all",
+   221,
+   179,
+   "0.497",
+   "0.671",
+   "0.231",
+   "0.306",
+   "33.2 / 382.6",
+   "bowl_1 0.49 none 0.17 bowl_2 0.16 plate 0.13"
+  ],
+  [
+   "un-mirror (default)",
+   "approach",
+   105,
+   101,
+   "0.696",
+   "1.000",
+   "0.732",
+   "0.489",
+   "12.0 / 382.1",
+   "bowl_1 0.70 bowl_2 0.21 plate 0.06 stove 0.02"
+  ],
+  [
+   "un-mirror (default)",
+   "grasp",
+   25,
+   24,
+   "0.769",
+   "1.000",
+   "0.673",
+   "0.565",
+   "16.3 / 312.2",
+   "bowl_1 0.76 none 0.11 plate 0.07 robot_sphere 0.03"
+  ],
+  [
+   "un-mirror (default)",
+   "transport",
+   91,
+   54,
+   "0.056",
+   "0.000",
+   "0.000",
+   "0.024",
+   "155.3 / 420.3",
+   "none 0.49 plate 0.25 bowl_2 0.12 ramekin 0.05"
+  ],
+  [
+   "un-mirror (default)",
+   "carry",
+   116,
+   78,
+   "0.270",
+   "0.000",
+   "0.000",
+   "0.141",
+   "96.9 / 407.4",
+   "none 0.37 bowl_1 0.27 plate 0.20 bowl_2 0.09"
+  ],
+  [
+   "mirror",
+   "all",
+   221,
+   202,
+   "0.368",
+   "0.000",
+   "0.000",
+   "0.213",
+   "148.4 / 557.7",
+   "bowl_1 0.37 ramekin 0.23 none 0.20 bowl_2 0.09"
+  ],
+  [
+   "mirror",
+   "approach",
+   105,
+   89,
+   "0.548",
+   "0.000",
+   "0.000",
+   "0.289",
+   "236.2 / 567.5",
+   "bowl_1 0.55 ramekin 0.18 bowl_2 0.13 cookies 0.11"
+  ],
+  [
+   "mirror",
+   "grasp",
+   25,
+   25,
+   "0.677",
+   "1.000",
+   "0.364",
+   "0.392",
+   "27.1 / 351.5",
+   "bowl_1 0.66 ramekin 0.20 none 0.07 cookies 0.05"
+  ],
+  [
+   "mirror",
+   "transport",
+   91,
+   88,
+   "0.120",
+   "0.000",
+   "0.000",
+   "0.075",
+   "155.9 / 540.7",
+   "none 0.42 ramekin 0.28 bowl_1 0.12 bowl_2 0.08"
+  ],
+  [
+   "mirror",
+   "carry",
+   116,
+   113,
+   "0.231",
+   "0.000",
+   "0.000",
+   "0.143",
+   "116.6 / 504.4",
+   "none 0.35 ramekin 0.26 bowl_1 0.23 bowl_2 0.06"
+  ]
+ ],
+ "attention_split": [
+  [
+   "head",
+   "unmirror",
+   "approach",
+   105,
+   "0.214",
+   "0.098",
+   "0.018",
+   "0.018",
+   "0.670",
+   "0.012 / 0.021"
+  ],
+  [
+   "head",
+   "unmirror",
+   "grasp",
+   25,
+   "0.072",
+   "0.397",
+   "0.017",
+   "0.015",
+   "0.514",
+   "0.008 / 0.020"
+  ],
+  [
+   "head",
+   "unmirror",
+   "transport",
+   91,
+   "0.025",
+   "0.578",
+   "0.005",
+   "0.004",
+   "0.392",
+   "0.012 / 0.018"
+  ],
+  [
+   "head",
+   "mirror",
+   "approach",
+   105,
+   "0.043",
+   "0.006",
+   "0.005",
+   "0.006",
+   "0.946",
+   "0.012 / 0.021"
+  ],
+  [
+   "head",
+   "mirror",
+   "grasp",
+   25,
+   "0.002",
+   "0.001",
+   "0.005",
+   "0.005",
+   "0.991",
+   "0.008 / 0.020"
+  ],
+  [
+   "head",
+   "mirror",
+   "transport",
+   91,
+   "0.001",
+   "0.000",
+   "0.001",
+   "0.002",
+   "0.999",
+   "0.012 / 0.018"
+  ],
+  [
+   "left_wrist",
+   "unmirror",
+   "approach",
+   105,
+   "0.315",
+   "0.023",
+   "0.092",
+   "0.000",
+   "0.571",
+   "0.068 / 0.046"
+  ],
+  [
+   "left_wrist",
+   "unmirror",
+   "grasp",
+   25,
+   "0.214",
+   "0.144",
+   "0.398",
+   "0.000",
+   "0.244",
+   "0.163 / 0.119"
+  ],
+  [
+   "left_wrist",
+   "unmirror",
+   "transport",
+   91,
+   "0.022",
+   "0.619",
+   "0.056",
+   "0.000",
+   "0.303",
+   "0.176 / 0.049"
+  ],
+  [
+   "left_wrist",
+   "mirror",
+   "approach",
+   105,
+   "0.225",
+   "0.033",
+   "0.092",
+   "0.000",
+   "0.650",
+   "0.068 / 0.046"
+  ],
+  [
+   "left_wrist",
+   "mirror",
+   "grasp",
+   25,
+   "0.171",
+   "0.029",
+   "0.399",
+   "0.000",
+   "0.400",
+   "0.163 / 0.119"
+  ],
+  [
+   "left_wrist",
+   "mirror",
+   "transport",
+   91,
+   "0.407",
+   "0.126",
+   "0.056",
+   "0.000",
+   "0.411",
+   "0.176 / 0.049"
+  ]
+ ],
+ "lte": [
+  [
+   "plate",
+   419732,
+   "0.984",
+   "0.941",
+   "0.0436",
+   "46 / 26",
+   "0.023 / 0.050 / 0.068",
+   "0.999",
+   ""
+  ],
+  [
+   "bowl_2",
+   295531,
+   "0.911",
+   "0.776",
+   "0.1359",
+   "64 / 30",
+   "0.161 / 0.000 / 0.136",
+   "0.990",
+   ""
+  ],
+  [
+   "cookies",
+   125777,
+   "0.996",
+   "0.992",
+   "0.0032",
+   "14 / 1",
+   "0.006 / 0.000 / 0.000",
+   "1.000",
+   ""
+  ],
+  [
+   "ramekin",
+   193839,
+   "0.964",
+   "0.947",
+   "0.0176",
+   "103 / 10",
+   "0.009 / 0.028 / 0.032",
+   "0.998",
+   ""
+  ],
+  [
+   "stove",
+   261022,
+   "0.958",
+   "0.942",
+   "0.0161",
+   "54 / 11",
+   "0.011 / 0.017 / 0.022",
+   "1.000",
+   ""
+  ],
+  [
+   "cabinet",
+   84514,
+   "0.718",
+   "0.717",
+   "0.0006",
+   "33 / 0",
+   "0.001 / 0.001 / 0.000",
+   "0.910",
+   ""
+  ],
+  [
+   "table",
+   93353,
+   "0.979",
+   "0.978",
+   "0.0004",
+   "19 / 0",
+   "0.001 / 0.000 / 0.000",
+   "0.993",
+   ""
+  ],
+  [
+   "bowl_1",
+   392444,
+   "0.823",
+   "0.575",
+   "0.2477",
+   "194 / 99",
+   "0.353 / 0.459 / 0.054",
+   "0.959",
+   "tf removed 0.425 (>5mm), 0.196 (>20mm)"
+  ],
+  [
+   "mount",
+   11640,
+   "0.000",
+   "0.000",
+   "0.0000",
+   "0 / 0",
+   "0.000 / 0.000 / 0.000",
+   "0.014",
+   ""
+  ]
+ ],
+ "field_box_mount_cost": [
+  [
+   "#6 main - exact (mm)",
+   "median -2.26, p95 19.19, |err| median 4.73 p95 38.60 (n 4862); approach |err| median 2.73 p95 8.36; transport 11.93 / 55.25"
+  ],
+  [
+   "#6 tf - exact without target",
+   "median -21.09, p05 -189.43, p95 -0.92; |err| median 21.09 p95 189.43; approach |err| median 4.83 p95 39.50"
+  ],
+  [
+   "#6 tf - exact with target",
+   "median 0.37, p05 -33.73, p95 31.60 (approach -1.60 / -7.60 / 28.99; transport 5.25 / -53.41 / 35.12)"
+  ],
+  [
+   "#6 eikonal (xz slices, 30-250 mm)",
+   "median |grad| per call: median 0.992, p05 0.936"
+  ],
+  [
+   "#7 table vis. ESDF<=5 mm",
+   "panda box 0.979 vs V11AB box 0.005 (<=20 mm 0.993 vs 0.114); table vis samples z<0: 1.000; cloud outside V11AB box 0.670, outside panda box 0.0014"
+  ],
+  [
+   "#7 coarse occupied voxels",
+   "panda median 2440 vs V11AB 259; sphere ESDF (v11ab - panda) median 0.00 p05 -4.79 p95 5.81 mm"
+  ],
+  [
+   "#8 mount residual cloud points",
+   "217 calls, 1225 points (median 7 / call), z -0.133..-0.062 m; min distance to 22 gripper spheres median 616 mm (min 326), to 61 franka spheres median 150 mm; mount GT samples ESDF<=5 mm: 1 / 663000"
+  ],
+  [
+   "#9 cost (episode-first excluded)",
+   "t_process p50 94.6 p95 117.1 ms; scene_recon 38.8/44.1; grounding 3.4/15.6; esdf 45.0/60.9; self-filter probe head 17.1/17.8 wrist 19.1/22.9 ms; torch peak 827 MiB; nvidia-smi 1702 MiB"
+  ]
+ ]
+}
