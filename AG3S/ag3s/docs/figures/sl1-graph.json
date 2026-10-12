@@ -1,0 +1,213 @@
+{
+ "replay_max_abs_diff": {
+  "a geom": 0.0,
+  "b seg": 0.0,
+  "c off": 0.0
+ },
+ "surface_median_mm": {
+  "K_recorded/head": {
+   "table": 2.004677754809746,
+   "akita_black_bowl_1": 1.1996227480251296,
+   "akita_black_bowl_2": 1.1444947118598896,
+   "plate_1": 2.030936451974304,
+   "glazed_rim_porcelain_ramekin_1": 1.6151741664189092,
+   "cookies_1": 1.9260411832202569,
+   "wooden_cabinet_1": 1.5645751951673765,
+   "flat_stove_1": 2.3945504069401973,
+   "robot": 1.2576125196805505
+  },
+  "K_recorded/left_wrist": {
+   "table": 0.24730565336825855,
+   "akita_black_bowl_1": 0.3282900148718402,
+   "akita_black_bowl_2": 0.38497993447037737,
+   "plate_1": 0.2780251941743457,
+   "glazed_rim_porcelain_ramekin_1": 0.4877964629395828,
+   "cookies_1": 0.259060590271856,
+   "wooden_cabinet_1": 1.1171615521957556,
+   "flat_stove_1": 0.2758227242248661,
+   "robot": 0.3605521645083889
+  },
+  "K_pixel_centre/head": {
+   "table": 0.9011430742499535,
+   "akita_black_bowl_1": 0.5414820104386086,
+   "akita_black_bowl_2": 0.5199304632762708,
+   "plate_1": 0.8638120752685553,
+   "glazed_rim_porcelain_ramekin_1": 0.7717306498641553,
+   "cookies_1": 0.8008662605748386,
+   "wooden_cabinet_1": 0.5570924191275959,
+   "flat_stove_1": 1.0159949884707278,
+   "robot": 0.580637969487033
+  },
+  "K_pixel_centre/left_wrist": {
+   "table": 0.24729339084820362,
+   "akita_black_bowl_1": 0.22495136635142698,
+   "akita_black_bowl_2": 0.3269290023925637,
+   "plate_1": 0.2531601394594797,
+   "glazed_rim_porcelain_ramekin_1": 0.33661501628254126,
+   "cookies_1": 0.24005124435186131,
+   "wooden_cabinet_1": 0.28174632704323505,
+   "flat_stove_1": 0.2561684899243071,
+   "robot": 0.18504499861642484
+  },
+  "K_depth_sample/head": {
+   "table": 0.18016588158818042,
+   "akita_black_bowl_1": 0.15950533095732874,
+   "akita_black_bowl_2": 0.1636966081498605,
+   "plate_1": 0.19056971002932402,
+   "glazed_rim_porcelain_ramekin_1": 0.1496129225968317,
+   "cookies_1": 0.17162559540800432,
+   "wooden_cabinet_1": 0.12639246022428458,
+   "flat_stove_1": 0.16285047971545744,
+   "robot": 0.17212106377062106
+  },
+  "K_depth_sample/left_wrist": {
+   "table": 0.24730411670440683,
+   "akita_black_bowl_1": 0.17882056389609818,
+   "akita_black_bowl_2": 0.09239953111591444,
+   "plate_1": 0.25163984406408835,
+   "glazed_rim_porcelain_ramekin_1": 0.174170437483334,
+   "cookies_1": 0.21541815231480854,
+   "wooden_cabinet_1": 0.11632231053283965,
+   "flat_stove_1": 0.23043117663531024,
+   "robot": 0.14729709561570026
+  }
+ },
+ "surface_all_objects_p50_p95": {
+  "K_recorded/head": [
+   1.8299808502197266,
+   2.812478542327881
+  ],
+  "K_recorded/left_wrist": [
+   0.27160894870758057,
+   0.6782606840133667
+  ],
+  "K_pixel_centre/head": [
+   0.7642411589622498,
+   1.2652852535247803
+  ],
+  "K_pixel_centre/left_wrist": [
+   0.23768506944179535,
+   0.499229371547699
+  ],
+  "K_depth_sample/head": [
+   0.16495922207832336,
+   0.40979713201522827
+  ],
+  "K_depth_sample/left_wrist": [
+   0.2131456881761551,
+   0.47122254967689514
+  ]
+ },
+ "cross_camera": {
+  "K_recorded/all": [
+   2.4582972526550293,
+   10.68995475769043
+  ],
+  "K_recorded/all_covisible": [
+   2.406493902206421,
+   3.408930540084839
+  ],
+  "K_pixel_centre/all": [
+   1.6609530448913574,
+   9.410873413085938
+  ],
+  "K_pixel_centre/all_covisible": [
+   1.6099815368652344,
+   2.5513648986816406
+  ],
+  "K_depth_sample/all": [
+   1.431052327156067,
+   8.689413070678711
+  ],
+  "K_depth_sample/all_covisible": [
+   1.378566861152649,
+   2.336792469024658
+  ]
+ },
+ "depth_sample_grid_frac_dz_lt_0p01mm_head_wrist_mean": {
+  "offsets": [
+   0.125,
+   0.375,
+   0.5,
+   0.625,
+   0.875
+  ],
+  "rows_ov_cols_ou": [
+   [
+    0.007484008410476912,
+    0.009162321816379113,
+    0.006330380840764256,
+    0.005871084566563176,
+    0.004489683198245133
+   ],
+   [
+    0.11385160904929335,
+    0.11574357922966583,
+    0.11164150933444594,
+    0.1103978834964686,
+    0.1092014076494266
+   ],
+   [
+    0.11509000883827991,
+    0.11824163748174515,
+    0.11379102270853664,
+    0.11109661550808025,
+    0.10971758735436675
+   ],
+   [
+    0.1177332236421133,
+    0.12359693228409692,
+    0.11709843277473891,
+    0.11398987367274394,
+    0.11188386956037055
+   ],
+   [
+    0.6809508396029461,
+    0.9092593720825142,
+    0.7023924869515218,
+    0.680438995059682,
+    0.5308809998492926
+   ]
+  ]
+ },
+ "capture_instant_robot_p50_p95": {
+  "V1 seg+pose at image instant P/head": [
+   1.2576124668121338,
+   2.793978214263916
+  ],
+  "V1 seg+pose at image instant P/left_wrist": [
+   0.3605521619319916,
+   0.556828498840332
+  ],
+  "V2 recorded seg, pose P/head": [
+   1.2577874660491943,
+   2.7997500896453857
+  ],
+  "V2 recorded seg, pose P/left_wrist": [
+   0.3605521619319916,
+   0.556828498840332
+  ],
+  "V3 recorded seg, pose at sim_state/head": [
+   1.323436975479126,
+   2.815683364868164
+  ],
+  "V3 recorded seg, pose at sim_state/left_wrist": [
+   0.27045783400535583,
+   0.650252103805542
+  ],
+  "V4 recorded seg, pose at return/head": [
+   1.3734712600708008,
+   2.918834924697876
+  ],
+  "V4 recorded seg, pose at return/left_wrist": [
+   0.3676794171333313,
+   0.862539529800415
+  ]
+ },
+ "sources": [
+  "outputs/verify/SL1/replay_compare.json",
+  "outputs/verify/SL1/geometry_analysis.json",
+  "outputs/verify/SL1/depth_sample_offset.json",
+  "outputs/verify/SL1/raw/geometry_distributions.npz"
+ ]
+}
