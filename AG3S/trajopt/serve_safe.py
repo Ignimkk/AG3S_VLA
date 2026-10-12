@@ -825,7 +825,11 @@ def target_exclusion_section(args) -> dict:
         out["target_exclusion"] = str(args.target_exclusion).replace("-", "_")
     for flag, key in (("owned_tie_voxels", "owned_tie_voxels"),
                       ("owned_max_dist_voxels", "owned_max_dist_voxels"),
-                      ("owned_unowned", "owned_unowned")):
+                      ("owned_unowned", "owned_unowned"),
+                      # T46 F1 · F2 (given flags only: absent = config default, bit-identical)
+                      ("nontarget_evidence", "nontarget_evidence"),
+                      ("nontarget_shell_voxels", "nontarget_shell_voxels"),
+                      ("owned_ambiguous", "owned_ambiguous")):
         v = getattr(args, flag, None)
         if v is not None:
             out[key] = v
@@ -1106,6 +1110,10 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
         logging.warning("AG3S target_exclusion = %s (tie %.2f · max_dist %.2f voxels · unowned %s) "
                         "— T44 I1", e.target_exclusion, e.owned_tie_voxels,
                         e.owned_max_dist_voxels, e.owned_unowned)
+        if e.nontarget_evidence != "proximity" or e.owned_ambiguous != "keep":
+            logging.warning("AG3S T46 — nontarget_evidence = %s (shell %.2f voxels) · owned_ambiguous = %s "
+                            "(ball_owned 미세 target-free 계층만)", e.nontarget_evidence,
+                            e.nontarget_shell_voxels, e.owned_ambiguous)
     # T44e A9 — begin
     if contact:
         lost = {k: getattr(ag3s.config.contact, k) for k, v in contact.items()
@@ -1506,6 +1514,21 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--owned-unowned", choices=("remove", "keep"), default=None,
                     help="T44 I1 — ball-owned: unowned seed 를 지우나 (remove, 기본) 두나 (keep)")
     # T44 I1 (A1) — end
+    # T46 F1 · F2 — begin
+    ap.add_argument("--nontarget-evidence", choices=("proximity", "surface"), default=None,
+                    help="T46 F1 — ball-owned 미세 계층의 non-target 근거. proximity (기본: config "
+                         "esdf.nontarget_evidence) = T44 I1 그대로. surface = 공의 표면 구 맞춤이 받아들여진 "
+                         "frame 에서 공 안 · 맞춘 구 + --nontarget-shell-voxels 안의 근거 점을 target 표면으로 보고 "
+                         "뺀다 (가장 가까운 target 점 거리 + tie 가 껍질 밖 근거 점 거리보다 크면 이웃으로 보고 남긴다). "
+                         "--target-exclusion ball-owned 와 함께만")
+    ap.add_argument("--nontarget-shell-voxels", type=float, default=None, metavar="V",
+                    help="T46 F1 — surface: 맞춘 구 반지름 바깥 V 미세 voxel 까지 (기본 2.0 = 10 mm). "
+                         "--nontarget-evidence surface 와 함께만")
+    ap.add_argument("--owned-ambiguous", choices=("keep", "remove"), default=None,
+                    help="T46 F2 — ball-owned: ambiguous seed (|d_t − d_o| ≤ tie) 를 두나 (keep, 기본: config "
+                         "esdf.owned_ambiguous) 지우나 (remove). 미세 target-free 계층만. "
+                         "--target-exclusion ball-owned 와 함께만")
+    # T46 F1 · F2 — end
     # T44c A5 — begin
     ap.add_argument("--target-free-coarse", action="store_true",
                     help="T44c — target 을 지운 거친 계층 (coarse_no_target) 을 한 겹 더 만들어 target-free "
@@ -1790,7 +1813,12 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
     # T44 I1 (A1) — begin
     owned_given = [flag for flag, v in (("--owned-tie-voxels", args.owned_tie_voxels),
                                         ("--owned-max-dist-voxels", args.owned_max_dist_voxels),
-                                        ("--owned-unowned", args.owned_unowned)) if v is not None]
+                                        ("--owned-unowned", args.owned_unowned),
+                                        # T46 F1 · F2
+                                        ("--nontarget-evidence", args.nontarget_evidence),
+                                        ("--nontarget-shell-voxels", args.nontarget_shell_voxels),
+                                        ("--owned-ambiguous", args.owned_ambiguous))
+                   if v is not None]
     if owned_given and args.target_exclusion != "ball-owned":
         ap.error(f"{', '.join(owned_given)} 는 --target-exclusion ball-owned 에서만 읽힙니다 — "
                  "그대로 띄우면 효과가 있었다고 믿게 됩니다")
@@ -1798,6 +1826,14 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ap.error("--target-exclusion ball-owned 는 target 없는 계층에서 동작합니다 — "
                  "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오")
     # T44 I1 (A1) — end
+    # T46 F1 — begin
+    if args.nontarget_shell_voxels is not None:
+        if args.nontarget_evidence != "surface":
+            ap.error("--nontarget-shell-voxels 는 --nontarget-evidence surface 에서만 읽힙니다 — "
+                     "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+        if not (math.isfinite(args.nontarget_shell_voxels) and args.nontarget_shell_voxels > 0):
+            ap.error(f"--nontarget-shell-voxels 는 유한한 양수입니다 (받은 값 {args.nontarget_shell_voxels})")
+    # T46 F1 — end
     # T44c A5 — begin
     if args.target_free_coarse and args.target_field_policy == "relax":
         ap.error("--target-free-coarse 는 target 없는 계층에서 동작합니다 — "

@@ -2632,6 +2632,23 @@ class AG3S:
         if cfg.backend == "curobo":
             window_request = self._fine_window_request(
                 robot_state, execution_path, contact_context, points)
+        # T46 F1 — `ball_owned` 미세 계층의 non-target 근거에서 target 자신의 표면 점을 더 뺀다
+        # (`esdf.nontarget_evidence == "surface"` 일 때만; 기본 `proximity` 는 이 kwarg 를 만들지 않는다).
+        owned_nontarget = None
+        if (nontarget is not None and target_free_ball is not None
+                and getattr(cfg, "target_exclusion", "ball") == "ball_owned"
+                and getattr(cfg, "nontarget_evidence", "proximity") == "surface"):
+            from AG3S.ag3s.fields.curobo_builder import nontarget_surface_evidence
+
+            fine = float(getattr(cfg, "fine_voxel_size", 0.0) or cfg.voxel_size)
+            drop, f1 = nontarget_surface_evidence(
+                nontarget["points"], target_free_points, target_free_ball,
+                shell_m=float(getattr(cfg, "nontarget_shell_voxels", 2.0)) * fine,
+                tie_m=float(getattr(cfg, "owned_tie_voxels", 1.0)) * fine)
+            owned_nontarget = np.asarray(nontarget["points"], np.float64).reshape(-1, 3)[~drop]
+            # the record (`stats["target_free"]["nontarget"]`): the coarse tier's evidence count stays
+            # `n_points`; the fine `ball_owned` evidence is `n_points_owned`.
+            nontarget = {**nontarget, "evidence": f1, "n_points_owned": int(len(owned_nontarget))}
         support_evidence = (None if support_cloud is None or target_free_ball is None
                             else self._support_seed_evidence(support_cloud, support_surfaces,
                                                              target_free_ball))
@@ -2676,7 +2693,10 @@ class AG3S:
                                                                   False))) else {}),
                                           # T44e A8: only with `target_free_coarse_support == "exclude"`.
                                           **({"support_seed_evidence": support_evidence}
-                                             if support_evidence is not None else {}))
+                                             if support_evidence is not None else {}),
+                                          # T46 F1: only with `nontarget_evidence == "surface"`.
+                                          **({"owned_nontarget_points": owned_nontarget}
+                                             if owned_nontarget is not None else {}))
         self._record_geometry_version(field, target, frame_index, nontarget)
         notes = []
         if window_request is not None:
@@ -2727,8 +2747,41 @@ class AG3S:
                 drop = d <= radius
         n_target = int((drop & keep).sum())
         keep &= ~drop
-        return {"points": pts[keep], "source": source, "n_cloud": int(n),
-                "n_target_dropped": n_target, "n_support_dropped": n_support}
+        out = {"points": pts[keep], "source": source, "n_cloud": int(n),
+               "n_target_dropped": n_target, "n_support_dropped": n_support}
+        if (source == "proximity"
+                and getattr(self.config.esdf, "target_exclusion", "ball") == "ball_owned"
+                and getattr(self.config.esdf, "nontarget_evidence", "proximity") != "proximity"):
+            # T46 F1 (c) — why the indices path was not taken (recorded only with F1 on: the
+            # default's stats stay bit-identical).
+            out["proximity_reason"] = self._proximity_reason(idx, tp, pts, geometry)
+        return out
+
+    def _proximity_reason(self, idx, tp, pts, geometry) -> dict:
+        """T46 F1 (c) — why `_nontarget_points` fell back to `proximity`: `why` (`no_indices` = the geometry
+        is a stand-in with empty `point_indices` — an anchor / occluded / closing geometry of an older
+        frame · `length_mismatch` · `out_of_range` · `points_mismatch`), the stand-in flags of the
+        geometry's metrics, the gated identity's state / last observed frame and this request's frame."""
+        n = len(pts)
+        if not len(idx):
+            why = "no_indices"
+        elif len(idx) != len(tp):
+            why = "length_mismatch"
+        elif int(idx.min()) < 0 or int(idx.max()) >= n:
+            why = "out_of_range"
+        else:
+            why = "points_mismatch"
+        metrics = dict(getattr(geometry, "metrics", {}) or {})
+        flags = sorted(k for k in ("manipulated_occluded", "manipulated_subset_kept_anchor",
+                                   "manipulated_unsplit_kept_anchor")
+                       if float(metrics.get(k, 0.0) or 0.0) >= 1.0)
+        ident = getattr(self, "_gated_manipulated", None)
+        return {"why": why, "stand_in_flags": flags,
+                "grasp_active": bool(getattr(self, "_grasp_active", False)),
+                "manipulated_state": None if ident is None else str(ident.state),
+                "observed_frame": (None if ident is None
+                                   else int(getattr(ident, "last_seen_frame", -1))),
+                "request_frame": int(getattr(self, "frame_index", -1))}
 
     def _record_geometry_version(self, field, target, frame_index, nontarget) -> None:
         """T44 I0 — `stats["target_free"]["geometry_version"]`: which request and which observed

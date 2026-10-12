@@ -1071,6 +1071,26 @@ class EsdfConfig:
     owned_max_dist_voxels: float = 2.0
     #: `ball_owned` — unowned seed 를 `"remove"` (기본, 공의 recall 유지) 하나 `"keep"` 하나.
     owned_unowned: str = "remove"
+    #: **T46 F1 — `ball_owned` 미세 계층의 non-target 근거에서 target 자신의 점을 더 빼는가.**
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"proximity"` (기본) | T44 I1 그대로 — cloud − target `point_indices` (이 cloud 의 것일 때) 또는 target 점에서 미세 voxel 안의 점 − 지원면 (`AG3S._nontarget_points`). 값 비트 동일 |
+    #: | `"surface"` | 위에 더해, 공의 **표면 구 맞춤이 받아들여졌을 때만** (`centre_method == "surface_fit"`) 공 안 (`z ≥ z_min`) 이고 맞춘 구 + `nontarget_shell_voxels` 안인 근거 점을 뺀다 — 단 그 점에서 가장 가까운 target 점 거리 + tie (`owned_tie_voxels`) 가 껍질 밖 근거 점 거리보다 크면 남긴다 (이웃 보호, `curobo_builder.nontarget_surface_evidence`) |
+    #:
+    #: 왜 (`T45TF.verify.json` D-TF): grasp 중 target 기하는 옛 frame 의 anchor 라 `point_indices` 가 비고
+    #: `proximity` (반경 = 미세 voxel 5 mm) 로 떨어진다 (17/17 chunk). fused cloud 의 간격 (fusion voxel 10 mm,
+    #: 최근접 중앙 7.7 mm) 이 그 반경보다 커서 target 표면 cloud 점 667 중 280 이 non-target 근거로 남았다.
+    #: 거친 계층 (`target_free_coarse`) 은 이 값을 읽지 않는다 — 원래 근거 그대로다.
+    nontarget_evidence: str = "proximity"
+    NONTARGET_EVIDENCES = ("proximity", "surface")
+    #: T46 F1 `"surface"` — 맞춘 구 반지름 바깥으로 몇 미세 voxel 까지를 target 표면으로 보나.
+    #: 2.0 (= 10 mm @ 5 mm) 은 fused cloud 의 양자화 (fusion voxel 10 mm) 와 같다. `"proximity"` 에서는 읽지 않는다.
+    nontarget_shell_voxels: float = 2.0
+    #: **T46 F2 — `ball_owned` 의 ambiguous seed (`|d_t − d_o| ≤ tie`) 를** `"keep"` (기본, T44 I1 그대로 —
+    #: 보존) 하나 `"remove"` (target · unowned 처럼 지운다) 하나. 미세 target-free 계층에만 — 거친 계층은 keep 그대로.
+    owned_ambiguous: str = "keep"
+    OWNED_AMBIGUOUS = ("keep", "remove")
 
     #: **T44c A5 — target 을 지운 거친 계층 (`coarse_no_target`) 을 한 겹 더 만들고 target-free 질의에
     #: 합성한다.** 기본 `False` = 예전 그대로 (값 비트 동일, 계층을 만들지도 않는다).
@@ -1181,6 +1201,19 @@ class EsdfConfig:
         if not float(self.owned_max_dist_voxels) > 0.0:
             raise AG3SConfigError(
                 f"esdf.owned_max_dist_voxels 는 양수여야 합니다: {self.owned_max_dist_voxels}")
+        # T46 F1 · F2
+        if self.nontarget_evidence not in self.NONTARGET_EVIDENCES:
+            raise AG3SConfigError(
+                f"esdf.nontarget_evidence 는 {self.NONTARGET_EVIDENCES} 중 하나여야 합니다: "
+                f"{self.nontarget_evidence!r}")
+        if not (math.isfinite(float(self.nontarget_shell_voxels))
+                and float(self.nontarget_shell_voxels) > 0.0):
+            raise AG3SConfigError(
+                f"esdf.nontarget_shell_voxels 는 유한한 양수여야 합니다: {self.nontarget_shell_voxels}")
+        if self.owned_ambiguous not in self.OWNED_AMBIGUOUS:
+            raise AG3SConfigError(
+                f"esdf.owned_ambiguous 는 {self.OWNED_AMBIGUOUS} 중 하나여야 합니다: "
+                f"{self.owned_ambiguous!r}")
         if not isinstance(self.target_free_coarse, bool):
             raise AG3SConfigError(
                 f"esdf.target_free_coarse 는 true 또는 false 여야 합니다: {self.target_free_coarse!r}")

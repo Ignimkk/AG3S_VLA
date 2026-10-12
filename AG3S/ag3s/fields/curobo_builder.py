@@ -93,7 +93,7 @@ from AG3S.ag3s.fields.provenance import FieldProvenance
 __all__ = ["CuroboFieldBuilder", "TargetBall", "OwnedEvidence", "OWNED_CLASSES", "ATTACHED_LABEL", "unpack_site_linear",
            "CoarseFreeSpec", "CUROBO_SEED_BAND_VOXELS", "coarse_exclusion_params", "COARSE_SIGN_FLOORS",
            "FineWindowRequest", "FineWindow", "place_fine_window", "WINDOW_BASES",
-           "WINDOW_PLACEMENTS"]
+           "WINDOW_PLACEMENTS", "NONTARGET_EVIDENCES", "nontarget_surface_evidence"]
 
 #: 쥔 물체에 붙이는 내부 라벨. 호출자의 `labelled_points` 이름과 겹치면 안 되므로 밑줄로 감싼다.
 ATTACHED_LABEL = "__attached__"
@@ -194,7 +194,7 @@ class OwnedEvidence:
     | 조건 (순서대로) | 분류 | 처리 |
     |---|---|---|
     | `min(d_t, d_o) > max_dist_voxels·vs` | unowned | `unowned` 대로 (`remove` · `keep`) |
-    | `|d_t − d_o| ≤ tie_voxels·vs` | ambiguous | **보존** · 기록 |
+    | `|d_t − d_o| ≤ tie_voxels·vs` | ambiguous | `ambiguous` 대로 (`keep` 기본 = **보존** · `remove` = T46 F2) · 기록 |
     | `d_t < d_o` | target | 제거 |
     | 그 밖 | non-target | **보존** |
 
@@ -203,7 +203,8 @@ class OwnedEvidence:
     | 필드 | 무엇 |
     |---|---|
     | `target_points` | target 점 (`TargetGeometry.points` — pipeline 의 `target_free_points`) |
-    | `nontarget_points` | fused cloud − target `point_indices` − support (pipeline `_nontarget_points`) |
+    | `nontarget_points` | fused cloud − target `point_indices` − support (pipeline `_nontarget_points`; T46 F1 `surface` 면 `nontarget_surface_evidence` 로 더 뺀 것) |
+    | `ambiguous` | (T46 F2) `keep` (기본, T44 I1 그대로) · `remove` — ambiguous seed 도 지운다 |
     """
 
     target_points: np.ndarray
@@ -211,6 +212,8 @@ class OwnedEvidence:
     tie_voxels: float = 1.0
     max_dist_voxels: float = 2.0
     unowned: str = "remove"
+    #: T46 F2 — `"keep"` (기본) · `"remove"`. 미세 target-free 계층만 이 값을 넘긴다 (거친 계층은 기본 keep).
+    ambiguous: str = "keep"
 
     def __post_init__(self) -> None:
         tp = np.asarray(self.target_points, np.float64).reshape(-1, 3)
@@ -221,6 +224,8 @@ class OwnedEvidence:
                            else np.asarray(nt, np.float64).reshape(-1, 3))
         if self.unowned not in ("remove", "keep"):
             raise ValueError(f"unowned 는 'remove' 또는 'keep' 이어야 합니다: {self.unowned!r}")
+        if self.ambiguous not in ("keep", "remove"):
+            raise ValueError(f"ambiguous 는 'keep' 또는 'remove' 이어야 합니다: {self.ambiguous!r}")
         if float(self.tie_voxels) < 0.0 or not float(self.max_dist_voxels) > 0.0:
             raise ValueError("tie_voxels ≥ 0, max_dist_voxels > 0 이어야 합니다")
 
@@ -413,7 +418,7 @@ def _ball_owned_split(centres: np.ndarray, is_seed: np.ndarray, ball: "TargetBal
     돌려주는 것 (전부 `centres` 와 같은 길이의 bool, `d_t`·`d_o` 는 float):
 
     - `target` · `nontarget` · `ambiguous` · `unowned` — **seed 에 대한** 분류 (`OwnedEvidence` 의 표)
-    - `removed` — 지울 seed = target ∪ (unowned if `remove`)
+    - `removed` — 지울 seed = target ∪ (unowned if `remove`) ∪ (ambiguous if `owned.ambiguous == "remove"`, T46 F2)
     - `sign` — 부호 교정 후보 = `removed` ∪ **non-seed 중 target 쪽** (`d_t < d_o − tie`)
 
     **왜 non-seed 를 sign 에 넣나.** `ball` 의 부호 교정 집합은 공 안 voxel 전부다 (`_clear_seeds`
@@ -446,10 +451,74 @@ def _ball_owned_split(centres: np.ndarray, is_seed: np.ndarray, ball: "TargetBal
     tgt = decided & (d_t < d_o)
     ntg = decided & ~tgt
     removed = seed & (tgt | (unowned & (owned.unowned == "remove")))
+    if owned.ambiguous == "remove":
+        # T46 F2 — ambiguous seed 도 지운다 (`sign` 은 `removed` 를 담으므로 그 부호 교정도 함께).
+        removed = removed | (seed & ambiguous)
     sign = removed | (~seed & (d_t < d_o - tie))
     return {"target": seed & tgt, "nontarget": seed & ntg, "ambiguous": seed & ambiguous,
             "unowned": seed & unowned, "removed": removed, "sign": sign,
             "d_t": d_t, "d_o": d_o, "n_nontarget_near": int(len(nt))}
+
+
+#: T46 F1 — `esdf.nontarget_evidence` 의 선택지 (config 의 목록을 그대로 쓴다).
+NONTARGET_EVIDENCES = EsdfConfig.NONTARGET_EVIDENCES
+
+
+def nontarget_surface_evidence(nontarget_points, target_points, ball: "TargetBall", *,
+                               shell_m: float, tie_m: float = 0.0) -> tuple[np.ndarray, dict]:
+    """T46 F1 `"surface"` — non-target 근거 점 중 **target 자신의 표면** 인 것 `(drop (N,) bool, info)`.
+
+    `ball_owned` 의 non-target 근거 (`AG3S._nontarget_points`) 는 grasp 중 `proximity` (target 점에서 미세 voxel
+    5 mm 안을 뺀다) 로 떨어진다 — target 기하가 옛 frame 의 anchor 라 `point_indices` 가 이 cloud 의 것이 아니다.
+    fused cloud 의 점 간격 (fusion voxel 10 mm) 이 그 반경보다 커서 target 표면 점이 근거로 남고 (`T45TF.verify.json`
+    D-TF: 667 중 280), 그 점이 target seed 를 ambiguous / non-target 으로 보존시킨다. 여기서는 **GT 없이 기하만으로**
+    그 점을 고른다:
+
+    | 단계 | 조건 | 근거 |
+    |---|---|---|
+    | 문 (gate) | 공의 중심이 표면 구 맞춤에서 왔다 (`provenance["centre_method"] == "surface_fit"`) | 맞춤이 물러난 공 (`centroid`) 은 target 점이 한 볼록 물체가 아니다 — 이웃 과일이 섞인 기하 (D-TF F3: 섞인 6/6 chunk 가 물러남, 안 섞인 11/11 이 받아들임). 그때는 아무것도 더 빼지 않는다 |
+    | 후보 | 공 안 (`|p − c| ≤ 공 반지름`, `z ≥ z_min`) **이고** `|p − c| ≤ 맞춘 반지름 + shell_m` | 맞춘 구 안의 관측 점은 target 이다 — 물체는 서로 파고들지 않으므로 이웃은 맞춘 구에 접촉 띠로만 들어온다. `shell_m` = cloud 양자화 · 비구형 (배) 여유 |
+    | 이웃 보호 | 후보 `p` 에서 가장 가까운 **target 점** 거리 `d_t` 와 가장 가까운 **후보 밖 근거 점** 거리 `d_c` 가 `d_t + tie_m ≤ d_c` 인 것만 뺀다 | 접촉 띠에 든 이웃 점은 제 몸의 (껍질 밖) 점이 가깝다. seed 의 `ball_owned` 규칙 (`d_t` vs `d_o`, tie 안 = ambiguous = 보존) 을 근거 점에 같은 tie (`owned_tie_voxels`) 로 건다 — 애매한 근거 점은 근거로 남는다 |
+
+    `info` = `{"method", "shell_mm", "tie_mm", "applied", "why"?, "fit_radius_mm", "limit_mm", "n_candidates",
+    "n_protected", "n_dropped"}`. 순수 numpy — pipeline 과 offline replay (`AG3S.trajopt.experiments.target_free_replay`) 가 같이 쓴다.
+    맞춘 반지름은 `provenance["fit"]["radius_mm"]` (기록과 같은 1 µm 반올림 값) 을 읽는다 — 서버와 replay 가 같은 수를 쓴다.
+    """
+    nt = np.asarray(nontarget_points, np.float64).reshape(-1, 3)
+    tp = np.asarray(target_points, np.float64).reshape(-1, 3)
+    drop = np.zeros(len(nt), bool)
+    info: dict = {"method": "surface", "shell_mm": round(float(shell_m) * 1000.0, 3),
+                  "tie_mm": round(float(tie_m) * 1000.0, 3),
+                  "applied": False, "n_candidates": 0, "n_protected": 0, "n_dropped": 0}
+    prov = dict(getattr(ball, "provenance", {}) or {})
+    fit = prov.get("fit") or {}
+    if prov.get("centre_method") != "surface_fit" or fit.get("radius_mm") is None:
+        reason = fit.get("reason") if isinstance(fit, dict) else None
+        info["why"] = "no_surface_fit" + (f" ({reason})" if reason else "")
+        return drop, info
+    if not len(tp):
+        info["why"] = "no_target_points"
+        return drop, info
+    r_fit = float(fit["radius_mm"]) / 1000.0
+    limit = min(float(ball.radius), r_fit + float(shell_m))
+    info.update({"applied": True, "fit_radius_mm": round(r_fit * 1000.0, 3),
+                 "limit_mm": round(limit * 1000.0, 3)})
+    if not len(nt):
+        return drop, info
+    centre = np.asarray(ball.centre, np.float64).reshape(3)
+    r = np.linalg.norm(nt - centre[None, :], axis=1)
+    cand = (r <= limit) & (nt[:, 2] >= float(ball.z_min))
+    info["n_candidates"] = int(cand.sum())
+    if not cand.any():
+        return drop, info
+    q = nt[cand]
+    d_t = _nearest(tp, q)
+    d_c = _nearest(nt[~cand], q)
+    own = d_t + float(tie_m) <= d_c
+    drop[np.flatnonzero(cand)[own]] = True
+    info["n_protected"] = int((~own).sum())
+    info["n_dropped"] = int(own.sum())
+    return drop, info
 
 
 #: `stats["window"]["basis"]` 의 값. 창이 **무엇을 근거로** 놓였나 (T21).
@@ -923,7 +992,8 @@ class CuroboFieldBuilder:
                fine_window: Optional["FineWindowRequest"] = None,
                held_free_points: Optional[np.ndarray] = None,
                nontarget_points: Optional[np.ndarray] = None,
-               support_seed_evidence: Optional[dict] = None) -> CuroboEsdfField:
+               support_seed_evidence: Optional[dict] = None,
+               owned_nontarget_points: Optional[np.ndarray] = None) -> CuroboEsdfField:
         """`EsdfBuilder.update` 와 같은 계약. 돌려주는 것은 `CuroboEsdfField` 다.
 
         `exclude_target` 는 **지원하지 않는다.** E1 이 그것을 폐기했다 — 필드는 익명이라
@@ -944,6 +1014,11 @@ class CuroboFieldBuilder:
         읽는다 — 공 안 seed 중 그 점들에 더 가까운 것을 보존한다 (`OwnedEvidence`). `ball` (기본)
         에서는 무시한다 (값 비트 동일). 어느 쪽이든 공 제외의 trace 가 `stats["target_free"]`
         (수) 와 `field.exclusion_trace` (ijk) 에 실린다.
+
+        `owned_nontarget_points` (T46 F1) 는 `ball_owned` **미세** target-free 계층만 읽는 non-target 근거다
+        (`esdf.nontarget_evidence == "surface"` 일 때 pipeline 이 `nontarget_points` 에서 target 표면 점을 더 뺀 것).
+        `None` (기본) 이면 미세 계층도 `nontarget_points` 를 쓴다 (비트 동일). 거친 계층은 언제나 `nontarget_points` 다.
+        `esdf.owned_ambiguous` (T46 F2) 도 미세 계층의 `OwnedEvidence` 에만 실린다.
 
         `esdf.target_free_coarse` (T44c A5) 가 켜져 있고 공이 오면 target 을 지운 **거친** 계층
         (`coarse_no_target`) 을 한 겹 더 만들어 `field.target_free_coarse_layer` 에 싣는다. 그 계층은
@@ -1057,6 +1132,7 @@ class CuroboFieldBuilder:
             remove = held if target_free_ball is not None else (
                 free_points if held is None else np.vstack([held, free_points]))
             owned = None
+            owned_fine = None
             if (target_free_ball is not None
                     and str(getattr(cfg, "target_exclusion", "ball")) == "ball_owned"):
                 owned = OwnedEvidence(
@@ -1064,10 +1140,18 @@ class CuroboFieldBuilder:
                     tie_voxels=float(getattr(cfg, "owned_tie_voxels", 1.0)),
                     max_dist_voxels=float(getattr(cfg, "owned_max_dist_voxels", 2.0)),
                     unowned=str(getattr(cfg, "owned_unowned", "remove")))
+                owned_fine = owned
+                # T46 F1 · F2 — 미세 계층에만. 기본 (근거 그대로 · keep) 이면 같은 객체 (비트 동일).
+                amb = str(getattr(cfg, "owned_ambiguous", "keep"))
+                if owned_nontarget_points is not None or amb != "keep":
+                    owned_fine = dataclasses.replace(
+                        owned, ambiguous=amb,
+                        **({} if owned_nontarget_points is None
+                           else {"nontarget_points": owned_nontarget_points}))
             free_tiers = self._build_tiers(itg, remove, dev, torch, only="fine",
                                            tier_name="fine_no_target",
                                            ball=target_free_ball, itg_fine=itg_fine,
-                                           owned=owned)
+                                           owned=owned_fine)
             free_ms = (time.monotonic() - t0) * 1e3
             self._announce_target_free_cost(free_ms, len(free_points), free_tiers,
                                             ball=target_free_ball)
@@ -1521,7 +1605,8 @@ class CuroboFieldBuilder:
             out["exclusion_method"] = ex.get("exclusion_method")
             for k in keys:
                 out[k] += int(ex.get(k, 0))
-            for k in ("n_target_owned", "n_sign_candidates", "n_sign_candidates_nonseed"):
+            for k in ("n_target_owned", "n_sign_candidates", "n_sign_candidates_nonseed",
+                      "n_ambiguous_removed"):   # T46 F2 (remove 일 때만 있다)
                 if k in ex:
                     out[k] = out.get(k, 0) + int(ex[k])
             if "owned" in ex:
@@ -1582,8 +1667,12 @@ class CuroboFieldBuilder:
                     "    T44 I1 target_exclusion = **ball_owned** (%s) — 공 안 seed %d 중 제거 %d · "
                     "non-target 보존 %d · ambiguous 보존 %d · unowned 제거 %d / 보존 %d.",
                     ex.get("owned"), ex["n_seeds_in_ball"], ex["n_removed"],
-                    ex["n_kept_nontarget"], ex["n_ambiguous"], ex["n_unowned_removed"],
-                    ex["n_unowned_kept"])
+                    ex["n_kept_nontarget"],
+                    ex["n_ambiguous"] - int(ex.get("n_ambiguous_removed", 0)),   # T46 F2
+                    ex["n_unowned_removed"], ex["n_unowned_kept"])
+                if ex.get("n_ambiguous_removed") is not None:
+                    log.warning("    T46 F2 owned_ambiguous = **remove** — ambiguous seed %d 개도 지웠다 "
+                                "(제거 수에 포함).", int(ex["n_ambiguous_removed"]))
 
     @staticmethod
     def _free_tsdf_points(itg, points: np.ndarray, truncation: float) -> int:
@@ -1849,6 +1938,11 @@ class CuroboFieldBuilder:
                       "n_nontarget_points": int(len(owned.nontarget_points)),
                       "n_nontarget_near": split["n_nontarget_near"]},
         })
+        if owned.ambiguous == "remove":
+            # T46 F2 — 지운 ambiguous 수 (`n_ambiguous` 는 분류 수 그대로, `n_removed` 에 이 수가 들어 있다).
+            # 기본 keep 이면 키를 만들지 않는다 (stats 비트 동일).
+            counts["n_ambiguous_removed"] = int(split["ambiguous"].sum())
+            counts["owned"]["ambiguous"] = "remove"
         trace["removed_ijk"] = removed
         trace["nontarget_kept_ijk"] = cand[split["nontarget"]]
         trace["ambiguous_ijk"] = cand[split["ambiguous"]]

@@ -31,6 +31,11 @@ with the T43 HM classification), so carry and crate-entry chunks are re-solved t
 | servo state (evaluator only) | `ServoObserver` propagated through the recorded `exec_feedback` in chunk order (`servo.py`) |
 | target (outward, evaluator only) | `target_centroid` of chunks with a target and nothing held |
 
+T46 variants `TF0` · `F1` · `F2` · `F1F2` replace only the **fine target-free layer** with the offline replay
+(`target_free_replay.rebuild_target_free`: `TF0` = the record's settings, `F1` = `nontarget_evidence surface`,
+`F2` = `owned_ambiguous remove`); they solve and are measured on that scene, and record the replay counts
+(`target_free_replay`) and the verdict rows on the recorded field (`n_collision_rows_recorded_field`).
+
 Open loop: every chunk starts from the recorded state with the recorded (V8) history — a variant's
 own earlier output does not feed its next chunk (continuity · B · C history · servo state).
 
@@ -178,6 +183,14 @@ VARIANTS.update({
                                  {"sqp": {"warm_start_lookahead": True}}),
     # T45 A10 — the recorded server config with `--palm-cover on` (V-T45 offline TO time / grasp)
     "PC": dict(_PC),
+    # T46 — the recorded server config with the fine target-free layer replayed offline
+    # (`target_free_replay.rebuild_target_free`): `TF0` = the record's own settings (the control: a
+    # variant minus TF0 is the option alone), `F1` = `--nontarget-evidence surface`, `F2` =
+    # `--owned-ambiguous remove`, `F1F2` = both. Chunks without a `ball_owned` layer keep the record.
+    "TF0": {"_target_free": {}},
+    "F1": {"_target_free": {"nontarget_evidence": "surface"}},
+    "F2": {"_target_free": {"owned_ambiguous": "remove"}},
+    "F1F2": {"_target_free": {"nontarget_evidence": "surface", "owned_ambiguous": "remove"}},
 })
 
 
@@ -241,6 +254,44 @@ def build_robot(args):
 def variant_server_args(name: str) -> tuple:
     """T43 TP — extra server flags of a variant (its own robot model), `()` for the recorded one."""
     return tuple(VARIANTS[name].get("_server_args", ()))
+
+
+def variant_target_free(name: str) -> Optional[dict]:
+    """T46 — a variant's `rebuild_target_free` keyword arguments, or None (the recorded layer)."""
+    tf = VARIANTS[name].get("_target_free")
+    return None if tf is None else dict(tf)
+
+
+def target_free_scenes(inp: dict, spec: dict) -> tuple[Any, Any, dict]:
+    """T46 — `(scene, hm_scene, info)` of chunk `inp` with its fine target-free layer replayed under `spec`
+    (`target_free_replay.rebuild_target_free`). The coarse / fine main layers, the destination label and
+    every other scene input are the recorded ones; a chunk without a `ball_owned` layer is returned as is
+    (`info["replayed"] = False`). `info` = the replay's counts / evidence / record differences."""
+    import dataclasses
+
+    from AG3S.ag3s.fields.curobo_field import layer_from_arrays
+    from AG3S.trajopt.experiments import target_free_replay as TFR
+
+    z, s = inp["z"], inp["summary"]
+    rep = TFR.rebuild_target_free(z, s, **spec)
+    if rep is None:
+        return inp["scene"], inp["hm_scene"], {"replayed": False}
+    base = inp["scene"].esdf
+    inner = base._field if isinstance(base, _DestinationLabels) else base
+    free = layer_from_arrays(rep["values"].astype(np.float16), rep["origin"], rep["voxel_size"])
+    # every other field input (main layers, outside distance, a recorded coarse free layer) as recorded
+    field = dataclasses.replace(inner, target_free_layers=(free,))
+    if isinstance(base, _DestinationLabels):
+        dest = inp["dest"]
+        field = _DestinationLabels(field, dest["aabb_min"], dest["aabb_max"], str(dest["label"]))
+    scene = dataclasses.replace(inp["scene"], esdf=field)
+    hm_scene = (None if inp["hm_scene"] is None
+                else dataclasses.replace(inp["hm_scene"], esdf=field))
+    info = {"replayed": True, "counts": rep["counts"], "evidence": rep["evidence"],
+            "n_removed_not_in_record": rep["n_removed_not_in_record"],
+            "n_record_removed_not_removed": rep["n_record_removed_not_removed"],
+            "record_split_equal": TFR.recorded_split_equal(z, rep)}
+    return scene, hm_scene, info
 
 
 def variant_config(base_cfg, name: str, hm: bool):
@@ -658,6 +709,9 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
         if extra and extra not in alts:
             alts[extra] = Run(key, entry, cli, extra_server_args=extra)
     solver_run = {v: alts.get(variant_server_args(v), run) for v in variants}
+    for v in variants:
+        if variant_target_free(v) is not None and variant_server_args(v):
+            raise ValueError(f"variant {v}: `_target_free` with `_server_args` is not supported")
     keep_state = bool(getattr(cli, "keep_state", False))
     ref_variant = getattr(cli, "ref_variant", None)
     holder: dict[str, Any] = {}
@@ -718,6 +772,16 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
             if float(np.linalg.norm(gap[:2])) <= 0.08 and centre[2] <= hi[2] + 0.08:
                 rec["phase"] = phase = "crate"
         scene = inp["hm_scene"] if run.hm else inp["scene"]
+        # T46 — variants with a replayed fine target-free layer solve **and are measured** on their own
+        # scene (the field the server would have built); `n_collision_rows_recorded_field` keeps the
+        # verdict rows on the recorded field next to it.
+        tf_scenes: dict[str, Any] = {}
+        tf_info: dict[str, dict] = {}
+        for v in variants:
+            spec = variant_target_free(v)
+            if spec is not None:
+                sc, hsc, tf_info[v] = target_free_scenes(inp, spec)
+                tf_scenes[v] = hsc if run.hm else sc
         rec_traj = run.layout.chunk_to_trajectory(inp["rec_chunk"])[:, :K_EXEC]
         ref_traj_full = run.layout.chunk_to_trajectory(inp["ref_chunk"])
         # fidelity — the recorded refined chunk on the reconstructed (server-flag) scene
@@ -775,7 +839,7 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
                     v_scene = a_inp["hm_scene"] if run.hm else a_inp["scene"]
                     lin.set_joint_parameter_path(solver_run[v].finger_path(s, inp["ref_chunk"], H))
                 else:
-                    v_scene = scene
+                    v_scene = tf_scenes.get(v, scene)          # T46: replayed target-free layer
                     lin.set_joint_parameter_path(run.finger_path(s, inp["ref_chunk"], H))
                 # certified = True: geometry certification is the same for every variant and is
                 # not what is compared here (the verdict rows are, `classify_violations`).
@@ -811,16 +875,17 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
                 base_traj = ex
             trajs[v] = ex
             fingers8 = run.finger_path(s, inp["ref_chunk"], K_EXEC)
-            lin8, cen = states_of(run, ex, q_now, scene, fingers8)
-            gc = group_clearance(run, lin8, cen, scene, dest_box)
+            m_scene = tf_scenes.get(v, scene)                  # T46: the variant's own field
+            lin8, cen = states_of(run, ex, q_now, m_scene, fingers8)
+            gc = group_clearance(run, lin8, cen, m_scene, dest_box)
             # servo-predicted states (evaluator) — 4 sub-steps per row
             ro = run.servo.rollout(sstate.q, sstate.v, ex, sstate.tau, samples=SERVO_SAMPLES)
             qs = ro["q_samples"].reshape(ex.shape[0], -1)                # (nq, 8*4)
             fs = None if fingers8 is None else np.repeat(fingers8, len(SERVO_SAMPLES), axis=1)
-            lin32, cen32 = states_of(run, qs, q_now, scene, fs)
-            gs = group_clearance(run, lin32, cen32, scene, dest_box)
+            lin32, cen32 = states_of(run, qs, q_now, m_scene, fs)
+            gs = group_clearance(run, lin32, cen32, m_scene, dest_box)
             cls = classify_violations(
-                lin8, ex, q_now, scene, authorized_links=run.authorized,
+                lin8, ex, q_now, m_scene, authorized_links=run.authorized,
                 tolerance=float(cfg.safety.violation_tolerance),
                 manipulated=s.get("manipulated") or {}, steps=K_EXEC)
             pr = palm_path(run, ex, q_now)
@@ -866,6 +931,15 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
                 vr["outward_mm"] = (d_v - d_p) * 1e3
             if v == variants[0]:
                 vr["exec_palm_path_m"] = pr.tolist()
+            if v in tf_scenes:
+                # T46: the replay's record (counts, evidence, differences from the recorded trace) and
+                # the same trajectory's verdict rows on the recorded field.
+                vr["target_free_replay"] = tf_info[v]
+                cls_rec = classify_violations(
+                    lin8, ex, q_now, scene, authorized_links=run.authorized,
+                    tolerance=float(cfg.safety.violation_tolerance),
+                    manipulated=s.get("manipulated") or {}, steps=K_EXEC)
+                vr["n_collision_rows_recorded_field"] = int(cls_rec["n_collision"])
             rec["variants"][v] = vr
         if ref_variant is not None and ref_variant in trajs:
             # T43 TP — every variant against the reference variant (V11AB), rows 0-7
