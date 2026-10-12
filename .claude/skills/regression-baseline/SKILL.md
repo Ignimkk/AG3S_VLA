@@ -9,7 +9,7 @@ description: AG3S 16D 회귀 기준선을 돌리고 판정한다. 코드를 고�
 
 ```bash
 MUJOCO_GL=osmesa PYTHONPATH=${AG3S_PROJECT_ROOT} ${AG3S_PROJECT_ROOT}/.venv-ag3s/bin/python -m \
-  AG3S.trajopt.experiments.esdf_rollout --records run_16d_ep1800 \
+  AG3S.trajopt.experiments.esdf_rollout --records ${AG3S_STORAGE_ROOT}/recordings/run_16d_ep1800 \
   --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz \
   --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all \
   --support-surfaces field --constraint-links arms --out-json /tmp/base.json

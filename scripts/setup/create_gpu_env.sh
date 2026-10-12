@@ -14,6 +14,8 @@ if [ ! -x "$ROOT/.venv-openpi-live/bin/python" ]; then
 fi
 "$UV" pip install --link-mode copy --python "$ROOT/.venv-openpi-live/bin/python" --no-deps -r "$ROOT/environments/openpi-live/requirements.txt"
 "$UV" pip install --link-mode copy --python "$ROOT/.venv-openpi-live/bin/python" --no-deps -e "$ROOT" -e "$ROOT/third_party/openpi" -e "$ROOT/third_party/openpi/packages/openpi-client"
+# serve_safe imports cuRobo in-process (--esdf-backend curobo); the previous live env had the same editable install.
+SETUPTOOLS_SCM_PRETEND_VERSION=0.8.0.post1.dev43 "$UV" pip install --link-mode copy --python "$ROOT/.venv-openpi-live/bin/python" --no-deps -e "$ROOT/third_party/curobo"
 # The fork's documented Torch transformer adaptations, copied only into own venv.
 "$ROOT/.venv-openpi-live/bin/python" - "$ROOT" <<'PY'
 from pathlib import Path

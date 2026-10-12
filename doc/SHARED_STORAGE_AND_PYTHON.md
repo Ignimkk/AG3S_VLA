@@ -93,7 +93,7 @@ Bringup의 일반 `print`/native stderr까지 저장하려면 shell에서 run �
 
 | Development 환경 | 실제 설치 | 용도 |
 |---|---|---|
-| `.venv-openpi-live` | Python 3.11.16, OpenPI 0.1.0, JAX/JAXlib 0.5.3, Torch 2.7.1+cu126, numpy 1.26.4, MuJoCo 3.11.0 | VS Code 주 interpreter, OpenPI GPU inference |
+| `.venv-openpi-live` | Python 3.11.16, OpenPI 0.1.0, JAX/JAXlib 0.5.3, Torch 2.7.1+cu126, numpy 1.26.4, MuJoCo 3.11.0, cuRobo 0.8.0.post1.dev43 (editable `third_party/curobo`) | VS Code 주 interpreter, OpenPI GPU inference, `serve_safe --esdf-backend curobo` |
 | `.venv-curobo` | Python 3.11.16, cuRobo 0.8.0.post1.dev43, Torch 2.7.1+cu126, cuda-core 1.2.0, Warp 1.17.0, numpy 1.26.4 | 별도 TSDF/ESDF producer |
 | `.venv-ag3s` | Python 3.11.16, numpy 2.4.6 | 기존 CPU 회귀·거리장 소비 |
 | Benchmark `.venv-ag3s` | 기존 독립 CPU 환경 | 이 작업에서 변경하지 않음 |
@@ -127,6 +127,11 @@ bash scripts/setup/create_cpu_env.sh
 OpenPI `uv pip check`는 이전 환경과 같은 **gym-aloha의 MuJoCo <3 제약 1건**을 보고한다.
 요청된 MuJoCo 3.11.0과 OpenPI/JAX/Torch 버전을 유지하며 실제 RBY1 checkpoint inference를 별도로 검증한다.
 ALOHA 전체 호환성이나 신규 training 완료를 주장하지 않는다.
+
+`serve_safe`와 `esdf_rollout --esdf-backend curobo`는 cuRobo를 같은 process에서 import한다. 이전 live 환경과 같게
+`.venv-openpi-live`에도 cuRobo를 `--no-deps` editable로 설치한다 (`create_gpu_env.sh`; dependency는 이미 같은 version).
+2026-10-12 KST 설치 후 cuRobo 회귀 기준선 10/15 · 15/15 · −9.171877401271193 mm가 PYTHONPATH 우회 없이 일치했다
+(`results/development/20261012T110000+0900_f14ae3e6b62b_469dfaac099c/verify/env-curobo/`).
 
 ## Cache와 GPU 직렬 검증
 
