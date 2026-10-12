@@ -24,9 +24,10 @@
 | Phase (plan §7) | 범위 | 상태 | 비고 |
 |---|---|---|---|
 | **P1** Panda adapter | SL-0 pi0.5-only 1 episode, 독립 환경 · checkpoint · run 기록 | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL0](#sl0--pi05-only-libero-spatial-1-episode-2026-10-12) |
-| | SL-1 agent-view · wrist RGB/depth, intrinsics/extrinsics → AG3S 관측 형식 | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL1](#sl1--libero-panda-camera-adapter-rgbdepth--k--t_base_cam--v11ab-wire-관측-2026-10-12). 판정 2건(K principal point 127.5, `robot_state` image 순간)은 SL2 에서 구현 예정 |
-| | SL-2 Panda geometry / self-filter | **다음** | SL1 판정 2건 반영 포함 |
-| | SL-3 ~ SL-8 (attention read-out, ATS/LTE, EE delta ↔ CCR, phase, contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1) |
+| | SL-1 agent-view · wrist RGB/depth, intrinsics/extrinsics → AG3S 관측 형식 | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL1](#sl1--libero-panda-camera-adapter-rgbdepth--k--t_base_cam--v11ab-wire-관측-2026-10-12). ~~판정 2건(K principal point 127.5, `robot_state` image 순간)은 SL2 에서 구현 예정~~ → SL2 에서 구현·측정 완료 |
+| | SL-2 Panda geometry / self-filter | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL2](#sl2--panda-geometry-sphere-chain--self-filter--contact-link-sl1-후속-2건-2026-10-12). self-filter 기본 = confined hand+mount cover, constraint model = `franka.yml` sphere 그대로 |
+| | SL-3 attention read-out audit | **다음** | SL2 후속 구현 2건(confined cover 를 기본으로 commit, `robot_geometry.py` 의 `LD_LIBRARY_PATH` 정리)을 SL3 에서 처리 |
+| | SL-4 ~ SL-8 (ATS/LTE, EE delta ↔ CCR, phase, contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1) |
 | **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | 미착수 | SL0 의 1 episode 로는 성능을 말할 수 없다 |
 | **P3** SafeLIBERO Spatial Level I/II pilot | contact 판정 검증 + paired 결과 | 미착수 | |
 | **P4** 전체 SafeLIBERO | official I/II 전체 | 미착수 | |
@@ -71,6 +72,22 @@
 | **action replay** | 기존 run 의 기록 action 을 policy 없이 같은 task · init state · seed 로 다시 실행해 새 run 에 추가 정보(geometry)를 기록하는 방식. 원 기록과 byte 단위로 같은지 확인할 수 있다 |
 | **left-right mirror (policy image)** | pi0.5 가 받는 image 는 OpenCV image 의 열만 뒤집은 것(`policy256 == opencv[:, ::-1]`)이다. 180° 회전이 아니다 |
 | **co-visible** | 두 camera 가 모두 보고 있는 영역. cross-camera 일관성(#4)은 이 영역에서만 의미가 있다 |
+| **self-filter** | depth 에서 robot 자신의 pixel 을 지우는 단계(V11AB 의 `DepthRobotMask`). robot 의 sphere 를 현재 joint 값으로 FK 해 camera 로 투영하고, 그 안에 들어온 depth 점을 제거한다. 지우지 못한 robot 점은 ESDF 에서 장애물이 된다 |
+| **constraint model / self-filter model** | V11AB 가 robot 을 두 가지 sphere 집합으로 쓴다. constraint model = optimizer 의 clearance constraint 에 쓰는 sphere(실제 몸체에 가깝게). self-filter model = constraint model + 덮개(cover) capsule(몸체 표면이 depth 에 남지 않게 덮는다). 덮개는 constraint 에 넣지 않는다 |
+| **sphere chain (`UrdfSphereChain`)** | URDF 의 link frame 에 sphere/capsule 을 붙이고 joint 값으로 FK 해 sphere 위치를 내는 V11AB 의 robot 표현. finger 개도는 학습 변수가 아닌 parameter joint 로 받는다 |
+| **zero-length capsule** | 길이 0, 반지름 r 인 capsule = sphere 하나. cuRobo `franka.yml` 의 collision sphere 를 sphere chain 에 넣는 형태 |
+| **cover capsule / self_filter_cover** | self-filter model 에만 들어가는 덮개. robot collision mesh 표면 중 `franka.yml` sphere 가 덮지 못한 부분을 V11AB 의 `self_filter_covering_capsules` fitter 로 맞춘 capsule(sphere role `self_filter_cover`) |
+| **confined cover** | 덮개를 body 별로 그 body 의 collision hull 안쪽에 가두어 다시 맞춘 것. 큰 capsule 몇 개 대신 작은 capsule 을 많이 써서 capsule 끝 반구가 몸체 밖으로 나가는 양을 줄인다. V11AB 에서는 RB-Y1 `base` 만 이 방식이다 |
+| **protrusion** | sphere union 의 경계가 robot collision hull 밖으로 나간 두께(mm). 덮개가 실제 몸체보다 크게 나간 정도를 본다 |
+| **coverage** | robot collision mesh 표면 표본점 중 sphere union 안에 들어간 비율과, 밖인 점의 최대 거리 |
+| **false removal (오제거)** | self-filter 가 robot 이 아닌 pixel(target · table · stove 등)을 지운 것. segmentation 이 robot 이 아니라고 한 pixel 중 제거된 비율 |
+| **T17 (RB-Y1)** | RB-Y1 쪽 episode 이름. 옛 sphere 모델에서 쥔 사과가 17 frame 동안 통째로 지워졌고(`AG3S_T0T6_LOG.md` §3 T28 Phase 1: 사과 retention 0.472), 원인은 손목 부근 capsule 이 쥔 물체까지 덮은 것이었다. 같은 종류의 문제가 Panda 에서 재현되는지가 SL2 의 되돌아올 지점이었다 |
+| **fixture (SL2)** | 금지 접촉(robot 의 arm link 나 hand 가 장애물에 파고드는 자세)을 만든 정적 scene. 관절 값을 random 하게 뽑아 MuJoCo contact 가 의도한 link-물체 쌍에 생기는 q 를 골랐다 |
+| **FK (forward kinematics)** | joint 값에서 각 link frame 의 pose 를 계산하는 것. 여기서는 adapter URDF 의 FK 를 robosuite MuJoCo body pose 와 비교한다 |
+| **MuJoCo contact** | MuJoCo 가 `mj_step` 중 geom 쌍의 접촉으로 보고하는 것(`dist` < 0 이 접촉 깊이). 독립 정답으로 쓴다 |
+| **signed distance (`sphere_sd`)** | link 의 sphere 와 물체 collision geom 사이의 signed distance. 양수 = 떨어져 있음, 음수 = 침투(penetrate). link 별 최솟값을 쓴다 |
+| **confusion table (contact × penetration)** | cell 마다 MuJoCo contact 가 있었는가(C) 와 sphere 가 침투했는가(P)로 4칸을 센 표. `C&P` = 접촉을 sphere 가 침투로 잡음, `C&noP` = 접촉을 놓침(miss), `noC&P` = 접촉 없는데 침투(false alarm), `noC&noP` = 둘 다 없음 |
+| **manipulator side** | V11AB 의 16-D layout `[L7, Lg, R7, Rg]` 에서 robot 의 팔이 놓이는 쪽. Panda 한 팔은 `left`(wrist camera 가 `left_wrist` 이므로) |
 
 ---
 
@@ -610,7 +627,8 @@ V11AB 의 depth 유효 범위는 0.05 ~ 3.0 m, 기본 ESDF box 는 base frame z 
 | 3 | **MSAA sample 위치의 K(`K_depth_sample`, 127.625 / 127.125)는 채택하지 않는다.** renderer 에 따라 달라지는 값이기 때문이다. |
 | 4 | **`robot_state` 를 image 순간 값으로 고친다.** SL-2 전에 반영한다. |
 
-위 2, 4 는 **SL2 에서 구현한다. 아직 구현도 측정도 되지 않았다.** 이 절의 `K_pixel_centre` 열은 현재 기록한 depth 에 오프라인으로 K 만 바꿔 적용해 본 값이며, SL2 구현 후의 adapter 출력을 다시 재야 한다. 그 값이 위 기대(head table median 약 0.9 mm, table plane 평균 +0.84 mm)와 같을지는 그때 확인한다.
+~~위 2, 4 는 **SL2 에서 구현한다. 아직 구현도 측정도 되지 않았다.** 이 절의 `K_pixel_centre` 열은 현재 기록한 depth 에 오프라인으로 K 만 바꿔 적용해 본 값이며, SL2 구현 후의 adapter 출력을 다시 재야 한다. 그 값이 위 기대(head table median 약 0.9 mm, table plane 평균 +0.84 mm)와 같을지는 그때 확인한다.~~
+→ **SL2 에서 구현했고 새 replay 로 측정했다.** 판정 2(K = 127.5) 와 판정 4(`robot_state` = image 순간)의 결과는 아래 [SL2 의 "SL1 후속 2건"](#결과--sl1-후속-2건-구현-후-재측정)에 있다. `K_pixel_centre` 열과 같은 값이 adapter 출력에서 나왔다. 이 절의 `K_recorded` 열과 "capture instant" 절의 `robot_state` 수치는 SL1 시점의 기록이다.
 
 ### 측정하지 않은 것
 
@@ -627,7 +645,7 @@ V11AB 의 depth 유효 범위는 0.05 ~ 3.0 m, 기본 ESDF box 는 base frame z 
 
 | # | 내용 | 영향 / 다음 |
 |---|---|---|
-| 1 | SL2 에서 K 를 127.5 로, `robot_state` 를 image 순간으로 고친 뒤 #2 · capture instant 를 재측정 | 판정 2 · 4 |
+| 1 | ~~SL2 에서 K 를 127.5 로, `robot_state` 를 image 순간으로 고친 뒤 #2 · capture instant 를 재측정~~ | ~~판정 2 · 4~~ → SL2 에서 완료 |
 | 2 | ESDF box z 범위 · table 처리 | SL-4 에서 결정 ((d)) |
 | 3 | SL-3 attention -> depth 사상에서 좌우 되돌리기 | `opencv_to_policy_pixel` / `policy_to_opencv_pixel` 사용 ((a)) |
 | 4 | wrist 0.05 m 미만 pixel 과 head 3.0 m 초과 pixel 의 처리 | SL-2 · SL-3 ((e)) |
@@ -642,3 +660,351 @@ V11AB 의 depth 유효 범위는 0.05 ~ 3.0 m, 기본 ESDF box 는 base frame z 
 | #2 오차가 voxel 이상이었다면 | near/far · fovy · base pose 정의를 재점검, 원인 확정 전 SL-2 로 가지 않음 (이번에는 p95 가 2.85 mm 이하라 해당 없음) |
 | SL-3 token 순서 audit 이 `left_wrist` slot 과 다르다 | adapter 의 camera 이름 table 만 변경 |
 | 공식 EGL renderer 를 쓰게 된다 | depth sample 위치와 K 규약 재측정 (판정 3) |
+
+---
+
+## SL2 — Panda geometry: sphere chain · self-filter · contact link, SL1 후속 2건 (2026-10-12)
+
+> 2026-10-12. 구현 commit `7ce24d9f` · 검증 commit `9b51a3c4` (git author date 2026-10-12 04:57 / 05:33 +0000). 사용자 확정 2026-10-12.
+> 원본: [`handoff/SL2.task.md`](handoff/SL2.task.md) · [`handoff/SL2.impl.md`](handoff/SL2.impl.md) ·
+> [`handoff/SL2.verify.json`](handoff/SL2.verify.json). raw 출력은 `outputs/verify/SL2/`.
+> 이 절의 수치는 `SL2.verify.json` 의 `numbers` 가 출처다. 구현 단계에서만 나온 값(URDF 보정 전 오차 등)은 그 자리에서 "impl.md" 로 표시한다.
+> 단위는 따로 적지 않으면 mm 이고, task 0 · episode 0 의 replay 114 observation 위의 값이다. frame 번호는 observation index(0–113)다.
+
+### 이 STEP 이 답하는 질문
+
+V11AB 와 **같은 구조**(self-filter 는 전신 + 덮개, constraint 는 gripper/arm)의 Panda sphere model 이 LIBERO simulator 의 실제 Panda 위치·형상과 맞아서,
+**robot 점은 지우고 target 은 지우지 않으며, 실제 접촉을 sphere 침투로 나타내는가?** 그리고 SL1 에서 판정한 후속 2건(K principal point, `robot_state` image 순간)이 구현되었는가?
+
+```
+robot_state(q7 + finger2, image 순간) --FK--> Panda UrdfSphereChain (adapter URDF)
+        |-- self-filter model (franka.yml 61 sphere + 덮개 capsule)  -> DepthRobotMask -> depth 에서 robot 점 제거
+        `-- constraint model  (franka.yml 61 sphere, link_filter)    -> clearance constraint (SL-4/5 에서 연결)
+```
+
+Action 변환(SL-5), attention(SL-3), ESDF 연결(SL-4)은 이번 범위가 아니다.
+
+### 무엇을 만들었나
+
+**SL1 후속 2건 (camera adapter).**
+
+| 항목 | 내용 |
+|---|---|
+| K principal point | `pixel_centre` 규약 `((W-1)/2, (H-1)/2) = (127.5, 127.5)`. 규약 이름과 값을 `conventions()` · manifest 에 기록 (`K_convention`). robosuite 의 `intrinsic_matrix` 는 비교 기준으로만 남겼다 |
+| `robot_state` = image 순간 | geometry capture 의 observable 이 같은 physics substep 에서 두 후보(`mj_integratePos(qpos, qvel, -dt)` 와 현재 `qpos`)를 scratch `MjData` 에서 다시 풀어 render 가 본 kinematics 를 재현하는 쪽을 고른다. 어느 쪽도 1e-9 m 안에 재현하지 못하면 capture 가 예외를 낸다. 기록된 `sim_state` 는 그 substep 의 simulator 상태라는 원래 뜻 그대로 두고, `sim_state_image` 를 새로 추가했다 |
+| `_geom.npz` 추가 key | `sim_state_image`, `qpos_image_source`, `qpos_image_residual_m` (검증용) |
+
+**Panda robot model (`AG3S/adapters/panda/`, 새 파일. `AG3S/ag3s/**` algorithm 은 한 줄도 바꾸지 않았다).**
+
+| 구성 | 내용 |
+|---|---|
+| adapter URDF (`robots/panda/description/panda_libero.urdf`) | cuRobo `franka_panda.urdf` 의 팔 관절 7 개를 그대로 쓰고, **손과 손가락 장착 offset 3 값만 robosuite(LIBERO `MountedPanda` + `PandaGripper`) 값으로 고쳤다**: `panda_joint8` z 0.107 → 0.1065, `panda_hand_joint` yaw −0.785398 → −0.7858908 (robot.xml quat 의 `2·atan2(−0.383, 0.924)`), finger joint z 0.0584 → 0.0524. root = `panda_link0` (= `robot0_base`). 보정 전 cuRobo URDF 는 4 고정 q 에서 팔(link0–7) 0.000 mm, hand 0.5 mm · 0.028°, finger 6.5 mm 어긋났다(impl.md 의 test 값). hand · finger collision mesh 의 bbox 가 두 쪽 link frame 에서 같아서 mesh 가 아닌 frame offset 의 문제였다. `panda_grip_site` · `panda_eye_in_hand`(OpenCV 축) fixed link 를 추가했다 |
+| finger joint 대응 | `robot_state[7]` → `panda_finger_joint1` (+), `robot_state[8]` → `panda_finger_joint2` (부호 반전: MuJoCo `finger_joint2` 는 +y 축 · range [−0.04, 0], URDF 는 −y 축 · [0, 0.04]). finger 개도는 V11AB 의 T29 parameter joint 로 받는다 |
+| constraint model | adapter URDF 위에 cuRobo `franka.yml` collision sphere 61 개를 zero-length `UrdfCapsule`(role `collision`)로 넣었다 |
+| self-filter model | 위 61 개 + robosuite **collision mesh**(group 0) 에서 `franka.yml` sphere 가 덮지 못한 표면을 **V11AB 의 `self_filter_covering_capsules` 를 그대로 호출**해 맞춘 덮개 capsule(role `self_filter_cover`). 덮개는 constraint model 에 넣지 않는다 |
+| 덮개 대상 body | Panda link0–7, hand, 손가락 + pad body, mount 3 개(`controller_box`, `pedestal_feet`, `pedestal`). SL1 segmentation 에서 head camera 가 `mount0_pedestal_vis` · `mount0_torso_vis` 를 보기 때문이다. RB-Y1 이 base 를 덮은 것과 같은 이유 |
+| robosuite 모델 재구성 | robosuite 는 Python 3.8 쪽에만 있어서, 3.8 exporter(`robot_geometry.py`)가 robot subtree 의 body · joint · geom · mesh 를 npz 로 내고 3.11 쪽(`cover.py`)이 `MjSpec` 모델을 다시 짓는다. body 이름을 URDF link 이름으로 바꿔 두어 V11AB 함수의 `static_urdf_ancestor` 가 RB-Y1 에서처럼 link 를 찾는다 |
+| 덮개 JSON | `libero_panda_self_filter_cover.json` — 51 capsule, provenance(geometry · kinematic digest, URDF · `franka.yml` SHA-256) 포함. confined variant 는 `cover.py --confine` 으로 만든다 |
+| builder | `build_panda_self_filter_model()`, `build_panda_constraint_model(link_filter=...)`, `panda_depth_robot_mask(...)`(V11AB `backproject` + `depth_robot_mask` 연결) |
+
+**link 집합 대응 (RB-Y1 ↔ Panda).** V11AB 의 link 집합 이름(`grounding_report`/`config`)을 같은 역할로 Panda 에 옮겼다. 오타 · 빈 집합 · 모르는 그룹은 `ValueError` 다.
+
+| 역할 | RB-Y1 | Panda |
+|---|---|---|
+| `PALM_LINKS` | `ee_left`, `ee_right` | `panda_hand` |
+| `FINGER_LINKS` | `ee_finger_{l1,l2,r1,r2}` | `panda_leftfinger`, `panda_rightfinger` |
+| `GRIPPER_LINKS` (`--links gripper`, V11AB 기본) | PALM + FINGER (6) | PALM + FINGER (3 link, 22 sphere) |
+| `ARM_LINKS` (`--links arms`) | `link_{left,right}_arm_0..6` + GRIPPER | `panda_link1..7` + GRIPPER (10 link, 59 sphere) |
+| 결정 변수 없는 link (filter 만) | base, wheels, torso, head | `panda_link0`, mount (덮개만) |
+| `DEFAULT_CONTACT_LINKS[side]` | left: `ee_left, ee_finger_l1, l2` / right: 대응 | left: `panda_hand, panda_leftfinger, panda_rightfinger` |
+
+**Manipulator side = `left`.** Panda 단일 팔을 `left` 로 둔다. SL1 에서 wrist camera 를 pi05_libero 의 token slot 에 맞춰 `left_wrist` 로 정했으므로 camera 가 달린 팔과 contact link 의 side 가 일치해야 한다. V11AB 16-D layout `[L7, Lg, R7, Rg]` 의 L 슬롯에 대응한다(SL-5 에서 사용). camera.py · model.py · manifest 두 곳에 기록했다. SL-3/SL-5 의 camera↔arm audit 결과가 다르면 adapter 표만 바꾼다.
+
+V11AB server 연결(`serve_safe.build_ag3s`)은 하지 않았다. RB-Y1 hardcode 지점 목록은 impl.md 에 있다(아래 "열린 항목" 5).
+
+### 실행
+
+| 항목 | 값 |
+|---|---|
+| source | SL0 run `20261012T045129_6ba81024d243_sl0-pi05only-t0e0` (읽기만) |
+| replay + segmentation (측정 대상) | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T135846_7ce24d9ff7aa_sl2-replay-seg-t0e0` (`--capture-geometry --capture-float-depth --capture-segmentation`) |
+| replay flag 없음 (SL0 경로 보존) | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T135938_7ce24d9ff7aa_sl2-replay-off-t0e0` |
+| robot geometry ground truth | `outputs/verify/SL2/raw/geo_libero.npz` (실제 LIBERO env 의 robot subtree export), `fk_libero.npz` |
+| 환경 | GPU · policy server 불필요. launcher `.venv-ag3s` → replay `.venv-libero`. cgroup working set 최대 57.357 GiB (다른 checkout 의 process 가 동시에 돌고 있었다: development checkout 의 pytest, `t47_head_selection`) |
+| 명령 편차 | impl.md 가 준 `robot_geometry.py` 명령은 이 shell 에서 실패했다(`env.sh`/pod 의 `LD_LIBRARY_PATH` 가 `/usr/local/lib/python3.10/dist-packages/torch/lib` 를 포함해 `libtorch_python.so` 의 `PyObject_GET_WEAKREFS_LISTPTR` ImportError). verifier 가 `LD_LIBRARY_PATH` 를 비우고 `PYTHONPATH` 를 해제하는 wrapper `libero_env.sh` 로 실행했다. 코드 수정은 SL3 에서 한다(아래 "열린 항목" 1) |
+
+### 결과 — Figure
+
+세 figure 는 verifier 가 만들었다(`outputs/verify/SL2/scripts/`, sidecar `.json` 동봉).
+
+**실제 scene** — frame 92(MuJoCo 가 두 finger pad 모두 target bowl 에 접촉으로 보고하는 frame). 위 줄: robosuite collision mesh(MuJoCo pose) 위에 sphere 를 겹친 정면(base frame y–z)·측면(x–z) 그림. constraint(61), self-filter default(61 + 184 cover = 245), hand close-up 에서 default 대 confined hand(61 + 1,066 cover = 1,127). 가운데 두 줄: wrist · head 에서 self-filter variant 5 개의 제거 결과(파랑 = 제거된 robot/기타, 빨강 = 제거된 target bowl, 초록 윤곽 = target bowl). 아래: head depth 를 back-project 한 point cloud(side view) 와 forbidden-contact fixture F1–F3.
+
+![SL2 scene](figures/sl2-scene.png)
+
+**graph** — FK 위치 오차(frame 별, log 축), robosuite collision mesh coverage, self-filter 의 물체별 제거율, wrist · head 에서 target bowl 제거 비율의 frame 별 추이(초록 띠 = finger pad 접촉, 노랑 띠 = hand 접촉, 점선 = bowl 의 lift), constraint sphere signed distance.
+
+![SL2 graph](figures/sl2-graph.png)
+
+**table** — link 집합 대응 · sphere 출처와 수 · self-filter variant 비교 · contact × penetration confusion table · SL1 후속, FK, 회귀 요약.
+
+![SL2 table](figures/sl2-table.png)
+
+### 결과 — SL1 후속 2건 (구현 후 재측정)
+
+**robot_state 가 image 순간이 되었는가.** adapter URDF 로 FK 한 wrist camera pose 와 기록된 `T_world_cam` 의 차이다.
+
+| 비교 | 위치 최대 | 회전 최대 |
+|---|---|---|
+| SL2 run: FK(`robot_state`) vs `T_world_cam` | 2.6e-16 m | 6.4e-6 deg |
+| SL1 run 에 같은 검사 (`robot_state` = `sim_state.qpos`, 1 substep 늦음) | 0.574 mm (median 0.408 mm) | 0.041 deg |
+
+- 기록된 `robot_state` 와 `sim_state_image` 의 qpos 차이: head · left_wrist 모두 0.0 (최대 절대값). `sim_state_image` 와 `integratePos` 로 만든 qpos 의 차이도 0.0.
+- `sim_state_image` 에서 re-render 한 RGB · depth 가 기록과 같은 frame 수: head 114/114, left_wrist 114/114 (RGB · depth 모두). `T_world_cam` · `T_world_base` 차이는 0.0 이하 수준(wrist 3.3e-16, base 0.0).
+- 고른 후보: `integrated_back` 113 frame, `current`(현재 qpos) 1 frame (frame 0, 아직 아무것도 움직이기 전).
+- 기록된 segmentation 은 여전히 `env.step` 반환 시점 render 라 image 순간과 다르다(SL1 차이 #4 그대로): image 순간 segmentation 과 같은 frame 은 head 4 개, left_wrist 1 개, 다른 pixel 수 합계는 head 8,686 · left_wrist 11,938. 아래 self-filter 측정은 image 순간 segmentation(`segP`)을 쓰고, 기록된 segmentation(`segRec`)으로 낸 값과 함께 확인했다(차이는 0.2 %p 안).
+
+**pixel-centre K 로 SL1 #2 · #4 를 다시 쟀다.** 기록된 K 의 principal point 는 (127.5, 127.5), SL1 run 의 K 와의 차이는 (−0.5, −0.5), 초점거리 차이는 0 이다. 새 adapter 출력의 값이 SL1 의 `K_pixel_centre` 열(depth 에 오프라인으로 K 만 바꿔 적용한 값)과 같다.
+
+| 측정 | SL1 `K_recorded` (128.0) | SL2 adapter 출력 (127.5) | SL1 `K_pixel_centre` 열 |
+|---|---|---|---|
+| head table 표면 거리 median / p95 | 2.00 / 2.85 | **0.90 / 1.28** | 0.90 / 1.28 |
+| head bowl_1 (target) median / p95 | 1.20 / 2.56 | 0.54 / 1.17 | 0.54 / 1.17 |
+| head robot median / p95 | 1.26 / 2.79 | 0.58 / 1.34 | 0.58 / 1.34 |
+| head stove median / p95 | 2.39 / 2.83 | 1.02 / 1.35 | 1.02 / 1.35 |
+| wrist table median / p95 | 0.25 / 0.51 | 0.25 / 0.49 | 0.25 / 0.49 |
+| wrist bowl_1 (target) median / p95 | 0.33 / 0.99 | 0.22 / 0.56 | 0.23 / 0.56 |
+| head table plane z − table top 평균 | +2.001 | +0.836 | +0.836 |
+| head table plane tilt | 0.104 deg | 0.048 deg | 0.048 deg |
+| cross-camera nearest (all) median / p95 | 2.46 / 10.69 | 1.66 / 9.41 | 1.66 / 9.41 |
+| cross-camera nearest (all_covisible) median / p95 | 2.41 / 3.41 | 1.61 / 2.54 | 1.61 / 2.55 |
+
+wrist 쪽은 camera 가 table 에 가까워 K 규약의 영향이 작다(table plane z − top 평균 +0.011 mm, SL1 표와 같다). 물체별 전체 값은 `SL2.verify.json` `n1b_pixel_centre_K_remeasure` 에 있다. 이로써 SL1 판정 2(K = 127.5) 와 4(`robot_state` = image 순간)는 구현되었고 측정되었다.
+
+### 결과 — #2 FK 일치 (adapter URDF vs LIBERO MuJoCo)
+
+adapter URDF 의 FK 를 같은 q 에서 robosuite MuJoCo body pose 와 비교했다(`robot0_base` frame). 비교 link 는 link1–7 · hand · leftfinger · rightfinger(+ camera frame `panda_eye_in_hand`).
+
+| 비교 | 위치 최대 | 위치 p95 | 회전 최대 | 회전 p95 |
+|---|---|---|---|---|
+| trajectory 114 frame × 10 link (link1–7, hand, 두 finger) | 4.8e-9 mm | 4.2e-9 mm | 5.6e-10 deg | 5.6e-10 deg |
+| 고정 q 4 개 × 12 frame (10 link + `panda_grip_site` + `panda_eye_in_hand`) | 5.1e-9 mm (`panda_grip_site`) | | 8.3e-10 deg (`panda_link6`) | |
+
+목표(≤ 1 mm, ≤ 0.1°)를 float 정밀도까지 만족한다(link 별 표: `n2_fk`). **adapter URDF 의 kinematics 는 LIBERO 의 Panda 와 같다.** 이 값은 위의 hand · finger offset 보정 뒤의 결과이고, 보정 전 cuRobo URDF 의 오차는 impl.md 가 낸 값만 있다(독립 측정 아님).
+
+### 결과 — #3 sphere 출처 · 수 · coverage
+
+**sphere model 별 수.**
+
+| model | 출처 | sphere 수 | 덮개 sphere / capsule |
+|---|---|---:|---|
+| constraint `gripper` | `franka.yml` (hand 18 + finger 2 + 2) | 22 | — |
+| constraint `arms` (builder 기본) | `franka.yml` link1–7 + gripper | 59 | — |
+| constraint `all` | `franka.yml` 전부 (11 link, 반지름 11–60 mm, role `collision`) | 61 | 0 |
+| self-filter **default** | `franka.yml` 61 + V11AB fitter 덮개 | 245 | 184 / 51 |
+| self-filter confined hand | default 에서 hand 를 confined 로 다시 맞춤 | 1,127 | 1,066 / 294 |
+| self-filter confined mount | default 에서 mount 를 confined 로 다시 맞춤 | 3,389 | 3,328 / 793 |
+| self-filter **confined hand+mount** (Panda 기본으로 채택, 아래 판정) | 둘 다 confined | **4,271** | 4,210 / 1,036 (link0 3,192, hand 911) |
+
+model 의 반지름과 `franka.yml` 반지름의 차이는 최대 0.0 이다. commit 된 덮개 51 capsule 은 이 export 에서 다시 맞추면 동일하고(`committed_cover_refit_from_this_export_identical = true`), 덮개를 맞춘 geometry 의 digest 는 이번 export 의 digest 와 같다.
+
+**constraint model(`franka.yml` sphere)이 robosuite collision mesh 표면을 얼마나 덮는가.** mesh 표면 표본점 중 그 link 자신의 sphere union 안에 든 비율, 밖인 점의 최대 거리, 그리고 전체 sphere union 으로 본 값(19 frame 평균; 이웃 link sphere 가 덮어 주는 몫 포함)이다.
+
+| link | 표본 수 | own-link 안 비율 | 밖 최대 거리 (mm) | 전체 union, q 19 frame 평균 |
+|---|---:|---:|---:|---:|
+| `panda_link0` | 30,208 | 2.3 % | 99.6 | 10.3 % |
+| mount | 931,688 | 0.0 % | 1,095 | 0.0 % |
+| `panda_link1` | 33,291 | 73.8 % | 27.3 | 73.8 % |
+| `panda_link2` | 29,419 | 28.6 % | 42.5 | 36.3 % |
+| `panda_link3` | 24,141 | 33.7 % | 34.3 | 38.3 % |
+| `panda_link4` | 24,454 | 22.3 % | 36.7 | 25.8 % |
+| `panda_link5` | 33,798 | 13.9 % | 65.2 | 17.4 % |
+| `panda_link6` | 17,593 | 12.3 % | 90.3 | 39.1 % |
+| `panda_link7` | 8,459 | 41.5 % | 12.2 | 47.2 % |
+| `panda_hand` | 12,752 | 13.4 % | 15.6 | 27.2 % |
+| `panda_leftfinger` | 1,528 | 23.4 % | 14.2 | 46.6 % |
+| `panda_rightfinger` | 1,528 | 23.3 % | 14.2 | 44.8 % |
+
+`franka.yml` sphere 는 몸체의 **일부만** 덮는다(link 별 12–74 %). 이것이 constraint 용으로는 충분한 근사인지는 sphere 가 몸체 밖으로 나간 두께와 contact 측정(아래 #5)으로 본다. 한편 self-filter default 모델(덮개 포함)은 모든 link · mount 의 collision 표면 표본을 100 % 담는다(밖 최대 0.0). visual 표면 표본으로 보면 default 는 모든 link 에서 100 % 이고, confined hand 는 hand 에서 99.76 %(밖 최대 1.16 mm), confined mount 는 mount 의 visual 표면에서 57.8 %(밖 최대 92.7 mm)다. mount 는 collision 으로 맞췄기 때문에 visual 만 있는 표면은 덮이지 않는다.
+
+**sphere union 이 collision hull 밖으로 나간 두께 (protrusion, p95 / 최대, mm).** 값이 클수록 depth 에서 robot 이 아닌 곳을 robot 으로 오인해 지울 위험이 크다.
+
+| link | constraint (`franka.yml`) | self-filter default | confined (hand 는 confined hand, link0 는 confined mount) |
+|---|---|---|---|
+| `panda_link0` (+ mount) | 23.0 / 28.2 | **215.0 / 249.6** | 61.3 / 129.8 |
+| `panda_link1` | 20.6 / 37.7 | 62.8 / 71.1 | 62.8 / 71.1 |
+| `panda_link2` | 14.8 / 30.9 | 100.5 / 110.7 | 100.5 / 110.7 |
+| `panda_link3` | 22.3 / 38.7 | 92.5 / 101.3 | 92.5 / 101.3 |
+| `panda_link4` | 13.7 / 25.6 | 90.2 / 97.9 | 90.2 / 97.9 |
+| `panda_link5` | 30.5 / 61.7 | 105.1 / 112.1 | 105.1 / 112.1 |
+| `panda_link6` | 2.9 / 8.6 | 72.6 / 82.8 | 72.6 / 82.8 |
+| `panda_link7` | 13.4 / 26.8 | 46.6 / 52.7 | 46.6 / 52.7 |
+| `panda_hand` | 1.6 / 5.1 | **49.1 / 56.4** | 17.5 / 43.1 |
+| `panda_leftfinger` | 3.5 / 5.4 | 22.7 / 24.8 | 22.7 / 24.8 |
+| `panda_rightfinger` | 3.5 / 5.5 | 22.8 / 24.8 | 22.8 / 24.8 |
+
+constraint sphere(`franka.yml`)는 hand · finger 에서 몸체 밖으로 거의 나가지 않는다(hand p95 1.6 mm). 반면 self-filter 덮개는 link 몸체보다 수 cm 크게 나간다. 이 차이가 constraint 와 self-filter 를 따로 두는 이유이고, 아래 #4 가 그 대가를 보여 준다.
+
+### 결과 — #4 self-filter (SL1 depth 에 Panda self-filter model 적용)
+
+SL1 의 metric depth(유효 범위 0.05–3.0 m, inflation 0, guard radius 0)에 `DepthRobotMask` 를 적용했다. segmentation 이 정답이다: "robot 제거율" = segmentation 이 robot 인 pixel 중 제거된 비율, "오제거" = robot 이 아닌 물체 pixel 중 제거된 비율. 비교한 variant 는 5 개다.
+
+- **default** — `franka.yml` 61 + V11AB fitter 덮개 51 capsule(245 sphere)
+- **confined hand** — hand 덮개만 confined(1,127)
+- **confined mount** — mount 덮개만 confined(3,389)
+- **confined hand+mount** — 둘 다(4,271)
+- **`franka.yml` only** — 덮개 없음(61)
+
+114 frame 합산(removed / labelled valid-depth pixel):
+
+| variant | sphere | robot 제거율 head / wrist | mount head 제거율 | target bowl 오제거 head / wrist | table 오제거 head / wrist | stove 오제거 head / wrist |
+|---|---:|---|---|---|---|---|
+| default | 245 | 99.23 % / 99.98 % | 99.93 % | 5.46 % / 11.00 % | 5.75 % / 1.62 % | **30.92 % / 11.68 %** |
+| confined hand | 1,127 | 99.22 % / 99.98 % | 99.93 % | **1.91 % / 4.30 %** | 5.72 % / 1.41 % | 30.92 % / 11.68 % |
+| confined mount | 3,389 | 99.17 % / 99.97 % | 98.70 % | 5.46 % / 11.00 % | **0.74 % / 0.60 %** | **0.00 % / 0.33 %** |
+| **confined hand+mount** | 4,271 | 99.17 % / 99.97 % | 98.70 % | **1.91 % / 4.30 %** | **0.72 % / 0.38 %** | **0.00 % / 0.33 %** |
+| `franka.yml` only | 61 | **41.86 % / 36.29 %** | 0.05 % | 0.02 % / 0.01 % | 0.00 % / 0.01 % | 0.00 % / 0.06 % |
+
+(pixel 수: head target bowl 75,545, stove 179,550, table 3,153,421; wrist target bowl 642,523, stove 150,097, table 3,854,155. default 의 head stove 는 55,518 pixel 이 제거됐다.)
+
+**target bowl 이 지워지는 frame (target bowl pixel 중 제거된 비율).**
+
+| variant | head 최대 (frame) | wrist 최대 (frame) | grasp 구간 frame 90–113 평균 head / wrist | 제거가 0 보다 큰 frame 수 head / wrist |
+|---|---|---|---|---|
+| default · confined mount | 62.98 % (83) | 34.24 % (52) | 6.72 % / 7.68 % | 57 / 85 |
+| confined hand · confined hand+mount | 18.41 % (83) | 15.53 % (53) | 3.64 % / 5.32 % | 55 / 85 |
+| `franka.yml` only | 0.40 % (89) | 0.24 % (41) | 0.04 % / 0.00 % | 14 / 42 |
+
+bowl 이 통째로 지워진 frame 은 없다(최대 62.98 %). default 에서 wrist 의 제거는 frame 49–56(finger 가 bowl 에 접근해 pad 접촉(frame 54)이 일어나는 구간)에 몰리고(frame 51–53 에서 31–34 %), head 의 제거는 frame 82–84(hand 가 bowl 에 접촉하는 구간)에서 61–63 % 로 커진다. 제거된 target pixel 을 가장 가까운 sphere 로 귀속시키면 default 에서 wrist 70,696 pixel 중 `panda_hand` 덮개가 65,135, `panda_rightfinger` 덮개가 5,561 pixel 이고, confined hand 에서는 wrist 27,656 pixel 중 `panda_rightfinger` 덮개 22,973, `panda_hand` 덮개 4,269, `panda_leftfinger` 덮개 414 pixel 이다.
+
+**robot 이 아닌 다른 물체의 오제거는 variant 와 무관하게 작다.** bowl_2 0.51 % (head) · 0.50 % (wrist), ramekin 0.28 % · 0.17 %, plate 0 % · 0.036 %(default) → 0.011 %(confined hand), cookies · cabinet 0 %. 이 비율은 `franka.yml` only 에서는 거의 0 이다. segmentation 이 geom 이 아닌 pixel(seg −1)은 위 비율에서 뺐다: head 49,962 pixel(valid 7,282,370 중), wrist 86,922 pixel(valid 6,858,240 중)이며, 이 중 제거된 pixel 은 default 21,354 / 20,094 → confined hand+mount 18,453 / 3,362 이다(base frame z median 은 head 0.016 m, wrist −0.012 m).
+
+#### 왜 default 덮개가 stove 와 target bowl 을 지웠나
+
+**stove — mount 덮개가 table 위로 뻗어 있었다.** robot 의 mount(pedestal)는 크고 둥근 collision 몸체다. V11AB 의 덮개 fitter 는 `franka.yml` sphere 가 덮지 못한 표면을 **몇 개의 큰 capsule** 로 한꺼번에 덮는다. capsule 은 반지름이 크고 양 끝이 반구라서, 그 끝 반구가 mount 몸체 밖으로 나간다. default 에서 `panda_link0`(+ mount) 의 sphere union 은 collision hull 밖으로 p95 215.0 mm, 최대 249.6 mm 나가 있다(위 protrusion 표). 이 부분이 base 옆의 table 과 stove 위까지 닿아서, camera 가 본 table · stove 의 depth 점이 "robot sphere 안"으로 판정되어 지워졌다(head 에서 stove 30.92 %, table 5.75 %). 구현 단계의 smoke 도 같은 방향이다(impl.md, 검증 수치 아님: pedestal 덮개 중 위쪽 capsule 이 base frame z +0.173 m, x +0.394 m 까지 닿고 table top 은 z −0.012 m). **원인 분리 실험이 이를 확인한다.** hand 만 confined 로 바꾼 variant 는 stove 오제거가 그대로 30.92 % 이고, mount 만 confined 로 바꾼 variant 는 0.00 % 로 떨어진다(table 도 5.75 % → 0.74 %). confined mount 는 mount 의 큰 capsule 을 collision hull 안쪽에 가두어 작은 capsule 로 다시 맞춘 것(덮개 capsule 전체가 51 → 793 개)이고 protrusion 은 p95 61.3 mm · 최대 129.8 mm 로 줄었다.
+
+**target bowl — hand 덮개가 손가락 사이로 내려와 있었다.** 같은 fitter 가 hand body 의 덮이지 않은 표면(옆면 등)을 한 덩어리로 보고 큰 capsule 몇 개로 덮었다. 그 capsule 의 끝 반구는 palm 아래, 즉 **두 손가락 사이 — 파지할 bowl 의 rim 이 들어오는 자리** 까지 나온다(hand protrusion p95 49.1 mm · 최대 56.4 mm; impl.md smoke: 손가락 z 0.052–0.106 m 사이의 파지 자리에 덮개 끝 반구가 hand z 0.112–0.120 m 까지 내려온다, 검증 수치 아님). 그래서 손가락이 bowl 을 잡으러 내려오고 bowl 이 손가락 사이로 들어올 때 bowl 의 depth 점이 hand 덮개 안에 들어가 robot 으로 지워졌다. 실제로 제거된 wrist target pixel 의 92 %(65,135 / 70,696)가 `panda_hand` 덮개에 귀속된다. **hand 만 confined 로 바꾸면 이 오제거가 11.00 % → 4.30 %(wrist), 5.46 % → 1.91 %(head)로 줄고** hand protrusion 은 p95 17.5 mm · 최대 43.1 mm 가 된다. mount 만 바꾼 variant 는 target 오제거가 그대로(5.46 / 11.00 %)이므로, target 오제거의 원인은 hand 덮개이고 mount 덮개와는 무관하다.
+
+**RB-Y1 T17 과의 유사성.** T17 은 RB-Y1 쪽 episode 로, 옛 sphere 모델에서 손목 부근 capsule 이 쥔 사과를 덮어 사과가 **17 frame 동안 통째로 지워졌다**(사과 retention 0.472, `AG3S_T0T6_LOG.md` §3 T28 Phase 1; 이후 T29 의 손가락 개도 parameter joint + 덮개 재설계로 0 frame 이 되었다). 이번 Panda default 도 같은 종류의 기하다: **덮개 capsule 이 몸체 표면을 덮는 데 그치지 않고, 몸체가 잡으려는 물체가 들어올 공간까지 부풀어 있다.** 다만 Panda 에서는 bowl 이 통째로 지워진 frame 이 없다(최대 62.98 %). 그리고 finger 개도 parameter 의 문제가 아니다 — 손가락을 포함한 모든 variant 가 같은 finger joint 대응을 쓰고, 덮개를 hand 에서만 바꿔도 값이 바뀐다.
+
+**남는 오제거는 finger 접촉 구간이다.** confined hand 에서도 wrist 에서 4.30 % 가 남는다. 제거된 pixel 의 대부분(27,656 중 22,973)이 `panda_rightfinger` 덮개에 귀속되고, 최대 15.53 %(frame 53)는 pad 접촉(frame 54) 직전이다. 이 구간은 MuJoCo 가 finger–bowl 접촉으로 보고하는 곳이므로 finger 덮개 표면과 bowl 표면이 맞닿아 있다(해석. 덮개 반지름별 분해는 측정하지 않았다). 한편 `franka.yml` only 는 target 을 거의 지우지 않지만(0.02 % · 0.01 %) robot 을 head 41.86 %, wrist 36.29 % 밖에 지우지 못해, 지우지 못한 robot 점이 ESDF 에서 장애물이 된다. 덮개는 필요하다.
+
+### 결과 — #5 contact 장면 (MuJoCo contact × constraint sphere 침투)
+
+**어떻게 쟀나.** link 별 sphere 와 물체 collision geom(이번 scene 의 LIBERO 물체 collision geom 은 모두 box 이고 바닥 plane 은 뺐다) 사이의 signed distance `sphere_sd` 의 최솟값을 구하고, 같은 (scene × 물체) cell 에서 MuJoCo contact 가 보고되는지와 대조했다. `sphere_sd < 0` 을 침투(P)로 센다(trajectory 접촉 cell 의 sd 부호와 일치). cell = (scene × 물체). trajectory 는 114 frame 위의 912 cell(link 별), fixture 는 7 개 scene 위의 56 cell. 아래 표는 `arms` constraint model(link1–7 + gripper, 59 sphere)이고, `gripper`(22 sphere)는 hand · finger 행과 같다.
+
+**trajectory 의 MuJoCo contact frame (target bowl 과 접촉, image 순간 상태 기준).**
+
+| MuJoCo geom → link | contact frame |
+|---|---|
+| `gripper0_rightfinger` (finger pad) → `panda_rightfinger` | 54, 90, 113 |
+| `gripper0_right_gripper` (hand) → `panda_hand` | 82, 83, 84 |
+| `gripper0_finger_joint1_tip` → `panda_leftfinger` | 90–113 (24 frame) |
+| `gripper0_finger_joint2_tip` → `panda_rightfinger` | 90, 92–113 (23 frame) |
+
+target bowl 의 lift(frame 10 대비 z 상승): frame 88 −0.0007 mm, 89 0.35 mm, 90 1.29 mm, 92 6.16 mm, 95 34.9 mm, 100 89.6 mm, 105 93.3 mm, 113 13.6 mm. 즉 frame 90 에서 파지가 되고 lift 가 시작된다.
+
+**link 별 confusion table (C = MuJoCo contact, P = sphere 침투).**
+
+| link (arms model) | trajectory C&P | C&noP (miss) | noC&P (false alarm) | noC&noP | fixture C&P | C&noP | noC&P | noC&noP |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `panda_link1` | 0 | 0 | 0 | 912 | 0 | 0 | 0 | 56 |
+| `panda_link2` | 0 | 0 | 0 | 912 | 0 | 0 | 0 | 56 |
+| `panda_link3` | 0 | 0 | 0 | 912 | 0 | 0 | 0 | 56 |
+| `panda_link4` | 0 | 0 | 0 | 912 | 0 | 0 | 0 | 56 |
+| `panda_link5` | 0 | 0 | 0 | 912 | 1 | 0 | 0 | 55 |
+| `panda_link6` | 0 | 0 | 0 | 912 | 1 | 0 | 0 | 55 |
+| `panda_link7` | 0 | 0 | 0 | 912 | 2 | 0 | 0 | 54 |
+| `panda_hand` | 0 | 3 | 0 | 909 | 2 | 1 | 0 | 53 |
+| `panda_leftfinger` | 22 | 2 | 0 | 888 | 1 | 0 | 0 | 55 |
+| `panda_rightfinger` | 0 | 24 | 0 | 888 | 0 | 0 | 0 | 56 |
+
+- **false alarm 은 없다**: 접촉이 없는데 sphere 가 침투한 cell 은 trajectory 에서 0 이다(`no_contact_penetrate_cells` 가 비어 있다).
+- **trajectory 의 접촉은 gripper 와 target bowl 의 파지 접촉뿐이다**(arm link1–7 은 접촉 cell 0). 접촉 cell 에서 sphere signed distance 는 `panda_leftfinger` −0.60 ~ +0.86 mm(24 cell 중 22 가 침투), `panda_rightfinger` **+0.47 ~ +2.02 mm**(24 cell 전부 침투 없음), `panda_hand` **+1.08 ~ +1.40 mm**(3 cell, 침투 없음)다. 같은 cell 의 MuJoCo contact 깊이는 0.02–0.49 mm 로 얕다(`contact dist` −0.0185 ~ −0.49 mm). 즉 gripper sphere 는 접촉 지점에서 **mm 수준(0.5–2 mm)으로 몸체보다 안쪽**에 있다(sphere 가 몸체보다 작다는 §#3 protrusion 과 일치).
+- **비접촉 frame 의 최소 clearance (`sphere_sd`, bowl 에 가장 가까운 frame)**: `panda_hand` 3.3 mm(frame 85), `panda_leftfinger` 1.2 mm(frame 89), `panda_rightfinger` 0.74 mm(frame 55), `panda_link7` 57.1 mm(frame 83), `panda_link6` 112.1 mm, `panda_link5` 126.9 mm, `panda_link4` 323.7 mm, `panda_link3` 393.4 mm, `panda_link2` 325.3 mm, `panda_link1` 177.1 mm.
+
+**금지 접촉 fixture 7 개.** joint 값을 random 하게 60,000 개 뽑아(seed 20261012) link–물체 간 MuJoCo contact 의 깊이가 −30 ~ −2 mm 인 자세를 골라, 의도한 link–물체 쌍마다 한 자세를 정했다(scene frame 10). 후보 수와 선택된 fixture 는 아래와 같다(탐색 27.4 s).
+
+| fixture | 의도한 쌍 | 조건에 맞은 후보 수 | MuJoCo contact 깊이 (mm) | 해당 link 의 `sphere_sd` (mm) | 결과 |
+|---|---|---:|---:|---:|---|
+| F1 | link7 – cabinet | 317 | −10.50 | −8.24 | C&P |
+| F2 | link6 – table | 988 | −10.04 | −8.34 | C&P |
+| F3 | link5 – cabinet | 215 | −10.05 | −3.96 | C&P |
+| F4 | hand – plate | 64 | hand −4.31 / leftfinger −6.20 | **hand +0.36** / leftfinger −4.62 | **hand 는 miss (C&noP)**, leftfinger 는 C&P |
+| F5 | hand – table | 1,389 | −9.87 | −4.87 | C&P |
+| F6 | link7 – stove | 352 | −8.41 | −5.65 | C&P |
+| F7 | hand – bowl_2 | 169 | −8.86 | −3.45 | C&P |
+
+**F4 의 miss.** hand 와 plate 사이 MuJoCo contact 깊이가 −4.31 mm 인데 hand sphere 의 signed distance 는 +0.36 mm(침투 아님)다. hand 의 constraint sphere 가 그 접촉 지점에서 mesh 보다 안쪽에 있기 때문이다. 같은 scene 에서 leftfinger 는 contact −6.20 mm, sphere −4.62 mm 로 침투를 잡으므로 scene 전체는 구별되지만, 이 한 칸은 hand 단독으로는 놓친다. 그 밖의 fixture 는 모두 접촉한 link 의 sphere 가 침투(−3.45 ~ −8.34 mm)로 나타났다. 관절 설정으로 만든 정적 scene 이므로 이 결과는 "fixture 7 개에서" 그렇다는 것이다.
+
+`mj_geomDistance` 는 음수 값이 MuJoCo contact 깊이와 크게 달라(F2 link6–table: contact −10.04 mm, geomDistance −162.94 mm) 침투 깊이로 쓰지 않았고, figure 는 양수 값만 그렸다.
+
+### 결과 — #6 SL0 경로 보존 · 회귀
+
+| 검사 | 결과 |
+|---|---|
+| flag 없는 replay = SL0 | episode npz SHA-256 `e8a15133b8e2ae4aa9c069532d6eca9eba96ed453b070f1b3523a8c48aaaa088` 이 SL0 · geometry replay · flag 없음 replay 에서 모두 같고, mp4 SHA-256 `9ce6114fb5d99dc57549b28c54a6e047d9b967f4b15b381584c88899e7036f8a` 도 같다. flag 없는 run 은 `_geom.npz` 를 만들지 않았다 |
+| `run_cpu_regression.sh` A (SL0 5 파일, `.venv-openpi-live`) | **73 passed** (SL0 · SL1 과 같다) |
+| 같은 script B (`tests/benchmark`, `.venv-openpi-live`) | 58 passed (SL1 44 + 새 py38 check 1 + SL2 13) |
+| 같은 script C (`tests/benchmark`, `.venv-ag3s`) | 57 passed, 1 skipped (serve_policy test, flax 없음 — SL1 과 같다) |
+| script exit status | 0 |
+| 16D legacy ESDF 기준선 | violated start 14/15 · has_target 15/15 · frame0 clearance −29.031 mm — 기준선과 일치 |
+| 16D cuRobo ESDF 기준선 | 이 STEP 에서는 돌리지 않았다 (CPU 전용 task) |
+
+`AG3S/ag3s/**` · `AG3S/trajopt/**` 를 바꾸지 않았으므로 16D 기준선이 그대로인 것은 구조상 예상된 결과다.
+
+### 이 STEP 에서 알게 된 것 (평이한 설명)
+
+**(a) Panda kinematics 는 맞다. 어긋난 것은 hand 장착 offset 뿐이었다.** cuRobo 의 `franka_panda.urdf` 는 팔 관절이 LIBERO 와 같고 손 장착 offset 만 robosuite 와 달랐다(impl.md: hand 0.5 mm, finger 6.5 mm). 이를 고친 adapter URDF 는 114 frame 에서 link1–7, hand, finger 의 FK 가 MuJoCo 와 4.8e-9 mm 이내로 같다.
+
+**(b) `franka.yml` sphere 는 constraint 용이지 self-filter 용이 아니다.** 몸체를 12–74 % 만 덮고(arm), hand 는 13.4 % 다. 그런데 몸체 밖으로는 거의 나가지 않는다(hand protrusion p95 1.6 mm). constraint 로 쓸 때는 "실제 몸체보다 크지 않은 sphere" 가 맞는 성질이고, self-filter 로 쓰면 robot 의 depth 점을 head 41.86 %, wrist 36.29 % 밖에 못 지운다. 그래서 V11AB 는 덮개를 self-filter model 에만 넣는다.
+
+**(c) 덮개를 두 곳에서 가두면 오제거가 거의 사라지고 robot 제거율은 그대로다.** mount 덮개가 stove · table 을(30.92 % → 0 %, 5.75 % → 0.72 %), hand 덮개가 target bowl 을(11.00 % → 4.30 %, 5.46 % → 1.91 %) 지웠다. 두 원인을 따로 바꾼 variant 가 서로의 값에 영향을 주지 않아 원인이 분리된다. robot 제거율은 head 99.23 % → 99.17 %, wrist 99.98 % → 99.97 % 로 거의 같다. 대가는 sphere 수다(245 → 4,271).
+
+**(d) constraint sphere 는 gripper 에서 mm 수준으로 안쪽이다.** 접촉 지점에서 right finger 는 +0.47–2.02 mm, hand 는 +1.08–1.40 mm 떨어져 있고, trajectory 에서 접촉을 침투로 잡는 것은 left finger 뿐이다(22/24). 그래서 이 sphere 를 "접촉 판정"에 쓰면 mm 수준의 miss 가 있다(trajectory 에서 hand 3, right finger 24, left finger 2 cell; fixture F4 의 hand). false alarm 은 없다. clearance constraint 에 연결했을 때 이 mm 수준의 gap 이 margin 으로 흡수되는지는 이 STEP 에서 측정하지 않았다.
+
+**(e) arm link 의 coverage 는 낮지만(12–74 %) trajectory 에서는 문제가 드러나지 않았다.** trajectory 는 arm 이 장애물에 가까워지지 않는 장면이라(link5–7 의 최소 sphere signed distance 57–127 mm 이상) 이 결과가 arm 보호가 충분하다는 뜻은 아니다. fixture 에서는 arm link(link5–7)가 접촉한 4 cell 이 모두 침투로 잡혔다.
+
+### 판정 (2026-10-12, 사용자)
+
+| # | 판정 |
+|---|---|
+| 1 | **SL2 확정.** |
+| 2 | **self-filter model 의 Panda 기본 = confined hand+mount cover.** 이것은 algorithm 변경이 아니라 **robot geometry 보정**이다. (sphere 수 4,271 대 245; runtime 은 SL-4 에서 측정하고, 필요하면 compact refit 한다.) 남는 한계: mount pixel 1.3 % 가 남고(head mount 제거율 98.70 %), wrist 의 target 오제거 4.30 % 가 남는다. |
+| 3 | **constraint model = cuRobo `franka.yml` sphere 그대로**(V11AB main). gripper-only protection 이다: sphere 가 mm 수준(0.5–2 mm)으로 gripper 몸체 안쪽이고, arm coverage 의 빈틈은 기록으로 남긴다(위 coverage 표). whole-body 보호가 필요해지면 MJCF-fit variant 를 따로 만든다. MuJoCo contact 를 정답으로 쓰는 독립 evaluator 는 SL-7 에서 만든다. |
+| 4 | **다음은 SL-3 (attention audit).** |
+
+SL2 의 "되돌아올 지점" 중 "`franka.yml` sphere coverage 가 크게 다르면 MJCF fit variant" 는 coverage 가 낮았지만(arm 12–74 %), 판정 3 이 V11AB main 에는 하나만 두기로 하여 **variant 를 만들지 않았다.**
+
+### 측정하지 않은 것
+
+- cuRobo 16D baseline (`.venv-openpi-live`, GPU) — CPU 전용 task
+- URDF 쪽(cuRobo `franka_description`)의 mesh 에 대한 sphere coverage — robosuite mesh 만 쟀다
+- `sphere_sd` 는 물체 collision box 기준이다(이 scene 의 모든 LIBERO 물체 collision geom 이 box). 바닥 plane 은 제외했다. 다른 task 의 비-box 물체는 쟀다고 할 수 없다
+- `mj_geomDistance` 의 음수 값은 침투 깊이로 쓰지 않았다(MuJoCo contact 깊이와 달라서)
+- segmentation 이 geom 이 아닌 pixel(seg −1)은 물체별 비율에서 제외했다(head 49,962 · wrist 86,922 pixel; 개수는 위에 기록)
+- confined 4,271 sphere 모델의 runtime (SL-4 에서 측정)
+- 다른 task · episode, 다른 해상도 (replay 한 task 0 · episode 0 의 114 frame 만)
+- constraint clearance margin 이 mm 수준 gap 을 흡수하는지(clearance constraint 에 연결하지 않았다)
+
+### 열린 항목
+
+| # | 내용 | 영향 / 다음 |
+|---|---|---|
+| 1 | 구현 보류 2건: (a) confined hand+mount cover 를 기본 덮개 JSON 으로 commit (지금 commit 된 것은 default 51 capsule 이다), (b) `robot_geometry.py` 가 `LD_LIBRARY_PATH` 를 정리해서 `env.sh` 아래에서도 실행되게 하기 | **SL3 에서 구현** (판정 2) |
+| 2 | confined 모델 sphere 4,271 의 runtime | SL-4 에서 측정, 느리면 compact refit |
+| 3 | arm coverage 의 빈틈(12–74 %) · gripper 의 mm 수준 gap | 판정 3 의 한계. whole-body 가 필요하면 MJCF-fit variant. 독립 contact evaluator 는 SL-7 |
+| 4 | 남는 한계: mount pixel 1.3 %, wrist target 오제거 4.30 %, 기타 물체 오제거(bowl_2 0.51 % 등) | SL-4 에서 ESDF 결과로 영향 확인 |
+| 5 | V11AB 의 RB-Y1 hardcode 지점 (impl.md 의 표): `serve_safe.build_ag3s` 의 model 주입, `constraint_link_filter`, `DEFAULT_CONTACT_LINKS` · `ContactConfig`, `safe_policy` 의 grasp/hold link, `multiview` 가 `robot_state` 를 그대로 q 로 쓰는 부분(Panda wire 는 9-D = q7 + finger 2 라 `split_robot_state` 가 필요), `wire.py` 의 camera 이름과 16-D layout(`ChunkLayout.rby1`), 관절 한계 model. **특히 `--capsule-radius-scale 0.05`(V11AB 의 RB-Y1 gap capsule 용)는 `franka.yml` sphere(role `collision`, zero-length)에 그대로 넘기면 반지름이 5 % 가 되므로 Panda 에서는 넘기지 않거나 exact role 로 두는 결정이 필요하다.** `--finger-cover both` 는 RB-Y1 손가락 구조 전제라 Panda 에 이식하지 않았다 | SL-4/5 입력. 구현은 하지 않았다 |
+| 6 | wrist 0.05 m 미만 pixel(전체의 8.2 %, SL1)과 head 3.0 m 초과 pixel 의 처리 | SL-3 · SL-4 (SL1 열린 항목 4) |
+| 7 | ESDF box z 범위와 table 처리 | SL-4 (SL1 열린 항목 2) |
+
+### 되돌아올 지점 (SL2)
+
+| 전환 신호 | 돌아와서 할 일 |
+|---|---|
+| FK 불일치가 장착 offset 으로 설명되지 않으면 | cuRobo URDF 대신 robosuite MJCF 에서 URDF 를 생성 (이번에는 hand · finger offset 3 값으로 설명되어 해당 없음) |
+| `franka.yml` sphere coverage 가 robosuite mesh 와 크게 다르면 | MJCF mesh fit sphere 로 constraint model 을 만드는 variant 를 별도 이름으로 비교 (coverage 는 낮았지만 판정 3 으로 V11AB main 에는 `franka.yml` 만 두기로 하여 보류) |
+| self-filter 가 grasp 중 target 을 지우면 | RB-Y1 T17 과 같은 원인인지 확인, 덮개 반지름 · finger parameter 재검토 (이번에는 hand 덮개가 원인임을 variant 로 분리하여 confined hand 로 처리) |
+| confined 4,271 sphere 가 SL-4 runtime 을 넘으면 | compact refit(sphere 수를 줄이는 재맞춤) 또는 덮개를 hand+mount 에 한정한 채 반지름 정책 재검토 |
+| Manipulator side `left` 가 SL-3/SL-5 의 camera↔arm audit 와 다르면 | adapter 의 side 표만 변경 |
+| SL-4 에서 mm 수준 gripper gap 이 clearance 판정을 흔들면 | gripper sphere 반지름 보정 또는 MJCF-fit variant |
