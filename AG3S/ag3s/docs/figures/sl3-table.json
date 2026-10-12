@@ -1,0 +1,158 @@
+{
+ "token_layout": [
+  [
+   "base_0_rgb",
+   "0-256",
+   256,
+   "True",
+   "True",
+   "head (agentview)",
+   "0.001051 / 0.04622 / 0.9346"
+  ],
+  [
+   "left_wrist_0_rgb",
+   "256-512",
+   256,
+   "True",
+   "True",
+   "left_wrist (robot0_eye_in_hand)",
+   "0.9946 / 0.9236 / 1.002"
+  ],
+  [
+   "right_wrist_0_rgb",
+   "512-768",
+   256,
+   "False",
+   "False",
+   "padding (unused)",
+   "0 / 0 / 0"
+  ],
+  [
+   "text",
+   "768-968",
+   200,
+   "-",
+   "valid 20",
+   "-",
+   "all L x H padding mass max 0.0"
+  ]
+ ],
+ "mapping": [
+  [
+   "policy image",
+   "resize_with_pad(raw[::-1, ::-1], 224); OpenCV = raw[::-1]; policy256[i,j] = opencv[i, 255-j]"
+  ],
+  [
+   "grid -> OpenCV",
+   "opencv_grid = policy_grid[:, ::-1]; patch (r,c) -> rows [16r,16r+16), cols [16(15-c),16(16-c))"
+  ],
+  [
+   "pixel map",
+   "GridAttentionAdapter('bilinear').to_pixel_map(opencv_grid, (256,256))  (V11AB lifting resampling)"
+  ],
+  [
+   "image check (16x16 block MAE, 0-255)",
+   "head un-mirror 0.077 vs mirror 42.2 (221/221 calls); wrist 0.077 vs 30.7 (221/221)"
+  ],
+  [
+   "phase rule",
+   "approach < first gripper-target contact <= grasp < lift (target z > z0 + 1 cm) <= transport <= last contact"
+  ]
+ ],
+ "summary": [
+  [
+   "head",
+   "un-mirror",
+   221,
+   221,
+   "0.120",
+   "0.026",
+   "0.012",
+   "10.20",
+   "0.317",
+   "0.059",
+   "3.54",
+   "0.115"
+  ],
+  [
+   "head",
+   "mirror left in",
+   221,
+   221,
+   "0.021",
+   "0.000",
+   "0.012",
+   "1.79",
+   "0.059",
+   "0.000",
+   "5.29",
+   "0.020"
+  ],
+  [
+   "left_wrist",
+   "un-mirror",
+   221,
+   214,
+   "0.183",
+   "0.060",
+   "0.123",
+   "1.48",
+   "0.385",
+   "0.220",
+   "2.24",
+   "0.180"
+  ],
+  [
+   "left_wrist",
+   "mirror left in",
+   221,
+   214,
+   "0.294",
+   "0.110",
+   "0.123",
+   "2.39",
+   "0.380",
+   "0.388",
+   "2.31",
+   "0.292"
+  ]
+ ],
+ "grid_rank": [
+  [
+   "head",
+   "5/144 (0.121; median 0.035, max 0.248 at L12H3)",
+   "5/144 (10.278; median 2.990, max 21.057 at L12H3)",
+   "10/144 (0.317; median 0.035, max 0.525 at L6H0)",
+   "26/144 (0.059; median 0.007, max 0.419 at L17H6)"
+  ],
+  [
+   "left_wrist",
+   "12/144 (0.183; median 0.100, max 0.343 at L5H5)",
+   "12/144 (1.483; median 0.807, max 2.786 at L5H5)",
+   "15/144 (0.385; median 0.133, max 0.575 at L5H5)",
+   "26/144 (0.220; median 0.070, max 0.607 at L5H5)"
+  ]
+ ],
+ "other": [
+  [
+   "dev rollout",
+   "10/10 official_success (record only); env steps [113, 120, 142, 98, 126, 107, 114, 124, 120, 122]; calls [21, 22, 27, 18, 24, 20, 21, 23, 22, 23]"
+  ],
+  [
+   "rollout client latency",
+   "first 3222 ms; p50 77.2 / p95 103.3 ms (GPU shared with development CL3, 16:36:15-16:43:28 KST)"
+  ],
+  [
+   "attention pass (audit)",
+   "first (JIT) 2.09 s; p50 64.4 / p95 77.3 ms (n=220); jax peak 7.21 GB; nvidia-smi max 8868 MiB"
+  ],
+  [
+   "self-filter default (confined)",
+   "robot 0.9917 / mount 0.9870 / target 0.0191 / stove 0.0000 / table 0.0072 removed (head segP) = SL2 confined hand+mount: 44/44 cells equal"
+  ],
+  [
+   "visual-mesh excess (4 mm)",
+   "max signed distance render mesh -> default model (+ = outside): hand -0.170 mm, torso 34.448 mm, pedestal 93.215 mm; not-removed pedestal px (head, 114 frames) 2062 (unconfined 114)"
+  ]
+ ]
+}
