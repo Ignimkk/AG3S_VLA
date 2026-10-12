@@ -1,0 +1,3389 @@
+{
+ "_comment": "ag3s-verifier (A2). numbers + paths only, no interpretation.",
+ "step": "T48",
+ "sub_step": "T48a",
+ "date": "2026-10-12",
+ "time_kst": "15:52-16:40 KST",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee",
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "command": "MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT OMP_NUM_THREADS=1 .venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --out-json <R>/baseline/legacy.json",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/baseline/legacy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/baseline/legacy.log",
+   "load_before": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/baseline/load_before.txt"
+  },
+  {
+   "id": "plan",
+   "command": "CUDA_VISIBLE_DEVICES='' JAX_PLATFORMS=cpu MUJOCO_GL=osmesa OMP_NUM_THREADS=1 .venv-openpi-live/bin/python -m AG3S.ag3s.experiments.studies.t48_hsr_counterfactual --stage plan --check-tokens",
+   "venv": ".venv-openpi-live",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/plan/",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/plan.log"
+  },
+  {
+   "id": "c0_stored_independent",
+   "command": ".venv-ag3s/bin/python <R>/scripts/c0_stored.py <SUBTASK-b feat> kv_L4_v1.npz <out>",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/c0_stored/c0_stored.json"
+  },
+  {
+   "id": "extract_gpu",
+   "command": "flock -n /tmp/ag3s-vla-gpu-validation.lock env MUJOCO_GL=osmesa OMP_NUM_THREADS=1 .venv-openpi-live/bin/python -m AG3S.ag3s.experiments.studies.t48_hsr_counterfactual --stage extract --batch 4",
+   "venv": ".venv-openpi-live",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/feat/full/ , /mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/extract/",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/extract.log",
+   "start": "2026-10-12T06:54:21+00:00",
+   "end_rc": [
+    "rc=0",
+    "2026-10-12T07:09:47+00:00"
+   ]
+  },
+  {
+   "id": "score",
+   "command": "MUJOCO_GL=osmesa OMP_NUM_THREADS=1 .venv-ag3s/bin/python -m AG3S.ag3s.experiments.studies.t48_hsr_counterfactual --stage score",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/score/",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/score.log"
+  },
+  {
+   "id": "independent_recompute",
+   "command": "<R>/scripts/indep_metrics.py, compare.py, swap_sanity.py",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/indep/"
+  },
+  {
+   "id": "pytest_t48",
+   "command": "pytest -q tests/ag3s/test_t48_hsr_counterfactual.py",
+   "venv": ".venv-ag3s",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/pytest_t48.log"
+  },
+  {
+   "id": "figures",
+   "command": "<R>/scripts/fig_graph_table.py, fig_scene.py",
+   "venv": ".venv-ag3s / .venv-openpi-live (av decode)"
+  }
+ ],
+ "code_state": {
+  "repo": "AG3S_VLA-development",
+  "branch": "feature/ag3s-development",
+  "head": "218229ac6464ab0341896a2f9bfecbbb0d42f6a8",
+  "dirty_files": [
+   " M AG3S/ag3s/docs/handoff/T46.task.md",
+   "?? AG3S/ag3s/docs/figures/t47/",
+   "?? AG3S/ag3s/docs/figures/t48/",
+   "?? AG3S/ag3s/docs/handoff/T47.impl.md",
+   "?? AG3S/ag3s/docs/handoff/T47.task.md",
+   "?? AG3S/ag3s/docs/handoff/T47.verify.json",
+   "?? AG3S/ag3s/docs/handoff/T47b.impl.md",
+   "?? AG3S/ag3s/docs/handoff/T47b.task.md",
+   "?? AG3S/ag3s/docs/handoff/T47b.verify.json",
+   "?? AG3S/ag3s/docs/handoff/T48.impl.md",
+   "?? AG3S/ag3s/docs/handoff/T48.task.md",
+   "?? AG3S/ag3s/docs/handoff/T48.verify.json",
+   "?? AG3S/ag3s/docs/handoff/T49.impl.md",
+   "?? AG3S/ag3s/docs/handoff/T49.task.md",
+   "?? AG3S/ag3s/experiments/studies/t47_head_metrics.py",
+   "?? AG3S/ag3s/experiments/studies/t47_head_selection.py",
+   "?? AG3S/ag3s/experiments/studies/t47_replay.py",
+   "?? AG3S/ag3s/experiments/studies/t47b_aggregation.py",
+   "?? AG3S/ag3s/experiments/studies/t47b_b3.py",
+   "?? AG3S/ag3s/experiments/studies/t47b_metrics.py",
+   "?? AG3S/ag3s/experiments/studies/t47b_replay.py",
+   "?? AG3S/ag3s/experiments/studies/t47b_sink.py",
+   "?? AG3S/ag3s/experiments/studies/t47b_study.py",
+   "?? AG3S/ag3s/experiments/studies/t48_hsr_core.py",
+   "?? AG3S/ag3s/experiments/studies/t48_hsr_counterfactual.py",
+   "?? AG3S/ag3s/experiments/studies/t48_hsr_features.py",
+   "?? AG3S/ag3s/experiments/studies/t48_hsr_io.py",
+   "?? AG3S/ag3s/experiments/studies/t49_noun_query.py",
+   "?? AG3S/ag3s/experiments/studies/t49_noun_query_core.py",
+   "?? AG3S/ag3s/experiments/studies/t49_noun_query_extract.py",
+   "?? doc/reviews/",
+   "?? papers/",
+   "?? tests/ag3s/test_t47_head_selection.py",
+   "?? tests/ag3s/test_t47b_aggregation_metrics.py",
+   "?? tests/ag3s/test_t47b_b3_sink_cli.py",
+   "?? tests/ag3s/test_t48_hsr_counterfactual.py",
+   "?? tests/ag3s/test_t49_noun_query.py"
+  ]
+ },
+ "numbers": {
+  "baseline_legacy": {
+   "violated_start": 14,
+   "frames": 15,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -29.031048280806342,
+   "concurrent_load_1min": 9.95
+  },
+  "pytest_t48": {
+   "passed": 27,
+   "skipped": 1,
+   "failed": 0
+  },
+  "plan": {
+   "val_units": 50,
+   "val_frames": 2601,
+   "val_per_class": [
+    1000,
+    800,
+    801
+   ],
+   "ep1807_frames": 75,
+   "ep1807_per_class": [
+    19,
+    13,
+    43
+   ],
+   "variants_val_total": 23409,
+   "variants_ep1807_total": 675,
+   "gripper_rep_open": 1.0,
+   "gripper_rep_closed": 0.6702,
+   "subtask_b_data_parity": {
+    "found": true,
+    "units_compared": 51,
+    "units_not_ok": 0
+   },
+   "subtask_b_data_parity_detail": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/plan/summary.json"
+  },
+  "C0_reproduction": {
+   "reference_acc_subtask_b": 0.9807766243752403,
+   "tolerance": 0.002,
+   "reproduced_flag": true,
+   "val_probe_acc_new_features": 0.9803921568627451,
+   "val_n": 2601,
+   "val_confusion_new": [
+    [
+     982,
+     18,
+     0
+    ],
+    [
+     32,
+     768,
+     0
+    ],
+    [
+     0,
+     1,
+     800
+    ]
+   ],
+   "val_probe_acc_stored_features_independent": 0.9807766243752403,
+   "val_rule_acc_stored_features_independent": 0.9423298731257209,
+   "ep1807_probe_acc_new_features": 0.96,
+   "ep1807_confusion_new": [
+    [
+     19,
+     0,
+     0
+    ],
+    [
+     1,
+     12,
+     0
+    ],
+    [
+     0,
+     2,
+     41
+    ]
+   ],
+   "feature_parity_val": {
+    "n_frames": 2601,
+    "n_units": 50,
+    "rel_l2_median": 0.0024101420087662595,
+    "rel_l2_p99": 0.003354820762527653,
+    "rel_l2_max": 0.00612089419943368,
+    "argmax_agree": 2600,
+    "argmax_agree_ratio": 0.9996155324875048,
+    "acc_new_features": 0.9803921568627451,
+    "acc_subtask_b_features_same_frames": 0.9807766243752403
+   },
+   "feature_parity_ep1807": {
+    "n_frames": 75,
+    "n_units": 1,
+    "rel_l2_median": 0.0024716480601361,
+    "rel_l2_p99": 0.0033191968639173456,
+    "rel_l2_max": 0.0034265253161145496,
+    "argmax_agree": 75,
+    "argmax_agree_ratio": 1.0,
+    "acc_new_features": 0.96,
+    "acc_subtask_b_features_same_frames": 0.96
+   },
+   "batch_parity_batch4_vs_batch1": {
+    "n": 4,
+    "rel_l2_max": 0.0028898620512336493,
+    "max_abs": 0.002969704568386078
+   }
+  },
+  "independent_checks": {
+   "probe_recompute_from_cache_mismatch": {
+    "val": "0/23409",
+    "ep1807": "0/675"
+   },
+   "metrics_recompute_fields_compared": 1104,
+   "metrics_recompute_diffs": 0,
+   "swap_sanity": {
+    "val": {
+     "n_units": 50,
+     "replica_mismatch": 27,
+     "c2s_bins_eq_B": 2601,
+     "c2i_bins_eq_A": 2601,
+     "n_pairs": 2601,
+     "c1_bins_eq": 7803,
+     "n_c1": 7803,
+     "c1p_bins_eq": 5202,
+     "n_c1p": 5202,
+     "c2s_text_nearer_B": 33,
+     "c2s_img_nearer_A": 2601,
+     "c2i_img_nearer_B": 2601,
+     "c2i_text_nearer_A": 35,
+     "c2g_bins_changed_hist": {
+      "1": 2601
+     }
+    },
+    "ep1807": {
+     "n_units": 1,
+     "replica_mismatch": 0,
+     "c2s_bins_eq_B": 75,
+     "c2i_bins_eq_A": 75,
+     "n_pairs": 75,
+     "c1_bins_eq": 225,
+     "n_c1": 225,
+     "c1p_bins_eq": 150,
+     "n_c1p": 150,
+     "c2s_text_nearer_B": 0,
+     "c2s_img_nearer_A": 75,
+     "c2i_img_nearer_B": 75,
+     "c2i_text_nearer_A": 0,
+     "c2g_bins_changed_hist": {
+      "1": 75
+     }
+    }
+   }
+  },
+  "sets": {
+   "val": {
+    "n_variants": {
+     "C0": 2601,
+     "C1": 7803,
+     "C1p": 5202,
+     "C2g": 2601,
+     "C2s": 2601,
+     "C2i": 2601
+    },
+    "n_units": 50,
+    "missing_units": [],
+    "frame_index_fallback_rows": 0,
+    "probe": {
+     "accuracy": {
+      "C0": {
+       "pooled": 0.9803921568627451,
+       "k": 2550,
+       "n": 2601,
+       "episode_median": 0.9807692307692307,
+       "episode_q25": 0.9807692307692307,
+       "episode_q75": 0.9807692307692307,
+       "n_episodes": 50
+      },
+      "C1": {
+       "pooled": 0.3897219018326285,
+       "k": 3041,
+       "n": 7803,
+       "episode_median": 0.40384615384615385,
+       "episode_q25": 0.3717948717948718,
+       "episode_q75": 0.40384615384615385,
+       "n_episodes": 50
+      },
+      "C1p": {
+       "pooled": 0.9801999231064975,
+       "k": 5099,
+       "n": 5202,
+       "episode_median": 0.9807692307692307,
+       "episode_q25": 0.9807692307692307,
+       "episode_q75": 0.9807692307692307,
+       "n_episodes": 50
+      },
+      "C2g": {
+       "pooled": 0.9803921568627451,
+       "k": 2550,
+       "n": 2601,
+       "episode_median": 0.9807692307692307,
+       "episode_q25": 0.9807692307692307,
+       "episode_q75": 0.9807692307692307,
+       "n_episodes": 50
+      },
+      "C2s": {
+       "pooled": 0.9788542868127643,
+       "k": 2546,
+       "n": 2601,
+       "episode_median": 0.9807692307692307,
+       "episode_q25": 0.9807692307692307,
+       "episode_q75": 0.9807692307692307,
+       "n_episodes": 50
+      },
+      "C2i": {
+       "pooled": 0.9792387543252595,
+       "k": 2547,
+       "n": 2601,
+       "episode_median": 0.9807692307692307,
+       "episode_q25": 0.9617198838896952,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      }
+     },
+     "C0_confusion": [
+      [
+       982,
+       18,
+       0
+      ],
+      [
+       32,
+       768,
+       0
+      ],
+      [
+       0,
+       1,
+       800
+      ]
+     ],
+     "C1_to_pick": {
+      "pick": {
+       "pooled": 0.982,
+       "k": 2946,
+       "n": 3000,
+       "episode_median": 1.0,
+       "episode_q25": 0.9666666666666667,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 0.03958333333333333,
+       "k": 95,
+       "n": 2400,
+       "episode_median": 0.0625,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0625,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2403,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C1_to_pick_all": {
+      "pooled": 0.3897219018326285,
+      "k": 3041,
+      "n": 7803,
+      "episode_median": 0.40384615384615385,
+      "episode_q25": 0.3717948717948718,
+      "episode_q75": 0.40384615384615385,
+      "n_episodes": 50
+     },
+     "C1_matrix_origclass_x_pred": [
+      [
+       2946,
+       54,
+       0
+      ],
+      [
+       95,
+       2303,
+       2
+      ],
+      [
+       0,
+       3,
+       2400
+      ]
+     ],
+     "C1_to_pick_by_distractor": {
+      "apple": 0.3875324675324675,
+      "banana": 0.39099645928174,
+      "orange": 0.38846153846153847,
+      "pear": 0.3916386352715041
+     },
+     "C1p_retain": {
+      "pick": {
+       "pooled": 0.997,
+       "k": 1994,
+       "n": 2000,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 0.996875,
+       "k": 1595,
+       "n": 1600,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 1602,
+       "n": 1602,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "all": {
+       "pooled": 0.9978854286812764,
+       "k": 5191,
+       "n": 5202,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      }
+     },
+     "C2g_changed": {
+      "pick": {
+       "pooled": 0.007,
+       "k": 7,
+       "n": 1000,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 0.0075,
+       "k": 6,
+       "n": 800,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 0.0012484394506866417,
+       "k": 1,
+       "n": 801,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "all": {
+       "pooled": 0.005382545174932718,
+       "k": 14,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C2g_matrix_origclass_x_pred": [
+      [
+       989,
+       11,
+       0
+      ],
+      [
+       38,
+       762,
+       0
+      ],
+      [
+       0,
+       2,
+       799
+      ]
+     ],
+     "C2s_follow": {
+      "state": {
+       "pooled": 0.011918492887351018,
+       "k": 31,
+       "n": 2601,
+       "episode_median": 0.019230769230769232,
+       "episode_q25": 0.0,
+       "episode_q75": 0.019230769230769232,
+       "n_episodes": 50
+      },
+      "image": {
+       "pooled": 0.9788542868127643,
+       "k": 2546,
+       "n": 2601,
+       "episode_median": 0.9807692307692307,
+       "episode_q25": 0.9807692307692307,
+       "episode_q75": 0.9807692307692307,
+       "n_episodes": 50
+      },
+      "other": {
+       "pooled": 0.00922722029988466,
+       "k": 24,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.019230769230769232,
+       "n_episodes": 50
+      }
+     },
+     "C2i_follow": {
+      "state": {
+       "pooled": 0.012687427912341407,
+       "k": 33,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.019230769230769232,
+       "n_episodes": 50
+      },
+      "image": {
+       "pooled": 0.9792387543252595,
+       "k": 2547,
+       "n": 2601,
+       "episode_median": 0.9807692307692307,
+       "episode_q25": 0.9617198838896952,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "other": {
+       "pooled": 0.008073817762399077,
+       "k": 21,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.019230769230769232,
+       "n_episodes": 50
+      }
+     },
+     "C2s_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 506,
+       "state": 0.021739130434782608,
+       "image": 0.9782608695652174,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 494,
+       "state": 0.0,
+       "image": 0.9838056680161943,
+       "other": 0.016194331983805668
+      },
+      "img_place__state_pick": {
+       "n": 416,
+       "state": 0.04807692307692308,
+       "image": 0.9495192307692307,
+       "other": 0.002403846153846154
+      },
+      "img_place__state_home": {
+       "n": 384,
+       "state": 0.0,
+       "image": 0.9609375,
+       "other": 0.0390625
+      },
+      "img_home__state_pick": {
+       "n": 405,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_home__state_place": {
+       "n": 396,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      }
+     },
+     "C2i_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 416,
+       "state": 0.014423076923076924,
+       "image": 0.9855769230769231,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 405,
+       "state": 0.0,
+       "image": 0.9827160493827161,
+       "other": 0.01728395061728395
+      },
+      "img_place__state_pick": {
+       "n": 506,
+       "state": 0.05138339920948617,
+       "image": 0.9466403162055336,
+       "other": 0.001976284584980237
+      },
+      "img_place__state_home": {
+       "n": 396,
+       "state": 0.0025252525252525255,
+       "image": 0.9646464646464646,
+       "other": 0.03282828282828283
+      },
+      "img_home__state_pick": {
+       "n": 494,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_home__state_place": {
+       "n": 384,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      }
+     },
+     "C2_pairs_joint": {
+      "n_pairs": 2601,
+      "joint": {
+       "C2s_state__C2i_state": 0,
+       "C2s_state__C2i_image": 31,
+       "C2s_state__C2i_other": 0,
+       "C2s_image__C2i_state": 33,
+       "C2s_image__C2i_image": 2492,
+       "C2s_image__C2i_other": 21,
+       "C2s_other__C2i_state": 0,
+       "C2s_other__C2i_image": 24,
+       "C2s_other__C2i_other": 0
+      }
+     }
+    },
+    "rule": {
+     "accuracy": {
+      "C0": {
+       "pooled": 0.9423298731257209,
+       "k": 2451,
+       "n": 2601,
+       "episode_median": 0.9423076923076923,
+       "episode_q25": 0.9423076923076923,
+       "episode_q75": 0.9423076923076923,
+       "n_episodes": 50
+      },
+      "C1": {
+       "pooled": 0.3460207612456747,
+       "k": 2700,
+       "n": 7803,
+       "episode_median": 0.34615384615384615,
+       "episode_q25": 0.34615384615384615,
+       "episode_q75": 0.34615384615384615,
+       "n_episodes": 50
+      },
+      "C1p": {
+       "pooled": 0.9423298731257209,
+       "k": 4902,
+       "n": 5202,
+       "episode_median": 0.9423076923076923,
+       "episode_q25": 0.9423076923076923,
+       "episode_q75": 0.9423076923076923,
+       "n_episodes": 50
+      },
+      "C2g": {
+       "pooled": 0.019223375624759707,
+       "k": 50,
+       "n": 2601,
+       "episode_median": 0.019230769230769232,
+       "episode_q25": 0.019230769230769232,
+       "episode_q75": 0.019230769230769232,
+       "n_episodes": 50
+      },
+      "C2s": {
+       "pooled": 0.34409842368319876,
+       "k": 895,
+       "n": 2601,
+       "episode_median": 0.33653846153846156,
+       "episode_q25": 0.3076923076923077,
+       "episode_q75": 0.36538461538461536,
+       "n_episodes": 50
+      },
+      "C2i": {
+       "pooled": 0.025374855824682813,
+       "k": 66,
+       "n": 2601,
+       "episode_median": 0.019230769230769232,
+       "episode_q25": 0.019230769230769232,
+       "episode_q75": 0.038461538461538464,
+       "n_episodes": 50
+      }
+     },
+     "C0_confusion": [
+      [
+       900,
+       100,
+       0
+      ],
+      [
+       0,
+       750,
+       50
+      ],
+      [
+       0,
+       0,
+       801
+      ]
+     ],
+     "C1_to_pick": {
+      "pick": {
+       "pooled": 0.9,
+       "k": 2700,
+       "n": 3000,
+       "episode_median": 0.9,
+       "episode_q25": 0.9,
+       "episode_q75": 0.9,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2400,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2403,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C1_to_pick_all": {
+      "pooled": 0.3460207612456747,
+      "k": 2700,
+      "n": 7803,
+      "episode_median": 0.34615384615384615,
+      "episode_q25": 0.34615384615384615,
+      "episode_q75": 0.34615384615384615,
+      "n_episodes": 50
+     },
+     "C1_matrix_origclass_x_pred": [
+      [
+       2700,
+       300,
+       0
+      ],
+      [
+       0,
+       2250,
+       150
+      ],
+      [
+       0,
+       0,
+       2403
+      ]
+     ],
+     "C1_to_pick_by_distractor": {
+      "apple": 0.345974025974026,
+      "banana": 0.34597875569044007,
+      "orange": 0.34615384615384615,
+      "pear": 0.3459875060067275
+     },
+     "C1p_retain": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 2000,
+       "n": 2000,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 1.0,
+       "k": 1600,
+       "n": 1600,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 1602,
+       "n": 1602,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "all": {
+       "pooled": 1.0,
+       "k": 5202,
+       "n": 5202,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      }
+     },
+     "C2g_changed": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 1000,
+       "n": 1000,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 1.0,
+       "k": 800,
+       "n": 800,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 801,
+       "n": 801,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "all": {
+       "pooled": 1.0,
+       "k": 2601,
+       "n": 2601,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      }
+     },
+     "C2g_matrix_origclass_x_pred": [
+      [
+       0,
+       900,
+       100
+      ],
+      [
+       0,
+       50,
+       750
+      ],
+      [
+       0,
+       801,
+       0
+      ]
+     ],
+     "C2s_follow": {
+      "state": {
+       "pooled": 0.49519415609381007,
+       "k": 1288,
+       "n": 2601,
+       "episode_median": 0.5,
+       "episode_q25": 0.46153846153846156,
+       "episode_q75": 0.5384615384615384,
+       "n_episodes": 50
+      },
+      "image": {
+       "pooled": 0.34409842368319876,
+       "k": 895,
+       "n": 2601,
+       "episode_median": 0.33653846153846156,
+       "episode_q25": 0.3076923076923077,
+       "episode_q75": 0.36538461538461536,
+       "n_episodes": 50
+      },
+      "other": {
+       "pooled": 0.16070742022299117,
+       "k": 418,
+       "n": 2601,
+       "episode_median": 0.15384615384615385,
+       "episode_q25": 0.1346153846153846,
+       "episode_q75": 0.19230769230769232,
+       "n_episodes": 50
+      }
+     },
+     "C2i_follow": {
+      "state": {
+       "pooled": 0.9423298731257209,
+       "k": 2451,
+       "n": 2601,
+       "episode_median": 0.9423076923076923,
+       "episode_q25": 0.9423076923076923,
+       "episode_q75": 0.9423076923076923,
+       "n_episodes": 50
+      },
+      "image": {
+       "pooled": 0.025374855824682813,
+       "k": 66,
+       "n": 2601,
+       "episode_median": 0.019230769230769232,
+       "episode_q25": 0.019230769230769232,
+       "episode_q75": 0.038461538461538464,
+       "n_episodes": 50
+      },
+      "other": {
+       "pooled": 0.03229527104959631,
+       "k": 84,
+       "n": 2601,
+       "episode_median": 0.038461538461538464,
+       "episode_q25": 0.019230769230769232,
+       "episode_q75": 0.038461538461538464,
+       "n_episodes": 50
+      }
+     },
+     "C2s_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 506,
+       "state": 0.9545454545454546,
+       "image": 0.037549407114624504,
+       "other": 0.007905138339920948
+      },
+      "img_pick__state_home": {
+       "n": 494,
+       "state": 0.09919028340080972,
+       "image": 0.9008097165991903,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 416,
+       "state": 0.0,
+       "image": 0.10576923076923077,
+       "other": 0.8942307692307693
+      },
+      "img_place__state_home": {
+       "n": 384,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 405,
+       "state": 0.0,
+       "image": 0.8962962962962963,
+       "other": 0.1037037037037037
+      },
+      "img_home__state_place": {
+       "n": 396,
+       "state": 0.9393939393939394,
+       "image": 0.06060606060606061,
+       "other": 0.0
+      }
+     },
+     "C2i_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 416,
+       "state": 0.9158653846153846,
+       "image": 0.0,
+       "other": 0.08413461538461539
+      },
+      "img_pick__state_home": {
+       "n": 405,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 506,
+       "state": 0.8992094861660079,
+       "image": 0.1007905138339921,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 396,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 494,
+       "state": 0.9008097165991903,
+       "image": 0.0,
+       "other": 0.09919028340080972
+      },
+      "img_home__state_place": {
+       "n": 384,
+       "state": 0.9609375,
+       "image": 0.0390625,
+       "other": 0.0
+      }
+     },
+     "C2_pairs_joint": {
+      "n_pairs": 2601,
+      "joint": {
+       "C2s_state__C2i_state": 1177,
+       "C2s_state__C2i_image": 62,
+       "C2s_state__C2i_other": 49,
+       "C2s_image__C2i_state": 887,
+       "C2s_image__C2i_image": 0,
+       "C2s_image__C2i_other": 8,
+       "C2s_other__C2i_state": 387,
+       "C2s_other__C2i_image": 4,
+       "C2s_other__C2i_other": 27
+      }
+     }
+    },
+    "proxy": {
+     "accuracy": {
+      "C0": {
+       "pooled": 0.9953863898500577,
+       "k": 2589,
+       "n": 2601,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "C1": {
+       "pooled": 0.37985390234525185,
+       "k": 2964,
+       "n": 7803,
+       "episode_median": 0.38461538461538464,
+       "episode_q25": 0.3791727140783745,
+       "episode_q75": 0.38461538461538464,
+       "n_episodes": 50
+      },
+      "C1p": {
+       "pooled": 0.9953863898500577,
+       "k": 5178,
+       "n": 5202,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "C2g": {
+       "pooled": 0.9615532487504805,
+       "k": 2501,
+       "n": 2601,
+       "episode_median": 0.9615384615384616,
+       "episode_q25": 0.9615384615384616,
+       "episode_q75": 0.9615384615384616,
+       "n_episodes": 50
+      },
+      "C2s": {
+       "pooled": 0.9700115340253749,
+       "k": 2523,
+       "n": 2601,
+       "episode_median": 0.9807692307692307,
+       "episode_q25": 0.9615384615384616,
+       "episode_q75": 0.9807692307692307,
+       "n_episodes": 50
+      },
+      "C2i": {
+       "pooled": 0.002691272587466359,
+       "k": 7,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C0_confusion": [
+      [
+       988,
+       12,
+       0
+      ],
+      [
+       0,
+       800,
+       0
+      ],
+      [
+       0,
+       0,
+       801
+      ]
+     ],
+     "C1_to_pick": {
+      "pick": {
+       "pooled": 0.988,
+       "k": 2964,
+       "n": 3000,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2400,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2403,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C1_to_pick_all": {
+      "pooled": 0.37985390234525185,
+      "k": 2964,
+      "n": 7803,
+      "episode_median": 0.38461538461538464,
+      "episode_q25": 0.3791727140783745,
+      "episode_q75": 0.38461538461538464,
+      "n_episodes": 50
+     },
+     "C1_matrix_origclass_x_pred": [
+      [
+       2964,
+       36,
+       0
+      ],
+      [
+       0,
+       2400,
+       0
+      ],
+      [
+       0,
+       0,
+       2403
+      ]
+     ],
+     "C1_to_pick_by_distractor": {
+      "apple": 0.3807792207792208,
+      "banana": 0.3783510369246333,
+      "orange": 0.38076923076923075,
+      "pear": 0.37962518020182606
+     },
+     "C1p_retain": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 2000,
+       "n": 2000,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 1.0,
+       "k": 1600,
+       "n": 1600,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 1602,
+       "n": 1602,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "all": {
+       "pooled": 1.0,
+       "k": 5202,
+       "n": 5202,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      }
+     },
+     "C2g_changed": {
+      "pick": {
+       "pooled": 0.012,
+       "k": 12,
+       "n": 1000,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 0.0625,
+       "k": 50,
+       "n": 800,
+       "episode_median": 0.0625,
+       "episode_q25": 0.0625,
+       "episode_q75": 0.0625,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 0.062421972534332085,
+       "k": 50,
+       "n": 801,
+       "episode_median": 0.0625,
+       "episode_q25": 0.0625,
+       "episode_q75": 0.0625,
+       "n_episodes": 50
+      },
+      "all": {
+       "pooled": 0.04306036139946175,
+       "k": 112,
+       "n": 2601,
+       "episode_median": 0.038461538461538464,
+       "episode_q25": 0.038461538461538464,
+       "episode_q75": 0.038461538461538464,
+       "n_episodes": 50
+      }
+     },
+     "C2g_matrix_origclass_x_pred": [
+      [
+       1000,
+       0,
+       0
+      ],
+      [
+       50,
+       750,
+       0
+      ],
+      [
+       0,
+       50,
+       751
+      ]
+     ],
+     "C2s_follow": {
+      "state": {
+       "pooled": 0.020761245674740483,
+       "k": 54,
+       "n": 2601,
+       "episode_median": 0.019230769230769232,
+       "episode_q25": 0.019230769230769232,
+       "episode_q75": 0.033109579100145135,
+       "n_episodes": 50
+      },
+      "image": {
+       "pooled": 0.9700115340253749,
+       "k": 2523,
+       "n": 2601,
+       "episode_median": 0.9807692307692307,
+       "episode_q25": 0.9615384615384616,
+       "episode_q75": 0.9807692307692307,
+       "n_episodes": 50
+      },
+      "other": {
+       "pooled": 0.00922722029988466,
+       "k": 24,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.019230769230769232,
+       "n_episodes": 50
+      }
+     },
+     "C2i_follow": {
+      "state": {
+       "pooled": 0.9953863898500577,
+       "k": 2589,
+       "n": 2601,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "image": {
+       "pooled": 0.002691272587466359,
+       "k": 7,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "other": {
+       "pooled": 0.0019223375624759708,
+       "k": 5,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C2s_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 506,
+       "state": 0.017786561264822136,
+       "image": 0.9822134387351779,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 494,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 416,
+       "state": 0.0625,
+       "image": 0.9375,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 384,
+       "state": 0.0,
+       "image": 0.9453125,
+       "other": 0.0546875
+      },
+      "img_home__state_pick": {
+       "n": 405,
+       "state": 0.0,
+       "image": 0.9925925925925926,
+       "other": 0.007407407407407408
+      },
+      "img_home__state_place": {
+       "n": 396,
+       "state": 0.047979797979797977,
+       "image": 0.952020202020202,
+       "other": 0.0
+      }
+     },
+     "C2i_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 416,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 405,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 506,
+       "state": 0.9861660079051383,
+       "image": 0.01383399209486166,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 396,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 494,
+       "state": 0.9898785425101214,
+       "image": 0.0,
+       "other": 0.010121457489878543
+      },
+      "img_home__state_place": {
+       "n": 384,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      }
+     },
+     "C2_pairs_joint": {
+      "n_pairs": 2601,
+      "joint": {
+       "C2s_state__C2i_state": 47,
+       "C2s_state__C2i_image": 7,
+       "C2s_state__C2i_other": 0,
+       "C2s_image__C2i_state": 2518,
+       "C2s_image__C2i_image": 0,
+       "C2s_image__C2i_other": 5,
+       "C2s_other__C2i_state": 24,
+       "C2s_other__C2i_image": 0,
+       "C2s_other__C2i_other": 0
+      }
+     }
+    },
+    "frame_index": {
+     "accuracy": {
+      "C0": {
+       "pooled": 1.0,
+       "k": 2601,
+       "n": 2601,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "C1": {
+       "pooled": 0.3844675124951942,
+       "k": 3000,
+       "n": 7803,
+       "episode_median": 0.38461538461538464,
+       "episode_q25": 0.38461538461538464,
+       "episode_q75": 0.38461538461538464,
+       "n_episodes": 50
+      },
+      "C1p": {
+       "pooled": 1.0,
+       "k": 5202,
+       "n": 5202,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "C2g": {
+       "pooled": 1.0,
+       "k": 2601,
+       "n": 2601,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "C2s": {
+       "pooled": 1.0,
+       "k": 2601,
+       "n": 2601,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "C2i": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C0_confusion": [
+      [
+       1000,
+       0,
+       0
+      ],
+      [
+       0,
+       800,
+       0
+      ],
+      [
+       0,
+       0,
+       801
+      ]
+     ],
+     "C1_to_pick": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 3000,
+       "n": 3000,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2400,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2403,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C1_to_pick_all": {
+      "pooled": 0.3844675124951942,
+      "k": 3000,
+      "n": 7803,
+      "episode_median": 0.38461538461538464,
+      "episode_q25": 0.38461538461538464,
+      "episode_q75": 0.38461538461538464,
+      "n_episodes": 50
+     },
+     "C1_matrix_origclass_x_pred": [
+      [
+       3000,
+       0,
+       0
+      ],
+      [
+       0,
+       2400,
+       0
+      ],
+      [
+       0,
+       0,
+       2403
+      ]
+     ],
+     "C1_to_pick_by_distractor": {
+      "apple": 0.38441558441558443,
+      "banana": 0.3844208396560445,
+      "orange": 0.38461538461538464,
+      "pear": 0.38443056222969724
+     },
+     "C1p_retain": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 2000,
+       "n": 2000,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 1.0,
+       "k": 1600,
+       "n": 1600,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 1602,
+       "n": 1602,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "all": {
+       "pooled": 1.0,
+       "k": 5202,
+       "n": 5202,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      }
+     },
+     "C2g_changed": {
+      "pick": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 1000,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "place": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 800,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 801,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "all": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C2g_matrix_origclass_x_pred": [
+      [
+       1000,
+       0,
+       0
+      ],
+      [
+       0,
+       800,
+       0
+      ],
+      [
+       0,
+       0,
+       801
+      ]
+     ],
+     "C2s_follow": {
+      "state": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "image": {
+       "pooled": 1.0,
+       "k": 2601,
+       "n": 2601,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "other": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C2i_follow": {
+      "state": {
+       "pooled": 1.0,
+       "k": 2601,
+       "n": 2601,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 50
+      },
+      "image": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      },
+      "other": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 2601,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 50
+      }
+     },
+     "C2s_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 506,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 494,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 416,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 384,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 405,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_home__state_place": {
+       "n": 396,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      }
+     },
+     "C2i_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 416,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 405,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 506,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 396,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 494,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_place": {
+       "n": 384,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      }
+     },
+     "C2_pairs_joint": {
+      "n_pairs": 2601,
+      "joint": {
+       "C2s_state__C2i_state": 0,
+       "C2s_state__C2i_image": 0,
+       "C2s_state__C2i_other": 0,
+       "C2s_image__C2i_state": 2601,
+       "C2s_image__C2i_image": 0,
+       "C2s_image__C2i_other": 0,
+       "C2s_other__C2i_state": 0,
+       "C2s_other__C2i_image": 0,
+       "C2s_other__C2i_other": 0
+      }
+     }
+    }
+   },
+   "ep1807": {
+    "n_variants": {
+     "C0": 75,
+     "C1": 225,
+     "C1p": 150,
+     "C2g": 75,
+     "C2s": 75,
+     "C2i": 75
+    },
+    "n_units": 1,
+    "missing_units": [],
+    "frame_index_fallback_rows": 549,
+    "probe": {
+     "accuracy": {
+      "C0": {
+       "pooled": 0.96,
+       "k": 72,
+       "n": 75,
+       "episode_median": 0.96,
+       "episode_q25": 0.96,
+       "episode_q75": 0.96,
+       "n_episodes": 1
+      },
+      "C1": {
+       "pooled": 0.26666666666666666,
+       "k": 60,
+       "n": 225,
+       "episode_median": 0.26666666666666666,
+       "episode_q25": 0.26666666666666666,
+       "episode_q75": 0.26666666666666666,
+       "n_episodes": 1
+      },
+      "C1p": {
+       "pooled": 0.96,
+       "k": 144,
+       "n": 150,
+       "episode_median": 0.96,
+       "episode_q25": 0.96,
+       "episode_q75": 0.96,
+       "n_episodes": 1
+      },
+      "C2g": {
+       "pooled": 0.96,
+       "k": 72,
+       "n": 75,
+       "episode_median": 0.96,
+       "episode_q25": 0.96,
+       "episode_q75": 0.96,
+       "n_episodes": 1
+      },
+      "C2s": {
+       "pooled": 0.96,
+       "k": 72,
+       "n": 75,
+       "episode_median": 0.96,
+       "episode_q25": 0.96,
+       "episode_q75": 0.96,
+       "n_episodes": 1
+      },
+      "C2i": {
+       "pooled": 1.0,
+       "k": 75,
+       "n": 75,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      }
+     },
+     "C0_confusion": [
+      [
+       19,
+       0,
+       0
+      ],
+      [
+       1,
+       12,
+       0
+      ],
+      [
+       0,
+       2,
+       41
+      ]
+     ],
+     "C1_to_pick": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 57,
+       "n": 57,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 0.07692307692307693,
+       "k": 3,
+       "n": 39,
+       "episode_median": 0.07692307692307693,
+       "episode_q25": 0.07692307692307693,
+       "episode_q75": 0.07692307692307693,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 129,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C1_to_pick_all": {
+      "pooled": 0.26666666666666666,
+      "k": 60,
+      "n": 225,
+      "episode_median": 0.26666666666666666,
+      "episode_q25": 0.26666666666666666,
+      "episode_q75": 0.26666666666666666,
+      "n_episodes": 1
+     },
+     "C1_matrix_origclass_x_pred": [
+      [
+       57,
+       0,
+       0
+      ],
+      [
+       3,
+       36,
+       0
+      ],
+      [
+       0,
+       6,
+       123
+      ]
+     ],
+     "C1_to_pick_by_distractor": {
+      "banana": 0.26666666666666666,
+      "orange": 0.26666666666666666,
+      "pear": 0.26666666666666666
+     },
+     "C1p_retain": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 38,
+       "n": 38,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 1.0,
+       "k": 26,
+       "n": 26,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 86,
+       "n": 86,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "all": {
+       "pooled": 1.0,
+       "k": 150,
+       "n": 150,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      }
+     },
+     "C2g_changed": {
+      "pick": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 19,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 13,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 43,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "all": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C2g_matrix_origclass_x_pred": [
+      [
+       19,
+       0,
+       0
+      ],
+      [
+       1,
+       12,
+       0
+      ],
+      [
+       0,
+       2,
+       41
+      ]
+     ],
+     "C2s_follow": {
+      "state": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "image": {
+       "pooled": 0.96,
+       "k": 72,
+       "n": 75,
+       "episode_median": 0.96,
+       "episode_q25": 0.96,
+       "episode_q75": 0.96,
+       "n_episodes": 1
+      },
+      "other": {
+       "pooled": 0.04,
+       "k": 3,
+       "n": 75,
+       "episode_median": 0.04,
+       "episode_q25": 0.04,
+       "episode_q75": 0.04,
+       "n_episodes": 1
+      }
+     },
+     "C2i_follow": {
+      "state": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "image": {
+       "pooled": 1.0,
+       "k": 75,
+       "n": 75,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "other": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C2s_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 7,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 12,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 8,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 5,
+       "state": 0.0,
+       "image": 0.8,
+       "other": 0.2
+      },
+      "img_home__state_pick": {
+       "n": 21,
+       "state": 0.0,
+       "image": 0.9047619047619048,
+       "other": 0.09523809523809523
+      },
+      "img_home__state_place": {
+       "n": 22,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      }
+     },
+     "C2i_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 8,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 21,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 7,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 22,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 12,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_home__state_place": {
+       "n": 5,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      }
+     },
+     "C2_pairs_joint": {
+      "n_pairs": 75,
+      "joint": {
+       "C2s_state__C2i_state": 0,
+       "C2s_state__C2i_image": 0,
+       "C2s_state__C2i_other": 0,
+       "C2s_image__C2i_state": 0,
+       "C2s_image__C2i_image": 72,
+       "C2s_image__C2i_other": 0,
+       "C2s_other__C2i_state": 0,
+       "C2s_other__C2i_image": 3,
+       "C2s_other__C2i_other": 0
+      }
+     }
+    },
+    "rule": {
+     "accuracy": {
+      "C0": {
+       "pooled": 1.0,
+       "k": 75,
+       "n": 75,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "C1": {
+       "pooled": 0.25333333333333335,
+       "k": 57,
+       "n": 225,
+       "episode_median": 0.25333333333333335,
+       "episode_q25": 0.25333333333333335,
+       "episode_q75": 0.25333333333333335,
+       "n_episodes": 1
+      },
+      "C1p": {
+       "pooled": 1.0,
+       "k": 150,
+       "n": 150,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "C2g": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "C2s": {
+       "pooled": 0.44,
+       "k": 33,
+       "n": 75,
+       "episode_median": 0.44,
+       "episode_q25": 0.44,
+       "episode_q75": 0.44,
+       "n_episodes": 1
+      },
+      "C2i": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C0_confusion": [
+      [
+       19,
+       0,
+       0
+      ],
+      [
+       0,
+       13,
+       0
+      ],
+      [
+       0,
+       0,
+       43
+      ]
+     ],
+     "C1_to_pick": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 57,
+       "n": 57,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 39,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 129,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C1_to_pick_all": {
+      "pooled": 0.25333333333333335,
+      "k": 57,
+      "n": 225,
+      "episode_median": 0.25333333333333335,
+      "episode_q25": 0.25333333333333335,
+      "episode_q75": 0.25333333333333335,
+      "n_episodes": 1
+     },
+     "C1_matrix_origclass_x_pred": [
+      [
+       57,
+       0,
+       0
+      ],
+      [
+       0,
+       39,
+       0
+      ],
+      [
+       0,
+       0,
+       129
+      ]
+     ],
+     "C1_to_pick_by_distractor": {
+      "banana": 0.25333333333333335,
+      "orange": 0.25333333333333335,
+      "pear": 0.25333333333333335
+     },
+     "C1p_retain": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 38,
+       "n": 38,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 1.0,
+       "k": 26,
+       "n": 26,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 86,
+       "n": 86,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "all": {
+       "pooled": 1.0,
+       "k": 150,
+       "n": 150,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      }
+     },
+     "C2g_changed": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 19,
+       "n": 19,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 1.0,
+       "k": 13,
+       "n": 13,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 43,
+       "n": 43,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "all": {
+       "pooled": 1.0,
+       "k": 75,
+       "n": 75,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      }
+     },
+     "C2g_matrix_origclass_x_pred": [
+      [
+       0,
+       19,
+       0
+      ],
+      [
+       1,
+       0,
+       12
+      ],
+      [
+       0,
+       43,
+       0
+      ]
+     ],
+     "C2s_follow": {
+      "state": {
+       "pooled": 0.44,
+       "k": 33,
+       "n": 75,
+       "episode_median": 0.44,
+       "episode_q25": 0.44,
+       "episode_q75": 0.44,
+       "n_episodes": 1
+      },
+      "image": {
+       "pooled": 0.44,
+       "k": 33,
+       "n": 75,
+       "episode_median": 0.44,
+       "episode_q25": 0.44,
+       "episode_q75": 0.44,
+       "n_episodes": 1
+      },
+      "other": {
+       "pooled": 0.12,
+       "k": 9,
+       "n": 75,
+       "episode_median": 0.12,
+       "episode_q25": 0.12,
+       "episode_q75": 0.12,
+       "n_episodes": 1
+      }
+     },
+     "C2i_follow": {
+      "state": {
+       "pooled": 1.0,
+       "k": 75,
+       "n": 75,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "image": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "other": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C2s_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 7,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 12,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 8,
+       "state": 0.0,
+       "image": 0.0,
+       "other": 1.0
+      },
+      "img_place__state_home": {
+       "n": 5,
+       "state": 0.8,
+       "image": 0.0,
+       "other": 0.2
+      },
+      "img_home__state_pick": {
+       "n": 21,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_home__state_place": {
+       "n": 22,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      }
+     },
+     "C2i_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 8,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 21,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 7,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 22,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 12,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_place": {
+       "n": 5,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      }
+     },
+     "C2_pairs_joint": {
+      "n_pairs": 75,
+      "joint": {
+       "C2s_state__C2i_state": 33,
+       "C2s_state__C2i_image": 0,
+       "C2s_state__C2i_other": 0,
+       "C2s_image__C2i_state": 33,
+       "C2s_image__C2i_image": 0,
+       "C2s_image__C2i_other": 0,
+       "C2s_other__C2i_state": 9,
+       "C2s_other__C2i_image": 0,
+       "C2s_other__C2i_other": 0
+      }
+     }
+    },
+    "proxy": {
+     "accuracy": {
+      "C0": {
+       "pooled": 0.96,
+       "k": 72,
+       "n": 75,
+       "episode_median": 0.96,
+       "episode_q25": 0.96,
+       "episode_q75": 0.96,
+       "n_episodes": 1
+      },
+      "C1": {
+       "pooled": 0.28,
+       "k": 63,
+       "n": 225,
+       "episode_median": 0.28,
+       "episode_q25": 0.28,
+       "episode_q75": 0.28,
+       "n_episodes": 1
+      },
+      "C1p": {
+       "pooled": 0.96,
+       "k": 144,
+       "n": 150,
+       "episode_median": 0.96,
+       "episode_q25": 0.96,
+       "episode_q75": 0.96,
+       "n_episodes": 1
+      },
+      "C2g": {
+       "pooled": 0.9333333333333333,
+       "k": 70,
+       "n": 75,
+       "episode_median": 0.9333333333333333,
+       "episode_q25": 0.9333333333333333,
+       "episode_q75": 0.9333333333333333,
+       "n_episodes": 1
+      },
+      "C2s": {
+       "pooled": 0.9466666666666667,
+       "k": 71,
+       "n": 75,
+       "episode_median": 0.9466666666666667,
+       "episode_q25": 0.9466666666666667,
+       "episode_q75": 0.9466666666666667,
+       "n_episodes": 1
+      },
+      "C2i": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C0_confusion": [
+      [
+       19,
+       0,
+       0
+      ],
+      [
+       2,
+       11,
+       0
+      ],
+      [
+       0,
+       1,
+       42
+      ]
+     ],
+     "C1_to_pick": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 57,
+       "n": 57,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 0.15384615384615385,
+       "k": 6,
+       "n": 39,
+       "episode_median": 0.15384615384615385,
+       "episode_q25": 0.15384615384615385,
+       "episode_q75": 0.15384615384615385,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 129,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C1_to_pick_all": {
+      "pooled": 0.28,
+      "k": 63,
+      "n": 225,
+      "episode_median": 0.28,
+      "episode_q25": 0.28,
+      "episode_q75": 0.28,
+      "n_episodes": 1
+     },
+     "C1_matrix_origclass_x_pred": [
+      [
+       57,
+       0,
+       0
+      ],
+      [
+       6,
+       33,
+       0
+      ],
+      [
+       0,
+       3,
+       126
+      ]
+     ],
+     "C1_to_pick_by_distractor": {
+      "banana": 0.28,
+      "orange": 0.28,
+      "pear": 0.28
+     },
+     "C1p_retain": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 38,
+       "n": 38,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 1.0,
+       "k": 26,
+       "n": 26,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 86,
+       "n": 86,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "all": {
+       "pooled": 1.0,
+       "k": 150,
+       "n": 150,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      }
+     },
+     "C2g_changed": {
+      "pick": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 19,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 0.07692307692307693,
+       "k": 1,
+       "n": 13,
+       "episode_median": 0.07692307692307693,
+       "episode_q25": 0.07692307692307693,
+       "episode_q75": 0.07692307692307693,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 0.023255813953488372,
+       "k": 1,
+       "n": 43,
+       "episode_median": 0.023255813953488372,
+       "episode_q25": 0.023255813953488372,
+       "episode_q75": 0.023255813953488372,
+       "n_episodes": 1
+      },
+      "all": {
+       "pooled": 0.02666666666666667,
+       "k": 2,
+       "n": 75,
+       "episode_median": 0.02666666666666667,
+       "episode_q25": 0.02666666666666667,
+       "episode_q75": 0.02666666666666667,
+       "n_episodes": 1
+      }
+     },
+     "C2g_matrix_origclass_x_pred": [
+      [
+       19,
+       0,
+       0
+      ],
+      [
+       3,
+       10,
+       0
+      ],
+      [
+       0,
+       2,
+       41
+      ]
+     ],
+     "C2s_follow": {
+      "state": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "image": {
+       "pooled": 0.9466666666666667,
+       "k": 71,
+       "n": 75,
+       "episode_median": 0.9466666666666667,
+       "episode_q25": 0.9466666666666667,
+       "episode_q75": 0.9466666666666667,
+       "n_episodes": 1
+      },
+      "other": {
+       "pooled": 0.05333333333333334,
+       "k": 4,
+       "n": 75,
+       "episode_median": 0.05333333333333334,
+       "episode_q25": 0.05333333333333334,
+       "episode_q75": 0.05333333333333334,
+       "n_episodes": 1
+      }
+     },
+     "C2i_follow": {
+      "state": {
+       "pooled": 0.96,
+       "k": 72,
+       "n": 75,
+       "episode_median": 0.96,
+       "episode_q25": 0.96,
+       "episode_q75": 0.96,
+       "n_episodes": 1
+      },
+      "image": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "other": {
+       "pooled": 0.04,
+       "k": 3,
+       "n": 75,
+       "episode_median": 0.04,
+       "episode_q25": 0.04,
+       "episode_q75": 0.04,
+       "n_episodes": 1
+      }
+     },
+     "C2s_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 7,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 12,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 8,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 5,
+       "state": 0.0,
+       "image": 0.4,
+       "other": 0.6
+      },
+      "img_home__state_pick": {
+       "n": 21,
+       "state": 0.0,
+       "image": 0.9523809523809523,
+       "other": 0.047619047619047616
+      },
+      "img_home__state_place": {
+       "n": 22,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      }
+     },
+     "C2i_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 8,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 21,
+       "state": 0.9523809523809523,
+       "image": 0.0,
+       "other": 0.047619047619047616
+      },
+      "img_place__state_pick": {
+       "n": 7,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 22,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 12,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_place": {
+       "n": 5,
+       "state": 0.6,
+       "image": 0.0,
+       "other": 0.4
+      }
+     },
+     "C2_pairs_joint": {
+      "n_pairs": 75,
+      "joint": {
+       "C2s_state__C2i_state": 0,
+       "C2s_state__C2i_image": 0,
+       "C2s_state__C2i_other": 0,
+       "C2s_image__C2i_state": 71,
+       "C2s_image__C2i_image": 0,
+       "C2s_image__C2i_other": 0,
+       "C2s_other__C2i_state": 1,
+       "C2s_other__C2i_image": 0,
+       "C2s_other__C2i_other": 3
+      }
+     }
+    },
+    "frame_index": {
+     "accuracy": {
+      "C0": {
+       "pooled": 0.88,
+       "k": 66,
+       "n": 75,
+       "episode_median": 0.88,
+       "episode_q25": 0.88,
+       "episode_q75": 0.88,
+       "n_episodes": 1
+      },
+      "C1": {
+       "pooled": 0.2,
+       "k": 45,
+       "n": 225,
+       "episode_median": 0.2,
+       "episode_q25": 0.2,
+       "episode_q75": 0.2,
+       "n_episodes": 1
+      },
+      "C1p": {
+       "pooled": 0.88,
+       "k": 132,
+       "n": 150,
+       "episode_median": 0.88,
+       "episode_q25": 0.88,
+       "episode_q75": 0.88,
+       "n_episodes": 1
+      },
+      "C2g": {
+       "pooled": 0.88,
+       "k": 66,
+       "n": 75,
+       "episode_median": 0.88,
+       "episode_q25": 0.88,
+       "episode_q75": 0.88,
+       "n_episodes": 1
+      },
+      "C2s": {
+       "pooled": 0.88,
+       "k": 66,
+       "n": 75,
+       "episode_median": 0.88,
+       "episode_q25": 0.88,
+       "episode_q75": 0.88,
+       "n_episodes": 1
+      },
+      "C2i": {
+       "pooled": 0.04,
+       "k": 3,
+       "n": 75,
+       "episode_median": 0.04,
+       "episode_q25": 0.04,
+       "episode_q75": 0.04,
+       "n_episodes": 1
+      }
+     },
+     "C0_confusion": [
+      [
+       15,
+       4,
+       0
+      ],
+      [
+       0,
+       8,
+       5
+      ],
+      [
+       0,
+       0,
+       43
+      ]
+     ],
+     "C1_to_pick": {
+      "pick": {
+       "pooled": 0.7894736842105263,
+       "k": 45,
+       "n": 57,
+       "episode_median": 0.7894736842105263,
+       "episode_q25": 0.7894736842105263,
+       "episode_q75": 0.7894736842105263,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 39,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 129,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C1_to_pick_all": {
+      "pooled": 0.2,
+      "k": 45,
+      "n": 225,
+      "episode_median": 0.2,
+      "episode_q25": 0.2,
+      "episode_q75": 0.2,
+      "n_episodes": 1
+     },
+     "C1_matrix_origclass_x_pred": [
+      [
+       45,
+       12,
+       0
+      ],
+      [
+       0,
+       24,
+       15
+      ],
+      [
+       0,
+       0,
+       129
+      ]
+     ],
+     "C1_to_pick_by_distractor": {
+      "banana": 0.2,
+      "orange": 0.2,
+      "pear": 0.2
+     },
+     "C1p_retain": {
+      "pick": {
+       "pooled": 1.0,
+       "k": 38,
+       "n": 38,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 1.0,
+       "k": 26,
+       "n": 26,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 1.0,
+       "k": 86,
+       "n": 86,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      },
+      "all": {
+       "pooled": 1.0,
+       "k": 150,
+       "n": 150,
+       "episode_median": 1.0,
+       "episode_q25": 1.0,
+       "episode_q75": 1.0,
+       "n_episodes": 1
+      }
+     },
+     "C2g_changed": {
+      "pick": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 19,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "place": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 13,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "home": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 43,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      },
+      "all": {
+       "pooled": 0.0,
+       "k": 0,
+       "n": 75,
+       "episode_median": 0.0,
+       "episode_q25": 0.0,
+       "episode_q75": 0.0,
+       "n_episodes": 1
+      }
+     },
+     "C2g_matrix_origclass_x_pred": [
+      [
+       15,
+       4,
+       0
+      ],
+      [
+       0,
+       8,
+       5
+      ],
+      [
+       0,
+       0,
+       43
+      ]
+     ],
+     "C2s_follow": {
+      "state": {
+       "pooled": 0.04,
+       "k": 3,
+       "n": 75,
+       "episode_median": 0.04,
+       "episode_q25": 0.04,
+       "episode_q75": 0.04,
+       "n_episodes": 1
+      },
+      "image": {
+       "pooled": 0.88,
+       "k": 66,
+       "n": 75,
+       "episode_median": 0.88,
+       "episode_q25": 0.88,
+       "episode_q75": 0.88,
+       "n_episodes": 1
+      },
+      "other": {
+       "pooled": 0.08,
+       "k": 6,
+       "n": 75,
+       "episode_median": 0.08,
+       "episode_q25": 0.08,
+       "episode_q75": 0.08,
+       "n_episodes": 1
+      }
+     },
+     "C2i_follow": {
+      "state": {
+       "pooled": 0.88,
+       "k": 66,
+       "n": 75,
+       "episode_median": 0.88,
+       "episode_q25": 0.88,
+       "episode_q75": 0.88,
+       "n_episodes": 1
+      },
+      "image": {
+       "pooled": 0.04,
+       "k": 3,
+       "n": 75,
+       "episode_median": 0.04,
+       "episode_q25": 0.04,
+       "episode_q75": 0.04,
+       "n_episodes": 1
+      },
+      "other": {
+       "pooled": 0.08,
+       "k": 6,
+       "n": 75,
+       "episode_median": 0.08,
+       "episode_q25": 0.08,
+       "episode_q75": 0.08,
+       "n_episodes": 1
+      }
+     },
+     "C2s_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 7,
+       "state": 0.2857142857142857,
+       "image": 0.7142857142857143,
+       "other": 0.0
+      },
+      "img_pick__state_home": {
+       "n": 12,
+       "state": 0.0,
+       "image": 0.8333333333333334,
+       "other": 0.16666666666666666
+      },
+      "img_place__state_pick": {
+       "n": 8,
+       "state": 0.0,
+       "image": 0.5,
+       "other": 0.5
+      },
+      "img_place__state_home": {
+       "n": 5,
+       "state": 0.2,
+       "image": 0.8,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 21,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      },
+      "img_home__state_place": {
+       "n": 22,
+       "state": 0.0,
+       "image": 1.0,
+       "other": 0.0
+      }
+     },
+     "C2i_by_image_state_class": {
+      "img_pick__state_place": {
+       "n": 8,
+       "state": 0.5,
+       "image": 0.0,
+       "other": 0.5
+      },
+      "img_pick__state_home": {
+       "n": 21,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_place__state_pick": {
+       "n": 7,
+       "state": 0.7142857142857143,
+       "image": 0.2857142857142857,
+       "other": 0.0
+      },
+      "img_place__state_home": {
+       "n": 22,
+       "state": 1.0,
+       "image": 0.0,
+       "other": 0.0
+      },
+      "img_home__state_pick": {
+       "n": 12,
+       "state": 0.8333333333333334,
+       "image": 0.0,
+       "other": 0.16666666666666666
+      },
+      "img_home__state_place": {
+       "n": 5,
+       "state": 0.8,
+       "image": 0.2,
+       "other": 0.0
+      }
+     },
+     "C2_pairs_joint": {
+      "n_pairs": 75,
+      "joint": {
+       "C2s_state__C2i_state": 0,
+       "C2s_state__C2i_image": 3,
+       "C2s_state__C2i_other": 0,
+       "C2s_image__C2i_state": 66,
+       "C2s_image__C2i_image": 0,
+       "C2s_image__C2i_other": 0,
+       "C2s_other__C2i_state": 0,
+       "C2s_other__C2i_image": 0,
+       "C2s_other__C2i_other": 6
+      }
+     }
+    }
+   }
+  },
+  "cost": {
+   "batch": 4,
+   "per_input_prefix_ms_median": 15.054809511639178,
+   "per_input_prefix_ms_p90": 15.115939476527274,
+   "call_ms_median_batch4": 60.218979604542255,
+   "n_inputs": 24084,
+   "n_calls": 6022,
+   "prefix_total_s": 363.35134456213564,
+   "extract_wall_s": 922.707380771637,
+   "checkpoint_load_s": 11.977916204370558,
+   "unit_wall_s_typical": 17.0,
+   "first_unit_wall_s_incl_jit": 46.26,
+   "jax_peak_bytes_in_use": 7600011264,
+   "nvidia_smi_process_mib": 8808,
+   "timing_note": "prefix pass + kv_L4 reduction on device, block_until_ready; excludes input transform, video decode, warm-up/JIT",
+   "concurrent_gpu_state": {
+    "gpu_compute_processes_before_extract": [],
+    "sampler_window": [
+     "2026-10-12T07:06:34+00:00",
+     "2026-10-12T07:09:35+00:00"
+    ],
+    "sampler_n": 10,
+    "compute_apps_count_all_samples": [
+     1
+    ],
+    "memory_used_mib_max": 8808,
+    "utilization_gpu_pct_samples": [
+     58,
+     0,
+     0,
+     73,
+     59,
+     61,
+     0,
+     0,
+     52,
+     59
+    ],
+    "label": "no other compute process observed (only this extract) -> not concurrent load"
+   },
+   "pod_working_set_bytes": {
+    "start": null,
+    "start_note": "lead request arrived mid-extract; first sample 2026-10-12T07:06:26Z (unit 39/51)",
+    "mid_first_sample": 41713995776,
+    "max_during_samples": 43304148992,
+    "end": 39024975872
+   }
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t48/t48-scene-c2-pairs.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t48/t48-scene-c2-pairs.json",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t48/t48-c1-c2-graph.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t48/t48-c1-c2-graph.json",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t48/t48-accuracy-table.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t48/t48-accuracy-table.json",
+   "kind": "table"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy: violated_start 14/15, has_target 15/15, frame0 clearance_before -29.031048280806342 mm = skill baseline. cuRobo baseline not run (GPU)."
+ },
+ "verdict": "legacy baseline match; C0 reproduced within tolerance (|0.980392-0.980777| = 0.000385 <= 0.002); GPU extract ran (lock acquired, rc 0)",
+ "blocked": [],
+ "not_measured": [
+  "cuRobo regression baseline (GPU; not run to keep GPU use to the single approved extract)",
+  "batch-1 full extract (serving batch size); extract used --batch 4, batch_parity on first batch recorded",
+  "pod working set at extract start (lead request arrived mid-extract)",
+  "actual strong rule (grasp_latch with execution feedback); only the offline proxy",
+  "T48b (empty grasp / slip)"
+ ],
+ "notes_facts": [
+  "replica_mismatch: 27 rows in val ep_001648 (dim 13, |bin diff| 1) between numpy discretize_state replica and serving-decoded bins; serving bins are what the model saw",
+  "C0 parity argmax disagreement 1/2601 frames (val); C0 confusion new [[982,18,0],[32,768,0],[0,1,800]] vs SUBTASK-b [[983,17,0],[32,768,0],[0,1,800]]"
+ ]
+}
