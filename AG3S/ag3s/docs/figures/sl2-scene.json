@@ -1,0 +1,92 @@
+{
+ "frame": 92,
+ "models": {
+  "constraint (franka.yml, 61)": {
+   "n_spheres": 61,
+   "n_cover": 0
+  },
+  "self-filter default (61 + 184 cover = 245)": {
+   "n_spheres": 245,
+   "n_cover": 184
+  },
+  "self-filter confined hand (61 + 1066 cover = 1127)": {
+   "n_spheres": 1127,
+   "n_cover": 1066
+  }
+ },
+ "erasure_px": {
+  "left_wrist/default": {
+   "target_px": 9701,
+   "target_removed_px": 714
+  },
+  "left_wrist/confine_hand": {
+   "target_px": 9701,
+   "target_removed_px": 488
+  },
+  "left_wrist/confine_mount": {
+   "target_px": 9701,
+   "target_removed_px": 714
+  },
+  "left_wrist/confine_hand_mount": {
+   "target_px": 9701,
+   "target_removed_px": 488
+  },
+  "left_wrist/no_cover_franka_yml": {
+   "target_px": 9701,
+   "target_removed_px": 0
+  },
+  "head/default": {
+   "target_px": 544,
+   "target_removed_px": 36
+  },
+  "head/confine_hand": {
+   "target_px": 544,
+   "target_removed_px": 23
+  },
+  "head/confine_mount": {
+   "target_px": 544,
+   "target_removed_px": 36
+  },
+  "head/confine_hand_mount": {
+   "target_px": 544,
+   "target_removed_px": 23
+  },
+  "head/no_cover_franka_yml": {
+   "target_px": 544,
+   "target_removed_px": 0
+  }
+ },
+ "pointcloud_counts_head_default": {
+  "kept, non-robot": 37419,
+  "unlabelled (seg not a geom)": 394,
+  "kept target bowl": 508,
+  "removed robot": 9276,
+  "robot kept (leak)": 26,
+  "removed non-robot": 2169,
+  "removed target bowl": 36
+ },
+ "fixtures": {
+  "F1_link7_cabinet": {
+   "link": "panda_link7",
+   "contact_min_dist_mm": -10.500810532621593,
+   "sphere_sd_mm": -8.243736895940014
+  },
+  "F2_link6_table": {
+   "link": "panda_link6",
+   "contact_min_dist_mm": -10.0350269936208,
+   "sphere_sd_mm": -8.33774143837649
+  },
+  "F3_link5_cabinet": {
+   "link": "panda_link5",
+   "contact_min_dist_mm": -10.049723937806206,
+   "sphere_sd_mm": -3.9649248685184184
+  }
+ },
+ "sources": [
+  "outputs/verify/SL2/raw/selffilter_masks.npz",
+  "outputs/verify/SL2/raw/gt_sl2_run.npz",
+  "outputs/verify/SL2/raw/fixtures.npz",
+  "outputs/verify/SL2/contact.json",
+  "outputs/verify/SL2/raw/geo_libero.npz"
+ ]
+}

@@ -1,0 +1,137 @@
+{
+ "confusion_arms": {
+  "trajectory": {
+   "panda_link1": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 912
+   },
+   "panda_link2": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 912
+   },
+   "panda_link3": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 912
+   },
+   "panda_link4": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 912
+   },
+   "panda_link5": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 912
+   },
+   "panda_link6": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 912
+   },
+   "panda_link7": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 912
+   },
+   "panda_hand": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 3,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 909
+   },
+   "panda_leftfinger": {
+    "contact_penetrate": 22,
+    "contact_no_penetrate": 2,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 888
+   },
+   "panda_rightfinger": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 24,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 888
+   }
+  },
+  "fixtures": {
+   "panda_link1": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 56
+   },
+   "panda_link2": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 56
+   },
+   "panda_link3": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 56
+   },
+   "panda_link4": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 56
+   },
+   "panda_link5": {
+    "contact_penetrate": 1,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 55
+   },
+   "panda_link6": {
+    "contact_penetrate": 1,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 55
+   },
+   "panda_link7": {
+    "contact_penetrate": 2,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 54
+   },
+   "panda_hand": {
+    "contact_penetrate": 2,
+    "contact_no_penetrate": 1,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 53
+   },
+   "panda_leftfinger": {
+    "contact_penetrate": 1,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 55
+   },
+   "panda_rightfinger": {
+    "contact_penetrate": 0,
+    "contact_no_penetrate": 0,
+    "no_contact_penetrate": 0,
+    "no_contact_no_penetrate": 56
+   }
+  }
+ },
+ "selffilter_rows": null,
+ "sources": [
+  "outputs/verify/SL2/selffilter.json",
+  "outputs/verify/SL2/contact.json",
+  "outputs/verify/SL2/fk_coverage.json",
+  "outputs/verify/SL2/n1b_remeasure.json",
+  "outputs/verify/SL2/gt_checks.json",
+  "outputs/verify/SL2/replay_compare.json"
+ ]
+}

@@ -1,0 +1,85 @@
+{
+ "sources": [
+  "outputs/verify/SL2/raw/fk_errors.npz",
+  "outputs/verify/SL2/fk_coverage.json",
+  "outputs/verify/SL2/coverage_whole_robot_q.json",
+  "outputs/verify/SL2/selffilter.json",
+  "outputs/verify/SL2/contact.json",
+  "outputs/verify/SL2/raw/contact_series.npz"
+ ],
+ "finger_pad_contact_frames": [
+  90,
+  91,
+  92,
+  93,
+  94,
+  95,
+  96,
+  97,
+  98,
+  99,
+  100,
+  101,
+  102,
+  103,
+  104,
+  105,
+  106,
+  107,
+  108,
+  109,
+  110,
+  111,
+  112,
+  113
+ ],
+ "hand_contact_frames": [
+  82,
+  83,
+  84
+ ],
+ "coverage_bars": {
+  "constraint, own-link spheres": {
+   "panda_link0": 0.02323887711864407,
+   "mount": 0.0,
+   "panda_link1": 0.7383076507164098,
+   "panda_link2": 0.28583568442163226,
+   "panda_link3": 0.33685431423718987,
+   "panda_link4": 0.2228674245522205,
+   "panda_link5": 0.13917983312622048,
+   "panda_link6": 0.12317398965497642,
+   "panda_link7": 0.41494266461756707,
+   "panda_hand": 0.13370451693851945,
+   "panda_leftfinger": 0.23363874345549737,
+   "panda_rightfinger": 0.23298429319371727
+  },
+  "constraint, all spheres at q (mean of 19 frames)": {
+   "panda_link0": 0.10282044491525424,
+   "mount": 0.0,
+   "panda_link1": 0.7383076507164098,
+   "panda_link2": 0.36255481151636704,
+   "panda_link3": 0.38320045173203926,
+   "panda_link4": 0.2583647923275925,
+   "panda_link5": 0.17357769534790288,
+   "panda_link6": 0.39055306087648495,
+   "panda_link7": 0.472041612483745,
+   "panda_hand": 0.2718046292016113,
+   "panda_leftfinger": 0.4656241388812345,
+   "panda_rightfinger": 0.4481950950675117
+  },
+  "self-filter default, own-link": {
+   "panda_link0": 1.0,
+   "mount": 1.0,
+   "panda_link1": 1.0,
+   "panda_link2": 1.0,
+   "panda_link3": 1.0,
+   "panda_link4": 1.0,
+   "panda_link5": 1.0,
+   "panda_link6": 1.0,
+   "panda_link7": 1.0,
+   "panda_hand": 1.0,
+   "panda_leftfinger": 1.0,
+   "panda_rightfinger": 1.0
+  }
+ }
+}
