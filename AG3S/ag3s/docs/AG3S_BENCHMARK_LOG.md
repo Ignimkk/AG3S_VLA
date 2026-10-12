@@ -27,8 +27,11 @@
 | | SL-1 agent-view · wrist RGB/depth, intrinsics/extrinsics → AG3S 관측 형식 | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL1](#sl1--libero-panda-camera-adapter-rgbdepth--k--t_base_cam--v11ab-wire-관측-2026-10-12). ~~판정 2건(K principal point 127.5, `robot_state` image 순간)은 SL2 에서 구현 예정~~ → SL2 에서 구현·측정 완료 |
 | | SL-2 Panda geometry / self-filter | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL2](#sl2--panda-geometry-sphere-chain--self-filter--contact-link-sl1-후속-2건-2026-10-12). self-filter 기본 = confined hand+mount cover, constraint model = `franka.yml` sphere 그대로 |
 | | SL-3 attention read-out audit | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL3](#sl3--v11ab-attention-read-out-audit-on-pi05_libero--sl2-후속-2건-2026-10-12). SL2 후속 2건(confined cover 기본값, `robot_geometry.py` CLI) 구현·확인 완료. V11AB cell L8H2 를 Panda 에 그대로 쓴다(recalibration 없음) |
-| | SL-4 Panda 를 V11AB core 에 연결 (ATS / LTE / ESDF) | **다음** | head block mass 가 작은 점(raw-mass threshold), wrist 의 mirror 비교 원인 분해, AG3S core 주입 지점(SL3 열린 항목 3) |
-| | SL-5 ~ SL-8 (EE delta ↔ CCR, phase, contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. ~~SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1)~~ → SL3 에서 un-mirror mapping 구현·측정 완료(image 검사 221/221 call). 이후 단계는 이 mapping 을 그대로 쓴다 |
+| | SL-4 Panda 를 V11AB core 에 연결 (ATS / LTE / ESDF), offline | **완료 (2026-10-13, 사용자 확정)** | 아래 [SL4](#sl4--panda-관측을-v11ab-perception--esdf-에-연결-ats--lte--esdf-offline-2026-10-12). core diff 0 줄, 기준선 둘 다 일치. 접근 단계 ATS 는 대체로 target 을 잡았으나(101/105 call) **t4 · t5 · t9 에서 다른 물체를 target 으로 골랐다**. ~~SL3 열린 항목(head block mass, wrist mirror 비교 원인, core 주입 지점)~~ → SL4 에서 측정(head seed 기여, wrist mirror 질량 분해, offline 주입 profile). online 주입은 SL-5 |
+| | SL-4b ATS 용 attention cell dev calibration 연구 | **진행 중 (사전 등록 2026-10-13)** | [`handoff/SL4b.task.md`](handoff/SL4b.task.md) (commit `41a5b28a`). 선택 규칙을 결과 전에 고정했다(아래 SL4 "판정" 절). test 데이터는 쓰지 않는다 |
+| | SL-5 EE delta ↔ joint-space 변환 + online 연결 | **다음 (SL-4b 이후)** | core 변경은 **robot model · contact link · bound 주입만 허용하는 최소 변경**으로 하고 RB-Y1 동작은 baseline 으로 동일함을 확인한다 (사용자 판정 2026-10-13) |
+| | SL-6 phase / gate source | 미착수 | Panda main 의 phase source = gripper-state strong rule 또는 pi05_libero feature 로 dev 에서 새로 학습한 probe(GT phase 는 oracle 비교용). **SL-6 에서 결정** |
+| | SL-7 ~ SL-8 (contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. ~~SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1)~~ → SL3 에서 un-mirror mapping 구현·측정 완료(image 검사 221/221 call), **SL4 에서 ATS 결과로도 확인**(mirror 로 돌린 접근 단계 centroid 오차 median 236.2 mm 대 12.0 mm). 이후 단계는 이 mapping 을 그대로 쓴다 |
 | **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | 미착수 | SL0 의 1 episode 로는 성능을 말할 수 없다 |
 | **P3** SafeLIBERO Spatial Level I/II pilot | contact 판정 검증 + paired 결과 | 미착수 | |
 | **P4** 전체 SafeLIBERO | official I/II 전체 | 미착수 | |
@@ -102,6 +105,17 @@
 | **diagnostic grid** | 전체 18 layer × 8 head = 144 cell 의 grounding 지표 표. V11AB cell 의 순위를 보는 진단용이며 layer/head 선택에는 쓰지 않는다 |
 | **dev / test split** | LIBERO Spatial 각 task 의 init state 0–4 를 dev(측정 · 필요 시 calibration), 5–49 를 test 로 분리(안 A, plan §6.0). layer/head 는 dev 에서만 정할 수 있고 test 에 쓰지 않는다 |
 | **GPU lock** | 여러 checkout 이 한 GPU 를 쓰므로 GPU 작업은 `/tmp/ag3s-vla-gpu-validation.lock` 을 `flock` 으로 잡고, `nvidia-smi` 로 다른 compute process 가 없음을 확인한 뒤 시작하는 규칙 |
+| **ATS** | Attention-based Target Segmentation. VLA attention 을 depth 점에 올리고(attention lifting) 가장 높은 점들을 seed 로 target 점 cluster 를 고르는 V11AB 단계 |
+| **LTE** | Link-specific Target Exemption. target 접촉을 허가된(authorized) link 에만 허용한다. 이 기록에서는 허가 link 가 읽는 **target-free layer** 가 그 구현 |
+| **target-free layer** | ESDF 에서 ATS target 점(+ 그 주변 target ball)을 제외하고 만든 별도 거리장. 허가 link(Panda 는 `panda_hand` · 두 finger)는 이 layer 를 읽고, 나머지 link 는 target 이 들어 있는 main layer 를 읽는다. 대비 용어: **main layer** |
+| **profile (Panda AG3S profile)** | V11AB server 가 쓰는 AG3S 를 Panda 로 만드는 설정 묶음(`AG3S/adapters/panda/profile.py`). config 는 serve_safe 의 V11AB flag 에서 유도하고, Panda 와 다른 부분만 override 로 덮는다 |
+| **override** | profile 이 V11AB 값 대신 쓰는 Panda 값. 반드시 근거를 manifest 에 적고 `diff_against_v11ab()` 가 이 목록 외의 차이를 `UNDECLARED` 로 잡는다. 이번 STEP 의 config override 는 `contact.contact_links` 와 `esdf.bounds_lower` 의 z 둘 |
+| **offline harness (perception replay)** | 기록된 dev rollout 의 policy-call frame 을 V11AB 의 실제 perception 경로(`process_multi_debug`)에 다시 넣어 closed loop 없이 ATS · ESDF 를 측정하는 도구(`benchmark/runners/perception_replay.py`). 로봇이 움직이지 않으므로 측정이 policy 와 TrajOpt 의 영향을 받지 않는다. 한계: grasp latch · attach 가 없다 |
+| **nearest-instance** | ATS target 점 하나가 어느 scene 물체의 표면에 가장 가까운가(10 mm 이내). 점들이 실제로 어떤 물체 위에 있는지의 분포로, GT target 외의 물체(plate, bowl_2 등)를 target 으로 골랐는지 본다. 10 mm 안에 어느 물체도 없으면 `none` |
+| **grounding-only** | (SL4b) ESDF · constraint 단계를 건너뛰고 ATS grounding 까지만 실행하는 빠른 선별 모드. full 실행의 grounding 과 같아야 한다 |
+| **target_correct** | (SL4b 1차 지표) call 에서 ATS 가 target 을 냈고, target 점의 nearest-instance 다수결이 진짜 target 이며, centroid 오차 ≤ 30 mm 이면 1 |
+| **pre-registration (사전 등록)** | 결과를 보기 전에 지표 · 후보 · 채택 조건을 문서로 고정해 두는 것. dev 에서 cell 을 고르더라도 고른 뒤에 기준을 바꾸지 못하게 한다 |
+| **oracle** | GT(MuJoCo segmentation 등 privileged 정보)로 만든 참고 값. 방법의 상한을 보는 용도이며 선택이나 실제 입력에 쓰지 않고 privileged 로 표시한다 |
 
 ---
 
@@ -1186,7 +1200,7 @@ task 0–9 × init state 0 각 1 episode. official success 는 `env.step()` 의 
 - head 는 un-mirror 가 맞다는 (a) 와 (b) 가 모두 같은 방향이다.
 - **wrist 는 (a) 와 (b) 가 어긋난다.** image 로는 un-mirror 가 정확한데, target mass 평균은 mirror left in 이 높다(0.294 대 0.183). argmax 가 target 위인 비율은 거의 같다(0.385 대 0.380).
 - phase 별로 보면 이 차이의 위치가 드러난다(wrist, mass 평균): approach 는 un-mirror 0.315 대 mirror 0.225, grasp 는 0.214 대 0.171 로 un-mirror 가 높고, **transport 에서만** un-mirror 0.022 대 mirror 0.407 로 뒤집힌다(transport 의 target area 평균은 0.176). 아래 phase 표 참고.
-- **미검증 가설 (lead 의 작업 가설)**: grasp 이후 bowl 이 wrist view 의 중앙에서 크게 보이므로, 좌우를 뒤집은 map 도 대칭성 때문에 target 과 겹친다. 이 가설은 이 STEP 에서 검증하지 않았다(per-phase · per-position 분해는 SL-4 로 예정). 위 transport 수치는 가설과 모순되지 않는 관찰일 뿐 증명이 아니다.
+- ~~**미검증 가설 (lead 의 작업 가설)**: grasp 이후 bowl 이 wrist view 의 중앙에서 크게 보이므로, 좌우를 뒤집은 map 도 대칭성 때문에 target 과 겹친다. 이 가설은 이 STEP 에서 검증하지 않았다(per-phase · per-position 분해는 SL-4 로 예정). 위 transport 수치는 가설과 모순되지 않는 관찰일 뿐 증명이 아니다.~~ → **SL4 에서 질량 분해로 해소했다**(아래 [SL4 #4](#결과--4-wrist-mirror-진단--attention-mass-분해와-mirror-run)). transport 에서 policy 의 attention 은 target bowl 이 아니라 **destination plate** 로 옮겨 간다(head 0.578 · wrist 0.619). mirror left in 이 wrist transport 에서 높았던 것(target mass 0.407, plate mass 0.126)은 더 정확한 mapping 이어서가 아니라, plate 에 있던 attention 이 뒤집히며 면적이 큰 bowl(wrist image 면적 0.176, plate 0.049)에 우연히 걸린 결과로 읽는다. 겹친 위치 자체는 측정하지 않았다. un-mirror 는 확정이다.
 - 따라서 **mapping 은 un-mirror 로 확정한다**(image 검사 기준). wrist 의 mass 점수만으로 mirror 를 택하지 않는다.
 
 ### 결과 — #6 V11AB cell 의 target grounding (L8H2, denoise 0, `last`; un-mirror; `segP`)
@@ -1282,7 +1296,7 @@ V11AB L8H2 가 전체 18 layer × 8 head = 144 cell(denoise 0, aggregation `last
 
 1. **V11AB 의 head attention 은 pi05_libero 에서도 target 근처에 모인다.** target mask 가 차지하는 면적(uniform baseline) 대비 약 10 배(mass/area 10.20)이고, 144 개 (layer, head) 중 mass 순위는 5 위다. 접근(approach) 단계에서 특히 높다(17.19; 위 graph (a)). 하지만 target 이 가장 많이 받는 물체는 아니다(rank 1 은 5.9 %; table · plate 가 더 받는다). grasp 이후에는 급격히 떨어진다(transport 2.09, median 비는 0.07 정도로 chance 이하). task 7 · 4 는 약하다.
 2. **이 cell 은 attention 의 거의 전부를 wrist image 에 둔다.** head block mass 의 median 이 0.00105 이고 wrist block 은 0.995 다. V11AB 가 raw mass 에 threshold 를 걸어 pixel 을 고르는 구조라면 head pixel 은 threshold 를 통과하지 못할 수 있다. 이것은 가능성이며 **SL-4 에서 측정한다**(여기서는 정규화한 mass 비율만 재었다).
-3. **mirror 는 풀어야 한다.** image 검사는 221/221 call 에서 un-mirror 를 지지한다. head 에서는 attention 검사도 같은 결론이다(167/221 call, mass 0.120 대 0.021). **wrist 에서는 mirror left in 의 target mass 평균이 더 높았다**(0.294 대 0.183). 이 불일치는 transport phase 에 집중돼 있고(0.407 대 0.022), approach · grasp 에서는 un-mirror 가 높다. lead 의 **미검증 가설**: grasp 이후 bowl 이 wrist view 에서 중앙에 크게 보이므로 좌우를 뒤집은 map 도 대칭성으로 겹친다. 이 가설과 phase 별 원인 분해는 SL-4 에서 한다.
+3. **mirror 는 풀어야 한다.** image 검사는 221/221 call 에서 un-mirror 를 지지한다. head 에서는 attention 검사도 같은 결론이다(167/221 call, mass 0.120 대 0.021). **wrist 에서는 mirror left in 의 target mass 평균이 더 높았다**(0.294 대 0.183). 이 불일치는 transport phase 에 집중돼 있고(0.407 대 0.022), approach · grasp 에서는 un-mirror 가 높다. ~~lead 의 **미검증 가설**: grasp 이후 bowl 이 wrist view 에서 중앙에 크게 보이므로 좌우를 뒤집은 map 도 대칭성으로 겹친다. 이 가설과 phase 별 원인 분해는 SL-4 에서 한다.~~ → SL4 #4 에서 분해했다: transport 에서 attention 이 destination plate 로 옮겨 가며, 가설의 "중앙의 bowl" 설명은 맞지 않았다.
 4. confined cover 로 target · stove · table 오제거는 줄었지만(head target 5.46 → 1.91 %, stove 30.92 → 0 %) mount 의 **visual mesh** 일부(pedestal 93 mm, torso 34 mm)가 sphere union 밖에 남는다.
 
 ### 판정 (2026-10-12, 사용자)
@@ -1317,11 +1331,11 @@ V11AB L8H2 가 전체 18 layer × 8 head = 144 cell(denoise 0, aggregation `last
 
 | # | 내용 | 영향 / 다음 |
 |---|---|---|
-| 1 | **head block mass 가 매우 작다**(median 0.00105). V11AB 의 raw-mass threshold 가 head pixel 을 고르는지 | SL-4 에서 ATS 를 연결해 측정 |
-| 2 | wrist 에서 mirror left in 이 mass 가 높은 원인(가설: grasp 후 bowl 이 중앙에서 크다) | SL-4 에서 phase · 위치 별 분해. un-mirror 확정은 image 검사 기준 |
-| 3 | **SL-4 가 필요로 하는 AG3S core 주입 지점**(구현하지 않았다): `serve_safe.py:1037-1058` `attention_extractor` 의 camera alias 를 Panda(`cam_high -> head`, `cam_left_wrist -> left_wrist`, `cam_right_wrist` 버림)로 바꾸고 **`lift` 전에 grid 열 뒤집기**(`attention.unmirror_grid`)를 넣어야 한다. core `GridAttentionAdapter` / `lift` 에는 flip 옵션이 없다. 그 밖에 SL2 열린 항목 5 의 RB-Y1 hardcode 지점이 남아 있다 | SL-4 |
+| 1 | ~~**head block mass 가 매우 작다**(median 0.00105). V11AB 의 raw-mass threshold 가 head pixel 을 고르는지~~ | → SL4 #3 에서 측정: head 가 seed 를 만든다(접근 단계 seed 의 head-argmax 비율 0.520). 해소 |
+| 2 | ~~wrist 에서 mirror left in 이 mass 가 높은 원인(가설: grasp 후 bowl 이 중앙에서 크다)~~ | → SL4 #4 에서 분해. 원인 = transport 의 attention 이 destination plate 로 이동. 해소 |
+| 3 | ~~**SL-4 가 필요로 하는 AG3S core 주입 지점**(구현하지 않았다): `serve_safe.py:1037-1058` `attention_extractor` 의 camera alias 를 Panda(`cam_high -> head`, `cam_left_wrist -> left_wrist`, `cam_right_wrist` 버림)로 바꾸고 **`lift` 전에 grid 열 뒤집기**(`attention.unmirror_grid`)를 넣어야 한다. core `GridAttentionAdapter` / `lift` 에는 flip 옵션이 없다. 그 밖에 SL2 열린 항목 5 의 RB-Y1 hardcode 지점이 남아 있다~~ | → offline 은 SL4 profile(생성자 인자 · config dict)로 core 변경 없이 해결. **online server 주입은 SL-5**(최소 core 변경, 사용자 판정 2026-10-13) |
 | 4 | subtask probe `kv_L4_v1` 은 RB-Y1 feature 로 학습됐다. 이번 phase label 은 MuJoCo contact · lift 이고 probe 는 쓰지 않았다. Panda `kv_feature` 는 저장돼 있다 | SL-6 audit |
-| 5 | confined 4,271 sphere self-filter 의 runtime, mount visual mesh 초과(pedestal 93 mm, torso 34 mm)가 ESDF 에 장애물로 남는지 | SL-4 (SL2 열린 항목 2 · 4) |
+| 5 | ~~confined 4,271 sphere self-filter 의 runtime, mount visual mesh 초과(pedestal 93 mm, torso 34 mm)가 ESDF 에 장애물로 남는지~~ | → SL4 #8 · #9 에서 측정(self-filter 포함 scene_reconstruction p50 38.8 ms; mount 잔여 점은 call 당 최대 7 개, gripper 에서 326 mm 이상). 해소 |
 | 6 | wrist 0.05 m 미만 pixel(전체 8.2 %, SL1)과 head 3.0 m 초과 pixel 처리 | SL-4 (SL2 열린 항목 6 에서 이월; 이 STEP 에서 다루지 않았다) |
 | 7 | segmentation 은 `env.step` return 시점 render 가 기본 기록이다. attention 채점은 image instant 로 다시 render 한 `segP` 를 썼다. 두 결과 차이는 작았다(위 #6) | SL-4 에서 ATS 가 어느 시점 mask 를 쓰는지 정한다 |
 | 8 | dev 는 task 당 episode 1 개. call 들이 episode 안에서 상관돼 있어 신뢰구간을 말하지 않는다 | init state 1–4 로 확장 시 |
@@ -1334,3 +1348,457 @@ V11AB L8H2 가 전체 18 layer × 8 head = 144 cell(denoise 0, aggregation `last
 | SL-4 per-phase 분해에서 wrist 의 mirror 우세가 가설과 다르게 나옴 | SL1 의 orientation 측정 · policy transform 경로를 다시 대조한다(원인 확정 전 wrist attention 을 depth 에 쓰지 않는다) |
 | subtask probe 가 Panda 에서 쓸 수 없음 | SL-6 에서 strong-rule / GT phase 등 계획의 대안과 함께 blocker 로 기록 |
 | confined 4,271 sphere 가 SL-4 runtime 을 넘음 | compact refit 또는 덮개를 hand + mount 에 한정한 채 반지름 정책 재검토 (SL2 에서 이월) |
+
+
+---
+
+## SL4 — Panda 관측을 V11AB perception → ESDF 에 연결 (ATS · LTE · ESDF), offline (2026-10-12)
+
+> 2026-10-12 ~ 10-13 KST. 구현 commit `46a08d6f`(2026-10-12 22:53 KST) · 검증 commit `c2ba3fea`(2026-10-13 00:21 KST). 사용자 확정 2026-10-13.
+> 관련 commit: `d53d8e07`(GPU lock `flock` 예시 수정, 아래 "운영 기록"), `41a5b28a`(SL4b task 정의, 아래 "판정").
+> 원본: [`handoff/SL4.task.md`](handoff/SL4.task.md) · [`handoff/SL4.impl.md`](handoff/SL4.impl.md) ·
+> [`handoff/SL4.verify.json`](handoff/SL4.verify.json). raw 출력은 `outputs/verify/SL4/`.
+> 이 절의 수치는 모두 `SL4.verify.json` 의 `numbers` 가 출처다. **측정은 전부 dev 데이터**(LIBERO Spatial task 0–9 × init state 0,
+> 10 episode, 221 policy call; SL3 dev rollout + SL3 attention audit)이고 이 STEP 에서 **아무것도 선택하지 않았다**(cell · 규칙 · threshold 모두 V11AB 값 그대로).
+
+### 이 STEP 이 답하는 질문
+
+SL1–SL3 으로 Panda 의 camera(depth · K · `T_base_cam`), robot geometry(self-filter · constraint sphere), attention(L8H2 + un-mirror)이 각각 V11AB 형식으로 준비됐다.
+SL4 는 이것들을 **V11AB 의 실제 perception 코드**(`AG3S.process_multi_debug`)에 넣는다. AG3S core 는 수정하지 않는다. 질문은 이것이다:
+
+> V11AB perception 코드를 바꾸지 않고 입력만 Panda 로 바꿨을 때, LIBERO scene 에서 (1) target bowl 을 추출하는가(ATS),
+> (2) target 만 제외한 layer 를 만들면서 다른 장애물은 보존하는가(LTE), (3) gripper 주변 거리장이 실제 거리와 mm 수준으로 맞는가(ESDF)?
+
+```
+recorded dev frame (wire npz: depth mm, K, T_base_cam, robot_state 9-D) + attention(L8H2, un-mirror)
+  -> robot_state 를 q7 + finger 로 split -> AG3S.set_finger_joints -> CameraObservation x2 (head, left_wrist)
+  -> AG3S(robot_model = Panda self-filter, constraint_robot_model = Panda gripper, attached_parent_links = Panda,
+          config = V11AB flag 에서 유도 + Panda override 둘)
+  -> process_multi_debug(phase="approach", active_manipulators=["left"])
+  -> grounding(ATS) · target-free layer · CuroboEsdfField · CollisionConstraintSet
+```
+
+closed loop(TrajOpt, action 변환)은 SL-5 다. 이 STEP 은 **offline** 이다: 기록된 frame 을 다시 넣을 뿐 로봇은 움직이지 않는다.
+
+### 무엇을 만들었나
+
+**1. Panda AG3S profile** (`AG3S/adapters/panda/profile.py`; AG3S core 는 한 줄도 바꾸지 않았다)
+
+config 를 손으로 다시 적지 않았다. launcher 스크립트(`scripts/benchmark/v11ab/start_server.sh`)의 V11AB flag 를 **serve_safe 자신의 parser · 검사**로 읽고,
+`serve_safe.main` 의 `build_ag3s(...)` 호출식(AST)에서 keyword 를 만들어, `build_ag3s` 의 config 조립(유일하게 피할 수 없는 복사본)으로 config 를 만든다.
+test 가 **실제 `build_ag3s`** 를 같은 keyword 로 돌려 AG3S 생성자에 넘어가는 config 와 field 별로 대조한다.
+Panda 와 달라지는 것은 아래 **override** 뿐이다. `diff_against_v11ab()` 가 이 목록 밖의 차이를 `UNDECLARED` 로 잡는다.
+
+| override | V11AB | Panda | 이유 |
+|---|---|---|---|
+| `contact.contact_links` (config) | `left: (ee_left, ee_finger_l1, ee_finger_l2)`, `right: (ee_right, ee_finger_r1, ee_finger_r2)` | `left: (panda_hand, panda_leftfinger, panda_rightfinger)` | RB-Y1 link 이름이 Panda 에 없다. Panda 한 팔 = left manipulator(SL2). LTE 가 target 접촉을 허용하는 link 가 palm + 두 finger 가 된다 |
+| `esdf.bounds_lower` z (config) | `(-0.3, -0.9, 0.0)` (`default_bounds()`) | `(-0.3, -0.9, -0.10)`, x · y 와 `bounds_upper` 는 그대로 | V11AB box 의 바닥은 base z 0.0(RB-Y1 의 table 은 base 보다 훨씬 위). **LIBERO table 윗면은 base z −0.012 m**(SL1)여서 기본 box 가 table 을 잘라 낸다 |
+
+config 밖의 **constructor 차이**(로봇 geometry 에서 오는 것):
+
+| 무엇 | V11AB | Panda |
+|---|---|---|
+| self-filter model | RB-Y1 `build_robot_model` | `build_panda_self_filter_model()` (`confined_hand_mount` cover, 4,271 sphere) |
+| constraint model | `build_constraint_robot_model(links="gripper", …)` | `build_panda_constraint_model(PANDA_GRIPPER_LINKS)` (22 sphere) |
+| `attached_parent_links` | `("ee_left", "ee_right")` | `("panda_hand",)` |
+| constraint sphere options(`capsule_radius_scale` 0.05 등) | 적용 | **적용 안 함**: `franka.yml` sphere 는 길이 0 capsule 이라 scale 0.05 가 반지름을 5 % 로 줄인다(SL2) |
+| `finger_cover: both` | 적용 | **적용 안 함**: RB-Y1 finger body capsule 용이다(SL2) |
+
+V11AB flag 에서 유도한 값은 task 표와 대조해 일치했다(`esdf.voxel_size` 0.02, `max_distance` 0.4, `fine_voxel_size` 0.005, `tsdf_voxel_size` 0.005, `exclude_support_surfaces` False, backend `curobo`,
+`attached_sign_threshold_voxels` 1.5, `pointcloud.range_max` 2.0, `self_collision` False). client 의 phase flag 는 `approach` 이다(V11AB client 는 `--safe-phase approach` 를 보낸다).
+
+**2. offline harness** (`benchmark/runners/perception_replay.py`, `.venv-openpi-live`, GPU)
+
+SL3 dev rollout 의 policy-call frame 221 개를 V11AB 의 실제 perception 경로로 다시 넣는다: `wire_pack` → `wire.strip_request` → `wire.unpack_camera_observations` →
+robot_state 9-D 를 q7 + finger 로 split → `set_finger_joints` → SL3 audit 의 call 별 L8H2 grid 를 un-mirror 해 `CameraObservation.attention` 에 부착 →
+`process_multi_debug(phase="approach", active_manipulators=["left"])`. 입력 join 은 dev run ↔ audit run 의 episode npz · geom SHA-256 과 `obs_index == chunk_t` 가 맞아야 시작한다.
+`--attention-mapping {unmirror,mirror}`(진단용), `--esdf-bounds {panda,v11ab}`(#7 용)를 둔다. 저장 항목: frame 별 grounding 결과(status, target 점, seed 와 camera provenance),
+fused cloud 요약, ESDF 를 GT 점 · gripper sphere 중심에서 query 한 값(main layer 와 target-free layer), constraint 요약, stage 별 시간, GPU memory.
+
+**3. scene GT 도구** (`benchmark/adapters/libero_panda/scene_export.py`(py3.8) · `benchmark/evaluators/libero_scene_gt.py`(3.11))
+
+episode 마다 LIBERO env 를 다시 만들어 call frame 의 MuJoCo 상태를 복원하고, 물체(target, plate, bowl_2, cookies, ramekin, stove, cabinet, table)와 robot mount 의
+**visual mesh 표면 sample**(4 mm, instance 당 최대 3,000 점)을 base frame 으로 내보낸다. 점–삼각형 **정확 거리**, collision primitive 포함 판정, 기록 depth 와 점의 camera z 차이(depth 잔차)를 제공한다.
+**visible GT sample** = `|기록 depth − sample 의 camera z| ≤ 10 mm`(head 또는 left_wrist). 바닥면 · 가려진 면은 sample 에 들어 있어서 이 조건으로 거른다.
+검증 쪽에서 독립 구현(KD-pruned)과 brute force 가 300 점에서 최대 차 0.0 으로 같음을 확인했다.
+
+**4. test** — `tests/benchmark/test_panda_sl4.py` 추가(CPU). profile config 대 실제 `build_ag3s` config, diff 가 선언한 override 와 정확히 같음, robot_state split · finger 부호, attention 부착 방향, ESDF bound 적용, harness dry-run, py3.8 export.
+
+### 실행
+
+| run | 값 |
+|---|---|
+| source dev rollout / attention audit | `.../20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0` / `.../20261012T202459_309e4c6da477_sl3-attention-audit-dev` (SL3, 읽기만) |
+| scene GT | `outputs/verify/SL4/raw/scene` (`.venv-libero`, CPU) |
+| 기본 run (un-mirror, Panda box) | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T225820_46a08d6ff644_sl4-perception-dev` — 실행 창 13:58:18–14:03:19 UTC, GPU lock 안 |
+| mirror run (#4 진단) | `.../20261012T230325_46a08d6ff644_sl4-perception-dev-mirror` — `--attention-mapping mirror` |
+| V11AB box run (#7) | `.../20261012T230818_46a08d6ff644_sl4-perception-dev-v11abbox` — `--esdf-bounds v11ab` |
+| flags-off replay (SL0 경로 보존) | `.../20261012T232117_46a08d6ff644_sl4-replay-off-t0e0` |
+| 기준선 | legacy 16D(`.venv-ag3s`, CPU), cuRobo 16D(`.venv-openpi-live`, GPU lock 안, compute process 없음 확인) |
+
+세 run 모두 같은 frame 221 개에 대해 `gt_samples_equal_harness` · `obs_index_equal_sl3_phases` 가 true 다(GT sample 과 phase label 이 harness 와 같다). phase 는 SL3 와 같다: approach 105 · grasp 25 · transport 91 call(post_release 0).
+**carry** = grasp + transport(116 call).
+
+### 결과 — Figure
+
+세 figure 는 verifier 가 만들었다 (`outputs/verify/SL4/scripts/make_figures.py`, sidecar `.json` 동봉).
+
+**실제 scene** — 5 개 frame(t0 의 approach · grasp · transport, ATS 가 오선택한 t4 의 approach, t5 의 approach)을 행으로, 각 행은 (1) 위에서 본 배치도(xy slice box 점선, xz 절단선 빨강),
+(2) 옆에서 본 배치도, (3–4) xy 평면의 **main layer** 와 **target-free layer** ESDF(검은 contour = ESDF 5 mm), (5–6) xz 단면의 main 과 target-free 이다. fused cloud 는 물체별 색,
+ATS target 점은 검정, 22 gripper constraint sphere 는 흰 원, target-free ball 은 빨강 점선이다. t0 approach · grasp 행은 ATS 점이 target bowl 위에 있고 target-free layer 에서 그 bowl 만 지워진다(visible plate sample 1,994 중 erased 1 · 0, bowl_2 erased 0).
+t0 transport 행(attach 없음)은 ATS 가 target 이 아닌 곳에 있고, t4 · t5 행은 ATS 점이 각각 plate · bowl_2 위에 있어 **target-free layer 에서 지워지는 것이 true target 이 아니라 그 물체다**(t4: visible plate sample 1,964 중 568 이 erased, t5: visible bowl_2 sample 2,141 중 1,747 이 erased).
+
+![SL4 scene](figures/sl4-scene.png)
+
+**graph** — (a) call 별 ATS precision · recall(+ mirror run 의 recall 선), (b) call 별 centroid 오차(log), (c) 물체별 visible GT 점의 occupied 비율(main · target-free), (d) phase 별 LTE,
+(e) camera block 별 attention mass 분해(target · plate · gripper · other), (f) seed 의 head-argmax 비율, (g) ESDF box 효과, (h) gripper sphere 중심의 ESDF − 정확 거리, (i) stage 시간.
+
+![SL4 graph](figures/sl4-graph.png)
+
+**table** — profile 대 V11AB 표, 기준선 · 회귀, ATS · mirror, attention mass, LTE, field · box · mount · cost 요약.
+
+![SL4 table](figures/sl4-table.png)
+
+### 결과 — #1 V11AB 동일성
+
+| 확인 | 결과 |
+|---|---|
+| core diff (`AG3S/ag3s/**` · `AG3S/trajopt/**`, 시작 HEAD `d1605030` 이후) | **0 줄**, untracked 0 |
+| profile config 대 V11AB 차이 (profile 자체의 `diff_against_v11ab()`) | `contact.contact_links`, `esdf.bounds_lower`(z) 둘 — 선언한 override 와 정확히 같다 |
+| 검증 쪽 독립 비교(`to_dict` 의 149 leaf) | Panda box: contact links + `bounds_lower` z(+ `bounds_upper` 의 `None` → 명시 기본값). V11AB box(`--esdf-bounds v11ab`): contact links 만 |
+| 기준선: legacy 16D (15 frame, `.venv-ag3s`) | violated start 14/15 · has_target 15/15 · frame0 clearance −29.031 mm — **일치** |
+| 기준선: cuRobo 16D (15 frame, `.venv-openpi-live`, GPU lock) | violated start 10/15 · has_target 15/15 · frame0 clearance −9.172 mm — **일치** |
+
+**RB-Y1 기준선 둘이 그대로이므로** core 는 바뀌지 않았다는 독립 확인이다(task 의 중단 조건: 기준선이 어긋나면 즉시 중단 — 해당 없음).
+
+### 결과 — #2 ATS: target 추출
+
+용어: **precision** = ATS target 점 중 GT target(`akita_black_bowl_1`) 표면까지 정확 거리 ≤ 10 mm 인 비율. **recall** = visible GT target sample 중 10 mm 안에 ATS target 점이 있는 비율.
+**centroid 오차** = |ATS target centroid − visible GT target sample 의 centroid|. `has_target` 은 ATS 가 target 점을 낸 call 이다. 실패 status: `no_seed`(seed 없음), `no_cluster`, `no_admissible`.
+
+**phase 별** (un-mirror, 기본 run)
+
+| phase | call | has_target | status | precision (pooled) | precision (call median) | recall (call median, target 있는 call) | recall (target 없음 = 0 평균) | centroid 오차 median / p95 (mm) |
+|---|---:|---:|---|---:|---:|---:|---:|---:|
+| all | 221 | 179 | ok 179, no_cluster 27, no_seed 11, no_admissible 4 | 0.497 | 0.671 | 0.231 | 0.306 | 33.2 / 382.6 |
+| approach | 105 | 101 | ok 101, no_admissible 4 | 0.696 | 1.000 | 0.732 | 0.489 | 12.0 / 382.1 |
+| grasp | 25 | 24 | ok 24, no_seed 1 | 0.769 | 1.000 | 0.673 | 0.565 | 16.3 / 312.2 |
+| transport | 91 | 54 | ok 54, no_cluster 27, no_seed 10 | 0.056 | 0.000 | 0.000 | 0.024 | 155.3 / 420.3 |
+| carry | 116 | 78 | ok 78, no_cluster 27, no_seed 11 | 0.270 | 0.000 | 0.000 | 0.141 | 96.9 / 407.4 |
+
+- **접근(approach) 단계에서 ATS 는 대체로 target 을 잡았다**: 105 call 중 101 call 에서 target 을 냈고(실패 4 = `no_admissible`, 모두 t4), centroid 오차 median 12.0 mm, precision call median 1.000.
+  단 p95 는 382.1 mm 로 **일부 task 에서 아예 다른 물체**를 골랐다(아래 task 별).
+- transport 에서는 ATS 가 target 이 아닌 곳에 있다(precision 0.056). **이 구간은 attach 가 없는 offline 한계의 영향을 받는다**(아래 "알게 된 것" c).
+- centroid 오차는 GT body 원점이 아니라 **visible 표면 sample 의 centroid** 와 비교한 값이다(GT body 원점은 bowl 바닥이라 표면 centroid 와 다르다; GT body 원점 기준 centroid 오차 median 은 approach 38.5 mm).
+- ATS target centroid 가 직전 call 과 완전히 같은 call 이 target 이 있는 179 call 중 125 개다. 그 의미(target 유지 규칙인지)는 확인하지 않았다.
+
+**task 별** (모든 phase, 한 task = episode 하나이므로 call 은 서로 독립이 아니다). 마지막 열은 ATS target 점의 **nearest-instance** 분포(0.05 이상만; `none` = 10 mm 안에 어느 물체도 없음).
+
+| task | 설명 (target 은 모두 `akita_black_bowl_1`) | call | has_target | precision (pooled) | recall median | centroid 오차 median / p95 (mm) | target 점의 nearest-instance |
+|---:|---|---:|---:|---:|---:|---:|---|
+| 0 | between plate and ramekin | 21 | 19 | 0.909 | 0.750 | 12.6 / 46.7 | bowl_1 0.91, none 0.09 |
+| 1 | next to ramekin | 22 | 16 | 0.739 | 0.209 | 41.7 / 325.2 | bowl_1 0.74, none 0.21 |
+| 2 | table center | 27 | 22 | 0.818 | 0.765 | 6.1 / 240.8 | bowl_1 0.82, none 0.18 |
+| 3 | on the cookie box | 18 | 14 | 0.771 | 0.765 | 9.1 / 169.7 | bowl_1 0.77, none 0.18 |
+| 4 | in the top drawer of the cabinet | 24 | 19 | 0.000 | 0.000 | 376.9 / 407.3 | plate 1.00 |
+| 5 | on the ramekin | 20 | 20 | 0.119 | 0.000 | 211.6 / 303.1 | bowl_2 0.49, none 0.23, ramekin 0.17, bowl_1 0.10 |
+| 6 | next to the cookie box | 21 | 19 | 0.638 | 0.474 | 13.9 / 143.3 | bowl_1 0.64, none 0.22, plate 0.14 |
+| 7 | on the stove | 23 | 15 | 0.621 | 0.485 | 14.0 / 462.3 | bowl_1 0.62, none 0.31 |
+| 8 | next to the plate | 22 | 20 | 0.640 | 0.145 | 51.6 / 158.5 | bowl_1 0.64, none 0.36 |
+| 9 | on the wooden cabinet | 23 | 15 | 0.000 | 0.000 | 371.3 / 393.3 | bowl_2 0.79, plate 0.12, stove 0.09 |
+
+- **t4 · t5 · t9 에서 ATS 가 true target 이 아닌 물체를 골랐다.** t4(top drawer 안의 bowl): target 점의 nearest-instance 가 **plate 100 %**, precision 0.000(plate 는 destination 이다).
+  t5(ramekin 위의 bowl): **bowl_2 0.49**, ramekin 0.17, true target(bowl_1) 0.10, precision 0.119. t9(cabinet 위의 bowl): **bowl_2 0.79**, plate 0.12, stove 0.09, bowl_1 은 0, precision 0.000.
+- 나머지 7 task 는 target 점이 bowl_1 위에 놓인 비율이 0.62–0.91(t0 0.91 · t2 0.82 · t3 0.77 · t1 0.74 · t8 0.64 · t6 0.64 · t7 0.62)이다.
+
+**phase 별 nearest-instance** (ATS target 점 pooled, 비율)
+
+| phase | bowl_1 | bowl_2 | plate | ramekin | cookies | stove | table | robot_sphere | none |
+|---|---|---|---|---|---|---|---|---|---|
+| approach | 0.696 | 0.214 | 0.063 | 0.006 | 0.004 | 0.015 | 0 | 0.000 | 0.001 |
+| grasp | 0.757 | 0 | 0.071 | 0.027 | 0.004 | 0.002 | 0 | 0.028 | 0.110 |
+| transport | 0.053 | 0.125 | 0.250 | 0.054 | 0.006 | 0.019 | 0.004 | 0.004 | 0.485 |
+
+### 결과 — #3 seed 를 만든 camera
+
+**seed** = ATS 가 attention 상위(95 percentile) 점으로 고른 점이다. 점마다 per-camera attention 이 더 큰 camera 를 **argmax camera** 로 기록했다(core `_with_camera_provenance` 와 같은 규칙).
+SL3 열린 항목 1(head block mass 가 매우 작은데 head pixel 이 seed 에 들어가는가)의 답이다.
+
+| phase | seed 수 | argmax head / wrist | 관측한 camera: head 만 / wrist 만 / 둘 다 | head-argmax seed 가 하나라도 있는 call | head 가 과반인 call | call 별 head seed 비율 median | (mirror run) argmax head 비율 |
+|---|---:|---|---|---:|---:|---:|---:|
+| all | 19386 | 0.587 / 0.413 | 0.190 / 0.226 / 0.584 | 204 / 210 | 142 / 210 | 0.663 | 0.513 |
+| approach | 12906 | 0.520 / 0.480 | 0.132 / 0.267 / 0.601 | 105 / 105 | 65 / 105 | 0.621 | 0.394 |
+| grasp | 1670 | 0.640 / 0.360 | 0.346 / 0.210 / 0.444 | 23 / 24 | 16 / 24 | 0.609 | 0.664 |
+| transport | 4810 | 0.749 / 0.251 | 0.294 / 0.122 / 0.584 | 76 / 81 | 61 / 81 | 0.791 | 0.598 |
+
+- **head 가 seed 를 만든다.** 전체 seed 의 0.587 이 head-argmax 이고, seed 가 있는 210 call 중 204 call 에 head-argmax seed 가 있다. 접근 단계는 head 0.520 · wrist 0.480 으로 거의 반반이고 transport 로 갈수록 head 가 늘어난다(0.749).
+  head block mass 가 작다는 SL3 의 우려는 **seed 구성에서는 문제가 되지 않았다**(fusion 에서 voxel 별 max, fused cloud 전체 percentile 정규화를 거치므로 block 합이 작아도 head 점이 상위에 들어간다는 구조적 설명은 이 STEP 에서 따로 검증하지 않았다).
+- seed 점은 두 camera 가 모두 관측한 점이 0.584 로 가장 많다.
+- ATS target 의 `seed_camera` 필드는 target 이 있는 179 call 중 head 23 · left_wrist 22 로 기록되고 134 call 은 빈 값이다(빈 값의 의미는 확인하지 않았다).
+
+### 결과 — #4 wrist mirror 진단: attention mass 분해와 mirror run
+
+SL3 #5 의 불일치(image 검사는 un-mirror 가 맞는데 wrist 의 target mass 평균은 mirror left in 이 높다)를 phase 별로 분해한다. **mass 분해** = call 평균. camera 의 256 token 합을 1 로 정규화했을 때 물체 mask 가 덮는 patch 가중 합이다
+(`other` = 1 − target − destination − gripper; arm · fixture · 기타 물체 · rest 가 포함된다). 마지막 열은 같은 patch 가중으로 센 target / destination 의 면적 비율(uniform baseline)이다.
+
+| camera | mapping | phase (call) | target | destination (plate) | gripper | other | area target / destination |
+|---|---|---|---:|---:|---:|---:|---|
+| head | unmirror | approach (105) | 0.214 | 0.098 | 0.018 | 0.670 | 0.0124 / 0.0208 |
+| head | unmirror | grasp (25) | 0.072 | 0.397 | 0.017 | 0.514 | 0.0081 / 0.0198 |
+| head | unmirror | transport (91) | 0.025 | 0.578 | 0.005 | 0.392 | 0.0120 / 0.0183 |
+| head | mirror | approach (105) | 0.043 | 0.006 | 0.005 | 0.946 | 0.0124 / 0.0208 |
+| head | mirror | grasp (25) | 0.002 | 0.001 | 0.005 | 0.991 | 0.0081 / 0.0198 |
+| head | mirror | transport (91) | 0.001 | 0.000 | 0.001 | 0.999 | 0.0120 / 0.0183 |
+| left_wrist | unmirror | approach (105) | 0.315 | 0.023 | 0.092 | 0.571 | 0.0682 / 0.0465 |
+| left_wrist | unmirror | grasp (25) | 0.214 | 0.144 | 0.398 | 0.244 | 0.1634 / 0.1186 |
+| left_wrist | unmirror | transport (91) | 0.022 | 0.619 | 0.056 | 0.303 | 0.1755 / 0.0488 |
+| left_wrist | mirror | approach (105) | 0.225 | 0.033 | 0.092 | 0.650 | 0.0682 / 0.0465 |
+| left_wrist | mirror | grasp (25) | 0.171 | 0.029 | 0.399 | 0.400 | 0.1634 / 0.1186 |
+| left_wrist | mirror | transport (91) | 0.407 | 0.126 | 0.056 | 0.411 | 0.1755 / 0.0488 |
+
+- **transport 에서 policy 의 attention 은 target bowl 을 떠나 destination plate 로 옮겨 간다.** un-mirror 로 head 는 plate 0.578 · target 0.025, wrist 는 plate 0.619 · target 0.022 다.
+  grasp 에서 이미 옮겨 가는 중이다(head plate 0.397; wrist 는 gripper 0.398 · target 0.214 · plate 0.144).
+- mirror left in 으로 바꾸면 head 는 전 phase 에서 target · plate mass 가 0 에 가까워진다(transport 0.001 · 0.000). 즉 head 는 **un-mirror 가 맞다**.
+- wrist 는 approach · grasp 에서 un-mirror 가 target mass 가 높고(0.315 대 0.225, 0.214 대 0.171), transport 에서만 mirror 가 높다(0.407 대 0.022). 그 mirror 값의 내용은 plate 0.126(un-mirror 0.619)이다.
+  **mirror left in 이 wrist transport 에서 높았던 것은 mapping 이 맞아서가 아니다.** attention 이 plate 에 있었는데 뒤집으면 plate(wrist image 면적 0.049)에서 빠져나와 면적이 큰 target bowl(0.176)에 걸린 것이다.
+
+**mirror 로 harness 를 돌린 ATS** (같은 221 call, 다른 것은 mapping 뿐)
+
+| phase | call | has_target | status | precision (pooled) | precision (call median) | recall (call median) | recall (target 없음 = 0 평균) | centroid 오차 median / p95 (mm) |
+|---|---:|---:|---|---:|---:|---:|---:|---:|
+| all | 221 | 202 | no_admissible 12, ok 202, no_cluster 5, no_seed 2 | 0.368 | 0.000 | 0.000 | 0.213 | 148.4 / 557.7 |
+| approach | 105 | 89 | no_admissible 12, ok 89, no_cluster 3, no_seed 1 | 0.548 | 0.000 | 0.000 | 0.289 | 236.2 / 567.5 |
+| grasp | 25 | 25 | ok 25 | 0.677 | 1.000 | 0.364 | 0.392 | 27.1 / 351.5 |
+| transport | 91 | 88 | ok 88, no_cluster 2, no_seed 1 | 0.120 | 0.000 | 0.000 | 0.075 | 155.9 / 540.7 |
+| carry | 116 | 113 | ok 113, no_cluster 2, no_seed 1 | 0.231 | 0.000 | 0.000 | 0.143 | 116.6 / 504.4 |
+
+- 접근 단계에서 mirror 는 ATS 를 크게 해친다: precision(pooled) 0.696 → 0.548, recall median 0.732 → 0.000, centroid 오차 median **12.0 mm → 236.2 mm**. mirror 에서는 `no_admissible` 이 12 call 로 늘고 ATS 가 ramekin(nearest-instance 0.18) · cookies(0.11)를 target 으로 고르는 경우가 생긴다.
+- **ATS 결과로도 un-mirror 가 확정**이다. 위 mirror 의 grasp precision(0.677)은 un-mirror(0.769)보다 낮고, transport 의 precision(0.120 대 0.056)은 높지만 둘 다 위 offline 한계 구간이다.
+- mirror run 의 seed camera: 접근 단계 head-argmax 비율 0.394(un-mirror 0.520)로 head 의 기여가 줄어든다.
+
+### 결과 — #5 장애물 보존과 LTE
+
+용어: **occupied** = ESDF 값 ≤ 5 mm(20 mm 열은 따로 표시). **erased** = main layer 에서 occupied 이고 target-free layer 에서 > 5 mm. 대상은 **visible GT sample**(depth 잔차 ≤ 10 mm)이고 221 call 을 pooled 했다.
+target-free layer 는 217 call 에 있다(approach 101 · grasp 25 · transport 91; 나머지 4 call 은 ATS 가 target 을 내지 못함).
+
+| 물체 | visible 점 | main occupied (5 mm) | target-free occupied (5 mm) | main occupied (20 mm) | erased 비율 | erased: approach / grasp / transport | erased > 0 / ≥ 10 % 인 call |
+|---|---:|---:|---:|---:|---:|---|---|
+| plate | 419732 | 0.984 | 0.941 | 0.999 | 0.0436 | 0.023 / 0.050 / 0.068 | 46 / 26 |
+| bowl_2 | 295531 | 0.911 | 0.776 | 0.990 | 0.1359 | 0.161 / 0.000 / 0.136 | 64 / 30 |
+| cookies | 125777 | 0.996 | 0.992 | 1.000 | 0.0032 | 0.006 / 0.000 / 0.000 | 14 / 1 |
+| ramekin | 193839 | 0.964 | 0.947 | 0.998 | 0.0176 | 0.009 / 0.028 / 0.032 | 103 / 10 |
+| stove | 261022 | 0.958 | 0.942 | 1.000 | 0.0161 | 0.011 / 0.017 / 0.022 | 54 / 11 |
+| cabinet | 84514 | 0.718 | 0.717 | 0.910 | 0.0006 | 0.001 / 0.001 / 0.000 | 33 / 0 |
+| table | 93353 | 0.979 | 0.978 | 0.993 | 0.0004 | 0.001 / 0.000 / 0.000 | 19 / 0 |
+| bowl_1 | 392444 | 0.823 | 0.575 | 0.959 | 0.2477 | 0.353 / 0.459 / 0.054 | 194 / 99 |
+| mount | 11640 | 0.000 | 0.000 | 0.014 | 0.0000 | 0.000 / 0.000 / 0.000 | 0 / 0 |
+
+- **비target 물체는 main layer 에서 거의 그대로 보존된다**: plate 0.984 · cookies 0.996 · table 0.979 · ramekin 0.964 · stove 0.958 · bowl_2 0.911(5 mm). 20 mm 로 보면 0.99 이상이다(cabinet 만 0.910).
+  cabinet 의 main occupied 는 5 mm 에서 0.718 로 낮다(fine layer 구간에서는 0.992). 이 낮음의 원인은 분석하지 않았다.
+- **target-free layer 에서 true target(bowl_1)은 부분적으로만 지워진다**: 5 mm 로 target-free 에서 제거된 비율 approach 0.364 · grasp 0.551 · transport 0.473(erased 만 세면 0.353 · 0.459 · 0.054). 이유는 둘이다 — ATS recall 이 완전하지 않고, **t4 · t5 · t9 에서는 다른 물체를 골랐다**. 두 이유의 몫은 분해하지 않았다.
+- **오선택이 비target 물체를 지운다.** bowl_2 는 approach 에서 0.161 이 erased 이고 16 call 은 10 % 이상 지워진다(t5 · t9 가 bowl_2 를 target 으로 고른 것과 같은 방향이다; task 별로 분해하지는 않았다). plate 는 transport 0.068, 전체 26 call 에서 10 % 이상 지워진다(t4 의 plate 선택과 같은 방향).
+  가장 큰 것은 **true target 이 target-free layer 에도 남는 것**이다(5 mm 로 approach 0.636, grasp 0.449, transport 0.527 가 target-free 에서도 occupied).
+- cookies · ramekin · stove · table · cabinet 은 erased 비율이 0.032 이하다. mount 는 어느 layer 에도 occupied 가 아니다(0.000; 20 mm 0.014).
+
+| phase | target visible 점 | main occupied (5 mm) | target-free occupied (5 mm) | target-free 에서 제거(5 mm) | target-free 에서 제거(20 mm) | erased | erased ≥ 10 % 인 call / call |
+|---|---:|---:|---:|---:|---:|---:|---|
+| approach | 201696 | 0.989 | 0.636 | 0.364 | 0.192 | 0.353 | 66 / 105 |
+| grasp | 38729 | 0.909 | 0.449 | 0.551 | 0.257 | 0.459 | 23 / 25 |
+| transport | 152019 | 0.581 | 0.527 | 0.473 | 0.184 | 0.054 | 10 / 91 |
+
+transport 의 main layer 에서 target 이 0.581 만 occupied 인 것은 offline 한계 구간이라 원인을 분해하지 않았다.
+
+### 결과 — #6 field 정확도: 22 gripper constraint sphere 중심의 ESDF 값
+
+**err** = ESDF(sphere 중심) − 정확 거리(그 점에서 visual 표면까지의 최근접 거리, mount 제외, 정확 거리 ≤ 0.4 m, 중심이 collision primitive 안인 sphere 제외). 음수 = ESDF 가 실제보다 가깝다고 말함(안전 쪽).
+`tf` 는 target-free layer 를 target 까지 뺀 정확 거리와 비교한 것이다. n 은 sphere × call 쌍 수다.
+
+| layer | phase | n | err median (mm) | err p05 / p95 | \|err\| median | \|err\| p95 |
+|---|---|---:|---:|---|---:|---:|
+| main | all | 4862 | -2.26 | -34.35 / 19.19 | 4.73 | 38.60 |
+| main | approach | 2310 | -2.67 | -8.36 / 0.48 | 2.73 | 8.36 |
+| main | grasp | 550 | -3.91 | -13.01 / 6.62 | 4.74 | 13.38 |
+| main | transport | 2002 | 4.12 | -55.25 / 25.57 | 11.93 | 55.25 |
+| tf | all | 4862 | -21.09 | -189.43 / -0.92 | 21.09 | 189.43 |
+| tf | approach | 2310 | -4.80 | -39.50 / -0.33 | 4.83 | 39.50 |
+| tf | grasp | 550 | -11.38 | -41.71 / -1.18 | 11.38 | 41.71 |
+| tf | transport | 2002 | -122.16 | -218.09 / -14.63 | 122.16 | 218.09 |
+
+- **접근 단계에서 main layer 는 mm 수준으로 맞는다**: \|err\| median 2.73 mm, p95 8.36 mm(최대 23.4 mm), 오차는 일관되게 음수(median −2.67 mm)라 **안전 쪽 bias** 다. grasp 는 median 4.74 · p95 13.38 mm.
+- **transport 에서는 오차가 커진다**(\|err\| median 11.93 · p95 55.25 mm, 부호도 양수로 바뀐다 median +4.12). 이 구간은 attach 가 없는 offline 구간이며 원인은 분해하지 않았다.
+- approach 에서 coarse tier 의 \|err\| median 은 5.08 mm, fine tier 는 2.57 mm 로 fine layer 가 더 정확하다. transport 는 두 tier 모두 크다(12.12 · 11.90 mm).
+
+| phase | tier | n | \|err\| median | \|err\| p95 |
+|---|---|---:|---:|---:|
+| approach | coarse | 287 | 5.08 | 11.45 |
+| approach | fine | 2023 | 2.57 | 7.34 |
+| grasp | coarse | 89 | 5.15 | 12.61 |
+| grasp | fine | 461 | 4.68 | 13.69 |
+| transport | coarse | 265 | 12.12 | 74.31 |
+| transport | fine | 1737 | 11.90 | 51.21 |
+
+정확 거리 구간별(\|err\| 의 n / median / p95, mm):
+
+| phase | 0–30 mm | 30–100 mm | 100–400 mm |
+|---|---|---|---|
+| all | 472 / 9.34 / 24.73 | 2459 / 7.33 / 49.81 | 1931 / 2.67 / 9.30 |
+| approach | 28 / 4.17 / 12.39 | 490 / 3.38 / 7.99 | 1792 / 2.57 / 8.36 |
+| grasp | 81 / 6.07 / 17.66 | 393 / 4.75 / 13.37 | 76 / 4.05 / 7.68 |
+| transport | 363 / 10.79 / 25.99 | 1576 / 12.22 / 58.56 | 63 / 12.90 / 92.14 |
+
+- **target-free layer(`tf`)의 오차는 target 을 뺀 정확 거리와 비교하면 크다**(approach \|err\| median 4.83 · p95 39.50 mm, transport median −122.16 mm). 정확 거리에 **target 을 포함해** 비교하면 오차가 줄어든다(아래 표; transport median +5.25 mm).
+  즉 tf layer 가 target bowl 을 아직 장애물로 갖고 있다는 뜻이다(위 #5: true target 이 tf 에 남는 것과 같은 현상).
+
+| phase | n | tf − 정확 거리(target 포함) median (mm) | p05 / p95 |
+|---|---:|---:|---|
+| all | 4862 | 0.37 | -33.73 / 31.60 |
+| approach | 2310 | -1.60 | -7.60 / 28.99 |
+| grasp | 550 | 16.08 | -6.74 / 36.57 |
+| transport | 2002 | 5.25 | -53.41 / 35.12 |
+
+- eikonal 자가진단(`|grad ESDF|`, xz 단면; call 별 median 의 median): 0.992(p05 0.936), `|grad| > 1.1` 인 비율의 median 0.0005. xy 단면은 GT target 높이에서 자른 것이라 table 접촉면 근처의 0 gradient 가 섞여 이 지표로 쓰지 않았다.
+- V11AB box 에서 돌린 run 의 값도 같은 수준이다(all, main \|err\| median 4.30 · p95 36.88 mm; approach \|err\| median 2.69 · p95 8.00 mm).
+
+### 결과 — #7 ESDF box: z 하한 −0.10 m override 의 효과
+
+같은 frame · 같은 ATS 로 두 box 만 바꿔 돌렸다(cloud 점 수와 call 별 `has_target` 은 둘이 같다).
+
+| 지표 | Panda box (z ≥ −0.10) | V11AB box (z ≥ 0.0) |
+|---|---:|---:|
+| **table visible 점의 ESDF ≤ 5 mm 비율** | **0.979** | **0.005** |
+| table visible 점의 ESDF ≤ 20 mm 비율 | 0.993 | 0.114 |
+| main occupied coarse voxel 수 (call median) | 2,440 | 259 |
+| fused cloud 점 중 box 밖 비율 | 0.0014 | 0.670 |
+
+- table 점은 전부(1.000) base z < 0 에 있어 V11AB box 에서는 field 안에 표현되지 않는다. cloud 점의 0.670 이 box 밖(z < 0)이다.
+- 그런데 gripper sphere 중심의 main ESDF 값 차이(V11AB box − Panda box)는 median 0.00 mm, p05 −4.79 · p95 +5.81 mm 로 작다(차이 > 1 mm 인 sphere 는 0.641 이지만 크기가 작다). 이 dev frame 에서 gripper 가 table 을 가장 가까운 장애물로 갖는 경우가 드물어 값이 거의 안 바뀐 것으로 보이나 분해하지는 않았다.
+  **그래도 table 이 장애물로 field 에 없다는 점은 바뀌지 않는다**(위 0.005) — 이것이 override 가 필요한 이유다.
+
+### 결과 — #8 mount 잔여
+
+self-filter(confined hand + mount cover) 뒤에 남은 robot mount pedestal 점이 field 에 들어가는지 본다(SL3 열린 항목 5).
+
+| 지표 | 값 |
+|---|---|
+| mount 잔여 cloud 점이 있는 call | 217 / 221 |
+| mount 잔여 점 수 | 총 1,225, call 당 median 7(최대 7) |
+| 잔여 점 → 22 gripper sphere 최소 거리 | median 616 mm(min 326 mm) |
+| 잔여 점 → franka 61 sphere 전체 최소 거리 | median 150 mm(min 150 mm) |
+| mount GT 표면 sample 중 main ESDF ≤ 5 mm | 1 / 663,000 (1 call; 그 점에서 gripper sphere 까지 336 mm) |
+| 잔여 점 근처(10 mm 안) mount GT sample 의 ESDF | median 19.3 mm(164 call), ≤ 5 mm 인 call 1 |
+
+mount 점이 field 에 남지만 call 당 최대 7 점이고 gripper sphere 에서 326 mm 이상 떨어져 있다. 잔여 점 자체의 ESDF 값은 재지 않았다(근처 GT sample 로만 봄).
+
+### 결과 — #9 비용
+
+각 episode 의 첫 call 은 제외했다(n = 211). 첫 call 은 JIT 때문에 6.73 s 였고, 각 episode 의 첫 call 에 3.80 s 까지 걸린 경우가 있다(원인은 확인하지 않았다).
+
+| stage | p50 (ms) | p95 (ms) |
+|---|---:|---:|
+| scene_reconstruction (back-project · downsample · **self-filter 4,271 sphere** · fusion) | 38.8 | 44.1 |
+| support_surface | 2.9 | 3.6 |
+| attention_lifting | 0.007 | 0.010 |
+| target_grounding (ATS) | 3.4 | 15.6 |
+| esdf | 45.0 | 60.9 |
+| constraint_generation (esdf 포함) | 46.1 | 61.9 |
+| **t_process (frame 전체)** | **94.6** | **117.1** |
+| (진단) self-filter mask 만: head / left_wrist | 17.1 / 19.1 | 17.8 / 22.9 |
+
+- GPU: torch peak 0.867 GB(866,799,616 B), reserved 1.141 GB, `nvidia-smi` process 1,702 MiB. 진단용 self-filter mask 를 다시 만들어 frame 의 mask 와 비교한 것은 442 / 442 pixel 단위로 같다.
+- **이 값은 perception 만이다**(policy 추론 · TrajOpt 제외). 250 ms policy 주기(lead 가 지정한 budget; `verify.json` 값이 아니다)에는 p95 117.1 ms 로 들어간다. policy 와 합친 online 비용은 SL-5 에서 잰다.
+- harness 의 call 당 기록 오버헤드(npz · slice 저장)는 mean 1.09 s 이며 `t_process` 에 포함되지 않는다.
+
+### 결과 — #10 회귀
+
+| 검사 | 결과 |
+|---|---|
+| `scripts/testing/run_cpu_regression.sh` | A 73 passed / B 92 passed / C 90 passed, 2 skipped / exit 0 (SL3 은 A 73 · B 78 · C 76 + 2 skipped; B · C 의 증가는 SL4 test 추가) |
+| flags-off replay (SL0 경로) | episode npz 가 SL0 와 모든 key 에서 같다. official_success true · status success · env step 113 · policy call 21 (replay 와 SL0 동일) |
+
+### 이 STEP 에서 알게 된 것 (평이한 설명)
+
+**(a) SL3 의 wrist mirror 수수께끼는 풀렸고, un-mirror 가 맞다.** SL3 에서 wrist 만 mirror left in 이 target mass 가 높게 나온 이유는 transport 에서 policy 의 attention 이
+target bowl 이 아니라 **destination plate** 로 옮겨 가기 때문이다(un-mirror 의 plate mass: head 0.578, wrist 0.619; target 은 0.025 · 0.022). 옮겨 간 attention 을 좌우로 뒤집으면 plate 에서 빠져나와
+(0.619 → 0.126) 면적이 큰 bowl 위에 걸릴 뿐(0.022 → 0.407)이라 mapping 이 맞아서가 아니다. 접근 단계에서는 mirror 가 ATS 를 실제로 해친다(centroid 오차 median 12.0 → 236.2 mm). SL3 의 가설("중앙의 bowl 이 대칭으로 겹친다")은 이 분해로 대체됐다.
+
+**(b) ATS 는 일부 task 에서 다른 물체를 target 으로 고른다.** t4 는 plate(destination), t5 는 **같은 모양의 bowl_2**, t9 는 true bowl 위에 target 점이 하나도 없다(bowl_2 0.79). LIBERO Spatial 의 핵심 난점이
+같은 모양 bowl 두 개를 **위치 관계**("between the plate and the ramekin", "on the ramekin" 등)로 구분하는 것인데, attention 이 그 구분을 못 하면 ATS 는 모양만 닮은 물체를 고른다.
+**오선택의 비용은 대칭이 아니다**: 잘못 고른 물체가 target-free layer 에서 지워지고 true target 은 장애물로 남는다. LTE 는 target 만 면제하는 방식이라, 면제가 엉뚱한 곳에 적용되면 grasp 하려는 bowl 이
+오히려 contact 금지 장애물이 된다. 이것이 V11AB 평가에 어떻게 반영될지는 closed loop(SL-5)에서 본다. 원인이 attention cell 인지 grounding 기하인지는 SL4b 가 분리한다.
+
+**(c) offline 의 한계.** harness 에는 **grasp latch · attach** 가 없다. 그래서 grasp 이후에도 bowl 은 "쥐지 않은 target" 으로 처리되고(V11AB 였다면 gripper 에 attach 했을 것), **carry(grasp + transport) 구간의 숫자는 쥐지 않은 bowl 의 숫자**로 읽어야 한다.
+또 fine window 는 `execution_path` 없이 `q_now` 로만 놓인다. Panda 에는 **phase · subtask probe 가 없다**(probe `kv_L4_v1` 은 RB-Y1 feature 로 학습). 그래서 subtask gate 는 켜져 있으되 label 이 없어 **inert**(ungated)이고, harness 는 V11AB client 처럼 `phase="approach"` 를 모든 frame 에 준다.
+
+**(d) ESDF z 하한 override 는 필요하다.** V11AB 기본 box 에서는 table visible 점의 5 mm occupied 가 0.005 에 불과하고(Panda box 0.979), cloud 점의 0.670 이 box 밖이다. table 이 거리장에 없으면 table 과의 clearance 를 optimizer 가 볼 수 없다.
+접근 단계의 gripper 근처 거리장은 이 override 와 별개로 mm 수준으로 맞는다(\|err\| median 2.73 mm).
+
+**(e) 비용은 policy 주기에 들어간다.** perception 만 p50 94.6 ms · p95 117.1 ms(첫 call 제외)이고 가장 큰 stage 는 esdf(45.0 ms)와 self-filter 를 포함한 scene_reconstruction(38.8 ms)이다. 250 ms 주기(lead 지정)보다 작다.
+policy 추론과의 합은 SL-5 에서 잰다.
+
+그 밖에: **head 는 seed 를 만든다**(접근 단계 seed 의 head-argmax 0.520). SL3 의 head block mass 우려는 seed 구성에서는 문제가 아니었다. **mount 잔여** 는 call 당 최대 7 점이고 gripper 에서 326 mm 이상이다.
+
+### 판정 (2026-10-13, 사용자)
+
+| # | 판정 |
+|---|---|
+| 1 | **SL4 확정.** |
+| 2 | **SL-4b 를 수행한다 — ATS 용 attention cell dev calibration 연구, 선택 규칙을 사전 등록**([`handoff/SL4b.task.md`](handoff/SL4b.task.md), commit `41a5b28a`). 아래 규칙 참고. test 데이터는 쓰지 않는다 |
+| 3 | **SL-5 는 core 를 최소로 바꾼다**: server 에 robot model · contact link · bound 를 **주입**할 수 있게만 하고 RB-Y1 동작은 동일하게 유지한다(기준선으로 확인). 거기에 EE-delta ↔ joint 변환을 더한다 |
+| 4 | **SL-6 의 Panda main phase source** 는 gripper-state strong rule 이거나 dev 데이터에서 pi05_libero feature 로 **새로 학습한 probe** 이다. GT phase 는 oracle 비교로만 쓴다. **SL-6 에서 결정** |
+
+**SL4b 사전 등록 규칙** (`SL4b.task.md`; 결과를 보기 전에 고정, 바꾸지 않는다)
+
+| 항목 | 정의 |
+|---|---|
+| 데이터 | dev 만: task 0–9 × init state 0–4(50 episode). init 0 은 SL3 run 재사용, init 1–4 는 새 rollout. **test(init 5–49)는 사용하지 않는다** |
+| 평가 phase | approach + grasp(carry 는 attach 가 없는 offline 한계로 제외) |
+| **1차 지표 `target_correct`** | 평가 phase call 중 ATS 가 target 을 냈고, target 점의 nearest-instance 다수결이 true target 이며, centroid 오차 ≤ 30 mm 인 call 의 비율 |
+| 2차 지표 | pooled precision(10 mm), recall median, centroid 오차 median / p95, task 별 `target_correct` |
+| 후보 | V11AB L8H2 + **선별 지표**(dev 50 episode attention 에서 approach + grasp call 의 head + wrist target mass 평균, un-mirror)의 상위 16 cell. 진단 grid 는 denoise 0, aggregation `last` |
+| **채택 조건** | 후보 cell 이 L8H2 보다 1차 지표가 **≥ 10 %p 높고**, task 별로 **10 개 중 ≥ 6 개 task 에서 L8H2 이상**이면 "Panda calibrated cell" 후보로 사용자에게 제안한다. 여러 개면 1차 지표 최고, 동률이면 낮은 layer. 만족하는 cell 이 없으면 L8H2 유지 |
+| 원인 분리 | L8H2 의 오선택 call 마다 attention argmax(head · wrist)가 true target 위에 있었는지 → attention 원인 / grounding 원인 |
+| 참고(후보 아님) | **oracle**: GT target segmentation 으로 target pixel 만 attention = 1 로 둔 ATS 기하 상한. privileged input 이며 선택에 쓰지 않는다 |
+
+채택 후보를 main 으로 쓸지 variant 로 둘지는 test 전에 사용자가 정한다. 규칙에 따라 판정 문장은 평가기 출력(사실)으로만 기록한다. **SL-4b 의 결과는 이 STEP 에 포함되지 않는다.**
+
+### 측정하지 않은 것
+
+- grasp 이후 attach / held-object 경로(offline harness 에 latch 가 없다; carry 구간은 쥐지 않은 bowl 의 숫자)
+- `execution_path` 로 놓이는 fine window(harness 는 `q_now` 로만 놓았다)
+- online `serve_safe` 경로(SL-5)
+- init state 1–4(SL3 attention 이 init 0 에만 있다; SL4b 에서 만든다)
+- mount 잔여 점 자체의 ESDF 값(그 근처 GT sample 로만 봄)
+- cabinet 의 main layer 5 mm occupied 가 0.718 로 낮은 원인
+- transport 의 main layer · field 오차가 커지는 원인 분해
+- #5 의 erased 비율을 task 별로 분해한 것(오선택 task 와의 대응은 방향만 말했다)
+- ATS target centroid 가 직전 call 과 같은 call 이 125 / 179 인 이유(target 유지 규칙인지)
+- xy 단면의 eikonal 지표(GT target 높이에서 잘라 table 접촉면이 섞인다)
+
+### 운영 기록
+
+| 사건 | 내용 |
+|---|---|
+| GPU lock `flock` 형식 오류 | task 에 적힌 `flock -w 1800 9 CMD … 9>/tmp/ag3s-vla-gpu-validation.lock` 은 명령이 뒤에 붙으면 `9` 를 **파일 이름**으로 받아 cwd 에 `./9` 를 만들어 잠근다. 공용 lock 은 fd 9 로 열려 있기만 하고 **잡히지 않는다**(바깥 flock 아래에서 다른 `flock -n` 이 성공하는 것으로 재현). implementer 의 GPU smoke 두 번이 이 형식으로 돌아 공용 lock 을 잡지 않았다(시작 직전 compute process 는 비어 있었음). 실제로 lock 을 잡는 형식은 `( flock -w N 9 \|\| exit 1; CMD ) 9>/tmp/ag3s-vla-gpu-validation.lock` 또는 `flock -w N /tmp/ag3s-vla-gpu-validation.lock CMD` 이다. `d53d8e07` 이 규칙 예시를 고쳤다. 검증 run 은 모두 올바른 형식으로 lock 을 잡고 compute process 가 없음을 확인한 뒤 실행했다 |
+
+### 열린 항목
+
+| # | 내용 | 영향 / 다음 |
+|---|---|---|
+| 1 | **ATS 오선택**: t4(plate), t5(bowl_2), t9(true bowl 위 target 점 0). 원인이 attention cell 인지 grounding 기하인지 | SL-4b 가 dev 에서 분리하고 사전 등록 규칙으로 cell 후보를 평가한다 |
+| 2 | **attach · latch · execution_path 없음**(offline). carry 구간 ATS · field 숫자는 쥐지 않은 bowl 의 숫자 | SL-5 online 에서 재측정 |
+| 3 | **phase / subtask 신호가 Panda 에 없다**(subtask gate inert) | SL-6: gripper-state strong rule 또는 새 probe, GT phase 는 oracle 비교 |
+| 4 | **core 주입**: offline 은 profile 로 해결. online `serve_safe` 는 robot model · contact link · bound 주입 길이가 없다 | SL-5 에서 최소 core 변경(RB-Y1 동작은 기준선으로 확인) |
+| 5 | true target 이 target-free layer 에도 남는 비율(5 mm 로 approach 0.636) 중 recall 부족 몫과 오선택 몫 | SL-4b 후 task 별 분해 |
+| 6 | cabinet 의 main layer 5 mm occupied 0.718, transport 의 field 오차 증가 | 원인 분석 미실시. closed loop 에서 문제가 되면 다룸 |
+| 7 | dev 는 task 당 episode 하나. call 이 episode 안에서 상관돼 신뢰구간을 말하지 않는다 | SL4b 의 init state 1–4 로 확장 |
+| 8 | Panda 에는 `constraint_sphere_options` · `finger_cover` 를 적용하지 않았다(RB-Y1 용 knob) | SL-5 이후 clearance 가 문제가 되면 재검토 |
+
+### 되돌아올 지점 (SL4)
+
+| 전환 신호 | 돌아와서 할 일 |
+|---|---|
+| SL-4b 에서 오선택의 원인이 attention cell 이 아니라 grounding(기하 · clustering)으로 나옴 | cell 교체로 해결되지 않는다. V11AB grounding 규칙 변경은 method variant 이므로 사용자 판정 |
+| SL-4b 에서 채택 조건(≥ 10 %p, ≥ 6 / 10 task)을 넘는 cell 이 없음 | L8H2 유지, 오선택을 Panda 결과의 한계로 기록 |
+| target ball 이 인접 장애물을 지우는 것이 closed loop 에서 확인됨 | V11AB `_target_ball` 반경 · 규칙이 Panda scene 스케일에 맞는지 확인(변경은 variant, 사용자 판정) |
+| ESDF box 를 z 외에도 바꿔야 함 | 근거(측정)와 함께 사용자 판정 |
+| 기준선이 어긋남 | 즉시 중단(core 가 바뀌지 않았어야 한다) |
