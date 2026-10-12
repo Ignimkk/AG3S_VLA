@@ -490,7 +490,30 @@ cuRobo 이관 과정, I1~I4. 아래 **"물려받은 결정"** 표가 그 자리�
 | **rows8 (D-TF)** | D-SF 의 8 chunk 위반 행. PC 모델 기준 위반 행 575 |
 | **W what-if (D-TF)** | 기록 target-free 층의 seed 처리만 바꿔 같은 실행 chunk 에서 `classify_violations` 를 다시 한 것. W_amb_remove = ambiguous 도 제거, W_nt_gt_oracle = non-target 근거에서 GT target 점 제외 (GT 상한), W_ball_owned_radius+k = 공 반지름 + k mm, W_nt_dropN = non-target 근거 drop 반경 N mm, thr0 = 부호교정 임계 0 |
 | **F1 · F2 · F3 · F4 (D-TF 후보)** | F1 = non-target 근거에서 target 자신의 cloud 점 빼기. F2 = ambiguous seed 도 제거. F3 = target 점 오염 (이웃 과일 점이 target 점에 섞임). F4 = TSDF 잔상. D-TF 는 구현하지 않고 후보로 적었다. T46 이 F1 · F2 를 구현한다 |
-| **T46 · A11 · V-T46 · CL3** | target-free 층 target 잔여 제거 STEP · 그 구현 (F1 · F2, 기본 off) · offline 비교 · 고른 변형으로 할 CL2 와 같은 18 쌍 closed-loop. 모두 아직 시작하지 않았다 |
+| **T46 · A11 · V-T46 · CL3** | target-free 층 target 잔여 제거 STEP · 그 구현 (F1 · F2, 기본 off) · offline 비교 · 고른 변형으로 할 CL2 와 같은 18 쌍 closed-loop. ~~모두 아직 시작하지 않았다~~ → **모두 끝남 (2026-10-12).** 아래 "T46 (2026-10-12 추가)" 용어 표와 "T46" 절 |
+
+**T46 (2026-10-12 추가)** — 위 T44e CL2 · CL-A · D-SF · D-TF 소절에 이어지는 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **F1 `--nontarget-evidence surface`** | non-target evidence 에서 **target 의 fitted sphere 표면 위 점** 을 추가로 빼는 옵션 (기본 `proximity` = 이전 동작). GT 를 쓰지 않는다. fit 이 받아들여진 frame 에서만 동작하고 이웃 보호 규칙 (가장 가까운 target 점이 껍질 밖 evidence 점보다 tie 만큼 확실히 가까울 때만) 이 걸린다 |
+| **nontarget shell (`--nontarget-shell-voxels`)** | F1 이 "fitted sphere 표면" 으로 보는 껍질의 두께. 기본 2.0 fine voxel = 10 mm |
+| **fitted sphere · `surface_fit` · `centroid` (fit 물러남)** | `TargetBall` 이 target 점에 맞춘 sphere. 맞춤이 받아들여지면 `centre_method == surface_fit`, target 점이 한 볼록 물체가 아니라서 (이웃이 섞임) 물러나면 `centroid` (fit rejected). F1 은 `centroid` 인 공에서는 동작하지 않는다 |
+| **F2 `--owned-ambiguous remove`** | `ball_owned` 의 ambiguous seed 를 제거하는 옵션 (기본 `keep`). 이웃 과일 seed 도 함께 지워질 수 있다 |
+| **`proximity_reason`** | F1 on 일 때 non-target evidence 가 `indices` 가 아니라 `proximity` 경로로 떨어진 이유 (`no_indices` · `length_mismatch` · `out_of_range` · `points_mismatch`) 를 남기는 trace 키 |
+| **design set · held-out set (V-T46)** | design set = F1 설계 때 implementer 가 GT 라벨을 본 D-TF 17 충돌 chunk (참고용). held-out set = 설계에 쓰지 않은 CL2 C1a 18 run 의 pre8+close 162 chunk (판정용) |
+| **F1GT** | non-target evidence 에서 GT target 점을 빼는 상한 대조 (GT 는 대조 · 평가에만 쓴다) |
+| **replay variant `TF0` · `F1` · `F2` · `F1F2` (`target_free_replay`)** | 기록된 chunk 에서 fine target-free layer 만 off (TF0) / F1 / F2 / F1F2 로 다시 짓는 offline 재구성. off 는 기록과 float16 bit 로 같아야 한다 |
+| **HOLD 0 행 chunk** | 기록에서 HOLD 였던 chunk 중 변형으로 재분류한 뒤 충돌 행이 0 이 된 chunk 수 (재풀이가 아니라 기록된 실행 chunk 의 재분류) |
+| **잃은 이웃 과일 seed · 이웃 내부를 안전하다고 읽는 frame** | 이웃 과일의 seed 가 off 대비 새로 지워진 개수 (이웃 hull 5 mm 안 기준) · T44e 정의로 이웃 과일 내부 voxel 이 clearance ≥ 10 mm 로 읽히는 (낙관) frame 이 off 보다 많아진 수 |
+| **target removal recall (T44 E2 정의)** | GT target 에 속한 seed 중 제거된 비율. V-T46 은 GT hull 의 최근접 body voxel 라벨로 이식해 잰다 |
+| **pre8+close window** | 각 run 에서 첫 close 명령 (`grasp.state == closing`) 의 server chunk 와 그 8 chunk 전부터의 9 chunk (18 run × 9 = 162 chunk). V-T45 · D-TF 의 pre8+close 와 같은 정의 |
+| **close 뒤 HOLD** | 위 window 의 close chunk 이후 구간의 HOLD chunk (C1a 107 · C1a+F1 183 · C1a+F1F2 122). `uncertified` HOLD kind 는 위 용어 (HOLD kind) 정의를 따른다 |
+| **CL3 arm 이름 `C1aF1` · `C1aF1F2`** | CL3 의 arm = C1a (= CL2 C1a flag) · C1a+F1 (`--nontarget-evidence surface` 추가) · C1a+F1F2 (여기에 `--owned-ambiguous remove` 추가). 로그 표에서는 `C1a+F1` · `C1a+F1F2` 로 쓰고 run 디렉터리 · verify.json 키는 `C1aF1` · `C1aF1F2` |
+| **foreign GPU overlap** | 우리 server 가 아닌 프로세스가 같은 GPU 를 동시에 쓴 구간과 그 구간에 걸친 run. 우리 server 의 전체 GPU 메모리 sample 에서 (사용량 − 18,200 MiB × 살아 있는 우리 server 수) 가 임계를 넘는 구간으로 잡았다 |
+| **supp rerun (보충 재실행)** | foreign GPU 겹침 run 을 같은 (episode, seed) 로 다시 돌린 것. 원본 대비 executed_actions 동일 여부를 확인했다 (4 / 4 동일) |
+| **memory guard wait** | server 시작 chain 이 client 시작 전 `pod working set + 4 GiB ≤ 64 GiB` 를 확인하며 60 초마다 기다린 것 |
+| **세 집계 기준 (`all` · `no_overlap` · `supp_substituted`)** | CL3 를 같은 54 run 위에서 세 방식으로 집계: 원본 54 run 전부 · foreign 겹침 run 이 속한 pair 를 뺌 · 겹침 4 run 을 보충 재실행으로 대체 |
 
 **T47 이후의 용어** (T47 · T47b · T48a …) 는 [`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) 의 "용어 (T47 이후)" 절로 옮겼다 (2026-10-12).
 
@@ -552,7 +575,7 @@ cuRobo 이관 과정, I1~I4. 아래 **"물려받은 결정"** 표가 그 자리�
 | **T44c · T44d** target-free coarse tier · A6 바닥 잔류 수정 · closed-loop 4 arm (C0 · C1a · C1b · C2) | coarse tier 와 비권한 link margin 이 closed-loop 에서 어떻게 작동하나 | **기록은 아래 "T44c" · "T44d" 절.** T44d 요약 (T44e CL2 참고 수치): task success C0 14 · C1a 15 · C1b 7 · C2 0 / 18 |
 | **T44e** coarse support 처리 (`exclude_target`) · 비권한 link target margin = obstacle (A8 · A8b · A9) → CL2 closed-loop · CL-A 첫 갈림 chunk | coarse 에서 table seed 를 빼면 C1b 의 파지 하락이 회복되나, 비권한 arm link 를 일반 obstacle 로 다루면 `--links arms` 가 서나 | **CL2 · CL-A 측정 완료 (2026-10-12)** — 사용자 판정 "1(a) · 2(a) 를 함께 진행" (선택지 원문은 기록에 없다) → CL-A → 판정 "추천하는 방향으로 진행" → T46. — CL2 (72 run) task success **C0 14 · C1a 14 · C1b′ 11 · C2′ 1 / 18**. C1b 7 → C1b′ 11 (T44d 대 CL2, 다른 날 · 참고만) 이나 C1a 14 → C1b′ 11 (p 0.375) 로 C1a 를 못 넘는다. C2′ 는 C2 0 → 1 (p 1.0), C1b′ 대 C2′ 11 → 1 (p 0.00195). CL-A 는 갈림 chunk 의 worst row 를 가렸고 (아래 절) 수정은 하지 않았다. 절 "T44e-CL2 · CL-A · T45 D-SF · D-TF" |
 | **T45** 손 충돌 구 audit · palm cover 5 mm (A10) → D-SF (self-filter 잔여?) → D-TF (target-free 층 target 잔여) | palm cover on 의 새 HOLD 는 로봇 자신의 점인가, 아니면 field 에 남은 target 표면인가 | **D-SF · D-TF 측정 완료 (2026-10-12, 사용자 판정: palm cover 는 계속 기본 off, D-TF 를 CL2 와 병렬)** — self-filter 잔여 가설 반박 (M1 · M2 가 M0 와 같은 위반 행 8/8), 막는 voxel 은 target 과일 자신의 표면 (가중 ≥ 0.53 in 8/8, 전부 target_free tier). D-TF: C1a 기록 충돌 17 chunk (HOLD 14) 에서 ambiguous 도 제거하면 601 → 53 행 (HOLD 10/14 가 0 행), 단 이웃 과일 seed 688 도 제거. 절 "T44e-CL2 · CL-A · T45 D-SF · D-TF" |
-| **T46** target-free 층의 target 잔여 제거: F1 (non-target 근거 정화) · F2 (ambiguous 제거) | GT 없이 target 잔여를 지우는 방법이 C1a 의 grasp 직전 HOLD 를 줄이면서 이웃 과일 보호를 유지하나 | **대기 (2026-10-12, 사용자 판정 "추천하는 방향으로 진행")** — 구현 (A11) · 검증 (V-T46) 모두 아직 시작 전. 결과 없음. `handoff/T46.task.md` |
+| **T46** target-free 층의 target 잔여 제거: F1 (non-target 근거 정화) · F2 (ambiguous 제거) | GT 없이 target 잔여를 지우는 방법이 C1a 의 grasp 직전 HOLD 를 줄이면서 이웃 과일 보호를 유지하나 | ~~**대기 (2026-10-12, 사용자 판정 "추천하는 방향으로 진행")** — 구현 (A11) · 검증 (V-T46) 모두 아직 시작 전. 결과 없음.~~ → **A11 · V-T46 · CL3 완료 (2026-10-12), 다음 단계 사용자 판정 대기.** offline (held-out 162 chunk): 충돌 행 887 → F1 401 · F2 136 · F1F2 107, 이웃 seed 손실 F1 0 · F2 2,463. closed-loop (18 쌍): pre8+close HOLD **12 → 6 (F1) → 2 (F1F2)**, 이웃 접촉 행 38 → 16 → 27, **task success 14 → 13 → 13 (p 1.0)**, 전체 HOLD 119 → **189** → 124 (F1 에서 증가, close 뒤 `uncertified` 37 → 130). CL3 C1a = CL2 C1a executed_actions 18 / 18 동일. 절 "T46", `handoff/T46.task.md` · `T46.verify.json` · `T46-CL3.verify.json` |
 | — | T47 이후 (T47 · T47b · T48a · T48b · T49) 의 진행 현황은 [`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) 의 "진행 현황 — T47 이후" 표로 옮겼다 | — |
 
 ### 이 국면에서 쓰는 자산
@@ -643,6 +666,10 @@ cuRobo 이관 과정, I1~I4. 아래 **"물려받은 결정"** 표가 그 자리�
 | 27 | (T44e CL2 · CL-A 가 추가) **closed-loop counterfactual** — C1b′ 에서 divergence chunk 이후 coarse 를 끈 실행, C2′ 에서 비권한 link 의 target 을 뺀 실행 | CL-A 는 single-chunk open-loop re-solve 만 했다 (re-solve 와 기록 refined 의 차이 1e-7 ~ 0.09 rad, C2′ window 중앙 2.8e-3 rad). 이보다 작은 offline variant 간 차이는 QP 수치와 가르지 못했다. 매달린 (held) chunk 는 재조회하지 않았다 (ta_offline held 재구성 149 중 32 불일치) | **측정 안 됨** |
 | 28 | (T44e CL-A 가 추가) **TO 시간의 단계 분해 (fk · field · qp)** | 서버 `timing_ms` 에는 linearize · assemble · qp · check 만 있다. fk / field / qp 분해는 offline cProfile (8 chunk, 다른 기계 부하) 뿐이다 — C1b′ refine 67.5 · C2′ 84.2 ms (중앙) | **서버에서 직접 측정 안 됨** |
 | 29 | (T44e CL2 가 추가) **CL2 의 미측정** — 바나나 (통과 episode 없음), 영상, 집계 시점의 cuRobo regression baseline | `T44e-CL2.verify.json` `not_measured`: 바나나 · T44d 같은 side-by-side mp4 · 집계 시점의 cuRobo baseline (GPU 미사용, 실행 시점 값은 `provenance.json`) · `target_rows_unauthorized_kept` (PathChecker 에서만 나오고 sweep_check 가 모든 arm 에서 off 라 전 arm `absent`). T44d 대 CL2 비교는 다른 날 · 다른 환경이고 C1b 대 C1b′, C2 대 C2′ 는 flag 도 다르다 | **측정 안 됨 / 참고만** |
+| T46-1 | (T46 V-T46 · CL3 가 추가) **close 뒤 `uncertified` HOLD 증가의 원인** | CL3: 전체 HOLD 119 (C1a) → 189 (C1a+F1) → 124 (C1a+F1F2), `uncertified` 37 → 130 → 118. 증가는 ep30_s301 (0 → 39) · ep11_s111 (1 → 40) · ep54_s542 (1 → 15) 에 있다. chunk 별 첫 HOLD · verdict reason 은 분해하지 않았다 (`not_measured`: discordant 쌍의 first-divergence 분석) | **원인 미측정.** T46b 진단 후보 (사용자 판정 대기). 후속 STEP 은 `AG3S_T47_LOG.md` 에 쓴다 |
+| T46-2 | (T46 이 추가) **C2′ + F1 · F2 의 closed-loop** | CL3 는 C1a 계열 3 arm 만 돌렸다. V-T46 의 C2′ 는 단일 chunk 재풀이 (206 chunk) 이고 row 7 중앙 69.7 → 68.5 (F1) 이나 짝지은 차의 중앙은 0.0 mm, 이 값에 C2′ 의 coarse target-free layer 는 기록 그대로 들어 있다 | **측정 안 됨** |
+| T46-3 | (T46 이 추가) **CL3 기록의 GT 기반 residual 수치 · 서버 end-to-end build 시간 · 새로 지운 seed 의 TSDF 부호** | V-T46 harness 를 CL3 기록에 다시 돌리지 않았다. build 시간은 `gt_label` identity harness (CPU F1 단계는 중앙 0.0798 ms). 부호는 replay 가 음수로 가정 (양수 상한도 충돌 행 같음) | **측정 안 됨** |
+| T46-4 | (T46 이 추가) **banana · side-by-side 영상 · foreign GPU 의 07:45 UTC (16:45 KST) 이전 존재** | banana 는 LB2 통과 episode 없음. 영상은 안 만들었고 run 디렉터리 mp4 만 있다. foreign 은 우리 server 의 GPU 메모리 sample 에서 재구성한 것 | **측정 안 됨** |
 | — | (T47 이후의 재측정 대기는 [`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) 의 "재측정 대기 — T47 이후" 표로 옮겼다. 원래 번호 30–35) | — | — |
 
 ~~재측정이 끝나면 이 표의 `상태` 를 값과 함께 갱신하고, 값이 달라진 것은 **왜 달라졌는지**를
@@ -9064,7 +9091,7 @@ pre8 + close 162 chunk (palm cover off 의 기록 실행 chunk) 중 충돌 행�
 
 ### 9. 사용자 판정 · 다음 단계 · 산출물
 
-#### 9-1. 다음 단계 — T46 (대기, 결과 없음)
+#### 9-1. ~~다음 단계 — T46 (대기, 결과 없음)~~ → T46 은 실행됨 (2026-10-12): 아래 "T46" 절
 
 사용자 판정 (2026-10-12, "추천하는 방향으로 진행") 으로 lead 가 `handoff/T46.task.md` 를 만들었다 (13:21 KST 마지막 수정). **이 절은 계획만 적고 결과를 적지 않는다.**
 
@@ -9086,6 +9113,371 @@ pre8 + close 162 chunk (palm cover off 의 기록 실행 chunk) 중 충돌 행�
 - **figure** (각각 `.json` sidecar 있음): CL2 [`scene`](figures/t44/t44e-cl2-scene.png) · [`graph`](figures/t44/t44e-cl2-graph.png) · [`table`](figures/t44/t44e-cl2-table.png), CL-A [`scene`](figures/t44/t44e-cla-scene.png) · [`graph`](figures/t44/t44e-cla-graph.png) · [`table`](figures/t44/t44e-cla-table.png), D-SF [`scene`](figures/t45/t45sf-scene.png) · [`graph`](figures/t45/t45sf-graph.png) · [`table`](figures/t45/t45sf-table.png), D-TF [`scene`](figures/t45/t45tf-scene.png) · [`graph`](figures/t45/t45tf-graph.png) · [`table`](figures/t45/t45tf-table.png).
 - **task 문서**: `handoff/T44e.task.md` (CL2 확정 · 이관 · 결과) · `handoff/T45.task.md` (D-SF · D-TF) · `handoff/T46.task.md` (다음 단계).
 - 구현 변경은 이 절에 없다 (모두 수정 없는 진단). commit 은 하지 않았다.
+
+---
+
+## T46 — target-free 층의 target 잔여 제거 (F1 · F2): 구현 A11 · offline 비교 V-T46 · closed-loop CL3 (2026-10-12 KST)
+
+**이 절이 답하는 물음 (목적).** 앞 절 (T44e-CL2 · CL-A · T45 D-SF · D-TF) 은 *"C1a 의 grasp 직전 HOLD 와 C2′ 의 권한 손가락 행이 같은 병목을 가리킨다 — 권한 손이 읽는 target-free fine layer 에 target 과일 자신의 표면이 남는다"* 까지 왔다. 이 절은 그 residual 을 **GT 없이** 지우는 두 옵션 — **F1** (non-target evidence 에서 target 자신의 cloud 점을 빼기) 과 **F2** (ambiguous seed 도 지우기) — 을 (1) 구현하고 (A11), (2) offline 에서 GT 를 평가에만 써서 비교하고 (V-T46), (3) 고른 변형을 CL2 와 같은 18 쌍 closed-loop 에 올려 (CL3) *"grasp 직전 HOLD 를 줄이면서 이웃 과일 보호를 유지하는가, 그리고 task success 가 오르는가"* 를 본다.
+
+**한 줄 결과 (before → after).** 기준은 V11AB = C0 와 직전 arm C1a 다.
+
+- **offline (V-T46, held-out 162 chunk, CL2 C1a 기록 재분류):** C1a 의 grasp 직전 충돌 행 **887 → F1 401 · F2 136 · F1F2 107**, 기록 HOLD 12 chunk 중 충돌 행이 0 이 된 chunk **0 → 5 · 4 · 6**. 이웃 과일 seed 손실은 **F1 0 · F2 / F1F2 2,463**. 사전 고정 기준 중 판정 항목 (#5 recall · #7 build 시간) 은 통과, #2 off bit-identical 은 held-out 에서 0 차이.
+- **closed-loop (CL3, 3 arm × 18 쌍 = 54 run):** grasp 직전 (pre8+close) HOLD chunk **C1a 12 → C1a+F1 6 → C1a+F1F2 2** (C0 는 1). 이웃 과일 접촉 (`hand-fruit_other`) 행 **38 → 16 → 27**. **개선되지 않은 것:** task success **14 → 13 → 13 / 18** (McNemar p 1.0), 전체 HOLD chunk **119 → 189 → 124** (F1 에서 증가, 증가분의 대부분이 close 뒤 `uncertified`: 37 → 130), grasp 17 → 16 → 16.
+- **재현성:** CL3 C1a 의 executed_actions 가 CL2 C1a 와 **18 / 18 동일**하다 (task · CT · grasp · HOLD 합 모두 같다).
+- 사용자 판정 대기: 다음 단계 (§7). 결과를 근거로 한 새 판정은 아직 없다.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `T46.verify.json` (이하 **V-T46**) 과 `T46-CL3.verify.json` (이하 **CL3**) 의 `numbers` · `design` · `not_measured` 에서만 왔다. 같은 파일 숫자의 덧셈 · 개수 세기는 "(산출)" 이다. 구현 쪽 (§2) 의 수치는 `T46.impl.md` 의 **(구현자)** 보고이고 verifier 가 다시 재지 않았다. 이 절의 환경 사실 (`c906cda2` 의 42 test) 은 `LEGACY_INDEX_PATHS.impl.md` (구현자 보고) 에서 왔다. figure sidecar 의 숫자는 쓰지 않았다.
+- **해석의 출처를 가른다.** `T46.task.md` 의 lead 문구는 "(lead)" 로 적었다.
+- **시각.** pod 에 tzdata 가 없어 `date` 가 UTC 로 나온다. KST 는 run 디렉터리 이름의 `+0900` 접미사나 verify.json 의 UTC 필드에 +9 h 를 더해 환산했다 (commit 시각 포함).
+- **설계-평가 겹침.** F1 의 설계 때 implementer 가 D-TF 17 chunk 의 GT 점 라벨을 봤다. 그래서 V-T46 은 그 17 chunk 를 **design set** (참고) 으로, 설계에 쓰지 않은 CL2 C1a 18 run 의 grasp 직전 chunk 를 **held-out set** (판정) 으로 갈라 보고한다 (lead 보완, `T46.task.md`).
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+| # | 판정 (2026-10-12) | 이 절에서 |
+|---|---|---|
+| 1 | D-TF · CL-A 뒤 **"추천하는 방향으로 진행"** — F1 · F2 를 둘 다 기본 off 옵션으로 구현하고 offline 에서 GT 없이 비교, 나은 쪽을 CL3 에 (`T46.task.md`) | §2 · §3 |
+| 2 | V-T46 결과 뒤 **"CL3 = A 안"** (`T46.task.md` 의 기록. 선택지 원문은 기록에 없다). CL3 의 arm 구성은 task 문서에 적힌 C1a · C1a+F1 · C1a+F1F2 이다 | §4 |
+
+| 시각 (KST, 환산) | 무엇 | 출처 |
+|---|---|---|
+| 13:26:31 | A11 구현 run 디렉터리 생성 (`20261012T132631+0900_8efc1157a495_…`) | `T46.impl.md` |
+| 14:16:22 | V-T46 run 디렉터리 생성 (`20261012T141622+0900_bd778e5e3453_…`) | V-T46 `run_dir` |
+| 14:20:58 | commit `c906cda2` (기록 index 의 `/mnt/dev/work` 경로 rebase, 환경 수정) | `git log` 05:20:58 UTC |
+| 15:36:50 | commit `218229ac` (T46 F1 · F2 구현과 offline 검증) — CL3 의 snapshot | `git log` 06:36:50 UTC |
+| 15:51:30 | CL3 run 디렉터리 생성 (`20261012T155130+0900_218229ac6464_…`) | CL3 `run_dir` |
+| 16:09:47 – 16:10:30 | CL3 시작 전 cuRobo regression baseline (GPU lock) | CL3 `design.gpu_lock` (07:09:47 – 07:10:30 UTC) |
+| 16:10:47 – 16:21:01 | smoke (C1a+F1 ep12 s121 한 run + 나머지 두 arm 은 서버 시작 guard 만) | CL3 `design.gpu_lock` · `smoke` |
+| 16:21:24 – 19:03:20 | CL3 54 run 실행 (3 block, 실패 0 · 재시도 0) | CL3 `design.run_window_utc` (07:21:24 – 10:03:20 UTC) |
+| 19:03:43 – 19:18:17 | 보충 재실행 4 run (foreign GPU 겹침 run 대체) | CL3 `design.supp_window_utc` (10:03:43 – 10:18:17 UTC) |
+
+### 2. A11 구현 요약 (구현자 `T46.impl.md`)
+
+**왜 `proximity` 가 target 점을 남기는가 (구현자, 기록에서 확인).** grasp 중에는 target 기하가 옛 frame 의 anchor 라서 `point_indices` 가 비어 non-target evidence 가 `proximity` 경로 (target 점 5 mm = fine voxel 안의 점만 target 으로 보고 뺌) 로 떨어진다. fused cloud 의 최근접 점 간격이 중앙 7.7 mm · p90 9.6 mm (3 chunk) 로 그 반경보다 크다. 그래서 anchor 점과 지금 cloud 의 target 점이 5 mm 안에서 짝지어지지 않아 target 표면 점이 non-target evidence 로 남는다.
+
+**before → after (둘 다 기본 off, off 면 이전과 bit-identical).**
+
+| | 이전 (off, 기본) | F1 `--nontarget-evidence surface` | F2 `--owned-ambiguous remove` |
+|---|---|---|---|
+| fine target-free layer 의 non-target evidence | cloud − target 점 5 mm 안 − support 면 | 이전 − **target 의 fitted sphere 표면 위 점** (fit 이 받아들여진 frame 만, 이웃 보호 규칙 포함) | 이전 그대로 |
+| ambiguous seed (target 과 non-target 거리 차 ≤ tie) | 보존 (장애물로 둠) | 보존 (evidence 가 고쳐지므로 수는 준다) | **제거** (부호 교정 집합도 함께 커짐) |
+| coarse target-free layer · main layer · permission · `ball` 모드 | — | 그대로 | 그대로 |
+| 추가되는 기록 (`stats["target_free"]`) | — | `nontarget.evidence` · `n_points_owned` · `proximity_reason` | `n_ambiguous_removed` · `owned.ambiguous` |
+
+- **F1 은 GT 를 쓰지 않는다.** `TargetBall` 이 이미 가진 "관측 표면에 맞춘 sphere (fitted sphere)" 를 쓴다. 공 안이고 fitted sphere + 10 mm (shell 2 fine voxel) 안인 non-target evidence 점을 target 표면으로 보되, 그 점의 가장 가까운 target 점이 껍질 밖 evidence 점보다 tie (5 mm) 만큼 확실히 가까울 때만 뺀다. **fit 이 물러난 공** (`centre_method == centroid`, target 점이 한 볼록 물체가 아님 = 이웃이 섞임) 에서는 아무것도 하지 않는다.
+- 이 규칙의 값 (문 · shell · tie) 은 D-TF 17 chunk 의 GT 라벨 probe 로 골랐다 (구현자). 그 chunk 가 V-T46 의 design set 이고, 이것이 held-out 을 따로 둔 이유다.
+- 고르지 않은 후보 (구현자): (a) 반경을 config 로 키우기 — 이웃 과일 evidence 를 더 뺀다 (probe 에서 이웃 점 155 → 205 / 298). (b) target 점에서 시작하는 cloud 연결 성분 확장 — cloud 간격 (7.7 mm) 보다 긴 연결 거리가 필요해 닿은 이웃으로 넘어간다. (c) 현재 frame 의 observation cluster indices 우선 — grasp 중 기하가 anchor 라 `point_indices` 가 없고 (17 / 17) 기록에 cluster 가 없어 offline 으로 잴 수 없다. 대신 `proximity_reason` 을 남긴다.
+- **구현 파일:** `config.py` · `curobo_builder.py` (`nontarget_surface_evidence`, `_ball_owned_split`) · `pipeline.py` (`_build_esdf` 배선) · `serve_safe.py` (flag 3 개: `--nontarget-evidence {proximity,surface}` · `--nontarget-shell-voxels` · `--owned-ambiguous {keep,remove}`, 모두 `--target-exclusion ball-owned` 에서만) · `target_free_replay.py` (새, offline 재구성) · `ta_offline.py` (variant `TF0` · `F1` · `F2` · `F1F2`) · `tests/ag3s/test_t46_target_free_residual.py` (새, 23 test).
+- **단위 검증 (구현자):** 새 test 23 passed (GPU 포함). 전체 `tests/trajopt tests/ag3s` 는 2746 passed · **42 failed**. 실패 42 개는 T46 와 무관하다 — 옛 `/mnt/dev/work` 절대경로가 기록 index 의 key 에 들어 있어서 test 가 `KeyError` 를 낸 것이다 (T46 변경 전 HEAD 만 풀어도 같은 42 failed).
+- **환경 메모 (구현자, `LEGACY_INDEX_PATHS.impl.md`):** 위 42 개는 commit `c906cda2` 에서 index 경로를 shared storage 로 rebase 하는 helper 를 추가해 `/mnt/dev/work` 접근 없이 **42 passed** 가 됐다 (기록 JSON 은 수정하지 않았다). T46 의 algorithm 과 무관한 환경 수정이다.
+- **smoke (구현자, 측정 아님):** off replay 가 D-TF 17 chunk 에서 기록 층과 float16 bit 로 같다 (17 / 17). 같은 17 chunk 의 off 제거 seed 합 17,513 → F1 18,709 → F2 20,068 이고, F1 이 적용된 chunk 는 11 / 17 (6 은 fit 물러남).
+
+### 3. V-T46 — offline 비교 (held-out 기준 판정)
+
+**방법.** 기록된 grasp 직전 chunk 의 fine target-free layer 를 `target_free_replay` 로 off / F1 / F2 / F1F2 로 다시 짓고 같은 `classify_violations` 로 충돌 행을 센다 (기록된 실행 chunk 를 재분류한 것이지 재풀이가 아니다 — C2′ #6 만 재풀이). **F1GT** 는 GT 점을 evidence 에서 빼는 상한 대조다 (GT 는 평가 · 대조에만). 입력: held-out = CL2 C1a 18 run 의 grasp 직전 (pre8 + close) **162 chunk** (충돌 14 chunk · 기록 HOLD 12 chunk), design set = D-TF 의 17 충돌 chunk (기록 HOLD 14), D-SF 8 chunk, CL-A 의 C2′ window 206 chunk. 사전 고정 기준은 `p/definitions_fixed_before_measuring.json`.
+
+#### 3-1. 사전 고정 기준 7 개의 결과
+
+| # | 무엇 | 기준 (측정 전 고정) | 측정 | 결과 |
+|---|---|---|---|---|
+| 1 | 회귀 기준선 | 일치 | legacy 14 / 15 · 15 / 15 · frame0 −29.031048280806342 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877401271193 mm | **일치** |
+| 2 | off bit-identical (기록 chunk replay 차이) | 0 | held-out 0 / 162 chunk · design17 0 / 17 · D-SF 8 chunk 0 / 8 · C2′ window 0 / 206. 부가로 본 design162 (D-TF 162 chunk) 는 2 / 162 chunk 에서 6 voxel 차이 (두 chunk 모두 충돌 행은 기록과 off 가 같은 0) | **held-out 0 · design17 0 · C2′ 0** |
+| 3 | 충돌 행 · HOLD 0 행 chunk | 보고 | §3-2 | 보고 |
+| 4 | 이웃 과일 보존 | F1 악화 ≤ 소폭 · F2 는 688 기준 대비 보고 | §3-2 | F1 0 (held-out) · F2 2,463 |
+| 5 | target removal recall (T44 E2 정의: target 점이 제거된 비율) 중앙값 | held-out off − 5 pp = 0.8445 이상 | off 0.8945 → F1 0.9541 · F2 0.9616 · F1F2 0.9632 | **통과** |
+| 6 | C2′ window 권한 손가락 → target 거리 (재풀이) row 7 중앙 | 보고 (기준 69.7 mm) | off 69.7029 → F1 68.4528 · F2 68.0124 · F1F2 68.4377 mm | 보고 |
+| 7 | AG3S build 시간 p90 증가 | ≤ 10 ms | F1 +0.2012 · F2 −0.0941 · F1F2 +0.0657 ms | **통과** |
+
+(off replay 대 C2′ 기록의 row 7: 206 / 206 chunk 에서 1e-6 mm 안 일치, 최대 차 0.0 mm.)
+
+#### 3-2. 충돌 행 · HOLD · 이웃 과일 · recall (off → F1 / F2 / F1F2, F1GT 상한)
+
+"HOLD 0 행 chunk" = 기록 HOLD chunk 중 변형 뒤 충돌 행이 0 이 된 chunk 수.
+
+| 세트 | 지표 | off | F1 | F2 | F1F2 | F1GT |
+|---|---|---:|---:|---:|---:|---:|
+| **held-out** (162 chunk, 충돌 14 · HOLD 12) | 충돌 행 합 | 887 | 401 | 136 | 107 | 113 |
+| | HOLD 0 행 chunk (/12) | 0 | 5 | 4 | 6 | 6 |
+| | 충돌 0 chunk (/14) | 0 | 6 | 6 | 8 | 8 |
+| | 잃은 이웃 과일 seed (전체 / 충돌 chunk) | 0 / 0 | 0 / 0 | 2,463 / 487 | 2,463 / 487 | 48 / 5 |
+| | 이웃 과일 내부를 안전하다고 읽는 frame (off 초과) | 0 | 0 | 43 | 43 | 9 |
+| | recall 중앙 / p10 | 0.8945 / 0.7776 | 0.9541 / 0.8375 | 0.9616 / 0.9340 | 0.9632 / 0.9366 | 0.9632 / 0.9340 |
+| **design set** (참고, D-TF 17 chunk, HOLD 14) | 충돌 행 합 | 601 | 387 | 53 | 53 | 72 |
+| | HOLD 0 행 chunk (/14) | 0 | 6 | 10 | 10 | 8 |
+| | 잃은 이웃 과일 seed | 0 | 1 | 688 | 688 | 25 |
+| | recall 중앙 | 0.8267 | 0.9405 | 0.9426 | 0.9436 | 0.9430 |
+| D-SF 8 chunk (palm cover on 모델, 기록 HOLD 0) | 충돌 행 합 | 595 | 542 | 537 | 537 | 548 |
+| | 충돌 0 chunk (/8) | 0 | 1 | 2 | 2 | 1 |
+
+- (산출) held-out 에서 어떤 변형도 off 보다 충돌 행이 늘어난 chunk 는 0, 새로 충돌이 생긴 chunk 도 0 이다 (`chunks_rows_increased_vs_off` · `new_collision_chunks_vs_off`).
+- **F1 은 이웃 과일 보호를 지켰다:** held-out 에서 잃은 이웃 과일 seed 0, design set 에서 1. **F2 는 지킬 수 없었다:** 69 chunk (162 중) 에서 이웃 seed 를 잃고, design set 의 688 (D-TF what-if 와 같은 수) 이 held-out 에서는 2,463 이다.
+- F1 이 못 한 몫: **fit 이 물러난 chunk 는 held-out 54 / 162 (충돌 chunk 는 14 중 6)** 이고, 그 chunk 에서 F1 은 동작하지 않아 off 와 같다 (§3-3).
+- recall 의 F1 · F2 모두 off 이상이다 (지우는 쪽으로만 바꾸므로 예상된 방향).
+
+#### 3-3. held-out 충돌 14 chunk 별 (충돌 행)
+
+`*` = fit 물러남 (`centroid`, F1 동작 안 함). `HOLD` = 기록 HOLD.
+
+| chunk | HOLD | off | F1 | F2 | F1F2 | F1GT | F2 가 잃은 이웃 seed |
+|---|---|---:|---:|---:|---:|---:|---:|
+| ep0_s2:16 | 예 | 5 | 5 | 5 | 5 | 5 | 0 |
+| ep104_s1041:15 | 아니오 | 39 | 0 | 0 | 0 | 0 | 0 |
+| ep104_s1042:14 | 예 | 121 | 0 | 17 | 0 | 0 | 0 |
+| ep110_s1101:18 * | 예 | 53 | 53 | 39 | 39 | 40 | 73 |
+| ep110_s1102:19 * | 예 | 171 | 171 | 0 | 0 | 0 | 69 |
+| ep11_s112:17 | 예 | 6 | 0 | 0 | 0 | 0 | 0 |
+| ep123_s1231:14 * | 예 | 88 | 88 | 42 | 42 | 42 | 77 |
+| ep123_s1232:15 * | 예 | 50 | 50 | 1 | 1 | 1 | 68 |
+| ep12_s121:16 | 예 | 44 | 23 | 23 | 18 | 23 | 0 |
+| ep12_s122:16 | 예 | 117 | 0 | 7 | 0 | 0 | 0 |
+| ep3_s31:18 * | 예 | 10 | 10 | 2 | 2 | 2 | 36 |
+| ep3_s32:21 * | 아니오 | 1 | 1 | 0 | 0 | 0 | 164 |
+| ep54_s541:16 | 예 | 107 | 0 | 0 | 0 | 0 | 0 |
+| ep54_s542:19 | 예 | 75 | 0 | 0 | 0 | 0 | 0 |
+
+F1 은 fit 이 받아들여진 chunk 에서 충돌 행을 거의 전부 지운다 (ep104 · ep11 · ep12_s122 · ep54: 0 행). fit 이 물러난 6 chunk (`*`) 는 F1 이 off 와 같고, 그 chunk 에서 충돌을 줄이는 것은 F2 이며 대가는 오른쪽 열의 이웃 seed 손실이다. (산출) `*` 6 chunk 의 이웃 seed 손실 합 487 은 held-out 충돌 chunk 의 손실 487 과 같다 — F2 의 충돌 chunk 손실이 전부 fit 물러난 chunk 에서 났다.
+
+#### 3-4. C2′ window 재풀이 (#6) 와 build 시간 (#7)
+
+| 지표 | off | F1 | F2 | F1F2 |
+|---|---:|---:|---:|---:|
+| C2′ row 7 권한 손가락 → target 중앙 (mm, 206 chunk) | 69.7029 | 68.4528 | 68.0124 | 68.4377 |
+| row 7 p10 / p90 (mm) | 39.2113 / 115.5044 | 39.3588 / 115.5043 | 33.8630 / 114.4768 | 39.3602 / 112.1489 |
+| target 과의 gap 중앙 (mm) | 11.779 | 10.3269 | 10.4073 | 10.2383 |
+| 재풀이 status (feasible / violated) | 172 / 34 | 178 / 28 | 168 / 38 | 176 / 30 |
+| off 보다 1 mm 넘게 가까워진 / 멀어진 chunk | — | 28 / 21 | 55 / 31 | 51 / 37 |
+| AG3S build ms (근거 + fine tier) 중앙 / p90 | 12.10 / 16.90 | 12.31 / 17.10 | 12.07 / 16.80 | 12.30 / 16.96 |
+
+- C2′ window 에서 F1 이 동작하지 않은 chunk 는 206 중 67 이다. **chunk 별 짝지은 차 (변형 − off) 의 중앙값은 F1 · F2 · F1F2 모두 0.0 mm** (`row7_minus_off_median_mm`) 이다 — 중앙값 69.7 → 68.5 의 이동은 일부 chunk 의 변화이고, 가까워진 chunk 와 멀어진 chunk 가 함께 있다 (위 표 마지막에서 두 번째 행).
+- C2′ 의 coarse target-free layer 는 F1 · F2 가 건드리지 않아 기록 그대로다 (`not_measured`).
+- build 시간 (#7) 은 `gt_label` identity harness (GPU) 에서 held-out 36 frame × 10 회 잰 것이다. 이 harness 에서는 `proximity` 가 target 점을 전부 지워 F1 후보가 적다. 기록된 evidence 위에서 F1 단계만 CPU 로 잰 값은 162 chunk 중 108 에서 적용, 중앙 0.0798 ms · p90 0.637 ms · 최대 2.08 ms. 서버 end-to-end build 시간은 재지 않았다 (§6).
+
+#### 3-5. 구현자의 기대와 측정 (구현자 `T46.impl.md` "내가 기대하는 결과", verifier 는 측정 뒤에 읽음)
+
+| 항목 | 기대 (구현자) | 측정 (V-T46) |
+|---|---|---|
+| off bit-identical | 0 차이 | held-out · design17 · D-SF 8 · C2′ 모두 0 |
+| design 17 의 F1 HOLD 0 행 | 5–7 / 14 | **6 / 14** |
+| design 17 의 F2 · F1F2 HOLD 0 행 | ~10 / 14 | **10 / 14** · 10 / 14 |
+| 이웃 seed 손실 | F1 거의 0 · F2 688 수준 | F1 0 (held-out) · 1 (design) · F2 2,463 (held-out) · 688 (design) |
+| recall | F1 · F2 모두 off 이상 | 모두 off 이상 |
+| C2′ 손가락 → target | 69.7 mm 중앙이 줄 것 | 68.45 (F1) · 68.01 (F2) · 68.44 (F1F2) |
+| build p90 증가 | ≤ 10 ms 를 넉넉히 | +0.20 · −0.09 · +0.07 ms |
+
+(design set 은 설계에 쓴 chunk 라 held-out 이 판정 근거다. held-out 의 F1 HOLD 0 행은 5 / 12 로, design 17 의 6 / 14 와 비슷한 비율이다.)
+
+#### 3-6. figure
+
+- [`figures/t46/t46-scene.png`](figures/t46/t46-scene.png) — held-out 두 chunk (ep104_s1042:14 = fit 받아들임, ep110_s1102:19 = fit 물러남) 의 fine target-free layer 에서 값 ≤ 0 인 voxel (공 + 20 mm 안) 을 **x-z 평면에 투영** 한 것이다 (단면이 아니라 투영). 열 = off · F1 · F2 · F1F2, 점 색 = target 표면 / 이웃 과일 / 그 밖, × = 충돌 행 질의 구 중심. ep104_s1042:14 는 충돌 행 121 (off) → 0 (F1) → 17 (F2) → 0 (F1F2) 이고 F1 에서 target 표면 voxel 덩어리가 사라진다. ep110_s1102:19 는 171 (off) → 171 (F1, 동작 안 함) → 0 (F2) → 0 (F1F2) 이다.
+- [`figures/t46/t46-graph.png`](figures/t46/t46-graph.png) — (위) design set · held-out 의 변형별 충돌 행과 HOLD 0 행 chunk, held-out 충돌 chunk 별 막대. (아래) 잃은 이웃 과일 seed, 이웃 내부를 안전하다고 읽는 frame, recall (기준선 held-out off − 5 pp 점선).
+- [`figures/t46/t46-table.png`](figures/t46/t46-table.png) — held-out 기준 숫자표 (#3–#7).
+
+### 4. CL3 — closed-loop (C1a · C1a+F1 · C1a+F1F2, 18 쌍)
+
+**목적.** F1 이 C1a 대비 grasp · task success 와 grasp 직전 HOLD 를 개선하는가, F2 를 더한 이득이 이웃 과일 접촉 증가로 상쇄되는가 (`T46.task.md`). V-T46 에서 이웃 seed 손실이 큰 F2 를 F1 위에 얹는 arm (C1a+F1F2) 도 함께 돌렸다.
+
+#### 4-1. 설계
+
+| 항목 | 내용 (CL3 `design`) |
+|---|---|
+| 코드 | commit `218229ac` 를 `git archive` 한 immutable snapshot (checkout HEAD 와 tracked code 차이 0). cuRobo 는 `.venv-openpi-live` 의 editable 설치 (submodule `78fd485`, local 변경 0) |
+| harness | CL2 (`20261012T040647+0900_f14ae3e6b62b_…/verify/T44/CL2/p/`) 를 복사해 arm · 경로 · T46 guard 만 바꿨다. 정의는 CL2 (T44d) 그대로 |
+| arm | **C1a** = CL2 C1a 와 같은 flag (같은 시간대 재실행) · **C1a+F1** (`C1aF1`) = C1a + `--nontarget-evidence surface` (shell 기본 2.0) · **C1a+F1F2** (`C1aF1F2`) = C1a+F1 + `--owned-ambiguous remove`. palm cover 는 쓰지 않았다 |
+| episode · seed | CL2 와 같은 9 episode × 2 seed = 18 쌍, arm 당 18 run, 총 54 run. server 2 개 (port 8290 · 8291), block 3 × round 2 로 arm 을 교대 배치 |
+| 서버 시작 guard | 서버를 시작할 때마다 (C1a 4 · C1a+F1 5 · C1a+F1F2 4 회) flag 가 cmdline · server log · chunk stats (`nontarget_evidence` · `n_ambiguous_removed`) 에 반영됐는지 확인. `t46_stats_check` ok 전부, retry 0 |
+| smoke | C1a+F1 ep12 s121 한 run: 75 chunk 중 ball_owned 16 chunk 에서 F1 이 16 / 16 적용, shell 10 mm, evidence 점 29 개 제거, F2 key 없음. 같은 pair 의 본 run 과 refined chunk 최대 차 0.0 · executed_actions 최대 차 0.0 (smoke 가 본 측정 54 run 에는 들어가지 않는다) |
+| 회귀 기준선 (실행 전) | legacy 14 / 15 · 15 / 15 · −29.031048280806342 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877401271193 mm **일치** |
+| 완료 | 54 / 54 run done (실패 0 · 재시도 0), 54 / 54 replay (qpos mismatch 0 행), 54 / 54 server segment 짝 |
+
+#### 4-2. arm 별 결과 (18 run / arm, CL2 C0 · C1a 는 기록 참고)
+
+| 지표 | CL2 C0 (V11AB) | CL2 C1a | **CL3 C1a** | **C1a+F1** | **C1a+F1F2** |
+|---|---:|---:|---:|---:|---:|
+| task success | 14 | 14 | 14 | 13 | 13 |
+| CT success (접촉 포함 성공) | 12 | 11 | 11 | 12 | 12 |
+| grasp (final) | 16 | 17 | 17 | 16 | 16 |
+| first grasp ok (regrasp 없음) | 14 | 16 | 16 | 16 | 15 |
+| robust grasp | 13 | 14 | 14 | 13 | 13 |
+| regrasp run | 2 | 1 | 1 | 0 | 1 |
+| 이웃 과일 접촉 `hand-fruit_other` 행 (run) | 64 | 38 | 38 (4) | **16 (1)** | **27 (2)** |
+| `robot_other-target` 행 (run) | 1 | 7 | 7 (1) | 7 (1) | **0 (0)** |
+| `hand-target` 행 | 2,160 | 2,384 | 2,384 | 2,160 | 1,911 |
+| pre-release 새 접촉 run | 4 | 4 | 4 | 1 | 2 |
+| HOLD chunk 합 (run) | 101 (5) | 119 (14) | 119 (14) | **189 (12)** | 124 (9) |
+| HOLD **pre8+close** chunk (run) | 1 (1) | 12 (12) | 12 (12) | **6 (6)** | **2 (2)** |
+| HOLD kind (collision / uncertified) | — | — | 82 / 37 | **59 / 130** | **6 / 118** |
+| close 뒤 HOLD chunk | — | — | 107 | 183 | 122 |
+| TO ms 중앙 / p90 | — | — | 164 / 615 | 163 / 601 | 164 / 515 |
+| AG3S ms 중앙 / p90 | — | — | 282 / 511 | 280 / 495 | 283 / 515 |
+
+- 용어: **pre8+close** = 각 run 에서 첫 close 명령 (`grasp.state == 'closing'`) 의 server chunk 를 기준으로 그 8 chunk 전부터 close chunk 까지 9 chunk × 18 run = 162 chunk 의 window (V-T45 · D-TF 와 같은 정의). HOLD chunk 의 kind (`collision` · `uncertified`) 는 위 "용어" 절의 **HOLD kind** 정의 그대로다.
+- window 안의 HOLD 는 세 arm 모두 전부 `collision` kind 였다 (12 · 6 · 2). window 이전의 HOLD 는 0 이다 (`hold_chunks_before_window`).
+- `—` 는 CL3 verify.json 에 없는 값이다 (C0 의 HOLD kind · close 뒤 HOLD, CL2 C1a 의 kind · 시간).
+- 시간: pooled 1,332 chunk (첫 chunk 제외) 의 round trip 은 세 arm 모두 533 ms 를 넘는다 (실시간이 아니라는 기존 사실, 비교 대상 아님).
+
+#### 4-3. 개선된 것과 개선되지 않은 것
+
+| | C1a → C1a+F1 | C1a → C1a+F1F2 | 비고 |
+|---|---|---|---|
+| **grasp 직전 (pre8+close) HOLD chunk** | 12 → **6** (window HOLD 가 C1a 에만 있는 run 6 · F1 에만 있는 run 0 · 둘 다 6 · 둘 다 없음 6, McNemar p 0.03125) | 12 → **2** (C1a 에만 11 run · F1F2 에만 1 run (ep3_s32) · 둘 다 1 · 둘 다 없음 5, p 0.00634765625) | C0 는 1. 기록 HOLD 의 kind 가 모두 `collision` |
+| **이웃 과일 접촉** `hand-fruit_other` 행 | 38 → **16** (run 4 → 1) | 38 → **27** (run 4 → 2) | pre-release 새 접촉 run 4 → 1 (3 대 0, p 0.25) · 4 → 2 (3 대 1, p 0.625) |
+| `robot_other-target` 접촉 | 7 → 7 | 7 → **0** | |
+| **task success** | 14 → **13** | 14 → **13** | McNemar p 1.0 · 1.0 (1 대 0 · 2 대 1). **개선되지 않았다** |
+| CT success | 11 → 12 | 11 → 12 | p 1.0 · 1.0 |
+| grasp (final) | 17 → **16** | 17 → **16** | p 1.0 |
+| **전체 HOLD chunk** | 119 → **189 (증가)** | 119 → 124 | F1 에서 증가, 대부분이 close 뒤 `uncertified` |
+| HOLD kind `uncertified` | 37 → **130** | 37 → **118** | `collision` 82 → 59 → 6 |
+
+- 이 비교의 n 은 18 쌍이다. McNemar p 는 기술용이다 (이전 절과 같다). pre8+close HOLD 의 p 0.03125 · 0.00634765625 가 가장 작은 값이다.
+- 같은 pair 간 executed_actions 가 **동일한 run**: C1a 대 C1a+F1 6 / 18, C1a+F1 대 C1a+F1F2 8 / 18, C1a 대 C1a+F1F2 0 / 18. C1a 대 C1a+F1 이 동일한 6 쌍은 ep3 · ep110 · ep123 의 두 seed 씩으로, V-T46 의 fit 물러난 episode 와 같다 (§3-3). 갈리는 첫 control step 은 가장 이른 것이 64 (ep12_s121 · ep11_s111) 이다.
+- **F1 · F2 의 활동 (서버 chunk stats):**
+
+| | C1a | C1a+F1 | C1a+F1F2 |
+|---|---:|---:|---:|
+| ball_owned chunk | 506 | 559 | 579 |
+| F1 적용 chunk (run) | 0 | 396 (13 / 18) | 382 (13 / 18) |
+| F1 이 지운 evidence 점 / 후보 / 보호 | 0 | 3,003 / 3,621 / 618 | 2,464 / 2,602 / 138 |
+| F1 이 적용되지 않은 chunk (이유 `no_surface_fit`) | — | 163 | 197 |
+| F2 로 제거된 ambiguous seed (chunk) | 0 | 0 | 9,232 (150) |
+| ambiguous seed 분류 합 | 17,288 | 10,024 | 9,232 |
+| 남은 non-target seed 합 | 7,572 | 5,881 | 6,866 |
+| window 내 ambiguous (pre8+close) | 13,911 | 6,558 | 6,360 |
+
+  (C1a 의 window ambiguous 합 13,911 은 V-T46 held-out off 의 ambiguous 합 13,911 과 같다 — offline 재구성이 기록과 맞는다는 또 하나의 확인이다.)
+
+#### 4-4. HOLD 증가의 분포 (run 별, 사실만; 원인은 측정하지 않았다)
+
+F1 의 전체 HOLD 증가 (+70) 와 감소가 run 에 집중되어 있다 (HOLD chunk 수, C1a → F1 → F1F2):
+
+| run | C1a | C1a+F1 | C1a+F1F2 | kind 변화 |
+|---|---:|---:|---:|---|
+| ep30_s301 | 0 | **39** | 39 | F1: collision 3 · uncertified 36, close 뒤 39 |
+| ep11_s111 | 1 | **40** | 40 | C1a collision 1 → F1 uncertified 40 (close 뒤) |
+| ep54_s542 | 1 | **15** | 2 | F1 uncertified 15 (close 뒤) → F1F2 uncertified 2 |
+| ep54_s541 | 38 | 38 | 38 | C1a collision 1 · uncertified 37 → F1 uncertified 38 |
+| ep3_s31 | 50 | 50 | **1** | collision 50 (close 뒤 49) → F1F2 collision 1 |
+| ep104_s1042 | 19 | **1** | 1 | C1a collision 19 → F1 uncertified 1 (close 뒤) |
+| ep0_s1 | 0 | 0 | 1 | F1F2 uncertified 1 |
+| (나머지 11 run) | 합 10 | 합 6 | 합 2 | 전부 collision kind |
+
+(산출: per_run 의 `n_hold_chunks` · `hold_kinds`; 위 합은 119 · 189 · 124 와 맞춘 것이다. ep30_s301 은 foreign GPU 겹침 pair 에 속하나 보충 재실행의 executed_actions 가 원본과 동일했다 — §4-6.)
+
+- **분명한 사실:** F1 에서 늘어난 HOLD 는 window (pre8+close) 밖의 close 뒤 구간이다 (F1 의 close 뒤 HOLD 183 chunk, window 6). 그 kind 는 `uncertified` 이다 (37 → 130).
+- **측정하지 않은 것:** `uncertified` 가 왜 늘었는지 — 어느 chunk 에서 첫 HOLD 가 났고 verdict reason 이 무엇인지 — 는 CL3 에서 분해하지 않았다 (CL3 `not_measured` 의 "discordant pair 의 first-divergence chunk 분석 안 함" 포함). 이 원인을 가정으로 적지 않는다.
+
+#### 4-5. 갈리는 쌍 (discordant, CL3 `discordant`)
+
+| episode · seed (target, arm) | C1a | C1a+F1 | C1a+F1F2 | 갈리는 지표 |
+|---|---|---|---|---|
+| ep0 s1 (orange, left) | success · CT · grasp | **no_grasp** | regrasp (grasp 있음, success 없음) | success · CT · robust · grasp · first grasp ok |
+| ep3 s32 (orange, right) | success · CT | 같음 | **no_grasp**, pre-release `hand-fruit_other` 22 행 | F1F2 만 실패 |
+| ep54 s541 · s542 (apple, right) | success, CT False (`hand-fruit_other` 7 · 7 행) | **CT True** (접촉 0) | CT True | CT · pre-release contact |
+| ep123 s1232 (orange, right) | slip_in_transport, `robot_other-target` 7 행 | 같음 | **success · CT** (접촉 0) | F1F2 만 성공 |
+| ep104 s1042 (pear, left) | regrasp, `hand-fruit_other` 8 행 | slip_at_lift (접촉 0) | slip_at_lift (접촉 0) | first grasp ok · pre-release contact |
+
+- 쌍 별 McNemar (all 18 쌍) 은 task · CT · grasp · robust · first grasp ok · pre-release contact · any new contact 에서 전부 p ≥ 0.25 이다 (C1a 대 C1a+F1 의 pre-release / any contact 가 3 대 0 · p 0.25, C1a 대 C1a+F1F2 any contact 가 4 대 1 · p 0.375).
+- ep0 s1 의 C1a+F1 `no_grasp` 와 ep3 s32 의 C1a+F1F2 `no_grasp` 의 원인은 측정하지 않았다 (위와 같다).
+
+#### 4-6. 재현성과 run 간 동일성
+
+| 비교 | 결과 |
+|---|---|
+| **CL3 C1a 대 CL2 C1a** (같은 18 pair, 다른 snapshot `218229ac` 대 `f14ae3e6`) | executed_actions **18 / 18 동일** (최대 차 0.0). task · CT · robust · first grasp ok · grasp · pre-release contact · any contact 의 same-outcome pair 모두 18 / 18. HOLD 119 chunk · 14 run 대 119 · 14, pre8+close 12 대 12, 접촉 행 (`hand-fruit_other` 38 · `robot_other-target` 7 · `hand-target` 2,384) 동일 |
+| smoke 대 본 run (C1a+F1 ep12 s121) | refined chunk 최대 차 0.0, executed_actions 최대 차 0.0 |
+| 원본 대 보충 재실행 (4 run) | executed_actions **4 / 4 동일** |
+
+이 결과로 C1a 의 CL2 대 CL3 차이는 0 이다. 그래서 CL3 의 C1a 대 C1a+F1 · C1a+F1F2 의 차이는 **같은 harness 의 짝지은 arm 차이로 읽을 수 있다** (CL2 → CL3 사이 환경 변화는 이 비교에 영향이 없다).
+
+#### 4-7. 자원 사고 (foreign GPU 겹침 · memory guard 대기) — CL3 `foreign_gpu` · `memory_wait` · `pod_load_during_runs`
+
+**foreign GPU overlap** = 우리 server 가 아닌 프로세스가 같은 GPU 를 동시에 쓴 구간. 우리 server 의 `gpu_samples.txt` (2 초 간격, 전체 GPU 메모리) 에서 `사용량 − 18,200 MiB × (그 시각에 살아 있는 우리 server 수)` 가 임계를 넘는 구간을 foreign 으로 정했다.
+
+| 구간 (KST) | sample 수 | 최대 초과 메모리 |
+|---|---:|---:|
+| 16:25:29 – 16:26:02 | 18 | 7,330 MiB |
+| 16:36:51 – 16:43:28 | 246 | 9,130 MiB |
+
+- 이 두 구간과 겹친 run 은 **4 개**이다: C1a_ep12_s121 · C1aF1_ep12_s121 · C1a_ep30_s301 · C1aF1_ep30_s301 (구간별 run 대응은 verify.json 에 따로 적혀 있지 않다). 같은 시각에 benchmark checkout (`/mnt/dev/AG3S_VLA-benchmark`) 의 `serve_policy.py` 가 GPU 를 쓰고 있었다는 것은 lead 의 보고이고 (GPU app 8.8 GB 16:36:51 – 16:43:28), `gpu_mem.txt` 에 host pid 548247 (8,818 MiB, 16:25:56) 과 596005 (8,802 MiB, 16:37:45 · 16:39:35) 가 보였다. 소유자는 lead 보고에 의존한다.
+- **memory guard 대기:** 서버 시작 chain 의 client 시작 조건은 `pod working set + 4 GiB ≤ 64 GiB` 이다. 이 조건이 깨져 chain 이 60 초마다 대기했다 — C1a (8290) 16:37:46 – 16:47:46 (10 회), C1aF1 (8291) 16:39:36 – 16:47:36 (8 회). 대기 중 두 서버는 idle 이었다. 지연된 run: C1a_ep30_s302 (직전 run 종료 16:37:45, 시작 16:47:46), C1aF1_ep30_s302 (16:39:35 → 16:47:36), 보충 C1aF1_ep30_s301 (대기 19:13:02, 시작 19:14). 원인은 benchmark checkout 의 프로세스들이다 (lead 보고: serve_policy.py + libero client + export_gt_dev.py 약 16:36 부터, `selffilter_default.py` pid 1033860 RSS 10.9 GB 약 16:42 부터; 후자는 sampler 에 16:45:16 – 19:19:35 동안 보였다).
+- pod 상태: 54 run 의 client 시작 시 working set 중앙 34.97 GiB (최소 24.18 · 최대 56.83), 전체 GPU 메모리 최대 45,530 MiB, round 경계 loadavg1 중앙 18.45 (11.24 – 23.05). sampler 의 working set 최대 72.8 GiB (19:14:31, 보충 재실행 중 anon 54.9 GB), 64 GiB 를 넘은 sample 은 16:46:17 (65.48) · 16:47:17 (66.77) · 19:13:30 (71.17) · 19:14:31 (72.80) 이다.
+- **보충 재실행 (supp rerun):** foreign 겹침 4 run 을 같은 (episode, seed) 로 다시 돌렸다 (C1a ep12 s121 · C1a ep30 s301 · C1aF1 ep12 s121 · C1aF1 ep30 s301). 재실행의 겹침은 **0**, executed_actions 는 원본과 **4 / 4 동일**이다.
+
+#### 4-8. 세 가지 집계 기준 (같은 54 run 위)
+
+겹친 4 run 이 결과를 바꾸는지 보려고 세 기준으로 집계했다 (CL3 `variants`).
+
+| 기준 | 내용 | n (pair) | C1a → F1 pre8+close HOLD (p) | F1 → F1F2 (p) | C1a → F1F2 (p) | task success C1a / F1 / F1F2 | 전체 HOLD 합 C1a / F1 / F1F2 |
+|---|---|---:|---|---|---|---|---|
+| **all** (본 집계) | 54 원본 run | 18 | 12 → 6 (0.03125) | 6 → 2 (0.21875) | 12 → 2 (0.00634765625) | 14 / 13 / 13 | 119 / 189 / 124 |
+| **no_overlap** | 겹친 run 을 뺀 pair 만 (2 pair × 2 arm 제외) | 16 | 11 → 6 (0.0625) | 6 → 2 (0.21875) | 11 → 2 (0.01171875) | 12 / 11 / 13 (n = 16 · 16 · 18) | 118 / 150 / 124 |
+| **supp_substituted** | 겹친 4 run 을 보충 재실행으로 대체 | 18 | 12 → 6 (0.03125) | 6 → 2 (0.21875) | 12 → 2 (0.00634765625) | 14 / 13 / 13 | 119 / 189 / 124 |
+
+- **supp_substituted 의 결과는 all 과 모든 수가 같다** (보충 재실행의 executed_actions 가 원본과 동일했으므로). no_overlap 에서도 방향은 같다 — F1 의 pre8+close HOLD 는 줄고 (11 → 6) 전체 HOLD 는 는다 (118 → 150). pair 기준 (n = 16) 전체 HOLD 합은 F1 → F1F2 150 → 85, C1a → F1F2 118 → 85 이다.
+- no_overlap 의 C1a 대 C1a+F1 task success 는 12 / 16 대 11 / 16, CT 9 대 10, grasp 15 대 14 로 all 과 같은 방향이다 (1 대 0 · 2 대 1, 전부 p ≥ 0.25 의 같은 구조).
+
+#### 4-9. figure
+
+- [`figures/t46/t46-cl3-scene.png`](figures/t46/t46-cl3-scene.png) — 같은 (episode, seed) 의 C1a 와 C1a+F1 의 front camera video frame (control step t) 을 위아래로 짝지은 것. 세 pair: ep54 s541 (C1a CT False, `hand-fruit_other` 7 행, HOLD 38 · pre8+close 1 → F1 CT True, 접촉 0, HOLD 38 · pre8+close 0), ep0 s1 (C1a success · HOLD 0 → F1 `no_grasp` · HOLD 0, 영상 표시 줄의 `success=False CT=False no_grasp`), ep104 s1042 (C1a regrasp, `hand-fruit_other` 8 행, HOLD 19 → F1 slip_at_lift, 접촉 0, HOLD 1). 열 = 첫 hand-target 접촉 40 step 전 · 접촉 · 60 step 뒤 · 종료.
+- [`figures/t46/t46-cl3-graph.png`](figures/t46/t46-cl3-graph.png) — (a) arm 별 결과 (CL2 C0 · C1a 빗금 참고) (b) 새 접촉 class 별 run (c) run 별 HOLD chunk 와 pre8+close window (d) chunk 별 server 시간 (e) (episode, seed) 별 성공 격자 (f) 짝 불일치 (g) 재현성 CL2 C1a 대 CL3 C1a (h) F1 · F2 활동 (chunk stats).
+- [`figures/t46/t46-cl3-table.png`](figures/t46/t46-cl3-table.png) — arm 별 요약표 · 짝 비교표 · 재현성표.
+
+### 5. 두 측정을 나란히 — offline 예측과 closed-loop
+
+| 질문 | V-T46 (offline, 기록 chunk 재분류) | CL3 (closed-loop, 궤적이 달라짐) |
+|---|---|---|
+| grasp 직전 HOLD 를 줄이나 | HOLD 12 chunk 중 충돌 0 이 된 것 F1 5 · F1F2 6 | pre8+close HOLD 12 → F1 6 · F1F2 2 (C0 1) |
+| 이웃 과일 보호 | F1 0 · F2 / F1F2 2,463 seed 손실 | 접촉 `hand-fruit_other` 행 38 → 16 (F1) · 27 (F1F2). F1F2 는 F1 (16) 보다 많고 C1a (38) 보다 적다. F2 단독 arm 은 closed-loop 에서 돌리지 않았다. 18 쌍이다 |
+| task success | (측정 대상 아님) | 14 → 13 · 13 |
+
+두 열은 지표가 다르다 (재분류 대 재실행). V-T46 의 값으로 CL3 의 값을 설명하지는 않았다.
+
+### 6. 측정의 한계 (`not_measured` 와 설계상 제약)
+
+| 항목 | 내용 |
+|---|---|
+| CL3 의 n | 18 쌍, arm 당 18 run. 모든 task · grasp · 접촉 비교의 McNemar p 는 ≥ 0.25 이고, pre8+close HOLD 만 p 가 작다 (0.03125 · 0.00634765625 · no_overlap 0.0625 · 0.01171875) |
+| closed-loop 의 범위 | C1a 계열 3 arm 만 돌렸다. C2′ + F 는 돌리지 않았다 (closed-loop 미측정). V-T46 의 C2′ 재풀이는 단일 chunk open-loop 다 |
+| V-T46 의 재분류 | held-out · design 의 충돌 행은 기록된 실행 chunk 의 재분류이지 재풀이가 아니다 (CL3 와 별개) |
+| 새로 지운 seed 의 TSDF 부호 | 기록에 없다. replay 는 음수로 가정 (D-TF 규약). `*_pos` 변형 (양수 상한) 의 충돌 행은 모든 세트에서 음수 가정과 같았다 |
+| recall 정의 | T44 E2 의 per-pixel / mesh-sample 다수결 라벨이 아니라 GT hull 의 최근접 body voxel 라벨 (이식) 이다 |
+| build 시간 (#7) | harness (`gt_label` identity) 에서의 evidence + fine tier 시간이다. 서버 end-to-end build 시간은 F1 · F2 켜고 재지 않았다 |
+| CL3 의 GT 지표 | CL3 기록에 V-T46 의 GT 기반 residual 수치를 다시 재지 않았다 (V-T46 harness 를 CL3 에 안 돌림) |
+| discordant 쌍 | first-divergence chunk 분석을 하지 않았다. HOLD `uncertified` 증가의 chunk 별 reason 도 분해하지 않았다 |
+| banana · 영상 | banana 는 LB2 에 통과 episode 가 없어 측정하지 않았다. side-by-side mp4 는 만들지 않았다 (각 run 디렉터리에 third-person mp4 가 있다) |
+| foreign GPU | 16:45 (07:45 UTC) 이전의 foreign 존재는 우리 server 의 전체 GPU 메모리 샘플과 `gpu_mem.txt` app 목록에서 재구성한 것이고 프로세스 목록이 아니다 |
+| 환경 | V-T46 은 작업 트리 (HEAD `bd778e5e` + T46 파일, md5 기록 · 측정 뒤 재확인 동일) 에서, CL3 는 commit `218229ac` snapshot 에서 돌았다. 다른 세션의 CPU job 이 같은 pod 에서 돌았다 (V-T46 loadavg 4 – 17, CL3 round 경계 loadavg1 중앙 18.45) |
+
+### 7. 사용자 판정 대기 · 다음 단계
+
+**대기 중 (이 절은 결과를 적지 않는다).** 사용자에게 올린 다음 단계 후보:
+
+| 후보 | 내용 | 출처 |
+|---|---|---|
+| **T46b — close 뒤 `uncertified` HOLD 증가 진단** | C1a+F1 에서 전체 HOLD 가 119 → 189 로 늘었고 `uncertified` 가 37 → 130 이다. 어느 chunk 에서 첫 HOLD 가 나고 verdict reason 이 무엇인지 분해 (offline) | (lead 권고) |
+| F1 을 기본 baseline 으로 받고 C2′ + F1 로 진행 | grasp 직전 HOLD 와 이웃 접촉은 줄었으나 task success 는 오르지 않았다. 그 위에서 CL-A 의 C2′ (비권한 link margin) 를 다시 본다 | (후보) |
+| seed 를 늘려 확인 | 18 쌍으로는 task · 접촉 비교가 p ≥ 0.25 라 결론을 내기 어렵다 | (후보) |
+
+T46 의 후속 접미사 STEP (`T46b` 등) 은 [`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) 에 쓴다 (기록 규칙, 2026-10-12). 번호는 예약하고 쓴다.
+
+### 8. 되돌아올 지점 (`T46.task.md` 에서 승계, CL3 반영)
+
+| 안 고른 것 | 왜 | 전환 신호 |
+|---|---|---|
+| F2 단독 closed-loop (`--owned-ambiguous remove` 만) | V-T46 에서 이웃 seed 손실이 가장 크다 (held-out 2,463 · design 688). CL3 에는 F1 위에 얹은 F1F2 만 돌렸다 | F1F2 의 이득이 F2 에서 오는지 가를 필요가 생길 때 |
+| 권한 손가락 행의 target-free obstacle margin 0 (CL-A 후보 3) | 증상 완화 — residual 자체가 남는다 | F 가 residual 을 못 줄일 때 (V-T46: fit 물러난 chunk 에서 F1 은 off 와 같다) |
+| coarse 를 권한 손가락 행에서 끄기 (CL-A 후보 1) | CL-A: coarse 가 접근을 막은 것은 C1a-only 4 쌍 중 ep12_s122 1 건 (lead 요약) | CL3 · C2′ 에서 coarse arm 이 다시 뒤질 때 |
+| 비권한 link target margin 0 (CL-A 후보 2) | F 뒤 C2′ 의 남은 몫을 다시 본 뒤 | F 적용 후에도 C2′ grasp ≤ 2/18 (C2′ + F closed-loop 미측정) |
+| fit 이 물러난 chunk 의 F1 (이웃이 섞인 target 점) | F1 의 문이 막는다 (held-out 54 / 162 chunk) | F3 (target 점 오염: 이웃 과일 점이 target 점에 섞임) 의 attention split · identity 진단 |
+
+### 9. 산출물
+
+- **측정:** `handoff/T46.verify.json` (V-T46, `run_dir` `…/20261012T141622+0900_bd778e5e3453_1d71d76a5b73`) · `handoff/T46-CL3.verify.json` (CL3, `run_dir` `…/20261012T155130+0900_218229ac6464_5fb5ff542c33`). 원자료는 각 `raw_dir` · `run_dir` 의 `verify/T46/` · `verify/T46/CL3/`.
+- **구현 보고:** `handoff/T46.impl.md` (A11) · `handoff/LEGACY_INDEX_PATHS.impl.md` (환경 수정, commit `c906cda2`).
+- **figure** (각각 `.json` sidecar 있음): V-T46 [`scene`](figures/t46/t46-scene.png) · [`graph`](figures/t46/t46-graph.png) · [`table`](figures/t46/t46-table.png), CL3 [`scene`](figures/t46/t46-cl3-scene.png) · [`graph`](figures/t46/t46-cl3-graph.png) · [`table`](figures/t46/t46-cl3-table.png).
+- **task 문서:** `handoff/T46.task.md` (목적 · 통과 기준 · 판정 · CL3 정의 · T47 세션 조율).
+- 구현 변경은 commit `218229ac` (T46) · `c906cda2` (환경) 에 있다. 이 절은 commit 하지 않았다.
 
 ---
 
