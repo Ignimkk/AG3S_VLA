@@ -68,7 +68,9 @@ GPU 실행 시 `OPENPI_DATA_HOME`은 자기 checkout의 `.cache/openpi`,
 **공용 GPU·pod 자원 (사용자 지시 2026-10-12, development checkout과 같은 규칙):**
 GPU 작업(policy server · rollout · 추출 · GPU 검증)은 다른 checkout과 동시에 실행하지 않는다.
 모든 checkout이 `/tmp/ag3s-vla-gpu-validation.lock`을 공유한다. GPU 단계 전체를 `flock`으로 잡고
-(`flock -w <초> 9 … 9>/tmp/ag3s-vla-gpu-validation.lock` 또는 `flock -n`으로 한 번 시도 후 미루기),
+(`flock -w <초> /tmp/ag3s-vla-gpu-validation.lock CMD …` 또는 `( flock -w <초> 9 || exit 1; CMD … ) 9>/tmp/ag3s-vla-gpu-validation.lock`,
+`flock -n`으로 한 번 시도 후 미루기도 가능). **`flock -w <초> 9 CMD … 9>lock`처럼 fd 번호 뒤에 command를 붙이면
+`9`를 파일 이름으로 해석해 공용 lock을 잡지 못한다** (2026-10-12 재현),
 시작 전에 `nvidia-smi --query-compute-apps`로 다른 compute process가 없는지 확인한다.
 이유: development의 TrajOpt는 wall-clock 마감(`sqp.time_budget_ms`)으로 반복 수가 정해져,
 GPU를 나눠 쓰면 timing뿐 아니라 closed-loop 결과 자체가 바뀐다.
