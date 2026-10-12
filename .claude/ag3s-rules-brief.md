@@ -4,6 +4,6 @@
 - 소유권: lead = `AG3S/ag3s/docs/handoff/*.task.md` · PLAN, implementer = `*.py` · `tests/`, verifier = `AG3S/ag3s/docs/figures/` · `*.verify.json` · `outputs/verify/`, scribe = `AG3S/ag3s/docs/*.md`.
 - 진행: 설명 → 사용자 질문 (멈춤) → 판정 → 확정된 것만 수정 · 검증 → 기록. 추측을 기록하지 않는다.
 - 토큰: 긴 sub-agent 를 재개하지 말고 task 문서로 새로 띄운다. verifier 기본은 Opus; 실행 · 대기 · 단순 집계만 맡길 때는 Agent 호출에 `model: sonnet` 을 지정하고, 결과 분석 · 원인 진단 · 구현은 Opus 로 따로 띄운다. 동시 agent ≤ 3. 그림은 평소 sidecar `.json` 으로 확인하되, 문제가 풀리지 않거나 꼭 필요할 때는 그림을 직접 연다.
-- 공용 pod: working set (memory.current − inactive_file) + 추정 ≤ 64 GiB, worker ≤ 4, 서버 ≤ 2, GPU ≤ 130 GB, 다른 세션 프로세스 금지, 기존 workspace의 공유 `.venv-ag3s` · 포트 8123 금지; 새 checkout의 독립 `.venv-ag3s` 사용 가능.
+- 공용 pod: working set (memory.current − inactive_file) + 추정 ≤ 64 GiB(하드 80 GiB), CPU worker 세션당 ≤ 2(pod ≤ 4), 서버 ≤ 2, GPU ≤ 130 GB, 다른 세션 프로세스 종료 금지, 기존 workspace의 공유 `.venv-ag3s` · 포트 8123 금지. **GPU 작업은 다른 checkout과 동시 실행 금지 — `/tmp/ag3s-vla-gpu-validation.lock`을 `flock`으로 잡고 `nvidia-smi --query-compute-apps` 확인 후 시작, 긴 GPU 작업 전후 다른 세션에 알림.** 측정 job은 nohup 없이 실행.
 
 - Shared input: `AG3S_STORAGE_ROOT`(checkout 옆 `AG3S_VLA-storage`); 이전 checkout을 input/code/env 경로로 사용하지 않는다. Interpreter는 `doc/SHARED_STORAGE_AND_PYTHON.md`를 따른다.

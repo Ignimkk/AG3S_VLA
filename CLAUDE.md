@@ -64,6 +64,18 @@ OpenPI fork는 `third_party/openpi/`에 직접 추적된다.
 
 GPU 실행 시 `OPENPI_DATA_HOME`은 자기 checkout의 `.cache/openpi`,
 `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 사용한다.
+
+**공용 GPU·pod 자원 (사용자 지시 2026-10-12, development checkout과 같은 규칙):**
+GPU 작업(policy server · rollout · 추출 · GPU 검증)은 다른 checkout과 동시에 실행하지 않는다.
+모든 checkout이 `/tmp/ag3s-vla-gpu-validation.lock`을 공유한다. GPU 단계 전체를 `flock`으로 잡고
+(`flock -w <초> 9 … 9>/tmp/ag3s-vla-gpu-validation.lock` 또는 `flock -n`으로 한 번 시도 후 미루기),
+시작 전에 `nvidia-smi --query-compute-apps`로 다른 compute process가 없는지 확인한다.
+이유: development의 TrajOpt는 wall-clock 마감(`sqp.time_budget_ms`)으로 반복 수가 정해져,
+GPU를 나눠 쓰면 timing뿐 아니라 closed-loop 결과 자체가 바뀐다.
+공용 pod: working set (memory.current − inactive_file) + 추정 ≤ 64 GiB(cgroup 하드 한도 80 GiB),
+CPU worker는 세션당 ≤ 2(pod 전체 ≤ 4), 서버 ≤ 2, GPU ≤ 130 GB. 다른 세션의 process는 종료하지 않는다.
+측정·분석 job은 nohup/detach 없이 자기 shell에서 실행하고, 큰 배열은 chunk로 처리해 RSS를 작게 유지한다.
+긴 GPU 작업 시작 전·종료 후에는 같은 pod의 다른 세션(ListAgents)에 알린다.
 이 benchmark checkout의 VLA 환경·checkpoint loading은 검증했다. Action sampling·closed-loop
 rollout과 Panda robot/camera adapter는 다음 단계다.
 최초 Migration 기록은 `doc/migration/IMPLEMENTATION_REPORT.md`, 후속 storage 경로 분리 결과는
