@@ -31,7 +31,7 @@ policy image 224×224 (= OpenCV 256 image 좌우 반전 + resize)
 | subtask probe `kv_L4_v1`(pick/place/home)는 RB-Y1 feature로 학습됨 | `attention_policy.py:16-21`, `AG3S/ag3s/asset/subtask_probe/` → **Panda 적용은 SL-6 audit 대상** |
 | policy image = OpenCV 좌우 반전 (228/228) | `SL1.verify.json` |
 
-## Dev/test 분리 (lead 제안 — 사용자 확인 대기, 확인 전까지는 이 STEP 안에서만 사용)
+## Dev/test 분리 (사용자 확정 2026-10-12, 안 A — `doc/develope_PLAN_SUMMARY.md` §6.0)
 
 이 STEP의 측정은 **dev**다. LIBERO Spatial 각 task의 init state index **0–4를 dev 예약**으로 두고, P2 이후 test episode 목록에서 제외한다.
 이 STEP은 그중 index 0만 쓴다. Layer/head **선택은 이 STEP에서 하지 않는다**(V11AB 고정 cell을 그대로 측정). 전체 layer×head 표는 진단용이며,

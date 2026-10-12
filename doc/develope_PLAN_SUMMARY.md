@@ -245,6 +245,17 @@ policy latency의 deadline은 실행할 action 수·replanning 간격·async 여
 | Q4 | V11AB 실제 module·link·geometry·phase | Source/config audit로 고정. V7g/V8 선택 문제는 종료; 없는 기능을 main에 추가하지 않음 |
 | Q5 | Panda subset / LIBERO-Safety protocol | Task/level/seed 목록, official 지표, adapter 차이와 제외 범위를 고정 |
 
+### 6.0 LIBERO dev/test 분리 — 사용자 확정 2026-10-12 (안 A)
+
+| 구분 | LIBERO Spatial init state (task마다) | 용도 |
+|---|---|---|
+| dev | 0–4 (10 task × 5 = 50 episodes) | adapter audit, attention/threshold/ESDF bound 등 calibration, 디버깅. 여기서만 설정을 고른다 |
+| test | 5–49 (10 task × 45 = 450 episodes) | P2 main 비교(pi0.5-only vs V11AB). 설정 고정·사전 등록 후 1회 실행 |
+
+- Test 목록·metric·non-inferiority margin·CI 방법은 test 실행 **전에** manifest와 이 문서에 고정한다. Test 결과를 본 뒤 설정·episode·seed를 바꾸지 않는다.
+- Main 표는 test 450을 쓰고, 공식 protocol(task당 50) 규모의 참고 행은 "dev 포함"으로 따로 표시한다.
+- 이미 사용한 dev: SL0(t0/init0), SL3(t0–9/init0). 다른 LIBERO suite·SafeLIBERO·LIBERO-Safety의 분리는 해당 단계(P3/P5) 시작 전에 정한다.
+
 ### 6.1 환경·저장·재현 기록
 
 - 실행 코드와 venv는 자기 benchmark checkout에 둔다. 이전 `/mnt/dev/work` source/venv를 runtime에 사용하지 않는다.
