@@ -1,0 +1,2639 @@
+{
+ "step": "T49b",
+ "date": "2026-10-12",
+ "status": "done",
+ "exploratory": true,
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe",
+ "output_handling": "T49 CLI out_root() is fixed to verify/T49 and has no output option. A verifier wrapper (verify/T49b/scripts/run_e2e_variant.py) calls the unmodified t49_noun_query.stage_e2e(args, root) with root = verify/T49b/variants/<name>/ containing relative symlinks select -> T49/select and extract -> T49/extract (read only); only variants/<name>/e2e/ is written. verify/T49/e2e sha1 identical before/after (analysis/t49_e2e_sha1_before.txt, _after.txt). No T49 files copied, moved or overwritten. 2D numbers are read from the existing T49 validate outputs (validate.json, per_sample.npz); validate was not re-run.",
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "command": "AG3S_RUN_DIR=/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= JAX_PLATFORMS=cpu /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records /mnt/dev/AG3S_VLA-storage/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --out-json /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/baseline_legacy.json",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/baseline_legacy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/baseline_legacy.log"
+  },
+  {
+   "id": "e2e_gt_k1_s0",
+   "command": "AG3S_RUN_DIR=/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= JAX_PLATFORMS=cpu /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/run_e2e_variant.py gt_k1_s0 -- --stage e2e --workers 1 --k 1 --sigma 0 --sources noun_gt l8h2",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/variants/gt_k1_s0/e2e",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/e2e_gt_k1_s0.log"
+  },
+  {
+   "id": "e2e_gt_k2_s0",
+   "command": "AG3S_RUN_DIR=/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= JAX_PLATFORMS=cpu /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/run_e2e_variant.py gt_k2_s0 -- --stage e2e --workers 1 --k 2 --sigma 0 --sources noun_gt l8h2",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/variants/gt_k2_s0/e2e",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/e2e_gt_k2_s0.log"
+  },
+  {
+   "id": "e2e_gt_k3_s0",
+   "command": "AG3S_RUN_DIR=/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= JAX_PLATFORMS=cpu /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/run_e2e_variant.py gt_k3_s0 -- --stage e2e --workers 1 --k 3 --sigma 0 --sources noun_gt noun_lf l8h2",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/variants/gt_k3_s0/e2e",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/e2e_gt_k3_s0.log"
+  },
+  {
+   "id": "e2e_gt_k1_s1",
+   "command": "AG3S_RUN_DIR=/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= JAX_PLATFORMS=cpu /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/run_e2e_variant.py gt_k1_s1 -- --stage e2e --workers 1 --k 1 --sigma 1 --sources noun_gt l8h2",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/variants/gt_k1_s1/e2e",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/e2e_gt_k1_s1.log"
+  },
+  {
+   "id": "e2e_gt_k2_s1",
+   "command": "AG3S_RUN_DIR=/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= JAX_PLATFORMS=cpu /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/run_e2e_variant.py gt_k2_s1 -- --stage e2e --workers 1 --k 2 --sigma 1 --sources noun_gt l8h2",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/variants/gt_k2_s1/e2e",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/e2e_gt_k2_s1.log"
+  },
+  {
+   "id": "e2e_gt_k3_s1",
+   "command": "AG3S_RUN_DIR=/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= JAX_PLATFORMS=cpu /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/run_e2e_variant.py gt_k3_s1 -- --stage e2e --workers 1 --k 3 --sigma 1 --sources noun_gt l8h2",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/variants/gt_k3_s1/e2e",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/e2e_gt_k3_s1.log"
+  },
+  {
+   "id": "analysis",
+   "command": "/mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/analyze.py /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/numbers_t49b.json; /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/fig_graph_table.py ...; /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/fig_scene.py ...; /mnt/dev/AG3S_VLA-development/.venv-ag3s/bin/python /mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/scripts/build_verify.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/numbers_t49b.json"
+  }
+ ],
+ "code_state": {
+  "repo": "AG3S_VLA-development",
+  "head": "ed47b9765a885606348cfc129a9e296b7e68d8f7",
+  "branch": "feature/ag3s-development",
+  "tracked_modified": [
+   "M doc/plans/develope_PLAN.md"
+  ],
+  "t49_files": "untracked (unchanged; read only)",
+  "head_of_T49_extract": "28b981600bf72152f18cd49a30c1bbfa8d7a13ad",
+  "head_at_e2e_runs": {
+   "gt_k1_s0": "de2042e9",
+   "gt_k2_s0": "de2042e9",
+   "gt_k3_s0": "de2042e9",
+   "gt_k1_s1": "de2042e9",
+   "gt_k2_s1": "de2042e9",
+   "gt_k3_s1": "ed47b976"
+  },
+  "head_change_de2042e9_to_ed47b976": "docs-only commit (T46b handoff/figures/log; 7 files, no .py)",
+  "head_at_baseline": "de2042e9"
+ },
+ "numbers": {
+  "_scope": "EXPLORATORY. held-out = headfix, ep1800 (same_scene) / ep1850, ep1900 (new_scene); 15 frames each, 0 extract-error frames. 3D: record-level (frames pooled per record, unweighted mean over records), phase_group T47b (grasp -> post_grasp). nontarget = seed_nontarget_loss_per_frame (points). l8h2 = action npz d0 last L8H2 raw (sigma-independent).",
+  "n0_baseline_env": {
+   "legacy_baseline": {
+    "violated_start": "14/15",
+    "has_target": "15/15",
+    "frame0_clearance_before_mm": -29.031048280806342,
+    "expected": "14/15, 15/15, -29.031048280806342"
+   },
+   "curobo_baseline": "not run (no GPU)",
+   "t49_e2e_unchanged": true
+  },
+  "cells": {
+   "noun_gt_k1_s0": [
+    [
+     8,
+     6
+    ]
+   ],
+   "noun_gt_k2_s0": [
+    [
+     8,
+     6
+    ],
+    [
+     5,
+     4
+    ]
+   ],
+   "noun_gt_k3_s0": [
+    [
+     8,
+     6
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     2
+    ]
+   ],
+   "noun_gt_k1_s1": [
+    [
+     8,
+     6
+    ]
+   ],
+   "noun_gt_k2_s1": [
+    [
+     8,
+     6
+    ],
+    [
+     5,
+     4
+    ]
+   ],
+   "noun_gt_k3_s1": [
+    [
+     8,
+     6
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     4,
+     2
+    ]
+   ],
+   "noun_lf_k3_s0": [
+    [
+     4,
+     7
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     8,
+     6
+    ]
+   ],
+   "l8h2": [
+    [
+     8,
+     2
+    ]
+   ]
+  },
+  "parity_vs_T49_e2e_rows": {
+   "gt_k1_s0:l8h2_vs_T49:l8h2": {
+    "frames": 60,
+    "fields_compared": 4260,
+    "n_mismatch": 0,
+    "mismatch": []
+   },
+   "gt_k2_s0:l8h2_vs_T49:l8h2": {
+    "frames": 60,
+    "fields_compared": 4260,
+    "n_mismatch": 0,
+    "mismatch": []
+   },
+   "gt_k3_s0:l8h2_vs_T49:l8h2": {
+    "frames": 60,
+    "fields_compared": 4260,
+    "n_mismatch": 0,
+    "mismatch": []
+   },
+   "gt_k1_s1:l8h2_vs_T49:l8h2": {
+    "frames": 60,
+    "fields_compared": 4260,
+    "n_mismatch": 0,
+    "mismatch": []
+   },
+   "gt_k2_s1:l8h2_vs_T49:l8h2": {
+    "frames": 60,
+    "fields_compared": 4260,
+    "n_mismatch": 0,
+    "mismatch": []
+   },
+   "gt_k3_s1:l8h2_vs_T49:l8h2": {
+    "frames": 60,
+    "fields_compared": 4260,
+    "n_mismatch": 0,
+    "mismatch": []
+   },
+   "gt_k3_s1:noun_gt_vs_T49:noun_gt": {
+    "frames": 60,
+    "fields_compared": 4260,
+    "n_mismatch": 0,
+    "mismatch": []
+   }
+  },
+  "parity_note": "json-float NaN==NaN treated equal; fields ending in _ms excluded",
+  "e2e_3d_record_mean": {
+   "noun_gt_k1_s0": {
+    "all": {
+     "on_target_rate": 0.9166666666666666,
+     "identity_correct_rate": 0.8500000000000001,
+     "silent_failure_rate": 0.08333333333333333,
+     "identity_failure_rate": 0.15000000000000002,
+     "chosen_cluster_purity_mean": 0.8314009063826849,
+     "seed_nontarget_loss_per_frame": 512.7666666666667,
+     "seed_nontarget_loss__other_object_sum": 595.25,
+     "seed_nontarget_loss__destination_sum": 6122.5,
+     "seed_nontarget_loss__table_sum": 973.75,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.006859841811298122,
+     "cluster_nontarget_loss_per_frame": 18.4,
+     "ball_nontarget_loss_per_frame": 25.71666666666667,
+     "on_target_not_identity": 1.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene": {
+     "on_target_rate": 0.8666666666666667,
+     "identity_correct_rate": 0.7666666666666666,
+     "silent_failure_rate": 0.13333333333333333,
+     "identity_failure_rate": 0.23333333333333334,
+     "chosen_cluster_purity_mean": 0.6628018127653698,
+     "seed_nontarget_loss_per_frame": 398.66666666666663,
+     "seed_nontarget_loss__other_object_sum": 459.5,
+     "seed_nontarget_loss__destination_sum": 4205.0,
+     "seed_nontarget_loss__table_sum": 1315.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.011789181692094313,
+     "cluster_nontarget_loss_per_frame": 36.8,
+     "ball_nontarget_loss_per_frame": 39.833333333333336,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene": {
+     "on_target_rate": 0.9666666666666667,
+     "identity_correct_rate": 0.9333333333333333,
+     "silent_failure_rate": 0.03333333333333333,
+     "identity_failure_rate": 0.06666666666666667,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 626.8666666666666,
+     "seed_nontarget_loss__other_object_sum": 731.0,
+     "seed_nontarget_loss__destination_sum": 8040.0,
+     "seed_nontarget_loss__table_sum": 632.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0019305019305019305,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 11.6,
+     "on_target_not_identity": 0.5,
+     "identity_not_on_target": 0.0
+    },
+    "phase=pre_grasp": {
+     "on_target_rate": 0.8888888888888888,
+     "identity_correct_rate": 0.8888888888888888,
+     "silent_failure_rate": 0.1111111111111111,
+     "identity_failure_rate": 0.1111111111111111,
+     "chosen_cluster_purity_mean": 0.7981229917791484,
+     "seed_nontarget_loss_per_frame": 442.8138888888889,
+     "seed_nontarget_loss__other_object_sum": 402.5,
+     "seed_nontarget_loss__destination_sum": 3021.5,
+     "seed_nontarget_loss__table_sum": 715.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 21.22222222222222,
+     "ball_nontarget_loss_per_frame": 28.416666666666668,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "phase=post_grasp": {
+     "on_target_rate": 0.95,
+     "identity_correct_rate": 0.775,
+     "silent_failure_rate": 0.05,
+     "identity_failure_rate": 0.225,
+     "chosen_cluster_purity_mean": 0.8813177782879895,
+     "seed_nontarget_loss_per_frame": 629.85,
+     "seed_nontarget_loss__other_object_sum": 192.75,
+     "seed_nontarget_loss__destination_sum": 3101.0,
+     "seed_nontarget_loss__table_sum": 258.75,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.02555006656856562,
+     "cluster_nontarget_loss_per_frame": 14.166666666666666,
+     "ball_nontarget_loss_per_frame": 21.666666666666668,
+     "on_target_not_identity": 1.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=pre_grasp": {
+     "on_target_rate": 0.7777777777777778,
+     "identity_correct_rate": 0.7777777777777778,
+     "silent_failure_rate": 0.2222222222222222,
+     "identity_failure_rate": 0.2222222222222222,
+     "chosen_cluster_purity_mean": 0.5962459835582969,
+     "seed_nontarget_loss_per_frame": 336.83333333333337,
+     "seed_nontarget_loss__other_object_sum": 343.5,
+     "seed_nontarget_loss__destination_sum": 1632.5,
+     "seed_nontarget_loss__table_sum": 1055.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 42.44444444444444,
+     "ball_nontarget_loss_per_frame": 45.55555555555556,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=post_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 0.75,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.25,
+     "chosen_cluster_purity_mean": 0.762635556575979,
+     "seed_nontarget_loss_per_frame": 491.4166666666667,
+     "seed_nontarget_loss__other_object_sum": 116.0,
+     "seed_nontarget_loss__destination_sum": 2572.5,
+     "seed_nontarget_loss__table_sum": 260.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.03990610328638498,
+     "cluster_nontarget_loss_per_frame": 28.333333333333332,
+     "ball_nontarget_loss_per_frame": 31.25,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=pre_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 1.0,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.0,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 548.7944444444445,
+     "seed_nontarget_loss__other_object_sum": 461.5,
+     "seed_nontarget_loss__destination_sum": 4410.5,
+     "seed_nontarget_loss__table_sum": 374.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 11.277777777777779,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=post_grasp": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.8,
+     "silent_failure_rate": 0.1,
+     "identity_failure_rate": 0.2,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 768.2833333333333,
+     "seed_nontarget_loss__other_object_sum": 269.5,
+     "seed_nontarget_loss__destination_sum": 3629.5,
+     "seed_nontarget_loss__table_sum": 257.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.011194029850746268,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 12.083333333333334,
+     "on_target_not_identity": 0.5,
+     "identity_not_on_target": 0.0
+    }
+   },
+   "noun_gt_k2_s0": {
+    "all": {
+     "on_target_rate": 0.9166666666666666,
+     "identity_correct_rate": 0.8500000000000001,
+     "silent_failure_rate": 0.08333333333333333,
+     "identity_failure_rate": 0.15000000000000002,
+     "chosen_cluster_purity_mean": 0.8311908286702364,
+     "seed_nontarget_loss_per_frame": 564.9166666666666,
+     "seed_nontarget_loss__other_object_sum": 1183.0,
+     "seed_nontarget_loss__destination_sum": 6635.0,
+     "seed_nontarget_loss__table_sum": 655.75,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0018841243693159156,
+     "cluster_nontarget_loss_per_frame": 22.466666666666665,
+     "ball_nontarget_loss_per_frame": 28.883333333333333,
+     "on_target_not_identity": 1.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene": {
+     "on_target_rate": 0.8666666666666667,
+     "identity_correct_rate": 0.7666666666666666,
+     "silent_failure_rate": 0.13333333333333333,
+     "identity_failure_rate": 0.23333333333333334,
+     "chosen_cluster_purity_mean": 0.6623816573404727,
+     "seed_nontarget_loss_per_frame": 430.6333333333333,
+     "seed_nontarget_loss__other_object_sum": 642.0,
+     "seed_nontarget_loss__destination_sum": 4565.5,
+     "seed_nontarget_loss__table_sum": 1252.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0034674063800277394,
+     "cluster_nontarget_loss_per_frame": 44.93333333333333,
+     "ball_nontarget_loss_per_frame": 46.16666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene": {
+     "on_target_rate": 0.9666666666666667,
+     "identity_correct_rate": 0.9333333333333333,
+     "silent_failure_rate": 0.03333333333333333,
+     "identity_failure_rate": 0.06666666666666667,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 699.2,
+     "seed_nontarget_loss__other_object_sum": 1724.0,
+     "seed_nontarget_loss__destination_sum": 8704.5,
+     "seed_nontarget_loss__table_sum": 59.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.00030084235860409147,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 11.6,
+     "on_target_not_identity": 0.5,
+     "identity_not_on_target": 0.0
+    },
+    "phase=pre_grasp": {
+     "on_target_rate": 0.8888888888888888,
+     "identity_correct_rate": 0.8888888888888888,
+     "silent_failure_rate": 0.1111111111111111,
+     "identity_failure_rate": 0.1111111111111111,
+     "chosen_cluster_purity_mean": 0.7977728622584008,
+     "seed_nontarget_loss_per_frame": 551.9055555555556,
+     "seed_nontarget_loss__other_object_sum": 839.5,
+     "seed_nontarget_loss__destination_sum": 3805.5,
+     "seed_nontarget_loss__table_sum": 504.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 28.0,
+     "ball_nontarget_loss_per_frame": 33.69444444444444,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "phase=post_grasp": {
+     "on_target_rate": 0.95,
+     "identity_correct_rate": 0.775,
+     "silent_failure_rate": 0.05,
+     "identity_failure_rate": 0.225,
+     "chosen_cluster_purity_mean": 0.8813177782879895,
+     "seed_nontarget_loss_per_frame": 585.9333333333334,
+     "seed_nontarget_loss__other_object_sum": 343.5,
+     "seed_nontarget_loss__destination_sum": 2829.5,
+     "seed_nontarget_loss__table_sum": 151.25,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.006282451885707179,
+     "cluster_nontarget_loss_per_frame": 14.166666666666666,
+     "ball_nontarget_loss_per_frame": 21.666666666666668,
+     "on_target_not_identity": 1.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=pre_grasp": {
+     "on_target_rate": 0.7777777777777778,
+     "identity_correct_rate": 0.7777777777777778,
+     "silent_failure_rate": 0.2222222222222222,
+     "identity_failure_rate": 0.2222222222222222,
+     "chosen_cluster_purity_mean": 0.5955457245168019,
+     "seed_nontarget_loss_per_frame": 422.94444444444446,
+     "seed_nontarget_loss__other_object_sum": 406.5,
+     "seed_nontarget_loss__destination_sum": 2391.0,
+     "seed_nontarget_loss__table_sum": 1009.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 56.0,
+     "ball_nontarget_loss_per_frame": 56.111111111111114,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=post_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 0.75,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.25,
+     "chosen_cluster_purity_mean": 0.762635556575979,
+     "seed_nontarget_loss_per_frame": 442.1666666666667,
+     "seed_nontarget_loss__other_object_sum": 235.5,
+     "seed_nontarget_loss__destination_sum": 2174.5,
+     "seed_nontarget_loss__table_sum": 243.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.011737089201877934,
+     "cluster_nontarget_loss_per_frame": 28.333333333333332,
+     "ball_nontarget_loss_per_frame": 31.25,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=pre_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 1.0,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.0,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 680.8666666666667,
+     "seed_nontarget_loss__other_object_sum": 1272.5,
+     "seed_nontarget_loss__destination_sum": 5220.0,
+     "seed_nontarget_loss__table_sum": 0.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 11.277777777777779,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=post_grasp": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.8,
+     "silent_failure_rate": 0.1,
+     "identity_failure_rate": 0.2,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 729.7,
+     "seed_nontarget_loss__other_object_sum": 451.5,
+     "seed_nontarget_loss__destination_sum": 3484.5,
+     "seed_nontarget_loss__table_sum": 59.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0008278145695364238,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 12.083333333333334,
+     "on_target_not_identity": 0.5,
+     "identity_not_on_target": 0.0
+    }
+   },
+   "noun_gt_k3_s0": {
+    "all": {
+     "on_target_rate": 0.9166666666666666,
+     "identity_correct_rate": 0.8500000000000001,
+     "silent_failure_rate": 0.08333333333333333,
+     "identity_failure_rate": 0.15000000000000002,
+     "chosen_cluster_purity_mean": 0.8313009157158073,
+     "seed_nontarget_loss_per_frame": 583.3666666666667,
+     "seed_nontarget_loss__other_object_sum": 1793.0,
+     "seed_nontarget_loss__destination_sum": 6425.25,
+     "seed_nontarget_loss__table_sum": 532.25,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0010152315977558697,
+     "cluster_nontarget_loss_per_frame": 22.416666666666668,
+     "ball_nontarget_loss_per_frame": 28.883333333333333,
+     "on_target_not_identity": 1.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene": {
+     "on_target_rate": 0.8666666666666667,
+     "identity_correct_rate": 0.7666666666666666,
+     "silent_failure_rate": 0.13333333333333333,
+     "identity_failure_rate": 0.23333333333333334,
+     "chosen_cluster_purity_mean": 0.6626018314316146,
+     "seed_nontarget_loss_per_frame": 460.5,
+     "seed_nontarget_loss__other_object_sum": 1767.5,
+     "seed_nontarget_loss__destination_sum": 4133.5,
+     "seed_nontarget_loss__table_sum": 1006.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0013869625520110957,
+     "cluster_nontarget_loss_per_frame": 44.833333333333336,
+     "ball_nontarget_loss_per_frame": 46.16666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene": {
+     "on_target_rate": 0.9666666666666667,
+     "identity_correct_rate": 0.9333333333333333,
+     "silent_failure_rate": 0.03333333333333333,
+     "identity_failure_rate": 0.06666666666666667,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 706.2333333333333,
+     "seed_nontarget_loss__other_object_sum": 1818.5,
+     "seed_nontarget_loss__destination_sum": 8717.0,
+     "seed_nontarget_loss__table_sum": 58.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0006435006435006435,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 11.6,
+     "on_target_not_identity": 0.5,
+     "identity_not_on_target": 0.0
+    },
+    "phase=pre_grasp": {
+     "on_target_rate": 0.8888888888888888,
+     "identity_correct_rate": 0.8888888888888888,
+     "silent_failure_rate": 0.1111111111111111,
+     "identity_failure_rate": 0.1111111111111111,
+     "chosen_cluster_purity_mean": 0.7979563406676857,
+     "seed_nontarget_loss_per_frame": 579.1333333333333,
+     "seed_nontarget_loss__other_object_sum": 1343.0,
+     "seed_nontarget_loss__destination_sum": 3664.25,
+     "seed_nontarget_loss__table_sum": 392.25,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 27.916666666666664,
+     "ball_nontarget_loss_per_frame": 33.69444444444444,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "phase=post_grasp": {
+     "on_target_rate": 0.95,
+     "identity_correct_rate": 0.775,
+     "silent_failure_rate": 0.05,
+     "identity_failure_rate": 0.225,
+     "chosen_cluster_purity_mean": 0.8813177782879895,
+     "seed_nontarget_loss_per_frame": 590.975,
+     "seed_nontarget_loss__other_object_sum": 450.0,
+     "seed_nontarget_loss__destination_sum": 2761.0,
+     "seed_nontarget_loss__table_sum": 140.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.004213089482166632,
+     "cluster_nontarget_loss_per_frame": 14.166666666666666,
+     "ball_nontarget_loss_per_frame": 21.666666666666668,
+     "on_target_not_identity": 1.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=pre_grasp": {
+     "on_target_rate": 0.7777777777777778,
+     "identity_correct_rate": 0.7777777777777778,
+     "silent_failure_rate": 0.2222222222222222,
+     "identity_failure_rate": 0.2222222222222222,
+     "chosen_cluster_purity_mean": 0.5959126813353717,
+     "seed_nontarget_loss_per_frame": 468.33333333333337,
+     "seed_nontarget_loss__other_object_sum": 1358.5,
+     "seed_nontarget_loss__destination_sum": 2072.0,
+     "seed_nontarget_loss__table_sum": 784.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 55.83333333333333,
+     "ball_nontarget_loss_per_frame": 56.111111111111114,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=post_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 0.75,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.25,
+     "chosen_cluster_purity_mean": 0.762635556575979,
+     "seed_nontarget_loss_per_frame": 448.75,
+     "seed_nontarget_loss__other_object_sum": 409.0,
+     "seed_nontarget_loss__destination_sum": 2061.5,
+     "seed_nontarget_loss__table_sum": 222.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.004694835680751174,
+     "cluster_nontarget_loss_per_frame": 28.333333333333332,
+     "ball_nontarget_loss_per_frame": 31.25,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=pre_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 1.0,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.0,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 689.9333333333334,
+     "seed_nontarget_loss__other_object_sum": 1327.5,
+     "seed_nontarget_loss__destination_sum": 5256.5,
+     "seed_nontarget_loss__table_sum": 0.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 11.277777777777779,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=post_grasp": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.8,
+     "silent_failure_rate": 0.1,
+     "identity_failure_rate": 0.2,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 733.2,
+     "seed_nontarget_loss__other_object_sum": 491.0,
+     "seed_nontarget_loss__destination_sum": 3460.5,
+     "seed_nontarget_loss__table_sum": 58.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0037313432835820895,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 12.083333333333334,
+     "on_target_not_identity": 0.5,
+     "identity_not_on_target": 0.0
+    }
+   },
+   "noun_gt_k1_s1": {
+    "all": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.8,
+     "silent_failure_rate": 0.09999999999999999,
+     "identity_failure_rate": 0.2,
+     "chosen_cluster_purity_mean": 0.7004281565567576,
+     "seed_nontarget_loss_per_frame": 394.46666666666664,
+     "seed_nontarget_loss__other_object_sum": 1094.5,
+     "seed_nontarget_loss__destination_sum": 3676.5,
+     "seed_nontarget_loss__table_sum": 1146.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.006709899913783408,
+     "cluster_nontarget_loss_per_frame": 46.483333333333334,
+     "ball_nontarget_loss_per_frame": 47.53333333333333,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene": {
+     "on_target_rate": 0.8333333333333333,
+     "identity_correct_rate": 0.7333333333333334,
+     "silent_failure_rate": 0.16666666666666666,
+     "identity_failure_rate": 0.26666666666666666,
+     "chosen_cluster_purity_mean": 0.6290483240071394,
+     "seed_nontarget_loss_per_frame": 333.76666666666665,
+     "seed_nontarget_loss__other_object_sum": 1099.0,
+     "seed_nontarget_loss__destination_sum": 2777.0,
+     "seed_nontarget_loss__table_sum": 1130.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0076282940360610264,
+     "cluster_nontarget_loss_per_frame": 48.53333333333333,
+     "ball_nontarget_loss_per_frame": 49.7,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene": {
+     "on_target_rate": 0.9666666666666667,
+     "identity_correct_rate": 0.8666666666666667,
+     "silent_failure_rate": 0.03333333333333333,
+     "identity_failure_rate": 0.13333333333333333,
+     "chosen_cluster_purity_mean": 0.7718079891063758,
+     "seed_nontarget_loss_per_frame": 455.16666666666663,
+     "seed_nontarget_loss__other_object_sum": 1090.0,
+     "seed_nontarget_loss__destination_sum": 4576.0,
+     "seed_nontarget_loss__table_sum": 1161.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.005791505791505791,
+     "cluster_nontarget_loss_per_frame": 44.43333333333333,
+     "ball_nontarget_loss_per_frame": 45.36666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "phase=pre_grasp": {
+     "on_target_rate": 0.8611111111111112,
+     "identity_correct_rate": 0.8611111111111112,
+     "silent_failure_rate": 0.1388888888888889,
+     "identity_failure_rate": 0.1388888888888889,
+     "chosen_cluster_purity_mean": 0.6608313297105779,
+     "seed_nontarget_loss_per_frame": 335.0638888888889,
+     "seed_nontarget_loss__other_object_sum": 781.0,
+     "seed_nontarget_loss__destination_sum": 1556.75,
+     "seed_nontarget_loss__table_sum": 776.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 53.77777777777777,
+     "ball_nontarget_loss_per_frame": 53.77777777777777,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "phase=post_grasp": {
+     "on_target_rate": 0.95,
+     "identity_correct_rate": 0.6916666666666667,
+     "silent_failure_rate": 0.05,
+     "identity_failure_rate": 0.30833333333333335,
+     "chosen_cluster_purity_mean": 0.7598233968260272,
+     "seed_nontarget_loss_per_frame": 493.26666666666665,
+     "seed_nontarget_loss__other_object_sum": 313.5,
+     "seed_nontarget_loss__destination_sum": 2119.75,
+     "seed_nontarget_loss__table_sum": 369.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.02970184289818513,
+     "cluster_nontarget_loss_per_frame": 35.541666666666664,
+     "ball_nontarget_loss_per_frame": 38.16666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=pre_grasp": {
+     "on_target_rate": 0.7222222222222222,
+     "identity_correct_rate": 0.7222222222222222,
+     "silent_failure_rate": 0.2777777777777778,
+     "identity_failure_rate": 0.2777777777777778,
+     "chosen_cluster_purity_mean": 0.5399901689612463,
+     "seed_nontarget_loss_per_frame": 266.83333333333337,
+     "seed_nontarget_loss__other_object_sum": 787.0,
+     "seed_nontarget_loss__destination_sum": 789.5,
+     "seed_nontarget_loss__table_sum": 825.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 62.0,
+     "ball_nontarget_loss_per_frame": 62.0,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=post_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 0.75,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.25,
+     "chosen_cluster_purity_mean": 0.762635556575979,
+     "seed_nontarget_loss_per_frame": 434.1666666666667,
+     "seed_nontarget_loss__other_object_sum": 312.0,
+     "seed_nontarget_loss__destination_sum": 1987.5,
+     "seed_nontarget_loss__table_sum": 305.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.025821596244131457,
+     "cluster_nontarget_loss_per_frame": 28.333333333333332,
+     "ball_nontarget_loss_per_frame": 31.25,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=pre_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 1.0,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.0,
+     "chosen_cluster_purity_mean": 0.7816724904599095,
+     "seed_nontarget_loss_per_frame": 403.2944444444445,
+     "seed_nontarget_loss__other_object_sum": 775.0,
+     "seed_nontarget_loss__destination_sum": 2324.0,
+     "seed_nontarget_loss__table_sum": 728.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 45.55555555555556,
+     "ball_nontarget_loss_per_frame": 45.55555555555556,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=post_grasp": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.6333333333333333,
+     "silent_failure_rate": 0.1,
+     "identity_failure_rate": 0.3666666666666667,
+     "chosen_cluster_purity_mean": 0.7570112370760753,
+     "seed_nontarget_loss_per_frame": 552.3666666666667,
+     "seed_nontarget_loss__other_object_sum": 315.0,
+     "seed_nontarget_loss__destination_sum": 2252.0,
+     "seed_nontarget_loss__table_sum": 433.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.033582089552238806,
+     "cluster_nontarget_loss_per_frame": 42.75,
+     "ball_nontarget_loss_per_frame": 45.083333333333336,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    }
+   },
+   "noun_gt_k2_s1": {
+    "all": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.8,
+     "silent_failure_rate": 0.09999999999999999,
+     "identity_failure_rate": 0.2,
+     "chosen_cluster_purity_mean": 0.7004281565567576,
+     "seed_nontarget_loss_per_frame": 411.0333333333333,
+     "seed_nontarget_loss__other_object_sum": 1012.25,
+     "seed_nontarget_loss__destination_sum": 3990.0,
+     "seed_nontarget_loss__table_sum": 1163.25,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0008168709625020305,
+     "cluster_nontarget_loss_per_frame": 46.483333333333334,
+     "ball_nontarget_loss_per_frame": 47.53333333333333,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene": {
+     "on_target_rate": 0.8333333333333333,
+     "identity_correct_rate": 0.7333333333333334,
+     "silent_failure_rate": 0.16666666666666666,
+     "identity_failure_rate": 0.26666666666666666,
+     "chosen_cluster_purity_mean": 0.6290483240071394,
+     "seed_nontarget_loss_per_frame": 324.46666666666664,
+     "seed_nontarget_loss__other_object_sum": 980.5,
+     "seed_nontarget_loss__destination_sum": 2752.5,
+     "seed_nontarget_loss__table_sum": 1134.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.00034674063800277393,
+     "cluster_nontarget_loss_per_frame": 48.53333333333333,
+     "ball_nontarget_loss_per_frame": 49.7,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene": {
+     "on_target_rate": 0.9666666666666667,
+     "identity_correct_rate": 0.8666666666666667,
+     "silent_failure_rate": 0.03333333333333333,
+     "identity_failure_rate": 0.13333333333333333,
+     "chosen_cluster_purity_mean": 0.7718079891063758,
+     "seed_nontarget_loss_per_frame": 497.6,
+     "seed_nontarget_loss__other_object_sum": 1044.0,
+     "seed_nontarget_loss__destination_sum": 5227.5,
+     "seed_nontarget_loss__table_sum": 1192.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.001287001287001287,
+     "cluster_nontarget_loss_per_frame": 44.43333333333333,
+     "ball_nontarget_loss_per_frame": 45.36666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "phase=pre_grasp": {
+     "on_target_rate": 0.8611111111111112,
+     "identity_correct_rate": 0.8611111111111112,
+     "silent_failure_rate": 0.1388888888888889,
+     "identity_failure_rate": 0.1388888888888889,
+     "chosen_cluster_purity_mean": 0.6608313297105779,
+     "seed_nontarget_loss_per_frame": 358.1444444444445,
+     "seed_nontarget_loss__other_object_sum": 696.0,
+     "seed_nontarget_loss__destination_sum": 1813.5,
+     "seed_nontarget_loss__table_sum": 830.25,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 53.77777777777777,
+     "ball_nontarget_loss_per_frame": 53.77777777777777,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "phase=post_grasp": {
+     "on_target_rate": 0.95,
+     "identity_correct_rate": 0.6916666666666667,
+     "silent_failure_rate": 0.05,
+     "identity_failure_rate": 0.30833333333333335,
+     "chosen_cluster_purity_mean": 0.7598233968260272,
+     "seed_nontarget_loss_per_frame": 496.79999999999995,
+     "seed_nontarget_loss__other_object_sum": 316.25,
+     "seed_nontarget_loss__destination_sum": 2176.5,
+     "seed_nontarget_loss__table_sum": 333.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.004318197743675986,
+     "cluster_nontarget_loss_per_frame": 35.541666666666664,
+     "ball_nontarget_loss_per_frame": 38.16666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=pre_grasp": {
+     "on_target_rate": 0.7222222222222222,
+     "identity_correct_rate": 0.7222222222222222,
+     "silent_failure_rate": 0.2777777777777778,
+     "identity_failure_rate": 0.2777777777777778,
+     "chosen_cluster_purity_mean": 0.5399901689612463,
+     "seed_nontarget_loss_per_frame": 269.44444444444446,
+     "seed_nontarget_loss__other_object_sum": 667.0,
+     "seed_nontarget_loss__destination_sum": 896.5,
+     "seed_nontarget_loss__table_sum": 861.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 62.0,
+     "ball_nontarget_loss_per_frame": 62.0,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=post_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 0.75,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.25,
+     "chosen_cluster_purity_mean": 0.762635556575979,
+     "seed_nontarget_loss_per_frame": 407.0,
+     "seed_nontarget_loss__other_object_sum": 313.5,
+     "seed_nontarget_loss__destination_sum": 1856.0,
+     "seed_nontarget_loss__table_sum": 272.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0011737089201877935,
+     "cluster_nontarget_loss_per_frame": 28.333333333333332,
+     "ball_nontarget_loss_per_frame": 31.25,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=pre_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 1.0,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.0,
+     "chosen_cluster_purity_mean": 0.7816724904599095,
+     "seed_nontarget_loss_per_frame": 446.84444444444443,
+     "seed_nontarget_loss__other_object_sum": 725.0,
+     "seed_nontarget_loss__destination_sum": 2730.5,
+     "seed_nontarget_loss__table_sum": 799.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 45.55555555555556,
+     "ball_nontarget_loss_per_frame": 45.55555555555556,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=post_grasp": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.6333333333333333,
+     "silent_failure_rate": 0.1,
+     "identity_failure_rate": 0.3666666666666667,
+     "chosen_cluster_purity_mean": 0.7570112370760753,
+     "seed_nontarget_loss_per_frame": 586.6,
+     "seed_nontarget_loss__other_object_sum": 319.0,
+     "seed_nontarget_loss__destination_sum": 2497.0,
+     "seed_nontarget_loss__table_sum": 393.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.007462686567164179,
+     "cluster_nontarget_loss_per_frame": 42.75,
+     "ball_nontarget_loss_per_frame": 45.083333333333336,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    }
+   },
+   "noun_gt_k3_s1": {
+    "all": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.8,
+     "silent_failure_rate": 0.09999999999999999,
+     "identity_failure_rate": 0.2,
+     "chosen_cluster_purity_mean": 0.7004281565567576,
+     "seed_nontarget_loss_per_frame": 420.29999999999995,
+     "seed_nontarget_loss__other_object_sum": 1118.5,
+     "seed_nontarget_loss__destination_sum": 4052.5,
+     "seed_nontarget_loss__table_sum": 1133.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0030691232147542825,
+     "cluster_nontarget_loss_per_frame": 46.483333333333334,
+     "ball_nontarget_loss_per_frame": 47.53333333333333,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene": {
+     "on_target_rate": 0.8333333333333333,
+     "identity_correct_rate": 0.7333333333333334,
+     "silent_failure_rate": 0.16666666666666666,
+     "identity_failure_rate": 0.26666666666666666,
+     "chosen_cluster_purity_mean": 0.6290483240071394,
+     "seed_nontarget_loss_per_frame": 342.53333333333336,
+     "seed_nontarget_loss__other_object_sum": 1174.0,
+     "seed_nontarget_loss__destination_sum": 2844.5,
+     "seed_nontarget_loss__table_sum": 1119.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.00034674063800277393,
+     "cluster_nontarget_loss_per_frame": 48.53333333333333,
+     "ball_nontarget_loss_per_frame": 49.7,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene": {
+     "on_target_rate": 0.9666666666666667,
+     "identity_correct_rate": 0.8666666666666667,
+     "silent_failure_rate": 0.03333333333333333,
+     "identity_failure_rate": 0.13333333333333333,
+     "chosen_cluster_purity_mean": 0.7718079891063758,
+     "seed_nontarget_loss_per_frame": 498.06666666666666,
+     "seed_nontarget_loss__other_object_sum": 1063.0,
+     "seed_nontarget_loss__destination_sum": 5260.5,
+     "seed_nontarget_loss__table_sum": 1147.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.005791505791505791,
+     "cluster_nontarget_loss_per_frame": 44.43333333333333,
+     "ball_nontarget_loss_per_frame": 45.36666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "phase=pre_grasp": {
+     "on_target_rate": 0.8611111111111112,
+     "identity_correct_rate": 0.8611111111111112,
+     "silent_failure_rate": 0.1388888888888889,
+     "identity_failure_rate": 0.1388888888888889,
+     "chosen_cluster_purity_mean": 0.6608313297105779,
+     "seed_nontarget_loss_per_frame": 373.9666666666667,
+     "seed_nontarget_loss__other_object_sum": 770.0,
+     "seed_nontarget_loss__destination_sum": 1903.25,
+     "seed_nontarget_loss__table_sum": 810.75,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 53.77777777777777,
+     "ball_nontarget_loss_per_frame": 53.77777777777777,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "phase=post_grasp": {
+     "on_target_rate": 0.95,
+     "identity_correct_rate": 0.6916666666666667,
+     "silent_failure_rate": 0.05,
+     "identity_failure_rate": 0.30833333333333335,
+     "chosen_cluster_purity_mean": 0.7598233968260272,
+     "seed_nontarget_loss_per_frame": 496.3083333333333,
+     "seed_nontarget_loss__other_object_sum": 348.5,
+     "seed_nontarget_loss__destination_sum": 2149.25,
+     "seed_nontarget_loss__table_sum": 322.75,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0173778992362133,
+     "cluster_nontarget_loss_per_frame": 35.541666666666664,
+     "ball_nontarget_loss_per_frame": 38.16666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=pre_grasp": {
+     "on_target_rate": 0.7222222222222222,
+     "identity_correct_rate": 0.7222222222222222,
+     "silent_failure_rate": 0.2777777777777778,
+     "identity_failure_rate": 0.2777777777777778,
+     "chosen_cluster_purity_mean": 0.5399901689612463,
+     "seed_nontarget_loss_per_frame": 299.6111111111111,
+     "seed_nontarget_loss__other_object_sum": 806.5,
+     "seed_nontarget_loss__destination_sum": 1032.5,
+     "seed_nontarget_loss__table_sum": 857.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 62.0,
+     "ball_nontarget_loss_per_frame": 62.0,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=post_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 0.75,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.25,
+     "chosen_cluster_purity_mean": 0.762635556575979,
+     "seed_nontarget_loss_per_frame": 406.91666666666663,
+     "seed_nontarget_loss__other_object_sum": 367.5,
+     "seed_nontarget_loss__destination_sum": 1812.0,
+     "seed_nontarget_loss__table_sum": 262.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0011737089201877935,
+     "cluster_nontarget_loss_per_frame": 28.333333333333332,
+     "ball_nontarget_loss_per_frame": 31.25,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=pre_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 1.0,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.0,
+     "chosen_cluster_purity_mean": 0.7816724904599095,
+     "seed_nontarget_loss_per_frame": 448.3222222222222,
+     "seed_nontarget_loss__other_object_sum": 733.5,
+     "seed_nontarget_loss__destination_sum": 2774.0,
+     "seed_nontarget_loss__table_sum": 764.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 45.55555555555556,
+     "ball_nontarget_loss_per_frame": 45.55555555555556,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=post_grasp": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.6333333333333333,
+     "silent_failure_rate": 0.1,
+     "identity_failure_rate": 0.3666666666666667,
+     "chosen_cluster_purity_mean": 0.7570112370760753,
+     "seed_nontarget_loss_per_frame": 585.7,
+     "seed_nontarget_loss__other_object_sum": 329.5,
+     "seed_nontarget_loss__destination_sum": 2486.5,
+     "seed_nontarget_loss__table_sum": 383.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.033582089552238806,
+     "cluster_nontarget_loss_per_frame": 42.75,
+     "ball_nontarget_loss_per_frame": 45.083333333333336,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    }
+   },
+   "noun_lf_k3_s0": {
+    "all": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.8,
+     "silent_failure_rate": 0.09999999999999999,
+     "identity_failure_rate": 0.2,
+     "chosen_cluster_purity_mean": 0.7004281565567576,
+     "seed_nontarget_loss_per_frame": 675.5833333333334,
+     "seed_nontarget_loss__other_object_sum": 3193.75,
+     "seed_nontarget_loss__destination_sum": 6900.0,
+     "seed_nontarget_loss__table_sum": 40.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.02331545195009497,
+     "cluster_nontarget_loss_per_frame": 46.483333333333334,
+     "ball_nontarget_loss_per_frame": 47.53333333333333,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene": {
+     "on_target_rate": 0.8333333333333333,
+     "identity_correct_rate": 0.7333333333333334,
+     "silent_failure_rate": 0.16666666666666666,
+     "identity_failure_rate": 0.26666666666666666,
+     "chosen_cluster_purity_mean": 0.6290483240071394,
+     "seed_nontarget_loss_per_frame": 582.2333333333333,
+     "seed_nontarget_loss__other_object_sum": 2769.5,
+     "seed_nontarget_loss__destination_sum": 5885.5,
+     "seed_nontarget_loss__table_sum": 78.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.006934812760055479,
+     "cluster_nontarget_loss_per_frame": 48.53333333333333,
+     "ball_nontarget_loss_per_frame": 49.7,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene": {
+     "on_target_rate": 0.9666666666666667,
+     "identity_correct_rate": 0.8666666666666667,
+     "silent_failure_rate": 0.03333333333333333,
+     "identity_failure_rate": 0.13333333333333333,
+     "chosen_cluster_purity_mean": 0.7718079891063758,
+     "seed_nontarget_loss_per_frame": 768.9333333333334,
+     "seed_nontarget_loss__other_object_sum": 3618.0,
+     "seed_nontarget_loss__destination_sum": 7914.5,
+     "seed_nontarget_loss__table_sum": 1.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.03969609114013446,
+     "cluster_nontarget_loss_per_frame": 44.43333333333333,
+     "ball_nontarget_loss_per_frame": 45.36666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "phase=pre_grasp": {
+     "on_target_rate": 0.8611111111111112,
+     "identity_correct_rate": 0.8611111111111112,
+     "silent_failure_rate": 0.1388888888888889,
+     "identity_failure_rate": 0.1388888888888889,
+     "chosen_cluster_purity_mean": 0.6608313297105779,
+     "seed_nontarget_loss_per_frame": 659.7277777777778,
+     "seed_nontarget_loss__other_object_sum": 2089.25,
+     "seed_nontarget_loss__destination_sum": 4087.5,
+     "seed_nontarget_loss__table_sum": 0.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.015178364060244542,
+     "cluster_nontarget_loss_per_frame": 53.77777777777777,
+     "ball_nontarget_loss_per_frame": 53.77777777777777,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "phase=post_grasp": {
+     "on_target_rate": 0.95,
+     "identity_correct_rate": 0.6916666666666667,
+     "silent_failure_rate": 0.05,
+     "identity_failure_rate": 0.30833333333333335,
+     "chosen_cluster_purity_mean": 0.7598233968260272,
+     "seed_nontarget_loss_per_frame": 697.5583333333334,
+     "seed_nontarget_loss__other_object_sum": 1104.5,
+     "seed_nontarget_loss__destination_sum": 2812.5,
+     "seed_nontarget_loss__table_sum": 40.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.046134637882316795,
+     "cluster_nontarget_loss_per_frame": 35.541666666666664,
+     "ball_nontarget_loss_per_frame": 38.16666666666667,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=pre_grasp": {
+     "on_target_rate": 0.7222222222222222,
+     "identity_correct_rate": 0.7222222222222222,
+     "silent_failure_rate": 0.2777777777777778,
+     "identity_failure_rate": 0.2777777777777778,
+     "chosen_cluster_purity_mean": 0.5399901689612463,
+     "seed_nontarget_loss_per_frame": 579.0555555555555,
+     "seed_nontarget_loss__other_object_sum": 1827.0,
+     "seed_nontarget_loss__destination_sum": 3384.5,
+     "seed_nontarget_loss__table_sum": 0.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 62.0,
+     "ball_nontarget_loss_per_frame": 62.0,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=post_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 0.75,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.25,
+     "chosen_cluster_purity_mean": 0.762635556575979,
+     "seed_nontarget_loss_per_frame": 587.0,
+     "seed_nontarget_loss__other_object_sum": 942.5,
+     "seed_nontarget_loss__destination_sum": 2501.0,
+     "seed_nontarget_loss__table_sum": 78.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.023474178403755867,
+     "cluster_nontarget_loss_per_frame": 28.333333333333332,
+     "ball_nontarget_loss_per_frame": 31.25,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=pre_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 1.0,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.0,
+     "chosen_cluster_purity_mean": 0.7816724904599095,
+     "seed_nontarget_loss_per_frame": 740.4,
+     "seed_nontarget_loss__other_object_sum": 2351.5,
+     "seed_nontarget_loss__destination_sum": 4790.5,
+     "seed_nontarget_loss__table_sum": 0.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.030356728120489083,
+     "cluster_nontarget_loss_per_frame": 45.55555555555556,
+     "ball_nontarget_loss_per_frame": 45.55555555555556,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=post_grasp": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.6333333333333333,
+     "silent_failure_rate": 0.1,
+     "identity_failure_rate": 0.3666666666666667,
+     "chosen_cluster_purity_mean": 0.7570112370760753,
+     "seed_nontarget_loss_per_frame": 808.1166666666667,
+     "seed_nontarget_loss__other_object_sum": 1266.5,
+     "seed_nontarget_loss__destination_sum": 3124.0,
+     "seed_nontarget_loss__table_sum": 1.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.06879509736087773,
+     "cluster_nontarget_loss_per_frame": 42.75,
+     "ball_nontarget_loss_per_frame": 45.083333333333336,
+     "on_target_not_identity": 1.5,
+     "identity_not_on_target": 0.0
+    }
+   },
+   "l8h2": {
+    "all": {
+     "on_target_rate": 0.9166666666666666,
+     "identity_correct_rate": 0.9,
+     "silent_failure_rate": 0.08333333333333333,
+     "identity_failure_rate": 0.1,
+     "chosen_cluster_purity_mean": 0.9333333333333333,
+     "seed_nontarget_loss_per_frame": 190.26666666666665,
+     "seed_nontarget_loss__other_object_sum": 499.5,
+     "seed_nontarget_loss__destination_sum": 1944.25,
+     "seed_nontarget_loss__table_sum": 410.25,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0925900546882987,
+     "cluster_nontarget_loss_per_frame": 3.25,
+     "ball_nontarget_loss_per_frame": 9.9,
+     "on_target_not_identity": 0.25,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene": {
+     "on_target_rate": 0.8666666666666667,
+     "identity_correct_rate": 0.8666666666666667,
+     "silent_failure_rate": 0.13333333333333333,
+     "identity_failure_rate": 0.13333333333333333,
+     "chosen_cluster_purity_mean": 0.8666666666666667,
+     "seed_nontarget_loss_per_frame": 119.93333333333334,
+     "seed_nontarget_loss__other_object_sum": 519.0,
+     "seed_nontarget_loss__destination_sum": 520.0,
+     "seed_nontarget_loss__table_sum": 760.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.03891496852661901,
+     "cluster_nontarget_loss_per_frame": 6.5,
+     "ball_nontarget_loss_per_frame": 8.2,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene": {
+     "on_target_rate": 0.9666666666666667,
+     "identity_correct_rate": 0.9333333333333333,
+     "silent_failure_rate": 0.03333333333333333,
+     "identity_failure_rate": 0.06666666666666667,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 260.6,
+     "seed_nontarget_loss__other_object_sum": 480.0,
+     "seed_nontarget_loss__destination_sum": 3368.5,
+     "seed_nontarget_loss__table_sum": 60.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.14626514084997838,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 11.6,
+     "on_target_not_identity": 0.5,
+     "identity_not_on_target": 0.0
+    },
+    "phase=pre_grasp": {
+     "on_target_rate": 0.8888888888888888,
+     "identity_correct_rate": 0.8888888888888888,
+     "silent_failure_rate": 0.1111111111111111,
+     "identity_failure_rate": 0.1111111111111111,
+     "chosen_cluster_purity_mean": 0.8888888888888888,
+     "seed_nontarget_loss_per_frame": 148.27777777777777,
+     "seed_nontarget_loss__other_object_sum": 333.75,
+     "seed_nontarget_loss__destination_sum": 661.0,
+     "seed_nontarget_loss__table_sum": 375.75,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.028938958744307606,
+     "cluster_nontarget_loss_per_frame": 5.416666666666667,
+     "ball_nontarget_loss_per_frame": 12.472222222222223,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "phase=post_grasp": {
+     "on_target_rate": 0.95,
+     "identity_correct_rate": 0.9,
+     "silent_failure_rate": 0.05,
+     "identity_failure_rate": 0.1,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 273.5416666666667,
+     "seed_nontarget_loss__other_object_sum": 165.75,
+     "seed_nontarget_loss__destination_sum": 1283.25,
+     "seed_nontarget_loss__table_sum": 34.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.2896772645909781,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 6.041666666666667,
+     "on_target_not_identity": 0.25,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=pre_grasp": {
+     "on_target_rate": 0.7777777777777778,
+     "identity_correct_rate": 0.7777777777777778,
+     "silent_failure_rate": 0.2222222222222222,
+     "identity_failure_rate": 0.2222222222222222,
+     "chosen_cluster_purity_mean": 0.7777777777777778,
+     "seed_nontarget_loss_per_frame": 136.22222222222223,
+     "seed_nontarget_loss__other_object_sum": 329.5,
+     "seed_nontarget_loss__destination_sum": 192.0,
+     "seed_nontarget_loss__table_sum": 704.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.0,
+     "cluster_nontarget_loss_per_frame": 10.833333333333334,
+     "ball_nontarget_loss_per_frame": 13.666666666666668,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=same_scene|phase=post_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 1.0,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.0,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 95.5,
+     "seed_nontarget_loss__other_object_sum": 189.5,
+     "seed_nontarget_loss__destination_sum": 328.0,
+     "seed_nontarget_loss__table_sum": 55.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.1076979116075765,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 0.0,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=pre_grasp": {
+     "on_target_rate": 1.0,
+     "identity_correct_rate": 1.0,
+     "silent_failure_rate": 0.0,
+     "identity_failure_rate": 0.0,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 160.33333333333331,
+     "seed_nontarget_loss__other_object_sum": 338.0,
+     "seed_nontarget_loss__destination_sum": 1130.0,
+     "seed_nontarget_loss__table_sum": 47.0,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.05787791748861521,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 11.277777777777779,
+     "on_target_not_identity": 0.0,
+     "identity_not_on_target": 0.0
+    },
+    "scene=new_scene|phase=post_grasp": {
+     "on_target_rate": 0.9,
+     "identity_correct_rate": 0.8,
+     "silent_failure_rate": 0.1,
+     "identity_failure_rate": 0.2,
+     "chosen_cluster_purity_mean": 1.0,
+     "seed_nontarget_loss_per_frame": 451.58333333333337,
+     "seed_nontarget_loss__other_object_sum": 142.0,
+     "seed_nontarget_loss__destination_sum": 2238.5,
+     "seed_nontarget_loss__table_sum": 13.5,
+     "seed_nontarget_loss__robot_sum": 0.0,
+     "seed_target_residual_ratio": 0.4716566175743797,
+     "cluster_nontarget_loss_per_frame": 0.0,
+     "ball_nontarget_loss_per_frame": 12.083333333333334,
+     "on_target_not_identity": 0.5,
+     "identity_not_on_target": 0.0
+    }
+   }
+  },
+  "e2e_3d_per_record_counts": {
+   "noun_gt_k1_s0": {
+    "all": {
+     "headfix": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 12,
+      "chosen_cluster_purity_mean": 0.5922702921974062,
+      "seed_nontarget_loss_sum": 9893
+     },
+     "ep1800": {
+      "n_frames": 15,
+      "on_target": 11,
+      "identity_correct": 11,
+      "chosen_cluster_purity_mean": 0.7333333333333333,
+      "seed_nontarget_loss_sum": 2067
+     },
+     "ep1850": {
+      "n_frames": 15,
+      "on_target": 14,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 10679
+     },
+     "ep1900": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 15,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 8127
+     }
+    },
+    "phase=pre_grasp": {
+     "headfix": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.6369364115610383,
+      "seed_nontarget_loss_sum": 4850
+     },
+     "ep1800": {
+      "n_frames": 9,
+      "on_target": 5,
+      "identity_correct": 5,
+      "chosen_cluster_purity_mean": 0.5555555555555556,
+      "seed_nontarget_loss_sum": 1213
+     },
+     "ep1850": {
+      "n_frames": 10,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 6147
+     },
+     "ep1900": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 4346
+     }
+    },
+    "phase=post_grasp": {
+     "headfix": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 0.5252711131519581,
+      "seed_nontarget_loss_sum": 5043
+     },
+     "ep1800": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 854
+     },
+     "ep1850": {
+      "n_frames": 5,
+      "on_target": 4,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 4532
+     },
+     "ep1900": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 3781
+     }
+    }
+   },
+   "noun_gt_k2_s0": {
+    "all": {
+     "headfix": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 12,
+      "chosen_cluster_purity_mean": 0.5914299813476122,
+      "seed_nontarget_loss_sum": 9774
+     },
+     "ep1800": {
+      "n_frames": 15,
+      "on_target": 11,
+      "identity_correct": 11,
+      "chosen_cluster_purity_mean": 0.7333333333333333,
+      "seed_nontarget_loss_sum": 3145
+     },
+     "ep1850": {
+      "n_frames": 15,
+      "on_target": 14,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 11121
+     },
+     "ep1900": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 15,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 9855
+     }
+    },
+    "phase=pre_grasp": {
+     "headfix": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.6355358934780482,
+      "seed_nontarget_loss_sum": 4948
+     },
+     "ep1800": {
+      "n_frames": 9,
+      "on_target": 5,
+      "identity_correct": 5,
+      "chosen_cluster_purity_mean": 0.5555555555555556,
+      "seed_nontarget_loss_sum": 2665
+     },
+     "ep1850": {
+      "n_frames": 10,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 7294
+     },
+     "ep1900": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 5691
+     }
+    },
+    "phase=post_grasp": {
+     "headfix": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 0.5252711131519581,
+      "seed_nontarget_loss_sum": 4826
+     },
+     "ep1800": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 480
+     },
+     "ep1850": {
+      "n_frames": 5,
+      "on_target": 4,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 3827
+     },
+     "ep1900": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 4164
+     }
+    }
+   },
+   "noun_gt_k3_s0": {
+    "all": {
+     "headfix": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 12,
+      "chosen_cluster_purity_mean": 0.5918703295298958,
+      "seed_nontarget_loss_sum": 9756
+     },
+     "ep1800": {
+      "n_frames": 15,
+      "on_target": 11,
+      "identity_correct": 11,
+      "chosen_cluster_purity_mean": 0.7333333333333333,
+      "seed_nontarget_loss_sum": 4059
+     },
+     "ep1850": {
+      "n_frames": 15,
+      "on_target": 14,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 11389
+     },
+     "ep1900": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 15,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 9798
+     }
+    },
+    "phase=pre_grasp": {
+     "headfix": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.6362698071151878,
+      "seed_nontarget_loss_sum": 5034
+     },
+     "ep1800": {
+      "n_frames": 9,
+      "on_target": 5,
+      "identity_correct": 5,
+      "chosen_cluster_purity_mean": 0.5555555555555556,
+      "seed_nontarget_loss_sum": 3396
+     },
+     "ep1850": {
+      "n_frames": 10,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 7492
+     },
+     "ep1900": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 5676
+     }
+    },
+    "phase=post_grasp": {
+     "headfix": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 0.5252711131519581,
+      "seed_nontarget_loss_sum": 4722
+     },
+     "ep1800": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 663
+     },
+     "ep1850": {
+      "n_frames": 5,
+      "on_target": 4,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 3897
+     },
+     "ep1900": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 4122
+     }
+    }
+   },
+   "noun_gt_k1_s1": {
+    "all": {
+     "headfix": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 12,
+      "chosen_cluster_purity_mean": 0.5914299813476122,
+      "seed_nontarget_loss_sum": 7733
+     },
+     "ep1800": {
+      "n_frames": 15,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 0.6666666666666666,
+      "seed_nontarget_loss_sum": 2280
+     },
+     "ep1850": {
+      "n_frames": 15,
+      "on_target": 14,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 7084
+     },
+     "ep1900": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 0.5436159782127518,
+      "seed_nontarget_loss_sum": 6571
+     }
+    },
+    "phase=pre_grasp": {
+     "headfix": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.6355358934780482,
+      "seed_nontarget_loss_sum": 3201
+     },
+     "ep1800": {
+      "n_frames": 9,
+      "on_target": 4,
+      "identity_correct": 4,
+      "chosen_cluster_purity_mean": 0.4444444444444444,
+      "seed_nontarget_loss_sum": 1602
+     },
+     "ep1850": {
+      "n_frames": 10,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 3947
+     },
+     "ep1900": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.5633449809198191,
+      "seed_nontarget_loss_sum": 3707
+     }
+    },
+    "phase=post_grasp": {
+     "headfix": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 0.5252711131519581,
+      "seed_nontarget_loss_sum": 4532
+     },
+     "ep1800": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 678
+     },
+     "ep1850": {
+      "n_frames": 5,
+      "on_target": 4,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 3137
+     },
+     "ep1900": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 4,
+      "chosen_cluster_purity_mean": 0.5140224741521505,
+      "seed_nontarget_loss_sum": 2864
+     }
+    }
+   },
+   "noun_gt_k2_s1": {
+    "all": {
+     "headfix": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 12,
+      "chosen_cluster_purity_mean": 0.5914299813476122,
+      "seed_nontarget_loss_sum": 7611
+     },
+     "ep1800": {
+      "n_frames": 15,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 0.6666666666666666,
+      "seed_nontarget_loss_sum": 2123
+     },
+     "ep1850": {
+      "n_frames": 15,
+      "on_target": 14,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 7759
+     },
+     "ep1900": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 0.5436159782127518,
+      "seed_nontarget_loss_sum": 7169
+     }
+    },
+    "phase=pre_grasp": {
+     "headfix": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.6355358934780482,
+      "seed_nontarget_loss_sum": 3389
+     },
+     "ep1800": {
+      "n_frames": 9,
+      "on_target": 4,
+      "identity_correct": 4,
+      "chosen_cluster_purity_mean": 0.4444444444444444,
+      "seed_nontarget_loss_sum": 1461
+     },
+     "ep1850": {
+      "n_frames": 10,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 4658
+     },
+     "ep1900": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.5633449809198191,
+      "seed_nontarget_loss_sum": 3851
+     }
+    },
+    "phase=post_grasp": {
+     "headfix": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 0.5252711131519581,
+      "seed_nontarget_loss_sum": 4222
+     },
+     "ep1800": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 662
+     },
+     "ep1850": {
+      "n_frames": 5,
+      "on_target": 4,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 3101
+     },
+     "ep1900": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 4,
+      "chosen_cluster_purity_mean": 0.5140224741521505,
+      "seed_nontarget_loss_sum": 3318
+     }
+    }
+   },
+   "noun_gt_k3_s1": {
+    "all": {
+     "headfix": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 12,
+      "chosen_cluster_purity_mean": 0.5914299813476122,
+      "seed_nontarget_loss_sum": 7568
+     },
+     "ep1800": {
+      "n_frames": 15,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 0.6666666666666666,
+      "seed_nontarget_loss_sum": 2708
+     },
+     "ep1850": {
+      "n_frames": 15,
+      "on_target": 14,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 7879
+     },
+     "ep1900": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 0.5436159782127518,
+      "seed_nontarget_loss_sum": 7063
+     }
+    },
+    "phase=pre_grasp": {
+     "headfix": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.6355358934780482,
+      "seed_nontarget_loss_sum": 3388
+     },
+     "ep1800": {
+      "n_frames": 9,
+      "on_target": 4,
+      "identity_correct": 4,
+      "chosen_cluster_purity_mean": 0.4444444444444444,
+      "seed_nontarget_loss_sum": 2005
+     },
+     "ep1850": {
+      "n_frames": 10,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 4732
+     },
+     "ep1900": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.5633449809198191,
+      "seed_nontarget_loss_sum": 3811
+     }
+    },
+    "phase=post_grasp": {
+     "headfix": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 0.5252711131519581,
+      "seed_nontarget_loss_sum": 4180
+     },
+     "ep1800": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 703
+     },
+     "ep1850": {
+      "n_frames": 5,
+      "on_target": 4,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 3147
+     },
+     "ep1900": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 4,
+      "chosen_cluster_purity_mean": 0.5140224741521505,
+      "seed_nontarget_loss_sum": 3252
+     }
+    }
+   },
+   "noun_lf_k3_s0": {
+    "all": {
+     "headfix": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 12,
+      "chosen_cluster_purity_mean": 0.5914299813476122,
+      "seed_nontarget_loss_sum": 12646
+     },
+     "ep1800": {
+      "n_frames": 15,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 0.6666666666666666,
+      "seed_nontarget_loss_sum": 4821
+     },
+     "ep1850": {
+      "n_frames": 15,
+      "on_target": 14,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 14135
+     },
+     "ep1900": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 0.5436159782127518,
+      "seed_nontarget_loss_sum": 8933
+     }
+    },
+    "phase=pre_grasp": {
+     "headfix": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.6355358934780482,
+      "seed_nontarget_loss_sum": 7306
+     },
+     "ep1800": {
+      "n_frames": 9,
+      "on_target": 4,
+      "identity_correct": 4,
+      "chosen_cluster_purity_mean": 0.4444444444444444,
+      "seed_nontarget_loss_sum": 3117
+     },
+     "ep1850": {
+      "n_frames": 10,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 9568
+     },
+     "ep1900": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 0.5633449809198191,
+      "seed_nontarget_loss_sum": 4716
+     }
+    },
+    "phase=post_grasp": {
+     "headfix": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 0.5252711131519581,
+      "seed_nontarget_loss_sum": 5340
+     },
+     "ep1800": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 1704
+     },
+     "ep1850": {
+      "n_frames": 5,
+      "on_target": 4,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 4567
+     },
+     "ep1900": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 4,
+      "chosen_cluster_purity_mean": 0.5140224741521505,
+      "seed_nontarget_loss_sum": 4217
+     }
+    }
+   },
+   "l8h2": {
+    "all": {
+     "headfix": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 15,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 2770
+     },
+     "ep1800": {
+      "n_frames": 15,
+      "on_target": 11,
+      "identity_correct": 11,
+      "chosen_cluster_purity_mean": 0.7333333333333333,
+      "seed_nontarget_loss_sum": 828
+     },
+     "ep1850": {
+      "n_frames": 15,
+      "on_target": 14,
+      "identity_correct": 13,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 4595
+     },
+     "ep1900": {
+      "n_frames": 15,
+      "on_target": 15,
+      "identity_correct": 15,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 3223
+     }
+    },
+    "phase=pre_grasp": {
+     "headfix": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 1966
+     },
+     "ep1800": {
+      "n_frames": 9,
+      "on_target": 5,
+      "identity_correct": 5,
+      "chosen_cluster_purity_mean": 0.5555555555555556,
+      "seed_nontarget_loss_sum": 486
+     },
+     "ep1850": {
+      "n_frames": 10,
+      "on_target": 10,
+      "identity_correct": 10,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 1440
+     },
+     "ep1900": {
+      "n_frames": 9,
+      "on_target": 9,
+      "identity_correct": 9,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 1590
+     }
+    },
+    "phase=post_grasp": {
+     "headfix": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 804
+     },
+     "ep1800": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 342
+     },
+     "ep1850": {
+      "n_frames": 5,
+      "on_target": 4,
+      "identity_correct": 3,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 3155
+     },
+     "ep1900": {
+      "n_frames": 6,
+      "on_target": 6,
+      "identity_correct": 6,
+      "chosen_cluster_purity_mean": 1.0,
+      "seed_nontarget_loss_sum": 1633
+     }
+    }
+   }
+  },
+  "2d_vs_target_by_scene_from_validate": {
+   "noun_gt_k1_s0": {
+    "same_scene": {
+     "target_mass": 0.5874145062703452,
+     "lift": 98.45137837918755,
+     "peak_on_target": 1.0
+    },
+    "new_scene": {
+     "target_mass": 0.4936040046758685,
+     "lift": 98.48477613032892,
+     "peak_on_target": 1.0
+    }
+   },
+   "noun_gt_k2_s0": {
+    "same_scene": {
+     "target_mass": 0.5706753602990073,
+     "lift": 98.29133133081226,
+     "peak_on_target": 1.0
+    },
+    "new_scene": {
+     "target_mass": 0.47030142863965974,
+     "lift": 89.13403446838035,
+     "peak_on_target": 1.0
+    }
+   },
+   "noun_gt_k3_s0": {
+    "same_scene": {
+     "target_mass": 0.5730114326259497,
+     "lift": 98.31567635069146,
+     "peak_on_target": 1.0
+    },
+    "new_scene": {
+     "target_mass": 0.483233826629072,
+     "lift": 89.56021699675584,
+     "peak_on_target": 1.0
+    }
+   },
+   "noun_gt_k1_s1": {
+    "same_scene": {
+     "target_mass": 0.26911838048343883,
+     "lift": 31.02586138697732,
+     "peak_on_target": 1.0
+    },
+    "new_scene": {
+     "target_mass": 0.20673075439073044,
+     "lift": 27.814168609158777,
+     "peak_on_target": 1.0
+    }
+   },
+   "noun_gt_k2_s1": {
+    "same_scene": {
+     "target_mass": 0.2650362117808564,
+     "lift": 31.15840728812288,
+     "peak_on_target": 1.0
+    },
+    "new_scene": {
+     "target_mass": 0.197835677692697,
+     "lift": 25.444993799985433,
+     "peak_on_target": 1.0
+    }
+   },
+   "noun_gt_k3_s1": {
+    "same_scene": {
+     "target_mass": 0.2672720332142046,
+     "lift": 31.1482845831172,
+     "peak_on_target": 1.0
+    },
+    "new_scene": {
+     "target_mass": 0.20447139072319903,
+     "lift": 25.68378098871944,
+     "peak_on_target": 1.0
+    }
+   },
+   "noun_lf_k3_s0": {
+    "same_scene": {
+     "target_mass": 0.3532241550976366,
+     "lift": 51.22230476053725,
+     "peak_on_target": 1.0
+    },
+    "new_scene": {
+     "target_mass": 0.33308230046402354,
+     "lift": 43.12528423292363,
+     "peak_on_target": 0.8541666666666667
+    }
+   },
+   "l8h2": {
+    "same_scene": {
+     "target_mass": 0.16663861702245972,
+     "lift": 56.252283807126986,
+     "peak_on_target": 0.7307692307692308
+    },
+    "new_scene": {
+     "target_mass": 0.1263542449554811,
+     "lift": 54.13625299128991,
+     "peak_on_target": 0.6550925925925926
+    }
+   }
+  },
+  "2d_vs_target_scene_phase_recomputed": {
+   "noun_gt_k1_s0": {
+    "same_scene": {
+     "target_mass": 0.5874145062703452,
+     "lift": 98.45137837918755,
+     "peak_on_target": 1.0,
+     "n_samples": 39
+    },
+    "same_scene|pre_grasp": {
+     "target_mass": 0.5550184453301741,
+     "lift": 129.67356501791141,
+     "peak_on_target": 1.0,
+     "n_samples": 25
+    },
+    "same_scene|post_grasp": {
+     "target_mass": 0.6459073621473101,
+     "lift": 46.08869585399199,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    },
+    "new_scene": {
+     "target_mass": 0.4936040046758685,
+     "lift": 98.48477613032892,
+     "peak_on_target": 1.0,
+     "n_samples": 51
+    },
+    "new_scene|pre_grasp": {
+     "target_mass": 0.42406148769141394,
+     "lift": 115.06411518801022,
+     "peak_on_target": 1.0,
+     "n_samples": 37
+    },
+    "new_scene|post_grasp": {
+     "target_mass": 0.7108029590172186,
+     "lift": 54.350920523155175,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    }
+   },
+   "noun_gt_k2_s0": {
+    "same_scene": {
+     "target_mass": 0.5706753602990073,
+     "lift": 98.29133133081226,
+     "peak_on_target": 1.0,
+     "n_samples": 39
+    },
+    "same_scene|pre_grasp": {
+     "target_mass": 0.5395807894313436,
+     "lift": 128.8943155190671,
+     "peak_on_target": 1.0,
+     "n_samples": 25
+    },
+    "same_scene|post_grasp": {
+     "target_mass": 0.622385457453833,
+     "lift": 46.71912739134461,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    },
+    "new_scene": {
+     "target_mass": 0.47030142863965974,
+     "lift": 89.13403446838035,
+     "peak_on_target": 1.0,
+     "n_samples": 51
+    },
+    "new_scene|pre_grasp": {
+     "target_mass": 0.41372536174573615,
+     "lift": 104.62122645340253,
+     "peak_on_target": 1.0,
+     "n_samples": 37
+    },
+    "new_scene|post_grasp": {
+     "target_mass": 0.6456049276970227,
+     "lift": 50.429013351298735,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    }
+   },
+   "noun_gt_k3_s0": {
+    "same_scene": {
+     "target_mass": 0.5730114326259497,
+     "lift": 98.31567635069146,
+     "peak_on_target": 1.0,
+     "n_samples": 39
+    },
+    "same_scene|pre_grasp": {
+     "target_mass": 0.5401802396362171,
+     "lift": 128.7162779936964,
+     "peak_on_target": 1.0,
+     "n_samples": 25
+    },
+    "same_scene|post_grasp": {
+     "target_mass": 0.6258702328443977,
+     "lift": 46.90624640767701,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    },
+    "new_scene": {
+     "target_mass": 0.483233826629072,
+     "lift": 89.56021699675584,
+     "peak_on_target": 1.0,
+     "n_samples": 51
+    },
+    "new_scene|pre_grasp": {
+     "target_mass": 0.4220413902603552,
+     "lift": 104.94629783946326,
+     "peak_on_target": 1.0,
+     "n_samples": 37
+    },
+    "new_scene|post_grasp": {
+     "target_mass": 0.6739466665717642,
+     "lift": 51.48854139495141,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    }
+   },
+   "noun_gt_k1_s1": {
+    "same_scene": {
+     "target_mass": 0.26911838048343883,
+     "lift": 31.02586138697732,
+     "peak_on_target": 1.0,
+     "n_samples": 39
+    },
+    "same_scene|pre_grasp": {
+     "target_mass": 0.19729246838197453,
+     "lift": 38.28604373062586,
+     "peak_on_target": 1.0,
+     "n_samples": 25
+    },
+    "same_scene|post_grasp": {
+     "target_mass": 0.38882561444841746,
+     "lift": 19.557229307688395,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    },
+    "new_scene": {
+     "target_mass": 0.20673075439073044,
+     "lift": 27.814168609158777,
+     "peak_on_target": 1.0,
+     "n_samples": 51
+    },
+    "new_scene|pre_grasp": {
+     "target_mass": 0.15003901562058414,
+     "lift": 31.139058499444516,
+     "peak_on_target": 1.0,
+     "n_samples": 37
+    },
+    "new_scene|post_grasp": {
+     "target_mass": 0.3681580664399945,
+     "lift": 18.71283203525415,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    }
+   },
+   "noun_gt_k2_s1": {
+    "same_scene": {
+     "target_mass": 0.2650362117808564,
+     "lift": 31.15840728812288,
+     "peak_on_target": 1.0,
+     "n_samples": 39
+    },
+    "same_scene|pre_grasp": {
+     "target_mass": 0.20106431011168657,
+     "lift": 38.8141236479392,
+     "peak_on_target": 1.0,
+     "n_samples": 25
+    },
+    "same_scene|post_grasp": {
+     "target_mass": 0.3716621241339886,
+     "lift": 19.170188354677187,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    },
+    "new_scene": {
+     "target_mass": 0.197835677692697,
+     "lift": 25.444993799985433,
+     "peak_on_target": 1.0,
+     "n_samples": 51
+    },
+    "new_scene|pre_grasp": {
+     "target_mass": 0.14612420380270297,
+     "lift": 28.518430581436895,
+     "peak_on_target": 1.0,
+     "n_samples": 37
+    },
+    "new_scene|post_grasp": {
+     "target_mass": 0.3437669517255449,
+     "lift": 17.57654995787112,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    }
+   },
+   "noun_gt_k3_s1": {
+    "same_scene": {
+     "target_mass": 0.2672720332142046,
+     "lift": 31.1482845831172,
+     "peak_on_target": 1.0,
+     "n_samples": 39
+    },
+    "same_scene|pre_grasp": {
+     "target_mass": 0.20071866856636192,
+     "lift": 38.70443911030658,
+     "peak_on_target": 1.0,
+     "n_samples": 25
+    },
+    "same_scene|post_grasp": {
+     "target_mass": 0.3776510619191329,
+     "lift": 19.29520417053019,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    },
+    "new_scene": {
+     "target_mass": 0.20447139072319903,
+     "lift": 25.68378098871944,
+     "peak_on_target": 1.0,
+     "n_samples": 51
+    },
+    "new_scene|pre_grasp": {
+     "target_mass": 0.14846138561208586,
+     "lift": 28.64765022980523,
+     "peak_on_target": 1.0,
+     "n_samples": 37
+    },
+    "new_scene|post_grasp": {
+     "target_mass": 0.36208761733217454,
+     "lift": 18.1993765021612,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    }
+   },
+   "noun_lf_k3_s0": {
+    "same_scene": {
+     "target_mass": 0.3532241550976366,
+     "lift": 51.22230476053725,
+     "peak_on_target": 1.0,
+     "n_samples": 39
+    },
+    "same_scene|pre_grasp": {
+     "target_mass": 0.32650231594979545,
+     "lift": 68.75433675448947,
+     "peak_on_target": 1.0,
+     "n_samples": 25
+    },
+    "same_scene|post_grasp": {
+     "target_mass": 0.4052188943877977,
+     "lift": 24.114229416914952,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    },
+    "new_scene": {
+     "target_mass": 0.33308230046402354,
+     "lift": 43.12528423292363,
+     "peak_on_target": 0.8541666666666667,
+     "n_samples": 51
+    },
+    "new_scene|pre_grasp": {
+     "target_mass": 0.28086198287254605,
+     "lift": 49.500424880982116,
+     "peak_on_target": 0.8157894736842105,
+     "n_samples": 37
+    },
+    "new_scene|post_grasp": {
+     "target_mass": 0.49594002041172136,
+     "lift": 27.439596697647012,
+     "peak_on_target": 1.0,
+     "n_samples": 14
+    }
+   },
+   "l8h2": {
+    "same_scene": {
+     "target_mass": 0.16663861702245972,
+     "lift": 56.252283807126986,
+     "peak_on_target": 0.7307692307692308,
+     "n_samples": 39
+    },
+    "same_scene|pre_grasp": {
+     "target_mass": 0.21513122504013546,
+     "lift": 77.6215992811789,
+     "peak_on_target": 0.9444444444444444,
+     "n_samples": 25
+    },
+    "same_scene|post_grasp": {
+     "target_mass": 0.0871068800111785,
+     "lift": 19.43769196615468,
+     "peak_on_target": 0.375,
+     "n_samples": 14
+    },
+    "new_scene": {
+     "target_mass": 0.1263542449554811,
+     "lift": 54.13625299128991,
+     "peak_on_target": 0.6550925925925926,
+     "n_samples": 51
+    },
+    "new_scene|pre_grasp": {
+     "target_mass": 0.1496473109809181,
+     "lift": 71.3237918820869,
+     "peak_on_target": 0.7339181286549707,
+     "n_samples": 37
+    },
+    "new_scene|post_grasp": {
+     "target_mass": 0.06457480326779265,
+     "lift": 10.672866246730354,
+     "peak_on_target": 0.3888888888888889,
+     "n_samples": 14
+    }
+   }
+  },
+  "2d_recompute_max_abs_diff_vs_validate": 0.0,
+  "2d_note": "held-out kept (frame, camera) samples (target >= 200 px, extract ok); per-record mean then unweighted mean over 2 records per scene; phase from t49_noun_query.phase_groups (T47b definition)"
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t49/t49b-scene-variants.png",
+   "kind": "scene",
+   "sidecar": "AG3S/ag3s/docs/figures/t49/t49b-scene-variants.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t49/t49b-sigma-k-3d.png",
+   "kind": "graph",
+   "sidecar": "AG3S/ag3s/docs/figures/t49/t49b-sigma-k-3d.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t49/t49b-variants-table.png",
+   "kind": "table",
+   "sidecar": "AG3S/ag3s/docs/figures/t49/t49b-variants-table.json"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy: violated_start 14/15, has_target 15/15, frame0 clearance_before -29.031048280806342 mm; cuRobo baseline not run (no GPU)"
+ },
+ "verdict": "legacy 기준선 일치. 6 run 의 l8h2 row 와 gt_k3_s1 noun_gt row 가 T49 e2e row 와 field 단위 일치 (mismatch 0, _ms 제외). T49 e2e 출력 sha1 불변. exploratory.",
+ "not_measured": [
+  "cuRobo regression baseline (GPU 미사용 지시)",
+  "noun_lf at k 1, 2 or sigma 1 (task 범위 밖)",
+  "selection records (CLI 가 noun_gt 를 selection record 에서 거절)",
+  "swap / separation 재측정 (task 범위 밖)"
+ ],
+ "blocked": []
+}

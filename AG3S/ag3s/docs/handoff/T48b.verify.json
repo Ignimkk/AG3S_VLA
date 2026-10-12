@@ -1,0 +1,6102 @@
+{
+ "_comment": "ag3s-verifier (A2). numbers + paths only, no interpretation. CPU render + GPU extract + CPU score.",
+ "step": "T48b",
+ "date": "2026-10-12",
+ "time_kst": "17:01-17:30 KST (CPU render), 19:23-19:28 KST (GPU extract), 21:00-21:20 KST (CPU score, figures)",
+ "status": "done",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a",
+ "run_dir_note": "GPU verifier: reuse this AG3S_RUN_DIR (render cache under verify/T48b/render, digest-bound to t48b code sha below). Extract/score must use the same --extra-runs train_range.",
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "command": "CUDA_VISIBLE_DEVICES='' MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT OMP_NUM_THREADS=1 .venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --out-json <R>/verify/T48b/baseline/legacy.json",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/baseline/legacy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/baseline/legacy.log",
+   "load_before": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/baseline/load_before.txt",
+   "load_after": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/baseline/load_after.txt"
+  },
+  {
+   "id": "render_attempt0",
+   "command": "(wrapped in /usr/bin/time -v, binary absent)",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/render_attempt0_no_time_binary.log",
+   "rc": 127,
+   "note": "python not started; no output written"
+  },
+  {
+   "id": "render",
+   "command": "CUDA_VISIBLE_DEVICES='' MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT OMP_NUM_THREADS=1 LP_NUM_THREADS=1 .venv-ag3s/bin/python -m AG3S.ag3s.experiments.studies.t48b_hsr --stage render --extra-runs train_range",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/render/ , /mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/plan/",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/render.log",
+   "start": "2026-10-12T08:03:03+00:00",
+   "end": "2026-10-12T08:10:28+00:00",
+   "rc": 0,
+   "load_before": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/load_before_render.txt",
+   "load_after": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/load_after_render.txt"
+  },
+  {
+   "id": "indep_parity",
+   "command": ".venv-ag3s/bin/python -I <R>/verify/T48b/scripts/indep_parity.py <R>/verify/T48b",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/parity_and_exclusions.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/indep_parity.log"
+  },
+  {
+   "id": "indep_edit_check",
+   "command": ".venv-ag3s/bin/python -I <R>/verify/T48b/scripts/indep_edit_check.py <R>/verify/T48b",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/edit_checks.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/edit_checks.log"
+  },
+  {
+   "id": "e1_e2_fruit_xy",
+   "command": ".venv-ag3s/bin/python -I <R>/verify/T48b/scripts/e1_e2_xy.py <R>/verify/T48b",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/e1_e2_fruit_xy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/e1_e2_fruit_xy.log"
+  },
+  {
+   "id": "pytest_t48b",
+   "command": "pytest -q tests/ag3s/test_t48b_scene.py tests/ag3s/test_t48b_hsr_cli.py",
+   "venv": ".venv-ag3s",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/pytest_t48b.log"
+  },
+  {
+   "id": "figures",
+   "command": "<R>/verify/T48b/scripts/fig_scene.py, fig_table_cpu.py",
+   "venv": ".venv-ag3s"
+  },
+  {
+   "id": "baseline_legacy_score_stage",
+   "command": "CUDA_VISIBLE_DEVICES='' MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT OMP_NUM_THREADS=1 .venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --out-json <R>/verify/T48b/baseline_score/legacy.json",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/baseline_score/legacy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/baseline_score/legacy.log",
+   "load_before": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/baseline_score/load_before.txt",
+   "load_after": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/baseline_score/load_after.txt",
+   "rc": 0
+  },
+  {
+   "id": "score",
+   "command": "CUDA_VISIBLE_DEVICES='' MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT OMP_NUM_THREADS=1 LP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 .venv-ag3s/bin/python -m AG3S.ag3s.experiments.studies.t48b_hsr --stage score --extra-runs train_range",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/score/ (metrics.json, parity.json, predictions.csv)",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/score.log",
+   "start": "2026-10-12T12:02:54+00:00",
+   "end": "2026-10-12T12:02:58+00:00",
+   "rc": 0
+  },
+  {
+   "id": "indep_score",
+   "command": ".venv-ag3s/bin/python -I <R>/verify/T48b/scripts/indep_score.py <R>/verify/T48b AG3S/ag3s/asset/subtask_probe/kv_L4_v1.npz",
+   "note": "numpy-only probe re-application from feat/*.npz + re-scoring from score/predictions.csv",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/score_indep.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/score_indep.log"
+  },
+  {
+   "id": "crosscheck_metrics",
+   "command": ".venv-ag3s/bin/python -I <R>/verify/T48b/scripts/crosscheck_metrics.py <R>/verify/T48b",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/crosscheck_metrics.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/crosscheck_metrics.log"
+  },
+  {
+   "id": "figures_score",
+   "command": ".venv-ag3s/bin/python <R>/verify/T48b/scripts/fig_scene_pred.py <R>/verify/T48b ; .venv-ag3s/bin/python <R>/verify/T48b/scripts/fig_score.py <R>/verify/T48b"
+  }
+ ],
+ "code_state": {
+  "repo": "AG3S_VLA-development",
+  "branch": "feature/ag3s-development",
+  "head": "28b98160",
+  "t48b_files_untracked_sha256": {
+   "t48b_hsr.py": "a0866c6525f19f8610af54a59735647ba04a092b64c02e0efddaf515a3c22141",
+   "t48b_metrics.py": "1667ec6c3ae0c7a3b3adedc3fb4e5bbcbd9c764714d078caf9ae2428adc7253e",
+   "t48b_scene.py": "74e86c2b077b7d83d26e69b9a3e44157526448d21f06bf6b582327c0d334b688"
+  },
+  "render_cache_digests": {
+   "ep1807": {
+    "E0": "563a25cf2b6e9fc4c8fc8997e3f6f8541ffcb1217fcff2273dd593b121e14282",
+    "edits": "c1b8afc3c4e08da0e74830ac6a66ffd9da3e15e8cf809b984440424cec625591"
+   },
+   "long": {
+    "E0": "f41d4235ab0d26eeef6ea3833b042480cc41a1d4c887cdbf97d3b95220ec3400",
+    "edits": "8573ef089f5e4e645ea921fe92a59d551e3d09b0914d43f1f1a24f14d3ea43d7"
+   },
+   "t2": {
+    "E0": "420ce4f1b8e3ce03c7194ce8503998da177a602946d3676d2f02476b85ae774a",
+    "edits": "9db369bd3742f439c6ca607395719433e9cbbf1d4ee94a86ac4e86ad8799632d"
+   },
+   "headfix": {
+    "E0": "48d983f0fcf5efffc050b57d68b5ec281953966a74dc883664b713f786764ec9",
+    "edits": "4551eea93c25c7edd5a9bd2dbbacfb5135ed2c2e3dfd9b5a193a0e0dac98960f"
+   },
+   "ep1800": {
+    "E0": "a8fb6bae35c99004a9d0a429bddc8b6a54571589820a88d31a3cd1f69120bae3",
+    "edits": "c0602d866042794cb5eac6bbfe918170a1f29cd9543f9ed4f285afa4d03051f5"
+   },
+   "ep1850": {
+    "E0": "65e85d28de7d7a82bb4d0abb90dc2b46dfba428ebf99a2082f10080ca67bb797",
+    "edits": "0ef3ec0d37c63712525b06ec732250c72ef99a22f4ef8a22db393e6e74b97752"
+   },
+   "ep1900": {
+    "E0": "953e75d09e3bdb3c3d52cde68524091d4b7614c07697022d46a6b146d95ac553",
+    "edits": "4a16adbfb1001e0a8bd64dfe8e2b8faecad5cc7625f9fe7bbca247ae730cab8e"
+   },
+   "ep0": {
+    "E0": "cdf3b146c26896341bd0f6cc0d8e58949f922f5983c1743250be5fc950ef2f37",
+    "edits": "2c7c3e4b77fe22a12eb00e45ae59760019f704ff28c8139aa836537d711f97be"
+   },
+   "ep500": {
+    "E0": "7461422ef0c1096440f31ded23a60926dbca76e53e9170d4a461f57c59bc0086",
+    "edits": "c09a6d5880160f8c3beb4d3f1afd78c0a085878b49203a3a1113bba5f8c9892b"
+   },
+   "ep1200": {
+    "E0": "f58e322db6c27ba1b154e8cb48457b47455143a8e885cb86d0307d73a1414b58",
+    "edits": "9bbdd735e967ffc61b0d1a9b057dbd1e80c556c34d542733314db157a73fb1a9"
+   }
+  }
+ },
+ "numbers": {
+  "_comment": "held_out_primary = 7 main runs (long/t2/headfix/ep1800 share scene ep1800); train_range_secondary = ep0/ep500/ep1200 (VLA fine-tune episodes; ep0, ep1200 also probe-train). E1z exploratory.",
+  "pytest_t48b": {
+   "passed": 43,
+   "failed": 0
+  },
+  "edit_params": {
+   "g_empty": 0.45702920890223303,
+   "g_empty_recorded_n": 22,
+   "g_empty_quantiles_p0_p5_p50_p95_p100": [
+    0.38862652923163316,
+    0.40154299046538244,
+    0.45702920890223303,
+    0.494565982141541,
+    0.6878293517679525
+   ],
+   "penetration_max_mm": 2.0,
+   "g_hold_by_fruit": {
+    "apple": 0.7231306433677673,
+    "banana": 0.49480584263801575,
+    "orange": 0.6667375564575195,
+    "pear": 0.6730694770812988
+   },
+   "free_qpos_from_model": {
+    "crate": 31,
+    "apple": 38,
+    "banana": 45,
+    "orange": 52,
+    "pear": 59
+   },
+   "recorded_penetration_max_mm_main": 1.826189903785879,
+   "recorded_penetration_max_mm_train_range": 2.0996484081631728
+  },
+  "parity_0": {
+   "pixel_gate": {
+    "pixel_mad_max_allowed": 1.0,
+    "worst_frame_camera_mad": 0.0,
+    "passed": true
+   },
+   "held_out_primary": {
+    "runs": [
+     "ep1807",
+     "long",
+     "t2",
+     "headfix",
+     "ep1800",
+     "ep1850",
+     "ep1900"
+    ],
+    "E0_frames": 260,
+    "E0_frames_bit_identical_all_cams": 260,
+    "E0_mad_max": 0.0,
+    "E0_max_abs": 0,
+    "E0_state_max_abs": 0.0,
+    "E0_gt_cl_ne_phys_unambiguous": 39,
+    "E0_gt_phys_ambiguous": 6
+   },
+   "train_range_secondary": {
+    "runs": [
+     "ep0",
+     "ep500",
+     "ep1200"
+    ],
+    "E0_frames": 339,
+    "E0_frames_bit_identical_all_cams": 339,
+    "E0_mad_max": 0.0,
+    "E0_max_abs": 0,
+    "E0_state_max_abs": 0.0,
+    "E0_gt_cl_ne_phys_unambiguous": 1,
+    "E0_gt_phys_ambiguous": 5
+   },
+   "all_599_frames_bit_identical_3_cams": true,
+   "repeat_render_identical_all_runs": true,
+   "state_recon_max_abs_all": 0.0,
+   "probe_prediction_agreement": {
+    "held_out_primary": {
+     "k": 260,
+     "n": 260,
+     "rate": 1.0
+    },
+    "ep1807": {
+     "k": 75,
+     "n": 75,
+     "rate": 1.0
+    },
+    "held_out_minus_ep1807": {
+     "k": 185,
+     "n": 185,
+     "rate": 1.0
+    },
+    "scene_ep1800": {
+     "k": 155,
+     "n": 155,
+     "rate": 1.0
+    },
+    "train_range_secondary": {
+     "k": 339,
+     "n": 339,
+     "rate": 1.0
+    },
+    "per_run": {
+     "ep1807": [
+      75,
+      75
+     ],
+     "long": [
+      50,
+      50
+     ],
+     "t2": [
+      75,
+      75
+     ],
+     "headfix": [
+      15,
+      15
+     ],
+     "ep1800": [
+      15,
+      15
+     ],
+     "ep1850": [
+      15,
+      15
+     ],
+     "ep1900": [
+      15,
+      15
+     ],
+     "ep0": [
+      113,
+      113
+     ],
+     "ep500": [
+      113,
+      113
+     ],
+     "ep1200": [
+      113,
+      113
+     ]
+    },
+    "pass_threshold": 0.95
+   },
+   "extract_gate": {
+    "agreement_min": 0.95,
+    "k": 599,
+    "n": 599,
+    "agreement": 1.0,
+    "per_run": {
+     "ep1807": [
+      75,
+      75
+     ],
+     "long": [
+      50,
+      50
+     ],
+     "t2": [
+      75,
+      75
+     ],
+     "headfix": [
+      15,
+      15
+     ],
+     "ep1800": [
+      15,
+      15
+     ],
+     "ep1850": [
+      15,
+      15
+     ],
+     "ep1900": [
+      15,
+      15
+     ],
+     "ep0": [
+      113,
+      113
+     ],
+     "ep500": [
+      113,
+      113
+     ],
+     "ep1200": [
+      113,
+      113
+     ]
+    },
+    "passed": true
+   },
+   "probe_p_change_E0rec_vs_E0": {
+    "n": 599,
+    "median": 0.0,
+    "p99": 0.0,
+    "max": 0.0
+   },
+   "feature_max_abs_E0rec_vs_E0_per_run": {
+    "ep1807": 0.0,
+    "long": 0.0,
+    "t2": 0.0,
+    "headfix": 0.0,
+    "ep1800": 0.0,
+    "ep1850": 0.0,
+    "ep1900": 0.0,
+    "ep0": 0.0,
+    "ep500": 0.0,
+    "ep1200": 0.0
+   },
+   "rule_proxy_frameindex_agreement_all_599": {
+    "probe": [
+     599,
+     599
+    ],
+    "rule": [
+     599,
+     599
+    ],
+    "proxy": [
+     599,
+     599
+    ],
+    "frame_index": [
+     599,
+     599
+    ]
+   }
+  },
+  "exclusions_4": {
+   "held_out_primary": {
+    "E1": {
+     "planned": 16,
+     "included": 13,
+     "excluded": 3
+    },
+    "E1s": {
+     "planned": 16,
+     "included": 13,
+     "excluded": 3
+    },
+    "E1z": {
+     "planned": 16,
+     "included": 13,
+     "excluded": 3
+    },
+    "E2": {
+     "planned": 16,
+     "included": 7,
+     "excluded": 9
+    },
+    "E3": {
+     "planned": 123,
+     "included": 99,
+     "excluded": 24
+    }
+   },
+   "train_range_secondary": {
+    "E1": {
+     "planned": 38,
+     "included": 30,
+     "excluded": 8
+    },
+    "E1s": {
+     "planned": 38,
+     "included": 31,
+     "excluded": 7
+    },
+    "E1z": {
+     "planned": 38,
+     "included": 31,
+     "excluded": 7
+    },
+    "E2": {
+     "planned": 38,
+     "included": 13,
+     "excluded": 25
+    },
+    "E3": {
+     "planned": 66,
+     "included": 62,
+     "excluded": 4
+    }
+   },
+   "held_hosts": {
+    "held_out_primary": 16,
+    "train_range_secondary": 38
+   },
+   "reach_hosts": {
+    "held_out_primary": 123,
+    "train_range_secondary": 66
+   },
+   "ep1807_only": {
+    "E1": {
+     "planned": 12,
+     "included": 11
+    },
+    "E1s": {
+     "planned": 12,
+     "included": 11
+    },
+    "E1z": {
+     "planned": 12,
+     "included": 11
+    },
+    "E2": {
+     "planned": 12,
+     "included": 5
+    },
+    "E3": {
+     "planned": 19,
+     "included": 17
+    }
+   },
+   "independent_scene_groups_held_out": {
+    "ep1807": {
+     "E1": 11,
+     "E1s": 11,
+     "E1z": 11,
+     "E2": 5,
+     "E3": 17
+    },
+    "scene_ep1800 (long+t2+headfix+ep1800)": {
+     "E1": 0,
+     "E1s": 0,
+     "E1z": 0,
+     "E2": 0,
+     "E3": 56
+    },
+    "ep1850": {
+     "E1": 2,
+     "E1s": 2,
+     "E1z": 2,
+     "E2": 2,
+     "E3": 11
+    },
+    "ep1900": {
+     "E1": 0,
+     "E1s": 0,
+     "E1z": 0,
+     "E2": 0,
+     "E3": 15
+    }
+   },
+   "excluded_reason_counts_by_family": {
+    "held_out_primary": {
+     "E1": {
+      "penetration": 3
+     },
+     "E1s": {
+      "penetration": 3
+     },
+     "E1z": {
+      "penetration": 3
+     },
+     "E2": {
+      "penetration": 9
+     },
+     "E3": {
+      "penetration": 24
+     }
+    },
+    "train_range_secondary": {
+     "E1": {
+      "penetration": 6,
+      "finger_touch": 2
+     },
+     "E1s": {
+      "penetration": 6,
+      "finger_touch": 1
+     },
+     "E1z": {
+      "penetration": 7
+     },
+     "E2": {
+      "penetration": 24,
+      "finger_touch": 1
+     },
+     "E3": {
+      "penetration": 4
+     }
+    }
+   }
+  },
+  "edit_locality": {
+   "E1s_qpos_changed": "target fruit free joint (7) only; state unchanged (all 10 runs)",
+   "E1_E1z_E3_qpos_changed": "fruit free joint (7) + used-hand finger x1/x2 (27/28 left, 18/19 right); state changes only used gripper dim (7 left / 15 right)",
+   "E2_qpos_changed": "fruit z + quaternion (5) + used-hand fingers; fruit xy unchanged",
+   "E1_fruit_xy_dist_from_host_lt_50mm_included": {
+    "held_out_primary": "6/13",
+    "train_range_secondary": "10/30"
+   },
+   "E1_E2_fruit_xy_source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/indep/e1_e2_fruit_xy.json"
+  },
+  "E0_gt_double_scoring_label_counts": {
+   "held_out_primary": {
+    "closed_loop_gt_ne_phys_unambiguous": 39,
+    "phys_ambiguous": 6
+   },
+   "train_range_secondary": {
+    "closed_loop_gt_ne_phys_unambiguous": 1,
+    "phys_ambiguous": 5
+   },
+   "scores": {
+    "closed_loop_gt": {
+     "held_out_primary": {
+      "probe": {
+       "k": 228,
+       "n": 260,
+       "pooled": 0.8769230769230769,
+       "run_median": 1.0,
+       "scene_median": 0.98,
+       "pred_counts_pick_place_home": [
+        162,
+        47,
+        51
+       ]
+      },
+      "rule": {
+       "k": 227,
+       "n": 260,
+       "pooled": 0.8730769230769231,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        123,
+        61,
+        76
+       ]
+      },
+      "proxy": {
+       "k": 204,
+       "n": 260,
+       "pooled": 0.7846153846153846,
+       "run_median": 0.96,
+       "scene_median": 0.9466666666666667,
+       "pred_counts_pick_place_home": [
+        131,
+        41,
+        88
+       ]
+      },
+      "frame_index": {
+       "k": 164,
+       "n": 260,
+       "pooled": 0.6307692307692307,
+       "run_median": 0.88,
+       "scene_median": 0.8066666666666666,
+       "pred_counts_pick_place_home": [
+        105,
+        36,
+        119
+       ]
+      },
+      "n_runs": 7,
+      "n_scenes": 4,
+      "probe_per_run": {
+       "ep1800": {
+        "k": 15,
+        "n": 15
+       },
+       "ep1807": {
+        "k": 72,
+        "n": 75
+       },
+       "ep1850": {
+        "k": 15,
+        "n": 15
+       },
+       "ep1900": {
+        "k": 15,
+        "n": 15
+       },
+       "headfix": {
+        "k": 15,
+        "n": 15
+       },
+       "long": {
+        "k": 37,
+        "n": 50
+       },
+       "t2": {
+        "k": 59,
+        "n": 75
+       }
+      },
+      "probe_per_scene": {
+       "ep1807": {
+        "k": 72,
+        "n": 75
+       },
+       "ep1850": {
+        "k": 15,
+        "n": 15
+       },
+       "ep1900": {
+        "k": 15,
+        "n": 15
+       },
+       "scene1800": {
+        "k": 126,
+        "n": 155
+       }
+      }
+     },
+     "ep1807": {
+      "probe": {
+       "k": 72,
+       "n": 75,
+       "pooled": 0.96,
+       "run_median": 0.96,
+       "scene_median": 0.96,
+       "pred_counts_pick_place_home": [
+        20,
+        14,
+        41
+       ]
+      },
+      "rule": {
+       "k": 75,
+       "n": 75,
+       "pooled": 1.0,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        19,
+        13,
+        43
+       ]
+      },
+      "proxy": {
+       "k": 72,
+       "n": 75,
+       "pooled": 0.96,
+       "run_median": 0.96,
+       "scene_median": 0.96,
+       "pred_counts_pick_place_home": [
+        21,
+        12,
+        42
+       ]
+      },
+      "frame_index": {
+       "k": 66,
+       "n": 75,
+       "pooled": 0.88,
+       "run_median": 0.88,
+       "scene_median": 0.88,
+       "pred_counts_pick_place_home": [
+        15,
+        12,
+        48
+       ]
+      },
+      "n_runs": 1,
+      "n_scenes": 1,
+      "probe_per_run": {
+       "ep1807": {
+        "k": 72,
+        "n": 75
+       }
+      },
+      "probe_per_scene": {
+       "ep1807": {
+        "k": 72,
+        "n": 75
+       }
+      }
+     },
+     "held_out_minus_ep1807": {
+      "probe": {
+       "k": 156,
+       "n": 185,
+       "pooled": 0.8432432432432433,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        142,
+        33,
+        10
+       ]
+      },
+      "rule": {
+       "k": 152,
+       "n": 185,
+       "pooled": 0.8216216216216217,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        104,
+        48,
+        33
+       ]
+      },
+      "proxy": {
+       "k": 132,
+       "n": 185,
+       "pooled": 0.7135135135135136,
+       "run_median": 0.9666666666666667,
+       "scene_median": 0.9333333333333333,
+       "pred_counts_pick_place_home": [
+        110,
+        29,
+        46
+       ]
+      },
+      "frame_index": {
+       "k": 98,
+       "n": 185,
+       "pooled": 0.5297297297297298,
+       "run_median": 0.8666666666666667,
+       "scene_median": 0.7333333333333333,
+       "pred_counts_pick_place_home": [
+        90,
+        24,
+        71
+       ]
+      },
+      "n_runs": 6,
+      "n_scenes": 3,
+      "probe_per_run": {
+       "ep1800": {
+        "k": 15,
+        "n": 15
+       },
+       "ep1850": {
+        "k": 15,
+        "n": 15
+       },
+       "ep1900": {
+        "k": 15,
+        "n": 15
+       },
+       "headfix": {
+        "k": 15,
+        "n": 15
+       },
+       "long": {
+        "k": 37,
+        "n": 50
+       },
+       "t2": {
+        "k": 59,
+        "n": 75
+       }
+      },
+      "probe_per_scene": {
+       "ep1850": {
+        "k": 15,
+        "n": 15
+       },
+       "ep1900": {
+        "k": 15,
+        "n": 15
+       },
+       "scene1800": {
+        "k": 126,
+        "n": 155
+       }
+      }
+     },
+     "scene_ep1800": {
+      "probe": {
+       "k": 126,
+       "n": 155,
+       "pooled": 0.8129032258064516,
+       "run_median": 0.8933333333333333,
+       "scene_median": 0.8129032258064516,
+       "pred_counts_pick_place_home": [
+        116,
+        29,
+        10
+       ]
+      },
+      "rule": {
+       "k": 122,
+       "n": 155,
+       "pooled": 0.7870967741935484,
+       "run_median": 1.0,
+       "scene_median": 0.7870967741935484,
+       "pred_counts_pick_place_home": [
+        78,
+        44,
+        33
+       ]
+      },
+      "proxy": {
+       "k": 103,
+       "n": 155,
+       "pooled": 0.6645161290322581,
+       "run_median": 0.96,
+       "scene_median": 0.6645161290322581,
+       "pred_counts_pick_place_home": [
+        83,
+        26,
+        46
+       ]
+      },
+      "frame_index": {
+       "k": 72,
+       "n": 155,
+       "pooled": 0.4645161290322581,
+       "run_median": 0.6799999999999999,
+       "scene_median": 0.4645161290322581,
+       "pred_counts_pick_place_home": [
+        60,
+        24,
+        71
+       ]
+      },
+      "n_runs": 4,
+      "n_scenes": 1,
+      "probe_per_run": {
+       "ep1800": {
+        "k": 15,
+        "n": 15
+       },
+       "headfix": {
+        "k": 15,
+        "n": 15
+       },
+       "long": {
+        "k": 37,
+        "n": 50
+       },
+       "t2": {
+        "k": 59,
+        "n": 75
+       }
+      },
+      "probe_per_scene": {
+       "scene1800": {
+        "k": 126,
+        "n": 155
+       }
+      }
+     },
+     "train_range_secondary": {
+      "probe": {
+       "k": 325,
+       "n": 339,
+       "pooled": 0.9587020648967551,
+       "run_median": 0.9646017699115044,
+       "scene_median": 0.9646017699115044,
+       "pred_counts_pick_place_home": [
+        73,
+        44,
+        222
+       ]
+      },
+      "rule": {
+       "k": 339,
+       "n": 339,
+       "pooled": 1.0,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        66,
+        44,
+        229
+       ]
+      },
+      "proxy": {
+       "k": 332,
+       "n": 339,
+       "pooled": 0.9793510324483776,
+       "run_median": 0.9823008849557522,
+       "scene_median": 0.9823008849557522,
+       "pred_counts_pick_place_home": [
+        70,
+        43,
+        226
+       ]
+      },
+      "frame_index": {
+       "k": 296,
+       "n": 339,
+       "pooled": 0.8731563421828908,
+       "run_median": 0.9646017699115044,
+       "scene_median": 0.9646017699115044,
+       "pred_counts_pick_place_home": [
+        45,
+        36,
+        258
+       ]
+      },
+      "n_runs": 3,
+      "n_scenes": 3,
+      "probe_per_run": {
+       "ep0": {
+        "k": 110,
+        "n": 113
+       },
+       "ep1200": {
+        "k": 106,
+        "n": 113
+       },
+       "ep500": {
+        "k": 109,
+        "n": 113
+       }
+      },
+      "probe_per_scene": {
+       "ep0": {
+        "k": 110,
+        "n": 113
+       },
+       "ep1200": {
+        "k": 106,
+        "n": 113
+       },
+       "ep500": {
+        "k": 109,
+        "n": 113
+       }
+      }
+     }
+    },
+    "contact_state": {
+     "held_out_primary": {
+      "probe": {
+       "k": 215,
+       "n": 254,
+       "pooled": 0.8464566929133859,
+       "run_median": 1.0,
+       "scene_median": 0.9864864864864865,
+       "pred_counts_pick_place_home": [
+        160,
+        43,
+        51
+       ]
+      },
+      "rule": {
+       "k": 182,
+       "n": 254,
+       "pooled": 0.7165354330708661,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        123,
+        55,
+        76
+       ]
+      },
+      "proxy": {
+       "k": 181,
+       "n": 254,
+       "pooled": 0.7125984251968503,
+       "run_median": 0.972972972972973,
+       "scene_median": 0.9507722007722008,
+       "pred_counts_pick_place_home": [
+        127,
+        39,
+        88
+       ]
+      },
+      "frame_index": {
+       "k": 152,
+       "n": 254,
+       "pooled": 0.5984251968503937,
+       "run_median": 0.8783783783783784,
+       "scene_median": 0.832046332046332,
+       "pred_counts_pick_place_home": [
+        104,
+        33,
+        117
+       ]
+      },
+      "n_runs": 7,
+      "n_scenes": 4,
+      "probe_per_run": {
+       "ep1800": {
+        "k": 15,
+        "n": 15
+       },
+       "ep1807": {
+        "k": 72,
+        "n": 74
+       },
+       "ep1850": {
+        "k": 14,
+        "n": 14
+       },
+       "ep1900": {
+        "k": 15,
+        "n": 15
+       },
+       "headfix": {
+        "k": 15,
+        "n": 15
+       },
+       "long": {
+        "k": 46,
+        "n": 48
+       },
+       "t2": {
+        "k": 38,
+        "n": 73
+       }
+      },
+      "probe_per_scene": {
+       "ep1807": {
+        "k": 72,
+        "n": 74
+       },
+       "ep1850": {
+        "k": 14,
+        "n": 14
+       },
+       "ep1900": {
+        "k": 15,
+        "n": 15
+       },
+       "scene1800": {
+        "k": 114,
+        "n": 151
+       }
+      }
+     },
+     "ep1807": {
+      "probe": {
+       "k": 72,
+       "n": 74,
+       "pooled": 0.972972972972973,
+       "run_median": 0.972972972972973,
+       "scene_median": 0.972972972972973,
+       "pred_counts_pick_place_home": [
+        19,
+        14,
+        41
+       ]
+      },
+      "rule": {
+       "k": 74,
+       "n": 74,
+       "pooled": 1.0,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        19,
+        12,
+        43
+       ]
+      },
+      "proxy": {
+       "k": 72,
+       "n": 74,
+       "pooled": 0.972972972972973,
+       "run_median": 0.972972972972973,
+       "scene_median": 0.972972972972973,
+       "pred_counts_pick_place_home": [
+        20,
+        12,
+        42
+       ]
+      },
+      "frame_index": {
+       "k": 65,
+       "n": 74,
+       "pooled": 0.8783783783783784,
+       "run_median": 0.8783783783783784,
+       "scene_median": 0.8783783783783784,
+       "pred_counts_pick_place_home": [
+        15,
+        11,
+        48
+       ]
+      },
+      "n_runs": 1,
+      "n_scenes": 1,
+      "probe_per_run": {
+       "ep1807": {
+        "k": 72,
+        "n": 74
+       }
+      },
+      "probe_per_scene": {
+       "ep1807": {
+        "k": 72,
+        "n": 74
+       }
+      }
+     },
+     "held_out_minus_ep1807": {
+      "probe": {
+       "k": 143,
+       "n": 180,
+       "pooled": 0.7944444444444444,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        141,
+        29,
+        10
+       ]
+      },
+      "rule": {
+       "k": 108,
+       "n": 180,
+       "pooled": 0.6,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        104,
+        43,
+        33
+       ]
+      },
+      "proxy": {
+       "k": 109,
+       "n": 180,
+       "pooled": 0.6055555555555555,
+       "run_median": 0.9642857142857143,
+       "scene_median": 0.9285714285714286,
+       "pred_counts_pick_place_home": [
+        107,
+        27,
+        46
+       ]
+      },
+      "frame_index": {
+       "k": 87,
+       "n": 180,
+       "pooled": 0.48333333333333334,
+       "run_median": 0.8928571428571428,
+       "scene_median": 0.7857142857142857,
+       "pred_counts_pick_place_home": [
+        89,
+        22,
+        69
+       ]
+      },
+      "n_runs": 6,
+      "n_scenes": 3,
+      "probe_per_run": {
+       "ep1800": {
+        "k": 15,
+        "n": 15
+       },
+       "ep1850": {
+        "k": 14,
+        "n": 14
+       },
+       "ep1900": {
+        "k": 15,
+        "n": 15
+       },
+       "headfix": {
+        "k": 15,
+        "n": 15
+       },
+       "long": {
+        "k": 46,
+        "n": 48
+       },
+       "t2": {
+        "k": 38,
+        "n": 73
+       }
+      },
+      "probe_per_scene": {
+       "ep1850": {
+        "k": 14,
+        "n": 14
+       },
+       "ep1900": {
+        "k": 15,
+        "n": 15
+       },
+       "scene1800": {
+        "k": 114,
+        "n": 151
+       }
+      }
+     },
+     "scene_ep1800": {
+      "probe": {
+       "k": 114,
+       "n": 151,
+       "pooled": 0.7549668874172185,
+       "run_median": 0.9791666666666667,
+       "scene_median": 0.7549668874172185,
+       "pred_counts_pick_place_home": [
+        115,
+        26,
+        10
+       ]
+      },
+      "rule": {
+       "k": 79,
+       "n": 151,
+       "pooled": 0.5231788079470199,
+       "run_median": 0.84375,
+       "scene_median": 0.5231788079470199,
+       "pred_counts_pick_place_home": [
+        78,
+        40,
+        33
+       ]
+      },
+      "proxy": {
+       "k": 81,
+       "n": 151,
+       "pooled": 0.5364238410596026,
+       "run_median": 0.8645833333333333,
+       "scene_median": 0.5364238410596026,
+       "pred_counts_pick_place_home": [
+        80,
+        25,
+        46
+       ]
+      },
+      "frame_index": {
+       "k": 61,
+       "n": 151,
+       "pooled": 0.40397350993377484,
+       "run_median": 0.65625,
+       "scene_median": 0.40397350993377484,
+       "pred_counts_pick_place_home": [
+        60,
+        22,
+        69
+       ]
+      },
+      "n_runs": 4,
+      "n_scenes": 1,
+      "probe_per_run": {
+       "ep1800": {
+        "k": 15,
+        "n": 15
+       },
+       "headfix": {
+        "k": 15,
+        "n": 15
+       },
+       "long": {
+        "k": 46,
+        "n": 48
+       },
+       "t2": {
+        "k": 38,
+        "n": 73
+       }
+      },
+      "probe_per_scene": {
+       "scene1800": {
+        "k": 114,
+        "n": 151
+       }
+      }
+     },
+     "train_range_secondary": {
+      "probe": {
+       "k": 324,
+       "n": 334,
+       "pooled": 0.9700598802395209,
+       "run_median": 0.9727272727272728,
+       "scene_median": 0.9727272727272728,
+       "pred_counts_pick_place_home": [
+        70,
+        42,
+        222
+       ]
+      },
+      "rule": {
+       "k": 333,
+       "n": 334,
+       "pooled": 0.9970059880239521,
+       "run_median": 1.0,
+       "scene_median": 1.0,
+       "pred_counts_pick_place_home": [
+        66,
+        39,
+        229
+       ]
+      },
+      "proxy": {
+       "k": 330,
+       "n": 334,
+       "pooled": 0.9880239520958084,
+       "run_median": 0.9910714285714286,
+       "scene_median": 0.9910714285714286,
+       "pred_counts_pick_place_home": [
+        68,
+        40,
+        226
+       ]
+      },
+      "frame_index": {
+       "k": 292,
+       "n": 334,
+       "pooled": 0.874251497005988,
+       "run_median": 0.9636363636363636,
+       "scene_median": 0.9636363636363636,
+       "pred_counts_pick_place_home": [
+        45,
+        32,
+        257
+       ]
+      },
+      "n_runs": 3,
+      "n_scenes": 3,
+      "probe_per_run": {
+       "ep0": {
+        "k": 110,
+        "n": 112
+       },
+       "ep1200": {
+        "k": 107,
+        "n": 112
+       },
+       "ep500": {
+        "k": 107,
+        "n": 110
+       }
+      },
+      "probe_per_scene": {
+       "ep0": {
+        "k": 110,
+        "n": 112
+       },
+       "ep1200": {
+        "k": 107,
+        "n": 112
+       },
+       "ep500": {
+        "k": 107,
+        "n": 110
+       }
+      }
+     }
+    }
+   }
+  },
+  "cost_5": {
+   "render_stage_wall_s": 443.5,
+   "E0_render_s_per_frame_3cam": {
+    "median": 0.2858,
+    "mean": 0.3483,
+    "p95": 0.6025,
+    "n": 599
+   },
+   "edit_render_s_per_frame_3cam": {
+    "median": 0.2909,
+    "mean": 0.3515,
+    "p95": 0.682,
+    "n": 312
+   },
+   "edit_compute_s": {
+    "E3_median": 0.4419,
+    "E3_mean": 0.502,
+    "n_E3": 189,
+    "E1_E1s_E1z_E2_median": 0.0006,
+    "n": 216
+   },
+   "conditions": "1 thread (OMP/LP_NUM_THREADS=1), osmesa, host load average 16.7 -> 25.9 during render (other sessions incl. GPU closed-loop job)",
+   "prefix_ms": {
+    "per_input_ms_median": 14.982199762016535,
+    "per_input_ms_p90": 15.035961382091045,
+    "batch": 4,
+    "call_ms_median": 59.92285534739494,
+    "n_inputs": 1510,
+    "n_calls": 385,
+    "prefix_total_s": 23.10442276392132,
+    "load_s": 10.852874848991632,
+    "extract_wall_s": 278.3828544616699,
+    "jax_peak_bytes": 7607856384,
+    "nvidia_smi_peak_MiB": 8804,
+    "note": "prefix pass + kv_L4 reduction on device, block_until_ready; excludes input transform, video decode, warm-up/JIT",
+    "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/extract/timing.json"
+   }
+  },
+  "per_run": {
+   "ep1807": {
+    "group": "held_out_primary",
+    "episode": 1807,
+    "fruit": "apple",
+    "hand": "left",
+    "n_records": 75,
+    "held_hosts": 12,
+    "reach_hosts": 19,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 75,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.287,
+     "render_s_mean": 0.292
+    },
+    "edits": {
+     "E1": {
+      "planned": 12,
+      "included": 11,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28,
+       29,
+       30,
+       31
+      ],
+      "penetration_max_included_mm": 0.012988634716215586,
+      "phys_after_included": {
+       "on_table": 11
+      }
+     },
+     "E1s": {
+      "planned": 12,
+      "included": 11,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28,
+       29,
+       30,
+       31
+      ],
+      "penetration_max_included_mm": 0.012988634716215586,
+      "phys_after_included": {
+       "on_table": 11
+      }
+     },
+     "E1z": {
+      "planned": 12,
+      "included": 11,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28,
+       29,
+       30,
+       31
+      ],
+      "penetration_max_included_mm": 0.012988634716215586,
+      "phys_after_included": {
+       "on_table": 11
+      }
+     },
+     "E2": {
+      "planned": 12,
+      "included": 5,
+      "excluded": 7,
+      "excluded_reasons": {
+       "penetration": 7
+      },
+      "hosts_included": [
+       21,
+       22,
+       23,
+       24,
+       25
+      ],
+      "penetration_max_included_mm": 0.012988634716215586,
+      "phys_after_included": {
+       "on_table": 5
+      }
+     },
+     "E3": {
+      "planned": 19,
+      "included": 17,
+      "excluded": 2,
+      "excluded_reasons": {
+       "penetration": 2
+      },
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14,
+       15,
+       16
+      ],
+      "penetration_max_included_mm": 0.00939350081561713,
+      "phys_after_included": {
+       "held": 17
+      }
+     }
+    },
+    "edit_template_src": "ep1807:31",
+    "E0_gt_closed_loop_counts": {
+     "0": 19,
+     "1": 13,
+     "2": 43
+    },
+    "E0_gt_phys_counts": {
+     "-1": 1,
+     "0": 19,
+     "1": 12,
+     "2": 43
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 0,
+    "E0_gt_phys_ambiguous": 1,
+    "membership": {
+     "episode": 1807,
+     "dataset_split": "test",
+     "vla_finetune_episode": false,
+     "probe_train_episode": false,
+     "subtask_b_closed_loop_eval": true,
+     "t47_head_selection_role": "selection",
+     "same_scene_runs": []
+    },
+    "edit_locality": {
+     "E1": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       38,
+       39,
+       40,
+       41,
+       42,
+       43,
+       44
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 11,
+      "n": 11,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E1s": {
+      "qpos_idx_changed_union": [
+       38,
+       39,
+       40,
+       41,
+       42,
+       43,
+       44
+      ],
+      "state_dims_changed_union": [],
+      "fruit_qpos_changed_rows": 11,
+      "n": 11,
+      "used_gripper_state_min_median_max": [
+       0.7198864221358331,
+       0.7202542495108992,
+       0.7206408751027623
+      ]
+     },
+     "E1z": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       38,
+       39,
+       40,
+       41,
+       42,
+       43,
+       44
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 11,
+      "n": 11,
+      "used_gripper_state_min_median_max": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "E2": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       40,
+       41,
+       42,
+       43,
+       44
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 5,
+      "n": 5,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E3": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       38,
+       39,
+       40,
+       41,
+       42,
+       43,
+       44
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 17,
+      "n": 17,
+      "used_gripper_state_min_median_max": [
+       0.7221174597740172,
+       0.7221174597740172,
+       0.7221174597740172
+      ]
+     }
+    }
+   },
+   "long": {
+    "group": "held_out_primary",
+    "episode": 1800,
+    "fruit": "apple",
+    "hand": "left",
+    "n_records": 50,
+    "held_hosts": 0,
+    "reach_hosts": 33,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 50,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.2754,
+     "render_s_mean": 0.2804
+    },
+    "edits": {
+     "E3": {
+      "planned": 33,
+      "included": 16,
+      "excluded": 17,
+      "excluded_reasons": {
+       "penetration": 17
+      },
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       15,
+       20
+      ],
+      "penetration_max_included_mm": 0.009393500815611388,
+      "phys_after_included": {
+       "held": 16
+      }
+     }
+    },
+    "edit_template_src": "ep1807:31",
+    "E0_gt_closed_loop_counts": {
+     "0": 33,
+     "1": 17
+    },
+    "E0_gt_phys_counts": {
+     "-1": 2,
+     "0": 48
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 15,
+    "E0_gt_phys_ambiguous": 2,
+    "membership": {
+     "episode": 1800,
+     "dataset_split": "test",
+     "vla_finetune_episode": false,
+     "probe_train_episode": false,
+     "subtask_b_closed_loop_eval": false,
+     "t47_head_selection_role": "selection",
+     "same_scene_runs": [
+      "ep1800",
+      "headfix",
+      "t2"
+     ]
+    },
+    "edit_locality": {
+     "E3": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       38,
+       39,
+       40,
+       41,
+       42,
+       43,
+       44
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 16,
+      "n": 16,
+      "used_gripper_state_min_median_max": [
+       0.7221174597740172,
+       0.7221174597740172,
+       0.7223005652427674
+      ]
+     }
+    }
+   },
+   "t2": {
+    "group": "held_out_primary",
+    "episode": 1800,
+    "fruit": "apple",
+    "hand": "left",
+    "n_records": 75,
+    "held_hosts": 1,
+    "reach_hosts": 15,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 75,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.3167,
+     "render_s_mean": 0.5789
+    },
+    "edits": {
+     "E1": {
+      "planned": 1,
+      "included": 0,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [],
+      "penetration_max_included_mm": null,
+      "phys_after_included": {}
+     },
+     "E1s": {
+      "planned": 1,
+      "included": 0,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [],
+      "penetration_max_included_mm": null,
+      "phys_after_included": {}
+     },
+     "E1z": {
+      "planned": 1,
+      "included": 0,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [],
+      "penetration_max_included_mm": null,
+      "phys_after_included": {}
+     },
+     "E2": {
+      "planned": 1,
+      "included": 0,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [],
+      "penetration_max_included_mm": null,
+      "phys_after_included": {}
+     },
+     "E3": {
+      "planned": 15,
+      "included": 15,
+      "excluded": 0,
+      "excluded_reasons": {},
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14
+      ],
+      "penetration_max_included_mm": 0.13687902395925455,
+      "phys_after_included": {
+       "held": 15
+      }
+     }
+    },
+    "edit_template_src": "t2:16",
+    "E0_gt_closed_loop_counts": {
+     "0": 48,
+     "1": 27
+    },
+    "E0_gt_phys_counts": {
+     "-1": 2,
+     "0": 72,
+     "1": 1
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 24,
+    "E0_gt_phys_ambiguous": 2,
+    "membership": {
+     "episode": 1800,
+     "dataset_split": "test",
+     "vla_finetune_episode": false,
+     "probe_train_episode": false,
+     "subtask_b_closed_loop_eval": false,
+     "t47_head_selection_role": "selection",
+     "same_scene_runs": [
+      "ep1800",
+      "headfix",
+      "long"
+     ]
+    },
+    "edit_locality": {
+     "E3": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       38,
+       39,
+       40,
+       41,
+       42,
+       43,
+       44
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 15,
+      "n": 15,
+      "used_gripper_state_min_median_max": [
+       0.7290754675865174,
+       0.7290754675865174,
+       0.7304792761802673
+      ]
+     }
+    }
+   },
+   "headfix": {
+    "group": "held_out_primary",
+    "episode": 1800,
+    "fruit": "apple",
+    "hand": "left",
+    "n_records": 15,
+    "held_hosts": 0,
+    "reach_hosts": 15,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 15,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.2926,
+     "render_s_mean": 0.3449
+    },
+    "edits": {
+     "E3": {
+      "planned": 15,
+      "included": 12,
+      "excluded": 3,
+      "excluded_reasons": {
+       "penetration": 3
+      },
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11
+      ],
+      "penetration_max_included_mm": 0.009393500815660883,
+      "phys_after_included": {
+       "held": 12
+      }
+     }
+    },
+    "edit_template_src": "ep1807:31",
+    "E0_gt_closed_loop_counts": {
+     "0": 15
+    },
+    "E0_gt_phys_counts": {
+     "0": 15
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 0,
+    "E0_gt_phys_ambiguous": 0,
+    "membership": {
+     "episode": 1800,
+     "dataset_split": "test",
+     "vla_finetune_episode": false,
+     "probe_train_episode": false,
+     "subtask_b_closed_loop_eval": false,
+     "t47_head_selection_role": "heldout",
+     "same_scene_runs": [
+      "ep1800",
+      "long",
+      "t2"
+     ]
+    },
+    "edit_locality": {
+     "E3": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       38,
+       39,
+       40,
+       41,
+       42,
+       43,
+       44
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 12,
+      "n": 12,
+      "used_gripper_state_min_median_max": [
+       0.7221174597740172,
+       0.7221174597740172,
+       0.7221174597740172
+      ]
+     }
+    }
+   },
+   "ep1800": {
+    "group": "held_out_primary",
+    "episode": 1800,
+    "fruit": "apple",
+    "hand": "left",
+    "n_records": 15,
+    "held_hosts": 0,
+    "reach_hosts": 15,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 15,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.2862,
+     "render_s_mean": 0.2936
+    },
+    "edits": {
+     "E3": {
+      "planned": 15,
+      "included": 13,
+      "excluded": 2,
+      "excluded_reasons": {
+       "penetration": 2
+      },
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12
+      ],
+      "penetration_max_included_mm": 0.009393500815605525,
+      "phys_after_included": {
+       "held": 13
+      }
+     }
+    },
+    "edit_template_src": "ep1807:31",
+    "E0_gt_closed_loop_counts": {
+     "0": 15
+    },
+    "E0_gt_phys_counts": {
+     "0": 15
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 0,
+    "E0_gt_phys_ambiguous": 0,
+    "membership": {
+     "episode": 1800,
+     "dataset_split": "test",
+     "vla_finetune_episode": false,
+     "probe_train_episode": false,
+     "subtask_b_closed_loop_eval": false,
+     "t47_head_selection_role": "heldout",
+     "same_scene_runs": [
+      "headfix",
+      "long",
+      "t2"
+     ]
+    },
+    "edit_locality": {
+     "E3": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       38,
+       39,
+       40,
+       41,
+       42,
+       43,
+       44
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 13,
+      "n": 13,
+      "used_gripper_state_min_median_max": [
+       0.7221174597740172,
+       0.7221174597740172,
+       0.7221174597740172
+      ]
+     }
+    }
+   },
+   "ep1850": {
+    "group": "held_out_primary",
+    "episode": 1850,
+    "fruit": "banana",
+    "hand": "left",
+    "n_records": 15,
+    "held_hosts": 3,
+    "reach_hosts": 11,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 15,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.2782,
+     "render_s_mean": 0.2934
+    },
+    "edits": {
+     "E1": {
+      "planned": 3,
+      "included": 2,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [
+       13,
+       14
+      ],
+      "penetration_max_included_mm": 0.006713378929101843,
+      "phys_after_included": {
+       "on_table": 2
+      }
+     },
+     "E1s": {
+      "planned": 3,
+      "included": 2,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [
+       13,
+       14
+      ],
+      "penetration_max_included_mm": 0.006713378929101843,
+      "phys_after_included": {
+       "on_table": 2
+      }
+     },
+     "E1z": {
+      "planned": 3,
+      "included": 2,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [
+       13,
+       14
+      ],
+      "penetration_max_included_mm": 0.006713378929101843,
+      "phys_after_included": {
+       "on_table": 2
+      }
+     },
+     "E2": {
+      "planned": 3,
+      "included": 2,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [
+       13,
+       14
+      ],
+      "penetration_max_included_mm": 0.006713378929101843,
+      "phys_after_included": {
+       "on_table": 2
+      }
+     },
+     "E3": {
+      "planned": 11,
+      "included": 11,
+      "excluded": 0,
+      "excluded_reasons": {},
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10
+      ],
+      "penetration_max_included_mm": 0.19995884730024557,
+      "phys_after_included": {
+       "held": 11
+      }
+     }
+    },
+    "edit_template_src": "ep1850:14",
+    "E0_gt_closed_loop_counts": {
+     "0": 11,
+     "1": 4
+    },
+    "E0_gt_phys_counts": {
+     "-1": 1,
+     "0": 11,
+     "1": 3
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 0,
+    "E0_gt_phys_ambiguous": 1,
+    "membership": {
+     "episode": 1850,
+     "dataset_split": "test",
+     "vla_finetune_episode": false,
+     "probe_train_episode": false,
+     "subtask_b_closed_loop_eval": false,
+     "t47_head_selection_role": "heldout",
+     "same_scene_runs": []
+    },
+    "edit_locality": {
+     "E1": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 2,
+      "n": 2,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E1s": {
+      "qpos_idx_changed_union": [
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [],
+      "fruit_qpos_changed_rows": 2,
+      "n": 2,
+      "used_gripper_state_min_median_max": [
+       0.5040991634997344,
+       0.5053251859241998,
+       0.5065512083486653
+      ]
+     },
+     "E1z": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 2,
+      "n": 2,
+      "used_gripper_state_min_median_max": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "E2": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 2,
+      "n": 2,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E3": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 11,
+      "n": 11,
+      "used_gripper_state_min_median_max": [
+       0.5059996902942657,
+       0.5059996902942657,
+       0.5059996902942657
+      ]
+     }
+    }
+   },
+   "ep1900": {
+    "group": "held_out_primary",
+    "episode": 1900,
+    "fruit": "pear",
+    "hand": "left",
+    "n_records": 15,
+    "held_hosts": 0,
+    "reach_hosts": 15,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 15,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.2872,
+     "render_s_mean": 0.3195
+    },
+    "edits": {
+     "E3": {
+      "planned": 15,
+      "included": 15,
+      "excluded": 0,
+      "excluded_reasons": {},
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14
+      ],
+      "penetration_max_included_mm": 1.9829504786520684,
+      "phys_after_included": {
+       "held": 15
+      }
+     }
+    },
+    "edit_template_src": "pad_midpoint",
+    "E0_gt_closed_loop_counts": {
+     "0": 15
+    },
+    "E0_gt_phys_counts": {
+     "0": 15
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 0,
+    "E0_gt_phys_ambiguous": 0,
+    "membership": {
+     "episode": 1900,
+     "dataset_split": "test",
+     "vla_finetune_episode": false,
+     "probe_train_episode": false,
+     "subtask_b_closed_loop_eval": false,
+     "t47_head_selection_role": "heldout",
+     "same_scene_runs": []
+    },
+    "edit_locality": {
+     "E3": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       59,
+       60,
+       61,
+       62,
+       63,
+       64,
+       65
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 15,
+      "n": 15,
+      "used_gripper_state_min_median_max": [
+       0.6488018989562988,
+       0.6561871528625488,
+       0.6655255317687988
+      ]
+     }
+    }
+   },
+   "ep0": {
+    "group": "train_range_secondary",
+    "episode": 0,
+    "fruit": "orange",
+    "hand": "left",
+    "n_records": 113,
+    "held_hosts": 12,
+    "reach_hosts": 16,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 113,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.2675,
+     "render_s_mean": 0.3077
+    },
+    "edits": {
+     "E1": {
+      "planned": 12,
+      "included": 10,
+      "excluded": 2,
+      "excluded_reasons": {
+       "penetration": 1,
+       "finger_touch": 1
+      },
+      "hosts_included": [
+       19,
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28
+      ],
+      "penetration_max_included_mm": 0.02148767875387314,
+      "phys_after_included": {
+       "on_table": 10
+      }
+     },
+     "E1s": {
+      "planned": 12,
+      "included": 11,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [
+       18,
+       19,
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28
+      ],
+      "penetration_max_included_mm": 0.02148767875387314,
+      "phys_after_included": {
+       "on_table": 11
+      }
+     },
+     "E1z": {
+      "planned": 12,
+      "included": 10,
+      "excluded": 2,
+      "excluded_reasons": {
+       "penetration": 2
+      },
+      "hosts_included": [
+       19,
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28
+      ],
+      "penetration_max_included_mm": 0.02148767875387314,
+      "phys_after_included": {
+       "on_table": 10
+      }
+     },
+     "E2": {
+      "planned": 12,
+      "included": 4,
+      "excluded": 8,
+      "excluded_reasons": {
+       "penetration": 8
+      },
+      "hosts_included": [
+       19,
+       20,
+       21,
+       22
+      ],
+      "penetration_max_included_mm": 0.02148767875387314,
+      "phys_after_included": {
+       "on_table": 4
+      }
+     },
+     "E3": {
+      "planned": 16,
+      "included": 15,
+      "excluded": 1,
+      "excluded_reasons": {
+       "penetration": 1
+      },
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14
+      ],
+      "penetration_max_included_mm": 0.07625006290034417,
+      "phys_after_included": {
+       "held": 15
+      }
+     }
+    },
+    "edit_template_src": "ep0:26",
+    "E0_gt_closed_loop_counts": {
+     "0": 16,
+     "1": 13,
+     "2": 84
+    },
+    "E0_gt_phys_counts": {
+     "-1": 1,
+     "0": 16,
+     "1": 12,
+     "2": 84
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 0,
+    "E0_gt_phys_ambiguous": 1,
+    "membership": {
+     "episode": 0,
+     "dataset_split": "train",
+     "vla_finetune_episode": true,
+     "probe_train_episode": true,
+     "subtask_b_closed_loop_eval": true,
+     "t47_head_selection_role": null,
+     "same_scene_runs": []
+    },
+    "edit_locality": {
+     "E1": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       52,
+       53,
+       54,
+       55,
+       56,
+       57,
+       58
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 10,
+      "n": 10,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E1s": {
+      "qpos_idx_changed_union": [
+       52,
+       53,
+       54,
+       55,
+       56,
+       57,
+       58
+      ],
+      "state_dims_changed_union": [],
+      "fruit_qpos_changed_rows": 11,
+      "n": 11,
+      "used_gripper_state_min_median_max": [
+       0.6658627880324063,
+       0.6668662301772864,
+       0.6708921969850244
+      ]
+     },
+     "E1z": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       52,
+       53,
+       54,
+       55,
+       56,
+       57,
+       58
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 10,
+      "n": 10,
+      "used_gripper_state_min_median_max": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "E2": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       54,
+       55,
+       56,
+       57,
+       58
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 4,
+      "n": 4,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E3": {
+      "qpos_idx_changed_union": [
+       27,
+       28,
+       52,
+       53,
+       54,
+       55,
+       56,
+       57,
+       58
+      ],
+      "state_dims_changed_union": [
+       7
+      ],
+      "fruit_qpos_changed_rows": 15,
+      "n": 15,
+      "used_gripper_state_min_median_max": [
+       0.6676164627075195,
+       0.6676164627075195,
+       0.6676774978637695
+      ]
+     }
+    }
+   },
+   "ep500": {
+    "group": "train_range_secondary",
+    "episode": 500,
+    "fruit": "banana",
+    "hand": "right",
+    "n_records": 113,
+    "held_hosts": 13,
+    "reach_hosts": 14,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 113,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.2848,
+     "render_s_mean": 0.3219
+    },
+    "edits": {
+     "E1": {
+      "planned": 13,
+      "included": 10,
+      "excluded": 3,
+      "excluded_reasons": {
+       "penetration": 2,
+       "finger_touch": 1
+      },
+      "hosts_included": [
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28,
+       29
+      ],
+      "penetration_max_included_mm": 0.005282409330842341,
+      "phys_after_included": {
+       "on_table": 10
+      }
+     },
+     "E1s": {
+      "planned": 13,
+      "included": 10,
+      "excluded": 3,
+      "excluded_reasons": {
+       "penetration": 2,
+       "finger_touch": 1
+      },
+      "hosts_included": [
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28,
+       29
+      ],
+      "penetration_max_included_mm": 0.005282409330842341,
+      "phys_after_included": {
+       "on_table": 10
+      }
+     },
+     "E1z": {
+      "planned": 13,
+      "included": 11,
+      "excluded": 2,
+      "excluded_reasons": {
+       "penetration": 2
+      },
+      "hosts_included": [
+       18,
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28,
+       29
+      ],
+      "penetration_max_included_mm": 0.005282409330842341,
+      "phys_after_included": {
+       "on_table": 11
+      }
+     },
+     "E2": {
+      "planned": 13,
+      "included": 4,
+      "excluded": 9,
+      "excluded_reasons": {
+       "penetration": 8,
+       "finger_touch": 1
+      },
+      "hosts_included": [
+       20,
+       21,
+       22,
+       23
+      ],
+      "penetration_max_included_mm": 0.005282409330842341,
+      "phys_after_included": {
+       "on_table": 4
+      }
+     },
+     "E3": {
+      "planned": 14,
+      "included": 11,
+      "excluded": 3,
+      "excluded_reasons": {
+       "penetration": 3
+      },
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10
+      ],
+      "penetration_max_included_mm": 0.0034802322520469517,
+      "phys_after_included": {
+       "held": 11
+      }
+     }
+    },
+    "edit_template_src": "ep500:29",
+    "E0_gt_closed_loop_counts": {
+     "0": 14,
+     "1": 16,
+     "2": 83
+    },
+    "E0_gt_phys_counts": {
+     "-1": 3,
+     "0": 14,
+     "1": 13,
+     "2": 83
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 0,
+    "E0_gt_phys_ambiguous": 3,
+    "membership": {
+     "episode": 500,
+     "dataset_split": "train",
+     "vla_finetune_episode": true,
+     "probe_train_episode": false,
+     "subtask_b_closed_loop_eval": true,
+     "t47_head_selection_role": null,
+     "same_scene_runs": []
+    },
+    "edit_locality": {
+     "E1": {
+      "qpos_idx_changed_union": [
+       18,
+       19,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [
+       15
+      ],
+      "fruit_qpos_changed_rows": 10,
+      "n": 10,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E1s": {
+      "qpos_idx_changed_union": [
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [],
+      "fruit_qpos_changed_rows": 10,
+      "n": 10,
+      "used_gripper_state_min_median_max": [
+       0.5042465848273591,
+       0.5084274407923667,
+       0.5138362886968725
+      ]
+     },
+     "E1z": {
+      "qpos_idx_changed_union": [
+       18,
+       19,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [
+       15
+      ],
+      "fruit_qpos_changed_rows": 11,
+      "n": 11,
+      "used_gripper_state_min_median_max": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "E2": {
+      "qpos_idx_changed_union": [
+       18,
+       19,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [
+       15
+      ],
+      "fruit_qpos_changed_rows": 4,
+      "n": 4,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E3": {
+      "qpos_idx_changed_union": [
+       18,
+       19,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50,
+       51
+      ],
+      "state_dims_changed_union": [
+       15
+      ],
+      "fruit_qpos_changed_rows": 11,
+      "n": 11,
+      "used_gripper_state_min_median_max": [
+       0.5063659012317657,
+       0.5063659012317657,
+       0.5063659012317657
+      ]
+     }
+    }
+   },
+   "ep1200": {
+    "group": "train_range_secondary",
+    "episode": 1200,
+    "fruit": "pear",
+    "hand": "right",
+    "n_records": 113,
+    "held_hosts": 13,
+    "reach_hosts": 36,
+    "E0_parity": {
+     "cams": [
+      "cam_high",
+      "cam_left_wrist",
+      "cam_right_wrist"
+     ],
+     "mad_max_per_cam": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "max_abs_per_cam": [
+      0,
+      0,
+      0
+     ],
+     "nonzero_pixel_values_total": 0,
+     "frames_bit_identical_all_cams": 113,
+     "state_max_abs": 0.0,
+     "render_s_median": 0.2904,
+     "render_s_mean": 0.3486
+    },
+    "edits": {
+     "E1": {
+      "planned": 13,
+      "included": 10,
+      "excluded": 3,
+      "excluded_reasons": {
+       "penetration": 3
+      },
+      "hosts_included": [
+       41,
+       42,
+       43,
+       44,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50
+      ],
+      "penetration_max_included_mm": 0.014577194744402888,
+      "phys_after_included": {
+       "on_table": 10
+      }
+     },
+     "E1s": {
+      "planned": 13,
+      "included": 10,
+      "excluded": 3,
+      "excluded_reasons": {
+       "penetration": 3
+      },
+      "hosts_included": [
+       41,
+       42,
+       43,
+       44,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50
+      ],
+      "penetration_max_included_mm": 0.014577194744402888,
+      "phys_after_included": {
+       "on_table": 10
+      }
+     },
+     "E1z": {
+      "planned": 13,
+      "included": 10,
+      "excluded": 3,
+      "excluded_reasons": {
+       "penetration": 3
+      },
+      "hosts_included": [
+       41,
+       42,
+       43,
+       44,
+       45,
+       46,
+       47,
+       48,
+       49,
+       50
+      ],
+      "penetration_max_included_mm": 0.014577194744402888,
+      "phys_after_included": {
+       "on_table": 10
+      }
+     },
+     "E2": {
+      "planned": 13,
+      "included": 5,
+      "excluded": 8,
+      "excluded_reasons": {
+       "penetration": 8
+      },
+      "hosts_included": [
+       41,
+       42,
+       43,
+       44,
+       45
+      ],
+      "penetration_max_included_mm": 1.2151860950339168,
+      "phys_after_included": {
+       "on_table": 5
+      }
+     },
+     "E3": {
+      "planned": 36,
+      "included": 36,
+      "excluded": 0,
+      "excluded_reasons": {},
+      "hosts_included": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7,
+       8,
+       9,
+       10,
+       11,
+       12,
+       13,
+       14,
+       15,
+       16,
+       17,
+       18,
+       19,
+       20,
+       21,
+       22,
+       23,
+       24,
+       25,
+       26,
+       27,
+       28,
+       29,
+       30,
+       31,
+       32,
+       33,
+       34,
+       35
+      ],
+      "penetration_max_included_mm": 0.08178600617091199,
+      "phys_after_included": {
+       "held": 36
+      }
+     }
+    },
+    "edit_template_src": "ep1200:45",
+    "E0_gt_closed_loop_counts": {
+     "0": 36,
+     "1": 15,
+     "2": 62
+    },
+    "E0_gt_phys_counts": {
+     "-1": 1,
+     "0": 37,
+     "1": 13,
+     "2": 62
+    },
+    "E0_gt_cl_ne_phys_unambiguous": 1,
+    "E0_gt_phys_ambiguous": 1,
+    "membership": {
+     "episode": 1200,
+     "dataset_split": "train",
+     "vla_finetune_episode": true,
+     "probe_train_episode": true,
+     "subtask_b_closed_loop_eval": true,
+     "t47_head_selection_role": null,
+     "same_scene_runs": []
+    },
+    "edit_locality": {
+     "E1": {
+      "qpos_idx_changed_union": [
+       18,
+       19,
+       59,
+       60,
+       61,
+       62,
+       63,
+       64,
+       65
+      ],
+      "state_dims_changed_union": [
+       15
+      ],
+      "fruit_qpos_changed_rows": 10,
+      "n": 10,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E1s": {
+      "qpos_idx_changed_union": [
+       59,
+       60,
+       61,
+       62,
+       63,
+       64,
+       65
+      ],
+      "state_dims_changed_union": [],
+      "fruit_qpos_changed_rows": 10,
+      "n": 10,
+      "used_gripper_state_min_median_max": [
+       0.6814974866659589,
+       0.682067974441072,
+       0.6842275389485237
+      ]
+     },
+     "E1z": {
+      "qpos_idx_changed_union": [
+       18,
+       19,
+       59,
+       60,
+       61,
+       62,
+       63,
+       64,
+       65
+      ],
+      "state_dims_changed_union": [
+       15
+      ],
+      "fruit_qpos_changed_rows": 10,
+      "n": 10,
+      "used_gripper_state_min_median_max": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "E2": {
+      "qpos_idx_changed_union": [
+       18,
+       19,
+       61,
+       62,
+       63,
+       64,
+       65
+      ],
+      "state_dims_changed_union": [
+       15
+      ],
+      "fruit_qpos_changed_rows": 5,
+      "n": 5,
+      "used_gripper_state_min_median_max": [
+       0.45702920890223303,
+       0.45702920890223303,
+       0.45702920890223303
+      ]
+     },
+     "E3": {
+      "qpos_idx_changed_union": [
+       18,
+       19,
+       59,
+       60,
+       61,
+       62,
+       63,
+       64,
+       65
+      ],
+      "state_dims_changed_union": [
+       15
+      ],
+      "fruit_qpos_changed_rows": 36,
+      "n": 36,
+      "used_gripper_state_min_median_max": [
+       0.6827374458312988,
+       0.6827374458312988,
+       0.6827374458312988
+      ]
+     }
+    }
+   }
+  },
+  "edits_1_3": {
+   "_comment": "target: E1/E1s/E1z/E2 = pick, E3 = place (physical-predicate edits). pooled = k/n frames. scene = independent unit (long/t2/headfix/ep1800 = scene_ep1800). E1z exploratory.",
+   "E1": {
+    "held_out_primary": {
+     "probe": {
+      "k": 1,
+      "n": 13,
+      "pooled": 0.07692307692307693,
+      "run_median": 0.045454545454545456,
+      "scene_median": 0.045454545454545456,
+      "pred_counts_pick_place_home": [
+       1,
+       12,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 13,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       13,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 1,
+      "n": 13,
+      "pooled": 0.07692307692307693,
+      "run_median": 0.045454545454545456,
+      "scene_median": 0.045454545454545456,
+      "pred_counts_pick_place_home": [
+       1,
+       12,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 13,
+      "pooled": 0.15384615384615385,
+      "run_median": 0.5,
+      "scene_median": 0.5,
+      "pred_counts_pick_place_home": [
+       2,
+       6,
+       5
+      ]
+     },
+     "n_runs": 2,
+     "n_scenes": 2,
+     "probe_per_run": {
+      "ep1807": {
+       "k": 1,
+       "n": 11
+      },
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 1,
+       "n": 11
+      },
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     }
+    },
+    "ep1807": {
+     "probe": {
+      "k": 1,
+      "n": 11,
+      "pooled": 0.09090909090909091,
+      "run_median": 0.09090909090909091,
+      "scene_median": 0.09090909090909091,
+      "pred_counts_pick_place_home": [
+       1,
+       10,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 11,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       11,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 1,
+      "n": 11,
+      "pooled": 0.09090909090909091,
+      "run_median": 0.09090909090909091,
+      "scene_median": 0.09090909090909091,
+      "pred_counts_pick_place_home": [
+       1,
+       10,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 11,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       6,
+       5
+      ]
+     },
+     "n_runs": 1,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1807": {
+       "k": 1,
+       "n": 11
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 1,
+       "n": 11
+      }
+     }
+    },
+    "held_out_minus_ep1807": {
+     "probe": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 2,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       2,
+       0,
+       0
+      ]
+     },
+     "n_runs": 1,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     },
+     "probe_per_scene": {
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     }
+    },
+    "scene_ep1800": {
+     "probe": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "n_runs": 0,
+     "n_scenes": 0,
+     "probe_per_run": {},
+     "probe_per_scene": {}
+    },
+    "train_range_secondary": {
+     "probe": {
+      "k": 5,
+      "n": 30,
+      "pooled": 0.16666666666666666,
+      "run_median": 0.2,
+      "scene_median": 0.2,
+      "pred_counts_pick_place_home": [
+       5,
+       25,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 30,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       30,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 30,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       30,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 30,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       15,
+       15
+      ]
+     },
+     "n_runs": 3,
+     "n_scenes": 3,
+     "probe_per_run": {
+      "ep0": {
+       "k": 1,
+       "n": 10
+      },
+      "ep1200": {
+       "k": 2,
+       "n": 10
+      },
+      "ep500": {
+       "k": 2,
+       "n": 10
+      }
+     },
+     "probe_per_scene": {
+      "ep0": {
+       "k": 1,
+       "n": 10
+      },
+      "ep1200": {
+       "k": 2,
+       "n": 10
+      },
+      "ep500": {
+       "k": 2,
+       "n": 10
+      }
+     }
+    }
+   },
+   "E1s": {
+    "held_out_primary": {
+     "probe": {
+      "k": 4,
+      "n": 13,
+      "pooled": 0.3076923076923077,
+      "run_median": 0.18181818181818182,
+      "scene_median": 0.18181818181818182,
+      "pred_counts_pick_place_home": [
+       4,
+       9,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 13,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       13,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 13,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       13,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 13,
+      "pooled": 0.15384615384615385,
+      "run_median": 0.5,
+      "scene_median": 0.5,
+      "pred_counts_pick_place_home": [
+       2,
+       6,
+       5
+      ]
+     },
+     "n_runs": 2,
+     "n_scenes": 2,
+     "probe_per_run": {
+      "ep1807": {
+       "k": 4,
+       "n": 11
+      },
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 4,
+       "n": 11
+      },
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     }
+    },
+    "ep1807": {
+     "probe": {
+      "k": 4,
+      "n": 11,
+      "pooled": 0.36363636363636365,
+      "run_median": 0.36363636363636365,
+      "scene_median": 0.36363636363636365,
+      "pred_counts_pick_place_home": [
+       4,
+       7,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 11,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       11,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 11,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       11,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 11,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       6,
+       5
+      ]
+     },
+     "n_runs": 1,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1807": {
+       "k": 4,
+       "n": 11
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 4,
+       "n": 11
+      }
+     }
+    },
+    "held_out_minus_ep1807": {
+     "probe": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 2,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       2,
+       0,
+       0
+      ]
+     },
+     "n_runs": 1,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     },
+     "probe_per_scene": {
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     }
+    },
+    "scene_ep1800": {
+     "probe": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "n_runs": 0,
+     "n_scenes": 0,
+     "probe_per_run": {},
+     "probe_per_scene": {}
+    },
+    "train_range_secondary": {
+     "probe": {
+      "k": 7,
+      "n": 31,
+      "pooled": 0.22580645161290322,
+      "run_median": 0.2,
+      "scene_median": 0.2,
+      "pred_counts_pick_place_home": [
+       7,
+       23,
+       1
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 31,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       31,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 31,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       31,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 31,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       16,
+       15
+      ]
+     },
+     "n_runs": 3,
+     "n_scenes": 3,
+     "probe_per_run": {
+      "ep0": {
+       "k": 2,
+       "n": 11
+      },
+      "ep1200": {
+       "k": 3,
+       "n": 10
+      },
+      "ep500": {
+       "k": 2,
+       "n": 10
+      }
+     },
+     "probe_per_scene": {
+      "ep0": {
+       "k": 2,
+       "n": 11
+      },
+      "ep1200": {
+       "k": 3,
+       "n": 10
+      },
+      "ep500": {
+       "k": 2,
+       "n": 10
+      }
+     }
+    }
+   },
+   "E2": {
+    "held_out_primary": {
+     "probe": {
+      "k": 3,
+      "n": 7,
+      "pooled": 0.42857142857142855,
+      "run_median": 0.3,
+      "scene_median": 0.3,
+      "pred_counts_pick_place_home": [
+       3,
+       4,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 7,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       7,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 1,
+      "n": 7,
+      "pooled": 0.14285714285714285,
+      "run_median": 0.1,
+      "scene_median": 0.1,
+      "pred_counts_pick_place_home": [
+       1,
+       6,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 7,
+      "pooled": 0.2857142857142857,
+      "run_median": 0.5,
+      "scene_median": 0.5,
+      "pred_counts_pick_place_home": [
+       2,
+       5,
+       0
+      ]
+     },
+     "n_runs": 2,
+     "n_scenes": 2,
+     "probe_per_run": {
+      "ep1807": {
+       "k": 3,
+       "n": 5
+      },
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 3,
+       "n": 5
+      },
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     }
+    },
+    "ep1807": {
+     "probe": {
+      "k": 3,
+      "n": 5,
+      "pooled": 0.6,
+      "run_median": 0.6,
+      "scene_median": 0.6,
+      "pred_counts_pick_place_home": [
+       3,
+       2,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 5,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       5,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 1,
+      "n": 5,
+      "pooled": 0.2,
+      "run_median": 0.2,
+      "scene_median": 0.2,
+      "pred_counts_pick_place_home": [
+       1,
+       4,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 5,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       5,
+       0
+      ]
+     },
+     "n_runs": 1,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1807": {
+       "k": 3,
+       "n": 5
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 3,
+       "n": 5
+      }
+     }
+    },
+    "held_out_minus_ep1807": {
+     "probe": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 2,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       2,
+       0,
+       0
+      ]
+     },
+     "n_runs": 1,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     },
+     "probe_per_scene": {
+      "ep1850": {
+       "k": 0,
+       "n": 2
+      }
+     }
+    },
+    "scene_ep1800": {
+     "probe": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "n_runs": 0,
+     "n_scenes": 0,
+     "probe_per_run": {},
+     "probe_per_scene": {}
+    },
+    "train_range_secondary": {
+     "probe": {
+      "k": 5,
+      "n": 13,
+      "pooled": 0.38461538461538464,
+      "run_median": 0.25,
+      "scene_median": 0.25,
+      "pred_counts_pick_place_home": [
+       5,
+       8,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 13,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       13,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 13,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       13,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 13,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       8,
+       5
+      ]
+     },
+     "n_runs": 3,
+     "n_scenes": 3,
+     "probe_per_run": {
+      "ep0": {
+       "k": 0,
+       "n": 4
+      },
+      "ep1200": {
+       "k": 4,
+       "n": 5
+      },
+      "ep500": {
+       "k": 1,
+       "n": 4
+      }
+     },
+     "probe_per_scene": {
+      "ep0": {
+       "k": 0,
+       "n": 4
+      },
+      "ep1200": {
+       "k": 4,
+       "n": 5
+      },
+      "ep500": {
+       "k": 1,
+       "n": 4
+      }
+     }
+    }
+   },
+   "E3": {
+    "held_out_primary": {
+     "probe": {
+      "k": 97,
+      "n": 99,
+      "pooled": 0.9797979797979798,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       2,
+       97,
+       0
+      ]
+     },
+     "rule": {
+      "k": 99,
+      "n": 99,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       0,
+       99,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 99,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       99,
+       0,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 4,
+      "n": 99,
+      "pooled": 0.04040404040404041,
+      "run_median": 0.0,
+      "scene_median": 0.017857142857142856,
+      "pred_counts_pick_place_home": [
+       95,
+       4,
+       0
+      ]
+     },
+     "n_runs": 7,
+     "n_scenes": 4,
+     "probe_per_run": {
+      "ep1800": {
+       "k": 13,
+       "n": 13
+      },
+      "ep1807": {
+       "k": 17,
+       "n": 17
+      },
+      "ep1850": {
+       "k": 11,
+       "n": 11
+      },
+      "ep1900": {
+       "k": 13,
+       "n": 15
+      },
+      "headfix": {
+       "k": 12,
+       "n": 12
+      },
+      "long": {
+       "k": 16,
+       "n": 16
+      },
+      "t2": {
+       "k": 15,
+       "n": 15
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 17,
+       "n": 17
+      },
+      "ep1850": {
+       "k": 11,
+       "n": 11
+      },
+      "ep1900": {
+       "k": 13,
+       "n": 15
+      },
+      "scene1800": {
+       "k": 56,
+       "n": 56
+      }
+     }
+    },
+    "ep1807": {
+     "probe": {
+      "k": 17,
+      "n": 17,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       0,
+       17,
+       0
+      ]
+     },
+     "rule": {
+      "k": 17,
+      "n": 17,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       0,
+       17,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 17,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       17,
+       0,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 17,
+      "pooled": 0.11764705882352941,
+      "run_median": 0.11764705882352941,
+      "scene_median": 0.11764705882352941,
+      "pred_counts_pick_place_home": [
+       15,
+       2,
+       0
+      ]
+     },
+     "n_runs": 1,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1807": {
+       "k": 17,
+       "n": 17
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 17,
+       "n": 17
+      }
+     }
+    },
+    "held_out_minus_ep1807": {
+     "probe": {
+      "k": 80,
+      "n": 82,
+      "pooled": 0.975609756097561,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       2,
+       80,
+       0
+      ]
+     },
+     "rule": {
+      "k": 82,
+      "n": 82,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       0,
+       82,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 82,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       82,
+       0,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 82,
+      "pooled": 0.024390243902439025,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       80,
+       2,
+       0
+      ]
+     },
+     "n_runs": 6,
+     "n_scenes": 3,
+     "probe_per_run": {
+      "ep1800": {
+       "k": 13,
+       "n": 13
+      },
+      "ep1850": {
+       "k": 11,
+       "n": 11
+      },
+      "ep1900": {
+       "k": 13,
+       "n": 15
+      },
+      "headfix": {
+       "k": 12,
+       "n": 12
+      },
+      "long": {
+       "k": 16,
+       "n": 16
+      },
+      "t2": {
+       "k": 15,
+       "n": 15
+      }
+     },
+     "probe_per_scene": {
+      "ep1850": {
+       "k": 11,
+       "n": 11
+      },
+      "ep1900": {
+       "k": 13,
+       "n": 15
+      },
+      "scene1800": {
+       "k": 56,
+       "n": 56
+      }
+     }
+    },
+    "scene_ep1800": {
+     "probe": {
+      "k": 56,
+      "n": 56,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       0,
+       56,
+       0
+      ]
+     },
+     "rule": {
+      "k": 56,
+      "n": 56,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       0,
+       56,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 56,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       56,
+       0,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 56,
+      "pooled": 0.03571428571428571,
+      "run_median": 0.0,
+      "scene_median": 0.03571428571428571,
+      "pred_counts_pick_place_home": [
+       54,
+       2,
+       0
+      ]
+     },
+     "n_runs": 4,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1800": {
+       "k": 13,
+       "n": 13
+      },
+      "headfix": {
+       "k": 12,
+       "n": 12
+      },
+      "long": {
+       "k": 16,
+       "n": 16
+      },
+      "t2": {
+       "k": 15,
+       "n": 15
+      }
+     },
+     "probe_per_scene": {
+      "scene1800": {
+       "k": 56,
+       "n": 56
+      }
+     }
+    },
+    "train_range_secondary": {
+     "probe": {
+      "k": 60,
+      "n": 62,
+      "pooled": 0.967741935483871,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       2,
+       60,
+       0
+      ]
+     },
+     "rule": {
+      "k": 62,
+      "n": 62,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       0,
+       62,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 62,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       62,
+       0,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 12,
+      "n": 62,
+      "pooled": 0.1935483870967742,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       41,
+       12,
+       9
+      ]
+     },
+     "n_runs": 3,
+     "n_scenes": 3,
+     "probe_per_run": {
+      "ep0": {
+       "k": 15,
+       "n": 15
+      },
+      "ep1200": {
+       "k": 34,
+       "n": 36
+      },
+      "ep500": {
+       "k": 11,
+       "n": 11
+      }
+     },
+     "probe_per_scene": {
+      "ep0": {
+       "k": 15,
+       "n": 15
+      },
+      "ep1200": {
+       "k": 34,
+       "n": 36
+      },
+      "ep500": {
+       "k": 11,
+       "n": 11
+      }
+     }
+    }
+   },
+   "E1z_exploratory": {
+    "held_out_primary": {
+     "probe": {
+      "k": 5,
+      "n": 13,
+      "pooled": 0.38461538461538464,
+      "run_median": 0.6363636363636364,
+      "scene_median": 0.6363636363636364,
+      "pred_counts_pick_place_home": [
+       5,
+       8,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 13,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       13,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 1,
+      "n": 13,
+      "pooled": 0.07692307692307693,
+      "run_median": 0.045454545454545456,
+      "scene_median": 0.045454545454545456,
+      "pred_counts_pick_place_home": [
+       1,
+       12,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 13,
+      "pooled": 0.15384615384615385,
+      "run_median": 0.5,
+      "scene_median": 0.5,
+      "pred_counts_pick_place_home": [
+       2,
+       6,
+       5
+      ]
+     },
+     "n_runs": 2,
+     "n_scenes": 2,
+     "probe_per_run": {
+      "ep1807": {
+       "k": 3,
+       "n": 11
+      },
+      "ep1850": {
+       "k": 2,
+       "n": 2
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 3,
+       "n": 11
+      },
+      "ep1850": {
+       "k": 2,
+       "n": 2
+      }
+     }
+    },
+    "ep1807": {
+     "probe": {
+      "k": 3,
+      "n": 11,
+      "pooled": 0.2727272727272727,
+      "run_median": 0.2727272727272727,
+      "scene_median": 0.2727272727272727,
+      "pred_counts_pick_place_home": [
+       3,
+       8,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 11,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       11,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 1,
+      "n": 11,
+      "pooled": 0.09090909090909091,
+      "run_median": 0.09090909090909091,
+      "scene_median": 0.09090909090909091,
+      "pred_counts_pick_place_home": [
+       1,
+       10,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 11,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       6,
+       5
+      ]
+     },
+     "n_runs": 1,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1807": {
+       "k": 3,
+       "n": 11
+      }
+     },
+     "probe_per_scene": {
+      "ep1807": {
+       "k": 3,
+       "n": 11
+      }
+     }
+    },
+    "held_out_minus_ep1807": {
+     "probe": {
+      "k": 2,
+      "n": 2,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       2,
+       0,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 2,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       2,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 2,
+      "n": 2,
+      "pooled": 1.0,
+      "run_median": 1.0,
+      "scene_median": 1.0,
+      "pred_counts_pick_place_home": [
+       2,
+       0,
+       0
+      ]
+     },
+     "n_runs": 1,
+     "n_scenes": 1,
+     "probe_per_run": {
+      "ep1850": {
+       "k": 2,
+       "n": 2
+      }
+     },
+     "probe_per_scene": {
+      "ep1850": {
+       "k": 2,
+       "n": 2
+      }
+     }
+    },
+    "scene_ep1800": {
+     "probe": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 0,
+      "pooled": null,
+      "run_median": null,
+      "scene_median": null,
+      "pred_counts_pick_place_home": [
+       0,
+       0,
+       0
+      ]
+     },
+     "n_runs": 0,
+     "n_scenes": 0,
+     "probe_per_run": {},
+     "probe_per_scene": {}
+    },
+    "train_range_secondary": {
+     "probe": {
+      "k": 9,
+      "n": 31,
+      "pooled": 0.2903225806451613,
+      "run_median": 0.2727272727272727,
+      "scene_median": 0.2727272727272727,
+      "pred_counts_pick_place_home": [
+       9,
+       22,
+       0
+      ]
+     },
+     "rule": {
+      "k": 0,
+      "n": 31,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       31,
+       0
+      ]
+     },
+     "proxy": {
+      "k": 0,
+      "n": 31,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       31,
+       0
+      ]
+     },
+     "frame_index": {
+      "k": 0,
+      "n": 31,
+      "pooled": 0.0,
+      "run_median": 0.0,
+      "scene_median": 0.0,
+      "pred_counts_pick_place_home": [
+       0,
+       16,
+       15
+      ]
+     },
+     "n_runs": 3,
+     "n_scenes": 3,
+     "probe_per_run": {
+      "ep0": {
+       "k": 2,
+       "n": 10
+      },
+      "ep1200": {
+       "k": 4,
+       "n": 10
+      },
+      "ep500": {
+       "k": 3,
+       "n": 11
+      }
+     },
+     "probe_per_scene": {
+      "ep0": {
+       "k": 2,
+       "n": 10
+      },
+      "ep1200": {
+       "k": 4,
+       "n": 10
+      },
+      "ep500": {
+       "k": 3,
+       "n": 11
+      }
+     }
+    }
+   },
+   "changed_vs_E0_same_host": {
+    "E1": {
+     "held_out_primary": {
+      "probe": {
+       "changed": 1,
+       "n": 13
+      },
+      "rule": {
+       "changed": 0,
+       "n": 13
+      },
+      "proxy": {
+       "changed": 1,
+       "n": 13
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 13
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.1103940009246154,
+       0.877228076923077,
+       0.012377897538461536
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.0021135493284615385,
+       0.9974960769230768,
+       0.00039052973076923075
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       13,
+       0
+      ]
+     },
+     "ep1807": {
+      "probe": {
+       "changed": 1,
+       "n": 11
+      },
+      "rule": {
+       "changed": 0,
+       "n": 11
+      },
+      "proxy": {
+       "changed": 1,
+       "n": 11
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 11
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.11406354654727276,
+       0.8713797272727273,
+       0.01455666318181818
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.00040613284272727286,
+       0.9991497272727272,
+       0.0004442912181818182
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       11,
+       0
+      ]
+     },
+     "held_out_minus_ep1807": {
+      "probe": {
+       "changed": 0,
+       "n": 2
+      },
+      "rule": {
+       "changed": 0,
+       "n": 2
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 2
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 2
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.0902115,
+       0.909394,
+       0.00039468650000000006
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.01150434,
+       0.988401,
+       9.484155e-05
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       2,
+       0
+      ]
+     },
+     "scene_ep1800": {
+      "probe": {
+       "changed": 0,
+       "n": 0
+      },
+      "rule": {
+       "changed": 0,
+       "n": 0
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 0
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 0
+      },
+      "probe_mean_p_edit_pick_place_home": null,
+      "probe_mean_p_E0_same_hosts_pick_place_home": null,
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       0,
+       0
+      ]
+     },
+     "train_range_secondary": {
+      "probe": {
+       "changed": 5,
+       "n": 30
+      },
+      "rule": {
+       "changed": 0,
+       "n": 30
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 30
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 30
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.13245323239133333,
+       0.8593817033333335,
+       0.00816499036
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.0009344504180000003,
+       0.9986217999999999,
+       0.0004436843836666666
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       30,
+       0
+      ]
+     }
+    },
+    "E1s": {
+     "held_out_primary": {
+      "probe": {
+       "changed": 4,
+       "n": 13
+      },
+      "rule": {
+       "changed": 0,
+       "n": 13
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 13
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 13
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.28192503655076917,
+       0.6986492361538462,
+       0.01942565738461538
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.0021135493284615385,
+       0.9974960769230768,
+       0.00039052973076923075
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       13,
+       0
+      ]
+     },
+     "ep1807": {
+      "probe": {
+       "changed": 4,
+       "n": 11
+      },
+      "rule": {
+       "changed": 0,
+       "n": 11
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 11
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 11
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.32368869774181813,
+       0.6534435518181818,
+       0.022867675909090904
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.00040613284272727286,
+       0.9991497272727272,
+       0.0004442912181818182
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       11,
+       0
+      ]
+     },
+     "held_out_minus_ep1807": {
+      "probe": {
+       "changed": 0,
+       "n": 2
+      },
+      "rule": {
+       "changed": 0,
+       "n": 2
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 2
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 2
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.052224900000000005,
+       0.9472805,
+       0.0004945555
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.01150434,
+       0.988401,
+       9.484155e-05
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       2,
+       0
+      ]
+     },
+     "scene_ep1800": {
+      "probe": {
+       "changed": 0,
+       "n": 0
+      },
+      "rule": {
+       "changed": 0,
+       "n": 0
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 0
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 0
+      },
+      "probe_mean_p_edit_pick_place_home": null,
+      "probe_mean_p_E0_same_hosts_pick_place_home": null,
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       0,
+       0
+      ]
+     },
+     "train_range_secondary": {
+      "probe": {
+       "changed": 8,
+       "n": 31
+      },
+      "rule": {
+       "changed": 0,
+       "n": 31
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 31
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 31
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.2264562345580645,
+       0.7405914616129035,
+       0.03295229038709677
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.0016930552432258069,
+       0.9978731935483871,
+       0.00043367356483870964
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       31,
+       0
+      ]
+     }
+    },
+    "E1z": {
+     "held_out_primary": {
+      "probe": {
+       "changed": 5,
+       "n": 13
+      },
+      "rule": {
+       "changed": 0,
+       "n": 13
+      },
+      "proxy": {
+       "changed": 1,
+       "n": 13
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 13
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.3919478022461539,
+       0.5521670230769231,
+       0.05588513046153845
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.0021135493284615385,
+       0.9974960769230768,
+       0.00039052973076923075
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       13,
+       0
+      ]
+     },
+     "ep1807": {
+      "probe": {
+       "changed": 3,
+       "n": 11
+      },
+      "rule": {
+       "changed": 0,
+       "n": 11
+      },
+      "proxy": {
+       "changed": 1,
+       "n": 11
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 11
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.28466894810909094,
+       0.6495306090909091,
+       0.06580038727272726
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.00040613284272727286,
+       0.9991497272727272,
+       0.0004442912181818182
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       11,
+       0
+      ]
+     },
+     "held_out_minus_ep1807": {
+      "probe": {
+       "changed": 2,
+       "n": 2
+      },
+      "rule": {
+       "changed": 0,
+       "n": 2
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 2
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 2
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.9819815,
+       0.0166673,
+       0.001351218
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.01150434,
+       0.988401,
+       9.484155e-05
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       2,
+       0
+      ]
+     },
+     "scene_ep1800": {
+      "probe": {
+       "changed": 0,
+       "n": 0
+      },
+      "rule": {
+       "changed": 0,
+       "n": 0
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 0
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 0
+      },
+      "probe_mean_p_edit_pick_place_home": null,
+      "probe_mean_p_E0_same_hosts_pick_place_home": null,
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       0,
+       0
+      ]
+     },
+     "train_range_secondary": {
+      "probe": {
+       "changed": 9,
+       "n": 31
+      },
+      "rule": {
+       "changed": 0,
+       "n": 31
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 31
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 31
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.2925743507,
+       0.6794119096774194,
+       0.028013785806451613
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.0012109033077419356,
+       0.9983565806451612,
+       0.0004324382293548387
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       31,
+       0
+      ]
+     }
+    },
+    "E2": {
+     "held_out_primary": {
+      "probe": {
+       "changed": 3,
+       "n": 7
+      },
+      "rule": {
+       "changed": 0,
+       "n": 7
+      },
+      "proxy": {
+       "changed": 1,
+       "n": 7
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 7
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.3748253571428572,
+       0.6086025428571428,
+       0.016571907
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.0038814367,
+       0.9958072857142858,
+       0.0003114880714285714
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       7,
+       0
+      ]
+     },
+     "ep1807": {
+      "probe": {
+       "changed": 3,
+       "n": 5
+      },
+      "rule": {
+       "changed": 0,
+       "n": 5
+      },
+      "proxy": {
+       "changed": 1,
+       "n": 5
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 5
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.5090014600000001,
+       0.46788295999999996,
+       0.0231153228
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.00083227538,
+       0.9987698,
+       0.00039814668
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       5,
+       0
+      ]
+     },
+     "held_out_minus_ep1807": {
+      "probe": {
+       "changed": 0,
+       "n": 2
+      },
+      "rule": {
+       "changed": 0,
+       "n": 2
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 2
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 2
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.0393851,
+       0.9604015,
+       0.0002133675
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.01150434,
+       0.988401,
+       9.484155e-05
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       2,
+       0
+      ]
+     },
+     "scene_ep1800": {
+      "probe": {
+       "changed": 0,
+       "n": 0
+      },
+      "rule": {
+       "changed": 0,
+       "n": 0
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 0
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 0
+      },
+      "probe_mean_p_edit_pick_place_home": null,
+      "probe_mean_p_E0_same_hosts_pick_place_home": null,
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       0,
+       0
+      ]
+     },
+     "train_range_secondary": {
+      "probe": {
+       "changed": 5,
+       "n": 13
+      },
+      "rule": {
+       "changed": 0,
+       "n": 13
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 13
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 13
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.37430854,
+       0.6198004923076923,
+       0.0058909688769230775
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.0018089745384615385,
+       0.9980246153846153,
+       0.00016632750076923076
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       0,
+       13,
+       0
+      ]
+     }
+    },
+    "E3": {
+     "held_out_primary": {
+      "probe": {
+       "changed": 97,
+       "n": 99
+      },
+      "rule": {
+       "changed": 99,
+       "n": 99
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 99
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 99
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.03784021898282828,
+       0.9620768636363635,
+       8.29055305050505e-05
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.9952106060606063,
+       0.002428011171717171,
+       0.0023613734545454546
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       99,
+       0,
+       0
+      ]
+     },
+     "ep1807": {
+      "probe": {
+       "changed": 17,
+       "n": 17
+      },
+      "rule": {
+       "changed": 17,
+       "n": 17
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 17
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 17
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.0011816888235294115,
+       0.9987742352941178,
+       4.4072982352941174e-05
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.9970574117647059,
+       0.0007472205294117646,
+       0.0021953887647058828
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       17,
+       0,
+       0
+      ]
+     },
+     "held_out_minus_ep1807": {
+      "probe": {
+       "changed": 80,
+       "n": 82
+      },
+      "rule": {
+       "changed": 82,
+       "n": 82
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 82
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 82
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.04544015816219512,
+       0.954468871951219,
+       9.095618073170728e-05
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.9948277317073175,
+       0.002776467768292682,
+       0.0023957849146341464
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       82,
+       0,
+       0
+      ]
+     },
+     "scene_ep1800": {
+      "probe": {
+       "changed": 56,
+       "n": 56
+      },
+      "rule": {
+       "changed": 56,
+       "n": 56
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 56
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 56
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.022806755469642857,
+       0.9771285178571424,
+       6.470902e-05
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.993730267857143,
+       0.003243531246428572,
+       0.003026163767857144
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       56,
+       0,
+       0
+      ]
+     },
+     "train_range_secondary": {
+      "probe": {
+       "changed": 60,
+       "n": 62
+      },
+      "rule": {
+       "changed": 62,
+       "n": 62
+      },
+      "proxy": {
+       "changed": 0,
+       "n": 62
+      },
+      "frame_index": {
+       "changed": 0,
+       "n": 62
+      },
+      "probe_mean_p_edit_pick_place_home": [
+       0.02706524556451613,
+       0.9728161612903226,
+       0.0001186140112903226
+      ],
+      "probe_mean_p_E0_same_hosts_pick_place_home": [
+       0.9960440161290324,
+       0.0009978945322580647,
+       0.0029580481774193544
+      ],
+      "E0_probe_pred_counts_same_hosts": [
+       62,
+       0,
+       0
+      ]
+     }
+    }
+   },
+   "frame_index_nearest_fallback_rows": 1210,
+   "rows_total": 1510
+  },
+  "independent_checks": {
+   "probe_reapply_numpy": {
+    "n": 1510,
+    "argmax_mismatch": 0,
+    "p_max_abs_diff": 4.989623924034348e-07,
+    "feature_rows_not_in_csv": 0
+   },
+   "metrics_json_vs_indep_kn": {
+    "compared": 124,
+    "mismatch": 0,
+    "diffs": []
+   }
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t48/t48b-scene-held-edits.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t48/t48b-scene-held-edits.json",
+   "kind": "scene",
+   "note": "ep1807 r23, ep1850 r14: E0/E1/E1s/E1z/E2 x 3 cams with probe (p pick/place/home) / rule / proxy / frame-index predictions (re-rendered at score stage, same images)"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t48/t48b-scene-e3-phantom.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t48/t48b-scene-e3-phantom.json",
+   "kind": "scene",
+   "note": "ep1807 r10, ep1850 r5, ep1900 r10 (pad_midpoint): E0 vs E3 x 3 cams with predictions (re-rendered at score stage, same images)"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t48/t48b-cpu-parity-exclusions-table.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t48/t48b-cpu-parity-exclusions-table.json",
+   "kind": "table",
+   "note": "#0 pixel/state parity, #4 included/planned, render s/frame"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t48/t48b-score-accuracy-bars.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t48/t48b-score-accuracy-bars.json",
+   "kind": "graph",
+   "note": "edit x method fraction = target; panels held-out primary / ep1807 / train_range secondary; per-scene probe markers; E1z shaded"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t48/t48b-score-table.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t48/t48b-score-table.json",
+   "kind": "table",
+   "note": "#0 pixel parity + probe agreement, E0 double scoring, #1-#3 per group x method (k/n), #5 prefix ms"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy: violated_start 14/15, has_target 15/15, frame0 clearance_before -29.031048280806342 mm = skill baseline (status feasible 15, not a baseline item). Run alone before render; host load avg 18.8 at start with another session's GPU closed-loop serve_safe (pid 1085581) running. cuRobo baseline not run (GPU prohibited this run).",
+  "score_stage": {
+   "matched": true,
+   "violated_start": 14,
+   "frames": 15,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -29.031048280806342,
+   "note": "re-run alone before score stage (no code change since 28b98160 outside docs/.claude)"
+  }
+ },
+ "verdict": "baseline matched (legacy 14/15, has_target 15/15, frame0 -29.031048280806342 mm; CPU and score stage). E0 pixel parity 599/599 bit-identical; probe prediction agreement E0rec vs E0 held-out 260/260, train_range 339/339 (threshold 0.95). #1-#3 scored; metrics.json = independent re-score 124/124.",
+ "blocked": [],
+ "not_measured": [
+  "cuRobo regression baseline (GPU; not run in this STEP)"
+ ],
+ "notes_facts": [
+  "scratchpad rundir pointer was overwritten by another agent at ~08:07 UTC; all T48b commands of this run started before that or used the hard-coded run dir; no file written to the other run dir.",
+  "E3 template for ep1807/long/headfix/ep1800 = ep1807:31 (impl smoke reported ep1807:25 for a 26-record smoke).",
+  "ep500, ep1200 used hand = right (finger qpos 18/19, state dim 15); main 7 runs and ep0 = left.",
+  "SendUserFile tool not available in this verifier session; figures not sent to user.",
+  "score stage run with --extra-runs train_range (same as render/extract); groups in score/metrics.json: main = held-out 7 runs, train_range = ep0/ep500/ep1200.",
+  "scene figures t48b-scene-held-edits / t48b-scene-e3-phantom were re-drawn at score stage from the same render cache (images unchanged) to add predictions; files were untracked and not linked by any log.",
+  "frame-index baseline uses nearest-t_step fallback on 1210 of 1510 scored rows (T48 ep1807 convention).",
+  "E1s: rule/proxy inputs are identical to E0 by construction (state unchanged)."
+ ],
+ "gpu_extract": [
+  {
+   "command": "AG3S_RUN_DIR=/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a /mnt/dev/AG3S_VLA-development/.venv-openpi-live/bin/python -m AG3S.ag3s.experiments.studies.t48b_hsr --stage extract --batch 4 --extra-runs train_range",
+   "start_utc": "2026-10-12T10:23:35+0000",
+   "end_utc": "2026-10-12T10:28:16+0000",
+   "rc": 0,
+   "wall_s": 280.9,
+   "lock_flock": "blocking flock /tmp/ag3s-vla-gpu-validation.lock (job-wise)",
+   "retries": 0,
+   "nvidia_smi_memory_used_MiB_peak_observed": 8804,
+   "nvidia_smi_memory_used_MiB_baseline_before_start": 0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a",
+   "log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/gpu_extract_T48b_extract.log",
+   "mem_csv": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/gpu_extract_T48b_extract.mem.csv",
+   "meta": "20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/gpu_extract_T48b_extract.meta.json",
+   "output_paths": [
+    "20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/feat/<run>__{E0,edits}.npz",
+    ".../T48b/extract/{parity_gate,timing,extract_meta}.json"
+   ],
+   "queue_script": "20261012T190547+0900_28b981600bf7_c39a577332fe/verify/gpu_queue.sh",
+   "queue_log": "20261012T190547+0900_28b981600bf7_c39a577332fe/verify/gpu_queue.log"
+  }
+ ]
+}

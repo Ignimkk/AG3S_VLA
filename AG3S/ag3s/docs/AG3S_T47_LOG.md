@@ -54,7 +54,7 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **fixed-patch sink · broad single blob** | 진단용 읽기 이름. fixed-patch sink = frame 이 바뀌어도 argmax 가 늘 같은 patch (modal ≥ 0.8 이고 top-1 patch 몫 ≥ 0.3). broad single blob = 질량이 넓게 퍼져 평균 위 pixel 의 최대 component 가 grid 의 0.15 이상. threshold 는 읽기용이고 어느 선택에도 쓰지 않았다 |
 | **`modal_fraction` · top-1 patch 몫 (sink 진단)** | modal_fraction = frame 별 argmax patch 중 가장 흔한 patch 의 비율. top-1 몫 = 최대 patch 값 ÷ `S_cam` |
 | **B3 (raw amplitude 점검)** | lifting 에서 grounding 까지 raw (정규화 전) attention 에 절대값 비교를 하는 곳을 file:line 으로 찾아 ×k 배율 불변 여부를 판정하고 수치로 시험한 것 (24 지점). `decision_identical` = grounding 의 결정 (cloud · seed · peak · cluster · status · chosen) 이 같음, `bit_identical` = 그에 더해 정규화 값 · score · centroid 가 bit 단위로 같음 |
-| **T47 · T47b · T49** | T47 = head 재선택 (label-free 기준) 의 2D · 3D 검증. T47b = 합산 방식 · label 기반 3D 지표 · raw amplitude · sink 진단. T49 = 명사 token query (D) 로 넘어가는 다음 STEP (~~아직 시작 전~~ → 진행 중 (2026-10-12, 진행 현황 표 참조), `handoff/T49.task.md`) |
+| **T47 · T47b · T49** | T47 = head 재선택 (label-free 기준) 의 2D · 3D 검증. T47b = 합산 방식 · label 기반 3D 지표 · raw amplitude · sink 진단. T49 = 명사 token query (D) 로 넘어가는 다음 STEP (~~아직 시작 전~~ → ~~진행 중 (2026-10-12, 진행 현황 표 참조)~~ → 완료 (아래 "T49" 절), `handoff/T49.task.md`) |
 
 **T48a (2026-10-12 추가)** — HSR counterfactual 의 용어.
 
@@ -73,7 +73,45 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **host frame A · partner frame B** | C2s · C2i 의 쌍. A 는 원래 frame, B 는 A 와 같은 episode 의 **다른 class** frame (seed 0 고정). C2s = image A + state B, C2i = image B + state A |
 | **`to_pick` · `retain` · `changed` · `follow` (T48a 지표)** | `to_pick` = C1 에서 `pick` 으로 예측된 비율 (원래 class 별). `retain` = C1p 에서 같은 host frame 의 C0 예측이 유지된 비율. `changed` = C2g 에서 예측이 C0 예측과 달라진 비율. `follow` = C2s · C2i 에서 예측 class 가 state 쪽 class / image 쪽 class / 기타 인 비율 |
 | **serving state bin · replica 불일치** | 서빙 tokenizer 가 16D state 를 `np.digitize` 로 256 bin 으로 만든 값 (model 이 실제로 본 prompt 의 `State:` 숫자). numpy replica 는 보고용이고, val 27 row (`ep_001648` 차원 13, 1 bin 차이) 에서 서빙 bin 과 달랐다 |
-| **T48 · T48a · T48b** | T48 = HSR counterfactual. T48a = prompt · state · image 변형 (rendering 불필요, 기록 frame 만 사용). T48b = 물체의 유무를 바꾼 image (empty grasp · slip · phantom hold) 를 MuJoCo 로 다시 render 해 같은 팔 자세에서 probe 가 쥠 상태를 읽는지 가르는 다음 STEP (`handoff/T48b.task.md`) |
+| **T48 · T48a · T48b** | T48 = HSR counterfactual. T48a = prompt · state · image 변형 (rendering 불필요, 기록 frame 만 사용). T48b = 물체의 유무를 바꾼 image (empty grasp · slip · phantom hold) 를 MuJoCo 로 다시 render 해 같은 팔 자세에서 probe 가 쥠 상태를 읽는지 가르는 다음 STEP (`handoff/T48b.task.md`; ~~진행 중~~ → 완료, 아래 "T48b" 절) |
+
+**T48b (2026-10-12 추가)** — 물체의 유무를 바꾼 counterfactual 의 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **re-render parity (E0)** | 기록된 qpos 를 MuJoCo 로 policy image 규약 (224×224, reflection off) 그대로 다시 그린 image 가 기록 RGB 와 같은가. `bit-identical` = 3 camera 의 모든 pixel 값이 같음 (MAD 0 · max abs 0). 편집 image 를 믿어도 되는지의 전제 |
+| **E0 · E1 · E1s · E1z · E2 · E3** | E0 = 편집 없이 re-render 만 (parity 점검). 나머지는 대상 과일의 free joint 와 쓰는 손 finger joint 만 바꾸고 `mj_forward` 후 다시 그린 것. **E1 (empty grasp)** = 쥔 과일을 초기 table 위치로 옮기고 finger 를 "물체 없이 닫힌" 값 (state 0.457) 으로 둔다, 정답 `pick`. **E1s** = 과일만 옮기고 finger · state 는 그대로, 정답 `pick`. **E1z** (exploratory) = E1 과 같되 finger 를 joint 한계 (state 0, 완전히 닫힘) 로 둔다. **E2 (slip)** = 과일을 손 바로 아래 table 위에 놓고 finger · state 는 E1 과 같게, 정답 `pick`. **E3 (phantom hold)** = 파지 전 접근 frame 에서 과일을 finger 사이에 넣고 finger 를 과일 폭에 맞춘다, 정답 `place` (물리적으로 쥐어짐) |
+| **물리 predicate (`held` · `reach` · `on_table` · `in_crate`)** | MuJoCo contact 로 정한 과일 상태. `held` = 한 손의 finger 두 개 모두와 접촉하고 table · crate 와 비접촉. `reach` host = 쓰는 손이 처음 닫히기 전 frame. 편집의 정답은 gripper 값이 아니라 이 predicate 로 정한다 |
+| **E0 이중 채점 (`closed_loop_gt` · contact state)** | E0 정답을 두 기준으로 채점. `closed_loop_gt` = SUBTASK-b 정의 (gripper 가 닫혔으면 `held`), contact state = 위 물리 predicate (모호 frame 제외). long · t2 의 빈 손 닫힘 frame 에서 둘이 다르다 |
+| **관통 제외 (penetration exclusion)** | 편집 뒤 대상 과일 또는 finger 가 낀 contact 의 최대 관통 깊이가 2.0 mm 를 넘는 편집은 제외. 기준은 편집하지 않은 기록 frame 의 최대 관통 (held-out 1.83 mm) 에 맞춰 결과 전에 고정 |
+| **held-out primary · train_range secondary** | primary = ep1807 · long · t2 · headfix · ep1800 · ep1850 · ep1900 (VLA · probe 어느 학습에도 없는 7 run). secondary = ep0 · ep500 · ep1200 (VLA fine-tune episode, ep0 · ep1200 은 probe 학습 episode 이기도 함) — 편집 image 는 학습에 없었으나 장면은 익숙할 수 있어 분리 보고. long · t2 · headfix · ep1800 은 같은 scene (episode 1800) 이라 독립 표본 1 개로 센다 |
+
+**T49 · T49b (2026-10-12 추가)** — 명사 token query 의 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **명사 token query** | prefix 의 prompt 안 target 과일 명사 token (예 `▁apple`) 의 행 (query row) 이 image 768 열에 둔 attention 을 camera 별 16×16 map 으로 쓴 것. action (suffix) token query 와 달리 prefix pass 한 번으로 끝나고 denoise · noise seed 가 없다 (결정적). `basket` token 행은 같은 방식의 목적지 map |
+| **image mass · BOS sink** | image mass = 명사 행 attention 중 image 768 열의 합 (나머지는 text 열, 그중 BOS 열이 큼). BOS 열에 몰리는 head 는 image 를 보지 않는 head 로 읽는다. layer 별 median 이 0.01 미만이면 "image 를 거의 보지 않음" 으로 표시 (표시만 하고 선택에서 제외하지 않음 — 결과 전 고정) |
+| **cell 선택: GT primary · label-free secondary** | primary (`noun_gt`) = selection record 3 개 (long · t2 · ep1807) 에서 target map 의 lift 평균으로 18×8 cell 순위를 매기고 top-3 를 σ=1 raw 합. secondary (`noun_lf`) = 같은 명사 행에 T47 의 label-free 절차 (S_cam τ Kneedle + spatial entropy + selection frequency, k=3). 목적지 map (`basket_gt` · `basket_lf`) 도 같은 방식, crate coverage 기준 |
+| **`noun_gt_k{k}_s{σ}`** | 명사 GT cell 의 top-k 를 σ 로 smoothing 후 합산한 source 이름 (primary = `k3_s1`) |
+| **separation (분리)** | 같은 prefix pass 에서 target map 과 basket map 이 서로 다른 물체를 가리키는가. 3 camera joint argmax 가 target map 은 target body 위 (`target_peak_on_target`), basket map 은 crate 위 (`basket_peak_on_crate`) 에 있는 frame 의 비율이 `both_correct_rate`. 섞임 mass = target map 의 crate mass, basket map 의 target mass |
+| **prompt swap (교체)** | 같은 frame (image · state 그대로) 에서 prompt 의 target 명사만 scene 의 다른 과일로 바꿔 map 이 새 과일로 옮겨가는가를 본다 (exploratory). `moved` = 원 prompt map 의 peak 가 원 target 위에 있고 동시에 교체 prompt map 의 peak 가 새 과일 위에 있음 (둘 다 ≥ 200 px 보이는 frame 에서) |
+| **`lift_new_gain` · `map_corr`** | lift_new_gain = 교체 prompt 의 새 과일 lift − 원 prompt 의 새 과일 lift. map_corr = 두 map 의 Pearson 상관 (낮을수록 map 이 많이 바뀜) |
+| **record-mean** | 지표를 record (episode) 안에서 frame 으로 pool 한 뒤 record 가중 없이 평균한 값. T49 · T49b 의 3D · 분리 · swap 표는 모두 이 집계다 (T47 의 pooled 값과 집계가 달라 같은 source 의 값이 조금 다르다) |
+| **T49b (exploratory)** | 이미 추출한 명사 attention 위에서 σ ∈ {0, 1} × k ∈ {1, 2, 3} 과 label-free σ=0 을 3D e2e 로 다시 잰 보강 측정. 채택 근거가 아니다 |
+
+**T50 (2026-10-12 추가)** — representation 분리 측정의 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **`pi05_base`** | 우리 16D LoRA 학습의 초기 weight (로컬 12 GB). 같은 16D config 의 입력 변환 그대로 params 만 바꿔 같은 변형의 `kv_L4` feature 를 뽑아 LoRA 와 비교한다 |
+| **`r` ratio (feature 민감도)** | frame 마다 `r = d(C0, C1) / d(C0, C1p)`. d = host frame 의 C0 feature 에 대한 상대 L2 (각 절반 안에서), C1 = 다른 과일 3 개를 지시한 prompt 의 평균, C1p = 같은 target 의 다른 phrasing 2 개의 평균. r < 1 이면 target 교체가 표현만 바꾼 것보다 feature 를 덜 움직인다. text 절반 (dim 0–255) · image 절반 (256–511) · full 을 따로 낸다 |
+| **`d_adj`** | 같은 episode 의 다음 sampled frame (stride 6 = 0.4 s) 의 C0 와의 상대 L2. feature 가 시간에 따라 움직이는 기준선 |
+| **counterfactual probe** | 같은 512D feature 위의 multinomial LogReg 를 원본 C0 행 + C1 행 (distractor 지시, 정답 `pick`) 1 : 1 로 학습한 것. **standard probe** = C0 행만 학습 (`kv_L4_v1` 과 같은 방식). 지표 `C0` = C0 정확도, `C1_instr` = 원래 place · home 인 host 의 C1 행 중 `pick` 으로 예측한 비율 |
+| **`valcv` · `trainval`** | `valcv` (T50a primary) = val 50 episode 안의 episode 단위 5-fold 교차검증. `trainval` (T50b) = train split 200 episode 의 C0 + C1 로 학습해 val 50 episode 전체 평가 |
+| **통제 (control)** | text 절반만 · image 절반만 · label 섞음 (C1 행의 label 을 무작위로). label 을 섞으면 C1_instr 가 올라가지 않아야 학습이 label 을 쓴 것이다 |
+| **decision rule (사전 고정)** | LoRA 에서 ② 가 C0 ≥ 0.95 이고 C1_instr ≥ 0.80 이면 representation 에 있음 → 원인은 (a) probe 학습. 아니면 (b) representation 또는 (c) fine-tuning. base 에서 기준을 넘고 LoRA 에서 넘지 못하면 (c), 둘 다 넘지 못하면 fine-tuning 탓이 아니다. 0.95 · 0.80 은 episode 별 정확도의 median 에 적용 (lead 가 결과 전 고정) |
+| **T50 · T50a · T50b** | T50 = HSR 의 instruction 둔감이 probe 학습 · representation · fine-tuning 중 어디서 오는지 가르는 STEP. T50a = LoRA feature 위 ① 민감도 · ② probe (CPU). T50b = base feature 를 GPU 로 뽑아 같은 표 (+ train split C1) |
 
 ---
 
@@ -83,8 +121,12 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 |---|---|---|
 | **T47 · T47b** attention head 재선택 (label-free: attention sum + spatial entropy, 고정 top-k) 과 보강 (합산 방식 · label 기반 3D 지표 · raw amplitude · sink 진단) | 16D · camera 3 대에서 다시 고른 head set 이 L8H2 보다 held-out 에서 target 을 더 잘 가리키는가 | **완료 (2026-10-12) — L8H2 유지 (사용자 판정).** 사전 고정 primary (L4H1 · L2H0 · L14H5, σ=1) 는 3D `on_target` 0 / 60 (L8H2 55 / 60), target mass 0.0134 (L8H2 0.1498). 선택된 head = sink 1 + broad blob 2. 합산 방식은 3D 를 거의 안 바꿈, `on_target` 이 놓치는 `identity_correct` 불일치와 σ=1 의 이웃 과일 흡수를 측정. held-out 은 pilot. 후속 T49 (명사 token query). 아래 "T47 · T47b" 절 |
 | **T48a** HSR counterfactual (a): prompt target 교체 · state 이식 · image 이식 · gripper 반전 (rendering 불필요) | frozen VLA feature 위의 phase probe (`kv_L4_v1`) 가 instruction · state 문자열 · image 가 바뀌면 어떻게 반응하는가 (strong decodability) | **측정 완료 (2026-10-12).** C0 재현 (val 0.9804 대 0.9808). 사실 셋: (a) probe 는 image 를 따르고 state 문자열을 따르지 않는다 (C2s · C2i 에서 image 쪽 0.979, gripper 반전 시 예측 변화 0.005), (b) instruction 의 target 교체에 거의 반응하지 않는다 (C1 원래 place → `pick` 0.040 = C0 의 place → pick 오류율 0.040), (c) grasp state 를 읽는지 팔 자세 순서를 읽는지는 **미결**. strong-rule proxy 는 strong rule 이 아니다. **T48b 진행 (사용자 판정)**. 아래 "T48a" 절 |
-| **T48b** HSR counterfactual (b): empty grasp · slip · phantom hold (물체의 유무를 바꾼 image 를 MuJoCo 로 re-render) | probe 가 "물체를 쥐고 있다" 를 읽는가, "팔이 이 자세에 있다" 를 읽는가 | **진행 중 (2026-10-12)** — 16D policy image re-render parity 확인이 먼저. task: [`handoff/T48b.task.md`](handoff/T48b.task.md). 아직 기록할 측정 없음 |
-| **T49** 명사 token query: prefix 의 target 명사 · "basket" token → image attention 으로 target · 목적지 map | action token query (L8H2) 대신 명사 token 을 query 로 쓰면 target · 목적지를 더 잘 가리키는가 | **진행 중 (2026-10-12)** — 구현 단계 (`handoff/T49.impl.md` 있음), verify 대기. task: [`handoff/T49.task.md`](handoff/T49.task.md). 아직 기록할 측정 없음 |
+| **T48b** HSR counterfactual (b): empty grasp · slip · phantom hold (물체의 유무를 바꾼 image 를 MuJoCo 로 re-render) | probe 가 "물체를 쥐고 있다" 를 읽는가, "팔이 이 자세에 있다" 를 읽는가 | ~~**진행 중 (2026-10-12)** — 16D policy image re-render parity 확인이 먼저. task: [`handoff/T48b.task.md`](handoff/T48b.task.md). 아직 기록할 측정 없음~~ → **측정 완료 (2026-10-12).** E0 re-render 가 기록 image 와 599/599 frame bit-identical (parity 통과). held-out primary (7 run) 의 편집 결과: empty grasp (E1) 에서 probe `pick` 1/13 (`place` 유지 12/13), E1s 4/13, slip (E2) 3/7, phantom hold (E3) `place` 97/99 (simple rule 99/99, offline proxy 0/99). **E1 · E2 는 2 run · 2 scene (ep1807 · ep1850) 에서 나온 pilot** (n = 13 · 7). "자세를 읽는가" 의 해석과 HSR 위치는 **판정 대기** (아래 "T48b" 절 §7). 실제 strong rule 은 측정 안 함. task: [`handoff/T48b.task.md`](handoff/T48b.task.md) |
+| **T49** 명사 token query: prefix 의 target 명사 · "basket" token → image attention 으로 target · 목적지 map | action token query (L8H2) 대신 명사 token 을 query 로 쓰면 target · 목적지를 더 잘 가리키는가 | ~~**진행 중 (2026-10-12)** — 구현 단계 (`handoff/T49.impl.md` 있음), verify 대기. task: [`handoff/T49.task.md`](handoff/T49.task.md). 아직 기록할 측정 없음~~ → **측정 완료 (2026-10-12).** GPU extract 1040 frame 오류 0. held-out (4 record pilot, record-mean): 2D `peak_on_target` 1.000 (L8H2 0.693), 잡은 뒤 1.000 (L8H2 0.382), target ∧ 목적지 분리 `both_correct` 0.981, prompt 교체 시 map 이 새 과일로 옮겨간 frame 157/164. **그러나 3D `identity_correct` 0.800 (L8H2 0.900), purity 0.700 (0.933), non-target seed 손실 420.3 / frame (190.3).** 서빙 cell 은 L8H2 유지, 서빙 반영 없음. task: [`handoff/T49.task.md`](handoff/T49.task.md). 아래 "T49" 절 |
+| **T49b** 명사 query 3D 열세 확인 (exploratory): σ ∈ {0, 1} × k ∈ {1, 2, 3} | 명사 query 의 3D 열세가 smoothing · 합산 설정 때문인가 | **측정 완료 (2026-10-12, 채택 근거 아님).** 모든 변형에서 `identity_correct` 0.800 – 0.850, purity 0.700 – 0.831 로 L8H2 (0.900 · 0.933) 에 못 미침. non-target seed 손실은 σ=0 에서 오히려 큼 (512.8 – 583.4 대 σ=1 394.5 – 420.3, L8H2 190.3). cell · k · σ 선택은 T51b 로. 아래 "T49b" 절 |
+| **T50** HSR 의 instruction 둔감은 fine-tuning 탓인가 (T50a LoRA feature CPU + T50b `pi05_base` GPU) | probe 학습 · representation · fine-tuning 중 원인 분리 | **측정 완료 (2026-10-12).** 사전 고정 decision rule 의 출력: LoRA · base 모두 counterfactual probe 가 기준 (C0 ≥ 0.95 ∧ C1_instr ≥ 0.80, episode median) 미달 → **"fine-tuning 탓이 아니다"** (규칙이 정한 문구). feature 민감도 r (full, episode median) 은 LoRA 0.611 · base 0.999. 아래 "T50" 절 |
+| **T51** attention head 선택 protocol 공식화 (RB-Y1 sim + 실물용 grasp-event label + LIBERO) | head · layer 를 하나로 고정하는 선택의 당위성 | **진행 중 (2026-10-12)** — task: [`handoff/T51.task.md`](handoff/T51.task.md). 아직 기록할 측정 없음 |
+| **T51b** head 선택 protocol 에 명사 query 행 추가 | action query 와 명사 query 를 같은 기준으로 비교 | **진행 중 (2026-10-12)** — task: [`handoff/T51b.task.md`](handoff/T51b.task.md). 아직 기록할 측정 없음 |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -100,6 +142,13 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | T47 — 서빙 attention cell 은 L8H2 (`denoise 0 · agg last · L8 · h2`) 를 유지한다 | 사용자 판정 (2026-10-12). label-free 기준 (attention sum + spatial entropy) 으로 다시 고른 공통 top-3 가 held-out 에서 실패했다 (3D `on_target` 0 / 60 대 L8H2 55 / 60). 교체는 새 근거가 있는 별도 STEP 에서만 판정한다 | 16D (pilot 규모) |
 | T47b — grounding 평가는 `on_target` 에 `identity_correct` (label 기반) 를 함께 본다 (**제안, 판정 대기**) | `on_target` 이 참이어도 chosen cluster 의 다수 label 이 target 이 아닌 frame 이 있다 (60 frame 중 6 – 13, 반대 방향 0) | 16D |
 | T48 — HSR counterfactual 은 T48a (rendering 불필요) 먼저, wrong-object 의 정답은 instruction 기준 `pick`, T48b (empty grasp · slip) 는 T48a 결과 후 판정 → **진행** | 사용자 판정 (2026-10-12). 사과를 쥔 frame + prompt "pear" → `pick`. offline GPU feature 추출 (prefix pass, server 없음) 승인. T48b 는 16D policy image re-render parity 를 먼저 확인하고 GPU 추출은 T46 의 CL3 후 (`handoff/T48b.task.md`) | 16D |
+| T48b 범위 — held-out 7 run 의 held frame 이 **primary**, VLA 학습 episode 의 recorded run (ep0 · ep500 · ep1200) 은 **secondary 로 분리 보고**, E1z 는 exploratory | 사용자 판정 (2026-10-12, T48b.impl.md 확인 후 · 결과 전). 같은 scene (episode 1800) 의 run 은 독립 표본으로 세지 않는다. 빈 손 닫힘 값 0.457 · 관통 제외 2.0 mm 는 impl.md 의 근거대로 고정. E0 는 `closed_loop_gt` 와 contact state 로 이중 채점 (`handoff/T48b.task.md` 사전 고정 보완) | 16D (pilot 규모) |
+| T49 — 명사 token query 를 시험한다. cell 선택은 **GT primary + label-free secondary**, **prompt 교체 시험 포함** (exploratory). 서빙 cell (L8H2) 은 유지 | 사용자 판정 (2026-10-12, T47 결과 후). offline GPU prefix pass 승인. 서빙 반영 (`attention_policy.py` 의 source 교체) 은 이 STEP 에서 하지 않고, 결과 → 사용자 판정 → 별도 STEP (`handoff/T49.task.md`) | 16D (pilot 규모) |
+| T49b — 명사 query 의 σ · k 변형은 **exploratory**, 채택 근거가 아니다. cell · k · σ 선택은 T51b (공식 protocol) 로 정한다 | 사용자 판정 (2026-10-12, T49 결과 후). 이미 추출된 data 로 CPU 만 사용 (`handoff/T49b.task.md`) | 16D (pilot 규모) |
+| T50 — **T50a (CPU) + T50b (GPU, `pi05_base`) 를 모두 진행**한다. 판정 임계 (C0 ≥ 0.95 · C1_instr ≥ 0.80) 는 episode 별 정확도의 **median** 에 적용 | 사용자 판정 (2026-10-12) 으로 T50a + T50b 진행. median 적용은 lead 가 결과 전 고정 (`handoff/T50.task.md`) | 16D |
+| T50 — decision rule 의 출력은 "fine-tuning 탓이 아니다" (LoRA · base 모두 기준 미달) | **사전 고정 규칙의 출력이다 (사용자 판정이 아니다).** 규칙을 어떻게 읽고 무엇을 하는지는 사용자 판정 대기 (T50 절 §7) | 16D |
+| (**제안, 판정 대기 — 미측정 해석 포함**) HSR 을 phase source 의 **보조 구성 요소** 로 둔다 | 검토 문서 §6 의 채택 기준 ("HSR 이 strong rule 보다 실행상 도움이 없으면 보조 구성 요소로 남긴다"). T48a (C1 둔감), T48b (E1 `place` 유지 12/13), T50 (counterfactual probe 도 기준 미달) 은 이 방향과 같은 쪽이나, **실제 strong rule 과의 비교와 gate on/off 실행 이득은 측정하지 않았다** (미측정 해석) | 16D |
+| (**제안, 판정 대기 — 미측정 해석 포함**) **명사 query 로 identity · destination 을, L8H2 로 3D seed 를 얻는** 결합 | T49: 명사 query 가 2D peak · 분리 · prompt 교체에서 앞서고 L8H2 가 3D `identity_correct` · purity · non-target 손실에서 앞섰다. 그 결합이 실제로 3D 를 개선하는지는 **돌리지 않았다** (미측정 해석). 공식 비교는 T51b | 16D |
 
 ---
 
@@ -113,9 +162,15 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 1 (T0T6 30) | (T47 · T47b 가 추가) **grasp latch 를 포함한 e2e** 에서의 head 비교, cuRobo ESDF backend e2e, T47b source 의 selection record 3D | offline e2e 는 CPU legacy ESDF 이고 grasp latch 가 없다 (`T47.verify.json not_measured`, `T47b.verify.json not_measured`). selection record 3D 는 T47 의 5 source 만 있다 | **측정 안 됨** |
 | 2 (T0T6 31) | (T47 · T47b 가 추가) **held-out 의 일반화** — banana · pear 각 1 record 와 same-scene 2 record 뿐이다. `cam_right_wrist` 2D 는 4 record 모두 target < 200 px 라 제외 | record 를 늘리려면 GPU attention pass 가 필요하다 (사용자 승인 사항) | **측정 안 됨** |
 | 3 (T0T6 32) | (T47b 가 추가) **σ=1 이 이웃 과일 흡수를 늘리는 경로**, 그리고 B3 수치 시험의 다른 source (L8H2 · oracle top-3 σ=1 에서만 시험) | `identity_correct` 54 → 49 (L8H2, σ=1) 는 측정했으나 smoothing 이 seed 를 번지게 하는지는 분리해 재지 않았다 | **원인 미확정** |
-| 4 (T0T6 33) | (T48a 가 추가) **probe 가 "물체를 쥐고 있다" 를 읽는가, "팔이 이 자세에 있다" 를 읽는가** — 같은 팔 자세에서 물체의 유무만 바꾼 image 로 가른다 | T48a 의 C2 는 같은 episode 의 다른 frame 의 image 를 통째로 이식해 팔 자세와 물체 상태가 함께 바뀐다. dataset 은 scripted 라 둘이 같이 움직인다 (frame index 만으로 val 1.000) | **T48b 로 진행 (사용자 판정, 2026-10-12)** — E0 re-render parity 먼저 |
+| 4 (T0T6 33) | (T48a 가 추가) **probe 가 "물체를 쥐고 있다" 를 읽는가, "팔이 이 자세에 있다" 를 읽는가** — 같은 팔 자세에서 물체의 유무만 바꾼 image 로 가른다 | T48a 의 C2 는 같은 episode 의 다른 frame 의 image 를 통째로 이식해 팔 자세와 물체 상태가 함께 바뀐다. dataset 은 scripted 라 둘이 같이 움직인다 (frame index 만으로 val 1.000) | ~~**T48b 로 진행 (사용자 판정, 2026-10-12)** — E0 re-render parity 먼저~~ → **T48b 측정 완료, 결론은 판정 대기.** E0 parity 통과, E1 · E2 · E3 측정 (E1 n = 13 · E2 n = 7 의 pilot). "자세를 읽는가" 의 해석은 T48b 절 §7 |
 | 5 (T0T6 34) | (T48a 가 추가) **실제 strong rule (`grasp_latch.py` + 실행 feedback) 과의 비교** | T48a 는 offline strong-rule proxy 만 썼다 (`T48.verify.json not_measured`) | **측정 안 됨** |
 | 6 (T0T6 35) | (T48a 가 추가) **batch 1 (서빙 batch size) 전체 extract · cuRobo 회귀 기준선 · extract 시작 시점의 pod working set** | extract 는 `--batch 4` (batch parity 는 첫 batch n = 4 에서만), cuRobo 변형은 돌리지 않았고, lead 요청이 extract 도중 도착해 시작 시점 working set 이 없다 (`T48.verify.json not_measured`) | **측정 안 됨** |
+| 7 | (T48b 가 추가) **E1 · E2 의 표본 확대** — held-out 의 `held` host 16 개 중 편집이 남은 것은 E1 13 · E2 7 이고 2 run · 2 scene (ep1807 · ep1850) 에서 나왔다 | 관통 제외로 줄었다 (E2 는 16 → 7). 더 늘리려면 held 구간이 긴 run 의 recorded data 가 필요 | **측정 안 됨** |
+| 8 | (T48b 가 추가) **E3 에서 probe 의 `place` 가 물체를 읽은 것인지 finger 닫힘을 읽은 것인지** | E3 는 과일과 finger 를 함께 바꾼다 (finger 를 과일 폭에 맞춤). simple rule (finger 값만 봄) 도 99/99 로 `place` 라 이 편집만으로는 가를 수 없다 (미측정 해석) | **원인 미확정** |
+| 9 | (T49 · T49b 가 추가) **명사 query 의 3D `identity_correct` · purity · non-target 손실 열세의 원인**, 명사 map 과 L8H2 의 결합 (제안 (b)) | σ · k 변형 (T49b) 으로는 L8H2 수준에 못 미쳤다. 명사 map 으로 seed 를 고르는 경로와 L8H2 seed 의 결합은 돌리지 않았다 | **원인 미확정 · 결합 측정 안 됨** → T51b |
+| 10 | (T49 가 추가) **grasp latch 를 포함한 e2e · cuRobo ESDF backend · held-out 4 record 보다 큰 표본** (T47 의 1 · 2 번과 같은 한계) | T49 e2e 는 legacy ESDF, grasp latch 없음, held-out 4 record × 15 frame. cuRobo 기준선은 GPU 미사용 지시로 돌리지 않음 (`T49.verify.json not_measured`) | **측정 안 됨** |
+| 11 | (T50 이 추가) **base · LoRA 모두 `kv_L4` 위 counterfactual probe 가 기준 미달인 이유** — 다른 layer · 다른 feature · contrastive objective 에서는 어떤가 | T50 은 `kv_L4_v1` 의 feature 정의 (layer 4 · V · head 0, text · image 평균) 와 LogReg 만 시험했다 | **측정 안 됨** |
+| 12 | (T50 이 추가) **실제 gate on / off 실행 이득과 실제 strong rule 비교** (HSR 위치 판정의 근거) | T48a · T48b · T50 모두 offline 이다 | **측정 안 됨** |
 
 ---
 
@@ -871,4 +926,657 @@ timing 은 prefix pass 와 `kv_L4` reduction 의 device 시간이며 input trans
 - **figure** (각각 `.json` sidecar 있음): [`scene`](figures/t48/t48-scene-c2-pairs.png) · [`graph`](figures/t48/t48-c1-c2-graph.png) · [`table`](figures/t48/t48-accuracy-table.png).
 - **구현**: `AG3S/ag3s/experiments/studies/t48_hsr_*.py` (4 개) · `tests/ag3s/test_t48_hsr_counterfactual.py` (27 passed · 1 skipped). `handoff/T48.impl.md`.
 - **task 문서**: `handoff/T48.task.md` (T48a) · `handoff/T48b.task.md` (다음 STEP).
+- commit 은 하지 않았다.
+
+---
+
+## T48b — HSR counterfactual (b): 같은 팔 자세에서 물체의 유무만 바꾸면 phase probe 는 반응하는가 (2026-10-12 KST)
+
+**이 절이 답하는 물음 (목적).** T48a 는 probe (`kv_L4_v1`, 위 "T48a" 절) 가 state 문자열이 아니라 image 를 따른다는 것까지 보였지만, image 안에서 **"물체를 쥐고 있다" 는 작업 상태** 를 읽는지 **"팔이 이 자세에 있다" 는 자세 순서** 를 읽는지는 가리지 못했다 (T48a 결과 (c)). 데이터가 실패 · retry 없는 scripted 시연이라 팔 자세와 쥠 상태가 항상 같이 움직이기 때문이다. T48b 는 기록된 16D step 의 qpos 에서 **대상 과일의 free joint 와 쓰는 손 finger joint 만** 바꾸고 MuJoCo (osmesa, CPU) 로 policy image 규약 그대로 다시 그려 (팔 자세는 그대로, 물체의 유무 · 위치만 다름) 같은 probe 에 넣는다. 편집의 종류는 용어 절 "T48b" 표 (E0 · E1 · E1s · E1z · E2 · E3) 에 풀어 두었다. 정답은 gripper 값이 아니라 **MuJoCo contact 로 정한 물리 predicate** 다.
+
+**한 줄 결과 (before → after).**
+
+- **before.** T48a 후: probe 는 image 를 따르나 무엇을 읽는지는 열려 있었다.
+- **after — 측정된 사실.**
+  - **re-render parity 통과.** E0 (편집 없이 re-render) 가 기록 image 와 **599 / 599 frame (held-out 260 + train_range 339) 에서 3 camera 모두 bit-identical** (MAD 0 · max abs 0, state 차이 0.0), probe 예측 일치 599 / 599 (통과 기준 ≥ 0.95).
+  - **held-out primary 의 편집 결과** (frame 합산 k/n, "= target" 은 정답과 같은 예측). 정답이 `pick` 인 편집에서 probe 가 `pick` 으로 읽은 비율: **E1 (empty grasp) 1/13** (`place` 유지 12/13), **E1s 4/13**, **E2 (slip) 3/7**, E1z (exploratory) 5/13. 정답이 `place` 인 **E3 (phantom hold)** 에서 probe `place` **97/99**.
+  - **simple rule 과 offline proxy** (proxy 는 strong rule 이 아니다): E1 에서 rule 0/13 · proxy 1/13, E3 에서 rule 99/99 · proxy 0/99. rule 은 finger 값 (state) 만 보고 proxy 는 host record 의 이력 (PRE → CLOSING → HELD) 을 쓰기 때문에 같은 편집에서 서로 반대 방향의 값이 나온다 (정의에서 오는 값이며 이 로그는 더 해석하지 않는다).
+  - **규모.** E1 · E2 의 held-out 값은 **2 run · 2 scene (ep1807 · ep1850) 에서 나온 pilot** 이다 (E1 은 ep1807 11 + ep1850 2 frame, E2 는 5 + 2). E3 는 4 scene (ep1807 17 · scene ep1800 56 · ep1850 11 · ep1900 15 frame).
+- **"자세를 읽는가" 의 해석은 하지 않았다.** task 의 되돌아올 지점이 "E1 · E2 에서 probe 가 `place` 를 유지하면 자세 순서를 읽는다" 로 적어 둔 조건에 해당하는 값은 §7 에 두고, HSR 의 위치는 판정 대기로 둔다.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `T48b.verify.json` 의 `numbers` 에서만 왔다. 같은 파일 숫자의 덧셈은 "(산출)" 로 적었다. 구현의 설계 값 (host 선택 규칙 · 편집 정의 · 렌더 자세 규칙) 은 `T48b.impl.md` 의 서술이며 그 수치는 verify.json 에 있는 것만 옮겼다.
+- 해석의 출처를 가른다: 사용자 판정 "(사용자 판정)", lead 가 task 에 쓴 것 "(lead)", 측정으로 확인하지 않은 해석 "(미측정 해석)".
+- **독립 단위.** frame 은 독립 trial 이 아니다. 표는 frame 합산 k/n 을 적고, scene (독립 단위) 별 probe 값은 figure 의 마커와 verify.json `probe_per_scene` 에 있다. long · t2 · headfix · ep1800 은 같은 scene (episode 1800) 이라 1 scene 이다.
+- **환경.** CPU render (`.venv-ag3s`, osmesa, 1 thread) + GPU extract 1 회 (offline prefix pass, GPU lock 아래, 시작 전 compute process 0) + CPU score. 회귀 기준선은 render 앞과 score 앞 두 번 일치했다 — legacy 14 / 15 · has_target 15 / 15 · frame0 `clearance_before` −29.031048 mm. cuRobo 기준선은 이 STEP 에서 돌리지 않았다. HEAD `28b98160` (T48b 파일 3 개는 untracked, 새 파일뿐).
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+| # | 판정 · 사건 (2026-10-12) | 이 절에서 |
+|---|---|---|
+| 1 | **(사용자 판정, T48a 결과 후)** T48b 진행. 16D policy image re-render parity (E0) 를 먼저 확인하고 통과하지 못하면 거기서 멈춰 보고. GPU 추출은 T46 의 CL3 가 끝난 뒤 | §3 |
+| 2 | **(사용자 판정, T48b.impl.md 확인 후 · 결과 전)** held-out 7 run 의 `held` frame 이 **primary**, VLA 학습 episode 의 recorded run (ep0 · ep500 · ep1200) 은 **secondary 로 분리 보고** (편집 image 는 학습에 없으나 장면은 익숙할 수 있음을 명시). 같은 scene 의 run 은 독립 표본으로 세지 않는다. E1z 는 exploratory | §4 |
+| 3 | **(lead)** 정답은 물리 predicate. 빈 손 닫힘 값 0.457 (기록된 빈 손 닫힘 22 개의 median) · 관통 제외 기준 2.0 mm (편집하지 않은 기록 frame 의 최대 1.83 mm) 고정. E0 는 `closed_loop_gt` 와 contact state 두 기준으로 채점 | §2, §3 |
+
+| 시각 (KST) | 무엇 | 출처 |
+|---|---|---|
+| 17:03 – 17:10 | CPU render (`--stage render --extra-runs train_range`, rc 0, stage wall 443.5 s). 앞서 회귀 기준선 | `runs[render]` 08:03:03Z – 08:10:28Z · `cost_5.render_stage_wall_s` |
+| 19:23:35 – 19:28:16 | GPU extract (`--stage extract --batch 4`, rc 0, wall 280.9 s, retry 0, nvidia-smi peak 8804 MiB) | `gpu_extract[0]` 10:23:35Z – 10:28:16Z |
+| 21:00 – 21:20 | CPU score · figure (회귀 기준선 재확인 일치) | verify.json `time_kst` |
+
+### 2. 설계와 구현 (새 파일만, `T48b.impl.md`)
+
+| ID | host frame | 편집 | 정답 | 묻는 것 |
+|---|---|---|---|---|
+| **E0** | 사용 frame 전부 | 없음 (re-render 만) | 원래 정답 (이중 채점) | parity |
+| **E1** | `held` (파지 후 · 놓기 전) | 과일 → 초기 table 위치, finger → 0.457, state 도 같게 | `pick` | 손은 닫혔고 팔은 운반 자세인데 물체가 없다 |
+| **E1s** | `held` | 과일만 옮김, finger · state 그대로 | `pick` | E1 에서 finger image · state 효과를 뺀다 |
+| **E1z** (exploratory) | `held` | E1 과 같되 finger → 0 (joint 한계) | `pick` | 기록된 빈 손 (0.457) 과 완전히 닫힌 손의 차이 |
+| **E2** | `held` | 과일 → 손 바로 아래 table 위 (xy 그대로, z · 자세 = 초기), finger · state 는 E1 과 같게 | `pick` | 물체가 손 근처에 있으나 쥐어져 있지 않다 |
+| **E3** | `reach` (쓰는 손이 처음 닫히기 전, 과일 `on_table`) | 과일 → finger 사이, finger → 과일 폭에 맞춤, state 도 맞춤 | `place` | 팔은 접근 자세인데 물체는 손 안에 있다 (E1 의 대칭) |
+
+- **렌더 자세 규칙.** 기록의 qpos 는 마지막 `mj_step` 뒤 값이지만 camera 가 본 kinematics 는 그 step 앞의 것이라 `mj_integratePos(qpos, qvel, −dt)` 로 한 step 되돌려 그린다 (첫 record 는 예외). 이 규칙으로 parity 가 bit 단위로 맞았다 (`T48b.impl.md` §1; 규칙 없이는 움직이는 link 가장자리가 다르다고 impl 이 smoke 로 확인).
+- **편집 지역성 (verifier 독립 점검, 10 run).** E1s 는 과일의 free joint 7 개만 바뀌고 state 는 그대로다. E1 · E1z · E3 는 과일 7 개 + 쓰는 손 finger joint 2 개가 바뀌고 state 는 쓰는 gripper 한 차원만 바뀐다. E2 는 과일의 z · 자세 5 개 + finger 가 바뀌고 xy 는 그대로다.
+- **빈 손 닫힘 값 `g_empty` = 0.457** (n = 22 기록, p0 0.389 · p5 0.402 · p95 0.495 · p100 0.688). 기준 hold 값 (dataset 의 닫는 명령): apple 0.723 · banana 0.495 · orange 0.667 · pear 0.673.
+- 테스트: `test_t48b_*` 43 passed · 0 failed (`numbers.pytest_t48b`).
+
+### 3. 검증 — E0 re-render parity (통과 기준 = 예측 일치 ≥ 0.95, MAD 가 render 잡음 수준)
+
+![T48b CPU parity · 제외 표](figures/t48/t48b-cpu-parity-exclusions-table.png)
+
+[`t48b-cpu-parity-exclusions-table.png`](figures/t48/t48b-cpu-parity-exclusions-table.png) — #0 pixel · state parity, #4 편집별 포함 / 계획 frame 수, render 비용.
+
+| 점검 | held-out primary (7 run) | train_range secondary (3 run) |
+|---|---|---|
+| E0 frame 수 | 260 | 339 |
+| 3 camera 모두 bit-identical | **260 / 260** | **339 / 339** |
+| MAD 최대 · max abs · state max abs | 0.0 · 0 · 0.0 | 0.0 · 0 · 0.0 |
+| probe 예측 일치 (re-render 대 기록 image) | **260 / 260** | **339 / 339** |
+| probe 확률 변화 (599 frame) | median · p99 · max 모두 0.0 | |
+| 같은 자세 재렌더가 동일 | 전 run 참 | |
+
+- 일치율 1.0 (≥ 0.95), pixel gate (frame · camera MAD 최대 ≤ 1.0) 통과 → **E1 – E3 진행.** rule · proxy · frame-index 의 예측 일치도 599 / 599 이다.
+- state 재구성 (`build_obs("rby1_16d")` 규칙) 과 기록 state 의 차이 최대 0.0 (전 frame).
+- 독립 확인: 편집 · 확률을 verifier 가 따로 다시 계산했다 — probe 를 numpy 로 다시 적용한 argmax 불일치 0 / 1510 (확률 최대 차 5.0e-7), `metrics.json` 대 독립 재채점 124 / 124 field 일치.
+
+**E0 이중 채점** (정답 기준을 가름; frame 합산 k/n). held-out primary 에서 `closed_loop_gt` 와 contact state 가 다른 (모호하지 않은) frame 은 39 개, 모호 frame 은 6 개다 (long · t2 의 빈 손으로 닫힌 frame 에서 `closed_loop_gt` 는 `held` 로 친다). train_range 는 1 개 · 5 개.
+
+| 채점 | 대상 | probe | simple rule | offline proxy | frame-index |
+|---|---|---:|---:|---:|---:|
+| `closed_loop_gt` | held-out primary | 228 / 260 | 227 / 260 | 204 / 260 | 164 / 260 |
+| | ep1807 만 | 72 / 75 | 75 / 75 | 72 / 75 | 66 / 75 |
+| | train_range | 325 / 339 | 339 / 339 | 332 / 339 | 296 / 339 |
+| contact state | held-out primary | 215 / 254 | 182 / 254 | 181 / 254 | 152 / 254 |
+| | ep1807 만 | 72 / 74 | 74 / 74 | 72 / 74 | 65 / 74 |
+| | train_range | 324 / 334 | 333 / 334 | 330 / 334 | 292 / 334 |
+
+(frame-index baseline 은 채점 1510 row 중 1210 row 에서 nearest-`t_step` fallback 을 썼다 — T48a 의 ep1807 과 같은 정의.)
+
+**편집 · 제외.** 관통 > 2.0 mm 인 편집은 제외했다. 제외 사유는 held-out 에서 전부 `penetration` 이다 (train_range 는 `penetration` 과 `finger_touch`: 쓰는 손 finger 가 과일에 닿은 채 `on_table` 로 판정).
+
+| 편집 | held-out primary 계획 → 포함 (제외) | ep1807 만 | train_range 계획 → 포함 (제외) |
+|---|---|---|---|
+| E1 | 16 → 13 (3) | 12 → 11 | 38 → 30 (8) |
+| E1s | 16 → 13 (3) | 12 → 11 | 38 → 31 (7) |
+| E1z | 16 → 13 (3) | 12 → 11 | 38 → 31 (7) |
+| E2 | 16 → **7** (9) | 12 → 5 | 38 → 13 (25) |
+| E3 | 123 → 99 (24) | 19 → 17 | 66 → 62 (4) |
+
+- 독립 scene 단위로 쓰면 held-out 의 **E1 · E1s · E1z 는 ep1807 11 + ep1850 2 (scene 2 개), E2 는 5 + 2, E3 는 ep1807 17 · scene ep1800 56 · ep1850 11 · ep1900 15** 이다. scene ep1800 (long + t2 + headfix + ep1800) 과 ep1900 에는 `held` host 가 없어 E1 · E2 가 0 이다.
+- E1 에서 과일을 초기 table 위치로 옮긴 결과 host 기준 xy 50 mm 안에 놓인 포함 편집이 held-out 6 / 13, train_range 10 / 30 이다 (정의와 값은 `indep/e1_e2_fruit_xy.json`; 이 로그는 해석하지 않는다). train_range 의 기록된 관통 최대는 2.10 mm 로 (held-out 1.83 mm) 편집 제외 기준 2.0 mm 와 가깝다.
+
+**비용 (#5).** re-render 는 frame 당 median 0.286 s (3 camera, 1 thread, osmesa; mean 0.348 · p95 0.603, n = 599), 편집 image 는 median 0.291 s (n = 312), E3 의 배치 계산 median 0.442 s (n = 189) — render 중 host load average 16.7 → 25.9 (다른 session 의 GPU closed-loop job 포함). prefix pass 는 input 당 median 14.98 ms (batch 4, 1510 input, 385 call, device 시간), JAX peak 7.6 GB, nvidia-smi peak 8804 MiB, load 10.9 s, extract wall 278.4 s.
+
+### 4. 결과 — 편집 × 방법 (정답과 같은 예측 비율, frame 합산 k/n)
+
+![T48b 편집 × 방법](figures/t48/t48b-score-accuracy-bars.png)
+
+[`t48b-score-accuracy-bars.png`](figures/t48/t48b-score-accuracy-bars.png) — 세 panel (held-out primary / ep1807 만 / train_range secondary). 막대 = frame 합산, 마름모 = scene 별 probe 값 (독립 단위). E1z 는 음영 (exploratory). 표는 [`t48b-score-table.png`](figures/t48/t48b-score-table.png) (sidecar 에 같은 수치).
+
+**held-out primary (정답과 같은 예측: E1 · E1s · E1z · E2 는 `pick`, E3 는 `place`)**
+
+| 편집 (정답) | n | probe | simple rule | offline proxy | frame-index |
+|---|---:|---:|---:|---:|---:|
+| E1 empty grasp (`pick`) | 13 | **1 / 13** | 0 / 13 | 1 / 13 | 2 / 13 |
+| E1s empty, state 고정 (`pick`) | 13 | **4 / 13** | 0 / 13 | 0 / 13 | 2 / 13 |
+| E2 slip (`pick`) | 7 | **3 / 7** | 0 / 7 | 1 / 7 | 2 / 7 |
+| E3 phantom hold (`place`) | 99 | **97 / 99** | 99 / 99 | 0 / 99 | 4 / 99 |
+| E1z, finger 완전 닫힘 (exploratory) | 13 | 5 / 13 | 0 / 13 | 1 / 13 | 2 / 13 |
+
+- probe 의 예측 분포 (`pick` / `place` / `home`): E1 [1, 12, 0], E1s [4, 9, 0], E2 [3, 4, 0], E1z [5, 8, 0], E3 [2, 97, 0]. 같은 host frame 의 E0 에서 probe 의 평균 확률은 E1 의 host 13 개에서 `place` 0.997 이고, E1 편집 뒤 평균은 `pick` 0.110 · `place` 0.877 · `home` 0.012 다. E1s 는 0.282 / 0.699 / 0.019, E2 는 0.375 / 0.609 / 0.017, E1z 는 0.392 / 0.552 / 0.056. E3 는 E0 에서 `pick` 0.995 이던 평균이 편집 뒤 `place` 0.962 로 바뀐다.
+- E0 대비 예측이 바뀐 frame 수 (probe): E1 1 / 13, E1s 4 / 13, E2 3 / 7, E1z 5 / 13, E3 97 / 99. rule 은 E3 99 / 99 만 바뀌고 (E1 · E1s · E1z · E2 는 0), proxy 는 E1 1 · E1z 1 · E2 1 · E3 0.
+- scene 별 probe (`pick` 으로 읽은 수): E1 ep1807 1 / 11 · ep1850 0 / 2, E1s 4 / 11 · 0 / 2, E2 3 / 5 · 0 / 2, E1z 3 / 11 · 2 / 2. E3 ep1807 17 / 17 · scene ep1800 56 / 56 · ep1850 11 / 11 · ep1900 13 / 15 (`place` 으로 읽은 수).
+
+**ep1807 만 (유일하게 probe · VLA 어느 학습에도 없고 SUBTASK-b closed-loop 평가에 쓰인 run)**
+
+| 편집 | n | probe | rule | proxy | frame-index |
+|---|---:|---:|---:|---:|---:|
+| E1 | 11 | 1 / 11 | 0 / 11 | 1 / 11 | 0 / 11 |
+| E1s | 11 | 4 / 11 | 0 / 11 | 0 / 11 | 0 / 11 |
+| E2 | 5 | 3 / 5 | 0 / 5 | 1 / 5 | 0 / 5 |
+| E3 | 17 | 17 / 17 | 17 / 17 | 0 / 17 | 2 / 17 |
+| E1z | 11 | 3 / 11 | 0 / 11 | 1 / 11 | 0 / 11 |
+
+**train_range secondary (VLA fine-tune episode; ep0 · ep1200 은 probe 학습 episode 이기도 함 — 장면이 익숙할 수 있다)**
+
+| 편집 | n | probe | rule | proxy | frame-index |
+|---|---:|---:|---:|---:|---:|
+| E1 | 30 | 5 / 30 | 0 / 30 | 0 / 30 | 0 / 30 |
+| E1s | 31 | 7 / 31 | 0 / 31 | 0 / 31 | 0 / 31 |
+| E2 | 13 | 5 / 13 | 0 / 13 | 0 / 13 | 0 / 13 |
+| E3 | 62 | 60 / 62 | 62 / 62 | 0 / 62 | 12 / 62 |
+| E1z | 31 | 9 / 31 | 0 / 31 | 0 / 31 | 0 / 31 |
+
+- train_range 의 scene 별 probe: E1 ep0 1 / 10 · ep500 2 / 10 · ep1200 2 / 10, E2 0 / 4 · 1 / 4 · 4 / 5.
+- 정의에서 정해지는 칸: E1s 는 state 가 그대로라 rule · proxy 예측이 정의상 E0 와 같다 (그래서 0 / 13). proxy 는 host record 의 원래 이력을 쓰므로 E3 에서 `place` 로 못 바뀐다 (0 / 99). 이 칸들은 probe 의 반응과 같은 의미의 측정이 아니다.
+
+### 5. 실제 scene
+
+![T48b held host 의 편집 image](figures/t48/t48b-scene-held-edits.png)
+
+[`t48b-scene-held-edits.png`](figures/t48/t48b-scene-held-edits.png) — held-out 두 frame (ep1807 r23, ep1850 r14) 의 E0 (기록 image 와 bit-identical) · E1 · E1s · E1z · E2 를 3 camera 로 보이고 각 열 제목에 probe · rule · proxy · frame-index 예측과 probe 확률을 적었다. 이 두 frame 은 선택 기준이 sidecar 에 있고 결과로 고르지 않았다. 그림에서: ep1807 r23 은 E1s · E1z · E2 가 `pick` 으로, ep1850 r14 는 E1z 만 `pick` 으로 읽힌다 (같은 host frame 이라도 편집마다 예측이 갈린다). wrist camera 에서 E1 · E2 는 과일이 finger 사이에 없고 E1z 는 finger 가 붙어 있다.
+
+![T48b E3 phantom hold](figures/t48/t48b-scene-e3-phantom.png)
+
+[`t48b-scene-e3-phantom.png`](figures/t48/t48b-scene-e3-phantom.png) — E3 (ep1807 r10 · ep1850 r5 · ep1900 r10 (template 가 없는 pear 의 `pad_midpoint` 배치)) 의 E0 대 E3 를 3 camera 와 예측으로. E3 는 접근 자세의 팔이 과일을 finger 사이에 쥐고 있는 image 다.
+
+### 6. 읽을 때의 한계
+
+| 한계 | 내용 |
+|---|---|
+| **E1 · E2 는 pilot** | held-out 에서 E1 13 · E2 7 frame, 2 scene. 관통 제외로 줄었다 (E2 16 → 7). 한 scene 안의 frame 은 독립 trial 이 아니다 |
+| **E3 의 template** | 손 안의 과일 자세는 같은 과일 · 같은 손의 실제 `held` record 에서 잰 상대 자세를 옮긴 것이다. ep1807 · long · headfix · ep1800 의 template 은 `ep1807:31`. pear (ep1900) 는 template 이 없어 finger pad 중점 규칙을 쓴다 |
+| **E3 에서 과일과 finger 가 함께 바뀐다** | 과일의 유무와 finger 닫힘을 분리해 재지 않았다 (재측정 대기 8) |
+| **proxy ≠ strong rule** | 실제 strong rule (`grasp_latch.py` + 실행 feedback) 은 측정하지 않았다 |
+| **secondary 의 장면 익숙함** | train_range 3 run 은 VLA fine-tune episode 이고 ep0 · ep1200 은 probe 학습 episode 이기도 하다. 편집 image 는 학습에 없으나 장면은 익숙할 수 있다 |
+| **E0 정답 기준** | `closed_loop_gt` 와 contact state 가 다른 frame 이 있다 (held-out 39 frame). 편집 (E1 – E3) 의 정답은 contact state 계열의 물리 predicate 만 쓴다 |
+
+### 7. 되돌아올 지점 · 판정 대기 제안
+
+| task 의 신호 (`T48b.task.md`) | 측정 | 다음 |
+|---|---|---|
+| E0 parity 미달 → 이후 진행 없음 | 통과 (599 / 599 일치, bit-identical) | 해당 없음 |
+| E1 · E2 에서 probe 가 `place` 를 유지하면 probe 는 자세 순서를 읽는다. 그러면 HSR 은 empty grasp · slip 에서 strong rule (measured opening) 보다 못하다 → 검토 문서 §6 대로 HSR 을 **보조 구성 요소** 로 둔다 | held-out 에서 E1 `place` 유지 12 / 13, E2 4 / 7 (n = 13 · 7, 2 scene) | 조건에 해당하는 값이다. 단 **strong rule 은 측정하지 않았다** (proxy 는 strong rule 이 아니다). 해석과 HSR 의 위치는 **판정 대기** (아래 제안 (a)) |
+| E1 · E2 · E3 에서 probe 가 물체를 따라가면 image 의 쥠 상태를 읽는 것이다 → 실험 4 (phase source ablation) 의 HSR arm 근거 | E3 에서 `pick` → `place` 로 바뀐 frame 97 / 99 (rule 도 99 / 99), E1 은 대부분 `place` 유지 (12 / 13), E2 는 4 / 7 | 한 방향의 신호가 아니다. 판정 대기 |
+
+**판정 대기 제안 (a) — HSR 을 보조 구성 요소로 둔다 (미측정 해석 포함).** 검토 문서 §6 의 채택 기준 ("HSR 이 strong rule 보다 실행상 도움이 없으면 HSR 은 보조 구성 요소로 남긴다") 을 쓰면, T48a (instruction 교체 반응 0.040), T48b (E1 `place` 유지 12 / 13), T50 (counterfactual probe 도 기준 미달, 아래 T50 절) 은 같은 쪽을 가리킨다. 그러나 이 기준의 전제인 **strong rule 과의 실행 비교와 gate on / off 이득은 어떤 STEP 에서도 측정하지 않았다 (미측정 해석).** 사용자 판정 전이므로 HSR 의 위치를 이 로그가 정하지 않는다.
+
+**측정하지 않은 것 (`T48b.verify.json` `not_measured`).** cuRobo 회귀 기준선 (GPU, 이 STEP 에서 돌리지 않음). 그 밖에 이 절에서 밝힌 것: 실제 strong rule, E3 의 과일 · finger 분리, held-out E1 · E2 의 표본 확대.
+
+**산출물.**
+
+- **측정**: `handoff/T48b.verify.json`. 원자료는 run 디렉터리 `/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b/` (`plan` · `render` · `feat` · `extract` · `score` · `indep`).
+- **figure** (각각 `.json` sidecar 있음): [`scene (held edits)`](figures/t48/t48b-scene-held-edits.png) · [`scene (E3)`](figures/t48/t48b-scene-e3-phantom.png) · [`graph`](figures/t48/t48b-score-accuracy-bars.png) · [`table (parity · 제외)`](figures/t48/t48b-cpu-parity-exclusions-table.png) · [`table (score)`](figures/t48/t48b-score-table.png).
+- **구현**: `AG3S/ag3s/experiments/studies/t48b_{scene,metrics,hsr}.py` · `tests/ag3s/test_t48b_{scene,hsr_cli}.py` (43 passed). `handoff/T48b.impl.md`.
+- commit 은 하지 않았다.
+
+---
+
+## T49 — 명사 token query: prompt 의 target 명사 · "basket" token 이 image 를 보는 attention 은 target · 목적지를 가리키는가 (2026-10-12 KST)
+
+**이 절이 답하는 물음 (목적).** T47 은 논문 (Kang et al.) 의 label-free 기준을 **action (suffix) token query** 에 적용했고 실패했다 (선택된 head 가 fixed-patch sink 와 넓게 퍼진 map). 논문의 원래 query 는 **text** 이고 여러 물체를 다룰 때 **명사 token** 마다 map 을 따로 만든다. pi0.5 의 prefix 는 완전 bidirectional 이라 (image · text 모두 `ar_mask = False`) text 행이 image 열을 본다. T49 는 얼린 pi0.5 의 prefix pass **한 번** 에서 (denoise · noise seed 불필요, 결정적) target 과일 명사 token 과 `basket` token 의 행이 image 768 열에 둔 attention 을 꺼내 camera 별 16×16 map 으로 만들고, (1) target 을 더 잘 가리키는가, (2) target 과 목적지를 서로 다른 단어로 따로 얻을 수 있는가 (separation), (3) prompt 의 명사를 바꾸면 map 이 따라 움직이는가 (prompt swap), (4) 3D 파이프라인에 넣으면 L8H2 보다 나은가를 잰다. query 의 성격이 다르다: action query 는 policy 가 "어디로 움직이려 하는가" 를 보고 (잡은 뒤 basket 으로 옮겨갈 수 있다), 명사 query 는 "이 단어가 무엇을 가리키는가" 를 본다.
+
+**한 줄 결과 (before → after).**
+
+- **before.** 서빙 query (L8H2, action token) 는 held-out 에서 `peak_on_target` 0.693 이고 잡은 뒤 (post-grasp) 에는 0.382 로 떨어진다. 목적지는 규칙 (잡을 수 없음 + 3 frame 우위) 으로만 판정했다.
+- **after — 2D · 분리 · prompt 교체는 명사 query 가 앞선다** (held-out 4 record pilot, record-mean).
+  - 명사 GT cell (primary, `noun_gt_k3_s1` = L8H6 · L5H4 · L4H2, σ=1) `peak_on_target` **1.000** (pre-grasp 1.000 · post-grasp 1.000), target mass 0.236. 같은 cell 을 σ=0 으로 합산하면 target mass 0.528 · lift 93.9. L8H2 는 0.693 (post-grasp 0.382), target mass 0.147.
+  - **분리**: target map 의 peak 가 target 위 · basket map 의 peak 가 crate 위인 frame 비율 `both_correct` **0.981** (target map 의 crate 위 peak 0.000, basket map 의 target 위 peak 0.000). label 없이 고른 secondary 는 0.914.
+  - **prompt 교체**: 새로 지명한 과일 위로 map peak 가 옮겨간 (`moved`) frame 이 held-out **157 / 164** (pre-grasp 98 / 98, post-grasp 59 / 66).
+- **after — 그러나 3D 는 명사 primary 가 L8H2 보다 낮다** (held-out 60 frame, record-mean): `identity_correct` **0.800 대 0.900**, chosen cluster purity **0.700 대 0.933**, non-target seed 손실 **420.3 대 190.3** point / frame. `on_target` 은 0.900 대 0.917.
+- **비용**: 명사 prefix pass 의 device 시간 median 26.5 ms (1025 frame). 같은 frame 에서 전처리 포함 49.2 ms 대 L8H2 의 prefix + suffix 10 회 107.5 ms.
+- 서빙 cell 은 L8H2 를 유지한다 (T47 판정). 서빙 반영은 이 STEP 에서 하지 않았다.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `T49.verify.json` 의 `numbers` 에서만 왔다. 같은 파일 숫자의 덧셈 · 개수 세기는 "(산출)". 모든 집계는 verify.json `_scope` 의 **record-mean** (record 안에서 frame pool → record 가중 없는 평균) 이라 T47 의 pooled 값과 같은 source 도 조금 다르다 (L8H2 의 target mass · lift · peak: T47 pooled 0.1498 · 59.60 · 0.689 대 T49 record-mean 0.1465 · 55.19 · 0.693).
+- 해석의 출처를 가른다: "(사용자 판정)" · "(lead)" · "(미측정 해석)".
+- **held-out 은 pilot** 이다 (same-scene `headfix` · `ep1800`, new-scene `ep1850` · `ep1900`; record 당 15 frame, 같은 scene 의 두 record 는 독립 표본이 아니다). `noun_gt` · `basket_gt` 는 selection record (`long` · `t2` · `ep1807`) 의 GT 로 고른 cell 이라 **held-out 에서만 채점**하고 e2e 는 selection record 에서 거절한다.
+- **환경.** GPU 는 offline prefix pass (checkpoint `…/29999`, 16D LoRA) 한 번에만 썼다 (GPU lock 아래, 시작 전 nvidia-smi memory 0 MiB). 나머지는 CPU (`.venv-ag3s`, legacy ESDF). 회귀 기준선: legacy 14 / 15 · has_target 15 / 15 · frame0 `clearance_before` −29.031048 mm 일치 (분석 시 load 1 분 평균 12.34 → 10.74). cuRobo 기준선은 돌리지 않았다. 분석 HEAD `ec2e79fe`, extract HEAD `28b98160` (T49 파일은 untracked).
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+| # | 판정 · 사건 (2026-10-12) | 이 절에서 |
+|---|---|---|
+| 1 | **(사용자 판정, T47 결과 후)** 명사 token query (D) 를 시험한다. 서빙 cell L8H2 는 유지 (T47 판정) | 전체 |
+| 2 | **(사용자 판정)** cell 선택 = **GT 기반 primary + label-free secondary** (결과 보기 전 고정) | §2 |
+| 3 | **(사용자 판정)** **prompt 교체 시험 포함** (exploratory) | §8 |
+| 4 | **(사용자 판정)** VLA checkpoint 의 offline GPU prefix pass 승인. GPU 를 동시에 쓸 수 있으면 동시 실행 — 단 **(lead 판정) T46 의 CL3 와는 겹치지 않는다** (CL3 의 TO 가 wall-clock 마감에서 멈추므로 GPU 를 나눠 쓰면 refined action 이 바뀌어 paired 비교가 무너진다). 그래서 GPU 추출은 CL3 종료 후 | §9 |
+| 5 | **(lead, T49.impl.md 확인 후 · 결과 전)** 명사 행 image mass 의 record 통합 median < 0.01 인 layer 는 "image 를 거의 보지 않음" 으로 **표시만** 하고 primary GT top-3 선택에서 제외하지 않는다 | §3 |
+| 6 | **(사용자 판정, T49 결과 후)** T49b exploratory 진행 (§T49b), T51b 로 명사 행을 공식 protocol 에 추가 | T49b 절 |
+
+| 시각 (KST) | 무엇 | 출처 |
+|---|---|---|
+| 19:18:17 – 19:19:15 | GPU smoke (`--records ep1850 --no-swaps --cost-frames 4`, rc 0, wall 57.8 s) | `gpu_extract[0]` 10:18:17Z – 10:19:15Z |
+| 19:19:18 – 19:23:34 | GPU full extract (1040 frame = 7 record × 4 variant, rc 0, wall 255.9 s, retry 0, nvidia-smi peak 8806 MiB) | `gpu_extract[1]` 10:19:18Z – 10:23:34Z |
+| (이후) | CPU select 11 s · validate 8 s · swap 13 s · e2e (4 source) 173 s | `n8_cost.cpu_stage_wall_s` |
+
+### 2. 사전 고정과 구현 (새 파일만, `T49.impl.md`)
+
+| 항목 | **primary** | secondary / exploratory |
+|---|---|---|
+| query 행 | prompt 의 target 과일 명사 1 token (target map) · `basket` 1 token (목적지 map). `last_text` (마지막 text token) 행은 기록만 하고 판정에 쓰지 않음 | — |
+| cell 선택 | **GT 기반**: selection record 3 개에서 target map 의 lift 평균으로 18×8 = 144 cell 의 순위를 매기고 top-3 를 σ=1 raw 합 | **secondary**: 같은 명사 행에 T47 의 label-free 절차 (S_cam τ Kneedle + spatial entropy + selection frequency, L0 · L1 제외, k = 3) |
+| 목적지 map cell | target 과 같은 방식으로 따로 (crate coverage 기준 lift) | target 의 GT cell 을 그대로 쓴 변형 (`basket_samecells`) |
+| 평가 | held-out 4 record (pilot) | k = 1..5, σ = 0 |
+| 비교 기준 | L8H2 (action query, 서빙) · T47 oracle top-3 (action, L8H3 · L10H7 · L12H4) | head-average (명사 행, L2–17) |
+
+- **추출** (GPU): `pi05_attention._prefix` 를 복제한 jitted 함수가 probs 를 jit 안에서 `[18 layer, 8 head, 3 query row, 768]` 로 잘라 host 로 보낸다 (전체 `[18,1,1,8,968,968]` 는 device 밖으로 안 나간다). 명사 위치는 `obs.tokenized_prompt` 안에서 piece id 매칭으로 찾는다 (index 하드코딩 없음, 0 개 · 2 개 이상이면 오류). **1040 frame 에서 오류 0** (`extract_frames_not_ok` 0).
+- **e2e**: T47b 의 `run_b2_record` (live 서빙 경로 `wire.pack_request → process_multi_debug` 를 조립한 것 + label 기반 3D 지표) 를 쓴다. attention source 만 바뀐다. 3D 는 legacy ESDF, grasp latch 없음 (T47 과 같은 한계).
+- 테스트: `.venv-ag3s` 30 passed · 3 skipped (jax · sentencepiece 없는 venv 의 3 test).
+- **L8H2 의 e2e row 일치 점검**: T49 의 L8H2 row 는 T47 row 와 field 불일치 0, T47b row 와는 2 (모두 ep1850 frame 13 · 14 의 `chosen_cluster_purity` NaN 대 NaN 비교, 다른 field 는 일치).
+
+### 3. 명사 행의 mass 배분 (#1) — 이 query 는 image 를 보는가
+
+![명사 · basket 행의 layer 별 mass 배분과 분리](figures/t49/t49-separation-mass.png)
+
+[`t49-separation-mass.png`](figures/t49/t49-separation-mass.png) — 왼쪽 두 panel = target · basket 행의 layer 별 median mass 배분 (image · text 제외 BOS · BOS, 로그 축, 0.01 점선), 오른쪽 = §6 의 분리 (scene × phase). 아래는 같은 수치 (7 record, 260 frame, (frame, head) median; `image + text` 의 최대 편차 0.0031 · 0.0028 · 0.0029).
+
+| layer | target 행 image | target 행 BOS | basket 행 image | basket 행 BOS | last_text 행 image |
+|---:|---:|---:|---:|---:|---:|
+| L0 | **0.0002** | 0.9805 | **0.0013** | 0.8691 | **0.0004** |
+| L1 | 0.174 | 0.1357 | 0.3833 | 0.0498 | 0.1144 |
+| L2 | 0.1715 | 0.3428 | 0.3064 | 0.1572 | 0.0941 |
+| L3 | 0.3356 | 0.0952 | 0.432 | 0.0614 | 0.0647 |
+| L4 | 0.2159 | 0.1597 | 0.3559 | 0.0935 | 0.0601 |
+| L5 | 0.1498 | 0.2051 | 0.1306 | 0.0774 | 0.0929 |
+| L6 | 0.418 | 0.0469 | 0.4583 | 0.0747 | 0.1083 |
+| L7 | 0.1308 | 0.1548 | 0.1822 | 0.1445 | 0.0703 |
+| L8 | 0.4611 | 0.1982 | 0.5873 | 0.0684 | 0.127 |
+| L9 | 0.0979 | 0.1997 | 0.1128 | 0.1367 | 0.0258 |
+| L10 | 0.2294 | 0.2388 | 0.2923 | 0.126 | 0.1475 |
+| L11 | 0.0609 | 0.5742 | 0.0847 | 0.0806 | 0.1042 |
+| L12 | 0.207 | 0.4873 | 0.1567 | 0.1328 | 0.0595 |
+| L13 | 0.0486 | 0.4814 | 0.094 | 0.1008 | 0.0427 |
+| L14 | 0.0343 | 0.8086 | 0.0302 | 0.4355 | 0.2175 |
+| L15 | 0.0501 | 0.7031 | 0.0498 | 0.6621 | 0.0786 |
+| L16 | 0.1904 | 0.1948 | 0.148 | 0.4424 | 0.1702 |
+| L17 | 0.4767 | 0.0806 | 0.4999 | 0.146 | **0.0012** |
+
+- **image mass < 0.01 로 표시된 layer**: target · basket 행 = **L0 만**, `last_text` 행 = L0 · L17. 나머지 layer 는 image 에 0.03 – 0.59 를 둔다. 모든 layer 에서 `image + text ≈ 1` 이라 slicing 이 맞다 (사전에 둔 확인 기준 ≈ 1e-2 이하).
+- 선택된 cell 은 layer median 보다 훨씬 image 를 본다: 명사 GT cell L8H6 0.9716 · L5H4 0.9948 · L4H2 0.9618, label-free L4H7 0.8436 · L4H6 0.9204, basket GT L8H6 0.9975 · L4H2 0.9531 · L8H0 0.7658 (cell 별 median image mass).
+- (미측정 해석) 명사 행이 layer 에 따라 BOS (L0 · L14 · L15 에서 큼) 나 text 에 질량을 두는 것은 head 마다 역할이 다르다는 뜻일 수 있다. 이 STEP 은 그 이유를 분리해 재지 않았다.
+
+### 4. cell 선택 (#2)
+
+selection record 3 개 (long · t2 · ep1807) 만 쓴다. `n` = 선택에 쓰인 (frame, camera) sample 수.
+
+| query 행 | 방식 | top-3 (layer 번호는 L, head 번호는 H) | 비고 |
+|---|---|---|---|
+| target 명사 | **GT primary** (n = 219) | **L8H6 · L5H4 · L4H2** | lift 86.86 · 86.33 · 84.36, `peak_on_target` 1.000 · 0.995 · 0.995 |
+| | label-free secondary (τ = camera 별 Kneedle) | L4H7 · L4H6 · L8H6 | selection frequency 0.490 · 0.485 · 0.403 |
+| | (변형) label-free, τ = 전체 `S_img` | L6H7 · L8H6 · L4H6 | frequency 0.667 · 0.613 · 0.458 |
+| basket | **GT primary** (n = 550, crate 기준) | **L8H6 · L4H2 · L8H0** | lift 10.02 · 8.17 · 8.165, peak on crate 0.980 · 0.913 · 0.913 |
+| | label-free secondary | L4H7 · L8H2 · L8H0 | frequency 0.600 · 0.512 · 0.497 |
+| | (변형) label-free, τ = `S_img` | L8H6 · L4H2 · L3H4 | |
+| (참고) `last_text` 행, target | GT | L8H7 · L12H2 · L10H2 | lift 31.26 · 30.04 · 29.32. 판정에 쓰지 않음 |
+| (참고) `last_text` 행, destination | GT | L3H6 · L0H4 · L0H6 | lift 2.12 · 1.93 · 1.87. 판정에 쓰지 않음 |
+
+- record 별 GT top-3 (target): long = L8H6 · L8H0 · L4H2, t2 = L4H2 · L5H4 · L8H0, ep1807 = L8H6 · L5H4 · L4H2. record 하나를 빼고 다시 고른 top-3 가 전체 top-3 와 겹친 cell 수 (3 이면 같은 집합): GT target **3 · 3 · 3**, label-free target 2 · 2 · 2, GT basket 2 · 2 · 3, label-free basket 3 · 2 · 2. (T47 의 action query 공통 top-3 는 같은 지표가 0 / 3 이었다.)
+- 서빙 L8H2 (L8, head 2) 는 명사 target GT top-3 에 들지 않고 basket label-free top-3 에 든다. T47 의 action oracle top-3 = L8H3 · L10H7 · L12H4, 명사 GT cell 은 L8H6 · L5H4 · L4H2 로 겹치지 않는다.
+- 명사 label-free 절차의 top-3 는 GT primary 와 L8H6 하나만 겹친다 (target).
+
+### 5. 2D 검증 (#3 · #4) — held-out, record-mean
+
+![layer × head lift heatmap](figures/t49/t49-lift-heatmaps.png)
+
+[`t49-lift-heatmaps.png`](figures/t49/t49-lift-heatmaps.png) — 18 × 8 cell 의 lift (target · basket, selection record 와 held-out). 상자 = GT top-3, 점 = label-free top-3, x = L8H2. 정의와 수치는 sidecar.
+
+**target map** (target body 기준, 모든 phase; same-scene · new-scene 은 record 2 개씩의 평균)
+
+| source | target mass | lift | `peak_on_target` | IoU@0.25 | IoU@0.5 | same-scene mass · lift | new-scene mass · lift |
+|---|---:|---:|---:|---:|---:|---|---|
+| **명사 GT k3 σ1 (primary)** | 0.2359 | 28.42 | **1.000** | 0.181 | 0.165 | 0.267 · 31.15 | 0.205 · 25.68 |
+| 명사 GT k3 σ0 | **0.5281** | **93.94** | 1.000 | 0.652 | 0.481 | 0.573 · 98.32 | 0.483 · 89.56 |
+| 명사 label-free k3 σ1 (secondary) | 0.1649 | 17.39 | 0.9375 | 0.124 | 0.114 | 0.174 · 18.66 | 0.156 · 16.12 |
+| 명사 head-average (L2–17) | 0.2346 | 35.60 | 0.9375 | 0.099 | 0.092 | 0.262 · 42.59 | 0.208 · 28.61 |
+| **L8H2 (action, 서빙)** | 0.1465 | 55.19 | 0.693 | 0.169 | 0.092 | 0.167 · 56.25 | 0.126 · 54.14 |
+| T47 oracle top-3 σ1 (action) | 0.0644 | 8.78 | 0.746 | 0.058 | 0.052 | 0.076 · 10.52 | 0.053 · 7.03 |
+| T47 oracle top-3 σ0 (action) | 0.1057 | 22.07 | 0.880 | 0.061 | 0.050 | 0.129 · 28.01 | 0.083 · 16.13 |
+
+- **phase 별** (target mass · lift · `peak_on_target`): 명사 GT σ1 pre-grasp 0.175 · 33.68 · 1.000, post-grasp 0.370 · 18.75 · **1.000**. L8H2 pre-grasp 0.182 · 74.47 · 0.839, post-grasp 0.076 · 15.06 · **0.382**. 명사 GT σ0 pre 0.481 · 116.8, post 0.650 · 49.20. T47 oracle σ1 pre `peak` 0.770, post 0.697.
+- **lift 는 L8H2 가 명사 σ1 primary 보다 크다 (55.2 대 28.4)** 이고 target mass 와 `peak_on_target` 은 명사가 앞선다. 명사 σ0 는 셋 모두 앞선다. 지표마다 앞서는 쪽이 다르다 — 어느 쪽으로 읽을지는 §7 의 3D 와 함께 본다.
+- **class mass 분해** (all phases, same-scene / new-scene):
+
+| source | target | destination | other_object | robot_gripper | robot | support | background |
+|---|---|---|---|---|---|---|---|
+| 명사 GT σ1 | 0.267 / 0.205 | 0.030 / 0.065 | 0.019 / 0.018 | 0.170 / 0.105 | 0.011 / 0.050 | 0.458 / 0.456 | 0.046 / 0.102 |
+| 명사 GT σ0 | 0.573 / 0.483 | 0.007 / 0.029 | 0.015 / 0.012 | 0.161 / 0.065 | 0.002 / 0.033 | 0.231 / 0.330 | 0.011 / 0.048 |
+| L8H2 | 0.167 / 0.126 | 0.004 / 0.035 | 0.008 / 0.006 | 0.079 / 0.035 | 0.003 / 0.038 | 0.723 / 0.711 | 0.016 / 0.050 |
+
+**목적지 map** (crate 기준; 아래 "crate mass" = crate 칸의 attention 질량 몫, verify.json 의 `target_mass` 필드가 이 표에서는 crate 를 뜻한다)
+
+| source | crate mass | lift | peak on crate | IoU@0.25 | IoU@0.5 |
+|---|---:|---:|---:|---:|---:|
+| **basket GT k3 σ1 (primary)** | **0.6052** | 7.20 | **0.958** | 0.499 | 0.451 |
+| basket GT k3 σ0 | 0.7173 | 9.39 | 0.956 | 0.455 | 0.418 |
+| basket 같은 cell (target 의 GT cell) σ1 | 0.6151 | 7.31 | 0.975 | 0.509 | 0.457 |
+| basket label-free σ1 | 0.2886 | 3.37 | 0.719 | 0.272 | 0.235 |
+| basket head-average | 0.2802 | 4.13 | 0.367 | 0.231 | 0.205 |
+| L8H2 (action) | 0.1751 | 2.41 | 0.222 | 0.128 | 0.120 |
+| T47 oracle σ1 (action) | 0.1150 | 1.23 | 0.072 | 0.109 | 0.099 |
+| (참고) target 명사 map 을 crate 로 채점 | 0.0982 | 1.46 | 0.028 | 0.125 | 0.097 |
+
+- basket map 을 **target** 으로 채점하면 (섞임) target mass 0.0237 · lift 2.31 · peak 0.048 이다 (pre-grasp peak 0.000).
+- 목적지 class mass (basket GT σ1): destination 0.653 (same) / 0.557 (new), target 0.014 / 0.012.
+- L8H2 의 목적지 질량은 같은 지표에서 crate mass 0.175, peak 0.222 로, post-grasp 에서 높다 (crate mass pre 0.117 → post 0.275).
+
+### 6. 분리 (#5) — target 과 목적지를 한 번의 prefix pass 에서 따로 얻는가
+
+(§3 그림의 오른쪽 panel.) peak 는 3 camera joint argmax, 적중은 patch coverage > 0.05. 4 record 의 record-mean.
+
+| 쌍 | target peak ∈ target | basket peak ∈ crate | **both_correct** | target peak ∈ crate | basket peak ∈ target | 같은 patch | target map 의 target mass · crate mass | basket map 의 crate mass · target mass |
+|---|---:|---:|---:|---:|---:|---:|---|---|
+| **primary** (`noun_gt` / `basket_gt` k3 σ1) | 1.000 | 0.983 | **0.981** | 0.000 | 0.000 | 0.000 | 0.275 · 0.035 | 0.553 · 0.007 |
+| secondary (label-free) | 1.000 | 0.917 | 0.914 | 0.000 | 0.000 | 0.000 | 0.161 · 0.099 | 0.251 · 0.014 |
+| basket 에 target 의 cell 사용 | 1.000 | 0.917 | 0.904 | 0.000 | 0.000 | 0.000 | 0.275 · 0.035 | 0.511 · 0.004 |
+| head-average | 1.000 | 0.767 | 0.769 | 0.000 | 0.077 | 0.067 | 0.191 · 0.095 | 0.252 · 0.032 |
+
+- primary 의 `both_correct`: scene 별 same-scene 0.962 (pre-grasp 0.929 · post-grasp 1.000), new-scene 1.000. phase 별 pre-grasp 0.964 · post-grasp 1.000.
+- record · phase 별 개수 (primary): both_correct / both_visible = ep1800 pre 6 / 7 · post 6 / 6, headfix 9 / 9 · 6 / 6, ep1850 10 / 10 · 5 / 5, ep1900 9 / 9 · 6 / 6 → 합 57 / 58 (산출; 60 frame 중 ep1800 의 pre-grasp 2 frame 은 target 이 가려져 eligible 이 아님). 이 표의 mass 열은 분리 집계의 frame 단위 값이라 §5 표의 camera-sample 집계 값과 다르다 (미측정 해석 — 집계 단위 차이로 읽었으나 verify.json 이 이 차이를 직접 서술하지 않는다).
+- L8H2 대응 값은 없다 — action query 에는 basket map 이 없다 (`not_measured`).
+
+![scene overlay](figures/t49/t49-scene-overlay.png)
+
+[`t49-scene-overlay.png`](figures/t49/t49-scene-overlay.png) — held-out 4 frame (ep1800 frame 6 · 11, ep1850 frame 6 · 12; pre-grasp 와 post-grasp 각 2) 의 3 camera 위에 target 명사 map · basket map · L8H2 map (파랑, 3 camera 최대로 정규화) 과 GT target 윤곽 (초록) · crate 윤곽 (주황) 을 겹쳤다. 빨간 x = joint 3-camera argmax. 열 제목에 per-camera target · crate mass 몫. 선택 규칙은 sidecar (σ=1, k=3, cell 은 §4). 이 그림에서 명사 target map 은 `cam_left_wrist` 의 과일 윤곽 안에, basket map 은 crate 윤곽 안에 놓이고, 같은 frame 의 L8H2 map 은 post-grasp 의 ep1850 frame 12 `cam_left_wrist` 에서 과일 밖의 pixel 들에 흩어진다.
+
+### 7. 3D end-to-end (#6) — held-out 60 frame, record-mean
+
+![T49 3D 비교 표](figures/t49/t49-e2e-table.png)
+
+[`t49-e2e-table.png`](figures/t49/t49-e2e-table.png) — source × 지표 표 (같은 수치의 scene · phase 분해 포함).
+
+| source (σ=1) | `on_target` | `identity_correct` | silent failure | chosen cluster purity | non-target seed 손실 (point / frame) | target 잔여 비율 |
+|---|---:|---:|---:|---:|---:|---:|
+| **명사 GT k3 (primary)** | 0.900 | **0.800** | 0.100 | **0.700** | **420.3** | 0.0031 |
+| 명사 label-free k3 (secondary) | 0.883 | 0.783 | 0.117 | 0.684 | 579.3 | 0.0051 |
+| **L8H2 (서빙, σ 없음)** | 0.917 | **0.900** | 0.083 | **0.933** | **190.3** | 0.0926 |
+| T47 oracle top-3 (action) | 0.917 | 0.817 | 0.083 | 0.717 | 114.7 | 0.0828 |
+
+- **scene · phase 로 나눈 `identity_correct` · purity · non-target 손실** — 명사 GT: same-scene 0.733 · 0.629 · 342.5, new-scene 0.867 · 0.772 · 498.1, pre-grasp 0.861 · 0.661 · 374.0, post-grasp 0.692 · 0.760 · 496.3. L8H2: same 0.867 · 0.867 · 119.9, new 0.933 · 1.000 · 260.6, pre 0.889 · 0.889 · 148.3, post 0.900 · 1.000 · 273.5.
+- non-target seed 손실의 class 별 합 (4 record 평균의 합; 명사 GT 대 L8H2): destination 4052.5 대 1944.3, other_object 1118.5 대 499.5, table 1133.5 대 410.3. L8H2 는 target 잔여 비율이 크다 (0.0926 대 0.0031).
+- **pooled (60 frame, T47 style)**: `on_target` 명사 GT 54 · 명사 label-free 53 · L8H2 55 · oracle 55, silent failure 6 · 7 · 5 · 5. seed precision / recall: 명사 GT 0.173 / 0.995, L8H2 0.366 / 0.864, oracle 0.520 / 0.917. chosen target 점 비율 0.565 · 0.785 · 0.614 (명사 GT · L8H2 · oracle), centroid 오차 median 0.0346 · 0.0169 · 0.0345 m. 한 frame 의 e2e 시간 median 456 · 441 · 440 ms (명사 GT · L8H2 · oracle).
+- record 단위 pilot (4 record × 15 frame) 이므로 `identity_correct` 0.800 과 0.900 의 차이를 크게 읽지 않는다. 그러나 purity (0.700 대 0.933) 와 non-target 손실 (420 대 190) 은 같은 방향으로 갈린다.
+- **task 의 되돌아올 지점**: "2D 는 좋은데 3D 가 L8H2 와 같으면 head 처럼 3D 집계가 흡수하는 것이다. 이득은 목적지 분리 · 결정성 · 비용 쪽에서만 주장한다." 측정된 3D 는 같지 않고 **낮다** (identity · purity · non-target 손실). 그래서 3D 에서의 이득은 주장하지 않고, 이득의 후보는 분리 · 결정성 · 비용 쪽에 둔다. 원인은 T49b 에서 σ · k 로 확인했으나 닫히지 않았다.
+
+### 8. prompt 교체 (#7, exploratory) — map 은 instruction 을 따라 움직이는가
+
+같은 frame (image · state 그대로) 에서 target 명사만 scene 의 다른 과일로 바꾼 prompt 로 다시 뽑았다 (record 당 3 개, 7 record × 3 = 21 variant). held-out 4 record 의 12 variant (180 frame 중 두 과일이 모두 ≥ 200 px 보이는 164 frame 이 eligible, 산출 180 = 4 × 3 × 15). 선택 record 는 cell 선택에 쓰였으므로 판단 근거로 쓰지 않는다.
+
+| source (held-out, record-mean) | 새 과일 위 peak (교체 prompt) | 새 과일 위 peak (원 prompt) | 원 target 위 peak (교체 prompt) | **moved** | pooled moved | 새 과일 lift 교체 / 원 | lift_new_gain | map_corr |
+|---|---:|---:|---:|---:|---|---|---:|---:|
+| **명사 GT k3 σ1** | 0.959 | 0.017 | 0.104 | **0.958** | **157 / 164** | 29.47 / 5.86 | 23.61 | 0.210 |
+| 명사 head-average | 0.939 | 0.022 | 0.125 | 0.939 | 153 / 164 | 51.13 / 4.09 | 47.03 | 0.369 |
+| 명사 label-free σ1 | 0.757 | 0.011 | 0.305 | 0.755 | 121 / 164 | 18.75 / 7.27 | 11.48 | 0.696 |
+
+- 명사 GT 의 `moved`: same-scene 0.927 · new-scene 0.989. pre-grasp 98 / 98, post-grasp 59 / 66 (same-scene post-grasp 0.828, new-scene post-grasp 0.967).
+- 같은 교체에서 **basket map 은 흔들리지 않는다**: basket GT map 의 원 prompt 대 교체 prompt 상관 0.989 (held-out), crate lift 7.20 → 7.23.
+- 참고 (selection record 포함, cell 이 그 record 로 골라진 것이라 판단 근거 아님): 명사 GT `moved` 0.896 (455 / 501).
+- **되돌아올 지점 점검**: "prompt 교체에서 map 이 옮겨가지 않으면 명사 map 은 instruction 이 아니라 장면의 현저한 물체를 따른다 → wrong-object 진단에는 쓸 수 없다." 측정은 옮겨갔다 (157 / 164). 다만 이것은 (wrong-object 정의 · 사용자 판정을 거친) 별도의 wrong-object 진단 STEP 이 아니다.
+
+### 9. 비용 (#8)
+
+| 항목 | 값 |
+|---|---|
+| 명사 prefix pass (device, embed_prefix + 18 layer + jit 안 slice) | median **26.52 ms** · p90 26.93 ms (1025 frame) |
+| 같은 frame (`long` 앞 8 frame) 전처리 포함 | 명사 49.21 ms 대 L8H2 의 prefix + suffix 10 회 **107.5 ms** (median) |
+| model load · compile | 27.8 s · 1.61 s |
+| memory | JAX peak 7.60 GB, nvidia-smi peak 8806 MiB |
+| 추출 wall | smoke 57.8 s, full 255.9 s |
+
+(L8H2 와의 memory 비교는 별도 process 로 재지 않았다 — `not_measured`.)
+
+### 10. 읽을 때의 한계
+
+| 한계 | 내용 |
+|---|---|
+| **pilot** | held-out 4 record × 15 frame, 같은 scene 의 두 record 는 독립 아님. 모든 비율의 단위가 크다 |
+| **GT 로 고른 cell** | primary cell 은 selection record 3 개의 GT lift 로 골랐다 (label 이 필요). label-free 로 고른 secondary 는 record-mean 전체 기준 2D · 3D 지표 모두 primary 보다 나쁘다 (2D target mass 0.165 대 0.236, 3D non-target 손실 579.3 대 420.3) |
+| **primary 는 σ=1** | 사전 고정이 σ=1 이다. σ=0 합산은 exploratory (target mass 0.528 · lift 93.9) 이고 3D 는 T49b 에서 잰다 |
+| **3D 는 legacy ESDF · grasp latch 없음** | cuRobo ESDF backend e2e 와 latch 포함 e2e 는 측정하지 않았다 (재측정 대기 10) |
+| **L8H2 와 명사의 집계가 다른 값을 줄 수 있다** | T47 pooled 와 T49 record-mean (§ 읽는 법) |
+
+### 11. 되돌아올 지점 · 판정 대기 제안
+
+| task 의 신호 (`T49.task.md`) | 측정 | 다음 |
+|---|---|---|
+| #1 에서 명사 행의 image mass 가 거의 없으면 명사 query 는 쓸 수 없다 | image mass < 0.01 은 L0 하나 (target · basket 행), 선택된 cell 의 image mass 는 0.77 – 0.99 | 해당 없음 |
+| 2D 는 좋은데 3D 가 L8H2 와 같으면 이득은 분리 · 결정성 · 비용 쪽에서만 | 3D 는 L8H2 보다 낮다 (identity 0.800 대 0.900 · purity 0.700 대 0.933 · non-target 손실 420 대 190) | 3D 이득은 주장하지 않는다. T49b (σ · k) 후 T51b 로 |
+| prompt 교체에서 map 이 옮겨가지 않으면 wrong-object 진단에 쓸 수 없다 | 옮겨갔다 (157 / 164) | wrong-object 진단 후보 (검토 문서 §3 후속 후보) 는 별도 판정 |
+| 서빙 반영 (`attention_policy.py` source 교체) 은 별도 STEP | 하지 않았다 | 결과 보고 → 사용자 판정 → 별도 STEP (T46 session 에 먼저 알린다) |
+
+**판정 대기 제안 (b) — 명사 query 로 identity · destination, L8H2 로 3D seed 를 얻는 결합 (미측정 해석 포함).** 측정된 비대칭은 이렇다. 명사 query 는 prompt 가 가리키는 물체 (2D `peak_on_target` 1.000, post-grasp 에서도), 목적지 (`both_correct` 0.981), instruction 교체 (157 / 164) 를 따라가고, L8H2 는 3D 에서 `identity_correct` · purity · non-target 손실이 낫다. 이 두 장점을 합치면 (예: 명사 map 으로 어느 물체인지, L8H2 로 3D seed 를) 좋아질 수 있다고 **볼 수 있으나, 그 결합을 어떤 방식으로도 돌리지 않았다 (미측정 해석).** 어떤 경로로 결합하는지도 정해지지 않았다. 공식 비교는 T51b (명사 행을 T51 의 protocol 에 추가) 의 몫이고, 사용자 판정 전이므로 이 로그는 결합을 채택하지 않는다.
+
+**측정하지 않은 것 (`T49.verify.json` `not_measured`).** cuRobo 회귀 기준선 (GPU 미사용 지시) · 명사 prefix 의 GPU memory 를 L8H2 serving 과 별도 process 로 잰 값 · selection record 의 e2e 3D · separation 의 L8H2 대응 (action query 에 basket map 이 없음).
+
+**산출물.**
+
+- **측정**: `handoff/T49.verify.json`. 원자료는 run 디렉터리 `/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49/` (`extract` · `select` · `validate` · `swap` · `e2e`). T47 의 GT cache 는 읽기 전용 입력.
+- **figure** (각각 `.json` sidecar 있음): [`scene`](figures/t49/t49-scene-overlay.png) · [`lift heatmap`](figures/t49/t49-lift-heatmaps.png) · [`mass · 분리`](figures/t49/t49-separation-mass.png) · [`3D 표`](figures/t49/t49-e2e-table.png).
+- **구현**: `AG3S/ag3s/experiments/studies/t49_noun_query{,_core,_extract}.py` · `tests/ag3s/test_t49_noun_query.py`. `handoff/T49.impl.md`.
+- commit 은 하지 않았다.
+
+---
+
+## T49b — 명사 query 의 3D 약점 확인: smoothing (σ) 과 cell 수 (k) 변형 (exploratory, 2026-10-12 KST)
+
+**이 절이 답하는 물음 (목적).** T49 에서 명사 query 는 2D · 분리 · prompt 교체에서 L8H2 보다 앞섰지만 3D 의 `identity_correct` · purity · non-target 손실은 L8H2 보다 나빴다. 의심한 원인은 사전 고정한 **σ=1 smoothing 과 top-3 raw 합산** 이다 (T47b 에서 σ=1 이 L8H2 의 3D identity 를 떨어뜨린 전례: held-out 60 frame 의 `identity_correct` 54 → 49, 위 "T47 · T47b" 절 §8). T49b 는 이미 추출된 명사 attention 위에서 **σ ∈ {0, 1} × k ∈ {1, 2, 3}** 과 label-free top-3 σ=0 을 3D e2e 로 다시 잰다. k=1 은 GT 순위 1 위 L8H6 단독이다. **이 STEP 은 exploratory 이고 채택 근거가 아니다** (사용자 판정, T49 결과 후): 명사 query 의 cell · k · σ 선택은 T51b (공식 protocol) 로 정한다.
+
+**한 줄 결과 (before → after).**
+
+- **before.** T49 primary (`noun_gt_k3_s1`): `identity_correct` 0.800, purity 0.700, non-target 손실 420.3 (L8H2 0.900 · 0.933 · 190.3).
+- **after.** **어떤 σ · k 변형도 L8H2 의 3D 수준에 못 미쳤다.** σ=0 이 identity 를 0.800 → 0.850, purity 를 0.700 → 0.831 로 올렸고 (k 와 무관), k 는 identity · purity 를 바꾸지 않았다 (σ 가 같으면 0.850 / 0.800 으로 같음). 대신 **non-target 손실은 σ=0 에서 오히려 커졌다** (512.8 → 583.4, k 가 커질수록 증가; σ=1 은 394.5 → 420.3). L8H2 는 0.900 · 0.933 · 190.3. label-free top-3 σ=0 은 0.800 · 0.700 · 675.6.
+- 2D 는 σ=0 에서 target mass 0.47 – 0.59, lift 89 – 98.5 로 σ=1 (0.20 – 0.27, 25 – 31) 보다 높다. 3D 와 2D 가 같은 방향으로 움직이지 않았다.
+
+**읽는 법과 출처 규약.** 수치는 `T49b.verify.json` 의 `numbers` 에서만 왔다. 모두 **exploratory** 이며 해석은 "(미측정 해석)". 집계는 T49 와 같은 record-mean (held-out 4 record × 15 frame, 추출 오류 frame 0). 같은 입력 (T49 의 select · extract) 을 읽기 전용으로 쓰고 `verify/T49b/variants/<name>/e2e/` 에만 썼다 (T49 e2e 출력의 sha1 은 전후 동일). 3D 는 CPU, legacy ESDF, grasp latch 없음. 회귀 기준선 일치 (legacy 14 / 15 · 15 / 15 · −29.031048 mm), cuRobo 기준선은 돌리지 않았다. 검증: 6 개 e2e run 의 L8H2 row 와 `gt_k3_s1` 의 명사 row 가 T49 e2e row 와 field 단위 일치 (불일치 0, 비교한 field 4260 개 / 60 frame, `_ms` 제외), 2D 재계산이 T49 validate 와 최대 절대차 0.0. HEAD `ed47b976` (e2e 는 `de2042e9` 에서 시작해 중간 docs-only commit 만 바뀜, .py 변경 없음).
+
+### 1. 3D 결과 (held-out, record-mean, 모든 phase)
+
+![T49b σ × k 3D 그래프](figures/t49/t49b-sigma-k-3d.png)
+
+[`t49b-sigma-k-3d.png`](figures/t49/t49b-sigma-k-3d.png) — σ × k 별 `identity_correct` · purity 와 L8H2 기준선. 전 변형 표는 [`t49b-variants-table.png`](figures/t49/t49b-variants-table.png).
+
+| source | `on_target` | `identity_correct` | silent | chosen cluster purity | non-target seed 손실 (point / frame) | `on_target` ∧ ¬`identity` (record 평균 frame 수) |
+|---|---:|---:|---:|---:|---:|---:|
+| 명사 GT k1 σ0 (L8H6 단독) | 0.917 | 0.850 | 0.083 | 0.831 | 512.8 | 1.00 |
+| 명사 GT k2 σ0 | 0.917 | 0.850 | 0.083 | 0.831 | 564.9 | 1.00 |
+| 명사 GT k3 σ0 | 0.917 | 0.850 | 0.083 | 0.831 | 583.4 | 1.00 |
+| 명사 GT k1 σ1 | 0.900 | 0.800 | 0.100 | 0.700 | 394.5 | 1.50 |
+| 명사 GT k2 σ1 | 0.900 | 0.800 | 0.100 | 0.700 | 411.0 | 1.50 |
+| 명사 GT k3 σ1 (T49 primary) | 0.900 | 0.800 | 0.100 | 0.700 | 420.3 | 1.50 |
+| 명사 label-free k3 σ0 | 0.900 | 0.800 | 0.100 | 0.700 | 675.6 | 1.50 |
+| **L8H2 (σ 없음)** | 0.917 | **0.900** | 0.083 | **0.933** | **190.3** | 0.25 |
+
+- 합산 개수 (산출, 4 record × 15 frame = 60): `identity_correct` σ0 변형 51 / 60, σ1 변형 48 / 60, L8H2 54 / 60. `on_target` 55 · 54 · 55. record 별로 보면 명사 변형은 모두 `headfix` 에서 `identity_correct` 12 / 15 (L8H2 15 / 15) 이고, σ1 변형과 label-free 는 `ep1900` 에서 13 / 15 (σ0 변형과 L8H2 15 / 15). 차이가 나는 record 가 둘뿐이라 4 record pilot 이다.
+- **scene · phase 별** (identity · purity · non-target 손실):
+
+| source | same-scene | new-scene | pre-grasp | post-grasp |
+|---|---|---|---|---|
+| 명사 GT k1 σ0 | 0.767 · 0.663 · 398.7 | 0.933 · 1.000 · 626.9 | 0.889 · 0.798 · 442.8 | 0.775 · 0.881 · 629.9 |
+| 명사 GT k2 σ0 | 0.767 · 0.662 · 430.6 | 0.933 · 1.000 · 699.2 | 0.889 · 0.798 · 551.9 | 0.775 · 0.881 · 585.9 |
+| 명사 GT k3 σ0 | 0.767 · 0.663 · 460.5 | 0.933 · 1.000 · 706.2 | 0.889 · 0.798 · 579.1 | 0.775 · 0.881 · 591.0 |
+| 명사 GT k1 σ1 | 0.733 · 0.629 · 333.8 | 0.867 · 0.772 · 455.2 | 0.861 · 0.661 · 335.1 | 0.692 · 0.760 · 493.3 |
+| 명사 GT k2 σ1 | 0.733 · 0.629 · 324.5 | 0.867 · 0.772 · 497.6 | 0.861 · 0.661 · 358.1 | 0.692 · 0.760 · 496.8 |
+| 명사 GT k3 σ1 | 0.733 · 0.629 · 342.5 | 0.867 · 0.772 · 498.1 | 0.861 · 0.661 · 374.0 | 0.692 · 0.760 · 496.3 |
+| 명사 label-free k3 σ0 | 0.733 · 0.629 · 582.2 | 0.867 · 0.772 · 768.9 | 0.861 · 0.661 · 659.7 | 0.692 · 0.760 · 697.6 |
+| L8H2 | 0.867 · 0.867 · 119.9 | 0.933 · 1.000 · 260.6 | 0.889 · 0.889 · 148.3 | 0.900 · 1.000 · 273.5 |
+
+### 2. 2D (같은 변형, held-out, T49 validate 에서 읽음)
+
+| source | same-scene target mass · lift · peak | new-scene target mass · lift · peak |
+|---|---|---|
+| 명사 GT k1 σ0 | 0.587 · 98.5 · 1.000 | 0.494 · 98.5 · 1.000 |
+| 명사 GT k2 σ0 | 0.571 · 98.3 · 1.000 | 0.470 · 89.1 · 1.000 |
+| 명사 GT k3 σ0 | 0.573 · 98.3 · 1.000 | 0.483 · 89.6 · 1.000 |
+| 명사 GT k1 σ1 | 0.269 · 31.0 · 1.000 | 0.207 · 27.8 · 1.000 |
+| 명사 GT k2 σ1 | 0.265 · 31.2 · 1.000 | 0.198 · 25.4 · 1.000 |
+| 명사 GT k3 σ1 | 0.267 · 31.1 · 1.000 | 0.204 · 25.7 · 1.000 |
+| 명사 label-free k3 σ0 | 0.353 · 51.2 · 1.000 | 0.333 · 43.1 · 0.854 |
+| L8H2 | 0.167 · 56.3 · 0.731 | 0.126 · 54.1 · 0.655 |
+
+(scene × phase 별 2D 는 `numbers.2d_vs_target_scene_phase_recomputed` 와 위 그림 sidecar. 표본 수는 same-scene 39 · new-scene 51 (frame, camera) sample.)
+
+![T49b 변형의 실제 scene](figures/t49/t49b-scene-variants.png)
+
+[`t49b-scene-variants.png`](figures/t49/t49b-scene-variants.png) — ep1900 frame 13 (post-grasp) 에서 변형 별 map 과 그 frame 의 3D 결과 (`on_target` · `identity_correct` · purity · non-target 손실). 정의는 sidecar.
+
+### 3. 이 STEP 이 닫은 것과 닫지 못한 것
+
+- 사전 질문 "명사 query 의 3D 열세는 smoothing · 합산 설정 때문인가? σ=0 이나 k=1 에서 L8H2 와의 차이가 줄어드는가?" 에 대한 측정: σ=0 에서 identity · purity 는 올랐으나 (0.800 → 0.850, 0.700 → 0.831) L8H2 (0.900 · 0.933) 에 못 미쳤고, non-target 손실은 σ=0 에서 커졌다 (512.8 – 583.4 대 σ=1 의 394.5 – 420.3, L8H2 190.3). k=1 도 같다. **σ · k 만으로는 3D 열세가 닫히지 않았다.**
+- 원인은 확정하지 못했다 (재측정 대기 9). (미측정 해석) 명사 map 이 target 과 목적지 · 주변을 넓게 덮는 것 (T49 의 class mass: support 0.46, destination 0.03 – 0.06) 과 3D lifting 이 그 map 을 seed 로 쓰는 방식의 상호작용일 수 있으나, 이 STEP 은 분리해 재지 않았다.
+- `noun_lf` 는 σ=0 · k=3 한 변형만 돌렸다 (k 1 · 2 와 σ=1 은 task 범위 밖, `not_measured`). selection record 의 3D 는 CLI 가 `noun_gt` 를 selection record 에서 거절해 측정하지 않았다. swap · separation 은 다시 재지 않았다.
+- **채택 근거가 아니다.** 4 record 의 pilot 이고 변형은 held-out 에서 비교한 것이므로, 최종 설정은 T51b 의 calibration → held-out 분리 아래서 다시 정해야 한다.
+
+**산출물.** `handoff/T49b.verify.json`, 원자료 `/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/` (`variants/<name>/e2e` · `analysis`). figure: [`graph`](figures/t49/t49b-sigma-k-3d.png) · [`scene`](figures/t49/t49b-scene-variants.png) · [`table`](figures/t49/t49b-variants-table.png). 코드 변경 없음 (T49 의 `--k` · `--sigma` 를 wrapper 로 호출). commit 은 하지 않았다.
+
+---
+
+## T50 — HSR 의 instruction 둔감은 fine-tuning 탓인가: probe 학습 · representation · fine-tuning 의 분리 (2026-10-12 KST)
+
+**이 절이 답하는 물음 (목적).** T48a 에서 phase probe (`kv_L4_v1`) 는 image 를 따랐으나 instruction 의 target 교체에는 거의 반응하지 않았다 (C1 에서 원래 place 인 frame 이 `pick` 으로 바뀐 비율 0.040, home 0.000). 사용자 질문: **이것이 우리 fine-tuning (16D LoRA) 때문인가?** 원인 후보는 셋이다 — **(a) probe 학습**: probe 는 prompt 와 장면이 항상 맞는 frame 으로만 학습돼 언어를 쓸 이유가 없다 (fine-tuning 탓 아님). **(b) representation**: L4 V feature 에 "지시된 물체의 진행 상태" 가 선형으로 들어 있지 않다. **(c) fine-tuning data**: 2000 episode 가 모두 성공한 scripted 시연 (target 1 + distractor 3) 이라 언어는 처음에 과일을 고를 때만 필요하다. `pi05_base` (우리 LoRA 학습의 초기 weight) 가 로컬에 있어 **같은 feature 정의 · 같은 입력 변형을 base 와 LoRA 에 똑같이 적용해 비교**할 수 있다. ① feature 가 prompt 교체에 얼마나 움직이나 (`r` ratio), ② counterfactual 변형 (C1, 정답 `pick`) 을 학습에 넣은 probe 가 선형으로 "instruction 기준 phase" 를 읽을 수 있나를 잰다.
+
+**한 줄 결과 (before → after).**
+
+- **before.** probe 가 instruction 에 둔감한 것은 확인됐으나 원인 후보 셋은 가려지지 않았다.
+- **after — 사전 고정 decision rule 의 출력.** LoRA 와 base 모두 counterfactual probe 가 기준 (**C0 ≥ 0.95 이고 C1_instr ≥ 0.80**, episode 별 정확도의 median) 에 미달했다. LoRA: C0 0.781 · C1_instr 0.672 (valcv), 0.827 · 0.745 (trainval). base: 0.673 · 0.698 (valcv), 0.769 · 0.656 (trainval). 규칙이 정한 문구는 "**둘 다 넘지 못하면 fine-tuning 탓이 아니다**" 이다. 이 문구가 이 STEP 의 규칙 출력이고 사용자 판정이 아니다.
+- **① 민감도 r (full, episode median)**: LoRA **0.611**, base **0.999** (text 절반 0.585 / 0.791, image 절반 1.177 / 1.407). r < 1 은 target 교체가 표현만 바꾼 것보다 feature 를 덜 움직인다는 뜻이다. LoRA 가 base 보다 낮다 (이 값의 의미는 (미측정 해석), 규칙은 ② 로 판정).
+- **통제**: C1 의 label 을 섞으면 C1_instr 가 0.03 으로 올라가지 않는다 (학습이 label 을 쓴다). counterfactual probe 는 C1_instr 를 올렸으나 (standard 0.02 → 0.66 – 0.71, LoRA) C0 를 0.98 에서 0.77 – 0.83 으로 낮췄다.
+- base 위 **표준 probe** (원본 data 로만 학습) 의 C1 반응은 LoRA 와 같은 수준이다: place → `pick` 0.047 (base) 대 0.040 (LoRA), home → `pick` 0.002 대 0.000.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `T50.verify.json` 의 `numbers` (T50a = 최상위, T50b = `numbers.T50b`) 에서만 왔다. 같은 파일 숫자의 나눗셈 · 덧셈은 "(산출)". 새 probe 는 sklearn 이 없어 numpy / scipy 로 다시 쓴 LogReg 이며 (SUBTASK-b 의 `kv_L4_v1` 을 재현함은 `T50.impl.md` §1, 그 수치는 verify.json 의 `numbers` 에 없어 옮기지 않았다), verifier 가 probe metric 을 독립 재계산해 **base 108 / 108 · LoRA 108 / 108 field 가 1e-9 안에서 일치**, `r` frame 값의 최대 절대차 ≤ 5e-6.
+- **집계.** 판정에 쓰는 값은 episode (50 개) 별 정확도의 **median** (lead 가 결과 전 고정). frame 합산 (pooled) 은 함께 보고만 한다. frame 은 독립 trial 이 아니다.
+- **환경.** T50a = CPU (T48 의 LoRA feature cache 읽기 전용). T50b = GPU offline prefix pass 2 회 (base: val 6 family + train C0 · C1, LoRA: train C0 · C1; GPU lock 아래, 각각 시작 전 memory 0 MiB) + CPU 분석. 회귀 기준선: T50a 와 T50b 시점 모두 legacy 14 / 15 · 15 / 15 · −29.031048 mm 일치 (T50a 시점 다른 session 의 CL3 server 가 돌고 있어 load 약 24 – 27). cuRobo 기준선은 돌리지 않았다.
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+| # | 판정 · 사건 (2026-10-12) | 이 절에서 |
+|---|---|---|
+| 1 | **(사용자 판정)** T50a (CPU, 바로) + T50b (GPU, T46 CL3 종료 후) 진행. offline GPU prefix pass 승인 (`pi05_base` 와 16D LoRA checkpoint) | 전체 |
+| 2 | **(lead, T50.impl.md 확인 후 · 결과 전 고정)** 판정 임계 (0.95 · 0.80) 는 episode 별 정확도의 median 에 적용한다 | §3 |
+
+| 시각 (KST) | 무엇 | 출처 |
+|---|---|---|
+| 17:20 – 17:35 | T50a (CPU): sensitivity · probe (valcv) · figure. 앞서 회귀 기준선 | `time_kst` · `runs` |
+| 19:37:44 – 20:24:53 | T50b GPU: base extract (`--sets val train`, 65013 input, rc 0, wall 2829.7 s) | `gpu_extract[0]` 10:37:44Z – 11:24:53Z |
+| 20:26:15 – 21:00:21 | T50b GPU: LoRA train extract (`--sets train`, 41604 input, rc 0, wall 2045.3 s) | `gpu_extract[1]` 11:26:15Z – 12:00:21Z |
+| 21:02 – 21:30 | T50b CPU 분석 (base ① · ② valcv · trainval, LoRA ② trainval, compare) · figure | `time_kst` |
+
+### 2. ① feature 민감도 — prompt 교체는 feature 를 얼마나 움직이는가
+
+val 50 episode · 2601 frame. `r = d(C0, C1) / d(C0, C1p)` (C1 = distractor 3 개 prompt 평균, C1p = 같은 target 의 다른 phrasing 2 개 평균), d = host C0 feature 에 대한 상대 L2 (절반 안에서). 기준선 `d_adj` = 같은 episode 의 다음 sampled frame (stride 6 = 0.4 s) 과의 C0 거리. episode median (괄호 = q25 – q75).
+
+![T50a 민감도 · probe 그래프](figures/t50/t50a-sensitivity-probe-graph.png)
+
+[`t50a-sensitivity-probe-graph.png`](figures/t50/t50a-sensitivity-probe-graph.png) — LoRA 의 r (frame 분포 · episode 분포) 과 probe 정확도. base 와 LoRA 의 나란한 비교는 [`t50b-base-vs-lora-graph.png`](figures/t50/t50b-base-vs-lora-graph.png).
+
+![T50b base 대 LoRA](figures/t50/t50b-base-vs-lora-graph.png)
+
+| 모델 · 절반 | r (all) | d_c1 | d_c1p | d_adj |
+|---|---|---:|---:|---:|
+| **LoRA full** | **0.611** (0.523 – 0.662) | 0.0409 | 0.0662 | 0.1309 |
+| LoRA text 절반 | 0.585 (0.496 – 0.627) | 0.0662 | 0.1125 | 0.1282 |
+| LoRA image 절반 | 1.177 (1.055 – 1.314) | 0.0158 | 0.0141 | 0.1310 |
+| **base full** | **0.999** (0.870 – 1.155) | 0.1071 | 0.1125 | 0.1000 |
+| base text 절반 | 0.791 (0.676 – 0.896) | 0.1441 | 0.1939 | 0.1452 |
+| base image 절반 | 1.407 (1.276 – 1.602) | 0.0915 | 0.0672 | 0.0779 |
+
+- 원래 class 별 r (full, episode median): LoRA pick 0.622 · place 0.582 · home 0.633, base pick 0.980 · place 1.006 · home 0.998. frame 합산 median: LoRA full 0.603 · text 0.574 · image 1.208, base full 1.000 · text 0.788 · image 1.401.
+- (산출) target 교체의 feature 이동 `d_c1` 은 인접 frame 이동 `d_adj` 의 LoRA full 0.0409 / 0.1309 = 0.31, base full 0.1071 / 0.1000 = 1.07 배다. LoRA image 절반은 0.0158 / 0.1310 = 0.12 배다.
+- (미측정 해석) LoRA fine-tuning 이 prompt 교체에 대한 feature 반응을 줄였다고 읽을 수 있으나, 이 STEP 의 판정 규칙은 ② 에 건 것이다. r 의 감소가 읽기 가능성 (②) 에는 영향이 없었다는 것이 아래 §3 이다.
+
+### 3. ② counterfactual probe 와 decision rule
+
+![T50a 판정 규칙 표](figures/t50/t50a-decision-rule-table.png)
+
+[`t50a-decision-rule-table.png`](figures/t50/t50a-decision-rule-table.png) (LoRA valcv) · [`t50b-decision-rule-table.png`](figures/t50/t50b-decision-rule-table.png) (base 대 LoRA, valcv · trainval). `valcv` = val 50 episode 의 episode 단위 5-fold CV (T50a primary), `trainval` = train 200 episode 의 C0 + C1 로 학습해 val 50 episode 평가 (T50b). 모든 probe 는 같은 512D feature, multinomial LogReg (C 는 inner GroupKFold 로 선택, 모든 fold 수렴).
+
+![T50b 판정 규칙 표 (base 대 LoRA)](figures/t50/t50b-decision-rule-table.png)
+
+**사전 고정 규칙 (`T50.task.md`).**
+
+1. LoRA 에서 ② 가 C0 ≥ 0.95 이고 C1 instruction-기준 ≥ 0.80 이면 "representation 에 있음 → 원인은 (a) probe 학습".
+2. 아니면 (b) 또는 (c). **(b) 와 (c) 의 구분은 base 결과로 한다**: base 에서 기준을 넘고 LoRA 에서 넘지 못하면 (c) fine-tuning 탓. **둘 다 넘지 못하면 fine-tuning 탓이 아니다.**
+
+**episode median 값 (판정에 쓰는 값)**: counterfactual probe (primary, `full__counterfactual`) 의 C0 / C1_instr.
+
+| 모델 | ② (i) valcv C0 · C1_instr | ② (ii) trainval C0 · C1_instr | 기준 (≥ 0.95 ∧ ≥ 0.80) |
+|---|---|---|---|
+| **LoRA** | 0.781 · 0.672 | 0.827 · 0.745 | 미달 (둘 다) |
+| **base** | 0.673 · 0.698 | 0.769 · 0.656 | 미달 (둘 다) |
+
+frame 합산 (보고만): LoRA valcv 0.766 · 0.662, trainval 0.825 · 0.708. base valcv 0.703 · 0.667, trainval 0.756 · 0.669.
+
+**통제와 참고 cell (episode median, C0 · C1_instr).** 정의: `text` · `image` = 그 절반만, `shuffled` = C1 행 label 무작위, `standard` = C0 행만으로 학습.
+
+| cell | LoRA valcv | base valcv | LoRA trainval | base trainval |
+|---|---|---|---|---|
+| counterfactual, full (primary) | 0.781 · 0.672 | 0.673 · 0.698 | 0.827 · 0.745 | 0.769 · 0.656 |
+| counterfactual, text 절반 | 0.750 · 0.625 | 0.692 · 0.661 | 0.827 · 0.682 | 0.731 · 0.641 |
+| counterfactual, image 절반 | 0.606 · 0.625 | 0.683 · 0.635 | 0.702 · 0.474 | 0.692 · 0.589 |
+| shuffled label, full | 0.981 · 0.031 | 0.962 · 0.031 | 0.981 · 0.031 | 0.962 · 0.031 |
+| standard, full (`kv_L4_v1` 과 같은 방식) | 0.981 · 0.031 | 0.962 · 0.031 | 0.981 · 0.031 | 0.981 · 0.031 |
+
+- standard probe 의 C0 는 base · LoRA 모두 기준을 넘는다 (episode median 0.962 – 0.981; frame 합산 base 0.953 / 0.972, LoRA 0.978 / 0.981). 즉 **base feature 도 phase 를 읽는다** — task 의 "base 가 16D 입력 변환과 맞지 않아 feature 가 무의미" 되돌아올 지점에는 해당하지 않는다.
+- 같은 probe 를 counterfactual 로 학습하면 C1_instr 는 올라가지만 (LoRA valcv frame 합산: standard 0.021 → counterfactual 0.662, `pick` 예측 비율 place 0.637 · home 0.687) C0 가 같이 떨어진다 (0.978 → 0.766). label 을 섞은 통제는 C1_instr 0.027 로, label 이 학습에 쓰였음을 확인한다.
+- (미측정 해석) 이 512D · 이 층 · 이 선형 probe 위에서 C0 와 C1 을 동시에 만족하는 해가 학습되지 않았다. VLA 의 다른 layer 나 다른 objective (예: contrastive) 에서는 어떤지 이 STEP 은 시험하지 않았다 (재측정 대기 11).
+
+**규칙의 출력.**
+
+| 질문 | 측정 | 규칙의 출력 |
+|---|---|---|
+| LoRA 에서 ② 가 C0 ≥ 0.95 ∧ C1_instr ≥ 0.80 인가 | 아니다 (valcv · trainval 모두) | (a) "representation 에 있음 → probe 학습" 은 **확인되지 않았다** |
+| base 에서 기준을 넘고 LoRA 에서 넘지 못하는가 | 아니다 (base 도 둘 다 미달) | (c) **해당 없음.** **"둘 다 넘지 못하면 fine-tuning 탓이 아니다"** |
+
+**따라서 사전 고정 규칙에 따른 이 STEP 의 결론은 "instruction 둔감은 fine-tuning 탓이 아니다" 이다.** 규칙이 (b) 와 (c) 를 base 의 통과 여부로 가르므로, 규칙으로 남는 후보는 (b) representation (이 feature 에서 선형으로 읽히지 않음) 이다 — 이것은 규칙에서 나온 소거이고 **(b) 를 직접 확인한 측정은 아니다 (미측정 해석).** 사용자 판정 전이므로 다음 STEP (probe 를 counterfactual-aware 로 다시 학습할지, 다른 layer 를 볼지) 은 이 로그가 정하지 않는다.
+
+### 4. base 위 표준 probe 의 T48a C1 반응 (#6)
+
+| `pick` 으로 예측된 비율 (val C1 행, 원래 class 별, pooled) | place (n = 2400) | home (n = 2403) |
+|---|---:|---:|
+| base 위 표준 probe (train 200 episode C0 로 학습, `trainval` standard) | 0.0471 (113 / 2400) | 0.0017 (4 / 2403) |
+| LoRA 위 표준 probe (같은 조건) | 0.0400 (96 / 2400) | 0.0000 (0 / 2403) |
+| (참고) T48a 의 `kv_L4_v1` (LoRA, 원 probe) | 0.0396 (95 / 2400) | 0.0000 (0 / 2403) |
+
+### 5. 실제 scene — C1 에서 feature 반응이 큰 frame · 작은 frame
+
+![T50a C1 반응이 큰 / 작은 frame](figures/t50/t50a-scene-c1-response.png)
+
+[`t50a-scene-c1-response.png`](figures/t50/t50a-scene-c1-response.png) — LoRA feature 에서 full `r` 이 가장 큰 frame 과 가장 작은 frame (전체 · 원래 place / home 중, episode 마다 하나), 그 frame 의 image 와 C0 · C1 · C1p 의 prompt, probe 예측 · 확률. 선택 규칙은 sidecar (`selection_rule`: full__r 로 정렬, 가장 큰 / 작은 것). **T50b (base) 의 scene figure 는 만들지 않았다** (`not_measured`).
+
+### 6. 비용 (T50b #4)
+
+| 항목 | base | LoRA (train) |
+|---|---|---|
+| 추출 input · call (batch 4) | 65013 · 16254 | 41604 · 10401 |
+| unit · variant (val / train) | val 50 · 23409, train 200 · 41604 | train 200 · 41604 (LoRA val 은 T48 cache 재사용) |
+| prefix pass (device) input 당 median · p90 | **13.72 ms** · 13.77 ms | 14.99 ms · 15.04 ms |
+| prefix 합 · load · wall | 892.5 s · 58.1 s · 2824 s | 623.7 s · 9.85 s · 2039 s |
+| JAX peak · nvidia-smi peak | 7.38 GB · 8820 MiB | 7.47 GB · 8804 MiB |
+| batch parity (n = 4) rel L2 max | 0.0065 | 0.0025 |
+| state bin replica 불일치 row (val / train) | 27 / 4 | — / 4 |
+
+- 비교의 전제: val plan digest 가 base 와 LoRA 에서 **50 / 50 같다** (같은 입력 변형을 비교한다).
+
+### 7. 읽을 때의 한계 · 측정하지 않은 것 · 판정 대기
+
+| 한계 | 내용 |
+|---|---|
+| **feature 정의는 하나** | `kv_L4_v1` 의 정의 (layer 4 · V · head 0, text · image 평균 512D) 와 LogReg 만 시험했다. 다른 layer · head · pooling · objective 는 측정하지 않았다 |
+| **probe 학습 data** | `valcv` 의 학습은 val 40 episode 라 `kv_L4_v1` (train 200 episode) 과 같은 probe 가 아니다. `trainval` 은 train 200 episode 를 쓴다. 두 방식 모두 같은 결론 (미달) |
+| **C1 정답 pick 의 전제** | T48a 와 같다 — distractor 가 episode 내내 건드려지지 않는다는 dataset 성질에 기댄다 |
+| **fine-tuning 의 다른 요인** | base 대 LoRA 의 차이는 SigLIP fine-tune 과 gemma_2b LoRA adapter 의 합이다 (`T50.impl.md` §3 의 서술). 어느 쪽이 r 의 변화를 만들었는지는 가르지 않았다 |
+| **본 측정이 아닌 smoke** | impl 의 smoke 수치는 이 로그에 쓰지 않았다 |
+
+**측정하지 않은 것 (`T50.verify.json` `not_measured`).** cuRobo 회귀 기준선 · T50b 의 scene figure (실제 image + prompt, T50a 의 scene figure 가 LoRA 만 다룸).
+
+**판정 대기.** (1) decision rule 의 출력 ("fine-tuning 탓이 아니다") 을 받아들이고 후속을 정할지 — 후속 후보는 task 의 되돌아올 지점 (a) 에 적힌 "probe 를 counterfactual-aware 로 다시 학습" (Bhardwaj et al. 의 contrastive objective 와 비교) 이나, 이번 결과는 (a) 가 아니라 규칙상 소거로 (b) 쪽이다. (2) HSR 의 위치 (T48b 절 제안 (a)). 둘 다 사용자 판정 전이다.
+
+**산출물.**
+
+- **측정**: `handoff/T50.verify.json`. 원자료는 run 디렉터리 `/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/` (`lora` · `base` · `compare/compare_full.{json,csv}` · `T50b`).
+- **figure** (각각 `.json` sidecar 있음): [`scene`](figures/t50/t50a-scene-c1-response.png) · [`graph (T50a)`](figures/t50/t50a-sensitivity-probe-graph.png) · [`graph (T50b)`](figures/t50/t50b-base-vs-lora-graph.png) · [`table (T50a)`](figures/t50/t50a-decision-rule-table.png) · [`table (T50b)`](figures/t50/t50b-decision-rule-table.png).
+- **구현**: `AG3S/ag3s/experiments/studies/t50_{core,extract,hsr_rep}.py` · `tests/ag3s/test_t50_hsr_rep.py` (T50a 시점 19 passed · 1 skipped). `handoff/T50.impl.md`.
 - commit 은 하지 않았다.
