@@ -26,8 +26,9 @@
 | **P1** Panda adapter | SL-0 pi0.5-only 1 episode, 독립 환경 · checkpoint · run 기록 | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL0](#sl0--pi05-only-libero-spatial-1-episode-2026-10-12) |
 | | SL-1 agent-view · wrist RGB/depth, intrinsics/extrinsics → AG3S 관측 형식 | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL1](#sl1--libero-panda-camera-adapter-rgbdepth--k--t_base_cam--v11ab-wire-관측-2026-10-12). ~~판정 2건(K principal point 127.5, `robot_state` image 순간)은 SL2 에서 구현 예정~~ → SL2 에서 구현·측정 완료 |
 | | SL-2 Panda geometry / self-filter | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL2](#sl2--panda-geometry-sphere-chain--self-filter--contact-link-sl1-후속-2건-2026-10-12). self-filter 기본 = confined hand+mount cover, constraint model = `franka.yml` sphere 그대로 |
-| | SL-3 attention read-out audit | **다음** | SL2 후속 구현 2건(confined cover 를 기본으로 commit, `robot_geometry.py` 의 `LD_LIBRARY_PATH` 정리)을 SL3 에서 처리 |
-| | SL-4 ~ SL-8 (ATS/LTE, EE delta ↔ CCR, phase, contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1) |
+| | SL-3 attention read-out audit | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL3](#sl3--v11ab-attention-read-out-audit-on-pi05_libero--sl2-후속-2건-2026-10-12). SL2 후속 2건(confined cover 기본값, `robot_geometry.py` CLI) 구현·확인 완료. V11AB cell L8H2 를 Panda 에 그대로 쓴다(recalibration 없음) |
+| | SL-4 Panda 를 V11AB core 에 연결 (ATS / LTE / ESDF) | **다음** | head block mass 가 작은 점(raw-mass threshold), wrist 의 mirror 비교 원인 분해, AG3S core 주입 지점(SL3 열린 항목 3) |
+| | SL-5 ~ SL-8 (EE delta ↔ CCR, phase, contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. ~~SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1)~~ → SL3 에서 un-mirror mapping 구현·측정 완료(image 검사 221/221 call). 이후 단계는 이 mapping 을 그대로 쓴다 |
 | **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | 미착수 | SL0 의 1 episode 로는 성능을 말할 수 없다 |
 | **P3** SafeLIBERO Spatial Level I/II pilot | contact 판정 검증 + paired 결과 | 미착수 | |
 | **P4** 전체 SafeLIBERO | official I/II 전체 | 미착수 | |
@@ -88,6 +89,19 @@
 | **signed distance (`sphere_sd`)** | link 의 sphere 와 물체 collision geom 사이의 signed distance. 양수 = 떨어져 있음, 음수 = 침투(penetrate). link 별 최솟값을 쓴다 |
 | **confusion table (contact × penetration)** | cell 마다 MuJoCo contact 가 있었는가(C) 와 sphere 가 침투했는가(P)로 4칸을 센 표. `C&P` = 접촉을 sphere 가 침투로 잡음, `C&noP` = 접촉을 놓침(miss), `noC&P` = 접촉 없는데 침투(false alarm), `noC&noP` = 둘 다 없음 |
 | **manipulator side** | V11AB 의 16-D layout `[L7, Lg, R7, Rg]` 에서 robot 의 팔이 놓이는 쪽. Panda 한 팔은 `left`(wrist camera 가 `left_wrist` 이므로) |
+| **attention cell** | V11AB 가 attention 을 읽는 고정 좌표 (denoise step, aggregation, layer, head). V11AB 의 cell = denoise step 0 · aggregation `last` · layer 8 · head 2 (이하 L8H2). RB-Y1 checkpoint 에서 고른 값이다 |
+| **denoise step** | pi0.5 의 action expert 가 noise 에서 action chunk 를 만드는 반복(flow-matching) 단계. attention cell 의 step 0 은 첫 번째 단계이고, audit 은 한 call 에 10 step 을 돈다(`num_denoise` 10) |
+| **aggregation `last`** | suffix 의 query token(예측 action step 마다 하나)을 하나로 합치는 방식(`AGGREGATIONS` 의 `mean` / `first` / `last`) 중 하나. `last` 는 action horizon 의 마지막 query token 의 attention 을 쓴다 |
+| **token block** | VLA prefix 에서 image 한 장이 차지하는 token 구간. pi05_libero 는 `base_0_rgb`(0–256) · `left_wrist_0_rgb`(256–512) · `right_wrist_0_rgb`(512–768, LIBERO 에서는 padding)이고 각 16×16 grid |
+| **block mass** | 한 attention cell 의 attention 합 중 token block 하나에 놓인 양. 이 cell 은 wrist block 에 거의 전부(median 0.995)를, head block 에 median 0.00105 를 둔다 |
+| **mirror-undo (un-mirror) mapping** | policy image 는 OpenCV image 의 좌우 반전이므로, 16×16 attention grid 의 열을 뒤집고 224→256 scale 을 적용해 OpenCV pixel 로 옮기는 사상. 뒤집지 않은 비교용 mapping 은 mirror left in |
+| **grounding** | attention 이 target object 에 놓이는 정도. 여기서는 target mass(target mask 가 덮는 patch 가중 attention 합), area 대비 mass/area, argmax 가 target 위인 비율, rank 로 잰다 |
+| **uniform baseline** | attention 이 token 에 균일하게 퍼졌을 때 기대되는 target mass = target 이 image 에서 차지하는 면적 비율(area). mass/area > 1 이면 chance 보다 target 에 모인다 |
+| **phase (approach / grasp / transport)** | MuJoCo contact · target 높이로 정한 단계. approach = 첫 gripper–target contact 이전, grasp = 첫 contact ~ lift(target z > z0 + 1 cm), transport = lift ~ 마지막 contact |
+| **segP / segRec** | `segP` = image instant 로 다시 render 한 segmentation, `segRec` = `env.step` return 시점에 기록된 segmentation. attention 채점은 `segP` 를 기본으로 썼다 |
+| **diagnostic grid** | 전체 18 layer × 8 head = 144 cell 의 grounding 지표 표. V11AB cell 의 순위를 보는 진단용이며 layer/head 선택에는 쓰지 않는다 |
+| **dev / test split** | LIBERO Spatial 각 task 의 init state 0–4 를 dev(측정 · 필요 시 calibration), 5–49 를 test 로 분리(안 A, plan §6.0). layer/head 는 dev 에서만 정할 수 있고 test 에 쓰지 않는다 |
+| **GPU lock** | 여러 checkout 이 한 GPU 를 쓰므로 GPU 작업은 `/tmp/ag3s-vla-gpu-validation.lock` 을 `flock` 으로 잡고, `nvidia-smi` 로 다른 compute process 가 없음을 확인한 뒤 시작하는 규칙 |
 
 ---
 
@@ -990,7 +1004,7 @@ SL2 의 "되돌아올 지점" 중 "`franka.yml` sphere coverage 가 크게 다�
 
 | # | 내용 | 영향 / 다음 |
 |---|---|---|
-| 1 | 구현 보류 2건: (a) confined hand+mount cover 를 기본 덮개 JSON 으로 commit (지금 commit 된 것은 default 51 capsule 이다), (b) `robot_geometry.py` 가 `LD_LIBRARY_PATH` 를 정리해서 `env.sh` 아래에서도 실행되게 하기 | **SL3 에서 구현** (판정 2) |
+| 1 | ~~구현 보류 2건: (a) confined hand+mount cover 를 기본 덮개 JSON 으로 commit (지금 commit 된 것은 default 51 capsule 이다), (b) `robot_geometry.py` 가 `LD_LIBRARY_PATH` 를 정리해서 `env.sh` 아래에서도 실행되게 하기~~ | ~~**SL3 에서 구현** (판정 2)~~ **SL3 에서 구현·확인 완료**: 기본 덮개 = confined(1,036 capsule), CLI 가 기본 shell 에서 returncode 0 |
 | 2 | confined 모델 sphere 4,271 의 runtime | SL-4 에서 측정, 느리면 compact refit |
 | 3 | arm coverage 의 빈틈(12–74 %) · gripper 의 mm 수준 gap | 판정 3 의 한계. whole-body 가 필요하면 MJCF-fit variant. 독립 contact evaluator 는 SL-7 |
 | 4 | 남는 한계: mount pixel 1.3 %, wrist target 오제거 4.30 %, 기타 물체 오제거(bowl_2 0.51 % 등) | SL-4 에서 ESDF 결과로 영향 확인 |
@@ -1008,3 +1022,315 @@ SL2 의 "되돌아올 지점" 중 "`franka.yml` sphere coverage 가 크게 다�
 | confined 4,271 sphere 가 SL-4 runtime 을 넘으면 | compact refit(sphere 수를 줄이는 재맞춤) 또는 덮개를 hand+mount 에 한정한 채 반지름 정책 재검토 |
 | Manipulator side `left` 가 SL-3/SL-5 의 camera↔arm audit 와 다르면 | adapter 의 side 표만 변경 |
 | SL-4 에서 mm 수준 gripper gap 이 clearance 판정을 흔들면 | gripper sphere 반지름 보정 또는 MJCF-fit variant |
+
+---
+
+## SL3 — V11AB attention read-out audit on pi05_libero (+ SL2 후속 2건) (2026-10-12)
+
+> 2026-10-12 KST. 구현 commit `ce29b9be` · 검증 commit `ae5d74a3`. 사용자 확정 2026-10-12.
+> 관련 commit: `41339944`(공용 GPU lock · pod 자원 규칙 적용), `309e4c6d`(LIBERO dev/test 분리 확정).
+> 원본: [`handoff/SL3.task.md`](handoff/SL3.task.md) · [`handoff/SL3.impl.md`](handoff/SL3.impl.md) ·
+> [`handoff/SL3.verify.json`](handoff/SL3.verify.json). raw 출력은 `outputs/verify/SL3/`.
+> 이 절의 수치는 모두 `SL3.verify.json` 의 `numbers` 가 출처다. **측정은 전부 dev 데이터**(LIBERO Spatial task 0–9 × init state 0, 10 episode, 221 policy call)이고, 이 STEP 에서 layer/head 를 **선택하지 않았다**(V11AB 고정 cell 을 그대로 측정했다).
+
+### 이 STEP 이 답하는 질문
+
+V11AB 의 ATS(Attention-based Target Segmentation: VLA attention 과 depth 로 target 을 고르는 단계)는 attention 을 RB-Y1 checkpoint 에서 고른
+**고정된 attention cell** — denoise step 0, aggregation `last`, layer 8, head 2(이하 L8H2) — 에서 읽는다. 이 cell 을 `pi05_libero` 에 그대로 적용하고
+policy image 의 좌우 반전(SL1 #3)을 되돌렸을 때, attention 이 LIBERO Spatial 의 target object 에 모이는가?
+
+```
+policy image 224×224 (= OpenCV 256 image 의 좌우 반전 + resize)
+  -> pi05 prefix: base_0_rgb 256 token | left_wrist_0_rgb 256 token | right_wrist_0_rgb 256 token (LIBERO 는 padding, mask False)
+  -> V11AB AttentionSampler (denoise 0, agg last, L8, H2) -> [768] -> 16×16 grid × camera
+  -> [SL3] un-mirror(grid 열 뒤집기) + 224->256 scale -> OpenCV pixel (head / left_wrist) -> SL-4 attention lifting
+```
+
+### 무엇을 만들었나
+
+**SL2 후속 2건** (SL2 판정 2 에 따른 구현 보류분)
+
+| # | 내용 |
+|---|---|
+| 1 | self-filter 기본 덮개를 **confined hand + mount cover**(`confined_hand_mount`)로 바꿨다. 생성 JSON 은 provenance · digest 를 포함하고 `robots/panda/description/` 에 있다. 이전 기본(unconfined cover)은 내용을 바꾸지 않고 이름만 바꿔 **비교용으로 남겼다**(`..._unconfined.json`). run manifest 의 `robot_model.self_filter_cover` 에 cover 이름 · capsule 수 · sphere 수 · digest 를 기록한다 |
+| 2 | `robot_geometry.py` CLI 가 기본 shell(`env.sh`)에서 import 에 실패하던 문제(pod `LD_LIBRARY_PATH` 의 외부 torch lib)를 고쳤다. launcher 와 **같은 함수**(`client_env.client_environment`)로 환경을 고치고 자기 자신을 한 번 re-exec 한다. launcher 의 규칙도 이 함수 하나로 합쳤다(동작 변경 없음) |
+
+**Panda attention binding** (AG3S core 는 한 줄도 바꾸지 않았다)
+
+| 구성 | 내용 |
+|---|---|
+| `AG3S/adapters/panda/attention.py` | V11AB 의 `AttentionSampler` · `AGGREGATIONS` · cell 상수(step 0, `last`, L8, H2)를 **import 해서 그대로** 쓴다(값을 다시 적지 않음). token block 표(`base_0_rgb -> head`, `left_wrist_0_rgb -> left_wrist`, `right_wrist_0_rgb -> padding`)는 가정이 아니라 model input 에서 **읽어서**(`read_token_layout`: `embed_prefix` 순서, image 별 token 수, image mask, V11AB prefix pass 가 실제로 쓴 prefix mask) 대조한다 |
+| mirror-undo + 224→256 mapping | policy patch `(r, c)` 는 OpenCV 행 `[16r, 16r+16)`, 열 `[16(15-c), 16(16-c))` 와 정확히 일치한다. 따라서 un-mirror 는 grid 의 열 뒤집기이고 224→256 scale 은 V11AB 자신의 bilinear resampling 이 흡수한다. 반전을 **풀지 않은** mapping(`unmirror=False`, "mirror left in")도 비교용으로 같은 함수에 있다 |
+| BDDL target 파싱 (`task_target.py`) | LIBERO BDDL 의 goal predicate 중 첫 인자가 `obj_of_interest` 에 있는 것을 target 으로 읽고 segmentation geom id 와 잇는다. **LIBERO Spatial 10 task 모두 target = `akita_black_bowl_1`, destination = `plate_1`** 이다. py3.8 check 가 LIBERO 자체 parser 와 10 task 모두 일치하고, live env 의 `obj_of_interest` · object root body 와도 일치함을 확인했다 |
+| `benchmark/runners/attention_audit.py` | source run 의 `policy_records` + geom npz 를 읽어 call 별 attention(V11AB cell + 전체 [layer, head] 진단 배열 float16)을 **새 run** 에 저장한다. source run 은 읽기만 한다. policy record ↔ episode 의 join(state · prompt · image bit 동일)을 call 마다 검사하고 하나라도 다르면 멈춘다 |
+
+### 실행
+
+| run | 값 |
+|---|---|
+| dev rollout | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0`. `launch_libero_pi05_only.py --task-ids 0..9 --episode-ids 0 --capture-geometry --capture-segmentation`. 실행 창 2026-10-12 16:36:15–16:43:28 KST |
+| attention audit | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T202459_309e4c6da477_sl3-attention-audit-dev` (`attention_audit.py`, `.venv-openpi-live`). GPU lock 을 잡고 compute process 가 없음을 확인한 뒤 실행. 실행 창 20:24:58–20:26:15 KST |
+| flags-off replay (SL0 경로 보존) | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T195406_309e4c6da477_sl3-replay-off-t0e0` |
+| 채점 | segmentation 은 **image instant**(image 가 찍힌 순간)로 다시 render 한 mask(`segP`)를 기본으로 쓰고, `env.step` return 시점에 기록된 mask(`segRec`)와 비교했다(SL1 의 capture instant 차이 때문) |
+
+### 결과 — Figure
+
+세 figure 는 verifier 가 만들었다 (`outputs/verify/SL3/scripts/make_figures.py`, sidecar `.json` 동봉).
+
+**실제 scene** — task 0–9 의 대표 call(approach 단계) 의 head · left_wrist OpenCV RGB 위에 V11AB cell attention(파랑)과 target `akita_black_bowl_1` 의 segmentation contour(주황)를 겹쳤다. 각 camera 마다 **un-mirror 와 mirror left in 을 위아래로 대조**했다.
+head 는 un-mirror 쪽에서 attention 이 target 주변에 놓이고, mirror left in 에서는 좌우가 어긋난 곳에 놓여 mass 가 0 에 가깝다(t0 · t5 · t8 은 0.000).
+
+![SL3 scene](figures/sl3-scene.png)
+
+**graph** — (a, b) call 별 target mass 추이(배경 색 = phase, 점선 = target area, 즉 uniform baseline), (c, d) task 별 mass 대 area, (e) phase 별, (f, g) 전체 layer×head 진단 grid(주황 상자 = V11AB L8H2), (h) call 별 mapping 비교(대각선 위 = un-mirror 가 큼).
+
+![SL3 graph](figures/sl3-graph.png)
+
+**table** — token layout · mapping 규약 · grounding 지표 · 진단 grid 순위 · 비용 · SL2 후속을 한 장에 모은 표.
+
+![SL3 table](figures/sl3-table.png)
+
+### 결과 — #1 SL2 후속: confined cover 기본값과 robot_geometry CLI
+
+| 확인 | 결과 |
+|---|---|
+| `robot_geometry.py export` 를 기본 shell 에서 실행 | returncode 0 (시작 시 `LD_LIBRARY_PATH` 에 외부 torch lib 가 있었음). export 파일 SHA-256 이 SL2 export 와 같고 `geometry_digest` `ea38872f…` 가 같다 |
+| manifest 의 cover 항목 (dry-run) | `confined_hand_mount`, capsule 1,036 · cover sphere 4,210 · self-filter sphere 4,271, file SHA-256 `b8ec2deb…` (비교용 unconfined SHA-256 `895b7dbf…`, 이전과 같음) |
+| 무인자 builder 의 sphere 수 | 기본 4,271, `"unconfined"` 245 |
+| SL2 측정과 일치 | 기본 = SL2 `confine_hand_mount` 와 44/44 cell 일치, unconfined = SL2 default 와 44/44 cell 일치 (6/6 row band 일치) |
+
+**self-filter 제거율** (SL2 replay task 0 · episode 0, 114 frame, `segP`, 기본 confined 대 비교용 unconfined). 지운 pixel 비율이며 robot 은 높을수록, 나머지(target · stove · table)는 **낮을수록** 좋다.
+
+| camera | 대상 (pixel 수) | confined (기본) | unconfined |
+|---|---|---:|---:|
+| head | robot (854,825) | 99.17 % | 99.23 % |
+| head | mount (159,088) | 98.70 % | 99.93 % |
+| head | target bowl (75,545) | 1.91 % | 5.46 % |
+| head | stove (179,550) | 0.00 % | 30.92 % |
+| head | table (3,153,421) | 0.72 % | 5.75 % |
+| left_wrist | robot (769,260) | 99.97 % | 99.98 % |
+| left_wrist | target bowl (642,523) | 4.30 % | 11.00 % |
+| left_wrist | stove (150,097) | 0.33 % | 11.68 % |
+| left_wrist | table (3,854,155) | 0.38 % | 1.62 % |
+
+이 값은 SL2 의 confined hand+mount 결과와 같다(위 cell 비교). 대가는 sphere 수(245 → 4,271)이며 runtime 은 SL-4 에서 잰다.
+
+### 결과 — #2 visual mesh 밖으로 나온 양 (confined cover 의 알려진 한계)
+
+confined 규칙은 hand · mount capsule 을 body 의 **collision** 표면 안에 가둔다. 그래서 collision 표면은 덮지만 **visual(render) mesh** 는 그 밖으로 나올 수 있다. frame 0, 4 mm 표본에서 render mesh 표면의 sphere union 에 대한 최대 signed distance (양수 = sphere 밖):
+
+| body | confined (기본) | unconfined | confined 에서 밖인 표본 / 전체 |
+|---|---:|---:|---:|
+| `gripper0_right_gripper` (hand) | −0.170 mm | −4.404 mm | 0 / 85,399 |
+| `mount0_torso` | **+34.448 mm** | −122.468 mm | 773 / 4,056 |
+| `mount0_pedestal` | **+93.215 mm** | −4.533 mm | 1,602,405 / 3,522,906 |
+
+- hand 의 visual mesh 는 기본 cover 안에 들어간다. implementer 가 `SL3.impl.md` 에 적은 hand 0.880 mm 와 verifier 값(−0.170 mm)은 다르다. verifier 값을 정본으로 쓰며 차이의 원인은 조사하지 않았다.
+- SL2 의 mount 제거율은 98.70 %(unconfined 99.93 %)였다. 제거되지 않고 남은 mount pixel 은 pedestal 에서만 나온다(같은 body 의 visual 초과와 일치). 수는 head 에서 head 에서 2,062 개(114 frame 합, 모두 `mount0_pedestal`)이고 sphere union 까지의 거리는 median 10.68 mm(min 0.38 mm, max 771.28 mm)이다. unconfined 에서는 114 개(median 661.76 mm)다. wrist 에는 mount 가 보이지 않는다(0 pixel).
+- 남은 mount pixel 이 ESDF 에서 장애물이 되는지는 이 STEP 에서 재지 않았다(SL-4).
+
+### 결과 — #3 dev rollout (기록만; 성공률 주장이 아니다)
+
+task 0–9 × init state 0 각 1 episode. official success 는 `env.step()` 의 `done` 이다.
+
+| task | 설명 (target 은 모두 `akita_black_bowl_1` → `plate_1`) | official_success | status | env step (wait 포함 / 제외) | policy call |
+|---:|---|:---:|---|---:|---:|
+| 0 | pick up the black bowl between the plate and the ramekin … | true | success | 113 / 103 | 21 |
+| 1 | … black bowl next to the ramekin … | true | success | 120 / 110 | 22 |
+| 2 | … black bowl from table center … | true | success | 142 / 132 | 27 |
+| 3 | … black bowl on the cookie box … | true | success | 98 / 88 | 18 |
+| 4 | … black bowl in the top drawer of the wooden cabinet … | true | success | 126 / 116 | 24 |
+| 5 | … black bowl on the ramekin … | true | success | 107 / 97 | 20 |
+| 6 | … black bowl next to the cookie box … | true | success | 114 / 104 | 21 |
+| 7 | … black bowl on the stove … | true | success | 124 / 114 | 23 |
+| 8 | … black bowl next to the plate … | true | success | 120 / 110 | 22 |
+| 9 | … black bowl on the wooden cabinet … | true | success | 122 / 112 | 23 |
+
+- 10/10 episode 가 `success`, policy call 합 221 = `policy_records` 221 개. task 0 의 npz 는 SL0 run 과 같다(`t0_npz_equal_to_SL0`).
+- **이것은 dev 의 10 episode(task 당 init state 하나)이며 성공률이 아니다.** test(init state 5–49)는 쓰지 않았다.
+
+### 결과 — #4 token layout (모델 input 에서 읽은 값)
+
+| block | token 범위 | image_mask | prefix mask | camera | cell L8H2 block mass (median / mean / max) |
+|---|---|---|---|---|---|
+| `base_0_rgb` | 0–256 | True | True | head (agentview) | 0.00105 / 0.0462 / 0.935 |
+| `left_wrist_0_rgb` | 256–512 | True | True | left_wrist (robot0_eye_in_hand) | 0.995 / 0.924 / 1.002 |
+| `right_wrist_0_rgb` | 512–768 | **False** | False | padding (사용 안 함) | 0 / 0 / 0 |
+| text | 768–968 | – | 유효 20 / 200 | – | – |
+
+- `problems = []`: 읽어낸 layout 이 V11AB `CAMERA_BINDINGS` 와 camera 표에 모두 일치한다. prefix 길이 968.
+- padding block 의 attention mass 는 **전체 18 × 8 [layer, head] 모든 call 에서 최대 0.0** 이다.
+- V11AB 자신의 `AttentionPolicy` 와 대조한 2 call 은 bit 동일(max |Δ| 0.0). 저장한 float16 pooled 배열의 L8H2 와 float32 `cell_tokens` 의 차이는 최대 3.0e-8 이다.
+- **block mass** = 한 cell 의 attention 이 image block 하나에 놓인 합. 이 cell 은 attention 을 **거의 전부 wrist image 에** 두고(wrist median 0.995), head block 은 median 0.00105 만 받는다. 이 값은 아래 "알게 된 것"에서 다시 다룬다.
+
+### 결과 — #5 방향 대응: un-mirror 대 mirror left in
+
+두 검사를 분리해서 읽는다.
+
+**(a) image 검사 — un-mirror 가 기하학적으로 맞다.** policy image 를 OpenCV image 로 복원한 것과 16×16 block 단위로 비교한 MAE(0–255):
+
+| camera | un-mirror | mirror left in | un-mirror 가 더 작은 call |
+|---|---:|---:|---:|
+| head | 0.077 | 42.20 | 221 / 221 |
+| left_wrist | 0.077 | 30.72 | 221 / 221 |
+
+**(b) attention 검사 — target mass 비교** (221 call, `segP`).
+
+| camera | mapping | mass 평균 | mass / area (평균 비) | argmax 가 target 위 | call 별 un-mirror > mirror / < / 같음 |
+|---|---|---:|---:|---:|---|
+| head | un-mirror | **0.1202** | 10.20 | 0.317 | **167** / 54 / 0 |
+| head | mirror left in | 0.0211 | 1.79 | 0.059 | |
+| left_wrist | un-mirror | 0.1826 | 1.48 | 0.385 | 91 / **123** / 7 |
+| left_wrist | mirror left in | **0.2939** | 2.39 | 0.380 | |
+
+- head 는 un-mirror 가 맞다는 (a) 와 (b) 가 모두 같은 방향이다.
+- **wrist 는 (a) 와 (b) 가 어긋난다.** image 로는 un-mirror 가 정확한데, target mass 평균은 mirror left in 이 높다(0.294 대 0.183). argmax 가 target 위인 비율은 거의 같다(0.385 대 0.380).
+- phase 별로 보면 이 차이의 위치가 드러난다(wrist, mass 평균): approach 는 un-mirror 0.315 대 mirror 0.225, grasp 는 0.214 대 0.171 로 un-mirror 가 높고, **transport 에서만** un-mirror 0.022 대 mirror 0.407 로 뒤집힌다(transport 의 target area 평균은 0.176). 아래 phase 표 참고.
+- **미검증 가설 (lead 의 작업 가설)**: grasp 이후 bowl 이 wrist view 의 중앙에서 크게 보이므로, 좌우를 뒤집은 map 도 대칭성 때문에 target 과 겹친다. 이 가설은 이 STEP 에서 검증하지 않았다(per-phase · per-position 분해는 SL-4 로 예정). 위 transport 수치는 가설과 모순되지 않는 관찰일 뿐 증명이 아니다.
+- 따라서 **mapping 은 un-mirror 로 확정한다**(image 검사 기준). wrist 의 mass 점수만으로 mirror 를 택하지 않는다.
+
+### 결과 — #6 V11AB cell 의 target grounding (L8H2, denoise 0, `last`; un-mirror; `segP`)
+
+용어: **mass** = 그 camera 의 256 token attention 합을 1 로 정규화했을 때 target mask 가 덮는 patch 가중 합. **area** = 같은 patch 가중으로 센 target 의 면적 비율 = attention 이 균일하게 퍼졌을 때 기대되는 mass(**uniform baseline**). **mass/area** > 1 이면 chance 보다 target 에 모인다. **rank** = BDDL 물체 · fixture 중 target 보다 mass 가 큰 것의 수 + 1.
+
+**전체**
+
+| camera | n call (target 보임) | mass 평균 / median | area 평균 | mass/area (평균 비) | median mass/area | mass > area 인 call 비율 | argmax 가 target 위 | rank 1 비율 | rank 평균 (median) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---|
+| head | 221 (221) | 0.120 / 0.026 | 0.0118 | **10.20** | 3.13 | 0.548 | 0.317 | 0.059 | 3.54 (3) |
+| left_wrist | 221 (214) | 0.183 / 0.060 | 0.123 | 1.48 | 0.53 | 0.444 | 0.385 (visible 0.397) | 0.220 | 2.24 (2) |
+
+- 같은 camera 에서 평균 instance mass(head)는 `main_table` 0.425, `plate_1` 0.330, target `akita_black_bowl_1` 0.120, robot 0.025 순이다. 즉 head 의 attention 은 target 에 chance 의 약 10 배로 모이지만 **target 이 가장 많이 받는 물체는 아니다**(rank 1 은 call 의 5.9 %). `main_table` 은 면적이 크다.
+- `segP` 와 `segRec` 의 차이는 작다: head mass 평균 절대차 0.00026, wrist 0.0016, rank 가 달라지는 call 은 head 0 · wrist 1. image instant 로 다시 render 한 RGB 는 모든 call frame 에서 기록된 RGB 와 같다.
+
+**phase 별** — approach = 첫 gripper–target contact 이전, grasp = 첫 contact 부터 lift(target z > z0 + 1 cm)까지, transport = lift 부터 마지막 contact 까지(post_release 는 0 call). MuJoCo contact · target 높이로 정한 label 이며 subtask probe 는 쓰지 않았다.
+
+| camera | phase (n) | mass 평균 | area 평균 | mass/area | argmax 가 target 위 | rank 평균 |
+|---|---|---:|---:|---:|---:|---:|
+| head | approach (105) | 0.214 | 0.0124 | **17.19** | 0.505 | 2.79 |
+| head | grasp (25) | 0.0725 | 0.0081 | 8.99 | 0.080 | 4.24 |
+| head | transport (91) | 0.0252 | 0.0120 | 2.09 | 0.165 | 4.21 |
+| left_wrist | approach (105, 보임 98) | 0.315 | 0.0682 | 4.61 | 0.686 | 1.66 |
+| left_wrist | grasp (25) | 0.214 | 0.163 | 1.31 | 0.240 | 2.00 |
+| left_wrist | transport (91) | 0.0218 | 0.176 | 0.12 | 0.077 | 2.93 |
+
+(참고: 같은 phase 의 mirror left in, wrist 는 approach 0.225 / grasp 0.171 / transport 0.407, head 는 0.0433 / 0.0023 / 0.0006.) grasp phase 는 task 당 0–8 call 로 짧다(t9 는 contact 와 lift 가 같은 frame 이라 0 call).
+
+**task 별** (head · left_wrist, un-mirror). 한 task 는 episode 하나(call 18–27 개)이므로 call 들은 서로 독립이 아니다.
+
+| task | head mass | head area | head mass/area | head argmax 가 target 위 | wrist mass | wrist area | wrist mass/area | wrist argmax 가 target 위 |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 0.233 | 0.0100 | 23.34 | 0.429 | 0.352 | 0.0899 | 3.92 | 0.667 |
+| 1 | 0.179 | 0.0091 | 19.77 | 0.455 | 0.211 | 0.0873 | 2.41 | 0.318 |
+| 2 | 0.0714 | 0.0101 | 7.10 | 0.296 | 0.160 | 0.1268 | 1.26 | 0.481 |
+| 3 | 0.176 | 0.0131 | 13.47 | 0.556 | 0.173 | 0.1015 | 1.71 | 0.500 |
+| 4 | 0.0372 | 0.0158 | 2.35 | 0.125 | 0.110 | 0.1312 | 0.84 | 0.208 |
+| 5 | 0.123 | 0.0110 | 11.16 | 0.550 | 0.240 | 0.0901 | 2.67 | 0.450 |
+| 6 | 0.183 | 0.0145 | 12.62 | 0.524 | 0.191 | 0.1139 | 1.68 | 0.381 |
+| 7 | **0.0047** | 0.0076 | **0.62** | 0.000 | 0.0855 | 0.2468 | 0.35 | 0.174 |
+| 8 | 0.158 | 0.0122 | 12.90 | 0.227 | 0.193 | 0.0760 | 2.54 | 0.545 |
+| 9 | 0.0818 | 0.0149 | 5.49 | 0.130 | 0.139 | 0.1509 | 0.92 | 0.174 |
+
+head 는 10 task 중 8 task 에서 mass/area > 5 이고, task 7(`stove` 위의 bowl)은 mass/area 0.62 로 chance 아래다. task 4(drawer 안)도 2.35 로 낮다. wrist 의 task 7 area 평균이 0.247 로 가장 큰데 mass 는 0.0855 이다.
+
+### 결과 — #7 진단 grid (dev only; 선택하지 않았다)
+
+V11AB L8H2 가 전체 18 layer × 8 head = 144 cell(denoise 0, aggregation `last`, float16 pooled) 중 어디에 놓이는지만 센다. **이 표로 layer/head 를 고르지 않는다.**
+
+| camera | 지표 | V11AB L8H2 (순위 / 144) | 144 cell median | 최대 (위치) |
+|---|---|---|---:|---|
+| head | mass 평균 | 0.121 (**5**) | 0.0352 | 0.248 (L12H3) |
+| head | mass/area | 10.28 (**5**) | 2.99 | 21.06 (L12H3) |
+| head | argmax 가 target 위 | 0.317 (10) | 0.0351 | 0.525 (L6H0) |
+| head | rank 1 비율 | 0.059 (26) | 0.0068 | 0.419 (L17H6) |
+| left_wrist | mass 평균 | 0.183 (12) | 0.0998 | 0.343 (L5H5) |
+| left_wrist | mass/area | 1.48 (12) | 0.807 | 2.79 (L5H5) |
+| left_wrist | argmax 가 target 위 | 0.385 (15) | 0.133 | 0.575 (L5H5) |
+| left_wrist | rank 1 비율 | 0.220 (26) | 0.0701 | 0.607 (L5H5) |
+
+- uniform baseline: head 0.0118, wrist 0.123. V11AB cell 의 head mass/area 10.28 은 144 cell 의 median(2.99)보다 크다.
+- 일부 cell 은 어떤 call 에서 block 합이 float16 에서 0 이 되어 유효 call 수가 31–221 이다(head 10 cell, wrist 8 cell). V11AB L8H2 는 221 call 모두 유효하다.
+- float16 pooled 로 계산한 L8H2 head mass 0.1211 은 float32 `cell_tokens` 의 0.1202 와 float16 오차 안에서 같다.
+
+### 결과 — #8 비용
+
+| 항목 | 값 | 조건 |
+|---|---|---|
+| attention pass 첫 call (JIT) | 2.094 s | audit, **uncontended**(GPU lock) |
+| attention pass 이후 (n = 220) | p50 64.36 ms / p95 77.29 ms / mean 65.44 ms / max 94.60 ms | audit, uncontended. 기본 설정(num_denoise 10, subtask feature, full grid 저장) |
+| model load | 34.86 s | audit |
+| JAX device memory | load 후 6.98 GB(6,983,379,712 B), peak 7.21 GB(7,212,886,784 B) | audit |
+| `nvidia-smi` 이 process 의 최대 | 8,868 MiB | audit |
+| rollout client 왕복 latency, 첫 call (JIT) | 3,222.2 ms | dev rollout, **GPU contended** |
+| rollout client 왕복 (n = 220) | p50 77.18 ms / p95 103.31 ms / max 264.75 ms | dev rollout, **GPU contended** |
+| rollout server policy infer, 첫 call | 2,022.5 ms | dev rollout, **GPU contended** |
+| rollout server policy infer (n = 220) | p50 41.05 ms / p95 54.36 ms / max 153.28 ms | dev rollout, **GPU contended** |
+
+- **rollout latency 는 development checkout 의 CL3 closed-loop run 과 GPU 를 함께 쓰던 2026-10-12 16:36:15–16:43:28 KST 구간에서 쟀다.** 경합 없는 steady-state 값이 아니므로 다른 STEP 의 latency 와 직접 비교하지 않는다. **audit latency 는 GPU lock 을 잡고 다른 compute process 가 없음을 확인한 뒤 쟀다(경합 없음).**
+- rollout 중 GPU 최대 사용: 다른 process 두 개가 각각 18,060 · 18,058 MiB, 이 run 의 server(pid 596005)가 8,802 MiB, GPU 전체 합 최대 45,530 MiB.
+- audit 의 attention pass 는 V11AB `AttentionSampler` 로 계산한 비용이다(기본 설정: num_denoise 10, subtask feature on, full grid 저장 on; `SL3.impl.md`). runtime budget 판정은 SL-4 이후.
+
+### 결과 — #9 회귀
+
+| 검사 | 결과 |
+|---|---|
+| legacy 16D ESDF 기준선 | violated start 14/15 · has_target 15/15 · frame0 clearance −29.031 mm — 기준값과 일치 |
+| `scripts/testing/run_cpu_regression.sh` | A 73 passed (77 warnings) / B 78 passed / C 76 passed, 2 skipped / exit 0 |
+| flags-off replay (SL0 경로) | episode npz 가 SL0 와 모든 key 에서 같다. jsonl: official_success true · status success · env step 113 · policy call 21 (replay 와 SL0 동일) |
+
+### 이 STEP 에서 알게 된 것 (평이한 설명)
+
+1. **V11AB 의 head attention 은 pi05_libero 에서도 target 근처에 모인다.** target mask 가 차지하는 면적(uniform baseline) 대비 약 10 배(mass/area 10.20)이고, 144 개 (layer, head) 중 mass 순위는 5 위다. 접근(approach) 단계에서 특히 높다(17.19; 위 graph (a)). 하지만 target 이 가장 많이 받는 물체는 아니다(rank 1 은 5.9 %; table · plate 가 더 받는다). grasp 이후에는 급격히 떨어진다(transport 2.09, median 비는 0.07 정도로 chance 이하). task 7 · 4 는 약하다.
+2. **이 cell 은 attention 의 거의 전부를 wrist image 에 둔다.** head block mass 의 median 이 0.00105 이고 wrist block 은 0.995 다. V11AB 가 raw mass 에 threshold 를 걸어 pixel 을 고르는 구조라면 head pixel 은 threshold 를 통과하지 못할 수 있다. 이것은 가능성이며 **SL-4 에서 측정한다**(여기서는 정규화한 mass 비율만 재었다).
+3. **mirror 는 풀어야 한다.** image 검사는 221/221 call 에서 un-mirror 를 지지한다. head 에서는 attention 검사도 같은 결론이다(167/221 call, mass 0.120 대 0.021). **wrist 에서는 mirror left in 의 target mass 평균이 더 높았다**(0.294 대 0.183). 이 불일치는 transport phase 에 집중돼 있고(0.407 대 0.022), approach · grasp 에서는 un-mirror 가 높다. lead 의 **미검증 가설**: grasp 이후 bowl 이 wrist view 에서 중앙에 크게 보이므로 좌우를 뒤집은 map 도 대칭성으로 겹친다. 이 가설과 phase 별 원인 분해는 SL-4 에서 한다.
+4. confined cover 로 target · stove · table 오제거는 줄었지만(head target 5.46 → 1.91 %, stove 30.92 → 0 %) mount 의 **visual mesh** 일부(pedestal 93 mm, torso 34 mm)가 sphere union 밖에 남는다.
+
+### 판정 (2026-10-12, 사용자)
+
+| # | 판정 |
+|---|---|
+| 1 | **SL3 확정.** |
+| 2 | **LIBERO dev/test 분리 = 안 A.** dev = init state 0–4, test = 5–49 (plan §6.0). 이 STEP 의 측정은 모두 dev 다. |
+| 3 | **Panda 는 V11AB attention cell L8H2 를 그대로 쓴다**(recalibration 하지 않는다). SL-4 에서 target geometry 가 부족하다고 확인된 경우에만 **dev 전용 calibration variant** 를 별도 이름으로 만든다. 진단 grid 의 최대(L12H3)를 자동으로 채택하지 않는다. |
+| 4 | **다음은 SL-4**: Panda 를 V11AB core 에 연결(ATS / LTE / ESDF). |
+
+### 측정하지 않은 것
+
+- SL0 run 에 대한 attention audit (dev t0e0 npz 가 SL0 와 같아 반복하지 않았다)
+- 경합 없는 rollout latency (rollout 은 development CL3 와 GPU 를 공유하는 동안 쟀다)
+- cuRobo 16D baseline (legacy baseline 만 실행)
+- frame 0 외의 frame 에서의 visual mesh 초과 (rigid body 이므로 한 frame)
+- Panda feature 에서의 subtask probe `kv_L4_v1` (SL-6)
+- phase 가 아닌 **위치** 별(wrist 중앙 / 가장자리) 분해, mirror left in 의 wrist 우세 원인
+- head 의 raw mass threshold 가 pixel 을 고르는지(SL-4)
+- init state 1–4(dev 의 나머지)와 test init state
+
+### 운영 기록 (shared pod)
+
+| 사건 | 내용 |
+|---|---|
+| development checkout 과의 GPU 겹침 | dev rollout(2026-10-12 16:36:15–16:43:28 KST)이 development checkout 의 CL3 closed-loop run 과 GPU 를 동시에 썼다. 그래서 rollout latency 는 경합 하에서 잰 값으로 표시한다. 이후 attention audit 은 `/tmp/ag3s-vla-gpu-validation.lock` 을 `flock` 으로 잡고 `nvidia-smi` 로 다른 compute process 가 없음을 확인한 뒤 실행했다 |
+| pod 메모리 | benchmark 쪽 CPU 측정 job 이 pod working set 을 64 GiB 위로 올려 lead 가 중단했다(lead 보고; 최대값은 verify.json 에 없다). verify.json 의 self-filter 측정(`selffilter_default`)은 row band 16 단위 처리와 RSS 기록(`selffilter_rss.csv`)으로 다시 실행된 기록이 남아 있다 |
+| 규칙 채택 | 사용자가 development checkout 과 같은 공용 GPU lock · pod 자원 규칙을 이 checkout 에도 적용하기로 결정했다(commit `41339944`): GPU 작업은 lock 을 잡고 다른 compute process 확인 후 시작, 다른 checkout 과 동시 실행 금지, pod working set ≤ 64 GiB(하드 80 GiB), CPU worker 세션당 ≤ 2(pod ≤ 4), 측정 job 은 `nohup` 없이 실행, 긴 GPU 작업 전후 다른 세션에 알림 |
+
+### 열린 항목
+
+| # | 내용 | 영향 / 다음 |
+|---|---|---|
+| 1 | **head block mass 가 매우 작다**(median 0.00105). V11AB 의 raw-mass threshold 가 head pixel 을 고르는지 | SL-4 에서 ATS 를 연결해 측정 |
+| 2 | wrist 에서 mirror left in 이 mass 가 높은 원인(가설: grasp 후 bowl 이 중앙에서 크다) | SL-4 에서 phase · 위치 별 분해. un-mirror 확정은 image 검사 기준 |
+| 3 | **SL-4 가 필요로 하는 AG3S core 주입 지점**(구현하지 않았다): `serve_safe.py:1037-1058` `attention_extractor` 의 camera alias 를 Panda(`cam_high -> head`, `cam_left_wrist -> left_wrist`, `cam_right_wrist` 버림)로 바꾸고 **`lift` 전에 grid 열 뒤집기**(`attention.unmirror_grid`)를 넣어야 한다. core `GridAttentionAdapter` / `lift` 에는 flip 옵션이 없다. 그 밖에 SL2 열린 항목 5 의 RB-Y1 hardcode 지점이 남아 있다 | SL-4 |
+| 4 | subtask probe `kv_L4_v1` 은 RB-Y1 feature 로 학습됐다. 이번 phase label 은 MuJoCo contact · lift 이고 probe 는 쓰지 않았다. Panda `kv_feature` 는 저장돼 있다 | SL-6 audit |
+| 5 | confined 4,271 sphere self-filter 의 runtime, mount visual mesh 초과(pedestal 93 mm, torso 34 mm)가 ESDF 에 장애물로 남는지 | SL-4 (SL2 열린 항목 2 · 4) |
+| 6 | wrist 0.05 m 미만 pixel(전체 8.2 %, SL1)과 head 3.0 m 초과 pixel 처리 | SL-4 (SL2 열린 항목 6 에서 이월; 이 STEP 에서 다루지 않았다) |
+| 7 | segmentation 은 `env.step` return 시점 render 가 기본 기록이다. attention 채점은 image instant 로 다시 render 한 `segP` 를 썼다. 두 결과 차이는 작았다(위 #6) | SL-4 에서 ATS 가 어느 시점 mask 를 쓰는지 정한다 |
+| 8 | dev 는 task 당 episode 1 개. call 들이 episode 안에서 상관돼 있어 신뢰구간을 말하지 않는다 | init state 1–4 로 확장 시 |
+
+### 되돌아올 지점 (SL3)
+
+| 전환 신호 | 돌아와서 할 일 |
+|---|---|
+| SL-4 에서 head target geometry 가 ESDF 에 부족하다고 확인(threshold 가 head pixel 을 못 고름 등) | **dev 전용 calibration variant** 를 별도 이름으로 선언하고 init state 0–4 에서만 고른다. 사용자 판정 필요. 진단 grid 최대(L12H3)를 자동 채택하지 않는다(test init state 5–49 와 분리) |
+| SL-4 per-phase 분해에서 wrist 의 mirror 우세가 가설과 다르게 나옴 | SL1 의 orientation 측정 · policy transform 경로를 다시 대조한다(원인 확정 전 wrist attention 을 depth 에 쓰지 않는다) |
+| subtask probe 가 Panda 에서 쓸 수 없음 | SL-6 에서 strong-rule / GT phase 등 계획의 대안과 함께 blocker 로 기록 |
+| confined 4,271 sphere 가 SL-4 runtime 을 넘음 | compact refit 또는 덮개를 hand + mount 에 한정한 채 반지름 정책 재검토 (SL2 에서 이월) |
