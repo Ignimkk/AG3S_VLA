@@ -358,6 +358,18 @@ class ClusteringConfig:
     #: `AG3S/ag3s/asset/subtask_probe/kv_L4_v1.npz`. Read by the policy side that computes the
     #: label (`trajopt/attention_policy.AttentionPolicy`); the gate itself only sees probabilities.
     subtask_probe_path: str | None = None
+    #: **T46c A12 (W1) — certify a placed / home `no_seed` frame.** True = after the latch reached
+    #: PLACED, under the confirmed label `home` with `subtask_gate` on, a frame whose grounding is
+    #: `no_seed` (every top-percentile attention seed lies on the support surface, so the
+    #: support-masked seed set is empty) is certified like SUBTASK-f's `no_admissible`: status
+    #: `no_target` ∧ validity `valid` ∧ nothing carved (`types.subtask_no_target`). Certification
+    #: only removes the `uncertified` reason — the field still holds every object at full clearance
+    #: and a violating row still holds. Before PLACED, under `pick` / `place`, with the gate off, or
+    #: with this False nothing changes. Evidence: `T46b.verify.json` (placed `no_seed` HOLD
+    #: 37 / 129 / 116 chunks in C1a / C1a+F1 / C1a+F1+F2). Carried to the certification predicate
+    #: as `metrics["subtask"]["placed_no_seed_certify"] = True` (key absent when False — the
+    #: record and every decision are then bit-identical to before). Default False.
+    placed_no_seed_certify: bool = False
     w_attention: float = 0.7
     w_geometry: float = 0.3
     max_seed_points: int = 4000  # cap on seeds fed to the connectivity search, for latency
@@ -451,6 +463,10 @@ class ClusteringConfig:
         if not isinstance(self.subtask_gate, bool):
             raise AG3SConfigError(
                 f"clustering.subtask_gate must be true or false, got {self.subtask_gate!r}")
+        if not isinstance(self.placed_no_seed_certify, bool):
+            raise AG3SConfigError(
+                f"clustering.placed_no_seed_certify must be true or false, "
+                f"got {self.placed_no_seed_certify!r}")
         if not isinstance(self.closing_keep_geometry, bool):
             raise AG3SConfigError(
                 f"clustering.closing_keep_geometry must be true or false, "

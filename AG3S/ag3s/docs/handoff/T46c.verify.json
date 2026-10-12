@@ -1,0 +1,235 @@
+{
+ "step": "T46c",
+ "date": "2026-10-12",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37",
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "command": "MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT nice -n 19 .venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --out-json baseline_legacy.json",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/baseline_legacy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/baseline_legacy.log"
+  },
+  {
+   "id": "baseline_curobo",
+   "command": "( flock -w 1200 9 ...; XLA_PYTHON_CLIENT_PREALLOCATE=false XLA_FLAGS=--xla_gpu_enable_command_buffer= OMP_NUM_THREADS=2 MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT nice -n 19 .venv-openpi-live/bin/python -m AG3S.trajopt.experiments.esdf_rollout <same args> --esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005 --out-json baseline_curobo.json ) 9>/tmp/ag3s-vla-gpu-validation.lock",
+   "venv": ".venv-openpi-live",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/baseline_curobo.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/baseline_curobo.log"
+  },
+  {
+   "id": "certification_replay_CL3",
+   "command": "JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT nice -n 19 .venv-openpi-live/bin/python -m AG3S.trajopt.experiments.certification_replay --cl /mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3 --out certification_replay_CL3.json",
+   "venv": ".venv-openpi-live",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/certification_replay_CL3.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/certification_replay_CL3.log"
+  },
+  {
+   "id": "pytest_t46c",
+   "command": "JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT nice -n 19 .venv-openpi-live/bin/python -m pytest -q -p no:cacheprovider tests/trajopt/test_t46c_placed_no_seed_certify.py",
+   "venv": ".venv-openpi-live",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/pytest_t46c.log"
+  },
+  {
+   "id": "pytest_subtask",
+   "command": "same env; pytest -q tests/trajopt/test_subtask_gate_default.py test_subtask_no_admissible_home.py test_subtask_no_target.py test_subtask_wiring.py tests/ag3s/test_subtask_gate.py",
+   "venv": ".venv-openpi-live",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/pytest_subtask.log"
+  }
+ ],
+ "code_state": {
+  "repo": "AG3S_VLA-development",
+  "head": "972f28056cd8d68b78230cfc0181002a026cad4b",
+  "branch": "feature/ag3s-development",
+  "dirty_files": [
+   "AG3S/ag3s/config.py",
+   "AG3S/ag3s/runtime/pipeline.py",
+   "AG3S/ag3s/types.py",
+   "AG3S/trajopt/experiments/ta_offline.py",
+   "AG3S/trajopt/safe_policy.py",
+   "AG3S/trajopt/serve_safe.py",
+   "AG3S/trajopt/wire.py",
+   "AG3S/trajopt/experiments/certification_replay.py",
+   "tests/trajopt/test_t46c_placed_no_seed_certify.py"
+  ],
+  "md5": {
+   "AG3S/ag3s/config.py": "469fe86079a84ac670afd9c32cebb6a5",
+   "AG3S/ag3s/runtime/pipeline.py": "32c0be9040fe72473fd7b040120c66cf",
+   "AG3S/ag3s/types.py": "606f4ce6f2651ba8e3407a0adf8639c6",
+   "AG3S/trajopt/experiments/ta_offline.py": "7cc573aca35b7d468450a1d5d652f967",
+   "AG3S/trajopt/safe_policy.py": "c0039f4bc8db47de8f9991f298233d01",
+   "AG3S/trajopt/serve_safe.py": "c0eab570b00e63ae7c25c002c1e71fda",
+   "AG3S/trajopt/wire.py": "18125618a4f5674c65e4e5f910693851",
+   "AG3S/trajopt/experiments/certification_replay.py": "14745e5d406afa2759198d111a11bb69",
+   "tests/trajopt/test_t46c_placed_no_seed_certify.py": "e7aebf53e0052f8fe57150538661194f"
+  },
+  "git_status": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/git_status.txt"
+ },
+ "numbers": {
+  "criterion_1_baselines": {
+   "legacy": {
+    "start_violated": 14,
+    "frames": 15,
+    "has_target": 15,
+    "frame0_clearance_before_mm": -29.031048280806342
+   },
+   "curobo": {
+    "start_violated": 10,
+    "frames": 15,
+    "has_target": 15,
+    "frame0_clearance_before_mm": -9.171877401271193
+   },
+   "note": "legacy final status feasible 15; cuRobo feasible 14 violated 1 (not baseline; SQP wallclock). machine load average ~14 from other sessions during legacy run."
+  },
+  "criterion_2_off_bit_identical": {
+   "arms": {
+    "C1a": {
+     "W0_fidelity_reason": 1350,
+     "W0_fidelity_certified": 1350,
+     "n": 1350,
+     "W0_after_close_hold": {
+      "total": 107,
+      "uncertified": 37
+     },
+     "recorded_after_close_hold": {
+      "total": 107,
+      "uncertified": 37
+     }
+    },
+    "C1aF1": {
+     "W0_fidelity_reason": 1350,
+     "W0_fidelity_certified": 1350,
+     "n": 1350,
+     "W0_after_close_hold": {
+      "total": 183,
+      "uncertified": 130
+     },
+     "recorded_after_close_hold": {
+      "total": 183,
+      "uncertified": 130
+     }
+    },
+    "C1aF1F2": {
+     "W0_fidelity_reason": 1350,
+     "W0_fidelity_certified": 1350,
+     "n": 1350,
+     "W0_after_close_hold": {
+      "total": 122,
+      "uncertified": 118
+     },
+     "recorded_after_close_hold": {
+      "total": 122,
+      "uncertified": 118
+     }
+    }
+   }
+  },
+  "criterion_3_W1": {
+   "arms": {
+    "C1a": {
+     "execute_conversions": 37,
+     "after_close_hold": {
+      "total": 70,
+      "uncertified": 0
+     },
+     "conversions_by_cell": {
+      "grounding=no_seed|phase=placed|label=home|placed_seen=True": 37
+     },
+     "flipped": {
+      "no_seed|placed|False->True": 37
+     },
+     "conversion_runs": {
+      "C1a_ep54_s541": 37
+     },
+     "certified_but_still_hold": 0,
+     "certified_recorded_execute": 0
+    },
+    "C1aF1": {
+     "execute_conversions": 129,
+     "after_close_hold": {
+      "total": 54,
+      "uncertified": 1
+     },
+     "conversions_by_cell": {
+      "grounding=no_seed|phase=placed|label=home|placed_seen=True": 129
+     },
+     "flipped": {
+      "no_seed|placed|False->True": 129
+     },
+     "conversion_runs": {
+      "C1aF1_ep11_s111": 40,
+      "C1aF1_ep30_s301": 36,
+      "C1aF1_ep54_s541": 38,
+      "C1aF1_ep54_s542": 15
+     },
+     "certified_but_still_hold": 0,
+     "certified_recorded_execute": 0
+    },
+    "C1aF1F2": {
+     "execute_conversions": 116,
+     "after_close_hold": {
+      "total": 6,
+      "uncertified": 2
+     },
+     "conversions_by_cell": {
+      "grounding=no_seed|phase=placed|label=home|placed_seen=True": 116
+     },
+     "flipped": {
+      "no_seed|placed|False->True": 116
+     },
+     "conversion_runs": {
+      "C1aF1F2_ep11_s111": 40,
+      "C1aF1F2_ep30_s301": 36,
+      "C1aF1F2_ep54_s541": 38,
+      "C1aF1F2_ep54_s542": 2
+     },
+     "certified_but_still_hold": 0,
+     "certified_recorded_execute": 0
+    }
+   }
+  },
+  "criterion_4_tests": {
+   "t46c_test": {
+    "passed": 67,
+    "failed": 0,
+    "skipped": 0
+   },
+   "subtask_suites": {
+    "files": [
+     "tests/trajopt/test_subtask_gate_default.py",
+     "tests/trajopt/test_subtask_no_admissible_home.py",
+     "tests/trajopt/test_subtask_no_target.py",
+     "tests/trajopt/test_subtask_wiring.py",
+     "tests/ag3s/test_subtask_gate.py"
+    ],
+    "passed": 316,
+    "failed": 0,
+    "skipped": 1
+   }
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t46/t46c-table.png",
+   "kind": "table",
+   "sidecar": "AG3S/ag3s/docs/figures/t46/t46c-table.json"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy 14/15 · 15/15 · -29.031048280806342 ; cuRobo 10/15 · 15/15 · -9.171877401271193"
+ },
+ "criteria": {
+  "c1": "PASS",
+  "c2": "PASS",
+  "c3": "PASS",
+  "c4": "PASS"
+ },
+ "verdict": "기준선 일치; off(W0) 기록 1350/1350 x3 일치; W1 offline 재현 T46b 와 일치; tests 통과",
+ "not_measured": [
+  "closed-loop effect of W1 (per-chunk what-if only)",
+  "ta_offline TO re-solve variants W0/W1/F1W1 (not required by criteria)",
+  "'violation row keeps HOLD' on CL3 records (no such chunk in CL3; covered only by unit tests)",
+  "full pytest suite"
+ ]
+}

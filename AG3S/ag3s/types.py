@@ -976,7 +976,8 @@ class CollisionConstraintSet:
     @property
     def subtask_no_target(self) -> bool:
         """The subtask gate emptied the target on purpose (or, after PLACED under `home`, nothing
-        admissible is left) and nothing is carved (SUBTASK-e, -f).
+        admissible is left — or, with `clustering.placed_no_seed_certify`, no seed is left, T46c
+        W1) and nothing is carved (SUBTASK-e, -f).
 
         `subtask_no_target(self)` — see the function for the exact rule.
         """
@@ -1066,6 +1067,13 @@ def _placed_home(metrics: Any) -> bool:
             and sub.get("placed_seen") is True)
 
 
+def _placed_no_seed(metrics: Any) -> bool:
+    """T46c A12 (W1) — `_placed_home` **and** `metrics["subtask"]["placed_no_seed_certify"] is True`
+    (written by the pipeline only with `clustering.placed_no_seed_certify` on). Exact values only."""
+    return (_placed_home(metrics)
+            and metrics["subtask"].get("placed_no_seed_certify") is True)
+
+
 def subtask_no_target(constraint_set: Any) -> bool:
     """True when the frame has no target **because the subtask gate decided so** (or, after the
     object was placed and the label is home, because nothing graspable is left), and the field
@@ -1084,6 +1092,12 @@ def subtask_no_target(constraint_set: Any) -> bool:
         scene, not a grounding failure. The grounding status is not rewritten (the record keeps
         `no_admissible`). Before PLACED, under another label, or with the gate off this branch is
         closed — gate off, the whole predicate is always False;
+      * T46c A12 (W1): `grounding_status == no_seed` under the **same** SUBTASK-f conditions **and**
+        `metrics["subtask"]["placed_no_seed_certify"] is True` (`clustering.placed_no_seed_certify`,
+        default off → the key is absent and this branch is closed). After the object was put down
+        the attention's top seeds can all fall on the support surface, which the support mask
+        removes — "nothing to name" for the same reason as `no_admissible`. The record keeps
+        `no_seed`;
     - `validity == valid` (a degraded / incomplete frame stays uncertified, gated or not);
     - nothing is carved: no target, no manipulated object (`manipulated` and the identity record
       `metrics["manipulated"]`), nothing attached, no target-free mask, no contact margin, and the
@@ -1100,7 +1114,8 @@ def subtask_no_target(constraint_set: Any) -> bool:
     metrics = getattr(cs, "metrics", None)
     grounding = _enum_value(getattr(cs, "grounding_status", None))
     if not (grounding == GroundingStatus.SUBTASK_GATED.value
-            or (grounding == GroundingStatus.NO_ADMISSIBLE.value and _placed_home(metrics))):
+            or (grounding == GroundingStatus.NO_ADMISSIBLE.value and _placed_home(metrics))
+            or (grounding == GroundingStatus.NO_SEED.value and _placed_no_seed(metrics))):
         return False
     if _enum_value(getattr(cs, "validity", None)) != ConstraintValidity.VALID.value:
         return False

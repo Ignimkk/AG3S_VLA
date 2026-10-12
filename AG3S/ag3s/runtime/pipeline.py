@@ -1948,7 +1948,12 @@ class AG3S:
                 "frames": rec["frames"],
                 # B3: released the placed manipulated object this frame (and which id).
                 "released": tc.subtask_released is not None,
-                "released_id": tc.subtask_released, "placed_seen": bool(tc.placed_seen)}
+                "released_id": tc.subtask_released, "placed_seen": bool(tc.placed_seen),
+                # T46c A12 (W1): the certification predicate (`types.subtask_no_target`) reads it
+                # here, next to gate / label / placed_seen. Only when on — off, the record is the
+                # one before (no key).
+                **({"placed_no_seed_certify": True}
+                   if self.config.clustering.placed_no_seed_certify else {})}
 
     def _admissibility_frame_record(self) -> Optional[dict]:
         """This frame's clusters' admissibility, score order — the evidence behind `first`/`switch`."""

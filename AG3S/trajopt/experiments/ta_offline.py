@@ -35,6 +35,10 @@ T46 variants `TF0` · `F1` · `F2` · `F1F2` replace only the **fine target-free
 (`target_free_replay.rebuild_target_free`: `TF0` = the record's settings, `F1` = `nontarget_evidence surface`,
 `F2` = `owned_ambiguous remove`); they solve and are measured on that scene, and record the replay counts
 (`target_free_replay`) and the verdict rows on the recorded field (`n_collision_rows_recorded_field`).
+T46c variants `W0` · `W1` · `F1W1` hand the optimizer the certification re-asked on the chunk's record
+(`certification_replay.certified`: `W0` = the recorded rule, `W1` = `--placed-no-seed-certify`; `F1W1`
+also replays `F1`'s layer) instead of `True`, and record it (`certification`). The per-chunk verdict
+replay over a whole closed-loop directory (no TO re-solve) is `certification_replay`.
 
 Open loop: every chunk starts from the recorded state with the recorded (V8) history — a variant's
 own earlier output does not feed its next chunk (continuity · B · C history · servo state).
@@ -191,6 +195,14 @@ VARIANTS.update({
     "F1": {"_target_free": {"nontarget_evidence": "surface"}},
     "F2": {"_target_free": {"owned_ambiguous": "remove"}},
     "F1F2": {"_target_free": {"nontarget_evidence": "surface", "owned_ambiguous": "remove"}},
+    # T46c A12 — the geometry certification handed to the optimizer is re-asked on the chunk's record
+    # (`certification_replay.certified`) instead of `True`: `W0` = the recorded rule (the control),
+    # `W1` = `--placed-no-seed-certify`, `F1W1` = `F1`'s replayed target-free layer + `W1`. An
+    # uncertified chunk is demoted by the optimizer (`sqp`: safe status → violated), as online.
+    "W0": {"_certify": {"placed_no_seed_certify": None}},
+    "W1": {"_certify": {"placed_no_seed_certify": True}},
+    "F1W1": {"_target_free": {"nontarget_evidence": "surface"},
+             "_certify": {"placed_no_seed_certify": True}},
 })
 
 
@@ -260,6 +272,13 @@ def variant_target_free(name: str) -> Optional[dict]:
     """T46 — a variant's `rebuild_target_free` keyword arguments, or None (the recorded layer)."""
     tf = VARIANTS[name].get("_target_free")
     return None if tf is None else dict(tf)
+
+
+def variant_certify(name: str) -> Optional[dict]:
+    """T46c A12 — a variant's `certification_replay.record_from_summary` keyword arguments, or None
+    (every chunk certified, the harness default since T43 TA)."""
+    c = VARIANTS[name].get("_certify")
+    return None if c is None else dict(c)
 
 
 def target_free_scenes(inp: dict, spec: dict) -> tuple[Any, Any, dict]:
@@ -782,6 +801,14 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
             if spec is not None:
                 sc, hsc, tf_info[v] = target_free_scenes(inp, spec)
                 tf_scenes[v] = hsc if run.hm else sc
+        # T46c A12 — the certification each `_certify` variant hands the optimizer.
+        certs: dict[str, bool] = {}
+        for v in variants:
+            cspec = variant_certify(v)
+            if cspec is not None:
+                from AG3S.trajopt.experiments import certification_replay as CR
+
+                certs[v] = CR.certified(s, **cspec)
         rec_traj = run.layout.chunk_to_trajectory(inp["rec_chunk"])[:, :K_EXEC]
         ref_traj_full = run.layout.chunk_to_trajectory(inp["ref_chunk"])
         # fidelity — the recorded refined chunk on the reconstructed (server-flag) scene
@@ -842,8 +869,9 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
                     v_scene = tf_scenes.get(v, scene)          # T46: replayed target-free layer
                     lin.set_joint_parameter_path(run.finger_path(s, inp["ref_chunk"], H))
                 # certified = True: geometry certification is the same for every variant and is
-                # not what is compared here (the verdict rows are, `classify_violations`).
-                holder["value"] = (v_scene, q_now, True)
+                # not what is compared here (the verdict rows are, `classify_violations`) — except
+                # the T46c variants (`_certify`), which re-ask it on the record.
+                holder["value"] = (v_scene, q_now, certs.get(v, True))
                 ctx = dict(context_base)
                 if hist is not None and cfg.limits.servo_accel != "off":
                     ctx["command_history"] = hist
@@ -931,6 +959,15 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
                 vr["outward_mm"] = (d_v - d_p) * 1e3
             if v == variants[0]:
                 vr["exec_palm_path_m"] = pr.tolist()
+            if v in certs:
+                # T46c A12: what the optimizer was told, next to the recorded rule's answer
+                from AG3S.trajopt.experiments import certification_replay as CR
+
+                vr["certification"] = {
+                    "certified": bool(certs[v]), "recorded_rule": CR.certified(s),
+                    "grounding_status": s.get("grounding_status"),
+                    "geometry_certified_recorded": ((s.get("to") or {}).get("metrics")
+                                                    or {}).get("geometry_certified")}
             if v in tf_scenes:
                 # T46: the replay's record (counts, evidence, differences from the recorded trace) and
                 # the same trajectory's verdict rows on the recorded field.

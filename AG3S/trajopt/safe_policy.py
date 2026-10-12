@@ -329,6 +329,10 @@ class SafePolicy:
             meta["obstacle_margin_support"] = bool(self.to_config.collision.obstacle_margin_support)
             if getattr(self.to_config.collision, "held_obstacle_margin", False):
                 meta["held_obstacle_margin"] = True                     # T43 HM
+        # T46c A12 (W1) — 같은 규약: 켰을 때만 키가 생긴다 (placed · home 의 `no_seed` 인증).
+        clustering = getattr(getattr(self.ag3s, "config", None), "clustering", None)
+        if getattr(clustering, "placed_no_seed_certify", False) is True:
+            meta["placed_no_seed_certify"] = True
         return meta
 
     def reset(self) -> None:
@@ -1588,7 +1592,8 @@ class SafePolicy:
         """`subtask_no_target` — target 이 없는데 실행하는 이유를 기록에 남긴다 (SUBTASK-e, -f).
 
         `grounding_status` 가 둘을 가른다: `subtask_gated` (gate 가 비웠다, SUBTASK-e) ·
-        `no_admissible` (놓은 뒤 home 에서 잡을 것이 없다, SUBTASK-f).
+        `no_admissible` (놓은 뒤 home 에서 잡을 것이 없다, SUBTASK-f) · `no_seed` (놓은 뒤 home 에서
+        seed 가 모두 지지면 위, T46c W1 — `placed_no_seed_certify` 를 증거에 더한다).
 
         증거는 `_certification_reason` 과 같은 키에 subtask label (`metrics["subtask"]`) 을 더한다 —
         "gate 가 무엇을 보고 비웠나" (label · released · placed_seen) 가 같은 줄에 있게.
@@ -1599,11 +1604,20 @@ class SafePolicy:
         metrics = getattr(cs, "metrics", None) or {}
         sub = metrics.get("subtask") if isinstance(metrics.get("subtask"), dict) else {}
         exclusion = metrics.get("exclusion") if isinstance(metrics.get("exclusion"), dict) else {}
+        w1: dict[str, Any] = {}
         if grounding == "no_admissible":
             # SUBTASK-f: 놓은 뒤 home — 보이는 것이 놓을 곳 (crate) 뿐이라 잡을 것이 없는 것이 정상.
             why = (f"no target this frame: nothing admissible is in view after the object was "
                    f"placed (placed_seen={sub.get('placed_seen')}, label={sub.get('label')}, "
                    f"gate={sub.get('gate')}, released={sub.get('released')})")
+        elif grounding == "no_seed":
+            # T46c W1: 놓은 뒤 home — attention 상위 seed 가 모두 지지면 위라 지지면 mask 뒤 seed 가 0.
+            # 이 갈래는 `clustering.placed_no_seed_certify` 가 켜졌을 때만 닿는다 (types.subtask_no_target).
+            why = (f"no target this frame: no attention seed is left off the support surface after "
+                   f"the object was placed (placed_seen={sub.get('placed_seen')}, "
+                   f"label={sub.get('label')}, gate={sub.get('gate')}, "
+                   f"released={sub.get('released')}, placed_no_seed_certify=True)")
+            w1 = {"placed_no_seed_certify": True}
         else:
             why = (f"no target this frame because the subtask gate withheld it (label="
                    f"{sub.get('label')}, blocked={sub.get('blocked')}, "
@@ -1616,7 +1630,7 @@ class SafePolicy:
             subtask_label=sub.get("label"), subtask_blocked=sub.get("blocked"),
             subtask_released=sub.get("released"), subtask_released_id=sub.get("released_id"),
             placed_seen=sub.get("placed_seen"), exclusion_source=exclusion.get("source"),
-            exclusion_active=exclusion.get("active"))
+            exclusion_active=exclusion.get("active"), **w1)
 
     def _authorized_links(self, cs) -> frozenset:
         """접촉 권한이 있는 link — 제약을 지을 때 쓴 **같은** 집합 (`ClearancePolicy.authorized_links`)."""
@@ -1856,7 +1870,8 @@ def geometry_certified(constraint_set: Any) -> bool:
 
     `status == ok` 이거나, SUBTASK-e: target 이 없는 이유가 subtask gate 이고 carve 중인 것이 없다
     (`ag3s.types.subtask_no_target`). SUBTASK-f: gate on ∧ 확정 label home ∧ PLACED 도달 뒤의
-    `no_admissible` 도 같은 조건으로 인증된다. 그 밖의 `no_target` (`no_seed` · `low_score` · `lost` ·
+    `no_admissible` 도 같은 조건으로 인증된다. T46c W1: `clustering.placed_no_seed_certify` 를 켜면 같은
+    조건의 `no_seed` 도 인증된다 (끄면 키가 없어 닫힌다). 그 밖의 `no_target` (`no_seed` · `low_score` · `lost` ·
     놓기 전 `no_admissible` …) · degraded · incomplete 는 지금처럼 미인증이다. gate off 에서는 두 갈래
     모두 닫히므로 이 값은 `status == ok` 와 같다.
     """

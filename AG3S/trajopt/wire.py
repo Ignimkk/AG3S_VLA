@@ -136,7 +136,7 @@ T16 에서 `--no-collision` 인데도 34 청크 중 25 개가 HOLD 였다. 이�
 | `budget_only` | 예산/반복 상한으로 끝났지만 최종 검사 통과 | 실행 |
 | `occluded_target` | 미인증의 이유가 target 없음(`no_target`) 하나뿐이고 manipulated 가 `occluded` 다 (T20) | 실행 |
 | `uncertified_waived` | 기하 미인증이지만 서버가 `require_certified_geometry=False` 로 떠 있다 | 실행 |
-| `subtask_no_target` | target 이 없는 이유가 **subtask gate** 다 (`grounding_status=subtask_gated` · `validity=valid` · carve 중인 대상 없음, `ag3s.types.subtask_no_target`). SUBTASK-f: gate on ∧ label `home` ∧ PLACED 도달 뒤의 `no_admissible` (잡을 것이 남지 않음) 도 같다 — evidence 의 `grounding_status` 가 둘을 가른다. 이 기하는 **인증된 것으로 본다** (`geometry_certified=True`) — 이 사유는 "target 이 없는데 왜 실행했나" 를 남기는 기록이다 (SUBTASK-e) | 실행 |
+| `subtask_no_target` | target 이 없는 이유가 **subtask gate** 다 (`grounding_status=subtask_gated` · `validity=valid` · carve 중인 대상 없음, `ag3s.types.subtask_no_target`). SUBTASK-f: gate on ∧ label `home` ∧ PLACED 도달 뒤의 `no_admissible` (잡을 것이 남지 않음) 도 같다. T46c W1 (`--placed-no-seed-certify`, 기본 off): 같은 조건의 `no_seed` 도 같다 — evidence 의 `grounding_status` 가 셋을 가른다. 이 기하는 **인증된 것으로 본다** (`geometry_certified=True`) — 이 사유는 "target 이 없는데 왜 실행했나" 를 남기는 기록이다 (SUBTASK-e) | 실행 |
 | `follow_to` | **T43 Z6** (`serve_safe --hold-follow-to N`, 기본 off): `collision` 행이 전부 margin 안쪽뿐 (ESDF − r ≥ 0) 이고 그 최소 clearance 가 현재 상태보다 작지 않으며 refined 가 정책 reference 가 아니다 — TO refined chunk 를 실행한다. 원래 `collision` 사유는 evidence `replaced` 에 | 실행 |
 | `collision` | 권한 없는 link, 또는 manipulated 가 아닌 물체와의 관통 (> tolerance) | HOLD |
 | `uncertified` | `geometry_certified=False` (위 `occluded_target` 이 아닌 것 전부. `subtask_no_target` 은 미인증이 아니다) | HOLD |

@@ -884,6 +884,15 @@ def split_identity_section(args) -> dict:
     return out
 
 
+# T46c A12 (W1) — begin
+def placed_no_seed_section(args) -> dict:
+    """T46c A12 (W1) — `clustering.placed_no_seed_certify` for `--placed-no-seed-certify` only (not
+    given = `{}`, config as is = off). Merged into `build_ag3s(identity=...)` so `assert_ag3s_config`
+    checks it survived `with_overrides`."""
+    return {"placed_no_seed_certify": True} if getattr(args, "placed_no_seed_certify", False) else {}
+# T46c A12 (W1) — end
+
+
 def held_permission_overrides(args) -> dict:
     """T44b A4 (I2b CLI) — `--held-permission-parent-links N` → `collision.held_permission_parent_links`.
     안 줬으면 `{}` (config 기본 1 = 사용자 판정)."""
@@ -1137,6 +1146,10 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
     if identity:
         logging.warning("AG3S identity (T43 T fix 3): %s", ", ".join(
             f"{k}={v}" for k, v in sorted(identity.items())))
+    if ag3s.config.clustering.placed_no_seed_certify:
+        # T46c A12 (W1) — 인증 규칙이 바뀐 서버다. 기록 (`subtask.placed_no_seed_certify`) 과 함께 크게.
+        logging.warning("AG3S T46c W1 — placed_no_seed_certify = True: PLACED 뒤 home (gate on) 의 "
+                        "no_seed frame 을 no_admissible 과 같은 조건으로 인증한다 (위반 행은 그대로 HOLD)")
     if held_free_observed_pad is not None:
         # T43 T fix 2 — the pre-grasp observation, freed at its place on every held frame.
         ag3s.held_free_observed_pad = float(held_free_observed_pad)
@@ -1647,6 +1660,14 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--subtask-probe", default=None, metavar="NPZ",
                     help="subtask probe asset (`clustering.subtask_probe_path`). 안 주면 동봉 "
                          "AG3S/ag3s/asset/subtask_probe/kv_L4_v1.npz")
+    # T46c A12 (W1) — begin
+    ap.add_argument("--placed-no-seed-certify", action="store_true",
+                    help="T46c W1 — PLACED 뒤 확정 label home (subtask gate on) 에서 grounding 이 "
+                         "no_seed (attention 상위 seed 가 모두 지지면 위) 인 frame 을 SUBTASK-f 의 "
+                         "no_admissible 과 같은 조건 (valid ∧ carve 없음) 으로 인증한다 "
+                         "(clustering.placed_no_seed_certify). 인증은 'uncertified' 사유만 없앤다 — "
+                         "위반 행이 있으면 그대로 HOLD. 기본 off")
+    # T46c A12 (W1) — end
     ap.add_argument("--record-constraints", default=None, metavar="DIR",
                     help="청크마다 AG3S 중간 산출물(attention·grounding·거리장·제약 여유)을 "
                          "npz 로 남긴다. `--safe-remote` 청크는 이것들을 응답에 싣지 않으므로, "
@@ -1796,6 +1817,16 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
                                                  or getattr(args, "no_perception", False)):
         ap.error("--subtask-probe 는 attention 서버의 probe 를 고르는 flag 입니다 (--no-safe · "
                  "--no-attention · --no-perception 은 attention 서버를 안 만듭니다)")
+    # T46c A12 (W1) — 인증 갈래는 gate on ∧ label home ∧ PLACED 에서만 열린다. label 이 안 오거나
+    # gate 를 끈 조합이면 아무것도 안 하는 flag 다.
+    if getattr(args, "placed_no_seed_certify", False):
+        if _label_unavailable(args):
+            ap.error("--placed-no-seed-certify 는 subtask label (attention 서버) 과 AG3S 인증 술어를 "
+                     "읽는 flag 입니다 (--no-safe · --no-attention · --no-perception 은 그 중 하나를 "
+                     "끕니다). 그대로 띄우면 효과가 있었다고 믿게 됩니다")
+        if getattr(args, "subtask_gate", None) is False:
+            ap.error("--placed-no-seed-certify 는 subtask gate on 에서만 열립니다 (--no-subtask-gate "
+                     "와 같이 주면 아무 일도 하지 않습니다)")
     if args.target_field_policy != "relax" and args.no_safe:
         ap.error("--target-field-policy 는 안전 계층의 거리장 질의를 고치는 flag 입니다 "
                  "(--no-safe 는 그 계층을 아예 안 만듭니다). 그대로 띄우면 target 을 필드에서 "
@@ -2566,7 +2597,10 @@ def main() -> None:
                          if self_filter_options(args) else {}),
                       # SUBTASK-c — **항상 남긴다**: 이 키가 없는 기록은 SUBTASK-c 전이다.
                       "subtask": {"gate": bool(args.subtask_gate),
-                                  "probe": args.subtask_probe or "shipped:kv_L4_v1"}})
+                                  "probe": args.subtask_probe or "shipped:kv_L4_v1",
+                                  # T46c A12 (W1) — 켰을 때만 키가 생긴다.
+                                  **({"placed_no_seed_certify": True}
+                                     if getattr(args, "placed_no_seed_certify", False) else {})}})
             # **시작할 때 거절한다.** 기록기가 이 backend 의 거리장을 실을 수 없으면 청크마다
             # 예외가 나고, 예전에는 그것이 `print` 한 줄이라 75 chunk 를 돌리고도 빈 디렉토리가
             # 남았다 (2026-09-28). 여기서 죽으면 체크포인트를 올리기 전이다.
@@ -2666,7 +2700,8 @@ def main() -> None:
                             held_body_cover=args.held_body_cover,
                             # T44b A4 — split keys join the identity keys (checked by assert_ag3s_config).
                             identity={**t43t_identity_section(args),
-                                      **split_identity_section(args)} or None,
+                                      **split_identity_section(args),
+                                      **placed_no_seed_section(args)} or None,  # T46c A12
                             target_exclusion=({**target_exclusion_section(args),   # T44 I1 (A1)
                                                **target_free_coarse_section(args),  # T44c A5
                                                **target_free_coarse_sign_section(args),  # T44c A6
