@@ -1,0 +1,40 @@
+{
+ "name": "C1aF1_ep104_s1042",
+ "seq": 14,
+ "n_rows_flip_m10_arm5": 31,
+ "exec_step": 104,
+ "used_arm": "left",
+ "target": "pear",
+ "exec_min_mm": {
+  "link_left_arm_5": -11.72224162891413,
+  "link_left_arm_6": 122.48911243746993,
+  "link_left_arm_4": 204.9823467151955,
+  "ee_left": 28.218177198662385,
+  "ee_finger_l1": 20.109292190161625,
+  "ee_finger_l2": 5.504537951481274
+ },
+ "render": {
+  "closest_arm5_sphere_index": 0,
+  "closest_arm5_mm": -11.72224162891413,
+  "target_uv": [
+   431.6,
+   387.9
+  ]
+ },
+ "slice": {
+  "y_m": 0.296927632415523,
+  "flip_rows_m10_arm5_chunk": 31,
+  "closest_flip_row": {
+   "step": 1,
+   "sphere": 84,
+   "dfull_mm": -14.386234203845746,
+   "dfree_mm": 34.26256477338532,
+   "gt_target_mm": -13.615879680027856
+  }
+ },
+ "source": {
+  "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233920+0900_392462577320_70c141f47dbe/verify/T46d",
+  "chunk_record": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1aF1/server_8290_20261012T091034/server_constraints/run_0000/chunk_00238.npz",
+  "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233920+0900_392462577320_70c141f47dbe/verify/T46d/p/fig_scene.py"
+ }
+}
