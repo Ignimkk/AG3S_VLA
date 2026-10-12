@@ -1,0 +1,507 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/agg.json",
+ "arm_labels": {
+  "C0": "C0",
+  "C1a": "C1a",
+  "C1bp": "C1b'",
+  "C2p": "C2'"
+ },
+ "numbers": {
+  "outcomes": {
+   "C0": {
+    "task success": 14,
+    "CT success": 12,
+    "robust grasp": 13,
+    "first grasp ok": 14,
+    "grasp (final)": 16
+   },
+   "C1a": {
+    "task success": 14,
+    "CT success": 11,
+    "robust grasp": 14,
+    "first grasp ok": 16,
+    "grasp (final)": 17
+   },
+   "C1bp": {
+    "task success": 11,
+    "CT success": 9,
+    "robust grasp": 11,
+    "first grasp ok": 13,
+    "grasp (final)": 13
+   },
+   "C2p": {
+    "task success": 1,
+    "CT success": 0,
+    "robust grasp": 0,
+    "first grasp ok": 0,
+    "grasp (final)": 1
+   }
+  },
+  "contact_runs": {
+   "C0": {
+    "hand-fruit_other": 4,
+    "robot_other-target": 1,
+    "robot_other-fruit_other": 0
+   },
+   "C1a": {
+    "hand-fruit_other": 4,
+    "robot_other-target": 1,
+    "robot_other-fruit_other": 0
+   },
+   "C1bp": {
+    "hand-fruit_other": 4,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0
+   },
+   "C2p": {
+    "hand-fruit_other": 6,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0
+   }
+  },
+  "contact_rows": {
+   "C0": {
+    "hand-fruit_other": 64,
+    "robot_other-target": 1,
+    "robot_other-fruit_other": 0
+   },
+   "C1a": {
+    "hand-fruit_other": 38,
+    "robot_other-target": 7,
+    "robot_other-fruit_other": 0
+   },
+   "C1bp": {
+    "hand-fruit_other": 30,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0
+   },
+   "C2p": {
+    "hand-fruit_other": 147,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0
+   }
+  },
+  "hold_chunks_per_run": {
+   "C0": [
+    0,
+    0,
+    39,
+    0,
+    0,
+    1,
+    4,
+    0,
+    0,
+    37,
+    20,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "C1a": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    50,
+    1,
+    1,
+    2,
+    38,
+    1,
+    1,
+    1,
+    0,
+    19,
+    1,
+    1
+   ],
+   "C1bp": [
+    1,
+    0,
+    0,
+    2,
+    0,
+    0,
+    2,
+    0,
+    1,
+    36,
+    2,
+    35,
+    2,
+    1,
+    2,
+    1,
+    1,
+    1
+   ],
+   "C2p": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    2,
+    0,
+    20,
+    2,
+    2,
+    2,
+    3,
+    1,
+    0,
+    1,
+    5
+   ]
+  },
+  "timing_ms_median_p90": {
+   "TO ms": {
+    "C0": [
+     163.70715387165546,
+     504.9752562306824
+    ],
+    "C1a": [
+     166.31162259727716,
+     593.9341818913819
+    ],
+    "C1bp": [
+     207.00168702751398,
+     512.8567645326257
+    ],
+    "C2p": [
+     502.0729913376272,
+     801.1824418790638
+    ]
+   },
+   "AG3S ms": {
+    "C0": [
+     284.47577776387334,
+     532.9654863104224
+    ],
+    "C1a": [
+     286.9779677130282,
+     562.0578285306693
+    ],
+    "C1bp": [
+     362.96394001692533,
+     525.780239328742
+    ],
+    "C2p": [
+     410.1761979982257,
+     555.8525208383799
+    ]
+   }
+  },
+  "pair_matrix_0fail_1success_noCT_2successCT": {
+   "ep12_s121": [
+    2,
+    2,
+    2,
+    0
+   ],
+   "ep12_s122": [
+    2,
+    2,
+    0,
+    0
+   ],
+   "ep30_s301": [
+    2,
+    2,
+    2,
+    0
+   ],
+   "ep30_s302": [
+    2,
+    2,
+    2,
+    0
+   ],
+   "ep0_s1": [
+    0,
+    2,
+    0,
+    0
+   ],
+   "ep0_s2": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ep3_s31": [
+    2,
+    0,
+    0,
+    0
+   ],
+   "ep3_s32": [
+    0,
+    2,
+    0,
+    0
+   ],
+   "ep11_s111": [
+    2,
+    2,
+    2,
+    0
+   ],
+   "ep11_s112": [
+    2,
+    2,
+    2,
+    1
+   ],
+   "ep54_s541": [
+    0,
+    1,
+    1,
+    0
+   ],
+   "ep54_s542": [
+    1,
+    1,
+    1,
+    0
+   ],
+   "ep123_s1231": [
+    2,
+    2,
+    2,
+    0
+   ],
+   "ep123_s1232": [
+    2,
+    0,
+    2,
+    0
+   ],
+   "ep104_s1041": [
+    2,
+    2,
+    0,
+    0
+   ],
+   "ep104_s1042": [
+    2,
+    0,
+    0,
+    0
+   ],
+   "ep110_s1101": [
+    2,
+    2,
+    2,
+    0
+   ],
+   "ep110_s1102": [
+    1,
+    1,
+    2,
+    0
+   ]
+  },
+  "pairs_A_only_B_only_p": {
+   "C0_vs_C1a": {
+    "success": [
+     3,
+     3,
+     1.0
+    ],
+    "success_ct": [
+     3,
+     2,
+     1.0
+    ],
+    "grasp": [
+     0,
+     1,
+     1.0
+    ],
+    "pre_release_new_contact": [
+     1,
+     1,
+     1.0
+    ]
+   },
+   "C1a_vs_C1bp": {
+    "success": [
+     4,
+     1,
+     0.375
+    ],
+    "success_ct": [
+     4,
+     2,
+     0.6875
+    ],
+    "grasp": [
+     4,
+     0,
+     0.125
+    ],
+    "pre_release_new_contact": [
+     2,
+     2,
+     1.0
+    ]
+   },
+   "C1bp_vs_C2p": {
+    "success": [
+     10,
+     0,
+     0.001953125
+    ],
+    "success_ct": [
+     9,
+     0,
+     0.00390625
+    ],
+    "grasp": [
+     12,
+     0,
+     0.00048828125
+    ],
+    "pre_release_new_contact": [
+     3,
+     5,
+     0.7265625
+    ]
+   }
+  },
+  "cross_day_totals_T44d_CL2": {
+   "C0->C0": {
+    "success": [
+     14,
+     14,
+     2,
+     2,
+     1.0
+    ],
+    "success_ct": [
+     13,
+     12,
+     3,
+     2,
+     1.0
+    ],
+    "grasp": [
+     14,
+     16,
+     1,
+     3,
+     0.625
+    ]
+   },
+   "C1a->C1a": {
+    "success": [
+     15,
+     14,
+     2,
+     1,
+     1.0
+    ],
+    "success_ct": [
+     12,
+     11,
+     3,
+     2,
+     1.0
+    ],
+    "grasp": [
+     15,
+     17,
+     0,
+     2,
+     0.5
+    ]
+   },
+   "C1b->C1bp": {
+    "success": [
+     7,
+     11,
+     1,
+     5,
+     0.21875
+    ],
+    "success_ct": [
+     4,
+     9,
+     1,
+     6,
+     0.125
+    ],
+    "grasp": [
+     10,
+     13,
+     2,
+     5,
+     0.453125
+    ]
+   },
+   "C2->C2p": {
+    "success": [
+     0,
+     1,
+     0,
+     1,
+     1.0
+    ],
+    "success_ct": [
+     0,
+     0,
+     0,
+     0,
+     1.0
+    ],
+    "grasp": [
+     0,
+     1,
+     0,
+     1,
+     1.0
+    ]
+   }
+  },
+  "trace_sums": {
+   "C0": {
+    "n_removed_sum": 565297,
+    "n_kept_nontarget_sum": 0,
+    "n_ambiguous_sum": 0,
+    "n_unowned_removed_sum": 0,
+    "coarse_n_shared_kept_sum": 0
+   },
+   "C1a": {
+    "n_removed_sum": 383957,
+    "n_kept_nontarget_sum": 7572,
+    "n_ambiguous_sum": 17288,
+    "n_unowned_removed_sum": 155383,
+    "coarse_n_shared_kept_sum": 0
+   },
+   "C1bp": {
+    "n_removed_sum": 505573,
+    "n_kept_nontarget_sum": 13055,
+    "n_ambiguous_sum": 56550,
+    "n_unowned_removed_sum": 218115,
+    "coarse_n_shared_kept_sum": 1096
+   },
+   "C2p": {
+    "n_removed_sum": 1220675,
+    "n_kept_nontarget_sum": 57718,
+    "n_ambiguous_sum": 271223,
+    "n_unowned_removed_sum": 544739,
+    "coarse_n_shared_kept_sum": 4888
+   }
+  }
+ }
+}
