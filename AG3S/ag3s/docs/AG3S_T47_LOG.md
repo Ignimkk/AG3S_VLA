@@ -157,6 +157,27 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **scene-level paired difference (T51b (c))** | 두 선택 (예: 명사 best 와 action best) 의 held-out scene 평균 `identity_correct` 의 **scene 별 차를 평균** 한 값과 그 scene bootstrap 95 % CI (B = 1000, seed 5107 + 3^3 = 27 resample 전수). frame 단위 McNemar 는 frame 을 독립으로 세므로 **참고값** |
 | **T51 · T51b** | T51 = head 선택 protocol 공식화 (RB-Y1 sim P1–P6 + self label + LIBERO 2D). T51b = 같은 protocol 에 명사 query 행을 추가해 action query 와 같은 기준으로 비교 |
 
+**T46c-W1 · T46d · T46f (2026-10-13 추가)** — placed `no_seed` 인증 수정 (W1) 의 재현 검증, DX-04 (link 별 target 예외) 선행 확인, LTE 검증 블록 계획의 용어. (W1 · `no_seed` · `geometry_certified` 는 위 "T46b · T46c" 표, PA-1 · DT-02 · DT-05A 도 그 표.)
+
+| 용어 | 뜻 |
+|---|---|
+| **authorized / non-authorized link (허용 / 비허용 link)** | authorized = target 에 닿는 것이 작업의 일부인 link: active hand 의 손바닥 `ee_<side>` (MJCF `EE_BODY_*`) 와 손가락 `ee_finger_<side>1/2`. non-authorized = 그 밖의 link: 손목 F/T 센서 `FT_SENSOR_<side>` · `link_*_arm_5` · `link_*_arm_6` · 반대 손 · 팔. 허용 여부는 link 의 축이고 target 영역 (어느 물체인가) 과 다른 축이다 |
+| **field policy: no exemption · global exclusion · LTE** | query sphere 가 ESDF 에서 target 을 어떻게 읽는가의 세 방식 (develope_PLAN DX-04). **no exemption** = 모든 link 가 target 을 일반 obstacle 로 읽음 (full field, 권한 link margin 완화도 없음). **global exclusion** = 모든 link 가 target-free 합성 field 를 읽음 (CLI `--target-field-policy exclude-all`). **LTE (link-specific target exemption)** = authorized link 만 target-free field 를 읽고 나머지는 full field (`exclude-authorized`, 이 STEP 은 `--target-permission-strict` + `--nonauthorized-target-margin obstacle` 조합을 쓴다고 정함 — T46f §4). 현재 CLI 선택지는 `relax` / `exclude-authorized` / `exclude-all` 이고 no exemption 은 별도 선택지가 아니다. T46f 가 `none` 을 추가한다 (아래 "no exemption `none`") |
+| **no exemption policy `none` (T46f 계획)** | `--target-field-policy none` — 모든 link 가 target 을 일반 obstacle 로 읽고 권한 link margin 완화도 하지 않는 정책. 아직 구현되지 않았다 (T46f A14, 계획) |
+| **퇴화 (degenerate) 비교** | LTE 와 global exclusion 이 같은 판정을 내서 비교할 수 없는 상태. query set 의 모든 link 가 authorized 이면 두 정책이 같은 field 를 읽는다. 측정은 "target 근처 non-authorized 행 수 = 0" 으로 했다 |
+| **near-target (criterion 2, T46d 사전 고정)** | link 의 sphere 표면에서 target 표면까지 거리가 50 mm 이하인 chunk 가 그 run 의 window 안에 하나라도 있으면 그 link 는 그 run 에서 target 에 접근한 것. 50 mm 는 target 의 full margin 이고, 측정 전에 고정했다 |
+| **window (pre8close) · policy-active chunk** | pre8close = close 가 시작된 chunk 이전 8 chunk 부터 close chunk 까지 (T46b 의 window 와 같은 정의, 18 run × 9 = 162 chunk). policy-active = 그 chunk 의 target permission 정책이 `exclude_authorized` 이고 held 가 아니며 target 이 있고 target-free field 가 기록된 chunk. LTE 와 global 의 차이는 이 chunk 에서만 생길 수 있다 |
+| **field-level re-query (LTE ≠ global chunk)** | 기록된 field (full / target-free 두 층) 를 plan 의 16 행 sphere 위치에서 다시 읽어 `d − r < m` 인 행을 위반으로 세는 offline 재계산. m ∈ {0, 10 mm (obstacle margin), 50 mm (target full margin)}. 한 chunk 에서 global (모두 target-free) 과 LTE (authorized 만 target-free) 의 위반 행 집합이 1 행이라도 다르면 그 chunk 는 **LTE ≠ global**. TrajOpt 를 다시 푼 것이 아니다 |
+| **binding row · C2′** | binding row = 그 chunk 의 TO 에서 가장 제한적인 (최악) query 행의 link. C2′ = 이전 CL2 의 `--links arms` (양팔 14 link + 손가락, 422 구) arm ([이전 로그 정의](AG3S_T0T6_LOG.md)) |
+| **sphere model 대 MJCF geom** | sphere model = URDF capsule 을 구로 덮은 constraint model (TrajOpt 가 보는 것). MJCF geom = MuJoCo 가 실제 접촉을 계산하는 collision geom. 두 모델이 어긋나면 constraint 가 실제 접촉과 다른 것을 막는다 (**형상 근사 오류**) |
+| **FT sensor cover (`wrist_cover`, T46f 계획)** | 손목 F/T 센서 (MJCF `FT_SENSOR_*`, `link_*_arm_6` 의 자식 body) mesh 를 덮는 coverage 구의 role 이름 (예). 현재 URDF constraint model 에는 이 body 를 덮는 구가 없다. non-authorized 로 둔다 |
+| **coverage audit** | 각 보정 link 의 MJCF geom 표면 점 중 구 밖 비율 · 밖 거리 (median / p95 / max) 로 형상 **누락** 을, 구가 geom 밖으로 나간 정도의 max 로 **과도한 팽창** 을, 비허용 구와 허용 (손바닥 · 손가락) 구 · MJCF 손 geom 의 **겹침** 을 재는 검사 (T46f §4). 선례: 이전 로그의 finger · palm coverage audit ([이전 로그](AG3S_T0T6_LOG.md)) |
+| **diagnostic scene (진단 장면)** | 손의 target 접촉과 non-authorized link (FT sensor 등) 의 회피가 **동시에** 필요하도록 고른 배치. 기존 18 쌍은 일반 작업 성능 · 부작용 평가로 유지하고 이 장면을 따로 둔다 (T46f §5) |
+| **S1 – S4 (diagnostic scene 선정 기준, 결과 전 고정)** | S1 = 실제 MuJoCo geom 기준 non-authorized 접촉 위험이 있음 (E0 rollout 의 FT sensor–target 최소 표면 거리 ≤ 50 mm 는 **후보 선별** 기준일 뿐 충돌 · 보호 효과의 증거가 아님). S2 = 접근 경로나 손목 자세를 바꾸면 작업 완료가 가능 (성공 시연 또는 IK / 계획 feasibility 1 개 이상). S3 = 초기 관통 (t = 0 접촉) 이나 구조적으로 성공 불가능한 배치 제외. S4 = 개발용 배치와 최종 평가용 배치를 episode id 로 사전 분리 (예: dev = train split, eval = held-out test split 1800–1999) |
+| **visible observed surface oracle (T46e)** | 시뮬레이터의 GT 로 **카메라에 실제 보인 target 표면 점** (target geom id 의 visible pixel 의 depth 점) 에서 온 seed 만 target 으로 지우는 extent 상한. 전체 형상 (full mesh) oracle 이 아니다. 기본 off 이고 T46e 가 격리 worktree 에서 구현 (미적용) |
+| **비허용 접촉 없는 작업 성공률 (T46f 주 지표)** | task success ∧ 실제 MuJoCo geom 기준 non-authorized link–target 접촉 0. HOLD · TO 실패가 늘어 접촉률이 낮아진 결과는 보호 효과로 읽지 않는다 |
+| **T46c-W1 · T46d · T46f · T46e** | T46c-W1 = placed `no_seed` 인증 수정 (flag 기본 off) 의 검증. T46d = DX-04 선행 확인 (어떤 non-authorized link 를 넣어야 LTE 와 global 비교가 성립하는가, offline). T46e = visible observed surface oracle extent 구현 (`handoff/T46e.task.md`). T46f = LTE 검증 블록 (형상 보정 → 진단 장면 → 3 조건 closed-loop) 의 계획 (`handoff/T46f.task.md`) |
+
 ---
 
 ## 진행 현황 — T47 이후
@@ -173,6 +194,9 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **T51b** head 선택 protocol 에 명사 query 행 추가 | action query 와 명사 query 를 같은 기준으로 비교 | ~~**진행 중 (2026-10-12)** — task: [`handoff/T51b.task.md`](handoff/T51b.task.md). 아직 기록할 측정 없음~~ → **측정 완료 (2026-10-12, 사용자 판정 대기).** (a) 명사만 Ω: GT 1 위 `noun_target:L10H7` P(rank1) 0.687 (상위 10 cell 의 점수 차 0.007 이내), self 1 위 `noun_target:L8H6` 0.529. (b) action + 명사 Ω: GT 1 위 `last:L12H4` P(rank1) 0.753 (action family 합 0.918), self 1 위 `noun_target:L8H6`. (c) held-out scene mean: 명사 best 0.867 대 action best 0.911, scene 단위 차 −0.044 (95 % CI [−0.133, 0.000], scene 3 개). 명사가 더 낫다는 증거는 없다. 아래 "T51 · T51b" 절 §12 |
 | **T46b** F1 을 켠 뒤 늘어난 close 이후 uncertified HOLD 의 원인 (진단, CPU offline, T46 의 후속) | F1 이 grasp 이후 처리와 충돌해서 HOLD 가 늘었는가, 아니면 다른 원인인가 — F1 을 develope_PLAN §0.10.1-3 의 방법으로 채택할 수 있는가 | **측정 완료 (2026-10-12).** close 이후 uncertified HOLD 는 전부 **placed phase** (C1a 37 / 37 · C1aF1 130 / 130 · C1aF1F2 118 / 118 chunk) 이고, 실패 항목은 grounding `no_seed` (C1a 37 · C1aF1 129 · C1aF1F2 116 chunk, `n_clusters = 0`). 그 HOLD chunk 의 F1 기록은 0 / 130. 가설 (a) F1 이 grasp 이후 처리와 충돌 · (b) non-target 근거 감소 · (c) 분모 효과는 **반박**, (d) placed 뒤 `no_seed` 인증 공백은 **확인**. 같은 HOLD 가 F1 이 없는 CL2 에도 있다 (C0 73 · C1bp 70). F1 이 `no_seed` run 을 계통적으로 늘렸는지는 **모름** (3 / 0 / 1, p = 0.25). 아래 "T46b" 절 |
 | **T46c** F1 채택 (한계 L1–L9 명시) · W1 (A12) 구현 · PA-1 ablation 초안 | F1 을 현재 extent 방법으로 채택하는가, close 이후 HOLD 를 어떻게 다루는가, ablation 을 어떻게 구성하는가 | **F1 채택 (사용자 판정, 2026-10-12) — 한계 L1–L9 를 함께 기록.** W1 구현은 **진행 중 (결과 없음)**. PA-1 ablation 구성은 **사용자 판정 대기**. 아래 "T46c" 절 |
+| **T46c-W1** placed `no_seed` 인증 수정 (flag 기본 off) 의 검증 (V-T46c, CPU offline) | W1 이 T46b 의 what-if 를 코드로 재현하는가, off 에서 기록과 같은가 | **측정 완료 (2026-10-12 23:40 KST, PASS).** 기준선 일치 (legacy 14 / 15 · 15 / 15 · −29.031048 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877 mm). off (W0) 가 기록 reason · certified 와 3 arm × 1350 / 1350 chunk 에서 같다. W1 의 close 이후 HOLD (total / uncertified) 는 C1a 107 / 37 → 70 / 0, C1aF1 183 / 130 → 54 / 1, C1aF1F2 122 / 118 → 6 / 2. **per-chunk what-if 이고 closed-loop 효과는 측정하지 않았다.** 사용자 판정으로 모든 Ablation arm 에 켠다 (바로 위 T46c 행의 "W1 구현은 진행 중 (결과 없음)" 은 이 행으로 대체). 아래 "T46c-W1 · T46d · T46f" 절 |
+| **T46d** DX-04 선행 확인: LTE 대 global exclusion 비교가 성립하는 최소 non-authorized link 집합 (CPU offline, 18 run × 3 arm) | 현재 gripper scope 에서 LTE 와 global exclusion 이 다른 판정을 내는가, 어떤 link 를 넣어야 비교가 성립하는가 | **측정 완료 (2026-10-13 00:17 KST), 사용자 판정 (2026-10-13).** 기록 문구 (사용자 지정): **현재 gripper scope 에서는 LTE 와 global exclusion 의 비교가 퇴화하며, `link_*_arm_5` 를 추가했을 때 나타난 차이는 형상 근사 오류의 영향을 받는다.** ("효과 없음" 이 아니다.) gripper scope 에서 target 근처 non-authorized 행 0 / 349,920 (C1aF1, pre8close). arm_5 sphere 는 18 / 18 run 에서 target 50 mm 안이지만 MJCF arm_5 geom 은 18 / 18 run 에서 100 mm cap 이상. 판정: **A (주장 축소) 가 아니라 B 를 확장해 진행, C (arm_5 근사 구 그대로) 제외.** 아래 절 |
+| **T46f** LTE 검증 블록: 형상 보정 (A14) → 진단 장면 → oracle extent 로 no exemption · global exclusion · LTE → AG3S extent | 지정 link 에만 target 접촉을 허용하면 필요한 손의 접촉을 유지하면서 비허용 link 의 접촉을 줄이는가 (가설, 사전 고정) | **계획 단계 (2026-10-13 01:23 KST). 측정 결과 없음.** 형상 보정 (A14) 이 진행 중이다. LTE 의 우수성을 전제하지 않는다. 아래 절 |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -206,6 +230,11 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | T51 — 사전 고정 안정성 기준 (full-sample 1 위의 P(rank1) ≥ 0.5) 를 GT 선택이 **충족하지 못했으므로 (0.429) 단일 head 고정을 주장하지 않는다** | **사전 고정 규칙의 출력이다 (사용자 판정이 아니다).** task 의 되돌아올 지점이 정한 문구. 후속 (k > 1 · 명사 query) 은 T51b 와 판정 대기 항목 | 16D (5 scene) |
 | T51b — action query 와 같은 protocol 을 명사 query 행에 돌려 비교한다 (offline GPU prefix pass, GPU lock) | 사용자 판정 (2026-10-12, T49 결과 후). T51 은 그대로 끝내고 추가 | 16D |
 | T51b — **명사 단독 Ω 의 3D 강제 포함 cell = T49 primary 명사 cell L8H6 · L5H4 · L4H2** (합친 Ω 에서는 T51 의 forced 에 이 3 개를 더한다). **(c) 비교의 primary 통계 = scene 단위 paired 차이 + scene bootstrap 95 % CI**, frame 단위 McNemar 는 참고값 | lead (T51b.impl.md ★ 두 항목에 대한 판정, 결과 전 고정). 사용자 판정이 아니다. 구현이 이 forced 를 코드에 넣지 않은 일은 §12 에 기록 | 16D |
+| T46c — **W1 (`--placed-no-seed-certify`) 을 Ablation 의 모든 arm 에 켠다. 코드의 기본값은 off 로 두고 실험 arm 에서 명시적으로 켠다** | 사용자 판정 (2026-10-12, 추천안 채택). **2026-10-04 판정 ("`no_seed` HOLD 는 그대로 둔다") 을 이번에 바꾼다.** 근거: 그 판정의 전환 신호 관측 (T46b) · V11AB (C0) 에도 같은 HOLD. 위 "close 이후 HOLD 의 고칠 곳은 F1 이 아니라 인증 규칙 (W1)" 행 (lead 의 설계 결정) 을 사용자 판정으로 확정한다 (`handoff/T46c.task.md` "사용자 판정" 절) | 16D (pilot 규모) |
+| T46c — DX-04 선행 확인의 비허용 link 범위는 develope_PLAN §0.10.1-1 의 **최소 범위** (wrist 등) 부터, 표본은 **18 쌍 유지** (CL2 · CL3 와 같은 9 episode × 2 seed), 순서는 develope_PLAN §11 (DX-04 선행 확인 → DX-01 identity / extent 분리 + visible-target oracle → contact handling → Ablation closed-loop) | 사용자 판정 (2026-10-12, 추천안 채택). 근거 (task 문서 인용): develope_PLAN §0.4 "유리한 결과를 위해 표본을 늘리지 않는다". 범위는 T46d 에서 기록으로 고른다 | 16D |
+| T46d — **기록 문구는 "현재 gripper scope 에서는 LTE 와 global exclusion 의 비교가 퇴화하며, `link_*_arm_5` 를 추가했을 때 나타난 차이는 형상 근사 오류의 영향을 받는다"** 이다. "효과 없음" 으로 쓰지 않는다 | 사용자 지정 (2026-10-13 KST, `handoff/T46d.task.md` "결과 기록과 사용자 판정") | 16D |
+| T46d · T46f — **T46d 의 A (link-specific 효과 주장 축소) 가 아니라 B 를 확장해 진행한다: 형상 보정 (FT sensor coverage · arm_5 근사 보정) → 진단 장면 → oracle extent 3 조건 closed-loop. C (arm_5 근사 구 그대로) 는 제외한다. LTE 의 우수성을 전제하지 않는다** | 사용자 판정 (2026-10-13 KST, `handoff/T46f.task.md` 머리말). A · C 의 괄호 설명은 `T46f.task.md` 의 문구이고, B 는 "B 를 확장" 으로만 적혀 있어 내용은 T46f 의 단계 (아래 절) 로 읽는다 | 16D |
+| T46f — 가설 · 주 지표 · 접촉 정의 · DT-02 와 DT-05A 블록 분리 · 진단 장면 기준 S1 – S4 · 단계 · 중단 기준 | **lead 의 사전 고정 (`handoff/T46f.task.md`).** 사용자 판정 문장에는 직접 나오지 않는다. FT sensor 비접촉을 이 작업의 요구사항으로 정의한 것도 lead 의 정의다 ("센서 보호") | 16D |
 
 ---
 
@@ -240,6 +269,13 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 22 | (T51 이 추가) **LIBERO 3D · KNOWS 재현** — LIBERO 는 agent view 2D lift 만 있고 3D `identity_correct` 가 없다. KNOWS 재현 (`--init zeros`) 은 사용자 판정으로 하지 않았다. wrist GT 는 저장되어 있지 않다 | RB-Y1 에서 2D lift 1 위 (`last:L12H3`) 는 3D 에서 6 위였다 (§6). 2D 만으로 고른 LIBERO 선택이 3D 에서도 같은지는 모른다 | **측정 안 됨** |
 | 23 | (T51b 가 추가) **명사 대 action query 의 일반화 · 후보 구성 의존** — held-out 3 scene 의 scene 단위 차의 CI 가 0 에 닿는다. 합친 Ω 의 2D 상위 16 은 전부 명사 cell 이라 action cell 은 forced 3 개 (`last:L8H3` · `last:L10H7` · `last:L12H4`) 로만 3D 에 들어갔다 | (b) 의 P(rank1) 0.753 은 그 후보 구성 아래의 값이다. action 후보를 넓힌 합친 Ω 는 돌리지 않았다. LIBERO 의 명사 행은 범위 밖 | **측정 안 됨** |
 | 24 | (T51 · T51b 가 추가) **grasp latch 를 포함한 e2e · cuRobo backend · 서빙 반영 후의 효과** | T51 의 3D 는 legacy ESDF offline replay (subtask gate off, grasp latch 없음). cuRobo 회귀 기준선은 GPU 미사용 지시로 돌리지 않았다 (`T51.verify.json not_measured`) | **측정 안 됨** |
+| 25 | (T46c-W1 이 추가) **W1 의 closed-loop 효과** — HOLD 가 풀리면 이후 궤적이 달라진다. home 복귀 시간 · safe success · 새 위반 · 접촉 | replay 는 기록 chunk 의 per-chunk what-if 다 (`T46c.verify.json not_measured`). #16 (T46b 가 추가한 같은 항목) 의 구현 쪽 | **측정 안 됨** (모든 Ablation arm 에 W1 on 이므로 CL4 이후의 closed-loop 에서 처음 잰다) |
+| 26 | (T46c-W1 이 추가) **"위반 행이 있으면 HOLD 유지" 의 기록 chunk 시험** | CL3 기록에는 그런 chunk 가 없다 (`not_measured`). 단위 test 로만 덮인다 | **측정 안 됨** (기록으로는) |
+| 27 | (T46c-W1 이 추가) **V11AB (C0) 에서의 W1 what-if · 전체 pytest · `ta_offline` 의 TO 재풀이 variant (W0 / W1 / F1W1)** | certification replay 의 입력은 CL3 의 세 arm (C1a · C1aF1 · C1aF1F2) 이다. verifier 는 전체 pytest 와 TO 재풀이 variant 를 돌리지 않았다 (`not_measured`) | **측정 안 됨** |
+| 28 | (T46d 가 추가) **형상을 보정한 뒤의 LTE 대 global exclusion 차이** — arm_5 에서 나타난 LTE ≠ global 의 크기가 형상 근사 오류를 뺀 뒤에도 남는가 | T46d 는 구 모델 위의 field-level re-query 만 했다. 보정 형상 (FT sensor cover · arm_5 보정) 은 T46f A14 가 만든다 | **측정 안 됨** (T46f 단계 1 이후) |
+| 29 | (T46d 가 추가) **TrajOpt 재풀이 · closed-loop 에서의 TO 시간 · 성공 · 접촉** | LTE ≠ global 은 `d − r` 을 임계값과 비교한 field-level 재계산이고 TO verdict 는 재현하지 않았다. TO 시간은 구 수 선형 추정이다 (`T46d.verify.json not_measured`). 재계산 fidelity: 기록 clearance 와 재조회 `d_full` 의 차가 policy-active chunk 에서 최대 22.00 mm (C1aF1), 손가락 행은 closing chunk 에서 기록과 최대 26.3 mm 달랐다 (손가락 관절 경로를 재현하지 않음) | **측정 안 됨** |
+| 30 | (T46d 가 추가) **MJCF 거리의 100 mm cap 이후 · `FT_SENSOR` / `EE_BODY` 의 0.0 mm 거리가 접촉 필터를 거친 겹침과 구별되지 않음 · held 구간 (lift / carry 대부분) 의 LTE ≠ global · cuRobo 회귀 기준선 (GPU 미사용)** | `mj_geomDistance` 의 distmax 100 mm 로 arm_5 / arm_6 거리는 "100 mm 이상" 으로만 안다 (`T46d.verify.json not_measured`) | **측정 안 됨** |
+| 31 | (T46f 가 추가) **T46f 의 모든 단계 결과** — 형상 보정 audit · 진단 장면 수 (S1 – S4 를 만족하는 dev / eval 배치) · 3 조건 closed-loop (oracle · AG3S extent) · 주 지표 | 계획 단계다. 결과 없음 | **측정 안 됨 (계획만)** |
 
 ---
 
@@ -1873,7 +1909,7 @@ CL3 의 18 쌍 × 3 arm 의 recorded chunk (4050 server chunk) 를 phase 별로 
 
 ---
 
-## T46c — F1 채택 (한계 L1–L9 를 함께 기록) · close 이후 HOLD 원인 · W1 구현 (진행 중) · PA-1 ablation 초안 (2026-10-12 KST)
+## T46c — F1 채택 (한계 L1–L9 를 함께 기록) · close 이후 HOLD 원인 · W1 구현 (~~진행 중~~ → 완료, 아래 "T46c-W1 · T46d · T46f" 절) · PA-1 ablation 초안 (2026-10-12 KST)
 
 **이 절이 답하는 물음 (목적).** T46b 의 진단 뒤에 정할 것이 셋이다. (1) F1 (non-target 근거에서 target 자신의 표면 점을 빼는 surface 근거) 을 develope_PLAN §0.10.1-3 의 **"경계 보존 방법 하나"** 로 현재 범위에서 채택할 것인가. (2) 채택하면서 close 이후 HOLD 증가를 어떻게 기록할 것인가. (3) 그 방법을 논문의 ablation 에 어떻게 넣을 것인가. 이 절은 (1) 과 (2) 의 판정을 기록하고, 그 판정이 요구한 구현 (W1) 이 **진행 중임** 과 (3) 의 초안이 **판정 대기임** 을 적는다. **W1 의 결과는 아직 없다.**
 
@@ -1882,7 +1918,7 @@ CL3 의 18 쌍 × 3 arm 의 recorded chunk (4050 server chunk) 를 phase 별로 
 - **before.** F1 은 grasp 직전 경계 효과를 보였지만 (HOLD run 12 → 6, 이웃 과일 접촉 run 4 → 1) 성공률은 같았고 (task 14 → 13) close 이후 HOLD 가 107 → 183 chunk 로 늘어, 채택 여부와 논문 주장 범위가 정해지지 않았다.
 - **after (사용자 판정, 2026-10-12).** **F1 을 현재 extent 방법으로 채택한다.** "권장하는 A 로 진행. **한계는 명확하게 작성하고 넘어갈 것.** F1 이 grasp 이후 HOLD 를 늘린 원인을 작성할 것." 한계 9 개 (L1–L9) 는 §3 에 논문 주장 범위의 제약과 함께 적었다. 채택 근거는 성공률이 아니라 **같은 identity 에서 extent 처리만 바꿨을 때 grasp 직전 충돌 행 887 → 401 (offline), HOLD run 12 → 6 (closed-loop), 잃은 이웃 과일 seed 0 → 0** 이다.
 - **close 이후 HOLD 의 원인** 은 F1 이 아니라 placed 뒤 `no_seed` 인증 공백이다 (T46b). 늘어난 uncertified HOLD 130 chunk 에서 F1 기록은 0 이고, F1 이 없는 V11AB (C0) 에도 73 chunk 가 있다.
-- **고칠 곳은 인증 규칙이다 (lead).** W1 (placed · home 의 `no_seed` 를 인증) 을 구현 중이다. **결과 없음.**
+- **고칠 곳은 인증 규칙이다 (lead).** W1 (placed · home 의 `no_seed` 를 인증) 을 ~~구현 중이다. **결과 없음.**~~ → **구현 · offline 재현 완료 (2026-10-12 23:40 KST, 아래 "T46c-W1 · T46d · T46f" 절 §2).**
 - **PA-1 ablation 구성** (extent 를 주 block 으로) 은 **판정 대기** 다.
 
 **읽는 법과 출처 규약.**
@@ -1989,7 +2025,7 @@ CL3 의 18 쌍 × 3 arm 의 recorded chunk (4050 server chunk) 를 phase 별로 
 | (d) placed 뒤 `no_seed` 인증 공백 | **확인** | CL2 C0 73 · C1bp 70 (F1 없음) |
 | (d′) F1 이 `no_seed` 를 계통적으로 늘림 | 모름 | 3 / 0 / 1, p = 0.25 |
 
-### 5. W1 (A12) — placed `no_seed` 인증 공백의 구현 (**진행 중, 결과 없음**)
+### 5. W1 (A12) — placed `no_seed` 인증 공백의 구현 (~~**진행 중, 결과 없음**~~ → **완료, 2026-10-12 23:40 KST 갱신: 아래 "T46c-W1 · T46d · T46f" 절 §2**)
 
 **목적 (lead).** F1 채택과 함께 close 이후 HOLD 증가를 인증 규칙 쪽에서 해소하고, 모든 arm 에 같은 수정을 적용해 비교 대상에서 뺀다.
 
@@ -2002,10 +2038,10 @@ CL3 의 18 쌍 × 3 arm 의 recorded chunk (4050 server chunk) 를 phase 별로 
 | **손대지 않을 것** | F1 · F2 · ball_owned · coarse · permission 로직, T47 session 파일 |
 | **절차** | implementer 구현 + 단위 test + 전체 pytest (GPU 는 공용 lock) → `T46c.impl.md` → verifier 의 offline 재현 → 사용자 보고 |
 
-- **상태.** 이 기록을 쓰는 시점에 `T46c.impl.md` · `T46c.verify.json` 이 없다. **W1 수치는 아직 측정된 것이 없으며** 위 목표 수치는 T46b 의 per-chunk what-if 다 (closed-loop 아님).
-- **주의 (lead 확인 필요).** W1 은 SUBTASK 절 되돌아올 지점 표의 "`no_seed` HOLD 를 인증 — **사용자 판정: 그대로 둔다**" 를 바꾸는 구현이다 ([이전 로그](AG3S_T0T6_LOG.md)). 그 표가 적은 전환 신호 (`no_seed` 가 다른 run 에서도 놓은 뒤 길게 이어짐) 는 T46b 에서 충족됐다. 사용자 문장 "권장하는 A 로 진행" 이 W1 구현을 명시적으로 포함하는지는 이 로그에 근거가 없어 **적지 않는다** — T46c task 문서는 W1 을 지시했으나 "이전 판정을 번복한다" 는 사용자 확인은 기록돼 있지 않다.
+- ~~**상태.** 이 기록을 쓰는 시점에 `T46c.impl.md` · `T46c.verify.json` 이 없다.~~ (2026-10-12 23:40 KST 이후 둘 다 있다.) ~~**W1 수치는 아직 측정된 것이 없으며** 위 목표 수치는 T46b 의 per-chunk what-if 다 (closed-loop 아님).~~ → 위 목표 수치는 V-T46c 가 재현했다 (아래 절 §2). 그 수치는 여전히 per-chunk what-if 이며 closed-loop 이 아니다.
+- ~~**주의 (lead 확인 필요).** W1 은 SUBTASK 절 되돌아올 지점 표의 "`no_seed` HOLD 를 인증 — **사용자 판정: 그대로 둔다**" 를 바꾸는 구현이다 ([이전 로그](AG3S_T0T6_LOG.md)). 그 표가 적은 전환 신호 (`no_seed` 가 다른 run 에서도 놓은 뒤 길게 이어짐) 는 T46b 에서 충족됐다. 사용자 문장 "권장하는 A 로 진행" 이 W1 구현을 명시적으로 포함하는지는 이 로그에 근거가 없어 **적지 않는다** — T46c task 문서는 W1 을 지시했으나 "이전 판정을 번복한다" 는 사용자 확인은 기록돼 있지 않다.~~ → **해소: 사용자 판정 (2026-10-12, 추천안 채택) 이 2026-10-04 판정을 바꾸는 것을 명시했다 (아래 절 §1).**
 
-### 6. PA-1 — Ablation 구성 초안 (**판정 대기**, lead 초안)
+### 6. PA-1 — Ablation 구성 초안 (~~**판정 대기**~~ → 일부 판정됨: (b) 최소 범위 · (c) 18 쌍 유지 · W1 모든 arm on, 아래 절 §1. lead 초안)
 
 develope_PLAN DX-01 (identity / extent 분리) · DX-04 (contact handling) · DT-02 · DT-05A 에 맞춘 초안이다. 모든 arm 에 W1 을 같이 적용한다 (공통 인증 수정은 비교 대상이 아니다).
 
@@ -2035,11 +2071,11 @@ develope_PLAN DX-01 (identity / extent 분리) · DX-04 (contact handling) · DT
 | F2 채택 | 이웃 과일 seed 2463 개 손실 | 이웃 과일 보존이 문제가 되지 않는 장면에서 F2 의 추가 감소 (충돌 행 401 → 107, F1 + F2) 가 실행 이득으로 이어진다는 측정이 나올 때 |
 | phase-gated F1 | 0 / 130 chunk 만 바꾼다 | T46b §8 |
 
-**판정 대기.** (1) PA-1 의 (a) – (c) (§6). (2) W1 이 SUBTASK 절의 이전 사용자 판정을 바꾸는 점을 사용자가 확인했는지 (§5 주의). (3) W1 구현 · offline 재현 뒤 close 이후 HOLD 를 모든 arm 에 W1 을 켠 상태로 다시 잴 것인가 (closed-loop 은 새 task).
+~~**판정 대기.** (1) PA-1 의 (a) – (c) (§6). (2) W1 이 SUBTASK 절의 이전 사용자 판정을 바꾸는 점을 사용자가 확인했는지 (§5 주의). (3) W1 구현 · offline 재현 뒤 close 이후 HOLD 를 모든 arm 에 W1 을 켠 상태로 다시 잴 것인가 (closed-loop 은 새 task).~~ → **2026-10-12 갱신:** (1) (b) 비허용 link 범위는 최소 범위부터 (T46d 에서 기록으로 선택), (c) 표본은 18 쌍 유지로 판정. (a) visible-target oracle extent arm 은 `T46e.task.md` 가 "계획서상 필요" 로 적고 구현을 지시했다 (구현 완료 · 미적용, 검증 없음). (2) 해소 (위). (3) W1 on 으로 다시 재는 closed-loop 은 Ablation 단계 (T46f 단계 4 이후) 의 몫이다.
 
 **산출물.**
 
-- **측정 (이 절이 인용)**: `handoff/T46.verify.json` · `handoff/T46-CL3.verify.json` · `handoff/T46b.verify.json`. **T46c 자체의 verify.json 은 아직 없다** (W1 결과 없음).
+- **측정 (이 절이 인용)**: `handoff/T46.verify.json` · `handoff/T46-CL3.verify.json` · `handoff/T46b.verify.json`. ~~**T46c 자체의 verify.json 은 아직 없다** (W1 결과 없음).~~ → [`handoff/T46c.verify.json`](handoff/T46c.verify.json) 이 2026-10-12 23:40 KST 에 생겼다 (아래 절).
 - **figure**: 새로 만든 것 없음 — [`t46-cl3-*`](figures/t46/) (CL3) · [`t46b-*`](figures/t46/) (T46b) 를 링크했다.
 - 요청 문서: [`handoff/T46c.task.md`](handoff/T46c.task.md) (commit `6d134a69`). commit 은 하지 않았다.
 
@@ -2433,3 +2469,298 @@ calibration 6 record 539 frame 전부, cell × camera.
 [`t51-protocol-table__scene.png`](figures/t51/t51-protocol-table__scene.png) ([sidecar](figures/t51/t51-protocol-table__scene.json)) — P1–P6 · self label · annotation curve · LIBERO 의 단계별 결과 요약.
 
 - **구현**: `AG3S/ag3s/experiments/studies/t51_{protocol,records,extract,selflabel,replay,study,libero}.py` · `t51b_{noun_extract,study}.py` · `tests/ag3s/test_t51*.py` · `test_t51b_*.py`. [`handoff/T51.impl.md`](handoff/T51.impl.md) · [`handoff/T51b.impl.md`](handoff/T51b.impl.md). commit 은 하지 않았다 (T51 · T51b 파일은 untracked).
+
+
+---
+
+## T46c-W1 · T46d · T46f — W1 의 재현 검증, DX-04 (link 별 target 예외) 선행 확인, LTE 검증 블록 계획 (2026-10-12 ~ 2026-10-13 KST)
+
+> 이 절은 위 "T46c" 절의 **갱신**이다 (그 절의 W1 "진행 중, 결과 없음" 을 이 절 §2 가 닫는다). 이전 서술은 지우지 않고 취소선으로 표시했다.
+> 시각은 pod 에 tzdata 가 없어 UTC 에 +9 h 를 더해 환산한 KST 다 (파일 mtime · `git log`; run 디렉터리 이름의 `+0900` 은 그대로 읽음).
+
+**이 절이 답하는 물음 (목적).** develope_PLAN 은 P0-B ("대상 identity, 경계 추정, 접촉 처리 중 무엇이 실행을 개선하는가") 의 접촉 처리 쪽을 DX-04 (link-specific exemption: 허용 link 에만 target 접촉을 허용하는 LTE 가 target 을 전역으로 지우는 방식보다 필요한 접촉과 금지 접촉을 더 잘 구분하는가) 로 묻고, 결과를 **DT-05A** (세 field policy 별 pair 의 contact · success · stop 표) 와 **DF-04B** (같은 ESDF slice 에서 link 별 distance · gradient 와 실제 contact 그림) 에 싣는다. 이 주장 (DC-3: link-specific exemption 이 필요한 접촉과 금지 접촉을 더 잘 구분한다, DC-4: 전체 시스템이 task completion 과 forbidden contact 의 trade-off 를 개선한다) 이 성립하려면 먼저 (i) F1 채택 뒤 늘어난 close 이후 HOLD 가 비교를 오염시키지 않아야 하고 (T46c-W1), (ii) query set 에 허용 link 와 비허용 link 가 함께 있어야 한다 (T46d). 이 절은 (i) 의 재현 검증, (ii) 의 선행 확인 결과와 사용자 판정, 그리고 그 판정이 정한 다음 블록 (T46f) 의 **계획**을 기록한다.
+
+**한 줄 결과 (before → after).**
+
+- **W1 (T46c, 결과 있음).** before: F1 을 켠 C1a + F1 은 close 이후 HOLD 가 183 chunk (uncertified 130) 였고 그 원인은 placed `no_seed` 의 인증 공백이었다 (T46b). after: 인증 술어를 넓힌 W1 을 off 로 두면 3 arm 모두 기록과 **1350 / 1350** chunk 에서 같고, W1 을 켜면 close 이후 HOLD (total / uncertified) 가 C1a 107 / 37 → **70 / 0**, C1a + F1 183 / 130 → **54 / 1**, C1a + F1 + F2 122 / 118 → **6 / 2** 로 줄어든다 (T46b 의 what-if 와 같은 값). **per-chunk what-if 이고 closed-loop 효과는 아니다.** 사용자 판정으로 W1 은 모든 Ablation arm 에 켠다.
+- **DX-04 선행 확인 (T46d, 결과 있음).** 현재 gripper scope (손바닥 2 + 손가락 4, 270 구) 에서는 non-authorized 행이 target 50 mm 안에 한 번도 오지 않아 LTE 와 global exclusion 이 **퇴화** 한다 (target 근처 non-authorized 행 0 / 349,920, LTE ≠ global chunk 0 / 162). `link_*_arm_5` 를 더하면 두 정책이 갈리는 chunk 가 생기지만 (C1a + F1, 162 chunk 중 89), 그 arm_5 구는 **실제 MJCF 접촉 geom 이 target 에서 100 mm cap 이상 떨어져 있는 18 / 18 run 에서도** target 50 mm 안에 놓인다. 기록 문구 (사용자 지정): **현재 gripper scope 에서는 LTE 와 global exclusion 의 비교가 퇴화하며, `link_*_arm_5` 를 추가했을 때 나타난 차이는 형상 근사 오류의 영향을 받는다.** "효과 없음" 이 아니다.
+- **T46f (계획, 결과 없음).** 사용자 판정으로 link-specific 효과 주장을 줄이지 않고 **형상 보정 → 진단 장면 → oracle extent 3 조건 closed-loop** 으로 확장한다. LTE 의 우수성은 전제하지 않는다.
+
+**이 절이 주장하지 않는 것.**
+
+- **LTE 가 global exclusion 보다 낫다** 는 주장. T46d 는 비교가 성립하는 조건을 찾는 선행 확인이고 효과를 재지 않았다.
+- **arm_5 에서 나타난 LTE ≠ global chunk 수가 LTE 의 효과다** 라는 주장. 그 차이는 형상 근사 오류의 영향을 받는다 (사용자 지정 문구).
+- **LTE ≠ global chunk 수는 contribution 의 근거가 아니다.** 메커니즘 설명용 **보조 지표**일 뿐이다 (T46f §1, lead). 주 지표는 비허용 접촉 없는 작업 성공률이다.
+- **정지 (HOLD · TO 실패) 가 늘어 접촉률이 낮아진 결과는 보호 효과가 아니다.** 보호 효과로 해석하지 않는다 (T46f §1).
+- **W1 이 task success · completion time 을 개선한다** 는 주장. closed-loop 으로 재지 않았다.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 [`T46c.verify.json`](handoff/T46c.verify.json) (W1) · [`T46d.verify.json`](handoff/T46d.verify.json) (DX-04 선행 확인) 의 `numbers` 에서 왔다. 이전 STEP 의 수치는 [`T46b.verify.json`](handoff/T46b.verify.json) · [`T46-CL3.verify.json`](handoff/T46-CL3.verify.json) 이고 그 자리에 적었다. 같은 파일 숫자의 덧셈 · 뺄셈은 "(산출)" 로 적었다. **T46f 는 계획이라 verify.json 이 없다**; 그 절의 서술은 전부 lead 의 [`T46f.task.md`](handoff/T46f.task.md) 이고 "(lead)" 로 표시했다.
+- 판정의 출처: **(사용자 판정)** · **(lead)** · **(산출)** 은 위와 같다. 측정으로 확인하지 않은 해석은 "(미측정 해석)" 이다.
+- 이 STEP 의 측정 입력은 모두 **읽기 전용** 이고 코드 수정은 없었다 (T46d). T46c 의 코드 변경은 implementer 의 W1 구현이다 ([`T46c.impl.md`](handoff/T46c.impl.md)).
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+| # | 판정 · 사건 | 이 절에서 |
+|---|---|---|
+| 1 | **(사용자 판정, 2026-10-12, 추천안 채택)** W1 을 Ablation 의 **모든 arm 에 켠다** — 2026-10-04 판정 ("남은 `no_seed` HOLD 는 그대로 둔다") 을 이번에 바꾼다. 근거: 그 판정의 전환 신호 관측 (T46b), V11AB 에도 같은 HOLD. W1 의 기본값은 off 로 두고 실험 arm 에서 명시적으로 켠다 | §2 |
+| 2 | **(사용자 판정, 2026-10-12, 추천안 채택)** DX-04 선행 확인의 비허용 link 범위는 develope_PLAN §0.10.1-1 대로 **최소 범위** (wrist 등) 부터 — T46d 에서 기록으로 고른다 | §3 |
+| 3 | **(사용자 판정, 2026-10-12, 추천안 채택)** 표본은 **18 쌍 유지** (CL2 · CL3 와 같은 9 episode × 2 seed) | §4 |
+| 4 | **(사용자 판정, 2026-10-12, 추천안 채택)** 순서는 develope_PLAN §11: DX-04 선행 확인 (T46d) → DX-01 identity / extent 분리 + visible-target oracle (T46e 이후) → contact handling → Ablation closed-loop | §4 |
+| 5 | **(사용자 지정, 2026-10-13)** T46d 의 기록 문구: "현재 gripper scope 에서는 LTE 와 global exclusion 의 비교가 퇴화하며, `link_*_arm_5` 를 추가했을 때 나타난 차이는 형상 근사 오류의 영향을 받는다." ("효과 없음" 으로 기록하지 않는다) | §3 |
+| 6 | **(사용자 판정, 2026-10-13)** A (link-specific 효과 주장 축소) 가 아니라 **B 를 확장해 진행** (형상 보정 → 진단 장면 → oracle extent 3 조건 closed-loop). **C (arm_5 근사 구 그대로) 는 제외.** LTE 의 우수성을 전제하지 않는다 | §4 |
+
+| 시각 (KST) | 무엇 | 출처 |
+|---|---|---|
+| 2026-10-12 23:02 | T46c task 작성 (lead) | `T46c.task.md` |
+| 23:32 | W1 구현 보고 `T46c.impl.md` (implementer) | mtime 14:32Z |
+| 23:35:15 | V-T46c verifier run 시작 | run 디렉터리 `20261012T233515+0900_972f28056cd8_318f98f36f37` |
+| 23:36 | 사용자 판정 (위 1 – 4) 과 T46d task 를 task 문서에 기록 | commit `39246257` 14:36:40Z |
+| 23:39 | `t46c-table.png` 생성 | mtime 14:39Z |
+| 23:39:20 | V-T46d verifier run 시작 | run 디렉터리 `20261012T233920+0900_392462577320_70c141f47dbe` |
+| 23:40 | **`T46c.verify.json` 작성 (PASS)** | mtime 14:40Z |
+| 23:41:40 | T46d 판정 기준 (`thresholds_fixed_before_measuring.json`) 을 측정 전에 고정 | `T46d.verify.json definitions.written_utc` 14:41:40Z. 그 전에는 legacy 기준선과 구 모델 확인만 돌았다 |
+| 23:41:51 | W1 코드 · test · replay harness commit | commit `6dfaf7bb` 14:41:51Z |
+| 23:42:37 | T46e task (visible-target oracle extent 구현 지시) commit | commit `15314ba3` 14:42:37Z |
+| 2026-10-13 00:06 – 00:16 | `t46d-scene` · `t46d-graph` · `t46d-table` figure 생성 | mtime 15:06Z · 15:15Z · 15:16Z |
+| 00:17 | **`T46d.verify.json` 작성** | mtime 15:17Z |
+| 00:19:35 | T46d 결과 commit | commit `e7157636` 15:19:35Z |
+| 01:23 – 01:24 | 사용자 지정 기록 문구 · 판정을 `T46d.task.md` 에 기록, **T46f task 작성** (lead) | `T46f.task.md` mtime 16:23Z, commit `ab9b3fba` 16:24:23Z |
+
+### 2. T46c — W1 (placed `no_seed` 인증) 의 재현 검증 (V-T46c: PASS)
+
+**무엇을 검증했나.** W1 (`--placed-no-seed-certify`, 기본 off) 은 인증 술어 `subtask_no_target` 에 한 갈래를 더한다: gate on ∧ label `home` ∧ `placed_seen` ∧ validity `valid` ∧ carve 없음 ∧ grounding `no_seed` 이면 인증한다 (구현: `AG3S/ag3s/types.py` 의 `subtask_no_target`, `AG3S/trajopt/safe_policy.py`, CLI `AG3S/trajopt/serve_safe.py`; 상세 [`T46c.impl.md`](handoff/T46c.impl.md)). 다른 조건 — 위반 행이 있음, `placed_seen` 없음, label `pick` / `place` — 은 그대로 HOLD 다. 인증은 "AG3S 가 장면을 다 설명했는가" 라는 질문만 바꾸고 field 는 그대로 모든 물체를 full clearance 로 잡는다. 검증 기준 (verifier, 측정 전):
+
+| 기준 | 내용 | 결과 |
+|---|---|---|
+| 1 | 회귀 기준선 일치 (legacy · cuRobo) | PASS |
+| 2 | off (W0) 가 CL3 기록의 reason · `geometry_certified` 와 chunk 단위로 같은가 (3 arm × 1350 chunk) | PASS |
+| 3 | W1 이 T46b 의 what-if (execute 전환 37 / 129 / 116, close 이후 HOLD) 를 재현하는가 | PASS |
+| 4 | 새 test · 기존 SUBTASK test 통과 | PASS |
+
+**기준 1 — 회귀 기준선.**
+
+| backend | start-violated | has_target | frame 0 clearance_before | 기대값과 |
+|---|---|---|---|---|
+| legacy (CPU, `.venv-ag3s`) | 14 / 15 | 15 / 15 | −29.031048 mm | 일치 |
+| cuRobo (GPU, `.venv-openpi-live`) | 10 / 15 | 15 / 15 | −9.171877 mm | 일치 |
+
+(출처: `numbers.criterion_1_baselines`, `baseline_check.matched = true`. 부기: legacy 의 final status 는 feasible 15, cuRobo 는 feasible 14 · violated 1 이고 verifier 는 이것을 기준선이 아니라고 적었다 (SQP wall-clock). legacy 실행 중 다른 session 때문에 machine load average 가 약 14 였다.)
+
+**기준 2 · 3 — off bit-identical, W1 offline 재현 (before → after).** 입력은 CL3 의 기록 chunk (arm 당 1350 chunk, [`T46-CL3`](handoff/T46-CL3.verify.json) 의 18 쌍). **C1a · C1a + F1 · C1a + F1 + F2 의 세 arm 이 입력이다.** V11AB (C0) 는 CL2 의 run 이라 이 replay 에 들어 있지 않다 (재측정 대기 #27).
+
+| 기록 arm | off (W0) 가 기록 reason 과 같음 | off (W0) 가 기록 `certified` 와 같음 | close 이후 HOLD, 기록 그대로 (total / uncertified) | **W1: execute 로 바뀌는 chunk** | **W1: close 이후 HOLD (total / uncertified)** |
+|---|---|---|---|---|---|
+| C1a | 1350 / 1350 | 1350 / 1350 | 107 / 37 | **37** | **70 / 0** |
+| C1a + F1 | 1350 / 1350 | 1350 / 1350 | 183 / 130 | **129** | **54 / 1** |
+| C1a + F1 + F2 | 1350 / 1350 | 1350 / 1350 | 122 / 118 | **116** | **6 / 2** |
+
+(출처: `numbers.criterion_2_off_bit_identical`, `numbers.criterion_3_W1`. 기록 그대로의 값은 `W0_after_close_hold` 와 `recorded_after_close_hold` 가 같다. T46b 의 what-if 와 대조하면 전환 37 / 129 / 116 · HOLD 70 / 54 / 6 · uncertified 0 / 1 / 2 가 모두 같다.)
+
+![T46c verifier 표: 회귀 기준선과 CL3 certification replay](figures/t46/t46c-table.png)
+
+[`t46c-table.png`](figures/t46/t46c-table.png) (sidecar [`.json`](figures/t46/t46c-table.json)) — 위: 두 backend 의 기준선. 아래: arm 별 off fidelity · W1 전환 · close 이후 HOLD · 바뀐 칸.
+
+- **바뀐 chunk 는 전부 한 칸이다:** `grounding = no_seed` · `phase = placed` · `label = home` · `placed_seen = True` 에서 C1a 37 / 37 · C1a + F1 129 / 129 · C1a + F1 + F2 116 / 116 chunk 이고, `no_seed` · placed · home 이 아닌 칸에서 인증이 바뀐 chunk 는 없다 (`conversions_by_cell`, `flipped`). 인증이 바뀌었는데 다른 사유로 HOLD 가 남은 chunk 와 인증이 바뀐 chunk 가 기록에서 실행이었던 경우는 세 arm 모두 0 이다 (`certified_but_still_hold`, `certified_recorded_execute`).
+- **전환된 run (chunk 수):** C1a `ep54_s541` 37 · C1a + F1 `ep11_s111` 40 · `ep30_s301` 36 · `ep54_s541` 38 · `ep54_s542` 15 · C1a + F1 + F2 `ep11_s111` 40 · `ep30_s301` 36 · `ep54_s541` 38 · `ep54_s542` 2 (`conversion_runs`). 이 run 들은 T46b §4 에서 placed `no_seed` 가 episode 끝까지 이어졌거나 풀린 run 과 같다.
+- **W1 후에 남는 uncertified 1 · 2 chunk** 는 T46b 가 `no_admissible` + label `pick` chunk 수 (C1a + F1 1, C1a + F1 + F2 2) 와 같다고 정리했다 (개수 일치로 읽음). T46c verify 는 그 chunk 의 칸을 따로 분해하지 않았다.
+
+**기준 4 — test.** W1 test (`tests/trajopt/test_t46c_placed_no_seed_certify.py`) 는 passed 67 · failed 0 · skipped 0. 기존 SUBTASK suite 5 개 파일은 passed 316 · failed 0 · skipped 1 (`numbers.criterion_4_tests`). 구현자는 전체 pytest 도 돌렸으나 그 결과는 `T46c.impl.md` 에만 있고 verifier 는 재지 않았다 (`not_measured`, #27). 측정은 working tree (HEAD `972f2805` 에 미커밋 변경) 위에서 했고 verify.json 의 md5 (`config.py` · `types.py` · `safe_policy.py` · `certification_replay.py`) 는 이 로그를 쓰는 시점의 working tree 와 같다.
+
+**before → after 요약 (C0 = V11AB · C1a · C1a + F1).**
+
+| 지표 | V11AB (C0) | C1a | C1a + F1 | 출처 |
+|---|---|---|---|---|
+| close 이후 uncertified HOLD, 기록 그대로 (W0) (uncertified 는 placed phase 에서만 발생) | 73 chunk (CL2 의 uncertified HOLD 총합) | 37 | 130 | T46b §6 (C0), `T46c.verify.json` (C1a · F1) |
+| **close 이후 HOLD (total / uncertified), W1 what-if** | **측정 안 됨** (replay 입력에 없음) | **70 / 0** | **54 / 1** | `numbers.criterion_3_W1` |
+
+(C0 의 73 은 T46b 가 CL2 의 placed `no_seed` HOLD chunk 로 센 값이고, C0 의 close 이후 total 은 이 로그에 없다.)
+
+**읽는 법 — W1 이 주장하는 것과 주장하지 않는 것.**
+
+- 주장하는 것: 인증 술어를 `no_seed` 까지 넓히면 기록된 chunk 의 인증이 T46b 가 예측한 칸에서만, 예측한 수만큼 바뀐다. off 일 때는 기록과 chunk 단위로 같다.
+- **주장하지 않는 것:** (1) closed-loop 에서 HOLD 가 풀린 뒤의 궤적 · home 복귀 시간 · safe success (#25). (2) "위반 행이 있으면 HOLD 를 유지한다" 의 **기록 chunk 시험** — CL3 의 `no_seed` chunk 는 전부 `uncertified` 하나로 멈춰 있어 이 갈래를 밟는 chunk 가 없다 (`not_measured`, #26). 이 안전 조건은 단위 test 가 맡는다. (3) "F1 이 close 이후 HOLD 를 늘린다 / 늘리지 않는다" 의 판정 — 원인은 T46b 의 결론 (인증 공백) 이고 W1 은 그 공백을 메운 것이다. F1 이 placed `no_seed` run 을 계통적으로 늘리는지는 여전히 모른다 (#15).
+- **알려진 위험 (구현자, [`T46c.impl.md`](handoff/T46c.impl.md) "판정이 필요한 것" 2).** `no_seed` 는 `no_admissible` 보다 근거가 약하다. `no_admissible` 은 "cluster 를 보고 잡을 것이 없다고 판단했다" 이고, `no_seed` 는 "attention 이 지지면만 본다" 이며 지지면 밖 물체를 하나도 보지 않았다는 뜻이 아니다. 완화 근거: target 이 없어 carve 가 없고, field 는 모든 관측 물체를 full clearance 로 잡아 위반 행이 있으면 HOLD 이며, `validity` 가 `valid` 일 때만 열린다 (구현자의 서술이고 verifier 가 이 경로를 closed-loop 로 시험하지 않았다).
+- **되돌아올 지점.** 코드 기본값은 off 로 둔다 (사용자 판정). W1 on 에서 새 위반 · 접촉이 home 경로에서 나타나는 closed-loop 측정이 나오면 인증 범위를 다시 판정한다.
+
+### 3. T46d — DX-04 선행 확인: LTE 대 global exclusion 비교는 어디서 성립하는가
+
+**무엇을 쟀나 (lead 의 task, verifier 측정, CPU offline, 코드 수정 없음).** 입력은 CL3 의 C1a + F1 · C1a (둘 다 gripper scope 로 서빙, 각 18 run) 와 CL2 C2′ (arms scope 로 서빙, 18 run). 구 모델은 `--capsule-radius-scale 0.05` 등 서버와 같은 flag 로 지은 constraint model (gripper 270 구, arms 422 구) 이고, 실제 접촉 판정은 MJCF collision geom 의 MuJoCo 거리와 replay contact 로 했다. 판정 기준은 측정 전에 고정했다 (2026-10-12 23:41:40 KST, §1 표). 중단 기준 (lead): 한 번의 offline 실행, 새 closed-loop 없음, 어떤 최소 집합도 criterion 2 를 만족하지 않으면 "DX-04 비교 불성립" 으로 닫고 사용자 판정에 올린다. 회귀 기준선: legacy 14 / 15 · 15 / 15 · −29.031048 mm 일치 (`numbers.baseline_legacy`). **cuRobo 기준선은 GPU 를 쓰지 않아 돌리지 않았다** (#30).
+
+**3.1 gripper scope 에서는 비교가 퇴화한다.** policy-active chunk 에서 target 표면 50 mm 안에 든 non-authorized query 행 수가 0 이다.
+
+| arm (gripper scope 로 서빙) | window | policy-active chunk | non-authorized 행 평가 수 | **target 50 mm 안 non-authorized 행** | **LTE ≠ global chunk (m = 10 mm)** | non-authorized 행의 target 최소 거리 (min / median, plan 16 행) |
+|---|---|---|---|---|---|---|
+| C1a + F1 | pre8close | 162 | 349,920 | **0** | **0** | 475.67 / 508.34 mm |
+| C1a + F1 | lift | 2 | 4,320 | 0 | 0 | 505.18 / 508.19 mm |
+| C1a + F1 | carry | 63 | 136,080 | 0 | 0 | 247.87 / 338.78 mm |
+| C1a | pre8close | 162 | 349,920 | 0 | 0 | 474.73 / 508.10 mm |
+| C1a | carry | 102 | 220,320 | 0 | 0 | 180.64 / 386.96 mm |
+| CL2 C2′ 기록 (같은 gripper scope 정의로 평가) | pre8close | 162 | 349,920 | 0 | 0 | 476.84 / 510.12 mm |
+
+(출처: `numbers.item1_degeneracy_gripper_scope`, `numbers.windows_chunks`. 같은 표의 m = 0 · 50 mm 에서도 LTE ≠ global chunk 는 모두 0 이다. C1a 의 lift 는 1 chunk 이고 C2′ 의 lift 는 policy-active chunk 가 0 이라 평가 대상이 없다.) 반대로 **authorized 행은 target 근처에 있다**: C1a + F1 pre8close 에서 authorized 행 349,920 개 중 172,801 개가 plan 16 행 기준 target 50 mm 안이다. 즉 이 scope 에서 target 근처에 오는 것은 전부 손이라 LTE 와 global exclusion 이 같은 field 를 읽는다. 이것이 **퇴화** 다.
+
+**3.2 어떤 non-authorized link 가 target 에 접근하는가 — arms scope 구 모델 (pre8close, executed rows, run 당 최소 거리).** criterion 2 = window 안 chunk 중 하나라도 구 표면–target 표면 거리 ≤ 50 mm 인 run.
+
+| link (used = 실행에 쓴 쪽 팔) | C1a + F1 criterion 2 run | C1a | C2′ | C1a + F1 의 run 최소 거리 (median, 범위) |
+|---|---|---|---|---|
+| **`link_*_arm_5`** | **18 / 18** | **18 / 18** | **18 / 18** | **−2.16 mm (−12.41 – 1.57)** |
+| `link_*_arm_6` | 0 / 18 | 0 / 18 | 0 / 18 | 130.23 mm (122.35 – 134.81) |
+| `link_*_arm_4` | 0 / 18 | 0 / 18 | 0 / 18 | 206.51 mm (193.14 – 214.83) |
+| `link_*_arm_3` · 반대 팔 · 반대 손 | 0 / 18 | 0 / 18 | 0 / 18 | (그래프 (a) 참조) |
+
+(출처: `numbers.item2_approach_sphere_model`, `verdict`. 음수는 구 표면이 target hull 안으로 들어간 것이다. C2′ 의 arm_5 run 최소 거리는 median 16.45 mm (10.86 – 38.86): arms scope 로 서빙한 C2′ 는 arm_5 구가 constraint 에 들어 있어 target 에서 떨어져 있었던 것으로 읽힌다 (미측정 해석). arm_5 구가 target 50 mm 안이었던 chunk 는 C1a + F1 90 (1449 행) · C1a 91 (1482 행) · C2′ 125 (1798 행). 같은 arm_5 구가 이웃 과일 50 mm 안에 든 run 은 C1a + F1 17 · C1a 17 · C2′ 9 / 18.)
+
+**3.3 그 접근은 실제 접촉 geom 에서도 일어나는가 — 아니다 (형상 근사 오류).** 같은 run · window 의 MuJoCo MJCF geom 과 replay contact (C1a + F1, 18 run, 1296 control step):
+
+| 항목 | 값 | 출처 |
+|---|---|---|
+| MJCF `link_<used>_arm_5` geom 의 run 최소 target 거리 | **18 / 18 run 모두 100 mm cap 이상** (`mj_geomDistance` distmax 100 mm, 그래서 "100 mm 이상" 으로만 안다), C1a 도 18 / 18 | `item2_approach_mjcf`, `item2_arm5_geometry`, `verdict_facts.mjcf_arm_5_runs_beyond_100mm_C1aF1 = 18` |
+| replay contact: 손 이외 로봇 ↔ target | **0 / 1296 step**, 해당 run 0 (C1a 도 0 / 1296) | `replay_contacts.robot_other-target_steps` |
+| replay contact: 손 ↔ target | 321 step | 같음 |
+| MJCF `FT_SENSOR` (`link_*_arm_6` 의 자식) 의 run 최소 target 거리 ≤ 50 mm | **3 / 18 run (C1a + F1), 4 / 18 (C1a)**, median 72.77 / 68.08 mm | `tgt_run_min_mm.A_FT_SENSOR` |
+| 같은 run 의 URDF `link_*_arm_6` 구 최소 target 거리 | ≥ 122 mm (C1a + F1: 122.35 mm) | §3.2 |
+| URDF `link_*_arm_5` capsule | 반지름 75 mm · 길이 250 mm, 먼 끝이 joint 에서 225 mm. `--capsule-radius-scale 0.05` 로 지은 구의 effective 반지름 14.39 mm (arm_6 구는 5.25 – 5.35 mm) | `item2_arm5_geometry` |
+| target 50 mm 안에 든 arm_5 구 (36 CL3 run 의 가장 가까운 executed step) | **87 개**. joint 에서 169.4 – 225.0 mm 떨어져 있고, **가장 가까운 authorized 손 구의 중심에서 11.0 – 47.5 mm** | 같음 |
+
+해석 (사용자 지정 문구에 맞춰): URDF 의 긴 arm_5 capsule 의 먼 끝 구가 손 영역 안에 놓여 있고, 그 구가 target 에 접근하는 것은 실제 arm_5 geom 의 접근이 아니라 **근사의 산물** 이다. 반대로 실제 MJCF 에서 target 에 가까워진 비허용 body 는 URDF 구가 덮지 않는 `FT_SENSOR` (3 – 4 / 18 run) 였다. 이 두 사실이 T46f 의 형상 보정 (FT sensor cover 추가 · arm_5 근사 보정) 의 근거다.
+
+![T46d 장면: gripper scope run 에서 non-authorized arm_5 구가 target 에 놓인 실제 frame, 같은 단면의 full field 와 target-free field](figures/t46/t46d-scene.png)
+
+[`t46d-scene.png`](figures/t46/t46d-scene.png) (sidecar [`.json`](figures/t46/t46d-scene.json)) — `C1aF1_ep104_s1042`, chunk seq 14, control step 104 (close seq 16, 쓴 팔 left, target pear). (a) front camera, (b) 같은 상태의 MuJoCo render 에 arms scope 구를 겹침 (주황 = arm_5, 초록 = arm_6, 노랑 = arm_4, 파랑 = 허용 손 구), (c) 배치도 (top view, plan 16 행의 구 중심, GT hull, 단면선 y = 0.297 m), (d) 단면에서 full field (LTE 에서 non-authorized 행이 읽는 것), (e) 같은 단면의 target-free field (global exclusion 에서 모든 행이 읽는 것). executed step 104 의 구 표면–GT hull 거리: `link_left_arm_5` −11.72 mm, `link_left_arm_6` 122.49 mm, `link_left_arm_4` 204.98 mm, `ee_left` 28.22 mm, `ee_finger_l1` 20.11 mm, `ee_finger_l2` 5.50 mm. 이 chunk 에서 m = 10 mm 에 LTE 와 global 이 갈리는 arm_5 행은 31 개이고, 가장 가까운 행의 full field 는 −14.39 mm, target-free field 는 34.26 mm, GT target 거리는 −13.62 mm 다. **이 장면은 gripper scope 로 서빙한 run 을 arms scope 구 모델로 다시 읽은 것이라 서버는 이 arm_5 구를 constraint 로 쓰지 않았다.**
+
+**3.4 후보 집합과 비용, 그리고 세 정책의 offline 차이.** 후보 = gripper scope 에 non-authorized link 를 (양 팔 모두) 더한 것. TO 시간은 구 수에 선형이라고 가정한 **추정** 이다 (CL2 C1b′ 270 구 median 160.34 ms, C2′ 422 구 median 402.87 ms 사이에서 보간, 재풀이 없음). LTE ≠ global 은 pre8close 162 chunk 중 chunk 수이고 field-level re-query 다 (용어). C2′ binding = C2′ 의 chunk 에서 그 link 집합이 최악 행이었던 chunk 수 (pre8close 162 chunk / 전체 1350 chunk).
+
+| 후보 | 더한 구 (양 팔) | 구 합계 | ESDF 행 / chunk (gripper 대비) | TO solve ms (**추정**) | criterion 2 run (C1a + F1 / C1a / C2′) | LTE ≠ global chunk, C1a + F1 (m = 0 / 10 / 50 mm) | C1a | C2′ | C2′ binding (pre8close / 전체) |
+|---|---|---|---|---|---|---|---|---|---|
+| `--links gripper` | 0 | 270 | 4320 (1.00×) | 160 (C1b′ 실측 median) | 0 / 0 / 0 (반대 손) | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | — |
+| + `link_*_arm_6` | 58 | 328 | 5248 (1.21×) | 253 | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 1 |
+| **+ `link_*_arm_5`** | **20** | **290** | **4640 (1.07×)** | **192** | **18 / 18 / 18** | **78 / 89 / 84** | **77 / 81 / 83** | **0 / 4 / 82** | **52 / 86** |
+| + `link_*_arm_5–6` | 78 | 348 | 5568 (1.29×) | 285 | 18 / 18 / 18 | 같음 | 같음 | 같음 | 52 / 87 |
+| + `link_*_arm_4–6` | 94 | 364 | 5824 (1.35×) | 310 | 18 / 18 / 18 | 같음 | 같음 | 같음 | 52 / 87 |
+| + `link_*_arm_3–6` | 112 | 382 | 6112 (1.41×) | 339 | 18 / 18 / 18 | 같음 | 같음 | 같음 | 52 / 87 |
+| `--links arms` (C2′) | 152 | 422 | 6752 (1.56×) | 403 | 18 / 18 / 18 | 같음 | 같음 | 같음 | 52 / 87 |
+
+(출처: `numbers.item3_candidates`, `numbers.item3_to_time_basis`. "같음" = arm_5 를 포함하는 집합은 arm_5 를 넘어 더해도 숫자가 바뀌지 않는다 — 비교가 갈리는 것은 전부 arm_5 구에서만 나온다: C1a + F1 의 m = 10 mm 위반 행 차이 1048 행 전부가 `A_arm_5` 이다 (`flip_rows_by_link_m10`).) C2′ 의 pre8close binding link 는 `ee_finger_r2` 60 · `ee_finger_l1` 45 · `link_right_arm_5` 43 · `link_left_arm_5` 9 · `ee_right` 4 · `ee_finger_r1` 1 chunk (합 162, `numbers.item3_C2p_binding_by_link_pre8close`) — **arm_5 가 최악 행인 chunk 는 52 / 162 이고 손 link 가 110 / 162 이다** (산출).
+
+![T46d 그래프: 어느 non-authorized link 가 target 50 mm 안에 오는가, 후보 집합별 변화와 비용](figures/t46/t46d-graph.png)
+
+[`t46d-graph.png`](figures/t46/t46d-graph.png) (sidecar [`.json`](figures/t46/t46d-graph.json)) — (a) arms scope 구 모델의 link 별 run 최소 거리 (50 mm 점선, 위 숫자 = criterion 2 를 만족한 run 수). (b) 같은 run 의 MJCF geom 최소 거리 (100 mm cap), replay contact 가 위 제목에 있다. (c) 후보 집합별 LTE ≠ global chunk 와 C2′ binding chunk. (d) 후보별 ESDF query 행 (정확) 과 TO 시간 (추정).
+
+![T46d 표: 후보 constraint 집합과 arm_5 · non-authorized 형상 사실](figures/t46/t46d-table.png)
+
+[`t46d-table.png`](figures/t46/t46d-table.png) (sidecar [`.json`](figures/t46/t46d-table.json)) — 위 후보 표 (§3.4) 와 arm_5 형상 사실 (§3.3) 을 한 장에 모았다.
+
+**3.5 verifier 의 결론과 사용자 판정이 읽은 것.**
+
+- **verifier (사전 고정 기준 2 기준).** "기준 2 를 만족하는 비권한 link: `link_<used>_arm_5` (sphere model) 18 / 18 run (C1a + F1 · C1a · C2′ 각각); arm_6 / arm_4 / arm_3 / 반대팔 / 반대손 0 / 18. gripper scope 비권한 행 target 50 mm 이내 0. 최소 집합 = gripper + `link_*_arm_5` (290 구, 4640 행 / chunk). **측정 정의상 성립.**" (`verdict`, 원문 요약). 비교가 갈리는 chunk 는 C1a + F1 에서 pre8close 162 chunk 중 89 (m = 10 mm, 18 run 모두) 였다.
+- **사용자 지정 기록 문구.** "현재 gripper scope 에서는 LTE 와 global exclusion 의 비교가 퇴화하며, `link_*_arm_5` 를 추가했을 때 나타난 차이는 형상 근사 오류의 영향을 받는다." 위 §3.3 이 이 문구의 근거다: arm_5 구가 target 에 접근하는 18 / 18 run 에서 실제 arm_5 geom 은 100 mm cap 이상이고 손 이외 로봇 ↔ target 접촉은 0 / 1296 step 이며, 접근하는 구는 authorized 손 구 중심에서 11.0 – 47.5 mm 에 있다. **verifier 의 "성립" 은 사전 고정한 측정 정의 (구 표면 ≤ 50 mm) 에서의 말이고, 그 접근이 실제 접촉 위험인지는 구 모델의 형상에 달려 있다.**
+- **이 결과를 "효과 없음" 으로 기록하지 않는다 (사용자).** 무엇이 측정됐는가: (a) gripper scope 에서 비교가 퇴화함, (b) arm_5 를 더하면 두 정책이 갈리는 chunk 가 생김, (c) 그 갈림이 근사 오류의 영향을 받음. 무엇이 측정되지 않았는가: 형상을 바로잡은 뒤 갈림이 남는가 (#28), 갈림이 closed-loop 의 접촉 · 성공 차이로 이어지는가 (#29).
+- **판정 (사용자, 2026-10-13).** A (link-specific 효과 주장 축소) 가 아니라 **B 를 확장해 진행** (형상 보정 → 진단 장면 → oracle extent 3 조건 closed-loop), **C (arm_5 근사 구 그대로) 는 제외**. 이유는 위 해석 (C 는 근사 오류를 그대로 비교에 넣는다 — 이 문장은 scribe 의 정리이고 사용자 문장에는 이유가 적혀 있지 않다). 상세 계획은 §4.
+
+**3.6 읽을 때의 한계 · 측정하지 않은 것 (`T46d.verify.json not_measured`, `fidelity`).**
+
+| 한계 | 내용 |
+|---|---|
+| **field-level 재계산이다** | LTE ≠ global 은 `d − r` 을 임계값 (m = 0 · 10 · 50 mm) 과 비교한 재조회이고 서빙 설정의 per-row margin (support 0 · obstacle 10 mm · non-authorized target 50 mm 또는 obstacle) 과 TO verdict 는 재현하지 않았다. `--nonauthorized-target-margin` 이 full (기본 50 mm) 인가 obstacle 인가에 따라 LTE arm 의 arm_5 행이 달라진다: C2′ 의 LTE ≠ global chunk 는 m = 10 mm 에서 4, m = 50 mm 에서 82 |
+| **재조회 fidelity** | 기록 clearance 와 재조회 `d_full` 의 차가 policy-active chunk 에서 최대 22.00 mm (C1a + F1, 559 chunk 중 0.5 mm 초과 60 chunk), C2′ 는 최대 66.08 mm (1303 chunk 중 190). plan 16 행의 손가락 관절 경로를 재현하지 않아 (planning row 값으로 고정) closing chunk 의 손가락 행이 기록과 최대 26.3 mm 어긋난다. 팔 · 손바닥 행은 정확하다 |
+| **구 모델 구성** | 구 위치 재현은 기록과 최대 0.21 mm (C1a) 차이. arm_5 구 87 개는 36 CL3 run 의 가장 가까운 step 에서 센 값 |
+| **MJCF 거리의 cap** | 100 mm 에서 잘려 arm_5 · arm_6 의 실제 거리는 "100 mm 이상" 으로만 안다. `FT_SENSOR` · `EE_BODY` 의 0.0 mm 거리는 접촉 필터를 거친 겹침과 구별하지 못했다 (#30) |
+| **held 구간** | lift · carry 는 대부분 held (policy 가 active 가 아님) 라 LTE ≠ global 을 평가한 chunk 가 적다 (C1a + F1 lift 2 · carry 63 chunk) |
+| **TO 시간은 추정이다** | 구 수 선형 보간이고 실측이 아니다 |
+| **표본** | 18 run × 3 arm. no exemption 은 "모든 행이 full field 를 읽는다" 로만 평가했고 서빙된 `relax` 정책은 재현하지 않았다 |
+
+**구현 요구 (`implementation_needs`).** 최소 집합 (gripper + arm_5, 290 구) 은 기존 flag 로 표현할 수 있다: `--links arms --exclude-links link_{left,right}_arm_{0,1,2,3,4,6}` (12 개 이름). 서버는 이를 "arms minus ..." 로 표시하고 진단용 EXCLUDING 경고를 낸다. 이름 붙은 `--links` 값 (예: gripper + arm_5) 은 없다 (`LINK_GROUPS` 는 gripper / arms / all). `--target-field-policy` 의 선택지는 `relax` / `exclude-authorized` / `exclude-all` 이고 **no exemption 은 별도 선택지가 아니다** (`relax` 는 권한 link margin 을 완화한다).
+
+### 4. T46f — LTE 검증 블록 (계획, **결과 없음**)
+
+> 이 절의 모든 서술은 [`T46f.task.md`](handoff/T46f.task.md) (lead, 2026-10-13 01:23 KST) 의 **사전 고정** 이다. 측정된 것이 없으므로 verify.json 이 없고 이 절에 결과 수치는 없다. 상태: 단계 1 (형상 보정, A14) 이 진행 중이다.
+
+**검증할 가설 (사전 고정).** "지정된 link 에만 target 접촉 예외를 적용하면, 필요한 손의 접촉을 유지하면서 비허용 link 의 접촉을 줄일 수 있다."
+
+| 항목 | 정의 |
+|---|---|
+| **주 지표** | **비허용 접촉 없는 작업 성공률** = task success ∧ 실제 MuJoCo geom 기준 non-authorized link–target 접촉 0 |
+| 함께 보고 | 일반 task success · 실제 geom 기준 non-authorized 접촉 발생률 · 접촉 지속 시간 (step) · non-authorized link–target 최소 표면 거리 · 정지 (HOLD) · TO 실패율 · 작업 완료 시간 · **실측** TO 계산 시간 · 같은 episode · seed 의 실패 → 성공 / 성공 → 실패 쌍 수 (McNemar) |
+| 보조 지표 | LTE ≠ global chunk 수 — **메커니즘 설명용이고 contribution 의 근거가 아니다** |
+| 해석 규칙 | HOLD · TO 실패가 늘어 접촉률이 낮아진 결과는 보호 효과로 해석하지 않는다. 정확한 형상과 oracle extent 에서도 LTE 가 주 지표를 개선하지 못하면 그대로 보고하고 가설을 재검토한다. **사후 기준 변경 금지** |
+| 전제 | **LTE 의 우수성을 전제하지 않는다** (사용자 판정) |
+
+**접촉 허용의 정의 (lead, §2).**
+
+| 구분 | link / 접촉면 | target 에 대한 제약 |
+|---|---|---|
+| authorized | active hand 의 손바닥 `ee_<side>` (MJCF `EE_BODY_*`) 와 손가락 `ee_finger_<side>1/2` | LTE 에서 target-free 층을 읽음 (접촉 허용) |
+| non-authorized | **`FT_SENSOR_<side>`** (손목 F/T 센서), `link_*_arm_5` · `link_*_arm_6`, 반대 손 · 팔 | target 을 일반 obstacle 로 (`nonauthorized_target_margin` = obstacle) |
+
+- **FT sensor 비접촉은 이 작업의 요구사항으로 정의한다** (센서 보호; lead 의 정의). 실제 접촉 판정은 MuJoCo `FT_SENSOR_*` geom 과 target geom 의 contact 다.
+- target 영역 = target 과일. oracle 단계에서는 T46e 의 **visible observed surface oracle** — 카메라에 실제 보인 target 표면 점에서 온 seed — 를 쓴다. 전체 형상 (full mesh) oracle 이 아니다. 접촉 허용 link 집합과 target 영역은 서로 다른 축이다.
+
+**블록 분리 — DT-02 와 DT-05A 를 섞지 않는다 (lead, §3).**
+
+| 블록 | 질문 | 바꾸는 것 | 고정 |
+|---|---|---|---|
+| **DT-02 extent (T46e · CL4)** | 같은 identity · 같은 예외 정책에서 extent 처리의 효과 | ball · ball_owned · + F1 · oracle | 예외 정책 = LTE, 형상 = 보정 형상 |
+| **DT-05A link 예외 (T46f)** | 같은 extent 에서 예외 정책의 효과 | ① 예외 없음 · ② global exclusion · ③ LTE | extent = 1차 oracle (visible observed surface), 2차 AG3S (ball_owned + F1) |
+
+공통: 같은 보정 형상 · 초기 상태 · seed · TO 예산 · W1 on · snapshot. CL4 (DT-02 closed-loop) 는 단계 1 의 형상 보정이 끝난 뒤 보정 형상으로 실행한다 (두 블록이 같은 형상을 쓰게). 정책 구현: ① = `--target-field-policy none` (새로 추가, 모든 link 가 target 을 일반 obstacle 로, 권한 link margin 완화도 없음), ② = `exclude_all`, ③ = `exclude_authorized` + `--target-permission-strict` + `--nonauthorized-target-margin obstacle`. 정책 외 조건은 동일하다.
+
+**단계 (lead, §4 – §6).**
+
+| 단계 | 내용 | 상태 |
+|---|---|---|
+| **1. 충돌 형상 보정 (A14, implementer)** | (1) **FT sensor cover (`wrist_cover`) 구 추가** — 기존 coverage 코드 (`gripper_cover.link_surface` · `finger_body_spheres` · `_body_capsules`) 를 MJCF `FT_SENSOR_*` mesh 에 재사용, non-authorized. (2) **arm_5 근사 구 보정** — MJCF 실제 arm_5 geom 기반 coverage 구로 교체하거나 손 영역과 겹치는 구를 제거. 보정하지 못하면 그 구에 의존한 보호 효과를 주장하지 않는다. (3) **coverage audit** (필수): 구 밖 비율 · 밖 거리 (median / p95 / max) = 형상 누락, 구가 geom 밖으로 나간 정도의 max = 과도한 팽창, 비허용 구와 허용 구 · MJCF 손 geom 의 겹침. (4) 새 link 집합 (예: `--links gripper_wrist` = gripper + 보정 arm_5 · arm_6 · FT sensor) 을 세 조건 · CL4 모든 arm 이 같이 쓴다 (LTE 에만 coverage 추가 금지). (5) `--target-field-policy none` 추가. (6) 기본값은 모두 기존 그대로 (off bit-identical), 격리 worktree 에서 | **진행 중 (결과 없음)** |
+| **2. 진단 장면 (A15 / V)** | 기존 18 쌍은 일반 작업 성능 · 부작용 평가로 유지. 별도로 **손의 target 접촉과 FT sensor 회피가 동시에 필요한 진단 장면** 을 만든다 (아래 S1 – S4) | 대기 |
+| 3. 소규모 진단 (dev) | 회피 가능성 확인: ③ 에서 성공하는 경로가 존재하는가, 측정 장치가 정상인가 | 대기 |
+| 4. oracle extent 로 ① · ② · ③ | 진단 장면 (dev → eval) + 기존 18 쌍 | 대기 (T46e 의 검증 · 적용이 선행) |
+| 5. AG3S extent (ball_owned + F1) 로 반복 | 단계 4 에서 효과가 확인되면 같은 비교를 반복 | 대기 |
+
+**진단 장면 선정 기준 S1 – S4 (방법별 결과를 보기 전에 고정, lead §5).**
+
+| 기준 | 내용 |
+|---|---|
+| S1 | 실제 MuJoCo geom 기준 non-authorized (FT sensor · arm) 접촉 위험이 존재. 정책 rollout (E0: VLA 단독) 에서 FT sensor–target 최소 표면 거리 ≤ 50 mm 는 **후보 선별 기준일 뿐 충돌 · 보호 효과의 증거가 아니다** |
+| S2 | 접근 경로나 손목 자세를 바꾸면 작업 완료가 가능 — 같은 배치에서 다른 손목 yaw / 접근 방향의 성공 시연 (데이터셋 demo 또는 IK / 계획 feasibility) 이 1 개 이상 |
+| S3 | 초기 관통 (t = 0 접촉) 이나 구조적으로 성공 불가능한 배치 제외 |
+| S4 | 개발용 배치와 최종 평가용 배치를 episode id 로 사전 분리 (예: dev = train split, eval = held-out test split 1800 – 1999) |
+
+후보 생성 방법 (사전 고정): E0 rollout 과 기존 기록에서 S1 을 만족하는 배치를 찾고, 부족하면 target 을 crate 벽 · 이웃 과일 사이 등 손목이 낮게 들어가야 하는 위치로 옮긴 변형 배치를 규칙으로 생성한다.
+
+**진행 · 중단 기준 (측정 전 고정, lead §8).**
+
+- 단계 1 의 audit 에서 FT sensor 형상 누락 (구 밖 표면 비율) 이나 손 영역 침범이 남으면 단계 2 로 넘어가지 않는다.
+- 단계 2 에서 S1 – S3 를 만족하는 eval 배치가 사전 정한 최소 수 (예: 10) 에 못 미치면 사용자에게 보고하고 장면 생성 규칙을 판정받는다.
+- 단계 4 전에 비교 조건 · 장면 수 · 예상 GPU 시간 · 진행 / 중단 기준을 정리해 **사용자 확인 후** 실행한다.
+
+**의존성 (lead §9).** T46e (oracle extent) 는 격리 worktree 에서 구현 완료 · 미적용이다. 단계 4 의 oracle 은 T46e 를 쓰므로 T46e 의 검증 · 적용이 선행한다. T47 session 의 측정 보호를 위해 메인 tree 의 pipeline · config · curobo_builder 변경 전에 알린다.
+
+**develope_PLAN 과의 연결.**
+
+| 계획서 단위 | 이 절이 주는 것 | 주의 |
+|---|---|---|
+| **DX-04 선행 확인 (§11 순서 1)** | T46d: gripper scope 퇴화, 비교는 arm_5 에서만 갈리나 그 구가 형상 근사 오류의 영향을 받음 → link-specific 효과 주장을 줄이지 않고 형상을 보정한 뒤 다시 확인 (사용자 판정). 계획서의 선택지 중 "관련 비허용 link 를 모든 조건에 동일하게 추가" 쪽 | 계획서의 다른 선택지 ("link-specific 효과 주장 축소") 는 고르지 않았다 |
+| **DT-05A (세 field policy 의 pair 별 contact · success · stop)** | T46f 단계 4 – 5 가 채운다. **지금은 비어 있다** | DX-04 판정: "No exemption 이 멈춘다는 관찰만으로 LTE 전체 효과를 결론내리지 않는다" (develope_PLAN) |
+| **DF-04B (같은 ESDF slice 의 link 별 distance · gradient 와 실제 contact)** | [`t46d-scene.png`](figures/t46/t46d-scene.png) 는 full field 와 target-free field 의 같은 단면을 보이는 **후보 장면** 이다. 단 서버가 그 arm_5 구를 constraint 로 쓰지 않은 run 의 offline 재조회이고 형상 근사 오류의 영향을 받는다 | 보정 형상 · 진단 장면 뒤에 새로 만든다. 지금 장면을 DF-04B 로 쓰지 않는다 |
+| **DC-3** (link-specific exemption 이 필요한 접촉과 금지 접촉을 더 잘 구분한다) | 근거 없음 (측정 안 됨). T46f 가 가설을 사전 고정했다 | 효과가 확인된 link · phase · scene 만 서술한다 (계획서의 판정 규칙) |
+| **DC-4** (task completion 과 forbidden contact 의 trade-off 를 개선한다) | 주 지표 (비허용 접촉 없는 작업 성공률) 와 정지 · 시간을 함께 보고하는 것으로 구조화 | 충돌만 줄고 성공 손실이 크면 trade-off 와 실패 조건을 명시한다 |
+| **DT-02 extent block** (T46c §6 의 초안) | W1 on 을 공통 조건으로 확정 (사용자). 비허용 link 범위는 T46f 의 보정 형상이 정한다 | oracle arm 은 T46e 의 검증 · 적용 뒤 |
+
+### 5. 되돌아올 지점 · 판정 대기
+
+| 안 고른 것 | 왜 | 되돌아올 신호 |
+|---|---|---|
+| **A: link-specific 효과 주장 축소** (T46d 가 올린 선택지) | 사용자가 B 확장을 택했다 | 단계 1 audit 에서 FT sensor 형상 누락 · 손 영역 침범이 남음, 또는 단계 2 에서 S1 – S3 를 만족하는 eval 배치가 최소 수 (예: 10) 에 못 미치고 장면 생성 규칙도 성립하지 않음 (T46f §8) |
+| **C: arm_5 근사 구를 그대로 비교** | 사용자가 제외했다 | 형상을 보정하지 못하는 구가 남으면 그 구에 의존한 보호 효과를 주장하지 않는다 (T46f §4-2) |
+| W1 기본 on | 기본값은 off (사용자 판정) | 실험 arm 이 아니라 서버 기본값에서 `no_seed` HOLD 가 문제가 되는 측정 |
+| W1 을 `place` label 로 넓힘 | CL3 의 placed `no_seed` 는 전부 `home` 이었다 (구현자, `T46c.impl.md`) | `place` 칸에서 같은 HOLD 가 관찰될 때 |
+| 표본 확대 | 사용자가 18 쌍 유지를 택했다 (develope_PLAN §0.4) | 사용자가 새로 판정할 때만 |
+
+**판정 대기.** (1) T46f 단계 4 전의 비교 조건 · 장면 수 · 예상 GPU 시간 · 진행 / 중단 기준 확인 (단계 4 직전, lead 가 정리해 올림). (2) T46e (visible observed surface oracle) 의 검증 · 적용 시점. (3) T46f 단계 2 의 S1 – S3 만족 eval 배치 최소 수 (예: 10) 가 사전 정한 값으로 확정되는가.
+
+**산출물.**
+
+- **측정**: [`handoff/T46c.verify.json`](handoff/T46c.verify.json) (원자료 `/mnt/dev/AG3S_VLA-storage/results/development/20261012T233515+0900_972f28056cd8_318f98f36f37/verify/T46c/`), [`handoff/T46d.verify.json`](handoff/T46d.verify.json) (원자료 `.../20261012T233920+0900_392462577320_70c141f47dbe/verify/T46d/`, 입력 CL3 · CL2 · CL-A 는 읽기 전용).
+- **figure** (각각 `.json` sidecar 있음): [`t46c-table`](figures/t46/t46c-table.png) · [`t46d-scene`](figures/t46/t46d-scene.png) · [`t46d-graph`](figures/t46/t46d-graph.png) · [`t46d-table`](figures/t46/t46d-table.png). T46f 는 figure 가 없다 (계획).
+- **구현** (T46c-W1): `AG3S/ag3s/config.py` · `AG3S/ag3s/runtime/pipeline.py` · `AG3S/ag3s/types.py` · `AG3S/trajopt/safe_policy.py` · `serve_safe.py` · `wire.py` · `experiments/certification_replay.py` · `experiments/ta_offline.py` · `tests/trajopt/test_t46c_placed_no_seed_certify.py` (commit `6dfaf7bb`). 상세 [`handoff/T46c.impl.md`](handoff/T46c.impl.md).
+- 요청 문서: [`handoff/T46c.task.md`](handoff/T46c.task.md) · [`handoff/T46d.task.md`](handoff/T46d.task.md) · [`handoff/T46e.task.md`](handoff/T46e.task.md) · [`handoff/T46f.task.md`](handoff/T46f.task.md). commit 은 하지 않았다.
