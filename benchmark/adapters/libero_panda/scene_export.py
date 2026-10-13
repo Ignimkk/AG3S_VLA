@@ -18,6 +18,13 @@ distances without LIBERO:
 
 The run is only read. Default frames are the policy-call frames (``obs_index = chunk_t[k]``).
 
+Env history (SL4b fix): the env of each episode is the rollout's -- one env per task block and one
+``env.reset()`` + ``set_init_state`` per preceding episode of that task, in the run's recorded order
+(``env_history.episode_envs``), because LIBERO re-samples the fixture placement (cabinet, stove: model
+``body_pos``, not in the recorded state) on every reset. Hard check: every exported policy-call frame
+re-renders RGB **bit-identical** to the recorded frame on both cameras (``checks.rgb_rerender_equal_call_frames``),
+otherwise the episode raises and nothing is written.
+
 CLI (``.venv-libero``; re-executes itself with ``client_env.client_environment`` like
 ``robot_geometry.py``)::
 
@@ -50,7 +57,7 @@ BASE_BODY = "robot0_base"
 #: Gripper bodies (the constraint links panda_hand / fingers live here; robosuite names).
 GRIPPER_BODY_PREFIXES = ("gripper0_", "robot0_right_hand")
 DISTMAX = 0.40
-SCHEMA = 1
+SCHEMA = 2  # 2: env history of the run reproduced (SL4b fix), RGB equality enforced
 
 
 def _sha256(path):
@@ -127,20 +134,17 @@ def model_tables(m):
     }
 
 
-def export_episode(run, ep, out_dir, frames="calls", limit_frames=None, distmax=DISTMAX):
+def export_episode(run, ep, out_dir, env, history, frames="calls", limit_frames=None, distmax=DISTMAX):
+    """Export one episode from ``env`` = the task's env right after the rollout's ``start_episode`` of it
+    (``env_history.episode_envs``; ``history`` = its provenance note)."""
     _imports()
     import mujoco
-    from libero.libero import benchmark as lb
-    import libero_pi05_client as client
-    from benchmark.adapters.libero_panda import camera, task_target as tt
+    from benchmark.adapters.libero_panda import camera, env_history, task_target as tt
 
     run = pathlib.Path(run)
     target = pathlib.Path(out_dir) / "scene_{}.npz".format(ep["stem"])
     if target.exists():
         raise SystemExit("refusing to overwrite {}".format(target))
-    suite = lb.get_benchmark_dict()[ep["suite"]]()
-    env, _ = client._get_libero_env_with_depth(suite.get_task(ep["task_id"]), 256, 7)
-    env.reset()
     sim = env.sim
     m, d = sim.model._model, sim.data._data
     e = np.load(str(run / ep["npz"]))
@@ -151,6 +155,7 @@ def export_episode(run, ep, out_dir, frames="calls", limit_frames=None, distmax=
     if not np.array_equal(np.asarray(g["model_geom_bodyid"]), tables["geom_bodyid"]):
         raise ValueError("{}: geom table differs from the record".format(ep["stem"]))
     obs_index = np.asarray(g["obs_index"]).reshape(-1)
+    call_set = set(int(t) for t in np.asarray(e["chunk_t"]).reshape(-1))
     if frames == "calls":
         wanted = [int(t) for t in np.asarray(e["chunk_t"]).reshape(-1)]
     else:
@@ -167,6 +172,8 @@ def export_episode(run, ep, out_dir, frames="calls", limit_frames=None, distmax=
            "T_world_base": np.zeros((F, 4, 4)), "robot_state": np.zeros((F, 9))}
     contacts, gdist = [], []
     check = {"T_world_base_vs_record_max_abs": 0.0, "robot_qpos_vs_robot_state_max_abs": 0.0}
+    rgb_equal = {source: 0 for source, _ in env_history.RGB_CHECK_CAMERAS}
+    rgb_checked = 0
     qidx = np.asarray(g["robot_qpos_indexes"])
     fromto = np.zeros(6)
     rgeoms = [int(k) for k in tables["robot_collision_geoms"]]
@@ -192,6 +199,15 @@ def export_episode(run, ep, out_dir, frames="calls", limit_frames=None, distmax=
                 dist = mujoco.mj_geomDistance(m, d, rg, og, distmax, fromto)
                 if dist < distmax:
                     gdist.append((f, rg, og, float(dist)) + tuple(float(x) for x in fromto))
+        # after the MuJoCo reads above: rendering never feeds them
+        if wanted[f] in call_set:
+            rgb_checked += 1
+            for source, equal in env_history.rgb_rerender_equal(sim, e, wanted[f]).items():
+                rgb_equal[source] += int(equal)
+    env_history.require_rgb_equal(ep["stem"], rgb_equal, rgb_checked)
+    wire = dict(camera.CAMERA_TABLE)
+    check["rgb_rerender_checked_call_frames"] = rgb_checked
+    check["rgb_rerender_equal_call_frames"] = {wire[k]: v for k, v in rgb_equal.items()}
     out["contacts"] = np.array(contacts, np.float64).reshape(-1, 4)
     out["geomdist"] = np.array(gdist, np.float64).reshape(-1, 10)
     out["geomdist_distmax"] = np.array(distmax)
@@ -203,13 +219,12 @@ def export_episode(run, ep, out_dir, frames="calls", limit_frames=None, distmax=
             "limit_frames": limit_frames, "npz": ep["npz"], "npz_sha256": _sha256(run / ep["npz"]),
             "geom_npz": ep["geom_npz"], "geom_npz_sha256": _sha256(run / ep["geom_npz"]),
             "mujoco": mujoco.__version__, "python": sys.version.split()[0], "distmax": distmax,
-            "state": "sim_state_image (image instant, SL2)", "checks": check,
+            "state": "sim_state_image (image instant, SL2)", "checks": check, "env_history": history,
             "camera_conventions": camera.conventions() if hasattr(camera, "conventions") else None}
     out["provenance_json"] = np.array(json.dumps(prov, sort_keys=True))
     target.parent.mkdir(parents=True, exist_ok=True)
     with open(str(target), "xb") as stream:
         np.savez_compressed(stream, **out)
-    env.close()
     return {"file": target.name, "sha256": _sha256(target), "frames": F, "contacts": len(contacts),
             "geomdist_rows": len(gdist), "target": info["target"], "destination": info["destination"], **prov}
 
@@ -226,17 +241,23 @@ def main(argv=None):
     run, out = pathlib.Path(args.run).resolve(), pathlib.Path(args.out)
     if (out / "scene_export.json").exists():
         raise SystemExit("refusing to overwrite {}".format(out / "scene_export.json"))
+    _imports()
+    from benchmark.adapters.libero_panda import env_history
+
     tasks = None if args.task_ids is None else set(int(x) for x in args.task_ids.split(",") if x.strip())
-    eps = [ep for ep in episode_rows(run) if tasks is None or ep["task_id"] in tasks]
+    eps = {ep["stem"]: ep for ep in episode_rows(run) if tasks is None or ep["task_id"] in tasks}
+    env_history.run_history(run)  # refuse an unknown order before creating anything
     out.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     results = []
-    for ep in eps:
-        res = export_episode(run, ep, out, args.frames, args.limit_frames, args.distmax)
+    for row, env, history in env_history.episode_envs(run, set(eps)):
+        ep = eps[env_history.stem_of(row)]
+        res = export_episode(run, ep, out, env, history, args.frames, args.limit_frames, args.distmax)
         res["seconds"] = time.time() - t0
         results.append(res)
-        print(json.dumps({k: res[k] for k in ("file", "frames", "contacts", "geomdist_rows", "target", "checks", "seconds")}),
-              flush=True)
+        line = {k: res[k] for k in ("file", "frames", "contacts", "geomdist_rows", "target", "checks", "seconds")}
+        line["resets_before"] = history["resets_before"]
+        print(json.dumps(line), flush=True)
     summary = {"schema": SCHEMA, "run": str(run), "argv": sys.argv, "episodes": results, "seconds": time.time() - t0}
     with open(str(out / "scene_export.json"), "x") as stream:
         stream.write(json.dumps(summary, indent=1) + "\n")

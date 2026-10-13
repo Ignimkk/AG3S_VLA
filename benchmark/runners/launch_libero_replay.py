@@ -23,7 +23,9 @@ import time
 
 from common.workspace import PROJECT_ROOT, shared_storage_root
 from benchmark.runners import launch_libero_pi05_only as launcher
+from benchmark.adapters.libero_panda import env_history
 from benchmark.runners import libero_pi05_client as client_mod
+from benchmark.runners import libero_replay
 
 REPLAY_SCRIPT = PROJECT_ROOT / "benchmark/runners/libero_replay.py"
 CONDITION = "replay (no policy): executed actions of the source run"
@@ -44,6 +46,8 @@ def source_record(source: Path, task_ids, episode_ids) -> dict:
         if line.strip():
             row = json.loads(line)
             rows[(int(row["task_id"]), int(row["episode_idx"]))] = row
+    # SL4b: source resets the replay repeats before each episode (raises for an order the source never ran)
+    resets = libero_replay.source_history_resets(env_history.run_history(source), list(task_ids), list(episode_ids))
     episodes = []
     for task_id in task_ids:
         for episode_idx in episode_ids:
@@ -54,7 +58,8 @@ def source_record(source: Path, task_ids, episode_ids) -> dict:
             episodes.append({"task_id": task_id, "episode_idx": episode_idx, "npz": row["npz"],
                              "npz_sha256": launcher.sha256_file(npz), "status": row.get("status"),
                              "policy_calls": row.get("policy_calls"),
-                             "env_steps_including_wait": row.get("env_steps_including_wait")})
+                             "env_steps_including_wait": row.get("env_steps_including_wait"),
+                             "source_history_resets": resets[(task_id, episode_idx)]})
     protocol = manifest.get("settings", {}).get("protocol", {})
     return {"run_dir": str(source), "run_id": source.name, "commit": manifest.get("commit"),
             "branch": manifest.get("branch"), "condition": manifest.get("settings", {}).get("condition"),

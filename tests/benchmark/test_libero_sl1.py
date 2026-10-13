@@ -382,7 +382,8 @@ def fake_source_run(tmp_path, monkeypatch):
     _, arrays, _ = _recorded_episode()
     np.savez_compressed(source / "episodes/libero_spatial_t0_e0.npz", **arrays)
     (source / "run_manifest.json").write_text(json.dumps({"commit": "abc", "settings": {
-        "condition": "pi0.5-only", "protocol": {"suite": "libero_spatial", "seed": 7, "num_steps_wait": 10}}}))
+        "condition": "pi0.5-only", "protocol": {"suite": "libero_spatial", "seed": 7, "num_steps_wait": 10,
+                                                  "task_ids": [0], "episode_ids": [0]}}}))
     row = {"suite": "libero_spatial", "task_id": 0, "episode_idx": 0, "seed": 7, "num_steps_wait": 10,
            "status": "success", "npz": "episodes/libero_spatial_t0_e0.npz", "policy_calls": 3}
     (source / "episodes.jsonl").write_text(json.dumps(row) + "\n")

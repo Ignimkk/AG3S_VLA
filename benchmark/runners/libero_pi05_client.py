@@ -183,6 +183,29 @@ def _quat2axisangle(quat):
     return (quat[:3] * 2.0 * math.acos(quat[3])) / den
 
 
+# --- Env history (shared with the scene / phase exports and the replay, SL4b) ----------------------
+def make_task_env(task, seed, capture_geometry):
+    """The env of one task exactly as :func:`run_tasks` builds it: ``_get_libero_env[_with_depth]`` (which
+    seeds the global numpy RNG, ``env.seed`` = ``np.random.seed``) and, with geometry capture, the capture
+    observable installed before the first ``env.reset()``. Returns ``(env, task_description)``."""
+    make_env = _get_libero_env_with_depth if capture_geometry else _get_libero_env
+    env, task_description = make_env(task, LIBERO_ENV_RESOLUTION, seed)
+    if capture_geometry:
+        # Read-only snapshot observable sampled with the cameras; installed before run_episode's env.reset().
+        _geometry_adapter()[0].install_capture_observable(env)
+    return env, task_description
+
+
+def start_episode(env, initial_states, episode_idx):
+    """Start of every episode of the official loop: ``env.reset()`` then ``set_init_state``. Returns the obs.
+
+    LIBERO's reset is a hard reset that re-samples the **fixture** placement (``body_pos`` of e.g.
+    ``wooden_cabinet_1`` / ``flat_stove_1``, not part of the simulator state) from the global numpy RNG, so the
+    scene of episode k of a task depends on how many resets the task's env saw before (SL4b)."""
+    env.reset()
+    return env.set_init_state(initial_states[episode_idx])
+
+
 # --- Episode --------------------------------------------------------------------------------------
 class _Recorder:
     """Per-step raw data; observations have one more entry than actions (initial obs)."""
@@ -305,12 +328,9 @@ def run_episode(env, initial_states, episode_idx, task_description, client, args
     done = False
     started = _now()
 
-    # Reset environment
-    env.reset()
+    # Reset environment, set initial states (start_episode: the same two calls, shared with the exports)
+    obs = start_episode(env, initial_states, episode_idx)
     action_plan = collections.deque()
-
-    # Set initial states
-    obs = env.set_init_state(initial_states[episode_idx])
     rec.observe(obs)
     if observer is not None:
         observer(env, obs)
@@ -517,12 +537,15 @@ def eval_libero(args) -> int:
     return 1 if errors else 0
 
 
-def run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for) -> int:
+def run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for, prepare_episode=None) -> int:
     """Task/episode loop of the official example. ``policy_for(task_id, episode_idx)`` returns
-    ``(policy, connector name, extra jsonl fields)``. Returns the number of execution errors."""
+    ``(policy, connector name, extra jsonl fields)``. Returns the number of execution errors.
+
+    ``prepare_episode(env, initial_states, task_id, episode_idx)`` (replay only, SL4b) runs right before an
+    episode on the task's env -- the replay uses it to repeat the source run's resets of episodes it does not
+    replay. ``None`` (the client) = the official loop unchanged."""
     episodes_dir = run_dir / "episodes"
     videos_dir = run_dir / "videos"
-    make_env = _get_libero_env_with_depth if args.capture_geometry else _get_libero_env
     total_episodes, total_successes, errors = 0, 0, 0
     for task_id in args.task_ids:
         # Get task
@@ -532,14 +555,13 @@ def run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for) -> int:
         initial_states = task_suite.get_task_init_states(task_id)
 
         # Initialize LIBERO environment and task description
-        env, task_description = make_env(task, LIBERO_ENV_RESOLUTION, args.seed)
-        if args.capture_geometry:
-            # Read-only snapshot observable sampled with the cameras; installed before run_episode's env.reset().
-            _geometry_adapter()[0].install_capture_observable(env)
+        env, task_description = make_task_env(task, args.seed, args.capture_geometry)
 
         for episode_idx in args.episode_ids:
             if not 0 <= episode_idx < len(initial_states):
                 raise ValueError("episode id {} outside {} init states".format(episode_idx, len(initial_states)))
+            if prepare_episode is not None:
+                prepare_episode(env, initial_states, task_id, episode_idx)
             client, connector, extra = policy_for(task_id, episode_idx)
             geometry = (_GeometryRecorder(args.capture_segmentation, args.capture_float_depth)
                         if args.capture_geometry else None)

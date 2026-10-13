@@ -10,6 +10,12 @@ the recorded ``action`` array is checked to be exactly what the chunk/replan rul
 
 If the replay diverges (e.g. ``done`` later than recorded) the policy runs out of chunks and the
 episode ends as ``execution_error`` with that reason -- the replay never invents actions.
+
+Env history (SL4b): LIBERO re-samples the fixture placement on every ``env.reset()`` of a task's env, so episode k
+of a source task is only reproduced after the same resets. Before each replayed episode the source episodes of
+that task that ran before it and are not replayed get their ``start_episode`` (reset + init state) on the replay
+env (``source_history_resets``; source order from ``env_history.run_history``). Replaying the source's own
+task/episode list adds nothing (the SL0/SL1/SL3 replays are unchanged); an order the source never ran is refused.
 """
 from __future__ import annotations
 
@@ -18,6 +24,7 @@ import hashlib
 import json
 import logging
 import pathlib
+import sys
 
 import numpy as np
 
@@ -25,6 +32,11 @@ try:  # .venv-ag3s unit tests import this module as part of the package
     from benchmark.runners import libero_pi05_client as client_mod
 except ImportError:  # .venv-libero script: benchmark/runners is sys.path[0]
     import libero_pi05_client as client_mod
+try:
+    from benchmark.adapters.libero_panda import env_history
+except ImportError:  # .venv-libero script: append (never prepend) the checkout root, as the client does
+    sys.path.append(str(pathlib.Path(__file__).resolve().parents[2]))
+    from benchmark.adapters.libero_panda import env_history
 
 
 def sha256_file(path) -> str:
@@ -106,6 +118,37 @@ def load_source_episode(source_run: pathlib.Path, row):
     return npz_path, arrays
 
 
+def source_history_resets(blocks, task_ids, episode_ids):
+    """``{(task_id, episode_idx): [source episode_idx, ...]}``: source episodes of the task that ran before the
+    replayed one (and after the previous replayed one) and are not replayed -- their resets must be repeated.
+
+    ``blocks``: ``env_history.run_history(source)``. Raises ``ValueError`` if a task has several source env blocks,
+    ids repeat, or the replay order is not a subsequence of the source order."""
+    order = {}
+    for block in blocks:
+        if block["task_id"] in order:
+            raise ValueError("source run built several envs for task {}: env history ambiguous".format(block["task_id"]))
+        order[block["task_id"]] = [int(r["episode_idx"]) for r in block["rows"]]
+    if len(set(task_ids)) != len(task_ids) or len(set(episode_ids)) != len(episode_ids):
+        raise ValueError("replay task / episode ids repeat")
+    out = {}
+    for task_id in task_ids:
+        source = order.get(task_id)
+        if source is None:
+            raise ValueError("source run has no task {}".format(task_id))
+        last = -1
+        for episode_idx in episode_ids:
+            if episode_idx not in source:
+                raise ValueError("source run has no episode task {} / episode {}".format(task_id, episode_idx))
+            pos = source.index(episode_idx)
+            if pos <= last:
+                raise ValueError("replay order {} of task {} is not the source order {}: env history differs".format(
+                    list(episode_ids), task_id, source))
+            out[(task_id, episode_idx)] = source[last + 1:pos]
+            last = pos
+    return out
+
+
 def check_protocol(args, row):
     for name, value in (("suite", args.task_suite_name), ("seed", args.seed), ("num_steps_wait", args.num_steps_wait)):
         if row.get(name) != value:
@@ -144,6 +187,7 @@ def replay(args) -> int:
             npz_path, arrays = load_source_episode(source_run, row)
             check_replayable(arrays, args.replan_steps)
             sources[(task_id, episode_idx)] = (row, npz_path, arrays)
+    resets = source_history_resets(env_history.run_history(source_run), list(args.task_ids), list(args.episode_ids))
 
     client_mod.require_libero_config()
     from libero.libero import benchmark
@@ -170,12 +214,17 @@ def replay(args) -> int:
             "source_env_steps_including_wait": int(len(arrays["action"])),
             "source_done_step_index": [int(i) for i in done],
             "executed_actions": "recorded action_chunks[i][:replan_steps] (checked equal to recorded action)",
+            "source_history_resets": resets[(task_id, episode_idx)],
         }
         policy = ReplayPolicy(arrays["action_chunks"], {"replay_of": info["source_run_id"], "source_npz": info["source_npz"]})
         return policy, "replay (recorded action chunks; no policy server)", {"replay": info}
 
+    def prepare_episode(env, initial_states, task_id, episode_idx):
+        for skipped in resets[(task_id, episode_idx)]:  # source episodes not replayed: same reset + init state
+            client_mod.start_episode(env, initial_states, skipped)
+
     with jsonl:
-        errors = client_mod.run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for)
+        errors = client_mod.run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for, prepare_episode)
     return 1 if errors else 0
 
 

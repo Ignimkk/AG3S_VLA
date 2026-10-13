@@ -193,6 +193,64 @@ CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=2 JAX_PLATFORMS=cpu bash scripts/testing/r
 - **AG3S 내부 속성**: `install_grounding_only` 가 instance 의 `_build_esdf` 를 바꾼다 (쓰기는 그 instance 에만). grounding 이 ESDF 산출물을 읽지 않는 근거: field 는 `_last_esdf_field` 와 `_last_object_fit/_points` 로만 남고 둘 다 grasp latch 뒤 attach 경로(`pipeline.py:861, 926`)에서만 읽힌다 — harness 는 latch 하지 않는다. test·GPU smoke 가 같음을 확인.
 - **offline 한계** (SL4 와 같음): execution path 없음, grasp latch·attach 없음 → grasp phase 이후 target 은 쥐지 않은 물체. 평가 phase 가 approach + grasp 인 이유.
 
+## SL4b fix — reset history (2026-10-13 KST, verifier finding 대응)
+
+**평이한 요약.** LIBERO 는 `env.reset()` 때마다 fixture(`wooden_cabinet_1`, `flat_stove_1`)의 위치를 global numpy RNG 로 다시 뽑는다.
+fixture 는 joint 가 없어 기록된 sim state 에 들어 있지 않다. rollout client 는 task 마다 env 를 하나 만들고 episode 마다 reset 한다.
+그래서 같은 task 의 k 번째 episode 는 k 번째 reset 의 fixture 를 본다. 예전 export 는 episode 마다 새 env 에서 reset 을 한 번만 했다.
+이 때문에 각 task 의 첫 episode(init 1–4 run 에서는 e1)만 맞았다. 이제 export 는 run 에 기록된 순서대로 env history 를 재현한다.
+재현은 task 마다 env 하나, 앞선 episode 마다 `reset` + `set_init_state` 이다. 내보내는 모든 call frame 은 두 camera 모두 RGB 재render 가 기록과
+**bit 단위로 같아야** 하며, 다르면 그 episode 는 예외로 멈추고 파일을 쓰지 않는다.
+
+**코드 근거.** `env.seed` = `np.random.seed` (`benchmark/LIBERO/libero/libero/envs/bddl_base_domain.py:162-163`). hard reset 때 fixture
+`body_pos` 를 다시 뽑는다 (`bddl_base_domain.py:776`). client 는 task 마다 env 하나를 만들고 episode 마다 reset 한다 (`libero_pi05_client.py:558`, `:332`).
+robosuite step 경로는 기본 설정(identity corrupter, delay 0)에서 RNG 를 쓰지 않는다. hard reset 은 sim 을 새로 만들므로 다음 episode 로
+넘어가는 것은 reset 횟수뿐이다. 이것은 아래 873/873 결과가 실측으로 확인한다.
+
+| 파일 | 무엇을 |
+|---|---|
+| `benchmark/runners/libero_pi05_client.py` | **동작 불변 추출**: `make_task_env` (`:187`, env 생성 + seed + capture observable), `start_episode` (`:199`, reset → `set_init_state`). `run_tasks`·`run_episode` 가 이 둘을 부른다. `run_tasks(..., prepare_episode=None)` hook 추가 (`:564`; client 는 None = 예전 loop 그대로) |
+| `benchmark/adapters/libero_panda/env_history.py` (새, py3.8) | `history_blocks`/`run_history` (`:51`): `episodes.jsonl` 줄 순서 = manifest `protocol.task_ids × episode_ids` 를 확인하고, `started_at` 단조·block 별 suite/seed/geometry 단일을 검사한다. 하나라도 어긋나면 **거부**. `plan` (`:98`), `episode_envs` (`:133`, client 의 `make_task_env`/`start_episode` 를 그대로 호출), `rgb_rerender_equal` (`:155`), `require_rgb_equal` (`:166`) |
+| `scene_export.py` (SCHEMA 1→2) | `episode_envs` 로 env 를 받는다 (`:253`). 내보내는 call frame 마다 RGB 2 camera 를 대조하고 불일치하면 raise (`:207`). `checks.rgb_rerender_equal_call_frames`, provenance `env_history` (resets_before, preceding_episodes) |
+| `phase_export.py` (SCHEMA 2→3) | 위와 같다 (`:217`, `:169`). RGB 대조는 `--no-segmentation` 이어도 항상 한다. provenance `env_history`, `rgb_rerender_equal_call_frames` |
+| `benchmark/runners/libero_replay.py` | `source_history_resets` (`:121`): replay 하지 않는 앞선 source episode 를 `prepare_episode` 로 `start_episode` 한다 (`:222`). source 순서의 부분열이 아니면 거부한다. jsonl `replay.source_history_resets` 에 기록 |
+| `benchmark/runners/launch_libero_replay.py` | dry-run/manifest 에 episode 별 `source_history_resets` 를 넣는다 (잘못된 순서는 run 할당 전에 거부) |
+| `tests/benchmark/test_panda_sl4b_history.py` (새, 10 test), `libero_py38_history_checks.py` (새) | 아래. `test_libero_sl1.py` fake manifest 에 `task_ids/episode_ids` 추가 (실제 manifest 는 모두 가짐) |
+
+**재현 증거 (scratchpad, CPU, export 는 한 번에 하나, peak RSS ≤ 2.78 GB).**
+
+| 대상 | episode | call frame | head RGB 같음 | left_wrist RGB 같음 |
+|---|---|---|---|---|
+| `phase_export` — SL4b dev run (init 1–4) | 40 | 873 | **873/873** | **873/873** |
+| `scene_export` — SL4b dev run (init 1–4) | 40 | 873 | **873/873** | **873/873** |
+| `phase_export` — SL3 dev run (init 0) | 10 | 214 | 214/214 | 214/214 |
+| `scene_export` — SL3 dev run (init 0) | 10 | 214 | 214/214 | 214/214 |
+
+| 비교 (배열 단위, `provenance_json` 제외) | 결과 |
+|---|---|
+| init 0 scene 새 export vs `outputs/verify/SL4/raw/scene` | 10/10 episode, 37 배열 모두 bit 동일 |
+| init 0 phase 새 export vs `outputs/verify/SL3/raw/gt` | 10/10 episode, 공통 10 배열(`segP` 포함) 모두 bit 동일 |
+| init 1–4 새 export vs 기존 `outputs/verify/SL4b/raw/{scene,phase}` | e1 10/10 배열 동일. e2–e4 30/30: scene 은 **fixture body 10 개만** 이동 (stove·cabinet root, 1.95–16.07 mm). 자유 물체·robot 은 같다. phase 는 `segP/*` 30/30 다르고 `contact_target_any` 가 t4_e2 1 개 다르다. **phase label 입력(`target_xpos`, `contact_grip_target`)은 40/40 동일** |
+| 실제 action replay (scratch storage, `libero_replay.py`) | SL0 t0e0 replay npz = SL0 rollout npz 14/14 배열 (client 추출이 bit 불변). SL4b t0 **e3 만** replay (source resets [1, 2]) = rollout e3 14/14 배열. 같은 replay 를 history 없이(예전 동작) 돌리면 두 image 배열이 다르고 agentview 0/89 frame 만 같다 |
+
+**libero_replay 영향.** 영향을 받았다 (잠재적). replay 의 task/episode 목록이 source 와 같으면 history 가 같지만, source 의 일부(예: e3 만)를 replay 하면
+fixture 가 달랐다. 기존 replay run(SL1 3 개, SL3 `replay-off`)은 모두 source 가 task 당 episode 하나라 해당 없고 결과는 그대로다.
+
+**단위 검증.** `test_panda_sl4b_history.py` 10 passed (.venv-openpi-live·.venv-ag3s 모두). 내용:
+- 순서 규칙(거부 6 종), plan, replay 부분열 규칙, RGB 검사 raise, py3.8 문법.
+- fake RNG env 로 rollout(`run_tasks` 2 task × e1–3) → `episode_envs` 전체와 부분 → fresh env(예전 동작은 e1 만 맞음) → `prepare_episode` replay.
+- 실제 LIBERO t0 e1·e3: history 일치, fresh e3 불일치, replay e3 단독 일치.
+
+CPU regression (`run_cpu_regression.sh` 의 세 suite 를 같은 명령으로 따로 실행): **A 73 passed / B 119 passed / C 117 passed + 2 skip**.
+B·C 는 위 10 개가 늘었고, SL0/SL1 replay·`run_tasks` 동등성 test 와 SL3 export bit 동일 test 를 포함한다.
+
+**verifier 가 알아야 할 것.**
+- `outputs/verify/SL4b/raw/scene`·`raw/phase` 의 init 1–4 파일은 **다시 만들어야 한다**. e2–e4 30 episode 는 fixture 가 틀렸다. e1 은 배열이 같지만 schema·provenance 가 바뀌었다.
+  명령은 위 3 단계와 같다. export 는 RSS ≈ 2.7 GB 이므로 한 번에 하나씩 돌린다. 시간은 40 episode 기준 scene ≈ 12.5 min, phase ≈ 14 min (CPU, 이번 실측).
+- 그 scene/phase 를 읽은 산출물(선별 지표의 target coverage, oracle attention, grounding-only replay 의 GT 대조, 평가)은 e2–e4 에서 영향을 받는다.
+  phase label 은 바뀌지 않는다 (`target_xpos`·`contact_grip_target` 40/40 동일).
+- 이번 수정은 `perception_replay.py`·`ats_calibration.py` 를 건드리지 않았다. 출력 key 는 늘기만 했다 (`checks.rgb_rerender_*`, provenance `env_history`).
+
 ## 내가 기대하는 결과
 
 <!-- verifier 는 측정이 끝나기 전에 이 절을 읽지 않는다 -->
