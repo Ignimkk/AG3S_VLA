@@ -28,8 +28,10 @@
 | | SL-2 Panda geometry / self-filter | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL2](#sl2--panda-geometry-sphere-chain--self-filter--contact-link-sl1-후속-2건-2026-10-12). self-filter 기본 = confined hand+mount cover, constraint model = `franka.yml` sphere 그대로 |
 | | SL-3 attention read-out audit | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL3](#sl3--v11ab-attention-read-out-audit-on-pi05_libero--sl2-후속-2건-2026-10-12). SL2 후속 2건(confined cover 기본값, `robot_geometry.py` CLI) 구현·확인 완료. V11AB cell L8H2 를 Panda 에 그대로 쓴다(recalibration 없음) |
 | | SL-4 Panda 를 V11AB core 에 연결 (ATS / LTE / ESDF), offline | **완료 (2026-10-13, 사용자 확정)** | 아래 [SL4](#sl4--panda-관측을-v11ab-perception--esdf-에-연결-ats--lte--esdf-offline-2026-10-12). core diff 0 줄, 기준선 둘 다 일치. 접근 단계 ATS 는 대체로 target 을 잡았으나(101/105 call) **t4 · t5 · t9 에서 다른 물체를 target 으로 골랐다**. ~~SL3 열린 항목(head block mass, wrist mirror 비교 원인, core 주입 지점)~~ → SL4 에서 측정(head seed 기여, wrist mirror 질량 분해, offline 주입 profile). online 주입은 SL-5 |
-| | SL-4b ATS 용 attention cell dev calibration 연구 | **진행 중 (사전 등록 2026-10-13)** | [`handoff/SL4b.task.md`](handoff/SL4b.task.md) (commit `41a5b28a`). 선택 규칙을 결과 전에 고정했다(아래 SL4 "판정" 절). test 데이터는 쓰지 않는다 |
-| | SL-5 EE delta ↔ joint-space 변환 + online 연결 | **다음 (SL-4b 이후)** | core 변경은 **robot model · contact link · bound 주입만 허용하는 최소 변경**으로 하고 RB-Y1 동작은 baseline 으로 동일함을 확인한다 (사용자 판정 2026-10-13) |
+| | SL-4b ATS 용 attention cell dev calibration 연구 | **완료 (2026-10-13, 사용자 확정)** | 아래 [SL4b](#sl4b--ats-용-attention-cell-dev-calibration-2026-10-13). ~~진행 중 (사전 등록)~~ → 사전 등록 규칙대로 **V11AB L8H2 유지**(최고 후보 L12H3 가 +1.5 %p, 기준 +10 %p 미달). oracle 도 t4 · t9 에서 0 이어서 오선택은 attention cell 이 아니라 그 뒤 grounding 단계 문제로 남는다. 같은 STEP 에서 LIBERO fixture reset 이력 문제를 찾아 export · replay 를 고쳤다. test 데이터는 쓰지 않았다 |
+| | SL-4c ATS grounding 탈락 원인 진단 (t4 · t5 · t9) | **진행 중 (2026-10-13)** | [`handoff/SL4c.task.md`](handoff/SL4c.task.md) (commit `cf4649ce`). **진단만** 한다. code 는 `85e6d9d1` worktree 에 고정. cluster 병합 · Panda 8 cm 개도 한계는 **가설**이며 측정이 확인 또는 반박한다 |
+| | SL-5a Panda 주입(최소 core 변경) + EE delta ↔ joint 변환, offline 검증 | **진행 중 (2026-10-13, SL-4c 와 병행)** | [`handoff/SL5a.task.md`](handoff/SL5a.task.md). core 변경은 **robot model · contact link · bound 주입만 허용하는 최소 변경**이다(사용자 판정 2026-10-13). 필수 조건: **RB-Y1 golden 출력 bit 동일**, **무개입 chunk 의 출력 action bit 동일** |
+| | SL-5b live closed-loop 1 episode | 미착수 | SL-5a 이후 판정 |
 | | SL-6 phase / gate source | 미착수 | Panda main 의 phase source = gripper-state strong rule 또는 pi05_libero feature 로 dev 에서 새로 학습한 probe(GT phase 는 oracle 비교용). **SL-6 에서 결정** |
 | | SL-7 ~ SL-8 (contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. ~~SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1)~~ → SL3 에서 un-mirror mapping 구현·측정 완료(image 검사 221/221 call), **SL4 에서 ATS 결과로도 확인**(mirror 로 돌린 접근 단계 centroid 오차 median 236.2 mm 대 12.0 mm). 이후 단계는 이 mapping 을 그대로 쓴다 |
 | **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | 미착수 | SL0 의 1 episode 로는 성능을 말할 수 없다 |
@@ -116,6 +118,12 @@
 | **target_correct** | (SL4b 1차 지표) call 에서 ATS 가 target 을 냈고, target 점의 nearest-instance 다수결이 진짜 target 이며, centroid 오차 ≤ 30 mm 이면 1 |
 | **pre-registration (사전 등록)** | 결과를 보기 전에 지표 · 후보 · 채택 조건을 문서로 고정해 두는 것. dev 에서 cell 을 고르더라도 고른 뒤에 기준을 바꾸지 못하게 한다 |
 | **oracle** | GT(MuJoCo segmentation 등 privileged 정보)로 만든 참고 값. 방법의 상한을 보는 용도이며 선택이나 실제 입력에 쓰지 않고 privileged 로 표시한다 |
+| **fixture (LIBERO)** | scene 에 고정된 가구 · 설비 body(`wooden_cabinet_1`, `flat_stove_1`). joint 가 없어 기록된 `sim_state` 에 들어 있지 않고, LIBERO 가 `env.reset()` 때마다 위치를 다시 뽑는다. (SL2 의 **fixture** 는 금지 접촉 scene 을 뜻해 다른 말이다) |
+| **reset history** | 한 run 에서 task 마다 env 하나를 만들고 episode 마다 `reset` 한 횟수와 순서. fixture 위치는 global numpy RNG 로 뽑히므로 k 번째 episode 의 scene 은 그 task 에서 k 번째 reset 의 결과다. export · replay 는 이 이력을 그대로 재현해야 같은 scene 이 된다 |
+| **superseded (대체됨)** | 오류가 확인되어 새 산출물로 교체한 옛 산출물. 지우지 않고 `raw/superseded_*` 에 남기되 결과 해석에 쓰지 않는다 |
+| **misselection (오선택)** | ATS 가 낸 target 점의 nearest-instance 다수결이 진짜 target 이 아닌 call (`wrong_instance`). 다수가 없거나(동률) 어느 물체도 아닌 `none` 도 포함한다 |
+| **cause split** | L8H2 misselection call 을 attention 원인과 grounding 원인으로 나누는 규칙. 두 camera 의 raw attention grid 에서 joint argmax patch 가 진짜 target 의 image-instant segmentation 위에 없으면 attention 원인, 위에 있는데도 ATS 가 다른 물체를 골랐으면 grounding 원인 |
+| **frozen worktree** | 한 진단이 끝날 때까지 code 를 한 commit 에 고정하기 위해 만든 detached `git worktree`(`.runtime/worktrees/sl4c-85e6d9d1`). 병행 STEP 의 code 변경이 측정에 섞이지 않게 한다 |
 
 ---
 
@@ -1784,13 +1792,13 @@ policy 추론과의 합은 SL-5 에서 잰다.
 
 | # | 내용 | 영향 / 다음 |
 |---|---|---|
-| 1 | **ATS 오선택**: t4(plate), t5(bowl_2), t9(true bowl 위 target 점 0). 원인이 attention cell 인지 grounding 기하인지 | SL-4b 가 dev 에서 분리하고 사전 등록 규칙으로 cell 후보를 평가한다 |
+| 1 | **ATS 오선택**: t4(plate), t5(bowl_2), t9(true bowl 위 target 점 0). ~~원인이 attention cell 인지 grounding 기하인지~~ | ~~SL-4b 가 dev 에서 분리하고 사전 등록 규칙으로 cell 후보를 평가한다~~ → SL4b 에서 측정: cell 교체로 해결되지 않는다. 그 뒤 단계의 원인은 SL-4c 가 진단 |
 | 2 | **attach · latch · execution_path 없음**(offline). carry 구간 ATS · field 숫자는 쥐지 않은 bowl 의 숫자 | SL-5 online 에서 재측정 |
 | 3 | **phase / subtask 신호가 Panda 에 없다**(subtask gate inert) | SL-6: gripper-state strong rule 또는 새 probe, GT phase 는 oracle 비교 |
 | 4 | **core 주입**: offline 은 profile 로 해결. online `serve_safe` 는 robot model · contact link · bound 주입 길이가 없다 | SL-5 에서 최소 core 변경(RB-Y1 동작은 기준선으로 확인) |
 | 5 | true target 이 target-free layer 에도 남는 비율(5 mm 로 approach 0.636) 중 recall 부족 몫과 오선택 몫 | SL-4b 후 task 별 분해 |
 | 6 | cabinet 의 main layer 5 mm occupied 0.718, transport 의 field 오차 증가 | 원인 분석 미실시. closed loop 에서 문제가 되면 다룸 |
-| 7 | dev 는 task 당 episode 하나. call 이 episode 안에서 상관돼 신뢰구간을 말하지 않는다 | SL4b 의 init state 1–4 로 확장 |
+| 7 | ~~dev 는 task 당 episode 하나.~~ call 이 episode 안에서 상관돼 신뢰구간을 말하지 않는다 | ~~SL4b 의 init state 1–4 로 확장~~ → SL4b 에서 50 episode 로 확장(신뢰구간은 아직 말하지 않는다) |
 | 8 | Panda 에는 `constraint_sphere_options` · `finger_cover` 를 적용하지 않았다(RB-Y1 용 knob) | SL-5 이후 clearance 가 문제가 되면 재검토 |
 
 ### 되돌아올 지점 (SL4)
@@ -1802,3 +1810,327 @@ policy 추론과의 합은 SL-5 에서 잰다.
 | target ball 이 인접 장애물을 지우는 것이 closed loop 에서 확인됨 | V11AB `_target_ball` 반경 · 규칙이 Panda scene 스케일에 맞는지 확인(변경은 variant, 사용자 판정) |
 | ESDF box 를 z 외에도 바꿔야 함 | 근거(측정)와 함께 사용자 판정 |
 | 기준선이 어긋남 | 즉시 중단(core 가 바뀌지 않았어야 한다) |
+
+---
+
+## SL4b — ATS 용 attention cell dev calibration (2026-10-13)
+
+> 2026-10-13 KST. 사전 등록 commit `41a5b28a`(2026-10-13 01:00 KST) · 구현 commit `714c8914`(09:23 KST) · reset history 수정 commit `8f0a07ec`(11:11 KST) ·
+> 검증 commit `85e6d9d1`(13:57 KST) · 다음 STEP task commit `cf4649ce`(14:07 KST, SL4c). 직전 기록(SL4 log, SL5a task)은 `635a9762`. 사용자 확정 2026-10-13.
+> 원본: [`handoff/SL4b.task.md`](handoff/SL4b.task.md) · [`handoff/SL4b.impl.md`](handoff/SL4b.impl.md)(마지막 절 "SL4b fix — reset history") ·
+> [`handoff/SL4b.verify.json`](handoff/SL4b.verify.json). raw 출력은 `outputs/verify/SL4b/`.
+> 이 절의 수치는 `SL4b.verify.json` 의 `numbers` 가 출처다. 예외 둘은 그 자리에 표시했다(impl.md 의 재현 표). **측정은 전부 dev 데이터**이고 test(init 5–49)는 쓰지 않았다.
+
+### 이 STEP 이 답하는 질문
+
+SL4 에서 V11AB attention cell(L8H2)로 만든 ATS 는 10 개 task 중 t4(plate 를 target 으로 고름), t5(같은 모양의 `bowl_2`), t9(true bowl 위 target 점 0)에서 진짜 target 을 놓쳤다.
+LIBERO Spatial 은 같은 bowl 두 개를 위치 관계로 구분하는 과제라 이 오선택은 true target 을 장애물로 남기는 방향으로 작동할 수 있다. 질문은 둘이다.
+
+1. 원인이 **attention cell** 인가, 그 뒤 **grounding**(attention → seed → cluster → 선택)인가?
+2. cell 이 원인이라면 dev 에서만 고른 다른 cell 이 사전 등록한 기준을 넘는가?
+
+### 사전 등록 (결과를 보기 전에 고정, 바꾸지 않았다)
+
+`SL4b.task.md` 의 표를 문구 그대로 옮긴다. 이 표는 평가기 `benchmark/evaluators/ats_calibration.py` 의 `PREREGISTRATION_ROWS` 에 같은 문구로 들어 있고
+test 가 task 파일과 문자 단위로 대조한다. 행 sha256 `77dfe79044da5df9f26c3a0a5e332586b99ca376a15a4d352b8b5256dfe32a55`, evaluator module sha256 `59c037c1ac351fe327604bba47abd45d830917fdf9da770456470395ca00643f`
+(모든 SL4b replay run 의 manifest 와 평가기 출력에 기록).
+
+| 항목 | 정의 (원문) |
+|---|---|
+| Dev 데이터 | LIBERO Spatial task 0–9 × init state 0–4 (50 episodes). init 0은 SL3 run 재사용, init 1–4는 새 rollout(pi0.5-only, 같은 protocol) |
+| Phase | SL3/SL4와 같은 정의(MuJoCo finger–target contact, lift z0+10 mm). **평가 phase = approach + grasp** (운반 단계는 attach가 없는 offline 한계로 제외) |
+| 1차 지표 (`target_correct`) | call별: ATS가 target을 냈고(has_target) **ATS target 점의 최근접 instance 다수결 = 진짜 target** 이고 centroid 오차 ≤ 30 mm 이면 1. 평가 phase call 전체에 대한 비율 |
+| 2차 지표 | pooled precision(10 mm), recall median, centroid 오차 median/p95, task별 `target_correct` |
+| 후보 cell | V11AB L8H2 + **선별 지표**(dev 50 episode attention에서 approach+grasp call의 head+wrist target mass 평균, un-mirror)의 상위 16개 cell. 진단 grid는 denoise 0, agg `last`(V11AB와 같은 집계) |
+| 채택 조건 | 후보 cell이 L8H2보다 1차 지표가 **≥ 10 %p 높고**, task별로 **10개 중 ≥ 6개 task에서 L8H2 이상**이면 "Panda calibrated cell" 후보로 사용자에게 제안. 여러 개면 1차 지표 최고, 동률이면 낮은 layer. 조건을 만족하는 cell이 없으면 L8H2 유지 |
+| 원인 분리 | L8H2의 오선택 call마다: attention argmax(head·wrist)가 진짜 target 위에 있었는지 → attention 원인 / grounding 원인 비율 |
+| 참고(후보 아님) | GT target oracle seed(segmentation으로 target pixel만 attention=1) — ATS 기하 상한. privileged input으로 표시, 선택에 사용 안 함 |
+
+표가 말하지 않는 해석(`OPERATIONAL_DEFINITIONS`)도 manifest 에 기록했다. 예: 분모는 target 이 없는 call 도 포함한 평가 phase call 전체이고, 다수결은 유일한 최대 label 만 인정(1 위 동률은 다수 없음 = `target_correct` 0),
+채택 동률의 마지막 순서(낮은 head)는 등록 밖에서 결정적으로 완결하기 위해 정했다. 판정 문장은 평가기 출력(사실)으로만 기록한다.
+
+### 데이터
+
+| 항목 | 값 |
+|---|---|
+| dev episode | 50 (task 0–9 × init 0–4) |
+| 평가 call (approach + grasp) | 607 |
+| init 0 | SL3 dev rollout `20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0` + SL3 attention audit `20261012T202459_309e4c6da477_sl3-attention-audit-dev` (재사용) |
+| init 1–4 | 새 rollout `20261013T092537_714c891415d9_sl4b-dev-pi05only-t0-9e1-4`(pi0.5-only, 같은 protocol; 09:25–09:47 KST, client 1270.96 s) + attention audit `20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4`(09:47–09:49 KST) |
+| scene GT · phase / segmentation | init 0 = `outputs/verify/SL4/raw/scene` · `outputs/verify/SL3/raw/gt`, init 1–4 = `outputs/verify/SL4b/raw/{scene,phase}` (아래 reset history 수정 후 두 번째 export) |
+| test (init 5–49) | **사용하지 않았다** |
+
+### 무엇을 만들었나
+
+AG3S core(`AG3S/ag3s/**`, `AG3S/trajopt/**`)는 수정하지 않았다(SL4 와 같은 원칙).
+
+**1. harness 옵션 넷** (`benchmark/runners/perception_replay.py`; 기본값은 SL4 경로 그대로)
+
+| 옵션 | 하는 일 |
+|---|---|
+| `--attention-cell L,H` | attention audit 에 저장된 진단 grid(`[L,H,768]`, float16)에서 해당 cell 을 꺼내 쓴다. 기본 V11AB L8H2 는 SL4 가 쓴 float32 read-out 그대로이고 다른 cell 은 float16 `pooled_f16`. float16 underflow 로 block 합이 0 인 call 은 `attention_invalid` 로 표시 |
+| `--grounding-only` | ESDF · constraint 단계를 건너뛰고 grounding 까지만 기록(빠른 선별용). 그 AG3S instance 의 `_build_esdf` 만 바꾸므로 core 파일은 그대로 |
+| `--attention-source oracle` | GT target segmentation(image instant 로 다시 render 한 `segP`)으로 attention 을 만든 참고 실행. manifest 에 `privileged_attention` 과 "PRIVILEGED: …" 를 기록 |
+| `--source-run` / `--attention-run` / `--scene-gt` 반복 | init 0 run 과 init 1–4 run 을 한 번에 받는다 |
+
+**2. 평가기** (`benchmark/evaluators/ats_calibration.py`): 사전 등록 지표 · 후보 선별 `select` · 채택 조건 판정 · 원인 분리 · oracle 참고 `evaluate`. 채택 조건 문구와 숫자를 코드 상수로 두고 manifest 에 hash 와 함께 기록한다.
+segmentation 은 rollout 이 `env.step` 반환 시점에 기록한 `segmentation_geom` 이 아니라 RGB · depth · attention 과 같은 순간(image instant)의 `segP` 를 쓴다(SL3 와 같은 입력). 새 `phase_export.py` 가 init 1–4 의 `segP` 를 만든다.
+
+**3. test** — `tests/benchmark/test_panda_sl4b.py` 17 개(CPU)가 `--attention-cell 8,2` = 기존 경로, grounding-only = full 의 grounding, 평가기 지표 정의, 채택 경계(정확히 10 %p 통과 / 9 %p 실패 등)를 확인한다.
+
+### 실행
+
+| 단계 | 값 (시각은 KST) |
+|---|---|
+| dev rollout init 1–4 · audit | 09:25–09:47 · 09:47–09:49 (GPU lock 안, compute process 없음 확인) |
+| 후보 선별 `select` | 50 episode 의 평가 call 에서 (call, camera) 쌍 1,214 개(head + wrist). 후보 17 cell(L8H2 + 상위 16) |
+| grounding-only replay | 19 run(L8H2 · 후보 16 · oracle · L8H2-f16 대조) 모두 returncode 0, 11:36–12:16 KST, 각각 GPU lock 안. replay code 는 `8f0a07ec` |
+| 평가 `evaluate` | 12:17–12:40 KST (CPU) |
+| 채택 시 full replay (step 7) | **수행하지 않았다** — 평가기 `selected_by_rule` 이 null |
+
+### 결과 — Figure
+
+세 figure 는 verifier 가 만들었다(sidecar `.json` 동봉).
+
+**실제 scene** — 행은 t4 · t5 · t9(L8H2 가 오선택한 call)와 대조 t7(L8H2 정답), 열은 head · left_wrist 별로 [L8H2(V11AB), L12H3(1차 지표 최고 후보), oracle(privileged 참고)] 이다.
+흰 윤곽 = GT target(image instant segmentation), 주황 윤곽 = ATS 점 다수가 놓인 물체(GT target 이 아닐 때), 검은 점 = ATS target 점, 파란 = block 정규화한 cell attention, 빨강 사각형 = 그 camera 의 attention argmax patch.
+oracle 열(빨강 fill = GT mask 가 attention)에서도 t4 는 ramekin, t5 는 stove, t9 는 `bowl_2` 위에 ATS 점이 놓인다(정확한 call 번호와 centroid 오차는 각 panel 제목).
+
+![SL4b scene](figures/sl4b-scene.png)
+
+**graph** — (a) cell 별 1차 지표(diamond, call 수 표기)와 task 별 점, (b) 선별 지표 대 1차 지표, (c) task × cell 의 `target_correct`(count / call), (d) L8H2 원인 분리, (e) task 별 L8H2 · L12H3 · oracle, (f) task 별 원인 분리.
+
+![SL4b graph](figures/sl4b-graph.png)
+
+**table** — 사전 등록 규칙, 후보 순위, 채택 조건 결과, rollout official success(pi0.5-only), fixture shift(아래 발견).
+
+![SL4b table](figures/sl4b-table.png)
+
+### 결과 — #1 후보 순위와 채택 조건
+
+선별 지표 순위는 전체 144 cell 중의 순위다. L8H2(V11AB)는 2 위(선별 지표 0.2417), L12H3 이 1 위(0.2914)다. **1차 지표** `target_correct` = 평가 phase call 607 개 중 정답 call 수(L8H2 기준 400).
+`gain` 은 L8H2 대비 %p, `tasks ≥ L8H2` 는 10 task 중 L8H2 이상인 task 수(채택 조건 ≥ 6).
+
+| 선별 순위 | cell | 선별 지표 | correct / 607 | rate | gain (%p) | tasks ≥ L8H2 | gain ≥ 10 %p | tasks ≥ 6 |
+|---:|---|---:|---:|---:|---:|---:|:---:|:---:|
+| 2 | **L8H2 (V11AB, baseline)** | 0.2417 | **400** | 0.659 | — | — | — | — |
+| 1 | L12H3 | 0.2914 | 409 | 0.674 | +1.48 | 6 | no | yes |
+| 3 | L12H4 | 0.2104 | 373 | 0.614 | −4.45 | 5 | no | no |
+| 4 | L5H5 | 0.2078 | 250 | 0.412 | −24.71 | 4 | no | no |
+| 5 | L9H5 | 0.1820 | 400 | 0.659 | 0.00 | 7 | no | yes |
+| 6 | L9H1 | 0.1742 | 303 | 0.499 | −15.98 | 3 | no | no |
+| 7 | L8H3 | 0.1442 | 351 | 0.578 | −8.07 | 5 | no | no |
+| 8 | L10H0 | 0.1433 | 356 | 0.586 | −7.25 | 4 | no | no |
+| 9 | L7H3 | 0.1387 | 300 | 0.494 | −16.47 | 3 | no | no |
+| 10 | L12H1 | 0.1370 | 386 | 0.636 | −2.31 | 5 | no | no |
+| 11 | L12H2 | 0.1283 | 299 | 0.493 | −16.64 | 4 | no | no |
+| 12 | L6H2 | 0.1260 | 301 | 0.496 | −16.31 | 3 | no | no |
+| 13 | L3H1 | 0.1183 | 277 | 0.456 | −20.26 | 4 | no | no |
+| 14 | L10H3 | 0.1145 | 315 | 0.519 | −14.00 | 4 | no | no |
+| 15 | L5H4 | 0.1086 | 330 | 0.544 | −11.53 | 4 | no | no |
+| 16 | L8H7 | 0.1082 | 172 | 0.283 | −37.56 | 3 | no | no |
+| 17 | L15H0 | 0.1080 | 321 | 0.529 | −13.01 | 4 | no | no |
+
+**채택 조건 결과** (평가기 출력 그대로): outcome = "no candidate satisfies the rule (rule: keep L8H2)", `selected_by_rule` = null, `satisfying` = [], `complete_dev_set_50` = true.
+1 차 지표가 가장 높은 후보 L12H3 은 +9 call(+1.48 %p)로 +10 %p 기준에 못 미치고(task 조건은 만족), L9H5 는 L8H2 와 같다(400, task 조건 만족).
+`tasks ≥ L8H2` 에는 모든 cell 이 0 인 t4 · t9 도 "이상"으로 세어진다는 점을 읽을 때 유의한다.
+
+float16 대조(`L8H2-f16`, 후보 아님): L8H2 를 `pooled_f16` 로 읽어도 400 / 607, task 별 count 도 같고 `attention_invalid` call 은 1 개다(float32 read-out 은 0).
+
+### 결과 — #2 L8H2 대 oracle, task 별
+
+`n` = 평가 call 수. oracle 은 privileged 참고이며 선택에 쓰지 않았다. 열은 `target_correct` count 이다.
+
+| task | n | L8H2 | L12H3 | oracle (privileged) |
+|---|---:|---:|---:|---:|
+| t0 | 66 | 56 | 55 | 56 |
+| t1 | 65 | 44 | 48 | 48 |
+| t2 | 61 | 60 | 57 | 61 |
+| t3 | 61 | 54 | 53 | 57 |
+| **t4** | 67 | **0** | 0 | **0** |
+| t5 | 48 | 24 | 33 | 18 |
+| t6 | 63 | 53 | 57 | 60 |
+| t7 | 53 | 53 | 53 | 53 |
+| t8 | 68 | 56 | 53 | 62 |
+| **t9** | 55 | **0** | 0 | **0** |
+| 합계 | 607 | 400 (0.659) | 409 (0.674) | 415 (0.684) |
+
+L8H2 의 category(607 call): correct 400, centroid_far 27, no_target 30, wrong_instance 150. phase 별로는 approach 315 / 492(0.640), grasp 85 / 115(0.739).
+pooled precision 0.705, recall median 0.688, centroid 오차 median 14.27 mm · p95 400.30 mm. oracle 의 category 는 correct 415, centroid_far 23, wrong_instance 169(no_target 0)이고 pooled precision 0.746 이다.
+
+t4 · t5 · t9 에서 oracle ATS 가 고른 물체(nearest-instance 다수결, call 수):
+
+| task | L8H2 의 오선택 다수 label | oracle 의 오선택 다수 label | oracle 의 ATS centroid 와 true target(`segP` back-projection)의 거리, median |
+|---|---|---|---:|
+| t4 | plate_1 42, ramekin 11 | ramekin 39, flat_stove_1 28 | 461.9 mm |
+| t5 | `akita_black_bowl_2` 23 | flat_stove_1 30 (정답 18) | 382.4 mm |
+| t9 | `akita_black_bowl_2` 44, plate_1 1 | `akita_black_bowl_2` 55 | 379.7 mm |
+
+같은 거리가 정상 task 에서는 median 11.9–17.3 mm(t0 · t1 · t2 · t3 · t6 · t7 · t8)다. t1 의 p90 만 59.9 mm 이다.
+
+### 결과 — #3 L8H2 오선택의 원인 분리
+
+L8H2 의 `wrong_instance` call 150 개를 나눴다. 기준은 두 camera 의 raw attention grid 에서 joint argmax patch 가 true target 의 image-instant segmentation 위에 있는지다.
+
+| | call | 비율 |
+|---|---:|---:|
+| 오선택 | 150 | |
+| attention 원인 (argmax 가 target 밖) | 67 | 0.447 |
+| grounding 원인 (argmax 가 target 위인데 ATS 가 다른 물체) | 83 | 0.553 |
+
+camera 별: head argmax 가 target 위 53, wrist 82, 둘 중 하나라도 93, 둘 다 42. joint argmax 를 낸 camera 는 left_wrist 148, head 2. 다수 label 이 어느 물체도 아닌 call(`none`)은 2 개(모두 attention 원인)이고, 다른 instance 가 다수인 call 148 개 중 attention 65 · grounding 83 이다.
+
+| task | 오선택 | attention 원인 | grounding 원인 | 다수 label |
+|---|---:|---:|---:|---|
+| t1 | 14 | 4 | 10 | ramekin 13, none 1 |
+| t3 | 4 | 3 | 1 | plate 3, none 1 |
+| **t4** | 53 | 25 | 28 | plate 42, ramekin 11 |
+| **t5** | 23 | 4 | 19 | `bowl_2` 23 |
+| t6 | 7 | 4 | 3 | `bowl_2` 7 |
+| t8 | 4 | 1 | 3 | `bowl_2` 4 |
+| **t9** | 45 | 26 | 19 | `bowl_2` 44, plate 1 |
+| 합계 | 150 | 67 | 83 | |
+
+### 결과 — #4 dev rollout official success (**pi0.5-only**, V11AB 결과가 아니다)
+
+dev 50 episode 의 rollout 은 VLA(pi0.5)만 쓰고 AG3S safety layer 를 붙이지 않은 **pi0.5-only** 실행이다(init 0 = SL3 run, init 1–4 = SL4b run). 아래 `official_success` 는 그 기준 경로의 성공이며
+**V11AB 의 성공이 아니다.** V11AB 와의 비교는 closed loop(SL-5 이후)에서 paired 로 한다.
+
+| task | init 0 | init 1 | init 2 | init 3 | init 4 | task 합 |
+|---|:---:|:---:|:---:|:---:|:---:|---:|
+| t0 | success | success | success | success | success | 5 / 5 |
+| t1 | success | success | success | success | success | 5 / 5 |
+| t2 | success | success | success | success | success | 5 / 5 |
+| t3 | success | success | success | success | success | 5 / 5 |
+| t4 | success | success | success | success | success | 5 / 5 |
+| t5 | success | success | success | success | success | 5 / 5 |
+| t6 | success | success | success | **fail** | success | 4 / 5 |
+| t7 | success | success | success | success | success | 5 / 5 |
+| t8 | success | success | success | success | success | 5 / 5 |
+| t9 | success | **fail** | success | success | success | 4 / 5 |
+| init 합 | 10 / 10 | 9 / 10 | 10 / 10 | 9 / 10 | 10 / 10 | **48 / 50** |
+
+### 결과 — #5 fixture reset 이력 발견과 수정
+
+**평이한 설명.** LIBERO 는 `env.reset()` 을 부를 때마다 fixture(`wooden_cabinet_1`, `flat_stove_1`)의 위치를 global numpy RNG 로 **다시 뽑는다**(`bddl_base_domain.py:776`; `env.seed` = `np.random.seed`).
+fixture 는 joint 가 없어서 기록된 `sim_state` 에 들어 있지 않다. rollout client 는 task 마다 env 를 하나 만들고 episode 마다 reset 하므로, 같은 task 의 k 번째 episode 는 그 task 의 k 번째 reset 에서 뽑힌 fixture 위치를 본다.
+SL4b 의 첫 scene GT · phase / segmentation export 는 episode 마다 새 env 를 만들고 reset 을 **한 번만** 했다. 그래서 task 의 첫 episode(init 1–4 run 에서는 init 1)만 rollout 과 같은 scene 이었고, **init 2–4 는 fixture 가 달랐다.**
+이 오류는 rollout 이 기록한 head segmentation 의 cabinet · stove 위치와 export 를 비교하다 드러났다.
+
+| 측정 | 값 |
+|---|---|
+| 첫 export(대체됨)의 fixture 이동량: head 첫 call frame 에서 cabinet · stove centroid 의 rollout 기록 대비 최대 이동 | init 1 = 0.0 mm, init 2 = 57.7 mm, init 3 = 35.4 mm, init 4 = 23.1 mm |
+| fixture entry(80 개) 중 1 mm 를 넘은 것 | 60 개 |
+| 수정 후 같은 비교의 최대 이동 | 모든 init 에서 0.0 mm |
+| 새 export 대 대체된 export, scene GT 40 episode | 10 episode 동일(init 1 전부), 30 episode 에서 fixture body 10 개만 이동: cabinet 계열 5.3–16.1 mm, stove 계열 1.9–15.3 mm |
+| 수정 전후 L8H2 grounding-only 반복(50 episode) | **50 / 50 episode 에서 grounding 결과 동일**. 달라진 것은 init 2–4 30 episode 의 GT depth 잔차 두 key(`gt_depth_residual_head`, `gt_depth_residual_left_wrist`)뿐 |
+
+즉 ATS 자체의 출력은 영향을 받지 않았고, 영향을 받은 것은 init 2–4 의 **GT 쪽 입력**(scene GT 의 fixture, `segP`)이다. 그래서 첫 export 를 쓴 산출물(선별 지표의 target coverage, oracle attention, GT 대조, 평가)은 모두 **superseded** 로 두고, 위 결과 표의 수치는 전부 수정 후 두 번째 export 로 다시 낸 것이다.
+첫 export · 선별 · replay 는 `outputs/verify/SL4b/raw/superseded_*`, `select.superseded.json`, `replay_runs.superseded.tsv` 등에 보존했고 결과 해석에 쓰지 않는다. 후보 cell 17 개는 옛 선별과 새 선별이 같았다.
+phase label 입력(`target_xpos`, `contact_grip_target`)은 40 / 40 episode 에서 같았다(impl.md).
+
+**수정** (`8f0a07ec`; impl.md "SL4b fix — reset history"): export 와 action replay 가 rollout 의 **task 별 reset 이력을 그대로 재현**한다.
+
+| 파일 | 하는 일 |
+|---|---|
+| `benchmark/runners/libero_pi05_client.py` | 동작을 바꾸지 않는 추출: `make_task_env`(env 생성 + seed), `start_episode`(reset → `set_init_state`). client 와 export 가 같은 두 함수를 부른다 |
+| `benchmark/adapters/libero_panda/env_history.py` (새) | `episodes.jsonl` 의 순서가 manifest 의 `task_ids × episode_ids` 와 같음을 확인(어긋나면 **거부**)하고, task 마다 env 하나 + 앞선 episode 마다 `reset` + `set_init_state` 로 이력을 재현 |
+| `scene_export.py` · `phase_export.py` | 위 이력으로 env 를 받고, 내보내는 call frame 마다 두 camera 의 RGB 재render 를 기록과 대조해 **하나라도 다르면 그 episode 는 예외로 멈추고 파일을 쓰지 않는다** |
+| `benchmark/runners/libero_replay.py` · `launch_libero_replay.py` | replay 하지 않는 앞선 source episode 도 `start_episode` 로 reset 횟수를 맞춘다(`source_history_resets`) |
+| `tests/benchmark/test_panda_sl4b_history.py` (새) | 10 test: 순서 규칙(거부 6 종), fake RNG env 와 실제 LIBERO t0 의 이력 일치, history 없는 fresh env 는 e3 불일치 |
+
+**재현 증거** (`SL4b.impl.md` 의 재현 표 — `verify.json` 의 `numbers` 가 아니라 impl.md 가 출처다):
+
+| 대상 | episode | call frame | head RGB 같음 | left_wrist RGB 같음 |
+|---|---:|---:|---:|---:|
+| `phase_export` init 1–4 | 40 | 873 | 873 / 873 | 873 / 873 |
+| `scene_export` init 1–4 | 40 | 873 | 873 / 873 | 873 / 873 |
+| `phase_export` · `scene_export` init 0 (SL3 run) | 10 | 214 | 214 / 214 | 214 / 214 |
+
+init 0 의 새 scene export 는 `outputs/verify/SL4/raw/scene` 와 10 / 10 episode 에서 모든 배열이 bit 동일하다. e3 만 replay 한 경우 history 를 주면 rollout 의 e3 와 14 / 14 배열이 같고, history 없이(예전 동작) 돌리면 두 image 배열이 달랐다(impl.md).
+
+**P2 로 넘어가는 결론.** paired 비교(V11AB 대 pi0.5-only 등)는 **task 별 episode 순서와 reset 횟수를 같게 유지해야** 같은 scene 에서 비교된다. episode 일부만 replay 하거나 순서를 바꾸면 fixture 가 달라진다(`libero_replay` 는 이제 source 순서의 부분열이 아니면 거부하고 앞선 reset 을 맞춘다).
+기존 replay run(SL1 3 개, SL3 `replay-off`)은 source 가 task 당 episode 하나라 영향이 없다(impl.md).
+
+### 결과 — #6 회귀
+
+| 확인 | 결과 |
+|---|---|
+| core diff (`AG3S/ag3s/**` · `AG3S/trajopt/**`) | code tree 의 변경 파일 없음(verify.json `dirty_files_code_trees` 비어 있음) |
+| 기준선: legacy 16D (15 frame) | violated start 14 / 15 · has_target 15 / 15 · frame0 clearance −29.031 mm — **일치** |
+| 기준선: cuRobo 16D (15 frame, GPU lock) | violated start 10 / 15 · has_target 15 / 15 · frame0 clearance −9.172 mm — **일치** |
+| `--attention-cell 8,2` grounding-only 대 SL4 default run | init 0 의 10 episode · 221 call · 32 key 모두 동일(attention grid 도 audit 의 `cell_grid_policy` 와 같음) |
+| 대체된 GT 로 돌린 L8H2 run 대 SL4 default | 같은 10 episode · 221 call · 32 key 동일 |
+| CPU regression (`run_cpu_regression.sh`) | exit 0 — A 73 passed / B 119 passed / C 117 passed, 2 skipped(flax import) |
+
+### 알아둘 점 — replay 시간 측정은 기준이 아니다
+
+grounding-only replay 19 개를 돌리는 동안 GPU lock 을 job 마다 풀었기 때문에 **다른 세션의 GPU 작업이 사이에 끼었다**(job 별 lock 대기 구간이 verify.json 에 기록됨).
+그래서 이 run 들의 replay latency(`t_process_s`, `t_record_s`, `stage_ms`)는 시간 기준선이 아니고 인용하지 않는다. grounding-only 는 ESDF · constraint 단계를 건너뛰므로 어차피 SL4 의 stage 시간과 같은 값이 아니다.
+이 verification 의 figure · verify.json 작업은 GPU 를 쓰지 않았다.
+
+### 이 STEP 에서 알게 된 것 (평이한 설명)
+
+**(a) cell 을 바꿔서는 해결되지 않는다.** 사전 등록 규칙에 따라 V11AB 의 L8H2 를 유지한다. 최고 후보 L12H3 도 607 call 중 +9 call(+1.48 %p)이어서 기준 +10 %p 의 15 % 수준이다.
+선별 지표(target 위 attention 질량)와 1 차 지표(ATS 가 진짜 target 을 고르는가)는 같이 오르지 않는다(graph (b): 선별 지표 3 위 L12H4 의 1 차 지표가 L8H2 보다 낮다). attention 질량이 target 위에 있다는 것이 ATS 정답을 보장하지 않는다.
+
+**(b) oracle 도 t4 · t9 에서 0, t5 에서는 일부만 맞는다.** oracle 은 attention 이 곧 GT target mask 이므로 attention 이 진짜 bowl 을 정확히 가리킨다. 그런데 t4(bowl 이 서랍 안), t9(bowl 이 cabinet 위)에서는 `target_correct` 가 0 이고
+t5(bowl 이 ramekin 위)는 18 / 48 로 L8H2(24 / 48)보다도 낮다. 이 task 들에서 ATS target 점이 놓이는 물체는 ramekin · stove · `bowl_2` 로, cell 과 무관하게 진짜 bowl 이 아니다.
+따라서 이 실패는 **attention cell 이 아니라 attention 이후의 grounding · cluster 선택 단계에 있다.** L8H2 오선택 150 call 중 83 call(0.553)이 이미 attention argmax 가 target 위에 있는데도 ATS 가 다른 물체를 골랐다는 원인 분리와도 방향이 같다(t5 에서 23 중 19).
+반대로 attention 원인 67 call 은 t4 25 · t9 26 이지만, 두 task 는 oracle 도 0 이므로 cell 을 개선해도 풀리지 않는다.
+
+**(c) 왜 그런지는 아직 모른다.** 작업 가설 둘이 있다. **둘 다 검증되지 않았다.**
+
+| 가설 | 내용 | 상태 |
+|---|---|---|
+| H1 병합 | 진짜 bowl 이 받치고 있는 물체(서랍 · cabinet · ramekin)와 하나의 cluster 로 합쳐져 선택에서 밀린다 | **미검증** |
+| H2 개도 한계 | admissibility 가 Panda 의 8 cm 개도 한계를 쓰고, 이것이 bowl 크기를 가진 cluster 를 탈락시킨다 | **미검증** |
+
+이 중 어느 것도 이번 측정으로 확인하지 않았다. 진단은 SL-4c 가 `85e6d9d1` 에 고정한 code 로 한다.
+oracle run 의 seed 와 ATS 선택 cluster 를 비교한 대표 call 의 숫자는 아래와 같고, 해석하지 않는다(`oracle_seed_vs_cluster.json`).
+
+| call | oracle target pixel (head, wrist) | seed 점 | cluster 수 | ATS target 점 | ATS target centroid (base, m) |
+|---|---|---:|---:|---:|---|
+| t4 init 0 call 4 | 1244, 8557 | 937 | 4 | 123 | (0.458, 0.192, 0.020) |
+| t5 init 0 call 2 | 708, 3566 | 708 | 3 | 63 | (0.248, −0.123, 0.025) |
+| t9 init 0 call 0 | 1179, 0 | 761 | 4 | 261 | (0.410, −0.136, 0.045) |
+| t7 init 0 call 3 (대조, 정답) | 548, 3494 | 700 | 4 | 236 | (0.399, −0.130, 0.048) |
+
+**(d) oracle 은 call 단위 상한이 아니다.** oracle 합계 415 는 L8H2 보다 15 call 많지만 t5 는 오히려 6 call 적다(18 대 24). oracle 은 "ATS 기하가 attention 을 얼마나 그대로 따르는가"의 참고이며 방법의 상한으로 읽지 않는다.
+
+**(e) 오류를 하나 찾고 고쳤다.** 위 발견(#5)의 fixture 문제다. 이 STEP 의 최종 숫자는 수정 후 export 로 낸 것이다. 이전 export 로 낸 중간 산출물은 superseded 로 보존했다.
+
+### 판정 (2026-10-13, 사용자)
+
+| # | 판정 |
+|---|---|
+| 1 | **SL4b 확정.** V11AB L8H2 를 사전 등록 규칙에 따라 유지한다(최고 후보 +1.5 %p < +10 %p 기준). dev rollout 48 / 50 은 **pi0.5-only** 결과로 따로 기록한다 |
+| 2 | **SL4c 는 원인 진단까지만 한다.** 측정: 단계별 target 점 생존, cluster 의 물체 구성과 크기, **실제로 적용된** 개도 한계, 탈락 사유. 병합과 8 cm 한계는 **가설로 둔다.** code · parameter 변경은 진단 후 별도 판정한다. 물리적 robot 사양을 잘못 옮긴 오류는 adapter 보정 후보이고, 성능을 위해 clustering · 선택 기준을 바꾸는 것은 **별도의 method 변경**이다 |
+| 3 | **SL5a 를 정의대로 병행 시작한다**: Panda 주입과 offline EE-delta ↔ joint 검증. **RB-Y1 golden 동일성**과 **무개입 bit 동일성**을 필수 조건으로 한다. SL4c 는 `85e6d9d1` 로 고정해(frozen worktree `.runtime/worktrees/sl4c-85e6d9d1`) SL5a 의 core 변경이 섞이지 않게 한다. live SL5b 는 SL5a 후에 판정한다 |
+
+### 측정하지 않은 것
+
+- 채택 후보의 full replay(ESDF 포함, task step 7): 채택 후보가 없어서 수행하지 않았다
+- t4 · t5 · t9 에서 oracle 의 ATS target cluster 가 seed 가 놓인 cluster 가 아닌 이유(위 대표 call 숫자만 있다) → SL4c
+- test split(init 5–49): 설계상 사용하지 않았다
+- 시간: replay latency 는 GPU 를 번갈아 써서 기준이 아니다
+- diagnostic grid 의 다른 denoise step · aggregation(grid 는 denoise 0 · `last` 로 고정)
+- 1 차 지표의 신뢰구간: call 이 episode 안에서 상관되므로 말하지 않는다
+
+### 열린 항목
+
+| # | 내용 | 영향 / 다음 |
+|---|---|---|
+| 1 | t4 · t5 · t9 에서 ATS 가 true bowl 을 고르지 못하는 단계와 기준(H1 병합, H2 8 cm 개도 한계 포함) | SL-4c 진단. 결과에 따라 adapter 보정(사양 매핑 오류) 또는 별도 method 변경 판정 |
+| 2 | 오선택이 closed loop 에서 true target 을 장애물로 남기는 비용 | SL-5 이후 online 측정 |
+| 3 | paired 비교는 task 별 episode 순서와 reset 횟수를 같게 유지해야 한다 | P2 설계에 반영 |
+| 4 | dev 는 50 episode 이며 신뢰구간을 말하지 않는다 | P2 이후 |
+
+### 되돌아올 지점 (SL4b)
+
+| 전환 신호 | 돌아와서 할 일 |
+|---|---|
+| SL-4c 진단이 Panda 사양(개도 한계 등)을 잘못 옮긴 것으로 나옴 | adapter 보정 후보. 보정 후 SL4b 지표를 같은 평가기로 다시 잰다 |
+| SL-4c 진단이 clustering · 선택 기준이 원인으로 나옴 | 그 기준 변경은 V11AB 의 method 변경이므로 사용자 판정(variant 로 분리, test 전 고정) |
+| test(init 5–49)를 열기 전에 cell 을 바꾸려는 요청 | 사전 등록 규칙(L8H2 유지)을 먼저 확인하고, 바꾸려면 새 사전 등록이 필요하다 |
+| 동일 scene 으로 paired 비교한 결과가 episode 순서에 민감함 | reset history 재현 규칙(위 #5)을 먼저 확인 |
