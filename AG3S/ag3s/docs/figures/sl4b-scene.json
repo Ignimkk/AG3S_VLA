@@ -1,0 +1,817 @@
+{
+ "best_candidate": "L12H3",
+ "best_candidate_rule": "highest primary count among the 16 candidates (no cell satisfies the rule)",
+ "baseline": "L8H2",
+ "pick_rule": "per task t4/t5/t9: L8H2 evaluation call with category wrong_instance; prefer calls the best candidate gets right, then approach, then lowest init, then lowest call_k. Reference row: task 7, init 0, middle approach call that L8H2 gets right",
+ "image": "recorded RGB (OpenCV rows = raw[::-1]). Cell panels: attention = the cell grid the replay attached (attention_grid_policy), block-normalised, attention_pixel_map(unmirror=True). Oracle panels (privileged reference, not a candidate): the attention IS the image-instant GT target segmentation (red fill). White contour = image-instant GT target segmentation (segP); orange contour = the instance holding the majority of the ATS target points when that is not the GT target; black dots = ATS target points projected with the recorded K, T_base_cam",
+ "panels": [
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t4_e0",
+   "call_k": 4,
+   "frame": 30,
+   "phase": "approach",
+   "camera": "head",
+   "source": "L8H2",
+   "category": "wrong_instance",
+   "majority": "plate_1",
+   "label_counts": {
+    "plate_1": 150
+   },
+   "centroid_err_mm": 382.60722747486716,
+   "target_points": 150,
+   "target_points_in_image": 150,
+   "argmax_patch_opencv": [
+    12,
+    11
+   ],
+   "block_sum": 0.001587440894354586,
+   "target_pixels_segP": 1244,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     6,
+     2
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t4_e0",
+   "call_k": 4,
+   "frame": 30,
+   "phase": "approach",
+   "camera": "head",
+   "source": "L12H3",
+   "category": "wrong_instance",
+   "majority": "cookies_1",
+   "label_counts": {
+    "cookies_1": 70
+   },
+   "centroid_err_mm": 242.012737506332,
+   "target_points": 70,
+   "target_points_in_image": 70,
+   "argmax_patch_opencv": [
+    8,
+    4
+   ],
+   "block_sum": 0.3675045371055603,
+   "target_pixels_segP": 1244,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     6,
+     2
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t4_e0",
+   "call_k": 4,
+   "frame": 30,
+   "phase": "approach",
+   "camera": "head",
+   "source": "oracle",
+   "category": "wrong_instance",
+   "majority": "glazed_rim_porcelain_ramekin_1",
+   "label_counts": {
+    "glazed_rim_porcelain_ramekin_1": 123
+   },
+   "centroid_err_mm": 458.9757935410747,
+   "target_points": 123,
+   "target_points_in_image": 123,
+   "argmax_patch_opencv": null,
+   "block_sum": 0.0,
+   "target_pixels_segP": 1244,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     6,
+     2
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t4_e0",
+   "call_k": 4,
+   "frame": 30,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "L8H2",
+   "category": "wrong_instance",
+   "majority": "plate_1",
+   "label_counts": {
+    "plate_1": 150
+   },
+   "centroid_err_mm": 382.60722747486716,
+   "target_points": 150,
+   "target_points_in_image": 73,
+   "argmax_patch_opencv": [
+    6,
+    13
+   ],
+   "block_sum": 0.9888033176212048,
+   "target_pixels_segP": 8557,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     6,
+     2
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t4_e0",
+   "call_k": 4,
+   "frame": 30,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "L12H3",
+   "category": "wrong_instance",
+   "majority": "cookies_1",
+   "label_counts": {
+    "cookies_1": 70
+   },
+   "centroid_err_mm": 242.012737506332,
+   "target_points": 70,
+   "target_points_in_image": 70,
+   "argmax_patch_opencv": [
+    7,
+    8
+   ],
+   "block_sum": 0.5978212952613831,
+   "target_pixels_segP": 8557,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     6,
+     2
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t4_e0",
+   "call_k": 4,
+   "frame": 30,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "oracle",
+   "category": "wrong_instance",
+   "majority": "glazed_rim_porcelain_ramekin_1",
+   "label_counts": {
+    "glazed_rim_porcelain_ramekin_1": 123
+   },
+   "centroid_err_mm": 458.9757935410747,
+   "target_points": 123,
+   "target_points_in_image": 40,
+   "argmax_patch_opencv": null,
+   "block_sum": 0.0,
+   "target_pixels_segP": 8557,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     6,
+     2
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t5_e0",
+   "call_k": 2,
+   "frame": 20,
+   "phase": "approach",
+   "camera": "head",
+   "source": "L8H2",
+   "category": "wrong_instance",
+   "majority": "akita_black_bowl_2",
+   "label_counts": {
+    "akita_black_bowl_2": 197,
+    "cookies_1": 1
+   },
+   "centroid_err_mm": 302.47830072039795,
+   "target_points": 198,
+   "target_points_in_image": 198,
+   "argmax_patch_opencv": [
+    7,
+    10
+   ],
+   "block_sum": 0.0016723218284653285,
+   "target_pixels_segP": 708,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     9,
+     11
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": true,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t5_e0",
+   "call_k": 2,
+   "frame": 20,
+   "phase": "approach",
+   "camera": "head",
+   "source": "L12H3",
+   "category": "correct",
+   "majority": "akita_black_bowl_1",
+   "label_counts": {
+    "akita_black_bowl_1": 246,
+    "glazed_rim_porcelain_ramekin_1": 51
+   },
+   "centroid_err_mm": 7.845014875911577,
+   "target_points": 297,
+   "target_points_in_image": 297,
+   "argmax_patch_opencv": [
+    6,
+    11
+   ],
+   "block_sum": 0.9864165782928467,
+   "target_pixels_segP": 708,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     9,
+     11
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": true,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t5_e0",
+   "call_k": 2,
+   "frame": 20,
+   "phase": "approach",
+   "camera": "head",
+   "source": "oracle",
+   "category": "wrong_instance",
+   "majority": "flat_stove_1",
+   "label_counts": {
+    "flat_stove_1": 63
+   },
+   "centroid_err_mm": 388.2675443283529,
+   "target_points": 63,
+   "target_points_in_image": 63,
+   "argmax_patch_opencv": null,
+   "block_sum": 0.0,
+   "target_pixels_segP": 708,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     9,
+     11
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": true,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t5_e0",
+   "call_k": 2,
+   "frame": 20,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "L8H2",
+   "category": "wrong_instance",
+   "majority": "akita_black_bowl_2",
+   "label_counts": {
+    "akita_black_bowl_2": 197,
+    "cookies_1": 1
+   },
+   "centroid_err_mm": 302.47830072039795,
+   "target_points": 198,
+   "target_points_in_image": 167,
+   "argmax_patch_opencv": [
+    9,
+    4
+   ],
+   "block_sum": 0.99736747175848,
+   "target_pixels_segP": 3566,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     9,
+     11
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": true,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t5_e0",
+   "call_k": 2,
+   "frame": 20,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "L12H3",
+   "category": "correct",
+   "majority": "akita_black_bowl_1",
+   "label_counts": {
+    "akita_black_bowl_1": 246,
+    "glazed_rim_porcelain_ramekin_1": 51
+   },
+   "centroid_err_mm": 7.845014875911577,
+   "target_points": 297,
+   "target_points_in_image": 297,
+   "argmax_patch_opencv": [
+    9,
+    5
+   ],
+   "block_sum": 0.010989010334014893,
+   "target_pixels_segP": 3566,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     9,
+     11
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": true,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t5_e0",
+   "call_k": 2,
+   "frame": 20,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "oracle",
+   "category": "wrong_instance",
+   "majority": "flat_stove_1",
+   "label_counts": {
+    "flat_stove_1": 63
+   },
+   "centroid_err_mm": 388.2675443283529,
+   "target_points": 63,
+   "target_points_in_image": 11,
+   "argmax_patch_opencv": null,
+   "block_sum": 0.0,
+   "target_pixels_segP": 3566,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     9,
+     11
+    ],
+    "argmax_on_target": true,
+    "head_argmax_on_target": true,
+    "wrist_argmax_on_target": true,
+    "target_visible": [
+     true,
+     true
+    ],
+    "cause": "grounding"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t9_e0",
+   "call_k": 0,
+   "frame": 10,
+   "phase": "approach",
+   "camera": "head",
+   "source": "L8H2",
+   "category": "wrong_instance",
+   "majority": "akita_black_bowl_2",
+   "label_counts": {
+    "akita_black_bowl_2": 234,
+    "flat_stove_1": 27
+   },
+   "centroid_err_mm": 371.2591914800378,
+   "target_points": 261,
+   "target_points_in_image": 261,
+   "argmax_patch_opencv": [
+    12,
+    11
+   ],
+   "block_sum": 0.24243949976516888,
+   "target_pixels_segP": 1179,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     10,
+     5
+    ],
+    "argmax_on_target": false,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": false,
+    "target_visible": [
+     true,
+     false
+    ],
+    "cause": "attention"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t9_e0",
+   "call_k": 0,
+   "frame": 10,
+   "phase": "approach",
+   "camera": "head",
+   "source": "L12H3",
+   "category": "no_target",
+   "majority": null,
+   "label_counts": {},
+   "centroid_err_mm": null,
+   "target_points": 0,
+   "target_points_in_image": 0,
+   "argmax_patch_opencv": [
+    5,
+    3
+   ],
+   "block_sum": 0.24495792388916016,
+   "target_pixels_segP": 1179,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     10,
+     5
+    ],
+    "argmax_on_target": false,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": false,
+    "target_visible": [
+     true,
+     false
+    ],
+    "cause": "attention"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t9_e0",
+   "call_k": 0,
+   "frame": 10,
+   "phase": "approach",
+   "camera": "head",
+   "source": "oracle",
+   "category": "wrong_instance",
+   "majority": "akita_black_bowl_2",
+   "label_counts": {
+    "akita_black_bowl_2": 234,
+    "flat_stove_1": 27
+   },
+   "centroid_err_mm": 371.2591914800378,
+   "target_points": 261,
+   "target_points_in_image": 261,
+   "argmax_patch_opencv": null,
+   "block_sum": 0.0,
+   "target_pixels_segP": 1179,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     10,
+     5
+    ],
+    "argmax_on_target": false,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": false,
+    "target_visible": [
+     true,
+     false
+    ],
+    "cause": "attention"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t9_e0",
+   "call_k": 0,
+   "frame": 10,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "L8H2",
+   "category": "wrong_instance",
+   "majority": "akita_black_bowl_2",
+   "label_counts": {
+    "akita_black_bowl_2": 234,
+    "flat_stove_1": 27
+   },
+   "centroid_err_mm": 371.2591914800378,
+   "target_points": 261,
+   "target_points_in_image": 261,
+   "argmax_patch_opencv": [
+    10,
+    10
+   ],
+   "block_sum": 0.5785136547638103,
+   "target_pixels_segP": 0,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     10,
+     5
+    ],
+    "argmax_on_target": false,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": false,
+    "target_visible": [
+     true,
+     false
+    ],
+    "cause": "attention"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t9_e0",
+   "call_k": 0,
+   "frame": 10,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "L12H3",
+   "category": "no_target",
+   "majority": null,
+   "label_counts": {},
+   "centroid_err_mm": null,
+   "target_points": 0,
+   "target_points_in_image": 0,
+   "argmax_patch_opencv": [
+    6,
+    4
+   ],
+   "block_sum": 0.35285115242004395,
+   "target_pixels_segP": 0,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     10,
+     5
+    ],
+    "argmax_on_target": false,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": false,
+    "target_visible": [
+     true,
+     false
+    ],
+    "cause": "attention"
+   }
+  },
+  {
+   "row_kind": "L8H2 misselection",
+   "stem": "libero_spatial_t9_e0",
+   "call_k": 0,
+   "frame": 10,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "oracle",
+   "category": "wrong_instance",
+   "majority": "akita_black_bowl_2",
+   "label_counts": {
+    "akita_black_bowl_2": 234,
+    "flat_stove_1": 27
+   },
+   "centroid_err_mm": 371.2591914800378,
+   "target_points": 261,
+   "target_points_in_image": 261,
+   "argmax_patch_opencv": null,
+   "block_sum": 0.0,
+   "target_pixels_segP": 0,
+   "cause_L8H2": {
+    "argmax_camera": "left_wrist",
+    "argmax_patch": [
+     10,
+     5
+    ],
+    "argmax_on_target": false,
+    "head_argmax_on_target": false,
+    "wrist_argmax_on_target": false,
+    "target_visible": [
+     true,
+     false
+    ],
+    "cause": "attention"
+   }
+  },
+  {
+   "row_kind": "L8H2 correct (reference task)",
+   "stem": "libero_spatial_t7_e0",
+   "call_k": 3,
+   "frame": 25,
+   "phase": "approach",
+   "camera": "head",
+   "source": "L8H2",
+   "category": "correct",
+   "majority": "akita_black_bowl_1",
+   "label_counts": {
+    "akita_black_bowl_1": 236
+   },
+   "centroid_err_mm": 5.346984818435037,
+   "target_points": 236,
+   "target_points_in_image": 236,
+   "argmax_patch_opencv": [
+    12,
+    11
+   ],
+   "block_sum": 2.3715703594717752e-05,
+   "target_pixels_segP": 548,
+   "cause_L8H2": null
+  },
+  {
+   "row_kind": "L8H2 correct (reference task)",
+   "stem": "libero_spatial_t7_e0",
+   "call_k": 3,
+   "frame": 25,
+   "phase": "approach",
+   "camera": "head",
+   "source": "L12H3",
+   "category": "correct",
+   "majority": "akita_black_bowl_1",
+   "label_counts": {
+    "akita_black_bowl_1": 236
+   },
+   "centroid_err_mm": 5.346984818435037,
+   "target_points": 236,
+   "target_points_in_image": 236,
+   "argmax_patch_opencv": [
+    6,
+    5
+   ],
+   "block_sum": 0.9685477614402771,
+   "target_pixels_segP": 548,
+   "cause_L8H2": null
+  },
+  {
+   "row_kind": "L8H2 correct (reference task)",
+   "stem": "libero_spatial_t7_e0",
+   "call_k": 3,
+   "frame": 25,
+   "phase": "approach",
+   "camera": "head",
+   "source": "oracle",
+   "category": "correct",
+   "majority": "akita_black_bowl_1",
+   "label_counts": {
+    "akita_black_bowl_1": 236
+   },
+   "centroid_err_mm": 5.346984818435037,
+   "target_points": 236,
+   "target_points_in_image": 236,
+   "argmax_patch_opencv": null,
+   "block_sum": 0.0,
+   "target_pixels_segP": 548,
+   "cause_L8H2": null
+  },
+  {
+   "row_kind": "L8H2 correct (reference task)",
+   "stem": "libero_spatial_t7_e0",
+   "call_k": 3,
+   "frame": 25,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "L8H2",
+   "category": "correct",
+   "majority": "akita_black_bowl_1",
+   "label_counts": {
+    "akita_black_bowl_1": 236
+   },
+   "centroid_err_mm": 5.346984818435037,
+   "target_points": 236,
+   "target_points_in_image": 236,
+   "argmax_patch_opencv": [
+    11,
+    9
+   ],
+   "block_sum": 0.9995885860221279,
+   "target_pixels_segP": 3494,
+   "cause_L8H2": null
+  },
+  {
+   "row_kind": "L8H2 correct (reference task)",
+   "stem": "libero_spatial_t7_e0",
+   "call_k": 3,
+   "frame": 25,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "L12H3",
+   "category": "correct",
+   "majority": "akita_black_bowl_1",
+   "label_counts": {
+    "akita_black_bowl_1": 236
+   },
+   "centroid_err_mm": 5.346984818435037,
+   "target_points": 236,
+   "target_points_in_image": 236,
+   "argmax_patch_opencv": [
+    11,
+    9
+   ],
+   "block_sum": 0.028456926345825195,
+   "target_pixels_segP": 3494,
+   "cause_L8H2": null
+  },
+  {
+   "row_kind": "L8H2 correct (reference task)",
+   "stem": "libero_spatial_t7_e0",
+   "call_k": 3,
+   "frame": 25,
+   "phase": "approach",
+   "camera": "left_wrist",
+   "source": "oracle",
+   "category": "correct",
+   "majority": "akita_black_bowl_1",
+   "label_counts": {
+    "akita_black_bowl_1": 236
+   },
+   "centroid_err_mm": 5.346984818435037,
+   "target_points": 236,
+   "target_points_in_image": 236,
+   "argmax_patch_opencv": null,
+   "block_sum": 0.0,
+   "target_pixels_segP": 3494,
+   "cause_L8H2": null
+  }
+ ]
+}

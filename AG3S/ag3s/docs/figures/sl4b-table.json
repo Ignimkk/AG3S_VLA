@@ -1,0 +1,969 @@
+{
+ "preregistration": {
+  "rows_sha256": "77dfe79044da5df9f26c3a0a5e332586b99ca376a15a4d352b8b5256dfe32a55",
+  "rows": [
+   {
+    "항목": "Dev 데이터",
+    "정의": "LIBERO Spatial task 0–9 × init state 0–4 (50 episodes). init 0은 SL3 run 재사용, init 1–4는 새 rollout(pi0.5-only, 같은 protocol)"
+   },
+   {
+    "항목": "Phase",
+    "정의": "SL3/SL4와 같은 정의(MuJoCo finger–target contact, lift z0+10 mm). **평가 phase = approach + grasp** (운반 단계는 attach가 없는 offline 한계로 제외)"
+   },
+   {
+    "항목": "1차 지표 (`target_correct`)",
+    "정의": "call별: ATS가 target을 냈고(has_target) **ATS target 점의 최근접 instance 다수결 = 진짜 target** 이고 centroid 오차 ≤ 30 mm 이면 1. 평가 phase call 전체에 대한 비율"
+   },
+   {
+    "항목": "2차 지표",
+    "정의": "pooled precision(10 mm), recall median, centroid 오차 median/p95, task별 `target_correct`"
+   },
+   {
+    "항목": "후보 cell",
+    "정의": "V11AB L8H2 + **선별 지표**(dev 50 episode attention에서 approach+grasp call의 head+wrist target mass 평균, un-mirror)의 상위 16개 cell. 진단 grid는 denoise 0, agg `last`(V11AB와 같은 집계)"
+   },
+   {
+    "항목": "채택 조건",
+    "정의": "후보 cell이 L8H2보다 1차 지표가 **≥ 10 %p 높고**, task별로 **10개 중 ≥ 6개 task에서 L8H2 이상**이면 \"Panda calibrated cell\" 후보로 사용자에게 제안. 여러 개면 1차 지표 최고, 동률이면 낮은 layer. 조건을 만족하는 cell이 없으면 L8H2 유지"
+   },
+   {
+    "항목": "원인 분리",
+    "정의": "L8H2의 오선택 call마다: attention argmax(head·wrist)가 진짜 target 위에 있었는지 → attention 원인 / grounding 원인 비율"
+   },
+   {
+    "항목": "참고(후보 아님)",
+    "정의": "GT target oracle seed(segmentation으로 target pixel만 attention=1) — ATS 기하 상한. privileged input으로 표시, 선택에 사용 안 함"
+   }
+  ]
+ },
+ "table": {
+  "header": [
+   "cell",
+   "role",
+   "sel. metric",
+   "rank (144)",
+   "correct / n",
+   "rate",
+   "gain %p",
+   "tasks >= L8H2",
+   "gain ok",
+   "tasks ok",
+   "satisfies",
+   "precision",
+   "recall med",
+   "centroid med / p95 mm",
+   "invalid calls"
+  ],
+  "rows": [
+   [
+    "L8H2",
+    "baseline",
+    "0.2417",
+    "2",
+    "400 / 607",
+    "0.659",
+    "-",
+    "-",
+    "-",
+    "-",
+    "-",
+    "0.705",
+    "0.688",
+    "14.3 / 400.3",
+    "0"
+   ],
+   [
+    "L12H3",
+    "candidate",
+    "0.2914",
+    "1",
+    "409 / 607",
+    "0.674",
+    "+1.5",
+    "6",
+    "False",
+    "True",
+    "False",
+    "0.826",
+    "0.700",
+    "13.9 / 460.1",
+    "0"
+   ],
+   [
+    "L12H4",
+    "candidate",
+    "0.2104",
+    "3",
+    "373 / 607",
+    "0.614",
+    "-4.4",
+    "5",
+    "False",
+    "False",
+    "False",
+    "0.704",
+    "0.644",
+    "15.2 / 472.8",
+    "0"
+   ],
+   [
+    "L5H5",
+    "candidate",
+    "0.2078",
+    "4",
+    "250 / 607",
+    "0.412",
+    "-24.7",
+    "4",
+    "False",
+    "False",
+    "False",
+    "0.519",
+    "0.253",
+    "49.9 / 457.6",
+    "0"
+   ],
+   [
+    "L9H5",
+    "candidate",
+    "0.1820",
+    "5",
+    "400 / 607",
+    "0.659",
+    "+0.0",
+    "7",
+    "False",
+    "True",
+    "False",
+    "0.797",
+    "0.682",
+    "14.1 / 396.4",
+    "0"
+   ],
+   [
+    "L9H1",
+    "candidate",
+    "0.1742",
+    "6",
+    "303 / 607",
+    "0.499",
+    "-16.0",
+    "3",
+    "False",
+    "False",
+    "False",
+    "0.586",
+    "0.574",
+    "23.8 / 467.4",
+    "0"
+   ],
+   [
+    "L8H3",
+    "candidate",
+    "0.1442",
+    "7",
+    "351 / 607",
+    "0.578",
+    "-8.1",
+    "5",
+    "False",
+    "False",
+    "False",
+    "0.636",
+    "0.648",
+    "15.8 / 501.7",
+    "0"
+   ],
+   [
+    "L10H0",
+    "candidate",
+    "0.1433",
+    "8",
+    "356 / 607",
+    "0.586",
+    "-7.2",
+    "4",
+    "False",
+    "False",
+    "False",
+    "0.650",
+    "0.630",
+    "15.7 / 458.8",
+    "0"
+   ],
+   [
+    "L7H3",
+    "candidate",
+    "0.1387",
+    "9",
+    "300 / 607",
+    "0.494",
+    "-16.5",
+    "3",
+    "False",
+    "False",
+    "False",
+    "0.621",
+    "0.580",
+    "22.6 / 458.3",
+    "0"
+   ],
+   [
+    "L12H1",
+    "candidate",
+    "0.1370",
+    "10",
+    "386 / 607",
+    "0.636",
+    "-2.3",
+    "5",
+    "False",
+    "False",
+    "False",
+    "0.722",
+    "0.697",
+    "14.4 / 385.7",
+    "0"
+   ],
+   [
+    "L12H2",
+    "candidate",
+    "0.1283",
+    "11",
+    "299 / 607",
+    "0.493",
+    "-16.6",
+    "4",
+    "False",
+    "False",
+    "False",
+    "0.571",
+    "0.532",
+    "26.9 / 465.1",
+    "0"
+   ],
+   [
+    "L6H2",
+    "candidate",
+    "0.1260",
+    "12",
+    "301 / 607",
+    "0.496",
+    "-16.3",
+    "3",
+    "False",
+    "False",
+    "False",
+    "0.558",
+    "0.587",
+    "23.9 / 463.1",
+    "0"
+   ],
+   [
+    "L3H1",
+    "candidate",
+    "0.1183",
+    "13",
+    "277 / 607",
+    "0.456",
+    "-20.3",
+    "4",
+    "False",
+    "False",
+    "False",
+    "0.527",
+    "0.483",
+    "46.6 / 464.2",
+    "0"
+   ],
+   [
+    "L10H3",
+    "candidate",
+    "0.1145",
+    "14",
+    "315 / 607",
+    "0.519",
+    "-14.0",
+    "4",
+    "False",
+    "False",
+    "False",
+    "0.668",
+    "0.626",
+    "18.1 / 537.8",
+    "0"
+   ],
+   [
+    "L5H4",
+    "candidate",
+    "0.1086",
+    "15",
+    "330 / 607",
+    "0.544",
+    "-11.5",
+    "4",
+    "False",
+    "False",
+    "False",
+    "0.605",
+    "0.616",
+    "17.9 / 459.1",
+    "0"
+   ],
+   [
+    "L8H7",
+    "candidate",
+    "0.1082",
+    "16",
+    "172 / 607",
+    "0.283",
+    "-37.6",
+    "3",
+    "False",
+    "False",
+    "False",
+    "0.486",
+    "0.000",
+    "157.8 / 532.4",
+    "0"
+   ],
+   [
+    "L15H0",
+    "candidate",
+    "0.1080",
+    "17",
+    "321 / 607",
+    "0.529",
+    "-13.0",
+    "4",
+    "False",
+    "False",
+    "False",
+    "0.608",
+    "0.578",
+    "18.8 / 472.8",
+    "0"
+   ],
+   [
+    "oracle",
+    "oracle (priv.)",
+    "-",
+    "-",
+    "415 / 607",
+    "0.684",
+    "-",
+    "-",
+    "-",
+    "-",
+    "-",
+    "0.746",
+    "0.659",
+    "14.9 / 470.3",
+    "0"
+   ],
+   [
+    "L8H2-f16",
+    "reference",
+    "-",
+    "-",
+    "400 / 607",
+    "0.659",
+    "-",
+    "-",
+    "-",
+    "-",
+    "-",
+    "0.705",
+    "0.688",
+    "14.3 / 400.3",
+    "1"
+   ]
+  ]
+ },
+ "adoption": {
+  "rule_text": "후보 cell이 L8H2보다 1차 지표가 **≥ 10 %p 높고**, task별로 **10개 중 ≥ 6개 task에서 L8H2 이상**이면 \"Panda calibrated cell\" 후보로 사용자에게 제안. 여러 개면 1차 지표 최고, 동률이면 낮은 layer. 조건을 만족하는 cell이 없으면 L8H2 유지",
+  "baseline": "L8H2",
+  "baseline_correct": 400,
+  "n": 607,
+  "candidates": [
+   {
+    "label": "L12H3",
+    "cell": [
+     12,
+     3
+    ],
+    "correct": 409,
+    "n": 607,
+    "rate": 0.6738056013179572,
+    "gain_correct": 9,
+    "gain_pp": 1.4827018121911038,
+    "gain_ok": false,
+    "tasks_ge_baseline": 6,
+    "tasks_ge_baseline_list": [
+     1,
+     4,
+     5,
+     6,
+     7,
+     9
+    ],
+    "tasks_ok": true,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L12H4",
+    "cell": [
+     12,
+     4
+    ],
+    "correct": 373,
+    "n": 607,
+    "rate": 0.6144975288303131,
+    "gain_correct": -27,
+    "gain_pp": -4.448105436573312,
+    "gain_ok": false,
+    "tasks_ge_baseline": 5,
+    "tasks_ge_baseline_list": [
+     2,
+     4,
+     5,
+     7,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L5H5",
+    "cell": [
+     5,
+     5
+    ],
+    "correct": 250,
+    "n": 607,
+    "rate": 0.41186161449752884,
+    "gain_correct": -150,
+    "gain_pp": -24.71169686985173,
+    "gain_ok": false,
+    "tasks_ge_baseline": 4,
+    "tasks_ge_baseline_list": [
+     4,
+     5,
+     7,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L9H5",
+    "cell": [
+     9,
+     5
+    ],
+    "correct": 400,
+    "n": 607,
+    "rate": 0.6589785831960461,
+    "gain_correct": 0,
+    "gain_pp": 0.0,
+    "gain_ok": false,
+    "tasks_ge_baseline": 7,
+    "tasks_ge_baseline_list": [
+     1,
+     3,
+     4,
+     5,
+     6,
+     7,
+     9
+    ],
+    "tasks_ok": true,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L9H1",
+    "cell": [
+     9,
+     1
+    ],
+    "correct": 303,
+    "n": 607,
+    "rate": 0.49917627677100496,
+    "gain_correct": -97,
+    "gain_pp": -15.980230642504118,
+    "gain_ok": false,
+    "tasks_ge_baseline": 3,
+    "tasks_ge_baseline_list": [
+     4,
+     5,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L8H3",
+    "cell": [
+     8,
+     3
+    ],
+    "correct": 351,
+    "n": 607,
+    "rate": 0.5782537067545305,
+    "gain_correct": -49,
+    "gain_pp": -8.072487644151565,
+    "gain_ok": false,
+    "tasks_ge_baseline": 5,
+    "tasks_ge_baseline_list": [
+     3,
+     4,
+     5,
+     7,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L10H0",
+    "cell": [
+     10,
+     0
+    ],
+    "correct": 356,
+    "n": 607,
+    "rate": 0.586490939044481,
+    "gain_correct": -44,
+    "gain_pp": -7.248764415156508,
+    "gain_ok": false,
+    "tasks_ge_baseline": 4,
+    "tasks_ge_baseline_list": [
+     0,
+     4,
+     5,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L7H3",
+    "cell": [
+     7,
+     3
+    ],
+    "correct": 300,
+    "n": 607,
+    "rate": 0.4942339373970346,
+    "gain_correct": -100,
+    "gain_pp": -16.474464579901152,
+    "gain_ok": false,
+    "tasks_ge_baseline": 3,
+    "tasks_ge_baseline_list": [
+     4,
+     5,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L12H1",
+    "cell": [
+     12,
+     1
+    ],
+    "correct": 386,
+    "n": 607,
+    "rate": 0.6359143327841845,
+    "gain_correct": -14,
+    "gain_pp": -2.3064250411861615,
+    "gain_ok": false,
+    "tasks_ge_baseline": 5,
+    "tasks_ge_baseline_list": [
+     2,
+     4,
+     5,
+     7,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L12H2",
+    "cell": [
+     12,
+     2
+    ],
+    "correct": 299,
+    "n": 607,
+    "rate": 0.4925864909390445,
+    "gain_correct": -101,
+    "gain_pp": -16.639209225700164,
+    "gain_ok": false,
+    "tasks_ge_baseline": 4,
+    "tasks_ge_baseline_list": [
+     4,
+     5,
+     7,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L6H2",
+    "cell": [
+     6,
+     2
+    ],
+    "correct": 301,
+    "n": 607,
+    "rate": 0.4958813838550247,
+    "gain_correct": -99,
+    "gain_pp": -16.30971993410214,
+    "gain_ok": false,
+    "tasks_ge_baseline": 3,
+    "tasks_ge_baseline_list": [
+     4,
+     7,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L3H1",
+    "cell": [
+     3,
+     1
+    ],
+    "correct": 277,
+    "n": 607,
+    "rate": 0.45634266886326197,
+    "gain_correct": -123,
+    "gain_pp": -20.263591433278417,
+    "gain_ok": false,
+    "tasks_ge_baseline": 4,
+    "tasks_ge_baseline_list": [
+     4,
+     5,
+     7,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L10H3",
+    "cell": [
+     10,
+     3
+    ],
+    "correct": 315,
+    "n": 607,
+    "rate": 0.5189456342668863,
+    "gain_correct": -85,
+    "gain_pp": -14.00329489291598,
+    "gain_ok": false,
+    "tasks_ge_baseline": 4,
+    "tasks_ge_baseline_list": [
+     1,
+     4,
+     5,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L5H4",
+    "cell": [
+     5,
+     4
+    ],
+    "correct": 330,
+    "n": 607,
+    "rate": 0.5436573311367381,
+    "gain_correct": -70,
+    "gain_pp": -11.532125205930807,
+    "gain_ok": false,
+    "tasks_ge_baseline": 4,
+    "tasks_ge_baseline_list": [
+     4,
+     5,
+     7,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L8H7",
+    "cell": [
+     8,
+     7
+    ],
+    "correct": 172,
+    "n": 607,
+    "rate": 0.2833607907742998,
+    "gain_correct": -228,
+    "gain_pp": -37.56177924217463,
+    "gain_ok": false,
+    "tasks_ge_baseline": 3,
+    "tasks_ge_baseline_list": [
+     4,
+     5,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   },
+   {
+    "label": "L15H0",
+    "cell": [
+     15,
+     0
+    ],
+    "correct": 321,
+    "n": 607,
+    "rate": 0.528830313014827,
+    "gain_correct": -79,
+    "gain_pp": -13.014827018121911,
+    "gain_ok": false,
+    "tasks_ge_baseline": 4,
+    "tasks_ge_baseline_list": [
+     4,
+     5,
+     7,
+     9
+    ],
+    "tasks_ok": false,
+    "satisfies_rule": false
+   }
+  ],
+  "satisfying": [],
+  "selected_by_rule": null,
+  "selected_cell": null,
+  "outcome": "no candidate satisfies the rule (rule: keep L8H2)"
+ },
+ "rollout_success": {
+  "success_per_task": {
+   "0": 5,
+   "1": 5,
+   "2": 5,
+   "3": 5,
+   "4": 5,
+   "5": 5,
+   "6": 4,
+   "7": 5,
+   "8": 5,
+   "9": 4
+  },
+  "success_per_init": {
+   "0": 10,
+   "1": 9,
+   "2": 10,
+   "3": 9,
+   "4": 10
+  },
+  "success_total": 48,
+  "episodes": 50,
+  "runs": {
+   "init0": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0",
+   "init1_4": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261013T092537_714c891415d9_sl4b-dev-pi05only-t0-9e1-4"
+  },
+  "grid_official_success": {
+   "0": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "1": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "2": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "3": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "4": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "5": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "6": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": false,
+    "4": true
+   },
+   "7": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "8": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "9": {
+    "0": true,
+    "1": false,
+    "2": true,
+    "3": true,
+    "4": true
+   }
+  }
+ },
+ "fixture_shift": {
+  "1": {
+   "before_fix": {
+    "n": 20,
+    "median_mm": 0.0,
+    "max_mm": 0.0,
+    "min_iou": 1.0
+   },
+   "after_fix": {
+    "n": 20,
+    "median_mm": 0.0,
+    "max_mm": 0.0,
+    "min_iou": 1.0
+   }
+  },
+  "2": {
+   "before_fix": {
+    "n": 20,
+    "median_mm": 10.356741420037322,
+    "max_mm": 57.70199936423457,
+    "min_iou": 0.7296380090497737
+   },
+   "after_fix": {
+    "n": 20,
+    "median_mm": 0.0,
+    "max_mm": 0.0,
+    "min_iou": 1.0
+   }
+  },
+  "3": {
+   "before_fix": {
+    "n": 20,
+    "median_mm": 8.25440416457545,
+    "max_mm": 35.375529722969226,
+    "min_iou": 0.7845171588188348
+   },
+   "after_fix": {
+    "n": 20,
+    "median_mm": 0.0,
+    "max_mm": 0.0,
+    "min_iou": 1.0
+   }
+  },
+  "4": {
+   "before_fix": {
+    "n": 20,
+    "median_mm": 13.406756801129006,
+    "max_mm": 23.111187068201474,
+    "min_iou": 0.62
+   },
+   "after_fix": {
+    "n": 20,
+    "median_mm": 0.0,
+    "max_mm": 0.0,
+    "min_iou": 1.0
+   }
+  }
+ },
+ "oracle_reference": {
+  "oracle": {
+   "primary": {
+    "correct": 415,
+    "n": 607,
+    "rate": 0.6836902800658978
+   },
+   "per_task": {
+    "0": {
+     "correct": 56,
+     "n": 66,
+     "rate": 0.8484848484848485
+    },
+    "1": {
+     "correct": 48,
+     "n": 65,
+     "rate": 0.7384615384615385
+    },
+    "2": {
+     "correct": 61,
+     "n": 61,
+     "rate": 1.0
+    },
+    "3": {
+     "correct": 57,
+     "n": 61,
+     "rate": 0.9344262295081968
+    },
+    "4": {
+     "correct": 0,
+     "n": 67,
+     "rate": 0.0
+    },
+    "5": {
+     "correct": 18,
+     "n": 48,
+     "rate": 0.375
+    },
+    "6": {
+     "correct": 60,
+     "n": 63,
+     "rate": 0.9523809523809523
+    },
+    "7": {
+     "correct": 53,
+     "n": 53,
+     "rate": 1.0
+    },
+    "8": {
+     "correct": 62,
+     "n": 68,
+     "rate": 0.9117647058823529
+    },
+    "9": {
+     "correct": 0,
+     "n": 55,
+     "rate": 0.0
+    }
+   }
+  }
+ }
+}
