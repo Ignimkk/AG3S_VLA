@@ -1,0 +1,735 @@
+{
+ "stages": [
+  "after_support",
+  "seeds",
+  "in_any_cluster",
+  "in_admissible_cluster",
+  "in_chosen_target"
+ ],
+ "oracle": {
+  "0": {
+   "n_eval_calls": 66,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.5504597274814806,
+    "seeds": 0.5476167919234902,
+    "in_any_cluster": 0.5374305605299542,
+    "in_admissible_cluster": 0.5374305605299542,
+    "in_chosen_target": 0.19757242371896758,
+    "support_excluded_frac": 0.4495402725185193
+   },
+   "fused_target_points_median": 223.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "admissible": 66
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 31,
+    "glazed_rim_porcelain_ramekin_1": 8,
+    "plate_1": 5,
+    "none": 14,
+    "robot": 6
+   },
+   "target_cluster_n_points_median": 136.5,
+   "target_cluster_target_label_fraction_median": 0.9060431166185707,
+   "target_cluster_narrowest_extent_mm_median": 32.790000000000006,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    27.1375,
+    44.89
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 32.6,
+   "split_triggered_calls": 66,
+   "split_succeeded_calls": 0,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 23,
+    "<no target>": 43
+   }
+  },
+  "1": {
+   "n_eval_calls": 65,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.6446244896642411,
+    "seeds": 0.6446244896642411,
+    "in_any_cluster": 0.6201565673081294,
+    "in_admissible_cluster": 0.6201565673081294,
+    "in_chosen_target": 0.3198743096044984,
+    "support_excluded_frac": 0.355375510335759
+   },
+   "fused_target_points_median": 211.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "admissible": 65
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 28,
+    "none": 22,
+    "glazed_rim_porcelain_ramekin_1": 14
+   },
+   "target_cluster_n_points_median": 152.0,
+   "target_cluster_target_label_fraction_median": 0.87248322147651,
+   "target_cluster_narrowest_extent_mm_median": 34.69,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    27.498,
+    46.419999999999995
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 34.8,
+   "split_triggered_calls": 65,
+   "split_succeeded_calls": 27,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 31,
+    "<no target>": 33,
+    "glazed_rim_porcelain_ramekin_1": 1
+   }
+  },
+  "2": {
+   "n_eval_calls": 61,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.6024611697882672,
+    "seeds": 0.6019416401068883,
+    "in_any_cluster": 0.5586073707568253,
+    "in_admissible_cluster": 0.5586073707568253,
+    "in_chosen_target": 0.2618961512741498,
+    "support_excluded_frac": 0.3975388302117328
+   },
+   "fused_target_points_median": 233.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "admissible": 61
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 33,
+    "none": 25,
+    "robot": 3
+   },
+   "target_cluster_n_points_median": 148.0,
+   "target_cluster_target_label_fraction_median": 0.9066666666666666,
+   "target_cluster_narrowest_extent_mm_median": 42.98,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    34.77,
+    51.91
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 44.7,
+   "split_triggered_calls": 61,
+   "split_succeeded_calls": 0,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 26,
+    "<no target>": 35
+   }
+  },
+  "3": {
+   "n_eval_calls": 61,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.7500103218876821,
+    "seeds": 0.7194026913414149,
+    "in_any_cluster": 0.7455887654294523,
+    "in_admissible_cluster": 0.7158186086916385,
+    "in_chosen_target": 0.17457536474505247,
+    "support_excluded_frac": 0.24998967811231787
+   },
+   "fused_target_points_median": 220.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "admissible": 58,
+    "not_graspable": 3
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 18,
+    "cookies_1": 20,
+    "none": 20,
+    "robot": 3
+   },
+   "target_cluster_n_points_median": 183.0,
+   "target_cluster_target_label_fraction_median": 0.8961038961038961,
+   "target_cluster_narrowest_extent_mm_median": 61.2,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    33.92,
+    76.25
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 50.8,
+   "split_triggered_calls": 61,
+   "split_succeeded_calls": 15,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 14,
+    "<no target>": 47
+   }
+  },
+  "4": {
+   "n_eval_calls": 67,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.9921218476338871,
+    "seeds": 0.9527702497257431,
+    "in_any_cluster": 0.9920689207788009,
+    "in_admissible_cluster": 0.0,
+    "in_chosen_target": 0.0,
+    "support_excluded_frac": 0.007878152366112926
+   },
+   "fused_target_points_median": 245.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "not_graspable": 67
+   },
+   "target_cluster_dominant_other_instance": {
+    "wooden_cabinet_1": 67
+   },
+   "target_cluster_n_points_median": 1900.0,
+   "target_cluster_target_label_fraction_median": 0.12243702401874634,
+   "target_cluster_narrowest_extent_mm_median": 224.06,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    211.499,
+    295.47499999999997
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 57.1,
+   "split_triggered_calls": 67,
+   "split_succeeded_calls": 0,
+   "chosen_target_dominant_instance": {
+    "glazed_rim_porcelain_ramekin_1": 34,
+    "<no target>": 26,
+    "flat_stove_1": 7
+   }
+  },
+  "5": {
+   "n_eval_calls": 48,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.9317490186030494,
+    "seeds": 0.9317490186030494,
+    "in_any_cluster": 0.928249849801615,
+    "in_admissible_cluster": 0.4681934959148171,
+    "in_chosen_target": 0.15071415375380234,
+    "support_excluded_frac": 0.06825098139695057
+   },
+   "fused_target_points_median": 211.5,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "not_graspable": 20,
+    "admissible": 24,
+    "destination_overlap": 4
+   },
+   "target_cluster_dominant_other_instance": {
+    "glazed_rim_porcelain_ramekin_1": 45,
+    "none": 3
+   },
+   "target_cluster_n_points_median": 265.0,
+   "target_cluster_target_label_fraction_median": 0.7347764328063241,
+   "target_cluster_narrowest_extent_mm_median": 75.39500000000001,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    61.085,
+    87.6635
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 66.1,
+   "split_triggered_calls": 46,
+   "split_succeeded_calls": 1,
+   "chosen_target_dominant_instance": {
+    "flat_stove_1": 12,
+    "<no target>": 28,
+    "akita_black_bowl_1": 8
+   }
+  },
+  "6": {
+   "n_eval_calls": 63,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.774482089224081,
+    "seeds": 0.7434520325873776,
+    "in_any_cluster": 0.7484354600620066,
+    "in_admissible_cluster": 0.7484354600620066,
+    "in_chosen_target": 0.37189583628451095,
+    "support_excluded_frac": 0.22551791077591896
+   },
+   "fused_target_points_median": 223.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "admissible": 63
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 34,
+    "none": 19,
+    "robot": 10
+   },
+   "target_cluster_n_points_median": 170.0,
+   "target_cluster_target_label_fraction_median": 0.9319727891156463,
+   "target_cluster_narrowest_extent_mm_median": 44.03,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    28.906000000000002,
+    52.028
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 44.6,
+   "split_triggered_calls": 63,
+   "split_succeeded_calls": 10,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 32,
+    "<no target>": 31
+   }
+  },
+  "7": {
+   "n_eval_calls": 53,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.9522114219279778,
+    "seeds": 0.9522114219279778,
+    "in_any_cluster": 0.9485164400676878,
+    "in_admissible_cluster": 0.7358236246114233,
+    "in_chosen_target": 0.4149646170874922,
+    "support_excluded_frac": 0.04778857807202212
+   },
+   "fused_target_points_median": 225.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "admissible": 42,
+    "not_graspable": 11
+   },
+   "target_cluster_dominant_other_instance": {
+    "flat_stove_1": 45,
+    "robot": 2,
+    "none": 6
+   },
+   "target_cluster_n_points_median": 238.0,
+   "target_cluster_target_label_fraction_median": 0.8817733990147784,
+   "target_cluster_narrowest_extent_mm_median": 55.35,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    44.114,
+    82.578
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 52.7,
+   "split_triggered_calls": 53,
+   "split_succeeded_calls": 0,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 24,
+    "<no target>": 29
+   }
+  },
+  "8": {
+   "n_eval_calls": 68,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.6085493208013654,
+    "seeds": 0.6007147745363328,
+    "in_any_cluster": 0.5824898709130713,
+    "in_admissible_cluster": 0.5824898709130713,
+    "in_chosen_target": 0.2714862775211141,
+    "support_excluded_frac": 0.3914506791986348
+   },
+   "fused_target_points_median": 206.5,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "admissible": 68
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 41,
+    "plate_1": 5,
+    "none": 12,
+    "robot": 7,
+    "akita_black_bowl_2": 2
+   },
+   "target_cluster_n_points_median": 140.0,
+   "target_cluster_target_label_fraction_median": 0.9341991341991343,
+   "target_cluster_narrowest_extent_mm_median": 33.95,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    27.4,
+    47.144
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 34.3,
+   "split_triggered_calls": 68,
+   "split_succeeded_calls": 6,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 32,
+    "<no target>": 36
+   }
+  },
+  "9": {
+   "n_eval_calls": 55,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 1.0,
+    "seeds": 0.92776877943922,
+    "in_any_cluster": 0.9991850785945546,
+    "in_admissible_cluster": 0.0,
+    "in_chosen_target": 0.0,
+    "support_excluded_frac": 0.0
+   },
+   "fused_target_points_median": 192.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "not_graspable": 55
+   },
+   "target_cluster_dominant_other_instance": {
+    "wooden_cabinet_1": 55
+   },
+   "target_cluster_n_points_median": 1484.0,
+   "target_cluster_target_label_fraction_median": 0.12676853423882287,
+   "target_cluster_narrowest_extent_mm_median": 203.62,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    163.11100000000002,
+    225.98399999999998
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 57.6,
+   "split_triggered_calls": 54,
+   "split_succeeded_calls": 0,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_2": 11,
+    "<no target>": 44
+   }
+  }
+ },
+ "L8H2": {
+  "0": {
+   "n_eval_calls": 66,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.5504597274814806,
+    "seeds": 0.2549973455338437,
+    "in_any_cluster": 0.5374305605299542,
+    "in_admissible_cluster": 0.5374305605299542,
+    "in_chosen_target": 0.19757242371896758,
+    "support_excluded_frac": 0.4495402725185193
+   },
+   "fused_target_points_median": 223.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "admissible": 66
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 31,
+    "glazed_rim_porcelain_ramekin_1": 8,
+    "plate_1": 5,
+    "none": 14,
+    "robot": 6
+   },
+   "target_cluster_n_points_median": 135.5,
+   "target_cluster_target_label_fraction_median": 0.9060431166185707,
+   "target_cluster_narrowest_extent_mm_median": 32.66,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    26.994999999999997,
+    44.715
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 32.6,
+   "split_triggered_calls": 66,
+   "split_succeeded_calls": 5,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 23,
+    "<no target>": 43
+   }
+  },
+  "1": {
+   "n_eval_calls": 65,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.6446244896642411,
+    "seeds": 0.3427267504232654,
+    "in_any_cluster": 0.6103436774952397,
+    "in_admissible_cluster": 0.6103436774952397,
+    "in_chosen_target": 0.2917842501363012,
+    "support_excluded_frac": 0.355375510335759
+   },
+   "fused_target_points_median": 211.0,
+   "calls_without_target_cluster": 1,
+   "target_cluster_admissibility_reason": {
+    "admissible": 64
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 27,
+    "none": 21,
+    "glazed_rim_porcelain_ramekin_1": 15
+   },
+   "target_cluster_n_points_median": 154.5,
+   "target_cluster_target_label_fraction_median": 0.8719141253581381,
+   "target_cluster_narrowest_extent_mm_median": 34.605000000000004,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    27.4785,
+    45.927499999999995
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 34.8,
+   "split_triggered_calls": 64,
+   "split_succeeded_calls": 25,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 28,
+    "<no target>": 36,
+    "glazed_rim_porcelain_ramekin_1": 1
+   }
+  },
+  "2": {
+   "n_eval_calls": 61,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.6024611697882672,
+    "seeds": 0.33595042990325047,
+    "in_any_cluster": 0.5494463292910587,
+    "in_admissible_cluster": 0.5494463292910587,
+    "in_chosen_target": 0.2215078955772894,
+    "support_excluded_frac": 0.3975388302117328
+   },
+   "fused_target_points_median": 233.0,
+   "calls_without_target_cluster": 1,
+   "target_cluster_admissibility_reason": {
+    "admissible": 60
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 36,
+    "none": 20,
+    "robot": 4
+   },
+   "target_cluster_n_points_median": 144.0,
+   "target_cluster_target_label_fraction_median": 0.9119183285849952,
+   "target_cluster_narrowest_extent_mm_median": 42.21,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    22.27,
+    48.171
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 44.7,
+   "split_triggered_calls": 60,
+   "split_succeeded_calls": 14,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 22,
+    "<no target>": 39
+   }
+  },
+  "3": {
+   "n_eval_calls": 61,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.7500103218876821,
+    "seeds": 0.34623293392734317,
+    "in_any_cluster": 0.7165982234255589,
+    "in_admissible_cluster": 0.6868280666877451,
+    "in_chosen_target": 0.16854246441864176,
+    "support_excluded_frac": 0.24998967811231787
+   },
+   "fused_target_points_median": 220.0,
+   "calls_without_target_cluster": 2,
+   "target_cluster_admissibility_reason": {
+    "admissible": 56,
+    "not_graspable": 3
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 18,
+    "cookies_1": 19,
+    "none": 20,
+    "robot": 2
+   },
+   "target_cluster_n_points_median": 183.0,
+   "target_cluster_target_label_fraction_median": 0.8955223880597015,
+   "target_cluster_narrowest_extent_mm_median": 61.84,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    33.326,
+    76.55899999999998
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 50.8,
+   "split_triggered_calls": 58,
+   "split_succeeded_calls": 13,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 13,
+    "<no target>": 47,
+    "plate_1": 1
+   }
+  },
+  "4": {
+   "n_eval_calls": 67,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.9921218476338871,
+    "seeds": 0.33592857668254283,
+    "in_any_cluster": 0.9622181745101442,
+    "in_admissible_cluster": 0.0,
+    "in_chosen_target": 0.0,
+    "support_excluded_frac": 0.007878152366112926
+   },
+   "fused_target_points_median": 245.0,
+   "calls_without_target_cluster": 2,
+   "target_cluster_admissibility_reason": {
+    "not_graspable": 65
+   },
+   "target_cluster_dominant_other_instance": {
+    "wooden_cabinet_1": 65
+   },
+   "target_cluster_n_points_median": 1900.0,
+   "target_cluster_target_label_fraction_median": 0.12352532963219987,
+   "target_cluster_narrowest_extent_mm_median": 224.06,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    211.436,
+    295.51
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 57.1,
+   "split_triggered_calls": 50,
+   "split_succeeded_calls": 0,
+   "chosen_target_dominant_instance": {
+    "<no target>": 25,
+    "plate_1": 39,
+    "glazed_rim_porcelain_ramekin_1": 3
+   }
+  },
+  "5": {
+   "n_eval_calls": 48,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.9317490186030494,
+    "seeds": 0.39409982643099156,
+    "in_any_cluster": 0.928249849801615,
+    "in_admissible_cluster": 0.4681934959148171,
+    "in_chosen_target": 0.17807852423060097,
+    "support_excluded_frac": 0.06825098139695057
+   },
+   "fused_target_points_median": 211.5,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "not_graspable": 20,
+    "admissible": 24,
+    "destination_overlap": 4
+   },
+   "target_cluster_dominant_other_instance": {
+    "glazed_rim_porcelain_ramekin_1": 45,
+    "none": 3
+   },
+   "target_cluster_n_points_median": 265.0,
+   "target_cluster_target_label_fraction_median": 0.7347764328063241,
+   "target_cluster_narrowest_extent_mm_median": 75.39500000000001,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    61.085,
+    87.6635
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 66.1,
+   "split_triggered_calls": 35,
+   "split_succeeded_calls": 2,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_2": 4,
+    "<no target>": 35,
+    "akita_black_bowl_1": 9
+   }
+  },
+  "6": {
+   "n_eval_calls": 63,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.774482089224081,
+    "seeds": 0.40246073577927427,
+    "in_any_cluster": 0.7248936411277628,
+    "in_admissible_cluster": 0.7248936411277628,
+    "in_chosen_target": 0.3364458190062608,
+    "support_excluded_frac": 0.22551791077591896
+   },
+   "fused_target_points_median": 223.0,
+   "calls_without_target_cluster": 2,
+   "target_cluster_admissibility_reason": {
+    "admissible": 61
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 33,
+    "none": 19,
+    "robot": 9
+   },
+   "target_cluster_n_points_median": 173.0,
+   "target_cluster_target_label_fraction_median": 0.9319727891156463,
+   "target_cluster_narrowest_extent_mm_median": 43.85,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    28.89,
+    52.08
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 44.6,
+   "split_triggered_calls": 63,
+   "split_succeeded_calls": 12,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 28,
+    "<no target>": 33,
+    "akita_black_bowl_2": 2
+   }
+  },
+  "7": {
+   "n_eval_calls": 53,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.9522114219279778,
+    "seeds": 0.26514197983370663,
+    "in_any_cluster": 0.9433991637549957,
+    "in_admissible_cluster": 0.7358236246114233,
+    "in_chosen_target": 0.4149646170874922,
+    "support_excluded_frac": 0.04778857807202212
+   },
+   "fused_target_points_median": 225.0,
+   "calls_without_target_cluster": 0,
+   "target_cluster_admissibility_reason": {
+    "admissible": 42,
+    "not_graspable": 11
+   },
+   "target_cluster_dominant_other_instance": {
+    "flat_stove_1": 45,
+    "robot": 2,
+    "none": 6
+   },
+   "target_cluster_n_points_median": 238.0,
+   "target_cluster_target_label_fraction_median": 0.8817733990147784,
+   "target_cluster_narrowest_extent_mm_median": 55.35,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    44.114,
+    82.578
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 52.7,
+   "split_triggered_calls": 52,
+   "split_succeeded_calls": 0,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 24,
+    "<no target>": 29
+   }
+  },
+  "8": {
+   "n_eval_calls": 68,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 0.6085493208013654,
+    "seeds": 0.280494319783114,
+    "in_any_cluster": 0.5739568280663031,
+    "in_admissible_cluster": 0.5739568280663031,
+    "in_chosen_target": 0.251455277498365,
+    "support_excluded_frac": 0.3914506791986348
+   },
+   "fused_target_points_median": 206.5,
+   "calls_without_target_cluster": 1,
+   "target_cluster_admissibility_reason": {
+    "admissible": 67
+   },
+   "target_cluster_dominant_other_instance": {
+    "main_table": 40,
+    "plate_1": 5,
+    "none": 12,
+    "robot": 7,
+    "akita_black_bowl_2": 2
+   },
+   "target_cluster_n_points_median": 141.0,
+   "target_cluster_target_label_fraction_median": 0.9333333333333333,
+   "target_cluster_narrowest_extent_mm_median": 33.94,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    27.39,
+    47.261999999999986
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 34.3,
+   "split_triggered_calls": 67,
+   "split_succeeded_calls": 6,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_1": 28,
+    "<no target>": 38,
+    "akita_black_bowl_2": 2
+   }
+  },
+  "9": {
+   "n_eval_calls": 55,
+   "stage_survival_mean_frac_of_fused_target": {
+    "after_support": 1.0,
+    "seeds": 0.36324172772397945,
+    "in_any_cluster": 0.9083917954445835,
+    "in_admissible_cluster": 0.0,
+    "in_chosen_target": 0.0,
+    "support_excluded_frac": 0.0
+   },
+   "fused_target_points_median": 192.0,
+   "calls_without_target_cluster": 5,
+   "target_cluster_admissibility_reason": {
+    "not_graspable": 50
+   },
+   "target_cluster_dominant_other_instance": {
+    "wooden_cabinet_1": 50
+   },
+   "target_cluster_n_points_median": 1487.0,
+   "target_cluster_target_label_fraction_median": 0.12864398187886444,
+   "target_cluster_narrowest_extent_mm_median": 204.04000000000002,
+   "target_cluster_narrowest_extent_mm_p05_p95": [
+    162.45350000000002,
+    227.02899999999997
+   ],
+   "target_only_narrowest_pca_extent_mm_median": 57.6,
+   "split_triggered_calls": 17,
+   "split_succeeded_calls": 0,
+   "chosen_target_dominant_instance": {
+    "akita_black_bowl_2": 6,
+    "<no target>": 48,
+    "plate_1": 1
+   }
+  }
+ },
+ "opening_mm": {
+  "panda": 78.0,
+  "rby1": 71.46
+ }
+}

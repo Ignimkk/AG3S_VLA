@@ -1,0 +1,180 @@
+{
+ "source": "outputs/verify/SL4c/raw/oracle",
+ "cases": {
+  "t4": {
+   "stem": "libero_spatial_t4_e0",
+   "call_k": 0,
+   "target_cluster": {
+    "id": 2,
+    "n_points": 1900,
+    "composition": {
+     "wooden_cabinet_1": 1516,
+     "akita_black_bowl_1": 200,
+     "akita_black_bowl_2": 167,
+     "main_table": 12,
+     "flat_stove_1": 4,
+     "none": 1
+    },
+    "pca_extents_mm": [
+     294.4,
+     356.9,
+     361.1
+    ],
+    "admissibility": {
+     "admissible": false,
+     "reason": "not_graspable",
+     "graspable": false,
+     "narrowest_extent_mm": 294.45,
+     "extents_mm": [
+      294.4,
+      356.9,
+      361.1
+     ],
+     "max_opening_mm": 78.0,
+     "destination_overlap": 0.0,
+     "overlaps_destination": false,
+     "destination_id": null
+    }
+   },
+   "target_only_pca_extents_mm": [
+    56.4,
+    107.4,
+    135.0
+   ],
+   "chosen_label_composition": {
+    "glazed_rim_porcelain_ramekin_1": 92,
+    "main_table": 9
+   }
+  },
+  "t9": {
+   "stem": "libero_spatial_t9_e0",
+   "call_k": 0,
+   "target_cluster": {
+    "id": 3,
+    "n_points": 1533,
+    "composition": {
+     "wooden_cabinet_1": 1333,
+     "akita_black_bowl_1": 183,
+     "main_table": 9,
+     "akita_black_bowl_2": 3,
+     "flat_stove_1": 3,
+     "other": 2
+    },
+    "pca_extents_mm": [
+     204.3,
+     272.5,
+     295.6
+    ],
+    "admissibility": {
+     "admissible": false,
+     "reason": "not_graspable",
+     "graspable": false,
+     "narrowest_extent_mm": 204.3,
+     "extents_mm": [
+      204.3,
+      272.5,
+      295.6
+     ],
+     "max_opening_mm": 78.0,
+     "destination_overlap": 0.0,
+     "overlaps_destination": false,
+     "destination_id": null
+    }
+   },
+   "target_only_pca_extents_mm": [
+    55.7,
+    105.1,
+    109.4
+   ],
+   "chosen_label_composition": {
+    "akita_black_bowl_2": 223,
+    "flat_stove_1": 33,
+    "none": 3,
+    "main_table": 2
+   }
+  },
+  "t5": {
+   "stem": "libero_spatial_t5_e0",
+   "call_k": 0,
+   "target_cluster": {
+    "id": 2,
+    "n_points": 292,
+    "composition": {
+     "akita_black_bowl_1": 229,
+     "glazed_rim_porcelain_ramekin_1": 55,
+     "main_table": 8
+    },
+    "pca_extents_mm": [
+     81.5,
+     109.3,
+     116.6
+    ],
+    "admissibility": {
+     "admissible": false,
+     "reason": "not_graspable",
+     "graspable": false,
+     "narrowest_extent_mm": 81.52,
+     "extents_mm": [
+      81.5,
+      109.3,
+      116.6
+     ],
+     "max_opening_mm": 78.0,
+     "destination_overlap": 0.0,
+     "overlaps_destination": false,
+     "destination_id": null
+    }
+   },
+   "target_only_pca_extents_mm": [
+    78.7,
+    107.6,
+    108.8
+   ],
+   "chosen_label_composition": {
+    "flat_stove_1": 62,
+    "main_table": 1
+   }
+  },
+  "t2": {
+   "stem": "libero_spatial_t2_e0",
+   "call_k": 0,
+   "target_cluster": {
+    "id": 4,
+    "n_points": 152,
+    "composition": {
+     "akita_black_bowl_1": 142,
+     "main_table": 10
+    },
+    "pca_extents_mm": [
+     46.8,
+     109.6,
+     110.7
+    ],
+    "admissibility": {
+     "admissible": true,
+     "reason": "admissible",
+     "graspable": true,
+     "narrowest_extent_mm": 46.76,
+     "extents_mm": [
+      46.8,
+      109.6,
+      110.7
+     ],
+     "max_opening_mm": 78.0,
+     "destination_overlap": 0.0,
+     "overlaps_destination": false,
+     "destination_id": null
+    }
+   },
+   "target_only_pca_extents_mm": [
+    43.6,
+    108.3,
+    109.0
+   ],
+   "chosen_label_composition": {
+    "akita_black_bowl_1": 142,
+    "main_table": 10
+   }
+  }
+ }
+}

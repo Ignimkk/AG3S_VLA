@@ -1,0 +1,141 @@
+{
+ "columns": [
+  "task",
+  "n",
+  "target cluster: reason (oracle)",
+  "dominant other instance",
+  "cluster pts (med)",
+  "narrowest mm (med)",
+  "target-only mm (med)",
+  "split trig/ok",
+  "support excl."
+ ],
+ "rows": [
+  [
+   "t0 between plate & ramekin",
+   66,
+   "admissible 66",
+   "main_table (31)",
+   "136",
+   "33",
+   "33",
+   "66/0",
+   "0.45"
+  ],
+  [
+   "t1 next to ramekin",
+   65,
+   "admissible 65",
+   "main_table (28)",
+   "152",
+   "35",
+   "35",
+   "65/27",
+   "0.36"
+  ],
+  [
+   "t2 table center",
+   61,
+   "admissible 61",
+   "main_table (33)",
+   "148",
+   "43",
+   "45",
+   "61/0",
+   "0.40"
+  ],
+  [
+   "t3 on cookie box",
+   61,
+   "admissible 58, not_graspable 3",
+   "cookies_1 (20)",
+   "183",
+   "61",
+   "51",
+   "61/15",
+   "0.25"
+  ],
+  [
+   "t4 in cabinet top drawer",
+   67,
+   "not_graspable 67",
+   "wooden_cabinet_1 (67)",
+   "1900",
+   "224",
+   "57",
+   "67/0",
+   "0.01"
+  ],
+  [
+   "t5 on ramekin",
+   48,
+   "not_graspable 20, admissible 24, destination_overlap 4",
+   "glazed_rim_porcelain_ramekin_1 (45)",
+   "265",
+   "75",
+   "66",
+   "46/1",
+   "0.07"
+  ],
+  [
+   "t6 next to cookie box",
+   63,
+   "admissible 63",
+   "main_table (34)",
+   "170",
+   "44",
+   "45",
+   "63/10",
+   "0.23"
+  ],
+  [
+   "t7 on stove",
+   53,
+   "admissible 42, not_graspable 11",
+   "flat_stove_1 (45)",
+   "238",
+   "55",
+   "53",
+   "53/0",
+   "0.05"
+  ],
+  [
+   "t8 next to plate",
+   68,
+   "admissible 68",
+   "main_table (41)",
+   "140",
+   "34",
+   "34",
+   "68/6",
+   "0.39"
+  ],
+  [
+   "t9 on wooden cabinet",
+   55,
+   "not_graspable 55",
+   "wooden_cabinet_1 (55)",
+   "1484",
+   "204",
+   "58",
+   "54/0",
+   "0.00"
+  ]
+ ],
+ "opening_limit": [
+  [
+   "Panda (applied)",
+   "78.0",
+   "robot_model",
+   "min over grippers of the finger collision geometry's inner-face gap along the closing axis, finger joints at the open limit",
+   "finger joints 0.04 + 0.04 m (origin gap 80 mm)"
+  ],
+  [
+   "RB-Y1 V11AB counterpart",
+   "71.46",
+   "robot_model",
+   "min over grippers of the finger collision geometry's inner-face gap along the closing axis, finger joints at the open limit",
+   "same rule"
+  ]
+ ]
+}
