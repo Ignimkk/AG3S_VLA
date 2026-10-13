@@ -1,0 +1,245 @@
+{
+ "vla_only_run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261013T170602_76ee59ba9c48_sl5b-smoke2-t0e0-vla_only",
+ "vla_v11ab_run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261013T170742_76ee59ba9c48_sl5b-smoke2-t0e0-vla_v11ab",
+ "stem": "libero_spatial_t0_e0",
+ "steps": [
+  10,
+  40,
+  70,
+  90,
+  114,
+  230
+ ],
+ "vla_only": {
+  "official_success": true,
+  "status": "success",
+  "env_steps_excluding_wait": 104
+ },
+ "vla_v11ab": {
+  "official_success": false,
+  "status": "max_steps",
+  "env_steps_excluding_wait": 220
+ },
+ "calls": [
+  {
+   "obs": 10,
+   "hold": false,
+   "max_da": 0.0
+  },
+  {
+   "obs": 15,
+   "hold": false,
+   "max_da": 0.1444140162717428
+  },
+  {
+   "obs": 20,
+   "hold": false,
+   "max_da": 0.4003385852000799
+  },
+  {
+   "obs": 25,
+   "hold": false,
+   "max_da": 0.3168732011477157
+  },
+  {
+   "obs": 30,
+   "hold": false,
+   "max_da": 0.35927898672688996
+  },
+  {
+   "obs": 35,
+   "hold": false,
+   "max_da": 0.4113765811806128
+  },
+  {
+   "obs": 40,
+   "hold": false,
+   "max_da": 0.5005257874948099
+  },
+  {
+   "obs": 45,
+   "hold": false,
+   "max_da": 0.6742143653815856
+  },
+  {
+   "obs": 50,
+   "hold": false,
+   "max_da": 0.7422505930265342
+  },
+  {
+   "obs": 55,
+   "hold": false,
+   "max_da": 0.4221809955793528
+  },
+  {
+   "obs": 60,
+   "hold": false,
+   "max_da": 1.1324851340264082
+  },
+  {
+   "obs": 65,
+   "hold": false,
+   "max_da": 0.40436514174949545
+  },
+  {
+   "obs": 70,
+   "hold": false,
+   "max_da": 0.5840790103435964
+  },
+  {
+   "obs": 75,
+   "hold": false,
+   "max_da": 0.8877223633891309
+  },
+  {
+   "obs": 80,
+   "hold": false,
+   "max_da": 0.9923604917779647
+  },
+  {
+   "obs": 85,
+   "hold": true,
+   "max_da": 0.9568232489786148
+  },
+  {
+   "obs": 90,
+   "hold": false,
+   "max_da": 1.599199087920606
+  },
+  {
+   "obs": 95,
+   "hold": false,
+   "max_da": 1.7115997527855633
+  },
+  {
+   "obs": 100,
+   "hold": false,
+   "max_da": 1.7406091030809878
+  },
+  {
+   "obs": 105,
+   "hold": false,
+   "max_da": 1.6503436478074789
+  },
+  {
+   "obs": 110,
+   "hold": true,
+   "max_da": 0.7360404833919406
+  },
+  {
+   "obs": 115,
+   "hold": true,
+   "max_da": 0.7154376658148766
+  },
+  {
+   "obs": 120,
+   "hold": true,
+   "max_da": 0.7775050606780052
+  },
+  {
+   "obs": 125,
+   "hold": true,
+   "max_da": 0.6959365822485686
+  },
+  {
+   "obs": 130,
+   "hold": true,
+   "max_da": 0.7066531619233192
+  },
+  {
+   "obs": 135,
+   "hold": true,
+   "max_da": 0.6924106920402646
+  },
+  {
+   "obs": 140,
+   "hold": true,
+   "max_da": 0.8355788831108213
+  },
+  {
+   "obs": 145,
+   "hold": true,
+   "max_da": 0.7369759482400418
+  },
+  {
+   "obs": 150,
+   "hold": true,
+   "max_da": 0.7767345597394705
+  },
+  {
+   "obs": 155,
+   "hold": true,
+   "max_da": 0.8555674285036325
+  },
+  {
+   "obs": 160,
+   "hold": true,
+   "max_da": 0.7761940845567584
+  },
+  {
+   "obs": 165,
+   "hold": true,
+   "max_da": 0.768610865324974
+  },
+  {
+   "obs": 170,
+   "hold": true,
+   "max_da": 0.7899786616159677
+  },
+  {
+   "obs": 175,
+   "hold": true,
+   "max_da": 0.7667070030893087
+  },
+  {
+   "obs": 180,
+   "hold": true,
+   "max_da": 0.8362055049973727
+  },
+  {
+   "obs": 185,
+   "hold": true,
+   "max_da": 0.759784743940711
+  },
+  {
+   "obs": 190,
+   "hold": true,
+   "max_da": 0.7633240882962347
+  },
+  {
+   "obs": 195,
+   "hold": true,
+   "max_da": 0.7988921345530748
+  },
+  {
+   "obs": 200,
+   "hold": true,
+   "max_da": 0.7641314375334978
+  },
+  {
+   "obs": 205,
+   "hold": true,
+   "max_da": 0.7665300910937787
+  },
+  {
+   "obs": 210,
+   "hold": true,
+   "max_da": 0.7479294313503504
+  },
+  {
+   "obs": 215,
+   "hold": true,
+   "max_da": 0.8340492268952131
+  },
+  {
+   "obs": 220,
+   "hold": true,
+   "max_da": 0.7494881043461561
+  },
+  {
+   "obs": 225,
+   "hold": true,
+   "max_da": 0.7792749838659764
+  }
+ ]
+}
