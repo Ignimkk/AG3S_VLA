@@ -173,6 +173,82 @@ def point_triangles_distance(p: np.ndarray, tri: np.ndarray, chunk: int = 1_000_
     return out
 
 
+def closest_points_pairwise(p: np.ndarray, a: np.ndarray, b: np.ndarray, c: np.ndarray) -> np.ndarray:
+    """Closest point of triangle ``m`` to point ``m`` (all (M, 3)); the algorithm of
+    :func:`closest_points_on_triangles` (Ericson 5.1.5) element-wise instead of all-pairs."""
+    p, a, b, c = (np.asarray(x, np.float64).reshape(-1, 3) for x in (p, a, b, c))
+    ab, ac = b - a, c - a
+    ap, bp, cp = p - a, p - b, p - c
+    dot = lambda x, y: np.einsum("mk,mk->m", x, y)  # noqa: E731
+    d1, d2 = dot(ab, ap), dot(ac, ap)
+    d3, d4 = dot(ab, bp), dot(ac, bp)
+    d5, d6 = dot(ab, cp), dot(ac, cp)
+    va, vb, vc = d3 * d6 - d5 * d4, d5 * d2 - d1 * d6, d1 * d4 - d3 * d2
+    with np.errstate(divide="ignore", invalid="ignore"):
+        denom = va + vb + vc
+        denom = np.where(np.abs(denom) < 1e-300, 1e-300, denom)
+        q = a + ab * (vb / denom)[:, None] + ac * (vc / denom)[:, None]
+        den = (d4 - d3) + (d5 - d6)
+        w = np.where(np.abs(den) < 1e-300, 0.0, (d4 - d3) / np.where(np.abs(den) < 1e-300, 1.0, den))
+        m = (va <= 0) & ((d4 - d3) >= 0) & ((d5 - d6) >= 0)
+        q = np.where(m[:, None], b + (c - b) * w[:, None], q)
+        den = d2 - d6
+        w = np.where(np.abs(den) < 1e-300, 0.0, d2 / np.where(np.abs(den) < 1e-300, 1.0, den))
+        m = (vb <= 0) & (d2 >= 0) & (d6 <= 0)
+        q = np.where(m[:, None], a + ac * w[:, None], q)
+        m = (d6 >= 0) & (d5 <= d6)
+        q = np.where(m[:, None], c, q)
+        den = d1 - d3
+        v = np.where(np.abs(den) < 1e-300, 0.0, d1 / np.where(np.abs(den) < 1e-300, 1.0, den))
+        m = (vc <= 0) & (d1 >= 0) & (d3 <= 0)
+        q = np.where(m[:, None], a + ab * v[:, None], q)
+        m = (d3 >= 0) & (d4 <= d3)
+        q = np.where(m[:, None], b, q)
+        m = (d1 <= 0) & (d2 <= 0)
+        q = np.where(m[:, None], a, q)
+    return q
+
+
+def point_triangles_distance_near(p: np.ndarray, tri: np.ndarray, max_distance: float,
+                                  pair_budget: int = 4_000_000) -> np.ndarray:
+    """``(N,)`` min distance from each point to a triangle soup, **exact where it is <= max_distance** and ``inf``
+    otherwise.
+
+    Candidate (point, triangle) pairs come from a KD-tree of the points: triangle ``t`` with centroid ``c_t`` and
+    circumradius ``r_t = max |v - c_t|`` can only be within ``max_distance`` of points with
+    ``|p - c_t| <= r_t + max_distance`` (triangle inequality through its closest point), so no pair that can be
+    within ``max_distance`` is skipped. Each candidate pair is then solved exactly
+    (:func:`closest_points_pairwise`, Ericson), ``pair_budget`` pairs at a time."""
+    from scipy.spatial import cKDTree
+
+    p = np.asarray(p, np.float64).reshape(-1, 3)
+    tri = np.asarray(tri, np.float64).reshape(-1, 3, 3)
+    out = np.full(len(p), np.inf)
+    if not len(tri) or not len(p):
+        return out
+    lo, hi = tri.min(1), tri.max(1)
+    # a triangle within max_distance of some point has its box inside the points' box grown by max_distance
+    keep = np.all((hi >= p.min(0) - max_distance) & (lo <= p.max(0) + max_distance), axis=1)
+    if not keep.any():
+        return out
+    tri = tri[keep]
+    centre = tri.mean(1)
+    radius = np.sqrt(((tri - centre[:, None]) ** 2).sum(-1)).max(1)
+    lists = cKDTree(p).query_ball_point(centre, radius + float(max_distance) + 1e-12)
+    counts = np.fromiter((len(x) for x in lists), np.int64, count=len(lists))
+    if not counts.sum():
+        return out
+    ti = np.repeat(np.arange(len(tri)), counts)
+    pi = np.concatenate([np.asarray(x, np.int64) for x in lists if len(x)])
+    step = max(1, int(pair_budget))
+    for s in range(0, len(pi), step):
+        a, b = pi[s:s + step], ti[s:s + step]
+        cp = closest_points_pairwise(p[a], tri[b, 0], tri[b, 1], tri[b, 2])
+        np.minimum.at(out, a, np.sqrt(((cp - p[a]) ** 2).sum(-1)))
+    out[out > max_distance] = np.inf
+    return out
+
+
 def sample_triangles(v: np.ndarray, f: np.ndarray, spacing: float, rng: np.random.Generator) -> np.ndarray:
     """Area-weighted uniform samples, ``ceil(area / spacing^2)`` points."""
     tri = v[f]
@@ -341,6 +417,22 @@ class SceneGT:
         out[out > max_distance] = np.inf
         return out
 
+    def exact_distance_near(self, points: np.ndarray, row: int, *, max_distance: float) -> np.ndarray:
+        """:meth:`exact_distance` for a small ``max_distance`` (e.g. 10 mm labels): the same exact distances where
+        they are <= ``max_distance`` (``inf`` beyond), with per-triangle box culling (SL4b evaluator)."""
+        pts = np.asarray(points, np.float64).reshape(-1, 3)
+        out = np.full((len(pts), len(self._instances)), np.inf)
+        for i, instance in enumerate(self._instances):
+            for g in instance.visual_geoms:
+                tri = self.triangles_base(row, g)
+                lo, hi = tri.reshape(-1, 3).min(0), tri.reshape(-1, 3).max(0)
+                lb = np.linalg.norm(np.maximum(0.0, np.maximum(lo - pts, pts - hi)), axis=1)
+                near = lb <= max_distance
+                if near.any():
+                    d = point_triangles_distance_near(pts[near], tri, max_distance)
+                    out[near, i] = np.minimum(out[near, i], d)
+        return out
+
     def inside(self, points: np.ndarray, row: int) -> np.ndarray:
         """``(N, I)`` -- point inside one of the instance's collision primitives (analytic)."""
         pts = np.asarray(points, np.float64).reshape(-1, 3)
@@ -411,5 +503,6 @@ def depth_residual(points_base: np.ndarray, depth_m: np.ndarray, K: np.ndarray, 
 
 
 __all__ = ["BOX", "CAPSULE", "CYLINDER", "ELLIPSOID", "Instance", "MESH", "PLANE", "ROLES", "SAMPLE_CAP", "SAMPLE_SPACING",
-           "SEGMENTS", "SPHERE", "Samples", "SceneGT", "VISUAL_GROUP", "closest_points_on_triangles", "depth_residual",
-           "point_triangles_distance", "primitive_mesh", "sample_triangles"]
+           "SEGMENTS", "SPHERE", "Samples", "SceneGT", "VISUAL_GROUP", "closest_points_on_triangles", "closest_points_pairwise",
+           "depth_residual", "point_triangles_distance", "point_triangles_distance_near", "primitive_mesh",
+           "sample_triangles"]
