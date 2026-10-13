@@ -42,5 +42,11 @@ worktree 의 diff 를 메인에 적용할 때: T47 세션에 먼저 알린다 (T
 - GPU: `( flock -w N 9 || exit 13; CMD ) 9>/tmp/ag3s-vla-gpu-validation.lock` + `nvidia-smi` 확인. TO 는 wall-clock 마감이라 closed-loop 중 GPU 공유 금지.
 - 작업 트리의 다른 세션 미커밋 파일 (T47–T57 · `doc/plans/develope_PLAN.md` · `.claude/worktrees/`) 은 commit 하지 않는다.
 
-## 5. A14 결과 (작업 종료 시 덧붙임)
-(아래에 추가)
+## 5. A14 결과 (2026-10-13 KST, 구현 종료 — 독립 검증 · 판정 전)
+worktree `.claude/worktrees/agent-a48b7e7cad456d7a9` (base ab9b3fba, 미커밋). 보고서 `AG3S/ag3s/docs/handoff/T46f-A14.impl.md` (worktree 안).
+적용용 patch: `results/development/20261013T091400+0900_ab9b3fba7316_a2f876957965/impl/T46f-A14/diff_final_with_new.patch` (새 파일 포함). raw: 같은 폴더 `audit.json` · `pytest_all.log`.
+- **변경 (기본 off, 기본 flag 에서 모델 bit 동일):** `--links gripper_wrist` = gripper + 양손 arm_5 · arm_6 · FT sensor. arm_5 URDF capsule (r 75 mm) → MJCF mesh 몸통 구, arm_6 도 같은 방식으로 보정, FT sensor 덮개 구 (role `wrist_cover`, URDF link `FT_sensor_<S>`). 비권한 구는 권한 손 MJCF 껍질을 keep-out 으로. FT 는 `clearance.PROTECTED_LINKS` (어떤 설정에서도 비권한). `--target-field-policy none` (예외 없음) 추가.
+- **audit (구현자 측정, 독립 검증 전):** arm_5 손 geom 침범 20.0 mm → 0 (손 geom 까지 ≥ 67 mm); 겉면 구 밖 비율 arm_5 98 % → 0.02 %, arm_6 96 % → 0.05–0.07 %, FT 100 % → 0.68 % (최대 1.9 mm, 손바닥 옆 틈); 넘침 ≤ 5.04 mm. **사전 기준 all_pass = false** — arm_6 L 표본 2 개가 0.97 mm (기준 0.5 mm, 사후 변경 안 함).
+- 테스트: 새 30 passed, 전체 CPU pytest 3075 passed / 11 skipped / 0 failed (CUDA test 8 개 미실행 — GPU 를 다른 세션이 사용). 구 수 1,122 (gripper 270 의 4.2 배), TO 시간 · closed-loop · 회귀 기준선 미측정.
+- **구현자가 남긴 판정 필요 7 건** (impl.md): ① FT 0.68 % 가 §8 "형상 누락" 인가 ② arm_6 L 기준 초과 (inset 0.5 mm 로 해결 가능, 구 84 → 99) ③ arm_6 보정은 task 범위 밖 추가 ④ 구 1,122 개 비용 (overflow 10 mm 면 ~686) ⑤ `none` 이 verdict 허용 접촉까지 없앰 ⑥ exclude_all 에서 FT 도 target-free 층을 읽음 ⑦ audit 침범 기준 0 → 0.001 mm (본 측정 전, FK 부동소수).
+- 다음 (새 세션 판정 뒤): V-T46f-A14 독립 검증 → 메인 적용 (T46e 와 충돌 해결, T47 에 알림) → T46f 단계 2 (진단 장면).
