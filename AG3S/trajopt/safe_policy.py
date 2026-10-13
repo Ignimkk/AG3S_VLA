@@ -333,7 +333,19 @@ class SafePolicy:
         clustering = getattr(getattr(self.ag3s, "config", None), "clustering", None)
         if getattr(clustering, "placed_no_seed_certify", False) is True:
             meta["placed_no_seed_certify"] = True
+        # T46e A13 — 같은 규약: oracle extent 서버일 때만 키가 생긴다. client 는 이 키를 보고 segmentation 을
+        # 안 보내는 자신을 접속 즉시 거절한다 (`SafeRemoteClient._check_server_metadata`).
+        if self._oracle_extent_on():
+            meta[wire.ORACLE_SEG_REQUIRED] = True
+            meta["target_extent"] = "oracle_visible"
+            meta["oracle_extent_identity"] = str(getattr(self.ag3s.config.esdf, "oracle_extent_identity",
+                                                         "pipeline"))
         return meta
+
+    def _oracle_extent_on(self) -> bool:
+        """T46e A13 — `esdf.target_extent == "oracle_visible"` on this server's AG3S."""
+        esdf = getattr(getattr(self.ag3s, "config", None), "esdf", None)
+        return getattr(esdf, "target_extent", "estimated") == "oracle_visible"
 
     def reset(self) -> None:
         """에피소드 경계. SEAM·AG3S·TO 의 내부 상태와 warm-start 를 **모두** 버린다.
@@ -831,6 +843,11 @@ class SafePolicy:
         set_placed = getattr(self.ag3s, "set_placed", None)
         if callable(set_placed):
             set_placed(self._latch.phase is GraspPhase.PLACED)
+        # T46e A13 — the request's GT segmentation, only for an oracle-extent server (off: not even unpacked).
+        if self._oracle_extent_on():
+            set_oracle = getattr(self.ag3s, "set_oracle_segmentation", None)
+            if callable(set_oracle):
+                set_oracle(wire.unpack_oracle_segmentation(scene))
 
         newest = max(observations, key=lambda o: o.timestamp)
         execution_path = self._execution_path(np.asarray(newest.robot_state, np.float64))

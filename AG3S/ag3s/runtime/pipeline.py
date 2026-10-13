@@ -189,6 +189,13 @@ class AG3S:
         #: SUBTASK-c: this request's subtask probabilities (`set_subtask`), handed to
         #: `TargetConfirm.note_subtask` by the next grounding call and consumed by it.
         self._subtask_p: Optional[dict[str, float]] = None
+        #: T46e A13: this request's GT segmentation (`set_oracle_segmentation`), consumed by the next
+        #: `_run`, and the episode's labelled surface samples. Both stay None unless
+        #: `esdf.target_extent == "oracle_visible"` (then the memory is made on first use).
+        self._oracle_pending: Optional[dict[str, Any]] = None
+        self._oracle_memory = None
+        #: The record of the last frame's oracle step (`stats["target_free"]["oracle"]`).
+        self._oracle_frame: Optional[dict[str, Any]] = None
         #: The **manipulated object** after the latest frame (T20): id, observation state
         #: (`visible | occluded | lost`) and last observed geometry, as `TargetConfirm` left it.
         #: Contact permission (`manipulated_link_margin`), target exclusion (`target_field_exclude`,
@@ -405,6 +412,11 @@ class AG3S:
         self._grasp_active = False
         self._grasp_latched = False
         self._subtask_p = None
+        # T46e A13: the oracle samples are per episode, like the TSDF.
+        self._oracle_pending = None
+        self._oracle_frame = None
+        if self._oracle_memory is not None:
+            self._oracle_memory.reset()
         self.frame_index = 0
         self._attached = None
         self._held_record = None
@@ -476,6 +488,82 @@ class AG3S:
         if p is not None and isinstance(p.get("p"), Mapping):
             p = p["p"]
         self._subtask_p = None if p is None else {str(k): float(v) for k, v in p.items()}
+
+    def set_oracle_segmentation(self, seg: Optional[Mapping[str, Any]]) -> None:
+        """T46e A13 — this request's GT segmentation, as `set_subtask` is given (consumed by the next frame).
+
+        `seg`: `{"labels": {camera_id value: (H, W) uint8 code image}, "meta": {"target", "codes", …}}`
+        (`wire.unpack_oracle_segmentation`, keyed like `CameraObservation.camera_id`) or None (no segmentation in
+        this request). Read only with `esdf.target_extent == "oracle_visible"`; otherwise ignored (nothing is
+        stored, every record and value is as before).
+        """
+        if getattr(self.config.esdf, "target_extent", "estimated") != "oracle_visible":
+            self._oracle_pending = None
+            return
+        self._oracle_pending = None if seg is None else dict(seg)
+
+    def _oracle_update(self, observations) -> dict[str, Any]:
+        """T46e — fold this request's segmentation into the episode's samples. Returns the frame record."""
+        from AG3S.ag3s.runtime.oracle_segmentation import OracleMemory, OracleView
+
+        seg, self._oracle_pending = self._oracle_pending, None
+        cfg = self.config.esdf
+        if self._oracle_memory is None:
+            fine = float(getattr(cfg, "fine_voxel_size", 0.0) or cfg.voxel_size)
+            max_d = float(getattr(cfg, "oracle_max_dist_voxels", 6.0)) * fine
+            # cell = half a fine voxel; ROI margin ≥ 2 × the candidate reach (`oracle_visible_split`); carving
+            # tolerance = two fine voxels (a sample is dropped only when a ray clearly passed beyond it).
+            self._oracle_memory = OracleMemory(cell=0.5 * fine, roi_margin=2.0 * max_d + fine,
+                                               carve_tol=2.0 * fine, depth_min=float(cfg.depth_min),
+                                               depth_max=float(cfg.depth_max),
+                                               # the truncation band of the TSDF the fine tiers read
+                                               band_depth=float(cfg.fine_truncation))
+        mem = self._oracle_memory
+        rec: dict[str, Any] = {"segmentation": seg is not None}
+        if seg is None or not observations:
+            rec["memory"] = {"n_samples": len(mem), "update": mem.n_updates, "updated": False}
+            return rec
+        labels = dict(seg.get("labels") or {})
+        meta = dict(seg.get("meta") or {})
+        scale = float(self.config.pointcloud.depth_scale)
+        views = []
+        for obs in observations:
+            cam_id = getattr(obs, "camera_id", None)
+            key = cam_id.value if cam_id is not None else str(getattr(obs, "name", ""))
+            lab = labels.get(key)
+            if lab is None or getattr(obs, "depth", None) is None:
+                continue
+            T = (np.asarray(obs.resolve_T_base_cam(self.robot_model), np.float64)
+                 if hasattr(obs, "resolve_T_base_cam") else np.asarray(obs.T_base_cam, np.float64))
+            views.append(OracleView(depth_m=np.asarray(obs.depth, np.float64) * scale,
+                                    K=np.asarray(obs.camera_intrinsics, np.float64), T_base_cam=T,
+                                    labels=np.asarray(lab), name=key))
+        rec["cameras"] = [v.name for v in views]
+        rec["target"] = meta.get("target")
+        t0 = time.monotonic()
+        rec["memory"] = {**mem.update(views, legend=meta.get("codes")), "updated": True,
+                         "update_ms": round((time.monotonic() - t0) * 1e3, 3)}
+        return rec
+
+    def _oracle_evidence(self, geometry, ball=None):
+        """T46e — `(OracleVisibleEvidence | None, record)` for this frame's target-free layer.
+
+        Which object: `esdf.oracle_extent_identity` — `pipeline` = the object the manipulated geometry lies on
+        (`OracleMemory.instance_of`, nearest sample within one fusion voxel, majority ≥ ½), `gt` = the GT target.
+        None (→ the estimated extent this frame) when there is no segmentation memory, no geometry, the object is
+        not resolved or it has no visible sample yet; the record says why.
+        """
+        from AG3S.ag3s.runtime.oracle_segmentation import oracle_evidence
+
+        cfg = self.config.esdf
+        ev, rec = oracle_evidence(
+            self._oracle_memory, np.zeros((0, 3)) if geometry is None else geometry.points,
+            radius=float(self.config.timing.fusion_voxel_size),
+            identity=str(getattr(cfg, "oracle_extent_identity", "pipeline")),
+            max_dist_voxels=float(getattr(cfg, "oracle_max_dist_voxels", 6.0)),
+            # the support guard = the ball's z_min (the same table protection as `ball` / `ball_owned`)
+            z_floor=None if ball is None else float(ball.z_min))
+        return ev, {**dict(self._oracle_frame or {}), **rec}
 
     @property
     def subtask_label(self) -> Optional[str]:
@@ -1672,6 +1760,10 @@ class AG3S:
                 cameras = self._depth_cameras_from(
                     observations, depth, camera_intrinsics, T_base_cam, robot_state)
                 self._frame_depth_masks = []
+                # T46e A13: fold this request's GT segmentation into the episode's samples (every frame,
+                # target or not — the TSDF accumulates every frame too). Off: not called, nothing stored.
+                if getattr(cfg.esdf, "target_extent", "estimated") == "oracle_visible":
+                    self._oracle_frame = self._oracle_update(observations)
                 # T44 I1: the non-target evidence `ball_owned` compares against — computed only
                 # when that exclusion is on (the default `ball` never builds it: same calls as before).
                 # T44c A5: the target-free coarse tier reads the same evidence (shared coarse voxels
@@ -2654,6 +2746,15 @@ class AG3S:
             # the record (`stats["target_free"]["nontarget"]`): the coarse tier's evidence count stays
             # `n_points`; the fine `ball_owned` evidence is `n_points_owned`.
             nontarget = {**nontarget, "evidence": f1, "n_points_owned": int(len(owned_nontarget))}
+        # T46e A13 — the GT extent of the fine target-free layer (`esdf.target_extent == "oracle_visible"` only).
+        oracle_evidence = None
+        oracle_record = None
+        if getattr(cfg, "target_extent", "estimated") == "oracle_visible":
+            if target_free_points is None:
+                oracle_record = {**dict(self._oracle_frame or {}), "applied": False,
+                                 "why": "no_target_free_layer"}
+            else:
+                oracle_evidence, oracle_record = self._oracle_evidence(target, target_free_ball)
         support_evidence = (None if support_cloud is None or target_free_ball is None
                             else self._support_seed_evidence(support_cloud, support_surfaces,
                                                              target_free_ball))
@@ -2701,8 +2802,15 @@ class AG3S:
                                              if support_evidence is not None else {}),
                                           # T46 F1: only with `nontarget_evidence == "surface"`.
                                           **({"owned_nontarget_points": owned_nontarget}
-                                             if owned_nontarget is not None else {}))
+                                             if owned_nontarget is not None else {}),
+                                          # T46e A13: only with `target_extent == "oracle_visible"` and samples.
+                                          **({"oracle_evidence": oracle_evidence}
+                                             if oracle_evidence is not None else {}))
         self._record_geometry_version(field, target, frame_index, nontarget)
+        if oracle_record is not None:
+            stats = getattr(field, "stats", None)
+            if isinstance(stats, dict) and isinstance(stats.get("target_free"), dict):
+                stats["target_free"]["oracle"] = oracle_record
         notes = []
         if window_request is not None:
             notes = self._window_query_report(

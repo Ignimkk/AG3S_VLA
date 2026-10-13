@@ -26,6 +26,8 @@
 | `ag3s/seq` | 요청 일련번호. 응답에 그대로 돌아오고, 오래된 응답을 버리는 근거가 된다 |
 | `ag3s/exec_feedback` | **직전 청크의 실행 사실** (T18). 아래 |
 | `ag3s/policy_seed` | **선택.** 정책 RNG seed (int, T39). 서버가 이 요청의 `policy.infer` 직전에 정책 RNG 를 `jax.random.key(seed)` 로 다시 놓는다. 아래 |
+| `ag3s/oracle_seg/<cam>` | **선택 · 진단 (T46e A13).** (H, W) uint8 GT code 영상 (`runtime.oracle_segmentation` 의 표: 0 없음·로봇 · 1 GT target · 2 정적 · ≥3 다른 잡을 물체). 시뮬레이터 client 가 `oracle_target=` 일 때만 싣는다. 서버는 `esdf.target_extent = "oracle_visible"` 일 때만 읽는다 — 없으면 off |
+| `ag3s/oracle_seg_meta` | **선택 (T46e).** `{"version", "target", "codes": {물체: code}}` — `oracle_seg/<cam>` 과 함께만 |
 
 카메라마다 `robot_state` 를 따로 싣는 것이 이 형식의 핵심이다. 손목 카메라는 팔과 함께
 움직이므로 80 ms 전 프레임은 80 ms 전 자세에 놓여야 한다. 하나의 `q_now` 로 세 대를 변환하면
@@ -281,6 +283,7 @@ __all__ = [
     "make_reason", "gate_decision", "unpack_verdict_reasons", "derive_verdict_reasons",
     "POLICY_SEED", "POLICY_SEED_LIMIT", "check_policy_seed", "unpack_policy_seed",
     "unpack_policy_seed_echo",
+    "ORACLE_SEG", "ORACLE_SEG_META", "ORACLE_SEG_REQUIRED", "unpack_oracle_segmentation",
 ]
 
 PREFIX = "ag3s/"
@@ -330,6 +333,13 @@ POLICY_SEED = "policy_seed"
 #: seed 의 상한 (배타). `jax.random.key` 는 64 비트도 받지만 x64 가 꺼진 JAX 에서 상위 비트가 어떻게
 #: 접히는지에 기대지 않는다 — O1 의 seed 는 `10·ep + rep` (≈ 2·10⁴) 이다.
 POLICY_SEED_LIMIT = 2 ** 32
+
+#: 요청 키 (`ag3s/` 접두 뒤) — **T46e A13 GT segmentation** (진단 oracle). `oracle_seg/<cam>` = uint8 code 영상,
+#: `oracle_seg_meta` = `{"version", "target", "codes"}`. 둘 다 `pack_request(oracle_seg=...)` 를 줬을 때만 생긴다.
+ORACLE_SEG = "oracle_seg"
+ORACLE_SEG_META = "oracle_seg_meta"
+#: 서버 metadata 키 — 이 서버가 GT segmentation 을 **요구한다** (`esdf.target_extent = "oracle_visible"`). 켰을 때만 실린다.
+ORACLE_SEG_REQUIRED = "oracle_segmentation_required"
 
 #: HOLD 사유의 종류. `SafeRemoteClient.last_ipc` 의 값 중 `ok` 를 뺀 것과 같다 — 사유를 새로
 #: 지어내지 않고 로컬이 이미 쓰는 이름을 그대로 싣는다.
@@ -422,7 +432,9 @@ def pack_request(obs: dict[str, Any], *, cameras: Sequence[str],
                  exec_feedback: Optional[dict[str, Any]] = None,
                  render_stamps: Optional[dict[str, float]] = None,
                  stamp_mode: Optional[str] = None,
-                 policy_seed: Optional[int] = None) -> dict[str, Any]:
+                 policy_seed: Optional[int] = None,
+                 oracle_seg: Optional[dict[str, np.ndarray]] = None,
+                 oracle_seg_meta: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     """정책 관측에 AG3S 가 필요한 것을 더한다. `obs` 는 제자리에서 바뀌지 않는다.
 
     `exec_feedback` 은 `make_exec_feedback` / `no_exec_feedback` 의 결과다. **`None` 이면 키를
@@ -434,6 +446,9 @@ def pack_request(obs: dict[str, Any], *, cameras: Sequence[str],
 
     `policy_seed` (T39) 도 **주었을 때만** `ag3s/policy_seed` 가 생긴다 — `None` 이면 요청이 T39 전과
     바이트까지 같다. 값은 `check_policy_seed` 로 검사한다 (보내기 전에 죽는다).
+
+    `oracle_seg` (T46e A13, 진단) — `{cam: (H, W) uint8 code 영상}` — 도 **주었을 때만** `oracle_seg/<cam>` 과
+    `oracle_seg_meta` 가 생긴다. 영상 크기가 그 카메라의 depth 와 다르면 보내기 전에 죽는다.
     """
     if stamp_mode is not None and stamp_mode not in STAMP_MODES:
         raise ValueError(f"stamp_mode must be one of {STAMP_MODES}, got {stamp_mode!r}")
@@ -459,6 +474,13 @@ def pack_request(obs: dict[str, Any], *, cameras: Sequence[str],
         out[f"{PREFIX}stamp/{cam}"] = float(stamps[cam])
         if render_stamps is not None:
             out[f"{PREFIX}render_stamp/{cam}"] = float(render_stamps[cam])
+    if oracle_seg is not None:
+        for cam in cameras:
+            lab = np.asarray(oracle_seg[cam])
+            if lab.shape != np.asarray(depth[cam]).shape:
+                raise ValueError(f"oracle_seg/{cam} {lab.shape} != depth {np.asarray(depth[cam]).shape}")
+            out[f"{PREFIX}{ORACLE_SEG}/{cam}"] = lab.astype(np.uint8)
+        out[PREFIX + ORACLE_SEG_META] = dict(oracle_seg_meta or {})
     return out
 
 
@@ -491,6 +513,25 @@ def unpack_policy_seed_echo(response: dict[str, Any]) -> Optional[int]:
     """응답의 seed 회신 (T39). 서버가 그 요청에 seed 를 **적용했을 때만** 있다. 없으면 `None`."""
     value = response.get(POLICY_SEED)
     return None if value is None else int(value)
+
+
+def unpack_oracle_segmentation(scene: dict[str, Any]) -> Optional[dict[str, Any]]:
+    """T46e A13 — the request's GT segmentation, keyed like `CameraObservation.camera_id` (the same mount table as
+    `unpack_camera_observations`): `{"labels": {camera_id value: (H, W) uint8}, "meta": {...}}`. `None` when the
+    request carries none (an old client, or a client without `oracle_target`) — the server then runs without it.
+    """
+    from AG3S.ag3s.experiments.sources.mujoco_source import CAMERA_MOUNTS
+
+    labels = {}
+    for cam in scene.get("cameras", ()) or ():
+        lab = scene.get(f"{ORACLE_SEG}/{cam}")
+        if lab is None:
+            continue
+        _, camera_id = CAMERA_MOUNTS.get(cam, (None, cam))
+        labels[str(camera_id)] = np.asarray(lab, np.uint8)
+    if not labels:
+        return None
+    return {"labels": labels, "meta": dict(scene.get(ORACLE_SEG_META) or {})}
 
 
 def unpack_stamps(scene: dict[str, Any]) -> dict[str, Any]:

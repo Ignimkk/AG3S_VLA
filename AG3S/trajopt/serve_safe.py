@@ -829,10 +829,15 @@ def target_exclusion_section(args) -> dict:
                       # T46 F1 · F2 (given flags only: absent = config default, bit-identical)
                       ("nontarget_evidence", "nontarget_evidence"),
                       ("nontarget_shell_voxels", "nontarget_shell_voxels"),
-                      ("owned_ambiguous", "owned_ambiguous")):
+                      ("owned_ambiguous", "owned_ambiguous"),
+                      # T46e A13 (given flags only: absent = config default `estimated`, bit-identical)
+                      ("oracle_max_dist_voxels", "oracle_max_dist_voxels"),
+                      ("oracle_extent_identity", "oracle_extent_identity")):
         v = getattr(args, flag, None)
         if v is not None:
             out[key] = v
+    if getattr(args, "target_extent", None) not in (None, "estimated"):
+        out["target_extent"] = str(args.target_extent).replace("-", "_")
     return out
 # T44 I1 (A1) — end
 
@@ -1123,6 +1128,15 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
             logging.warning("AG3S T46 — nontarget_evidence = %s (shell %.2f voxels) · owned_ambiguous = %s "
                             "(ball_owned 미세 target-free 계층만)", e.nontarget_evidence,
                             e.nontarget_shell_voxels, e.owned_ambiguous)
+        if e.target_extent == "oracle_visible":
+            # T46e A13 — 진단 oracle 서버다. 기록 (`target_free.oracle`) · metadata 와 함께 크게.
+            logging.warning("!!! AG3S T46e — target_extent = oracle_visible (identity %s · max_dist %.2f voxels): "
+                            "미세 target-free 계층을 client 의 GT segmentation 으로 짓는다 (진단 상한, 제안이 아니다). "
+                            "client 는 --safe-oracle-seg 로 떠야 한다 !!!", e.oracle_extent_identity,
+                            e.oracle_max_dist_voxels)
+            if e.target_free_coarse:
+                logging.warning("AG3S T46e — target_free_coarse 도 켜져 있다: 거친 target-free 계층은 oracle 이 아니라 "
+                                "target_exclusion = %s 그대로다", e.target_exclusion)
     # T44e A9 — begin
     if contact:
         lost = {k: getattr(ag3s.config.contact, k) for k, v in contact.items()
@@ -1542,6 +1556,22 @@ def build_parser() -> argparse.ArgumentParser:
                          "esdf.owned_ambiguous) 지우나 (remove). 미세 target-free 계층만. "
                          "--target-exclusion ball-owned 와 함께만")
     # T46 F1 · F2 — end
+    # T46e A13 — begin
+    ap.add_argument("--target-extent", choices=("estimated", "oracle-visible"), default=None,
+                    help="T46e — 미세 target-free 계층의 target 범위. estimated (기본: config esdf.target_extent) = "
+                         "--target-exclusion (+ F1 · F2) 의 추정 그대로. oracle-visible = **진단 상한**: client 가 보낸 "
+                         "GT segmentation (pi05_infer --safe-oracle-seg) 으로 이 episode 에 보인 표면 표본을 모으고, "
+                         "가장 가까운 표본이 지울 물체인 seed 만 지운다 (이웃 과일 · table · crate 는 남는다). "
+                         "공 · 창 · 권한 · 거친 target-free 계층은 --target-exclusion 그대로. "
+                         "--target-field-policy exclude-* 와 함께만")
+    ap.add_argument("--oracle-extent-identity", choices=("pipeline", "gt"), default=None,
+                    help="T46e — oracle-visible 이 지울 물체: pipeline (기본) = AG3S manipulated 기하가 놓인 물체 "
+                         "(identity 는 다른 arm 과 같다) · gt = 늘 GT target (identity 도 GT 인 상한). "
+                         "--target-extent oracle-visible 와 함께만")
+    ap.add_argument("--oracle-max-dist-voxels", type=float, default=None, metavar="V",
+                    help="T46e — oracle-visible: seed 후보 = target 표본에서 V 미세 voxel 안 (기본 6.0 = 30 mm = "
+                         "미세 TSDF truncation). --target-extent oracle-visible 와 함께만")
+    # T46e A13 — end
     # T44c A5 — begin
     ap.add_argument("--target-free-coarse", action="store_true",
                     help="T44c — target 을 지운 거친 계층 (coarse_no_target) 을 한 겹 더 만들어 target-free "
@@ -1865,6 +1895,29 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         if not (math.isfinite(args.nontarget_shell_voxels) and args.nontarget_shell_voxels > 0):
             ap.error(f"--nontarget-shell-voxels 는 유한한 양수입니다 (받은 값 {args.nontarget_shell_voxels})")
     # T46 F1 — end
+    # T46e A13 — begin
+    oracle_on = getattr(args, "target_extent", None) == "oracle-visible"
+    oracle_given = [flag for flag, v in (("--oracle-extent-identity", getattr(args, "oracle_extent_identity", None)),
+                                         ("--oracle-max-dist-voxels", getattr(args, "oracle_max_dist_voxels", None)))
+                    if v is not None]
+    if oracle_given and not oracle_on:
+        ap.error(f"{', '.join(oracle_given)} 는 --target-extent oracle-visible 에서만 읽힙니다 — "
+                 "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    if oracle_on:
+        if args.target_field_policy == "relax":
+            ap.error("--target-extent oracle-visible 는 target 없는 계층의 범위를 바꿉니다 — "
+                     "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오")
+        if args.no_safe or getattr(args, "no_perception", False):
+            ap.error("--target-extent oracle-visible 는 AG3S 의 거리장을 고치는 flag 입니다 "
+                     "(--no-safe · --no-perception 은 그것을 안 만듭니다)")
+        if args.nontarget_evidence not in (None, "proximity") or args.owned_ambiguous not in (None, "keep"):
+            ap.error("--target-extent oracle-visible 는 ball-owned 미세 계층의 분할을 GT 로 대신합니다 — "
+                     "--nontarget-evidence surface · --owned-ambiguous remove (T46 F1 · F2) 는 그 분할에만 걸리므로 "
+                     "함께 주면 효과가 없습니다")
+        md = getattr(args, "oracle_max_dist_voxels", None)
+        if md is not None and not (math.isfinite(md) and md > 0):
+            ap.error(f"--oracle-max-dist-voxels 는 유한한 양수입니다 (받은 값 {md})")
+    # T46e A13 — end
     # T44c A5 — begin
     if args.target_free_coarse and args.target_field_policy == "relax":
         ap.error("--target-free-coarse 는 target 없는 계층에서 동작합니다 — "

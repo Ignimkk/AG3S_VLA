@@ -1,0 +1,204 @@
+{
+ "step": "V-T46e-apply",
+ "date": "2026-10-13",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6",
+ "raw_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply",
+ "runs": [
+  {
+   "id": "import_paths",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/logs/import_paths.txt",
+   "note": "AG3S.trajopt.wire, AG3S.ag3s.runtime.pipeline, common.run_output, AG3S.ag3s.runtime.oracle_segmentation all resolve under /mnt/dev/AG3S_VLA-development/.claude/worktrees/t46e-apply"
+  },
+  {
+   "id": "baseline_legacy",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/p/run_baseline_legacy.sh",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/baseline/legacy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/baseline/legacy.log",
+   "summary": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/baseline/legacy_summary.json"
+  },
+  {
+   "id": "baseline_curobo",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/p/run_baseline_curobo.sh",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/baseline/curobo.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/baseline/curobo.log",
+   "summary": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/baseline/curobo_summary.json",
+   "gpu_check": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/baseline/nvidia_smi_locked_curobo.txt (no compute apps inside flock)"
+  },
+  {
+   "id": "pytest_cpu_all",
+   "command": "JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= nice -n 19 pytest -q -p no:cacheprovider tests/trajopt tests/ag3s tests/test_workspace_rebase.py -rs",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/p/run_pytest_cpu.sh",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/logs/pytest_cpu_all.log"
+  },
+  {
+   "id": "pytest_gpu_subset",
+   "command": "under flock: pytest -rs tests/ag3s/test_t46e_oracle_extent.py tests/ag3s/test_t46_target_free_residual.py tests/ag3s/test_t44_target_exclusion_owned.py tests/trajopt/test_safe_client.py tests/trajopt/test_t46c_placed_no_seed_certify.py",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/p/run_pytest_gpu.sh",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/logs/pytest_gpu_subset.log"
+  },
+  {
+   "id": "cl3_off_replay_patched_vs_head",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/p/run_cl3.sh",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/raw/cl3/compare.json",
+   "patched": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/raw/cl3/patched.jsonl",
+   "base_head": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/raw/cl3/base_head.jsonl",
+   "note": "base_head = git archive 39dfb5dc AG3S common (no worktree added, git state untouched) at /mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/base_tree"
+  },
+  {
+   "id": "wire_old_client",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/p/wire_compat.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/raw/wire/patched.json",
+   "base_raw": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply/raw/wire/base_head.json"
+  }
+ ],
+ "code_state": {
+  "repo": "AG3S_VLA",
+  "head": "39dfb5dc2b38",
+  "worktree": "/mnt/dev/AG3S_VLA-development/.claude/worktrees/t46e-apply",
+  "dirty_files": [
+   "AG3S/ag3s/config.py",
+   "AG3S/ag3s/fields/curobo_builder.py",
+   "AG3S/ag3s/runtime/pipeline.py",
+   "AG3S/trajopt/client.py",
+   "AG3S/trajopt/experiments/target_free_replay.py",
+   "AG3S/trajopt/safe_policy.py",
+   "AG3S/trajopt/serve_safe.py",
+   "AG3S/trajopt/wire.py",
+   "integration/rby1/bringup/pi05_infer.py",
+   "(untracked) AG3S/ag3s/runtime/oracle_segmentation.py",
+   "(untracked) tests/ag3s/test_t46e_oracle_extent.py",
+   "(untracked) T46e handoff/figure files"
+  ],
+  "patch_md5": "d54cc6ae75b12acfa542fe2b3ec860c3",
+  "patch_reverse_check": "git apply --reverse --check OK (worktree diff == patch)",
+  "interpreter": "/mnt/dev/AG3S_VLA-development/.venv-openpi-live/bin/python",
+  "main_tree_touched": false
+ },
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy 14/15 15/15 -29.031048280806342; cuRobo 10/15 15/15 -9.171877401271193"
+ },
+ "numbers": {
+  "1_baseline": {
+   "legacy": {
+    "start_violated": 14,
+    "n": 15,
+    "has_target": 15,
+    "frame0_clearance_before_mm": "-29.031048280806342"
+   },
+   "curobo": {
+    "start_violated": 10,
+    "n": 15,
+    "has_target": 15,
+    "frame0_clearance_before_mm": "-9.171877401271193"
+   }
+  },
+  "2_pytest_cpu_all": {
+   "passed": 3180,
+   "failed": 0,
+   "skipped": 12,
+   "duration_s": 790.61,
+   "skips": {
+    "cuda_needed": 9,
+    "gpu_checkpoint_opt_in": 2,
+    "tokenizer_not_cached": 1
+   },
+   "skip_cuda_tests_run_in_gpu_subset": [
+    "test_t44_target_exclusion_owned:528",
+    "test_t46_target_free_residual:655",
+    "test_t46e_oracle_extent:795"
+   ],
+   "skip_cuda_tests_not_run": [
+    "test_t32_fine_truncation_curobo:21",
+    "test_t44c_a6_sign_floor:389",
+    "test_t44c_a7_default_plane:224",
+    "test_t44c_target_free_coarse:641",
+    "test_t44e_a8_coarse_support:448",
+    "test_t44e_a8b_coarse_support_footprint:339"
+   ]
+  },
+  "2_pytest_gpu_subset": {
+   "passed": 181,
+   "failed": 0,
+   "skipped": 0,
+   "duration_s": 105.61,
+   "vtest_t46e_reference": "181 passed in 105.30 s"
+  },
+  "3_off_bit_identical": {
+   "cl3_chunks": 4125,
+   "layers_patched": 1630,
+   "layers_base_head": 1630,
+   "layers_identical_patched_vs_head": 1630,
+   "layers_differ": 0,
+   "layers_bit_equal_to_record_f16_patched": 1618,
+   "layers_bit_equal_to_record_f16_head": 1618,
+   "layers_differing_from_record_voxels": [
+    39,
+    5,
+    23,
+    39,
+    23,
+    39,
+    5,
+    191,
+    39,
+    5,
+    20,
+    23
+   ],
+   "per_arm_layers": {
+    "C1a": 506,
+    "C1aF1": 562,
+    "C1aF1F2": 562
+   },
+   "vt46e_reference": {
+    "layers": 1630,
+    "identical": 1630,
+    "equal_record": 1618
+   }
+  },
+  "3_wire_old_client": {
+   "digest_patched": "86512318d0ea095a0451747c8ad15730692ffc7d12c94fe960f5675dc8ef586a",
+   "digest_head": "86512318d0ea095a0451747c8ad15730692ffc7d12c94fe960f5675dc8ef586a",
+   "n_keys": 17,
+   "unpack_oracle_segmentation_on_old_request": null
+  }
+ },
+ "pass_criteria": {
+  "1_baseline": {
+   "criterion": "legacy 14/15 15/15 -29.031048280806342; cuRobo 10/15 15/15 -9.171877401271193",
+   "measured": "equal on both",
+   "result": "PASS"
+  },
+  "2_pytest_cpu_all": {
+   "criterion": "0 failed",
+   "measured": "3180 passed 12 skipped 0 failed",
+   "result": "PASS"
+  },
+  "2_pytest_gpu_subset": {
+   "criterion": "181 tests of V-T46e all pass under GPU lock",
+   "measured": "181 passed 0 skipped 0 failed",
+   "result": "PASS"
+  },
+  "3_off_bit_identical": {
+   "criterion": "CL3 1630 layers identical to V-T46e result (1630 identical, 1618 equal record, same 12 differ)",
+   "measured": "1630/1630 identical patched vs HEAD 39dfb5dc; 1618 equal record in both; same 12 differing voxel counts",
+   "result": "PASS"
+  },
+  "3_wire_old_client": {
+   "criterion": "digest 86512318... equal",
+   "measured": "equal patched and HEAD",
+   "result": "PASS"
+  }
+ },
+ "figures": [],
+ "verdict": "기준선 일치",
+ "not_measured": [
+  "figure (not requested)",
+  "closed-loop rollout / server run (not requested)",
+  "6 CUDA-gated tests outside the 181 subset (t32_fine_truncation_curobo, t44c_a6, t44c_a7, t44c_target_free_coarse, t44e_a8, t44e_a8b) were not run",
+  "2 GPU+checkpoint opt-in tests (AG3S_GPU_TESTS=1) and 1 tokenizer-not-cached test skipped",
+  "oracle offline replay numbers (V-T46e criterion 3) not re-run",
+  "pytest ran concurrently with other sessions' CPU load (load average ~18 on 2 cores); SQP-after / timing values not used"
+ ]
+}

@@ -93,7 +93,9 @@ from AG3S.ag3s.fields.provenance import FieldProvenance
 __all__ = ["CuroboFieldBuilder", "TargetBall", "OwnedEvidence", "OWNED_CLASSES", "ATTACHED_LABEL", "unpack_site_linear",
            "CoarseFreeSpec", "CUROBO_SEED_BAND_VOXELS", "coarse_exclusion_params", "COARSE_SIGN_FLOORS",
            "FineWindowRequest", "FineWindow", "place_fine_window", "WINDOW_BASES",
-           "WINDOW_PLACEMENTS", "NONTARGET_EVIDENCES", "nontarget_surface_evidence"]
+           "WINDOW_PLACEMENTS", "NONTARGET_EVIDENCES", "nontarget_surface_evidence",
+           "OracleVisibleEvidence", "oracle_candidates", "oracle_visible_split", "oracle_cell_keys",
+           "oracle_band_masks"]
 
 #: 쥔 물체에 붙이는 내부 라벨. 호출자의 `labelled_points` 이름과 겹치면 안 되므로 밑줄로 감싼다.
 ATTACHED_LABEL = "__attached__"
@@ -519,6 +521,140 @@ def nontarget_surface_evidence(nontarget_points, target_points, ball: "TargetBal
     info["n_protected"] = int((~own).sum())
     info["n_dropped"] = int(own.sum())
     return drop, info
+
+
+@dataclasses.dataclass(frozen=True)
+class OracleVisibleEvidence:
+    """T46e A13 — `esdf.target_extent == "oracle_visible"` 의 재료 (시뮬레이터 GT, 진단 상한).
+
+    | 필드 | 무엇 |
+    |---|---|
+    | `target_points` | 지울 물체의 **보인** 표면 표본 (`runtime.oracle_segmentation.OracleMemory.evidence`) |
+    | `other_points` | 그 밖의 모든 표본 (이웃 과일 · table · crate · 바닥) — 로봇은 없다 (code 0) |
+    | `max_dist_voxels` | seed 후보 = target 표본에서 이 거리 (voxel) 안 (`esdf.oracle_max_dist_voxels`) |
+    | `code` | 지울 물체의 code (`band_masks` 의 bit) |
+    | `band_cell` · `band_keys` · `band_masks` | 이 episode 의 **truncation 띠** — 물체 pixel 의 광선을 따라 보인 면 뒤 truncation 까지 지나간 칸 (`band_cell` m 격자 key, 정렬) 과 그 칸을 지나간 물체 code 의 bit mask (`OracleMemory.band_lookup`). 비어 있으면 띠 길을 쓰지 않는다 |
+    | `surface_protect_voxels` | 띠 길은 다른 표본에서 이 거리 (voxel) 안의 seed 를 가져가지 않는다 (관측된 이웃 · table 표면 보호) |
+    | `z_floor` | 이 z (m) 아래는 어느 길로도 지우지 않는다 — 지지면 상판 (`TargetBall.z_min` 과 같은 값; None = 없음) |
+    | `info` | 기록에 그대로 실린다 |
+    """
+
+    target_points: np.ndarray
+    other_points: Optional[np.ndarray] = None
+    max_dist_voxels: float = 6.0
+    info: dict = dataclasses.field(default_factory=dict)
+    code: int = 1
+    band_cell: float = 0.0
+    band_keys: Optional[np.ndarray] = None
+    band_masks: Optional[np.ndarray] = None
+    surface_protect_voxels: float = 1.0
+    z_floor: Optional[float] = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "target_points",
+                           np.asarray(self.target_points, np.float64).reshape(-1, 3))
+        op = self.other_points
+        object.__setattr__(self, "other_points",
+                           np.zeros((0, 3)) if op is None else np.asarray(op, np.float64).reshape(-1, 3))
+        bk = np.zeros(0, np.int64) if self.band_keys is None else np.asarray(self.band_keys, np.int64).reshape(-1)
+        bm = np.zeros(0, np.uint32) if self.band_masks is None else np.asarray(self.band_masks, np.uint32).reshape(-1)
+        if len(bk) != len(bm):
+            raise ValueError("band_keys 와 band_masks 의 길이가 다릅니다")
+        object.__setattr__(self, "band_keys", bk)
+        object.__setattr__(self, "band_masks", bm)
+        if not float(self.max_dist_voxels) > 0.0:
+            raise ValueError(f"max_dist_voxels 는 양수여야 합니다: {self.max_dist_voxels}")
+        if not (float(self.surface_protect_voxels) >= 0.0 and float(self.band_cell) >= 0.0):
+            raise ValueError("surface_protect_voxels ≥ 0, band_cell ≥ 0")
+        if len(bk) and not float(self.band_cell) > 0.0:
+            raise ValueError("band_keys 가 있으면 band_cell > 0 이어야 합니다")
+        if not 0 <= int(self.code) < 32:
+            raise ValueError(f"code 는 0..31 (band mask 의 bit): {self.code}")
+
+
+def oracle_cell_keys(points: np.ndarray, cell: float) -> np.ndarray:
+    """T46e — `floor(p / cell)` 칸의 int64 key (`runtime.oracle_segmentation` 의 표본 · 띠와 같은 규약, 축마다 ±2²⁰ 칸)."""
+    c = np.floor(np.asarray(points, np.float64).reshape(-1, 3) / float(cell)).astype(np.int64) + (1 << 20)
+    return (c[:, 0] << 42) | (c[:, 1] << 21) | c[:, 2]
+
+
+def oracle_band_masks(points: np.ndarray, keys: np.ndarray, masks: np.ndarray, cell: float) -> np.ndarray:
+    """T46e — 점마다 그 칸의 띠 bit mask (uint32, 띠 밖이면 0). `keys` 는 정렬돼 있어야 한다."""
+    p = np.asarray(points, np.float64).reshape(-1, 3)
+    out = np.zeros(len(p), np.uint32)
+    if not len(p) or not len(keys):
+        return out
+    k = oracle_cell_keys(p, cell)
+    i = np.clip(np.searchsorted(keys, k), 0, len(keys) - 1)
+    hit = keys[i] == k
+    out[hit] = masks[i[hit]]
+    return out
+
+
+def oracle_candidates(target_points: np.ndarray, origin: np.ndarray, voxel_size: float, shape,
+                      max_dist: float) -> Optional[np.ndarray]:
+    """T46e — 격자 안에서 중심이 target 표본에서 `max_dist` 안인 voxel `(K, 3)` int64 (meshgrid `ij` 순서), 없으면 None."""
+    tp = np.asarray(target_points, np.float64).reshape(-1, 3)
+    if not len(tp):
+        return None
+    vs = float(voxel_size)
+    nx, ny, nz = (int(v) for v in shape)
+    org = np.asarray(origin, np.float64).reshape(3)
+    lo = np.floor((tp.min(axis=0) - max_dist - org) / vs + 0.5).astype(np.int64)
+    hi = np.ceil((tp.max(axis=0) + max_dist - org) / vs + 0.5).astype(np.int64)
+    lo = np.maximum(lo, 0)
+    hi = np.minimum(hi + 1, np.array([nx, ny, nz]))
+    if np.any(hi <= lo):
+        return None
+    ax = [np.arange(int(lo[i]), int(hi[i]), dtype=np.int64) for i in range(3)]
+    grid = np.stack(np.meshgrid(*ax, indexing="ij"), axis=-1).reshape(-1, 3)
+    centres = org[None, :] + grid.astype(np.float64) * vs
+    cand = grid[_nearest(tp, centres) <= float(max_dist)]
+    return cand if len(cand) else None
+
+
+def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: OracleVisibleEvidence,
+                         voxel_size: float) -> dict:
+    """T46e — 후보 voxel 을 GT 로 가른다 (순수 numpy; server · offline replay · 단위 검증이 같이 쓴다).
+
+    seed 가 **그 물체의 pixel 에서 왔다** 를 두 길로 판정한다. `d_t` = 가장 가까운 그 물체 표본, `d_o` = 가장 가까운
+    다른 표본 (없으면 ∞), `z_floor` 아래는 어느 길로도 지우지 않는다 (지지면 상판 — `ball` · `ball_owned` 의 `z_min` 과 같다):
+
+    | 길 | 조건 (seed) | 무엇을 잡나 |
+    |---|---|---|
+    | 표면 | `d_t ≤ max_dist` ∧ `d_t < d_o` | 보인 표면의 seed — 이 episode 에 본 모든 표본 중 그 물체가 가장 가깝다 |
+    | 띠 | 그 칸을 지나간 띠가 **그 물체 것뿐** (`band_masks`) ∧ `d_o > surface_protect·vs` ∧ `d_t ≤ max_dist` | 보인 면 **뒤** truncation 띠의 seed — TSDF 가 그 물체 pixel 의 광선으로 만든 음수 띠의 경계 (물체 밑 · 안쪽의 그림자 seed). 표면 표본에서 멀어 표면 길이 못 잡는다 (실측 C1a_ep54_s541 seq 16: 425 개, 앞 frame 광선의 것이 많아 이 요청의 카메라만으로는 설명되지 않는다 — 그래서 띠도 episode 동안 모은다) |
+    | 그 밖 | | 보존 (이웃 · table · crate 표면, 두 물체의 띠가 겹친 칸, 동률 — 보수 쪽) |
+
+    부호 교정 후보 (`sign`) = 지운 seed ∪ 표면 길의 non-seed (그 물체 안쪽). 띠 길은 non-seed 의 부호를 바꾸지 않는다 —
+    띠는 보인 면 뒤 truncation 까지라 다른 물체 안쪽에 닿을 수 있어서다. tie 는 없다 (code 가 GT 다; 같은 거리 = 보존).
+    다른 표본은 그 물체 표본 AABB + `2·max_dist + vs` 안의 것만 쓴다 — 그 밖은 결과를 바꾸지 못한다.
+    """
+    vs = float(voxel_size)
+    c = np.asarray(centres, np.float64).reshape(-1, 3)
+    seed = np.asarray(is_seed, bool).reshape(-1)
+    tp = oracle.target_points
+    max_d = float(oracle.max_dist_voxels) * vs
+    op = oracle.other_points
+    if len(op) and len(tp):
+        lo = tp.min(axis=0) - (2.0 * max_d + vs)
+        hi = tp.max(axis=0) + (2.0 * max_d + vs)
+        op = op[np.all((op >= lo) & (op <= hi), axis=1)]
+    d_t = _nearest(tp, c)
+    d_o = _nearest(op, c)
+    above = (np.ones(len(c), bool) if oracle.z_floor is None
+             else c[:, 2] >= float(oracle.z_floor))
+    surface = (d_t <= max_d) & (d_t < d_o) & above
+    band = np.zeros(len(c), bool)
+    if len(oracle.band_keys):
+        m = oracle_band_masks(c, oracle.band_keys, oracle.band_masks, oracle.band_cell)
+        bit = np.uint32(1) << np.uint32(int(oracle.code))
+        band = ((m == bit) & seed & (d_t <= max_d) & above
+                & (d_o > float(oracle.surface_protect_voxels) * vs) & ~surface)
+    removed = seed & (surface | band)
+    return {"removed": removed, "kept_other": seed & ~removed, "sign": surface | removed,
+            "surface": seed & surface, "band": band,
+            "d_t": d_t, "d_o": d_o, "n_other_near": int(len(op))}
 
 
 #: `stats["window"]["basis"]` 의 값. 창이 **무엇을 근거로** 놓였나 (T21).
@@ -993,7 +1129,8 @@ class CuroboFieldBuilder:
                held_free_points: Optional[np.ndarray] = None,
                nontarget_points: Optional[np.ndarray] = None,
                support_seed_evidence: Optional[dict] = None,
-               owned_nontarget_points: Optional[np.ndarray] = None) -> CuroboEsdfField:
+               owned_nontarget_points: Optional[np.ndarray] = None,
+               oracle_evidence: Optional[OracleVisibleEvidence] = None) -> CuroboEsdfField:
         """`EsdfBuilder.update` 와 같은 계약. 돌려주는 것은 `CuroboEsdfField` 다.
 
         `exclude_target` 는 **지원하지 않는다.** E1 이 그것을 폐기했다 — 필드는 익명이라
@@ -1019,6 +1156,10 @@ class CuroboFieldBuilder:
         (`esdf.nontarget_evidence == "surface"` 일 때 pipeline 이 `nontarget_points` 에서 target 표면 점을 더 뺀 것).
         `None` (기본) 이면 미세 계층도 `nontarget_points` 를 쓴다 (비트 동일). 거친 계층은 언제나 `nontarget_points` 다.
         `esdf.owned_ambiguous` (T46 F2) 도 미세 계층의 `OwnedEvidence` 에만 실린다.
+
+        `oracle_evidence` (T46e A13, `esdf.target_extent == "oracle_visible"`) 가 오면 **미세** target-free 계층의 제외를
+        공 · ownership 대신 `oracle_visible_split` (GT 표본) 으로 한다 (`_oracle_exclusion`). 공은 기록에만 남고, 거친
+        target-free 계층은 그대로 공 · `target_exclusion` 이다. `None` (기본) 이면 예전 호출과 같다 (비트 동일).
 
         `esdf.target_free_coarse` (T44c A5) 가 켜져 있고 공이 오면 target 을 지운 **거친** 계층
         (`coarse_no_target`) 을 한 겹 더 만들어 `field.target_free_coarse_layer` 에 싣는다. 그 계층은
@@ -1129,7 +1270,8 @@ class CuroboFieldBuilder:
             # 쥔 물체 점은 공과 **함께** 지운다 — 그쪽은 점이 물체 전체를 덮으므로 맞는 길이다.
             held = (None if attached is None or not len(attached)
                     else np.asarray(attached, np.float64).reshape(-1, 3))
-            remove = held if target_free_ball is not None else (
+            # T46e: oracle 도 점 제외를 쓰지 않는다 (GT 표본이 범위를 정한다).
+            remove = held if (target_free_ball is not None or oracle_evidence is not None) else (
                 free_points if held is None else np.vstack([held, free_points]))
             owned = None
             owned_fine = None
@@ -1151,7 +1293,10 @@ class CuroboFieldBuilder:
             free_tiers = self._build_tiers(itg, remove, dev, torch, only="fine",
                                            tier_name="fine_no_target",
                                            ball=target_free_ball, itg_fine=itg_fine,
-                                           owned=owned_fine)
+                                           # T46e: oracle 이 오면 미세 계층의 분할은 그것이다 (owned 는 거친 계층만).
+                                           owned=None if oracle_evidence is not None else owned_fine,
+                                           **({} if oracle_evidence is None
+                                              else {"oracle": oracle_evidence}))
             free_ms = (time.monotonic() - t0) * 1e3
             self._announce_target_free_cost(free_ms, len(free_points), free_tiers,
                                             ball=target_free_ball)
@@ -1265,7 +1410,8 @@ class CuroboFieldBuilder:
             "label": target_free_label,
             # **무엇으로 지웠는지 기록에 남긴다** (T13). `"points"` 로 남은 프레임은 사과가
             # 안 지워진 프레임이다 — 그 구별이 없으면 두 실행을 나란히 읽을 수 없다.
-            "mode": ("ball" if target_free_ball is not None
+            "mode": ("oracle_visible" if oracle_evidence is not None and free_tiers   # T46e
+                     else "ball" if target_free_ball is not None
                      else ("points" if free_points is not None and len(free_points) else "none")),
             "ball": None if target_free_ball is None else target_free_ball.summary(),
             "n_ball_seeds_excluded": sum(
@@ -1499,7 +1645,8 @@ class CuroboFieldBuilder:
                      ball: Optional["TargetBall"] = None,
                      itg_fine=None,
                      owned: Optional["OwnedEvidence"] = None,
-                     coarse_free: Optional[CoarseFreeSpec] = None) -> list[_Tier]:
+                     coarse_free: Optional[CoarseFreeSpec] = None,
+                     oracle: Optional[OracleVisibleEvidence] = None) -> list[_Tier]:
         """계층마다 seed -> (제외) -> propagate -> 복사.
 
         `Mapper.compute_esdf` 를 부르지 않는다 — 그쪽은 CUDA graph 로 seed·propagate·distance
@@ -1551,6 +1698,12 @@ class CuroboFieldBuilder:
                 n_ball, ball_idx, excl = self._coarse_ball_exclusion(itg, ball, org, vs, shape,
                                                                      coarse_free)
                 sign_thr_voxels = excl["params"]["sign_threshold_voxels"]
+                if ball_idx is not None:
+                    att_idx = (ball_idx if att_idx is None
+                               else np.unique(np.vstack([att_idx, ball_idx]), axis=0))
+            elif oracle is not None:
+                # T46e A13: 미세 target-free 계층의 제외를 GT 표본으로 (공 · ownership 대신). 공은 기록에만.
+                n_ball, ball_idx, excl = self._oracle_exclusion(itg, oracle, org, vs, shape)
                 if ball_idx is not None:
                     att_idx = (ball_idx if att_idx is None
                                else np.unique(np.vstack([att_idx, ball_idx]), axis=0))
@@ -1611,6 +1764,8 @@ class CuroboFieldBuilder:
                     out[k] = out.get(k, 0) + int(ex[k])
             if "owned" in ex:
                 out["owned"] = dict(ex["owned"])
+            if "oracle" in ex:   # T46e A13 (oracle_visible 일 때만 있다)
+                out["oracle_split"] = dict(ex["oracle"])
             out["classify_ms"] = round(out.get("classify_ms", 0.0) + float(ex.get("classify_ms", 0.0)), 3)
         return out
 
@@ -1948,6 +2103,58 @@ class CuroboFieldBuilder:
         trace["ambiguous_ijk"] = cand[split["ambiguous"]]
         if keep_unowned:
             trace["unowned_kept_ijk"] = cand[split["unowned"]]
+        counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+        return n, (sign_idx if len(sign_idx) else None), {"counts": counts, "trace": trace}
+
+    def _oracle_exclusion(self, itg, oracle: OracleVisibleEvidence, origin: np.ndarray,
+                          voxel_size: float, shape):
+        """T46e A13 — 미세 target-free 계층의 **GT** 제외. `(n_removed, sign_idx | None, excl)` — `_ball_exclusion` 과 같은 계약.
+
+        후보 = target 표본에서 `max_dist` 안의 voxel (`oracle_candidates`), 분할 = `oracle_visible_split`. 지운 seed 와
+        target 쪽 non-seed 가 부호 교정 후보다. 기록 키는 `ball_owned` 와 같은 이름을 쓴다 (`n_seeds_in_ball` = 후보 안 seed,
+        `n_kept_nontarget` = 다른 표본에 더 가까워 남긴 seed; ambiguous · unowned 는 0) — 기존 집계 스크립트가 그대로 읽는다.
+        """
+        t0 = time.monotonic()
+        vs = float(voxel_size)
+        empty = np.zeros((0, 3), np.int64)
+        counts = {"exclusion_method": "oracle_visible", "n_seeds_in_ball": 0, "n_removed": 0,
+                  "n_kept_nontarget": 0, "n_ambiguous": 0, "n_unowned_removed": 0,
+                  "n_unowned_kept": 0}
+        trace = {"removed_ijk": empty, "nontarget_kept_ijk": empty, "ambiguous_ijk": empty,
+                 "unowned_kept_ijk": empty}
+        max_d = float(oracle.max_dist_voxels) * vs
+        info = {"max_dist_voxels": float(oracle.max_dist_voxels),
+                "n_target_points": int(len(oracle.target_points)),
+                "n_other_points": int(len(oracle.other_points)), "n_candidates": 0,
+                "n_band_cells": int(len(oracle.band_keys)),
+                "z_floor_m": None if oracle.z_floor is None else float(oracle.z_floor)}
+        cand = oracle_candidates(oracle.target_points, origin, vs, shape, max_d)
+        if cand is None:
+            counts["oracle"] = info
+            counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return 0, None, {"counts": counts, "trace": trace}
+        seed = self._seed_mask(itg, cand)
+        centres = origin[None, :] + cand.astype(np.float64) * vs
+        split = oracle_visible_split(centres, seed, oracle, vs)
+        removed = cand[split["removed"]]
+        n = 0
+        if len(removed):
+            n, _ = self._clear_seeds(itg, removed, shape)
+        sign_idx = cand[split["sign"]]
+        info.update({"n_candidates": int(len(cand)), "n_other_near": split["n_other_near"],
+                     "n_removed_surface": int(split["surface"].sum()),
+                     "n_removed_band": int(split["band"].sum())})
+        counts.update({
+            "n_seeds_in_ball": int(seed.sum()),
+            "n_removed": int(n),
+            "n_target_owned": int(split["removed"].sum()),
+            "n_kept_nontarget": int(split["kept_other"].sum()),
+            "n_sign_candidates": int(len(sign_idx)),
+            "n_sign_candidates_nonseed": int((split["sign"] & ~seed).sum()),
+            "oracle": info,
+        })
+        trace["removed_ijk"] = removed
+        trace["nontarget_kept_ijk"] = cand[split["kept_other"]]
         counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
         return n, (sign_idx if len(sign_idx) else None), {"counts": counts, "trace": trace}
 

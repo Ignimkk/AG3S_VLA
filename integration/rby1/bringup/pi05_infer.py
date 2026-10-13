@@ -618,6 +618,18 @@ def apply_action(action_format, action, d, idx, act):
     raise ValueError(f"unknown action_format: {action_format}")
 
 
+def oracle_target_of(randomized_episode, ap):
+    """T46e A13 — the GT target body for `--safe-oracle-seg` (the randomized episode's `target_fruit`).
+
+    Refuses (ap.error) when there is none: an oracle run without a known target would label nothing as the
+    target and the server would fall back to the estimated extent on every frame.
+    """
+    target = (randomized_episode or {}).get("target_fruit")
+    if not target:
+        ap.error("--safe-oracle-seg needs the episode's target_fruit (a randomized 16-D episode)")
+    return str(target)
+
+
 def validate_rby1_observation(obs, *, log=False):
     """Validate the raw 14-D/three-camera interface sent to the policy."""
     state = np.asarray(obs.get("state"))
@@ -776,6 +788,11 @@ def main():
                          "프레임마다 그대로 기록된다. 서버도 `--shadow` 로 떠 있어야 하고, "
                          "짝이 안 맞으면 즉시 죽는다. timeout·오래된 응답·서버 오류는 shadow "
                          "에서도 hold 다")
+    ap.add_argument("--safe-oracle-seg", action="store_true",
+                    help="T46e A13 (진단 oracle) — 요청마다 카메라별 MuJoCo GT segmentation code 영상을 싣는다 "
+                         "(이 episode 의 target_fruit = code 1, 다른 과일 · 정적 물체 · 로봇을 구별; capture 가 이미 "
+                         "렌더한 것이라 추가 렌더 없음). 서버가 --target-extent oracle-visible 일 때 필요하다 — 그 "
+                         "서버에 이 flag 없이 붙으면 접속 즉시 죽는다. --safe-remote 와 randomized 16-D episode 에서만")
     ap.add_argument("--safe-timeout", type=float, default=2.0, metavar="SEC",
                     help="서버 응답 제한 시간. 넘으면 hold")
     # T23 — 실행 게이트와 HOLD. 세 flag 모두 기본값이 새 동작이고, `legacy` 가 T23 전 동작이다.
@@ -1064,6 +1081,8 @@ def main():
     if args.safe_gate == "off" and args.safe_shadow:
         ap.error("--safe-gate off executes the REFINED chunk; --safe-shadow executes the policy "
                  "REFERENCE chunk. They are different experiments — pick one")
+    if args.safe_oracle_seg and not args.safe_remote:
+        ap.error("--safe-oracle-seg only does something together with --safe-remote (the server reads it)")
     if args.safe_shadow and not args.safe_remote:
         ap.error("--safe-shadow requires --safe-remote: shadow means the server runs the whole "
                  "pipeline and the robot executes the policy's own chunk. Without the server "
@@ -1380,6 +1399,9 @@ def main():
             trace_dir=args.trace,
             shadow=args.safe_shadow,
             gate=args.safe_gate,
+            # T46e A13 — the episode's GT target for the oracle segmentation (only with --safe-oracle-seg).
+            **({"oracle_target": oracle_target_of(randomized_episode, ap)}
+               if args.safe_oracle_seg else {}),
         )
         hold_ctl = HoldController(mode=args.safe_hold_mode,
                                   max_hold_chunks=args.safe_max_hold_chunks)
@@ -1465,7 +1487,9 @@ def main():
                     # T23 — 게이트 · HOLD 방식 · 연속 HOLD 한도.
                     "safe_gate": args.safe_gate,
                     "safe_hold_mode": args.safe_hold_mode,
-                    "safe_max_hold_chunks": args.safe_max_hold_chunks},
+                    "safe_max_hold_chunks": args.safe_max_hold_chunks,
+                    # T46e A13 — 켰을 때만 키가 생긴다 (GT segmentation 을 실은 run).
+                    **({"safe_oracle_seg": True} if args.safe_oracle_seg else {})},
             # 거리장 설정은 **서버가** 들고 있다. 여기서는 클라이언트가 아는 것만 적고,
             # 서버가 실제로 무엇을 썼는지는 프레임마다 응답의 `field.backend` 가 답한다 —
             # 그쪽이 T0 의 "실제로 사용된 backend provenance" 다.

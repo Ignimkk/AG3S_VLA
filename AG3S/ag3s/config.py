@@ -1107,6 +1107,29 @@ class EsdfConfig:
     #: 보존) 하나 `"remove"` (target · unowned 처럼 지운다) 하나. 미세 target-free 계층에만 — 거친 계층은 keep 그대로.
     owned_ambiguous: str = "keep"
     OWNED_AMBIGUOUS = ("keep", "remove")
+    #: **T46e A13 — 미세 target-free 계층의 target 범위 (extent) 를 무엇으로 정하나** (DX-01 조건 B, DT-02 extent block).
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"estimated"` (기본) | 지금 그대로 — `target_exclusion` (`ball` · `ball_owned`, + T46 F1 · F2) 의 추정 범위. 값 비트 동일 |
+    #: | `"oracle_visible"` | **시뮬레이터 GT** — client 가 보낸 카메라별 segmentation (`wire.ORACLE_SEG`) 의 depth 점을 이 episode 동안 모은 표면 표본과 truncation 띠 (`runtime.oracle_segmentation.OracleMemory`) 로, **그 물체의 pixel 에서 온 seed** 만 지운다 (`curobo_builder.oracle_visible_split`): 가장 가까운 표본이 그 물체의 보인 표면인 seed (표면 길) ∪ 그 물체 pixel 의 광선이 보인 면 뒤 truncation 안에서만 지나간 칸의 seed (띠 길 — 물체 밑 · 안쪽의 그림자 seed). 이웃 과일 · 지지면 (공의 `z_min` 아래) · crate 의 seed 는 남는다. 공 · ownership 판정을 쓰지 않는다 |
+    #:
+    #: oracle 은 **진단 상한**이다 (제안이 아니다). target-free 계층이 만들어지는 조건 (`target_field_policy`, 지금 manipulated
+    #: 기하가 있고 쥔 것이 없음) · 공 (기록) · 창 · 권한 · 거친 target-free 계층은 그대로 `target_exclusion` 을 따른다.
+    #: segmentation 이 안 오거나 target 표본이 없으면 그 frame 은 `estimated` 로 짓고 이유를 `stats["target_free"]["oracle"]` 에 남긴다.
+    target_extent: str = "estimated"
+    TARGET_EXTENTS = ("estimated", "oracle_visible")
+    #: `oracle_visible` — seed 후보 = target 표본에서 이 거리 (미세 voxel) 안의 voxel. 6 (= 30 mm @ 5 mm) 은 미세 TSDF
+    #: truncation (`fine_truncation_m` 30 mm) 과 같다 — 보인 면 뒤 음수 띠의 끝에 생기는 내부 seed 까지 닿는다.
+    oracle_max_dist_voxels: float = 6.0
+    #: `oracle_visible` — 지울 물체를 **누가 정하나**.
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"pipeline"` (기본) | 지금 manipulated 기하 (AG3S identity) 가 가리키는 물체의 GT 표본 — identity 는 다른 arm 과 같고 extent 만 GT (DX-01 조건 B) |
+    #: | `"gt"` | 늘 GT target 물체 — identity 와 extent 둘 다 GT 인 미세 target-free 계층 (상한). 공 · 창 · 권한 · 거친 계층의 identity 는 그대로 AG3S 의 것 |
+    oracle_extent_identity: str = "pipeline"
+    ORACLE_EXTENT_IDENTITIES = ("pipeline", "gt")
 
     #: **T44c A5 — target 을 지운 거친 계층 (`coarse_no_target`) 을 한 겹 더 만들고 target-free 질의에
     #: 합성한다.** 기본 `False` = 예전 그대로 (값 비트 동일, 계층을 만들지도 않는다).
@@ -1230,6 +1253,27 @@ class EsdfConfig:
             raise AG3SConfigError(
                 f"esdf.owned_ambiguous 는 {self.OWNED_AMBIGUOUS} 중 하나여야 합니다: "
                 f"{self.owned_ambiguous!r}")
+        # T46e A13
+        if self.target_extent not in self.TARGET_EXTENTS:
+            raise AG3SConfigError(
+                f"esdf.target_extent 는 {self.TARGET_EXTENTS} 중 하나여야 합니다: {self.target_extent!r}")
+        if not (isinstance(self.oracle_max_dist_voxels, (int, float))
+                and not isinstance(self.oracle_max_dist_voxels, bool)
+                and math.isfinite(float(self.oracle_max_dist_voxels))
+                and float(self.oracle_max_dist_voxels) > 0.0):
+            raise AG3SConfigError(
+                f"esdf.oracle_max_dist_voxels 는 유한한 양수여야 합니다: {self.oracle_max_dist_voxels!r}")
+        if self.oracle_extent_identity not in self.ORACLE_EXTENT_IDENTITIES:
+            raise AG3SConfigError(
+                f"esdf.oracle_extent_identity 는 {self.ORACLE_EXTENT_IDENTITIES} 중 하나여야 합니다: "
+                f"{self.oracle_extent_identity!r}")
+        if self.target_extent == "oracle_visible" and (
+                self.nontarget_evidence != "proximity" or self.owned_ambiguous != "keep"):
+            # F1 · F2 바꾸는 것은 `ball_owned` 미세 계층의 분할뿐이고, oracle 이 그 분할을 대신한다 — 효과 없는 설정.
+            raise AG3SConfigError(
+                "esdf.target_extent='oracle_visible' 는 미세 target-free 계층의 분할을 GT 로 대신합니다 — "
+                "T46 F1 (nontarget_evidence) · F2 (owned_ambiguous) 는 그 분할에만 걸리므로 함께 두면 효과가 없습니다: "
+                f"nontarget_evidence={self.nontarget_evidence!r}, owned_ambiguous={self.owned_ambiguous!r}")
         if not isinstance(self.target_free_coarse, bool):
             raise AG3SConfigError(
                 f"esdf.target_free_coarse 는 true 또는 false 여야 합니다: {self.target_free_coarse!r}")
