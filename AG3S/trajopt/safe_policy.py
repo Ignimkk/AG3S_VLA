@@ -141,7 +141,18 @@ class SafePolicy:
                  shadow: bool = False,
                  verdict_policy: str = "reasons",
                  allowed_contact_pad_m: float = 0.01,
-                 allow_unresolved_contact_tier: bool = False):
+                 allow_unresolved_contact_tier: bool = False,
+                 layout: Optional[ChunkLayout] = None,
+                 gripper_columns: Optional[Sequence[int]] = None,
+                 finger_map: Any = None,
+                 hands: Optional[dict[str, int]] = None):
+        # SL5a — robot injection points (`layout`, `gripper_columns`, `finger_map`, `hands`). All None
+        # (default) = the RB-Y1 behaviour below, unchanged: `ChunkLayout.rby1(model.joint_names)`,
+        # `wire.gripper_columns(nq_opt // 2)`, `FingerJointMap` from the RB-Y1 client convention, and the
+        # hand → index rule `0 if hand == "left" else 1` (index into `gripper_columns` and into the wire's
+        # `[left, right]` gripper pairs). Another robot (`AG3S/adapters/panda`) passes its own.
+        self._hands: Optional[dict[str, int]] = None if hands is None else {
+            str(h): int(i) for h, i in dict(hands).items()}
         self._policy = policy
         #: **`safe` 를 무엇으로 정하나** (T23). `"reasons"`(기본) 는 `verdict_reasons` 에 HOLD 처리인
         #: 사유가 없을 때 `safe` 다 — 권한 link ↔ manipulated 접촉(`allowed_contact`) · 가려진
@@ -253,20 +264,30 @@ class SafePolicy:
                 "AG3S was built without a constraint robot model, so there is nothing to write "
                 "collision constraints against")
         self.constraint_robot_model = model
-        self.layout = ChunkLayout.rby1(model.joint_names)
+        self.layout = ChunkLayout.rby1(model.joint_names) if layout is None else layout
         #: 그리퍼가 앉은 두 열, **레이아웃에서 유도한다**. 14D 는 `(6, 13)`, 16D 는 `(7, 15)` 다.
         #: 박아 두면 차원을 바꿀 때 엉뚱한 열을 그리퍼로 읽는다 — 이 프로젝트가 이미 밟았다:
         #: `_run_latch` 가 16D 에서 열 6(= `left_arm_6` 손목)을 그리퍼 개도로 읽고 있었고
         #: (T6f 에서 고쳤다), 손목 각도가 우연히 문턱을 넘으면 잠금이 파지로 오인한다. 증상이
         #: 궤적 오차가 아니라 **권한이 엉뚱한 물체에 붙는 것**으로 나오므로 조용하다.
-        self.gripper_columns = wire.gripper_columns(self.layout.nq_opt // 2)
+        self.gripper_columns = (wire.gripper_columns(self.layout.nq_opt // 2) if gripper_columns is None
+                                else tuple(int(c) for c in gripper_columns))
+        if self._hands is not None:
+            bad = {h: i for h, i in self._hands.items() if not 0 <= i < len(self.gripper_columns)}
+            if bad or not self._hands:
+                raise ValueError(f"hands {self._hands} must map each hand to an index of gripper_columns "
+                                 f"{self.gripper_columns}")
+        elif len(self.gripper_columns) != 2:
+            raise ValueError(f"gripper_columns {self.gripper_columns} is not a (left, right) pair; pass "
+                             "hands={hand: index} for a robot with another number of grippers")
         self.linearizer = CollisionLinearizer(model, self.layout, self.to_config.horizon.planned)
         self.refiner = TrajOptChunkRefiner(model, self.layout, self._scene_fn, self.to_config)
         #: T29 — 손가락 관절을 실제 개도로. 모델에 finger parameter 가 있으면 (RB-Y1
         #: `UrdfSphereChain`) 클라이언트의 gripper 규약(`pi05_infer.py` 의 `RBY1_GRIPPER_OPEN` ·
         #: `GRIPPER_L/R_JOINT`)을 **여기서 읽는다** — 못 읽으면 시작할 때 죽는다 (손가락이 조용히
         #: 닫힌 채 떠 있는 것이 T29 가 고치는 결함이다). 없는 모델(mock)은 예전 그대로.
-        self._finger_map = self._build_finger_map(model, getattr(ag3s, "robot_model", None))
+        self._finger_map = (self._build_finger_map(model, getattr(ag3s, "robot_model", None))
+                            if finger_map is None else finger_map)
         #: 이번 청크의 손가락 상태 기록 (`summary_json.finger_joints`).
         self._last_finger: dict[str, Any] = {}
 
@@ -906,25 +927,41 @@ class SafePolicy:
             out.append(lin)
         return [x for x in out if getattr(x, "param_names", ())]
 
+    def _hand_index(self, hand: str) -> int:
+        """SL5a — the hand's index into `gripper_columns` and into the wire's `[left, right]` gripper
+        pairs (`exec_feedback`). Default (no `hands=`): `0 if hand == "left" else 1`, as before."""
+        if self._hands is None:
+            return 0 if hand == "left" else 1
+        return self._hands[str(hand)]
+
+    def _hand_items(self) -> list[tuple[str, int]]:
+        """SL5a — `[(hand, index)]` in order. Default: `[("left", 0), ("right", 1)]`, as before."""
+        if self._hands is None:
+            return [("left", 0), ("right", 1)]
+        return list(self._hands.items())
+
     def _measured_openings(self) -> tuple[dict[str, float], str]:
         """`({hand: norm}, source)` — 촬영 시점 측정 개도 (클라이언트 규약, 1 = 열림).
 
         1순위는 정책 관측 16D `state` 의 gripper 열 (`self.gripper_columns`, 16D = 7 · 15) 이다 —
         클라이언트 `build_obs` 가 `|qpos| / |RBY1_GRIPPER_OPEN|` 로 쓴 값이고, 같은 요청의 카메라와
         같은 순간에 찍힌다. 없으면 실행 피드백의 `measured_gripper` (같은 식, T18). 둘 다 없으면 빈 dict.
+        손과 열은 `_hand_items` (SL5a; 기본 = 왼 · 오른).
         """
         state = self._pending.get("state")
-        left_col, right_col = self.gripper_columns
+        hands = self._hand_items()
+        cols = [self.gripper_columns[i] for _, i in hands]
         if state is not None:
             arr = np.asarray(state, np.float64).reshape(-1)
-            if arr.shape[0] > right_col and np.all(np.isfinite(arr[[left_col, right_col]])):
-                return ({"left": float(arr[left_col]), "right": float(arr[right_col])},
-                        f"state[{left_col}],state[{right_col}]")
+            if arr.shape[0] > max(cols) and np.all(np.isfinite(arr[cols])):
+                return ({h: float(arr[c]) for (h, _), c in zip(hands, cols)},
+                        ",".join(f"state[{c}]" for c in cols))
         fb = self._pending.get("exec_feedback") or {}
         if fb.get("available") and fb.get("measured_gripper") is not None:
             mg = np.asarray(fb["measured_gripper"], np.float64).reshape(-1)
-            if mg.shape[0] >= 2 and np.all(np.isfinite(mg[:2])):
-                return ({"left": float(mg[0]), "right": float(mg[1])},
+            index = [i for _, i in hands]
+            if mg.shape[0] > max(index) and np.all(np.isfinite(mg[index])):
+                return ({h: float(mg[i]) for h, i in hands},
                         f"exec_feedback.measured_gripper (seq {fb.get('seq')})")
         return {}, "none"
 
@@ -964,11 +1001,10 @@ class SafePolicy:
                     names = set(getattr(model, "param_joint_names", ()))
                     setter({k: v for k, v in values.items() if k in names})
         chunk = self._pending.get("chunk")
-        left_col, right_col = self.gripper_columns
+        cols = {h: self.gripper_columns[i] for h, i in self._hand_items()}
         commanded: dict[str, np.ndarray] = {}
-        if chunk is not None and len(chunk) and chunk.ndim == 2 and chunk.shape[1] > right_col:
-            commanded = {"left": np.asarray(chunk[:, left_col], np.float64),
-                         "right": np.asarray(chunk[:, right_col], np.float64)}
+        if chunk is not None and len(chunk) and chunk.ndim == 2 and chunk.shape[1] > max(cols.values()):
+            commanded = {h: np.asarray(chunk[:, c], np.float64) for h, c in cols.items()}
         path_record: dict[str, Any] = {}
         for lin in self._finger_linearizers():
             default = self.constraint_robot_model.param_vector()
@@ -1121,7 +1157,7 @@ class SafePolicy:
         hand, parent_link, allowed = self._grasp_hand(manipulators)
         cfg = self._latch.config
         signal = grasp_signal_from_feedback(
-            self._pending.get("exec_feedback"), 0 if hand == "left" else 1,
+            self._pending.get("exec_feedback"), self._hand_index(hand),
             cfg.gripper_closed_below)
         newest = max(observations, key=lambda o: o.timestamp)
         q = np.asarray(newest.robot_state, np.float64)
@@ -1227,7 +1263,7 @@ class SafePolicy:
         if manip is not None:
             try:
                 fingers = tuple(f for f in allowed if f != self.hold_links.get(hand, parent_link))
-                col = self.gripper_columns[0 if hand == "left" else 1]
+                col = self.gripper_columns[self._hand_index(hand)]
                 self._last_grasp_record["tip_alignment"] = {
                     "definition": TIP_ALIGNMENT_DEFINITION,
                     "manipulated_id": int(manip.id), "manipulated_state": str(manip.state),
@@ -1310,14 +1346,13 @@ class SafePolicy:
         chunk = self._pending.get("chunk")
         planned = None
         if chunk is not None and len(chunk):
-            left_col, right_col = self.gripper_columns
-            column = left_col if hand == "left" else right_col
+            column = self.gripper_columns[self._hand_index(hand)]
             if chunk.shape[1] > column:
                 planned = float(chunk[0, column])
         fb = self._pending.get("exec_feedback") or {}
         if fb.get("available"):
             measured = np.asarray(fb["measured_gripper"], np.float64)
-            value = float(measured[0 if hand == "left" else 1])
+            value = float(measured[self._hand_index(hand)])
             self._last_latch_signal = {
                 "hand": hand, "source": "measured", "value": value, "planned_first_row": planned,
                 "note": f"gripper signal = measured (feedback seq {fb['seq']}, {hand} {value:.3f})"}

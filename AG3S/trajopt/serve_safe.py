@@ -1034,13 +1034,19 @@ def load_static_geometry(spec: str, model_xml: str, *, links: str):
     return shapes
 
 
-def attention_extractor():
+def attention_extractor(alias: dict | None = None, cameras: Sequence[str] | None = None,
+                        transform=None):
     """정책 응답에서 카메라별 attention 맵을 꺼내는 함수.
 
     **합성 attention 을 몰래 끼워넣지 않는다.** 정책이 `attention` 키를 실어 보내지 않으면 빈
     딕셔너리를 돌려주고, AG3S 는 target 없이 돈다 — 거리장이 target 복셀을 파내지 않아 제약이
     더 보수적이 되는, 안전한 방향의 실패다. 가짜 attention 을 채우면 이 서버가 실측
     파이프라인인 척하게 되고, 결과를 읽는 사람이 그것을 알 방법이 없다.
+
+    SL5a — 다른 로봇의 주입 지점 (셋 다 None 이 기본 = 아래 RB-Y1 동작 그대로):
+    `alias` 정책 카메라 이름 → wire 카메라 이름 (기본 `ALIAS`), `cameras` 이름 그대로 받는 wire
+    카메라 (기본 `wire.DEFAULT_CAMERAS`), `transform(wire_camera, map) -> map` (기본 없음; Panda 는
+    정책 이미지의 좌우 반전을 되돌린다, `AG3S/adapters/panda/attention.unmirror_grid`).
     """
     from AG3S.trajopt import wire
 
@@ -1048,13 +1054,19 @@ def attention_extractor():
     ALIAS = {"cam_high": "zed_left",
              "cam_left_wrist": "wrist_cam_l",
              "cam_right_wrist": "wrist_cam_r"}
+    if alias is not None:
+        ALIAS = dict(alias)
+    known = wire.DEFAULT_CAMERAS if cameras is None else tuple(cameras)
 
     def extract(_policy_obs, result):
         raw = result.get("attention")
         if not raw:
             return {}
-        return {ALIAS.get(k, k): v for k, v in raw.items()
-                if k in ALIAS or k in wire.DEFAULT_CAMERAS}
+        out = {ALIAS.get(k, k): v for k, v in raw.items()
+               if k in ALIAS or k in known}
+        if transform is None:
+            return out
+        return {cam: transform(cam, v) for cam, v in out.items()}
 
     return extract
 
@@ -1095,6 +1107,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="RB-Y1 씬 XML. 로봇 모델(자기 필터·제약)을 만드는 데만 쓴다")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--default-prompt", default=None)
+    # SL5a — 로봇 주입. 기본 rby1 = 이 파일의 서버 그대로 (아래 main 이 한 줄로 갈라진다).
+    ap.add_argument("--robot", choices=("rby1", "panda"), default="rby1",
+                    help="rby1(기본) = 지금 서버. panda = LIBERO Panda (pi05_libero EE delta chunk): "
+                         "AG3S/adapters/panda/server.py 가 Panda profile·chunk 변환·horizon/limits "
+                         "override 로 같은 SafePolicy 를 띄운다 (SL5a)")
     ap.add_argument("--voxel", type=float, default=0.020, help="ESDF 복셀 크기 (m)")
     ap.add_argument("--range-max", type=float, default=2.0, help="점군 최대 거리 (m)")
     ap.add_argument("--links", choices=LINK_GROUPS, default=DEFAULT_LINKS,
@@ -2158,6 +2175,12 @@ def main() -> None:
     for path in (repo, repo / "third_party" / "openpi" / "src"):
         if str(path) not in sys.path:
             sys.path.insert(0, str(path))
+    if args.robot != "rby1":
+        # SL5a — the Panda server (same SafePolicy, Panda profile / chunk adapter injected). rby1 never
+        # reaches this line; everything below is the RB-Y1 server unchanged.
+        from AG3S.adapters.panda import server as _panda_server
+
+        return _panda_server.main(args, ap)
 
     from openpi.policies import policy_config as _policy_config
     from openpi.serving import websocket_policy_server

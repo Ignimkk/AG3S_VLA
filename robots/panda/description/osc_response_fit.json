@@ -1,0 +1,33 @@
+{
+ "model": "y_t = alpha*y_{t-1} + beta*x_t (world frame, per component, shared coefficients)",
+ "data": {
+  "runs": [
+   "20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0",
+   "20261013T092537_714c891415d9_sl4b-dev-pi05only-t0-9e1-4"
+  ],
+  "episodes": 50
+ },
+ "pos": {
+  "alpha": 0.7168853306811694,
+  "beta": 0.0706193331348551,
+  "r2": 0.9922557328302993,
+  "n": 16023,
+  "steady_state_gain": 0.2494372096817311,
+  "rmse": 0.0004988415338512902
+ },
+ "rot": {
+  "alpha": 0.8746653348908529,
+  "beta": 0.031139259616434996,
+  "r2": 0.9623369201595513,
+  "n": 16023,
+  "steady_state_gain": 0.2484488995069122,
+  "rmse": 0.0011177318904718
+ },
+ "provenance": {
+  "script": "outputs/verify/SL5a/scripts/fit_osc_response.py",
+  "date": "2026-10-13",
+  "data_split": "LIBERO Spatial dev init 0-4 only (plan \u00a76.0); pi0.5-only rollouts",
+  "controller": "robosuite 1.4.1 OSC_POSE, LIBERO control_freq 20 Hz",
+  "use": "AG3S/adapters/panda/action.py forward prediction and reverse conversion (adapter model of the controller, not a V11AB change)"
+ }
+}

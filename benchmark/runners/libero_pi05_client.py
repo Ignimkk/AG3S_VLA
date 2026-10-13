@@ -537,13 +537,18 @@ def eval_libero(args) -> int:
     return 1 if errors else 0
 
 
-def run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for, prepare_episode=None) -> int:
+def run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for, prepare_episode=None,
+              observer_for=None, after_episode=None) -> int:
     """Task/episode loop of the official example. ``policy_for(task_id, episode_idx)`` returns
     ``(policy, connector name, extra jsonl fields)``. Returns the number of execution errors.
 
     ``prepare_episode(env, initial_states, task_id, episode_idx)`` (replay only, SL4b) runs right before an
     episode on the task's env -- the replay uses it to repeat the source run's resets of episodes it does not
-    replay. ``None`` (the client) = the official loop unchanged."""
+    replay. ``None`` (the client) = the official loop unchanged.
+
+    ``observer_for(client, geometry, task_id, episode_idx)`` (SL5a safe client) returns the observer to use instead of
+    ``geometry.observe``; ``after_episode(client, stem, row)`` returns extra jsonl fields after the episode's files
+    are written. Both ``None`` = unchanged."""
     episodes_dir = run_dir / "episodes"
     videos_dir = run_dir / "videos"
     total_episodes, total_successes, errors = 0, 0, 0
@@ -566,9 +571,12 @@ def run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for, prepare_e
             geometry = (_GeometryRecorder(args.capture_segmentation, args.capture_float_depth)
                         if args.capture_geometry else None)
             logging.info("\nTask: %s", task_description)
+            observer = None if geometry is None else geometry.observe
+            if observer_for is not None:
+                observer = observer_for(client, geometry, task_id, episode_idx)
             summary, rec, replay_images = run_episode(
                 env, initial_states, episode_idx, task_description, client, args, max_steps,
-                observer=None if geometry is None else geometry.observe,
+                observer=observer,
             )
             stem = episode_stem(args.task_suite_name, task_id, episode_idx)
             suffix = "success" if summary["official_success"] else "failure"
@@ -603,6 +611,8 @@ def run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for, prepare_e
                     "env_camera_depths": True,
                 }
             row.update(extra)
+            if after_episode is not None:
+                row.update(after_episode(client, stem, row))
             jsonl.write(json.dumps(row, ensure_ascii=False) + "\n")
             jsonl.flush()
             os.fsync(jsonl.fileno())
