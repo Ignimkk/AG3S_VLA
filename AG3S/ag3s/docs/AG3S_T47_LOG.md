@@ -133,6 +133,30 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **L1–L9 (F1 한계)** | T46c §2 의 한계 표 번호. 각 한계는 논문 주장 범위의 제약을 짝으로 갖는다 |
 | **PA-1 / DT-02 / DT-03 / DT-05A** | develope_PLAN 의 논문 설계 단위. PA-1 = 논문 설계와 evidence 선별, DT-02 = identity source 와 고정 identity 의 extent 비교 표, DT-03 = identity · extent · contact handling 의 핵심 contrast (closed-loop), DT-05A = field policy (no exemption · global exclusion · LTE) 별 contact · success · stop |
 
+**T51 · T51b (2026-10-12 추가)** — attention head 선택 protocol (filter → calibration → bootstrap → k 선택 → held-out → ablation) 과 명사 query 추가의 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **Ω (후보 집합)** | head 선택이 고르는 후보 cell 전체. T51 의 Ω = {action query × layer L2–17 × head 0–7}. action query = action token, denoise 0, aggregation `agg ∈ {last, mean, first}` → **384 cell** (L0 · L1 제외). T51b 는 Ω 에 명사 token 행 (`noun_target`) 을 넣는다: **명사만 (a) = 128 cell**, **action + 명사 (b) = 512 cell** |
+| **P1–P6 (protocol 6 단계, 결과 전 사전 고정)** | P1 filter (label 없이 이상한 head 를 거름) → P2 calibration 점수 (3D `identity_correct` 비율로 cell 순위) → P3 안정성 (scene bootstrap) → P4 k 선택 (nested CV) → P5 held-out (calibration 에 쓰지 않은 record 평가) → P6 ablation (다른 선택 규칙과 비교) |
+| **P1 filter rule — `low_mass` · `fixed_patch_sink` · `broad_map`** | (cell × camera 마다, 한 camera 라도 해당하면 그 cell 제외) **`low_mass`** = image mass 의 frame median < 0.01 (image 를 거의 보지 않는 head). **`fixed_patch_sink`** = 최빈 argmax patch 의 frame 비율 > 0.5 **이고** top-1 patch mass 몫 > 0.4 (frame 이 바뀌어도 늘 같은 patch 에 몰리는 head). **`broad_map`** = top-1 patch mass 몫 < 0.03 **이고** 평균 위 pixel 의 최대 component 면적 > grid 의 15 % (넓게 퍼진 map). T47 · T47b 의 sink · broad blob 진단 (위 "fixed-patch sink · broad single blob") 을 제외 규칙으로 바꾼 것이고, threshold 는 결과 전에 고정했고 다시 맞추지 않는다 |
+| **2D → 3D 2 단계 선별 · forced cell** | 3D 계산 (MuJoCo replay, 비싸다) 은 P1 을 통과한 cell 중 **2D lift 상위 16 개** 와 **forced cell** (서빙 `last:L8H2` + T47 oracle top-3 `last:L8H3` · `last:L10H7` · `last:L12H4`) 에만 한다. P1 에 걸린 forced cell 은 3D 점수만 보고하고 순위 경쟁에는 넣지 않는다 |
+| **scene · scene mean** | **scene** = 같은 초기 배치 (episode index) 에서 출발한 run 의 묶음. calibration 의 scene 은 5 개: 1800 (`long` · `t2`), 1807, 0, 500, 1200. **scene mean** = 같은 scene 의 run 을 먼저 평균한 뒤 scene 끼리 평균한 값 (P2 의 사전 고정 점 추정). run 이 많은 scene 이 가중을 더 받지 않는다 |
+| **record-mean (T51 의 deviation)** | run (record) 6 개를 가중 없이 평균한 값. 사전 고정은 scene mean 이었으나 첫 구현이 이것으로 순위를 매겼다 (이 절 §4). 보고만 하고 판정에 쓰지 않는다 |
+| **VLA 학습 episode (calibration 확장)** | `ep0` · `ep500` · `ep1200` 은 VLA fine-tune 에 쓰인 episode 의 기록이다 (사용자 판정으로 calibration 에 추가). held-out 은 그대로 VLA 학습에 없는 4 record 다 |
+| **scene-level bootstrap** | scene 을 단위로 복원 추출한다 (같은 scene 의 run 은 함께 뽑힌다). B = 1000, seed 5103. scene 이 5 개라 서로 다른 resample 은 126 개뿐이라 모든 resample 을 세는 exact enumeration 값 (`exact_p_rank1`) 도 함께 낸다 |
+| **P(rank1) · P(top3) · rank-1 tie rate** | resample 마다 P2 순위를 다시 매겼을 때 그 cell 이 1 위 / 상위 3 위 안인 비율. **rank-1 tie rate** = 1 위 점수가 동점이라 2D lift tie-break 가 순위를 정한 resample 의 비율. `stable_single_cell` = full-sample 1 위의 P(rank1) ≥ 0.5 (사전 고정, 되돌아올 지점의 기준) |
+| **k 선택 (nested CV, leave-one-scene-out)** | k ∈ {1, 2, 3} (상위 k cell 의 raw 합) 을 scene 단위 교차검증으로 고른다. test scene 을 뺀 나머지로 순위를 매기고 top-k 합을 test scene 에서 잰다. 규칙: CV 평균이 가장 높은 k (best) 와의 쌍 차이 bootstrap 95 % CI 하한이 0 이하인 가장 작은 k 를 쓴다 (단순성 원칙). **nested** = 각 outer fold 의 k 를 그 안쪽 CV 로 정한다 (`k_inner`) |
+| **held-out scene mean** | held-out 4 record (`headfix` · `ep1800` · `ep1850` · `ep1900`) 도 scene 으로 묶는다: scene1800 = `headfix` + `ep1800`, scene1850, scene1900 → **3 scene**. P5 · P6 의 판정 값 = scene 평균 (record 평균은 함께 보고) |
+| **self label (grasp-event pseudo label)** | 사람 annotation 없이 얻는 target 위치 label. 한 손의 두 finger 가 처음 target 에 닿고 그 손이 이후 `held` 가 되는 시점 (`both_contact`) 의 fingertip pad 중점 (3D) 을 그 **이전 frame** 의 camera 로 투영해 16×16 label 과 3D ball (반지름 = 물체 반지름 + 2 cm) 을 만든다. 물체가 쥐기 전에 정지해 있다는 가정에 기댄다. 실물에서는 `grasp_latch` 의 HELD 가 같은 역할을 한다 (**이 STEP 은 sim 에서만 시험**) |
+| **`proj_err_px` · `hit_pixel` · `hit_patch` · `target_disp_m`** | self label 의 sim 점검. `proj_err_px` = 투영점과 GT target pixel 중심의 거리 (480×640 px, target ≥ 200 px 일 때). `hit_pixel` = 투영점이 GT target pixel 위, `hit_patch` = 그 16×16 patch 의 GT target coverage > 0.05. `target_disp_m` = label frame 들과 grasp frame 사이 target 원점의 이동 최대 (1 cm 초과 frame 수 `n_frames_gt_tol` 를 함께 낸다) — "쥐기 전 정지" 가정의 직접 점검 |
+| **`self_identity`** | self label 로 판정한 identity: chosen cluster 의 점 중 ball 안이 **엄격한 과반** 인 frame 의 비율 (grasp 이전 frame 만). GT `identity_correct` 와 정의가 다르다 |
+| **annotation curve** | GT 로 고른 선택을 소량 사람 annotation 으로 재현하려면 frame 이 몇 개 필요한가: calibration frame n 개를 비복원으로 뽑아 순위를 다시 매기고, 전체 1 위와 같을 확률 (`P(same top-1)`) 과 1 위가 전체 상위 3 안일 확률 (`P(top-1 in reference)`) 을 낸다 (exploratory, frame 을 pool 해서 뽑는다) |
+| **LIBERO task aggregation** | LIBERO 는 task (20 개) × episode (2 개) 다. 같은 task 의 두 episode 를 함께 묶어 점 추정과 bootstrap 을 한다 (scene 단위와 같은 원칙). primary 지표는 **agent view 2D lift** (3D `identity_correct` 불가) |
+| **noun-only Ω (a) · combined Ω (b)** | (a) 후보가 명사 행 128 cell 뿐, (b) action 384 + 명사 128 = 512 cell. 같은 P1–P6 를 각각 돌려 어느 query 의 cell 이 뽑히는가를 본다. `p_rank1_sum_by_query_family` = P(rank1) 을 query family (action / noun) 별로 합친 값 |
+| **scene-level paired difference (T51b (c))** | 두 선택 (예: 명사 best 와 action best) 의 held-out scene 평균 `identity_correct` 의 **scene 별 차를 평균** 한 값과 그 scene bootstrap 95 % CI (B = 1000, seed 5107 + 3^3 = 27 resample 전수). frame 단위 McNemar 는 frame 을 독립으로 세므로 **참고값** |
+| **T51 · T51b** | T51 = head 선택 protocol 공식화 (RB-Y1 sim P1–P6 + self label + LIBERO 2D). T51b = 같은 protocol 에 명사 query 행을 추가해 action query 와 같은 기준으로 비교 |
+
 ---
 
 ## 진행 현황 — T47 이후
@@ -145,8 +169,8 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **T49** 명사 token query: prefix 의 target 명사 · "basket" token → image attention 으로 target · 목적지 map | action token query (L8H2) 대신 명사 token 을 query 로 쓰면 target · 목적지를 더 잘 가리키는가 | ~~**진행 중 (2026-10-12)** — 구현 단계 (`handoff/T49.impl.md` 있음), verify 대기. task: [`handoff/T49.task.md`](handoff/T49.task.md). 아직 기록할 측정 없음~~ → **측정 완료 (2026-10-12).** GPU extract 1040 frame 오류 0. held-out (4 record pilot, record-mean): 2D `peak_on_target` 1.000 (L8H2 0.693), 잡은 뒤 1.000 (L8H2 0.382), target ∧ 목적지 분리 `both_correct` 0.981, prompt 교체 시 map 이 새 과일로 옮겨간 frame 157/164. **그러나 3D `identity_correct` 0.800 (L8H2 0.900), purity 0.700 (0.933), non-target seed 손실 420.3 / frame (190.3).** 서빙 cell 은 L8H2 유지, 서빙 반영 없음. task: [`handoff/T49.task.md`](handoff/T49.task.md). 아래 "T49" 절 |
 | **T49b** 명사 query 3D 열세 확인 (exploratory): σ ∈ {0, 1} × k ∈ {1, 2, 3} | 명사 query 의 3D 열세가 smoothing · 합산 설정 때문인가 | **측정 완료 (2026-10-12, 채택 근거 아님).** 모든 변형에서 `identity_correct` 0.800 – 0.850, purity 0.700 – 0.831 로 L8H2 (0.900 · 0.933) 에 못 미침. non-target seed 손실은 σ=0 에서 오히려 큼 (512.8 – 583.4 대 σ=1 394.5 – 420.3, L8H2 190.3). cell · k · σ 선택은 T51b 로. 아래 "T49b" 절 |
 | **T50** HSR 의 instruction 둔감은 fine-tuning 탓인가 (T50a LoRA feature CPU + T50b `pi05_base` GPU) | probe 학습 · representation · fine-tuning 중 원인 분리 | **측정 완료 (2026-10-12).** 사전 고정 decision rule 의 출력: LoRA · base 모두 counterfactual probe 가 기준 (C0 ≥ 0.95 ∧ C1_instr ≥ 0.80, episode median) 미달 → **"fine-tuning 탓이 아니다"** (규칙이 정한 문구). feature 민감도 r (full, episode median) 은 LoRA 0.611 · base 0.999. 아래 "T50" 절 |
-| **T51** attention head 선택 protocol 공식화 (RB-Y1 sim + 실물용 grasp-event label + LIBERO) | head · layer 를 하나로 고정하는 선택의 당위성 | **진행 중 (2026-10-12)** — task: [`handoff/T51.task.md`](handoff/T51.task.md). 아직 기록할 측정 없음 |
-| **T51b** head 선택 protocol 에 명사 query 행 추가 | action query 와 명사 query 를 같은 기준으로 비교 | **진행 중 (2026-10-12)** — task: [`handoff/T51b.task.md`](handoff/T51b.task.md). 아직 기록할 측정 없음 |
+| **T51** attention head 선택 protocol 공식화 (RB-Y1 sim + 실물용 grasp-event label + LIBERO) | head · layer 를 하나로 고정하는 선택의 당위성 | ~~**진행 중 (2026-10-12)** — task: [`handoff/T51.task.md`](handoff/T51.task.md). 아직 기록할 측정 없음~~ → **측정 완료 (2026-10-12, 사용자 판정 대기).** calibration 6 record · 5 scene (ep0 · ep500 · ep1200 = VLA 학습 episode 추가), scene mean primary. P1 filter 가 L8H2 를 `low_mass` 로 제외 (cam_high mass median 0.006293 < 0.01). P2 GT 3D `identity_correct` 1 위 `last:L12H4` 0.691. **사전 고정 안정성 기준 (P(rank1) ≥ 0.5) 미충족: 0.429 → 단일 head 고정은 주장하지 않는다.** P4 는 단순성 규칙으로 k\* = 1 (CV 평균 최고는 k = 3). held-out (3 scene) 에서 `last:L12H4` · `last:L12H3` · `last:L8H2` 가 0.911 로 동률. self label 은 `self_identity` 1.0 으로 포화해 2D lift tie-break 가 선택을 정했다. LIBERO (2D lift, task 단위) 1 위 `mean:L12H3`. 집계 단위 deviation (record-mean → scene mean) 을 중간에 발견해 고침. 아래 "T51 · T51b" 절 |
+| **T51b** head 선택 protocol 에 명사 query 행 추가 | action query 와 명사 query 를 같은 기준으로 비교 | ~~**진행 중 (2026-10-12)** — task: [`handoff/T51b.task.md`](handoff/T51b.task.md). 아직 기록할 측정 없음~~ → **측정 완료 (2026-10-12, 사용자 판정 대기).** (a) 명사만 Ω: GT 1 위 `noun_target:L10H7` P(rank1) 0.687 (상위 10 cell 의 점수 차 0.007 이내), self 1 위 `noun_target:L8H6` 0.529. (b) action + 명사 Ω: GT 1 위 `last:L12H4` P(rank1) 0.753 (action family 합 0.918), self 1 위 `noun_target:L8H6`. (c) held-out scene mean: 명사 best 0.867 대 action best 0.911, scene 단위 차 −0.044 (95 % CI [−0.133, 0.000], scene 3 개). 명사가 더 낫다는 증거는 없다. 아래 "T51 · T51b" 절 §12 |
 | **T46b** F1 을 켠 뒤 늘어난 close 이후 uncertified HOLD 의 원인 (진단, CPU offline, T46 의 후속) | F1 이 grasp 이후 처리와 충돌해서 HOLD 가 늘었는가, 아니면 다른 원인인가 — F1 을 develope_PLAN §0.10.1-3 의 방법으로 채택할 수 있는가 | **측정 완료 (2026-10-12).** close 이후 uncertified HOLD 는 전부 **placed phase** (C1a 37 / 37 · C1aF1 130 / 130 · C1aF1F2 118 / 118 chunk) 이고, 실패 항목은 grounding `no_seed` (C1a 37 · C1aF1 129 · C1aF1F2 116 chunk, `n_clusters = 0`). 그 HOLD chunk 의 F1 기록은 0 / 130. 가설 (a) F1 이 grasp 이후 처리와 충돌 · (b) non-target 근거 감소 · (c) 분모 효과는 **반박**, (d) placed 뒤 `no_seed` 인증 공백은 **확인**. 같은 HOLD 가 F1 이 없는 CL2 에도 있다 (C0 73 · C1bp 70). F1 이 `no_seed` run 을 계통적으로 늘렸는지는 **모름** (3 / 0 / 1, p = 0.25). 아래 "T46b" 절 |
 | **T46c** F1 채택 (한계 L1–L9 명시) · W1 (A12) 구현 · PA-1 ablation 초안 | F1 을 현재 extent 방법으로 채택하는가, close 이후 HOLD 를 어떻게 다루는가, ablation 을 어떻게 구성하는가 | **F1 채택 (사용자 판정, 2026-10-12) — 한계 L1–L9 를 함께 기록.** W1 구현은 **진행 중 (결과 없음)**. PA-1 ablation 구성은 **사용자 판정 대기**. 아래 "T46c" 절 |
 
@@ -175,6 +199,13 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | T46c — F2 (`--owned-ambiguous remove`) 는 채택하지 않고 대조 arm 으로만 남긴다 | **lead 의 정리 (T46c.task.md §1, 사용자 판정 문장에 직접 나오지 않음).** 이유: 이웃 과일 seed 를 지운다 (offline held-out 에서 잃은 이웃 seed 2,463) | 16D |
 | T46c — close 이후 HOLD 의 고칠 곳은 F1 이 아니라 인증 규칙 (W1), W1 은 모든 arm 에 같이 적용한다 | **lead 의 설계 결정 (T46c.task.md §3 · §4).** W1 구현 (A12) 은 진행 중이고 결과가 없다. 사용자 판정이 아니다 | 16D |
 | (**제안, 판정 대기**) PA-1 ablation 구성 — DT-02 extent (주) · identity · DT-05A contact handling | **lead 의 초안 (T46c.task.md §5).** 판정 필요: (a) visible-target oracle extent arm 을 만들지, (b) DT-05A 용 비권한 link 범위, (c) 표본 수 (18 쌍 유지 · 확대) | 16D |
+| T51 — head · layer 를 하나로 고정해 쓰려면 선택의 당위성이 있어야 하고 실물 로봇 · LIBERO 에서도 같은 절차로 고를 수 있어야 한다. 범위는 **RB-Y1 sim protocol + 실물용 grasp-event self label 검증 + LIBERO**, primary 선택 지표는 **3D `identity_correct`**, 2D lift 는 depth 가 없는 플랫폼용 보조 지표 | 사용자 판정 (2026-10-12, `handoff/T51.task.md`) | 16D (+ `pi05_libero`) |
+| T51 판정 보완 — **LIBERO L1 승인 (KNOWS 재현 확인 없이)**: 저장 frame 에 `pi05_libero` attention pass 를 한 번 돌린다 (새 rollout 없음). **RB-Y1 calibration 확장 승인**: `ep0` · `ep500` · `ep1200` (**VLA 학습에 쓰인 episode 의 기록**) 을 calibration 에 추가, 결과에 학습 episode 임을 명시. bootstrap 은 **scene 단위** | 사용자 판정 (2026-10-12, T51.impl.md 확인 후 · 결과 전). 근거: calibration 이 3 record (2.5 scene) 라 서로 다른 resample 이 10 개뿐이고 P4 inner CV 가 1 episode 로 학습 | 16D (calibration 6 record · 5 scene) |
+| T51 집계 단위 — P2 점 추정은 **scene mean** (사전 고정). 첫 구현이 record 평균으로 순위를 매긴 것을 verifier 가 발견해 `--aggregate scene` 으로 고쳤고, **scene mean 결과가 primary**, record 평균은 "사전 고정과 다른 방식" 으로 보고만 한다. held-out 비교도 held-out scene mean, LIBERO 는 task 단위 | lead (2026-10-12, 결과 전 고정 · 수정). 사용자 판정이 아니다. 이 절 §4 | 16D |
+| T51 — **서빙 반영은 이 STEP 에서 하지 않는다.** 선택 결과가 L8H2 와 다르더라도 교체는 별도 판정 | task 의 되돌아올 지점 (lead). 서빙 cell 은 T47 판정대로 L8H2 | 16D |
+| T51 — 사전 고정 안정성 기준 (full-sample 1 위의 P(rank1) ≥ 0.5) 를 GT 선택이 **충족하지 못했으므로 (0.429) 단일 head 고정을 주장하지 않는다** | **사전 고정 규칙의 출력이다 (사용자 판정이 아니다).** task 의 되돌아올 지점이 정한 문구. 후속 (k > 1 · 명사 query) 은 T51b 와 판정 대기 항목 | 16D (5 scene) |
+| T51b — action query 와 같은 protocol 을 명사 query 행에 돌려 비교한다 (offline GPU prefix pass, GPU lock) | 사용자 판정 (2026-10-12, T49 결과 후). T51 은 그대로 끝내고 추가 | 16D |
+| T51b — **명사 단독 Ω 의 3D 강제 포함 cell = T49 primary 명사 cell L8H6 · L5H4 · L4H2** (합친 Ω 에서는 T51 의 forced 에 이 3 개를 더한다). **(c) 비교의 primary 통계 = scene 단위 paired 차이 + scene bootstrap 95 % CI**, frame 단위 McNemar 는 참고값 | lead (T51b.impl.md ★ 두 항목에 대한 판정, 결과 전 고정). 사용자 판정이 아니다. 구현이 이 forced 를 코드에 넣지 않은 일은 §12 에 기록 | 16D |
 
 ---
 
@@ -202,6 +233,13 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 15 | (T46b 가 추가) **F1 이 placed `no_seed` run 을 계통적으로 늘리는가** | F1 만 3 · C1a 만 0 · 둘 다 1 (15 pair, McNemar exact p = 0.25). 연결은 궤적 분기를 통해서만 있고 (F1 기록 0 / 130), 표본이 작다 | **모름** |
 | 16 | (T46b 가 추가) **W1 · phase-gated F1 의 closed-loop 효과, 그리고 placed HOLD 가 completion time · safe success 에 주는 영향** | W1 수치는 기록 chunk 위 per-chunk what-if 이고, HOLD 가 풀리면 이후 궤적이 달라진다. F1 의 `no_seed` run 4 개는 모두 task success 이고 `no_seed` 시작이 place 이후다. 홈 복귀까지의 시간은 재지 않았다 (`T46b.verify.json not_measured`) | **측정 안 됨** (W1 구현은 T46c A12 진행 중) |
 | 17 | (T46c 가 추가) **F1 한계 L1–L9 를 줄이는 측정** — 표본 확대 · banana · 비구형 물체 · 실물 · 다른 checkpoint · real-time | T46c §2 의 한계 표. 이 중 F1 의 closed-loop 효과는 18 쌍 pilot 이다 | **측정 안 됨** |
+| 18 | (T51 이 추가) **GT 선택의 안정성 — calibration scene 확대** | scene 5 개 (그중 3 개는 VLA 학습 episode) 에서 `last:L12H4` 의 scene 별 `identity_correct` 가 0.363 – 0.885 로 흩어진다. P(rank1) 0.429 < 0.5. 학습에 쓰이지 않은 scene 을 더한 calibration 은 하지 않았다 | **측정 안 됨** (원인은 scene 수 부족인지 head 간 실제 동률인지 미확정) |
+| 19 | (T51 이 추가) **held-out 의 변별력** — 선택 `last:L12H4` · `last:L12H3` · serving `last:L8H2` 가 3 scene · 60 frame 에서 같은 frame 을 맞히고 같은 frame 을 틀린다 (0.911 동률) | 이 held-out 으로는 세 cell 을 가를 수 없다. 더 큰 held-out · 학습에 없는 물체 · 다른 scene 이 필요 (#2 와 같은 한계) | **측정 안 됨** |
+| 20 | (T51 이 추가) **self label 이 cell 을 가르는가, 실물에서 되는가** | sim 에서 `self_identity` 가 상위 9 cell 모두 1.0 으로 포화해 선택은 2D lift tie-break 가 정했다. grasp event 가 없는 record 가 10 개 중 4 개, "쥐기 전 정지" 가정은 6 개 중 3 개 record 에서 1 cm 를 넘어 움직였다. 실물 (`grasp_latch` HELD) 은 시험하지 않았다 | **측정 안 됨** (포화의 원인은 미확정) |
+| 21 | (T51 이 추가) **P1 `low_mass` 제외의 의미** — L8H2 가 cam_high 의 mass median 0.006293 으로 제외됐으나 held-out 에서 선택과 동률이고 LIBERO 에서도 2D lift 4 위 (제외 안 했을 때) | threshold (0.01) 는 사전 고정이라 다시 맞추지 않았다. `low_mass` 가 head 의 유용성을 반영하는지는 재지 않았다 | **측정 안 됨** |
+| 22 | (T51 이 추가) **LIBERO 3D · KNOWS 재현** — LIBERO 는 agent view 2D lift 만 있고 3D `identity_correct` 가 없다. KNOWS 재현 (`--init zeros`) 은 사용자 판정으로 하지 않았다. wrist GT 는 저장되어 있지 않다 | RB-Y1 에서 2D lift 1 위 (`last:L12H3`) 는 3D 에서 6 위였다 (§6). 2D 만으로 고른 LIBERO 선택이 3D 에서도 같은지는 모른다 | **측정 안 됨** |
+| 23 | (T51b 가 추가) **명사 대 action query 의 일반화 · 후보 구성 의존** — held-out 3 scene 의 scene 단위 차의 CI 가 0 에 닿는다. 합친 Ω 의 2D 상위 16 은 전부 명사 cell 이라 action cell 은 forced 3 개 (`last:L8H3` · `last:L10H7` · `last:L12H4`) 로만 3D 에 들어갔다 | (b) 의 P(rank1) 0.753 은 그 후보 구성 아래의 값이다. action 후보를 넓힌 합친 Ω 는 돌리지 않았다. LIBERO 의 명사 행은 범위 밖 | **측정 안 됨** |
+| 24 | (T51 · T51b 가 추가) **grasp latch 를 포함한 e2e · cuRobo backend · 서빙 반영 후의 효과** | T51 의 3D 는 legacy ESDF offline replay (subtask gate off, grasp latch 없음). cuRobo 회귀 기준선은 GPU 미사용 지시로 돌리지 않았다 (`T51.verify.json not_measured`) | **측정 안 됨** |
 
 ---
 
@@ -2004,3 +2042,394 @@ develope_PLAN DX-01 (identity / extent 분리) · DX-04 (contact handling) · DT
 - **측정 (이 절이 인용)**: `handoff/T46.verify.json` · `handoff/T46-CL3.verify.json` · `handoff/T46b.verify.json`. **T46c 자체의 verify.json 은 아직 없다** (W1 결과 없음).
 - **figure**: 새로 만든 것 없음 — [`t46-cl3-*`](figures/t46/) (CL3) · [`t46b-*`](figures/t46/) (T46b) 를 링크했다.
 - 요청 문서: [`handoff/T46c.task.md`](handoff/T46c.task.md) (commit `6d134a69`). commit 은 하지 않았다.
+
+
+## T51 · T51b — attention head 를 하나로 고정해 써도 되는가: 사전 고정한 선택 protocol 과 명사 query 비교 (2026-10-12 KST)
+
+**이 절이 답하는 물음 (목적).** AG3S 는 attention 이 가리키는 3D cluster 에 target 이름을 붙이는데, 그 attention 은 지금 고정된 cell 하나 (`denoise 0 · agg last · layer 8 · head 2`, 이하 **L8H2**) 에서 온다. 이 cell 은 14D 모델 · `cam_high` 1 대 · 28 frame 에서 `peak_on_target` 하나로 골랐고 (T47 절 서술), 절차로 설명되지 않는다. T47 은 논문 (Kang et al., arXiv 2503.06287) 의 label-free 기준이 action-token query 에서 sink head 와 넓게 퍼진 map 을 고른다는 것을 보였다. 리뷰어가 납득하려면 **"이 규칙을 따르면 어느 모델 · 로봇에서도 같은 방식으로 cell 이 정해지고, 그 선택이 얼마나 안정적인지 수치로 말할 수 있다"** 가 필요하다. T51 은 그 규칙을 **결과를 보기 전에 고정**한 protocol (P1 filter → P2 calibration → P3 bootstrap 안정성 → P4 k 선택 → P5 held-out → P6 ablation) 로 만들어 RB-Y1 sim 에서 돌리고, 실물용 label 없는 대안 (grasp-event self label) 과 다른 모델 (LIBERO `pi05_libero`) 에서도 돌려 본다. T51b 는 T49 의 명사 token query 행을 같은 후보 집합 Ω 에 넣어 **action query 와 명사 query 를 같은 기준으로** 비교한다.
+
+**한 줄 결과 (before → after).**
+
+- **before.** 서빙 cell L8H2 는 절차 없이 골라졌고, 시험한 label-free 대안 (T47) 은 실패했다. "하나로 고정" 에 데이터의 근거가 없었다.
+- **after (RB-Y1, scene mean primary).** 사전 고정 절차의 출력은 **GT 3D `identity_correct` 1 위 `last:L12H4` (scene mean 0.691, 95 % CI [0.515, 0.840])** 이다. 그러나 **bootstrap 에서 1 위가 되는 확률 P(rank1) 은 0.429 로 사전 고정 기준 (≥ 0.5) 에 못 미쳤다.** 규칙대로 **"단일 head 고정" 은 주장하지 않는다.** P4 는 단순성 규칙으로 k\* = 1 을 냈으나 CV 평균이 가장 높은 것은 k = 3 이다 (차이 CI 가 0 을 포함).
+- **held-out (3 scene · 60 frame).** 선택 `last:L12H4`, self label 로 고른 `last:L12H3`, 서빙 `last:L8H2` 가 **모두 scene mean 0.911 로 동률**이고 frame 단위로도 같은 frame 을 맞힌다. 논문 label-free top-3 는 0.000, head 평균 0.867, 무작위 cell 20 개의 median 은 0.756. 이 held-out 은 세 cell 을 가르지 못한다.
+- **P1 은 L8H2 를 제외한다** (`low_mass`, cam_high 의 image mass median 0.006293 < 0.01). 그런데 held-out 에서 선택과 동률이다. threshold 는 다시 맞추지 않고 측정된 대로 기록한다.
+- **self label** (사람 annotation 없음): 선택 cell 은 GT 와 다르다 (`last:L12H3` 대 `last:L12H4`, 상위 3 의 겹침 1) 그러나 `self_identity` 가 상위 9 cell 모두 1.0 으로 **포화**해 선택을 2D lift tie-break 가 정했다. held-out 의 GT `identity_correct` 차이는 4 / 4 record 에서 0.
+- **LIBERO** (2D lift primary, task 단위, `pi05_libero`): 1 위 `mean:L12H3`, task bootstrap P(rank1) 1.0. 3D 지표는 없다.
+- **T51b.** 명사만: GT 1 위 `noun_target:L10H7` (P(rank1) 0.687), 합친 Ω: GT 1 위 `last:L12H4` (P(rank1) 0.753, action family 합 0.918). held-out scene mean 은 **명사 best 0.867 대 action best 0.911 (scene 단위 차 −0.044, 95 % CI [−0.133, 0.000])**. 명사가 더 낫다는 증거는 없다.
+- **서빙 반영 없음.** 서빙 cell 은 L8H2 그대로다.
+
+**정직하게 먼저 적어 둘 것 (결과를 읽기 전에).**
+
+| # | 무엇 | 어디 |
+|---|---|---|
+| 1 | **집계 단위 deviation.** 사전 고정은 scene mean 인데 첫 구현은 record 평균으로 순위를 매겼다. 실행 중 verifier 가 발견했고 `--aggregate scene` 으로 고쳐 **scene 단위로 전 단계를 다시 돌렸다.** 이 절의 primary 는 scene mean 이다. record 평균 결과는 "사전 고정과 다른 방식" 으로 따로 보고한다 | §4 |
+| 2 | **안정성 기준 미충족.** GT 선택의 P(rank1) = 0.429 < 0.5. 되돌아올 지점에 따라 단일 head 고정을 주장하지 않는다 | §7 |
+| 3 | **L8H2 는 P1 low_mass 로 제외됐지만 held-out 에서 선택과 같다.** threshold 를 다시 맞추지 않았다 | §5 · §9 |
+| 4 | **self label 포화.** rank-1 tie rate 1.0 이라 self 선택은 2D lift tie-break 로 정해졌다. "self 와 GT 의 선택이 (부분) 일치한다" 를 self label 의 검증으로 읽지 않는다 | §10 |
+| 5 | **T51b 의 forced cell 구현 불일치.** lead 가 고정한 명사 forced cell 3 개가 코드의 forced 목록에 없었다. 이 3 개가 이미 모든 선별에 들어 있어 결과는 바뀌지 않았다 | §12 |
+| 6 | **LIBERO 는 2D primary 만.** 3D `identity_correct` 가 불가능하고 KNOWS 재현은 하지 않았다 | §11 |
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `T51.verify.json` · `T51b.verify.json` 의 `numbers` 에서만 왔다. **T51 은 `numbers.scene_mean_primary` 블록이 PRIMARY** 이고, 그 밖의 블록 (`p3_bootstrap` · `p4_ksel_record_mean_code_deviation` · `p5_heldout_record_mean_selection` · `p6_ablation_heldout` · `self_label` · `annotate_curve_gt_exploratory`) 은 record 평균 chain (사전 고정과 다른 방식) 이다. 해당 표에 "record-mean" 이라 적었다. 같은 파일 숫자의 나눗셈 · 덧셈은 "(산출)", 해석은 "(미측정 해석)" 이다.
+- **frame 은 독립 trial 이 아니다.** 판정은 scene 단위 (calibration 5 scene, held-out 3 scene) 로 한다. frame 단위 값은 참고다.
+- **calibration 의 `ep0` · `ep500` · `ep1200` 은 VLA 학습에 쓰인 episode 의 기록이다** (사용자 판정으로 추가). held-out 4 record 는 VLA 학습에 없다.
+- 회귀 기준선: legacy `esdf_rollout` (`run_16d_ep1800`) 이 start 시점과 scene 재실행 시점 모두 `violated_start` 14 / 15 · `has_target` 15 / 15 · frame 0 clearance_before −29.031048 mm 로 일치. cuRobo 기준선은 GPU 미사용 지시로 돌리지 않았다.
+
+### 1. 사용자 판정과 사전 고정 (타임라인 · KST)
+
+| # | 판정 · 사건 (2026-10-12) | 이 절에서 |
+|---|---|---|
+| 1 | **(사용자 판정)** head · layer 를 하나로 고정해 쓰려면 선택의 당위성이 있어야 하고 실물 · LIBERO 에서도 같은 절차로 고를 수 있어야 한다. 범위 = RB-Y1 sim protocol + 실물용 grasp-event self label + LIBERO. **primary = 3D `identity_correct`**, 2D lift 는 depth 없는 플랫폼용 보조 | 전체 |
+| 2 | **(사용자 판정, T51.impl.md 확인 후 · 결과 전)** LIBERO L1 승인 — **KNOWS 재현 확인 없이** 저장 frame 에 `pi05_libero` attention pass 를 한 번 돌린다 (새 rollout 없음). primary = 2D lift. **calibration 확장 승인** — VLA 학습 episode `ep0` · `ep500` · `ep1200` 추가 (결과에 학습 episode 임을 명시). bootstrap 은 scene 단위 | §3 · §11 |
+| 3 | **(lead, 결과 전 고정)** P2 점 추정은 scene mean, LIBERO 는 task 단위 | §4 |
+| 4 | **(lead, verifier 발견 후 수정)** 첫 구현이 record 평균이었음 → `--aggregate scene` 추가, scene mean 이 primary. held-out 비교도 held-out scene mean | §4 |
+| 5 | **(사용자 판정, T49 결과 후)** T51b 추가. offline GPU prefix pass (GPU lock) 승인 | §12 |
+| 6 | **(lead, T51b.impl.md ★ 판정, 결과 전)** 명사 forced cell = T49 primary 명사 cell L8H6 · L5H4 · L4H2. (c) 의 primary 통계 = scene 단위 paired 차이 + scene bootstrap CI, McNemar 는 참고 | §12 |
+
+| 시각 (KST) | 무엇 | 출처 |
+|---|---|---|
+| 19:28:18 – 19:29:01 | GPU: RB-Y1 extra attention parity (`ep1807` 첫 4 frame, rc 0, wall 43.9 s, 시작 전 memory 0 MiB) | `gpu_extract[0]` 10:28:18Z – 10:29:01Z |
+| 19:29:03 – 19:32:35 | GPU: `ep0` · `ep500` · `ep1200` attention extract (rc 0, wall 211.9 s) | `gpu_extract[1]` |
+| 19:32:40 – 19:37:43 | GPU: LIBERO `pi05_libero` attention pass (40 episode, rc 0, wall 302.9 s) | `gpu_extract[2]` |
+| (그 뒤, CPU) | `gt_extra` → P1–P6 (record 평균 chain) → verifier 가 집계 단위 deviation 발견 → scene 평균으로 전 단계 재실행 → T51b 추출 · P1–P6 · (c) | `runs` |
+
+### 2. Protocol (사전 고정)
+
+후보 Ω = {query × layer L2–17 × head 0–7}. T51 의 query = action token (denoise 0, agg ∈ {last, mean, first}) → 384 cell. 모든 threshold (0.01 · 0.5 · 0.4 · 0.03 · 15 % · 상위 16 · k ∈ {1, 2, 3}) 는 lead 가 결과를 보기 전에 정했다. T47b 에서 관찰한 sink (L14H5) 와 넓은 map (L4H1 · L2H0) 을 걸러내는 최소 조건이다. **"이 값들로 L8H2 가 제외되는지는 결과에서 보고만 한다. 값을 다시 맞추지 않는다"** 가 task 에 적혀 있었다.
+
+| 단계 | 정의 | label |
+|---|---|---|
+| **P1 filter** | calibration 전체에서 cell × camera 마다 계산. 제외: `low_mass` (image mass median < 0.01) · `fixed_patch_sink` (최빈 argmax patch 비율 > 0.5 이고 top-1 patch 몫 > 0.4) · `broad_map` (top-1 몫 < 0.03 이고 최대 component > grid 15 %). 한 camera 라도 해당하면 cell 제외 | 아니오 |
+| **P2 calibration 점수** | cell 마다 primary **3D `identity_correct` 비율** (T47b 정의, raw · σ=0, scene mean). 3D 는 비싸서 **2D lift 상위 16 + forced (L8H2 + T47 oracle 3)** 에만 | 예 (GT 또는 self label) |
+| **P3 안정성** | scene bootstrap B = 1000: cell 별 P(rank1) · P(top3) · 점수 95 % CI. 기준 P(rank1) ≥ 0.5 | 예 |
+| **P4 k 선택** | k ∈ {1, 2, 3} (상위 cell raw 합) 을 leave-one-scene-out nested CV 로. 차이가 CI 안이면 더 작은 k | 예 |
+| **P5 held-out** | calibration 에 쓰지 않은 record: same-scene `headfix` · `ep1800`, new-scene `ep1850` · `ep1900` (T47 과 같은 split). 항상 GT `identity_correct` 로 채점 | 예 |
+| **P6 ablation** | 같은 held-out: 논문 label-free top-3 (σ=0 · σ=1) · head 평균 · 무작위 cell 20 개 (P1 통과 cell, seed 5106) · GT-oracle (T47 top-3) · 서빙 L8H2 · restricted oracle (후보 중 held-out 최고 단일 cell, 상한 참고) | 예 |
+
+- **"단일 head 고정 여부" 는 P4 와 P3 의 안정성으로 정해진다** — 고정이 데이터의 결론이 되게 한다는 것이 task 의 원칙이다.
+- 누수 방지: P4 의 모든 training set 마다 그 set 만으로 2D → 3D 선별을 다시 한다 (scene fold 5 + 안쪽 10 = 15 개, `candidates_3d` 는 그 합집합). 구현 단위 시험 (63 test) 이 test scene 점수를 바꿔도 fold 선택이 불변임을 확인했다 (`pytest_t51` 63 passed, 24.0 s).
+
+### 3. calibration 확장과 GPU 추출 (RB-Y1)
+
+| record | scene | frame | target | VLA 학습 episode | 비고 |
+|---|---|---:|---|---|---|
+| `long` | scene1800 | 50 | — | 아니오 | T47 selection record |
+| `t2` | scene1800 | 75 | — | 아니오 | `long` 과 같은 scene |
+| `ep1807` | scene1807 | 75 | — | 아니오 | |
+| **`ep0`** | scene0 | 113 | orange | **예** | 추가. target ≥ 200 px 인 frame: cam_high 97 · left wrist 113 · right wrist 85 |
+| **`ep500`** | scene500 | 113 | banana | **예** | 추가. 24 · 25 · 111 |
+| **`ep1200`** | scene1200 | 113 | pear | **예** | 추가. 94 · 23 · 113 |
+| held-out `headfix` · `ep1800` · `ep1850` · `ep1900` | scene1800 · scene1800 · scene1850 · scene1900 | 각 15 | | 아니오 | P5 · P6 |
+
+- 추가 3 run 의 attention 은 T47 asset 을 만든 producer (`pi05_attention`) 를 수정 없이 subprocess 로 돌려 같은 축 · 같은 checkpoint 에서 뽑았다. 이 환경이 T47 asset 을 재현하는지 `ep1807` 첫 4 frame 으로 확인했다: **bit 동일은 아니다** (`bitwise_equal` false, max |Δ| 0.003906, mean |Δ| 1e-06, argmax patch 일치 0.995885 (d0 0.995563), 서빙 cell 의 Pearson r 0.999998). float16 저장과 GPU reduction 순서가 원인일 수 있으나 분리하지 않았다 (미측정 해석).
+- GT cache (CPU, MuJoCo osmesa) 는 T47 의 `extract_gt` 를 그대로 불러 만들었다. 3 run 의 render 대 기록 RGB: `rgb_mad_max` 0.009619 · 0.015745 · 0.195871 (`ep0` · `ep500` · `ep1200`), `rgb_frac_gt16_max` 0.00012 · 0.000199 · 0.003647.
+- GPU: 시작 전 compute process 없음 (memory 0 MiB), nvidia-smi peak 8802 MiB (RB-Y1), 8804 MiB (LIBERO).
+- T51 실행 중 다른 세션이 T46c 관련 파일 5 개 (`config.py` · `pipeline.py` · `types.py` · `wire.py` · `serve_safe.py`) 를 바꿨다. verifier 가 같은 입력으로 재측정해 **108 / 108 row 가 같음** (`ag3s_ms` 제외) 을 확인했다.
+- (`numbers.check` 는 GPU 추출 전 snapshot 이다: `all_ok` false, "no attention npz". 이후 `check` 는 rc 0.)
+
+### 4. 집계 단위 deviation — 실행 중 발견 (정직한 기록 1)
+
+**사전 고정.** P2 의 점 추정은 **scene mean** (같은 scene 의 run 을 먼저 평균 → scene 끼리 평균). `long` · `t2` 는 같은 scene 이라 한 scene 으로 센다.
+
+**발견.** T51 verifier 가 보고했다: 처음 구현은 P2 · P3 · P4 의 순위를 **record 6 개의 가중 없는 평균** 으로 매겼다. 그래서 scene1800 (`long` · `t2`) 이 6 개 중 2 개의 가중을 받았다. P3 의 scene bootstrap 도 resample 안에서는 record 평균이었다. 이 구현의 GT 1 위는 `mean:L12H4`, 사전 고정 (scene mean) 의 1 위는 `last:L12H4` 로 달랐다.
+
+**수정.** lead 가 `--aggregate scene` (P2 · P3 · P4 · P5 · P6 전부 scene mean, held-out 은 held-out scene mean) 을 요청했다. 구현은 기본값 `record` 를 유지해 (진행 중이던 verifier stage 를 깨지 않기 위해) `--aggregate scene` 을 더했고, 출력은 `__scene` 이름으로 따로 썼다. **verifier 가 scene 단위로 P2 · P3 · P4 · P5 · P6 을 전부 다시 돌렸고, 이 절의 primary 는 그 결과다.** 3D row cache 는 집계와 무관해 공유했다.
+
+**검증.** scene mean 의 P2 · P3 를 코드 출력과 verifier 의 독립 스크립트로 각각 구해 대조했다: **순위 동일, 최대 절대차 0.0** (P2 · P(rank1) · P(top3) · CI), 서로 다른 resample 126 개 동일. 재실행 중 감시한 파일의 md5 는 변하지 않았다. scene mean 의 2D → 3D 후보 선별 (GT · self top-16) 은 record 평균과 같았다 (`gt_top16_identical` · `self_top16_identical` true).
+
+**두 집계가 가른 것 (GT label).**
+
+| 단계 | record-mean chain (사전 고정과 다른 방식) | **scene mean (primary)** |
+|---|---|---|
+| P2 3D 1 위 | `mean:L12H4` 0.6819 (`last:L12H4` 0.6766 이 2 위) | **`last:L12H4` 0.6913** (`mean:L12H4` 0.6909 가 2 위) |
+| P3 1 위 확률 | `mean:L12H4` P(rank1) 0.388 · P(top3) 0.826 (record 단위 resample 은 0.372, 6 단위 · 462 개) | `last:L12H4` P(rank1) **0.429** · P(top3) 0.879 |
+| P4 CV 평균 k = 1 / 2 / 3, 선택 | 0.586 / 0.596 / 0.537, k\* = 1 `mean:L12H4` (best k = 2) | 0.586 / 0.596 / 0.647, k\* = 1 `last:L12H4` (best k = 3) |
+| P5 held-out | record mean 0.900 (선택 · L8H2 · `last:L12H3` 모두) | held-out scene mean 0.911 (record mean 0.900) |
+
+- 두 집계의 선택은 같은 head (L12H4) 의 `mean` 과 `last` aggregation 이고 점수 차는 작다 (scene mean 기준 0.6913 대 0.6909). 그러나 **두 chain 어느 쪽도 P(rank1) ≥ 0.5 를 넘지 못한다.**
+- P4 의 15 fold 에서 record 평균과 scene 평균의 fold 순위를 비교하면 top-3 의 순서가 다른 fold 가 8 개, top-1 이 다른 fold 가 3 개다.
+- 같은 이름에 `__scene` 이 붙지 않은 figure ([`t51-bootstrap-rank1.png`](figures/t51/t51-bootstrap-rank1.png) · [`t51-ablation-heldout.png`](figures/t51/t51-ablation-heldout.png) · [`t51-protocol-table.png`](figures/t51/t51-protocol-table.png)) 는 **record-mean chain 의 증거로 보존**했고 primary 가 아니다. primary 는 `__scene` 이 붙은 아래 figure 들이다.
+
+### 5. P1 filter — 무엇이 걸러졌나 (label 없음)
+
+calibration 6 record 539 frame 전부, cell × camera.
+
+| query | eligible | 제외 (한 camera 라도): `low_mass` | `fixed_patch_sink` | `broad_map` |
+|---|---:|---:|---:|---:|
+| last | 81 | 37 | 3 | 8 |
+| mean | 87 | 29 | 3 | 11 |
+| first | 74 | 43 | 10 | 8 |
+| **합 (384 cell)** | **242** | 사유 집합별 cell 수: `low_mass` 만 99 · `broad_map` 만 26 · `fixed_patch_sink` + `low_mass` 9 · `fixed_patch_sink` 만 7 · `broad_map` + `low_mass` 1 | | |
+
+![P1 filter 후 2D heatmap](figures/t51/t51-filter-2d-heatmap.png)
+
+[`t51-filter-2d-heatmap.png`](figures/t51/t51-filter-2d-heatmap.png) ([sidecar](figures/t51/t51-filter-2d-heatmap.json)) — layer × head, query · camera 별 2D lift (GT label, scene mean of record means). × = P1 제외, 네모 = 전역 2D 상위 16.
+
+**표시한 cell 의 판정.**
+
+| cell | 판정 | 이유 · 통계 |
+|---|---|---|
+| **`last:L8H2` (서빙)** | **제외** | cam_high `low_mass`: mass median **0.006293** (< 0.01). left wrist 0.015043, right wrist 0.081629 는 통과. 다른 두 통계는 규칙 안 (modal_fraction 0.165 – 0.315, top-1 몫 0.165 – 0.225, 최대 component 7.8 – 9.3 %) |
+| T47 label-free top-3 `last:L4H1` · `last:L2H0` | 제외 | 3 camera 모두 `broad_map` (top-1 몫 0.012 – 0.025, 최대 component 15.8 – 23.5 %) |
+| `last:L14H5` | 제외 | cam_high `fixed_patch_sink` (modal_fraction 0.931354, top-1 몫 0.583195) |
+| T47 oracle top-3 `last:L8H3` · `last:L10H7` · `last:L12H4` | 통과 | |
+
+- **L8H2 의 제외는 사전 고정 규칙의 출력이다.** 2D lift 로는 L8H2 가 통과한 1 위 `last:L12H3` 보다 높다 (record 평균 2D lift 27.95 대 19.83). 즉 이 규칙은 "image 질량이 작은 head" 를 거르는데 그 head 가 target 위에 몰려 있다 (미측정 해석: image 질량의 절대량이 작아도 그 질량이 target 에 몰릴 수 있다). threshold 는 바꾸지 않았다.
+- 제외된 L8H2 는 **forced cell 이라 3D 점수만 보고하고 순위 경쟁에는 넣지 않았다** (§6).
+
+### 6. P2 calibration 점수 — 2D 와 3D
+
+**2D lift (GT label, scene mean 선별).** 통과한 cell 의 2D lift 1 위는 `last:L12H3` (scene mean 15.22). 2D → 3D 후보는 GT 20 개, self 23 개. 선별 집합은 record 평균과 같다.
+
+**3D `identity_correct` (GT label, scene mean, primary).** 표는 상위 cell 의 scene mean 과 scene 별 값이다.
+
+| cell | scene mean | scene1800 (`long`+`t2`) | scene1807 | scene0\* | scene500\* | scene1200\* |
+|---|---:|---:|---:|---:|---:|---:|
+| **`last:L12H4`** | **0.6913** | 0.6033 | 0.8267 | 0.8850 | 0.7788 | 0.3628 |
+| `mean:L12H4` | 0.6909 | 0.6367 | 0.8267 | 0.8850 | 0.7434 | 0.3628 |
+| `last:L10H7` | 0.6069 | 0.6167 | 0.4000 | 0.8850 | 0.7611 | 0.3717 |
+| `mean:L10H7` | 0.6055 | 0.6500 | 0.3333 | 0.8850 | 0.7965 | 0.3628 |
+| `last:L8H3` | 0.5905 | 0.5833 | 0.3867 | 0.8761 | 0.7522 | 0.3540 |
+| `last:L12H3` (2D 1 위) | 0.5772 | 0.6500 | 0.2800 | 0.8850 | 0.6991 | 0.3717 |
+| `mean:L12H3` | 0.5683 | 0.6500 | 0.2800 | 0.8496 | 0.6903 | 0.3717 |
+| `last:L8H2` (forced · P1 제외 · 순위 밖) | 0.5858 | — | — | — | — | — |
+
+(\* = VLA 학습 episode.) 순위 밖 L8H2 의 0.5858 은 순위 5 위 `last:L8H3` (0.5905) 와 6 위 `last:L12H3` (0.5772) 사이다 (산출 비교).
+
+- **2D lift 1 위 (`last:L12H3`) 는 3D 에서 6 위다.** 2D 와 3D 의 순위가 다르다. 이것이 primary 를 3D 로 정한 이유의 직접 증거이고, 2D 만 있는 플랫폼 (LIBERO, §11) 의 선택은 이 한계를 가진다.
+- scene 별 값이 크게 흩어진다: `last:L12H4` 는 scene0 0.8850 에서 scene1200 0.3628 까지. scene1200 (pear) 은 상위 cell 대부분이 0.35 – 0.37 이다. 이 scene 만 낮은 이유는 측정하지 않았다 (이 값이 P3 의 불안정을 만든다, §7).
+
+### 7. P3 안정성 — 사전 고정 기준 미충족 (정직한 기록 2)
+
+![P3 bootstrap 1 위 확률 (scene mean)](figures/t51/t51-bootstrap-rank1__scene.png)
+
+[`t51-bootstrap-rank1__scene.png`](figures/t51/t51-bootstrap-rank1__scene.png) ([sidecar](figures/t51/t51-bootstrap-rank1__scene.json)) — scene bootstrap (B = 1000, seed 5103, 5 scene, 서로 다른 resample 126 개) 의 cell 별 P(rank1) (파랑) · P(top3) (주황) 과 primary 점수 95 % CI. 점선 = 0.5 안정성 기준. 위 = GT label, 아래 = self label.
+
+| cell (GT, scene mean) | P(rank1) | exact P(rank1) | P(top3) | 점수 95 % CI |
+|---|---:|---:|---:|---|
+| **`last:L12H4`** | **0.429** | 0.4355 | 0.879 | [0.515, 0.840] |
+| `mean:L12H4` | 0.256 | 0.2368 | 0.794 | [0.522, 0.833] |
+| `mean:L10H7` | 0.232 | 0.2483 | 0.459 | [0.403, 0.797] |
+| `last:L12H3` | 0.080 | 0.0774 | 0.127 | [0.372, 0.764] |
+| `last:L10H7` | 0.002 | 0.0016 | 0.350 | [0.426, 0.782] |
+
+- **full-sample 1 위의 P(rank1) = 0.429 < 0.5 → `stable_single_cell` = false.** rank-1 tie rate 0.099 (동점이 순위를 정한 resample 비율). 1 위 확률이 `last:L12H4` · `mean:L12H4` · `mean:L10H7` 세 cell 에 나뉜다.
+- **사전 고정 되돌아올 지점의 적용: "선택이 불안정하면 단일 head 고정을 주장하지 않는다. k > 1 또는 명사 query 를 Ω 에 넣어 다시 돌린다."** → 단일 head 고정은 주장하지 않는다. k > 1 은 §8, 명사 query 는 §12.
+- 읽을 때의 한계: scene 이 5 개이고 그중 3 개가 VLA 학습 episode 라서 이 값은 "이 5 scene 을 다시 뽑았을 때" 의 변동이다. 새 scene 의 변동은 아니다 (§13).
+- (미측정 해석) 1 위 cell 들이 같은 head L12H4 의 aggregation 이라 head 단위로는 `last` · `mean` 합 P(rank1) 가 0.685 로 높지만 (산출 0.429 + 0.256), 이 합은 사전 고정 기준이 아니다.
+
+### 8. P4 k 선택
+
+| k | CV 평균 (scene 5 fold) | 95 % CI |
+|---|---:|---|
+| 1 | 0.586 | [0.405, 0.772] |
+| 2 | 0.596 | [0.412, 0.786] |
+| 3 | **0.647** (best) | [0.481, 0.812] |
+
+- best = k 3. 단순성 규칙: k = 1 대 best 의 쌍 차이 0.061, 95 % CI [−0.119, 0.296] 이 0 을 포함 → **k\* = 1, 선택 `last:L12H4`.** nested CV 평균 0.586, 안쪽 fold 의 k 는 [1, 1, 1, 1, 2] (scene1800 · 1807 · 0 · 500 · 1200 순).
+- **읽는 법.** k = 1 은 "k = 3 이 더 낫지 않다" 는 증거가 아니라 **"차이가 5 scene 으로는 구별되지 않아 단순한 쪽을 택하는" 규칙의 출력** 이다. 코드가 내는 `single_head_fixed: true` 는 k\* = 1 이라는 뜻일 뿐, §7 의 안정성 기준을 충족했다는 뜻이 아니다.
+- self label (§10): k 별 CV 평균이 모두 1.0 → k\* = 1, `last:L12H3`.
+
+### 9. P5 held-out · P6 ablation (정직한 기록 3 포함)
+
+![P5 · P6 held-out (scene mean)](figures/t51/t51-ablation-heldout__scene.png)
+
+[`t51-ablation-heldout__scene.png`](figures/t51/t51-ablation-heldout__scene.png) ([sidecar](figures/t51/t51-ablation-heldout__scene.json)) — 왼쪽: 무작위 eligible cell 20 개 (seed 5106) 의 held-out GT `identity_correct` 분포 위에 이름 붙은 선택들. 오른쪽: held-out scene 별 값. held-out = 4 record · 3 scene · record 당 15 frame.
+
+| source | held-out scene mean | scene1800 (`headfix`+`ep1800`) | scene1850 | scene1900 | record mean |
+|---|---:|---:|---:|---:|---:|
+| **선택 GT (k\* = 1) `last:L12H4`** | **0.911** | 0.867 | 0.867 | 1.000 | 0.900 |
+| 선택 self label `last:L12H3` | 0.911 | 0.867 | 0.867 | 1.000 | 0.900 |
+| **서빙 `last:L8H2`** | **0.911** | 0.867 | 0.867 | 1.000 | 0.900 |
+| T47 GT-oracle top-3 합 | 0.911 | | | | 0.900 |
+| restricted oracle (`mean:L8H2`, held-out 최고) | 0.911 | | | | |
+| head 평균 (last, L2–17) | 0.867 | | | | 0.867 |
+| 논문 label-free top-3, σ=0 · σ=1 | 0.000 · 0.000 | | | | 0.000 · 0.000 |
+| 무작위 cell 20 개 | median 0.756 (p05 0.022, p95 0.912) | | | | median 0.733 |
+
+- record 별 (세 선택 공통): `headfix` 1.000 · `ep1850` 0.867 · `ep1900` 1.000 · `ep1800` 0.733.
+- **세 선택은 frame 단위로도 같다.** 4 record 모두에서 모든 frame (15 / 15) 의 identity 판정이 세 source 에서 일치한다. 서빙 L8H2 의 row 는 T47b σ=0 의 `l8h2` row 와 4 record 모두 15 / 15 같다 (T51 replay loop 가 T47b 와 갈라지지 않았음).
+- 선택이 무작위 cell 20 개 중 `share_at_or_above_selected` 0.10 (2 개, 0.9111 · 0.9222) 만 같거나 높다 — 무작위에서 좋은 cell 이 거의 없지는 않다. 논문 top-3 은 σ 와 무관하게 0.000.
+
+**L8H2 는 P1 에서 제외됐는데 held-out 에서 선택과 같다 (정직한 기록 3).** 사전 고정 규칙은 L8H2 를 low_mass 로 제외했고, 그 cell 은 calibration 3D 에서 순위 5 · 6 위 사이 (0.5858), held-out 에서는 선택과 모든 frame 에서 동률이다. 규칙이 그 cell 을 거른 것이 틀렸다고도 맞았다고도 이 측정은 말하지 못한다 — held-out 이 세 cell 을 가르지 못하기 때문이다 (재측정 대기 #19). **threshold 를 다시 맞추지 않았고 그 선택을 제안하지도 않는다.**
+
+### 10. 자기 label (grasp-event pseudo label) — 실물 적용 가능성의 sim 검증 (정직한 기록 4)
+
+![자기 label 투영 (실제 scene)](figures/t51/t51-selflabel-scene.png)
+
+[`t51-selflabel-scene.png`](figures/t51/t51-selflabel-scene.png) ([sidecar](figures/t51/t51-selflabel-scene.json)) — 6 record (행: `t2` · `ep1807` · `ep0`\* · `ep500`\* · `ep1200`\* · `ep1850`) 의 grasp event 에서 구한 fingertip pad 중점 (붉은 점 + 반지름 disc) 을 이전 frame 의 camera 로 투영해 MuJoCo GT segmentation 위에 겹쳤다. 열: cam_high 첫 frame (전체) · 같은 frame (80×60 확대) · grasp 직전 frame (확대) · grasp 손의 wrist camera. 검은 + = GT target centroid, 색 = GT class (파랑 target, 주황 destination, 초록 other_object, 노랑 robot_gripper).
+
+**event 와 투영 오차 (GT 점검, 6 record).**
+
+| record | 손 · 시각 | label frame | r_obj (m) | 쥐기 전 target 이동 max · 1 cm 초과 frame | cam_high proj 오차 median (px) · hit_patch | 손 wrist camera 오차 median (px) |
+|---|---|---:|---:|---|---|---:|
+| `t2` | 왼 · t = 120 | 15 | 0.0314 | **1.11 cm · 15 / 15** | 4.65 · 0.933 | 19.97 |
+| `ep1807` | 왼 · t = 152 | 19 | 0.0309 | **1.24 cm · 19 / 19** | 2.31 · 0.895 | 9.28 |
+| `ep1850` (held-out) | 왼 · t = 88 | 11 | 0.0222 | 0.65 cm · 0 | 5.11 · 0.818 | 11.75 |
+| `ep0`\* | 왼 · t = 128 | 16 | 0.0297 | 0.73 cm · 0 | 4.56 · 0.813 | 12.52 |
+| `ep500`\* | 오른 · t = 112 | 14 | 0.0236 | 0.18 cm · 0 | 3.66 · 1.000 | 21.56 |
+| `ep1200`\* | 오른 · t = 296 | 37 | 0.0301 | **1.47 cm · 37 / 37** | 5.33 · 0.865 | 13.09 |
+
+- **grasp event 가 검출되지 않은 record 가 10 개 중 4 개** (`long` · `headfix` · `ep1800` · `ep1900`) 다. 그 record 는 self label 이 없다 (원인은 확인하지 않았다).
+- **"쥐기 전 정지" 가정은 6 개 중 3 개 record 에서 깨진다.** target 이 label frame 과 grasp frame 사이에 1 cm 넘게 움직였다 (`t2` · `ep1807` · `ep1200`, 그 record 의 모든 label frame). 그런데 cam_high 의 투영 오차 median 은 2.3 – 5.3 px 로 가정이 깨진 record 와 안 깨진 record 가 비슷하다. wrist camera 의 오차 (9.3 – 21.6 px) 는 disc 가 크고 gripper 가 가려서 (그림의 4 열) cam_high 보다 크다 (원인은 미측정 해석).
+- 그림의 `ep1850` grasp 직전 frame 에서 투영점이 gripper 위에 놓이고 target 은 가려진다 — 이 label 은 occlusion 을 모른다 (실물과 같은 조건).
+
+**P2 · P3 · P4 에서 self label 로 고른 결과 (scene mean).**
+
+| | GT label | self label |
+|---|---|---|
+| P2 1 위 | `last:L12H4` | `last:L12H3` |
+| P2 상위 3 | `last:L12H4` · `mean:L12H4` · `last:L10H7` | `last:L12H3` · `mean:L12H3` · `last:L12H4` (겹침 1) |
+| P3 1 위 확률 | `last:L12H4` 0.429, rank-1 tie rate 0.099 | `last:L12H3` 0.720, **rank-1 tie rate 1.0** |
+| 교차 확률 | self label bootstrap 이 GT 1 위 `last:L12H4` 를 1 위로 뽑는 확률 **0.279** (self 1 위 자신은 0.720) | GT label bootstrap 이 self 1 위 `last:L12H3` 를 1 위로 뽑는 확률 **0.080** (GT 1 위 자신은 0.429) |
+| P4 | k\* = 1 `last:L12H4` | k\* = 1 `last:L12H3` (같은 k, 다른 cell) |
+| held-out GT `identity_correct` | 0.911 | 0.911 (record 별 차이 4 / 4 에서 0.0) |
+
+- **포화 (정직한 기록 4).** `self_identity` 의 scene mean 이 상위 **9 cell 모두 1.0** (95 % CI [1.0, 1.0], 10 번째 `last:L8H3` 0.974) 이고 **rank-1 tie rate 가 1.0** 이다. 즉 모든 bootstrap resample 에서 1 위가 동점이라 **2D lift tie-break 가 순위를 정했다.** 실제로 self 의 상위 9 cell 은 2D lift 내림차순 (35.14, 29.70, 29.61, 24.78, 23.58, 23.32, 19.96, 13.17, 11.42) 이다. GT 의 2D lift 1 위도 `last:L12H3` 이다. 따라서 self 의 P(rank1) 0.720 은 **3D 지표가 cell 을 가른 확률이 아니라 2D tie-break 의 안정성** 이고, "self label 이 GT 와 같은 cell 을 골랐다" 는 성립하지 않았으며 (1 위가 다르다) "다른 cell 을 골랐다" 도 self label 의 결함이라고 읽지 않는다.
+- 포화가 frame 부분집합 때문인지 보려고 같은 frame (self label 이 있는 grasp 이전 frame) 에서 GT `identity_correct` 를 재면 상위 3 GT cell (`mean:L12H4` · `last:L12H4` · `mean:L10H7`) 이 모두 1.0 이다 (record-mean chain 의 전체 frame 값은 0.682 · 0.677 · 0.613). **grasp 이전 frame 에서는 GT 로 재도 cell 을 가를 수 없다** (미측정 해석: 오분리가 grasp 이후 phase 에서 생긴다. phase 별로 쪼개 측정하지 않았다).
+- **되돌아올 지점의 적용: "자기 label 의 결과가 GT 와 다르면 실물 적용에는 소량 사람 annotation 이 필요하다고 명시한다."** P2 1 위가 다르므로 명시한다. 단 위 포화 때문에 이것이 self label 의 부정확을 뜻하는지 지표의 해상도 한계를 뜻하는지는 가려지지 않는다.
+- 실물 (`grasp_latch` 의 HELD) 의 label 은 시험하지 않았다. sim 의 `both_contact` 물리 predicate 만 썼다.
+
+**annotation curve (GT, exploratory — 필요 frame 수 추정).** calibration frame (539 개 pool) 에서 n 개를 비복원으로 뽑아 (B = 1000) 순위를 다시 매긴다. 기준 상위 3 = `last:L12H4` · `mean:L12H4` · `last:L10H7`.
+
+| n frame | P(same top-1) | P(top-1 이 기준 상위 3 안) |
+|---:|---:|---:|
+| 5 | 0.269 | 0.282 |
+| 10 | 0.467 | 0.532 |
+| 20 | 0.670 | 0.827 |
+| 40 | 0.685 | 0.962 |
+| 80 | 0.615 | 0.991 |
+| 120 | 0.550 | 0.998 |
+| 539 (전부) | 0.000 | 1.000 |
+
+- frame 을 pool 해서 순위를 매기므로 (record · scene 가중이 달라짐) n = 539 에서 `P(same top-1)` 이 0.000 이다 (미측정 해석: scene mean 기준 1 위와 pool 평균 1 위가 달라서일 수 있다). **이 열은 해석에 쓰지 않는다.** `P(top-1 in reference)` 는 약 40 frame 에서 0.962 가 된다 — frame 이 같은 scene 에서 오는 상관을 무시한 값이라 scene 수가 아니라 frame 수의 효과를 과대평가할 수 있다 (미측정 해석).
+
+### 11. LIBERO — 2D primary, task 단위 (정직한 기록 6)
+
+**L0 조사.** KNOWS P0b 수집물 (`datasets/workspace/knows_p0b/`, 40 episode · 1,479 step) 에는 frame · state · GT segmentation · depth 는 있으나 **cell 별 attention 이 저장되어 있지 않았다.** 사용자 판정 (L1 승인, KNOWS 재현 확인 없이) 으로 저장 frame 에 `pi05_libero` attention pass 를 이 checkout 의 `.venv-openpi-live` 에서 한 번 돌렸다 (40 episode · 1,479 step, extract 240.8 s). **GT 가 agent view 의 segmentation 뿐이라 primary 는 2D lift (agent view) 이고 3D `identity_correct` 는 불가능하다.** KNOWS 재현 (`--init zeros`) 은 하지 않았다.
+
+![LIBERO layer × head 2D lift](figures/t51/t51-libero-heatmap.png)
+
+[`t51-libero-heatmap.png`](figures/t51/t51-libero-heatmap.png) ([sidecar](figures/t51/t51-libero-heatmap.json)) — LIBERO agent view 2D lift 의 layer × head (query 별). 집계 방식과 무관한 heatmap 이다.
+
+- **P1.** eligible cell 287 개. 제외 사유 (cell × camera 수): agent view `low_mass` 81 · `fixed_patch_sink` 5 · `broad_map` 4, wrist `low_mass` 31 · `fixed_patch_sink` 10 · `broad_map` 4.
+- **P2 · P3 (task 단위, 20 task × 2 episode).**
+
+| 순위 (eligible) | cell | 2D lift (task mean) | 95 % CI | `peak_on_target` | KNOWS hit |
+|---:|---|---:|---|---:|---:|
+| 1 | **`mean:L12H3`** | **23.35** | [17.69, 28.50] | 0.756 | 0.711 |
+| 2 | `last:L12H3` | 22.23 | [16.91, 26.98] | 0.751 | 0.760 |
+| 3 | `first:L12H3` | 20.21 | [15.53, 24.68] | 0.614 | 0.648 |
+| 4 | `first:L12H0` | 14.51 | [11.30, 17.58] | 0.552 | 0.670 |
+
+- task bootstrap: `mean:L12H3` P(rank1) **1.0** (`stable_single_cell` true), `last:L12H3` · `first:L12H3` 도 P(top3) 1.0. task 평균과 episode 평균은 같다 (상위 20 의 순서 동일, 최대 절대차 7.1e-15).
+- **LIBERO 에서도 L12H3 이 1 위** — RB-Y1 의 2D lift 1 위도 `last:L12H3` 이다. **head index 가 두 모델에서 같은 것은 관측이고** (미측정 해석: 같은 base weight 에서 fine-tune 된 영향일 수 있다 — 시험하지 않았다), 3D 로는 확인할 수 없다. §6 에서 RB-Y1 의 2D 1 위가 3D 에서 6 위였다는 점이 이 선택의 한계다.
+- **L8H2 (LIBERO).** `last:L8H2` 는 P1 로 제외됐지만 (eligible 아님) 2D lift 15.83 으로 **전체 cell 중 4 위**, KNOWS hit 0.809 로 전체 cell 중 1 위다. `mean:L8H2` 는 eligible 이고 lift 12.20 (eligible 중 16 위). `mean:L12H4` 는 13.40 (eligible 중 10 위, KNOWS hit 0.739). RB-Y1 과 같이 **P1 이 제외한 L8H2 가 다른 지표에서는 상위** 에 있다. threshold 는 바꾸지 않았다.
+- KNOWS 재현 확인을 하지 않았으므로 이 추출이 KNOWS 의 attention 과 같다는 점검은 없다 (사용자 판정). 이 점검 대신 RB-Y1 에서 같은 sampler 가 T47 asset 을 재현한 parity (§3, argmax 0.995885) 가 있다.
+
+### 12. T51b — 명사 query 행을 같은 protocol 에 추가
+
+**설정.** 명사 행 = T49 `target` query (prompt 의 target 명사 token 이 image 를 보는 attention, prefix 1 회, denoise 없음, raw σ=0). T47 record 의 명사 행은 T49 run 에서, 추가 3 run 은 새로 추출했다 (GPU lock). 같은 P1–P6 · 같은 threshold · scene 집계로 (a) 명사 128 cell, (b) action 384 + 명사 128 = 512 cell 을 돌린다. 3D row 는 T51 의 action row 를 읽기만 하고 명사 row 는 새로 replay 했다 (row 출처 집계: 명사 Ω 는 GT 108 · self 120 row 모두 `t51b`, 합친 Ω 는 GT 24 row 가 T51 cache · 108 row 가 `t51b`, self 30 row 가 T51 cache · 108 row 가 `t51b`).
+
+**추출 검증.** `ep0` · `ep500` · `ep1200` 모두 113 / 113 frame 에서 명사가 정확히 1 회 매칭되어 오류 0, `check` 통과. `ep1807` 첫 4 frame 을 T49 의 `orig` 추출과 비교하면 **bit 동일** (max |Δ| 0.0, argmax 일치 1.0, Pearson r 1.0, t_step · token index 같음). prefix 시간 median 24.19 ms, GPU peak 7,527,781,120 byte. 시작 전 GPU compute process 없음.
+
+**forced cell 구현 불일치 (정직한 기록 5).**
+
+- lead 판정 (결과 전 고정): 명사 단독 Ω 의 3D 강제 포함 = **`noun_target:L8H6` · `L5H4` · `L4H2`** (T49 primary 명사 cell), 합친 Ω 에서는 T51 forced 에 이 3 개를 더한다.
+- 구현은 T51 의 규칙 그대로 forced = [`last:L8H2` + T47 oracle 3] ∩ Ω 만 썼다. **명사 cell 3 개는 forced 목록에 넣지 않았다.** (a) 에서는 forced 가 Ω 안에 하나도 없어 실효 forced 가 비었다. (코드 규칙과 lead 판정의 차이가 verifier 에 의해 확인되었다.)
+- verifier 가 영향을 점검했다: 세 cell 은 (a) · (b) × GT · self 네 경우 모두 **P1 eligible, 전역 2D 상위 16 안, 15 개 fold 모두의 순위 집합 안** 에 있다. 즉 forced 로 넣었어도 3D 후보 집합이 바뀌지 않는다 → **결과는 바뀌지 않았다.** 코드는 고치지 않았다.
+- verifier 가 P2 3D · bootstrap 을 독립 재계산해 코드 값과 최대 절대차 1.1e-16 으로 일치시켰다 (명사 · 합친 Ω, GT).
+
+![T51b bootstrap 1 위 확률 (query 별 색)](figures/t51/t51b-bootstrap-rank1-by-query.png)
+
+[`t51b-bootstrap-rank1-by-query.png`](figures/t51/t51b-bootstrap-rank1-by-query.png) ([sidecar](figures/t51/t51b-bootstrap-rank1-by-query.json)) — 위 = GT label, 아래 = self label. 열: action Ω (T51) · (a) 명사 Ω · (b) action + 명사 Ω. 채움 = P(rank1), 윤곽 = P(top3), 파랑 = action query, 주황 = 명사 query. 점선 = 0.5.
+
+**(a) 명사만 Ω.**
+
+- **P1**: eligible 83 / 128. 제외 45 (cell 수, 한 camera 라도): `low_mass` 43, `fixed_patch_sink` 4, `broad_map` 0. lead 의 세 cell 은 모두 eligible.
+- **P2 3D (GT, scene mean)**: 1 위 `noun_target:L10H7` 0.5957. 이어 `L8H0` · `L5H6` · `L6H5` 0.5931, `L6H4` 0.5913, `L4H2` 0.5911, `L8H6` 0.5891. **상위 10 cell 의 점수가 0.589 – 0.596 안에 있다 (차 0.007).** 비교: action 의 상위 점수는 0.691 (§6).
+- **P3 (GT)**: `noun_target:L10H7` P(rank1) **0.687** (P(top3) 0.687, CI [0.406, 0.779], rank-1 tie rate 0.313, `stable_single_cell` true). 이어 `L4H2` 0.232 · `L8H6` 0.070 · `L5H4` 0.010. **P(rank1) 은 0.5 를 넘지만 점수가 거의 같은 cell 사이의 동점이 순위를 정하는 구조다** (tie rate 0.313, 미측정 해석: 어느 명사 cell 을 골라도 3D 에서는 구별되지 않는다).
+- **P4 (GT)**: CV 평균 k = 1 · 2 · 3 = 0.5911 · 0.5911 · 0.5931 (best k = 3, 차 CI 가 0 을 포함) → k\* = 1 `noun_target:L10H7`.
+- **self label**: 1 위 `noun_target:L8H6` P(rank1) 0.529 (rank-1 tie rate 1.0 — T51 과 같은 포화), `L5H4` 0.424, `L4H2` 0.047. k\* = 1 `noun_target:L8H6`.
+- **P5 · P6 (held-out scene mean, GT 채점)**: 선택 GT `noun_target:L10H7` **0.867** (scene1800 0.733, scene1850 0.867, scene1900 1.000; record mean 0.833), 선택 self `noun_target:L8H6` 0.878 (scene1800 0.767; record mean 0.850), T49 primary 세 cell (`L8H6` · `L5H4` · `L4H2`) 각각 0.878, 서빙 `last:L8H2` 0.911. 무작위 명사 cell 20 개의 median 0.661, 선택 이상인 비율 0.40. restricted oracle `noun_target:L8H7` 0.878. (T49 절의 명사 수치는 k = 3 · σ = 1 합이라 이 단일 cell raw 값과 같은 source 가 아니다.)
+
+**(b) action + 명사 합친 Ω.**
+
+- **P1**: eligible 325 / 512 (last 81 · mean 87 · first 74 · 명사 83).
+- **후보 구성.** 전역 2D lift 상위 16 은 **전부 명사 cell 이다 (명사 16 · action 0).** action cell 이 3D 후보로 들어간 것은 forced (`last:L8H3` · `last:L10H7` · `last:L12H4`, L8H2 는 P1 로 제외) 뿐이다. 3D 후보는 GT 22 개 · self 23 개다. 따라서 T51 의 action 단독 순위에서 2 · 3 위였던 `mean:L12H4` · `mean:L10H7` 와 2D 1 위 `last:L12H3` 는 이 순위 집합에 없다.
+- **P2 3D (GT)**: 1 위 `last:L12H4` 0.6913, 이어 `last:L10H7` 0.6069, `noun_target:L10H7` 0.5957, `noun_target:L8H0` · `L5H6` · `L6H5` 0.5931 ….
+- **P3 (GT)**: `last:L12H4` P(rank1) **0.753** (P(top3) 0.921, rank-1 tie rate 0.076, `stable_single_cell` true). **query family 별 P(rank1) 합 = action 0.918 · noun 0.082.** 이어 `last:L10H7` 0.165, `noun_target:L4H2` 0.065.
+- **(미측정 해석) 0.429 (action 단독) 에서 0.753 으로 올라간 것은 같은 실험의 결과로 비교하기 어렵다.** action 단독에서 P(rank1) 을 나눠 가졌던 `mean:L12H4` (0.256) · `mean:L10H7` (0.232) 가 이 순위 집합에 없다. 합친 Ω 의 action 후보를 넓힌 실험은 하지 않았다.
+- **P4 (GT)**: CV 평균 k = 1 · 2 · 3 = 0.606 · 0.588 · 0.466 → best = k 1, k\* = 1 `last:L12H4`.
+- **self label**: 1 위 `noun_target:L8H6` P(rank1) 0.529 (family 합 noun 1.0 · action 0.0, tie rate 1.0). 고른 것이 명사 cell 인 것은 self 의 2D lift tie-break 가 명사 cell (lift 94.5 등) 을 앞세운 결과다 (자기 label 의 3D 점수는 상위 cell 모두 1.0).
+- **P6 (GT 선택 `last:L12H4`, held-out scene mean 0.911)**: 무작위 20 개 (합친 Ω) median 0.639 (p05 0.032, p95 0.879), 선택 이상 비율 0.0, restricted oracle `last:L8H2` 0.911.
+
+**(c) action 최선 대 명사 최선의 held-out 비교 (primary = scene 단위 paired 차이).**
+
+![T51b held-out 비교 표](figures/t51/t51b-heldout-compare-table.png)
+
+[`t51b-heldout-compare-table.png`](figures/t51/t51b-heldout-compare-table.png) ([sidecar](figures/t51/t51b-heldout-compare-table.json)) — 위: 선택별 held-out scene 별 `identity_correct` · scene mean · record mean. 아래: scene 단위 paired 차이 (seed 5107, B = 1000 과 3^3 = 27 resample 전수) 와 frame 단위 McNemar (참고).
+
+| 선택 | cell | scene1800 | scene1850 | scene1900 | **scene mean** | record mean |
+|---|---|---:|---:|---:|---:|---:|
+| action best (GT) | `last:L12H4` | 0.867 | 0.867 | 1.000 | **0.911** | 0.900 |
+| **명사 best (GT)** | `noun_target:L10H7` | **0.733** | 0.867 | 1.000 | **0.867** | 0.833 |
+| 합친 best (GT) | `last:L12H4` | 0.867 | 0.867 | 1.000 | 0.911 | 0.900 |
+| action best (self) | `last:L12H3` | 0.867 | 0.867 | 1.000 | 0.911 | 0.900 |
+| 명사 best (self) = 합친 best (self) | `noun_target:L8H6` | 0.767 | 0.867 | 1.000 | 0.878 | 0.850 |
+| 서빙 | `last:L8H2` | 0.867 | 0.867 | 1.000 | 0.911 | 0.900 |
+
+| 쌍 (a − b) | scene 별 차 (1800 · 1850 · 1900) | scene mean 차 | 95 % CI (scene bootstrap MC) | 95 % CI (전수 27) | frame only_a / only_b | McNemar p (참고) |
+|---|---|---:|---|---|---|---:|
+| 명사 best − action best (GT) | −0.133 · 0 · 0 | **−0.044** | [−0.133, 0.000] | [−0.104, 0.000] | 0 / 4 | 0.125 |
+| 합친 best − action best (GT) | 0 · 0 · 0 | 0.000 | [0, 0] | [0, 0] | 0 / 0 | 1 |
+| 명사 best − 서빙 L8H2 | −0.133 · 0 · 0 | −0.044 | [−0.133, 0.000] | [−0.104, 0.000] | 0 / 4 | 0.125 |
+| action best − 서빙 L8H2 | 0 · 0 · 0 | 0.000 | [0, 0] | [0, 0] | 0 / 0 | 1 |
+| 명사 best − action best (self) | −0.100 · 0 · 0 | −0.033 | [−0.100, 0.000] | [−0.078, 0.000] | 0 / 3 | 0.25 |
+
+- **차이는 scene1800 한 곳에서만 난다** (`headfix`: 명사 best 0.733 대 action best 1.000, `ep1800` 은 둘 다 0.733). scene1850 · scene1900 은 같다. scene 이 3 개라 bootstrap CI 의 상한이 0 에 걸리고 (MC resample 의 69.2 % 가 음수, 양수는 0 %), 전수 27 resample 에서 서로 다른 값은 4 개뿐이다.
+- 따라서 **명사 query 가 action query 보다 3D target 을 더 잘 고른다는 증거는 없다.** 방향은 명사 ≤ action 이지만 유의하다고도 하지 않는다 (scene 3 개, frame 60 개). frame 단위 McNemar 는 frame 을 독립으로 세므로 참고다.
+- 이 결과는 T49 의 3D 열세 (명사 query 의 `identity_correct` · purity · non-target 손실이 L8H2 보다 낮음) 와 같은 방향이고, 같은 source 가 아니라 크기를 직접 비교하지 않는다.
+- (미측정 해석) T49 의 제안 (b) — 명사 query 로 identity · destination 을, L8H2 로 3D seed 를 얻는 결합 — 은 이 STEP 에서도 측정하지 않았다. T51b 의 "합친 Ω" 는 한 cell 을 고르는 것이지 두 query 를 결합하는 것이 아니다.
+
+### 13. 읽을 때의 한계 · 측정하지 않은 것 · 되돌아올 지점 · 판정 대기
+
+| 한계 | 내용 |
+|---|---|
+| **calibration scene 5 개** | 그중 3 개 (`ep0` · `ep500` · `ep1200`) 는 VLA 학습 episode 의 기록이다. P3 의 변동은 "이 5 scene 을 다시 뽑을 때" 의 변동이고 새 scene 의 일반화가 아니다. 서로 다른 resample 이 126 개뿐이다 |
+| **held-out 3 scene · 60 frame** | 세 선택이 frame 단위로 동률이라 변별력이 없다 (#19). held-out 은 물체 종류 3 (apple · banana · pear) 정도로 좁다 |
+| **3D 는 legacy ESDF offline replay** | subtask gate off, grasp latch 없음. cuRobo ESDF · closed-loop 효과는 측정하지 않았다 (#24) |
+| **self label 은 sim 만** | `both_contact` 물리 predicate. 포화 · 쥐기 전 이동 (6 중 3) · event 없는 record (10 중 4) (#20) |
+| **LIBERO 는 2D 만** | 3D · wrist · KNOWS 재현 없음 (#22) |
+| **T51b 의 후보 구성** | 합친 Ω 의 2D 상위 16 이 모두 명사. action 후보는 forced 3 개 (#23) |
+| **집계 단위 deviation** | 수정되었고 scene 로 재측정했다. record-mean chain 은 보고만 한다 (§4) |
+
+**측정하지 않은 것 (`not_measured`).** T51: cuRobo 회귀 기준선 (GPU 미사용) · LIBERO KNOWS 재현 (`--init zeros`, protocol 밖) · 명사 행은 T51b 로 분리. T51b: T51b 용 MuJoCo scene figure (T51 의 scene figure 가 같은 held-out record 를 다룬다) · LIBERO 의 명사 행 (범위 밖) · record-aggregate (`__scene` 이 아닌) T51b 출력 · cuRobo 기준선.
+
+**되돌아올 지점 (task 가 미리 정한 전환 신호의 적용).**
+
+| 신호 | 결과 | 취한 행동 |
+|---|---|---|
+| 선택이 불안정 (1 위 확률 < 0.5) | 해당 (0.429) | 단일 head 고정을 주장하지 않는다. k > 1 은 P4 에서 CV 최고가 k = 3 (0.647) 이나 차 CI 가 0 을 포함해 단순성 규칙으로 k = 1. 명사 query 를 Ω 에 넣은 T51b 의 합친 Ω 는 P(rank1) 0.753 이나 후보 구성에 의존 (§12) |
+| self label 결과가 GT 와 다름 | 해당 (P2 1 위 다름) | 실물 적용에는 소량 사람 annotation 이 필요하다고 명시한다. 필요 frame 수는 annotation curve (exploratory, 40 frame 에서 P(top-1 in reference) 0.962). 단 self 지표 포화 때문에 이 결론의 강도는 약하다 (§10) |
+| LIBERO 수집물 없음 | 해당 (attention 없음) | 사용자 L1 승인 후 `pi05_libero` pass 수행 (§11) |
+| 서빙 반영 | 하지 않음 | 별도 판정 |
+
+**판정 대기 (제안, 미측정 해석 포함).**
+
+1. **서빙 cell 을 어떻게 할 것인가.** 이 STEP 은 L8H2 를 유지한다. P1 이 L8H2 를 제외했지만 held-out 에서 `last:L12H4` · `last:L12H3` 와 frame 단위로 동률이어서, 이 측정만으로 교체나 유지의 근거는 확정되지 않는다.
+2. **논문에서 이 protocol 을 어떻게 기술할 것인가 (제안).** 근거가 있는 주장은 "사전 고정한 절차로 cell 을 고르고 선택의 안정성을 수치로 보고한다" 까지다. "단일 head 가 최적이다" · "self label 이 GT 를 대체한다" · "명사 query 가 낫다" 는 이 측정이 받치지 않는다.
+3. **후속 측정 (제안).** (i) 학습에 쓰이지 않은 scene 을 calibration 에 더해 P3 를 다시 (#18), (ii) 더 큰 held-out (#19), (iii) self label 을 phase 별 · 실물 `grasp_latch` 로 (#20), (iv) 합친 Ω 에서 action 후보를 넓힌 재실행 (#23).
+
+**산출물.**
+
+- **측정 (이 절이 인용)**: [`handoff/T51.verify.json`](handoff/T51.verify.json) (`numbers.scene_mean_primary` 가 primary) · [`handoff/T51b.verify.json`](handoff/T51b.verify.json). 원자료 run: `/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/{T51,T51b}/`.
+- **figure** (각각 `.json` sidecar 있음, 위에서 링크): primary — [`t51-bootstrap-rank1__scene`](figures/t51/t51-bootstrap-rank1__scene.png) · [`t51-ablation-heldout__scene`](figures/t51/t51-ablation-heldout__scene.png) · [`t51-protocol-table__scene`](figures/t51/t51-protocol-table__scene.png) · [`t51-filter-2d-heatmap`](figures/t51/t51-filter-2d-heatmap.png) · [`t51-selflabel-scene`](figures/t51/t51-selflabel-scene.png) · [`t51-libero-heatmap`](figures/t51/t51-libero-heatmap.png) · [`t51b-bootstrap-rank1-by-query`](figures/t51/t51b-bootstrap-rank1-by-query.png) · [`t51b-heldout-compare-table`](figures/t51/t51b-heldout-compare-table.png). record-mean chain (deviation 증거로 보존) — [`t51-bootstrap-rank1`](figures/t51/t51-bootstrap-rank1.png) · [`t51-ablation-heldout`](figures/t51/t51-ablation-heldout.png) · [`t51-protocol-table`](figures/t51/t51-protocol-table.png).
+
+![T51 protocol 단계별 결과 요약 (scene mean)](figures/t51/t51-protocol-table__scene.png)
+
+[`t51-protocol-table__scene.png`](figures/t51/t51-protocol-table__scene.png) ([sidecar](figures/t51/t51-protocol-table__scene.json)) — P1–P6 · self label · annotation curve · LIBERO 의 단계별 결과 요약.
+
+- **구현**: `AG3S/ag3s/experiments/studies/t51_{protocol,records,extract,selflabel,replay,study,libero}.py` · `t51b_{noun_extract,study}.py` · `tests/ag3s/test_t51*.py` · `test_t51b_*.py`. [`handoff/T51.impl.md`](handoff/T51.impl.md) · [`handoff/T51b.impl.md`](handoff/T51b.impl.md). commit 은 하지 않았다 (T51 · T51b 파일은 untracked).
