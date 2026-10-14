@@ -116,3 +116,39 @@ def test_rby1_golden_identity():
                              text=True, env={**__import__("os").environ, "MUJOCO_GL": "osmesa", "CUDA_VISIBLE_DEVICES": ""})
         last = [l for l in out.stdout.splitlines() if l.startswith("{")][-1]
         assert json.loads(last)["identical"] is True, out.stdout[-2000:] + out.stderr[-2000:]
+
+
+def test_mode_b_passthrough_and_realisation(kin):
+    from AG3S.adapters.panda import action as pa
+
+    q0 = np.array([0.0, 0.17, 0.0, -2.45, 0.0, 2.6, 0.79])
+    A = (np.zeros((10, 7)) + [0.3, 0.1, -0.2, 0, 0, 0.05, -1]).astype(np.float32)
+    conv = pa.delta_chunk_to_joint_chunk(kin, A, q0, np.eye(4))
+    ref = conv.joint_chunk.astype(np.float32)
+    out, rec = pa.joint_chunk_to_delta_chunk(kin, conv, ref.copy(), ref, mode="B")
+    assert np.array_equal(out, A) and rec["mode"] == "B" and rec["passthrough_rows"] == list(range(10))
+    mod = ref.copy()
+    mod[2:, 1] += 0.01
+    outA, _ = pa.joint_chunk_to_delta_chunk(kin, conv, mod, ref, mode="A")
+    outB, _ = pa.joint_chunk_to_delta_chunk(kin, conv, mod, ref, mode="B")
+    rA = pa.realisation_record(kin, conv, outA, mod.astype(np.float64), 5)
+    rB = pa.realisation_record(kin, conv, outB, mod.astype(np.float64), 5)
+    # A inverts the response model, so it realises the refined path more closely than B (unsaturated case)
+    assert rA["predicted_vs_refined_mm_max"] <= rB["predicted_vs_refined_mm_max"] + 1e-9
+    assert np.abs(outB.astype(float) - A).max() < np.abs(outA.astype(float) - A).max()
+    with pytest.raises(ValueError):
+        pa.joint_chunk_to_delta_chunk(kin, conv, mod, ref, mode="C")
+
+
+def test_panda_latch_calibration():
+    from AG3S.adapters.panda import server as ps
+    from AG3S.trajopt.grasp_latch import LatchConfig
+
+    cal = ps.gripper_calibration()
+    cfg = ps.panda_latch_config()
+    e, g = cal["measured"]["empty_closure"]["norm"], cal["measured"]["grasped_lifted"]["norm_min"]
+    assert e < cfg.empty_below < g  # separates the measured empty closure from the grasped openings
+    d = LatchConfig()
+    for f in d.__dataclass_fields__:
+        if f != "empty_below":
+            assert getattr(cfg, f) == getattr(d, f), f  # every other V11AB default unchanged

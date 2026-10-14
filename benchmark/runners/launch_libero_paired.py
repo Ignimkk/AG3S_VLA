@@ -78,11 +78,13 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
     port = l0.choose_port(None)
     s_argv = [str(l0.openpi_python()), "-m", "AG3S.trajopt.serve_safe"] + server_argv(mode, identity["path"], port)
     settings = {"step": args.step, "condition": mode, "paired_group": args.run_id, "port": port,
+                "panda_conversion_mode": args.conversion if mode == "vla_v11ab" else None,
                 "protocol": l0.protocol_settings(args), "runtime_schedule": l0.runtime_schedule(args),
                 "task_ids": args.task_ids, "episode_ids": args.episode_ids, "seed": args.seed,
                 "policy_seed_rule": "seed*100000 + task_id*1000 + episode_idx (libero_safe_client.episode_seed)",
                 "checkpoint": identity, "server_argv": s_argv, "data_split": args.data_split, **shared}
-    run_dir = create_run(run_id=f"{args.run_id}-{mode}", settings=settings, checkpoint=identity["path"])
+    tag = f"{mode}-{args.conversion}" if mode == "vla_v11ab" else mode
+    run_dir = create_run(run_id=f"{args.run_id}-{tag}", settings=settings, checkpoint=identity["path"])
     print(f"[{mode}] {run_dir}", flush=True)
     c_argv = client_argv(str(run_dir), port, args)
     logs = run_dir / "logs"
@@ -99,7 +101,7 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
             if time.monotonic() > deadline:
                 raise RuntimeError(f"other GPU compute processes still running: {gpu_compute_apps()}")
             time.sleep(15)
-        env = dict(os.environ, AG3S_RUN_DIR=str(run_dir))
+        env = dict(os.environ, AG3S_RUN_DIR=str(run_dir), AG3S_PANDA_CONVERSION=args.conversion)
         with open(logs / "server_console.log", "x") as server_log:
             server = subprocess.Popen(s_argv, cwd=str(PROJECT_ROOT), env=env, stdout=server_log, stderr=subprocess.STDOUT)
         record_execution(run_dir, checkpoint=identity["path"], settings={"role": "server", "argv": s_argv, "pid": server.pid})
@@ -161,6 +163,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--capture-segmentation", action="store_true")
     ap.add_argument("--server-timeout", type=float, default=1800.0)
     ap.add_argument("--busy-gpu-wait", type=float, default=1800.0)
+    ap.add_argument("--conversion", choices=("A", "B"), required=True,
+                    help="Panda reverse conversion for VLA+V11AB (AG3S/adapters/panda/action.py CONVERSION_MODES)")
     ap.add_argument("--dry-run", action="store_true")
     # protocol constants read by l0.protocol_settings / runtime_schedule
     ap.add_argument("--host", default="127.0.0.1")

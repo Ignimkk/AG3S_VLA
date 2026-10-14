@@ -149,6 +149,8 @@ class SafeClient(object):
             self.arrays["actions_policy"].append(pol)
             self.arrays["joint_refined"].append(np.asarray(resp["panda/joint_refined"], np.float32))
             self.arrays["joint_reference"].append(np.asarray(resp["panda/joint_reference"], np.float32))
+            self.arrays["predicted_ee_base"].append(np.asarray(resp["panda/predicted_ee_base"], np.float32))
+            self.arrays["T_world_base"].append(np.asarray(req["panda/T_world_base"], np.float64))
         self.arrays["actions_response"].append(np.asarray(actions, np.float64))
         self.arrays["actions_executed"].append(np.asarray(executed, np.float64))
         self.arrays["call_obs_index"].append(len(self.eef) - 1)

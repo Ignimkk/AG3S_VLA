@@ -1,0 +1,43 @@
+{
+ "what": "Panda grasp-confirmation 'empty hand' threshold (V11AB LatchConfig.empty_below), adapter calibration",
+ "normalisation": "opening_norm = panda_finger_joint1 [m] / 0.04 (1 = open); width = 2 * q1",
+ "rby1_default": {
+  "empty_below": 0.1,
+  "meaning": "~9 mm object width on RB-Y1 (gripper_finger_l1 range 0.045 m)"
+ },
+ "measured": {
+  "empty_closure": {
+   "q1_m_settled_max": 0.0005002852787188419,
+   "q1_m_settled_min": 0.0004994002073109418,
+   "norm": 0.012507131967971047,
+   "how": "a6=+1 (close), arm delta 0, after reset+set_init_state(0)+10 dummy steps; LIBERO seed 7",
+   "tasks": 10,
+   "script": "outputs/verify/SL5b/scripts/empty_closure.py"
+  },
+  "grasped_lifted": {
+   "q1_m": {
+    "min": 0.0015252693695157287,
+    "p01": 0.001575955194306712,
+    "p05": 0.0016695279306340389,
+    "median": 0.0022492339545020588,
+    "max": 0.009933353456735666
+   },
+   "norm_min": 0.03813173423789321,
+   "norm_p01": 0.039398879857667796,
+   "norm_median": 0.05623084886255147,
+   "n_frames": 881,
+   "episodes": 40,
+   "rule": "Frame rule: MuJoCo finger-target contact (contact_grip_target) AND target z > z(first frame) + 10 mm AND the last executed",
+   "script": "outputs/verify/SL5b/scripts/grasp_opening.py",
+   "data": "LIBERO Spatial dev init 0-4 pi0.5-only rollouts (sl3-dev, sl4b-dev)"
+  }
+ },
+ "panda": {
+  "empty_below": 0.025325,
+  "q1_m": 0.001013,
+  "width_mm": 2.026,
+  "rule": "midpoint between the settled empty closure (max) and the smallest grasped-and-lifted opening; fixed from these physical distributions, not tuned on success"
+ },
+ "unchanged": "all other LatchConfig fields keep the V11AB/RB-Y1 defaults (gripper_closed_below 0.85, min_drop 0.05, blocked_gap 0.05, settle_epsilon 0.02, reach 0.12, ...)",
+ "decision": "user 2026-10-14: adapter calibration allowed; 0.02 was a candidate, fix from measured distributions"
+}

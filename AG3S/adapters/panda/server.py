@@ -47,6 +47,27 @@ PANDA_HORIZON = {"horizon": 10, "execution_length": 5, "control_hz": 20.0, "plan
 FRANKA_ACCEL_LIMITS = (15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0)
 PANDA_DEFAULT_ACCELERATION = min(FRANKA_ACCEL_LIMITS)
 ATTENTION_ALIAS = {"cam_high": "head", "cam_left_wrist": "left_wrist"}
+#: Reverse-conversion mode of this server (``action.CONVERSION_MODES``): env ``AG3S_PANDA_CONVERSION`` (A | B).
+ENV_CONVERSION = "AG3S_PANDA_CONVERSION"
+GRIPPER_CALIBRATION = pm.DESCRIPTION_DIR / "gripper_calibration.json"
+
+
+def conversion_mode() -> str:
+    mode = os.environ.get(ENV_CONVERSION, "A").strip().upper()
+    if mode not in pa.CONVERSION_MODES:
+        raise ValueError(f"{ENV_CONVERSION}={mode!r}: expected one of {sorted(pa.CONVERSION_MODES)}")
+    return mode
+
+
+def gripper_calibration() -> dict:
+    return json.loads(GRIPPER_CALIBRATION.read_text())
+
+
+def panda_latch_config():
+    """V11AB ``LatchConfig`` defaults with only ``empty_below`` calibrated for the Panda gripper."""
+    from AG3S.trajopt.grasp_latch import LatchConfig
+
+    return LatchConfig(empty_below=float(gripper_calibration()["panda"]["empty_below"]))
 ATTENTION_CAMERAS = ("head", "left_wrist")
 HANDS = {pm.MANIPULATOR_SIDE: 0}
 GRIPPER_COLUMNS = (pa.GRIPPER_COLUMN,)
@@ -164,9 +185,10 @@ class ChunkToJointPolicy:
 class PandaSafeServer:
     """Outside ``SafePolicy``: refined joint chunk -> EE-delta chunk (``action.joint_chunk_to_delta_chunk``)."""
 
-    def __init__(self, safe, chunk_policy: ChunkToJointPolicy):
+    def __init__(self, safe, chunk_policy: ChunkToJointPolicy, mode: str = "A"):
         self._policy = safe
         self.chunk_policy = chunk_policy
+        self.mode = mode
 
     @property
     def metadata(self):
@@ -181,7 +203,12 @@ class PandaSafeServer:
         refined, reference = response["actions"], response.get("actions_reference")
         if conv is None or reference is None:
             raise RuntimeError("SafePolicy returned no reference chunk for the Panda conversion")
-        actions, rec = pa.joint_chunk_to_delta_chunk(self.chunk_policy.kin, conv, refined, reference)
+        actions, rec = pa.joint_chunk_to_delta_chunk(self.chunk_policy.kin, conv, refined, reference, mode=self.mode)
+        real = pa.realisation_record(self.chunk_policy.kin, conv, actions, np.asarray(refined, np.float64),
+                                     PANDA_HORIZON["execution_length"])
+        # response-model EE positions (robot base frame) for the executed rows of the actions sent
+        response["panda/predicted_ee_base"] = np.asarray(real.pop("p_hat_base"), np.float32)
+        rec["realisation"] = real
         response["panda/joint_refined"] = np.asarray(refined, np.float32)
         response["panda/joint_reference"] = np.asarray(reference, np.float32)
         response["panda/actions_policy"] = np.asarray(conv.delta)
@@ -219,12 +246,15 @@ def build_safe_server(policy, args, *, attention_model=None):
     to_config = _replace_horizon_limits(ss.trajopt_config_from_args(args))
     attention_fn = ss.attention_extractor(alias=ATTENTION_ALIAS, cameras=ATTENTION_CAMERAS,
                                           transform=lambda _cam, grid: pat.unmirror_grid(np.asarray(grid)))
-    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn,
+    mode = conversion_mode()
+    safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(),
                       grasp_links=dict(profile.PANDA_GRASP_LINKS), hold_links=dict(profile.PANDA_HOLD_LINKS),
                       static_geometry=None, recorder=None, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,
                       finger_map=FingerJointMap(constraint, convention=panda_gripper_convention()), hands=HANDS)
-    info = {"ag3s": ag3s_info, "horizon": PANDA_HORIZON,
+    info = {"ag3s": ag3s_info, "horizon": PANDA_HORIZON, "conversion_mode": {"mode": mode, "name": pa.CONVERSION_MODES[mode]},
+            "latch": {"empty_below": panda_latch_config().empty_below, "calibration": str(GRIPPER_CALIBRATION),
+                      "calibration_record": gripper_calibration()},
             "limits": {"source": "urdf", "urdf": str(pm.PANDA_URDF), "default_acceleration": PANDA_DEFAULT_ACCELERATION,
                        "franka_accel_limits": FRANKA_ACCEL_LIMITS},
             "to_config": {"horizon": dataclasses.asdict(to_config.horizon), "planned": to_config.horizon.planned},
@@ -234,7 +264,7 @@ def build_safe_server(policy, args, *, attention_model=None):
             "hands": HANDS, "gripper_columns": GRIPPER_COLUMNS, "gripper_convention": panda_gripper_convention().record(),
             "conversion": pa.conventions(), "static_geometry": None,
             "v11ab_build_kwargs_not_applied": ["constraint_sphere_options", "finger_cover"]}
-    return PandaSafeServer(safe, chunk_policy), info
+    return PandaSafeServer(safe, chunk_policy, mode=mode), info
 
 
 def _write_config(record: dict) -> Optional[str]:

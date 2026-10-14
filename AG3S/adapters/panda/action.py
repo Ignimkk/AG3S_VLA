@@ -207,9 +207,19 @@ def delta_chunk_to_joint_chunk(kin: PandaKinematics, delta: np.ndarray, q_now: n
 
 
 # --- reverse --------------------------------------------------------------------------------------------
+#: Reverse-conversion modes (explicit; recorded per run).
+#: ``A`` / ``lag_inverse``: realise the refined *path* under the response model, Dx = (Dy - alpha Dy_prev) / beta.
+#: ``B`` / ``command_offset``: add the refined path change to the *commanded* step unchanged, Dx = Dy
+#: (V11AB's change applied as a change of the commanded target, without inverting the controller lag).
+CONVERSION_MODES = {"A": "lag_inverse", "B": "command_offset"}
+
+
 def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: np.ndarray,
-                               reference: np.ndarray, response: Optional[dict] = None) -> tuple[np.ndarray, dict]:
+                               reference: np.ndarray, response: Optional[dict] = None,
+                               mode: str = "A") -> tuple[np.ndarray, dict]:
     """``(actions (H, 7) in the policy's dtype, record)``. See the module docstring for the rule."""
+    if mode not in CONVERSION_MODES:
+        raise ValueError(f"conversion mode {mode!r} not in {sorted(CONVERSION_MODES)}")
     resp = response or RESPONSE
     (ap, bp), (ar, br) = resp["pos"], resp["rot"]
     Qs = np.asarray(refined)[:, :ARM_DOF]
@@ -235,8 +245,11 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
             passthrough.append(k)
             dyp, dyr = np.zeros(3), np.zeros(3)  # identical chain: exactly no change
         else:
-            dxp = (dyp - ap * dyp_prev) / bp
-            dxr = (dyr - ar * dyr_prev) / br
+            if mode == "A":
+                dxp = (dyp - ap * dyp_prev) / bp
+                dxr = (dyr - ar * dyr_prev) / br
+            else:
+                dxp, dxr = dyp, dyr
             corr = np.concatenate([dxp / OSC_POS_SCALE, dxr / OSC_ORI_SCALE])
             raw = np.asarray(conv.delta[k, :6], np.float64) + corr
             clipped = np.clip(raw, -OSC_INPUT_CLIP, OSC_INPUT_CLIP)
@@ -246,11 +259,53 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
             corrected.append(k)
             max_corr = max(max_corr, float(np.max(np.abs(corr))))
         dyp_prev, dyr_prev = dyp, dyr
-    rec = {"rows": int(H), "passthrough_rows": passthrough, "corrected_rows": corrected,
+    rec = {"mode": mode, "mode_name": CONVERSION_MODES[mode],
+           "rows": int(H), "passthrough_rows": passthrough, "corrected_rows": corrected,
            "saturated_rows": sat_rows, "max_abs_correction": max_corr,
            "max_abs_joint_change_rad": float(np.max(np.abs(np.asarray(Qs[:H], np.float64)
                                                              - np.asarray(Qr[:H], np.float64)))) if H else 0.0}
     return out, rec
+
+
+def predict_ee_path(kin: PandaKinematics, conv: Conversion, actions: np.ndarray, response: Optional[dict] = None):
+    """EE positions (base frame, (H, 3)) the response model predicts for ``actions`` from the chunk's start state."""
+    resp = response or RESPONSE
+    (ap, bp), (ar, br) = resp["pos"], resp["rot"]
+    R_bw = conv.R_world_base.T
+    yp, yr = (np.asarray(conv.prev_step_world[0], np.float64).copy(), np.asarray(conv.prev_step_world[1], np.float64).copy())
+    p, R = kin.fk(conv.q_now)
+    out = []
+    for k in range(np.asarray(actions).shape[0]):
+        a = np.clip(np.asarray(actions[k, :6], np.float64), -OSC_INPUT_CLIP, OSC_INPUT_CLIP)
+        yp = ap * yp + bp * (OSC_POS_SCALE * a[:3])
+        yr = ar * yr + br * (OSC_ORI_SCALE * a[3:6])
+        p = p + R_bw @ yp
+        R = rotvec_to_matrix(R_bw @ yr) @ R
+        out.append(p.copy())
+    return np.asarray(out)
+
+
+def realisation_record(kin: PandaKinematics, conv: Conversion, actions: np.ndarray, refined: np.ndarray,
+                       rows: int) -> dict:
+    """How much of V11AB's path change the output actions realise (response model), over the first ``rows`` rows.
+
+    ``p_ref`` = FK(reference rows), ``p_star`` = FK(refined rows), ``p_hat`` = path predicted for the output actions.
+    """
+    H = min(int(rows), np.asarray(actions).shape[0], np.asarray(refined).shape[0])
+    p_hat = predict_ee_path(kin, conv, np.asarray(actions)[:H])
+    p_ref = np.asarray([t[0] for t in conv.targets_base[:H]])
+    p_star = np.asarray([kin.fk(np.asarray(refined[k, :ARM_DOF], np.float64))[0] for k in range(H)])
+    want = np.linalg.norm(p_star - p_ref, axis=1)
+    got = np.linalg.norm(p_hat - p_ref, axis=1)
+    err = np.linalg.norm(p_hat - p_star, axis=1)
+    sel = want > 1e-4
+    return {"rows": H, "refined_change_mm_max": float(1000 * want.max()) if H else 0.0,
+            "predicted_change_mm_max": float(1000 * got.max()) if H else 0.0,
+            "predicted_vs_refined_mm_max": float(1000 * err.max()) if H else 0.0,
+            "realised_fraction_median": float(np.median(got[sel] / want[sel])) if sel.any() else None,
+            "realised_projection_median": float(np.median(np.einsum("ij,ij->i", p_hat[sel] - p_ref[sel], p_star[sel] - p_ref[sel])
+                                                          / want[sel] ** 2)) if sel.any() else None,
+            "p_hat_base": p_hat.tolist()}
 
 
 def panda_chunk_layout(joint_names: Sequence[str]):
@@ -272,8 +327,11 @@ def conventions() -> dict:
                                "form": "y_t = alpha*y_{t-1} + beta*x_t (world)"},
             "forward": "predict the EE path with the response model from FK(q_now) and the last realised step; "
                        "DLS IK per row seeded by the previous row",
-            "reverse": "a'_k = a_k + (Dy_k - alpha*Dy_{k-1})/beta/scale, Dy = refined minus reference chained FK step; "
-                       "clip; rows with refined == reference (float32, this and previous row) pass the original bits",
+            "reverse": {"A (lag_inverse)": "a'_k = a_k + (Dy_k - alpha*Dy_{k-1})/beta/scale",
+                        "B (command_offset)": "a'_k = a_k + Dy_k/scale",
+                        "Dy": "refined minus reference chained FK step (world)",
+                        "passthrough": "rows with refined == reference (float32, this and previous row) pass the original bits",
+                        "clip": "[-1, 1] per component after the correction"},
             "gripper": "joint-chunk column 7 = (1 - clip(a6)) / 2 (1 = open); output gripper = original a6",
             "ik": {"max_iters": IK_MAX_ITERS, "damping": IK_DAMPING, "pos_tol_m": IK_POS_TOL_M,
                    "rot_tol_rad": IK_ROT_TOL_RAD, "step_clip_rad": IK_STEP_CLIP_RAD}}
