@@ -32,6 +32,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from benchmark.runners import launch_libero_pi05_only as l0  # noqa: E402
 
 GPU_LOCK = "/tmp/ag3s-vla-gpu-validation.lock"
+DEFAULT_SPLIT = "dev (LIBERO init 0-4, plan §6.0)"
 MODES = ("vla_only", "vla_v11ab")
 CLIENT_SCRIPT = PROJECT_ROOT / "benchmark/runners/libero_safe_client.py"
 
@@ -54,7 +55,8 @@ def client_argv(run_dir: str, port: int, args) -> list[str]:
     return [str(l0.libero_python()), str(CLIENT_SCRIPT), "--run-dir", str(run_dir), "--host", "127.0.0.1",
             "--port", str(port), "--task-suite-name", args.task_suite_name,
             "--task-ids", ",".join(map(str, args.task_ids)), "--episode-ids", ",".join(map(str, args.episode_ids)),
-            "--seed", str(args.seed)] + (["--capture-segmentation"] if args.capture_segmentation else [])
+            "--seed", str(args.seed)] + (["--capture-segmentation"] if args.capture_segmentation else []) + (
+                ["--safety-level", args.safety_level] if args.safety_level else [])
 
 
 def gpu_compute_apps() -> list[str]:
@@ -81,9 +83,12 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
                 "panda_conversion_mode": args.conversion if mode == "vla_v11ab" else None,
                 "protocol": l0.protocol_settings(args), "runtime_schedule": l0.runtime_schedule(args),
                 "task_ids": args.task_ids, "episode_ids": args.episode_ids, "seed": args.seed,
+                "safety_level": args.safety_level,
                 "policy_seed_rule": "seed*100000 + task_id*1000 + episode_idx (libero_safe_client.episode_seed)",
                 "checkpoint": identity, "server_argv": s_argv, "data_split": args.data_split, **shared}
     tag = f"{mode}-{args.conversion}" if mode == "vla_v11ab" else mode
+    if args.safety_level:
+        tag = f"L{args.safety_level}-{tag}"
     run_dir = create_run(run_id=f"{args.run_id}-{tag}", settings=settings, checkpoint=identity["path"])
     print(f"[{mode}] {run_dir}", flush=True)
     c_argv = client_argv(str(run_dir), port, args)
@@ -136,17 +141,36 @@ def paired_summary(runs: dict) -> dict:
     for key in sorted(set(a) | set(b)):
         ra, rb = a.get(key, {}), b.get(key, {})
         row = {"task_id": key[0], "episode_idx": key[1], "task": ra.get("task_description") or rb.get("task_description"),
-               "vla_only": {k: ra.get(k) for k in ("official_success", "status", "env_steps_excluding_wait", "video")},
-               "vla_v11ab": {k: rb.get(k) for k in ("official_success", "status", "env_steps_excluding_wait", "video")},
+               "vla_only": {**{k: ra.get(k) for k in ("official_success", "status", "env_steps_excluding_wait", "video")},
+                            **_safety(ra)},
+               "vla_v11ab": {**{k: rb.get(k) for k in ("official_success", "status", "env_steps_excluding_wait", "video")},
+                             **_safety(rb)},
                "v11ab_hold_calls": (rb.get("safe_client") or {}).get("hold_calls"),
                "v11ab_max_abs_action_change": (rb.get("safe_client") or {}).get("max_abs_action_change_executed")}
         rows.append(row)
-        if ra.get("official_success") is False and rb.get("official_success") is True:
+        ok = "safe_success" if "safe_success" in row["vla_only"] else "official_success"
+        if row["vla_only"].get(ok) is False and row["vla_v11ab"].get(ok) is True:
             candidates.append(row)
-    return {"runs": {m: str(p) for m, p in runs.items()}, "episodes": rows,
-            "n": len(rows), "vla_only_success": sum(bool(r["vla_only"]["official_success"]) for r in rows),
-            "vla_v11ab_success": sum(bool(r["vla_v11ab"]["official_success"]) for r in rows),
-            "candidates_vla_fail_v11ab_success": candidates}
+    out = {"runs": {m: str(p) for m, p in runs.items()}, "episodes": rows,
+           "n": len(rows), "vla_only_success": sum(bool(r["vla_only"]["official_success"]) for r in rows),
+           "vla_v11ab_success": sum(bool(r["vla_v11ab"]["official_success"]) for r in rows),
+           "candidate_rule": "VLA-only fails and VLA+V11AB succeeds on {} (same task, init state, policy_seed)".format(
+               "safe_success (official success and no obstacle collision)" if rows and "safe_success" in rows[0]["vla_only"]
+               else "official success"),
+           "candidates_vla_fail_v11ab_success": candidates}
+    if rows and "safe_success" in rows[0]["vla_only"]:
+        for m in ("vla_only", "vla_v11ab"):
+            out[m + "_collided"] = sum(bool(r[m].get("collided")) for r in rows)
+            out[m + "_safe_success"] = sum(bool(r[m].get("safe_success")) for r in rows)
+    return out
+
+
+def _safety(row: dict) -> dict:
+    sl = row.get("safelibero")
+    if not sl:
+        return {}
+    return {"collided": sl.get("collided"), "collide_t": sl.get("collide_t"), "safe_success": sl.get("safe_success"),
+            "obstacle": sl.get("obstacle")}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -158,11 +182,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--modes", default=",".join(MODES))
     ap.add_argument("--step", default="SL5b")
-    ap.add_argument("--data-split", default="dev (LIBERO init 0-4, plan §6.0)")
+    ap.add_argument("--data-split", default=DEFAULT_SPLIT)
     ap.add_argument("--checkpoint-dir", default=str(l0.default_checkpoint()))
     ap.add_argument("--capture-segmentation", action="store_true")
     ap.add_argument("--server-timeout", type=float, default=1800.0)
     ap.add_argument("--busy-gpu-wait", type=float, default=1800.0)
+    ap.add_argument("--safety-level", choices=("I", "II"), default=None, help="SafeLIBERO suites only")
     ap.add_argument("--conversion", choices=("A", "B"), required=True,
                     help="Panda reverse conversion for VLA+V11AB (AG3S/adapters/panda/action.py CONVERSION_MODES)")
     ap.add_argument("--dry-run", action="store_true")
@@ -177,7 +202,12 @@ def main(argv=None) -> int:
         setattr(args, name, getattr(args, name, value))
     if os.environ.get("AG3S_PROJECT_ROOT") != str(PROJECT_ROOT):
         raise RuntimeError("source scripts/setup/env.sh of this checkout first")
-    if args.data_split.startswith("dev") and any(e > 4 for e in args.episode_ids):
+    if args.task_suite_name.startswith("safelibero") and args.data_split == DEFAULT_SPLIT:
+        raise ValueError("SafeLIBERO has no fixed dev/test split yet (plan §6.0: decided before P3); "
+                         "pass --data-split explicitly")
+    if args.task_suite_name.startswith("safelibero") != (args.safety_level is not None):
+        raise ValueError("--safety-level is required for SafeLIBERO suites and only for them")
+    if args.data_split == DEFAULT_SPLIT and any(e > 4 for e in args.episode_ids):
         raise ValueError("dev split is LIBERO init states 0-4 (plan §6.0); pass --data-split for anything else")
     identity = l0.checkpoint_identity(Path(args.checkpoint_dir), require=True)
     modes = [m for m in args.modes.split(",") if m]
