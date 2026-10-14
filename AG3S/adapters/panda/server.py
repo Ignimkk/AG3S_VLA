@@ -189,15 +189,59 @@ class PandaSafeServer:
         self._policy = safe
         self.chunk_policy = chunk_policy
         self.mode = mode
+        self._sent = {}  # seq -> (Conversion, refined, reference) of the chunks sent, for the next exec_feedback
 
     @property
     def metadata(self):
         return getattr(self._policy, "metadata", {})
 
     def reset(self):
+        self._sent.clear()
         self._policy.reset()
 
+    def _feedback(self, obs: dict) -> dict:
+        """``exec_feedback.applied_arm`` from the OSC rows the client actually applied (``panda/exec_applied_osc``).
+
+        The client confirms the feedback after the rows ran (``n_steps`` = steps actually executed). Here the
+        applied OSC commands become joint command rows with the conversion of the request that sent them
+        (``action.applied_command_rows``). Without that conversion or those rows the feedback is withdrawn
+        (``available=False`` with the reason) rather than filled with a substitute.
+        """
+        osc = obs.pop("panda/exec_applied_osc", None)
+        fb = obs.get("ag3s/exec_feedback")
+        if not isinstance(fb, dict) or not fb.get("available"):
+            return {"used": False}
+        seq = int(fb["seq"])
+        sent = self._sent.get(seq)
+        why = None
+        if sent is None:
+            why = f"no chunk sent for feedback seq {seq} in this server session"
+        elif osc is None:
+            why = "client sent no panda/exec_applied_osc"
+        elif np.asarray(osc).shape[0] != int(fb.get("n_steps", -1)):
+            why = f"panda/exec_applied_osc has {np.asarray(osc).shape[0]} rows, n_steps={fb.get('n_steps')}"
+        if why is not None:
+            obs["ag3s/exec_feedback"] = {"available": False, "reason": f"panda adapter: {why}"}
+            return {"used": False, "withdrawn": why}
+        conv, refined, reference = sent
+        arm = pa.applied_command_rows(self.chunk_policy.kin, conv, np.asarray(osc, np.float64))
+        obs["ag3s/exec_feedback"] = dict(fb, applied_arm=arm.astype(np.float32))
+        n = arm.shape[0]
+        rec = {"used": True, "seq": seq, "n_steps": n, "n_exec": int(fb.get("n_exec", 0)),
+               "executed_chunk": fb.get("executed_chunk")}
+        if n:
+            rec["applied_minus_refined_rad_max"] = float(np.abs(arm - np.asarray(refined, np.float64)[:n, :pa.ARM_DOF]).max())
+            rec["applied_minus_reference_rad_max"] = float(np.abs(arm - np.asarray(reference, np.float64)[:n, :pa.ARM_DOF]).max())
+            rec["applied_equals_reference_rows"] = int(sum(np.array_equal(arm[k].astype(np.float32),
+                                                                           np.asarray(reference, np.float32)[k, :pa.ARM_DOF])
+                                                           for k in range(n)))
+        return rec
+
     def infer(self, obs: dict, **kwargs) -> dict:
+        obs = dict(obs)
+        if obs.get("ag3s/reset"):
+            self._sent.clear()  # a new episode: seq restarts, earlier chunks are not this episode's
+        fb_rec = self._feedback(obs)
         response = dict(self._policy.infer(adapt_request(obs), **kwargs))
         conv = self.chunk_policy.last
         refined, reference = response["actions"], response.get("actions_reference")
@@ -215,6 +259,10 @@ class PandaSafeServer:
         response["panda/conversion"] = {**conv.record(), **rec}
         response["panda/mode"] = "vla_v11ab"
         response["actions"] = actions
+        response["panda/feedback"] = fb_rec
+        if "ag3s/seq" in obs:
+            self._sent = {k: v for k, v in self._sent.items() if k > int(obs["ag3s/seq"]) - 3}
+            self._sent[int(obs["ag3s/seq"])] = (conv, np.asarray(refined, np.float32), np.asarray(reference, np.float32))
         # logging only (read, not changed): the grasp-latch decision and the gripper value it saw, per chunk
         from AG3S.trajopt.safe_policy import _jsonable
 

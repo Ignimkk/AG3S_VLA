@@ -206,6 +206,25 @@ def delta_chunk_to_joint_chunk(kin: PandaKinematics, delta: np.ndarray, q_now: n
                       joint_chunk=np.asarray(rows, np.float64), ik=iks, targets_base=targets, prev_step_world=prev)
 
 
+def applied_command_rows(kin: PandaKinematics, conv: Conversion, applied: np.ndarray) -> np.ndarray:
+    """``exec_feedback.applied_arm`` for Panda: the OSC commands **actually applied** (``(n, 7)`` EE deltas, HOLD
+    rows included), expressed as joint command rows in the same convention as the chunk the server optimised.
+
+    Same forward map and the same start state (``q_now`` · ``R_world_base`` · ``prev_step_world``) as ``conv`` —
+    the conversion of the request whose chunk these rows came from. Rows equal to the policy's own deltas give
+    the reference rows bit for bit; this is a command history, not the measured joint path.
+    """
+    a = np.asarray(applied, np.float64)
+    if a.ndim != 2 or a.shape[1] < 7:
+        raise ValueError(f"expected applied OSC rows (n, 7), got {a.shape}")
+    if a.shape[0] == 0:
+        return np.zeros((0, ARM_DOF), np.float64)
+    T = np.eye(4)
+    T[:3, :3] = conv.R_world_base
+    rows = delta_chunk_to_joint_chunk(kin, a, conv.q_now, T, prev_step_world=conv.prev_step_world)
+    return rows.joint_chunk[:, :ARM_DOF]
+
+
 # --- reverse --------------------------------------------------------------------------------------------
 #: Reverse-conversion modes (explicit; recorded per run).
 #: ``A`` / ``lag_inverse``: realise the refined *path* under the response model, Dx = (Dy - alpha Dy_prev) / beta.

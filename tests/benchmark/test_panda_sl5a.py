@@ -152,3 +152,68 @@ def test_panda_latch_calibration():
     for f in d.__dataclass_fields__:
         if f != "empty_below":
             assert getattr(cfg, f) == getattr(d, f), f  # every other V11AB default unchanged
+
+
+def _feedback(seq, n, safe=True):
+    return {"available": True, "seq": seq, "t_step_start": 10, "n_steps": n, "n_exec": n if safe else 0,
+            "n_hold": 0 if safe else n, "executed": [safe] * n, "executed_chunk": "refined" if safe else "none"}
+
+
+def test_applied_command_rows_contract(kin):
+    """applied_arm = the applied OSC rows in the server's joint command convention (same map, same start state)."""
+    from types import SimpleNamespace
+
+    from AG3S.adapters.panda import action as pa
+    from AG3S.adapters.panda import server as ps
+
+    q0 = np.array([0.0, 0.17, 0.0, -2.45, 0.0, 2.6, 0.79])
+    A = np.clip(np.random.default_rng(3).normal(0, 0.5, (10, 7)), -1, 1).astype(np.float32)
+    conv = pa.delta_chunk_to_joint_chunk(kin, A, q0, np.eye(4), prev_step_world=(np.full(3, 0.002), np.zeros(3)))
+    ref = conv.joint_chunk.astype(np.float32)
+    rows = pa.applied_command_rows(kin, conv, A[:5])
+    assert np.array_equal(rows, conv.joint_chunk[:5, :7])  # unintervened rows -> the reference rows, bit for bit
+    hold = np.zeros((5, 7)); hold[:, 6] = A[4, 6]
+    assert not np.allclose(pa.applied_command_rows(kin, conv, hold), conv.joint_chunk[:5, :7])
+
+    srv = ps.PandaSafeServer(None, SimpleNamespace(kin=kin), mode="B")
+    srv._sent[3] = (conv, ref, ref)
+    obs = {"ag3s/exec_feedback": _feedback(3, 5), "panda/exec_applied_osc": A[:5].astype(np.float64)}
+    rec = srv._feedback(obs)
+    assert rec["used"] and rec["applied_equals_reference_rows"] == 5 and "panda/exec_applied_osc" not in obs
+    assert obs["ag3s/exec_feedback"]["applied_arm"].shape == (5, 7)
+    # a partial chunk (episode ended / fewer steps ran): rows must match n_steps
+    obs = {"ag3s/exec_feedback": _feedback(3, 2), "panda/exec_applied_osc": A[:2].astype(np.float64)}
+    assert srv._feedback(obs)["n_steps"] == 2
+    for bad in ({"ag3s/exec_feedback": _feedback(9, 5), "panda/exec_applied_osc": A[:5]},      # unknown seq
+                {"ag3s/exec_feedback": _feedback(3, 5)},                                       # no OSC rows
+                {"ag3s/exec_feedback": _feedback(3, 4), "panda/exec_applied_osc": A[:5]}):     # row count mismatch
+        rec = srv._feedback(bad)
+        assert rec["used"] is False and bad["ag3s/exec_feedback"]["available"] is False
+
+
+def test_client_confirms_feedback_after_execution():
+    """The py3.8 client counts the steps that actually ran and measures the gripper at this request."""
+    code = r'''
+import sys, json, numpy as np
+sys.path.insert(0, "benchmark/runners")
+import libero_safe_client as c
+cl = c.SafeClient(None, 7, 0, 0, 5)
+cl.eef = [None] * 8
+cl.sent = {"seq": 2, "t_call": 7, "safe": True, "applied": np.arange(35.0).reshape(5, 7) / 100,
+           "planned": np.zeros((5, 7))}
+out = {}
+cl.eef += [None] * 3                                   # only 3 of the 5 rows ran
+fb, osc = cl._confirmed_feedback(np.r_[np.zeros(7), 0.012, -0.012])
+out["partial"] = [fb["n_steps"], fb["n_exec"], osc.shape[0], round(float(fb["measured_gripper"][0]), 4)]
+cl.eef += [None] * 2
+cl.sent["safe"] = False
+fb, osc = cl._confirmed_feedback(np.r_[np.zeros(7), 0.04, -0.04])
+out["hold"] = [fb["n_steps"], fb["n_exec"], fb["n_hold"], fb["executed_chunk"], osc.shape[0]]
+print(json.dumps(out))
+'''
+    r = subprocess.run([str(ROOT / ".venv-libero/bin/python"), "-c", code], cwd=str(ROOT), capture_output=True, text=True)
+    if r.returncode != 0 and "No module named" in r.stderr:
+        pytest.skip(r.stderr.splitlines()[-1])
+    out = json.loads(r.stdout.strip().splitlines()[-1])
+    assert out["partial"] == [3, 3, 3, 0.3]
+    assert out["hold"] == [5, 0, 5, "none", 5]
