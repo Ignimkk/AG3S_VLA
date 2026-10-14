@@ -206,6 +206,57 @@ def test_v_rows_impl_is_t53s_noun_v_at_one_layer():
     np.testing.assert_allclose(got[2], 3000 + 779 + 0.01 * np.arange(6), atol=1e-3)
 
 
+class _JnpLLM:
+    """A traceable stand-in (jax.numpy only): probs / V are fixed functions of the shapes."""
+
+    def __call__(self, embedded, mask, positions):
+        import jax.numpy as jnp
+
+        tok = embedded[0]
+        b, s = tok.shape[0], tok.shape[1]
+        grid = jnp.arange(N_L * N_G * s * s, dtype=jnp.float32).reshape(N_L, 1, 1, N_G, s, s)
+        probs = jnp.broadcast_to(jnp.sin(grid), (N_L, b, 1, N_G, s, s)) + 0.0 * tok.sum()
+        lv = jnp.arange(N_L, dtype=jnp.float32)[:, None, None, None, None]
+        sv = jnp.arange(s, dtype=jnp.float32)[None, None, :, None, None]
+        hv = jnp.arange(6, dtype=jnp.float32)[None, None, None, None, :]
+        v = jnp.broadcast_to(1000 * lv + sv + 0.01 * hv, (N_L, b, s, 1, 6)).astype(jnp.bfloat16)
+        return [tok, None], (jnp.zeros_like(v), v), probs
+
+
+class _JnpModel:
+    PaliGemma = types.SimpleNamespace(llm=_JnpLLM())
+
+    @staticmethod
+    def embed_prefix(obs):
+        import jax.numpy as jnp
+
+        s = 768 + obs.tokenized_prompt.shape[1]
+        return (jnp.zeros((1, s, 2), jnp.float32), jnp.ones((1, s), bool), jnp.zeros((1, s), bool))
+
+
+def test_traced_bodies_jit_under_jax_cpu():
+    """The bodies `JaxPrefixBackend` jits: traceable with traced rows and static (layer, head), and equal to
+    the T49 / T53 gathers run under the same jit (jax CPU; skipped where jax is absent)."""
+    jax = pytest.importorskip("jax")
+    import jax.numpy as jnp
+
+    from AG3S.ag3s.experiments.studies import t49_noun_query_extract as nx
+    from AG3S.ag3s.experiments.studies import t53_extract as ex
+
+    obs = types.SimpleNamespace(tokenized_prompt=jnp.zeros((1, T_TXT), jnp.int32))
+    rows = jnp.asarray([770, 775, 779], jnp.int32)
+    mam = lambda m, a: None  # noqa: E731
+    f = jax.jit(lambda r: prefix_noun_impl(_JnpModel(), obs, r, layer=2, head=1, make_attn_mask=mam, xp=jnp))
+    kv, mask, cell = f(rows)
+    ref = jax.jit(lambda r: nx.prefix_rows_impl(_JnpModel(), obs, r, make_attn_mask=mam, xp=jnp))(rows)
+    assert cell.shape == (3, 768) and cell.dtype == jnp.float32
+    assert np.array_equal(np.asarray(cell), np.asarray(ref["image"][2, 1]))
+    v = jax.jit(lambda k, r: v_rows_impl(k, r, layer=3, xp=jnp))(kv, rows)
+    want = jax.jit(lambda r: ex.noun_token_impl(_JnpModel(), obs, r, jnp.asarray([3]), make_attn_mask=mam,
+                                                xp=jnp)["v"][0])(rows)
+    assert v.dtype == jnp.float32 and np.array_equal(np.asarray(v), np.asarray(want))
+
+
 # =============================================================================================
 # 4. probe
 # =============================================================================================
