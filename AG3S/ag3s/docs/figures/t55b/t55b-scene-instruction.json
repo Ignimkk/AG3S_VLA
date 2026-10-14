@@ -1,0 +1,36 @@
+{
+ "key": "ep1804",
+ "frame": 21,
+ "t_step": 168,
+ "fruits": [
+  "apple",
+  "banana",
+  "orange",
+  "pear"
+ ],
+ "panels": {
+  "instr_banana": {
+   "latch": "closing",
+   "manipulated_nearest": "banana",
+   "reach_mm": 670.3,
+   "checks": {
+    "blocked": true,
+    "closed": true,
+    "dropped": true,
+    "manipulated": true,
+    "not_empty": true,
+    "reach": false,
+    "settled": true
+   }
+  },
+  "instr_orange": {
+   "latch": "held",
+   "manipulated_nearest": "apple",
+   "reach_mm": 79.28,
+   "checks": {}
+  }
+ },
+ "held_fruit_truth": [
+  "apple"
+ ]
+}
