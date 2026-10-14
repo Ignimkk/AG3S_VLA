@@ -1857,6 +1857,28 @@ def build_parser() -> argparse.ArgumentParser:
                          "(observed|hand_relative) · reach_observed_mm · reach_hand_relative_mm. 기본 off "
                          "= T46g 전과 같다")
     # T46g — end
+    # T57-A — begin
+    ap.add_argument("--attention-source", default=None, metavar="SPEC",
+                    help="T57-A — AG3S 에 들어가는 attention 의 셀. action:<mean|first|last>:L<l>H<h> (action "
+                         "query, Euler step 0) 또는 noun_target:L<l>H<h> (prompt 의 target 명사 token 행, prefix "
+                         "pass, raw σ0 k1 — T57 단계 1 N 은 noun_target:L10H7; T61 선택은 action:mean:L10H7). "
+                         "명사를 못 찾은 요청은 attention 이 비고 (합성하지 않는다) 사유가 기록된다. 응답 · "
+                         "summary_json 에 attention_source. 기본 (안 줌) = action:last:L8H2, T57 전과 같다")
+    gate = ap.add_mutually_exclusive_group()
+    gate.add_argument("--task-gate", action="store_true",
+                      help="T57 단계 2 — HELD 중 task-aware 실행 gate: grasp latch 가 HELD 인데 명사 token probe "
+                           "(T55 prereg: target 명사 token 의 layer 5 V · logistic · τ 0.3 · p 1 · noun_ok 필요) 가 "
+                           "통과하지 않으면 그 청크를 HOLD (verdict kind task_not_ready). HELD 가 아니면 차단하지 "
+                           "않는다. attach/detach · TargetConfirm · Phase 는 그대로. 추론은 HOLD 중에도 요청마다 "
+                           "계속된다. 기본 off")
+    gate.add_argument("--task-gate-shadow", action="store_true",
+                      help="T57 단계 2 shadow — gate 와 같은 값 (probe_p · task_ready · noun_ok · latch_state · "
+                           "task_gate_applied) 을 요청마다 계산해 기록만 한다 (HOLD 하지 않는다). 추가 계산 비용이 "
+                           "있다 (target 행 V gather + logistic). 기본 off")
+    ap.add_argument("--task-probe", default=None, metavar="NPZ",
+                    help="T57 단계 2 의 명사 probe. 안 주면 $AG3S_STORAGE_ROOT/" + "<T55 run>/verify/T55/"
+                         "noun_probe.npz (T55 prereg). md5 가 prereg 의 값과 다르면 거절한다")
+    # T57-A — end
     ap.add_argument("--held-cover-cap-mm", type=float, default=None, metavar="MM",
                     help="T43 Z6 — attach 때 쥔 질의 구 (body cover sphere · segments, H2 덮개 모두) 의 "
                          "반지름 ≤ 관측 반폭 (attach 시점 target cluster 의 맞춘 반지름) + MM, 각 구 중심은 "
@@ -1905,6 +1927,74 @@ def resolve_subtask_gate(args) -> str | None:
                 f"gate 를 끈다. 명시한 --subtask-gate 였다면 오류)")
     args.subtask_gate = True
     return None
+
+
+# T57-A — begin
+def task_gate_mode(args) -> str:
+    """`SafePolicy(task_gate=...)`: ``on`` (`--task-gate`), ``shadow`` (`--task-gate-shadow`), else ``off``."""
+    if getattr(args, "task_gate", False):
+        return "on"
+    if getattr(args, "task_gate_shadow", False):
+        return "shadow"
+    return "off"
+
+
+def task_probe_path(args):
+    """The probe file the gate reads: `--task-probe`, else the T55 prereg file under the storage root."""
+    from AG3S.trajopt.attention_source import default_task_probe_path
+
+    given = getattr(args, "task_probe", None)
+    return pathlib.Path(given) if given else default_task_probe_path()
+
+
+def t57a_record_meta(args) -> dict:
+    """Constraint-record meta keys — only for the flags that are on (the default meta is the pre-T57 one)."""
+    out: dict = {}
+    if getattr(args, "attention_source", None):
+        from AG3S.trajopt.attention_source import parse_attention_source
+
+        out["attention_source"] = parse_attention_source(args.attention_source).record()
+    mode = task_gate_mode(args)
+    if mode != "off":
+        from AG3S.trajopt.attention_source import (
+            TASK_PROBE_FEATURE, TASK_PROBE_PERSIST, TASK_PROBE_TAU, file_md5)
+
+        path = task_probe_path(args)
+        out["task_gate"] = {"mode": mode, "probe": str(path), "probe_md5": file_md5(path),
+                            "feature": TASK_PROBE_FEATURE, "tau": TASK_PROBE_TAU,
+                            "persist": TASK_PROBE_PERSIST}
+    return out
+
+
+def reject_t57a_flags(ap: argparse.ArgumentParser, args) -> None:
+    """T57-A flags: a SPEC that does not parse, a flag on a server without the attention model (`--no-safe` ·
+    `--no-attention` · `--no-perception`), `--task-probe` without a gate, and a gate whose probe file is
+    missing or is not the T55 prereg's (md5). `--task-gate` with `--task-gate-shadow` is refused by argparse
+    (mutually exclusive: the gate already records everything shadow records)."""
+    from AG3S.trajopt.attention_source import load_noun_probe, parse_attention_source
+
+    spec = getattr(args, "attention_source", None)
+    mode = task_gate_mode(args)
+    given = [f for f, on in (("--attention-source", spec is not None),
+                             ("--task-gate", mode == "on"), ("--task-gate-shadow", mode == "shadow"),
+                             ("--task-probe", getattr(args, "task_probe", None) is not None)) if on]
+    if given and (args.no_safe or args.no_attention or getattr(args, "no_perception", False)):
+        ap.error(f"{', '.join(given)} 는 attention 서버 (AttentionPolicy) 와 SafePolicy 의 flag 입니다 "
+                 "(--no-safe · --no-attention · --no-perception 은 그것을 안 만듭니다) — 빼고 띄우십시오")
+    if spec is not None:
+        try:
+            parse_attention_source(spec)
+        except ValueError as exc:
+            ap.error(f"--attention-source: {exc}")
+    if getattr(args, "task_probe", None) is not None and mode == "off":
+        ap.error("--task-probe 는 --task-gate · --task-gate-shadow 에서만 읽힙니다 — 그대로 띄우면 효과가 "
+                 "있었다고 믿게 됩니다")
+    if mode != "off":
+        try:
+            load_noun_probe(task_probe_path(args))
+        except (OSError, ValueError, KeyError) as exc:
+            ap.error(f"--task-gate{'-shadow' if mode == 'shadow' else ''}: probe 를 쓸 수 없습니다 — {exc}")
+# T57-A — end
 
 
 def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
@@ -2070,6 +2160,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
     if t43t_ag3s and (args.no_safe or getattr(args, "no_perception", False)):
         ap.error(f"{', '.join(t43t_ag3s)} 는 AG3S / SafePolicy 의 flag 입니다 (--no-safe · "
                  "--no-perception 은 그것을 안 만듭니다) — 빼고 띄우십시오")
+    # T57-A — begin
+    reject_t57a_flags(ap, args)
+    # T57-A — end
     if getattr(args, "held_cover_cap_mm", None) is not None and not (
             args.held_cover_cap_mm >= 0.0 and math.isfinite(args.held_cover_cap_mm)):
         ap.error(f"--held-cover-cap-mm 는 0 이상의 mm 입니다 (받은 값 {args.held_cover_cap_mm})")
@@ -2697,8 +2790,23 @@ def main() -> None:
             logging.info("loading a second copy of the checkpoint for attention extraction")
             attn_model = load_attention_model(args.config, args.checkpoint)
             # SUBTASK-c — 같은 prefix pass 에서 subtask label 을 싣는다 (`clustering.subtask_probe_path`).
+            # T57-A — 켰을 때만 인자를 준다 (안 주면 T57 전 AttentionPolicy 그대로).
+            t57a: dict = {}
+            if args.attention_source or task_gate_mode(args) != "off":
+                from AG3S.trajopt.attention_source import (
+                    NounTokens, load_noun_probe, log_source, parse_attention_source)
+
+                source = (parse_attention_source(args.attention_source) if args.attention_source
+                          else None)
+                task_probe = (load_noun_probe(task_probe_path(args)) if task_gate_mode(args) != "off"
+                              else None)
+                t57a = {"attention_source": source, "task_probe": task_probe,
+                        "default_prompt": args.default_prompt}
+                if task_probe is not None or (source is not None and source.is_noun):
+                    t57a["noun_tokens"] = NounTokens.from_config(args.config)
+                log_source(source, task_probe)
             served_policy = AttentionPolicy(policy, attn_model,
-                                            subtask_probe=args.subtask_probe or "default")
+                                            subtask_probe=args.subtask_probe or "default", **t57a)
             probe = served_policy.subtask_probe
             logging.info("subtask label: %s · gate %s",
                          "OFF (probe 를 못 읽었다 — label 없음)" if probe is None
@@ -2766,7 +2874,9 @@ def main() -> None:
                                   "probe": args.subtask_probe or "shipped:kv_L4_v1",
                                   # T46c A12 (W1) — 켰을 때만 키가 생긴다.
                                   **({"placed_no_seed_certify": True}
-                                     if getattr(args, "placed_no_seed_certify", False) else {})}})
+                                     if getattr(args, "placed_no_seed_certify", False) else {})},
+                      # T57-A — 켰을 때만 키가 생긴다.
+                      **t57a_record_meta(args)})
             # **시작할 때 거절한다.** 기록기가 이 backend 의 거리장을 실을 수 없으면 청크마다
             # 예외가 나고, 예전에는 그것이 `print` 한 줄이라 75 chunk 를 돌리고도 빈 디렉토리가
             # 남았다 (2026-09-28). 여기서 죽으면 체크포인트를 올리기 전이다.
@@ -2884,6 +2994,8 @@ def main() -> None:
             attention_fn=attention_extractor(),
             recorder=recorder,
             shadow=args.shadow,
+            # T57-A — 켰을 때만 (기본 off = 인자 없음).
+            **({"task_gate": task_gate_mode(args)} if task_gate_mode(args) != "off" else {}),
         )
         # **어느 모드로 떠 있는지 시작할 때 크게 말한다.** legacy backend 경고와 같은 이유다 —
         # 조용히 shadow 로 떠 있으면(또는 shadow 가 아닌 채로) 로그를 읽는 사람이 그 실행이

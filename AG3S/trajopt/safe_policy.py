@@ -150,7 +150,9 @@ class SafePolicy:
                  shadow: bool = False,
                  verdict_policy: str = "reasons",
                  allowed_contact_pad_m: float = 0.01,
-                 allow_unresolved_contact_tier: bool = False):
+                 allow_unresolved_contact_tier: bool = False,
+                 task_gate: str = "off",
+                 task_gate_tau: Optional[float] = None):
         self._policy = policy
         #: **`safe` 를 무엇으로 정하나** (T23). `"reasons"`(기본) 는 `verdict_reasons` 에 HOLD 처리인
         #: 사유가 없을 때 `safe` 다 — 권한 link ↔ manipulated 접촉(`allowed_contact`) · 가려진
@@ -167,6 +169,24 @@ class SafePolicy:
         #: 의 근거로 받는다. 기본 False — T21 의 규칙 (`curobo_field.RESOLVED_TIERS`: 창 밖 답은
         #: 접촉 허용의 근거가 못 된다). 그런 행은 `unverified` (HOLD) 로 간다.
         self.allow_unresolved_contact_tier = bool(allow_unresolved_contact_tier)
+        # T57-A — begin. **HELD 중 task-aware 실행 gate** (T57 단계 2, 사용자 판정 6). `"off"` (기본) 는 아무
+        # 것도 하지 않는다 (판정 · 기록 · 응답이 T57 전과 같다). `"on"`: latch 가 HELD 인데 정책이 실은 명사
+        # probe (`result["task_probe"]`, T55 prereg v5 · τ 0.3 · p 1 · noun_ok 필요) 가 통과하지 않으면 그
+        # 요청의 `verdict_reasons` 에 `task_not_ready` (HOLD) 를 더한다. `"shadow"`: 같은 값을 계산해 기록만
+        # 한다 (사유를 더하지 않는다). 운반 · 놓기 단계 전이나 작업 완료를 인증하는 기능이 아니다 —
+        # 물리적으로 보유 중이지만 지시한 대상을 보유했다는 신호가 부족하면 실행을 보류하는 기능이다.
+        from AG3S.trajopt.attention_source import TASK_GATE_MODES, TASK_PROBE_TAU
+
+        if task_gate not in TASK_GATE_MODES:
+            raise ValueError(f"task_gate must be one of {TASK_GATE_MODES}, got {task_gate!r}")
+        if task_gate == "on" and verdict_policy == "legacy":
+            raise ValueError("task_gate='on' adds a verdict reason; verdict_policy='legacy' ignores reasons "
+                             "(safe = TrajOptStatus.safe), so the gate would hold nothing")
+        self.task_gate = str(task_gate)
+        self.task_gate_tau = float(TASK_PROBE_TAU if task_gate_tau is None else task_gate_tau)
+        #: 이번 요청의 gate 기록 (`summary_json.task_gate`, 응답 `task_gate`). off 이면 언제나 `{}`.
+        self._last_task_gate: dict[str, Any] = {}
+        # T57-A — end
         self.ag3s = ag3s
         self.to_config = to_config or TrajOptConfig.from_dict({
             "collision": {"backend": "esdf", "esdf_margin": 0.05, "use_support_planes": False},
@@ -352,6 +372,9 @@ class SafePolicy:
             meta["placed_no_seed_certify"] = True
         # T46e A13 — 같은 규약: oracle extent 서버일 때만 키가 생긴다. client 는 이 키를 보고 segmentation 을
         # 안 보내는 자신을 접속 즉시 거절한다 (`SafeRemoteClient._check_server_metadata`).
+        # T57-A — 같은 규약: gate (on · shadow) 일 때만 키가 생긴다.
+        if self.task_gate != "off":
+            meta["task_gate"] = {"mode": self.task_gate, "tau": self.task_gate_tau}
         if self._oracle_extent_on():
             meta[wire.ORACLE_SEG_REQUIRED] = True
             meta["target_extent"] = "oracle_visible"
@@ -403,6 +426,7 @@ class SafePolicy:
         self._grasp_constraint_version = None
         self._last_grasp_record = {}
         self._last_finger = {}
+        self._last_task_gate = {}
         for lin in self._finger_linearizers():
             lin.set_joint_parameter_path(None)
 
@@ -455,6 +479,12 @@ class SafePolicy:
                          "state": policy_obs.get("state"),
                          # SUBTASK-c: `AttentionPolicy` 가 실은 subtask label (없으면 None).
                          "subtask": result.get("subtask") if isinstance(result, dict) else None}
+        # T57-A — 켰을 때만 (off 이면 `_pending` 도 T57 전과 같다).
+        self._last_task_gate = {}
+        if self.task_gate != "off":
+            self._pending["task_probe"] = result.get("task_probe") if isinstance(result, dict) else None
+        if isinstance(result, dict) and result.get("attention_source") is not None:
+            self._pending["attention_source"] = result.get("attention_source")
 
         previous, executed_steps = self._continuity_input(feedback)
         context: dict[str, Any] = {"t_step": seq, "previous_physical_chunk": previous}
@@ -521,6 +551,13 @@ class SafePolicy:
                   + "; ".join(f"{r['kind']}: {r['detail']}" for r in self._last_reasons))
 
         extra = {k: v for k, v in result.items() if k != "actions"}
+        if self.task_gate != "off":
+            # T57-A — 요청마다 gate 기록 (task_ready · probe_p · noun_ok · latch_state · task_gate_applied).
+            extra["task_gate"] = _jsonable(self._last_task_gate)
+            g = self._last_task_gate
+            print(f"[safe_policy] seq={seq} task_gate={self.task_gate} latch={g.get('latch_state')} "
+                  f"p={g.get('probe_p')} noun_ok={g.get('noun_ok')} task_ready={g.get('task_ready')} "
+                  f"applied={g.get('task_gate_applied')}")
         if self._seed_applied is not None:
             # T39 — 적용했다는 회신. 적용한 요청에만 — 없는 요청의 응답은 T39 전과 같다.
             extra[wire.POLICY_SEED] = self._seed_applied
@@ -1533,6 +1570,10 @@ class SafePolicy:
             # T43 TA — the B / C history this chunk used. Only with those flags on.
             **({"ta_history": _jsonable(self._last_ta_history)}
                if getattr(self, "_last_ta_history", None) else {}),
+            # T57-A — 켰을 때만 키가 생긴다: 쓰인 attention source (flag 를 준 경우) 와 HELD gate 기록.
+            **({"attention_source": _jsonable(self._pending["attention_source"])}
+               if self._pending.get("attention_source") is not None else {}),
+            **({"task_gate": _jsonable(self._last_task_gate)} if self.task_gate != "off" else {}),
             # T23 — 판정 사유와 위반 행 분류. `reasons` 가 `None` 이면 판정 전(기록 순서상 없음).
             "verdict": _jsonable({
                 "policy": self.verdict_policy,
@@ -1593,6 +1634,9 @@ class SafePolicy:
             self._last_reasons = [wire.make_reason(
                 "uncertified", "no scene: the optimizer did not run"
                 + (f" — {why}" if why else ""), carried_on_wire=False)]
+            if self.task_gate != "off":
+                # T57-A — 기록만 (이 청크는 사유 없이 HOLD 다; latch 는 이번 요청에 돌지 않았다).
+                self._last_reasons = self._task_gate(self._last_reasons, scene=False)
             return wire.SafetyVerdict(
                 ag3s_status=ag3s_status, geometry_certified=False,
                 trajopt_status="no_solution", max_violation_m=float("inf"), safe=False,
@@ -1609,6 +1653,10 @@ class SafePolicy:
         reasons = self._reasons(result, cs, certified, violation, pair)
         if self.follow_to_limit is not None and self.verdict_policy != "legacy":
             reasons = self._follow_to(result, reasons, policy_chunk)
+        if self.task_gate != "off":
+            # T57-A — latch 상태 (`_scene_fn` 의 최종 phase) 와 이번 요청의 명사 probe 가 준비된 뒤, 최종
+            # 판정 직전. 다른 사유는 건드리지 않는다.
+            reasons = self._task_gate(reasons)
         action, holding = wire.gate_decision(reasons)
         if self.verdict_policy == "legacy":
             # T23 전 그대로. 기하 미인증은 이미 그 안에 들어가 있다 — sqp 가
@@ -1660,6 +1708,62 @@ class SafePolicy:
                 max_iterations_hit=bool(metrics.get("max_iterations_hit")),
                 sqp_iterations=metrics.get("sqp_iterations")))
         return reasons
+
+    # --- T57-A: HELD 중 task-aware 실행 gate ---------------------------------------------
+    def _task_gate(self, reasons: list[dict[str, Any]], *, scene: bool = True) -> list[dict[str, Any]]:
+        """사용자 판정 6 그대로::
+
+            task_ready = held and probe_pass
+            if task_gate_enabled and held and not probe_pass:
+                verdict_reasons.add("task_not_ready")
+
+        `held` = latch 의 **이번 요청 최종** phase 가 HELD (`_scene_fn` 의 `_advance_grasp` · `_run_latch` 뒤 —
+        기록 `grasp.state` 와 같은 값). `probe_pass` = 이번 요청의 `result["task_probe"]` 가 ``ok`` (명사를 찾았고
+        p 를 계산했다) 이고 ``p ≥ τ`` (T55 prereg τ 0.3, 지속 p = 1 — 이번 요청 하나). probe 가 없거나 깨졌으면
+        통과가 아니다 (fail closed). HELD 가 아니면 사유를 더하지 않는다. 다른 사유 · attach / detach ·
+        TargetConfirm · 외부 Phase 는 바꾸지 않는다. shadow 는 같은 값을 계산해 기록만 한다.
+        """
+        probe = self._pending.get("task_probe")
+        probe = probe if isinstance(probe, dict) else None
+        p = None if probe is None else probe.get("p")
+        p = float(p) if isinstance(p, (int, float)) and np.isfinite(float(p)) else None
+        noun_ok = bool(probe is not None and probe.get("noun_ok"))
+        probe_ok = bool(probe is not None and probe.get("ok") and noun_ok and p is not None)
+        probe_pass = bool(probe_ok and p >= self.task_gate_tau)
+        phase = self._latch.phase
+        held = phase is GraspPhase.HELD
+        task_ready = bool(held and probe_pass)
+        applied = bool(self.task_gate == "on" and held and not probe_pass)
+        why = ("" if probe_pass else
+               "no task_probe in the policy result" if probe is None else
+               (probe.get("error") or ("noun not found" if not noun_ok else "probe gave no finite p"))
+               if not probe_ok else
+               f"p {p:.4f} < tau {self.task_gate_tau:g}")
+        self._last_task_gate = {
+            "mode": self.task_gate, "seq": int(self._pending.get("scene", {}).get("seq", 0)),
+            "task_ready": task_ready, "probe_p": p, "probe_pass": probe_pass, "noun_ok": noun_ok,
+            "noun": None if probe is None else probe.get("noun"),
+            "feature_sha1": None if probe is None else probe.get("feature_sha1"),
+            "latch_state": phase.value, "held": held, "tau": self.task_gate_tau,
+            "task_gate_applied": applied, "why_not_ready": why,
+            **({} if scene else {"scene": False, "on_wire": False}),
+        }
+        if not applied:
+            return reasons
+        if (self.follow_to_limit is not None
+                and (self._last_follow_to or {}).get("decision") == "follow_to"):
+            # T43 Z6 의 한도는 "스스로 인증된 청크 뒤로 **따른** 청크 수" 다. 이 청크는 이 gate 가 HOLD 하므로
+            # 따르지 않았다 — `_follow_to` 가 올린 streak 을 되돌린다 (판정 · 다른 사유는 그대로).
+            self._follow_to_streak = max(0, int(self._follow_to_streak) - 1)
+            self._last_follow_to.update({"held_by": "task_not_ready", "streak": int(self._follow_to_streak)})
+        reason = wire.make_reason(
+            "task_not_ready",
+            f"latch HELD but the noun probe does not say the instructed object is held ({why}); "
+            "this chunk is held, inference continues next request",
+            probe_p=p, tau=self.task_gate_tau, noun_ok=noun_ok, latch_state=phase.value,
+            noun=self._last_task_gate["noun"],
+            **({} if scene else {"carried_on_wire": False}))
+        return list(reasons) + [reason]
 
     def _manipulated_record(self, cs) -> dict[str, Any]:
         """이 프레임의 조작 대상 기록 (T20 `ManipulatedIdentity.record()`), 없으면 `{}`.
