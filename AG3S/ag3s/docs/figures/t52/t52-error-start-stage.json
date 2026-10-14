@@ -1,0 +1,361 @@
+{
+ "counts": {
+  "scene1800": {
+   "l8h2": {
+    "identity": 7,
+    "seed": 16,
+    "region_growing": 0,
+    "no_cluster": 0,
+    "ok": 5,
+    "no_visible_camera": 2
+   },
+   "noun_L8H6": {
+    "identity": 0,
+    "seed": 27,
+    "region_growing": 0,
+    "no_cluster": 0,
+    "ok": 1,
+    "no_visible_camera": 2
+   },
+   "noun_L10H7": {
+    "identity": 0,
+    "seed": 12,
+    "region_growing": 6,
+    "no_cluster": 0,
+    "ok": 10,
+    "no_visible_camera": 2
+   }
+  },
+  "scene1850": {
+   "l8h2": {
+    "identity": 7,
+    "seed": 6,
+    "region_growing": 0,
+    "no_cluster": 0,
+    "ok": 2,
+    "no_visible_camera": 0
+   },
+   "noun_L8H6": {
+    "identity": 0,
+    "seed": 15,
+    "region_growing": 0,
+    "no_cluster": 0,
+    "ok": 0,
+    "no_visible_camera": 0
+   },
+   "noun_L10H7": {
+    "identity": 3,
+    "seed": 0,
+    "region_growing": 0,
+    "no_cluster": 0,
+    "ok": 12,
+    "no_visible_camera": 0
+   }
+  },
+  "scene1900": {
+   "l8h2": {
+    "identity": 2,
+    "seed": 12,
+    "region_growing": 0,
+    "no_cluster": 0,
+    "ok": 1,
+    "no_visible_camera": 0
+   },
+   "noun_L8H6": {
+    "identity": 0,
+    "seed": 15,
+    "region_growing": 0,
+    "no_cluster": 0,
+    "ok": 0,
+    "no_visible_camera": 0
+   },
+   "noun_L10H7": {
+    "identity": 0,
+    "seed": 5,
+    "region_growing": 0,
+    "no_cluster": 0,
+    "ok": 10,
+    "no_visible_camera": 0
+   }
+  }
+ },
+ "ci95": {
+  "scene1800": {
+   "l8h2": {
+    "identity": {
+     "count": 7,
+     "ci95": [
+      0.0,
+      11.0
+     ]
+    },
+    "seed": {
+     "count": 16,
+     "ci95": [
+      12.0,
+      23.0
+     ]
+    },
+    "region_growing": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "ok": {
+     "count": 5,
+     "ci95": [
+      2.0,
+      12.0
+     ]
+    }
+   },
+   "noun_L8H6": {
+    "identity": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "seed": {
+     "count": 27,
+     "ci95": [
+      24.0,
+      30.0
+     ]
+    },
+    "region_growing": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "ok": {
+     "count": 1,
+     "ci95": [
+      0.0,
+      3.0
+     ]
+    }
+   },
+   "noun_L10H7": {
+    "identity": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "seed": {
+     "count": 12,
+     "ci95": [
+      3.0,
+      17.0
+     ]
+    },
+    "region_growing": {
+     "count": 6,
+     "ci95": [
+      3.0,
+      14.0
+     ]
+    },
+    "ok": {
+     "count": 10,
+     "ci95": [
+      5.0,
+      15.0
+     ]
+    }
+   }
+  },
+  "scene1850": {
+   "l8h2": {
+    "identity": {
+     "count": 7,
+     "ci95": [
+      3.0,
+      13.0
+     ]
+    },
+    "seed": {
+     "count": 6,
+     "ci95": [
+      2.0,
+      9.0
+     ]
+    },
+    "region_growing": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "ok": {
+     "count": 2,
+     "ci95": [
+      0.0,
+      5.0
+     ]
+    }
+   },
+   "noun_L8H6": {
+    "identity": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "seed": {
+     "count": 15,
+     "ci95": [
+      15.0,
+      15.0
+     ]
+    },
+    "region_growing": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "ok": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "noun_L10H7": {
+    "identity": {
+     "count": 3,
+     "ci95": [
+      0.0,
+      7.0
+     ]
+    },
+    "seed": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "region_growing": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "ok": {
+     "count": 12,
+     "ci95": [
+      8.0,
+      15.0
+     ]
+    }
+   }
+  },
+  "scene1900": {
+   "l8h2": {
+    "identity": {
+     "count": 2,
+     "ci95": [
+      0.0,
+      4.0
+     ]
+    },
+    "seed": {
+     "count": 12,
+     "ci95": [
+      10.0,
+      15.0
+     ]
+    },
+    "region_growing": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "ok": {
+     "count": 1,
+     "ci95": [
+      0.0,
+      3.0
+     ]
+    }
+   },
+   "noun_L8H6": {
+    "identity": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "seed": {
+     "count": 15,
+     "ci95": [
+      15.0,
+      15.0
+     ]
+    },
+    "region_growing": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "ok": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "noun_L10H7": {
+    "identity": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "seed": {
+     "count": 5,
+     "ci95": [
+      0.0,
+      6.0
+     ]
+    },
+    "region_growing": {
+     "count": 0,
+     "ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "ok": {
+     "count": 10,
+     "ci95": [
+      9.0,
+      15.0
+     ]
+    }
+   }
+  }
+ },
+ "bootstrap": "moving block bootstrap within each record, block 5 frames, non-circular, B=10000, seed 5205; scene = sum over its records (independent draws); CI = 2.5/97.5 percentiles of the resampled frame count"
+}

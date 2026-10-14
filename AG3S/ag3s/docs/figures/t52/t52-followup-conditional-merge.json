@@ -1,0 +1,741 @@
+{
+ "rows": [
+  {
+   "scene": "scene1800",
+   "source": "l8h2",
+   "fail: earliest identity": 0,
+   "fail: earliest seed": 4,
+   "fail: earliest region/no_cluster": 0,
+   "fail: no flag": 0,
+   "success: seed or identity flag": 21,
+   "success: no seed/identity flag": 5
+  },
+  {
+   "scene": "scene1800",
+   "source": "noun_L8H6",
+   "fail: earliest identity": 0,
+   "fail: earliest seed": 7,
+   "fail: earliest region/no_cluster": 0,
+   "fail: no flag": 0,
+   "success: seed or identity flag": 22,
+   "success: no seed/identity flag": 1
+  },
+  {
+   "scene": "scene1800",
+   "source": "noun_L10H7",
+   "fail: earliest identity": 0,
+   "fail: earliest seed": 8,
+   "fail: earliest region/no_cluster": 0,
+   "fail: no flag": 0,
+   "success: seed or identity flag": 6,
+   "success: no seed/identity flag": 16
+  },
+  {
+   "scene": "scene1850",
+   "source": "l8h2",
+   "fail: earliest identity": 2,
+   "fail: earliest seed": 0,
+   "fail: earliest region/no_cluster": 0,
+   "fail: no flag": 0,
+   "success: seed or identity flag": 11,
+   "success: no seed/identity flag": 2
+  },
+  {
+   "scene": "scene1850",
+   "source": "noun_L8H6",
+   "fail: earliest identity": 0,
+   "fail: earliest seed": 2,
+   "fail: earliest region/no_cluster": 0,
+   "fail: no flag": 0,
+   "success: seed or identity flag": 13,
+   "success: no seed/identity flag": 0
+  },
+  {
+   "scene": "scene1850",
+   "source": "noun_L10H7",
+   "fail: earliest identity": 1,
+   "fail: earliest seed": 0,
+   "fail: earliest region/no_cluster": 0,
+   "fail: no flag": 1,
+   "success: seed or identity flag": 2,
+   "success: no seed/identity flag": 11
+  },
+  {
+   "scene": "scene1900",
+   "source": "l8h2",
+   "fail: earliest identity": 0,
+   "fail: earliest seed": 0,
+   "fail: earliest region/no_cluster": 0,
+   "fail: no flag": 0,
+   "success: seed or identity flag": 14,
+   "success: no seed/identity flag": 1
+  },
+  {
+   "scene": "scene1900",
+   "source": "noun_L8H6",
+   "fail: earliest identity": 0,
+   "fail: earliest seed": 0,
+   "fail: earliest region/no_cluster": 0,
+   "fail: no flag": 0,
+   "success: seed or identity flag": 15,
+   "success: no seed/identity flag": 0
+  },
+  {
+   "scene": "scene1900",
+   "source": "noun_L10H7",
+   "fail: earliest identity": 0,
+   "fail: earliest seed": 0,
+   "fail: earliest region/no_cluster": 0,
+   "fail: no flag": 0,
+   "success: seed or identity flag": 5,
+   "success: no seed/identity flag": 10
+  }
+ ],
+ "b": [
+  {
+   "scene": "scene1800",
+   "source": "l8h2",
+   "metric": "frac_seed_fail",
+   "fraction": 0.7692307692307693,
+   "ci95": [
+    0.5666666666666667,
+    0.8666666666666667
+   ],
+   "num": 20,
+   "den": 26
+  },
+  {
+   "scene": "scene1850",
+   "source": "l8h2",
+   "metric": "frac_seed_fail",
+   "fraction": 0.7692307692307693,
+   "ci95": [
+    0.4666666666666667,
+    1.0
+   ],
+   "num": 10,
+   "den": 13
+  },
+  {
+   "scene": "scene1900",
+   "source": "l8h2",
+   "metric": "frac_seed_fail",
+   "fraction": 0.9333333333333333,
+   "ci95": [
+    0.8,
+    1.0
+   ],
+   "num": 14,
+   "den": 15
+  },
+  {
+   "scene": "scene1800",
+   "source": "l8h2",
+   "metric": "frac_identity_fail",
+   "fraction": 0.2692307692307692,
+   "ci95": [
+    0.0,
+    0.38461538461538464
+   ],
+   "num": 7,
+   "den": 26
+  },
+  {
+   "scene": "scene1850",
+   "source": "l8h2",
+   "metric": "frac_identity_fail",
+   "fraction": 0.38461538461538464,
+   "ci95": [
+    0.2,
+    0.8333333333333334
+   ],
+   "num": 5,
+   "den": 13
+  },
+  {
+   "scene": "scene1900",
+   "source": "l8h2",
+   "metric": "frac_identity_fail",
+   "fraction": 0.13333333333333333,
+   "ci95": [
+    0.0,
+    0.26666666666666666
+   ],
+   "num": 2,
+   "den": 15
+  },
+  {
+   "scene": "scene1800",
+   "source": "noun_L8H6",
+   "metric": "frac_seed_fail",
+   "fraction": 0.9565217391304348,
+   "ci95": [
+    0.8571428571428571,
+    1.0
+   ],
+   "num": 22,
+   "den": 23
+  },
+  {
+   "scene": "scene1850",
+   "source": "noun_L8H6",
+   "metric": "frac_seed_fail",
+   "fraction": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ],
+   "num": 13,
+   "den": 13
+  },
+  {
+   "scene": "scene1900",
+   "source": "noun_L8H6",
+   "metric": "frac_seed_fail",
+   "fraction": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ],
+   "num": 15,
+   "den": 15
+  },
+  {
+   "scene": "scene1800",
+   "source": "noun_L8H6",
+   "metric": "frac_identity_fail",
+   "fraction": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "num": 0,
+   "den": 23
+  },
+  {
+   "scene": "scene1850",
+   "source": "noun_L8H6",
+   "metric": "frac_identity_fail",
+   "fraction": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "num": 0,
+   "den": 13
+  },
+  {
+   "scene": "scene1900",
+   "source": "noun_L8H6",
+   "metric": "frac_identity_fail",
+   "fraction": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "num": 0,
+   "den": 15
+  },
+  {
+   "scene": "scene1800",
+   "source": "noun_L10H7",
+   "metric": "frac_seed_fail",
+   "fraction": 0.2727272727272727,
+   "ci95": [
+    0.07142857142857142,
+    0.4444444444444444
+   ],
+   "num": 6,
+   "den": 22
+  },
+  {
+   "scene": "scene1850",
+   "source": "noun_L10H7",
+   "metric": "frac_seed_fail",
+   "fraction": 0.15384615384615385,
+   "ci95": [
+    0.0,
+    0.4166666666666667
+   ],
+   "num": 2,
+   "den": 13
+  },
+  {
+   "scene": "scene1900",
+   "source": "noun_L10H7",
+   "metric": "frac_seed_fail",
+   "fraction": 0.3333333333333333,
+   "ci95": [
+    0.0,
+    0.4
+   ],
+   "num": 5,
+   "den": 15
+  },
+  {
+   "scene": "scene1800",
+   "source": "noun_L10H7",
+   "metric": "frac_identity_fail",
+   "fraction": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "num": 0,
+   "den": 22
+  },
+  {
+   "scene": "scene1850",
+   "source": "noun_L10H7",
+   "metric": "frac_identity_fail",
+   "fraction": 0.15384615384615385,
+   "ci95": [
+    0.0,
+    0.4166666666666667
+   ],
+   "num": 2,
+   "den": 13
+  },
+  {
+   "scene": "scene1900",
+   "source": "noun_L10H7",
+   "metric": "frac_identity_fail",
+   "fraction": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "num": 0,
+   "den": 15
+  }
+ ],
+ "c": [
+  {
+   "record": "headfix",
+   "frame": 0,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 2.461,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 2.429,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 2,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 2.753,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 3,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 3.084,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 4,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 4.6,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 7.474,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 6,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 5.485,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 7,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 3.756,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 8,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 5.416,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 9,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 4.487,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 10,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 12.869,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 11,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 9.896,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 4.736,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 13,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 3.781,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 14,
+   "source": "l8h2",
+   "pipeline_split_ratio_norm": 2.021,
+   "chosen_merged": false
+  },
+  {
+   "record": "headfix",
+   "frame": 0,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 1.742,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 1.722,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 2,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 1.817,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 3,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 1.908,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 4,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 1.883,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 2.298,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 6,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 2.137,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 7,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 2.206,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 8,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 1.896,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 9,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 1.484,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 10,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 1.36,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 11,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 9.571,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 42.666,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 13,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 38.789,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 14,
+   "source": "noun_L8H6",
+   "pipeline_split_ratio_norm": 22.711,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 0,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 1.97,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 1.952,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 2,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 2.292,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 3,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 2.716,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 4,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 4.119,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 5.757,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 6,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 4.508,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 7,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 3.583,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 8,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 4.099,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 9,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 2.717,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 10,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 2.084,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 11,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 2.09,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 1.928,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 13,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 1.552,
+   "chosen_merged": true
+  },
+  {
+   "record": "headfix",
+   "frame": 14,
+   "source": "noun_L10H7",
+   "pipeline_split_ratio_norm": 0.78,
+   "chosen_merged": true
+  }
+ ],
+ "d_table": [
+  [
+   "",
+   "L8H2",
+   "noun L8H6",
+   "noun L10H7"
+  ],
+  [
+   "merged frames (scene 1800, of 30)",
+   "0",
+   "15",
+   "15"
+  ],
+  [
+   "  of which final identity_correct",
+   "\u2013",
+   "12",
+   "11"
+  ],
+  [
+   "  current cluster ratio below 2",
+   "\u2013",
+   "6",
+   "2"
+  ],
+  [
+   "  kept geometry this frame split accepted",
+   "\u2013",
+   "7",
+   "10"
+  ],
+  [
+   "  kept geometry this frame not split",
+   "\u2013",
+   "2",
+   "3"
+  ],
+  [
+   "trigger fired / \u22652 comps (15 mm)",
+   "15/15 \u00b7 15/15",
+   "15/15 \u00b7 15/15",
+   "15/15 \u00b7 15/15"
+  ],
+  [
+   "split ratio \u2265 2 (pipeline, normalised)",
+   "15/15",
+   "7/15",
+   "10/15"
+  ],
+  [
+   "median split ratio (pipeline, norm.)",
+   "4.49",
+   "1.91",
+   "2.29"
+  ],
+  [
+   "median GT ratio target/banana norm. \u00b7 raw",
+   "\u2013",
+   "1.91 \u00b7 10.80",
+   "2.26 \u00b7 36.01"
+  ],
+  [
+   "L8H2: pre-split parent holds banana",
+   "15/15",
+   "",
+   ""
+  ],
+  [
+   "L8H2: banana seeds per frame (median)",
+   "51",
+   "",
+   ""
+  ],
+  [
+   "GT mesh gap apple\u2013banana (median)",
+   "18.4 mm",
+   "",
+   ""
+  ],
+  [
+   "(C) L8H2 2D-identity fail, final correct",
+   "14 frames",
+   "",
+   ""
+  ],
+  [
+   "  L8H2 argmax class, visible cams (n cams)",
+   "support 14\nbackground 1",
+   "",
+   ""
+  ],
+  [
+   "  noun argmax on target (any visible cam)",
+   "",
+   "14/14",
+   "12/14"
+  ],
+  [
+   "  chosen = kept TargetConfirm geometry",
+   "13/14",
+   "",
+   ""
+  ],
+  [
+   "  rank-0 cluster holds target",
+   "11/14",
+   "",
+   ""
+  ]
+ ],
+ "source_numbers": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T094624+0900_693dcedeaadc_a2c23cf2a275/verify/T52/followup/analysis/followup_numbers.json",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T094624+0900_693dcedeaadc_a2c23cf2a275/verify/T52/scripts/followup_fig.py"
+}

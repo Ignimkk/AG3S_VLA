@@ -1,0 +1,453 @@
+{
+ "frames": [
+  {
+   "record": "headfix",
+   "frame": 4,
+   "t_step": 32,
+   "phase_group": "pre_grasp",
+   "source": "l8h2",
+   "stage": "seed",
+   "identity_correct": true,
+   "target_px": [
+    549,
+    3270,
+    0
+   ],
+   "visible": [
+    true,
+    true,
+    false
+   ],
+   "argmax_on_target": [
+    true,
+    true,
+    false
+   ],
+   "argmax_class": [
+    "support",
+    "support",
+    "destination"
+   ],
+   "target_mass": [
+    0.3005423547151026,
+    0.20368345265325508,
+    0.0
+   ],
+   "neighbour_mass": [
+    0.037476325314033374,
+    5.647178860545261e-07,
+    0.0001401598809205252
+   ],
+   "seed_precision": 0.34615384615384615,
+   "seed_recall": 1.0,
+   "seed_neighbour": 54,
+   "n_seeds": 338,
+   "purity": 1.0,
+   "coverage": 1.0,
+   "cluster_neighbour": 0,
+   "merged": false,
+   "min_neighbour_mesh_dist_m": 0.018395438130345075,
+   "nearest_neighbour": "banana"
+  },
+  {
+   "record": "headfix",
+   "frame": 4,
+   "t_step": 32,
+   "phase_group": "pre_grasp",
+   "source": "noun_L8H6",
+   "stage": "seed",
+   "identity_correct": true,
+   "target_px": [
+    549,
+    3270,
+    0
+   ],
+   "visible": [
+    true,
+    true,
+    false
+   ],
+   "argmax_on_target": [
+    true,
+    true,
+    false
+   ],
+   "argmax_class": [
+    "support",
+    "target",
+    "robot_gripper"
+   ],
+   "target_mass": [
+    0.3744592945106314,
+    0.8569565208042934,
+    0.0
+   ],
+   "neighbour_mass": [
+    0.04870526413251413,
+    2.1438546073680253e-06,
+    0.0002441531709275433
+   ],
+   "seed_precision": 0.15704697986577182,
+   "seed_recall": 1.0,
+   "seed_neighbour": 52,
+   "n_seeds": 745,
+   "purity": 0.65,
+   "coverage": 1.0,
+   "cluster_neighbour": 63,
+   "merged": true,
+   "min_neighbour_mesh_dist_m": 0.018395438130345075,
+   "nearest_neighbour": "banana"
+  },
+  {
+   "record": "headfix",
+   "frame": 4,
+   "t_step": 32,
+   "phase_group": "pre_grasp",
+   "source": "noun_L10H7",
+   "stage": "region_growing",
+   "identity_correct": true,
+   "target_px": [
+    549,
+    3270,
+    0
+   ],
+   "visible": [
+    true,
+    true,
+    false
+   ],
+   "argmax_on_target": [
+    true,
+    true,
+    false
+   ],
+   "argmax_class": [
+    "support",
+    "target",
+    "support"
+   ],
+   "target_mass": [
+    0.1678267930361568,
+    0.6259227138227915,
+    0.0
+   ],
+   "neighbour_mass": [
+    0.022368525421932437,
+    8.390990838236454e-05,
+    0.0002559674168578345
+   ],
+   "seed_precision": 0.6842105263157895,
+   "seed_recall": 1.0,
+   "seed_neighbour": 47,
+   "n_seeds": 171,
+   "purity": 0.6242424242424243,
+   "coverage": 0.8803418803418803,
+   "cluster_neighbour": 62,
+   "merged": true,
+   "min_neighbour_mesh_dist_m": 0.018395438130345075,
+   "nearest_neighbour": "banana"
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "t_step": 96,
+   "phase_group": "post_grasp",
+   "source": "l8h2",
+   "stage": "identity",
+   "identity_correct": true,
+   "target_px": [
+    93,
+    14010,
+    0
+   ],
+   "visible": [
+    false,
+    true,
+    false
+   ],
+   "argmax_on_target": [
+    false,
+    false,
+    false
+   ],
+   "argmax_class": [
+    "destination",
+    "support",
+    "destination"
+   ],
+   "target_mass": [
+    0.0022403939073272956,
+    0.03216076606509747,
+    0.0
+   ],
+   "neighbour_mass": [
+    0.0019470998187867865,
+    0.001443076641076296,
+    0.0001193590908997927
+   ],
+   "seed_precision": 0.27564102564102566,
+   "seed_recall": 0.8431372549019608,
+   "seed_neighbour": 32,
+   "n_seeds": 156,
+   "purity": 1.0,
+   "coverage": 0.9215686274509804,
+   "cluster_neighbour": 0,
+   "merged": false,
+   "min_neighbour_mesh_dist_m": 0.018471088062284327,
+   "nearest_neighbour": "banana"
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "t_step": 96,
+   "phase_group": "post_grasp",
+   "source": "noun_L8H6",
+   "stage": "seed",
+   "identity_correct": false,
+   "target_px": [
+    93,
+    14010,
+    0
+   ],
+   "visible": [
+    false,
+    true,
+    false
+   ],
+   "argmax_on_target": [
+    false,
+    true,
+    false
+   ],
+   "argmax_class": [
+    "destination",
+    "target",
+    "destination"
+   ],
+   "target_mass": [
+    0.0006296539490660159,
+    0.7133911212564124,
+    0.0
+   ],
+   "neighbour_mass": [
+    0.0010087369421665905,
+    0.0018451329597538814,
+    0.0005648830521100938
+   ],
+   "seed_precision": 0.04422869471413161,
+   "seed_recall": 0.803921568627451,
+   "seed_neighbour": 0,
+   "n_seeds": 927,
+   "purity": 0.46534653465346537,
+   "coverage": 0.9215686274509804,
+   "cluster_neighbour": 54,
+   "merged": true,
+   "min_neighbour_mesh_dist_m": 0.018471088062284327,
+   "nearest_neighbour": "banana"
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "t_step": 96,
+   "phase_group": "post_grasp",
+   "source": "noun_L10H7",
+   "stage": "seed",
+   "identity_correct": false,
+   "target_px": [
+    93,
+    14010,
+    0
+   ],
+   "visible": [
+    false,
+    true,
+    false
+   ],
+   "argmax_on_target": [
+    false,
+    true,
+    false
+   ],
+   "argmax_class": [
+    "robot",
+    "target",
+    "destination"
+   ],
+   "target_mass": [
+    0.00484868237202262,
+    0.655585504227447,
+    0.0
+   ],
+   "neighbour_mass": [
+    0.003985999680386589,
+    0.008286700047497212,
+    0.0007579911124387366
+   ],
+   "seed_precision": 0.3448275862068966,
+   "seed_recall": 0.9803921568627451,
+   "seed_neighbour": 59,
+   "n_seeds": 145,
+   "purity": 0.4368932038834951,
+   "coverage": 0.8823529411764706,
+   "cluster_neighbour": 58,
+   "merged": true,
+   "min_neighbour_mesh_dist_m": 0.018471088062284327,
+   "nearest_neighbour": "banana"
+  },
+  {
+   "record": "ep1800",
+   "frame": 2,
+   "t_step": 16,
+   "phase_group": "pre_grasp",
+   "source": "l8h2",
+   "stage": "seed",
+   "identity_correct": false,
+   "target_px": [
+    0,
+    413,
+    0
+   ],
+   "visible": [
+    false,
+    true,
+    false
+   ],
+   "argmax_on_target": [
+    false,
+    true,
+    false
+   ],
+   "argmax_class": [
+    "background",
+    "robot_gripper",
+    "support"
+   ],
+   "target_mass": [
+    0.0,
+    0.2558065934775032,
+    0.0
+   ],
+   "neighbour_mass": [
+    0.0,
+    0.0,
+    0.04901184006086005
+   ],
+   "seed_precision": 0.19230769230769232,
+   "seed_recall": 1.0,
+   "seed_neighbour": 23,
+   "n_seeds": 104,
+   "purity": 0.0,
+   "coverage": 0.0,
+   "cluster_neighbour": 0,
+   "merged": false,
+   "min_neighbour_mesh_dist_m": 0.026010305264403153,
+   "nearest_neighbour": "banana"
+  },
+  {
+   "record": "ep1800",
+   "frame": 2,
+   "t_step": 16,
+   "phase_group": "pre_grasp",
+   "source": "noun_L8H6",
+   "stage": "seed",
+   "identity_correct": false,
+   "target_px": [
+    0,
+    413,
+    0
+   ],
+   "visible": [
+    false,
+    true,
+    false
+   ],
+   "argmax_on_target": [
+    false,
+    true,
+    false
+   ],
+   "argmax_class": [
+    "robot",
+    "robot_gripper",
+    "support"
+   ],
+   "target_mass": [
+    0.0,
+    0.28552441525586497,
+    0.0
+   ],
+   "neighbour_mass": [
+    0.0,
+    0.0,
+    0.07931302207964137
+   ],
+   "seed_precision": 0.145985401459854,
+   "seed_recall": 1.0,
+   "seed_neighbour": 19,
+   "n_seeds": 137,
+   "purity": 0.0,
+   "coverage": 0.0,
+   "cluster_neighbour": 0,
+   "merged": false,
+   "min_neighbour_mesh_dist_m": 0.026010305264403153,
+   "nearest_neighbour": "banana"
+  },
+  {
+   "record": "ep1800",
+   "frame": 2,
+   "t_step": 16,
+   "phase_group": "pre_grasp",
+   "source": "noun_L10H7",
+   "stage": "seed",
+   "identity_correct": false,
+   "target_px": [
+    0,
+    413,
+    0
+   ],
+   "visible": [
+    false,
+    true,
+    false
+   ],
+   "argmax_on_target": [
+    false,
+    true,
+    false
+   ],
+   "argmax_class": [
+    "support",
+    "robot_gripper",
+    "support"
+   ],
+   "target_mass": [
+    0.0,
+    0.22440145921822932,
+    0.0
+   ],
+   "neighbour_mass": [
+    0.0,
+    8.554133001442466e-05,
+    0.036852386540636745
+   ],
+   "seed_precision": 0.25316455696202533,
+   "seed_recall": 1.0,
+   "seed_neighbour": 14,
+   "n_seeds": 79,
+   "purity": 0.0,
+   "coverage": 0.0,
+   "cluster_neighbour": 0,
+   "merged": false,
+   "min_neighbour_mesh_dist_m": 0.026010305264403153,
+   "nearest_neighbour": "banana"
+  }
+ ],
+ "legend": {
+  "map": "raw 16x16 map, normalised to its 3-camera max, blue ramp",
+  "outline_green": "GT target",
+  "outline_orange": "GT neighbour fruits (other_object)",
+  "outline_purple": "GT crate",
+  "plus": "per-camera raw argmax patch",
+  "3d_panel": "top-down base-frame XY of cloud points within 0.20 m of the GT target centre, coloured by GT point label; black dots = attention seeds; red line = convex hull of the chosen cluster"
+ }
+}
