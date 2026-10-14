@@ -265,6 +265,17 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 
 ---
 
+**T46f-S2 · T46g · T60d (2026-10-14 추가, 세션 A)**
+
+| 용어 | 뜻 |
+|---|---|
+| **checked distance (검사한 거리 계산)** | `mujoco.mj_geomDistance` 를 native CCD 를 끈 libccd 로 부르고, 값마다 \|from-to 간격 − \|d\|\| ≤ 1 mm 와 d ≥ bounding sphere 하한 − 1 mm 를 확인해 맞지 않으면 버리는 거리. native CCD 그대로 쓰면 작은 `FT_SENSOR` mesh 와 과일 사이에서 실제 > 55 mm 인데 0 (또는 음수) 이 나왔다 (T46d 의 오류 원인) |
+| **S1 · S2 · S3 · S4 (T46f 진단 장면 기준)** | S1 = 정책 rollout 에서 비허용 link (FT sensor · arm · 그 밖의 로봇 geom) 와 target 의 최소 거리 ≤ 50 mm (후보 선별용, 보호 효과의 증거가 아님). S2 = 다른 접근으로 비허용 접촉 없이 쥘 수 있음 (demo 또는 IK). S3 = 시작 시점 관통 · 구조적 불가능 제외. S4 = dev (train split) 와 eval (test split 1800–1999) 분리 |
+| **S1 창 (접근 + 파지)** | 사용 gripper 의 첫 닫힘 명령 (applied ctrl < 0.5) 전의 control row 전부 + 그 뒤 16 row |
+| **변형 배치 N · C (T46f pilot)** | 규칙으로 target 의 xy 만 옮긴 배치. N = 가장 가까운 다른 과일 쪽으로 표면 간격 10 mm 까지, C = crate 쪽으로 표면 간격 20 mm 까지 (checked distance 로 이동량을 구함) |
+| **class A (T46g, SL5b)** | attach 가 한 번도 되지 않은 실패 episode 중, 닫힘 호출에서 `reach` 만 실패하고 (대상이 가려진 상태), 마지막으로 보인 centroid 를 손과 함께 움직였다면 reach 가 통과하며, 그 뒤 쥔 물체 쪽 collision HOLD 가 이어진 경우 |
+| **NR · R (T60d)** | NR = P (안정 placement) 에 도달했지만 H (준비자세 복귀) 에 도달하지 못한 run, R = H 에 도달한 run |
+
 ## 진행 현황 — T47 이후
 
 | 게이트 | 무엇을 묻나 | 상태 |
@@ -294,6 +305,9 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **T54c** 명사 grounding (N · B) 후속 확인: 한 번도 쓰지 않은 새 16 episode (rollout + 추출 + offline 재생) | T53 을 본 뒤 후보가 된 N · B 의 현재 frame 개선이 새 data 에서도 관측되는가 | **측정 완료 (2026-10-14).** 현재 frame (16 episode · 1162 frame) identity: L8H2 63.80 %, **N +19.90 %p (CI [+10.75, +30.16])**, B +19.65 %p, A +2.90 %p. N · B 는 사전 고정 진입 표 (identity · coverage · 개선 근거 · hold · 시간 · T53 과 같은 방향) 를 모두 충족 → 규칙상 **N 을 T57 후보로 선정**. `hold_attach` 에서는 N − L8H2 = +0.84 %p (CI [−0.18, +2.50]). 서빙 rollout 기준선: success 12/16 · `success_ct` 12/16 · HOLD 150 chunk. 아래 "T54c" 절 |
 | **T55** 작업 의도와 실제 grasp 상태의 분리: phase feature (HSR · 명사 token probe) 대 `grasp_latch` strong rule, 정답 = 물리 predicate (offline 재시뮬 + 재실행 grounding) | `task_ready = HELD ∧ feature` 가 wrong-object · empty · slip 을 task 성공으로 통과시키는 오류를 줄이면서 올바른 보유의 거부 · 지연을 허용폭 안에 두는가 | **측정 완료 (2026-10-14).** T53 16 episode (E0 16/16 bit-exact). 조건 합산 P_task: 명사 probe 결합 false pass −4.46 %p · false reject +1.53 %p · 지연 0 · 추가 미검출 0, HSR 결합 −1.19 · +0.76 · 0.1 · 0 (둘 다 사전 고정 허용폭 충족). instruction 변경의 wrong-object false pass: strong 216 → 명사 7 · HSR 212. 규칙 출력 → **명사 probe 결합 = T57 단계 2 후보, HSR = 보조 기록용.** 아래 "T55" 절 |
 | **T55b** instruction 변경 시 strong rule 이 실제 보유를 HELD 로 인정하지 않는 원인 (재측정 대기 #48, 기존 T55 기록, CPU) | 바뀐 prompt 의 grounding 변화가 latch 의 HELD 판정에 어떤 경로로 영향을 주는가, gate (HELD ∧ probe) 를 얼마나 제한하는가 | **측정 완료 (2026-10-14).** HELD 를 놓친 117 frame 모두 manipulated object = 바뀐 명사의 과일, `reach` 162.5 – 741.8 mm (limit 120) 로 실패. 실제 손 안 과일까지는 50.7 – 72.7 mm (MuJoCo). P_task 양성 중 HELD 거짓은 natural 0 / 111 → 측정 data 에서 gate 의 P_task 결과를 제한하지 않음. SL5b (stale centroid) 와 같은 `reach` 검사를 지나지만 원인이 다르다. 수정안은 A 가 "centroid 출처" 로 묶어 판정. 아래 "T55b" 절 |
+| **T46f-S2 · T46d 정정** T46f 단계 2 진단 장면 선정 (S1–S3 scan) · T46d FT 근접 수치 정정 | 기존 기록에서 손의 target 접촉과 비허용 link (FT sensor 등) 회피가 함께 필요한 배치가 있는가 | **측정 완료 (2026-10-14).** 178 run / 57 episode 에서 eval (test) S1 배치 0, dev 3 (모두 CL2 C2′ run). 실제 FT–target 접촉 0. T46d 의 FT ≤ 50 mm 는 거리 계산 오류 → 정정. 사용자 판정: 변형 배치 pilot 한 번 + CL4 에 ② global arm. 아래 "T46f-S2" 절 |
+| **T46g** SL5b reach 진단 (benchmark 기록 · RB-Y1 기록, offline) | 가려진 target 의 오래된 centroid 로 reach 를 검사해 attach 가 거절되고 HOLD 로 이어지는가 | **진단 완료 (2026-10-14).** V11AB-B 실패 7 중 4, V11AB-A 실패 8 중 2 가 그 경로. RB-Y1 기록에서는 reach 단독 실패 0. 사용자 판정: T57 보다 먼저 최소 수정 (threshold 변경 아님), #48 과는 수정 분리. 아래 "T46g" 절 |
+| **T60d** T60b 복귀 정체 후속 (기록 기반) | 놓은 뒤 복귀하지 않는 run 에서 정책 입력 · 제안은 무엇이 다른가 | **측정 완료 (2026-10-14, 기록만).** 정체 run 의 state 는 demo 의 release 단계에 가깝고 복귀 단계로 가지 않는다; 사용 팔 arm_5 가 demo 범위 밖. 사용자 판정: VLA 단독 4 run 확인 (우선순위 뒤). 아래 "T60d" 절 |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -394,7 +408,7 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 27 | (T46c-W1 이 추가) **V11AB (C0) 에서의 W1 what-if · 전체 pytest · `ta_offline` 의 TO 재풀이 variant (W0 / W1 / F1W1)** | certification replay 의 입력은 CL3 의 세 arm (C1a · C1aF1 · C1aF1F2) 이다. verifier 는 전체 pytest 와 TO 재풀이 variant 를 돌리지 않았다 (`not_measured`) | **측정 안 됨** |
 | 28 | (T46d 가 추가) **형상을 보정한 뒤의 LTE 대 global exclusion 차이** — arm_5 에서 나타난 LTE ≠ global 의 크기가 형상 근사 오류를 뺀 뒤에도 남는가 | T46d 는 구 모델 위의 field-level re-query 만 했다. 보정 형상 (FT sensor cover · arm_5 보정) 은 T46f A14 가 만든다 | **측정 안 됨** (T46f 단계 1 이후) |
 | 29 | (T46d 가 추가) **TrajOpt 재풀이 · closed-loop 에서의 TO 시간 · 성공 · 접촉** | LTE ≠ global 은 `d − r` 을 임계값과 비교한 field-level 재계산이고 TO verdict 는 재현하지 않았다. TO 시간은 구 수 선형 추정이다 (`T46d.verify.json not_measured`). 재계산 fidelity: 기록 clearance 와 재조회 `d_full` 의 차가 policy-active chunk 에서 최대 22.00 mm (C1aF1), 손가락 행은 closing chunk 에서 기록과 최대 26.3 mm 달랐다 (손가락 관절 경로를 재현하지 않음) | **측정 안 됨** |
-| 30 | (T46d 가 추가) **MJCF 거리의 100 mm cap 이후 · `FT_SENSOR` / `EE_BODY` 의 0.0 mm 거리가 접촉 필터를 거친 겹침과 구별되지 않음 · held 구간 (lift / carry 대부분) 의 LTE ≠ global · cuRobo 회귀 기준선 (GPU 미사용)** | `mj_geomDistance` 의 distmax 100 mm 로 arm_5 / arm_6 거리는 "100 mm 이상" 으로만 안다 (`T46d.verify.json not_measured`) | **측정 안 됨** |
+| 30 | (T46d 가 추가) **MJCF 거리의 100 mm cap 이후 · `FT_SENSOR` / `EE_BODY` 의 0.0 mm 거리가 접촉 필터를 거친 겹침과 구별되지 않음 · held 구간 (lift / carry 대부분) 의 LTE ≠ global · cuRobo 회귀 기준선 (GPU 미사용)** | `mj_geomDistance` 의 distmax 100 mm 로 arm_5 / arm_6 거리는 "100 mm 이상" 으로만 안다 (`T46d.verify.json not_measured`) | ~~**측정 안 됨**~~ → **`FT_SENSOR` 0.0 mm 부분 해소 (2026-10-14):** 그 0.0 mm 는 겹침이 아니라 native CCD `mj_geomDistance` 의 오류 값이었다 (실제 > 55 mm). 아래 "T46f-S2 · T46d 정정" 절. 나머지 (100 mm cap · held 구간 · cuRobo 기준선) 는 그대로 |
 | 31 | (T46f 가 추가) **T46f 의 모든 단계 결과** — 형상 보정 audit · 진단 장면 수 (S1 – S4 를 만족하는 dev / eval 배치) · 3 조건 closed-loop (oracle · AG3S extent) · 주 지표 | 계획 단계다. 결과 없음 | **측정 안 됨 (계획만)** |
 | 32 (T52 · T53 · T54 가 추가) | **head 0 기록 (`ep1800` · `long`) 위에서 잰 과거 수치** — 두 기록은 X2 수정 (2026-09-25) 전에 녹화해 `head_1` = 0.0 이라 cam_high 가 벽을 본다 (기록 qpos 확인 15 / 15 · 50 / 50 frame, lead 의 확인; 나머지 T47 record 와 T53 16 episode 는 0.7001). [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md) 의 X2 절 §6 이 "무효가 되는 기록 — grounding 수치는 다시 재야 한다" 고 적었지만 T47 selection (`long`) 과 held-out scene1800 (`ep1800`) 에 들어갔다. **영향받는 과거 수치 (사용자 지시 목록):** T47 selection (`long`) 의 head 선택, **held-out scene1800 이 들어간 T49b · T51 · T51b · T52** 의 수치. 같은 held-out 4 record 를 쓰는 T47 · T47b · T49 도 `ep1800` 을 포함한다 (영향 크기는 확인하지 않았다). **T51b 의 명사 열세 (scene 단위 −0.133) 는 `headfix` 에서 나왔다** (`T51b.verify.json` `per_record_gt_identity`: `headfix` 에서 action best 1.0 대 noun best 0.733, `ep1800` 에서는 둘 다 0.733). T52 에서는 scene1800 의 `ok` (L8H2 5 · L8H6 1 · L10H7 10 frame) 가 전부 `ep1800` 에서 나왔고 `ep1800` 의 cam_high target 가시 pixel 은 15 frame 모두 0 | **다시 재지 않았다 (사용자 판정: 과거 STEP 은 재측정하지 않고 표시만).** T55 · T56 dev 에서는 제외, T54 dev parity 는 유지 | **표시만 (재측정 안 함)** |
 | 33 (T52 가 추가) | **병합 기전의 일반화 · 원인** — split 비율 ≥ 2 조건이 명사 병합을 남긴다는 측정은 `headfix` 15 frame 한 record 의 것이다. 명사 map 이 target 과 이웃에 퍼지는 이유, split 비율을 raw attention 으로 읽으면 병합이 사라지는지 (raw 비율 ≥ 2 는 두 명사 source 에서 15 / 15 frame) 는 시험하지 않았다 | `T52.verify.json not_measured` + 위 해석 (미측정 해석) | **원인 미확정 · 측정 안 됨** |
@@ -2757,7 +2771,7 @@ calibration 6 record 539 frame 전부, cell × camera.
 | MJCF `link_<used>_arm_5` geom 의 run 최소 target 거리 | **18 / 18 run 모두 100 mm cap 이상** (`mj_geomDistance` distmax 100 mm, 그래서 "100 mm 이상" 으로만 안다), C1a 도 18 / 18 | `item2_approach_mjcf`, `item2_arm5_geometry`, `verdict_facts.mjcf_arm_5_runs_beyond_100mm_C1aF1 = 18` |
 | replay contact: 손 이외 로봇 ↔ target | **0 / 1296 step**, 해당 run 0 (C1a 도 0 / 1296) | `replay_contacts.robot_other-target_steps` |
 | replay contact: 손 ↔ target | 321 step | 같음 |
-| MJCF `FT_SENSOR` (`link_*_arm_6` 의 자식) 의 run 최소 target 거리 ≤ 50 mm | **3 / 18 run (C1a + F1), 4 / 18 (C1a)**, median 72.77 / 68.08 mm | `tgt_run_min_mm.A_FT_SENSOR` |
+| MJCF `FT_SENSOR` (`link_*_arm_6` 의 자식) 의 run 최소 target 거리 ≤ 50 mm | ~~**3 / 18 run (C1a + F1), 4 / 18 (C1a)**, median 72.77 / 68.08 mm~~ → **정정 (2026-10-14): 거리 계산 오류. 결과를 검사한 계산으로 0 / 18 (C1a + F1, 접근 + 파지 창)** — 아래 "T46f-S2 · T46d 정정" 절 | `tgt_run_min_mm.A_FT_SENSOR` (원 수치, 보존) · `T46f-S2.verify.json` `T46d_recheck_CL3_C1aF1` |
 | 같은 run 의 URDF `link_*_arm_6` 구 최소 target 거리 | ≥ 122 mm (C1a + F1: 122.35 mm) | §3.2 |
 | URDF `link_*_arm_5` capsule | 반지름 75 mm · 길이 250 mm, 먼 끝이 joint 에서 225 mm. `--capsule-radius-scale 0.05` 로 지은 구의 effective 반지름 14.39 mm (arm_6 구는 5.25 – 5.35 mm) | `item2_arm5_geometry` |
 | target 50 mm 안에 든 arm_5 구 (36 CL3 run 의 가장 가까운 executed step) | **87 개**. joint 에서 169.4 – 225.0 mm 떨어져 있고, **가장 가까운 authorized 손 구의 중심에서 11.0 – 47.5 mm** | 같음 |
@@ -5034,3 +5048,84 @@ endpoint: P 도달 12 / 16, H 도달 12 / 16. 제거된 inference frame: P 511 �
 - 측정: [`handoff/T55b.verify.json`](handoff/T55b.verify.json), 원자료 `results/development/20261014T222232+0900_903ea16764c1_eb761f984d83/verify/T55b/t55b_held_fn.json`
 - 코드: `t55b_held_fn.py` · `t55b_build_verify.py` · `t55b_figures.py` · test `tests/ag3s/test_t55b_t54c_windows.py` (commit `38307ddb`)
 
+
+---
+
+## T46f-S2 · T46d 정정 · T46g · T60d — 진단 장면 선정, FT 근접 수치 정정, SL5b reach 진단, 복귀 정체 후속 (기록 기반, 2026-10-14 KST, 세션 A)
+
+> 측정 run `results/development/20261014T221405+0900_903ea16764c1_c83c3c6fb2d8/verify/` (`T46f-S2/` · `T46g-SL5b/` · `T60d/`), 새 rollout · GPU 없음.
+> 수치는 [`handoff/T46f-S2.verify.json`](handoff/T46f-S2.verify.json) · [`handoff/T46g.verify.json`](handoff/T46g.verify.json) · [`handoff/T60d.verify.json`](handoff/T60d.verify.json) 의 `numbers` 에서만 왔다.
+> develope_PLAN 연결: T46f-S2 → DX-04 선행 확인 (DT-05A · DF-04B), T46g → P1-B / DX-07 (benchmark 주 비교의 실패 경로), T60d → DX-00 (T60 P · H 평가 정의의 후속).
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+| 순서 (2026-10-14) | 판정 · 사건 |
+|---|---|
+| 1 | 사용자 지시: T46f 단계 2 – 3 우선, SL5b 는 기존 기록으로 원인부터, T60b 후속은 기존 기록부터 |
+| 2 (22:30 KST) | 세션 A 보고: eval S1 배치 0, T46d FT 근접 수치가 계산 오류, SL5b 원인 확인 |
+| 3 | **사용자 판정.** (1) T46f 진단 장면은 (c): 변형 배치 pilot 한 번으로 제한 + CL4 에 ② global arm, ② 결과는 "이 평가 범위에서는 link 별 구분의 실행상 차이가 관측되지 않았다" 로만 쓴다. (2) T46d 정정 기록과 T46f 전제 수정 진행 (확인된 오류의 정정). (3) CL4 90 run · 약 4 h 승인 ([`handoff/CL4.task.md`](handoff/CL4.task.md)). (4) SL5b 를 T57 보다 먼저 최소 수정, #48 과 수정 분리, threshold 변경은 수정이 아니다. (5) T60d VLA 단독 4 run 승인 (우선순위 뒤). (6) T57 단계 2 연결 위치 확정 (latch HELD ∧ ¬probe → `task_not_ready`, 최종 verdict 직전) |
+
+### 2. T46d 정정 — FT_SENSOR 근접 수치는 거리 계산 오류였다
+
+- **잘못된 계산.** T46d `p/mjdist.py` 는 native CCD 의 `mj_geomDistance` (distmax 0.10 m) 를 결과 검사 없이 썼다. 작은 `FT_SENSOR` mesh geom 과 과일 mesh 사이에서 실제 거리가 55 mm 를 넘는데 0 이 나온 경우가 있었다 (bounding sphere 하한 38 mm 이상, from-to 간격 0.09 – 0.16 m).
+- **수정한 계산.** checked distance (용어 표). 교차 확인 — 단순 배치 15 개 (구–구 · 상자–mesh · mesh–mesh, 간격 0.5 – 90 mm) 에서 해석값과의 최대 차 0.0001 mm, 오류가 났던 실제 장면에서 과일을 5 · 10 mm 떼면 거리도 같은 양 늘었다 (`numbers.xcheck`).
+- **수정된 수치.** CL3 C1a + F1 18 run, 접근 + 파지 창: T46d 방법으로 FT ≤ 50 mm 는 2 run (둘 다 검사에 걸리는 0 값), 수정한 계산으로 0 run. 검사에 걸리지 않은 값은 두 방법이 0.18 mm 안에서 같다 (`numbers.T46d_recheck_CL3_C1aF1`).
+- **영향받는 결론.** T46d §3 의 "FT_SENSOR 3 / 18 · 4 / 18 run ≤ 50 mm" 는 실증 근거에서 뺀다 (원 수치 · 원자료는 보존, 그 행에 정정 표시). T46f 의 가설 ("지정된 link 에만 target 접촉 예외를 적용하면 필요한 손의 접촉을 유지하면서 비허용 link 의 접촉을 줄일 수 있다") 은 그대로이고, "기존 장면에 FT 근접 위험이 관측되었다" 는 근거만 철회한다 ([`handoff/T46f.task.md`](handoff/T46f.task.md) "정정" 절). 적용된 형상 보정 (`8df34591`) 의 audit · 회귀는 영향받지 않는다.
+
+### 3. T46f 단계 2 — 기존 기록에서 진단 장면 찾기 (S1 – S3)
+
+| 항목 | 결과 |
+|---|---|
+| 입력 | CL2 (C0 · C1a · C1b′ · C2′) · CL3 (C1a · C1aF1 · C1aF1F2) · T53 · T54c · T61 의 178 run / 57 episode (train 9 · test 48) |
+| S1 (비허용 로봇 geom ↔ target ≤ 50 mm, S1 창) | **3 run — 모두 CL2 C2′** (C2p_ep3_s31 23.6 mm · C2p_ep11_s111 26.5 mm · C2p_ep54_s541 44.6 mm). 나머지 175 run 은 57 mm 이상, 전체 run 최소 거리 중앙 73.3 mm |
+| S1 episode | **eval (test) 0 개**, dev (train) 3 개 (ep 3 · 11 · 54) |
+| 실제 비허용 link ↔ target 접촉 | S1 창 0 run. FT ↔ target 은 전 구간 0 run |
+| S1 창 뒤의 비허용 접촉 | 3 run — 떨어진 target 이 바닥에서 base · 바퀴에 닿은 것 (평가기는 이것도 `robot_other–target` 으로 센다) |
+| S2 (같은 배치 demo, 비허용 접촉 없이 쥠) | dev 3 episode 모두 충족 (FT 최소 75.8 · 69.8 · 77.5 mm, 접촉 0) |
+| S3 | ep 123 시작 시점에 target 이 다른 과일과 맞닿음 (로봇 접촉 아님) |
+
+![S1 scan](figures/t46f/t46f-s1-scan.png)
+
+*(a) run 별 비허용 로봇 geom ↔ target 최소 거리 (S1 창, checked distance). 50 mm 아래는 CL2 C2′ 의 3 run 뿐이다. (b) T46d 방법 (native CCD, 검사 없음) 대 checked distance — 빨간 × 2 개가 native 의 0 값 (실제 67.9 · 71.8 mm).*
+
+![S1 scene](figures/t46f/t46f-s1-scene.png)
+
+*왼쪽: C2′ ep3 s31 의 FT_SENSOR 최근접 순간 (23.6 mm). 오른쪽: 같은 episode · seed 의 C1a 최근접 순간 (76.5 mm). 정책은 손바닥으로 위에서 쥐고, 그때 FT sensor 는 target 에서 약 66 mm 이상 떨어진다.*
+
+**읽는 법.** 이 task 분포에서 VLA 의 쥐는 자세는 FT sensor 를 target 에서 떨어뜨려 둔다. 그래서 기존 장면에서는 LTE 와 global exclusion 의 차이가 드러날 상황이 거의 없다. 이것은 "LTE 가 유용할 상황이 없다" 는 결론이 아니다 — 사용자 판정 (c) 에 따라 변형 배치 pilot (규칙: target 을 이웃 과일 · crate 쪽으로 옮김, [`handoff/T46f.task.md`](handoff/T46f.task.md) "변형 배치 pilot") 을 한 번 해 보고, CL4 에 ② global arm 을 넣어 실행 차이를 잰다.
+
+### 4. T46g — SL5b reach 진단 (benchmark 기록 · RB-Y1 기록)
+
+| 분류 (실패 episode) | V11AB-B (7) | V11AB-A (8) | smoke (3) |
+|---|---|---|---|
+| **class A** (가려진 대상의 오래된 centroid 로 reach 만 실패 → attach 없음 → 쥔 물체 쪽 HOLD) | **4** (t2 · t3 · t6 · t8) | **2** (t0 · t2) | 2 |
+| 다른 원인 | 3 (t9 identity 오선택 · t4 no grasp · t5 `dropped` 동반 실패와 release) | 5 (t1 · t4 · t7 no grasp, t6 attach 두 번 철회, t9 identity 오선택) | 0 |
+| 판정 불가 | 0 | 1 (t8) | 1 |
+
+- benchmark 인계 문서는 V11AB-B 실패 7 중 6 이라고 했으나, 기록으로는 4 다 (나머지는 원인이 다르다).
+- class A 의 reach-only 호출에서 마지막으로 보인 centroid 를 손과 함께 움직이면 reach 가 62.8 – 102.6 mm 로 모두 통과한다 (반사실 계산, logged `robot_state` 에 Panda FK, logged `reach_mm` 재현 오차 ≤ 0.3 mm).
+- 코드 경로 (development): `grasp_latch.py:697` 의 reach 검사 ← `safe_policy.py:1164` `parent_reach(…, manip.centroid)` ← `target_grounding.py:792–799` (`centroid = self._held`, 보일 때만 갱신).
+- **RB-Y1 기록 (CL3 55 episode · T53 18 episode) 에서는 reach 단독 실패가 0 이다.** reach 실패는 늘 `blocked` · `dropped` 와 함께였다. 같은 경로가 RB-Y1 에서도 일어날 수 있다는 것은 코드에서의 추론이다.
+- 사용자 판정: T57 보다 먼저 최소 수정 (마지막으로 보인 centroid 를 손 기준으로 유지, 기본 off) 과 대표 실패 사례 재확인. reach threshold (120 mm) 를 늘리는 것은 원인 해결이 아니다. #48 (바뀐 instruction 의 과일이 manipulated object 로 잡힘, B 의 T55b) 과는 "지시 대상 추정과 실제 보유 물체 추적의 구분" 으로 원인 설명만 연결하고 수정은 분리한다.
+
+![SL5b reach per call](figures/t46g/sl5b_reach_per_call.png)
+
+### 5. T60d — 놓은 뒤 복귀 정체 (T60b 후속, 기록만)
+
+| 측정 (사전 고정, 중앙값) | NR (27) | R (62) |
+|---|---|---|
+| 첫 post-P chunk 의 최근접 demo phase (arm 7 관절) | phase 9 (release_verify) 26 · 10 1 | 주로 phase 10 (retreat) |
+| post-P chunk 중 phase 12 – 13 (return · terminal) 에 가장 가까운 비율 | **0** (모든 run) | 0.11 (모든 run > 0) |
+| 최근접 demo 와의 거리 (첫 8 chunk) | 0.81 | 0.068 |
+| release row (demo release 202) | 300 | 220 |
+
+- exploratory (사전 고정 아님): 그 거리의 대부분은 사용 팔 arm_5 하나다 (0.74 rad, 26 / 27 run 에서 가장 큰 차). release 때 arm_5 = 0.57 rad (demo 1.22 – 1.53, demo 최소 0.81), 이 값은 TO 전 정책 출력 (`actions_reference`) 에 이미 있다. NR 의 chunk 제안은 매번 17 – 28 step 뒤에야 움직이기 시작하고 (R 은 3 – 4 step), 실행은 앞 8 step 이라 상태가 바뀌지 않는다.
+- 독립 표본 주의: NR 27 run 은 서로 다른 궤적 19 개 (CL2 C1a · CL3 C1a · C1aF1 가 같은 seed 에서 같은 궤적), 3 episode 에 몰려 있다. 검정은 하지 않았다.
+- **추론 (측정 아님):** "arm_5 이탈 → 정책이 release 직후 대기를 반복 제안 → 실행되는 부분이 대기라 상태 불변" 은 측정된 상관을 이은 가설이다.
+- 사용자 판정: ep 110 · 123 을 seed 2 개씩 VLA 단독 (TO 없음) 으로 확인 (P 도달과 이후 복귀 제안 · H 도달을 구분해 보고, "국소 원인을 완전히 분리했다" 로 쓰지 않음, 결과가 불명확해도 확대하지 않음).
+
+![T60d state vs demo](figures/t60d/t60d_state_vs_demo.png)
+
+### 6. 다음 (사용자 판정 순서)
+
+오류 정정 · CL4 구성 고정 (완료: `6caae1c6`, [`handoff/CL4.task.md`](handoff/CL4.task.md)) → SL5b 최소 수정 (진행 중, 격리 worktree) → GPU: 변형 배치 pilot → CL4 → T60d. T57 은 SL5b 뒤 (단계 1 grounding → 단계 2 gate, 연결 위치는 사용자 판정 (6)). GPU 작업은 pod 메모리 (B 의 T56 replay) 에 맞춰 일정을 잡는다.
