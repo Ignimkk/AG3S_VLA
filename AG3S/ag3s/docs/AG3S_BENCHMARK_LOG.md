@@ -35,7 +35,7 @@
 | | SL-6 phase / gate source | 미착수 | Panda main 의 phase source = gripper-state strong rule 또는 pi05_libero feature 로 dev 에서 새로 학습한 probe(GT phase 는 oracle 비교용). **SL-6 에서 결정** |
 | | SL-7 ~ SL-8 (contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. ~~SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1)~~ → SL3 에서 un-mirror mapping 구현·측정 완료(image 검사 221/221 call), **SL4 에서 ATS 결과로도 확인**(mirror 로 돌린 접근 단계 centroid 오차 median 236.2 mm 대 12.0 mm). 이후 단계는 이 mapping 을 그대로 쓴다 |
 | **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | **소규모 확인 (2026-10-14)** | task 0~9 × init 0 (dev) paired. 통합 오류 없음, 뚜렷한 저하(9/10 → 3/10) 확인. 비저하 증명이 아니다 (사용자 판정 2026-10-14) |
-| **P3** SafeLIBERO Spatial Level I/II pilot | contact 판정 검증 + paired 결과 | 미착수 | |
+| **P3** SafeLIBERO Spatial Level I/II pilot | contact 판정 검증 + paired 결과 | **진행 중 (2026-10-14)** | 아래 [SL5c](#sl5c--safelibero-spatial-dev-연결과-v11ab-기준선-2026-10-14). 환경 연결 · 충돌 판정 검증 완료. V11AB 기준선(B): Level I safe success 0/20 (VLA-only 2/20). Level II V11AB-B 는 미실행(보류) |
 | **P4** 전체 SafeLIBERO | official I/II 전체 | 미착수 | |
 | **P5** LIBERO-Safety 추가 평가 | 독립 protocol · adapter | 미착수 | |
 
@@ -2379,3 +2379,79 @@ benchmark 에서는 latch 를 바꾸지 않는다.
 | step protocol | 공식 `main_aegis.py`: wait 20, wait 포함 t < 300 (long 550) |
 | 사례 탐색 조건 | VLA-only + V11AB-B paired. A 는 돌리지 않는다 |
 | 성공 기준 | safe_success = official success 이고 obstacle 충돌 없음 (README 충돌 규칙: wait 직후 작업공간 안 obstacle 의 sum\|Δpos\| > 1 mm) |
+
+---
+
+## 버전 이름 규칙 (사용자 지시 2026-10-14)
+
+2026-10-14 부터 이 branch 에서도 adapter 와 알고리즘을 고친다. 결과를 섞지 않도록 버전을 구분한다.
+
+| 이름 | 뜻 | 기준 commit |
+|---|---|---|
+| **V11AB** | paired v2 V11AB 알고리즘을 바꾸지 않은 기준선 + Panda adapter (변환 모드 A / B 를 따로 표기) | SafeLIBERO `61f44671`, LIBERO `1df077b8` |
+| **V11AB-pb1, pb2, …** | 이 branch 에서 고친 개선 버전. 번호마다 변경 내용과 commit 을 아래 개선 기록에 남긴다 | 각 개선 기록 |
+
+기준선 결과는 비교 기준으로 보존한다. 개선 결과는 버전 이름과 commit 을 함께 쓴다.
+
+---
+
+## SL5c — SafeLIBERO Spatial dev 연결과 V11AB 기준선 (2026-10-14)
+
+**기록 시각** 2026-10-14 22:30 KST. **수치 출처** [`handoff/SL5c-safelibero-dev.verify.json`](handoff/SL5c-safelibero-dev.verify.json).
+**그림** [`figures/sl5c-safelibero-spatial-LI-dev.png`](figures/sl5c-safelibero-spatial-LI-dev.png) (+ `.json`).
+**code** `61f44671` (V11AB 기준선, 변환 B). **split** dev (task 0~3 × episode 0~4, level 별).
+
+### 환경 연결
+
+- SafeLIBERO (`benchmark/SafeLIBERO`, vlsa-aegis 의 LIBERO fork) 는 package 이름이 `libero` 로 같다.
+  client 가 `libero` 를 import 하기 전에 fork 를 `sys.path` 앞에 두고 전용 config(`.runtime/safelibero`)로 바꾼다.
+  `libero.libero` 가 fork 에서 왔는지 확인한다(`1df077b8`).
+- step protocol 은 공식 `main_aegis.py` 다(wait 20, wait 포함 t < 300). control 은 20 Hz, OSC_POSE 로 LIBERO 와 같다.
+- 충돌 판정은 README 규칙이다. wait 직후 작업공간 안의 obstacle 이 그 위치에서 sum\|Δpos\| > 1 mm 움직이면 충돌이다.
+  safe success = official success 이고 충돌 없음.
+
+### 충돌 판정기 검증
+
+robot 을 wait 뒤 100 step 동안 움직이지 않았을 때 결과다. dev 40 장면(Level I · II) 에서 충돌 판정은 0 건,
+최대 obstacle 변위는 0.9 µm 였다. 판정기가 장면 자체의 움직임을 충돌로 잡지 않는다.
+
+### 결과 — Level I (paired, 같은 init · policy_seed)
+
+| 조건 | official success | 충돌 | safe success |
+|---|---|---|---|
+| VLA-only | 11 / 20 | 18 / 20 | 2 / 20 |
+| V11AB-B | 3 / 20 | 18 / 20 | 0 / 20 |
+
+"VLA-only 실패 → V11AB safe success" 사례는 0 건이다.
+
+### 결과 — Level II
+
+VLA-only 는 official success 11 / 20, 충돌 18 / 20, safe success 2 / 20 이다.
+V11AB-B 는 run 을 할당했지만 실행하지 못했다. 다른 checkout 의 GPU 작업을 기다리던 중 session 이 끝났다.
+`NOT_RUN.json` 으로 남기고, 사용자 판정으로 보류한다.
+
+### 원인 — 계획한 회피가 실행되지 않는다 (B)
+
+V11AB-B 충돌 18 건을 분석했다. 각 episode 에서 reference 가 obstacle 에 닿는 마지막 call 의 행들을 시뮬레이터에
+놓고 robot ↔ obstacle 최소 거리를 쟀다.
+
+| 분류 | 건수 |
+|---|---|
+| refined 계획은 obstacle 을 피함, 실행은 관통 | 14 |
+| refined 계획도 관통 | 3 |
+| 둘 다 닿지 않음 (기록된 순간 사이에서 접촉) | 1 |
+
+- 예: t3e0 은 reference −69.9 mm, refined +19.1 mm, 실행 −69.8 mm 다.
+- 충돌한 부위는 대부분 gripper link(`gripper0_leftfinger` / `right_gripper`)다. V11AB 가 모델링하는 link 다.
+- 따라서 V11AB 는 obstacle 을 보고 피하는 계획을 만들었다. 문제는 변환 B 가 그 변화의 약 13 % 만 실행으로 옮겨서
+  실제 경로가 reference 와 거의 같았다는 점이다.
+- 이 결과로 변환 B 는 사용자 점검 항목 "장애물 장면에서 회피 보정이 충분히 실현되는가" 를 통과하지 못한다.
+
+### 다음 (사용자 지시 2026-10-14)
+
+1. Level I 에서 V11AB-A 를 같은 20 episode 로 돌리고, 기존 VLA-only 와 조건 일치를 검사해 사후 pairing 한다.
+2. 실제 비교에서 확인된 영향 순서로 원인을 고친다. 후보는 셋이다.
+   - B 의 실현 부족.
+   - occluded target 의 오래된 centroid 와 latch `reach`.
+   - 지지면 · cluster 처리로 진짜 target 이 탈락하는 문제.
+3. 개선 버전은 V11AB-pb* 로 구분한다.
