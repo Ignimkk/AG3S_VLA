@@ -1655,6 +1655,12 @@ class SafePolicy:
         policy = getattr(getattr(self.ag3s, "builder", None), "clearance_policy", None)
         if ctx is None or policy is None:
             return frozenset()
+        # T46f A14 — `target_field_policy == "none"` (예외 없음): 쥐지 않은 target 에는 권한이 없다 — 제약 (마진) 과
+        # 같은 문맥 (`target_permission_context`). 다른 정책 · 쥔 뒤에는 예전 계산 그대로.
+        from AG3S.ag3s.constraints.clearance import target_permission_context
+
+        ctx = target_permission_context(ctx, str(getattr(cs, "target_field_policy", "") or ""),
+                                        getattr(cs, "attached", None))
         return frozenset(str(n) for n in policy.authorized_links(ctx))
 
     def _violation_reasons(self, result, cs, pair: Optional[dict],

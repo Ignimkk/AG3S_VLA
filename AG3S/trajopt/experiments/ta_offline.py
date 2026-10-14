@@ -255,6 +255,9 @@ def build_robot(args):
     pc = serve_safe.palm_cover_options(args)            # T45 A10 (off → no key)
     if pc:
         cover["palm_cover"] = pc
+    wc = serve_safe.wrist_cover_options(args)          # T46f A14 (--links gripper_wrist only)
+    if wc:
+        cover["wrist_cover"] = wc
     robot = build_constraint_robot_model(
         scene, link_filter=serve_safe.constraint_link_filter(args.links),
         sphere_options=serve_safe.sphere_options(args), **cover)
@@ -467,6 +470,13 @@ class Run:
         self.names = names
         self.margin_vec = self.policy.margin_matrix(names, [SourceType.TARGET], context=self.ctx,
                                                     target_grounded=True)[:, 0]
+        # T46f A14 — `--target-field-policy none` (예외 없음): 쥐지 않은 target 의 마진은 권한을 비운 문맥으로
+        # (`to_adapter` 와 같은 `target_permission_context`). 다른 정책에서는 쓰이지 않는다.
+        from AG3S.ag3s.constraints.clearance import target_permission_context
+
+        self.margin_vec_unheld = self.policy.margin_matrix(
+            names, [SourceType.TARGET], target_grounded=True,
+            context=target_permission_context(self.ctx, cfg_policy(self.sargs)))[:, 0]
         fl = "l" if self.hand == "left" else "r"
         self.idx = {"palm": np.asarray([i for i, n in enumerate(names) if n == f"ee_{self.hand}"]),
                     "fingers": np.asarray([i for i, n in enumerate(names)
@@ -548,8 +558,8 @@ class Run:
             tp = z["target_points"] if "target_points" in z.files else None
             if bool(s.get("has_target")) and tp is not None and len(tp):
                 kw.update(manipulated_points=np.asarray(tp, np.float64),
-                          manipulated_link_margin=self.margin_vec)
-                if (str(cfg_policy(self.sargs)) != "relax"
+                          manipulated_link_margin=self.margin_vec_unheld)
+                if (str(cfg_policy(self.sargs)) in ("exclude_authorized", "exclude_all")
                         and getattr(field, "target_free_layers", ())):
                     if cfg_policy(self.sargs) == "exclude_all":
                         mask = np.ones(len(self.names), bool)

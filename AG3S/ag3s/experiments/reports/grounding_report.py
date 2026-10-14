@@ -151,6 +151,25 @@ PALM_COVER_HANDS = {
 }
 
 
+#: T46f A14 — 손목 (비권한) link: arm_5 · arm_6 · FT sensor (URDF 이름). `wrist_cover={"hands": ...}` 이 고칠 link.
+WRIST_LINKS_BY_SIDE = {
+    "left": ("link_left_arm_5", "link_left_arm_6", "FT_sensor_L"),
+    "right": ("link_right_arm_5", "link_right_arm_6", "FT_sensor_R"),
+}
+WRIST_LINKS = WRIST_LINKS_BY_SIDE["left"] + WRIST_LINKS_BY_SIDE["right"]
+
+#: T46f A14 — `--links gripper_wrist`: 손바닥 2 + 손가락 4 + 손목 6 (arm_5 · arm_6 · FT sensor, 양손). 손목 형상은
+#: `wrist_cover` 로 고친 것만 쓴다 (`serve_safe` 가 이 집합에서 켠다) — URDF arm_5 capsule (r 75 mm) 이 손을 삼키는
+#: 형상으로는 비권한 link 의 보호 효과를 주장할 수 없다 (T46d).
+GRIPPER_WRIST_LINKS = GRIPPER_LINKS + WRIST_LINKS
+
+WRIST_COVER_HANDS = {
+    "both": WRIST_LINKS,
+    "left": WRIST_LINKS_BY_SIDE["left"],
+    "right": WRIST_LINKS_BY_SIDE["right"],
+}
+
+
 def _replace_link_capsules(gap: list, body: list) -> list:
     """`gap` 에서 `body` 가 가진 link 의 capsule 을 지우고, 그 link 의 첫 capsule 자리에 `body` 의 그 link
     구를 넣는다 — 다른 link 의 순서 · 값은 그대로 (T43 FC 손가락 · T45 A10 손바닥 몸통 구)."""
@@ -168,8 +187,48 @@ def _replace_link_capsules(gap: list, body: list) -> list:
     return new_gap
 
 
+def _apply_wrist_cover(urdf, gap: list, body: list) -> tuple:
+    """T46f A14 — 손목 몸통 구를 제자리에: `(urdf', gap')`.
+
+    * URDF capsule 이 있는 link (arm_5) 은 그 capsule 들을 지우고 첫 capsule 자리에 몸통 구를 넣는다 (`urdf.capsules`).
+    * gap-filling capsule 이 있는 link (arm_6) 은 `_replace_link_capsules` 와 같다.
+    * 어디에도 capsule 이 없는 link (FT_sensor) 은 같은 쪽 arm_6 구 바로 뒤에, arm_6 이 없으면 gap 맨 뒤에 붙인다.
+    다른 link 의 순서 · 값은 그대로다."""
+    import dataclasses
+
+    by_link: dict = {}
+    for cap in body:
+        by_link.setdefault(cap.link, []).append(cap)
+    caps, placed = [], set()
+    for cap in urdf.capsules:
+        if cap.link in by_link:
+            if cap.link not in placed:
+                caps.extend(by_link[cap.link])
+                placed.add(cap.link)
+            continue
+        caps.append(cap)
+    urdf = dataclasses.replace(urdf, capsules=tuple(caps))
+    rest = [c for c in body if c.link not in placed]
+    in_gap = {c.link for c in gap}
+    gap = _replace_link_capsules(gap, [c for c in rest if c.link in in_gap])
+    placed |= in_gap & set(by_link)
+    for link, spheres in by_link.items():
+        if link in placed:
+            continue
+        side = "left" if link in WRIST_LINKS_BY_SIDE["left"] else "right"
+        anchor = WRIST_LINKS_BY_SIDE[side][1]                       # link_<side>_arm_6
+        last = max((i for i, c in enumerate(gap) if c.link == anchor), default=None)
+        if last is None:
+            gap = list(gap) + list(spheres)
+        else:
+            gap = list(gap[:last + 1]) + list(spheres) + list(gap[last + 1:])
+        placed.add(link)
+    return urdf, gap
+
+
 def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options=None,
-                                 gripper_cover=None, finger_cover=None, palm_cover=None):
+                                 gripper_cover=None, finger_cover=None, palm_cover=None,
+                                 wrist_cover=None):
     """제약에 쓰는 모델. 자기 필터 모델과 **일부러 다르다**.
 
     제약 행은 최적화기가 실제로 움직일 수 있는 구에만 의미가 있다. RB-Y1 의 결정 변수는 양팔
@@ -215,6 +274,14 @@ def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options
     다른 link 의 구는 순서 · 값 그대로다. link 이름은 그대로 `ee_<side>` 이므로 접촉 권한 (`contact_links`) ·
     target-free 조회는 손바닥 구 전부에 그대로 걸린다. 결과는 `model.palm_cover_report`. `finger_cover` 와
     같이 주면 둘 다 바꾸고, `gripper_cover` 는 바뀐 모델 위에서 만든다.
+
+    `wrist_cover` (T46f A14, 기본 `None` = 꺼짐): `None`/`False`/`{}` 면 위 모델 그대로. `True` 또는 `dict` (`hands` =
+    `WRIST_COVER_HANDS` 의 키, `overflow` = m (기본 `gripper_cover.WRIST_COVER_OVERFLOW`), `keep_out_hand` = bool
+    (기본 True)) 이면 `link_filter` 안의 손목 link 형상을 MJCF collision mesh 의 몸통 구 (`gripper_cover.
+    wrist_body_capsules`) 로 고친다: `link_*_arm_5` 의 URDF capsule (r 75 mm, 손을 삼킨다) 을 **대신하고**, `link_*_arm_6`
+    의 gap-filling capsule 사슬을 대신하고, URDF link `FT_sensor_<S>` (지금까지 구 없음) 에 덮개 구를 단다. 구는 권한 손
+    (손바닥 + 손가락) 의 MJCF collision 껍질 안으로 들어가지 않는다. link_filter 에 손목 link 이 하나도 없으면
+    ValueError. 결과는 `model.wrist_cover_report`.
     """
     from AG3S.ag3s.experiments.sources.mujoco_source import HEAD_JOINTS, gap_filling_capsules
     from AG3S.ag3s.robot_models import RBY1_URDF, UrdfSphereChain, parse_urdf
@@ -283,6 +350,58 @@ def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options
         model.palm_cover_report = palm_report
         if finger_report is not None:
             model.finger_cover_report = finger_report
+    wrist_report = None
+    if wrist_cover:
+        import math
+
+        from AG3S.ag3s.experiments.sources.gripper_cover import (
+            WRIST_COVER_INSET, WRIST_COVER_OVERFLOW, wrist_body_capsules)
+
+        w_opts = dict(wrist_cover) if isinstance(wrist_cover, dict) else {}
+        w_hands = str(w_opts.pop("hands", "both"))
+        if w_hands not in WRIST_COVER_HANDS:
+            raise ValueError(
+                f"wrist_cover hands 는 {sorted(WRIST_COVER_HANDS)} 중 하나: {w_hands!r}")
+        w_overflow = float(w_opts.pop("overflow", WRIST_COVER_OVERFLOW))
+        if not (math.isfinite(w_overflow) and w_overflow > 0.0):
+            raise ValueError(f"wrist_cover overflow 는 0 보다 커야 합니다 (m): {w_overflow}")
+        w_keep = bool(w_opts.pop("keep_out_hand", True))
+        # T46f A14b — link 마다 greedy inset (m). 키가 없으면 `WRIST_COVER_INSET` (arm_6 양손 0.5 mm), `{}` = 전부 0 (A14)
+        w_inset_in = w_opts.pop("inset", None)
+        w_inset = dict(WRIST_COVER_INSET if w_inset_in is None else w_inset_in)
+        bad = sorted(set(w_inset) - set(WRIST_LINKS))
+        if bad:
+            raise ValueError(f"wrist_cover inset 의 link 은 손목 link ({WRIST_LINKS}) 이어야 합니다: {bad}")
+        for link, v in w_inset.items():
+            if not (math.isfinite(float(v)) and float(v) >= 0.0):
+                raise ValueError(f"wrist_cover inset 은 0 이상이어야 합니다 (m): {link}={v}")
+        w_inset = {k: float(v) for k, v in w_inset.items()}
+        if w_opts:
+            raise ValueError(f"wrist_cover 의 모르는 키: {sorted(w_opts)}")
+        keep = None if link_filter is None else set(link_filter)
+        w_links = [n for n in WRIST_COVER_HANDS[w_hands] if keep is None or n in keep]
+        if not w_links:
+            # 조용히 아무것도 안 고친 채 고쳤다고 믿는 것이 가장 나쁘다 (`--exclude-links` 와 같은 규율)
+            raise ValueError(
+                f"wrist_cover 를 켰지만 link_filter 에 손목 link ({WRIST_COVER_HANDS[w_hands]}) 가 없습니다 — "
+                "--links gripper_wrist (또는 all) 와 같이 쓰십시오")
+        body, per_link = wrist_body_capsules(scene.model, model, w_links, overflow=w_overflow,
+                                             keep_out_hand=w_keep, inset=w_inset)
+        n_before = model.n_spheres
+        urdf, gap = _apply_wrist_cover(urdf, gap, body)
+        model = UrdfSphereChain(urdf, extra_capsules=gap,
+                                fixed_joint_values=head, link_filter=link_filter,
+                                **dict(sphere_options or {}))
+        wrist_report = {"options": {"hands": w_hands, "overflow": w_overflow,
+                                    "keep_out_hand": w_keep,
+                                    "inset": {k: v for k, v in w_inset.items() if k in w_links and v > 0.0}},
+                        "n_spheres_before": n_before, "n_spheres_after": model.n_spheres,
+                        "links": per_link}
+        model.wrist_cover_report = wrist_report
+        if finger_report is not None:
+            model.finger_cover_report = finger_report
+        if palm_report is not None:
+            model.palm_cover_report = palm_report
     if not gripper_cover:
         return model
     from AG3S.ag3s.experiments.sources.gripper_cover import outer_cover_capsules
@@ -303,6 +422,8 @@ def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options
         covered.finger_cover_report = finger_report
     if palm_report is not None:
         covered.palm_cover_report = palm_report
+    if wrist_report is not None:
+        covered.wrist_cover_report = wrist_report
     return covered
 
 

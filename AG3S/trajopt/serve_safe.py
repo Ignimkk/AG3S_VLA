@@ -97,7 +97,10 @@ def constraint_links_minus(present: Sequence[str], exclude: Sequence[str],
 #: `--links` 선택지. **첫 항목이 기본이다 — T27 부터 `gripper`** (사용자 판정 2026-09-28: "거리장 충돌제약은
 #: gripper 에만, 나머지 link 은 전부 제외"). 손바닥 둘 + 손가락 넷(`GRIPPER_LINKS`)에만 제약이 걸린다.
 #: `arms`(T27 전 기본) · `all` 은 옵션으로 남고, 고르면 시작 로그가 크게 말한다.
-LINK_GROUPS: tuple[str, ...] = ("gripper", "arms", "all")
+#: T46f A14 — `gripper_wrist` (맨 뒤 — 기본은 그대로 `gripper`) = gripper + 손목 (`link_*_arm_5` · `link_*_arm_6` ·
+#: `FT_sensor_*`). 이 집합은 **늘 보정 형상** (`wrist_cover`, MJCF collision mesh 의 몸통 구 — URDF arm_5 capsule 이
+#: 손을 삼키지 않는다) 으로 짓는다 (`build_ag3s` · `wrist_cover_options`).
+LINK_GROUPS: tuple[str, ...] = ("gripper", "arms", "all", "gripper_wrist")
 
 #: `--links` 의 기본값. `LINK_GROUPS[0]` 과 같다 — 두 곳에 적지 않는다.
 DEFAULT_LINKS: str = LINK_GROUPS[0]
@@ -126,16 +129,26 @@ def resolve_target_field_policy(value: str) -> str:
     return text
 
 
+def _policy_reads_target_free(value: str) -> bool:
+    """T46f A14 — `--target-field-policy` 가 target-free 계층을 읽는가 (`config.TARGET_FREE_POLICIES`). `relax` ·
+    `none` 은 아니다. 모르는 이름은 `resolve_target_field_policy` 가 거절한다."""
+    from AG3S.ag3s.config import TARGET_FREE_POLICIES
+
+    return resolve_target_field_policy(value) in TARGET_FREE_POLICIES
+
+
 def constraint_link_filter(links: str):
     """`--links` 값 → `build_constraint_robot_model(link_filter=...)` 에 줄 것.
 
-    `gripper`(기본, T27) = **손바닥 2 + 손가락 4** · `arms` = 양팔 14 link + 손가락 4 · `all` = 전신(`None`).
+    `gripper`(기본, T27) = **손바닥 2 + 손가락 4** · `arms` = 양팔 14 link + 손가락 4 · `all` = 전신(`None`) ·
+    `gripper_wrist` (T46f A14) = gripper + `link_*_arm_5` · `link_*_arm_6` · `FT_sensor_*` (형상은 `wrist_cover`).
 
     이름 목록을 `grounding_report` 에서 가져오는 것이 요점이다 (T7b). 같은 일을
     `--exclude-links` 로 하려면 남길 것 넷을 빼고 열넷을 손으로 적어야 하고, `link_filter` 는
     집합 교집합이라 오타 하나가 조용히 사라진다 — 그래서 집합 이름을 선택지로 둔다.
     """
-    from AG3S.ag3s.experiments.reports.grounding_report import ARM_LINKS, GRIPPER_LINKS
+    from AG3S.ag3s.experiments.reports.grounding_report import (
+        ARM_LINKS, GRIPPER_LINKS, GRIPPER_WRIST_LINKS)
 
     if links == "all":
         return None
@@ -143,6 +156,8 @@ def constraint_link_filter(links: str):
         return ARM_LINKS
     if links == "gripper":
         return GRIPPER_LINKS
+    if links == "gripper_wrist":
+        return GRIPPER_WRIST_LINKS
     raise ValueError(f"--links 는 {LINK_GROUPS} 중 하나여야 합니다: {links!r}")
 
 
@@ -429,7 +444,8 @@ def announce_diagnostic_scope(*, links: str, self_collision: bool,
             "밀려 청크가 바뀔 수 있습니다 (T6d·T7b). 사용자 판정(2026-09-28)의 기본은 gripper "
             "(손바닥 2 + 손가락 4) 입니다.",
             links.upper(), DEFAULT_LINKS, ", ".join(str(n) for n in constraint_links) or "(전신)",
-            "몸통·바퀴·베이스" if links == "all" else "반대팔")
+            "몸통·바퀴·베이스" if links == "all"
+            else "FT sensor (MJCF mesh 보정 형상, T46f A14)" if links == "gripper_wrist" else "반대팔")
     else:
         log.info(
             "constraint scope: %s (기본, T27) — %s. **여기 없는 link(팔뚝·몸통·반대팔)는 무엇에 "
@@ -461,6 +477,12 @@ def announce_diagnostic_scope(*, links: str, self_collision: bool,
             "반대팔에게도 사라집니다 — 사과 위로 팔꿈치가 지나가도 아무도 막지 않습니다.\n"
             "    사용자가 명시한 fallback 입니다. 이름으로 빼는 쪽은 exclude-authorized "
             "입니다. table·crate 는 어느 쪽에서도 그대로 막습니다.")
+    if target_field_policy == "none":
+        log.warning(
+            "!!! NO TARGET EXEMPTION (--target-field-policy none, T46f A14) !!!\n"
+            "    쥐지 않은 target 을 **모든 link** (권한 link %s 포함) 이 일반 obstacle 로 봅니다 — target-free "
+            "계층 조회도, 마진 완화도, verdict 의 허용 접촉도 없습니다. 쥔 뒤의 규칙은 그대로입니다.",
+            ", ".join(str(n) for n in authorized_links) or "(없음)")
     extents = dict(link_extents or {})
     if link_scales or extents:
         # **굵기와 절단을 한 warning 에 같이 찍는다.** 둘은 다른 축이지만 같은 link 에 함께
@@ -642,6 +664,52 @@ def palm_cover_options(args) -> dict | None:
         out["overflow"] = float(overflow_mm) * 1e-3
     return out
 # --- T45 A10 palm cover (block end) -----------------------------------------------------------
+
+
+# --- T46f A14 wrist cover (block start) -------------------------------------------------------
+#: `--links` 값 중 손목 보정 형상 (`wrist_cover`) 을 쓰는 것.
+WRIST_COVER_LINK_GROUPS: tuple[str, ...] = ("gripper_wrist",)
+
+
+def wrist_cover_options(args) -> dict | None:
+    """`--links gripper_wrist` (+ `--wrist-cover-overflow MM`) → `build_constraint_robot_model` 의 `wrist_cover`
+    (T46f A14). 다른 `--links` 면 `None` — 제약 모델이 예전과 글자 그대로 같다. overflow 를 안 주면 키가 없다
+    (= `gripper_cover.WRIST_COVER_OVERFLOW` 5 mm)."""
+    links = getattr(args, "links", None) or DEFAULT_LINKS
+    overflow_mm = getattr(args, "wrist_cover_overflow", None)
+    if links not in WRIST_COVER_LINK_GROUPS:
+        if overflow_mm is not None:
+            raise SystemExit("--wrist-cover-overflow 는 --links gripper_wrist 와 함께 줘야 합니다 — "
+                             "혼자서는 아무 일도 하지 않습니다")
+        return None
+    out: dict = {"hands": "both"}
+    if overflow_mm is not None:
+        if not (math.isfinite(float(overflow_mm)) and float(overflow_mm) > 0):
+            raise SystemExit(f"--wrist-cover-overflow 는 0 보다 커야 합니다 (mm): {overflow_mm}")
+        out["overflow"] = float(overflow_mm) * 1e-3
+    return out
+
+
+def announce_wrist_cover(report: dict | None) -> None:
+    """T46f A14 — 손목 보정 형상을 켰을 때만 (WARNING): 구 수 · link 마다 반지름 · 못 덮은 표본 · 넘친 양."""
+    if not report:
+        return
+    per = ", ".join(
+        f"{link} {r['n_spheres']} 구 (r {r['radius_mm'][0]:.1f}–{r['radius_mm'][1]:.1f} mm, 미달 표본 "
+        f"{r['n_uncovered']}/{r['n_targets']} 최대 {r['max_gap_mm']:.2f} mm, 넘침 실측 "
+        f"{r['overflow_sampled_mm']:.2f} mm)"
+        if r.get("radius_mm") else f"{link} 0 구" for link, r in report["links"].items())
+    inset = report["options"].get("inset") or {}
+    logging.warning(
+        "constraint wrist cover (T46f A14): 구 %d → %d — arm_5 (URDF capsule r 75 mm 대신) · arm_6 · FT sensor "
+        "의 MJCF collision mesh 몸통 구 (넘침 ≤ %.1f mm, 권한 손 껍질 keep-out %s, 손 %s, inset %s): %s. 모두 "
+        "비권한 link 이다 (target 예외 없음). ESDF 질의 · FK 비용이 구 수에 비례한다",
+        report["n_spheres_before"], report["n_spheres_after"],
+        1e3 * float(report["options"]["overflow"]),
+        "on" if report["options"].get("keep_out_hand", True) else "OFF",
+        report["options"]["hands"],
+        ", ".join(f"{k} {1e3 * float(v):.1f} mm" for k, v in inset.items()) or "없음", per)
+# --- T46f A14 wrist cover (block end) ---------------------------------------------------------
 
 
 def parse_self_filter_inflation(pairs: Sequence[str]) -> dict[str, float]:
@@ -916,6 +984,7 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                gripper_cover: dict | None = None,
                finger_cover: dict | None = None,
                palm_cover: dict | None = None,
+               wrist_cover: dict | None = None,
                self_collision: bool = True,
                target_field_policy: str = "relax",
                plan_horizon_steps: int | None = None,
@@ -980,6 +1049,12 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
     # T45 A10 — 손바닥 몸통 구도 같은 규약 (`None` 이면 키가 없다).
     if palm_cover:
         cover["palm_cover"] = palm_cover
+    # T46f A14 — `gripper_wrist` 는 늘 보정 손목 형상으로 짓는다 (URDF arm_5 capsule 이 손을 삼키는 형상으로
+    # 비권한 link 의 보호를 말할 수 없다). 다른 `--links` 에서는 키가 없다 = 예전 호출 그대로.
+    if links in WRIST_COVER_LINK_GROUPS and not wrist_cover:
+        wrist_cover = {"hands": "both"}
+    if wrist_cover:
+        cover["wrist_cover"] = wrist_cover
     constraint_robot = build_constraint_robot_model(
         scene, link_filter=constraint_link_filter(links), sphere_options=spheres, **cover)
     # **기본이 아닌 범위·자기충돌·굵기로 떠 있으면 여기서 크게 말한다.** 제약 모델을 만든
@@ -1064,6 +1139,7 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
     announce_gripper_cover(getattr(constraint_robot, "gripper_cover_report", None))
     announce_finger_cover(getattr(constraint_robot, "finger_cover_report", None))
     announce_palm_cover(getattr(constraint_robot, "palm_cover_report", None))  # T45 A10
+    announce_wrist_cover(getattr(constraint_robot, "wrist_cover_report", None))  # T46f A14
     # **구 개수와 행 개수를 갈라 찍는다.** 구를 촘촘하게 만들면 구는 늘지만 QP 행은 안 늘고,
     # 그 구분이 없으면 "구를 늘렸다" 가 "실시간을 잃었다" 로 읽힌다.
     announce_row_budget(n_constraint_spheres=constraint_robot.n_spheres,
@@ -1283,7 +1359,9 @@ def build_parser() -> argparse.ArgumentParser:
                          "= 손바닥 둘 + 손가락 넷 (ee_left/ee_right, ee_finger_l1/l2/r1/r2): 팔뚝·"
                          "손목·몸통·반대팔은 제약에서 빠지고, 빠진 것은 무엇에 부딪혀도 아무도 "
                          "막지 않는다. arms = 양팔과 손끝 (T27 전 기본) · all = 전신 — 둘 다 시작 "
-                         "로그가 크게 말한다. 자기 필터 모델(전신)은 이 값과 무관하다")
+                         "로그가 크게 말한다. gripper_wrist (T46f A14) = gripper + 양손 손목 (link_*_arm_5 · "
+                         "link_*_arm_6 · FT_sensor_*) — 손목은 MJCF collision mesh 의 보정 형상 (URDF arm_5 "
+                         "capsule 대신) 으로 짓는다. 자기 필터 모델(전신)은 이 값과 무관하다")
     ap.add_argument("--exclude-links", nargs="+", default=(), metavar="LINK",
                     help="제약 모델에서 **뺄** link 이름. 예: --exclude-links "
                          "link_left_arm_5 link_right_arm_5. --links 가 고른 집합에서 뺀다. "
@@ -1527,7 +1605,10 @@ def build_parser() -> argparse.ArgumentParser:
                          "exclude-all = 모든 제약 구가 그 계층에 묻는다 — **E1 이 되살아난다** "
                          "(몸통·전완·반대팔에게도 사과가 사라진다). 어느 쪽이든 table·crate 는 "
                          "그 계층에도 있으므로 보호가 유지되고, 쥔 뒤에는 정책이 돌지 않는다 "
-                         "(그때 target 은 crate 이고 crate 는 빼면 안 된다)")
+                         "(그때 target 은 crate 이고 crate 는 빼면 안 된다). none (T46f A14) = **예외 "
+                         "없음**: 쥐지 않은 target 을 모든 link 이 일반 obstacle 로 본다 — target-free 계층도, "
+                         "권한 link 의 마진 완화도, verdict 의 허용 접촉도 없다 (DX-04 조건 ①). 비권한 여유는 "
+                         "--nonauthorized-target-margin 이 모든 link 에 걸린다")
     # T44 I1 (A1) — begin
     ap.add_argument("--target-exclusion", choices=("ball", "ball-owned"), default="ball",
                     help="T44 I1 — target 없는 계층에서 공 안의 무엇을 지우나. ball (기본) = T13 그대로 "
@@ -1640,6 +1721,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--palm-cover-overflow", type=float, default=None, metavar="MM",
                     help="T45 A10 — 손바닥 몸통 구가 mesh 밖으로 나가는 최대 거리 (mm, 기본 5.0). "
                          "--palm-cover on 과 함께만")
+    ap.add_argument("--wrist-cover-overflow", type=float, default=None, metavar="MM",
+                    help="T46f A14 — 손목 (arm_5 · arm_6 · FT sensor) 몸통 구가 MJCF collision mesh 밖으로 나가는 "
+                         "최대 거리 (mm, 기본 5.0). --links gripper_wrist 와 함께만")
     # --- 목적함수 가중치 (T9) ------------------------------------------------------------
     # **제약이 하나도 활성이 아닌 판에서도 TO 가 청크를 고친다** (실행되는 8 step 안에서 중앙값
     # 2.6°, 최대 8.8°). 그러면 남은 변형은 전부 이 넷이 만든 것이므로, 훑을 수 있어야 한다.
@@ -1861,7 +1945,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ap.error("--target-field-policy 는 안전 계층의 거리장 질의를 고치는 flag 입니다 "
                  "(--no-safe 는 그 계층을 아예 안 만듭니다). 그대로 띄우면 target 을 필드에서 "
                  "뺐다고 믿게 되는데, 실은 어떤 충돌 제약도 없는 서버가 뜹니다")
-    if args.target_field_policy != "relax":
+    if _policy_reads_target_free(args.target_field_policy):
+        # T46f A14 — `none` (예외 없음) 은 target-free 계층을 만들지도 읽지도 않으므로 이 요구가 없다.
         # **서버가 뜨기 전에 막는다.** 이 두 조합은 첫 프레임에서 죽는데, 그때는 체크포인트
         # 두 벌이 이미 GPU 에 올라간 뒤이고 로컬은 이미 붙어 있다.
         if args.esdf_backend != "curobo":
@@ -1883,9 +1968,10 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
     if owned_given and args.target_exclusion != "ball-owned":
         ap.error(f"{', '.join(owned_given)} 는 --target-exclusion ball-owned 에서만 읽힙니다 — "
                  "그대로 띄우면 효과가 있었다고 믿게 됩니다")
-    if args.target_exclusion != "ball" and args.target_field_policy == "relax":
+    if args.target_exclusion != "ball" and not _policy_reads_target_free(args.target_field_policy):
         ap.error("--target-exclusion ball-owned 는 target 없는 계층에서 동작합니다 — "
-                 "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오")
+                 "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오 "
+                 "(relax · none 은 그 계층을 만들지 않습니다)")
     # T44 I1 (A1) — end
     # T46 F1 — begin
     if args.nontarget_shell_voxels is not None:
@@ -1904,9 +1990,12 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ap.error(f"{', '.join(oracle_given)} 는 --target-extent oracle-visible 에서만 읽힙니다 — "
                  "그대로 띄우면 효과가 있었다고 믿게 됩니다")
     if oracle_on:
-        if args.target_field_policy == "relax":
+        # T46f A14c — `none` (예외 없음, T46f A14) 도 `relax` 처럼 target-free 계층을 만들지 않는다: oracle 이 바꿀
+        # 계층이 없다. `--links` (gripper_wrist 포함) 와는 무관하다 — 형상은 제약 모델, oracle 은 거리장이다.
+        if not _policy_reads_target_free(args.target_field_policy):
             ap.error("--target-extent oracle-visible 는 target 없는 계층의 범위를 바꿉니다 — "
-                     "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오")
+                     "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오 "
+                     f"(받은 값 {args.target_field_policy}: relax · none 은 그 계층을 만들지 않습니다)")
         if args.no_safe or getattr(args, "no_perception", False):
             ap.error("--target-extent oracle-visible 는 AG3S 의 거리장을 고치는 flag 입니다 "
                      "(--no-safe · --no-perception 은 그것을 안 만듭니다)")
@@ -1919,7 +2008,7 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
             ap.error(f"--oracle-max-dist-voxels 는 유한한 양수입니다 (받은 값 {md})")
     # T46e A13 — end
     # T44c A5 — begin
-    if args.target_free_coarse and args.target_field_policy == "relax":
+    if args.target_free_coarse and not _policy_reads_target_free(args.target_field_policy):
         ap.error("--target-free-coarse 는 target 없는 계층에서 동작합니다 — "
                  "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오")
     # T44c A5 — end
@@ -2033,6 +2122,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
                  "있었다고 믿게 됩니다")
     if finger_cover_options(args) and (args.no_safe or args.no_perception):
         ap.error("--finger-cover 는 제약 모델의 손가락 구를 바꾸는 flag 입니다 (--no-safe · "
+                 "--no-perception 서버에는 그 모델의 충돌 행이 없습니다). 그대로 띄우면 효과가 "
+                 "있었다고 믿게 됩니다")
+    # T46f A14 — wrist cover: 같은 규율 (형식 오류도 여기서 죽는다).
+    if wrist_cover_options(args) and (args.no_safe or args.no_perception):
+        ap.error("--links gripper_wrist 는 제약 모델의 손목 형상을 바꾸는 집합입니다 (--no-safe · "
                  "--no-perception 서버에는 그 모델의 충돌 행이 없습니다). 그대로 띄우면 효과가 "
                  "있었다고 믿게 됩니다")
     # T45 A10 — palm cover: 같은 규율.
@@ -2646,6 +2740,9 @@ def main() -> None:
                       # T45 A10 — 켰을 때만 키가 생긴다.
                       **({"palm_cover": palm_cover_options(args)}
                          if palm_cover_options(args) else {}),
+                      # T46f A14 — 켰을 때만 (`--links gripper_wrist`) 키가 생긴다.
+                      **({"wrist_cover": wrist_cover_options(args)}
+                         if wrist_cover_options(args) else {}),
                       **({"self_filter": self_filter_options(args)}
                          if self_filter_options(args) else {}),
                       # SUBTASK-c — **항상 남긴다**: 이 키가 없는 기록은 SUBTASK-c 전이다.
@@ -2743,6 +2840,7 @@ def main() -> None:
                             gripper_cover=gripper_cover_options(args),
                             finger_cover=finger_cover_options(args),
                             palm_cover=palm_cover_options(args),  # T45 A10
+                            wrist_cover=wrist_cover_options(args),  # T46f A14
                             self_collision=not args.no_self_collision,
                             target_field_policy=args.target_field_policy,
                             plan_horizon_steps=horizon.planned,

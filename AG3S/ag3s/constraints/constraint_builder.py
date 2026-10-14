@@ -187,6 +187,14 @@ class ConstraintBuilder:
                 "    사용자가 명시한 fallback 이고, 이름으로 빼는 쪽은 "
                 "'exclude_authorized' 입니다 (권한 있는 link 만, E1 재발 없음). "
                 "table·crate 는 어느 쪽에서도 그대로 막습니다.")
+        elif policy == "none":
+            logging.getLogger(__name__).warning(
+                "!!! NO TARGET EXEMPTION (constraint.target_field_policy='none') !!!\n"
+                "    쥐지 않은 target 을 **모든 link** 이 일반 obstacle 로 봅니다 — target-free 계층 조회도, 권한 "
+                "link (%s) 의 마진 완화도 없습니다 (T46f DX-04 조건 ①). 쥔 뒤의 규칙은 그대로입니다.",
+                ", ".join(sorted(
+                    n for links in self.clearance_policy.contact.contact_links.values()
+                    for n in links)) or "(없음)")
         elif policy == "exclude_authorized":
             logging.getLogger(__name__).warning(
                 "!!! TARGET IS EXCLUDED FROM THE FIELD FOR AUTHORIZED LINKS "
@@ -390,8 +398,14 @@ class ConstraintBuilder:
         # The margin block. Inactive slots get the full margin too — harmless, since `active=0`
         # makes their row a constant, and it means a slot that becomes active mid-frame can never
         # inherit a stale relaxation.
+        # T46f A14 — `target_field_policy == "none"` (예외 없음): 쥐지 않은 target 에 대한 권한을 비운 문맥으로 잰다
+        # (다른 정책 · 쥔 뒤에는 `ctx` 그대로 — 예전 계산).
+        from AG3S.ag3s.constraints.clearance import target_permission_context
+
+        margin_ctx = target_permission_context(
+            ctx, str(getattr(self.constraint_config, "target_field_policy", "relax")), attached)
         margins = self.clearance_policy.margin_matrix(
-            self.sphere_link_names, slot_sources, context=ctx, target_grounded=target_grounded
+            self.sphere_link_names, slot_sources, context=margin_ctx, target_grounded=target_grounded
         )
         values[lo_d : lo_d + s * m] = margins.reshape(-1)
 

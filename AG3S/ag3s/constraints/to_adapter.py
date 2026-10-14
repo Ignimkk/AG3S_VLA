@@ -28,7 +28,9 @@ from typing import Any, Iterable, Optional, Sequence
 import numpy as np
 
 from AG3S.ag3s.constraints.constraint_builder import ConstraintBuilder
-from AG3S.ag3s.constraints.clearance import manipulated_object
+from AG3S.ag3s.config import TARGET_FREE_POLICIES
+from AG3S.ag3s.constraints.clearance import (
+    PROTECTED_LINKS, manipulated_object, target_permission_context)
 from AG3S.ag3s.runtime.degradation import ensure_reason, reason
 from AG3S.ag3s.types import (
     AttachedCollisionGeometry,
@@ -198,10 +200,14 @@ def build_constraint_set(
     manipulated = manipulated_object(
         manipulated_geometry, attached, robot_model=builder.robot_model, robot_state=robot_state
     )
+    target_field_policy = str(getattr(builder.constraint_config, "target_field_policy", "relax"))
+    # T46f A14 — `"none"` (예외 없음): 쥔 것이 없으면 권한을 비운 문맥으로 잰다 → 모든 행이 `full_margin(TARGET)`.
+    # 다른 정책 · 쥔 뒤에는 `ctx` 그대로다.
+    perm_ctx = target_permission_context(ctx, target_field_policy, attached)
     manipulated_link_margin = None
     if manipulated is not None and builder.n_robot_spheres:
         manipulated_link_margin = builder.clearance_policy.margin_matrix(
-            builder.sphere_link_names, [SourceType.TARGET], context=ctx, target_grounded=True,
+            builder.sphere_link_names, [SourceType.TARGET], context=perm_ctx, target_grounded=True,
         )[:, 0]
 
     # ESDF 쪽 **target 제외** — 마진이 아니라 `d` 자체를 바꾼다 (T8b, 사용자 판정).
@@ -215,7 +221,7 @@ def build_constraint_set(
     # 거리를 묻는다. 행을 끄는 것이 아니다: 그 계층도 table·crate 를 그대로 담고 있다.
     #
     # 조건이 넷이고 하나라도 어긋나면 `None`(= 지금 동작)이다.
-    # 1. 정책이 `relax`(기본)가 아니다.
+    # 1. 정책이 target-free 계층을 읽는 것이다 (`exclude_authorized` · `exclude_all`; `relax`(기본) · `none` 은 아니다).
     # 2. **쥔 것이 없다** — 쥔 뒤에는 그 물체가 attached 경로(필드에서 파임 + 로봇 쪽 질의점)로
     #    빠진다 (T26 §4: 파지 전 manipulated → 파지 후 attached, 끊김 없음). T26 전의 이유 ("쥔
     #    뒤의 target 은 crate") 는 더 이상 참이 아니다 — crate 는 admissible 이 아니어서
@@ -223,9 +229,9 @@ def build_constraint_set(
     # 3. 조작 대상이 있다 (`visible` 또는 `occluded` — T20. 예전엔 "target 이 grounding 됐다").
     #    사과가 손가락에 가려진 프레임에도 사과의 제외는 살아 있어야 한다.
     # 4. 필드가 실제로 그 계층을 들고 있다 — 없으면 켰다고 믿은 채 아무 일도 안 일어난다.
-    target_field_policy = str(getattr(builder.constraint_config, "target_field_policy", "relax"))
     target_field_exclude = None
-    if (target_field_policy != "relax" and attached is None and manipulated_geometry is not None
+    if (target_field_policy in TARGET_FREE_POLICIES and attached is None
+            and manipulated_geometry is not None
             and builder.n_robot_spheres and getattr(esdf, "has_target_free", False)):
         names = [str(n) for n in builder.sphere_link_names]
         if target_field_policy == "exclude_all":
@@ -244,7 +250,7 @@ def build_constraint_set(
     # target 이 빠진 계층을 읽었나. 권한 없는 link 이 target 예외를 받았는지 기록만 보고 셀 수 있게.
     metrics = dict(metrics or {})
     metrics["target_permission"] = _target_permission_record(
-        builder, ctx, target_field_policy, target_field_exclude)
+        builder, perm_ctx, target_field_policy, target_field_exclude)
     # T44b I2b — while holding: which rows belong to the holding hand (ContactConfig side of the
     # hold link) and to its hold chain above the gripper (URDF parent relation). Record only here;
     # trajopt reads it with `collision.target_permission_strict` (`linearize.held_contact_rows_of`).
@@ -256,7 +262,7 @@ def build_constraint_set(
     nonauthorized_target_rows = None
     if nonauth_margin != "full":
         if manipulated_link_margin is not None and attached is None:
-            authorized = builder.clearance_policy.authorized_links(ctx)
+            authorized = builder.clearance_policy.authorized_links(perm_ctx)
             nonauthorized_target_rows = np.asarray(
                 [str(n) not in authorized for n in builder.sphere_link_names], bool)
         metrics["target_permission"]["nonauthorized_target_margin"] = {
@@ -360,19 +366,23 @@ def held_contact_depth(sphere_link_names: Sequence[str], hold_link: str,
     The chain counts only links that carry spheres in this constraint model and are not contact
     links — a link with no sphere (RB-Y1: the fixed `FT_sensor_L/R` frame between `ee_<side>` and
     `link_<side>_arm_6`) has no row to permit. `parent_links` lists the counted links, nearest first.
+
+    T46f A14 — `clearance.PROTECTED_LINKS` (the FT sensors, which carry spheres under `--links gripper_wrist`)
+    are **never** permitted and not counted either: they stay −1, so `link_<side>_arm_6` keeps depth 1 exactly
+    as before the FT sensor had spheres.
     """
     names = [str(n) for n in sphere_link_names]
     contact = {str(link) for link in contact_links}
     have = set(names)
     depth = np.full(len(names), -1, np.int64)
     for i, name in enumerate(names):
-        if name in contact:
+        if name in contact and name not in PROTECTED_LINKS:
             depth[i] = 0
     parents: list[str] = []
     cursor, seen = parent_of.get(str(hold_link)), {str(hold_link)}
     while cursor is not None and cursor not in seen:
         seen.add(cursor)
-        if cursor in have and cursor not in contact:
+        if cursor in have and cursor not in contact and cursor not in PROTECTED_LINKS:
             parents.append(cursor)
             k = len(parents)
             for i, name in enumerate(names):

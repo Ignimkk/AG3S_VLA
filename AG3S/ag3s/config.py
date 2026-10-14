@@ -1442,7 +1442,12 @@ class ContactConfig:
 
 #: `ConstraintConfig.target_field_policy` 의 선택지. **첫 항목이 기본값이고 그것이 지금까지의
 #: 동작이다.** 문자열을 두 곳에 박으면 갈라지므로 parser 도 이 목록을 본다.
-TARGET_FIELD_POLICIES: tuple[str, ...] = ("relax", "exclude_authorized", "exclude_all")
+#: T46f A14 — `"none"` (맨 뒤 — 기본은 그대로 `relax`): **예외 없음.** 쥐지 않은 target 을 모든 link 이 일반 obstacle
+#: 로 본다 — target-free 계층도, 권한 link 의 마진 완화도 없다 (DX-04 조건 ①).
+TARGET_FIELD_POLICIES: tuple[str, ...] = ("relax", "exclude_authorized", "exclude_all", "none")
+
+#: target 이 빠진 계층 (target-free layer) 을 읽는 정책. 나머지 (`relax` · `none`) 는 그 계층을 만들지 않는다.
+TARGET_FREE_POLICIES: tuple[str, ...] = ("exclude_authorized", "exclude_all")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1489,6 +1494,7 @@ class ConstraintConfig:
     #: | `"relax"` | target 은 필드에 그대로 있고 `manipulated_link_margin` 으로 마진만 완화한다 |
     #: | `"exclude_authorized"` | 접촉 권한이 있는 link 의 구만 **target 이 빠진 계층**에 거리를 묻는다 |
     #: | `"exclude_all"` | 모든 제약 구가 target 이 빠진 계층에 묻는다 |
+    #: | `"none"` (T46f A14) | **예외 없음** — target 은 필드에 그대로, 어느 link 도 마진 완화 · target-free 조회 · verdict 의 허용 접촉을 받지 않는다 (쥐지 않은 동안). 모든 link 이 target 을 일반 obstacle 로 (여유는 `contact.nonauthorized_target_margin` 의 비권한 값) |
     #:
     #: **왜 마진으로는 안 되는가.** 제약은 `d − r ≥ m` 이고 `m ≥ 0` 이라 표면 안쪽을 허용할 수
     #: 없다. 성공한 shadow 궤적의 손끝 구는 사과 표면을 −17.96 mm 관통하므로, `margin = 0`
@@ -1508,8 +1514,8 @@ class ConstraintConfig:
 
     @property
     def excludes_target_from_field(self) -> bool:
-        """target 없는 계층이 **필요한가**. 기본 정책에서는 `False` 이고 추가 비용이 0 이다."""
-        return self.target_field_policy != TARGET_FIELD_POLICIES[0]
+        """target 없는 계층이 **필요한가**. 기본 정책 (`relax`) 과 `none` 에서는 `False` 이고 추가 비용이 0 이다."""
+        return self.target_field_policy in TARGET_FREE_POLICIES
 
     def validate(self) -> None:
         if self.target_field_policy not in TARGET_FIELD_POLICIES:
@@ -1774,5 +1780,6 @@ __all__ = [
     "ProfilingConfig",
     "SupportSurfaceConfig",
     "TARGET_FIELD_POLICIES",
+    "TARGET_FREE_POLICIES",
     "TimingConfig",
 ]

@@ -226,8 +226,20 @@ FINGER_BODY_ROLE = "finger_body"
 #: palm overflow (5 mm). Exact radius for the same reason.
 PALM_BODY_ROLE = "palm_body"
 
+#: T46f A14 — `UrdfCapsule.role` of the **wrist body spheres** (`gripper_cover.wrist_body_capsules`,
+#: `serve_safe --links gripper_wrist`): `link_*_arm_5` (replacing the URDF capsule r 75 mm that swallowed the
+#: hand) and `link_*_arm_6` (replacing its gap-filling chain), built like `PALM_BODY_ROLE` from the MJCF
+#: collision meshes and kept out of the authorized hand's collision hulls. Non-authorized links. Exact radius.
+WRIST_BODY_ROLE = "wrist_body"
+
+#: T46f A14 — `UrdfCapsule.role` of the **FT sensor cover spheres** on the URDF link `FT_sensor_<S>` (MJCF
+#: `FT_SENSOR_<S>`, which had no sphere in the constraint model). Same construction as `WRIST_BODY_ROLE`. The
+#: link is never a contact link (`contact.contact_links`), so the target is an obstacle for it. Exact radius.
+WRIST_COVER_ROLE = "wrist_cover"
+
 #: Roles whose sphere radius is used as is (no `capsule_radius_scale`, no spacing inflation).
-EXACT_SPHERE_ROLES = frozenset({EXACT_SPHERE_ROLE, FINGER_BODY_ROLE, PALM_BODY_ROLE})
+EXACT_SPHERE_ROLES = frozenset({EXACT_SPHERE_ROLE, FINGER_BODY_ROLE, PALM_BODY_ROLE,
+                                WRIST_BODY_ROLE, WRIST_COVER_ROLE})
 
 
 @dataclasses.dataclass(frozen=True)
