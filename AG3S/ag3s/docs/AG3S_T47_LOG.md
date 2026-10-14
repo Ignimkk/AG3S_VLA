@@ -255,6 +255,14 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **실험 자세 점검 (A7, `wrist_pose_check`)** | CL3 54 run 의 planning 행 qpos 에서 (a) 비허용 구의 active hand MJCF 침범, (b) 비허용 구와 권한 구의 겹침, (c) target 이 손 5 mm 안일 때 비허용 구 안에 드는 target 표면 점 (가짜 제약 후보) 을 world frame 으로 잰 것 |
 | **실행 경로 guard** | 검증 실행 앞에 cwd · HEAD · 실제 import 경로가 예상 worktree 와 다르면 멈추는 검사 (`scripts/setup/env.sh` 가 메인으로 `cd` 하고 `pyproject` 의 `pythonpath = ["."]` 가 cwd 코드를 import 하기 때문, 2026-10-14) |
 
+**T55b · P / H add-on (2026-10-14 추가, 세션 B)**
+
+| 용어 | 뜻 |
+|---|---|
+| **`reach` 검사** | `grasp_latch` 가 attach (HELD) 를 판단할 때 쓰는 grasp evidence 의 한 항목. grasp parent link 원점에서 AG3S manipulated object centroid 까지의 거리가 `reach_limit_mm` (120 mm) 이하인지 본다. centroid 가 손 안 물체가 아니면 실제로 쥐어도 실패한다 (T55b) |
+| **P · H 보조 창** | T60 의 종료 술어로 자른 평가 구간. P = placement 완료 (target 이 crate 안 · 손 떨어짐 · 정지) 까지, H = P 이후 준비자세 복귀까지. 도달하지 못한 run 은 전체 구간. 이미 고정된 실험 (T54c · T55 · T56) 에서는 주 판정을 바꾸지 않는 보조 분석이다 |
+| **HELD 중 task-aware 실행 gate** | T57 단계 2 의 실험 후보 (사용자 판정 2026-10-14). latch 가 HELD 인데 명사 probe 가 false 이면 기존 HOLD 경로에 `task_not_ready` 사유를 추가한다. 운반 · 놓기 단계 전환이나 placement 완료 인증이 아니다 |
+
 ---
 
 ## 진행 현황 — T47 이후
@@ -283,6 +291,9 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **T53** 새 평가 data: 한 번도 쓰지 않은 16 episode 의 rollout · 추출 | T54 – T56 의 final test 로 쓸 data 가 준비됐는가 | **측정 완료 (2026-10-13).** 16 episode 현재 서빙: **success 9 / 16, `success_ct` 7 / 16, HOLD 37 chunk (10 run)**, 비허용 접촉은 `hand-fruit_other` 4 run · 31 행 (전부 놓기 전). 추출 1200 frame 오류 0, check 문제 0, attention parity argmax 0.9959, noun parity bitwise 동일. **T57 의 현재 서빙 기준선.** T54 결과 후 N · B 에 대해서는 dev (사용자 판정). 아래 "T53" 절 |
 | **T54** grounding 비교: L8H2 · 명사 단독 (N) · 명사 선택 + L8H2 seed (A) · 명사 seed + L8H2 split (B) (offline CPU, T53 16 episode) | 명사 identity + L8H2 seed 조합이 수정에 쓰지 않은 episode 에서 identity · purity · 이웃 혼입을 개선하는가 | **측정 완료 (2026-10-13).** 현재 frame (16 episode · 1178 frame) identity: L8H2 70.93 %, **N +7.15 %p (CI [+3.65, +11.11]), B +7.07 %p, A −3.08 %p (CI [−8.00, +0.85])**. **A 는 사전 고정 T57 진입 기준 (identity ≥ −3 %p · 개선 근거) 미충족 → 기각 (T57 진입 안 함).** N · B 는 identity · coverage · 이웃 혼입에서 개선 관측, N ≈ B. 유지 포함 (`hold`) 은 attach 미재현이라 N · B 가 L8H2 와 같고 post · placed identity 0 (→ T54b). 사용자 판정: N · B 를 후속 후보로 새 16 episode 에서 확인 (T54c, 이 로그 미기록). 아래 "T54" 절 |
 | **T54b** T54 유지 포함 재생에 기록된 latch · attach 를 넣어 다시 (`hold_attach`, offline CPU) | N · B 의 개선이 시간 유지 · attach 가 있는 조건에서도 남는가, 재생이 서빙과 일치하는가 | **측정 완료 (2026-10-14).** L8H2 arm 이 서빙 기록과 일치 (identity 0.9992 · chosen · manipulated 같은 물체 1.0 · attached 1.0 · frozen 1.0). **N · B 는 L8H2 와 identity · purity 가 같다 (차이 0).** post · placed identity 0 은 서빙을 재생한 L8H2 에서도 0 (재생 결함이 아님). A 진입 표의 hold 행 충족 (identity −1.42 · coverage −1.72 %p), A 판정 불변. 한계: arm 별 latch 상태 기계 미재현. 아래 "T54b" 절 |
+| **T54c** 명사 grounding (N · B) 후속 확인: 한 번도 쓰지 않은 새 16 episode (rollout + 추출 + offline 재생) | T53 을 본 뒤 후보가 된 N · B 의 현재 frame 개선이 새 data 에서도 관측되는가 | **측정 완료 (2026-10-14).** 현재 frame (16 episode · 1162 frame) identity: L8H2 63.80 %, **N +19.90 %p (CI [+10.75, +30.16])**, B +19.65 %p, A +2.90 %p. N · B 는 사전 고정 진입 표 (identity · coverage · 개선 근거 · hold · 시간 · T53 과 같은 방향) 를 모두 충족 → 규칙상 **N 을 T57 후보로 선정**. `hold_attach` 에서는 N − L8H2 = +0.84 %p (CI [−0.18, +2.50]). 서빙 rollout 기준선: success 12/16 · `success_ct` 12/16 · HOLD 150 chunk. 아래 "T54c" 절 |
+| **T55** 작업 의도와 실제 grasp 상태의 분리: phase feature (HSR · 명사 token probe) 대 `grasp_latch` strong rule, 정답 = 물리 predicate (offline 재시뮬 + 재실행 grounding) | `task_ready = HELD ∧ feature` 가 wrong-object · empty · slip 을 task 성공으로 통과시키는 오류를 줄이면서 올바른 보유의 거부 · 지연을 허용폭 안에 두는가 | **측정 완료 (2026-10-14).** T53 16 episode (E0 16/16 bit-exact). 조건 합산 P_task: 명사 probe 결합 false pass −4.46 %p · false reject +1.53 %p · 지연 0 · 추가 미검출 0, HSR 결합 −1.19 · +0.76 · 0.1 · 0 (둘 다 사전 고정 허용폭 충족). instruction 변경의 wrong-object false pass: strong 216 → 명사 7 · HSR 212. 규칙 출력 → **명사 probe 결합 = T57 단계 2 후보, HSR = 보조 기록용.** 아래 "T55" 절 |
+| **T55b** instruction 변경 시 strong rule 이 실제 보유를 HELD 로 인정하지 않는 원인 (재측정 대기 #48, 기존 T55 기록, CPU) | 바뀐 prompt 의 grounding 변화가 latch 의 HELD 판정에 어떤 경로로 영향을 주는가, gate (HELD ∧ probe) 를 얼마나 제한하는가 | **측정 완료 (2026-10-14).** HELD 를 놓친 117 frame 모두 manipulated object = 바뀐 명사의 과일, `reach` 162.5 – 741.8 mm (limit 120) 로 실패. 실제 손 안 과일까지는 50.7 – 72.7 mm (MuJoCo). P_task 양성 중 HELD 거짓은 natural 0 / 111 → 측정 data 에서 gate 의 P_task 결과를 제한하지 않음. SL5b (stale centroid) 와 같은 `reach` 검사를 지나지만 원인이 다르다. 수정안은 A 가 "centroid 출처" 로 묶어 판정. 아래 "T55b" 절 |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -338,6 +349,12 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | T46f — **TO 시간 합격 기준: 같은 chunk · 같은 하드웨어 · 같은 TO 설정에서 chunk 별 (보정 후 / 보정 전) 시간의 median ≤ 2.0** (초기화 · 컴파일 제외). SQP 반복 수 · 종료 사유는 기록만 (일치 요구 없음), timeout · 수렴 실패 비율을 함께 보고 뚜렷이 늘면 재판정 | 사용자 확정 (2026-10-13, V-T46f-A14 측정 전) | 16D |
 | T46f — arm_6 R 정점 0.51 mm 는 중단 사유가 아니다 (표본 기준 판정 유지, 정점은 보조값). A7 실험 자세 점검은 **수정된 도구의 2 회차 채택** (왼손 손가락 대응 오류 수정, 기준 완화 아님, 1 회차 · 수정 내역 보존). **C3: T46f 전체와 CL4 모든 arm 에 palm cover on, 최종 형상 = `gripper_wrist + --palm-cover on` 1,349 구로 고정** | 사용자 판정 (2026-10-14, A14c 뒤) | 16D |
 | T46f — **TO 상대 비용 FAIL (median 비 2.65) 을 그대로 기록하고 현재 형상으로 메인 적용 · 단계 2 진행.** 기준을 사후에 올려 PASS 로 바꾸지 않는다. overflow 10 mm 변경 · 손목 / palm 비용 분리 측정은 지금 필수 아님. 모든 비교 조건에 같은 최종 형상 · TO 설정. 보고 문구는 "이번 replay 에서 시간 예산 종료와 제약 위반 상태의 건수가 증가하지 않았다" — **"동기식이므로 해는 바뀌지 않는다" 는 쓰지 않는다** (solver 의 wall-clock 종료 조건은 남는다). 실물 실시간 실행 가능성은 미확인. CPU 부하는 측정 한계로 기록, 재측정은 진행 조건이 아니다 | 사용자 판정 (2026-10-14, V-T46f-A14 뒤) | 16D |
+| (사용자 판정, 2026-10-14) T54c episode 는 보수적 목록 (slot 4 = 1844, slot 15 = 1903; 문서의 숫자가 episode 언급이 아니어도 제외) | 규칙 문구 그대로면 1812 · 1855 였다. data 를 열기 전에 정했다 | 아래 "T54c" 절 §1 |
+| (규칙 출력 + 사용자 판정, 2026-10-14) **T54c 사전 고정 진입 표에서 N · B 가 모두 통과 → N 을 T57 (closed-loop) 후보로 선정.** T57 은 T54c 16 episode 를 재사용해 N arm 만 추가하고, 채택 조건은 P 까지의 `success_ct` 비열등 (허용 −1 run) + 비허용 접촉 run · HOLD chunk 비악화. 서빙 구현 (기본 off flag) 은 T46 세션에 위임 | "offline 개선이 새 data 에서 다시 관측돼 closed-loop 확인 대상으로 선정했다" 까지만 쓴다. `hold_attach` 차이 (+0.84 %p) 가 작아 closed-loop 효과는 열려 있다 | 아래 "T54c" 절 §5, `handoff/T57.task.md` |
+| (사용자 판정, 2026-10-14) T60 종료 구간 (P · H) 은 진행 중인 T54c · T55 · T56 에서 **보조 분석** 으로만 쓰고, 새로 설계하는 실험 (T57 부터) 은 **P 까지가 주 작업 지표 + H 필수 보고** | 결과가 잘 나오는 창을 골라 주 판정으로 바꾸지 않는다 | `handoff/T52-T57.plan.task.md` 갱신 4 |
+| (사용자 판정, 2026-10-14) benchmark 세션의 SL5b reach 인계 (가려진 target 의 마지막 centroid 기준 reach 실패 → attach 거절 → HOLD) 는 T46 세션 담당 | latch method 변경이다. T55 결과에 같은 현상이 보이면 T46 에 알린다 | `/mnt/dev/AG3S_VLA-benchmark/AG3S/ag3s/docs/handoff/SL5b-reach-to-development.md` |
+| (사용자 판정, 2026-10-13 ~ 14) **T55 사전 고정:** 정답 = 물리 predicate (P_grasp · P_task 분리, wrong-object 를 빈손과 구분), dev 기준 = 비개입 재시뮬, perception = 재시뮬 관측의 재실행 grounding, 허용폭 = false reject +5 %p · 지연 +1 frame · 추가 미검출 0 (조건 합산, 자연 조건 초과는 함께 보고), slip ghost · park 둘 다 유지 | 결과를 본 뒤 조건별 필수 기준으로 바꾸지 않는다 | `handoff/T55.task.md` 사용자 판정 절들, `T55.prereg.json` |
+| (규칙 출력 + 사용자 판정, 2026-10-14) **T55: 명사 token probe 결합을 T57 단계 2 (task gate) 후보로, HSR 은 보조 기록용.** 단계 1 (N grounding) 과 섞지 않고 별도 단계로 시험하며, 서빙 구현은 A 세션에 위임, task_ready 연결 위치는 구현 전 판정 | HSR 이 instruction 기반 단계 판단을 한다고 주장하지 않는다 (plan 판정 1) | 아래 "T55" 절 §5, `handoff/T57.task.md` 단계 2 |
 
 ---
 
@@ -387,13 +404,16 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 37 (T54 가 추가) | **처리 시간의 같은 장치 e2e** — T54 의 e2e 는 CPU replay 의 lift + ground 와 GPU 의 명사 prefix_ms 중앙값 (24.35 ms) 의 합이다. C2 의 p95 (875.40 ms) 는 L8H2 서빙 자체의 p95 825.95 ms 가 이미 chunk 간격 533.33 ms 를 넘기 때문에 충족되지 않는다 | `T54.verify.json not_measured` | **측정 안 됨** |
 | 38 (T54b 가 추가) | **arm 별 서빙 latch 상태 기계 (`observe_grasp` · `revert_attach`) 재실행, L8H2 외 arm 의 서빙 일치도, N · B 가 시간 유지 조건에서 L8H2 와 같아지는 원인, `execution_path` · cuRobo field, `--attach-reach off`** | A-k3 의 attach 거절 2 건에서 서빙이라면 latch 가 CLOSING 으로 되돌아간다. 재생 궤적은 모든 arm 에서 L8H2 서빙 궤적이다 (`T54b.verify.json not_measured`) | **측정 안 됨** |
 | 39 (T54b 가 추가) | **post · placed phase 의 identity 0 (8 arm 모두, 서빙을 재생한 L8H2 포함) 의 원인** — placed 401 frame 중 `subtask_gated` 276 · `no_admissible` 91 (replay 의 decision mode). 지표 정의 (chosen cluster 의 plurality 가 target) 의 문제인지 서빙의 의도된 동작인지 가르지 않았다 | 위 T54b 절 §6 (미측정 해석) | **원인 미확정** |
-| 40 (T54 가 추가) | **T54c (N · B 의 새 16 episode 확인) 의 결과** — 계획 · 구현만 있고 이 로그에 기록된 측정이 없다 | `handoff/T54c.task.md` · `T54c.impl.md` | **측정 안 됨 (이 로그 미기록)** |
+| ~~40~~ (T54 가 추가) | ~~**T54c (N · B 의 새 16 episode 확인) 의 결과**~~ | `handoff/T54c.task.md` · `T54c.verify.json` | **해소 (2026-10-14, 아래 "T54c" 절).** N +19.90 %p · 진입 표 충족 → T57 후보. closed-loop 확인은 T57 |
 | 41 (T46e 가 추가) | **DX-01 조건 A — GT identity × 제안 extent (oracle identity) 비교** | T46e 는 oracle extent 의 물체 선택 (`--oracle-extent-identity gt`) 과 `identity_matches_gt` 기록까지만 넣었다. AG3S manipulated identity 전체의 GT 교체는 보류 (판정 B5) | **미완료** |
 | 42 (T46e-D 가 추가) | **오류 후보 voxel 이 실제 형상에서 5–8 mm 떨어진 원인** — 신규 7 chunk 오류 후보 121 행. voxel 크기와 비슷하다는 것은 설명 후보다 | T46e-D 는 ESDF seed 만 기록에서 읽었다. TSDF 자체, 각 seed 를 만든 요청은 측정하지 않았다 (`T46e-D.verify.json not_measured`) | **원인 미확정** |
 | 43 (T46e 가 추가) | **oracle extent 의 closed-loop (CL4, DT-02 extent block)** — offline 수치가 closed-loop 의 HOLD · 성공 · 접촉으로 어떻게 옮겨지는가, 서버 memory 가 실제 받은 요청으로 쌓일 때의 차이, oracle 지연 | T46e · T46e-D 는 기록 chunk 의 offline replay 다. CL4 는 보정 형상 (T46f 단계 1) 뒤로 미뤘다 | **측정 안 됨** |
 | 44 (T46f 가 추가) | **최종 형상 (1,349 구) 의 실물 실시간 실행 가능성 · 비동기 TO 예산** — offline replay 의 wall 시간 median 92.8 ms · p90 175.1 ms (기준 31.3 · 61.6 ms) | V-T46f-A14 는 sim 기록 chunk 의 GPU 재풀이 (다른 세션의 CPU load1 median 27) 다. 실물 비동기 루프는 재지 않았다 | **측정 안 됨** |
 | 45 (T46f 가 추가) | **TO 비용의 손목 (+883 구) · palm cover (+196 구) 분리, overflow 10 mm 대안** | 사용자 판정으로 지금 필수 아님 (병목이 구 수 비례 단계라는 근거로 충분) | **측정 안 됨 (보류)** |
 | 46 (T46f 가 추가) | **최종 형상의 closed-loop (T46f 단계 2 – 5, CL4)** | 단계 1 은 offline 검증만 했다 | **측정 안 됨** |
+| 47 (T55 가 추가) | **T55 의 T60 종료 구간 (P · H) 보조 분석** — 사용자 판정 (2026-10-14) 으로 기존 정의 · P · H 를 나란히 보고해야 한다 | `t55_windows.py` (add-on, B 로 인계) | **측정 안 됨 (진행 중 · 미기록)** → **해소 (2026-10-14, T55 절 §8 · T54c 절 §10)** |
+| 48 (T55 가 추가) | **instruction 변경 시 strong rule 의 P_grasp 반응** — 바뀐 prompt 로 재-grounding 하면 실제 보유 333 frame 중 117 을 HELD 로 인정하지 않고 보유 시작 30 건 중 10 건을 놓쳤다 | `T55.verify.json` test.pooled_p_grasp · primary_reground | **원인 미측정** (미측정 해석: 조작 대상 식별이 prompt 를 따라 바뀌고 latch 가 그 대상에 묶임) → **원인 측정 (2026-10-14, "T55b" 절):** manipulated object = 바뀐 명사의 과일 → `reach` 실패 (117 / 117). latch 수정은 A 의 판정 대기 |
+| 49 (T55 가 추가) | **slip 개입의 양성 frame 이 너무 짧다** — 개입이 보유 성립 2 frame 뒤라 strong rule 이 HELD 를 세우기 전에 개입된다 (FR 20/20, 두 결합 arm 차이 0) | `T55.prereg.json` (after_frames 2) | **설계 한계, 재측정 안 함** |
 
 ---
 
@@ -3534,7 +3554,7 @@ C1 의 전체 비율 변화는 home frame 이 빠진 구성 효과다. **판단 
 3. **T51 의 GT 선택이 창마다 다르다** — head 선택을 하나로 고정한다면 self label 경로 (`last:L12H3`, 창과 무관) 를 쓸지, L8H2 를 유지할지.
 4. **T54b · T54c · T55 · T56 에 이 mask 를 적용할지** (dev-82 세션의 사전 고정 task).
 
-**→ 판정됨 (사용자, 2026-10-14; 전문은 [`handoff/T60.task.md`](handoff/T60.task.md) "사용자 판정 2").** ① 기본 창 = **P 주 작업 지표 + H 필수 보고** (develope_PLAN 평가 규칙에 반영). ② 복귀 미도달 → 기록 기반 진단 (아래 **T60b**). ③ L8H2 를 관행적으로 유지하지 않고 **사전 고정 알고리즘으로 head 를 골라 실행 중 고정** (초안 [`handoff/T61.task.md`](handoff/T61.task.md), 실행 전 판정 필요), L8H2 는 기준선으로 보존. ④ 이미 고정된 실험은 **기존 주 판정 유지 + P · H 보조** (T52-T57 세션에 전달). ⑤ T51b 재집계 진행 (아래 **T60c**), HSR demo 재시뮬 보류. ⑥ commit 은 공유 로그 작업 종료 후 T60 범위만 분리.
+**→ 판정됨 (사용자, 2026-10-14; 전문은 [`handoff/T60.task.md`](handoff/T60.task.md) "사용자 판정 2").** ① 기본 창 = **P 주 작업 지표 + H 필수 보고** (develope_PLAN 평가 규칙에 반영). ② 복귀 미도달 → 기록 기반 진단 (아래 **T60b**). ③ L8H2 를 관행적으로 유지하지 않고 **사전 고정 알고리즘으로 head 를 골라 실행 중 고정**, L8H2 는 기준선으로 보존 (2026-10-14 후속 판정으로 [`handoff/T61.task.md`](handoff/T61.task.md) 사전 고정: 새 held-out 16 episode, calibration 에서 `long` 제외 (입력 배선), 강제 후보 없음, 명사 query 포함 · query 별 고정 배분, 선택 단위 = query · denoise · aggregation · layer · head, k 는 CV one-SE 규칙, bootstrap 은 보고만). ④ 이미 고정된 실험은 **기존 주 판정 유지 + P · H 보조** (T52-T57 세션에 전달). ⑤ T51b 재집계 진행 (아래 **T60c**), HSR demo 재시뮬 보류. ⑥ commit 은 공유 로그 작업 종료 후 T60 범위만 분리.
 
 **되돌아올 지점.**
 
@@ -4447,6 +4467,8 @@ T54 (아래) 결과를 본 사용자가 N · B 를 후속 후보로 하고 **새
 - 미도달이 scene 3 개에 몰려 있어 run 수 (27) 보다 독립 표본이 적다.
 - 판정 ① 에 따라 H 미도달은 H 기준 실패로 계속 보고한다. 이 진단은 H 정의나 task 를 바꾸지 않는다.
 
+**사용자 판정 (2026-10-14).** T60b 의 결론을 **"복귀 미도달은 TO 차단보다 정책의 복귀 제안 부재에서 발생했다"** 로 채택한다. 왜 특정 scene 에서 제자리 유지가 나오는지는 **미확정** 이며, 추가 rollout 까지 바로 확대하지 않는다.
+
 ---
 
 ## T60c — T51b (명사 query 를 넣은 head 선택) 의 종료 창 재집계 (offline, 2026-10-14 KST)
@@ -4575,6 +4597,440 @@ figure: [실제 씬](figures/t46/t46f-v-scene.png) (왼손 손바닥 · FT senso
 
 ### 7. 산출물
 
-- 코드 (A14c worktree `.claude/worktrees/t46f-a14-apply`, 메인 적용은 T47 계열 측정 종료 뒤): patch `results/development/20261013T135703+0900_cf38c9dbca7b_e00b546bda0d/impl/T46f-A14c/diff_a14c_on_cf38c9db.patch` (md5 f949fa24…).
+- 코드: ~~A14c worktree, 메인 적용은 T47 계열 측정 종료 뒤~~ → **메인 적용 `8df34591` (2026-10-14, T55 test 종료 뒤, 19 파일이 검증 worktree 와 byte 동일, 메인 smoke 92 passed · 1 skipped)**. 원 patch: patch `results/development/20261013T135703+0900_cf38c9dbca7b_e00b546bda0d/impl/T46f-A14c/diff_a14c_on_cf38c9db.patch` (md5 f949fa24…).
 - handoff: [`T46f.task.md`](handoff/T46f.task.md) · [`T46f-A14.verify.json`](handoff/T46f-A14.verify.json) · `T46f-A14.impl.md` (A14 · A14b · A14c, 메인 적용 때 들어온다).
 - raw: `results/development/20261014T155631+0900_cf38c9dbca7b_04a1d797f62a/verify/T46f-A14/` (`raw/agg_timing.json` · `raw/timing/` · `raw/audit.json` · `raw/palm_coverage.json` · `raw/pose_check_final.json` · `baseline/` · `logs/` · `p/`).
+
+---
+
+## T54c — 명사 grounding (N · B) 후속 확인: 한 번도 쓰지 않은 새 16 episode 에서 (rollout + 추출 + offline 재생, 2026-10-14 KST)
+
+**이 절이 답하는 물음 (목적).** T54 에서 사전 고정 후보 A 는 기각됐다. 대신 비교 arm N (명사 `noun_target:L10H7` 단독) 과 원인 확인용 B (명사 seed + L8H2 split 비율) 가 T53 의 현재 frame 조건에서 identity 개선을 보였다. 그러나 N · B 는 **T53 을 본 뒤에 후보가 됐다.** 그래서 T53 을 dev 로 돌리고, 결과를 열기 전에 후보와 기준을 고정한 뒤 (`handoff/T54c.task.md`), 새 16 episode 에서 다시 확인했다. 통과한 후보만 T57 (closed-loop) 로 넘긴다.
+
+**한 줄 결과 (before → after).**
+
+- **before (T54, T53 16 episode).** N − L8H2 identity +7.15 %p (CI [+3.65, +11.11]). 그러나 이 episode 들은 후보 선정에 쓰였다.
+- **after (T54c, 새 16 episode).** N − L8H2 identity **+19.90 %p (CI [+10.75, +30.16])**, B +19.65 %p, A +2.90 %p (CI [−0.12, +6.88]).
+  - N · B 는 사전 고정 진입 표의 모든 행을 충족했다: identity ≥ −3 %p, coverage ≥ −5 %p, 개선 근거, hold 행, 시간, T53 과 같은 방향.
+  - 규칙 ("둘 다 통과하면 구성 요소가 적은 N") 에 따라 **N 을 T57 후보로 선정** 했다.
+  - 표현은 **"offline 개선이 새 data 에서 다시 관측돼 closed-loop 확인 대상으로 선정했다"** 까지로 한다.
+- **같은 data 의 유지 포함 (`hold_attach`, 서빙과 같은 시간 유지 · attach) 조건에서는 N − L8H2 = +0.84 %p (CI [−0.18, +2.50]).** T54b 와 같이, 서빙의 시간 유지가 켜지면 차이가 거의 남지 않는다. closed-loop 의 작업 결과가 달라지는지는 열려 있다 (T57).
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `handoff/T54c.verify.json` 에서만 왔다. 원자료 run 은 `results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/` 이다.
+- 집계 단위는 episode 평균이고, CI 는 episode block bootstrap (B = 10000, seed **5417**) 이다. frame 은 독립 표본으로 세지 않는다.
+- 이 STEP 은 사용자 지시 (2026-10-14, "병렬 작업이 필요할 때만 sub agent") 에 따라 **lead 가 직접 실행** 했다. figure 셋과 verify.json 정리만 verifier 가 병렬로 맡았다.
+- 독립 재계산이 `t54_stats` 와 최대 차이 1.2e-16 안에서 일치했다.
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+| # | 판정 · 사건 (2026-10-13 ~ 14) | 이 절에서 |
+|---|---|---|
+| 1 | **(사용자 판정)** T54 후 N · B 를 후속 후보로 하고, 새 data 에서 확인한다. T53 은 N · B 에 대해 dev 다 | 전체 |
+| 2 | **(lead, 결과 전 고정, `T54c.task.md`)** 후보 = N · B, 기준 = L8H2, 조건 = 현재 frame (주) · `hold_attach` (보조, T54b 재생). 진입 표는 T54 사전 고정 5 그대로 N · B 에 각각 적용하고, "새 data 에서 N − L8H2 identity 의 방향이 T53 과 같을 것" 을 더했다. 둘 다 통과하면 N | §5 |
+| 3 | **(사용자 판정)** episode 는 보수적 목록 (slot 4 = 1844, slot 15 = 1903). T58 예약 episode (1925 · 1830 · 1623) 는 제외 | §2 |
+| 4 | **(사용자 판정)** rollout 승인. 다른 세션 (T46 · T58 · benchmark · e4) 과 GPU 를 조율한 뒤 시작 | §3 |
+| 5 | **(사용자 판정)** T60 종료 구간 (P · H) 은 이 STEP 에서 보조 분석으로만 쓴다 (아직 계산하지 않음) | §8 |
+
+| 시각 (KST) | 무엇 |
+|---|---|
+| 13:37 – 14:24 | rollout (cuRobo 회귀 기준선 일치 후 16 run, port 8292 · 8293, GPU lock 내내 보유) |
+| 15:51 – 16:41 | 추출 (layout → attention → noun → feat → gt → grasp → check). T46 의 TO 시간 측정 (16:10 – 16:26) 동안 noun 이 lock 을 기다렸다 |
+| 16:44 – 17:38 | offline 재생 (32 job, CPU worker 4) · 분석 |
+
+### 2. 새 16 episode (선택 규칙, metadata 만 사용)
+
+![T54c 초기 배치](figures/t54c/t54c-initial-layout.png)
+
+[`t54c-initial-layout.png`](figures/t54c/t54c-initial-layout.png) ([sidecar](figures/t54c/t54c-initial-layout.json)) — 16 episode 의 첫 frame (layout slot 0 – 15).
+
+| slot | episode | slot | episode | slot | episode | slot | episode |
+|---|---|---|---|---|---|---|---|
+| 0 | 1856 | 4 | 1844 | 8 | 1816 | 12 | 1820 |
+| 1 | 1825 | 5 | 1813 | 9 | 1817 | 13 | 1821 |
+| 2 | 1826 | 6 | 1814 | 10 | 1882 | 14 | 1806 |
+| 3 | 1811 | 7 | 1831 | 11 | 1835 | 15 | 1903 |
+
+- 규칙: test split 에서 layout slot 마다, 어떤 기록 · 로그 · 다른 세션 예약에도 쓰이지 않은 episode 중 index 가 가장 작은 것을 고른다.
+- 더 작은 index 25 개는 사용 흔적이 있어서 건너뛰었다. 1812 · 1855 · 1871 은 문서에 숫자만 나온 경우 (표 값 · 코드 줄 번호 · diff 줄 번호, 각 2 파일) 라 보수적으로 제외했다 (판정 3).
+- policy seed = episode × 10 + 1.
+
+### 3. closed-loop 기록 (현재 서빙 = C1a, T57 의 기준 arm)
+
+| | T54c (새 16 episode) | T53 (참고) |
+|---|---|---|
+| task success | 12 | 9 |
+| `success_ct` | 12 | 7 |
+| 실패 형태 | no_grasp 4 | — |
+| HOLD chunk (run 수) | 150 (10 run; uncertified 143 · collision 7 · unverified 1) | 37 (10 run) |
+| 한 run 의 HOLD 최대 · 끝까지 HOLD 인 run | 38 · 4 | 15 · 0 |
+| 비허용 접촉 (pre-release) | `hand-fruit_other` 1 run · 4 행 (ep1882) | 4 run · 31 행 |
+
+- cuRobo 회귀 기준선이 일치했다 (10/15 · 15/15 · −9.171877401271193 mm). 시작과 끝의 md5 가 같았다.
+- rollout 동안 GPU 에는 우리 server 2 개만 있었다 (273 sample).
+- 물리 접촉 replay 는 16 run 모두 600 행이고, 기록과의 불일치는 0 이었다.
+- 이 기록이 **T57 의 L8H2 기준 arm** 이다 (사용자 판정, §5).
+
+### 4. 추출과 offline 재생
+
+- 추출: 모든 stage rc = 0, `check.json` 문제 0, 명사 token 은 16 episode 모두 75/75 frame 에서 매칭됐다.
+- 재생: 32 row 파일 × 600 행. 조건은 현재 frame 과 `hold_attach` 이고, 조건마다 target frame 은 1162 개다. 예산은 533.33 ms 다.
+
+**현재 frame, arm − L8H2 (episode bootstrap 95 % CI).** L8H2 자체는 identity 0.638, coverage 0.635 다.
+
+| arm | identity | coverage | purity | `no_target` | 이웃 혼입 (점) |
+|---|---|---|---|---|---|
+| **N** | **+0.199 [+0.108, +0.302]** (14 episode ↑ · 1 ↓) | +0.194 [+0.103, +0.297] | +0.057 [−0.025, +0.136] | −0.178 | −9.28 |
+| B | +0.197 [+0.106, +0.299] | +0.193 [+0.102, +0.296] | | | |
+| A | +0.029 [−0.001, +0.069] | +0.028 | | | |
+
+![T54c paired 차이](figures/t54c/t54c-paired-diff.png)
+
+[`t54c-paired-diff.png`](figures/t54c/t54c-paired-diff.png) ([sidecar](figures/t54c/t54c-paired-diff.json)) — 점은 episode 별 arm − L8H2, 검은 사각형은 평균, 막대는 CI, 빨간 점선은 진입 허용폭이다. 위는 현재 frame, 아래는 `hold_attach` 다. arm × 지표의 전체 표는 [`t54c-arm-metric-table.png`](figures/t54c/t54c-arm-metric-table.png) ([sidecar](figures/t54c/t54c-arm-metric-table.json)).
+
+- **phase 별 (현재 frame, N − L8H2 identity):** pre +0.042 (401 frame), held +0.305 (146), post +0.449 (57), placed +0.274 (558).
+- **N 과 L8H2 의 선택이 갈린 target frame 은 161 개다:** N 만 맞음 88, L8H2 만 맞음 6, 둘 다 틀림 67.
+- **`hold_attach`:** N · B − L8H2 = +0.008 (CI [−0.002, +0.025]), A +0.002.
+- **처리 시간 (e2e median / p95):** N 62.5 / 75.5 ms, B 81.3 / 101.3 ms, A 78.8 / 101.9 ms. 모두 예산 533.33 ms 안이다.
+
+![T54c 장면: N 과 L8H2 의 선택이 갈린 frame](figures/t54c/t54c-scene-choice-diff.png)
+
+[`t54c-scene-choice-diff.png`](figures/t54c/t54c-scene-choice-diff.png) ([sidecar](figures/t54c/t54c-scene-choice-diff.json)) — ep1856:24 · ep1816:34 (N 맞음, L8H2 틀림), ep1814:23 (L8H2 맞음, N 틀림), ep1831:31 (둘 다 틀림). 다시 렌더링한 4 frame × 2 arm 이 저장된 행과 모든 field 에서 같았다.
+
+### 5. 진입 표 (기계적 비교) 와 판정
+
+| 행 | N | B | A (보고만) |
+|---|---|---|---|
+| identity ≥ −3 %p | +19.90 ✓ | +19.65 ✓ | +2.90 ✓ |
+| coverage ≥ −5 %p | +19.38 ✓ | +19.29 ✓ | +2.78 ✓ |
+| 개선 근거 (identity ↑ · purity ↑ · 이웃 ↓ 중 하나) | 셋 다 ✓ | ✓ | ✓ |
+| hold (`hold_attach`) 같은 허용폭 | +0.84 · +0.71 ✓ | ✓ | ✓ |
+| 시간 (예산 안) | ✓ | ✓ | ✓ |
+| T53 과 같은 방향 (identity 차이 > 0) | ✓ | ✓ | ✓ |
+| **전부** | **통과** | 통과 | (A 는 T54 에서 기각되어 후보 아님) |
+
+- **규칙 출력:** N · B 가 모두 통과했으므로 **N 을 T57 후보로 한다.** B 는 보고만 한다.
+- **(사용자 판정, 2026-10-14) T57 설계** (`handoff/T57.task.md`):
+  - data: T54c 16 episode 를 재사용하고 N arm 만 추가한다. 기준 arm 은 §3 의 L8H2 기록이다.
+  - 채택 조건: P 까지의 `success_ct` 비열등 (허용 −1 run), 비허용 접촉 run 과 HOLD chunk 비악화. H 구간은 필수 보고.
+  - 서빙 구현 (기본 off flag) 은 T46 세션에 위임했다.
+
+![T53 대 T54c](figures/t54c/t54c-t53-vs-t54c-diff.png)
+
+[`t54c-t53-vs-t54c-diff.png`](figures/t54c/t54c-t53-vs-t54c-diff.png) ([sidecar](figures/t54c/t54c-t53-vs-t54c-diff.json)) — 현재 frame 의 identity · coverage 차이 (arm − L8H2). T53 (T54 분석) 과 T54c 를 나란히 놓았다. N: T53 +0.071 [+0.036, +0.111] → T54c +0.199 [+0.108, +0.302].
+
+### 6. 읽을 때의 한계
+
+| 한계 | 내용 |
+|---|---|
+| **offline 재생** | 서빙 rollout 의 궤적 (L8H2 가 만든 것) 위에서 arm 을 바꿔 재생한 것이다. N 이 서빙에 들어가면 궤적이 달라진다 (T57) |
+| **유지 포함 조건의 차이가 작다** | `hold_attach` +0.84 %p. (미측정 해석) 서빙은 grasp 전에 TargetConfirm 이 target 을 잡고 이후 geometry 를 유지하므로, 현재 frame 개선 대부분이 작업 결과로 이어지지 않을 수 있다 |
+| **T53 대비 효과 크기가 다르다** | +7.15 → +19.90 %p. L8H2 기준값도 0.709 → 0.638 로 다르다. 원인은 측정하지 않았다 |
+| **시간 측정 장치가 섞여 있다** | 명사 추출 시간은 GPU (T54 파일 24.355 ms; T54c 자체 median 24.34 ms) 이고, lift + grounding 은 공유 host 의 CPU 재생 (load ≈ 33) 이다 |
+
+### 7. deviation
+
+1. attention stage 의 첫 실행은 lead driver 에 `--episodes-root` 가 빠져 1 초 만에 rc = 1 로 끝났다. 인자를 넣어 다시 돌렸다.
+2. 재생 budget stage 의 첫 실행이 `t54c_records` 의 clone 버그 (원본 `t53_records` 가 `sys.modules` 에 없는 경로에서 dataclass 생성 실패) 로 rc = 1 이 됐다. lead 가 원본을 먼저 import 하는 4 줄을 고치고 새 process 회귀 test 를 추가한 뒤 (수정 전 실패 · 수정 후 통과) 다시 돌렸다. 수정본 md5 `36224241…` 은 commit 전이다.
+3. HEAD 가 layout (cf38c9db) 과 attention (8587083e) 사이에 바뀌었다. 8587083e 는 새 파일 53 개만 더한 commit 이고, 서빙 md5 는 같다.
+
+### 8. 측정하지 않은 것 · 되돌아올 지점
+
+- T60 종료 구간 (P · H) mask 의 보조 분석 (판정 5).
+- N · B 의 closed-loop 효과 (T57).
+- CPU 재생 장치에서의 명사 추출 시간.
+- legacy (non-cuRobo) 회귀 기준선 (cuRobo 만 돌렸다).
+- **되돌아올 지점:** T57 에서 채택 조건을 넘지 못하면, offline 의 현재 frame 개선만으로는 서빙 grounding 을 바꾸지 않는다.
+
+### 9. 산출물
+
+- **측정:** [`handoff/T54c.verify.json`](handoff/T54c.verify.json). 원자료는 `results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/` 의 다음 위치다.
+  - `T54c_selection/` · `runs/` · `agg.json`
+  - `extract_logs/` · `replay/test/analysis/t54_summary.json` · `scene/` · `scripts/`
+- **figure** (모두 `.json` sidecar 있음): [`initial layout`](figures/t54c/t54c-initial-layout.png) · [`paired diff`](figures/t54c/t54c-paired-diff.png) · [`arm × metric`](figures/t54c/t54c-arm-metric-table.png) · [`scene`](figures/t54c/t54c-scene-choice-diff.png) · [`T53 대 T54c`](figures/t54c/t54c-t53-vs-t54c-diff.png).
+- **구현:** `t54c_records.py` · `t54c_extract.py` · `t54c_rollout.py` · `t54_study --registry t54c` ([`handoff/T54c.impl.md`](handoff/T54c.impl.md)). T57 task 는 [`handoff/T57.task.md`](handoff/T57.task.md).
+
+### 10. T60 P · H 보조 창 (2026-10-14 22:40 KST 추가, 세션 B)
+
+- **사용자 판정 (2026-10-14):** 이미 고정된 실험 (T54c · T55 · T56) 은 기존 주 판정 (전체 창) 을 유지하고, P · H 를 보조 분석으로 나란히 보고한다. T54c 는 T57 의 기준선이라 closed-loop 기록과 offline 재생 둘 다 정리한다.
+- **창의 뜻:** P = target 이 crate 안에 놓이고 손이 떨어진 채 멈춤 (T60 placement 완료 술어). H = P 이후 사용 팔이 준비자세로 돌아옴. 창 안 = 관측 시각 `t_step` ≤ 종료 row. 종료에 도달하지 않은 run 은 전체 frame 을 남긴다 (T60 규칙). 정의 · 파라미터는 T60 primary 그대로다 (아래 "T60" 절).
+- **도구:** `t54c_windows.py` (새 파일). T60 의 `t60_timestamps` · `t60_closed_loop` 를 고치지 않고 T54c 기록에 다시 썼다. offline 재생은 공개된 T54c frame 행 (`t54_frames.jsonl`) 을 같은 bootstrap seed · block 으로 다시 집계했다. **full 창이 공개값 (`agg.json` · `t54_summary.json`, 8 arm × 4 지표, 1e-6) 을 재현함을 assert 로 확인한 뒤** P · H 를 냈다. 재시뮬레이션 · 재추출은 없다.
+- 수치 출처: [`handoff/T54c_windows.verify.json`](handoff/T54c_windows.verify.json). 그림: [`t54c-windows-ph.png`](figures/t54c/t54c-windows-ph.png) ([sidecar](figures/t54c/t54c-windows-ph.json)).
+
+**(a) 서빙 기록 (C1a, 16 run) — T57 기준 arm**
+
+| 창 | success | `success_ct` | 비허용 접촉 run | HOLD chunk (run) | 완료 시간 median · mean (s) | 남은 control row |
+|---|---|---|---|---|---|---|
+| full | 12 / 16 | 12 / 16 | 1 | 150 (10) | – | 9600 |
+| P | 12 / 16 | 12 / 16 | 1 | 7 (5) | 15.77 · 16.98 | 5457 |
+| H | 12 / 16 | 12 / 16 | 1 | 16 (10) | 20.70 · 21.46 | 6262 |
+
+endpoint: P 도달 12 / 16, H 도달 12 / 16. 제거된 inference frame: P 511 · H 410 / 1200.
+
+**(b) offline grounding 재생 — 현재 frame (주) 과 `hold_attach` (서빙 보조 진단)**
+
+| 창 | 조건 | target frame | L8H2 identity | N − L8H2 | B − L8H2 | A − L8H2 | 진입 표 통과 (N · B · A) |
+|---|---|---|---|---|---|---|---|
+| full | current | 1162 | 63.80 % | +19.90 %p [+10.75, +30.16] | +19.65 %p [+10.56, +29.90] | +2.90 %p [-0.12, +6.88] | 예 · 예 · 예 |
+| full | hold_attach | 1162 | 38.73 % | +0.84 %p [-0.18, +2.50] | +0.84 %p [-0.18, +2.50] | +0.20 %p [-3.25, +3.86] | – |
+| P | current | 651 | 77.19 % | +15.63 %p [+10.31, +21.04] | +15.00 %p [+10.08, +20.02] | +4.05 %p [-0.20, +8.86] | 예 · 예 · 예 |
+| P | hold_attach | 651 | 59.85 % | +0.84 %p [-0.18, +2.50] | +0.84 %p [-0.18, +2.50] | -1.62 %p [-8.71, +3.86] | – |
+| H | current | 752 | 72.03 % | +17.62 %p [+11.59, +24.04] | +17.03 %p [+11.35, +23.07] | +3.90 %p [+0.06, +8.44] | 예 · 예 · 예 |
+| H | hold_attach | 752 | 52.20 % | +0.84 %p [-0.18, +2.50] | +0.84 %p [-0.18, +2.50] | -0.60 %p [-5.67, +3.86] | – |
+
+**(c) `hold_attach` 의 phase 별 identity**
+
+| 창 | phase | L8H2 identity (frame) | N identity (frame) |
+|---|---|---|---|
+| full | pre | 0.967 (401) | 0.974 (401) |
+| full | held | 0.121 (146) | 0.121 (146) |
+| full | post | 0.129 (57) | 0.134 (57) |
+| full | placed | 0.000 (558) | 0.000 (558) |
+| P | pre | 0.967 (401) | 0.974 (401) |
+| P | held | 0.121 (146) | 0.121 (146) |
+| P | post | 0.129 (57) | 0.134 (57) |
+| P | placed | 0.000 (47) | 0.000 (47) |
+| H | pre | 0.967 (401) | 0.974 (401) |
+| H | held | 0.121 (146) | 0.121 (146) |
+| H | post | 0.129 (57) | 0.134 (57) |
+| H | placed | 0.000 (148) | 0.000 (148) |
+
+- **읽는 법:**
+  - 서빙 기록의 success · `success_ct` 는 세 창에서 같다. HOLD chunk 는 대부분 P 이후다 (150 → P 7 · H 16).
+  - 현재 frame 의 N − L8H2 는 세 창 모두 양수이고 CI 가 0 을 넘는다. 진입 표 통과 여부는 세 창에서 같다.
+  - **`hold_attach` 의 N − L8H2 (+0.84 %p) 는 세 창에서 같다.** 차이가 모두 grasp 이전 (`pre`) frame 에서 나기 때문이다 (위 (c)).
+  - grasp 이후 (`held` · `post` · `placed`) identity 는 L8H2 와 N 이 같은 값 (0.121 · 0.13 · 0.000) 이다. 재측정 대기 #39 (지표 정의 = chosen cluster 의 plurality 가 target 인가, 서빙의 `subtask_gated` · `no_admissible`) 구간이라 **이 0 을 source 실패로 읽지 않는다.**
+- **주 판정은 바뀌지 않는다** (§5: 규칙상 N 을 T57 후보로 선정). P · H 는 보조다.
+
+---
+
+## T55 — 작업 의도와 실제 grasp 상태의 분리: phase feature 대 `grasp_latch` strong rule, 정답 = 물리 predicate (offline 재시뮬 + 재실행 grounding, 2026-10-13 ~ 14 KST)
+
+**이 절이 답하는 물음 (목적).** 지금까지 HSR (`kv_L4_v1`) 은 offline strong-rule proxy 와만 비교했다 (재측정 대기 5 · 12). strong rule (`grasp_latch` + 실행 feedback) 은 "무엇인가를 쥐었다" 만 안다. phase feature 의 목적은 "지시된 물체를 쥐었다" 를 읽는 것이다.
+- 그래서 정답을 둘로 나눴다. **P_grasp** = 활성 손이 어떤 물체든 보유한다. **P_task** = 지시된 target 을 보유한다.
+- feature 가 strong rule 을 대체하는지가 아니라, `task_ready = HELD ∧ feature` 로 **task gate 를 보완하는지** 를 물었다 (`handoff/T55.task.md`).
+
+**한 줄 결과 (before → after).**
+
+- **before.** HSR 은 offline proxy 와만 비교됐다. 실제 strong rule 과의 비교, 물리 predicate 에 대한 채점, wrong-object 통과율은 측정되지 않았다.
+- **after (T53 16 episode, 재시뮬 E0 16/16 bit-exact, 조건 합산 P_task).**
+  - 명사 token probe 결합: false pass −4.46 %p (CI [−6.44, −2.58]), false reject +1.53 %p (CI [0, +4.76]), 지연 0, 추가 미검출 0.
+  - HSR 결합: false pass −1.19 %p, false reject +0.76 %p, 지연 +0.1 frame, 추가 미검출 0.
+  - 둘 다 사전 고정 허용폭 (+5 %p · +1 frame · 0 건) 을 충족한다.
+  - **instruction 변경 조건의 wrong-object false pass: strong rule 단독 216 frame → 명사 결합 7 · HSR 결합 212.**
+  - 규칙 출력 ("보완 효과가 있으면 T57 후보, 없으면 HSR 은 보조 기록용") 은 **명사 probe 결합 = T57 단계 2 후보, HSR = 보조 기록용** 이다.
+
+**읽는 법과 출처 규약.**
+
+- 수치는 `handoff/T55.verify.json` (dev 블록 + `test` 블록) 에서만 왔다. 원자료 run 은 `results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55/` 이다.
+- dev 는 verifier 가, test 는 lead 가 실행했다. 사용자 지시 (2026-10-14) 로 sub agent 는 병렬일 때만 썼다.
+- test 수치는 독립 재계산과 trace 400/400 · 조건 16/16 이 일치했다.
+- CI 는 episode block bootstrap (B = 10000, seed 5507) 이다. 조건 합산은 count 를 먼저 더하고 나눈다. false reject 의 분모는 P_task = True frame 뿐이다.
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+| # | 판정 · 사건 | 이 절에서 |
+|---|---|---|
+| 1 | **(사용자 판정 2026-10-13)** 정답 = 물리 predicate. P_grasp · P_task 를 분리하고, wrong-object 를 빈손과 구분한다. 지속 조건 K 는 dev 에서 고정한다 | §2 |
+| 2 | **(사용자 판정)** 조건 = 물리 재시뮬 (empty grasp · slip 개입) + T53 자연 발생 + instruction 변경. 기록 qpos 덮어쓰기는 쓰지 않는다 | §2 |
+| 3 | **(사용자 판정)** feature = HSR (고정) + 명사 token 선형 probe (dev episode-fold CV, T53 은 학습 · 선택에 쓰지 않음) | §2 |
+| 4 | **(사용자 판정)** 판단 = task gate 의 보완 가치. gate 는 attach / detach 를 바꾸지 않는다 | §4 |
+| 5 | **(사용자 판정, 구현 후)** dev 기준 = 비개입 재시뮬 (dev 기록은 float32 동작 저장이라 정확히 재현되지 않음). perception = 재시뮬 관측에서 서빙 L8H2 grounding 재실행. 허용폭 = false reject +5 %p · 지연 +1 frame · 추가 미검출 0 (dev 분포로 정하지 않음) | §3 |
+| 6 | **(사용자 판정, prereg 확인 2026-10-14)** 허용폭은 조건 합산 기준을 유지한다 (dev 자연 조건 +5.66 %p 는 "초과" 로 함께 보고). slip ghost · park 를 둘 다 유지한다. T60 P · H 창은 보조 분석으로 나란히 보고한다 | §3 · §6 |
+| 7 | **(사용자 판정, 결과 후 2026-10-14)** 명사 probe gate 는 T57 에 별도 단계 (단계 2) 로 시험한다. 서빙 구현은 A 세션에 위임한다 | §5 |
+
+| 시각 (KST) | 무엇 |
+|---|---|
+| 10-13 17:14 – 18:07 | dev 재시뮬 · attention (GPU 8.6 분) · feature (GPU 38.1 분) |
+| 10-13 22:35 – 23:03 | dev perception (API 한도로 끊긴 뒤 재개) · dev 고정 → `T55.prereg.json` |
+| 10-14 16:47 – 19:06 | test 재시뮬 · attention · feature · perception (재실행 grounding + 서버 attention 진단) · 채점 |
+
+### 2. 설계 (사전 고정 요약)
+
+| 항목 | 값 |
+|---|---|
+| 정답 | P_grasp (두 finger 접촉 ∧ table · crate 비접촉, 물체 무관) · P_task (P_grasp ∧ 물체 = prompt 의 target). 지속 K 는 dev 에서 **2** policy frame 으로 고정 |
+| 4 상태 | 빈손 · **wrong-object** (P_grasp ∧ ¬P_task) · target 보유 · placed |
+| 조건 | 자연 (T53 기록 그대로) · instruction 변경 (같은 image 에서 target 명사를 scene 의 다른 과일로) · empty grasp (닫기 전 target 제거, park) · slip (보유 성립 2 frame 뒤 ghost / park) |
+| source | strong rule = `grasp_latch` HELD (재시뮬 feedback + 재실행 grounding). HSR = `kv_L4_v1` 의 `place` (dev: τ 0.9 · p 1). 명사 probe = target 명사 token feature 위 선형 probe (dev CV: layer v5 · C 0.1 · τ 0.3 · p 1) |
+| 결합 | `task_ready = HELD ∧ feature_target_held` (attach / detach 불변) |
+| 오류 | false pass = `task_ready ∧ ¬P_task`, false reject = `¬task_ready ∧ P_task`, 검출 지연 (event 단위) |
+
+### 3. dev 고정 (`T55.prereg.json`, sha256 `8f62fc76…`)
+
+- dev 재시뮬과 기록의 일치는 8 개 중 0 개였다. 예를 들어 qpos 최대 차이는 t2 0.127, ep1807 0.324, ep1200 1.225, headfix 4.2e-8 rad 다.
+- 그래서 판정 5 대로 비개입 재시뮬을 기준으로 썼다. slip 평가에서 빠진 dev record 는 t2 · headfix · ep1900 이다.
+- dev 선택점 (조건 합산):
+  - HSR: Δfp −0.0077, Δfr +0.0492, Δ지연 +0.6
+  - 명사: Δfp −0.0258, Δfr +0.0492, Δ지연 +0.6
+- dev 자연 조건만 보면 Δfr +0.0566 이다. 판정 6 에 따라 이를 "합산 허용폭 충족, 자연 조건에서는 초과" 로 보고한다.
+
+![T55 dev prereg 표](figures/t55/t55-dev-prereg-table.png)
+
+[`t55-dev-prereg-table.png`](figures/t55/t55-dev-prereg-table.png) ([sidecar](figures/t55/t55-dev-prereg-table.json)) · dev 재시뮬 parity [`t55-dev-e0-parity.png`](figures/t55/t55-dev-e0-parity.png) · E0 대 empty 장면 [`t55-dev-scene-e0-vs-empty.png`](figures/t55/t55-dev-scene-e0-vs-empty.png).
+
+### 4. test 결과 (T53 16 episode, 주 perception = 재실행 grounding)
+
+- **재현 점검:**
+  - E0 는 16/16 bit-exact 다 (feedback · 기록 latch 1200/1200).
+  - attention 은 서버 기록 대비 patch argmax 몫이 최소 0.9956 이다.
+  - feature 는 T53 feature 와 최대 차이 0 이다.
+  - 서버 attention 을 그대로 넣은 진단 재생과 주 재생이 latch 상태 1200/1200 · attach / detach 16/16 · 조작 대상 1200/1200 에서 같았다. reach 차이는 ep1853 에서만 최대 17.06 mm 였다.
+- slip 평가에서 빠진 test episode 는 1840 · 1843 · 1848 · 1849 · 1851 · 1853 (6 개) 이다.
+
+**조건 × source (P_task, frame 수).** FP = false pass, FR = false reject.
+
+| 조건 | 음성 / 양성 | strong FP | HSR FP | 명사 FP | strong FR | HSR FR | 명사 FR |
+|---|---|---|---|---|---|---|---|
+| 자연 | 1089 / 111 | 32 | 9 | 12 | 0 | 1 | 2 |
+| instruction | 3600 / 0 | 282 (wrong-object 216) | 226 | **7** | – | – | – |
+| empty | 913 / 0 | 0 | 0 | 0 | – | – | – |
+| slip ghost | 507 / 10 | 0 | 0 | 0 | 10 | 10 | 10 |
+| slip park | 507 / 10 | 0 | 0 | 0 | 10 | 10 | 10 |
+
+**조건 합산 P_task (사전 고정 판정 행).**
+
+| arm | Δ false reject [CI] | Δ false pass [CI] | Δ 지연 | 추가 미검출 | FP strong → arm | 허용폭 |
+|---|---|---|---|---|---|---|
+| HSR | +0.0076 [0, +0.0238] | −0.0119 [−0.0222, −0.0043] | +0.1 | 0 | 314 → 235 | 충족 |
+| **명사** | +0.0153 [0, +0.0476] | **−0.0446 [−0.0644, −0.0258]** | 0 | 0 | 314 → **19** | 충족 |
+
+- **자연 조건만:** HSR Δfr +0.0090 [0, +0.0280], 명사 Δfr +0.0180 [0, +0.0559]. dev 에서 초과였던 자연 조건이 test 에서는 허용폭 안이다.
+- **민감도 (조건 합산 strong FP 율 → arm):** 기록 perception 은 0.0697 → HSR 0.0550 · 명사 0.0030, oracle 은 0.0651 → 0.0517 · 0.0029 로 같은 방향이다.
+- **strong rule 자체 (P_grasp):**
+  - 자연 조건 false pass 32/1089 frame (빈손 상태 24 · placed 8), 보유 시작 10/10 검출, empty 개입 false pass 0.
+  - **instruction 을 바꾸면 실제 보유 333 frame 중 117 을 HELD 로 인정하지 않았고, 보유 시작 30 건 중 10 건을 놓쳤다** (재측정 대기 48).
+  - 명사 결합은 P_grasp 로 채점하면 FR 326/333 이다. gate 가 wrong-object 보유를 막도록 설계된 결과다.
+- 자연 발생 사건 (16 episode): 보유 시작 10, slip 1 (ep1822), wrong-object frame 0, 닫기 시도 21, 닫혔으나 빈 frame 249.
+
+![T55 test paired 차이](figures/t55/t55-test-paired-diff.png)
+
+[`t55-test-paired-diff.png`](figures/t55/t55-test-paired-diff.png) ([sidecar](figures/t55/t55-test-paired-diff.json)) — 조건별 episode paired Δfp · Δfr (HSR · 명사) 와 CI. 전체 표는 [`t55-test-table.png`](figures/t55/t55-test-table.png) ([sidecar](figures/t55/t55-test-table.json)).
+
+![T55 test 장면: instruction 변경](figures/t55/t55-test-scene-instruction.png)
+
+[`t55-test-scene-instruction.png`](figures/t55/t55-test-scene-instruction.png) ([sidecar](figures/t55/t55-test-scene-instruction.json)) — ep1804 frame 25, prompt apple → pear. 물리적으로는 apple 을 쥐었다 (wrong-object). strong rule 과 HSR 은 task_ready 를 통과시키고, 명사 probe (p = 0.0002) 가 막는다.
+
+### 5. 규칙 출력과 판정
+
+- **규칙 출력:** 명사 probe 결합은 wrong-object false pass 를 줄였다 (216 → 7). 올바른 보유의 거부와 지연도 허용폭 안이다 → **T57 후보.** HSR 결합은 wrong-object 를 거의 줄이지 못했다 (216 → 212) → **보조 기록용.**
+- **(사용자 판정, 2026-10-14)** 명사 probe gate 는 T57 의 **별도 단계 (단계 2)** 로, 단계 1 (N grounding) 이 끝난 뒤 같은 episode · seed 에서 gate 만 켠 arm 으로 비교한다.
+  - 서빙 구현 (기본 off flag) 은 A 세션에 위임했다.
+  - **task_ready 를 서빙의 어디에 연결할지는 구현 전에 사용자 판정을 받는다 (판정 대기).**
+- 표현: "명사 token feature 가 offline 재시뮬에서 wrong-object 를 task 성공 상태로 통과시키는 오류를 줄였다" 까지만 쓴다. closed-loop 효과는 T57 이다. "HSR 이 instruction 기반 단계 판단을 한다" 고 주장하지 않는다.
+
+### 6. 읽을 때의 한계
+
+| 한계 | 내용 |
+|---|---|
+| **instruction 조건은 합성이다** | 같은 image 에서 prompt 만 바꿨다. 실제로 다른 물체를 집는 rollout 이 아니다 (자연 조건의 wrong-object frame 은 0 이었다) |
+| **slip 양성이 짧다** | 개입이 보유 성립 2 frame 뒤라 strong rule 이 HELD 를 세우기 전이다. 두 결합 arm 의 차이가 0 이다 (재측정 대기 49) |
+| **dev 재시뮬은 기록과 다르다** | float32 동작 저장 때문이다. test (T53) 는 bit-exact 다 |
+| **ESDF backend** | 재실행 grounding 은 legacy ESDF 로 했다 (서빙은 cuRobo). 서빙 latch 를 75/75 재현하는 것은 ep1804 와 진단 재생에서 확인했다 |
+| **T60 P · H 창** | ~~보조 분석은 add-on (`t55_windows.py`) 으로 진행 중이고, 이 절에 기록하지 않았다 (재측정 대기 47)~~ → **완료, 아래 §8** |
+
+### 7. 산출물
+
+- **측정:** [`handoff/T55.verify.json`](handoff/T55.verify.json). 원자료는 `results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55/` 의 다음 위치다.
+  - `T55.prereg.json` · `noun_probe.npz` · `test_results.json`
+  - `resim/` · `attention/` · `feat/` · `perception/`
+  - `test_verify/` · `scripts/` · `logs/`
+- **figure** (모두 `.json` sidecar 있음):
+  - dev: [`prereg table`](figures/t55/t55-dev-prereg-table.png) · [`E0 parity`](figures/t55/t55-dev-e0-parity.png) · [`E0 vs empty`](figures/t55/t55-dev-scene-e0-vs-empty.png)
+  - test: [`paired diff`](figures/t55/t55-test-paired-diff.png) · [`table`](figures/t55/t55-test-table.png) · [`instruction scene`](figures/t55/t55-test-scene-instruction.png)
+- **구현:** `t55_resim.py` · `t55_predicate.py` · `t55_attention.py` · `t55_perception.py` · `t55_features.py` · `t55_study.py` 와 test ([`handoff/T55.impl.md`](handoff/T55.impl.md)).
+
+
+### 8. T60 P · H 보조 창 (2026-10-14 22:40 KST 추가, 세션 B)
+
+- 사용자 판정 (2026-10-14): **주 판정은 전체 창이다.** T55 는 놓기 · 복귀 뒤 동작도 평가하므로 P 결과가 전체 기능 평가를 대신하지 않는다.
+- **mask 규칙 (분석 전에 고정):** T60 이 T53 기록에서 만든 episode 별 P · H mask 를 그 episode 의 모든 trace (natural · instruction ×3 · empty · slip) 에 같게 건다. 모든 arm · predicate · latch mode 에 같다 ([`T55_windows.impl.md`](handoff/T55_windows.impl.md)).
+- **실행 · 재현:**
+  - 1 차 실행은 구현자 (T52-T57 세션) 가 했다. 세션 B 가 새 run 에서 독립 재실행했고 (71 s), 출력 5 파일이 1 차와 **byte 단위로 같다.**
+  - 두 실행 모두 full 창이 `test_results.json` 을 완전히 재현했다 (latch mode 3 개, bootstrap CI · per_episode · natural_events 포함).
+  - 수치 출처: [`handoff/T55_windows.verify.json`](handoff/T55_windows.verify.json).
+- T53 16 episode 의 끝점: 제거된 inference frame 은 P 362 · H 280 / 1200 이다.
+
+**합산 P_task (reground, 결합 arm − strong rule, episode block 95 % CI)**
+
+| arm | 창 | Δ false pass | Δ false reject | Δ 지연 (frame) | Δ 미검출 | false pass strong → arm / 음성 frame | 허용폭 |
+|---|---|---|---|---|---|---|---|
+| 명사 probe | **full (주)** | −4.46 %p [−6.44, −2.58] | +1.53 %p [0.00, +4.76] | 0.0 | 0 | 314 → 19 / 6616 | 충족 |
+| 명사 probe | P | −7.10 %p [−12.38, −3.48] | +1.53 %p [0.00, +4.76] | 0.0 | 0 | 308 → 18 / 4082 | 충족 |
+| 명사 probe | H | −6.34 %p [−9.87, −3.32] | +1.53 %p [0.00, +4.76] | 0.0 | 0 | 314 → 19 / 4656 | 충족 |
+| HSR | **full (주)** | −1.19 %p [−2.22, −0.43] | +0.76 %p [0.00, +2.38] | +0.1 | 0 | 314 → 235 / 6616 | 충족 |
+| HSR | P | −1.84 %p [−3.60, −0.65] | +0.76 %p [0.00, +2.38] | +0.1 | 0 | 308 → 233 / 4082 | 충족 |
+| HSR | H | −1.70 %p [−3.02, −0.61] | +0.76 %p [0.00, +2.38] | +0.1 | 0 | 314 → 235 / 4656 | 충족 |
+
+- **instruction 조건의 wrong-object false pass** (wrong-object frame 333): strong 216 · HSR 212 · 명사 probe 7. 세 창에서 같다 (음성 frame 3600 · 2514 · 2760). record · oracle latch mode 에서도 세 창 모두 허용폭을 충족했다.
+- **읽는 법:**
+  - 양성 frame (131) · false reject · 지연 · 미검출은 세 창에서 같다. P_task 양성 frame 이 모두 t_P 이전이기 때문이다.
+  - P · H 에서 Δ false pass rate 가 커지는 것은 대부분 **분모 (음성 frame) 가 줄어든 효과** 다. false pass count 는 거의 같다.
+- **주 판정 (§5: 명사 probe = T57 단계 2 후보, HSR = 보조) 은 바뀌지 않는다.**
+- 단계 2 의 서빙 연결은 사용자 판정 (2026-10-14) 으로 정해졌다: **"HELD 중 task-aware 실행 gate"**, HELD ∧ ¬probe 일 때 기존 HOLD 경로에 `task_not_ready` 사유를 추가한다. 명세는 [`handoff/T57.task.md`](handoff/T57.task.md) 의 "단계 2 구현 명세" 에 있고, 구현 · 실행은 A 다.
+
+---
+
+## T55b — instruction 을 바꾸면 strong rule 이 실제 보유를 HELD 로 인정하지 않는 원인 (재측정 대기 #48, 기존 T55 기록, 2026-10-14 KST)
+
+> 세션 B (`ag3s-vla-development-c4`). 사용자 판정 (2026-10-14, B 작업 확정 7): #48 은 기존 기록으로 원인 분리까지 한다. P_grasp 와 P_task 를 구분하고, instruction 변경 뒤 grounding 변화가 HELD 판정에 영향을 준 경로를 추적한다. latch 수정이 필요하면 재현 근거와 함께 A 에 넘긴다. SL5b 와 같은 원인인지는 확인 전까지 단정하지 않는다.
+> 새 rollout · 재시뮬 · 재추출은 없다. T55 test 의 재실행 grounding (`reground`) 출력과 재시뮬 물리 참값만 읽는다. 수치 출처: [`handoff/T55b.verify.json`](handoff/T55b.verify.json).
+
+### 1. 무엇을 쟀나
+
+- **문제 (#48):** T55 test 의 instruction 조건 (같은 image · state 에 prompt 의 명사만 다른 과일로 바꿈) 에서, 손이 실제로 과일을 쥔 frame (P_grasp) 333 개 중 117 개를 strong rule (`grasp_latch` 의 HELD) 이 HELD 로 인정하지 않았다. natural 조건에서는 0 / 111 이었다.
+- **방법:** HELD 를 놓친 frame 마다 다음을 기록에서 읽었다 (`t55b_held_fn.py`).
+  - 그 요청의 latch 상태와, `grasp_json.evidence.checks` 중 거짓인 항목
+  - AG3S 의 manipulated object centroid 가 그 frame 에 어느 과일 (MuJoCo `fruit_pos`) 에 가장 가까운가: 바뀐 명사의 과일 · 손 안 과일 · 다른 과일
+  - latch 가 잰 `reach` 와, MuJoCo 기준 손 (parent link) 에서 실제 손 안 과일 중심까지의 거리 (진단용 참값, latch 는 볼 수 없다)
+- **재현:** `n_p_grasp` · false reject (natural · instruction) 와 조건별 P_task 양성 · false reject 가 `T55.verify.json` 과 같음을 assert 로 확인했다.
+- **용어:**
+  - **`reach` 검사** = latch 가 attach 를 판단할 때, grasp parent link 원점에서 manipulated object centroid 까지의 거리가 `reach_limit_mm` (120 mm) 이하인지 보는 grasp evidence 항목이다.
+  - **manipulated object** = AG3S 가 조작 대상으로 고른 cluster 다 (`TargetConfirm`).
+
+### 2. 결과
+
+| HELD 를 놓친 117 frame | 값 |
+|---|---|
+| manipulated object = 바뀐 명사의 과일 | **117 / 117** |
+| latch 상태 · 거짓인 evidence | CLOSING · `reach` 만 97, CLOSING · `dropped` + `reach` 11, LATCHED (evidence 미평가) 9 |
+| latch 의 `reach` (limit 120 mm) | 162.5 – 741.8 mm, median 529.7 mm (n 117) |
+| 손 → 실제 손 안 과일 중심 (MuJoCo, 진단용) | 50.7 – 72.7 mm, median 55.9 mm (n 105, 그 frame 에 물리 보유가 기록된 frame) |
+| P_task 가 참인 frame | 0 (모두 바뀐 명사가 아닌 원래 과일을 쥐고 있다) |
+
+- **trace 단위 (instruction, attach 요청에서의 manipulated object):**
+  - 실제 grasp 가 있는 35 trace 중 25 개가 HELD 에 도달했다. 그 attach 순간의 manipulated object 는 손 안 과일 18 · 바뀐 명사의 과일 5 · 다른 과일 2 다.
+  - HELD 에 도달하지 못한 10 trace 는 전부 바뀐 명사의 과일이었다. 나머지 13 trace 는 grasp 가 없었다.
+  - natural 조건 (16 trace): 지시 과일 11 · 다른 과일 1 · grasp 없음 4.
+- **경로:** prompt 의 명사가 바뀐다 → 재실행 grounding 이 그 명사의 과일을 manipulated object 로 고른다 → latch 의 `reach` 가 테이블 위 그 과일의 centroid 로 잰다 → 손이 실제로 쥐었어도 CLOSING (또는 LATCHED) 에 머물러 attach (HELD) 가 되지 않는다.
+- 그림:
+  - [`t55b-scene-instruction.png`](figures/t55b/t55b-scene-instruction.png) ([sidecar](figures/t55b/t55b-scene-instruction.json)) — ep1804 frame 21, 같은 image 에 명사만 다르게 준 두 prompt 를 비교했다. banana 는 CLOSING 에서 `reach` 로 실패했고 (수치는 그림 sidecar), orange 는 HELD 다. MuJoCo 기준 손 안 과일은 apple 이다.
+  - [`t55b-held-fn-reach.png`](figures/t55b/t55b-held-fn-reach.png) ([sidecar](figures/t55b/t55b-held-fn-reach.json)) — 거리 분포와 attach 순간의 manipulated object.
+
+### 3. gate (`task_ready = HELD ∧ probe`) 에 대한 제한
+
+- 이 gate 는 probe 로 HELD 를 거부할 수만 있다. **HELD 의 false negative 는 되돌리지 못한다.**
+- T55 test 에서 P_task 양성인데 HELD 가 거짓인 frame: natural **0 / 111**, slip **20 / 20** (재측정 대기 #49 의 설계 한계 — 개입이 보유 성립 2 frame 뒤), instruction 0 (P_task 양성 없음), empty 0.
+- 그래서 **측정된 data 에서 #48 은 gate 의 P_task 결과를 제한하지 않았다.** #48 이 해치는 것은 P_grasp 쪽, 즉 손에 쥔 물체가 attach 되지 않아 충돌 모델에서 빠지는 것이다 (DX-05 attached-object protection 과 연결).
+
+### 4. SL5b 와의 관계 · A 에 넘긴 것
+
+- A 의 T46g (SL5b, benchmark · Panda) 와 #48 은 **같은 `reach` 검사를 지나지만, centroid 가 틀어지는 원인이 다르다.**
+  - SL5b: 가려진 target 의 오래된 (stale) centroid. 관측될 때만 갱신된다.
+  - #48: 다른 물체 (바뀐 명사의 과일) 의 centroid. identity 선택 오류다.
+  - 그래서 "centroid 를 손과 함께 움직이기" 만으로는 #48 이 해결되지 않는다. 손 안 물체의 identity 를 고르는 경로까지 다뤄야 한다.
+- A 가 두 경로를 **"reach 검사의 centroid 출처"** 하나로 묶어 수정안 판정을 받기로 했다 (2026-10-14). 근거로 이 절과 `T55b.verify.json` 을 넘겼다.
+
+### 5. 한계 · 측정하지 않은 것 · 되돌아올 지점
+
+- instruction 조건은 합성이다. 같은 image 에 prompt 만 바꿨고, policy 가 실제로 다른 물체를 집는 rollout 이 아니다.
+- 바뀐 명사의 과일로 attach 된 5 trace 에서 attach 된 geometry 가 손 안 과일과 같은지는 측정하지 않았다.
+- 손 사이 물체로 `reach` 를 재는 latch 변형은 돌리지 않았다. 위의 MuJoCo 거리는 참값 진단이고, latch 가 쓸 수 있는 관측이 아니다.
+- 되돌아올 지점: latch 수정안이 판정되면 T55 instruction 조건 (기존 재시뮬) 을 그 latch 로 다시 채점해 117 frame 이 회복되는지 확인한다 (A 의 구현 뒤).
+
+### 6. 산출물
+
+- 측정: [`handoff/T55b.verify.json`](handoff/T55b.verify.json), 원자료 `results/development/20261014T222232+0900_903ea16764c1_eb761f984d83/verify/T55b/t55b_held_fn.json`
+- 코드: `t55b_held_fn.py` · `t55b_build_verify.py` · `t55b_figures.py` · test `tests/ag3s/test_t55b_t54c_windows.py` (commit `38307ddb`)
+
