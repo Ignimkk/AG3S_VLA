@@ -58,3 +58,6 @@
 - G4 에서 `--target-permission-strict` · `--nonauthorized-target-margin obstacle` 은 받아들여지지만 exclude-all 에서는 비권한 행이 target 을 보지 않아 효과가 거의 없다 (X4 와 정책 외 flag 를 같게 둔 결과).
 - X4 · G4 의 초기 chunk 는 oracle 표본이 쌓이기 전이라 ball_owned 로 돈다 (설계).
 - 예상 시간 갱신: 4.0 – 4.5 h (+ cuRobo 기준선 약 3 min). run 수는 90 그대로.
+- **STARTUP 확인 (2026-10-14 15:48 – 16:33 UTC):** 첫 시도는 run dir 안의 시험용 symlink (CL3 를 가리킴) 를 출력 경로 검사가 거절해 5 서버 모두 기동 전에 종료 → symlink 제거 (시험 결과는 `prep/test_cl3` 에 남음). 두 번째: X1 · G4 는 모든 guard 통과, X2 · X3 · X4 는 900 s 안에 listening 에 이르지 못함. 최종 형상 서버의 기동이 10 – 15 min 걸렸다 (CL3 는 76 s; 두 서버가 동시에 기동하면 더 늦다). 실패 기록은 `startup_check_failed_symlink/` · `startup_check/` 에 보존.
+- **일정 v2 (lead):** 기동 시간 때문에 arm × port 마다 서버를 한 번만 띄운다 — port 8290 = pair 1 – 9 를 X1 X2 X3 X4 G4 순서, port 8291 = pair 10 – 18 을 G4 X4 X3 X2 X1 순서 (같은 pair 는 모든 arm 에서 같은 port), 8291 은 8 min 늦게 시작. `SERVER_UP_TIMEOUT_S` 2400 s. X2 · X3 · X4 의 기동 guard 는 본 실행의 첫 기동에서 같은 검사로 확인한다 (불일치면 그 chain 이 거절).
+- **본 실행 시작 16:34 UTC.** 예상 종료 ≈ 21:30 UTC (≈ 4.9 h; 서버 기동 10 회 × 10 – 15 min 포함). 승인 예산 (약 4 h) 보다 약 1 h 길다 — run 수는 90 그대로, 추가분은 서버 기동 시간이다.
