@@ -874,6 +874,12 @@ def t43t_identity_section(args) -> dict:
         # T43 Z3 — read by `SafePolicy` (grasp latch `slip_detach`); carried in the AG3S config so
         # `assert_ag3s_config` checks it survived `with_overrides` like the other T43 T keys.
         out["held_slip_detach"] = True
+    # T46g — begin
+    if getattr(args, "latch_reach_hand_relative", False):
+        # SL5b — read by `SafePolicy` (grasp latch `reach_hand_relative`); carried in the AG3S config
+        # so `assert_ag3s_config` checks it survived `with_overrides` like `held_slip_detach`.
+        out["latch_reach_hand_relative"] = True
+    # T46g — end
     if getattr(args, "held_cover_cap_mm", None) is not None:
         # T43 Z6 — read by `AG3S.attach` (held query sphere cap).
         out["held_cover_cap"] = float(args.held_cover_cap_mm) / 1000.0
@@ -1842,6 +1848,15 @@ def build_parser() -> argparse.ArgumentParser:
                          "attach 순간보다 0.05 이상 더 닫히고 마지막 실행 명령과의 차가 0.05 아래인 요청이 "
                          "2 번 연속이면 latch 가 PLACED 로 가고 그 뒤 물체는 장면 물체다 (쥔 구 · body "
                          "cover 없음). 실행 피드백만 본다. 기본 off = Z3 전과 같다")
+    # T46g — begin
+    ap.add_argument("--latch-reach-hand-relative", action="store_true",
+                    help="T46g (SL5b) — 조작 대상이 이번에 관측되지 않았으면 (occluded) grasp latch 의 "
+                         "reach 를 마지막 관측 centroid 를 그 관측 frame 의 자세에서 손바닥 (hold link) 에 "
+                         "붙여 지금 자세로 옮긴 점에서 잰다 (AG3S.attach 의 reach 관문도 같은 점). 관측된 "
+                         "프레임 · 문턱 (120 mm) · 다른 check 는 그대로. 기록: grasp.evidence.reach_source "
+                         "(observed|hand_relative) · reach_observed_mm · reach_hand_relative_mm. 기본 off "
+                         "= T46g 전과 같다")
+    # T46g — end
     ap.add_argument("--held-cover-cap-mm", type=float, default=None, metavar="MM",
                     help="T43 Z6 — attach 때 쥔 질의 구 (body cover sphere · segments, H2 덮개 모두) 의 "
                          "반지름 ≤ 관측 반폭 (attach 시점 target cluster 의 맞춘 반지름) + MM, 각 구 중심은 "
@@ -2047,6 +2062,7 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ("--refused-identity-release", getattr(args, "refused_identity_release", None) is not None),
         ("--supported-max-bottom-mm", getattr(args, "supported_max_bottom_mm", None) is not None),
         ("--held-slip-detach", getattr(args, "held_slip_detach", False)),
+        ("--latch-reach-hand-relative", getattr(args, "latch_reach_hand_relative", False)),  # T46g
         ("--held-cover-cap-mm", getattr(args, "held_cover_cap_mm", None) is not None),
         ("--hold-follow-to", getattr(args, "hold_follow_to", None) is not None),
         ("--held-free-observed-mm", getattr(args, "held_free_observed_mm", None) is not None))

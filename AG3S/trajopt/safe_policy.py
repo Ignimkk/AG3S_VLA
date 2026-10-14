@@ -89,6 +89,15 @@ def held_slip_detach_enabled(ag3s) -> bool:
     return getattr(clustering, "held_slip_detach", False) is True
 
 
+# T46g — begin
+def latch_reach_hand_relative_enabled(ag3s) -> bool:
+    """T46g (SL5b): AG3S 의 config 가 `clustering.latch_reach_hand_relative` 를 켰나. config 가 없는
+    AG3S (테스트 stub) 는 False — 기본과 같다."""
+    clustering = getattr(getattr(ag3s, "config", None), "clustering", None)
+    return getattr(clustering, "latch_reach_hand_relative", False) is True
+# T46g — end
+
+
 def hold_follow_to_limit(ag3s) -> Optional[int]:
     """T43 Z6: AG3S 의 config 가 `clustering.hold_follow_to` (연속 한도) 를 켰나 — 정수 또는 None (off).
     config 가 없는 AG3S (테스트 stub) 는 None — 기본과 같다."""
@@ -184,6 +193,14 @@ class SafePolicy:
             import dataclasses as _dc
 
             latch_cfg = _dc.replace(latch_cfg, slip_detach=True)
+        # T46g — begin
+        if latch_reach_hand_relative_enabled(ag3s) and not latch_cfg.reach_hand_relative:
+            # SL5b — `clustering.latch_reach_hand_relative` (`serve_safe --latch-reach-hand-relative`)
+            # 가 켜면 latch 도 켠다 (T43 Z3 와 같은 길). 직접 준 `LatchConfig` 는 그대로다.
+            import dataclasses as _dc
+
+            latch_cfg = _dc.replace(latch_cfg, reach_hand_relative=True)
+        # T46g — end
         #: T26: 목적지는 **AG3S 가 등록한 destination** 이다 (`ag3s.destination`). grounding 이름으로
         #: 배우던 길(파지 뒤의 target = 목적지)은 T26 뒤 target 이 사과로 남으므로 닫는다.
         self._latch = GraspLatch(latch_cfg, evidence=not latch_cfg.legacy_gripper_attach,
@@ -1116,6 +1133,63 @@ class SafePolicy:
             hand, self.grasp_links.get("left", ("ee_finger_l1", ())))
         return hand, parent_link, allowed
 
+    # T46g — begin
+    def _hand_relative_reach(self, model, q, parent_link: str, hand: str, manip,
+                             observed: Optional[float]) -> dict[str, Any]:
+        """SL5b — reach of an **unobserved** manipulated object, carried with the hand (flag on only).
+
+        The manipulated centroid stays where the object was last seen while it is occluded
+        (`TargetConfirm`, T20); lifted in the closing hand it is then 128–372 mm from the finger
+        (SL5b) and `reach` refuses the grasp. Here the centroid rides the hold link (the palm the
+        attach snapshot rides, T32 H2) from the state of the frame it was observed in
+        (`AG3S.manipulated_seen_state`) to `q`:
+
+            c_now = T_hold(q) · T_hold(q_seen)⁻¹ · c_seen,   reach = |c_now − origin_parent(q)|
+
+        The palm, not the finger: finger joints are model parameters set to **this** frame's
+        opening (T29), so a finger pose at `q_seen` would mix two openings; the palm does not move
+        with them. Returns `{source: observed|hand_relative, reach_m, observed_reach_m, reason, ...}`;
+        `observed` (reach unchanged) when the object is visible or the observation state is unknown.
+        """
+        from AG3S.ag3s.constraints.attached import _link_pose_numeric, carried_point, parent_reach
+
+        hold = self.hold_links.get(hand, parent_link)
+        out: dict[str, Any] = {
+            "source": "observed", "observed_reach_m": observed, "reach_m": None, "reason": None,
+            "carry_link": hold, "seen_frame": None,
+            "last_seen_frame": None if manip is None else int(manip.last_seen_frame),
+            "hand_shift_since_seen_mm": None, "centroid_carried_m": None,
+            "q_seen": None, "centroid_now": None}
+        if manip is None:
+            out["reason"] = "no_manipulated_object"
+            return out
+        if str(manip.state) == "visible":
+            out["reason"] = "visible"
+            return out
+        seen_fn = getattr(self.ag3s, "manipulated_seen_state", None)
+        seen = seen_fn() if callable(seen_fn) else None
+        if seen is None:
+            out["reason"] = "seen_state_unknown"
+            return out
+        frame, q_seen = int(seen[0]), np.asarray(seen[1], np.float64).reshape(-1)
+        out["seen_frame"] = frame
+        if q_seen.shape[0] != q.shape[0]:
+            out["reason"] = f"seen_state_length {q_seen.shape[0]} != {q.shape[0]}"
+            return out
+        try:
+            c_now = carried_point(model, q_seen, q, hold, manip.centroid)
+            r = parent_reach(model, q, parent_link, c_now)
+            shift = float(np.linalg.norm(_link_pose_numeric(model, q, hold)[:3, 3]
+                                         - _link_pose_numeric(model, q_seen, hold)[:3, 3]))
+        except Exception as exc:  # noqa: BLE001 — FK 실패는 옮길 수 없다는 뜻, 관측 reach 그대로
+            out["reason"] = f"{type(exc).__name__}: {exc}"
+            return out
+        out.update(source="hand_relative", reach_m=float(r), q_seen=q_seen, centroid_now=c_now,
+                   centroid_carried_m=[round(float(v), 5) for v in c_now],
+                   hand_shift_since_seen_mm=round(shift * 1000.0, 2))
+        return out
+    # T46g — end
+
     def _advance_grasp(self, observations, manipulators) -> None:
         """**제약을 짓기 전에** 파지 상태를 갱신하고, 잠금이 말할 때만 `attach`/`detach` 를 부른다 (T22).
 
@@ -1171,6 +1245,16 @@ class SafePolicy:
             except Exception as exc:  # noqa: BLE001 — FK 실패는 "reach 모름" 이다, 파지 확인 불가
                 alignment["reach_error"] = f"{type(exc).__name__}: {exc}"
                 reach = None
+        # T46g — begin
+        # SL5b: flag 가 켜졌고 조작 대상이 이번에 관측되지 않았으면, reach 는 마지막 관측 centroid 를 손과
+        # 함께 지금 자세로 옮긴 점에서 잰다. 관측됐거나 옮길 수 없으면 (관측 frame 의 자세를 모름) 위의
+        # 값 그대로다 (fail-closed: stale reach 는 거절 쪽이다). 꺼지면 아무것도 하지 않는다.
+        reach_carry = None
+        if cfg.reach_hand_relative:
+            reach_carry = self._hand_relative_reach(model, q, parent_link, hand, manip, reach)
+            if reach_carry["source"] == "hand_relative":
+                reach = reach_carry["reach_m"]
+        # T46g — end
 
         placed = False
         if (self.placed_fn is not None and self._latch.holding
@@ -1198,10 +1282,19 @@ class SafePolicy:
                 if not usable:
                     raise AttachRejected("manipulated object has no usable geometry",
                                          parent_link=parent_link)
+                # T46g — begin
+                # hand-relative reach 로 통과했으면 마지막 관문도 같은 점을 재고, 스냅샷은 그 centroid 를
+                # 관측한 frame 의 자세로 짓는다 (T32 H2 의 `_state_by_frame` 은 16 frame 만 남는다).
+                carry = {}
+                if reach_carry is not None and reach_carry["source"] == "hand_relative":
+                    carry = {"geometry_state": reach_carry["q_seen"],
+                             "reach_centroid": reach_carry["centroid_now"]}
+                # T46g — end
                 self.ag3s.attach(manip.geometry, robot_state=q, parent_link=parent_link,
                                  allowed_contact_links=allowed, label="manipulated",
                                  reach=cfg.reach,
-                                 hold_link=self.hold_links.get(hand, parent_link))
+                                 hold_link=self.hold_links.get(hand, parent_link),
+                                 **carry)  # T46g
                 self._grasp_state_version += 1
             except AttachRejected as exc:
                 rejected = exc.record()
@@ -1244,6 +1337,19 @@ class SafePolicy:
         if cfg.slip_detach:
             # T43 Z3 — flag 가 켜졌을 때만 싣는다 (꺼지면 기록이 Z3 전과 같다). 근거는 `evidence.slip`.
             self._last_grasp_record["held_slip"] = bool(event.slipped)
+        # T46g — begin
+        if reach_carry is not None:
+            # flag 가 켜졌을 때만 싣는다 (꺼지면 기록이 T46g 전과 같다). `reach_mm` 은 latch 가 쓴 값이다.
+            ev = self._last_grasp_record["evidence"]
+            ev["reach_source"] = reach_carry["source"]
+            ev["reach_observed_mm"] = (None if reach_carry["observed_reach_m"] is None
+                                       else round(float(reach_carry["observed_reach_m"]) * 1000.0, 2))
+            ev["reach_hand_relative_mm"] = (None if reach_carry["reach_m"] is None
+                                            else round(float(reach_carry["reach_m"]) * 1000.0, 2))
+            ev["reach_carry"] = {k: reach_carry[k] for k in (
+                "reason", "carry_link", "seen_frame", "last_seen_frame",
+                "hand_shift_since_seen_mm", "centroid_carried_m")}
+        # T46g — end
         # T43 T (측정만): 손끝 중점 ↔ AG3S target centroid. 판단에 쓰지 않는다 — 기록 키 하나.
         if manip is not None:
             try:
