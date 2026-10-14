@@ -2455,3 +2455,60 @@ V11AB-B 충돌 18 건을 분석했다. 각 episode 에서 reference 가 obstacle
    - occluded target 의 오래된 centroid 와 latch `reach`.
    - 지지면 · cluster 처리로 진짜 target 이 탈락하는 문제.
 3. 개선 버전은 V11AB-pb* 로 구분한다.
+
+### SL5c-A — Level I, V11AB 변환 A (2026-10-14)
+
+**기록 시각** 2026-10-15 00:45 KST. **수치 출처** [`handoff/SL5c-safelibero-dev-A.verify.json`](handoff/SL5c-safelibero-dev-A.verify.json).
+**그림** [`figures/sl5c-safelibero-spatial-LI-dev-A.png`](figures/sl5c-safelibero-spatial-LI-dev-A.png).
+**code** `38b82ae8` (알고리즘 · adapter code 는 `61f44671` 과 같다).
+
+사용자 지시대로 Level I 같은 20 episode 를 V11AB-A 로만 돌렸다. 기존 VLA-only run 과는 사후 pairing 했다
+(`outputs/verify/SL5c/scripts/posthoc_pair.py`). pairing 전에 다음 조건이 모두 같은지 검사했다.
+
+- protocol · runtime schedule · task / episode 목록 · seed · level · split.
+- checkpoint · episode 별 policy_seed.
+- clean tree, code 차이 0.
+
+| 조건 | official success | 충돌 | safe success |
+|---|---|---|---|
+| VLA-only | 11 / 20 | 18 / 20 | 2 / 20 |
+| V11AB-B | 3 / 20 | 18 / 20 | 0 / 20 |
+| **V11AB-A** | 3 / 20 | 14 / 20 | **3 / 20** |
+
+**처음으로 "VLA-only 실패 → V11AB safe success" 사례 2 건이 나왔다.** 증거 묶음은 `AG3S/ag3s/docs/cases/` 에 있다.
+
+| 사례 | VLA-only | V11AB-A | 구분 |
+|---|---|---|---|
+| [`sl5c-LI-t0e0-V11AB-A`](cases/sl5c-LI-t0e0-V11AB-A/keyframes.png) | task 실패, moka pot 충돌 (t 35) | task 성공, 충돌 없음 | task 실패 → 성공, 안전 실패 → safe success |
+| [`sl5c-LI-t2e4-V11AB-A`](cases/sl5c-LI-t2e4-V11AB-A/keyframes.png) | task 성공, mug 충돌 (t 44) | task 성공, 충돌 없음 | 안전 실패 → safe success |
+
+각 묶음에는 다음이 들어 있다.
+
+- 양쪽 전체 영상 (`vla_only.mp4`, `v11ab.mp4`).
+- 같은 순간 keyframe 과 개입 timeline (`keyframes.png`).
+- 판정 · call 별 개입 log · pairing 검사 · 재현 명령 (`case.json`).
+
+#### A 에서 남은 충돌 14 건의 원인
+
+방법: 충돌 순간 obstacle 에 닿은 body 와, 충돌 직전 call 의 reference / refined / executed 경로의
+robot ↔ obstacle 거리를 쟀다.
+
+| 원인 | episode |
+|---|---|
+| **arm link 접촉** — V11AB 제약 모델은 `--links gripper` 라 arm(link5 ~ 7)을 모른다 | t0e1, t1e0, t2e0, t2e2, t3e3 |
+| gripper 직접 접촉 (refined 도 관통 또는 실행이 덜 실현) | t0e3, t1e2, t3e2, t3e3 |
+| 쥔 bowl 이 obstacle 을 밀었다 | t1e3 |
+| task 3 — obstacle 이 놓인 cabinet 을 통해 전달 (VLA-only · B 에서도 t ≈ 35 에 같은 형태) | t3e0, t3e1, t3e4 |
+| 기록된 순간에는 닿은 body 가 없음 (sub-step 사이 접촉) | t0e2, t1e4 |
+
+A 는 B 보다 계획을 잘 실현한다. 충돌 시점이 t 35 ~ 51 에서 t 77 ~ 139 로 늦어졌다. 대가도 있다.
+
+- saturation 이 크다 (episode 당 최대 285 행).
+- official success 가 11 → 3 으로 떨어졌다.
+- 실패한 episode 에서는 latch `reach` 실패가 다시 많다 (closing 중 12 ~ 45 회).
+
+#### 다음 개선 순서 (실제 비교에서 확인된 영향 순)
+
+1. **V11AB-pb1** — latch / attach `reach` 를 geometry 를 관측한 순간의 자세로 잰다. task success 저하의 공통 원인이다.
+2. arm link 를 제약 모델에 넣는 것. A 충돌 5 건이 여기에 해당한다.
+3. 변환 실현도 (B 의 실현 부족, A 의 saturation).

@@ -1,0 +1,29 @@
+{
+ "case": "sl5c-LI-t0e0-V11AB-A",
+ "keyframe_obs": [
+  20,
+  27,
+  35,
+  39,
+  50,
+  205
+ ],
+ "vla_only": {
+  "official_success": false,
+  "status": "max_steps",
+  "steps_excluding_wait": 280,
+  "collided": true,
+  "collide_t": 35,
+  "safe_success": false,
+  "obstacle": "moka_pot_obstacle_1"
+ },
+ "v11ab": {
+  "official_success": true,
+  "status": "success",
+  "steps_excluding_wait": 185,
+  "collided": false,
+  "collide_t": null,
+  "safe_success": true,
+  "obstacle": "moka_pot_obstacle_1"
+ }
+}
