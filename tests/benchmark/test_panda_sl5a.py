@@ -137,7 +137,7 @@ def test_mode_b_passthrough_and_realisation(kin):
     assert rA["predicted_vs_refined_mm_max"] <= rB["predicted_vs_refined_mm_max"] + 1e-9
     assert np.abs(outB.astype(float) - A).max() < np.abs(outA.astype(float) - A).max()
     with pytest.raises(ValueError):
-        pa.joint_chunk_to_delta_chunk(kin, conv, mod, ref, mode="C")
+        pa.joint_chunk_to_delta_chunk(kin, conv, mod, ref, mode="Z")
 
 
 def test_panda_latch_calibration():
@@ -217,3 +217,41 @@ print(json.dumps(out))
     out = json.loads(r.stdout.strip().splitlines()[-1])
     assert out["partial"] == [3, 3, 3, 0.3]
     assert out["hold"] == [5, 0, 5, "none", 5]
+
+
+def _conv_case(kin, seed=5):
+    from AG3S.adapters.panda import action as pa
+
+    q0 = np.array([0.0, 0.17, 0.0, -2.45, 0.0, 2.6, 0.79])
+    A = (np.zeros((10, 7)) + [0.3, 0.1, -0.2, 0, 0, 0.05, -1]).astype(np.float32)
+    conv = pa.delta_chunk_to_joint_chunk(kin, A, q0, np.eye(4))
+    return pa, A, conv, conv.joint_chunk.astype(np.float32)
+
+
+def test_mode_c_passthrough_and_equals_a_without_clipping(kin):
+    pa, A, conv, ref = _conv_case(kin)
+    out, rec = pa.joint_chunk_to_delta_chunk(kin, conv, ref.copy(), ref, mode="C")
+    assert np.array_equal(out, A) and rec["passthrough_rows"] == list(range(10)) and rec["mode"] == "C"
+    mod = ref.copy()
+    mod[:, 1] += np.linspace(0.0005, 0.002, 10, dtype=np.float32)       # every row changed, small: no clipping
+    outA, rA = pa.joint_chunk_to_delta_chunk(kin, conv, mod, ref, mode="A")
+    outC, rC = pa.joint_chunk_to_delta_chunk(kin, conv, mod, ref, mode="C")
+    assert not rA["saturated_rows"] and not rC["saturated_rows"]
+    assert np.allclose(outA, outC, atol=1e-6) and rC["tracking_residual_mm"] < 1e-6
+
+
+def test_mode_c_carries_the_clipped_deficit_and_stops_the_lag_tail(kin):
+    pa, A, conv, ref = _conv_case(kin)
+    mod = ref.copy()
+    mod[2:5, 1] += 0.03                                                   # a 3-row detour, then back on the reference
+    res = {}
+    for m in ("A", "C"):
+        out, rec = pa.joint_chunk_to_delta_chunk(kin, conv, mod, ref, mode=m)
+        real = pa.realisation_record(kin, conv, out, mod.astype(np.float64), 10)
+        res[m] = (rec, real)
+    assert res["A"][0]["saturated_rows"]                                  # the detour saturates the commands
+    # C lands closer to the refined path over the chunk (deficit carried, tail stopped)
+    assert res["C"][1]["predicted_vs_refined_mm_max"] < res["A"][1]["predicted_vs_refined_mm_max"]
+    # A passes the rows after the detour unchanged; C keeps correcting until its predicted state settles
+    assert 5 in res["A"][0]["passthrough_rows"] or 6 in res["A"][0]["passthrough_rows"]
+    assert 5 in res["C"][0]["corrected_rows"]

@@ -230,7 +230,15 @@ def applied_command_rows(kin: PandaKinematics, conv: Conversion, applied: np.nda
 #: ``A`` / ``lag_inverse``: realise the refined *path* under the response model, Dx = (Dy - alpha Dy_prev) / beta.
 #: ``B`` / ``command_offset``: add the refined path change to the *commanded* step unchanged, Dx = Dy
 #: (V11AB's change applied as a change of the commanded target, without inverting the controller lag).
-CONVERSION_MODES = {"A": "lag_inverse", "B": "command_offset"}
+#: ``C`` / ``lag_inverse_tracking`` (V11AB-pb, 2026-10-14): A's inverse, but against the deviation the response model
+#: predicts the commands *actually* produce (clipping included) and aimed at the refined path's cumulative position:
+#: ``Dx_k = ((D*_k - D^_{k-1}) - alpha d^_{k-1}) / beta`` with ``d^_k = alpha d^_{k-1} + beta Dx_k(clipped)``,
+#: ``D^_k = D^_{k-1} + d^_k``. A clipped row's deficit carries into the next rows, and once the refined rows rejoin the
+#: reference the lag tail is stopped (rows stay corrected until ``d^`` and ``D* - D^`` are zero). Without clipping and
+#: with every row corrected it equals A; a chunk without any change passes the policy's bits.
+CONVERSION_MODES = {"A": "lag_inverse", "B": "command_offset", "C": "lag_inverse_tracking"}
+#: C: a row is "back on the reference" when the predicted deviation state is below this (m / rad).
+TRACKING_EPS = 1e-9
 
 
 def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: np.ndarray,
@@ -253,6 +261,9 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
     fk_r = [kin.fk(conv.q_now)] + [kin.fk(np.asarray(Qr[k], np.float64)) for k in range(H)]
     dyp_prev = np.zeros(3)
     dyr_prev = np.zeros(3)
+    # C: predicted actual deviation state (step d^, cumulative D^) and the refined cumulative target D*
+    hat_dp, hat_dr, hat_Dp, hat_Dr = np.zeros(3), np.zeros(3), np.zeros(3), np.zeros(3)
+    star_Dp, star_Dr = np.zeros(3), np.zeros(3)
     passthrough, corrected, sat_rows = [], [], []
     max_corr = 0.0
     for k in range(H):
@@ -260,6 +271,31 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
         (pr0, Rr0), (pr1, Rr1) = fk_r[k], fk_r[k + 1]
         dyp = R_wb @ ((ps1 - ps0) - (pr1 - pr0))
         dyr = R_wb @ (matrix_to_rotvec(Rs1 @ Rs0.T) - matrix_to_rotvec(Rr1 @ Rr0.T))
+        if mode == "C":
+            if unchanged[k] and (k == 0 or bool(unchanged[k - 1])):
+                dyp, dyr = np.zeros(3), np.zeros(3)  # identical chain: exactly no change in the target
+            star_Dp, star_Dr = star_Dp + dyp, star_Dr + dyr
+            settled = (max(np.abs(hat_dp).max(), np.abs(hat_dr).max(), np.abs(star_Dp - hat_Dp).max(),
+                           np.abs(star_Dr - hat_Dr).max()) <= TRACKING_EPS)
+            if unchanged[k] and (k == 0 or bool(unchanged[k - 1])) and settled:
+                passthrough.append(k)
+                continue
+            dxp = ((star_Dp - hat_Dp) - ap * hat_dp) / bp
+            dxr = ((star_Dr - hat_Dr) - ar * hat_dr) / br
+            corr = np.concatenate([dxp / OSC_POS_SCALE, dxr / OSC_ORI_SCALE])
+            raw = np.asarray(conv.delta[k, :6], np.float64) + corr
+            clipped = np.clip(raw, -OSC_INPUT_CLIP, OSC_INPUT_CLIP)
+            if np.any(clipped != raw):
+                sat_rows.append(k)
+            out[k, :6] = clipped.astype(out.dtype)
+            corrected.append(k)
+            max_corr = max(max_corr, float(np.max(np.abs(corr))))
+            eff = np.asarray(out[k, :6], np.float64) - np.asarray(np.clip(conv.delta[k, :6], -OSC_INPUT_CLIP,
+                                                                           OSC_INPUT_CLIP), np.float64)
+            hat_dp = ap * hat_dp + bp * OSC_POS_SCALE * eff[:3]
+            hat_dr = ar * hat_dr + br * OSC_ORI_SCALE * eff[3:]
+            hat_Dp, hat_Dr = hat_Dp + hat_dp, hat_Dr + hat_dr
+            continue
         if unchanged[k] and (k == 0 or bool(unchanged[k - 1])):
             passthrough.append(k)
             dyp, dyr = np.zeros(3), np.zeros(3)  # identical chain: exactly no change
@@ -278,7 +314,12 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
             corrected.append(k)
             max_corr = max(max_corr, float(np.max(np.abs(corr))))
         dyp_prev, dyr_prev = dyp, dyr
-    rec = {"mode": mode, "mode_name": CONVERSION_MODES[mode],
+    if mode == "C":
+        rec_track = {"tracking_residual_mm": float(1000 * np.linalg.norm(star_Dp - hat_Dp)),
+                     "tracking_residual_rad": float(np.linalg.norm(star_Dr - hat_Dr))}
+    else:
+        rec_track = {}
+    rec = {"mode": mode, "mode_name": CONVERSION_MODES[mode], **rec_track,
            "rows": int(H), "passthrough_rows": passthrough, "corrected_rows": corrected,
            "saturated_rows": sat_rows, "max_abs_correction": max_corr,
            "max_abs_joint_change_rad": float(np.max(np.abs(np.asarray(Qs[:H], np.float64)

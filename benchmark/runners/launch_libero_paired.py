@@ -228,7 +228,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--safety-level", choices=("I", "II"), default=None, help="SafeLIBERO suites only")
     ap.add_argument("--ag3s-version", default="V11AB",
                     help="AG3S version served in vla_v11ab mode (AG3S/adapters/panda/profile.py AG3S_VERSIONS)")
-    ap.add_argument("--conversion", choices=("A", "B"), required=True,
+    ap.add_argument("--conversion", choices=("A", "B", "C"), required=True,
                     help="Panda reverse conversion for VLA+V11AB (AG3S/adapters/panda/action.py CONVERSION_MODES)")
     ap.add_argument("--dry-run", action="store_true")
     # protocol constants read by l0.protocol_settings / runtime_schedule
