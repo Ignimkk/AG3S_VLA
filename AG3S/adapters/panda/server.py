@@ -215,6 +215,11 @@ class PandaSafeServer:
         response["panda/conversion"] = {**conv.record(), **rec}
         response["panda/mode"] = "vla_v11ab"
         response["actions"] = actions
+        # logging only (read, not changed): the grasp-latch decision and the gripper value it saw, per chunk
+        from AG3S.trajopt.safe_policy import _jsonable
+
+        response["panda/grasp"] = _jsonable(getattr(self._policy, "_last_grasp_record", None) or {})
+        response["panda/latch_signal"] = _jsonable(getattr(self._policy, "_last_latch_signal", None) or {})
         return response
 
 

@@ -142,6 +142,8 @@ class SafeClient(object):
                "max_violation_m": base._jsonable(resp.get("max_violation_m")),
                "ag3s": base._jsonable(resp.get("ag3s")), "to": base._jsonable(resp.get("to")),
                "conversion": base._jsonable(resp.get("panda/conversion")),
+               "grasp": base._jsonable(resp.get("panda/grasp")),
+               "latch_signal": base._jsonable(resp.get("panda/latch_signal")),
                "timing_ms": base._jsonable(resp.get("timing_ms")), "policy_seed": resp.get("policy_seed")}
         if "panda/actions_policy" in resp:
             pol = np.asarray(resp["panda/actions_policy"], np.float64)
