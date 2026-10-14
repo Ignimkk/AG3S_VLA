@@ -30,8 +30,8 @@
 | | SL-4 Panda 를 V11AB core 에 연결 (ATS / LTE / ESDF), offline | **완료 (2026-10-13, 사용자 확정)** | 아래 [SL4](#sl4--panda-관측을-v11ab-perception--esdf-에-연결-ats--lte--esdf-offline-2026-10-12). core diff 0 줄, 기준선 둘 다 일치. 접근 단계 ATS 는 대체로 target 을 잡았으나(101/105 call) **t4 · t5 · t9 에서 다른 물체를 target 으로 골랐다**. ~~SL3 열린 항목(head block mass, wrist mirror 비교 원인, core 주입 지점)~~ → SL4 에서 측정(head seed 기여, wrist mirror 질량 분해, offline 주입 profile). online 주입은 SL-5 |
 | | SL-4b ATS 용 attention cell dev calibration 연구 | **완료 (2026-10-13, 사용자 확정)** | 아래 [SL4b](#sl4b--ats-용-attention-cell-dev-calibration-2026-10-13). ~~진행 중 (사전 등록)~~ → 사전 등록 규칙대로 **V11AB L8H2 유지**(최고 후보 L12H3 가 +1.5 %p, 기준 +10 %p 미달). oracle 도 t4 · t9 에서 0 이어서 오선택은 attention cell 이 아니라 그 뒤 grounding 단계 문제로 남는다. 같은 STEP 에서 LIBERO fixture reset 이력 문제를 찾아 export · replay 를 고쳤다. test 데이터는 쓰지 않았다 |
 | | SL-4c ATS grounding 탈락 원인 진단 (t4 · t5 · t9) | **진행 중 (2026-10-13)** | [`handoff/SL4c.task.md`](handoff/SL4c.task.md) (commit `cf4649ce`). **진단만** 한다. code 는 `85e6d9d1` worktree 에 고정. cluster 병합 · Panda 8 cm 개도 한계는 **가설**이며 측정이 확인 또는 반박한다 |
-| | SL-5a Panda 주입(최소 core 변경) + EE delta ↔ joint 변환, offline 검증 | **진행 중 (2026-10-13, SL-4c 와 병행)** | [`handoff/SL5a.task.md`](handoff/SL5a.task.md). core 변경은 **robot model · contact link · bound 주입만 허용하는 최소 변경**이다(사용자 판정 2026-10-13). 필수 조건: **RB-Y1 golden 출력 bit 동일**, **무개입 chunk 의 출력 action bit 동일** |
-| | SL-5b live closed-loop 1 episode | 미착수 | SL-5a 이후 판정 |
+| | SL-5a Panda 주입(최소 core 변경) + EE delta ↔ joint 변환, offline 검증 | **구현 완료 (2026-10-13, commit `76ee59ba`), 2026-10-14 보정 추가** | [`handoff/SL5a.task.md`](handoff/SL5a.task.md). RB-Y1 golden bit 동일 · 무개입 chunk bit 동일 유지. 2026-10-14: gripper `empty_below` Panda 보정, 역변환 A/B 명시 모드 (아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14)) |
+| | SL-5b live closed-loop 1 episode | **진행 중 (2026-10-14)** | 아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14). closed loop 연결은 동작한다. V11AB 는 t0 init0 에서 A · B 모두 실패(VLA-only 성공). 원인 = 들어올린 bowl 이 occluded 되어 latch `reach` 가 마지막 관측 centroid 기준으로 120 mm 를 넘는다 — **사용자 판정 대기** |
 | | SL-6 phase / gate source | 미착수 | Panda main 의 phase source = gripper-state strong rule 또는 pi05_libero feature 로 dev 에서 새로 학습한 probe(GT phase 는 oracle 비교용). **SL-6 에서 결정** |
 | | SL-7 ~ SL-8 (contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. ~~SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1)~~ → SL3 에서 un-mirror mapping 구현·측정 완료(image 검사 221/221 call), **SL4 에서 ATS 결과로도 확인**(mirror 로 돌린 접근 단계 centroid 오차 median 236.2 mm 대 12.0 mm). 이후 단계는 이 mapping 을 그대로 쓴다 |
 | **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | 미착수 | SL0 의 1 episode 로는 성능을 말할 수 없다 |
@@ -2134,3 +2134,86 @@ oracle run 의 seed 와 ATS 선택 cluster 를 비교한 대표 call 의 숫자�
 | SL-4c 진단이 clustering · 선택 기준이 원인으로 나옴 | 그 기준 변경은 V11AB 의 method 변경이므로 사용자 판정(variant 로 분리, test 전 고정) |
 | test(init 5–49)를 열기 전에 cell 을 바꾸려는 요청 | 사전 등록 규칙(L8H2 유지)을 먼저 확인하고, 바꾸려면 새 사전 등록이 필요하다 |
 | 동일 scene 으로 paired 비교한 결과가 episode 순서에 민감함 | reset history 재현 규칙(위 #5)을 먼저 확인 |
+
+---
+
+## SL5b-smoke — t0 init0 paired smoke 재확인, conversion A / B (2026-10-14)
+
+**기록 시각** 2026-10-14 14:45 KST. **수치 출처** [`handoff/SL5b-smoke.verify.json`](handoff/SL5b-smoke.verify.json).
+**그림** [`figures/sl5b-smoke4-t0e0-ab.png`](figures/sl5b-smoke4-t0e0-ab.png) (+ `.json` sidecar).
+**code** run 은 `945b608c`, 호출별 grasp 기록과 그림은 `fa658e06`.
+
+### 무엇을 했나
+
+사용자 판정(2026-10-14) 두 가지를 반영하고 t0 init0 를 다시 돌렸다.
+
+1. **gripper `empty_below` Panda 보정.** Panda 의 빈손 닫힘(normalised opening 0.0125)과 물체를 쥐고 들어올린
+   순간의 opening(최소 0.0381)을 측정해 그 중간점 **0.025325** 를 Panda 값으로 정했다. RB-Y1 기본값 0.10 은
+   Panda 의 bowl rim 파지(약 0.06)를 빈손으로 판정했다. 다른 `LatchConfig` 값은 V11AB 기본 그대로다.
+   근거 파일 `robots/panda/description/gripper_calibration.json`.
+2. **역변환을 명시 실행 모드로 분리.** A = `lag_inverse` (OSC 1차 응답 모델의 역, `Dx = (Dy − αDy_prev)/β`),
+   B = `command_offset` (`Dx = Dy`). 둘 다 refined == reference 인 행은 원래 action bit 를 그대로 보낸다.
+   launcher 는 `--conversion {A,B}` 를 필수로 받고 run id · manifest 에 모드를 남긴다.
+   서버는 응답에 response model 이 예측한 EE 경로(`panda/predicted_ee_base`)와 실현도 기록을 싣는다.
+
+### 결과 — official success
+
+| 조건 | 결과 | steps | HOLD call | attach |
+|---|---|---|---|---|
+| VLA-only | **success** | 104 | — | — |
+| V11AB-A | max_steps (실패) | 220 | 25 / 44 | 없음 |
+| V11AB-B | max_steps (실패) | 220 | 3 / 44 | obs 145 (call 27) 에 attach, 그 뒤 VLA 가 gripper 를 열어 detach |
+
+B 는 두 번(smoke3 · smoke4) 돌려 모든 점검 수치가 같았다. A 의 결과는 `empty_below` 0.10 으로 돌린 이전 smoke2 와
+점검 수치가 같았다 — 보정은 A 에서 결과를 바꾸지 못했다(아래 원인).
+
+### 결과 — 역변환 점검 (사용자 점검 항목)
+
+| 항목 | A | B |
+|---|---|---|
+| 무개입 행 bit 동일 | 58 / 58 | 82 / 82 |
+| 보정된 call 수 | 18 | 40 |
+| 실현 비율 (response model 예측 / refined 변화, call median) | 1.00 | 0.15 |
+| 예측 − refined 경로 (mm, p50 / max) | 1.7 / 119 | 14.8 / 143 |
+| 예측 − 실제 EE (mm, 보정 call p50 / max) | 7.6 / 30.2 | 6.4 / 17.2 |
+| 실행 arm action 변화 \|Δa\| (p50 / max) | 0.63 / 1.74 | 0.23 / 1.59 |
+| saturated 행 · \|a\|≥1 항목 | 57 · 72 | 25 · 14 |
+
+무개입 call 의 예측 − 실제 오차는 두 모드 모두 3.2 mm 다(response model 자체의 오차).
+
+- **A** 는 refined 경로를 거의 그대로 실현하지만 action 을 크게 바꾸고 자주 포화한다.
+- **B** 는 action 변화가 작지만 V11AB 가 요구한 경로 변화의 약 15 % 만 실현한다. B 에서 보정 call 이 40 개로 늘어난
+  것은, 서버에 보내는 `exec_feedback` 가 "refined 경로를 실행했다"고 알리는데 실제로는 그 일부만 실행되어
+  continuity 기준이 실제 경로와 어긋나기 때문일 가능성이 있다(**가설, 측정하지 않았다**).
+- 두 모드 모두 **장애물 회피 장면에서의 실현 정도는 아직 측정하지 않았다** (LIBERO t0 에는 추가 장애물이 없다).
+
+### 결과 — 실패 원인: latch `reach` 검사와 occluded target
+
+호출별 grasp 기록(이번에 추가한 로그)으로 latch 의 attach 조건을 call 마다 확인했다.
+
+| 구간 (B) | 상태 | 실패한 검사 |
+|---|---|---|
+| call 8 ~ 10 | 첫 닫힘 시작 | closed · dropped · settled (손가락이 아직 움직임) |
+| call 11 ~ 14 | VLA 가 스스로 다시 열었다 (VLA-only 도 같은 동작) | settled · blocked · reach |
+| call 15 ~ 18 | 두 번째 닫힘 (opening 약 0.06) | settled |
+| call 19 ~ 26 | 들어올림, bowl **occluded** (geometry frame 17 에 고정) | **reach 만** (127.9 ~ 184.2 mm > 120 mm) |
+| call 27 | 손이 내려와 reach 111.7 mm | 전부 통과 → attach |
+
+- `reach` 는 parent link(`panda_leftfinger`) 원점과 조작 대상 centroid 의 거리다. 들어올린 뒤 bowl 은 카메라에서
+  보이지 않아(`occluded`) centroid 가 마지막 관측(바닥에 있던 위치)에 고정되고, 손이 올라갈수록 거리가 커진다.
+- attach 가 안 된 동안 쥔 bowl 은 장애물로 남아 `panda_hand ↔ esdf` 충돌 HOLD 가 났다.
+- **A**: reach 가 178 mm 에 고정된 채 HOLD 가 끝까지 이어졌다(교착).
+- **B**: 늦게 attach 했지만, 그 사이 경로가 VLA-only 와 달라져 VLA 가 plate 밖에서 gripper 를 열었다.
+- 첫 닫힘의 `blocked` 실패는 VLA 가 열림 명령을 보낸 구간에서만 났다. 이번 실패의 원인이 아니다.
+
+### 판정이 필요한 것
+
+- `reach` 실패는 Panda 의 물리 사양 대응(adapter)이 아니라 **occluded target 의 마지막 관측을 유지하는 V11AB 동작**에서
+  온다. 한도를 키우면 gate 를 바꾸는 것이 된다.
+- B 의 `exec_feedback` 를 실제 실행에 맞추는 것은 adapter 범위이다. 다만 아직 판정 전이다.
+
+### 측정하지 않은 것
+
+- 장애물 장면에서 A · B 의 회피 실현도.
+- task 1~9 와 다른 init.
+- B feedback 불일치 가설.

@@ -1,0 +1,678 @@
+{
+ "step": "SL5b-smoke",
+ "date": "2026-10-14",
+ "code_commit": "945b608c (runs), fa658e06 (grasp logging + figure)",
+ "runs": {
+  "vla_only": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T142532_945b608c6a0c_sl5b-smoke3-t0e0-vla_only",
+  "v11ab_A": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T143323_945b608c6a0c_sl5b-smoke4-t0e0-vla_v11ab-A",
+  "v11ab_B": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T143614_945b608c6a0c_sl5b-smoke4-t0e0-vla_v11ab-B",
+  "v11ab_B_smoke3_no_grasp_log": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T142806_945b608c6a0c_sl5b-smoke3-t0e0-vla_v11ab-B",
+  "earlier_A_smoke2_empty_below_0.10": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261013T170742_76ee59ba9c48_sl5b-smoke2-t0e0-vla_v11ab"
+ },
+ "figure": "AG3S/ag3s/docs/figures/sl5b-smoke4-t0e0-ab.png",
+ "numbers": {
+  "task": "libero_spatial task 0 init 0, policy_seed 700000",
+  "gripper_calibration": {
+   "empty_closure_norm": 0.012507131967971047,
+   "grasped_norm_min": 0.03813173423789321,
+   "empty_below_panda": 0.025325,
+   "empty_below_rby1_default": 0.1
+  },
+  "episodes": {
+   "VLA-only": {
+    "official_success": true,
+    "status": "success",
+    "env_steps_excluding_wait": 104
+   },
+   "V11AB-A": {
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps_excluding_wait": 220
+   },
+   "V11AB-B": {
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps_excluding_wait": 220
+   }
+  },
+  "attach_obs": {
+   "VLA-only": null,
+   "V11AB-A": [],
+   "V11AB-B": [
+    145
+   ]
+  },
+  "detach_obs": {
+   "VLA-only": null,
+   "V11AB-A": [],
+   "V11AB-B": [
+    165
+   ]
+  },
+  "A": {
+   "stem": "libero_spatial_t0_e0",
+   "official_success": false,
+   "status": "max_steps",
+   "env_steps": 220,
+   "calls": 44,
+   "hold_calls": 25,
+   "corrected_calls": 18,
+   "passthrough_rows_total": 58,
+   "passthrough_rows_bit_identical": 58,
+   "pred_vs_actual_mm": {
+    "passthrough_calls_p50_max": [
+     3.2143713852016713,
+     3.2143713852016713
+    ],
+    "corrected_calls_p50_max": [
+     7.627493331183848,
+     30.241212903781815
+    ]
+   },
+   "corrected_calls_realisation": {
+    "refined_change_mm_p50_max": [
+     2.903311213554588,
+     120.0723899991597
+    ],
+    "predicted_vs_refined_mm_p50_max": [
+     1.7141085217964878,
+     118.93774843752888
+    ],
+    "realised_fraction_p50": 0.9991898410915763
+   },
+   "max_abs_arm_change_executed_p50_max": [
+    0.6291466878625911,
+    1.7406091030809878
+   ],
+   "saturated_rows_total": 57,
+   "executed_abs_ge_1_total": 72
+  },
+  "B": {
+   "stem": "libero_spatial_t0_e0",
+   "official_success": false,
+   "status": "max_steps",
+   "env_steps": 220,
+   "calls": 44,
+   "hold_calls": 3,
+   "corrected_calls": 40,
+   "passthrough_rows_total": 82,
+   "passthrough_rows_bit_identical": 82,
+   "pred_vs_actual_mm": {
+    "passthrough_calls_p50_max": [
+     3.2143713852016713,
+     3.2143713852016713
+    ],
+    "corrected_calls_p50_max": [
+     6.37813535432294,
+     17.151860322653658
+    ]
+   },
+   "corrected_calls_realisation": {
+    "refined_change_mm_p50_max": [
+     16.452566935335163,
+     168.32527267645744
+    ],
+    "predicted_vs_refined_mm_p50_max": [
+     14.756245207400775,
+     143.49908178423522
+    ],
+    "realised_fraction_p50": 0.14702085311334315
+   },
+   "max_abs_arm_change_executed_p50_max": [
+    0.22742724777593842,
+    1.5851378687314988
+   ],
+   "saturated_rows_total": 25,
+   "executed_abs_ge_1_total": 14
+  },
+  "B_smoke3_equals_smoke4": true,
+  "reach_limit_mm": 120.0,
+  "reach_per_call_A": [
+   [
+    10,
+    null,
+    false,
+    null
+   ],
+   [
+    15,
+    400.13,
+    false,
+    "visible"
+   ],
+   [
+    20,
+    375.33,
+    false,
+    "visible"
+   ],
+   [
+    25,
+    359.51,
+    false,
+    "visible"
+   ],
+   [
+    30,
+    343.99,
+    false,
+    "visible"
+   ],
+   [
+    35,
+    310.47,
+    false,
+    "visible"
+   ],
+   [
+    40,
+    268.25,
+    false,
+    "visible"
+   ],
+   [
+    45,
+    212.83,
+    false,
+    "visible"
+   ],
+   [
+    50,
+    154.62,
+    false,
+    "visible"
+   ],
+   [
+    55,
+    105.98,
+    false,
+    "visible"
+   ],
+   [
+    60,
+    82.52,
+    false,
+    "visible"
+   ],
+   [
+    65,
+    71.95,
+    false,
+    "visible"
+   ],
+   [
+    70,
+    84.88,
+    false,
+    "occluded"
+   ],
+   [
+    75,
+    123.48,
+    false,
+    "visible"
+   ],
+   [
+    80,
+    172.13,
+    false,
+    "occluded"
+   ],
+   [
+    85,
+    199.91,
+    true,
+    "occluded"
+   ],
+   [
+    90,
+    197.35,
+    false,
+    "occluded"
+   ],
+   [
+    95,
+    190.28,
+    false,
+    "occluded"
+   ],
+   [
+    100,
+    186.57,
+    false,
+    "occluded"
+   ],
+   [
+    105,
+    163.88,
+    false,
+    "occluded"
+   ],
+   [
+    110,
+    157.22,
+    true,
+    "occluded"
+   ],
+   [
+    115,
+    165.33,
+    true,
+    "occluded"
+   ],
+   [
+    120,
+    167.51,
+    true,
+    "occluded"
+   ],
+   [
+    125,
+    172.74,
+    true,
+    "occluded"
+   ],
+   [
+    130,
+    175.46,
+    true,
+    "occluded"
+   ],
+   [
+    135,
+    176.8,
+    true,
+    "occluded"
+   ],
+   [
+    140,
+    177.45,
+    true,
+    "occluded"
+   ],
+   [
+    145,
+    177.76,
+    true,
+    "occluded"
+   ],
+   [
+    150,
+    177.9,
+    true,
+    "occluded"
+   ],
+   [
+    155,
+    177.95,
+    true,
+    "occluded"
+   ],
+   [
+    160,
+    177.98,
+    true,
+    "occluded"
+   ],
+   [
+    165,
+    178.0,
+    true,
+    "occluded"
+   ],
+   [
+    170,
+    178.0,
+    true,
+    "occluded"
+   ],
+   [
+    175,
+    178.0,
+    true,
+    "occluded"
+   ],
+   [
+    180,
+    178.01,
+    true,
+    "occluded"
+   ],
+   [
+    185,
+    178.01,
+    true,
+    "occluded"
+   ],
+   [
+    190,
+    178.01,
+    true,
+    "occluded"
+   ],
+   [
+    195,
+    178.02,
+    true,
+    "occluded"
+   ],
+   [
+    200,
+    178.02,
+    true,
+    "occluded"
+   ],
+   [
+    205,
+    178.02,
+    true,
+    "occluded"
+   ],
+   [
+    210,
+    178.03,
+    true,
+    "occluded"
+   ],
+   [
+    215,
+    178.03,
+    true,
+    "occluded"
+   ],
+   [
+    220,
+    178.03,
+    true,
+    "occluded"
+   ],
+   [
+    225,
+    178.04,
+    true,
+    "occluded"
+   ]
+  ],
+  "reach_per_call_B": [
+   [
+    10,
+    null,
+    false,
+    null
+   ],
+   [
+    15,
+    400.13,
+    false,
+    "visible"
+   ],
+   [
+    20,
+    374.41,
+    false,
+    "visible"
+   ],
+   [
+    25,
+    352.71,
+    false,
+    "occluded"
+   ],
+   [
+    30,
+    330.81,
+    false,
+    "visible"
+   ],
+   [
+    35,
+    286.94,
+    false,
+    "visible"
+   ],
+   [
+    40,
+    231.38,
+    false,
+    "visible"
+   ],
+   [
+    45,
+    163.36,
+    false,
+    "visible"
+   ],
+   [
+    50,
+    112.75,
+    false,
+    "visible"
+   ],
+   [
+    55,
+    96.2,
+    false,
+    "visible"
+   ],
+   [
+    60,
+    103.42,
+    false,
+    "visible"
+   ],
+   [
+    65,
+    145.06,
+    false,
+    "visible"
+   ],
+   [
+    70,
+    172.05,
+    false,
+    "visible"
+   ],
+   [
+    75,
+    146.93,
+    false,
+    "visible"
+   ],
+   [
+    80,
+    94.22,
+    false,
+    "visible"
+   ],
+   [
+    85,
+    79.32,
+    false,
+    "visible"
+   ],
+   [
+    90,
+    68.67,
+    false,
+    "visible"
+   ],
+   [
+    95,
+    65.23,
+    false,
+    "visible"
+   ],
+   [
+    100,
+    97.43,
+    false,
+    "visible"
+   ],
+   [
+    105,
+    138.86,
+    false,
+    "occluded"
+   ],
+   [
+    110,
+    155.87,
+    false,
+    "occluded"
+   ],
+   [
+    115,
+    184.22,
+    false,
+    "occluded"
+   ],
+   [
+    120,
+    152.25,
+    true,
+    "occluded"
+   ],
+   [
+    125,
+    137.66,
+    true,
+    "occluded"
+   ],
+   [
+    130,
+    136.78,
+    false,
+    "occluded"
+   ],
+   [
+    135,
+    133.01,
+    true,
+    "occluded"
+   ],
+   [
+    140,
+    127.89,
+    false,
+    "occluded"
+   ],
+   [
+    145,
+    111.71,
+    false,
+    "occluded"
+   ],
+   [
+    150,
+    112.61,
+    false,
+    "occluded"
+   ],
+   [
+    155,
+    147.74,
+    false,
+    "occluded"
+   ],
+   [
+    160,
+    170.35,
+    false,
+    "occluded"
+   ],
+   [
+    165,
+    177.43,
+    false,
+    "occluded"
+   ],
+   [
+    170,
+    150.86,
+    false,
+    "occluded"
+   ],
+   [
+    175,
+    127.11,
+    false,
+    "occluded"
+   ],
+   [
+    180,
+    124.05,
+    false,
+    "occluded"
+   ],
+   [
+    185,
+    92.23,
+    false,
+    "visible"
+   ],
+   [
+    190,
+    73.6,
+    false,
+    "visible"
+   ],
+   [
+    195,
+    81.0,
+    false,
+    "visible"
+   ],
+   [
+    200,
+    112.52,
+    false,
+    "visible"
+   ],
+   [
+    205,
+    110.28,
+    false,
+    "visible"
+   ],
+   [
+    210,
+    125.45,
+    false,
+    "occluded"
+   ],
+   [
+    215,
+    94.7,
+    false,
+    "visible"
+   ],
+   [
+    220,
+    102.34,
+    false,
+    "visible"
+   ],
+   [
+    225,
+    83.88,
+    false,
+    "visible"
+   ]
+  ],
+  "A_reach_mm_last_calls": [
+   178.02,
+   178.03,
+   178.03,
+   178.03,
+   178.04
+  ],
+  "B_attach_call": {
+   "call_seq": 27, "obs": 145, "feedback_seq": 26,
+   "reach_mm": 111.71,
+   "opening": 0.061
+  },
+  "B_first_reach_fail_seq": 19,
+  "B_first_occluded_seq": 19,
+  "geometry_frame_frozen_at": 17
+ }
+}
