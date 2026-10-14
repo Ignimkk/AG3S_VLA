@@ -1,0 +1,530 @@
+{
+ "runs": {
+  "VLA-only": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T170642_1df077b8a699_sl5b-libero10-init0-r2-vla_only",
+  "V11AB-B": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T171250_1df077b8a699_sl5b-libero10-init0-r2-vla_v11ab-B",
+  "V11AB-A": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T165043_1df077b8a699_sl5b-libero10-init0-vla_v11ab-A"
+ },
+ "per_task": {
+  "VLA-only": {
+   "0": {
+    "success": true,
+    "steps": 104,
+    "status": "success"
+   },
+   "1": {
+    "success": true,
+    "steps": 109,
+    "status": "success"
+   },
+   "2": {
+    "success": true,
+    "steps": 126,
+    "status": "success"
+   },
+   "3": {
+    "success": true,
+    "steps": 87,
+    "status": "success"
+   },
+   "4": {
+    "success": true,
+    "steps": 117,
+    "status": "success"
+   },
+   "5": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps"
+   },
+   "6": {
+    "success": true,
+    "steps": 110,
+    "status": "success"
+   },
+   "7": {
+    "success": true,
+    "steps": 125,
+    "status": "success"
+   },
+   "8": {
+    "success": true,
+    "steps": 104,
+    "status": "success"
+   },
+   "9": {
+    "success": true,
+    "steps": 122,
+    "status": "success"
+   }
+  },
+  "V11AB-B": {
+   "0": {
+    "success": true,
+    "steps": 114,
+    "status": "success",
+    "calls": 23,
+    "hold": 0,
+    "hold_kinds": {},
+    "attach_seq": [
+     18
+    ],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 9,
+     "closed": 2,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 5,
+     "manipulated": 0,
+     "reach": 3
+    },
+    "time_budget_hit": 0
+   },
+   "1": {
+    "success": true,
+    "steps": 116,
+    "status": "success",
+    "calls": 24,
+    "hold": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "attach_seq": [
+     14
+    ],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 3,
+     "closed": 1,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 0
+    },
+    "time_budget_hit": 0
+   },
+   "2": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 13,
+    "hold_kinds": {
+     "collision": 13
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 4,
+     "closed": 1,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 26
+    },
+    "time_budget_hit": 0
+   },
+   "3": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 21,
+    "hold_kinds": {
+     "collision": 21
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 6,
+     "closed": 1,
+     "dropped": 1,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 31
+    },
+    "time_budget_hit": 0
+   },
+   "4": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 8,
+    "hold_kinds": {
+     "uncertified": 8
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 18,
+     "closed": 3,
+     "dropped": 2,
+     "not_empty": 2,
+     "blocked": 10,
+     "manipulated": 0,
+     "reach": 20
+    },
+    "time_budget_hit": 0
+   },
+   "5": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 8,
+     "closed": 0,
+     "dropped": 12,
+     "not_empty": 0,
+     "blocked": 4,
+     "manipulated": 0,
+     "reach": 29
+    },
+    "time_budget_hit": 0
+   },
+   "6": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 7,
+    "hold_kinds": {
+     "collision": 7
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 5,
+     "closed": 0,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 30
+    },
+    "time_budget_hit": 0
+   },
+   "7": {
+    "success": true,
+    "steps": 132,
+    "status": "success",
+    "calls": 27,
+    "hold": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "attach_seq": [
+     11
+    ],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 4,
+     "closed": 1,
+     "dropped": 1,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 0
+    },
+    "time_budget_hit": 0
+   },
+   "8": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 13,
+    "hold_kinds": {
+     "collision": 13
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 4,
+     "closed": 0,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 29
+    },
+    "time_budget_hit": 0
+   },
+   "9": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 16,
+    "hold_kinds": {
+     "collision": 16
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 3,
+     "closed": 1,
+     "dropped": 1,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 35
+    },
+    "time_budget_hit": 0
+   }
+  },
+  "V11AB-A": {
+   "0": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 12,
+    "hold_kinds": {
+     "collision": 12
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 3,
+     "closed": 0,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 11,
+     "manipulated": 0,
+     "reach": 31
+    },
+    "time_budget_hit": 0
+   },
+   "1": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 0,
+    "hold_kinds": {},
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 20,
+     "closed": 3,
+     "dropped": 3,
+     "not_empty": 4,
+     "blocked": 14,
+     "manipulated": 0,
+     "reach": 11
+    },
+    "time_budget_hit": 0
+   },
+   "2": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 17,
+    "hold_kinds": {
+     "collision": 17
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 4,
+     "closed": 1,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 1,
+     "manipulated": 0,
+     "reach": 25
+    },
+    "time_budget_hit": 0
+   },
+   "3": {
+    "success": true,
+    "steps": 97,
+    "status": "success",
+    "calls": 20,
+    "hold": 0,
+    "hold_kinds": {},
+    "attach_seq": [
+     14
+    ],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 3,
+     "closed": 0,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 0
+    },
+    "time_budget_hit": 0
+   },
+   "4": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 34,
+    "hold_kinds": {
+     "uncertified": 8,
+     "collision": 26
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 0,
+     "closed": 0,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 0
+    },
+    "time_budget_hit": 0
+   },
+   "5": {
+    "success": true,
+    "steps": 101,
+    "status": "success",
+    "calls": 21,
+    "hold": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 0,
+     "closed": 0,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 0
+    },
+    "time_budget_hit": 0
+   },
+   "6": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 16,
+    "hold_kinds": {
+     "collision": 16
+    },
+    "attach_seq": [
+     15,
+     30
+    ],
+    "detach_seq": [
+     16,
+     34
+    ],
+    "closing_fails": {
+     "settled": 10,
+     "closed": 1,
+     "dropped": 4,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 10
+    },
+    "time_budget_hit": 0
+   },
+   "7": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 0,
+    "hold_kinds": {},
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 23,
+     "closed": 0,
+     "dropped": 0,
+     "not_empty": 8,
+     "blocked": 22,
+     "manipulated": 0,
+     "reach": 18
+    },
+    "time_budget_hit": 0
+   },
+   "8": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "attach_seq": [
+     16
+    ],
+    "detach_seq": [
+     30
+    ],
+    "closing_fails": {
+     "settled": 3,
+     "closed": 1,
+     "dropped": 0,
+     "not_empty": 0,
+     "blocked": 0,
+     "manipulated": 0,
+     "reach": 0
+    },
+    "time_budget_hit": 0
+   },
+   "9": {
+    "success": false,
+    "steps": 220,
+    "status": "max_steps",
+    "calls": 44,
+    "hold": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "attach_seq": [],
+    "detach_seq": [],
+    "closing_fails": {
+     "settled": 8,
+     "closed": 0,
+     "dropped": 0,
+     "not_empty": 1,
+     "blocked": 18,
+     "manipulated": 0,
+     "reach": 22
+    },
+    "time_budget_hit": 0
+   }
+  }
+ },
+ "success": {
+  "VLA-only": 9,
+  "V11AB-B": 3,
+  "V11AB-A": 2
+ },
+ "keyframe_task": 9,
+ "keyframe_obs": [
+  50,
+  80,
+  110,
+  140,
+  180,
+  229
+ ]
+}

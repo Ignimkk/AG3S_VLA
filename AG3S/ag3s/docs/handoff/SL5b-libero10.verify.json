@@ -1,0 +1,1589 @@
+{
+ "step": "SL5b-libero10",
+ "date": "2026-10-14",
+ "code_commit": "1df077b8 (all three runs used here)",
+ "runs": {
+  "VLA-only": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T170642_1df077b8a699_sl5b-libero10-init0-r2-vla_only",
+  "V11AB-B": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T171250_1df077b8a699_sl5b-libero10-init0-r2-vla_v11ab-B",
+  "V11AB-A": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T165043_1df077b8a699_sl5b-libero10-init0-vla_v11ab-A"
+ },
+ "figure": "AG3S/ag3s/docs/figures/sl5b-libero10-init0.png",
+ "excluded_runs": {
+  "20261014T164309_5b1e11cefbb3_sl5b-libero10-init0-vla_only": "VLA-only on 5b1e11ce; its V11AB-B partner did not run (client refused: run allocated on 5b1e11ce, checkout moved to 1df077b8 before the client started). Not paired; same per-task official success as the r2 VLA-only (10/10 equal).",
+  "20261014T164941_5b1e11cefbb3_sl5b-libero10-init0-vla_v11ab-B": "no episodes (client refused, see above)"
+ },
+ "data_split": "dev (LIBERO init 0, plan §6.0)",
+ "numbers": {
+  "success": {
+   "VLA-only": 9,
+   "V11AB-B": 3,
+   "V11AB-A": 2
+  },
+  "paired_summary_B": {
+   "n": 10,
+   "vla_only_success": 9,
+   "vla_v11ab_success": 3,
+   "candidate_rule": "VLA-only fails and VLA+V11AB succeeds on official success (same task, init state, policy_seed)"
+  },
+  "candidates_B": 0,
+  "per_task": {
+   "VLA-only": {
+    "0": {
+     "success": true,
+     "steps": 104,
+     "status": "success"
+    },
+    "1": {
+     "success": true,
+     "steps": 109,
+     "status": "success"
+    },
+    "2": {
+     "success": true,
+     "steps": 126,
+     "status": "success"
+    },
+    "3": {
+     "success": true,
+     "steps": 87,
+     "status": "success"
+    },
+    "4": {
+     "success": true,
+     "steps": 117,
+     "status": "success"
+    },
+    "5": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps"
+    },
+    "6": {
+     "success": true,
+     "steps": 110,
+     "status": "success"
+    },
+    "7": {
+     "success": true,
+     "steps": 125,
+     "status": "success"
+    },
+    "8": {
+     "success": true,
+     "steps": 104,
+     "status": "success"
+    },
+    "9": {
+     "success": true,
+     "steps": 122,
+     "status": "success"
+    }
+   },
+   "V11AB-B": {
+    "0": {
+     "success": true,
+     "steps": 114,
+     "status": "success",
+     "calls": 23,
+     "hold": 0,
+     "hold_kinds": {},
+     "attach_seq": [
+      18
+     ],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 9,
+      "closed": 2,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 5,
+      "manipulated": 0,
+      "reach": 3
+     },
+     "time_budget_hit": 0
+    },
+    "1": {
+     "success": true,
+     "steps": 116,
+     "status": "success",
+     "calls": 24,
+     "hold": 1,
+     "hold_kinds": {
+      "collision": 1
+     },
+     "attach_seq": [
+      14
+     ],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 3,
+      "closed": 1,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 0
+     },
+     "time_budget_hit": 0
+    },
+    "2": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 13,
+     "hold_kinds": {
+      "collision": 13
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 4,
+      "closed": 1,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 26
+     },
+     "time_budget_hit": 0
+    },
+    "3": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 21,
+     "hold_kinds": {
+      "collision": 21
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 6,
+      "closed": 1,
+      "dropped": 1,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 31
+     },
+     "time_budget_hit": 0
+    },
+    "4": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 8,
+     "hold_kinds": {
+      "uncertified": 8
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 18,
+      "closed": 3,
+      "dropped": 2,
+      "not_empty": 2,
+      "blocked": 10,
+      "manipulated": 0,
+      "reach": 20
+     },
+     "time_budget_hit": 0
+    },
+    "5": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 2,
+     "hold_kinds": {
+      "collision": 2
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 8,
+      "closed": 0,
+      "dropped": 12,
+      "not_empty": 0,
+      "blocked": 4,
+      "manipulated": 0,
+      "reach": 29
+     },
+     "time_budget_hit": 0
+    },
+    "6": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 7,
+     "hold_kinds": {
+      "collision": 7
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 5,
+      "closed": 0,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 30
+     },
+     "time_budget_hit": 0
+    },
+    "7": {
+     "success": true,
+     "steps": 132,
+     "status": "success",
+     "calls": 27,
+     "hold": 1,
+     "hold_kinds": {
+      "collision": 1
+     },
+     "attach_seq": [
+      11
+     ],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 4,
+      "closed": 1,
+      "dropped": 1,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 0
+     },
+     "time_budget_hit": 0
+    },
+    "8": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 13,
+     "hold_kinds": {
+      "collision": 13
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 4,
+      "closed": 0,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 29
+     },
+     "time_budget_hit": 0
+    },
+    "9": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 16,
+     "hold_kinds": {
+      "collision": 16
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 3,
+      "closed": 1,
+      "dropped": 1,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 35
+     },
+     "time_budget_hit": 0
+    }
+   },
+   "V11AB-A": {
+    "0": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 12,
+     "hold_kinds": {
+      "collision": 12
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 3,
+      "closed": 0,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 11,
+      "manipulated": 0,
+      "reach": 31
+     },
+     "time_budget_hit": 0
+    },
+    "1": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 0,
+     "hold_kinds": {},
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 20,
+      "closed": 3,
+      "dropped": 3,
+      "not_empty": 4,
+      "blocked": 14,
+      "manipulated": 0,
+      "reach": 11
+     },
+     "time_budget_hit": 0
+    },
+    "2": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 17,
+     "hold_kinds": {
+      "collision": 17
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 4,
+      "closed": 1,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 1,
+      "manipulated": 0,
+      "reach": 25
+     },
+     "time_budget_hit": 0
+    },
+    "3": {
+     "success": true,
+     "steps": 97,
+     "status": "success",
+     "calls": 20,
+     "hold": 0,
+     "hold_kinds": {},
+     "attach_seq": [
+      14
+     ],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 3,
+      "closed": 0,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 0
+     },
+     "time_budget_hit": 0
+    },
+    "4": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 34,
+     "hold_kinds": {
+      "uncertified": 8,
+      "collision": 26
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 0,
+      "closed": 0,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 0
+     },
+     "time_budget_hit": 0
+    },
+    "5": {
+     "success": true,
+     "steps": 101,
+     "status": "success",
+     "calls": 21,
+     "hold": 1,
+     "hold_kinds": {
+      "collision": 1
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 0,
+      "closed": 0,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 0
+     },
+     "time_budget_hit": 0
+    },
+    "6": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 16,
+     "hold_kinds": {
+      "collision": 16
+     },
+     "attach_seq": [
+      15,
+      30
+     ],
+     "detach_seq": [
+      16,
+      34
+     ],
+     "closing_fails": {
+      "settled": 10,
+      "closed": 1,
+      "dropped": 4,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 10
+     },
+     "time_budget_hit": 0
+    },
+    "7": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 0,
+     "hold_kinds": {},
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 23,
+      "closed": 0,
+      "dropped": 0,
+      "not_empty": 8,
+      "blocked": 22,
+      "manipulated": 0,
+      "reach": 18
+     },
+     "time_budget_hit": 0
+    },
+    "8": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 1,
+     "hold_kinds": {
+      "collision": 1
+     },
+     "attach_seq": [
+      16
+     ],
+     "detach_seq": [
+      30
+     ],
+     "closing_fails": {
+      "settled": 3,
+      "closed": 1,
+      "dropped": 0,
+      "not_empty": 0,
+      "blocked": 0,
+      "manipulated": 0,
+      "reach": 0
+     },
+     "time_budget_hit": 0
+    },
+    "9": {
+     "success": false,
+     "steps": 220,
+     "status": "max_steps",
+     "calls": 44,
+     "hold": 2,
+     "hold_kinds": {
+      "collision": 2
+     },
+     "attach_seq": [],
+     "detach_seq": [],
+     "closing_fails": {
+      "settled": 8,
+      "closed": 0,
+      "dropped": 0,
+      "not_empty": 1,
+      "blocked": 18,
+      "manipulated": 0,
+      "reach": 22
+     },
+     "time_budget_hit": 0
+    }
+   }
+  },
+  "contract_B": {
+   "feedback_calls": 372,
+   "n_steps_ok": 372,
+   "measured_ok": 372,
+   "withdrawn": 0,
+   "unintervened_chunks": 12,
+   "unintervened_equal": 12,
+   "passthrough_rows": 940,
+   "passthrough_bit_identical": 940
+  },
+  "contract_A": {
+   "feedback_calls": 383,
+   "n_steps_ok": 383,
+   "measured_ok": 383,
+   "withdrawn": 0,
+   "unintervened_chunks": 10,
+   "unintervened_equal": 10,
+   "passthrough_rows": 902,
+   "passthrough_bit_identical": 902
+  },
+  "B_episodes": [
+   {
+    "stem": "libero_spatial_t0_e0",
+    "official_success": true,
+    "status": "success",
+    "env_steps": 114,
+    "calls": 23,
+    "hold_calls": 0,
+    "corrected_calls": 21,
+    "passthrough_rows_total": 100,
+    "passthrough_rows_bit_identical": 100,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      9.736309515434396,
+      16.25824764566712
+     ],
+     "corrected_calls_p50_max": [
+      5.521597719000986,
+      27.554536913879648
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      1.8705177729858549,
+      238.6154249141957
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      1.5566728384140116,
+      202.14793037097996
+     ],
+     "realised_fraction_p50": 0.12617989350626868
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.010048120893433876,
+     0.9416101364948717
+    ],
+    "saturated_rows_total": 4,
+    "executed_abs_ge_1_total": 0,
+    "feedback_contract": {
+     "feedback_calls": 22,
+     "server_used": 22,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 22,
+     "measured_equals_this_capture": 22,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.007654538341330119,
+      0.18582674224038787
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t1_e0",
+    "official_success": true,
+    "status": "success",
+    "env_steps": 116,
+    "calls": 24,
+    "hold_calls": 1,
+    "corrected_calls": 22,
+    "passthrough_rows_total": 104,
+    "passthrough_rows_bit_identical": 104,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      9.661697672322235,
+      9.661697672322235
+     ],
+     "corrected_calls_p50_max": [
+      5.18749839805607,
+      10.395800665303868
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      2.1804697784759615,
+      63.828778640839964
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      1.7941586815517234,
+      54.424823298705405
+     ],
+     "realised_fraction_p50": 0.129719307254066
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.016178360689584337,
+     0.25912159589491446
+    ],
+    "saturated_rows_total": 0,
+    "executed_abs_ge_1_total": 0,
+    "feedback_contract": {
+     "feedback_calls": 23,
+     "server_used": 23,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 23,
+     "measured_equals_this_capture": 23,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.006209892016347751,
+      0.09980324325783219
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t2_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 13,
+    "corrected_calls": 30,
+    "passthrough_rows_total": 86,
+    "passthrough_rows_bit_identical": 86,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      0.8908411758005675,
+      0.8908411758005675
+     ],
+     "corrected_calls_p50_max": [
+      4.8931274787187125,
+      27.816412280694877
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      1.5913850980256212,
+      290.62835006658315
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      1.3190991880051492,
+      258.85124232649264
+     ],
+     "realised_fraction_p50": 0.12876098052244186
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.010909551238316717,
+     1.451839452088833
+    ],
+    "saturated_rows_total": 14,
+    "executed_abs_ge_1_total": 5,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.033277848834430634,
+      0.5114938966832888
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t3_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 21,
+    "corrected_calls": 22,
+    "passthrough_rows_total": 232,
+    "passthrough_rows_bit_identical": 232,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      4.726985851512784,
+      4.726985851512784
+     ],
+     "corrected_calls_p50_max": [
+      6.381881131006412,
+      15.061643695440198
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      3.1292470744927328,
+      201.8080100479784
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      2.6072052821465457,
+      184.99178291665
+     ],
+     "realised_fraction_p50": 0.12665792671144493
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.022740423074801397,
+     1.4352539049053397
+    ],
+    "saturated_rows_total": 20,
+    "executed_abs_ge_1_total": 12,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.06831912735087542,
+      0.3586853997251027
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t4_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 8,
+    "corrected_calls": 36,
+    "passthrough_rows_total": 106,
+    "passthrough_rows_bit_identical": 106,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      null,
+      null
+     ],
+     "corrected_calls_p50_max": [
+      9.341697459116673,
+      34.58681277847972
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      26.07579124561803,
+      173.75708685602788
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      23.691637480827907,
+      157.84645409408427
+     ],
+     "realised_fraction_p50": 0.13414323833487765
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.2039301400563892,
+     1.0855583965980098
+    ],
+    "saturated_rows_total": 4,
+    "executed_abs_ge_1_total": 4,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 0,
+     "unintervened_applied_equals_reference": 0,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.03323633416870159,
+      0.17412142677002107
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t5_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 2,
+    "corrected_calls": 41,
+    "passthrough_rows_total": 60,
+    "passthrough_rows_bit_identical": 60,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      6.238334095404828,
+      6.238334095404828
+     ],
+     "corrected_calls_p50_max": [
+      6.443085365469891,
+      23.652452556173472
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      15.73551958268563,
+      297.6540706654258
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      14.154203224750308,
+      256.9065853521525
+     ],
+     "realised_fraction_p50": 0.13631787481636926
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.1881751761810957,
+     1.2801454239900383
+    ],
+    "saturated_rows_total": 10,
+    "executed_abs_ge_1_total": 4,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.014799830322195562,
+      0.24521590490292522
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t6_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 7,
+    "corrected_calls": 35,
+    "passthrough_rows_total": 88,
+    "passthrough_rows_bit_identical": 88,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      6.130536081830001,
+      8.264760962745148
+     ],
+     "corrected_calls_p50_max": [
+      7.635368497377845,
+      24.914953364459038
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      50.745549505073114,
+      262.49441920724104
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      41.5659431609788,
+      227.39459973103192
+     ],
+     "realised_fraction_p50": 0.1347783887450388
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.4461830316421844,
+     1.7157113693772554
+    ],
+    "saturated_rows_total": 16,
+    "executed_abs_ge_1_total": 9,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 2,
+     "unintervened_applied_equals_reference": 2,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.048671186416332946,
+      0.36107452886055147
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t7_e0",
+    "official_success": true,
+    "status": "success",
+    "env_steps": 132,
+    "calls": 27,
+    "hold_calls": 1,
+    "corrected_calls": 23,
+    "passthrough_rows_total": 58,
+    "passthrough_rows_bit_identical": 58,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      5.58488791782656,
+      6.605012905623166
+     ],
+     "corrected_calls_p50_max": [
+      3.179512175061256,
+      6.769698563937483
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      1.7680891874061995,
+      33.241419501537116
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      1.4746838527966095,
+      27.53054116645921
+     ],
+     "realised_fraction_p50": 0.13260160548059177
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.01577204240515384,
+     0.45981529823266365
+    ],
+    "saturated_rows_total": 0,
+    "executed_abs_ge_1_total": 0,
+    "feedback_contract": {
+     "feedback_calls": 26,
+     "server_used": 26,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 26,
+     "measured_equals_this_capture": 26,
+     "unintervened_prev_chunks": 3,
+     "unintervened_applied_equals_reference": 3,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.004452931673042983,
+      0.16520108739381145
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t8_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 13,
+    "corrected_calls": 30,
+    "passthrough_rows_total": 76,
+    "passthrough_rows_bit_identical": 76,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      3.8427906891267183,
+      3.8427906891267183
+     ],
+     "corrected_calls_p50_max": [
+      6.056307780305712,
+      22.13942297678481
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      40.14999533272997,
+      144.60005593307517
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      33.35274065973961,
+      132.47901172865335
+     ],
+     "realised_fraction_p50": 0.13133878920664216
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.3285203514169928,
+     1.2204839325939236
+    ],
+    "saturated_rows_total": 7,
+    "executed_abs_ge_1_total": 4,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.08262157782136459,
+      0.4645194987945762
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t9_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 16,
+    "corrected_calls": 27,
+    "passthrough_rows_total": 30,
+    "passthrough_rows_bit_identical": 30,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      8.768927308637688,
+      8.768927308637688
+     ],
+     "corrected_calls_p50_max": [
+      6.879295963797609,
+      23.35273844805347
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      33.81100446431741,
+      186.3000995438744
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      31.94986934236029,
+      161.82615823355997
+     ],
+     "realised_fraction_p50": 0.12501943931888757
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.4429443114615794,
+     1.8635670298756362
+    ],
+    "saturated_rows_total": 25,
+    "executed_abs_ge_1_total": 24,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.07607070537527416,
+      0.27347014271736303
+     ]
+    }
+   }
+  ],
+  "A_episodes": [
+   {
+    "stem": "libero_spatial_t0_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 12,
+    "corrected_calls": 31,
+    "passthrough_rows_total": 58,
+    "passthrough_rows_bit_identical": 58,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      3.2143713852016713,
+      3.2143713852016713
+     ],
+     "corrected_calls_p50_max": [
+      15.058587632949354,
+      69.53507478120689
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      24.22530658351905,
+      275.4326487532938
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      16.91108853006234,
+      275.53448081576556
+     ],
+     "realised_fraction_p50": 0.8356457081211169
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     1.6272332908908127,
+     1.925765720846951
+    ],
+    "saturated_rows_total": 104,
+    "executed_abs_ge_1_total": 217,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.08283014271099798,
+      0.5786861455126008
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t1_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 0,
+    "corrected_calls": 43,
+    "passthrough_rows_total": 138,
+    "passthrough_rows_bit_identical": 138,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      9.661697672322235,
+      9.661697672322235
+     ],
+     "corrected_calls_p50_max": [
+      7.639634645972033,
+      41.019421005728304
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      7.513846588161841,
+      80.88670092699607
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      7.0153250830929625,
+      39.00944619466529
+     ],
+     "realised_fraction_p50": 1.1058946667128147
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     1.2242063364480735,
+     1.9831859857401848
+    ],
+    "saturated_rows_total": 104,
+    "executed_abs_ge_1_total": 116,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.01206528498206283,
+      0.11132561139076835
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t2_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 17,
+    "corrected_calls": 25,
+    "passthrough_rows_total": 100,
+    "passthrough_rows_bit_identical": 100,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      2.473190756471677,
+      4.055540337142786
+     ],
+     "corrected_calls_p50_max": [
+      5.141326622073878,
+      30.89821292339062
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      1.4871519349243636,
+      120.379803131669
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      0.008305924450481577,
+      114.68889855396422
+     ],
+     "realised_fraction_p50": 0.9996335444051798
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.4012136376009253,
+     1.7596728334732057
+    ],
+    "saturated_rows_total": 33,
+    "executed_abs_ge_1_total": 75,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 2,
+     "unintervened_applied_equals_reference": 2,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.04959828924774068,
+      0.5598634757669709
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t3_e0",
+    "official_success": true,
+    "status": "success",
+    "env_steps": 97,
+    "calls": 20,
+    "hold_calls": 0,
+    "corrected_calls": 19,
+    "passthrough_rows_total": 74,
+    "passthrough_rows_bit_identical": 74,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      4.726985851512784,
+      4.726985851512784
+     ],
+     "corrected_calls_p50_max": [
+      10.630569214725028,
+      37.35571114327577
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      4.112573949198266,
+      52.13657500391681
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      5.238267416853619,
+      44.32096195342487
+     ],
+     "realised_fraction_p50": 1.3727793945277802
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.9720822813923123,
+     1.9587662929742335
+    ],
+    "saturated_rows_total": 43,
+    "executed_abs_ge_1_total": 46,
+    "feedback_contract": {
+     "feedback_calls": 19,
+     "server_used": 19,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 19,
+     "measured_equals_this_capture": 19,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.013626490732076557,
+      0.1803095411021734
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t4_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 34,
+    "corrected_calls": 10,
+    "passthrough_rows_total": 102,
+    "passthrough_rows_bit_identical": 102,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      null,
+      null
+     ],
+     "corrected_calls_p50_max": [
+      7.503609005764972,
+      28.02871605144655
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      2.112984898129331,
+      33.28180211576057
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      1.971639780718527,
+      18.24743370850918
+     ],
+     "realised_fraction_p50": 1.3286136925807008
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.6217989326537643,
+     1.7108082343223097
+    ],
+    "saturated_rows_total": 16,
+    "executed_abs_ge_1_total": 23,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 0,
+     "unintervened_applied_equals_reference": 0,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.28720845952730034,
+      0.40739668305745486
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t5_e0",
+    "official_success": true,
+    "status": "success",
+    "env_steps": 101,
+    "calls": 21,
+    "hold_calls": 1,
+    "corrected_calls": 19,
+    "passthrough_rows_total": 34,
+    "passthrough_rows_bit_identical": 34,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      6.238334095404828,
+      6.238334095404828
+     ],
+     "corrected_calls_p50_max": [
+      14.213767742440687,
+      37.46155136552496
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      7.080757963640373,
+      361.06236414611095
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      8.073149956693419,
+      367.0538637587234
+     ],
+     "realised_fraction_p50": 0.9998879008402465
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     1.3726997702007293,
+     1.856660761642575
+    ],
+    "saturated_rows_total": 50,
+    "executed_abs_ge_1_total": 105,
+    "feedback_contract": {
+     "feedback_calls": 20,
+     "server_used": 20,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 20,
+     "measured_equals_this_capture": 20,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.02901163144796376,
+      0.3109428959133004
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t6_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 16,
+    "corrected_calls": 27,
+    "passthrough_rows_total": 74,
+    "passthrough_rows_bit_identical": 74,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      8.264760962745148,
+      8.264760962745148
+     ],
+     "corrected_calls_p50_max": [
+      16.78576718848551,
+      93.67957866071164
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      24.024717437794497,
+      192.8773661962394
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      19.404352838332233,
+      222.45326688422054
+     ],
+     "realised_fraction_p50": 0.6963178854034675
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     1.5512497495824098,
+     1.9330141515590546
+    ],
+    "saturated_rows_total": 89,
+    "executed_abs_ge_1_total": 212,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.17271937969889328,
+      0.5364643348160443
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t7_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 0,
+    "corrected_calls": 43,
+    "passthrough_rows_total": 146,
+    "passthrough_rows_bit_identical": 146,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      5.58488791782656,
+      5.58488791782656
+     ],
+     "corrected_calls_p50_max": [
+      9.575889600322421,
+      46.89889573588658
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      3.9627995825496156,
+      93.68916109871232
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      0.009525547437714069,
+      43.338935744750465
+     ],
+     "realised_fraction_p50": 0.9997912064474185
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     0.7434023630207409,
+     1.5139223841323257
+    ],
+    "saturated_rows_total": 47,
+    "executed_abs_ge_1_total": 60,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.00398816052899181,
+      0.07464847805283664
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t8_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 1,
+    "corrected_calls": 42,
+    "passthrough_rows_total": 114,
+    "passthrough_rows_bit_identical": 114,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      3.8427906891267183,
+      3.8427906891267183
+     ],
+     "corrected_calls_p50_max": [
+      12.18581450833779,
+      51.19791799457639
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      9.740988110470749,
+      83.91381902388754
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      7.599124066486022,
+      79.92968212636417
+     ],
+     "realised_fraction_p50": 0.996722064297856
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     1.129387921395123,
+     1.8465743608660696
+    ],
+    "saturated_rows_total": 107,
+    "executed_abs_ge_1_total": 195,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.019270972034368783,
+      0.2265751023256668
+     ]
+    }
+   },
+   {
+    "stem": "libero_spatial_t9_e0",
+    "official_success": false,
+    "status": "max_steps",
+    "env_steps": 220,
+    "calls": 44,
+    "hold_calls": 2,
+    "corrected_calls": 41,
+    "passthrough_rows_total": 62,
+    "passthrough_rows_bit_identical": 62,
+    "pred_vs_actual_mm": {
+     "passthrough_calls_p50_max": [
+      8.768927308637688,
+      8.768927308637688
+     ],
+     "corrected_calls_p50_max": [
+      13.429799117690266,
+      53.81797107690135
+     ]
+    },
+    "corrected_calls_realisation": {
+     "refined_change_mm_p50_max": [
+      22.582358175281797,
+      106.18378280372141
+     ],
+     "predicted_vs_refined_mm_p50_max": [
+      15.62100214325453,
+      134.19697315421047
+     ],
+     "realised_fraction_p50": 0.7364252222313449
+    },
+    "max_abs_arm_change_executed_p50_max": [
+     1.5715029907836913,
+     1.9914419843188524
+    ],
+    "saturated_rows_total": 128,
+    "executed_abs_ge_1_total": 257,
+    "feedback_contract": {
+     "feedback_calls": 43,
+     "server_used": 43,
+     "withdrawn": [],
+     "n_steps_equals_steps_run": 43,
+     "measured_equals_this_capture": 43,
+     "unintervened_prev_chunks": 1,
+     "unintervened_applied_equals_reference": 1,
+     "applied_minus_refined_rad_max_p50_max": [
+      0.033793206645354644,
+      0.3294075245257614
+     ]
+    }
+   }
+  ],
+  "time_budget_hit_total": {
+   "V11AB-B": 0,
+   "V11AB-A": 0
+  },
+  "vla_only_5b1e11ce_equals_r2_per_task": true,
+  "load_average_during_runs": "27-54 (16 cores, node shared)"
+ }
+}

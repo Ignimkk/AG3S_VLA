@@ -31,10 +31,10 @@
 | | SL-4b ATS 용 attention cell dev calibration 연구 | **완료 (2026-10-13, 사용자 확정)** | 아래 [SL4b](#sl4b--ats-용-attention-cell-dev-calibration-2026-10-13). ~~진행 중 (사전 등록)~~ → 사전 등록 규칙대로 **V11AB L8H2 유지**(최고 후보 L12H3 가 +1.5 %p, 기준 +10 %p 미달). oracle 도 t4 · t9 에서 0 이어서 오선택은 attention cell 이 아니라 그 뒤 grounding 단계 문제로 남는다. 같은 STEP 에서 LIBERO fixture reset 이력 문제를 찾아 export · replay 를 고쳤다. test 데이터는 쓰지 않았다 |
 | | SL-4c ATS grounding 탈락 원인 진단 (t4 · t5 · t9) | **진행 중 (2026-10-13)** | [`handoff/SL4c.task.md`](handoff/SL4c.task.md) (commit `cf4649ce`). **진단만** 한다. code 는 `85e6d9d1` worktree 에 고정. cluster 병합 · Panda 8 cm 개도 한계는 **가설**이며 측정이 확인 또는 반박한다 |
 | | SL-5a Panda 주입(최소 core 변경) + EE delta ↔ joint 변환, offline 검증 | **구현 완료 (2026-10-13, commit `76ee59ba`), 2026-10-14 보정 추가** | [`handoff/SL5a.task.md`](handoff/SL5a.task.md). RB-Y1 golden bit 동일 · 무개입 chunk bit 동일 유지. 2026-10-14: gripper `empty_below` Panda 보정, 역변환 A/B 명시 모드 (아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14)) |
-| | SL-5b live closed-loop 1 episode | **진행 중 (2026-10-14)** | 아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14) · [SL5b-feedback](#sl5b-feedback--exec_feedback-를-실제-실행-기준으로-확정-t0-재측정-2026-10-14). feedback 정합성 수정 후 t0 init0 에서 V11AB-B 성공(114 steps), V11AB-A 실패. latch `reach` · occluded target 문제는 development 로 전달(사용자 판정) |
+| | SL-5b live closed-loop 1 episode | **연결 확인 완료 (2026-10-14)**, 한계 기록 | 아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14) · [SL5b-feedback](#sl5b-feedback--exec_feedback-를-실제-실행-기준으로-확정-t0-재측정-2026-10-14) · [SL5b-libero10](#sl5b-libero10--libero-task-09--init-0-paired-2026-10-14). closed loop · 피드백 계약 · 무개입 동일성은 10 episode 전부 성립. V11AB-B 3/10, A 2/10 (VLA-only 9/10). 실패 7 건 중 6 건은 latch `reach`(occluded target) 로 attach 되지 않은 경우 — development 로 전달 |
 | | SL-6 phase / gate source | 미착수 | Panda main 의 phase source = gripper-state strong rule 또는 pi05_libero feature 로 dev 에서 새로 학습한 probe(GT phase 는 oracle 비교용). **SL-6 에서 결정** |
 | | SL-7 ~ SL-8 (contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. ~~SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1)~~ → SL3 에서 un-mirror mapping 구현·측정 완료(image 검사 221/221 call), **SL4 에서 ATS 결과로도 확인**(mirror 로 돌린 접근 단계 centroid 오차 median 236.2 mm 대 12.0 mm). 이후 단계는 이 mapping 을 그대로 쓴다 |
-| **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | 미착수 | SL0 의 1 episode 로는 성능을 말할 수 없다 |
+| **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | **소규모 확인 (2026-10-14)** | task 0~9 × init 0 (dev) paired. 통합 오류 없음, 뚜렷한 저하(9/10 → 3/10) 확인. 비저하 증명이 아니다 (사용자 판정 2026-10-14) |
 | **P3** SafeLIBERO Spatial Level I/II pilot | contact 판정 검증 + paired 결과 | 미착수 | |
 | **P4** 전체 SafeLIBERO | official I/II 전체 | 미착수 | |
 | **P5** LIBERO-Safety 추가 평가 | 독립 protocol · adapter | 미착수 | |
@@ -2303,3 +2303,70 @@ V11AB 는 `exec_feedback` 를 세 곳에서 쓴다.
 
 - 장애물 장면에서 B 의 회피 실현도. SafeLIBERO 에서 측정한다.
 - t0 외 task · init.
+
+---
+
+## SL5b-libero10 — LIBERO task 0~9 × init 0 paired (2026-10-14)
+
+**기록 시각** 2026-10-14 17:55 KST. **수치 출처** [`handoff/SL5b-libero10.verify.json`](handoff/SL5b-libero10.verify.json).
+**그림** [`figures/sl5b-libero10-init0.png`](figures/sl5b-libero10-init0.png) (+ `.json`). **code** `1df077b8` (세 run 모두).
+**split** dev (LIBERO init 0, plan §6.0).
+
+목적은 사용자 판정대로 **통합 오류와 뚜렷한 저하의 확인**이다. 10 episode 로 비저하를 증명하지 않는다.
+
+### 진행 중 생긴 문제 (기록)
+
+첫 시도(run-id `sl5b-libero10-init0`)에서 문제가 있었다.
+
+- VLA-only 는 `5b1e11ce` 에서 돌았다.
+- V11AB-B 는 client 가 시작되기 전에 내가 SafeLIBERO 연결을 commit(`1df077b8`)했다. client 는 "다른 commit 의 run" 이라며
+  거부했고 episode 가 없다.
+- 그래서 VLA-only 와 V11AB-B 를 `1df077b8` 에서 다시 돌렸다(`-r2`).
+- 첫 VLA-only 는 r2 VLA-only 와 task 별 성공이 10 / 10 같다. 하지만 짝이 없으므로 비교에 쓰지 않는다.
+- 이후 run 진행 중에는 runner 코드를 고치지 않는다.
+
+### 결과 — official success
+
+| 조건 | 성공 | 성공 task |
+|---|---|---|
+| VLA-only | 9 / 10 | t5 제외 전부 |
+| V11AB-B (paired) | 3 / 10 | t0 · t1 · t7 |
+| V11AB-A (별도 run, 같은 commit) | 2 / 10 | t3 · t5 |
+
+V11AB-B 기준 "VLA-only 실패 · V11AB 성공" 후보는 0 건이다.
+
+V11AB-A 는 t5 에서 VLA-only 가 실패한 episode 를 성공했다. 다만 이 episode 에서 latch 는 한 번도 파지 상태가 되지
+않았다(`searching`). HOLD 는 1 회이고 action 변화가 크다(saturated 50 행). 회피에 의한 성공으로 볼 근거가 없어
+관찰로만 남긴다.
+
+### 결과 — 통합 점검 (통과 기준)
+
+| 항목 | B | A |
+|---|---|---|
+| 피드백 `n_steps` = 실제 진행 step | 372 / 372 | 383 / 383 |
+| `measured_gripper` = 이번 촬영값 | 372 / 372 | 383 / 383 |
+| 무개입 chunk 의 `applied_arm` = reference | 12 / 12 | 10 / 10 |
+| 철회된 피드백 | 0 | 0 |
+| 무개입 행 action bit 동일 | 940 / 940 | 902 / 902 |
+| TrajOpt `time_budget_hit` | 0 | 0 |
+| client 실행 오류 | 0 | 0 |
+
+통합 오류는 없다. node load average 는 27 ~ 54 (16 core) 였지만 time budget 에 걸린 call 은 없었다.
+
+### 결과 — 저하 원인 (V11AB-B)
+
+| 구분 | episode | latch | 주된 HOLD |
+|---|---|---|---|
+| 성공 | t0 · t1 · t7 | 전부 attach | 없음 또는 1 회 |
+| 실패 | t2 · t3 · t5 · t6 · t8 · t9 | attach 없음. 닫힘 중 `reach` 실패 26 ~ 35 회 | `panda_hand ↔ esdf` collision (쥔 bowl 이 장애물로 남음) |
+| 실패 | t4 | attach 없음 (`reach` 20 · `settled` 18 · `blocked` 10) | `uncertified` 8 회 (target 을 잃음, SL4 에서 본 t4 grounding 문제) |
+
+실패 7 건 중 6 건은 t0 smoke 와 같은 기전이다. 들어올린 bowl 이 occluded 되고, latch 의 `reach` 가 마지막 관측
+centroid 기준으로 120 mm 를 넘는다. 그래서 attach 하지 못하고, 쥔 bowl 이 장애물로 남아 HOLD 가 난다.
+이 문제는 development 로 전달했다([`handoff/SL5b-reach-to-development.md`](handoff/SL5b-reach-to-development.md)).
+benchmark 에서는 latch 를 바꾸지 않는다.
+
+### 측정하지 않은 것
+
+- init 1~4 와 test split.
+- 장애물 장면에서 B 의 회피 실현도 (SafeLIBERO 에서 측정).

@@ -40,6 +40,16 @@ held object stays in the ESDF as an obstacle, and the verdict gives collision HO
   - each with a `.json` sidecar holding `reach_mm_per_call`: (obs, reach, HOLD, manipulated_state).
 - Numbers: `AG3S/ag3s/docs/handoff/SL5b-smoke.verify.json`, `SL5b-feedback.verify.json`.
 
+## How often (LIBERO task 0-9 x init 0, code `1df077b8`, 2026-10-14)
+
+V11AB-B succeeded on 3/10 (VLA-only 9/10). All 3 successes attached. Of the 7 failures, 6 (t2, t3, t5, t6, t8, t9)
+never attached: `reach` failed on 26–35 closing calls each, and collision HOLDs followed (`panda_hand ↔ esdf`).
+t4 lost its target (`uncertified`). Runs:
+- `20261014T171250_1df077b8a699_sl5b-libero10-init0-r2-vla_v11ab-B`;
+- `20261014T165043_1df077b8a699_sl5b-libero10-init0-vla_v11ab-A`;
+- figure `AG3S/ag3s/docs/figures/sl5b-libero10-init0.png`;
+- numbers `AG3S/ag3s/docs/handoff/SL5b-libero10.verify.json`.
+
 ## Reproduce (benchmark checkout)
 
 ```bash
