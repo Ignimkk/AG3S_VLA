@@ -93,3 +93,14 @@ def test_ag3s_version_flags_reach_the_server_argv():
     assert profile.v11ab_build_kwargs(profile.parse_v11ab_args())["reach_at_capture"] is False
     with pytest.raises(ValueError):
         profile.version_server_flags("V99")
+
+
+def test_pb2_flags_reach_the_trajopt_config():
+    from AG3S.adapters.panda import profile
+    from AG3S.trajopt import serve_safe as ss
+
+    args = profile.parse_v11ab_args(argv=profile.v11ab_server_argv() + profile.version_server_flags("V11AB-pb2"))
+    cfg = ss.trajopt_config_from_args(args)
+    assert cfg.sqp.minimal_intervention == pytest.approx(0.010)
+    assert profile.v11ab_build_kwargs(args)["reach_at_capture"] is True
+    assert ss.trajopt_config_from_args(profile.parse_v11ab_args()).sqp.minimal_intervention is None

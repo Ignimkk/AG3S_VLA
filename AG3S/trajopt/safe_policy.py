@@ -728,6 +728,9 @@ class SafePolicy:
             **({"rest_start": _jsonable(metrics["rest_start"])} if "rest_start" in metrics else {}),
             # T43 Q — servo / sweep rows: only when on.
             **({"path_check": _jsonable(metrics["path_check"])} if "path_check" in metrics else {}),
+            # V11AB-pb2 — minimal intervention gate (only when on).
+            **({"minimal_intervention": _jsonable(metrics["minimal_intervention"])}
+               if "minimal_intervention" in metrics else {}),
             "reference_deviation": round(
                 float(getattr(result, "reference_deviation", 0.0) or 0.0), 6),
         }

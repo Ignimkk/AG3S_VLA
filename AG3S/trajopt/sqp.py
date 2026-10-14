@@ -290,6 +290,25 @@ class TrajectoryOptimizer:
             )
 
         self._gate_record = None
+        self._mi_record = None
+        mi = getattr(cfg.sqp, "minimal_intervention", None)
+        if mi is not None:
+            # V11AB-pb2: certify the reference itself first (same rows as `reference_violation` below).
+            self.linearizer.set_attached(
+                getattr(scene, "attached_points", None), getattr(scene, "attached_parent_link", None))
+            span = self.lookahead_from if self.lookahead_from is not None else None
+            per_step = self.linearizer.step_clearances(reference, q_now, scene)
+            ref_clear = float((per_step[:span] if span else per_step).min(initial=np.inf))
+            self._mi_record = {"threshold_m": float(mi), "applied": bool(ref_clear >= float(mi)),
+                               "reference_clearance_m": ref_clear if np.isfinite(ref_clear) else None}
+            if self._mi_record["applied"]:
+                notes.append(f"minimal intervention: the reference clears every row by "
+                             f"{ref_clear * 1000:.1f} mm >= {float(mi) * 1000:.1f} mm; returned unchanged")
+                result = self._finish(reference.copy(), reference, q_now, scene, template, 0, 0.0,
+                                      -ref_clear if np.isfinite(ref_clear) else 0.0, previous_chunk,
+                                      notes, started, geometry_certified)
+                result.metrics["minimal_intervention"] = dict(self._mi_record)
+                return result
         if self.window_optimizer is not None:
             gate = self._lookahead_gate(reference, q_now, scene)
             self._gate_record = {x: v for x, v in gate.items() if x != "open"}
@@ -562,6 +581,8 @@ class TrajectoryOptimizer:
             states=best_states, timing=timing, qp_iterations=qp_iterations,
             time_budget_hit=time_budget_hit, selection=selection,
         )
+        if self._mi_record is not None:
+            result.metrics["minimal_intervention"] = dict(self._mi_record)
         if envelope is not None:
             result.metrics["rest_start"] = self._rest_start_record(
                 best, reference, q_now, envelope)

@@ -581,6 +581,14 @@ class SqpConfig:
 
     max_iterations: int = 3
     time_budget_ms: float = 50.0
+    #: V11AB-pb2 (benchmark branch, 2026-10-14) — **minimal intervention gate** (m). ``None`` (default) = V11AB:
+    #: every constrained chunk is optimized. A number = before the SQP, if the *reference* clears every row the
+    #: optimizer would certify by at least this much (``d − r − margin`` ≥ value, the same rows and exemptions
+    #: as the verdict), the reference is returned as the plan (``_finish`` with it, so certification and the
+    #: record are those of a solve). The policy's chunk then reaches the robot untouched in free space; the
+    #: tracking / continuity / deflection terms no longer bend chunks that collide with nothing (Panda SL5c:
+    #: 15–60 mm path changes on chunks with no violation).
+    minimal_intervention: Optional[float] = None
     #: **벽시계 예산이 걸리기 전에 반드시 도는 SQP 반복 수** (T31 G2-i). 예산은 이 수만큼 돈 뒤부터
     #: 검사된다 — `max_iterations` 는 여전히 상한이고, 수렴(`step_tolerance`)·QP 실패로 더 일찍
     #: 끝날 수는 있다. 1 이면 T31 전 동작(첫 반복 뒤 곧바로 예산 검사)이다.

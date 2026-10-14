@@ -202,6 +202,9 @@ def v11ab_client_phase(run_client: pathlib.Path = RUN_CLIENT) -> str:
 AG3S_VERSIONS: dict[str, tuple[str, ...]] = {
     "V11AB": (),
     "V11AB-pb1": ("--reach-at-capture",),
+    # pb2 = pb1 + minimal intervention gate at 10 mm (the response model's prediction error on unchanged chunks is
+    # ~3 mm median, 7.5 mm max (SL5a), so a reference within 10 mm of a constraint is still optimized).
+    "V11AB-pb2": ("--reach-at-capture", "--minimal-intervention-mm", "10"),
 }
 
 

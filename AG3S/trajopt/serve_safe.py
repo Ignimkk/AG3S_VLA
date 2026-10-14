@@ -1501,6 +1501,10 @@ def build_parser() -> argparse.ArgumentParser:
                          "collision 뿐이고 그 행이 전부 margin 안쪽 (ESDF − r ≥ 0) 이며 최소 clearance 가 "
                          "현재 상태 (q_now) 보다 작지 않고 refined 가 정책 reference 와 다를 때. 스스로 "
                          "인증된 청크 뒤로 최대 N 청크. 기본 off")
+    ap.add_argument("--minimal-intervention-mm", type=float, default=None, metavar="MM",
+                    help="V11AB-pb2 (benchmark branch): minimal intervention gate. If the policy's reference clears "
+                         "every row TrajOpt would certify by at least MM (d - r - margin), it is returned as the plan "
+                         "(certified as a solve result) instead of being optimized. Off = V11AB")
     ap.add_argument("--reach-at-capture", action="store_true",
                     help="V11AB-pb1 (benchmark branch): the grasp reach gate (latch evidence and AG3S.attach) pairs "
                          "the manipulated object's last observed centroid with the robot state of that capture, not "
@@ -1753,6 +1757,9 @@ def sqp_overrides(args) -> dict:
             out[key] = cast(value)
     if getattr(args, "no_limit_projection", False):
         out["limit_projection_fallback"] = False
+    if getattr(args, "minimal_intervention_mm", None) is not None:
+        # V11AB-pb2 — the minimal intervention gate (`SqpConfig.minimal_intervention`, m).
+        out["minimal_intervention"] = float(args.minimal_intervention_mm) / 1000.0
     return out
 
 
