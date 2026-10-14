@@ -31,7 +31,7 @@
 | | SL-4b ATS 용 attention cell dev calibration 연구 | **완료 (2026-10-13, 사용자 확정)** | 아래 [SL4b](#sl4b--ats-용-attention-cell-dev-calibration-2026-10-13). ~~진행 중 (사전 등록)~~ → 사전 등록 규칙대로 **V11AB L8H2 유지**(최고 후보 L12H3 가 +1.5 %p, 기준 +10 %p 미달). oracle 도 t4 · t9 에서 0 이어서 오선택은 attention cell 이 아니라 그 뒤 grounding 단계 문제로 남는다. 같은 STEP 에서 LIBERO fixture reset 이력 문제를 찾아 export · replay 를 고쳤다. test 데이터는 쓰지 않았다 |
 | | SL-4c ATS grounding 탈락 원인 진단 (t4 · t5 · t9) | **진행 중 (2026-10-13)** | [`handoff/SL4c.task.md`](handoff/SL4c.task.md) (commit `cf4649ce`). **진단만** 한다. code 는 `85e6d9d1` worktree 에 고정. cluster 병합 · Panda 8 cm 개도 한계는 **가설**이며 측정이 확인 또는 반박한다 |
 | | SL-5a Panda 주입(최소 core 변경) + EE delta ↔ joint 변환, offline 검증 | **구현 완료 (2026-10-13, commit `76ee59ba`), 2026-10-14 보정 추가** | [`handoff/SL5a.task.md`](handoff/SL5a.task.md). RB-Y1 golden bit 동일 · 무개입 chunk bit 동일 유지. 2026-10-14: gripper `empty_below` Panda 보정, 역변환 A/B 명시 모드 (아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14)) |
-| | SL-5b live closed-loop 1 episode | **진행 중 (2026-10-14)** | 아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14). closed loop 연결은 동작한다. V11AB 는 t0 init0 에서 A · B 모두 실패(VLA-only 성공). 원인 = 들어올린 bowl 이 occluded 되어 latch `reach` 가 마지막 관측 centroid 기준으로 120 mm 를 넘는다 — **사용자 판정 대기** |
+| | SL-5b live closed-loop 1 episode | **진행 중 (2026-10-14)** | 아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14) · [SL5b-feedback](#sl5b-feedback--exec_feedback-를-실제-실행-기준으로-확정-t0-재측정-2026-10-14). feedback 정합성 수정 후 t0 init0 에서 V11AB-B 성공(114 steps), V11AB-A 실패. latch `reach` · occluded target 문제는 development 로 전달(사용자 판정) |
 | | SL-6 phase / gate source | 미착수 | Panda main 의 phase source = gripper-state strong rule 또는 pi05_libero feature 로 dev 에서 새로 학습한 probe(GT phase 는 oracle 비교용). **SL-6 에서 결정** |
 | | SL-7 ~ SL-8 (contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. ~~SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1)~~ → SL3 에서 un-mirror mapping 구현·측정 완료(image 검사 221/221 call), **SL4 에서 ATS 결과로도 확인**(mirror 로 돌린 접근 단계 centroid 오차 median 236.2 mm 대 12.0 mm). 이후 단계는 이 mapping 을 그대로 쓴다 |
 | **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | 미착수 | SL0 의 1 episode 로는 성능을 말할 수 없다 |
@@ -2217,3 +2217,89 @@ B 는 두 번(smoke3 · smoke4) 돌려 모든 점검 수치가 같았다. A 의 
 - 장애물 장면에서 A · B 의 회피 실현도.
 - task 1~9 와 다른 init.
 - B feedback 불일치 가설.
+
+### 판정 (2026-10-14, 사용자)
+
+- **reach 실패 → development branch 로 전달.** Panda 의 거리 기준 문제가 아니라, 가려진 물체의 오래된 위치를 쓰는
+  문제다. reach 120 mm 를 유지한다. benchmark branch 는 latch 를 바꾸지 않는다. 전달 문서
+  [`handoff/SL5b-reach-to-development.md`](handoff/SL5b-reach-to-development.md).
+- **B feedback → 수정 후 재측정.** 예측 경로를 `applied_arm` 에 넣는 안은 승인하지 않았다. `applied_arm` 은
+  실제로 적용한 팔 목표 명령이다. 실제 적용 OSC 명령 · 예측 경로 · 측정 joint 경로를 구분하고, 피드백은 실제
+  실행된 step 기준으로 확정한다.
+  - 통과 기준: 피드백 의미의 일치와 무개입 동일성.
+  - 관찰 지표: 보정 횟수와 action 변화.
+- 진행 순서: 피드백 정합성 수정 → t0 B 재측정 → LIBERO 10 개 paired 로 한계 기록 → SafeLIBERO 사례 탐색.
+  reach 문제를 해결할 때까지 benchmark 진행을 멈추지 않는다.
+
+---
+
+## SL5b-feedback — exec_feedback 를 실제 실행 기준으로 확정, t0 재측정 (2026-10-14)
+
+**기록 시각** 2026-10-14 16:50 KST. **수치 출처** [`handoff/SL5b-feedback.verify.json`](handoff/SL5b-feedback.verify.json).
+**그림** [`figures/sl5b-smoke5-t0e0-ab-feedback.png`](figures/sl5b-smoke5-t0e0-ab-feedback.png) (+ `.json`).
+**code** `a06b2ac2`.
+
+### 무엇을 고쳤나 (adapter 범위, 알고리즘 변경 없음)
+
+V11AB 는 `exec_feedback` 를 세 곳에서 쓴다.
+
+1. continuity 정렬: `executed_chunk` · `n_exec` 를 쓴다.
+2. `w_deflection_rate` 항: `applied_arm[-1]` − 이전 계획의 reference.
+3. grasp latch: `measured_gripper` · `applied_gripper` 를 쓴다.
+
+기존 client 의 문제는 둘이었다.
+
+- 피드백을 호출 시점에 미리 만들었다.
+- `measured_gripper` 에 **한 chunk 전 촬영값**을 넣었다. wire 계약은 "이번 요청의 촬영 시점" 이다.
+
+| 항목 | 수정 전 | 수정 후 |
+|---|---|---|
+| 확정 시점 | 호출 때 미리 | 다음 요청 때, 실제 진행한 env step 수로 (`n_steps`) |
+| `measured_gripper` | 직전 호출의 촬영값 | 이번 요청의 촬영값 |
+| `applied_arm` | refined joint 행 (B 에서는 실제 명령과 다름) | 실제 적용한 OSC 명령(HOLD 포함)을, 그 chunk 를 보낸 요청과 같은 forward map · 같은 시작 상태로 옮긴 joint 명령 행 (`action.applied_command_rows`) |
+| 근거가 없을 때 | — | `available=False` 로 철회 |
+
+`applied_arm` 은 명령 이력이고, 예측 경로나 측정 경로가 아니다. 무개입 행은 reference 행과 bit 동일하다(unit test).
+
+### 결과 — 통과 기준
+
+| 항목 | B | A |
+|---|---|---|
+| `n_steps` = 실제 진행 step | 22 / 22 | 43 / 43 |
+| `measured_gripper` = 이번 촬영값 | 22 / 22 | 43 / 43 |
+| 무개입 chunk 의 `applied_arm` = reference | 1 / 1 | 1 / 1 |
+| 철회된 피드백 | 0 | 0 |
+| 무개입 행 action bit 동일 | 100 / 100 | 58 / 58 |
+
+두 모드 모두 통과했다. 다만 V11AB 가 거의 모든 chunk 를 보정해서(B 21 / 23, A 31 / 44) 무개입 chunk 표본은
+각 1 개뿐이다.
+
+### 결과 — official success (같은 init, 같은 policy_seed)
+
+| 조건 | 결과 | steps | HOLD | attach |
+|---|---|---|---|---|
+| VLA-only (smoke3) | success | 104 | — | — |
+| V11AB-B | **success** | 114 | 0 / 23 | obs 100 (call 18, reach 103.5 mm) |
+| V11AB-A | max_steps (실패) | 220 | 12 / 44 | 없음 |
+
+- **B**: 현재 촬영값으로 `settled` 가 한 호출 먼저 통과했다. 그래서 bowl 이 occluded 되는 바로 그 호출에서 attach 했다
+  (수정 전 smoke4 의 call 18: latch 가 본 값 0.0724, 실제 그 순간 0.063).
+  attach 뒤 reach 는 133.9 ~ 149.8 mm 였지만 held 상태는 유지되었다. 단, **attach 여부가 들어올리기 전에 `settled`
+  가 통과하느냐에 달려 있다는 의존성은 그대로**다.
+- **A**: 경로가 달라져 파지 개도가 0.043 ~ 0.059 였다. 일부 호출에서 `blocked`(0.05)도 실패했다.
+  bowl 이 obs 80 부터 occluded 되어 reach 가 357.1 mm 까지 커졌고 attach 하지 못했다.
+  A 는 saturated 104 행 · \|a\|≥1 217 항목으로, action 을 크게 바꾼다.
+
+### 관찰 지표 (통과 기준 아님)
+
+| 항목 | B | A |
+|---|---|---|
+| 보정 call | 21 | 31 |
+| 실현 비율 p50 | 0.13 | 0.84 |
+| 실행 arm \|Δa\| p50 / max | 0.01 / 0.94 | 1.63 / 1.93 |
+| saturated 행 | 4 | 104 |
+
+### 측정하지 않은 것
+
+- 장애물 장면에서 B 의 회피 실현도. SafeLIBERO 에서 측정한다.
+- t0 외 task · init.

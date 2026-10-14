@@ -1,0 +1,479 @@
+{
+ "runs": {
+  "VLA-only": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T142532_945b608c6a0c_sl5b-smoke3-t0e0-vla_only",
+  "V11AB-A": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T163754_a06b2ac23d09_sl5b-smoke5-t0e0-vla_v11ab-A",
+  "V11AB-B": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T163552_a06b2ac23d09_sl5b-smoke5-t0e0-vla_v11ab-B"
+ },
+ "stem": "libero_spatial_t0_e0",
+ "keyframes": [
+  60,
+  100,
+  120,
+  140,
+  160,
+  219
+ ],
+ "episodes": {
+  "VLA-only": {
+   "official_success": true,
+   "status": "success",
+   "env_steps_excluding_wait": 104
+  },
+  "V11AB-A": {
+   "official_success": false,
+   "status": "max_steps",
+   "env_steps_excluding_wait": 220
+  },
+  "V11AB-B": {
+   "official_success": true,
+   "status": "success",
+   "env_steps_excluding_wait": 114
+  }
+ },
+ "attach_obs": {
+  "VLA-only": null,
+  "V11AB-A": [],
+  "V11AB-B": [
+   100
+  ]
+ },
+ "detach_obs": {
+  "VLA-only": null,
+  "V11AB-A": [],
+  "V11AB-B": []
+ },
+ "reach_mm_per_call": {
+  "V11AB-A": [
+   [
+    10,
+    null,
+    false,
+    null
+   ],
+   [
+    15,
+    400.13,
+    false,
+    "visible"
+   ],
+   [
+    20,
+    375.33,
+    false,
+    "visible"
+   ],
+   [
+    25,
+    359.51,
+    false,
+    "visible"
+   ],
+   [
+    30,
+    344.05,
+    false,
+    "visible"
+   ],
+   [
+    35,
+    310.01,
+    false,
+    "visible"
+   ],
+   [
+    40,
+    266.0,
+    false,
+    "occluded"
+   ],
+   [
+    45,
+    214.13,
+    false,
+    "visible"
+   ],
+   [
+    50,
+    162.19,
+    false,
+    "visible"
+   ],
+   [
+    55,
+    109.78,
+    false,
+    "visible"
+   ],
+   [
+    60,
+    82.22,
+    false,
+    "visible"
+   ],
+   [
+    65,
+    64.05,
+    false,
+    "visible"
+   ],
+   [
+    70,
+    83.7,
+    false,
+    "visible"
+   ],
+   [
+    75,
+    123.42,
+    false,
+    "visible"
+   ],
+   [
+    80,
+    176.69,
+    false,
+    "occluded"
+   ],
+   [
+    85,
+    207.51,
+    false,
+    "occluded"
+   ],
+   [
+    90,
+    200.5,
+    false,
+    "occluded"
+   ],
+   [
+    95,
+    227.96,
+    false,
+    "occluded"
+   ],
+   [
+    100,
+    273.4,
+    false,
+    "occluded"
+   ],
+   [
+    105,
+    303.57,
+    false,
+    "occluded"
+   ],
+   [
+    110,
+    298.58,
+    false,
+    "occluded"
+   ],
+   [
+    115,
+    299.12,
+    false,
+    "occluded"
+   ],
+   [
+    120,
+    315.24,
+    false,
+    "occluded"
+   ],
+   [
+    125,
+    311.85,
+    false,
+    "occluded"
+   ],
+   [
+    130,
+    319.91,
+    false,
+    "occluded"
+   ],
+   [
+    135,
+    337.99,
+    false,
+    "occluded"
+   ],
+   [
+    140,
+    342.65,
+    false,
+    "occluded"
+   ],
+   [
+    145,
+    325.96,
+    false,
+    "occluded"
+   ],
+   [
+    150,
+    346.76,
+    false,
+    "occluded"
+   ],
+   [
+    155,
+    357.05,
+    false,
+    "occluded"
+   ],
+   [
+    160,
+    372.22,
+    false,
+    "occluded"
+   ],
+   [
+    165,
+    297.25,
+    true,
+    "occluded"
+   ],
+   [
+    170,
+    227.6,
+    true,
+    "occluded"
+   ],
+   [
+    175,
+    193.88,
+    false,
+    "occluded"
+   ],
+   [
+    180,
+    217.25,
+    true,
+    "occluded"
+   ],
+   [
+    185,
+    231.18,
+    true,
+    "occluded"
+   ],
+   [
+    190,
+    242.75,
+    true,
+    "occluded"
+   ],
+   [
+    195,
+    248.09,
+    true,
+    "occluded"
+   ],
+   [
+    200,
+    250.31,
+    true,
+    "occluded"
+   ],
+   [
+    205,
+    251.14,
+    true,
+    "occluded"
+   ],
+   [
+    210,
+    251.16,
+    true,
+    "occluded"
+   ],
+   [
+    215,
+    250.78,
+    true,
+    "occluded"
+   ],
+   [
+    220,
+    250.29,
+    true,
+    "occluded"
+   ],
+   [
+    225,
+    249.84,
+    true,
+    "occluded"
+   ]
+  ],
+  "V11AB-B": [
+   [
+    10,
+    null,
+    false,
+    null
+   ],
+   [
+    15,
+    400.13,
+    false,
+    "visible"
+   ],
+   [
+    20,
+    374.41,
+    false,
+    "visible"
+   ],
+   [
+    25,
+    352.63,
+    false,
+    "occluded"
+   ],
+   [
+    30,
+    330.32,
+    false,
+    "visible"
+   ],
+   [
+    35,
+    286.1,
+    false,
+    "visible"
+   ],
+   [
+    40,
+    230.92,
+    false,
+    "visible"
+   ],
+   [
+    45,
+    162.73,
+    false,
+    "visible"
+   ],
+   [
+    50,
+    112.45,
+    false,
+    "visible"
+   ],
+   [
+    55,
+    95.97,
+    false,
+    "visible"
+   ],
+   [
+    60,
+    103.39,
+    false,
+    "visible"
+   ],
+   [
+    65,
+    145.36,
+    false,
+    "visible"
+   ],
+   [
+    70,
+    172.95,
+    false,
+    "visible"
+   ],
+   [
+    75,
+    149.47,
+    false,
+    "visible"
+   ],
+   [
+    80,
+    97.24,
+    false,
+    "visible"
+   ],
+   [
+    85,
+    82.53,
+    false,
+    "visible"
+   ],
+   [
+    90,
+    71.72,
+    false,
+    "visible"
+   ],
+   [
+    95,
+    69.13,
+    false,
+    "visible"
+   ],
+   [
+    100,
+    103.49,
+    false,
+    "occluded"
+   ],
+   [
+    105,
+    140.43,
+    false,
+    "occluded"
+   ],
+   [
+    110,
+    149.81,
+    false,
+    "occluded"
+   ],
+   [
+    115,
+    133.85,
+    false,
+    "occluded"
+   ],
+   [
+    120,
+    143.59,
+    false,
+    "occluded"
+   ]
+  ]
+ },
+ "table": {
+  "V11AB-A": {
+   "corrected\ncalls": "31",
+   "HOLD\ncalls": "12",
+   "passthrough rows\nbit-identical": "58/58",
+   "realised\nfraction p50": "0.84",
+   "pred-refined mm\np50 / max": "16.9 / 276",
+   "pred-actual mm\np50 / max (corr.)": "15.1 / 69.5",
+   "arm |da|\np50 / max": "1.63 / 1.93",
+   "saturated\nrows": "104",
+   "|a|>=1\nentries": "217"
+  },
+  "V11AB-B": {
+   "corrected\ncalls": "21",
+   "HOLD\ncalls": "0",
+   "passthrough rows\nbit-identical": "100/100",
+   "realised\nfraction p50": "0.13",
+   "pred-refined mm\np50 / max": "1.6 / 202",
+   "pred-actual mm\np50 / max (corr.)": "5.5 / 27.6",
+   "arm |da|\np50 / max": "0.01 / 0.94",
+   "saturated\nrows": "4",
+   "|a|>=1\nentries": "0"
+  }
+ },
+ "empty_below": 0.025325,
+ "reach_limit_mm": 120.0
+}
