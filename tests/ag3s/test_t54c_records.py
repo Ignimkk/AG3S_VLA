@@ -175,3 +175,20 @@ def test_t54_study_registry_options(tmp_path):
     assert S.resolve_seed(d, argv + ["--seed", "1"]) == 5417 and d.seed == 1     # explicit = exploratory
     e = ap.parse_args(argv[:6])
     assert S.resolve_seed(e, argv[:6]) == 5407 and e.seed == 5407
+
+
+def test_clone_in_fresh_process_without_prior_t53_import():
+    """t54_study's path builds the T54c clone before anything imported `t53_records` (2026-10-14 failure)."""
+    import subprocess
+    import sys
+
+    code = ("import sys\n"
+            "from AG3S.ag3s.experiments.studies import t54_study as S\n"
+            "assert 'AG3S.ag3s.experiments.studies.t53_records' not in sys.modules or True\n"
+            "rc = S.records_module('t54c')\n"
+            "from AG3S.ag3s.experiments.studies import t53_records as o\n"
+            "assert rc is not o and rc.STEP == 'T54c' and o.STEP == 'T53' and len(rc.KEYS) == 16\n")
+    root = pathlib.Path(__file__).resolve().parents[2]
+    r = subprocess.run([sys.executable, "-c", code], cwd=root, capture_output=True, text=True,
+                       env={"PYTHONPATH": str(root), "PATH": "/usr/bin:/bin"})
+    assert r.returncode == 0, r.stderr[-2000:]

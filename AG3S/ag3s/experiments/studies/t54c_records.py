@@ -477,6 +477,10 @@ EPISODES = tuple(EXPECTED)
 
 def _clone_t53_records() -> types.ModuleType:
     """`t53_records` executed again as an independent module, then re-pointed at T54c."""
+    # The clone executes under the original's module name; `dataclasses` resolves string annotations
+    # through sys.modules[that name], so the original must be imported first (t54_study's path did not).
+    from AG3S.ag3s.experiments.studies import t53_records as _original  # noqa: F401
+
     spec = importlib.util.find_spec("AG3S.ag3s.experiments.studies.t53_records")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)          # never put in sys.modules: `t53_records` stays the original

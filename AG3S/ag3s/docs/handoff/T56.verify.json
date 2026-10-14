@@ -1,0 +1,1157 @@
+{
+ "step": "T56",
+ "stage": "dev",
+ "status": "dev_done — STOP for user confirmation",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc",
+ "raw_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56",
+ "abandoned_runs": [
+  {
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T161631+0900_cf38c9dbca7b_392250b77964",
+   "reason": "abandoned by lead: t54_stats.py / t54_study.py changed during its replay (md5 differed from start); 28 of 96 jobs finished; outputs not reused"
+  }
+ ],
+ "code_state": {
+  "head": "cf38c9dbca7b2c6d78935a67a1edc6fc2ed6d3ac",
+  "head_start_equals_end": true,
+  "md5_start_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56/md5_start.txt",
+  "md5_after_replay_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56/md5_after_replay.txt",
+  "md5_end_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56/md5_end.txt",
+  "md5_changed_during_run": false,
+  "periodic_md5_check": "every 5 min during replay (progress.txt); also after replay, after held, at end; no change",
+  "md5_t54": {
+   "t54_arms": "fabb3c47f357018148a4bee1de24bfe7",
+   "t54_replay": "21a6dd92dc0796f1790de03a5788490e",
+   "t54_stats": "ec8e4fa1a8b10743b5772a9fed450dd6",
+   "t54_study": "513c5b3909cd7f40035590c493efb909"
+  },
+  "md5_other": "see md5_start.txt (t56_*.py, pipeline.py=AG3S/ag3s/runtime, target_grounding.py / attention_split.py=AG3S/ag3s/stages, config.py, grasp_latch.py=AG3S/trajopt)"
+ },
+ "numbers": {
+  "records": [
+   "t2",
+   "headfix",
+   "ep1807",
+   "ep1850",
+   "ep1900",
+   "ep0",
+   "ep500",
+   "ep1200"
+  ],
+  "dev_excluded": [
+   "long",
+   "ep1800"
+  ],
+  "n_cells": 50,
+  "n_arms": 8,
+  "replay_jobs": 96,
+  "replay_jobs_done": 96,
+  "chosen": {
+   "s1": {
+    "margin": 0.03,
+    "combine": "mean",
+    "normalize": "frame_max",
+    "cover_tol": 0.005
+   },
+   "s2": {
+    "comove_tol": 0.01,
+    "min_hand_motion": 0.03,
+    "reference": "held",
+    "min_points": 5,
+    "stop_on_lost": true
+   },
+   "resolution": 0.01,
+   "regret_tol": 0.03,
+   "purity_tol": 0.05,
+   "coverage_tol": 0.05
+  },
+  "chosen_note": "search_space fixed values given at impl defaults (resolution 0.01, regret_tol 0.03, purity_tol 0.05, coverage_tol 0.05); S1/S2 selected by dev rule on current condition",
+  "prereg": {
+   "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56/T56.prereg.json",
+   "sha256": "bbe98958ed94d76458f004e99b9fd322948666f86baecbc4626f0af565ec0f9e",
+   "sha256_in_file": "57c3bccbd16536a6a5d1bc3c721405812d0e3f283f1b14f2402dbb2acb8b20aa"
+  },
+  "held": {
+   "source_counts": {
+    "offline_latch": 8
+   },
+   "n_with_event": 6,
+   "n_without_event": 2,
+   "records_without_event": [
+    "ep1900",
+    "headfix"
+   ],
+   "per_record": {
+    "t2": {
+     "source": "offline_latch",
+     "hand": "left",
+     "frame": 16,
+     "exit": 18,
+     "exit_reason": "revoked"
+    },
+    "headfix": {
+     "source": "offline_latch",
+     "hand": null,
+     "frame": null,
+     "exit": null,
+     "exit_reason": null
+    },
+    "ep1807": {
+     "source": "offline_latch",
+     "hand": "left",
+     "frame": 21,
+     "exit": 33,
+     "exit_reason": "release"
+    },
+    "ep1850": {
+     "source": "offline_latch",
+     "hand": "left",
+     "frame": 12,
+     "exit": null,
+     "exit_reason": null
+    },
+    "ep1900": {
+     "source": "offline_latch",
+     "hand": null,
+     "frame": null,
+     "exit": null,
+     "exit_reason": null
+    },
+    "ep0": {
+     "source": "offline_latch",
+     "hand": "left",
+     "frame": 17,
+     "exit": 30,
+     "exit_reason": "release"
+    },
+    "ep500": {
+     "source": "offline_latch",
+     "hand": "right",
+     "frame": 15,
+     "exit": 31,
+     "exit_reason": "release"
+    },
+    "ep1200": {
+     "source": "offline_latch",
+     "hand": "right",
+     "frame": 38,
+     "exit": 52,
+     "exit_reason": "release"
+    }
+   }
+  },
+  "held_label_errors": {
+   "n_held_events": 6,
+   "n_label_wrong": 0,
+   "held_label_error_rate": 0.0,
+   "wrong_records": [],
+   "verdict_counts": {
+    "correct": 6
+   },
+   "records_without_held": [
+    "headfix",
+    "ep1900"
+   ],
+   "note": "HELD is a trigger, not a certification: these are label errors of the HELD label"
+  },
+  "held_label_per_record_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56/dev_numbers.json (label_per_record)",
+  "dev_current_condition_primary": {
+   "cells": {
+    "S0": {
+     "selected": "last:L15H0",
+     "tie_size": 7,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0639,
+     "regret_identity_ci": [
+      0.01,
+      0.1937
+     ],
+     "tie_regret_identity": 0.0704,
+     "tie_regret_ci": [
+      0.0288,
+      0.1298
+     ],
+     "purity_regret": 0.0516,
+     "purity_tie_regret": 0.0654,
+     "coverage_regret": 0.084,
+     "coverage_tie_regret": 0.0819,
+     "tau_b_identity_mean": 0.5497796451217154,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 29.833333333333332
+    },
+    "S1": {
+     "selected": "last:L15H0",
+     "tie_size": 8,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0639,
+     "regret_identity_ci": [
+      0.0055,
+      0.2418
+     ],
+     "tie_regret_identity": 0.0714,
+     "tie_regret_ci": [
+      0.0329,
+      0.1428
+     ],
+     "purity_regret": 0.0516,
+     "purity_tie_regret": 0.0462,
+     "coverage_regret": 0.084,
+     "coverage_tie_regret": 0.0767,
+     "tau_b_identity_mean": 0.488388394437606,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 26.166666666666668
+    },
+    "S2": {
+     "selected": "noun_target:L10H7",
+     "tie_size": 3,
+     "tie_rate_boot": 0.9259,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0404,
+     "regret_identity_ci": [
+      0.0,
+      0.1445
+     ],
+     "tie_regret_identity": 0.0337,
+     "tie_regret_ci": [
+      0.0095,
+      0.1028
+     ],
+     "purity_regret": 0.0666,
+     "purity_tie_regret": 0.057,
+     "coverage_regret": 0.0135,
+     "coverage_tie_regret": 0.0158,
+     "tau_b_identity_mean": 0.6960986728116115,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 16.166666666666668
+    }
+   },
+   "cells_action": {
+    "S0": {
+     "selected": "last:L15H0",
+     "tie_size": 6,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0321,
+     "regret_identity_ci": [
+      0.0,
+      0.1655
+     ],
+     "tie_regret_identity": 0.0503,
+     "tie_regret_ci": [
+      0.022,
+      0.1338
+     ],
+     "purity_regret": 0.0516,
+     "purity_tie_regret": 0.0664,
+     "coverage_regret": 0.0639,
+     "coverage_tie_regret": 0.0747,
+     "tau_b_identity_mean": 0.5435070757716757,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 14.166666666666666
+    },
+    "S1": {
+     "selected": "last:L15H0",
+     "tie_size": 7,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0321,
+     "regret_identity_ci": [
+      0.0,
+      0.206
+     ],
+     "tie_regret_identity": 0.0457,
+     "tie_regret_ci": [
+      0.0216,
+      0.122
+     ],
+     "purity_regret": 0.0516,
+     "purity_tie_regret": 0.0471,
+     "coverage_regret": 0.0639,
+     "coverage_tie_regret": 0.0646,
+     "tau_b_identity_mean": 0.5052955176201431,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 12.0
+    },
+    "S2": {
+     "selected": "last:L15H0",
+     "tie_size": 1,
+     "tie_rate_boot": 0.4793,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0321,
+     "regret_identity_ci": [
+      0.0,
+      0.1215
+     ],
+     "tie_regret_identity": 0.0321,
+     "tie_regret_ci": [
+      0.0,
+      0.1072
+     ],
+     "purity_regret": 0.0516,
+     "purity_tie_regret": 0.0516,
+     "coverage_regret": 0.0639,
+     "coverage_tie_regret": 0.0639,
+     "tau_b_identity_mean": 0.6745896527674162,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 0.6666666666666666,
+     "episode_tie_size_mean": 3.5
+    }
+   },
+   "cells_noun": {
+    "S0": {
+     "selected": "noun_target:L8H6",
+     "tie_size": 1,
+     "tie_rate_boot": 0.7001,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0,
+     "regret_identity_ci": [
+      0.0,
+      0.0813
+     ],
+     "tie_regret_identity": 0.0,
+     "tie_regret_ci": [
+      0.0,
+      0.0634
+     ],
+     "purity_regret": 0.0474,
+     "purity_tie_regret": 0.0474,
+     "coverage_regret": 0.0041,
+     "coverage_tie_regret": 0.0041,
+     "tau_b_identity_mean": 0.6846315849712993,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 15.666666666666666
+    },
+    "S1": {
+     "selected": "noun_target:L10H7",
+     "tie_size": 3,
+     "tie_rate_boot": 0.7111,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0404,
+     "regret_identity_ci": [
+      0.0,
+      0.0904
+     ],
+     "tie_regret_identity": 0.023,
+     "tie_regret_ci": [
+      0.0131,
+      0.0857
+     ],
+     "purity_regret": 0.0545,
+     "purity_tie_regret": 0.0433,
+     "coverage_regret": 0.0135,
+     "coverage_tie_regret": 0.0126,
+     "tau_b_identity_mean": 0.5673023238723139,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 0.8333333333333334,
+     "episode_tie_size_mean": 14.333333333333334
+    },
+    "S2": {
+     "selected": "noun_target:L10H7",
+     "tie_size": 3,
+     "tie_rate_boot": 0.8162,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0404,
+     "regret_identity_ci": [
+      0.0,
+      0.0917
+     ],
+     "tie_regret_identity": 0.0337,
+     "tie_regret_ci": [
+      0.0095,
+      0.0857
+     ],
+     "purity_regret": 0.0545,
+     "purity_tie_regret": 0.0448,
+     "coverage_regret": 0.0135,
+     "coverage_tie_regret": 0.0158,
+     "tau_b_identity_mean": 0.6947167770404667,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 0.8333333333333334,
+     "episode_tie_size_mean": 12.833333333333334
+    }
+   },
+   "arms": {
+    "S0": {
+     "selected": "B",
+     "tie_size": 2,
+     "tie_rate_boot": 0.7545,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0,
+     "regret_identity_ci": [
+      0.0,
+      0.0809
+     ],
+     "tie_regret_identity": 0.0566,
+     "tie_regret_ci": [
+      0.0,
+      0.1316
+     ],
+     "purity_regret": 0.0,
+     "purity_tie_regret": 0.0368,
+     "coverage_regret": 0.0096,
+     "coverage_tie_regret": 0.0738,
+     "tau_b_identity_mean": 0.5737030978733539,
+     "tau_status": "defined",
+     "tau_n_defined": 5,
+     "tau_n_undefined": 3,
+     "tau_undefined_reasons": {
+      "no_event": 2,
+      "self_all_tied": 1
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 5.833333333333333
+    },
+    "S1": {
+     "selected": "B",
+     "tie_size": 1,
+     "tie_rate_boot": 0.5299,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0,
+     "regret_identity_ci": [
+      0.0,
+      0.0173
+     ],
+     "tie_regret_identity": 0.0,
+     "tie_regret_ci": [
+      0.0,
+      0.0389
+     ],
+     "purity_regret": 0.0,
+     "purity_tie_regret": 0.0,
+     "coverage_regret": 0.0096,
+     "coverage_tie_regret": 0.0096,
+     "tau_b_identity_mean": 0.4969979522178585,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 0.8333333333333334,
+     "episode_tie_size_mean": 4.5
+    },
+    "S2": {
+     "selected": "B",
+     "tie_size": 1,
+     "tie_rate_boot": 0.49,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0,
+     "regret_identity_ci": [
+      0.0,
+      0.0173
+     ],
+     "tie_regret_identity": 0.0,
+     "tie_regret_ci": [
+      0.0,
+      0.0333
+     ],
+     "purity_regret": 0.0,
+     "purity_tie_regret": 0.0,
+     "coverage_regret": 0.0096,
+     "coverage_tie_regret": 0.0096,
+     "tau_b_identity_mean": 0.7500225509521186,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 0.8333333333333334,
+     "episode_tie_size_mean": 2.5
+    }
+   }
+  },
+  "dev_hold_condition_report_only": {
+   "cells": {
+    "S0": {
+     "selected": "noun_target:L8H2",
+     "tie_size": 33,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.1221,
+     "regret_identity_ci": [
+      0.0338,
+      0.2616
+     ],
+     "tie_regret_identity": 0.1046,
+     "tie_regret_ci": [
+      0.0354,
+      0.214
+     ],
+     "purity_regret": 0.317,
+     "purity_tie_regret": 0.1352,
+     "coverage_regret": 0.0055,
+     "coverage_tie_regret": 0.0395,
+     "tau_b_identity_mean": 0.5512192680492602,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 40.0
+    },
+    "S1": {
+     "selected": "last:L12H3",
+     "tie_size": 13,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0689,
+     "regret_identity_ci": [
+      0.0088,
+      0.2529
+     ],
+     "tie_regret_identity": 0.0811,
+     "tie_regret_ci": [
+      0.0244,
+      0.1904
+     ],
+     "purity_regret": 0.044,
+     "purity_tie_regret": 0.0717,
+     "coverage_regret": 0.0823,
+     "coverage_tie_regret": 0.0646,
+     "tau_b_identity_mean": 0.5940652372700023,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 35.333333333333336
+    },
+    "S2": {
+     "selected": "last:L15H0",
+     "tie_size": 5,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.2073,
+     "regret_identity_ci": [
+      0.0088,
+      0.3586
+     ],
+     "tie_regret_identity": 0.1142,
+     "tie_regret_ci": [
+      0.0243,
+      0.2197
+     ],
+     "purity_regret": 0.1771,
+     "purity_tie_regret": 0.0719,
+     "coverage_regret": 0.1261,
+     "coverage_tie_regret": 0.0826,
+     "tau_b_identity_mean": 0.658585777996214,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 28.0
+    }
+   },
+   "cells_action": {
+    "S0": {
+     "selected": "last:L12H3",
+     "tie_size": 12,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0689,
+     "regret_identity_ci": [
+      0.0088,
+      0.2573
+     ],
+     "tie_regret_identity": 0.0836,
+     "tie_regret_ci": [
+      0.0251,
+      0.1918
+     ],
+     "purity_regret": 0.044,
+     "purity_tie_regret": 0.0663,
+     "coverage_regret": 0.0823,
+     "coverage_tie_regret": 0.069,
+     "tau_b_identity_mean": 0.554364415340563,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 18.166666666666668
+    },
+    "S1": {
+     "selected": "last:L12H3",
+     "tie_size": 12,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0689,
+     "regret_identity_ci": [
+      0.0088,
+      0.2529
+     ],
+     "tie_regret_identity": 0.0836,
+     "tie_regret_ci": [
+      0.0251,
+      0.1918
+     ],
+     "purity_regret": 0.044,
+     "purity_tie_regret": 0.0663,
+     "coverage_regret": 0.0823,
+     "coverage_tie_regret": 0.069,
+     "tau_b_identity_mean": 0.5307706391317867,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 17.5
+    },
+    "S2": {
+     "selected": "last:L15H0",
+     "tie_size": 4,
+     "tie_rate_boot": 0.9695,
+     "n_event_episodes": 6,
+     "regret_identity": 0.2073,
+     "regret_identity_ci": [
+      0.0088,
+      0.3586
+     ],
+     "tie_regret_identity": 0.1297,
+     "tie_regret_ci": [
+      0.0252,
+      0.2893
+     ],
+     "purity_regret": 0.1771,
+     "purity_tie_regret": 0.0558,
+     "coverage_regret": 0.1261,
+     "coverage_tie_regret": 0.1003,
+     "tau_b_identity_mean": 0.5737972288492023,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 11.666666666666666
+    }
+   },
+   "cells_noun": {
+    "S0": {
+     "selected": "noun_target:L8H2",
+     "tie_size": 21,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0699,
+     "regret_identity_ci": [
+      0.0099,
+      0.1455
+     ],
+     "tie_regret_identity": 0.0644,
+     "tie_regret_ci": [
+      0.0118,
+      0.1367
+     ],
+     "purity_regret": 0.2281,
+     "purity_tie_regret": 0.0856,
+     "coverage_regret": 0.0,
+     "coverage_tie_regret": 0.0172,
+     "tau_b_identity_mean": 0.613423933312914,
+     "tau_status": "defined",
+     "tau_n_defined": 5,
+     "tau_n_undefined": 3,
+     "tau_undefined_reasons": {
+      "no_event": 2,
+      "self_all_tied": 1
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 21.833333333333332
+    },
+    "S1": {
+     "selected": "noun_target:L6H6",
+     "tie_size": 1,
+     "tie_rate_boot": 0.3423,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0,
+     "regret_identity_ci": [
+      0.0,
+      0.1
+     ],
+     "tie_regret_identity": 0.0,
+     "tie_regret_ci": [
+      0.0,
+      0.0784
+     ],
+     "purity_regret": 0.0474,
+     "purity_tie_regret": 0.0474,
+     "coverage_regret": 0.0065,
+     "coverage_tie_regret": 0.0065,
+     "tau_b_identity_mean": 0.5865407821718125,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 0.8333333333333334,
+     "episode_tie_size_mean": 17.833333333333332
+    },
+    "S2": {
+     "selected": "noun_target:L6H6",
+     "tie_size": 1,
+     "tie_rate_boot": 0.3423,
+     "n_event_episodes": 6,
+     "regret_identity": 0.0,
+     "regret_identity_ci": [
+      0.0,
+      0.1
+     ],
+     "tie_regret_identity": 0.0,
+     "tie_regret_ci": [
+      0.0,
+      0.0781
+     ],
+     "purity_regret": 0.0474,
+     "purity_tie_regret": 0.0474,
+     "coverage_regret": 0.0065,
+     "coverage_tie_regret": 0.0065,
+     "tau_b_identity_mean": 0.5679488458491965,
+     "tau_status": "defined",
+     "tau_n_defined": 6,
+     "tau_n_undefined": 2,
+     "tau_undefined_reasons": {
+      "no_event": 2
+     },
+     "episode_tie_rate": 0.8333333333333334,
+     "episode_tie_size_mean": 16.333333333333332
+    }
+   },
+   "arms": {
+    "S0": {
+     "selected": "N-k3",
+     "tie_size": 8,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.1227,
+     "regret_identity_ci": [
+      0.0399,
+      0.2668
+     ],
+     "tie_regret_identity": 0.0908,
+     "tie_regret_ci": [
+      0.0264,
+      0.1729
+     ],
+     "purity_regret": 0.2008,
+     "purity_tie_regret": 0.118,
+     "coverage_regret": 0.0076,
+     "coverage_tie_regret": 0.0472,
+     "tau_b_identity_mean": null,
+     "tau_status": "undefined",
+     "tau_n_defined": 0,
+     "tau_n_undefined": 8,
+     "tau_undefined_reasons": {
+      "self_all_tied": 4,
+      "no_event": 2,
+      "both_all_tied": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 8.0
+    },
+    "S1": {
+     "selected": "A",
+     "tie_size": 6,
+     "tie_rate_boot": 1.0,
+     "n_event_episodes": 6,
+     "regret_identity": 0.1369,
+     "regret_identity_ci": [
+      0.0476,
+      0.2759
+     ],
+     "tie_regret_identity": 0.0824,
+     "tie_regret_ci": [
+      0.025,
+      0.1663
+     ],
+     "purity_regret": 0.1335,
+     "purity_tie_regret": 0.1097,
+     "coverage_regret": 0.0921,
+     "coverage_tie_regret": 0.0584,
+     "tau_b_identity_mean": 0.29463735304182603,
+     "tau_status": "defined",
+     "tau_n_defined": 2,
+     "tau_n_undefined": 6,
+     "tau_undefined_reasons": {
+      "no_event": 2,
+      "self_all_tied": 2,
+      "both_all_tied": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 7.5
+    },
+    "S2": {
+     "selected": "A",
+     "tie_size": 3,
+     "tie_rate_boot": 0.8326,
+     "n_event_episodes": 6,
+     "regret_identity": 0.1369,
+     "regret_identity_ci": [
+      0.0,
+      0.2435
+     ],
+     "tie_regret_identity": 0.114,
+     "tie_regret_ci": [
+      0.0,
+      0.2207
+     ],
+     "purity_regret": 0.1335,
+     "purity_tie_regret": 0.0977,
+     "coverage_regret": 0.0921,
+     "coverage_tie_regret": 0.0719,
+     "tau_b_identity_mean": 0.19970468414456866,
+     "tau_status": "defined",
+     "tau_n_defined": 4,
+     "tau_n_undefined": 4,
+     "tau_undefined_reasons": {
+      "no_event": 2,
+      "both_all_tied": 2
+     },
+     "episode_tie_rate": 1.0,
+     "episode_tie_size_mean": 5.833333333333333
+    }
+   }
+  },
+  "dev_paired_bootstrap_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56/dev_numbers.json (final.<cond>.<group>.paired)",
+  "tie_size_by_resolution": {
+   "0.0": {
+    "cells": {
+     "S0": {
+      "tie_size": 7,
+      "selected": "last:L15H0"
+     },
+     "S1": {
+      "tie_size": 4,
+      "selected": "mean:L12H3"
+     },
+     "S2": {
+      "tie_size": 1,
+      "selected": "noun_target:L6H6"
+     }
+    },
+    "cells_action": {
+     "S0": {
+      "tie_size": 6,
+      "selected": "last:L15H0"
+     },
+     "S1": {
+      "tie_size": 4,
+      "selected": "mean:L12H3"
+     },
+     "S2": {
+      "tie_size": 1,
+      "selected": "last:L15H0"
+     }
+    },
+    "cells_noun": {
+     "S0": {
+      "tie_size": 1,
+      "selected": "noun_target:L8H6"
+     },
+     "S1": {
+      "tie_size": 1,
+      "selected": "noun_target:L6H6"
+     },
+     "S2": {
+      "tie_size": 1,
+      "selected": "noun_target:L6H6"
+     }
+    },
+    "arms": {
+     "S0": {
+      "tie_size": 2,
+      "selected": "B"
+     },
+     "S1": {
+      "tie_size": 1,
+      "selected": "B"
+     },
+     "S2": {
+      "tie_size": 1,
+      "selected": "B"
+     }
+    }
+   },
+   "0.005": {
+    "cells": {
+     "S0": {
+      "tie_size": 7,
+      "selected": "last:L15H0"
+     },
+     "S1": {
+      "tie_size": 5,
+      "selected": "last:L15H0"
+     },
+     "S2": {
+      "tie_size": 2,
+      "selected": "noun_target:L10H7"
+     }
+    },
+    "cells_action": {
+     "S0": {
+      "tie_size": 6,
+      "selected": "last:L15H0"
+     },
+     "S1": {
+      "tie_size": 5,
+      "selected": "last:L15H0"
+     },
+     "S2": {
+      "tie_size": 1,
+      "selected": "last:L15H0"
+     }
+    },
+    "cells_noun": {
+     "S0": {
+      "tie_size": 1,
+      "selected": "noun_target:L8H6"
+     },
+     "S1": {
+      "tie_size": 1,
+      "selected": "noun_target:L6H6"
+     },
+     "S2": {
+      "tie_size": 2,
+      "selected": "noun_target:L10H7"
+     }
+    },
+    "arms": {
+     "S0": {
+      "tie_size": 2,
+      "selected": "B"
+     },
+     "S1": {
+      "tie_size": 1,
+      "selected": "B"
+     },
+     "S2": {
+      "tie_size": 1,
+      "selected": "B"
+     }
+    }
+   },
+   "0.01": {
+    "cells": {
+     "S0": {
+      "tie_size": 7,
+      "selected": "last:L15H0"
+     },
+     "S1": {
+      "tie_size": 8,
+      "selected": "last:L15H0"
+     },
+     "S2": {
+      "tie_size": 3,
+      "selected": "noun_target:L10H7"
+     }
+    },
+    "cells_action": {
+     "S0": {
+      "tie_size": 6,
+      "selected": "last:L15H0"
+     },
+     "S1": {
+      "tie_size": 7,
+      "selected": "last:L15H0"
+     },
+     "S2": {
+      "tie_size": 1,
+      "selected": "last:L15H0"
+     }
+    },
+    "cells_noun": {
+     "S0": {
+      "tie_size": 1,
+      "selected": "noun_target:L8H6"
+     },
+     "S1": {
+      "tie_size": 3,
+      "selected": "noun_target:L10H7"
+     },
+     "S2": {
+      "tie_size": 3,
+      "selected": "noun_target:L10H7"
+     }
+    },
+    "arms": {
+     "S0": {
+      "tie_size": 2,
+      "selected": "B"
+     },
+     "S1": {
+      "tie_size": 1,
+      "selected": "B"
+     },
+     "S2": {
+      "tie_size": 1,
+      "selected": "B"
+     }
+    }
+   },
+   "0.02": {
+    "cells": {
+     "S0": {
+      "tie_size": 10,
+      "selected": "last:L15H0"
+     },
+     "S1": {
+      "tie_size": 14,
+      "selected": "last:L15H0"
+     },
+     "S2": {
+      "tie_size": 10,
+      "selected": "last:L15H0"
+     }
+    },
+    "cells_action": {
+     "S0": {
+      "tie_size": 7,
+      "selected": "last:L15H0"
+     },
+     "S1": {
+      "tie_size": 9,
+      "selected": "last:L15H0"
+     },
+     "S2": {
+      "tie_size": 3,
+      "selected": "last:L15H0"
+     }
+    },
+    "cells_noun": {
+     "S0": {
+      "tie_size": 3,
+      "selected": "noun_target:L12H7"
+     },
+     "S1": {
+      "tie_size": 7,
+      "selected": "noun_target:L10H7"
+     },
+     "S2": {
+      "tie_size": 9,
+      "selected": "noun_target:L10H7"
+     }
+    },
+    "arms": {
+     "S0": {
+      "tie_size": 2,
+      "selected": "B"
+     },
+     "S1": {
+      "tie_size": 2,
+      "selected": "B"
+     },
+     "S2": {
+      "tie_size": 2,
+      "selected": "B"
+     }
+    }
+   }
+  },
+  "tau_b_note": "mean_defined = mean over defined episodes; undefined counts and reasons listed per group/variant; 2 records (headfix, ep1900) have no HELD event -> undefined:no_event for all variants",
+  "t55_resim_label_checks": null,
+  "dev_numbers_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56/dev_numbers.json",
+  "dev_summary_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56/dev/dev_summary.json"
+ },
+ "timings": {
+  "replay_start_utc": "2026-10-13T13:36:56Z",
+  "replay_end_utc": "2026-10-13T16:14:09Z",
+  "replay_wallclock": "2h37m13s",
+  "workers": 4,
+  "job_seconds_peak_mb_max": 7731,
+  "worker_peak_mb_mean": 6374,
+  "held_stage_seconds": 19.2,
+  "dev_stage_seconds": 86.7,
+  "dev_stage_internal_seconds": 66.5
+ },
+ "memory": {
+  "workers": 4,
+  "worker_choice_basis": "cgroup working set (anon+active_file) at start ~22 GiB; 22+28 <= 64 GiB",
+  "sampler_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223613+0900_cf38c9dbca7b_60a2394b8ccc/verify/T56/memlog.txt",
+  "sampler_interval_s": 60,
+  "sampler_stopped": true,
+  "max_cgroup_memory_current_gib": 79.99,
+  "cgroup_memory_max_gib": 80.0,
+  "max_working_set_anon_plus_active_file_gib": 61.54,
+  "oom_kill_before": 39,
+  "oom_kill_after": 39,
+  "cgroup_oom_kill_before_after": [
+   39,
+   39
+  ],
+  "worker_peak_mb_max": 7731
+ },
+ "deviations": [
+  "md5 file list: lead named pipeline.py/target_grounding.py/attention_split.py/config.py/grasp_latch.py without directories; used AG3S/ag3s/runtime/pipeline.py, AG3S/ag3s/stages/target_grounding.py, AG3S/ag3s/stages/attention_split.py, AG3S/ag3s/config.py, AG3S/trajopt/grasp_latch.py",
+  "first watcher exited immediately because the recorded pid was the setsid wrapper, not the python process; replay itself was unaffected; watcher restarted ~2 min after replay start (md5 checked at 5 min intervals from then; replay start 13:36:56Z, first checked 13:38Z)",
+  "cgroup memory.current reached the 80 GiB limit (page cache; working set max 61.5 GiB, includes other sessions); no oom_kill event",
+  "T55 resim label checks not run (no --t55-run given)",
+  "git status_porcelain in dev outputs differs from the earlier task snapshot (other sessions' files); the md5-listed files are unchanged",
+  "test stage not run; no figures made at this stage"
+ ],
+ "verdict": "dev stage completed; prereg written; stopped before test stage"
+}
