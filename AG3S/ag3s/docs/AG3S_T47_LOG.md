@@ -178,6 +178,83 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **비허용 접촉 없는 작업 성공률 (T46f 주 지표)** | task success ∧ 실제 MuJoCo geom 기준 non-authorized link–target 접촉 0. HOLD · TO 실패가 늘어 접촉률이 낮아진 결과는 보호 효과로 읽지 않는다 |
 | **T46c-W1 · T46d · T46f · T46e** | T46c-W1 = placed `no_seed` 인증 수정 (flag 기본 off) 의 검증. T46d = DX-04 선행 확인 (어떤 non-authorized link 를 넣어야 LTE 와 global 비교가 성립하는가, offline). T46e = visible observed surface oracle extent 구현 (`handoff/T46e.task.md`). T46f = LTE 검증 블록 (형상 보정 → 진단 장면 → 3 조건 closed-loop) 의 계획 (`handoff/T46f.task.md`) |
 
+**T59 (2026-10-13 추가)** — phase 를 나누지 않은 grounding 대 현재 serving 의 offline 비교의 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **U (phase 미분할 grounding)** | 매 frame `AG3S.reset()` 후 L8H2 attention 만으로 고른 cluster. TargetConfirm 의 latch · freeze · HSR gate · 시간 유지가 없다 (T54 `current` 조건의 L8H2 arm). 이 STEP 의 "phase 를 나누지 않았다" 의 뜻 |
+| **S (현재 serving = phase 분할)** | T53 closed-loop 의 server chunk 가 그 frame 에 실제로 쓴 manipulated / attached 물체와 latch 상태 · HSR label. phase 신호 (latch · freeze · HSR gate) 를 쓰는 pipeline 의 기록 |
+| **phase (T59)** | 물리 grasp 상태 `gt/<key>.grasp.npz` 의 `grasp_state`: `pre` · `held` · `post` · `placed`. 서버 grasp FSM 의 상태 (S_grasp_state) 와 이름은 같으나 다른 변수다 |
+| **manipulated centroid · `last_seen_frame`** | serving 이 조작 대상으로 기록한 점군의 centroid 와 그 점군을 마지막으로 관측한 frame. attached · occluded 인 chunk 에서 centroid 는 `last_seen_frame` 의 geometry 에 머문다 |
+| **S class · Sg · S (same frame)** | S class = manipulated centroid 에 가장 가까운 GT 물체의 class (target · other_object · destination(crate) · no_target). **Sg (주 정의)** = GT 위치를 centroid 를 관측한 frame (`last_seen_frame`) 로 잡음. **S (same frame, 사전 정의)** = GT 위치를 그 chunk 의 frame 으로 잡음. 주 정의는 결과를 본 뒤 사용자 판정으로 Sg 로 바꾸었다 |
+| **U class** | U 의 chosen cluster 의 GT point label 에서 엄격히 가장 많은 class. `no_target` (grounding 실패 · 선택 없음) 도 class 의 하나로 센다 |
+| **U ≠ target ∧ Sg = target** | 나누지 않으면 틀리고 나누면 맞는 frame 의 비율. 반대 방향 (U = target ∧ Sg ≠ target) 도 같은 표에 둔다. 정답은 GT 최근접으로 판정한 class 이지 contact · 성공이 아니다 |
+| **분석 창 W1 · W2 (T59)** | 그래프 · 표에서 필요 없는 구간을 자르는 창. **W1 = place 직후 종료**: frame 0 부터 `min(첫 placed, S 의 HSR 확정 label 이 처음 home 인 frame)` (포함), 둘 다 없으면 episode 끝. **W2 = home 복귀 후 종료**: 첫 `placed` 이후 used arm 관절이 준비 자세에서 0.2 rad 안에 처음 들어온 frame 까지 (측정 완료, §12). T46c 의 W1 (placed `no_seed` 인증 수정) 과 이름만 같다 |
+| **ready distance (T59)** | 준비 자세 `q_ready` (= `traj.npz` 의 `measured_qpos[0]`, control step 0 의 16D 상태) 와 그 frame 의 used arm 7 관절의 L2 거리 `‖q − q_ready‖₂` (rad). frame 의 q 는 기록 qpos (chunk 를 실행하기 전 상태). W2 의 끝을 정하는 물리 기준으로 0.2 rad 이하를 쓴다 (사용자 판정). SUBTASK-e 의 "왼팔이 준비 자세로 돌아온다" 와 같은 정의 |
+| **no_target (release 뒤) (T59)** | S · Sg 의 class 규칙에서 serving chunk 에 manipulated 물체가 없는 frame 의 class. 그 중 `subtask.released` 가 그 episode 에서 그 frame 까지 한 번이라도 True 였던 frame 을 `released` 로 센다 (task 문서의 "B3 해제 뒤"). W2 의 placed 153 frame 중 119 frame 이 이것이고 S 의 exclusion 이 꺼져 있고 HSR 확정 label 은 `home` 이다. U 의 `no_target` (grounding 실패 · 선택 없음) 과 정의가 다르다 |
+| **placed 의 "U class × S 상태" (T59)** | W2 의 placed 153 frame 에서 U 가 고른 class 를 같은 frame 의 S 상태 (manipulated 유무 · exclusion active · HSR 확정 label) 로 나눠 센 표 (§12.7) |
+| **대표 episode (T59)** | 성공 episode 중 held frame 에서 U ≠ target 인 frame 수가 가장 많은 것 (동률이면 episode 번호가 작은 것). U 가 가장 많이 틀리는 episode 를 고른 규칙이라 평균의 대표가 아니다 |
+| **T59** | T59 = 16D T53 기록 16 episode 에서 phase 별로 U 와 S 가 각각 무엇을 target 으로 쓰는지 센 offline 기술 통계 STEP (`handoff/T59.task.md`, 아래 "T59" 절) |
+
+**T60 (2026-10-14 추가)** — 종료 구간 (완료 이후 frame) 을 평가 · 선택에서 빼는 술어의 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **규칙 P · t_P (placement 완료)** | target 이 crate 안 (`analyze_t42` 중심 규칙) ∧ hand–target contact 없음 ∧ target 속도 ≤ 0.030 m/s 가 8 row 연속인 첫 시점. 그 뒤의 추론 · 행동 · 지표는 task 밖 (사용자 판정 2026-10-13) |
+| **규칙 H · t_H (준비자세 복귀 완료)** | t_P 뒤 사용 팔 7 관절 max\|q − q0\| ≤ 0.35 rad ∧ TCP 오차 ≤ 0.12 m 가 8 row 연속인 첫 시점. q0 = episode 의 warm-up 후 row 0 자세. place → 준비자세 이동은 task 안 |
+| **full · P · H 창** | full = 발표 정의 (horizon 전체, 성공은 마지막 row 기준). P · H = 각 완료 시점까지 (inference frame 은 `t_step ≤ t_end` 이면 유지). 완료하지 못한 run 은 full horizon 유지 |
+| **endpoint mask · protocol `T60-v1`** | run 마다 저장한 `keep_rows_P/H` (control row) · `keep_frames_P/H` (inference frame). 원 기록을 지우지 않고 창을 적용한다 |
+| **H 미도달 (placed, not returned)** | P 에는 도달했지만 H 에는 도달하지 못한 run. 사용자 판정으로 H 기준 실패, P 성공은 따로 보고 |
+| **frame 단위 근사 (`endpoints_sampled`)** | inference 시점 (8 row 마다) 상태만 있는 step record 에서, 연속 두 표본이 술어를 만족하면 그 사이 8 row 가 유지된 것으로 보는 P · H. 142 run 에서 row 단위와 비교해 P frame 일치 0.9977 · H 1.0 |
+| **T60** | T60 = 위 술어로 T44–T56 의 고정 후보를 재집계하고 head 선택을 다시 계산한 offline STEP (`handoff/T60.task.md`, 아래 "T60" 절) |
+| **실행 구간 제안 (`pred8_ref_min`, T60b)** | 매 chunk 에서 실제로 실행되는 앞 8 step 의 정책 원래 출력 (`actions_reference`, TO 전) 이 준비자세에 가장 가까웠던 값 (max\|a − q0\|). 정책이 "지금 실행할 동작" 으로 복귀를 제안했는지 본다 |
+| **(a) 복귀 미생성 · (b) 실행 차단 · (c) 다른 위치로 물러남 (T60b)** | H 미도달 run 의 사전 고정 분류. (b) = P 이후 HOLD ≥ 1 이거나 TO · 실행이 준비자세 제안을 0.05 rad 넘게 바꿈, (c) = (b) 아님 ∧ TCP 가 0.10 m 이상 움직이고 target 에서 0.10 m 이상 떨어짐, (a) = 그 밖 |
+| **T60b · T60c** | T60b = H 미도달 27 run 의 기록 기반 진단, T60c = T51b 의 종료 창 재집계 (`handoff/T60.task.md`, 아래 각 절) |
+
+**T52 · T53 · T54 · T54b (2026-10-14 추가)** — 장면 1800 실패 분해, 새 평가 data, grounding 비교 (명사 · 조합), 시간 유지 재생의 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **오류 시작 단계 (error-start stage)** | grounding 의 세 단계 ① identity (2D: attention map 의 argmax 가 target 위인가) → ② seed (3D: 상위 attention 점, percentile 95) → ③ region growing (eps 0.03 m + DBSCAN → chosen cluster) 중 **처음으로 사전 고정 기준을 못 넘은 단계** (T52) |
+| **seed precision · seed recall** | seed 점 중 GT target 인 비율 (precision) · target 관측 점 중 seed 인 비율 (recall). T52 의 ② 실패 기준은 precision < 0.5 (사전 고정) |
+| **병합 (merged cluster)** | chosen cluster 가 GT 이웃 과일 점 ≥ 1 과 target 점 ≥ 1 을 함께 가진 경우. identity 를 항상 깨지는 않고 purity · 이웃 점 혼입을 깬다 |
+| **attention split 비율 (split ratio)** | 15 mm 재군집 뒤 가장 질량이 큰 성분의 평균 attention ÷ 다른 성분의 최대. 이 비율이 2 이상이어야 split 이 받아들여진다 (`attention_split_ratio`, 기본 normalised) |
+| **`TargetConfirm` · 유지된 geometry (kept geometry)** | 이전 frame 에서 확정한 target geometry 를 현재 frame 에 이어 쓰는 단계 (freeze · latch 포함). L8H2 의 2D peak 가 target 밖인 frame 에서도 3D 가 맞는 이유 (T52 §6) |
+| **최종 실패 · 최종 성공 frame** | 단계 flag 와 무관하게 최종 `identity_correct` 가 거짓 · 참인 frame. T52 follow-up (A) 가 1 차 기준 (독립 flag) 의 한계를 보완하려고 도입 |
+| **`headfix` · head 0 기록** | `headfix` = X2 수정 (2026-09-25) 후 재촬영한 장면 1800 기록 (`head_1` 0.7001). **head 0 기록** = X2 수정 전에 녹화해 `head_1` 이 0.0 이라 cam_high 가 벽을 보는 `ep1800` (`recordings/run_16d_ep1800`) 과 `long` (`20260924_long16d`) |
+| **final test · dev** | final test = 설정 결정에 쓰이지 않은 평가 data (T53 16 episode). dev = 설정을 정하거나 구현을 점검한 data. 결과를 보고 정의를 바꾸면 그 수정안에 대해서는 final test 도 dev 가 된다 |
+| **arm L8H2 · N · A · B** (T54) | L8H2 = 서빙 (lifting · seed · split · 선택 모두 L8H2). N = 명사 단독 (`noun_target:L10H7`, 전부 명사). **A = L8H2 가 후보를 만들고 split 도 L8H2, 선택 점수만 명사 map 질량.** B = seed 는 명사, split 비율은 L8H2 map, 선택은 명사. 보조 L12H4 · A-L12H4 · N-k3 · A-k3 |
+| **`current` · `hold` · `hold_attach` 조건** | current = frame 마다 `AG3S.reset()` (history 없음, 주 조건). hold = 시간 순서 + `TargetConfirm`, 기록된 latch flag 만 주입 (attach 미재현). **hold_attach = hold 에 기록된 attach · detach 도 모든 arm 에 같은 순서로 주입** (T54b) |
+| **`target_candidate_present` · 후보 생성 실패 · 선택 실패** | 선택 직전 후보 cluster 중 엄격한 다수 class 가 target 인 것이 있는가. 후보 생성 실패 = ¬present, 선택 실패 = present ∧ ¬`identity_correct` |
+| **episode block bootstrap · moving-block** | episode block = 16 episode 를 복원 추출 (B 10000, seed 5407, percentile 95 %). moving-block = episode 안 target frame 을 5 frame 연속 block 으로 복원 추출 (민감도). frame 은 독립 표본이 아니다 |
+| **T57 진입 기준** | A 를 closed-loop (T57) 에 보낼지 정하는 사전 고정 기준: identity ≥ −3 %p · coverage ≥ −5 %p · 개선 근거 하나 이상 · hold 같은 허용 하락 · 처리 시간 보고. −3 %p · −5 %p 는 실무 허용폭이고 통계 도출값이 아니다. 통과 문구는 "offline 개선이 관측돼 closed-loop 확인 대상으로 선정" 까지 |
+| **재생 충실도 (fidelity)** | `hold_attach` 의 L8H2 arm 이 같은 frame 의 서빙 chunk 기록 (chosen target · manipulated identity · attached · frozen) 과 일치하는 정도. 같은 물체 = 둘 다 없음 또는 centroid 거리 ≤ 30 mm |
+| **T52 · T53 · T54 · T54b** | T52 = 장면 1800 실패의 단계별 분해. T53 = 16 episode rollout + 추출. T54 = 명사 · 조합 grounding 비교 (offline). T54b = T54 의 유지 포함 재생을 attach 포함으로 수정 (각 절) |
+
+
+**T46e (2026-10-14 추가)** — visible-target oracle extent 와 그 진단의 용어. (F1 · F1GT · C1a · CL3 · DT-02 는 위 "T46b · T46c" 표와 [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md) 의 "용어" 절.)
+
+| 용어 | 뜻 |
+|---|---|
+| **visible-target oracle extent (`oracle-visible`, ORV)** | 시뮬레이터의 GT segmentation 으로 **카메라에 실제로 보인 target 표면 점** 에서 온 seed 만 target-free 층에서 지우는 extent arm. 이웃 과일 · 지지면 · 로봇은 지우지 않는다. 서버 `--target-extent oracle-visible` + client `--safe-oracle-seg` (기본 off). DT-02 extent block 의 **비대상 보존을 중시하는 관측 기반 비교 기준선** 이고 충돌 행 수 · 성공률의 **상한이 아니다** (사용자 판정 B3) |
+| **ORV · ORVgt · ORV_S (offline variant)** | ORV = oracle, 물체 선택은 pipeline identity (`--oracle-extent-identity pipeline`). ORVgt = 같은 oracle, 물체 선택만 GT. ORV_S = ORV 에 다른 arm 이 지우는 지지면 층 (공의 `z_min` 위 10 mm) 삭제를 더한 진단 variant (서버 option 아님, **채택 안 함**, 판정 B2) |
+| **oracle memory · 띠 (band) 길** | oracle memory = 그 run 에서 받은 요청의 GT 라벨 pixel 을 back-projection 해 쌓은 물체별 표본. 띠 길 = target pixel 광선의 보인 면 뒤 30 mm 를 target 띠로 누적해 (5 mm 칸, 다른 물체 표본 5 mm 보호) 그림자 seed 를 지우는 경로. `d_t` · `d_o` = seed 에서 가장 가까운 target 표본 · 다른 물체 표본까지의 거리 (`d_t > d_o` 면 표면 길로 지우지 않는다) |
+| **책임 voxel · `d_geom` · 오류 후보 (T46e-D)** | 책임 voxel = oracle 충돌 행의 구 중심에 가장 가까운, 그 행이 읽은 층에 남은 seed. `d_geom` = 그 voxel 중심에서 기록 qpos 장면의 실제 MuJoCo 형상 (과일은 `_vis` mesh 의 convex hull) 까지의 부호 거리 중 최소. **`d_geom ≤ 5 mm` 면 `preserved_<class>` (target 이면 `target_surface_kept`), 5 mm 초과면 `error_candidate`** — 측정 전 고정 (R0–R8, 2026-10-13 11:02 KST). 오류 후보는 "표현 · memory 오류의 후보" 이고 원인 확정이 아니다 |
+| **신규 7 chunk · 악화 1 chunk** | held-out 162 chunk (CL3 grasp 직전 window) 중 off · F1 · F1GT 가 0 행인데 ORV 만 행이 생긴 7 chunk, 그리고 off 보다 행이 는 1 chunk (`C1a_ep110_s1101:18`). T46e-D 의 대상 8 chunk |
+| **T46e · T46e-D · T46e-apply** | T46e = oracle extent 구현 (A13) 과 offline 검증 (V-T46e). T46e-D = 8 chunk · 지지면 층의 원인 진단 (측정만). T46e-apply = 메인 HEAD 위 patch 의 회귀 · 호환성 확인과 메인 적용 (`cf38c9db`) |
+
+**T46f-A14 (2026-10-14 추가)** — 손목 · 손바닥 충돌 형상 보정과 그 독립 검증의 용어. (LTE · global exclusion · 비허용 link 는 위 "T46c-W1 · T46d · T46f" 표.)
+
+| 용어 | 뜻 |
+|---|---|
+| **`--links gripper_wrist`** | 손 (손바닥 · 손가락) 에 양손 `link_*_arm_5` · `link_*_arm_6` · FT sensor (`FT_sensor_<S>`) 를 더한 TO 구 link 집합. 손목 link 의 구는 URDF capsule 이 아니라 MJCF collision mesh 겉면에서 다시 만든다 (손가락 · 손바닥 cover 와 같은 계산). 기본 `--links gripper` 는 그대로 |
+| **wrist cover · keep-out · overflow · inset** | wrist cover = 손목 link 의 MJCF 겉면을 덮는 구. keep-out = 비허용 손목 구가 권한 손 (손바닥 + 손가락 sweep) 의 MJCF 껍질 안으로 들어가지 않게 반지름 상한을 두는 것. overflow = 구가 자기 mesh 밖으로 나가도 되는 최대 거리 (5 mm). inset = 표본을 구 경계 안쪽 0.5 mm 까지 담아야 덮인 것으로 세는 규칙 (arm_6 에만) |
+| **palm cover (최종 형상에서 on)** | 권한 손바닥 (`ee_<side>`) 구를 MJCF 손바닥 겉면에 다시 만드는 옵션 (T45 A10, overflow 5 mm). T46f 의 최종 형상은 `--links gripper_wrist --palm-cover on`, **1,349 구** (기준 `gripper` · palm off 270 구) |
+| **`--target-field-policy none` (예외 없음)** | 쥐기 전 target 을 모든 link 가 일반 obstacle 로 다루는 정책 (권한 link margin 완화 · target-free 층 조회 없음, 실행 중 verdict 의 허용 접촉도 없음). 쥔 뒤 규칙은 다른 정책과 같다. **평가용 허용 접촉 정의는 세 조건 공통** (사용자 판정 A5) |
+| **`PROTECTED_LINKS`** | 어떤 정책에서도 권한 집합 · 쥔 물체 권한 사슬에 들지 않는 link (FT sensor 양쪽) |
+| **실험 자세 점검 (A7, `wrist_pose_check`)** | CL3 54 run 의 planning 행 qpos 에서 (a) 비허용 구의 active hand MJCF 침범, (b) 비허용 구와 권한 구의 겹침, (c) target 이 손 5 mm 안일 때 비허용 구 안에 드는 target 표면 점 (가짜 제약 후보) 을 world frame 으로 잰 것 |
+| **실행 경로 guard** | 검증 실행 앞에 cwd · HEAD · 실제 import 경로가 예상 worktree 와 다르면 멈추는 검사 (`scripts/setup/env.sh` 가 메인으로 `cd` 하고 `pyproject` 의 `pythonpath = ["."]` 가 cwd 코드를 import 하기 때문, 2026-10-14) |
+
 ---
 
 ## 진행 현황 — T47 이후
@@ -193,10 +270,19 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **T51** attention head 선택 protocol 공식화 (RB-Y1 sim + 실물용 grasp-event label + LIBERO) | head · layer 를 하나로 고정하는 선택의 당위성 | ~~**진행 중 (2026-10-12)** — task: [`handoff/T51.task.md`](handoff/T51.task.md). 아직 기록할 측정 없음~~ → **측정 완료 (2026-10-12, 사용자 판정 대기).** calibration 6 record · 5 scene (ep0 · ep500 · ep1200 = VLA 학습 episode 추가), scene mean primary. P1 filter 가 L8H2 를 `low_mass` 로 제외 (cam_high mass median 0.006293 < 0.01). P2 GT 3D `identity_correct` 1 위 `last:L12H4` 0.691. **사전 고정 안정성 기준 (P(rank1) ≥ 0.5) 미충족: 0.429 → 단일 head 고정은 주장하지 않는다.** P4 는 단순성 규칙으로 k\* = 1 (CV 평균 최고는 k = 3). held-out (3 scene) 에서 `last:L12H4` · `last:L12H3` · `last:L8H2` 가 0.911 로 동률. self label 은 `self_identity` 1.0 으로 포화해 2D lift tie-break 가 선택을 정했다. LIBERO (2D lift, task 단위) 1 위 `mean:L12H3`. 집계 단위 deviation (record-mean → scene mean) 을 중간에 발견해 고침. 아래 "T51 · T51b" 절 |
 | **T51b** head 선택 protocol 에 명사 query 행 추가 | action query 와 명사 query 를 같은 기준으로 비교 | ~~**진행 중 (2026-10-12)** — task: [`handoff/T51b.task.md`](handoff/T51b.task.md). 아직 기록할 측정 없음~~ → **측정 완료 (2026-10-12, 사용자 판정 대기).** (a) 명사만 Ω: GT 1 위 `noun_target:L10H7` P(rank1) 0.687 (상위 10 cell 의 점수 차 0.007 이내), self 1 위 `noun_target:L8H6` 0.529. (b) action + 명사 Ω: GT 1 위 `last:L12H4` P(rank1) 0.753 (action family 합 0.918), self 1 위 `noun_target:L8H6`. (c) held-out scene mean: 명사 best 0.867 대 action best 0.911, scene 단위 차 −0.044 (95 % CI [−0.133, 0.000], scene 3 개). 명사가 더 낫다는 증거는 없다. 아래 "T51 · T51b" 절 §12 |
 | **T46b** F1 을 켠 뒤 늘어난 close 이후 uncertified HOLD 의 원인 (진단, CPU offline, T46 의 후속) | F1 이 grasp 이후 처리와 충돌해서 HOLD 가 늘었는가, 아니면 다른 원인인가 — F1 을 develope_PLAN §0.10.1-3 의 방법으로 채택할 수 있는가 | **측정 완료 (2026-10-12).** close 이후 uncertified HOLD 는 전부 **placed phase** (C1a 37 / 37 · C1aF1 130 / 130 · C1aF1F2 118 / 118 chunk) 이고, 실패 항목은 grounding `no_seed` (C1a 37 · C1aF1 129 · C1aF1F2 116 chunk, `n_clusters = 0`). 그 HOLD chunk 의 F1 기록은 0 / 130. 가설 (a) F1 이 grasp 이후 처리와 충돌 · (b) non-target 근거 감소 · (c) 분모 효과는 **반박**, (d) placed 뒤 `no_seed` 인증 공백은 **확인**. 같은 HOLD 가 F1 이 없는 CL2 에도 있다 (C0 73 · C1bp 70). F1 이 `no_seed` run 을 계통적으로 늘렸는지는 **모름** (3 / 0 / 1, p = 0.25). 아래 "T46b" 절 |
-| **T46c** F1 채택 (한계 L1–L9 명시) · W1 (A12) 구현 · PA-1 ablation 초안 | F1 을 현재 extent 방법으로 채택하는가, close 이후 HOLD 를 어떻게 다루는가, ablation 을 어떻게 구성하는가 | **F1 채택 (사용자 판정, 2026-10-12) — 한계 L1–L9 를 함께 기록.** W1 구현은 **진행 중 (결과 없음)**. PA-1 ablation 구성은 **사용자 판정 대기**. 아래 "T46c" 절 |
+| **T46c** F1 채택 (한계 L1–L9 명시) · W1 (A12) 구현 · PA-1 ablation 초안 | F1 을 현재 extent 방법으로 채택하는가, close 이후 HOLD 를 어떻게 다루는가, ablation 을 어떻게 구성하는가 | **F1 채택 (사용자 판정, 2026-10-12) — 한계 L1–L9 를 함께 기록.** W1 구현은 ~~**진행 중 (결과 없음)**~~ → **완료 · 검증 PASS (아래 "T46c-W1" 행)**. PA-1 ablation 구성은 **사용자 판정 대기**. 아래 "T46c" 절 |
 | **T46c-W1** placed `no_seed` 인증 수정 (flag 기본 off) 의 검증 (V-T46c, CPU offline) | W1 이 T46b 의 what-if 를 코드로 재현하는가, off 에서 기록과 같은가 | **측정 완료 (2026-10-12 23:40 KST, PASS).** 기준선 일치 (legacy 14 / 15 · 15 / 15 · −29.031048 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877 mm). off (W0) 가 기록 reason · certified 와 3 arm × 1350 / 1350 chunk 에서 같다. W1 의 close 이후 HOLD (total / uncertified) 는 C1a 107 / 37 → 70 / 0, C1aF1 183 / 130 → 54 / 1, C1aF1F2 122 / 118 → 6 / 2. **per-chunk what-if 이고 closed-loop 효과는 측정하지 않았다.** 사용자 판정으로 모든 Ablation arm 에 켠다 (바로 위 T46c 행의 "W1 구현은 진행 중 (결과 없음)" 은 이 행으로 대체). 아래 "T46c-W1 · T46d · T46f" 절 |
 | **T46d** DX-04 선행 확인: LTE 대 global exclusion 비교가 성립하는 최소 non-authorized link 집합 (CPU offline, 18 run × 3 arm) | 현재 gripper scope 에서 LTE 와 global exclusion 이 다른 판정을 내는가, 어떤 link 를 넣어야 비교가 성립하는가 | **측정 완료 (2026-10-13 00:17 KST), 사용자 판정 (2026-10-13).** 기록 문구 (사용자 지정): **현재 gripper scope 에서는 LTE 와 global exclusion 의 비교가 퇴화하며, `link_*_arm_5` 를 추가했을 때 나타난 차이는 형상 근사 오류의 영향을 받는다.** ("효과 없음" 이 아니다.) gripper scope 에서 target 근처 non-authorized 행 0 / 349,920 (C1aF1, pre8close). arm_5 sphere 는 18 / 18 run 에서 target 50 mm 안이지만 MJCF arm_5 geom 은 18 / 18 run 에서 100 mm cap 이상. 판정: **A (주장 축소) 가 아니라 B 를 확장해 진행, C (arm_5 근사 구 그대로) 제외.** 아래 절 |
-| **T46f** LTE 검증 블록: 형상 보정 (A14) → 진단 장면 → oracle extent 로 no exemption · global exclusion · LTE → AG3S extent | 지정 link 에만 target 접촉을 허용하면 필요한 손의 접촉을 유지하면서 비허용 link 의 접촉을 줄이는가 (가설, 사전 고정) | **계획 단계 (2026-10-13 01:23 KST). 측정 결과 없음.** 형상 보정 (A14) 이 진행 중이다. LTE 의 우수성을 전제하지 않는다. 아래 절 |
+| **T46f** LTE 검증 블록: 형상 보정 (A14) → 진단 장면 → oracle extent 로 no exemption · global exclusion · LTE → AG3S extent | 지정 link 에만 target 접촉을 허용하면 필요한 손의 접촉을 유지하면서 비허용 link 의 접촉을 줄이는가 (가설, 사전 고정) | ~~**계획 단계 (2026-10-13 01:23 KST). 측정 결과 없음.** 형상 보정 (A14) 이 진행 중이다.~~ → ~~**단계 1 구현 · 재-audit 진행, 독립 검증 전**~~ → **단계 1 (형상 보정) 독립 검증 완료 (2026-10-14): 형상 · 회귀 · 호환성 PASS. TO 상대 비용 기준 FAIL (chunk 별 시간비 median 2.65 > 2.0). 계산 비용 증가를 수용하여 실험용 적용 및 단계 2 진행 승인 (사용자 판정).** 최종 형상 `gripper_wrist + palm cover on` 1,349 구. 이번 replay 에서 시간 예산 종료와 제약 위반 상태의 건수가 증가하지 않았다. 단계 2 (진단 장면) 이후는 측정 없음. 사용자 판정 A1–A9 · TO 시간 기준은 아래 "물려받은 결정". LTE 의 우수성을 전제하지 않는다. 아래 "T46c-W1 · T46d · T46f" 절 |
+| **T46e** visible-target oracle extent (기본 off) 구현 · offline 검증 · 8 chunk 원인 진단 (T46e-D) · 메인 적용 | 카메라에 보인 target 표면만 지우는 oracle 이 DT-02 의 관측 기반 비교 기준선이 되는가, oracle 만 행이 생긴 chunk 는 oracle 오류인가 | **메인 적용 (`cf38c9db`, 2026-10-13), 사용자 판정 B1–B5 (2026-10-13).** held-out 14 충돌 chunk 충돌 행 off 887 · F1 401 · F1GT 113 · ORV 216, 지운 seed 중 이웃 과일 ≤ 5 mm 2216 · 2216 · 2221 · 6. 신규 7 chunk 143 행 = 오류 후보 121 · robot 근접 20 · target 잔류 2 — **oracle 오류로 일괄 판정하지 않음 (B1)**, 지지면 층 일괄 삭제 (ORV_S) 채택 안 함 (B2). 기본 off 에서 CL3 1630 / 1630 층 bit-identical. closed-loop 는 돌리지 않았다. 아래 "T46e" 절 |
+| **T59** 16D 에서 phase 별 attention 사용: phase 를 나누지 않은 grounding (U) 대 현재 serving (S) (offline, T53 기록 16 episode, CPU) | 16D 현재 serving 기록에서 phase 를 나누지 않은 grounding 은 쥐기 전 · 들고 가는 중 · 내려놓는 중에 각각 무엇을 target 으로 고르며, 같은 frame 에서 phase 를 나눈 serving 은 무엇을 쓰고 있었는가 | **측정 완료 (2026-10-13, 분석 창 W1 = place 직후 종료 · W2 = home 복귀 후 종료 둘 다).** W1 (606 frame): held 106 frame · 10 episode 에서 U 의 class 는 target 0.591 · other_object 0.354 · no_target 0.055 · destination 0 / 106, Sg (관측 frame GT) 는 target 0.862 (frame 합산 0.943). U ≠ target ∧ Sg = target 은 held 0.294 (34 / 106), pre 0.105 (48 / 477, CI 겹침). S class 의 주 정의는 **결과를 본 뒤 사용자 판정으로 Sg 로 바꿨고** 사전 정의 S (같은 frame GT) 는 held 에서 target 0.136 이라 표에 남겼다. 14D F11 (들고 가는 동안 crate) 은 이 기록에서 재현되지 않았다. **W2 (750 frame, W1 에 `placed` 144 frame 이 더해져 placed 153, pre · held · post 는 W1 과 같다):** 첫 placed 이후 ready distance 0.2 rad 안에 든 episode 는 7 / 9 (ep1866 · ep1839 는 끝까지 미도달, 최소 1.169 · 0.251 rad). **placed 153 frame 중 119 frame 에서 serving 은 HSR 이 home 으로 확정한 뒤 manipulated 가 없고 exclusion 이 꺼져 있으며** (나머지 34 frame 은 manipulated 있음 · exclusion active · HSR place), **같은 119 frame 에서 U 가 고른 class 는 target 81 · no_target 25 · other_object 7 · table 5 · destination 1.** **기술 통계: closed loop 에서 U 를 쓰면 실제 carving · 접촉이 어떻게 되는가, HSR 대 strong rule (T55) 은 측정하지 않았다.** 후속 (미분할 closed-loop arm, T55 대기) 은 절의 "되돌아올 지점" 에. 아래 "T59" 절 (W2 는 §12) |
+| **T60** 종료 구간 (P · H) 술어와 T44–T56 고정 후보 재집계 · 선택 재계산 (offline, 새 rollout 없음, CPU) | 완료 이후 구간을 평가 · 선택에서 빼면 어떤 수치와 선택이 바뀌는가 | **측정 완료 (2026-10-14 00:34 KST), 판정 대기.** 142 closed-loop run (CL2 · CL3 · T53): P 도달 89 (발표 success 와 142 / 142 일치), H 도달 62 — **placed 27 run 은 준비자세로 돌아오지 않는다.** P 창에서 8 arm 의 success · `success_ct` 는 발표값 그대로, HOLD 는 크게 줄고 (CL3 C1a 119 → 82 · C1aF1 189 → 60 · C1aF1F2 124 → 8) uncertified HOLD 는 대부분 t_H 이후. H 창에서 CL2 C1bp 대 C2p `success_ct` p 0.0039 → 0.0625. T54: N · B identity 개선 +7.15 → +10.40 (P) / +9.80 (H) %p, A 진입은 창마다 뒤집힘 (경계). T47 공통 top-3 → L4H1 · L14H5 · L3H3, held-out `on_target` 0 → 43 / 60 (L8H2 55 / 60, 유지). T51 GT 선택 `last:L12H4` → `mean:L10H7` (P) · `mean:L12H4` (H), held-out 은 L8H2 (0.911) 를 넘지 않음, self label 선택 불변. T49 primary · T52 · pre-grasp 결과 불변. T54b – T56 · HSR demo 는 범위 밖. 아래 "T60" 절 |
+| **T60b** 복귀 미도달 (P 도달 ∧ H 미도달) 27 run 의 기록 기반 진단 (offline, 새 rollout 없음) | 정책이 복귀를 만들지 않았나, HOLD · TO 로 실행이 막혔나, 다른 곳으로 물러났나 | **측정 완료 (2026-10-14).** 사전 고정 분류: (a) 복귀 미생성 26 · (c) 다른 위치로 물러남 1 (경계) · (b) 실행 차단 0. P 이후 HOLD 0, 정책 원래 출력의 실행 구간이 준비자세 (≤ 0.35 rad) 를 제안한 run 0 (가장 가까운 값 0.584–1.162 rad), TO 변경 ≤ 0.074 rad. 미도달은 episode 110 · 123 · 3 에 24 run 이 몰리고, 이 episode 들의 학습 데모는 모두 정확히 복귀한다. 아래 "T60b" 절 |
+| **T60c** T51b (명사 · combined Ω) 의 종료 창 재집계 (offline) | 명사 query 를 넣은 head 선택도 종료 창에 따라 바뀌는가 | **측정 완료 (2026-10-14).** full 은 발표 T51b 와 같다. 명사 GT 선택 `noun_target:L10H7` 은 세 창 모두 같고 (T54 고정 명사 source 와 같은 cell) 1 위 확률만 0.687 → 0.409 / 0.407. self label 선택은 Ω · 창과 무관하게 불변. combined GT 선택은 P 에서만 `last:L8H7`. held-out 에서 어느 선택도 L8H2 (0.911) 를 넘지 않음. 아래 "T60c" 절 |
+| **T52** 장면 1800 grounding 실패의 단계별 분해 (offline CPU, 4 record × 3 source) + follow-up | 명사 identity · 3D seed · 영역 확장 중 오류는 어디서 시작되는가 | **측정 완료 (2026-10-13).** scene1800 30 frame: 2D identity 실패 명사 0 (L8H2 7). 명사는 seed precision 이 낮고 (L8H6 중앙값 0.16) 이웃 바나나와 병합 (15 frame, 전부 `headfix`, purity 0.65 · 0.63, L8H2 병합 0 · purity 1.00). follow-up: **최종 실패만 보면 첫 단계는 거의 모두 seed** (L8H2 4 · L8H6 7 · L10H7 8 frame, region 0), 최종 성공도 seed 기준을 자주 넘지 못해 (L8H2 20 / 26 · L8H6 22 / 23) **seed precision 은 단독 예측 지표가 아님**. 병합 기전 = split 비율 ≥ 2 (L8H6 7 / 15 · L10H7 10 / 15 · L8H2 15 / 15). L8H2 의 2D 실패인데 3D 가 맞은 14 frame 중 13 은 `TargetConfirm` 유지. **`ep1800` 은 head 0 기록 (사용자 판정: dev 제외 + 과거 결과 표시, 재측정 대기 #32).** 아래 "T52" 절 |
+| **T53** 새 평가 data: 한 번도 쓰지 않은 16 episode 의 rollout · 추출 | T54 – T56 의 final test 로 쓸 data 가 준비됐는가 | **측정 완료 (2026-10-13).** 16 episode 현재 서빙: **success 9 / 16, `success_ct` 7 / 16, HOLD 37 chunk (10 run)**, 비허용 접촉은 `hand-fruit_other` 4 run · 31 행 (전부 놓기 전). 추출 1200 frame 오류 0, check 문제 0, attention parity argmax 0.9959, noun parity bitwise 동일. **T57 의 현재 서빙 기준선.** T54 결과 후 N · B 에 대해서는 dev (사용자 판정). 아래 "T53" 절 |
+| **T54** grounding 비교: L8H2 · 명사 단독 (N) · 명사 선택 + L8H2 seed (A) · 명사 seed + L8H2 split (B) (offline CPU, T53 16 episode) | 명사 identity + L8H2 seed 조합이 수정에 쓰지 않은 episode 에서 identity · purity · 이웃 혼입을 개선하는가 | **측정 완료 (2026-10-13).** 현재 frame (16 episode · 1178 frame) identity: L8H2 70.93 %, **N +7.15 %p (CI [+3.65, +11.11]), B +7.07 %p, A −3.08 %p (CI [−8.00, +0.85])**. **A 는 사전 고정 T57 진입 기준 (identity ≥ −3 %p · 개선 근거) 미충족 → 기각 (T57 진입 안 함).** N · B 는 identity · coverage · 이웃 혼입에서 개선 관측, N ≈ B. 유지 포함 (`hold`) 은 attach 미재현이라 N · B 가 L8H2 와 같고 post · placed identity 0 (→ T54b). 사용자 판정: N · B 를 후속 후보로 새 16 episode 에서 확인 (T54c, 이 로그 미기록). 아래 "T54" 절 |
+| **T54b** T54 유지 포함 재생에 기록된 latch · attach 를 넣어 다시 (`hold_attach`, offline CPU) | N · B 의 개선이 시간 유지 · attach 가 있는 조건에서도 남는가, 재생이 서빙과 일치하는가 | **측정 완료 (2026-10-14).** L8H2 arm 이 서빙 기록과 일치 (identity 0.9992 · chosen · manipulated 같은 물체 1.0 · attached 1.0 · frozen 1.0). **N · B 는 L8H2 와 identity · purity 가 같다 (차이 0).** post · placed identity 0 은 서빙을 재생한 L8H2 에서도 0 (재생 결함이 아님). A 진입 표의 hold 행 충족 (identity −1.42 · coverage −1.72 %p), A 판정 불변. 한계: arm 별 latch 상태 기계 미재현. 아래 "T54b" 절 |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -217,8 +303,8 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | T49b — 명사 query 의 σ · k 변형은 **exploratory**, 채택 근거가 아니다. cell · k · σ 선택은 T51b (공식 protocol) 로 정한다 | 사용자 판정 (2026-10-12, T49 결과 후). 이미 추출된 data 로 CPU 만 사용 (`handoff/T49b.task.md`) | 16D (pilot 규모) |
 | T50 — **T50a (CPU) + T50b (GPU, `pi05_base`) 를 모두 진행**한다. 판정 임계 (C0 ≥ 0.95 · C1_instr ≥ 0.80) 는 episode 별 정확도의 **median** 에 적용 | 사용자 판정 (2026-10-12) 으로 T50a + T50b 진행. median 적용은 lead 가 결과 전 고정 (`handoff/T50.task.md`) | 16D |
 | T50 — decision rule 의 출력은 "fine-tuning 탓이 아니다" (LoRA · base 모두 기준 미달) | **사전 고정 규칙의 출력이다 (사용자 판정이 아니다).** 규칙을 어떻게 읽고 무엇을 하는지는 사용자 판정 대기 (T50 절 §7) | 16D |
-| (**제안, 판정 대기 — 미측정 해석 포함**) HSR 을 phase source 의 **보조 구성 요소** 로 둔다 | 검토 문서 §6 의 채택 기준 ("HSR 이 strong rule 보다 실행상 도움이 없으면 보조 구성 요소로 남긴다"). T48a (C1 둔감), T48b (E1 `place` 유지 12/13), T50 (counterfactual probe 도 기준 미달) 은 이 방향과 같은 쪽이나, **실제 strong rule 과의 비교와 gate on/off 실행 이득은 측정하지 않았다** (미측정 해석) | 16D |
-| (**제안, 판정 대기 — 미측정 해석 포함**) **명사 query 로 identity · destination 을, L8H2 로 3D seed 를 얻는** 결합 | T49: 명사 query 가 2D peak · 분리 · prompt 교체에서 앞서고 L8H2 가 3D `identity_correct` · purity · non-target 손실에서 앞섰다. 그 결합이 실제로 3D 를 개선하는지는 **돌리지 않았다** (미측정 해석). 공식 비교는 T51b | 16D |
+| ~~(**제안, 판정 대기 — 미측정 해석 포함**)~~ → **사용자 판정 (2026-10-13) 으로 확정, 아래 T52 – T57 행.** HSR 을 phase source 의 **보조 구성 요소** 로 둔다 | 검토 문서 §6 의 채택 기준 ("HSR 이 strong rule 보다 실행상 도움이 없으면 보조 구성 요소로 남긴다"). T48a (C1 둔감), T48b (E1 `place` 유지 12/13), T50 (counterfactual probe 도 기준 미달) 은 이 방향과 같은 쪽이나, **실제 strong rule 과의 비교와 gate on/off 실행 이득은 측정하지 않았다** (미측정 해석) | 16D |
+| ~~(**제안, 판정 대기 — 미측정 해석 포함**)~~ → **T54 에서 측정: A (L8H2 seed · split + 명사 선택) 는 진입 기준 미충족 · 기각, N · B (명사 seed) 는 현재 frame 에서 개선 관측, 후속 T54c (아래 T54 행).** **명사 query 로 identity · destination 을, L8H2 로 3D seed 를 얻는** 결합 | T49: 명사 query 가 2D peak · 분리 · prompt 교체에서 앞서고 L8H2 가 3D `identity_correct` · purity · non-target 손실에서 앞섰다. 그 결합이 실제로 3D 를 개선하는지는 **돌리지 않았다** (미측정 해석). 공식 비교는 T51b | 16D |
 | T46c — **F1 (`--nontarget-evidence surface`) 을 develope_PLAN §0.10.1-3 의 현재 extent 방법으로 채택한다. 한계 L1–L9 는 명확하게 기록한다. F1 이 close 이후 HOLD 를 늘린 원인도 기록한다** | 사용자 판정 (2026-10-12): "권장하는 A 로 진행. 한계는 명확하게 작성하고 넘어갈 것. F1 이 grasp 이후 HOLD 를 늘린 원인을 작성할 것." 근거와 한계는 T46c 절 §1 · §2, 원인은 T46b · T46c §3 | 16D (pilot 규모, 18 쌍) |
 | T46c — F2 (`--owned-ambiguous remove`) 는 채택하지 않고 대조 arm 으로만 남긴다 | **lead 의 정리 (T46c.task.md §1, 사용자 판정 문장에 직접 나오지 않음).** 이유: 이웃 과일 seed 를 지운다 (offline held-out 에서 잃은 이웃 seed 2,463) | 16D |
 | T46c — close 이후 HOLD 의 고칠 곳은 F1 이 아니라 인증 규칙 (W1), W1 은 모든 arm 에 같이 적용한다 | **lead 의 설계 결정 (T46c.task.md §3 · §4).** W1 구현 (A12) 은 진행 중이고 결과가 없다. 사용자 판정이 아니다 | 16D |
@@ -235,6 +321,23 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | T46d — **기록 문구는 "현재 gripper scope 에서는 LTE 와 global exclusion 의 비교가 퇴화하며, `link_*_arm_5` 를 추가했을 때 나타난 차이는 형상 근사 오류의 영향을 받는다"** 이다. "효과 없음" 으로 쓰지 않는다 | 사용자 지정 (2026-10-13 KST, `handoff/T46d.task.md` "결과 기록과 사용자 판정") | 16D |
 | T46d · T46f — **T46d 의 A (link-specific 효과 주장 축소) 가 아니라 B 를 확장해 진행한다: 형상 보정 (FT sensor coverage · arm_5 근사 보정) → 진단 장면 → oracle extent 3 조건 closed-loop. C (arm_5 근사 구 그대로) 는 제외한다. LTE 의 우수성을 전제하지 않는다** | 사용자 판정 (2026-10-13 KST, `handoff/T46f.task.md` 머리말). A · C 의 괄호 설명은 `T46f.task.md` 의 문구이고, B 는 "B 를 확장" 으로만 적혀 있어 내용은 T46f 의 단계 (아래 절) 로 읽는다 | 16D |
 | T46f — 가설 · 주 지표 · 접촉 정의 · DT-02 와 DT-05A 블록 분리 · 진단 장면 기준 S1 – S4 · 단계 · 중단 기준 | **lead 의 사전 고정 (`handoff/T46f.task.md`).** 사용자 판정 문장에는 직접 나오지 않는다. FT sensor 비접촉을 이 작업의 요구사항으로 정의한 것도 lead 의 정의다 ("센서 보호") | 16D |
+| T52 – T57 — **L8H2 유지, HSR 은 보조 구성 요소** (L12H4 가 우월하다거나 HSR 이 instruction 기반 단계 판단을 한다고 주장하지 않는다). 장면 1800 실패 원인을 먼저 분해한다. grounding 은 action 단독 (L8H2) / 명사 단독 / 명사 identity + L8H2 seed 를 비교하고 L12H4 결합은 추가 ablation 으로만 한다. 중심 거리만으로 성공을 판정하지 않는다. 수정에 쓰지 않은 장면 · episode 에서 검증하고 연속 frame 상관을 반영한 불확실성 (episode block bootstrap) 을 보고한다. offline 개선이 확인된 후보만 closed-loop | 사용자 판정 (2026-10-13, 계획서 판정 1 · 2 · 3 · 6 · 7, [`handoff/T52-T57.plan.task.md`](handoff/T52-T57.plan.task.md)). 위 두 "(제안)" 행 (HSR 보조 구성 요소 · 명사 identity + L8H2 seed 결합) 을 확정 · 측정 단계로 옮긴다. T55 · T56 항목은 각 STEP 이 기록한다 | 16D |
+| T52 — 장면 1800 은 T52 진단에 쓰였으므로 T54 의 최종 판정에 넣지 않는다 | lead 의 사전 고정 (`T52.task.md` · `T54.task.md`). 사용자 판정 문장에 직접 나오지 않는다 | 16D |
+| T53 — 16 episode 전부 final test, 설정은 기존 record 로만 정하고 test 결과를 보고 바꾸지 않는다 (바꾸면 그 수정안에 대해서는 dev). rollout 은 AG3S ON 현재 서빙 (C1a flag, `placed_no_seed_certify` off), policy seed = episode × 10 + 1 | lead 의 사전 고정 (`T53.task.md`). 사용자 판정의 "수정에 쓰지 않은 episode 에서 검증" 을 구체화한 것 | 16D |
+| T54 — arm 정의 (A 주 · B 원인 확인용), 현재 frame 이 주 조건 · 유지 포함은 보조, T57 진입 기준 identity ≥ −3 %p · coverage ≥ −5 %p, 명사 head = `noun_target:L10H7` (GT 로 개발 data 에서 고른 고정 head, label-free 선택이라고 부르지 않는다) | 사용자 판정 (2026-10-13, task 작성 시). −3 %p · −5 %p 는 실무 허용폭이고 통계 도출값이 아니다 (`T54.task.md` 사전 고정 5) | 16D |
+| T54 — **A 는 T57 진입 기준 미충족 (규칙의 출력) 이라 기각한다. N · B 는 후속 후보로 새 16 episode 에서 확인한다 (T54c). T53 16 episode 는 N · B 에 대해 이제 dev 다** | 사용자 판정 (2026-10-13, T54 결과 후). "N 이 채택된다" 는 뜻이 아니다 — T54c 의 사전 고정 기준 (`handoff/T54c.task.md`, 이 로그 미기록) 에서 정한다 | 16D (T53 16 episode) |
+| T54b — 유지 포함 재생에 기록된 latch · attach 를 넣어 다시 돌린다 (현재 frame 결과는 바뀌지 않는다) | 사용자 판정 (2026-10-13, T54 결과 후) | 16D |
+| **head 0 기록 (`ep1800` · `long`, X2 수정 전, `head_1` = 0.0) 은 T55 · T56 의 dev 에서 제외하고 과거 결과에 표시한다. 과거 STEP 은 다시 재지 않는다** (T54 dev parity 는 코드 재현 점검이라 그대로) | 사용자 판정 (2026-10-13). 재측정 대기 #32 | 16D |
+| P · H 창 (T60 의 종료 구간 술어) 은 T54c · T55 · T56 의 **보조 분석** 으로 쓴다 | 사용자 판정 (2026-10-14) | 16D |
+| T46e B1 — **oracle 만 행이 생긴 신규 7 chunk 를 oracle 오류로 일괄 판정하지 않는다.** off 의 0 행을 정답으로 놓고 oracle 을 평가할 수 없다 (off · F1 · F1GT 가 그 voxel 을 모두 지웠다). "7 chunk 모두 정상 이웃 보존" 도 과한 해석이다. 기록 문구: "기존 arm 이 삭제하던 비대상 관련 seed 를 oracle 이 보존하면서 추가 제약이 나타났다. 일부 seed 에는 실제 형상과의 거리 차이가 있으며, 그 발생 원인은 확정하지 못했다." "이웃을 남기는 모든 arm 에서 동일하게 발생한다" 는 주장하지 않는다 | 사용자 판정 (2026-10-13, T46e-D 결과 후). 5–8 mm 가 voxel 크기와 비슷하다는 것은 설명 후보일 뿐이고, 구–장애물 거리가 양수여도 safety margin 안이면 제약은 정상 (margin 밖이면 보수적 과대평가일 수 있다) | 16D |
+| T46e B2 — **oracle 의 지지면 층 보존을 유지하고 ORV_S (지지면 층 일괄 삭제) 는 채택하지 않는다** | 사용자 판정 (2026-10-13). 그 높이 띠는 순수 table 층이 아니다 — ORV_S 가 추가로 지운 seed 는 모두 가장 가까운 class 가 이웃 과일. 일괄 삭제가 비대상 보존을 훼손한다는 사실만으로 제외에 충분 | 16D |
+| T46e B3 — **oracle 은 주 진단 기준선, F1GT 는 보조. 충돌 수 · 성공률의 수학적 상한으로 부르지 않는다.** ep3_s32:27 의 target 잔류 (1 voxel · 2 행) 는 "관측 memory 와 현재 형상 간 불일치 가능성" 으로 기록하고 계약 위반으로 확정하지 않는다. 제거 반경 확대 · full-mesh GT 삭제 수정은 하지 않는다 | 사용자 판정 (2026-10-13) | 16D |
+| T46e B5 — **AG3S 전체 identity 의 GT 교체 (DX-01 조건 A) 는 이번 범위에서 보류한다.** `identity_matches_gt` 로그는 GT 통제의 대체재가 아니다 — extent 비교에서 identity 불일치 chunk 는 별도로 처리하고, 조건 A 는 미완료로 남긴다 (재측정 대기 #41) | 사용자 판정 (2026-10-13) | 16D |
+| T46e — **B1 · B2 때문에 메인 적용을 보류하지 않는다. 회귀 · 호환성 · 세션 조율 조건을 충족하면 적용한다** → `cf38c9db` (2026-10-13, T47 세션의 T53 추출 종료 알림 뒤, pathspec) | 사용자 판정 (2026-10-13) | 16D |
+| T46f A1–A9 — FT coverage 의 잔여 누락은 수용 (FT 기준 1 % 는 "0.5 mm 넘게 밖인 표본 비율" 이고 전체 밖 비율과 다르다), arm_6 L 미달은 기준 유지 · inset 후 전체 재-audit, arm_6 보정 유지, overflow 5 mm 유지 (10 mm 전환은 별도 설계 변경 · 재-audit), `none` 의 verdict 적용은 동의하되 **평가용 허용 접촉 정의는 세 조건 공통**, global 에서도 실제 FT–target 접촉은 비허용, 비허용 근사 구가 활성 손 접촉 영역을 침범하는지 **실험 자세에서** 확인, 손 침범은 "0" 이 아니라 "수치 허용오차 (0.001 mm) 이내", 단계 2 진입은 재-audit · 독립 검증 PASS 뒤 | 사용자 판정 (2026-10-13, A14 구현 보고 후). `handoff/T46f.task.md` "사용자 판정" 절 | 16D |
+| T46f — **TO 시간 합격 기준: 같은 chunk · 같은 하드웨어 · 같은 TO 설정에서 chunk 별 (보정 후 / 보정 전) 시간의 median ≤ 2.0** (초기화 · 컴파일 제외). SQP 반복 수 · 종료 사유는 기록만 (일치 요구 없음), timeout · 수렴 실패 비율을 함께 보고 뚜렷이 늘면 재판정 | 사용자 확정 (2026-10-13, V-T46f-A14 측정 전) | 16D |
+| T46f — arm_6 R 정점 0.51 mm 는 중단 사유가 아니다 (표본 기준 판정 유지, 정점은 보조값). A7 실험 자세 점검은 **수정된 도구의 2 회차 채택** (왼손 손가락 대응 오류 수정, 기준 완화 아님, 1 회차 · 수정 내역 보존). **C3: T46f 전체와 CL4 모든 arm 에 palm cover on, 최종 형상 = `gripper_wrist + --palm-cover on` 1,349 구로 고정** | 사용자 판정 (2026-10-14, A14c 뒤) | 16D |
+| T46f — **TO 상대 비용 FAIL (median 비 2.65) 을 그대로 기록하고 현재 형상으로 메인 적용 · 단계 2 진행.** 기준을 사후에 올려 PASS 로 바꾸지 않는다. overflow 10 mm 변경 · 손목 / palm 비용 분리 측정은 지금 필수 아님. 모든 비교 조건에 같은 최종 형상 · TO 설정. 보고 문구는 "이번 replay 에서 시간 예산 종료와 제약 위반 상태의 건수가 증가하지 않았다" — **"동기식이므로 해는 바뀌지 않는다" 는 쓰지 않는다** (solver 의 wall-clock 종료 조건은 남는다). 실물 실시간 실행 가능성은 미확인. CPU 부하는 측정 한계로 기록, 재측정은 진행 조건이 아니다 | 사용자 판정 (2026-10-14, V-T46f-A14 뒤) | 16D |
 
 ---
 
@@ -276,6 +379,21 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 29 | (T46d 가 추가) **TrajOpt 재풀이 · closed-loop 에서의 TO 시간 · 성공 · 접촉** | LTE ≠ global 은 `d − r` 을 임계값과 비교한 field-level 재계산이고 TO verdict 는 재현하지 않았다. TO 시간은 구 수 선형 추정이다 (`T46d.verify.json not_measured`). 재계산 fidelity: 기록 clearance 와 재조회 `d_full` 의 차가 policy-active chunk 에서 최대 22.00 mm (C1aF1), 손가락 행은 closing chunk 에서 기록과 최대 26.3 mm 달랐다 (손가락 관절 경로를 재현하지 않음) | **측정 안 됨** |
 | 30 | (T46d 가 추가) **MJCF 거리의 100 mm cap 이후 · `FT_SENSOR` / `EE_BODY` 의 0.0 mm 거리가 접촉 필터를 거친 겹침과 구별되지 않음 · held 구간 (lift / carry 대부분) 의 LTE ≠ global · cuRobo 회귀 기준선 (GPU 미사용)** | `mj_geomDistance` 의 distmax 100 mm 로 arm_5 / arm_6 거리는 "100 mm 이상" 으로만 안다 (`T46d.verify.json not_measured`) | **측정 안 됨** |
 | 31 | (T46f 가 추가) **T46f 의 모든 단계 결과** — 형상 보정 audit · 진단 장면 수 (S1 – S4 를 만족하는 dev / eval 배치) · 3 조건 closed-loop (oracle · AG3S extent) · 주 지표 | 계획 단계다. 결과 없음 | **측정 안 됨 (계획만)** |
+| 32 (T52 · T53 · T54 가 추가) | **head 0 기록 (`ep1800` · `long`) 위에서 잰 과거 수치** — 두 기록은 X2 수정 (2026-09-25) 전에 녹화해 `head_1` = 0.0 이라 cam_high 가 벽을 본다 (기록 qpos 확인 15 / 15 · 50 / 50 frame, lead 의 확인; 나머지 T47 record 와 T53 16 episode 는 0.7001). [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md) 의 X2 절 §6 이 "무효가 되는 기록 — grounding 수치는 다시 재야 한다" 고 적었지만 T47 selection (`long`) 과 held-out scene1800 (`ep1800`) 에 들어갔다. **영향받는 과거 수치 (사용자 지시 목록):** T47 selection (`long`) 의 head 선택, **held-out scene1800 이 들어간 T49b · T51 · T51b · T52** 의 수치. 같은 held-out 4 record 를 쓰는 T47 · T47b · T49 도 `ep1800` 을 포함한다 (영향 크기는 확인하지 않았다). **T51b 의 명사 열세 (scene 단위 −0.133) 는 `headfix` 에서 나왔다** (`T51b.verify.json` `per_record_gt_identity`: `headfix` 에서 action best 1.0 대 noun best 0.733, `ep1800` 에서는 둘 다 0.733). T52 에서는 scene1800 의 `ok` (L8H2 5 · L8H6 1 · L10H7 10 frame) 가 전부 `ep1800` 에서 나왔고 `ep1800` 의 cam_high target 가시 pixel 은 15 frame 모두 0 | **다시 재지 않았다 (사용자 판정: 과거 STEP 은 재측정하지 않고 표시만).** T55 · T56 dev 에서는 제외, T54 dev parity 는 유지 | **표시만 (재측정 안 함)** |
+| 33 (T52 가 추가) | **병합 기전의 일반화 · 원인** — split 비율 ≥ 2 조건이 명사 병합을 남긴다는 측정은 `headfix` 15 frame 한 record 의 것이다. 명사 map 이 target 과 이웃에 퍼지는 이유, split 비율을 raw attention 으로 읽으면 병합이 사라지는지 (raw 비율 ≥ 2 는 두 명사 source 에서 15 / 15 frame) 는 시험하지 않았다 | `T52.verify.json not_measured` + 위 해석 (미측정 해석) | **원인 미확정 · 측정 안 됨** |
+| 34 (T52 · T54 가 추가) | **병합 frame 이 T53 test 의 purity 에서 B 와 N 을 가르는가** — T54 에서 N 과 B 의 identity 가 78.08 · 78.00 % 로 사실상 같고 병합 frame 수를 세지 않았다 | `T54.verify.json numbers` 에 merged frame 수 없음 | **측정 안 됨** |
+| 35 (T53 이 추가) | **success 9 / 16 · `success_ct` 7 / 16 의 분산** — policy seed 1 개 / episode, 16 episode. 같은 episode 의 seed 를 바꾼 재측정 없음 | T57 현재 서빙 기준선의 불확실성 | **측정 안 됨** |
+| 36 (T54 가 추가) | **A 변형 (질량 합 대신 평균 attention 등) 과 A 선택 실패 증가의 원인** — chosen cluster 의 destination · support 점이 +2.13 · +10.21 점 늘었으나 (미측정 해석: 큰 cluster 에 유리한 질량 합) 변형을 시험하지 않았다. 시험하면 T53 은 그 변형에 대해 dev | `T54.verify.json numbers` | **원인 미확정 · 측정 안 됨** |
+| 37 (T54 가 추가) | **처리 시간의 같은 장치 e2e** — T54 의 e2e 는 CPU replay 의 lift + ground 와 GPU 의 명사 prefix_ms 중앙값 (24.35 ms) 의 합이다. C2 의 p95 (875.40 ms) 는 L8H2 서빙 자체의 p95 825.95 ms 가 이미 chunk 간격 533.33 ms 를 넘기 때문에 충족되지 않는다 | `T54.verify.json not_measured` | **측정 안 됨** |
+| 38 (T54b 가 추가) | **arm 별 서빙 latch 상태 기계 (`observe_grasp` · `revert_attach`) 재실행, L8H2 외 arm 의 서빙 일치도, N · B 가 시간 유지 조건에서 L8H2 와 같아지는 원인, `execution_path` · cuRobo field, `--attach-reach off`** | A-k3 의 attach 거절 2 건에서 서빙이라면 latch 가 CLOSING 으로 되돌아간다. 재생 궤적은 모든 arm 에서 L8H2 서빙 궤적이다 (`T54b.verify.json not_measured`) | **측정 안 됨** |
+| 39 (T54b 가 추가) | **post · placed phase 의 identity 0 (8 arm 모두, 서빙을 재생한 L8H2 포함) 의 원인** — placed 401 frame 중 `subtask_gated` 276 · `no_admissible` 91 (replay 의 decision mode). 지표 정의 (chosen cluster 의 plurality 가 target) 의 문제인지 서빙의 의도된 동작인지 가르지 않았다 | 위 T54b 절 §6 (미측정 해석) | **원인 미확정** |
+| 40 (T54 가 추가) | **T54c (N · B 의 새 16 episode 확인) 의 결과** — 계획 · 구현만 있고 이 로그에 기록된 측정이 없다 | `handoff/T54c.task.md` · `T54c.impl.md` | **측정 안 됨 (이 로그 미기록)** |
+| 41 (T46e 가 추가) | **DX-01 조건 A — GT identity × 제안 extent (oracle identity) 비교** | T46e 는 oracle extent 의 물체 선택 (`--oracle-extent-identity gt`) 과 `identity_matches_gt` 기록까지만 넣었다. AG3S manipulated identity 전체의 GT 교체는 보류 (판정 B5) | **미완료** |
+| 42 (T46e-D 가 추가) | **오류 후보 voxel 이 실제 형상에서 5–8 mm 떨어진 원인** — 신규 7 chunk 오류 후보 121 행. voxel 크기와 비슷하다는 것은 설명 후보다 | T46e-D 는 ESDF seed 만 기록에서 읽었다. TSDF 자체, 각 seed 를 만든 요청은 측정하지 않았다 (`T46e-D.verify.json not_measured`) | **원인 미확정** |
+| 43 (T46e 가 추가) | **oracle extent 의 closed-loop (CL4, DT-02 extent block)** — offline 수치가 closed-loop 의 HOLD · 성공 · 접촉으로 어떻게 옮겨지는가, 서버 memory 가 실제 받은 요청으로 쌓일 때의 차이, oracle 지연 | T46e · T46e-D 는 기록 chunk 의 offline replay 다. CL4 는 보정 형상 (T46f 단계 1) 뒤로 미뤘다 | **측정 안 됨** |
+| 44 (T46f 가 추가) | **최종 형상 (1,349 구) 의 실물 실시간 실행 가능성 · 비동기 TO 예산** — offline replay 의 wall 시간 median 92.8 ms · p90 175.1 ms (기준 31.3 · 61.6 ms) | V-T46f-A14 는 sim 기록 chunk 의 GPU 재풀이 (다른 세션의 CPU load1 median 27) 다. 실물 비동기 루프는 재지 않았다 | **측정 안 됨** |
+| 45 (T46f 가 추가) | **TO 비용의 손목 (+883 구) · palm cover (+196 구) 분리, overflow 10 mm 대안** | 사용자 판정으로 지금 필수 아님 (병목이 구 수 비례 단계라는 근거로 충분) | **측정 안 됨 (보류)** |
+| 46 (T46f 가 추가) | **최종 형상의 closed-loop (T46f 단계 2 – 5, CL4)** | 단계 1 은 offline 검증만 했다 | **측정 안 됨** |
 
 ---
 
@@ -2764,3 +2882,1699 @@ calibration 6 record 539 frame 전부, cell × camera.
 - **figure** (각각 `.json` sidecar 있음): [`t46c-table`](figures/t46/t46c-table.png) · [`t46d-scene`](figures/t46/t46d-scene.png) · [`t46d-graph`](figures/t46/t46d-graph.png) · [`t46d-table`](figures/t46/t46d-table.png). T46f 는 figure 가 없다 (계획).
 - **구현** (T46c-W1): `AG3S/ag3s/config.py` · `AG3S/ag3s/runtime/pipeline.py` · `AG3S/ag3s/types.py` · `AG3S/trajopt/safe_policy.py` · `serve_safe.py` · `wire.py` · `experiments/certification_replay.py` · `experiments/ta_offline.py` · `tests/trajopt/test_t46c_placed_no_seed_certify.py` (commit `6dfaf7bb`). 상세 [`handoff/T46c.impl.md`](handoff/T46c.impl.md).
 - 요청 문서: [`handoff/T46c.task.md`](handoff/T46c.task.md) · [`handoff/T46d.task.md`](handoff/T46d.task.md) · [`handoff/T46e.task.md`](handoff/T46e.task.md) · [`handoff/T46f.task.md`](handoff/T46f.task.md). commit 은 하지 않았다.
+
+
+---
+
+## T59 — 16D 에서 phase 별 attention 사용: phase 를 나누지 않은 grounding (U) 대 현재 serving (S) (offline, T53 기록 16 episode, 2026-10-13 KST)
+
+> 측정 run `20261013T211142+0900_cf38c9dbca7b_c658029a568a` (2026-10-13 21:11 KST 시작), 기록 2026-10-13 KST. 수치는 모두 [`T59.verify.json`](handoff/T59.verify.json) 의 `numbers` · `definitions` · `runs` 에서 왔다 (W1 은 `numbers.W1`, W2 는 `numbers.W2`, 대표 episode 의 frame 별 표는 `numbers.representative_frame_table_ep1839`. 원자료는 같은 run 의 `verify/T59/`, frame 별 표 `t59_frames.jsonl`). 요청 문서는 [`handoff/T59.task.md`](handoff/T59.task.md). 이 STEP 은 **기술 통계**이고 통과 기준이 없다.
+> **분석 창이 둘이다 (사용자 판정, 2026-10-13 두 번째): W1 = place 직후 종료, W2 = home 복귀 후 종료. 둘 다 측정을 마쳤다.** §1 – §11 의 모든 수치는 W1 (`numbers.W1`; W2 세션에서 verifier 가 갱신 전 `numbers` 와 같음을 assert 했다) 이다. **W2 의 결과는 §12 "W2 — home 복귀 후 종료"** 에 있다. W2 는 W1 과 pre · held · post 가 같고 `placed` 만 9 에서 153 frame 으로 늘어난다.
+> (이 절의 "W1 · W2" 는 **분석 창** 이름이다. T46c 의 W1 = placed `no_seed` 인증 수정 (위 T46c 절) 과 무관하다.)
+> 이 파일에 T53 · T54 절이 아직 없어, 입력 기록은 [`T53.verify.json`](handoff/T53.verify.json) · [`T53.impl.md`](handoff/T53.impl.md) · [`T54.verify.json`](handoff/T54.verify.json) 로 링크한다.
+
+**이 절이 답하는 물음 (목적).** develope_PLAN §0.10 의 방향은 "경계를 보존하는 방법 하나 + ablation + closed-loop" 이고, 그 중 phase (쥐기 전 · 들고 가는 중 · 내려놓는 중) 를 신호로 쓰는 TargetConfirm (latch · freeze · HSR gate) 이 필요한가는 근거가 14D 시기 기록 하나였다. 이 STEP 은 **16D 의 T53 closed-loop 기록 16 episode** 를 offline 으로 다시 읽어, "phase 를 나누지 않은 grounding (현재 frame 의 L8H2 attention 만) 이 phase 별로 무엇을 target 으로 고르는가" 와 "같은 frame 에서 phase 를 나눈 현재 serving 은 무엇을 쓰고 있었는가" 를 나란히 놓는다. 새 rollout · GPU · 서버는 쓰지 않았다.
+
+```
+카메라 depth → 로봇 마스크 → [attention lifting → target grounding → TargetConfirm(latch · freeze · HSR gate)] → TSDF/ESDF
+                                         └─ U: 여기까지만 (현재 frame)      └─ S: serving 이 실제로 쓴 것
+```
+
+**한 줄 결과 (W1 창 안, 16 episode, 기술 통계).**
+
+- **들고 가는 중 (`held`, 106 frame · 10 episode).** U 가 고른 cluster 의 class 는 target 0.591 (95 % CI [0.39, 0.76], frame 합산 0.651 = 69 / 106), other_object 0.354 ([0.18, 0.56], 31 frame), no_target 0.055 (6 frame), **destination (crate) 0 / 106**. 같은 frame 에서 serving 이 쓴 물체 (Sg) 는 target 0.862 ([0.63, 1.00], frame 합산 0.943 = 100 / 106).
+- **쥐기 전 (`pre`, 477 frame · 16 episode).** U target 0.825 ([0.69, 0.93], 403 / 477), Sg target 0.895 ([0.75, 1.00], 430 / 477).
+- **"U ≠ target 이면서 Sg = target" (나누지 않으면 틀리고 나누면 맞는 frame).** held 0.294 ([0.15, 0.46], 34 / 106), pre 0.105 ([0.05, 0.17], 48 / 477). 반대 방향 (U = target 이면서 Sg ≠ target) 은 held 0.023 (3 / 106), pre 0.035 (21 / 477, 한 episode 에서만 나옴).
+- **정직한 기록.** S 의 class 정의는 **결과를 본 뒤 사용자 판정으로 바꾸었다** (아래 "사용자 판정과 타임라인"). 원래 사전 정의 S (같은 frame GT) 의 값은 표에 남긴다: held 에서 S target 0.136, other_object 0.864 로 Sg 와 정반대다.
+
+**이 절이 주장하지 않는 것.**
+
+- **나누지 않으면 실제 접촉 · 성공이 나빠진다** 는 주장. closed loop 에서 latch · freeze 를 끈 arm 을 돌리지 않았다. 이 STEP 은 "U 가 틀린 frame 이 있다" 까지만 말하고 그것이 접촉 · 성공 · carving 양으로 이어지는지는 측정하지 않았다.
+- **HSR 이 strong rule (실제 grasp latch) 보다 낫거나 못하다** 는 주장. 그 비교는 T55 의 결과를 쓴다 (사용자 판정 2). 이 STEP 의 phase 는 물리 상태 (`grasp_state`) 이고 HSR 은 S 쪽 설명 변수로만 보고했다.
+- **S (serving) 가 옳다** 는 주장. S 는 serving 이 쓴 물체의 class 이고, 그 물체가 target 인 것과 serving 이 옳게 carving 한 것은 다른 이야기다. 정답은 GT 물체 위치와의 최근접으로 판정했을 뿐이다.
+- **U 의 cluster 로 지은 가상 field 의 오염량.** U 는 점 · 위치만 표시했고 field 를 새로 짓지 않았다.
+- **post · placed 의 해석.** post 14 frame (2 episode), placed 9 frame (성공 episode 마다 1 frame) 으로 표본이 너무 작다 (post 에서 bootstrap 10000 draw 중 1148 에서 그 phase 가 비었다).
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+**사용자 판정 (2026-10-13, 결과 전, `T59.task.md`).**
+
+1. 16D 재관측은 T53 기록 **offline** (새 rollout · GPU 없음).
+2. HSR 실험 (HSR 대 grasp_latch, 물리 predicate 정답) 은 **T55 결과를 쓴다.** 이 STEP 에서 하지 않는다.
+3. phase 를 나누지 않았을 때의 실험은 **offline 먼저.** closed loop 은 하지 않는다.
+4. 그래프는 **place 이후 · home 으로 돌아온 이후를 자르고** 보인다.
+
+**사용자 판정 (2026-10-13, 결과 확인 후) — S class 의 주 정의를 바꾼다.**
+
+- **주 정의 = Sg** (manipulated centroid 를 **관측한 frame** (`manipulated.last_seen_frame`) 의 GT 위치에 가장 가까운 물체). 이유: attached · occluded chunk 에서 기록된 manipulated centroid 는 **마지막으로 관측된 geometry** 에 머문다. held 에서 서버 기록의 `manipulated.state` 는 occluded 104 / visible 2 frame 이고, centroid 에서 **같은 frame GT** 의 가장 가까운 물체까지의 거리 median 은 **95.3 mm** (p95 101.9 mm), **관측 frame GT** 로는 **16.3 mm** (p95 29.4 mm) 이다 (`numbers.W1.S_nearest_distance`).
+- **task 의 원래 정의 S (같은 frame GT) 는 결과를 본 뒤 바꾼 사전 정의**다. 사전 정의를 숨기지 않고 모든 표에 S (same frame) 로 남긴다. **timeline 의 발표용 버전에서는 S (same frame) 행을 뺀다** (사용자 판정). 현재 링크된 [`t59-timeline-ep1839.png`](figures/t59/t59-timeline-ep1839.png) 는 두 행을 모두 갖고 있다 (점검용).
+- T59 를 이 로그에 지금 기록한다. commit 은 별도 승인을 받는다.
+
+**결과 전에 고정한 것 (task).** 분석 창, 대표 episode 선택 규칙, class 정의 (S same-frame), 성공 / 실패 분리, bootstrap 설정. 결과 전에 고정하지 않고 **verifier 가 render 전에 고정한 것**: 씬 figure 의 frame 선택 규칙 (`definitions.scene_frame_rule`). 그 외 **결과 뒤에 추가한 것**: Sg 정의 (위), 창을 자르지 않은 exploratory 표 (아래 §8).
+
+**타임라인.**
+
+| 시각 (KST) | 일 |
+|---|---|
+| 2026-10-13 (결과 전) | task 작성 · 사용자 판정 1–4 · STEP 번호 T59 를 dev-70 (T58) · development 세션에 알려 충돌 없음 확인 |
+| 2026-10-13 21:11 | verifier run 시작 (`verify/T59/`). regression baseline (legacy) 이 먼저: `start_violated` 14 / 15, `has_target` 15 / 15, frame 0 clearance −29.031048 mm — 기대값과 일치. cuRobo 는 task 지시대로 돌리지 않음 |
+| 2026-10-13 (결과 후) | 사용자가 S 의 주 정의를 Sg 로 바꾸라고 판정, 이 로그에 기록하라고 지시 |
+
+### 2. 입력 · 정의 · 정렬 점검
+
+입력은 새로 만든 것이 아니라 이미 있는 두 기록이다.
+
+| 조건 | 무엇 | 출처 |
+|---|---|---|
+| **U (phase 미분할 grounding)** | 매 frame `AG3S.reset()` 후 L8H2 attention 만으로 고른 cluster. TargetConfirm 의 latch · freeze · HSR gate · 시간 유지가 **없다** | T54 `current` 조건, arm L8H2 (서빙 `last:L8H2`), C1a build kwargs |
+| **S (현재 serving = phase 분할)** | T53 closed-loop 의 server chunk 가 그 frame 에 실제로 쓴 manipulated / attached 물체, latch 상태, HSR label | T53 server chunk `summary_json` |
+
+| 정의 | 내용 (`definitions`) |
+|---|---|
+| **phase** | T53 `gt/<key>.grasp.npz` 의 `grasp_state`: `pre` · `held` · `post` · `placed` (`held_other_hand` 는 0 frame). 물리 상태이고 latch 상태가 아니다 |
+| **U class** | chosen cluster 의 GT point label 에서 **엄격히 가장 많은** class (target · other_object · destination · table · robot …). label 없는 점은 무시, `grounding_status != ok` 이거나 `chosen_n == 0` 이면 `no_target` (class 의 하나로 센다). 동률 `tie` 는 0 frame |
+| **S class (Sg, 주 정의)** | S 의 manipulated centroid 에 가장 가까운 GT 물체 (apple · banana · orange · pear · crate, body origin 을 robot base frame 으로) — 단 GT 위치는 **centroid 를 관측한 frame (`last_seen_frame`)** 의 것. target 이면 target, crate → destination, 다른 과일 → other_object, manipulated 없음 → no_target |
+| **S class (S same frame, 사전 정의)** | 같은 최근접 규칙, GT 위치는 **그 chunk 의 frame** 의 것 |
+| **창 W1 (사용자 판정 4, place 직후 종료)** | frame 0 부터 `min(첫 placed frame, S 의 HSR 확정 label 이 처음 `home` 인 frame)` 까지 (포함). 둘 다 없으면 episode 끝. 사전 고정 |
+| **HSR 확정 label** | `subtask.label` (`SubtaskDebounce`: argmax 가 같은 값 3 번 연속일 때 확정) |
+| **집계** | episode 평균 = 그 phase 의 frame 이 1 개 이상인 episode 들의 episode 별 비율의 평균 (동일 가중). frame 합산 = frame 수 합. CI = episode bootstrap (복원 추출, B 10000, seed 5407, percentile 2.5 / 97.5), 한 episode 집합 안의 모든 양에 같은 draw |
+
+**정렬 점검 (조용히 버리지 않는다).** 1200 행 (16 episode × 75 frame) 이 모두 정렬되었고 정렬 불일치로 제외한 행은 **0** 이다 (`numbers.W1.n_excluded_alignment = 0`). 같은 frame 의 U class 와 T54 행의 `identity_label` 이 어긋난 frame 은 0, 성공 판정과 placed 존재가 어긋난 episode 는 없다. GT 과일 위치는 T53 의 GT 와 최대 절대 차이 0.0 m 로 같다. 대응 규칙은 T54 `t_step` = 8 × frame = T53 gt `t_step` 이고, server chunk 의 `t_step` 은 요청 순번 (frame + 1) 이라 `chunk_index − episode 첫 chunk_index` 로 맞췄다 (`definitions.alignment`).
+
+**창.** 606 / 1200 frame 이 창 안이다 (성공 episode 283, 실패 episode 323). phase 별로 pre 477 · held 106 · placed 9 · post 14 이고, 창 밖까지 합치면 pre 608 · held 113 · placed 401 · post 78 이다.
+
+| 창의 끝 | episode (target, 창 frame 수) |
+|---|---|
+| 첫 `placed` (성공 9) | ep1809 (banana, 31) · ep1842 (pear, 33) · ep1860 (orange, 28) · ep1845 (pear, 32) · ep1862 (apple, 30) · ep1815 (apple, 31) · ep1866 (orange, 32) · ep1804 (apple, 34) · ep1839 (orange, 32) |
+| HSR 확정 `home` (실패 5) | ep1840 (banana, 38) · ep1848 (orange, 33) · ep1849 (banana, 35) · ep1853 (pear, 38) · ep1822 (banana, 29) |
+| episode 끝 (실패 2, placed · home 모두 없음) | ep1843 (apple, 75) · ep1851 (orange, 75) |
+
+잘린 frame 수는 episode 별로 `numbers.W1.window_per_episode.n_cut` 에 있다. 성공 episode 는 placed 이후 41 – 47 frame 이 잘렸고, 실패 episode 에서 **home 으로 잘리면서 사라진 held frame** 은 ep1853 에서 1, ep1822 에서 6 이다 (그 전에 post 가 ep1849 40 · ep1822 24, pre 가 ep1840 37 · ep1848 42 · ep1853 36 · ep1822 16 frame 잘림).
+
+### 3. 측정 1 · 2 — phase 별 class 비율 (U 대 S)
+
+figure: [`t59-phase-class-bars.png`](figures/t59/t59-phase-class-bars.png) (phase × {U, S same frame, Sg}, stacked = episode 평균, 아래 점 = CI) · 표 [`t59-table-measures.png`](figures/t59/t59-table-measures.png) · sidecar 는 같은 이름의 `.json`.
+
+칸 = **episode 평균 [95 % CI] / frame 합산 (frame 수)**. destination · table · no_target 중 0 인 칸은 생략했다 (표 figure 와 `numbers.W1.main_16_episodes` 에 있다).
+
+| phase (frame / episode) | 조건 | target | other_object | destination | no_target |
+|---|---|---|---|---|---|
+| pre (477 / 16) | **U** | 0.825 [0.69, 0.93] / 0.845 (403) | 0.145 [0.05, 0.28] / 0.124 (59) | 0 (0) | 0.024 [0.00, 0.05] / 0.023 (11); table 0.007 (4) |
+| | **Sg (주)** | 0.895 [0.75, 1.00] / 0.901 (430) | 0.104 [0.00, 0.25] / 0.096 (46) | 0 (0) | 0.002 (1) |
+| | S same frame (사전 정의) | 0.895 [0.75, 1.00] / 0.901 (430) | 0.104 [0.00, 0.25] / 0.096 (46) | 0 (0) | 0.002 (1) |
+| **held (106 / 10)** | **U** | 0.591 [0.39, 0.76] / 0.651 (69) | 0.354 [0.18, 0.56] / 0.292 (31) | **0 (0)** | 0.055 [0.00, 0.12] / 0.057 (6) |
+| | **Sg (주)** | **0.862 [0.63, 1.00] / 0.943 (100)** | 0.138 [0.00, 0.37] / 0.057 (6) | 0 (0) | 0 (0) |
+| | S same frame (사전 정의) | 0.136 [0.09, 0.17] / 0.151 (16) | 0.864 [0.83, 0.91] / 0.849 (90) | 0 (0) | 0 (0) |
+| post (14 / 2, 해석 금지) | U | 0.500 [0.00, 1.00] / 0.071 (1) | 0.462 [0.00, 0.92] / 0.857 (12) | 0 (0) | 0.038 / 0.071 (1) |
+| | Sg | 0 (0) | 1.000 / 1.000 (14) | 0 (0) | 0 (0) |
+| | S same frame | 0 (0) | 1.000 / 1.000 (14) | 0 (0) | 0 (0) |
+| placed (9 / 9, 해석 금지) | U | 0.444 [0.12, 0.78] / 0.444 (4) | 0.444 [0.12, 0.78] / 0.444 (4) | 0.111 / 0.111 (1) | 0 (0) |
+| | Sg | 0.889 [0.67, 1.00] / 0.889 (8) | 0.111 / 0.111 (1) | 0 (0) | 0 (0) |
+| | S same frame | 0 (0) | 1.000 / 1.000 (9) | 0 (0) | 0 (0) |
+
+읽는 법 (측정이 보이는 것).
+
+- **pre**: U 와 S 모두 target 이 다수다. S 의 두 정의는 같다 (centroid 가 이 phase 에서는 갱신되고 있다. 같은 frame 거리 median 16.8 mm 대 관측 frame 16.3 mm).
+- **held**: U 의 target 비율은 pre 보다 낮다 (0.591 대 0.825, 두 CI 가 일부 겹친다). U 가 target 을 못 고른 frame 은 other_object 31 · no_target 6 이고 crate (destination) 는 0 이다 (**0 frame 인 칸의 CI [0, 0] 은 표본 부족의 표시가 아니라 자명한 퇴화**다).
+- **S 의 두 정의는 held 에서 정반대다.** 같은 frame GT 로 최근접을 잡으면 other_object 0.864, 관측 frame GT 로 잡으면 target 0.862. 이것이 주 정의를 바꾼 이유이고, 두 값은 모두 같은 서버 기록에서 나왔다. 같은 frame 정의에서 최근접과 2 위 물체의 거리 차 (margin) 의 held median 은 0.148 m 라 대부분의 frame 에서 최근접이 분명하다. 다만 margin 이 가장 작은 held frame 은 2.0 mm 라 모호한 frame 도 있다 (`numbers.W1.S_nearest_distance.same_frame_margin_to_second`).
+- **post · placed** 는 위 한계 때문에 해석하지 않는다. placed 에서 Sg 의 거리 median 은 16.3 mm 이다 (같은 frame 은 96.5 mm).
+
+### 4. 측정 3 — U ≠ target 이면서 Sg = target (그리고 반대)
+
+표: [`t59-table-measures.png`](figures/t59/t59-table-measures.png) 의 둘째 표. 칸 = episode 평균 [CI] / frame 합산 (frame 수).
+
+| phase | S 정의 | U≠target ∧ S=target | U=target ∧ S≠target | 둘 다 target | 둘 다 target 아님 |
+|---|---|---|---|---|---|
+| pre (477) | Sg · same frame (같은 값) | 0.105 [0.05, 0.17] / 0.101 (48) | 0.035 [0.00, 0.10] / 0.044 (21) | 0.790 [0.64, 0.91] / 0.801 (382) | 0.071 [0.00, 0.20] / 0.055 (26) |
+| **held (106)** | **Sg (주)** | **0.294 [0.15, 0.46] / 0.321 (34)** | 0.023 [0.00, 0.08] / 0.028 (3) | 0.568 [0.38, 0.74] / 0.623 (66) | 0.115 [0.00, 0.33] / 0.028 (3) |
+| | S same frame (사전 정의) | 0.075 [0.02, 0.13] / 0.085 (9) | 0.530 [0.36, 0.67] / 0.585 (62) | 0.061 [0.02, 0.11] / 0.066 (7) | 0.334 [0.19, 0.52] / 0.264 (28) |
+| post (14) | Sg | 0 (0) | 0.500 / 0.071 (1) | 0 (0) | 0.500 / 0.929 (13) |
+| placed (9) | Sg | 0.444 [0.12, 0.78] / 0.444 (4) | 0 (0) | 0.444 [0.12, 0.78] / 0.444 (4) | 0.111 / 0.111 (1) |
+
+- held 에서 **U 가 틀리고 Sg 가 맞는 frame** 은 34 / 106 이고 9 episode 에 걸쳐 있다 (`numbers.W1.main_16_episodes.m3b_cross_U_vs_S_at_geometry_frame.held.U_not_target__S_target.n_episodes_with_class = 9`, held 가 있는 10 episode 중). 반대 방향은 3 frame 으로 한 episode 에서만 나왔다.
+- pre 에서도 U ≠ target ∧ Sg = target 이 48 / 477 frame, 10 episode 에서 나온다. **즉 "U 가 target 을 놓치는 것" 은 held 에만 있는 현상이 아니다.** 점 추정은 held 쪽이 크지만 (0.294 대 0.105) 두 CI ([0.15, 0.46] 대 [0.05, 0.17]) 가 겹치므로 **이 비교로 held 가 pre 보다 크다고 확정하지 않는다.**
+- 같은 frame 정의 (사전) 로 읽으면 held 에서 "U = target ∧ S ≠ target" 이 0.530 (62 frame) 이 된다. 이 값은 S 의 centroid 가 마지막 관측 geometry 에 머문 것의 영향이고, Sg 로 읽으면 3 frame 이다.
+
+### 5. 측정 4 — S 의 latch · HSR 확정 label 이 물리 phase 와 어떻게 겹치는가
+
+표: [`t59-table-latch-window.png`](figures/t59/t59-table-latch-window.png). 칸 = frame 수 (창 안). 이 표는 phase 가 아닌 S 의 상태 변수를 phase 로 나눠 센 것이다. (`grasp_state` 는 위 phase 와 이름이 같으나 phase 는 물리 상태 `gt/<key>.grasp.npz`, 여기 S_grasp_state 는 서버 chunk 의 grasp FSM 이다.)
+
+| phase (frame) | S grasp FSM 상태 | `decision.latched` | `grasp_active` | attached | manipulated 상태 | HSR 확정 label | HSR p 평균 (pick / place / home) |
+|---|---|---|---|---|---|---|---|
+| pre (477) | latched 269 · closing 149 · searching 32 · placed 14 · held 13 | True 402 · False 75 | False 315 · True 162 | False 464 · True 13 | visible 412 · occluded 64 · None 1 | pick 381 · place 60 · None 32 · home 4 | 0.823 / 0.150 / 0.027 |
+| **held (106)** | held 106 | **False 106** | True 106 | True 106 | **occluded 104 · visible 2** | pick 19 · place 87 | 0.021 / 0.979 / 0.0004 |
+| post (14) | latched 4 · closing 9 · held 1 | True 13 · False 1 | False 4 · True 10 | False 13 · True 1 | visible 11 · occluded 3 | place 13 · home 1 | 0.010 / 0.805 / 0.185 |
+| placed (9) | held 9 | False 9 | True 9 | True 9 | occluded 9 | place 9 | 0.0004 / 0.972 / 0.028 |
+
+- 서버의 grasp FSM 은 물리 `held` 106 frame 모두에서 `held` 이고 attached 이다. 반대로 pre 에서도 FSM 이 `held` 13 · attached 13 frame, `placed` 14 frame 이다 (물리 phase 와 FSM 의 상태가 pre 에서 어긋나는 frame 이 있다). 이 어긋남의 원인은 측정하지 않았다.
+- HSR 의 확정 label 은 held 106 frame 중 `pick` 19 · `place` 87 이다. 확정 전 argmax 는 `place` 104 · `pick` 2 이다 (`numbers.W1.m4_latch_hsr_by_phase.S_hsr_argmax`). 즉 확정 label 이 argmax 보다 늦게 `place` 로 바뀐다 (debounce 3 번 연속의 결과이고, ep1839 에서 그림으로 보인다, §7).
+- pre 에서 HSR 확정 label 이 `place` 인 frame 이 60, `home` 이 4 다. 이 frame 들이 어느 episode · 어느 시점인지는 이 STEP 에서 따로 분해하지 않았다.
+
+### 6. 측정 5 — 성공 9 / 실패 7 episode
+
+표: [`t59-table-measures.png`](figures/t59/t59-table-measures.png) 의 셋째 표. 칸 = episode 평균 [CI] / frame 합산 (frame 수).
+
+| 집단 | phase (frame / episode) | U target | Sg target | S same frame target | U≠target ∧ Sg=target |
+|---|---|---|---|---|---|
+| 성공 | pre (168 / 9) | 0.929 [0.86, 0.98] / 0.929 (156) | 1.000 (168) | 1.000 (168) | 0.071 [0.02, 0.14] (12) |
+| 성공 | **held (105 / 9)** | **0.657 [0.50, 0.79] / 0.657 (69)** | **0.957 [0.87, 1.00] / 0.952 (100)** | 0.151 / 0.152 (16) | **0.326 [0.19, 0.49] (34)** |
+| 성공 | post (1 / 1) · placed (9 / 9) | post 1.000 (1) · placed 0.444 (4) | post 0 (0) · placed 0.889 (8) | post 0 · placed 0 | 해석 금지 |
+| 실패 | pre (309 / 7) | 0.691 [0.44, 0.88] / 0.799 (247) | 0.759 [0.47, 1.00] / 0.848 (262) | 0.759 / 0.848 (262) | 0.148 [0.05, 0.26] / 0.117 (36) |
+| 실패 | held (1 / 1) · post (13 / 1) | held 0 (U 는 other_object) · post 0 (U other_object 12, no_target 1) | 0 · 0 | 0 · 0 | 0 · 0 |
+
+- 실패 7 episode 는 창 안의 frame 이 pre 에 거의 몰려 있다 (309 frame). held 1 frame, post 13 frame (한 episode) 으로 **실패 episode 에서는 "들고 가는 중" 이 거의 측정되지 않았다.** held 에서 U ≠ target ∧ Sg = target 인 34 frame 은 모두 성공 episode 에서 나왔다.
+- 실패 episode 의 pre 에서는 U target 이 episode 평균 0.691 로 성공 episode (0.929) 보다 낮고, Sg target 도 0.759 로 낮다. 같은 pre 에서 U = target ∧ Sg ≠ target 21 frame 은 실패 episode 의 한 episode 에서만 나왔다.
+
+### 7. 대표 episode ep1839 — timeline 과 실제 scene
+
+**선택 규칙 (결과 전 고정).** 성공 episode 중 `held` frame 에서 U ≠ target 인 frame 수가 가장 많은 것, 동률이면 episode 번호가 작은 것. ep1839 가 9 / 14 held frame 으로 1 위, ep1809 가 8 / 10 으로 2 위, ep1842 · ep1860 이 4 (각 12 · 11 held frame) 다 (후보 9 개 전체는 `numbers.W1.representative.candidates`). 대표 episode 는 **U 가 가장 많이 틀리는 episode 로 고른 것**이라 평균의 대표가 아니다.
+
+figure: [`t59-timeline-ep1839.png`](figures/t59/t59-timeline-ep1839.png) — 위에서부터 물리 phase 띠 · S latch 띠 · S HSR p(pick / place / home) 곡선 · S HSR 확정 label 띠 · **U class 띠** · S class (같은 frame GT) 띠 · S class (geometry frame GT) 띠. target = orange, 오른팔, 창 = frame 0–31 (32 frame, 끝 = 첫 placed). HSR 확정 `home` 은 frame 34 라 placed (31) 가 더 이르다.
+
+- frame 별 표 ([`numbers.representative_frame_table_ep1839.W1`](handoff/T59.verify.json), 연속 구간 `segments`, frame 0 – 31) 에서 읽은 값. 물리 phase 는 pre 0 – 16 · held 17 – 30 · placed 31, S 의 grasp FSM 은 `closing` 16 · `held+att` 17 – 31 이고, **HSR 확정 label 은 pick 2 – 18 · place 19 – 31** 이다. 즉 확정 label 이 `place` 로 바뀌는 frame (19) 은 물리 held 의 시작 (17) 보다 2 frame 늦다 (위 §5 의 argmax 대 확정 label 차이). p(pick) 이 내려가고 p(place) 가 올라오기 시작하는 frame 은 그림에서만 보이고 verify.json 에 frame 별 확률이 없어 번호를 적지 않는다. (처음 초안이 그림에서 읽어 적은 "2 – 3 frame 늦다" 는 verify.json 값으로 2 frame 이다.)
+- **U class 구간.** target 0 – 14 · **other_object 15 – 24** · target 25 – 29 · other_object 30 · target 31. frame 15 · 16 은 물리 phase 가 아직 pre, 17 – 24 는 held 이고 30 도 held 다. 그림에서 읽은 값과 같았다. ▼ 표시는 held 이면서 U ≠ target 인 frame 17 – 24 (8 frame) 와 30 (1 frame), 합쳐 9 frame 이다 (`numbers.W1.representative.candidates` 의 9 / 14 와 같다).
+- S (같은 frame GT) 는 target 0 – 19 · other_object 20 – 31 이라 held 가 시작된 뒤 3 frame 이 지나 other_object 로 바뀐다. S (geometry frame GT, Sg) 는 0 – 31 전체가 target 이다 (이 episode 의 S 두 정의 차이).
+
+figure: [`t59-scene-ep1839.png`](figures/t59/t59-scene-ep1839.png) — 기록 qpos 의 MuJoCo replay (zed_left, wrist_cam_r) · 위에서 본 cloud 에 U cluster 점 (점선 원) 과 S manipulated 점 (○), centroid (★) · 같은 chunk 의 **기록된 serving** `esdf_distance` 의 xy 단면 · target-free 층 (`esdf_free_distance`) 의 같은 단면 (기록이 있는 chunk 만) · 단면 위치 배치도. **U 의 cluster 로 field 를 새로 지은 것이 아니다.** U 의 점과 footprint 는 "지어지지 않은 가상" 으로만 표시했다. 선택한 3 frame (규칙 `definitions.scene_frame_rule`: pre 는 창 안 pre 의 하위 중앙값, held 는 U ≠ target 인 첫 · 마지막 held frame):
+
+| frame | phase | U class (chosen 점 수) | Sg (관측 frame) | S same frame | 단면에서 U 점의 field 값 |
+|---|---|---|---|---|---|
+| 8 | pre | target (94) | target (관측 frame 8) | target (orange, 15.0 mm) | serving field `esdf_distance` 에서 min −5.0 mm · median 0.0 mm; target-free 층 `esdf_free_distance` 에서 min 5.0 mm · median 24.0 mm |
+| 17 | held | other_object (105) | target (관측 frame 16) | target (orange, 16.5 mm) | `esdf_distance` 에서 min −5.0 mm · median 0.0 mm. target-free 층 기록 없음 (target-free 층 0 개, exclusion source = attached) |
+| 30 | held | other_object (39) | target (관측 frame 16) | other_object (apple, 90.5 mm) | `esdf_distance` 에서 min −7.1 mm · median 0.0 mm. target-free 층 기록 없음 |
+
+- frame 8 의 U cluster 는 target (orange) 이고 serving 의 target-free 층에서는 그 점들의 clearance median 이 24.0 mm 로 올라간다 (target 이 지워진 층). 이것은 S 가 target 을 지운 결과를 한 frame 에서 보인 것이다.
+- held 의 frame 17 · 30 에서 U 가 고른 cluster 는 other_object (점 105 · 39) 이고, serving 의 manipulated 는 관측 frame 16 에서 target 이다. U 점의 serving field 값 median 0.0 mm 는 그 점이 serving field 의 0 m 등고선 위에 있다는 뜻이다. 그 점이 위험했는지는 재지 않았다.
+- frame 30 에서 S (같은 frame GT) 는 other_object (apple, 90.5 mm) 인데 Sg 는 target 이다 (§3 의 두 정의 차이가 한 frame 에서 보이는 예).
+
+### 8. 창 밖 frame 과 GT 가시성 — 보조 표 (exploratory, 결과 뒤 추가)
+
+task 의 주 표는 창 안이다. 창을 자르지 않은 전체 frame 의 U class 는 `numbers.W1.exploratory_no_window_cut`, GT target 이 3 camera 중 하나에서 200 px 이상 보이는 frame 만의 값은 `numbers.W1.supplementary_gt_target_visible_only` 에 있다.
+
+| 구간 | frame / episode | U target (episode 평균) | U other_object | U destination | Sg target |
+|---|---|---|---|---|---|
+| pre, 창 안 | 477 / 16 | 0.825 | 0.145 | 0 | 0.895 |
+| pre, 창 자르지 않음 | 608 / 16 | 0.838 | 0.141 | 0.001 (1) | 0.882 |
+| held, 창 안 | 106 / 10 | 0.591 | 0.354 | 0 | 0.862 |
+| held, 창 자르지 않음 | 113 / 12 | 0.534 | 0.378 | 0 (0) | 0.885 |
+| post, 창 자르지 않음 | 78 / 3 | 0.416 | 0.438 | 0 | 0.125 |
+| placed, 창 자르지 않음 | 401 / 9 | 0.597 | 0.050 | 0.010 (4) | 0.070 (placed 에서는 Sg 의 no_target 이 0.915 = 367 / 401) |
+
+- 창을 자르지 않은 held 의 U ≠ target ∧ Sg = target 은 0.370 (38 frame), pre 는 0.089 (64 frame) 이다 (`numbers.W1.main_16_episodes.m3b_cross_U_vs_S_at_geometry_frame`).
+- GT target 이 보이는 frame 만 (594 frame, 창 안) 으로 줄이면 pre 는 469 frame · U target 0.835, held 는 106 frame (줄지 않음) · U target 0.591 이다.
+- **창이 held 의 U target 에 미치는 영향.** 창을 자르면 held 가 113 에서 106 frame, 12 에서 10 episode 가 되고 U target 이 0.534 에서 0.591 로 올라간다. 잘린 held frame 은 ep1853 의 1 frame 과 ep1822 의 6 frame 이다 (HSR 확정 `home` 이후). 이 차이는 창 규칙의 결과이고 주 표는 사전 고정한 창을 쓴다.
+
+### 9. 이전 근거와의 관계 — 14D 의 F11 · F17 과 T54 의 phase 별 L8H2 identity
+
+**(a) 14D 시기 근거 (F11 · F17).** F11 (쥔 물체가 attention target 이 아니라 목적지 쪽이다) 과 F17 (조작 대상을 에피소드 상태로 잠그지 않는다) 의 근거 그림은 14D 시기 기록 하나이다 ([`archive/14d-era-20260923/figures/target-latch-evidence.png`](archive/14d-era-20260923/figures/target-latch-evidence.png), 정의와 출처는 [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md) 의 F11 · F17). 그 그림 (a) 는 한 run (`run_0004`) 에서 "손이 사과를 쥐고 있는 구간" 의 grounding 이 고른 물체가 crate 였다고 읽었다. 이 STEP 은 그 값을 옮겨 적지 않고 읽은 그림만 요약한다.
+
+| | 14D 그림 (a) (run 하나) | 16D T59 (U = 현재 frame L8H2, 16 episode) |
+|---|---|---|
+| 들고 가는 구간에서 고른 것 | crate (그림에서 읽은 구간) | **destination (crate) 0 / 106 frame** (창 안). 창을 자르지 않아도 0 / 113 |
+| target 을 고른 몫 | — | 0.591 (frame 합산 0.651, 69 / 106) |
+| 그 밖 | — | other_object 0.354 (31 frame), no_target 0.055 (6 frame) |
+
+- 16D T59 에서는 U 가 held 에서 **crate 를 고른 frame 이 없다.** "들고 가는 동안 attention target 이 crate" 라는 F11 의 모양은 이 16D · L8H2 · T53 기록에서는 **재현되지 않았다.**
+- 동시에 U 가 held 에서 target 을 일관되게 고르는 것도 아니다. 못 고른 몫은 다른 과일 (other_object) 과 no_target 이다. **U ≠ target 의 방향이 14D 와 다르다** (crate 가 아니라 다른 과일).
+- 비교의 한계: 14D 는 **한 run, 14D 모델** 이고 이 STEP 은 **16 episode, 16D 모델** 이다. 14D 시기의 grounding 구성은 여기서 다시 확인하지 않았다. 따라서 "latch 가 필요하다 / 필요 없다" 를 이 비교에서 읽지 않는다. 읽을 수 있는 것은 "F11 의 crate 쏠림이 16D 현재 기록에서는 나오지 않았다" 와 "나누지 않은 U 가 held 에서 target 을 놓친 frame 이 있다 (34 / 106, Sg 기준)" 의 두 가지다.
+
+**(b) T54 의 phase 별 L8H2 current identity.** T54 ([`T54.verify.json`](handoff/T54.verify.json) `numbers.current.phase`) 의 L8H2 `identity` (episode 평균) 는 pre 0.847 (594 frame · 16 episode), held 0.534 (113 · 12), post 0.425 (70 · 3), placed 0.597 (401 · 9) 이다. T59 의 U target 비율과 다음 차이로 달라진다 (**새 로그가 우선**).
+
+| | T54 (L8H2 current, identity) | T59 U target (창 안, 주 표) | T59 U target (창 자르지 않음) |
+|---|---|---|---|
+| pre | 0.847 (594 frame) | 0.825 (477) | 0.838 (608) |
+| held | 0.534 (113 · 12 episode) | 0.591 (106 · 10 episode) | **0.534 (113 · 12 episode)** |
+| post | 0.425 (70 · 3) | 0.500 (14 · 2) | 0.416 (78 · 3) |
+| placed | 0.597 (401 · 9) | 0.444 (9 · 9) | 0.597 (401 · 9) |
+
+- **창 · 분모의 차이.** T54 의 분모는 GT target 이 3 camera 중 한 곳에서 200 px 이상 보이는 frame (`has_target`) 이고 창을 자르지 않는다. T59 주 표의 분모는 창 안의 모든 frame 이고 `no_target` 도 class 의 하나로 센다. T59 의 창을 자르지 않은 held · placed 값은 T54 와 같다 (0.534 · 0.597). pre · post 는 조금 다르다 (pre 608 대 594 frame, post 78 대 70 frame). 분모 정의가 다른 것과 같은 방향이나 frame 별로 분해해 확인하지는 않았다. **같은 frame 에서 T59 의 U class 와 T54 의 `identity_label` 이 어긋난 것은 0** 이다 (§2).
+- T54 의 held 0.534 와 T59 주 표의 held 0.591 의 차이는 **창의 효과**이다 (home 으로 잘린 7 held frame, §8).
+
+### 10. 읽을 때의 한계 · 측정하지 않은 것
+
+- **closed-loop 효과를 재지 않았다.** U 는 offline 에서 매 frame 새로 만든 grounding 이고 S 의 기록은 phase 를 나눈 서버가 실제로 쓴 값이다. latch · freeze 를 끈 arm 을 돌리지 않았으므로 U ≠ target 이 실제 접촉 · carving · 성공에 어떻게 이어지는지는 말하지 않는다.
+- **U 의 cluster 로 가상 field 를 짓지 않았다.** "잘못 carving 했을 양" 은 측정하지 않았다 (되돌아올 지점).
+- **HSR 대 strong rule 은 이 STEP 이 아니다 (T55).** HSR label 은 phase 정답이 아니라 S 의 설명 변수이다.
+- **Sg 는 centroid 를 관측한 frame 의 GT 최근접이다.** serving 이 실제로 target 을 올바르게 tracking 했는지는 centroid 와 물체의 거리 (held 관측 frame median 16.3 mm, p95 29.4 mm, 최대 29.9 mm) 로 간접 확인한 것이다. 보이지 않는 동안의 centroid 가 마지막 관측에 머문다는 것이 정의의 전제이고, 그 전제가 closed loop 에서 문제가 되는지는 측정하지 않았다.
+- **표본.** held 106 frame · 10 episode, 실패 episode 의 held 는 1 frame 이다. post 14 · placed 9 는 해석하지 않는다. 대표 episode 는 U 가 가장 많이 틀린 것을 고른 규칙의 결과이다 (§7).
+- **16D · T53 기록 16 episode 한 번의 시행** (T53 의 seed · 배치). L8H2 는 T47 판정으로 유지된 서빙 cell 이고 다른 head · 명사 query (T54 의 N · A · B arm) 의 phase 별 U 는 이 STEP 이 아니다.
+
+### 11. 되돌아올 지점 · 판정 대기
+
+| 안 하고 둔 것 | 왜 | 되돌아올 신호 |
+|---|---|---|
+| 16D closed loop 에서 latch · freeze 를 끈 미분할 arm | 사용자 판정 3 (offline 먼저, closed loop 은 보류) | held 의 U ≠ target 이 크고 (이 STEP: Sg 기준 34 / 106) 그것이 실제 접촉 · 성공에 이어지는지 확인이 필요해질 때 |
+| HSR 대 strong rule 비교 | 사용자 판정 2 (T55 결과를 쓴다) | T55 결과가 나올 때 |
+| U 의 cluster 로 가상 field 를 지어 "잘못 carving 했을 양" 재기 | 이번에는 표시만 (task) | 위 closed loop 판단 전에 양으로 먼저 보고 싶을 때 |
+| 발표용 timeline 에서 S (same frame) 행 제거 | 사용자 판정 (결과 후) | 발표 figure 를 만드는 시점 (verifier 의 figure 재생성). 현재 링크된 그림은 점검용이라 두 행을 갖고 있다 |
+
+### 12. W2 — home 복귀 후 종료
+
+> 수치는 [`T59.verify.json`](handoff/T59.verify.json) `numbers.W2` (창 · 거리 · 측정 1 – 4 · placed 표) 와 `numbers.representative_frame_table_ep1839.W2` (ep1839 의 frame 별 연속 구간) 에서 왔다. W1 의 값은 `numbers.W1` 에 그대로 있고 W2 세션에서 verifier 가 W1 재계산이 갱신 전 값과 같음을 assert 했다 (`numbers.W2.W1_recompute_equals_t59_stats_json` 의 main · m4 · m5 · frames_in_window 모두 true).
+
+**12.1 창의 정의 (사용자 판정, 2026-10-13 두 번째, 결과 전 고정, [`T59.task.md`](handoff/T59.task.md) 끝 절).**
+
+- 사용자 판정의 이유: "home 이후에도 inference 가 계속 돌아 값이 이상할 수 있다." 그래서 기록을 두 창으로 끊어 각각 잰다. W1 (place 직후 종료, §2) 은 그대로 둔다.
+- **W2 끝 = 첫 `placed` 이후, used arm 의 7 관절이 준비 자세 (ready pose) 에서 0.2 rad 안에 처음 들어온 frame (포함).** 준비 자세 `q_ready` 는 control step 0 의 관절값 (`traj.npz` 의 `measured_qpos[0]`, SUBTASK-e 정의), 거리는 `‖q − q_ready‖₂` (used arm 관절만, 기록 qpos 로 계산). 이 거리를 이 로그에서 **ready distance** 라 부른다. 기록 qpos 와 `traj` 의 `inference_states` 는 최대 절대 차이 0.0 rad 로 같다 (`numbers.W2.window_summary.rec_qpos_vs_inference_states_max_abs_rad`).
+- **HSR 확정 label 로 W2 를 끊지 않는다.** HSR 을 평가하는 측정이 HSR 로 창을 정하면 순환이기 때문이다 (사용자 판정). 그래서 W2 의 끝은 물리량 (관절 거리) 으로 정한다.
+- `placed` 가 없는 episode (실패 7) 는 "place 이후" 구간이 없어 W1 과 같은 끝을 쓴다. 이 7 episode 중 5 개의 끝은 여전히 S 의 HSR 확정 `home` frame 이고 (W1 규칙을 그대로 옮긴 것이다) 2 개는 episode 끝이다.
+- `placed` 는 있는데 0.2 rad 안에 끝까지 들어오지 않은 episode 는 episode 끝 (frame 74) 까지가 창이다. 그 수와 최소 거리는 12.3.
+- 구현 세부 (`deviations`): "0.2 rad 안" 은 distance ≤ 0.2 rad 로 구현했고, 탐색은 첫 `placed` frame 부터 (포함) 시작한다. 첫 `placed` frame 에서 이미 0.2 rad 안인 episode 는 없다. frame q 는 그 frame 의 기록 qpos (chunk 를 실행하기 전 상태) 이고 `q_ready` 는 step 0 *뒤* 의 상태라 frame 0 의 거리는 0 이 아니라 0.0004 – 0.0032 rad 이다.
+
+**12.2 창의 크기.** W2 는 750 / 1200 frame 이다 (성공 episode 427 · 실패 episode 323). W1 (606 frame) 보다 144 frame 많고 늘어난 144 frame 은 **모두 `placed`** 이다. phase 별로 pre 477 · held 106 · post 14 · placed 153 이고 (W1 은 placed 9), **pre · held · post 의 frame 은 W1 과 같다.** 그래서 pre · held · post 의 모든 측정값 (측정 1 – 4) 은 W1 과 같다 (`numbers.W1` 과 `numbers.W2` 의 해당 phase 값을 대조했다). 새로 얻는 것은 `placed` 153 frame 의 값이다.
+
+**12.3 episode 별 W2 끝 frame.** 거리는 ready distance (rad) 이다. 표: [`t59-table-W2.png`](figures/t59/t59-table-W2.png) 의 넷째 표.
+
+성공 9 episode (첫 `placed` 가 있는 episode).
+
+| episode (target, arm) | 첫 `placed` | W2 끝 frame | 끝의 이유 | 첫 placed → W2 끝 (frame 수) | **W2 끝 frame 의 거리 (rad)** | 첫 placed 이후 episode 끝까지의 최소 거리 (rad, 그 frame) | placed frame 수 | 그 중 manipulated 없음 (release 뒤) |
+|---|---|---|---|---|---|---|---|---|
+| ep1809 (banana, left) | 30 | 39 | 0.2 rad 안 도달 | 9 | 0.101 | 0.100 (frame 40) | 10 | 5 |
+| ep1842 (pear, right) | 32 | 39 | 0.2 rad 안 도달 | 7 | 0.104 | 0.074 (frame 66) | 8 | 5 |
+| ep1860 (orange, left) | 27 | 34 | 0.2 rad 안 도달 | 7 | 0.095 | 0.094 (frame 35) | 8 | 4 |
+| ep1845 (pear, left) | 31 | 39 | 0.2 rad 안 도달 | 8 | 0.073 | 0.067 (frame 40) | 9 | 5 |
+| ep1862 (apple, right) | 29 | 39 | 0.2 rad 안 도달 | 10 | 0.147 | 0.130 (frame 45) | 11 | 8 |
+| ep1815 (apple, right) | 30 | 38 | 0.2 rad 안 도달 | 8 | 0.108 | 0.089 (frame 49) | 9 | 6 |
+| ep1866 (orange, right) | 31 | 74 | **미도달 → episode 끝** | 43 | **0.2 안에 든 적 없음** | 1.169 (frame 74) | 44 | 38 |
+| ep1804 (apple, right) | 33 | 42 | 0.2 rad 안 도달 | 9 | 0.046 | 0.046 (frame 42) | 10 | 7 |
+| ep1839 (orange, right) | 31 | 74 | **미도달 → episode 끝** | 43 | **0.2 안에 든 적 없음** | 0.251 (frame 46) | 44 | 41 |
+
+- **0.2 rad 안에 들어온 episode 는 7 / 9** 이고 W2 끝은 첫 `placed` 로부터 7 – 10 frame 뒤다 (W2 끝 frame 의 거리 0.046 – 0.147 rad).
+- **끝까지 0.2 rad 안에 들어오지 못한 episode 는 2 / 9: ep1866 · ep1839 (대표 episode).** 이 둘의 W2 는 episode 끝까지 (frame 74, 첫 `placed` 이후 43 frame, placed 44 frame) 이다. 최소 거리는 **ep1866 이 1.169 rad (episode 끝 frame 74 에서 최소)**, **ep1839 가 0.251 rad (frame 46 에서 최소, frame 74 에서는 0.302 rad)** 이다. 0.2 rad 기준을 ep1839 는 0.051 rad 차이로 넘지 못했고 ep1866 은 크게 못 미친다. 같은 규칙을 600 control step 의 `measured_qpos` 에 적용한 보조 계산도 두 episode 모두 0.2 rad 안에 들지 않는다 (최소 ep1866 1.153 rad, ep1839 0.248 rad).
+- 표의 "최소 거리" 열은 첫 `placed` 이후 episode 끝까지의 최소이므로, 도달한 episode 에서는 W2 끝 (처음 0.2 이하가 된 frame) 이후의 frame 에서 더 작아질 수 있다.
+- 이 두 episode 가 placed 153 frame 중 88 frame (44 + 44) 을 차지한다. 아래 episode 평균은 episode 에 같은 가중을 주고, frame 합산은 이 두 episode 의 긴 구간이 크게 반영된다.
+
+실패 7 episode (`placed` 없음, W2 끝 = W1 끝).
+
+| episode (target, arm) | W2 끝 frame | 끝의 이유 | W2 frame 수 |
+|---|---|---|---|
+| ep1840 (banana, right) | 37 | W1 끝 = S 의 HSR 확정 `home` | 38 |
+| ep1843 (apple, right) | 74 | W1 끝 = episode 끝 (placed · home 없음) | 75 |
+| ep1848 (orange, left) | 32 | W1 끝 = S 의 HSR 확정 `home` | 33 |
+| ep1849 (banana, right) | 34 | W1 끝 = S 의 HSR 확정 `home` | 35 |
+| ep1851 (orange, left) | 74 | W1 끝 = episode 끝 (placed · home 없음) | 75 |
+| ep1853 (pear, left) | 37 | W1 끝 = S 의 HSR 확정 `home` | 38 |
+| ep1822 (banana, right) | 28 | W1 끝 = S 의 HSR 확정 `home` | 29 |
+
+**12.4 측정 1 · 2 — phase 별 class 비율 (U · Sg · S, placed 추가).** figure: [`t59-phase-class-bars-W2.png`](figures/t59/t59-phase-class-bars-W2.png) (phase × {U, Sg, S} 의 stacked bar. `post` 는 표본이 작아 그림에서 뺐다, sidecar `excluded_phase_post`) · 표 [`t59-table-W2.png`](figures/t59/t59-table-W2.png) 의 첫째 표 · sidecar 는 같은 이름 `.json`. 발표판 [`t59-ppt-phase-bars-W2.png`](figures/ppt-1013/t59-ppt-phase-bars-W2.png). 칸 = **episode 평균 [95 % CI] / frame 합산 (frame 수)**, §3 과 같은 형식이다. S = 같은 frame GT (사전 정의), Sg = 관측 frame GT (주 정의). 0 인 칸은 생략했다.
+
+| phase (frame / episode) | 조건 | target | other_object | destination | table | no_target |
+|---|---|---|---|---|---|---|
+| pre (477 / 16), W1 과 같음 | U | 0.825 [0.69, 0.93] / 0.845 (403) | 0.145 [0.05, 0.28] / 0.124 (59) | 0 (0) | 0.007 / 0.008 (4) | 0.024 [0.00, 0.05] / 0.023 (11) |
+| | Sg | 0.895 [0.75, 1.00] / 0.901 (430) | 0.104 [0.00, 0.25] / 0.096 (46) | 0 (0) | | 0.002 / 0.002 (1) |
+| held (106 / 10), W1 과 같음 | U | 0.591 [0.39, 0.76] / 0.651 (69) | 0.354 [0.18, 0.56] / 0.292 (31) | 0 (0) | | 0.055 [0.00, 0.12] / 0.057 (6) |
+| | Sg | 0.862 [0.63, 1.00] / 0.943 (100) | 0.138 [0.00, 0.37] / 0.057 (6) | 0 (0) | | 0 (0) |
+| | S | 0.136 [0.09, 0.17] / 0.151 (16) | 0.864 [0.83, 0.91] / 0.849 (90) | 0 (0) | | 0 (0) |
+| post (14 / 2), W1 과 같음, 해석 금지 | U | 0.500 [0.00, 1.00] / 0.071 (1) | 0.462 [0.00, 0.92] / 0.857 (12) | 0 (0) | | 0.038 / 0.071 (1) |
+| | Sg · S | 0 (0) | 1.000 / 1.000 (14) | 0 (0) | | 0 (0) |
+| **placed (153 / 9), W2 에서 새로 늘어남** | **U** | **0.526 [0.26, 0.79] / 0.654 (100)** | 0.178 [0.06, 0.31] / 0.111 (17) | 0.030 [0.00, 0.08] / 0.026 (4) | 0.057 [0.00, 0.16] / 0.033 (5) | 0.209 [0.09, 0.34] / 0.176 (27) |
+| | **Sg (주)** | 0.310 [0.19, 0.42] / 0.183 (28) | 0.015 [0.00, 0.05] / 0.039 (6) | 0 (0) | | **0.674 [0.58, 0.77] / 0.778 (119)** |
+| | S (사전 정의) | 0 (0) | 0.326 [0.23, 0.42] / 0.222 (34) | 0 (0) | | **0.674 [0.58, 0.77] / 0.778 (119)** |
+
+- **placed 의 S · Sg 는 153 frame 중 119 frame (0.778) 이 `no_target`** 이다. 이 119 frame 은 서버 chunk 에 manipulated 물체가 없는 frame 이라 class 규칙 (manipulated 없음 → no_target) 이 no_target 으로 센 것이고, 119 frame 모두 release 뒤이다 (`S_no_target_breakdown`: released 119, 그 밖의 kind 0; pre 에도 released 가 1 frame 있다). 이 소절에서 "`no_target` (release 뒤)" 라 부른 칸이 이것이다. 나머지 34 frame 은 manipulated 가 있고 (S_manipulated_state 는 모두 occluded) Sg 로 target 28 · other_object 6, S 로 other_object 34 이다.
+- **placed 에서 U 가 고른 class 는 target 이 가장 많다 (0.526, 100 / 153 frame)** 이나 other_object 17 · no_target 27 · table 5 · destination (crate) 4 frame 도 있다. U 가 crate 를 고른 frame 은 W1 의 held (0 / 106) 와 달리 placed 에서 4 frame (2 episode) 나온다.
+- 같은 frame 에서 S 와 Sg 의 target 은 다르다 (Sg 28 대 S 0). 거리 median 은 Sg 0.016 m (관측 frame GT), S 0.096 m (같은 frame GT) 로 held 와 같은 모양이다 (`numbers.W2.S_nearest_distance`, placed 의 manipulated 있는 34 frame).
+- placed 의 frame 은 길이가 다른 episode (8 – 44 frame) 에서 왔고 episode 평균과 frame 합산이 다르다 (U target 0.526 대 0.654). ep1839 의 U target 29 / 44 와 ep1866 의 42 / 44 를 더하면 100 frame 중 71 frame 이다.
+
+**12.5 측정 3 — U ≠ target ∧ S = target (placed).** 칸 = episode 평균 [CI] / frame 합산 (frame 수). pre · held · post 는 §4 와 같다. 표: [`t59-table-W2.png`](figures/t59/t59-table-W2.png) 의 둘째 표.
+
+| phase (frame) | S 정의 | U≠target ∧ S=target | U=target ∧ S≠target | 둘 다 target | 둘 다 target 아님 |
+|---|---|---|---|---|---|
+| **placed (153)** | **Sg (주)** | 0.155 [0.06, 0.25] / 0.085 (13) | **0.371 [0.16, 0.58] / 0.556 (85)** | 0.155 [0.04, 0.30] / 0.098 (15) | 0.318 [0.14, 0.50] / 0.261 (40) |
+| | S (사전 정의) | 0 (0) | 0.526 [0.26, 0.79] / 0.654 (100) | 0 (0) | 0.474 [0.21, 0.74] / 0.346 (53) |
+
+- Sg 로 읽은 "U = target ∧ Sg ≠ target" 85 frame 은 **U = target 이고 Sg 가 no_target (release 뒤) 인 frame 81 + Sg 가 other_object 인 frame 4** 로 이루어진다 (`numbers.W2.placed_phase_table.U_class_x_Sg_class`). 즉 이 칸의 대부분은 "S 가 target 을 지닌 채 틀렸다" 가 아니라 "S 에 조작 물체가 이미 없는데 U 는 target 을 골랐다" 이다. 이 칸이 held 의 같은 이름 칸 (0.023, 3 frame) 과 의미가 다르다.
+- 반대 방향 U ≠ target ∧ Sg = target 은 13 frame (5 episode), 이 중 U class 는 other_object 10 · no_target 2 · destination 1 이다.
+
+**12.6 측정 4 — placed 의 S 상태 (latch · HSR · exclusion).** §5 의 표에 placed (153 frame) 행을 W1 의 placed (9 frame) 와 나란히 놓는다 (이 표는 figure 가 아니라 `numbers.W2.m4_latch_hsr_by_phase` 의 값이다).
+
+| placed 구간 | S grasp FSM | `decision.latched` | `grasp_active` | attached | manipulated 상태 | HSR 확정 label | exclusion active | HSR p 평균 (pick / place / home) |
+|---|---|---|---|---|---|---|---|---|
+| W1 (9 frame) | held 9 | False 9 | True 9 | True 9 | occluded 9 | place 9 | (표시 없음, §5) | 0.0004 / 0.972 / 0.028 |
+| **W2 (153 frame)** | held 16 · placed 137 | False 152 · None 1 | True 16 · False 137 | True 16 · False 137 | occluded 34 · **None 119** | place 34 · **home 119** | True 34 · **False 119** | 0.002 / 0.101 / 0.897 |
+
+- **S 의 세 상태 (manipulated 유무 · exclusion active · HSR 확정 label) 는 placed 153 frame 에서 두 조합으로만 나타난다.** (manipulated 있음 · exclusion active · HSR `place`) 34 frame, **(manipulated 없음 · exclusion off · HSR `home`) 119 frame** 이다 (`numbers.W2.placed_phase_table.S_state_totals`). 세 변수가 어긋난 frame 은 없다.
+- **즉 placed 에서 serving 은 HSR 이 home 으로 확정한 뒤 (release 뒤) manipulated 가 없고 exclusion 이 꺼져 있다.** 그 119 frame 의 exclusion 은 꺼져 있다 (`S_exclusion_active` False 119).
+- S 의 `grounding_status` 는 placed 에서 ok 34 · subtask_gated 94 · no_admissible 24 · no_seed 1 이다 (`numbers.W2.m4_latch_hsr_by_phase.S_grounding_status`). 서버의 grasp FSM 이 `held` 인 frame (16) 이 manipulated 가 있는 frame (34) 보다 적다. 이 차이의 원인은 측정하지 않았다.
+- HSR 확정 label 이 `home` 인 119 frame 중 W1 의 placed (9 frame) 에 속한 것은 없다 (W1 의 placed 9 frame 은 모두 `place`). 확정 전 argmax 는 placed 에서 place 15 · home 138 이다.
+
+**12.7 placed 153 frame 의 "U class × S 상태" (U 가 고른 class 를 같은 frame 의 S 상태로 나눠 센 것).** 표: [`t59-table-W2.png`](figures/t59/t59-table-W2.png) 의 셋째 표. 칸 = frame 수.
+
+| U class | manipulated 없음 · exclusion off · HSR `home` (release 뒤) | manipulated 있음 · exclusion active · HSR `place` | 합계 |
+|---|---|---|---|
+| target | **81** | 19 | 100 |
+| other_object | 7 | 10 | 17 |
+| no_target | 25 | 2 | 27 |
+| table | 5 | 0 | 5 |
+| destination (crate) | 1 | 3 | 4 |
+| **합계** | **119** | **34** | **153** |
+
+- **release 뒤 119 frame 에서 U 가 고른 class 는 target 81 (0.681) · no_target 25 · other_object 7 · table 5 · destination 1** 이다. 같은 frame 에서 serving 은 manipulated 를 갖지 않고 exclusion 이 꺼져 있다. 즉 U 는 target 을 고르는데 serving 의 exclusion 이 꺼져 있는 frame 이 81 개이다. (U 가 target 을 고른다는 것은 U 의 cluster 가 target 물체의 점이 다수라는 뜻이고, 그 점이 collision 대상에서 제외되어야 하는지는 이 STEP 이 판정하지 않는다.)
+- 나머지 34 frame (manipulated 있음) 에서는 U 가 target 19 · other_object 10 · destination 3 · no_target 2 이다.
+- 이 119 frame 의 episode 분포 (`placed_phase_table.per_episode` 의 S 상태): ep1839 41 · ep1866 38 이 79 frame 이고 나머지 7 episode 가 40 frame (4 – 8 frame 씩) 이다.
+
+**12.8 대표 episode ep1839 의 W2 timeline.** figure: [`t59-timeline-ep1839-W2.png`](figures/t59/t59-timeline-ep1839-W2.png) (위에서부터 물리 phase · S latch · S HSR p · S HSR 확정 label · U class · Sg class · S class · ready distance 곡선과 0.2 rad 선, 점선 = W1 끝). 발표판 [`t59-ppt-timeline-ep1839-W2.png`](figures/ppt-1013/t59-ppt-timeline-ep1839-W2.png). 연속 구간은 `numbers.representative_frame_table_ep1839.W2.segments` (frame 0 – 74, 75 frame, W2 끝 = episode 끝 = frame 74).
+
+| 띠 | 연속 구간 (frame, 포함) |
+|---|---|
+| 물리 phase | pre 0 – 16 · held 17 – 30 · **placed 31 – 74** |
+| S latch | searching 0 – 1 · latched 2 – 15 · closing 16 · held+att 17 – 31 · **placed 32 – 74** |
+| S HSR 확정 label | None 0 – 1 · pick 2 – 18 · place 19 – 33 · **home 34 – 74** |
+| U class | target 0 – 14 · other_object 15 – 24 · target 25 – 29 · other_object 30 · target 31 – 40 · other_object 41 – 43 · target 44 – 46 · no_target 47 – 54 · target 55 · no_target 56 · target 57 · no_target 58 – 60 · target 61 – 74 |
+| Sg class | target 0 – 33 · **no_target 34 – 74** |
+| S class (같은 frame GT) | target 0 – 19 · other_object 20 – 33 · **no_target 34 – 74** |
+
+- **frame 34 에서 HSR 확정 label 이 `home` 이 되고 같은 frame 에서 Sg · S 가 `no_target` (release 뒤) 이 된다.** ready distance 는 frame 31 의 0.909 rad 에서 frame 46 의 0.251 rad 까지 내려간 뒤 0.251 – 0.302 rad 에 머문다 (frame 47 – 74, frame 74 에서 0.302 rad). 0.2 rad 선 (그림의 점선) 아래로 내려간 frame 이 없다.
+- W2 에서 ep1839 의 placed 는 44 frame (31 – 74) 이고 U class 는 target 29 · no_target 12 · other_object 3 이다. **HSR `home` 구간 (frame 34 – 74, 41 frame) 의 U class 는 target 26 · no_target 12 · other_object 3** 이다. 같은 구간에서 Sg · S 는 전부 `no_target` 이다.
+- U 가 `no_target` 인 frame 은 47 – 54 · 56 · 58 – 60 (12 frame) 이다 (no_target 은 U 의 grounding 이 ok 가 아니거나 chosen 점이 없을 때). 그 이유는 이 STEP 에서 측정하지 않았다.
+
+**12.9 W2 가 말하는 것과 말하지 않는 것.**
+
+- **말하는 것 (기술 통계).** (1) place 이후 used arm 이 준비 자세로 돌아오는 데 걸린 frame 수는 7 episode 에서 7 – 10 frame 이고 2 episode (ep1866 · ep1839) 는 episode 끝까지 0.2 rad 안에 들지 않았다. (2) placed 153 frame 중 119 frame 에서 serving 은 HSR 이 home 으로 확정한 뒤 manipulated 가 없고 exclusion 이 꺼져 있다. (3) 그 119 frame 에서 같은 frame 의 U 는 target 81 · no_target 25 · other_object 7 · table 5 · destination 1 을 골랐다. (4) placed 에서 U 가 crate 를 고른 frame 은 4 frame 으로 W1 held 의 0 과 다르다.
+- **말하지 않는 것 (측정하지 않았다).**
+  - **closed loop 에서 U 를 쓰면 실제 carving · 접촉이 어떻게 되는가.** 이 표는 같은 frame 에서 U 가 고른 class 를 센 것이고 U 의 cluster 로 field 를 짓지 않았다. release 뒤 119 frame 에서 U 가 target 을 골랐다는 것이 접촉 · 성공 · carving 양에 영향을 준다는 뜻이 아니다.
+  - **HSR 대 strong rule (실제 grasp latch) 의 비교는 T55 의 결과를 쓴다** (사용자 판정 2). W2 의 HSR 확정 label 은 S 의 설명 변수로만 보고했고 phase 정답이 아니다.
+  - 0.2 rad 기준이 "home 에 돌아왔다" 의 적절한 정의인가는 사용자 판정으로 정한 값이고, 다른 기준 (예: 0.1 rad, 0.3 rad) 에서 W2 끝이 어떻게 달라지는지는 재지 않았다. ep1839 의 최소 거리는 0.251 rad 이다.
+  - ep1839 · ep1866 의 used arm 이 준비 자세로 돌아가지 않은 이유 (rollout 이 episode 끝 전에 정지하는지, 다른 자세로 가는지) 는 이 STEP 이 아니다.
+  - 실패 7 episode 의 placed · post 는 없다 (post 는 W1 과 같은 14 frame).
+
+**산출물.**
+
+- **측정**: [`handoff/T59.verify.json`](handoff/T59.verify.json) (원자료 `/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/`, `t59_frames.jsonl` 이 frame 별 표, W2 창은 `t59_w2_window.json`). repo 코드는 verifier 가 수정하지 않았다 (HEAD `cf38c9dbca7b` 시작 · 끝 동일, W2 세션도 같다). W2 세션에도 regression baseline (legacy) 이 먼저 돌았고 기대값과 일치했다 (`start_violated` 14 / 15, `has_target` 15 / 15, frame 0 clearance −29.031048 mm).
+- **figure W1** (각각 `.json` sidecar 있음, 위 절에 링크): [`t59-timeline-ep1839`](figures/t59/t59-timeline-ep1839.png) · [`t59-phase-class-bars`](figures/t59/t59-phase-class-bars.png) · [`t59-scene-ep1839`](figures/t59/t59-scene-ep1839.png) · [`t59-table-measures`](figures/t59/t59-table-measures.png) · [`t59-table-latch-window`](figures/t59/t59-table-latch-window.png). 발표판 [`t59-ppt-timeline-ep1839`](figures/ppt-1013/t59-ppt-timeline-ep1839.png) · [`t59-ppt-phase-bars`](figures/ppt-1013/t59-ppt-phase-bars.png).
+- **figure W2** (새 이름, W1 파일을 덮어쓰지 않았다): [`t59-timeline-ep1839-W2`](figures/t59/t59-timeline-ep1839-W2.png) · [`t59-phase-class-bars-W2`](figures/t59/t59-phase-class-bars-W2.png) · [`t59-table-W2`](figures/t59/t59-table-W2.png) · 발표판 [`t59-ppt-timeline-ep1839-W2`](figures/ppt-1013/t59-ppt-timeline-ep1839-W2.png) · [`t59-ppt-phase-bars-W2`](figures/ppt-1013/t59-ppt-phase-bars-W2.png). (verifier 가 W2 표를 처음 한 번 그렸다가 패널이 겹쳐 지우고 같은 이름으로 다시 썼다 — `deviations`.)
+- 입력: T53 기록 (`.../20261013T100210+0900_4a540f1a18d7_cb037c425d2f`), T54 기록 (`.../20261013T135232+0900_cf38c9dbca7b_611265305126`) 은 읽기 전용이다.
+- 요청 문서: [`handoff/T59.task.md`](handoff/T59.task.md). commit 은 하지 않았다.
+
+---
+
+## T60 — 종료 구간 (P · H) 술어와 T44–T56 의 고정 후보 재집계 · 선택 재계산 (offline, 새 rollout 없음, 2026-10-13 ~ 14 KST)
+
+> 측정 run `20261013T223348+0900_cf38c9dbca7b_8aef81831126` (2026-10-13 22:33 KST 시작, 2026-10-14 00:34 KST 끝), 기록 2026-10-14 KST. 수치는 모두 [`T60.verify.json`](handoff/T60.verify.json) 의 `numbers` (`step1` · `step2` · `step3`) 에서 왔다. 요청 문서: [`handoff/T60.task.md`](handoff/T60.task.md).
+> 근거 문서 [`doc/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md`](../../../doc/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md) 의 "무엇부터 다시 해야 하는가" 1–3 을 수행했다. 감사 문서의 잠정 절단 (T53 첫 physical `placed`, 401 frame) 은 그대로 보존한다. 이 절의 수치는 그와 별개인 정식 술어의 값이다.
+> 이 STEP 은 사용자 지시로 **sub-agent 없이 한 세션이** 구현 · 측정 · 기록을 맡았다. 기존 코드 · 기록은 고치지 않았다 (새 파일 `AG3S/ag3s/experiments/studies/t60_*.py` · `tests/ag3s/test_t60_termination.py` 만).
+
+**이 절이 답하는 물음 (목적).** 완료 이후 구간 (놓은 뒤, 준비자세로 돌아온 뒤) 을 평가 · 선택에서 빼면 T44–T56 의 어떤 수치와 어떤 선택이 바뀌는가. develope_PLAN §0.10 의 closed-loop 지표 (success · safe success · HOLD) 와 attention head 선택이 종료 정의에 얼마나 민감한지 정한다.
+
+**한 줄 결과.**
+
+- **success · safe success (`success_ct`) 는 P 에서 그대로다.** 8 arm (CL2 4 · CL3 3 · T53 1) 모두 P 창의 값이 발표값과 같다. P 이후 hand–target 재접촉 · crate 이탈은 89 placed run 에서 0 이다 — 이 기록들에서 "완료 뒤 재파지가 성공 판정을 바꾼다" 는 일은 없었다.
+- **H 에서는 success 가 내려간다.** placed 89 run 중 **27 run 이 준비자세로 돌아오지 않는다** (H 도달 62). 팔이 crate 위에 머문다 (최소 관절 오차 0.617 rad 이상). 이 때문에 CL2 C1bp 대 C2p 의 `success_ct` 차이는 full 9 대 0 (McNemar p 0.0039) → H 5 대 0 (p 0.0625) 이 된다.
+- **uncertified HOLD 의 대부분은 준비자세 복귀가 끝난 뒤다.** CL3 C1aF1 의 uncertified HOLD 130 chunk 중 126 이 t_H 이후 (P 창 안 1, H 창 안 4). 그래서 HOLD chunk 수는 P 창에서 C1a 82 · C1aF1 60 · C1aF1F2 8 로, full (119 · 189 · 124) 에서 보이던 "F1 이 HOLD 를 늘린다" 의 순서가 뒤집힌다.
+- **T54 의 N · B 개선은 창과 무관하게 남고 더 커진다** (identity − L8H2: full +7.15 / P +10.40 / H +9.80 %p, CI 하한 > +5 %p). **A 의 T57 진입 판정은 창마다 뒤집힌다** (full 탈락 · P 탈락 · H 통과) — 셋 다 허용폭 경계에 있다.
+- **attention head 선택은 바뀐다.** T47 의 label-free 공통 top-3 = L4H1 · L2H0 · L14H5 → **L4H1 · L14H5 · L3H3** (P · H 같음), 그 held-out 3D `on_target` = **0 / 60 → 43 / 60** (σ 0; σ 1 에서 38 / 60). L8H2 는 55 / 60 그대로라 **"L8H2 유지" 결론은 바뀌지 않는다.** T51 의 GT label 선택은 `last:L12H4` → P `mean:L10H7` · H `mean:L12H4` 로 창마다 다르고, held-out 에서 셋 다 L8H2 (0.911) 를 넘지 못한다. self label 선택 (`last:L12H3`) 과 T49 의 primary (GT) 명사 cell 은 바뀌지 않는다.
+
+**이 절이 주장하지 않는 것.**
+
+- P · H 의 허용범위가 "옳다" 는 주장. 사용자가 정한 값이고, 그 근처 grid (81 조합) 에서 분류가 안정적이라는 것까지만 보였다.
+- H 미도달 27 run 의 **원인.** 정책이 복귀하지 않는 이유는 진단하지 않았다.
+- 바뀐 head 선택이 closed loop 에서 낫다는 주장. held-out offline 지표만 쟀다.
+- T54b · T54c · T55 · T56 · T48a val · T48b · T50 의 재집계 (§7 범위 밖).
+
+### 1. 사용자 판정과 타임라인 (KST)
+
+**사용자 판정 (2026-10-13, arm 별 결과를 열기 전, `T60.task.md`).**
+
+| # | 질문 | 판정 |
+|---|---|---|
+| 1 | P (안정 placement) 의 유지시간 | **8 row (0.53 s, 한 chunk)** |
+| 2 | H (준비자세 복귀) 의 허용범위 | **사용 팔 7 관절 max\|q − q0\| ≤ 0.35 rad ∧ TCP ≤ 0.12 m, P 이후 8 row 유지** |
+| 3 | 놓은 뒤 돌아오지 않은 run 의 H 판정 | **H 기준 실패, P 성공은 따로 보고** |
+| 4 | 범위 | **2 + 3 단계** (고정 후보 재집계 + 선택 · 학습 목적함수 재계산) |
+
+**타임라인.**
+
+| 시각 (KST) | 일 |
+|---|---|
+| 2026-10-13 22:33 | run 시작. 술어 구현 · unit test 6 / 6. 142 run 의 t_P · t_H 와 허용범위 grid (arm 별 집계는 열지 않음) |
+| 2026-10-13 (결과 전) | STEP 번호 T60 을 다른 세션 (dev-70 · dev-82 · 9f · 50) 에 알려 충돌 없음 확인. 사용자 판정 1–4 |
+| 2026-10-13 22:50 – 23:00 | 2 단계: closed-loop 재집계 · T54 재평가 (full 은 발표값 assert) |
+| 2026-10-13 22:54 – 2026-10-14 00:34 | 3 단계: frame 근사 검증 → record endpoint → T47 · T49 · T48a → T51 full / P / H scene chain |
+| 2026-10-14 00:12 | T51 P ablation 이 `paper3_s1` 의 stale row (원래 T47 집합으로 계산된 cache) 를 읽은 것을 발견 → P · H 의 해당 row 삭제 후 재계산 (§6) |
+| 2026-10-13 (측정 중) | regression baseline (legacy): 위반으로 시작 14 / 15 · `has_target` 15 / 15 · frame 0 clearance −29.031048280806342 mm — 기준과 같다 |
+
+### 2. 술어 — 무엇을 "완료" 로 보는가
+
+| 정의 | 내용 |
+|---|---|
+| **row 규약** | control row 하나 = 15 Hz policy step. row k 의 술어는 row k 시작 상태 · row k 동안의 contact · row k 평균 target 속도로 정하고, row k 가 끝날 때 알 수 있다. inference frame 은 `t_step ≤ t_end` 이면 유지 (완료 확인 관측은 남기고 완료 뒤의 새 추론은 뺀다) |
+| **P (placement 완료)** | `in_crate` (`analyze_t42` 중심 규칙: crate local \|x\| < 0.077, \|y\| < 0.137, −0.052 < z < 0.075) ∧ hand–target contact 없음 ∧ target 속도 ≤ 0.030 m/s (수집기 `TARGET_LINEAR_SPEED_TOLERANCE_MPS`) 가 8 row 연속인 첫 시점 = t_P |
+| **H (준비자세 복귀 완료)** | t_P 뒤에 사용 팔 max\|q − q0\| ≤ 0.35 rad ∧ TCP ≤ 0.12 m 가 8 row 연속인 첫 시점 = t_H. q0 · TCP0 = 그 episode 의 warm-up 후 row 0 (데이터 수집기의 `rest_ctrl` 와 같은 episode 별 준비자세). P 이전에는 H 를 보지 않으므로 t = 0 에 끝나지 않는다 |
+| **미완료 run** | P (또는 H) 가 없으면 full horizon 을 유지. 실패 run 을 버리지 않는다. 같은 술어를 모든 arm 에 적용 |
+| **endpoint mask** | run 마다 `keep_rows_P/H` (600 row) · `keep_frames_P/H` (75 frame) 와 protocol `T60-v1` 을 저장 (run 의 `verify/T60/step1/masks/`). 원 기록은 지우지 않는다 |
+
+![T60 endpoint scene](figures/t60/t60-endpoint-scene.png)
+
+*실제 장면 (기록 영상 `third_person_front.mp4`, frame k = control row k).* 위: CL3 C1a ep11 s111 — t_P = 204 에서 과일이 crate 안에 멈추고, t_H = 264 에 오른팔이 준비자세로 돌아온다. 그 뒤 336 row 는 정지 상태다. 아래: CL3 C1a ep110 s1101 — t_P = 308 이후 팔이 crate 위에 머물러 (관절 오차 ≈ 1.1 rad) H 에 도달하지 않는다. 그래프의 파랑 = 준비자세 관절 오차, 주황 = TCP 오차 ×5, 초록 = target 속도 ×2, 하늘색 띠 = in crate, 노란 띠 = hand–target contact.
+
+### 3. 1 단계 — 142 run 의 t_P · t_H (CL2 72 · CL3 54 · T53 16)
+
+| 기록 | runs | 발표 success | P 도달 | P = success | H 도달 | P 이후 제거 frame | H 이후 제거 frame |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| CL2 | 72 | 40 | 40 | 72 / 72 | 26 | 1603 / 5400 | 976 |
+| CL3 | 54 | 40 | 40 | 54 / 54 | 28 | 1648 / 4050 | 1057 |
+| T53 | 16 | 9 | 9 | 16 / 16 | 8 | **362** / 1200 (잠정 proxy 401) | 280 |
+| 전체 | 142 | 89 | 89 | 142 / 142 | 62 | 3613 / 10650 | 2313 |
+
+- t_P − 기록 `place_t` (마지막 in-crate streak 의 시작 chunk) = 4 – 62 row (중앙값 26). t_H − t_P = 8 – 109 row (중앙값 56, 62 run).
+- P 이후 hand–target contact 가 있는 run 0, crate 밖으로 나간 run 0. replay qpos 불일치 0 row.
+- **허용범위 grid** (dwell_p 1 / 8 / 23 · q 0.25 / 0.35 / 0.50 rad · TCP 0.08 / 0.12 / 0.16 m · dwell_h 1 / 8 / 15 = 81 조합): H 분류가 바뀌는 조합 0. P 는 dwell 23 row (수집기 `TARGET_SETTLE_SECS` 1.5 s) 에서만 1 run 이 빠진다 (늦게 놓아 horizon 안에 1.5 s 를 못 채움).
+
+![T60 ready-pose gap](figures/t60/t60-ready-gap.png)
+
+*placed 89 run 의 "P 이후 가장 가까웠던 8 row" 의 준비자세 오차.* 두 무리 사이가 비어 있다: H 도달 run 은 관절 ≤ 0.222 rad · TCP ≤ 0.073 m, 미도달 run 은 관절 ≥ 0.617 rad · TCP ≥ 0.210 m. 허용범위 (점선) 는 그 빈 곳에 있다.
+
+![T60 removed table](figures/t60/t60-removed-table.png)
+
+### 4. 2 단계 — 고정 후보의 closed-loop 지표 (CL2 · CL3 · T53)
+
+정의 (`T60.verify.json` `step2`, 코드 `t60_closed_loop.py`).
+
+| 창 | success | safe success (`success_ct`) | 비허용 contact 를 세는 row |
+|---|---|---|---|
+| **full** (발표 정의) | grasp ∧ 마지막 planning row 에서 crate 안 | success ∧ `success_rel` ∧ 비허용 contact 없음 | t ≤ Z4 `release_t` (마지막 hand–target contact + 1), 미release 는 전체 |
+| **P** | grasp ∧ P 도달 | success_P ∧ 비허용 contact 없음 | t ≤ t_P (미도달은 전체) |
+| **H** | success_P ∧ H 도달 | success_H ∧ 비허용 contact 없음 | t ≤ t_H (place → 준비자세 포함, 미도달은 전체) |
+
+비허용 contact = V11 CT 집합 {hand–fruit_other, robot_other–target, robot_other–fruit_other}. HOLD chunk 는 시작 t ≤ t_end 이면 창 안이다. **full 창은 발표 `agg.json` 의 run flag (success · success_ct · success_ct_fruit · pre_release_new_contact · n_hold_chunks) 와 arm 합계를 전부 재현한 뒤 (assert) P · H 를 계산했다.**
+
+| 기록 · arm (runs) | success full / P / H | `success_ct` full / P / H | HOLD chunk full / P / H | 완료 시간 중앙값 P / H (s) |
+|---|---|---|---|---|
+| CL2 C0 (18) | 14 / 14 / 9 | 12 / 12 / 9 | 101 / 28 / 30 | 17.4 / 19.4 |
+| CL2 C1a (18) | 14 / 14 / 10 | 11 / 11 / 8 | 119 / 82 / 83 | 17.1 / 18.8 |
+| CL2 C1bp (18) | 11 / 11 / 7 | 9 / 9 / 5 | 87 / 17 / 19 | 17.2 / 19.9 |
+| CL2 C2p (18) | 1 / 1 / 0 | 0 / 0 / 0 | 40 / 40 / 40 | 39.1 / — |
+| CL3 C1a (18) | 14 / 14 / 10 | 11 / 11 / 8 | 119 / 82 / 83 | 17.1 / 18.8 |
+| CL3 C1aF1 (18) | 13 / 13 / 9 | 12 / 12 / 9 | 189 / 60 / 63 | 17.1 / 19.9 |
+| CL3 C1aF1F2 (18) | 13 / 13 / 9 | 12 / 12 / 9 | 124 / 8 / 11 | 16.3 / 19.9 |
+| T53 C1a (16) | 9 / 9 / 8 | 7 / 7 / 6 | 37 / 35 / 36 | 18.1 / 21.0 |
+
+짝 비교 (`success_ct`, A_total 대 B_total, McNemar exact p).
+
+| 짝 | full | P | H |
+|---|---|---|---|
+| CL2 C0 대 C1a | 12 대 11, p 1.0 | 같음 | 9 대 8, p 1.0 |
+| CL2 C1a 대 C1bp | 11 대 9, p 0.6875 | 같음 | 8 대 5, p 0.25 |
+| CL2 C1bp 대 C2p | 9 대 0, p 0.0039 | 같음 | **5 대 0, p 0.0625** |
+| CL2 C0 대 C2p | 12 대 0, p 0.0005 | 같음 | 9 대 0, p 0.0039 |
+| CL3 C1a 대 C1aF1 | 11 대 12, p 1.0 | 같음 | 8 대 9, p 1.0 |
+| CL3 C1aF1 대 C1aF1F2 | 12 대 12, p 1.0 | 같음 | 9 대 9, p 1.0 |
+
+- **pre8 + close (파지 직전) HOLD** 33 chunk (CL3 20 · T53 13, CL2 0) 는 전부 t_P 이전이다. T44–T46 의 파지 직전 결과 (T46 F1 / F2 의 HOLD 12 → 6 포함) 는 종료 정의에 영향을 받지 않는다.
+- 비허용 contact row 는 P · H 창에서 일부 늘어난다 (예: CL2 C0 hand–fruit_other 33 → 64 row). P 에 도달하지 못한 run 은 full horizon 을 세는데, 발표 정의는 `release_t` 까지만 셌기 때문이다. success_ct 의 run 수는 P 에서 바뀌지 않았다.
+
+![T60 closed loop](figures/t60/t60-closed-loop.png)
+
+**HOLD 가 어디서 나는가 — T46b · W1 (A12, placed `no_seed` 인증 수정) 과의 관계.**
+
+![T60 HOLD position](figures/t60/t60-hold-position.png)
+
+| arm | uncertified HOLD (full) | ≤ t_P | t_P – t_H (복귀 중) | > t_H (복귀 완료 후) | P 미도달 run |
+|---|---:|---:|---:|---:|---:|
+| CL2 C0 | 73 | 0 | 2 | 71 | 0 |
+| CL2 C1bp | 70 | 0 | 2 | 68 | 0 |
+| CL3 C1a | 37 | 0 | 1 | 36 | 0 |
+| CL3 C1aF1 | 130 | 0 | 3 | 126 | 1 |
+| CL3 C1aF1F2 | 118 | 0 | 3 | 113 | 2 |
+| T53 C1a | 2 | 0 | 1 | 1 | 0 |
+
+- T46b 가 "F1 을 켠 뒤 close 이후 HOLD 가 늘었다" 고 본 uncertified HOLD 는 **준비자세 복귀를 마친 뒤의 정지 상태** 에서 난 것이다. P 창 안에는 uncertified HOLD 가 C1aF1 1 · C1aF1F2 2 만 있다.
+- 그래서 W1 은 규칙 P 에서는 주 작업 평가 밖이고, 규칙 H 에서도 복귀 중 HOLD (arm 당 1–3 chunk) 만 대상이다. **W1 코드가 틀렸다는 뜻은 아니다** (T46c-W1 의 재현 검증은 그대로).
+- 감사 문서가 예로 든 C1aF1 ep11 s111 (기록 `place_t` 184, `no_seed` onset t 280) 은 이 표의 "> t_H" 에 들어간다.
+
+### 5. 2 단계 — T54 (current / hold, 8 고정 arm) 재평가
+
+T54 의 행 · GT · bootstrap (B 10000, seed 5407) · `t54_stats.analyze` / `entry_criteria` 를 그대로 쓰고 frame 만 mask 로 걸렀다. **full 은 발표 평균 (identity · no_target · purity · coverage, 8 arm, current · hold) 을 1e-6 안에서 재현했다.**
+
+| 창 | target frame | L8H2 identity | N − L8H2 [95 % CI] | B − L8H2 [95 % CI] | A − L8H2 [95 % CI] |
+|---|---:|---:|---|---|---|
+| full | 1178 | 0.7093 | +7.15 %p [+3.65, +11.11] | +7.07 %p [+3.70, +11.25] | −3.08 %p [−8.00, +0.85] |
+| P | 816 | 0.7558 | +10.40 %p [+5.64, +15.80] | +10.16 %p [+6.01, +14.68] | −1.72 %p [−6.48, +2.05] |
+| H | 898 | 0.7490 | +9.80 %p [+5.30, +14.94] | +9.46 %p [+5.49, +13.63] | −2.71 %p [−7.86, +1.57] |
+
+**A 의 T57 진입 판정 (기계적 비교, 허용폭은 실용값).**
+
+| 창 | identity (≥ −3 %p) | coverage (≥ −5 %p) | 개선 관측 (identity · purity ↑ 또는 neighbour ↓) | hold (identity · coverage ≥ 허용폭) | 전체 |
+|---|---|---|---|---|---|
+| full | 탈락 (−3.08) | 통과 (−3.16) | 탈락 (neighbour +0.128) | 통과 (−1.42 · −1.40) | **탈락** |
+| P | 통과 (−1.72) | 통과 (−1.85) | 탈락 (neighbour +0.569) | **탈락 (−3.12 · −3.09)** | **탈락** |
+| H | 통과 (−2.71) | 통과 (−2.84) | **통과 (neighbour −0.114)** | 통과 (−2.36 · −2.34) | **통과** |
+
+- 판정이 창마다 다른 이유는 모든 행이 허용폭 바로 옆에 있기 때문이다. **어느 창으로도 "A 가 기준을 통과했다" 고 말할 근거로는 약하다** (identity 차이의 CI 가 세 창 모두 0 과 −3 %p 를 함께 포함한다).
+- hold 조건의 L8H2 identity 는 full 0.4367 → P 0.6032 · H 0.5511 이다. **T54 hold 재생의 attach 누락 (`T54b` 가 다루는 제한) 은 절단으로 해결되지 않는다** — 놓은 뒤의 빈손 frame 이 빠져 값만 올라간다.
+- 잠정 proxy (감사 문서) 와의 차이: proxy 는 A −1.68 %p · N +9.88 %p 였고 정식 P 는 −1.72 · +10.40 이다. 정식 P 가 frame 을 덜 지운다 (401 → 362, 안정 dwell · contact · 속도 조건 때문).
+
+![T60 T54 identity](figures/t60/t60-t54-identity.png)
+
+### 6. 3 단계 — 선택 · 목적함수 재계산 (T47 · T49 · T51 · T48a · T52)
+
+**frame 단위 근사의 충실도 (먼저 확인).** head 선택 record 는 inference 시점 (8 row 마다) 의 `qpos` · `qvel` 만 있다. 두 표본 f, f+1 이 모두 술어를 만족하면 그 사이 8 row 가 유지된 것으로 보고 t̂ = t_f + 7 로 둔다 (`endpoints_sampled`). row 단위 정답이 있는 142 run 에서: P frame 일치 0.9977 (127 run 완전 일치, 나머지는 1–3 frame **더 일찍** 자름), H frame 일치 1.0, 완료 여부 불일치 0.
+
+**record 별 endpoint** (MuJoCo `mj_forward` 로 frame 마다 target · crate · contact · TCP).
+
+| record | 역할 | frame | P 이후 제거 | H 이후 제거 |
+|---|---|---:|---:|---:|
+| `long` · `t2` | T47 selection | 50 · 75 | 0 (placement 없음) | 0 |
+| `ep1807` | T47 selection | 75 | 38 | 33 |
+| `ep0` · `ep500` · `ep1200` | T51 calibration (VLA 학습 episode) | 113 · 113 · 113 | 82 · 80 · 60 | 73 · 72 · 52 |
+| `headfix` · `ep1800` · `ep1850` · `ep1900` | held-out | 15 each | 0 | 0 |
+
+**held-out 4 record 는 15 frame (8 s) 이라 placement 전에 끝난다** → T47 · T49 · T51 의 held-out 평가와 **T52 (held-out 만 사용) 는 종료 정의의 영향을 받지 않는다.** 감사 문서의 "T52 집계 재계산 필요" 는 해당 없음으로 확인했다.
+
+![T60 records scene](figures/t60/t60-records-scene.png)
+
+*선택 record 의 실제 장면 (cam_high).* ep1807 은 t 295 에 놓고 t 335 에 돌아온 뒤 75 frame 중 33 frame 을 정지 상태로 보낸다. ep0 는 113 frame 중 73 frame 이 준비자세에 머문 상태다 — head 선택 점수의 절반 이상이 이런 frame 에서 왔다.
+
+**T47 label-free 선택 (attention sum + spatial entropy).** `record_statistics` · `select_from_stats` 를 그대로 쓰고 selection record 의 frame 만 걸렀다. full 은 발표 `selection.json` 의 모든 setting top-k 와 같다 (assert).
+
+| | full (발표) | P | H |
+|---|---|---|---|
+| 공통 top-3 (d0 · last · cam τ, 사전 고정 primary) | L4H1 · L2H0 · L14H5 | **L4H1 · L14H5 · L3H3** | 같음 (P) |
+| GT-oracle top-3 (selection record 의 peak_on_target) | L8H3 · L10H7 · L12H4 | **L10H7 · L12H4 · L8H7** | 같음 (P) |
+| 공통 top-3 의 held-out 3D `on_target` (σ 0) | **0 / 60** | **43 / 60** | 43 / 60 |
+| 같은 집합, σ 1 | (T47b: 0 / 60) | 38 / 60 | — |
+| L8H2 · head-average · GT-oracle | 55 · 55 · 55 / 60 | 55 · 55 · 55 / 60 | 같음 |
+
+- 공통 top-3 집합이 바뀐 setting (9 setting × cam / img τ = 18 중 5): d0 last cam, d4 last cam · img, d9 first cam, d9 last cam.
+- **T47 의 "label-free primary 는 held-out 에서 0 / 60" 은 완료 이후 frame 의 영향을 크게 받은 값이다.** 정식 창에서 다시 고른 집합은 43 / 60 까지 올라가지만 여전히 L8H2 (55 / 60) 보다 낮으므로 **"L8H2 유지" (T47 사용자 판정) 는 그대로다.** 새 집합의 T47b label 기반 3D 지표 (`identity_correct` · purity) 는 재지 않았다.
+
+**T49 명사 query 의 cell 선택.** full 은 발표 `select.json` 과 완전히 같다.
+
+| query | GT top-3 (primary) full → P / H | label-free top-3 (secondary) full → P / H |
+|---|---|---|
+| target 명사 | L8H6 · L5H4 · L4H2 → **변화 없음** | L4H7 · L4H6 · L8H6 → L4H7 · L4H6 · **L7H7** |
+| "basket" | L8H6 · L4H2 · L8H0 → **변화 없음** | L4H7 · L8H2 · L8H0 → L4H7 · **L4H6** · L8H2 |
+
+primary 는 그대로라 T49 · T49b 의 held-out 결론은 유지된다. 바뀐 secondary 집합의 held-out 평가는 하지 않았다.
+
+**T51 head 선택 protocol (scene 평균 chain, 사전 고정 그대로).** full 은 발표 scene chain 의 모든 json 과 1e-9 안에서 같다 (ksel 의 `replayed_for_ksel` 목록만 cache 때문에 다름). P · H 는 각자 다시 만든 T47 출력 (`--t47-dir`) 을 읽는다 — forced 후보 (L8H2 + T47 GT-oracle top-3) 가 바뀌기 때문이다.
+
+| | full (발표) | P | H |
+|---|---|---|---|
+| calibration frame (long · t2 · ep1807 · ep0 · ep500 · ep1200) | 50 · 75 · 75 · 113 · 113 · 113 | 50 · 75 · 37 · 31 · 33 · 53 | 50 · 75 · 42 · 40 · 41 · 61 |
+| P1 통과 cell | 242 | 225 | 225 |
+| P2 3D 1 위 (GT, scene 평균 identity) | `last:L12H4` 0.691 | `mean:L10H7` 0.652 | `mean:L12H4` 0.628 |
+| P3 bootstrap 1 위 확률 · 안정 판정 | 0.429 · 불안정 | 0.701 · 안정 | 0.613 · 안정 |
+| P4 선택 (GT label) | `last:L12H4` (k 1) | **`mean:L10H7`** (k 1) | **`mean:L12H4`** (k 1) |
+| P4 선택 (self label) | `last:L12H3` | 같음 | 같음 |
+| P5 held-out identity (scene 평균): GT 선택 · self 선택 · L8H2 | 0.911 · 0.911 · 0.911 | **0.900** · 0.911 · 0.911 | 0.911 · 0.911 · 0.911 |
+| P6 paper top-3 (σ 0 · σ 1) | 0.000 · 0.000 | 0.700 · 0.644 | 0.700 · 0.644 |
+| P6 random 20 조합 중앙값 · head-average · T47 oracle | 0.756 · 0.867 · 0.911 | 0.706 · 0.867 · 0.911 | 0.711 · 0.867 · 0.911 |
+
+- **GT 로 고른 cell 은 창마다 바뀐다** (상위 cell 의 3D 점수 차가 0.01–0.04). held-out 에서 어느 것도 L8H2 를 넘지 않는다. P · H 에서 bootstrap 이 "안정" 으로 바뀐 것은 완료 이후 frame 이 GT 순위를 흐리고 있었다는 뜻이다.
+- **self label (grasp event 자기 label) 은 event 이전 frame 만 쓰므로 영향이 없다** — T51 의 실물용 self label 경로는 종료 정의에 강건하다.
+- **정직한 기록 — stale cache.** T51 의 row cache 는 source id 로 저장되는데, 특수 source `paper3_s1` 은 이름만 같고 내용 (T47 paper top-3) 은 `--t47-dir` 에서 온다. 처음 P ablation 은 원래 T47 집합으로 만든 row 를 읽어 0.000 을 냈다. P · H 의 해당 row 를 지우고 다시 돌려 0.644 를 얻었다 (위 표가 정정 값). 같은 주의를 `t60_t51.py` docstring 에 적었다.
+
+**T48a 의 closed-loop ep1807 보조 평가 (HSR probe).** full 은 발표 수치 (C0 72 / 75, C1 → pick 60 / 225: pick 57 / 57 · place 3 / 39 · home 0 / 129) 를 재현한다.
+
+| 창 | host frame (pick · place · home) | C0 정답 | C1 → pick 전체 | place frame 에서 C1 → pick |
+|---|---|---|---|---|
+| full | 75 (19 · 13 · 43) | 72 / 75 | 60 / 225 | 3 / 39 |
+| P | 37 (19 · 13 · 5) | 34 / 37 | 60 / 111 | 3 / 39 |
+| H | 42 (19 · 13 · 10) | 39 / 42 | 60 / 126 | 3 / 39 |
+
+C1 의 전체 비율 변화는 home frame 이 빠진 구성 효과다. **판단 근거였던 place frame 의 반응 (3 / 39) 은 그대로다** — T48a 의 "instruction 교체에 거의 반응하지 않는다" 는 바뀌지 않는다.
+
+![T60 selection graphs](figures/t60/t60-selection-graphs.png)
+
+![T60 selection table](figures/t60/t60-selection-table.png)
+
+### 7. 감사 표의 STEP 별 판정 (이 STEP 의 측정으로 닫힌 것 · 남은 것)
+
+| STEP | 감사 문서의 요구 | T60 의 결과 |
+|---|---|---|
+| T44 I0–I2 · 단위 / 회귀 | 다시 할 필요 없음 | 회귀 baseline 일치 |
+| T44 E2 · T46 F1 / F2 (pre-grasp) | cutoff 보다 앞인지 확인 | pre8 + close HOLD 33 chunk 전부 t_P 이전 → **유지** |
+| T44d CL · T44e CL2 · T46 CL3 | 새 종료 술어로 재집계 | **완료.** P: success · success_ct 변화 없음, HOLD 크게 감소. H: success 감소 (복귀 미도달 27 run) |
+| T46b · T46c-W1 | placement / home 시점과 HOLD onset 교차표 | **완료.** uncertified HOLD 는 대부분 t_H 이후 |
+| T47 · T47b | calibration 재절단 · 후보가 바뀌면 replay | **완료.** 공통 top-3 · oracle 이 바뀜, held-out 0 → 43 / 60 (σ 0). L8H2 유지 |
+| T48a ep1807 | tail 포함 요약 재계산 | **완료.** place 반응 3 / 39 그대로 |
+| T48a val · T48b · T50 (HSR demo) | 새 window 로 평가 | **하지 않음** — dataset 에 frame 별 물체 상태가 없어 물리 술어를 계산할 수 없다 (재시뮬레이션 필요) |
+| T49 · T49b | 저장 map 으로 재평가 | **완료 (선택).** primary (GT) 불변, secondary label-free 1 cell 씩 변경 |
+| T51 · T51b | P1 · calibration · k 선택 · 평가 재실행 | **T51 완료.** GT 선택 창마다 변경, held-out 은 L8H2 를 못 넘음. **T51b (명사 Ω) 는 하지 않음** |
+| T52 | 집계 재계산 | **해당 없음** (held-out 15 frame 만 사용) |
+| T53 | 성공 · 접촉 · HOLD · 시간 갱신 | **완료** (§3 · §4) |
+| T54 | 고정 후보 재평가 | **완료.** N · B 개선 강화, A 진입은 경계 |
+| T54b · T54c · T55 · T56 | dev / test window 통일 | **하지 않음** — 다른 세션 (dev-82) 진행 중. mask 와 술어를 전달했다 (2026-10-13) |
+
+### 8. 읽을 때의 한계
+
+- **표본이 작다.** closed-loop 은 arm 당 18 (T53 16) run, head 선택의 calibration 은 5 scene, held-out 은 4 record · 60 frame 이다.
+- **frame 단위 근사.** head 선택 record 의 P 는 row 단위보다 0–3 frame 일찍 자른다 (142 run 검증). 속도는 순간 `qvel`, contact 는 순간 MuJoCo contact 다.
+- **허용범위는 사용자 판정이다.** grid 안에서 분류가 안정적이라는 것까지만 보였다. 준비자세의 정의는 episode 의 초기 자세 하나뿐이다.
+- **H 에 도달하지 못한 27 run 은 정책 행동이다.** P 이후에도 기록이 이어지는데 돌아오지 않았다. 원인은 진단하지 않았다.
+- **이미 개발에 쓴 T53 · selection record 는 새 후보의 독립 test 가 아니다.** 새로 고른 cell (T47 · T51) 의 평가는 같은 held-out 4 record 다.
+
+### 9. 판정 대기 · 되돌아올 지점
+
+**판정 대기 (사용자).**
+
+1. **기본 보고 창을 무엇으로 할 것인가** — P (placement 까지) / H (준비자세 복귀까지) / 둘 다. develope_PLAN 의 "Release 뒤 평가에는 retreat / terminal hold 까지 포함" (§ 평가 규칙) 과 맞추려면 H 가 가깝고, H 는 terminal hold 를 빼는 점이 다르다. **develope_PLAN 은 다른 세션이 수정 중이라 고치지 않았다.**
+2. **H 미도달 27 run 을 어떻게 다룰 것인가** — 정책의 복귀 실패로 진단할지, task 정의에서 복귀를 뺄지.
+3. **T51 의 GT 선택이 창마다 다르다** — head 선택을 하나로 고정한다면 self label 경로 (`last:L12H3`, 창과 무관) 를 쓸지, L8H2 를 유지할지.
+4. **T54b · T54c · T55 · T56 에 이 mask 를 적용할지** (dev-82 세션의 사전 고정 task).
+
+**→ 판정됨 (사용자, 2026-10-14; 전문은 [`handoff/T60.task.md`](handoff/T60.task.md) "사용자 판정 2").** ① 기본 창 = **P 주 작업 지표 + H 필수 보고** (develope_PLAN 평가 규칙에 반영). ② 복귀 미도달 → 기록 기반 진단 (아래 **T60b**). ③ L8H2 를 관행적으로 유지하지 않고 **사전 고정 알고리즘으로 head 를 골라 실행 중 고정** (초안 [`handoff/T61.task.md`](handoff/T61.task.md), 실행 전 판정 필요), L8H2 는 기준선으로 보존. ④ 이미 고정된 실험은 **기존 주 판정 유지 + P · H 보조** (T52-T57 세션에 전달). ⑤ T51b 재집계 진행 (아래 **T60c**), HSR demo 재시뮬 보류. ⑥ commit 은 공유 로그 작업 종료 후 T60 범위만 분리.
+
+**되돌아올 지점.**
+
+- 허용범위를 다시 볼 신호: 새 기록에서 placed run 의 준비자세 오차가 0.25 – 0.50 rad 사이에 들어오면 grid 결과가 달라진다.
+- T48a val · T48b · T50: T48b 의 재렌더 경로로 demo 의 물체 상태를 재구성하면 같은 술어를 적용할 수 있다.
+- T59 의 분석 창은 이 술어와 다르다: W1 은 첫 placed 또는 HSR `home` 확정 label 을 끝으로 쓰고 (감사 문서 기준으로 `home` label 은 실제 도착 확인이 아니다), W2 의 ready distance 는 관절 L2 0.2 rad 다 (H 는 관절 max 0.35 rad ∧ TCP 0.12 m, 8 row 유지). 이 STEP 범위 (T44–T56) 밖이라 고치지 않았다.
+- runtime 종료 감지기 (감사 문서 4 단계): `t60_termination.endpoints` 를 client 에 넣으면 같은 술어로 rollout 을 끝낼 수 있다. 새 rollout 이 필요하다.
+
+### 10. 산출물
+
+- **측정**: [`handoff/T60.verify.json`](handoff/T60.verify.json) (원자료 `/mnt/dev/AG3S_VLA-storage/results/development/20261013T223348+0900_cf38c9dbca7b_8aef81831126/verify/T60/`: `step1/` timestamps · masks, `step2/` closed_loop · t54, `step3/` records · T47_P/H · T47_P_s1 · T49_* · T51_full/P/H · logs, `baseline/legacy.json`)
+- **figure** (각각 `.json` sidecar): [`t60-endpoint-scene`](figures/t60/t60-endpoint-scene.png) · [`t60-ready-gap`](figures/t60/t60-ready-gap.png) · [`t60-removed-table`](figures/t60/t60-removed-table.png) · [`t60-closed-loop`](figures/t60/t60-closed-loop.png) · [`t60-hold-position`](figures/t60/t60-hold-position.png) · [`t60-t54-identity`](figures/t60/t60-t54-identity.png) · [`t60-records-scene`](figures/t60/t60-records-scene.png) · [`t60-selection-graphs`](figures/t60/t60-selection-graphs.png) · [`t60-selection-table`](figures/t60/t60-selection-table.png)
+- **코드 (새 파일)**: `AG3S/ag3s/experiments/studies/t60_termination.py` (술어) · `t60_timestamps.py` · `t60_closed_loop.py` · `t60_t54.py` · `t60_sampled_check.py` · `t60_records.py` · `t60_t47.py` · `t60_t47_run.py` · `t60_t49.py` · `t60_t51.py` · `t60_t48a.py` · `t60_figures.py` · `t60_figures2.py` · `t60_figures3.py` · `t60_build_verify.py`, `tests/ag3s/test_t60_termination.py` (6 / 6)
+- 입력 (읽기 전용): CL2 · CL3 · T53 · T54 · T47 · T49 · T51 · T48 run. commit 은 하지 않았다.
+
+## T52 — 장면 1800 의 grounding 실패는 identity 판정 · 3D seed · 영역 확장 중 어디서 시작되는가 (offline, CPU, 2026-10-13 KST)
+
+> 측정 run `20261013T094624+0900_693dcedeaadc_a2c23cf2a275` (2026-10-13 09:46 KST 시작), 기록 2026-10-14 KST. 수치는 모두 [`T52.verify.json`](handoff/T52.verify.json) 의 `numbers` (1 차) 와 `followup.numbers` (follow-up) 에서 왔다. 요청 문서: [`handoff/T52.task.md`](handoff/T52.task.md), 계획 · 사용자 판정: [`handoff/T52-T57.plan.task.md`](handoff/T52-T57.plan.task.md).
+> 새 코드 없음 (분석 script 는 run dir 에 두었고 repo 코드는 verifier 가 고치지 않았다). 입력은 T49 · T49b · T51 · T51b 의 저장 row 와 T47 GT cache 이고 읽기만 했다.
+> **이 절의 장면 1800 수치 중 `ep1800` record 가 만든 것은 head 0 기록 위에서 잰 값이다 (§7). 과거 결과로 표시하고 다시 재지 않았다.**
+
+**이 절이 답하는 물음 (목적).** T49b · T51b 에서 명사 query 의 열세는 장면 1800 (held-out `headfix` · `ep1800`) 에 몰려 있었다 (T51b (c): held-out scene 단위 명사 최선 − action 최선 = −0.044 중 scene1800 이 −0.133). 사용자는 명사로 identity 를 판정하고 L8H2 로 3D seed 를 얻는 조합을 비교하기 **전에**, 실패가 어느 단계에서 시작되는지 분해하라고 했다 (사용자 판정 2026-10-13, 계획서 판정 2). grounding 파이프라인의 세 단계는 다음과 같다.
+
+```
+attention map (명사 / L8H2) → ① identity (2D): 어느 물체를 가리키는가
+   → ② seed (3D): 상위 attention 점 (percentile 95, ≤ 4000)
+   → ③ region growing (eps 0.03 m) + DBSCAN → chosen cluster → identity_correct · purity
+```
+
+**한 줄 결과 (before → after).**
+
+- **before:** "명사 query 가 장면 1800 에서 3D 로 지는 이유" 는 T49b · T51b 가 증상 (`identity_correct` · purity 열세) 만 보였고 원인 단계가 없었다.
+- **after:** 명사 query 의 **2D identity 실패는 scene1800 30 frame 에서 0** 이다 (L8H2 는 7 frame). 그러나 명사 query 는 seed precision 이 낮고 (L8H6 중앙값 0.16) **이웃 바나나와 cluster 가 병합** 된다 (L8H6 · L10H7 모두 `headfix` 15 / 15 frame, apple–banana GT mesh 간격 중앙값 18.4 mm < eps 30 mm). purity 중앙값은 0.65 · 0.63, L8H2 는 병합 0 · purity 1.00. **병합이 남는 기전은 attention split 비율 (≥ 2) 조건이다**: 병합 frame 에서 비율 통과가 L8H6 7 / 15 · L10H7 10 / 15, L8H2 15 / 15. **최종 실패 frame 만 보면 오류의 첫 단계는 거의 모두 seed 다** (scene1800 L8H2 4 · L8H6 7 · L10H7 8 frame 중 region 단계가 처음인 것은 0).
+- **L8H2 의 2D peak 가 target 밖인데 3D 가 맞은 14 frame 은 현재 frame attention 이 아니라 이전 frame 에서 확정한 geometry (`TargetConfirm`) 를 유지한 덕이다 (13 / 14)** — attention source 의 효과와 temporal latch 의 효과를 나눠 평가해야 한다는 근거 (T54 의 `current` · `hold` 조건).
+
+**이 절이 주장하지 않는 것.**
+
+- 명사 query 가 L8H2 보다 낫거나 못하다는 일반 주장 (scene 3 개 · record 4 개 · frame 15 개씩의 pilot 이고 frame 은 독립 표본이 아니다).
+- 병합 기전이 장면 1800 밖에서도 같다는 주장 (병합 frame 은 `headfix` 15 frame 에서만 나왔다).
+- "명사 map 이 두 과일에 퍼진다" 의 원인 (attention 이 퍼지는 이유는 측정하지 않았다).
+
+### 1. 사전 고정과 타임라인
+
+**사전 고정 (결과를 열기 전, `T52.task.md` · `T52.verify.json numbers.definitions`).**
+
+| 항목 | 정의 |
+|---|---|
+| visible camera | GT target pixel ≥ 200 (480×640 GT render, T47 keep rule). 보이는 camera 가 없으면 ① 은 정의되지 않아 따로 센다 |
+| ① identity 실패 | 보이는 camera 가 1 대 이상이고, 보이는 모든 camera 에서 raw argmax patch 가 target 위가 아님 (target coverage of argmax patch > 0.05) |
+| ② seed 실패 | seed precision (GT target seed ÷ 전체 seed) < 0.5. seed 가 없으면 실패 |
+| ③ region 실패 | ② 를 통과했고 (chosen cluster purity < 0.8 또는 병합). 병합 = chosen cluster 가 GT 이웃 과일 점 ≥ 1 과 target 점 ≥ 1 을 함께 가짐 |
+| 오류 시작 단계 | identity → seed → region 순서에서 처음 실패한 단계 |
+| 불확실성 | record 안 moving-block bootstrap (block 5 frame, B 10000, seed 5205), scene = record 합. block 길이는 결과 전에 정했다 |
+| source | `l8h2` = action npz d0 · last · L8H2 raw (서빙 cell), `noun_L8H6` = T49 명사 GT cell (k1 σ0), `noun_L10H7` = T51b 선택 (`noun_best_gt`) |
+| 대상 | held-out 4 record × 15 frame. `headfix` · `ep1800` = scene1800, `ep1850` = scene1850, `ep1900` = scene1900 (대조) |
+
+**타임라인 (KST).**
+
+| 시각 | 일 |
+|---|---|
+| 2026-10-13 09:46 | run 시작 (HEAD `693dcede`). legacy 회귀 기준선 일치: 위반으로 시작 14 / 15 · `has_target` 15 / 15 · frame 0 clearance −29.031048280806342 mm |
+| 같은 run | 4 record × 3 source 재생 (서빙 경로, CPU, worker 2). 이전 row 와 비교: T49b `gt_k1_s0` (명사 · L8H2) · T51b (L10H7) · T51 (`last:L8H2`) 각각 840 field **mismatch 0** |
+| 1 차 결과 후 | lead 가 follow-up 을 요청: (A) 최종 실패 frame 만의 조건부 분해 (1 차 기준은 최종 성공 frame 도 seed 실패로 세는 한계가 있었다), (B) scene1800 병합 기전, (C) L8H2 의 2D 실패 frame 에서 3D 가 맞은 이유. **follow-up 은 1 차 결과를 본 뒤의 보완 측정이고 사전 고정이 아니다.** HEAD `ae6f2345`. 기준선 재실행 일치, 재생 row 대 T52 row 0 / 900 field mismatch |
+| 2026-10-13 오후 | 사용자가 아래 figure 의 ep1800 f2 cam_high 가 정면을 본다고 질문 → head 0 기록 발견 (§7) |
+
+### 2. 1 차 결과 — frame 별 오류 시작 단계
+
+(frame 수. `[ ]` = moving-block bootstrap 95 % CI. frame 은 독립 표본이 아니다.)
+
+| scene (frame) | source | ① identity | ② seed | ③ region growing | no_cluster | ok (최종 오류 없음) | 보이는 camera 없음 |
+|---|---|---:|---:|---:|---:|---:|---:|
+| scene1800 (30) | L8H2 | 7 [0, 11] | 16 [12, 23] | 0 [0, 0] | 0 [0, 0] | 5 [2, 12] | 2 [0, 3.0] |
+| scene1800 (30) | 명사 L8H6 (k1 σ0, T49 GT cell) | 0 [0, 0] | 27 [24, 30] | 0 [0, 0] | 0 [0, 0] | 1 [0, 3] | 2 [0, 3.0] |
+| scene1800 (30) | 명사 L10H7 (T51b 선택) | 0 [0, 0] | 12 [3, 17] | 6 [3, 14] | 0 [0, 0] | 10 [5, 15] | 2 [0, 3.0] |
+| scene1850 (15) | L8H2 | 7 [3, 13] | 6 [2, 9] | 0 [0, 0] | 0 [0, 0] | 2 [0, 5] | 0 [0, 0] |
+| scene1850 (15) | 명사 L8H6 (k1 σ0, T49 GT cell) | 0 [0, 0] | 15 [15, 15] | 0 [0, 0] | 0 [0, 0] | 0 [0, 0] | 0 [0, 0] |
+| scene1850 (15) | 명사 L10H7 (T51b 선택) | 3 [0, 7] | 0 [0, 0] | 0 [0, 0] | 0 [0, 0] | 12 [8, 15] | 0 [0, 0] |
+| scene1900 (15) | L8H2 | 2 [0, 4] | 12 [10, 15] | 0 [0, 0] | 0 [0, 0] | 1 [0, 3] | 0 [0, 0] |
+| scene1900 (15) | 명사 L8H6 (k1 σ0, T49 GT cell) | 0 [0, 0] | 15 [15, 15] | 0 [0, 0] | 0 [0, 0] | 0 [0, 0] | 0 [0, 0] |
+| scene1900 (15) | 명사 L10H7 (T51b 선택) | 0 [0, 0] | 5 [0, 6] | 0 [0, 0] | 0 [0, 0] | 10 [9, 15] | 0 [0, 0] |
+
+![T52 error-start stage](figures/t52/t52-error-start-stage.png)
+
+*scene × source 별 오류 시작 단계 stacked bar.* [`t52-error-start-stage.json`](figures/t52/t52-error-start-stage.json)
+
+**읽는 법과 측정된 사실.**
+
+- scene1800 에서 명사 query 두 source 의 ① identity 실패는 **0 frame** 이다. L8H2 는 7 frame (CI [0, 11]). 즉 2D 에서 target 을 못 가리키는 쪽은 L8H2 다.
+- 명사 L8H6 은 scene1800 30 frame 중 27 이 ② seed 에서 걸린다 (CI [24, 30]). seed precision 중앙값이 0.16 이다. L10H7 은 ② 12 · ③ 6 · ok 10 이다.
+- ③ region 단계가 처음인 frame 은 L10H7 의 6 frame (모두 `headfix`) 뿐이다.
+- L8H2 의 ② 16 은 최종 성공 frame 을 포함한다 (§4 follow-up). 1 차 표만으로 "seed 가 실패 원인" 이라고 읽을 수 없다.
+- **record 별로 쪼개면 `ok` 는 전부 `ep1800` 에서 나온다** (headfix 0 · ep1800 L8H2 5 · L8H6 1 · L10H7 10). `ep1800` 은 head 0 기록이다 (§7).
+
+| record | L8H2 | 명사 L8H6 | 명사 L10H7 |
+|---|---|---|---|
+| headfix | 4 / 11 / 0 / 0 / 0 / 0 | 0 / 15 / 0 / 0 / 0 / 0 | 0 / 9 / 6 / 0 / 0 / 0 |
+| ep1800 | 3 / 5 / 0 / 0 / 5 / 2 | 0 / 12 / 0 / 0 / 1 / 2 | 0 / 3 / 0 / 0 / 10 / 2 |
+
+*(identity / seed / region_growing / no_cluster / ok / 보이는 camera 없음 순서의 frame 수.)*
+
+### 3. 단계별 지표
+
+| scene | source | 2D: 보이는 camera 중 argmax 가 target 인 비율 | 3D `identity_correct` | seed precision (중앙값) | seed recall | 이웃 과일 seed (중앙값, 점) | purity | coverage | 합쳐진 frame | min target–이웃 mesh 거리 (mm, 중앙값) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| scene1800 | L8H2 | 0.75 (28 frame) | 26 / 30 | 0.35 | 1.00 | 30.5 | 1.00 | 1.00 | 0 | 22.2 |
+| scene1800 | 명사 L8H6 (k1 σ0, T49 GT cell) | 1.00 (28 frame) | 23 / 30 | 0.16 | 1.00 | 30 | 0.65 | 0.98 | 15 | 22.2 |
+| scene1800 | 명사 L10H7 (T51b 선택) | 1.00 (28 frame) | 22 / 30 | 0.53 | 1.00 | 29 | 0.63 | 0.93 | 15 | 22.2 |
+| scene1850 | L8H2 | 0.53 (15 frame) | 13 / 15 | 0.34 | 0.88 | 0 | 1.00 | 1.00 | 0 | 15.6 |
+| scene1850 | 명사 L8H6 (k1 σ0, T49 GT cell) | 1.00 (15 frame) | 13 / 15 | 0.08 | 1.00 | 30 | 1.00 | 1.00 | 0 | 15.6 |
+| scene1850 | 명사 L10H7 (T51b 선택) | 0.80 (15 frame) | 13 / 15 | 0.69 | 0.85 | 0 | 1.00 | 1.00 | 0 | 15.6 |
+| scene1900 | L8H2 | 0.87 (15 frame) | 15 / 15 | 0.37 | 1.00 | 54 | 1.00 | 0.94 | 0 | 14.2 |
+| scene1900 | 명사 L8H6 (k1 σ0, T49 GT cell) | 1.00 (15 frame) | 15 / 15 | 0.18 | 1.00 | 68 | 1.00 | 0.94 | 0 | 14.2 |
+| scene1900 | 명사 L10H7 (T51b 선택) | 1.00 (15 frame) | 15 / 15 | 0.56 | 0.98 | 48 | 1.00 | 0.94 | 0 | 14.2 |
+
+(중앙값은 scene 안 frame 의 중앙값이다. "합쳐진 frame" = chosen cluster 가 GT 이웃 과일 점과 target 점을 함께 가진 frame. min target–이웃 거리는 GT visual mesh 기준 `min_neighbour_mesh_dist_m` 의 scene 중앙값이고, scene1800 의 22.2 mm 는 `headfix` (18.3 – 18.5 mm) 와 `ep1800` (26.0 – 27.8 mm) 15 frame 씩을 합친 값이다.)
+
+![T52 stage metrics table](figures/t52/t52-stage-metrics-table.png)
+
+*단계별 지표 표.* [`t52-stage-metrics-table.json`](figures/t52/t52-stage-metrics-table.json)
+
+**scene1800 의 특징 (`numbers.scene_characteristics`).**
+
+| 항목 | 값 |
+|---|---|
+| 배치 (`headfix` frame 0, base frame) | apple (0.457, 0.327, 0.850) · banana (0.550, 0.325, 0.843) · orange (0.462, −0.299) · pear (0.555, −0.304) · crate (0.500, 0.002). target = apple, prompt "Place the apple into the basket." |
+| 가장 가까운 이웃 | banana (두 record 모두). apple–banana GT visual mesh 거리: `headfix` 15 frame 에서 18.3 – 18.5 mm (중앙값 18.4 mm), `ep1800` 에서 26.0 – 27.8 mm. collision geom 거리는 `headfix` 21.8 – 22.0 mm · `ep1800` 28.1 – 29.9 mm |
+| camera 별 target 가시 pixel (`headfix`) | cam_high 547 px (frame 0) → 62 – 93 px (grasp 구간 frame 11 – 14). cam_left_wrist 249 → 14,132 px. cam_right_wrist 는 15 frame 모두 0 |
+| camera 별 target 가시 pixel (`ep1800`) | **cam_high 는 15 frame 모두 0 px** (§7), cam_left_wrist 22 → 10,459 px. 보이는 camera 가 없는 frame 이 2 개 (frame 0 · 1) |
+| phase (`headfix`) | transit 3 · approach 4 · pre_grasp 2 · grasp 6 (pre-grasp 9 · post-grasp 6) |
+
+![T52 scene 1800 stages](figures/t52/t52-scene1800-stages.png)
+
+*실제 장면 (scene1800).* 행마다 (frame, source) 하나, 열은 cam_high · cam_left_wrist · cam_right_wrist 의 map 과 GT label 윤곽, 오른쪽 열은 base frame 위에서 본 seed (검은 점) · chosen cluster (빨간 윤곽) · label 색 (target 초록, neighbour fruit 주황, crate 파랑). 각 행의 값은 sidecar 에 있다.
+
+| frame | source | seed precision | seed 수 | purity | cluster 안 이웃 점 | 병합 | `identity_correct` |
+|---|---|---:|---:|---:|---:|---|---|
+| `headfix` f4 (pre-grasp) | L8H2 | 0.35 | 338 | 1.00 | 0 | 아니오 | 예 |
+| `headfix` f4 | 명사 L8H6 | 0.16 | 745 | 0.65 | 63 | 예 | 예 |
+| `headfix` f4 | 명사 L10H7 | 0.68 | 171 | 0.62 | 62 | 예 | 예 |
+| `headfix` f12 (post-grasp) | L8H2 | 0.28 | 156 | 1.00 | 0 | 아니오 | 예 |
+| `headfix` f12 | 명사 L8H6 | 0.04 | 927 | 0.47 | 54 | 예 | 아니오 |
+| `headfix` f12 | 명사 L10H7 | 0.34 | 145 | 0.44 | 58 | 예 | 아니오 |
+| `ep1800` f2 (pre-grasp, cam_high 0 px) | L8H2 | 0.19 | 104 | 0.00 | 0 | 아니오 | 아니오 |
+| `ep1800` f2 | 명사 L8H6 | 0.15 | 137 | 0.00 | 0 | 아니오 | 아니오 |
+| `ep1800` f2 | 명사 L10H7 | 0.25 | 79 | 0.00 | 0 | 아니오 | 아니오 |
+
+마지막 세 행 `ep1800` f2 의 cam_high 는 target 이 없는 방 안쪽을 본다 (0 px). [`t52-scene1800-stages.json`](figures/t52/t52-scene1800-stages.json)
+
+### 4. follow-up (A) — 최종 실패 frame 만의 조건부 분해
+
+1 차 기준 (독립 flag) 은 최종 성공 frame 도 seed precision < 0.5 이면 seed 단계로 센다. follow-up (A) 는 **최종 결과 (`identity_correct`) 가 틀린 frame 만** 따로 세어 첫 단계를 보고, 최종 성공 frame 이 단계 flag 를 얼마나 켜는지도 센다.
+
+| scene | source | 최종 실패 frame | 오류 시작: identity / seed / region · no_cluster | 최종 성공 frame | 성공인데 seed precision < 0.5 | 성공인데 2D identity 실패 |
+|---|---|---:|---|---:|---|---|
+| scene1800 | L8H2 | 4 (보이는 camera 없음 2) | 0 / 4 / 0 | 26 | 20 / 26 (CI 0.57–0.87) | 7 / 26 |
+| scene1800 | 명사 L8H6 (k1 σ0, T49 GT cell) | 7 (보이는 camera 없음 2) | 0 / 7 / 0 | 23 | 22 / 23 (CI 0.86–1.00) | 0 / 23 |
+| scene1800 | 명사 L10H7 (T51b 선택) | 8 (보이는 camera 없음 2) | 0 / 8 / 0 | 22 | 6 / 22 (CI 0.07–0.44) | 0 / 22 |
+| scene1850 | L8H2 | 2 (보이는 camera 없음 0) | 2 / 0 / 0 | 13 | 10 / 13 (CI 0.47–1.00) | 5 / 13 |
+| scene1850 | 명사 L8H6 (k1 σ0, T49 GT cell) | 2 (보이는 camera 없음 0) | 0 / 2 / 0 | 13 | 13 / 13 (CI 1.00–1.00) | 0 / 13 |
+| scene1850 | 명사 L10H7 (T51b 선택) | 2 (보이는 camera 없음 0) | 1 / 0 / 0 | 13 | 2 / 13 (CI 0.00–0.42) | 2 / 13 |
+| scene1900 | L8H2 | 0 (보이는 camera 없음 0) | 0 / 0 / 0 | 15 | 14 / 15 (CI 0.80–1.00) | 2 / 15 |
+| scene1900 | 명사 L8H6 (k1 σ0, T49 GT cell) | 0 (보이는 camera 없음 0) | 0 / 0 / 0 | 15 | 15 / 15 (CI 1.00–1.00) | 0 / 15 |
+| scene1900 | 명사 L10H7 (T51b 선택) | 0 (보이는 camera 없음 0) | 0 / 0 / 0 | 15 | 5 / 15 (CI 0.00–0.40) | 0 / 15 |
+
+![T52 follow-up conditional merge](figures/t52/t52-followup-conditional-merge.png)
+
+*(a) 최종 실패의 오류 시작 단계와 성공 frame 의 flag, (b) 최종 성공인데 seed · identity 기준을 넘지 못한 비율 (block bootstrap CI), (c) headfix 15 frame 의 attention split 비율, (d) 병합 기전 표.* [`t52-followup-conditional-merge.json`](figures/t52/t52-followup-conditional-merge.json)
+
+- **최종 실패만 보면 오류의 첫 단계는 거의 모두 seed 다.** scene1800: L8H2 4 · L8H6 7 · L10H7 8 frame 이 모두 seed 가 처음 (그중 2 frame 은 보이는 camera 가 없다). region 단계가 처음인 실패는 0 이다. 단 scene1800 의 모든 최종 실패에서 region flag 도 켜져 있다 (독립 flag 라서 순서만 seed 가 앞).
+- **최종 성공 frame 도 seed 기준 (precision < 0.5) 을 자주 넘지 못한다:** L8H2 20 / 26, L8H6 22 / 23 (scene1800). → **seed precision < 0.5 는 최종 실패를 예측하는 단독 지표가 아니다.** 반대로 L10H7 은 성공 frame 의 6 / 22 만 걸린다.
+
+### 5. follow-up (B) — scene1800 의 병합 기전
+
+병합 frame = 선택된 geometry 가 GT 기준 target 점과 이웃 과일 점을 함께 가진 frame. scene1800 30 frame 중 L8H6 · L10H7 은 **각각 15 frame 이 병합** (모두 `headfix`), L8H2 는 0 frame 이다. 병합 frame 중 최종 `identity_correct` 는 L8H6 12 · L10H7 11 이다. 즉 병합은 identity 를 항상 깨는 것이 아니라 purity · 이웃 점 혼입을 깬다.
+
+| 단계 (`headfix` frame 0 – 14) | L8H2 | 명사 L8H6 | 명사 L10H7 |
+|---|---|---|---|
+| 병합 frame (scene1800 30 중) | 0 | 15 | 15 |
+| split trigger 발동 · 15 mm 재군집에서 성분 ≥ 2 (병합 frame 중) | 15 / 15 · 15 / 15 | 15 / 15 · 15 / 15 | 15 / 15 · 15 / 15 |
+| **split attention 비율 ≥ 2 통과** (pipeline, normalised) | **15 / 15** | **7 / 15** | **10 / 15** |
+| split 비율 중앙값 (최소 – 최대) | 4.49 (2.02 – 12.87) | 1.91 (1.36 – 42.67) | 2.29 (0.78 – 5.76) |
+| 병합 기전 label (verifier; L8H2 는 명사 병합 frame 15 개에서 본 label) | split 전 parent cluster 에 바나나 점 15 / 15 frame, split 이 받아들여짐 15 / 15. `split_fired_on_parent_with_neighbour` 9 · `kept_geometry_from_split_anchor` 6 | `current_cluster_ratio_below_2` 6 · `kept_geometry_this_frame_split_accepted` 7 · `kept_geometry_this_frame_not_split` 2 | 2 · 10 · 3 |
+| 병합 cluster 의 membership | — | 현재 frame cluster 6 · 유지된 geometry (proximity) 9 | 현재 frame cluster 2 · 유지된 geometry 13 |
+| GT 비율 target ÷ 바나나 평균 attention (normalised · raw, 중앙값) | — | 1.91 · 10.80 | 2.26 · 36.01 |
+| split 전 바나나 seed 점 (frame 당 중앙값, 범위) | 51 (29 – 59) | — | — |
+
+- split trigger 와 15 mm 재군집은 세 source 모두 15 / 15 에서 동작했다. 차이는 **attention 비율 ≥ 2 조건** 이다.
+- **(미측정 해석) 명사 map 은 target 과 이웃 바나나에 비교적 고르게 퍼져 split 비율 조건을 못 넘고, 병합 cluster 가 남는다.** 지지하는 측정: 비율 중앙값 1.91 · 2.29 대 L8H2 4.49 (같은 식, 같은 frame). 왜 퍼지는지는 측정하지 않았다.
+- 같은 비율을 raw attention 으로 읽으면 두 명사 source 모두 GT 비율 ≥ 2 가 15 / 15 frame 이다 (`gt_ratio_raw_ge2` L8H6 15 · L10H7 15). pipeline 의 `attention_split_ratio_source` 는 `normalized` 로 측정했다. raw 로 바꾸는 시험은 하지 않았다.
+- L8H2 도 split 전 cluster 에는 바나나가 15 / 15 frame 섞여 있다. split 이 그것을 분리했다.
+
+### 6. follow-up (C) — L8H2 의 2D peak 가 target 밖인데 3D 가 맞은 frame
+
+보이는 camera 모두에서 L8H2 의 raw argmax 가 target 밖인데 최종 `identity_correct` 인 frame 은 **14 개** (scene1800 7 · scene1850 5 · scene1900 2, 대부분 grasp 구간: grasp 12 · approach 1 · pre_grasp 1).
+
+| 측정 | 값 |
+|---|---|
+| L8H2 argmax 의 GT class (보이는 camera 별) | support 14 · background 1 |
+| 3D attention peak 가 놓인 물체 | **14 / 14 가 support** |
+| 같은 frame 에서 명사 argmax 가 target 위 (보이는 camera 중 하나 이상) | L8H6 14 / 14 · L10H7 12 / 14 |
+| chosen geometry 의 출처 | **`kept_geometry` 13 · 현재 frame cluster 1** (이전 frame 에서 `TargetConfirm` 이 확정한 geometry) |
+| 그 frame 의 seed precision | 중앙값 0.24 (사분위 0.09 – 0.33, 최소 0.0 – 최대 0.90) |
+| 현재 frame 의 score 1 위 cluster 가 target 점을 가짐 | 11 / 14 |
+
+→ **L8H2 가 맞은 14 frame 중 13 은 현재 frame 의 attention 이 아니라 시간 유지 (`TargetConfirm`) 로 맞았다.** T54 가 "현재 frame 만" 과 "시간 유지 포함" 을 나눠 평가한 이유다.
+
+### 7. 새 발견 — `ep1800` · `long` 은 head 가 0 인 기록이다 (사용자 판정: dev 제외 + 과거 결과 표시)
+
+위 figure (scene1800-stages) 의 `ep1800` f2 cam_high 가 target 없이 방 안쪽을 보는 것을 사용자가 질문해, 기록 qpos 를 직접 확인했다 (lead 의 확인, [`handoff/T52-T57.plan.task.md`](handoff/T52-T57.plan.task.md) "새 발견" 절).
+
+- `ep1800` (`recordings/run_16d_ep1800`) 과 `long` (`20260924_long16d`) 은 **X2 수정 전 (2026-09-25 이전) 에 녹화** 했다. **`head_1` = 0.0** 이라 cam_high 가 벽을 본다. 기록 qpos 확인: **15 / 15 · 50 / 50 frame** (lead 의 확인이고 이 STEP 의 `verify.json numbers` 에는 없다). 나머지 T47 record 와 T53 16 episode 의 `head_1` 은 0.7001 이다 (같은 출처).
+- 이 STEP 의 `verify.json` 이 독립으로 보이는 것: `ep1800` 의 cam_high target 가시 pixel 이 **15 frame 모두 0** (`headfix` 는 547 – 543 px → 62 – 93 px).
+- [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md) "X2 — head cam 이 벽을 보고 있었다" 의 §6 ("무효가 되는 기록", 1673 줄 부근) 은 이 두 기록 위에서 잰 grounding 수치를 **"다시 재야 한다"** 고 적었다. 그런데도 T47 selection (`long`) 과 held-out scene1800 (`ep1800`) 에 들어갔다.
+- **사용자 판정 (2026-10-13):** T55 · T56 의 dev 에서 두 기록을 뺀다. T54 dev parity 는 코드 재현 점검이라 그대로 둔다. **과거 STEP 은 다시 재지 않고** 영향받는 수치에 표시한다 (아래 "재측정 대기" #32).
+- **이 STEP 에서 영향받는 수치:** scene1800 의 `ep1800` 절반 (15 frame) 이 들어간 모든 scene 단위 수치. 위 §2 의 record 별 표가 `headfix` 와 `ep1800` 의 몫을 나눈다. 병합 기전 (§5) 과 `headfix` 열은 영향 없다 (`headfix` 는 0.7001 기록).
+- **다른 STEP 의 영향 (표시만, 재측정 안 함):** T47 selection (`long`), held-out scene1800 이 들어간 T49b · T51 · T51b 수치. **T51b 의 명사 열세 (scene 단위 −0.133) 는 `ep1800` 이 아니라 `headfix` 에서 나왔다** — 근거 [`T51b.verify.json`](handoff/T51b.verify.json) `c_heldout_compare.per_record_gt_identity`: GT identity 가 `headfix` 에서 action best 1.0 대 noun best 0.733 이고 `ep1800` 에서는 두 값이 0.733 으로 같다.
+
+### 8. 한계 · 측정하지 않은 것 · 되돌아올 지점
+
+- **표본.** 4 record × 15 frame, scene 3 개. frame 은 독립이 아니고 CI 는 record 안 moving-block 이다. 병합 기전은 `headfix` 한 record 에서만 관측됐다.
+- **follow-up 의 정의는 사후 보완이다.** 1 차 고정 기준의 한계를 본 뒤 lead 가 추가했다.
+- **측정하지 않은 것** (`T52.verify.json not_measured`): cuRobo 회귀 기준선 (GPU 미사용), region 단계의 growth-only 대 DBSCAN split 분리 (`grow_region` 집합이 저장되지 않았다), T49 primary k3 σ1 source (task 가 k1 σ0 를 지정).
+- **되돌아올 지점.** 병합이 `headfix` 밖에서도 나오는지, split 비율을 raw 로 읽으면 병합이 사라지는지는 T54 · T54c 의 새 episode 에서 병합 frame 수를 직접 세면 가른다 (T54 `numbers` 에는 병합 frame 수가 없다).
+
+### 9. 산출물
+
+- **측정**: [`handoff/T52.verify.json`](handoff/T52.verify.json) (원자료 `/mnt/dev/AG3S_VLA-storage/results/development/20261013T094624+0900_693dcedeaadc_a2c23cf2a275/verify/T52/`: `raw/replay` · `followup/`).
+- **figure** (각각 `.json` sidecar): [`t52-error-start-stage`](figures/t52/t52-error-start-stage.png) · [`t52-stage-metrics-table`](figures/t52/t52-stage-metrics-table.png) · [`t52-scene1800-stages`](figures/t52/t52-scene1800-stages.png) · [`t52-followup-conditional-merge`](figures/t52/t52-followup-conditional-merge.png)
+- 코드 변경 없음. commit 하지 않았다.
+
+## T53 — 한 번도 쓰지 않은 16 episode 의 rollout 기록과 attention · noun · feature · GT 추출 (2026-10-13 KST)
+
+> rollout run `20261013T100210+0900_4a540f1a18d7_cb037c425d2f` (2026-10-13 10:02 KST 시작), 추출은 같은 run 의 `verify/T53/`, 기록 2026-10-14 KST. 수치는 모두 [`T53.verify.json`](handoff/T53.verify.json) 의 `numbers` (rollout) 와 `extraction` (추출) 에서 왔다. 요청 문서: [`handoff/T53.task.md`](handoff/T53.task.md), 구현: [`handoff/T53.impl.md`](handoff/T53.impl.md) (`t53_records.py` · `t53_extract.py`).
+> 이 STEP 은 **평가 data 를 만든다.** 방법을 비교하지 않는다. rollout 은 AG3S ON 의 **현재 서빙 설정 (L8H2 · C1a flag set)** 이고, 아래 success · 접촉 수치가 **T57 의 현재 서빙 기준선** 이다.
+
+**이 절이 답하는 물음 (목적).** 사용자는 "수정에 쓰지 않은 장면 · episode 에서 검증하고, 연속 frame 의 상관을 반영한 불확실성을 보고하라" 고 판정했다 (2026-10-13, 계획서 판정 6). T54 – T56 의 최종 판정에 쓸, 설정 결정에 한 번도 쓰이지 않은 16 episode 의 평가 data 가 준비되었는가.
+
+**한 줄 결과 (before → after).**
+
+- **before:** head 선택 · 진단 · 설정 결정에 쓰지 않은 test data 가 없었다 (기존 record 는 T47 · T51 · T52 에 이미 쓰였다).
+- **after:** 16 episode 전부 완료 (600 step · planning row 75 · step npz 75 / run). **success 9 / 16, `success_ct` (접촉 조건을 지킨 success) 7 / 16, HOLD 37 chunk (10 run).** 비허용 접촉은 전부 `hand-fruit_other` · 놓기 전이다 (31 행 · 4 run). 추출 1200 frame 에서 오류 0, check 문제 0. **이 16 episode 는 T54 의 test 로 쓰였고 (N · B 의 최종 판정은 새 episode 의 T54c 로 넘어갔으므로) 이후 이 data 는 N · B 에 대해 dev 다 (사용자 판정 2026-10-13, §6).**
+
+**이 절이 주장하지 않는 것.** success 9 / 16 의 신뢰구간 (16 episode, 분산 미측정), 다른 설정 (F1 · W1 등) 과의 비교, 실물 일반화.
+
+### 1. 사전 고정과 타임라인
+
+**사전 고정 (`T53.task.md`, lead).**
+
+| 항목 | 값 |
+|---|---|
+| episode (test split, 미사용) | 1840 · 1809 · 1842 · 1843 · 1860 · 1845 · 1862 · 1815 · 1848 · 1849 · 1866 · 1851 · 1804 · 1853 · 1822 · 1839 (layout slot 0 – 15, 과일 4 종 · 양팔) |
+| 역할 | **16 개 전부 final test.** 설정은 기존 record 로만 정하고 test 결과를 보고 바꾸지 않는다 |
+| 기록 조건 | AG3S ON 현재 서빙 (L8H2 · C1a flag set, CL3 의 `start_server.sh` 와 같음), `clustering.placed_no_seed_certify` = off, policy seed = `episode × 10 + 1` (사전 고정, `seeds.json`), 600 step |
+| 동시성 | server 2 개 (port 8290 · 8291), `/tmp/ag3s-vla-gpu-validation.lock` 을 잡는다 |
+| 추출 | action attention (T47 형식) · 명사 attention (T49 형식) · phase feature `kv_L4` + 명사 token feature (T55 용) · GT cache (class · body coverage, 물리 grasp 상태) |
+
+**타임라인 (KST).**
+
+| 시각 | 일 |
+|---|---|
+| 2026-10-13 10:02 | run 시작. snapshot = HEAD `4a540f1a` (회귀 기준선 legacy · cuRobo 모두 일치: legacy 14 / 15 · 15 / 15 · −29.031048280806342 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877401271193 mm). 대상 6 파일의 md5 는 시작 = 끝 |
+| 10:07:46 – 10:56:41 | GPU lock 보유 (2,935 s). server 8290 10:08:48 – 10:54:25, 8291 10:11:04 – 10:56:40. 다른 session 의 GPU process 는 rollout 동안 0 |
+| 2026-10-13 (시각 미기록) | 추출 (attention → noun → feat → gt → grasp → check). executor = ag3s-verifier (part 2), 코드 HEAD `39dfb5dc` (직전 commit 이 문서만 바꿨다). 끝난 뒤 T46 session 에 알렸다 (T46e 메인 tree 적용 대기 중이었다, 계획서 갱신) |
+
+### 2. rollout 결과 — 16 episode 의 현재 서빙 기준선
+
+| 지표 | 값 |
+|---|---|
+| episode 수 · 완료 | 16 · 16 (check mode full 16, replay qpos 불일치 0 행) |
+| **task success** | **9 / 16** (`success_rel` 9) |
+| **`success_ct`** | **7 / 16** (`success_ct_fruit` 7) |
+| grasp 최종 · 첫 grasp 성공 · robust grasp | 11 · 10 · 9 (regrasp run 1 · slip run 2) |
+| place | 9 |
+| failure mode | `ok` 9 · `no_grasp` 5 · `slip_at_lift` 1 · `regrasp` 1 |
+| **HOLD chunk** | **37 (10 run), run 당 최대 15.** kind 별 `collision` 35 · `uncertified` 2. 끝까지 HOLD 인 run 0 |
+| 통신 실패 chunk | 0 |
+| 비허용 접촉 | **`hand-fruit_other` 4 run · 31 행 (substep 755), 전부 놓기 전** — ep1862 · ep1849 · ep1804 · ep1822. `robot_other-target` 0 · `robot_other-fruit_other` 0 (`robot_other` class 0) |
+| hand–target 접촉 | 16 run 모두 (1473 행) |
+| run 당 wall time | 중앙값 280.5 s (p90 299.5, 최대 301.0, 합 4521 s) |
+| server 시간 (chunk 1184 개, 첫 chunk 제외) | TO 중앙값 191.4 ms (p90 634.6) · AG3S 중앙값 297.9 ms (p90 453.7) · client round trip 중앙값 1169.5 ms (p90 1718.3). **round trip 이 nominal chunk 간격 533 ms 를 넘은 chunk 가 1184 / 1184** (sim 이라 실시간 제약은 없다) |
+
+| slot | episode | target · 팔 | seed | success | `success_ct` | failure mode | release row | HOLD chunk (kind) | pre-release `hand-fruit_other` 행 | wall (s) | pre · held · placed · post (frame) | target ≥ 200 px 가시 frame (high · L wrist · R wrist) |
+|---:|---|---|---:|---|---|---|---:|---|---:|---:|---|---|
+| 0 | 1840 | banana · right | 18401 | X | X | no_grasp | — | 5 (collision 5) | 0 | 301.0 | 75 · 0 · 0 · 0 | 49 · 0 · 66 |
+| 1 | 1809 | banana · left | 18091 | O | O | ok | 240 | 0 (—) | 0 | 280.0 | 20 · 10 · 45 · 0 | 15 · 75 · 46 |
+| 2 | 1842 | pear · right | 18421 | O | O | ok | 252 | 1 (collision 1) | 0 | 266.0 | 20 · 12 · 43 · 0 | 51 · 43 · 73 |
+| 3 | 1843 | apple · right | 18431 | X | X | no_grasp | — | 15 (collision 15) | 0 | 281.0 | 75 · 0 · 0 · 0 | 75 · 0 · 74 |
+| 4 | 1860 | orange · left | 18601 | O | O | ok | 215 | 2 (collision 2) | 0 | 278.0 | 16 · 11 · 48 · 0 | 9 · 33 · 48 |
+| 5 | 1845 | pear · left | 18451 | O | O | ok | 245 | 0 (—) | 0 | 275.0 | 20 · 11 · 44 · 0 | 55 · 75 · 44 |
+| 6 | 1862 | apple · right | 18621 | O | X | ok | 228 | 1 (collision 1) | 11 | 292.0 | 18 · 11 · 46 · 0 | 54 · 0 · 75 |
+| 7 | 1815 | apple · right | 18151 | O | O | ok | 235 | 3 (collision 1, uncertified 2) | 0 | 298.0 | 19 · 11 · 45 · 0 | 54 · 45 · 75 |
+| 8 | 1848 | orange · left | 18481 | X | X | no_grasp | — | 0 (—) | 0 | 301.0 | 75 · 0 · 0 · 0 | 59 · 27 · 0 |
+| 9 | 1849 | banana · right | 18491 | X | X | slip_at_lift | 478 | 1 (collision 1) | 13 | 281.0 | 21 · 1 · 0 · 53 | 45 · 0 · 69 |
+| 10 | 1866 | orange · right | 18661 | O | O | ok | 240 | 1 (collision 1) | 0 | 289.0 | 17 · 13 · 44 · 1 | 21 · 45 · 72 |
+| 11 | 1851 | orange · left | 18511 | X | X | no_grasp | — | 2 (collision 2) | 0 | 277.0 | 75 · 0 · 0 · 0 | 58 · 46 · 0 |
+| 12 | 1804 | apple · right | 18041 | O | X | ok | 261 | 6 (collision 6) | 5 | 271.0 | 21 · 12 · 42 · 0 | 43 · 42 · 75 |
+| 13 | 1853 | pear · left | 18531 | X | X | no_grasp | — | 0 (—) | 0 | 278.0 | 74 · 1 · 0 · 0 | 37 · 52 · 0 |
+| 14 | 1822 | banana · right | 18221 | X | X | regrasp | 408 | 0 (—) | 2 | 291.0 | 45 · 6 · 0 · 24 | 56 · 0 · 47 |
+| 15 | 1839 | orange · right | 18391 | O | O | ok | 245 | 0 (—) | 0 | 262.0 | 17 · 14 · 44 · 0 | 54 · 0 · 71 |
+
+![T53 rollouts table](figures/t53/t53-rollouts-table.png)
+
+*16 episode 의 결과 표.* [`t53-rollouts-table.json`](figures/t53/t53-rollouts-table.json)
+
+![T53 initial layout](figures/t53/t53-initial-layout.png)
+
+*실제 장면: layout slot 순서의 초기 배치 (`third_person_front.mp4` 첫 frame).* 제목의 S · CT 는 success · `success_ct`. 과일 4 종 · 양팔이 slot 에 하나씩 배치된다. [`t53-initial-layout.json`](figures/t53/t53-initial-layout.json)
+
+![T53 hold contacts](figures/t53/t53-hold-contacts.png)
+
+*episode 별 HOLD chunk (kind 별) 와 놓기 전 비허용 접촉 행.* [`t53-hold-contacts.json`](figures/t53/t53-hold-contacts.json)
+
+**측정된 사실.**
+
+- success 9 / 16 중 7 은 `success_ct` 도 만족한다. 만족하지 못한 두 run (ep1862 · ep1804) 은 놓기 전 `hand-fruit_other` 접촉이 11 · 5 행 있었다.
+- `no_grasp` 5 run (ep1840 · 1843 · 1848 · 1851 · 1853) 중 4 run 은 pre 가 75 frame 전부이고 ep1853 은 pre 74 · held 1 이다. 그중 ep1843 은 HOLD 가 15 chunk (kind 전부 `collision`) 이고, ep1848 · ep1853 은 HOLD 0 이다.
+- 놓기 전 접촉 4 run 중 2 run (ep1849 slip · ep1822 regrasp) 은 task 실패다.
+- 1840 · 1809 는 verifier 의 check script 경로 오류 (`RUN_D/ag3s/*.npz` 를 재귀 없이 셈) 로 같은 seed 로 한 번씩 더 돌았다. **두 번째가 기록이고 첫 번째는 `runs/C1a/R/failed/` 에 보존했다.** 수정한 script 로 재점검했고 완료 (step npz 75) 다. 시작 md5 파일의 `pipeline.py` 경로가 틀려 그 값은 `p/code_md5_t53.txt` 를 쓴다.
+- `replay_contacts` 의 server block 정렬은 best effort 라 위 두 failed run 의 chunk block 때문에 첫 server 의 run block index 가 어긋났을 수 있다. `analyze_cl` 은 server segment 를 action 일치로 짝짓기 때문에 영향이 없다.
+
+### 3. 추출과 parity
+
+| 단계 | 결과 |
+|---|---|
+| 규모 | 16 episode × 75 frame = **1200 frame**, episode 당 chunk 75 |
+| 오류 | 명사 추출 `noun_ok` 1200 / 1200, **오류 0** (`noun_errors` 0 · `feat_noun_errors` 0) |
+| **check** | `all_ok` true, **문제 0**, layout problems 0 |
+| 벽시계 (s) | attention parity 75.7 · attention 867.5 · noun parity 35.2 · noun 281.3 · feat parity 41.7 · feat 213.4 · gt 282.3 · grasp 20.2 · check 32.0 · layout 23.8 |
+| GPU | nvidia-smi 총 사용 peak 8802 – 8806 MiB, 각 단계 시작 전 compute process 0 |
+| 산출물 크기 | attention 1.7 G · noun 531 M · feat 47 M · gt 12 M |
+
+**parity (기존 추출과 같은 checkpoint · 형식인지, ep1807 4 frame).**
+
+| 추출 | 항목 | 값 |
+|---|---|---|
+| attention | argmax patch 일치 비율 | **0.9959** (denoise 0 만 0.9956) |
+| attention | 최대 절대 차 · 평균 절대 차 | 0.0039 · 8.5e-07 (bitwise 동일은 아님) |
+| attention | 서빙 cell (L8H2) Pearson r | 0.999998, format 문제 0 |
+| noun | target · basket · last_text 최대 절대 차 | **0.0 · 0.0 · 0.0**, argmax 일치 1.0, **bitwise 동일** |
+| feat | `kv_L4` 상대 L2 최대 | 2.2e-08 (최대 절대 5.96e-08) |
+| feat | 명사 V 대 sampler cache 최대 절대 차 | 0.0, 명사 token 결정적 |
+
+**GT · grasp 상태 (16 episode 합, 1200 frame).**
+
+| 항목 | frame |
+|---|---:|
+| `grasp_state` (qpos 기준과 동일) | pre 608 · held 113 · placed 401 · post 78 · held_other_hand 0 |
+| 물리 상태 (`phys_state`) | on_table 629 · held 113 · grasping 31 · in_crate 401 · other 26 |
+| target ≥ 200 px 가 보이는 frame | cam_high 735 · cam_left_wrist 483 · cam_right_wrist 835 |
+| 최대 관통 | 0.00011 – 0.0014 m (episode 별 최대) |
+| render 대 qpos 불일치 | 0 |
+
+(`pre` 는 first held 이전, `placed` 는 crate 안 안정 이후. 정의는 `gt/<key>.grasp.npz` 의 `grasp_state` 이고 T54 가 phase 분해에 같은 값을 쓴다.)
+
+### 4. 한계 · 측정하지 않은 것 · 되돌아올 지점
+
+- **표본.** 16 episode, policy seed 1 개 / episode. success 9 / 16 의 분산은 측정하지 않았다 (한 run 의 seed 를 바꿔 재측정하지 않음).
+- **구조적 한계 (T54 구현에서 확인).** server 의 `exec_feedback` · latch 기록은 서빙 L8H2 궤적의 것이다. 다른 arm 을 재생해도 궤적은 L8H2 서빙 것이다.
+- **T46e 와의 순서.** rollout 은 T46e 가 메인 tree 에 적용되기 전에 끝냈다 (snapshot HEAD `4a540f1a`, 시작 · 끝 md5 일치).
+- **head 0 점검.** 이 16 episode 의 `head_1` 은 0.7001 이다 (lead 의 확인, [`handoff/T52-T57.plan.task.md`](handoff/T52-T57.plan.task.md), `verify.json numbers` 에는 없음). `verify.json` 이 독립으로 보이는 것: 16 episode 모두에서 cam_high 가 target 을 ≥ 200 px 로 보는 frame 이 있다 (episode 별 9 – 75 frame, 합 735). head 0 기록 (`ep1800`) 은 cam_high 가 15 frame 모두 0 px 였다 (T52 §7).
+- **되돌아올 지점.** 이 data 로 정한 N · B 후속 후보가 새 episode 의 T54c 에서 지지되지 않으면 T53 의 해석을 다시 연다.
+
+### 5. 산출물
+
+- **측정**: [`handoff/T53.verify.json`](handoff/T53.verify.json) (rollout `numbers` · 추출 `extraction`), [`handoff/T53.impl.md`](handoff/T53.impl.md). 원자료 `/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/` (`attention/` · `noun/orig/` · `feat/` · `gt/` · `check.json` · `layout.json`).
+- **figure** (각각 `.json` sidecar): [`t53-rollouts-table`](figures/t53/t53-rollouts-table.png) · [`t53-initial-layout`](figures/t53/t53-initial-layout.png) · [`t53-hold-contacts`](figures/t53/t53-hold-contacts.png)
+- **코드 (새 파일)**: `AG3S/ag3s/experiments/studies/t53_records.py` · `t53_extract.py` (test 53, 전체 1437 통과, `T53.impl.md`).
+
+### 6. 사용자 판정 (2026-10-13, T54 결과 후) — T53 은 이제 N · B 의 dev 다
+
+T54 (아래) 결과를 본 사용자가 N · B 를 후속 후보로 하고 **새 16 episode 에서 확인하라** 고 판정했다 (T54c). 따라서 **이 16 episode 는 N · B 에 대해서는 dev 로 취급한다** (T54 사전 고정 5 의 규칙: 결과를 보고 정의를 바꾸면 그 수정안에 대해서는 T53 을 개발 data 로 취급한다). 이 절의 success · 접촉 기준선 (현재 서빙) 은 그대로다.
+
+## T54 — grounding 비교: action 단독 (L8H2) · 명사 단독 · 명사 선택 + L8H2 seed 조합, 수정에 쓰지 않은 16 episode (offline, CPU, 2026-10-13 KST)
+
+> 측정 run `20261013T135232+0900_cf38c9dbca7b_611265305126` (2026-10-13 13:52 KST 시작, HEAD `cf38c9db` = T46e 가 메인 tree 에 적용된 뒤, 기본 off · bit-identical), 기록 2026-10-14 KST. 수치는 모두 [`T54.verify.json`](handoff/T54.verify.json) 의 `numbers` · `budget` 에서 왔다. 요청 문서: [`handoff/T54.task.md`](handoff/T54.task.md), 구현: [`handoff/T54.impl.md`](handoff/T54.impl.md) (새 파일 `t54_arms.py` · `t54_replay.py` · `t54_stats.py` · `t54_study.py`, test 31 · 전체 `tests/ag3s` 1468 통과). 입력 data = T53 16 episode ([T53 절](#t53--한-번도-쓰지-않은-16-episode-의-rollout-기록과-attention--noun--feature--gt-추출-2026-10-13-kst)).
+> **서빙 코드는 한 줄도 바꾸지 않았다.** arm 은 서빙 `AG3S.process_multi_debug` 를 study 쪽 hook 으로 감싸 재생한 것이다. 처음부터 끝까지 offline 재생이라 **closed-loop 효과는 측정하지 않았다.**
+
+**이 절이 답하는 물음 (목적).** T52 에서 명사 query 는 2D identity 실패가 0 이지만 병합 cluster 가 남았고, 병합이 남는 이유는 attention split 비율 (≥ 2) 조건이었다. 가설은 "L8H2 가 만든 후보 중에서 target 을 고르는 일만 명사 정보로 바꾸면 identity 는 나아지고 purity 는 지킬 수 있다" 이고, 이 가설을 수정에 쓰지 않은 T53 16 episode 에서 검증한다 (사용자 판정 3 · 6 · 7). 통과한 후보만 closed-loop (T57) 로 보낸다.
+
+**한 줄 결과 (before → after).**
+
+- **before:** 명사로 identity 를 판정하고 L8H2 로 seed 를 얻는 조합 (제안, 미측정 해석) 이 실제로 3D 를 개선하는지 돌려 본 적이 없었다.
+- **after (현재 frame, 16 episode · 1178 target frame, episode 평균):** identity 는 **L8H2 70.93 %, N (명사 단독) 78.08 % (+7.15 %p, CI [+3.65, +11.11]), B 78.00 % (+7.07 %p), A (조합 주 실험) 67.85 % (−3.08 %p, CI [−8.00, +0.85])** 이다. **A 는 사전 고정한 T57 진입 기준 (identity ≥ −3 %p) 을 미충족** (−3.08 %p), 개선 근거 (identity · purity 증가, 이웃 혼입 감소) 도 없다 → **A 는 T57 로 보내지 않고 기각한다.** N · B 는 현재 frame 에서 identity · coverage · 이웃 혼입에서 개선이 관측됐다. **N 과 B 는 identity 차이가 0.07 %p 로 사실상 같다.** 사용자 판정: N · B 를 후속 후보로 하고 새 16 episode 에서 확인한다 (T54c).
+- **한계:** 시간 유지 포함 재생 (`hold`) 은 attach / detach 를 재현하지 않아 post · placed phase 의 identity 가 모든 arm 에서 0 이고 N · B 가 L8H2 와 정확히 같다. 이 조건의 신뢰도는 낮고 T54b 가 다시 잰다.
+
+**이 절이 주장하지 않는 것.**
+
+- N · B 가 L8H2 보다 낫다는 **입증.** 진입 기준 −3 %p · −5 %p 는 실무 허용폭으로 채택한 값이고 통계로 도출한 값이 아니다. 통과 문구도 "offline 개선이 관측돼 closed-loop 확인 대상으로 선정" 까지다 (`T54.task.md` 사전 고정 5).
+- 명사 head L10H7 이 label-free 로 골라졌다는 주장 (GT 를 써서 개발 data 로 고른 고정 head 다. 추론 때 GT 를 쓰는 oracle 은 아니다).
+- closed-loop 에서의 작업 성공 · 비허용 접촉 · HOLD (T57 · T54c 대상).
+
+### 1. 사전 고정과 사용자 판정, 타임라인
+
+**사용자 판정 (2026-10-13).**
+
+| # | 판정 | 출처 |
+|---|---|---|
+| 1 | grounding 비교는 action 단독 (L8H2) / 명사 단독 / **명사로 identity 판정 + L8H2 로 3D seed**. L12H4 결합은 추가 ablation 으로만 한다. 지표는 identity · purity · coverage · 이웃 혼입 · 전체 처리 시간이고 **중심 거리만으로 성공을 판정하지 않는다** | 계획서 판정 3 |
+| 2 | 수정에 쓰지 않은 episode 에서 검증하고 연속 frame 상관을 반영한 불확실성 (episode block bootstrap) 을 보고한다 | 계획서 판정 6 |
+| 3 | A 가 주 실험, B 는 원인 확인용 (채택 근거 아님). 현재 frame 이 주 조건, 시간 유지 포함은 보조. T57 진입 기준 identity ≥ −3 %p · coverage ≥ −5 %p. 명사 head = `noun_target:L10H7` | `T54.task.md` 작성 시 사용자 판정 (계획서 갱신 1) |
+
+**사전 고정 (결과를 열기 전, `T54.task.md`).**
+
+| arm | 역할 | lifting · seed · cluster | split 비율이 읽는 map | target 선택 점수 |
+|---|---|---|---|---|
+| L8H2 | 기준 (서빙) | L8H2 | L8H2 | L8H2 |
+| N | 명사 단독 | 명사 | 명사 | 명사 |
+| **A** | 조합, 주 실험 | **L8H2** | **L8H2** | **명사 map 질량** (후보 cluster 점에 lift 된 명사 attention 합) |
+| B | 조합, 원인 확인용 | 명사 (seed) | **L8H2** | 명사 |
+| L12H4 · A-L12H4 | ablation | L12H4 / L12H4 | L12H4 | L12H4 / 명사 |
+| N-k3 · A-k3 | 보조 (기존 방식 연결) | — / L8H2 | — / L8H2 | 명사 = T49 primary (`L8H6` · `L5H4` · `L4H2`, k3 σ1) |
+
+- 지표 (GT = T53 GT cache, 대상 = target 이 3 camera 중 1 대 이상에서 ≥ 200 px 로 보이는 frame): `identity_correct` (**출력 없음 = 거짓**) · `no_target` 비율 · purity (출력 frame 만, `no_target` 과 함께) · coverage (출력 없음 = 0) · 이웃 혼입 (chosen cluster 안 GT `other_object` 점) · `target_candidate_present` · 처리 시간. 중심 거리 `on_target` 은 참고.
+- 집계: episode 평균 (16 episode 동일 가중) · arm − L8H2 의 episode 별 paired 차이 · episode block bootstrap (B 10000, seed 5407, percentile 95 %) · 민감도로 episode 안 moving block (5 frame). frame 단위 McNemar 는 참고.
+- 재생 조건: **현재 frame (주)** = frame 마다 `AG3S.reset()` (history 없음), **시간 유지 포함 (`hold`, 보조)** = 시간 순서 + `TargetConfirm`, arm 마다 자기 예측으로 자기 history. latch (freeze) 입력은 기록된 서빙 chunk 값을 모든 arm 에 같게.
+- **T57 진입 기준 (A, 현재 frame, T53 16 episode, A − L8H2):** identity ≥ −3 %p · coverage ≥ −5 %p · 개선 하나 이상 (identity 증가 · purity 증가 · 이웃 혼입 감소) · `hold` 에서 같은 허용 하락 · 처리 시간을 보고 (기존 실행 예산을 넘으면 바로 본 실험으로 확대하지 않음).
+- 처리 시간 예산 (**결과 전 2026-10-13 13:57:11 KST 에 `budget` 에 기록**): T53 서빙 기록의 L8H2 chunk 당 AG3S 처리 시간 (`profile_ms` 합) 중앙값 402.64 ms · p95 825.95 ms, attention lifting + target grounding 만은 92.72 ms · 194.77 ms, nominal chunk 간격 533.33 ms. 비교 C1 = A 의 replay e2e ≤ 533.33 ms, C2 = 서빙 AG3S + A 추가 e2e ≤ 533.33 ms, C3 = A 의 추가 lift · ground 시간 (숫자만).
+- **장면 1800 은 T52 진단에 쓰였으므로 test 에 넣지 않는다.** dev (구현 점검 전용) = T47 record (`long` · `t2` · `headfix` · `ep1800` · `ep1807` · `ep1850` · `ep1900`) · T51 calibration. **dev parity 는 코드 재현 점검이라 head 0 기록 (`ep1800` · `long`, T52 §7) 이 들어가도 그대로 둔다.**
+
+**타임라인 (KST).**
+
+| 시각 | 일 |
+|---|---|
+| 2026-10-13 13:52 | run 시작 (HEAD `cf38c9db`). 회귀 기준선 일치: legacy 14 / 15 · 15 / 15 · −29.031048280806342 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877401271193 mm |
+| 13:57:11 | `budget` 기록 (T53 서빙 기록에서, 결과 전) |
+| 이어서 | dev parity: held-out 4 record 의 L8H2 · N 재생 대 T51 · T51b · T52 row, **mismatch 0** (16 쌍 × 210 field). 조건은 `hold` (아래 §7 deviation) |
+| ≈ 14:43 | **네트워크 중단으로 test 재생 중단.** 32 job (16 episode × 2 조건) 중 4 job (ep1809 · ep1840 의 current · hold) 완료 |
+| 14:54 | **같은 run dir 에서 같은 명령으로 재개** (28 job). 완료된 4 job 은 건너뜀, 중간 job 의 log 2 개는 `t54_study` 가 지우고 사본은 `logs/interrupted_run1/`. `--force` 미사용 |
+| 재생 후 | test replay 32 / 32 job (각 600 행) 완료. 독립 재계산 (crosscheck) 이 `t54_stats` 와 ≤ 2.2e-16 안에서 일치. A 대 L8H2 `current` 의 후보 cluster 목록 불일치 **0 / 1200 frame** (A 는 선택 점수만 L8H2 와 다르다는 bit-identity). 코드 md5 시작 = 끝 |
+
+### 2. 결과 — 현재 frame 조건 (주)
+
+대상 1178 target frame, episode 16 개. identity · coverage · purity 의 `−` 차이는 arm − L8H2 (%p), CI 는 episode block bootstrap 95 %.
+
+| arm | identity (%) | identity − L8H2 (%p) · episode CI | moving-block CI | episode up / down | coverage − L8H2 (%p) · CI | purity − L8H2 (%p) · CI | no_target (%) | 이웃 점 (평균, 점) |
+|---|---:|---|---|---|---|---|---:|---:|
+| L8H2 | 70.93 | — | — | — | (coverage 75.98) | (purity 80.64) | 10.38 | 15.76 |
+| N | 78.08 | +7.15 · [+3.65, +11.11] | [+5.11, +9.69] | 12 / 1 | +6.82 · [+3.44, +11.00] | +4.03 · [-3.90, +9.70] | 6.45 | 11.08 |
+| A | 67.85 | -3.08 · [-8.00, +0.85] | [-4.47, -0.98] | 4 / 6 | -3.16 · [-7.99, +0.72] | -3.13 · [-8.05, +0.82] | 10.38 | 15.88 |
+| B | 78.00 | +7.07 · [+3.70, +11.25] | [+5.11, +9.60] | 13 / 0 | +6.95 · [+3.61, +11.11] | +4.07 · [-3.88, +9.73] | 6.45 | 11.35 |
+| L12H4 | 65.14 | -5.79 · [-11.18, -0.90] | [-8.94, -2.80] | 4 / 11 | -7.15 · [-11.85, -3.20] | -2.51 · [-7.01, +1.98] | 15.76 | 14.74 |
+| A-L12H4 | 62.38 | -8.55 · [-14.42, -2.99] | [-11.52, -5.25] | 1 / 11 | -9.11 · [-14.56, -4.15] | -5.09 · [-10.67, +0.25] | 15.76 | 15.37 |
+| N-k3 | 76.40 | +5.47 · [+1.47, +9.44] | [+2.65, +8.46] | 11 / 2 | +8.22 · [+4.69, +12.47] | +4.87 · [+1.61, +8.20] | 8.86 | 13.52 |
+| A-k3 | 60.49 | -10.44 · [-17.87, -4.20] | [-12.90, -7.28] | 1 / 9 | -10.41 · [-17.79, -4.22] | -10.89 · [-18.29, -4.63] | 10.38 | 22.34 |
+
+![T54 arm metric table](figures/t54/t54-arm-metric-table.png)
+
+*arm × 지표 표 (현재 frame · hold).* [`t54-arm-metric-table.json`](figures/t54/t54-arm-metric-table.json)
+
+![T54 paired diff](figures/t54/t54-paired-diff.png)
+
+*arm − L8H2 의 episode 별 paired 차이 (점 = episode, 검은 사각형 = 평균, 막대 = episode bootstrap 95 % CI, 점선 = T57 진입 허용폭). 위 줄 = 현재 frame, 아래 줄 = hold.* [`t54-paired-diff.json`](figures/t54/t54-paired-diff.json)
+
+**측정된 사실.**
+
+- **N · B 는 identity · coverage 가 오르고 이웃 혼입이 준다.** identity 의 episode 별 방향은 N 12 개 상승 · 1 개 하락, B 13 · 0 이다. moving-block CI 는 N [+5.11, +9.69], B [+5.11, +9.60] %p 로 0 을 배제한다. coverage +6.82 · +6.95 %p, 이웃 점 평균 15.76 → 11.08 · 11.35 (episode CI 상한이 0.5 – 0.9 로 0 을 넘는다). `no_target` 비율은 10.38 → 6.45 %.
+- **purity 는 episode CI 가 0 을 포함한다** (N +4.03, B +4.07 %p, CI 하한 −3.9). moving-block CI 는 [+1.5, +7.1] 로 0 을 배제한다. 두 CI 가 갈린다.
+- **N 과 B 는 사실상 같다** (identity 78.08 대 78.00). B 는 split 비율을 L8H2 map 으로 읽는데 지표가 거의 바뀌지 않았다. T52 의 병합 기전 (split 비율 조건) 이 test 의 purity 에서 N 과 B 를 갈랐는지는 **이 data 로 가르지 못했다** (merged frame 수는 이 STEP 에서 세지 않았다).
+- **A 는 identity · coverage · purity 가 모두 L8H2 아래다** (−3.08 · −3.16 · −3.13 %p, episode 상승 4 · 하락 6). moving-block CI 는 identity [−4.47, −0.98] 로 0 을 배제한다. 이웃 혼입은 +0.13 점으로 변화가 없다.
+- **A 의 실패는 후보 생성이 아니라 선택에서 늘었다** (아래 분해). A 와 L8H2 의 선택 (chosen rank) 이 갈린 frame 은 614 / 1200 (target frame 중 601 / 1178).
+- ablation: **L12H4 는 현재 frame 에서 L8H2 보다 낮다** (identity −5.79 %p, CI [−11.18, −0.90], episode 상승 4 · 하락 11 · `no_target` +5.38 %p). A-L12H4 −8.55, N-k3 +5.47, A-k3 −10.44 %p. **L12H4 가 우월하다는 근거는 없다** (사용자 판정 1 과 일치).
+
+**A 의 실패 분해 (현재 frame, frame 비율).** `identity` + 후보 생성 실패 (선택 직전 후보 cluster 중 엄격한 다수 class 가 target 인 것이 없음) + 명사 선택 실패 (후보에 target 이 있는데 고르지 못함) = 1.
+
+| arm | identity | 후보 생성 실패 (`¬present`) | 선택 실패 (`present ∧ ¬identity`) |
+|---|---:|---:|---:|
+| L8H2 | 0.7093 | 0.2475 | 0.0433 |
+| N | 0.7808 | 0.2151 | 0.0042 |
+| **A** | 0.6785 | **0.2475** | **0.0740** |
+| B | 0.7800 | 0.2158 | 0.0042 |
+
+- A 의 후보 생성 실패는 L8H2 와 같다 (후보 목록이 bit 단위로 같다). **선택 실패가 4.33 % → 7.40 % 로 늘었다.** 즉 L8H2 가 만든 후보 안에서 명사 질량으로 고르면 오히려 더 틀렸다. N · B 의 후보 생성 실패는 L8H2 보다 3.2 %p 적고 (0.2475 → 0.2151 · 0.2158), 선택 실패가 거의 없다 (0.0042).
+- **(미측정 해석)** 후보 cluster 의 "명사 질량 합" 은 점이 많은 cluster (destination · support 등 큰 cluster) 에 유리할 수 있다. 지지하는 측정: A 에서 chosen cluster 안 destination 점이 +2.13 점, support 점이 +10.21 점 늘었다 (L8H2 0.35 → 2.48, 23.65 → 33.86). 질량 합 대신 평균 attention 으로 고르는 변형은 시험하지 않았다.
+
+**phase 별 identity (현재 frame, 평균 %, 괄호 = L8H2 와의 차이 %p · episode CI, episode 수가 작은 phase 는 CI 가 넓다).**
+
+| phase | frame / episode | L8H2 | N | A | B | `no_target` (L8H2 / N / A / B, %) |
+|---|---|---:|---|---|---|---|
+| pre | 594 / 16 | 84.7 | 89.8 (+5.1, [+1.7, +9.3]) | 81.4 (−3.3, [−8.4, +1.0]) | 88.6 (+3.9, [+1.6, +6.5]) | 1.4 / 1.4 / 1.4 / 1.4 |
+| held | 113 / 12 | 53.4 | 83.8 (+30.4, [+15.5, +48.3]) | 57.7 (+4.3, [+0.7, +9.3]) | 85.0 (+31.6, [+16.2, +49.3]) | 8.7 / 4.2 / 8.7 / 4.2 |
+| placed | 401 / 9 | 59.7 | 66.7 (+7.0, [+1.6, +15.1]) | 56.9 (−2.8, [−11.9, +2.5]) | 66.7 (+7.0, [+1.6, +15.1]) | 23.6 / 9.7 / 23.6 / 9.7 |
+| post | 70 / 3 | 42.5 | 41.8 (−0.7, [−2.0, 0.0]) | 41.8 (−0.7, [−2.0, 0.0]) | 42.5 (0.0, [0.0, 0.0]) | 16.7 / 33.7 / 16.7 / 33.7 |
+
+- phase 는 T53 의 물리 grasp 상태 (`grasp_state`: pre · held · placed · post) 다. 잡은 뒤에도 target 을 찾는 것은 grounding 성능이지 단계 전환의 증거가 아니다 (사용자 판정 4).
+- **N · B 의 개선은 held (쥔 뒤 · 들고 가는 중) 에서 가장 크다** (+30.4 · +31.6 %p, 12 episode · 113 frame). 이 phase 에서 L8H2 의 identity 는 53.4 % 다.
+- post 는 episode 3 개 · 70 frame 이라 해석하지 않는다.
+
+![T54 scene choice diff](figures/t54/t54-scene-choice-diff.png)
+
+*실제 장면: A (명사 질량 선택) 와 L8H2 의 선택이 갈린 frame (현재 frame).* 행마다 L8H2 map · 명사 map 의 3 camera, 오른쪽 열 = base frame 위의 후보 cluster (파랑 = L8H2 선택, 빨강 = A 선택) 와 후보 목록 (L8H2 rank · plurality · n · admissible · L8H2 score · A rank · 명사 질량). 위 두 장면 (ep1853 f20 pre · ep1860 f20 held) 은 A 가 target 을 고르고 L8H2 가 이웃 과일을 고른 경우, 아래 두 장면 (ep1851 f13 pre · ep1866 f60 placed) 은 반대로 L8H2 가 맞고 A 가 이웃 · 다른 cluster 를 고른 경우다. [`t54-scene-choice-diff.json`](figures/t54/t54-scene-choice-diff.json)
+
+### 3. T57 진입 표 (A, 기계적 비교) → A 기각
+
+| 항목 | 값 | 기준 | 충족 |
+|---|---|---|---|
+| identity (A − L8H2, 현재 frame) | −3.08 %p, CI [−8.00, +0.85] | ≥ −3 %p | **미충족** |
+| coverage | −3.16 %p, CI [−7.99, +0.72] | ≥ −5 %p | 충족 |
+| 개선 근거 | identity −3.08 · purity −3.13 %p · 이웃 점 +0.13 (`no_target` 차이 0) | 하나 이상 개선 | **미충족** (identity ↑ 아님 · purity ↑ 아님 · 이웃 ↓ 아님) |
+| 시간 유지 (`hold`) | identity −1.42 %p, coverage −1.40 %p | −3 %p · −5 %p | 충족 (단 attach 미재현, §5) |
+| 처리 시간 C1 (A 의 replay e2e 중앙값 · p95) | 80.34 · 117.83 ms | ≤ 533.33 ms | 충족 · 충족 |
+| 처리 시간 C2 (서빙 AG3S + A 추가 e2e, 중앙값 · p95) | 445.32 ms · **875.40 ms** | ≤ 533.33 ms | 충족 · **미충족** |
+| C3 (A 의 추가 lift · ground 시간, 중앙값 · p95) | 18.32 ms · 25.10 ms | 숫자만 | — |
+
+- **`all_numeric_rows_pass` = false → A 는 T57 에 진입하지 않는다.** 판정 문구는 사전 고정 규칙의 출력이다.
+- C2 의 p95 미충족은 A 의 추가 비용 때문이 아니라 **L8H2 서빙 자체의 AG3S p95 가 825.95 ms 로 nominal chunk 간격 533.33 ms 를 넘기 때문**이다 (A 의 추가분은 49.45 ms). C1 은 replay 의 lift + ground 만 본 값이다.
+- 처리 시간은 **같은 장치에서 재지 못했다.** e2e = CPU replay (OMP 1 thread) 의 lift + ground + 명사 추출 median 24.35 ms (T53 의 GPU H200 에서 잰 prefix_ms 중앙값, 서빙에서 명사 행만 더 읽을 때의 상한). 두 부분의 장치가 다르다 (§7).
+
+| arm | lift + ground (중앙값 · p95, ms) | e2e = + 명사 추출 (중앙값 · p95, ms) | L8H2 대비 추가 e2e (중앙값 · p95) |
+|---|---|---|---|
+| L8H2 | 36.9 · 66.2 | 36.9 · 66.2 | — |
+| N | 39.5 · 55.3 | 63.8 · 79.7 | 24.78 · 36.45 |
+| A | 56.0 · 93.5 | 80.3 · 117.8 | 42.68 · 49.45 |
+| B | 58.2 · 77.0 | 82.6 · 101.4 | 43.27 · 58.10 |
+
+### 4. 사용자 판정 (T54 결과 후, 2026-10-13)
+
+| # | 판정 |
+|---|---|
+| 1 | **A 는 T57 진입 기준을 못 넘었다 → 기각.** (진입 기준 미충족은 규칙의 출력, 기각이라는 정리는 lead · 사용자 판정 후의 정리) |
+| 2 | **N · B 를 후속 후보로 하고 새 16 episode 에서 확인한다 (T54c).** T53 16 episode 는 이제 N · B 에 대해 dev 다 (T53 절 §6). |
+| 3 | **유지 포함 재생에 기록된 latch · attach 를 넣어 다시 돌린다** (→ T54b). 현재 frame 의 결과는 바뀌지 않는다. |
+| 4 | **(2026-10-14) P · H 창 (T60 의 종료 구간 술어) 은 T54c · T55 · T56 의 보조 분석으로 쓴다.** T54 의 P · H 재집계 수치는 아래 T60 절에 있다 |
+
+- 후속 후보의 이름은 사용자 판정이다. **"N 이 최종 채택된다" 는 뜻이 아니다.** T54c 의 사전 고정 기준 (후보 · 기준을 새 data 를 열기 전에 고정, 둘 다 통과하면 N) 에서 정한다 (`handoff/T54c.task.md`, 이 로그에는 아직 기록하지 않았다).
+
+### 5. 시간 유지 포함 (`hold`) 조건 — 신뢰도 낮음, T54b 로 보정
+
+| arm | identity (%) | identity − L8H2 (%p) · episode CI | coverage (%) | 이웃 점 |
+|---|---:|---|---:|---:|
+| L8H2 | 43.67 | — | 32.96 | 11.16 |
+| N | 43.67 | +0.00 · [+0.00, +0.00] | 32.95 | 11.16 |
+| A | 42.26 | −1.42 · [−4.25, +0.00] | 31.56 | 16.52 |
+| B | 43.67 | +0.00 · [+0.00, +0.00] | 32.96 | 11.16 |
+| L12H4 | 48.84 | +5.17 · [+0.00, +15.50] | 33.05 | 7.76 |
+
+- **현재 frame 의 N · B 개선 (+7.1 %p) 이 `hold` 에서는 0 이다.** N · B 가 L8H2 와 episode 별 identity · purity · `no_target` 이 정확히 같다.
+- **모든 arm 이 placed · post phase 에서 identity 가 0.0 이다** (placed 401 frame 의 `no_target` 91.5 %, post 70 frame 의 25.0 %). `hold` 에서 `no_target` 은 L8H2 32.17 %.
+- 이 재생은 attach / detach 를 재현하지 않았다 (impl 한계: 서빙은 쥔 과일을 self-filter 로 지우는데 `hold` 는 그 과일이 cloud 에 남는다. T53 은 16 episode 중 13 개에 attach 가 1 회씩 있었다). **그래서 이 조건은 "실제 사용 조건에서 개선이 사라지는가" 의 답으로 읽지 않는다.** 이 점을 다시 재는 것이 T54b 다.
+- 서빙 decision mode (16 episode · 1200 frame, L8H2 `hold`): keep 506 · subtask_gated 289 · occluded 224 · no_admissible 98 · hold 65 · first 17 · switch 1. N 은 subtask_gated 334 · no_admissible 53.
+
+### 6. 해석 (측정 범위 안과 밖)
+
+- **측정:** 현재 frame 에서 seed 를 명사로 바꾼 arm (N · B) 이 identity · coverage · 이웃 혼입에서 앞서고, 선택만 명사 질량으로 바꾼 arm (A) 은 뒤진다. B ≈ N.
+- **(미측정 해석)** 개선의 원인은 seed (후보 생성) 를 명사로 바꾼 데 있고 split 비율의 map 은 test 지표를 거의 바꾸지 않는다. 지지: N 과 B 가 identity 78.08 · 78.00 %, A 의 후보 생성 실패가 L8H2 와 같음 (0.2475). 반대 가능성: B 의 split map 변경이 효과를 내는 frame (병합 frame) 이 test 에서 적어 가려졌을 수 있다. merged frame 은 세지 않았다.
+- **(미측정 해석)** held phase 에서 개선이 큰 것은 L8H2 의 action attention 이 쥔 뒤에 target 을 못 가리키는 대신 명사 query 가 가리키기 때문일 수 있다. 원인은 분리하지 않았다. 현재 frame 에서만 확인된 이 개선이 시간 유지 (`TargetConfirm`) 가 있는 조건에서도 남는지는 T54b · T54c 가 가른다 (T52 §6 에서 L8H2 가 맞은 frame 의 13 / 14 가 시간 유지 덕이었다).
+
+### 7. deviation · 한계 · 측정하지 않은 것 · 되돌아올 지점
+
+**deviation (verifier 가 기록한 것).**
+
+1. **네트워크 중단 후 재개.** 첫 실행은 4 / 32 job 에서 끊겼고, 같은 run dir · 같은 명령으로 28 job 을 재개했다 (§1). 첫 실행 job 은 ≈ 1230 s, 재개 job 은 321 – 390 s (같은 코드, md5 동일; 첫 실행 때 pod working set 이 79 GiB 까지 올랐다). `numbers` 의 시간은 두 구간이 섞인 값이다. OOM kill 은 시작 전 · 후 39 로 늘지 않았다 (재개 때 working set 최대 40 GiB).
+2. **dev parity 를 `hold` 조건으로 확인했다 (lead 판단).** task 는 "현재 frame 재생이 T51b · T52 행과 같아야 한다" 고 적었으나 그 row 는 연속 재생 + `TargetConfirm` 으로 만든 것이라 현재 frame 재생과 같을 수 없다. 현재 frame 대 T52 의 차이는 정보로만 기록했다 (L8H2 `headfix` 6 frame · 16 field, `ep1800` 7 frame · 27 field, `ep1850` 7 frame · 28 field, `ep1900` 10 frame · 33 field 가 다르고 그중 identity 가 다른 frame 은 L8H2 에서 `ep1800` 2 · `ep1850` 2 · `ep1900` 1, `headfix` 0). test 지표에는 영향이 없다.
+3. **`hold` 는 attach / detach 를 재생하지 않았다** (§5, T54b 가 보정).
+4. **e2e 시간은 두 장치의 합성이다.** CPU replay 의 lift + ground 와 GPU 의 명사 prefix_ms 중앙값 (action = 0 으로 둠).
+5. scene figure 의 배치 (크기 · margin · 후보 목록 표기) 만 고쳤고 측정은 바뀌지 않았다.
+
+**한계.**
+
+- **표본.** 16 episode · 1178 target frame. episode 단위 평균이고 phase 별 episode 수는 post 3 · placed 9 · held 12 로 작다.
+- **offline 재생이라 closed-loop 이 아니다.** 재생 궤적은 모든 arm 에서 L8H2 서빙 궤적이다. 기록 재생은 closed-loop 효과의 증명이 아니다.
+- **명사 head 는 GT 를 써서 개발 data 로 고른 고정 head 다** (label-free 선택이 아니다).
+- **장면 1800 · head 0 기록은 test 에 없다.** dev parity 에만 들어갔다.
+
+**측정하지 않은 것** (`T54.verify.json not_measured`): closed-loop 효과 (T57), CPU replay 장치에서의 attention 추출 시간 (GPU prefix_ms 사용), 서빙 정책 호출과 명사 추출이 공유되는 경우의 실제 추가 비용 (상한만).
+
+**되돌아올 지점.** T54c (새 16 episode) 에서 N · B 의 identity 개선이 사라지면 이 data 에서 본 개선은 T53 의 특성이었던 것이다. A 를 다시 여는 신호: 질량 합 대신 평균 attention 같은 변형이 사전 고정 기준을 통과하는 경우 (이 STEP 에서는 시험하지 않았고, 시험하면 T53 은 그 변형에 대해 dev 다).
+
+### 8. 산출물
+
+- **측정**: [`handoff/T54.verify.json`](handoff/T54.verify.json) (원자료 `/mnt/dev/AG3S_VLA-storage/results/development/20261013T135232+0900_cf38c9dbca7b_611265305126/verify/T54/`: `test/analysis/t54_summary.json` · `test/rows/*.jsonl` · `dev/` · `logs/`), [`handoff/T54.impl.md`](handoff/T54.impl.md).
+- **figure** (각각 `.json` sidecar): [`t54-arm-metric-table`](figures/t54/t54-arm-metric-table.png) · [`t54-paired-diff`](figures/t54/t54-paired-diff.png) · [`t54-scene-choice-diff`](figures/t54/t54-scene-choice-diff.png)
+- **코드 (새 파일)**: `AG3S/ag3s/experiments/studies/t54_arms.py` · `t54_replay.py` · `t54_stats.py` · `t54_study.py`, `tests/ag3s/test_t54_arms.py` · `test_t54_replay.py` · `test_t54_stats.py` (31). commit 은 하지 않았다.
+
+## T54b — T54 시간 유지 재생의 수정: 기록된 latch · attach / detach 를 모든 arm 에 똑같이 넣는다 (offline, CPU, 2026-10-13 ~ 14 KST)
+
+> 측정 run `20261013T225350+0900_cf38c9dbca7b_f739ac556e8a` (2026-10-13 22:53 KST 시작, 재생은 2026-10-14 01:17 KST 시작), HEAD `cf38c9db`. 기록 2026-10-14 KST. 수치는 모두 [`T54b.verify.json`](handoff/T54b.verify.json) 의 `numbers` 에서 왔다. 요청 문서: [`handoff/T54b.task.md`](handoff/T54b.task.md), 구현: [`handoff/T54b.impl.md`](handoff/T54b.impl.md) (새 파일 `t54b_hold.py`, test 13, T54 · T54b · T54c test 66 · 전체 `tests/ag3s` 1637 통과).
+> T54 의 현재 frame (주) 결과는 이 STEP 에서 다시 재지 않았고 **바뀌지 않았다** (T54 의 `current` · `hold` summary 를 이 run 의 analyze 가 재현: 최대 차이 0.0).
+
+**이 절이 답하는 물음 (목적).** T54 의 시간 유지 포함 재생 (`hold`) 은 attach / detach 를 재현하지 않아 (1) 모든 arm 이 post · placed phase 에서 identity 가 0.0 이고 (2) N · B 가 모든 episode 에서 L8H2 와 정확히 같았다. 그래서 "실제 사용 조건에서 개선이 사라지거나 역전되는가" 를 확인하지 못했다 (사용자 판정, 2026-10-13: "기록된 latch · attach 를 넣어 다시"). 이 확인은 T54c (N · B 후속 확인) 에도 필요하다.
+
+**한 줄 결과 (before → after).**
+
+- **before (T54 `hold`):** attach 없음 → L8H2 identity 43.67 %, 쥔 과일이 cloud 에 남아 서빙과 다른 조건.
+- **after (`hold_attach`, 기록된 latch · attach · detach · freeze 를 모든 arm 에 같은 순서로):** **L8H2 arm 의 재생이 서빙 기록과 일치한다 (fidelity: has_target 1.0, identity 0.999 (1200 frame 중 1 frame 불일치), chosen · manipulated 같은 물체 1.0, attached 1.0, frozen 1.0).** L8H2 identity 는 42.31 %. **N · B 는 `hold_attach` 에서도 L8H2 와 identity · purity 가 같다 (차이 0, 16 episode 중 15 개에서 모든 frame 의 identity · purity · `no_target` 이 같다).** **post · placed phase 의 identity 는 attach 를 넣어도 모든 arm 에서 0.0 이다 — 서빙과 같은 동작을 재생하는 L8H2 arm 도 0 이므로 재생 결함이 아니다.** A 의 진입 표 `hold` 행은 여전히 충족 (identity −1.42 %p · coverage −1.72 %p) 이고 A 의 판정 (진입 실패) 은 바뀌지 않는다.
+
+**이 절이 주장하지 않는 것.**
+
+- N · B 가 시간 유지가 있는 실제 조건에서 개선을 잃는다는 결론. `hold_attach` 는 모든 arm 이 L8H2 서빙 궤적 위에서 자기 history 를 쌓는 offline 재생이고, N · B 가 L8H2 와 같아지는 원인은 분리하지 않았다.
+- 서빙 latch 상태 기계의 재현 (아래 알려진 격차). L8H2 외 arm 의 서빙 일치도.
+- closed-loop 효과.
+
+### 1. 조건의 정의와 타임라인
+
+`hold_attach` = episode 를 시간 순서로 돌고 `TargetConfirm` 을 켜며 **arm 마다 AG3S 를 하나씩** 둔다. frame 마다 서빙 chunk 기록의 값을 모든 arm 에 **같은 순서 · 같은 값으로** 넣는다 (`SafePolicy._scene_fn` 과 같은 순서).
+
+```
+① 손가락 관절 → ② 기록된 grasp event (attach / detach) → ③ latch flag (grasp_active · grasp_latched · subtask · placed = freeze) → ④ process_multi_debug
+```
+
+- attach 의 **시점과 parameter** (손, parent link, 접촉 허용 link, hold link, reach 한계 0.12 m) 는 기록값이고 모든 arm 에 같다. 붙이는 **기하** 는 그 arm 자신의 `AG3S.manipulated` 다 — L8H2 서빙 기하를 다른 arm 에 넣지 않는다. 그 arm 의 manipulated 가 usable 이 아니거나 reach 밖이면 `AttachRejected` 로 기록한다.
+- 기존 `hold` 는 옵션으로 남아 있고 T54 결과를 재현한다 (`t54_replay.py` · `t54_arms.py` 는 T54 와 byte 단위로 같다).
+- **기록된 event (T53 16 episode):** attach 12 episode (frame 15 – 46) · detach 12 episode. attach 가 없는 4 episode 는 모두 `no_grasp` (ep1840 · 1843 · 1848 · 1851). 서빙이 attach 상태였던 frame 합 143. attach 가 철회 (`attach_revoked`) 된 episode 1 (ep1849), `held_slip` 2 (ep1853 · ep1822). 서빙에서 attach 가 거절된 chunk 0.
+
+**타임라인 (KST).**
+
+| 시각 | 일 |
+|---|---|
+| 2026-10-13 22:50 | 구현 보고 (`T54b.impl.md`): 새 조건 `hold_attach` · `--stage fidelity` · test 13 |
+| 22:53 | run 시작. 입력 점검 problems 0. legacy 회귀 기준선 일치 (14 / 15 · 15 / 15 · −29.031048280806342 mm), **cuRobo 기준선은 CPU 전용 지시로 돌리지 않았다** |
+| 22:56:50 – 01:17:31 (2 h 21 min) | **메모리 규칙 대기.** 규칙 = working set + 14 GiB ≤ 60 GiB 가 3 번 연속 (5 분 poll). 동시에 도는 T55 · T56 · T60 때문에 working set 이 50 – 61 GiB 였다 |
+| 2026-10-14 01:17:31 | 재생 시작 (working set 23 GiB, 재생 중 최대 38 GiB, oom kill 39 → 39). 16 job (episode) 완료, 각 600 행, 실패 0 |
+| 이어서 | fidelity · analyze (`current` · `hold` 행은 T54 run 에서 `--extra-rows-dir` 로 읽기 전용) · figure |
+
+### 2. 재생 충실도 — L8H2 arm 의 `hold_attach` 대 서빙 chunk 기록
+
+비교 단위 = frame (1200). 일치 정의: **같은 물체 = 둘 다 없음, 또는 둘 다 있고 centroid 거리 ≤ 30 mm.** identity 는 chosen 점에 같은 GT labeller 를 붙인 plurality.
+
+| row phase | frames | identity 일치 | chosen same object | manip same object | attached 일치 | frozen 일치 |
+|---|---:|---:|---:|---:|---:|---:|
+| approach | 64 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 (64) |
+| grasp | 931 | 0.9989 | 1.0000 | 1.0000 | 1.0000 | 1.0000 (929) |
+| pre_grasp | 32 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 (32) |
+| transit | 173 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 (173) |
+| pooled | 1200 | 0.999167 | 1.0000 | 1.0000 | 1.0000 | 1.0000 (1198) |
+
+- **pooled (1200 frame):** has_target 일치 1.0 · identity 일치 0.999167 (불일치 1 frame: ep1815 frame 19, 서빙 chosen label 없음 대 replay target) · chosen same object 1.0 · manipulated same object 1.0 · attached 일치 1.0 (서빙 143 frame 대 replay 143 frame) · frozen 일치 1.0 (n = 1198). episode 평균도 같은 값.
+- chosen cluster centroid 의 서빙 대 replay 거리: 중앙값 0.40 mm · p95 2.09 mm · 최대 23.85 mm (둘 다 있는 813 frame). 서빙 `identity_correct` 509 frame 대 replay 510.
+- **측정 범위: L8H2 arm 만** (task 의 점검 항목). 다른 arm 의 서빙 일치도는 정의상 서빙 기록이 없어 계산하지 않았다.
+
+### 3. `hold_attach` 의 arm 별 결과
+
+대상 1178 target frame, episode 16 개. 차이는 arm − L8H2 (%p), CI 는 episode block bootstrap 95 %.
+
+| arm | identity (%) | identity − L8H2 (%p) · episode CI | moving-block CI | episode up / down | coverage (%) | coverage − L8H2 (%p) | purity (%) | purity − L8H2 (%p) | no_target (%) | 이웃 점 | attach 호출 · 성공 · 거절 |
+|---|---:|---|---|---|---:|---|---:|---|---:|---:|---|
+| L8H2 | 42.31 | — | — | — | 35.17 | — | 85.28 | — | 32.17 | 10.31 | 12 · 12 · 0 |
+| N | 42.31 | +0.00 · [+0.00, +0.00] | [+0.00, +0.00] | 0 / 0 | 35.16 | -0.01 | 85.28 | +0.00 | 32.42 | 10.31 | 12 · 12 · 0 |
+| A | 40.90 | -1.42 · [-4.25, +0.00] | [-2.67, -0.17] | 0 / 1 | 33.44 | -1.72 | 79.03 | -6.25 | 32.17 | 15.24 | 12 · 12 · 0 |
+| B | 42.31 | +0.00 · [+0.00, +0.00] | [+0.00, +0.00] | 0 / 0 | 35.17 | +0.00 | 85.28 | +0.00 | 32.42 | 10.31 | 12 · 12 · 0 |
+| L12H4 | 47.39 | +5.08 · [-0.26, +15.50] | [+3.99, +6.16] | 1 / 1 | 35.40 | +0.23 | 90.13 | +4.84 | 32.25 | 6.90 | 12 · 12 · 0 |
+| A-L12H4 | 40.97 | -1.34 · [-3.93, +0.00] | [-2.59, -0.09] | 0 / 2 | 33.75 | -1.41 | 79.69 | -5.59 | 32.25 | 13.56 | 12 · 12 · 0 |
+| N-k3 | 39.65 | -2.67 · [-5.58, +0.00] | [-4.50, -1.00] | 0 / 3 | 35.22 | +0.05 | 76.13 | -9.16 | 32.17 | 19.96 | 12 · 12 · 0 |
+| A-k3 | 28.43 | -13.89 · [-27.89, -3.67] | [-16.29, -10.78] | 0 / 6 | 23.87 | -11.30 | 57.02 | -28.27 | 32.17 | 25.64 | 12 · 10 · 2 |
+
+![T54b arm metric table](figures/t54b/t54b-arm-metric-table.png)
+
+*arm × 지표 표 (`hold_attach`).* [`t54b-arm-metric-table.json`](figures/t54b/t54b-arm-metric-table.json)
+
+**측정된 사실.**
+
+- **N · B 는 L8H2 와 identity · purity 가 같다 (차이 0, episode 상승 · 하락 0 / 0).** N · B 와 L8H2 의 차이는 `no_target` +0.25 %p (1 episode) 와 coverage −0.01 %p 뿐이다 (has_target 이 다른 frame 3 개). 16 episode 중 15 개에서 모든 frame 의 identity · purity · `no_target` 이 같다. frame 단위 McNemar 의 불일치 쌍 0 · 0.
+- **A 는 L8H2 보다 identity −1.42 %p** (episode 하락 1 개), purity −6.25 %p, coverage −1.72 %p, 이웃 점 +4.93. 후보 cluster 선택이 갈린 frame 74, identity 가 갈린 frame 17 (전부 L8H2 쪽이 맞음, McNemar 불일치 쌍 0 대 17).
+- L12H4: identity +5.08 %p (CI [−0.26, +15.50]), episode 상승 1 · 하락 1, McNemar 62 대 1. A-k3: **−13.89 %p** (CI [−27.89, −3.67]), 6 episode 모두 하락.
+- **attach 결과.** 8 arm 중 7 arm 이 attach 호출 12 건 모두 성공 · detach 12 / 12 해제. **A-k3 만 2 건 거절:** ep1809 f20 (reach 141.34 mm > 120 mm, parent `ee_finger_l1`, manip state visible), ep1853 f17 (reach 490.43 mm > 120 mm, occluded). A-k3 의 attached frame 은 123 (다른 arm 143).
+
+### 4. phase 별 identity — attach 를 넣기 전 (T54 `hold`) 대 후 (`hold_attach`)
+
+| phase (frames) | 조건 | L8H2 | N | A | B | L12H4 | A-L12H4 | N-k3 | A-k3 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| pre (594) | hold | 87.50 | 87.50 | 81.25 | 87.50 | 92.67 | 81.25 | 79.56 | 60.25 |
+| pre (594) | hold_attach | 85.27 | 85.27 | 79.02 | 85.27 | 90.35 | 78.93 | 77.64 | 58.55 |
+| held (113) | hold | 5.13 | 5.13 | 5.13 | 5.13 | 5.13 | 5.13 | 4.43 | 4.29 |
+| held (113) | hold_attach | 1.39 | 1.39 | 1.39 | 1.39 | 1.39 | 2.58 | 1.39 | 1.39 |
+| post (70) | hold | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| post (70) | hold_attach | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| placed (401) | hold | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| placed (401) | hold_attach | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+
+![T54b phase identity hold vs attach](figures/t54b/t54b-phase-identity-hold-vs-attach.png)
+
+*grasp 상태 (물리 `grasp_state`) 별 identity, arm 별 T54 `hold` (파랑) 대 T54b `hold_attach` (주황), 막대 = episode bootstrap 95 % CI.* [`t54b-phase-identity-hold-vs-attach.json`](figures/t54b/t54b-phase-identity-hold-vs-attach.json)
+
+**측정된 사실.**
+
+- **post (70 frame, 3 episode) · placed (401 frame, 9 episode) 의 identity 는 attach 를 넣어도 8 arm 모두 0.0 이다.** placed 의 `no_target` 은 91.5 %, post 의 `no_target` 은 25.0 % 다 (두 조건 같음).
+- **서빙을 재생하는 L8H2 arm 도 같은 0.0 이다.** L8H2 arm 의 identity 는 서빙 기록과 1200 frame 중 1199 에서 일치하므로 (§2), 이 0.0 은 attach 미재현이나 재생 결함이 아니라 **서빙 기록 자체의 chosen cluster 가 이 구간에서 target 이 아닌 결과다.** L8H2 `hold_attach` 의 phase 구성 (replay 의 `decision_mode`):
+
+| phase | frame | has_target | `decision_mode` (frame 수) | chosen label (frame 수) |
+|---|---:|---:|---|---|
+| pre | 594 | 591 | keep 441 · occluded 76 · hold 56 · first 17 · subtask_gated 3 · switch 1 | target 491 · other_object 83 · none 20 |
+| held | 113 | 113 | occluded 111 · hold 1 · keep 1 | target 1 · other_object 11 · none 101 |
+| placed | 401 | 34 | subtask_gated 276 · no_admissible 91 · occluded 34 | target 0 · other_object 6 · none 395 |
+| post | 70 | 55 | keep 47 · subtask_gated 8 · no_admissible 7 · occluded 6 · hold 2 | target 0 · other_object 50 · none 20 |
+
+- **held (113 frame, 12 episode) 의 identity 는 L8H2 에서 `hold` 5.13 % → `hold_attach` 1.39 %** (N · A · B · L12H4 도 같은 값, N-k3 · A-k3 는 `hold` 4.43 · 4.29 → 1.39, A-L12H4 만 2.58 %). T54 의 현재 frame 조건의 held 는 L8H2 53.4 % · N 83.8 % 였다. 시간 유지가 들어가면 (attach 유무와 관계없이) 이 phase 의 identity 가 거의 사라진다. 이 phase 는 replay 의 `decision_mode` 가 113 frame 중 111 에서 `occluded` 다.
+- pre phase 는 `hold` 87.50 → `hold_attach` 85.27 % (L8H2 · N · B). pre phase 에도 attach 상태 frame 이 13 개 있다 (서빙 13 · replay 13).
+
+![T54b scene attach choice](figures/t54b/t54b-scene-attach-choice.png)
+
+*실제 장면: post-grasp (held) frame 에서 주입된 attach 와 arm 별 chosen cluster.* 위 = ep1839 f22 (orange, `held`, right hand, `ee_finger_r1`, reach 120 mm), 아래 = ep1809 f21 (banana, `held`, left hand, `ee_finger_l1`). 오른쪽 = base frame 위 점 구름, **십자 = 주입된 attach 점 (arm 별 색)**, 윤곽 = arm 별 chosen cluster. 위 장면에서 8 arm 이 모두 attached 이고 chosen cluster 의 identity 는 모두 아니오이며 (A · A-L12H4 · N-k3 · A-k3 는 chosen 크기가 다르다), 아래 장면에서 A-k3 는 attach 거절 (attached 0 pts) 이다. [`t54b-scene-attach-choice.json`](figures/t54b/t54b-scene-attach-choice.json)
+
+### 5. 진입 표의 "시간 유지" 행 (A, 기계적 재계산)
+
+| 조건 | identity (A − L8H2) | coverage (A − L8H2) | 기준 | 충족 |
+|---|---|---|---|---|
+| T54 `hold` | −1.42 %p, CI [−4.25, 0.00] | −1.40 %p, CI [−4.20, 0.00] | −3 %p · −5 %p | 충족 |
+| **T54b `hold_attach`** | −1.42 %p, CI [−4.25, 0.00] | **−1.72 %p**, CI [−5.17, 0.00] | −3 %p · −5 %p | **충족** |
+
+- A 의 전체 진입 표는 T54 와 같다 (`all_numeric_rows_pass` = false: 현재 frame identity −3.08 %p 가 −3 %p 를 못 넘고 개선 근거가 없다). 이 STEP 은 숫자만 갱신한다. A 의 판정은 바뀌지 않았다 (사전 고정, `T54b.task.md`).
+
+### 6. 해석 (측정 범위 안과 밖)
+
+- **측정:** (a) `hold_attach` 의 L8H2 arm 은 서빙 기록을 거의 그대로 재현한다. (b) 이 조건에서 N · B 는 L8H2 와 identity · purity 가 같고, post · placed 의 identity 는 모든 arm 에서 0 이다.
+- **(미측정 해석)** N · B 가 시간 유지 조건에서 L8H2 와 같아지는 것은 `TargetConfirm` 이 첫 확정 geometry (이후 attach 한 manipulated 기하) 를 유지해 arm 의 attention source 차이가 이후 frame 에서 사라지기 때문일 수 있다. 지지: T52 §6 에서 L8H2 가 맞은 14 frame 중 13 이 유지된 geometry 였다. 반대 가능성: 이 offline 재생은 모든 arm 이 L8H2 서빙 궤적 위에 있다. 실제 closed-loop 에서 N · B 의 첫 확정이 달라지면 궤적과 geometry 가 달라진다. 이 가설은 분리하지 않았다.
+- **(미측정 해석)** post · placed 의 identity 0 은 이 평가 정의 (chosen cluster 의 plurality 가 target) 와 서빙의 `subtask_gated` · `no_admissible` 상태 (placed 401 frame 중 367) 가 겹친 결과일 수 있다. 서빙이 이 구간에서 chosen cluster 를 두지 않는 것이 의도된 동작인지 지표 정의의 문제인지는 이 STEP 에서 가르지 않았다 (재측정 대기 #39).
+
+### 7. deviation · 알려진 격차 · 측정하지 않은 것 · 되돌아올 지점
+
+**알려진 격차 (impl 에서 그대로 보고).**
+
+- **서빙의 latch 상태 기계 (`observe_grasp` · `revert_attach`) 를 arm 마다 다시 돌리지 않는다.** 기록된 event 를 넣는다 (사전 고정 2: robot feedback). 어떤 arm 의 attach 가 거절되면 서빙이라면 `revert_attach` 로 latch 가 CLOSING 으로 돌아가지만 재생은 기록된 flag 를 계속 넣는다. A-k3 의 거절 2 건이 이 경우다.
+- 재생 궤적은 모든 arm 에서 서빙 (L8H2) 궤적이다. ESDF 는 legacy (CPU) 이고 `execution_path` · `active_manipulators` · cuRobo field 는 재생하지 않는다 (T54 의 c1a profile 과 같다).
+
+**deviation (verifier).**
+
+1. cuRobo 회귀 기준선은 CPU 전용 지시로 돌리지 않았다 (legacy 만).
+2. 재생 시작이 2 h 21 min 메모리 규칙 대기였다 (동시 T55 · T56 · T60 실행).
+3. verifier 가 시작 때 `cat` 으로 `T54b.impl.md` 를 읽다가 impl 의 "기대하는 결과" 절이 측정 전에 함께 출력됐다 (그 기대로 행동하지 않았고 투명성 위해 기록).
+4. fidelity stage 는 L8H2 arm 만 계산한다. `by_phase` 의 phase 는 planner row phase (approach · pre_grasp · grasp · transit) 이지 metric 분해의 GT grasp phase 가 아니다.
+5. scene figure 의 두 frame (ep1839 f22 · ep1809 f21) 은 frame 0 부터 8 arm 을 `hold_attach` 로 다시 돌려 그렸다 (ep1839 23 frame × 8 arm, ep1809 22 frame × 8 arm). 저장 row 와 chosen rank · identity · has_target · n_candidates · split digest · attach 결과가 **mismatch 0**. figure 의 attach 십자는 가독성을 위해 arm 슬롯마다 x 로 2 mm 씩 어긋나게 그렸다.
+
+**측정하지 않은 것** (`T54b.verify.json not_measured`): 서빙 latch 상태 기계의 arm 별 재실행 (A-k3 거절 2 건에서 서빙이라면 latch 가 CLOSING 으로 되돌아간다), L8H2 외 arm 의 서빙 대비 일치도, `execution_path` · `active_manipulators` · cuRobo field, closed-loop 효과 (T57), `--attach-reach off` 변형, cuRobo 회귀 기준선.
+
+**되돌아올 지점.** N · B 의 시간 유지 조건 결과를 가르려면 arm 별 latch 상태 기계를 다시 돌리는 재생이나 새 rollout (T54c) 이 필요하다. T54c 가 N · B 의 closed-loop (또는 새 16 episode 재생) 에서 L8H2 와 갈리지 않으면 현재 frame 의 개선 (+7.1 %p) 이 시간 유지에 흡수되는 것으로 읽는다.
+
+### 8. 산출물
+
+- **측정**: [`handoff/T54b.verify.json`](handoff/T54b.verify.json) (원자료 `/mnt/dev/AG3S_VLA-storage/results/development/20261013T225350+0900_cf38c9dbca7b_f739ac556e8a/verify/T54b/`: `test/rows/*__hold_attach.jsonl` · `test/analysis/t54_summary.json` · `t54b_fidelity.json` · `phase_breakdown.json` · `logs/`), [`handoff/T54b.impl.md`](handoff/T54b.impl.md).
+- **figure** (각각 `.json` sidecar): [`t54b-arm-metric-table`](figures/t54b/t54b-arm-metric-table.png) · [`t54b-phase-identity-hold-vs-attach`](figures/t54b/t54b-phase-identity-hold-vs-attach.png) · [`t54b-scene-attach-choice`](figures/t54b/t54b-scene-attach-choice.png)
+- **코드 (새 파일 · 수정)**: `AG3S/ag3s/experiments/studies/t54b_hold.py` (새), `t54_study.py` · `t54_stats.py` (새 옵션만, 기본 경로 동작 불변), `tests/ag3s/test_t54b_hold.py` (13). commit 은 하지 않았다.
+
+---
+
+## T46e — visible-target oracle extent: 카메라에 보인 target 표면만 지우는 비교 기준선의 구현 · offline 검증 · 8 chunk 원인 진단 · 메인 적용 (2026-10-12 ~ 13 KST)
+
+**이 절이 답하는 물음.** DT-02 extent block (같은 identity 에서 extent 처리만 바꾼 비교: ball · ball_owned (C1a) · ball_owned + F1 · oracle) 에 필요한 **oracle arm** 을 만든다. oracle 은 시뮬레이터의 GT 로 **카메라에 실제로 보인 target 표면 점** 에서 온 seed 만 target-free 층에서 지운다 (이웃 과일 · 지지면 · 로봇은 보존). 그리고 oracle 만 충돌 행이 생긴 chunk 가 oracle 의 오류인지 진단한다.
+
+**이전 대비.** 이전 (V11AB = C0 · C1a) 에는 extent 의 비교 기준선이 없었고, D-TF 의 F1GT (GT 로 non-target 근거를 고른 offline variant) 를 상한처럼 읽을 수밖에 없었다. 이 STEP 뒤에는 **관측 기반 기준선 (oracle)** 이 서버 option (기본 off) 으로 있고, F1GT 의 행 감소 일부가 **이웃 과일 seed 를 지운 데서 온다** 는 것이 측정됐다. oracle 은 충돌 행 수 · 성공률의 상한이 아니다 (사용자 판정 B3).
+
+**한 줄 결과.** held-out 14 충돌 chunk 에서 충돌 행은 off 887 · F1 401 · F1GT 113 · **ORV 216**, 지운 seed 중 이웃 과일 5 mm 안은 2216 · 2216 · 2221 · **6** 이다. oracle 만 행이 생긴 신규 7 chunk 의 143 행은 사전 고정 규칙으로 **오류 후보 121 · robot 근접 20 · target 잔류 2** 이고, 그 voxel 은 off · F1 · F1GT 가 모두 지운 것이다 — **oracle 오류로 일괄 판정하지 않는다 (B1).** 지지면 층을 다른 arm 처럼 지우는 ORV_S 는 이웃 과일 seed 를 지우므로 채택하지 않는다 (B2). 메인 적용 `cf38c9db` (기본 off 에서 CL3 1630 / 1630 층 bit-identical). **closed-loop 는 돌리지 않았다.**
+
+### 1. 타임라인 (KST)
+
+| 시각 | 무엇 | 출처 |
+|---|---|---|
+| 2026-10-12 | 사용자 판정: develope_PLAN §11 순서, oracle extent arm 은 계획서상 필요, W1 은 모든 Ablation arm on, 18 쌍 유지 → A13 구현 (격리 worktree, base 15314ba3) | `handoff/T46e.task.md` |
+| 2026-10-13 01:25 – | V-T46e (offline 검증, 사전 기준 4 항목) | `handoff/T46e.verify.json` |
+| 10:56 | 사용자 판정 B1 – B5 (진단 · 지지면 보류 · F1GT 보조 · 적용 시점 · identity GT 보류) | `T46e.task.md` "사용자 판정" |
+| 11:02 | T46e-D 분류 규칙 R0 – R8 고정 (측정 전) → 측정 | `handoff/T46e-D.verify.json` |
+| T46e-D 뒤 | 사용자 판정 확정: B1 일괄 오류 판정 안 함 · B2 ORV_S 채택 안 함 · B3 target 잔류는 계약 위반 확정 안 함 · 메인 적용 보류 해제 | `T46e.task.md` "T46e-D 결과 후" |
+| 11:59 – | T46e-apply: HEAD 39dfb5dc + patch (md5 `d54cc6ae`) 의 회귀 · 호환성 (임시 worktree) | `handoff/T46e-apply.verify.json` |
+| 13:50 – | T47 세션의 T53 추출 종료 알림 → 적용 시작 · 끝 알림 → commit `cf38c9db` (pathspec, push 안 함) | git |
+
+### 2. 구현 (A13, 기본 off)
+
+| 항목 | 내용 |
+|---|---|
+| 서버 | `--target-extent oracle-visible` (+ `--oracle-extent-identity {pipeline,gt}` · `--oracle-max-dist-voxels`). `--target-field-policy exclude-*` 와 함께, `--target-exclusion ball` / `ball-owned` 위에 쓴다. F1 · F2 와 함께 주면 거절 |
+| client | `--safe-oracle-seg` — 카메라별 GT target segmentation 을 요청에 실어 보낸다. 키가 없으면 off (구 client 와 wire 호환) |
+| 동작 | 서버의 oracle memory (§ 용어) 가 표면 길 (`d_t ≤ d_o` 인 seed) 과 띠 길 (보인 면 뒤 30 mm) 로 target seed 만 지운다. 지지면은 공의 `z_min` 아래만 보호하고 그 위는 지우지 않는다 |
+| 기록 | `esdf_stats.target_free.oracle` (`applied` · `identity_matches_gt` · `memory` 수) · `oracle_split` |
+
+### 3. V-T46e — offline 검증 (CL3 기록 chunk 재풀이)
+
+사전 기준 4 항목 모두 PASS: 회귀 기준선 (legacy 14 / 15 · 15 / 15 · −29.031048 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877 mm), 기본 off 에서 CL3 fine target-free 층 1630 / 1630 이 base 와 같다 (C1a 506 · C1aF1 562 · C1aF1F2 562), 구현자 표 재현, 테스트 (CPU 29 passed · 1 skipped, GPU subset 181 passed, 구 client wire digest 동일).
+
+| set | 지표 | off | F1 | F1GT | **ORV** | ORVgt | ORV_S (진단) |
+|---|---|---:|---:|---:|---:|---:|---:|
+| held-out 14 충돌 chunk (HOLD 12) | 충돌 행 | 887 | 401 | 113 | **216** | 216 | 201 |
+| | HOLD 0 행 | 0 / 12 | 5 / 12 | 6 / 12 | 5 / 12 | 5 / 12 | 5 / 12 |
+| | 지운 seed 중 이웃 과일 ≤ 5 mm | 2216 | 2216 | 2221 | **6** | 6 | 368 |
+| design 17 충돌 chunk (HOLD 14) | 충돌 행 | 601 | 387 | 72 | **160** | 143 | 153 |
+| | HOLD 0 행 | 0 / 14 | 6 / 14 | 8 / 14 | 7 / 14 | 7 / 14 | 8 / 14 |
+| | 지운 seed 중 이웃 과일 ≤ 5 mm | 1799 | 1800 | 1824 | 321 | 1 | 606 |
+| held-out 전체 162 chunk | 충돌 행 | 887 | 401 | 113 | 359 | 359 | 318 |
+| | 지운 seed 중 이웃 과일 ≤ 5 mm | 20739 | 20739 | 20787 | 49 | 49 | 3627 |
+| | off 0 행 chunk (148) 위의 행 | — | 0 | 0 | **143** | 143 | 117 |
+
+- held-out 162 chunk 에서 off 가 지우고 ORV 가 남긴 seed 41432 개의 GT 분류: 이웃 과일 ≤ 5 mm 20533 · 지지면 층 (`z_min` 위 10 mm) 13156 · target ≤ 5 mm 3656 · 그 밖 4087.
+- `applied` 162 / 162, `identity_matches_gt` 162 / 162 (held-out). design 17 에서는 16 / 17 (1 chunk 는 pipeline identity 가 GT 와 다름).
+- replay pose 오차 최대 0.319 mm.
+- figure: [표](figures/t46/t46e-table.png) · [그래프](figures/t46/t46e-graph.png) (+ `.json`).
+
+### 4. T46e-D — oracle 만 행이 생긴 8 chunk 와 지지면 층의 원인 진단 (측정만)
+
+**규칙 (측정 전 고정, R0 – R8).** 각 ORV 충돌 행의 책임 voxel 을 정하고 (§ 용어), 기록 qpos 장면의 실제 MuJoCo 형상까지의 부호 거리 `d_geom` 의 최소 class 로 분류한다. `d_geom ≤ 5 mm` (fine voxel 1 개) 면 `preserved_<class>` (target 이면 `target_surface_kept`), 초과면 `error_candidate`. 2.5 · 10 mm 는 민감도로만 보고. 재현: 162 chunk 의 variant 별 행 수가 V-T46e 와 불일치 0.
+
+| chunk | ORV 행 (off) | 행의 분류 | 책임 voxel `d_geom` mm (min – max) | 구 → 로봇 밖 실제 형상 거리 mm (min · median) |
+|---|---:|---|---|---|
+| ep110_s1101:17 | 15 (0) | 오류 후보 15 (가장 가까운 class 이웃 과일) | 7.654 | 16.254 · 16.707 |
+| ep110_s1102:16 | 20 (0) | 오류 후보 20 | 6.799 – 8.301 | 9.872 · 13.793 |
+| ep110_s1102:17 | 30 (0) | 오류 후보 30 | 5.404 – 6.254 | 12.258 · 13.146 |
+| ep110_s1102:18 | 50 (0) | 오류 후보 45 · robot 5 | 3.634 – 7.069 | 9.847 · 12.096 |
+| ep11_s111:12 | 12 (0) | 오류 후보 8 · robot 4 | 3.244 – 5.943 | 4.335 · 5.772 |
+| ep123_s1231:13 | 14 (0) | robot 11 · 오류 후보 3 | 0.0 – 6.131 | 5.147 · 5.579 |
+| ep3_s32:27 | 2 (0) | target 잔류 2 | −1.276 | — |
+| **신규 7 chunk 합** | **143** | **오류 후보 121 · robot 근접 20 · target 잔류 2** | | |
+| ep110_s1101:18 (HOLD, 악화) | 123 (53) | 이웃 과일 53 · table 26 · target 26 · 오류 후보 18 | −5.386 – 12.897 | **−15.817 · −4.307** (구가 실제 형상 안) |
+
+- 8 chunk 모두 `applied = True` · `identity_matches_gt = True`.
+- **신규 7 chunk 의 책임 voxel 은 off · F1 · F1GT 가 모두 지운 voxel 이다** (예: ep110_s1101:17 의 15 행 → off · F1 · F1GT 15 / 15). 그래서 off 의 0 행은 "정답" 이 아니라 그 seed 를 지운 결과다.
+- **ep3_s32:27 (target 잔류):** voxel → 현재 target 형상 −1.276 mm, → 가장 가까운 target memory 표본 (`d_t`) 19.854 mm, → 다른 물체 memory 표본 (`d_o`) 4.132 mm. 현재 GT 형상 안이지만 관측 memory 에서는 다른 물체 근거가 더 가깝다.
+- 구 → 장애물 거리가 양수인 행도 safety margin 안이면 정상 제약이고, margin 밖이면 보수적 과대평가일 수 있다 — 이 표는 그 구분을 하지 않았다.
+
+**B2 — 지지면 층 (held-out 162 chunk).** S = off 와 F1GT 가 지우고 ORV 가 남긴 `z_min ≤ z < z_min + 10 mm` 의 voxel.
+
+| 측정 | 값 |
+|---|---|
+| S voxel 수 (그중 S′) | 20426 (13156) |
+| S → 실제 `table_top` 거리 | min 6.452 · median 7.681 · max 16.715 mm. ≤ 5 mm 0 개, 5 – 10 mm 14446, > 10 mm 5980 |
+| S 의 가장 가까운 class | table 10577 · **이웃 과일 6485** · target 3210 · robot 154 |
+| ORV 충돌 행 중 S 에서 온 행 | 57 / 359. 그 행의 구 → 실제 table 거리 median 5.633 mm (0 미만 1 행) |
+| ORV_S 가 지운 이웃 근접 seed 3627 | 지지면 층 삭제에서 온 것 3578 — **전부 가장 가까운 class 가 이웃 과일** (hull 거리 median −1.525 mm, 과일 안쪽) |
+
+- figure: [실제 씬](figures/t46/t46e-d-scene.png) (ep110_s1101:18 · ep110_s1102:18, ORV 행이 가장 많은 2 chunk) · [분류 그래프](figures/t46/t46e-d-graph.png) · [표](figures/t46/t46e-d-table.png) (+ `.json`).
+
+### 5. 사용자 판정 (T46e-D 결과 후)
+
+- **B1:** 신규 7 chunk 를 oracle 오류로 일괄 판정하지 않는다. 사전 분류 (오류 후보 121 · robot 근접 20 · target 잔류 2) 는 유지한다. **"기존 arm 이 삭제하던 비대상 관련 seed 를 oracle 이 보존하면서 추가 제약이 나타났다. 일부 seed 에는 실제 형상과의 거리 차이가 있으며, 그 발생 원인은 확정하지 못했다."** 5 – 8 mm 가 voxel 크기와 비슷하다는 것은 설명 후보일 뿐 TSDF 원인의 입증이 아니다. "이웃을 남기는 모든 arm 에서 동일하게 발생한다" 는 주장하지 않는다. 표현 오차를 한계로 남기고 진행.
+- **B2:** oracle 의 지지면 층 보존 유지, ORV_S 채택 안 함. 기존 arm 의 지지면 삭제를 oracle 에 복제하면 기존 arm 의 잘못된 삭제까지 복제한다. 57 행이 모두 필요한 table 제약이라고 단정하지도 않는다.
+- **B3:** oracle = 주 진단 기준선 (비대상 보존 중심의 관측 기반), F1GT = 보조. 상한으로 부르지 않는다. ep3 은 "target 잔류 1 voxel · 2 행, 관측 memory 와 현재 형상 간 불일치 가능성" 으로 기록하고 계약 위반으로 확정하지 않는다. 제거 반경 확대 · full-mesh GT 삭제는 하지 않는다.
+- **B5:** AG3S identity 전체의 GT 교체는 보류. extent 비교에서 identity 불일치 chunk 는 별도로 처리하고 DX-01 조건 A 는 미완료 (재측정 대기 #41).
+- **적용:** B1 · B2 때문에 메인 적용을 보류하지 않는다. 이번 결과로 TSDF 전체를 고치거나 추가 행을 모두 없앨 필요는 없다.
+
+### 6. 메인 적용 (T46e-apply)
+
+| 확인 (HEAD 39dfb5dc + patch md5 `d54cc6ae`, 임시 worktree) | 결과 |
+|---|---|
+| 회귀 기준선 | legacy 14 / 15 · 15 / 15 · −29.031048 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877 mm (기대값과 같다) |
+| CPU 전체 pytest | 3180 passed · 0 failed · 12 skipped |
+| GPU subset | 181 passed (V-T46e 와 같은 5 파일) |
+| 나머지 CUDA test 6 파일 (`curobo_builder` 경로) | ~~88 passed (임시 worktree)~~ → 첫 실행은 `env.sh` 의 `cd` 와 `pyproject` 의 `pythonpath = ["."]` 때문에 **메인 tree (39dfb5dc, T46e 전) 코드를 import 했다 — T46e 의 근거가 아니다.** 메인 적용 뒤 `cf38c9db` (T46e 포함, import 경로 확인) 에서 다시 돌려 **88 passed** |
+| 기본 off bit-identical | CL3 1630 / 1630 층 같음 (patched 대 HEAD), 기록과 float16 비트가 같은 층 1618 (patched · HEAD 동일) |
+| 구 client wire | digest 동일 (`86512318…`, 17 키), 구 요청에서 oracle segmentation = None |
+
+→ commit `cf38c9db` (코드 9 파일 · 새 파일 2 · handoff · figure, pathspec). T47 세션 (T53 추출) 의 종료 알림 뒤 적용하고 시작 · 끝 · hash 를 알렸다.
+
+### 7. 한계 · 측정하지 않은 것 · 되돌아올 지점
+
+- **closed-loop 없음.** 서버 memory 는 실제 받은 요청으로 쌓이고 replay 는 planning 행을 다시 그린다 — 같은 집합이어야 하지만 closed-loop 에서 확인하지 않았다 (재측정 대기 #43, CL4 는 T46f 단계 1 뒤).
+- **TSDF 자체 · 각 seed 를 만든 요청은 측정하지 않았다** — 오류 후보의 5 – 8 mm 원인 미확정 (#42).
+- T46e-D 는 held-out 162 chunk 만 봤다 (design17 · design162 · dsf8 set 은 범위 밖). 162 chunk 에서 identity 불일치가 없어 불일치 처리는 시험되지 않았다.
+- oracle 지연 (CPU 측정, 부하 큰 상태) 은 이 로그의 verify 수치에 없다 — CL4 시간 비교에서 따로 잰다.
+- 되돌아올 지점: 나중에 "제거 조건을 만족했는데 코드가 누락했다" 가 확인되면 그 지점만 국소 수정 (B3). ORV_S 는 서버 option 으로 만들지 않았다.
+
+### 8. 산출물
+
+- 코드 (메인 `cf38c9db`): `AG3S/ag3s/runtime/oracle_segmentation.py` (새), `config.py` · `fields/curobo_builder.py` · `runtime/pipeline.py` · `trajopt/{client,safe_policy,serve_safe,wire}.py` · `trajopt/experiments/target_free_replay.py` · `integration/rby1/bringup/pi05_infer.py`, test `tests/ag3s/test_t46e_oracle_extent.py`.
+- handoff: [`T46e.task.md`](handoff/T46e.task.md) · [`T46e.impl.md`](handoff/T46e.impl.md) · [`T46e.verify.json`](handoff/T46e.verify.json) · [`T46e-D.verify.json`](handoff/T46e-D.verify.json) · [`T46e-apply.verify.json`](handoff/T46e-apply.verify.json).
+- raw: V-T46e `results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e`, T46e-D `…/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D`, T46e-apply `…/20261013T115928+0900_39dfb5dc2b38_a0fa7e4af1b6/verify/T46e-apply`.
+
+---
+
+## T60b — 놓은 뒤 준비자세로 돌아오지 않는 27 run: 정책이 복귀를 만들지 않았나, 실행이 막혔나, 다른 곳으로 물러났나 (기록 기반 진단, 2026-10-14 KST)
+
+> 측정 run `20261013T223348+0900_cf38c9dbca7b_8aef81831126` (`verify/T60b/`), 기록 2026-10-14 KST. 수치는 모두 [`T60b.verify.json`](handoff/T60b.verify.json) 의 `numbers` 에서 왔다. 사전 고정 분류는 [`handoff/T60.task.md`](handoff/T60.task.md) 의 "T60b" 절.
+> 새 rollout 없이 CL2 · CL3 · T53 기록 (제안 동작 · 실행 동작 · 정지 사유 · 자세) 만 썼다. **진단 전에 복귀를 task 에서 빼거나 H 허용범위를 넓히지 않았다** (사용자 판정 ②).
+
+**이 절이 답하는 물음.** T60 에서 P (안정 placement) 에 도달한 89 run 중 27 run 이 H (준비자세 복귀) 에 도달하지 못했다. 이것이 (a) 정책이 복귀 동작을 생성하지 않은 것인지, (b) 생성했지만 HOLD · TO (trajectory optimization) 때문에 실행되지 않은 것인지, (c) 정상적으로 물러났지만 다른 자세에 멈춰 H 정의를 못 채운 것인지 가른다.
+
+**한 줄 결과.** **27 run 중 26 run 이 (a) — 정책이 실제로 실행되는 구간에서 복귀 동작을 제안하지 않았다.** P 이후 HOLD 는 27 run 모두 0 이고, 정책 원래 출력 (TO 전) 의 실행 구간도 준비자세에 한 번도 0.35 rad 안으로 들어오지 않았다 (가장 가까운 값 0.584 – 1.162 rad). TO 가 바꾼 양은 최대 0.074 rad 라 원인이 아니다. 나머지 1 run 은 사전 규칙상 (c) 이지만 경계에 있다 (TCP 이동 0.114 m, 기준 0.10 m; 최종 관절 오차 1.538 rad).
+
+**이 절이 주장하지 않는 것.** 정책 내부에서 왜 제안이 멈추는지 (attention · feature) 는 재지 않았다. "정책 결함" 으로 확정하지 않는다 — 복귀를 생성하지 않는다는 것까지가 기록이 보여 주는 사실이다.
+
+### 1. 무엇을 쟀나
+
+| 측정 (t_P 이후, 사용 팔, q0 = row 0 자세) | 뜻 |
+|---|---|
+| `pred8_ref_min` | 정책 원래 출력 (`actions_reference`, TO 전) 의 **실행 구간 (chunk 앞 8 step)** 이 준비자세에 가장 가까웠던 값 (max\|a − q0\|) |
+| `pred50_min` | 같은 chunk 의 **예측 50 step 전체** 에서 가장 가까웠던 값 (실행되지 않는 뒷부분 포함, 설명용) |
+| `to_dev_max` | TO 결과 (`actions`) 와 정책 원래 출력의 차이 (실행 구간) |
+| HOLD after P | t_P 뒤에 시작한 HOLD chunk 수 |
+| `tcp_move` · `tcp_target_final` | TCP 가 t_P 위치에서 움직인 최대 거리, 마지막 TCP–target 거리 |
+
+**분류 (사전 고정, 우선순위 순).** (b) 실행 차단 = HOLD ≥ 1, 또는 TO · 실행 변경 > 0.05 rad 이면서 정책 원래 출력이 준비자세 (≤ 0.35 rad) 를 제안. (c) 다른 위치로 물러남 = (b) 아님 ∧ TCP 이동 ≥ 0.10 m ∧ 마지막 TCP–target ≥ 0.10 m (수집기 `RETREAT_TARGET_CLEARANCE_M`). (a) 복귀 미생성 = 그 밖.
+
+**정직한 기록 — 측정 하나를 의도에 맞게 바꿨다.** 사전 고정한 `exec_dev` (실행 동작 − 기록된 chunk) 는 "TO 가 제안을 바꿨는가" 를 보려던 것인데, 기록된 `predicted_chunks` 는 `--safe-remote` 에서 **TO 를 거친 뒤의 chunk** 라 그 차이가 모든 run 에서 0 이었다. 분류 전에 planning row 의 `actions` (TO 후) 와 `actions_reference` (정책 원래) 로 `to_dev` · `pred8_ref_min` 을 더해 (b) 판정에 썼다 (`T60b.verify.json` `deviations`).
+
+### 2. 결과
+
+| | H 미도달 (27) | H 도달 (62, 대조) |
+|---|---|---|
+| P 이후 HOLD 가 있는 run | **0** | 16 |
+| 정책 원래 출력의 실행 구간이 준비자세 (≤ 0.35 rad) 를 제안한 run | **0** | 62 |
+| 예측 50 step 전체가 준비자세를 제안한 run | 3 | 62 |
+| 실행 구간 제안이 준비자세에 가장 가까웠던 값 (rad) 최소 / 중앙 / 최대 | 0.584 / 0.977 / 1.162 | 0.027 / 0.046 / 0.212 |
+| 예측 50 step 전체에서 가장 가까웠던 값 (rad) | 0.138 / 0.458 / 0.542 | 0.017 / 0.042 / 0.162 |
+| TO 변경량 (rad) | 0.005 / 0.050 / 0.074 | 0.006 / 0.042 / 0.099 |
+| t_P 이후 TCP 이동 (m) | 0.022 / 0.051 / 0.114 | 0.036 / 0.229 / 0.366 |
+| 마지막 관절 오차 (rad) | 0.586 / 1.117 / 1.538 | 0.035 / 0.072 / 0.281 |
+| t_P 이후 남은 row | 13 / 291 / 357 | 287 / 352 / 404 |
+| **분류** | **(a) 26 · (c) 1 · (b) 0** | — |
+
+![T60b proposal scene](figures/t60b/t60b-proposal-scene.png)
+
+*실제 장면과 chunk 별 제안.* 위 (CL3 C1a ep110 s1101, H 미도달): t_P = 308 뒤 팔은 crate 위에 머문다. chunk 마다 정책이 실행 구간으로 제안한 자세 (주황 점) 가 측정 자세 (파랑) 와 겹쳐 1.1 rad 근처에 있다 — **제자리 유지를 제안하고 그대로 실행된다.** 50 step 전체 (초록) 에도 0.45 – 0.6 rad 이하로 내려가는 복귀는 없다. 아래 (CL3 C1a ep11 s111, H 도달): t_P = 204 뒤 t 264 chunk 부터 실행 구간 제안이 0.04 rad 로 떨어지고 팔이 돌아온다.
+
+![T60b runs](figures/t60b/t60b-runs.png)
+
+![T60b table](figures/t60b/t60b-table.png)
+
+- **scene 에 몰린다.** 미도달 27 run 은 episode 110 (12 / 12 run), 123 (9 / 9), 3 (3 / 4) 에 24 run 이 있고, 나머지는 ep11 · ep54 · ep1866 의 1 run 씩이다. 같은 오른팔이라도 episode 30 은 12 / 12 가 돌아온다 — 팔의 문제가 아니라 scene 에 따른 현상이다. arm 마다 미도달 수는 CL2 C0 5 · C1a 4 · C1bp 4, CL3 C1a · C1aF1 · C1aF1F2 각 4 로 비슷하다 (CL2 C2p 는 placed 1 run 이 미도달, T53 은 1 run). 미도달 run 에서 CL3 C1a 와 C1aF1 은 같은 (episode, seed) 마다 같은 수치를 낸다.
+- **학습 데이터의 데모는 모두 복귀한다.** episode 110 · 123 · 3 · 30 은 모두 train split 이고, 데모는 release frame 202 · 준비자세 복귀 끝 279 (frame 310 중) 로 최종 관절 오차 0 이다. **정책이 자기 학습 scene 에서도 데모의 복귀를 재현하지 못한다.**
+- **늦게 놓을수록 돌아오지 않는 경향 (exploratory, 사전 고정 아님).** t_P 중앙값: 미도달 308 row, 도달 247 row. t_P > 300 이면 미도달 17 · 도달 2, t_P ≤ 300 이면 미도달 10 · 도달 60. 완전히 갈리지는 않는다.
+- **horizon 에 잘린 1 run.** CL2 C2p ep11 s112 는 t_P = 586 이라 남은 row 가 13 이다 (H 도달 run 의 t_H − t_P 는 최소 8, 중앙 56 row). 이 run 은 사전 규칙상 (a) 로 셌다.
+
+### 3. 읽을 때의 한계 · 되돌아올 지점
+
+- 기록이 보여 주는 것은 "실행 구간에 복귀 제안이 없다" 까지다. 왜 정책이 제자리 유지를 제안하는지 (관측 · state · instruction 중 무엇에 반응하는지) 는 재지 않았다. 다음 후보: 멈춘 chunk 의 입력 (state · image) 을 복귀한 run 의 같은 단계와 바꿔 넣는 offline counterfactual (T48a 방식), 또는 데모 frame 과의 state 거리.
+- 미도달이 scene 3 개에 몰려 있어 run 수 (27) 보다 독립 표본이 적다.
+- 판정 ① 에 따라 H 미도달은 H 기준 실패로 계속 보고한다. 이 진단은 H 정의나 task 를 바꾸지 않는다.
+
+---
+
+## T60c — T51b (명사 query 를 넣은 head 선택) 의 종료 창 재집계 (offline, 2026-10-14 KST)
+
+> 측정 run `20261013T223348+0900_cf38c9dbca7b_8aef81831126` (`verify/T60c/`), 기록 2026-10-14 KST. 수치는 모두 [`T60c.verify.json`](handoff/T60c.verify.json) 의 `numbers` 에서 왔다. 사용자 판정 ⑤ (2026-10-14): T51b 진행, 결과가 달라도 진행 중인 T54–T56 의 고정 명사 source 를 소급 교체하지 않는다.
+
+**이 절이 답하는 물음.** T60 은 action query 만의 head 선택 (T51) 이 종료 창에 따라 바뀜을 보였다. 명사 token query 를 후보에 넣은 T51b 의 선택 — 명사만 (noun Ω, 128 cell) · action 과 함께 (combined Ω, 512 cell) — 도 바뀌는가.
+
+**방법.** `t51b_study` 를 그대로 돌리고 T60 과 같은 frame window (calibration record 의 P / H mask) 를 얹었다 (`t60_t51b.py`). `--t51-dir` · `--t47-dir` 는 T60 의 창별 출력 (같은 창의 T51 선택 · row · self label, 같은 창의 T47 후보) 이다. **full 창은 발표 T51b 의 모든 scene 출력과 1e-9 안에서 같다** (heldout_compare 는 파일 경로 문자열만 다름).
+**cache 확인 (판정 ⑤).** 창마다 T51b row cache 를 따로 두었고, 시작할 때 이름만으로 내용이 정해지는 특수 source (`paper3_s1`) row 가 없음을 검사했다. replay 옵션은 창별 T51 의 `__scene` payload 와 대조했다 (`check_replay_opts`). P 의 새 row 는 H 로 복사해 재사용하고 `paper3_s1` 은 지웠다.
+
+![T60c selection table](figures/t60c/t60c-selection-table.png)
+
+| Ω · label | full (발표) | P | H |
+|---|---|---|---|
+| action (T51) · GT | `last:L12H4` (P(rank 1) 0.429) | `mean:L10H7` (0.701) | `mean:L12H4` (0.613) |
+| action (T51) · self | `last:L12H3` (0.720) | 같음 | 같음 |
+| **noun · GT** | `noun_target:L10H7` (0.687) | **같은 cell (0.409)** | **같은 cell (0.407)** |
+| noun · self | `noun_target:L8H6` (0.529) | 같음 | 같음 |
+| combined · GT | `last:L12H4` (0.753) | **`last:L8H7`** (0.555) | `last:L12H4` (0.769) |
+| combined · self | `noun_target:L8H6` (0.529) | 같음 | 같음 |
+| held-out identity (scene 평균): noun 최선 GT / combined 최선 GT / L8H2 | 0.867 / 0.911 / 0.911 | 같음 | 같음 |
+
+![T60c stability and held-out](figures/t60c/t60c-stability-heldout.png)
+
+- **명사 query 의 GT 선택 (`noun_target:L10H7`) 은 세 창 모두 같다.** T52 · T54 의 고정 명사 source 와 같은 cell 이라 소급 교체 문제가 생기지 않는다. 다만 bootstrap 1 위 확률이 0.687 → 0.409 / 0.407 로 떨어져 **완료 이후 frame 을 빼면 명사 선택은 덜 안정적이다** (T51 의 action 선택은 반대로 0.429 → 0.701 / 0.613 으로 안정해졌다).
+- **self label 선택은 Ω 와 창에 상관없이 그대로다** (action `last:L12H3`, noun · combined `noun_target:L8H6`). self label 은 grasp event 이전 frame 만 쓰기 때문이다.
+- **combined Ω 의 GT 선택은 P 에서만 `last:L8H7` 로 바뀌고** H 에서는 full 과 같다.
+- **held-out 에서 어느 창의 선택도 L8H2 (0.911) 를 넘지 않는다.** 명사 최선은 세 창 모두 0.867 이다 (T51b 의 결론 "명사 query 는 held-out 3D 에서 L8H2 에 못 미친다" 는 종료 창과 무관하다).
+- 실제 장면: calibration record 의 종료 시점은 T60 의 [`t60-records-scene`](figures/t60/t60-records-scene.png) 과 같다 (같은 mask).
+
+**한계.** held-out 은 4 record · 60 frame 이고 T60 에서 이미 열었다 (T61 초안의 판정 필요 1 번). calibration 은 5 scene 이다.
+
+---
+
+## T46f-A14 · V-T46f-A14 — DX-04 전 손목 · 손바닥 충돌 형상 보정과 독립 검증 (T46f 단계 1, 2026-10-13 ~ 14 KST)
+
+**이 절이 답하는 물음.** DX-04 (지정 link 에만 target 접촉 예외를 주는 LTE 와 global exclusion · 예외 없음의 비교) 는 비허용 link 가 실제 형상대로 검사될 때만 의미가 있다. T46d 에서 URDF `link_*_arm_5` capsule 구가 손 영역 안에 놓이고 FT sensor 에는 구가 없다는 것이 드러났다 (사용자 지정 문구: "현재 gripper scope 에서는 LTE 와 global exclusion 의 비교가 퇴화하며, arm_5 를 추가했을 때 나타난 차이는 형상 근사 오류의 영향을 받는다"). 이 STEP 은 그 형상을 MJCF 에 맞추고, 같은 형상을 세 조건 모두에 쓸 수 있는지 독립 검증한다. LTE 의 우수성은 전제하지 않는다.
+
+**이전 대비.** 이전 (V11AB = C0 · C1a, `--links gripper`) 은 손바닥 · 손가락만 검사했고 손바닥 구는 MJCF 손바닥 겉면의 대부분을 덮지 못했다 (T45). `--links arms` 를 쓰면 arm_5 capsule 구가 손 geom 을 침범했다. 이 STEP 뒤 최종 형상 (`--links gripper_wrist --palm-cover on`, 1,349 구) 은 손목 · 손바닥 겉면을 표본 기준으로 덮고, 비허용 구가 권한 손 안으로 들어가지 않는다. 대신 TO 계산 시간이 늘었다.
+
+**한 줄 결과.** **형상 · 회귀 · 호환성 PASS. TO 상대 비용 기준 FAIL (chunk 별 시간비 median 2.65 > 2.0). 계산 비용 증가를 수용하여 실험용 적용 및 단계 2 진행 승인 (사용자 판정).** 이번 replay 에서 시간 예산 종료와 제약 위반 상태의 건수가 증가하지 않았다. 실물 실시간 실행 가능성은 확인하지 않았다.
+
+### 1. 타임라인 (KST)
+
+| 시각 | 무엇 | 출처 |
+|---|---|---|
+| 2026-10-13 | 사용자 판정: T46d 의 B 를 확장 (형상 보정 → 진단 장면 → 3 조건 closed-loop), C (arm_5 근사 그대로) 제외 → A14 구현 (격리 worktree) | `handoff/T46f.task.md` |
+| 10-13 10:56 | A14 구현 보고 뒤 사용자 판정 A1 – A9 (FT 잔여 누락 수용 · arm_6 L 기준 유지 후 inset · 0.001 mm 허용오차 · `none` 의 평가 정의 공통 · 실험 자세 점검 · TO 시간 기준) | `T46f.task.md` "사용자 판정" |
+| 10-13 – 14 | A14b (arm_6 inset · 재-audit · 실험 자세 점검), A14c (T46e 가 들어간 `cf38c9db` 위로 rebase, oracle × `none` 거절 1 줄) | `handoff/T46f-A14.impl.md` (worktree) |
+| 10-14 | 사용자 판정: 정점 0.51 mm 는 보조값, 수정 도구 2 회차 채택, **C3 palm cover 를 모든 비교 조건에** | `T46f.task.md` |
+| 10-14 16:10 – 16:26 | V-T46f-A14 TO 시간 (GPU 단독, 다른 세션에 알림) → CPU audit · 손바닥 coverage · 실험 자세 · 회귀 기준선 | `handoff/T46f-A14.verify.json` |
+| 10-14 | 사용자 판정: TO FAIL 을 그대로 기록하고 현재 형상으로 진행 | `T46f.task.md` |
+
+### 2. 무엇을 바꿨나 (기본 off)
+
+| flag | 뜻 |
+|---|---|
+| `--links gripper_wrist` | 손 + 양손 arm_5 · arm_6 · FT sensor. 손목 구는 MJCF collision mesh 겉면에서 만들고, 권한 손 껍질 (keep-out) 안으로 들어가지 않는다. arm_6 는 inset 0.5 mm |
+| `--wrist-cover-overflow MM` | 손목 구의 overflow (기본 5 mm) |
+| `--target-field-policy none` | 예외 없음 (용어 표). oracle extent (`--target-extent oracle-visible`) 와 함께 주면 거절 (target-free 층이 없다) |
+| `PROTECTED_LINKS` | FT sensor 는 어떤 정책에서도 권한 없음 |
+
+기본 flag (`--links gripper`, palm cover off, `relax`) 에서 `gripper` 모델은 CL3 서버 기록과 구 이름 · 반지름이 float32 비트로 같다 (A14 test).
+
+### 3. 독립 검증 (V-T46f-A14) — 최종 형상 1,349 구
+
+모든 실행 앞에 실행 경로 guard (cwd = A14c worktree, HEAD `cf38c9db`, import 경로 worktree) 를 걸었다. 구 수: `gripper` · palm off 270, 손목 보정만 1,153, 최종 1,349, 이전 `arms` 422.
+
+**(a) 손목 coverage audit (사전 THRESHOLDS, 150 자세) — `all_pass = true`.**
+
+| link | 구 (이전 `arms` → 최종) | 닿을 수 있는 겉면 중 구 밖 비율 (이전 → 최종) | 밖 최대 mm (이전 → 최종) | > 0.5 mm 밖 비율 (최종) | 넘침 max mm |
+|---|---|---|---|---:|---:|
+| link_left_arm_5 | 10 → 122 | 0.981 → 0.00018 | 56.85 → 0.28 | 0 | 5.02 |
+| link_left_arm_6 | 29 → 99 | 0.961 → 0 | 20.43 → 0 | 0 | 5.03 |
+| FT_sensor_L | 0 → 216 | 1.0 (구 없음) → 0.0068 | — → 1.88 | 0.0013 | 5.01 |
+| link_right_arm_5 | 10 → 127 | 0.981 → 0.00015 | 56.84 → 0.15 | 0 | 5.02 |
+| link_right_arm_6 | 29 → 98 | 0.962 → 0 | 20.58 → 0 | 0 | 5.02 |
+| FT_sensor_R | 0 → 221 | 1.0 → 0.0067 | — → 1.55 | 0.0010 | 5.01 |
+
+- FT 의 기준은 "닿을 수 있는 표본 max 밖 ≤ 2.5 mm · 0.5 mm 넘게 밖인 비율 ≤ 1 %" 이고, 전체 밖 비율 (≈ 0.68 %) 과 다르다 (사용자 판정 A1 의 정정). **FT coverage 는 허용 기준을 만족하며, 손바닥 인접부에 작은 잔여 누락이 있다.**
+- 정점 (보조값): arm_6 R 의 닿을 수 있는 정점 max 0.51 mm — 기준 항목이 아니다 (사용자 판정 1).
+- 손 침범 (MJCF 손 geom): 이전 `arms` 의 arm_5 구는 손바닥 `EE_BODY_L` 을 20.00 mm, 손가락을 11.40 mm 침범했다. 최종 형상은 **수치 허용오차 (0.001 mm) 이내** — 원시 max FT L 0.00097 · R 0.00088 mm (허용오차는 4 자세 smoke 이후 · 본 측정 이전에 0 → 0.001 mm 로 정했다, FK 부동소수 차). frame 검사 0.00091 mm.
+- 비허용 구와 권한 구의 겹침 ≤ 권한 구 돌출: palm off 모델 FT 6.70 · 7.65 mm ≤ 8.86 mm, **palm on (최종) FT 4.36 · 4.73 mm ≤ 5.12 mm** — 손목 구와 손바닥 구의 겹침도 기준 안이다.
+
+**(b) 권한 손바닥 coverage (`EE_BODY_*`, 기준 없이 보고).** 닿을 수 있는 겉면 표본 198,693 개 중 구 밖 비율: palm off (23 구) **0.946**, 최대 54.42 mm (p95 41.63) → palm on (121 구) **0.00028**, 최대 0.33 mm. palm cover 를 켜도 손목 구 6 link 는 비트로 같다.
+
+**(c) 실험 자세 점검 (수정된 도구, CL3 54 run · 4,050 planning 행, 최종 형상) — `all_pass = true`.** (a) 비허용 구의 active hand MJCF 침범 max 0.00057 mm (≤ 0.001), (b) 비허용 구–권한 구 겹침 max 4.73 mm ≤ 돌출 5.12 mm, (c) target 이 손 5 mm 안인 868 행의 target 표면 1,309,649 점 중 비허용 구 안 0 (가장 가까운 점이 손목 구 겉면에서 66.98 mm), frame 0.00064 mm. 참고 (판정 없음): 반대 손까지 최소 109.9 · 41.9 mm (하한).
+
+**(d) 회귀 기준선 (A14c worktree 코드).** legacy 14 / 15 · 15 / 15 · −29.031048 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877 mm — 기대값과 같다. A14c pytest: CPU 3206 passed · 0 failed · 12 skipped, 손목 cover test 포함 targeted 132 passed · 1 skipped, CUDA 9 파일 162 passed.
+
+**(e) TO 시간 — FAIL.** CL3 C1aF1 18 run 의 기록 chunk 1,350 개를 같은 GPU (lock 단독, nvidia-smi 빈 상태에서 시작) · 같은 TO 설정으로 두 형상에 chunk 마다 번갈아 재풀이.
+
+| 지표 | `gripper` · palm off (270) | 최종 (1,349) |
+|---|---:|---:|
+| **chunk 별 시간비 (최종 / 기준)** | | **median 2.65** (기준 ≤ 2.0), p90 3.21, max 11.57 · 2.0 이하 chunk 8.3 % |
+| wall ms median / p90 / max | 31.3 / 61.6 / 381.9 | 92.8 / 175.1 / 466.6 |
+| 단계 median ms: FK · ESDF 질의 · clearance | 5.03 · 8.97 · 2.09 | 23.31 · 32.81 · 8.11 |
+| 단계 median ms: QP build · OSQP | 3.64 · 3.05 | 3.68 · 3.14 |
+| SQP 반복 3 / 2 / 1 | 1030 / 320 / 0 | 1000 / 347 / 3 |
+| status feasible / optimal / violated | 970 / 320 / 60 | 940 / 350 / 60 |
+| 시간 예산 종료 (`time_budget_hit`) | 0 | 0 |
+
+- 늘어난 시간은 구 수에 비례하는 단계 (FK · ESDF 질의 · clearance) 에서 온다. QP 단계는 거의 같다.
+- run 별 시간비 median 은 17 / 18 run 이 2.51 – 3.07, `ep3_s31` 만 1.51.
+- **이번 replay 에서 시간 예산 종료와 제약 위반 상태의 건수가 증가하지 않았다.** 동기식 시뮬레이션은 계산 중 물리 시간을 멈출 뿐, solver 의 wall-clock 종료 조건을 무효화하지 않는다 — 실물 실시간 실행 가능성은 확인하지 않았다 (재측정 대기 #44).
+- 측정 한계: 측정 내내 다른 세션의 CPU 부하 (load1 median 27.0, 24.0 – 35.9). 두 형상을 번갈아 풀어 비교 조건은 같지만 절대 ms 는 부하 영향을 받는다. 재측정은 진행 조건이 아니다 (사용자 판정).
+
+figure: [실제 씬](figures/t46/t46f-v-scene.png) (왼손 손바닥 · FT sensor · arm_5 의 MJCF collision 겉면과 구 단면, 이전 `arms` · palm off 대 최종 — 이전 FT 는 구 0 개, 이전 arm_5 구는 MJCF 몸통 아래 손 쪽으로 뻗는다) · [TO 시간](figures/t46/t46f-v-timing.png) · [판정 표](figures/t46/t46f-v-table.png) (+ `.json`).
+
+### 4. 사용자 판정 (V-T46f-A14 뒤)
+
+- **상태: 형상 · 회귀 · 호환성 PASS. TO 상대 비용 기준 FAIL. 계산 비용 증가를 수용하여 실험용 적용 및 단계 2 진행 승인.**
+- median 비 ≤ 2.0 은 FAIL 로 유지 (사후에 기준을 올리지 않는다). overflow 10 mm 변경 · 손목 / palm 비용 분리는 지금 필수 아님 (#45). 모든 비교 조건에 같은 최종 형상 · TO 설정. 지금은 속도를 맞추려고 형상 정확도를 낮추지 않는다.
+
+### 5. 실행 경로 오류와 정정 (2026-10-14)
+
+`scripts/setup/env.sh` 는 마지막에 메인 checkout 으로 `cd` 하고, `pyproject.toml` 의 `pythonpath = ["."]` 는 cwd 의 코드를 import 한다. 그래서 worktree 에서 env.sh 를 source 한 뒤 돌린 실행 둘이 메인 tree 코드를 검사했다: A14c 의 첫 묶음 pytest (결과 폴더 `pytest_chunks_INVALID_main_tree/` 로 보존) 와 T46e-apply 의 CUDA 6 파일 첫 실행 (위 "T46e" 절 §6 에서 정정). 두 경우 모두 무효 결과를 보존하고 올바른 코드에서 다시 돌렸으며 commit 이력은 다시 쓰지 않았다. 이후 모든 검증은 실행 경로 guard 를 쓴다.
+
+### 6. 한계 · 측정하지 않은 것 · 되돌아올 지점
+
+- closed-loop 없음 — 단계 2 (진단 장면) – 5 와 CL4 는 이 형상으로 이제 시작한다 (#46).
+- TO 시간은 C1aF1 18 run 만, 손목 / palm 분리 없음 (#45), 실물 비동기 예산 없음 (#44).
+- 반대 손과의 self-collision 은 범위 밖 (참고 거리만).
+- 되돌아올 지점: 실시간 예산이 실험을 막으면 overflow 10 mm (넘침 기준이 바뀌는 별도 설계 변경 → 재판정 · 재-audit) 를 모든 조건에 같이.
+
+### 7. 산출물
+
+- 코드 (A14c worktree `.claude/worktrees/t46f-a14-apply`, 메인 적용은 T47 계열 측정 종료 뒤): patch `results/development/20261013T135703+0900_cf38c9dbca7b_e00b546bda0d/impl/T46f-A14c/diff_a14c_on_cf38c9db.patch` (md5 f949fa24…).
+- handoff: [`T46f.task.md`](handoff/T46f.task.md) · [`T46f-A14.verify.json`](handoff/T46f-A14.verify.json) · `T46f-A14.impl.md` (A14 · A14b · A14c, 메인 적용 때 들어온다).
+- raw: `results/development/20261014T155631+0900_cf38c9dbca7b_04a1d797f62a/verify/T46f-A14/` (`raw/agg_timing.json` · `raw/timing/` · `raw/audit.json` · `raw/palm_coverage.json` · `raw/pose_check_final.json` · `baseline/` · `logs/` · `p/`).
