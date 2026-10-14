@@ -8,7 +8,7 @@
 
 | | **A — 메인 (develope)** | **B — identity · phase source 분석** |
 |---|---|---|
-| 세션 | 지금 본 세션 (`ag3s-vla-development-d2`, 이름이 바뀌면 ListAgents 로 확인) | 새 세션 (T52-T57 세션 + 재검증 세션 통합) |
+| 세션 | 메인 develope 세션. 2026-10-14 에 새 세션으로 교체 (인계: [`HANDOFF_A_main.md`](HANDOFF_A_main.md)). **이름은 ListAgents 로 확인 — 새 A 가 시작 시 B · 다른 세션에 자기 이름을 알린다** (이전 이름 `ag3s-vla-development-d2`) | 새 세션 (T52-T57 세션 + 재검증 세션 통합) |
 | 기준 문서 | `doc/plans/develope_PLAN.md` (진행 정본) | develope_PLAN 의 DX-01 identity · DX-02 · DX-03 절 |
 | 맡는 DX | DX-00 (평가 정의 · geometry, **T60 P · H 창 포함**), DX-01 **extent**, DX-04 LTE, DX-05, DX-06, DX-07, DX-09 | DX-01 **identity source** (attention head 선택 T51 · T56 · **T61** 통합, 명사 query), DX-02 HSR 대 strong rule (T55, T57 단계 2 probe 정의), DX-03 설계 |
 | 실행 | **closed-loop 실행 · GPU 일정 조율 전부.** 서빙 코드 변경의 유일한 writer | offline 분석만. 새 rollout · 서빙 변경이 필요하면 task 문서로 A 에 요청 (A 가 실행) |
@@ -51,7 +51,7 @@
 
 ```
 [사용자 지시 · 세션 통합] development 세션을 2 개로 정리합니다. 역할 정본: AG3S/ag3s/docs/handoff/SESSIONS_A_B.md (먼저 읽으세요).
-- 메인 A = ag3s-vla-development-d2 (develope_PLAN · 서빙 코드 · closed-loop · GPU 일정 · 공유 로그 commit).
+- 메인 A = 메인 develope 세션 (이전 이름 ag3s-vla-development-d2, 새 세션으로 교체 중 — 새 A 가 이름을 알립니다) (develope_PLAN · 서빙 코드 · closed-loop · GPU 일정 · 공유 로그 commit).
 - 새 세션 B = identity · phase source 분석 (이 세션과 재검증 세션 e4 를 합친 것). 이 세션은 인계 후 종료합니다.
 
 이 세션에서 할 일 (순서대로, 새 STEP 은 시작하지 않습니다):
@@ -65,7 +65,7 @@
    (e) B 가 다음에 할 일 순서 추천과 그 근거, A 에 요청할 서빙 · closed-loop 작업 (T57 은 이미 A 에 위임됨)
    (f) 알려진 함정 (head 0 기록 ep1800 · long 제외 등)
 4. 자기 파일 (handoff · figures · t5x code · test) 을 pathspec 으로 commit 합니다 (공유 로그 · 다른 세션 파일 제외). push 하지 않습니다.
-5. A (ag3s-vla-development-d2) 에 "인계 완료 + commit hash + HANDOFF 경로" 를 보내고, 사용자에게 종료해도 된다고 보고합니다.
+5. A (새 이름을 알려 오면 그 이름, 아직이면 HANDOFF 문서에만 남김) 에 "인계 완료 + commit hash + HANDOFF 경로" 를 보내고, 사용자에게 종료해도 된다고 보고합니다.
 GPU 를 쓰면 공용 lock · nvidia-smi 확인 · 시작/끝 알림을 지킵니다.
 ```
 
@@ -73,7 +73,7 @@ GPU 를 쓰면 공용 lock · nvidia-smi 확인 · 시작/끝 알림을 지킵�
 
 ```
 [사용자 지시 · 세션 통합] development 세션을 2 개로 정리합니다. 역할 정본: AG3S/ag3s/docs/handoff/SESSIONS_A_B.md (먼저 읽으세요).
-- 메인 A = ag3s-vla-development-d2 (develope_PLAN · 서빙 코드 · closed-loop · GPU 일정 · 공유 로그 commit). T60 의 P · H 평가 정의 (종료 구간 술어) 는 A 가 이어받습니다.
+- 메인 A = 메인 develope 세션 (이전 이름 ag3s-vla-development-d2, 새 세션으로 교체 중 — 새 A 가 이름을 알립니다) (develope_PLAN · 서빙 코드 · closed-loop · GPU 일정 · 공유 로그 commit). T60 의 P · H 평가 정의 (종료 구간 술어) 는 A 가 이어받습니다.
 - 새 세션 B = identity · phase source 분석 (이 세션과 T52-T57 세션을 합친 것). T61 의 선택 · held-out 분석은 B 가 이어받습니다. 이 세션은 인계 후 종료합니다.
 
 이 세션에서 할 일 (순서대로, 새 STEP 은 시작하지 않습니다):
@@ -87,14 +87,14 @@ GPU 를 쓰면 공용 lock · nvidia-smi 확인 · 시작/끝 알림을 지킵�
    (e) A 로 넘길 것 (T60 P · H 술어의 정의 · 코드 위치, T60b 복귀 미도달 진단의 후속) 과 B 로 넘길 것 (T61 분석 순서)
    (f) 알려진 함정
 4. 자기 파일 (T61 code · test · handoff · figures) 을 pathspec 으로 commit 합니다 (공유 로그 · 다른 세션 파일 제외). push 하지 않습니다.
-5. A (ag3s-vla-development-d2) 에 "인계 완료 + commit hash + HANDOFF 경로" 를 보내고, 사용자에게 종료해도 된다고 보고합니다.
+5. A (새 이름을 알려 오면 그 이름, 아직이면 HANDOFF 문서에만 남김) 에 "인계 완료 + commit hash + HANDOFF 경로" 를 보내고, 사용자에게 종료해도 된다고 보고합니다.
 GPU 를 쓰면 공용 lock · nvidia-smi 확인 · 시작/끝 알림을 지킵니다.
 ```
 
 ## 부록 C — 새 세션 B 를 열 때 보낼 프롬프트
 
 ```
-이 세션은 development 의 "B — identity · phase source 분석" 세션입니다. 이전 두 세션 (T52-T57_ATS,HSR 개선작업 · 재검증 작업(T44~T56)) 을 합쳐 이어받습니다. 메인 세션 A 는 ag3s-vla-development-d2 입니다 (ListAgents 로 이름 확인).
+이 세션은 development 의 "B — identity · phase source 분석" 세션입니다. 이전 두 세션 (T52-T57_ATS,HSR 개선작업 · 재검증 작업(T44~T56)) 을 합쳐 이어받습니다. 메인 세션 A 의 이름은 ListAgents 로 확인합니다 (A 가 알려 옵니다; 이전 이름 ag3s-vla-development-d2).
 
 먼저 읽을 것 (순서):
 1. CLAUDE.md · .claude/ag3s-rules.md · AG3S/ag3s/docs/handoff/SESSIONS_A_B.md (역할 · 소유권 · 조율 규칙의 정본)
@@ -113,5 +113,5 @@ GPU 를 쓰면 공용 lock · nvidia-smi 확인 · 시작/끝 알림을 지킵�
 
 진행 원칙: 설명 → 사용자 질문 (멈춤) → 판정 → 확정된 것만 수정 · 검증 → 기록. 사전 고정 기준을 사후에 바꾸지 않고, 제안 방법의 우수성을 전제하지 않습니다. 보고는 목적 + 이전 (V11AB = L8H2 서빙) 대비 before → after 로, develope_PLAN 의 어느 Figure · Table 에 쓰이는지 함께 적습니다.
 
-첫 응답에서 할 일: 위 문서를 읽고 (1) 이어받은 STEP 상태 표, (2) 판정 대기 질문 목록, (3) 다음 작업 순서 추천 을 정리해 저에게 보고한 뒤 멈추세요. 그리고 A (ag3s-vla-development-d2) 에 "B 세션 시작" 을 알리세요. 아직 실행은 시작하지 않습니다.
+첫 응답에서 할 일: 위 문서를 읽고 (1) 이어받은 STEP 상태 표, (2) 판정 대기 질문 목록, (3) 다음 작업 순서 추천 을 정리해 저에게 보고한 뒤 멈추세요. 그리고 A 에 "B 세션 시작" 을 알리세요. 아직 실행은 시작하지 않습니다.
 ```
