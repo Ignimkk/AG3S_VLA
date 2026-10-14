@@ -339,6 +339,17 @@ def hold_keyframe_pose(m, d):
         d.ctrl[actuator] = d.qpos[m.jnt_qposadr[joint]]
 
 
+# T46f pilot — begin
+def apply_target_offset_xy(record, offset_xy):
+    """T46f 변형 배치 pilot: target 과일의 초기 xy 만 옮긴 **새** record 를 돌려준다 (원 record 는 그대로)."""
+    tgt = record["target_fruit"]
+    pose = [float(v) for v in record["initial_fruit_poses"][tgt]]
+    pose[0] += float(offset_xy[0])
+    pose[1] += float(offset_xy[1])
+    return dict(record, initial_fruit_poses=dict(record["initial_fruit_poses"], **{tgt: pose}))
+# T46f pilot — end
+
+
 def reset_randomized_scene(m, d, record, settle_seconds=1.5):
     """Restore the exact initial state the recorded episode started from.
 
@@ -923,6 +934,18 @@ def main():
         help="move non-preloaded fruits this many metres radially away from the basket "
              "during a fruit-grid reset (inference-only; requires --fruit-layout-index)",
     )
+    # T46f pilot — begin
+    ap.add_argument(
+        "--target-offset-xy",
+        type=float,
+        nargs=2,
+        default=None,
+        metavar=("DX", "DY"),
+        help="T46f 변형 배치 pilot — 16D randomized episode 의 target 과일 초기 위치를 world x · y 로 "
+             "DX · DY m 만큼 옮긴다 (z · 자세 · 다른 물체 그대로, settle 은 기존 그대로). 진단용, 기본 off. "
+             "--model rby1_randomized_pick_place_16d 에서만",
+    )
+    # T46f pilot — end
     ap.add_argument(
         "--seed",
         type=int,
@@ -981,6 +1004,13 @@ def main():
         ap.error("--obstacle-stop-distance must be non-negative")
     if not np.isfinite(args.fruit_basket_offset) or args.fruit_basket_offset < 0:
         ap.error("--fruit-basket-offset must be a finite non-negative distance")
+    # T46f pilot — begin
+    if args.target_offset_xy is not None:
+        if args.model != "rby1_randomized_pick_place_16d":
+            ap.error("--target-offset-xy requires --model rby1_randomized_pick_place_16d")
+        if not all(np.isfinite(v) and abs(v) <= 0.10 for v in args.target_offset_xy):
+            ap.error("--target-offset-xy values must be finite and within ±0.10 m")
+    # T46f pilot — end
     if args.fruit_layout_index is not None and args.model != "rby1_transport_14d":
         ap.error("--fruit-layout-index requires --model rby1_transport_14d")
     if args.fruit_layout_index is None and (
@@ -1206,6 +1236,13 @@ def main():
             randomized_episode = load_randomized_episode(args.episode_index)
         except (FileNotFoundError, ValueError) as exc:
             ap.error(str(exc))
+        # T46f pilot — begin
+        if args.target_offset_xy is not None:
+            tgt = randomized_episode["target_fruit"]
+            randomized_episode = apply_target_offset_xy(randomized_episode, args.target_offset_xy)
+            print(f"  [T46f pilot] target {tgt} initial xy moved by "
+                  f"({args.target_offset_xy[0]:+.3f}, {args.target_offset_xy[1]:+.3f}) m")
+        # T46f pilot — end
         reset_randomized_scene(m, d, randomized_episode)
         split = randomized_split_of(args.episode_index)
         print(
@@ -1472,6 +1509,9 @@ def main():
                            mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g)
                            for g in policy_hidden_geoms]}
                       if args.obstacle_policy_hidden else {}),
+                   # T46f pilot — only when on (off: the manifest is the one from before).
+                   **({"episode_target_offset_xy": [float(v) for v in args.target_offset_xy]}
+                      if args.target_offset_xy is not None else {}),
                    "fruit_layout_index": args.fruit_layout_index,
                    "fruit_slot_order": list(args.fruit_slot_order or ()),
                    "fruit_preloaded": list(args.fruit_preloaded or ()),
