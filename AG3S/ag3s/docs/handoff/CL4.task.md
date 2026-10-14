@@ -21,7 +21,7 @@
 
 | arm | 블록 | target field policy | extent | 비고 |
 |---|---|---|---|---|
-| **X1** | extent | ③ LTE = `exclude-authorized --target-permission-strict --nonauthorized-target-margin obstacle` | ball (기본 `--target-exclusion ball`) | V11AB 의 extent |
+| **X1** | extent | ③ LTE = `exclude-authorized --target-permission-strict --nonauthorized-target-margin obstacle` | ball (기본 `--target-exclusion ball`) + grounding split `--attention-split-radius-mm 12 --attention-split-ratio-source raw` (X2 – G4 와 같게) | V11AB 의 extent |
 | **X2** | extent | ③ | ball_owned (`--target-exclusion ball-owned --owned-max-dist-voxels 3 --attention-split-radius-mm 12 --attention-split-ratio-source raw`) | C1a extent |
 | **X3** | extent | ③ | ball_owned + F1 (`--nontarget-evidence surface`) | 채택한 extent 방법 (T46c) |
 | **X4** | extent · 정책 | ③ | oracle-visible (X2 bundle + `--target-extent oracle-visible`, client `--safe-oracle-seg`) | 관측 기반 비교 기준선 (상한 아님) |
@@ -51,3 +51,10 @@
 - **중단:** infra 실패 (server crash · 기록 불완전 · import 경로가 snapshot 밖) 가 run 의 10 % 를 넘으면 멈추고 보고한다. 결과 내용으로는 멈추지 않는다.
 - 예산: 90 run, 예상 GPU wall ≈ 3.5 – 4 h (CL3 실측 run 당 ≈ 4.6 min, 서버 2 병렬, 형상 비용 증가분 포함 추정). 초과가 예상되면 추가분만 사용자에게 알린다.
 - 산출: `verify/CL4/` (runs · replay · analysis), `handoff/CL4.verify.json`, `figures/cl4/` (실제 장면 · 그래프 · 표).
+
+## 실행 준비 기록 (lead, 2026-10-14)
+- 준비 (verifier): `verify/CL4/p/` 스크립트, CPU dry run 으로 5 arm 의 flag 가 모두 받아들여지고 1,349 구를 짓는 것을 확인, guard 양성 5 · 음성 10 (다른 arm 의 log) 확인, 분석 도구를 CL3 기록으로 시험 (기존 결과 재현).
+- **lead 정정 (실행 전):** 처음 준비본은 X1 에 grounding split flag (12 mm · raw) 가 없어 X1 → X2 가 extent 와 split 두 가지를 바꿨다. 사용자 판정 "LTE 고정, extent 만 변경" 에 맞춰 X1 에도 같은 split 을 넣었다 (`env.sh`, X1 guard). 다시 dry run · guard 시험 통과. 이 split 은 attention 후보 재군집 설정이며 extent 가 아니다.
+- G4 에서 `--target-permission-strict` · `--nonauthorized-target-margin obstacle` 은 받아들여지지만 exclude-all 에서는 비권한 행이 target 을 보지 않아 효과가 거의 없다 (X4 와 정책 외 flag 를 같게 둔 결과).
+- X4 · G4 의 초기 chunk 는 oracle 표본이 쌓이기 전이라 ball_owned 로 돈다 (설계).
+- 예상 시간 갱신: 4.0 – 4.5 h (+ cuRobo 기준선 약 3 min). run 수는 90 그대로.
