@@ -1176,7 +1176,18 @@ class SafePolicy:
         }
         if manip is not None:
             try:
-                reach = parent_reach(model, q, parent_link, manip.centroid)
+                q_reach = q
+                if getattr(self.ag3s, "reach_at_capture", False):
+                    # V11AB-pb1: reach at the pose the manipulated geometry was observed with
+                    # (`AG3S.reach_at_capture`); the hand-now distance is kept in the record.
+                    q_cap = self.ag3s.capture_state(int(manip.last_seen_frame))
+                    alignment["reach_now_mm"] = round(parent_reach(model, q, parent_link, manip.centroid) * 1000.0, 2)
+                    if q_cap is not None and len(q_cap) == len(q):
+                        q_reach = q_cap
+                        alignment["reach_state"] = f"capture frame {int(manip.last_seen_frame)}"
+                    else:
+                        alignment["reach_state"] = "now (no capture state kept)"
+                reach = parent_reach(model, q_reach, parent_link, manip.centroid)
                 if self._last_q_now is not None and len(self._last_q_now) == len(q):
                     # 직전 요청 이후 parent link 원점이 움직인 거리 — 조작 대상 기하(직전 프레임
                     # 관측)와 지금 자세 사이의 시점 차이가 얼마나 비싼가.

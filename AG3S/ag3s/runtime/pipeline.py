@@ -240,6 +240,15 @@ class AG3S:
         #: (`ManipulatedIdentity.frame` / `last_seen_frame`). `attach()` snapshots the manipulated
         #: geometry with the state **it was observed at**, not the attach request's — see `attach`.
         self._state_by_frame: dict[int, np.ndarray] = {}
+        #: V11AB-pb1 (benchmark branch, 2026-10-14) — the grasp reach gate measured at the capture state.
+        #: ``False`` (default) = V11AB: ``attach``'s reach gate uses the attach request's ``robot_state``,
+        #: i.e. the hand **now** against the manipulated object's **last observed** centroid. Once the
+        #: object is lifted out of view (``occluded``) that centroid stays where it was seen while the hand
+        #: rises, so the distance grows with the lift and a real grasp is refused (Panda/LIBERO SL5b:
+        #: 6 of 7 failures). ``True`` = the gate pairs the centroid with the hand pose of the frame the
+        #: geometry was captured at (the same ``_snapshot_state`` the held snapshot already uses, T32 H2),
+        #: and that frame's state is kept in ``_state_by_frame`` as long as it is the last-seen one.
+        self.reach_at_capture: bool = False
         #: T32 H3: the last accepted surface fit of the manipulated object before a grasp
         #: (`_target_ball`) — `(centre, radius)`, base frame. Its place on the table is one of the
         #: held object's old traces cleared at attach.
@@ -723,7 +732,11 @@ class AG3S:
                 raise AttachRejected("reach: the target has neither a centroid nor points, so "
                                      "its distance to the hand cannot be checked",
                                      limit_m=float(reach), parent_link=str(parent_link))
-            dist = parent_reach(self.constraint_robot_model, robot_state, str(parent_link),
+            reach_state = robot_state
+            if self.reach_at_capture:
+                # V11AB-pb1: the centroid against the hand pose it was observed with (see __init__).
+                reach_state = self._snapshot_state(geometry, robot_state, geometry_state)[0]
+            dist = parent_reach(self.constraint_robot_model, reach_state, str(parent_link),
                                 centroid)
             if dist > float(reach):
                 raise AttachRejected(
@@ -933,6 +946,11 @@ class AG3S:
             None if self.held_free_observed_pad is None or self._last_object_points is None
             else self._last_object_points.copy())
         return extra
+
+    def capture_state(self, frame: int) -> Optional[np.ndarray]:
+        """The robot state grounding frame ``frame`` was captured at (T32 H2 history), or None."""
+        q = self._state_by_frame.get(int(frame))
+        return None if q is None else np.asarray(q, np.float64).copy()
 
     def _snapshot_state(self, geometry, robot_state, geometry_state):
         """`(q, source)` to snapshot `geometry` with (T32 H2): explicit > the frame the manipulated
@@ -1531,8 +1549,10 @@ class AG3S:
         if manipulated is not None and robot_state is not None:
             # T32 H2: which q this frame's geometry was captured at (for `attach`'s snapshot).
             self._state_by_frame[int(manipulated.frame)] = np.asarray(robot_state, np.float64).copy()
+            keep = {int(manipulated.last_seen_frame)} if self.reach_at_capture else set()
             for old_frame in sorted(self._state_by_frame)[:-16]:
-                del self._state_by_frame[old_frame]
+                if old_frame not in keep:
+                    del self._state_by_frame[old_frame]
         # T26 §3: **exclusion geometry only from an admissible manipulated object.** The gate
         # re-checks the evidence (narrowest extent ≤ max opening, not the destination); on failure
         # nothing is excluded, nothing is permitted, and `invariant_violation` is recorded (raised

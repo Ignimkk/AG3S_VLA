@@ -37,7 +37,7 @@ MODES = ("vla_only", "vla_v11ab")
 CLIENT_SCRIPT = PROJECT_ROOT / "benchmark/runners/libero_safe_client.py"
 
 
-def server_argv(mode: str, checkpoint: str, port: int) -> list[str]:
+def server_argv(mode: str, checkpoint: str, port: int, version: str = "V11AB") -> list[str]:
     from AG3S.adapters.panda import profile
 
     if mode == "vla_only":
@@ -48,7 +48,7 @@ def server_argv(mode: str, checkpoint: str, port: int) -> list[str]:
     argv[argv.index("--config") + 1] = "pi05_libero"
     argv[argv.index("--checkpoint") + 1] = checkpoint
     argv[argv.index("--port") + 1] = str(port)
-    return argv + ["--robot", "panda"]
+    return argv + ["--robot", "panda"] + profile.version_server_flags(version)
 
 
 def client_argv(run_dir: str, port: int, args) -> list[str]:
@@ -112,15 +112,19 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
     from common.run_artifacts import create_run, record_execution
 
     port = l0.choose_port(None)
-    s_argv = [str(l0.openpi_python()), "-m", "AG3S.trajopt.serve_safe"] + server_argv(mode, identity["path"], port)
+    s_argv = [str(l0.openpi_python()), "-m", "AG3S.trajopt.serve_safe"] + server_argv(mode, identity["path"], port,
+                                                                                       args.ag3s_version)
     settings = {"step": args.step, "condition": mode, "paired_group": args.run_id, "port": port,
                 "panda_conversion_mode": args.conversion if mode == "vla_v11ab" else None,
+                "ag3s_version": args.ag3s_version if mode == "vla_v11ab" else None,
                 "protocol": protocol_settings(args), "runtime_schedule": runtime_schedule(args),
                 "task_ids": args.task_ids, "episode_ids": args.episode_ids, "seed": args.seed,
                 "safety_level": args.safety_level,
                 "policy_seed_rule": "seed*100000 + task_id*1000 + episode_idx (libero_safe_client.episode_seed)",
                 "checkpoint": identity, "server_argv": s_argv, "data_split": args.data_split, **shared}
-    tag = f"{mode}-{args.conversion}" if mode == "vla_v11ab" else mode
+    tag = mode
+    if mode == "vla_v11ab":
+        tag = f"{mode}-{args.conversion}" if args.ag3s_version == "V11AB" else f"{mode}-{args.ag3s_version}-{args.conversion}"
     if args.safety_level:
         tag = f"L{args.safety_level}-{tag}"
     run_dir = create_run(run_id=f"{args.run_id}-{tag}", settings=settings, checkpoint=identity["path"])
@@ -222,6 +226,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--server-timeout", type=float, default=1800.0)
     ap.add_argument("--busy-gpu-wait", type=float, default=1800.0)
     ap.add_argument("--safety-level", choices=("I", "II"), default=None, help="SafeLIBERO suites only")
+    ap.add_argument("--ag3s-version", default="V11AB",
+                    help="AG3S version served in vla_v11ab mode (AG3S/adapters/panda/profile.py AG3S_VERSIONS)")
     ap.add_argument("--conversion", choices=("A", "B"), required=True,
                     help="Panda reverse conversion for VLA+V11AB (AG3S/adapters/panda/action.py CONVERSION_MODES)")
     ap.add_argument("--dry-run", action="store_true")
@@ -246,7 +252,7 @@ def main(argv=None) -> int:
     identity = l0.checkpoint_identity(Path(args.checkpoint_dir), require=True)
     modes = [m for m in args.modes.split(",") if m]
     if args.dry_run:
-        print(json.dumps({m: server_argv(m, identity["path"], 0) for m in modes}, indent=1))
+        print(json.dumps({m: server_argv(m, identity["path"], 0, args.ag3s_version) for m in modes}, indent=1))
         print(json.dumps(client_argv("<run>", 0, args)))
         print(json.dumps({"protocol": protocol_settings(args), "runtime_schedule": runtime_schedule(args)}, default=str))
         return 0

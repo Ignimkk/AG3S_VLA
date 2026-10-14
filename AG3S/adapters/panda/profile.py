@@ -195,6 +195,22 @@ def v11ab_client_phase(run_client: pathlib.Path = RUN_CLIENT) -> str:
     return m.group(1)
 
 
+#: AG3S versions the benchmark serves: serve_safe flags added to the V11AB argv. ``V11AB`` is the paired-v2
+#: baseline (unchanged algorithm); every ``V11AB-pb<N>`` is an improvement made on feature/panda-benchmark,
+#: recorded in AG3S_BENCHMARK_LOG.md (cause, change, commit, before/after). Flags only add behaviour that is off
+#: in V11AB, so the baseline stays bit-identical.
+AG3S_VERSIONS: dict[str, tuple[str, ...]] = {
+    "V11AB": (),
+    "V11AB-pb1": ("--reach-at-capture",),
+}
+
+
+def version_server_flags(version: str) -> list[str]:
+    if version not in AG3S_VERSIONS:
+        raise ValueError(f"unknown AG3S version {version!r}; known: {sorted(AG3S_VERSIONS)}")
+    return list(AG3S_VERSIONS[version])
+
+
 def v11ab_server_argv(arm: str = V11AB_ARM) -> list[str]:
     req = v11ab_required_args()
     return ["--config", req["config"], "--checkpoint", "<not loaded: perception only>",
@@ -439,6 +455,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         ag3s.held_body_cover = True
     if kw.get("held_free_observed_pad") is not None:
         ag3s.held_free_observed_pad = float(kw["held_free_observed_pad"])
+    if kw.get("reach_at_capture"):
+        ag3s.reach_at_capture = True
     info = {"esdf_bounds": esdf_bounds, "extra_overrides": _jsonable(dict(extra_overrides or {})),
             "n_self_filter_spheres": int(models.self_filter.n_spheres),
             "n_constraint_spheres": int(models.constraint.n_spheres),
@@ -446,6 +464,7 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
             "attached_parent_links": list(parents),
             "held_body_cover": bool(ag3s.held_body_cover),
             "held_free_observed_pad": ag3s.held_free_observed_pad,
+            "reach_at_capture": bool(getattr(ag3s, "reach_at_capture", False)),
             "gripper_max_opening": ag3s.max_opening.record() if hasattr(ag3s.max_opening, "record") else None}
     return ag3s, info
 

@@ -795,7 +795,8 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                subtask_probe_path: str | None = None,
                held_body_cover: bool = False,
                identity: dict | None = None,
-               held_free_observed_pad: float | None = None):
+               held_free_observed_pad: float | None = None,
+               reach_at_capture: bool = False):
     """서버가 쓸 AG3S. 자기 필터는 전신, 제약은 `links` (T27 부터 기본 `gripper` — 손바닥 + 손가락).
 
     **두 모델은 일부러 다르다.** 자기 필터는 바퀴·베이스까지 있어야 한다 — 머리 카메라가 자기
@@ -984,6 +985,10 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
     if identity:
         logging.warning("AG3S identity (T43 T fix 3): %s", ", ".join(
             f"{k}={v}" for k, v in sorted(identity.items())))
+    if reach_at_capture:
+        # V11AB-pb1 — grasp reach gate at the manipulated geometry's capture state (pipeline.reach_at_capture).
+        ag3s.reach_at_capture = True
+        logging.warning("AG3S reach gate at the capture state (V11AB-pb1)")
     if held_free_observed_pad is not None:
         # T43 T fix 2 — the pre-grasp observation, freed at its place on every held frame.
         ag3s.held_free_observed_pad = float(held_free_observed_pad)
@@ -1496,6 +1501,10 @@ def build_parser() -> argparse.ArgumentParser:
                          "collision 뿐이고 그 행이 전부 margin 안쪽 (ESDF − r ≥ 0) 이며 최소 clearance 가 "
                          "현재 상태 (q_now) 보다 작지 않고 refined 가 정책 reference 와 다를 때. 스스로 "
                          "인증된 청크 뒤로 최대 N 청크. 기본 off")
+    ap.add_argument("--reach-at-capture", action="store_true",
+                    help="V11AB-pb1 (benchmark branch): the grasp reach gate (latch evidence and AG3S.attach) pairs "
+                         "the manipulated object's last observed centroid with the robot state of that capture, not "
+                         "with the hand now (an occluded lifted object no longer drifts out of reach). Off = V11AB.")
     ap.add_argument("--held-free-observed-mm", type=float, default=None, metavar="MM",
                     help="T43 T fix 2 — 쥔 동안 매 프레임, 파지 직전 관측한 조작 대상 점들의 **그 자리** "
                          "(base frame, 손을 따라가지 않음) 에서 MM 안의 TSDF voxel 을 비운다 (받침면 + 1 "
@@ -2362,7 +2371,8 @@ def main() -> None:
                             identity=t43t_identity_section(args) or None,
                             held_free_observed_pad=(
                                 None if args.held_free_observed_mm is None
-                                else float(args.held_free_observed_mm) / 1000.0)),
+                                else float(args.held_free_observed_mm) / 1000.0),
+                            reach_at_capture=args.reach_at_capture),
             static_geometry=load_static_geometry(args.static_geometry, args.model_xml,
                                                  links=args.links),
             to_config=to_config,

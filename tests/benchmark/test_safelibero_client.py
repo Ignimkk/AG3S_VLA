@@ -78,3 +78,18 @@ def test_launcher_records_the_safelibero_protocol():
     assert r["control_freq_hz"] == 20 and r["num_steps_wait"] == 20 and "SafeLIBERO" in r["control_freq_source"]
     lib = args()
     assert lp.protocol_settings(lib)["max_steps"] == 220 and lp.protocol_settings(lib)["num_steps_wait"] == 10
+
+
+def test_ag3s_version_flags_reach_the_server_argv():
+    from AG3S.adapters.panda import profile
+    from benchmark.runners import launch_libero_paired as lp
+
+    base = lp.server_argv("vla_v11ab", "<ckpt>", 1)
+    pb1 = lp.server_argv("vla_v11ab", "<ckpt>", 1, "V11AB-pb1")
+    assert "--reach-at-capture" not in base and pb1 == base + ["--reach-at-capture"]
+    assert lp.server_argv("vla_only", "<ckpt>", 1, "V11AB-pb1") == lp.server_argv("vla_only", "<ckpt>", 1)
+    args = profile.parse_v11ab_args(argv=profile.v11ab_server_argv() + profile.version_server_flags("V11AB-pb1"))
+    assert profile.v11ab_build_kwargs(args)["reach_at_capture"] is True
+    assert profile.v11ab_build_kwargs(profile.parse_v11ab_args())["reach_at_capture"] is False
+    with pytest.raises(ValueError):
+        profile.version_server_flags("V99")

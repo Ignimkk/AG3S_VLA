@@ -382,6 +382,14 @@ def check_fixture(path=FIXTURE) -> list[str]:
 SERVE_SAFE_FIXTURE = ROOT / "tests/trajopt/data/sl5a_serve_safe_golden.json"
 #: argparse keys SL5a adds (absent from the pre-SL5a namespace; compared separately for their defaults)
 SL5A_NEW_ARG_KEYS = ("robot",)
+#: Options added after the golden for benchmark-branch improvements (V11AB-pb*), with their off default. They are
+#: left out of the comparison **only while off** in the V11AB / bare argv, so the golden keeps meaning "V11AB as
+#: served"; an option that is on (or a changed default) still shows up as a difference.
+PB_DEFAULT_OFF = {"reach_at_capture": False}
+
+
+def _drop_default_off(d: dict, values: dict) -> dict:
+    return {k: v for k, v in d.items() if not (k in PB_DEFAULT_OFF and values.get(k) == PB_DEFAULT_OFF[k])}
 
 
 def serve_safe_record() -> dict:
@@ -397,10 +405,12 @@ def serve_safe_record() -> dict:
         args = ap.parse_args(argv)
         ss.reject_bad_flag_combinations(ap, args)
         ss.resolve_subtask_gate(args)
-        out[name] = {"namespace": _jsonable({k: v for k, v in vars(args).items() if k not in SL5A_NEW_ARG_KEYS}),
+        values = vars(args)
+        out[name] = {"namespace": _jsonable(_drop_default_off(
+                         {k: v for k, v in vars(args).items() if k not in SL5A_NEW_ARG_KEYS}, values)),
                      "trajopt_config": _jsonable(ss.trajopt_config_from_args(args).to_dict()),
-                     "build_kwargs": _jsonable({k: v for k, v in pf.v11ab_build_kwargs(args).items()}),
-                     "build_call": pf.v11ab_build_call_source()}
+                     "build_kwargs": _jsonable(_drop_default_off(dict(pf.v11ab_build_kwargs(args)), values)),
+                     "build_call": _drop_default_off(pf.v11ab_build_call_source(), values)}
     rng = np.random.default_rng(0)
     raw = {k: rng.random((16, 16)).astype(np.float32)
            for k in ("cam_high", "cam_left_wrist", "cam_right_wrist", "zed_left", "other", "base_0_rgb")}
