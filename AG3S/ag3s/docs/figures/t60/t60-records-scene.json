@@ -1,0 +1,50 @@
+{
+ "ep1807": {
+  "endpoints": {
+   "record": "results/workspace/live_test/20260925_ep1807/run_0000",
+   "role": "selection",
+   "episode": 1807,
+   "used_arm": "left",
+   "target": "apple",
+   "n_frames": 75,
+   "last_t_step": 592,
+   "t_P": 295,
+   "t_H": 335,
+   "frames_removed_P": 38,
+   "frames_removed_H": 33,
+   "first_in_crate_t": 248,
+   "q_err_final": 0.08352533914997506,
+   "tcp_err_final": 0.028394772860697845
+  },
+  "picked_frames": {
+   "처음 in-crate": 31,
+   "P 마지막 유지 frame": 36,
+   "H 마지막 유지 frame": 41,
+   "기록 마지막 frame": 74
+  }
+ },
+ "ep0": {
+  "endpoints": {
+   "record": "results/workspace/live_test/20260925_train/ep0/run_0000",
+   "role": "calibration_train",
+   "episode": 0,
+   "used_arm": "left",
+   "target": "orange",
+   "n_frames": 113,
+   "last_t_step": 896,
+   "t_P": 247,
+   "t_H": 319,
+   "frames_removed_P": 82,
+   "frames_removed_H": 73,
+   "first_in_crate_t": 224,
+   "q_err_final": 0.13970074386525289,
+   "tcp_err_final": 0.06712981781565715
+  },
+  "picked_frames": {
+   "처음 in-crate": 28,
+   "P 마지막 유지 frame": 30,
+   "H 마지막 유지 frame": 39,
+   "기록 마지막 frame": 112
+  }
+ }
+}

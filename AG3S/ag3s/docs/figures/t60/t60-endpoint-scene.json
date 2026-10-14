@@ -1,0 +1,37 @@
+{
+ "runs": {
+  "CL3/C1a_ep11_s111": {
+   "t_P": 204,
+   "t_H": 264,
+   "place_t": 192,
+   "frames": {
+    "recorded place_t": 192,
+    "t_P": 204,
+    "t_H": 264,
+    "horizon end": 599
+   },
+   "q_err_final": 0.048514225282692,
+   "tcp_err_final": 0.011747481033068037
+  },
+  "CL3/C1a_ep110_s1101": {
+   "t_P": 308,
+   "t_H": null,
+   "place_t": 296,
+   "frames": {
+    "recorded place_t": 296,
+    "t_P": 308,
+    "H 미도달 · 마지막 row": 599
+   },
+   "q_err_final": 1.1739102209608108,
+   "tcp_err_final": 0.21430370600066204
+  }
+ },
+ "params": {
+  "dwell_p": 8,
+  "speed_tol": 0.03,
+  "q_tol": 0.35,
+  "tcp_tol": 0.12,
+  "dwell_h": 8
+ },
+ "video_frame_rule": "frame k of third_person_front.mp4 (600 frames, 15 fps) = control row k"
+}
