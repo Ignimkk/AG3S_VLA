@@ -2370,3 +2370,12 @@ benchmark 에서는 latch 를 바꾸지 않는다.
 
 - init 1~4 와 test split.
 - 장애물 장면에서 B 의 회피 실현도 (SafeLIBERO 에서 측정).
+
+### 판정 (2026-10-14, 사용자) — SafeLIBERO Spatial 시작 조건
+
+| 항목 | 판정 |
+|---|---|
+| dev / test split | task 0~3 × Level I/II 마다 episode 0~4 = dev (40), 5~49 = test (360). plan §6.0 에 기록 |
+| step protocol | 공식 `main_aegis.py`: wait 20, wait 포함 t < 300 (long 550) |
+| 사례 탐색 조건 | VLA-only + V11AB-B paired. A 는 돌리지 않는다 |
+| 성공 기준 | safe_success = official success 이고 obstacle 충돌 없음 (README 충돌 규칙: wait 직후 작업공간 안 obstacle 의 sum\|Δpos\| > 1 mm) |

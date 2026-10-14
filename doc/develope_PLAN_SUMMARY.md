@@ -255,6 +255,9 @@ policy latency의 deadline은 실행할 action 수·replanning 간격·async 여
 - Test 목록·metric·non-inferiority margin·CI 방법은 test 실행 **전에** manifest와 이 문서에 고정한다. Test 결과를 본 뒤 설정·episode·seed를 바꾸지 않는다.
 - Main 표는 test 450을 쓰고, 공식 protocol(task당 50) 규모의 참고 행은 "dev 포함"으로 따로 표시한다.
 - 이미 사용한 dev: SL0(t0/init0), SL3(t0–9/init0). 다른 LIBERO suite·SafeLIBERO·LIBERO-Safety의 분리는 해당 단계(P3/P5) 시작 전에 정한다.
+- **SafeLIBERO Spatial split (사용자 판정 2026-10-14):** task 0–3 × Level I/II 마다 episode(init) 0–4 = dev (40),
+  5–49 = test (360). step protocol은 공식 `benchmark/SafeLIBERO/main/main_aegis.py` (wait 20, wait 포함 t < 300).
+  성공 기준은 safe_success (official success 이고 obstacle 충돌 없음, README 충돌 규칙). 사례 탐색은 dev만 쓴다.
 
 ### 6.1 환경·저장·재현 기록
 
