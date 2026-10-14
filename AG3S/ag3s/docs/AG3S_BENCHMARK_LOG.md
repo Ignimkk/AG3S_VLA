@@ -2512,3 +2512,50 @@ A 는 B 보다 계획을 잘 실현한다. 충돌 시점이 t 35 ~ 51 에서 t 7
 1. **V11AB-pb1** — latch / attach `reach` 를 geometry 를 관측한 순간의 자세로 잰다. task success 저하의 공통 원인이다.
 2. arm link 를 제약 모델에 넣는 것. A 충돌 5 건이 여기에 해당한다.
 3. 변환 실현도 (B 의 실현 부족, A 의 saturation).
+
+---
+
+## 개선 기록 — V11AB-pb1 · 변환 C · V11AB-pb2 (2026-10-15, 구현 · CPU 검증까지)
+
+**기록 시각** 2026-10-15 02:30 KST. GPU 검증은 다른 checkout 의 GPU 작업이 끝난 뒤 진행한다 (아래 계획).
+
+### V11AB-pb1 — grasp reach 를 geometry 관측 시점의 자세로 잰다 (commit `3dea2bc0`)
+
+| 항목 | 내용 |
+|---|---|
+| 재현 run · episode | LIBERO t0 init0 smoke4 A · B (`SL5b-smoke.verify.json`), LIBERO 10 V11AB-B 실패 7 중 6 (`SL5b-libero10.verify.json`), SafeLIBERO Level I A 실패 다수 (closing 중 `reach` 실패 12 ~ 45 회) |
+| 관찰 근거 | 들어올린 bowl 이 `occluded` 가 되고 geometry 가 마지막 관측 frame 에 고정된다. latch 와 `AG3S.attach` 는 손의 **지금** 원점에서 재므로 reach 가 120 mm 를 넘는다. 다른 evidence 검사는 모두 통과한다 |
+| 원인 | 시점이 다른 두 값을 비교했다. held snapshot 은 이미 관측 시점 자세를 쓴다(T32 H2). reach 검사만 지금 자세를 썼다 |
+| 변경 | `AG3S.reach_at_capture` (기본 False = V11AB). True 면 latch evidence 와 attach 관문이 centroid 를 그 geometry 를 관측한 frame 의 robot state 와 짝지어 잰다. 그 frame 의 state 는 history 에서 지우지 않는다. 한도 120 mm 와 다른 검사는 그대로 |
+| 파일 | `AG3S/ag3s/runtime/pipeline.py`, `AG3S/trajopt/safe_policy.py`, `AG3S/trajopt/serve_safe.py` (`--reach-at-capture`), `AG3S/adapters/panda/profile.py` (`AG3S_VERSIONS`), `benchmark/runners/launch_libero_paired.py` (`--ag3s-version`) |
+| 검증 (CPU) | `tests/trajopt/test_pb1_reach_at_capture.py` 5 건. V11AB 는 거절하고, pb1 은 capture 시점 reach 50 mm 로 attach 한다. 빈 손 닫힘과 state 가 없을 때는 여전히 거절한다. RB-Y1 golden bit 동일 |
+| development 이식 주의 | flag 하나로 켜진다. RB-Y1 에서도 같은 의미다 (손을 들어올린 뒤 occluded). `_state_by_frame` 이 last-seen frame 을 지우지 않도록 바뀐다(flag 켤 때만). 이 문제는 development(d2)에도 전달되어 있다 |
+
+### 변환 C — `lag_inverse_tracking` (adapter, commit `6d1723de`)
+
+| 항목 | 내용 |
+|---|---|
+| 재현 | SL5c Level I A: refined 는 obstacle 을 피했는데 실행은 관통한 call 이 있다 (t1e2, t3e1, t3e4 등) |
+| 원인 | A 는 직전 행의 deviation 이 계획대로 실현됐다고 가정한다. 그래서 clip 된 행의 부족분을 버린다. refined 가 reference 로 돌아온 뒤에는 원래 bit 를 내보내서 1 차 lag 꼬리(α · d)가 계속 밀고 나간다 |
+| 변경 | response model 이 예측하는 실제 deviation 을 추적하고, refined 누적 위치를 목표로 한다: `Dx_k = ((D*_k − D^_{k−1}) − α d^_{k−1}) / β` |
+| offline 비교 | A run 의 보정 call 965 개에 같은 계획으로 적용했다 (open loop). 예측 경로 − refined p50 15.3 → 10.9 mm. C 가 더 가까운 call 617, 더 먼 call 40. saturated 행 2501 → 3645 |
+| 한계 | refined 자체가 5 행 안에서 p90 110 mm 벗어난다. Panda OSC 의 정상상태 한 step 은 약 12.5 mm 다. 변환만으로는 다 실현할 수 없다 → pb2 |
+
+### V11AB-pb2 — minimal intervention gate (commit `7740ac17`, pb2 = pb1 + gate 10 mm)
+
+| 항목 | 내용 |
+|---|---|
+| 재현 · 근거 | SL5c Level I A 의 보정 call 중 status `feasible`, verdict `budget_only`(위반 없음)가 대부분이다: 15 mm 이하 321, 15 ~ 60 mm 292, 60 mm 초과 66. 위반이 없는 chunk 에서도 경로를 크게 바꾼다 |
+| 원인 | TrajOpt 목적함수의 track + continuity(직전 refined 의 겹치는 꼬리, w 0.5) + deflection-rate(w 20) 가 VLA 의 새 chunk 를 이전 계획 쪽으로 당긴다. Panda 에서는 이것이 큰 action 변화가 된다. official success 11 → 3 의 유력한 원인이다 (**가설, GPU 검증 대상**) |
+| 변경 | `SqpConfig.minimal_intervention` (m, 기본 None = V11AB). SQP 전에 reference 의 step clearance 최소값(검증과 같은 행 · 면제)을 본다. 기준 이상이면 reference 를 그대로 계획으로 낸다. 판정은 `_finish` 로 해서 실제 solve 결과와 같다 (certified geometry 요구 포함) |
+| 기준 10 mm | response model 의 예측 오차를 덮는다 (무변경 chunk p50 약 3 mm, 최대 7.5 mm, SL5a). 이보다 가까운 reference 는 여전히 최적화한다 |
+| 파일 | `AG3S/trajopt/config.py`, `sqp.py`, `safe_policy.py` (`to.minimal_intervention` 기록), `serve_safe.py` (`--minimal-intervention-mm`), `AG3S/adapters/panda/profile.py` |
+| 검증 (CPU) | `tests/trajopt/test_pb2_minimal_intervention.py` 4 건. 깨끗한 reference 는 bit 그대로 OPTIMAL 이다. 기준 안쪽 · 충돌 reference 는 최적화되어 안전하다. V11AB 기본에는 gate 가 없다 |
+| 회귀 | tests/benchmark + tests/trajopt 1584 passed, 6 skipped. 제외한 2 파일은 이 변경과 무관하게 이미 실패한다(legacy path) |
+| development 이식 주의 | gate 는 RB-Y1 에서도 동작한다. 다만 RB-Y1 V11AB 는 free-space 보정을 의도적으로 허용해 왔다 (T43 TA 기록). 이식할 때는 RB-Y1 기준선에서 따로 판정해야 한다 |
+
+### GPU 검증 계획 (다른 checkout 의 GPU 작업 종료 뒤, 이 순서)
+
+1. 원인 재현: LIBERO task 0 ~ 9 × init 0, VLA-only + V11AB-pb1 (B). 기준은 V11AB-B 3 / 10 이고, reach 실패 6 건이 회복되는지 본다.
+2. 같은 dev 집합: SafeLIBERO Spatial Level I dev 20, VLA-only + V11AB-pb2 (C). V11AB-A 3 / 20 safe success · B 0 / 20 과 비교한다.
+3. 비저하 확인: LIBERO task 0 ~ 9 × init 0, VLA-only + V11AB-pb2 (C).
