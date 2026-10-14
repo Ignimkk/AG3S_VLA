@@ -59,6 +59,40 @@ def client_argv(run_dir: str, port: int, args) -> list[str]:
                 ["--safety-level", args.safety_level] if args.safety_level else [])
 
 
+def _is_safelibero(args) -> bool:
+    return args.task_suite_name.startswith("safelibero")
+
+
+def protocol_settings(args) -> dict:
+    """``l0.protocol_settings`` for LIBERO; for SafeLIBERO the same keys with the official main_aegis.py step
+    protocol (``libero_safe_client.safelibero_protocol``) — what the client actually runs."""
+    if not _is_safelibero(args):
+        return l0.protocol_settings(args)
+    from benchmark.runners import libero_safe_client as sc
+
+    out = l0.protocol_settings(argparse.Namespace(**{**vars(args), "task_suite_name": "libero_spatial"}))
+    total = sc.SAFELIBERO_TOTAL_STEPS[args.task_suite_name]
+    out.update({"suite": args.task_suite_name, "safety_level": args.safety_level,
+                "max_steps": total - sc.SAFELIBERO_NUM_STEPS_WAIT, "num_steps_wait": sc.SAFELIBERO_NUM_STEPS_WAIT,
+                "loop": f"t < max_steps + num_steps_wait = {total} (wait steps counted)",
+                "safelibero": sc.safelibero_protocol()})
+    return out
+
+
+def runtime_schedule(args) -> dict:
+    if not _is_safelibero(args):
+        return l0.runtime_schedule(args)
+    from benchmark.runners import libero_safe_client as sc
+
+    path = PROJECT_ROOT / "benchmark/SafeLIBERO/safelibero/libero/libero/envs/env_wrapper.py"
+    out = l0.runtime_schedule(args)
+    hz = l0.libero_control_freq(path)
+    out.update({"control_freq_hz": hz, "control_freq_source": f"{path.relative_to(PROJECT_ROOT)} ControlEnv.__init__ default",
+                "control_period_s": 1.0 / hz, "policy_call_period_sim_s": out["replan_steps"] / hz,
+                "num_steps_wait": sc.SAFELIBERO_NUM_STEPS_WAIT, "first_policy_call_env_step": sc.SAFELIBERO_NUM_STEPS_WAIT})
+    return out
+
+
 def gpu_compute_apps() -> list[str]:
     out = subprocess.run(["nvidia-smi", "--query-compute-apps=pid,used_memory", "--format=csv,noheader"],
                          capture_output=True, text=True, check=False).stdout
@@ -81,7 +115,7 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
     s_argv = [str(l0.openpi_python()), "-m", "AG3S.trajopt.serve_safe"] + server_argv(mode, identity["path"], port)
     settings = {"step": args.step, "condition": mode, "paired_group": args.run_id, "port": port,
                 "panda_conversion_mode": args.conversion if mode == "vla_v11ab" else None,
-                "protocol": l0.protocol_settings(args), "runtime_schedule": l0.runtime_schedule(args),
+                "protocol": protocol_settings(args), "runtime_schedule": runtime_schedule(args),
                 "task_ids": args.task_ids, "episode_ids": args.episode_ids, "seed": args.seed,
                 "safety_level": args.safety_level,
                 "policy_seed_rule": "seed*100000 + task_id*1000 + episode_idx (libero_safe_client.episode_seed)",
@@ -214,6 +248,7 @@ def main(argv=None) -> int:
     if args.dry_run:
         print(json.dumps({m: server_argv(m, identity["path"], 0) for m in modes}, indent=1))
         print(json.dumps(client_argv("<run>", 0, args)))
+        print(json.dumps({"protocol": protocol_settings(args), "runtime_schedule": runtime_schedule(args)}, default=str))
         return 0
     shared = {"versions": versions()}
     runs = {m: run_mode(m, args, identity, shared) for m in modes}

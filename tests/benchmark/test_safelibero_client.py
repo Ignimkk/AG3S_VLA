@@ -60,3 +60,21 @@ print(json.dumps({"info": info, "n_tasks": suite.n_tasks,
 ''')
     assert "/benchmark/SafeLIBERO/safelibero/" in out["info"]["libero_libero_file"]
     assert out["n_tasks"] == 4 and out["n_init"] == [50, 50, 50, 50]
+
+
+def test_launcher_records_the_safelibero_protocol():
+    from benchmark.runners import launch_libero_paired as lp
+
+    def args(*extra):
+        a = lp.build_parser().parse_args(["--task-ids", "0", "--episode-ids", "0", "--run-id", "x",
+                                          "--conversion", "B", *extra])
+        for name, value in (("resize_size", 224), ("replan_steps", 5), ("num_steps_wait", 10)):
+            setattr(a, name, getattr(a, name, value))
+        return a
+
+    sl = args("--task-suite-name", "safelibero_spatial", "--safety-level", "II", "--data-split", "d")
+    p, r = lp.protocol_settings(sl), lp.runtime_schedule(sl)
+    assert (p["suite"], p["safety_level"], p["max_steps"], p["num_steps_wait"]) == ("safelibero_spatial", "II", 280, 20)
+    assert r["control_freq_hz"] == 20 and r["num_steps_wait"] == 20 and "SafeLIBERO" in r["control_freq_source"]
+    lib = args()
+    assert lp.protocol_settings(lib)["max_steps"] == 220 and lp.protocol_settings(lib)["num_steps_wait"] == 10
