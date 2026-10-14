@@ -1,0 +1,466 @@
+{
+ "_comment": "numbers only; status partial — selection / held-out evaluation and judgement belong to session B",
+ "step": "T61",
+ "status": "partial",
+ "date": "2026-10-14",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6",
+ "code_state": {
+  "head_at_write": "38307ddbac423527cb797a08cb968e60e3994796",
+  "pre_registration_commit": "95b6586c080cdcb630ef03523bc7a376d86c6807",
+  "snapshot_head": "95b6586c080cdcb630ef03523bc7a376d86c6807",
+  "serving_md5_equal_to_T54c_snapshot": true
+ },
+ "runs": [
+  {
+   "id": "select",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/chain_select.sh (t61_select.py over t51b_study, P window, records t2 ep1807 ep0 ep500 ep1200)"
+  },
+  {
+   "id": "rollout",
+   "command": "nohup setsid /mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/p/launch_t61.sh > /mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/launch_t61.out"
+  },
+  {
+   "id": "extract",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/p/run_extract.sh"
+  }
+ ],
+ "baseline_check": {
+  "curobo": {
+   "n_frames": 15,
+   "start_violated": 10,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -9.171877401271193,
+   "expected_curobo": {
+    "start_violated": 10,
+    "has_target": 15,
+    "frame0_clearance_before_mm": -9.171877401271193
+   },
+   "match": true
+  }
+ },
+ "numbers": {
+  "heldout_episodes": {
+   "_comment": "T61 pre-registered policy seeds (t54c_rollout, written before any rollout). One seed per episode, seed = episode_index * 10 + 1. Port split: layout slot even -> 8292, odd -> 8293. Episodes = t61_records.EXPECTED (selection rule in T61.task.md). Arm C1a = current serving, clustering.placed_no_seed_certify off (default).",
+   "episodes": [
+    {
+     "slot": 0,
+     "episode": 1872,
+     "seed": 18721,
+     "port": 8292
+    },
+    {
+     "slot": 1,
+     "episode": 1841,
+     "seed": 18411,
+     "port": 8293
+    },
+    {
+     "slot": 2,
+     "episode": 1858,
+     "seed": 18581,
+     "port": 8292
+    },
+    {
+     "slot": 3,
+     "episode": 1827,
+     "seed": 18271,
+     "port": 8293
+    },
+    {
+     "slot": 4,
+     "episode": 1876,
+     "seed": 18761,
+     "port": 8292
+    },
+    {
+     "slot": 5,
+     "episode": 1829,
+     "seed": 18291,
+     "port": 8293
+    },
+    {
+     "slot": 6,
+     "episode": 1846,
+     "seed": 18461,
+     "port": 8292
+    },
+    {
+     "slot": 7,
+     "episode": 1879,
+     "seed": 18791,
+     "port": 8293
+    },
+    {
+     "slot": 8,
+     "episode": 1880,
+     "seed": 18801,
+     "port": 8292
+    },
+    {
+     "slot": 9,
+     "episode": 1833,
+     "seed": 18331,
+     "port": 8293
+    },
+    {
+     "slot": 10,
+     "episode": 1898,
+     "seed": 18981,
+     "port": 8292
+    },
+    {
+     "slot": 11,
+     "episode": 1867,
+     "seed": 18671,
+     "port": 8293
+    },
+    {
+     "slot": 12,
+     "episode": 1916,
+     "seed": 19161,
+     "port": 8292
+    },
+    {
+     "slot": 13,
+     "episode": 1869,
+     "seed": 18691,
+     "port": 8293
+    },
+    {
+     "slot": 14,
+     "episode": 1838,
+     "seed": 18381,
+     "port": 8292
+    },
+    {
+     "slot": 15,
+     "episode": 1919,
+     "seed": 19191,
+     "port": 8293
+    }
+   ]
+  },
+  "rollout": {
+   "n_run_dirs": 16,
+   "n_done": 16,
+   "done": [
+    "C1a_ep1827_s18271",
+    "C1a_ep1829_s18291",
+    "C1a_ep1833_s18331",
+    "C1a_ep1838_s18381",
+    "C1a_ep1841_s18411",
+    "C1a_ep1846_s18461",
+    "C1a_ep1858_s18581",
+    "C1a_ep1867_s18671",
+    "C1a_ep1869_s18691",
+    "C1a_ep1872_s18721",
+    "C1a_ep1876_s18761",
+    "C1a_ep1879_s18791",
+    "C1a_ep1880_s18801",
+    "C1a_ep1898_s18981",
+    "C1a_ep1916_s19161",
+    "C1a_ep1919_s19191"
+   ],
+   "agg_partial": {
+    "_comment": "ag3s-verifier partial record for T53 rollouts (numbers and paths only). runs is rebuilt by p/update_partial.py after every run.",
+    "step": "T61",
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6",
+    "runs": {
+     "C1a/R/C1a_ep1827_s18271": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1827,
+      "seed": 18271,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1827_s18271",
+      "port": 8293,
+      "obstacle": ":",
+      "start": "2026-10-14T10:47:03+00:00",
+      "end": "2026-10-14T10:51:33+00:00",
+      "wall_s": 270.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1829_s18291": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1829,
+      "seed": 18291,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1829_s18291",
+      "port": 8293,
+      "obstacle": ":",
+      "start": "2026-10-14T10:51:35+00:00",
+      "end": "2026-10-14T10:56:17+00:00",
+      "wall_s": 282.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1833_s18331": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1833,
+      "seed": 18331,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1833_s18331",
+      "port": 8293,
+      "obstacle": ":",
+      "start": "2026-10-14T11:00:48+00:00",
+      "end": "2026-10-14T11:05:24+00:00",
+      "wall_s": 276.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1838_s18381": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1838,
+      "seed": 18381,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1838_s18381",
+      "port": 8292,
+      "obstacle": ":",
+      "start": "2026-10-14T11:11:55+00:00",
+      "end": "2026-10-14T11:16:29+00:00",
+      "wall_s": 274.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1841_s18411": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1841,
+      "seed": 18411,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1841_s18411",
+      "port": 8293,
+      "obstacle": ":",
+      "start": "2026-10-14T10:41:57+00:00",
+      "end": "2026-10-14T10:47:01+00:00",
+      "wall_s": 304.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1846_s18461": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1846,
+      "seed": 18461,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1846_s18461",
+      "port": 8292,
+      "obstacle": ":",
+      "start": "2026-10-14T10:54:01+00:00",
+      "end": "2026-10-14T10:58:28+00:00",
+      "wall_s": 267.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1858_s18581": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1858,
+      "seed": 18581,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1858_s18581",
+      "port": 8292,
+      "obstacle": ":",
+      "start": "2026-10-14T10:45:05+00:00",
+      "end": "2026-10-14T10:49:37+00:00",
+      "wall_s": 272.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1867_s18671": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1867,
+      "seed": 18671,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1867_s18671",
+      "port": 8293,
+      "obstacle": ":",
+      "start": "2026-10-14T11:05:26+00:00",
+      "end": "2026-10-14T11:09:59+00:00",
+      "wall_s": 273.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1869_s18691": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1869,
+      "seed": 18691,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1869_s18691",
+      "port": 8293,
+      "obstacle": ":",
+      "start": "2026-10-14T11:10:00+00:00",
+      "end": "2026-10-14T11:14:52+00:00",
+      "wall_s": 292.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1872_s18721": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1872,
+      "seed": 18721,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1872_s18721",
+      "port": 8292,
+      "obstacle": ":",
+      "start": "2026-10-14T10:39:48+00:00",
+      "end": "2026-10-14T10:45:03+00:00",
+      "wall_s": 315.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1876_s18761": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1876,
+      "seed": 18761,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1876_s18761",
+      "port": 8292,
+      "obstacle": ":",
+      "start": "2026-10-14T10:49:38+00:00",
+      "end": "2026-10-14T10:53:59+00:00",
+      "wall_s": 261.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1879_s18791": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1879,
+      "seed": 18791,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1879_s18791",
+      "port": 8293,
+      "obstacle": ":",
+      "start": "2026-10-14T10:56:19+00:00",
+      "end": "2026-10-14T11:00:47+00:00",
+      "wall_s": 268.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1880_s18801": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1880,
+      "seed": 18801,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1880_s18801",
+      "port": 8292,
+      "obstacle": ":",
+      "start": "2026-10-14T10:58:30+00:00",
+      "end": "2026-10-14T11:02:58+00:00",
+      "wall_s": 268.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1898_s18981": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1898,
+      "seed": 18981,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1898_s18981",
+      "port": 8292,
+      "obstacle": ":",
+      "start": "2026-10-14T11:03:00+00:00",
+      "end": "2026-10-14T11:07:27+00:00",
+      "wall_s": 267.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1916_s19161": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1916,
+      "seed": 19161,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1916_s19161",
+      "port": 8292,
+      "obstacle": ":",
+      "start": "2026-10-14T11:07:28+00:00",
+      "end": "2026-10-14T11:11:53+00:00",
+      "wall_s": 265.0,
+      "n_failed_attempts": 0
+     },
+     "C1a/R/C1a_ep1919_s19191": {
+      "stage": "R",
+      "cond": "C1a",
+      "episode": 1919,
+      "seed": 19191,
+      "status": "done",
+      "check_mode": "full",
+      "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6/verify/T61/runs/C1a/R/C1a_ep1919_s19191",
+      "port": 8293,
+      "obstacle": ":",
+      "start": "2026-10-14T11:14:53+00:00",
+      "end": "2026-10-14T11:19:08+00:00",
+      "wall_s": 255.0,
+      "n_failed_attempts": 0
+     }
+    },
+    "run_counts": {
+     "R:C1a:done": 16
+    },
+    "progress_R": {
+     "C1a": {
+      "done": 16,
+      "failed": 0,
+      "running": 0,
+      "of": 16
+     }
+    },
+    "progress_R_total_done": 16,
+    "updated": "2026-10-14T11:19:17+00:00"
+   }
+  },
+  "extraction_stages": [
+   "layout start 2026-10-14T12:50:10+00:00",
+   "layout end 2026-10-14T12:50:28+00:00 rc=0",
+   "attention start 2026-10-14T12:50:28+00:00",
+   "attention end 2026-10-14T13:06:05+00:00 rc=0",
+   "noun start 2026-10-14T13:06:05+00:00",
+   "noun end 2026-10-14T13:11:10+00:00 rc=0",
+   "gt start 2026-10-14T13:11:10+00:00",
+   "gt end 2026-10-14T13:16:10+00:00 rc=0",
+   "grasp start 2026-10-14T13:16:10+00:00",
+   "grasp end 2026-10-14T13:16:32+00:00 rc=0",
+   "ALL DONE 2026-10-14T13:16:32+00:00"
+  ],
+  "selection_chain_log": [
+   "2026-10-14T09:36:13+00:00 filter rc=0 wall=33",
+   "2026-10-14T09:36:25+00:00 score2d_gt rc=0 wall=12",
+   "2026-10-14T09:36:53+00:00 score2d_self rc=0 wall=12",
+   "2026-10-14T10:38:23+00:00 score3d rc=0 wall=3690",
+   "2026-10-14T12:50:10+00:00 resume after session restart (ksel_gt interrupted)",
+   "2026-10-14T13:08:07+00:00 ksel_gt rc=0 wall=1077",
+   "2026-10-14T13:34:41+00:00 ksel_self rc=0 wall=1594",
+   "2026-10-14T13:34:44+00:00 bootstrap_gt rc=0 wall=3",
+   "2026-10-14T13:34:44+00:00 chain done"
+  ],
+  "selection_outputs_sha256": {
+   "select/combined/gt/bootstrap/bootstrap__scene.json": "08555fca3d9cabafee2956618bb5f7f4a28ba7086e23e8c2336d3bfc6c50f905",
+   "select/combined/gt/ksel/ksel__scene.json": "e8e9a9f82e72932f9c72513b316954b63666bba5d2fd1d79c8ae42682a5de1e1",
+   "select/combined/gt/score2d/score2d__scene.json": "06996b1edcce3d58db6cb871fe23ffffa2391873e16f91de6619e6552349ed63",
+   "select/combined/gt/score3d/score3d__scene.json": "75b6fe99a484f08c38d15cf31bbfd40846c03337e89f61879bb2ed346b88e01a",
+   "select/combined/self/ksel/ksel__scene.json": "a5163b415a1748b5e7d7aa1f92e67c86d5e3a3a9c398442d412b54db23e11906",
+   "select/combined/self/score2d/score2d__scene.json": "5dbd11f7d6767c803cb71e4863e5c50085a0476486e3e544f77525b8a08627b0",
+   "select/combined/self/score3d/score3d__scene.json": "193d6b038b3e04b465c3552058df5d364886abdbf5d7ada012fad7cb19965adc",
+   "select/combined/filter/filter.json": "5b83a8a7e7d51b510cae145bd96bbb0b657158015e9bb9e6b97545c8ab5c6707"
+  }
+ },
+ "not_measured": [
+  "held-out 3D replay rows of the selected configuration and the baselines",
+  "T60 P / H endpoints of the held-out runs (replay_contacts → t60_termination)",
+  "held-out evaluation (episode-mean identity, paired difference, bootstrap seed 6102)",
+  "serving implementation of the selected configuration (session A)"
+ ]
+}
