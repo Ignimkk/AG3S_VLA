@@ -521,3 +521,16 @@ Figure: `AG3S/ag3s/docs/figures/ifg/ifg-r9-filter-matched.png` (+json).
   - [FINAL_REPORT_KO.md](FINAL_REPORT_KO.md)를 쉬운 설명판으로 다시 썼다(용어표, 실험별 질문→한 일→결과→그림, 약어 미사용).
   - [METHODOLOGY_EVOLUTION_KO.md](METHODOLOGY_EVOLUTION_KO.md): 이전 → 원래 계획 → 현재 후보 → 계획, novelty 대응, **채택 후보 A–D(사용자 판정 대기)**.
   - 도식: `ifg-method-evolution.png`.
+
+## 2026-10-15 00:31 KST — 사용자 판정: 채택 방법론 B
+
+| 항목 | 판정 |
+|---|---|
+| 채택 방법론 | **B = A + 시간축 identity 전환.** 구성: Attention + 3D 범위(R6), feature 기억 영역 전환(R10b, centered, δ = 0.05), feature 기억 안전 경보(R11), 3D 단계·잡기 판단(R12) |
+
+**반영:**
+
+- `LOCK_heldout.json`에 `adopted_method`를 기록했다.
+- Held-out arm: B, A(전환 없음, 전환 효과 분리용), B0 + render mask, B0, G:N.
+- 영역 전환이 dev에서 미확정(+0.019 [−0.020, +0.060])이라는 점과 δ 척도를 조정하지 않았다는 점을 문서에 명시했다.
+- 수정한 문서: METHODOLOGY_EVOLUTION §5, FINAL_REPORT §4.
