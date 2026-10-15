@@ -1,7 +1,7 @@
 {
  "_comment": "numbers only; status partial — selection / held-out evaluation and judgement belong to session B",
  "step": "T61",
- "status": "partial",
+ "status": "held-out evaluated (selection frozen b49f5f6c before opening)",
  "date": "2026-10-14",
  "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6",
  "code_state": {
@@ -462,5 +462,891 @@
   "T60 P / H endpoints of the held-out runs (replay_contacts → t60_termination)",
   "held-out evaluation (episode-mean identity, paired difference, bootstrap seed 6102)",
   "serving implementation of the selected configuration (session A)"
- ]
+ ],
+ "heldout": {
+  "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T222232+0900_903ea16764c1_eb761f984d83",
+  "code": "git archive 28539681 (serving md5 = T56 run2 = calibration code)",
+  "replay_status": [
+   "relaunch with 3 workers 2026-10-15T02:56:43+00:00: session A runs 1 CPU worker (CL4 diagnosis), pod worker cap 4",
+   "old 4-worker launcher (pid 3565019, still in the memory wait loop, never started) stopped 2026-10-15T02:56:56+00:00",
+   "replay start 2026-10-15T07:48:53+00:00 ws=38 import=/mnt/dev/AG3S_VLA-storage/results/development/20261014T222232+0900_903ea16764c1_eb761f984d83/snapshot_28539681",
+   "replay end 2026-10-15T08:06:54+00:00 rc=0 ws=47"
+  ],
+  "numbers": {
+   "selection": {
+    "k": 1,
+    "combo": "mean:L10H7",
+    "cells": [
+     "mean:L10H7"
+    ]
+   },
+   "selection_sha256": "c3f3b60f11f08aa21dcc525c6ba079b3d0fa4699b5017451607ba12d8cda9a14",
+   "sources": [
+    "mean:L10H7",
+    "last:L8H2",
+    "last:L12H4",
+    "noun_target:L10H7"
+   ],
+   "bootstrap": {
+    "unit": "episode",
+    "B": 10000,
+    "seed": 6102,
+    "moving_block": 5
+   },
+   "endpoints": {
+    "ep1827": {
+     "t_P": null,
+     "t_H": null,
+     "frames_kept_P": 75,
+     "frames_kept_H": 75
+    },
+    "ep1829": {
+     "t_P": 305,
+     "t_H": 382,
+     "frames_kept_P": 39,
+     "frames_kept_H": 48
+    },
+    "ep1833": {
+     "t_P": 268,
+     "t_H": null,
+     "frames_kept_P": 34,
+     "frames_kept_H": 75
+    },
+    "ep1838": {
+     "t_P": null,
+     "t_H": null,
+     "frames_kept_P": 75,
+     "frames_kept_H": 75
+    },
+    "ep1841": {
+     "t_P": null,
+     "t_H": null,
+     "frames_kept_P": 75,
+     "frames_kept_H": 75
+    },
+    "ep1846": {
+     "t_P": null,
+     "t_H": null,
+     "frames_kept_P": 75,
+     "frames_kept_H": 75
+    },
+    "ep1858": {
+     "t_P": 257,
+     "t_H": 299,
+     "frames_kept_P": 33,
+     "frames_kept_H": 38
+    },
+    "ep1867": {
+     "t_P": 215,
+     "t_H": 292,
+     "frames_kept_P": 27,
+     "frames_kept_H": 37
+    },
+    "ep1869": {
+     "t_P": null,
+     "t_H": null,
+     "frames_kept_P": 75,
+     "frames_kept_H": 75
+    },
+    "ep1872": {
+     "t_P": 292,
+     "t_H": 322,
+     "frames_kept_P": 37,
+     "frames_kept_H": 41
+    },
+    "ep1876": {
+     "t_P": 219,
+     "t_H": 288,
+     "frames_kept_P": 28,
+     "frames_kept_H": 37
+    },
+    "ep1879": {
+     "t_P": 286,
+     "t_H": 377,
+     "frames_kept_P": 36,
+     "frames_kept_H": 48
+    },
+    "ep1880": {
+     "t_P": 422,
+     "t_H": 521,
+     "frames_kept_P": 53,
+     "frames_kept_H": 66
+    },
+    "ep1898": {
+     "t_P": null,
+     "t_H": null,
+     "frames_kept_P": 75,
+     "frames_kept_H": 75
+    },
+    "ep1916": {
+     "t_P": 251,
+     "t_H": 289,
+     "frames_kept_P": 32,
+     "frames_kept_H": 37
+    },
+    "ep1919": {
+     "t_P": 253,
+     "t_H": 282,
+     "frames_kept_P": 32,
+     "frames_kept_H": 36
+    }
+   },
+   "endpoints_reached": {
+    "P": 10,
+    "H": 9
+   },
+   "windows": {
+    "full": {
+     "mean:L10H7": {
+      "episode_mean_gt_identity": 0.7008333333333333,
+      "episode_mean_purity": 0.9402156637685537,
+      "episode_mean_coverage": 0.55628185205784,
+      "n_frames": 1200,
+      "grounding_status": {
+       "ok": 1149,
+       "no_seed": 30,
+       "no_admissible": 20,
+       "no_cluster": 1
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.9294605809128631,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.2446043165467626,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.7902097902097902,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.5642201834862385,
+        "n": 436
+       }
+      },
+      "paired_vs_L8H2": {
+       "mean_diff": 0.14916666666666667,
+       "ci95_episode_bootstrap": [
+        0.030833333333333324,
+        0.2791666666666667
+       ],
+       "ci95_moving_block_frames": [
+        0.1,
+        0.20083333333333334
+       ],
+       "n_episodes": 16,
+       "n_up": 7,
+       "n_down": 6,
+       "purity_diff": 0.12247233075629263,
+       "coverage_diff": 0.11893004868604941
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.8666666666666667,
+       "ep1841": 0.9066666666666666,
+       "ep1858": 0.72,
+       "ep1827": 0.6933333333333334,
+       "ep1876": 0.7066666666666667,
+       "ep1829": 0.6533333333333333,
+       "ep1846": 1.0,
+       "ep1879": 0.6133333333333333,
+       "ep1880": 0.48,
+       "ep1833": 0.24,
+       "ep1898": 0.7066666666666667,
+       "ep1867": 0.21333333333333335,
+       "ep1916": 0.76,
+       "ep1869": 0.92,
+       "ep1838": 0.9333333333333333,
+       "ep1919": 0.8
+      }
+     },
+     "last:L8H2": {
+      "episode_mean_gt_identity": 0.5516666666666666,
+      "episode_mean_purity": 0.8177433330122611,
+      "episode_mean_coverage": 0.43735180337179064,
+      "n_frames": 1200,
+      "grounding_status": {
+       "ok": 1036,
+       "no_seed": 105,
+       "no_admissible": 59
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.8319502074688797,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.23741007194244604,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.48951048951048953,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.3623853211009174,
+        "n": 436
+       }
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.64,
+       "ep1841": 0.7333333333333333,
+       "ep1858": 0.24,
+       "ep1827": 0.7466666666666667,
+       "ep1876": 0.7733333333333333,
+       "ep1829": 0.3466666666666667,
+       "ep1846": 1.0,
+       "ep1879": 0.8266666666666667,
+       "ep1880": 0.49333333333333335,
+       "ep1833": 0.24,
+       "ep1898": 0.29333333333333333,
+       "ep1867": 0.21333333333333335,
+       "ep1916": 0.26666666666666666,
+       "ep1869": 0.2,
+       "ep1838": 0.9733333333333334,
+       "ep1919": 0.84
+      }
+     },
+     "last:L12H4": {
+      "episode_mean_gt_identity": 0.58,
+      "episode_mean_purity": 0.7853091749474178,
+      "episode_mean_coverage": 0.4822516024783863,
+      "n_frames": 1200,
+      "grounding_status": {
+       "ok": 1133,
+       "no_admissible": 64,
+       "no_seed": 3
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.7136929460580913,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.22302158273381295,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.7902097902097902,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.47706422018348627,
+        "n": 436
+       }
+      },
+      "paired_vs_L8H2": {
+       "mean_diff": 0.02833333333333332,
+       "ci95_episode_bootstrap": [
+        -0.08166666666666668,
+        0.1391874999999997
+       ],
+       "ci95_moving_block_frames": [
+        -0.020833333333333332,
+        0.0775
+       ],
+       "n_episodes": 16,
+       "n_up": 7,
+       "n_down": 7,
+       "purity_diff": -0.03243415806484325,
+       "coverage_diff": 0.04489979910659569
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.8133333333333334,
+       "ep1841": 0.8133333333333334,
+       "ep1858": 0.72,
+       "ep1827": 0.6,
+       "ep1876": 0.6933333333333334,
+       "ep1829": 0.6666666666666666,
+       "ep1846": 0.5466666666666666,
+       "ep1879": 0.6,
+       "ep1880": 0.5733333333333334,
+       "ep1833": 0.24,
+       "ep1898": 0.7066666666666667,
+       "ep1867": 0.2,
+       "ep1916": 0.25333333333333335,
+       "ep1869": 0.22666666666666666,
+       "ep1838": 0.7866666666666666,
+       "ep1919": 0.84
+      }
+     },
+     "noun_target:L10H7": {
+      "episode_mean_gt_identity": 0.6100000000000001,
+      "episode_mean_purity": 0.8336922241923412,
+      "episode_mean_coverage": 0.5009575697866243,
+      "n_frames": 1200,
+      "grounding_status": {
+       "ok": 1125,
+       "no_seed": 1,
+       "no_admissible": 74
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.8195020746887967,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.2589928057553957,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.4755244755244755,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.5344036697247706,
+        "n": 436
+       }
+      },
+      "paired_vs_L8H2": {
+       "mean_diff": 0.058333333333333334,
+       "ci95_episode_bootstrap": [
+        -0.007499999999999993,
+        0.14252083333333304
+       ],
+       "ci95_moving_block_frames": [
+        0.0275,
+        0.0925
+       ],
+       "n_episodes": 16,
+       "n_up": 4,
+       "n_down": 4,
+       "purity_diff": 0.015948891180080096,
+       "coverage_diff": 0.0636057664148337
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.8666666666666667,
+       "ep1841": 0.7066666666666667,
+       "ep1858": 0.24,
+       "ep1827": 0.72,
+       "ep1876": 0.7866666666666666,
+       "ep1829": 0.68,
+       "ep1846": 0.9466666666666667,
+       "ep1879": 0.8266666666666667,
+       "ep1880": 0.49333333333333335,
+       "ep1833": 0.24,
+       "ep1898": 0.29333333333333333,
+       "ep1867": 0.21333333333333335,
+       "ep1916": 0.7733333333333333,
+       "ep1869": 0.2,
+       "ep1838": 0.9733333333333334,
+       "ep1919": 0.8
+      }
+     }
+    },
+    "P": {
+     "mean:L10H7": {
+      "episode_mean_gt_identity": 0.6998470411168976,
+      "episode_mean_purity": 0.9447098555789837,
+      "episode_mean_coverage": 0.5606940164865888,
+      "n_frames": 801,
+      "grounding_status": {
+       "ok": 779,
+       "no_seed": 16,
+       "no_admissible": 5,
+       "no_cluster": 1
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.9294605809128631,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.2446043165467626,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.7902097902097902,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.16216216216216217,
+        "n": 37
+       }
+      },
+      "paired_vs_L8H2": {
+       "mean_diff": 0.07044097641532783,
+       "ci95_episode_bootstrap": [
+        -0.01271411634224871,
+        0.18357792737557627
+       ],
+       "ci95_moving_block_frames": [
+        0.062421972534332085,
+        0.1647940074906367
+       ],
+       "n_episodes": 16,
+       "n_up": 5,
+       "n_down": 6,
+       "purity_diff": 0.12098216922942812,
+       "coverage_diff": 0.016586704189728445
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.7297297297297297,
+       "ep1841": 0.9066666666666666,
+       "ep1858": 0.5454545454545454,
+       "ep1827": 0.6933333333333334,
+       "ep1876": 0.5714285714285714,
+       "ep1829": 0.6153846153846154,
+       "ep1846": 1.0,
+       "ep1879": 0.5555555555555556,
+       "ep1880": 0.6792452830188679,
+       "ep1833": 0.5294117647058824,
+       "ep1898": 0.7066666666666667,
+       "ep1867": 0.5925925925925926,
+       "ep1916": 0.625,
+       "ep1869": 0.92,
+       "ep1838": 0.9333333333333333,
+       "ep1919": 0.59375
+      }
+     },
+     "last:L8H2": {
+      "episode_mean_gt_identity": 0.6294060647015697,
+      "episode_mean_purity": 0.8237276863495556,
+      "episode_mean_coverage": 0.5441073122968604,
+      "n_frames": 801,
+      "grounding_status": {
+       "ok": 742,
+       "no_admissible": 59
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.8319502074688797,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.23741007194244604,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.48951048951048953,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.2702702702702703,
+        "n": 37
+       }
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.7027027027027027,
+       "ep1841": 0.7333333333333333,
+       "ep1858": 0.5454545454545454,
+       "ep1827": 0.7466666666666667,
+       "ep1876": 0.5,
+       "ep1829": 0.6666666666666666,
+       "ep1846": 1.0,
+       "ep1879": 0.6388888888888888,
+       "ep1880": 0.6981132075471698,
+       "ep1833": 0.5294117647058824,
+       "ep1898": 0.29333333333333333,
+       "ep1867": 0.5925925925925926,
+       "ep1916": 0.625,
+       "ep1869": 0.2,
+       "ep1838": 0.9733333333333334,
+       "ep1919": 0.625
+      }
+     },
+     "last:L12H4": {
+      "episode_mean_gt_identity": 0.6109681753394468,
+      "episode_mean_purity": 0.8398316132598522,
+      "episode_mean_coverage": 0.510673335298156,
+      "n_frames": 801,
+      "grounding_status": {
+       "ok": 743,
+       "no_admissible": 55,
+       "no_seed": 3
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.7136929460580913,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.22302158273381295,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.7902097902097902,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.1891891891891892,
+        "n": 37
+       }
+      },
+      "paired_vs_L8H2": {
+       "mean_diff": -0.018437889362122845,
+       "ci95_episode_bootstrap": [
+        -0.1019986448518288,
+        0.06241310164847158
+       ],
+       "ci95_moving_block_frames": [
+        -0.07615480649188515,
+        0.02749687890137283
+       ],
+       "n_episodes": 16,
+       "n_up": 5,
+       "n_down": 7,
+       "purity_diff": 0.01610392691029655,
+       "coverage_diff": -0.0334339769987044
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.7027027027027027,
+       "ep1841": 0.8133333333333334,
+       "ep1858": 0.5454545454545454,
+       "ep1827": 0.6,
+       "ep1876": 0.5357142857142857,
+       "ep1829": 0.6410256410256411,
+       "ep1846": 0.5466666666666666,
+       "ep1879": 0.5555555555555556,
+       "ep1880": 0.8113207547169812,
+       "ep1833": 0.5294117647058824,
+       "ep1898": 0.7066666666666667,
+       "ep1867": 0.5555555555555556,
+       "ep1916": 0.59375,
+       "ep1869": 0.22666666666666666,
+       "ep1838": 0.7866666666666666,
+       "ep1919": 0.625
+      }
+     },
+     "noun_target:L10H7": {
+      "episode_mean_gt_identity": 0.6269397479383779,
+      "episode_mean_purity": 0.879127520507007,
+      "episode_mean_coverage": 0.5476731990278825,
+      "n_frames": 801,
+      "grounding_status": {
+       "ok": 741,
+       "no_seed": 1,
+       "no_admissible": 59
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.8195020746887967,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.2589928057553957,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.4755244755244755,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.24324324324324326,
+        "n": 37
+       }
+      },
+      "paired_vs_L8H2": {
+       "mean_diff": -0.00246631676319177,
+       "ci95_episode_bootstrap": [
+        -0.014192708333333331,
+        0.010662805662805648
+       ],
+       "ci95_moving_block_frames": [
+        -0.019975031210986267,
+        0.004993757802746567
+       ],
+       "n_episodes": 16,
+       "n_up": 2,
+       "n_down": 4,
+       "purity_diff": 0.0553998341574513,
+       "coverage_diff": 0.003565886731022049
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.7297297297297297,
+       "ep1841": 0.7066666666666667,
+       "ep1858": 0.5454545454545454,
+       "ep1827": 0.72,
+       "ep1876": 0.5714285714285714,
+       "ep1829": 0.6666666666666666,
+       "ep1846": 0.9466666666666667,
+       "ep1879": 0.6388888888888888,
+       "ep1880": 0.6981132075471698,
+       "ep1833": 0.5294117647058824,
+       "ep1898": 0.29333333333333333,
+       "ep1867": 0.5925925925925926,
+       "ep1916": 0.625,
+       "ep1869": 0.2,
+       "ep1838": 0.9733333333333334,
+       "ep1919": 0.59375
+      }
+     }
+    },
+    "H": {
+     "mean:L10H7": {
+      "episode_mean_gt_identity": 0.6300401076476172,
+      "episode_mean_purity": 0.9416365947754597,
+      "episode_mean_coverage": 0.4950175303523574,
+      "n_frames": 913,
+      "grounding_status": {
+       "ok": 871,
+       "no_seed": 30,
+       "no_admissible": 11,
+       "no_cluster": 1
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.9294605809128631,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.2446043165467626,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.7902097902097902,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.08053691275167785,
+        "n": 149
+       }
+      },
+      "paired_vs_L8H2": {
+       "mean_diff": 0.04231024712350932,
+       "ci95_episode_bootstrap": [
+        -0.055133529749955036,
+        0.16436872312653558
+       ],
+       "ci95_moving_block_frames": [
+        0.025191675794085433,
+        0.1248630887185104
+       ],
+       "n_episodes": 16,
+       "n_up": 4,
+       "n_down": 7,
+       "purity_diff": 0.1095457098769471,
+       "coverage_diff": 0.004057585565270937
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.7560975609756098,
+       "ep1841": 0.9066666666666666,
+       "ep1858": 0.47368421052631576,
+       "ep1827": 0.6933333333333334,
+       "ep1876": 0.43243243243243246,
+       "ep1829": 0.5,
+       "ep1846": 1.0,
+       "ep1879": 0.4166666666666667,
+       "ep1880": 0.5454545454545454,
+       "ep1833": 0.24,
+       "ep1898": 0.7066666666666667,
+       "ep1867": 0.43243243243243246,
+       "ep1916": 0.5405405405405406,
+       "ep1869": 0.92,
+       "ep1838": 0.9333333333333333,
+       "ep1919": 0.5833333333333334
+      }
+     },
+     "last:L8H2": {
+      "episode_mean_gt_identity": 0.5877298605241079,
+      "episode_mean_purity": 0.8320908848985127,
+      "episode_mean_coverage": 0.4909599447870865,
+      "n_frames": 913,
+      "grounding_status": {
+       "ok": 851,
+       "no_seed": 3,
+       "no_admissible": 59
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.8319502074688797,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.23741007194244604,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.48951048951048953,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.24161073825503357,
+        "n": 149
+       }
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.7317073170731707,
+       "ep1841": 0.7333333333333333,
+       "ep1858": 0.47368421052631576,
+       "ep1827": 0.7466666666666667,
+       "ep1876": 0.5405405405405406,
+       "ep1829": 0.5416666666666666,
+       "ep1846": 1.0,
+       "ep1879": 0.7291666666666666,
+       "ep1880": 0.5606060606060606,
+       "ep1833": 0.24,
+       "ep1898": 0.29333333333333333,
+       "ep1867": 0.43243243243243246,
+       "ep1916": 0.5405405405405406,
+       "ep1869": 0.2,
+       "ep1838": 0.9733333333333334,
+       "ep1919": 0.6666666666666666
+      }
+     },
+     "last:L12H4": {
+      "episode_mean_gt_identity": 0.5440873543816018,
+      "episode_mean_purity": 0.8140951353719134,
+      "episode_mean_coverage": 0.44732443750631257,
+      "n_frames": 913,
+      "grounding_status": {
+       "ok": 847,
+       "no_admissible": 63,
+       "no_seed": 3
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.7136929460580913,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.22302158273381295,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.7902097902097902,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.10067114093959731,
+        "n": 149
+       }
+      },
+      "paired_vs_L8H2": {
+       "mean_diff": -0.04364250614250616,
+       "ci95_episode_bootstrap": [
+        -0.13141925163800167,
+        0.04485114020270267
+       ],
+       "ci95_moving_block_frames": [
+        -0.09090909090909091,
+        0.008762322015334063
+       ],
+       "n_episodes": 16,
+       "n_up": 4,
+       "n_down": 8,
+       "purity_diff": -0.01799574952659931,
+       "coverage_diff": -0.04363550728077394
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.7317073170731707,
+       "ep1841": 0.8133333333333334,
+       "ep1858": 0.47368421052631576,
+       "ep1827": 0.6,
+       "ep1876": 0.40540540540540543,
+       "ep1829": 0.5208333333333334,
+       "ep1846": 0.5466666666666666,
+       "ep1879": 0.4166666666666667,
+       "ep1880": 0.6515151515151515,
+       "ep1833": 0.24,
+       "ep1898": 0.7066666666666667,
+       "ep1867": 0.40540540540540543,
+       "ep1916": 0.5135135135135135,
+       "ep1869": 0.22666666666666666,
+       "ep1838": 0.7866666666666666,
+       "ep1919": 0.6666666666666666
+      }
+     },
+     "noun_target:L10H7": {
+      "episode_mean_gt_identity": 0.5790684399571996,
+      "episode_mean_purity": 0.876122353248791,
+      "episode_mean_coverage": 0.4928549831493462,
+      "n_frames": 913,
+      "grounding_status": {
+       "ok": 847,
+       "no_seed": 1,
+       "no_admissible": 65
+      },
+      "phase_identity": {
+       "pre": {
+        "rate": 0.8195020746887967,
+        "n": 482
+       },
+       "held": {
+        "rate": 0.2589928057553957,
+        "n": 139
+       },
+       "post": {
+        "rate": 0.4755244755244755,
+        "n": 143
+       },
+       "placed": {
+        "rate": 0.21476510067114093,
+        "n": 149
+       }
+      },
+      "paired_vs_L8H2": {
+       "mean_diff": -0.00866142056690837,
+       "ci95_episode_bootstrap": [
+        -0.02241142056690837,
+        0.0030938255328499184
+       ],
+       "ci95_moving_block_frames": [
+        -0.024096385542168676,
+        0.002190580503833516
+       ],
+       "n_episodes": 16,
+       "n_up": 2,
+       "n_down": 4,
+       "purity_diff": 0.0440314683502782,
+       "coverage_diff": 0.0018950383622597516
+      },
+      "per_episode_gt_identity": {
+       "ep1872": 0.7560975609756098,
+       "ep1841": 0.7066666666666667,
+       "ep1858": 0.47368421052631576,
+       "ep1827": 0.72,
+       "ep1876": 0.5675675675675675,
+       "ep1829": 0.5416666666666666,
+       "ep1846": 0.9466666666666667,
+       "ep1879": 0.7291666666666666,
+       "ep1880": 0.5606060606060606,
+       "ep1833": 0.24,
+       "ep1898": 0.29333333333333333,
+       "ep1867": 0.43243243243243246,
+       "ep1916": 0.5405405405405406,
+       "ep1869": 0.2,
+       "ep1838": 0.9733333333333334,
+       "ep1919": 0.5833333333333334
+      }
+     }
+    }
+   },
+   "serving_record_C1a": {
+    "agg_t1_success": {
+     "n_runs": 16,
+     "n_with_replay": 16,
+     "task_success": 10,
+     "success_rel": 10,
+     "success_ct": 10,
+     "success_ct_fruit": 10
+    },
+    "hold_chunks_total": 192,
+    "windows": {
+     "full": {
+      "success": 10,
+      "success_ct": 10,
+      "hold_chunks": 192,
+      "hold_runs": 14,
+      "completion_s_median": null
+     },
+     "P": {
+      "success": 10,
+      "success_ct": 10,
+      "hold_chunks": 87,
+      "hold_runs": 13,
+      "completion_s_median": 17.566666666666666
+     },
+     "H": {
+      "success": 9,
+      "success_ct": 9,
+      "hold_chunks": 90,
+      "hold_runs": 14,
+      "completion_s_median": 20.0
+     }
+    }
+   }
+  }
+ }
 }
