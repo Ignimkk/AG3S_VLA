@@ -1,0 +1,207 @@
+{
+ "runs": {
+  "pb1_B": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261015T101413_6ad2aef28fae_sl5d-libero10-init0-pb1-vla_v11ab-V11AB-pb1-B",
+  "V11AB_B": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261014T171250_1df077b8a699_sl5b-libero10-init0-r2-vla_v11ab-B"
+ },
+ "vla_only": {
+  "0": true,
+  "1": true,
+  "2": true,
+  "3": true,
+  "4": true,
+  "5": false,
+  "6": true,
+  "7": true,
+  "8": true,
+  "9": true
+ },
+ "V11AB_B": {
+  "0": {
+   "success": true,
+   "steps": 114,
+   "attach": [
+    18
+   ],
+   "hold": 0,
+   "calls": 23,
+   "reach_fail_closing": 3
+  },
+  "1": {
+   "success": true,
+   "steps": 116,
+   "attach": [
+    14
+   ],
+   "hold": 1,
+   "calls": 24,
+   "reach_fail_closing": 0
+  },
+  "2": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 13,
+   "calls": 44,
+   "reach_fail_closing": 26
+  },
+  "3": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 21,
+   "calls": 44,
+   "reach_fail_closing": 31
+  },
+  "4": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 8,
+   "calls": 44,
+   "reach_fail_closing": 20
+  },
+  "5": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 2,
+   "calls": 44,
+   "reach_fail_closing": 29
+  },
+  "6": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 7,
+   "calls": 44,
+   "reach_fail_closing": 30
+  },
+  "7": {
+   "success": true,
+   "steps": 132,
+   "attach": [
+    11
+   ],
+   "hold": 1,
+   "calls": 27,
+   "reach_fail_closing": 0
+  },
+  "8": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 13,
+   "calls": 44,
+   "reach_fail_closing": 29
+  },
+  "9": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 16,
+   "calls": 44,
+   "reach_fail_closing": 35
+  }
+ },
+ "V11AB_pb1_B": {
+  "0": {
+   "success": true,
+   "steps": 114,
+   "attach": [
+    18
+   ],
+   "hold": 0,
+   "calls": 23,
+   "reach_fail_closing": 4
+  },
+  "1": {
+   "success": true,
+   "steps": 116,
+   "attach": [
+    14
+   ],
+   "hold": 1,
+   "calls": 24,
+   "reach_fail_closing": 0
+  },
+  "2": {
+   "success": true,
+   "steps": 126,
+   "attach": [
+    18
+   ],
+   "hold": 0,
+   "calls": 26,
+   "reach_fail_closing": 0
+  },
+  "3": {
+   "success": true,
+   "steps": 95,
+   "attach": [
+    13
+   ],
+   "hold": 0,
+   "calls": 19,
+   "reach_fail_closing": 0
+  },
+  "4": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 8,
+   "calls": 44,
+   "reach_fail_closing": 20
+  },
+  "5": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 2,
+   "calls": 44,
+   "reach_fail_closing": 28
+  },
+  "6": {
+   "success": true,
+   "steps": 108,
+   "attach": [
+    14
+   ],
+   "hold": 0,
+   "calls": 22,
+   "reach_fail_closing": 0
+  },
+  "7": {
+   "success": true,
+   "steps": 132,
+   "attach": [
+    11
+   ],
+   "hold": 1,
+   "calls": 27,
+   "reach_fail_closing": 0
+  },
+  "8": {
+   "success": true,
+   "steps": 101,
+   "attach": [
+    15
+   ],
+   "hold": 0,
+   "calls": 21,
+   "reach_fail_closing": 0
+  },
+  "9": {
+   "success": false,
+   "steps": 220,
+   "attach": [],
+   "hold": 16,
+   "calls": 44,
+   "reach_fail_closing": 35
+  }
+ },
+ "success": {
+  "vla_only": 9,
+  "V11AB_B": 3,
+  "V11AB_pb1_B": 7
+ }
+}

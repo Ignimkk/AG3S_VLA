@@ -2559,3 +2559,22 @@ A 는 B 보다 계획을 잘 실현한다. 충돌 시점이 t 35 ~ 51 에서 t 7
 1. 원인 재현: LIBERO task 0 ~ 9 × init 0, VLA-only + V11AB-pb1 (B). 기준은 V11AB-B 3 / 10 이고, reach 실패 6 건이 회복되는지 본다.
 2. 같은 dev 집합: SafeLIBERO Spatial Level I dev 20, VLA-only + V11AB-pb2 (C). V11AB-A 3 / 20 safe success · B 0 / 20 과 비교한다.
 3. 비저하 확인: LIBERO task 0 ~ 9 × init 0, VLA-only + V11AB-pb2 (C).
+
+### SL5d-1 — V11AB-pb1 원인 재현 검증, LIBERO task 0~9 × init 0 (2026-10-15)
+
+**기록 시각** 2026-10-15 12:15 KST. **수치 출처** [`handoff/SL5d-pb1-repro.verify.json`](handoff/SL5d-pb1-repro.verify.json).
+**그림** [`figures/sl5d-pb1-libero10-repro.png`](figures/sl5d-pb1-libero10-repro.png). **code** `6ad2aef2`, 변환 B. VLA-only 는 같은 launcher 호출로 paired 했다.
+
+| 조건 | official success | 성공 task |
+|---|---|---|
+| VLA-only | 9 / 10 | t5 제외 |
+| V11AB-B (기준선, `1df077b8`) | 3 / 10 | t0 · t1 · t7 |
+| **V11AB-pb1-B** | **7 / 10** | t0 · t1 · t2 · t3 · t6 · t7 · t8 |
+
+- 기준선에서 reach 때문에 attach 하지 못해 실패한 6 건 중 4 건(t2 · t3 · t6 · t8)이 attach 하고 성공했다.
+- 모든 latch 기록의 reach 는 capture 시점 자세로 쟀다(`reach_state = capture frame N`).
+- 남은 실패는 세 건이다.
+  - t4: target 을 잃었다(`uncertified` HOLD 8 회).
+  - t5: VLA-only 도 실패하는 episode 다.
+  - t9: capture 시점으로 재도 reach 가 120 mm 를 넘는다(closing 중 35 회). SL4 에서 t4 · t5 · t9 는 ATS 가 다른 물체를 target 으로 고른 task 다. 그래서 남은 실패는 세 번째 후보인 target 탈락 · 오선택과 연결된다 (**가설**).
+- 이 비교에서 "VLA-only 실패 → pb1 성공" 후보는 0 건이다. pb1 의 목적은 V11AB 의 task 저하를 줄이는 것이다.
