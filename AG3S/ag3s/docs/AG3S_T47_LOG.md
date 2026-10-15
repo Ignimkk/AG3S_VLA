@@ -308,6 +308,7 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **T46f-S2 · T46d 정정** T46f 단계 2 진단 장면 선정 (S1–S3 scan) · T46d FT 근접 수치 정정 | 기존 기록에서 손의 target 접촉과 비허용 link (FT sensor 등) 회피가 함께 필요한 배치가 있는가 | **측정 완료 (2026-10-14).** 178 run / 57 episode 에서 eval (test) S1 배치 0, dev 3 (모두 CL2 C2′ run). 실제 FT–target 접촉 0. T46d 의 FT ≤ 50 mm 는 거리 계산 오류 → 정정. 사용자 판정: 변형 배치 pilot 한 번 + CL4 에 ② global arm. 아래 "T46f-S2" 절 |
 | **T46g** SL5b reach 진단 (benchmark 기록 · RB-Y1 기록, offline) | 가려진 target 의 오래된 centroid 로 reach 를 검사해 attach 가 거절되고 HOLD 로 이어지는가 | **진단 완료 (2026-10-14).** V11AB-B 실패 7 중 4, V11AB-A 실패 8 중 2 가 그 경로. RB-Y1 기록에서는 reach 단독 실패 0. 사용자 판정: T57 보다 먼저 최소 수정 (threshold 변경 아님), #48 과는 수정 분리. 아래 "T46g" 절 |
 | **T60d** T60b 복귀 정체 후속 (기록 기반) | 놓은 뒤 복귀하지 않는 run 에서 정책 입력 · 제안은 무엇이 다른가 | **측정 완료 (2026-10-14, 기록만).** 정체 run 의 state 는 demo 의 release 단계에 가깝고 복귀 단계로 가지 않는다; 사용 팔 arm_5 가 demo 범위 밖. 사용자 판정: VLA 단독 4 run 확인 (우선순위 뒤). 아래 "T60d" 절 |
+| **CL4** extent (DT-02, LTE 고정 X1–X4) · 접촉 정책 (DT-05A, oracle 고정 X4 대 G4) closed-loop, 최종 형상 (1,349 구 + palm cover), 90 run | 같은 identity · 형상에서 extent 처리와 link 별 접촉 처리의 실행 효과 | **측정 완료 (2026-10-15).** success_ct (P): ball 10 · oracle-visible 9 · ball_owned+F1 7 · ball_owned 5 · global+oracle 7 / 18. link 별 구분의 실행상 차이 관측 안 됨. CL3 (기존 형상) 보다 전체 성공이 낮아 원인 진단 중 (X2G). 아래 "CL4" 절 |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -5129,3 +5130,53 @@ endpoint: P 도달 12 / 16, H 도달 12 / 16. 제거된 inference frame: P 511 �
 ### 6. 다음 (사용자 판정 순서)
 
 오류 정정 · CL4 구성 고정 (완료: `6caae1c6`, [`handoff/CL4.task.md`](handoff/CL4.task.md)) → SL5b 최소 수정 (진행 중, 격리 worktree) → GPU: 변형 배치 pilot → CL4 → T60d. T57 은 SL5b 뒤 (단계 1 grounding → 단계 2 gate, 연결 위치는 사용자 판정 (6)). GPU 작업은 pod 메모리 (B 의 T56 replay) 에 맞춰 일정을 잡는다.
+
+---
+
+## CL4 · T60d-E0 · CL4 기록 진단 — 최종 형상에서의 extent · 접촉 정책 비교와 성공률 하락 진단 (2026-10-15 KST, 세션 A)
+
+> 수치는 [`handoff/CL4.verify.json`](handoff/CL4.verify.json) · [`handoff/CL4-diag.verify.json`](handoff/CL4-diag.verify.json) · [`handoff/T60d-E0.verify.json`](handoff/T60d-E0.verify.json) 의 `numbers` 에서만 왔다. 계획 · 판정: [`handoff/CL4.task.md`](handoff/CL4.task.md).
+> develope_PLAN 연결: DX-01 조건 B → **DT-02 extent block**, DX-04 → **DT-05A**, DX-00 (T60 P · H).
+
+### 1. 실행
+- run `results/development/20261014T231714+0900_150d429b86ff_17b0cec4fb97/verify/CL4/`, snapshot `git archive 150d429b`, 90 run (5 arm × 18 쌍), GPU 2026-10-14 16:36 – 23:40 UTC, infra 실패 0, cuRobo 기준선 일치.
+- 18 쌍 = **9 scene (train split dev episode) × 2 seed**. 모든 arm: `--links gripper_wrist --palm-cover on` (1,349 구), V11AB TA · TP, W1, grounding split 12 mm · raw, `--nonauthorized-target-margin obstacle`.
+- arm: X1 = LTE + ball, X2 = LTE + ball_owned, X3 = LTE + ball_owned + F1, X4 = LTE + oracle-visible, G4 = global (exclude-all) + oracle-visible.
+
+### 2. DT-02 — extent (LTE 고정) · 사용자 지정 문구
+
+**최종 형상의 18개 dev episode–seed 조건에서 success_ct(P)는 ball 10, oracle-visible 9, ball_owned+F1 7, ball_owned 5였다. 이 조건에서는 ball_owned와 F1의 ball 대비 실행상 우위가 관측되지 않았다.**
+
+| arm | success | success_ct (P) | robust grasp | HOLD chunk (run) | H 도달 |
+|---|---|---|---|---|---|
+| X1 ball | 10 | 10 | 10 | 18 (8) | 4 |
+| X2 ball_owned | 7 | 5 | 4 | 28 (14) | 3 |
+| X3 ball_owned + F1 | 9 | 7 | 7 | 33 (13) | 5 |
+| X4 oracle-visible | 9 | 9 | 7 | 60 (5) | 4 |
+
+- ball > oracle > F1 > ball_owned 는 **이 조건에서 관측된 값의 순서**이고 방법의 일반적 우열이 아니다. 쌍 비교 (McNemar exact, 참고): X1 대 X2 success_ct 10 대 5 (p 0.125), robust grasp 10 대 4 (p 0.031).
+- F1 은 X2 대비 5 → 7 의 탐색적 회복이 있었으나 ball 보다 낫다는 근거는 없다. **이전 CL3 의 F1 채택 판단 (T46c) 은 그 형상 (gripper 270 구, palm cover off) · 설정에 한정된다.**
+
+![CL4 outcomes](figures/cl4/cl4-outcomes.png)
+
+### 3. DT-05A — 접촉 정책 (oracle 고정) · 사용자 지정 문구
+
+**이 평가 범위에서는 link 별 구분의 실행상 차이가 관측되지 않았다.**
+- X4 (LTE) 9 대 G4 (global) 7 / 18 (p 0.69). 이 차이를 LTE 효과로 귀속하지 않는다: LTE 와 global 의 비허용 행 판정이 달라진 chunk 는 0 mm · 10 mm margin 에서 0 (50 mm 에서만 51 – 95, 실행 판정에 쓰이지 않는 보조 지표).
+- **FT_SENSOR ↔ target 접촉: 모든 arm 0 run.** 비허용 접촉 class `robot_other–target` 은 X3 1 · X4 2 · G4 3 run 이고 모두 **놓은 뒤** 떨어진 target 이 로봇 base · 몸통 · 바퀴에 닿은 것이다 (기존 정의대로 비허용 접촉으로 센다, FT–target 접촉과 구분).
+
+### 4. 이전 (기존 형상) 대비 성공률 하락과 기록 진단
+
+| | success | success_ct | robust grasp |
+|---|---|---|---|
+| CL2 C0 (V11AB, 기존 형상) | 14 | 12 | 13 |
+| CL3 C1a · C1aF1 (기존 형상) | 14 · 13 | 11 · 12 | 14 · 13 |
+| CL4 X1 – X4 (최종 형상) | 7 – 10 | 5 – 10 | 4 – 10 |
+
+- CL3 → CL4 사이에 형상 (palm cover · 손목 구), 비허용 margin flag, W1, snapshot 이 함께 바뀌어 기록만으로는 원인을 가를 수 없다.
+- **기록 진단 (CL3 C1a 대 CL4 X2 · X1, 같은 episode · seed, t ≤ 160):** 손바닥 (`ee_left` / `ee_right`, palm cover 구) 이 TO 의 최악 행 (target-free 층) 이 된 chunk 가 18 쌍 합 **CL3 21 · X2 109 · X1 95**. 그 손바닥 구의 다수는 AG3S target 점 15 mm 안에 있다 (예: X2 ep11_s111 33 개 중 24, X2 ep104_s1041 69 개 중 59). 실패 전환 사례 (CL3 성공 → X2 no grasp) 에서 손가락 중점–target 최소 거리가 커졌다 (예: ep11_s111 37 → 48 mm, ep30_s301 40 → 50 mm). 궤적은 첫 25 control row 안에서 갈린다.
+- 다만 **같은 형상의 X1 도 손바닥 구속이 많은데 (95) 성공은 X2 보다 높아**, 성공률 하락을 형상으로 귀속하는 것은 기록만으로 되지 않는다 → 사용자 판정대로 **X2G (X2 에서 형상만 기존 gripper 270 구로)** 18 run 을 진행한다 (B 의 T61 replay 뒤로 순서 조정, pod 메모리 gate 판정 대기).
+
+### 5. T60d-E0 — VLA 단독 (TO-off) 4 run · 사용자 지정 문구
+- ep110 · 123 의 TO-on 과 같은 seed (CL2 · CL3 에서는 모든 arm 이 P 도달 후 복귀하지 않음). TO-off: 3 run 이 P 에 도달했고 **3 run 모두 H 에 도달** (ep110 s1101 은 P 미도달).
+- **TO-off 에서 P 에 도달한 3 run 은 모두 H 에 도달했다. 따라서 TO 가 이전 궤적과 상태를 바꿔 복귀에 간접적으로 영향을 주었을 가능성을 배제할 수 없다.** 기존의 "관측된 복귀 구간에서 정책의 복귀 제안이 없었다" 는 유지하고, "TO 는 복귀 실패에 기여하지 않았다" 로 확대하지 않는다. T60d 는 여기서 멈춘다 (추가 seed 없음).
