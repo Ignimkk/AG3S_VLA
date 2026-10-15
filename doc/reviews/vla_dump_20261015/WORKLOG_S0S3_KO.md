@@ -504,3 +504,20 @@ Figure: `AG3S/ag3s/docs/figures/ifg/ifg-r9-filter-matched.png` (+json).
 - **[FINAL_REPORT_KO.md](FINAL_REPORT_KO.md):** 가이드 §15.8 순서(최초 실패 → 개선 이유 → 바꾼 것 → 전후 수치 → 남은 한계). 사본은 `$RUN/FINAL_REPORT_KO.md`.
 - **`$RUN/manifest.json`:** 입력, `ifg_*.py` sha256, 산출물 목록. 프로토콜 필수 산출물 중 빠져 있던 항목이다.
 - **Figure `ifg-final-overview.png`(+json):** B0 3종, R0 G/FG, R3/R5/R6 후보, R7 FG, oracle seed의 episode-mean IoU와 95% CI.
+
+## 2026-10-15 00:29 KST — 커밋, 실험별 figure, 쉬운 설명판 보고서, 방법론 변화 문서 (사용자 요청 4건)
+
+- **커밋:** `4f36ff51`(ifg 코드·figure·문서 4종). 사용자가 추가한 `Novelty_contribution.pdf`를 읽고 방법론 문서에 반영했다.
+- **실험별 figure:** `AG3S/ag3s/docs/figures/ifg/exp/`, `ifg_experiment_figures.py`. 실제 장면 투영 9장(+json). 예시 frame은 "효과가 가장 큰 frame" 규칙으로 자동 선택하고 sidecar에 규칙을 기록했다.
+  - S0 정합, R1–R3 gate 단위, R4 질량 편향, R5 탁자 시작점, R7 feature 점수 손실, R9 기존 방법 비교, R10 centering, R11 경보, R12 단계 신호
+- **검토 중 고친 것:**
+  - R1–R3 / R9 / R11 제목이 그림 내용을 과장하던 부분을 실제 수치로 바꿨다. 예: R11 = 경보 15회, 그중 잘못된 선택 6개, 오경보 9회.
+  - R5는 세 camera를 모두 표시하도록 바꿨다.
+- **R12 입력 정의 정정:**
+  - "탁자 위 높이"는 실제로 base 좌표계 높이였다. support에 바닥(z ≈ 0.003)과 탁자(z ≈ 0.82)가 함께 있고, 주변 중앙값이 바닥에서 나왔다.
+  - 모든 장면의 탁자 높이가 같아 결과에는 영향이 없다. 잠근 weight는 유지하고 이름·문서만 고쳤다.
+  - `LOCK_heldout.json`에 amendment를 기록했다(`ifg_phase.py` docstring만 변경).
+- **문서:**
+  - [FINAL_REPORT_KO.md](FINAL_REPORT_KO.md)를 쉬운 설명판으로 다시 썼다(용어표, 실험별 질문→한 일→결과→그림, 약어 미사용).
+  - [METHODOLOGY_EVOLUTION_KO.md](METHODOLOGY_EVOLUTION_KO.md): 이전 → 원래 계획 → 현재 후보 → 계획, novelty 대응, **채택 후보 A–D(사용자 판정 대기)**.
+  - 도식: `ifg-method-evolution.png`.

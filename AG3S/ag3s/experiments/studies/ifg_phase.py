@@ -3,7 +3,9 @@
 Stage `features` (CPU, MuJoCo for FK only): per frame, the R6 target region (ifg_memory.r6_choice) and
   hand_d   min distance from its centroid to the two gripper TCP proxies (mean position of the bodies
            below link_{left,right}_arm_6 at the recorded qpos, base frame)
-  height   centroid z - median z of support nodes within 0.25 m (xy) of the centroid
+  height   centroid z - median z of support nodes within 0.25 m (xy) of the centroid. NOTE (2026-10-15 audit): the
+           support set holds both the floor (z ~ 0.003) and the table top (z ~ 0.82); the floor dominates the median, so
+           this is the target height in the base frame (table height is the same in every scene), not height above the table.
   lognodes log(1 + region node count)
   grip     min of the two gripper state columns (7, 15) of the recorded raw state
   hsr      log of derived.npz hsr_p (pick, place, home)

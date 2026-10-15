@@ -81,10 +81,12 @@ HSR subtask probe(prefix KV L4 → logistic, class pick/place/home)를 argmax로
 입력:
 - HSR log-prob
 - gripper 상태(두 gripper 열의 최솟값)
-- 3D 관계: 선택 영역 중심과 두 gripper TCP(FK) 사이 최소 거리, 주변 support 위 높이, 영역 크기
+- 3D 관계: 선택 영역 중심과 두 gripper TCP(FK) 사이 최소 거리, base 좌표계 target 높이(아래 주의), 영역 크기
 - (선택) 기억 feature 일치도
 
 numpy L2 logistic regression(L2 = 1.0 사전 고정)을 episode 단위 leave-one-out CV로 평가했다.
+
+**주의(사후 감사):** "높이" 입력은 원래 "주변 support 위 높이"로 의도했다. 그러나 support에 바닥(z ≈ 0.003 m)과 탁자(z ≈ 0.82 m)가 함께 있고 중앙값이 바닥에서 나와, 실제로는 base 좌표계 target 높이다. 모든 장면의 탁자 높이가 같으므로 표준화 후 정보는 같다. 결과와 잠근 weight는 그대로 두고 이름만 바로잡았다.
 
 ## 3. 결과 분류
 

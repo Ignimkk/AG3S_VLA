@@ -1,98 +1,183 @@
-# 최종 보고서 — VLA 내부 feature + RGB-D target 영역 추정 (S0–S3 및 개선 cycle)
+# 최종 보고서 — 로봇이 "잡을 물체의 3D 표면"을 찾는 방법 개선 (쉬운 설명판)
 
-작성: 2026-10-15 KST. 분석 session(branch `feature/ag3s-development`, HEAD `30955b6c` + 미커밋 `ifg_*.py`).
+작성: 2026-10-15 KST.
 
-- 정본 문서: [실험 프로토콜 v1.2](EXPERIMENT_PROTOCOL_KO.md), [3D Surface Graph 가이드 §15](../AG3S_3D_Surface_Graph_and_Parameter_Tuning_Guide.md)
-- 상세 결과: [SUMMARY_METHODS_RESULTS_KO.md](SUMMARY_METHODS_RESULTS_KO.md)
+- 기술 상세판: [SUMMARY_METHODS_RESULTS_KO.md](SUMMARY_METHODS_RESULTS_KO.md)
 - 시간순 기록: [WORKLOG_S0S3_KO.md](WORKLOG_S0S3_KO.md)
-- Held-out 요청: [HELDOUT_COLLECTION_REQUEST_KO.md](HELDOUT_COLLECTION_REQUEST_KO.md)
-- Run: `/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba` (`manifest.json`, `improvement_registry.jsonl`, `LOCK_heldout.json`)
+- 방법론 변화: [METHODOLOGY_EVOLUTION_KO.md](METHODOLOGY_EVOLUTION_KO.md)
+- 커밋: `4f36ff51` 이후 / branch `feature/ag3s-development`
+- 데이터 run: `/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba`
 
-> **범위:** 모든 수치는 **dev**(T53 + T54c 32 episode, 180 phase key-moment frame, 이미 결과를 본 episode)에서 나왔다. 개선은 dev GT를 보고 설계했고, 같은 dev에서 평가한 CI는 독립적인 유의성 증거가 아니다. **Held-out 검증은 아직 없다.** Depth는 MuJoCo replay이고, false-exemption은 segmentation FP proxy다.
+> **먼저 알아 둘 한계.** 모든 숫자는 이미 연구에 썼던 32개 episode(180장면)에서 나왔다(**dev**). 방법을 고른 데이터와 평가한 데이터가 같으므로, 처음 보는 데이터(**held-out**)로 다시 확인하기 전에는 "확정된 성능"이 아니다. Held-out 수집은 요청해 두었다.
 
-![overview](../../../AG3S/ag3s/docs/figures/ifg/ifg-final-overview.png)
+## 0. 이 연구가 푸는 문제
 
-## 1. 결론
+AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여기서는 π0.5)의 동작을 안전하게 다듬는 시스템이다. 로봇 팔이 장애물에 부딪히지 않게 하려면 주변 3D 공간을 **"부딪히면 안 되는 곳"**으로 표시해야 한다. 그런데 **잡으려는 물체(target)는 손이 닿아야 하므로** 그 표면만은 예외로 둬야 한다.
 
-| 질문 | 답 (dev) |
+이 예외 영역이 **너무 크면** 옆의 다른 물체까지 "부딪혀도 되는 곳"이 되어 위험하다. **너무 작으면** 잡아야 할 물체를 장애물로 보고 잡지 못한다. 그래서 **target의 3D 표면을 정확히 찾는 것**이 이번 작업의 목표다.
+
+![장면 예시](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-S0-alignment.png)
+
+## 1. 용어 설명 (이 보고서에서 쓰는 말)
+
+| 용어 | 뜻 |
 |---|---|
-| 같은 seed·관측 표면에서 **feature + geometry가 geometry-only보다 target 경계를 더 잘 잡는가** (원래 연구 질문) | **아니오.** 프로토콜 기본값(R0), 원인별 개선 6 cycle(R1–R6), 개선된 기반에서의 재검증(R7) 모두 feature 추가 이득이 없었다. Feature를 edge에 넣으면 효과 0, unary로 넣으면 recall이 떨어졌다 |
-| Attention + 3D(feature 없이)는 기존 serving보다 나은가 | **같은 robot mask 조건에서 IoU +0.057 [+0.006, +0.103]**(0.893 대 0.837, 27/5 episode). 이득은 주로 precision(+0.073)에서 온다. CI 하한이 0에 가깝고 dev 결과다 |
-| Feature를 쓸 곳은 없는가 | **과거 frame 기억과의 일치도를 안전 경보로 쓰면 유용하다.** 잘못 고른 frame 탐지 AUROC는 0.998(147 frame)이고, feature 없는 점수는 0.914(179 frame)다. 같은 frame 집합에서의 차이는 +0.096 [0.000, +0.266]이다. 잘못된 frame이 6개뿐이다 |
-| 3D는 작업 단계·파지 판단을 돕는가 | **돕는다**(supervised ablation): 단계 정확도 0.783 → 0.939, 파지 0.828 → 0.933. Feature identity는 추가 효과가 없다(이 dump에는 엉뚱한 물체를 쥔 사례가 없음) |
+| **Attention (주의 지도)** | VLA가 이미지의 어느 부분을 중요하게 보는지 나타내는 값. 이미지를 16×16 칸으로 나눈 칸마다 하나씩 있다. 명령 속 명사("orange")에 대한 attention을 **noun attention**이라 부른다 |
+| **Feature (내부 특징)** | VLA가 각 칸의 내용을 2048개 숫자로 요약한 값. 비슷한 물체는 비슷한 feature를 갖는다고 기대했다. 역시 16×16 칸 단위다 |
+| **Depth / 3D 점** | 카메라에서 각 pixel까지의 거리. 이를 이용해 각 pixel을 3D 점으로 바꾼다 |
+| **Voxel / node** | 3D 공간을 5 mm 정육면체로 나눈 칸. 점들이 들어 있는 칸 하나를 graph의 node(점) 하나로 쓴다 |
+| **표면 연결(edge)** | 두 node가 같은 물체 표면으로 이어져 있다는 표시. 이번 방법은 **이미지에서 이웃한 pixel이면서 depth가 끊기지 않을 때만** 잇는다. 3D로 가까워도 깊이가 갑자기 바뀌면(물체 경계) 잇지 않는다 |
+| **Seed (시작점)** | target일 가능성이 가장 높은 칸. noun attention이 가장 큰 5칸을 쓴다 |
+| **Region (영역)** | 표면 연결을 따라 seed에서 퍼져 나간, 서로 이어진 node 묶음 |
+| **Robot mask** | 로봇 자신의 팔·손을 지우는 표시. 지우지 않으면 로봇 몸이 장애물로 보인다 |
+| **Graph energy 풀이** | "seed는 target(1), 탁자는 target 아님(0)"이라는 단서를 표면 연결을 따라 매끄럽게 퍼뜨려 node마다 0–1 점수를 매기는 계산 |
+| **IoU** | 예측한 target 표면과 실제 target 표면이 얼마나 겹치는지(0–1, 1이 완벽) |
+| **Precision / Recall** | Precision: 예측한 것 중 진짜 target 비율(남의 물체를 덜 포함할수록 높음). Recall: 진짜 target 중 찾아낸 비율(target을 덜 놓칠수록 높음) |
+| **FP / FN** | FP: target이 아닌데 target이라고 한 부분(위험). FN: target인데 놓친 부분 |
+| **기존 방법 (serving, "B0")** | 현재 AG3S가 쓰는 방식. attention을 3D 점에 옮기고, 상위 5% 점에서 3 cm 반경으로 키워 덩어리를 만든 뒤 점수가 가장 높은 덩어리를 고른다 |
+| **Oracle** | 정답(GT)을 몰래 알려 준 진단용 실험. 실제 방법이 아니라 "여기까지는 가능하다"는 상한을 보는 용도 |
+| **Shuffle 대조군** | feature를 무작위로 섞은 가짜 실험. 섞어도 결과가 같으면 그 feature는 실제로 아무 역할도 하지 않았다는 뜻 |
+| **95% CI** | 결과의 불확실성 범위. 범위가 0을 포함하면 "차이가 있다고 확신할 수 없음" |
+| **Dev / Held-out** | Dev: 방법을 만들며 본 데이터. Held-out: 방법을 고정한 뒤 처음 보는 데이터 |
 
-## 2. 최초 실패 (R0, 프로토콜 그대로)
+## 2. 결론 한눈에 보기
 
-**구현:** S0 정합 → S1 seed × feature 15 prototype → S2 depth surface graph → S3 연속 energy와 2×2 mechanism control(G / FGe / FGu / FG).
+![전체 결과](../../../AG3S/ag3s/docs/figures/ifg/ifg-final-overview.png)
 
-**정합(S0):**
-- frame022 기존 진단을 bitwise로 재현했다(float 822개 차이 0).
-- 180 frame 전부 통과: state·image·GT fingerprint 일치, depth planar z(ray 검사 오차 ≤ 2 µm), roundtrip ~1e-12 px.
-
-**결과(seed N, τ = 0.5):**
-
-| Arm | IoU |
-|---|---:|
-| B0 serving noun | 0.785 |
-| **G**(attention + 3D graph) | 0.728 |
-| FGe | 0.728 |
-| FG(projector) | 0.582 |
-| F(feature-only) | 0.256 |
-
-FG − G는 5개 feature 모두 −0.10 ~ −0.19였다. 설정 문제 하나도 발견했다: 문서 기본 depth 범위(z ≤ 3 m)에서는 table plane이 검출되지 않았다. Serving `range_max` 2.0 m로 맞췄다(결과를 본 뒤 수정했고, 기록함).
-
-## 3. 개선 이유 → 바꾼 것 → 전후 수치
-
-각 round는 실행 전에 가설·반증 대조군·채택 규칙을 registry에 등록했다. 채택 규칙: Δrecall ≥ −0.02, FP proxy ≤ reference, IoU ≥ parent + 0.02, shuffle 대조가 효과를 재현하지 않을 것.
-
-| Round | 관측 증거 → 원인 가설 | 바꾼 것 | 전 → 후 (IoU) | 판정 |
-|---|---|---|---|---|
-| R1 | FG의 FP가 다른 과일·crate로 번짐. Patch 점수가 표면마다 복사됨 | feature를 graph component identity gate로 | 0.728 → 0.642 | 기각. Component가 target과 table을 묶음 |
-| R2 | R1의 단위 오류 | gate 단위를 G 예측 영역으로 | 0.728 → 0.755(recall −0.050) | 기각 |
-| R3 | 기각된 영역 중 seed 질량 1위가 대부분 target(166/172) | 1위 영역 보호 | 0.755 → 0.785. **shuffle 0.784, feature 없는 top1-only 0.794** | feature gate 음성 종료. **top1-only 채택** |
-| R4 | serving은 cluster 질량으로 선택 | region 질량 합으로 선택 | 0.794 → 0.688 | 기각(크기 편향). Oracle region 0.843 → 병목은 identity |
-| (진단) | "FK filter가 seed 자격을 빼앗는다" | — | — | **가설 틀림.** 실패 frame의 seed pixel 71%가 table |
-| R5 | seed 후보에 table pixel이 섞임 | seed 자격에서 support 제외(serving 원칙과 동일) | 0.794 → **0.817**(+0.023 [+0.005, +0.049], 7/0) | **채택** |
-| R6 | FK sphere filter가 손가락 사이 과일을 지움(FN의 46%) | robot mesh 렌더 depth와 일치하는 pixel만 robot | 0.817 → **0.893**(+0.076 [+0.060, +0.093], 31/0) | **채택** |
-| R7 | R0 실패에 seed·mask 결함이 섞였을 수 있음 | R6 기반에서 A+F+3D 전 arm + 가이드 A3 region growing 재실행 | FGe = G, FG 0.79–0.83, FG-R 0.74–0.76, GT seed를 줘도 FG < G | feature graph **최종 음성** |
-| R8 | 16×16보다 촘촘한 신호가 필요한가 | dump의 224×224 pixel gradient 진단 | 면적 일치 precision 0.02–0.07(noun 0.50) | 음성(진단만) |
-| R9 | R6 vs B0에 filter 차이가 섞임 | B0에도 같은 render mask | B0 0.785 → 0.837. 후보 − B0 = **+0.057 [+0.006, +0.103]** | 방법 효과 분리 |
-| R10 / R10b | 같은 frame prototype은 seed 오류를 물려받음 | 과거 frame 기억으로 영역 전환. 전환이 안 되는 원인이 anisotropy(cos 0.96–0.98)여서 centering 추가 | R10 악화 또는 전환 없음, R10b 0.893 → 0.912(+0.019, n.s.) | 미확정(δ 척도 미조정, 결과를 본 뒤 수정) |
-| R11 | 기억 일치도가 오류를 알릴 수 있음 | 경보 점수 비교 | AUROC(centered): 기억 chain 0.998(147 frame) / 같은 frame seed 0.928 / feature 없음 0.914(179 frame). 같은 147 frame의 raw 비교: 0.982 대 0.900, 차이 +0.096 [0.000, +0.266]. 10% 보류 시 FP 82% 제거, TP 6% 손실 | 긍정(표본 작음) |
-| R12 | 3D 관계가 단계·파지 증거 | HSR + gripper + 3D logistic(LOEO) | 단계 0.783 → 0.939, 파지 0.828 → 0.933. Feature 추가 효과 없음 | 3D 긍정, feature 효과 없음 |
-
-## 4. Feature가 영역 추정에 기여하지 못한 원인 (측정)
-
-1. **해상도:** target 경계 edge의 73%는 양쪽이 같은 patch여서 feature 차이가 0이다. 경계는 depth가 이미 나눈다.
-2. **혼합 patch:** target 표면의 42%가 다른 물체와 섞인 patch에 있다. 거기서 prototype 점수가 낮게 나와 target이 빠진다.
-3. **정보 중복:** prototype은 seed에서 만들어지므로 seed가 맞으면 새 정보가 없고, 틀리면 함께 틀린다(AUC 0.93 → 0.74–0.78).
-4. **Anisotropy:** 모든 feature가 큰 공통 성분을 공유해 cosine이 0.96–0.98에 몰린다. Centering으로 해소된다.
-
-**정리:** feature에는 identity 정보가 있다(shuffle은 크게 나쁨). 그러나 같은 frame의 경계 추정에는 쓸 수 없고, **다른 시점과의 identity 일치 확인**에는 쓸 수 있다.
-
-## 5. 현재 dev 후보 (held-out 전 잠금)
-
-- **영역 추정:** noun L10H7 top-5 seed(비robot·비support pixel ≥ 60) → 5 mm depth-surface graph(image 인접 + depth 연속 edge) → 연속 energy(seed 1, support 0) → seed 질량 1위 영역 → render robot mask.
-- **안전 경보:** centered prefix_L8 기억 일치도, threshold 0.5904(dev 10% 분위수).
-- **단계·파지:** LR[HSR + gripper + 3D] weight.
-- 모두 `LOCK_heldout.json`에 코드 hash와 함께 고정했다.
-
-## 6. 남은 한계
-
-- **Held-out 없음.** 요청서는 작성했다(사용자 답변 반영: in-distribution 장면 허용, 성공 rollout 중심 평가, 이미 분석한 67 episode 제외, 실패 episode는 부록으로 보관, 최소 dump 항목).
-- **약점:** grasp 실패 직후(F3)에서 후보가 B0보다 낮다(0.745 대 0.920). 남은 seed identity 비용은 약 0.025 IoU다(oracle seed 0.918).
-- **실제 안전 지표 미측정:** permission builder의 false-exemption, ball/ESDF 연결, closed-loop.
-- **Simulation 이점:** render mask와 replay depth가 simulation에서 정확하므로 실제 센서보다 유리하다.
-- **Key moment만 사용:** 전환 지연과 시간 안정성은 미평가다. Held-out은 모든 step을 요청했다.
-- **미실행:** T54 `hold` 조건, S4 multiview/time 비교, S5 인과 검증, σ_f/λ sensitivity(사전 조건 미충족).
-- **가림 장애물 시나리오(0 / 1/3 / 1/2):** 테스트용으로 요청했고, 결과는 별도 보고하며 비중은 사용자가 판단한다.
-
-## 7. 산출물
-
-| 종류 | 위치 |
+| 질문 | 답 (dev 기준) |
 |---|---|
-| Run manifest, registry, lock | `$RUN/manifest.json`, `$RUN/improvement_registry.jsonl`, `$RUN/LOCK_heldout.json` |
-| Round별 가설·명령·결과·판정 | `$RUN/rounds/R0…R12/` |
-| Figure (+json) | `AG3S/ag3s/docs/figures/ifg/`: `ifg-final-overview`, `ifg-scene-*`, `ifg-episode-iou`, `ifg-table`, `ifg-rounds`, `ifg-rounds-r4r6`, `ifg-r7-feature-revalidation`, `ifg-r8-gradient`, `ifg-r9-filter-matched`, `ifg-r10-r12-feature-reuse` |
-| Code | `AG3S/ag3s/experiments/studies/ifg_*.py`(미커밋 WIP, sha256은 manifest에 기록) |
-| 재현 | `bash $RUN/pipeline.sh` 후 `bash $RUN/rounds/<R>/commands.txt` |
+| **원래 계획: VLA feature를 3D graph에 넣으면 target 표면을 더 정확히 찾는가?** | **아니다.** 처음 계획대로 해도(정확도 0.73 → 0.58로 하락), 원인을 고쳐 가며 여러 방식으로 다시 해도, feature를 넣은 쪽이 나아지지 않았다 |
+| **Attention + 3D(feature 없이)는 기존 방법보다 나은가?** | **나아 보인다.** 같은 robot mask 조건에서 0.837 → **0.893**(+0.057). 주로 남의 물체를 덜 포함한다. 다만 불확실성 범위의 하한이 0에 가까워 held-out 확인이 필요하다 |
+| **Feature는 쓸모가 없는가?** | **아니다.** "이전 장면에서 본 target과 지금 고른 영역이 같은 물체인가"를 확인하는 **안전 경보**로는 잘 맞았다. 다만 잘못 고른 장면이 6개뿐이라 표본이 작다 |
+| **3D 정보는 작업 단계·잡기 판단에도 도움이 되는가?** | **된다.** 손-물체 거리, 물체 높이, gripper 상태를 더하면 단계 판단 정확도가 0.78 → 0.94로 오른다(학습형 모델) |
+
+## 3. 실험별 설명
+
+각 실험은 **질문 → 한 일 → 결과 → 그림**으로 정리했다. 그림은 실제 장면 이미지 위에 결과를 겹친 것이다(초록 = 맞게 찾은 target, 주황 = 잘못 포함한 다른 물체, 파랑 = 놓친 target).
+
+### 3.1 준비: 데이터가 정확한가 (S0)
+
+- **질문:** 저장된 VLA 내부값, 다시 만든 depth, 정답 표시가 같은 장면을 가리키는가?
+- **한 일:** 180장면 모두에서 이미지·로봇 상태·depth 단위·카메라 위치를 대조했다. 이전 진단 결과도 소수점까지 똑같이 재현했다.
+- **결과:** 전부 일치했다. 발견한 문제는 기록하고 고쳤다: 먼 바닥 때문에 탁자 평면을 못 찾던 문제, 일부 저장값의 숫자 넘침(사용하지 않는 부분).
+- **그림:** 위 §0의 장면 그림.
+
+### 3.2 원래 계획 그대로 해 보기 (R0)
+
+- **질문:** noun attention으로 시작점을 잡고, feature 유사도로 영역을 넓히고, depth 표면 graph로 다듬으면 target 표면이 더 정확해지는가?
+- **한 일:** 시작점 3종 × feature 5종을 모두 비교했다. 같은 graph에서 feature를 (a) 연결 강도에만, (b) node 점수에만, (c) 둘 다에 넣는 경우와 (d) 전혀 안 넣는 경우를 비교했다.
+- **결과:**
+  - **feature 없는 3D graph: 0.728**
+  - feature를 연결 강도에만 넣음: 0.728(변화 없음)
+  - feature를 점수에 넣음: 0.58 수준(하락)
+  - feature만 사용: 0.26
+  - 기존 방법: 0.785
+  - 하락 원인: feature가 바구니나 옆 과일까지 target으로 끌어들였다.
+- **그림:** [실패 장면: feature가 바구니 전체로 번짐](../../../AG3S/ag3s/docs/figures/ifg/ifg-scene-T54c_ep1806_f031.png)
+
+### 3.3 Feature를 살려 보는 시도 (R1–R3)
+
+- **질문:** feature를 "영역이 target인지 판정"하는 데만 쓰면 되지 않을까?
+- **한 일:**
+  - R1: 이어진 덩어리 전체 단위로 판정했다.
+  - R2: 예측한 영역 단위로 판정했다.
+  - R3: 가장 유력한 영역은 보호하고 나머지만 판정했다.
+- **결과:**
+  - R1·R2는 진짜 target까지 버려 실패했다.
+  - R3는 0.785로 좋아졌다. 그러나 **feature를 무작위로 섞어도 0.784로 같았고, feature를 아예 안 쓰고 "가장 유력한 영역 하나만 남기기"만 해도 0.794**였다.
+  - 즉 좋아진 이유는 feature가 아니라 **"seed가 가장 많이 몰린 영역 하나만 고르는 규칙"**이었다. 이 규칙을 채택했다.
+- **그림:** [덩어리 단위 판정이 target을 버리는 장면](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R1-R3-gate-unit.png)
+
+### 3.4 기존 방법처럼 "attention 합"으로 고르기 (R4)
+
+- **질문:** 기존 방법은 덩어리의 attention 합으로 target을 고른다. 이걸 따라 하면 좋아지는가?
+- **결과:** 0.688로 하락했다. 큰 바구니가 크기만으로 attention 합을 많이 모았다.
+- **덤으로 얻은 진단:** 정답을 알려 주고 영역만 고르게 하면 0.843이다. 즉 **표면을 나누는 방식 자체는 충분히 좋고, 남은 문제는 "어느 영역이 target인지 고르는 것"**이다.
+- **그림:** [attention 합이 바구니를 고르는 장면](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R4-mass-bias.png)
+
+### 3.5 시작점이 탁자에 떨어지는 문제 (R5) — 채택
+
+- **질문:** 몇몇 장면에서는 시작점(seed) 자체가 target 밖에 있었다. 왜일까?
+- **한 일:** 처음엔 "로봇 손 mask가 과일을 지워서"라고 생각했다. 측정해 보니 **이 가설은 틀렸다.** 실제로는 noun attention이 높은 칸에 **탁자 pixel이 대부분**(실패 장면에서 71%)이었다. 그래서 시작점 후보에서 탁자 pixel을 빼도록 했다(기존 방법도 탁자를 시작점에서 뺀다).
+- **결과:** 0.794 → **0.817**(+0.023, 32 episode 중 7개 개선, 0개 악화).
+- **그림:** [탁자 위 시작점 vs 물체 위 시작점](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R5-nonsupport-seed.png)
+
+### 3.6 손에 든 과일을 로봇으로 지우는 문제 (R6) — 채택
+
+- **질문:** 들고 있는 과일이 자주 사라졌다. 왜일까?
+- **원인:** 기존 robot mask는 손 주변을 **공(구) 모양 부피**로 덮고, 그 안의 점을 모두 지운다. 손가락 사이의 과일도 같이 지워졌다(놓친 target의 46%).
+- **한 일:** 로봇의 실제 모양(mesh)을 그 자세로 그려 보고, **카메라가 본 깊이와 로봇 표면 깊이가 1 cm 안에서 일치하는 pixel만** 로봇으로 지웠다. 과일이 손가락 앞에 있으면 깊이가 다르므로 남는다.
+- **결과:** 0.817 → **0.893**(+0.076, 32 episode 중 31개 개선). 잡은 직후 장면이 0.72 → 0.94로 크게 좋아졌다.
+- **그림:** [구 부피 mask는 과일을 지우고, 렌더 mask는 남긴다](../../../AG3S/ag3s/docs/figures/ifg/ifg-scene-r6-T54c_ep1817_f020.png)
+
+### 3.7 Feature 재검증 (R7)
+
+- **질문:** R0 실패 때는 시작점·robot mask 문제가 섞여 있었다. 고친 상태에서 feature를 다시 넣으면?
+- **결과:**
+  - 여전히 도움이 되지 않았다. 연결 강도에 넣으면 변화가 없고, 점수에 넣으면 0.07–0.11 하락했다.
+  - **정답 시작점을 줘도** 마찬가지였다.
+  - 원인(측정): (1) 칸이 거칠다. 경계 양쪽의 73%가 같은 칸이라 feature 차이가 0이다. (2) target 표면의 42%가 손·탁자와 섞인 칸에 있어 점수가 낮게 나온다. (3) feature 기준이 seed에서 만들어지므로 attention과 같은 정보다.
+- **그림:** [섞인 칸 때문에 target이 빠지는 장면](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R7-feature-unary-loss.png)
+
+### 3.8 더 촘촘한 신호: pixel gradient (R8)
+
+- **질문:** 16×16보다 촘촘한 신호(224×224, 행동에 대한 pixel 민감도)를 쓰면?
+- **결과:** target을 가리키는 비율이 0.02–0.07로, noun attention(0.50)보다 훨씬 낮았다. 이 신호는 "행동에 영향을 주는 곳"이지 "명령한 물체"가 아니었다.
+- **그림:** [gradient는 장면 전체 경계에 흩어진다](../../../AG3S/ag3s/docs/figures/ifg/ifg-r8-gradient.png)
+
+### 3.9 기존 방법과 공정하게 비교 (R9)
+
+- **질문:** 0.893 대 0.785 차이에는 robot mask 개선이 섞여 있다. 기존 방법에도 같은 mask를 주면?
+- **결과:**
+  - 기존 방법도 0.785 → 0.837로 좋아졌다(mask 효과).
+  - 같은 조건에서 **새 방법이 +0.057** 앞섰다(32 episode 중 27개 우위).
+  - 바구니에 놓은 뒤 장면에서 차이가 컸다(0.88 대 0.62).
+  - 반대로 **잡기에 실패한 직후 장면은 기존 방법이 낫다**(0.92 대 0.75).
+- **그림:** [새 방법이 앞선 장면 / 기존 방법이 앞선 장면](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R9-vs-serving.png)
+
+### 3.10 Feature를 다르게 쓰기 ① 시간축 기억 (R10, R10b) — 미확정
+
+- **질문:** 이전 장면에서 target의 feature를 기억해 두면, 지금 attention이 틀렸을 때 바로잡을 수 있는가?
+- **결과:**
+  - 처음엔 작동하지 않았다. VLA feature는 모든 물체가 0.96–0.98로 비슷하게 나오기 때문이다(공통 성분이 큼).
+  - **장면 평균을 빼는 보정(centering)** 후에는 target이 확실히 구별됐다(0.60 대 0.41).
+  - 정확도는 0.893 → 0.912(+0.019)였다. 사전 기준(+0.02)에 약간 못 미치고 불확실성 범위가 0을 포함해 **미확정**이다.
+- **그림:** [보정 전엔 모두 비슷, 보정 후 target이 구별됨](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R10-centering.png)
+
+### 3.11 Feature를 다르게 쓰기 ② 안전 경보 (R11) — 긍정
+
+- **질문:** 지금 고른 영역이 기억 속 target과 다르면 "확실하지 않음" 경보를 울릴 수 있는가? 경보가 울리면 그 영역에 접촉 예외를 주지 않는다.
+- **결과:**
+  - 147장면 중 경보는 15번 울렸다. **잘못 고른 6장면을 모두 포함**했고, 나머지 9번은 불필요한 경보였다.
+  - 잘못 포함될 뻔한 영역의 82%를 막고, 정상 target은 6%만 잃는다.
+  - feature 없이 만든 경보보다 낫다. 단 잘못된 장면이 6개뿐이라 확인이 더 필요하다.
+- **그림:** [경보가 울린 장면들](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R11-confidence-gate.png)
+
+### 3.12 작업 단계·잡기 판단 (R12)
+
+- **질문:** 3D 정보(손-물체 거리, 물체 높이)를 더하면 "지금 집는 중 / 옮기는 중 / 놓은 뒤" 판단이 좋아지는가?
+- **결과:**
+  - 기존 판단기(HSR)만 쓰면 0.78이다. 특히 "놓은 뒤"를 절반만 맞힌다.
+  - 3D와 gripper 상태를 더한 학습형 모델은 **0.94**다.
+  - 잡았는지 판단도 0.83 → 0.93으로 오른다.
+  - feature 추가 효과는 없었다. 이 데이터에는 엉뚱한 물체를 잡는 경우가 없기 때문이다.
+- **주의:** "높이" 입력은 원래 "탁자 위 높이"를 의도했다. 실제로는 바닥 기준 절대 높이였다. 모든 장면의 탁자 높이가 같아 결과에는 영향이 없다.
+- **그림:** [단계별로 바뀌는 3D 신호](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R12-phase-3d.png)
+
+## 4. 채택·보류·기각 정리
+
+| 구분 | 내용 |
+|---|---|
+| **채택(dev 후보)** | noun attention 시작점(탁자 제외) + depth 표면 graph + 가장 유력한 영역 하나 + 렌더 robot mask (0.893) |
+| **긍정, 추가 확인 필요** | feature 기억 기반 안전 경보, 3D 기반 단계·잡기 판단 |
+| **미확정** | feature 기억으로 영역 바꾸기(+0.019) |
+| **기각** | feature를 3D graph의 연결·점수에 넣기, feature만으로 영역 찾기, attention 합으로 고르기, pixel gradient |
+| **최종 채택 결정** | **사용자 판정 대기**(방법론 문서의 후보안 참조) |
+
+## 5. 남은 일
+
+1. **Held-out 검증:** 처음 보는 episode로 확인한다. 설정은 이미 잠갔다. 요청서: [HELDOUT_COLLECTION_REQUEST_KO.md](HELDOUT_COLLECTION_REQUEST_KO.md).
+2. **AG3S 연결:** 찾은 target 영역을 실제 "접촉 허용 영역"과 충돌 제약에 연결하고, 로봇이 실제로 움직이는 실험(closed-loop)에서 확인한다.
+3. **가림 테스트(테스트용, 별도 보고):** target이 1/3, 1/2 가려진 장면에서 확인한다.
+4. **강한 비교 대상:** 외부 분할 모델(Grounded SAM 등)과 정답 mask를 같은 안전 제약에 넣은 비교. Novelty 문서의 제안이다.
+5. **약점:** 잡기에 실패한 직후 장면(기존 방법보다 낮음)을 개선한다.
