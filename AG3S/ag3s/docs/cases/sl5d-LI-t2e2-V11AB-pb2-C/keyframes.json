@@ -1,0 +1,30 @@
+{
+ "case": "sl5d-LI-t2e2-V11AB-pb2-C",
+ "keyframe_obs": [
+  20,
+  76,
+  84,
+  88,
+  99,
+  149,
+  219
+ ],
+ "vla_only": {
+  "official_success": true,
+  "status": "success",
+  "steps_excluding_wait": 129,
+  "collided": true,
+  "collide_t": 84,
+  "safe_success": false,
+  "obstacle": "milk_obstacle_1"
+ },
+ "v11ab": {
+  "official_success": true,
+  "status": "success",
+  "steps_excluding_wait": 199,
+  "collided": false,
+  "collide_t": null,
+  "safe_success": true,
+  "obstacle": "milk_obstacle_1"
+ }
+}

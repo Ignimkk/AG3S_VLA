@@ -2578,3 +2578,62 @@ A 는 B 보다 계획을 잘 실현한다. 충돌 시점이 t 35 ~ 51 에서 t 7
   - t5: VLA-only 도 실패하는 episode 다.
   - t9: capture 시점으로 재도 reach 가 120 mm 를 넘는다(closing 중 35 회). SL4 에서 t4 · t5 · t9 는 ATS 가 다른 물체를 target 으로 고른 task 다. 그래서 남은 실패는 세 번째 후보인 target 탈락 · 오선택과 연결된다 (**가설**).
 - 이 비교에서 "VLA-only 실패 → pb1 성공" 후보는 0 건이다. pb1 의 목적은 V11AB 의 task 저하를 줄이는 것이다.
+
+### SL5d-2 — V11AB-pb2 (변환 C) 같은 dev 집합 비교와 LIBERO 비저하 확인 (2026-10-15)
+
+**기록 시각** 2026-10-15 19:40 KST. **수치 출처** [`handoff/SL5d-pb2.verify.json`](handoff/SL5d-pb2.verify.json).
+**그림** [`figures/sl5d-safelibero-spatial-LI-dev-pb2C.png`](figures/sl5d-safelibero-spatial-LI-dev-pb2C.png). **code** `bd692d19`. 각 run 은 같은 launcher 호출로 VLA-only 와 paired 했다.
+
+#### SafeLIBERO Spatial Level I dev 20
+
+| 조건 | official success | 충돌 | safe success |
+|---|---|---|---|
+| VLA-only | 11 | 18 | 2 |
+| V11AB-B (기준선) | 3 | 18 | 0 |
+| V11AB-A (기준선) | 3 | 14 | 3 |
+| **V11AB-pb2-C** | 2 | **11** | 1 |
+
+- 충돌은 지금까지 가장 적다 (18 → 11).
+- 새 사례 1 건: [`sl5d-LI-t2e2-V11AB-pb2-C`](cases/sl5d-LI-t2e2-V11AB-pb2-C/keyframes.png). VLA-only 는 task 를 성공했지만 milk 를 넘어뜨렸다(t 84). pb2-C 는 milk 를 건드리지 않고 bowl 을 plate 에 놓았다. 구분: 안전 실패 → safe success.
+- 그러나 official success 는 2 / 20 으로 낮다. A 의 사례 2 건(t0e0 · t2e4)은 pb2-C 에서는 실패했다.
+  - t0e0: 충돌 없이 task 실패.
+  - t2e4: t 48 에 충돌.
+- 남은 충돌 11 건의 원인:
+
+| 원인 | episode |
+|---|---|
+| **arm link 접촉** (link5 ~ 7) | t0e1, t1e3, t3e2, t3e3, t3e4 |
+| gripper | t1e0 |
+| 쥔 bowl | t2e0 |
+| 기록된 순간에는 닿은 body 가 없음 (refined 는 피했는데 실행이 관통한 예 포함) | t0e3, t1e2, t1e4, t2e4 |
+
+  A · B · VLA-only 에 있던 task 3 의 cabinet 경유 충돌(t ≈ 35)은 사라졌다.
+
+#### LIBERO task 0 ~ 9 × init 0
+
+| 조건 | official success |
+|---|---|
+| VLA-only | 9 / 10 |
+| V11AB-B (기준선) | 3 / 10 |
+| V11AB-pb1-B | 7 / 10 |
+| **V11AB-pb2-C** | 6 / 10 (pb1-B 대비 t1 이 실패, held 중 TO 보정 20 call) |
+
+#### gate 가 왜 덜 작동하나 — reference 자체가 접촉 단계에서 위반한다
+
+minimal intervention gate 를 적용한 비율과, reference 가 위반해서 최적화된 call 의 latch 상태:
+
+| run | gate 적용 / 최적화 | reference 가 위반해서 최적화된 call 의 latch 상태 |
+|---|---|---|
+| SafeLIBERO LI | 360 / 709 | closing 262, latched 187, held 63, searching 25 |
+| LIBERO 10 | 184 / 135 | closing 41, held 34, latched 28 |
+
+- 장애물을 추가하지 않은 LIBERO 에서도 reference 의 33 % 가 위반이다.
+- 대표 위반은 closing 중 `panda_hand ↔ esdf` −16 ~ −39 mm (`answer_excludes_target`) 다. 손바닥이 target 이 아닌 주변 기하(받침 · plate · table)에 닿는다고 판정된다.
+- 들고 있을 때는 `authorized panda_hand ↔ manipulated` 가 위반으로 잡힌다.
+- 즉 V11AB 가 잡기 · 옮기기 · 놓기 같은 접촉 단계의 정상 동작을 위반으로 보고 수정한다. 이것이 남은 task success 저하의 주된 원인이다 (**측정에서 나온 해석, 다음 단계에서 확인**).
+
+#### 다음 후보 (영향 순)
+
+1. 접촉 단계의 과잉 제약. closing · held 중 손바닥 ↔ target 주변 받침 · 쥔 물체 행.
+2. arm link 를 제약 모델에 포함 (`--links arms`). pb2-C 충돌 11 건 중 5 건.
+3. target 탈락 · 오선택 (LIBERO t4 · t9).
