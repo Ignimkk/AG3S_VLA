@@ -293,6 +293,16 @@ class ClusteringConfig:
     #: is the latch's (execution feedback only). T43 W V5 1925 s19253: the apple slipped out at
     #: t 369 with the command at 0.59 and stayed attached to the end. False (default) = bit-identical.
     held_slip_detach: bool = False
+    # T46g — begin
+    #: **T46g (SL5b) — the grasp latch's reach of an unobserved manipulated object rides the hand.**
+    #: True = the caller's grasp latch (`SafePolicy` → `trajopt.grasp_latch.LatchConfig.
+    #: reach_hand_relative`) measures `reach` of an `occluded` / `lost` manipulated object from its
+    #: last observed centroid carried rigidly with the hold link from the state of the frame it was
+    #: observed in (`AG3S.manipulated_seen_state`) to the current state, and `AG3S.attach`'s reach
+    #: gate measures the same point. A `visible` object, the threshold and every other check are
+    #: unchanged. AG3S stores it; the decision is the latch's. False (default) = bit-identical.
+    latch_reach_hand_relative: bool = False
+    # T46g — end
     #: **T43 Z6 — cap the held query spheres at attach.** A distance `a` (m) = at attach every held
     #: query sphere (R2 body cover in `sphere` and `segments` mode, or the H2 covering spheres) gets
     #: radius ≤ observed half-width + `a` and a centre within `a` of the observed body centre (pulled
@@ -478,6 +488,10 @@ class ClusteringConfig:
         if not isinstance(self.held_slip_detach, bool):
             raise AG3SConfigError(
                 f"clustering.held_slip_detach must be true or false, got {self.held_slip_detach!r}")
+        if not isinstance(self.latch_reach_hand_relative, bool):  # T46g
+            raise AG3SConfigError(
+                f"clustering.latch_reach_hand_relative must be true or false, "
+                f"got {self.latch_reach_hand_relative!r}")
         hc = self.held_cover_cap
         if hc is not None and (isinstance(hc, bool) or not isinstance(hc, (int, float))
                                or not math.isfinite(float(hc)) or float(hc) < 0.0):

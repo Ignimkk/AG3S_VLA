@@ -143,6 +143,17 @@ class LatchConfig:
     #: 17.6 mm (T17a) 라 여유를 두었다. verifier 가 재서 정한다. T14 의 636 mm 는 어떤 값으로도
     #: 거절돼야 한다. `AG3S.attach` 의 기본 관문(`attached.DEFAULT_ATTACH_REACH_M`)과 같은 값.
     reach: float = 0.12
+    # T46g — begin
+    #: **SL5b — 가려진 조작 대상의 reach 를 손과 함께 옮긴 centroid 로 잰다.** 기본 False = T46g 전과
+    #: 비트 동일. 이 latch 는 `reach_m` 을 받기만 하므로 이 필드는 `SafePolicy._advance_grasp` 가 읽는다:
+    #: 조작 대상이 이번에 관측되지 않았으면 (`state != visible`) 마지막 관측 centroid 를 그 관측 frame 의
+    #: 자세에서 쥔 link (hold link = 손바닥) 에 강체로 붙여 지금 자세로 옮긴 점과 parent link 원점의
+    #: 거리를 쓴다 — `c_now = T_hold(q_now) · T_hold(q_seen)⁻¹ · c_seen`. 관측된 프레임은 그대로다.
+    #: 문턱(`reach`)은 바꾸지 않는다. 근거: SL5b 진단 (`verify/T46g-SL5b/sl5b_diag.md`) — 가려진 채 손과
+    #: 함께 들린 물체의 stale centroid 로 reach 128–372 mm 가 나와 attach 가 거절됐고, 같은 call 들의
+    #: hand-relative reach 는 62.8–102.6 mm. `serve_safe --latch-reach-hand-relative`.
+    reach_hand_relative: bool = False
+    # T46g — end
     #: **측정 개도가 멈췄다** 의 문턱 (T30 F4, 정규화 개도 — 1 = 열림). 이번 요청의 측정 개도와
     #: 직전 요청의 측정 개도 차가 이보다 작아야 `settled`. 명령 스텝을 세지 않는다.
     #:

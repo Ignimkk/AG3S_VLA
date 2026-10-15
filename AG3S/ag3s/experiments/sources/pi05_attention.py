@@ -151,7 +151,7 @@ class AttentionSampler:
         # -> [L, heads, action_tokens, image_tokens]
         return v_t, probs[:, 0, 0, :, :, :n_image_tokens].astype(jnp.float32)
 
-    def attention(self, obs, denoise_steps, *, noise_seed: int = 0):
+    def attention(self, obs, denoise_steps, *, noise_seed: int = 0, kv_hook=None):
         """`{denoise_step: [L, heads, action_tokens, 768]}` for the requested Euler steps.
 
         The denoising loop is started from **Gaussian noise, not zeros**, because that is what
@@ -164,18 +164,23 @@ class AttentionSampler:
         recoverable, so what this can offer is reproducibility rather than an exact replay. Pass
         several seeds to check the ranking does not depend on the draw.
         """
-        return self._sample(obs, denoise_steps, noise_seed=noise_seed, subtask_feature=False)[0]
+        return self._sample(obs, denoise_steps, noise_seed=noise_seed, subtask_feature=False,
+                            kv_hook=kv_hook)[0]
 
-    def attention_and_subtask_feature(self, obs, denoise_steps, *, noise_seed: int = 0):
+    def attention_and_subtask_feature(self, obs, denoise_steps, *, noise_seed: int = 0, kv_hook=None):
         """`(attention(...), kv_L4)` from **one** prefix pass (SUBTASK-c).
 
         The attention dict is exactly what `attention()` returns for the same arguments; the
         feature (`(512,)` float32, batch 0) is reduced from the KV cache that pass already built —
         no extra forward. See `AG3S/ag3s/stages/subtask_probe.py` for the probe it feeds.
         """
-        return self._sample(obs, denoise_steps, noise_seed=noise_seed, subtask_feature=True)
+        return self._sample(obs, denoise_steps, noise_seed=noise_seed, subtask_feature=True,
+                            kv_hook=kv_hook)
 
-    def _sample(self, obs, denoise_steps, *, noise_seed: int, subtask_feature: bool):
+    def _sample(self, obs, denoise_steps, *, noise_seed: int, subtask_feature: bool, kv_hook=None):
+        """`kv_hook` (T57-A, default None = nothing): called once with ``(kv, prefix_mask)`` of the prefix
+        pass, before the suffix loop — `attention_source.JaxPrefixBackend` gathers the noun-token V rows
+        from this cache (no second prefix pass; the attention below is unchanged)."""
         import jax
         import jax.numpy as jnp
 
@@ -184,6 +189,8 @@ class AttentionSampler:
         # preprocess_observation is not idempotent -- exactly once, before the prefix pass.
         obs = _model.preprocess_observation(None, obs, train=False)
         kv, prefix_mask = self._jit_prefix(self._state, obs)
+        if kv_hook is not None:
+            kv_hook(kv, prefix_mask)
         feature = (np.asarray(self._jit_kv_feature(kv, prefix_mask), np.float32)
                    if subtask_feature else None)
 

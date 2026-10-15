@@ -145,6 +145,7 @@ T16 에서 `--no-collision` 인데도 34 청크 중 25 개가 HOLD 였다. 이�
 | `unverified` | 최적화기가 검사하지 못했다 (`solver_failed` · `unconstrained`) | HOLD |
 | `comms` | **클라이언트가 만든다** — `timeout` · `stale` · `dimension` · `error` (`evidence.ipc`) | HOLD |
 | `no_perception` | 서버가 `--no-perception` 으로 떠 있다 (T27, `to_only_policy`) — AG3S·ESDF 가 없고 **아무것도 검사하지 않았다** | HOLD |
+| `task_not_ready` | **T57 단계 2** (`serve_safe --task-gate`, 기본 off): grasp latch 가 HELD 인데 명사 token probe (T55 prereg: v5 · τ 0.3 · p 1 · noun_ok 필요) 가 지시한 대상을 쥐었다고 말하지 않는다 (`SafePolicy._task_gate`). evidence `probe_p` · `tau` · `noun_ok` · `latch_state`. HELD 가 아니면 생기지 않는다. 운반 · 놓기 전이나 작업 완료의 인증이 아니다 | HOLD |
 
 **모르는 kind 는 HOLD 다** (fail closed).
 
@@ -356,7 +357,8 @@ VERDICT_REASONS = "verdict_reasons"
 #: 곳은 없고 (`GATE_DEFAULT` 가 처리를 정한다), 표와 같은 순서가 읽기 쉽다.
 REASON_KINDS = ("allowed_contact", "budget_only", "occluded_target", "uncertified_waived",
                 "subtask_no_target", "follow_to",
-                "collision", "uncertified", "unverified", "comms", "no_perception")
+                "collision", "uncertified", "unverified", "comms", "no_perception",
+                "task_not_ready")
 
 #: 게이트의 처리 두 가지. **정지(abort)는 여기 없다** — 한 청크의 사유가 아니라 연속 HOLD 수가
 #: 정하는 것이고 (`--safe-max-hold-chunks`), 그것은 제어 루프의 일이다.
@@ -381,6 +383,8 @@ GATE_DEFAULT: dict[str, str] = {
     "comms": "hold",
     # T27 — `--no-perception` 서버. 검사되지 않은 청크다. 실행하려면 로컬 `--safe-gate off`.
     "no_perception": "hold",
+    # T57 단계 2 — HELD 인데 명사 probe 가 지시한 대상을 말하지 않는다 (`SafePolicy._task_gate`, 기본 off).
+    "task_not_ready": "hold",
 }
 
 #: `comms` 사유의 하위 종류 (`evidence.ipc`). `dimension` 은 `last_ipc` 로는 `error` 로 남는다 —

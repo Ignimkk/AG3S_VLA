@@ -247,6 +247,14 @@ class AG3S:
         #: (`ManipulatedIdentity.frame` / `last_seen_frame`). `attach()` snapshots the manipulated
         #: geometry with the state **it was observed at**, not the attach request's — see `attach`.
         self._state_by_frame: dict[int, np.ndarray] = {}
+        # T46g — begin
+        #: SL5b: the robot state at the last grounding frame that observed the manipulated object
+        #: (`last_seen_frame`) — `{"frame", "id", "centroid", "state"}` or None. Kept apart
+        #: from the 16-frame `_state_by_frame` window (SL5b occlusions last up to 30 frames). Pure
+        #: bookkeeping: only `manipulated_seen_state()` reads it (SafePolicy with
+        #: `latch_reach_hand_relative`), so nothing else changes with or without it.
+        self._manip_seen: Optional[dict[str, Any]] = None
+        # T46g — end
         #: T32 H3: the last accepted surface fit of the manipulated object before a grasp
         #: (`_target_ball`) — `(centre, radius)`, base frame. Its place on the table is one of the
         #: held object's old traces cleared at attach.
@@ -421,6 +429,7 @@ class AG3S:
         self._attached = None
         self._held_record = None
         self._state_by_frame = {}
+        self._manip_seen = None  # T46g
         self._last_object_fit = None
         self._last_object_points = None
         self._held_capture_points = None
@@ -691,6 +700,7 @@ class AG3S:
         reach: Optional[float] = None,
         hold_link: Optional[str] = None,
         geometry_state: Optional[np.ndarray] = None,
+        reach_centroid: Optional[np.ndarray] = None,
     ) -> AttachedCollisionGeometry:
         """Record an externally confirmed grasp. **AG3S never calls this itself.**
 
@@ -733,6 +743,11 @@ class AG3S:
         their behaviour: `trajopt/experiments/grasp_damage.py` attaches MuJoCo's true apple to
         `link_left_arm_6`, whose origin is ~270 mm from the apple (T17 FK), and a hand-sized default
         would refuse it. A limit only means something relative to a parent link.
+
+        T46g (SL5b): `reach_centroid` (base frame) replaces the geometry's centroid **in the reach
+        gate only** — `SafePolicy` with `clustering.latch_reach_hand_relative` passes the occluded
+        object's last observed centroid carried with the hand to `robot_state`, the same point its
+        latch measured. `None` (default) = the geometry's centroid, as before.
 
         The attach frame is the given `parent_link`. With a finger link (the default grasp links are
         `ee_finger_l1`/`ee_finger_r1`) the snapshot rides on that finger, so any later change of the
@@ -807,6 +822,8 @@ class AG3S:
             if centroid is None and getattr(geometry, "points", None) is not None \
                     and len(geometry.points):
                 centroid = np.asarray(geometry.points, np.float64).reshape(-1, 3).mean(axis=0)
+            if reach_centroid is not None:  # T46g
+                centroid = np.asarray(reach_centroid, np.float64).reshape(3)
             if centroid is None:
                 raise AttachRejected("reach: the target has neither a centroid nor points, so "
                                      "its distance to the hand cannot be checked",
@@ -1033,6 +1050,35 @@ class AG3S:
             if q is not None and len(q) == len(np.asarray(robot_state).reshape(-1)):
                 return q, f"frame {int(manip.last_seen_frame)} (manipulated last seen)"
         return np.asarray(robot_state, np.float64), "attach_request"
+
+    # T46g — begin
+    def _note_manipulated_seen(self, manipulated, robot_state) -> None:
+        """SL5b: pin the state of the last frame that **observed** the manipulated object
+        (`last_seen_frame == frame`) — the same frame `_snapshot_state` (T32 H2) snapshots with, kept
+        past the 16-frame window. A seen frame that keeps the anchor (`subset_kept_anchor`,
+        `closing_keep_geometry`) counts: the object was seen at the anchor's place then (the
+        association accepted it there), which is what the carry starts from."""
+        if int(manipulated.last_seen_frame) != int(manipulated.frame):
+            return
+        self._manip_seen = {"frame": int(manipulated.frame), "id": int(manipulated.id),
+                            "centroid": np.asarray(manipulated.centroid, np.float64).reshape(3).copy(),
+                            "state": np.asarray(robot_state, np.float64).reshape(-1).copy()}
+
+    def manipulated_seen_state(self) -> Optional[tuple[int, np.ndarray]]:
+        """SL5b — `(frame, q)`: the manipulated object's `last_seen_frame` and the robot state that
+        frame was captured at. None when unknown: nothing manipulated, no pin for that frame / id,
+        or the centroid changed since without an observation (then a caller must not pretend to
+        know where the hand was). Read by `SafePolicy` only with
+        `clustering.latch_reach_hand_relative`; reading it changes nothing."""
+        manip, pin = self._manipulated, self._manip_seen
+        if manip is None or pin is None or pin["id"] != int(manip.id) \
+                or pin["frame"] != int(manip.last_seen_frame):
+            return None
+        if not np.array_equal(pin["centroid"],
+                              np.asarray(manip.centroid, np.float64).reshape(3)):
+            return None
+        return int(pin["frame"]), pin["state"].copy()
+    # T46g — end
 
     def _resolve_hold_link(self, parent_link: str, hold_link: Optional[str]) -> str:
         """The link the held object's snapshot rides (T32 H2). See `attach`."""
@@ -1621,6 +1667,7 @@ class AG3S:
             self._state_by_frame[int(manipulated.frame)] = np.asarray(robot_state, np.float64).copy()
             for old_frame in sorted(self._state_by_frame)[:-16]:
                 del self._state_by_frame[old_frame]
+            self._note_manipulated_seen(manipulated, robot_state)  # T46g
         # T26 §3: **exclusion geometry only from an admissible manipulated object.** The gate
         # re-checks the evidence (narrowest extent ≤ max opening, not the destination); on failure
         # nothing is excluded, nothing is permitted, and `invariant_violation` is recorded (raised
