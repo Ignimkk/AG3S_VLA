@@ -61,3 +61,13 @@
 - **STARTUP 확인 (2026-10-14 15:48 – 16:33 UTC):** 첫 시도는 run dir 안의 시험용 symlink (CL3 를 가리킴) 를 출력 경로 검사가 거절해 5 서버 모두 기동 전에 종료 → symlink 제거 (시험 결과는 `prep/test_cl3` 에 남음). 두 번째: X1 · G4 는 모든 guard 통과, X2 · X3 · X4 는 900 s 안에 listening 에 이르지 못함. 최종 형상 서버의 기동이 10 – 15 min 걸렸다 (CL3 는 76 s; 두 서버가 동시에 기동하면 더 늦다). 실패 기록은 `startup_check_failed_symlink/` · `startup_check/` 에 보존.
 - **일정 v2 (lead):** 기동 시간 때문에 arm × port 마다 서버를 한 번만 띄운다 — port 8290 = pair 1 – 9 를 X1 X2 X3 X4 G4 순서, port 8291 = pair 10 – 18 을 G4 X4 X3 X2 X1 순서 (같은 pair 는 모든 arm 에서 같은 port), 8291 은 8 min 늦게 시작. `SERVER_UP_TIMEOUT_S` 2400 s. X2 · X3 · X4 의 기동 guard 는 본 실행의 첫 기동에서 같은 검사로 확인한다 (불일치면 그 chain 이 거절).
 - **본 실행 시작 16:34 UTC.** 예상 종료 ≈ 21:30 UTC (≈ 4.9 h; 서버 기동 10 회 × 10 – 15 min 포함). 승인 예산 (약 4 h) 보다 약 1 h 길다 — run 수는 90 그대로, 추가분은 서버 기동 시간이다.
+
+## 사용자 판정 (2026-10-15, CL4 결과 뒤)
+1. **성공률 하락 원인 진단 최우선.** offline: CL3 와 CL4 의 같은 episode · seed 에서 접근 궤적이 처음 갈리는 구간, 정책 원출력 대 TO 출력, 영향을 준 link · 제약, 손–target 거리 · 그리퍼 닫힘 시점. 대표 실패 전환 · 성공 유지 사례부터. 기록만으로 형상의 영향을 가르지 못하면 **X2 에서 형상만 기존 것으로 바꾼 18 run (X2G)** 을 재승인 없이 진행 (snapshot · margin · W1 · seed 그대로, SL5b · T57 변경 섞지 않음). palm · wrist 각각의 기여는 분리하지 않고, 성공이 회복돼도 누락이 알려진 기존 형상을 최종 채택하지 않는다. GPU 시간은 CL4 의 실제 기동 비용을 반영해 재산정.
+2. **DT-02 기록 (고정 문구):** "최종 형상의 18개 dev episode–seed 조건에서 success_ct(P)는 ball 10, oracle-visible 9, ball_owned+F1 7, ball_owned 5였다. 이 조건에서는 ball_owned와 F1의 ball 대비 실행상 우위가 관측되지 않았다." 순서는 관측값의 순서로만 쓰고 방법의 일반적 우열로 쓰지 않는다. 18 = 9 scene × 2 seed. F1 은 X2 대비 5 → 7 의 탐색적 회복, ball 보다 낫다는 근거 없음. 이전 CL3 의 채택 판단은 그 형상 · 설정에 한정.
+3. **DT-05A:** "이 평가 범위에서는 link 별 구분의 실행상 차이가 관측되지 않았다." X4 · G4 의 성공 수 차이를 LTE 효과로 귀속하지 않는다. 놓은 뒤의 비허용 접촉은 기존 정의대로 유지하고 FT–target 접촉과 구분해 보고.
+4. **T60d 종료:** "TO-off 에서 P 에 도달한 3 run 은 모두 H 에 도달했다. 따라서 TO 가 이전 궤적과 상태를 바꿔 복귀에 간접적으로 영향을 주었을 가능성을 배제할 수 없다." "관측된 복귀 구간에서 정책의 복귀 제안이 없었다" 는 유지, "TO 는 복귀 실패에 기여하지 않았다" 로 확대하지 않는다. 추가 seed 없음.
+
+## X2G 실행 (2026-10-15)
+- 기록 진단 (`verify/CL4_diag/`): CL4 X2 · X1 은 파지 전 구간 (t ≤ 160) 에서 손바닥 (`ee_left` / `ee_right`, palm cover 구) 이 TO 의 최악 행 (target-free 층) 이 된 chunk 가 18 쌍 합 109 · 95, CL3 C1a 는 21. 그 손바닥 구의 다수가 AG3S target 점 15 mm 안 (예: X2 ep11_s111 24/33, ep104_s1041 59/69). 같은 형상의 X1 도 손바닥 구속이 많은데 성공은 높아 결과 귀속은 기록만으로 가르지 못함 → X2G 진행.
+- X2G = X2 + `--links gripper` (270 구, palm cover off) 외 동일. 18 run, 서버 2, 같은 pair 분할. 재산정 GPU: 기존 형상 서버 기동 (CL3 76 s, 부하 시 수 분) + 9 run × ≈ 6 – 6.5 min ≈ 1 – 1.2 h. GPU lock 03:01 UTC, pod 메모리 guard 대기 후 시작.
