@@ -116,8 +116,8 @@
 
 | 평가 | 내용 |
 |---|---|
-| Target extent | 후보(`top1-only-ns+rm:N`) vs B0, B0 + render mask, G:N. 3D IoU/precision/recall, 이웃·support·robot FP |
-| 시간축 기억 | Mem-first:prefix_L8:δ0.05(centered), 보조 arm |
+| Target extent | 채택안 B, A(전환 없음) vs B0, B0 + render mask, G:N. 3D IoU/precision/recall, 이웃·support·robot FP |
+| 시간축 기억 | 채택안 B의 구성 요소(Mem-first:prefix_L8:δ0.05, centered). 전환 효과를 분리하려고 A(전환 없음)와 같은 episode에서 비교 |
 | 신뢰도 경보 | 잠근 threshold 0.5904에서 잘못된 선택 탐지, FP 제거율·TP 손실률 |
 | 단계·파지 | 잠근 LR weight vs HSR argmax·gripper 규칙. 모든 step이 있으므로 **전환 지연**도 측정 |
 | P_task | swap dump에서 엉뚱한 물체 지시 상태의 경보·판단 |
