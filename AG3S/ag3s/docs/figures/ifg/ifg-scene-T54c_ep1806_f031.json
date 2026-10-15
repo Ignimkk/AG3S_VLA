@@ -1,0 +1,24 @@
+{
+ "frame_id": "T54c_ep1806_f031",
+ "camera": "head (zed_left)",
+ "panels": {
+  "G:N": {
+   "iou": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "neighbor_fp": 0.0
+  },
+  "FG:N:projector": {
+   "iou": 0.03512544802867384,
+   "precision": 0.03512544802867384,
+   "recall": 1.0,
+   "neighbor_fp": 5384.0
+  },
+  "F:N:projector": {
+   "iou": 0.02549096111327871,
+   "precision": 0.02549096111327871,
+   "recall": 1.0,
+   "neighbor_fp": 6207.833333333333
+  }
+ }
+}
