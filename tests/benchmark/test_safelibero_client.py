@@ -104,3 +104,17 @@ def test_pb2_flags_reach_the_trajopt_config():
     assert cfg.sqp.minimal_intervention == pytest.approx(0.010)
     assert profile.v11ab_build_kwargs(args)["reach_at_capture"] is True
     assert ss.trajopt_config_from_args(profile.parse_v11ab_args()).sqp.minimal_intervention is None
+
+
+def test_pb3_adds_the_arm_links_to_the_constraint_model():
+    from AG3S.adapters.panda import model as pm
+    from AG3S.adapters.panda import profile
+
+    args = profile.parse_v11ab_args(argv=profile.v11ab_server_argv() + profile.version_server_flags("V11AB-pb3"))
+    kw = profile.v11ab_build_kwargs(args)
+    assert kw["links"] == "arms" and kw["reach_at_capture"] is True
+    assert profile.v11ab_build_kwargs(profile.parse_v11ab_args())["links"] == "gripper"
+    arm = pm.build_panda_constraint_model(pm.panda_constraint_link_filter("arms"))
+    grip = pm.build_panda_constraint_model(pm.panda_constraint_link_filter("gripper"))
+    assert arm.n_spheres > grip.n_spheres
+    assert {"panda_link5", "panda_link6", "panda_link7"} <= set(arm.sphere_link_names)

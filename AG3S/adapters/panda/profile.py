@@ -205,6 +205,10 @@ AG3S_VERSIONS: dict[str, tuple[str, ...]] = {
     # pb2 = pb1 + minimal intervention gate at 10 mm (the response model's prediction error on unchanged chunks is
     # ~3 mm median, 7.5 mm max (SL5a), so a reference within 10 mm of a constraint is still optimized).
     "V11AB-pb2": ("--reach-at-capture", "--minimal-intervention-mm", "10"),
+    # pb3 = pb2 + the arm links in the constraint model (panda_link1..7 + gripper, 59 franka.yml spheres instead of the
+    # gripper's 22): SL5d pb2-C, 5 of 11 SafeLIBERO Level I collisions were robot0_link5..7 touching the obstacle,
+    # which the gripper-only model cannot see.
+    "V11AB-pb3": ("--reach-at-capture", "--minimal-intervention-mm", "10", "--links", "arms"),
 }
 
 
