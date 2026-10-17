@@ -2671,3 +2671,31 @@ arm link 를 넣으니 충돌은 가장 적다(8). 그러나 task success 는 �
 #### 판정 (2026-10-17, 사용자)
 
 "held 면제 + grasp zone" 방향으로 진행한다. 각 변경은 따로 검증한다.
+
+### SL5f — pb4 · pb5 초기 구현 결과와 결함 수정 (2026-10-17)
+
+**기록 시각** 2026-10-17 17:50 KST. **수치 출처** [`handoff/SL5f-pb4pb5-initial.verify.json`](handoff/SL5f-pb4pb5-initial.verify.json).
+
+같은 commit(`38722284`)에서 VLA-only 1 회와 pb5-C · pb4-C 를 돌리고 사후 pairing 했다. condition 검사는 모두 통과했다.
+
+| 조건 | SafeLIBERO LI official / 충돌 / safe | LIBERO 10 |
+|---|---|---|
+| VLA-only | 11 / 18 / 2 | 9 |
+| pb3-C | 0 / 8 / 0 | 4 |
+| pb4-C (초기) | 0 / 7 / 0 | 4 |
+| pb5-C (초기) | 2 / 9 / 2 (사례 t0e0 재현) | 3 |
+
+task success 가 거의 회복되지 않았다. 분석에서 **구현 결함 두 개**를 찾았다.
+
+1. **authorized mask 오류.** latch 의 grasp links(손가락 둘)로 만들어서 손바닥(`panda_hand`)이 빠졌다. 진단에서 위반이 많았던 것이 손바닥이다.
+2. **기록 오류.** `to.grasp_contact` 를 TO 가 쓰지 않는 linearizer 에서 읽어서 늘 `{}` 였다. 그래서 규칙이 적용됐는지 알 수 없었다.
+
+수정(`f4f97337`): mask 를 제약을 지을 때 쓴 ClearancePolicy authorized links (손바닥 + 손가락, verdict 와 같은 집합)로 바꾸고, 기록은 TO 의 linearizer 에서 읽는다.
+
+수정 뒤 smoke (LIBERO t0 · t3 init 0, pb5-C):
+
+- 두 task 모두 성공했다 (150 · 91 step).
+- grasp zone 이 latched · closing 에서 수백 행에 적용됐다. held 면제는 held 에서 수십 행에 적용됐다.
+- 최소 개입 gate 는 latched · closing 의 거의 모든 call 에 적용됐다.
+
+위 표의 pb4 · pb5 수치는 **결함이 있는 초기 구현**의 결과로 남긴다. 수정본의 재검증은 다음 GPU 슬롯에서 한다.

@@ -1,0 +1,89 @@
+{
+ "step": "SL5f-pb4pb5-initial",
+ "date": "2026-10-17",
+ "code_commit": "38722284 (initial pb4/pb5: authorized mask = fingers only, grasp_contact record read from the wrong linearizer)",
+ "numbers": {
+  "LI_vla_only_pb5C": {
+   "n": 20,
+   "vla_only_success": 11,
+   "vla_v11ab_success": 2,
+   "vla_only_collided": 18,
+   "vla_only_safe_success": 2,
+   "vla_v11ab_collided": 9,
+   "vla_v11ab_safe_success": 2,
+   "candidates": [
+    [
+     0,
+     0
+    ]
+   ],
+   "runs": {
+    "vla_only": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only",
+    "vla_v11ab": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T153442_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C"
+   },
+   "checks_ok": true
+  },
+  "libero10-init0_pb4C": {
+   "n": 10,
+   "vla_only_success": 9,
+   "vla_v11ab_success": 4,
+   "candidates": [],
+   "runs": {
+    "vla_only": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T170230_38722284e2fa_sl5f-libero10-init0-vla_only",
+    "vla_v11ab": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T172203_38722284e2fa_sl5f-libero10-init0-vla_v11ab-V11AB-pb4-C"
+   },
+   "checks_ok": true
+  },
+  "libero10-init0_pb5C": {
+   "n": 10,
+   "vla_only_success": 9,
+   "vla_v11ab_success": 3,
+   "candidates": [],
+   "runs": {
+    "vla_only": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T170230_38722284e2fa_sl5f-libero10-init0-vla_only",
+    "vla_v11ab": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T170859_38722284e2fa_sl5f-libero10-init0-vla_v11ab-V11AB-pb5-C"
+   },
+   "checks_ok": true
+  },
+  "safelibero-LI-dev-LI_pb4C": {
+   "n": 20,
+   "vla_only_success": 11,
+   "vla_v11ab_success": 0,
+   "vla_only_collided": 18,
+   "vla_only_safe_success": 2,
+   "vla_v11ab_collided": 7,
+   "vla_v11ab_safe_success": 0,
+   "candidates": [],
+   "runs": {
+    "vla_only": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only",
+    "vla_v11ab": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T161857_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb4-C"
+   },
+   "checks_ok": true
+  },
+  "safelibero-LI-dev-LI_pb5C": {
+   "n": 20,
+   "vla_only_success": 11,
+   "vla_v11ab_success": 2,
+   "vla_only_collided": 18,
+   "vla_only_safe_success": 2,
+   "vla_v11ab_collided": 9,
+   "vla_v11ab_safe_success": 2,
+   "candidates": [
+    [
+     0,
+     0
+    ]
+   ],
+   "runs": {
+    "vla_only": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only",
+    "vla_v11ab": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T153442_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C"
+   },
+   "checks_ok": true
+  }
+ },
+ "fix": {
+  "commit": "f4f97337",
+  "smoke_run": "20261017T173633_f4f973379d9f_sl5g-pb5fix-smoke-vla_v11ab-V11AB-pb5-C",
+  "smoke": "LIBERO t0 e0 success (150 steps, attach at 15/18), t3 e0 success (91 steps); grasp_contact zone rows t0 latched 752 / closing 1295, held exempt 37; t3 latched 567 / closing 376, held 18"
+ }
+}
