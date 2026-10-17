@@ -2637,3 +2637,37 @@ minimal intervention gate 를 적용한 비율과, reference 가 위반해서 �
 1. 접촉 단계의 과잉 제약. closing · held 중 손바닥 ↔ target 주변 받침 · 쥔 물체 행.
 2. arm link 를 제약 모델에 포함 (`--links arms`). pb2-C 충돌 11 건 중 5 건.
 3. target 탈락 · 오선택 (LIBERO t4 · t9).
+
+### SL5e — V11AB-pb3 (arm link 포함) 결과와 접촉 단계 과잉 제약 진단 (2026-10-17)
+
+**기록 시각** 2026-10-17 14:30 KST. **수치 출처** [`handoff/SL5e-pb3.verify.json`](handoff/SL5e-pb3.verify.json). **code** `a2489584`, 변환 C.
+pb3 = pb2 + `--links arms` (panda_link1 ~ 7 + gripper sphere). 먼저 t0e0 smoke 로 arm sphere 가 HOLD 를 계속 일으키지 않는지 확인했다: HOLD 1 / 56, time budget 초과 0.
+
+| 조건 | SafeLIBERO LI official | 충돌 | safe | LIBERO 10 |
+|---|---|---|---|---|
+| VLA-only | 11 | 18 | 2 | 9 |
+| V11AB-pb2-C | 2 | 11 | 1 | 6 |
+| **V11AB-pb3-C** | **0** | **8** | 0 | 4 |
+
+arm link 를 넣으니 충돌은 가장 적다(8). 그러나 task success 는 더 떨어졌다. 제약이 늘어난 만큼 접촉 단계의 과잉 개입도 늘었다.
+
+#### 접촉 단계 진단 (LIBERO 10 pb2-C, CPU)
+
+방법: reference 가 위반해서 최적화된 latched · closing · held call 을 고른다. 기록된 sim state 에 reference 자세를 놓고, gripper 와 가장 가까운 물체를 쟀다 (`outputs/verify/SL5e/scripts/palm_neighbors.py`).
+
+| latch | 가장 가까운 물체 | call |
+|---|---|---|
+| held | 쥔 bowl 자신 | 34 |
+| closing | table | 24 |
+| latched | cabinet top (bowl 의 받침) | 19 |
+| closing | target bowl | 17 |
+| latched | target bowl | 6 |
+
+원인은 두 가지다.
+
+1. **contact phase 가 고정이다.** client 가 latch 상태와 무관하게 `ag3s/phase = approach` 를 보낸다(V11AB client 설정). 그래서 잡는 중에도 손가락이 target 에서 approach 규칙의 0.4 × 50 mm = 20 mm 를 지켜야 하고, rim 파지가 위반이 된다.
+2. **받침면이 obstacle margin 을 받는다.** 손가락이 받침면(table · cabinet top · plate)에 내려가면 sphere 근사가 3 ~ 37 mm 겹친다.
+
+#### 판정 (2026-10-17, 사용자)
+
+"held 면제 + grasp zone" 방향으로 진행한다. 각 변경은 따로 검증한다.
