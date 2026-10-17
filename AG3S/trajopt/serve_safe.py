@@ -1501,6 +1501,19 @@ def build_parser() -> argparse.ArgumentParser:
                          "collision 뿐이고 그 행이 전부 margin 안쪽 (ESDF − r ≥ 0) 이며 최소 clearance 가 "
                          "현재 상태 (q_now) 보다 작지 않고 refined 가 정책 reference 와 다를 때. 스스로 "
                          "인증된 청크 뒤로 최대 N 청크. 기본 off")
+    ap.add_argument("--held-hand-exempt", action="store_true",
+                    help="V11AB-pb4 (benchmark branch): while the grasp latch is HELD, the grasping hand's contact-link "
+                         "rows whose nearest surface is the manipulated object are dropped (the hand cannot collide "
+                         "with what it holds). Off = V11AB")
+    ap.add_argument("--grasp-zone-mm", type=float, default=None, metavar="MM",
+                    help="V11AB-pb5 (benchmark branch): while LATCHED / CLOSING, the hand's contact-link rows on the "
+                         "target or a support plane within --grasp-zone-radius-mm (horizontal) of the manipulated "
+                         "object may come MM closer. Obstacle rows and other links never change. Off = V11AB")
+    ap.add_argument("--grasp-zone-radius-mm", type=float, default=100.0, metavar="MM",
+                    help="V11AB-pb5: horizontal radius of the grasp zone around the manipulated object's centroid")
+    ap.add_argument("--latch-phase", action="store_true",
+                    help="V11AB-pb4 (benchmark branch): the contact phase comes from the grasp latch (LATCHED -> "
+                         "pre_grasp, CLOSING/HELD -> grasp) instead of the request's ag3s/phase. Off = V11AB")
     ap.add_argument("--minimal-intervention-mm", type=float, default=None, metavar="MM",
                     help="V11AB-pb2 (benchmark branch): minimal intervention gate. If the policy's reference clears "
                          "every row TrajOpt would certify by at least MM (d - r - margin), it is returned as the plan "
@@ -1744,6 +1757,20 @@ def load_joint_ranges(path) -> dict:
     if not isinstance(data, dict):
         raise SystemExit(f"--joint-ranges {path}: {{joint: [lower, upper]}} 매핑이어야 합니다")
     return {str(k): [float(v) for v in pair] for k, pair in data.items()}
+
+
+def apply_grasp_contact_flags(safe, args) -> dict:
+    """V11AB-pb4 / pb5 SafePolicy switches from the CLI (all off by default = V11AB). Returns the applied values."""
+    safe.latch_phase = bool(getattr(args, "latch_phase", False))
+    safe.held_hand_exempt = bool(getattr(args, "held_hand_exempt", False))
+    zone = getattr(args, "grasp_zone_mm", None)
+    safe.grasp_zone_allowance = None if zone is None else float(zone) / 1000.0
+    safe.grasp_zone_radius = float(getattr(args, "grasp_zone_radius_mm", 100.0) or 100.0) / 1000.0
+    out = {"latch_phase": safe.latch_phase, "held_hand_exempt": safe.held_hand_exempt,
+           "grasp_zone_allowance_m": safe.grasp_zone_allowance, "grasp_zone_radius_m": safe.grasp_zone_radius}
+    if safe.latch_phase or safe.held_hand_exempt or safe.grasp_zone_allowance is not None:
+        logging.warning("SafePolicy grasp contact rules (V11AB-pb4/pb5): %s", out)
+    return out
 
 
 def sqp_overrides(args) -> dict:
@@ -2387,6 +2414,7 @@ def main() -> None:
             recorder=recorder,
             shadow=args.shadow,
         )
+        apply_grasp_contact_flags(served, args)
         # **어느 모드로 떠 있는지 시작할 때 크게 말한다.** legacy backend 경고와 같은 이유다 —
         # 조용히 shadow 로 떠 있으면(또는 shadow 가 아닌 채로) 로그를 읽는 사람이 그 실행이
         # 로봇을 움직였는지 아닌지 알 방법이 없다.

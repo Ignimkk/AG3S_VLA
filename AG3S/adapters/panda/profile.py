@@ -209,6 +209,15 @@ AG3S_VERSIONS: dict[str, tuple[str, ...]] = {
     # gripper's 22): SL5d pb2-C, 5 of 11 SafeLIBERO Level I collisions were robot0_link5..7 touching the obstacle,
     # which the gripper-only model cannot see.
     "V11AB-pb3": ("--reach-at-capture", "--minimal-intervention-mm", "10", "--links", "arms"),
+    # pb4 = pb3 + held exemption (user 2026-10-17 (1)): while HELD the hand's rows on the object it holds are dropped.
+    # SL5e: in LIBERO 10, 34 of 102 reference-violating calls were the hand at the bowl it was carrying.
+    "V11AB-pb4": ("--reach-at-capture", "--minimal-intervention-mm", "10", "--links", "arms", "--held-hand-exempt"),
+    # pb5 = pb4 + grasp zone (user 2026-10-17 (2)): LATCHED/CLOSING take V11AB's phase rule from the latch
+    # (pre_grasp / grasp, client fixed at approach) and the hand's contact links may come 10 mm closer to the target and
+    # the support right under it within 100 mm (horizontal) of the object. SL5e: 68 of 102 calls were the gripper at
+    # the bowl (23) or the support under it (45) while latched/closing; 10 mm = 2 fine voxels (the support tolerance).
+    "V11AB-pb5": ("--reach-at-capture", "--minimal-intervention-mm", "10", "--links", "arms", "--held-hand-exempt",
+                  "--latch-phase", "--grasp-zone-mm", "10"),
 }
 
 

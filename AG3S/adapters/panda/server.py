@@ -305,7 +305,8 @@ def build_safe_server(policy, args, *, attention_model=None):
                       static_geometry=None, recorder=None, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,
                       finger_map=FingerJointMap(constraint, convention=panda_gripper_convention()), hands=HANDS)
-    info = {"ag3s": ag3s_info, "horizon": PANDA_HORIZON, "conversion_mode": {"mode": mode, "name": pa.CONVERSION_MODES[mode]},
+    grasp_contact = ss.apply_grasp_contact_flags(safe, args)  # V11AB-pb4 / pb5 (all off = V11AB)
+    info = {"ag3s": ag3s_info, "horizon": PANDA_HORIZON, "grasp_contact": grasp_contact, "conversion_mode": {"mode": mode, "name": pa.CONVERSION_MODES[mode]},
             "latch": {"empty_below": panda_latch_config().empty_below, "calibration": str(GRIPPER_CALIBRATION),
                       "calibration_record": gripper_calibration()},
             "limits": {"source": "urdf", "urdf": str(pm.PANDA_URDF), "default_acceleration": PANDA_DEFAULT_ACCELERATION,

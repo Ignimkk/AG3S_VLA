@@ -118,3 +118,21 @@ def test_pb3_adds_the_arm_links_to_the_constraint_model():
     grip = pm.build_panda_constraint_model(pm.panda_constraint_link_filter("gripper"))
     assert arm.n_spheres > grip.n_spheres
     assert {"panda_link5", "panda_link6", "panda_link7"} <= set(arm.sphere_link_names)
+
+
+def test_pb4_pb5_flags_reach_safe_policy():
+    from types import SimpleNamespace
+
+    from AG3S.adapters.panda import profile
+    from AG3S.trajopt import serve_safe as ss
+
+    def applied(version):
+        args = profile.parse_v11ab_args(argv=profile.v11ab_server_argv() + profile.version_server_flags(version))
+        safe = SimpleNamespace()
+        return ss.apply_grasp_contact_flags(safe, args)
+
+    assert applied("V11AB") == {"latch_phase": False, "held_hand_exempt": False, "grasp_zone_allowance_m": None,
+                                "grasp_zone_radius_m": 0.1}
+    assert applied("V11AB-pb4")["held_hand_exempt"] is True and applied("V11AB-pb4")["grasp_zone_allowance_m"] is None
+    pb5 = applied("V11AB-pb5")
+    assert pb5["held_hand_exempt"] and pb5["latch_phase"] and pb5["grasp_zone_allowance_m"] == pytest.approx(0.010)

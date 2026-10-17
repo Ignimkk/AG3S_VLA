@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import time
 import traceback
@@ -175,6 +176,22 @@ class SafePolicy:
         })
         self.attention_fn = attention_fn
         self.default_phase = default_phase
+        #: V11AB-pb4 (benchmark branch, 2026-10-17) — the contact phase from the grasp latch. ``False`` (default) = V11AB:
+        #: the phase is the request's ``ag3s/phase`` (the V11AB client always sends ``approach``), so an authorized
+        #: finger must keep ``approach``'s 0.4 x safety margin (20 mm) from the target even while closing on it or
+        #: holding it — a rim grasp and the carried bowl are then "violations" the optimizer pushes away
+        #: (SL5d / SL5e: 57 of 102 reference-violating calls in LIBERO 10 were the gripper at the bowl itself).
+        #: ``True`` = the latch's evidence picks V11AB's own phase rule: LATCHED -> ``pre_grasp`` (0.1 x),
+        #: CLOSING / HELD -> ``grasp`` (contact permitted at ``contact_margin``, authorized links only); other latch
+        #: states keep the request's phase. Margins of every other source and link are unchanged.
+        self.latch_phase: bool = False
+        #: V11AB-pb4 — HELD: the grasping hand's rows on the object it holds are dropped (`SceneSnapshot.grasp_contact`).
+        self.held_hand_exempt: bool = False
+        #: V11AB-pb5 — LATCHED / CLOSING: the grasp zone (m allowance, m horizontal radius) for the hand's contact links
+        #: on the target and the support right under it. ``None`` = off.
+        self.grasp_zone_allowance: Optional[float] = None
+        self.grasp_zone_radius: float = 0.10
+        self._last_contact_phase: Optional[dict[str, Any]] = None
         #: `ConstraintRecordWriter` 또는 None. `--safe-remote` 로 도는 청크는 서버 밖으로
         #: attention·grounding·거리장을 내보내지 않으므로, 진단하려면 여기서 남겨야 한다 —
         #: `AG3S/trajopt/bringup.py`의 `LivePipeline._record`와 같은 계약.
@@ -728,6 +745,12 @@ class SafePolicy:
             **({"rest_start": _jsonable(metrics["rest_start"])} if "rest_start" in metrics else {}),
             # T43 Q — servo / sweep rows: only when on.
             **({"path_check": _jsonable(metrics["path_check"])} if "path_check" in metrics else {}),
+            # V11AB-pb4 / pb5 — grasp contact rows changed on this chunk's plan (only when on).
+            **({"grasp_contact": dict(getattr(self.linearizer, "_last_grasp_contact", None) or {})}
+               if (self.held_hand_exempt or self.grasp_zone_allowance is not None) else {}),
+            # V11AB-pb4 — the contact phase the constraints were built with (only when the latch picked it).
+            **({"contact_phase": dict(self._last_contact_phase)}
+               if self.latch_phase and self._last_contact_phase else {}),
             # V11AB-pb2 — minimal intervention gate (only when on).
             **({"minimal_intervention": _jsonable(metrics["minimal_intervention"])}
                if "minimal_intervention" in metrics else {}),
@@ -860,7 +883,7 @@ class SafePolicy:
         # 돌려줄 뿐이다 (`AG3S.process_multi`는 이 호출의 [0]이다) — 기록기가 없어도 비용이 없다.
         constraint_set, debug = self.ag3s.process_multi_debug(
             observations,
-            phase=scene.get("phase") or self.default_phase,
+            phase=self._contact_phase(scene.get("phase") or self.default_phase),
             active_manipulators=manipulators,
             # 목적지는 **AG3S 가 가진 것**이다 (T26 — 인지 등록 또는 reset 주입). 여기서 넘기지
             # 않는다: 넘기면 AG3S 는 그것을 주입으로 받아 등록보다 앞세운다.
@@ -890,6 +913,9 @@ class SafePolicy:
         snapshot = scene_from_constraint_set(
             constraint_set, self.linearizer.robot_radii, self.to_config,
             held_capture=self._held_capture_for_scene())
+        gc = self._grasp_contact(scene_manipulators=self._pending.get("scene", {}).get("active_manipulators"))
+        if gc is not None:
+            snapshot = dataclasses.replace(snapshot, grasp_contact=gc)
         # 판정이 위반 행을 **최적화기가 본 것과 같은 씬으로** 다시 분류한다 (T23, `_verdict`).
         self._last_snapshot = snapshot
         # 촬영 시점 중 **가장 최신** 자세가 TO 가 계획을 시작하는 곳이다. AG3S 도 같은 규칙을
@@ -1127,6 +1153,34 @@ class SafePolicy:
         # (T26 전: "잠금이 목적지를 확정했고 지금 target 이 그것이면 그 점구름" — T26 뒤 target 은
         # 파지 뒤에도 사과이므로 그 길은 목적지를 영영 못 잡거나 사과를 목적지로 잡는다. 위에서
         # AG3S 의 destination 을 읽는 것으로 바꿨다.)
+
+    def _grasp_contact(self, scene_manipulators=None) -> Optional[dict]:
+        """V11AB-pb4 / pb5 — `SceneSnapshot.grasp_contact` from the latch, or None when both rules are off."""
+        if not self.held_hand_exempt and self.grasp_zone_allowance is None:
+            return None
+        hand, _, allowed = self._grasp_hand(list(scene_manipulators or ["left"]))
+        names = list(getattr(self.constraint_robot_model, "sphere_link_names", ()) or ())
+        allowed = set(allowed or ())
+        manip = getattr(self.ag3s, "manipulated", None)
+        centroid = None if manip is None or getattr(manip, "centroid", None) is None else np.asarray(manip.centroid, np.float64)
+        return {"latch": getattr(self._latch.phase, "value", str(self._latch.phase)),
+                "authorized": np.asarray([n in allowed for n in names], bool),
+                "held_exempt": bool(self.held_hand_exempt),
+                "zone_allowance": None if self.grasp_zone_allowance is None else float(self.grasp_zone_allowance),
+                "zone_radius": float(self.grasp_zone_radius), "centroid": centroid}
+
+    #: V11AB-pb4: latch state -> V11AB contact phase rule (`latch_phase`).
+    LATCH_CONTACT_PHASE = {GraspPhase.LATCHED: "pre_grasp", GraspPhase.CLOSING: "grasp", GraspPhase.HELD: "grasp"}
+
+    def _contact_phase(self, requested: str) -> str:
+        """The phase AG3S builds contact margins with. V11AB: the request's. pb4 (`latch_phase`): from the latch."""
+        phase = requested
+        if self.latch_phase:
+            phase = self.LATCH_CONTACT_PHASE.get(self._latch.phase, requested)
+        self._last_contact_phase = {"requested": str(requested), "applied": str(phase),
+                                    "source": "latch" if (self.latch_phase and phase != requested) else "request",
+                                    "latch": getattr(self._latch.phase, "value", str(self._latch.phase))}
+        return phase
 
     def _grasp_hand(self, manipulators) -> tuple[str, str, Any]:
         hand = str((manipulators or ["left"])[0])

@@ -117,7 +117,7 @@ class _BufferedCall:
 #: (`sqp.fast_eval`) re-applies the ones the original call set, so readers (`_identify`,
 #: `held_rows_record`, `sqp._finish`, the held radii on `query_radii`) see what they saw before.
 _CLEARANCE_SIDE_ATTRS = ("query_radii", "_last_obstacle_class", "_last_held_rows", "_last_lookahead",
-                         "last_target_free_tiers")
+                         "last_target_free_tiers", "_last_grasp_contact")
 _MISSING = object()
 
 
@@ -234,6 +234,16 @@ class SceneSnapshot:
     #: 않았고, `use_support_planes=False` 가 끄는 `plane_active` 와도 무관하다. 위 여유가 "최근접
     #: 표면이 지지면인가" 를 물을 때만 읽는다. `None` = 지지면 없음 (전부 장애물로 본다).
     support_planes: Optional[np.ndarray] = None
+    #: V11AB-pb4 / pb5 (benchmark branch, 2026-10-17) — grasp contact rules from the caller's grasp latch. ``None``
+    #: (default) = V11AB: nothing below changes. Otherwise ``{"latch": "latched"|"closing"|"held"|..., "authorized":
+    #: (n_spheres,) bool (the grasping hand's contact links), "held_exempt": bool, "zone_allowance": m | None,
+    #: "zone_radius": m, "centroid": (3,) base}`` and `_esdf_clearance_core` applies, to authorized robot rows only:
+    #: HELD + held_exempt -> rows whose nearest surface is the manipulated object (class target) are dropped (the hand
+    #: cannot collide with what it holds; the held object's own rows still guard the world); LATCHED / CLOSING +
+    #: zone_allowance -> rows of class target or support within ``zone_radius`` (horizontal) of the manipulated
+    #: object's centroid may come ``zone_allowance`` closer (``margin = min(margin, -allowance)``): the fingertips
+    #: reach the object and the surface right under it. Obstacle-class rows and unauthorized links never change.
+    grasp_contact: Optional[dict] = None
     #: **T43 T step 2** — `[cx, cy, cz, radius, z_min]` (m) of the manipulated object's carve-out
     #: ball (`collision.target_volume_exempt`); a row whose nearest surface point lies inside is a
     #: target row for the obstacle margin and the sweep rows. `None` (default) = this axis does not
@@ -975,6 +985,9 @@ class CollisionLinearizer:
             if getattr(scene, "held_obstacle_margin", False):
                 # T43 HM — the held rows' classes and clearances for the record (`held_rows_record`).
                 self._last_held_rows = self._held_rows_record(cls, d - radii[None, :] - margin)
+        gc = getattr(scene, "grasp_contact", None)
+        if gc:
+            margin = self._grasp_contact_margin(gc, margin, d, flat, scene, d_object, centres.shape[:2], n_query)
         clear = d - radii[None, :] - margin
         start = getattr(self, "lookahead_from", None)
         if start is not None and 0 < int(start) < clear.shape[0]:
@@ -993,6 +1006,34 @@ class CollisionLinearizer:
             self._last_lookahead = {"from": start, "n_tail_rows": int(keep.size),
                                     "n_tail_dropped": int((~keep).sum())}
         return clear[..., None]
+
+    def _grasp_contact_margin(self, gc: dict, margin: np.ndarray, d: np.ndarray, flat: np.ndarray,
+                              scene: SceneSnapshot, d_object: Optional[np.ndarray], shape, n_query: int) -> np.ndarray:
+        """V11AB-pb4 / pb5 — the grasp contact rules of `SceneSnapshot.grasp_contact` on authorized robot rows."""
+        if d_object is None:
+            d_object = self._manipulated_distance(flat, scene)
+            if d_object is not None:
+                d_object = d_object.reshape(shape)
+        cls = self._obstacle_rows(d, flat, scene, d_object)
+        auth = np.zeros(n_query, bool)
+        a = np.asarray(gc.get("authorized", ()), bool).reshape(-1)[:self.n_spheres]
+        auth[:a.shape[0]] = a
+        latch = str(gc.get("latch"))
+        rec = {"latch": latch, "held_exempt_rows": 0, "zone_rows": 0}
+        if gc.get("held_exempt") and latch == "held":
+            ex = (cls == _TARGET) & auth[None, :]
+            margin = np.where(ex, -1.0, margin)        # clearance + 1 m: the row cannot bind
+            rec["held_exempt_rows"] = int(ex.sum())
+        allowance = gc.get("zone_allowance")
+        if allowance is not None and latch in ("latched", "closing") and gc.get("centroid") is not None:
+            c = np.asarray(gc["centroid"], np.float64).reshape(3)
+            horiz = np.linalg.norm(flat[:, :2] - c[None, :2], axis=1).reshape(shape)
+            zone = ((horiz <= float(gc.get("zone_radius", 0.10))) & ((cls == _TARGET) | (cls == _SUPPORT))
+                    & auth[None, :])
+            margin = np.where(zone, np.minimum(margin, -float(allowance)), margin)
+            rec["zone_rows"] = int(zone.sum())
+        self._last_grasp_contact = rec
+        return margin
 
     def _lookahead_keep(self, d: np.ndarray, centres: np.ndarray, scene: SceneSnapshot,
                         d_object: Optional[np.ndarray]) -> np.ndarray:
