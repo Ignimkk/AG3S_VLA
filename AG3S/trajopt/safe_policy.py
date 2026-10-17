@@ -746,7 +746,8 @@ class SafePolicy:
             # T43 Q — servo / sweep rows: only when on.
             **({"path_check": _jsonable(metrics["path_check"])} if "path_check" in metrics else {}),
             # V11AB-pb4 / pb5 — grasp contact rows changed on this chunk's plan (only when on).
-            **({"grasp_contact": dict(getattr(self.linearizer, "_last_grasp_contact", None) or {})}
+            **({"grasp_contact": dict(getattr(getattr(getattr(self.refiner, "optimizer", None), "linearizer", None),
+                                              "_last_grasp_contact", None) or {})}
                if (self.held_hand_exempt or self.grasp_zone_allowance is not None) else {}),
             # V11AB-pb4 — the contact phase the constraints were built with (only when the latch picked it).
             **({"contact_phase": dict(self._last_contact_phase)}
@@ -913,7 +914,7 @@ class SafePolicy:
         snapshot = scene_from_constraint_set(
             constraint_set, self.linearizer.robot_radii, self.to_config,
             held_capture=self._held_capture_for_scene())
-        gc = self._grasp_contact(scene_manipulators=self._pending.get("scene", {}).get("active_manipulators"))
+        gc = self._grasp_contact(constraint_set)
         if gc is not None:
             snapshot = dataclasses.replace(snapshot, grasp_contact=gc)
         # 판정이 위반 행을 **최적화기가 본 것과 같은 씬으로** 다시 분류한다 (T23, `_verdict`).
@@ -1154,13 +1155,16 @@ class SafePolicy:
         # 파지 뒤에도 사과이므로 그 길은 목적지를 영영 못 잡거나 사과를 목적지로 잡는다. 위에서
         # AG3S 의 destination 을 읽는 것으로 바꿨다.)
 
-    def _grasp_contact(self, scene_manipulators=None) -> Optional[dict]:
-        """V11AB-pb4 / pb5 — `SceneSnapshot.grasp_contact` from the latch, or None when both rules are off."""
+    def _grasp_contact(self, constraint_set) -> Optional[dict]:
+        """V11AB-pb4 / pb5 — `SceneSnapshot.grasp_contact` from the latch, or None when both rules are off.
+
+        The authorized links are the ones the constraints were built with (`_authorized_links`, the clearance policy's
+        contact links: palm + fingers), the same set the verdict classifies with — not the latch's grasp links (the
+        fingers only, which left the palm out in the first pb4/pb5 runs, commit 38722284)."""
         if not self.held_hand_exempt and self.grasp_zone_allowance is None:
             return None
-        hand, _, allowed = self._grasp_hand(list(scene_manipulators or ["left"]))
         names = list(getattr(self.constraint_robot_model, "sphere_link_names", ()) or ())
-        allowed = set(allowed or ())
+        allowed = set(self._authorized_links(constraint_set))
         manip = getattr(self.ag3s, "manipulated", None)
         centroid = None if manip is None or getattr(manip, "centroid", None) is None else np.asarray(manip.centroid, np.float64)
         return {"latch": getattr(self._latch.phase, "value", str(self._latch.phase)),

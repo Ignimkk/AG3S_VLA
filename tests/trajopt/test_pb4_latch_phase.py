@@ -41,3 +41,18 @@ def test_pb4_grasp_phase_relaxes_only_authorized_links_on_the_target():
     assert m("grasp", SourceType.TARGET, "some_forearm") == m("approach", SourceType.TARGET, "some_forearm")
     assert m("grasp", SourceType.SUPPORT_SURFACE, left) == m("approach", SourceType.SUPPORT_SURFACE, left)
     assert m("grasp", SourceType.OBJECT, left) == m("approach", SourceType.OBJECT, left)
+
+
+def test_grasp_contact_authorized_mask_is_the_clearance_policy_set():
+    """pb4/pb5 fix: the mask is the constraint builder's authorized links (palm + fingers), not the latch's grasp links."""
+    import types
+
+    sp = _policy()
+    sp.held_hand_exempt = True
+    cs = types.SimpleNamespace(contact_context=None)
+    want = set(sp._authorized_links(cs))                                    # noqa: SLF001
+    gc = sp._grasp_contact(cs)                                              # noqa: SLF001
+    names = list(sp.constraint_robot_model.sphere_link_names)
+    assert {n for n, a in zip(names, gc["authorized"]) if a} == {n for n in names if n in want}
+    sp.held_hand_exempt = False
+    assert sp._grasp_contact(cs) is None                                    # noqa: SLF001
