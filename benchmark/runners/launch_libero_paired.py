@@ -6,6 +6,10 @@ client (``benchmark/runners/libero_safe_client.py``, ``.venv-libero``) runs the 
 launcher started is stopped. Each mode holds the shared GPU lock (``/tmp/ag3s-vla-gpu-validation.lock``,
 ``fcntl.flock``) for its whole server+client lifetime and refuses to start while other GPU compute processes run.
 
+With ``AG3S_GPU_LOCK_HELD=1`` (``benchmark/runners/run_parallel_gpu.sh``) the caller holds that lock for several
+launchers of this checkout at once: the launcher then takes no lock and does not wait for busy GPUs, but refuses
+to start unless the lock is held through a descriptor it inherited from the caller (``check_caller_holds_gpu_lock``).
+
 Both runs get the same protocol, task list, episode list, ``--seed`` and per-episode ``policy_seed``; the per-task
 env reset history is the same because both modes run the same episode order. After both modes,
 ``paired_summary.json`` is written into the VLA+V11AB run (and referenced from both manifests): per episode the
@@ -32,6 +36,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from benchmark.runners import launch_libero_pi05_only as l0  # noqa: E402
 
 GPU_LOCK = "/tmp/ag3s-vla-gpu-validation.lock"
+GPU_LOCK_HELD_ENV = "AG3S_GPU_LOCK_HELD"
 DEFAULT_SPLIT = "dev (LIBERO init 0-4, plan §6.0)"
 MODES = ("vla_only", "vla_v11ab")
 CLIENT_SCRIPT = PROJECT_ROOT / "benchmark/runners/libero_safe_client.py"
@@ -99,6 +104,65 @@ def gpu_compute_apps() -> list[str]:
     return [line.strip() for line in out.splitlines() if line.strip()]
 
 
+class GpuLockNotHeld(RuntimeError):
+    """``AG3S_GPU_LOCK_HELD=1`` was set but the caller does not hold the shared GPU lock for this launcher."""
+
+
+def gpu_lock_held_by_caller() -> bool:
+    """True when ``AG3S_GPU_LOCK_HELD=1``; unset (or ``0``) keeps the launcher's own lock handling."""
+    value = os.environ.get(GPU_LOCK_HELD_ENV)
+    if value is None or value == "0":
+        return False
+    if value == "1":
+        return True
+    raise ValueError(f"{GPU_LOCK_HELD_ENV} must be 1 (caller holds {GPU_LOCK}) or unset, got {value!r}")
+
+
+def _same_file_fds(st: os.stat_result) -> list[int]:
+    out = []
+    for name in os.listdir("/proc/self/fd"):
+        try:
+            fst = os.fstat(int(name))
+        except (OSError, ValueError):
+            continue
+        if (fst.st_dev, fst.st_ino) == (st.st_dev, st.st_ino):
+            out.append(int(name))
+    return sorted(out)
+
+
+def check_caller_holds_gpu_lock(path: str | None = None) -> dict:
+    """Confirm, without taking it, that the shared GPU lock is held by the caller of this launcher.
+
+    1. A fresh open file description of ``path`` must fail ``LOCK_EX | LOCK_NB`` (somebody holds the lock);
+       if it succeeds the lock was free: it is released at once and the launcher refuses.
+    2. One descriptor this process inherited from the caller must refer to the same file and be the holder
+       (``LOCK_EX | LOCK_NB`` on the holder's own description is a no-op that succeeds). This rejects a lock held
+       by an unrelated process (another checkout), which step 1 alone cannot tell apart. Inherited descriptors are
+       never unlocked here.
+    """
+    path = path or GPU_LOCK
+    with open(path, "a") as probe:
+        try:
+            fcntl.flock(probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            pass
+        else:
+            fcntl.flock(probe, fcntl.LOCK_UN)
+            raise GpuLockNotHeld(f"{GPU_LOCK_HELD_ENV}=1 but {path} is not locked: the caller must hold it "
+                                 "(benchmark/runners/run_parallel_gpu.sh)")
+        st = os.fstat(probe.fileno())
+        probe_fd = probe.fileno()
+        candidates = [fd for fd in _same_file_fds(st) if fd != probe_fd]
+    for fd in candidates:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            continue
+        return {"gpu_lock_mode": "held_by_caller", "gpu_lock_caller_pid": os.getppid(), "gpu_lock_fd": fd}
+    raise GpuLockNotHeld(f"{GPU_LOCK_HELD_ENV}=1 and {path} is locked, but not through a descriptor inherited by "
+                         f"this launcher (inherited fds on that file: {candidates}); another process holds it")
+
+
 def versions() -> dict:
     from AG3S.adapters.panda import action as pa
     from AG3S.adapters.panda import profile
@@ -133,17 +197,22 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
     logs = run_dir / "logs"
     result = {"role": "launcher_result", "mode": mode, "port": port}
     server = None
-    lock = open(GPU_LOCK, "a")
+    held = gpu_lock_held_by_caller()
+    lock = None if held else open(GPU_LOCK, "a")
     try:
-        t_wait = time.monotonic()
-        fcntl.flock(lock, fcntl.LOCK_EX)
-        result["gpu_lock_wait_s"] = time.monotonic() - t_wait
-        result["gpu_lock_acquired_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        deadline = time.monotonic() + args.busy_gpu_wait
-        while gpu_compute_apps():
-            if time.monotonic() > deadline:
-                raise RuntimeError(f"other GPU compute processes still running: {gpu_compute_apps()}")
-            time.sleep(15)
+        if held:
+            # caller (run_parallel_gpu.sh) holds the lock and checked the GPU once before starting its jobs
+            result.update(check_caller_holds_gpu_lock())
+        else:
+            t_wait = time.monotonic()
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            result["gpu_lock_wait_s"] = time.monotonic() - t_wait
+            result["gpu_lock_acquired_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            deadline = time.monotonic() + args.busy_gpu_wait
+            while gpu_compute_apps():
+                if time.monotonic() > deadline:
+                    raise RuntimeError(f"other GPU compute processes still running: {gpu_compute_apps()}")
+                time.sleep(15)
         env = dict(os.environ, AG3S_RUN_DIR=str(run_dir), AG3S_PANDA_CONVERSION=args.conversion)
         with open(logs / "server_console.log", "x") as server_log:
             server = subprocess.Popen(s_argv, cwd=str(PROJECT_ROOT), env=env, stdout=server_log, stderr=subprocess.STDOUT)
@@ -160,9 +229,10 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
     finally:
         if server is not None:
             result["server_returncode"] = l0.stop_own_process(server)
-        result["gpu_lock_released_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        fcntl.flock(lock, fcntl.LOCK_UN)
-        lock.close()
+        if lock is not None:
+            result["gpu_lock_released_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            fcntl.flock(lock, fcntl.LOCK_UN)
+            lock.close()
         record_execution(run_dir, checkpoint=identity["path"], settings=result)
         print(json.dumps(result), flush=True)
     return run_dir
@@ -256,6 +326,12 @@ def main(argv=None) -> int:
         print(json.dumps(client_argv("<run>", 0, args)))
         print(json.dumps({"protocol": protocol_settings(args), "runtime_schedule": runtime_schedule(args)}, default=str))
         return 0
+    if gpu_lock_held_by_caller():
+        try:  # refuse before any run directory is allocated
+            check_caller_holds_gpu_lock()
+        except GpuLockNotHeld as exc:
+            print(f"refused: {exc}", file=sys.stderr, flush=True)
+            return 2
     shared = {"versions": versions()}
     runs = {m: run_mode(m, args, identity, shared) for m in modes}
     if set(runs) == set(MODES):
