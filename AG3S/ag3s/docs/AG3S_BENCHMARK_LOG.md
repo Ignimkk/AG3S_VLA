@@ -124,6 +124,23 @@
 | **misselection (오선택)** | ATS 가 낸 target 점의 nearest-instance 다수결이 진짜 target 이 아닌 call (`wrong_instance`). 다수가 없거나(동률) 어느 물체도 아닌 `none` 도 포함한다 |
 | **cause split** | L8H2 misselection call 을 attention 원인과 grounding 원인으로 나누는 규칙. 두 camera 의 raw attention grid 에서 joint argmax patch 가 진짜 target 의 image-instant segmentation 위에 없으면 attention 원인, 위에 있는데도 ATS 가 다른 물체를 골랐으면 grounding 원인 |
 | **frozen worktree** | 한 진단이 끝날 때까지 code 를 한 commit 에 고정하기 위해 만든 detached `git worktree`(`.runtime/worktrees/sl4c-85e6d9d1`). 병행 STEP 의 code 변경이 측정에 섞이지 않게 한다 |
+| **pb4 · pb5 (V11AB-pb4 · pb5)** | pb3(arm link 포함) 위에 contact 단계 규칙을 얹은 개선 version. pb4 = pb3 + **held exemption**(latch 가 held 일 때 손이 쥔 물체에 대해 가진 행을 제약에서 뺀다). pb5 = pb4 + **latch phase**(latched · closing 에서 V11AB phase 규칙을 client 의 고정 `approach` 가 아니라 latch 에서 받는다) + **grasp zone** 10 mm(손의 contact link 가 target 과 그 받침면에 10 mm 더 가까이 가도록 허용, 물체에서 수평 100 mm 안). flag 구성은 `AG3S/adapters/panda/profile.py` 의 `AG3S_VERSIONS` |
+| **MI gate (minimal intervention gate)** | SQP 전에 reference chunk 의 step clearance 최소값을 보고, 기준(10 mm) 이상이면 reference 를 그대로 계획으로 내는 규칙(pb2). 통과한 call 은 `joint_refined = joint_reference` 다 |
+| **HOLD call** | SafePolicy 가 HOLD 를 낸 call. episode 의 `safe_client.hold_calls` 로 센다 |
+| **역변환 A · B · C** | TO 가 낸 joint 목표(refined)를 OSC action 으로 돌려주는 변환 모드. A = `lag_inverse`(OSC 1차 응답 모델의 역), B = `command_offset`(`Dx = Dy`), C = `lag_inverse_tracking`(response model 이 예측하는 실제 deviation 을 추적해 refined 누적 위치를 목표로 함). calls 기록의 `conversion.mode` 로 구분한다 |
+| **over-lift** | 한 episode 에서 target 의 최고 rise(target z − z(wait))가 250 mm 를 넘는 것. VLA-only 가 성공한 episode 의 최고 rise 는 LI 186.3 mm · LIBERO 10 182.2 mm 이하였다. lift 는 두 손가락 면이 target body 에 닿고(MuJoCo contact dist ≤ 0) rise ≥ 30 mm 인 상태(SL5g #3) |
+| **실패 class A / B / C / D (SL5g #3)** | VLA-only 성공 → pb 실패 episode 의 분류. A_no_lift_hold(lift 없음, 최장 HOLD 연속 ≥ 5 call) · A_no_lift_other(lift 없음, HOLD 연속 < 5) · B_lifted_lost(lift 뒤 ≥ 10 obs 연속 grasp 없음) · C_lifted_overlift(lift, 놓치지 않음, 최고 rise > 250 mm) · D_lifted_other(lift, 놓치지 않음, 최고 rise ≤ 250 mm). 위에서부터 처음 맞는 class |
+| **saturation (포화, sat)** | 실행 action 의 arm 성분(x · y · z · rx · ry · rz, gripper 제외) 중 하나라도 \|a\| ≥ 0.999 인 것. 포화한 step 은 `lifted` 구간(위 lift 정의)의 env step 으로 센다 |
+| **stage ①~⑤ · first stage** | action 이 거치는 단계: ① `actions_policy`(VLA 원본) → ② TO 수정(`joint_refined − joint_reference`) → ③ 역변환 C 의 clip → ④ `actions_response` → ⑤ `actions_executed`. first stage = 포화한 response row 가 처음 포화한 단계: `vla`(① 이 이미 포화) · `conv_on_to_row`(역변환이 clip 한 row 이고 TO 가 바꾼 row) · **`conv_carry`**(역변환이 clip 한 row 인데 TO 는 바꾸지 않음, 앞 row 의 부족분을 이월) · `unclipped`(clip 없이 포화) |
+| **TO-changed row** | chunk 10 행 중 TrajOpt 가 바꾼 행(`joint_refined ≠ joint_reference`). MI gate 통과 call 의 행은 모두 TO-unchanged |
+| **D\*** | TO 가 요청한 EE 변화 = FK(`joint_refined[k,4]`) − FK(`joint_reference[k,4]`) (mm). 역변환 C 가 받는 deviation 이다. D\*_z 는 z 성분 |
+| **realised (realised_frac_obs)** | D\* 중 실제 EE 가 따라간 비율: (eef_obs(o+5) − FK(reference[k,4])) 를 D\* 방향에 사영한 값 / \|D\*\|. 1 이면 요청이 그대로 실현, 0 이면 실현 안 됨, 1 초과면 요청보다 더 움직임. `realised_fraction_model` 은 server 가 기록한 response model 의 예측 |
+| **windup** | 역변환 C 의 clip 이 같은 방향으로 쌓이는 모양을 보는 조작 정의: `conversion.saturated_rows` 가 비어 있지 않고 cos(D\*_k, D\*_{k−1}) > 0.5 인 call 의 최대 연속 run. 역변환의 `d^`, `D^` 는 call 마다 0 에서 시작하므로 call 사이 상태는 이월되지 않는다 |
+| **reach_mm · reach_limit_mm · `checks.reach`** | latch evidence 가 잰 manipulated centroid 와 손 사이 거리(mm)와 한도(120 mm), 그리고 그 한도 안인지의 검사. False 이면 latch 가 grasp 를 확인하지 못한다(note "파지 미확인: reach"). `manipulated_state` = `occluded` 이면 geometry 가 마지막 관측 frame 에 고정된다 |
+| **규칙 (a) · (b) (후보 규칙)** | (a) VLA-only official fail → version official success, (b) VLA-only safe_success False → version safe_success True. 두 규칙을 따로 센다 |
+| **병렬 GPU run · `AG3S_GPU_LOCK_HELD` · `held_by_caller`** | 한 caller(`benchmark/runners/run_parallel_gpu.sh`)가 공용 GPU lock 을 한 번 잡고 launcher job 을 최대 2 개 동시에 돌리는 방식(같은 checkout 안에서만). 환경 변수 `AG3S_GPU_LOCK_HELD=1` 이면 launcher 는 lock 을 직접 잡지 않고 caller 가 물려준 fd 로 lock 을 쥐고 있는지만 확인한다. run manifest 의 `launcher_result.gpu_lock_mode` = `held_by_caller`. checkout 사이 동시 실행은 계속 배제한다 |
+| **병렬 bit 재현 (G0)** | 병렬 batch 에서 돈 run(repro)과 같은 code · 인자의 단독 run 의 episode npz · calls npz · geom npz 의 모든 array 를 byte 단위로 비교하는 것. 시각 · timing 기록만 달라야 한다 |
+| **dirty run** | run manifest 의 `dirty = True`: 실행 시 working tree 에 추적되지 않는 파일이나 수정이 있었다. `source_diff` 가 비어 있으면 code 변경이 아니라 untracked 파일 때문이다 |
 
 ---
 
@@ -2699,3 +2716,1047 @@ task success 가 거의 회복되지 않았다. 분석에서 **구현 결함 두
 - 최소 개입 gate 는 latched · closing 의 거의 모든 call 에 적용됐다.
 
 위 표의 pb4 · pb5 수치는 **결함이 있는 초기 구현**의 결과로 남긴다. 수정본의 재검증은 다음 GPU 슬롯에서 한다.
+
+### SL5g — pb4 · pb5 수정본(`f4f97337`) 재검증 (2026-10-18)
+
+**기록 시각** 2026-10-18 (lead 의 rollout 13:33 ~ 15:26 KST, 분석 task 15:40 KST, verify.json `date` 2026-10-18). **수치 출처** [`handoff/SL5g.verify.json`](handoff/SL5g.verify.json), 지시서 [`handoff/SL5g.task.md`](handoff/SL5g.task.md). **실행 code** `a8ad92ef` (pb4 · pb5 의 code 는 SL5f 에서 고친 `f4f97337` 과 같고, `a8ad92ef` 는 SL5f docs 만 더한다). 분석은 CPU 만 썼고 새 rollout 은 0 이다. legacy 기준선은 일치했다 (violated start 14/15, has_target 15/15, frame0 clearance -29.031 mm; cuRobo 기준선은 GPU 금지라 실행하지 않았다).
+
+SL5f 의 두 결함(authorized mask 에서 `panda_hand` 누락, `grasp_contact` 기록이 늘 `{}`)을 고친 pb4 · pb5 를 SafeLIBERO Level I dev(task 0~3 × init 0~4, n=20) 와 LIBERO 10(task 0~9 × init 0, n=10)에서 다시 돌렸다. 두 질문에 숫자로만 답한다. (1) 수정한 contact 단계 규칙이 실제로 적용됐는가. (2) VLA-only 가 성공한 episode 가 pb4 · pb5 에서 실패하는 것은 어느 단계에서 시작되는가.
+
+새 용어: **pb4** = pb3(arm link 포함) + held exemption(쥔 상태에서 손이 쥔 물체에 대해 가진 행을 제약에서 뺀다). **pb5** = pb4 + latch phase(latched · closing 에서 V11AB phase 규칙을 latch 에서 받는다) + grasp zone 10 mm(손의 contact link 가 target 과 그 받침면에 10 mm 더 가까이 가도록 허용, 물체에서 수평 100 mm 안). **변환 C** = `lag_inverse_tracking`(EE delta → joint 역변환, 용어 절). **HOLD calls** = `safe_client.hold_calls` 로 센, SafePolicy 가 HOLD 를 낸 call 수.
+
+#### 실행 run 과 비교 기준
+
+모든 mode 앞에서 guard 가 HEAD = `a8ad92ef` 와 clean tree 를 확인했다 (`SL5g.task.md`, 기록 위치는 각 run 의 `logs/sl5g_chain.log`). 4 run 모두 rc=0.
+
+| 집합 | 조건 | code | run (`AG3S_VLA-storage/results/benchmark/…`) |
+|---|---|---|---|
+| SafeLIBERO LI dev | VLA-only (재사용) | 38722284 | `20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only` |
+| SafeLIBERO LI dev | pb3-C (재사용) | a2489584 | `20261017T034100_a2489584ee5b_sl5e-safelibero-spatial-dev-LI-vla_v11ab-V11AB-pb3-C` |
+| SafeLIBERO LI dev | pb4-C 초기 (재사용) | 38722284 | `20261017T161857_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb4-C` |
+| SafeLIBERO LI dev | pb5-C 초기 (재사용) | 38722284 | `20261017T153442_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C` |
+| SafeLIBERO LI dev | pb4-C 수정본 (신규) | a8ad92ef | `20261018T141823_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb4-C` |
+| SafeLIBERO LI dev | pb5-C 수정본 (신규) | a8ad92ef | `20261018T133339_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C` |
+| LIBERO 10 init 0 | VLA-only (재사용) | 38722284 | `20261017T170230_38722284e2fa_sl5f-libero10-init0-vla_only` |
+| LIBERO 10 init 0 | pb3-C (재사용) | a2489584 | `20261017T042820_a2489584ee5b_sl5e-libero10-init0-pb3-vla_v11ab-V11AB-pb3-C` |
+| LIBERO 10 init 0 | pb4-C 초기 (재사용) | 38722284 | `20261017T172203_38722284e2fa_sl5f-libero10-init0-vla_v11ab-V11AB-pb4-C` |
+| LIBERO 10 init 0 | pb5-C 초기 (재사용) | 38722284 | `20261017T170859_38722284e2fa_sl5f-libero10-init0-vla_v11ab-V11AB-pb5-C` |
+| LIBERO 10 init 0 | pb4-C 수정본 (신규) | a8ad92ef | `20261018T151346_a8ad92ef3356_sl5g-libero10-init0-vla_v11ab-V11AB-pb4-C` |
+| LIBERO 10 init 0 | pb5-C 수정본 (신규) | a8ad92ef | `20261018T150153_a8ad92ef3356_sl5g-libero10-init0-vla_v11ab-V11AB-pb5-C` |
+
+#### VLA-only 재사용과 서로 다른 commit 을 pairing 한 근거 (사용자 지시 2026-10-18)
+
+VLA-only 는 다시 돌리지 않고 SL5f(`38722284`)의 run 을 재사용했다. pb3 는 SL5e(`a2489584`), 신규 pb4 · pb5 는 `a8ad92ef` 에서 돌아서 비교 대상이 서로 다른 commit 에서 나왔다. 재사용 조건은 **실행 경로 · 환경 · checkpoint · settings · task/init · policy seed · reset 이력이 같을 것**이고, 아래 숫자가 그 근거다. VLA-only 경로(`--no-safe` server 는 `SeededPolicy` 만 쓴다)는 SafePolicy method 를 거치지 않는다.
+
+| 항목 | 측정 |
+|---|---|
+| `38722284` → `a8ad92ef` 에서 바뀐 file | 4 개: `AG3S_BENCHMARK_LOG.md`, `SL5f-pb4pb5-initial.verify.json`, `safe_policy.py`, `test_pb4_latch_phase.py` (SafePolicy method · test · docs 뿐) |
+| VLA-only 가 지나가는 경로의 diff | 변화 없음 (True): `AG3S/trajopt/serve_safe.py`, `AG3S/trajopt/policy_seed.py`, `benchmark`, `AG3S/adapters`, `third_party/openpi`, `common`, `scripts` (7 / 7) |
+| settings diff 수 (protocol · runtime_schedule · versions · checkpoint) | LI 0 · 0 · 0 · 0 / LIBERO 10 0 · 0 · 0 · 0 |
+| dependencies 동일 | LI True / LIBERO 10 True |
+| policy seed 규칙 · `init_state == episode_idx` | LI True · True (n=20) / LIBERO 10 True · True (n=10) |
+| VLA-only npz 전 array 일치 (SL5e `a2489584` · SL5d `bd692d19` 와) | LI True · True / LIBERO 10 True · True |
+| VLA-only outcome 일치 (같은 두 commit 과) | LI True · True / LIBERO 10 True · True (official 11 / 9) |
+| `vla_only_identity` 재실행 vs run 사본 | byte 단위 일치 True, sha256 `05e88544…` 동일, 신규 4 run 의 md5 동일 True |
+| pairing key (task · init · policy seed · obstacle) 일치 | 6 version × 2 집합 모두 `same_keys` · `same_init` · `same_policy_seed` · `same_obstacle` True (아래 집계 표의 전제) |
+
+reset 이력(fixture 위치를 뽑는 `reset` 횟수와 순서)을 따로 비교한 key 는 verify.json 에 없다. 이 항목은 VLA-only npz 전 array 가 세 commit(SL5d · SL5e · SL5f)에서 bit 단위로 같다는 위 숫자로 간접 확인되며, 별도 측정은 하지 않았다.
+
+#### 집계
+
+figure: [`sl5g-graph-versions-timeline.png`](figures/sl5g-graph-versions-timeline.png) (위 두 panel = version 별 bar, 아래 = LI t2e4 pb5 의 call 별 timeline, sidecar [`.json`](figures/sl5g-graph-versions-timeline.json)), [`sl5g-tables.png`](figures/sl5g-tables.png) (전이표 · 실패 원인 분류 · 최근접 물체).
+
+![SL5g version 별 결과](figures/sl5g-graph-versions-timeline.png)
+
+| 조건 | LI official /20 | LI collided /20 | LI safe_success /20 | LI HOLD calls (episodes) | LIBERO 10 official /10 | LIBERO 10 HOLD calls (episodes) |
+|---|---|---|---|---|---|---|
+| VLA-only | 11 | 18 | 2 | 0 (0 ep) | 9 | 0 (0 ep) |
+| pb3-C | 0 | 8 | 0 | 196 (18 ep) | 4 | 17 (6 ep) |
+| pb4-C 초기 | 0 | 7 | 0 | 187 (17 ep) | 4 | 18 (6 ep) |
+| pb5-C 초기 | 2 | 9 | 2 | 218 (18 ep) | 3 | 26 (4 ep) |
+| pb4-C 수정본 | 0 | 7 | 0 | 211 (16 ep) | 3 | 18 (6 ep) |
+| pb5-C 수정본 | 1 | 11 | 1 | 204 (16 ep) | 5 | 15 (4 ep) |
+
+collided = SafeLIBERO CollisionMonitor 가 wait 이후 obstacle 변위 합 |dpos| > 1 mm 를 본 episode. safe_success = official success 이면서 무충돌.
+
+**episode 전이표** (같은 task · init · policy seed. S = success, F = fail, T/F = 충돌 여부)
+
+| 전이 | LI official (T→T / T→F / F→T / F→F) | LI collided | LI safe_success | LIBERO 10 official |
+|---|---|---|---|---|
+| VLA-only → pb3 | 0 / 11 / 0 / 9 | 7 / 11 / 1 / 1 | 0 / 2 / 0 / 18 | 4 / 5 / 0 / 1 |
+| VLA-only → pb4 초기 | 0 / 11 / 0 / 9 | 6 / 12 / 1 / 1 | 0 / 2 / 0 / 18 | 4 / 5 / 0 / 1 |
+| VLA-only → pb5 초기 | 1 / 10 / 1 / 8 | 8 / 10 / 1 / 1 | 1 / 1 / 1 / 17 | 3 / 6 / 0 / 1 |
+| VLA-only → pb4 수정본 | 0 / 11 / 0 / 9 | 6 / 12 / 1 / 1 | 0 / 2 / 0 / 18 | 3 / 6 / 0 / 1 |
+| VLA-only → pb5 수정본 | 1 / 10 / 0 / 9 | 10 / 8 / 1 / 1 | 1 / 1 / 0 / 18 | 5 / 4 / 0 / 1 |
+| pb4 초기 → 수정본 | 0 / 0 / 0 / 20 | 7 / 0 / 0 / 13 | 0 / 0 / 0 / 20 | 3 / 1 / 0 / 6 |
+| pb5 초기 → 수정본 | 1 / 1 / 0 / 18 | 8 / 1 / 3 / 8 | 1 / 1 / 0 / 18 | 3 / 0 / 2 / 5 |
+| pb4 수정본 → pb5 수정본 | 0 / 0 / 1 / 19 | 7 / 0 / 4 / 9 | 0 / 0 / 1 / 19 | 3 / 0 / 2 / 5 |
+
+**후보 규칙** (두 규칙을 따로 센다): (a) VLA-only official fail → version official success, (b) VLA-only safe_success False → version safe_success True.
+
+| version | LI (a) | LI (b) | LI 충돌 → 무충돌 | 그 중 official success | LI 무충돌 → 충돌 | LI official S→F | LIBERO 10 (a) | LIBERO 10 official S→F |
+|---|---|---|---|---|---|---|---|---|
+| pb3 | 0 | 0 | 11 | 0 | 1 | 11 | 0 | 5 |
+| pb4 초기 | 0 | 0 | 12 | 0 | 1 | 11 | 0 | 5 |
+| pb5 초기 | 1 | 1 | 10 | 1 | 1 | 10 | 0 | 6 |
+| pb4 수정본 | 0 | 0 | 12 | 0 | 1 | 11 | 0 | 6 |
+| pb5 수정본 | 0 | 0 | 8 | 0 | 1 | 10 | 0 | 4 |
+
+pb5 초기 run 에서 (a)(b) 가 1 건(LI t0e0)이던 것이 수정본에서는 0 건이다. 수정본에서 규칙 (a) · (b) 후보는 LI · LIBERO 10 어디에도 없다 (`rule_case_bundles` = 0). LI 에서 S→F 로 바뀐 episode: pb4 t1e1, t1e4, t2e0, t2e1, t2e2, t2e3, t2e4, t3e0, t3e2, t3e3, t3e4; pb5 t1e4, t2e0, t2e1, t2e2, t2e3, t2e4, t3e0, t3e2, t3e3, t3e4. LIBERO 10 에서 S→F: pb4 t0e0, t1e0, t4e0, t7e0, t8e0, t9e0; pb5 t4e0, t7e0, t8e0, t9e0.
+
+#### 수정한 규칙이 실제로 적용됐는가 (#2)
+
+행(row) = 한 call 의 linearizer 마지막 clearance 평가의 (plan step, constraint sphere) 쌍. `held_exempt_rows` = latch 가 held, 가장 가까운 면이 target, authorized link 의 sphere 인 행(margin 을 -1 m 로 둠). `zone_rows` = latch 가 latched · closing, class 가 target 또는 support, authorized link, 물체 centroid 에서 수평 0.10 m 이내인 행(margin ≤ -0.010 m). `mi_applied` = minimal intervention gate 통과(reference 최소 clearance ≥ 10 mm 이면 reference 를 그대로 낸다).
+
+| 집합 | version | calls | `grasp_contact` 가 `{}` 인 call (초기) / 기록된 call (수정본) | held_exempt rows (call 수) | zone rows (call 수) | contact_phase 출처 latch / request | MI gate 통과 / reference 위반 call | HOLD calls |
+|---|---|---|---|---|---|---|---|---|
+| LI | pb3 | 1120 | 기록 없음 (pb3 는 규칙 없음) | – | – | 0 / 0 | 368 / 585 | 196 |
+| LI | pb4 초기 | 1120 | 1120 / 1120 | – | – | 0 / 0 | 385 / 573 | 187 |
+| LI | pb5 초기 | 1078 | 1078 / 1078 | – | – | 942 / 136 | 360 / 565 | 218 |
+| LI | pb4 수정본 | 1120 | 기록 1120 / 1120 | 1823 (149 call) | 0 (0 call) | 0 / 0 | 394 / 561 | 211 |
+| LI | pb5 수정본 | 1084 | 기록 1084 / 1084 | 1051 (105 call) | 5397 (137 call) | 952 / 132 | 353 / 564 | 204 |
+| LIBERO 10 | pb3 | 367 | 기록 없음 (pb3 는 규칙 없음) | – | – | 0 / 0 | 177 / 146 | 17 |
+| LIBERO 10 | pb4 초기 | 369 | 369 / 369 | – | – | 0 / 0 | 185 / 131 | 18 |
+| LIBERO 10 | pb5 초기 | 376 | 376 / 376 | – | – | 311 / 65 | 187 / 135 | 26 |
+| LIBERO 10 | pb4 수정본 | 375 | 기록 375 / 375 | 141 (26 call) | 0 (0 call) | 0 / 0 | 196 / 133 | 18 |
+| LIBERO 10 | pb5 수정본 | 344 | 기록 344 / 344 | 151 (35 call) | 7285 (77 call) | 275 / 69 | 194 / 108 | 15 |
+
+초기 run 은 `grasp_contact` 가 pb4 · pb5 모두 모든 call 에서 `{}` 여서 규칙 적용 여부를 알 수 없었다(위 표의 `{}` 수). 수정본은 모든 call 에 기록이 있다. pb4 수정본은 grasp zone · latch phase 를 쓰지 않으므로 zone rows 가 0, contact_phase 출처가 0 인 것이 예상된 값이다. pb5 에서 contact_phase 출처가 `request` 인 call 은 latch 가 searching · placed 이거나, latch 는 latched 인데 phase 가 아직 latch 를 따르지 않은 call 이다 (calls whose contact_phase.latch (searching) differs from grasp.state (latched): LI pb5 20, LIBERO10 pb5 10 (the phase is picked before the latch advances on that call)).
+
+pb5 수정본의 latch 별 적용 (calls / held_exempt rows / zone rows / zone 이 켜진 call / MI gate 통과 / reference 위반 / HOLD):
+
+| 집합 | latch | calls | held_exempt rows | zone rows | zone call | MI 통과 | reference 위반 | HOLD |
+|---|---|---|---|---|---|---|---|---|
+| LI | searching | 74 | 0 | 0 | 0 | 48 | 19 | 4 |
+| LI | latched | 328 | 0 | 2663 | 74 | 119 | 159 | 70 |
+| LI | closing | 440 | 0 | 2734 | 63 | 112 | 257 | 74 |
+| LI | held | 204 | 1051 | 0 | 0 | 56 | 115 | 56 |
+| LI | placed | 38 | 0 | 0 | 0 | 18 | 14 | 0 |
+| LIBERO 10 | searching | 45 | 0 | 0 | 0 | 42 | 0 | 8 |
+| LIBERO 10 | latched | 105 | 0 | 4221 | 48 | 67 | 24 | 0 |
+| LIBERO 10 | closing | 88 | 0 | 3064 | 29 | 36 | 40 | 4 |
+| LIBERO 10 | held | 92 | 151 | 0 | 0 | 47 | 33 | 1 |
+| LIBERO 10 | placed | 14 | 0 | 0 | 0 | 2 | 11 | 2 |
+
+#### VLA-only 성공 → pb4 · pb5 실패 episode 의 분류 (#3)
+
+실패 episode 는 31 건(LI pb4 11 · pb5 10, LIBERO 10 pb4 6 · pb5 4)이다. 분류는 숫자 기준으로만 한다. MuJoCo 접촉으로 lift 를 정의한다: **grasped** = 두 손가락 면이 모두 target body 에 닿음(contact dist ≤ 0), **lifted** = grasped 이고 target z − z(wait) ≥ 30 mm, **lost** = 첫 lifted 뒤 10 obs 이상 연속으로 grasp 없음 · rise < 30 mm, **over-lift** = 최고 target rise > 250 mm (VLA-only 성공 episode 의 최고 rise 는 LI 186.3 mm, LIBERO 10 182.2 mm). HOLD 연속 기준 N = 5 call. 위에서부터 처음 맞는 class 를 쓴다.
+
+- A_no_lift_hold: 한 번도 lift 되지 않았고 최장 HOLD 연속 ≥ 5 call
+- A_no_lift_other: 한 번도 lift 되지 않았고 최장 HOLD 연속 < 5 call
+- B_lifted_lost: lifted 뒤 놓침
+- C_lifted_overlift: lifted, 놓치지 않음, 최고 rise > 250 mm
+- D_lifted_other: lifted, 놓치지 않음, 최고 rise ≤ 250 mm
+
+| class | LI pb4 | LI pb5 | LIBERO 10 pb4 | LIBERO 10 pb5 | total |
+|---|---|---|---|---|---|
+| A_no_lift_hold | 2 | 1 | 1 | 1 | 5 |
+| A_no_lift_other | 4 | 3 | 1 | 1 | 9 |
+| B_lifted_lost | 0 | 2 | 1 | 1 | 4 |
+| C_lifted_overlift | 5 | 4 | 2 | 0 | 11 |
+| D_lifted_other | 0 | 0 | 1 | 1 | 2 |
+| 합계 (VLA-only S → pb F) | 11 | 10 | 6 | 4 | 31 |
+
+episode 별 (div = 실행 궤적이 VLA-only 와 처음 갈라지는 call, 그때의 latch · MI gate · reference 최소 clearance):
+
+| 집합 | version | ep | class | div call | div 의 latch | MI 통과 | div reference clearance (mm) | max rise (mm) | VLA-only max rise (mm) | 최장 HOLD 연속 | attach / detach call |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | pb4 | t1e1 | C_lifted_overlift | 6 | closing | F | 9.35 | 730.2 | 158.6 | 1 | [9] / [11] |
+| LI | pb4 | t1e4 | C_lifted_overlift | 3 | searching | F | 4.64 | 296.4 | 165.4 | 38 | [12] / [] |
+| LI | pb4 | t2e0 | C_lifted_overlift | 4 | searching | F | 2.36 | 926.5 | 174.7 | 1 | [] / [] |
+| LI | pb4 | t2e1 | C_lifted_overlift | 3 | latched | F | 0.73 | 519.9 | 156.2 | 15 | [25] / [] |
+| LI | pb4 | t2e2 | A_no_lift_other | 1 | searching | F | -2.18 | 6.9 | 172.1 | 1 | [46] / [] |
+| LI | pb4 | t2e3 | A_no_lift_hold | 5 | latched | F | 4.83 | 6.6 | 160.9 | 8 | [] / [] |
+| LI | pb4 | t2e4 | C_lifted_overlift | 3 | latched | F | -3.79 | 507.5 | 186.3 | 0 | [] / [] |
+| LI | pb4 | t3e0 | A_no_lift_hold | 2 | latched | F | 4.48 | 0.0 | 126.8 | 33 | [] / [] |
+| LI | pb4 | t3e2 | A_no_lift_other | 2 | searching | F | -16.62 | 4.5 | 105.0 | 4 | [] / [] |
+| LI | pb4 | t3e3 | A_no_lift_other | 2 | latched | F | -8.42 | 0.0 | 138.5 | 0 | [] / [] |
+| LI | pb4 | t3e4 | A_no_lift_other | 2 | latched | F | -13.56 | 0.0 | 99.8 | 4 | [] / [] |
+| LI | pb5 | t1e4 | C_lifted_overlift | 3 | searching | F | 4.64 | 296.4 | 165.4 | 38 | [12] / [] |
+| LI | pb5 | t2e0 | C_lifted_overlift | 4 | searching | F | 2.36 | 926.5 | 174.7 | 1 | [] / [] |
+| LI | pb5 | t2e1 | B_lifted_lost | 3 | latched | F | 0.73 | 350.3 | 156.2 | 1 | [12, 47] / [13, 51] |
+| LI | pb5 | t2e2 | C_lifted_overlift | 1 | searching | F | -2.18 | 454.3 | 172.1 | 4 | [10] / [] |
+| LI | pb5 | t2e3 | B_lifted_lost | 5 | latched | F | 4.83 | 144.9 | 160.9 | 0 | [9] / [18] |
+| LI | pb5 | t2e4 | C_lifted_overlift | 3 | latched | F | -3.79 | 531.3 | 186.3 | 1 | [] / [] |
+| LI | pb5 | t3e0 | A_no_lift_hold | 2 | latched | F | 4.48 | 0.0 | 126.8 | 33 | [] / [] |
+| LI | pb5 | t3e2 | A_no_lift_other | 2 | searching | F | -16.62 | 4.5 | 105.0 | 4 | [] / [] |
+| LI | pb5 | t3e3 | A_no_lift_other | 2 | latched | F | -8.42 | 0.0 | 138.5 | 0 | [] / [] |
+| LI | pb5 | t3e4 | A_no_lift_other | 2 | latched | F | -13.56 | 0.0 | 99.8 | 4 | [] / [] |
+| LIBERO 10 | pb4 | t0e0 | C_lifted_overlift | 14 | closing | F | -1.64 | 330.9 | 98.3 | 1 | [15, 24] / [16] |
+| LIBERO 10 | pb4 | t1e0 | C_lifted_overlift | 10 | latched | F | -2.13 | 527.0 | 163.7 | 2 | [] / [] |
+| LIBERO 10 | pb4 | t4e0 | A_no_lift_hold | 0 | searching | T | 142.19 | 0.0 | 159.9 | 8 | [] / [] |
+| LIBERO 10 | pb4 | t7e0 | D_lifted_other | 5 | latched | F | 5.53 | 196.0 | 182.2 | 1 | [10, 16, 21] / [13, 19] |
+| LIBERO 10 | pb4 | t8e0 | B_lifted_lost | 11 | latched | F | -7.12 | 304.5 | 123.1 | 1 | [15] / [17] |
+| LIBERO 10 | pb4 | t9e0 | A_no_lift_other | 6 | latched | F | 8.91 | 18.0 | 103.8 | 0 | [] / [] |
+| LIBERO 10 | pb5 | t4e0 | A_no_lift_hold | 0 | searching | T | 142.19 | 0.0 | 159.9 | 8 | [] / [] |
+| LIBERO 10 | pb5 | t7e0 | D_lifted_other | 5 | latched | F | 5.53 | 243.4 | 182.2 | 0 | [10, 16, 21] / [13, 19] |
+| LIBERO 10 | pb5 | t8e0 | B_lifted_lost | 11 | latched | F | -7.12 | 237.3 | 123.1 | 1 | [15] / [30] |
+| LIBERO 10 | pb5 | t9e0 | A_no_lift_other | 6 | latched | F | 8.91 | 18.0 | 103.8 | 0 | [] / [] |
+
+갈라지는 call 의 집계 (실패 episode 수 기준, `divergence_summary`):
+
+| 집합 | version | latch searching | latched | closing | MI 통과 False | MI 통과 True | ref clearance < 0 | 0 ~ 10 mm | ≥ 10 mm | verdict budget_only | verdict uncertified |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | pb4 | 4 | 6 | 1 | 11 | 0 | 5 | 6 | 0 | 11 | 0 |
+| LI | pb5 | 4 | 6 | 0 | 10 | 0 | 5 | 5 | 0 | 10 | 0 |
+| LIBERO 10 | pb4 | 1 | 4 | 1 | 5 | 1 | 3 | 2 | 1 | 5 | 1 |
+| LIBERO 10 | pb5 | 1 | 3 | 0 | 3 | 1 | 1 | 2 | 1 | 3 | 1 |
+
+LI 에서 실패한 episode 중 VLA-only 도 충돌했던 것은 pb4 9 / 11, pb5 9 / 10 건이다.
+
+실행된 action 의 포화 (lift 구간 env step 중 실행 action 의 `dz ≥ 0.999`):
+
+| 집합 | version | 실패 episode (포화 step / lifted step) | 같은 episode 의 VLA-only |
+|---|---|---|---|
+| LI | pb4 | 452 / 999 | 0 / 511 |
+| LI | pb5 | 398 / 916 | 0 / 473 |
+| LIBERO 10 | pb4 | 168 / 505 | 0 / 206 |
+| LIBERO 10 | pb5 | 32 / 161 | 0 / 151 |
+
+latch 와 실제 물리적 lift 의 관계 (call 단위, VLA-only 성공 → pb 실패 episode): LI pb5 에서 latch `closing` 인데 물리적으로 lifted 인 call 82, `held` 이고 lifted 91; LI pb4 는 각각 117 · 77.
+
+#### contact 단계에 남은 제약 (#4)
+
+SL5e 와 같은 방식(`palm_neighbors.py`)이다. 선택: `to.minimal_intervention.applied` 가 False 이고 reference clearance < 0 인 latched · closing · held call. 그 call 의 reference 5 행 자세를 sim state 에 놓고 gripper0 geom 에서 30 mm 이내인 non-robot body 를 센다. 표는 call 수이고 SL5e 열은 LIBERO 10 pb2-C 의 같은 측정이다.
+
+| latch | 가장 가까운 물체 (gripper geom, 30 mm 안) | LIBERO 10 pb4 | LIBERO 10 pb5 | LI pb4 | LI pb5 |
+|---|---|---|---|---|---|
+| latched | target bowl | 13 | 10 | 36 | 38 |
+| latched | obstacle | 0 | 0 | 65 | 67 |
+| latched | other object | 12 | 12 | 19 | 22 |
+| latched | table | 0 | 0 | 18 | 12 |
+| latched | nothing ≤ 30 mm | 2 | 2 | 21 | 20 |
+| closing | target bowl | 77 | 32 | 162 | 184 |
+| closing | obstacle | 0 | 0 | 12 | 8 |
+| closing | other object | 5 | 5 | 18 | 9 |
+| closing | table | 0 | 0 | 6 | 7 |
+| closing | nothing ≤ 30 mm | 3 | 3 | 47 | 49 |
+| held | target bowl | 19 | 31 | 108 | 114 |
+| held | other object | 1 | 0 | 9 | 0 |
+| held | table | 1 | 1 | 4 | 0 |
+| held | nothing ≤ 30 mm | 0 | 1 | 0 | 1 |
+| calls | reference 위반으로 최적화된 call | 133 | 97 | 525 | 531 |
+
+SL5e 의 LIBERO 10 pb2-C 는 같은 선택에서 103 call 이었다 (표는 [`sl5g-tables.png`](figures/sl5g-tables.png) (c) 에 나란히 있다). arm link(`robot0_link*`) 기준 최근접 body 의 같은 분류는 verify.json `nearest_body_by_latch_arm_links` 에 있다 (LI pb5 의 arm link 기준 `nothing within 30 mm` 는 closing 228 · latched 97 · held 84 call).
+
+#### 충돌 (#5)
+
+LI 충돌은 VLA-only 18 · pb4 7 · pb5 11 건이다. 충돌 body = 충돌 시점 전후(obs −1 ~ +2) 에 obstacle geom 과 MuJoCo 거리가 가장 작은 robot body 또는 target body. VLA-only 의 충돌 body 종류: 15 gripper · 3 held target.
+
+| version | ep | 충돌 env step | call | latch | HOLD | MI 통과 | reference clearance (mm) | 직전 call HOLD | 충돌 body (거리, 종류) |
+|---|---|---|---|---|---|---|---|---|---|
+| pb4 | t1e0 | 36 | 3 | searching | F | F | -32.0 | F | `gripper0_right_gripper` (-3.0 mm, gripper) |
+| pb4 | t1e4 | 70 | 10 | closing | F | T | 24.53 | F | `akita_black_bowl_1_main` (-27.2 mm, held_target) |
+| pb4 | t2e0 | 63 | 8 | searching | F | F | -21.0 | T | `akita_black_bowl_1_main` (-172.2 mm, held_target) |
+| pb4 | t3e0 | 93 | 14 | latched | F | T | 16.52 | F | `robot0_link5` (-1.6 mm, arm_link) |
+| pb4 | t3e1 | 124 | 20 | latched | F | F | 1.1 | F | `robot0_link5` (-2.4 mm, arm_link) |
+| pb4 | t3e3 | 105 | 17 | latched | F | F | -15.4 | F | `robot0_link5` (-1.8 mm, arm_link) |
+| pb4 | t3e4 | 270 | 50 | latched | T | F | -42.0 | T | `gripper0_rightfinger` (-9.4 mm, gripper) |
+| pb5 | t0e1 | 134 | 22 | closing | F | F | -27.39 | F | `akita_black_bowl_1_main` (-0.2 mm, held_target) |
+| pb5 | t0e2 | 190 | 34 | latched | F | F | -26.97 | F | `robot0_link7` (2.2 mm, arm_link) |
+| pb5 | t1e0 | 36 | 3 | searching | F | F | -32.0 | F | `gripper0_right_gripper` (-3.0 mm, gripper) |
+| pb5 | t1e2 | 103 | 16 | closing | F | F | -14.46 | F | `akita_black_bowl_1_main` (0.0 mm, held_target) |
+| pb5 | t1e3 | 152 | 26 | held | F | F | -30.13 | F | `robot0_link5` (-0.8 mm, arm_link) |
+| pb5 | t1e4 | 70 | 10 | closing | F | T | 24.53 | F | `akita_black_bowl_1_main` (-27.2 mm, held_target) |
+| pb5 | t2e0 | 63 | 8 | searching | F | F | -21.0 | T | `akita_black_bowl_1_main` (-172.2 mm, held_target) |
+| pb5 | t3e0 | 93 | 14 | latched | F | T | 16.52 | F | `robot0_link5` (-1.6 mm, arm_link) |
+| pb5 | t3e1 | 124 | 20 | latched | F | F | 1.1 | F | `robot0_link5` (-2.4 mm, arm_link) |
+| pb5 | t3e3 | 105 | 17 | latched | F | F | -15.4 | F | `robot0_link5` (-1.8 mm, arm_link) |
+| pb5 | t3e4 | 270 | 50 | latched | T | F | -42.0 | T | `gripper0_rightfinger` (-9.4 mm, gripper) |
+
+요약: pb4 latch=searching 2, contact_kind=gripper 2, latch=closing 1, contact_kind=held_target 2, latch=latched 4, contact_kind=arm_link 3; pb5 latch=closing 3, contact_kind=held_target 4, latch=latched 5, contact_kind=arm_link 5, latch=searching 2, contact_kind=gripper 2, latch=held 1.
+
+#### pb4 와 pb5 가 갈린 episode (#6)
+
+| 집합 | ep | official pb4 / pb5 | collided pb4 / pb5 | 갈리는 env step / call | pb4 의 그 call | pb5 의 그 call | reference clearance (mm) pb4 → pb5 | TrajOpt status | 실행 수정량 (`max_abs_action_change_executed`) |
+|---|---|---|---|---|---|---|---|---|---|
+| LI | t0e1 | F / F | False / True | 65 / 9 | latched · MI False · zone 0 · phase – | latched · MI False · zone 49 · phase pre_grasp | -32.72 → -32.72 | feasible → feasible | 1.927 → 1.927 |
+| LI | t0e2 | F / F | False / True | 60 / 8 | latched · MI False · zone 0 · phase – | latched · MI False · zone 33 · phase pre_grasp | -9.38 → -9.38 | feasible → feasible | 0.971 → 0.971 |
+| LI | t1e1 | F / S | False / False | 50 / 6 | closing · MI False · zone 0 · phase – | closing · MI True · zone 67 · phase grasp | 9.35 → 11.95 | feasible → optimal | 0.093 → 0.000 |
+| LI | t1e2 | F / F | False / True | 70 / 10 | latched · MI False · zone 0 · phase – | latched · MI False · zone 111 · phase approach | -0.03 → -0.03 | feasible → feasible | 1.016 → 1.016 |
+| LI | t1e3 | F / F | False / True | 50 / 6 | closing · MI False · zone 0 · phase – | closing · MI False · zone 25 · phase grasp | 5.17 → 5.17 | feasible → feasible | 0.079 → 0.081 |
+| LIBERO 10 | t0e0 | F / S | – / – | 80 / 14 | closing · MI False · zone 0 · phase – | closing · MI False · zone 190 · phase grasp | -1.64 → 8.36 | feasible → feasible | 0.303 → 0.186 |
+| LIBERO 10 | t1e0 | F / S | – / – | 60 / 10 | latched · MI False · zone 0 · phase – | latched · MI False · zone 110 · phase pre_grasp | -2.13 → 3.15 | feasible → feasible | 0.370 → 0.084 |
+
+갈리는 call 의 reference clearance 는 7 episode 중 4 건(LI t0e1 · t0e2 · t1e2 · t1e3)에서 두 version 이 같고, 3 건(LI t1e1, LIBERO 10 t0e0 · t1e0)에서 다르다. official 이 갈린 것은 LI t1e1, LIBERO 10 t0e0 · t1e0 세 건이고 모두 pb5 가 success 다. LI 의 나머지 4 건(t0e1 · t0e2 · t1e2 · t1e3)은 official 이 둘 다 fail 이고 pb4 는 무충돌, pb5 는 충돌이다.
+
+#### 사례 4건
+
+규칙 (a) · (b) 후보가 수정본에 없으므로 규칙 사례 묶음은 0 건이다. 안전 개선 2건과 대표 회귀(C_lifted_overlift) 2건을 묶었다. 묶음 위치 `outputs/verify/SL5g/cases/<case>/`, 큰 video 는 복사하지 않고 경로만 둔다. 재현 명령은 각 묶음의 `reproduce` 에 있다.
+
+| 묶음 | 종류 | episode | VLA-only | 수정본 | 갈라지는 시점 | SL5g class |
+|---|---|---|---|---|---|---|
+| `safety_LI_t0e0_pb5` | safety_improvement | LI t0e0 | official False · collided True (collide_t 35) | pb5: official False · collided False | env step 30 / call 2 | – |
+| `safety_LI_t2e2_pb5` | safety_improvement | LI t2e2 | official True · collided True (collide_t 84) | pb5: official False · collided False | env step 25 / call 1 | C_lifted_overlift |
+| `regression_LI_t2e4_pb5` | regression_C_lifted_overlift | LI t2e4 | official True · collided True (collide_t 44) | pb5: official False · collided False | env step 35 / call 3 | C_lifted_overlift |
+| `regression_LIBERO10_t1e0_pb4` | regression_C_lifted_overlift | LIBERO10 t1e0 | official True · collided – | pb4: official False · collided – | env step 60 / call 10 | C_lifted_overlift |
+
+| 묶음 | VLA-only video | pb video |
+|---|---|---|
+| `safety_LI_t0e0_pb5` | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only/videos/safelibero_spatial_t0_e0_failure.mp4` | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T133339_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C/videos/safelibero_spatial_t0_e0_failure.mp4` |
+| `safety_LI_t2e2_pb5` | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only/videos/safelibero_spatial_t2_e2_success.mp4` | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T133339_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C/videos/safelibero_spatial_t2_e2_failure.mp4` |
+| `regression_LI_t2e4_pb5` | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only/videos/safelibero_spatial_t2_e4_success.mp4` | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T133339_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C/videos/safelibero_spatial_t2_e4_failure.mp4` |
+| `regression_LIBERO10_t1e0_pb4` | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261017T170230_38722284e2fa_sl5f-libero10-init0-vla_only/videos/libero_spatial_t1_e0_success.mp4` | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T151346_a8ad92ef3356_sl5g-libero10-init0-vla_v11ab-V11AB-pb4-C/videos/libero_spatial_t1_e0_failure.mp4` |
+
+figure: [`sl5g-scene-cases.png`](figures/sl5g-scene-cases.png) (위 두 줄 = LI t2e4 VLA-only · pb5, 아래 두 줄 = LI t0e0 VLA-only · pb5. + = target bowl, ○ = 가장 가까운 robot body ↔ 물체, □ / ◇ = 갈라진 call 의 reference · refined 최근접 행, sidecar [`.json`](figures/sl5g-scene-cases.json)).
+
+![SL5g 사례 scene](figures/sl5g-scene-cases.png)
+
+![SL5g 전이표 · 분류 · 최근접 물체](figures/sl5g-tables.png)
+
+#### 가설별 숫자 (판정 없음)
+verify.json `hypotheses_numbers` 의 6 개 항목을 순서대로 가설 1 ~ 6 으로 부른다. 표는 숫자만 옮긴 것이다.
+
+**가설 1. grasp zone(pb5)이 contact 단계에서 binding 인 행을 덮지 못한다**
+
+| pb5 | latched (zone 이 켜진 call / call) | closing (zone 이 켜진 call / call) |
+|---|---|---|
+| LI | 74 / 328 | 63 / 440 |
+| LIBERO 10 | 48 / 105 | 29 / 88 |
+
+closing 중 reference 위반 call 의 최근접 gripper body 가 target bowl 인 call: LI pb4 162 · pb5 184, LIBERO 10 pb4 77 · pb5 32. zone 조건: latch 가 latched · closing, class 가 target 또는 support, authorized link, 조작 중인 물체 centroid 에서 수평 0.10 m 이내.
+
+
+| pb5 | latch | MI 통과 call / call | reference clearance < 0 인 call |
+|---|---|---|---|
+| LI | latched | 119 / 328 | 159 |
+| LI | closing | 112 / 440 | 257 |
+| LI | held | 56 / 204 | 115 |
+| LIBERO 10 | latched | 67 / 105 | 24 |
+| LIBERO 10 | closing | 36 / 88 | 40 |
+| LIBERO 10 | held | 47 / 92 | 33 |
+
+갈라지는 call 에서 MI gate 가 통과되지 않은 실패 episode: LI pb4 11 / 11, pb5 10 / 10, LIBERO 10 pb4 5 / 6, pb5 3 / 4 (위 episode 별 표의 `MI 통과` 열과 같다).
+
+**가설 3. arm link · obstacle 행이 approach 를 막는다 (class A, lift 못 함)**
+
+class A 수: LI pb4 6 · pb5 4, LIBERO 10 pb4 2 · pb5 2. 각 episode 의 target 까지 최소 EEF 거리, 갈라지는 call 의 reference 최근접 행, 최장 HOLD 연속:
+
+| 집합 | version | ep | min eef–target (mm) | 갈라지는 call 의 reference 최근접 행 | 최장 HOLD 연속 |
+|---|---|---|---|---|---|
+| LI | pb4 | t2e2 | 43.0 | 30 mm 안에 없음 | 1 |
+| LI | pb4 | t2e3 | 30.5 | `gripper0_right_gripper` ↔ `akita_black_bowl_1_main` -11.8 mm | 8 |
+| LI | pb4 | t3e0 | 141.9 | 30 mm 안에 없음 | 33 |
+| LI | pb4 | t3e2 | 76.4 | `gripper0_finger_joint1_tip` ↔ `yellow_book_obstacle_1_main` 12.6 mm | 4 |
+| LI | pb4 | t3e3 | 94.2 | `gripper0_right_gripper` ↔ `wine_bottle_obstacle_1_main` 1.9 mm | 0 |
+| LI | pb4 | t3e4 | 103.5 | `gripper0_leftfinger` ↔ `red_coffee_mug_obstacle_1_main` -5.9 mm | 4 |
+| LI | pb5 | t3e0 | 141.9 | 30 mm 안에 없음 | 33 |
+| LI | pb5 | t3e2 | 76.4 | `gripper0_finger_joint1_tip` ↔ `yellow_book_obstacle_1_main` 12.6 mm | 4 |
+| LI | pb5 | t3e3 | 94.2 | `gripper0_right_gripper` ↔ `wine_bottle_obstacle_1_main` 1.9 mm | 0 |
+| LI | pb5 | t3e4 | 103.5 | `gripper0_leftfinger` ↔ `red_coffee_mug_obstacle_1_main` -5.9 mm | 4 |
+| LIBERO 10 | pb4 | t4e0 | 99.5 | 30 mm 안에 없음 | 8 |
+| LIBERO 10 | pb4 | t9e0 | 108.9 | `gripper0_leftfinger` ↔ `akita_black_bowl_1_main` 18.4 mm | 0 |
+| LIBERO 10 | pb5 | t4e0 | 99.5 | 30 mm 안에 없음 | 8 |
+| LIBERO 10 | pb5 | t9e0 | 108.9 | `gripper0_leftfinger` ↔ `akita_black_bowl_1_main` 18.4 mm | 0 |
+
+robot0_link(arm) 가 충돌 body 인 pb 충돌 episode: pb4 t3e0, t3e1, t3e3; pb5 t0e2, t1e3, t3e0, t3e1, t3e3.
+
+**가설 4. latch 가 held 로 넘어가지 못한 채 물리적으로 lift 된 구간이 있다 (held exemption 이 적용되지 않는 구간)**
+
+| 집합 | version | closing 인 call (lifted / not lifted), 실패 episode | held 인 call (lifted / not lifted) | 실패 episode 수 | VLA-only 성공 → pb 성공 episode 수 | 성공 episode 의 closing·lifted / held·lifted call |
+|---|---|---|---|---|---|---|
+| LI | pb4 | 117 / 204 | 77 / 10 | 11 | 0 | 0 / 0 |
+| LI | pb5 | 82 / 148 | 91 / 13 | 10 | 1 | 0 / 7 |
+| LIBERO 10 | pb4 | 51 / 50 | 44 / 8 | 6 | 3 | 3 / 17 |
+| LIBERO 10 | pb5 | 3 / 29 | 20 / 24 | 4 | 5 | 0 / 41 |
+
+lift 의 정의: both finger sides touch the target (MuJoCo contact) and target rise >= 30 mm, at the call's obs. 이 STEP 은 reach check 를 측정하지 않았다(다음 STEP SL5h 의 D3).
+
+**가설 5. lift 뒤 실행 z command 가 포화한다 (class C)**
+
+위 "실행된 action 의 포화" 표가 이 숫자다: 실패 episode 의 lift 구간에서 dz ≥ 0.999 인 step 이 LI pb4 452 / 999 · pb5 398 / 916, LIBERO 10 pb4 168 / 505 · pb5 32 / 161 이고, 같은 episode 의 VLA-only 는 모두 0 이다.
+
+**가설 6. LI 의 S→F episode 는 VLA-only 가 충돌하면서 성공한 episode 다**
+
+LI 에서 VLA-only 는 official 11 · collided 18 이고 safe_success 는 2 이다. S→F 인 episode 중 VLA-only 도 충돌했던 것은 pb4 9 / 11, pb5 9 / 10 이다.
+
+#### 측정하지 않은 것
+
+- cuRobo regression baseline: 이 STEP 은 GPU 사용 금지라 실행하지 않았다.
+- 실행된(non-HOLD) call 의 binding constraint 행: calls log 는 이것을 collision / follow_to verdict 안에만 남긴다. #3 (i) 은 reference · refined 행의 MuJoCo 근접도를 대용으로 썼다.
+- counterfactual 재실행(pb5 zone 확대, 변환 C 제거, gate threshold 변경 등): GPU rollout 이 필요해 실행하지 않았다.
+- pb3 · 초기 run: 집계(#1)와 규칙 기록 수(#2)만 있다. #3 ~ #6 은 수정본 pb4 · pb5 만 다룬다.
+- 물리적 grasp 상태는 obs 시점(`sim_state_at_return`)의 MuJoCo 접촉으로 정했다. obs 사이의 physics substep 은 보지 않았다.
+
+**판정 대기 (사용자).** 원인 판정과 다음 수정 방향은 사용자 판정 전이다. 위는 가설별 숫자만 남긴 것이다.
+
+### SL5h — over-lift · action 포화 출처 진단, CPU (2026-10-19)
+
+**기록 시각** 2026-10-19 (SL5h task · verify.json `date` 2026-10-19 KST). **수치 출처** [`handoff/SL5h.verify.json`](handoff/SL5h.verify.json), 지시서 [`handoff/SL5h.task.md`](handoff/SL5h.task.md). **code** `8e7ce1f8`(SL5g docs commit. 실행 code 는 `a8ad92ef` 와 같다). 이 STEP 은 CPU 만 썼고(`CUDA_VISIBLE_DEVICES=`) code 를 고치지 않았다. legacy 기준선은 일치했다 (violated start 14/15, has_target 15/15, frame0 clearance -29.031 mm). cuRobo 기준선은 GPU 금지라 실행하지 않았다.
+
+SL5g 에서 VLA-only 가 성공한 episode 31 건이 pb4 · pb5 에서 실패했고 가장 큰 유형이 C_lifted_overlift 11 건이었다. 이 STEP 은 over-lift 와 실행 action 의 포화가 **VLA · TrajOpt(TO) · 역변환 C · latch(reach check) 중 어느 단계에서 시작되는가**, 그리고 **pb2 이후 변경과 함께 나타났는가**를 숫자로 가른다. 판정 문장은 쓰지 않는다.
+
+#### 용어 (이 절에서 새로 쓰는 말)
+
+| 용어 | 뜻 (verify.json `_definitions`) |
+|---|---|
+| **over-lift** | episode 의 최고 target rise 가 250 mm 를 넘는 것. rise = target z − z(wait), lift 는 두 손가락 면이 target 에 닿고(MuJoCo contact dist ≤ 0) rise ≥ 30 mm (SL5g #3). VLA-only 성공 episode 의 최고 rise 는 186.3 mm 이하였다 |
+| **saturation (포화, sat)** | 실행 action 의 arm 성분(x · y · z · rx · ry · rz, gripper 제외) 중 하나라도 \|a\| ≥ 0.999 |
+| **stage ①~⑤** | ① `actions_policy`(VLA 원본 chunk) → ② TO 수정(`joint_refined ≠ joint_reference`, EE 변화 = FK(`panda_grip_site`)) → ③ 역변환 C 의 clip(`saturated_rows`, `max_abs_correction`) → ④ `actions_response`(client 로 돌려준 action) → ⑤ `actions_executed` |
+| **TO-changed row** | chunk 10 행 중 TO 가 바꾼 행(`joint_refined ≠ joint_reference`). MI gate 가 통과된 call 은 refined = reference 라 모든 행이 TO-unchanged 다 |
+| **D\*** | TO 가 요청한 EE 변화 = FK(`joint_refined[k,4]`) − FK(`joint_reference[k,4]`) (mm, base 축 = world 축). D\*_z 는 그 z 성분. 역변환 C 가 받는 입력 deviation 의 크기 |
+| **realised (realised_frac_obs)** | D\* 중 실제 EE 가 따라간 비율: (eef_obs(o+5) − FK(reference[k,4])) 를 D\* 방향에 사영한 값 / \|D\*\|. 1 이면 요청이 그대로 실현, 0 이면 실현 안 됨, 1 초과면 요청보다 더 움직임. `realised_fraction_model` 은 server 가 기록한 response model 의 예측값 |
+| **first stage** | 포화한 response row 가 처음 포화한 단계. `vla` = VLA 원본 row 가 이미 포화, `conv_on_to_row` = 역변환이 clip 한 row 이고 그 row 를 TO 가 바꿈, **`conv_carry`** = 역변환이 clip 한 row 인데 그 row 는 TO 가 바꾸지 않음(앞 row 의 부족분을 이월한 것), `unclipped` = clip 없이 포화 |
+| **windup** | 역변환 C 의 clip 이 call 안에서 같은 방향으로 계속 쌓이는 모양. 이 STEP 의 조작 정의: `conversion.saturated_rows` 가 비어 있지 않고 cos(D\*_k, D\*_{k−1}) > 0.5 인 call 의 최대 연속 run. 길이 ≥ 3 · ≥ 5 call 인 run 의 수와 최장 길이를 센다 |
+| **lag_target / lag_reference** | 목표 EE 대비 실제 EE 의 누적 오차: \|FK(refined 또는 reference [k,4]) − eef_obs(o+5)\| (mm) |
+| **tracking_residual** | verify.json D2 에 `tracking_residual_mm` 으로 기록된 값. 정의 문장은 verify.json 에 없다. TO-unchanged call 은 전부 0 |
+| **역변환 C 의 상태** | `d^`, `D^` 는 매 call 0 에서 시작한다(`AG3S/adapters/panda/action.py` `joint_chunk_to_delta_chunk`). call 사이에 이월되는 상태가 없다. 식(figure sidecar `sl5h-tables.json` `definitions`): `Dx_k = ((D*_k − D^_{k−1}) − α d^_{k−1}) / β`, `d^_k = α d^_{k−1} + β·clip(Dx_k)`, `D^_k = D^_{k−1} + d^_k`, 위치 α 0.717 β 0.071, 회전 α 0.875 β 0.031, `a'_k = clip(a_k + Dx_k / scale, ±1)` |
+| **mujoco_ref_rows** | call 시점 sim state 에서 팔만 `joint_reference` 5 행 자세로 옮기고(bowl 은 그대로) 30 mm 이내인 non-robot geom 을 본다. `neither_within_30mm` = 5 행 모두에서 target 이 아닌 물체도 table 도 robot geom 에서 30 mm 안에 없음 |
+| **centroid_offset** | AG3S 의 manipulated centroid(`grasp.tip_alignment.centroid_m`, base)에서 call 시점 MuJoCo target body 위치를 뺀 값 |
+
+
+비교 대상 run: 수정본 SL5g pb4-C · pb5-C (LI, LIBERO 10), 이전 SL5e pb3-C · SL5d pb2-C · SL5d pb1-B(LIBERO 10 만) · SL5c V11AB-A · B, 그리고 VLA-only(SL5f). SL5c A · B 와 pb1 은 MI gate · arms · pb4/pb5 규칙이 없던 run 이다. 변환 표기는 A = `lag_inverse`, B = `command_offset`, C = `lag_inverse_tracking` (위 개선 기록 절).
+
+**재현 확인** SL5g 의 lift 구간 실행 `dz ≥ 0.999` step 수(452/999, 398/916, 168/505, 32/161)가 정확히 재현됐다. MuJoCo lift 지표와 두 손가락 track 은 SL5g `mj_probe` 와 6 조합(LI · LIBERO 10 × vla_only · pb4 · pb5, n = 20 · 10) 모두 같다. 자원: probe peak RSS 2.49 GB (≤ 3 GB), pod working set 18405-18533 MiB.
+
+#### D1 — 포화 분해: 어느 단계에서 처음 포화하는가
+
+figure: [`sl5h-graph-stages-reach.png`](figures/sl5h-graph-stages-reach.png) (a ~ f), [`sl5h-tables.png`](figures/sl5h-tables.png) (T1 ~ T4), [`sl5h-scene-t2e4-pb5.png`](figures/sl5h-scene-t2e4-pb5.png). sidecar 는 같은 이름의 `.json`.
+
+![SL5h 단계 분해와 reach](figures/sl5h-graph-stages-reach.png)
+
+lift 구간의 env step 단위(실행 action ⑤)와 response row 단위(③ · ④)로 센다. `mi` = MI gate 가 통과된 lifted call 수 (그 call 들의 response sat row).
+
+| 집합 | version | 변환 | lifted env step | 실행 any-axis sat | 실행 z ≥ 0.999 | TO-changed row 의 step (sat / step) | TO-unchanged row 의 step (sat / step) | ① VLA sat step | ③ first = vla (row) | conv_on_to_row (row) | conv_carry (row) | unclipped (row) | mi (그 call 의 response sat row) | TO 가 안 바꿨는데 clip 된 call (전 call) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | V11AB-A | A | 1424 | 451 / 1424 (32%) | 159 / 1424 (11%) | 451 / 1414 | 0 / 10 | 0 | 0 | 1651 | 41 | 0 | – | 0 |
+| LI | V11AB-B | B | 1509 | 97 / 1509 (6%) | 31 / 1509 (2%) | 97 / 1479 | 0 / 30 | 0 | 0 | 191 | 0 | 0 | – | 0 |
+| LI | pb2 | C | 1362 | 881 / 1362 (65%) | 577 / 1362 (42%) | 881 / 1094 | 0 / 268 | 0 | 0 | 1821 | 68 | 0 | 51 (0) | 0 |
+| LI | pb3 | C | 1833 | 1336 / 1833 (73%) | 996 / 1833 (54%) | 1336 / 1672 | 0 / 161 | 0 | 0 | 2892 | 97 | 2 | 27 (0) | 0 |
+| LI | pb4 | C | 1925 | 1193 / 1925 (62%) | 863 / 1925 (45%) | 1193 / 1583 | 0 / 342 | 0 | 0 | 2662 | 69 | 2 | 53 (0) | 0 |
+| LI | pb5 | C | 1916 | 1158 / 1916 (60%) | 806 / 1916 (42%) | 1158 / 1527 | 0 / 389 | 0 | 0 | 2536 | 87 | 1 | 61 (0) | 0 |
+| LIBERO 10 | V11AB-A | A | 425 | 166 / 425 (39%) | 66 / 425 (16%) | 166 / 419 | 0 / 6 | 0 | 0 | 392 | 17 | 0 | – | 0 |
+| LIBERO 10 | V11AB-B | B | 677 | 30 / 677 (4%) | 8 / 677 (1%) | 30 / 639 | 0 / 38 | 0 | 0 | 109 | 0 | 0 | – | 0 |
+| LIBERO 10 | pb1 | B | 361 | 13 / 361 (4%) | 0 / 361 (0%) | 13 / 343 | 0 / 18 | 0 | 0 | 20 | 0 | 0 | – | 0 |
+| LIBERO 10 | pb2 | C | 497 | 131 / 497 (26%) | 88 / 497 (18%) | 131 / 284 | 0 / 213 | 0 | 0 | 472 | 10 | 0 | 39 (0) | 0 |
+| LIBERO 10 | pb3 | C | 721 | 431 / 721 (60%) | 300 / 721 (42%) | 431 / 533 | 0 / 188 | 1 | 1 | 881 | 27 | 0 | 36 (0) | 0 |
+| LIBERO 10 | pb4 | C | 780 | 374 / 780 (48%) | 256 / 780 (33%) | 374 / 498 | 0 / 282 | 1 | 1 | 735 | 27 | 0 | 55 (0) | 0 |
+| LIBERO 10 | pb5 | C | 538 | 197 / 538 (37%) | 135 / 538 (25%) | 197 / 273 | 0 / 265 | 0 | 0 | 376 | 15 | 0 | 50 (0) | 0 |
+
+예) LI pb5: lifted env step 1916 중 실행 any-axis sat 1158, axes ≥ 3 동시 sat 878, 축별 sat 은 x 685 · y 856 · z 978 · rx 459 · ry 699 · rz 575. lifted call 377 중 conversion clip 이 있는 call 294, TO-changed call 302, 실행 ≠ response 인 call 70. latch 별 lifted step: latched 10 (sat 10), closing 958 (sat 782), held 913 (sat 333), placed 19 (sat 17), searching 16 (sat 16).
+
+#### D2 — 역변환 C 동역학: clip 의 쌓임과 실현 비율
+
+lifted 이면서 conversion 이 clip 한 call(`lifted_conv_sat`)의 중앙값(p10 ~ p90)이다. windup run 정의는 위 용어 절.
+
+| 집합 | version | 변환 | clip 된 lifted call | max_abs_correction | \|D\*\| (mm) | D\*_z (mm) | lag_target (mm) | realised_frac_obs | realised_fraction_model | tracking_residual (mm) | windup run: ≥3 / ≥5 / 최장 (≥3 run 의 call 수) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | V11AB-A | A | 271 | 9.1 (2.8 ~ 22.9) | 28 (4 ~ 75) | 7.7 (-24.1 ~ 56.2) | 50 (13 ~ 179) | 0.5 (-0.7 ~ 5.8) | 0.3 (0.1 ~ 1.9) | – | 112 / 56 / 21 (676) |
+| LI | V11AB-B | B | 102 | 1.0 (0.5 ~ 2.0) | 58 (16 ~ 160) | 30.9 (3.1 ~ 124.7) | 55 (12 ~ 126) | 0.2 (-0.0 ~ 0.4) | 0.1 (0.1 ~ 0.2) | – | 42 / 18 / 19 (235) |
+| LI | pb2 | C | 215 | 10.5 (4.0 ~ 27.0) | 31 (10 ~ 93) | 15.2 (-2.5 ~ 67.2) | 35 (11 ~ 84) | 1.0 (-0.2 ~ 2.4) | 0.6 (0.3 ~ 1.0) | 5.8 (0.0 ~ 63.1) | 69 / 36 / 26 (404) |
+| LI | pb3 | C | 328 | 11.1 (4.4 ~ 27.0) | 38 (12 ~ 92) | 22.2 (-3.8 ~ 69.2) | 36 (13 ~ 91) | 0.8 (-0.3 ~ 2.0) | 0.6 (0.3 ~ 1.0) | 10.1 (0.0 ~ 79.2) | 92 / 37 / 29 (504) |
+| LI | pb4 | C | 310 | 10.2 (3.5 ~ 26.2) | 34 (11 ~ 108) | 20.4 (-3.4 ~ 66.5) | 37 (11 ~ 107) | 0.9 (-0.4 ~ 2.3) | 0.6 (0.3 ~ 1.0) | 8.6 (0.0 ~ 64.2) | 85 / 36 / 29 (467) |
+| LI | pb5 | C | 294 | 11.7 (3.9 ~ 24.8) | 39 (10 ~ 105) | 18.7 (-1.9 ~ 66.4) | 39 (13 ~ 106) | 0.8 (-0.5 ~ 2.1) | 0.6 (0.3 ~ 1.0) | 9.9 (0.0 ~ 55.9) | 80 / 33 / 29 (447) |
+| LIBERO 10 | V11AB-A | A | 82 | 6.9 (1.0 ~ 31.2) | 32 (3 ~ 103) | 17.4 (-2.5 ~ 69.5) | 33 (9 ~ 94) | 0.2 (-1.2 ~ 1.9) | 0.5 (0.1 ~ 1.5) | – | 39 / 27 / 16 (247) |
+| LIBERO 10 | V11AB-B | B | 46 | 1.0 (0.5 ~ 1.7) | 39 (15 ~ 136) | 21.8 (3.7 ~ 112.3) | 91 (18 ~ 202) | 0.2 (-0.0 ~ 4.3) | 0.1 (0.1 ~ 0.1) | – | 9 / 6 / 8 (52) |
+| LIBERO 10 | pb1 | B | 11 | 0.6 (0.5 ~ 1.4) | 38 (13 ~ 123) | 18.9 (3.8 ~ 61.5) | 33 (9 ~ 95) | 0.2 (0.1 ~ 0.3) | 0.1 (0.1 ~ 0.1) | – | 5 / 4 / 8 (30) |
+| LIBERO 10 | pb2 | C | 55 | 16.1 (3.6 ~ 27.3) | 41 (15 ~ 65) | 19.3 (5.0 ~ 50.7) | 48 (11 ~ 341) | 1.4 (0.7 ~ 5.3) | 0.4 (0.1 ~ 1.0) | 19.1 (0.0 ~ 85.3) | 12 / 6 / 21 (87) |
+| LIBERO 10 | pb3 | C | 103 | 9.9 (3.9 ~ 24.5) | 34 (14 ~ 94) | 21.3 (-7.3 ~ 74.3) | 39 (11 ~ 93) | 1.1 (-0.6 ~ 2.3) | 0.7 (0.4 ~ 1.1) | 13.4 (0.0 ~ 74.7) | 22 / 11 / 16 (119) |
+| LIBERO 10 | pb4 | C | 91 | 9.2 (2.7 ~ 22.5) | 33 (14 ~ 102) | 19.6 (-8.3 ~ 79.5) | 36 (11 ~ 93) | 1.2 (-0.7 ~ 2.3) | 0.8 (0.3 ~ 1.1) | 7.2 (0.0 ~ 51.7) | 19 / 8 / 16 (102) |
+| LIBERO 10 | pb5 | C | 47 | 9.5 (2.6 ~ 22.5) | 29 (15 ~ 81) | 21.9 (0.4 ~ 70.3) | 31 (10 ~ 56) | 1.3 (0.4 ~ 2.5) | 0.9 (0.4 ~ 1.3) | 5.9 (0.0 ~ 58.5) | 15 / 6 / 10 (77) |
+
+realised_frac_obs 의 구간별 call 수 (clip 된 lifted call)와 TO 변화 크기 대 correction 의 Spearman 상관 (lifted TO-changed call):
+
+| 집합 | version | 변환 | n | realised < 0 | 0 ~ 1.5 | > 1.5 | TO-changed lifted call | Spearman(max\|dEE\|, correction) | Spearman(D\*, correction) | clip 없는 TO-changed lifted call | TO-unchanged call (전체) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | V11AB-A | A | 271 | 97 | 86 | 88 | 275 | 0.798 | 0.69 | 4 | 71 |
+| LI | V11AB-B | B | 102 | 14 | 88 | 0 | 292 | 0.83 | 0.797 | 190 | 55 |
+| LI | pb2 | C | 215 | 38 | 116 | 61 | 216 | 0.844 | 0.764 | 1 | 373 |
+| LI | pb3 | C | 328 | 64 | 194 | 70 | 335 | 0.808 | 0.749 | 7 | 379 |
+| LI | pb4 | C | 310 | 47 | 173 | 90 | 317 | 0.809 | 0.782 | 7 | 414 |
+| LI | pb5 | C | 294 | 44 | 182 | 68 | 302 | 0.84 | 0.792 | 8 | 372 |
+| LIBERO 10 | V11AB-A | A | 82 | 29 | 42 | 11 | 82 | 0.899 | 0.857 | 0 | 19 |
+| LIBERO 10 | V11AB-B | B | 46 | 6 | 30 | 10 | 126 | 0.801 | 0.803 | 80 | 42 |
+| LIBERO 10 | pb1 | B | 11 | 1 | 10 | 0 | 68 | 0.961 | 0.96 | 57 | 21 |
+| LIBERO 10 | pb2 | C | 54 | 1 | 27 | 26 | 59 | 0.846 | 0.694 | 4 | 186 |
+| LIBERO 10 | pb3 | C | 103 | 17 | 55 | 31 | 107 | 0.796 | 0.764 | 4 | 179 |
+| LIBERO 10 | pb4 | C | 91 | 14 | 45 | 32 | 97 | 0.74 | 0.726 | 6 | 198 |
+| LIBERO 10 | pb5 | C | 47 | 3 | 28 | 16 | 55 | 0.813 | 0.784 | 8 | 196 |
+
+LI pb5 의 TO-unchanged call 372 개는 `max_abs_correction` · D\* · tracking_residual 이 모두 0 이다. lifted 이면서 clip 되고 `cos(D\*, 직전 D\*) > 0.5` 인 call 은 195 / 294.
+
+#### D3 — latch 와 reach check
+
+`reach_mm` = latch evidence 가 잰, manipulated centroid 와 손 사이 거리(capture frame 의 robot state 기준). `reach_limit_mm` = 120. `reach_now_mm` = 현재 자세로 잰 값(기록용). `checks.reach` 는 `reach_mm` 이 한도 안인지의 검사다. 대표 사례(LI t2e4 pb5 call 30)에서 이 check 가 False 여서 note 가 "파지 미확인: reach" 였다(`SL5h.task.md`). `manipulated_state` = `occluded` 는 target 이 시야에서 가려진 상태로, 이 경우 geometry 는 마지막 관측 frame 에 고정된다(개선 기록 pb1 절).
+
+| 집합 | version | 변환 | lifted call 의 latch: closing / held / 그 밖 | closing 이면서 lifted 인 call | 그 중 reach False | reach_mm 중앙값 | p90 | max | manipulated_state occluded / visible | 실패한 check (call 수) | reach False call (전체) | reach False call (lifted) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | V11AB-A | A | 182 / 92 / 3 | 182 | 181 / 182 (99%) | 306.16 | 414.38 | 514.71 | 140 / 42 | reach 181 · blocked 97 · dropped 76 · settled 11 | 366 | 181 |
+| LI | V11AB-B | B | 233 / 55 / 10 | 233 | 229 / 233 (98%) | 502.26 | 587.80 | 892.74 | 210 / 23 | reach 229 · dropped 43 · blocked 12 · settled 5 | 487 | 229 |
+| LI | pb2 | C | 155 / 96 / 17 | 155 | 134 / 155 (86%) | 227.77 | 519.35 | 677.29 | 120 / 35 | dropped 146 · reach 134 · blocked 55 · not_empty 5 · settled 3 | 282 | 134 |
+| LI | pb3 | C | 220 / 84 / 62 | 220 | 119 / 220 (54%) | 124.44 | 739.66 | 1039.09 | 185 / 35 | dropped 148 · reach 119 · blocked 76 · settled 12 · not_empty 3 | 337 | 119 |
+| LI | pb4 | C | 185 / 174 / 24 | 185 | 119 / 185 (64%) | 124.64 | 793.86 | 1039.09 | 150 / 35 | reach 119 · dropped 113 · blocked 41 · settled 12 · not_empty 3 | 337 | 119 |
+| LI | pb5 | C | 189 / 179 / 9 | 189 | 179 / 189 (95%) | 172.62 | 788.48 | 1039.09 | 129 / 60 | reach 179 · blocked 53 · dropped 42 · settled 17 · not_empty 1 | 382 | 179 |
+| LIBERO 10 | V11AB-A | A | 51 / 14 / 19 | 51 | 51 / 51 (100%) | 297.25 | 495.30 | 527.57 | 50 / 1 | reach 51 · blocked 20 | 117 | 51 |
+| LIBERO 10 | V11AB-B | B | 106 / 28 / 0 | 106 | 104 / 106 (98%) | 307.60 | 359.00 | 518.43 | 101 / 5 | reach 104 · dropped 11 · settled 4 | 203 | 104 |
+| LIBERO 10 | pb1 | B | 21 / 51 / 0 | 21 | 18 / 21 (86%) | 121.87 | 298.15 | 298.15 | 18 / 3 | reach 18 · dropped 11 · settled 3 | 87 | 18 |
+| LIBERO 10 | pb2 | C | 40 / 57 / 1 | 40 | 33 / 40 (82%) | 131.93 | 131.95 | 131.95 | 38 / 2 | dropped 33 · reach 33 · blocked 6 · settled 1 | 61 | 33 |
+| LIBERO 10 | pb3 | C | 89 / 51 / 3 | 89 | 61 / 89 (69%) | 123.73 | 133.13 | 133.22 | 84 / 5 | reach 61 · dropped 55 · blocked 9 · settled 4 | 91 | 61 |
+| LIBERO 10 | pb4 | C | 88 / 61 / 3 | 88 | 61 / 88 (69%) | 123.73 | 133.13 | 133.22 | 84 / 4 | reach 61 · dropped 55 · blocked 9 · settled 3 | 91 | 61 |
+| LIBERO 10 | pb5 | C | 37 / 61 / 7 | 37 | 33 / 37 (89%) | 133.07 | 133.15 | 133.22 | 36 / 1 | dropped 36 · reach 33 · settled 2 | 61 | 33 |
+
+첫 lift 전 `closing` 구간의 실패 check (call 수):
+
+| 집합 | version | closing·lift 전 call | reach | settled | blocked | dropped | not_empty | closed |
+|---|---|---|---|---|---|---|---|---|
+| LI | pb4 | 301 | 214 | 188 | 199 | 20 | 101 | 30 |
+| LI | pb5 | 211 | 172 | 129 | 132 | 8 | 77 | 20 |
+| LIBERO 10 | pb4 | 58 | 30 | 52 | 23 | 5 | 3 | 8 |
+| LIBERO 10 | pb5 | 51 | 28 | 45 | 20 | 2 | 3 | 7 |
+
+LI pb5 의 closing·lifted 189 call 은 `reach_mm` min 72.64 · 중앙값 172.62 · max 1039.09 mm 이고, `reach_state` 는 189 call 모두 capture frame 이다. `reach_now_mm` 중앙값 534.66 mm, `geometry_age_frames` 중앙값 5.0 (최대 41.0). lifted 로 센 obs 의 latch 분포: closing 963 · held 917 · placed 19 · latched 10 · searching 16.
+
+#### D4 — closing 중 쥔 물체에 걸린 제약
+
+latch 가 `closing`(또는 `held`) 이면서 실제 lift 중인 call 에서, 최적화된 call(MI gate 미통과)의 TO 행이 hand 를 어느 방향으로 밀었는지 센다. 행의 위/아래는 FK z 변화 ±0.5 mm 기준, `cos away` = EE 변화가 쥔 bowl 에서 멀어지는 방향인 행(`rows_cos_away_gt_0` / `rows_cos_n`). TO row 가 어느 ESDF 물체에 binding 인지는 calls log 에 count 만 남아 있어 직접 확인하지 못했고, MuJoCo row probe 와 centroid offset 을 대용으로 썼다.
+
+**latch = closing**
+
+| 집합 | version | 변환 | lifted call | 최적화된 call | MI 통과 call | 행 dz 위 / 아래 / flat | cos away > 0 행 | TO 행 dz 중앙값 (mm) | reference clearance < 0 call | MuJoCo: neither within 30 mm / probe call | centroid − bowl 중앙값 (mm) | 그 dz 중앙값 (mm) | zone row 가 켜진 call (rows) | held_exempt rows |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | V11AB-A | A | 182 | 181 | 0 | 1139 / 588 / 38 | 1392 / 1765 | 10.9 | – | 111 / 181 | 279 | -75 | 0 (0) | 0 |
+| LI | V11AB-B | B | 233 | 227 | 0 | 2049 / 143 / 38 | 2028 / 2230 | 40.0 | – | 203 / 227 | 476 | -119 | 0 (0) | 0 |
+| LI | pb2 | C | 155 | 142 | 13 | 1198 / 149 / 18 | 1243 / 1365 | 20.7 | 116 | 141 / 142 | 494 | -297 | 0 (0) | 0 |
+| LI | pb3 | C | 220 | 204 | 15 | 1695 / 222 / 48 | 1792 / 1965 | 26.4 | 167 | 203 / 204 | 513 | -392 | 0 (0) | 0 |
+| LI | pb4 | C | 185 | 170 | 15 | 1374 / 210 / 46 | 1470 / 1630 | 22.1 | 135 | 169 / 170 | 575 | -439 | 0 (0) | 0 |
+| LI | pb5 | C | 189 | 180 | 9 | 1431 / 243 / 51 | 1540 / 1725 | 23.5 | 150 | 175 / 180 | 477 | -369 | 7 (160) | 0 |
+| LIBERO 10 | V11AB-A | A | 51 | 50 | 0 | 410 / 58 / 2 | 422 / 470 | 22.4 | – | 48 / 50 | 237 | -87 | 0 (0) | 0 |
+| LIBERO 10 | V11AB-B | B | 106 | 102 | 0 | 830 / 122 / 13 | 880 / 965 | 27.8 | – | 89 / 102 | 265 | -48 | 0 (0) | 0 |
+| LIBERO 10 | pb1 | B | 21 | 21 | 0 | 162 / 15 / 8 | 174 / 185 | 19.3 | – | 21 / 21 | 312 | -117 | 0 (0) | 0 |
+| LIBERO 10 | pb2 | C | 40 | 36 | 4 | 195 / 136 / 24 | 175 / 355 | 2.8 | 35 | 12 / 36 | 403 | -160 | 0 (0) | 0 |
+| LIBERO 10 | pb3 | C | 89 | 75 | 14 | 617 / 100 / 8 | 647 / 725 | 23.7 | 67 | 75 / 75 | 444 | -280 | 0 (0) | 0 |
+| LIBERO 10 | pb4 | C | 88 | 75 | 13 | 617 / 100 / 8 | 647 / 725 | 23.7 | 67 | 75 / 75 | 444 | -280 | 0 (0) | 0 |
+| LIBERO 10 | pb5 | C | 37 | 29 | 8 | 234 / 50 / 6 | 232 / 290 | 25.4 | 26 | 29 / 29 | 524 | -349 | 0 (0) | 0 |
+
+**latch = held**
+
+| 집합 | version | 변환 | lifted call | 최적화된 call | MI 통과 call | 행 dz 위 / 아래 / flat | cos away > 0 행 | TO 행 dz 중앙값 (mm) | reference clearance < 0 call | MuJoCo: neither within 30 mm / probe call | centroid − bowl 중앙값 (mm) | 그 dz 중앙값 (mm) | zone row 가 켜진 call (rows) | held_exempt rows |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | V11AB-A | A | 92 | 92 | 0 | 422 / 226 / 77 | 402 / 725 | 2.0 | – | 74 / 91 | 403 | -69 | 0 (0) | 0 |
+| LI | V11AB-B | B | 55 | 55 | 0 | 358 / 91 / 36 | 437 / 485 | 3.9 | – | 46 / 55 | 263 | -64 | 0 (0) | 0 |
+| LI | pb2 | C | 96 | 59 | 36 | 386 / 150 / 19 | 490 / 555 | 5.4 | 45 | 51 / 59 | 480 | -151 | 0 (0) | 0 |
+| LI | pb3 | C | 84 | 71 | 10 | 559 / 106 / 10 | 545 / 675 | 18.4 | 56 | 48 / 71 | 339 | -185 | 0 (0) | 0 |
+| LI | pb4 | C | 174 | 125 | 36 | 1029 / 154 / 27 | 949 / 1210 | 19.8 | 98 | 77 / 125 | 343 | -159 | 0 (0) | 1332 |
+| LI | pb5 | C | 179 | 113 | 52 | 957 / 93 / 25 | 950 / 1075 | 20.9 | 89 | 78 / 113 | 319 | -159 | 0 (0) | 835 |
+| LIBERO 10 | V11AB-A | A | 14 | 13 | 0 | 54 / 17 / 9 | 50 / 80 | 2.1 | – | 11 / 13 | 122 | -38 | 0 (0) | 0 |
+| LIBERO 10 | V11AB-B | B | 28 | 24 | 0 | 109 / 6 / 60 | 137 / 175 | 1.5 | – | 22 / 24 | 221 | -71 | 0 (0) | 0 |
+| LIBERO 10 | pb1 | B | 51 | 47 | 0 | 214 / 19 / 82 | 242 / 315 | 1.5 | – | 45 / 47 | 168 | -70 | 0 (0) | 0 |
+| LIBERO 10 | pb2 | C | 57 | 23 | 34 | 165 / 39 / 11 | 142 / 215 | 16.7 | 19 | 22 / 23 | 482 | -111 | 0 (0) | 0 |
+| LIBERO 10 | pb3 | C | 51 | 30 | 21 | 241 / 32 / 7 | 261 / 280 | 22.3 | 25 | 29 / 30 | 254 | -111 | 0 (0) | 0 |
+| LIBERO 10 | pb4 | C | 61 | 20 | 41 | 148 / 14 / 18 | 149 / 180 | 13.0 | 14 | 13 / 20 | 388 | -80 | 0 (0) | 65 |
+| LIBERO 10 | pb5 | C | 61 | 21 | 40 | 174 / 11 / 5 | 179 / 190 | 17.7 | 15 | 14 / 21 | 149 | -9 | 0 (0) | 58 |
+
+LI pb5 closing: 최적화된 180 call 의 reference clearance 는 중앙값 -14.8 mm (min -62.2, max 9.0), 그 5 행 자세에서 gripper 의 target 최소 거리 중앙값(`grip_target_min_mm`) -30.4 mm 이고 probe call 모두(180) 두 손가락이 target 에 닿아 있다(`probe_grip_touching_target` 180). table 이 30 mm 안에 있는 call 0, target 이 아닌 물체가 30 mm 안에 있는 call 5, 둘 다 아닌 call 175. AG3S centroid 와 실제 bowl 의 차는 중앙값 477 mm (p90 796, max 1120), z 성분 중앙값 -369 mm.
+
+#### D5 — version · 변환별 서명
+
+같은 서명(over-lift 수, lifted step 의 실행 포화율, `checks.reach = False` 인 closing·lifted call)을 version 별로 센다. 아래 표의 VLA-only 는 SL5f.
+
+| 집합 | version | 변환 | official | over-lift episode / lifted episode | max rise 중앙값 (mm) | lifted 실행 any-axis sat | lifted 실행 z ≥ 0.999 | closing·lifted 중 reach False | D\*_z 중앙값 (mm, clip 된 lifted call) | realised_obs 중앙값 | realised_model 중앙값 | max_abs_correction 중앙값 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | vla_only | – | 11 / 20 | 0 / 14 | 132.7 | 0 / 717 (0%) | 0 / 717 (0%) | – | – | – | – | – |
+| LI | V11AB-A | A | 3 / 20 | 3 / 13 | 150.6 | 451 / 1424 (32%) | 159 / 1424 (11%) | 181 / 182 (99%) | 7.7 | 0.48 | 0.35 | 9.03 |
+| LI | V11AB-B | B | 3 / 20 | 0 / 13 | 157.7 | 97 / 1509 (6%) | 31 / 1509 (2%) | 229 / 233 (98%) | 30.9 | 0.21 | 0.14 | 0.68 |
+| LI | pb2 | C | 2 / 20 | 7 / 10 | 111.6 | 881 / 1362 (65%) | 577 / 1362 (42%) | 134 / 155 (86%) | 15.2 | 1.03 | 0.60 | 7.77 |
+| LI | pb3 | C | 0 / 20 | 9 / 10 | 90.5 | 1336 / 1833 (73%) | 996 / 1833 (54%) | 119 / 220 (54%) | 22.2 | 0.82 | 0.56 | 10.21 |
+| LI | pb4 | C | 0 / 20 | 9 / 10 | 128.7 | 1193 / 1925 (62%) | 863 / 1925 (45%) | 119 / 185 (64%) | 20.4 | 0.91 | 0.54 | 8.62 |
+| LI | pb5 | C | 1 / 20 | 10 / 12 | 226.9 | 1158 / 1916 (60%) | 806 / 1916 (42%) | 179 / 189 (95%) | 18.7 | 0.83 | 0.55 | 9.06 |
+| LIBERO 10 | vla_only | – | 9 / 10 | 0 / 10 | 147.3 | 0 / 348 (0%) | 0 / 348 (0%) | – | – | – | – | – |
+| LIBERO 10 | V11AB-A | A | 2 / 10 | 0 / 7 | 131.7 | 166 / 425 (39%) | 66 / 425 (16%) | 51 / 51 (100%) | 17.3 | 0.20 | 0.45 | 6.85 |
+| LIBERO 10 | V11AB-B | B | 3 / 10 | 0 / 9 | 140.4 | 30 / 677 (4%) | 8 / 677 (1%) | 104 / 106 (98%) | 21.8 | 0.22 | 0.13 | 0.57 |
+| LIBERO 10 | pb1 | B | 7 / 10 | 0 / 9 | 137.1 | 13 / 361 (4%) | 0 / 361 (0%) | 18 / 21 (86%) | 18.9 | 0.16 | 0.13 | 0.04 |
+| LIBERO 10 | pb2 | C | 6 / 10 | 1 / 8 | 138.1 | 131 / 497 (26%) | 88 / 497 (18%) | 33 / 40 (82%) | 19.3 | 1.36 | 0.40 | 3.57 |
+| LIBERO 10 | pb3 | C | 4 / 10 | 4 / 8 | 184.5 | 431 / 721 (60%) | 300 / 721 (42%) | 61 / 89 (69%) | 21.3 | 1.07 | 0.74 | 7.14 |
+| LIBERO 10 | pb4 | C | 3 / 10 | 4 / 8 | 184.5 | 374 / 780 (48%) | 256 / 780 (33%) | 61 / 88 (69%) | 19.6 | 1.21 | 0.73 | 4.02 |
+| LIBERO 10 | pb5 | C | 5 / 10 | 1 / 8 | 154.4 | 197 / 538 (37%) | 135 / 538 (25%) | 33 / 37 (89%) | 21.9 | 1.28 | 0.99 | 0.18 |
+
+over-lift episode 번호 (LI): A t0e1, t2e1, t2e2; B 없음; pb2 t0e3, t1e1, t1e2, t1e4, t2e0, t2e1, t2e3; pb3 t0e0, t0e1, t0e3, t1e1, t1e2, t1e4, t2e0, t2e1, t2e4; pb4 t0e0, t0e1, t0e3, t1e1, t1e2, t1e4, t2e0, t2e1, t2e4; pb5 t0e0, t0e1, t0e3, t1e2, t1e3, t1e4, t2e0, t2e1, t2e2, t2e4. LIBERO 10: A 없음; B 없음; pb1 없음; pb2 t1e0; pb3 t0e0, t1e0, t5e0, t8e0; pb4 t0e0, t1e0, t5e0, t8e0; pb5 t5e0.
+
+한계: 비교 run 은 code · 설정이 version 마다 다르다 (A · B · pb1 은 MI gate · arms · pb4/pb5 규칙이 없고, SL5c · SL5d · SL5e · SL5g 는 서로 다른 commit). 그래서 위 표는 같은 서명이 어느 run 에 나타나는지를 보여 줄 뿐 한 변수만 바꾼 비교가 아니다. SL5h-G 가 같은 pb5 규칙에서 변환만 바꾼 run 을 추가했다.
+
+#### D6 — pb5 성공 episode 와의 대조
+
+| 군 | ep | official | max rise (mm) | eef z 최고 (m) | VLA-only eef z 최고 (m) | 첫 closing call 의 obs | 첫 reach 실패 call 의 obs | 첫 held call 의 obs | 첫 lifted obs | lifted obs 의 latch | closing·lifted call | closing·lifted 의 실패 check | lifted step: z sat / any sat / 전체 | lifted call: clip / TO-changed / 전체 | closing·lifted 행 dz 위 / 아래 | held·lifted 행 dz 위 / 아래 | z 기여 합 TO-changed (mm) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LIBERO 10 pb5 성공 | t0e0 | True | 96.6 | 1.183 | 1.183 | 50 | 50 | 85 | 96 | closing 4, held 55 | 0 | – | 16 / 40 / 59 | 9 / 9 / 11 | 0 / 0 | 80 / 0 | 433.3 |
+| LIBERO 10 pb5 성공 | t1e0 | True | 179.0 | 1.188 | 1.188 | 65 | 65 | 80 | 79 | closing 1, held 41 | 0 | – | 0 / 0 / 42 | 0 / 1 / 9 | 0 / 0 | 10 / 0 | 29.2 |
+| LIBERO 10 pb5 성공 | t2e0 | True | 149.6 | 1.187 | 1.187 | 80 | – | 100 | 97 | closing 3, held 33 | 0 | – | 0 / 0 / 36 | 0 / 0 / 7 | 0 / 0 | 0 / 0 | 0 |
+| LIBERO 10 pb5 성공 | t3e0 | True | 127.3 | 1.176 | 1.176 | 55 | – | 70 | 69 | closing 1, held 23 | 0 | – | 0 / 0 / 24 | 0 / 1 / 5 | 0 / 0 | 9 / 0 | 8.0 |
+| LIBERO 10 pb5 성공 | t6e0 | True | 159.2 | 1.18 | 1.18 | 65 | – | 85 | 83 | closing 2, held 43 | 0 | – | 1 / 3 / 45 | 1 / 2 / 9 | 0 / 0 | 20 / 0 | 29.2 |
+| LIBERO 10 pb5 실패 | t4e0 | False | 0.0 | 1.239 | 1.269 | – | – | – | – | – | 0 | – | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 | 0 / 0 | 0 |
+| LIBERO 10 pb5 실패 | t5e0 | False | 689.0 | 1.609 | 1.167 | 60 | 65 | – | 59 | latched 1, closing 171 | 34 | dropped 34, reach 33 | 86 / 105 / 171 | 25 / 26 / 34 | 224 / 36 | 0 / 0 | 538.4 |
+| LIBERO 10 pb5 실패 | t7e0 | False | 243.4 | 1.227 | 1.158 | 40 | 40 | 60 | 71 | held 74, latched 8, closing 15 | 3 | settled 2, dropped 2 | 18 / 28 / 97 | 6 / 7 / 18 | 10 / 14 | 17 / 7 | 103.7 |
+| LIBERO 10 pb5 실패 | t8e0 | False | 237.3 | 1.202 | 1.181 | 70 | – | 85 | 82 | closing 3, held 32, placed 30 | 0 | – | 14 / 21 / 64 | 6 / 9 / 12 | 0 / 0 | 38 / 4 | 189.7 |
+| LIBERO 10 pb5 실패 | t9e0 | False | 18.0 | 1.285 | 1.281 | 120 | 120 | – | – | – | 0 | – | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 | 0 / 0 | 0 |
+| LI pb5 성공 | t1e1 | True | 157.4 | 1.176 | 1.176 | 50 | 50 | 70 | 67 | closing 3, held 35 | 0 | – | 0 / 0 / 38 | 1 / 2 / 7 | 0 / 0 | 9 / 4 | 3.7 |
+
+성공 episode 5 건(LIBERO 10 t0e0 · t1e0 · t2e0 · t3e0 · t6e0)의 closing 이면서 lifted 인 call 은 모두 0 이다. 같은 지표에서 LI t1e1(LI pb5 의 유일한 성공)도 0 이다. LIBERO 10 실패 episode 중 t5e0 은 lifted obs 가 latched 1 · closing 171 이고 closing·lifted 34 call 중 reach 33 · dropped 34 call 이 실패 check 다.
+
+#### 대표 사례 LI t2e4 pb5 (over-lift 531.3 mm)
+
+`reach_mm` 은 capture frame 21 에 고정된 채 34 call 동안 123.22 ~ 123.94 mm 였다 (limit 120). lead 가 확인한 "call 30" 은 calls jsonl 의 30 번째 줄(아래 표의 k 29, obs 165)이다: reach_mm 123.46, 포화 row [0, 1], max_abs_correction 1.391. 다음 call(k 30, obs 170)은 reach_mm 123.47, 포화 row 9 개, max_abs_correction 5.521 이다. lifted 로 센 obs 의 latch 는 모두 `closing`(178 obs) 이다.
+
+![SL5h LI t2e4 pb5 scene](figures/sl5h-scene-t2e4-pb5.png)
+
+| call k | obs | latch | lifted | rise (mm) | eef z (m) | MI 통과 | reference clearance (mm) | ① policy max\|a\| | ② TO max\|dEE\| (mm) | ③ max_abs_correction | ③ clip 된 row | ④ response max\|a\| | ⑤ executed max\|a\| | reach_mm | manipulated_state | lag_target (mm) | realised_obs |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 0 | 20 | searching | F | 0.0 | 1.185 | T | 113.1 | 0.86 | 0.0 | 0.00 | 0 | 0.86 | 0.54 | – | – | 10.8 | – |
+| 4 | 40 | latched | F | 0.0 | 1.043 | F | -4.8 | 0.92 | 14.8 | 3.11 | 8 | 1.00 | 1.00 | 164.9 | visible | 15.1 | -0.07 |
+| 22 | 130 | closing | T | 72.3 | 1.058 | F | 6.8 | 0.80 | 2.7 | 0.86 | 0 | 0.96 | 0.79 | 123.2 | visible | 5.3 | 2.49 |
+| 29 | 165 | closing | T | 256.5 | 1.245 | F | 3.9 | 0.63 | 14.3 | 1.39 | 2 | 1.00 | 1.00 | 123.5 | occluded | 5.4 | 1.29 |
+| 30 | 170 | closing | T | 257.2 | 1.245 | F | 1.3 | 0.72 | 44.2 | 5.52 | 9 | 1.00 | 1.00 | 123.5 | occluded | 11.1 | 1.48 |
+| 46 | 250 | closing | T | 523.5 | 1.494 | T | 19.0 | 0.71 | 0.0 | 0.00 | 0 | 0.71 | 0.64 | 123.4 | occluded | 19.0 | – |
+| 55 | 295 | closing | T | 483.1 | 1.401 | F | -14.1 | 0.71 | 45.0 | 8.60 | 10 | 1.00 | 1.00 | 123.9 | occluded | 112.1 | 2.71 |
+
+같은 episode 의 call 별 전체는 `numbers.case_LI_t2e4_pb5.per_call` 56 행에 있다. 각 행은 이 표와 같은 열을 가진다 (obs 20 부터 5 obs 간격). 위 표는 첫 call(k 0), 처음 clip 된 call(k 4), 처음 lifted 인 call(k 22), 포화 시작 call(k 29, 30), rise 최고 call(k 46), 마지막 부근(k 55)만 옮겼다.
+
+#### 보조 숫자: z 기여와 VLA 원본 z 부호
+
+| 집합 | version | 변환 | z 기여 합: TO-changed lifted call (n / mm) | TO-unchanged lifted call (n / mm) | 실행 z ≥ 0.999 step 의 VLA 원본 z 부호 pos / neg / near0 | VLA-only 최고 eef z 를 넘은 step | 그 중 실행 z 포화 step | 그 중 VLA 원본이 포화한 step |
+|---|---|---|---|---|---|---|---|---|
+| LI | V11AB-A | A | 275 / 6346.9 | 2 / 17.4 | 106 / 42 / 11 | 127 | 15 | 0 |
+| LI | V11AB-B | B | 291 / 2572.1 | 6 / 60.8 | 21 / 9 / 1 | 130 | 4 | 0 |
+| LI | pb2 | C | 216 / 2458.1 | 52 / -271.2 | 419 / 114 / 44 | 827 | 401 | 0 |
+| LI | pb3 | C | 335 / 4777.2 | 31 / -168.1 | 658 / 242 / 96 | 1346 | 803 | 0 |
+| LI | pb4 | C | 317 / 6551.1 | 66 / -151.5 | 599 / 207 / 57 | 1074 | 666 | 0 |
+| LI | pb5 | C | 302 / 3662.2 | 75 / -872.1 | 506 / 229 / 71 | 1019 | 581 | 0 |
+| LIBERO 10 | V11AB-A | A | 82 / 81.2 | 2 / -18.6 | 35 / 23 / 8 | 12 | 1 | 0 |
+| LIBERO 10 | V11AB-B | B | 126 / 3477.9 | 7 / 112.7 | 6 / 2 / 0 | 23 | 0 | 0 |
+| LIBERO 10 | pb1 | B | 68 / 33.1 | 3 / 41.7 | 0 / 0 / 0 | 23 | 0 | 0 |
+| LIBERO 10 | pb2 | C | 58 / 7743.9 | 39 / -293.3 | 38 / 34 / 16 | 66 | 48 | 0 |
+| LIBERO 10 | pb3 | C | 107 / 1355.0 | 36 / -177.0 | 143 / 131 / 26 | 306 | 179 | 1 |
+| LIBERO 10 | pb4 | C | 97 / 2166.7 | 55 / -248.3 | 114 / 121 / 21 | 289 | 169 | 1 |
+| LIBERO 10 | pb5 | C | 55 / 1331.5 | 50 / -280.9 | 44 / 69 / 22 | 164 | 85 | 0 |
+
+z 기여 = lifted call 마다 `eef_obs_z(o+5) − FK_z(joint_reference[k,4])` 의 합이다.
+
+#### 가설 H1 ~ H4 별 숫자 (판정 없음)
+
+verify.json `hypotheses_numbers` 가 각 가설에 붙인 `support` · `against` 구분을 그대로 옮긴다. 이 구분은 verifier 의 분류이고 이 로그의 판정이 아니다.
+
+**H1. 포화는 역변환 C 의 windup 에서 생긴다**
+
+support:
+
+- lifted 로 센 포화 response row 의 first stage (LI pb4 / pb5): conv_on_to_row 2662 / 2536, conv_carry 69 / 87, unclipped 2 / 1
+- lifted 실행 any-axis sat 비율: LI A / B / pb2-C / pb5-C = 0.317 / 0.064 / 0.647 / 0.604; LIBERO 10 B / pb1-B / pb2-C / pb5-C = 0.044 / 0.036 / 0.264 / 0.366
+- over-lift episode 수: LI A / B / pb2 / pb3 / pb4 / pb5 = 3 / 0 / 7 / 9 / 9 / 10; LIBERO 10 B / pb1 / pb2 / pb3 / pb4 / pb5 = 0 / 0 / 1 / 4 / 4 / 1
+- realised_frac_obs (LI pb5, clip 된 lifted call 294): > 1.5 인 call 68, < 0 인 call 44, 0 ~ 1.5 인 call 182
+- windup run (LI pb5): ≥ 3 call 80 개, ≥ 5 call 33 개, 최장 29 call, ≥ 3 run 안의 call 447
+
+against:
+
+- 역변환 상태는 call 마다 `d^`, `D^` = 0 에서 시작한다 (code). conv_carry row / 포화 response row (lifted, LI pb5) = 87 / 2624
+- TO-unchanged row 에서 포화한 lifted step: 13 개 (version × 집합) 모두 0; TO 가 안 바꿨는데 clip 된 call: 모두 0
+- Spearman(max\|dEE\|, max_abs_correction) lifted TO-changed call: LI|A 0.798, LI|B 0.83, LI|pb2 0.844, LI|pb3 0.808, LI|pb4 0.809, LI|pb5 0.84, L10|A 0.899, L10|B 0.801, L10|pb1 0.961, L10|pb2 0.846, L10|pb3 0.796, L10|pb4 0.74, L10|pb5 0.813
+
+**H2. 포화는 TO 수정에서 생긴다**
+
+support:
+
+| 집합 | version | 변환 | TO-changed row 의 lifted step (sat / step) | TO-unchanged row 의 lifted step (sat / step) | MI 통과 lifted call 의 response sat row | D\*_z 중앙값 (mm) | z 기여 합 TO-changed / unchanged (mm) |
+|---|---|---|---|---|---|---|---|
+| LI | V11AB-A | A | 451 / 1414 | 0 / 10 | – | 7.7 | 6346.9 / 17.4 |
+| LI | V11AB-B | B | 97 / 1479 | 0 / 30 | – | 30.9 | 2572.1 / 60.8 |
+| LI | pb2 | C | 881 / 1094 | 0 / 268 | 0 | 15.2 | 2458.1 / -271.2 |
+| LI | pb3 | C | 1336 / 1672 | 0 / 161 | 0 | 22.2 | 4777.2 / -168.1 |
+| LI | pb4 | C | 1193 / 1583 | 0 / 342 | 0 | 20.4 | 6551.1 / -151.5 |
+| LI | pb5 | C | 1158 / 1527 | 0 / 389 | 0 | 18.7 | 3662.2 / -872.1 |
+| LIBERO 10 | V11AB-A | A | 166 / 419 | 0 / 6 | – | 17.3 | 81.2 / -18.6 |
+| LIBERO 10 | V11AB-B | B | 30 / 639 | 0 / 38 | – | 21.8 | 3477.9 / 112.7 |
+| LIBERO 10 | pb1 | B | 13 / 343 | 0 / 18 | – | 18.9 | 33.1 / 41.7 |
+| LIBERO 10 | pb2 | C | 131 / 284 | 0 / 213 | 0 | 19.3 | 7743.9 / -293.3 |
+| LIBERO 10 | pb3 | C | 431 / 533 | 0 / 188 | 0 | 21.3 | 1355.0 / -177.0 |
+| LIBERO 10 | pb4 | C | 374 / 498 | 0 / 282 | 0 | 19.6 | 2166.7 / -248.3 |
+| LIBERO 10 | pb5 | C | 197 / 273 | 0 / 265 | 0 | 21.9 | 1331.5 / -280.9 |
+
+- TO 행 dz 위 / 아래 (LI pb5, closing·lifted): 1431 / 243
+
+against:
+
+- LI B(변환 B): TO-changed lifted step 중 포화 / step = 97 / 1479, D\*_z 중앙값 30.9 mm, over-lift 0
+
+**H3. latch 가 reach check 에서 막혀 held 로 못 가고, 쥔 bowl 이 제약으로 남아 hand 를 밀어 올린다**
+
+support (표는 closing·lifted call 기준):
+
+| 집합 | version | 변환 | reach False / closing·lifted call | ref clearance < 0 / 최적화 / MuJoCo neither within 30 mm (call) | TO 행 dz 위 / 아래 | centroid − bowl 중앙값 mm (dz) |
+|---|---|---|---|---|---|---|
+| LI | V11AB-A | A | 181 / 182 | 0 / 181 / 111 | 1139 / 588 | 279 (-75) |
+| LI | V11AB-B | B | 229 / 233 | 0 / 227 / 203 | 2049 / 143 | 476 (-119) |
+| LI | pb2 | C | 134 / 155 | 116 / 142 / 141 | 1198 / 149 | 494 (-297) |
+| LI | pb3 | C | 119 / 220 | 167 / 204 / 203 | 1695 / 222 | 513 (-392) |
+| LI | pb4 | C | 119 / 185 | 135 / 170 / 169 | 1374 / 210 | 575 (-439) |
+| LI | pb5 | C | 179 / 189 | 150 / 180 / 175 | 1431 / 243 | 477 (-369) |
+| LIBERO 10 | V11AB-A | A | 51 / 51 | 0 / 50 / 48 | 410 / 58 | 237 (-87) |
+| LIBERO 10 | V11AB-B | B | 104 / 106 | 0 / 102 / 89 | 830 / 122 | 265 (-48) |
+| LIBERO 10 | pb1 | B | 18 / 21 | 0 / 21 / 21 | 162 / 15 | 312 (-117) |
+| LIBERO 10 | pb2 | C | 33 / 40 | 35 / 36 / 12 | 195 / 136 | 403 (-160) |
+| LIBERO 10 | pb3 | C | 61 / 89 | 67 / 75 / 75 | 617 / 100 | 444 (-280) |
+| LIBERO 10 | pb4 | C | 61 / 88 | 67 / 75 / 75 | 617 / 100 | 444 (-280) |
+| LIBERO 10 | pb5 | C | 33 / 37 | 26 / 29 / 29 | 234 / 50 | 524 (-349) |
+
+- lifted call 의 latch 분포 (call 수): LI|pb4 held 174, placed 18, closing 185, latched 3, searching 3; LI|pb5 closing 189, held 179, searching 3, latched 2, placed 4; LIBERO 10|pb4 held 61, closing 88, latched 3; LIBERO 10|pb5 held 61, closing 37, latched 2, placed 5
+- closing·lifted call 중 zone_rows > 0 (pb5): LI 7, LIBERO 10 0
+- LIBERO 10 pb5 성공 episode(t0e0 · t1e0 · t2e0 · t3e0 · t6e0)의 closing·lifted call: t0e0 0, t1e0 0, t2e0 0, t3e0 0, t6e0 0
+- LI pb4 · pb3 · pb5 에서 closing·lifted 중 reach 외 실패 check: pb3 reach 119, settled 12, blocked 76, dropped 148, not_empty 3; pb4 reach 119, settled 12, blocked 41, dropped 113, not_empty 3; pb5 settled 17, reach 179, blocked 53, dropped 42, not_empty 1
+
+against:
+
+| 집합 | version | 변환 | held·lifted 의 TO 행 dz 위 / 아래 | ref clearance < 0 call | 최적화된 call |
+|---|---|---|---|---|---|
+| LI | V11AB-A | A | 422 / 226 | 0 | 92 |
+| LI | V11AB-B | B | 358 / 91 | 0 | 55 |
+| LI | pb2 | C | 386 / 150 | 45 | 59 |
+| LI | pb3 | C | 559 / 106 | 56 | 71 |
+| LI | pb4 | C | 1029 / 154 | 98 | 125 |
+| LI | pb5 | C | 957 / 93 | 89 | 113 |
+| LIBERO 10 | V11AB-A | A | 54 / 17 | 0 | 13 |
+| LIBERO 10 | V11AB-B | B | 109 / 6 | 0 | 24 |
+| LIBERO 10 | pb1 | B | 214 / 19 | 0 | 47 |
+| LIBERO 10 | pb2 | C | 165 / 39 | 19 | 23 |
+| LIBERO 10 | pb3 | C | 241 / 32 | 25 | 30 |
+| LIBERO 10 | pb4 | C | 148 / 14 | 14 | 20 |
+| LIBERO 10 | pb5 | C | 174 / 11 | 15 | 21 |
+
+- over-lift 가 없는 run 의 closing·lifted reach False: LI B 229 / 233 (over-lift 0), LIBERO 10 B 104 / 106 (over-lift 0), LIBERO 10 pb1 18 / 21 (over-lift 0)
+
+**H4. VLA reference 자체가 OOD 상태에서 포화한다**
+
+support (lifted 실행 z ≥ 0.999 step 의 VLA 원본 z 부호, VLA-only 최고 eef z 를 넘은 step) 는 위 "보조 숫자" 표의 마지막 네 열과 같은 값이다.
+
+against:
+
+| 집합 | version | 변환 | VLA 원본(①)이 포화한 lifted step / lifted step | first stage 가 vla 인 포화 response row (lifted) |
+|---|---|---|---|---|
+| LI | V11AB-A | A | 0 / 1424 | 0 |
+| LI | V11AB-B | B | 0 / 1509 | 0 |
+| LI | pb2 | C | 0 / 1362 | 0 |
+| LI | pb3 | C | 0 / 1833 | 0 |
+| LI | pb4 | C | 0 / 1925 | 0 |
+| LI | pb5 | C | 0 / 1916 | 0 |
+| LIBERO 10 | V11AB-A | A | 0 / 425 | 0 |
+| LIBERO 10 | V11AB-B | B | 0 / 677 | 0 |
+| LIBERO 10 | pb1 | B | 0 / 361 | 0 |
+| LIBERO 10 | pb2 | C | 0 / 497 | 0 |
+| LIBERO 10 | pb3 | C | 1 / 721 | 1 |
+| LIBERO 10 | pb4 | C | 1 / 780 | 1 |
+| LIBERO 10 | pb5 | C | 0 / 538 | 0 |
+
+- VLA-only 의 lifted step 중 VLA 원본 포화: LI 0 / 717, LIBERO 10 0 / 348
+
+#### 측정하지 않은 것
+
+- TO row 의 constraint 대상(어느 ESDF · attached 물체에 binding 인지): calls log 는 `zone_rows` · `held_exempt_rows` count 만 남긴다. server ESDF 가 cuRobo(GPU)라 offline replay 를 하지 않았다. D4 는 MuJoCo row probe 와 centroid offset 으로 대신했다.
+- reach_mm 을 잰 capture frame 의 robot state: 기록되지 않았다. `reach_mm` · `reach_now_mm` · `reach_state` 만 있다.
+- 역변환 C 의 row 별 response model 예측(p_hat): `predicted_ee_base` 5 행 이상은 없다. realised 는 관측 eef 로 계산했다.
+- GPU counterfactual(pb5-B · pb5-A, 병렬 bit 재현): 이 STEP 에서 실행하지 않았다 (다음 절 SL5h-G).
+- cuRobo regression baseline: GPU 금지.
+- SL5f 초기 pb4_init · pb5_init run 은 D5 에 넣지 않았다.
+
+**판정 대기 (사용자).** over-lift · 포화의 출처에 대한 판정과 다음 수정 방향은 사용자 판정 전이다. 위는 가설별 숫자만 남긴 것이다.
+
+### SL5h-G — pb5 × 변환 A / B / C counterfactual 과 같은 checkout 안 병렬 GPU 실행 (2026-10-19)
+
+**기록 시각** 병렬 launcher 구현 commit `e2b5deaa` 2026-10-19 18:22 UTC (2026-10-20 03:22 KST). rollout 은 2026-10-19 18:45 ~ 19:50 UTC = **2026-10-20 03:45 ~ 04:50 KST**, 분석 verify.json `date` = 2026-10-20 KST. **수치 출처** [`handoff/SL5h-G.verify.json`](handoff/SL5h-G.verify.json), 지시서 [`handoff/SL5h-G.task.md`](handoff/SL5h-G.task.md) · [`handoff/SL5h-launcher.task.md`](handoff/SL5h-launcher.task.md), 구현 기록 [`handoff/SL5h-launcher.impl.md`](handoff/SL5h-launcher.impl.md). **code** run 은 `743a1e76`(실행 경로는 SL5g 의 `a8ad92ef` 와 같고, 바뀐 것은 launcher 의 병렬 option 과 docs 뿐), 분석은 HEAD `4634ac11` 에서 CPU 만 썼다 (`CUDA_VISIBLE_DEVICES=`, code 수정 없음). legacy 기준선은 일치했다 (violated start 14/15, has_target 15/15, frame0 clearance -29.031 mm). cuRobo 기준선은 GPU 금지라 실행하지 않았다.
+
+이 절은 두 가지를 기록한다. (1) 같은 checkout 안에서 GPU run 을 동시에 둘까지 돌리는 launcher option 과 그 결과가 직렬 실행과 bit 단위로 같았는지. (2) SL5h 가 남긴 질문, 즉 포화 · over-lift 가 변환(역변환) 에서 나오는가를 **같은 pb5 규칙에서 변환만 A / B / C 로 바꾼** run 으로 잰 숫자. 판정은 쓰지 않는다.
+
+#### 병렬 실행 option (commit `e2b5deaa`, `benchmark/runners/run_parallel_gpu.sh`)
+
+**무엇이 바뀌었나.** 사용자 지시(2026-10-19)는 GPU(H200 NVL 140 GB)를 적절히 활용하라는 것이었다. 그동안 `launch_libero_paired.py` 의 `run_mode` 가 mode 마다 공용 GPU lock (`/tmp/ag3s-vla-gpu-validation.lock`)을 직접 `flock` 하고 다른 GPU compute process 가 있으면 기다렸으므로 launcher 두 개를 동시에 띄울 수 없었다. 이제는 다음 두 가지다 (`SL5h-launcher.impl.md`).
+
+| file | 내용 |
+|---|---|
+| `benchmark/runners/launch_libero_paired.py` | 환경 변수 `AG3S_GPU_LOCK_HELD=1` 이면 launcher 가 lock 을 직접 잡지 않고(busy-GPU 대기도 하지 않는다), **caller 가 lock 을 실제로 쥐고 있고 그 lock 이 물려받은 fd 로 잡혀 있는지**를 확인한 뒤 진행한다. 확인에 실패하면 run 디렉터리를 만들기 전에 `refused` 로 종료(rc 2). `launcher_result` 에 `gpu_lock_mode: "held_by_caller"`, caller pid, fd 를 기록한다. env 가 없으면 이전과 같은 동작이다 |
+| `benchmark/runners/run_parallel_gpu.sh` (신규 140 줄) | lock 을 한 번 잡고(`exec 9>>lock; flock -w N 9`) → `nvidia-smi` 로 다른 compute process 가 없는지 확인 → pod working set + 추정(12 GiB/run × 동시 수)이 64 GiB 이하인지 확인 → job(launcher 인자 한 줄)을 **최대 2 개 동시**에 실행하고 하나가 끝나면 다음을 넣는다. job 의 시작 · 끝 · rc · working set 을 한 log 에 남긴다 |
+| `tests/benchmark/test_parallel_gpu_launcher.py` (신규) | GPU 없이 mock · fake 로 확인. 구현 기록에는 기존 launcher test 2 개와 함께 13 passed (7.05 s) |
+
+바뀌지 않은 것: server argv, client argv, `libero_safe_client.py`, `serve_safe.py`, adapter, profile (실행 경로). 기존 file 중 바뀐 것은 `launch_libero_paired.py` 한 파일이다 (구현 기록의 `git diff --stat`). CLAUDE.md 의 주의대로 `flock -w N 9 CMD 9>lock`(fd 번호 뒤에 command)은 쓰지 않는다.
+
+**근거.** (i) 병렬로 돌려도 TrajOpt 결과가 바뀌지 않는다는 가정은 `SL5h-launcher.task.md` 가 든 것이다: benchmark V11AB 계열 TO 는 반복 수 상한(`max_iterations = 3`)으로만 끝나고 wall-clock 마감(`sqp.time_budget_ms`)에 걸리지 않는다. 그 근거로 lead 가 SL5c ~ SL5g 약 1 만 call 에서 `time_budget_hit = 0` 임을 적었다 (이 값은 verify.json 에 측정값으로 담겨 있지 않다. 지시서의 서술이다). (ii) 가정을 직접 확인한 것이 아래 **G0 bit 재현**이다.
+
+**배제하는 것.** checkout 사이 동시 실행은 계속 하지 않는다 (development 두 세션과 합의). 같은 checkout 안 2 job 도 lock 을 쥔 한 caller 아래서만 허용한다.
+
+**알려진 한계 (구현 기록).** 두 launcher 가 고른 port 가 같을 확률이 job 쌍마다 약 1/10⁴ 남는다(그러면 두 번째 server 의 bind 가 실패해 그 job 이 rc ≠ 0 이고 결과가 섞이지는 않는다). 메모리 추정 12 GiB/run 은 실측값이 아니다. 병렬 실행이 결과를 바꾸지 않는다는 것은 구현이 보장하지 않고 이 절의 G0 로만 확인한다.
+
+#### run 과 병렬 batch
+
+| 집합 | 조건 | code | run |
+|---|---|---|---|
+| SafeLIBERO LI dev (n=20) | VLA-only (SL5f 재사용) | 38722284 | `20261017T151126_38722284e2fa_sl5f-safelibero-LI-dev-LI-vla_only` |
+| SafeLIBERO LI dev (n=20) | pb5-C (SL5g 재사용) | a8ad92ef | `20261018T133339_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C` |
+| SafeLIBERO LI dev (n=20) | pb5-B (신규) | 743a1e76 | `20261020T035642_743a1e76874d_sl5h-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-B` |
+| SafeLIBERO LI dev (n=20) | pb5-A (신규) | 743a1e76 | `20261020T035857_743a1e76874d_sl5h-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-A` |
+| LIBERO 10 init 0 (n=10) | VLA-only (SL5f 재사용) | 38722284 | `20261017T170230_38722284e2fa_sl5f-libero10-init0-vla_only` |
+| LIBERO 10 init 0 (n=10) | pb5-C (SL5g 재사용) | a8ad92ef | `20261018T150153_a8ad92ef3356_sl5g-libero10-init0-vla_v11ab-V11AB-pb5-C` |
+| LIBERO 10 init 0 (n=10) | pb5-C repro (병렬 재실행) | 743a1e76 | `20261020T034523_743a1e76874d_sl5h-libero10-init0-repro-vla_v11ab-V11AB-pb5-C` |
+| LIBERO 10 init 0 (n=10) | pb5-B (신규) | 743a1e76 | `20261020T034555_743a1e76874d_sl5h-libero10-init0-vla_v11ab-V11AB-pb5-B` |
+| LIBERO 10 init 0 (n=10) | pb5-A (신규) | 743a1e76 | `20261020T043947_743a1e76874d_sl5h-libero10-init0-vla_v11ab-V11AB-pb5-A` |
+
+변환: A = `lag_inverse`, B = `command_offset`, C = `lag_inverse_tracking` (calls 기록의 `conversion.mode` 로 확인: 모든 call 이 해당 변환; LI|C C 1084, LI|B B 1080, LI|A A 997, LIBERO10|C C 344, LIBERO10|repro C 344, LIBERO10|B B 286, LIBERO10|A A 345 call). pb5 규칙은 모두 `V11AB-pb5` 이다.
+
+| job | 내용 | 시작 (UTC) | 끝 (UTC) | s | 동시에 돈 job (겹친 시간) |
+|---|---|---|---|---|---|
+| job0 | libero_spatial conversion C (SL5h-G-repro) | 2026-10-19T18:45:22Z | 2026-10-19T18:58:25Z | 783 | job1 618 s, job2 105 s |
+| job1 | libero_spatial conversion B (SL5h-G-pb5B) | 2026-10-19T18:45:52Z | 2026-10-19T18:56:10Z | 618 | job0 618 s |
+| job2 | safelibero_spatial conversion B (SL5h-G-pb5B) | 2026-10-19T18:56:40Z | 2026-10-19T19:39:16Z | 2556 | job0 105 s, job3 2420 s |
+| job3 | safelibero_spatial conversion A (SL5h-G-pb5A) | 2026-10-19T18:58:56Z | 2026-10-19T19:39:46Z | 2450 | job2 2420 s |
+| job4 | libero_spatial conversion A (SL5h-G-pb5A) | 2026-10-19T19:39:46Z | 2026-10-19T19:50:46Z | 660 | – |
+
+최대 동시 실행은 2 이다 (job0 · job1, job2 · job3). 로그는 `outputs/verify/SL5h-G/sl5h_g.log`.
+
+#### G0 — 병렬 bit 재현: repro(병렬) vs SL5g pb5-C(단독), LIBERO 10
+
+비교: episode 10 개마다 `<stem>.npz` · `<stem>_calls.npz` · `<stem>_geom.npz` 의 모든 array 를 key 집합 · dtype · shape · byte 단위로, `episodes.jsonl` 의 모든 field 를, calls jsonl 의 모든 leaf 를 비교했다 (`g0_bitrepro.json`).
+
+| 항목 | 결과 |
+|---|---|
+| npz array (episode 14 + calls 8 + geom 33 개 / episode) | 550 / 550 일치, 불일치 0, 한쪽에만 있는 key 0 |
+| 그 중 episode + calls array | 220 / 220 일치 |
+| 처음 달라진 episode · call · array | 없음 (`first_difference` = null) |
+| `episodes.jsonl` 결과 field (`official_success`, `status`, `error`, `env_steps_including_wait`, `env_steps_excluding_wait`, `wait_steps`, `loop_t_final`, `policy_calls`, `init_state_index`, `seed`) | 10 / 10 episode 일치 |
+| `episodes.jsonl` 에서 다른 field | `ended_at` 10 ep, `policy_latency_ms` 10 ep, `server_timing` 10 ep, `started_at` 10 ep (시각 · 지연 기록) |
+| calls jsonl (344 call) 에서 다른 leaf | `/timing_ms/ag3s` 344, `/timing_ms/trajopt` 344, `/to/solve_ms` 343, `/timing_ms/infer` 344, `/t_client_ms` 344, `/timing_ms/total` 344, `/grasp/attached/attached_at` 92 (모두 timing · 시각 기록) |
+| manifest | commit `a8ad92ef` → `743a1e76`, dirty [False, False]; conversion · ag3s_version · protocol · seed 동일, algorithm tree 는 `AG3S/ag3s` 하나만 다름(docs 를 포함하는 tree, 실행 경로는 같다), server argv 는 port 하나만 다름(index 10: 25269 → 28689) |
+| gpu lock 기록 | 단독 run: wait 4.0e-05 s, 2026-10-18T06:01:55Z ~ 2026-10-18T06:13:41Z; repro: `gpu_lock_mode` = `held_by_caller`, caller pid 3265472, fd 9 |
+| repro 와 동시에 돈 job | job1(pb5-B LIBERO 10) 618 s, job2(pb5-B LI) 105 s |
+
+이 표가 가정을 확인하는 측정이다: 시각 · timing 기록을 뺀 모든 array 와 결과 field 가 병렬 · 단독 run 사이에서 같다. 다만 재실행한 것은 LIBERO 10 의 pb5-C 한 집합(10 episode)이다. 아래 not_measured 참조.
+
+![SL5h-G tables](figures/sl5h-g-tables.png)
+
+#### G1 — 집계, 전이표, 후보 규칙
+
+figure: [`sl5h-g-graph-conversion.png`](figures/sl5h-g-graph-conversion.png) (a ~ f), [`sl5h-g-tables.png`](figures/sl5h-g-tables.png) (T1 ~ T5), [`sl5h-g-scene-C-vs-B.png`](figures/sl5h-g-scene-C-vs-B.png). sidecar 는 같은 이름의 `.json`. 모든 run 의 pairing key(task · init · policy seed · obstacle) 일치: LI 모두 True, LIBERO10 모두 True.
+
+![SL5h-G 변환별 결과와 서명](figures/sl5h-g-graph-conversion.png)
+
+| 집합 | 조건 | official | collided | safe_success | HOLD calls (episodes) | calls | status |
+|---|---|---|---|---|---|---|---|
+| LI | VLA-only | 11 / 20 | 18 | 2 | 0 (0 ep) | 796 | max_steps 9, success 11 |
+| LI | pb5-A | 4 / 20 | 9 | 3 | 327 (18 ep) | 997 | max_steps 16, success 4 |
+| LI | pb5-B | 2 / 20 | 17 | 1 | 246 (15 ep) | 1080 | success 2, max_steps 18 |
+| LI | pb5-C | 1 / 20 | 11 | 1 | 204 (16 ep) | 1084 | max_steps 19, success 1 |
+| LIBERO 10 | VLA-only | 9 / 10 | – | – | 0 (0 ep) | 248 | success 9, max_steps 1 |
+| LIBERO 10 | pb5-A | 5 / 10 | – | – | 56 (6 ep) | 345 | max_steps 5, success 5 |
+| LIBERO 10 | pb5-B | 7 / 10 | – | – | 12 (3 ep) | 286 | success 7, max_steps 3 |
+| LIBERO 10 | pb5-C | 5 / 10 | – | – | 15 (4 ep) | 344 | success 5, max_steps 5 |
+| LIBERO 10 | pb5-C repro | 5 / 10 | – | – | 15 (4 ep) | 344 | success 5, max_steps 5 |
+
+전이표 (같은 task · init · policy seed. official: T→T / T→F / F→T / F→F):
+
+| 집합 | 전이 | official | collided | safe_success |
+|---|---|---|---|---|
+| LI | vla_only → A | 2 / 9 / 2 / 7 | 8 / 10 / 1 / 1 | 1 / 1 / 2 / 16 |
+| LI | vla_only → B | 1 / 10 / 1 / 8 | 17 / 1 / 0 / 2 | 1 / 1 / 0 / 18 |
+| LI | vla_only → C | 1 / 10 / 0 / 9 | 10 / 8 / 1 / 1 | 1 / 1 / 0 / 18 |
+| LI | C → B | 1 / 0 / 1 / 18 | 10 / 1 / 7 / 2 | 1 / 0 / 0 / 19 |
+| LI | C → A | 1 / 0 / 3 / 16 | 8 / 3 / 1 / 8 | 1 / 0 / 2 / 17 |
+| LI | A → B | 1 / 3 / 1 / 15 | 8 / 1 / 9 / 2 | 1 / 2 / 0 / 17 |
+| LIBERO 10 | vla_only → A | 5 / 4 / 0 / 1 | – | – |
+| LIBERO 10 | vla_only → B | 7 / 2 / 0 / 1 | – | – |
+| LIBERO 10 | vla_only → C | 5 / 4 / 0 / 1 | – | – |
+| LIBERO 10 | vla_only → repro | 5 / 4 / 0 / 1 | – | – |
+| LIBERO 10 | C → B | 5 / 0 / 2 / 3 | – | – |
+| LIBERO 10 | C → A | 3 / 2 / 2 / 3 | – | – |
+| LIBERO 10 | A → B | 5 / 0 / 2 / 3 | – | – |
+| LIBERO 10 | C → repro | 5 / 0 / 0 / 5 | – | – |
+
+후보 규칙 (a) VLA-only official F→S, (b) VLA-only safe_success F→T 를 따로 센다. 표의 "충돌 → 무충돌" 은 VLA-only 에서 충돌했던 episode 가 그 변환에서 무충돌인 수다.
+
+| 집합 | 조건 | (a) official F→S | (b) safe_success F→T | 충돌 → 무충돌 | 무충돌 → 충돌 | official T→F (regression) |
+|---|---|---|---|---|---|---|
+| LI | pb5-A | 2 (t0e2, t0e3) | 2 (t0e3, t2e0; 그 중 VLA-only 충돌 t0e3, t2e0) | 10 (t0e0, t0e1, t0e3, t0e4, t2e0, t2e1, t2e2, t2e4, t3e2, t3e3; official success t0e3, t2e0) | 1 (t1e4) | 9 (t1e4, t2e1, t2e2, t2e3, t2e4, t3e0, t3e2, t3e3, t3e4) |
+| LI | pb5-B | 1 (t0e0) | 0 (–; 그 중 VLA-only 충돌 –) | 1 (t0e4; official success –) | 0 (–) | 10 (t1e4, t2e0, t2e1, t2e2, t2e3, t2e4, t3e0, t3e2, t3e3, t3e4) |
+| LI | pb5-C | 0 (–) | 0 (–; 그 중 VLA-only 충돌 –) | 8 (t0e0, t0e3, t0e4, t2e1, t2e2, t2e3, t2e4, t3e2; official success –) | 1 (t1e4) | 10 (t1e4, t2e0, t2e1, t2e2, t2e3, t2e4, t3e0, t3e2, t3e3, t3e4) |
+| LIBERO 10 | pb5-A | 0 (–) | – | – | – | 4 (t0e0, t4e0, t6e0, t9e0) |
+| LIBERO 10 | pb5-B | 0 (–) | – | – | – | 2 (t4e0, t9e0) |
+| LIBERO 10 | pb5-C | 0 (–) | – | – | – | 4 (t4e0, t7e0, t8e0, t9e0) |
+| LIBERO 10 | pb5-C repro | 0 (–) | – | – | – | 4 (t4e0, t7e0, t8e0, t9e0) |
+
+#### G2 — SL5h 서명: pb5 × 변환
+
+SL5h 의 정의와 script 를 그대로 재사용했다 (용어는 위 SL5h 절). 아래 "ref" 행은 SL5h 에서 복사한 SL5c A · B, pb1-B, SL5g pb5-C 로 **MI gate · arms · pb4/pb5 규칙이 없던 run** 이다.
+
+| 집합 | 조건 | official | over-lift episode / lifted episode | max rise 중앙값 (mm) | max rise 최대 (mm) | lifted 실행 any-axis sat | lifted 실행 z ≥ 0.999 | TO-unchanged row 의 sat / step | D\*_z 중앙값 (mm, clip 된 lifted call) | realised_obs 중앙값 (clip 된 call) | realised_model 중앙값 (lifted 전체) | closing·lifted 행 dz 위 / 아래 | closing·lifted 중 reach False | windup run: ≥3 (그 call 수) / ≥5 / 최장 | first stage: conv_on_to_row / conv_carry / unclipped |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| LI | VLA-only | 11 / 20 | 0 / 14 | 132.7 | 186.3 | 0 / 717 (0%) | 0 / 717 (0%) | – | – | – | – | – | – | – | – |
+| LI | pb5-A | 4 / 20 | 2 / 11 | 104.7 | 403.5 | 342 / 1250 (27%) | 147 / 1250 (12%) | 0 / 139 | 17.4 | 0.29 | 0.43 | 841 / 82 | 52 / 99 (53%) | 60 (539) / 39 / 36 | 1073 / 3 / 0 |
+| LI | pb5-B | 2 / 20 | 0 / 10 | 72.7 | 207.7 | 48 / 1166 (4%) | 18 / 1166 (2%) | 0 / 67 | 32.5 | 0.54 | 0.14 | 1009 / 344 | 59 / 144 (41%) | 35 (182) / 15 / 25 | 377 / 0 / 1 |
+| LI | pb5-C | 1 / 20 | 10 / 12 | 226.9 | 926.5 | 1158 / 1916 (60%) | 806 / 1916 (42%) | 0 / 389 | 18.7 | 0.83 | 0.55 | 1431 / 243 | 179 / 189 (95%) | 80 (447) / 33 / 29 | 2536 / 87 / 1 |
+| LIBERO 10 | VLA-only | 9 / 10 | 0 / 10 | 147.3 | 182.2 | 0 / 348 (0%) | 0 / 348 (0%) | – | – | – | – | – | – | – | – |
+| LIBERO 10 | pb5-A | 5 / 10 | 0 / 8 | 138.4 | 247.4 | 87 / 383 (23%) | 38 / 383 (10%) | 0 / 207 | 26.3 | -0.08 | 0.31 | 204 / 21 | 6 / 28 (21%) | 18 (100) / 10 / 10 | 174 / 4 / 0 |
+| LIBERO 10 | pb5-B | 7 / 10 | 0 / 9 | 136.7 | 193.0 | 7 / 315 (2%) | 0 / 315 (0%) | 0 / 214 | 22.1 | 0.22 | 0.13 | 137 / 10 | 7 / 19 (37%) | 3 (14) / 1 / 7 | 13 / 0 / 1 |
+| LIBERO 10 | pb5-C | 5 / 10 | 1 / 8 | 154.4 | 689.0 | 197 / 538 (37%) | 135 / 538 (25%) | 0 / 265 | 21.9 | 1.28 | 0.99 | 234 / 50 | 33 / 37 (89%) | 15 (77) / 6 / 10 | 376 / 15 / 0 |
+| LIBERO 10 | pb5-C repro | 5 / 10 | 1 / 8 | 154.4 | 689.0 | 197 / 538 (37%) | 135 / 538 (25%) | 0 / 265 | 21.9 | 1.28 | 0.99 | 234 / 50 | 33 / 37 (89%) | 15 (77) / 6 / 10 | 376 / 15 / 0 |
+| LI | SL5c A (ref) | 3 / 20 | 3 / – | – | – | 0.317 | 0.112 | – | 7.7 | 0.48 | – | 1139 / 588 | 181 / 182 | – | – |
+| LI | SL5c B (ref) | 3 / 20 | 0 / – | – | – | 0.064 | 0.021 | – | 30.9 | 0.21 | – | 2049 / 143 | 229 / 233 | – | – |
+| LI | SL5g pb5-C (ref) | 1 / 20 | 10 / – | – | – | 0.604 | 0.421 | – | 18.7 | 0.83 | – | 1431 / 243 | 179 / 189 | – | – |
+| LIBERO 10 | SL5c A (ref) | 2 / 10 | 0 / – | – | – | 0.391 | 0.155 | – | 17.3 | 0.20 | – | 410 / 58 | 51 / 51 | – | – |
+| LIBERO 10 | SL5c B (ref) | 3 / 10 | 0 / – | – | – | 0.044 | 0.012 | – | 21.8 | 0.22 | – | 830 / 122 | 104 / 106 | – | – |
+| LIBERO 10 | pb1-B (ref) | 7 / 10 | 0 / – | – | – | 0.036 | 0.000 | – | 18.9 | 0.16 | – | 162 / 15 | 18 / 21 | – | – |
+| LIBERO 10 | SL5g pb5-C (ref) | 5 / 10 | 1 / – | – | – | 0.366 | 0.251 | – | 21.9 | 1.28 | – | 234 / 50 | 33 / 37 | – | – |
+
+over-lift episode: LI pb5-A t1e4, t2e1; LI pb5-B 없음; LI pb5-C t0e0, t0e1, t0e3, t1e2, t1e3, t1e4, t2e0, t2e1, t2e2, t2e4; LIBERO 10 pb5-A 없음; LIBERO 10 pb5-B 없음; LIBERO 10 pb5-C t5e0; LIBERO 10 pb5-repro t5e0.
+
+실행 포화가 TO-unchanged row 에서 나온 step 은 A · B · C · repro 모두 0 이고, MI gate 가 통과된 lifted call 의 response sat row 는 pb5-A 0 (21 call) · pb5-B 0 (9 call) · pb5-C 0 (61 call) (LI) 이다.
+
+| 조건 | z 기여 합: TO-changed lifted call (n / mm) | TO-unchanged lifted call (n / mm) | 실행 z 포화 step 의 VLA 원본 z 부호 pos / neg / near0 |
+|---|---|---|---|
+| LI pb5-A | 219 / -2296.1 | 26 / -6.2 | 85 / 49 / 13 |
+| LI pb5-B | 218 / 14891.4 | 10 / 22.9 | 2 / 14 / 2 |
+| LI pb5-C | 302 / 3662.2 | 75 / -872.1 | 506 / 229 / 71 |
+| LIBERO 10 pb5-A | 36 / -142.0 | 39 / -101.6 | 28 / 10 / 0 |
+| LIBERO 10 pb5-B | 21 / 144.5 | 40 / -138.0 | 0 / 0 / 0 |
+| LIBERO 10 pb5-C | 55 / 1331.5 | 50 / -280.9 | 44 / 69 / 22 |
+| LIBERO 10 pb5-repro | 55 / 1331.5 | 50 / -280.9 | 44 / 69 / 22 |
+
+z 기여 = lifted call 마다 `eef_obs_z(o+5) − FK_z(joint_reference[k,4])` 의 합 (SL5h 정의).
+
+#### G3 — 실패 원인 분류 (SL5g #3 의 A / B / C / D)
+
+VLA-only 성공 → pb5 실패 episode 에 같은 규칙(lift = 두 손가락 접촉 + rise ≥ 30 mm, lost = lifted 뒤 ≥ 10 obs 연속 grasp 없음, over-lift > 250 mm, HOLD 연속 ≥ 5 call)을 적용했다. pb5-C 는 SL5g 의 `failure_classes.json` pb5 와 일치한다 (LI True, LIBERO 10 True).
+
+| 집합 | 조건 | A_no_lift_hold | A_no_lift_other | B_lifted_lost | C_lifted_overlift | D_lifted_other | 실패 episode 수 |
+|---|---|---|---|---|---|---|---|
+| LI | pb5-A | 3 | 1 | 0 | 2 | 3 | 9 |
+| LI | pb5-B | 2 | 1 | 2 | 0 | 5 | 10 |
+| LI | pb5-C | 1 | 3 | 2 | 4 | 0 | 10 |
+| LIBERO 10 | pb5-A | 1 | 1 | 1 | 0 | 1 | 4 |
+| LIBERO 10 | pb5-B | 1 | 0 | 0 | 0 | 1 | 2 |
+| LIBERO 10 | pb5-C | 1 | 1 | 1 | 0 | 1 | 4 |
+| 합계 | pb5-A | 4 | 2 | 1 | 2 | 4 | 13 |
+| 합계 | pb5-B | 3 | 1 | 2 | 0 | 6 | 12 |
+| 합계 | pb5-C | 2 | 4 | 3 | 4 | 1 | 14 |
+
+episode 별 (분류 / 최고 rise mm / 충돌):
+
+| 집합 | ep | VLA-only max rise (mm) | pb5-A | pb5-B | pb5-C |
+|---|---|---|---|---|---|
+| LI | t1e4 | 165.4 | C_lifted_overlift / 403.5 / True | B_lifted_lost / 173.6 / False | C_lifted_overlift / 296.4 / True |
+| LI | t2e0 | 174.7 | success / 241.0 / False | D_lifted_other / 186.0 / True | C_lifted_overlift / 926.5 / True |
+| LI | t2e1 | 156.2 | C_lifted_overlift / 250.6 / False | D_lifted_other / 193.7 / True | B_lifted_lost / 350.3 / False |
+| LI | t2e2 | 172.1 | D_lifted_other / 136.3 / False | D_lifted_other / 204.5 / True | C_lifted_overlift / 454.3 / False |
+| LI | t2e3 | 160.9 | D_lifted_other / 157.8 / True | D_lifted_other / 182.3 / True | B_lifted_lost / 144.9 / False |
+| LI | t2e4 | 186.3 | D_lifted_other / 212.9 / False | D_lifted_other / 207.7 / True | C_lifted_overlift / 531.3 / False |
+| LI | t3e0 | 126.8 | A_no_lift_hold / 7.9 / True | A_no_lift_hold / 14.7 / True | A_no_lift_hold / 0.0 / True |
+| LI | t3e2 | 105.0 | A_no_lift_hold / 0.0 / False | A_no_lift_other / 28.1 / True | A_no_lift_other / 4.5 / False |
+| LI | t3e3 | 138.5 | A_no_lift_other / 8.6 / False | A_no_lift_hold / 26.8 / True | A_no_lift_other / 0.0 / True |
+| LI | t3e4 | 99.8 | A_no_lift_hold / 0.0 / True | B_lifted_lost / 129.0 / True | A_no_lift_other / 0.0 / True |
+| LIBERO 10 | t0e0 | 98.3 | B_lifted_lost / 96.6 / – | success / 101.9 / – | success / 96.6 / – |
+| LIBERO 10 | t4e0 | 159.9 | A_no_lift_hold / 13.1 / – | A_no_lift_hold / 12.8 / – | A_no_lift_hold / 0.0 / – |
+| LIBERO 10 | t6e0 | 145.0 | D_lifted_other / 247.4 / – | success / 145.0 / – | success / 159.2 / – |
+| LIBERO 10 | t7e0 | 182.2 | success / 181.3 / – | success / 193.0 / – | D_lifted_other / 243.4 / – |
+| LIBERO 10 | t8e0 | 123.1 | success / 125.7 / – | success / 120.4 / – | B_lifted_lost / 237.3 / – |
+| LIBERO 10 | t9e0 | 103.8 | A_no_lift_other / 7.6 / – | D_lifted_other / 116.9 / – | A_no_lift_other / 18.0 / – |
+
+"success" 는 그 변환에서 official success 인 episode (VLA-only 성공 → 실패 집합에서 그 변환만 성공한 경우)다.
+
+#### G4 — 사례: LI t0e0 (pb5-C 는 over-lift 로 실패, pb5-B 는 성공, VLA-only 는 실패)
+
+조건 (i) pb5-C 가 over-lift 로 실패하고 pb5-B 가 성공한 episode: 1 건 (LI|t0e0). 조건 (ii) VLA-only 가 실패하고 pb5-B 가 성공한 episode: 1 건 (LI|t0e0). 같은 episode 하나가 두 조건을 만족해 사례 묶음은 1 개다. 묶음 위치 `outputs/verify/SL5h-G/cases/LI_t0e0_pb5_C_vs_B/` (`case.json`, calls csv, frame).
+
+![SL5h-G C vs B scene](figures/sl5h-g-scene-C-vs-B.png)
+
+| 조건 | official | collided | safe_success | max rise (mm) | rise 최고 obs | 첫 lifted obs | HOLD calls | lifted 실행 any-axis sat / lifted step |
+|---|---|---|---|---|---|---|---|---|
+| VLA-only | False | True | False | 8.1 | 250 | – | 0 | 0 / 0 |
+| pb5-A | False | False | False | 99.2 | 131 | – | 12 | 0 / 0 |
+| pb5-B | True | True | False | 113.7 | 150 | 136 | 9 | 0 / 23 |
+| pb5-C | False | False | False | 515.6 | 178 | 88 | 0 | 144 / 158 |
+
+B 와 갈라지는 시점: VLA-only · pb5-A · pb5-C 모두 env step 30 (B 의 call 2). figure 아래 줄은 LI t2e4(SL5h 의 대표 episode) 의 같은 조건 frame 이다: pb5-C 는 rise 531 mm(`lifted exec sat` 121/177), pb5-B 는 rise 208 mm, pb5-A 는 rise 213 mm.
+
+#### dirty = True run 3 개와 그 원인
+
+repro 를 뺀 SL5h-G 신규 run 4 개 중 3 개(pb5-B LI · pb5-A LI · pb5-A LIBERO 10)의 manifest 가 `dirty = True` 이다. 원인은 모두 같다: **untracked 파일 `AG3S/ag3s/docs/handoff/SL5h-G.task.md` 하나**이고 `source_diff` 는 비어 있다 (코드 변경 없음). 나머지 1 개(pb5-B LIBERO 10)는 `dirty = false` 이다.
+
+| run | dirty 원인 (verify.json `other_runs_dirty_reason`) |
+|---|---|
+| `20261020T035642_743a1e76874d_sl5h-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-B` | untracked AG3S/ag3s/docs/handoff/SL5h-G.task.md only (source_diff empty) |
+| `20261020T035857_743a1e76874d_sl5h-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-A` | untracked AG3S/ag3s/docs/handoff/SL5h-G.task.md only (source_diff empty) |
+| `20261020T043947_743a1e76874d_sl5h-libero10-init0-vla_v11ab-V11AB-pb5-A` | untracked AG3S/ag3s/docs/handoff/SL5h-G.task.md only (source_diff empty) |
+| `20261020T034555_743a1e76874d_sl5h-libero10-init0-vla_v11ab-V11AB-pb5-B` | dirty false |
+
+repro 와 SL5g pb5-C 의 manifest 는 둘 다 `dirty = false` 이다 (G0 표).
+
+#### 가설 H1 ~ H3 별 숫자 (판정 없음)
+
+verify.json `hypotheses_numbers` 의 `support` · `against` 구분을 옮긴다. 이 구분은 verifier 의 분류이고 이 로그의 판정이 아니다. H4(VLA reference 포화) 는 이 STEP 의 측정에 없다 (VLA 원본 any-axis 포화 lifted step 은 pb5-A · B · C 모두 0 이다: H2 의 표).
+
+**H1. 포화는 역변환 C 의 windup 에서 생긴다**
+
+| 지표 | pb5-A | pb5-B | pb5-C |
+|---|---|---|---|
+| lifted 실행 any-axis sat 비율 (LI) | 342 / 1250 (0.274) | 48 / 1166 (0.041) | 1158 / 1916 (0.604) |
+| lifted 실행 any-axis sat 비율 (LIBERO 10) | 87 / 383 (0.227) | 7 / 315 (0.022) | 197 / 538 (0.366) |
+| lifted 실행 z ≥ 0.999 비율 (LI) | 0.1176 | 0.0154 | 0.4207 |
+| lifted 실행 z ≥ 0.999 비율 (LIBERO 10) | 0.0992 | 0.0000 | 0.2509 |
+| over-lift episode (LI n=20) | 2 | 0 | 10 |
+| over-lift episode (LIBERO 10 n=10) | 0 | 0 | 1 |
+| realised_frac_obs 중앙값 (LI, clip 된 lifted call) | 0.290 | 0.535 | 0.826 |
+| realised_frac_obs 중앙값 (LIBERO 10) | -0.075 | 0.224 | 1.285 |
+| windup run ≥ 3 call: run 수 (그 안 call 수) (LI) | 60 (539) | 35 (182) | 80 (447) |
+| conversion clip 이 있는 lifted call / lifted call (LI) | 214 / 247 | 114 / 228 | 294 / 377 |
+| VLA-only 성공 → 실패 중 class C_lifted_overlift (두 집합 합) | 2 | 0 | 4 |
+
+against 로 분류된 숫자:
+
+| 지표 | pb5-A | pb5-B | pb5-C |
+|---|---|---|---|
+| official (LI n=20) | 4 | 2 | 1 |
+| official (LIBERO 10 n=10) | 5 | 7 | 5 |
+| collided (LI), VLA-only 는 18 | 9 | 17 | 11 |
+| official T→F regression (LI) | 9 | 10 | 10 |
+| official T→F regression (LIBERO 10) | 4 | 2 | 4 |
+
+- pb5-B(변환 C 없음)의 lifted 실행 any-axis sat step: LI 48, LIBERO 10 7 (0 이 아니다). pb5-B 의 windup run(≥ 3 call): LI 35, LIBERO 10 3.
+- 변환 A(`lag_inverse`) over-lift: LI 2, LIBERO 10 0. conv_carry row / 포화 response row (lifted, pb5-C LI): 87 / 2624.
+
+**H2. 포화는 TO 수정에서 생긴다**
+
+| 지표 | pb5-A | pb5-B | pb5-C |
+|---|---|---|---|
+| TO-unchanged row 의 lifted step 중 포화 / step (LI) | 0 / 139 | 0 / 67 | 0 / 389 |
+| TO-unchanged row 의 lifted step 중 포화 / step (LIBERO 10) | 0 / 207 | 0 / 214 | 0 / 265 |
+| TO 가 안 바꿨는데 clip 된 call (LI) | 0 | 0 | 0 |
+| TO 가 안 바꿨는데 clip 된 call (LIBERO 10) | 0 | 0 | 0 |
+| MI gate 통과 lifted call 의 response sat row / call (LI) | 0 / 21 | 0 / 9 | 0 / 61 |
+| VLA 원본 any-axis sat lifted step (LI) | 0 | 0 | 0 |
+| VLA 원본 any-axis sat lifted step (LIBERO 10) | 0 | 0 | 0 |
+| z 기여 합 TO-changed / unchanged, mm (LI) | -2296.1 / -6.2 | 14891.4 / 22.9 | 3662.2 / -872.1 |
+
+against 로 분류된 숫자:
+
+| 지표 | pb5-A | pb5-B | pb5-C |
+|---|---|---|---|
+| D\*_z 중앙값 mm (LI) | 17.4 | 32.5 | 18.7 |
+| D\*_z 중앙값 mm (LIBERO 10) | 26.3 | 22.1 | 21.9 |
+
+- 같은 pb5 TO 규칙에서 B 대 C: lifted 실행 any-axis sat 비율 LI 0.0412 대 0.6044, LIBERO 10 0.0222 대 0.3662; over-lift LI 0 대 10, LIBERO 10 0 대 1.
+
+**H3. latch 가 reach check 에서 막혀 held 로 못 가고, 쥔 bowl 이 제약으로 남아 hand 를 밀어 올린다**
+
+| 지표 | pb5-A | pb5-B | pb5-C |
+|---|---|---|---|
+| closing·lifted 중 reach False / call (LI) | 52 / 99 | 59 / 144 | 179 / 189 |
+| closing·lifted 중 reach False / call (LIBERO 10) | 6 / 28 | 7 / 19 | 33 / 37 |
+| closing·lifted 의 TO 행 dz 위 / 아래 (LI) | 841 / 82 | 1009 / 344 | 1431 / 243 |
+| closing·lifted 의 TO 행 dz 위 / 아래 (LIBERO 10) | 204 / 21 | 137 / 10 | 234 / 50 |
+| reference clearance < 0 / 최적화 / MuJoCo neither within 30 mm, call (LI) | 90 / 96 / 90 | 136 / 143 / 82 | 150 / 180 / 175 |
+| lifted call 의 latch (LI) | held 146, closing 99, latched 2 | closing 144, held 63, placed 17, latched 3, searching 1 | closing 189, held 179, searching 3, latched 2, placed 4 |
+
+against 로 분류된 숫자:
+
+- pb5-B (LI): closing·lifted TO 행 dz 위 / 아래 1009 / 344, reach False / call 59 / 144, over-lift episode 0.
+- closing·lifted 중 reach False 비율 (LI) pb5-A / B / C = 0.525 / 0.410 / 0.947.
+
+#### 측정하지 않은 것
+
+- LI 의 repro: 병렬 재실행은 LIBERO 10 의 pb5-C 한 집합만 했다.
+- pb5-A · pb5-B 의 bit 재현: 각각 한 번만 돌렸고 직렬 쌍둥이 run 이 없다.
+- cuRobo regression baseline: GPU 금지.
+- TO row 의 constraint 대상(어느 ESDF · attached 물체에 binding 인지): calls log 는 count 만 남긴다 (SL5h 와 같다).
+
+**판정 대기 (사용자).** 변환 A / B / C 의 차이에 대한 원인 판정과 다음 수정 방향은 사용자 판정 전이다. 위는 가설별 숫자만 남긴 것이다.
