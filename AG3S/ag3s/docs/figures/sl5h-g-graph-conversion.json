@@ -1,0 +1,455 @@
+{
+ "doc": "SL5h-G figure 2 — graphs per pb5 x conversion (A / B / C), with VLA-only and the parallel repro of pb5-C.\n\n(a) official / collided / safe_success per version (LI dev 20, LIBERO 10 init0 10)\n(b) over-lift episodes (max target rise > 250 mm) and lifted-step executed saturation share (any arm axis, z)\n(c) TO requested D*_z median (lifted clipped calls) and realised fraction medians (observed on clipped lifted calls; model on all lifted calls)\n(d) closing+lifted calls: TO row z-up share (up / (up + down)) and reach=False share\n(e) LI t0e0 (G4 case) target rise per observation for the four conditions\n(f) per-episode max target rise, pb5-C vs pb5-B (both sets), 250 mm lines\nNumbers: outputs/verify/SL5h-G/g1_aggregate.json, g2_signature.json, probe/mj_LI_*.json.\n",
+ "panels": {
+  "a": {
+   "official": {
+    "LI|vla_only": [
+     11,
+     20
+    ],
+    "LI|A": [
+     4,
+     20
+    ],
+    "LI|B": [
+     2,
+     20
+    ],
+    "LI|C": [
+     1,
+     20
+    ],
+    "LIBERO10|vla_only": [
+     9,
+     10
+    ],
+    "LIBERO10|A": [
+     5,
+     10
+    ],
+    "LIBERO10|B": [
+     7,
+     10
+    ],
+    "LIBERO10|C": [
+     5,
+     10
+    ],
+    "LIBERO10|repro": [
+     5,
+     10
+    ]
+   },
+   "collided": {
+    "LI|vla_only": [
+     18,
+     20
+    ],
+    "LI|A": [
+     9,
+     20
+    ],
+    "LI|B": [
+     17,
+     20
+    ],
+    "LI|C": [
+     11,
+     20
+    ],
+    "LIBERO10|vla_only": [
+     null,
+     10
+    ],
+    "LIBERO10|A": [
+     null,
+     10
+    ],
+    "LIBERO10|B": [
+     null,
+     10
+    ],
+    "LIBERO10|C": [
+     null,
+     10
+    ],
+    "LIBERO10|repro": [
+     null,
+     10
+    ]
+   },
+   "safe_success": {
+    "LI|vla_only": [
+     2,
+     20
+    ],
+    "LI|A": [
+     3,
+     20
+    ],
+    "LI|B": [
+     1,
+     20
+    ],
+    "LI|C": [
+     1,
+     20
+    ],
+    "LIBERO10|vla_only": [
+     null,
+     10
+    ],
+    "LIBERO10|A": [
+     null,
+     10
+    ],
+    "LIBERO10|B": [
+     null,
+     10
+    ],
+    "LIBERO10|C": [
+     null,
+     10
+    ],
+    "LIBERO10|repro": [
+     null,
+     10
+    ]
+   }
+  },
+  "b": {
+   "LI|vla_only": {
+    "overlift": 0,
+    "sat_share": 0.0,
+    "z_share": 0.0
+   },
+   "LI|A": {
+    "overlift": 2,
+    "sat_share": 0.2736,
+    "z_share": 0.1176
+   },
+   "LI|B": {
+    "overlift": 0,
+    "sat_share": 0.0412,
+    "z_share": 0.0154
+   },
+   "LI|C": {
+    "overlift": 10,
+    "sat_share": 0.6044,
+    "z_share": 0.4207
+   },
+   "LIBERO10|vla_only": {
+    "overlift": 0,
+    "sat_share": 0.0,
+    "z_share": 0.0
+   },
+   "LIBERO10|A": {
+    "overlift": 0,
+    "sat_share": 0.2272,
+    "z_share": 0.0992
+   },
+   "LIBERO10|B": {
+    "overlift": 0,
+    "sat_share": 0.0222,
+    "z_share": 0.0
+   },
+   "LIBERO10|C": {
+    "overlift": 1,
+    "sat_share": 0.3662,
+    "z_share": 0.2509
+   },
+   "LIBERO10|repro": {
+    "overlift": 1,
+    "sat_share": 0.3662,
+    "z_share": 0.2509
+   }
+  },
+  "c": {
+   "LI|A": {
+    "Dstar_z_median": 17.377667533955865,
+    "n": 214,
+    "realised_obs_median": 0.29022995063019774,
+    "realised_model_median": 0.43231324212113
+   },
+   "LI|B": {
+    "Dstar_z_median": 32.47566084074856,
+    "n": 114,
+    "realised_obs_median": 0.5354152349953997,
+    "realised_model_median": 0.13721407883184136
+   },
+   "LI|C": {
+    "Dstar_z_median": 18.70930341712493,
+    "n": 294,
+    "realised_obs_median": 0.8264789863691886,
+    "realised_model_median": 0.5475915776853981
+   },
+   "LIBERO10|A": {
+    "Dstar_z_median": 26.288984648906776,
+    "n": 33,
+    "realised_obs_median": -0.07518719392829186,
+    "realised_model_median": 0.3113149028733308
+   },
+   "LIBERO10|B": {
+    "Dstar_z_median": 22.101994007664917,
+    "n": 8,
+    "realised_obs_median": 0.22365055465349762,
+    "realised_model_median": 0.13119943950455507
+   },
+   "LIBERO10|C": {
+    "Dstar_z_median": 21.85407302046595,
+    "n": 47,
+    "realised_obs_median": 1.284552210306714,
+    "realised_model_median": 0.9853313413173512
+   },
+   "LIBERO10|repro": {
+    "Dstar_z_median": 21.85407302046595,
+    "n": 47,
+    "realised_obs_median": 1.284552210306714,
+    "realised_model_median": 0.9853313413173512
+   }
+  },
+  "d": {
+   "LI|A": {
+    "rows_up_share": 0.9112,
+    "reach_false_share": 0.5253
+   },
+   "LI|B": {
+    "rows_up_share": 0.7458,
+    "reach_false_share": 0.4097
+   },
+   "LI|C": {
+    "rows_up_share": 0.8548,
+    "reach_false_share": 0.9471
+   },
+   "LIBERO10|A": {
+    "rows_up_share": 0.9067,
+    "reach_false_share": 0.2143
+   },
+   "LIBERO10|B": {
+    "rows_up_share": 0.932,
+    "reach_false_share": 0.3684
+   },
+   "LIBERO10|C": {
+    "rows_up_share": 0.8239,
+    "reach_false_share": 0.8919
+   },
+   "LIBERO10|repro": {
+    "rows_up_share": 0.8239,
+    "reach_false_share": 0.8919
+   }
+  },
+  "e": {
+   "vla_only": {
+    "max_rise_mm": 8.1,
+    "obs_max": 250,
+    "n_lifted_obs": 0
+   },
+   "A": {
+    "max_rise_mm": 99.2,
+    "obs_max": 131,
+    "n_lifted_obs": 0
+   },
+   "B": {
+    "max_rise_mm": 113.7,
+    "obs_max": 150,
+    "n_lifted_obs": 23
+   },
+   "C": {
+    "max_rise_mm": 515.6,
+    "obs_max": 178,
+    "n_lifted_obs": 159
+   }
+  },
+  "f": {
+   "LI": {
+    "t0e0": {
+     "C": 515.6,
+     "B": 113.7,
+     "C_official": false,
+     "B_official": true
+    },
+    "t0e1": {
+     "C": 585.3,
+     "B": 8.8,
+     "C_official": false,
+     "B_official": false
+    },
+    "t0e2": {
+     "C": 13.6,
+     "B": 18.0,
+     "C_official": false,
+     "B_official": false
+    },
+    "t0e3": {
+     "C": 320.7,
+     "B": 31.6,
+     "C_official": false,
+     "B_official": false
+    },
+    "t0e4": {
+     "C": 0.0,
+     "B": 0.0,
+     "C_official": false,
+     "B_official": false
+    },
+    "t1e0": {
+     "C": 10.0,
+     "B": 0.0,
+     "C_official": false,
+     "B_official": false
+    },
+    "t1e1": {
+     "C": 157.4,
+     "B": 158.7,
+     "C_official": true,
+     "B_official": true
+    },
+    "t1e2": {
+     "C": 738.3,
+     "B": 0.0,
+     "C_official": false,
+     "B_official": false
+    },
+    "t1e3": {
+     "C": 353.4,
+     "B": 160.7,
+     "C_official": false,
+     "B_official": false
+    },
+    "t1e4": {
+     "C": 296.4,
+     "B": 173.6,
+     "C_official": false,
+     "B_official": false
+    },
+    "t2e0": {
+     "C": 926.5,
+     "B": 186.0,
+     "C_official": false,
+     "B_official": false
+    },
+    "t2e1": {
+     "C": 350.3,
+     "B": 193.7,
+     "C_official": false,
+     "B_official": false
+    },
+    "t2e2": {
+     "C": 454.3,
+     "B": 204.5,
+     "C_official": false,
+     "B_official": false
+    },
+    "t2e3": {
+     "C": 144.9,
+     "B": 182.3,
+     "C_official": false,
+     "B_official": false
+    },
+    "t2e4": {
+     "C": 531.3,
+     "B": 207.7,
+     "C_official": false,
+     "B_official": false
+    },
+    "t3e0": {
+     "C": 0.0,
+     "B": 14.7,
+     "C_official": false,
+     "B_official": false
+    },
+    "t3e1": {
+     "C": 2.3,
+     "B": 15.0,
+     "C_official": false,
+     "B_official": false
+    },
+    "t3e2": {
+     "C": 4.5,
+     "B": 28.1,
+     "C_official": false,
+     "B_official": false
+    },
+    "t3e3": {
+     "C": 0.0,
+     "B": 26.8,
+     "C_official": false,
+     "B_official": false
+    },
+    "t3e4": {
+     "C": 0.0,
+     "B": 129.0,
+     "C_official": false,
+     "B_official": false
+    }
+   },
+   "LIBERO10": {
+    "t0e0": {
+     "C": 96.6,
+     "B": 101.9,
+     "C_official": true,
+     "B_official": true
+    },
+    "t1e0": {
+     "C": 179.0,
+     "B": 163.2,
+     "C_official": true,
+     "B_official": true
+    },
+    "t2e0": {
+     "C": 149.6,
+     "B": 149.6,
+     "C_official": true,
+     "B_official": true
+    },
+    "t3e0": {
+     "C": 127.3,
+     "B": 128.3,
+     "C_official": true,
+     "B_official": true
+    },
+    "t4e0": {
+     "C": 0.0,
+     "B": 12.8,
+     "C_official": false,
+     "B_official": false
+    },
+    "t5e0": {
+     "C": 689.0,
+     "B": 153.0,
+     "C_official": false,
+     "B_official": false
+    },
+    "t6e0": {
+     "C": 159.2,
+     "B": 145.0,
+     "C_official": true,
+     "B_official": true
+    },
+    "t7e0": {
+     "C": 243.4,
+     "B": 193.0,
+     "C_official": false,
+     "B_official": true
+    },
+    "t8e0": {
+     "C": 237.3,
+     "B": 120.4,
+     "C_official": false,
+     "B_official": true
+    },
+    "t9e0": {
+     "C": 18.0,
+     "B": 116.9,
+     "C_official": false,
+     "B_official": false
+    }
+   }
+  }
+ },
+ "source": [
+  "outputs/verify/SL5h-G/g1_aggregate.json",
+  "outputs/verify/SL5h-G/g2_signature.json",
+  "outputs/verify/SL5h-G/probe/mj_LI_*.json"
+ ]
+}
