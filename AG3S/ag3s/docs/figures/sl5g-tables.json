@@ -1,0 +1,386 @@
+{
+ "transitions": {
+  "header": [
+   "version",
+   "LI off S→S",
+   "S→F",
+   "F→S",
+   "F→F",
+   "LI col T→F",
+   "F→T",
+   "LI safe F→T",
+   "rule a",
+   "rule b",
+   "L10 off S→S",
+   "S→F",
+   "F→S",
+   "F→F",
+   "rule a"
+  ],
+  "rows": [
+   [
+    "pb3",
+    0,
+    11,
+    0,
+    9,
+    11,
+    1,
+    0,
+    0,
+    0,
+    4,
+    5,
+    0,
+    1,
+    0
+   ],
+   [
+    "pb4 (초기)",
+    0,
+    11,
+    0,
+    9,
+    12,
+    1,
+    0,
+    0,
+    0,
+    4,
+    5,
+    0,
+    1,
+    0
+   ],
+   [
+    "pb5 (초기)",
+    1,
+    10,
+    1,
+    8,
+    10,
+    1,
+    1,
+    1,
+    1,
+    3,
+    6,
+    0,
+    1,
+    0
+   ],
+   [
+    "pb4",
+    0,
+    11,
+    0,
+    9,
+    12,
+    1,
+    0,
+    0,
+    0,
+    3,
+    6,
+    0,
+    1,
+    0
+   ],
+   [
+    "pb5",
+    1,
+    10,
+    0,
+    9,
+    8,
+    1,
+    0,
+    0,
+    0,
+    5,
+    4,
+    0,
+    1,
+    0
+   ],
+   [
+    "pb4(i)→pb4",
+    0,
+    0,
+    0,
+    20,
+    0,
+    0,
+    0,
+    "",
+    "",
+    3,
+    1,
+    0,
+    6,
+    ""
+   ],
+   [
+    "pb5(i)→pb5",
+    1,
+    1,
+    0,
+    18,
+    1,
+    3,
+    0,
+    "",
+    "",
+    3,
+    0,
+    2,
+    5,
+    ""
+   ],
+   [
+    "pb4→pb5",
+    0,
+    0,
+    1,
+    19,
+    0,
+    4,
+    1,
+    "",
+    "",
+    3,
+    0,
+    2,
+    5,
+    ""
+   ]
+  ]
+ },
+ "failure_classes": {
+  "header": [
+   "class",
+   "기준",
+   "LI pb4",
+   "LI pb5",
+   "L10 pb4",
+   "L10 pb5",
+   "total"
+  ],
+  "rows": [
+   [
+    "A_no_lift_hold",
+    "lift 없음, 최장 HOLD 연속 ≥ 5 call",
+    2,
+    1,
+    1,
+    1,
+    5
+   ],
+   [
+    "A_no_lift_other",
+    "lift 없음, 최장 HOLD 연속 < 5 call",
+    4,
+    3,
+    1,
+    1,
+    9
+   ],
+   [
+    "B_lifted_lost",
+    "lift 뒤 ≥ 10 obs 연속 미파지·rise < 30 mm",
+    0,
+    2,
+    1,
+    1,
+    4
+   ],
+   [
+    "C_lifted_overlift",
+    "lift, 놓치지 않음, 최고 rise > 250 mm",
+    5,
+    4,
+    2,
+    0,
+    11
+   ],
+   [
+    "D_lifted_other",
+    "lift, 놓치지 않음, 최고 rise ≤ 250 mm",
+    0,
+    0,
+    1,
+    1,
+    2
+   ],
+   [
+    "n (VLA-only S → pb F)",
+    "",
+    11,
+    10,
+    6,
+    4,
+    31
+   ]
+  ],
+  "criteria": {
+   "LIFT_MM": 30.0,
+   "LOST_RUN_obs": 10,
+   "OVERLIFT_MM": 250.0,
+   "N_HOLD_calls": 5,
+   "doc": "SL5g #3 — failure-cause classification of VLA-only success -> pb4/pb5 failure episodes (CPU, .venv-ag3s).\n\nInputs: failure_logs.json, mj_probe_LI.json, mj_probe_LIBERO10.json (object tracks), episode npz small arrays, calls logs.\nOutput: outputs/verify/SL5g/failure_classes.json\n\nNumeric criteria (obs = observation index incl. wait; LI wait 20, LIBERO10 wait 10):\n  grasped(obs)  = both finger sides touch the target body (MuJoCo contact, dist <= 0)\n  lifted(obs)   = grasped and target z - z(wait) >= LIFT_MM\n  lost          = after the first lifted obs, >= LOST_RUN consecutive obs with no grasp and rise < LIFT_MM\n  over-lift     = max target rise > OVERLIFT_MM (VLA-only success episodes, both sets: max rise <= 186.3 mm)\nClasses (first match wins):\n  A_no_lift_hold     : never lifted, and longest HOLD run >= N_HOLD calls\n  A_no_lift_other    : never lifted, longest HOLD run < N_HOLD\n  B_lifted_lost      : lifted, lost\n  C_lifted_overlift  : lifted, not lost, max rise > OVERLIFT_MM\n  D_lifted_other     : lifted, not lost, max rise <= OVERLIFT_MM\n"
+  }
+ },
+ "nearest_by_latch": {
+  "header": [
+   "latch",
+   "가장 가까운 물체 (gripper geom, 30 mm 안)",
+   "L10 pb2-C (SL5e)",
+   "L10 pb4",
+   "L10 pb5",
+   "LI pb4",
+   "LI pb5"
+  ],
+  "rows": [
+   [
+    "latched",
+    "obstacle",
+    0,
+    0,
+    0,
+    65,
+    67
+   ],
+   [
+    "latched",
+    "target bowl",
+    6,
+    13,
+    10,
+    36,
+    38
+   ],
+   [
+    "latched",
+    "other object (cabinet/plate/…)",
+    21,
+    12,
+    12,
+    19,
+    22
+   ],
+   [
+    "latched",
+    "nothing ≤30 mm",
+    1,
+    2,
+    2,
+    21,
+    20
+   ],
+   [
+    "latched",
+    "table",
+    0,
+    0,
+    0,
+    18,
+    12
+   ],
+   [
+    "closing",
+    "target bowl",
+    17,
+    77,
+    32,
+    162,
+    184
+   ],
+   [
+    "closing",
+    "nothing ≤30 mm",
+    0,
+    3,
+    3,
+    47,
+    49
+   ],
+   [
+    "closing",
+    "table",
+    24,
+    0,
+    0,
+    6,
+    7
+   ],
+   [
+    "closing",
+    "other object (cabinet/plate/…)",
+    0,
+    5,
+    5,
+    18,
+    9
+   ],
+   [
+    "closing",
+    "obstacle",
+    0,
+    0,
+    0,
+    12,
+    8
+   ],
+   [
+    "held",
+    "target bowl",
+    34,
+    19,
+    31,
+    108,
+    114
+   ],
+   [
+    "held",
+    "other object (cabinet/plate/…)",
+    0,
+    1,
+    0,
+    9,
+    0
+   ],
+   [
+    "held",
+    "table",
+    0,
+    1,
+    1,
+    4,
+    0
+   ],
+   [
+    "held",
+    "nothing ≤30 mm",
+    0,
+    0,
+    1,
+    0,
+    1
+   ],
+   [
+    "calls",
+    "reference 위반으로 최적화된 latched/closing/held call 수",
+    103,
+    133,
+    97,
+    525,
+    531
+   ]
+  ],
+  "category_rule": "target bowl / obstacle (name contains 'obstacle') / table / other object / nothing"
+ },
+ "source": [
+  "outputs/verify/SL5g/numbers.json",
+  "AG3S/ag3s/docs/handoff/SL5e-pb3.verify.json"
+ ]
+}

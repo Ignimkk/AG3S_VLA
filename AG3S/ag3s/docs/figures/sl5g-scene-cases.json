@@ -1,0 +1,343 @@
+{
+ "panels": [
+  {
+   "case": "regression_LI_t2e4_pb5",
+   "cond": "vla_only",
+   "label": "div",
+   "obs": 35,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/regression_LI_t2e4_pb5/frame_vla_only_div_obs035.png",
+   "target_uv": [
+    91.36680059002728,
+    115.60418226501704
+   ]
+  },
+  {
+   "case": "regression_LI_t2e4_pb5",
+   "cond": "vla_only",
+   "label": "collision",
+   "obs": 45,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/regression_LI_t2e4_pb5/frame_vla_only_collision_obs045.png",
+   "target_uv": [
+    91.36680059002728,
+    115.60418226501704
+   ],
+   "nearest": {
+    "robot": "gripper0_right_gripper",
+    "object": "red_coffee_mug_obstacle_1_main",
+    "dist_mm": -9.4,
+    "uv": [
+     121.05791382829398,
+     95.97132873708617
+    ],
+    "world": [
+     -0.24371553580563377,
+     -0.022338060302809284,
+     1.022203032448071
+    ]
+   }
+  },
+  {
+   "case": "regression_LI_t2e4_pb5",
+   "cond": "vla_only",
+   "label": "grasp",
+   "obs": 164,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/regression_LI_t2e4_pb5/frame_vla_only_grasp_obs164.png",
+   "target_uv": [
+    80.84527099070564,
+    112.82766989802677
+   ],
+   "nearest": {
+    "robot": "gripper0_finger_joint1_tip",
+    "object": "akita_black_bowl_1_main",
+    "dist_mm": -32.3,
+    "uv": [
+     89.01384074559412,
+     111.31066723486877
+    ],
+    "world": [
+     -0.21404976014809068,
+     -0.13402686166134836,
+     0.9781043163229828
+    ]
+   }
+  },
+  {
+   "case": "regression_LI_t2e4_pb5",
+   "cond": "vla_only",
+   "label": "maxrise_same_obs",
+   "obs": 235,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/regression_LI_t2e4_pb5/frame_vla_only_maxrise_same_obs_obs235.png",
+   "target_uv": [
+    195.91280159490225,
+    188.14173673055714
+   ],
+   "nearest": {
+    "robot": "gripper0_rightfinger",
+    "object": "akita_black_bowl_1_main",
+    "dist_mm": -16.8,
+    "uv": [
+     213.450615847731,
+     180.8645041834941
+    ],
+    "world": [
+     0.09060575986140623,
+     0.23597421177529138,
+     0.9633429553452328
+    ]
+   }
+  },
+  {
+   "case": "regression_LI_t2e4_pb5",
+   "cond": "pb5",
+   "label": "div",
+   "obs": 35,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/regression_LI_t2e4_pb5/frame_pb5_div_obs035.png",
+   "target_uv": [
+    91.36680059002728,
+    115.60418226501704
+   ],
+   "div_reference_rows": {
+    "robot": "gripper0_rightfinger",
+    "object": "red_coffee_mug_obstacle_1_main",
+    "dist_mm": 3.0,
+    "row": 4,
+    "uv": [
+     123.23804315125014,
+     99.10182288731517
+    ],
+    "world": [
+     -0.23191340022532708,
+     -0.014696249719326265,
+     1.0170771244731887
+    ]
+   },
+   "div_refined_rows": null
+  },
+  {
+   "case": "regression_LI_t2e4_pb5",
+   "cond": "pb5",
+   "label": "collision_same_obs",
+   "obs": 45,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/regression_LI_t2e4_pb5/frame_pb5_collision_same_obs_obs045.png",
+   "target_uv": [
+    91.36680059002728,
+    115.60418226501704
+   ],
+   "nearest": {
+    "robot": "gripper0_right_gripper",
+    "object": "red_coffee_mug_obstacle_1_main",
+    "dist_mm": 10.6,
+    "uv": [
+     122.36662871010562,
+     93.37127897448894
+    ],
+    "world": [
+     -0.24339201944573957,
+     -0.017682713964041016,
+     1.0330494771221155
+    ]
+   }
+  },
+  {
+   "case": "regression_LI_t2e4_pb5",
+   "cond": "pb5",
+   "label": "grasp",
+   "obs": 117,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/regression_LI_t2e4_pb5/frame_pb5_grasp_obs117.png",
+   "target_uv": [
+    73.26600040222715,
+    113.52560418781026
+   ],
+   "nearest": {
+    "robot": "gripper0_leftfinger",
+    "object": "akita_black_bowl_1_main",
+    "dist_mm": -13.7,
+    "uv": [
+     60.935757008374935,
+     98.7087370442347
+    ],
+    "world": [
+     -0.25253447129546347,
+     -0.2346178037658016,
+     1.0049971200870784
+    ]
+   }
+  },
+  {
+   "case": "regression_LI_t2e4_pb5",
+   "cond": "pb5",
+   "label": "maxrise",
+   "obs": 261,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/regression_LI_t2e4_pb5/frame_pb5_maxrise_obs261.png",
+   "target_uv": [
+    325.4463584515388,
+    3.6198881129684963
+   ],
+   "nearest": {
+    "robot": "gripper0_leftfinger",
+    "object": "akita_black_bowl_1_main",
+    "dist_mm": -15.0,
+    "uv": [
+     293.5260795399445,
+     -27.062832815302187
+    ],
+    "world": [
+     0.11672487162901672,
+     0.2665522935650628,
+     1.491709682057452
+    ]
+   }
+  },
+  {
+   "case": "safety_LI_t0e0_pb5",
+   "cond": "vla_only",
+   "label": "div",
+   "obs": 30,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/safety_LI_t0e0_pb5/frame_vla_only_div_obs030.png",
+   "target_uv": [
+    189.36846010885387,
+    158.1942403466503
+   ]
+  },
+  {
+   "case": "safety_LI_t0e0_pb5",
+   "cond": "vla_only",
+   "label": "collision",
+   "obs": 36,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/safety_LI_t0e0_pb5/frame_vla_only_collision_obs036.png",
+   "target_uv": [
+    189.36846010885387,
+    158.1942403466503
+   ],
+   "nearest": {
+    "robot": "gripper0_leftfinger",
+    "object": "moka_pot_obstacle_1_main",
+    "dist_mm": -1.1,
+    "uv": [
+     137.70716996390314,
+     96.23032191845826
+    ],
+    "world": [
+     -0.052628793874019086,
+     0.0279153836698392,
+     1.145914167070491
+    ]
+   }
+  },
+  {
+   "case": "safety_LI_t0e0_pb5",
+   "cond": "vla_only",
+   "label": "div+15",
+   "obs": 45,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/safety_LI_t0e0_pb5/frame_vla_only_div+15_obs045.png",
+   "target_uv": [
+    189.36846010885387,
+    158.1942403466503
+   ],
+   "nearest": {
+    "robot": "gripper0_leftfinger",
+    "object": "moka_pot_obstacle_1_main",
+    "dist_mm": -1.3,
+    "uv": [
+     157.06813532324784,
+     110.52713704826508
+    ],
+    "world": [
+     0.02257708900051108,
+     0.07490191651150888,
+     1.15198849513047
+    ]
+   }
+  },
+  {
+   "case": "safety_LI_t0e0_pb5",
+   "cond": "vla_only",
+   "label": "end",
+   "obs": 300,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/safety_LI_t0e0_pb5/frame_vla_only_end_obs300.png",
+   "target_uv": [
+    193.08576293938916,
+    156.60836413513863
+   ],
+   "nearest": {
+    "robot": "gripper0_leftfinger",
+    "object": "akita_black_bowl_1_main",
+    "dist_mm": 1.2,
+    "uv": [
+     177.52800698167067,
+     139.7634677467756
+    ],
+    "world": [
+     -0.09499406900304679,
+     0.16200912785633095,
+     0.9507343616418423
+    ]
+   }
+  },
+  {
+   "case": "safety_LI_t0e0_pb5",
+   "cond": "pb5",
+   "label": "div",
+   "obs": 30,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/safety_LI_t0e0_pb5/frame_pb5_div_obs030.png",
+   "target_uv": [
+    189.36846010885387,
+    158.1942403466503
+   ],
+   "div_reference_rows": null,
+   "div_refined_rows": null
+  },
+  {
+   "case": "safety_LI_t0e0_pb5",
+   "cond": "pb5",
+   "label": "collision_same_obs",
+   "obs": 36,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/safety_LI_t0e0_pb5/frame_pb5_collision_same_obs_obs036.png",
+   "target_uv": [
+    189.36846010885387,
+    158.1942403466503
+   ]
+  },
+  {
+   "case": "safety_LI_t0e0_pb5",
+   "cond": "pb5",
+   "label": "div+15",
+   "obs": 45,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/safety_LI_t0e0_pb5/frame_pb5_div+15_obs045.png",
+   "target_uv": [
+    189.36846010885387,
+    158.1942403466503
+   ]
+  },
+  {
+   "case": "safety_LI_t0e0_pb5",
+   "cond": "pb5",
+   "label": "end",
+   "obs": 300,
+   "png": "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL5g/cases/safety_LI_t0e0_pb5/frame_pb5_end_obs300.png",
+   "target_uv": [
+    324.34150542441597,
+    137.94691266556003
+   ],
+   "nearest": {
+    "robot": "gripper0_rightfinger",
+    "object": "akita_black_bowl_1_main",
+    "dist_mm": -16.9,
+    "uv": [
+     339.52543418540677,
+     122.47747973670448
+    ],
+    "world": [
+     -0.14161139820992197,
+     0.6965822312519301,
+     0.9853441708932051
+    ]
+   }
+  }
+ ],
+ "source": [
+  "outputs/verify/SL5g/cases/*/case.json",
+  "outputs/verify/SL5g/mj_figprobe_LI.json"
+ ],
+ "doc": "frames = agentview raw[::-1]; projection with recorded K/T_world_cam (head); distances = MuJoCo contact dist with 50 mm margin on non-robot geoms"
+}
