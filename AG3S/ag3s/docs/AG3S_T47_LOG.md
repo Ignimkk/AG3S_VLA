@@ -292,9 +292,30 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **composed world (`ComposedSceneCollision`)** | 상자 (`esdf_free` 격자) 안은 `esdf_free`, 밖은 coarse layer 로 읽는 cuRobo world. cuRobo 커널이 층 cost 를 더하기만 해서 `SceneCollision` 을 상속해 층별 결과를 sphere · step 별로 합성한다. `esdf_free` 가 없는 chunk 는 상자 안에서 `min(coarse, fine)` |
 | **`exact` · `resample16` (시간축)** | `exact` = 21 knot, state 격자 1/30 s 의 짝수 state 가 15 Hz chunk step (재샘플 없음, 주 결과). `resample16` = cuRobo 기본 16 knot 출력을 t = k/15 로 선형 재샘플 (민감도 참고) |
 | **warm · cold solve** | cold = 각 후보의 첫 solve (CUDA graph capture 포함, 결과도 warm 과 달라 버림). warm = 같은 chunk 를 다시 푼 solve. cuRobo wall 시간 = host `perf_counter` + `cuda.synchronize`, GPU 시간 = CUDA event |
-| **paired count (T63)** | chunk 마다 후보의 exec8 min clearance 와 `to_recorded` 의 것을 짝지어 센 수 (낮음 / 높음 / 같음, 후보만 관통 / `to_recorded` 만 관통 / 둘 다) |
+| **paired count (T63)** | chunk 마다 후보의 exec8 min clearance 와 `to_recorded` 의 것을 짝지어 센 수 (낮음 / 높음 / 같음, 후보만 ~~관통~~ 인증 위반 / `to_recorded` 만 ~~관통~~ 인증 위반 / 둘 다. 2026-10-22 정정: 10 mm 여유 포함 인증 clearance 기준, 물리 관통 아님 — T63b) |
 | **solver failure (T63)** | cuRobo = `success = false` (scene_collision · cspace 제약 위반), 우리 TO = status `violated` / `solver_failed`. 정의가 달라 개수를 같은 의미로 읽지 않는다 |
 | **solve 순서 의존 (order dependence)** | cuRobo 결과가 앞선 chunk 의 solve 이력에 따라 달라지는 현상. 같은 순서면 bit 단위로 같다. T63 은 chunk 순서를 고정해 실행했다 |
+
+**T63b (2026-10-22 추가)** — cuRobo B0 를 서빙에 넣은 closed-loop · B0m · 물리 clearance 의 용어. (E0 · C1aN · PRIMARY · HOLD · CCR · LTE 는 "T63b" 절 §3 과 T63 용어 표에서 풀었다.)
+
+| 용어 | 뜻 |
+|---|---|
+| **E0** | VLA checkpoint 단독 (AG3S 요청 없음). IFG-APPLE 의 대조 arm |
+| **C1aN** | 현재 서빙 (우리 TO = CCR) + noun attention 으로 target 선택. 서빙 코드 tree `f0d8046`. IFG-APPLE 의 기존 방식 arm |
+| **PRIMARY** | 성공 ∧ MuJoCo replay 접촉 행 없음 (IFG-APPLE agg 정의) |
+| **HOLD** | 인증이 실패한 chunk 에서 로봇을 현재 자세에 멈추는 규칙. 정지 ≠ 보호 — HOLD 횟수를 함께 보고한다 |
+| **LTE (Link-specific Target Exemption)** | target 에 닿는 것이 작업의 일부인 link 만 target 제외 field 를 읽고 나머지 link 는 target 을 포함한 field 를 읽는 접촉 정책 (T63 용어 표의 B4 행 참조) |
+| **CR0 · CR0m** | cuRobo B0 · B0m 을 서버의 TO 자리에 넣은 closed-loop arm. snapshot `snapshot_cr0` (tree `25982bb`) · `snapshot_cr0m` (tree `883cf39`). 서버 flag `--to-backend {sqp, curobo-b0, curobo-b0m}` (기본 `sqp`) |
+| **B0m** | B0 + cuRobo world 거리에서 server `obstacle_margin` (10 mm) 을 우리 TO 와 같은 행 규칙으로 뺀 것 (`obstacle` class 행에만, `target` · `support` 행은 0). 목적함수 항 추가가 아니라 정보만 맞춘다 |
+| **`obstacle_margin` (server, 0.010 m)** | 우리 TO 가 최근접 표면이 비-target 장애물 · support plane 인 행에 주는 clearance 여유. 평가기의 인증 clearance 에 포함되어 있다 (`step3_eval.py:21`) |
+| **인증 clearance 위반 (10 mm 여유 포함)** | 인증 clearance (obstacle margin · contact margin 포함) 가 0 아래인 것. T63 이 "관통" 이라 부른 것의 정정된 이름 |
+| **물리 clearance · 물리 관통** | 모든 여유를 0 으로 둔 signed distance `d − r`. 0 아래 = 실제 관통. target 행 면제는 contact policy 그대로 |
+| **flag-off parity** | 새 flag 를 끄면 기존 arm 과 동작이 같음을 보이는 검사 (기존 test 결과 · 기록 chunk 재풀이의 bit 단위 일치) |
+| **live-input parity** | 서버가 그 chunk 에 만든 live field · `q_now` · finger 열림이 offline 입력 (record 배열) 과 같은 값으로 cuRobo 에 들어간다는 검사 |
+| **follow-TO** | 인증이 `violated` 여도 HOLD 로 멈추지 않고 TO 가 낸 chunk 를 실행한 경우 (impl 용어) |
+| **close 명령 · 실행 창** | close 명령 = chunk 의 reference gripper 값 < 0.5 인 step. 실행 창 = chunk 의 앞 8 step (exec8) |
+| **place-stop (`--stop-after-place 2.5`)** | place (target 중심이 crate 안 ∧ 사용 손 gripper 열림 ≥ 0.5) 뒤 2.5 s 에서 closed-loop 기록을 끝내는 규칙 (사용자 규칙 2026-10-21). 기존 E0 · C1aN 기록은 같은 규칙으로 잘라 다시 센다 (truncation recount) |
+| **McNemar exact p** | 짝지은 2 × 2 에서 한쪽만 성공한 episode (discordant pair) 만으로 계산하는 exact 양측 p |
 
 ## 진행 현황 — T47 이후
 
@@ -329,7 +350,8 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **T46g** SL5b reach 진단 (benchmark 기록 · RB-Y1 기록, offline) | 가려진 target 의 오래된 centroid 로 reach 를 검사해 attach 가 거절되고 HOLD 로 이어지는가 | **진단 완료 (2026-10-14).** V11AB-B 실패 7 중 4, V11AB-A 실패 8 중 2 가 그 경로. RB-Y1 기록에서는 reach 단독 실패 0. 사용자 판정: T57 보다 먼저 최소 수정 (threshold 변경 아님), #48 과는 수정 분리. 아래 "T46g" 절 |
 | **T60d** T60b 복귀 정체 후속 (기록 기반) | 놓은 뒤 복귀하지 않는 run 에서 정책 입력 · 제안은 무엇이 다른가 | **측정 완료 (2026-10-14, 기록만).** 정체 run 의 state 는 demo 의 release 단계에 가깝고 복귀 단계로 가지 않는다; 사용 팔 arm_5 가 demo 범위 밖. 사용자 판정: VLA 단독 4 run 확인 (우선순위 뒤). 아래 "T60d" 절 |
 | **CL4** extent (DT-02, LTE 고정 X1–X4) · 접촉 정책 (DT-05A, oracle 고정 X4 대 G4) closed-loop, 최종 형상 (1,349 구 + palm cover), 90 run | 같은 identity · 형상에서 extent 처리와 link 별 접촉 처리의 실행 효과 | **측정 완료 (2026-10-15).** success_ct (P): ball 10 · oracle-visible 9 · ball_owned+F1 7 · ball_owned 5 · global+oracle 7 / 18. link 별 구분의 실행상 차이 관측 안 됨. CL3 (기존 형상) 보다 전체 성공이 낮아 원인 진단 중 (X2G). 아래 "CL4" 절 |
-| **T63** cuRobo v2 `TrajectoryOptimizer` (B0) 와 우리 항을 1–2 개씩 누적한 B1–B4 (λ ∈ {1, 100, 10⁴}) 대 우리 TO (CCR), offline 고정 입력 (사과 24 장면 run 중 10 episode · 750 chunk, 같은 평가기) | 같은 입력 · 같은 지표에서 cuRobo 의 trajectory optimization 과 우리 TO 가 어떻게 다른가 (어느 쪽이 낫다고 미리 정하지 않음) | **측정 완료 (2026-10-21, 명령 궤적만, 사용자 판정 5 로 closed-loop 결정).** 관통 chunk exec8 (all 750): reference 129 · `to_recorded` 48 · cuRobo 14 후보 145–153, 후보만 관통 97–105 대 `to_recorded` 만 관통 0–1. TCP 변경량 exec8 `to_recorded` 7.2 mm 대 cuRobo 14.8–20.6 mm. warm solve median B0 57 · B1 64 · B2 70–73 · B3 82–84 · B4 111–121 ms (GPU, `to_recorded` 162 ms server CPU). 한계: 명령 궤적만 · 평가기 충실도 22 / 750 chunk 가 0.01 mm 초과 (최대 15 mm) · solve 순서 의존 (최대 0.175 rad) · finger 열림 chunk 당 한 값. 아래 "T63" 절 |
+| **T63** cuRobo v2 `TrajectoryOptimizer` (B0) 와 우리 항을 1–2 개씩 누적한 B1–B4 (λ ∈ {1, 100, 10⁴}) 대 우리 TO (CCR), offline 고정 입력 (사과 24 장면 run 중 10 episode · 750 chunk, 같은 평가기) | 같은 입력 · 같은 지표에서 cuRobo 의 trajectory optimization 과 우리 TO 가 어떻게 다른가 (어느 쪽이 낫다고 미리 정하지 않음) | ~~**측정 완료 (2026-10-21, 명령 궤적만, 사용자 판정 5 로 closed-loop 결정).**~~ **종료 (사용자 판정 3, 2026-10-22 — T63b 결과 후 cuRobo 비교 종료, 아래 T63b 행).** 측정은 2026-10-21 완료, 명령 궤적만. **2026-10-22 정정: 아래 "관통" 은 10 mm 여유를 포함한 인증 clearance 위반이고 물리 관통이 아니다.** 인증 위반 chunk exec8 (all 750): reference 129 · `to_recorded` 48 · cuRobo 14 후보 145–153, 후보만 위반 97–105 대 `to_recorded` 만 위반 0–1. **물리 관통 chunk exec8 (T63b [V]): reference 86 · `to_recorded` 44 · cuRobo 14 후보 43–48.** TCP 변경량 exec8 `to_recorded` 7.2 mm 대 cuRobo 14.8–20.6 mm. warm solve median B0 57 · B1 64 · B2 70–73 · B3 82–84 · B4 111–121 ms (GPU, `to_recorded` 162 ms server CPU). 한계: 명령 궤적만 · 평가기 충실도 22 / 750 chunk 가 0.01 mm 초과 (최대 15 mm) · solve 순서 의존 (최대 0.175 rad) · finger 열림 chunk 당 한 값. 아래 "T63" 절 |
+| **T63b** cuRobo B0 (CR0) · 여유를 맞춘 B0m (CR0m) 을 서버 TO 자리에 넣은 10 episode closed-loop (E0 · C1aN 은 IFG-APPLE 기록 재사용) + T63 후보의 물리 clearance 재집계 | cuRobo 를 TO 자리에 넣어 실제 궤적 기준 contact · 성공 · HOLD 가 어떻게 달라지는가 (어느 쪽이 낫다고 미리 정하지 않음), T63 의 "관통" 은 물리 관통인가 | **측정 완료 · 종료 (2026-10-22 기록, 사용자 판정 3 으로 cuRobo 비교 종료).** (a) offline 750 chunk 물리 관통 exec8: reference 86 · `to_recorded` 44 · B0 44 · B0m 48 (인증 위반은 129 · 48 · 146 · 143). (b) closed-loop 10 episode (같은 장면 · seed, place + 2.5 s 로 자른 E0 · C1aN): **CR0m 0 / 10 성공 (모두 `no_grasp`)**, E0 10 / 10, C1aN 5 / 10 (paired McNemar p: 대 C1aN 0.0625 · 대 E0 0.00195). 장애물 접촉 행은 세 arm 모두 0, HOLD chunk CR0m 148 (6 run) · C1aN 91 (7 run). CR0m 10 run 중 8 run 은 chunk 의 앞 8 step 에 close 명령이 한 번도 없다. no_grasp 원인은 미확인 후보로만 남겼다. 한계: 10 장면 · 서버 1 개 순서 고정 · place-stop 실제 발동 없음 · B0m 계산 시간 66.7 ms 전부 초과. 아래 "T63b" 절 |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -395,7 +417,11 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | T63 — **B0 world = 상자 안 `esdf_free`, 밖 coarse layer. 시간축 `exact` 가 주 결과, `resample16` 은 민감도. TO-active = TCP 위치 차 > 1 mm (plan window 어디서든)** | 사용자 판정 (2026-10-21, 단계 0–1 결과 후). `esdf_free` 만으로는 상자 밖 sphere-step 97.8 % 가 빈 공간이 된다 | 16D |
 | T63 — **우리 항 전체에 같은 λ ∈ {1, 100, 10⁴} 를 곱한다 (결과 전 고정). B4 target 제외 mask = server record 의 mask** | 사용자 판정 (2026-10-21, 단계 2 결과 후). baseline 가중치에서 우리 항은 cuRobo 목적함수의 median 1.0 % (B1) · 1.5 % (B3) 였다 | 16D |
 | T63 — **보고의 우리 TO 주 기준 = `to_recorded` (server 기록 `refined_chunk`), `to_resolved` (chained 재풀이) 는 보조** | 사용자 판정 (2026-10-21, 단계 3 준비 결과 후). 실제로 실행된 궤적이고 B2 · B3 의 이전 chunk 입력이 이 기록에서 왔다 | 16D |
-| T63 — **cuRobo 를 서빙 경로에 넣은 10 episode closed-loop 을 돌린다** (후보 · λ · episode · 지표 · 연결 방식은 후속 task 에서 고정) | 사용자 판정 (2026-10-21, 단계 3 결과 후). 이 로그는 후보를 고르지 않았다 | 16D |
+| T63 — **cuRobo 를 서빙 경로에 넣은 10 episode closed-loop 을 돌린다** (후보 · λ · episode · 지표 · 연결 방식은 후속 task 에서 고정) → 아래 T63b 행들에서 고정되었다 | 사용자 판정 (2026-10-21, 단계 3 결과 후). 이 로그는 후보를 고르지 않았다 | 16D |
+| T63b — **closed-loop 변형은 B0 하나 (기본 cuRobo + 단계 2 · 3 composed world, 우리 목적함수 항 없음). cuRobo 결과가 충돌 · 실패여도 우리 TO 와 같은 인증 검사 · HOLD 규칙을 그대로 적용 (최적화기만 바꾼 비교), HOLD 횟수도 보고. 장면 = offline 과 같은 10 개 (place 211 · 320 · 572 · 850 · 901 · 954, clear 250 · 1345 · 126 · 309), IFG-APPLE 같은 seed. E0 · C1aN 은 기존 기록 재사용, 새 arm 이름 `CR0`** | 사용자 판정 1 (2026-10-21, T63 offline 결과 후, [`handoff/T63b.task.md`](handoff/T63b.task.md)). 어느 쪽이 낫다고 미리 정하지 않는다. 정지 ≠ 보호 | 16D |
+| T63b — **closed-loop 기록은 place 뒤 2.5 s 에서 끝낸다 (client `--stop-after-place 2.5`). E0 · C1aN 기존 기록도 같은 규칙으로 잘라 (place + 2.5 s) 다시 센다. 성공 · grasp 판정은 바뀌지 않아야 하고 verifier 가 이 10 장면에서 확인한다** | 사용자 규칙 (2026-10-21, `.claude/ag3s-rules.md`). 귀가 구간 data 는 필요 없다. 결과: 20 run 중 place 검출 15, success · grasp · PRIMARY · `place_t` 변경 0 (T63b 절 §9.5) | 16D |
+| T63b — **여유를 맞춘 B0m 먼저 (① offline 750 chunk B0m ② ep126 smoke ③ 통과하면 10 episode CR0m). B0m = B0 + cuRobo world 의 비-target 거리에서 server 와 같은 `obstacle_margin` (10 mm) 을 뺀 것 (우리 TO 와 같은 행 규칙, 목적함수 항 추가 아님). T63 기록은 용어 정정 ("관통" → "인증 clearance 위반 (10 mm 여유 포함)") + 저장 궤적에서 여유를 뺀 물리 clearance (< 0 = 실제 관통) 를 모든 후보에 대해 CPU 로 다시 센다. 물리 clearance = `obstacle_margin` · contact margin 을 0 으로 둔 signed distance, target 면제는 contact policy 그대로. smoke 통과 기준 = crash 없음 ∧ 끝에서 연속 HOLD ≥ 20 chunk 없음 (성공은 기준 아님)** | 사용자 판정 2 (2026-10-21, CR0 ep126 smoke 후 — T63 평가기 clearance 가 10 mm 여유를 포함함을 발견). 결과 전에 고정 | 16D |
+| T63b — **cuRobo 비교 (T63 · T63b) 를 여기서 종료한다. 진행 지연 가설 확인 (offline CPU) 과 B1 λ=10⁴ closed-loop 는 하지 않는다. 미확인으로 남김: no_grasp 원인 가설 (B0 에는 VLA 중간 경로 추종 항이 없어 실행 구간에서 손이 덜 나아가고, VLA 의 닫기 명령이 실행 창 (앞 8 step) 에 들어오지 않는다)** | 사용자 판정 3 (2026-10-22 KST 새벽, `T63b.verify.json` 결과 후). 근거 제시 수치: offline 750 chunk 물리 관통 (실행 구간) 우리 TO 기록 44 · B0 44 · B0m 48 · VLA 원본 86, closed-loop 10 episode CR0m 0 / 10 (모두 no_grasp) · E0 10 / 10 · C1aN 5 / 10, 장애물 접촉 행 세 arm 모두 0 | 16D |
 
 ---
 
@@ -455,8 +481,13 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 47 (T55 가 추가) | **T55 의 T60 종료 구간 (P · H) 보조 분석** — 사용자 판정 (2026-10-14) 으로 기존 정의 · P · H 를 나란히 보고해야 한다 | `t55_windows.py` (add-on, B 로 인계) | **측정 안 됨 (진행 중 · 미기록)** → **해소 (2026-10-14, T55 절 §8 · T54c 절 §10)** |
 | 48 (T55 가 추가) | **instruction 변경 시 strong rule 의 P_grasp 반응** — 바뀐 prompt 로 재-grounding 하면 실제 보유 333 frame 중 117 을 HELD 로 인정하지 않고 보유 시작 30 건 중 10 건을 놓쳤다 | `T55.verify.json` test.pooled_p_grasp · primary_reground | **원인 미측정** (미측정 해석: 조작 대상 식별이 prompt 를 따라 바뀌고 latch 가 그 대상에 묶임) → **원인 측정 (2026-10-14, "T55b" 절):** manipulated object = 바뀐 명사의 과일 → `reach` 실패 (117 / 117). latch 수정은 A 의 판정 대기 |
 | 49 (T55 가 추가) | **slip 개입의 양성 frame 이 너무 짧다** — 개입이 보유 성립 2 frame 뒤라 strong rule 이 HELD 를 세우기 전에 개입된다 (FR 20/20, 두 결합 arm 차이 0) | `T55.prereg.json` (after_frames 2) | **설계 한계, 재측정 안 함** |
-| 50 (T63 이 추가) | **cuRobo 후보의 실제 궤적 (`measured_qpos`) contact · success · HOLD** — T63 은 명령 궤적의 평가기 clearance 만 쟀다 | `T63.verify.json` `not_measured` | **측정 안 됨 (사용자 판정 2026-10-21: 10 episode closed-loop, 후속 task)** |
-| 51 (T63 이 추가) | **T63 의 미해소 한계** — 평가기 충실도 22 / 750 chunk 가 0.01 mm 초과 (최대 15.0 mm) 인 원인, cuRobo 의 solve 순서 의존 (최대 0.175 rad) 의 원인, cuRobo 의 step 별 finger 열림, cuRobo 관통 chunk 가 많은 이유 (미확인 후보: chunk 끝 goal 고정, 10 mm activation 의 soft collision penalty) | `T63.verify.json` `evaluator_fidelity` · `order_dependence_vs_impl_smoke_r3` | **측정 안 됨** |
+| 50 (T63 이 추가) | **cuRobo 후보의 실제 궤적 (`measured_qpos`) contact · success · HOLD** — T63 은 명령 궤적의 평가기 clearance 만 쟀다 | `T63.verify.json` `not_measured` | ~~**측정 안 됨 (사용자 판정 2026-10-21: 10 episode closed-loop, 후속 task)**~~ → **부분 해소 · 종료 (2026-10-22, "T63b" 절 §9).** B0m (CR0m) 만 10 episode 에서 실제 궤적 기준으로 쟀다 (장애물 접촉 행 0, 성공 0 / 10). B0 (CR0) 는 ep126 1 episode smoke 만, B1–B4 는 closed-loop 측정 안 함. 사용자 판정 3 으로 cuRobo 비교를 종료했으므로 더 재지 않는다 |
+| 51 (T63 이 추가) | **T63 의 미해소 한계** — 평가기 충실도 22 / 750 chunk 가 0.01 mm 초과 (최대 15.0 mm) 인 원인, cuRobo 의 solve 순서 의존 (최대 0.175 rad) 의 원인, cuRobo 의 step 별 finger 열림, cuRobo 관통 chunk 가 많은 이유 (미확인 후보: chunk 끝 goal 고정, 10 mm activation 의 soft collision penalty) | `T63.verify.json` `evaluator_fidelity` · `order_dependence_vs_impl_smoke_r3` | ~~**측정 안 됨**~~ → **부분 갱신 (2026-10-22, T63b), 종료로 더 재지 않는다.** "관통 chunk" 는 10 mm 여유 포함 인증 clearance 위반이었다 (T63 정정). 물리 관통 exec8 은 `to_recorded` 44 대 cuRobo 43–48 이다 [V]. 인증 위반 차이의 한 요인은 정의 차이 (cuRobo 는 10 mm 여유를 받지 않음, 확인된 사실) 이고 나머지 요인 (chunk 끝 goal 고정, 10 mm activation 의 soft penalty) 은 미확인 후보 그대로다. solve 순서 의존: closed-loop ep126 1 episode 에서 smoke 와 bit 단위로 같음 (다른 episode · 순서 변경은 재현하지 않음, 원인 미확인). 평가기 충실도 22 / 750 chunk · finger 열림 chunk 당 한 값은 해소되지 않았다 |
+| 52 (T63b 가 추가) | **no_grasp 의 원인** — CR0m 10 / 10 `no_grasp`. 미확인 후보: B0 · B0m 에는 VLA 중간 경로 추종 항이 없어 실행 구간에서 손이 덜 나아가고, VLA 의 닫기 명령이 실행 창 (앞 8 step) 에 들어오지 않는다. 관찰 (같은 방향이나 가설 시험이 아님): CR0m 10 run 중 8 run 은 어느 chunk 의 앞 8 step 에도 close 명령이 없다 (6 run 은 step 8–49 에만, 2 run 은 close 명령 자체가 없음) | `T63b.verify.json` `gripper_columns` | **원인 미확정 · 가설 시험 안 함 (사용자 판정 3 으로 종료)** |
+| 53 (T63b 가 추가) | **B0m 의 계산 시간 66.7 ms 초과** — offline warm wall median 107.8 ms (GPU 94.0), 서빙 cuRobo wall median 113.1 ms · TO 자리 합 215.3 ms, 66.7 ms 초과 750 / 750 (B0 offline 은 7.6 %) | `T63b.verify.json` `B0m_timing` · `cr0m_curobo_server_records_750` | **최적화 안 함 (종료)** |
+| 54 (T63b 가 추가) | **place-stop 의 실제 발동** — `check_run` 의 `place_stop` 분기와 client `--stop-after-place` 가 실제 run 에서 발동한 적이 없다 (CR0m 10 run · impl smoke 2 개 모두 place 없음). E0 · C1aN 의 place + 2.5 s 는 replay 상태 규칙으로만 구했다 | `T63b.verify.json` `not_measured` | **측정 안 됨** (place 에 도달하는 run 에서 처음 확인) |
+| 55 (T63b 가 추가) | **B0m parity 를 750 chunk 로 확대 · solve 순서를 바꾼 재실행 · 물리 기준 paired count** (같은 chunk 가 둘 다 관통하는지) | `T63b.verify.json` `not_measured` (parity 는 150 chunk 만, 순서는 ep126 1 episode 만 대조, paired 는 계산 안 함) | **측정 안 됨 (종료)** |
+| 56 (T63b 가 추가) | **진행 지연 가설 확인 (offline CPU) · B1 λ=10⁴ closed-loop** | 사용자 판정 3 (2026-10-22) | **하지 않기로 함 (사용자 판정 3)** |
 
 ---
 
@@ -5216,6 +5247,8 @@ endpoint: P 도달 12 / 16, H 도달 12 / 16. 제거된 inference frame: P 511 �
 > 작성: ag3s-scribe, **2026-10-21 10:07 KST** (머신 시계. 같은 시계의 figure 파일 수정 시각은 09:58). 근거: [`handoff/T63.task.md`](handoff/T63.task.md) (목적 · 사용자 판정 · 고정 입력), [`handoff/T63.impl.md`](handoff/T63.impl.md) (단계 0–2 · 단계 3 준비, implementer 측정), [`handoff/T63.verify.json`](handoff/T63.verify.json) (단계 3 수치, verifier 측정).
 > **수치 출처 표기.** `[V]` = `T63.verify.json` 의 `numbers` (verifier 측정). `[I]` = `T63.impl.md` (implementer 측정, 독립 검증 전). `[D]` = 이 절에서 `[V]` 값으로 계산한 파생값 (범위 · 합). 표시가 없는 수치는 없다.
 > 이 절은 **구현과 offline 측정의 기록**이다. 어느 방법이 낫다고 미리 정하지 않았고, 아래 해석은 표의 숫자가 보이는 범위에 한정한다.
+>
+> **정정 (2026-10-22 02:30 KST, 사유: T63b 에서 발견 — 아래 "T63b" 절 §6).** 이 절과 위 진행 현황 · 용어 · 재측정 대기의 T63 행에서 **"관통 (< 0)" · "관통 chunk" 는 물리적 관통이 아니다.** 공통 평가기의 clearance 는 server `--obstacle-margin 0.010` (10 mm 여유, `step3_eval.py:21` · server `TrajOptConfig`, `T63b.task.md` 사용자 판정 2) 을 비-target 장애물 · support plane 행에 더하고 contact margin 도 포함한 **인증 clearance** 다. 우리 TO 는 이 여유를 제약으로 받았고 B0–B4 는 받지 않았다 (`T63b.impl.md`, [I]). 그래서 이 절의 "관통" 은 모두 **"인증 clearance 위반 (10 mm 여유 포함)"** 으로 읽는다 (본문 · 표 머리글은 ~~관통~~ 취소선 뒤에 새 표기를 적었다). **T63 의 숫자는 하나도 바꾸지 않았다**: T63b 가 같은 저장 궤적을 다시 재서 17 후보 × 750 chunk = 12,750 / 12,750 metric dict 가 T63 과 같음을 확인했다 (`T63b.verify.json`, [V]). 물리 clearance (여유를 모두 0 으로 둔 signed distance, < 0 = 실제 관통) 의 재집계는 **§6.6** 에 추가했다. T63 의 closed-loop 후속과 종료는 "T63b" 절.
 
 ### 1. 목적과 범위
 
@@ -5307,13 +5340,13 @@ split 크기 [V]: all 750, TO-active 530, TO-inactive 220, `esdf_free` 있음 51
 
 **실행 사실 [V].** 후보 17 개 (reference · to_recorded · to_resolved · B0 · B0_resample16 · B1–B4 × λ 3) 전부 750 / 750 chunk 평가, 누락 0, crash 0, non-finite 0. 회귀 기준선 일치 (legacy start violated 14 / 15 · has_target 15 / 15 · frame0 clearance_before −29.031048 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877 mm). cuRobo `exact` 13 후보 1870 s, `resample16` B0 94 s, GPU 최대 할당 5.29 GiB. solver 는 후보 바깥 loop 로 한 번에 하나만 살려 두고, chunk 순서는 episode · chunk 오름차순으로 고정했다.
 
-표 읽는 법: min clearance 는 chunk 마다 앞 W step × 모든 sphere 의 최솟값 (mm, 음수 = 관통) 이고 median · p5 는 chunk 들에 대한 값이다. "관통 chunk" = 그 최솟값 < 0 인 chunk 수. 후보 이름 앞의 B0–B4 는 §3.
+표 읽는 법: min clearance 는 chunk 마다 앞 W step × 모든 sphere 의 최솟값 (mm) 이고 median · p5 는 chunk 들에 대한 값이다. **2026-10-22 정정:** 이 값은 server `obstacle_margin` 10 mm 와 contact margin 을 포함한 **인증 clearance** 이므로 ~~음수 = 관통~~ 음수 = 인증 clearance 위반 (물리적 관통이 아니다, §6.6). ~~"관통 chunk"~~ "인증 위반 chunk" = 그 최솟값 < 0 인 chunk 수. 이 절의 표 · 본문에서 "관통" 으로 쓴 곳은 모두 같은 정정을 받는다. 후보 이름 앞의 B0–B4 는 §3.
 
 #### 6.1 전체 750 chunk
 
-**표 1. clearance · 관통** (all, 750)
+**표 1. clearance · ~~관통~~ 인증 clearance 위반 (10 mm 여유 포함)** (all, 750)
 
-| 후보 | 관통 chunk exec8 | 관통 chunk plan16 | exec8 min clearance median / p5 (mm) | plan16 min clearance median / p5 (mm) | to_recorded 대비 낮음 / 높음 / 같음 (chunk) | 후보만 관통 / to_recorded 만 관통 / 둘 다 (exec8 chunk) |
+| 후보 | ~~관통~~ 인증 위반 chunk exec8 | ~~관통~~ 인증 위반 chunk plan16 | exec8 min clearance median / p5 (mm) | plan16 min clearance median / p5 (mm) | to_recorded 대비 낮음 / 높음 / 같음 (chunk) | 후보만 ~~관통~~ 인증 위반 / to_recorded 만 ~~관통~~ 인증 위반 / 둘 다 (exec8 chunk) |
 |---|---:|---:|---|---|---|---|
 | reference (VLA chunk) | 129 | 203 | 16.7 / -22.8 | 14.9 / -23.2 | 554 / 148 / 48 | 81 / 0 / 48 |
 | to_recorded (주 기준) | 48 | 90 | 17.9 / -18.5 | 15.3 / -21.6 | — | — |
@@ -5381,9 +5414,9 @@ split 크기 [V]: all 750, TO-active 530, TO-inactive 220, `esdf_free` 있음 51
 
 표 4–6 은 표 1–3 과 같은 열이고 대상만 TO-active chunk 다.
 
-**표 4. clearance · 관통** (TO-active, 530)
+**표 4. clearance · ~~관통~~ 인증 clearance 위반 (10 mm 여유 포함)** (TO-active, 530)
 
-| 후보 | 관통 chunk exec8 | 관통 chunk plan16 | exec8 min clearance median / p5 (mm) | plan16 min clearance median / p5 (mm) | to_recorded 대비 낮음 / 높음 / 같음 (chunk) | 후보만 관통 / to_recorded 만 관통 / 둘 다 (exec8 chunk) |
+| 후보 | ~~관통~~ 인증 위반 chunk exec8 | ~~관통~~ 인증 위반 chunk plan16 | exec8 min clearance median / p5 (mm) | plan16 min clearance median / p5 (mm) | to_recorded 대비 낮음 / 높음 / 같음 (chunk) | 후보만 ~~관통~~ 인증 위반 / to_recorded 만 ~~관통~~ 인증 위반 / 둘 다 (exec8 chunk) |
 |---|---:|---:|---|---|---|---|
 | reference (VLA chunk) | 108 | 176 | 14.3 / -23.1 | 11.8 / -23.6 | 407 / 121 / 2 | 81 / 0 / 27 |
 | to_recorded (주 기준) | 27 | 63 | 16.4 / -2.4 | 12.2 / -17.6 | — | — |
@@ -5447,7 +5480,7 @@ split 크기 [V]: all 750, TO-active 530, TO-inactive 220, `esdf_free` 있음 51
 | B4 λ=100 | 145 | 111 / 200 | 100.0 % | 96.9 / 100.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
 | B4 λ=10⁴ | 155 | 115 / 205 | 100.0 % | 98.2 / 100.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
 
-#### 6.3 부분집합별 관통 chunk (exec8 / plan16)
+#### 6.3 부분집합별 ~~관통~~ 인증 위반 chunk (exec8 / plan16)
 
 | 부분집합 (chunk 수) | reference | to_recorded | to_resolved | B0 | B4 λ=1 | B4 λ=10⁴ |
 |---|---|---|---|---|---|---|
@@ -5458,14 +5491,14 @@ split 크기 [V]: all 750, TO-active 530, TO-inactive 220, `esdf_free` 있음 51
 
 #### 6.4 표의 숫자가 보이는 범위 (해석 없음)
 
-- **관통 chunk 수 (all).** exec8: reference 129, `to_recorded` 48, `to_resolved` 47, cuRobo 14 후보 145–153. plan16: reference 203, `to_recorded` 90, `to_resolved` 90, cuRobo 14 후보 153–189 [D]. TO-active 530 chunk 도 같은 순서다 (exec8: reference 108, `to_recorded` 27, cuRobo 120–128).
-- **paired (all).** cuRobo 후보가 관통하고 `to_recorded` 는 관통하지 않는 exec8 chunk 가 97–105, 반대 (`to_recorded` 만 관통) 가 0–1 이다 [D]. 둘 다 관통하는 chunk 는 48 (B0).
+- **~~관통~~ 인증 위반 chunk 수 (all).** exec8: reference 129, `to_recorded` 48, `to_resolved` 47, cuRobo 14 후보 145–153. plan16: reference 203, `to_recorded` 90, `to_resolved` 90, cuRobo 14 후보 153–189 [D]. TO-active 530 chunk 도 같은 순서다 (exec8: reference 108, `to_recorded` 27, cuRobo 120–128).
+- **paired (all).** cuRobo 후보가 ~~관통하고~~ 인증 위반이고 `to_recorded` 는 ~~관통하지 않는~~ 인증 위반이 아닌 exec8 chunk 가 97–105, 반대 (`to_recorded` 만 인증 위반) 가 0–1 이다 [D]. 둘 다 인증 위반인 chunk 는 48 (B0). (물리 기준의 paired count 는 계산하지 않았다, §6.6.)
 - **min clearance (all, exec8).** median 은 reference 16.7 mm, `to_recorded` 17.9 mm, B0 13.7 mm. p5 는 `to_recorded` -18.5 mm, B0 -9.9 mm, reference -22.8 mm.
 - **TCP 변경량 (exec8, chunk 평균의 평균).** `to_recorded` 7.2 mm, cuRobo 14 후보 14.8–20.6 mm (TO-active: `to_recorded` 10.1, cuRobo 17.0–24.4) [D]. 최댓값은 `to_recorded` 246.9 mm, B0 169.3 mm.
 - **운동학.** cuRobo 후보의 가속 위반 chunk (exec8) 는 0–5 개, `to_recorded` 는 170, reference 는 93. jerk RMS (plan16 median) 는 reference 14.77, `to_recorded` 16.89, cuRobo 0.60–2.38 rad/s³.
-- **λ 를 1 → 10⁴ 로 올렸을 때 (all).** B1: TCP 변경량 exec8 20.6 → 14.8 mm, plan16 평균 32.6 → 13.0 mm, 관통 chunk plan16 156 → 186, solver failure 143 → 165, jerk RMS plan16 0.61 → 1.97. B2: 관통 plan16 162 → 187, failure 143 → 174. B3: 160 → 189, 144 → 171. B4: 167 → 184, 169 → 175. exec8 관통은 B1 147 → 152, B2 146 → 149, B3 147 → 153, B4 149 → 152. λ=100 은 B1 · B2 · B3 에서 plan16 관통이 λ=1 보다 3–9 개 적고 (153 · 153 · 155 대 156 · 162 · 160) solver failure 는 같다 (143 · 143 · 144). B4 는 λ=100 에서 plan16 관통 175 (λ=1 167) 이다.
-- **항을 더했을 때 (같은 λ).** λ=1 에서 exec8 관통 chunk 는 B0 146, B1 147, B2 146, B3 147, B4 149 이다. B4 는 plan16 에서 167 (B3 160) 이고 solver failure 가 169 (B3 144) 이다.
-- **timing 민감도.** B0 `exact` 대 `resample16`: 관통 exec8 146 대 146, plan16 161 대 160, TCP 변경량 exec8 20.6 대 20.2 mm.
+- **λ 를 1 → 10⁴ 로 올렸을 때 (all).** B1: TCP 변경량 exec8 20.6 → 14.8 mm, plan16 평균 32.6 → 13.0 mm, ~~관통~~ 인증 위반 chunk plan16 156 → 186, solver failure 143 → 165, jerk RMS plan16 0.61 → 1.97. B2: ~~관통~~ 인증 위반 plan16 162 → 187, failure 143 → 174. B3: 160 → 189, 144 → 171. B4: 167 → 184, 169 → 175. exec8 ~~관통~~ 인증 위반은 B1 147 → 152, B2 146 → 149, B3 147 → 153, B4 149 → 152. λ=100 은 B1 · B2 · B3 에서 plan16 ~~관통~~ 인증 위반이 λ=1 보다 3–9 개 적고 (153 · 153 · 155 대 156 · 162 · 160) solver failure 는 같다 (143 · 143 · 144). B4 는 λ=100 에서 plan16 ~~관통~~ 인증 위반 175 (λ=1 167) 이다.
+- **항을 더했을 때 (같은 λ).** λ=1 에서 exec8 ~~관통~~ 인증 위반 chunk 는 B0 146, B1 147, B2 146, B3 147, B4 149 이다. B4 는 plan16 에서 167 (B3 160) 이고 solver failure 가 169 (B3 144) 이다.
+- **timing 민감도.** B0 `exact` 대 `resample16`: ~~관통~~ 인증 위반 exec8 146 대 146, plan16 161 대 160, TCP 변경량 exec8 20.6 대 20.2 mm.
 - **계산 시간.** warm wall median (all): B0 57 ms, B1 64 ms, B2 70–73 ms, B3 82–84 ms, B4 111–121 ms (GPU), `to_recorded` 162 ms (server CPU), `to_resolved` 119 ms (offline CPU). warm 66.7 ms 초과 비율은 B0 7.6 %, B1 13.2–17.9 %, B2 90.0–97.5 %, B3 100 %, B4 100 %. cuRobo cold 첫 solve (ep126 chunk 300): B0 4354 ms, B1–B4 1375–2224 ms, `resample16` B0 5367 ms (wall).
 - **goal error.** 모든 cuRobo 후보 최대 joint 2.4e-07 rad · TCP 1.2e-04 mm, `to_recorded` 0.0. **구성상 0 이다** (cuRobo 는 cspace goal = `reference[-1]`, 우리 TO 는 tail 을 reference 그대로 둔다). 이 지표는 후보를 가르지 못한다.
 
@@ -5481,7 +5514,40 @@ split 크기 [V]: all 750, TO-active 530, TO-inactive 220, `esdf_free` 있음 51
 
 판정 4 의 본문이 인용한 "TCP 차 median 0.002 mm · max 17 mm" 는 단계 3 준비 때 ep211 한 episode (75 chunk) 의 값 [I] 이다. **전체 750 chunk 의 max 는 178.8 mm 로 더 크다.** status 쌍 (all): feasible→feasible 418, violated→violated 100, optimal→optimal 176, feasible→optimal 46, optimal→feasible 7, violated→feasible 1, feasible→violated 2.
 
+#### 6.6 정정 추가 — 물리 clearance 재집계 (2026-10-22, T63b 단계 (a), `T63b.verify.json`, [V])
+
+**정의 (사전 고정, `T63b.task.md`).** 물리 clearance = 같은 평가기에서 `obstacle_margin` · contact margin (`manipulated_link_margin`) 등 모든 여유를 0 으로 둔 signed distance `d − r` (`d` = 그 행이 읽는 field 값, `r` = sphere 반지름). 값이 0 아래이면 실제 관통이다. target 행의 면제 (권한 있는 손가락이 target 에 닿는 것) 는 contact policy 그대로 둔다 (target 을 만져도 되는 행은 여전히 target 제외 층을 읽는다). 저장된 궤적을 다시 잴 뿐 풀지 않았다 (CPU). 아래 표의 "인증 위반" 열은 위 표 1 의 숫자와 같다 (12,750 / 12,750 일치).
+
+**표 6.6. 인증 clearance 위반 대 물리 관통 (all, 750 chunk).** T63 의 17 후보 전부 (B0m 은 T63b 절 표 a1).
+
+| 후보 | 인증 위반 chunk exec8 / plan16 (T63 표 1 의 숫자, 변경 없음) | **물리 관통 chunk exec8 / plan16** | 인증 min clearance exec8 median / p5 (mm) | 물리 min clearance exec8 median / p5 / min (mm) |
+|---|---|---|---|---|
+| reference (VLA 원본 chunk) | 129 / 203 | **86 / 136** | 16.7 / -22.8 | 26.4 / -12.8 / -18.6 |
+| `to_recorded` (우리 TO 기록) | 48 / 90 | **44 / 59** | 17.9 / -18.5 | 27.3 / -8.5 / -13.9 |
+| `to_resolved` (우리 TO 재풀이) | 47 / 90 | **45 / 58** | 17.9 / -19.2 | 27.3 / -9.2 / -15.3 |
+| B0 | 146 / 161 | **44 / 44** | 13.7 / -9.9 | 23.3 / -1.1 / -16.3 |
+| B1 λ=1 | 147 / 156 | **44 / 44** | 13.8 / -9.9 | 23.3 / -1.1 / -16.3 |
+| B1 λ=100 | 145 / 153 | **44 / 44** | 14.0 / -9.9 | 23.4 / -1.1 / -16.6 |
+| B1 λ=10⁴ | 152 / 186 | **43 / 44** | 13.3 / -9.9 | 23.0 / -1.1 / -16.0 |
+| B2 λ=1 | 146 / 162 | **43 / 43** | 13.6 / -9.9 | 23.2 / -1.1 / -16.3 |
+| B2 λ=100 | 145 / 153 | **44 / 44** | 13.8 / -9.9 | 23.3 / -1.1 / -16.9 |
+| B2 λ=10⁴ | 149 / 187 | **45 / 47** | 13.3 / -9.9 | 23.0 / -1.3 / -15.9 |
+| B3 λ=1 | 147 / 160 | **44 / 44** | 13.7 / -9.9 | 23.3 / -1.1 / -15.8 |
+| B3 λ=100 | 145 / 155 | **44 / 44** | 13.8 / -9.9 | 23.3 / -1.1 / -15.8 |
+| B3 λ=10⁴ | 153 / 189 | **45 / 46** | 13.4 / -9.9 | 23.2 / -1.1 / -16.3 |
+| B4 λ=1 | 149 / 167 | **44 / 87** | 13.7 / -9.9 | 23.3 / -1.2 / -15.8 |
+| B4 λ=100 | 149 / 175 | **48 / 63** | 13.8 / -9.9 | 23.3 / -1.5 / -15.8 |
+| B4 λ=10⁴ | 152 / 184 | **44 / 46** | 13.3 / -9.9 | 22.9 / -1.1 / -16.3 |
+| B0_resample16 | 146 / 160 | **44 / 44** | 13.8 / -9.9 | 23.3 / -1.1 / -16.4 |
+
+- **인증 위반 대비 물리 관통 [D].** exec8: reference 129 → 86, `to_recorded` 48 → 44, `to_resolved` 47 → 45, cuRobo 14 후보 145–153 → 43–48. plan16: reference 203 → 136, `to_recorded` 90 → 59, cuRobo 14 후보 153–189 → 43–87 (B4 λ=1 87 · λ=100 63, 나머지 12 후보 43–47).
+- 위 §6.4 의 "인증 위반 chunk 수 (all)" 대비 (exec8: `to_recorded` 48 대 cuRobo 145–153) 는 물리 기준 exec8 에서 `to_recorded` 44 대 cuRobo 43–48 이다. plan16 은 `to_recorded` 59 대 cuRobo 43–47 (B4 λ=1 · λ=100 은 87 · 63). min clearance exec8 p5 는 `to_recorded` −8.5 mm 대 cuRobo −1.1 ~ −1.5 mm 이고, exec8 min 은 `to_recorded` −13.9 mm 대 cuRobo −15.8 ~ −16.9 mm 다.
+- **이 STEP 은 all 750 chunk 만 보고한다.** TO-active 530 chunk · 부분집합별 (§6.2, §6.3) 의 물리 재집계는 `verify.json` 의 `numbers` 에 없고, 물리 기준의 paired count (같은 chunk 가 둘 다 관통하는지) 도 계산하지 않았다.
+- 인증 clearance 는 우리 TO 가 최적화 중 제약으로 받은 값이고 cuRobo 후보는 받지 않았다 [I]. 따라서 위 표의 "인증 위반" 열은 두 방법에 같은 조건이 아니었다.
+
 ### 7. Figure (verifier 생성, 이 절에서는 링크만)
+
+> 2026-10-22 정정: figure 의 "penetration" 표기 (예: `T63_graph.json` 의 `penetration_exec8` 키, 표 figure) 는 **인증 clearance 위반 chunk 수**이다. figure 파일은 verifier 산출물이라 수정하지 않았다.
 
 1. **실제 장면 + 궤적 비교** — [`figures/T63_scene.png`](figures/T63_scene.png) · [`T63_scene.json`](figures/T63_scene.json). 선택 규칙 (사전 고정, sidecar): place stratum episode 의 TO-active chunk 중 `to_recorded` exec8 min clearance 가 가장 낮은 chunk → ep 211, chunk 696 (왼손). 왼쪽 위 MuJoCo 3인칭 view, 오른쪽 위 base frame 의 target 점군 + TCP 경로 3D, 왼쪽 아래 top view, 오른쪽 아래 step 별 min clearance (reference · `to_recorded` · B0 · B4 λ = 1 / 100 / 10⁴). **한 chunk 의 예시이고 대표 사례로 고른 것이 아니다.**
 
@@ -5497,7 +5563,7 @@ split 크기 [V]: all 750, TO-active 530, TO-inactive 220, `esdf_free` 있음 51
 
 ### 8. 한계와 측정하지 않은 것 (사실만)
 
-1. **offline 명령 궤적만.** 실제 궤적 (`measured_qpos`) 기준 contact 는 재지 않았다 (`not_measured` [V]). MuJoCo 의 kp · damping 때문에 명령과 실제가 다르므로 이 표의 관통은 "명령 궤적이 평가기 field 안으로 들어간 chunk" 이고 실제 접촉이 아니다.
+1. **offline 명령 궤적만.** 실제 궤적 (`measured_qpos`) 기준 contact 는 재지 않았다 (`not_measured` [V]). MuJoCo 의 kp · damping 때문에 명령과 실제가 다르므로 이 표의 ~~관통~~ 인증 위반은 ~~"명령 궤적이 평가기 field 안으로 들어간 chunk"~~ "명령 궤적의 인증 clearance (10 mm 여유 포함) 가 0 아래인 chunk" 이고 물리적 관통도 실제 접촉도 아니다 (2026-10-22 정정, T63b).
 2. **평가기 충실도.** 기록된 `refined_chunk` 의 exec8 최소 clearance 를 평가기가 다시 계산한 값과 record `to.metrics.clearance_m` 을 비교했을 때, **750 chunk 중 22 chunk 가 허용 0.01 mm 를 넘었다** (최대 15.0 mm, 중앙값 8.2e-06 mm). 그 22 개 중 21 개가 TO-active 이다 [D]. 지지면 inlier mask 는 748 / 750 chunk 에서 record 와 같다 (불일치: ep126 #359, ep1345 #365). 이 chunk 들은 **제외하지 않고 포함**했고, 표 1 의 `to_recorded` 행도 같은 평가기 값이다. 단계 3 준비 때의 충실도 (최대 0.00008 mm, ep211 75 chunk + smoke 8 chunk [I]) 는 전체 750 chunk 에서 유지되지 않았다. 원인은 확인하지 않았다.
 3. **cuRobo 결과의 solve 순서 의존.** 같은 순서로 다시 돌리면 bit 단위로 같다 [I]. 그러나 앞선 chunk 결과가 바뀌면 뒤 chunk 가 바뀐다: 전체 실행과 단계 3 준비 smoke (`smoke/curobo_r3`, ep126 · ep211 × 위치 0, 20, 40, 60 = 8 chunk) 의 같은 후보 · 같은 chunk 비교에서 `max |q|` 차가 최대 **0.175 rad** (B4 λ=1), 성공 여부가 달라진 chunk 는 0 [V]. 결과를 "chunk 독립" 으로 읽으면 안 된다. 원인은 확인하지 않았다 (implementer 는 optimizer 내부 상태로 추정). 전체 실행의 다른 chunk 순서는 측정하지 않았다.
 4. **finger 열림.** cuRobo 최적화는 chunk 당 한 값 (step 0 = 측정값) 이다. server envelope 가 plan window 안에서 최대 36 mm 벌어지는 구간이 있다 (사과 놓기 · 열기, episode 별 최대 3–36 mm [I]). 평가기는 모든 후보에 step 별 served 열림을 똑같이 쓴다.
@@ -5511,7 +5577,7 @@ split 크기 [V]: all 750, TO-active 530, TO-inactive 220, `esdf_free` 있음 51
 
 ### 9. 미확인 후보 (측정하지 않았다 — 원인으로 쓰지 않는다)
 
-cuRobo 후보의 관통 chunk 가 reference 와 우리 TO 보다 많은 이유에 대해 **원인을 확인한 실험은 없다.** 아래는 다음 측정에서 가를 수 있는 후보일 뿐이다.
+~~cuRobo 후보의 관통 chunk 가 reference 와 우리 TO 보다 많은 이유~~ cuRobo 후보의 **인증 위반** chunk 가 우리 TO 보다 많은 이유 (2026-10-22 정정: 인증 clearance 는 10 mm 여유를 포함하고 cuRobo B0–B4 는 이 여유를 받지 않았다 [I]. B0m 이 그 여유를 world 에 반영해도 offline 인증 위반 exec8 은 143 (B0 146) 이다 [V], T63b §8. 물리 관통 exec8 은 `to_recorded` 44 대 cuRobo 43–48 [V], §6.6) 에 대해 **원인을 확인한 실험은 없다.** 아래는 다음 측정에서 가를 수 있는 후보일 뿐이다.
 
 - 미확인 후보 1: goal 이 chunk 끝 joint 값 (`reference[-1]`) 에 고정되어 있어, 중간 경로가 장애물을 피해도 끝 상태로 되돌아가야 한다.
 - 미확인 후보 2: cuRobo 는 collision 을 가중 1e5, activation 거리 10 mm (0.01 m) 의 cost 항으로 더하는 soft penalty 로 다루므로, 다른 항과의 균형 속에서 chunk 안 clearance 가 음수로 남을 수 있다 (실패 판정은 constraint 로 따로 낸다 [I]).
@@ -5520,4 +5586,366 @@ cuRobo 후보의 관통 chunk 가 reference 와 우리 TO 보다 많은 이유�
 
 - **결정됨 (사용자, 2026-10-21):** cuRobo 를 서빙 경로에 넣은 **10 episode closed-loop** 을 돌린다. 어느 후보 · λ · episode · 지표로 어떻게 연결하는지는 후속 task 에서 고정한다. 이 절은 후보를 고르지 않았고, §6 의 offline 수치가 closed-loop 결과를 예측한다고 쓰지 않는다. 실제 궤적 (`measured_qpos`) contact · success · HOLD 는 그 단계의 주 지표다.
 - 재측정 대기 표에 항목 50–51 을 추가했다 (위).
+- ~~결정된 closed-loop 은 후속 task 에서 고정한다~~ **(2026-10-22 추가)** 이 closed-loop 은 T63b 로 실행되었고 (B0 → B0m 변형, 10 episode), 사용자 판정 3 (2026-10-22) 으로 cuRobo 비교는 종료되었다. 아래 "T63b" 절.
 - 되돌아올 지점: (a) 평가기 충실도 22 / 750 chunk 의 원인 (평가기 대 server 의 scene 재구성 차이 후보 — 확인 전), (b) cuRobo 의 solve 순서 의존 (최대 0.175 rad), (c) cuRobo 에 step 별 finger 열림을 넣는 설계, (d) 66.7 ms 주기 안 계산 시간 (warm median: B1 64 ms, B2 70–73 ms, B3 82–84 ms, B4 111–121 ms [V]) — closed-loop 진입 판정에서 다룬다.
+
+## T63b — cuRobo B0 를 서빙 TO 자리에 넣은 10 episode closed-loop · B0m · 물리 clearance 재집계 (T63 의 후속 STEP, 2026-10-21 ~ 22 KST)
+
+> 작성: ag3s-scribe, **2026-10-22 02:30 KST** (머신 시계 2026-10-21 17:30 UTC + 9 h. 같은 시계로 `T63b.verify.json` 수정 01:48 KST, figure 3 종 수정 01:43–01:44 KST, `T63b.task.md` 수정 02:26 KST). 근거: [`handoff/T63b.task.md`](handoff/T63b.task.md) (목적 · 사용자 판정 1–3 · B0m · 물리 clearance 정의 · place 뒤 조기 종료 규칙), [`handoff/T63b.impl.md`](handoff/T63b.impl.md) (CR0 서빙 연결 · smoke · B0m · snapshot, implementer 측정), [`handoff/T63b.verify.json`](handoff/T63b.verify.json) (측정 수치, verifier 측정). run 디렉토리: `/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26` (`verify/T63b/`).
+> **수치 출처 표기.** `[V]` = `T63b.verify.json` 의 `numbers` (verifier 측정, 독립 재현 포함). `[I]` = `T63b.impl.md` (implementer 측정 · 설명, 이 절의 해당 항목은 verifier 가 다시 재지 않았다). `[T]` = `T63b.task.md` 의 사용자 판정 · 정의 (측정값이 아님). `[D]` = 이 절에서 `[V]` 값으로 계산한 파생값 (합 · 비 · 차). 계획값 · placeholder 는 없다.
+> 이 절은 **구현과 측정의 기록**이다. 어느 쪽이 낫다고 미리 정하지 않았고, 아래 문장은 표의 숫자가 보이는 범위에 한정한다. 마지막 절은 사용자가 이 STEP 에서 cuRobo 비교를 **종료**하기로 한 판정이다.
+
+### 1. 목적과 범위
+
+T63 은 cuRobo v2 의 최적화기를 우리 입력 위에서 **offline 으로** 돌려 *명령 궤적* 만 쟀다. T63b 는 그 다음 단계로 cuRobo B0 (기본 cuRobo + 우리 목적함수 항 없음) 를 **서버의 TO 자리에 넣어 실제로 실행**하고, 같은 장면 · 같은 seed 의 VLA 단독 (**E0**) 과 현재 서빙 방식 (**C1aN**: 현재 serving flag + noun attention 으로 target 을 고르는 arm, 우리 TO = **CCR** 사용) 과 짝지어 **실제 궤적 (`measured_qpos`) 기준 contact** 와 작업 성공을 본다 [T].
+
+- 장면은 T63 offline 과 같은 10 개다 (IFG-APPLE 의 같은 seed, storage 의 `verify/IFG-APPLE/seeds.json`). place stratum 6 (ep 211 · 320 · 572 · 850 · 901 · 954), clear stratum 4 (ep 250 · 1345 · 126 · 309) [T]. **성공률 표본이 아니라 약 10 episode 의 빠른 확인이다.**
+- E0 · C1aN 은 **IFG-APPLE (2026-10-19 run `20261019T132719+0900_f15e587290f6_11408fd6d27f`) 의 같은 episode 기록을 재사용**했고 다시 돌리지 않았다 [T][V].
+- 도중에 두 가지가 바뀌었다. (1) CR0 smoke 에서 T63 평가기의 clearance 에 server 의 10 mm 여유가 들어 있음을 발견 → T63 기록 정정과 **B0m** 도입 (§6–7). (2) 사용자 판정 3 으로 cuRobo 비교 종료 (§13).
+
+### 2. 사용자 판정 타임라인 (KST, `T63b.task.md` 표기 날짜)
+
+판정 시각 (시 · 분) 은 task.md 에 없고 날짜만 있다. 판정 3 은 task.md 에 처음 2026-10-21 로 적혔다가 2026-10-22 정정.
+
+| 날짜 | 판정 시점 | 판정 [T] | 바뀐 것 |
+|---|---|---|---|
+| 2026-10-21 | T63 offline 결과를 본 뒤 (판정 1) | 다음 단계 = 기록 후 closed-loop 10 episode. **변형은 B0 하나** (기본 cuRobo + 단계 2 · 3 의 composed world, 우리 목적함수 항 없음). cuRobo 결과가 충돌 · 실패여도 **우리 TO 와 같은 인증 검사 · 정지 (HOLD) 규칙**을 그대로 적용 (최적화기만 바꾼 비교). HOLD 횟수도 보고 (정지 ≠ 보호). 장면 = offline 과 같은 10 개 | 새 arm 이름 `CR0` (cuRobo B0 in serving) |
+| 2026-10-21 | 사용자 규칙 (`.claude/ag3s-rules.md`) | closed-loop 기록은 place 뒤 2.5 s 에서 끝낸다 (client `--stop-after-place 2.5`). place = target 중심이 crate 안 ∧ 사용한 손 gripper 열림 ≥ 0.5. E0 · C1aN 기존 기록은 **같은 규칙으로 잘라 (place + 2.5 s) 다시 센다**. 성공 · grasp 판정은 바뀌지 않아야 하고 verifier 가 이 10 장면에서 다시 확인 | 짝 비교 공정성 (§9.5) |
+| 2026-10-21 | CR0 ep126 smoke 결과를 본 뒤 (판정 2) | **여유를 맞춘 B0m 먼저.** ① offline 750 chunk 를 B0m 으로 다시 재고 (T63 과 같은 평가기) ② ep126 smoke ③ 통과하면 10 episode (CR0m). T63 기록은 **용어 정정 + 물리 관통 추가** (저장 궤적에서 여유를 뺀 물리 clearance 를 모든 후보에 대해 CPU 로 다시 센다). 물리 clearance 정의 · smoke 통과 기준은 결과 전에 고정 | §6–8, T63 정정 |
+| 2026-10-22 (KST 새벽) | `T63b.verify.json` 결과를 본 뒤 (판정 3) | **cuRobo 비교 (T63 · T63b) 를 여기서 종료한다.** 진행 지연 가설 확인 (offline CPU) 과 B1 λ=10⁴ closed-loop 는 하지 않는다 | §13 |
+
+### 3. 이름 (이 절에서 쓰는 것)
+
+| 이름 | 뜻 |
+|---|---|
+| **E0** | VLA checkpoint 단독. AG3S 요청 없음 (IFG-APPLE 의 규약) |
+| **C1aN** | 현재 서빙 (우리 TO, **CCR** = Constrained Chunk Refinement) + noun attention 으로 target 선택. 서빙 코드 tree `f0d8046` |
+| **B0** | cuRobo v2 기본 최적화기 (T63 §3). goal = chunk 끝 joint 값, 우리 목적함수 항 없음 |
+| **CR0** | B0 를 서버의 TO 자리에 넣은 arm. snapshot `snapshot_cr0` (tree `25982bb`) |
+| **B0m** | B0 + cuRobo world 의 거리에서 server 와 같은 `obstacle_margin` (10 mm) 을 우리 TO 와 같은 행 규칙으로 뺀 것. **목적함수 항 추가가 아니라 정보만 맞춘다** [T] |
+| **CR0m** | B0m 을 서버의 TO 자리에 넣은 arm. snapshot `snapshot_cr0m` (tree `883cf39`) |
+| **인증 clearance (certified clearance)** | 우리 TO 가 인증할 때 쓰는 clearance. **server `obstacle_margin` 10 mm (비-target 장애물 · support plane 행) 와 contact margin 을 포함**한다. 음수 = **인증 clearance 위반** |
+| **물리 clearance (physical clearance)** | 같은 평가기에서 `obstacle_margin` · contact margin 등 모든 여유를 0 으로 둔 signed distance `d − r`. 음수 = 실제 관통. target 행 면제 (권한 있는 손가락이 target 에 닿는 것) 는 contact policy 그대로 [T] |
+| **HOLD** | 인증이 실패한 chunk 에서 로봇을 현재 자세에 멈추는 규칙. 정지는 충돌을 피한 것이 아니라 일을 멈춘 것이므로 보호로 세지 않는다 (정지 ≠ 보호) |
+| **PRIMARY** | 성공 ∧ MuJoCo replay 접촉 행 없음 (IFG-APPLE agg 정의 [T]). verifier 의 표 머리글은 "success, no obstacle / non-auth target rows" 로 적는다 [V] |
+
+### 4. 구현: cuRobo B0 를 서빙 TO 자리에 (CR0) [I]
+
+**바뀐 것은 하나다.** 서버 refiner 안에서 우리 SQP 대신 cuRobo B0 가 50 step chunk 를 낸다. 그 chunk 의 plan window (16 step) 는 **우리 TO 의 인증 코드** (`_finish`) 로 검사하고, HOLD · 상태 보고 · 기록은 기존 `SafePolicy` 경로 그대로다. C1aN snapshot tree `f0d8046` 에 T63 의 `curobo_v2` 와 서버 flag `--to-backend {sqp, curobo-b0}` (기본 `sqp`) 만 더했다. 서버 argv 는 C1aN 과 같고 flag 하나만 추가된다. working tree 의 다른 세션 미커밋 변경은 섞지 않았다.
+
+- **cuRobo 설정은 T63 offline B0 와 같다.** 같은 270 sphere robot · `link_torso_5` base · composed world (상자 안 `esdf_free`, free 층이 없으면 `min(coarse, fine)`, 상자 밖 coarse) · goal = chunk 의 `reference_chunk[-1]` (cspace) · seed = reference · timing `exact` · self-collision off · 우리 TO 의 joint limit. 입력은 record 배열 대신 **서버가 그 chunk 에 만든 live field · `q_now` · finger 열림**이다.
+- **인증 쪽.** `certify` 가 snapshot `TrajectoryOptimizer._solve` 의 서두 (continuity 를 look-ahead 창으로 자르기 · TA history · 빈 scene passthrough · attached · reference violation · servo / path · host mirror) 를 옮긴 뒤 `_finish` 를 부른다. 빠지는 것은 **SQP loop 와 look-ahead gate** 뿐이다. 그래서 CR0 chunk 에는 iteration cap 이 없어 status `feasible` (budget_only) 이 나오지 않는다 (깨끗하면 `optimal`).
+- **cuRobo 가 실패해도 HOLD 가 아니다.** cuRobo `success = false` 만으로는 HOLD 가 되지 않고, 인증 결과가 HOLD 를 정한다. cuRobo 출력이 None · 비유한 · 예외 · field 없음이면 reference 를 `solver_failed` (verdict `unverified`) 로 반환해 HOLD 가 된다. 이 경우는 10 episode 에서 0 이었다 (backend fallback 0, [V]).
+- **solver 는 서버 수명 동안 하나.** 서버 시작 시 warm-up (solver build 11.0 s, 합성 world solve 2 회: 첫 solve 4,620 ms = CUDA graph capture, 둘째 57.8 ms) 을 episode 전에 끝낸다. chunk 마다 cuRobo solve ms · success · failure reason · 인증 결과를 `curobo_b0_chunks.jsonl` 과 constraint record 에 남긴다.
+
+**flag off 일 때 C1aN 과 같다는 증거 (CPU, [I]).**
+
+| 검사 | 결과 |
+|---|---|
+| 기존 `tests/trajopt` 전체 — base `f0d8046` 대 `snapshot_cr0` | test id 별 결과 같음 (1,745 passed · 5 skipped, 같은 1 failed 와 같은 3 collection error 는 base 에도 있음). 최종 tree 의 T63 · T63b test 71 개를 빼면 같다 |
+| 기록 ep126 75 chunk 를 두 tree 로 다시 풂 | **75 chunk 모두 bit 단위로 같다** (`to_resolved_chunk` · clearance · TCP 전부) |
+| 같은 재풀이 대 **서버 기록** `refined_chunk` | chunk 0 은 50 행 전부 bit 단위로 같다. bit 단위 같은 chunk 4 / 75, 1e-6 rad 안 18 / 75, TCP 차 median 0.038 mm · p95 0.28 mm · max 13.9 mm (#322, T63 의 chained 재현 오차와 같은 종류), status 일치 73 / 75 |
+
+**live 입력 ↔ offline B0 입력 대응 (live-input parity, [I]).** spec: sphere 270 개 centre · radius · link 차 0.0, joint limit 4 종 차 0.0, URDF md5 같음. world: ep126 chunk 0–5 에서 world channel buffer 와 cuRobo 궤적이 record 경로 (`load_chunk`) 와 서빙 경로 (`load_layers`, device 에서 float16 반올림) 사이에 **bit 단위로 같다** (6 / 6 PASS). device float16 반올림 == numpy `astype(float16)` (200k 값 + 경계값). smoke chunk 0 의 `reference_chunk` · `esdf_distance` · `esdf_free_distance` · `esdf_coarse_distance` 가 C1aN 기록 chunk 0 과 bit 단위로 같다. finger 열림은 linearizer parameter path step 0 (= 측정 개도) 이고 chunk 마다 jsonl 에 기록한다.
+
+**client 변경.** `--stop-after-place SEC` (기본 off) 를 `snapshot_cr0` 에 옮겼다. 서버 동작에는 영향이 없다. kit 의 `check_run.py` 는 place 뒤 조기 종료를 정상 종료 (mode `place_stop`) 로 받는다 [I].
+
+### 5. CR0 1 episode smoke (ep126, seed 1263) [I]
+
+| 항목 | CR0 smoke | 같은 장면 C1aN |
+|---|---|---|
+| 완료 | crash 0 · 600 control / 75 planning · backend fallback 0 | 완료 |
+| 성공 · grasp · place | ✗ · ✗ · ✗ (`no_grasp`) | ✓ · ✓ · ✓ |
+| HOLD chunk | **68 / 75** (전부 `collision`, t≈19 부터 끝까지 64 chunk 연속) | 1 |
+| 인증 status | violated 69 · optimal 6 | — |
+| cuRobo success | 10 / 75 (실패 65 전부 `scene_collision`) | — |
+| 최악 행 | 늘 손가락 (`ee_finger_l1`, MJCF 이름 `ee_finger_l2`) ↔ 비-target 표면 행 (`answer_excludes_target`) | — |
+| cuRobo wall median (host + sync) | 61.9 ms (66.7 초과 5 / 75) | — |
+
+이 smoke 는 판정용 숫자가 아니고 wiring 검사다. 같은 episode 의 CR0 행은 verifier 가 replay 로 다시 세어 closed-loop 표에 **참고 행** 으로 넣었다 (§9.1, `no_grasp`, HOLD 68, 장애물 접촉 0 으로 일치 [V]).
+
+### 6. 10 mm 여유의 발견 [I][T]
+
+CR0 smoke 의 최악 행이 늘 비-target 표면 행이었고 이 행에는 server `--obstacle-margin 0.010` (10 mm) 이 걸린다. cuRobo B0 는 이 여유를 모른다. 그래서 **T63 offline 평가기의 clearance 도 이 10 mm 를 포함한다** (`step3_eval.py:21`, server `TrajOptConfig` · `obstacle_margin 0.010`) [T]. 우리 TO 는 이 여유를 제약으로 받았고 B0 는 받지 않았다 [I].
+
+- 결론 1: T63 의 "관통 (< 0)" 은 **"10 mm 여유를 포함한 인증 clearance 위반"** 이다. T63 절의 표기를 2026-10-22 에 정정했다 (T63 절 맨 위 정정 공지 · 표 머리글 · §6.6).
+- 결론 2: CR0 smoke 의 정지 (HOLD 68 / 75) 가 cuRobo 가 이 여유를 모르기 때문인지는 **확인하지 않았다** (impl 은 원인 미확인 후보로 적었다).
+
+### 7. B0m — 여유를 맞춘 B0 [I]
+
+**정의.** B0m = B0 + cuRobo world 의 거리에서 `obstacle_margin` (10 mm) 을 우리 TO 와 **같은 행 규칙**으로 뺀 것 [T]. task 는 "B0 world 에는 target 이 이미 빠져 있으니 거리 전체에서 0.010 m 를 빼면 같다" 고 보았으나, 구현에서 우리 TO 의 `_obstacle_rows` 가 **target 행과 support (테이블) 행에는 10 mm 를 주지 않음**을 확인해 B0m 이 같은 행 분류를 GPU 에서 다시 한다 [I].
+
+| 행 class | 우리 TO | B0m | 여유 |
+|---|---|---|---|
+| `target` | 최근접 표면이 target (`abs(d − d_obj) ≤ voxel`) ∧ 그 link 가 target 을 만져도 됨 | 같은 식 (target channel = 2.5 mm 거리 grid) | 0 |
+| `support` | 어느 지지 평면 `k` 에서 `abs(d − (n_k·p − o_k)) ≤ 2 voxel` | 같은 식 (평면은 해석적, 8 slot) | 0 |
+| `obstacle` | 나머지 | 나머지 | `max(행 margin, 0.010)` → 0.010 |
+
+**우리 TO 와 다르게 처리되는 행 (B0m 이 싣지 않는 것, [I]).** contact margin (target 행의 `manipulated_link_margin`, 0 으로 둠, 150 chunk 의 648,000 행 중 199 행), 상자 안 비-권한 행의 target (b0 world 는 상자 안 모든 행에 `esdf_free` = target 제외를 써서 그 행에게 target 이 보이지 않음, 118 행), 쥔 물체 질의점 (cuRobo 에 attached 없음; offline 10 episode 에 attached chunk 는 0), target 판정 오차 (정확 거리 `cKDTree` 대 2.5 mm grid 삼선형 보간).
+
+**B0m parity (150 chunk × 16 step × 270 구 = 648,000 행, ep126 + ep211, [I]).**
+
+| 검사 | 결과 |
+|---|---|
+| cuRobo `b0m` world 대 numpy 참조, class 가 같은 행 | 645,048 행 (99.54 %). abs(차) median 0.0006 · p95 0.0016 · max 0.0027 mm. 허용오차 (답한 층 voxel / 2) 초과 0 |
+| class 불일치 | 2,952 행 (0.456 %). 모두 target 판정의 tolerance 띠 안. 여유가 cost 를 바꿀 수 있는 행 (`d_b0 − r < 30 mm`) 58,624 행 중 불일치 **490 (0.84 %)**: target→obstacle 234 (B0m 이 10 mm 를 더 줌), obstacle→target 237 (B0m 이 10 mm 를 빼먹음), target↔support 19 |
+| 우리 인증 clearance 와 비교 (같은 거리 ∧ 같은 margin 인 행 644,886) | abs(차) median 0.0006 · p95 0.0016 mm, 2.5 mm 초과 0 (max 2.496 mm 는 "같은 거리" 선택 기준 voxel / 2 = 2.5 mm 에 묶인다) |
+
+**서빙 연결.** `--to-backend curobo-b0m` 은 `--obstacle-margin` > 0 일 때만 허용되고, 규칙은 chunk 마다 **인증에 쓰는 같은 live scene** 에서 읽는다 (scene margin 이 server config 와 다르면 예외 → `solver_failed`). jsonl 에 `b0m_rule` 을 남긴다. flag off 는 C1aN 과 같다: 기록 chunk 재풀이가 `snapshot_cr0` 와 bit 단위로 같고, 전체 trajopt test 결과는 test id 별로 같다 (1 failed · 1,832 passed · 24 skipped · 3 errors, 같은 1 failed · 3 collection error 는 base 에도 있음) [I]. **verifier 가 `snapshot_cr0m` 이 `git archive 883cf39` 와 같음을 확인했다** (`__pycache__` 제외, [V] `code_state`).
+
+**CR0m 1 episode smoke (ep126, seed 1263) — 사전 고정 통과 기준 [T] 의 결과 [I].**
+
+| 기준 | 결과 | 판정 |
+|---|---|---|
+| crash 없음 | chain rc 0 · 600 control / 75 planning · server 기록 75 / 75 · fallback 0 | 만족 |
+| 끝에서 이어지는 HOLD < 20 chunk | 끝 연속 HOLD **0** (가장 긴 연속 3) | 만족 |
+| (성공 여부는 통과 기준이 아니다) | 성공 ✗ (`no_grasp`) | 결과로 보고 |
+
+CR0 smoke 와 나란히: HOLD 68 → **3**, 인증 violated 69 → 6, cuRobo success 10 → 43 / 75 (실패 32 = `cspace` 17 · `scene_collision` 15), cuRobo wall median 61.9 → 112.6 ms [I]. 이 smoke 의 통과로 10 episode (CR0m) 를 진행했다 [T].
+
+### 8. (a) offline 750 chunk — 인증 clearance 위반 대 물리 관통, 모든 후보 [V]
+
+**실행 사실 [V].** 18 후보 (reference · `to_recorded` · `to_resolved` · T63 cuRobo 14 · **B0m**) 전부 750 / 750 chunk 평가 (`n_phys_evaluated` 750). B0m 은 이 STEP 에서 새로 풀었고 (GPU, lock 2026-10-22 00:48:17 – 00:51:28 KST = 15:48:17 – 15:51:28 UTC, lock 시점 compute process 0, 750 chunk 134 s, init 2.0 s · cold 5,529 ms), 나머지 17 후보는 **T63 verifier 의 저장 궤적을 다시 쟀다** (재풀이 없음, `--resolve saved:`). 회귀 기준선 일치 (legacy 14 / 15 · 15 / 15 · −29.031048 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877 mm). 독립 재현 검사 3 개:
+
+| 검사 | 결과 [V] |
+|---|---|
+| 1. T63 후보 17 개의 인증 지표 (`phys_*` 를 뺀 metric dict) 가 T63 verifier 의 `rows_ep*.json` 과 같은가 | **12,750 / 12,750 같음** (17 후보 × 750 chunk). **T63 의 숫자는 하나도 바뀌지 않았다** |
+| 2. B0m 의 ep126 · ep211 행이 impl 의 offline smoke 와 같은가 (전체 실행의 첫 150 chunk 와 같은 순서) | 행 150 / 150 같음 (timing 제외), 궤적 배열 bit 단위 같음 |
+| 3. B0m 규칙 입력 `rules/*.npz` 를 verifier 가 독립으로 다시 만든 것이 impl 의 것과 같은가 | 10 / 10 byte 같음 |
+
+B0m 의 cuRobo 결과 (750 chunk) [V]: success 498 · `scene_collision` 실패 165 · `cspace` 실패 12 · `cspace` + `scene_collision` 실패 75 (solver failure 252, B0 144). warm solve wall median 107.8 ms (p95 110.6, GPU CUDA event median 94.0 ms), **66.7 ms 초과 750 / 750**.
+
+**표 a1. 인증 clearance 위반 대 물리 관통 (all, 750).** 인증 위반 = 인증 min clearance (10 mm 여유 · contact margin 포함) < 0 인 chunk 수 (= T63 의 "관통 chunk"), 물리 관통 = 물리 min clearance < 0 인 chunk 수. exec8 = chunk 앞 8 step (실제 실행 구간), plan16 = plan window 16 step. min clearance 의 median · p5 · min 은 chunk 들에 대한 값이다. 시간은 T63 후보는 T63 기록 (재측정 안 함), B0m 은 이 STEP 의 측정이고 device 가 다르다 (`to_recorded` = server CPU, `to_resolved` = offline CPU, cuRobo · B0m = GPU H200).
+
+| 후보 | solver failure (chunk) | 인증 위반 exec8 / plan16 | **물리 관통 exec8 / plan16** | 물리 min clearance exec8 median / p5 / min (mm) | 물리 min clearance plan16 median / p5 / min (mm) | warm solve wall median (ms) | warm 66.7 ms 초과 비율 |
+|---|---:|---|---|---|---|---:|---:|
+| reference (VLA 원본 chunk) | 0 | 129 / 203 | **86 / 136** | 26.4 / -12.8 / -18.6 | 24.9 / -13.2 / -18.6 | — | — |
+| `to_recorded` (우리 TO 기록) | 101 | 48 / 90 | **44 / 59** | 27.3 / -8.5 / -13.9 | 25.1 / -11.6 / -14.3 | 162 | 93.1 % |
+| `to_resolved` (우리 TO 재풀이) | 102 | 47 / 90 | **45 / 58** | 27.3 / -9.2 / -15.3 | 25.2 / -11.9 / -15.3 | 119 | 74.0 % |
+| B0 | 144 | 146 / 161 | **44 / 44** | 23.3 / -1.1 / -16.3 | 19.9 / -1.1 / -16.3 | 57 | 7.6 % |
+| B1 λ=1 | 143 | 147 / 156 | **44 / 44** | 23.3 / -1.1 / -16.3 | 19.9 / -1.1 / -16.3 | 64 | 16.7 % |
+| B1 λ=100 | 143 | 145 / 153 | **44 / 44** | 23.4 / -1.1 / -16.6 | 21.0 / -1.1 / -16.6 | 64 | 17.9 % |
+| B1 λ=10⁴ | 165 | 152 / 186 | **43 / 44** | 23.0 / -1.1 / -16.0 | 20.3 / -1.2 / -16.0 | 64 | 13.2 % |
+| B2 λ=1 | 143 | 146 / 162 | **43 / 43** | 23.2 / -1.1 / -16.3 | 19.9 / -1.1 / -16.3 | 70 | 90.0 % |
+| B2 λ=100 | 143 | 145 / 153 | **44 / 44** | 23.3 / -1.1 / -16.9 | 21.0 / -1.1 / -16.9 | 70 | 97.5 % |
+| B2 λ=10⁴ | 174 | 149 / 187 | **45 / 47** | 23.0 / -1.3 / -15.9 | 19.9 / -1.3 / -15.9 | 73 | 95.5 % |
+| B3 λ=1 | 144 | 147 / 160 | **44 / 44** | 23.3 / -1.1 / -15.8 | 19.9 / -1.1 / -15.8 | 83 | 100.0 % |
+| B3 λ=100 | 144 | 145 / 155 | **44 / 44** | 23.3 / -1.1 / -15.8 | 21.4 / -1.1 / -15.8 | 84 | 100.0 % |
+| B3 λ=10⁴ | 171 | 153 / 189 | **45 / 46** | 23.2 / -1.1 / -16.3 | 20.3 / -1.3 / -16.3 | 82 | 100.0 % |
+| B4 λ=1 | 169 | 149 / 167 | **44 / 87** | 23.3 / -1.2 / -15.8 | 19.9 / -5.7 / -24.8 | 121 | 100.0 % |
+| B4 λ=100 | 162 | 149 / 175 | **48 / 63** | 23.3 / -1.5 / -15.8 | 20.8 / -4.3 / -26.9 | 111 | 100.0 % |
+| B4 λ=10⁴ | 175 | 152 / 184 | **44 / 46** | 22.9 / -1.1 / -16.3 | 19.9 / -1.3 / -16.3 | 114 | 100.0 % |
+| B0_resample16 | 143 | 146 / 160 | **44 / 44** | 23.3 / -1.1 / -16.4 | 20.3 / -1.1 / -16.4 | 56 | 2.5 % |
+| **B0m** | 252 | 143 / 143 | **48 / 48** | 23.5 / -1.8 / -16.4 | 21.3 / -1.8 / -16.4 | 108 | 100.0 % |
+
+**표의 숫자가 보이는 범위 (해석 없음).**
+
+- **인증 위반 대비 물리 관통 [D].** exec8: reference 129 → 86 (67 %), `to_recorded` 48 → 44 (92 %), `to_resolved` 47 → 45 (96 %), T63 cuRobo 14 후보 145–153 → 43–48 (28–32 %), B0m 143 → 48 (34 %). plan16: reference 203 → 136, `to_recorded` 90 → 59, cuRobo 14 후보 153–189 → 43–87, B0m 143 → 48.
+- **실행 구간 (exec8) 의 물리 관통 chunk 수.** reference 86 · `to_recorded` 44 · B0 44 · B0m 48 · T63 cuRobo 14 후보 43–48. plan16 은 `to_recorded` 59, cuRobo 14 후보 43–87 (B4 λ=1 87 · λ=100 63 을 빼면 43–47), B0m 48 [V][D].
+- **물리 min clearance.** exec8 min: reference −18.6 · `to_recorded` −13.9 · B0 −16.3 · B0m −16.4 (T63 cuRobo 14 후보 −15.8 ~ −16.9) mm. exec8 p5: `to_recorded` −8.5 · B0 −1.1 · B0m −1.8 mm. exec8 median: `to_recorded` 27.3 · B0 23.3 · B0m 23.5 mm.
+- **B0m 대 B0.** 인증 위반 exec8 143 (B0 146), plan16 143 (161). 물리 관통 exec8 48 (44), plan16 48 (44). solver failure 252 (144). warm wall median 108 (57) ms, 66.7 ms 초과 100 % (7.6 %).
+- **paired.** T63 §6.4 의 paired count (cuRobo 후보만 인증 위반 97–105 chunk 대 `to_recorded` 만 0–1) 는 인증 기준이다. **물리 기준 paired count (같은 chunk 가 둘 다 관통하는지) 는 이 STEP 에서 계산하지 않았다** (`verify.json` 에는 후보별 chunk 수만 있다).
+- **인증 기준의 성질 [I].** 인증 clearance 는 우리 TO 가 최적화 중 제약으로 받은 값이고 (10 mm 여유 포함) B0 · B1–B4 는 이 여유를 받지 않았다. B0m 은 그 여유를 world 에 반영한 변형이다.
+
+### 9. (b) closed-loop 10 episode — E0 · C1aN · CR0m [V]
+
+**실행 사실 [V].** 서버 1 개 (port 8292), client 1 개, GPU lock 2026-10-22 00:55:15 – 01:40:55 KST (15:55:15 – 16:40:55 UTC), lock 시점 compute process 0. 10 / 10 run 완료, chain rc 0, backend fallback 0, `replay_qpos_mismatch_rows` 10 episode 모두 0. 서버 기동 시 `code md5 == snapshot baseline` 과 import 가 `snapshot_cr0m` 아래임을 통과했다. episode 순서 = 211, 320, 572, 850, 901, 954, 250, 1345, 126, 309 (서버 · solver 하나로 이어서). 분석은 IFG-APPLE 과 같은 pipeline (`analyze_cl` · `replay_contacts` · agg) 이고 E0 · C1aN 은 **place + 2.5 s 로 잘라 다시 센 값**이다 (§9.5).
+
+#### 9.1 표 b1. arm 별 결과 (10 episode, window = place + 2.5 s, place 가 없으면 600 step)
+
+| 지표 | E0 (VLA 단독) | C1aN (우리 TO) | **CR0m** (cuRobo B0m) | CR0 smoke (B0, **ep126 1 run — 참고 행**) |
+|---|---|---|---|---|
+| episode | 10 | 10 | 10 | 1 |
+| success | 10 | 5 | **0** | 0 |
+| grasp | 10 | 6 | **0** | 0 |
+| PRIMARY | 10 | 5 | **0** | 0 |
+| failure mode | ok 10 | ok 5 · no_grasp 4 · slip_in_transport 1 | **no_grasp 10** | no_grasp 1 |
+| 장애물 접촉 행 (hand-obstacle · robot_other-obstacle · target-obstacle) | 0 · 0 · 0 | 0 · 0 · 0 | 0 · 0 · 0 | 0 · 0 · 0 |
+| 장애물 접촉 episode | 0 | 0 | 0 | 0 |
+| 비허용 link–target 접촉 행 (`robot_other-target`) / episode | 0 / 0 | **376 / 2** (ep320 15 · ep250 361) | 0 / 0 | 0 / 0 |
+| 이웃 과일 접촉 episode (`hand-fruit_other` 행) | 3 (56) | 2 (11) | 1 (7) | 0 (0) |
+| HOLD chunk / HOLD 가 있는 run | 0 / 0 | 91 / 7 | **148 / 6** | 68 / 1 |
+| HOLD 종류 | — | collision 46 · uncertified 45 | collision 148 | collision 68 |
+| planning chunk / control row | 373 / 2,946 | 538 / 4,279 | 750 / 6,000 | 75 / 600 |
+| 인증 status (server `to.status`) | — (TO 없음) | feasible 299 · optimal 138 · violated 101 | optimal 597 · violated 153 | optimal 6 · violated 69 |
+| TO 자리 시간 median / p95 (ms) (n chunk) | — | 205 / 643 (528, CPU SQP 기록) | 214 / 244 (740, cuRobo GPU + world load + 우리 인증 CPU) | 145 / 167 (74) |
+| 66.7 ms 초과 | — | 503 / 528 (95 %) | **740 / 740 (100 %)** | 74 / 74 (100 %) |
+| 명령 대 실제 TCP 차 median / p95 (mm) (pooled row) | 8.36 / 28.12 | 8.55 / 29.05 | 5.34 / 9.68 | 6.05 / 16.55 (n = 56 row) |
+| 성공 episode 의 완료 시간 median (s) (n) | 16.53 (10) | 14.40 (5) | — (성공 없음) | — |
+
+표 읽는 법.
+- **장애물 접촉 행은 세 arm 모두 0** 이다 [V]. 따라서 이 10 episode 는 장애물 접촉 지표로 arm 을 가르지 못한다 [D]. 접촉이 있는 것은 C1aN 의 비허용 link–target 접촉 376 행 (2 episode) 과 이웃 과일 접촉이다.
+- **HOLD 는 정지다.** CR0m 의 HOLD 148 chunk 는 모두 collision 이고 성공 0 과 함께 나왔다. HOLD 가 없는 4 episode (211 · 901 · 250 · 309) 에서도 CR0m 은 grasp 하지 못했다 (§9.3).
+- **TO 자리 시간은 device 가 다르다.** C1aN = 기록의 CPU SQP `to.solve_ms`, CR0m = cuRobo + world load + 우리 인증 (CPU) 의 합 (§9.4). 한 순위로 읽지 않는다. 각 arm 의 첫 chunk 는 시간에서 제외 (n = 740 / 528).
+- **명령 대 실제 TCP 차**: 명령 = `executed_actions[t]`, 실제 = `measured_qpos[t]` (step t 뒤 상태) 의 FK, 팔이 아닌 관절은 control row 의 qpos 를 쓴다 ([V] `not_measured` 의 정의). pooled row 수는 control row − 8 × HOLD chunk 와 같다 (CR0m 6,000 − 8 × 148 = 4,816, C1aN 4,279 − 8 × 91 = 3,551, [D]) — HOLD row 는 제외된 것으로 보인다.
+- **완료 시간**은 서로 다른 episode 부분집합의 median (E0 10 개, C1aN 성공 5 개) 이라 직접 비교하지 않는다.
+- window 를 600 step 전체로 세어도 success · grasp · PRIMARY · HOLD · 장애물 접촉 · 비허용 접촉 행 값은 같다 (E0 · C1aN 은 control row 만 6,000 으로 늘고 `apple-crate` 접촉 행 등 place 뒤 행만 바뀐다, §9.5).
+
+#### 9.2 표 b2. 같은 장면 · 같은 seed 의 짝 비교 (paired 2 × 2, n = 10)
+
+base arm 은 place + 2.5 s 로 잘라 다시 센 값이다. CI = episode 쌍 bootstrap 10,000 회 (seed 20261019), McNemar = exact 양측 p. **표본이 작아 검정은 방향 확인용이고, 여러 비교를 보정하지 않았다.**
+
+| 비교 | 지표 | 둘 다 성공 | base 만 | CR0m 만 | 둘 다 실패 | CR0m − base | 95 % CI | McNemar p |
+|---|---|---:|---:|---:|---:|---:|---|---:|
+| CR0m 대 C1aN | success | 0 | 5 | 0 | 5 | −0.50 | [−0.80, −0.20] | 0.0625 |
+| CR0m 대 C1aN | grasp | 0 | 6 | 0 | 4 | −0.60 | [−0.90, −0.30] | 0.03125 |
+| CR0m 대 C1aN | PRIMARY | 0 | 5 | 0 | 5 | −0.50 | [−0.80, −0.20] | 0.0625 |
+| CR0m 대 E0 | success | 0 | 10 | 0 | 0 | −1.00 | [−1.00, −1.00] | 0.001953 |
+| CR0m 대 E0 | grasp | 0 | 10 | 0 | 0 | −1.00 | [−1.00, −1.00] | 0.001953 |
+| CR0m 대 E0 | PRIMARY | 0 | 10 | 0 | 0 | −1.00 | [−1.00, −1.00] | 0.001953 |
+
+CR0m 이 성공하고 base 가 실패한 episode 는 한 개도 없다 (CR0m 만 = 0). stratum 별 (place 6 · clear 4) 값은 `verify.json` 에 있다 (같은 방향, n = 6 · 4).
+
+#### 9.3 episode 별 결과 (S = success, G = grasp 후 실패, − = grasp 없음)
+
+| episode (seed, stratum, 사용 손) | E0 | C1aN | CR0m | C1aN HOLD chunk | CR0m HOLD chunk | CR0m 인증 violated | CR0m cuRobo success / 75 | CR0m cuRobo wall median (ms) |
+|---|---|---|---|---:|---:|---:|---:|---:|
+| 211 (2113, place, left) | S | - | - | 34 | 0 | 0 | 52 | 111.4 |
+| 320 (3203, place, right) | S | - | - | 0 | 20 | 20 | 46 | 111.8 |
+| 572 (5723, place, right) | S | S | - | 3 | 27 | 28 | 31 | 114.1 |
+| 850 (8503, place, left) | S | S | - | 1 | 67 | 67 | 8 | 114.6 |
+| 901 (9013, place, left) | S | S | - | 2 | 0 | 0 | 63 | 113.7 |
+| 954 (9543, place, right) | S | - | - | 0 | 18 | 18 | 39 | 111.5 |
+| 250 (2503, clear, right) | S | G | - | 49 | 0 | 0 | 54 | 113.6 |
+| 1345 (13453, clear, left) | S | - | - | 0 | 13 | 14 | 47 | 114.4 |
+| 126 (1263, clear, left) | S | S | - | 1 | 3 | 6 | 43 | 112.7 |
+| 309 (3093, clear, right) | S | S | - | 1 | 0 | 0 | 68 | 112.6 |
+| 합 | S 10 | S 5 · G 1 · − 4 | − 10 | 91 | 148 | 153 | 451 | — |
+
+- C1aN 의 실패 5 episode: ep211 · 320 · 954 · 1345 = `no_grasp`, ep250 = grasp 후 `slip_in_transport`. 비허용 link–target 접촉 376 행은 ep320 (15) · ep250 (361) 에서 나왔다.
+- CR0m 의 HOLD 는 6 episode (320 · 572 · 850 · 954 · 1345 · 126) 에 있고, 4 episode (211 · 901 · 250 · 309) 는 HOLD 0 이다. 그 4 episode 에서도 grasp 는 없다.
+- 인증 violated 153 중 HOLD 가 아닌 chunk 는 5 개다 (ep572 1 · ep1345 1 · ep126 3, [D]). impl 은 이를 "follow-TO 로 실행된 violated chunk" 라 부른다 (ep126 은 t = 6 · 19 · 47, [I]).
+- cuRobo `success = false` 인데 인증이 `optimal` 인 chunk 가 146 개다 (표 b4). 이 chunk 들은 HOLD 가 아니다.
+- CR0m ep126 의 closed-loop 은 impl 의 CR0m smoke 와 `executed_actions` · `measured_qpos` · `predicted_chunks` 가 **bit 단위로 같다** (max abs diff 0.0, [V]). 이 episode 는 chain 의 9 번째, smoke 는 새 서버의 첫 episode 였다 (§10 이상 2).
+
+#### 9.4 CR0m 의 HOLD · 인증 · 계산 시간 (서버 기록 750 chunk) [V]
+
+**표 b3. cuRobo 결과 × 인증 결과 (750 chunk)**
+
+| cuRobo | 인증 | chunk | 비고 |
+|---|---|---:|---|
+| success | optimal | 451 | |
+| fail | optimal | 146 | `success = false` 만으로는 HOLD 가 아니다 |
+| fail | violated | 153 | |
+| success | violated | 0 | |
+
+cuRobo 실패 299 = `scene_collision` 181 · `cspace` 73 · `cspace` + `scene_collision` 45. 인증 `violated` 는 153 chunk 이고 HOLD 는 148 chunk 다 (collision 148).
+
+**표 b4. CR0m 의 chunk 당 시간 (ms, 750 chunk)**
+
+| 구성 | median | p95 | max | 66.7 ms 초과 chunk |
+|---|---:|---:|---:|---:|
+| cuRobo wall (host + sync) | 113.1 | 119.2 | 130.6 | **750 / 750** |
+| cuRobo GPU solve (CUDA event) | 97.2 | 100.3 | 107.4 | 750 / 750 |
+| world load (live field → cuRobo) | 12.0 | 15.7 | 18.8 | 0 / 750 |
+| 우리 인증 (CPU `certify`) | 85.7 | 118.2 | 249.7 | 456 / 750 |
+| **합 (TO 자리 전체, `total_ms`)** | **215.3** | 244.6 | 392.3 | **750 / 750** |
+
+참고: C1aN 의 TO 자리 시간 median 205 ms · p95 643 ms (기록의 CPU SQP, 표 b1), CR0 smoke 의 cuRobo wall median 61.9 ms · 합 145 ms. 시뮬레이션 loop 는 동기식이라 이 시간이 결과를 바꾸지 않는다 [I].
+
+#### 9.5 짝 비교 공정성 — E0 · C1aN 을 place + 2.5 s 로 잘라 다시 센 결과 (truncation fairness check) [V]
+
+규칙 [T]: place 검출 시각 `place_detect_t` = 사용한 손의 적용 gripper ≥ 0.5 ∧ target 중심이 crate 안 (`object_in_crate`) 인 첫 control row, 종료 시각 `stop_t` = `place_detect_t + 38` control row ([V] `window_rule`; 아래 표의 모든 쌍에서 차가 38). E0 · C1aN 의 20 run 에 이 규칙을 replay 상태로 적용했다.
+
+| 항목 | 결과 |
+|---|---|
+| place 가 검출된 run | 15 / 20 (E0 10 / 10, C1aN 5 / 10) |
+| **success 가 바뀐 run** | **0** |
+| grasp · PRIMARY · `place_t` 가 바뀐 run | 0 · 0 · 0 |
+| 잘라서 바뀐 값 | control row E0 6,000 → 2,946, C1aN 6,000 → 4,279. E0 `apple-crate` 접촉 행 3,376 → 322, `hand-crate` 43 → 31. C1aN `apple-crate` 1,889 → 168, `robot_other-crate` 24 → 0. HOLD (C1aN 91), 장애물 접촉 (0), 비허용 target 접촉 (376), 이웃 과일 접촉은 바뀌지 않았다 |
+
+episode 별 (`place_detect_t` / `stop_t`, control step, [V]):
+
+| episode | E0 | C1aN |
+|---|---|---|
+| 211 | 285 / 323 | place 없음 |
+| 320 | 324 / 362 | place 없음 |
+| 572 | 233 / 271 | 204 / 242 |
+| 850 | 197 / 235 | 242 / 280 |
+| 901 | 250 / 288 | 214 / 252 |
+| 954 | 237 / 275 | place 없음 |
+| 250 | 193 / 231 | place 없음 |
+| 1345 | 301 / 339 | place 없음 |
+| 126 | 213 / 251 | 197 / 235 |
+| 309 | 323 / 361 | 227 / 265 |
+
+CR0m 은 어느 run 도 place 에 도달하지 않아 600 step 전체가 window 다. **실제 client place-stop 이 발동한 run 은 없다** (§10 이상 1).
+
+#### 9.6 gripper 실행 창 사실 — close 명령이 chunk 의 앞 8 step 에 들어오는가 [V]
+
+서버 TO (우리 TO · cuRobo) 는 gripper 열 (사용한 손의 7 / 15 번째 열) 을 바꾸지 않는다: CR0m · C1aN 모두 모든 chunk 에서 `refined − reference` 의 gripper 열 최대 차 0.0 이다. 여기서 "close 명령" = 그 chunk 의 reference gripper 값이 0.5 보다 작은 step 이다. 실행 창 = chunk 의 앞 8 step (exec8).
+
+| episode (손) | CR0m: close 명령이 든 chunk / 그중 steps 0–7 에 든 chunk (HOLD 인 것) / steps 8–49 에만 든 chunk | CR0m: 실행된 row 중 gripper < 0.5 | CR0m grasp | C1aN: close 명령 chunk / steps 0–7 chunk (HOLD) / steps 8–49 에만 | C1aN: 실행 row 중 gripper < 0.5 | C1aN grasp |
+|---|---|---:|---|---|---:|---|
+| 211 (left) | 36 / 0 (0) / 36 | 0 | ✗ | 66 / 26 (0) / 40 | 202 | ✗ |
+| 320 (right) | 37 / 0 (0) / 37 | 0 | ✗ | 61 / 44 (0) / 17 | 334 | ✗ |
+| 572 (right) | 54 / 0 (0) / 54 | 0 | ✗ | 23 / 16 (0) / 7 | 122 | ✓ |
+| 850 (left) | 0 / 0 (0) / 0 | 0 | ✗ | 9 / 2 (0) / 7 | 14 | ✓ |
+| 901 (left) | 39 / 0 (0) / 39 | 0 | ✗ | 8 / 4 (2) / 4 | 23 | ✓ |
+| 954 (right) | 38 / 2 (0) / 36 | 6 | ✗ | 42 / 25 (0) / 17 | 187 | ✗ |
+| 250 (right) | 36 / 0 (0) / 36 | 0 | ✗ | 12 / 8 (4) / 4 | 18 | ✓ |
+| 1345 (left) | 66 / 14 (13) / 52 | 109 | ✗ | 22 / 13 (0) / 9 | 95 | ✗ |
+| 126 (left) | 0 / 0 (0) / 0 | 0 | ✗ | 7 / 3 (1) / 4 | 15 | ✓ |
+| 309 (right) | 52 / 0 (0) / 52 | 0 | ✗ | 8 / 3 (1) / 5 | 18 | ✓ |
+
+- **CR0m 10 run 중 8 run 은 어떤 chunk 의 앞 8 step 에도 close 명령이 없다** (ep211 · 320 · 572 · 850 · 901 · 250 · 126 · 309). 그 8 run 의 실행된 gripper < 0.5 row 는 0 이다.
+  - 그중 6 run (211 · 320 · 572 · 901 · 250 · 309) 은 close 명령이 36–54 chunk 에 있으나 **전부 step 8–49 에만** 있다.
+  - 나머지 2 run (850 · 126) 은 reference gripper 가 600 step 내내 ≥ 0.98 이라 close 명령 자체가 없다.
+- 나머지 2 run 은 앞 8 step 에도 close 명령이 있다. ep954 는 2 chunk (HOLD 0, 실행 row 6 개), ep1345 는 14 chunk (그중 13 chunk 는 HOLD, 실행 row 109 개). 두 run 도 grasp 는 없다.
+- **C1aN 은 10 run 모두 앞 8 step 에 close 명령이 든 chunk 가 2–44 개 있다** (실행 row 14–334). C1aN 의 `no_grasp` 4 run (211 · 320 · 954 · 1345) 에도 close 명령이 실행됐다 (실행 row 202 · 334 · 187 · 95) — grasp 가 없는 경로가 CR0m 과 같지 않다.
+- 이 표는 사실이다. **no_grasp 의 원인은 확인하지 않았다** (§13 미확인 후보).
+
+### 10. 이상 (anomalies) [V]
+
+1. **CR0m 에서 place-stop 이 한 번도 발동하지 않았다.** 10 run 모두 `place_detect_t = −1`, 마지막 control step 599 (traj 쪽 규칙과 replay 규칙이 10 / 10 일치). 따라서 `check_run.py` 의 `place_stop` 분기와 client `--stop-after-place` 의 실제 발동은 어느 run 으로도 시험되지 않았다 (impl 의 smoke 에서도 place 가 없어 발동하지 않았다). E0 · C1aN 의 `place_detect_t` 는 replay 상태 규칙으로만 구했고 실제 client place-stop 과 대조하지 않았다 (`not_measured`).
+2. **cuRobo solve 순서 의존.** 10 episode 는 서버 하나 · solver 하나로 위 순서대로 돌았고, 앞 episode 의 solve 이력이 뒤에 영향을 줄 수 있다 (T63 offline 에서 같은 후보 · 같은 chunk 의 최대 차 0.175 rad). 이번에 **관찰한 것은 한 episode** 다: ep126 (9 번째) 의 closed-loop 이 smoke (새 서버 첫 episode) 와 bit 단위로 같았다 [V]. 다른 9 episode 는 순서를 바꿔 다시 돌리지 않았으므로 순서 의존이 없다는 증거가 아니다. 순서 자체가 결과의 일부다 (`not_measured`).
+3. **B0m 의 계산 시간이 66.7 ms 를 모든 chunk 에서 넘는다.** offline 750 / 750 (warm wall median 107.8 ms, GPU 94.0 ms), 서빙 750 / 750 (cuRobo wall 단독 median 113.1 ms, TO 자리 합 median 215.3 ms, 표 b4). B0 offline 은 median 57 ms · 초과 7.6 % 였다 (T63). 최적화하지 않았다 [I]. 원인 [I]: optimizer 질의마다 분류용 거리 질의 3 개 (coarse · box · target, gradient 없음) 가 더해진다.
+4. (사실) B0m 은 offline 750 chunk 에서 B0 보다 cuRobo 실패가 많다 (252 대 144, 표 a1). impl 의 2 episode smoke 에서는 새 실패가 ep211 place 접근 구간 (#676–#725, `scene_collision`) 에 있었다 [I]. 원인은 확인하지 않았다.
+5. (사실) CR0m 의 `scene_collision` 실패 chunk 중 인증이 `optimal` 인 것이 있다 (표 b3 의 fail · optimal 146). cuRobo 의 실패 판정과 우리 인증 판정이 같지 않다 — 두 판정의 정의가 다르다 (T63 용어 "solver failure").
+
+### 11. Figure (verifier 생성, 이 절에서는 링크만)
+
+1. **실제 장면 + 궤적** — [`figures/T63b_scene.png`](figures/T63b_scene.png) · [`T63b_scene.json`](figures/T63b_scene.json). 선택 규칙 (사전 고정, sidecar): CR0m 과 C1aN 의 success 가 다른 episode ([126, 309, 572, 850, 901]) 중 가장 작은 번호 → **ep126 (clear, seed 1263)**. frame 시각 `t_key` = 둘 중 하나만 grasp 했을 때 그 arm 의 `grasp_t` → C1aN 의 120. 위: E0 · C1aN · CR0m 의 MuJoCo 3인칭 frame (t = 120), 아래: measured TCP 의 top view · side view 와 같은 seed 의 CR0m 대 C1aN measured TCP 거리 (n = 600 row, median 90.8 mm, max 310.6 mm, t_key 에서 123.6 mm [V]). **한 episode 의 예시이고 대표 사례로 고른 것이 아니다.**
+
+![T63b scene](figures/T63b_scene.png)
+
+2. **지표 graph** — [`figures/T63b_graph.png`](figures/T63b_graph.png) · [`T63b_graph.json`](figures/T63b_graph.json). (a) arm × episode 결과 (S / G / − · HOLD · 접촉 행), (b) 10 episode 합 (HOLD chunk · 장애물 접촉 행 · 비허용 target 접촉 행 · 장애물 접촉 episode), (c) chunk 당 TO 자리 시간 분포와 66.7 ms 선 (device 가 다르다), (d) offline 750 chunk 후보별 인증 위반 대 물리 관통 (exec8 · plan16, 표 a1).
+
+![T63b graph](figures/T63b_graph.png)
+
+3. **표** — [`figures/T63b_table.png`](figures/T63b_table.png) · [`T63b_table.json`](figures/T63b_table.json). 표 b1 (A) · 표 b2 (B) · 표 a1 (C) 의 요약.
+
+![T63b table](figures/T63b_table.png)
+
+### 12. 한계와 측정하지 않은 것 (사실만)
+
+1. **10 episode · 같은 10 장면.** offline 과 같은 장면이라 성공률 표본이 아니다. CI 는 n = 10 쌍의 bootstrap 이고 p 값은 보정하지 않았다.
+2. **E0 · C1aN 은 재사용한 기록**이고 place + 2.5 s 로 잘라 다시 센 값이다. 실제 client place-stop 과의 대조는 없다 (§10 이상 1).
+3. **서버 1 개 · solver 1 개 · 고정 episode 순서.** 순서를 바꾼 재실행 없음. 한 episode (ep126) 만 smoke 와 대조했다 (§10 이상 2).
+4. **B0m 은 우리 TO 의 규칙과 같지 않은 행이 있다 [I].** contact margin 0, 상자 안 비-권한 행에 target 이 보이지 않음, 쥔 물체 질의점 없음, target 판정 오차 (작동 구간 class 불일치 0.84 %). B0m parity 는 150 chunk (ep126 · ep211) 에서 쟀고 **750 chunk 로 넓히지 않았다** (선택 사항, 안 돌림, [V] `not_measured`).
+5. **cuRobo 쪽 한계 (T63 에서 이어짐).** finger 열림은 chunk 당 한 값 (step 0 측정값), self-collision 끔, cuRobo world 에 attached 물체 없음 [I]. look-ahead gate 는 돌지 않고 인증은 plan window 16 step 에서 앞 8 step 을 인증한다 (C1aN 의 gate-open 경우는 test 로 같음을 확인, gate-closed 경우는 test 하지 않음, [I]).
+6. **물리 clearance 는 저장된 명령 궤적에서 잰 값**이다. 실제 접촉은 closed-loop 의 MuJoCo replay 에서만 잰다. 물리 기준 paired count 는 계산하지 않았다.
+7. **T63 평가기 충실도 (22 / 750 chunk 가 0.01 mm 초과, 최대 15.0 mm) 는 해소되지 않았다.** 이 STEP 의 offline 평가도 같은 평가기다 (충실도 초과 chunk 는 T63 verifier 와 같은 값).
+8. **CR0 (B0) 의 closed-loop 은 ep126 1 run 뿐이고 B1–B4 는 closed-loop 으로 돌리지 않았다.** CR0 smoke 행은 참고용이다 (판정용 숫자 아님).
+9. **시간.** TO 자리 시간은 device 가 다른 값이다 (C1aN = server CPU 기록, CR0m = GPU cuRobo + CPU 인증). B0m 의 cuRobo wall median 은 서빙 113.1 ms 대 offline 107.8 ms [V] 이다. impl 은 서버 안에서 JAX · AG3S 와 GPU 를 같이 쓰기 때문으로 추정했고 확인하지 않았다 [I].
+10. **측정하지 않은 것 [V].** E0 의 TO 시간 · 인증 status (TO 없음), 실제 place-stop 과의 대조, 순서를 바꾼 solve 재현.
+
+### 13. 종료 결정 (사용자 판정 3, 2026-10-22 KST) · 미확인 · 되돌아올 지점
+
+**사용자 판정 [T]: cuRobo 비교 (T63 · T63b) 를 여기서 종료한다. 진행 지연 가설 확인 (offline CPU) 과 B1 λ=10⁴ closed-loop 는 하지 않는다.** 판정 근거로 제시된 결과는 `T63b.verify.json` 의 수치다:
+
+| 근거 [V] | 값 |
+|---|---|
+| offline 750 chunk 물리 관통 chunk (실행 구간 exec8) | 우리 TO 기록 44 · B0 44 · B0m 48 · VLA 원본 (reference) 86 |
+| closed-loop 10 episode (같은 장면 · seed) 성공 | CR0m 0 / 10 (모두 `no_grasp`), E0 10 / 10, C1aN 5 / 10 |
+| 장애물 접촉 행 | 세 arm 모두 0 |
+
+이 로그는 이 수치를 적을 뿐 어느 방법이 낫다고 결론짓지 않는다. 종료는 사용자 판정이다.
+
+**미확인으로 남기는 것 (원인으로 쓰지 않는다).**
+
+- **no_grasp 원인 가설 (미확인 후보).** B0 · B0m 에는 VLA 중간 경로를 따라가는 항이 없어 실행 구간에서 손이 덜 나아가고, VLA 의 닫기 명령이 실행 창 (앞 8 step) 에 들어오지 않는다는 가설이다 [T]. §9.6 의 사실 (CR0m 10 run 중 8 run 은 어떤 chunk 의 앞 8 step 에도 close 명령이 없음, 그중 6 run 은 step 8–49 에만 있음) 은 이 가설과 **같은 방향의 관찰**이지만, 가설을 시험한 실험 (예: VLA tracking 항을 넣은 B1 의 closed-loop) 은 하지 않았다. 그 실험이 사용자 판정 3 으로 하지 않기로 한 것이다.
+- CR0 smoke 의 정지 (HOLD 68 / 75) 가 cuRobo 가 10 mm 여유를 모르기 때문인지: ep126 한 episode 에서 B0m 의 HOLD 가 3 / 75 로 줄었으나, B0m 은 여유 외에도 행 분류 규칙이 같이 들어갔고 (§7) 변인을 분리하지 않았다.
+- B0m 의 offline 750 chunk 실패 (252 대 B0 144) 와 인증 최악 행이 step 0–1 의 `ee_finger_l1` 인 이유 (impl 의 추정 "시작 자세가 이미 10 mm 여유 안") 는 확인하지 않았다.
+
+**되돌아올 지점.** 종료한 것을 다시 열 신호: (a) no_grasp 원인 시험이 필요해질 때 — B1 (VLA tracking 항, λ=10⁴) closed-loop, 진행 지연 가설의 offline CPU 확인, (b) cuRobo 를 실시간 TO 후보로 다시 볼 때 — B0m 의 wall 113 ms · 인증 CPU 86 ms 를 66.7 ms 안으로 줄이는 설계, (c) 물리 기준 paired count 가 필요할 때 — 후보별 궤적이 저장되어 있으므로 (`verify/T63b/b0m_offline/` 과 T63 의 `curobo_merged`) 재풀이 없이 CPU 로 셀 수 있어 보인다 (계산해 보지 않았다). 재측정 대기 표에 항목 52–56 을 추가했고 50–51 에 주석을 달았다 (위).
