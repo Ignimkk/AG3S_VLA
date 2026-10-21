@@ -4,7 +4,7 @@
 작업 checkout `/mnt/dev/AG3S_VLA-development`, branch `feature/ag3s-development`.
 시작 HEAD `4292882ef3054a16c67c03d3fd6261ef8644a7e7`, origin `https://github.com/Ignimkk/AG3S_VLA.git`.
 최종 commit은 `git log -1`로 확인한다. Run의 commit은 검증 당시 base이며 변경 중인 code는
-[validated-code-state.json](validation/gpu-environment/validated-code-state.json)의 SHA-256으로 식별한다.
+[validated-code-state.json](../../archive/migration/validation/gpu-environment/validated-code-state.json)의 SHA-256으로 식별한다.
 main·benchmark·원본 legacy refs/submodule pin은 수정하지 않는다. AG3S algorithm과 기존 개선 이력을 유지한다.
 
 ## 완료된 변경
@@ -44,9 +44,9 @@ Norm stats를 새로 만들면 training에 해당 run/assets를 `--assets-base-d
 
 이전 live 환경을 metadata로 읽고 기존 `environments/legacy-python` snapshot과 함께 비교했다.
 cuRobo를 별도 환경으로 옮기고 자체 workspace metadata를 제외한 **279 distribution 버전**이 일치한다.
-[기존 직접 inventory](validation/gpu-environment/legacy-live-inventory.json),
-[현재 OpenPI inventory](validation/gpu-environment/development-openpi-inventory.json),
-[현재 cuRobo inventory](validation/gpu-environment/development-curobo-inventory.json)에 source URL까지 보존했다.
+[기존 직접 inventory](../../archive/migration/validation/gpu-environment/legacy-live-inventory.json),
+[현재 OpenPI inventory](../../archive/migration/validation/gpu-environment/development-openpi-inventory.json),
+[현재 cuRobo inventory](../../archive/migration/validation/gpu-environment/development-curobo-inventory.json)에 source URL까지 보존했다.
 LeRobot Git pin `0cf864870cf29f4738d3ade893e6fd13fbd7cdb5`를 재설치했다.
 OpenPI Torch transformer replacement 5개는 자기 vendored source와 installed 파일 SHA-256이 일치한다.
 
@@ -111,13 +111,13 @@ Raw GPU scripts/log/JSON과 action·ESDF 배열은 `verification/`, 새 MP4는 `
 각 venv에서 순서대로 실행한다. Raw measurement scripts는 당시 checkout/input 경로를 명시한 보존 artifact다.
 GPU가 사용 중이거나 공용 lock을 얻지 못하면 시작하지 않는다.
 
-Tracked 요약: [ENV_OUTPUT.verify.json](../../AG3S/ag3s/docs/handoff/ENV_OUTPUT.verify.json),
-[execution-verification.json](validation/gpu-environment/execution-verification.json),
-[legacy-audit.json](validation/gpu-environment/legacy-audit.json).
-Figure: [실제 policy 입력](../../AG3S/ag3s/docs/figures/env-output/recorded-policy-input.png),
-[action chunk](../../AG3S/ag3s/docs/figures/env-output/checkpoint-action-chunks.png),
-[ESDF](../../AG3S/ag3s/docs/figures/env-output/curobo-synthetic-esdf.png),
-[검증 표](../../AG3S/ag3s/docs/figures/env-output/gpu-validation-table.png).
+Tracked 요약: [ENV_OUTPUT.verify.json](../../../AG3S/ag3s/docs/handoff/ENV_OUTPUT.verify.json),
+[execution-verification.json](../../archive/migration/validation/gpu-environment/execution-verification.json),
+[legacy-audit.json](../../archive/migration/validation/gpu-environment/legacy-audit.json).
+Figure: [실제 policy 입력](../../../AG3S/ag3s/docs/figures/env-output/recorded-policy-input.png),
+[action chunk](../../../AG3S/ag3s/docs/figures/env-output/checkpoint-action-chunks.png),
+[ESDF](../../../AG3S/ag3s/docs/figures/env-output/curobo-synthetic-esdf.png),
+[검증 표](../../../AG3S/ag3s/docs/figures/env-output/gpu-validation-table.png).
 연구 로그와 review plan에는 factual infrastructure 결과만 append했다.
 
 ## `/mnt/dev/work` 삭제 가능 여부
@@ -130,7 +130,7 @@ Figure: [실제 policy 입력](../../AG3S/ag3s/docs/figures/env-output/recorded-
 
 | 점검 대상 | 현재 결과 / 필요한 후속 조건 |
 |---|---|
-| 최신 관리 문서 | v1.4 정본을 canonical `doc/PROJECT_FOLDER_AND_GIT_MANAGEMENT_FINAL.md`에 보존; 원본 3개와 hashes는 `legacy-management-v1.4`에도 보존 |
+| 최신 관리 문서 | v1.4 정본을 canonical `doc/archive/PROJECT_FOLDER_AND_GIT_MANAGEMENT_FINAL.md`에 보존; 원본 3개와 hashes는 `legacy-management-v1.4`에도 보존 |
 | 과거 source archive | storage `archive/source-snapshot-20261011`의 8,972개 SHA 정상; 변경된 운영 문서 2개는 추가 보존 |
 | 이전 폴더에만 있던 필요한 자료 | patch_dataset_timestamps.py, PPTX 2개, notices/config, 과거 paper build, cuRobo metadata 등 40개를 run/legacy-preservation에 보존; source/destination SHA 오류 0 |
 | 원본 Git object | 새 checkout에 없던 auxiliary object 2개를 `work-all-refs.bundle`로 보존, complete bundle verify 정상 |
@@ -148,7 +148,7 @@ Process와 link 상세는 run/legacy-audit의 `live-process-paths.json`와 `syml
 Codex auxiliary ref 이름은 작업 중 자동으로 갱신될 수 있으므로 이름의 정지 snapshot보다
 누락된 object SHA 두 개가 bundle에 보존된 사실을 판정 근거로 사용했다.
 
-보존 manifest: [legacy-preserved-files.json](validation/gpu-environment/legacy-preserved-files.json).
+보존 manifest: [legacy-preserved-files.json](../../archive/migration/validation/gpu-environment/legacy-preserved-files.json).
 Bundle 위치: 위 run의 `legacy-preservation/work-all-refs.bundle` (146,605,138 B).
 이 보존 자료와 shared input storage를 유지한 채 위 dependency 조건을 해소한 후 삭제 여부를 다시 판단한다.
 실제 삭제는 이번 작업 범위에서 수행하지 않는다. Commit은 현재 branch에만 생성하며 push는 사용자가 수행한다.

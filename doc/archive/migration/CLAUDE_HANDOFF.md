@@ -19,12 +19,12 @@ working tree는 그대로 두었다. 원본 dirty 상태를 새 clone에 다시 
 
 ```text
 AG3S_VLA 통합과 폴더 전환이 완료되었습니다. 현재 열린 checkout에서만 개발합니다.
-CLAUDE.md, .claude/project-context.md, doc/BRANCHES.md,
-doc/migration/source-manifest.json, doc/SHARED_STORAGE_AND_PYTHON.md,
-doc/migration/STORAGE_IMPLEMENTATION_REPORT.md를 먼저 읽으세요.
+CLAUDE.md, .claude/project-context.md, doc/active/BRANCHES.md,
+doc/active/migration/source-manifest.json, doc/active/SHARED_STORAGE_AND_PYTHON.md,
+doc/archive/migration/STORAGE_IMPLEMENTATION_REPORT.md를 먼저 읽으세요.
 Development는 자기 .venv-openpi-live/bin/python을 주 interpreter로, CPU 회귀는 .venv-ag3s, cuRobo producer는 .venv-curobo를 선택하세요.
 Input은 /mnt/dev/AG3S_VLA-storage이며 새 output은 results/development/<날짜_commit_run-id>/입니다.
-doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md의 GPU 검증과 legacy 삭제 조건을 읽으세요.
+doc/active/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md의 GPU 검증과 legacy 삭제 조건을 읽으세요.
 첫 응답에는 cwd, Git root, branch/HEAD, origin, 사용할 Python과 module __file__을 보고하세요.
 개선 branch와 V11AB 평가 branch의 source 기준을 혼합하지 마세요.
 기존 /mnt/dev/work의 Python source나 venv로 되돌아가지 마세요.

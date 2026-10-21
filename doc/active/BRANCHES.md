@@ -42,7 +42,7 @@ checkout 코드만 PYTHONPATH에 추가한다. Dataset/checkpoint 등 기존 inp
 
 새 폴더에서 **새 세션**을 시작한다. `/mnt/dev/work`의 이전 세션을 resume해 코드 편집을
 이어가지 않는다. `CLAUDE.md`, `.claude/project-context.md`, 이 문서, 자기 branch의
-`doc/migration/source-manifest.json`을 먼저 읽는다. SessionStart와 UserPromptSubmit hook이
+`doc/active/migration/source-manifest.json`을 먼저 읽는다. SessionStart와 UserPromptSubmit hook이
 실제 Git root·branch·HEAD와 branch 목적을 주입한다. Hook 실패 시 문서를 직접 읽고
 `scripts/setup/check_workspace.py`로 실제 경로를 확인한다.
 
@@ -65,7 +65,7 @@ module objects in this checkout; new code uses `AG3S.*` and `Baseline.*` directl
 
 Run `bash scripts/setup/create_cpu_env.sh` to create an independent CPU environment
 and Python installation in each checkout. Development GPU/OpenPI and independent cuRobo setup is now documented in
-`doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`; benchmark setup and end-to-end rollout remain separate.
+`doc/active/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`; benchmark setup and end-to-end rollout remain separate.
 
 ## External artifacts
 
@@ -85,16 +85,16 @@ CPU simulation test dependencies are pinned in `environments/testing/requirement
 
 ## Latest handoff
 
-`doc/migration/CLAUDE_HANDOFF.md`에 새 세션의 첫 확인과 남은 benchmark 작업을 기록한다.
+`doc/archive/migration/CLAUDE_HANDOFF.md`에 새 세션의 첫 확인과 남은 benchmark 작업을 기록한다.
 `scripts/setup/prepare_legacy_artifacts.py --relink`는 manifest의
 SHA-256을 확인한 뒤 ignored input link만 복원한다. 다른 checkout의 source는 연결하지 않는다.
 `pyproject.toml` editable package와 환경 requirements는 알고리즘 release 기준과 구분한다.
 
-현재 storage와 Python 정본: `doc/SHARED_STORAGE_AND_PYTHON.md`,
-`doc/migration/STORAGE_IMPLEMENTATION_REPORT.md`.
+현재 storage와 Python 정본: `doc/active/SHARED_STORAGE_AND_PYTHON.md`,
+`doc/archive/migration/STORAGE_IMPLEMENTATION_REPORT.md`.
 
 ## Legacy checkout retirement 후속 기록
 
 원본 Git·잔여 자료의 permanent archive와 역사적 sibling link/임시 worktree 정리는
-`doc/migration/LEGACY_RETIREMENT_REPORT.md`를 따른다. 이전 `/mnt/dev/work` 자체는 삭제하지 않았다.
+`doc/active/migration/LEGACY_RETIREMENT_REPORT.md`를 따른다. 이전 `/mnt/dev/work` 자체는 삭제하지 않았다.
 이 정리는 main·benchmark branch와 AG3S algorithm을 변경하지 않는다.

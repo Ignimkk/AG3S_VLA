@@ -2,7 +2,7 @@
 
 작성: 2026-10-15 KST. 용어 설명과 실험별 결과는 [FINAL_REPORT_KO.md](FINAL_REPORT_KO.md)에 있고, 기술 상세는 [SUMMARY_METHODS_RESULTS_KO.md](SUMMARY_METHODS_RESULTS_KO.md)에 있다. 연구 방향의 근거는 사용자 문서 `Novelty_contribution.pdf`("novelty 강화3")다.
 
-![방법론 변화](../../../AG3S/ag3s/docs/figures/ifg/ifg-method-evolution.png)
+![방법론 변화](../../../../AG3S/ag3s/docs/figures/ifg/ifg-method-evolution.png)
 
 > **모든 판단은 dev 결과 기준이다.** **사용자 판정(2026-10-15): 후보 B 채택**(§5). Held-out 검증 전까지 "dev 후보"로 표기한다.
 

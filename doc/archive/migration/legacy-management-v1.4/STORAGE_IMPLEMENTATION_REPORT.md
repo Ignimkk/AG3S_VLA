@@ -1,7 +1,7 @@
 # Storage 경로 분리 실행 결과
 
 완료 기록: **2026-10-11 23:58 KST**. 현재 경로 및 환경 안내의 정본은 이 문서와
-`doc/SHARED_STORAGE_AND_PYTHON.md`다. 이전 `IMPLEMENTATION_REPORT.md`는 최초 통합 당시 기록이다.
+`doc/active/SHARED_STORAGE_AND_PYTHON.md`다. 이전 `IMPLEMENTATION_REPORT.md`는 최초 통합 당시 기록이다.
 사용자가 이전 통합 commit과 원본 보존 refs를 push했다고 확인했다. 이번 후속 commit은 아직 push하지 않았다.
 
 ## 현재 구성 및 브랜치
@@ -67,7 +67,7 @@ GPU/OpenPI/cuRobo 별도 환경 설치, Panda adapter, LIBERO 계열 episode 평
 - `datasets/lerobot-atomic/local/rby1_atomic_basket_14d_v2`
 - `datasets/lerobot-transport/local/rby1_dataset_v1` (target: `datasets/rby1/rby1_transport_14d`)
 
-Raw log·JUnit·경로 집계는 `doc/migration/validation/storage/`에 보관한다. Raw JSON의 HEAD는
+Raw log·JUnit·경로 집계는 `doc/archive/migration/validation/storage/`에 보관한다. Raw JSON의 HEAD는
 실행 시점 commit이며 후속 문서 commit으로 덮어쓰지 않는다. 실제 최종 HEAD는 `git log -1`로 확인한다.
 위 검증 후 이번 임시 백업 `/mnt/dev/AG3S_VLA-storage-migration-backup-20261011T132205Z`을 **제거 완료**했다.
 이전 workspace와 사용자의 다른 backup은 보존했다.
@@ -77,7 +77,7 @@ Raw log·JUnit·경로 집계는 `doc/migration/validation/storage/`에 보관�
 두 새 폴더를 별도 VS Code 창으로 열고 각각 자기 `.venv-ag3s/bin/python`을 선택한다.
 새 terminal에서는 `source scripts/setup/env.sh` 후 `source .venv-ag3s/bin/activate`를 실행한다.
 기존 Claude session을 resume하지 않고 새 session에서 `CLAUDE.md`, `.claude/project-context.md`,
-`doc/BRANCHES.md`, `doc/SHARED_STORAGE_AND_PYTHON.md`, 이 보고서를 읽는다.
+`doc/active/BRANCHES.md`, `doc/active/SHARED_STORAGE_AND_PYTHON.md`, 이 보고서를 읽는다.
 
 아래는 후속 commit push 명령이다. 원본 legacy branch/tag를 다시 생성하거나 force push할 필요는 없다.
 

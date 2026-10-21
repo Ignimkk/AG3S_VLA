@@ -9,7 +9,7 @@
 
 | STEP | 상태 | 근거 |
 |---|---|---|
-| **T44–T56 재검증** (감사 문서 [`doc/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md`](../../../../doc/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md) 의 1–3 단계) | **완료** — T60 으로 수행 | 아래 T60 |
+| **T44–T56 재검증** (감사 문서 [`doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md`](../../../../doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md) 의 1–3 단계) | **완료** — T60 으로 수행 | 아래 T60 |
 | **T60** 종료 구간 P · H 술어, CL2 · CL3 · T53 · T54 재집계, T47 · T49 · T51 · T48a 선택 재계산 | **완료 · 판정 반영** | [`T60.task.md`](T60.task.md) · [`T60.verify.json`](T60.verify.json) · 로그 "T60" 절 · figures `t60/` · code `t60_*.py` (commit `e8e5bae1`) |
 | **T60b** H 미도달 27 run 진단 | **완료 · 결론 채택 (2026-10-14)** — "복귀 미도달은 TO 차단보다 정책의 복귀 제안 부재" | [`T60b.verify.json`](T60b.verify.json) · 로그 "T60b" 절 · figures `t60b/` · `t60b_return.py` |
 | **T60c** T51b (명사 · combined Ω) 종료 창 재집계 | **완료** | [`T60c.verify.json`](T60c.verify.json) · 로그 "T60c" 절 · figures `t60c/` · `t60_t51b.py` |

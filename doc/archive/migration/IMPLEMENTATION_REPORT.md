@@ -144,11 +144,11 @@ GPU·Torch/JAX·checkpoint opt-in 등 별도 환경 항목은 CPU 검증 범위 
 
 개선 폴더와 benchmark 폴더를 별도 VS Code 창으로 열고 각각 새 Claude session을 시작한다.
 기존 `/mnt/dev/work` session을 resume해 새 개발을 이어가지 않는다.
-전환 문구는 `doc/migration/CLAUDE_HANDOFF.md`에 있다. 실제 외부 메시지는 보내지 않았다.
+전환 문구는 `doc/archive/migration/CLAUDE_HANDOFF.md`에 있다. 실제 외부 메시지는 보내지 않았다.
 
 `feature/ag3s-development` 전체를 benchmark/main에 merge하면 V11AB 기준이 바뀐다.
 공통 구조 수정만 작은 commit으로 전달하고 알고리즘 개선은 별도 평가 profile로 다룬다.
-PR template과 `doc/BRANCHES.md`에 target branch·source SHA·기능 변화·검증을 남기도록 했다.
+PR template과 `doc/active/BRANCHES.md`에 target branch·source SHA·기능 변화·검증을 남기도록 했다.
 
 ## 7. Backup 및 기존 workspace
 

@@ -409,7 +409,7 @@ def stage_tokens(args, root: pathlib.Path) -> dict:
 
 def gpu_guard(args) -> list[int]:
     """T49's guard (`t49_noun_query.stage_extract`): nvidia-smi present, no compute process (unless
-    ``--allow-busy-gpu``), jax on the GPU. Sets the XLA env of `doc/SHARED_STORAGE_AND_PYTHON.md`."""
+    ``--allow-busy-gpu``), jax on the GPU. Sets the XLA env of `doc/active/SHARED_STORAGE_AND_PYTHON.md`."""
     for k, v in (("XLA_PYTHON_CLIENT_PREALLOCATE", "false"),
                  ("XLA_FLAGS", "--xla_gpu_enable_command_buffer=")):
         os.environ.setdefault(k, v)

@@ -2326,7 +2326,7 @@ pick 을 위한 것인지 place 를 위한 것인지 알 수 있나.
 최신 관리 문서와 이전 폴더에만 남은 필요한 artifact는 checkout과 storage에 보존했다.
 측정 수치와 figure는 [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md)의 **ENV_OUTPUT** 절,
 실행 방법과 보존 목록은
-[`GPU_OUTPUT_IMPLEMENTATION_REPORT.md`](../../../doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md)를 따른다.
+[`GPU_OUTPUT_IMPLEMENTATION_REPORT.md`](../../../doc/active/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md)를 따른다.
 
 `/mnt/dev/work` 삭제는 live process · sibling legacy symlink · 등록된 worktree 의존성의 해소와
 read-only 재점검 뒤에 판단한다. Physical robot/camera 실행, full closed-loop rollout과 training은
@@ -2336,7 +2336,7 @@ read-only 재점검 뒤에 판단한다. Physical robot/camera 실행, full clos
 ## T60 — 종료 구간 (P · H) 술어와 T44–T56 재집계 (2026-10-13 ~ 14 KST)
 
 **왜.** 완료 이후 frame (놓은 뒤, 준비자세로 돌아온 뒤) 이 평균 · 실패 수 · head 선택 · 목적함수에 섞이면 연구가 재는
-대상이 바뀐다 ([`doc/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md`](../../../doc/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md)).
+대상이 바뀐다 ([`doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md`](../../../doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md)).
 
 **한 일.** 사용자가 정한 술어 P (placement 안정, 8 row) · H (준비자세 복귀, 관절 0.35 rad ∧ TCP 0.12 m, 8 row) 를
 구현하고, 새 rollout 없이 기존 기록을 다시 집계했다. 측정 수치와 figure 는 [`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) 의

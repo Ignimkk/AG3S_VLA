@@ -4,7 +4,7 @@
 Development는 자기 source와 독립 환경을 사용한다. Benchmark checkout의 GPU 설치 상태는 별도다.
 설치·GPU 검증 근거는 [GPU_OUTPUT_IMPLEMENTATION_REPORT.md](migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md),
 최신 legacy 정리·삭제 조건은 [LEGACY_RETIREMENT_REPORT.md](migration/LEGACY_RETIREMENT_REPORT.md)에 있다.
-이전 v1.4 관리 문서 원본은 [보존 manifest](migration/legacy-management-v1.4/manifest.json)에 기록한다.
+이전 v1.4 관리 문서 원본은 [보존 manifest](../archive/migration/legacy-management-v1.4/manifest.json)에 기록한다.
 
 ## Shared input와 새 result
 

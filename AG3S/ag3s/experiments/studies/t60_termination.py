@@ -1,6 +1,6 @@
 """T60 — task termination predicates P (placement complete) and H (ready-pose return complete).
 
-`doc/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md` 의 "두 종료 규칙", as code. Pure numpy; the loader
+`doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md` 의 "두 종료 규칙", as code. Pure numpy; the loader
 reads the existing closed-loop records (CL2 / CL3 / T53) without changing them.
 
 Row convention (one control row = one 15 Hz policy step, the replay of `replay_contacts.py`)

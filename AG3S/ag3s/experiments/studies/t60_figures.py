@@ -178,7 +178,7 @@ def main(step1: pathlib.Path, fig_dir: pathlib.Path) -> None:
     fig_dir.mkdir(parents=True, exist_ok=True)
     ko = figstyle.use_korean()
     ts = json.loads((step1 / "timestamps.json").read_text())
-    proxy = json.loads((ROOT / "doc/reviews/TERMINATION_SCOPE_AUDIT_20261013.json").read_text())["frames_removed"]
+    proxy = json.loads((ROOT / "doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013.json").read_text())["frames_removed"]
     scene(ts, fig_dir, ko)
     g = gap(ts, fig_dir, ko)
     t = table(ts, fig_dir, ko, proxy)

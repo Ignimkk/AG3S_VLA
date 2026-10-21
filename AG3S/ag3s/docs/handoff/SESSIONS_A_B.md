@@ -9,7 +9,7 @@
 | | **A — 메인 (develope)** | **B — identity · phase source 분석** |
 |---|---|---|
 | 세션 | 메인 develope 세션. 2026-10-14 에 새 세션으로 교체 (인계: [`HANDOFF_A_main.md`](HANDOFF_A_main.md)). **이름은 ListAgents 로 확인 — 새 A 가 시작 시 B · 다른 세션에 자기 이름을 알린다** (이전 이름 `ag3s-vla-development-d2`) | 새 세션 (T52-T57 세션 + 재검증 세션 통합) |
-| 기준 문서 | `doc/plans/develope_PLAN.md` (진행 정본) | develope_PLAN 의 DX-01 identity · DX-02 · DX-03 절 |
+| 기준 문서 | `doc/active/plans/develope_PLAN.md` (진행 정본) | develope_PLAN 의 DX-01 identity · DX-02 · DX-03 절 |
 | 맡는 DX | DX-00 (평가 정의 · geometry, **T60 P · H 창 포함**), DX-01 **extent**, DX-04 LTE, DX-05, DX-06, DX-07, DX-09 | DX-01 **identity source** (attention head 선택 T51 · T56 · **T61** 통합, 명사 query), DX-02 HSR 대 strong rule (T55, T57 단계 2 probe 정의), DX-03 설계 |
 | 실행 | **closed-loop 실행 · GPU 일정 조율 전부.** 서빙 코드 변경의 유일한 writer | offline 분석만. 새 rollout · 서빙 변경이 필요하면 task 문서로 A 에 요청 (A 가 실행) |
 | 진행 중 · 대기 | T46f 단계 2 (진단 장면, 세션 정리 뒤), **T57 서빙 구현 (단계 1 명사 attention 입력 · 단계 2 task gate)**, SL5b reach (benchmark 인계), T60b 류 실행 중 막힘 진단 | T61 (사전 고정 head 선택, rollout · 추출 뒤의 선택 · held-out 분석), T56 (self label), T57 의 판정 근거 · probe 정의, T54c 후속 |
@@ -19,7 +19,7 @@
 
 | 파일 | 쓰는 쪽 | 비고 |
 |---|---|---|
-| `doc/plans/develope_PLAN.md` | **A 만** (사용자 직접 수정 포함) | B 는 변경 제안을 A 에 보낸다 |
+| `doc/active/plans/develope_PLAN.md` | **A 만** (사용자 직접 수정 포함) | B 는 변경 제안을 A 에 보낸다 |
 | 서빙 code — `AG3S/ag3s/{config.py,runtime/,fields/,constraints/,robot_models/}`, `AG3S/trajopt/` (experiments 제외), `integration/rby1/bringup/` | **A 만** | B 의 서빙 요구는 `handoff/<STEP>.task.md` "구현" 절로 |
 | offline 분석 code — `AG3S/ag3s/experiments/studies/t5x_*` · `t6x_*` 와 그 test | B | 기존 파일 동작은 바꾸지 않는다 (새 파일) |
 | `AG3S/ag3s/experiments/reports/` · `AG3S/trajopt/experiments/` | 만든 쪽. 상대 파일은 고치기 전 알림 | |
@@ -99,7 +99,7 @@ GPU 를 쓰면 공용 lock · nvidia-smi 확인 · 시작/끝 알림을 지킵�
 먼저 읽을 것 (순서):
 1. CLAUDE.md · .claude/ag3s-rules.md · AG3S/ag3s/docs/handoff/SESSIONS_A_B.md (역할 · 소유권 · 조율 규칙의 정본)
 2. AG3S/ag3s/docs/handoff/HANDOFF_T52-T57_to_B.md · HANDOFF_e4_to_B.md (이어받을 STEP · 판정 · 대기 질문)
-3. doc/plans/develope_PLAN.md 의 §0 과 DX-01 · DX-02 · DX-03 절
+3. doc/active/plans/develope_PLAN.md 의 §0 과 DX-01 · DX-02 · DX-03 절
 4. AG3S/ag3s/docs/AG3S_T47_LOG.md 맨 위 표 (용어 · 진행 현황 · 물려받은 결정 · 재측정 대기) 와 T51 · T54c · T55 · T56 · T60 · T61 관련 절
 
 역할:

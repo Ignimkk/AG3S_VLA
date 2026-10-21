@@ -2,7 +2,7 @@
 
 현재 작업 경로는 이 파일이 속한 독립 checkout이다. `git rev-parse --show-toplevel`,
 `git branch --show-current`, `git rev-parse HEAD`, `git remote -v`를 먼저 확인한다.
-`doc/BRANCHES.md`와 `doc/migration/source-manifest.json`에서 branch 목적·source 기준을 읽는다.
+`doc/active/BRANCHES.md`와 `doc/active/migration/source-manifest.json`에서 branch 목적·source 기준을 읽는다.
 main은 paired v2 기반 V11AB, feature/panda-benchmark는 그 benchmark 평가,
 feature/ag3s-development는 v2 이후 전체 개선 이력과 현재 WIP를 포함한다.
 개선 branch 전체를 benchmark branch에 merge하면 V11AB 평가 대상이 바뀐다.
@@ -35,7 +35,7 @@ Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았�
 - 새 STEP 의 판단 근거가 옛 로그에 있으면 그 줄을 **링크**하고 내용을 새 로그에 다시 옮겨 적지 않는다.
 - 옛 로그의 수치와 새 로그의 수치가 다르면 **새 로그가 우선**한다 (모델 · 배선 · 기준이 바뀌었을 수 있다 — 그 차이를 새 로그에 적는다).
 - `AG3S/ag3s/docs/AG3S_CUROBO_LIVE_TEST_PLAN.md` — T0~T6 실행 계획과 gate별 판정 항목 (이전 국면 계획).
-- `doc/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md` — T47 이후 연구 방향 (Kang et al. localization head · Bhardwaj et al. progress probe 와의 비교, 실험 순서와 채택 기준).
+- `doc/active/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md` — T47 이후 연구 방향 (Kang et al. localization head · Bhardwaj et al. progress probe 와의 비교, 실험 순서와 채택 기준).
 
 ## 반드시 지켜야 할 규칙
 
@@ -78,9 +78,9 @@ GPU 검증은 다른 checkout과 동시에 실행하지 않는다. `/tmp/ag3s-vl
 `OPENPI_DATA_HOME`·CUDA/Warp/JAX/Torch cache는 자기 checkout 아래다.
 `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 유지한다.
 
-현재 storage·interpreter 설정의 정본은 `doc/SHARED_STORAGE_AND_PYTHON.md`이며 설치·검증·삭제 조건은
-`doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`를 읽는다. Legacy 정리의 최신 판정은
-`doc/migration/LEGACY_RETIREMENT_REPORT.md`를 따른다. 이전 보고서는 그 시점 기록으로 보존한다.
+현재 storage·interpreter 설정의 정본은 `doc/active/SHARED_STORAGE_AND_PYTHON.md`이며 설치·검증·삭제 조건은
+`doc/active/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md`를 읽는다. Legacy 정리의 최신 판정은
+`doc/active/migration/LEGACY_RETIREMENT_REPORT.md`를 따른다. 이전 보고서는 그 시점 기록으로 보존한다.
 AG3S algorithm과 기존 개선 이력은 유지한다. `/mnt/dev/work`는 삭제하지 않았고 process를 종료하지 않는다.
 원본 Git·잔여 자료의 permanent archive, 역사적 sibling link 전환 및 clean 임시 worktree 정리는
 retirement 보고서의 검증 결과를 따른다. 실제 삭제 직전 live process 참조를 다시 확인한다.

@@ -4,7 +4,7 @@
 > 이 문서 이후 내려진 판정은 없다. 아래 "판정 대기" 는 전부 사용자 몫이다.
 
 ## 0. 먼저 읽을 것 (순서)
-1. `CLAUDE.md` · `.claude/ag3s-rules.md` · `doc/plans/develope_PLAN.md` §0.10 (방향의 정본 — **작업 트리에 사용자의 미커밋 수정이 있다, 건드리지 말 것**).
+1. `CLAUDE.md` · `.claude/ag3s-rules.md` · `doc/active/plans/develope_PLAN.md` §0.10 (방향의 정본 — **작업 트리에 사용자의 미커밋 수정이 있다, 건드리지 말 것**).
 2. 로그: `AG3S/ag3s/docs/AG3S_T47_LOG.md` (최신 정본, T46b 이후 T46 접미사 STEP 포함) → `AG3S_T0T6_LOG.md` (T46 까지).
 3. task: `T46.task.md` (끝의 "T47 세션과의 조율" — port · commit · log · W1 규칙), `T46c.task.md` (F1 채택 · 한계 L1–L11 · W1 판정), `T46d.task.md`, `T46e.task.md`, **`T46f.task.md` (DX-04 LTE 검증 블록 — 다음 작업의 정본)**.
 4. 사용자 보고 형식 (memory): 목적 + 이전 (V11AB = C0 · C1a) 대비 before → after, develope_PLAN 의 어느 표 · 그림에 쓰이는지, LTE · F1 등 제안 방법의 우수성을 전제하지 않음 (사전 고정 기준 · 실제 MuJoCo contact 주 지표 · 정지 ≠ 보호 · 사후 기준 변경 금지).
@@ -40,7 +40,7 @@ worktree 의 diff 를 메인에 적용할 때: T47 세션에 먼저 알린다 (T
 - **T47 세션** (`T47 Attention head 고르는 방법론`): T47–T57 예약 (T53 rollout 진행 중, GPU lock 보유, port 8290·8291 이번만). 이후 port **T46 = 8290–8291, T47 = 8292–8293**. 로그 쓰기 전 · 후 서로 알림, pathspec commit 만. T55 · T57 은 W1 값을 arm 간 고정. T46e 메인 적용은 T53 종료 알림 뒤.
 - **benchmark 세션** (`ag3s-vla-benchmark-60` · `-74`): 공용 GPU lock 규칙을 benchmark CLAUDE.md 에 반영 (`41339944`, 형식 수정 `d53d8e07`). SL4b GPU 작업 ~11:30 KST 까지.
 - GPU: `( flock -w N 9 || exit 13; CMD ) 9>/tmp/ag3s-vla-gpu-validation.lock` + `nvidia-smi` 확인. TO 는 wall-clock 마감이라 closed-loop 중 GPU 공유 금지.
-- 작업 트리의 다른 세션 미커밋 파일 (T47–T57 · `doc/plans/develope_PLAN.md` · `.claude/worktrees/`) 은 commit 하지 않는다.
+- 작업 트리의 다른 세션 미커밋 파일 (T47–T57 · `doc/active/plans/develope_PLAN.md` · `.claude/worktrees/`) 은 commit 하지 않는다.
 
 ## 5. A14 결과 (2026-10-13 KST, 구현 종료 — 독립 검증 · 판정 전)
 worktree `.claude/worktrees/agent-a48b7e7cad456d7a9` (base ab9b3fba, 미커밋). 보고서 `AG3S/ag3s/docs/handoff/T46f-A14.impl.md` (worktree 안).

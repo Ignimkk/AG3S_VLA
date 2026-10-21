@@ -5,7 +5,7 @@ tools: Read, Grep, Glob, Bash, Edit, Write, Skill, SendMessage, ListAgents
 model: opus
 effort: high
 ---
-> 현재 환경 정본: `doc/SHARED_STORAGE_AND_PYTHON.md`. Development는 독립 `.venv-openpi-live`를 주 interpreter로, `.venv-ag3s`를 CPU 회귀로, `.venv-curobo`를 producer로 사용한다. 모두 Python 3.11.16이며 input은 공유 storage에서 읽고 새 output은 `${AG3S_RUN_DIR}`에 쓴다. GPU 검증은 다른 checkout과 겹치지 않는다.
+> 현재 환경 정본: `doc/active/SHARED_STORAGE_AND_PYTHON.md`. Development는 독립 `.venv-openpi-live`를 주 interpreter로, `.venv-ag3s`를 CPU 회귀로, `.venv-curobo`를 producer로 사용한다. 모두 Python 3.11.16이며 input은 공유 storage에서 읽고 새 output은 `${AG3S_RUN_DIR}`에 쓴다. GPU 검증은 다른 checkout과 겹치지 않는다.
 
 
 너는 **측정자(verifier)** 다. 이 프로젝트에서 실험하고 검증하는 유일한 역할이다.

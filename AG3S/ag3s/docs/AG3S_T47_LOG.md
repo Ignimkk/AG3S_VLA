@@ -11,7 +11,7 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 
 > **계획서** — [`AG3S_REVIEW_PLAN.md`](AG3S_REVIEW_PLAN.md) (무엇을 왜 하는가),
 > [`AG3S_CUROBO_LIVE_TEST_PLAN.md`](AG3S_CUROBO_LIVE_TEST_PLAN.md) (T0~T6 실행 계획, 이전 국면).
-> T47 이후 연구 방향: `doc/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md`.
+> T47 이후 연구 방향: `doc/active/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md`.
 
 ## 문서 상태 — 로그 두 파일 (최신 → 오래된)
 
@@ -496,7 +496,7 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 
 | 시각 (KST) | 무엇 | 출처 |
 |---|---|---|
-| 13:57 | 검토 문서 `doc/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md` 작성 (context) | 문서 머리 |
+| 13:57 | 검토 문서 `doc/active/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md` 작성 (context) | 문서 머리 |
 | 14:14:12 | T47 run 디렉터리 생성 `20261012T141412+0900_bd778e5e3453_d7a51b456f36` | 디렉터리 이름 |
 | 14:14:56 – 14:15:16 | GT cache (8 파일) 생성 (gt stage 31.5 s) | T47b `m0_check.gt_cache_mtime_utc` · T47 `gt_stage_seconds_total` |
 | 14:20:58 | 다른 session 이 `c906cda2` commit (T47 validate 와 e2e 사이) | T47 `code_state` |
@@ -529,7 +529,7 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 
 ### 3. 사전 고정 (pre-registration, 사용자 판정 2026-10-12)
 
-verifier 결과를 lead 가 열기 전에 고정했다. 근거: `doc/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md` §3 (보강할 항목) · §6 ("k 나 threshold 를 held-out 에서 선택했다면 그 split 은 최종 test 가 아니다").
+verifier 결과를 lead 가 열기 전에 고정했다. 근거: `doc/active/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md` §3 (보강할 항목) · §6 ("k 나 threshold 를 held-out 에서 선택했다면 그 split 은 최종 test 가 아니다").
 
 | 항목 | **primary (채택 판단 근거)** | exploratory (보고만) |
 |---|---|---|
@@ -870,7 +870,7 @@ attention 이 lifting 에서 grounding 까지 가는 경로에서 raw (정규화
 
 **이 절이 답하는 물음 (목적).** HSR (Hidden-state Sub-task Recognition) 은 얼린 pi0.5 의 prefix KV cache 에서 뽑은 feature `kv_L4` (layer 4 · **V** · KV head 0, 512 차원 = `[valid text token 평균 | image token 768 개 평균]`) 위에 logistic regression 하나 (`kv_L4_v1`) 를 얹어 지금 하는 일을 `pick` / `place` / `home` 으로 읽는 구성 요소다 (SUBTASK 절). 이 label 은 `TargetConfirm` 의 **subtask gate** 로 들어간다 — 확정 label 이 `place` · `home` 이면 새 target 채택을 막고, PLACED 뒤 `home` 이면 쥐고 있던 물체를 놓아 준다 (`T48.task.md` 가 가리키는 `target_grounding.py:945, 959-968, 1124-1135, 1204-1209`, `config.py:342-360` `subtask_gate=True`).
 
-지금까지의 근거는 **weak decodability** (feature 에서 label 이 읽힌다) 하나였다. `paper/notes/SUBTASK_FACTS.md` §1 · §3 이 기록한 사실로, val accuracy 0.9808 이지만 **frame index 만으로도 val 1.000** (250 episode 중 248 이 같은 phase 순서의 scripted dataset) 이라 그 정확도가 *작업 상태* 를 읽은 것인지 *시간 · 팔 자세의 순서* 를 읽은 것인지 가를 수 없다. gripper 값을 가려도 0.9808 (mask (a)) 이고 단순 rule 은 0.9423 이었다. 다른 하나는 **strong decodability** (관련 입력이 바뀌면 올바르게 반응한다) 이다. 검토 문서 `doc/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md` §4 가 둘째 논문 (Bhardwaj et al., arXiv:2608.13474) 의 구분으로 가져온 것이고, 그 원문이 일반 probe 의 R² 0.95 에도 instruction target 을 바꾸면 출력이 거의 바뀌지 않았다고 보고한다고 적는다 (원문의 수치이며 이 로그가 측정한 것이 아니다). 여기에 우리 구성의 특수한 사정이 하나 더 있다 — **text 평균 안에 discretize 된 16D state 문자열 (gripper · joint 숫자) 이 들어 있어** probe 가 image 대신 state 문자열을 읽을 수 있다.
+지금까지의 근거는 **weak decodability** (feature 에서 label 이 읽힌다) 하나였다. `paper/notes/SUBTASK_FACTS.md` §1 · §3 이 기록한 사실로, val accuracy 0.9808 이지만 **frame index 만으로도 val 1.000** (250 episode 중 248 이 같은 phase 순서의 scripted dataset) 이라 그 정확도가 *작업 상태* 를 읽은 것인지 *시간 · 팔 자세의 순서* 를 읽은 것인지 가를 수 없다. gripper 값을 가려도 0.9808 (mask (a)) 이고 단순 rule 은 0.9423 이었다. 다른 하나는 **strong decodability** (관련 입력이 바뀌면 올바르게 반응한다) 이다. 검토 문서 `doc/active/reviews/AG3S_TWO_PAPER_REVIEW_20261012_KO.md` §4 가 둘째 논문 (Bhardwaj et al., arXiv:2608.13474) 의 구분으로 가져온 것이고, 그 원문이 일반 probe 의 R² 0.95 에도 instruction target 을 바꾸면 출력이 거의 바뀌지 않았다고 보고한다고 적는다 (원문의 수치이며 이 로그가 측정한 것이 아니다). 여기에 우리 구성의 특수한 사정이 하나 더 있다 — **text 평균 안에 discretize 된 16D state 문자열 (gripper · joint 숫자) 이 들어 있어** probe 가 image 대신 state 문자열을 읽을 수 있다.
 
 T48a 는 한 frame 의 입력 셋 (prompt · 16D state · RGB 3 장) 중 **하나만** 바꾼 변형 (counterfactual) 을 만들어 같은 probe 에 다시 넣고 예측이 어떻게 변하는지 잰다. rendering 이 필요 없고 (dataset 의 기록 frame 만 쓴다) GPU 는 offline prefix pass 에만 쓴다. empty grasp · slip (물체 없는 image 를 새로 만드는 것) 은 T48b 다.
 
@@ -3334,7 +3334,7 @@ task 의 주 표는 창 안이다. 창을 자르지 않은 전체 frame 의 U cl
 ## T60 — 종료 구간 (P · H) 술어와 T44–T56 의 고정 후보 재집계 · 선택 재계산 (offline, 새 rollout 없음, 2026-10-13 ~ 14 KST)
 
 > 측정 run `20261013T223348+0900_cf38c9dbca7b_8aef81831126` (2026-10-13 22:33 KST 시작, 2026-10-14 00:34 KST 끝), 기록 2026-10-14 KST. 수치는 모두 [`T60.verify.json`](handoff/T60.verify.json) 의 `numbers` (`step1` · `step2` · `step3`) 에서 왔다. 요청 문서: [`handoff/T60.task.md`](handoff/T60.task.md).
-> 근거 문서 [`doc/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md`](../../../doc/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md) 의 "무엇부터 다시 해야 하는가" 1–3 을 수행했다. 감사 문서의 잠정 절단 (T53 첫 physical `placed`, 401 frame) 은 그대로 보존한다. 이 절의 수치는 그와 별개인 정식 술어의 값이다.
+> 근거 문서 [`doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md`](../../../doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md) 의 "무엇부터 다시 해야 하는가" 1–3 을 수행했다. 감사 문서의 잠정 절단 (T53 첫 physical `placed`, 401 frame) 은 그대로 보존한다. 이 절의 수치는 그와 별개인 정식 술어의 값이다.
 > 이 STEP 은 사용자 지시로 **sub-agent 없이 한 세션이** 구현 · 측정 · 기록을 맡았다. 기존 코드 · 기록은 고치지 않았다 (새 파일 `AG3S/ag3s/experiments/studies/t60_*.py` · `tests/ag3s/test_t60_termination.py` 만).
 
 **이 절이 답하는 물음 (목적).** 완료 이후 구간 (놓은 뒤, 준비자세로 돌아온 뒤) 을 평가 · 선택에서 빼면 T44–T56 의 어떤 수치와 어떤 선택이 바뀌는가. develope_PLAN §0.10 의 closed-loop 지표 (success · safe success · HOLD) 와 attention head 선택이 종료 정의에 얼마나 민감한지 정한다.

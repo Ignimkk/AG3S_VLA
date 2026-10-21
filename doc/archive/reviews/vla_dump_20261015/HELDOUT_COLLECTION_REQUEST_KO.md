@@ -4,7 +4,7 @@
 
 **수신:** VLA dump collector를 맡은 agent. 사용자가 전달한다. 이 요청은 새 rollout과 내부값 dump를 요청하며, 분석 session은 수집을 직접 하지 않는다.
 
-배경 결과는 [SUMMARY_METHODS_RESULTS_KO.md](SUMMARY_METHODS_RESULTS_KO.md)에 있다. 지금까지의 수치는 모두 **dev**(T53 + T54c 32 episode, 이미 결과를 본 episode)에서 나왔다. 방법과 threshold는 `$RUN/LOCK_heldout.json`에 잠갔고, 새 데이터를 본 뒤에는 바꾸지 않는다.
+배경 결과는 [SUMMARY_METHODS_RESULTS_KO.md](../../../active/reviews/vla_dump_20261015/SUMMARY_METHODS_RESULTS_KO.md)에 있다. 지금까지의 수치는 모두 **dev**(T53 + T54c 32 episode, 이미 결과를 본 episode)에서 나왔다. 방법과 threshold는 `$RUN/LOCK_heldout.json`에 잠갔고, 새 데이터를 본 뒤에는 바꾸지 않는다.
 
 `$RUN = /mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba`
 

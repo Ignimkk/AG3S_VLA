@@ -159,7 +159,7 @@ Moment별(같은 render mask, 후보 대 B0):
 ## 3B. 앞으로 볼 시나리오: target을 가리는 장애물 (테스트용)
 
 - **목적:** 장애물이 camera 시야에서 target을 20–60% 또는 60% 이상 가릴 때 후보·B0·경보가 어떻게 동작하는지 확인한다.
-- **수집:** [HELDOUT_COLLECTION_REQUEST_KO.md](HELDOUT_COLLECTION_REQUEST_KO.md) §3.2.
+- **수집:** [HELDOUT_COLLECTION_REQUEST_KO.md](../../../archive/reviews/vla_dump_20261015/HELDOUT_COLLECTION_REQUEST_KO.md) §3.2.
 - **사용자 판정(2026-10-15):** 이 시나리오는 **테스트용**이다. 결과는 별도 표로만 보고하고 주 결론이나 채택 판단에 섞지 않는다. 비중은 사용자가 판단한다.
 - **dev에서 미리 알 수 있는 위험(검증 전, 가설):**
   - 가림으로 target 표면이 작아지면 noun seed의 자격 patch(비robot·비support 60 px)가 줄어든다.
@@ -185,7 +185,7 @@ Moment별(같은 render mask, 후보 대 B0):
 
 ## 5. 한계와 미실행
 
-- **Held-out 없음:** 모든 수치는 dev이고 설계와 평가가 같은 데이터다. 수집 요청서: [HELDOUT_COLLECTION_REQUEST_KO.md](HELDOUT_COLLECTION_REQUEST_KO.md). 방법과 threshold는 `$RUN/LOCK_heldout.json`에 잠갔다(경보 threshold 0.5904).
+- **Held-out 없음:** 모든 수치는 dev이고 설계와 평가가 같은 데이터다. 수집 요청서: [HELDOUT_COLLECTION_REQUEST_KO.md](../../../archive/reviews/vla_dump_20261015/HELDOUT_COLLECTION_REQUEST_KO.md). 방법과 threshold는 `$RUN/LOCK_heldout.json`에 잠갔다(경보 threshold 0.5904).
 - **False-exemption은 proxy:** 실제 permission builder와 ball/ESDF 연결 효과는 미측정이다.
 - **Simulation 이점:** depth와 render mask가 simulation에서 정확히 일치하므로 실제 센서보다 유리하다.
 - **Key moment frame만 사용:** 연속 timeline이 없어 단계 전환 지연(transition delay)이나 기억의 시간적 안정성은 평가하지 못했다.

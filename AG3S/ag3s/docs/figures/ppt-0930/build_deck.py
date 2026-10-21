@@ -31,7 +31,7 @@ FIG = ROOT / "AG3S/ag3s/docs/figures/ppt-0930"
 ARCH = ROOT / "AG3S/ag3s/docs/figures/ag3s-architecture-v2/ag3s-system-architecture.png"
 TEMPLATE = ROOT / "doc/곽민기_0930 발표 자료.pptx"
 OUT = ROOT / "doc/곽민기_0930 발표 자료_draft.pptx"
-SCRIPT_MD = ROOT / "doc/곽민기_0930 발표 대본.md"
+SCRIPT_MD = ROOT / "doc/archive/곽민기_0930 발표 대본.md"
 
 FONT = "NanumSquare Neo Regular"
 FONT_XB = "NanumSquare Neo ExtraBold"

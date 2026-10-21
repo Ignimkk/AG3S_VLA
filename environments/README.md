@@ -17,7 +17,7 @@ Model weights and additional upstream assets are not downloaded as part of repos
 Shared inputs default to the sibling `AG3S_VLA-storage` directory via `AG3S_STORAGE_ROOT`.
 `AG3S_LEGACY_STORAGE` is a derived compatibility alias to its `legacy-inputs` namespace;
 it no longer selects an old source checkout. New caches, LIBERO configuration and outputs
-default to the current checkout. See `doc/SHARED_STORAGE_AND_PYTHON.md` for interpreter selection. Historical evidence paths
+default to the current checkout. See `doc/active/SHARED_STORAGE_AND_PYTHON.md` for interpreter selection. Historical evidence paths
 inside archived documentation and verification JSON were preserved, not falsified as new runs.
 
 CPU bootstrap: `bash scripts/setup/create_cpu_env.sh` installs Python 3.11.16 and

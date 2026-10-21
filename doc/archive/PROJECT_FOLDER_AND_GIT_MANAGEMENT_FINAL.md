@@ -6,7 +6,7 @@
 - 문서 버전: **1.4**
 - 상태: **최초 통합 push 사용자 확인 / 독립 storage 전환 완료 / 후속 commit push는 사용자 수행**
 - 최신 경로·환경 정본: `SHARED_STORAGE_AND_PYTHON.md`, `STORAGE_IMPLEMENTATION_REPORT.md` 및 아래 23절.
-- 최초 통합 실행 결과 정본: 각 새 clone의 `doc/migration/IMPLEMENTATION_REPORT.md`와 `doc/BRANCHES.md`. 아래 1–21절은 설계 및 작성 시점의 준비 절차이며, 실행 여부는 22절이 우선한다.
+- 최초 통합 실행 결과 정본: 각 새 clone의 `doc/archive/migration/IMPLEMENTATION_REPORT.md`와 `doc/active/BRANCHES.md`. 아래 1–21절은 설계 및 작성 시점의 준비 절차이며, 실행 여부는 22절이 우선한다.
 - 원칙: 현재 AG3S 개선 작업의 코드와 미커밋 변경을 유지한다. 기존 `v2`를 checkout하거나 현재 working tree에 복원하지 않는다.
 
 ## 1. 최종 판정
@@ -335,8 +335,8 @@ Baseline 내부 test와 `rby1_manipulation/tests`는 package 단위 test로 유�
 | `.gitignore` | 기존 파일 이력 보존; 새 구조용 규칙은 별도 commit으로 작성 |
 | `CLAUDE.md` | 공유 규칙 유지; 이동 경로·실행 환경을 후속 수정 |
 | `COMMIT_MESSAGES.md` | 기존 개발 기록 유지; Git log의 대체물로 취급하지 않음 |
-| `develope_PLAN.md` | `doc/plans/develope_PLAN.md`; 원문과 이전 링크 대응 보존 |
-| `develope_PLAN_SUMMARY.md` | `doc/plans/develope_PLAN_SUMMARY.md` |
+| `develope_PLAN.md` | `doc/active/plans/develope_PLAN.md`; 원문과 이전 링크 대응 보존 |
+| `develope_PLAN_SUMMARY.md` | `doc/active/plans/develope_PLAN_SUMMARY.md` |
 | `ag3s_pipeline_architecture.svg`, `ag3s_pipeline_architecture.png` | `AG3S/docs/figures/architecture`; source/script와 연결 |
 | `ag3s_records.tgz` | `storage/backups/legacy`; archive 내용·checksum 기록 |
 | `attention_step1_run0002.npz` | `storage/recordings/legacy/attention`; raw 파일로 보존 |
@@ -613,7 +613,7 @@ Panda 이식 중에는 AG3S의 grounding·geometry 보존·link-specific contact
 
 **생성한 것은 이 Markdown 문서다.** Repository 생성·merge·checkout·tag 적용·원격 변경·push·폴더 이동·dependency 설치·기존 코드 수정·실험 실행은 수행하지 않았다. 따라서 본문에 제시한 migration 완료 기준과 Panda 검증 결과는 아직 달성한 결과가 아니라 후속 작업의 기준이다.
 
-문서 위치는 `/mnt/dev/work/doc/PROJECT_FOLDER_AND_GIT_MANAGEMENT_FINAL.md`다. 현재 최상위 Git의 ignore 상태와 별개로 요청 경로에 실제 파일을 보존한다.
+문서 위치는 `/mnt/dev/work/doc/archive/PROJECT_FOLDER_AND_GIT_MANAGEMENT_FINAL.md`다. 현재 최상위 Git의 ignore 상태와 별개로 요청 경로에 실제 파일을 보존한다.
 
 ## 18. 통합 전 정리: stage·commit·push
 
@@ -980,11 +980,11 @@ GPU·Torch/JAX·checkpoint opt-in 등 별도 환경 항목은 CPU 검증 범위 
 
 개선 폴더와 benchmark 폴더를 별도 VS Code 창으로 열고 각각 새 Claude session을 시작한다.
 기존 `/mnt/dev/work` session을 resume해 새 개발을 이어가지 않는다.
-전환 문구는 `doc/migration/CLAUDE_HANDOFF.md`에 있다. 실제 외부 메시지는 보내지 않았다.
+전환 문구는 `doc/archive/migration/CLAUDE_HANDOFF.md`에 있다. 실제 외부 메시지는 보내지 않았다.
 
 `feature/ag3s-development` 전체를 benchmark/main에 merge하면 V11AB 기준이 바뀐다.
 공통 구조 수정만 작은 commit으로 전달하고 알고리즘 개선은 별도 평가 profile로 다룬다.
-PR template과 `doc/BRANCHES.md`에 target branch·source SHA·기능 변화·검증을 남기도록 했다.
+PR template과 `doc/active/BRANCHES.md`에 target branch·source SHA·기능 변화·검증을 남기도록 했다.
 
 ## 7. Backup 및 기존 workspace
 
@@ -1021,8 +1021,8 @@ Force push나 `--mirror`는 사용하지 않는다. 보존 branch/tag push도 �
 
 최초 통합 이후 사용자가 `Ignimkk/AG3S_VLA`에 양쪽 개발 branch와 원본 보존 refs를
 push했다고 확인했다. 실제 origin은 `https://github.com/Ignimkk/AG3S_VLA.git`이다.
-이 절 및 [현재 storage·Python 안내](SHARED_STORAGE_AND_PYTHON.md),
-[후속 실행 결과](STORAGE_IMPLEMENTATION_REPORT.md)가 이전 절의 현재 경로/환경 설명보다 우선한다.
+이 절 및 [현재 storage·Python 안내](../active/SHARED_STORAGE_AND_PYTHON.md),
+[후속 실행 결과](../STORAGE_IMPLEMENTATION_REPORT.md)가 이전 절의 현재 경로/환경 설명보다 우선한다.
 이전 절의 commit·실험·backup 기록은 당시의 증거로 보존한다.
 
 Checkpoint·dataset·raw attention·기존 결과·설치된 uv/tectonic은 이제
@@ -1046,4 +1046,4 @@ size/mtime도 일치하며 1개는 기존 loadavg sampler가 계속 append하는
 검증을 완료했다. 이 작업의 임시 백업은 검증 후 제거했다. 사용자 다른 backup과 이전 코드는 보존한다.
 
 후속 commit push 명령과 Claude 재시작 문구는 새 실행 결과와 새 clone의
-`doc/migration/CLAUDE_HANDOFF.md`를 따른다.
+`doc/archive/migration/CLAUDE_HANDOFF.md`를 따른다.

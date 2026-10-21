@@ -4,7 +4,7 @@ set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../setup" && pwd)/env.sh"
 project="$AG3S_PROJECT_ROOT"
 python_bin="${AG3S_OPENPI_PYTHON:-$project/.venv-openpi-live/bin/python}"
-[ -x "$python_bin" ] || { echo "Configure an independent OpenPI environment; see doc/SHARED_STORAGE_AND_PYTHON.md" >&2; exit 1; }
+[ -x "$python_bin" ] || { echo "Configure an independent OpenPI environment; see doc/active/SHARED_STORAGE_AND_PYTHON.md" >&2; exit 1; }
 AG3S_RUN_DIR="$("$python_bin" -m common.run_output)"
 export AG3S_RUN_DIR
 mkdir -p "$AG3S_RUN_DIR/logs" "$AG3S_RUN_DIR/checkpoints"

@@ -16,7 +16,7 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
 
 이 예외 영역이 **너무 크면** 옆의 다른 물체까지 "부딪혀도 되는 곳"이 되어 위험하다. **너무 작으면** 잡아야 할 물체를 장애물로 보고 잡지 못한다. 그래서 **target의 3D 표면을 정확히 찾는 것**이 이번 작업의 목표다.
 
-![장면 예시](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-S0-alignment.png)
+![장면 예시](../../../../AG3S/ag3s/docs/figures/ifg/exp/exp-S0-alignment.png)
 
 ## 1. 용어 설명 (이 보고서에서 쓰는 말)
 
@@ -42,7 +42,7 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
 
 ## 2. 결론 한눈에 보기
 
-![전체 결과](../../../AG3S/ag3s/docs/figures/ifg/ifg-final-overview.png)
+![전체 결과](../../../../AG3S/ag3s/docs/figures/ifg/ifg-final-overview.png)
 
 | 질문 | 답 (dev 기준) |
 |---|---|
@@ -73,7 +73,7 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
   - feature만 사용: 0.26
   - 기존 방법: 0.785
   - 하락 원인: feature가 바구니나 옆 과일까지 target으로 끌어들였다.
-- **그림:** [실패 장면: feature가 바구니 전체로 번짐](../../../AG3S/ag3s/docs/figures/ifg/ifg-scene-T54c_ep1806_f031.png)
+- **그림:** [실패 장면: feature가 바구니 전체로 번짐](../../../../AG3S/ag3s/docs/figures/ifg/ifg-scene-T54c_ep1806_f031.png)
 
 ### 3.3 Feature를 살려 보는 시도 (R1–R3)
 
@@ -86,21 +86,21 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
   - R1·R2는 진짜 target까지 버려 실패했다.
   - R3는 0.785로 좋아졌다. 그러나 **feature를 무작위로 섞어도 0.784로 같았고, feature를 아예 안 쓰고 "가장 유력한 영역 하나만 남기기"만 해도 0.794**였다.
   - 즉 좋아진 이유는 feature가 아니라 **"seed가 가장 많이 몰린 영역 하나만 고르는 규칙"**이었다. 이 규칙을 채택했다.
-- **그림:** [덩어리 단위 판정이 target을 버리는 장면](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R1-R3-gate-unit.png)
+- **그림:** [덩어리 단위 판정이 target을 버리는 장면](../../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R1-R3-gate-unit.png)
 
 ### 3.4 기존 방법처럼 "attention 합"으로 고르기 (R4)
 
 - **질문:** 기존 방법은 덩어리의 attention 합으로 target을 고른다. 이걸 따라 하면 좋아지는가?
 - **결과:** 0.688로 하락했다. 큰 바구니가 크기만으로 attention 합을 많이 모았다.
 - **덤으로 얻은 진단:** 정답을 알려 주고 영역만 고르게 하면 0.843이다. 즉 **표면을 나누는 방식 자체는 충분히 좋고, 남은 문제는 "어느 영역이 target인지 고르는 것"**이다.
-- **그림:** [attention 합이 바구니를 고르는 장면](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R4-mass-bias.png)
+- **그림:** [attention 합이 바구니를 고르는 장면](../../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R4-mass-bias.png)
 
 ### 3.5 시작점이 탁자에 떨어지는 문제 (R5) — 채택
 
 - **질문:** 몇몇 장면에서는 시작점(seed) 자체가 target 밖에 있었다. 왜일까?
 - **한 일:** 처음엔 "로봇 손 mask가 과일을 지워서"라고 생각했다. 측정해 보니 **이 가설은 틀렸다.** 실제로는 noun attention이 높은 칸에 **탁자 pixel이 대부분**(실패 장면에서 71%)이었다. 그래서 시작점 후보에서 탁자 pixel을 빼도록 했다(기존 방법도 탁자를 시작점에서 뺀다).
 - **결과:** 0.794 → **0.817**(+0.023, 32 episode 중 7개 개선, 0개 악화).
-- **그림:** [탁자 위 시작점 vs 물체 위 시작점](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R5-nonsupport-seed.png)
+- **그림:** [탁자 위 시작점 vs 물체 위 시작점](../../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R5-nonsupport-seed.png)
 
 ### 3.6 손에 든 과일을 로봇으로 지우는 문제 (R6) — 채택
 
@@ -108,7 +108,7 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
 - **원인:** 기존 robot mask는 손 주변을 **공(구) 모양 부피**로 덮고, 그 안의 점을 모두 지운다. 손가락 사이의 과일도 같이 지워졌다(놓친 target의 46%).
 - **한 일:** 로봇의 실제 모양(mesh)을 그 자세로 그려 보고, **카메라가 본 깊이와 로봇 표면 깊이가 1 cm 안에서 일치하는 pixel만** 로봇으로 지웠다. 과일이 손가락 앞에 있으면 깊이가 다르므로 남는다.
 - **결과:** 0.817 → **0.893**(+0.076, 32 episode 중 31개 개선). 잡은 직후 장면이 0.72 → 0.94로 크게 좋아졌다.
-- **그림:** [구 부피 mask는 과일을 지우고, 렌더 mask는 남긴다](../../../AG3S/ag3s/docs/figures/ifg/ifg-scene-r6-T54c_ep1817_f020.png)
+- **그림:** [구 부피 mask는 과일을 지우고, 렌더 mask는 남긴다](../../../../AG3S/ag3s/docs/figures/ifg/ifg-scene-r6-T54c_ep1817_f020.png)
 
 ### 3.7 Feature 재검증 (R7)
 
@@ -117,13 +117,13 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
   - 여전히 도움이 되지 않았다. 연결 강도에 넣으면 변화가 없고, 점수에 넣으면 0.07–0.11 하락했다.
   - **정답 시작점을 줘도** 마찬가지였다.
   - 원인(측정): (1) 칸이 거칠다. 경계 양쪽의 73%가 같은 칸이라 feature 차이가 0이다. (2) target 표면의 42%가 손·탁자와 섞인 칸에 있어 점수가 낮게 나온다. (3) feature 기준이 seed에서 만들어지므로 attention과 같은 정보다.
-- **그림:** [섞인 칸 때문에 target이 빠지는 장면](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R7-feature-unary-loss.png)
+- **그림:** [섞인 칸 때문에 target이 빠지는 장면](../../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R7-feature-unary-loss.png)
 
 ### 3.8 더 촘촘한 신호: pixel gradient (R8)
 
 - **질문:** 16×16보다 촘촘한 신호(224×224, 행동에 대한 pixel 민감도)를 쓰면?
 - **결과:** target을 가리키는 비율이 0.02–0.07로, noun attention(0.50)보다 훨씬 낮았다. 이 신호는 "행동에 영향을 주는 곳"이지 "명령한 물체"가 아니었다.
-- **그림:** [gradient는 장면 전체 경계에 흩어진다](../../../AG3S/ag3s/docs/figures/ifg/ifg-r8-gradient.png)
+- **그림:** [gradient는 장면 전체 경계에 흩어진다](../../../../AG3S/ag3s/docs/figures/ifg/ifg-r8-gradient.png)
 
 ### 3.9 기존 방법과 공정하게 비교 (R9)
 
@@ -133,7 +133,7 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
   - 같은 조건에서 **새 방법이 +0.057** 앞섰다(32 episode 중 27개 우위).
   - 바구니에 놓은 뒤 장면에서 차이가 컸다(0.88 대 0.62).
   - 반대로 **잡기에 실패한 직후 장면은 기존 방법이 낫다**(0.92 대 0.75).
-- **그림:** [새 방법이 앞선 장면 / 기존 방법이 앞선 장면](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R9-vs-serving.png)
+- **그림:** [새 방법이 앞선 장면 / 기존 방법이 앞선 장면](../../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R9-vs-serving.png)
 
 ### 3.10 Feature를 다르게 쓰기 ① 시간축 기억 (R10, R10b) — 미확정
 
@@ -142,7 +142,7 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
   - 처음엔 작동하지 않았다. VLA feature는 모든 물체가 0.96–0.98로 비슷하게 나오기 때문이다(공통 성분이 큼).
   - **장면 평균을 빼는 보정(centering)** 후에는 target이 확실히 구별됐다(0.60 대 0.41).
   - 정확도는 0.893 → 0.912(+0.019)였다. 사전 기준(+0.02)에 약간 못 미치고 불확실성 범위가 0을 포함해 **미확정**이다.
-- **그림:** [보정 전엔 모두 비슷, 보정 후 target이 구별됨](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R10-centering.png)
+- **그림:** [보정 전엔 모두 비슷, 보정 후 target이 구별됨](../../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R10-centering.png)
 
 ### 3.11 Feature를 다르게 쓰기 ② 안전 경보 (R11) — 긍정
 
@@ -151,7 +151,7 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
   - 147장면 중 경보는 15번 울렸다. **잘못 고른 6장면을 모두 포함**했고, 나머지 9번은 불필요한 경보였다.
   - 잘못 포함될 뻔한 영역의 82%를 막고, 정상 target은 6%만 잃는다.
   - feature 없이 만든 경보보다 낫다. 단 잘못된 장면이 6개뿐이라 확인이 더 필요하다.
-- **그림:** [경보가 울린 장면들](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R11-confidence-gate.png)
+- **그림:** [경보가 울린 장면들](../../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R11-confidence-gate.png)
 
 ### 3.12 작업 단계·잡기 판단 (R12)
 
@@ -162,7 +162,7 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
   - 잡았는지 판단도 0.83 → 0.93으로 오른다.
   - feature 추가 효과는 없었다. 이 데이터에는 엉뚱한 물체를 잡는 경우가 없기 때문이다.
 - **주의:** "높이" 입력은 원래 "탁자 위 높이"를 의도했다. 실제로는 바닥 기준 절대 높이였다. 모든 장면의 탁자 높이가 같아 결과에는 영향이 없다.
-- **그림:** [단계별로 바뀌는 3D 신호](../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R12-phase-3d.png)
+- **그림:** [단계별로 바뀌는 3D 신호](../../../../AG3S/ag3s/docs/figures/ifg/exp/exp-R12-phase-3d.png)
 
 ## 4. 채택·보류·기각 정리
 
@@ -176,7 +176,7 @@ AG3S는 VLA(카메라 영상과 명령을 보고 로봇 동작을 내는 AI, 여
 
 ## 5. 남은 일
 
-1. **Held-out 검증:** 처음 보는 episode로 확인한다. 설정은 이미 잠갔다. 요청서: [HELDOUT_COLLECTION_REQUEST_KO.md](HELDOUT_COLLECTION_REQUEST_KO.md).
+1. **Held-out 검증:** 처음 보는 episode로 확인한다. 설정은 이미 잠갔다. 요청서: [HELDOUT_COLLECTION_REQUEST_KO.md](../../../archive/reviews/vla_dump_20261015/HELDOUT_COLLECTION_REQUEST_KO.md).
 2. **AG3S 연결:** 찾은 target 영역을 실제 "접촉 허용 영역"과 충돌 제약에 연결하고, 로봇이 실제로 움직이는 실험(closed-loop)에서 확인한다.
 3. **가림 테스트(테스트용, 별도 보고):** target이 1/3, 1/2 가려진 장면에서 확인한다.
 4. **강한 비교 대상:** 외부 분할 모델(Grounded SAM 등)과 정답 mask를 같은 안전 제약에 넣은 비교. Novelty 문서의 제안이다.

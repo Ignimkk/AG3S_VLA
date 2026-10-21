@@ -8655,7 +8655,7 @@ T44d 의 C0 · C1a · C1b 기록 replay 에서 hand–fruit 접촉 event 24 개 
 [`ENV_OUTPUT.impl.md`](handoff/ENV_OUTPUT.impl.md), 측정은
 [`ENV_OUTPUT.verify.json`](handoff/ENV_OUTPUT.verify.json)의 `numbers`와 raw artifact를 기준으로 한다.
 환경 구성·실행 방법·보존 목록은
-[`GPU_OUTPUT_IMPLEMENTATION_REPORT.md`](../../../doc/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md)에 기록한다.
+[`GPU_OUTPUT_IMPLEMENTATION_REPORT.md`](../../../doc/active/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md)에 기록한다.
 기존 AG3S algorithm 개선 이력과 앞선 실험 판정은 계속 유지한다.
 
 ### 독립 환경과 GPU · checkpoint 검증
@@ -9075,7 +9075,7 @@ pre8 + close 162 chunk (palm cover off 의 기록 실행 chunk) 중 충돌 행�
 | 항목 | 내용 |
 |---|---|
 | CL2 의 n | 18 쌍. C1a 대 C1b′ 의 task success 차이 (4 대 1) 는 p 0.375, grasp 차이 (4 대 0) 는 p 0.125 로 유의하지 않다. C1b′ 대 C2′ 만 p ≤ 0.00195 |
-| cuRobo 환경 | CL2 는 cuRobo 를 snapshot 의 pinned source (`78fd485`) 에서 `PYTHONPATH` 로 불러서 실행했다 (editable 설치는 이후, commit `7339fa4d`). 실행 시점 regression baseline: legacy 14 / 15 · 15 / 15 · −29.031048280806342 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877401271193 mm — 둘 다 기대값과 일치. 집계 시점의 legacy (checkout `7339fa4d`, CPU): 14 / 15 · 15 / 15 · −29.031048280806342 mm 일치. cuRobo 는 집계 시점에 다시 돌리지 않았다 (GPU 미사용). (lead 가 `doc/SHARED_STORAGE_AND_PYTHON.md` 에 editable 설치 뒤 baseline 일치가 적혀 있다고 알렸다 — 이 절 작성 때 그 문서를 열어 대조하지 않았다) |
+| cuRobo 환경 | CL2 는 cuRobo 를 snapshot 의 pinned source (`78fd485`) 에서 `PYTHONPATH` 로 불러서 실행했다 (editable 설치는 이후, commit `7339fa4d`). 실행 시점 regression baseline: legacy 14 / 15 · 15 / 15 · −29.031048280806342 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877401271193 mm — 둘 다 기대값과 일치. 집계 시점의 legacy (checkout `7339fa4d`, CPU): 14 / 15 · 15 / 15 · −29.031048280806342 mm 일치. cuRobo 는 집계 시점에 다시 돌리지 않았다 (GPU 미사용). (lead 가 `doc/active/SHARED_STORAGE_AND_PYTHON.md` 에 editable 설치 뒤 baseline 일치가 적혀 있다고 알렸다 — 이 절 작성 때 그 문서를 열어 대조하지 않았다) |
 | 다른 날 비교 | T44d 대 CL2 는 다른 날 · 다른 checkout · 다른 환경이다 (`/mnt/dev/work-t44cl` `f891abe` 대 snapshot `f14ae3e6`). C1b 대 C1b′ · C2 대 C2′ 는 flag 도 다르다 |
 | C1a 의 HOLD | T44d 대 CL2 에서 C1a 의 HOLD 합이 54 → 119 이다. 원인은 이 기록에 없다 |
 | 바나나 · 영상 | 바나나는 통과 episode 가 없어 측정하지 않았고, side-by-side mp4 는 만들지 않았다 (CL2 `not_measured`) |

@@ -26,7 +26,7 @@ directory와 symlink target을 비교한다. `.git`, `.venv*`, bytecode와 명�
 Target subtree 밖을 향한 link는 명시된 stable shared input 외에는 거부한다.
 변경 직전에 plan과 실제 파일을 재검증한다. Link별 atomic replace와 rollback manifest를 사용한다.
 
-Planner는 [plan_legacy_retirement.py](../../scripts/setup/plan_legacy_retirement.py)의 read-only 도구다.
+Planner는 [plan_legacy_retirement.py](../../../scripts/setup/plan_legacy_retirement.py)의 read-only 도구다.
 임의 archive를 자동 apply하는 기능은 제공하지 않는다. 실제 승인된 link 목록과 apply 결과는
 permanent archive의 `symlink-migration.json`, 원본 비교는 raw run의 `link-plan-before.json`에 기록한다.
 Git refs/HEAD/status, 보존 checksum, worktree 검증은 archive의 JSON과 독립 validation에 남긴다.

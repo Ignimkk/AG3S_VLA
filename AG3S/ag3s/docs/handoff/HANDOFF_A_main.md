@@ -5,7 +5,7 @@
 
 ## 0. 먼저 읽을 것 (순서)
 1. `CLAUDE.md` · `.claude/ag3s-rules.md` · `SESSIONS_A_B.md` (이 디렉터리).
-2. `doc/plans/develope_PLAN.md` §0 · §6 (DX-00 · DX-01 · DX-04 · DX-09) — A 의 진행 정본.
+2. `doc/active/plans/develope_PLAN.md` §0 · §6 (DX-00 · DX-01 · DX-04 · DX-09) — A 의 진행 정본.
 3. `AG3S/ag3s/docs/AG3S_T47_LOG.md` 맨 위 표 + "T46e" · "T46f-A14 · V-T46f-A14" · "T46c-W1 · T46d · T46f" 절.
 4. task: [`T46f.task.md`](T46f.task.md) (T46f 블록 전체 — 가설 · 접촉 정의 · 단계 1–5 · 모든 사용자 판정, **다음 작업의 정본**), [`T46e.task.md`](T46e.task.md), 위임받은 [`T57.task.md`](T57.task.md).
 5. memory (`~/.claude/projects/-mnt-dev-AG3S-VLA-development/memory/`): 보고 형식 · 우수성 비전제 · worktree env.sh 함정 · sub-agent 는 병렬일 때만.
