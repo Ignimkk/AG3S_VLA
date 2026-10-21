@@ -276,6 +276,26 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **class A (T46g, SL5b)** | attach 가 한 번도 되지 않은 실패 episode 중, 닫힘 호출에서 `reach` 만 실패하고 (대상이 가려진 상태), 마지막으로 보인 centroid 를 손과 함께 움직였다면 reach 가 통과하며, 그 뒤 쥔 물체 쪽 collision HOLD 가 이어진 경우 |
 | **NR · R (T60d)** | NR = P (안정 placement) 에 도달했지만 H (준비자세 복귀) 에 도달하지 못한 run, R = H 에 도달한 run |
 
+**T63 (2026-10-21 추가)** — cuRobo v2 TrajectoryOptimizer 와 우리 TO 의 offline 비교의 용어.
+
+| 용어 | 뜻 |
+|---|---|
+| **cuRobo v2 `TrajectoryOptimizer`** | cuRobo 0.8 (v2 API) 의 trajectory 최적화기. L-BFGS 로 B-spline knot 을 최적화하고 collision · c-space 정규화 · limit 을 cost / constraint 로 다룬다. T63 은 이것을 우리 입력 (VLA chunk · target 제외 ESDF) 위에서 돌린다 |
+| **CCR (Constrained Chunk Refinement)** | 우리 TO (`AG3S/trajopt`). VLA chunk 의 앞 plan window 를 QP 로 다듬고 clearance 를 제약으로 둔다 (collision 은 slack 1000 / m 의 hard 제약 취급) |
+| **B0 · B1 · B2 · B3 · B4 (T63 후보)** | B0 = cuRobo 기본 (goal = chunk 끝 joint 값). B1 = B0 + step 별 VLA tracking 항, B2 = B1 + 이전 refined chunk continuity, B3 = B2 + deflection-rate, B4 = B3 + 링크별 거리장 (LTE) + target margin. 항은 한 단계에 1–2 개씩 누적한다 |
+| **λ (T63 가중치 배율)** | 우리 항 (track · continuity · deflection-rate) 의 가중치에 공통으로 곱한 배율. 사용자 판정으로 {1, 100, 10⁴} 세 값을 결과 전에 고정. λ=1 은 baseline 가중치 그대로 |
+| **cspace goal** | 최적화의 goal 을 pose 가 아니라 joint 값으로 주는 방식. T63 의 B0 는 `reference_chunk[-1]` (VLA chunk 끝) 의 arm 관절값 |
+| **`reference` · `to_recorded` · `to_resolved`** | reference = VLA 원본 chunk. `to_recorded` = server 가 실제 실행한 우리 TO 의 `refined_chunk` 기록 (T63 의 주 기준, 사용자 판정). `to_resolved` = 같은 입력으로 우리 TO 를 episode 안에서 이어 (`chained`) 다시 푼 것 (재현 오차 · 같은 장비 시간을 보는 보조) |
+| **exec8 · plan16** | 평가 창. exec8 = chunk 앞 8 step (실제 실행 구간), plan16 = 우리 TO 의 plan window 16 step |
+| **TO-active chunk** | `to_recorded` 의 plan16 TCP 위치가 reference 와 어디서든 1 mm 넘게 다른 chunk (사용자 판정 2026-10-21). 나머지는 TO-inactive |
+| **common evaluator (공통 평가기)** | 모든 후보 궤적을 같은 함수 하나로 재는 평가기: 우리 TO 가 인증한 clearance (record 의 contact policy · target 제외 mask · server config · step 별 served finger 열림). `fidelity check` = 기록 `refined_chunk` 의 exec8 최소값을 record 의 `to.metrics.clearance_m` 과 비교 (허용 0.01 mm) |
+| **composed world (`ComposedSceneCollision`)** | 상자 (`esdf_free` 격자) 안은 `esdf_free`, 밖은 coarse layer 로 읽는 cuRobo world. cuRobo 커널이 층 cost 를 더하기만 해서 `SceneCollision` 을 상속해 층별 결과를 sphere · step 별로 합성한다. `esdf_free` 가 없는 chunk 는 상자 안에서 `min(coarse, fine)` |
+| **`exact` · `resample16` (시간축)** | `exact` = 21 knot, state 격자 1/30 s 의 짝수 state 가 15 Hz chunk step (재샘플 없음, 주 결과). `resample16` = cuRobo 기본 16 knot 출력을 t = k/15 로 선형 재샘플 (민감도 참고) |
+| **warm · cold solve** | cold = 각 후보의 첫 solve (CUDA graph capture 포함, 결과도 warm 과 달라 버림). warm = 같은 chunk 를 다시 푼 solve. cuRobo wall 시간 = host `perf_counter` + `cuda.synchronize`, GPU 시간 = CUDA event |
+| **paired count (T63)** | chunk 마다 후보의 exec8 min clearance 와 `to_recorded` 의 것을 짝지어 센 수 (낮음 / 높음 / 같음, 후보만 관통 / `to_recorded` 만 관통 / 둘 다) |
+| **solver failure (T63)** | cuRobo = `success = false` (scene_collision · cspace 제약 위반), 우리 TO = status `violated` / `solver_failed`. 정의가 달라 개수를 같은 의미로 읽지 않는다 |
+| **solve 순서 의존 (order dependence)** | cuRobo 결과가 앞선 chunk 의 solve 이력에 따라 달라지는 현상. 같은 순서면 bit 단위로 같다. T63 은 chunk 순서를 고정해 실행했다 |
+
 ## 진행 현황 — T47 이후
 
 | 게이트 | 무엇을 묻나 | 상태 |
@@ -309,6 +329,7 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **T46g** SL5b reach 진단 (benchmark 기록 · RB-Y1 기록, offline) | 가려진 target 의 오래된 centroid 로 reach 를 검사해 attach 가 거절되고 HOLD 로 이어지는가 | **진단 완료 (2026-10-14).** V11AB-B 실패 7 중 4, V11AB-A 실패 8 중 2 가 그 경로. RB-Y1 기록에서는 reach 단독 실패 0. 사용자 판정: T57 보다 먼저 최소 수정 (threshold 변경 아님), #48 과는 수정 분리. 아래 "T46g" 절 |
 | **T60d** T60b 복귀 정체 후속 (기록 기반) | 놓은 뒤 복귀하지 않는 run 에서 정책 입력 · 제안은 무엇이 다른가 | **측정 완료 (2026-10-14, 기록만).** 정체 run 의 state 는 demo 의 release 단계에 가깝고 복귀 단계로 가지 않는다; 사용 팔 arm_5 가 demo 범위 밖. 사용자 판정: VLA 단독 4 run 확인 (우선순위 뒤). 아래 "T60d" 절 |
 | **CL4** extent (DT-02, LTE 고정 X1–X4) · 접촉 정책 (DT-05A, oracle 고정 X4 대 G4) closed-loop, 최종 형상 (1,349 구 + palm cover), 90 run | 같은 identity · 형상에서 extent 처리와 link 별 접촉 처리의 실행 효과 | **측정 완료 (2026-10-15).** success_ct (P): ball 10 · oracle-visible 9 · ball_owned+F1 7 · ball_owned 5 · global+oracle 7 / 18. link 별 구분의 실행상 차이 관측 안 됨. CL3 (기존 형상) 보다 전체 성공이 낮아 원인 진단 중 (X2G). 아래 "CL4" 절 |
+| **T63** cuRobo v2 `TrajectoryOptimizer` (B0) 와 우리 항을 1–2 개씩 누적한 B1–B4 (λ ∈ {1, 100, 10⁴}) 대 우리 TO (CCR), offline 고정 입력 (사과 24 장면 run 중 10 episode · 750 chunk, 같은 평가기) | 같은 입력 · 같은 지표에서 cuRobo 의 trajectory optimization 과 우리 TO 가 어떻게 다른가 (어느 쪽이 낫다고 미리 정하지 않음) | **측정 완료 (2026-10-21, 명령 궤적만, 사용자 판정 5 로 closed-loop 결정).** 관통 chunk exec8 (all 750): reference 129 · `to_recorded` 48 · cuRobo 14 후보 145–153, 후보만 관통 97–105 대 `to_recorded` 만 관통 0–1. TCP 변경량 exec8 `to_recorded` 7.2 mm 대 cuRobo 14.8–20.6 mm. warm solve median B0 57 · B1 64 · B2 70–73 · B3 82–84 · B4 111–121 ms (GPU, `to_recorded` 162 ms server CPU). 한계: 명령 궤적만 · 평가기 충실도 22 / 750 chunk 가 0.01 mm 초과 (최대 15 mm) · solve 순서 의존 (최대 0.175 rad) · finger 열림 chunk 당 한 값. 아래 "T63" 절 |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -370,6 +391,11 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | (사용자 판정, 2026-10-14) benchmark 세션의 SL5b reach 인계 (가려진 target 의 마지막 centroid 기준 reach 실패 → attach 거절 → HOLD) 는 T46 세션 담당 | latch method 변경이다. T55 결과에 같은 현상이 보이면 T46 에 알린다 | `/mnt/dev/AG3S_VLA-benchmark/AG3S/ag3s/docs/handoff/SL5b-reach-to-development.md` |
 | (사용자 판정, 2026-10-13 ~ 14) **T55 사전 고정:** 정답 = 물리 predicate (P_grasp · P_task 분리, wrong-object 를 빈손과 구분), dev 기준 = 비개입 재시뮬, perception = 재시뮬 관측의 재실행 grounding, 허용폭 = false reject +5 %p · 지연 +1 frame · 추가 미검출 0 (조건 합산, 자연 조건 초과는 함께 보고), slip ghost · park 둘 다 유지 | 결과를 본 뒤 조건별 필수 기준으로 바꾸지 않는다 | `handoff/T55.task.md` 사용자 판정 절들, `T55.prereg.json` |
 | (규칙 출력 + 사용자 판정, 2026-10-14) **T55: 명사 token probe 결합을 T57 단계 2 (task gate) 후보로, HSR 은 보조 기록용.** 단계 1 (N grounding) 과 섞지 않고 별도 단계로 시험하며, 서빙 구현은 A 세션에 위임, task_ready 연결 위치는 구현 전 판정 | HSR 이 instruction 기반 단계 판단을 한다고 주장하지 않는다 (plan 판정 1) | 아래 "T55" 절 §5, `handoff/T57.task.md` 단계 2 |
+| T63 — **cuRobo B0 의 goal 은 VLA chunk 끝 joint 값 (cspace), pose goal 은 하지 않는다. offline 고정 입력 비교를 먼저, 쓸 만한 변형만 이후 10 episode closed-loop** | 사용자 판정 (2026-10-20). 어느 쪽이 낫다고 미리 정하지 않는다 ([`handoff/T63.task.md`](handoff/T63.task.md)) | 16D |
+| T63 — **B0 world = 상자 안 `esdf_free`, 밖 coarse layer. 시간축 `exact` 가 주 결과, `resample16` 은 민감도. TO-active = TCP 위치 차 > 1 mm (plan window 어디서든)** | 사용자 판정 (2026-10-21, 단계 0–1 결과 후). `esdf_free` 만으로는 상자 밖 sphere-step 97.8 % 가 빈 공간이 된다 | 16D |
+| T63 — **우리 항 전체에 같은 λ ∈ {1, 100, 10⁴} 를 곱한다 (결과 전 고정). B4 target 제외 mask = server record 의 mask** | 사용자 판정 (2026-10-21, 단계 2 결과 후). baseline 가중치에서 우리 항은 cuRobo 목적함수의 median 1.0 % (B1) · 1.5 % (B3) 였다 | 16D |
+| T63 — **보고의 우리 TO 주 기준 = `to_recorded` (server 기록 `refined_chunk`), `to_resolved` (chained 재풀이) 는 보조** | 사용자 판정 (2026-10-21, 단계 3 준비 결과 후). 실제로 실행된 궤적이고 B2 · B3 의 이전 chunk 입력이 이 기록에서 왔다 | 16D |
+| T63 — **cuRobo 를 서빙 경로에 넣은 10 episode closed-loop 을 돌린다** (후보 · λ · episode · 지표 · 연결 방식은 후속 task 에서 고정) | 사용자 판정 (2026-10-21, 단계 3 결과 후). 이 로그는 후보를 고르지 않았다 | 16D |
 
 ---
 
@@ -429,6 +455,8 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 47 (T55 가 추가) | **T55 의 T60 종료 구간 (P · H) 보조 분석** — 사용자 판정 (2026-10-14) 으로 기존 정의 · P · H 를 나란히 보고해야 한다 | `t55_windows.py` (add-on, B 로 인계) | **측정 안 됨 (진행 중 · 미기록)** → **해소 (2026-10-14, T55 절 §8 · T54c 절 §10)** |
 | 48 (T55 가 추가) | **instruction 변경 시 strong rule 의 P_grasp 반응** — 바뀐 prompt 로 재-grounding 하면 실제 보유 333 frame 중 117 을 HELD 로 인정하지 않고 보유 시작 30 건 중 10 건을 놓쳤다 | `T55.verify.json` test.pooled_p_grasp · primary_reground | **원인 미측정** (미측정 해석: 조작 대상 식별이 prompt 를 따라 바뀌고 latch 가 그 대상에 묶임) → **원인 측정 (2026-10-14, "T55b" 절):** manipulated object = 바뀐 명사의 과일 → `reach` 실패 (117 / 117). latch 수정은 A 의 판정 대기 |
 | 49 (T55 가 추가) | **slip 개입의 양성 frame 이 너무 짧다** — 개입이 보유 성립 2 frame 뒤라 strong rule 이 HELD 를 세우기 전에 개입된다 (FR 20/20, 두 결합 arm 차이 0) | `T55.prereg.json` (after_frames 2) | **설계 한계, 재측정 안 함** |
+| 50 (T63 이 추가) | **cuRobo 후보의 실제 궤적 (`measured_qpos`) contact · success · HOLD** — T63 은 명령 궤적의 평가기 clearance 만 쟀다 | `T63.verify.json` `not_measured` | **측정 안 됨 (사용자 판정 2026-10-21: 10 episode closed-loop, 후속 task)** |
+| 51 (T63 이 추가) | **T63 의 미해소 한계** — 평가기 충실도 22 / 750 chunk 가 0.01 mm 초과 (최대 15.0 mm) 인 원인, cuRobo 의 solve 순서 의존 (최대 0.175 rad) 의 원인, cuRobo 의 step 별 finger 열림, cuRobo 관통 chunk 가 많은 이유 (미확인 후보: chunk 끝 goal 고정, 10 mm activation 의 soft collision penalty) | `T63.verify.json` `evaluator_fidelity` · `order_dependence_vs_impl_smoke_r3` | **측정 안 됨** |
 
 ---
 
@@ -5180,3 +5208,316 @@ endpoint: P 도달 12 / 16, H 도달 12 / 16. 제거된 inference frame: P 511 �
 ### 5. T60d-E0 — VLA 단독 (TO-off) 4 run · 사용자 지정 문구
 - ep110 · 123 의 TO-on 과 같은 seed (CL2 · CL3 에서는 모든 arm 이 P 도달 후 복귀하지 않음). TO-off: 3 run 이 P 에 도달했고 **3 run 모두 H 에 도달** (ep110 s1101 은 P 미도달).
 - **TO-off 에서 P 에 도달한 3 run 은 모두 H 에 도달했다. 따라서 TO 가 이전 궤적과 상태를 바꿔 복귀에 간접적으로 영향을 주었을 가능성을 배제할 수 없다.** 기존의 "관측된 복귀 구간에서 정책의 복귀 제안이 없었다" 는 유지하고, "TO 는 복귀 실패에 기여하지 않았다" 로 확대하지 않는다. T60d 는 여기서 멈춘다 (추가 seed 없음).
+
+---
+
+## T63 — cuRobo v2 TrajectoryOptimizer 를 우리 입력 위에서 돌리고 우리 목적함수를 1–2 개씩 더하면 우리 TO 와 어떻게 다른가 (offline 고정 입력 비교, 2026-10-21 KST)
+
+> 작성: ag3s-scribe, **2026-10-21 10:07 KST** (머신 시계. 같은 시계의 figure 파일 수정 시각은 09:58). 근거: [`handoff/T63.task.md`](handoff/T63.task.md) (목적 · 사용자 판정 · 고정 입력), [`handoff/T63.impl.md`](handoff/T63.impl.md) (단계 0–2 · 단계 3 준비, implementer 측정), [`handoff/T63.verify.json`](handoff/T63.verify.json) (단계 3 수치, verifier 측정).
+> **수치 출처 표기.** `[V]` = `T63.verify.json` 의 `numbers` (verifier 측정). `[I]` = `T63.impl.md` (implementer 측정, 독립 검증 전). `[D]` = 이 절에서 `[V]` 값으로 계산한 파생값 (범위 · 합). 표시가 없는 수치는 없다.
+> 이 절은 **구현과 offline 측정의 기록**이다. 어느 방법이 낫다고 미리 정하지 않았고, 아래 해석은 표의 숫자가 보이는 범위에 한정한다.
+
+### 1. 목적과 범위
+
+cuRobo v2 의 `TrajectoryOptimizer` (cuRobo 가 trajectory 를 풀 때 쓰는 기본 최적화기) 를 **우리 입력 그대로** 돌린다. 입력은 VLA chunk (VLA 가 한 번에 내놓는 50 step action 열) 와 AG3S 가 만든 target 제외 ESDF 다. 그 위에 우리 목적함수 항을 **1–2 개씩 누적해서** 더하고, 우리 TO (CCR: Constrained Chunk Refinement, `AG3S/trajopt` 의 chunk 단위 trajectory refinement) 와 **같은 입력 · 같은 평가기**로 비교한다.
+
+- 비교는 **offline, 고정 입력**이다. 사과 24 장면 run (IFG-APPLE, E0 = VLA 단독 · C1aN = task.md 가 "현재 서빙 방식" 이라 부르는 arm) 중 10 episode 의 C1aN server constraint record 750 chunk (episode 당 75) 를 쓴다 (`episodes_chunks` [V]). episode 규칙: E0 성공 장면 중 place stratum 6 개 (211 · 320 · 572 · 850 · 901 · 954) 전부, clear stratum 중 C1aN 이 실패한 2 개 (250 · 1345), 둘 다 성공한 대조 2 개 (126 · 309). **성공률 표본이 아니다.**
+- 우리 TO 기준은 이 run 의 C1aN serving 코드가 담긴 snapshot (`f0d8046`) 이다. working tree 의 `trajopt` 는 다른 세션의 미커밋 변경이 있어 쓰지 않았다.
+- offline 은 **명령 궤적 (commanded trajectory) 만** 잴 수 있다. 실제 궤적 (`measured_qpos`) 기준 contact 는 closed-loop 의 주 지표이고 여기서 재지 않았다.
+
+### 2. 사용자 판정 타임라인 (KST)
+
+판정 시각 (시 · 분) 은 task.md 에 기록되지 않았고 날짜만 있다.
+
+| 날짜 | 판정 시점 | 판정 | 바뀐 것 |
+|---|---|---|---|
+| 2026-10-20 | task 시작 | STEP 번호 T63 을 peer 세션 3 곳에 알려 예약 (충돌 없음 회신). **goal = VLA chunk 끝의 joint 값 (cspace goal), pose goal 은 하지 않는다.** **offline 고정 입력 비교 먼저**, 쓸 만한 변형만 이후 10 episode closed-loop | 기본 cuRobo (B0) 의 goal · 비교 범위 |
+| 2026-10-21 | 단계 0–1 결과 (`T63.impl.md`) 를 본 뒤 (판정 2) | (a) B0 world = 상자 안 `esdf_free` (target 제외), 상자 밖 우리 TO 와 같은 coarse layer. (b) 시간축 `exact` 를 주 결과로, `resample16` 은 민감도 참고. (c) **TO-active** = 기록 `refined_chunk` 와 `reference_chunk` 의 TCP 위치 차가 plan window 어디서든 > 1 mm | (a) `esdf_free` 만으로는 0.64 m 상자 밖이 빈 공간이 되어 반대쪽 손이 보호되지 않는다 (상자 밖 sphere-step 97.8 %, 조작하지 않는 손, [I]). (c) task 원문의 clearance 조건 (activation band 0.35) 은 단위가 mm 가 아니라 뺐다 |
+| 2026-10-21 | 단계 2 결과를 본 뒤 (판정 3) | **우리 항 전체 (track · continuity · deflection-rate) 에 같은 배율 λ ∈ {1, 100, 10⁴} 를 곱한다** (결과 전에 이 세 값으로 고정, λ=1 은 baseline 가중치 그대로). B4 target 제외 mask 는 server record 의 mask (`--b4-mask record`) | baseline 가중치에서는 B1–B3 ≈ B0 였다 (아래 §5) |
+| 2026-10-21 | 단계 3 준비 결과를 본 뒤 (판정 4) | 보고의 "우리 TO" 주 기준 = server 기록 `refined_chunk` (**`to_recorded`**). chained 재풀이 (**`to_resolved`**) 는 재현 오차와 같은 장비 계산 시간을 보는 보조 | 실제로 실행된 궤적이고 B2 · B3 의 이전 chunk 입력도 이 기록에서 왔다 |
+| 2026-10-21 | 단계 3 결과를 본 뒤 (판정 5) | **cuRobo 를 서빙 경로에 넣은 10 episode closed-loop 을 돌린다.** 세부 (후보 · λ · episode · 지표 · 서빙 연결 방식) 는 후속 task 에서 고정한다 | §9 |
+
+lead 가 기본 처리로 정하고 사용자에게 알린 항목 (이의 없음, task.md): `esdf_free` 없는 chunk 232 / 750 은 main fine layer 로 대신하고 따로 집계, `grasp_active` chunk 는 pre-grasp / post-grasp 로 나눠 보고, 손가락 열림은 최적화에서 chunk 당 한 값이되 평가기는 모든 후보에 step 별 served 열림을 똑같이 사용, self-collision 은 끔, 항의 행 범위는 cuRobo 가 최적화하는 50 row 전부 (`--term-window chunk`), `esdf_free` 가 없는 chunk 의 상자 안 층은 우리 TO 와 같은 `min(coarse, fine)`, B4 margin 규칙이 우리 TO 보다 보수적인 점은 한계로 보고, B3 · B4 의 계산 시간이 66.7 ms 를 넘는 것은 offline 에서 보고만 한다.
+
+### 3. 비교 대상과 용어 (이 절에서 쓰는 이름)
+
+| 이름 | 뜻 |
+|---|---|
+| **reference** | VLA 원본 chunk (`reference_chunk`). 아무 refinement 도 하지 않은 명령 |
+| **`to_recorded`** (주 기준) | server 가 실제로 실행한 우리 TO 의 `refined_chunk` 기록 |
+| **`to_resolved`** (보조) | 같은 입력 (record scene · server config · record 에서 재구성한 context) 으로 우리 TO 를 episode 안에서 이어 (`chained`) 다시 푼 것. wall-clock 예산만 끔 |
+| **B0** | cuRobo v2 기본 trajectory optimization. start = chunk 의 `q_now`, goal = `reference_chunk[-1]` (cspace), seed = `reference_chunk`. world = `esdf_free` (상자 안) + coarse layer (상자 밖) |
+| **B1** | B0 + step 별 VLA chunk tracking 항 (우리 TO 의 `w_track`) |
+| **B2** | B1 + 이전 refined chunk continuity 항 (`w_continuity`) |
+| **B3** | B2 + deflection-rate 항 (`w_deflection_rate`). servo accel 항은 구현했지만 baseline 에서 꺼져 있어 넣지 않았다 |
+| **B4** | B3 + 링크별 거리장 (**LTE**: Link-specific Target Exemption — target 에 닿는 것이 작업의 일부인 link 만 target 제외 field 를 읽고 나머지 link 는 target 을 포함한 field 를 읽는다) + target clearance margin |
+| **λ** | 우리 항 (track · continuity · deflection-rate) 의 가중치에 공통으로 곱한 배율. λ=1 은 baseline 가중치. B4 의 target margin 과 cuRobo 자체 c-space 정규화 · collision 가중치에는 곱하지 않았다. 실제 가중치 [V]: λ=1 → track 1 · continuity 0.5 · deflection-rate 20, λ=100 → 100 · 50 · 2,000, λ=10⁴ → 10,000 · 5,000 · 200,000 |
+| **exec8 / plan16** | 평가 창. exec8 = chunk 의 앞 8 step (실제로 실행되는 구간), plan16 = 우리 TO 가 최적화하는 plan window 16 step |
+| **TO-active chunk** | `to_recorded` 의 plan16 TCP 위치가 reference 와 어디서든 1 mm 넘게 다른 chunk. TO 가 실제로 궤적을 바꾼 chunk 다. `to_inactive` 는 그 나머지 |
+| **TCP 변경량** | TCP (조작 손의 finger sphere 평균 위치) 의 reference 대비 거리 `‖tcp − tcp_ref‖` (mm). chunk 마다 step 평균과 최댓값을 낸다 |
+| **common evaluator** | 모든 후보 궤적을 같은 함수 하나로 잰다: 우리 TO 가 인증한 clearance (record 의 contact policy · target 제외 mask · server config · step 별 served finger 열림) |
+| **warm / cold solve** | cold = 각 후보의 첫 solve (CUDA graph capture 포함, 결과도 warm 과 다르므로 버림), warm = 같은 chunk 를 다시 푼 것 |
+| **paired count** | chunk 마다 후보의 exec8 min clearance 를 `to_recorded` 와 짝지어 센 수 |
+
+split 크기 [V]: all 750, TO-active 530, TO-inactive 220, `esdf_free` 있음 518, `esdf_free` 없음 (main fine layer) 232, pre-grasp 493, post-grasp 257. attached (쥔 물체) 질의점이 있는 chunk 는 0 개라 skip 이 없다 [I].
+
+### 4. 단계 0 · 2 의 parity gate (implementer 측정, 독립 검증 전) 와 cuRobo 기본값에서 바꾼 설정
+
+**단계 0 (robot model · ESDF world).** 같은 URDF 와 server 가 만든 collision sphere 270 개를 그대로 cuRobo 에 실었다 (cuRobo sphere fit 은 쓰지 않음, radii 최대 차 3.3e-10 m). gate 는 첫 실행 전에 고정했다: centre 최대 오차 ≤ 1 mm **그리고** interior row 중 허용오차 (답한 층의 `voxel_size / 2`: fine 2.5 mm, coarse 10 mm) 초과 0 개.
+
+| 측정 [I] | 값 |
+|---|---|
+| 범위 | 10 episode, 750 chunk, 3,240,000 row (plan window 16 step × 270 sphere) |
+| sphere centre 오차 (cuRobo FK 대 baseline FK / 대 record) 최대 | 0.00021 mm / 0.00019 mm |
+| signed distance 오차 (record `clearance` 대비) median / p95 / max | 0.0006 / 0.0016 / 0.0028 mm |
+| 허용오차 초과 row | 0 |
+
+**단계 2 (composed world).** cuRobo 커널은 층의 cost 를 더하기만 하므로 "상자 안은 이 층, 밖은 저 층" 합성을 `SceneCollision` 을 상속한 `ComposedSceneCollision` 으로 구현했다 (`third_party/curobo` 수정 없음). parity [I]: 3,240,000 row 에서 허용오차 초과 0, 최대 0.0027 mm (상자 층이 답한 row 1,667,436 · coarse 1,572,564). `esdf_free` 없는 232 chunk (새 규칙 `min(coarse, fine)`) 만 따로 1,002,240 row 에서 초과 0, 최대 0.0027 mm. LTE 의 target margin channel (5 mm 거리 격자 대 `cKDTree`, 13,589 row, `d_obj` < 80 mm) 은 `d_obj` ≥ 10 mm 에서 초과 0, `d_obj` < 10 mm 7 row 는 점군 근처 kink 로 보고만 했다.
+
+**cuRobo 기본값에서 바꾼 설정 (전부, [I] `B0_CHANGES` · `WORLD_CHANGES`).**
+
+| 설정 | 값 | 이유 |
+|---|---|---|
+| robot model | served 270 sphere, base_link `link_torso_5`, finger 4 관절은 lock 0 + sphere 를 prismatic axis 로 이동 | 같은 URDF · sphere · 최적화 관절 |
+| world frame | torso 가 chunk 마다 `q_now` 로 바뀌므로 world 를 torso_5 frame 으로 옮김 | torso lock 이 한 chunk 자세에 묶이는 것을 피함 |
+| joint limits | position = model_xml ± 0.02 rad, velocity · acceleration = URDF × 0.9 (우리 TO effective limit). jerk 는 cuRobo 기본 500 rad/s³ (우리 TO 에는 jerk limit 이 없음) | 우리 TO 와 같은 limit |
+| world | 상자 (`esdf_free` 격자) 안 `esdf_free`, 밖 coarse layer. `esdf_free` 없는 chunk 는 상자 안에서 `min(coarse, fine)` | 판정 2 · 3 |
+| `self_collision_check` | 끔. metrics rollout 의 self-collision constraint 도 제거 | 우리 TO 에 robot–robot 쌍이 없고, 이 sphere model 용 ignore table 이 없어 켜면 finger–palm sphere 겹침으로 모두 infeasible 이 됨 (debug 에서 확인) |
+| goal | `solve_cspace`, goal = `reference_chunk[-1]` 의 arm 관절 | 판정 1 |
+| seed | `seed_traj` 1 개 = reference path 를 knot 시각에서 샘플한 것. 나머지 3 seed 는 cuRobo 기본 (선형 보간). num_seeds 4 | task §1 |
+| dt / knots | state dt 를 `(50/15)/(horizon−1)` 로 고정 (`compute_trajectory_dt` override, `finetune_attempts=0`). `exact`: knots 16 → 21 (101 state, 1/30 s, 짝수 state 가 15 Hz chunk step). `resample16`: 기본 16 knot, t = k/15 선형 재샘플 | cuRobo 의 dense interpolation 출력은 3.33 s spline 을 4.07 s 로 늘려 쓸 수 없었다 |
+| start state | `q_now`, velocity = acceleration = 0 | record 에 촬영 시점 관절 속도가 없다 |
+| 추가 cost (B1–B4) | 우리 항을 cuRobo 자체 cost 다음에 cost manager 에만 더함. 행 범위 = 50 row 전부. λ 배율 | 판정 3. (variant, λ) 마다 solver 를 새로 만든다 (가중치가 CUDA graph 상수) |
+
+그 밖은 cuRobo 기본값 그대로다 (optimizer `lbfgs_bspline_trajopt.yml` 100 iter, cost 가중치, collision activation 0.01 m, sweep / speed metric, CUDA graph on).
+
+### 5. 단계 2 의 발견: baseline 가중치에서 우리 항은 cuRobo 목적함수의 1–1.5 % 였다 (implementer 측정 [I])
+
+| 시점 | cuRobo `cspace` 정규화 항 | cuRobo `scene_collision` (가중 1e5) | 우리 `to_track` (w=1) | 우리 continuity + deflection |
+|---|---:|---:|---:|---:|
+| seed (reference 경로), 40 chunk median | 1,162 | 0 (median) | 0.20 | — |
+| B1 solution, median | 209 | 0 (median) | 2.19 | — |
+| 우리 항의 비중 (solution) | — | — | B1: median **1.0 %**, max 10 % | B3 세 항 합: median **1.5 %**, max 43 % |
+
+- 그 결과 B1–B3 궤적은 B0 와 거의 같았다 (max-joint 차 median **0.002 rad**, 40 chunk smoke). 실패 chunk 도 같았다.
+- 항이 작동하지 않는 것은 아니다. 단일 chunk (ep211 #715) 에서 `w_track` 만 바꿔 새 solver 로 푼 확인: `|q − ref|` mean 이 0.0376 rad (w = 0, 1), 0.0373 (100), 0.0126 (10⁴) 였다. 가중치 scale 이 cuRobo 의 c-space 정규화 (가중 1e4 급) 보다 두세 자릿수 작다는 것이 측정이고, 그 이유 해석 (우리 QP 에서는 tracking 이 주 항이고 collision 이 hard 제약이라는 구조 차이) 은 implementer 의 설명이다.
+- 이 결과가 판정 3 의 **λ ∈ {1, 100, 10⁴}** 로 이어졌다. scale 을 implementer 가 고르지 않고 멈춰 사용자 판정을 받았다. 단계 2 smoke 의 B4 는 40 chunk 중 32 성공 (B0–B3 는 33) 이었다 [I] (단계 3 의 전체 750 chunk 수치는 §6).
+
+### 6. 단계 3 결과 (offline, 750 chunk, 고정 순서, `chunk` window 50 row, B4 mask = record) — verifier 측정 [V]
+
+**실행 사실 [V].** 후보 17 개 (reference · to_recorded · to_resolved · B0 · B0_resample16 · B1–B4 × λ 3) 전부 750 / 750 chunk 평가, 누락 0, crash 0, non-finite 0. 회귀 기준선 일치 (legacy start violated 14 / 15 · has_target 15 / 15 · frame0 clearance_before −29.031048 mm, cuRobo 10 / 15 · 15 / 15 · −9.171877 mm). cuRobo `exact` 13 후보 1870 s, `resample16` B0 94 s, GPU 최대 할당 5.29 GiB. solver 는 후보 바깥 loop 로 한 번에 하나만 살려 두고, chunk 순서는 episode · chunk 오름차순으로 고정했다.
+
+표 읽는 법: min clearance 는 chunk 마다 앞 W step × 모든 sphere 의 최솟값 (mm, 음수 = 관통) 이고 median · p5 는 chunk 들에 대한 값이다. "관통 chunk" = 그 최솟값 < 0 인 chunk 수. 후보 이름 앞의 B0–B4 는 §3.
+
+#### 6.1 전체 750 chunk
+
+**표 1. clearance · 관통** (all, 750)
+
+| 후보 | 관통 chunk exec8 | 관통 chunk plan16 | exec8 min clearance median / p5 (mm) | plan16 min clearance median / p5 (mm) | to_recorded 대비 낮음 / 높음 / 같음 (chunk) | 후보만 관통 / to_recorded 만 관통 / 둘 다 (exec8 chunk) |
+|---|---:|---:|---|---|---|---|
+| reference (VLA chunk) | 129 | 203 | 16.7 / -22.8 | 14.9 / -23.2 | 554 / 148 / 48 | 81 / 0 / 48 |
+| to_recorded (주 기준) | 48 | 90 | 17.9 / -18.5 | 15.3 / -21.6 | — | — |
+| to_resolved (보조) | 47 | 90 | 17.9 / -19.2 | 15.3 / -21.9 | 380 / 324 / 46 | 2 / 3 / 45 |
+| B0 | 146 | 161 | 13.7 / -9.9 | 10.3 / -9.9 | 632 / 118 / 0 | 98 / 0 / 48 |
+| B0_resample16 (민감도) | 146 | 160 | 13.8 / -9.9 | 10.9 / -9.9 | 633 / 117 / 0 | 98 / 0 / 48 |
+| B1 λ=1 | 147 | 156 | 13.8 / -9.9 | 10.3 / -9.9 | 634 / 116 / 0 | 99 / 0 / 48 |
+| B1 λ=100 | 145 | 153 | 14.0 / -9.9 | 11.6 / -9.9 | 636 / 114 / 0 | 97 / 0 / 48 |
+| B1 λ=10⁴ | 152 | 186 | 13.3 / -9.9 | 10.4 / -10.7 | 653 / 97 / 0 | 104 / 0 / 48 |
+| B2 λ=1 | 146 | 162 | 13.6 / -9.9 | 10.3 / -9.9 | 633 / 117 / 0 | 98 / 0 / 48 |
+| B2 λ=100 | 145 | 153 | 13.8 / -9.9 | 11.4 / -9.9 | 636 / 114 / 0 | 97 / 0 / 48 |
+| B2 λ=10⁴ | 149 | 187 | 13.3 / -9.9 | 10.3 / -10.7 | 654 / 96 / 0 | 101 / 0 / 48 |
+| B3 λ=1 | 147 | 160 | 13.7 / -9.9 | 10.4 / -9.9 | 635 / 115 / 0 | 99 / 0 / 48 |
+| B3 λ=100 | 145 | 155 | 13.8 / -9.9 | 11.9 / -9.9 | 637 / 113 / 0 | 98 / 1 / 47 |
+| B3 λ=10⁴ | 153 | 189 | 13.4 / -9.9 | 10.6 / -10.7 | 656 / 94 / 0 | 105 / 0 / 48 |
+| B4 λ=1 | 149 | 167 | 13.7 / -9.9 | 10.4 / -15.9 | 640 / 110 / 0 | 102 / 1 / 47 |
+| B4 λ=100 | 149 | 175 | 13.8 / -9.9 | 10.9 / -13.5 | 638 / 112 / 0 | 102 / 1 / 47 |
+| B4 λ=10⁴ | 152 | 184 | 13.3 / -9.9 | 10.6 / -11.0 | 655 / 95 / 0 | 104 / 0 / 48 |
+
+**표 2. reference 대비 TCP 변경량 · 운동학** (all, 750). 가속 위반 = `|q_k − 2q_(k−1) + q_(k−2)|` 가 step 한계 (+1e-6 rad) 를 넘는 step 이 하나라도 있는 chunk (step 0 은 세지 않음). jerk RMS 는 3 차 차분의 RMS (rad/s³).
+
+| 후보 | TCP 변경 exec8: chunk 평균의 평균 / 중앙값 / 최대 (mm) | TCP 변경 plan16: chunk 평균의 평균 / 최대 (mm) | 가속 위반 chunk exec8 / plan16 | jerk RMS median exec8 / plan16 (rad/s³) | 속도 위반 chunk / 위치 위반 chunk (plan16) |
+|---|---|---|---|---|---|
+| reference (VLA chunk) | 0.0 / 0.0 / 0.0 | 0.0 / 0.0 | 93 / 94 | 15.47 / 14.77 | 2 / 17 |
+| to_recorded (주 기준) | 7.2 / 2.7 / 246.9 | 5.9 / 246.9 | 170 / 198 | 17.60 / 16.89 | 3 / 7 |
+| to_resolved (보조) | 7.0 / 2.7 / 208.9 | 5.7 / 208.9 | 171 / 202 | 17.61 / 17.01 | 3 / 11 |
+| B0 | 20.6 / 11.4 / 169.3 | 33.1 / 375.2 | 0 / 1 | 0.89 / 0.61 | 0 / 8 |
+| B0_resample16 (민감도) | 20.2 / 10.7 / 170.9 | 33.5 / 426.2 | 0 / 0 | 0.84 / 0.60 | 0 / 7 |
+| B1 λ=1 | 20.6 / 11.2 / 169.1 | 32.6 / 317.8 | 0 / 0 | 0.89 / 0.61 | 0 / 8 |
+| B1 λ=100 | 19.6 / 10.4 / 156.6 | 27.9 / 385.6 | 0 / 0 | 1.02 / 0.73 | 0 / 5 |
+| B1 λ=10⁴ | 14.8 / 7.5 / 177.3 | 13.0 / 366.5 | 1 / 2 | 2.43 / 1.97 | 0 / 19 |
+| B2 λ=1 | 20.6 / 11.5 / 169.0 | 32.9 / 300.9 | 0 / 1 | 0.89 / 0.61 | 0 / 10 |
+| B2 λ=100 | 19.4 / 10.4 / 152.8 | 26.8 / 384.3 | 0 / 0 | 1.12 / 0.82 | 0 / 7 |
+| B2 λ=10⁴ | 14.9 / 8.3 / 172.5 | 14.6 / 287.5 | 3 / 4 | 3.25 / 2.38 | 0 / 21 |
+| B3 λ=1 | 20.6 / 11.2 / 169.0 | 33.1 / 315.7 | 0 / 0 | 0.89 / 0.61 | 0 / 6 |
+| B3 λ=100 | 19.5 / 10.7 / 151.7 | 27.1 / 385.1 | 1 / 2 | 1.18 / 0.84 | 0 / 6 |
+| B3 λ=10⁴ | 15.0 / 7.9 / 175.0 | 14.7 / 360.2 | 3 / 4 | 3.23 / 2.36 | 0 / 22 |
+| B4 λ=1 | 20.1 / 9.6 / 169.0 | 31.5 / 575.1 | 2 / 2 | 1.25 / 0.93 | 0 / 2 |
+| B4 λ=100 | 19.3 / 9.9 / 151.7 | 27.9 / 374.2 | 3 / 4 | 1.35 / 0.97 | 0 / 3 |
+| B4 λ=10⁴ | 15.4 / 7.8 / 178.6 | 16.7 / 352.4 | 5 / 6 | 2.81 / 2.17 | 1 / 21 |
+
+**표 3. 계산 시간 · 실패** (all, 750). solver failure 정의가 후보 종류별로 다르다: cuRobo = `success = false` (scene_collision · cspace 제약 위반), 우리 TO = status `violated` / `solver_failed`. 시간은 **device 가 다른 값을 직접 비교하지 않는다.**
+
+| 후보 | solver failure (chunk) | warm solve wall median / p95 (ms) | warm 66.7 ms 초과 비율 | cuRobo GPU CUDA event warm median (ms) / 66.7 ms 초과 비율 | device |
+|---|---:|---|---|---|---|
+| reference (VLA chunk) | 0 | — | — | — | (solve 없음) |
+| to_recorded (주 기준) | 101 | 162 / 627 | 93.1 % | — | server CPU (live 기록 `to.solve_ms`) |
+| to_resolved (보조) | 102 | 119 / 353 | 74.0 % | — | offline CPU (이 머신, 병렬 worker 4) |
+| B0 | 144 | 57 / 104 | 7.6 % | 45.1 / 4.3 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B0_resample16 (민감도) | 143 | 56 / 61 | 2.5 % | 42.5 / 1.5 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B1 λ=1 | 143 | 64 / 115 | 16.7 % | 52.0 / 5.9 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B1 λ=100 | 143 | 64 / 100 | 17.9 % | 51.8 / 4.7 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B1 λ=10⁴ | 165 | 64 / 100 | 13.2 % | 51.9 / 4.3 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B2 λ=1 | 143 | 70 / 134 | 90.0 % | 57.5 / 8.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B2 λ=100 | 143 | 70 / 124 | 97.5 % | 57.6 / 4.5 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B2 λ=10⁴ | 174 | 73 / 197 | 95.5 % | 59.1 / 30.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B3 λ=1 | 144 | 83 / 196 | 100.0 % | 68.9 / 86.8 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B3 λ=100 | 144 | 84 / 201 | 100.0 % | 68.9 / 79.6 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B3 λ=10⁴ | 171 | 82 / 153 | 100.0 % | 68.6 / 81.2 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B4 λ=1 | 169 | 121 / 204 | 100.0 % | 99.8 / 100.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B4 λ=100 | 162 | 111 / 202 | 100.0 % | 97.1 / 100.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B4 λ=10⁴ | 175 | 114 / 208 | 100.0 % | 97.9 / 100.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
+
+#### 6.2 TO-active 530 chunk
+
+표 4–6 은 표 1–3 과 같은 열이고 대상만 TO-active chunk 다.
+
+**표 4. clearance · 관통** (TO-active, 530)
+
+| 후보 | 관통 chunk exec8 | 관통 chunk plan16 | exec8 min clearance median / p5 (mm) | plan16 min clearance median / p5 (mm) | to_recorded 대비 낮음 / 높음 / 같음 (chunk) | 후보만 관통 / to_recorded 만 관통 / 둘 다 (exec8 chunk) |
+|---|---:|---:|---|---|---|---|
+| reference (VLA chunk) | 108 | 176 | 14.3 / -23.1 | 11.8 / -23.6 | 407 / 121 / 2 | 81 / 0 / 27 |
+| to_recorded (주 기준) | 27 | 63 | 16.4 / -2.4 | 12.2 / -17.6 | — | — |
+| to_resolved (보조) | 26 | 63 | 16.4 / 0.3 | 12.5 / -18.3 | 281 / 247 / 2 | 2 / 3 / 24 |
+| B0 | 120 | 135 | 12.4 / -11.6 | 8.0 / -11.6 | 444 / 86 / 0 | 93 / 0 / 27 |
+| B0_resample16 (민감도) | 120 | 133 | 12.9 / -11.7 | 8.0 / -11.7 | 445 / 85 / 0 | 93 / 0 / 27 |
+| B1 λ=1 | 121 | 129 | 12.5 / -11.6 | 7.8 / -11.6 | 445 / 85 / 0 | 94 / 0 / 27 |
+| B1 λ=100 | 120 | 128 | 12.3 / -11.6 | 9.3 / -11.6 | 447 / 83 / 0 | 93 / 0 / 27 |
+| B1 λ=10⁴ | 127 | 160 | 11.1 / -11.6 | 7.6 / -11.6 | 465 / 65 / 0 | 100 / 0 / 27 |
+| B2 λ=1 | 121 | 136 | 12.3 / -11.6 | 7.8 / -11.6 | 445 / 85 / 0 | 94 / 0 / 27 |
+| B2 λ=100 | 120 | 128 | 11.9 / -11.6 | 9.5 / -11.6 | 449 / 81 / 0 | 93 / 0 / 27 |
+| B2 λ=10⁴ | 124 | 162 | 10.9 / -11.6 | 7.4 / -11.7 | 467 / 63 / 0 | 97 / 0 / 27 |
+| B3 λ=1 | 120 | 132 | 12.3 / -11.6 | 8.0 / -11.6 | 447 / 83 / 0 | 93 / 0 / 27 |
+| B3 λ=100 | 120 | 129 | 12.0 / -11.6 | 10.0 / -11.6 | 450 / 80 / 0 | 94 / 1 / 26 |
+| B3 λ=10⁴ | 128 | 164 | 11.2 / -11.6 | 7.5 / -12.2 | 466 / 64 / 0 | 101 / 0 / 27 |
+| B4 λ=1 | 123 | 140 | 12.3 / -12.7 | 7.6 / -16.9 | 450 / 80 / 0 | 97 / 1 / 26 |
+| B4 λ=100 | 122 | 148 | 12.1 / -12.6 | 9.0 / -14.7 | 450 / 80 / 0 | 96 / 1 / 26 |
+| B4 λ=10⁴ | 126 | 158 | 11.4 / -11.7 | 7.6 / -12.9 | 465 / 65 / 0 | 99 / 0 / 27 |
+
+**표 5. TCP 변경량 · 운동학** (TO-active, 530)
+
+| 후보 | TCP 변경 exec8: chunk 평균의 평균 / 중앙값 / 최대 (mm) | TCP 변경 plan16: chunk 평균의 평균 / 최대 (mm) | 가속 위반 chunk exec8 / plan16 | jerk RMS median exec8 / plan16 (rad/s³) | 속도 위반 chunk / 위치 위반 chunk (plan16) |
+|---|---|---|---|---|---|
+| reference (VLA chunk) | 0.0 / 0.0 / 0.0 | 0.0 / 0.0 | 89 / 90 | 17.60 / 15.90 | 1 / 17 |
+| to_recorded (주 기준) | 10.1 / 4.7 / 246.9 | 8.4 / 246.9 | 165 / 193 | 20.07 / 20.04 | 3 / 7 |
+| to_resolved (보조) | 9.7 / 4.5 / 208.9 | 8.0 / 208.9 | 165 / 196 | 20.11 / 20.15 | 3 / 11 |
+| B0 | 24.4 / 16.8 / 169.3 | 40.4 / 375.2 | 0 / 1 | 1.05 / 0.72 | 0 / 7 |
+| B0_resample16 (민감도) | 23.8 / 15.4 / 170.9 | 40.4 / 426.2 | 0 / 0 | 0.97 / 0.72 | 0 / 6 |
+| B1 λ=1 | 24.3 / 16.9 / 169.1 | 39.7 / 317.8 | 0 / 0 | 1.05 / 0.72 | 0 / 8 |
+| B1 λ=100 | 23.0 / 15.8 / 156.6 | 33.6 / 385.6 | 0 / 0 | 1.27 / 0.91 | 0 / 4 |
+| B1 λ=10⁴ | 17.0 / 12.1 / 177.3 | 15.1 / 366.5 | 1 / 2 | 4.40 / 3.04 | 0 / 18 |
+| B2 λ=1 | 24.2 / 16.7 / 169.0 | 39.7 / 300.9 | 0 / 1 | 1.03 / 0.72 | 0 / 9 |
+| B2 λ=100 | 22.7 / 15.7 / 152.8 | 32.2 / 384.3 | 0 / 0 | 1.42 / 1.03 | 0 / 6 |
+| B2 λ=10⁴ | 17.2 / 12.3 / 172.5 | 17.2 / 287.5 | 2 / 3 | 4.96 / 3.46 | 0 / 20 |
+| B3 λ=1 | 24.3 / 16.7 / 169.0 | 40.2 / 315.7 | 0 / 0 | 1.05 / 0.72 | 0 / 5 |
+| B3 λ=100 | 22.8 / 15.7 / 151.7 | 32.3 / 385.1 | 1 / 2 | 1.48 / 1.08 | 0 / 5 |
+| B3 λ=10⁴ | 17.4 / 11.6 / 175.0 | 17.4 / 360.2 | 3 / 4 | 5.03 / 3.55 | 0 / 21 |
+| B4 λ=1 | 23.6 / 15.6 / 169.0 | 38.3 / 575.1 | 2 / 2 | 1.77 / 1.37 | 0 / 1 |
+| B4 λ=100 | 22.8 / 15.8 / 151.7 | 34.0 / 374.2 | 3 / 4 | 1.73 / 1.28 | 0 / 3 |
+| B4 λ=10⁴ | 18.0 / 12.8 / 178.6 | 20.1 / 352.4 | 5 / 6 | 4.20 / 3.03 | 1 / 20 |
+
+**표 6. 계산 시간 · 실패** (TO-active, 530)
+
+| 후보 | solver failure (chunk) | warm solve wall median / p95 (ms) | warm 66.7 ms 초과 비율 | cuRobo GPU CUDA event warm median (ms) / 66.7 ms 초과 비율 | device |
+|---|---:|---|---|---|---|
+| reference (VLA chunk) | 0 | — | — | — | (solve 없음) |
+| to_recorded (주 기준) | 80 | 214 / 645 | 95.1 % | — | server CPU (live 기록 `to.solve_ms`) |
+| to_resolved (보조) | 81 | 124 / 378 | 84.0 % | — | offline CPU (이 머신, 병렬 worker 4) |
+| B0 | 129 | 57 / 106 | 7.9 % | 45.2 / 4.5 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B0_resample16 (민감도) | 129 | 56 / 62 | 3.0 % | 42.8 / 1.5 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B1 λ=1 | 129 | 65 / 128 | 17.9 % | 52.2 / 6.8 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B1 λ=100 | 129 | 65 / 107 | 19.2 % | 52.2 / 4.9 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B1 λ=10⁴ | 147 | 64 / 100 | 14.9 % | 52.3 / 4.7 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B2 λ=1 | 129 | 70 / 140 | 87.2 % | 57.8 / 8.9 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B2 λ=100 | 129 | 70 / 89 | 97.9 % | 57.9 / 2.8 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B2 λ=10⁴ | 156 | 74 / 198 | 97.7 % | 59.7 / 31.3 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B3 λ=1 | 130 | 83 / 197 | 100.0 % | 69.0 / 90.2 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B3 λ=100 | 129 | 87 / 201 | 100.0 % | 69.1 / 81.9 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B3 λ=10⁴ | 152 | 82 / 154 | 100.0 % | 68.8 / 85.1 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B4 λ=1 | 154 | 117 / 203 | 100.0 % | 99.8 / 100.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B4 λ=100 | 145 | 111 / 200 | 100.0 % | 96.9 / 100.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
+| B4 λ=10⁴ | 155 | 115 / 205 | 100.0 % | 98.2 / 100.0 % | GPU (H200, wall = host + `cuda.synchronize`) |
+
+#### 6.3 부분집합별 관통 chunk (exec8 / plan16)
+
+| 부분집합 (chunk 수) | reference | to_recorded | to_resolved | B0 | B4 λ=1 | B4 λ=10⁴ |
+|---|---|---|---|---|---|---|
+| esdf_free 층 있음 (518) | 120 / 191 | 46 / 86 | 47 / 87 | 134 / 146 | 137 / 152 | 139 / 166 |
+| esdf_free 없음 (main fine 층) (232) | 9 / 12 | 2 / 4 | 0 / 3 | 12 / 15 | 12 / 15 | 13 / 18 |
+| pre-grasp (493) | 68 / 96 | 34 / 66 | 34 / 65 | 49 / 57 | 50 / 55 | 50 / 70 |
+| post-grasp (257) | 61 / 107 | 14 / 24 | 13 / 25 | 97 / 104 | 99 / 112 | 102 / 114 |
+
+#### 6.4 표의 숫자가 보이는 범위 (해석 없음)
+
+- **관통 chunk 수 (all).** exec8: reference 129, `to_recorded` 48, `to_resolved` 47, cuRobo 14 후보 145–153. plan16: reference 203, `to_recorded` 90, `to_resolved` 90, cuRobo 14 후보 153–189 [D]. TO-active 530 chunk 도 같은 순서다 (exec8: reference 108, `to_recorded` 27, cuRobo 120–128).
+- **paired (all).** cuRobo 후보가 관통하고 `to_recorded` 는 관통하지 않는 exec8 chunk 가 97–105, 반대 (`to_recorded` 만 관통) 가 0–1 이다 [D]. 둘 다 관통하는 chunk 는 48 (B0).
+- **min clearance (all, exec8).** median 은 reference 16.7 mm, `to_recorded` 17.9 mm, B0 13.7 mm. p5 는 `to_recorded` -18.5 mm, B0 -9.9 mm, reference -22.8 mm.
+- **TCP 변경량 (exec8, chunk 평균의 평균).** `to_recorded` 7.2 mm, cuRobo 14 후보 14.8–20.6 mm (TO-active: `to_recorded` 10.1, cuRobo 17.0–24.4) [D]. 최댓값은 `to_recorded` 246.9 mm, B0 169.3 mm.
+- **운동학.** cuRobo 후보의 가속 위반 chunk (exec8) 는 0–5 개, `to_recorded` 는 170, reference 는 93. jerk RMS (plan16 median) 는 reference 14.77, `to_recorded` 16.89, cuRobo 0.60–2.38 rad/s³.
+- **λ 를 1 → 10⁴ 로 올렸을 때 (all).** B1: TCP 변경량 exec8 20.6 → 14.8 mm, plan16 평균 32.6 → 13.0 mm, 관통 chunk plan16 156 → 186, solver failure 143 → 165, jerk RMS plan16 0.61 → 1.97. B2: 관통 plan16 162 → 187, failure 143 → 174. B3: 160 → 189, 144 → 171. B4: 167 → 184, 169 → 175. exec8 관통은 B1 147 → 152, B2 146 → 149, B3 147 → 153, B4 149 → 152. λ=100 은 B1 · B2 · B3 에서 plan16 관통이 λ=1 보다 3–9 개 적고 (153 · 153 · 155 대 156 · 162 · 160) solver failure 는 같다 (143 · 143 · 144). B4 는 λ=100 에서 plan16 관통 175 (λ=1 167) 이다.
+- **항을 더했을 때 (같은 λ).** λ=1 에서 exec8 관통 chunk 는 B0 146, B1 147, B2 146, B3 147, B4 149 이다. B4 는 plan16 에서 167 (B3 160) 이고 solver failure 가 169 (B3 144) 이다.
+- **timing 민감도.** B0 `exact` 대 `resample16`: 관통 exec8 146 대 146, plan16 161 대 160, TCP 변경량 exec8 20.6 대 20.2 mm.
+- **계산 시간.** warm wall median (all): B0 57 ms, B1 64 ms, B2 70–73 ms, B3 82–84 ms, B4 111–121 ms (GPU), `to_recorded` 162 ms (server CPU), `to_resolved` 119 ms (offline CPU). warm 66.7 ms 초과 비율은 B0 7.6 %, B1 13.2–17.9 %, B2 90.0–97.5 %, B3 100 %, B4 100 %. cuRobo cold 첫 solve (ep126 chunk 300): B0 4354 ms, B1–B4 1375–2224 ms, `resample16` B0 5367 ms (wall).
+- **goal error.** 모든 cuRobo 후보 최대 joint 2.4e-07 rad · TCP 1.2e-04 mm, `to_recorded` 0.0. **구성상 0 이다** (cuRobo 는 cspace goal = `reference[-1]`, 우리 TO 는 tail 을 reference 그대로 둔다). 이 지표는 후보를 가르지 못한다.
+
+#### 6.5 `to_resolved` 의 재현 오차 (대 `to_recorded`, 750 chunk) [V]
+
+| 항목 | all (750) | TO-active (530) |
+|---|---|---|
+| status 일치 chunk | 694 | 509 |
+| SQP 반복 수 일치 chunk | 697 | 512 |
+| plan16 TCP 차 median / p95 / max (mm) | 0.00007 / 6.03 / 178.8 | 0.0153 / 7.20 / 178.8 |
+| plan16 max joint 차 median / max (rad) | 1.1e-06 / 0.581 | 2.9e-05 / 0.581 |
+| TCP 차 > 1 mm chunk | 101 | 99 |
+
+판정 4 의 본문이 인용한 "TCP 차 median 0.002 mm · max 17 mm" 는 단계 3 준비 때 ep211 한 episode (75 chunk) 의 값 [I] 이다. **전체 750 chunk 의 max 는 178.8 mm 로 더 크다.** status 쌍 (all): feasible→feasible 418, violated→violated 100, optimal→optimal 176, feasible→optimal 46, optimal→feasible 7, violated→feasible 1, feasible→violated 2.
+
+### 7. Figure (verifier 생성, 이 절에서는 링크만)
+
+1. **실제 장면 + 궤적 비교** — [`figures/T63_scene.png`](figures/T63_scene.png) · [`T63_scene.json`](figures/T63_scene.json). 선택 규칙 (사전 고정, sidecar): place stratum episode 의 TO-active chunk 중 `to_recorded` exec8 min clearance 가 가장 낮은 chunk → ep 211, chunk 696 (왼손). 왼쪽 위 MuJoCo 3인칭 view, 오른쪽 위 base frame 의 target 점군 + TCP 경로 3D, 왼쪽 아래 top view, 오른쪽 아래 step 별 min clearance (reference · `to_recorded` · B0 · B4 λ = 1 / 100 / 10⁴). **한 chunk 의 예시이고 대표 사례로 고른 것이 아니다.**
+
+![T63 scene](figures/T63_scene.png)
+
+2. **지표 graph** — [`figures/T63_graph.png`](figures/T63_graph.png) · [`T63_graph.json`](figures/T63_graph.json). 왼쪽: TO-active 530 chunk 에서 TCP 변경량 (x, symlog) 대 exec8 min clearance (median, whisker 는 p5). 오른쪽: 후보별 warm solve wall 시간 (median, whisker 는 p95) 과 66.7 ms 주기. 두 패널 모두 §6 의 표와 같은 값이다. 시간 패널의 device 는 후보마다 다르다 (표 3).
+
+![T63 graph](figures/T63_graph.png)
+
+3. **표** — [`figures/T63_table.png`](figures/T63_table.png) · [`T63_table.json`](figures/T63_table.json). §6 표 1–3 의 요약 (all 과 TO-active).
+
+![T63 table](figures/T63_table.png)
+
+### 8. 한계와 측정하지 않은 것 (사실만)
+
+1. **offline 명령 궤적만.** 실제 궤적 (`measured_qpos`) 기준 contact 는 재지 않았다 (`not_measured` [V]). MuJoCo 의 kp · damping 때문에 명령과 실제가 다르므로 이 표의 관통은 "명령 궤적이 평가기 field 안으로 들어간 chunk" 이고 실제 접촉이 아니다.
+2. **평가기 충실도.** 기록된 `refined_chunk` 의 exec8 최소 clearance 를 평가기가 다시 계산한 값과 record `to.metrics.clearance_m` 을 비교했을 때, **750 chunk 중 22 chunk 가 허용 0.01 mm 를 넘었다** (최대 15.0 mm, 중앙값 8.2e-06 mm). 그 22 개 중 21 개가 TO-active 이다 [D]. 지지면 inlier mask 는 748 / 750 chunk 에서 record 와 같다 (불일치: ep126 #359, ep1345 #365). 이 chunk 들은 **제외하지 않고 포함**했고, 표 1 의 `to_recorded` 행도 같은 평가기 값이다. 단계 3 준비 때의 충실도 (최대 0.00008 mm, ep211 75 chunk + smoke 8 chunk [I]) 는 전체 750 chunk 에서 유지되지 않았다. 원인은 확인하지 않았다.
+3. **cuRobo 결과의 solve 순서 의존.** 같은 순서로 다시 돌리면 bit 단위로 같다 [I]. 그러나 앞선 chunk 결과가 바뀌면 뒤 chunk 가 바뀐다: 전체 실행과 단계 3 준비 smoke (`smoke/curobo_r3`, ep126 · ep211 × 위치 0, 20, 40, 60 = 8 chunk) 의 같은 후보 · 같은 chunk 비교에서 `max |q|` 차가 최대 **0.175 rad** (B4 λ=1), 성공 여부가 달라진 chunk 는 0 [V]. 결과를 "chunk 독립" 으로 읽으면 안 된다. 원인은 확인하지 않았다 (implementer 는 optimizer 내부 상태로 추정). 전체 실행의 다른 chunk 순서는 측정하지 않았다.
+4. **finger 열림.** cuRobo 최적화는 chunk 당 한 값 (step 0 = 측정값) 이다. server envelope 가 plan window 안에서 최대 36 mm 벌어지는 구간이 있다 (사과 놓기 · 열기, episode 별 최대 3–36 mm [I]). 평가기는 모든 후보에 step 별 served 열림을 똑같이 쓴다.
+5. **self-collision 은 끔** (우리 TO 에도 robot–robot 행이 없다).
+6. **B4 margin 규칙이 우리 TO 보다 보수적이다.** 우리 TO 는 최근접 표면이 target 인 행 (`|d − d_obj| ≤ 5 mm`) 에만 margin 을 주고, B4 는 비권한 손 sphere 에 target 점군 clearance `≥ r + m` 을 항상 요구한다 [I]. 서버의 `--obstacle-margin 0.010` · `--target-permission-strict` · `--lookahead obstacles` 는 B4 solver 에 넣지 않았다 (평가기에는 server config 로 들어 있다).
+7. **평가기의 look-ahead tail.** 평가기는 plan16 의 tail step (8–15) 에도 실행 창 규칙을 쓴다. 우리 TO 는 tail 에서 target · 지지면이 최근접인 행을 빼고 재므로 `to_recorded` · `to_resolved` 의 plan16 clearance 는 TO 자신의 tail 기록보다 낮게 나올 수 있다. exec8 은 TO 가 인증한 값과 같은 규칙이다 [I].
+8. **`to_resolved` 의 시간.** offline CPU 에서 병렬 worker 4 개로 풀었고, **다른 세션의 CPU 부하가 있는 상태**에서 측정했다 (부하 기록: `env.machine_load_note_file` 이 가리키는 `uptime_step3_exact.txt`, `numbers` 밖). `to_recorded` 는 server 의 live CPU 측정 (`to.solve_ms`) 이다. cuRobo 는 GPU (H200) 에서 한 번에 solver 하나, wall = host `perf_counter` + `cuda.synchronize`. 세 device 의 시간을 한 순위로 읽지 않는다. `to_resolved` fresh mode (chunk 마다 새 solver) 는 돌리지 않았다 (`chained` 만, [V] `not_measured`).
+9. **goal error 는 구성상 0** 이다 (§6.4).
+10. **선택한 설정의 범위.** λ 는 세 값 (1 · 100 · 10⁴) 만 돌렸고 cuRobo 자체 c-space 정규화 · collision 가중치는 기본값이다. 세 값 사이의 값 · cuRobo 가중치 변경은 측정하지 않았다. servo-accel 항은 baseline 에서 꺼져 있어 B3 에 없다. solver 13 개를 동시에 살리면 cuRobo 안에서 CUDA error 가 난 적이 있어 (원인 미확인 [I]) 후보마다 순차 실행했다.
+11. **표본.** 10 episode · 750 chunk 는 성공률 표본이 아니고, chunk 는 같은 episode 안에서 서로 독립이 아니다. 검정 · 신뢰구간은 계산하지 않았다.
+
+### 9. 미확인 후보 (측정하지 않았다 — 원인으로 쓰지 않는다)
+
+cuRobo 후보의 관통 chunk 가 reference 와 우리 TO 보다 많은 이유에 대해 **원인을 확인한 실험은 없다.** 아래는 다음 측정에서 가를 수 있는 후보일 뿐이다.
+
+- 미확인 후보 1: goal 이 chunk 끝 joint 값 (`reference[-1]`) 에 고정되어 있어, 중간 경로가 장애물을 피해도 끝 상태로 되돌아가야 한다.
+- 미확인 후보 2: cuRobo 는 collision 을 가중 1e5, activation 거리 10 mm (0.01 m) 의 cost 항으로 더하는 soft penalty 로 다루므로, 다른 항과의 균형 속에서 chunk 안 clearance 가 음수로 남을 수 있다 (실패 판정은 constraint 로 따로 낸다 [I]).
+
+### 10. 다음 단계와 되돌아올 지점
+
+- **결정됨 (사용자, 2026-10-21):** cuRobo 를 서빙 경로에 넣은 **10 episode closed-loop** 을 돌린다. 어느 후보 · λ · episode · 지표로 어떻게 연결하는지는 후속 task 에서 고정한다. 이 절은 후보를 고르지 않았고, §6 의 offline 수치가 closed-loop 결과를 예측한다고 쓰지 않는다. 실제 궤적 (`measured_qpos`) contact · success · HOLD 는 그 단계의 주 지표다.
+- 재측정 대기 표에 항목 50–51 을 추가했다 (위).
+- 되돌아올 지점: (a) 평가기 충실도 22 / 750 chunk 의 원인 (평가기 대 server 의 scene 재구성 차이 후보 — 확인 전), (b) cuRobo 의 solve 순서 의존 (최대 0.175 rad), (c) cuRobo 에 step 별 finger 열림을 넣는 설계, (d) 66.7 ms 주기 안 계산 시간 (warm median: B1 64 ms, B2 70–73 ms, B3 82–84 ms, B4 111–121 ms [V]) — closed-loop 진입 판정에서 다룬다.

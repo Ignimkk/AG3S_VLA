@@ -1,0 +1,290 @@
+{
+ "split": "to_active",
+ "n_chunks": 530,
+ "scatter": {
+  "reference": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 0.0,
+   "y_min_clearance_exec8_median_mm": 14.301306718020601,
+   "y_whisker_p5_mm": -23.101130653093296,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 108
+  },
+  "to_recorded": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 4.7050073090010835,
+   "y_min_clearance_exec8_median_mm": 16.413338274065552,
+   "y_whisker_p5_mm": -2.360274431784671,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 27
+  },
+  "to_resolved": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 4.544359898086346,
+   "y_min_clearance_exec8_median_mm": 16.40390081734899,
+   "y_whisker_p5_mm": 0.26027216781659007,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 26
+  },
+  "B0": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 16.813621237471203,
+   "y_min_clearance_exec8_median_mm": 12.396942060295057,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 120
+  },
+  "B1_lam1": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 16.91945065848935,
+   "y_min_clearance_exec8_median_mm": 12.498211010025209,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 121
+  },
+  "B1_lam100": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 15.83984907575794,
+   "y_min_clearance_exec8_median_mm": 12.27704806112213,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 120
+  },
+  "B1_lam10000": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 12.050220990751491,
+   "y_min_clearance_exec8_median_mm": 11.126080267809472,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 127
+  },
+  "B2_lam1": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 16.73314450781051,
+   "y_min_clearance_exec8_median_mm": 12.265972387327468,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 121
+  },
+  "B2_lam100": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 15.73781954765661,
+   "y_min_clearance_exec8_median_mm": 11.889393880639737,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 120
+  },
+  "B2_lam10000": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 12.268708771263523,
+   "y_min_clearance_exec8_median_mm": 10.891198304990763,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 124
+  },
+  "B3_lam1": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 16.68794353396099,
+   "y_min_clearance_exec8_median_mm": 12.267408888828186,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 120
+  },
+  "B3_lam100": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 15.730055532598222,
+   "y_min_clearance_exec8_median_mm": 11.981815336668562,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 120
+  },
+  "B3_lam10000": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 11.61416541638725,
+   "y_min_clearance_exec8_median_mm": 11.161308068221526,
+   "y_whisker_p5_mm": -11.635436542538542,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 128
+  },
+  "B4_lam1": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 15.601600929274499,
+   "y_min_clearance_exec8_median_mm": 12.267296801610684,
+   "y_whisker_p5_mm": -12.735937483520658,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 123
+  },
+  "B4_lam100": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 15.817217066514567,
+   "y_min_clearance_exec8_median_mm": 12.120477028913506,
+   "y_whisker_p5_mm": -12.64478918634817,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 122
+  },
+  "B4_lam10000": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 12.75926101115121,
+   "y_min_clearance_exec8_median_mm": 11.393661990387907,
+   "y_whisker_p5_mm": -11.711684492070884,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 126
+  },
+  "B0_resample16": {
+   "x_tcp_disp_exec8_median_of_chunk_mean_mm": 15.433823452629984,
+   "y_min_clearance_exec8_median_mm": 12.88958763791005,
+   "y_whisker_p5_mm": -11.68976029239424,
+   "n_evaluated": 530,
+   "n_penetration_exec8": 120
+  }
+ },
+ "solve_ms": {
+  "to_recorded": {
+   "device": [
+    "cpu (server, live; record to.solve_ms)"
+   ],
+   "warm_median": 162.4410399235785,
+   "warm_p95": 626.967145036906,
+   "warm_max": 743.200876750052,
+   "warm_fraction_over_66p7ms": 0.9306666666666666,
+   "warm_n": 750
+  },
+  "to_resolved": {
+   "device": [
+    "cpu (offline, this machine)"
+   ],
+   "warm_median": 119.05254516750574,
+   "warm_p95": 353.03889960050583,
+   "warm_max": 2292.849970050156,
+   "warm_fraction_over_66p7ms": 0.739946380697051,
+   "warm_n": 746
+  },
+  "B0": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 56.71145720407367,
+   "warm_p95": 104.28336723707613,
+   "warm_max": 300.4302829504013,
+   "warm_fraction_over_66p7ms": 0.076,
+   "warm_n": 750
+  },
+  "B1_lam1": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 64.42835927009583,
+   "warm_p95": 114.81642299331723,
+   "warm_max": 216.83804132044315,
+   "warm_fraction_over_66p7ms": 0.16666666666666666,
+   "warm_n": 750
+  },
+  "B1_lam100": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 64.41684812307358,
+   "warm_p95": 100.273461593315,
+   "warm_max": 288.24602626264095,
+   "warm_fraction_over_66p7ms": 0.17866666666666667,
+   "warm_n": 750
+  },
+  "B1_lam10000": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 64.09221095964313,
+   "warm_p95": 99.64956827461718,
+   "warm_max": 493.0220991373062,
+   "warm_fraction_over_66p7ms": 0.132,
+   "warm_n": 750
+  },
+  "B2_lam1": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 70.02144493162632,
+   "warm_p95": 133.8950899429618,
+   "warm_max": 299.34577364474535,
+   "warm_fraction_over_66p7ms": 0.9,
+   "warm_n": 750
+  },
+  "B2_lam100": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 70.20241115242243,
+   "warm_p95": 124.28692430257787,
+   "warm_max": 295.6415480002761,
+   "warm_fraction_over_66p7ms": 0.9746666666666667,
+   "warm_n": 750
+  },
+  "B2_lam10000": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 72.77192175388336,
+   "warm_p95": 197.2357707098126,
+   "warm_max": 302.41985712200403,
+   "warm_fraction_over_66p7ms": 0.9546666666666667,
+   "warm_n": 750
+  },
+  "B3_lam1": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 82.76564069092274,
+   "warm_p95": 195.68132595159113,
+   "warm_max": 298.7422840669751,
+   "warm_fraction_over_66p7ms": 1.0,
+   "warm_n": 750
+  },
+  "B3_lam100": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 83.64104945212603,
+   "warm_p95": 201.4455524738878,
+   "warm_max": 291.88787937164307,
+   "warm_fraction_over_66p7ms": 1.0,
+   "warm_n": 750
+  },
+  "B3_lam10000": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 82.13147427886724,
+   "warm_p95": 152.69263335503638,
+   "warm_max": 208.24996288865805,
+   "warm_fraction_over_66p7ms": 1.0,
+   "warm_n": 750
+  },
+  "B4_lam1": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 121.35860975831747,
+   "warm_p95": 203.79950595088303,
+   "warm_max": 297.13907092809677,
+   "warm_fraction_over_66p7ms": 1.0,
+   "warm_n": 750
+  },
+  "B4_lam100": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 111.3347033970058,
+   "warm_p95": 201.92548907361925,
+   "warm_max": 295.44654581695795,
+   "warm_fraction_over_66p7ms": 1.0,
+   "warm_n": 750
+  },
+  "B4_lam10000": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 113.7382797896862,
+   "warm_p95": 207.65742319636044,
+   "warm_max": 300.90458132326603,
+   "warm_fraction_over_66p7ms": 1.0,
+   "warm_n": 750
+  },
+  "B0_resample16": {
+   "device": [
+    "gpu"
+   ],
+   "warm_median": 55.86387775838375,
+   "warm_p95": 60.672734724357724,
+   "warm_max": 191.52295775711536,
+   "warm_fraction_over_66p7ms": 0.025333333333333333,
+   "warm_n": 750
+  }
+ },
+ "sources": {
+  "numbers": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T031207+0900_f15e587290f6_c832c14b5e2e/verify/T63/step3/verify_numbers.json"
+ }
+}
