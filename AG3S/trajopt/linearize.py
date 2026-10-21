@@ -117,7 +117,7 @@ class _BufferedCall:
 #: (`sqp.fast_eval`) re-applies the ones the original call set, so readers (`_identify`,
 #: `held_rows_record`, `sqp._finish`, the held radii on `query_radii`) see what they saw before.
 _CLEARANCE_SIDE_ATTRS = ("query_radii", "_last_obstacle_class", "_last_held_rows", "_last_lookahead",
-                         "last_target_free_tiers")
+                         "last_target_free_tiers", "_last_neighbour_contact")
 _MISSING = object()
 
 
@@ -272,6 +272,14 @@ class SceneSnapshot:
     #: (default) = as before. The look-ahead tail and sweep target tests are not touched (they follow
     #: `target_permission_strict`); the verdict still calls any violation of such a row `unauthorized_link`.
     nonauthorized_target_rows: Optional[np.ndarray] = None
+    #: **IFG-NBC — light contact with a neighbour object while grasping.** `None` (default) = as before. A dict
+    #: `{"links_mask": (S,) bool, "depth": m, "centre": (3,), "radius": m}` set by `SafePolicy` on pre-grasp chunks near
+    #: the target: a robot row whose link is in `links_mask` (the grasping hand's fingers), whose sphere centre is within
+    #: `radius` of `centre` (the target centroid) and whose nearest surface is an **obstacle** (not the target, not a
+    #: support plane, not held -- `_obstacle_rows`) gets the margin `-depth`: up to `depth` of overlap is accepted.
+    #: VLA alone touches a neighbouring fruit while it grasps (IFG ep211 / ep954) and no wrist roll at its grasp pose
+    #: clears the neighbour by the obstacle margin (`ifg_roll_feasibility`).
+    neighbour_contact: Optional[dict] = None
 
     @property
     def has_esdf(self) -> bool:
@@ -1004,6 +1012,23 @@ class CollisionLinearizer:
             if getattr(scene, "held_obstacle_margin", False):
                 # T43 HM — the held rows' classes and clearances for the record (`held_rows_record`).
                 self._last_held_rows = self._held_rows_record(cls, d - radii[None, :] - margin)
+        nb = getattr(scene, "neighbour_contact", None)
+        if nb is not None and float(nb.get("depth", 0.0)) > 0.0:
+            # IFG-NBC — the grasping fingers may overlap a neighbour obstacle near the target by up to `depth`.
+            if d_object is None and (scene.manipulated_points is not None or scene.manipulated_spheres is not None):
+                d_object = self._manipulated_distance(flat, scene)
+                if d_object is not None:
+                    d_object = d_object.reshape(centres.shape[:2])
+            cls_nb = (self._last_obstacle_class if obstacle_margin > 0.0
+                      else self._obstacle_rows(d, flat, scene, d_object))
+            cols = np.zeros(n_query, bool)
+            lm = np.asarray(nb["links_mask"], bool).reshape(-1)[:min(n_query, self.n_spheres)]
+            cols[:lm.shape[0]] = lm
+            near = np.linalg.norm(centres - np.asarray(nb["centre"], np.float64).reshape(1, 1, 3), axis=2) \
+                <= float(nb["radius"])
+            sel = (cls_nb == _OBSTACLE) & cols[None, :] & near
+            margin = np.where(sel, -float(nb["depth"]), margin)
+            self._last_neighbour_contact = {"n_rows": int(sel.sum())}
         clear = d - radii[None, :] - margin
         start = getattr(self, "lookahead_from", None)
         if start is not None and 0 < int(start) < clear.shape[0]:

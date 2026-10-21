@@ -138,6 +138,11 @@ SUBSET_KEPT_ANCHOR = "subset_kept_anchor"
 #: and the cluster at its place is a cluster that may again be several objects but could not be
 #: split this frame — the anchor is kept, the object counts as seen (T31b).
 UNSPLIT_KEPT_ANCHOR = "unsplit_kept_anchor"
+#: `ConfirmDecision.reason` when, before a grasp, the held object's cluster is the target component of
+#: an attention split while the anchor was adopted unsplit (merged with a neighbour): the split
+#: component replaces the anchor instead of counting as a hand-occluded subset (IFG-SPLIT,
+#: `clustering.split_supersedes_anchor`).
+SPLIT_SUPERSEDED_ANCHOR = "split_superseded_anchor"
 #: T43 T step 2 (`clustering.closing_keep_geometry`): a grasp is closing (frozen, nothing attached
 #: yet) — the object has not moved, the fingers only hide it; the pre-closing geometry stands in.
 CLOSING_KEPT_GEOMETRY = "closing_kept_geometry"
@@ -673,6 +678,14 @@ class TargetConfirm:
         self._anchor_kept = 0
         #: This frame kept the anchor (`observe` must not replace the geometry).
         self._keep_anchor = False
+        #: IFG-SPLIT: a split target replaces an unsplit anchor (`clustering.split_supersedes_anchor`),
+        #: and this frame's `observe` does so.
+        self.split_supersedes = bool(cfg.split_supersedes_anchor)
+        self._supersede = False
+        #: … and only when the split component is at least this much shorter (largest extent) than
+        #: the anchor: what was cut off is a neighbour, not a part of the object the hand shadows
+        #: (IFG-APPLE ep1313: a lone apple cut 113 → 59 + 34 points as the hand came, 72.7 → 61.7 mm).
+        self.supersede_min_drop = float(cfg.attention_partition_min_drop)
         #: T31b: this frame's split record (`note_split`), None until grounding reports one.
         self._split: Optional[dict] = None
         # --- hand occlusion (T32b S3) ---
@@ -1029,7 +1042,9 @@ class TargetConfirm:
         dec = split_by_attention(
             pts, np.asarray(att, np.float64), np.arange(len(pts)), max_opening=opening,
             radius=float(config.attention_split_radius), min_points=int(config.min_points),
-            min_ratio=float(config.attention_split_ratio))
+            min_ratio=float(config.attention_split_ratio),
+            partition=bool(config.attention_split_partition),
+            partition_min_drop=float(config.attention_partition_min_drop))
         if dec is None:
             event["skipped"] = "not_triggered"
             return event
@@ -1110,6 +1125,7 @@ class TargetConfirm:
         self._frame += 1
         self._association = None
         self._keep_anchor = False
+        self._supersede = False
         self._subtask_blocked = self._subtask_would = None
         self._release_if_placed_home()
         if self.refused_release_frames is not None:
@@ -1154,6 +1170,12 @@ class TargetConfirm:
             self._association = self._associate(clusters[held_rank], points)
             if self._association is not None and not self._association.accepted:
                 reason, held_rank = ASSOCIATION_REJECTED, None
+            elif (self._association is not None and self._association.subset
+                  and self._split_over_unsplit_anchor(clusters[held_rank])):
+                # IFG-SPLIT: the part is the target the attention split cut out of this frame's
+                # cluster, and the anchor was adopted merged — the rest of the anchor is the
+                # neighbour, not a part the hand hides. The split component becomes the anchor.
+                reason, self._supersede = SPLIT_SUPERSEDED_ANCHOR, True
             elif self._association is not None and self._association.subset:
                 # It is the object, but it shows only part of the anchor (the hand hides the rest):
                 # the anchor stays the exclusion geometry, the object counts as seen (T30 F3b).
@@ -1275,7 +1297,8 @@ class TargetConfirm:
             else None)
         decision = self.last.mode if self.last is not None else None
         source = ("observed" if self.frozen
-                  else decision if decision in ("first", "switch") else "refined")
+                  else decision if decision in ("first", "switch")
+                  else "split_superseded" if self._supersede else "refined")
         self._geometry_source, self._geometry_frame = source, self._frame
         self._anchor_kept = 0
         if source != "refined" or self._anchor_geom is None:
@@ -1400,6 +1423,22 @@ class TargetConfirm:
                                  distance=self.anchor_distance,
                                  min_coverage=float(self.anchor_coverage))
         return assoc
+
+    def _split_over_unsplit_anchor(self, cluster: "ClusterInfo") -> bool:
+        """IFG-SPLIT: `cluster` is the target component of an attention split, the anchor is not a
+        split component (it was adopted merged), and the component's largest extent is at least
+        `supersede_min_drop` shorter than the anchor's. Off unless `split_supersedes_anchor`."""
+        anchor = self._anchor_geom
+        if not (self.split_supersedes and not self.frozen and anchor is not None
+                and not anchor.metrics.get("attention_split", 0.0)
+                and cluster.split is not None and cluster.split.get("role") == "target"):
+            return False
+        a_ext = (self._anchor_extents if self._anchor_extents is not None
+                 else principal_extents(anchor.points))
+        c_ext = cluster.principal_extents
+        if c_ext is None or a_ext is None or len(c_ext) != 3 or len(a_ext) != 3:
+            return False
+        return bool(float(np.max(a_ext)) - float(np.max(c_ext)) >= self.supersede_min_drop)
 
     def _unsplit_over_split_anchor(self, cluster: "ClusterInfo") -> bool:
         """T31b: the anchor came from an attention split and `cluster` is a triggered cluster the
@@ -1865,7 +1904,8 @@ def _split_groups(groups, points, attention, cfg, confirm, *, enabled, ratio_att
         dec = None if opening is None else split_by_attention(
             points, attention, idx, max_opening=opening, radius=float(cfg.attention_split_radius),
             min_points=int(cfg.min_points), min_ratio=float(cfg.attention_split_ratio),
-            ratio_attention=ratio_attention)
+            ratio_attention=ratio_attention, partition=bool(cfg.attention_split_partition),
+            partition_min_drop=float(cfg.attention_partition_min_drop))
         if dec is None:
             out.append((idx, None))
             continue
@@ -2011,6 +2051,7 @@ def _unobserved_result(decision, confirm, clusters, seeds, peak_index, best_scor
 
 __all__ = [
     "ASSOCIATION_REJECTED",
+    "SPLIT_SUPERSEDED_ANCHOR",
     "SUBSET_KEPT_ANCHOR",
     "UNSPLIT_KEPT_ANCHOR",
     "INADMISSIBLE_MATCH",

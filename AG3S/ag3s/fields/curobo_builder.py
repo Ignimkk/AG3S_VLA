@@ -95,6 +95,7 @@ __all__ = ["CuroboFieldBuilder", "TargetBall", "OwnedEvidence", "OWNED_CLASSES",
            "FineWindowRequest", "FineWindow", "place_fine_window", "WINDOW_BASES",
            "WINDOW_PLACEMENTS", "NONTARGET_EVIDENCES", "nontarget_surface_evidence",
            "OracleVisibleEvidence", "oracle_candidates", "oracle_visible_split", "oracle_cell_keys",
+           "SurfaceProtectEvidence", "surface_protect_split",   # IFG-CL2
            "oracle_band_masks"]
 
 #: 쥔 물체에 붙이는 내부 라벨. 호출자의 `labelled_points` 이름과 겹치면 안 되므로 밑줄로 감싼다.
@@ -657,6 +658,61 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
             "d_t": d_t, "d_o": d_o, "n_other_near": int(len(op))}
 
 
+# --- IFG-CL2 — begin: `esdf.target_extent == "attention_surface_hybrid"` (ball_owned + attention-surface protection)
+@dataclasses.dataclass(frozen=True)
+class SurfaceProtectEvidence:
+    """IFG-CL2 — what protects seeds of the `ball_owned` fine target-free tier (`runtime.attention_surface_hybrid`).
+
+    | 필드 | 무엇 |
+    |---|---|
+    | `target_points` | 이번 frame 의 attention-surface 선택 영역 graph node 중심 (5 mm voxel centroid) |
+    | `other_points` | 선택 영역 **밖** 이고 지지면 (graph RANSAC) 이 **아닌** node 중심 — 이웃 과일 · crate · 그 밖의 관측 표면 |
+    | `info` | 기록에 그대로 실린다 |
+
+    지우는 범위는 `ball_owned` (공 + cloud 근거) 그대로다. 이 근거는 **보호에만** 쓴다 (`surface_protect_split`).
+    """
+
+    target_points: np.ndarray
+    other_points: Optional[np.ndarray] = None
+    info: dict = dataclasses.field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "target_points", np.asarray(self.target_points, np.float64).reshape(-1, 3))
+        op = self.other_points
+        object.__setattr__(self, "other_points",
+                           np.zeros((0, 3)) if op is None else np.asarray(op, np.float64).reshape(-1, 3))
+        if not len(self.target_points):
+            raise ValueError("SurfaceProtectEvidence 에 선택 영역 표본이 없습니다 (그 frame 은 보호 없이 짓는다)")
+
+
+def surface_protect_split(centres: np.ndarray, is_seed: np.ndarray, ball: "TargetBall", owned: OwnedEvidence,
+                          protect: SurfaceProtectEvidence, voxel_size: float) -> dict:
+    """IFG-CL2 — `ball_owned` 분할 (`_ball_owned_split`, cloud 근거) 에 attention-surface 보호를 건다. 순수 numpy.
+
+    같은 공 안 voxel 을 **두 번** 가른다 — 같은 규칙 (`OwnedEvidence` 의 tie · max_dist · unowned · ambiguous) 으로:
+
+    | 분할 | target 근거 | non-target 근거 |
+    |---|---|---|
+    | `est` (= C1aN, `estimated`) | manipulated 기하 점 (`owned.target_points`) | cloud − target − 지지면 (`owned.nontarget_points`) |
+    | `srf` (보호) | 선택 영역 node 중심 (`protect.target_points`) | 선택 밖 · 비지지면 node 중심 (`protect.other_points`) |
+
+    지우는 seed = `est.removed ∧ srf.removed` — 지우는 범위는 `est` 를 넘지 않는다. `protected` = `est` 는 지우려 했는데
+    `srf` 가 non-target · ambiguous (보존 쪽) 으로 본 seed. `srf` 에서 두 근거 모두 `max_dist` 밖 (unowned) 인 seed — target 의
+    **안 보인 쪽** · 그림자 seed — 는 `unowned = remove` 이면 보호하지 않는다 (`est` 대로 지운다; SURF 가 실패한 부분).
+    부호 교정 후보 = `est.sign ∧ srf.sign` (두 분할 모두 target 쪽이라 본 non-seed 와 지운 seed).
+
+    돌려주는 것: `est` 의 키 전부 (분류 · `d_t` · `d_o`) 에 `removed` · `sign` 을 위 값으로 바꾸고 `protected` · `srf` 를 더한 것.
+    """
+    est = _ball_owned_split(centres, is_seed, ball, owned, voxel_size)
+    srf_owned = dataclasses.replace(owned, target_points=protect.target_points,
+                                    nontarget_points=protect.other_points)
+    srf = _ball_owned_split(centres, is_seed, ball, srf_owned, voxel_size)
+    removed = est["removed"] & srf["removed"]
+    return {**est, "removed": removed, "sign": est["sign"] & srf["sign"],
+            "protected": est["removed"] & ~srf["removed"], "srf": srf}
+# --- IFG-CL2 — end
+
+
 #: `stats["window"]["basis"]` 의 값. 창이 **무엇을 근거로** 놓였나 (T21).
 #:
 #: | 값 | 뜻 |
@@ -1130,7 +1186,8 @@ class CuroboFieldBuilder:
                nontarget_points: Optional[np.ndarray] = None,
                support_seed_evidence: Optional[dict] = None,
                owned_nontarget_points: Optional[np.ndarray] = None,
-               oracle_evidence: Optional[OracleVisibleEvidence] = None) -> CuroboEsdfField:
+               oracle_evidence: Optional[OracleVisibleEvidence] = None,
+               surface_protect: Optional[SurfaceProtectEvidence] = None) -> CuroboEsdfField:
         """`EsdfBuilder.update` 와 같은 계약. 돌려주는 것은 `CuroboEsdfField` 다.
 
         `exclude_target` 는 **지원하지 않는다.** E1 이 그것을 폐기했다 — 필드는 익명이라
@@ -1174,6 +1231,12 @@ class CuroboFieldBuilder:
         # 프로세스(`.venv-ag3s`)의 테스트가 이것을 실제로 받아 볼 수 있어야 한다 (T7b 의
         # `announce_diagnostic_scope` 를 함수로 뺀 것과 같은 이유).
         self._check_target_free_request(target_free_points, target_points)
+        if surface_protect is not None:   # IFG-CL2 — protection of the `ball_owned` fine split only
+            if oracle_evidence is not None:
+                raise ValueError("surface_protect 와 oracle_evidence 는 함께 올 수 없습니다 (미세 분할이 둘 중 하나다)")
+            if target_free_ball is None or str(getattr(self.config, "target_exclusion", "ball")) != "ball_owned":
+                raise ValueError("surface_protect 는 ball_owned 미세 분할의 보호다 — 공과 "
+                                 "esdf.target_exclusion = 'ball_owned' 가 필요합니다")
 
         import torch
 
@@ -1296,7 +1359,10 @@ class CuroboFieldBuilder:
                                            # T46e: oracle 이 오면 미세 계층의 분할은 그것이다 (owned 는 거친 계층만).
                                            owned=None if oracle_evidence is not None else owned_fine,
                                            **({} if oracle_evidence is None
-                                              else {"oracle": oracle_evidence}))
+                                              else {"oracle": oracle_evidence}),
+                                           # IFG-CL2: only with `target_extent == "attention_surface_hybrid"`.
+                                           **({} if surface_protect is None
+                                              else {"surface_protect": surface_protect}))
             free_ms = (time.monotonic() - t0) * 1e3
             self._announce_target_free_cost(free_ms, len(free_points), free_tiers,
                                             ball=target_free_ball)
@@ -1646,7 +1712,8 @@ class CuroboFieldBuilder:
                      itg_fine=None,
                      owned: Optional["OwnedEvidence"] = None,
                      coarse_free: Optional[CoarseFreeSpec] = None,
-                     oracle: Optional[OracleVisibleEvidence] = None) -> list[_Tier]:
+                     oracle: Optional[OracleVisibleEvidence] = None,
+                     surface_protect: Optional[SurfaceProtectEvidence] = None) -> list[_Tier]:
         """계층마다 seed -> (제외) -> propagate -> 복사.
 
         `Mapper.compute_esdf` 를 부르지 않는다 — 그쪽은 CUDA graph 로 seed·propagate·distance
@@ -1711,7 +1778,10 @@ class CuroboFieldBuilder:
                 # T44 I0/I1: `ball` 은 예전 `_exclude_ball_seeds` 와 같은 cand · 같은 순서로 지운다
                 # (값 비트 동일). 달라지는 것은 trace (지운 seed 의 ijk) 를 함께 돌려주는 것뿐이다.
                 n_ball, ball_idx, excl = self._ball_exclusion(itg, ball, org, vs, shape,
-                                                              owned=owned)
+                                                              owned=owned,
+                                                              # IFG-CL2 (None = the call as before)
+                                                              **({} if surface_protect is None
+                                                                 else {"protect": surface_protect}))
                 # 부호 교정은 **지운 복셀 전체**에 걸려야 한다. 한쪽만 넘기면 나머지 복셀의
                 # 음수 부호가 그대로 남고, 그것이 `_force_sign_on_pure_voxels` 가 막는 실패다.
                 if ball_idx is not None:
@@ -1766,6 +1836,8 @@ class CuroboFieldBuilder:
                 out["owned"] = dict(ex["owned"])
             if "oracle" in ex:   # T46e A13 (oracle_visible 일 때만 있다)
                 out["oracle_split"] = dict(ex["oracle"])
+            if "surface_protect" in ex:   # IFG-CL2 (attention_surface_hybrid 이고 보호가 걸린 frame 만)
+                out["surface_protect"] = dict(ex["surface_protect"])
             out["classify_ms"] = round(out.get("classify_ms", 0.0) + float(ex.get("classify_ms", 0.0)), 3)
         return out
 
@@ -2036,7 +2108,8 @@ class CuroboFieldBuilder:
         return np.asarray(m, bool).reshape(-1)
 
     def _ball_exclusion(self, itg, ball: "TargetBall", origin: np.ndarray, voxel_size: float,
-                        shape, *, owned: Optional[OwnedEvidence] = None):
+                        shape, *, owned: Optional[OwnedEvidence] = None,
+                        protect: Optional[SurfaceProtectEvidence] = None):
         """target-free 계층의 공 제외 + trace (T44 I0/I1). `(n_removed, sign_idx | None, excl)`.
 
         `owned is None` → **`ball`**: `_exclude_ball_seeds` 와 같은 `cand` 를 같은 순서로
@@ -2070,7 +2143,13 @@ class CuroboFieldBuilder:
             counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
             return n, idx, {"counts": counts, "trace": trace}
         centres = origin[None, :] + cand.astype(np.float64) * float(voxel_size)
-        split = _ball_owned_split(centres, seed, ball, owned, voxel_size)
+        if protect is None:
+            split = _ball_owned_split(centres, seed, ball, owned, voxel_size)
+        else:
+            # IFG-CL2 — the same split, then the attention-surface protection (`surface_protect_split`).
+            t_p = time.monotonic()
+            split = surface_protect_split(centres, seed, ball, owned, protect, voxel_size)
+            protect_ms = (time.monotonic() - t_p) * 1e3
         removed = cand[split["removed"]]
         n = 0
         if len(removed):
@@ -2103,6 +2182,33 @@ class CuroboFieldBuilder:
         trace["ambiguous_ijk"] = cand[split["ambiguous"]]
         if keep_unowned:
             trace["unowned_kept_ijk"] = cand[split["unowned"]]
+        if protect is not None:
+            # IFG-CL2 — `n_removed` (above) is after the protection; the `ball_owned` classes keep their meaning
+            # (`est`). Kept-as-non-target = cloud non-target ∪ protected, so the trace's `nontarget_kept_ijk` holds
+            # every seed kept for a non-target reason (the GT kept-seed scripts read it unchanged) and
+            # `protected_ijk` is the protected subset.
+            prot = split["protected"]
+            srf = split["srf"]
+            unowned_c = split["unowned"] & ~prot
+            counts["n_kept_nontarget"] = int((split["nontarget"] | prot).sum())
+            if not keep_unowned:
+                counts["n_unowned_removed"] = int(unowned_c.sum())
+            counts["surface_protect"] = {
+                "n_protected": int(prot.sum()),
+                "n_removed_estimated": int(split["removed"].sum() + prot.sum()),
+                "n_protected_from_target": int((prot & split["target"]).sum()),
+                "n_protected_from_unowned": int((prot & split["unowned"]).sum()),
+                "n_protected_from_ambiguous": int((prot & split["ambiguous"]).sum()),
+                "srf": {"n_target": int(srf["target"].sum()), "n_nontarget": int(srf["nontarget"].sum()),
+                        "n_ambiguous": int(srf["ambiguous"].sum()), "n_unowned": int(srf["unowned"].sum()),
+                        "n_other_near": int(srf["n_nontarget_near"])},
+                "n_target_points": int(len(protect.target_points)),
+                "n_other_points": int(len(protect.other_points)),
+                "split_ms": round(float(protect_ms), 3),
+                **{k: v for k, v in (protect.info or {}).items() if k not in ("n_target_points", "n_other_points")},
+            }
+            trace["nontarget_kept_ijk"] = cand[split["nontarget"] | prot]
+            trace["protected_ijk"] = cand[prot]
         counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
         return n, (sign_idx if len(sign_idx) else None), {"counts": counts, "trace": trace}
 

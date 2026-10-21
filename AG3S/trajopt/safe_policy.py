@@ -24,6 +24,7 @@ import numpy as np
 
 from AG3S.ag3s.types import subtask_no_target
 from AG3S.trajopt import wire
+from AG3S.trajopt.attention_source import IFG_PREFIX_L8_KEY
 from AG3S.trajopt.config import TrajOptConfig
 from AG3S.trajopt.grasp_latch import (
     CentroidIdentity,
@@ -38,7 +39,7 @@ from AG3S.trajopt.refiner import TrajOptChunkRefiner
 from AG3S.trajopt.types import ChunkLayout
 
 __all__ = ["SafePolicy", "classify_violations", "VERDICT_POLICIES",
-           "GRASP_CONTINUITY_OFF_PHASES", "grasp_continuity_off_reason"]
+           "GRASP_CONTINUITY_OFF_PHASES", "grasp_continuity_off_reason", "DEFLECTION_RATE_OFF_PHASES"]
 
 
 #: 어느 손이 어느 링크로 쥐는가. 로봇마다 다르므로 **주입**이지만, 기본값이 두 곳에서 필요하다 —
@@ -152,8 +153,12 @@ class SafePolicy:
                  allowed_contact_pad_m: float = 0.01,
                  allow_unresolved_contact_tier: bool = False,
                  task_gate: str = "off",
-                 task_gate_tau: Optional[float] = None):
+                 task_gate_tau: Optional[float] = None,
+                 held_3d: Any = None):
         self._policy = policy
+        #: IFG-S2SERVE — the training-free 3D held rule (`held_3d.Held3DRule`, `serve_safe --held-3d-rule on`), ANDed
+        #: into the latch's attach checks (`_advance_grasp`). None (default) = off: checks · records as before.
+        self.held_3d = held_3d
         #: **`safe` 를 무엇으로 정하나** (T23). `"reasons"`(기본) 는 `verdict_reasons` 에 HOLD 처리인
         #: 사유가 없을 때 `safe` 다 — 권한 link ↔ manipulated 접촉(`allowed_contact`) · 가려진
         #: target(`occluded_target`) · 예산 종료(`budget_only`) 는 실행이다. `"legacy"` 는 T23 전
@@ -334,6 +339,19 @@ class SafePolicy:
         self._last_debug: dict[str, Any] = {}
         self._last_attention_by_camera: dict[str, Any] = {}
         self._last_q_now: Optional[np.ndarray] = None
+        #: IFG-HSR2 — `(frame, q)` of the request the latch entered CLOSING on (this grasp attempt), or None.
+        self._closing_start: Optional[tuple[int, np.ndarray]] = None
+        #: IFG-TOA — the frozen pre-grasp palm goal (`_grasp_anchor_gate`), or None.
+        self._grasp_goal: Optional[dict[str, Any]] = None
+        self._last_grasp_anchor: dict[str, Any] = {}
+        self._last_wrist_track: dict[str, Any] = {}   # IFG-TOW
+        self._last_neighbour_contact: dict[str, Any] = {}   # IFG-NBC
+        #: IFG-REC — retreat-and-retry recovery state (`_recovery_observe` / `_recovery_chunk`).
+        self._recovery: Optional[dict[str, Any]] = None
+        self._recovery_count = 0
+        self._recovery_hist: list[dict[str, Any]] = []
+        self._rec_streaks = {"hold": 0, "empty": 0}
+        self._last_recovery: dict[str, Any] = {}
         self._chunk_index = -1
         #: 기록 실패 횟수. **첫 실패만 크게 외치고** 그 뒤는 한 줄씩 — 같은 문장을 75 번
         #: 읽게 하면 읽는 사람이 로그를 건너뛰기 시작한다.
@@ -380,7 +398,30 @@ class SafePolicy:
             meta["target_extent"] = "oracle_visible"
             meta["oracle_extent_identity"] = str(getattr(self.ag3s.config.esdf, "oracle_extent_identity",
                                                          "pipeline"))
+        # IFG-CL1 — 같은 규약: 켰을 때만 키가 생긴다. attention-surface 는 client 에 segmentation 을 요구하지 않는다
+        # (code 영상은 서버가 만든다) — `ORACLE_SEG_REQUIRED` 는 싣지 않는다.
+        esdf = getattr(getattr(self.ag3s, "config", None), "esdf", None)
+        if getattr(esdf, "target_extent", "estimated") == "attention_surface":
+            meta["target_extent"] = "attention_surface"
+            meta["oracle_extent_identity"] = str(getattr(esdf, "oracle_extent_identity", "pipeline"))
+        if getattr(esdf, "target_extent", "estimated") == "attention_surface_hybrid":   # IFG-CL2
+            meta["target_extent"] = "attention_surface_hybrid"
+            meta["surface_hybrid_identity"] = str(getattr(esdf, "surface_hybrid_identity", "both"))
+            meta["surface_hybrid_other_exclude_voxels"] = float(   # IFG-CL2b
+                getattr(esdf, "surface_hybrid_other_exclude_voxels", 0.0))
+        if getattr(esdf, "robot_mask", "spheres") == "render":
+            meta["robot_mask"] = "render"
+        # IFG-S2SERVE — 같은 규약: 켰을 때만 키가 생긴다.
+        if self._confidence_gate_on():
+            meta["confidence_gate"] = self.ag3s.confidence_gate.record_meta()
+        if self.held_3d is not None:
+            meta["held_3d_rule"] = {"max_m": float(self.held_3d.max_m),
+                                    "grip_closed": float(self.held_3d.grip_closed)}
         return meta
+
+    def _confidence_gate_on(self) -> bool:
+        """IFG-S2SERVE — this server's AG3S carries a confidence gate (`AG3S(confidence_gate=...)`)."""
+        return getattr(self.ag3s, "confidence_gate", None) is not None
 
     def _oracle_extent_on(self) -> bool:
         """T46e A13 — `esdf.target_extent == "oracle_visible"` on this server's AG3S."""
@@ -416,6 +457,16 @@ class SafePolicy:
         self._last_debug = {}
         self._last_attention_by_camera = {}
         self._last_q_now = None
+        self._closing_start = None   # IFG-HSR2
+        self._grasp_goal = None      # IFG-TOA
+        self._last_grasp_anchor = {}
+        self._last_wrist_track = {}  # IFG-TOW
+        self._last_neighbour_contact = {}  # IFG-NBC
+        self._recovery = None        # IFG-REC
+        self._recovery_count = 0
+        self._recovery_hist = []
+        self._rec_streaks = {"hold": 0, "empty": 0}
+        self._last_recovery = {}
         self._pending = {}
         self._last_continuity = {}
         self._last_rest_start = {}
@@ -452,6 +503,15 @@ class SafePolicy:
         result = self._policy.infer(policy_obs, **kwargs)
         chunk = np.asarray(result["actions"], np.float64)
         timing["infer"] = (time.monotonic() - t) * 1000.0
+        # IFG-S2SERVE — the layer-8 feature never goes on the wire (only `AttentionPolicy(prefix_feature=True)` adds it).
+        gate_feature = None
+        if isinstance(result, dict) and IFG_PREFIX_L8_KEY in result:
+            result = dict(result)
+            gate_feature = result.pop(IFG_PREFIX_L8_KEY)
+        # IFG-REC — while a retreat is active the policy's chunk is replaced by the retreat (off: untouched).
+        self._last_recovery = {}
+        if self._recovery is not None:
+            chunk = self._recovery_chunk(chunk, policy_obs.get("state"))
 
         attention = {}
         if self.attention_fn is not None:
@@ -485,6 +545,10 @@ class SafePolicy:
             self._pending["task_probe"] = result.get("task_probe") if isinstance(result, dict) else None
         if isinstance(result, dict) and result.get("attention_source") is not None:
             self._pending["attention_source"] = result.get("attention_source")
+        if self._confidence_gate_on():
+            # IFG-S2SERVE — this request's prefix layer-8 image feature (None = extraction failed → `no_feature`),
+            # consumed by this request's AG3S frame; also clears the last frame's gate record.
+            self.ag3s.set_gate_feature(gate_feature)
 
         previous, executed_steps = self._continuity_input(feedback)
         context: dict[str, Any] = {"t_step": seq, "previous_physical_chunk": previous}
@@ -933,6 +997,27 @@ class SafePolicy:
                 context["continuity_off"] = off
             else:
                 context.pop("continuity_off", None)
+            # IFG-TOB: same place, same final latch state — the deflection-rate term before the grasp.
+            rate_off = self._deflection_rate_gate()
+            if rate_off:
+                context["deflection_rate_off"] = rate_off
+                context.pop("deflection_history", None)
+            else:
+                context.pop("deflection_rate_off", None)
+            # IFG-REC: same place, same final latch state — history and the recovery triggers.
+            self._recovery_observe(np.asarray(newest.robot_state, np.float64), manipulators)
+            # IFG-TOA: same place, same final latch state — the pre-grasp palm anchor.
+            anchor = self._grasp_anchor_gate(np.asarray(newest.robot_state, np.float64), manipulators)
+            if anchor is not None:
+                context["grasp_anchor"] = anchor
+            else:
+                context.pop("grasp_anchor", None)
+            # IFG-TOW: same place, same final latch state — wrist-weighted tracking near the target.
+            scale = self._wrist_track_gate(np.asarray(newest.robot_state, np.float64), manipulators)
+            if scale is not None:
+                context["joint_track_scale"] = scale
+            else:
+                context.pop("joint_track_scale", None)
         self._last_attention_by_camera = {
             o.camera_id: np.asarray(o.attention_map)
             for o in observations if getattr(o, "attention_map", None) is not None
@@ -951,6 +1036,13 @@ class SafePolicy:
         # SUBTASK-e: 판정(`_verdict`)과 **같은 규칙**. 여기서 다르면 sqp 가 `violated` 로 내린 청크를
         # 판정이 인증됐다고 읽는다 (또는 그 반대) — HOLD 를 만드는 두 곳이 같은 술어를 쓴다.
         certified = geometry_certified(constraint_set)
+        # IFG-NBC: the grasping fingers' light contact with a neighbour object (pre-grasp, near the target).
+        nbc = self._neighbour_contact_gate(q_now, manipulators)
+        if nbc is not None:
+            import dataclasses as _dc
+
+            snapshot = _dc.replace(snapshot, neighbour_contact=nbc)
+            self._last_snapshot = snapshot
         return snapshot, q_now, certified
 
     def _held_capture_for_scene(self):
@@ -1164,6 +1256,16 @@ class SafePolicy:
         # 파지 뒤에도 사과이므로 그 길은 목적지를 영영 못 잡거나 사과를 목적지로 잡는다. 위에서
         # AG3S 의 destination 을 읽는 것으로 바꿨다.)
 
+    def _held_3d_target_centre(self) -> Optional[np.ndarray]:
+        """IFG-S2SERVE — the 3D held rule's target centre: the **previous request's** grounded target centroid
+        (`_last_constraint_set.target`). The attach decision runs before this request's grounding, so this lags one
+        request behind the offline same-frame definition. None (no target that frame) → gripper condition only.
+        (Lead decision 2026-10-19: not `ag3s.manipulated.centroid` — the last observed geometry can stay near the
+        hand after a slip / loss.)"""
+        target = getattr(self._last_constraint_set, "target", None)
+        centroid = getattr(target, "centroid", None)
+        return None if centroid is None else np.asarray(centroid, np.float64).reshape(3)
+
     def _grasp_hand(self, manipulators) -> tuple[str, str, Any]:
         hand = str((manipulators or ["left"])[0])
         parent_link, allowed = self.grasp_links.get(
@@ -1200,7 +1302,14 @@ class SafePolicy:
         if manip is None:
             out["reason"] = "no_manipulated_object"
             return out
-        if str(manip.state) == "visible":
+        kept_fn = getattr(self.ag3s, "manipulated_kept_this_frame", None)
+        kept = bool(kept_fn()) if callable(kept_fn) else False
+        kept_on = bool(getattr(getattr(getattr(self.ag3s, "config", None), "clustering", None),
+                               "latch_reach_kept_unseen", False))
+        if kept_on:
+            out["kept_geometry"] = kept   # IFG-HSR: recorded only with the flag (T46g record as is otherwise)
+        if str(manip.state) == "visible" and not kept:
+            # IFG-HSR: a closing-kept geometry (flag `latch_reach_kept_unseen`) is not an observation.
             out["reason"] = "visible"
             return out
         seen_fn = getattr(self.ag3s, "manipulated_seen_state", None)
@@ -1210,6 +1319,16 @@ class SafePolicy:
             return out
         frame, q_seen = int(seen[0]), np.asarray(seen[1], np.float64).reshape(-1)
         out["seen_frame"] = frame
+        if self._carry_from_closing():
+            # IFG-HSR2: the object does not ride the hand before the fingers close — start the carry at the
+            # closing start when the pin is older (the pose between the pin and the closing is the approach).
+            cs = self._closing_start
+            out["carry_start"] = "seen"
+            out["closing_start_frame"] = None if cs is None else int(cs[0])
+            if cs is not None and int(cs[0]) > frame and len(cs[1]) == len(q_seen):
+                frame, q_seen = int(cs[0]), np.asarray(cs[1], np.float64).reshape(-1)
+                out["carry_start"] = "closing_start"
+            out["carry_frame"] = frame
         if q_seen.shape[0] != q.shape[0]:
             out["reason"] = f"seen_state_length {q_seen.shape[0]} != {q.shape[0]}"
             return out
@@ -1226,6 +1345,11 @@ class SafePolicy:
                    hand_shift_since_seen_mm=round(shift * 1000.0, 2))
         return out
     # T46g — end
+
+    def _carry_from_closing(self) -> bool:
+        """IFG-HSR2 — `clustering.latch_carry_from_closing` (False when there is no AG3S config)."""
+        return bool(getattr(getattr(getattr(self.ag3s, "config", None), "clustering", None),
+                            "latch_carry_from_closing", False))
 
     def _advance_grasp(self, observations, manipulators) -> None:
         """**제약을 짓기 전에** 파지 상태를 갱신하고, 잠금이 말할 때만 `attach`/`detach` 를 부른다 (T22).
@@ -1307,11 +1431,27 @@ class SafePolicy:
         if self._latch.holding:
             held_fn = getattr(self.ag3s, "held_observation", None)
             held_observation = held_fn() if callable(held_fn) else None
+        # IFG-S2SERVE — the 3D held rule, ANDed into the attach checks (off: no kwarg, the call as before).
+        held3d = None
+        if self.held_3d is not None:
+            openings, _ = self._measured_openings()
+            held3d = self.held_3d.evaluate(
+                state16=self._pending.get("state"), gripper_columns=self.gripper_columns,
+                robot_state=q, openings=openings, target_centre=self._held_3d_target_centre())
         event = self._latch.observe_grasp(
             signal, reach_m=reach,
             manipulated_id=None if manip is None else int(manip.id),
             manipulated_state=None if manip is None else str(manip.state),
-            placed=placed, held_observation=held_observation)
+            placed=placed, held_observation=held_observation,
+            **({} if held3d is None else {"extra_checks": {"held_3d": held3d["held_3d"]}}))
+        if self._carry_from_closing():
+            # IFG-HSR2: remember the request this grasp attempt entered CLOSING on; forget it when the latch
+            # leaves CLOSING / HELD (opened, revoked, placed) — a new attempt starts a new carry.
+            if self._latch.phase in (GraspPhase.CLOSING, GraspPhase.HELD):
+                if self._closing_start is None:
+                    self._closing_start = (int(getattr(self.ag3s, "frame_index", -1)), q.copy())
+            else:
+                self._closing_start = None
         rejected = None
         revoked = None
         if event.attach:
@@ -1374,6 +1514,9 @@ class SafePolicy:
         if cfg.slip_detach:
             # T43 Z3 — flag 가 켜졌을 때만 싣는다 (꺼지면 기록이 Z3 전과 같다). 근거는 `evidence.slip`.
             self._last_grasp_record["held_slip"] = bool(event.slipped)
+        if held3d is not None:
+            # IFG-S2SERVE — flag 가 켜졌을 때만 (hand_d · held_3d · held_gripper; attach 판정에 쓴 값은 checks.held_3d).
+            self._last_grasp_record["held_3d"] = held3d
         # T46g — begin
         if reach_carry is not None:
             # flag 가 켜졌을 때만 싣는다 (꺼지면 기록이 T46g 전과 같다). `reach_mm` 은 latch 가 쓴 값이다.
@@ -1385,7 +1528,9 @@ class SafePolicy:
                                             else round(float(reach_carry["reach_m"]) * 1000.0, 2))
             ev["reach_carry"] = {k: reach_carry[k] for k in (
                 "reason", "carry_link", "seen_frame", "last_seen_frame",
-                "hand_shift_since_seen_mm", "centroid_carried_m")}
+                "hand_shift_since_seen_mm", "centroid_carried_m") + (
+                ("kept_geometry",) if "kept_geometry" in reach_carry else ()) + tuple(
+                k for k in ("carry_start", "closing_start_frame", "carry_frame") if k in reach_carry)}  # IFG-HSR2
         # T46g — end
         # T43 T (측정만): 손끝 중점 ↔ AG3S target centroid. 판단에 쓰지 않는다 — 기록 키 하나.
         if manip is not None:
@@ -1426,6 +1571,290 @@ class SafePolicy:
             print(f"[safe_policy] continuity term "
                   f"{'OFF — ' + off if off else 'back ON (grasp latch ' + phase.value + ')'}")
         return off
+
+    def _deflection_rate_gate(self) -> Optional[str]:
+        """IFG-TOB — why this chunk drops the deflection-rate term, or `None`.
+
+        Only with `cost.deflection_rate_after_grasp` and `cost.w_deflection_rate > 0`: the term is dropped
+        while the grasp latch is `searching` · `latched` · `closing` (`DEFLECTION_RATE_OFF_PHASES`).
+        """
+        cost = self.to_config.cost
+        if not (getattr(cost, "deflection_rate_after_grasp", False)
+                and float(getattr(cost, "w_deflection_rate", 0.0) or 0.0) > 0.0):
+            return None
+        phase = self._latch.phase
+        if phase not in DEFLECTION_RATE_OFF_PHASES:
+            return None
+        return f"grasp latch {phase.value} (cost.deflection_rate_after_grasp)"
+
+    # --- IFG-REC: retreat-and-retry recovery ---------------------------------------------------------------
+    def _recovery_on(self) -> bool:
+        return bool(getattr(getattr(self.to_config, "safety", None), "recovery_retreat", False))
+
+    def _recovery_observe(self, q_now: np.ndarray, manipulators) -> None:
+        """IFG-REC — per request (inside `_scene_fn`, final latch state): log the pose, update the two streaks and
+        arm a retreat for the next request when one reaches its limit. Off (`safety.recovery_retreat` False): nothing.
+
+        * hold streak: the previous chunk was held whole (`exec_feedback.n_hold == n_steps`) for a collision verdict,
+          latch latched / closing.
+        * empty streak: latch closing, the grasp evidence says the fingers settled (`settled`) at the commanded opening
+          (`blocked` False — nothing between them).
+        Target: the latest earlier pose whose palm (hold link) was >= `safety.recovery_clear_m` from the manipulated
+        centroid for the same object, else the oldest logged pose of this attempt.
+        """
+        if not self._recovery_on():
+            return
+        from AG3S.ag3s.constraints.attached import _link_pose_numeric
+
+        cfg = self.to_config.safety
+        phase = self._latch.phase
+        manip = getattr(self.ag3s, "manipulated", None)
+        hand, parent_link, _ = self._grasp_hand(manipulators)
+        link = self.hold_links.get(hand, parent_link)
+        state16 = self._pending.get("state")
+        rec: dict[str, Any] = self._last_recovery if self._last_recovery else {}
+        self._last_recovery = rec
+        if isinstance(self._last_grasp_record, dict) and self._last_grasp_record:
+            self._last_grasp_record["recovery"] = rec
+        palm_d = None
+        if manip is not None:
+            palm = np.asarray(_link_pose_numeric(self.constraint_robot_model, q_now, link)[:3, 3], np.float64)
+            palm_d = float(np.linalg.norm(palm - np.asarray(manip.centroid, np.float64).reshape(3)))
+        pre_grasp = phase in (GraspPhase.LATCHED, GraspPhase.CLOSING)
+        if not pre_grasp:
+            self._recovery_hist = []
+            self._rec_streaks = {"hold": 0, "empty": 0}
+        elif state16 is not None:
+            self._recovery_hist.append({"frame": int(getattr(self.ag3s, "frame_index", -1)),
+                                        "state": np.asarray(state16, np.float64).reshape(-1).copy(),
+                                        "palm_to_target_m": palm_d, "manip_id": None if manip is None else int(manip.id)})
+            self._recovery_hist = self._recovery_hist[-40:]
+        if self._recovery is not None or not pre_grasp:
+            rec.update(active=self._recovery is not None, streaks=dict(self._rec_streaks), count=self._recovery_count)
+            return
+        fb = self._pending.get("exec_feedback") or {}
+        held_whole = bool(fb.get("available")) and int(fb.get("n_hold") or 0) > 0 \
+            and int(fb.get("n_hold") or 0) >= int(fb.get("n_steps") or 0) \
+            and "collision" in str(fb.get("hold_reason") or "")
+        self._rec_streaks["hold"] = self._rec_streaks["hold"] + 1 if held_whole else 0
+        checks = ((self._last_grasp_record or {}).get("evidence") or {}).get("checks") or {}
+        empty = (phase is GraspPhase.CLOSING and bool(checks.get("settled")) and checks.get("blocked") is False)
+        self._rec_streaks["empty"] = self._rec_streaks["empty"] + 1 if empty else 0
+        rec.update(streaks=dict(self._rec_streaks), count=self._recovery_count, palm_to_target_mm=(
+            None if palm_d is None else round(palm_d * 1000.0, 1)))
+        reason = ("deadlock" if self._rec_streaks["hold"] >= int(cfg.recovery_hold_streak)
+                  else "empty_grasp" if self._rec_streaks["empty"] >= int(cfg.recovery_empty_streak) else None)
+        if reason is None or self._recovery_count >= int(cfg.recovery_max):
+            if reason is not None:
+                rec["skipped"] = f"{reason}: recovery_max {cfg.recovery_max} reached"
+            return
+        mid = None if manip is None else int(manip.id)
+        past = self._recovery_hist[:-1]
+        target = next((h for h in reversed(past) if h["manip_id"] == mid and h["palm_to_target_m"] is not None
+                       and h["palm_to_target_m"] >= float(cfg.recovery_clear_m)), past[0] if past else None)
+        if target is None:
+            rec["skipped"] = f"{reason}: no earlier pose logged"
+            return
+        self._recovery = {"reason": reason, "target": target["state"].copy(), "target_frame": target["frame"],
+                          "target_palm_to_target_mm": (None if target["palm_to_target_m"] is None
+                                                       else round(target["palm_to_target_m"] * 1000.0, 1)),
+                          "armed_frame": int(getattr(self.ag3s, "frame_index", -1)), "requests": 0}
+        self._recovery_count += 1
+        self._rec_streaks = {"hold": 0, "empty": 0}
+        rec.update(armed=reason, target_frame=target["frame"], count=self._recovery_count,
+                   target_palm_to_target_mm=self._recovery["target_palm_to_target_mm"])
+        print(f"[safe_policy] recovery ({reason}): retreat to the pose of frame {target['frame']} "
+              f"(palm {self._recovery['target_palm_to_target_mm']} mm from the target), #{self._recovery_count}")
+
+    def _recovery_chunk(self, chunk: np.ndarray, state16) -> np.ndarray:
+        """IFG-REC — the retreat chunk: arm joints from the measured 16-D state toward the target state at <=
+        `safety.recovery_step_rad` per row, grippers open (1.0); padding columns as the policy gave them. Ends the
+        retreat when the arms are within 0.02 rad of the target at the start of a request, or after 8 requests."""
+        rv = self._recovery
+        cfg = self.to_config.safety
+        out = np.asarray(chunk, np.float64).copy()
+        if state16 is None:
+            self._recovery = None
+            self._last_recovery = {"ended": "no state"}
+            return out
+        cur = np.asarray(state16, np.float64).reshape(-1).copy()
+        tgt = np.asarray(rv["target"], np.float64).reshape(-1)
+        grip = [int(c) for c in self.gripper_columns]
+        arm = [i for i in range(min(cur.size, tgt.size)) if i not in grip]
+        remaining = float(np.max(np.abs(tgt[arm] - cur[arm]))) if arm else 0.0
+        rv["requests"] += 1
+        if remaining < 0.02 or rv["requests"] > 8:
+            self._last_recovery = {"ended": "reached" if remaining < 0.02 else "request limit",
+                                   "reason": rv["reason"], "requests": rv["requests"] - 1,
+                                   "remaining_rad": round(remaining, 4)}
+            self._recovery = None
+            print(f"[safe_policy] recovery ({rv['reason']}) ended: {self._last_recovery['ended']} — the policy has control")
+            return out
+        step = float(cfg.recovery_step_rad)
+        for i in range(out.shape[0]):
+            cur[arm] = cur[arm] + np.clip(tgt[arm] - cur[arm], -step, step)
+            out[i, arm] = cur[arm]
+            out[i, grip] = 1.0
+        self._last_recovery = {"active": True, "reason": rv["reason"], "request": rv["requests"],
+                               "target_frame": rv["target_frame"], "remaining_rad": round(remaining, 4)}
+        return out
+
+    def _neighbour_contact_gate(self, q_now: np.ndarray, manipulators) -> Optional[dict]:
+        """IFG-NBC — this chunk's `SceneSnapshot.neighbour_contact`, or None. Only with `collision.neighbour_contact_depth` > 0.
+
+        On: latch `latched` / `closing`, a manipulated object, no revoked attach, and the grasping hand's hold link (palm)
+        at `q_now` within `collision.neighbour_contact_gate` of the object's centroid. The rows: the grasping hand's finger
+        spheres (link name = the hand's grasp link without its trailing digits, e.g. `ee_finger_l`). Record:
+        `self._last_neighbour_contact` (also `grasp.neighbour_contact` in the chunk record).
+        """
+        col = self.to_config.collision
+        depth = float(getattr(col, "neighbour_contact_depth", 0.0) or 0.0)
+        self._last_neighbour_contact = {}
+        if depth <= 0.0:
+            return None
+        from AG3S.ag3s.constraints.attached import _link_pose_numeric
+
+        rec: dict[str, Any] = {"active": False, "depth_mm": round(depth * 1000.0, 1)}
+        self._last_neighbour_contact = rec
+        if isinstance(self._last_grasp_record, dict) and self._last_grasp_record:
+            self._last_grasp_record["neighbour_contact"] = rec
+        phase = self._latch.phase
+        manip = getattr(self.ag3s, "manipulated", None)
+        if phase not in (GraspPhase.LATCHED, GraspPhase.CLOSING) or manip is None:
+            rec["reason"] = "phase " + phase.value if manip is not None else "no target"
+            return None
+        if bool((self._last_grasp_record or {}).get("attach_revoked")):
+            rec["reason"] = "revoked"
+            return None
+        hand, parent_link, _ = self._grasp_hand(manipulators)
+        link = self.hold_links.get(hand, parent_link)
+        centre = np.asarray(manip.centroid, np.float64).reshape(3)
+        palm = np.asarray(_link_pose_numeric(self.constraint_robot_model, q_now, link)[:3, 3], np.float64)
+        dist = float(np.linalg.norm(palm - centre))
+        rec.update(hand=hand, palm_to_target_mm=round(dist * 1000.0, 1))
+        if dist > float(col.neighbour_contact_gate):
+            rec["reason"] = "palm outside the gate"
+            return None
+        prefix = str(parent_link).rstrip("0123456789")
+        names = [str(n) for n in self.constraint_robot_model.sphere_link_names]
+        mask = np.array([n.startswith(prefix) for n in names], bool)
+        if not mask.any():
+            rec["reason"] = f"no sphere of a link {prefix}*"
+            return None
+        rec.update(active=True, links=sorted({n for n, m in zip(names, mask) if m}), n_spheres=int(mask.sum()))
+        return {"links_mask": mask, "depth": depth, "centre": centre, "radius": float(col.neighbour_contact_radius)}
+
+    def _wrist_track_gate(self, q_now: np.ndarray, manipulators) -> Optional[np.ndarray]:
+        """IFG-TOW — this chunk's per-joint tracking scale `(nq_opt,)`, or None. Only with `cost.wrist_track_scale` < 1.
+
+        On: latch `latched` / `closing`, a manipulated object, no revoked attach, and the grasping hand's hold link
+        (palm) at `q_now` within `cost.wrist_track_radius` of the object's centroid. The grasping arm's
+        `cost.wrist_track_joints` get the scale, every other joint 1. Record: `self._last_wrist_track`
+        (also `grasp.wrist_track` in the chunk record).
+        """
+        cost = self.to_config.cost
+        s = float(getattr(cost, "wrist_track_scale", 1.0))
+        self._last_wrist_track = {}
+        if s >= 1.0:
+            return None
+        from AG3S.ag3s.constraints.attached import _link_pose_numeric
+
+        rec: dict[str, Any] = {"active": False, "scale": s}
+        self._last_wrist_track = rec
+        if isinstance(self._last_grasp_record, dict) and self._last_grasp_record:
+            self._last_grasp_record["wrist_track"] = rec
+        phase = self._latch.phase
+        manip = getattr(self.ag3s, "manipulated", None)
+        if phase not in (GraspPhase.LATCHED, GraspPhase.CLOSING) or manip is None:
+            rec["reason"] = "phase " + phase.value if manip is not None else "no target"
+            return None
+        if bool((self._last_grasp_record or {}).get("attach_revoked")):
+            rec["reason"] = "revoked"
+            return None
+        hand, parent_link, _ = self._grasp_hand(manipulators)
+        link = self.hold_links.get(hand, parent_link)
+        palm = np.asarray(_link_pose_numeric(self.constraint_robot_model, q_now, link)[:3, 3], np.float64)
+        dist = float(np.linalg.norm(palm - np.asarray(manip.centroid, np.float64).reshape(3)))
+        rec.update(hand=hand, palm_to_target_mm=round(dist * 1000.0, 1))
+        if dist > float(cost.wrist_track_radius):
+            rec["reason"] = "palm outside the radius"
+            return None
+        names = [str(self.layout.joint_names[i]) for i in self.layout.q_indices]
+        wanted = {f"{hand}_arm_{int(j)}" for j in cost.wrist_track_joints}
+        scale = np.array([s if n in wanted else 1.0 for n in names], np.float64)
+        rec.update(active=True, joints=[n for n in names if n in wanted])
+        return scale
+
+    def _grasp_anchor_gate(self, q_now: np.ndarray, manipulators) -> Optional[Any]:
+        """IFG-TOA — this chunk's `GraspAnchor`, or None. Only with `cost.w_grasp_tcp` / `cost.w_grasp_goal` > 0.
+
+        Goal: on the first pre-grasp request (latch `latched` / `closing`) whose policy chunk plans a close for the hand
+        (gripper command < `gripper_closed_below`), the hold-link (palm) origin at that row — FK of the policy chunk with
+        the other joints at `q_now` — is frozen, if it lies within `cost.grasp_goal_max_from_target` of the manipulated
+        object's centroid. Cleared when the latch leaves latched / closing, an attach is revoked or the target changes.
+        Anchor: the goal is set and the palm at `q_now` is within `cost.grasp_anchor_radius` of it. Record:
+        `self._last_grasp_anchor` (also `grasp.anchor` in the chunk record).
+        """
+        cost = self.to_config.cost
+        w_t = float(getattr(cost, "w_grasp_tcp", 0.0) or 0.0)
+        w_g = float(getattr(cost, "w_grasp_goal", 0.0) or 0.0)
+        self._last_grasp_anchor = {}
+        if not (w_t > 0.0 or w_g > 0.0):
+            return None
+        from AG3S.ag3s.constraints.attached import _link_pose_numeric
+        from AG3S.trajopt.grasp_anchor import GraspAnchor
+
+        rec: dict[str, Any] = {"active": False}
+        self._last_grasp_anchor = rec
+        if isinstance(self._last_grasp_record, dict) and self._last_grasp_record:
+            self._last_grasp_record["anchor"] = rec   # the chunk record's `grasp.anchor` (same dict, filled below)
+        phase = self._latch.phase
+        manip = getattr(self.ag3s, "manipulated", None)
+        revoked = bool((self._last_grasp_record or {}).get("attach_revoked"))
+        goal = self._grasp_goal
+        if (phase not in (GraspPhase.LATCHED, GraspPhase.CLOSING) or manip is None or revoked
+                or (goal is not None and goal["manip_id"] != int(manip.id))):
+            if goal is not None:
+                rec["cleared"] = ("revoked" if revoked else "phase " + phase.value if phase not in
+                                  (GraspPhase.LATCHED, GraspPhase.CLOSING) else "no target" if manip is None
+                                  else "target changed")
+            self._grasp_goal = None
+            rec["reason"] = rec.get("cleared") or ("phase " + phase.value if manip is not None else "no target")
+            return None
+        hand, parent_link, _ = self._grasp_hand(manipulators)
+        link = self.hold_links.get(hand, parent_link)
+        chunk = np.asarray(self._pending.get("chunk"), np.float64)
+        col = self.gripper_columns[0 if hand == "left" else 1]
+        closes = np.flatnonzero(chunk[:, col] < float(self._latch.config.gripper_closed_below))
+        close_row = int(closes[0]) if closes.size else None
+        rec.update(hand=hand, link=link, close_row=close_row)
+        model = self.constraint_robot_model
+        if self._grasp_goal is None and close_row is not None:
+            traj = self.layout.chunk_to_trajectory(chunk)
+            full = self.layout.full_q(traj[:, close_row:close_row + 1], q_now)[:, 0]
+            g = np.asarray(_link_pose_numeric(model, full, link)[:3, 3], np.float64)
+            off = float(np.linalg.norm(g - np.asarray(manip.centroid, np.float64).reshape(3)))
+            rec["goal_to_target_mm"] = round(off * 1000.0, 1)
+            if off <= float(cost.grasp_goal_max_from_target):
+                self._grasp_goal = {"goal": g, "manip_id": int(manip.id), "frame": int(getattr(self.ag3s, "frame_index", -1)),
+                                    "close_row": close_row, "link": link}
+                rec["frozen"] = True
+            else:
+                rec["reason"] = "goal too far from the target centroid"
+        goal = self._grasp_goal
+        if goal is None:
+            rec.setdefault("reason", "no close planned yet")
+            return None
+        palm = np.asarray(_link_pose_numeric(model, q_now, goal["link"])[:3, 3], np.float64)
+        dist = float(np.linalg.norm(palm - goal["goal"]))
+        rec.update(goal_m=[round(float(v), 5) for v in goal["goal"]], goal_frame=goal["frame"],
+                   palm_to_goal_mm=round(dist * 1000.0, 1))
+        if dist > float(cost.grasp_anchor_radius):
+            rec["reason"] = "palm outside the anchor radius"
+            return None
+        rec["active"] = True
+        return GraspAnchor(link=goal["link"], goal=goal["goal"], close_row=close_row, w_tcp=w_t, w_goal=w_g,
+                           goal_rows=int(getattr(cost, "grasp_goal_rows", 3)))
 
     def _finish_grasp_record(self, constraint_set) -> None:
         """제약을 지은 뒤 — 이번 제약이 어느 파지 상태로 지어졌는지 기록에 싣는다 (T22).
@@ -1574,6 +2003,9 @@ class SafePolicy:
             **({"attention_source": _jsonable(self._pending["attention_source"])}
                if self._pending.get("attention_source") is not None else {}),
             **({"task_gate": _jsonable(self._last_task_gate)} if self.task_gate != "off" else {}),
+            # IFG-S2SERVE — 켰을 때만: 이번 frame 의 경보 기록 (gate_score · gate_alert · gate_why · ms · 적용 여부).
+            **({"confidence_gate": _jsonable(self.ag3s.confidence_gate_record())}
+               if self._confidence_gate_on() else {}),
             # T23 — 판정 사유와 위반 행 분류. `reasons` 가 `None` 이면 판정 전(기록 순서상 없음).
             "verdict": _jsonable({
                 "policy": self.verdict_policy,
@@ -2132,6 +2564,10 @@ def _subtask_probabilities(subtask: Any) -> Optional[dict[str, float]]:
 
 
 GRASP_CONTINUITY_OFF_PHASES = (GraspPhase.CLOSING, GraspPhase.HELD)
+
+
+#: IFG-TOB — latch phases (before the grasp) on which `cost.deflection_rate_after_grasp` drops the term.
+DEFLECTION_RATE_OFF_PHASES = (GraspPhase.SEARCHING, GraspPhase.LATCHED, GraspPhase.CLOSING)
 
 
 def grasp_continuity_off_reason(phase, enabled: bool = True) -> Optional[str]:

@@ -69,11 +69,23 @@ from AG3S.ag3s.stages.admissibility import principal_extents
 
 #: `SplitDecision.method` — the only method implemented (the choice and its evidence: module doc).
 SPLIT_METHOD = "attention_recluster"
+#: IFG-SPLIT: the fallback when the re-cluster finds one component (`clustering.attention_split_partition`).
+PARTITION_METHOD = "attention_partition"
 #: `SplitDecision.reason` vocabulary.
 SPLIT = "split"
 ONE_COMPONENT = "one_component"
 ATTENTION_NOT_DISCRIMINATIVE = "attention_not_discriminative"
-SPLIT_REASONS = (SPLIT, ONE_COMPONENT, ATTENTION_NOT_DISCRIMINATIVE)
+#: IFG-SPLIT partition outcomes that leave the cluster whole: the log attention spans less than half a
+#: decade, a side has fewer than `min_points`, or the cut does not shorten the largest extent enough.
+PARTITION_FLAT = "attention_flat"
+PARTITION_SMALL = "partition_too_small"
+PARTITION_NO_DROP = "partition_no_drop"
+SPLIT_REASONS = (SPLIT, ONE_COMPONENT, ATTENTION_NOT_DISCRIMINATIVE,
+                 PARTITION_FLAT, PARTITION_SMALL, PARTITION_NO_DROP)
+#: Floor of the attention before the log (raw attention reaches 1e-6 on a neighbour fruit).
+_LOG_FLOOR = 1e-6
+#: Neighbours (incl. the point) of the majority vote that smooths the two attention classes.
+_PARTITION_K = 9
 #: `clustering.attention_split_ratio_source` vocabulary (T44b A4): which attention the ratio reads.
 RATIO_NORMALIZED = "normalized"
 RATIO_RAW = "raw"
@@ -204,6 +216,8 @@ def split_by_attention(
     min_ratio: float,
     extents: Optional[np.ndarray] = None,
     ratio_attention: Optional[np.ndarray] = None,
+    partition: bool = False,
+    partition_min_drop: float = 0.03,
 ) -> Optional[SplitDecision]:
     """Decide whether the cluster `members` (indices into `points`) is split (module doc).
 
@@ -213,6 +227,9 @@ def split_by_attention(
     `ratio_attention` (T44b A4): per-point values aligned with `points` (the pre-normalisation
     attention) that the ratio gate reads instead of `attention`. The target candidate is still the
     component with the largest `attention` mass. None (default) = the T31b decision, bit for bit.
+
+    `partition` (IFG-SPLIT): when the re-cluster finds fewer than two components, cut the cluster by
+    attention instead (`_partition`). False (default) = `one_component`, as before.
     """
     from scipy.spatial import cKDTree
 
@@ -241,6 +258,10 @@ def split_by_attention(
     ids, counts = np.unique(labels, return_counts=True)
     big = ids[counts >= int(min_points)]
     if big.size < 2:
+        if partition:
+            return _partition(pts, att, gate, members, ext, base, radius=float(radius),
+                              min_points=int(min_points), min_ratio=float(min_ratio),
+                              min_drop=float(partition_min_drop))
         return SplitDecision(reason=ONE_COMPONENT, **base)
 
     # Stragglers (components under `min_points`) join the candidate object nearest to them, so a
@@ -277,9 +298,95 @@ def split_by_attention(
     return SplitDecision(reason=reason, components=tuple(comps), ratio=ratio, **base)
 
 
+def _otsu(values: np.ndarray, bins: int = 64) -> float:
+    """Otsu threshold of 1-D `values` (the cut that maximises the between-class variance)."""
+    hist, edges = np.histogram(values, bins=bins)
+    centres = 0.5 * (edges[:-1] + edges[1:])
+    w0 = np.cumsum(hist).astype(np.float64)
+    w1 = w0[-1] - w0
+    m0 = np.cumsum(hist * centres)
+    mu0 = m0 / np.maximum(w0, _EPS)
+    mu1 = (m0[-1] - m0) / np.maximum(w1, _EPS)
+    between = w0 * w1 * (mu0 - mu1) ** 2
+    return float(edges[int(np.argmax(between[:-1])) + 1])
+
+
+def _partition(pts, att, gate, members, ext, base, *, radius, min_points, min_ratio,
+               min_drop) -> SplitDecision:
+    """IFG-SPLIT: cut a triggered cluster the re-cluster could not separate, by attention.
+
+    1. Two classes of log attention (the gate attention — raw when asked — floored at 1e-6), Otsu,
+       smoothed by a 9-nearest-neighbour majority vote.
+    2. The target candidate is the connected (`radius`) high-attention part with the largest
+       attention mass. The rest falls into connected parts; parts of at least `min_points` are the
+       other objects, smaller ones join the nearest of the target and those objects (no point is
+       dropped — geometry decides extent, attention only decided which object).
+    3. Taken only when the target's largest extent is at least `min_drop` shorter than the cluster's
+       and its mean gate attention is `min_ratio` times every other part's (the T31b gate).
+    """
+    from scipy.spatial import cKDTree
+
+    from AG3S.ag3s.stages.target_grounding import connected_components_3d
+
+    base = dict(base)
+    g = att if gate is None else gate
+    lg = np.log10(np.maximum(np.asarray(g, np.float64), _LOG_FLOOR))
+    if float(lg.max() - lg.min()) < 0.5:
+        return SplitDecision(reason=PARTITION_FLAT, method=PARTITION_METHOD, **base)
+    high = lg >= _otsu(lg)
+    k = min(_PARTITION_K, len(pts))
+    _, nn = cKDTree(pts).query(pts, k=k)
+    high = high[np.asarray(nn).reshape(len(pts), k)].mean(axis=1) > 0.5
+    if int(high.sum()) < min_points or int((~high).sum()) < min_points:
+        return SplitDecision(reason=PARTITION_SMALL, method=PARTITION_METHOD, **base)
+    hi = np.nonzero(high)[0]
+    hl = connected_components_3d(pts[hi], radius)
+    best = max(np.unique(hl), key=lambda c: (float(att[hi[hl == c]].sum()), -int(hi[hl == c].min())))
+    label = np.full(len(pts), -1, np.int64)
+    label[hi[hl == best]] = 0
+    rest = np.nonzero(label < 0)[0]
+    rl = connected_components_3d(pts[rest], radius)
+    ids, counts = np.unique(rl, return_counts=True)
+    big = ids[counts >= min_points]
+    if big.size == 0:
+        return SplitDecision(reason=PARTITION_SMALL, method=PARTITION_METHOD, **base)
+    for j, c in enumerate(big, start=1):
+        label[rest[rl == c]] = j
+    loose = np.nonzero(label < 0)[0]
+    if loose.size:
+        placed = np.nonzero(label >= 0)[0]
+        _, jj = cKDTree(pts[placed]).query(pts[loose], k=1)
+        label[loose] = label[placed[jj]]
+    core = np.nonzero(label == 0)[0]
+    if len(core) < min_points:
+        return SplitDecision(reason=PARTITION_SMALL, method=PARTITION_METHOD, **base)
+    core_ext = principal_extents(pts[core])
+    if float(ext[-1]) - float(core_ext[-1]) < float(min_drop):
+        return SplitDecision(reason=PARTITION_NO_DROP, method=PARTITION_METHOD, **base)
+    comps = []
+    for j in range(int(label.max()) + 1):
+        local = np.nonzero(label == j)[0]
+        a = att[local]
+        comps.append(SplitComponent(
+            indices=members[local], extents_m=tuple(float(v) for v in principal_extents(pts[local])),
+            attention_mass=float(a.sum()), mean_attention=float(a.mean()), centroid=pts[local].mean(axis=0),
+            mean_ratio_attention=None if gate is None else float(gate[local].mean())))
+    # The target candidate first (it was chosen by mass among the high parts), then the others by mass.
+    comps = [comps[0]] + sorted(comps[1:], key=lambda c: (-c.attention_mass, int(c.indices.min())))
+    top, rest_g = comps[0].gate_attention, max(c.gate_attention for c in comps[1:])
+    ratio = 0.0 if top <= _EPS else (float("inf") if rest_g <= _EPS else top / rest_g)
+    reason = SPLIT if ratio >= float(min_ratio) else ATTENTION_NOT_DISCRIMINATIVE
+    return SplitDecision(reason=reason, components=tuple(comps), ratio=ratio, method=PARTITION_METHOD,
+                         **base)
+
+
 __all__ = [
     "ATTENTION_NOT_DISCRIMINATIVE",
     "ONE_COMPONENT",
+    "PARTITION_FLAT",
+    "PARTITION_METHOD",
+    "PARTITION_NO_DROP",
+    "PARTITION_SMALL",
     "RATIO_NORMALIZED",
     "RATIO_RAW",
     "RATIO_SOURCES",

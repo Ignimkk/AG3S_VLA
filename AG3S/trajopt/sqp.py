@@ -130,6 +130,8 @@ class TrajectoryOptimizer:
             self._build_servo_accel(robot_model)
         #: T43 TA (B, C) — this solve's history (`solve(deflection_history=, command_history=)`).
         self._history: dict[str, Any] = {}
+        #: IFG-TOA — this solve's grasp-anchor state (`_anchor_setup`), `None` outside a solve or without an anchor.
+        self._anchor_state: Optional[dict[str, Any]] = None
 
     def _build_path(self, robot_model) -> None:
         """T43 Q — the servo (from the controlled MJCF) and the path checker. Only when on."""
@@ -176,13 +178,22 @@ class TrajectoryOptimizer:
         extra: dict[str, Any] = {}
         if self._history.get("deflection") is not None:
             extra["deflection_history"] = self._history["deflection"]
+        if self.__dict__.get("_track_scale") is not None:
+            extra["joint_track_scale"] = self._track_scale   # IFG-TOW
         if self.servo_accel_bound is not None:
             step = np.asarray(self.limits.max_step, np.float64)
             extra.update(servo_accel_bound=self.servo_accel_bound,
                          command_history=self._history.get("command"),
                          max_step_change=self._max_step_change(),
                          max_step=step if velocity_rows(self.limits) else None)
-        return objective(trajectory, reference, self.config, previous_chunk=previous_chunk, **extra)
+        value = objective(trajectory, reference, self.config, previous_chunk=previous_chunk, **extra)
+        anchor = self.__dict__.get("_anchor_state")
+        if anchor is not None and np.asarray(trajectory).shape[1] == anchor["horizon"]:
+            # IFG-TOA: the anchor terms, exactly (palm FK), so step acceptance sees what the QP optimises.
+            from AG3S.trajopt.grasp_anchor import anchor_cost
+
+            value += anchor_cost(anchor["fk"](trajectory, anchor["q_now"])[0], anchor["weights"], anchor["targets"])
+        return value
 
     def reset(self) -> None:
         """Clear cross-chunk state. Between episodes, never mid-episode."""
@@ -203,13 +214,75 @@ class TrajectoryOptimizer:
             mirror = getattr(getattr(scene, "esdf", None), "mirror_to_host", None)
             if mirror is not None:
                 mirror()
-        if not self.fast_eval:
-            return self._solve(reference, q_now, scene, **kwargs)
-        self.linearizer.begin_memo()
+        anchor = kwargs.get("grasp_anchor")
+        self._anchor_state = self._anchor_setup(anchor, reference, q_now)
+        scale = kwargs.pop("joint_track_scale", None)
+        self._track_scale = None if scale is None else np.asarray(scale, np.float64).reshape(-1)   # IFG-TOW
+        if scale is not None and self.window_optimizer is not None:
+            kwargs["window_track_scale"] = self._track_scale
         try:
-            return self._solve(reference, q_now, scene, **kwargs)
+            if not self.fast_eval:
+                result = self._solve(reference, q_now, scene, **kwargs)
+            else:
+                self.linearizer.begin_memo()
+                try:
+                    result = self._solve(reference, q_now, scene, **kwargs)
+                finally:
+                    self.linearizer.end_memo()
+            st = self._anchor_state
+            if st is not None and np.asarray(result.trajectory).shape[1] >= st["horizon"]:
+                from AG3S.trajopt.grasp_anchor import anchor_record
+
+                p_out = st["fk"](np.asarray(result.trajectory, np.float64)[:, :st["horizon"]], st["q_now"])[0]
+                rec = anchor_record(anchor, st["p_ref"], p_out)
+                tol = float(self.config.safety.violation_tolerance)
+                inner = (result.metrics.get("grasp_anchor") or {}).get("fallback")
+                if inner is None and float(result.max_violation) > tol:
+                    # IFG-TOA safety first: the anchored solve left a violation (IFG-APPLE-TOA2 ep211: the anchor priced
+                    # the translation the obstacle needs, every candidate was rejected, HOLD for ~50 chunks). Solve
+                    # again without the anchor and keep the result with the smaller violation (the anchored one on a tie).
+                    kw = {k: v for k, v in kwargs.items() if k != "grasp_anchor"}
+                    self._anchor_state = None
+                    plain = self.solve(reference, q_now, scene, **kw)
+                    use_plain = float(plain.max_violation) < float(result.max_violation)
+                    fb = {"anchored_violation_mm": round(float(result.max_violation) * 1000.0, 2),
+                          "plain_violation_mm": round(float(plain.max_violation) * 1000.0, 2),
+                          "used": "plain" if use_plain else "anchored"}
+                    rec["fallback"] = fb
+                    if use_plain:
+                        p_plain = st["fk"](np.asarray(plain.trajectory, np.float64)[:, :st["horizon"]], st["q_now"])[0]
+                        rec = anchor_record(anchor, st["p_ref"], p_plain)
+                        rec["fallback"] = fb
+                        plain.metrics["grasp_anchor"] = rec
+                        return plain
+                elif inner is not None:
+                    rec["fallback"] = inner
+                result.metrics["grasp_anchor"] = rec
+            return result
         finally:
-            self.linearizer.end_memo()
+            self._anchor_state = None
+
+    def _anchor_setup(self, anchor, reference, q_now) -> Optional[dict[str, Any]]:
+        """IFG-TOA — this solve's anchor state (palm FK, per-row weights and targets), or `None` (no anchor given, or
+        nothing switched on). The FK is built once per link."""
+        if anchor is None:
+            return None
+        reference = np.asarray(reference, np.float64)
+        H = int(reference.shape[1])
+        if H != self.horizon or not (anchor.w_tcp > 0.0 or anchor.w_goal > 0.0):
+            return None
+        from AG3S.trajopt.grasp_anchor import LinkPointFK, anchor_targets
+
+        cache = self.__dict__.setdefault("_anchor_fk", {})
+        fk = cache.get(anchor.link)
+        if fk is None:
+            fk = cache[anchor.link] = LinkPointFK(self.linearizer.robot_model, self.layout, H, anchor.link)
+        q_now = np.asarray(q_now, np.float64).reshape(-1)
+        p_ref = fk(reference, q_now)[0]
+        weights, targets = anchor_targets(anchor, p_ref)
+        if not np.any(weights > 0.0):
+            return None
+        return {"fk": fk, "q_now": q_now, "p_ref": p_ref, "weights": weights, "targets": targets, "horizon": H}
 
     def _solve(
         self,
@@ -224,6 +297,8 @@ class TrajectoryOptimizer:
         servo_feedback: Optional[dict[str, Any]] = None,
         deflection_history: Optional[np.ndarray] = None,
         command_history: Optional[np.ndarray] = None,
+        grasp_anchor: Optional[Any] = None,
+        window_track_scale: Optional[np.ndarray] = None,
     ) -> TrajOptResult:
         """Make `reference` safe against `scene`, or report how far short it fell.
 
@@ -298,6 +373,7 @@ class TrajectoryOptimizer:
                     gate, reference, q_now, scene, previous_chunk=previous_chunk,
                     template=template, geometry_certified=geometry_certified,
                     start_at_rest=start_at_rest, servo_feedback=servo_feedback,
+                    grasp_anchor=grasp_anchor, window_track_scale=window_track_scale,
                     deflection_history=deflection_history, command_history=command_history)
 
         n_path = self.path.n_slack if self.path is not None else 0
@@ -458,6 +534,15 @@ class TrajectoryOptimizer:
                 mark = time.perf_counter()
                 problem = self._append_path(problem, iterate, scene)
                 timing["path"] = timing.get("path", 0.0) + (time.perf_counter() - mark) * 1000.0
+            st = self.__dict__.get("_anchor_state")
+            if st is not None:
+                # IFG-TOA: the palm terms linearised at this iterate, on the joint block of P / q.
+                from AG3S.trajopt.grasp_anchor import add_to_problem, anchor_qp_terms
+
+                mark = time.perf_counter()
+                p_it, J_it = st["fk"](iterate, st["q_now"])
+                problem = add_to_problem(problem, *anchor_qp_terms(iterate, p_it, J_it, st["weights"], st["targets"]))
+                timing["anchor"] = timing.get("anchor", 0.0) + (time.perf_counter() - mark) * 1000.0
 
             mark = time.perf_counter()
             qp_extra: dict[str, Any] = {}
@@ -603,7 +688,7 @@ class TrajectoryOptimizer:
 
     def _solve_window(self, gate, reference, q_now, scene, *, previous_chunk, template,
                       geometry_certified, start_at_rest, servo_feedback, deflection_history,
-                      command_history) -> TrajOptResult:
+                      command_history, grasp_anchor=None, window_track_scale=None) -> TrajOptResult:
         """T43 TA (A) — gate closed: solve exactly as without look-ahead (`execution_length` steps,
         `self.window_optimizer`), and hand back the reference's tail untouched."""
         k = int(self.lookahead_from)
@@ -615,7 +700,9 @@ class TrajectoryOptimizer:
             previous_chunk=None if previous_chunk is None else previous_chunk[:, :k],
             template=template, geometry_certified=geometry_certified,
             start_at_rest=start_at_rest, servo_feedback=servo_feedback,
-            deflection_history=deflection_history, command_history=command_history)
+            deflection_history=deflection_history, command_history=command_history,
+            **({} if grasp_anchor is None else {"grasp_anchor": grasp_anchor}),
+            **({} if window_track_scale is None else {"joint_track_scale": window_track_scale}))
         trajectory = np.concatenate([np.asarray(result.trajectory, np.float64),
                                      np.asarray(reference, np.float64)[:, k:]], axis=1)
         result = dataclasses.replace(result, trajectory=trajectory)
@@ -633,6 +720,8 @@ class TrajectoryOptimizer:
             out["servo_accel_bound"] = self.servo_accel_bound
             if self._history.get("command") is not None:
                 out["command_history"] = self._history["command"]
+        if self.__dict__.get("_track_scale") is not None:
+            out["joint_track_scale"] = self._track_scale   # IFG-TOW
         return out
 
     def _append_path(self, problem, iterate, scene):

@@ -256,11 +256,63 @@ class CostConfig:
     #: 10.5 → 21.0 mm from k = 0 to k = 7 in every chunk). With `w_track` the optimum ramps a
     #: needed deflection over ≈ √(w_deflection_rate / w_track) rows.
     w_deflection_rate: float = 0.0
+    #: **IFG-TOB — the deflection-rate term only from the grasp on.** `False` (default) = as above, every chunk.
+    #: `True` = the term (and its executed-boundary history) is dropped on chunks whose grasp latch is
+    #: `searching` · `latched` · `closing` (before the grasp), and kept from `held` on (carry, place, return —
+    #: where T43 added it for the hurdle). IFG ep954: an avoidance deflection of the neighbour fruit taken at
+    #: request 12 was carried over five chunks by this term while approaching a static apple, and the policy's
+    #: intended grasp point followed the pushed hand (16 mm forward, 23 mm sideways at the close). Without the
+    #: term a deflection is not carried into the next chunk's row 0.
+    deflection_rate_after_grasp: bool = False
+    #: **IFG-TOA — grasp-goal anchor** (`grasp_anchor.py`). `0.0` (default) = off, the objective is unchanged. On
+    #: pre-grasp chunks (latch `latched` / `closing`) whose palm is within `grasp_anchor_radius` of the frozen grasp
+    #: goal, ``w_grasp_tcp`` (per m^2) weights the palm-origin distance to the policy's palm path on every planned row
+    #: (avoid by turning, not by translating) and ``w_grasp_goal`` (per m^2) the palm distance to the goal from the
+    #: policy's close row on. The goal = the palm position of the policy chunk's first closing row, frozen on the first
+    #: request that plans a close (cleared when the latch leaves latched / closing or the target changes).
+    #: The terms are quadratic and the collision slack is linear (`w_slack` per m): an anchor deviation d costs
+    #: 2·w·d at the margin, so collision keeps priority only while 2·w·d < w_slack (w = 2000: d < 0.25 m; a test
+    #: fixture with w = 20000 let the anchor buy 12 mm of penetration).
+    w_grasp_tcp: float = 0.0
+    w_grasp_goal: float = 0.0
+    grasp_anchor_radius: float = 0.15
+    #: IFG-TOA — rows of the goal term from the policy's close row on (the fingers closing; the rows after lift).
+    grasp_goal_rows: int = 3
+    #: IFG-TOA — a goal is frozen only within this distance (m) of the manipulated object's centroid (sanity).
+    grasp_goal_max_from_target: float = 0.12
+    #: **IFG-TOW — wrist-weighted tracking.** `1.0` (default) = off. On pre-grasp chunks (latch `latched` / `closing`)
+    #: whose palm is within `wrist_track_radius` of the manipulated object's centroid, the tracking weight of the
+    #: grasping arm's joints `wrist_track_joints` (indices within the arm, 0-6) is multiplied by this scale, so an
+    #: avoidance is cheaper by the distal joints (orientation; IFG ep954: TCP moves 3.5-4.4 mm/deg at arm_4/5, 0 at
+    #: arm_6, vs 12.6 at arm_0/1) than by the proximal ones (position). Every joint stays free; hurdles and the carry
+    #: (outside the radius, or held / placed) keep uniform weights.
+    wrist_track_scale: float = 1.0
+    wrist_track_radius: float = 0.15
+    wrist_track_joints: tuple = (4, 5, 6)
 
     def validate(self) -> None:
         if not (math.isfinite(self.w_deflection_rate) and self.w_deflection_rate >= 0.0):
             raise TrajOptConfigError(
                 f"cost.w_deflection_rate must be a finite value >= 0, got {self.w_deflection_rate}")
+        for name in ("w_grasp_tcp", "w_grasp_goal"):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v >= 0.0):
+                raise TrajOptConfigError(f"cost.{name} must be a finite value >= 0, got {v}")
+        if not (isinstance(self.grasp_goal_rows, int) and not isinstance(self.grasp_goal_rows, bool)
+                and self.grasp_goal_rows >= 1):
+            raise TrajOptConfigError(f"cost.grasp_goal_rows must be an integer >= 1, got {self.grasp_goal_rows!r}")
+        if not (math.isfinite(self.wrist_track_scale) and 0.0 < self.wrist_track_scale <= 1.0):
+            raise TrajOptConfigError(f"cost.wrist_track_scale must be in (0, 1], got {self.wrist_track_scale}")
+        if not (self.wrist_track_joints and all(isinstance(j, int) and not isinstance(j, bool) and 0 <= j <= 6
+                                                for j in self.wrist_track_joints)):
+            raise TrajOptConfigError(f"cost.wrist_track_joints must be arm joint indices 0-6, got {self.wrist_track_joints!r}")
+        for name in ("grasp_anchor_radius", "grasp_goal_max_from_target", "wrist_track_radius"):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v > 0.0):
+                raise TrajOptConfigError(f"cost.{name} must be a finite value > 0, got {v}")
+        if not isinstance(self.deflection_rate_after_grasp, bool):
+            raise TrajOptConfigError(
+                f"cost.deflection_rate_after_grasp must be a bool, got {self.deflection_rate_after_grasp!r}")
         if not isinstance(self.grasp_continuity_off, bool):
             raise TrajOptConfigError(
                 f"cost.grasp_continuity_off must be a bool, got {self.grasp_continuity_off!r}")
@@ -784,6 +836,16 @@ class CollisionBackendConfig:
     #: 지지면(테이블·바닥)도 위 여유를 받는가. 기본 `False` — 파지하려면 손가락이 테이블 가까이
     #: 가야 한다 (T40 B E3b 기록: 테이블이 최근접인 손 행 최소 3.9–5.0 mm, 6 run 중 4).
     obstacle_margin_support: bool = False
+    #: **IFG-NBC — light contact with a neighbour object while grasping (m).** `0.0` (default) = off. On pre-grasp
+    #: chunks (latch `latched` / `closing`) whose grasping palm is within `neighbour_contact_gate` of the manipulated
+    #: centroid, the grasping hand's finger rows whose sphere centre is within `neighbour_contact_radius` of that
+    #: centroid and whose nearest surface is an obstacle (not the target, a support plane or held) accept up to this
+    #: much overlap (margin `-depth`, `SceneSnapshot.neighbour_contact`). Palm, arm, table and the carry keep their
+    #: rules. User ruling 2026-10-21: option B (a wrist roll at the grasp point) was tried first and cannot clear the
+    #: neighbour in IFG ep211 / ep954 (`ifg_roll_feasibility`).
+    neighbour_contact_depth: float = 0.0
+    neighbour_contact_radius: float = 0.12
+    neighbour_contact_gate: float = 0.15
     #: **T43 HM — the held object's rows get the same classification and margin as the robot's.**
     #: Once grasped the object is part of the robot (user, 2026-10-07): a held query row whose
     #: nearest field surface is an obstacle gets `max(its margin, obstacle_margin)`, exactly like a
@@ -862,6 +924,14 @@ class CollisionBackendConfig:
             raise ValueError(f"collision.backend must be one of {self.BACKENDS}, got {self.backend!r}")
         if self.esdf_margin < 0.0:
             raise ValueError(f"collision.esdf_margin must be >= 0, got {self.esdf_margin}")
+        for name in ("neighbour_contact_depth",):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v >= 0.0):
+                raise TrajOptConfigError(f"collision.{name} must be a finite value >= 0, got {v}")
+        for name in ("neighbour_contact_radius", "neighbour_contact_gate"):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v > 0.0):
+                raise TrajOptConfigError(f"collision.{name} must be a finite value > 0, got {v}")
         if not self.obstacle_margin >= 0.0:
             raise ValueError(
                 f"collision.obstacle_margin must be >= 0, got {self.obstacle_margin}")
@@ -908,8 +978,32 @@ class SafetyConfig:
     # Trust the constraint set only when AG3S certified the geometry behind it. A frame AG3S marked
     # INCOMPLETE can still be optimized against, but the result cannot be called safe.
     require_certified_geometry: bool = True
+    #: **IFG-REC — retreat-and-retry recovery** (`SafePolicy._recovery_*`). `False` (default) = off. Pre-grasp (latch
+    #: latched / closing) triggers: `recovery_hold_streak` consecutive requests whose previous chunk was held whole
+    #: for a collision verdict (deadlock: HOLD -> the same chunk -> HOLD, IFG-APPLE-TOA3 ep211), or
+    #: `recovery_empty_streak` consecutive closing requests whose fingers settled at the commanded opening without
+    #: being blocked (an empty grasp the policy then carries to the crate, IFG ep954). Action: the gripper opens and
+    #: the arms go back in joint space (<= `recovery_step_rad` per row, through TrajOpt) to the latest earlier pose
+    #: whose palm was >= `recovery_clear_m` from the target; then the policy has control again. At most
+    #: `recovery_max` per episode.
+    recovery_retreat: bool = False
+    recovery_hold_streak: int = 3
+    recovery_empty_streak: int = 2
+    recovery_clear_m: float = 0.12
+    recovery_step_rad: float = 0.03
+    recovery_max: int = 2
 
     def validate(self) -> None:
+        for name in ("recovery_hold_streak", "recovery_empty_streak", "recovery_max"):
+            v = getattr(self, name)
+            if not (isinstance(v, int) and not isinstance(v, bool) and v >= 1):
+                raise TrajOptConfigError(f"safety.{name} must be an integer >= 1, got {v!r}")
+        for name in ("recovery_clear_m", "recovery_step_rad"):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v > 0.0):
+                raise TrajOptConfigError(f"safety.{name} must be a finite value > 0, got {v}")
+        if not isinstance(self.recovery_retreat, bool):
+            raise TrajOptConfigError(f"safety.recovery_retreat must be a bool, got {self.recovery_retreat!r}")
         if self.violation_tolerance < 0.0:
             raise TrajOptConfigError(
                 f"safety.violation_tolerance must be >= 0, got {self.violation_tolerance}"

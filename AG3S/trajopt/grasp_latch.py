@@ -512,6 +512,7 @@ class GraspLatch:
         manipulated_state: Optional[str] = None,
         placed: bool = False,
         held_observation: Optional[dict] = None,
+        extra_checks: Optional[dict] = None,
     ) -> LatchEvent:
         """직전 청크의 **실행 사실**로 닫힘 시도 · 파지 확인 · 놓임 확인을 갱신한다 (`evidence=True`).
 
@@ -527,6 +528,9 @@ class GraspLatch:
             held_observation: T34 J2 — 직전 프레임에 조작 대상이 **관측됐을 때** 쥔 구와의 비교
                 (`AG3S.held_observation()`: `centre_distance_m`, `held_radius_m`, `hand_rise_m`,
                 `object_rise_m`). 관측이 없으면 `None` — 그 두 검사는 판단하지 않는다.
+            extra_checks: IFG-S2SERVE — 닫힘 시도(CLOSING)의 파지 확인에 **AND 로 더할** 검사 `{name: bool}`
+                (`serve_safe --held-3d-rule on` 이면 `{"held_3d": …}`). attach 를 거는 조건에만 들어가고, 걸린 뒤의
+                회수 · 놓기 · slip 은 그대로다. `None` (기본) = 이전과 같다.
         """
         if not self.evidence:
             raise RuntimeError("observe_grasp needs GraspLatch(evidence=True)")
@@ -589,6 +593,8 @@ class GraspLatch:
             else:
                 checks = self._grasp_checks(opening, self._last_opening, reach_m,
                                             manipulated_id, manipulated_state)
+                if extra_checks:   # IFG-S2SERVE — AND (only given with the flag on)
+                    checks.update({str(k): bool(v) for k, v in extra_checks.items()})
                 ev["checks"] = checks
                 failed = [k for k, v in checks.items() if not v]
                 if not failed:

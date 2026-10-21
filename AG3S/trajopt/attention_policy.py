@@ -71,7 +71,8 @@ class AttentionPolicy:
     def __init__(self, policy, attn_model, *, num_denoise_steps: int = 10, noise_seed: int = 0,
                  subtask_probe: Any = "default", attention_source: Any = None,
                  noun_tokens: Any = None, task_probe: Any = None, sampler: Any = None,
-                 backend: Any = None, default_prompt: Optional[str] = None):
+                 backend: Any = None, default_prompt: Optional[str] = None,
+                 prefix_feature: bool = False):
         self._policy = policy
         if sampler is None:
             from AG3S.ag3s.experiments.sources.pi05_attention import AttentionSampler
@@ -89,8 +90,12 @@ class AttentionPolicy:
             attention_source = parse_attention_source(attention_source)
         self._source = attention_source
         self._task_probe = task_probe
-        self._extended = attention_source is not None or task_probe is not None
-        if self._extended and noun_tokens is None and (task_probe is not None or attention_source.is_noun):
+        #: IFG-S2SERVE (`serve_safe --confidence-gate on`, default False): also carry the prefix layer-8 image
+        #: residual (`attention_source.IFG_PREFIX_L8_KEY`) for the confidence gate. Takes the extended path.
+        self._prefix_feature = bool(prefix_feature)
+        self._extended = attention_source is not None or task_probe is not None or self._prefix_feature
+        if self._extended and noun_tokens is None and (
+                task_probe is not None or (attention_source is not None and attention_source.is_noun)):
             raise ValueError("a noun_target attention source / the task probe needs the prompt's noun token "
                              "ids (noun_tokens=NounTokens.from_config(config))")
         self._noun_tokens = noun_tokens
@@ -180,7 +185,9 @@ class AttentionPolicy:
             out = self._backend.run(
                 inputs, source=source, rows=rows,
                 want_feature=self._subtask_probe is not None,
-                v_layer=None if probe is None else probe.layer)
+                v_layer=None if probe is None else probe.layer,
+                # IFG-S2SERVE — only with the flag (the kwarg is absent otherwise: the T57-A call as before)
+                **({"want_resid": True} if self._prefix_feature else {}))
         except Exception:  # noqa: BLE001 — attention failing must not fail the policy call
             why = traceback.format_exc()
             logging.warning("attention extraction failed (T57-A path):\n%s", why)
@@ -218,6 +225,12 @@ class AttentionPolicy:
                     logging.warning("task probe failed:\n%s", traceback.format_exc())
                     probe_rec["error"] = "probe evaluation failed"
             result["task_probe"] = probe_rec
+        if self._prefix_feature and out.get("resid_l8") is not None:
+            # IFG-S2SERVE — the collector's storage rounding (float16 when finite), read back as float32.
+            from AG3S.ag3s.runtime.confidence_gate import dump_rounding
+            from AG3S.trajopt.attention_source import IFG_PREFIX_L8_KEY
+
+            result[IFG_PREFIX_L8_KEY] = dump_rounding(out["resid_l8"])
         feature = out.get("feature")
         if feature is not None:
             try:

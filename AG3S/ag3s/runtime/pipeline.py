@@ -142,9 +142,25 @@ class AG3S:
         max_support_surfaces: Optional[int] = None,
         attached_parent_links: Sequence[str] = (),
         strict_invariants: Optional[bool] = None,
+        robot_render: Any = None,
+        confidence_gate: Any = None,
     ):
         self.config = config or AG3SConfig()
+        #: IFG-S2SERVE — the feature-memory confidence alert (`runtime.confidence_gate.ConfidenceGate`, `serve_safe
+        #: --confidence-gate on`). None (default) = off: `_run` never reaches the gate code. On an alert frame the
+        #: target exemption is withheld (`_confidence_gate_step`). `set_gate_feature` hands it each request's feature.
+        self.confidence_gate = confidence_gate
+        self._gate_feature_pending = None
+        self._gate_frame: Optional[dict[str, Any]] = None
+        self._gate_counts = {"frames": 0, "alerts": 0, "applied": 0, "skipped_attached": 0,
+                             "skipped_no_exemption": 0}
         self.robot_model = robot_model
+        #: IFG-CL1: the rendered-robot depth mask (`runtime.robot_render_mask.RobotRenderMask`) — read only with
+        #: `esdf.robot_mask == "render"`, and required then (the server builds it from `--model-xml`).
+        self.robot_render = robot_render
+        if getattr(self.config.esdf, "robot_mask", "spheres") == "render" and robot_render is None:
+            raise ValueError("esdf.robot_mask='render' needs a robot renderer (AG3S(robot_render=RobotRenderMask("
+                             "model_xml))) — the server builds it from --model-xml")
         self.constraint_robot_model = constraint_robot_model or robot_model
         self.attention_adapter = attention_adapter
         self.tracker = CandidateTracker(self.config.collision_candidate)
@@ -196,6 +212,16 @@ class AG3S:
         self._oracle_memory = None
         #: The record of the last frame's oracle step (`stats["target_free"]["oracle"]`).
         self._oracle_frame: Optional[dict[str, Any]] = None
+        #: IFG-CL1: this frame's attention-surface record (`stats["target_free"]["attention_surface"]`) and code
+        #: images (`{camera: (H, W) uint8}` or None), and this frame's render-mask record
+        #: (`stats["robot_mask_render"]`). None unless `esdf.target_extent == "attention_surface"` /
+        #: `esdf.robot_mask == "render"`.
+        self._surface_frame: Optional[dict[str, Any]] = None
+        self._surface_codes: Optional[dict[str, np.ndarray]] = None
+        self._render_frame: Optional[dict[str, Any]] = None
+        #: IFG-CL2: this frame's attention-surface graph-node samples (`attention_surface_hybrid.HybridSamples`)
+        #: or None. None unless `esdf.target_extent == "attention_surface_hybrid"`.
+        self._surface_hybrid = None
         #: The **manipulated object** after the latest frame (T20): id, observation state
         #: (`visible | occluded | lost`) and last observed geometry, as `TargetConfirm` left it.
         #: Contact permission (`manipulated_link_margin`), target exclusion (`target_field_exclude`,
@@ -425,6 +451,15 @@ class AG3S:
         self._oracle_frame = None
         if self._oracle_memory is not None:
             self._oracle_memory.reset()
+        self._surface_frame = None   # IFG-CL1
+        self._surface_codes = None
+        self._render_frame = None
+        self._surface_hybrid = None   # IFG-CL2
+        if self.confidence_gate is not None:   # IFG-S2SERVE: the chain memory is per episode
+            self.confidence_gate.reset()
+            self._gate_feature_pending = None
+            self._gate_frame = None
+            self._gate_counts = {k: 0 for k in self._gate_counts}
         self.frame_index = 0
         self._attached = None
         self._held_record = None
@@ -498,6 +533,79 @@ class AG3S:
             p = p["p"]
         self._subtask_p = None if p is None else {str(k): float(v) for k, v in p.items()}
 
+    # --- IFG-S2SERVE: the confidence gate -----------------------------------------------------------------
+    def set_gate_feature(self, feature: Optional[np.ndarray]) -> None:
+        """This request's prefix layer-8 image rows (768, D) for the confidence gate (None = no feature), as
+        `set_subtask` is given; consumed by the next `_run`. Also clears the last frame's gate record."""
+        self._gate_feature_pending = None if feature is None else np.asarray(feature)
+        self._gate_frame = None
+
+    def confidence_gate_record(self) -> dict[str, Any]:
+        """The latest frame's gate record (`{}` before one) with the episode's counts (`skipped_attached` = alert
+        frames the exemption was not withheld on because an object was attached)."""
+        return {**dict(self._gate_frame or {}), "episode_counts": dict(self._gate_counts)}
+
+    def _confidence_gate_step(self, observations, cameras, sphere_masks, feature, manipulated_geometry, notes):
+        """IFG-S2SERVE — score this frame (`confidence_gate.surface_selection` on the depth views with the **FK-sphere**
+        mask — never the rendered mask — then `ConfidenceGate.step`) and, on an alert, withhold the target exemption
+        the way the exclusion gate refuses one (`_exclusion_gate`: no ball, no target-free layer, no contact
+        permission this frame) — the grounding target (latch identity) and the guard are kept, no invariant is
+        recorded. Not applied while an object is attached (the held object is robot-side; carving it back would
+        make it collide with itself). Returns the manipulated geometry the rest of the frame uses."""
+        from AG3S.ag3s.runtime.attention_surface import CAMERA_ORDER, SurfaceView
+        from AG3S.ag3s.runtime.confidence_gate import surface_selection
+
+        t0 = time.perf_counter()
+        obs_by = {}
+        for obs in observations or ():
+            cam_id = getattr(obs, "camera_id", None)
+            obs_by[cam_id.value if cam_id is not None else str(getattr(obs, "name", ""))] = obs
+        cam_by = {c.name: c for c in cameras}
+        views = []
+        for name in CAMERA_ORDER:
+            cam, obs = cam_by.get(name), obs_by.get(name)
+            if cam is None or obs is None:
+                continue
+            mk = sphere_masks.get(name)
+            if mk is None:
+                mk = np.zeros(np.shape(cam.depth), bool)
+            views.append(SurfaceView(name=name, depth_m=np.asarray(cam.depth, np.float64),
+                                     K=np.asarray(cam.camera_intrinsics, np.float64),
+                                     T_base_cam=np.asarray(cam.T_base_cam, np.float64),
+                                     robot_mask=np.asarray(mk, bool),
+                                     attention=getattr(obs, "attention_map", None)))
+        geo, chosen, surf = surface_selection(views)
+        ms_surface = round((time.perf_counter() - t0) * 1e3, 3)
+        rec = self.confidence_gate.step(geo, chosen, feature)
+        rec["ms"] = {"surface": ms_surface, **{f"gate_{k}": v for k, v in rec["ms"].items()}}
+        rec["surface"] = {k: surf.get(k) for k in ("applied", "why", "n_selected_nodes", "selected_centroid",
+                                                     "n_eligible_patches", "seed_patches")}
+        rec["surface"]["ms"] = surf.get("ms")
+        rec["frame_index"] = int(self.frame_index)
+        rec["applied"] = False
+        rec["skip"] = None
+        counts = self._gate_counts
+        counts["frames"] += 1
+        if rec["gate_alert"]:
+            counts["alerts"] += 1
+            if self._attached is not None:
+                rec["skip"] = "attached"
+                counts["skipped_attached"] += 1
+            elif manipulated_geometry is None:
+                rec["skip"] = "no_exemption"   # nothing to withhold this frame
+                counts["skipped_no_exemption"] += 1
+            else:
+                rec["applied"] = True
+                counts["applied"] += 1
+                manipulated_geometry = None
+                notes.append(
+                    f"confidence gate: feature-memory score {rec['gate_score']:.4f} < {rec['threshold']:.4f} — the "
+                    "target exemption is withheld this frame (no target-free layer, no contact permission; the "
+                    "target stays an obstacle)")
+        rec["ms"]["total"] = round((time.perf_counter() - t0) * 1e3, 3)
+        self._gate_frame = rec
+        return manipulated_geometry
+
     def set_oracle_segmentation(self, seg: Optional[Mapping[str, Any]]) -> None:
         """T46e A13 — this request's GT segmentation, as `set_subtask` is given (consumed by the next frame).
 
@@ -513,9 +621,18 @@ class AG3S:
 
     def _oracle_update(self, observations) -> dict[str, Any]:
         """T46e — fold this request's segmentation into the episode's samples. Returns the frame record."""
-        from AG3S.ag3s.runtime.oracle_segmentation import OracleMemory, OracleView
-
         seg, self._oracle_pending = self._oracle_pending, None
+        mem = self._oracle_memory_or_new()
+        rec: dict[str, Any] = {"segmentation": seg is not None}
+        if seg is None or not observations:
+            rec["memory"] = {"n_samples": len(mem), "update": mem.n_updates, "updated": False}
+            return rec
+        return self._oracle_fold(observations, dict(seg.get("labels") or {}), dict(seg.get("meta") or {}), rec)
+
+    def _oracle_memory_or_new(self):
+        """The episode's `OracleMemory`, made on first use (T46e; IFG-CL1 shares it)."""
+        from AG3S.ag3s.runtime.oracle_segmentation import OracleMemory
+
         cfg = self.config.esdf
         if self._oracle_memory is None:
             fine = float(getattr(cfg, "fine_voxel_size", 0.0) or cfg.voxel_size)
@@ -527,13 +644,14 @@ class AG3S:
                                                depth_max=float(cfg.depth_max),
                                                # the truncation band of the TSDF the fine tiers read
                                                band_depth=float(cfg.fine_truncation))
-        mem = self._oracle_memory
-        rec: dict[str, Any] = {"segmentation": seg is not None}
-        if seg is None or not observations:
-            rec["memory"] = {"n_samples": len(mem), "update": mem.n_updates, "updated": False}
-            return rec
-        labels = dict(seg.get("labels") or {})
-        meta = dict(seg.get("meta") or {})
+        return self._oracle_memory
+
+    def _oracle_fold(self, observations, labels: Mapping[str, Any], meta: Mapping[str, Any],
+                     rec: dict[str, Any]) -> dict[str, Any]:
+        """Fold code images `{camera_id value: (H, W) uint8}` into the episode's memory with this request's depth."""
+        from AG3S.ag3s.runtime.oracle_segmentation import OracleView
+
+        mem = self._oracle_memory_or_new()
         scale = float(self.config.pointcloud.depth_scale)
         views = []
         for obs in observations:
@@ -573,6 +691,159 @@ class AG3S:
             # the support guard = the ball's z_min (the same table protection as `ball` / `ball_owned`)
             z_floor=None if ball is None else float(ball.z_min))
         return ev, {**dict(self._oracle_frame or {}), **rec}
+
+    # --- IFG-CL1: rendered-robot mask · attention-surface code images --------------------------------
+    def _apply_render_mask(self, observations, cameras):
+        """IFG-CL1 (`esdf.robot_mask == "render"`) — `(cameras, sphere masks, render masks)`.
+
+        Each camera's TSDF mask becomes **sphere mask ∪ render mask** (`RobotRenderMask.masks`: the robot rendered at
+        that camera's capture `robot_state` with this frame's measured finger opening, |depth − render| ≤ 10 mm). The
+        sphere mask stays: it also covers the held object's spheres, the target guard and the inflation the render
+        does not model. A changed camera loses its pre-masked device depth (the TSDF uploads the host depth with the
+        union mask). `sphere masks` / `render masks` = `{camera: (H, W) bool | None}` for the attention-surface graph
+        (which uses the render mask alone, as offline R6 did). A render failure keeps the sphere masks and is recorded
+        (`stats["robot_mask_render"]["error"]`).
+        """
+        obs_by = {}
+        for obs in observations or ():
+            cam_id = getattr(obs, "camera_id", None)
+            obs_by[cam_id.value if cam_id is not None else str(getattr(obs, "name", ""))] = obs
+        spheres = {c.name: c.robot_mask for c in cameras}
+        views = [{"name": c.name, "depth_m": c.depth, "K": c.camera_intrinsics, "T_base_cam": c.T_base_cam,
+                  "robot_state": getattr(obs_by.get(c.name), "robot_state", None)} for c in cameras]
+        rec: dict[str, Any] = {"applied": False}
+        missing = [v["name"] for v in views if v["robot_state"] is None]
+        if missing or not views:
+            rec["why"] = f"no_robot_state:{','.join(missing)}" if missing else "no_cameras"
+            self._render_frame = rec
+            return cameras, spheres, {}
+        openings = (self._finger_record or {}).get("opening_norm")
+        try:
+            masks, mrec = self.robot_render.masks(views, openings=openings)
+        except Exception as exc:  # noqa: BLE001 — fall back to the sphere masks, loudly and on record
+            logging.getLogger(__name__).warning("IFG-CL1 render mask failed — this frame keeps the sphere masks: %s",
+                                                exc, exc_info=True)
+            rec.update({"why": "render_failed", "error": f"{type(exc).__name__}: {exc}"})
+            self._render_frame = rec
+            return cameras, spheres, {}
+        rec.update(mrec)
+        rec["finger_source"] = "measured" if openings else "keyframe"
+        out, render = [], {}
+        for cam, mk in zip(cameras, masks):
+            render[cam.name] = mk
+            if mk is None:
+                out.append(cam)
+                continue
+            sph = cam.robot_mask
+            union = mk if sph is None else (np.asarray(sph, bool) | mk)
+            c = rec["cameras"].setdefault(cam.name, {})
+            c["n_sphere_px"] = 0 if sph is None else int(np.asarray(sph, bool).sum())
+            c["n_union_px"] = int(union.sum())
+            c["n_render_only_px"] = int((mk & ~np.asarray(sph, bool)).sum()) if sph is not None else int(mk.sum())
+            out.append(dataclasses.replace(cam, robot_mask=union, device_depth=None))
+        rec["applied"] = any(m is not None for m in masks)
+        self._render_frame = rec
+        return out, spheres, render
+
+    def _attention_surface_update(self, observations, cameras, sphere_masks, render_masks) -> dict[str, Any]:
+        """IFG-CL1 (`esdf.target_extent == "attention_surface"`) — this request's code images from attention + depth
+        (`runtime.attention_surface.select_target_surface`), folded into the oracle memory. Returns the oracle record
+        (`segmentation` = whether a code image was made). The surface record is `self._surface_frame`."""
+        from AG3S.ag3s.runtime.attention_surface import (
+            ARM_RENDER, ARM_SPHERES, CAMERA_ORDER, SurfaceView, select_target_surface)
+
+        render_on = getattr(self.config.esdf, "robot_mask", "spheres") == "render"
+        obs_by = {}
+        for obs in observations or ():
+            cam_id = getattr(obs, "camera_id", None)
+            obs_by[cam_id.value if cam_id is not None else str(getattr(obs, "name", ""))] = obs
+        cam_by = {c.name: c for c in cameras}
+        views, mask_src = [], {}
+        for name in CAMERA_ORDER:
+            cam, obs = cam_by.get(name), obs_by.get(name)
+            if cam is None or obs is None:
+                continue
+            mk = render_masks.get(name) if render_on else None
+            mask_src[name] = "render" if mk is not None else "spheres"
+            if mk is None:
+                mk = sphere_masks.get(name)
+            if mk is None:
+                mk = np.zeros(np.shape(cam.depth), bool)
+                mask_src[name] = "none"
+            views.append(SurfaceView(name=name, depth_m=np.asarray(cam.depth, np.float64),
+                                     K=np.asarray(cam.camera_intrinsics, np.float64),
+                                     T_base_cam=np.asarray(cam.T_base_cam, np.float64),
+                                     robot_mask=np.asarray(mk, bool),
+                                     attention=getattr(obs, "attention_map", None)))
+        res = select_target_surface(views, arm=ARM_RENDER if render_on else ARM_SPHERES)
+        surf = dict(res.record)
+        surf["robot_mask_source"] = mask_src
+        self._surface_frame = surf
+        self._surface_codes = res.codes
+        rec: dict[str, Any] = {"segmentation": res.codes is not None, "source": "attention_surface"}
+        if res.codes is None:
+            mem = self._oracle_memory_or_new()
+            rec["memory"] = {"n_samples": len(mem), "update": mem.n_updates, "updated": False}
+            return rec
+        return self._oracle_fold(observations, res.codes,
+                                 {"target": None, "codes": {"attention_surface": 1}}, rec)
+
+    # --- IFG-CL2: attention-surface protection of the `ball_owned` split ---------------------------------------
+    def _attention_surface_hybrid_update(self, observations, cameras, sphere_masks, render_masks) -> None:
+        """IFG-CL2 (`esdf.target_extent == "attention_surface_hybrid"`) — this request's LOCK selection
+        (`select_target_surface`, the same views and robot mask as `_attention_surface_update`) and its graph-node
+        samples (`attention_surface_hybrid.hybrid_samples`). Sets `_surface_frame` (record), `_surface_codes` (code
+        images, recorded) and `_surface_hybrid` (samples, None on abstain); the oracle memory is not touched.
+        `_build_esdf` turns the samples into the protection (`_hybrid_protect`)."""
+        from AG3S.ag3s.runtime.attention_surface import (
+            ARM_RENDER, ARM_SPHERES, CAMERA_ORDER, SurfaceView, select_target_surface)
+        from AG3S.ag3s.runtime.attention_surface_hybrid import hybrid_samples
+
+        render_on = getattr(self.config.esdf, "robot_mask", "spheres") == "render"
+        obs_by = {}
+        for obs in observations or ():
+            cam_id = getattr(obs, "camera_id", None)
+            obs_by[cam_id.value if cam_id is not None else str(getattr(obs, "name", ""))] = obs
+        cam_by = {c.name: c for c in cameras}
+        views, mask_src = [], {}
+        for name in CAMERA_ORDER:
+            cam, obs = cam_by.get(name), obs_by.get(name)
+            if cam is None or obs is None:
+                continue
+            mk = render_masks.get(name) if render_on else None
+            mask_src[name] = "render" if mk is not None else "spheres"
+            if mk is None:
+                mk = sphere_masks.get(name)
+            if mk is None:
+                mk = np.zeros(np.shape(cam.depth), bool)
+                mask_src[name] = "none"
+            views.append(SurfaceView(name=name, depth_m=np.asarray(cam.depth, np.float64),
+                                     K=np.asarray(cam.camera_intrinsics, np.float64),
+                                     T_base_cam=np.asarray(cam.T_base_cam, np.float64),
+                                     robot_mask=np.asarray(mk, bool),
+                                     attention=getattr(obs, "attention_map", None)))
+        res = select_target_surface(views, arm=ARM_RENDER if render_on else ARM_SPHERES, keep_debug=True)
+        surf = dict(res.record)
+        surf["robot_mask_source"] = mask_src
+        t0 = time.perf_counter()
+        self._surface_hybrid = hybrid_samples(res)
+        surf.setdefault("ms", {})["samples"] = round((time.perf_counter() - t0) * 1e3, 3)
+        self._surface_frame = surf
+        self._surface_codes = res.codes
+
+    def _hybrid_protect(self, geometry_points, ball):
+        """IFG-CL2 — `(SurfaceProtectEvidence | None, record)` for this frame (`attention_surface_hybrid.hybrid_evidence`
+        with the identity rule `esdf.surface_hybrid_identity` and the oracle path's radius, one fusion voxel).
+        IFG-CL2b: the other nodes within `esdf.surface_hybrid_other_exclude_voxels` fusion voxels of the same geometry
+        points are dropped from the other evidence (0 = IFG-CL2)."""
+        from AG3S.ag3s.runtime.attention_surface_hybrid import hybrid_evidence
+
+        return hybrid_evidence(self._surface_hybrid, self._surface_frame,
+                               np.zeros((0, 3)) if geometry_points is None else geometry_points, ball,
+                               radius=float(self.config.timing.fusion_voxel_size),
+                               rule=str(getattr(self.config.esdf, "surface_hybrid_identity", "both")),
+                               other_exclude_voxels=float(
+                                   getattr(self.config.esdf, "surface_hybrid_other_exclude_voxels", 0.0)))
 
     @property
     def subtask_label(self) -> Optional[str]:
@@ -1060,9 +1331,28 @@ class AG3S:
         association accepted it there), which is what the carry starts from."""
         if int(manipulated.last_seen_frame) != int(manipulated.frame):
             return
+        if self.manipulated_kept_this_frame():
+            # IFG-HSR: the closing-kept geometry is the pre-closing observation, not this frame's —
+            # keep the pin of the frame that observed it and mark it as still standing through here.
+            pin = self._manip_seen
+            if (pin is not None and pin["id"] == int(manipulated.id)
+                    and np.array_equal(pin["centroid"], np.asarray(manipulated.centroid, np.float64).reshape(3))):
+                pin["through"] = int(manipulated.frame)
+            return
         self._manip_seen = {"frame": int(manipulated.frame), "id": int(manipulated.id),
                             "centroid": np.asarray(manipulated.centroid, np.float64).reshape(3).copy(),
                             "state": np.asarray(robot_state, np.float64).reshape(-1).copy()}
+
+    def manipulated_kept_this_frame(self) -> bool:
+        """IFG-HSR — the latest grounding kept the pre-closing geometry (`closing_kept_geometry`) and
+        `clustering.latch_reach_kept_unseen` is on: the manipulated object's geometry is not this
+        frame's observation. False when the flag is off (T46g as is)."""
+        if not getattr(self.config.clustering, "latch_reach_kept_unseen", False):
+            return False
+        from AG3S.ag3s.stages.target_grounding import CLOSING_KEPT_GEOMETRY
+
+        decision = self._target_confirm.last
+        return decision is not None and getattr(decision, "reason", None) == CLOSING_KEPT_GEOMETRY
 
     def manipulated_seen_state(self) -> Optional[tuple[int, np.ndarray]]:
         """SL5b — `(frame, q)`: the manipulated object's `last_seen_frame` and the robot state that
@@ -1072,7 +1362,7 @@ class AG3S:
         `clustering.latch_reach_hand_relative`; reading it changes nothing."""
         manip, pin = self._manipulated, self._manip_seen
         if manip is None or pin is None or pin["id"] != int(manip.id) \
-                or pin["frame"] != int(manip.last_seen_frame):
+                or int(manip.last_seen_frame) not in (pin["frame"], pin.get("through")):
             return None
         if not np.array_equal(pin["centroid"],
                               np.asarray(manip.centroid, np.float64).reshape(3)):
@@ -1518,6 +1808,16 @@ class AG3S:
         self._frame_filter_config = self._config_with_guard_radius(self._frame_guard_radius)
         self._mask_guard_px = []
         self._frame_depth_masks = []
+        # IFG-CL1: per-frame records (set again by the ESDF stage when its flag is on).
+        self._surface_frame = None
+        self._surface_codes = None
+        self._render_frame = None
+        self._surface_hybrid = None   # IFG-CL2
+        gate_feature = None
+        if self.confidence_gate is not None:   # IFG-S2SERVE: this request's feature, consumed here
+            gate_feature, self._gate_feature_pending = self._gate_feature_pending, None
+            self._gate_frame = {"gate_score": None, "gate_alert": False, "gate_why": "no_depth_cameras",
+                                "applied": False, "frame_index": int(self.frame_index)}
         # T32 H1: while an object is held, its spheres are part of the robot for the self-filter.
         self._prepare_frame_filter()
 
@@ -1807,10 +2107,38 @@ class AG3S:
                 cameras = self._depth_cameras_from(
                     observations, depth, camera_intrinsics, T_base_cam, robot_state)
                 self._frame_depth_masks = []
+                # IFG-CL1: the rendered-robot mask joins the sphere mask in the TSDF (off: not called).
+                sphere_masks, render_masks = None, {}
+                if getattr(cfg.esdf, "robot_mask", "spheres") == "render":
+                    with profiler.stage("robot_render_mask"):
+                        cameras, sphere_masks, render_masks = self._apply_render_mask(observations, cameras)
                 # T46e A13: fold this request's GT segmentation into the episode's samples (every frame,
                 # target or not — the TSDF accumulates every frame too). Off: not called, nothing stored.
-                if getattr(cfg.esdf, "target_extent", "estimated") == "oracle_visible":
+                extent = getattr(cfg.esdf, "target_extent", "estimated")
+                if extent == "oracle_visible":
                     self._oracle_frame = self._oracle_update(observations)
+                elif extent == "attention_surface":
+                    # IFG-CL1: the same memory, fed with the server's attention-surface code images.
+                    with profiler.stage("attention_surface"):
+                        self._oracle_frame = self._attention_surface_update(
+                            observations, cameras,
+                            sphere_masks if sphere_masks is not None else {c.name: c.robot_mask for c in cameras},
+                            render_masks)
+                elif extent == "attention_surface_hybrid":
+                    # IFG-CL2: the same selection; its graph nodes protect the `ball_owned` split (no oracle memory).
+                    with profiler.stage("attention_surface"):
+                        self._attention_surface_hybrid_update(
+                            observations, cameras,
+                            sphere_masks if sphere_masks is not None else {c.name: c.robot_mask for c in cameras},
+                            render_masks)
+                # IFG-S2SERVE: the confidence alert — before anything reads `manipulated_geometry` for the field
+                # (off: not called). The FK-sphere masks (`sphere_masks` when the render mask is on).
+                if self.confidence_gate is not None:
+                    with profiler.stage("confidence_gate"):
+                        manipulated_geometry = self._confidence_gate_step(
+                            observations, cameras,
+                            sphere_masks if sphere_masks is not None else {c.name: c.robot_mask for c in cameras},
+                            gate_feature, manipulated_geometry, notes)
                 # T44 I1: the non-target evidence `ball_owned` compares against — computed only
                 # when that exclusion is on (the default `ball` never builds it: same calls as before).
                 # T44c A5: the target-free coarse tier reads the same evidence (shared coarse voxels
@@ -1999,6 +2327,8 @@ class AG3S:
         # T26 §4: which mechanism keeps the manipulated object out of the gripper's field this frame.
         constraint_set.metrics["exclusion"] = self._exclusion_record(
             constraint_set, manipulated_geometry, context, robot_state)
+        if self.confidence_gate is not None:   # IFG-S2SERVE (off: no key)
+            constraint_set.metrics["confidence_gate"] = dict(self._gate_frame or {})
         profiler.end_frame()
         self.frame_index += 1
         object.__setattr__(constraint_set, "profile", profiler.last_frame_ms())
@@ -2019,6 +2349,9 @@ class AG3S:
             "candidate_stats": candidate_stats,
             "fusion": fusion,
         }
+        if getattr(cfg.esdf, "target_extent", "estimated") in ("attention_surface", "attention_surface_hybrid"):
+            # IFG-CL1 (· CL2): this frame's code images (None = abstained) — `--record-constraints` stores them.
+            debug["attention_surface_codes"] = self._surface_codes
         return constraint_set, debug
 
     # --- T26: the exclusion gate and its record ---------------------------------------------
@@ -2796,12 +3129,25 @@ class AG3S:
         # T46e A13 — the GT extent of the fine target-free layer (`esdf.target_extent == "oracle_visible"` only).
         oracle_evidence = None
         oracle_record = None
-        if getattr(cfg, "target_extent", "estimated") == "oracle_visible":
+        extent = getattr(cfg, "target_extent", "estimated")
+        if extent in ("oracle_visible", "attention_surface"):
             if target_free_points is None:
                 oracle_record = {**dict(self._oracle_frame or {}), "applied": False,
                                  "why": "no_target_free_layer"}
+            elif extent == "attention_surface" and not (self._surface_frame or {}).get("applied"):
+                # IFG-CL1: no region this frame → the estimated extent (the memory is not used either).
+                oracle_record = {**dict(self._oracle_frame or {}), "applied": False,
+                                 "why": f"attention_surface_abstained ({(self._surface_frame or {}).get('why')})"}
             else:
                 oracle_evidence, oracle_record = self._oracle_evidence(target, target_free_ball)
+        # IFG-CL2 — the attention-surface protection of the `ball_owned` fine split (`attention_surface_hybrid` only).
+        hybrid_protect = None
+        hybrid_record = None
+        if extent == "attention_surface_hybrid":
+            if target_free_points is None:
+                hybrid_record = {"applied": False, "why": "no_target_free_layer"}
+            else:
+                hybrid_protect, hybrid_record = self._hybrid_protect(target_free_points, target_free_ball)
         support_evidence = (None if support_cloud is None or target_free_ball is None
                             else self._support_seed_evidence(support_cloud, support_surfaces,
                                                              target_free_ball))
@@ -2852,12 +3198,26 @@ class AG3S:
                                              if owned_nontarget is not None else {}),
                                           # T46e A13: only with `target_extent == "oracle_visible"` and samples.
                                           **({"oracle_evidence": oracle_evidence}
-                                             if oracle_evidence is not None else {}))
+                                             if oracle_evidence is not None else {}),
+                                          # IFG-CL2: only with `attention_surface_hybrid` and the guard on.
+                                          **({"surface_protect": hybrid_protect}
+                                             if hybrid_protect is not None else {}))
         self._record_geometry_version(field, target, frame_index, nontarget)
         if oracle_record is not None:
             stats = getattr(field, "stats", None)
             if isinstance(stats, dict) and isinstance(stats.get("target_free"), dict):
                 stats["target_free"]["oracle"] = oracle_record
+                if extent == "attention_surface":   # IFG-CL1
+                    stats["target_free"]["attention_surface"] = dict(self._surface_frame or {})
+        if hybrid_record is not None:   # IFG-CL2
+            stats = getattr(field, "stats", None)
+            if isinstance(stats, dict) and isinstance(stats.get("target_free"), dict):
+                stats["target_free"]["attention_surface_hybrid"] = hybrid_record
+                stats["target_free"]["attention_surface"] = dict(self._surface_frame or {})
+        if getattr(cfg, "robot_mask", "spheres") == "render":   # IFG-CL1
+            stats = getattr(field, "stats", None)
+            if isinstance(stats, dict):
+                stats["robot_mask_render"] = dict(self._render_frame or {})
         notes = []
         if window_request is not None:
             notes = self._window_query_report(

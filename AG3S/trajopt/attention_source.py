@@ -58,6 +58,7 @@ __all__ = [
     "T55_PROBE_MD5", "T55_PROBE_REL", "TASK_GATE_MODES", "TASK_PROBE_FEATURE", "TASK_PROBE_TAU",
     "TASK_PROBE_PERSIST", "cell_maps", "default_task_probe_path", "load_noun_probe", "noun_lookup",
     "parse_attention_source", "prefix_noun_impl", "prompt_noun", "v_rows_impl",
+    "IFG_PREFIX_L8_KEY", "RESID_LAYER", "prefix_resid_loop", "resid_block_impl",
 ]
 
 #: gemma_2b (pi0.5's PaliGemma LLM): 18 layers, 8 query heads (multi-query: one kv head).
@@ -339,6 +340,39 @@ def v_rows_impl(kv, rows, *, layer: int, xp):
     return v[int(layer)][0][rows][:, 0, :].astype(xp.float32)
 
 
+# ------------------------------------------------------------------------------ IFG-S2SERVE: prefix layer-8 residual
+
+#: IFG-S2SERVE — the confidence gate's feature: the residual stream **after** prefix block `RESID_LAYER` (blocks
+#: 0 … 8 applied), image rows 0–767 — the tensor the held-out collector stored as ``prefix_L8.npz resid_out_image``
+#: (`…/20261016T000420+0900_30955b6ca8ef_2498252a873f/heldout/p/hc_dump.py`, `dump_step`).
+RESID_LAYER = 8
+#: `AttentionPolicy` result key that carries it (float32 (768, 2048), float16-rounded as the dump); `SafePolicy`
+#: pops it before the response is packed (it never goes on the wire).
+IFG_PREFIX_L8_KEY = "ifg_prefix_l8_image"
+
+
+def resid_block_impl(block, layers, layer, x, positions, mask4):
+    """One prefix block, the collector's ``layer`` jit: ``block.apply({"params": layers[l]}, [x, None], None, pos,
+    mask4, [None, None], True)[0][0]``. `layers` = the stacked ``nnx.state(PaliGemma.llm).to_pure_dict()["layers"]``;
+    the collector sliced layer `l` outside its jit, here the (exact) slice is inside so one executable serves all
+    nine layers."""
+    import jax
+
+    pl = jax.tree.map(lambda a: a[layer], layers)
+    ys, _ = block.apply({"params": pl}, [x, None], None, positions, mask4, [None, None], True)
+    return ys[0]
+
+
+def prefix_resid_loop(x, positions, mask4, layers, block_fn, *, n_layers: int = RESID_LAYER + 1):
+    """``for l in range(9): x = layer(layer_p[l], x, pos, mask4)`` — the collector's loop (`block_fn(layers, l, x,
+    positions, mask4)` = the jitted `resid_block_impl`). Returns the residual after block ``n_layers − 1``."""
+    import jax.numpy as jnp
+
+    for l in range(int(n_layers)):
+        x = block_fn(layers, jnp.asarray(l, jnp.int32), x, positions, mask4)
+    return x
+
+
 # ------------------------------------------------------------------------------ backend (jax)
 
 
@@ -355,6 +389,51 @@ class JaxPrefixBackend:
         self._noise_seed = int(noise_seed)
         self._jit_noun = jax.jit(self._noun_pass, static_argnames=("layer", "head"))
         self._jit_v = jax.jit(self._v_rows, static_argnames=("layer",))
+        #: IFG-S2SERVE — built on first use (`_resid_setup`), only when a request asks for the layer-8 residual.
+        self._resid = None
+
+    # --- IFG-S2SERVE: the collector's layer-8 residual pass -----------------------------------------
+    def _resid_setup(self):
+        """`(jit embed, jit block, stacked layer params)` — the collector's pieces (`hc_dump.py`): `Block(configs,
+        return_probs=False)`, ``nnx.state(PaliGemma.llm).to_pure_dict()["layers"]`` of the sampler's model state
+        (no copy), embed dtype of the LLM module. The served attention executables are not touched."""
+        if self._resid is not None:
+            return self._resid
+        import jax
+        import jax.numpy as jnp
+
+        from openpi.models import gemma as G
+        from openpi.models.pi0 import make_attn_mask
+
+        s = self._sampler
+        nnx = s._nnx  # noqa: SLF001
+        graphdef, state = s._graphdef, s._state  # noqa: SLF001
+        model = nnx.merge(graphdef, state)
+        llm_mod = model.PaliGemma.llm.module
+        layers = nnx.state(model.PaliGemma.llm).to_pure_dict()["layers"]
+        block = G.Block(configs=tuple(llm_mod.configs), return_probs=False)
+        emb_dt = jnp.dtype(llm_mod.embed_dtype)
+
+        def embed(state_, obs):
+            m = nnx.merge(graphdef, state_)
+            tokens, mask, ar = m.embed_prefix(obs)
+            mask4 = make_attn_mask(mask, ar)[:, None]
+            pos = jnp.cumsum(mask, 1) - 1
+            return tokens.astype(emb_dt), pos, mask4
+
+        jit_block = jax.jit(lambda ly, l, x, pos, mask4: resid_block_impl(block, ly, l, x, pos, mask4))
+        self._resid = (jax.jit(embed), jit_block, layers)
+        return self._resid
+
+    def resid_l8(self, obs) -> np.ndarray:
+        """``x[0, :768]`` float32 after prefix blocks 0 … 8 for a **preprocessed** batched `obs` (the collector's
+        ``dump_step``: embed_prefix → x = tokens.astype(embed dtype) → 9 × block → image rows)."""
+        from AG3S.ag3s.experiments.studies.t49_noun_query_core import N_IMAGE_TOKENS
+
+        jit_embed, jit_block, layers = self._resid_setup()
+        x, pos, mask4 = jit_embed(self._sampler._state, obs)  # noqa: SLF001
+        x = prefix_resid_loop(x, pos, mask4, layers, jit_block)
+        return np.asarray(x[0, :N_IMAGE_TOKENS], np.float32)
 
     def _noun_pass(self, state, obs, rows, *, layer, head):
         import jax.numpy as jnp
@@ -373,10 +452,11 @@ class JaxPrefixBackend:
         return v_rows_impl(kv, rows, layer=layer, xp=jnp)
 
     def run(self, inputs: Mapping[str, Any], *, source: AttentionSource, rows: Optional[np.ndarray],
-            want_feature: bool, v_layer: Optional[int]) -> dict[str, Any]:
+            want_feature: bool, v_layer: Optional[int], want_resid: bool = False) -> dict[str, Any]:
         """`inputs` = the policy's input transform output (no batch axis). Returns ``{"cell": [768] or None,
         "feature": kv_L4 (512,) or None, "v": [R, 256] float32 or None, "path": str}``. ``v`` needs `rows`
-        and `v_layer`; ``cell`` of a noun source needs `rows`."""
+        and `v_layer`; ``cell`` of a noun source needs `rows`. `want_resid` (IFG-S2SERVE, default False = no key):
+        ``"resid_l8"`` = (768, 2048) float32 from `resid_l8` on the same preprocessed observation."""
         import jax.numpy as jnp
 
         from AG3S.ag3s.experiments.sources.pi05_attention import AGGREGATIONS
@@ -401,6 +481,8 @@ class JaxPrefixBackend:
             out["feature"] = feature
             kv = captured.get("kv")
             out["path"] = "sampler prefix + suffix (action query)"
+            if want_resid:   # IFG-S2SERVE — the sampler preprocessed its own copy; this is a separate one
+                out["resid_l8"] = self.resid_l8(_model.preprocess_observation(None, model_obs, train=False))
         else:
             obs = _model.preprocess_observation(None, model_obs, train=False)  # exactly once
             if rows is None:
@@ -413,6 +495,8 @@ class JaxPrefixBackend:
                 out["path"] = "noun prefix pass (rows gathered in the jit)"
             if want_feature:
                 out["feature"] = np.asarray(s._jit_kv_feature(kv, mask), np.float32)  # noqa: SLF001
+            if want_resid:   # IFG-S2SERVE — the same preprocessed observation as the noun pass
+                out["resid_l8"] = self.resid_l8(obs)
         if want_v and kv is not None:
             out["v"] = np.asarray(self._jit_v(kv, jnp.asarray(np.asarray(rows, np.int32)), layer=int(v_layer)),
                                   np.float32)

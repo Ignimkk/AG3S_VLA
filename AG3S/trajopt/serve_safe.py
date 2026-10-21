@@ -271,7 +271,17 @@ def cost_overrides(args) -> dict[str, float]:
     그대로 같다.
     """
     given = {name: getattr(args, name, None) for name in COST_WEIGHTS}
-    return {k: float(v) for k, v in given.items() if v is not None}
+    out: dict = {k: float(v) for k, v in given.items() if v is not None}
+    if getattr(args, "deflection_rate_after_grasp", False):
+        out["deflection_rate_after_grasp"] = True   # IFG-TOB (needs --w-deflection-rate > 0)
+    if getattr(args, "grasp_anchor", None) is not None:
+        # IFG-TOA: one weight for both palm terms (per m^2), optional activation radius (mm).
+        out["w_grasp_tcp"] = out["w_grasp_goal"] = float(args.grasp_anchor)
+        if getattr(args, "grasp_anchor_radius_mm", None) is not None:
+            out["grasp_anchor_radius"] = float(args.grasp_anchor_radius_mm) / 1000.0
+    if getattr(args, "wrist_track_scale", None) is not None:
+        out["wrist_track_scale"] = float(args.wrist_track_scale)   # IFG-TOW
+    return out
 
 
 def announce_collision_switch(enabled: bool) -> None:
@@ -879,6 +889,12 @@ def t43t_identity_section(args) -> dict:
         # SL5b — read by `SafePolicy` (grasp latch `reach_hand_relative`); carried in the AG3S config
         # so `assert_ag3s_config` checks it survived `with_overrides` like `held_slip_detach`.
         out["latch_reach_hand_relative"] = True
+    if getattr(args, "latch_reach_kept_unseen", False):
+        # IFG-HSR — read by `AG3S` (seen-state pin) and `SafePolicy` (hand-relative reach).
+        out["latch_reach_kept_unseen"] = True
+    if getattr(args, "latch_carry_from_closing", False):
+        # IFG-HSR2 — read by `SafePolicy` (carry start of the hand-relative reach and the attach snapshot).
+        out["latch_carry_from_closing"] = True
     # T46g — end
     if getattr(args, "held_cover_cap_mm", None) is not None:
         # T43 Z6 — read by `AG3S.attach` (held query sphere cap).
@@ -912,6 +928,12 @@ def target_exclusion_section(args) -> dict:
             out[key] = v
     if getattr(args, "target_extent", None) not in (None, "estimated"):
         out["target_extent"] = str(args.target_extent).replace("-", "_")
+    if getattr(args, "robot_mask", None) not in (None, "spheres"):   # IFG-CL1 (given flag only)
+        out["robot_mask"] = str(args.robot_mask)
+    if getattr(args, "hybrid_identity", None) is not None:   # IFG-CL2 (given flag only)
+        out["surface_hybrid_identity"] = str(args.hybrid_identity)
+    if getattr(args, "hybrid_other_exclude_voxels", None) is not None:   # IFG-CL2b (given flag only)
+        out["surface_hybrid_other_exclude_voxels"] = float(args.hybrid_other_exclude_voxels)
     return out
 # T44 I1 (A1) — end
 
@@ -960,6 +982,11 @@ def split_identity_section(args) -> dict:
         out["attention_split_radius"] = float(args.attention_split_radius_mm) / 1000.0
     if getattr(args, "attention_split_ratio_source", None) is not None:
         out["attention_split_ratio_source"] = str(args.attention_split_ratio_source)
+    # IFG-SPLIT: attention partition of a merged cluster + a split target replacing an unsplit anchor.
+    if getattr(args, "attention_split_partition", False):
+        out["attention_split_partition"] = True
+    if getattr(args, "split_supersedes_anchor", False):
+        out["split_supersedes_anchor"] = True
     return out
 
 
@@ -1002,7 +1029,8 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
                identity: dict | None = None,
                held_free_observed_pad: float | None = None,
                target_exclusion: dict | None = None,
-               contact: dict | None = None):
+               contact: dict | None = None,
+               confidence_gate=None):
     """서버가 쓸 AG3S. 자기 필터는 전신, 제약은 `links` (T27 부터 기본 `gripper` — 손바닥 + 손가락).
 
     **두 모델은 일부러 다르다.** 자기 필터는 바퀴·베이스까지 있어야 한다 — 머리 카메라가 자기
@@ -1191,8 +1219,31 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
 
     parents = grasp_parent_links()
     logging.info("AG3S attached slots: %s", ", ".join(parents))
+    # IFG-CL1 — the rendered-robot mask, only with `--robot-mask render` (otherwise the AG3S call is as before).
+    render_kw: dict = {}
+    if config.esdf.robot_mask == "render":
+        from AG3S.ag3s.runtime.robot_render_mask import RobotRenderMask
+
+        robot_render = RobotRenderMask(model_xml)
+        # **시작할 때 한 번 렌더한다** — GL backend (MUJOCO_GL) 가 없으면 첫 요청이 아니라 여기서 죽는다.
+        probe = robot_render.probe()
+        logging.warning("!!! AG3S IFG-CL1 — robot_mask = render: TSDF 에 구 mask ∪ 렌더 robot mask (|depth − render| ≤ "
+                        "%.0f mm, %d robot geoms, keyframe %s, fingers %s), attention-surface graph 에는 렌더 mask. "
+                        "probe %d px in %.0f ms (MUJOCO_GL=%s) !!!", robot_render.tol * 1e3,
+                        robot_render.n_robot_geoms, robot_render.keyframe,
+                        "client convention" if robot_render.convention is not None
+                        else f"keyframe ({robot_render.convention_error})",
+                        probe["n_robot_px"], probe["ms"], __import__("os").environ.get("MUJOCO_GL"))
+        render_kw["robot_render"] = robot_render
+    if confidence_gate is not None:
+        # IFG-S2SERVE — only with `--confidence-gate on` (otherwise the AG3S call is as before).
+        render_kw["confidence_gate"] = confidence_gate
+        logging.warning("!!! AG3S IFG-S2SERVE — confidence gate ON: score = q_mem_chain:prefix_L8 (centered), alert if "
+                        "< %.6f → that frame's target exemption is withheld (target stays an obstacle; not while "
+                        "attached). Region = top1-only-ns:N on the FK-sphere mask (never the rendered mask) !!!",
+                        confidence_gate.threshold)
     ag3s = AG3S(config, robot_model=filter_robot, constraint_robot_model=constraint_robot,
-                attached_parent_links=parents)
+                attached_parent_links=parents, **render_kw)
     assert_ag3s_config(ag3s.config, collision_backend="esdf", esdf_backend=backend,
                        clustering=dict(identity or {}))
     if target_exclusion:
@@ -1219,6 +1270,27 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
             if e.target_free_coarse:
                 logging.warning("AG3S T46e — target_free_coarse 도 켜져 있다: 거친 target-free 계층은 oracle 이 아니라 "
                                 "target_exclusion = %s 그대로다", e.target_exclusion)
+        if e.target_extent == "attention_surface":
+            # IFG-CL1 — the oracle path fed by the server's attention-surface code images.
+            logging.warning("!!! AG3S IFG-CL1 — target_extent = attention_surface (identity %s · max_dist %.2f voxels): "
+                            "미세 target-free 계층의 target 범위 = 서버가 attention (noun L10H7) + depth 로 고른 표면 영역 "
+                            "(IFG LOCK %s). 영역이 없는 frame 은 estimated. robot mask = %s !!!",
+                            e.oracle_extent_identity, e.oracle_max_dist_voxels,
+                            "top1-only-ns+rm:N" if e.robot_mask == "render" else "top1-only-ns:N (구 mask)",
+                            e.robot_mask)
+            if e.target_free_coarse:
+                logging.warning("AG3S IFG-CL1 — target_free_coarse 도 켜져 있다: 거친 target-free 계층은 attention-surface "
+                                "가 아니라 target_exclusion = %s 그대로다", e.target_exclusion)
+        if e.target_extent == "attention_surface_hybrid":
+            # IFG-CL2 — ball_owned range, attention-surface protection.
+            logging.warning("!!! AG3S IFG-CL2 — target_extent = attention_surface_hybrid (identity %s): 미세 target-free "
+                            "계층은 ball_owned 범위 (tie %.1f · max_dist %.1f voxels · unowned %s) 를 지우되, attention "
+                            "(noun L10H7) 선택 영역 밖 비지지면 표면에 더 가까운 seed 는 보존한다 (IFG LOCK %s). 선택이 "
+                            "없거나 identity 가 안 맞는 frame 은 ball_owned 그대로. robot mask = %s. IFG-CL2b: manipulated "
+                            "기하 점에서 %.2f fusion voxel 안의 node 는 보존 근거에서 뺀다 (0 = IFG-CL2) !!!",
+                            e.surface_hybrid_identity, e.owned_tie_voxels, e.owned_max_dist_voxels, e.owned_unowned,
+                            "top1-only-ns+rm:N" if e.robot_mask == "render" else "top1-only-ns:N (구 mask)",
+                            e.robot_mask, float(e.surface_hybrid_other_exclude_voxels))
     # T44e A9 — begin
     if contact:
         lost = {k: getattr(ag3s.config.contact, k) for k, v in contact.items()
@@ -1388,6 +1460,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help="T43 T step 2 — 최근접 표면점이 조작 대상의 carve-out 공 (target-free 계층이 "
                          "물체로 보는 부피) 안인 손 구 행은 target 행이다: --obstacle-margin 을 안 받고 "
                          "sweep 경로 행에서도 빠진다. 기본 off")
+    ap.add_argument("--neighbour-contact-mm", type=float, default=None, metavar="MM",
+                    help="IFG-NBC — 쥐기 전(latched · closing) 손바닥이 target 중심 150 mm 안이면, 쥐는 손의 손가락 구가 "
+                         "target 120 mm 안에서 이웃 물체(target · 지지면 · 쥔 물체가 아닌 장애물)와 MM 까지 겹치는 것을 "
+                         "허용한다 (가볍게 밀면서 잡기). 손바닥 · 팔 · 탁자 · 운반은 그대로. 기본 off")
     ap.add_argument("--held-obstacle-margin", action="store_true",
                     help="T43 HM — 쥔 물체(사과) 행도 손 구 행과 같은 분류 · 여유를 받는다: 최근접 "
                          "표면이 장애물이면 max(그 행의 여유, --obstacle-margin). 지지면(테이블)은 늘 "
@@ -1414,6 +1490,14 @@ def build_parser() -> argparse.ArgumentParser:
                          "정규화 attention, raw = 정규화 전 attention (AttentionPointCloud.raw_attention). "
                          "target 후보 선택은 둘 다 정규화 attention 질량")
     # T44b A4 — end
+    # IFG-SPLIT — begin
+    ap.add_argument("--attention-split-partition", action="store_true",
+                    help="IFG-SPLIT — 재군집이 한 덩어리로 끝난 trigger cluster 를 attention 으로 가른다 "
+                         "(clustering.attention_split_partition). 안 주면 꺼짐 = T31b 그대로")
+    ap.add_argument("--split-supersedes-anchor", action="store_true",
+                    help="IFG-SPLIT — 쥐기 전, split 의 target 조각이 merge 된 채 잡힌 anchor 를 대체한다 "
+                         "(clustering.split_supersedes_anchor). 안 주면 꺼짐 = T30 F3b 그대로")
+    # IFG-SPLIT — end
     ap.add_argument("--obstacle-margin-support", action="store_true",
                     help="T41 a — 지지면(테이블·바닥)에도 --obstacle-margin 을 건다. 기본은 "
                          "제외 (파지하려면 손가락이 테이블 가까이 가야 한다). ablation 용")
@@ -1502,6 +1586,24 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--w-deflection-rate", type=float, default=None, metavar="W",
                     help="T43 TA (B). Weight on ‖ΔD‖², D = Q − Q_ref, inside the chunk and against "
                          "the last executed deflection. Default 0 (off)")
+    ap.add_argument("--recovery-retreat", action="store_true",
+                    help="IFG-REC — 쥐기 전 교착(충돌 HOLD 3 연속) 또는 빈 손 닫힘(닫는 중 손가락이 막히지 않고 멈춤 2 연속)이면 "
+                         "그리퍼를 열고, 손바닥이 target 에서 12 cm 이상 떨어져 있던 가장 최근 자세로 관절 공간에서 후퇴(TrajOpt 통과)한 뒤 "
+                         "정책에 다시 맡긴다. episode 당 최대 2 회. 기본 off")
+    ap.add_argument("--grasp-anchor", type=float, default=None, metavar="W",
+                    help="IFG-TOA — 잡을 지점 고정: 쥐기 전(latched · closing) 손바닥이 고정된 목표 반경 안이면, 손바닥 위치를 "
+                         "정책 경로에 붙이고(평행 이동 대신 자세 변경으로 피하게) 닫는 행부터 손바닥을 목표에 둔다. W = 두 항의 "
+                         "가중치 (m^-2, 예: 2000). 목표 = 정책 chunk 가 처음 닫기를 계획한 행의 손바닥 위치 (고정). 기본 off")
+    ap.add_argument("--wrist-track-scale", type=float, default=None, metavar="S",
+                    help="IFG-TOW — 쥐기 전(latched · closing) 손바닥이 target 중심 150 mm 안이면, 쥐는 팔의 4 · 5 · 6 번 관절 "
+                         "추종 가중치에 S (0 < S < 1, 예: 0.1) 를 곱한다. 회피를 위치(앞쪽 관절) 대신 방향(손목)으로 먼저 "
+                         "하게 한다. 허들 · 운반 구간은 균일 가중치. 기본 off")
+    ap.add_argument("--grasp-anchor-radius-mm", type=float, default=None, metavar="MM",
+                    help="IFG-TOA — --grasp-anchor 가 켜지는 손바닥–목표 거리 (기본 150 mm)")
+    ap.add_argument("--deflection-rate-after-grasp", action="store_true",
+                    help="IFG-TOB — --w-deflection-rate 항을 쥐기 전(latch searching · latched · closing) chunk 에서는 "
+                         "빼고 쥔 뒤(held 부터)만 쓴다. 접근 중 회피 꺾임이 다음 chunk 로 이어져 정지한 target 의 "
+                         "잡는 지점이 밀리는 것을 막는다. --w-deflection-rate > 0 과 함께만. 기본 off")
     ap.add_argument("--servo-accel", default=None, choices=("off", "strict", "relaxed"),
                     help="T43 TA (C). Bound on the command second difference incl. the chunk "
                          "boundary, a_C = ε·ωn²·Δt²/(2ζ²−1) from the MJCF servo constants. `relaxed` "
@@ -1644,21 +1746,51 @@ def build_parser() -> argparse.ArgumentParser:
                          "--target-exclusion ball-owned 와 함께만")
     # T46 F1 · F2 — end
     # T46e A13 — begin
-    ap.add_argument("--target-extent", choices=("estimated", "oracle-visible"), default=None,
+    ap.add_argument("--target-extent", choices=("estimated", "oracle-visible", "attention-surface",
+                                                "attention-surface-hybrid"), default=None,
                     help="T46e — 미세 target-free 계층의 target 범위. estimated (기본: config esdf.target_extent) = "
                          "--target-exclusion (+ F1 · F2) 의 추정 그대로. oracle-visible = **진단 상한**: client 가 보낸 "
                          "GT segmentation (pi05_infer --safe-oracle-seg) 으로 이 episode 에 보인 표면 표본을 모으고, "
                          "가장 가까운 표본이 지울 물체인 seed 만 지운다 (이웃 과일 · table · crate 는 남는다). "
                          "공 · 창 · 권한 · 거친 target-free 계층은 --target-exclusion 그대로. "
-                         "--target-field-policy exclude-* 와 함께만")
+                         "--target-field-policy exclude-* 와 함께만. attention-surface = IFG-CL1: 같은 oracle 경로에 넣는 "
+                         "code 영상을 서버가 attention + depth 로 만든다 (IFG LOCK top1-only-ns+rm:N, "
+                         "--attention-source noun_target:L10H7 필수, --robot-mask render 권장 — 안 주면 구 mask 로 "
+                         "top1-only-ns:N). client segmentation 은 필요 없다. attention-surface-hybrid = IFG-CL2: "
+                         "지우는 범위는 --target-exclusion ball-owned 그대로, 같은 attention-surface 선택은 보호에만 "
+                         "(공 안 seed 를 선택 node / 선택 밖 비지지면 node 로 한 번 더 갈라 둘 다 지우라는 seed 만 지운다). "
+                         "--attention-source noun_target:L10H7 · --target-exclusion ball-owned 필수, --hybrid-identity 로 "
+                         "identity 안전장치")
     ap.add_argument("--oracle-extent-identity", choices=("pipeline", "gt"), default=None,
                     help="T46e — oracle-visible 이 지울 물체: pipeline (기본) = AG3S manipulated 기하가 놓인 물체 "
                          "(identity 는 다른 arm 과 같다) · gt = 늘 GT target (identity 도 GT 인 상한). "
-                         "--target-extent oracle-visible 와 함께만")
+                         "--target-extent oracle-visible · attention-surface 와 함께만 (attention-surface 의 gt = "
+                         "늘 attention 영역 = code 1)")
     ap.add_argument("--oracle-max-dist-voxels", type=float, default=None, metavar="V",
                     help="T46e — oracle-visible: seed 후보 = target 표본에서 V 미세 voxel 안 (기본 6.0 = 30 mm = "
-                         "미세 TSDF truncation). --target-extent oracle-visible 와 함께만")
+                         "미세 TSDF truncation). --target-extent oracle-visible · attention-surface 와 함께만")
     # T46e A13 — end
+    # IFG-CL2 — begin
+    ap.add_argument("--hybrid-identity", choices=("both", "instance", "centre"), default=None,
+                    help="IFG-CL2 — attention-surface-hybrid 의 identity 안전장치 (기본 both: config "
+                         "esdf.surface_hybrid_identity). instance = manipulated 기하 점의 >= 1/2 이 선택 영역 node 위 "
+                         "(oracle 경로의 identity_unresolved 와 같은 규칙), centre = 선택 영역 중심이 공 안. 맞지 않는 frame 은 "
+                         "보호 없이 (= ball-owned). --target-extent attention-surface-hybrid 와 함께만")
+    ap.add_argument("--hybrid-other-exclude-voxels", type=float, default=None, metavar="V",
+                    help="IFG-CL2b — attention-surface-hybrid: 선택 밖 비지지면 node (보존 근거) 중 manipulated 기하 점에서 "
+                         "V fusion voxel (timing.fusion_voxel_size, 10 mm) 안의 것은 근거에서 뺀다 — 선택 영역이 과일 일부만 "
+                         "덮을 때 target 자신의 표면이 target seed 를 보존하지 않게. 기본 1.0 (config "
+                         "esdf.surface_hybrid_other_exclude_voxels, 미리 고정한 값), 0 = IFG-CL2 그대로. "
+                         "--target-extent attention-surface-hybrid 와 함께만")
+    # IFG-CL2 — end
+    # IFG-CL1 — begin
+    ap.add_argument("--robot-mask", choices=("spheres", "render"), default=None,
+                    help="IFG-CL1 — 로봇 pixel 을 무엇으로 정하나. spheres (기본: config esdf.robot_mask) = 지금 그대로 "
+                         "(self-filter 구의 depth mask). render = --model-xml 로봇을 요청 관절 상태 · 측정 손가락 개도로 "
+                         "렌더한 robot-only depth 와 관측 depth 차 <= 10 mm (IFG R6): TSDF 에는 구 mask ∪ render mask, "
+                         "--target-extent attention-surface 의 graph 에는 render mask. MUJOCO_GL 렌더러가 필요하다 "
+                         "(시작할 때 한 번 렌더해 확인한다)")
+    # IFG-CL1 — end
     # T44c A5 — begin
     ap.add_argument("--target-free-coarse", action="store_true",
                     help="T44c — target 을 지운 거친 계층 (coarse_no_target) 을 한 겹 더 만들어 target-free "
@@ -1856,6 +1988,14 @@ def build_parser() -> argparse.ArgumentParser:
                          "프레임 · 문턱 (120 mm) · 다른 check 는 그대로. 기록: grasp.evidence.reach_source "
                          "(observed|hand_relative) · reach_observed_mm · reach_hand_relative_mm. 기본 off "
                          "= T46g 전과 같다")
+    ap.add_argument("--latch-reach-kept-unseen", action="store_true",
+                    help="IFG-HSR — 손을 닫는 동안 유지한 닫기 전 형상 (closing_keep_geometry) 을 관측으로 세지 "
+                         "않는다: 그 frame 은 손 자세 기록을 바꾸지 않고, 손 기준 reach 를 적용한다. "
+                         "--latch-reach-hand-relative 와 함께만. 기본 off = T46g 그대로")
+    ap.add_argument("--latch-carry-from-closing", action="store_true",
+                    help="IFG-HSR2 — 손 기준 reach 가 관측 centroid 를 손과 함께 옮기기 시작하는 자세를, 관측 frame 이 "
+                         "닫기 시작한 요청보다 앞서면 닫기 시작한 요청의 자세로 한다 (attach 스냅샷 자세도 같다). "
+                         "닫기 전에는 물체가 손을 따라 움직이지 않는다. --latch-reach-hand-relative 와 함께만. 기본 off")
     # T46g — end
     # T57-A — begin
     ap.add_argument("--attention-source", default=None, metavar="SPEC",
@@ -1879,6 +2019,23 @@ def build_parser() -> argparse.ArgumentParser:
                     help="T57 단계 2 의 명사 probe. 안 주면 $AG3S_STORAGE_ROOT/" + "<T55 run>/verify/T55/"
                          "noun_probe.npz (T55 prereg). md5 가 prereg 의 값과 다르면 거절한다")
     # T57-A — end
+    # IFG-S2SERVE — begin
+    ap.add_argument("--confidence-gate", choices=("off", "on"), default="off",
+                    help="IFG-S2SERVE — feature 기억 신뢰도 경보 (IFG R11, LOCK arms.confidence_gate): 서버가 고른 "
+                         "attention 표면 영역 (top1-only-ns:N, FK 구 mask) 의 prefix layer-8 feature 와 직전 frame 기억 "
+                         "(chain) 의 cos 이 문턱 아래면 그 frame 의 target 접촉 예외를 보류한다 (target 을 장애물로 "
+                         "유지, 쥔 동안은 적용 안 함). --attention-source noun_target:L10H7 필요. 기록: summary_json "
+                         "confidence_gate. 기본 off")
+    ap.add_argument("--confidence-gate-threshold", type=float, default=None, metavar="S",
+                    help="IFG-S2SERVE — 경보 문턱. 안 주면 LOCK 값 0.5904207590672415 (dev 점수 10 백분위)")
+    ap.add_argument("--held-3d-rule", choices=("off", "on"), default="off",
+                    help="IFG-S2SERVE — 학습 없는 3D 쥠 규칙 (IFG-S2FK 고정): grip < 0.9 이고 target 중심 (직전 "
+                         "요청의 grounding) ↔ 손 대리점 (link_*_arm_6 아래 body 평균, --model-xml FK) 거리 ≤ "
+                         "--held-3d-max-m 이면 쥠 (target 없으면 gripper 만). grasp latch 의 attach 조건에 AND. "
+                         "revoke · 놓기는 그대로. 기록: grasp.held_3d. 기본 off")
+    ap.add_argument("--held-3d-max-m", type=float, default=None, metavar="M",
+                    help="IFG-S2SERVE — 3D 쥠 규칙의 거리 상한 (m). 안 주면 0.0813 + 0.05 = 0.1313 (IFG-S2FK)")
+    # IFG-S2SERVE — end
     ap.add_argument("--held-cover-cap-mm", type=float, default=None, metavar="MM",
                     help="T43 Z6 — attach 때 쥔 질의 구 (body cover sphere · segments, H2 덮개 모두) 의 "
                          "반지름 ≤ 관측 반폭 (attach 시점 target cluster 의 맞춘 반지름) + MM, 각 구 중심은 "
@@ -1966,6 +2123,47 @@ def t57a_record_meta(args) -> dict:
     return out
 
 
+def confidence_gate_from_args(args):
+    """IFG-S2SERVE — `ConfidenceGate` for `--confidence-gate on`, else None."""
+    if getattr(args, "confidence_gate", "off") != "on":
+        return None
+    from AG3S.ag3s.runtime.confidence_gate import GATE_THRESHOLD, ConfidenceGate
+
+    thr = getattr(args, "confidence_gate_threshold", None)
+    return ConfidenceGate(threshold=GATE_THRESHOLD if thr is None else float(thr))
+
+
+def held_3d_from_args(args):
+    """IFG-S2SERVE — `Held3DRule` (hand proxies from `--model-xml`) for `--held-3d-rule on`."""
+    from AG3S.trajopt.held_3d import HELD_3D_MAX_M, HandProxyFK, Held3DRule
+
+    dmax = getattr(args, "held_3d_max_m", None)
+    rule = Held3DRule(HandProxyFK(args.model_xml), max_m=HELD_3D_MAX_M if dmax is None else float(dmax))
+    logging.warning("!!! AG3S IFG-S2SERVE — 3D held rule ON: attach also needs grip < %.2f and (no target or hand_d ≤ "
+                    "%.4f m); target centre = previous request's grounded target; hand proxy = mean of the bodies "
+                    "below %s (%s) !!!", rule.grip_closed, rule.max_m, ", ".join(rule.fk.roots), rule.fk.model_xml)
+    return rule
+
+
+def ifg_cl1_record_meta(args) -> dict:
+    """IFG-CL1 constraint-record meta — only for the flags that are on (the default meta is unchanged)."""
+    out: dict = {}
+    if getattr(args, "target_extent", None) == "attention-surface":
+        out["target_extent"] = "attention_surface"
+    if getattr(args, "target_extent", None) == "attention-surface-hybrid":   # IFG-CL2
+        out["target_extent"] = "attention_surface_hybrid"
+        out["surface_hybrid_identity"] = str(getattr(args, "hybrid_identity", None) or "both")
+        v = getattr(args, "hybrid_other_exclude_voxels", None)   # IFG-CL2b: the value in effect
+        if v is None:
+            from AG3S.ag3s.config import EsdfConfig
+
+            v = EsdfConfig.surface_hybrid_other_exclude_voxels
+        out["surface_hybrid_other_exclude_voxels"] = float(v)
+    if getattr(args, "robot_mask", None) == "render":
+        out["robot_mask"] = "render"
+    return out
+
+
 def reject_t57a_flags(ap: argparse.ArgumentParser, args) -> None:
     """T57-A flags: a SPEC that does not parse, a flag on a server without the attention model (`--no-safe` ·
     `--no-attention` · `--no-perception`), `--task-probe` without a gate, and a gate whose probe file is
@@ -1997,11 +2195,67 @@ def reject_t57a_flags(ap: argparse.ArgumentParser, args) -> None:
 # T57-A — end
 
 
+def reject_ifg_s2serve_flags(ap: argparse.ArgumentParser, args) -> None:
+    """IFG-S2SERVE flags: a value flag without its switch, a switch on a server that cannot run it, the gate without
+    the locked seed map (noun L10H7), a non-finite / non-positive value."""
+    gate = getattr(args, "confidence_gate", "off") == "on"
+    held = getattr(args, "held_3d_rule", "off") == "on"
+    thr = getattr(args, "confidence_gate_threshold", None)
+    dmax = getattr(args, "held_3d_max_m", None)
+    if thr is not None and not gate:
+        ap.error("--confidence-gate-threshold 는 --confidence-gate on 에서만 읽힙니다 — 그대로 띄우면 효과가 있었다고 "
+                 "믿게 됩니다")
+    if dmax is not None and not held:
+        ap.error("--held-3d-max-m 는 --held-3d-rule on 에서만 읽힙니다 — 그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    if thr is not None and not math.isfinite(float(thr)):
+        ap.error(f"--confidence-gate-threshold 는 유한한 수여야 합니다 (받은 값 {thr})")
+    if dmax is not None and not (math.isfinite(float(dmax)) and float(dmax) > 0.0):
+        ap.error(f"--held-3d-max-m 는 유한한 양수입니다 (받은 값 {dmax})")
+    if (gate or held) and (args.no_safe or getattr(args, "no_perception", False)):
+        ap.error("--confidence-gate · --held-3d-rule 은 SafePolicy · AG3S 의 flag 입니다 (--no-safe · --no-perception "
+                 "은 그것을 안 만듭니다)")
+    if gate:
+        from AG3S.trajopt.attention_source import parse_attention_source
+
+        if args.no_attention:
+            ap.error("--confidence-gate on 은 attention 서버의 layer-8 feature 가 필요합니다 (--no-attention 과 함께 "
+                     "줄 수 없습니다)")
+        spec = getattr(args, "attention_source", None)
+        try:
+            src = None if spec is None else parse_attention_source(spec)
+        except ValueError:
+            src = None
+        if src is None or src.label != "noun_target:L10H7":
+            ap.error("--confidence-gate on 의 영역은 IFG LOCK 의 seed 지도 (noun L10H7) 로 고른다 — "
+                     f"--attention-source noun_target:L10H7 와 함께 주십시오 (받은 값 {spec!r})")
+
+
+def ifg_s2serve_record_meta(args) -> dict:
+    """IFG-S2SERVE constraint-record meta — only for the flags that are on (the default meta is unchanged)."""
+    out: dict = {}
+    if getattr(args, "confidence_gate", "off") == "on":
+        from AG3S.ag3s.runtime.confidence_gate import GATE_THRESHOLD
+
+        thr = getattr(args, "confidence_gate_threshold", None)
+        out["confidence_gate"] = {"score": "q_mem_chain:prefix_L8 (centered)", "memory": "chain",
+                                  "threshold": float(GATE_THRESHOLD if thr is None else thr),
+                                  "region": "top1-only-ns:N (FK-sphere mask)"}
+    if getattr(args, "held_3d_rule", "off") == "on":
+        from AG3S.trajopt.held_3d import HELD_3D_GRIP_CLOSED, HELD_3D_MAX_M
+
+        dmax = getattr(args, "held_3d_max_m", None)
+        out["held_3d_rule"] = {"max_m": float(HELD_3D_MAX_M if dmax is None else dmax),
+                               "grip_closed": HELD_3D_GRIP_CLOSED,
+                               "target_centre": "previous request's grounded target centroid"}
+    return out
+
+
 def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
     """안전 계층을 끈 채 그 계층의 flag 를 준 조합을 시작할 때 막는다.
 
     아무 일도 안 하는 flag 를 받아 놓고 뜨면, 로그를 읽는 사람은 그것이 효과가 있었다고 믿는다.
     """
+    reject_ifg_s2serve_flags(ap, args)   # IFG-S2SERVE
     # T31 — 표를 줬는데 다른 출처가 쓰이면 그 실행은 적힌 표로 돈 것처럼 읽힌다.
     if getattr(args, "joint_ranges", None) and getattr(args, "limits_source", None) != "config":
         ap.error("--joint-ranges 는 --limits-source config 일 때만 읽힙니다 "
@@ -2087,25 +2341,66 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
             ap.error(f"--nontarget-shell-voxels 는 유한한 양수입니다 (받은 값 {args.nontarget_shell_voxels})")
     # T46 F1 — end
     # T46e A13 — begin
-    oracle_on = getattr(args, "target_extent", None) == "oracle-visible"
+    extent = getattr(args, "target_extent", None)
+    oracle_on = extent in ("oracle-visible", "attention-surface")   # IFG-CL1: the same oracle path
     oracle_given = [flag for flag, v in (("--oracle-extent-identity", getattr(args, "oracle_extent_identity", None)),
                                          ("--oracle-max-dist-voxels", getattr(args, "oracle_max_dist_voxels", None)))
                     if v is not None]
     if oracle_given and not oracle_on:
-        ap.error(f"{', '.join(oracle_given)} 는 --target-extent oracle-visible 에서만 읽힙니다 — "
+        ap.error(f"{', '.join(oracle_given)} 는 --target-extent oracle-visible · attention-surface 에서만 읽힙니다 — "
                  "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    # IFG-CL2 — begin
+    if getattr(args, "hybrid_identity", None) is not None and extent != "attention-surface-hybrid":
+        ap.error("--hybrid-identity 는 --target-extent attention-surface-hybrid 에서만 읽힙니다 — "
+                 "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    v = getattr(args, "hybrid_other_exclude_voxels", None)   # IFG-CL2b
+    if v is not None and extent != "attention-surface-hybrid":
+        ap.error("--hybrid-other-exclude-voxels 는 --target-extent attention-surface-hybrid 에서만 읽힙니다 — "
+                 "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    if v is not None and not (math.isfinite(float(v)) and float(v) >= 0.0):
+        ap.error(f"--hybrid-other-exclude-voxels 는 유한한 0 이상의 수여야 합니다 (받은 값 {v})")
+    if extent == "attention-surface-hybrid":
+        if getattr(args, "target_exclusion", "ball") != "ball-owned":
+            ap.error("--target-extent attention-surface-hybrid 는 ball-owned 분할에 보호를 겁니다 — "
+                     f"--target-exclusion ball-owned 와 함께 주십시오 (받은 값 {args.target_exclusion})")
+        if not _policy_reads_target_free(args.target_field_policy):
+            ap.error("--target-extent attention-surface-hybrid 는 target 없는 계층의 분할을 바꿉니다 — "
+                     "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오 "
+                     f"(받은 값 {args.target_field_policy}: relax · none 은 그 계층을 만들지 않습니다)")
+        if args.no_safe or getattr(args, "no_perception", False):
+            ap.error("--target-extent attention-surface-hybrid 는 AG3S 의 거리장을 고치는 flag 입니다 "
+                     "(--no-safe · --no-perception 은 그것을 안 만듭니다)")
+    # IFG-CL2 — end
+    # IFG-CL1 — begin
+    if extent in ("attention-surface", "attention-surface-hybrid"):   # IFG-CL2: the same locked source
+        from AG3S.trajopt.attention_source import parse_attention_source
+
+        spec = getattr(args, "attention_source", None)
+        try:
+            src = None if spec is None else parse_attention_source(spec)
+        except ValueError:
+            src = None
+        if src is None or src.label != "noun_target:L10H7":
+            ap.error(f"--target-extent {extent} 는 IFG LOCK 의 seed 지도 (noun L10H7) 로 고정된 방법입니다 — "
+                     f"--attention-source noun_target:L10H7 와 함께 주십시오 (받은 값 {spec!r})")
+        if args.no_attention:
+            ap.error(f"--target-extent {extent} 는 attention 이 필요합니다 (--no-attention 과 함께 줄 수 없습니다)")
+    if getattr(args, "robot_mask", None) == "render" and (args.no_safe or getattr(args, "no_perception", False)):
+        ap.error("--robot-mask render 는 AG3S 의 depth mask 를 고치는 flag 입니다 "
+                 "(--no-safe · --no-perception 은 그것을 안 만듭니다)")
+    # IFG-CL1 — end
     if oracle_on:
         # T46f A14c — `none` (예외 없음, T46f A14) 도 `relax` 처럼 target-free 계층을 만들지 않는다: oracle 이 바꿀
         # 계층이 없다. `--links` (gripper_wrist 포함) 와는 무관하다 — 형상은 제약 모델, oracle 은 거리장이다.
         if not _policy_reads_target_free(args.target_field_policy):
-            ap.error("--target-extent oracle-visible 는 target 없는 계층의 범위를 바꿉니다 — "
+            ap.error(f"--target-extent {extent} 는 target 없는 계층의 범위를 바꿉니다 — "
                      "--target-field-policy exclude-authorized (또는 exclude-all) 와 함께 주십시오 "
                      f"(받은 값 {args.target_field_policy}: relax · none 은 그 계층을 만들지 않습니다)")
         if args.no_safe or getattr(args, "no_perception", False):
-            ap.error("--target-extent oracle-visible 는 AG3S 의 거리장을 고치는 flag 입니다 "
+            ap.error(f"--target-extent {extent} 는 AG3S 의 거리장을 고치는 flag 입니다 "
                      "(--no-safe · --no-perception 은 그것을 안 만듭니다)")
         if args.nontarget_evidence not in (None, "proximity") or args.owned_ambiguous not in (None, "keep"):
-            ap.error("--target-extent oracle-visible 는 ball-owned 미세 계층의 분할을 GT 로 대신합니다 — "
+            ap.error(f"--target-extent {extent} 는 ball-owned 미세 계층의 분할을 oracle 경로로 대신합니다 — "
                      "--nontarget-evidence surface · --owned-ambiguous remove (T46 F1 · F2) 는 그 분할에만 걸리므로 "
                      "함께 주면 효과가 없습니다")
         md = getattr(args, "oracle_max_dist_voxels", None)
@@ -2140,11 +2435,29 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ap.error(f"--attention-split-radius-mm 는 양의 mm 입니다 (받은 값 {rr})")
     a4_ag3s = [f for f, on in (("--attention-split-radius-mm", rr is not None),
                                ("--attention-split-ratio-source",
-                                getattr(args, "attention_split_ratio_source", None) is not None)) if on]
+                                getattr(args, "attention_split_ratio_source", None) is not None),
+                               ("--attention-split-partition", getattr(args, "attention_split_partition", False)),
+                               ("--split-supersedes-anchor", getattr(args, "split_supersedes_anchor", False))) if on]
     if a4_ag3s and (args.no_safe or getattr(args, "no_perception", False)):
         ap.error(f"{', '.join(a4_ag3s)} 는 AG3S target grounding 의 flag 입니다 (--no-safe · "
                  "--no-perception 은 그것을 안 만듭니다) — 빼고 띄우십시오")
     # T44b A4 — end
+    if getattr(args, "latch_reach_kept_unseen", False) and not getattr(args, "latch_reach_hand_relative", False):
+        ap.error("--latch-reach-kept-unseen 는 --latch-reach-hand-relative 의 손 기준 reach 에만 작용합니다 — "
+                 "함께 주십시오")   # IFG-HSR
+    if getattr(args, "latch_carry_from_closing", False) and not getattr(args, "latch_reach_hand_relative", False):
+        ap.error("--latch-carry-from-closing 는 --latch-reach-hand-relative 의 손 기준 reach 에만 작용합니다 — "
+                 "함께 주십시오")   # IFG-HSR2
+    if getattr(args, "grasp_anchor_radius_mm", None) is not None and getattr(args, "grasp_anchor", None) is None:
+        ap.error("--grasp-anchor-radius-mm 는 --grasp-anchor 와 함께만 씁니다")   # IFG-TOA
+    if getattr(args, "wrist_track_scale", None) is not None and not 0.0 < float(args.wrist_track_scale) < 1.0:
+        ap.error("--wrist-track-scale 은 0 과 1 사이 (끝 제외) 값이어야 합니다")   # IFG-TOW
+    if getattr(args, "grasp_anchor", None) is not None and not float(args.grasp_anchor) > 0.0:
+        ap.error("--grasp-anchor W 는 0 보다 커야 합니다")   # IFG-TOA
+    if getattr(args, "deflection_rate_after_grasp", False) and not (
+            getattr(args, "w_deflection_rate", None) is not None and float(args.w_deflection_rate) > 0.0):
+        ap.error("--deflection-rate-after-grasp 는 --w-deflection-rate (> 0) 항을 쥐기 전에 빼는 flag 입니다 — "
+                 "--w-deflection-rate 와 함께 주십시오")   # IFG-TOB
     t43t_ag3s = [name for name, on in (
         ("--closing-keep-geometry", getattr(args, "closing_keep_geometry", False)),
         ("--target-volume-exempt", getattr(args, "target_volume_exempt", False)),
@@ -2153,6 +2466,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ("--supported-max-bottom-mm", getattr(args, "supported_max_bottom_mm", None) is not None),
         ("--held-slip-detach", getattr(args, "held_slip_detach", False)),
         ("--latch-reach-hand-relative", getattr(args, "latch_reach_hand_relative", False)),  # T46g
+        ("--latch-reach-kept-unseen", getattr(args, "latch_reach_kept_unseen", False)),  # IFG-HSR
+        ("--latch-carry-from-closing", getattr(args, "latch_carry_from_closing", False)),  # IFG-HSR2
         ("--held-cover-cap-mm", getattr(args, "held_cover_cap_mm", None) is not None),
         ("--hold-follow-to", getattr(args, "hold_follow_to", None) is not None),
         ("--held-free-observed-mm", getattr(args, "held_free_observed_mm", None) is not None))
@@ -2421,6 +2736,12 @@ def obstacle_overrides(args) -> dict:
             raise SystemExit("--held-obstacle-margin 은 --obstacle-margin M (> 0) 과 함께 줘야 "
                              "합니다 — 쥔 물체 행에 그 여유를 주는 스위치입니다")
         out["held_obstacle_margin"] = True
+    nbc = getattr(args, "neighbour_contact_mm", None)
+    if nbc is not None:
+        # IFG-NBC — light contact of the grasping fingers with a neighbour object near the target.
+        if not float(nbc) > 0.0:
+            raise SystemExit(f"--neighbour-contact-mm 은 0 보다 커야 합니다: {nbc}")
+        out["neighbour_contact_depth"] = float(nbc) / 1000.0
     return out
 
 
@@ -2603,6 +2924,21 @@ def announce_ta(to_config) -> None:
     if float(c.w_deflection_rate) > 0.0:
         log.warning("TO deflection rate (T43 TA B): w_deflection_rate=%g (‖ΔD‖², incl. the "
                     "executed boundary)", c.w_deflection_rate)
+    if float(getattr(c, "w_grasp_tcp", 0.0)) > 0.0 or float(getattr(c, "w_grasp_goal", 0.0)) > 0.0:
+        log.warning("TO grasp anchor (IFG-TOA): w_grasp_tcp=%g w_grasp_goal=%g radius=%.0f mm — pre-grasp palm kept on "
+                    "the policy path and at the frozen grasp goal", c.w_grasp_tcp, c.w_grasp_goal,
+                    c.grasp_anchor_radius * 1000.0)
+    if float(getattr(c, "wrist_track_scale", 1.0)) < 1.0:
+        log.warning("TO wrist-weighted tracking (IFG-TOW): scale %g on arm joints %s within %.0f mm of the target, "
+                    "pre-grasp only", c.wrist_track_scale, list(c.wrist_track_joints), c.wrist_track_radius * 1000.0)
+    if getattr(to_config.safety, "recovery_retreat", False):
+        s_ = to_config.safety
+        log.warning("TO recovery retreat (IFG-REC): hold streak %d, empty-grasp streak %d, clear %.0f mm, %.3f rad/row, max %d",
+                    s_.recovery_hold_streak, s_.recovery_empty_streak, s_.recovery_clear_m * 1000.0,
+                    s_.recovery_step_rad, s_.recovery_max)
+    if getattr(c, "deflection_rate_after_grasp", False):
+        log.warning("TO deflection rate after grasp (IFG-TOB): the T43 TA B term is dropped on chunks "
+                    "before the grasp (latch searching / latched / closing)")
     from AG3S.trajopt.config import QpConfig
 
     if (to_config.qp.eps_abs, to_config.qp.eps_rel) != (QpConfig.eps_abs, QpConfig.eps_rel):
@@ -2662,7 +2998,9 @@ def trajopt_config_from_args(args):
         **({"qp": qp} if qp else {}),
         # 기하 인증 요구는 여기 **한 곳**에서만 켜고 끈다 (`--no-perception` 은 `ToOnlyPolicy` 가
         # 끈다 — 인증할 기하가 애초에 없다).
-        "safety": {"require_certified_geometry": not args.allow_uncertified},
+        "safety": {"require_certified_geometry": not args.allow_uncertified,
+                   # IFG-REC — only when given.
+                   **({"recovery_retreat": True} if getattr(args, "recovery_retreat", False) else {})},
         # 다듬는 창. `execution` 이면 `horizon.execution_length` 를 따라가므로 실행 길이가
         # 두 번 적히지 않는다 (`config.PLAN_EXECUTION_WINDOW` 머리말).
         "horizon": {"plan_horizon": resolve_plan_horizon(args.plan_horizon), **ta_horizon,
@@ -2805,6 +3143,9 @@ def main() -> None:
                 if task_probe is not None or (source is not None and source.is_noun):
                     t57a["noun_tokens"] = NounTokens.from_config(args.config)
                 log_source(source, task_probe)
+                if getattr(args, "confidence_gate", "off") == "on":
+                    # IFG-S2SERVE — the prefix layer-8 image residual rides on the result (never on the wire).
+                    t57a["prefix_feature"] = True
             served_policy = AttentionPolicy(policy, attn_model,
                                             subtask_probe=args.subtask_probe or "default", **t57a)
             probe = served_policy.subtask_probe
@@ -2876,7 +3217,11 @@ def main() -> None:
                                   **({"placed_no_seed_certify": True}
                                      if getattr(args, "placed_no_seed_certify", False) else {})},
                       # T57-A — 켰을 때만 키가 생긴다.
-                      **t57a_record_meta(args)})
+                      **t57a_record_meta(args),
+                      # IFG-CL1 — 켰을 때만 키가 생긴다.
+                      **ifg_cl1_record_meta(args),
+                      # IFG-S2SERVE — 켰을 때만 키가 생긴다.
+                      **ifg_s2serve_record_meta(args)})
             # **시작할 때 거절한다.** 기록기가 이 backend 의 거리장을 실을 수 없으면 청크마다
             # 예외가 나고, 예전에는 그것이 `print` 한 줄이라 75 chunk 를 돌리고도 빈 디렉토리가
             # 남았다 (2026-09-28). 여기서 죽으면 체크포인트를 올리기 전이다.
@@ -2921,6 +3266,12 @@ def main() -> None:
                 "지지면 %s · target · 쥔 물체 행은 제외 (T41 a)",
                 to_config.collision.obstacle_margin * 1000,
                 "포함" if to_config.collision.obstacle_margin_support else "제외")
+        if float(getattr(to_config.collision, "neighbour_contact_depth", 0.0)) > 0.0:
+            c_ = to_config.collision
+            logging.warning(
+                "TO neighbour contact (IFG-NBC): fingers may overlap a neighbour obstacle by %.0f mm within %.0f mm of "
+                "the target, palm within %.0f mm, pre-grasp only", c_.neighbour_contact_depth * 1000,
+                c_.neighbour_contact_radius * 1000, c_.neighbour_contact_gate * 1000)
         if getattr(to_config.collision, "held_obstacle_margin", False):
             logging.warning(
                 "TO held_obstacle_margin: ON — 쥔 물체 행도 같은 분류: 장애물이 최근접이면 %.1f mm "
@@ -2987,7 +3338,9 @@ def main() -> None:
                             contact=nonauthorized_target_margin_section(args) or None,  # T44e A9
                             held_free_observed_pad=(
                                 None if args.held_free_observed_mm is None
-                                else float(args.held_free_observed_mm) / 1000.0)),
+                                else float(args.held_free_observed_mm) / 1000.0),
+                            # IFG-S2SERVE — 켰을 때만 (기본 off = None, AG3S 호출이 예전 그대로).
+                            confidence_gate=confidence_gate_from_args(args)),
             static_geometry=load_static_geometry(args.static_geometry, args.model_xml,
                                                  links=args.links),
             to_config=to_config,
@@ -2996,6 +3349,8 @@ def main() -> None:
             shadow=args.shadow,
             # T57-A — 켰을 때만 (기본 off = 인자 없음).
             **({"task_gate": task_gate_mode(args)} if task_gate_mode(args) != "off" else {}),
+            # IFG-S2SERVE — 켰을 때만 (기본 off = 인자 없음).
+            **({"held_3d": held_3d_from_args(args)} if getattr(args, "held_3d_rule", "off") == "on" else {}),
         )
         # **어느 모드로 떠 있는지 시작할 때 크게 말한다.** legacy backend 경고와 같은 이유다 —
         # 조용히 shadow 로 떠 있으면(또는 shadow 가 아닌 채로) 로그를 읽는 사람이 그 실행이

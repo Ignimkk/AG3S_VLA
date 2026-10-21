@@ -250,6 +250,23 @@ class ClusteringConfig:
     #: band read ~1:1 (T44M, VLA attention, 34 merged demo frames: 12 mm radius + raw ratio → 24
     #: target-only clusters vs 20 at the default, non-merged 30/30, no wrong pick). Off by default.
     attention_split_ratio_source: str = "normalized"
+    #: **Attention partition when the re-cluster finds one component (IFG-SPLIT, 2026-10-20).**
+    #: A neighbour fruit touching the target (apple–banana gap 4–12 mm) stays connected at the
+    #: split radius, so the T31b split ends `one_component` and the target stays merged (IFG-APPLE:
+    #: 4 of 24 scenes, 136–151 mm clusters, 3 failed). Inside those clusters the per-point raw
+    #: attention still separates the fruits (median 0.05–0.18 vs 3e-5–4e-3, AUC 0.86–0.99). True =
+    #: such a cluster is cut by attention instead (two classes of log attention, Otsu, k-NN smoothed;
+    #: the largest-mass connected high-attention part is the target), under the same ratio gate.
+    #: False (default) = the T31b decision, bit for bit.
+    attention_split_partition: bool = False
+    #: The attention partition is taken only if it shortens the cluster's largest extent by at least
+    #: this much (m) — a lone fruit with an unevenly lit side is not cut in two. **0.03**.
+    attention_partition_min_drop: float = 0.03
+    #: **A split target replaces an unsplit anchor (IFG-SPLIT).** Before a grasp, when the held
+    #: object's cluster this frame is the target component of an attention split and the anchor is
+    #: not (it was adopted merged), the split component becomes the anchor instead of counting as a
+    #: hand-occluded subset (T30 F3b `subset_kept_anchor`). False (default) = T30 F3b as is.
+    split_supersedes_anchor: bool = False
     #: **Split the anchor once when a grasp attempt ends (T32b S2).** While `TargetConfirm` is
     #: frozen the split is off and the geometry follows the observation, so the geometry standing
     #: when the freeze is released — the new anchor — can be the apple merged with its neighbour
@@ -303,6 +320,22 @@ class ClusteringConfig:
     #: unchanged. AG3S stores it; the decision is the latch's. False (default) = bit-identical.
     latch_reach_hand_relative: bool = False
     # T46g — end
+    #: **IFG-HSR — a closing-kept frame is not an observation for the latch reach.** While the
+    #: gripper closes, `closing_keep_geometry` keeps the pre-closing (on-table) geometry and counts
+    #: the frame as seen, so the reach of a fruit the policy already lifted is measured to the table
+    #: (IFG-CL3 423 · 831 · 936: 123–159 mm on the first lifted request, attach one request late at
+    #: 17–19 cm lift). True (needs `latch_reach_hand_relative`) = such a frame neither re-pins the seen
+    #: state nor counts as visible for the hand-relative reach: the carry starts from the last frame
+    #: that really observed the object. False (default) = T46g as is.
+    latch_reach_kept_unseen: bool = False
+    #: **IFG-HSR2 — the carry starts at the closing start.** The hand-relative reach carries the last
+    #: observed centroid with the hand from the pose of the frame that observed it. Before the fingers
+    #: close the object does not move with the hand, so a pin left during the approach (IFG-10EP 1404:
+    #: pin at request 44, closing at 54 — centre 56 mm off, attach on a wrong place, revoked) carries the
+    #: approach too. True (needs `latch_reach_hand_relative`) = when the latch entered CLOSING after the
+    #: pinned frame, the carry (and the attach snapshot pose) starts from the pose of the request that
+    #: entered CLOSING. False (default) = as before.
+    latch_carry_from_closing: bool = False
     #: **T43 Z6 — cap the held query spheres at attach.** A distance `a` (m) = at attach every held
     #: query sphere (R2 body cover in `sphere` and `segments` mode, or the H2 covering spheres) gets
     #: radius ≤ observed half-width + `a` and a centre within `a` of the observed body centre (pulled
@@ -460,6 +493,16 @@ class ClusteringConfig:
             raise AG3SConfigError(
                 f"clustering.attention_split_ratio_source must be 'normalized' or 'raw', "
                 f"got {self.attention_split_ratio_source!r}")
+        for name in ("attention_split_partition", "split_supersedes_anchor", "latch_reach_kept_unseen",
+                     "latch_carry_from_closing"):
+            if not isinstance(getattr(self, name), bool):
+                raise AG3SConfigError(
+                    f"clustering.{name} must be true or false, got {getattr(self, name)!r}")
+        md = self.attention_partition_min_drop
+        if not (isinstance(md, (int, float)) and not isinstance(md, bool)
+                and math.isfinite(float(md)) and float(md) >= 0.0):
+            raise AG3SConfigError(
+                f"clustering.attention_partition_min_drop must be a finite length >= 0, got {md!r}")
         if not isinstance(self.split_anchor_on_release, bool):
             raise AG3SConfigError(
                 f"clustering.split_anchor_on_release must be true or false, "
@@ -1131,8 +1174,38 @@ class EsdfConfig:
     #: oracle 은 **진단 상한**이다 (제안이 아니다). target-free 계층이 만들어지는 조건 (`target_field_policy`, 지금 manipulated
     #: 기하가 있고 쥔 것이 없음) · 공 (기록) · 창 · 권한 · 거친 target-free 계층은 그대로 `target_exclusion` 을 따른다.
     #: segmentation 이 안 오거나 target 표본이 없으면 그 frame 은 `estimated` 로 짓고 이유를 `stats["target_free"]["oracle"]` 에 남긴다.
+    #:
+    #: **IFG-CL1 — `"attention_surface"`**: `oracle_visible` 과 같은 경로 (memory · carving · split · 계층 · 권한) 에 넣는 code 영상을
+    #: client GT 대신 **서버가 attention + depth 로 만든다** (`runtime.attention_surface`, IFG LOCK `top1-only-ns+rm:N`:
+    #: noun L10H7 top-5 seed → 표면 graph → seed 질량 최대 영역 = code 1, 나머지 유효 non-robot pixel = code 2). serve 는
+    #: `--attention-source noun_target:L10H7` 없이는 시작하지 않는다. 영역이 없는 frame (seed · 영역 없음 · 카메라 · attention 없음)
+    #: 은 `estimated` 로 짓고 이유를 `stats["target_free"]["attention_surface"]` 에 남긴다.
+    #:
+    #: **IFG-CL2 — `"attention_surface_hybrid"`**: 지우는 범위는 `ball_owned` (공 + cloud 근거, = `estimated`) 그대로, attention-surface
+    #: (같은 LOCK 선택) 는 **보호에만** 쓴다 (`runtime.attention_surface_hybrid`, `curobo_builder.surface_protect_split`): 공 안 seed 를
+    #: 같은 `ball_owned` 규칙으로 한 번 더 가른다 — target 근거 = 선택 영역 node, non-target 근거 = 선택 밖 · 비지지면 node — 그리고 두 분할
+    #: 모두 지우라는 seed 만 지운다. 선택 영역이 manipulated 물체와 맞지 않는 frame (`surface_hybrid_identity`) · 영역이 없는 frame 은 보호
+    #: 없이 (= `estimated`) 짓고 이유를 `stats["target_free"]["attention_surface_hybrid"]` 에 남긴다. `target_exclusion = "ball_owned"` 필수.
+    #: oracle memory 는 쓰지 않는다 (`oracle_*` 값은 읽지 않는다).
     target_extent: str = "estimated"
-    TARGET_EXTENTS = ("estimated", "oracle_visible")
+    TARGET_EXTENTS = ("estimated", "oracle_visible", "attention_surface", "attention_surface_hybrid")
+    #: IFG-CL2 — `attention_surface_hybrid` 의 identity 안전장치: `"both"` (기본) · `"instance"` (manipulated 기하 점의 ≥ ½ 이 선택 node
+    #: 위 — oracle 경로의 `identity_unresolved` 와 같은 규칙) · `"centre"` (선택 영역 중심이 공 안). 다른 extent 에서는 읽지 않는다.
+    surface_hybrid_identity: str = "both"
+    SURFACE_HYBRID_IDENTITIES = ("both", "instance", "centre")
+    #: IFG-CL2b — `attention_surface_hybrid` 의 "other" 근거에서 manipulated 기하 점 (identity guard 가 읽는 그 점) 에서
+    #: `V × timing.fusion_voxel_size` 안의 node 를 뺀다 (선택 영역이 과일 일부만 덮을 때 target 자신의 표면이 target seed 를
+    #: 보호하지 않게). 값은 미리 고정한 1.0 (= 10 mm). `0` = IFG-CL2 그대로 (비트 동일). manipulated 기하가 없으면 빼지 않는다.
+    #: 다른 extent 에서는 읽지 않는다.
+    surface_hybrid_other_exclude_voxels: float = 1.0
+    #: **IFG-CL1 — 로봇 pixel 을 무엇으로 정하나** (TSDF 입력 · `attention_surface` graph 입력).
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"spheres"` (기본) | 지금 그대로 — self-filter 구 (inflation · guard · 쥔 물체 구) 의 depth robot mask. 값 비트 동일 |
+    #: | `"render"` | 로봇 모델 (서버 `--model-xml`) 을 요청 관절 상태로 렌더한 robot-only depth 와 관측 depth 차 ≤ 10 mm 인 pixel (`runtime.robot_render_mask`, IFG R6). TSDF 에는 **구 mask ∪ render mask** 를 뺀다 (쥔 물체 · guard · inflation 은 구 mask 가 계속 맡는다), `attention_surface` graph 는 render mask 만 쓴다 (offline R6 와 같다). AG3S 생성에 `robot_render=` 가 필요하다 |
+    robot_mask: str = "spheres"
+    ROBOT_MASKS = ("spheres", "render")
     #: `oracle_visible` — seed 후보 = target 표본에서 이 거리 (미세 voxel) 안의 voxel. 6 (= 30 mm @ 5 mm) 은 미세 TSDF
     #: truncation (`fine_truncation_m` 30 mm) 과 같다 — 보인 면 뒤 음수 띠의 끝에 생기는 내부 seed 까지 닿는다.
     oracle_max_dist_voxels: float = 6.0
@@ -1281,11 +1354,27 @@ class EsdfConfig:
             raise AG3SConfigError(
                 f"esdf.oracle_extent_identity 는 {self.ORACLE_EXTENT_IDENTITIES} 중 하나여야 합니다: "
                 f"{self.oracle_extent_identity!r}")
-        if self.target_extent == "oracle_visible" and (
+        if self.robot_mask not in self.ROBOT_MASKS:
+            raise AG3SConfigError(
+                f"esdf.robot_mask 는 {self.ROBOT_MASKS} 중 하나여야 합니다: {self.robot_mask!r}")
+        # IFG-CL2
+        if self.surface_hybrid_identity not in self.SURFACE_HYBRID_IDENTITIES:
+            raise AG3SConfigError(
+                f"esdf.surface_hybrid_identity 는 {self.SURFACE_HYBRID_IDENTITIES} 중 하나여야 합니다: "
+                f"{self.surface_hybrid_identity!r}")
+        v = self.surface_hybrid_other_exclude_voxels   # IFG-CL2b
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(float(v)) or float(v) < 0.0:
+            raise AG3SConfigError(
+                f"esdf.surface_hybrid_other_exclude_voxels 는 유한한 0 이상의 수여야 합니다: {v!r}")
+        if self.target_extent == "attention_surface_hybrid" and self.target_exclusion != "ball_owned":
+            raise AG3SConfigError(
+                "esdf.target_extent='attention_surface_hybrid' 는 ball_owned 분할에 보호를 거는 것입니다 — "
+                f"esdf.target_exclusion='ball_owned' 와 함께 주십시오 (받은 값 {self.target_exclusion!r})")
+        if self.target_extent in ("oracle_visible", "attention_surface") and (
                 self.nontarget_evidence != "proximity" or self.owned_ambiguous != "keep"):
             # F1 · F2 바꾸는 것은 `ball_owned` 미세 계층의 분할뿐이고, oracle 이 그 분할을 대신한다 — 효과 없는 설정.
             raise AG3SConfigError(
-                "esdf.target_extent='oracle_visible' 는 미세 target-free 계층의 분할을 GT 로 대신합니다 — "
+                f"esdf.target_extent={self.target_extent!r} 는 미세 target-free 계층의 분할을 oracle 경로로 대신합니다 — "
                 "T46 F1 (nontarget_evidence) · F2 (owned_ambiguous) 는 그 분할에만 걸리므로 함께 두면 효과가 없습니다: "
                 f"nontarget_evidence={self.nontarget_evidence!r}, owned_ambiguous={self.owned_ambiguous!r}")
         if not isinstance(self.target_free_coarse, bool):

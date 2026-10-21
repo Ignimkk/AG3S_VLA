@@ -197,6 +197,11 @@ class ConstraintRecordWriter:
         mask = debug.get("support_mask")
         if mask is not None:
             payload["support_mask"] = self._thin(np.asarray(mask, bool))
+        # IFG-CL1: the server's attention-surface code images (uint8, 0 none/robot · 1 target · 2 static) — the key
+        # exists only with `esdf.target_extent == "attention_surface"` (· IFG-CL2 `"attention_surface_hybrid"`) and a
+        # frame that selected a region.
+        for cam, codes in (debug.get("attention_surface_codes") or {}).items():
+            payload[f"attention_surface_codes_{getattr(cam, 'value', cam)}"] = np.asarray(codes, np.uint8)
 
         # --- attention: 카메라별 원본 맵 ---------------------------------------------
         # 역투영·grounding 을 나중에 다른 파라미터로 다시 돌려보려면 맵 자체가 있어야 한다.
@@ -238,6 +243,10 @@ class ConstraintRecordWriter:
         if field is not None:
             summary.update(self._write_field(field, payload, occupancy))
             summary.update(self._write_exclusion_trace(field, payload))
+            # IFG-CL1: the rendered-robot mask record as real JSON (only with `esdf.robot_mask == "render"`).
+            render = (getattr(field, "stats", None) or {}).get("robot_mask_render")
+            if render:
+                summary["robot_mask_render"] = json.loads(json.dumps(render, default=_scalar))
 
         # --- 제약 행 -------------------------------------------------------------------
         if sphere_centres is not None:
@@ -503,7 +512,9 @@ class ConstraintRecordWriter:
         return info
 
     #: T44 I0 — chunk npz keys of the target-free exclusion trace (`field.exclusion_trace`).
-    EXCLUSION_TRACE_KEYS = ("removed_ijk", "nontarget_kept_ijk", "ambiguous_ijk", "unowned_kept_ijk")
+    EXCLUSION_TRACE_KEYS = ("removed_ijk", "nontarget_kept_ijk", "ambiguous_ijk", "unowned_kept_ijk",
+                            # IFG-CL2: only with `attention_surface_hybrid` and the protection on that frame.
+                            "protected_ijk")
 
     @classmethod
     def _write_exclusion_trace(cls, field, payload: dict[str, Any]) -> dict[str, Any]:
@@ -523,7 +534,15 @@ class ConstraintRecordWriter:
                     "n_ambiguous", "n_unowned_removed", "n_unowned_kept", "n_target_owned",
                     "n_sign_candidates", "n_sign_candidates_nonseed", "owned", "classify_ms",
                     "n_ball_seeds_excluded", "build_ms", "geometry_version", "nontarget",
-                    "coarse")
+                    "coarse",
+                    # IFG-CL1 (present only with `target_extent == "attention_surface"`): the surface record and
+                    # the oracle-path record it feeds.
+                    "attention_surface",
+                    # IFG-CL2 (present only with `target_extent == "attention_surface_hybrid"`): the protection record
+                    # (identity guard · why) and the builder's protection counts.
+                    "attention_surface_hybrid", "surface_protect")
+            if "attention_surface" in tf:
+                keep = keep + ("oracle",)
             info["target_exclusion"] = json.loads(json.dumps(
                 {k: tf[k] for k in keep if k in tf}, default=_scalar))
         trace = getattr(field, "exclusion_trace", None)
