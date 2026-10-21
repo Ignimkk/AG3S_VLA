@@ -1,0 +1,121 @@
+{
+ "arms": {
+  "C1aN": {
+   "hold_chunks_per_run": {
+    "median": 1.0,
+    "max": 49
+   },
+   "completion_s_success_runs": [
+    13.333333333333334,
+    11.2,
+    15.466666666666667,
+    15.466666666666667,
+    13.333333333333334,
+    13.333333333333334,
+    13.333333333333334,
+    13.333333333333334,
+    18.133333333333333,
+    13.333333333333334,
+    14.4,
+    15.466666666666667,
+    14.933333333333334,
+    14.4,
+    13.866666666666667,
+    16.533333333333335
+   ],
+   "n_runs": 24,
+   "n_success": 16,
+   "n_primary": 16,
+   "n_grasp_fail": 7,
+   "failure_modes": {
+    "no_grasp": 7,
+    "ok": 15,
+    "slip_at_lift": 1,
+    "slip_in_transport": 1
+   },
+   "n_nonauth_target": 2,
+   "n_obstacle_contact": 0,
+   "n_neighbour_contact": 4,
+   "hold_chunks_sum": 119,
+   "runs_with_hold": 17,
+   "completion_s": {
+    "n": 16,
+    "median": 14.133333333333333,
+    "min": 11.2,
+    "max": 18.133333333333333
+   },
+   "by_stratum": {
+    "clear": {
+     "n_runs": 16,
+     "n_success": 12,
+     "n_primary": 12,
+     "n_grasp_fail": 3
+    },
+    "place": {
+     "n_runs": 8,
+     "n_success": 4,
+     "n_primary": 4,
+     "n_grasp_fail": 4
+    }
+   }
+  },
+  "S2": {
+   "hold_chunks_per_run": {
+    "median": 1.0,
+    "max": 45
+   },
+   "completion_s_success_runs": [
+    13.333333333333334,
+    11.2,
+    15.466666666666667,
+    15.466666666666667,
+    13.333333333333334,
+    13.333333333333334,
+    13.333333333333334,
+    13.333333333333334,
+    18.133333333333333,
+    13.333333333333334,
+    14.4,
+    15.466666666666667,
+    14.933333333333334,
+    14.4,
+    16.533333333333335
+   ],
+   "n_runs": 24,
+   "n_success": 15,
+   "n_primary": 15,
+   "n_grasp_fail": 7,
+   "failure_modes": {
+    "no_grasp": 7,
+    "ok": 14,
+    "slip_at_lift": 2,
+    "slip_in_transport": 1
+   },
+   "n_nonauth_target": 1,
+   "n_obstacle_contact": 0,
+   "n_neighbour_contact": 4,
+   "hold_chunks_sum": 105,
+   "runs_with_hold": 17,
+   "completion_s": {
+    "n": 15,
+    "median": 14.4,
+    "min": 11.2,
+    "max": 18.133333333333333
+   },
+   "by_stratum": {
+    "clear": {
+     "n_runs": 16,
+     "n_success": 12,
+     "n_primary": 12,
+     "n_grasp_fail": 3
+    },
+    "place": {
+     "n_runs": 8,
+     "n_success": 3,
+     "n_primary": 3,
+     "n_grasp_fail": 4
+    }
+   }
+  }
+ }
+}

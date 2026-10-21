@@ -1,0 +1,347 @@
+{
+ "step": "IFG-APPLE-TOA2",
+ "written": "2026-10-21 KST (lead; CPU analysis after a 51-min GPU run)",
+ "plain_names": {
+  "E0": "VLA 단독",
+  "SPL": "기존 방식 + target 분리 (기존 기록)",
+  "SPLA": "SPL + 잡을 지점 고정 (--grasp-anchor 2000, 목표 행 = 닫는 행부터 3행)"
+ },
+ "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-TOA2",
+ "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-TOA2/agg4arm",
+ "gpu_window_utc": [
+  "2026-10-20T18:14:58",
+  "2026-10-20T19:05:51"
+ ],
+ "smoke": {
+  "passed": true,
+  "first_chunk_max_abs_diff_vs_E0": 5.867937691306224e-08
+ },
+ "code": "snapshot_toa2 tree cba727f0a20d4eb4f2e1c8a6ad4a22437ef96c2b",
+ "numbers": {
+  "success": {
+   "E0": 10,
+   "SPL": 7,
+   "SPLA": 7
+  },
+  "paired": {
+   "SPL_vs_SPLA": {
+    "both": 6,
+    "only_SPL": 1,
+    "only_SPLA": 1,
+    "neither": 2,
+    "missing": 0,
+    "n_pairs": 10,
+    "mcnemar_exact_p": 1.0,
+    "rate_SPL": 0.7,
+    "rate_SPLA": 0.7,
+    "diff_SPLA_minus_SPL": 0.0,
+    "ci95_bootstrap": [
+     -0.3,
+     0.3
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   },
+   "E0_vs_SPLA": {
+    "both": 7,
+    "only_E0": 3,
+    "only_SPLA": 0,
+    "neither": 0,
+    "missing": 0,
+    "n_pairs": 10,
+    "mcnemar_exact_p": 0.25,
+    "rate_E0": 1.0,
+    "rate_SPLA": 0.7,
+    "diff_SPLA_minus_E0": -0.3,
+    "ci95_bootstrap": [
+     -0.6,
+     0.0
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   }
+  },
+  "per_episode": {
+   "56": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "SPLA": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 4
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "211": {
+    "SPL": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6
+    },
+    "SPLA": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 63
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "1837": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 15
+    },
+    "SPLA": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 4
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 0
+    }
+   },
+   "320": {
+    "SPL": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "SPLA": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "753": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1
+    },
+    "SPLA": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "954": {
+    "SPL": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "SPLA": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "309": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "SPLA": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "250": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "SPLA": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "1668": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "SPLA": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 8
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "126": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "SPLA": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   }
+  },
+  "ep954": {
+   "anchor_frozen_request": 10,
+   "anchor_active_requests": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+   ],
+   "TO_edit_k12_k14": {
+    "translation_mm": [
+     5.4,
+     15.6,
+     11.3
+    ],
+    "rotation_deg": [
+     6.2,
+     13.7,
+     9.8
+    ],
+    "palm_dev_from_reference_max_mm": [
+     0.63,
+     2.57,
+     3.99
+    ]
+   },
+   "SPL_TO_edit_k12_k14": {
+    "translation_mm": [
+     17.5,
+     19.0,
+     15.9
+    ],
+    "rotation_deg": [
+     1.7,
+     1.7,
+     1.4
+    ]
+   },
+   "goal_err_mm_k14_reference_result": [
+    8.41,
+    4.5
+   ],
+   "first_close_t": {
+    "E0": 144,
+    "SPL": 146,
+    "SPLA": 113
+   },
+   "tcp_minus_apple_t0_at_first_close_mm": {
+    "E0": [
+     -4,
+     15,
+     12
+    ],
+    "SPL": [
+     13,
+     38,
+     23
+    ],
+    "SPLA": [
+     5,
+     15,
+     25
+    ]
+   }
+  },
+  "ep211": {
+   "hold_chunks": 63,
+   "pattern": "from request 11 every anchored solve 'violated' (window/tail penetration 21-24 mm), all 3 SQP candidates rejected (violation barely reduced while the anchor cost rose 20-30), the reference returned and the chunk held",
+   "k17": {
+    "initial_violation_m": 0.0429,
+    "candidate_violations_m": [
+     0.0396,
+     0.0421,
+     0.0435
+    ],
+    "initial_merit": 42.86,
+    "candidate_merits": [
+     73.47,
+     64.48,
+     66.24
+    ]
+   }
+  },
+  "ep1668": {
+   "hold_requests": [
+    13,
+    14,
+    18,
+    19,
+    20,
+    21,
+    22
+   ],
+   "note": "anchored solves 'violated' 0.7-10.8 mm, then no_grasp"
+  }
+ },
+ "diagnosis": {
+  "954": "mechanism as designed: the avoidance became a wrist rotation (6-14 deg) with the palm within 4 mm of the policy path; the lateral drift is gone (15 mm, = VLA alone); still no grasp: the policy closed 2 s earlier (t 113) and 13 mm higher than VLA alone",
+  "211_1668": "design defect: the anchor is summed over the 16 planned rows while the collision price is one linear slack, so when only a translation clears the obstacle the anchored QP step barely reduces the violation, every candidate is rejected and the chunk HOLDs (211: ~50 consecutive)",
+  "fix": "safety first (sqp.TrajectoryOptimizer.solve): an anchored result that leaves a violation above safety.violation_tolerance is re-solved without the anchor and the smaller violation is kept; recorded in metrics.grasp_anchor.fallback. Test added (fixture W=20000: anchored 12.4 mm -> plain within tolerance). Rerun as IFG-APPLE-TOA3"
+ }
+}

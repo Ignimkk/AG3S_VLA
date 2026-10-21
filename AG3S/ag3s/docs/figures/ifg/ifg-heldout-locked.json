@@ -1,0 +1,195 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+ "main_success": {
+  "G:N": {
+   "iou": {
+    "episode_mean": 0.7730478249129286,
+    "n_episodes": 34
+   },
+   "precision": {
+    "episode_mean": 0.8941035687057404,
+    "n_episodes": 34
+   },
+   "recall": {
+    "episode_mean": 0.8381835766308009,
+    "n_episodes": 34
+   },
+   "n_valid_frames": 2523,
+   "neighbor_fp_sum": 176069.9713933181,
+   "support_fp_sum": 794.1824287812866,
+   "robot_fp_sum": 226.91838952046052,
+   "FP_sum": 177091.97938555796,
+   "TP_sum": 646534.020614443
+  },
+  "A-fk": {
+   "iou": {
+    "episode_mean": 0.8320612510959661,
+    "n_episodes": 34
+   },
+   "precision": {
+    "episode_mean": 0.9552711342181999,
+    "n_episodes": 34
+   },
+   "recall": {
+    "episode_mean": 0.8355078746336647,
+    "n_episodes": 34
+   },
+   "n_valid_frames": 2523,
+   "neighbor_fp_sum": 46237.61075299564,
+   "support_fp_sum": 502.3729128190385,
+   "robot_fp_sum": 175.16828806817324,
+   "FP_sum": 46915.702689606966,
+   "TP_sum": 647208.2973103941
+  },
+  "A": {
+   "iou": {
+    "episode_mean": 0.876093971555441,
+    "n_episodes": 34
+   },
+   "precision": {
+    "episode_mean": 0.9490830942021894,
+    "n_episodes": 34
+   },
+   "recall": {
+    "episode_mean": 0.8838479458205702,
+    "n_episodes": 34
+   },
+   "n_valid_frames": 2523,
+   "neighbor_fp_sum": 46329.299182381736,
+   "support_fp_sum": 552.2908453349412,
+   "robot_fp_sum": 2640.379443738322,
+   "FP_sum": 49529.18917135399,
+   "TP_sum": 673792.8108286464
+  },
+  "B": {
+   "iou": {
+    "episode_mean": 0.8908732856842837,
+    "n_episodes": 34
+   },
+   "precision": {
+    "episode_mean": 0.9656474792528674,
+    "n_episodes": 34
+   },
+   "recall": {
+    "episode_mean": 0.8986232884658625,
+    "n_episodes": 34
+   },
+   "n_valid_frames": 2523,
+   "neighbor_fp_sum": 13581.713534193286,
+   "support_fp_sum": 517.4040243042206,
+   "robot_fp_sum": 2604.9563646802735,
+   "FP_sum": 16711.370546153663,
+   "TP_sum": 676155.6294538468
+  }
+ },
+ "paired_iou": {
+  "B - A": {
+   "n_episodes": 34,
+   "diff": 0.014779314128842732,
+   "ci95": [
+    -0.0116789100514432,
+    0.03944222857471973
+   ],
+   "better": 14,
+   "worse": 6
+  },
+  "A - A-fk": {
+   "n_episodes": 34,
+   "diff": 0.04403272045947481,
+   "ci95": [
+    0.03801383050689502,
+    0.050055427622609866
+   ],
+   "better": 34,
+   "worse": 0
+  },
+  "A - G:N": {
+   "n_episodes": 34,
+   "diff": 0.10304614664251237,
+   "ci95": [
+    0.08323494981427215,
+    0.12313285145943233
+   ],
+   "better": 34,
+   "worse": 0
+  },
+  "B - G:N": {
+   "n_episodes": 34,
+   "diff": 0.11782546077135511,
+   "ci95": [
+    0.08271813740590676,
+    0.15130667079948473
+   ],
+   "better": 32,
+   "worse": 2
+  }
+ },
+ "by_grasp_state": {
+  "pre": {
+   "G:N": {
+    "episode_mean": 0.8749510904201444,
+    "n_episodes": 34
+   },
+   "A-fk": {
+    "episode_mean": 0.9075024099794847,
+    "n_episodes": 34
+   },
+   "A": {
+    "episode_mean": 0.9698507944447411,
+    "n_episodes": 34
+   },
+   "B": {
+    "episode_mean": 0.9673310030050492,
+    "n_episodes": 34
+   }
+  },
+  "held": {
+   "G:N": {
+    "episode_mean": 0.5377397793127421,
+    "n_episodes": 34
+   },
+   "A-fk": {
+    "episode_mean": 0.64040778567183,
+    "n_episodes": 34
+   },
+   "A": {
+    "episode_mean": 0.8475770155578735,
+    "n_episodes": 34
+   },
+   "B": {
+    "episode_mean": 0.8411570863823252,
+    "n_episodes": 34
+   }
+  },
+  "placed": {
+   "G:N": {
+    "episode_mean": 0.7767709801403806,
+    "n_episodes": 34
+   },
+   "A-fk": {
+    "episode_mean": 0.8449822910803859,
+    "n_episodes": 34
+   },
+   "A": {
+    "episode_mean": 0.845807102001963,
+    "n_episodes": 34
+   },
+   "B": {
+    "episode_mean": 0.8728342906503719,
+    "n_episodes": 34
+   }
+  }
+ },
+ "gate": {
+  "threshold": 0.5904207590672415,
+  "n_frames": 2420,
+  "wrong_choices": 100,
+  "alerts": 238,
+  "alerts_on_wrong": 85,
+  "wrong_caught_ratio": 0.85,
+  "false_alarms": 153,
+  "fp_removed_ratio": 0.8788327204996255,
+  "tp_lost_ratio": 0.06698843965768998,
+  "auroc_wrong": 0.9251551724137931
+ }
+}

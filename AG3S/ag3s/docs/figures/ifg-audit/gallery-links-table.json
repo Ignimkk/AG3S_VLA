@@ -1,0 +1,36 @@
+{
+ "requests": {
+  "searching": 55,
+  "latched": 456,
+  "closing": 213,
+  "held": 240,
+  "placed": 836
+ },
+ "mechanism_by_state": {
+  "searching": {
+   "target_free_layer+contact_margin": 55
+  },
+  "latched": {
+   "target_free_layer+contact_margin": 456
+  },
+  "closing": {
+   "target_free_layer+contact_margin": 213
+  },
+  "held": {
+   "attached_query+held_free+self_filter": 240
+  },
+  "placed": {
+   "target_free_layer+contact_margin": 46,
+   "none": 790
+  }
+ },
+ "sphere_links": {
+  "ee_left": 23,
+  "ee_right": 23,
+  "ee_finger_r1": 56,
+  "ee_finger_r2": 56,
+  "ee_finger_l1": 56,
+  "ee_finger_l2": 56
+ },
+ "script": "AG3S/ag3s/experiments/studies/ifg_audit_gallery.py"
+}

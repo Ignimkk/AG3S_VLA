@@ -1,0 +1,259 @@
+{
+ "values": {
+  "precision": {
+   "clear": {
+    "searching": {
+     "value": 1.0,
+     "n": 12
+    },
+    "latched": {
+     "value": 1.0,
+     "n": 115
+    },
+    "closing": {
+     "value": 0.9636363636363636,
+     "n": 31
+    },
+    "held": {
+     "value": 0.0,
+     "n": 70
+    },
+    "placed": {
+     "value": 0.0,
+     "n": 10
+    }
+   },
+   "neighbour": {
+    "searching": {
+     "value": 1.0,
+     "n": 43
+    },
+    "latched": {
+     "value": 1.0,
+     "n": 340
+    },
+    "closing": {
+     "value": 0.6528925619834711,
+     "n": 175
+    },
+    "held": {
+     "value": 0.0,
+     "n": 161
+    },
+    "placed": {
+     "value": 0.0,
+     "n": 36
+    }
+   }
+  },
+  "recall": {
+   "clear": {
+    "searching": {
+     "value": 1.0,
+     "n": 12
+    },
+    "latched": {
+     "value": 0.9405882352941176,
+     "n": 114
+    },
+    "closing": {
+     "value": 0.71875,
+     "n": 31
+    },
+    "held": {
+     "value": 0.0,
+     "n": 7
+    },
+    "placed": {
+     "value": 0.0,
+     "n": 10
+    }
+   },
+   "neighbour": {
+    "searching": {
+     "value": 1.0,
+     "n": 43
+    },
+    "latched": {
+     "value": 0.9404158215010142,
+     "n": 326
+    },
+    "closing": {
+     "value": 0.1969403145873734,
+     "n": 146
+    },
+    "held": {
+     "value": 0.0,
+     "n": 19
+    },
+    "placed": {
+     "value": 0.0,
+     "n": 36
+    }
+   }
+  },
+  "iou": {
+   "clear": {
+    "searching": {
+     "value": 1.0,
+     "n": 12
+    },
+    "latched": {
+     "value": 0.9405882352941176,
+     "n": 114
+    },
+    "closing": {
+     "value": 0.71875,
+     "n": 31
+    },
+    "held": {
+     "value": 0.0,
+     "n": 7
+    },
+    "placed": {
+     "value": 0.0,
+     "n": 10
+    }
+   },
+   "neighbour": {
+    "searching": {
+     "value": 1.0,
+     "n": 43
+    },
+    "latched": {
+     "value": 0.9243060860707919,
+     "n": 326
+    },
+    "closing": {
+     "value": 0.1969403145873734,
+     "n": 146
+    },
+    "held": {
+     "value": 0.0,
+     "n": 38
+    },
+    "placed": {
+     "value": 0.0,
+     "n": 36
+    }
+   }
+  },
+  "identity_rate": {
+   "clear": {
+    "searching": {
+     "value": 1.0,
+     "n": 12
+    },
+    "latched": {
+     "value": 1.0,
+     "n": 115
+    },
+    "closing": {
+     "value": 1.0,
+     "n": 31
+    },
+    "held": {
+     "value": 0.14285714285714285,
+     "n": 70
+    },
+    "placed": {
+     "value": 0.0,
+     "n": 10
+    }
+   },
+   "neighbour": {
+    "searching": {
+     "value": 1.0,
+     "n": 43
+    },
+    "latched": {
+     "value": 0.961764705882353,
+     "n": 340
+    },
+    "closing": {
+     "value": 0.7371428571428571,
+     "n": 175
+    },
+    "held": {
+     "value": 0.16149068322981366,
+     "n": 161
+    },
+    "placed": {
+     "value": 0.0,
+     "n": 36
+    }
+   }
+  },
+  "composition": {
+   "apple": {
+    "searching": 0.9722232949257216,
+    "latched": 0.9158028610135709,
+    "closing": 0.6399323751850413,
+    "held": 0.0979533931186658,
+    "placed": 0.0
+   },
+   "fruit": {
+    "searching": 0.027776705074278398,
+    "latched": 0.010511410925348305,
+    "closing": 0.0040245435595461145,
+    "held": 0.01130773259769664,
+    "placed": 0.03391551342123424
+   },
+   "table": {
+    "searching": 0.0,
+    "latched": 0.0,
+    "closing": 0.0,
+    "held": 0.0,
+    "placed": 0.0
+   },
+   "crate": {
+    "searching": 0.0,
+    "latched": 0.0,
+    "closing": 0.0,
+    "held": 0.0,
+    "placed": 0.0
+   },
+   "robot": {
+    "searching": 0.0,
+    "latched": 0.014924221582951152,
+    "closing": 0.025617383063281648,
+    "held": 0.016815401702294088,
+    "placed": 0.0
+   },
+   "room": {
+    "searching": 0.0,
+    "latched": 0.0,
+    "closing": 0.0,
+    "held": 0.0,
+    "placed": 0.0
+   },
+   "none": {
+    "searching": 0.0,
+    "latched": 0.05876150647812963,
+    "closing": 0.3304256981921309,
+    "held": 0.8739234725813434,
+    "placed": 0.9660844865787657
+   },
+   "obstacle": {
+    "searching": 0.0,
+    "latched": 0.0,
+    "closing": 0.0,
+    "held": 0.0,
+    "placed": 0.0
+   }
+  }
+ },
+ "requests_by_phase": {
+  "searching": 55,
+  "latched": 456,
+  "closing": 213,
+  "held": 240,
+  "placed": 836,
+  "none": 0
+ },
+ "scenes_by_type": {
+  "clear": 6,
+  "neighbour": 18
+ },
+ "script": "AG3S/ag3s/experiments/studies/ifg_audit_ats.py"
+}

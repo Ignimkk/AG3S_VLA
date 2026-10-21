@@ -1,0 +1,1673 @@
+{
+ "numbers": {
+  "paired_primary_C1aN_vs_SPL": {
+   "both": 16,
+   "only_C1aN": 1,
+   "only_SPL": 2,
+   "neither": 21,
+   "missing": 0,
+   "n_pairs": 40,
+   "mcnemar_exact_p": 1.0,
+   "rate_C1aN": 0.425,
+   "rate_SPL": 0.45,
+   "diff_SPL_minus_C1aN": 0.025,
+   "ci95_bootstrap": [
+    -0.05,
+    0.1
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "by_stratum": {
+   "clear": {
+    "both": 5,
+    "only_C1aN": 0,
+    "only_SPL": 1,
+    "neither": 8,
+    "missing": 0,
+    "n_pairs": 14,
+    "mcnemar_exact_p": 1.0,
+    "rate_C1aN": 0.35714285714285715,
+    "rate_SPL": 0.42857142857142855,
+    "diff_SPL_minus_C1aN": 0.07142857142857142,
+    "ci95_bootstrap": [
+     0.0,
+     0.21428571428571427
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   },
+   "adjacent": {
+    "both": 6,
+    "only_C1aN": 1,
+    "only_SPL": 1,
+    "neither": 5,
+    "missing": 0,
+    "n_pairs": 13,
+    "mcnemar_exact_p": 1.0,
+    "rate_C1aN": 0.5384615384615384,
+    "rate_SPL": 0.5384615384615384,
+    "diff_SPL_minus_C1aN": 0.0,
+    "ci95_bootstrap": [
+     -0.23076923076923078,
+     0.23076923076923078
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   },
+   "place": {
+    "both": 5,
+    "only_C1aN": 0,
+    "only_SPL": 0,
+    "neither": 8,
+    "missing": 0,
+    "n_pairs": 13,
+    "mcnemar_exact_p": null,
+    "rate_C1aN": 0.38461538461538464,
+    "rate_SPL": 0.38461538461538464,
+    "diff_SPL_minus_C1aN": 0.0,
+    "ci95_bootstrap": [
+     0.0,
+     0.0
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   }
+  },
+  "paired_primary_C1aN_vs_SURF": {
+   "both": 12,
+   "only_C1aN": 5,
+   "only_SURF": 7,
+   "neither": 16,
+   "missing": 0,
+   "n_pairs": 40,
+   "mcnemar_exact_p": 0.7744140625,
+   "rate_C1aN": 0.425,
+   "rate_SURF": 0.475,
+   "diff_SURF_minus_C1aN": 0.05,
+   "ci95_bootstrap": [
+    -0.125,
+    0.225
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "n": 40,
+  "n_identical_executions": 34,
+  "not_read": [
+   1034
+  ],
+  "diverged": [
+   1582,
+   1096,
+   936,
+   1407,
+   849
+  ],
+  "flips_fail_to_success": [
+   1582,
+   1407
+  ],
+  "flips_success_to_fail": [
+   936
+  ],
+  "latch_gap_episodes": {
+   "C1aN": [
+    831,
+    423
+   ],
+   "SPL": [
+    831,
+    936,
+    423
+   ]
+  },
+  "server_alignment_not_usable": {
+   "C1aN": [
+    1096,
+    1863,
+    1529,
+    1211
+   ],
+   "SPL": []
+  },
+  "near_le_8.2cm": {
+   "n": 6,
+   "C1aN_primary": 2,
+   "C1aN_strict": 2,
+   "SPL_primary": 3,
+   "SPL_strict": 3,
+   "SURF_primary": 4,
+   "SURF_strict": 4
+  },
+  "far_gt_8.2cm": {
+   "n": 34,
+   "C1aN_primary": 15,
+   "C1aN_strict": 14,
+   "SPL_primary": 15,
+   "SPL_strict": 14,
+   "SURF_primary": 15,
+   "SURF_strict": 15
+  },
+  "all": {
+   "n": 40,
+   "C1aN_primary": 17,
+   "C1aN_strict": 16,
+   "SPL_primary": 18,
+   "SPL_strict": 17,
+   "SURF_primary": 19,
+   "SURF_strict": 19
+  },
+  "ep936_SPL_timeline": [
+   {
+    "k": 18,
+    "t": 144,
+    "lift": 4.994411029524137e-06,
+    "state": "latched",
+    "attached": false,
+    "reach_mm": 83.92,
+    "failed": [],
+    "to_push_mm": 7.444407289737052
+   },
+   {
+    "k": 19,
+    "t": 152,
+    "lift": 8.556535007198107e-06,
+    "state": "latched",
+    "attached": false,
+    "reach_mm": 82.91,
+    "failed": [],
+    "to_push_mm": 0.0
+   },
+   {
+    "k": 20,
+    "t": 160,
+    "lift": 1.1055360771283773e-06,
+    "state": "latched",
+    "attached": false,
+    "reach_mm": 82.14,
+    "failed": [],
+    "to_push_mm": 8.485389886420814
+   },
+   {
+    "k": 21,
+    "t": 168,
+    "lift": 9.385857599908398e-06,
+    "state": "latched",
+    "attached": false,
+    "reach_mm": 76.0,
+    "failed": [],
+    "to_push_mm": 12.33028835264199
+   },
+   {
+    "k": 22,
+    "t": 176,
+    "lift": 4.306185354963077e-07,
+    "state": "latched",
+    "attached": false,
+    "reach_mm": 75.24,
+    "failed": [],
+    "to_push_mm": 0.0
+   },
+   {
+    "k": 23,
+    "t": 184,
+    "lift": 9.59534298061726e-06,
+    "state": "latched",
+    "attached": false,
+    "reach_mm": 75.62,
+    "failed": [],
+    "to_push_mm": 0.0
+   },
+   {
+    "k": 24,
+    "t": 192,
+    "lift": 3.3778480581503345e-06,
+    "state": "latched",
+    "attached": false,
+    "reach_mm": 75.23,
+    "failed": [],
+    "to_push_mm": 0.0
+   },
+   {
+    "k": 25,
+    "t": 200,
+    "lift": 6.771331126809166e-06,
+    "state": "closing",
+    "attached": false,
+    "reach_mm": 65.5,
+    "failed": [
+     "settled"
+    ],
+    "to_push_mm": 130.2898631976224
+   },
+   {
+    "k": 26,
+    "t": 208,
+    "lift": 0.09849302046373476,
+    "state": "closing",
+    "attached": false,
+    "reach_mm": 158.73,
+    "failed": [
+     "settled",
+     "reach"
+    ],
+    "to_push_mm": 38.60917055617784
+   },
+   {
+    "k": 27,
+    "t": 216,
+    "lift": 0.16834454912118368,
+    "state": "closing",
+    "attached": false,
+    "reach_mm": 201.3,
+    "failed": [
+     "reach"
+    ],
+    "to_push_mm": 33.135307214908984
+   },
+   {
+    "k": 28,
+    "t": 224,
+    "lift": 0.2481932504618467,
+    "state": "closing",
+    "attached": false,
+    "reach_mm": 272.67,
+    "failed": [
+     "reach"
+    ],
+    "to_push_mm": 154.82097440263468
+   },
+   {
+    "k": 29,
+    "t": 232,
+    "lift": 0.10233443719249036,
+    "state": "closing",
+    "attached": false,
+    "reach_mm": 214.25,
+    "failed": [
+     "reach"
+    ],
+    "to_push_mm": 104.14970757810681
+   },
+   {
+    "k": 30,
+    "t": 240,
+    "lift": 0.0016243160702287263,
+    "state": "closing",
+    "attached": false,
+    "reach_mm": 196.58,
+    "failed": [
+     "blocked",
+     "reach"
+    ],
+    "to_push_mm": 34.192793878960394
+   },
+   {
+    "k": 31,
+    "t": 248,
+    "lift": 0.0012880151377873128,
+    "state": "latched",
+    "attached": false,
+    "reach_mm": 202.09,
+    "failed": [],
+    "to_push_mm": 10.651550845954933
+   },
+   {
+    "k": 32,
+    "t": 256,
+    "lift": 0.0007443530355005779,
+    "state": "latched",
+    "attached": false,
+    "reach_mm": 202.17,
+    "failed": [],
+    "to_push_mm": 8.240406311808924
+   }
+  ]
+ },
+ "rows": [
+  {
+   "episode": 189,
+   "stratum": "clear",
+   "target": "orange",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.07131689841825711,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 219,
+   "stratum": "adjacent",
+   "target": "apple",
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.0756548081750261,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1582,
+   "stratum": "clear",
+   "target": "orange",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.07612896951883694,
+   "first_divergence_row": 8,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 831,
+   "stratum": "place",
+   "target": "apple",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.07845285208327354,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 8,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 8
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 8,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 8
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1096,
+   "stratum": "place",
+   "target": "banana",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.08024076270823956,
+   "first_divergence_row": 64,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 1,
+     "latch_gap_chunks": null
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 3,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 4
+    }
+   }
+  },
+  {
+   "episode": 144,
+   "stratum": "place",
+   "target": "orange",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.08110221945175114,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 936,
+   "stratum": "adjacent",
+   "target": "orange",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.08319501186970289,
+   "first_divergence_row": 56,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 4
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1135,
+   "stratum": "adjacent",
+   "target": "banana",
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.08372645937814402,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 483,
+   "stratum": "clear",
+   "target": "pear",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.08452715539990677,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 568,
+   "stratum": "clear",
+   "target": "banana",
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.08470572589854834,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1304,
+   "stratum": "clear",
+   "target": "banana",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.08490376905650306,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1803,
+   "stratum": "adjacent",
+   "target": "banana",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.08510376019894773,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 7,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 7,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 232,
+   "stratum": "place",
+   "target": "apple",
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.0865940529135806,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1863,
+   "stratum": "place",
+   "target": "apple",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.08736704184073082,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": null
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1407,
+   "stratum": "adjacent",
+   "target": "apple",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.08769521081564267,
+   "first_divergence_row": 200,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 10,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 3,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 182,
+   "stratum": "adjacent",
+   "target": "orange",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.08795146388776025,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1264,
+   "stratum": "clear",
+   "target": "orange",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.08815469357895817,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 3,
+     "neighbour_rows": 52,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 3,
+     "neighbour_rows": 52,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1529,
+   "stratum": "place",
+   "target": "pear",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.08845168172510912,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": null
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1437,
+   "stratum": "clear",
+   "target": "banana",
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.08870005636976788,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 1,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 1,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1404,
+   "stratum": "clear",
+   "target": "orange",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.09039762165012971,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 1
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 1
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 423,
+   "stratum": "clear",
+   "target": "apple",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.09044390526729813,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 8
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 8
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1034,
+   "stratum": "place",
+   "target": "pear",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.0921138968885803,
+   "first_divergence_row": null,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 10,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 10,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 849,
+   "stratum": "adjacent",
+   "target": "pear",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.09240265147710865,
+   "first_divergence_row": 33,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 194,
+   "stratum": "adjacent",
+   "target": "apple",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.0931517579007503,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1941,
+   "stratum": "adjacent",
+   "target": "banana",
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.09316533690166102,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1533,
+   "stratum": "place",
+   "target": "orange",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.09442399059561082,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 444,
+   "stratum": "adjacent",
+   "target": "apple",
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.09502320769159502,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 188,
+   "stratum": "place",
+   "target": "banana",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.09765920335534178,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 447,
+   "stratum": "clear",
+   "target": "apple",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.09842296479988809,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 5,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 5,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 491,
+   "stratum": "clear",
+   "target": "orange",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.10215918950344113,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 131,
+   "stratum": "place",
+   "target": "orange",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.10335734129707481,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 495,
+   "stratum": "place",
+   "target": "orange",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.10382533409529682,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 4,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 4,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 8
+    }
+   }
+  },
+  {
+   "episode": 1286,
+   "stratum": "adjacent",
+   "target": "apple",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.1054306407075287,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 15,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 427,
+   "stratum": "place",
+   "target": "orange",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.1072479836640298,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 17,
+     "neighbour_rows": 47,
+     "latch_gap_chunks": 1
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 17,
+     "neighbour_rows": 47,
+     "latch_gap_chunks": 1
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1060,
+   "stratum": "clear",
+   "target": "orange",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.10764181343697256,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 5,
+     "neighbour_rows": 3
+    }
+   }
+  },
+  {
+   "episode": 1382,
+   "stratum": "adjacent",
+   "target": "orange",
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.11066819778057295,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1256,
+   "stratum": "clear",
+   "target": "orange",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.11263001376187436,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 4
+    }
+   }
+  },
+  {
+   "episode": 321,
+   "stratum": "adjacent",
+   "target": "apple",
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.11407541365254831,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 177,
+   "stratum": "clear",
+   "target": "orange",
+   "nearest_fruit": "apple",
+   "nearest_fruit_m": 0.11646115232127838,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  {
+   "episode": 1211,
+   "stratum": "place",
+   "target": "pear",
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.11985178346607948,
+   "first_divergence_row": -1,
+   "arms": {
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": null
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "latch_gap_chunks": 0
+    },
+    "SURF": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  }
+ ],
+ "sources": {
+  "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-CL3-SPLIT-AGG",
+  "script": "AG3S/ag3s/experiments/studies/ifg_split_cl3.py"
+ }
+}

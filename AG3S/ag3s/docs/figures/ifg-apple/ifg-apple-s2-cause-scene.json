@@ -1,0 +1,92 @@
+{
+ "frames": [
+  {
+   "arm": "C1aN",
+   "k": 17,
+   "t_row": 136,
+   "video_t_s": 9.066666666666666,
+   "exemption_active": true,
+   "apple_lift_m": 0.08862577276695971,
+   "latch_state": "held",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep572_s5723",
+   "frame_found": true
+  },
+  {
+   "arm": "C1aN",
+   "k": 18,
+   "t_row": 144,
+   "video_t_s": 9.6,
+   "exemption_active": true,
+   "apple_lift_m": 0.16973664156757695,
+   "latch_state": "latched",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep572_s5723",
+   "frame_found": true
+  },
+  {
+   "arm": "C1aN",
+   "k": 20,
+   "t_row": 160,
+   "video_t_s": 10.666666666666666,
+   "exemption_active": true,
+   "apple_lift_m": 0.244996950110004,
+   "latch_state": "closing",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep572_s5723",
+   "frame_found": true
+  },
+  {
+   "arm": "C1aN",
+   "k": 22,
+   "t_row": 176,
+   "video_t_s": 11.733333333333333,
+   "exemption_active": true,
+   "apple_lift_m": 0.21792184498284706,
+   "latch_state": "closing",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep572_s5723",
+   "frame_found": true
+  },
+  {
+   "arm": "S2",
+   "k": 17,
+   "t_row": 136,
+   "video_t_s": 9.066666666666666,
+   "exemption_active": true,
+   "apple_lift_m": 0.08862577276695971,
+   "latch_state": "held",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-S2/runs/S2/S2_ep572_s5723",
+   "frame_found": true
+  },
+  {
+   "arm": "S2",
+   "k": 18,
+   "t_row": 144,
+   "video_t_s": 9.6,
+   "exemption_active": false,
+   "apple_lift_m": 0.16973664156757695,
+   "latch_state": "latched",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-S2/runs/S2/S2_ep572_s5723",
+   "frame_found": true
+  },
+  {
+   "arm": "S2",
+   "k": 20,
+   "t_row": 160,
+   "video_t_s": 10.666666666666666,
+   "exemption_active": false,
+   "apple_lift_m": 0.23772473545727202,
+   "latch_state": "closing",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-S2/runs/S2/S2_ep572_s5723",
+   "frame_found": true
+  },
+  {
+   "arm": "S2",
+   "k": 22,
+   "t_row": 176,
+   "video_t_s": 11.733333333333333,
+   "exemption_active": false,
+   "apple_lift_m": 0.0004951790019461777,
+   "latch_state": "closing",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-S2/runs/S2/S2_ep572_s5723",
+   "frame_found": true
+  }
+ ]
+}

@@ -1,0 +1,648 @@
+{
+ "definitions": {
+  "D_hold_m": 0.1313,
+  "grip_closed": 0.9
+ },
+ "blocks": {
+  "render|success": {
+   "n_frames": 2528,
+   "n_episodes": 34,
+   "region_missing_frames": 69,
+   "class_counts": {
+    "phase": [
+     706,
+     326,
+     1496
+    ],
+    "held": [
+     2202,
+     326
+    ]
+   },
+   "accuracy": {
+    "phase": {
+     "HSR argmax (serving)": 0.9295886075949367,
+     "rule phase_rule (no learning)": 0.8935917721518988,
+     "LR locked (dev render weights)": 0.9572784810126582,
+     "LR LOEO on this set (reference only)": 0.9901107594936709
+    },
+    "held": {
+     "grip<0.9 (serving)": 0.8983386075949367,
+     "rule held_rule (no learning)": 0.9347310126582279,
+     "LR LOEO on this set (reference only)": 0.9806170886075949,
+     "LR locked (dev render weights)": 0.9798259493670886
+    }
+   },
+   "macro_f1": {
+    "phase": {
+     "HSR argmax (serving)": 0.9020529480261161,
+     "rule phase_rule (no learning)": 0.8558796501781029,
+     "LR locked (dev render weights)": 0.9472448615447062,
+     "LR LOEO on this set (reference only)": 0.9848570308235801
+    },
+    "held": {
+     "grip<0.9 (serving)": 0.8276496084621725,
+     "rule held_rule (no learning)": 0.8781083296440297,
+     "LR LOEO on this set (reference only)": 0.9579001031493695,
+     "LR locked (dev render weights)": 0.9545637641367104
+    }
+   },
+   "recall": {
+    "phase": {
+     "HSR argmax (serving)": {
+      "0": 0.9291784702549575,
+      "1": 1.0,
+      "2": 0.9144385026737968
+     },
+     "rule phase_rule (no learning)": {
+      "0": 0.78328611898017,
+      "1": 0.9815950920245399,
+      "2": 0.9264705882352942
+     },
+     "LR locked (dev render weights)": {
+      "0": 0.9716713881019831,
+      "1": 0.9539877300613497,
+      "2": 0.9512032085561497
+     },
+     "LR LOEO on this set (reference only)": {
+      "0": 0.9886685552407932,
+      "1": 1.0,
+      "2": 0.9886363636363636
+     }
+    },
+    "held": {
+     "grip<0.9 (serving)": {
+      "0": 0.8832879200726612,
+      "1": 1.0
+     },
+     "rule held_rule (no learning)": {
+      "0": 0.9277929155313351,
+      "1": 0.9815950920245399
+     },
+     "LR LOEO on this set (reference only)": {
+      "0": 0.9845594913714805,
+      "1": 0.9539877300613497
+     },
+     "LR locked (dev render weights)": {
+      "0": 0.9904632152588556,
+      "1": 0.9079754601226994
+     }
+    }
+   },
+   "paired": {
+    "phase: rule phase_rule (no learning) - HSR argmax (serving)": {
+     "diff": -0.03607417955232077,
+     "ci95": [
+      -0.05889723337897942,
+      -0.016723290966966575
+     ],
+     "better": 4,
+     "worse": 26
+    },
+    "phase: LR locked (dev render weights) - HSR argmax (serving)": {
+     "diff": 0.027595951775679625,
+     "ci95": [
+      0.0024099096734657307,
+      0.05093836947342184
+     ],
+     "better": 27,
+     "worse": 3
+    },
+    "phase: LR LOEO on this set (reference only) - HSR argmax (serving)": {
+     "diff": 0.060481212818406814,
+     "ci95": [
+      0.043466201575848074,
+      0.08147419077979819
+     ],
+     "better": 34,
+     "worse": 0
+    },
+    "phase: rule phase_rule (no learning) - LR locked (dev render weights)": {
+     "diff": -0.06367013132800041,
+     "ci95": [
+      -0.0949965635458182,
+      -0.032124803585178906
+     ],
+     "better": 2,
+     "worse": 32
+    },
+    "held: rule held_rule (no learning) - grip<0.9 (serving)": {
+     "diff": 0.03644113930411894,
+     "ci95": [
+      0.01925911248209543,
+      0.056770210711897855
+     ],
+     "better": 24,
+     "worse": 1
+    },
+    "held: LR LOEO on this set (reference only) - grip<0.9 (serving)": {
+     "diff": 0.08231999662042451,
+     "ci95": [
+      0.06086206736380808,
+      0.10690387686619217
+     ],
+     "better": 34,
+     "worse": 0
+    },
+    "held: LR locked (dev render weights) - grip<0.9 (serving)": {
+     "diff": 0.08148089737204604,
+     "ci95": [
+      0.05986500177030659,
+      0.10652246856425604
+     ],
+     "better": 34,
+     "worse": 0
+    },
+    "held: rule held_rule (no learning) - LR locked (dev render weights)": {
+     "diff": -0.0450397580679271,
+     "ci95": [
+      -0.06233236348403088,
+      -0.03203270181946655
+     ],
+     "better": 1,
+     "worse": 32
+    }
+   }
+  },
+  "render|all": {
+   "n_frames": 3196,
+   "n_episodes": 43,
+   "region_missing_frames": 71,
+   "class_counts": {
+    "phase": [
+     1319,
+     381,
+     1496
+    ],
+    "held": [
+     2815,
+     381
+    ]
+   },
+   "accuracy": {
+    "phase": {
+     "HSR argmax (serving)": 0.8654568210262829,
+     "rule phase_rule (no learning)": 0.8570087609511889,
+     "LR locked (dev render weights)": 0.9192740926157698,
+     "LR LOEO on this set (reference only)": 0.9377346683354193
+    },
+    "held": {
+     "grip<0.9 (serving)": 0.8138297872340425,
+     "rule held_rule (no learning)": 0.9214643304130162,
+     "LR LOEO on this set (reference only)": 0.9596370463078848,
+     "LR locked (dev render weights)": 0.9602628285356696
+    }
+   },
+   "macro_f1": {
+    "phase": {
+     "HSR argmax (serving)": 0.816901480765984,
+     "rule phase_rule (no learning)": 0.8238859969130026,
+     "LR locked (dev render weights)": 0.8979272957365909,
+     "LR LOEO on this set (reference only)": 0.9119135330492348
+    },
+    "held": {
+     "grip<0.9 (serving)": 0.7067959982453584,
+     "rule held_rule (no learning)": 0.83755318478954,
+     "LR LOEO on this set (reference only)": 0.9024550898628616,
+     "LR locked (dev render weights)": 0.9007305582505929
+    }
+   },
+   "recall": {
+    "phase": {
+     "HSR argmax (serving)": {
+      "0": 0.8051554207733131,
+      "1": 0.8818897637795275,
+      "2": 0.9144385026737968
+     },
+     "rule phase_rule (no learning)": {
+      "0": 0.78013646702047,
+      "1": 0.8503937007874016,
+      "2": 0.9264705882352942
+     },
+     "LR locked (dev render weights)": {
+      "0": 0.9097801364670205,
+      "1": 0.8267716535433071,
+      "2": 0.9512032085561497
+     },
+     "LR LOEO on this set (reference only)": {
+      "0": 0.9484457922668689,
+      "1": 0.821522309711286,
+      "2": 0.9578877005347594
+     }
+    },
+    "held": {
+     "grip<0.9 (serving)": {
+      "0": 0.8049733570159858,
+      "1": 0.8792650918635171
+     },
+     "rule held_rule (no learning)": {
+      "0": 0.9310834813499111,
+      "1": 0.8503937007874016
+     },
+     "LR LOEO on this set (reference only)": {
+      "0": 0.9793960923623446,
+      "1": 0.8136482939632546
+     },
+     "LR locked (dev render weights)": {
+      "0": 0.9847246891651865,
+      "1": 0.7795275590551181
+     }
+    }
+   },
+   "paired": {
+    "phase: rule phase_rule (no learning) - HSR argmax (serving)": {
+     "diff": -0.008327493640569934,
+     "ci95": [
+      -0.05146928544033403,
+      0.04161892533234722
+     ],
+     "better": 9,
+     "worse": 29
+    },
+    "phase: LR locked (dev render weights) - HSR argmax (serving)": {
+     "diff": 0.05398652687569047,
+     "ci95": [
+      0.01720930932042561,
+      0.09961831581075171
+     ],
+     "better": 33,
+     "worse": 5
+    },
+    "phase: LR LOEO on this set (reference only) - HSR argmax (serving)": {
+     "diff": 0.07233116359430475,
+     "ci95": [
+      0.03440915258201817,
+      0.120501432501313
+     ],
+     "better": 35,
+     "worse": 4
+    },
+    "phase: rule phase_rule (no learning) - LR locked (dev render weights)": {
+     "diff": -0.06231402051626041,
+     "ci95": [
+      -0.09605927282428277,
+      -0.0267374749120388
+     ],
+     "better": 3,
+     "worse": 38
+    },
+    "held: rule held_rule (no learning) - grip<0.9 (serving)": {
+     "diff": 0.10750901454020773,
+     "ci95": [
+      0.05335476315440666,
+      0.1650645542803077
+     ],
+     "better": 31,
+     "worse": 2
+    },
+    "held: LR LOEO on this set (reference only) - grip<0.9 (serving)": {
+     "diff": 0.14561527680442832,
+     "ci95": [
+      0.08935219290875529,
+      0.20633599241165343
+     ],
+     "better": 40,
+     "worse": 1
+    },
+    "held: LR locked (dev render weights) - grip<0.9 (serving)": {
+     "diff": 0.14626916871957682,
+     "ci95": [
+      0.09357121274038668,
+      0.2041078552090357
+     ],
+     "better": 41,
+     "worse": 1
+    },
+    "held: rule held_rule (no learning) - LR locked (dev render weights)": {
+     "diff": -0.03876015417936907,
+     "ci95": [
+      -0.05420582354348212,
+      -0.026869030767033647
+     ],
+     "better": 3,
+     "worse": 37
+    }
+   }
+  },
+  "fk|success": {
+   "n_frames": 2528,
+   "n_episodes": 34,
+   "region_missing_frames": 72,
+   "class_counts": {
+    "phase": [
+     706,
+     326,
+     1496
+    ],
+    "held": [
+     2202,
+     326
+    ]
+   },
+   "accuracy": {
+    "phase": {
+     "HSR argmax (serving)": 0.9295886075949367,
+     "rule phase_rule (no learning)": 0.8935917721518988,
+     "LR locked (dev render weights)": 0.9560917721518988,
+     "LR LOEO on this set (reference only)": 0.9901107594936709
+    },
+    "held": {
+     "grip<0.9 (serving)": 0.8983386075949367,
+     "rule held_rule (no learning)": 0.9347310126582279,
+     "LR LOEO on this set (reference only)": 0.9825949367088608,
+     "LR locked (dev render weights)": 0.975870253164557
+    }
+   },
+   "macro_f1": {
+    "phase": {
+     "HSR argmax (serving)": 0.9020529480261161,
+     "rule phase_rule (no learning)": 0.8558796501781029,
+     "LR locked (dev render weights)": 0.9453856487556678,
+     "LR LOEO on this set (reference only)": 0.9848570308235801
+    },
+    "held": {
+     "grip<0.9 (serving)": 0.8276496084621725,
+     "rule held_rule (no learning)": 0.8781083296440297,
+     "LR LOEO on this set (reference only)": 0.9620521946080491,
+     "LR locked (dev render weights)": 0.9443166779508012
+    }
+   },
+   "recall": {
+    "phase": {
+     "HSR argmax (serving)": {
+      "0": 0.9291784702549575,
+      "1": 1.0,
+      "2": 0.9144385026737968
+     },
+     "rule phase_rule (no learning)": {
+      "0": 0.78328611898017,
+      "1": 0.9815950920245399,
+      "2": 0.9264705882352942
+     },
+     "LR locked (dev render weights)": {
+      "0": 0.9787535410764873,
+      "1": 0.9355828220858896,
+      "2": 0.9498663101604278
+     },
+     "LR LOEO on this set (reference only)": {
+      "0": 0.9886685552407932,
+      "1": 1.0,
+      "2": 0.9886363636363636
+     }
+    },
+    "held": {
+     "grip<0.9 (serving)": {
+      "0": 0.8832879200726612,
+      "1": 1.0
+     },
+     "rule held_rule (no learning)": {
+      "0": 0.9277929155313351,
+      "1": 0.9815950920245399
+     },
+     "LR LOEO on this set (reference only)": {
+      "0": 0.9863760217983651,
+      "1": 0.9570552147239264
+     },
+     "LR locked (dev render weights)": {
+      "0": 0.9922797456857403,
+      "1": 0.8650306748466258
+     }
+    }
+   },
+   "paired": {
+    "phase: rule phase_rule (no learning) - HSR argmax (serving)": {
+     "diff": -0.03607417955232077,
+     "ci95": [
+      -0.05889723337897942,
+      -0.016723290966966575
+     ],
+     "better": 4,
+     "worse": 26
+    },
+    "phase: LR locked (dev render weights) - HSR argmax (serving)": {
+     "diff": 0.026463667876204338,
+     "ci95": [
+      0.0007491995512383158,
+      0.05031476982154604
+     ],
+     "better": 28,
+     "worse": 2
+    },
+    "phase: LR LOEO on this set (reference only) - HSR argmax (serving)": {
+     "diff": 0.06048651223547094,
+     "ci95": [
+      0.043750500004890766,
+      0.08113034850798864
+     ],
+     "better": 34,
+     "worse": 0
+    },
+    "phase: rule phase_rule (no learning) - LR locked (dev render weights)": {
+     "diff": -0.0625378474285251,
+     "ci95": [
+      -0.09425179877787242,
+      -0.030967217604190463
+     ],
+     "better": 2,
+     "worse": 32
+    },
+    "held: rule held_rule (no learning) - grip<0.9 (serving)": {
+     "diff": 0.03644113930411894,
+     "ci95": [
+      0.01925911248209543,
+      0.056770210711897855
+     ],
+     "better": 24,
+     "worse": 1
+    },
+    "held: LR LOEO on this set (reference only) - grip<0.9 (serving)": {
+     "diff": 0.08429137976827825,
+     "ci95": [
+      0.061870665609629116,
+      0.10951314373611391
+     ],
+     "better": 34,
+     "worse": 0
+    },
+    "held: LR locked (dev render weights) - grip<0.9 (serving)": {
+     "diff": 0.07753889400289965,
+     "ci95": [
+      0.05670026604102941,
+      0.10154920457322755
+     ],
+     "better": 34,
+     "worse": 0
+    },
+    "held: rule held_rule (no learning) - LR locked (dev render weights)": {
+     "diff": -0.04109775469878069,
+     "ci95": [
+      -0.05828514699100027,
+      -0.028058414302045913
+     ],
+     "better": 2,
+     "worse": 31
+    }
+   }
+  },
+  "fk|all": {
+   "n_frames": 3196,
+   "n_episodes": 43,
+   "region_missing_frames": 76,
+   "class_counts": {
+    "phase": [
+     1319,
+     381,
+     1496
+    ],
+    "held": [
+     2815,
+     381
+    ]
+   },
+   "accuracy": {
+    "phase": {
+     "HSR argmax (serving)": 0.8654568210262829,
+     "rule phase_rule (no learning)": 0.8570087609511889,
+     "LR locked (dev render weights)": 0.9224030037546934,
+     "LR LOEO on this set (reference only)": 0.9392991239048811
+    },
+    "held": {
+     "grip<0.9 (serving)": 0.8138297872340425,
+     "rule held_rule (no learning)": 0.9214643304130162,
+     "LR LOEO on this set (reference only)": 0.964017521902378,
+     "LR locked (dev render weights)": 0.9602628285356696
+    }
+   },
+   "macro_f1": {
+    "phase": {
+     "HSR argmax (serving)": 0.816901480765984,
+     "rule phase_rule (no learning)": 0.8238859969130026,
+     "LR locked (dev render weights)": 0.9022335087094318,
+     "LR LOEO on this set (reference only)": 0.9151060649710185
+    },
+    "held": {
+     "grip<0.9 (serving)": 0.7067959982453584,
+     "rule held_rule (no learning)": 0.83755318478954,
+     "LR LOEO on this set (reference only)": 0.9122269690124472,
+     "LR locked (dev render weights)": 0.8969658000437124
+    }
+   },
+   "recall": {
+    "phase": {
+     "HSR argmax (serving)": {
+      "0": 0.8051554207733131,
+      "1": 0.8818897637795275,
+      "2": 0.9144385026737968
+     },
+     "rule phase_rule (no learning)": {
+      "0": 0.78013646702047,
+      "1": 0.8503937007874016,
+      "2": 0.9264705882352942
+     },
+     "LR locked (dev render weights)": {
+      "0": 0.9241849886277483,
+      "1": 0.8083989501312336,
+      "2": 0.9498663101604278
+     },
+     "LR LOEO on this set (reference only)": {
+      "0": 0.9499620924943138,
+      "1": 0.8241469816272966,
+      "2": 0.9592245989304813
+     }
+    },
+    "held": {
+     "grip<0.9 (serving)": {
+      "0": 0.8049733570159858,
+      "1": 0.8792650918635171
+     },
+     "rule held_rule (no learning)": {
+      "0": 0.9310834813499111,
+      "1": 0.8503937007874016
+     },
+     "LR LOEO on this set (reference only)": {
+      "0": 0.983303730017762,
+      "1": 0.821522309711286
+     },
+     "LR locked (dev render weights)": {
+      "0": 0.9900532859680284,
+      "1": 0.7401574803149606
+     }
+    }
+   },
+   "paired": {
+    "phase: rule phase_rule (no learning) - HSR argmax (serving)": {
+     "diff": -0.008327493640569934,
+     "ci95": [
+      -0.05146928544033403,
+      0.04161892533234722
+     ],
+     "better": 9,
+     "worse": 29
+    },
+    "phase: LR locked (dev render weights) - HSR argmax (serving)": {
+     "diff": 0.05710932048489089,
+     "ci95": [
+      0.021560063671171546,
+      0.1019599575722023
+     ],
+     "better": 34,
+     "worse": 4
+    },
+    "phase: LR LOEO on this set (reference only) - HSR argmax (serving)": {
+     "diff": 0.07390296636234835,
+     "ci95": [
+      0.035759218520846445,
+      0.12090680083555996
+     ],
+     "better": 35,
+     "worse": 4
+    },
+    "phase: rule phase_rule (no learning) - LR locked (dev render weights)": {
+     "diff": -0.06543681412546085,
+     "ci95": [
+      -0.10244831431463321,
+      -0.02725725365849727
+     ],
+     "better": 3,
+     "worse": 38
+    },
+    "held: rule held_rule (no learning) - grip<0.9 (serving)": {
+     "diff": 0.10750901454020773,
+     "ci95": [
+      0.05335476315440666,
+      0.1650645542803077
+     ],
+     "better": 31,
+     "worse": 2
+    },
+    "held: LR LOEO on this set (reference only) - grip<0.9 (serving)": {
+     "diff": 0.15000314826939437,
+     "ci95": [
+      0.09407451572165429,
+      0.2107543656872483
+     ],
+     "better": 40,
+     "worse": 1
+    },
+    "held: LR locked (dev render weights) - grip<0.9 (serving)": {
+     "diff": 0.14624009112020006,
+     "ci95": [
+      0.09114337500771572,
+      0.20496331103323776
+     ],
+     "better": 41,
+     "worse": 1
+    },
+    "held: rule held_rule (no learning) - LR locked (dev render weights)": {
+     "diff": -0.03873107657999233,
+     "ci95": [
+      -0.054740825311040346,
+      -0.025438982976870177
+     ],
+     "better": 4,
+     "worse": 36
+    }
+   }
+  }
+ }
+}

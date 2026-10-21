@@ -1,0 +1,100 @@
+{
+ "frames": [
+  {
+   "episode": 250,
+   "arm": "C1aN",
+   "t_row": 128,
+   "crop_px": [
+    40,
+    15,
+    360,
+    305
+   ],
+   "frame_found": true
+  },
+  {
+   "episode": 250,
+   "arm": "C1aN",
+   "t_row": 234,
+   "crop_px": [
+    40,
+    15,
+    360,
+    305
+   ],
+   "frame_found": true
+  },
+  {
+   "episode": 250,
+   "arm": "SPL",
+   "t_row": 128,
+   "crop_px": [
+    40,
+    15,
+    360,
+    305
+   ],
+   "frame_found": true
+  },
+  {
+   "episode": 250,
+   "arm": "SPL",
+   "t_row": 199,
+   "crop_px": [
+    40,
+    15,
+    360,
+    305
+   ],
+   "frame_found": true
+  },
+  {
+   "episode": 1345,
+   "arm": "C1aN",
+   "t_row": 107,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true
+  },
+  {
+   "episode": 1345,
+   "arm": "C1aN",
+   "t_row": 300,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true
+  },
+  {
+   "episode": 1345,
+   "arm": "SPL",
+   "t_row": 127,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true
+  },
+  {
+   "episode": 1345,
+   "arm": "SPL",
+   "t_row": 154,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true
+  }
+ ]
+}

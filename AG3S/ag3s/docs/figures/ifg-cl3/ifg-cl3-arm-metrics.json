@@ -1,0 +1,140 @@
+{
+ "arms": {
+  "C1aN": {
+   "hold_chunks_per_run": {
+    "median": 1.0,
+    "max": 17
+   },
+   "completion_s_success_runs": [
+    13.866666666666667,
+    35.2,
+    13.333333333333334,
+    13.866666666666667,
+    21.333333333333332,
+    14.933333333333334,
+    16.533333333333335,
+    14.933333333333334,
+    20.266666666666666,
+    16.533333333333335,
+    13.866666666666667,
+    23.466666666666665,
+    13.866666666666667,
+    15.466666666666667,
+    14.933333333333334,
+    12.8,
+    22.933333333333334
+   ],
+   "n_runs": 40,
+   "n_success": 17,
+   "n_primary": 17,
+   "n_grasp_fail": 12,
+   "failure_modes": {
+    "no_grasp": 12,
+    "ok": 13,
+    "regrasp": 3,
+    "slip_at_lift": 9,
+    "slip_in_transport": 3
+   },
+   "n_nonauth_target": 1,
+   "n_obstacle_contact": 0,
+   "n_neighbour_contact": 6,
+   "hold_chunks_sum": 80,
+   "runs_with_hold": 25,
+   "completion_s": {
+    "n": 17,
+    "median": 14.933333333333334,
+    "min": 12.8,
+    "max": 35.2
+   },
+   "by_stratum": {
+    "clear": {
+     "n_runs": 14,
+     "n_success": 5,
+     "n_primary": 5,
+     "n_grasp_fail": 6
+    },
+    "adjacent": {
+     "n_runs": 13,
+     "n_success": 7,
+     "n_primary": 7,
+     "n_grasp_fail": 3
+    },
+    "place": {
+     "n_runs": 13,
+     "n_success": 5,
+     "n_primary": 5,
+     "n_grasp_fail": 3
+    }
+   }
+  },
+  "SURF": {
+   "hold_chunks_per_run": {
+    "median": 0.0,
+    "max": 15
+   },
+   "completion_s_success_runs": [
+    11.2,
+    13.866666666666667,
+    13.333333333333334,
+    13.866666666666667,
+    14.933333333333334,
+    16.0,
+    14.4,
+    13.866666666666667,
+    15.466666666666667,
+    14.933333333333334,
+    12.266666666666667,
+    15.466666666666667,
+    16.0,
+    14.933333333333334,
+    13.866666666666667,
+    14.4,
+    21.333333333333332,
+    14.933333333333334,
+    16.0
+   ],
+   "n_runs": 40,
+   "n_success": 19,
+   "n_primary": 19,
+   "n_grasp_fail": 13,
+   "failure_modes": {
+    "no_grasp": 13,
+    "ok": 18,
+    "regrasp": 4,
+    "slip_at_lift": 3,
+    "slip_in_transport": 2
+   },
+   "n_nonauth_target": 1,
+   "n_obstacle_contact": 2,
+   "n_neighbour_contact": 4,
+   "hold_chunks_sum": 32,
+   "runs_with_hold": 12,
+   "completion_s": {
+    "n": 19,
+    "median": 14.933333333333334,
+    "min": 11.2,
+    "max": 21.333333333333332
+   },
+   "by_stratum": {
+    "clear": {
+     "n_runs": 14,
+     "n_success": 4,
+     "n_primary": 4,
+     "n_grasp_fail": 6
+    },
+    "adjacent": {
+     "n_runs": 13,
+     "n_success": 9,
+     "n_primary": 9,
+     "n_grasp_fail": 2
+    },
+    "place": {
+     "n_runs": 13,
+     "n_success": 6,
+     "n_primary": 6,
+     "n_grasp_fail": 5
+    }
+   }
+  }
+ }
+}

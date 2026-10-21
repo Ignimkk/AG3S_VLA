@@ -1,0 +1,490 @@
+{
+ "step": "IFG-APPLE-TOW + IFG-OPTB + IFG-APPLE-NBC",
+ "written": "2026-10-21 KST (lead; CPU analysis after the GPU runs)",
+ "plain_names": {
+  "E0": "VLA 단독",
+  "SPL": "기존 방식 + target 분리",
+  "SPLW": "SPL + 쥐기 전 target 근처 손목 관절(4·5·6) 추종 가중치 0.1 (--wrist-track-scale 0.1)",
+  "SPLT": "SPLW + 쥐기 전 손가락의 이웃 물체 접촉 20 mm 허용 (--neighbour-contact-mm 20)"
+ },
+ "kits": {
+  "SPLW": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-TOW",
+  "SPLT": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC"
+ },
+ "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC/agg4arm (copies)",
+ "gpu_window_utc": {
+  "SPLW": [
+   "2026-10-21T06:37:56",
+   "2026-10-21T07:29:52"
+  ],
+  "SPLT": [
+   "2026-10-21T09:55:01",
+   "2026-10-21T10:53:48"
+  ]
+ },
+ "code": {
+  "SPLW": "snapshot_tow tree 45bdd8324b9a0806d3b1ea4e65df5bebb16e1fb9",
+  "SPLT": "snapshot_nbc tree 222a2f58a26ade976b1d529d52ab9f46883f7dbf"
+ },
+ "scripts": [
+  "AG3S/ag3s/experiments/studies/ifg_nbc_result.py",
+  "AG3S/ag3s/experiments/studies/ifg_roll_feasibility.py",
+  "AG3S/ag3s/experiments/studies/ifg_goal_drift.py (--cmp IFG-APPLE-TOW:SPLW / IFG-APPLE-NBC:SPLT)"
+ ],
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-nbc-result.png",
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-roll-feasibility-ep954.png",
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-roll-feasibility-ep211.png",
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-goal-drift-ep954-wrist-track.png",
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-goal-drift-ep211-wrist-track.png",
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-goal-drift-ep954-neighbour-contact.png",
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-goal-drift-ep211-neighbour-contact.png"
+ ],
+ "numbers": {
+  "success": {
+   "E0": 10,
+   "SPL": 7,
+   "SPLW": 8,
+   "SPLT": 9
+  },
+  "paired": {
+   "SPL_vs_SPLW": {
+    "both": 7,
+    "only_SPL": 0,
+    "only_SPLW": 1,
+    "neither": 2
+   },
+   "SPLW_vs_SPLT": {
+    "both": 8,
+    "only_SPLW": 0,
+    "only_SPLT": 1,
+    "neither": 1
+   },
+   "SPL_vs_SPLT": {
+    "both": 7,
+    "only_SPL": 0,
+    "only_SPLT": 2,
+    "neither": 1,
+    "mcnemar_exact_p": 0.5
+   },
+   "E0_vs_SPLT": {
+    "both": 9,
+    "only_E0": 1,
+    "only_SPLT": 0
+   }
+  },
+  "per_episode": {
+   "56": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLW": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLT": {
+     "primary": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 2,
+     "neighbour_rows": 0
+    }
+   },
+   "211": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 8
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6,
+     "neighbour_rows": 34
+    },
+    "SPLW": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 7,
+     "neighbour_rows": 8
+    },
+    "SPLT": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 2,
+     "neighbour_rows": 14
+    }
+   },
+   "1837": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 15,
+     "neighbour_rows": 0
+    },
+    "SPLW": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLT": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   },
+   "320": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPLW": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPLT": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   },
+   "753": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLW": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLT": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    }
+   },
+   "954": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 17
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPLW": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPLT": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 8
+    }
+   },
+   "309": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLW": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLT": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   },
+   "250": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPLW": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPLT": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    }
+   },
+   "1668": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLW": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3,
+     "neighbour_rows": 0
+    },
+    "SPLT": {
+     "primary": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 5,
+     "neighbour_rows": 0
+    }
+   },
+   "126": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLW": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPLT": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    }
+   }
+  },
+  "first_close": {
+   "954": {
+    "E0": {
+     "t": 144,
+     "tcp_rel_apple_t0_mm": [
+      -3.7720604521376266,
+      14.65058132752789,
+      12.315450192967425
+     ]
+    },
+    "SPLW": {
+     "t": 146,
+     "tcp_rel_apple_t0_mm": [
+      0.4500805644752637,
+      37.205597146199146,
+      21.90001479668846
+     ]
+    },
+    "SPLT": {
+     "t": 146,
+     "tcp_rel_apple_t0_mm": [
+      -7.29698966477732,
+      16.180305482836054,
+      11.356929028764728
+     ]
+    }
+   },
+   "211": {
+    "E0": {
+     "t": 184,
+     "tcp_rel_apple_t0_mm": [
+      -4.142954926877273,
+      6.092297846339467,
+      10.982749140119541
+     ]
+    },
+    "SPLW": {
+     "t": 163,
+     "tcp_rel_apple_t0_mm": [
+      66.55626871071108,
+      1.3279598665166814,
+      19.53944393910845
+     ]
+    },
+    "SPLT": {
+     "t": 163,
+     "tcp_rel_apple_t0_mm": [
+      67.46937219163097,
+      1.1759446579829302,
+      18.863896019245317
+     ]
+    }
+   }
+  },
+  "tow_joint_edit_deg_gated_requests": {
+   "ep320": {
+    "SPL_max": [
+     9.74,
+     8.78,
+     3.86,
+     3.13,
+     1.0,
+     6.34,
+     0.74
+    ],
+    "SPLW_max": [
+     0.87,
+     0.4,
+     0.36,
+     0.42,
+     0.75,
+     1.19,
+     0.32
+    ]
+   },
+   "ep954": {
+    "SPL_sum_prox_distal": [
+     29.9,
+     29.3
+    ],
+    "SPLW_sum_prox_distal": [
+     33.7,
+     65.7
+    ]
+   },
+   "ep1668": {
+    "SPL_sum_prox_distal": [
+     52.0,
+     42.1
+    ],
+    "SPLW_sum_prox_distal": [
+     27.1,
+     26.7
+    ]
+   }
+  },
+  "option_B_roll_feasibility": {
+   "margin_mm": 10.0,
+   "ep954_best_at_close": {
+    "roll_deg": -50,
+    "clearance_mm": -1.8,
+    "worst_sphere": "ee_finger_r1",
+    "palm_shift_mm": 0.0,
+    "within_limits": true
+   },
+   "ep954_roll0_at_close": {
+    "roll_deg": 0,
+    "clearance_mm": -6.6,
+    "worst_sphere": "ee_finger_r2",
+    "palm_shift_mm": 0.0,
+    "within_limits": true
+   },
+   "ep211_best_at_close": {
+    "roll_deg": 10,
+    "clearance_mm": 0.7,
+    "worst_sphere": "ee_finger_l1",
+    "palm_shift_mm": 0.0,
+    "within_limits": true
+   },
+   "ep211_best_15_steps_later": {
+    "roll_deg": 30,
+    "clearance_mm": -6.5,
+    "worst_sphere": "ee_finger_l2",
+    "palm_shift_mm": 0.0,
+    "within_limits": true
+   }
+  },
+  "ep211_SPLT": {
+   "hand_target_contact_first_t": 143,
+   "close_t": 163,
+   "E0_close_t": 184,
+   "tcp_rel_apple_at_close_mm": [
+    73.0,
+    -1.4,
+    18.9
+   ],
+   "finger_open_settled": 0.52,
+   "hand_neighbour_contact_first_t": 165,
+   "attach_request": 22,
+   "revoked_request": 23,
+   "revoke_reasons": [
+    "opening_dropped",
+    "not_blocked"
+   ],
+   "early_holds": "requests 12-13 whole-chunk HOLD (ee_finger_l1, 0.5 / 1.1 mm), palm 163.5 mm (NBC gate 150 mm not yet on)"
+  }
+ },
+ "diagnosis": {
+  "ep954": "fixed by NBC: closes at (-7.3, 16.2, 11.4) mm from the apple vs VLA alone (-3.8, 14.7, 12.3); neighbour contact rows 8 (VLA alone 17)",
+  "ep320": "fixed by TOW: the target-split avoidance used arm_0 / arm_1 (9.7 / 8.8 deg); with the wrist weight the edits fall below 1.2 deg",
+  "ep211": "not fixed: the hand reaches the apple ~2 s earlier than VLA alone, touches it at t=143, passes ~70 mm beyond and closes on the banana (fingers stop at 0.52); attach at request 22 is revoked at 23. The path diverges before the NBC gate opens (HOLDs at requests 12-13, palm 163 mm); cause of the earlier arrival not yet isolated"
+ }
+}

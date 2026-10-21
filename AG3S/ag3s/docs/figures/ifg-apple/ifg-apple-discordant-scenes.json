@@ -1,0 +1,517 @@
+{
+ "kind": "discordant",
+ "frames": [
+  {
+   "episode": 250,
+   "stratum": "clear",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep250_s2503",
+   "which": "E0 가 잡은 시각 (row 120)",
+   "frac": 0.2,
+   "grasp_t": 120,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 8.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 250,
+   "stratum": "clear",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep250_s2503",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 120,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 250,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep250_s2503",
+   "which": "E0 가 잡은 시각 (row 120)",
+   "frac": 0.2,
+   "grasp_t": 120,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 8.0
+   },
+   "outcome": "fail",
+   "failure_mode": "slip_in_transport",
+   "hold_chunks": 49
+  },
+  {
+   "episode": 250,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep250_s2503",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 120,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "fail",
+   "failure_mode": "slip_in_transport",
+   "hold_chunks": 49
+  },
+  {
+   "episode": 342,
+   "stratum": "clear",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep342_s3423",
+   "which": "C1aN 가 잡은 시각 (row 128)",
+   "frac": 0.21333333333333335,
+   "grasp_t": 128,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 8.533333333333333
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 342,
+   "stratum": "clear",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep342_s3423",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 128,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 342,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep342_s3423",
+   "which": "C1aN 가 잡은 시각 (row 128)",
+   "frac": 0.21333333333333335,
+   "grasp_t": 128,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 8.533333333333333
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 342,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep342_s3423",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 128,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 421,
+   "stratum": "clear",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep421_s4213",
+   "which": "C1aN 가 잡은 시각 (row 192)",
+   "frac": 0.32,
+   "grasp_t": 192,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 12.8
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 421,
+   "stratum": "clear",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep421_s4213",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 192,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 421,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep421_s4213",
+   "which": "C1aN 가 잡은 시각 (row 192)",
+   "frac": 0.32,
+   "grasp_t": 192,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 12.8
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 2
+  },
+  {
+   "episode": 421,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep421_s4213",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 192,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 2
+  },
+  {
+   "episode": 1345,
+   "stratum": "clear",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep1345_s13453",
+   "which": "E0 가 잡은 시각 (row 232)",
+   "frac": 0.38666666666666666,
+   "grasp_t": 232,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 15.466666666666667
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1345,
+   "stratum": "clear",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep1345_s13453",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 232,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1345,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1345_s13453",
+   "which": "E0 가 잡은 시각 (row 232)",
+   "frac": 0.38666666666666666,
+   "grasp_t": 232,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 15.466666666666667
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1345,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1345_s13453",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 232,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 211,
+   "stratum": "place",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep211_s2113",
+   "which": "E0 가 잡은 시각 (row 216)",
+   "frac": 0.36,
+   "grasp_t": 216,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 14.399999999999999
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 211,
+   "stratum": "place",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep211_s2113",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 216,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 211,
+   "stratum": "place",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep211_s2113",
+   "which": "E0 가 잡은 시각 (row 216)",
+   "frac": 0.36,
+   "grasp_t": 216,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 14.399999999999999
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 34
+  },
+  {
+   "episode": 211,
+   "stratum": "place",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep211_s2113",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 216,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 34
+  },
+  {
+   "episode": 320,
+   "stratum": "place",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep320_s3203",
+   "which": "E0 가 잡은 시각 (row 256)",
+   "frac": 0.4266666666666667,
+   "grasp_t": 256,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 17.066666666666666
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 320,
+   "stratum": "place",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep320_s3203",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 256,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 320,
+   "stratum": "place",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep320_s3203",
+   "which": "E0 가 잡은 시각 (row 256)",
+   "frac": 0.4266666666666667,
+   "grasp_t": 256,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 17.066666666666666
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 320,
+   "stratum": "place",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep320_s3203",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 256,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 954,
+   "stratum": "place",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep954_s9543",
+   "which": "E0 가 잡은 시각 (row 168)",
+   "frac": 0.28,
+   "grasp_t": 168,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 11.200000000000001
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 954,
+   "stratum": "place",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep954_s9543",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 168,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 954,
+   "stratum": "place",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep954_s9543",
+   "which": "E0 가 잡은 시각 (row 168)",
+   "frac": 0.28,
+   "grasp_t": 168,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 11.200000000000001
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 954,
+   "stratum": "place",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep954_s9543",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 168,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1222,
+   "stratum": "place",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep1222_s12223",
+   "which": "C1aN 가 잡은 시각 (row 144)",
+   "frac": 0.24,
+   "grasp_t": 144,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 9.6
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1222,
+   "stratum": "place",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep1222_s12223",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 144,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1222,
+   "stratum": "place",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1222_s12223",
+   "which": "C1aN 가 잡은 시각 (row 144)",
+   "frac": 0.24,
+   "grasp_t": 144,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 9.6
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 2
+  },
+  {
+   "episode": 1222,
+   "stratum": "place",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1222_s12223",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 144,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 2
+  }
+ ]
+}

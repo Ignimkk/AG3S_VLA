@@ -1,0 +1,1024 @@
+{
+ "numbers": {
+  "latch_closing_vs_close_cmd": {
+   "seconds": {
+    "n": 24,
+    "median": 0.3333,
+    "p90": 0.5333,
+    "max": 0.5333,
+    "min": -0.5333
+   },
+   "requests": {
+    "n": 24,
+    "median": 0.0,
+    "p90": 1.0,
+    "max": 1.0,
+    "min": -1.0
+   },
+   "per_run": [
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 12,
+     "t_event": 88,
+     "run": "SPL_ep56_s563"
+    },
+    {
+     "req": 0,
+     "s": 0.4667,
+     "k_latch": 15,
+     "t_event": 113,
+     "run": "SPL_ep119_s1193"
+    },
+    {
+     "req": 0,
+     "s": 0.2667,
+     "k_latch": 14,
+     "t_event": 108,
+     "run": "SPL_ep121_s1213"
+    },
+    {
+     "req": 0,
+     "s": 0.2667,
+     "k_latch": 12,
+     "t_event": 92,
+     "run": "SPL_ep126_s1263"
+    },
+    {
+     "req": 0,
+     "s": 0.3333,
+     "k_latch": 21,
+     "t_event": 163,
+     "run": "SPL_ep211_s2113"
+    },
+    {
+     "req": 0,
+     "s": 0.4667,
+     "k_latch": 11,
+     "t_event": 81,
+     "run": "SPL_ep250_s2503"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 16,
+     "t_event": 120,
+     "run": "SPL_ep309_s3093"
+    },
+    {
+     "req": 0,
+     "s": 0.3333,
+     "k_latch": 16,
+     "t_event": 123,
+     "run": "SPL_ep320_s3203"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 15,
+     "t_event": 112,
+     "run": "SPL_ep325_s3253"
+    },
+    {
+     "req": 0,
+     "s": 0.2667,
+     "k_latch": 14,
+     "t_event": 108,
+     "run": "SPL_ep342_s3423"
+    },
+    {
+     "req": 0,
+     "s": 0.1333,
+     "k_latch": 19,
+     "t_event": 150,
+     "run": "SPL_ep421_s4213"
+    },
+    {
+     "req": 0,
+     "s": 0.0667,
+     "k_latch": 18,
+     "t_event": 143,
+     "run": "SPL_ep526_s5263"
+    },
+    {
+     "req": 0,
+     "s": 0.3333,
+     "k_latch": 14,
+     "t_event": 107,
+     "run": "SPL_ep572_s5723"
+    },
+    {
+     "req": 0,
+     "s": 0.2667,
+     "k_latch": 16,
+     "t_event": 124,
+     "run": "SPL_ep753_s7533"
+    },
+    {
+     "req": 0,
+     "s": 0.2,
+     "k_latch": 17,
+     "t_event": 133,
+     "run": "SPL_ep850_s8503"
+    },
+    {
+     "req": 0,
+     "s": 0.0667,
+     "k_latch": 14,
+     "t_event": 111,
+     "run": "SPL_ep901_s9013"
+    },
+    {
+     "req": 0,
+     "s": 0.4,
+     "k_latch": 19,
+     "t_event": 146,
+     "run": "SPL_ep954_s9543"
+    },
+    {
+     "req": 0,
+     "s": 0.2667,
+     "k_latch": 25,
+     "t_event": 196,
+     "run": "SPL_ep979_s9793"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 15,
+     "t_event": 112,
+     "run": "SPL_ep1222_s12223"
+    },
+    {
+     "req": -1,
+     "s": -0.5333,
+     "k_latch": 18,
+     "t_event": 152,
+     "run": "SPL_ep1313_s13133"
+    },
+    {
+     "req": 0,
+     "s": 0.0667,
+     "k_latch": 16,
+     "t_event": 127,
+     "run": "SPL_ep1345_s13453"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 12,
+     "t_event": 88,
+     "run": "SPL_ep1596_s15963"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 14,
+     "t_event": 104,
+     "run": "SPL_ep1668_s16683"
+    },
+    {
+     "req": 0,
+     "s": 0.4,
+     "k_latch": 10,
+     "t_event": 74,
+     "run": "SPL_ep1837_s18373"
+    }
+   ],
+   "one_side_only": []
+  },
+  "latch_closing_vs_lifting_close_cmd": {
+   "seconds": {
+    "n": 19,
+    "median": 0.4,
+    "p90": 0.5333,
+    "max": 0.5333,
+    "min": 0.0667
+   },
+   "requests": {
+    "n": 19,
+    "median": 0.0,
+    "p90": 1.0,
+    "max": 1.0,
+    "min": 0.0
+   },
+   "per_run": [
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 12,
+     "t_event": 88,
+     "run": "SPL_ep56_s563"
+    },
+    {
+     "req": 0,
+     "s": 0.4667,
+     "k_latch": 15,
+     "t_event": 113,
+     "run": "SPL_ep119_s1193"
+    },
+    {
+     "req": 0,
+     "s": 0.2667,
+     "k_latch": 14,
+     "t_event": 108,
+     "run": "SPL_ep121_s1213"
+    },
+    {
+     "req": 0,
+     "s": 0.2667,
+     "k_latch": 12,
+     "t_event": 92,
+     "run": "SPL_ep126_s1263"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 63,
+     "t_event": 496,
+     "run": "SPL_ep211_s2113"
+    },
+    {
+     "req": 0,
+     "s": 0.4667,
+     "k_latch": 11,
+     "t_event": 81,
+     "run": "SPL_ep250_s2503"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 16,
+     "t_event": 120,
+     "run": "SPL_ep309_s3093"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 15,
+     "t_event": 112,
+     "run": "SPL_ep325_s3253"
+    },
+    {
+     "req": 0,
+     "s": 0.2667,
+     "k_latch": 14,
+     "t_event": 108,
+     "run": "SPL_ep342_s3423"
+    },
+    {
+     "req": 0,
+     "s": 0.1333,
+     "k_latch": 19,
+     "t_event": 150,
+     "run": "SPL_ep421_s4213"
+    },
+    {
+     "req": 0,
+     "s": 0.3333,
+     "k_latch": 14,
+     "t_event": 107,
+     "run": "SPL_ep572_s5723"
+    },
+    {
+     "req": 0,
+     "s": 0.2667,
+     "k_latch": 16,
+     "t_event": 124,
+     "run": "SPL_ep753_s7533"
+    },
+    {
+     "req": 0,
+     "s": 0.2,
+     "k_latch": 17,
+     "t_event": 133,
+     "run": "SPL_ep850_s8503"
+    },
+    {
+     "req": 0,
+     "s": 0.0667,
+     "k_latch": 14,
+     "t_event": 111,
+     "run": "SPL_ep901_s9013"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 15,
+     "t_event": 112,
+     "run": "SPL_ep1222_s12223"
+    },
+    {
+     "req": 0,
+     "s": 0.0667,
+     "k_latch": 16,
+     "t_event": 127,
+     "run": "SPL_ep1345_s13453"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 12,
+     "t_event": 88,
+     "run": "SPL_ep1596_s15963"
+    },
+    {
+     "req": 1,
+     "s": 0.5333,
+     "k_latch": 14,
+     "t_event": 104,
+     "run": "SPL_ep1668_s16683"
+    },
+    {
+     "req": 0,
+     "s": 0.4,
+     "k_latch": 10,
+     "t_event": 74,
+     "run": "SPL_ep1837_s18373"
+    }
+   ],
+   "one_side_only": []
+  },
+  "latch_attach_vs_lift_same_cycle": {
+   "seconds": {
+    "n": 19,
+    "median": -0.1333,
+    "p90": 0.4,
+    "max": 0.4,
+    "min": -1.1333
+   },
+   "requests": {
+    "n": 19,
+    "median": -1.0,
+    "p90": 0.0,
+    "max": 0.0,
+    "min": -3.0
+   },
+   "per_run": [
+    {
+     "req": -1,
+     "s": -0.2667,
+     "k_latch": 13,
+     "t_event": 108,
+     "run": "SPL_ep56_s563"
+    },
+    {
+     "req": -1,
+     "s": -0.1333,
+     "k_latch": 16,
+     "t_event": 130,
+     "run": "SPL_ep119_s1193"
+    },
+    {
+     "req": 0,
+     "s": 0.3333,
+     "k_latch": 15,
+     "t_event": 115,
+     "run": "SPL_ep121_s1213"
+    },
+    {
+     "req": -1,
+     "s": -0.2,
+     "k_latch": 13,
+     "t_event": 107,
+     "run": "SPL_ep126_s1263"
+    },
+    {
+     "req": 0,
+     "s": 0.4,
+     "k_latch": 64,
+     "t_event": 506,
+     "run": "SPL_ep211_s2113"
+    },
+    {
+     "req": -1,
+     "s": -0.3333,
+     "k_latch": 12,
+     "t_event": 101,
+     "run": "SPL_ep250_s2503"
+    },
+    {
+     "req": -1,
+     "s": -0.4,
+     "k_latch": 17,
+     "t_event": 142,
+     "run": "SPL_ep309_s3093"
+    },
+    {
+     "req": -1,
+     "s": -0.1333,
+     "k_latch": 16,
+     "t_event": 130,
+     "run": "SPL_ep325_s3253"
+    },
+    {
+     "req": 0,
+     "s": 0.4,
+     "k_latch": 15,
+     "t_event": 114,
+     "run": "SPL_ep342_s3423"
+    },
+    {
+     "req": -3,
+     "s": -1.1333,
+     "k_latch": 21,
+     "t_event": 185,
+     "run": "SPL_ep421_s4213"
+    },
+    {
+     "req": -1,
+     "s": -0.2,
+     "k_latch": 15,
+     "t_event": 123,
+     "run": "SPL_ep572_s5723"
+    },
+    {
+     "req": -1,
+     "s": -0.1333,
+     "k_latch": 17,
+     "t_event": 138,
+     "run": "SPL_ep753_s7533"
+    },
+    {
+     "req": -2,
+     "s": -0.6,
+     "k_latch": 18,
+     "t_event": 153,
+     "run": "SPL_ep850_s8503"
+    },
+    {
+     "req": -1,
+     "s": -0.2,
+     "k_latch": 16,
+     "t_event": 131,
+     "run": "SPL_ep901_s9013"
+    },
+    {
+     "req": -1,
+     "s": -0.2,
+     "k_latch": 16,
+     "t_event": 131,
+     "run": "SPL_ep1222_s12223"
+    },
+    {
+     "req": 0,
+     "s": 0.4,
+     "k_latch": 18,
+     "t_event": 138,
+     "run": "SPL_ep1345_s13453"
+    },
+    {
+     "req": -1,
+     "s": -0.1333,
+     "k_latch": 13,
+     "t_event": 106,
+     "run": "SPL_ep1596_s15963"
+    },
+    {
+     "req": -1,
+     "s": -0.0667,
+     "k_latch": 15,
+     "t_event": 121,
+     "run": "SPL_ep1668_s16683"
+    },
+    {
+     "req": 0,
+     "s": 0.3333,
+     "k_latch": 11,
+     "t_event": 83,
+     "run": "SPL_ep1837_s18373"
+    }
+   ],
+   "one_side_only": []
+  },
+  "latch_placed_vs_place": {
+   "seconds": {
+    "n": 18,
+    "median": 0.9333,
+    "p90": 1.2333200000000002,
+    "max": 1.4667,
+    "min": 0.6667
+   },
+   "requests": {
+    "n": 18,
+    "median": 1.0,
+    "p90": 2.0,
+    "max": 2.0,
+    "min": 1.0
+   },
+   "per_run": [
+    {
+     "req": 2,
+     "s": 1.1333,
+     "k_latch": 27,
+     "t_event": 199,
+     "run": "SPL_ep56_s563"
+    },
+    {
+     "req": 2,
+     "s": 1.4667,
+     "k_latch": 29,
+     "t_event": 210,
+     "run": "SPL_ep119_s1193"
+    },
+    {
+     "req": 1,
+     "s": 0.7333,
+     "k_latch": 27,
+     "t_event": 205,
+     "run": "SPL_ep121_s1213"
+    },
+    {
+     "req": 1,
+     "s": 0.8667,
+     "k_latch": 27,
+     "t_event": 203,
+     "run": "SPL_ep126_s1263"
+    },
+    {
+     "req": 2,
+     "s": 1.1333,
+     "k_latch": 25,
+     "t_event": 183,
+     "run": "SPL_ep250_s2503"
+    },
+    {
+     "req": 2,
+     "s": 1.1333,
+     "k_latch": 31,
+     "t_event": 231,
+     "run": "SPL_ep309_s3093"
+    },
+    {
+     "req": 1,
+     "s": 0.9333,
+     "k_latch": 30,
+     "t_event": 226,
+     "run": "SPL_ep325_s3253"
+    },
+    {
+     "req": 1,
+     "s": 0.9333,
+     "k_latch": 27,
+     "t_event": 202,
+     "run": "SPL_ep342_s3423"
+    },
+    {
+     "req": 2,
+     "s": 1.1333,
+     "k_latch": 36,
+     "t_event": 271,
+     "run": "SPL_ep421_s4213"
+    },
+    {
+     "req": 2,
+     "s": 1.0667,
+     "k_latch": 29,
+     "t_event": 216,
+     "run": "SPL_ep572_s5723"
+    },
+    {
+     "req": 1,
+     "s": 0.7333,
+     "k_latch": 31,
+     "t_event": 237,
+     "run": "SPL_ep753_s7533"
+    },
+    {
+     "req": 2,
+     "s": 1.0667,
+     "k_latch": 33,
+     "t_event": 248,
+     "run": "SPL_ep850_s8503"
+    },
+    {
+     "req": 1,
+     "s": 0.7333,
+     "k_latch": 29,
+     "t_event": 221,
+     "run": "SPL_ep901_s9013"
+    },
+    {
+     "req": 1,
+     "s": 0.7333,
+     "k_latch": 30,
+     "t_event": 229,
+     "run": "SPL_ep1222_s12223"
+    },
+    {
+     "req": 1,
+     "s": 0.8667,
+     "k_latch": 26,
+     "t_event": 195,
+     "run": "SPL_ep1345_s13453"
+    },
+    {
+     "req": 1,
+     "s": 0.7333,
+     "k_latch": 27,
+     "t_event": 205,
+     "run": "SPL_ep1596_s15963"
+    },
+    {
+     "req": 1,
+     "s": 0.6667,
+     "k_latch": 27,
+     "t_event": 206,
+     "run": "SPL_ep1668_s16683"
+    },
+    {
+     "req": 2,
+     "s": 1.4667,
+     "k_latch": 23,
+     "t_event": 162,
+     "run": "SPL_ep1837_s18373"
+    }
+   ],
+   "one_side_only": []
+  },
+  "probe_label_place_vs_lift_same_cycle": {
+   "seconds": {
+    "n": 19,
+    "median": 1.4,
+    "p90": 1.4667,
+    "max": 1.4667,
+    "min": -0.6
+   },
+   "requests": {
+    "n": 19,
+    "median": 2.0,
+    "p90": 2.0,
+    "max": 2.0,
+    "min": -2.0
+   },
+   "per_run": [
+    {
+     "req": 1,
+     "s": 0.8,
+     "k_latch": 15,
+     "t_event": 108,
+     "run": "SPL_ep56_s563"
+    },
+    {
+     "req": 0,
+     "s": 0.4,
+     "k_latch": 17,
+     "t_event": 130,
+     "run": "SPL_ep119_s1193"
+    },
+    {
+     "req": 1,
+     "s": 0.8667,
+     "k_latch": 16,
+     "t_event": 115,
+     "run": "SPL_ep121_s1213"
+    },
+    {
+     "req": 2,
+     "s": 1.4,
+     "k_latch": 16,
+     "t_event": 107,
+     "run": "SPL_ep126_s1263"
+    },
+    {
+     "req": 1,
+     "s": 0.9333,
+     "k_latch": 65,
+     "t_event": 506,
+     "run": "SPL_ep211_s2113"
+    },
+    {
+     "req": 1,
+     "s": 0.7333,
+     "k_latch": 14,
+     "t_event": 101,
+     "run": "SPL_ep250_s2503"
+    },
+    {
+     "req": 2,
+     "s": 1.2,
+     "k_latch": 20,
+     "t_event": 142,
+     "run": "SPL_ep309_s3093"
+    },
+    {
+     "req": 2,
+     "s": 1.4667,
+     "k_latch": 19,
+     "t_event": 130,
+     "run": "SPL_ep325_s3253"
+    },
+    {
+     "req": 2,
+     "s": 1.4667,
+     "k_latch": 17,
+     "t_event": 114,
+     "run": "SPL_ep342_s3423"
+    },
+    {
+     "req": -2,
+     "s": -0.6,
+     "k_latch": 22,
+     "t_event": 185,
+     "run": "SPL_ep421_s4213"
+    },
+    {
+     "req": 2,
+     "s": 1.4,
+     "k_latch": 18,
+     "t_event": 123,
+     "run": "SPL_ep572_s5723"
+    },
+    {
+     "req": 2,
+     "s": 1.4667,
+     "k_latch": 20,
+     "t_event": 138,
+     "run": "SPL_ep753_s7533"
+    },
+    {
+     "req": 1,
+     "s": 1.0,
+     "k_latch": 21,
+     "t_event": 153,
+     "run": "SPL_ep850_s8503"
+    },
+    {
+     "req": 2,
+     "s": 1.4,
+     "k_latch": 19,
+     "t_event": 131,
+     "run": "SPL_ep901_s9013"
+    },
+    {
+     "req": 2,
+     "s": 1.4,
+     "k_latch": 19,
+     "t_event": 131,
+     "run": "SPL_ep1222_s12223"
+    },
+    {
+     "req": 2,
+     "s": 1.4667,
+     "k_latch": 20,
+     "t_event": 138,
+     "run": "SPL_ep1345_s13453"
+    },
+    {
+     "req": 2,
+     "s": 1.4667,
+     "k_latch": 16,
+     "t_event": 106,
+     "run": "SPL_ep1596_s15963"
+    },
+    {
+     "req": 1,
+     "s": 1.0,
+     "k_latch": 17,
+     "t_event": 121,
+     "run": "SPL_ep1668_s16683"
+    },
+    {
+     "req": 2,
+     "s": 1.4,
+     "k_latch": 13,
+     "t_event": 83,
+     "run": "SPL_ep1837_s18373"
+    }
+   ],
+   "one_side_only": []
+  },
+  "probe_label_home_vs_place": {
+   "seconds": {
+    "n": 18,
+    "median": 2.16665,
+    "p90": 2.6933200000000004,
+    "max": 5.6667,
+    "min": 1.6667
+   },
+   "requests": {
+    "n": 18,
+    "median": 4.0,
+    "p90": 4.300000000000001,
+    "max": 10.0,
+    "min": 3.0
+   },
+   "per_run": [
+    {
+     "req": 4,
+     "s": 2.2,
+     "k_latch": 29,
+     "t_event": 199,
+     "run": "SPL_ep56_s563"
+    },
+    {
+     "req": 4,
+     "s": 2.5333,
+     "k_latch": 31,
+     "t_event": 210,
+     "run": "SPL_ep119_s1193"
+    },
+    {
+     "req": 4,
+     "s": 2.3333,
+     "k_latch": 30,
+     "t_event": 205,
+     "run": "SPL_ep121_s1213"
+    },
+    {
+     "req": 4,
+     "s": 2.4667,
+     "k_latch": 30,
+     "t_event": 203,
+     "run": "SPL_ep126_s1263"
+    },
+    {
+     "req": 3,
+     "s": 1.6667,
+     "k_latch": 26,
+     "t_event": 183,
+     "run": "SPL_ep250_s2503"
+    },
+    {
+     "req": 4,
+     "s": 2.2,
+     "k_latch": 33,
+     "t_event": 231,
+     "run": "SPL_ep309_s3093"
+    },
+    {
+     "req": 3,
+     "s": 2.0,
+     "k_latch": 32,
+     "t_event": 226,
+     "run": "SPL_ep325_s3253"
+    },
+    {
+     "req": 3,
+     "s": 2.0,
+     "k_latch": 29,
+     "t_event": 202,
+     "run": "SPL_ep342_s3423"
+    },
+    {
+     "req": 3,
+     "s": 1.6667,
+     "k_latch": 37,
+     "t_event": 271,
+     "run": "SPL_ep421_s4213"
+    },
+    {
+     "req": 4,
+     "s": 2.1333,
+     "k_latch": 31,
+     "t_event": 216,
+     "run": "SPL_ep572_s5723"
+    },
+    {
+     "req": 3,
+     "s": 1.8,
+     "k_latch": 33,
+     "t_event": 237,
+     "run": "SPL_ep753_s7533"
+    },
+    {
+     "req": 4,
+     "s": 2.1333,
+     "k_latch": 35,
+     "t_event": 248,
+     "run": "SPL_ep850_s8503"
+    },
+    {
+     "req": 4,
+     "s": 2.3333,
+     "k_latch": 32,
+     "t_event": 221,
+     "run": "SPL_ep901_s9013"
+    },
+    {
+     "req": 3,
+     "s": 1.8,
+     "k_latch": 32,
+     "t_event": 229,
+     "run": "SPL_ep1222_s12223"
+    },
+    {
+     "req": 10,
+     "s": 5.6667,
+     "k_latch": 35,
+     "t_event": 195,
+     "run": "SPL_ep1345_s13453"
+    },
+    {
+     "req": 3,
+     "s": 1.8,
+     "k_latch": 29,
+     "t_event": 205,
+     "run": "SPL_ep1596_s15963"
+    },
+    {
+     "req": 4,
+     "s": 2.2667,
+     "k_latch": 30,
+     "t_event": 206,
+     "run": "SPL_ep1668_s16683"
+    },
+    {
+     "req": 5,
+     "s": 3.0667,
+     "k_latch": 26,
+     "t_event": 162,
+     "run": "SPL_ep1837_s18373"
+    }
+   ],
+   "one_side_only": [
+    {
+     "run": "SPL_ep211_s2113",
+     "k_module": 43,
+     "t_event": null
+    },
+    {
+     "run": "SPL_ep526_s5263",
+     "k_module": 36,
+     "t_event": null
+    },
+    {
+     "run": "SPL_ep954_s9543",
+     "k_module": 37,
+     "t_event": null
+    },
+    {
+     "run": "SPL_ep1313_s13133",
+     "k_module": 35,
+     "t_event": null
+    }
+   ]
+  },
+  "panel_b": {
+   "runs": [
+    "SPL_ep56_s563",
+    "SPL_ep119_s1193",
+    "SPL_ep121_s1213",
+    "SPL_ep126_s1263",
+    "SPL_ep211_s2113",
+    "SPL_ep250_s2503",
+    "SPL_ep309_s3093",
+    "SPL_ep325_s3253",
+    "SPL_ep342_s3423",
+    "SPL_ep421_s4213",
+    "SPL_ep572_s5723",
+    "SPL_ep753_s7533",
+    "SPL_ep850_s8503",
+    "SPL_ep901_s9013",
+    "SPL_ep1222_s12223",
+    "SPL_ep1345_s13453",
+    "SPL_ep1596_s15963",
+    "SPL_ep1668_s16683",
+    "SPL_ep1837_s18373"
+   ],
+   "latch_attach_req": {
+    "SPL_ep56_s563": -1,
+    "SPL_ep119_s1193": -1,
+    "SPL_ep121_s1213": 0,
+    "SPL_ep126_s1263": -1,
+    "SPL_ep211_s2113": 0,
+    "SPL_ep250_s2503": -1,
+    "SPL_ep309_s3093": -1,
+    "SPL_ep325_s3253": -1,
+    "SPL_ep342_s3423": 0,
+    "SPL_ep421_s4213": -3,
+    "SPL_ep572_s5723": -1,
+    "SPL_ep753_s7533": -1,
+    "SPL_ep850_s8503": -2,
+    "SPL_ep901_s9013": -1,
+    "SPL_ep1222_s12223": -1,
+    "SPL_ep1345_s13453": 0,
+    "SPL_ep1596_s15963": -1,
+    "SPL_ep1668_s16683": -1,
+    "SPL_ep1837_s18373": 0
+   },
+   "probe_label_place_req": {
+    "SPL_ep56_s563": 1,
+    "SPL_ep119_s1193": 0,
+    "SPL_ep121_s1213": 1,
+    "SPL_ep126_s1263": 2,
+    "SPL_ep211_s2113": 1,
+    "SPL_ep250_s2503": 1,
+    "SPL_ep309_s3093": 2,
+    "SPL_ep325_s3253": 2,
+    "SPL_ep342_s3423": 2,
+    "SPL_ep421_s4213": -2,
+    "SPL_ep572_s5723": 2,
+    "SPL_ep753_s7533": 2,
+    "SPL_ep850_s8503": 1,
+    "SPL_ep901_s9013": 2,
+    "SPL_ep1222_s12223": 2,
+    "SPL_ep1345_s13453": 2,
+    "SPL_ep1596_s15963": 2,
+    "SPL_ep1668_s16683": 1,
+    "SPL_ep1837_s18373": 2
+   }
+  }
+ },
+ "definitions": "IFG-AUDIT-HSR: how accurately and how fast the AG3S stage trackers (grasp latch + sub-task probe) follow the true task\nstage on recorded closed-loop runs. CPU only, read only (inputs are never written).\n\n  cd /mnt/dev/AG3S_VLA-development; PYTHONPATH=.:integration/rby1/manipulation/src .venv-ag3s/bin/python       -m AG3S.ag3s.experiments.studies.ifg_audit_hsr --run <RUN> --fig AG3S/ag3s/docs/figures/ifg-audit\n\nInputs (24 apple scenes, arm SPL = current serving): <RUN>/verify/IFG-APPLE-SPLIT\n  replay/runs_SPL_SPL_ep*.npz   per control step (600): apple_pos, crate_pos/quat, grip_cmd (used arm, 1 = open),\n                                cnt_apple-hand, finger_open_norm, plan_index\n  replay/runs_SPL_SPL_ep*.json  server_chunk_alignment.block -> request k is chunk_dir/chunk_{k+offset:05d}.npz\n  server chunk npz summary_json  grasp (latch), subtask (probe), manipulated\n  analysis/SPL_ep*.json         success / failure_mode (cross-check only)\n  p/analyze_t42.py              in_crate rule (imported, not copied)\n\nGT definitions (per control step t, 15 Hz; request k is evaluated at its planning step t = 8k):\n  close cycle   [s, e): s = a step with grip_cmd < 0.5 (closing command), e = first later step with grip_cmd >= 0.9 (open command).\n                The carry command is ~0.58, so 0.5 cannot mark the end of a close.\n  lift onset    first step t where, for LIFT_L = 5 consecutive steps, apple z >= z0 + 10 mm AND cnt_apple-hand > 0\n                (z0 = apple z at step 0).\n  release       first step s > lift onset with cnt_apple-hand == 0 for REL_N = 8 consecutive steps (contact lost and not\n                regained within one chunk). HELD = [lift onset, release).\n  place         if the apple is in the crate (kit in_crate rule) at step 599: start of that final in-crate streak, but not\n                earlier than the last release. home onset = first step >= place with grip_cmd >= 0.9.\n  stage(t)      APPROACH      t < first closing command, or between close cycles before any lift (re-approach)\n                CLOSING       inside a close cycle that contains a lift onset, before the lift\n                FAILED_GRASP  inside a close cycle that contains no lift onset, before any lift\n                HELD          [lift onset, release)\n                RELEASED      [last release, place) when the apple ends in the crate (falling into the crate)\n                DROPPED       after a release, apple not (yet) placed and not RELEASED\n                PLACED        [place, home onset);  HOME  [home onset, end)\n  task phase    pick = APPROACH, CLOSING, FAILED_GRASP, DROPPED; place = HELD, RELEASED; home = PLACED, HOME.\n  latch phase   searching / latched / closing -> pick; held -> place; placed -> home.\nLatency: GT event at step t_e; first request able to observe it k_GT = ceil(t_e / 8); latency in requests = k_latch - k_GT,\nin seconds = (8 k_latch - t_e) / 15.\n"
+}

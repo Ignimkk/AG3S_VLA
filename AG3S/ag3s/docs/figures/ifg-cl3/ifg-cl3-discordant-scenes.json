@@ -1,0 +1,389 @@
+{
+ "kind": "discordant",
+ "frames": [
+  {
+   "episode": 1256,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep1256_s12563",
+   "which": "C1aN 가 잡은 시각 (row 232)",
+   "frac": 0.38666666666666666,
+   "grasp_t": 232,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 15.466666666666667
+   },
+   "outcome": "primary",
+   "failure_mode": "regrasp",
+   "hold_chunks": 2
+  },
+  {
+   "episode": 1256,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep1256_s12563",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 232,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "regrasp",
+   "hold_chunks": 2
+  },
+  {
+   "episode": 1256,
+   "stratum": "clear",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep1256_s12563",
+   "which": "C1aN 가 잡은 시각 (row 232)",
+   "frac": 0.38666666666666666,
+   "grasp_t": 232,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 15.466666666666667
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 1
+  },
+  {
+   "episode": 1256,
+   "stratum": "clear",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep1256_s12563",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 232,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 1
+  },
+  {
+   "episode": 1404,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep1404_s14043",
+   "which": "C1aN 가 잡은 시각 (row 112)",
+   "frac": 0.18666666666666668,
+   "grasp_t": 112,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 7.466666666666667
+   },
+   "outcome": "primary",
+   "failure_mode": "slip_at_lift",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1404,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep1404_s14043",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 112,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "slip_at_lift",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1404,
+   "stratum": "clear",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep1404_s14043",
+   "which": "C1aN 가 잡은 시각 (row 112)",
+   "frac": 0.18666666666666668,
+   "grasp_t": 112,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 7.466666666666667
+   },
+   "outcome": "fail",
+   "failure_mode": "slip_at_lift",
+   "hold_chunks": 1
+  },
+  {
+   "episode": 1404,
+   "stratum": "clear",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep1404_s14043",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 112,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "fail",
+   "failure_mode": "slip_at_lift",
+   "hold_chunks": 1
+  },
+  {
+   "episode": 1582,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep1582_s15823",
+   "which": "SURF 가 잡은 시각 (row 136)",
+   "frac": 0.22666666666666666,
+   "grasp_t": 136,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 9.066666666666666
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1582,
+   "stratum": "clear",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep1582_s15823",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 136,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1582,
+   "stratum": "clear",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep1582_s15823",
+   "which": "SURF 가 잡은 시각 (row 136)",
+   "frac": 0.22666666666666666,
+   "grasp_t": 136,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 9.066666666666666
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 1582,
+   "stratum": "clear",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep1582_s15823",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 136,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 182,
+   "stratum": "adjacent",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep182_s1823",
+   "which": "SURF 가 잡은 시각 (row 152)",
+   "frac": 0.25333333333333335,
+   "grasp_t": 152,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 10.133333333333335
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 182,
+   "stratum": "adjacent",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep182_s1823",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 152,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 182,
+   "stratum": "adjacent",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep182_s1823",
+   "which": "SURF 가 잡은 시각 (row 152)",
+   "frac": 0.25333333333333335,
+   "grasp_t": 152,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 10.133333333333335
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 182,
+   "stratum": "adjacent",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep182_s1823",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 152,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 194,
+   "stratum": "adjacent",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep194_s1943",
+   "which": "C1aN 가 잡은 시각 (row 192)",
+   "frac": 0.32,
+   "grasp_t": 192,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 12.8
+   },
+   "outcome": "fail",
+   "failure_mode": "slip_at_lift",
+   "hold_chunks": 2
+  },
+  {
+   "episode": 194,
+   "stratum": "adjacent",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep194_s1943",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 192,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "fail",
+   "failure_mode": "slip_at_lift",
+   "hold_chunks": 2
+  },
+  {
+   "episode": 194,
+   "stratum": "adjacent",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep194_s1943",
+   "which": "C1aN 가 잡은 시각 (row 192)",
+   "frac": 0.32,
+   "grasp_t": 192,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 12.8
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 194,
+   "stratum": "adjacent",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep194_s1943",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 192,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 0
+  },
+  {
+   "episode": 936,
+   "stratum": "adjacent",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep936_s9363",
+   "which": "C1aN 가 잡은 시각 (row 256)",
+   "frac": 0.4266666666666667,
+   "grasp_t": 256,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 17.066666666666666
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 3
+  },
+  {
+   "episode": 936,
+   "stratum": "adjacent",
+   "arm": "C1aN",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/C1aN/C1aN_ep936_s9363",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 256,
+   "video": {
+    "duration_s": 40.0,
+    "t_s": 40.0
+   },
+   "outcome": "primary",
+   "failure_mode": "ok",
+   "hold_chunks": 3
+  },
+  {
+   "episode": 936,
+   "stratum": "adjacent",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep936_s9363",
+   "which": "C1aN 가 잡은 시각 (row 256)",
+   "frac": 0.4266666666666667,
+   "grasp_t": 256,
+   "video": {
+    "duration_s": 14.0,
+    "t_s": 5.973333333333334
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 1
+  },
+  {
+   "episode": 936,
+   "stratum": "adjacent",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/runs/SURF/SURF_ep936_s9363",
+   "which": "마지막 frame",
+   "frac": 0.999,
+   "grasp_t": 256,
+   "video": {
+    "duration_s": 14.0,
+    "t_s": 14.0
+   },
+   "outcome": "no_grasp",
+   "failure_mode": "no_grasp",
+   "hold_chunks": 1
+  }
+ ]
+}

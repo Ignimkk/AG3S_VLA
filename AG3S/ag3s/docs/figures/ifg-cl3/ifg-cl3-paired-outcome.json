@@ -1,0 +1,71 @@
+{
+ "primary_metric": "contact-free task success (agg paired_primary)",
+ "groups": {
+  "all": {
+   "both": 12,
+   "only_C1aN": 5,
+   "only_SURF": 7,
+   "neither": 16,
+   "n_pairs": 40,
+   "rate_C1aN": 0.425,
+   "rate_SURF": 0.475,
+   "diff_SURF_minus_C1aN": 0.05,
+   "ci95_bootstrap": [
+    -0.125,
+    0.225
+   ],
+   "mcnemar_exact_p": 0.7744140625
+  },
+  "clear": {
+   "both": 3,
+   "only_C1aN": 2,
+   "only_SURF": 1,
+   "neither": 8,
+   "n_pairs": 14,
+   "rate_C1aN": 0.35714285714285715,
+   "rate_SURF": 0.2857142857142857,
+   "diff_SURF_minus_C1aN": -0.07142857142857142,
+   "ci95_bootstrap": [
+    -0.2857142857142857,
+    0.14285714285714285
+   ],
+   "mcnemar_exact_p": 1.0
+  },
+  "adjacent": {
+   "both": 5,
+   "only_C1aN": 2,
+   "only_SURF": 4,
+   "neither": 2,
+   "n_pairs": 13,
+   "rate_C1aN": 0.5384615384615384,
+   "rate_SURF": 0.6923076923076923,
+   "diff_SURF_minus_C1aN": 0.15384615384615385,
+   "ci95_bootstrap": [
+    -0.23076923076923078,
+    0.5384615384615384
+   ],
+   "mcnemar_exact_p": 0.6875
+  },
+  "place": {
+   "both": 4,
+   "only_C1aN": 1,
+   "only_SURF": 2,
+   "neither": 6,
+   "n_pairs": 13,
+   "rate_C1aN": 0.38461538461538464,
+   "rate_SURF": 0.46153846153846156,
+   "diff_SURF_minus_C1aN": 0.07692307692307693,
+   "ci95_bootstrap": [
+    -0.15384615384615385,
+    0.3076923076923077
+   ],
+   "mcnemar_exact_p": 1.0
+  }
+ },
+ "bootstrap": {
+  "n_resamples": 10000,
+  "seed": 20261018,
+  "unit": "episode pair",
+  "method": "percentile"
+ }
+}

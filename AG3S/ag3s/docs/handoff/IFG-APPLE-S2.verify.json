@@ -1,0 +1,321 @@
+{
+ "step": "IFG-APPLE-S2",
+ "written": "2026-10-20 KST (lead; numbers from merged agg + S2 server records, no judgement)",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f",
+ "arms": {
+  "E0": "VLA checkpoint alone",
+  "C1aN": "current serving + noun target choice",
+  "S2": "C1aN + --confidence-gate on + --held-3d-rule on (snapshot_s2)"
+ },
+ "numbers": {
+  "C1aN_vs_S2": {
+   "paired_primary": {
+    "both": 15,
+    "only_C1aN": 1,
+    "only_S2": 0,
+    "neither": 8,
+    "missing": 0,
+    "n_pairs": 24,
+    "mcnemar_exact_p": 1.0,
+    "rate_C1aN": 0.6666666666666666,
+    "rate_S2": 0.625,
+    "diff_S2_minus_C1aN": -0.041666666666666664,
+    "ci95_bootstrap": [
+     -0.125,
+     0.0
+    ]
+   },
+   "by_stratum": {
+    "clear": {
+     "both": 12,
+     "only_C1aN": 0,
+     "only_S2": 0,
+     "neither": 4,
+     "missing": 0,
+     "n_pairs": 16,
+     "mcnemar_exact_p": null,
+     "rate_C1aN": 0.75,
+     "rate_S2": 0.75,
+     "diff_S2_minus_C1aN": 0.0,
+     "ci95_bootstrap": [
+      0.0,
+      0.0
+     ]
+    },
+    "place": {
+     "both": 3,
+     "only_C1aN": 1,
+     "only_S2": 0,
+     "neither": 4,
+     "missing": 0,
+     "n_pairs": 8,
+     "mcnemar_exact_p": 1.0,
+     "rate_C1aN": 0.5,
+     "rate_S2": 0.375,
+     "diff_S2_minus_C1aN": -0.125,
+     "ci95_bootstrap": [
+      -0.375,
+      0.0
+     ]
+    }
+   }
+  },
+  "E0_vs_S2": {
+   "paired_primary": {
+    "both": 12,
+    "only_E0": 6,
+    "only_S2": 3,
+    "neither": 3,
+    "missing": 0,
+    "n_pairs": 24,
+    "mcnemar_exact_p": 0.5078125,
+    "rate_E0": 0.75,
+    "rate_S2": 0.625,
+    "diff_S2_minus_E0": -0.125,
+    "ci95_bootstrap": [
+     -0.375,
+     0.125
+    ]
+   },
+   "by_stratum": {
+    "clear": {
+     "both": 10,
+     "only_E0": 2,
+     "only_S2": 2,
+     "neither": 2,
+     "missing": 0,
+     "n_pairs": 16,
+     "mcnemar_exact_p": 1.0,
+     "rate_E0": 0.75,
+     "rate_S2": 0.75,
+     "diff_S2_minus_E0": 0.0,
+     "ci95_bootstrap": [
+      -0.25,
+      0.25
+     ]
+    },
+    "place": {
+     "both": 2,
+     "only_E0": 4,
+     "only_S2": 1,
+     "neither": 1,
+     "missing": 0,
+     "n_pairs": 8,
+     "mcnemar_exact_p": 0.375,
+     "rate_E0": 0.75,
+     "rate_S2": 0.375,
+     "diff_S2_minus_E0": -0.375,
+     "ci95_bootstrap": [
+      -0.875,
+      0.125
+     ]
+    }
+   }
+  },
+  "E0_vs_C1aN": {
+   "paired_primary": {
+    "both": 13,
+    "only_E0": 5,
+    "only_C1aN": 3,
+    "neither": 3,
+    "missing": 0,
+    "n_pairs": 24,
+    "mcnemar_exact_p": 0.7265625,
+    "rate_E0": 0.75,
+    "rate_C1aN": 0.6666666666666666,
+    "diff_C1aN_minus_E0": -0.08333333333333333,
+    "ci95_bootstrap": [
+     -0.2916666666666667,
+     0.125
+    ]
+   },
+   "by_stratum": {
+    "clear": {
+     "both": 10,
+     "only_E0": 2,
+     "only_C1aN": 2,
+     "neither": 2,
+     "missing": 0,
+     "n_pairs": 16,
+     "mcnemar_exact_p": 1.0,
+     "rate_E0": 0.75,
+     "rate_C1aN": 0.75,
+     "diff_C1aN_minus_E0": 0.0,
+     "ci95_bootstrap": [
+      -0.25,
+      0.25
+     ]
+    },
+    "place": {
+     "both": 3,
+     "only_E0": 3,
+     "only_C1aN": 1,
+     "neither": 1,
+     "missing": 0,
+     "n_pairs": 8,
+     "mcnemar_exact_p": 0.625,
+     "rate_E0": 0.75,
+     "rate_C1aN": 0.5,
+     "diff_C1aN_minus_E0": -0.25,
+     "ci95_bootstrap": [
+      -0.625,
+      0.25
+     ]
+    }
+   }
+  },
+  "per_arm": {
+   "C1aN": {
+    "n_runs": 24,
+    "n_primary": 16,
+    "n_grasp_fail": 7,
+    "failure_modes": {
+     "no_grasp": 7,
+     "ok": 15,
+     "slip_at_lift": 1,
+     "slip_in_transport": 1
+    },
+    "n_nonauth_target": 2,
+    "n_obstacle_contact": 0,
+    "n_neighbour_contact": 4,
+    "hold_chunks_sum": 119,
+    "runs_with_hold": 17,
+    "completion_s": {
+     "n": 16,
+     "median": 14.133333333333333,
+     "min": 11.2,
+     "max": 18.133333333333333
+    }
+   },
+   "S2": {
+    "n_runs": 24,
+    "n_primary": 15,
+    "n_grasp_fail": 7,
+    "failure_modes": {
+     "no_grasp": 7,
+     "ok": 14,
+     "slip_at_lift": 2,
+     "slip_in_transport": 1
+    },
+    "n_nonauth_target": 1,
+    "n_obstacle_contact": 0,
+    "n_neighbour_contact": 4,
+    "hold_chunks_sum": 105,
+    "runs_with_hold": 17,
+    "completion_s": {
+     "n": 15,
+     "median": 14.4,
+     "min": 11.2,
+     "max": 18.133333333333333
+    }
+   }
+  },
+  "client_round_trip_ms_median": {
+   "C1aN": 893.3,
+   "S2": 2478.3
+  },
+  "client_round_trip_ms_p95": {
+   "C1aN": 1387.9,
+   "S2": 3495.7
+  },
+  "alarm": {
+   "records": 1800,
+   "alerts": 1072,
+   "applied": 307,
+   "skipped_no_exemption": 596,
+   "skipped_attached": 169,
+   "no_score": {
+    "no_region": 72,
+    "no_memory": 24
+   },
+   "score_by_state": {
+    "offline": {
+     "n": 3077,
+     "frac_below": 0.13487162820929477,
+     "p10_50_90": [
+      0.37158544765809787,
+      0.9849206849296384,
+      0.9997999565672253
+     ]
+    },
+    "searching": {
+     "n": 24,
+     "frac_below": 0.0,
+     "p10_50_90": [
+      0.9916130901609043,
+      0.9975620606718272,
+      0.9997407748837877
+     ]
+    },
+    "latched": {
+     "n": 580,
+     "frac_below": 0.23793103448275862,
+     "p10_50_90": [
+      0.2072931653050702,
+      0.9678324745114049,
+      0.9985040795427045
+     ]
+    },
+    "closing": {
+     "n": 226,
+     "frac_below": 0.5929203539823009,
+     "p10_50_90": [
+      0.17297216633799312,
+      0.4253724059481238,
+      0.9728807302272151
+     ]
+    },
+    "held": {
+     "n": 199,
+     "frac_below": 0.8492462311557789,
+     "p10_50_90": [
+      -0.01435438192039237,
+      0.202327141810037,
+      0.681580311912061
+     ]
+    },
+    "placed": {
+     "n": 675,
+     "frac_below": 0.9348148148148148,
+     "p10_50_90": [
+      0.198157555264777,
+      0.4069657294596707,
+      0.5570685713243405
+     ]
+    }
+   }
+  },
+  "held_3d": {
+   "gripper_held_records": 458,
+   "rule_held_records": 83,
+   "rule_rejected_gripper_held": 375,
+   "hand_d": {
+    "serving_gripper_closed": {
+     "n": 450,
+     "p10_50_90": [
+      0.09416134745968142,
+      0.3133184401126783,
+      0.4693873897832637
+     ],
+     "frac_le_Dhold": 0.16666666666666666
+    },
+    "offline_gt_held": {
+     "n": 381,
+     "p10_50_90": [
+      0.08389038208915657,
+      0.08819514554021315,
+      0.14921041931622472
+     ],
+     "frac_le_Dhold": 0.8503937007874016
+    }
+   }
+  }
+ },
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-s2-diagnosis.png",
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-s2-paired-outcome.png",
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-s2-arm-metrics.png",
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-s2-outcome-grid.png",
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-s2-discordant-scenes.png"
+ ]
+}

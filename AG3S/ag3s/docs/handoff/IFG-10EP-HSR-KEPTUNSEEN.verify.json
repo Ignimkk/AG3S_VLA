@@ -1,0 +1,796 @@
+{
+ "step": "IFG-10EP-HSR-KEPTUNSEEN",
+ "written": "2026-10-20 KST (lead; CPU analysis after a 38-min GPU run)",
+ "plain_names": {
+  "C1aN": "기존 방식 (current serving)",
+  "SPL": "기존 방식 + target 분리 수정 (ATS)",
+  "SPLR": "SPL + 손 기준 쥠 거리 (HSR: --latch-reach-hand-relative, T46g)",
+  "SPLK": "SPLR + 닫는 동안 유지한 형상을 관측으로 세지 않기 (HSR: --latch-reach-kept-unseen)"
+ },
+ "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN",
+ "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN/agg4arm (copies, no symlink; C1aN/SPL/SPLR = IFG-10EP-TARGETSPLIT-HANDREACH/agg3arm records)",
+ "scenes_rule": "same 10 scenes and seeds as IFG-10EP-TARGETSPLIT-HANDREACH (seeds.json identical); diagnostic, not a success-rate sample",
+ "gpu_window_utc": [
+  "2026-10-20T10:32:18",
+  "2026-10-20T11:10:01"
+ ],
+ "smoke": {
+  "passed": true,
+  "first_chunk_max_abs_diff_vs_E0": 1.0104745928884995e-07
+ },
+ "code": "snapshot tree f0d8046bdf19cb08088304639f318b404a298ddc (main-tree HEAD f15e5872 + uncommitted IFG changes), md5_end.txt",
+ "scripts": [
+  "AG3S/ag3s/experiments/studies/ifg_10ep_keptunseen.py",
+  "<kit>/agg4arm/p/agg3.py (AGG_ARMS=X,SPLK)"
+ ],
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-10ep-keptunseen.png",
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-10ep-keptunseen-scenes.png"
+ ],
+ "numbers": {
+  "C1aN": 4,
+  "SPL": 6,
+  "SPLR": 7,
+  "SPLK": 9,
+  "paired_C1aN_vs_SPLK": {
+   "both": 3,
+   "only_C1aN": 1,
+   "only_SPLK": 6,
+   "neither": 0,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 0.125,
+   "rate_C1aN": 0.4,
+   "rate_SPLK": 0.9,
+   "diff_SPLK_minus_C1aN": 0.5,
+   "ci95_bootstrap": [
+    0.1,
+    0.9
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "paired_SPL_vs_SPLK": {
+   "both": 6,
+   "only_SPL": 0,
+   "only_SPLK": 3,
+   "neither": 1,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 0.25,
+   "rate_SPL": 0.6,
+   "rate_SPLK": 0.9,
+   "diff_SPLK_minus_SPL": 0.3,
+   "ci95_bootstrap": [
+    0.0,
+    0.6
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "paired_SPLR_vs_SPLK": {
+   "both": 7,
+   "only_SPLR": 0,
+   "only_SPLK": 2,
+   "neither": 1,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 0.5,
+   "rate_SPLR": 0.7,
+   "rate_SPLK": 0.9,
+   "diff_SPLK_minus_SPLR": 0.2,
+   "ci95_bootstrap": [
+    0.0,
+    0.5
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "per_episode": {
+   "250": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 49,
+     "lifted_not_attached_chunks": 14,
+     "first_attach": {
+      "k": 13,
+      "lift_m": -1.865478761331474e-05
+     },
+     "attached_requests": 3,
+     "revokes": 1,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 249.0970208820622
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 12,
+      "lift_m": 0.0013755504145206432
+     },
+     "attached_requests": 13,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 14.500788805717587
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 12,
+      "lift_m": 0.0013755504145206432
+     },
+     "attached_requests": 13,
+     "revokes": 0,
+     "carried_err_mm_first": 17.74022711710826,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 14.500788805717587
+    },
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 12,
+      "lift_m": 0.0013755504145206432
+     },
+     "attached_requests": 13,
+     "revokes": 0,
+     "carried_err_mm_first": 17.996476915001143,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 14.43919583539849
+    }
+   },
+   "211": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 34,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": null,
+     "attached_requests": 0,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 27.433001133591187
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 23,
+      "lift_m": 2.8201548509021457e-05
+     },
+     "attached_requests": 3,
+     "revokes": 2,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 88.24007598008129
+    },
+    "SPLR": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 23,
+      "lift_m": 2.8201548509021457e-05
+     },
+     "attached_requests": 3,
+     "revokes": 2,
+     "carried_err_mm_first": 40.380501133089744,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 88.24007598008129
+    },
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 23,
+      "lift_m": 2.8201548509021457e-05
+     },
+     "attached_requests": 12,
+     "revokes": 1,
+     "carried_err_mm_first": 40.380501133089744,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 88.24007598008129
+    }
+   },
+   "572": {
+    "C1aN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": {
+      "k": 15,
+      "lift_m": 9.343263382721734e-05
+     },
+     "attached_requests": 3,
+     "revokes": 1,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 148.09421592538985
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 15,
+      "lift_m": 7.225873560345875e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 1,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 33.08893987284701
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 15,
+      "lift_m": 7.225873560345875e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 15.173939426724617,
+     "held_occupied_after_2": 1,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 33.08893987284701
+    },
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 15,
+      "lift_m": 7.225873560345875e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 15.212706381657908,
+     "held_occupied_after_2": 1,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 33.08893987284701
+    }
+   },
+   "1345": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": null,
+     "attached_requests": 0,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 35.56410909291495
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 18,
+      "lift_m": 0.07375020709913416
+     },
+     "attached_requests": 8,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 1,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 114.50425994074762
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 18,
+      "lift_m": 0.07375020709913416
+     },
+     "attached_requests": 8,
+     "revokes": 0,
+     "carried_err_mm_first": 18.27002658571499,
+     "held_occupied_after_2": 1,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 114.50425994074762
+    },
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 18,
+      "lift_m": 0.07375020709913416
+     },
+     "attached_requests": 7,
+     "revokes": 0,
+     "carried_err_mm_first": 16.255447144433898,
+     "held_occupied_after_2": 1,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 114.50425994074762
+    }
+   },
+   "126": {
+    "C1aN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 13,
+      "lift_m": 8.168230955341027e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 38.18572535903753
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 13,
+      "lift_m": 8.168230955341027e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 38.18572535903753
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 13,
+      "lift_m": 8.168230955341027e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 15.892796469335504,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 38.18572535903753
+    },
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 13,
+      "lift_m": 8.168230955341027e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 17.356808497924362,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 38.185804155303
+    }
+   },
+   "423": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 3,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": null,
+     "attached_requests": 0,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 153.88432604653943
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 3,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": null,
+     "attached_requests": 0,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 153.88432604653943
+    },
+    "SPLR": {
+     "primary": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 35,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 17,
+      "lift_m": 0.19405258565386607
+     },
+     "attached_requests": 13,
+     "revokes": 1,
+     "carried_err_mm_first": 30.75603459109621,
+     "held_occupied_after_2": 11,
+     "worst_on_held_violating": 8,
+     "max_to_push_mm_closing_lift": 67.77442236046541
+    },
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 16,
+      "lift_m": 0.1051840858216403
+     },
+     "attached_requests": 12,
+     "revokes": 0,
+     "carried_err_mm_first": 12.176292399911196,
+     "held_occupied_after_2": 1,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 46.663207676792
+    }
+   },
+   "831": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 8,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": null,
+     "attached_requests": 0,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 184.3723080428693
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 8,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": null,
+     "attached_requests": 0,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 184.3723080428693
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 23,
+      "lift_m": 0.1830046610934053
+     },
+     "attached_requests": 12,
+     "revokes": 0,
+     "carried_err_mm_first": 19.790261810940972,
+     "held_occupied_after_2": 3,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 120.6160359313096
+    },
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 22,
+      "lift_m": 0.09301944086533032
+     },
+     "attached_requests": 12,
+     "revokes": 0,
+     "carried_err_mm_first": 21.759449815804956,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 120.6160359313096
+    }
+   },
+   "936": {
+    "C1aN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 31,
+      "lift_m": -2.3210060478007222e-05
+     },
+     "attached_requests": 16,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 66.45210087805229
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 4,
+     "first_attach": null,
+     "attached_requests": 0,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 154.82097440263468
+    },
+    "SPLR": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 2,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 27,
+      "lift_m": 0.16834454912118368
+     },
+     "attached_requests": 9,
+     "revokes": 0,
+     "carried_err_mm_first": 18.402154286666466,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 130.2898631976224
+    },
+    "SPLK": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 2,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 27,
+      "lift_m": 0.16834454912118368
+     },
+     "attached_requests": 10,
+     "revokes": 0,
+     "carried_err_mm_first": 17.737652488609164,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 130.2898631976224
+    }
+   },
+   "1582": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": null,
+     "attached_requests": 0,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 43.59021931766425
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 17,
+      "lift_m": 6.248698859290247e-05
+     },
+     "attached_requests": 9,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 1,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 25.763932349309712
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 17,
+      "lift_m": 6.248698859290247e-05
+     },
+     "attached_requests": 9,
+     "revokes": 0,
+     "carried_err_mm_first": 13.91744091571624,
+     "held_occupied_after_2": 1,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 25.763932349309712
+    },
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 17,
+      "lift_m": 6.248698859290247e-05
+     },
+     "attached_requests": 11,
+     "revokes": 0,
+     "carried_err_mm_first": 15.178199786153824,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 27.40883974509432
+    }
+   },
+   "1404": {
+    "C1aN": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 55,
+      "lift_m": 0.006669451563923068
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 1,
+     "max_to_push_mm_closing_lift": 204.7996624534779
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 55,
+      "lift_m": 0.006669451563923068
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": null,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 1,
+     "max_to_push_mm_closing_lift": 204.7996624534779
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 55,
+      "lift_m": 0.006669451563923068
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 21.64973458348616,
+     "held_occupied_after_2": 2,
+     "worst_on_held_violating": 1,
+     "max_to_push_mm_closing_lift": 204.7996624534779
+    },
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 3,
+     "lifted_not_attached_chunks": 7,
+     "first_attach": {
+      "k": 55,
+      "lift_m": 0.006669451563923068
+     },
+     "attached_requests": 1,
+     "revokes": 1,
+     "carried_err_mm_first": 55.55780938262066,
+     "held_occupied_after_2": 0,
+     "worst_on_held_violating": 0,
+     "max_to_push_mm_closing_lift": 222.3115004401474
+    }
+   }
+  },
+  "ep423_SPLR_held_in_field": {
+   "occupied_coarse_voxels_within_50mm_of_GT_while_attached": "5-9 per request in the first 6 attached requests; 11 attached requests after the first 2 still have > 0 (other 9 scenes: 0-3 such requests)",
+   "worst_row_point_on_held_apple_violating": 8,
+   "occupied_voxel_distance_to_apple_centre_mm": [
+    21,
+    45
+   ],
+   "carried_centre_error_mm": 31,
+   "attach_fit_centre_m": [
+    0.550786,
+    0.320901,
+    0.849553
+   ],
+   "GT_apple_k19_m": [
+    0.56,
+    0.298,
+    1.107
+   ],
+   "carry_seen_frame": 15,
+   "TO_push_k17_mm": 58
+  },
+  "ep423_SPLK": {
+   "carried_centre_error_mm": 12,
+   "occupied_after_2": 1,
+   "TO_push_k17_mm": 1,
+   "hold_chunks": 0
+  },
+  "ep1404_SPLK_regression": {
+   "attach_k": 55,
+   "revoked_k": 56,
+   "revoke_reason": "observed_elsewhere (centre distance 82.9 mm)",
+   "carry_seen_frame": 44,
+   "carried_centre_error_mm": 56,
+   "reach_mm_at_attach": 99.73,
+   "SPLR_reach_mm_at_attach": 57.98,
+   "lifted_not_attached_chunks": {
+    "SPLR": 1,
+    "SPLK": 7
+   },
+   "first_divergence": "executed TCP identical to row 440 (request 55); request-55 cloud after self-filter differs (101858 vs 101793 voxels)"
+  },
+  "ep936": {
+   "attach_k_both": 27,
+   "closing_chunk_TO_push_mm_k25_both": 130,
+   "failure": "slip_in_transport in both"
+  },
+  "ep211": {
+   "note": "SPLR attach k64 revoked k65 (opening_dropped, apple back at 0.2 cm); SPLK attach k64 held through k73; TO push at k64 8 mm both"
+  }
+ },
+ "diagnosis": {
+  "ep423_cause": "after attach the held apple's own surface stays in the coarse ESDF: attach snapshots the closing-kept (pre-closing, on-table) shape with the hand pose of request 15 (a kept frame counted as an observation), so the held spheres and held_free sit ~30 mm off the real apple; the field is not cleared and finger/attached rows violate against it -> HOLD in the air",
+  "ep423_fixed_by": "--latch-reach-kept-unseen: the seen-state pin does not move on kept frames, so the carry/snapshot pose matches the shape",
+  "ep1404_regression_cause": "with the flag the pin stays at request 44 (last non-kept observation, hand still approaching); the object did not move with the hand between 44 and the closing at 54, but the carry moves it with the hand -> centre 56 mm off, attach on a wrong shape, revoked next request, then 7 lifted chunks without attach (outcome still success)",
+  "common_point": "the carry start (from which pose the object rides the hand) is wrong in both directions: too late in 423 without the flag (during the lift), too early in 1404 with the flag (during the approach). Not fixed; candidate rule = carry from the pose at the closing start — needs user decision",
+  "not_attributable": "ep211 success change is not explained by the intended mechanism"
+ }
+}

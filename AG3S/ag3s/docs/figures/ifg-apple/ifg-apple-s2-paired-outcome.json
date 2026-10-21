@@ -1,0 +1,56 @@
+{
+ "primary_metric": "contact-free task success (agg paired_primary)",
+ "groups": {
+  "all": {
+   "both": 15,
+   "only_C1aN": 1,
+   "only_S2": 0,
+   "neither": 8,
+   "n_pairs": 24,
+   "rate_C1aN": 0.6666666666666666,
+   "rate_S2": 0.625,
+   "diff_S2_minus_C1aN": -0.041666666666666664,
+   "ci95_bootstrap": [
+    -0.125,
+    0.0
+   ],
+   "mcnemar_exact_p": 1.0
+  },
+  "clear": {
+   "both": 12,
+   "only_C1aN": 0,
+   "only_S2": 0,
+   "neither": 4,
+   "n_pairs": 16,
+   "rate_C1aN": 0.75,
+   "rate_S2": 0.75,
+   "diff_S2_minus_C1aN": 0.0,
+   "ci95_bootstrap": [
+    0.0,
+    0.0
+   ],
+   "mcnemar_exact_p": null
+  },
+  "place": {
+   "both": 3,
+   "only_C1aN": 1,
+   "only_S2": 0,
+   "neither": 4,
+   "n_pairs": 8,
+   "rate_C1aN": 0.5,
+   "rate_S2": 0.375,
+   "diff_S2_minus_C1aN": -0.125,
+   "ci95_bootstrap": [
+    -0.375,
+    0.0
+   ],
+   "mcnemar_exact_p": 1.0
+  }
+ },
+ "bootstrap": {
+  "n_resamples": 10000,
+  "seed": 20261019,
+  "unit": "episode pair",
+  "method": "percentile"
+ }
+}
