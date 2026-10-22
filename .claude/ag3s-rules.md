@@ -34,3 +34,35 @@ T46 (V-T46 · CL3) 를 제외한 2026-10-12 이후의 모든 새 STEP — T46 �
 **진행 방식**: `설명 → 사용자 질문(여기서 멈춤) → 공동 판정 → 확정된 것만 수정+검증 → 기록`.
 **추측을 기록에 남기지 않는다** — 그 자리에서 실행해 수치로 확정한다.
 체크포인트/MuJoCo 실행이 필요하면 먼저 사용자에게 요청한다.
+
+**공용 pod 자원 — 끝난 작업의 메모리는 다른 세션이 쓸 수 있게 회수한다** (2026-10-15 사용자 지시)
+- 한도: working set (`memory.current − inactive_file`, `/sys/fs/cgroup`) + 추정 ≤ 64 GiB (pod hard limit 80 GiB),
+  worker ≤ 4, 서버 ≤ 2, GPU ≤ 130 GB. 시작 전에 확인한다.
+- **page cache** 는 읽거나 쓴 파일 내용을 커널이 RAM 에 남겨 둔 것이다. process 가 끝나도 남고, 최근에 다시 읽힌
+  `active_file` 은 working set 에 그대로 잡힌다 — 한 세션의 기록 · checkpoint 가 다른 세션의 실행을 막는다
+  (2026-10-15 측정: process 메모리 6.5 GiB 인데 working set 56.6 GiB, 대부분 끝난 CL4 · T56 · T53 기록과 checkpoint 의 cache).
+- **기록 · 테스트 · 추출 · rollout · replay 가 끝나면 (handoff 를 넘기기 전에) 반드시 회수한다:**
+  1. 그 작업이 띄운 자기 process (server · worker · GPU process) 가 모두 끝났는지 확인하고, 남은 것은 종료한다.
+  2. `python3 scripts/setup/reclaim_cache.py "$AG3S_RUN_DIR" <읽은 큰 입력 (기록 · attention / feature npz · dataset · checkpoint) …>`
+     — 각 파일을 `fdatasync` 후 `posix_fadvise(DONTNEED)` 로 내린다. 파일은 디스크에 그대로 있고 다시 읽으면 NFS 에서 올라온다.
+     어떤 process 든 **지금 열고 있는 파일은 건너뛴다** (`/proc/*/fd` 검사; 이 pod 에는 `fuser` 가 없다) — 공용 checkpoint 를
+     서버가 들고 있거나 다른 세션이 run 을 쓰는 중이면 그 파일은 남는다. 다른 세션의 run 디렉터리는 인자로 넘기지 않는다.
+  3. 출력 한 줄 (`reclaim: ws A->B GiB | cache C->D GiB, …`; working set 과 대상 `fincore` 합의 전후) 을 handoff
+     (`impl.md` · `verify.json` 의 run 메모, 또는 사용자 보고) 에 그대로 남긴다. 확인만 할 때는 `--dry-run`.
+- **쓰지 않는다 (사용자 승인 없이):** `/proc/sys/vm/drop_caches` (노드 전체), `/sys/fs/cgroup/memory.reclaim` 쓰기
+  (pod 전체 — 다른 세션의 cache 까지 버린다). 다른 세션의 process 는 종료하지 않는다. VS Code 창이 닫혔는데 남은
+  Pylance (`ppid 1`, `--clientProcessId` 의 process 없음) 처럼 주인이 없는 process 를 보면 사용자에게 보고한다.
+
+**closed-loop 기록은 place 뒤 2–3 초에서 끝낸다** (2026-10-21 사용자 지시)
+- place 를 작업 완료로 본다. place 이후 홈 복귀 구간(약 23 초 이후) 데이터는 저장하지 않는다.
+- client `integration/rby1/bringup/pi05_infer.py --stop-after-place 2.5`
+  - place 판정: target 과일 중심이 바구니 안(`rby1_manipulation.evaluation.transport.object_in_crate`, 분석 `analyze_t42.py` 와 같은 기준)이고,
+    쓰는 팔의 그리퍼가 열린(≥ 0.5) 첫 control step
+  - 그 2.5 초(38 step) 뒤에 episode 를 끝낸다. log `[place] stop after place`, `traj.npz` 에 `place_detect_t` · `place_stop_t` 를 남긴다
+  - place 에 도달하지 못한 run 은 `--max-steps` 까지 그대로 기록한다(실패 분석용)
+- 새 kit 을 만들 때 세 군데를 고친다.
+  - `client_args.py` 가 위 flag 를 붙인다
+  - `check_run.py` 는 `[place] stop after place` 로그가 있고 기록이 일관되면(`n_planning == ceil(n_control / 8)`, `executed_actions (n_control, 16)`)
+    600 step 미만도 완료로 본다(`obstacle stop` 과 같은 방식)
+  - `run_chain.sh` 의 client 인자 검사에 이 flag 를 넣는다
+- 확인(2026-10-21, 기존 34 run 에 같은 규칙 적용): 27 run 이 place 에 도달했고, 평균 18.2 초에 끝난다(control step 55 % 감소). 최종 성공 판정이 바뀐 run 은 0

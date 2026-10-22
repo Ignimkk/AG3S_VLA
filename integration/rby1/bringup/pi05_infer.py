@@ -53,9 +53,11 @@ from rby1_manipulation.simulation.pick_place_obstacles import (
 )
 from rby1_manipulation.simulation.transport_scene import (
     CRATE_JOINT,
+    OBJECT_BODIES,
     OBJECT_JOINTS,
     load_layout_config,
 )
+from rby1_manipulation.evaluation.transport import object_in_crate
 
 MODELS = {
     "droid": {
@@ -765,6 +767,12 @@ def main():
              "validation and 1800-1999 test, so the default is the first held-out "
              "test scene. The episode's own prompt is used unless --prompt is given.")
     ap.add_argument("--max-steps", type=int, default=-1)
+    ap.add_argument(
+        "--stop-after-place", type=float, default=None, metavar="SEC",
+        help="IFG (user, 2026-10-21) — end the episode SEC seconds after the place: the first control step where the "
+             "episode's target fruit centre is inside the crate (rby1_manipulation.evaluation.transport.object_in_crate, "
+             "the analysis rule) and the used arm's applied gripper is open (>= 0.5). Logs '[place] stop after place'. "
+             "Off (default): run to --max-steps. Needs a randomized 16D episode.")
     ap.add_argument("--headless", action="store_true")
     ap.add_argument(
         "--view",
@@ -1779,6 +1787,19 @@ def main():
     sim_seconds_per_action = steps_per_action * m.opt.timestep
     wall_seconds_per_action = (sim_seconds_per_action / args.speed) if args.speed > 0 else 0.0
 
+    #: IFG `--stop-after-place` — filled by the loop (`placed_t`, `stop_t`); None = off.
+    place_stop = None
+    if args.stop_after_place is not None:
+        if not args.stop_after_place >= 0.0:
+            ap.error(f"--stop-after-place must be >= 0 s, got {args.stop_after_place}")
+        if randomized_episode is None or randomized_episode.get("used_arm") not in ("left", "right"):
+            ap.error("--stop-after-place needs a randomized 16D episode (target fruit and used arm)")
+        place_stop = {"fruit": str(randomized_episode["target_fruit"]), "arm": str(randomized_episode["used_arm"]),
+                      "grip_index": 0 if randomized_episode["used_arm"] == "left" else 1,
+                      "after_steps": int(round(args.stop_after_place * CTRL_HZ)), "placed_t": None, "stop_t": None}
+        print(f"[place] --stop-after-place {args.stop_after_place:.1f} s: {place_stop['fruit']} in the crate with the "
+              f"{place_stop['arm']} gripper open ends the episode {place_stop['after_steps']} steps later")
+
     def loop_body():
         chunk = None
         chunk_step = 0
@@ -2180,6 +2201,23 @@ def main():
                 )
                 break
 
+            if place_stop is not None:
+                # IFG — the task is done at the place; what follows (return home) is not recorded.
+                if place_stop["placed_t"] is None:
+                    grip = None if _applied is None else float(_applied["gripper"][place_stop["grip_index"]])
+                    if (grip is not None and grip >= 0.5
+                            and object_in_crate(m, d, OBJECT_BODIES[place_stop["fruit"]])):
+                        place_stop["placed_t"] = t_step
+                        print(f"[place] placed at t={t_step} ({place_stop['fruit']} in the crate, "
+                              f"{place_stop['arm']} gripper {grip:.2f}); stopping after "
+                              f"{place_stop['after_steps']} more steps")
+                if (place_stop["placed_t"] is not None
+                        and t_step >= place_stop["placed_t"] + place_stop["after_steps"]):
+                    place_stop["stop_t"] = t_step
+                    print(f"[place] stop after place: placed t={place_stop['placed_t']} stop t={t_step} "
+                          f"({args.stop_after_place:.1f} s)")
+                    break
+
             chunk_step += 1
             if ctx is not None and not ctx.is_running():
                 break
@@ -2264,6 +2302,13 @@ def main():
                 # T43 X — only when on.
                 **({"obstacle_policy_hidden": np.asarray(True)}
                    if args.obstacle_policy_hidden else {}),
+                # IFG --stop-after-place — only when on (-1 = not reached).
+                **({"stop_after_place_s": np.asarray(args.stop_after_place, dtype=np.float64),
+                    "place_detect_t": np.asarray(-1 if place_stop["placed_t"] is None else place_stop["placed_t"],
+                                                 dtype=np.int64),
+                    "place_stop_t": np.asarray(-1 if place_stop["stop_t"] is None else place_stop["stop_t"],
+                                               dtype=np.int64)}
+                   if place_stop is not None else {}),
             )
             print(f"saving trajectory ({len(executed_actions)} executed steps) -> {trajectory_path}")
 
