@@ -1,0 +1,2460 @@
+{
+ "step": "IFG-APPLE-NBC-TARGETSURFACE",
+ "task": "AG3S/ag3s/docs/handoff/IFG-APPLE-TSURF.task.md",
+ "date": "2026-10-22",
+ "written": "2026-10-23 KST (verifier)",
+ "configurations": {
+  "SPLT": "지금 최선 구성 (IFG-APPLE-NBC 기록, 다시 돌리지 않음)",
+  "NBCTS": "target 표면 점 빼기 + 놓은 뒤 인증 구성 = 지금 최선 구성 flag 그대로 + --nontarget-evidence surface --placed-no-seed-certify"
+ },
+ "runs": [
+  {
+   "id": "rollouts",
+   "command": "nohup setsid /mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/p/ts_launch.sh",
+   "venv": ".venv-openpi-live (server / client, snapshot_ts)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/runs/NBCTS",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/ts_launch.out"
+  },
+  {
+   "id": "analysis",
+   "command": "p/analyze_cl.py (after p/address_check.py) ; p/run_replays_cl.sh ; p/replay_contacts_ext.py (both configurations)",
+   "raw_output": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/analysis",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/replay",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/replay_ext"
+   ],
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/raw"
+  },
+  {
+   "id": "window_aggregation",
+   "command": "ts_agg.py agg_ts/ts_agg.json (cwd snapshot_ts)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/agg_ts/ts_agg.json"
+  },
+  {
+   "id": "precheck_rows",
+   "command": ".venv-ag3s -m AG3S.ag3s.experiments.studies.ifg_precheck_a collect (both kits; ep211 --extra-k 10..16)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/precheck_raw",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/raw"
+  },
+  {
+   "id": "residual_voxels",
+   "command": ".venv-ag3s -m AG3S.ag3s.experiments.studies.ifg_sphere_attrib collect --precheck precheck_raw (both kits)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/sphere_raw"
+  },
+  {
+   "id": "items_4_5",
+   "command": "ts_m45.py agg_ts/ts_m45.json",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/agg_ts/ts_m45.json"
+  },
+  {
+   "id": "figures",
+   "command": ".venv-openpi-live ts_fig.py AG3S/ag3s/docs/figures/ifg-split/",
+   "raw_output": "AG3S/ag3s/docs/figures/ifg-split/"
+  }
+ ],
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE",
+ "code_state": {
+  "repo": "AG3S_VLA-development",
+  "head": "a6ff7dd9",
+  "snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/snapshot_ts",
+  "snapshot_tree": "34f1c90e",
+  "snapshot_rule": "HEAD a6ff7dd9 tree + working-tree integration/rby1/bringup/pi05_infer.py (--stop-after-place)",
+  "runtime_md5_vs_snapshot_nbc": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/pre/code_md5_nbc_vs_ts.diff",
+  "runtime_diff_files": [
+   "AG3S/trajopt/curobo_v2/*",
+   "AG3S/trajopt/experiments/t63*_*.py",
+   "AG3S/ag3s/experiments/studies/ifg_*.py",
+   "integration/rby1/bringup/pi05_infer.py",
+   "-2 figure helper .py"
+  ],
+  "serving_modules_identical": true
+ },
+ "baseline_check": {
+  "matched": true,
+  "legacy": {
+   "start_violated": 14,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -29.031048280806342
+  },
+  "curobo": {
+   "start_violated": 10,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -9.171877401271193
+  },
+  "files": [
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/baseline/legacy_base_summary.json",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/baseline/curobo_base_summary.json"
+  ]
+ },
+ "smoke": {
+  "passed": true,
+  "episode": 56,
+  "first_chunk_max_abs_diff_vs_baseline_record": 0.0,
+  "surface_evidence_applied_chunks": 16,
+  "placed_no_seed_certify_records": 29,
+  "check_mode": "place_stop",
+  "file": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/smoke_report.json"
+ },
+ "numbers": {
+  "window": "control rows t <= place_detect_t + 38 (2.5 s), both configurations; no place -> full record",
+  "item1_success_of_10": {
+   "SPLT": 9,
+   "NBCTS": 9
+  },
+  "item1_success_full_record_of_10": {
+   "SPLT": 9,
+   "NBCTS": 9
+  },
+  "item1_grasp_of_10": {
+   "SPLT": 10,
+   "NBCTS": 9
+  },
+  "item1_paired_2x2": {
+   "both": 9,
+   "fail_to_success": 0,
+   "success_to_fail": 0,
+   "neither": 1
+  },
+  "item2_contacts_sum": {
+   "SPLT": {
+    "neighbour_fruit": {
+     "rows": 22,
+     "episodes": 2,
+     "max_pen_mm": 2.2979306684421874
+    },
+    "basket": {
+     "rows": 0,
+     "episodes": 0,
+     "max_pen_mm": 0.0
+    },
+    "table": {
+     "rows": 0,
+     "episodes": 0,
+     "max_pen_mm": 0.0
+    },
+    "post": {
+     "rows": 0,
+     "episodes": 0,
+     "max_pen_mm": 0.0
+    },
+    "unchecked_links": {
+     "rows": 0,
+     "episodes": 0,
+     "max_pen_mm": 0.0
+    }
+   },
+   "NBCTS": {
+    "neighbour_fruit": {
+     "rows": 9,
+     "episodes": 1,
+     "max_pen_mm": 1.4769005761451441
+    },
+    "basket": {
+     "rows": 0,
+     "episodes": 0,
+     "max_pen_mm": 0.0
+    },
+    "table": {
+     "rows": 0,
+     "episodes": 0,
+     "max_pen_mm": 0.0
+    },
+    "post": {
+     "rows": 0,
+     "episodes": 0,
+     "max_pen_mm": 0.0
+    },
+    "unchecked_links": {
+     "rows": 0,
+     "episodes": 0,
+     "max_pen_mm": 0.0
+    }
+   }
+  },
+  "item3_hold_sum": {
+   "SPLT": {
+    "n_window": 9,
+    "n_pre_grasp": 9,
+    "n_before_grasp_t": 4,
+    "n_after_place": 0,
+    "n_uncertified_window": 0,
+    "n_uncertified_after_place": 0
+   },
+   "NBCTS": {
+    "n_window": 0,
+    "n_pre_grasp": 0,
+    "n_before_grasp_t": 0,
+    "n_after_place": 0,
+    "n_uncertified_window": 0,
+    "n_uncertified_after_place": 0
+   }
+  },
+  "item4_residual_and_rows": {
+   "SPLT": {
+    "residual_median_latched": 189.0,
+    "residual_median_closing": 117.5,
+    "residual_median_pre_grasp": 168.0,
+    "n_requests_latched": 151,
+    "n_requests_closing": 32,
+    "n_stale": 60,
+    "active_ref_target": 2117,
+    "binding_out_target": 393,
+    "active_ref_target_layer_target_free": 2117,
+    "active_ref_all": 4258,
+    "active_ref_target_rows_per_request_median": 0.0,
+    "n_pre_grasp_requests": 243,
+    "fidelity": {
+     "n": 243,
+     "ok": 243,
+     "absent": 0
+    }
+   },
+   "NBCTS": {
+    "residual_median_latched": 77.0,
+    "residual_median_closing": 142.0,
+    "residual_median_pre_grasp": 77.5,
+    "n_requests_latched": 145,
+    "n_requests_closing": 11,
+    "n_stale": 44,
+    "active_ref_target": 39,
+    "binding_out_target": 0,
+    "active_ref_target_layer_target_free": 39,
+    "active_ref_all": 553,
+    "active_ref_target_rows_per_request_median": 0.0,
+    "n_pre_grasp_requests": 200,
+    "fidelity": {
+     "n": 200,
+     "ok": 200,
+     "absent": 0
+    }
+   }
+  },
+  "item5_ep211_k10_16": {
+   "SPLT": [
+    {
+     "k": 10,
+     "seq": 11,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 208.45950080799403,
+     "skipped": null,
+     "active_ref_by_group": {
+      "crate_post": 3
+     },
+     "binding_out_by_group": {},
+     "out_worst_window": {
+      "step": 7,
+      "query": 188,
+      "link": "ee_finger_l1",
+      "h_mm": 4.98819016848946
+     },
+     "correction_mm": 4.75250350892735,
+     "fidelity_abs_diff_mm": 4.5108570698171313e-07,
+     "residual_gt_apple_voxels": 680,
+     "residual_stale": false
+    },
+    {
+     "k": 11,
+     "seq": 12,
+     "state": "latched",
+     "hold": true,
+     "hold_kinds": [
+      "collision"
+     ],
+     "to_status": "violated",
+     "palm_target_gt_mm": 181.19148361253545,
+     "skipped": null,
+     "active_ref_by_group": {
+      "target": 24
+     },
+     "binding_out_by_group": {
+      "target": 7,
+      "table": 144,
+      "unknown": 24
+     },
+     "out_worst_window": {
+      "step": 7,
+      "query": 213,
+      "link": "ee_finger_l1",
+      "h_mm": -0.4631850446326722
+     },
+     "correction_mm": 31.61938999547838,
+     "fidelity_abs_diff_mm": 1.1320966247785336e-05,
+     "residual_gt_apple_voxels": 823,
+     "residual_stale": false
+    },
+    {
+     "k": 12,
+     "seq": 13,
+     "state": "latched",
+     "hold": true,
+     "hold_kinds": [
+      "collision"
+     ],
+     "to_status": "violated",
+     "palm_target_gt_mm": 177.64898223584598,
+     "skipped": null,
+     "active_ref_by_group": {
+      "crate_post": 1,
+      "target": 18,
+      "unknown": 3
+     },
+     "binding_out_by_group": {
+      "crate_post": 9,
+      "unknown": 86,
+      "target": 6,
+      "table": 124
+     },
+     "out_worst_window": {
+      "step": 7,
+      "query": 186,
+      "link": "ee_finger_l1",
+      "h_mm": -1.0739693516556812
+     },
+     "correction_mm": 87.32823916697812,
+     "fidelity_abs_diff_mm": 7.078008219460474e-06,
+     "residual_gt_apple_voxels": 761,
+     "residual_stale": false
+    },
+    {
+     "k": 13,
+     "seq": 14,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 177.62720321237092,
+     "skipped": null,
+     "active_ref_by_group": {
+      "crate_post": 1,
+      "unknown": 6,
+      "target": 18
+     },
+     "binding_out_by_group": {
+      "unknown": 10,
+      "target": 9,
+      "table": 39,
+      "crate_post": 55
+     },
+     "out_worst_window": {
+      "step": 7,
+      "query": 183,
+      "link": "ee_finger_l1",
+      "h_mm": 6.558409423591156
+     },
+     "correction_mm": 51.26701385399911,
+     "fidelity_abs_diff_mm": 7.687614661175401e-06,
+     "residual_gt_apple_voxels": 721,
+     "residual_stale": false
+    },
+    {
+     "k": 14,
+     "seq": 15,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 167.94064931612075,
+     "skipped": null,
+     "active_ref_by_group": {
+      "target": 42,
+      "unknown": 18
+     },
+     "binding_out_by_group": {
+      "crate_post": 329,
+      "unknown": 90,
+      "neighbour": 16
+     },
+     "out_worst_window": {
+      "step": 7,
+      "query": 188,
+      "link": "ee_finger_l1",
+      "h_mm": 0.3403125102570837
+     },
+     "correction_mm": 51.844193519605895,
+     "fidelity_abs_diff_mm": 4.998880625411983e-06,
+     "residual_gt_apple_voxels": 870,
+     "residual_stale": false
+    },
+    {
+     "k": 15,
+     "seq": 16,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 140.3712050542555,
+     "skipped": null,
+     "active_ref_by_group": {
+      "target": 4
+     },
+     "binding_out_by_group": {
+      "crate_post": 1
+     },
+     "out_worst_window": {
+      "step": 2,
+      "query": 0,
+      "link": "ee_left",
+      "h_mm": 0.9843418080403131
+     },
+     "correction_mm": 37.52862701947429,
+     "fidelity_abs_diff_mm": 1.0468133315039152e-05,
+     "residual_gt_apple_voxels": 863,
+     "residual_stale": false
+    },
+    {
+     "k": 16,
+     "seq": 17,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 107.85216376911077,
+     "skipped": null,
+     "active_ref_by_group": {},
+     "binding_out_by_group": {},
+     "out_worst_window": {
+      "step": 6,
+      "query": 158,
+      "link": "ee_finger_l1",
+      "h_mm": 5.667535601883893
+     },
+     "correction_mm": 10.737323316477395,
+     "fidelity_abs_diff_mm": 1.559793538601084e-05,
+     "residual_gt_apple_voxels": 566,
+     "residual_stale": false
+    }
+   ],
+   "NBCTS": [
+    {
+     "k": 10,
+     "seq": 11,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 208.4601101434853,
+     "skipped": null,
+     "active_ref_by_group": {
+      "crate_post": 1
+     },
+     "binding_out_by_group": {},
+     "out_worst_window": {
+      "step": 7,
+      "query": 188,
+      "link": "ee_finger_l1",
+      "h_mm": 5.020110944294188
+     },
+     "correction_mm": 4.755584937639981,
+     "fidelity_abs_diff_mm": 2.97491494979929e-06,
+     "residual_gt_apple_voxels": 115,
+     "residual_stale": false
+    },
+    {
+     "k": 11,
+     "seq": 12,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 181.1795824256718,
+     "skipped": null,
+     "active_ref_by_group": {
+      "crate_post": 2
+     },
+     "binding_out_by_group": {},
+     "out_worst_window": {
+      "step": 4,
+      "query": 0,
+      "link": "ee_left",
+      "h_mm": 4.969921098496812
+     },
+     "correction_mm": 5.237095215033904,
+     "fidelity_abs_diff_mm": 4.899630111354636e-06,
+     "residual_gt_apple_voxels": 51,
+     "residual_stale": false
+    },
+    {
+     "k": 12,
+     "seq": 13,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 155.63859181983128,
+     "skipped": null,
+     "active_ref_by_group": {},
+     "binding_out_by_group": {},
+     "out_worst_window": {
+      "step": 1,
+      "query": 0,
+      "link": "ee_left",
+      "h_mm": 6.891390768776989
+     },
+     "correction_mm": 3.3316115245032374,
+     "fidelity_abs_diff_mm": 7.3329940071531485e-06,
+     "residual_gt_apple_voxels": 132,
+     "residual_stale": false
+    },
+    {
+     "k": 13,
+     "seq": 14,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 121.52453301323872,
+     "skipped": null,
+     "active_ref_by_group": {
+      "table": 3,
+      "unknown": 3
+     },
+     "binding_out_by_group": {},
+     "out_worst_window": {
+      "step": 2,
+      "query": 158,
+      "link": "ee_finger_l1",
+      "h_mm": 5.014754323298993
+     },
+     "correction_mm": 7.590525563783348,
+     "fidelity_abs_diff_mm": 1.5510372673721573e-06,
+     "residual_gt_apple_voxels": 323,
+     "residual_stale": false
+    },
+    {
+     "k": 14,
+     "seq": 15,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 106.8968688118082,
+     "skipped": null,
+     "active_ref_by_group": {},
+     "binding_out_by_group": {},
+     "out_worst_window": {
+      "step": 3,
+      "query": 158,
+      "link": "ee_finger_l1",
+      "h_mm": 5.027626806506034
+     },
+     "correction_mm": 4.34286234915138,
+     "fidelity_abs_diff_mm": 1.3743276985195285e-06,
+     "residual_gt_apple_voxels": 274,
+     "residual_stale": false
+    },
+    {
+     "k": 15,
+     "seq": 16,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 107.22488464341377,
+     "skipped": null,
+     "active_ref_by_group": {
+      "table": 3
+     },
+     "binding_out_by_group": {},
+     "out_worst_window": {
+      "step": 2,
+      "query": 158,
+      "link": "ee_finger_l1",
+      "h_mm": 4.9683891289257005
+     },
+     "correction_mm": 3.1550042667354137,
+     "fidelity_abs_diff_mm": 1.8922960500628028e-05,
+     "residual_gt_apple_voxels": 261,
+     "residual_stale": false
+    },
+    {
+     "k": 16,
+     "seq": 17,
+     "state": "latched",
+     "hold": false,
+     "hold_kinds": [],
+     "to_status": "feasible",
+     "palm_target_gt_mm": 107.20563817566426,
+     "skipped": null,
+     "active_ref_by_group": {},
+     "binding_out_by_group": {},
+     "out_worst_window": {
+      "step": 5,
+      "query": 158,
+      "link": "ee_finger_l1",
+      "h_mm": 7.435231777866785
+     },
+     "correction_mm": 2.073579445087135,
+     "fidelity_abs_diff_mm": 2.8427824417393e-06,
+     "residual_gt_apple_voxels": 208,
+     "residual_stale": false
+    }
+   ]
+  },
+  "place_detect_consistency_NBCTS": [
+   {
+    "episode": 56,
+    "replay_rule": 187,
+    "traj": 187,
+    "traj_stop": 225,
+    "last_control_t": 225
+   },
+   {
+    "episode": 211,
+    "replay_rule": null,
+    "traj": -1,
+    "traj_stop": -1,
+    "last_control_t": 599
+   },
+   {
+    "episode": 1837,
+    "replay_rule": 162,
+    "traj": 162,
+    "traj_stop": 200,
+    "last_control_t": 200
+   },
+   {
+    "episode": 320,
+    "replay_rule": 223,
+    "traj": 223,
+    "traj_stop": 261,
+    "last_control_t": 261
+   },
+   {
+    "episode": 753,
+    "replay_rule": 214,
+    "traj": 214,
+    "traj_stop": 252,
+    "last_control_t": 252
+   },
+   {
+    "episode": 954,
+    "replay_rule": 244,
+    "traj": 244,
+    "traj_stop": 282,
+    "last_control_t": 282
+   },
+   {
+    "episode": 309,
+    "replay_rule": 227,
+    "traj": 227,
+    "traj_stop": 265,
+    "last_control_t": 265
+   },
+   {
+    "episode": 250,
+    "replay_rule": 178,
+    "traj": 178,
+    "traj_stop": 216,
+    "last_control_t": 216
+   },
+   {
+    "episode": 1668,
+    "replay_rule": 293,
+    "traj": 293,
+    "traj_stop": 331,
+    "last_control_t": 331
+   },
+   {
+    "episode": 126,
+    "replay_rule": 192,
+    "traj": 192,
+    "traj_stop": 230,
+    "last_control_t": 230
+   }
+  ],
+  "per_scene": {
+   "56": {
+    "SPLT": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "regrasp",
+     "grasp_t": 120,
+     "place_t": 192,
+     "place_detect_t": 190,
+     "stop_t": 228,
+     "close_start_t": 100,
+     "close_start_tcp_target_mm": 21.828870994593867,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 0,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 97,
+     "residual_gt_apple_voxels_median_pre_grasp": 438.5,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 16,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 112,
+     "place_t": 192,
+     "place_detect_t": 187,
+     "stop_t": 225,
+     "close_start_t": 88,
+     "close_start_tcp_target_mm": 17.097045312022495,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 0,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 102,
+     "residual_gt_apple_voxels_median_pre_grasp": 86.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 0,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 16,
+     "placed_no_seed_certify_records": 29
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 9,
+     "first_refined_diff_k": 8,
+     "first_executed_row_diff": 58,
+     "refined_max_abs_diff_at": 0.0013294517993927002,
+     "decision_SPLT": {
+      "k": 8,
+      "t": 64,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 4.879371929110926,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 999,
+       "n_kept_nontarget": 6,
+       "n_ambiguous": 214,
+       "n_seeds_in_ball": 1219
+      },
+      "nontarget_source": "proximity",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 8,
+      "t": 64,
+      "grasp_state": "latched",
+      "to_status": "optimal",
+      "to_clearance_mm": 30.887243109551406,
+      "reason_kinds": [],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1219,
+       "n_kept_nontarget": 0,
+       "n_ambiguous": 0,
+       "n_seeds_in_ball": 1219
+      },
+      "nontarget_source": "proximity",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 11,
+       "n_protected": 0,
+       "n_dropped": 11,
+       "fit_radius_mm": 33.372,
+       "limit_mm": 43.372
+      }
+     }
+    }
+   },
+   "211": {
+    "SPLT": {
+     "success_window": false,
+     "grasp_window": true,
+     "failure_mode": "regrasp",
+     "grasp_t": 568,
+     "place_t": null,
+     "place_detect_t": null,
+     "stop_t": null,
+     "close_start_t": 163,
+     "close_start_tcp_target_mm": 75.39485322514159,
+     "hold_pre_grasp": 2,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 2,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 0,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 0,
+      "n_reason_uncertified": 0,
+      "grounding_status": []
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 14,
+       "max_pen_mm": 2.2979306684421874
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 84,
+     "residual_gt_apple_voxels_median_pre_grasp": 146.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 112,
+     "apple_source_binding_out_rows": 26,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": false,
+     "grasp_window": false,
+     "failure_mode": "no_grasp",
+     "grasp_t": null,
+     "place_t": null,
+     "place_detect_t": null,
+     "stop_t": null,
+     "close_start_t": 233,
+     "close_start_tcp_target_mm": 17.161544824325333,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 0,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 0,
+      "n_reason_uncertified": 0,
+      "grounding_status": []
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 148,
+     "residual_gt_apple_voxels_median_pre_grasp": 204.0,
+     "n_stale_requests": 44,
+     "apple_source_active_ref_rows": 0,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 75,
+     "placed_no_seed_certify_records": 75
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 10,
+     "first_refined_diff_k": 9,
+     "first_executed_row_diff": 72,
+     "refined_max_abs_diff_at": 5.9604644775390625e-06,
+     "decision_SPLT": {
+      "k": 9,
+      "t": 72,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 4.9768974213877195,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 852,
+       "n_kept_nontarget": 164,
+       "n_ambiguous": 112,
+       "n_seeds_in_ball": 1128
+      },
+      "nontarget_source": "indices",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 9,
+      "t": 72,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 4.976821069534099,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1084,
+       "n_kept_nontarget": 7,
+       "n_ambiguous": 37,
+       "n_seeds_in_ball": 1128
+      },
+      "nontarget_source": "indices",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 29,
+       "n_protected": 0,
+       "n_dropped": 29,
+       "fit_radius_mm": 33.589,
+       "limit_mm": 43.589
+      }
+     }
+    }
+   },
+   "1837": {
+    "SPLT": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 96,
+     "place_t": 168,
+     "place_detect_t": 162,
+     "stop_t": 200,
+     "close_start_t": 74,
+     "close_start_tcp_target_mm": 14.143474007540508,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 1,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 94,
+     "residual_gt_apple_voxels_median_pre_grasp": 255.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 43,
+     "apple_source_binding_out_rows": 5,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 88,
+     "place_t": 168,
+     "place_detect_t": 162,
+     "stop_t": 200,
+     "close_start_t": 74,
+     "close_start_tcp_target_mm": 15.12182842548652,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 1,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 94,
+     "residual_gt_apple_voxels_median_pre_grasp": 73.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 0,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 13,
+     "placed_no_seed_certify_records": 26
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 7,
+     "first_refined_diff_k": 6,
+     "first_executed_row_diff": 48,
+     "refined_max_abs_diff_at": 0.0024553537368774414,
+     "decision_SPLT": {
+      "k": 6,
+      "t": 48,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 14.414911807095319,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1002,
+       "n_kept_nontarget": 59,
+       "n_ambiguous": 110,
+       "n_seeds_in_ball": 1171
+      },
+      "nontarget_source": "proximity",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 6,
+      "t": 48,
+      "grasp_state": "latched",
+      "to_status": "optimal",
+      "to_clearance_mm": 24.604475640288616,
+      "reason_kinds": [],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1114,
+       "n_kept_nontarget": 52,
+       "n_ambiguous": 5,
+       "n_seeds_in_ball": 1171
+      },
+      "nontarget_source": "proximity",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 4,
+       "n_protected": 0,
+       "n_dropped": 4,
+       "fit_radius_mm": 33.651,
+       "limit_mm": 43.651
+      }
+     }
+    }
+   },
+   "320": {
+    "SPLT": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 144,
+     "place_t": 224,
+     "place_detect_t": 221,
+     "stop_t": 259,
+     "close_start_t": 123,
+     "close_start_tcp_target_mm": 18.095224504481504,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 2,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "no_admissible",
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 98,
+     "residual_gt_apple_voxels_median_pre_grasp": 135.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 6,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 152,
+     "place_t": 224,
+     "place_detect_t": 223,
+     "stop_t": 261,
+     "close_start_t": 126,
+     "close_start_tcp_target_mm": 17.882377306696647,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 1,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "no_admissible",
+       "ok"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 103,
+     "residual_gt_apple_voxels_median_pre_grasp": 66.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 1,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 20,
+     "placed_no_seed_certify_records": 33
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 12,
+     "first_refined_diff_k": 11,
+     "first_executed_row_diff": 88,
+     "refined_max_abs_diff_at": 1.430511474609375e-06,
+     "decision_SPLT": {
+      "k": 11,
+      "t": 88,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 32.76340165513965,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 988,
+       "n_kept_nontarget": 3,
+       "n_ambiguous": 81,
+       "n_seeds_in_ball": 1072
+      },
+      "nontarget_source": "proximity",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 11,
+      "t": 88,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 32.76320735186152,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1069,
+       "n_kept_nontarget": 3,
+       "n_ambiguous": 0,
+       "n_seeds_in_ball": 1072
+      },
+      "nontarget_source": "proximity",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 4,
+       "n_protected": 0,
+       "n_dropped": 4,
+       "fit_radius_mm": 33.309,
+       "limit_mm": 43.309
+      }
+     }
+    }
+   },
+   "753": {
+    "SPLT": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 144,
+     "place_t": 224,
+     "place_detect_t": 223,
+     "stop_t": 261,
+     "close_start_t": 116,
+     "close_start_tcp_target_mm": 21.752524603923778,
+     "hold_pre_grasp": 1,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 1,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 0,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 117,
+     "residual_gt_apple_voxels_median_pre_grasp": 202.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 11,
+     "apple_source_binding_out_rows": 4,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 144,
+     "place_t": 216,
+     "place_detect_t": 214,
+     "stop_t": 252,
+     "close_start_t": 116,
+     "close_start_tcp_target_mm": 21.819192747198613,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 0,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 109,
+     "residual_gt_apple_voxels_median_pre_grasp": 70.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 0,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 19,
+     "placed_no_seed_certify_records": 32
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 10,
+     "first_refined_diff_k": 10,
+     "first_executed_row_diff": 72,
+     "refined_max_abs_diff_at": 0.0027683377265930176,
+     "decision_SPLT": {
+      "k": 10,
+      "t": 80,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 23.919415934253166,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1226,
+       "n_kept_nontarget": 0,
+       "n_ambiguous": 0,
+       "n_seeds_in_ball": 1226
+      },
+      "nontarget_source": "indices",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 10,
+      "t": 80,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 24.14526830340133,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1225,
+       "n_kept_nontarget": 0,
+       "n_ambiguous": 0,
+       "n_seeds_in_ball": 1225
+      },
+      "nontarget_source": "indices",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 0,
+       "n_protected": 0,
+       "n_dropped": 0,
+       "fit_radius_mm": 33.135,
+       "limit_mm": 43.135
+      }
+     }
+    }
+   },
+   "954": {
+    "SPLT": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 168,
+     "place_t": 248,
+     "place_detect_t": 240,
+     "stop_t": 278,
+     "close_start_t": 146,
+     "close_start_tcp_target_mm": 18.918296054939017,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 1,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 8,
+       "max_pen_mm": 1.3731714254841088
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 126,
+     "residual_gt_apple_voxels_median_pre_grasp": 206.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 3,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 168,
+     "place_t": 248,
+     "place_detect_t": 244,
+     "stop_t": 282,
+     "close_start_t": 146,
+     "close_start_tcp_target_mm": 19.30547448536914,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 2,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 9,
+       "max_pen_mm": 1.4769005761451441
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 124,
+     "residual_gt_apple_voxels_median_pre_grasp": 85.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 1,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 22,
+     "placed_no_seed_certify_records": 36
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 11,
+     "first_refined_diff_k": 11,
+     "first_executed_row_diff": 81,
+     "refined_max_abs_diff_at": 0.003179311752319336,
+     "decision_SPLT": {
+      "k": 11,
+      "t": 88,
+      "grasp_state": "latched",
+      "to_status": "optimal",
+      "to_clearance_mm": 18.93508266924053,
+      "reason_kinds": [],
+      "hold": false,
+      "target_free": {
+       "n_removed": 932,
+       "n_kept_nontarget": 37,
+       "n_ambiguous": 178,
+       "n_seeds_in_ball": 1147
+      },
+      "nontarget_source": "proximity",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 11,
+      "t": 88,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 21.914645273667404,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1121,
+       "n_kept_nontarget": 24,
+       "n_ambiguous": 2,
+       "n_seeds_in_ball": 1147
+      },
+      "nontarget_source": "proximity",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 9,
+       "n_protected": 0,
+       "n_dropped": 9,
+       "fit_radius_mm": 33.51,
+       "limit_mm": 43.51
+      }
+     }
+    }
+   },
+   "309": {
+    "SPLT": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 152,
+     "place_t": 232,
+     "place_detect_t": 226,
+     "stop_t": 264,
+     "close_start_t": 120,
+     "close_start_tcp_target_mm": 15.098109358599356,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 1,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 110,
+     "residual_gt_apple_voxels_median_pre_grasp": 86.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 0,
+     "apple_source_binding_out_rows": 2,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 152,
+     "place_t": 232,
+     "place_detect_t": 227,
+     "stop_t": 265,
+     "close_start_t": 120,
+     "close_start_tcp_target_mm": 15.098109358599356,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 1,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 111,
+     "residual_gt_apple_voxels_median_pre_grasp": 77.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 0,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 19,
+     "placed_no_seed_certify_records": 34
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 16,
+     "first_refined_diff_k": 16,
+     "first_executed_row_diff": 124,
+     "refined_max_abs_diff_at": 0.028025388717651367,
+     "decision_SPLT": {
+      "k": 16,
+      "t": 128,
+      "grasp_state": "closing",
+      "to_status": "feasible",
+      "to_clearance_mm": 0.06657463730488401,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 934,
+       "n_kept_nontarget": 9,
+       "n_ambiguous": 143,
+       "n_seeds_in_ball": 1086
+      },
+      "nontarget_source": "proximity",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 16,
+      "t": 128,
+      "grasp_state": "closing",
+      "to_status": "optimal",
+      "to_clearance_mm": 6.954351306335249,
+      "reason_kinds": [],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1295,
+       "n_kept_nontarget": 0,
+       "n_ambiguous": 0,
+       "n_seeds_in_ball": 1295
+      },
+      "nontarget_source": "proximity",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 14,
+       "n_protected": 0,
+       "n_dropped": 14,
+       "fit_radius_mm": 33.703,
+       "limit_mm": 43.703
+      }
+     }
+    }
+   },
+   "250": {
+    "SPLT": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 112,
+     "place_t": 192,
+     "place_detect_t": 184,
+     "stop_t": 222,
+     "close_start_t": 81,
+     "close_start_tcp_target_mm": 17.089210257393777,
+     "hold_pre_grasp": 1,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 1,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 1,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 108,
+     "residual_gt_apple_voxels_median_pre_grasp": 396.5,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 84,
+     "apple_source_binding_out_rows": 89,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 112,
+     "place_t": 184,
+     "place_detect_t": 178,
+     "stop_t": 216,
+     "close_start_t": 80,
+     "close_start_tcp_target_mm": 15.15787434834877,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 1,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 103,
+     "residual_gt_apple_voxels_median_pre_grasp": 99.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 8,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 13,
+     "placed_no_seed_certify_records": 28
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 8,
+     "first_refined_diff_k": 8,
+     "first_executed_row_diff": 56,
+     "refined_max_abs_diff_at": 0.0034216642379760742,
+     "decision_SPLT": {
+      "k": 8,
+      "t": 64,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 0.17993033807770648,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1019,
+       "n_kept_nontarget": 11,
+       "n_ambiguous": 170,
+       "n_seeds_in_ball": 1200
+      },
+      "nontarget_source": "proximity",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 8,
+      "t": 64,
+      "grasp_state": "latched",
+      "to_status": "optimal",
+      "to_clearance_mm": 9.455023399938671,
+      "reason_kinds": [],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1149,
+       "n_kept_nontarget": 4,
+       "n_ambiguous": 28,
+       "n_seeds_in_ball": 1181
+      },
+      "nontarget_source": "proximity",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 6,
+       "n_protected": 0,
+       "n_dropped": 6,
+       "fit_radius_mm": 34.0,
+       "limit_mm": 44.0
+      }
+     }
+    }
+   },
+   "1668": {
+    "SPLT": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "regrasp",
+     "grasp_t": 120,
+     "place_t": 208,
+     "place_detect_t": 204,
+     "stop_t": 242,
+     "close_start_t": 99,
+     "close_start_tcp_target_mm": 17.351022703923526,
+     "hold_pre_grasp": 5,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 5,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 0,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 102,
+     "residual_gt_apple_voxels_median_pre_grasp": 290.0,
+     "n_stale_requests": 60,
+     "apple_source_active_ref_rows": 1841,
+     "apple_source_binding_out_rows": 267,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 224,
+     "place_t": 296,
+     "place_detect_t": 293,
+     "stop_t": 331,
+     "close_start_t": 203,
+     "close_start_tcp_target_mm": 15.914643757387898,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 0,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 179,
+     "residual_gt_apple_voxels_median_pre_grasp": 75.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 29,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 30,
+     "placed_no_seed_certify_records": 42
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 11,
+     "first_refined_diff_k": 10,
+     "first_executed_row_diff": 80,
+     "refined_max_abs_diff_at": 0.007796347141265869,
+     "decision_SPLT": {
+      "k": 10,
+      "t": 80,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 1.7830280272334698,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1054,
+       "n_kept_nontarget": 1,
+       "n_ambiguous": 64,
+       "n_seeds_in_ball": 1119
+      },
+      "nontarget_source": "proximity",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 10,
+      "t": 80,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 23.989359689227026,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1119,
+       "n_kept_nontarget": 0,
+       "n_ambiguous": 0,
+       "n_seeds_in_ball": 1119
+      },
+      "nontarget_source": "proximity",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 3,
+       "n_protected": 0,
+       "n_dropped": 3,
+       "fit_radius_mm": 33.472,
+       "limit_mm": 43.472
+      }
+     }
+    }
+   },
+   "126": {
+    "SPLT": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 112,
+     "place_t": 200,
+     "place_detect_t": 194,
+     "stop_t": 232,
+     "close_start_t": 92,
+     "close_start_tcp_target_mm": 17.207549569948846,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 1,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok",
+       "subtask_gated"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 107,
+     "residual_gt_apple_voxels_median_pre_grasp": 111.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 1,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 0,
+     "placed_no_seed_certify_records": 0
+    },
+    "NBCTS": {
+     "success_window": true,
+     "grasp_window": true,
+     "failure_mode": "ok",
+     "grasp_t": 112,
+     "place_t": 200,
+     "place_detect_t": 192,
+     "stop_t": 230,
+     "close_start_t": 92,
+     "close_start_tcp_target_mm": 17.04672472186218,
+     "hold_pre_grasp": 0,
+     "hold_after_place_2p5s": 0,
+     "hold_window": 0,
+     "hold_uncertified_window": 0,
+     "after_place_requests": {
+      "n": 5,
+      "n_hold": 0,
+      "n_reason_subtask_no_target": 0,
+      "n_reason_uncertified": 0,
+      "grounding_status": [
+       "ok"
+      ]
+     },
+     "contacts": {
+      "neighbour_fruit": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "basket": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "table": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "post": {
+       "rows": 0,
+       "max_pen_mm": 0.0
+      },
+      "unchecked_links": {
+       "rows": 0,
+       "max_pen_mm": 0.0,
+       "by_class": {
+        "robot_other-crate": 0,
+        "robot_other-obstacle": 0,
+        "robot_other-target": 0,
+        "robot_other-fruit_other": 0,
+        "robot_other-table": 0
+       }
+      }
+     },
+     "hand_target_rows": 105,
+     "residual_gt_apple_voxels_median_pre_grasp": 76.0,
+     "n_stale_requests": 0,
+     "apple_source_active_ref_rows": 0,
+     "apple_source_binding_out_rows": 0,
+     "surface_evidence_requests_applied": 16,
+     "placed_no_seed_certify_records": 29
+    },
+    "first_divergence": {
+     "first_reference_diff_k": 10,
+     "first_refined_diff_k": 9,
+     "first_executed_row_diff": 72,
+     "refined_max_abs_diff_at": 1.9311904907226562e-05,
+     "decision_SPLT": {
+      "k": 9,
+      "t": 72,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 4.987752008735238,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 895,
+       "n_kept_nontarget": 16,
+       "n_ambiguous": 183,
+       "n_seeds_in_ball": 1094
+      },
+      "nontarget_source": "proximity",
+      "evidence": null
+     },
+     "decision_NBCTS": {
+      "k": 9,
+      "t": 72,
+      "grasp_state": "latched",
+      "to_status": "feasible",
+      "to_clearance_mm": 4.971033825616736,
+      "reason_kinds": [
+       "budget_only"
+      ],
+      "hold": false,
+      "target_free": {
+       "n_removed": 1094,
+       "n_kept_nontarget": 0,
+       "n_ambiguous": 0,
+       "n_seeds_in_ball": 1094
+      },
+      "nontarget_source": "proximity",
+      "evidence": {
+       "method": "surface",
+       "shell_mm": 10.0,
+       "tie_mm": 5.0,
+       "applied": true,
+       "n_candidates": 12,
+       "n_protected": 0,
+       "n_dropped": 12,
+       "fit_radius_mm": 33.388,
+       "limit_mm": 43.388
+      }
+     }
+    }
+   }
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/ifg-split/ifg-targetsurface-scene-ep211.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/ifg-split/ifg-targetsurface-graph.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/ifg-split/ifg-targetsurface-table.png",
+   "kind": "table"
+  }
+ ],
+ "notes": [
+  "두 구성 이름: 지금 최선 구성 (kit 코드 SPLT), target 표면 점 빼기 + 놓은 뒤 인증 구성 (kit 코드 NBCTS).",
+  "지금 최선 구성 기록은 600 step 까지 남아 있어 replay 로 place 판정 (T63b 규칙) 후 38 step 까지 잘라 analyze_t42 + grasp_robust 로 다시 판정했다. 새 구성의 replay 판정 place_detect_t 는 traj.npz place_detect_t 와 10 장면 모두 같다.",
+  "쥐기 전 HOLD = 서버 grasp state 가 latched / closing 인 요청의 HOLD. t < grasp_t 기준 수는 n_before_grasp_t 로 따로 남겼다.",
+  "접촉: replay_contacts_ext.py = kit replay_contacts.py + hand-table · robot_other-table 두 class. 표준 replay 와 기존 class 의 접촉 행이 20 run 모두 같다. 미검사 링크 = robot_other-* (활성 손 밖 로봇 geom).",
+  "남은 GT 사과 voxel = ifg_sphere_attrib n_residual (기록된 target-free 층 값 기준), stale 요청 (ball fit 중심이 GT 에서 30 mm 넘게) 제외. 이 script 의 offline 재구성은 surface 근거 설정을 쓰지 않아 새 구성에서 trace 일치가 63 / 200 요청이다 — n_residual 은 재구성이 아니라 기록 값에서 센다. 분류 (category) 는 쓰지 않았다.",
+  "사과 출처 활성 행 = ifg_precheck_a rows src == target, traj ref (h < 0), 쥐기 전 요청. 재구성 fidelity_ok: 243 / 243, 200 / 200.",
+  "요청 k = 0 부터 센 planning index = server chunk index (seq = k + 1).",
+  "실행 중 다른 세션의 IFG-CL3 client process 4 개 (2026-10-18 시작, D state, socket 없음) 가 pod 에 남아 있었다. 건드리지 않았다.",
+  "kit 의 run_analysis 에서 analyze_cl.py 가 agg/address_check.json 부재로 rc=1; address_check.py 를 먼저 돌리고 다시 실행했다 (raw/analysis_run.log)."
+ ],
+ "verdict": "회귀 기준선 legacy · cuRobo 일치. smoke 통과. 10 / 10 run 완료.",
+ "not_measured": [
+  "효과 크기 판정 (10 장면)",
+  "놓은 뒤 2.5 초 이후 구간 (기록하지 않음)",
+  "남은 voxel 의 원인 분류 (새 구성에서 offline 재구성 불일치)"
+ ]
+}

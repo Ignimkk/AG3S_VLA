@@ -1,0 +1,215 @@
+{
+ "scene_phase": {
+  "labels": [
+   "ep211 latch (실패)",
+   "ep211 closi (실패)",
+   "ep320 latch (실패)",
+   "ep320 closi (실패)",
+   "ep526 closi (실패)",
+   "ep954 latch (실패)",
+   "ep954 closi (실패)",
+   "ep1313 latch (실패)",
+   "ep1313 closi (실패)",
+   "ep250 latch (대조)",
+   "ep126 closi (대조)",
+   "ep572 closi (대조)"
+  ],
+  "counts": [
+   [
+    0.0,
+    17.0,
+    0.0,
+    0.0,
+    5.0,
+    36.0,
+    0.0,
+    12.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    23.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    706.0,
+    9.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    33.0,
+    0.0,
+    0.0,
+    433.0,
+    35.0,
+    0.0,
+    0.0
+   ],
+   [
+    76.0,
+    0.0,
+    0.0,
+    121.0,
+    0.0,
+    3.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    2.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    19.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    23.0,
+    0.0,
+    0.0,
+    0.0,
+    942.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    10.0,
+    0.0,
+    67.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    9.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    11.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  ],
+  "sources": [
+   "robot_self",
+   "target_at_request_gt",
+   "neighbour_fruit",
+   "support_surface",
+   "memory_stale",
+   "field_artefact",
+   "other",
+   "ambiguous"
+  ]
+ },
+ "u2_distance": {
+  "robot_self": {
+   "median_mm": 3.3,
+   "p95_mm": 5.03,
+   "n": 76
+  },
+  "target_at_request_gt": {
+   "median_mm": 4.26,
+   "p95_mm": 10.03,
+   "n": 73
+  },
+  "support_surface": {
+   "median_mm": 12.39,
+   "p95_mm": 12.5,
+   "n": 132
+  },
+  "memory_stale": {
+   "median_mm": 5.11,
+   "p95_mm": 10.11,
+   "n": 5
+  },
+  "field_artefact": {
+   "median_mm": 30.69,
+   "p95_mm": 40.13,
+   "n": 1134
+  },
+  "ambiguous": {
+   "median_mm": 2.04,
+   "p95_mm": 8.41,
+   "n": 14
+  }
+ },
+ "u2_visibility": {
+  "robot_self": {
+   "visible_k_fraction": 1.0,
+   "observed_k_fraction": 1.0,
+   "n_rows": 76
+  },
+  "target_at_request_gt": {
+   "visible_k_fraction": 0.726,
+   "observed_k_fraction": 0.6575,
+   "n_rows": 73
+  },
+  "support_surface": {
+   "visible_k_fraction": 0.0758,
+   "observed_k_fraction": 0.0758,
+   "n_rows": 132
+  },
+  "memory_stale": {
+   "visible_k_fraction": 0.0647,
+   "observed_k_fraction": 0.0017,
+   "n_rows": 1144
+  },
+  "field_artefact": {
+   "visible_k_fraction": 0.9497,
+   "observed_k_fraction": 0.0035,
+   "n_rows": 1134
+  },
+  "ambiguous": {
+   "visible_k_fraction": 0.9286,
+   "observed_k_fraction": 0.5714,
+   "n_rows": 14
+  }
+ },
+ "script": "AG3S/ag3s/experiments/studies/ifg_unknown_source.py"
+}

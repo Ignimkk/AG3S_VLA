@@ -1,0 +1,496 @@
+{
+ "rule": "per (episode, partner) the counted contact pair with the largest penetration; render = model_transport.xml + pillar visual from the replay pose, qpos = deepest sub-step",
+ "panels": [
+  {
+   "episode": 119,
+   "t": 128,
+   "sub": 0,
+   "request": 16,
+   "phase": "held",
+   "link_body": "EE_BODY_L",
+   "link_class": "checked",
+   "hand": "active",
+   "partner": "neighbour_fruit",
+   "partner_geom": "orange_geom",
+   "pen_mm": 0.051,
+   "pos": [
+    0.47808,
+    0.32179,
+    0.87065
+   ],
+   "nout": [
+    0.5715,
+    -0.5429,
+    0.6153
+   ],
+   "coarse_mm": [
+    0.65,
+    4.56,
+    9.84,
+    18.86
+   ],
+   "fine_mm": [
+    0.06,
+    4.78,
+    8.31,
+    17.49
+   ],
+   "main_mm": [
+    0.06,
+    4.56,
+    8.31,
+    17.49
+   ],
+   "free_mm": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "gt_main_mm": [
+    -0.02,
+    4.97,
+    9.97,
+    19.97
+   ],
+   "offsets_mm": [
+    0.0,
+    5.0,
+    10.0,
+    20.0
+   ],
+   "camera": {
+    "lookat": [
+     0.47808,
+     0.32179,
+     0.87065
+    ],
+    "distance": 0.42,
+    "azimuth": 268.9440311385306,
+    "elevation": -28
+   },
+   "pillar_rendered": false
+  },
+  {
+   "episode": 211,
+   "t": 166,
+   "sub": 0,
+   "request": 20,
+   "phase": "latched",
+   "link_body": "ee_finger_l2",
+   "link_class": "checked",
+   "hand": "active",
+   "partner": "neighbour_fruit",
+   "partner_geom": "banana_geom_1",
+   "pen_mm": 1.841,
+   "pos": [
+    0.54249,
+    0.28009,
+    0.84693
+   ],
+   "nout": [
+    -0.0204,
+    -0.9995,
+    0.0255
+   ],
+   "coarse_mm": [
+    6.84,
+    11.96,
+    17.09,
+    17.44
+   ],
+   "fine_mm": [
+    5.24,
+    9.26,
+    13.93,
+    21.69
+   ],
+   "main_mm": [
+    5.24,
+    9.26,
+    13.93,
+    17.44
+   ],
+   "free_mm": [
+    5.24,
+    9.26,
+    13.93,
+    21.69
+   ],
+   "gt_main_mm": [
+    -0.56,
+    4.1,
+    9.1,
+    19.1
+   ],
+   "offsets_mm": [
+    0.0,
+    5.0,
+    10.0,
+    20.0
+   ],
+   "camera": {
+    "lookat": [
+     0.54249,
+     0.28009,
+     0.84693
+    ],
+    "distance": 0.42,
+    "azimuth": 262.30750805267485,
+    "elevation": -28
+   },
+   "pillar_rendered": true
+  },
+  {
+   "episode": 320,
+   "t": 138,
+   "sub": 7,
+   "request": 17,
+   "phase": "closing",
+   "link_body": "ee_finger_r1",
+   "link_class": "checked",
+   "hand": "active",
+   "partner": "table",
+   "partner_geom": "table_top",
+   "pen_mm": 1.404,
+   "pos": [
+    0.41275,
+    -0.39099,
+    0.8193
+   ],
+   "nout": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "coarse_mm": [
+    0.0,
+    0.0,
+    0.0,
+    9.3
+   ],
+   "fine_mm": [
+    0.0,
+    0.0,
+    2.91,
+    12.91
+   ],
+   "main_mm": [
+    0.0,
+    0.0,
+    0.0,
+    9.3
+   ],
+   "free_mm": [
+    0.0,
+    0.0,
+    2.91,
+    12.91
+   ],
+   "gt_main_mm": [
+    -0.7,
+    4.3,
+    9.3,
+    9.82
+   ],
+   "offsets_mm": [
+    0.0,
+    5.0,
+    10.0,
+    20.0
+   ],
+   "camera": {
+    "lookat": [
+     0.41275,
+     -0.39099,
+     0.8193
+    ],
+    "distance": 0.42,
+    "azimuth": 191.550814547221,
+    "elevation": -28
+   },
+   "pillar_rendered": true
+  },
+  {
+   "episode": 320,
+   "t": 149,
+   "sub": 31,
+   "request": 18,
+   "phase": "closing",
+   "link_body": "wheel_r",
+   "link_class": "unchecked_body",
+   "hand": null,
+   "partner": "target",
+   "partner_geom": "apple_geom",
+   "pen_mm": 0.303,
+   "pos": [
+    0.3079,
+    -0.28881,
+    0.04395
+   ],
+   "nout": [
+    -0.4473,
+    0.8157,
+    0.3669
+   ],
+   "coarse_mm": [
+    40.22,
+    43.67,
+    47.56,
+    56.12
+   ],
+   "fine_mm": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "main_mm": [
+    40.22,
+    43.67,
+    47.56,
+    56.12
+   ],
+   "free_mm": [
+    40.22,
+    43.67,
+    47.56,
+    56.12
+   ],
+   "gt_main_mm": [
+    -0.15,
+    4.85,
+    9.85,
+    19.85
+   ],
+   "offsets_mm": [
+    0.0,
+    5.0,
+    10.0,
+    20.0
+   ],
+   "camera": {
+    "lookat": [
+     0.3079,
+     -0.28881,
+     0.04395
+    ],
+    "distance": 0.42,
+    "azimuth": 191.83238675753103,
+    "elevation": -28
+   },
+   "pillar_rendered": true
+  },
+  {
+   "episode": 342,
+   "t": 119,
+   "sub": 23,
+   "request": 14,
+   "phase": "closing",
+   "link_body": "EE_BODY_L",
+   "link_class": "checked",
+   "hand": "active",
+   "partner": "neighbour_fruit",
+   "partner_geom": "pear_geom",
+   "pen_mm": 0.348,
+   "pos": [
+    0.46657,
+    0.32731,
+    0.89252
+   ],
+   "nout": [
+    0.5395,
+    -0.3343,
+    0.7728
+   ],
+   "coarse_mm": [
+    3.34,
+    8.03,
+    12.78,
+    21.84
+   ],
+   "fine_mm": [
+    0.03,
+    1.82,
+    6.68,
+    15.58
+   ],
+   "main_mm": [
+    0.03,
+    1.82,
+    6.68,
+    15.58
+   ],
+   "free_mm": [
+    0.03,
+    1.82,
+    6.68,
+    15.58
+   ],
+   "gt_main_mm": [
+    -0.16,
+    4.84,
+    9.84,
+    19.84
+   ],
+   "offsets_mm": [
+    0.0,
+    5.0,
+    10.0,
+    20.0
+   ],
+   "camera": {
+    "lookat": [
+     0.46657,
+     0.32731,
+     0.89252
+    ],
+    "distance": 0.42,
+    "azimuth": 270.05057711431294,
+    "elevation": -28
+   },
+   "pillar_rendered": false
+  },
+  {
+   "episode": 901,
+   "t": 597,
+   "sub": 24,
+   "request": 74,
+   "phase": "placed",
+   "link_body": "ee_finger_r2",
+   "link_class": "checked",
+   "hand": "inactive",
+   "partner": "crate",
+   "partner_geom": "handle_bar_r",
+   "pen_mm": 0.061,
+   "pos": [
+    0.48259,
+    -0.21946,
+    0.97698
+   ],
+   "nout": [
+    0.0,
+    0.0001,
+    1.0
+   ],
+   "coarse_mm": [
+    13.53,
+    17.33,
+    21.12,
+    29.88
+   ],
+   "fine_mm": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "main_mm": [
+    13.53,
+    17.33,
+    21.12,
+    29.88
+   ],
+   "free_mm": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "gt_main_mm": [
+    0.02,
+    5.02,
+    10.02,
+    20.02
+   ],
+   "offsets_mm": [
+    0.0,
+    5.0,
+    10.0,
+    20.0
+   ],
+   "camera": {
+    "lookat": [
+     0.48259,
+     -0.21946,
+     0.97698
+    ],
+    "distance": 0.42,
+    "azimuth": 210.54611696489155,
+    "elevation": -28
+   },
+   "pillar_rendered": true
+  },
+  {
+   "episode": 1345,
+   "t": 102,
+   "sub": 11,
+   "request": 12,
+   "phase": "latched",
+   "link_body": "EE_BODY_L",
+   "link_class": "checked",
+   "hand": "active",
+   "partner": "neighbour_fruit",
+   "partner_geom": "orange_geom",
+   "pen_mm": 0.586,
+   "pos": [
+    0.47468,
+    0.29481,
+    0.87072
+   ],
+   "nout": [
+    0.3224,
+    -0.3369,
+    0.8846
+   ],
+   "coarse_mm": [
+    0.72,
+    5.14,
+    9.56,
+    19.81
+   ],
+   "fine_mm": [
+    0.0,
+    2.63,
+    7.22,
+    16.55
+   ],
+   "main_mm": [
+    0.0,
+    2.63,
+    7.22,
+    16.55
+   ],
+   "free_mm": [
+    0.0,
+    2.63,
+    7.22,
+    16.55
+   ],
+   "gt_main_mm": [
+    -0.28,
+    4.71,
+    9.71,
+    19.71
+   ],
+   "offsets_mm": [
+    0.0,
+    5.0,
+    10.0,
+    20.0
+   ],
+   "camera": {
+    "lookat": [
+     0.47468,
+     0.29481,
+     0.87072
+    ],
+    "distance": 0.42,
+    "azimuth": 266.8432182893059,
+    "elevation": -28
+   },
+   "pillar_rendered": false
+  }
+ ],
+ "script": "AG3S/ag3s/experiments/studies/ifg_precheck_b.py"
+}

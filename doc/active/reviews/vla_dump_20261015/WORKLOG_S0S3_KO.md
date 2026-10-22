@@ -2006,3 +2006,181 @@ Figure: `AG3S/ag3s/docs/figures/ifg/ifg-r9-filter-matched.png` (+json).
   - 순서 1 착수 전: 211 · 954 · 320 실패 장면에서 TrajOpt 제약을 켠 voxel이 남은 사과인지 이웃 바나나인지 나눠 센다. 211의 "일찍 도착" 원인(손바닥 163 mm, 요청 12–13 HOLD)도 함께 본다
   - 순서 3 착수 전: SPLIT 기록에서 바구니와 실제로 접촉한 사례를 센다. 접촉이 있으면 순서 3을 앞으로 올린다
 - 검증 방식: SPLIT 24 장면에서 GT와 비교하는 offline 측정 → VLA 단독 성공 사과 10 장면 closed-loop 짝 비교(기준: 이웃 접촉 20 mm 구성 9 / 10)
+
+## 2026-10-22 00:36 KST — 착수 전 확인 결과 (IFG-PRECHECK A · B, CPU offline)
+
+- task: `AG3S/ag3s/docs/handoff/IFG-PRECHECK.task.md` (결과 전 고정). 수치: `IFG-PRECHECK-A.verify.json` · `IFG-PRECHECK-B.verify.json`. 그림: `AG3S/ag3s/docs/figures/ifg-precheck/`
+- 데이터: `IFG-APPLE-SPLIT` 사과 24 장면 (A4는 `IFG-APPLE-NBC`도). 두 측정 모두 회귀 기준선 일치(legacy 14/15, has_target 15/15)
+- 재구성 충실도: A는 측정 요청 530개 중 528개가 기록된 TrajOpt 여유와 1 mm 안에서 일치했다(나머지 2개는 target이 가려진 요청). B는 24 장면 모두 qpos 불일치 0
+
+**A — 쥐기 전(latched · closing) TrajOpt 활성 제약의 출처** (출처 = 구 중심에서 GT 표면 거리가 거리장 값에 가장 가까운 물체, 허용 오차 10 / 20 mm)
+
+| 장면 | 활성 row | target 사과 | 이웃 과일 | 바구니 · 기둥 | 탁자 | 미상 |
+|---|---|---|---|---|---|---|
+| 실패 6 장면 합 | 5,423 | 18.8% | 23.9% | 4.8% | 5.0% | 47.5% |
+| 211 | 1,160 | 29% | 58% | 6% | — | 8% |
+| 320 | 1,907 | 23% | ~0% | — | 13% | 64% |
+| 526 | 354 | 5% | — | 38% | — | 56% |
+| 954 | 571 | 1% | 94% | 2% | — | 4% |
+| 979 | 66 | 88% | — | 12% | — | — |
+| 1313 | 1,365 | 13% | 6% | 3% | 1% | 76% |
+| 대조 성공 3 장면 합 (250 · 126 · 572) | 205 | 82.0% | 6.3% | — | — | 10.7% |
+
+- "미상" row는 가장 가까운 GT 물체에서 중앙값 31 mm 떨어져 있다. 가장 가까운 물체는 탁자 1,171 · 바구니 1,154 · target 260 row다. 원인은 확인하지 않았다
+- 요청별 가장 크게 침범한 row의 출처로 묶은 실패 장면 HOLD: target 3(211 k11 · k12 · k58), 이웃 과일 3(211 k21 · k22, 1313 k13)
+- 211 요청 10–16 (A4): k10–14는 SPLIT와 NBC가 같다. 가장 크게 침범한 row는 k10 바구니, k11–14 target이다. HOLD는 k11(0.5 mm) · k12(1.1 mm)이다. 이웃 접촉 규칙은 k15–16에서만 켜져 이 HOLD를 바꾸지 않는다. 손바닥–target 거리(GT)는 k10–16에서 208 → 108 mm다
+
+**B — 실제 접촉** (손이 target 사과에 닿은 것은 제외, 침범 ≥ 0 mm)
+
+| 상대 | 접촉 step | 장면 | 최대 침범 | 거리장 − GT (거친 / 고운, 중앙값) |
+|---|---|---|---|---|
+| 이웃 과일 | 72 | 119 · 1345 · 211 · 342 | 1.84 mm | +8.2 / +4.5 mm |
+| 바구니 | 24 (놓은 뒤) | 901 (쓰지 않는 손 손가락) | 0.06 mm | +13.8 mm / 고운 범위 밖 |
+| 탁자 | 21 (닫는 중) | 320 | 1.40 mm | 0 / 0 mm |
+| 바닥의 target 사과 (바퀴, 미검사 링크) | 15 | 320 | — | — |
+| 기둥 · 팔 · 손목 | 0 | — | — | — |
+
+**미리 정한 해석과의 대조**
+
+- A: target 출처가 실패를 "주로" 설명하지도, 이웃 과일 출처가 "대부분"이지도 않다. 미상이 47.5%로 가장 크다. 장면별로 갈린다(954는 이웃 94%, 979는 target 88%, 320 · 1313 · 526은 미상이 절반 이상). 사용자 판정을 기다린다
+- B: 조건(검사 대상 링크의 바구니 접촉 + 거친 층이 멀게 봄)은 901의 한 건(놓은 뒤, 0.06 mm)으로 글자 그대로 충족된다
+
+## 2026-10-22 00:50 KST — 사용자 판정: "미상" 출처 확인과 순서 1을 함께 진행
+
+- **IFG-UNKNOWN** (`AG3S/ag3s/docs/handoff/IFG-UNKNOWN.task.md`, verifier): 실패 장면 활성 제약의 47.5%를 차지한 미상 voxel이 어디서 왔는지 분류한다
+- **IFG-SPHERE 1단계** (`AG3S/ag3s/docs/handoff/IFG-SPHERE.task.md`, implementer, 코드 수정 없음): 남은 target voxel이 어느 판단 때문에 남는지 분해하고 설계안을 낸다
+  - task를 쓰며 확인한 사실: 제외 공의 중심은 이미 표면 구 맞춤(`centre_method == "surface_fit"`)이다. LTE 점검에서 맞춤 중심 오차는 stale 아닌 요청에서 중앙값 2.01 mm였다
+  - 그러니 "평균 대신 구 맞춤"만으로는 닫는 중 recall 0.59를 설명하지 못한다. 공 안에서 voxel을 남기는 판단(소유 판정, 표면 보호, 반지름 제한, stale 공 등)을 먼저 가른다
+  - 설계안은 사용자 판정 뒤 2단계에서 구현한다
+- 사전 확인 A agent가 filesystem 루트에 남긴 `/w2.out`(426 byte, argparse 오류 메시지)은 안전 검사 때문에 lead가 지우지 못했고, 사용자가 삭제했다(2026-10-22)
+
+## 2026-10-22 02:58 KST — "미상" 활성 제약의 출처 (IFG-UNKNOWN)
+
+- 수치: `AG3S/ag3s/docs/handoff/IFG-UNKNOWN.verify.json`. 그림: `AG3S/ag3s/docs/figures/ifg-unknown/`. 회귀 기준선 일치
+- 방법: 미상 row마다 거리장 기울기를 따라 표면 voxel을 찾고, 그 근처 10 mm 안의 관측 depth 점(frame 0..k, 카메라 3대, 서버 FK 구 mask 뒤)을 segmentation render로 분류했다. 근처 관측이 없으면 거리장 artefact로 본다
+- 규칙 변경 1건(02:55 KST, 1차 결과를 본 뒤):
+  - "옮겨짐" 판정을 충돌 geom 거리 대신 물체 pose 추적으로 바꿨다
+  - 바구니 테두리의 visual mesh가 충돌 벽보다 7 mm 높아, 움직이지 않은 점이 옮겨진 것으로 판정됐기 때문이다
+  - 1차 수치는 `numbers.v1_moved_test_gt_distance`에 남겼다
+
+| 출처 | 실패 6 장면 row (2,573) | voxel (406) |
+|---|---|---|
+| 옛 관측 기억(stale, 지금은 그 자리에 없는 물체) | 44.5% | 38.9% |
+| 거리장 artefact(관측 점이 근처에 없음) | 44.1% | 45.3% |
+| 지지면(탁자 · 바구니) 표면 | 5.1% | 3.2% |
+| 로봇 자기 몸 | 3.0% | 0.5% |
+| 그 요청의 target 사과 | 2.8% | 9.4% |
+| ambiguous | 14 row | 2.7% |
+
+- 장면별
+  - 320: 1,217 row 중 1,139가 기억이다. 모두 frame 17 이전에 본 target 사과다. 사과는 k = 18에 높이 0.85 → 0.23 m, k = 19에 0.03 m로 떨어졌다
+  - 1313: 1,042 row 중 1,009가 artefact다
+  - 526: 로봇 76 row(쓰지 않는 손, 앞 frame에서만), 바구니 표면 121 row
+  - 211: 93 row 중 59가 artefact다
+- artefact row: 가장 가까운 관측 점까지 중앙값 34.4 mm(p95 41.8). 가장 가까운 점의 라벨은 바구니 1,065 row, target 69 row
+- 그 순간 보이는가(카메라에서 표면 voxel까지 시선이 막히지 않음 / depth가 그 voxel에 닿음): 기억 0.06 / 0.002, artefact 0.95 / 0.004
+- U3: 미상 row가 가장 크게 침범한 22 요청에서 HOLD 0. TrajOpt 수정량 중앙값 artefact 9.15 mm, 기억 12.44 mm. 가장 큰 것은 320 k17 120.5 mm(artefact), k18 66.3 mm(artefact)
+- 대조 성공 3 장면: 미상 22 row 중 target 12, 기억 9, ambiguous 1
+- 한계
+  - 기록에 frame별 TSDF weight가 없어, 어느 frame이 voxel을 썼는지는 근처 점으로 추정했다
+  - 211 frame 23–24에서 mask 불일치가 최대 2,864 px다
+
+## 2026-10-22 03:16 KST — IFG-SPHERE 1단계: 남은 target voxel의 원인은 공이 아니라 non-target 근거였다
+
+- 결과: `AG3S/ag3s/docs/handoff/IFG-SPHERE.impl.md`
+- script: `AG3S/ag3s/experiments/studies/ifg_sphere_attrib.py`
+- raw: `20261022T023623+0900_055f2ea2f00b_8e1a8f54bb5e/verify/IFG-SPHERE-ATTRIB/`
+- 재현: latched · closing 요청 669개 중 661개를 측정했다. offline replay는 기록과 660 / 661 요청에서 일치한다. 남은 voxel 중앙값 251 · 520은 LTE 점검(251 · 516.5)과 같다
+
+| 남은 GT target voxel의 원인 | latched | closing |
+|---|---|---|
+| 공 밖(중심 · 반지름) | ≈ 0 | ≈ 0 |
+| `z_min` 아래 | 10.9% | 11.0% |
+| non-target으로 보존 | 4.2% | 5.1% |
+| ambiguous로 보존 | 18.9% | 21.2% |
+| seed는 지웠지만 부호가 음수로 남음 | 29.5% | 25.5% |
+| 내부, 부호 보정 대상 아님 | 27.9% | 28.3% |
+| 내부, 부호 검사 실패 | 8.5% | 7.2% |
+| stale 공 | 0.1% | 1.75% |
+
+- 보존 · 내부 voxel의 99.6%(122,295 / 122,797)에서 가장 가까운 non-target 근거 점이 GT target 점, 즉 사과 자신의 표면이다
+- 사전 확인 A의 target 출처 활성 row 중 stale 아닌 785개의 99%가 이 오염된 근거로 남은 voxel에 닿는다(211 k11–14 102 row, 979 58 row, 320 k16 42 row)
+- 추적 · 기억 중심(17.5 mm 치우침)은 제외 공에 쓰이지 않는다(661 / 661 요청 surface_fit)
+  - 쓰이는 곳: 쥠 도달 판정(`safe_policy.py:1399` → `grasp_latch.py:714`), self-filter guard 중심(`pipeline.py:1805`), NBC row 선택(`safe_policy.py:1731`)
+- **lead 확인: IFG serving 구성에는 T46c에서 채택한 F1(`--nontarget-evidence surface`)이 없다**
+  - IFG kit의 `run_chain.sh`는 C1aN · SPL · S2 · SURF arm에 이 flag가 있으면 실행을 거부한다
+  - `start_server.sh`의 계보는 T53("arm C1a only = current serving FLAGS") → T54c → held-out collector → IFG-CL1 → IFG-APPLE*이다
+  - F1의 close 이후 HOLD 증가를 고친 W1(`--placed-no-seed-certify`)도 없다
+  - 의도된 제외인지는 기록에서 확인하지 못했다
+- 설계안
+  - **P1:** 코드 수정 없이 F1을 켠다. offline 효과
+    - 남은 voxel 중앙값: 251 → 90, 520 → 136
+    - recall: 0.79 → 0.91, 0.58 → 0.85
+    - stale 아닌 target 활성 row: 785 → 133 (211 k11–14 102 → 19, 979 58 → 0, 320 k16 42 → 0)
+    - 이웃 과일 표면 voxel 손실: 3 / 24,647 · 7 / 12,303. 탁자 손실 0
+    - 위험: T46 CL3에서 close 이후 uncertified HOLD가 37 → 130으로 늘었다(W1로 해소)
+  - **P2:** 새 flag `--target-free-support-sign`. P1 위에서 남은 voxel 중앙값 90 → 40 · 136 → 75. 활성 row는 줄지 않는다(133). 부호를 바꾼 voxel 중 0.24%가 이웃 과일 안이다
+- 측정하지 않은 것: HOLD 변화(TrajOpt 재풀이 필요)와 closed-loop
+- 320 k17 393 row는 stale 공(닫는 중 사과가 밀려 맞춤 중심이 54 mm 어긋남)이라 P1 · P2로는 줄지 않는다. 이것은 순서 2(기억 이동 · 무효화)의 대상이다
+
+## 2026-10-22 23:39 KST — 사용자 판정: 장애물 근거에서 target 표면 점을 빼는 설정의 closed-loop 확인
+
+- 사용자 지적(세 번째): 줄인 이름(이전 STEP의 설정 기호, 제안 번호, "arm", 작업자 기호)을 쓰지 말고 무슨 실험이고 무엇을 쓴 실험인지로 말한다. 이 절부터 그렇게 쓴다
+- 판정
+  1. 지금 최선 구성(이웃 과일과 붙은 target 떼어 내기 + 쥐기 직전 손목 관절 경로 가중 0.1 + 손가락–이웃 과일 접촉 20 mm 허용, 9 / 10)에 두 설정을 더한다
+     - 장애물 근거에서 target 자신의 표면 점 빼기(`--nontarget-evidence surface`)
+     - 놓은 뒤 target을 못 찾아도 안전 인증(`--placed-no-seed-certify`)
+     - 같은 VLA 단독 성공 사과 10 장면 · seed에서 closed-loop로 짝 비교한다
+  2. 실험 틀은 새 구성에서만 두 설정을 허용한다. 기존 구성의 "있으면 거부" 검사는 그대로 둔다
+- 정정: 앞 절들에서 비교 기준을 "target 분리 + 이웃 접촉 20 mm"로 적었다. 실제 서버 flag에는 손목 관절 경로 가중 0.1(`--wrist-track-scale 0.1`)도 들어 있다
+- task: `AG3S/ag3s/docs/handoff/IFG-APPLE-TSURF.task.md`. run 폴더: `verify/IFG-APPLE-NBC-TARGETSURFACE`
+  - 사용자 규칙대로 place 판정 2.5 초 뒤 기록을 끝낸다
+  - 비교 기준은 끝까지 기록됐으므로, 두 쪽 모두 같은 구간(place 뒤 2.5 초까지)으로 잘라 비교한다
+
+## 2026-10-23 01:32 KST — 결과: target 표면 점 빼기 + 놓은 뒤 인증 구성 (사과 10 장면 closed-loop)
+
+- run: `verify/IFG-APPLE-NBC-TARGETSURFACE`. 수치: `AG3S/ag3s/docs/handoff/IFG-APPLE-NBC-TARGETSURFACE.verify.json`
+- 그림: `AG3S/ag3s/docs/figures/ifg-split/ifg-targetsurface-{scene-ep211,graph,table}.png`
+- 회귀 기준선 일치. smoke 통과(첫 VLA chunk 차이 0, surface 근거 적용 확인)
+- 두 구성 모두 place 판정 후 2.5 초까지로 잘라 비교했다
+- code snapshot: HEAD a6ff7dd9 + 아직 커밋하지 않은 client `--stop-after-place`. 서버 runtime은 비교 기준 snapshot과 같다
+
+| 지표 (10 장면 합) | 지금 최선 구성 | + target 표면 점 빼기 + 놓은 뒤 인증 |
+|---|---|---|
+| 작업 성공 | 9 / 10 | 9 / 10 (실패→성공 0, 성공→실패 0, 211 둘 다 실패) |
+| 다시 잡기(regrasp)로 성공 | 3 장면 (56 · 1668 · 211 실패) | 0 장면 |
+| 쥐기 전 HOLD chunk | 9 | 0 |
+| 놓은 뒤 2.5 초 안 HOLD | 0 | 0 |
+| 이웃 과일 실제 접촉 | 22 행 (2 장면, 최대 2.3 mm) | 9 행 (1 장면, 1.5 mm) |
+| 바구니 · 탁자 · 기둥 · 미검사 링크 접촉 | 0 | 0 |
+| 남은 GT 사과 voxel 중앙값 (stale 제외) | 168 | 77.5 (latched 189 → 77, closing 117.5 → 142) |
+| 사과 출처 활성 제약 행 | 2,117 | 39 |
+
+- 211 요청 10–16
+  - 지금 최선 구성: HOLD k11 · k12, 사과 출처 활성 행 0 · 24 · 18 · 18 · 42 · 4 · 0
+  - 새 구성: HOLD 0, 사과 출처 활성 행 0
+  - 새 구성의 손바닥–사과 거리: 208.5 · 181.2 · 155.6 · 121.5 · 106.9 · 107.2 · 107.2 mm
+  - 닫기 시작: 지금 최선 구성 t = 163(손끝–사과 75.4 mm), 새 구성 t = 233(17.2 mm)
+  - 새 구성에서는 그 뒤 손바닥–사과 약 107 mm가 유지되고 쥠이 일어나지 않았다(no_grasp). 원인은 아직 진단하지 않았다
+- 처음 갈라진 요청: 10 장면 모두 k6–16. 갈라진 이유는 target 제외 층의 non-target · ambiguous 보존 감소다(211 k9: 164 → 7 · 112 → 37)
+- 측정 한계
+  - offline 원인 분류 재구성(`ifg_sphere_attrib`)이 이 설정을 읽지 않아, 새 구성의 voxel 원인 분류는 쓰지 않았다
+  - 탁자 접촉은 확장 replay(`replay_contacts_ext.py`)로 셌다. 기존 class 접촉 행은 표준 replay와 20 run 모두 같다
+- 미리 정한 해석과의 대조: "211이 그대로 실패하면 요청 10–16의 사과 출처 제약이 줄었는지 본다" → 줄었다(112 → 0, HOLD 2 → 0). 211의 실패 양상은 쥐기 직전 멈춤에서 "가까이서 닫았는데 쥐지 못함"으로 바뀌었다
+- pod 관찰: 2026-10-18부터 D state로 멈춘 다른 세션의 IFG-CL3 client process 4개가 있다(socket 없음). 건드리지 않았다
+
+## 2026-10-23 01:43 KST — 사용자 판정: 새 비교 기준, 211 쥐기 실패 진단, 커밋, 멈춘 process 정리
+
+- **새 비교 기준 구성:** 이전 최선 구성에 다음 두 설정을 더한다. 이후 사과 실험은 이 구성에 하나씩 더해 비교한다
+  - 이전 최선 구성: 이웃 과일과 붙은 target 떼어 내기 + 쥐기 직전 손목 관절 경로 가중 0.1 + 손가락–이웃 과일 접촉 20 mm 허용
+  - 더한 설정: 장애물 근거에서 사과 표면 점 빼기 + 놓은 뒤 target을 못 찾아도 안전 인증
+- **211 쥐기 실패 진단:** task `AG3S/ag3s/docs/handoff/IFG-211-GRASP.task.md`, CPU offline, 진행 중
+  - 질문: 새 비교 기준 구성에서 사과 17 mm 앞에서 닫고도 쥐지 못한 원인
+  - 후보: 바나나 · 탁자 선접촉, 사과 밀림, VLA 계획, TrajOpt 이동, 쥠 판단, 그 밖
+- **커밋:** `27e79f8c`
+  - client의 place 뒤 기록 종료(`--stop-after-place`), 메모리 회수 script, 작업 규칙 문서 2개
+  - 이번 실험 기록은 이 절 뒤에 따로 커밋한다
+- **멈춘 process 정리 (사용자 허락):** 2026-10-18 IFG-CL3 run의 client 4개(pid 2150267 · 2151352 · 2394708 · 2395140)
+  - 상태: 부모 pid 1, 각 약 155 MB
+  - SIGTERM에 이어 SIGKILL을 보냈다. 커널의 페이지 입출력 대기(D state, `folio_wait_bit_common`)라 신호가 대기 상태로만 남고, 아직 종료되지 않았다
+  - 입출력이 풀리면 종료된다. 사용자 공간에서 더 할 수 있는 조치는 없다

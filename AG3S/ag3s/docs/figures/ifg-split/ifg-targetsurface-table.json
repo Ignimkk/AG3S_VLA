@@ -1,0 +1,154 @@
+{
+ "columns": [
+  "\uc7a5\uba74",
+  "\uc131\uacf5\n\ucd5c\uc120",
+  "\uc131\uacf5\n\ud45c\uba74+\uc778\uc99d",
+  "\uc2e4\ud328 \uc591\uc0c1\n\ucd5c\uc120 / \ud45c\uba74+\uc778\uc99d",
+  "\uc950\uae30 \uc804 HOLD\n\ucd5c\uc120 / \ud45c\uba74+\uc778\uc99d",
+  "\ub193\uc740 \ub4a4 HOLD\n(2.5 s)",
+  "\uc774\uc6c3 \uacfc\uc77c \uc811\ucd09 \ud589\n(\ucd5c\ub300 \uce68\ubc94 mm)",
+  "\ub0a8\uc740 \uc0ac\uacfc voxel\n\uc911\uc559\uac12",
+  "\uc0ac\uacfc \ucd9c\ucc98\n\ud65c\uc131 \ud589",
+  "\ucc98\uc74c \uac08\ub77c\uc9c4\n\uc694\uccad k"
+ ],
+ "rows": [
+  {
+   "scene": "ep56",
+   "success_best": "O",
+   "success_surf": "O",
+   "failure_mode": "regrasp / ok",
+   "pre_grasp_hold": "0 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "0 (0.0) / 0 (0.0)",
+   "residual_median": "438 / 86",
+   "apple_source_rows": "16 / 0",
+   "first_refined_diff_k": "8"
+  },
+  {
+   "scene": "ep211",
+   "success_best": "X",
+   "success_surf": "X",
+   "failure_mode": "regrasp / no_grasp",
+   "pre_grasp_hold": "2 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "14 (2.3) / 0 (0.0)",
+   "residual_median": "146 / 204",
+   "apple_source_rows": "112 / 0",
+   "first_refined_diff_k": "9"
+  },
+  {
+   "scene": "ep1837",
+   "success_best": "O",
+   "success_surf": "O",
+   "failure_mode": "ok / ok",
+   "pre_grasp_hold": "0 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "0 (0.0) / 0 (0.0)",
+   "residual_median": "255 / 73",
+   "apple_source_rows": "43 / 0",
+   "first_refined_diff_k": "6"
+  },
+  {
+   "scene": "ep320",
+   "success_best": "O",
+   "success_surf": "O",
+   "failure_mode": "ok / ok",
+   "pre_grasp_hold": "0 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "0 (0.0) / 0 (0.0)",
+   "residual_median": "135 / 66",
+   "apple_source_rows": "6 / 1",
+   "first_refined_diff_k": "11"
+  },
+  {
+   "scene": "ep753",
+   "success_best": "O",
+   "success_surf": "O",
+   "failure_mode": "ok / ok",
+   "pre_grasp_hold": "1 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "0 (0.0) / 0 (0.0)",
+   "residual_median": "202 / 70",
+   "apple_source_rows": "11 / 0",
+   "first_refined_diff_k": "10"
+  },
+  {
+   "scene": "ep954",
+   "success_best": "O",
+   "success_surf": "O",
+   "failure_mode": "ok / ok",
+   "pre_grasp_hold": "0 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "8 (1.4) / 9 (1.5)",
+   "residual_median": "206 / 85",
+   "apple_source_rows": "3 / 1",
+   "first_refined_diff_k": "11"
+  },
+  {
+   "scene": "ep309",
+   "success_best": "O",
+   "success_surf": "O",
+   "failure_mode": "ok / ok",
+   "pre_grasp_hold": "0 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "0 (0.0) / 0 (0.0)",
+   "residual_median": "86 / 77",
+   "apple_source_rows": "0 / 0",
+   "first_refined_diff_k": "16"
+  },
+  {
+   "scene": "ep250",
+   "success_best": "O",
+   "success_surf": "O",
+   "failure_mode": "ok / ok",
+   "pre_grasp_hold": "1 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "0 (0.0) / 0 (0.0)",
+   "residual_median": "396 / 99",
+   "apple_source_rows": "84 / 8",
+   "first_refined_diff_k": "8"
+  },
+  {
+   "scene": "ep1668",
+   "success_best": "O",
+   "success_surf": "O",
+   "failure_mode": "regrasp / ok",
+   "pre_grasp_hold": "5 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "0 (0.0) / 0 (0.0)",
+   "residual_median": "290 / 75",
+   "apple_source_rows": "1841 / 29",
+   "first_refined_diff_k": "10"
+  },
+  {
+   "scene": "ep126",
+   "success_best": "O",
+   "success_surf": "O",
+   "failure_mode": "ok / ok",
+   "pre_grasp_hold": "0 / 0",
+   "after_place_hold": "0 / 0",
+   "neighbour_rows_maxpen": "0 (0.0) / 0 (0.0)",
+   "residual_median": "111 / 76",
+   "apple_source_rows": "1 / 0",
+   "first_refined_diff_k": "9"
+  }
+ ],
+ "totals": [
+  "\ud569 / \uc911\uc559\uac12",
+  "9",
+  "9",
+  "",
+  "9 / 0",
+  "0 / 0",
+  "22 / 9",
+  "168 / 77.5",
+  "2117 / 39",
+  ""
+ ],
+ "paired_success_window": {
+  "both": 9,
+  "only_SPLT": 0,
+  "only_NBCTS": 0,
+  "neither": 1
+ }
+}
