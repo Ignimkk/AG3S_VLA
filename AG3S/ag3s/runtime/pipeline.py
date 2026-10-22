@@ -612,6 +612,7 @@ class AG3S:
         reach: Optional[float] = None,
         hold_link: Optional[str] = None,
         geometry_state: Optional[np.ndarray] = None,
+        reach_sticky: Optional[Mapping[str, Any]] = None,
     ) -> AttachedCollisionGeometry:
         """Record an externally confirmed grasp. **AG3S never calls this itself.**
 
@@ -654,6 +655,13 @@ class AG3S:
         their behaviour: `trajopt/experiments/grasp_damage.py` attaches MuJoCo's true apple to
         `link_left_arm_6`, whose origin is ~270 mm from the apple (T17 FK), and a hand-sized default
         would refuse it. A limit only means something relative to a parent link.
+
+        **V11AB-pb6 — `reach_sticky`** (benchmark branch, SL5i; ``None`` default = unchanged). The caller's grasp latch
+        already saw the reach gate pass **within this closing attempt** (`LatchConfig.reach_sticky`: the object does
+        not move before it is grasped, so "the hand was within reach of it" does not change inside one attempt; a later
+        capture re-measured it at 123-133 mm in SL5g pb5-C). Pass the latch's ``evidence["reach_sticky"]`` (with a
+        ``passed`` record) and the distance is still measured but no longer refused; ``held_record["reach_gate"]``
+        keeps the measured value, the limit and the latch's pass. Without a ``passed`` record the gate is as above.
 
         The attach frame is the given `parent_link`. With a finger link (the default grasp links are
         `ee_finger_l1`/`ee_finger_r1`) the snapshot rides on that finger, so any later change of the
@@ -698,10 +706,15 @@ class AG3S:
                 f"destination overlap {adm.destination_overlap:.2f}",
                 parent_link=None if parent_link is None else str(parent_link))
 
+        sticky_pass = (dict(reach_sticky["passed"]) if reach_sticky and reach_sticky.get("passed")
+                       else None)
+        reach_gate: Optional[dict] = None
         if isinstance(geometry, AttachedCollisionGeometry):
             if reach is not None:
                 dist = attached_reach(geometry)
-                if dist is not None and dist > float(reach):
+                if sticky_pass is not None:
+                    reach_gate = self._sticky_reach_gate(dist, reach, sticky_pass)
+                elif dist is not None and dist > float(reach):
                     raise AttachRejected(
                         f"reach: attached geometry centroid is {dist * 1000.0:.1f} mm from "
                         f"{geometry.parent_link!r}'s origin, over the {float(reach) * 1000.0:.0f} mm "
@@ -713,7 +726,8 @@ class AG3S:
             # A prebuilt attachment keeps its own primitives (they are the held object's spheres
             # for the self-filter and the optimizer); nothing is fitted.
             self._held_record = {"mode": "prebuilt", "frame_link": geometry.parent_link,
-                                 "n_spheres": len(geometry.primitives)}
+                                 "n_spheres": len(geometry.primitives),
+                                 **({} if reach_gate is None else {"reach_gate": reach_gate})}
             return self._attached
         if robot_state is None or parent_link is None:
             raise ValueError(
@@ -738,7 +752,9 @@ class AG3S:
                 reach_state = self._snapshot_state(geometry, robot_state, geometry_state)[0]
             dist = parent_reach(self.constraint_robot_model, reach_state, str(parent_link),
                                 centroid)
-            if dist > float(reach):
+            if sticky_pass is not None:
+                reach_gate = self._sticky_reach_gate(dist, reach, sticky_pass)
+            elif dist > float(reach):
                 raise AttachRejected(
                     f"reach: target centroid is {dist * 1000.0:.1f} mm from {parent_link!r}'s "
                     f"origin, over the {float(reach) * 1000.0:.0f} mm limit",
@@ -820,12 +836,22 @@ class AG3S:
                 else int(len(self._held_capture_points))}}),
             "hand_shift_since_capture_mm": round(
                 float(np.linalg.norm(T_now[:3, 3] - T_snap[:3, 3])) * 1000.0, 2),
+            # V11AB-pb6 — only when the caller passed a sticky reach pass.
+            **({} if reach_gate is None else {"reach_gate": reach_gate}),
             "spheres_parent_frame": [
                 {"centre_m": [round(float(v), 6) for v in (T_parent[:3, :3] @ p.center
                                                           + T_parent[:3, 3])],
                  "radius_mm": round(float(p.dimensions[0]) * 1000.0, 3)} for p in primitives],
         }
         return self._attached
+
+    @staticmethod
+    def _sticky_reach_gate(dist, reach, sticky_pass: dict) -> dict:
+        """V11AB-pb6 — the reach gate's record when the latch's pass stands in for it (`attach(reach_sticky=)`)."""
+        over = dist is not None and float(dist) > float(reach)
+        return {"sticky": True, "dist_mm": None if dist is None else round(float(dist) * 1000.0, 2),
+                "limit_mm": round(float(reach) * 1000.0, 2), "over_limit": bool(over),
+                "decided_by": "latch_pass" if over else "measured", "latch_pass": dict(sticky_pass)}
 
     def _lift_off_support(self, primitives, T_rel) -> tuple[list, dict]:
         """T34 J1 — the held **query** spheres do not cross the support surface at attach.

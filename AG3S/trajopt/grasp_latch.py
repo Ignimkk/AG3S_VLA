@@ -91,6 +91,14 @@ PLACED 로 간다. 조작 대상 관측(target cluster)은 쓰지 않는다: 쥔
 지워 조작 대상은 `occluded` 로 attach 전 마지막 관측에 동결돼 있다 (T43 W V4 · V5 38 run 에서 HELD 로
 끝난 요청 720 개 전부 — 관측 3 번은 모두 그 요청에서 attach 가 회수된 뒤다).
 
+## 파지 인식 수정 (V11AB-pb6, SL5i · benchmark branch, 둘 다 기본 off)
+
+* `LatchConfig.reach_sticky` — 한 닫힘 시도 안에서 한 번 통과한 `reach` 는 그 시도가 끝날 때까지 통과
+  (같은 `manipulated_id`). 지금 값은 계속 재서 남긴다 (`evidence.reach_sticky`). 호출자는 같은 판단을
+  `AG3S.attach(reach_sticky=...)` 에 넘긴다.
+* `LatchConfig.drop_from_open` — `dropped` 의 기준을 "닫힘 시도 직전 개도" 대신 마지막으로 열려 있던 요청
+  (실행 명령 · 측정 개도 둘 다 ≥ `gripper_closed_below`) 의 개도로. 없으면 예전 값.
+
 ## 이 모듈은 부르지 않는다
 
 `attach` / `detach` 를 **여기서 부르지 않는다.** 언제 불러야 하는지만 답하고, 부르는 것은
@@ -224,6 +232,24 @@ class LatchConfig:
     #: 연속 몇 요청이어야 detach 하나. `release_frames` 와 같은 2 — 한 요청의 측정 튐으로 쥔 물체를
     #: 잃지 않는다. 대가는 한 청크(8 스텝) 늦은 detach.
     slip_frames: int = 2
+
+    # --- V11AB-pb6 (benchmark branch, SL5i): 파지 인식 수정 ---------------------------------------------
+    #: **기본 False = SL5i 전과 비트 동일.** True 면 한 닫힘 시도(LATCHED→CLOSING 부터 reopen · revoke ·
+    #: reset 로 LATCHED 로 돌아가기 전까지) 안에서 `reach` check 가 **한 번 통과했으면** 그 시도가 끝날 때까지
+    #: 통과로 둔다 (같은 `manipulated_id` 일 때만). 쥐기 전에는 물체가 움직이지 않으므로 "그 물체에 손이 닿을
+    #: 거리였다" 는 시도 안에서 바뀌지 않는다. 근거 (SL5g pb5-C, `SL5i.task.md`): reach-at-capture 가 나중
+    #: capture 로 다시 재져 실패한다 — LI t2e4 seq 6 91.1 mm 통과 → capture frame 21 에서 123 mm 로 34 call
+    #: 고정, LIBERO t5e0 seq 10 81.7 mm → seq 11 부터 133 mm. 지금 값은 계속 재서 `evidence.reach_mm` 에 남는다.
+    #: 호출자는 이 판단을 `AG3S.attach(reach_sticky=...)` 에도 넘긴다 (latch 는 held 인데 attach 가 거부되는
+    #: 어긋남을 막는다, `LatchEvent.evidence["reach_sticky"]`).
+    reach_sticky: bool = False
+    #: **기본 False = SL5i 전과 비트 동일.** True 면 `dropped` 의 기준 개도(`opening_before`)를 LATCHED→CLOSING
+    #: 순간의 직전 측정 개도 대신 **닫힘 명령이 시작되기 전 마지막으로 열려 있던 측정 개도** — 마지막 실행 명령
+    #: ≥ `gripper_closed_below` 이고 측정 개도 ≥ `gripper_closed_below` 였던 마지막 요청 (SEARCHING 부터 추적) —
+    #: 로 둔다. 그런 요청이 없으면 예전 값 (fail-closed 유지). 근거: LIBERO t5e0 은 손가락이 이미 거의 닫힌
+    #: 뒤(seq 9, 개도 0.072) latched 가 되어 기준이 0.0719 로 잡혔고, 개도 0.055–0.072 에서 34 call 동안
+    #: `dropped=False` 였다 (실제로는 ≈1.0 에서 닫혔다).
+    drop_from_open: bool = False
 
 
 @dataclasses.dataclass(frozen=True)
@@ -501,6 +527,7 @@ class GraspLatch:
         manipulated_state: Optional[str] = None,
         placed: bool = False,
         held_observation: Optional[dict] = None,
+        reach_context: Optional[dict] = None,
     ) -> LatchEvent:
         """직전 청크의 **실행 사실**로 닫힘 시도 · 파지 확인 · 놓임 확인을 갱신한다 (`evidence=True`).
 
@@ -516,6 +543,8 @@ class GraspLatch:
             held_observation: T34 J2 — 직전 프레임에 조작 대상이 **관측됐을 때** 쥔 구와의 비교
                 (`AG3S.held_observation()`: `centre_distance_m`, `held_radius_m`, `hand_rise_m`,
                 `object_rise_m`). 관측이 없으면 `None` — 그 두 검사는 판단하지 않는다.
+            reach_context: V11AB-pb6 (`LatchConfig.reach_sticky`) — 이 reach 를 잰 맥락 (예: geometry/capture
+                frame). sticky 통과 기록에 그대로 남는다. 판단에는 쓰지 않는다. flag 가 꺼져 있으면 읽지 않는다.
         """
         if not self.evidence:
             raise RuntimeError("observe_grasp needs GraspLatch(evidence=True)")
@@ -553,7 +582,15 @@ class GraspLatch:
         if self.phase is GraspPhase.LATCHED and signal.closing_steps > 0:
             self.phase = GraspPhase.CLOSING
             self._opening_before = self._last_opening
+            if cfg.drop_from_open:
+                # V11AB-pb6 — 닫힘 명령이 시작되기 전 마지막으로 열려 있던 측정 개도 (없으면 위 값 그대로).
+                self._drop_basis = {"source": "transition", "transition_opening": self._last_opening,
+                                    "last_open": None if self._last_open is None else dict(self._last_open)}
+                if self._last_open is not None:
+                    self._opening_before = float(self._last_open["opening"])
+                    self._drop_basis["source"] = "last_open"
             self._settled_steps = 0
+            self._reach_pass = None      # V11AB-pb6 — 새 닫힘 시도: sticky reach 를 비운다
             note = (f"닫힘 시도: 실행된 닫힘 명령 {signal.closing_steps} 스텝 "
                     f"(feedback seq {signal.feedback_seq})")
         elif self.phase in (GraspPhase.SEARCHING, GraspPhase.PLACED) and signal.closing_steps > 0:
@@ -567,6 +604,8 @@ class GraspLatch:
             ev["opening_before"] = self._opening_before
             ev["last_command"] = self._last_command
             ev["settled_steps"] = int(self._settled_steps)
+            if cfg.drop_from_open:
+                ev["drop_from_open"] = None if self._drop_basis is None else dict(self._drop_basis)
             reopened = (signal.last_command is not None
                         and signal.last_command >= cfg.gripper_closed_below
                         and opening is not None and opening >= cfg.gripper_closed_below)
@@ -578,6 +617,9 @@ class GraspLatch:
             else:
                 checks = self._grasp_checks(opening, self._last_opening, reach_m,
                                             manipulated_id, manipulated_state)
+                if cfg.reach_sticky:
+                    ev["reach_sticky"] = self._sticky_reach(checks, reach_m, manipulated_id, signal,
+                                                            reach_context)
                 ev["checks"] = checks
                 failed = [k for k, v in checks.items() if not v]
                 if not failed:
@@ -590,11 +632,17 @@ class GraspLatch:
                     # T43 Z3: 쥔 동안의 "마지막 실행 명령" 은 닫힘 시도의 마지막 실행 명령에서 시작한다.
                     self._hold_command = self._last_command
                     self._slip_streak = 0
+                    sticky = ev.get("reach_sticky") or {}
+                    reach_txt = (f"reach {reach_m * 1000.0:.1f} mm ≤ {cfg.reach * 1000.0:.0f} mm"
+                                 if not sticky.get("used") else
+                                 f"reach sticky {sticky['passed']['reach_mm']:.1f} mm ≤ "
+                                 f"{cfg.reach * 1000.0:.0f} mm (feedback seq "
+                                 f"{sticky['passed']['feedback_seq']}; 지금 {sticky['now_mm']} mm)")
                     note = (f"파지 확인 — attach(manipulated id={manipulated_id}): 개도 "
                             f"{self._opening_before:.3f}→{opening:.3f} (정지: 직전 요청과 차 "
                             f"{ev['opening_delta']:.4f} < {cfg.settle_epsilon:g}), "
                             f"명령 {self._last_command:.3f}, "
-                            f"reach {reach_m * 1000.0:.1f} mm ≤ {cfg.reach * 1000.0:.0f} mm, "
+                            f"{reach_txt}, "
                             f"feedback seq {signal.feedback_seq}")
                 else:
                     note = ((note + "; ") if note else "") + (
@@ -624,6 +672,7 @@ class GraspLatch:
                 self._reset_grasp(keep_opening=True)
                 if opening is not None:
                     self._last_opening = float(opening)
+                self._track_open(signal, opening)
                 self._last_grasp = self._event(False, True, note, ev, revoked=True)
                 return self._last_grasp
             slipped = self._slip_check(signal, opening, ev) if cfg.slip_detach else False
@@ -646,13 +695,47 @@ class GraspLatch:
                         f"(feedback seq {signal.feedback_seq})")
                 if opening is not None:
                     self._last_opening = float(opening)
+                self._track_open(signal, opening)
                 self._last_grasp = self._event(False, True, note, ev, slipped=True)
                 return self._last_grasp
 
         if opening is not None:
             self._last_opening = float(opening)
+        self._track_open(signal, opening)
         self._last_grasp = self._event(attach, detach, note, ev)
         return self._last_grasp
+
+    def _track_open(self, signal: GraspSignal, opening) -> None:
+        """V11AB-pb6 (`drop_from_open`) — 이번 요청이 "열려 있음" 이면 기억한다: 마지막 실행 명령 ≥
+        `gripper_closed_below` **이고** 측정 개도 ≥ `gripper_closed_below`. 모든 상태에서 (SEARCHING 부터) 갱신하고
+        `reset()` 에서만 지운다. flag 가 꺼져 있으면 아무도 읽지 않는다 (기록에도 안 실린다)."""
+        cut = float(self.config.gripper_closed_below)
+        if (signal.last_command is not None and float(signal.last_command) >= cut
+                and opening is not None and float(opening) >= cut):
+            self._last_open = {"opening": float(opening), "command": float(signal.last_command),
+                               "feedback_seq": signal.feedback_seq}
+
+    def _sticky_reach(self, checks: dict, reach_m, manipulated_id, signal: GraspSignal,
+                      reach_context: Optional[dict]) -> dict:
+        """V11AB-pb6 (`reach_sticky`) — 이 닫힘 시도 안에서 reach 가 한 번 통과했으면 `checks["reach"]` 를 참으로 둔다.
+
+        통과 기록은 같은 `manipulated_id` 에만 쓴다 (다른 물체면 지금 값). 지금 값은 그대로 재서 돌려준다
+        (`now` · `now_mm`). `used` = 지금 값은 실패했는데 통과 기록으로 참이 됐다. 시도가 끝나면
+        (`_reset_grasp` · LATCHED→CLOSING) 기록이 지워진다.
+        """
+        now = bool(checks["reach"])
+        if now and (self._reach_pass is None or self._reach_pass["manipulated_id"] != manipulated_id):
+            self._reach_pass = {"reach_mm": round(float(reach_m) * 1000.0, 2),
+                                "feedback_seq": signal.feedback_seq,
+                                "manipulated_id": manipulated_id,
+                                "context": dict(reach_context or {})}
+        held = self._reach_pass is not None and self._reach_pass["manipulated_id"] == manipulated_id
+        used = bool(held and not now)
+        if used:
+            checks["reach"] = True
+        return {"now": now, "now_mm": None if reach_m is None else round(float(reach_m) * 1000.0, 2),
+                "passed": None if self._reach_pass is None else dict(self._reach_pass),
+                "same_object": bool(held), "used": used}
 
     def revert_attach(self, reason: str) -> LatchEvent:
         """`observe_grasp` 가 attach 를 냈는데 **마지막 관문**(`AG3S.attach` 의 reach 검사)이 거절했다.
@@ -805,10 +888,16 @@ class GraspLatch:
         #: T43 Z3: 쥔 동안 마지막으로 **실행된** gripper 명령 (HOLD 청크는 들고 간다) · slip 연속 요청 수.
         self._hold_command: Optional[float] = None
         self._slip_streak = 0
+        #: V11AB-pb6 (`reach_sticky`): 이 닫힘 시도 안에서 reach 가 처음 통과한 순간 (값 · seq · id · 맥락).
+        self._reach_pass: Optional[dict] = None
+        #: V11AB-pb6 (`drop_from_open`): 이 닫힘 시도의 `opening_before` 가 어디서 왔나 (기록용).
+        self._drop_basis: Optional[dict] = None
         if not keep_opening:
             #: 직전 요청의 측정 개도.
             self._last_opening: Optional[float] = None
             self._last_grasp: Optional[LatchEvent] = None
+            #: V11AB-pb6 (`drop_from_open`): 마지막으로 "열려 있음" (명령 · 개도 ≥ 문턱) 이던 요청.
+            self._last_open: Optional[dict] = None
 
     def reset(self) -> None:
         """다음 과제로 넘어간다. 잠금 둘과 상태를 모두 푼다."""

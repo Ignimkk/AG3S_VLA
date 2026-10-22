@@ -1511,6 +1511,20 @@ def build_parser() -> argparse.ArgumentParser:
                          "object may come MM closer. Obstacle rows and other links never change. Off = V11AB")
     ap.add_argument("--grasp-zone-radius-mm", type=float, default=100.0, metavar="MM",
                     help="V11AB-pb5: horizontal radius of the grasp zone around the manipulated object's centroid")
+    ap.add_argument("--grasp-reach-sticky", action="store_true",
+                    help="V11AB-pb6 (benchmark branch, SL5i): within one closing attempt (LATCHED->CLOSING until reopen / "
+                         "revoke / reset) a reach check that passed once stays passed for the same manipulated object "
+                         "(the value is still measured and recorded); AG3S.attach's reach gate takes the same pass. "
+                         "Off = V11AB")
+    ap.add_argument("--grasp-drop-from-open", action="store_true",
+                    help="V11AB-pb6 (benchmark branch, SL5i): the grasp check 'dropped' measures from the last request "
+                         "whose executed command and measured opening were both open (>= gripper_closed_below), tracked "
+                         "from SEARCHING, instead of the opening just before LATCHED->CLOSING (fallback when none). "
+                         "Off = V11AB")
+    ap.add_argument("--closing-hand-exempt", action="store_true",
+                    help="V11AB-pb7 (benchmark branch, SL5i): while CLOSING with the latch evidence closed, not_empty and "
+                         "blocked all true, the grasping hand's contact-link rows whose nearest surface is the "
+                         "manipulated object are dropped (the --held-hand-exempt rule). Off = V11AB")
     ap.add_argument("--latch-phase", action="store_true",
                     help="V11AB-pb4 (benchmark branch): the contact phase comes from the grasp latch (LATCHED -> "
                          "pre_grasp, CLOSING/HELD -> grasp) instead of the request's ag3s/phase. Off = V11AB")
@@ -1768,8 +1782,17 @@ def apply_grasp_contact_flags(safe, args) -> dict:
     safe.grasp_zone_radius = float(getattr(args, "grasp_zone_radius_mm", 100.0) or 100.0) / 1000.0
     out = {"latch_phase": safe.latch_phase, "held_hand_exempt": safe.held_hand_exempt,
            "grasp_zone_allowance_m": safe.grasp_zone_allowance, "grasp_zone_radius_m": safe.grasp_zone_radius}
-    if safe.latch_phase or safe.held_hand_exempt or safe.grasp_zone_allowance is not None:
-        logging.warning("SafePolicy grasp contact rules (V11AB-pb4/pb5): %s", out)
+    # V11AB-pb6 / pb7 (SL5i) — set and reported only when on (off = the pb5 record, key for key).
+    if getattr(args, "closing_hand_exempt", False):
+        safe.closing_hand_exempt = True
+        out["closing_hand_exempt"] = True
+    latch_opts = {k: True for k, flag in (("reach_sticky", "grasp_reach_sticky"),
+                                          ("drop_from_open", "grasp_drop_from_open")) if getattr(args, flag, False)}
+    if latch_opts:
+        safe.set_latch_options(**latch_opts)
+        out.update({f"latch_{k}": True for k in latch_opts})
+    if safe.latch_phase or safe.held_hand_exempt or safe.grasp_zone_allowance is not None or len(out) > 4:
+        logging.warning("SafePolicy grasp contact rules (V11AB-pb4..pb7): %s", out)
     return out
 
 

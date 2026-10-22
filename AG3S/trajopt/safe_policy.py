@@ -191,6 +191,10 @@ class SafePolicy:
         #: on the target and the support right under it. ``None`` = off.
         self.grasp_zone_allowance: Optional[float] = None
         self.grasp_zone_radius: float = 0.10
+        #: V11AB-pb7 (SL5i) — CLOSING with the latch evidence ``closed`` / ``not_empty`` / ``blocked`` all true (the fingers
+        #: stopped on something): the held exemption's rule (the grasping hand's authorized rows on the manipulated object
+        #: are dropped) applies to that call too. ``False`` (default) = pb6 / V11AB.
+        self.closing_hand_exempt: bool = False
         self._last_contact_phase: Optional[dict[str, Any]] = None
         #: `ConstraintRecordWriter` 또는 None. `--safe-remote` 로 도는 청크는 서버 밖으로
         #: attention·grounding·거리장을 내보내지 않으므로, 진단하려면 여기서 남겨야 한다 —
@@ -748,7 +752,8 @@ class SafePolicy:
             # V11AB-pb4 / pb5 — grasp contact rows changed on this chunk's plan (only when on).
             **({"grasp_contact": dict(getattr(getattr(getattr(self.refiner, "optimizer", None), "linearizer", None),
                                               "_last_grasp_contact", None) or {})}
-               if (self.held_hand_exempt or self.grasp_zone_allowance is not None) else {}),
+               if (self.held_hand_exempt or self.grasp_zone_allowance is not None or self.closing_hand_exempt)
+               else {}),
             # V11AB-pb4 — the contact phase the constraints were built with (only when the latch picked it).
             **({"contact_phase": dict(self._last_contact_phase)}
                if self.latch_phase and self._last_contact_phase else {}),
@@ -1161,17 +1166,40 @@ class SafePolicy:
         The authorized links are the ones the constraints were built with (`_authorized_links`, the clearance policy's
         contact links: palm + fingers), the same set the verdict classifies with — not the latch's grasp links (the
         fingers only, which left the palm out in the first pb4/pb5 runs, commit 38722284)."""
-        if not self.held_hand_exempt and self.grasp_zone_allowance is None:
+        if not self.held_hand_exempt and self.grasp_zone_allowance is None and not self.closing_hand_exempt:
             return None
         names = list(getattr(self.constraint_robot_model, "sphere_link_names", ()) or ())
         allowed = set(self._authorized_links(constraint_set))
         manip = getattr(self.ag3s, "manipulated", None)
         centroid = None if manip is None or getattr(manip, "centroid", None) is None else np.asarray(manip.centroid, np.float64)
-        return {"latch": getattr(self._latch.phase, "value", str(self._latch.phase)),
-                "authorized": np.asarray([n in allowed for n in names], bool),
-                "held_exempt": bool(self.held_hand_exempt),
-                "zone_allowance": None if self.grasp_zone_allowance is None else float(self.grasp_zone_allowance),
-                "zone_radius": float(self.grasp_zone_radius), "centroid": centroid}
+        out = {"latch": getattr(self._latch.phase, "value", str(self._latch.phase)),
+               "authorized": np.asarray([n in allowed for n in names], bool),
+               "held_exempt": bool(self.held_hand_exempt),
+               "zone_allowance": None if self.grasp_zone_allowance is None else float(self.grasp_zone_allowance),
+               "zone_radius": float(self.grasp_zone_radius), "centroid": centroid}
+        if self.closing_hand_exempt:
+            out["closing_exempt"] = self.closing_exempt_now()
+        return out
+
+    #: V11AB-pb7: the latch checks that together say "the fingers closed and stopped on something".
+    CLOSING_EXEMPT_CHECKS = ("closed", "not_empty", "blocked")
+
+    def closing_exempt_now(self) -> bool:
+        """V11AB-pb7 — this call's latch state is CLOSING and its evidence has `CLOSING_EXEMPT_CHECKS` all true."""
+        if self._latch.phase is not GraspPhase.CLOSING:
+            return False
+        ev = getattr(self._latch.last_grasp, "evidence", None) or {}
+        checks = ev.get("checks") or {}
+        return all(checks.get(k) is True for k in self.CLOSING_EXEMPT_CHECKS)
+
+    def set_latch_options(self, **changes) -> None:
+        """Replace fields of the grasp latch's `LatchConfig` (V11AB-pb6 CLI switches; call before the first request)."""
+        import dataclasses as _dc
+
+        cfg = _dc.replace(self._latch.config, **changes)
+        self._latch.config = cfg
+        self._latch._manipulated._cfg = cfg
+        self._latch._destination._cfg = cfg
 
     #: V11AB-pb4: latch state -> V11AB contact phase rule (`latch_phase`).
     LATCH_CONTACT_PHASE = {GraspPhase.LATCHED: "pre_grasp", GraspPhase.CLOSING: "grasp", GraspPhase.HELD: "grasp"}
@@ -1235,6 +1263,7 @@ class SafePolicy:
             "geometry_age_frames": None if manip is None else int(manip.age_frames),
             "hand_shift_mm": None,
         }
+        reach_context = None
         if manip is not None:
             try:
                 q_reach = q
@@ -1249,6 +1278,10 @@ class SafePolicy:
                     else:
                         alignment["reach_state"] = "now (no capture state kept)"
                 reach = parent_reach(model, q_reach, parent_link, manip.centroid)
+                if cfg.reach_sticky:
+                    # V11AB-pb6 — what this reach was measured against (kept with the latch's sticky pass).
+                    reach_context = {"geometry_frame": alignment["geometry_frame"],
+                                     "reach_state": alignment.get("reach_state", "now")}
                 if self._last_q_now is not None and len(self._last_q_now) == len(q):
                     # 직전 요청 이후 parent link 원점이 움직인 거리 — 조작 대상 기하(직전 프레임
                     # 관측)와 지금 자세 사이의 시점 차이가 얼마나 비싼가.
@@ -1277,7 +1310,8 @@ class SafePolicy:
             signal, reach_m=reach,
             manipulated_id=None if manip is None else int(manip.id),
             manipulated_state=None if manip is None else str(manip.state),
-            placed=placed, held_observation=held_observation)
+            placed=placed, held_observation=held_observation,
+            **({"reach_context": reach_context} if cfg.reach_sticky else {}))
         rejected = None
         revoked = None
         if event.attach:
@@ -1285,10 +1319,13 @@ class SafePolicy:
                 if not usable:
                     raise AttachRejected("manipulated object has no usable geometry",
                                          parent_link=parent_link)
+                # V11AB-pb6: the latch's sticky reach pass is AG3S's reach gate too (`AG3S.attach(reach_sticky=)`).
+                sticky = (event.evidence or {}).get("reach_sticky") if cfg.reach_sticky else None
                 self.ag3s.attach(manip.geometry, robot_state=q, parent_link=parent_link,
                                  allowed_contact_links=allowed, label="manipulated",
                                  reach=cfg.reach,
-                                 hold_link=self.hold_links.get(hand, parent_link))
+                                 hold_link=self.hold_links.get(hand, parent_link),
+                                 **({"reach_sticky": sticky} if sticky and sticky.get("same_object") else {}))
                 self._grasp_state_version += 1
             except AttachRejected as exc:
                 rejected = exc.record()

@@ -386,7 +386,9 @@ SL5A_NEW_ARG_KEYS = ("robot",)
 #: left out of the comparison **only while off** in the V11AB / bare argv, so the golden keeps meaning "V11AB as
 #: served"; an option that is on (or a changed default) still shows up as a difference.
 PB_DEFAULT_OFF = {"reach_at_capture": False, "minimal_intervention_mm": None, "latch_phase": False,
-                  "held_hand_exempt": False, "grasp_zone_mm": None, "grasp_zone_radius_mm": 100.0}
+                  "held_hand_exempt": False, "grasp_zone_mm": None, "grasp_zone_radius_mm": 100.0,
+                  # V11AB-pb6 / pb7 (SL5i)
+                  "grasp_reach_sticky": False, "grasp_drop_from_open": False, "closing_hand_exempt": False}
 
 
 def _drop_sqp_default_off(cfg: dict) -> dict:

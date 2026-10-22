@@ -218,6 +218,20 @@ AG3S_VERSIONS: dict[str, tuple[str, ...]] = {
     # the bowl (23) or the support under it (45) while latched/closing; 10 mm = 2 fine voxels (the support tolerance).
     "V11AB-pb5": ("--reach-at-capture", "--minimal-intervention-mm", "10", "--links", "arms", "--held-hand-exempt",
                   "--latch-phase", "--grasp-zone-mm", "10"),
+    # pb6 "파지 인식 수정판" = pb5 + the latch recognises the real grasp (SL5i, user 2026-10-22). SL5g pb5-C: the bowl was held
+    # while the latch stayed CLOSING on 189 LI / 37 LIBERO 10 calls, failing reach (179 / 33) and dropped (42 / 36).
+    # (a) reach sticky: the reach that passed on entering CLOSING (LI t2e4 91.1 mm, LIBERO t5e0 81.7 mm) was re-measured
+    # on a later capture (123 / 133 mm) and stayed failed; within one attempt it now stays passed (AG3S.attach too).
+    # (b) drop from open: t5e0 latched with the fingers already at 0.072, so 'dropped' measured from 0.0719 instead of
+    # the last open opening (~1.0).
+    "V11AB-pb6": ("--reach-at-capture", "--minimal-intervention-mm", "10", "--links", "arms", "--held-hand-exempt",
+                  "--latch-phase", "--grasp-zone-mm", "10", "--grasp-reach-sticky", "--grasp-drop-from-open"),
+    # pb7 "파지 인식 + closing 면제판" = pb6 + the held exemption also while CLOSING once the fingers stopped on something
+    # (closed, not_empty, blocked): SL5h D4, TO pushed the hand up on the grasped bowl (up 1431 rows, down 243) before
+    # the latch reached HELD.
+    "V11AB-pb7": ("--reach-at-capture", "--minimal-intervention-mm", "10", "--links", "arms", "--held-hand-exempt",
+                  "--latch-phase", "--grasp-zone-mm", "10", "--grasp-reach-sticky", "--grasp-drop-from-open",
+                  "--closing-hand-exempt"),
 }
 
 

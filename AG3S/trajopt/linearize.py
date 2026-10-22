@@ -243,6 +243,9 @@ class SceneSnapshot:
     #: zone_allowance -> rows of class target or support within ``zone_radius`` (horizontal) of the manipulated
     #: object's centroid may come ``zone_allowance`` closer (``margin = min(margin, -allowance)``): the fingertips
     #: reach the object and the surface right under it. Obstacle-class rows and unauthorized links never change.
+    #: V11AB-pb7 (SL5i): ``"closing_exempt": True`` (the caller sets it only for a CLOSING call whose latch evidence has
+    #: ``closed`` / ``not_empty`` / ``blocked`` all true -- the fingers stopped on something) applies the HELD rule above
+    #: to that call too; the record gets ``closing_exempt_rows``. Key absent = pb4 / pb5 as before.
     grasp_contact: Optional[dict] = None
     #: **T43 T step 2** — `[cx, cy, cz, radius, z_min]` (m) of the manipulated object's carve-out
     #: ball (`collision.target_volume_exempt`); a row whose nearest surface point lies inside is a
@@ -1024,6 +1027,13 @@ class CollisionLinearizer:
             ex = (cls == _TARGET) & auth[None, :]
             margin = np.where(ex, -1.0, margin)        # clearance + 1 m: the row cannot bind
             rec["held_exempt_rows"] = int(ex.sum())
+        if "closing_exempt" in gc:
+            # V11AB-pb7 — the same rule while CLOSING with the fingers stopped on something (caller's condition).
+            rec["closing_exempt_rows"] = 0
+            if gc.get("closing_exempt") and latch == "closing":
+                ex = (cls == _TARGET) & auth[None, :]
+                margin = np.where(ex, -1.0, margin)
+                rec["closing_exempt_rows"] = int(ex.sum())
         allowance = gc.get("zone_allowance")
         if allowance is not None and latch in ("latched", "closing") and gc.get("centroid") is not None:
             c = np.asarray(gc["centroid"], np.float64).reshape(3)
