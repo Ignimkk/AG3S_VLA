@@ -29,13 +29,13 @@
 | | SL-3 attention read-out audit | **완료 (2026-10-12, 사용자 확정)** | 아래 [SL3](#sl3--v11ab-attention-read-out-audit-on-pi05_libero--sl2-후속-2건-2026-10-12). SL2 후속 2건(confined cover 기본값, `robot_geometry.py` CLI) 구현·확인 완료. V11AB cell L8H2 를 Panda 에 그대로 쓴다(recalibration 없음) |
 | | SL-4 Panda 를 V11AB core 에 연결 (ATS / LTE / ESDF), offline | **완료 (2026-10-13, 사용자 확정)** | 아래 [SL4](#sl4--panda-관측을-v11ab-perception--esdf-에-연결-ats--lte--esdf-offline-2026-10-12). core diff 0 줄, 기준선 둘 다 일치. 접근 단계 ATS 는 대체로 target 을 잡았으나(101/105 call) **t4 · t5 · t9 에서 다른 물체를 target 으로 골랐다**. ~~SL3 열린 항목(head block mass, wrist mirror 비교 원인, core 주입 지점)~~ → SL4 에서 측정(head seed 기여, wrist mirror 질량 분해, offline 주입 profile). online 주입은 SL-5 |
 | | SL-4b ATS 용 attention cell dev calibration 연구 | **완료 (2026-10-13, 사용자 확정)** | 아래 [SL4b](#sl4b--ats-용-attention-cell-dev-calibration-2026-10-13). ~~진행 중 (사전 등록)~~ → 사전 등록 규칙대로 **V11AB L8H2 유지**(최고 후보 L12H3 가 +1.5 %p, 기준 +10 %p 미달). oracle 도 t4 · t9 에서 0 이어서 오선택은 attention cell 이 아니라 그 뒤 grounding 단계 문제로 남는다. 같은 STEP 에서 LIBERO fixture reset 이력 문제를 찾아 export · replay 를 고쳤다. test 데이터는 쓰지 않았다 |
-| | SL-4c ATS grounding 탈락 원인 진단 (t4 · t5 · t9) | **진행 중 (2026-10-13)** | [`handoff/SL4c.task.md`](handoff/SL4c.task.md) (commit `cf4649ce`). **진단만** 한다. code 는 `85e6d9d1` worktree 에 고정. cluster 병합 · Panda 8 cm 개도 한계는 **가설**이며 측정이 확인 또는 반박한다 |
+| | SL-4c ATS grounding 탈락 원인 진단 (t4 · t5 · t9) | ~~**진행 중 (2026-10-13)**~~ → **측정 완료 (verify 있음), 판정 기록 없음** | [`handoff/SL4c.task.md`](handoff/SL4c.task.md) (commit `cf4649ce`). **진단만** 한다. code 는 `85e6d9d1` worktree 에 고정. cluster 병합 · Panda 8 cm 개도 한계는 **가설**이며 측정이 확인 또는 반박한다 |
 | | SL-5a Panda 주입(최소 core 변경) + EE delta ↔ joint 변환, offline 검증 | **구현 완료 (2026-10-13, commit `76ee59ba`), 2026-10-14 보정 추가** | [`handoff/SL5a.task.md`](handoff/SL5a.task.md). RB-Y1 golden bit 동일 · 무개입 chunk bit 동일 유지. 2026-10-14: gripper `empty_below` Panda 보정, 역변환 A/B 명시 모드 (아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14)) |
 | | SL-5b live closed-loop 1 episode | **연결 확인 완료 (2026-10-14)**, 한계 기록 | 아래 [SL5b-smoke](#sl5b-smoke--t0-init0-paired-smoke-재확인-conversion-a--b-2026-10-14) · [SL5b-feedback](#sl5b-feedback--exec_feedback-를-실제-실행-기준으로-확정-t0-재측정-2026-10-14) · [SL5b-libero10](#sl5b-libero10--libero-task-09--init-0-paired-2026-10-14). closed loop · 피드백 계약 · 무개입 동일성은 10 episode 전부 성립. V11AB-B 3/10, A 2/10 (VLA-only 9/10). 실패 7 건 중 6 건은 latch `reach`(occluded target) 로 attach 되지 않은 경우 — development 로 전달 |
 | | SL-6 phase / gate source | 미착수 | Panda main 의 phase source = gripper-state strong rule 또는 pi05_libero feature 로 dev 에서 새로 학습한 probe(GT phase 는 oracle 비교용). **SL-6 에서 결정** |
 | | SL-7 ~ SL-8 (contact evaluator, runner) | 미착수 | P1 통과 기준에는 pi0.5-only 뿐 아니라 V11AB 최소 1 episode 도 포함. ~~SL-3 은 attention → depth 사상에서 policy image 의 좌우 반전을 되돌려야 한다(SL1)~~ → SL3 에서 un-mirror mapping 구현·측정 완료(image 검사 221/221 call), **SL4 에서 ATS 결과로도 확인**(mirror 로 돌린 접근 단계 centroid 오차 median 236.2 mm 대 12.0 mm). 이후 단계는 이 mapping 을 그대로 쓴다 |
 | **P2** LIBERO Spatial 소규모 평가 | 고정 task/seed paired 비교 | **소규모 확인 (2026-10-14)** | task 0~9 × init 0 (dev) paired. 통합 오류 없음, 뚜렷한 저하(9/10 → 3/10) 확인. 비저하 증명이 아니다 (사용자 판정 2026-10-14) |
-| **P3** SafeLIBERO Spatial Level I/II pilot | contact 판정 검증 + paired 결과 | **진행 중 (2026-10-14)** | 아래 [SL5c](#sl5c--safelibero-spatial-dev-연결과-v11ab-기준선-2026-10-14). 환경 연결 · 충돌 판정 검증 완료. V11AB 기준선(B): Level I safe success 0/20 (VLA-only 2/20). Level II V11AB-B 는 미실행(보류) |
+| **P3** SafeLIBERO Spatial Level I/II pilot | contact 판정 검증 + paired 결과 | **진행 중 (2026-10-14)** | 아래 [SL5c](#sl5c--safelibero-spatial-dev-연결과-v11ab-기준선-2026-10-14). 환경 연결 · 충돌 판정 검증 완료. V11AB 기준선(B): Level I safe success 0/20 (VLA-only 2/20). Level II V11AB-B 는 미실행(보류). 2026-10-23 까지 Level I dev 에서 개선판을 시험했다(minimal intervention gate 판부터 파지 인식 + closing 면제판까지, 역변환 A · B 비교 포함). 최고 safe success 3/20(파지 인식 + closing 면제판) vs VLA-only 2/20 (같은 3/20 이 V11AB-A 기준선과 grasp zone 허용판 + 역변환 A 에도 있다). official success 는 3/20 vs VLA-only 11/20. 아래 [SL5i](#sl5i--파지-인식-수정과-closing-중-쥔-물체-면제-2026-10-22~23) |
 | **P4** 전체 SafeLIBERO | official I/II 전체 | 미착수 | |
 | **P5** LIBERO-Safety 추가 평가 | 독립 protocol · adapter | 미착수 | |
 
@@ -141,6 +141,15 @@
 | **병렬 GPU run · `AG3S_GPU_LOCK_HELD` · `held_by_caller`** | 한 caller(`benchmark/runners/run_parallel_gpu.sh`)가 공용 GPU lock 을 한 번 잡고 launcher job 을 최대 2 개 동시에 돌리는 방식(같은 checkout 안에서만). 환경 변수 `AG3S_GPU_LOCK_HELD=1` 이면 launcher 는 lock 을 직접 잡지 않고 caller 가 물려준 fd 로 lock 을 쥐고 있는지만 확인한다. run manifest 의 `launcher_result.gpu_lock_mode` = `held_by_caller`. checkout 사이 동시 실행은 계속 배제한다 |
 | **병렬 bit 재현 (G0)** | 병렬 batch 에서 돈 run(repro)과 같은 code · 인자의 단독 run 의 episode npz · calls npz · geom npz 의 모든 array 를 byte 단위로 비교하는 것. 시각 · timing 기록만 달라야 한다 |
 | **dirty run** | run manifest 의 `dirty = True`: 실행 시 working tree 에 추적되지 않는 파일이나 수정이 있었다. `source_diff` 가 비어 있으면 code 변경이 아니라 untracked 파일 때문이다 |
+| **파지 인식 수정판 · 파지 인식 + closing 면제판 · grasp zone 허용판 (SL5i)** | 내부 key V11AB-pb6 · pb7 · pb5. grasp zone 허용판(pb5) = pb4 의 held 면제 + latch phase + grasp zone 10 mm. 파지 인식 수정판 = 허용판 + sticky reach + drop-from-open. 파지 인식 + closing 면제판 = 수정판 + closing 면제 |
+| **닫힘 시도 (closing attempt)** | latch 가 LATCHED→CLOSING 으로 넘어간 때부터 reopen · revoke(attach 취소) · LATCHED 복귀 · reset 중 하나가 일어날 때까지의 구간. sticky reach 의 유효 범위다. attach 거절로 HELD→CLOSING 으로 되돌아온 것(`revert_attach`)은 같은 시도로 본다 |
+| **sticky reach** | 한 닫힘 시도 안에서 reach check(손 – manipulated centroid 거리 ≤ 120 mm)가 한 번 통과했으면, 그 뒤 다른 capture 로 거리가 다시 재져 실패해도 시도가 끝날 때까지 통과로 두는 규칙. 같은 `manipulated_id` 일 때만 적용하고 AG3S `attach` 의 reach gate 에도 같은 판단을 넘긴다. flag `--grasp-reach-sticky` |
+| **drop-from-open** | `dropped` check(`opening_before − opening ≥ 0.05`)의 기준 개도를 LATCHED→CLOSING 전이 순간의 개도가 아니라 닫힘 명령이 시작되기 전 마지막으로 열려 있던 측정 개도(명령 ≥ 0.85 이고 개도 ≥ 0.85)로 바꾸는 규칙. latch 가 손가락이 거의 닫힌 뒤에 잠겨도 기준이 열림(≈1.0)으로 잡힌다. flag `--grasp-drop-from-open` |
+| **closing 면제 (closing exemption)** | latch 가 CLOSING 이고 그 call 의 `closed` · `not_empty` · `blocked` 가 모두 참일 때(손가락이 무언가를 쥐고 멈춘 상태), held 면제와 같은 규칙으로 손의 authorized link 행 중 nearest surface 가 manipulated object 인 행을 TO 제약에서 뺀다. 다른 물체 · table · obstacle 행은 남긴다. flag `--closing-hand-exempt`, record `closing_exempt_rows` |
+| **거짓 held (false held)** | latch 가 held 로 넘어갔는데 그 call 의 obs 에서 양손가락이 target 에 닿지 않은 것(MuJoCo `both_fingers` X). "새로 생긴 거짓 held" = 기존 version 에는 같은 seq 에 없던 것 |
+| **양손가락 (`both_fingers`)** | MuJoCo contact probe 에서 왼쪽 · 오른쪽 손가락 면이 모두 target body 에 닿아 있는 상태(dist ≤ 0). lifted = 양손가락 O 이고 rise ≥ 30 mm |
+| **offline latch replay · 첫 divergence** | 기록된 calls log 의 latch 입력을 `GraspLatch` 에 다시 넣어 flag 를 켰을 때의 state 전이를 구하는 CPU 검사. 첫 divergence = flag on 의 출력이 기록과 처음 달라진 call(그 call 까지는 실제 run 과 입력이 같다. 첫 held 뒤에는 closed loop 가 갈라진다) |
+| **revoke** | 이미 attach 된 물체를 latch 가 detach 하는 것(`attach_revoked`). 이후 latch 는 LATCHED 로 돌아가 같은 물체를 다시 시도할 수 있다 |
 
 ---
 
@@ -2410,6 +2419,8 @@ benchmark 에서는 latch 를 바꾸지 않는다.
 
 기준선 결과는 비교 기준으로 보존한다. 개선 결과는 버전 이름과 commit 을 함께 쓴다.
 
+**사용자 지시 2026-10-22:** "pb6 이렇게 표현하지 말고 실제 단계명을 작성하라. 내가 알아들을 수 있도록." 2026-10-22 이후 기록과 보고에서는 `pb` 번호 대신 version 에서 바꾼 내용(예: 파지 인식 수정판, 파지 인식 + closing 면제판, grasp zone 허용판, 역변환 C)으로 부르고, 내부 key 는 처음 한 번만 괄호나 대응표로 적는다. 아래 SL5i 절이 처음 적용한 곳이다.
+
 ---
 
 ## SL5c — SafeLIBERO Spatial dev 연결과 V11AB 기준선 (2026-10-14)
@@ -3760,3 +3771,280 @@ against 로 분류된 숫자:
 - TO row 의 constraint 대상(어느 ESDF · attached 물체에 binding 인지): calls log 는 count 만 남긴다 (SL5h 와 같다).
 
 **판정 대기 (사용자).** 변환 A / B / C 의 차이에 대한 원인 판정과 다음 수정 방향은 사용자 판정 전이다. 위는 가설별 숫자만 남긴 것이다.
+
+---
+
+## SL5i — 파지 인식 수정과 closing 중 쥔 물체 면제 (2026-10-22~23)
+
+이름은 사용자 지시(2026-10-22)대로 version 에서 바꾼 내용으로 부른다. 내부 key 는 아래 표에서 한 번만 적고, 이후 본문과 표에서는 쓰지 않는다 (figure 안의 범례에는 내부 key 가 괄호로 남아 있다).
+
+| 부르는 이름 | 내부 key | 내용 |
+|---|---|---|
+| grasp zone 허용판 | V11AB-pb5 | 직전 최신판. SL5g 에서 측정 |
+| 파지 인식 수정판 | V11AB-pb6 | grasp zone 허용판 + 같은 닫힘 시도 안에서 reach 유지 + 열린 개도 기준 `dropped` |
+| 파지 인식 + closing 면제판 | V11AB-pb7 | 파지 인식 수정판 + closing 중 쥔 물체에 대한 손 제약 제외 |
+| 역변환 C | `lag_inverse_tracking` | SL5h-G 에서 정의. 이 절의 모든 run 이 쓴다 |
+
+### SL5i-1 — 구현과 offline 검사
+
+**기록 시각** 2026-10-23 04:08 KST (구현 기록 작성 2026-10-23 02:40 KST). **code commit** `1ddb9376`.
+**출처** [`handoff/SL5i.task.md`](handoff/SL5i.task.md) (무엇을 왜 바꾸나) · [`handoff/SL5i.impl.md`](handoff/SL5i.impl.md) (구현 · test · replay 표) ·
+`outputs/verify/SL5i-pre/replay_summary.json` (offline latch replay 요약; 같은 폴더의 `latch_replay.json` · `replay_table.csv`).
+GPU 는 쓰지 않았다 (CPU, replay 1.2 s, RSS 42 MB).
+
+**사용자 판정 2026-10-22: "추천 방향에 맞게 수행".** 추천 방향은 두 가지다. ① latch(손가락이 실제로 물체를 쥐었는지 확인하는 상태기계)가 실제 파지를 인정하도록 파지 확인을 고친다. ② closing 중 쥔 물체에 대한 손의 제약을 뺀다. 변경마다 따로 검증하기로 해서 version 이 둘이다.
+
+#### 원인 — 실제로 쥐고 있는데 latch 가 closing 에 머문다
+
+SL5h 에서 over-lift(쥔 bowl 을 250 mm 넘게 들어 올림)의 출처를 따라가면 다음 연쇄가 나온다. latch 가 `held` 로 넘어가지 못하면 AG3S 가 보는 manipulated centroid 가 table 위 옛 위치에 남고, TO 가 손 근처의 쥔 bowl 을 obstacle 로 보고 손을 위로 민다(SL5h D4). 역변환 C 가 그 밀기를 그대로 실행해 over-lift 가 생긴다.
+
+그 연쇄의 첫 고리, 즉 closing 인데 이미 bowl 을 든 call 의 수와 그 call 에서 실패한 check 는 다음과 같다 (grasp zone 허용판 + 역변환 C, 출처 [`SL5i-G.verify.json`](handoff/SL5i-G.verify.json) `numbers.I3.signature`, SL5g 와 같은 run).
+
+| 집합 | closing 이면서 lifted 인 call | 실패한 check (call 수) |
+|---|---|---|
+| SafeLIBERO Level I dev 20 (LI) | 189 | reach 179 · blocked 53 · dropped 42 · settled 17 · not_empty 1 |
+| LIBERO 10 | 37 | dropped 36 · reach 33 · settled 2 |
+
+(lifted = 두 손가락 면이 target body 에 닿고 rise ≥ 30 mm. 한 call 이 여러 check 에서 동시에 실패할 수 있다.)
+
+실패한 check 두 개의 구체적 모양은 다음과 같다 (`SL5i.task.md`, SL5g 기록에서 lead 가 다시 확인한 숫자).
+
+- **reach 가 나중 capture 로 다시 재져 실패한다.** `reach-at-capture` 는 손-bowl 거리를 bowl 의 마지막 관측(capture) 시점 자세로 잰다. closing 에 들어갈 때는 통과한다(LI t2e4 seq 6: 91.1 mm, 한도 120 mm, geometry frame 5 / LIBERO t5e0 seq 10: 81.7 mm). 그 뒤 다른 capture 가 들어오면 실패하고 그대로 고정된다(t2e4: frame 21 에서 123 mm 로 34 call 고정 / t5e0: seq 11 부터 133 mm). bowl 은 쥐기 전에는 움직이지 않으므로, 한 번의 닫힘 시도 안에서 "그 bowl 에 손이 닿을 거리였다"는 사실은 바뀌지 않는다.
+- **`dropped` 가 늦은 latch 때문에 기준을 잃는다.** `dropped` 는 `opening_before − opening ≥ 0.05` 인지 본다. `opening_before` 는 LATCHED→CLOSING 전이 순간의 직전 개도다. LIBERO t5e0 에서는 latch 가 손가락이 이미 거의 닫힌 뒤(seq 9, 개도 0.072)에 잠겨 `opening_before` 가 0.0719 로 잡혔고, 그 뒤 개도 0.055~0.072 범위에서 34 call 동안 `dropped=False` 였다. 손가락은 실제로 열림(≈1.0)에서 닫혔다. 기준이 잘못 잡혔을 뿐이다.
+- **closing 중에도 같은 위쪽 밀기가 나온다.** 직전 version 의 held 면제(쥔 물체에 대해 손의 contact-link 행을 제약에서 뺀다)는 latch 가 `held` 일 때만 적용되므로, 손가락이 이미 닫혀 bowl 을 쥔 closing 구간은 면제되지 않는다.
+
+#### 바꾼 것 — flag 3개, version 2개
+
+모든 flag 는 기본값이 꺼짐이다.
+
+| flag | 하는 일 | 기록(flag 가 켜졌을 때만 생기는 key) |
+|---|---|---|
+| `--grasp-reach-sticky` | **sticky reach**: 같은 닫힘 시도(LATCHED→CLOSING 부터 reopen · revoke · LATCHED 복귀 전까지) 안에서 reach check 가 한 번 통과했으면 그 시도가 끝날 때까지 통과로 둔다. 같은 `manipulated_id` 일 때만 적용(다른 물체로 바뀌면 지금 값으로, fail-closed). 같은 판단을 AG3S `attach` 의 reach gate 에도 적용해 "latch 는 held 인데 attach 가 거부되는" 어긋남을 막는다 | `grasp.evidence.reach_sticky`, `held_record.reach_gate` |
+| `--grasp-drop-from-open` | **drop-from-open**: `dropped` 의 기준 개도를 "LATCHED→CLOSING 순간의 개도" 대신 "닫힘 명령이 시작되기 전 마지막으로 열려 있던 측정 개도"(명령 ≥ 0.85 이고 개도 ≥ 0.85 인 마지막 요청, SEARCHING 부터 추적)로 바꾼다. 그런 측정이 없으면 예전 값으로 돌아간다 | `grasp.evidence.drop_from_open` |
+| `--closing-hand-exempt` | **closing 면제**: latch 가 CLOSING 이고 그 call 의 `closed` · `not_empty` · `blocked` 가 모두 참일 때(손가락이 무언가를 쥐고 멈춘 상태) held 면제와 같은 규칙을 적용한다. 손의 authorized link 행 중 nearest surface 가 manipulated object 인 행만 뺀다. 다른 물체 · table · obstacle 행은 남는다 | `to.grasp_contact.closing_exempt_rows` |
+
+| version | 구성 |
+|---|---|
+| 파지 인식 수정판 | grasp zone 허용판 + `--grasp-reach-sticky` + `--grasp-drop-from-open` |
+| 파지 인식 + closing 면제판 | 파지 인식 수정판 + `--closing-hand-exempt` |
+
+바뀐 file 은 `AG3S/trajopt/grasp_latch.py` · `linearize.py` · `safe_policy.py` · `serve_safe.py`, `AG3S/ag3s/runtime/pipeline.py`, `AG3S/adapters/panda/profile.py` (code 6 file, +217 −16 에 golden allowlist `tests/trajopt/_sl5a_golden.py` 포함). file 별 줄 범위는 `SL5i.impl.md` 의 표가 정본이다. 새 test 는 `tests/trajopt/test_sl5i_grasp_recognition.py` 19 개(sticky 유지 · 초기화, drop 기준, attach gate, closing 면제의 조건과 빠지는 행, profile · CLI).
+
+#### flag 가 꺼진 상태에서 기존 동작과 bit 동일
+
+| 항목 | 변경 전 | 변경 후 |
+|---|---|---|
+| 회귀 기준선 legacy (`esdf_rollout … --constraint-links arms`, CPU) | 위반으로 시작 14/15 · has_target 15/15 · frame0 −29.031048280806342 mm · clearance_before sha1 `40798fb0…` | 같음 (sha1 까지) |
+| RB-Y1 golden `sl5a_rby1_golden.npz` (SafePolicy 경로) | identical | identical, 0 differences |
+| RB-Y1 golden `sl5a_serve_safe_golden.json` | identical | 새 argparse key 3개를 꺼진 값으로 allowlist(`PB_DEFAULT_OFF`)에 넣은 뒤 identical (이전 version 들과 같은 방식) |
+| offline latch replay, flag off | – | SL5g 의 30 episode 모든 call 에서 latch state · checks 가 기록과 같다(0 diff). 다시 계산한 `closing_steps` 도 같다(0 mismatch) |
+| flag off 일 때 code 경로 | – | 새 kwarg(`reach_context`, `reach_sticky`)를 넘기지 않고, 새 evidence · record key 를 만들지 않는다 |
+
+test: 새 test 와 관련 test 47 passed, `tests/ag3s` 계열 1033 passed. `tests/trajopt tests/benchmark` 에는 변경 전부터 있던 실패 47 failed + 2 errors 가 남아 있다. 원인은 `.venv-ag3s` 에 `openpi_client` 가 없는 것(`test_panda_sl3.py`)과 legacy harness 의 chunk index 가 옛 path 를 key 로 쓰는 `KeyError` 42 개이며, 변경하지 않은 HEAD 사본에서도 같은 42 개가 실패했다. cuRobo 기준선은 GPU 가 필요해서 이 단계에서 돌리지 않았다.
+
+#### offline latch replay — 기록된 입력으로 flag 를 켜 본다
+
+**offline latch replay** 는 SL5g(grasp zone 허용판 + 역변환 C)의 calls log 에서 latch 입력(실행 피드백 개도 · 명령 · `closing_steps` · manipulated state · reach)을 꺼내 `GraspLatch` 에 다시 넣고, flag 를 켰을 때 **처음 held 로 넘어가는 seq** 를 구하는 것이다. 대상은 LI 20 + LIBERO 10 episode 다. SEARCHING→LATCHED 전이(grounding lock)는 attention 으로 다시 계산하지 않고 기록의 `latched` call 에서 강제로 잠갔다. 이 전이는 flag 와 상관이 없다.
+
+**첫 divergence** = flag 를 켠 latch 의 출력(state · attach · detach)이 기록과 처음 달라진 call 이다. 첫 held 뒤에는 attach 가 제약을 바꿔 closed loop 가 갈라지므로, 정확한 비교는 첫 divergence 까지만 의미가 있다. **양손가락** = SL5h MuJoCo probe 에서 그 call 의 obs 에 왼쪽 · 오른쪽 손가락 면이 모두 target 에 닿아 있는가 (O/X). **거짓 held** = 양손가락이 target 에 닿지 않았는데 held 가 된 것. 이번 flag 때문에 새로 생긴 거짓 held 를 따로 센다.
+
+| | LI (20) | LIBERO 10 (10) |
+|---|---|---|
+| flag off replay 와 기록의 불일치 (state · checks 다른 call / 입력 불일치) | 0 / 0 | 0 / 0 |
+| held 에 도달한 episode: 기록(off) → sticky 만 / drop 만 / 파지 인식 수정판 | 8 → 10 / 8 / 10 | 7 → 7 / 8 / 8 |
+| 첫 held 이전 closing 이면서 lifted 인 call: off → sticky 만 / drop 만 / 수정판 | 152 → 90 / 152 / 90 | 34 → 34 / 0 / 0 |
+| 수정판의 divergence (모두 closing→held, 양손가락 O, lifted O) | 4 (sticky 3, drop 1) | 2 (drop 2) |
+| **새 거짓 held** (수정판 flag 때문에 held 가 됐는데 양손가락 X) | **0** | **0** |
+| 기록의 첫 held 가 이미 양손가락 X 였던 것 (수정판에서도 같은 seq, 새로 생긴 것 아님) | t0e1 seq 18 (rise 9.3 mm) · t1e3 seq 9 (33.2) · t2e1 seq 12 (68.7) | t0e0 seq 15 (0.0) |
+| closing 면제가 적용될 call (첫 held 이전, `closed`·`not_empty`·`blocked` 모두 참): 전체 / 양손가락 O / X | 103 / 56 / 47 | 23 / 7 / 16 |
+
+divergence 가 있는 6 episode 의 상세 (replay 표 `replay_table.csv` 에서):
+
+| set | episode | 기록의 첫 held (seq · 양손가락 · rise) | 수정판 replay 의 첫 divergence (원인) | MuJoCo 첫 lifted call (obs) | closing·lifted call: off → 수정판 |
+|---|---|---|---|---|---|
+| LI | t0e0 | 없음 | seq 16 closing→held (sticky reach). held obs 100, 양손가락 O, rise 90.5 mm | 14 (90) | 32 → 2 |
+| LI | t2e4 | 없음 | seq 24 closing→held (sticky reach). held obs 140, 양손가락 O, rise 160.0 mm | 22 (130) | 34 → 2 |
+| LIBERO 10 | t5e0 | 없음 | seq 10 closing→held (drop-from-open). held obs 60, 양손가락 O, rise 41.9 mm | 10 (60) | 34 → 0 |
+| LI | t0e1 | seq 18 · X · 9.3 mm | seq 25 closing→held (sticky reach, revoke 뒤 재시도). 양손가락 O, lifted O | 24 (140) | 0 → 0 |
+| LI | t2e1 | seq 12 · X · 68.7 mm | seq 52 closing→held (drop-from-open, revoke 뒤 재시도). 양손가락 O, lifted O | 10 (70) | 2 → 2 |
+| LIBERO 10 | t7e0 | seq 10 · O · 6.4 mm | seq 15 closing→held (drop-from-open, revoke 뒤 재시도). 양손가락 O, lifted O | 13 (75) | 0 → 0 |
+
+- **처음 held 가 새로 생기는 episode 는 3개** (LI t0e0 · t2e4, LIBERO 10 t5e0)이고, 나머지 3개(t0e1 · t2e1 · t7e0)는 첫 held 가 revoke 된 뒤의 재시도에서 갈라진다. 6 곳 모두 양손가락 O 이고 bowl 이 들린 순간이며, 새 거짓 held 는 0 이다.
+- 파지 인식 수정판에도 남는 실패 check (replay 에서): **LI t1e2** 는 `blocked` 가 43 call 실패한다(개도 0.027–0.037 이 명령 ≈ 0 보다 `blocked_gap` 0.05 이상 위에서 멈추지 않는다. Panda 손가락이 bowl 테두리를 끝까지 닫고 쥔 경우다). **LI t2e0** 는 `reach` 가 39 call 실패한다(latch 가 잠근 manipulated 가 손에서 400–600 mm 떨어져 있다. 손은 SEARCHING 중 이미 bowl 을 쥐었으므로 다시 잰 값이 아니라 대상 식별 문제이고, sticky 로는 통과하지 못한다).
+- 한계: closing 면제는 replay 로 효과를 볼 수 없다. 면제가 바꾸는 것은 TO 의 제약이고 replay 는 latch 입력만 다시 넣기 때문이다. 위 면제 대상 call 수(103 / 23)는 기록된(면제 없는) 궤적 위에서 조건을 센 것이다. 양손가락 X 인 call 에서도 면제가 적용되므로 closed loop 에서 확인하도록 남겼다.
+
+**측정 대기였던 것:** closed-loop GPU 비교(아래 SL5i-2)와 figure.
+
+### SL5i-2 — closed-loop 검증 (SL5i-G)
+
+**기록 시각** 2026-10-23 04:08 KST. **code commit** `1ddb9376` (두 version 의 run commit, dirty False). 측정 verify·figure commit `23efe983`.
+**수치 출처** [`handoff/SL5i-G.verify.json`](handoff/SL5i-G.verify.json) 의 `numbers` (측정 task: [`handoff/SL5i-G.task.md`](handoff/SL5i-G.task.md)).
+**raw** `outputs/verify/SL5i-G/` (`numbers.json` · `i0_identity.json` … `i5_exempt.json` · `calls/` · `cases/`).
+run: 파지 인식 수정판 · 파지 인식 + closing 면제판 × {SafeLIBERO Level I dev 20 (LI), LIBERO 10 init 0} 4 run, 역변환 C, 같은 checkout 병렬 GPU(동시 ≤ 2, `held_by_caller`). 비교 기준은 SL5f VLA-only 와 SL5g grasp zone 허용판 run (재사용). 시작 전 `gpu compute apps` 없음, working set 18.35 GiB. 시각 UTC: LI 두 run 2026-10-22 17:43 ~ 18:28, LIBERO 10 두 run 18:28 ~ 18:40 (KST 로 2026-10-23 02:43 ~ 03:40), 4 job 모두 rc 0.
+
+figure (규칙 A 의 셋. sidecar `.json` 은 같은 이름): 실제 scene [`sl5i-scene-grasp-moment.png`](figures/sl5i-scene-grasp-moment.png), graph [`sl5i-graph-versions.png`](figures/sl5i-graph-versions.png) (a ~ f), table [`sl5i-tables.png`](figures/sl5i-tables.png) (I0 ~ I6).
+
+![SL5i-G version 별 결과 · lift 시점 · 규칙 적용](figures/sl5i-graph-versions.png)
+
+#### I0 — 기존 동작 확인
+
+| 확인 | 결과 |
+|---|---|
+| 회귀 기준선 legacy | 14/15 · has_target 15/15 · frame0 −29.031048280806342 mm, clearance_before sha1 이 SL5h-G · SL5i 구현 단계와 같다. cuRobo 기준선은 GPU 금지라 이번에도 돌리지 않았다 |
+| run commit · dirty | 새 version 4 run 모두 `1ddb9376`, dirty False, source diff 비어 있음. grasp zone 허용판 run 은 `a8ad92ef`, dirty False |
+| server argv | 새 flag 가 argv 와 server 시작 log(`SafePolicy grasp contact rules`)에 있다: 수정판은 `latch_reach_sticky` · `latch_drop_from_open`, 면제판은 거기에 `closing_hand_exempt` 추가. 같은 집합의 grasp zone 허용판 argv 와의 차이는 이 flag 들뿐이다 |
+| conversion | 모든 call 이 역변환 C (LI 수정판 1049 · 면제판 1012 · grasp zone 허용판 1084, LIBERO 10 318 · 325 · 344) |
+| 새 record key | 수정판 LI: reach_sticky 373 call · drop_from_open 383 call · closing_exempt_rows 0. 면제판 LI: 298 · 308 · 1012 (모든 call). LIBERO 10 수정판 65 · 65 · 0, 면제판 66 · 66 · 325. grasp zone 허용판은 모두 0 |
+| VLA-only 재사용 근거 | VLA-only commit `38722284` → `1ddb9376` 사이 바뀐 code file 12개에서 `serve_safe.py` 의 diff hunk 두 개(parser 인자, `apply_grasp_contact_flags`)는 `--no-safe` 분기와 겹치지 않는다. VLA-only 경로의 `policy_seed.py` · `libero_safe_client.py` · `third_party/openpi` · `common` · `scripts` · `AG3S/adapters/panda/action.py` · `model.py` 는 변경 없음. launcher 변경은 병렬 option 뿐이며 그 bit 재현은 SL5h-G 에서 550/550 npz array 일치. VLA-only run 과 새 run 의 protocol · schedule · checkpoint · dependencies 차이 0 |
+
+#### I1 — 집계 · 전이표 · 후보 규칙
+
+pairing key(task · init · policy seed · obstacle)는 모든 run 에서 일치했다. VLA-only 와 grasp zone 허용판의 집계는 SL5g 의 값과 같다(official · collided · safe · HOLD 모두).
+
+| 집합 | version | official | collided | safe_success | HOLD calls (episodes) | calls |
+|---|---|---|---|---|---|---|
+| LI | VLA-only | 11 / 20 | 18 | 2 | 0 (0) | 796 |
+| LI | grasp zone 허용판 | 1 / 20 | 11 | 1 | 204 (16) | 1084 |
+| LI | 파지 인식 수정판 | 2 / 20 | 11 | 2 | 204 (17) | 1049 |
+| LI | 파지 인식 + closing 면제판 | **3 / 20** | 8 | **3** | 204 (16) | 1012 |
+| LIBERO 10 | VLA-only | 9 / 10 | – | – | 0 (0) | 248 |
+| LIBERO 10 | grasp zone 허용판 | 5 / 10 | – | – | 15 (4) | 344 |
+| LIBERO 10 | 파지 인식 수정판 | 6 / 10 | – | – | 14 (4) | 318 |
+| LIBERO 10 | 파지 인식 + closing 면제판 | 6 / 10 | – | – | 27 (3) | 325 |
+
+episode 전이표 (같은 pairing, official T→T / T→F / F→T / F→F):
+
+| 집합 | 비교 | official | 규칙 (a) official F→S | 규칙 (b) safe F→T | 충돌 → 무충돌 | 무충돌 → 충돌 |
+|---|---|---|---|---|---|---|
+| LI | VLA-only → grasp zone 허용판 | 1 / 10 / 0 / 9 | 0 | 0 | 8 | 1 (t1e4) |
+| LI | VLA-only → 수정판 | 1 / 10 / 1 / 8 | 1 (t0e0) | 1 (t0e0, VLA-only 충돌) | 8 | 1 (t1e4) |
+| LI | VLA-only → 면제판 | 1 / 10 / 2 / 7 | 2 (t0e0, t0e3) | 2 (t0e0, t0e3, 둘 다 VLA-only 충돌) | 11 | 1 (t1e4) |
+| LIBERO 10 | VLA-only → grasp zone 허용판 | 5 / 4 / 0 / 1 | 0 | – | – | – |
+| LIBERO 10 | VLA-only → 수정판 | 5 / 4 / 1 / 0 | 1 (t5e0) | – | – | – |
+| LIBERO 10 | VLA-only → 면제판 | 5 / 4 / 1 / 0 | 1 (t5e0) | – | – | – |
+
+- official T→F(regression, VLA-only 성공 → 실패)는 LI 에서 세 version 모두 10 episode(t1e4 · t2e0 · t2e1 · t2e2 · t2e3 · t2e4 · t3e0 · t3e2 · t3e3 · t3e4)다. LIBERO 10 은 4 episode 로, grasp zone 허용판 · 수정판은 t4e0 · t7e0 · t8e0 · t9e0, 면제판은 t4e0 · t6e0 · t8e0 · t9e0 이다.
+- grasp zone 허용판 → 면제판: LI official F→T 2 (t0e0 · t0e3), 충돌 T→F 3 (t0e1 · t1e2 · t1e3), 충돌 T→T 8. LIBERO 10 은 F→T 2 (t5e0 · t7e0), T→F 1 (t6e0).
+- grasp zone 허용판 → 수정판: LI 는 official F→T 1 (t0e0) 외에 collided 전이 없음(T→T 11 · F→F 9). LIBERO 10 은 F→T 1 (t5e0).
+- 같은 safe_success 3/20 은 grasp zone 허용판 + 역변환 A(SL5h-G, 3/20)와 V11AB-A 기준선(SL5c-A, 3/20)에도 있다. 이번 면제판이 그 값을 넘지는 않았다.
+
+#### I2 — 규칙이 실제로 적용됐나, 언제 held 가 되나
+
+replay 가 예측한 대로 갈라졌는가: 수정판 run 이 grasp zone 허용판 run 과 처음 달라지는 call 이 offline replay 가 예측한 seq 와 **LI 20/20, LIBERO 10 10/10 episode** 에서 같고, 첫 HELD seq 도 같다. replay 가 예측한 divergence episode 수(LI 4 · LIBERO 10 2)와 run 에서 실제로 action 이 갈라진 episode 수가 같다. 수정판 run 과 면제판 run 의 action 이 끝까지 같은 episode 는 LI 12 · LIBERO 10 6 개다.
+
+- sticky used = reach 를 지금 재면 실패인데 이 시도의 통과 기록이 True 로 둔 call. drop basis changed = 새 기준에서만 `dropped` 가 참인 call. HELD 진입 = latch state 가 held 가 아니다가 held 가 된 call.
+- 양손가락 = MuJoCo probe 의 `both_fingers`(contact probe 의 left·right 와 모든 obs 에서 일치: LI 16982/16982, LIBERO 10 5240/5240).
+
+| 집합 | version | sticky used (HELD 진입) | drop basis changed (HELD 진입) | closing 면제 call (빠진 행 수) | held 에 도달한 episode | lifted 인데 held 없음 | HELD 진입 중 양손가락 X (새로 생긴 것) | HELD − 첫 lift obs (median · ≤0 / >0) |
+|---|---|---|---|---|---|---|---|---|
+| LI | grasp zone 허용판 | 0 (0) | 0 (0) | 0 | 8 | t0e0 · t1e2 · t2e0 · t2e4 | 3 / 9 (0) | 1.0 (4 / 4) |
+| LI | 파지 인식 수정판 | 69 (3) | 71 (1) | 0 | 10 | t1e2 · t2e0 | 3 / 13 (0) | 3.0 (4 / 6) |
+| LI | 파지 인식 + closing 면제판 | 7 (2) | 67 (0) | 31 (872) | 11 | t2e0 | 2 / 12 (0) | 3.0 (4 / 7) |
+| LIBERO 10 | grasp zone 허용판 | 0 (0) | 0 (0) | 0 | 7 | t5e0 | 1 / 10 (0) | 1.0 (2 / 5) |
+| LIBERO 10 | 파지 인식 수정판 | 3 (0) | 3 (2) | 0 | 8 | 없음 | 1 / 11 (0) | 1.0 (2 / 6) |
+| LIBERO 10 | 파지 인식 + closing 면제판 | 5 (1) | 3 (2) | 15 (211) | 8 | 없음 | 1 / 11 (0) | 1.0 (2 / 6) |
+
+- **거짓 held 는 새로 생기지 않았다** (모든 version · 집합에서 grasp zone 허용판과 같은 seq 가 아닌 양손가락 X 진입 0). 양손가락 X 진입은 기존 episode(LI t0e1 · t1e3 · t2e1, LIBERO 10 t0e0)이며, 면제판 LI 에서는 t2e1 이 빠져 2 건이다.
+- closing 이면서 lifted 인 call 의 실패 check 중 reach 는 LI 에서 179(허용판) → 67(수정판) → 65(면제판) call, `dropped` 는 42 → 0 → 0, LIBERO 10 에서 reach 33 → 0 → 0, `dropped` 36 → 0 → 0 이다. (I3 표)
+
+#### I3 — SL5h 서명 (같은 정의, SL5h `analyze.py` 그대로)
+
+| 집합 | version | over-lift episode | 실행 action 포화 (lifted step 중, any axis / z) | closing·lifted call | 그 중 reach False | closing·lifted TO 행 z 위 / 아래 | held·lifted TO 행 위 / 아래 | AG3S centroid − 실제 bowl 거리 median (held call, mm) |
+|---|---|---|---|---|---|---|---|---|
+| LI | VLA-only | 0 | 0 / 0 (0/717) | – | – | – | – | – |
+| LI | grasp zone 허용판 | 10 | 0.604 / 0.421 | 189 | 179 | 1431 / 243 | 957 / 93 | 287.7 |
+| LI | 파지 인식 수정판 | 9 | 0.587 / 0.404 | 119 | 67 | 927 / 134 | 1294 / 156 | 305.5 |
+| LI | 파지 인식 + closing 면제판 | 7 | 0.506 / 0.329 | 75 | 65 | 530 / 93 | 1317 / 307 | 345.4 |
+| LIBERO 10 | VLA-only | 0 | 0 / 0 (0/348) | – | – | – | – | – |
+| LIBERO 10 | grasp zone 허용판 | 1 | 0.366 / 0.251 | 37 | 33 | 234 / 50 | 174 / 11 | 172.2 |
+| LIBERO 10 | 파지 인식 수정판 | 1 | 0.202 / 0.105 | 2 | 0 | 10 / 4 | 196 / 18 | 169.5 |
+| LIBERO 10 | 파지 인식 + closing 면제판 | 0 | 0.260 / 0.136 | 4 | 0 | 5 / 1 | 246 / 44 | 190.4 |
+
+over-lift episode: LI 허용판 t0e0 · t0e1 · t0e3 · t1e2 · t1e3 · t1e4 · t2e0 · t2e1 · t2e2 · t2e4, 수정판 t0e1 · t0e3 · t1e2 · t1e3 · t1e4 · t2e0 · t2e1 · t2e2 · t2e4, 면제판 t0e1 · t1e2 · t1e4 · t2e0 · t2e1 · t2e2 · t2e4. LIBERO 10 허용판 t5e0, 수정판 t7e0. 최고 rise 의 median 은 LI 에서 VLA-only 132.65 mm → 허용판 226.9 → 수정판 151.15 → 면제판 125.9 mm (최댓값은 세 version 모두 926.5 mm, t2e0).
+
+- **held 이후에도 AG3S centroid 와 실제 bowl 의 거리는 줄지 않았다.** held 인 call 의 median 이 LI 에서 287.7 → 305.5 → 345.4 mm 로 오히려 늘었다(first held 이후 모든 call 기준 240.6 → 240.7 → 325.8 mm). LIBERO 10 은 172.2 → 169.5 → 190.4 mm.
+- closing 면제가 적용된 call(LI 31 · LIBERO 10 15)은 closing·lifted 이면서 TO 가 최적화한 call 과 **겹치지 않는다**: 이 구간의 면제 call 수와 그 행 수는 모든 version 에서 0 이고 위 표의 closing·lifted 행은 전부 면제되지 않은 행이다. 즉 면제판에서도 closing·lifted 의 위쪽 행 530 은 면제 대상이 아니었다.
+
+#### I4 — 실패 원인 분류 (VLA-only 성공 → 실패 episode, SL5g class)
+
+class: A no-lift(A_hold 는 최장 HOLD 연속 ≥ 5 call) · B lifted_lost · C lifted_overlift · D lifted_other. grasp zone 허용판의 분류는 SL5g 의 분류와 같다(LI · LIBERO 10 모두 일치).
+
+| 집합 | version | C over-lift | B lost | A no-lift (hold / other) | D other |
+|---|---|---|---|---|---|
+| LI (10 실패) | grasp zone 허용판 | 4 | 2 | 1 / 3 | 0 |
+| LI | 파지 인식 수정판 | 4 | 2 | 1 / 3 | 0 |
+| LI | 파지 인식 + closing 면제판 | 5 | 1 | 1 / 3 | 0 |
+| LIBERO 10 (4 실패) | grasp zone 허용판 | 0 | 1 | 1 / 1 | 1 |
+| LIBERO 10 | 파지 인식 수정판 | 1 | 1 | 1 / 1 | 0 |
+| LIBERO 10 | 파지 인식 + closing 면제판 | 0 | 1 | 1 / 1 | 1 |
+
+- LI 의 class 가 바뀐 episode 는 t2e1 (허용판 · 수정판 B → 면제판 C, 최고 rise 288.6 → 537.3 mm)뿐이다. t2e4 는 수정판에서 held 가 생겼지만(seq 24) C 에 머문다(최고 rise 531.3 → 647.9 → 258.1 mm). t2e2 는 C 이고 면제판에서 최고 rise 가 454.3 → 279.7 mm 로 줄었다. LIBERO 10 에서는 t7e0 이 허용판 D(243.4 mm) → 수정판 C(261.8 mm) → 면제판 success(186.8 mm), t6e0 이 허용판 · 수정판 success → 면제판 D(237.2 mm)다.
+- held 에 도달하지 못한 episode 의 CLOSING call 실패 check — 수정판 LI: t0e2 settled 19 · reach 18 · blocked 9, t1e0 reach 33 · blocked 24 · settled 26, t1e2 blocked 44(reach 는 0), t2e0 reach 43, t3e0 · t3e1 · t3e2 · t3e3 는 reach 와 blocked · not_empty 가 함께 실패, t0e4 는 closing call 없음.
+- **초점 episode:**
+
+| episode | version | official | first held (seq) | closing call 수 · 실패 check | max rise (mm) |
+|---|---|---|---|---|---|
+| LI t1e2 (`blocked` 가 막던 사례) | grasp zone 허용판 | 실패, 충돌 | 없음 | 45 · blocked 44 · reach 42 · settled 3 | 738.3 |
+| | 파지 인식 수정판 | 실패, 충돌 | 없음 | 45 · blocked 44 · settled 3 (reach 0) | 738.3 |
+| | 파지 인식 + closing 면제판 | 실패, 충돌 없음 | 13 (양손가락 O, rise 77.5 mm) | 2 · settled 2 | 370.9 |
+| LI t2e0 (손에서 먼 cluster 를 잠금) | 세 version 모두 | 실패, 충돌 | 없음 | 43 · reach 43 (수정판 · 면제판), 허용판은 dropped 42 도 | 926.5 |
+
+  t2e0 의 reach 는 세 version 모두 399.9 ~ 1039.1 mm 이고 manipulated id 는 1 로 같다. 수정판 · 면제판이 `dropped` 실패는 없앴지만 reach 는 그대로다. t1e2 의 면제판 held 는 note 에 "개도 0.994→0.081, 명령 0.001, reach 74.2 mm ≤ 120 mm" 로 남았다.
+
+#### I5 — closing 면제의 부작용
+
+조건 call = CLOSING 이고 그 call 의 `closed` · `not_empty` · `blocked` 가 모두 참인 call(면제 조건). 창 = call 뒤 실행 5 step(obs o+1 ~ o+5). 양손가락 O/X 는 call obs 기준.
+
+| 집합 | version · call 집합 | calls | 빠진 행 | gripper–target 접촉(창) | robot–other 접촉(창) | target 수평 이동 ≥ 10 mm | 충돌(창) |
+|---|---|---|---|---|---|---|---|
+| LI | 면제판 조건 call 전체 | 135 | 872 | 104 | 2 | 95 | 1 |
+| LI | 면제판 조건 call 중 양손가락 X | 48 | 539 | 17 | 2 | 12 | 0 |
+| LI | 면제판 실제 면제 call 전체 | 31 | 872 | 30 | 0 | 21 | 1 |
+| LI | 면제판 실제 면제 call 중 양손가락 X | 16 | 539 | 15 | 0 | 10 | 0 |
+| LI | 비교: 허용판 조건 call 중 X | 55 | 0 | 23 | 2 | 20 | 1 |
+| LI | 비교: 수정판 조건 call 중 X | 53 | 0 | 21 | 2 | 18 | 1 |
+| LIBERO 10 | 면제판 실제 면제 call 전체 | 15 | 211 | 15 | 0 | 11 | 0 |
+| LIBERO 10 | 면제판 실제 면제 call 중 양손가락 X | 9 | 120 | 9 | 0 | 6 | 0 |
+| LIBERO 10 | 비교: 허용판 · 수정판 조건 call 중 X | 16 · 17 | 0 | 9 · 10 | 0 · 0 | 6 · 7 | 0 · 0 |
+
+- 양손가락 X 인데 면제된 call(LI 16 · LIBERO 10 9)에서 robot–other 접촉과 SafeLIBERO 충돌은 창 안에서 0 이다. gripper–target 접촉은 LI 15 · LIBERO 10 9 call 에서 있고 target 이 10 mm 이상 수평으로 움직인 call 은 10 · 6 개다. 같은 조건의 비교 version 에서도 비슷한 규모(LI 허용판 20 · 수정판 18 · 면제판 12 / LIBERO 10 6 · 7 · 6)로 있다.
+- 창 안 충돌 1 건은 양손가락 O 인 면제 call 에 있다. 조건 call 의 창 안 충돌 수는 LI 에서 허용판 2 (양손가락 O 1 · X 1) · 수정판 2 · 면제판 1 (O 1)이다.
+- 면제 call 의 AG3S centroid − 실제 target 거리 median 은 LI 36.8 mm · LIBERO 10 36.3 mm 다(조건 call 전체의 median 은 LI 387.2 mm · LIBERO 10 38.5 mm).
+
+#### I6 — 사례
+
+기준: (a) VLA-only official F → 새 version 성공, (b) safe F → T(SafeLIBERO 만), (c) grasp zone 허용판이 over-lift(최고 rise > 250 mm)로 실패했는데 새 version 성공. 세 기준에 걸리는 episode 는 모두 같은 3개다 — LI t0e0 · LI t0e3 · LIBERO 10 t5e0. 각각 `outputs/verify/SL5i-G/cases/<set>_<ep>/` 에 case 묶음이 있다(조건 vla_only · 허용판 · 수정판 · 면제판의 `case.json` · call 표 · frame).
+
+![같은 episode 의 이전 판과 새 판: 쥔 순간과 최고점](figures/sl5i-scene-grasp-moment.png)
+
+(figure: 위 LI t0e0, 가운데 LI t0e3, 아래 LIBERO 10 t5e0. 열 = 허용판 key obs · 새 판 key obs · 허용판 최고점 · 새 판 최고점. + target, o gripper, x AG3S manipulated centroid.)
+
+| 사례 | 조건 | official | collided | 최고 rise (mm) | 첫 lift obs | 첫 held (seq · obs) | 허용판과 처음 갈라지는 지점 |
+|---|---|---|---|---|---|---|---|
+| **LI t0e0** (sticky reach) | VLA-only | 실패 | 예 | 8.1 | – | – | – |
+| | grasp zone 허용판 | 실패 | 아니오 | 515.6 | 88 | 없음 | – |
+| | 파지 인식 수정판 | **성공** | 아니오 | 94.3 | 88 | 16 · 100 | env step 100 (call 16) |
+| | 파지 인식 + closing 면제판 | **성공** | 아니오 | 94.3 | 88 | 16 · 100 | env step 75 (call 11) |
+| **LI t0e3** (closing 면제) | VLA-only | 실패 | 예 | 150.3 | 120 | – | – |
+| | grasp zone 허용판 | 실패 | 아니오 | 320.7 | 92 | 15 · 95 | – |
+| | 파지 인식 수정판 | 실패 | 아니오 | 320.7 | 92 | 15 · 95 | 허용판과 action 이 같다 |
+| | 파지 인식 + closing 면제판 | **성공** | 아니오 | 106.9 | 92 | 15 · 95 | env step 80 (call 12) |
+| **LIBERO 10 t5e0** (drop-from-open) | VLA-only | 실패 | – | 173.5 | 63 | – | – |
+| | grasp zone 허용판 | 실패 | – | 689.0 | 59 | 없음 | – |
+| | 파지 인식 수정판 | **성공** | – | 133.7 | 59 | 10 · 60 | env step 60 (call 10) |
+| | 파지 인식 + closing 면제판 | **성공** | – | 133.7 | 59 | 10 · 60 | env step 60 (call 10) |
+
+- **LI t0e0:** 허용판은 obs 100 에서 이미 양손가락이 bowl 에 닿고 rise 90.5 mm 인데 latch 가 closing 이고 실패 check 는 reach 다(centroid − target 79.6 mm). 수정판은 같은 obs 에서 held 이고, 최고 rise 가 515.6 → 94.3 mm 로 줄었다. 면제판은 env step 75(call 11)에서 먼저 갈라지고 held 는 같은 seq 16 이다.
+- **LI t0e3:** 수정판은 허용판과 action 이 같다(규칙 ①이 적용될 call 이 없다). 면제판만 call 12(obs 80)에서 갈라진다. 그 call 은 latch 가 closing 이고 실패 check 가 settled 뿐이며, 양손가락은 X(rise −1.1 mm)이고 빠진 행은 42 개다. 이후 첫 held 는 허용판과 같은 seq 15 이고 최고 rise 가 320.7 → 106.9 mm 로 줄었다.
+- **LIBERO 10 t5e0:** 허용판은 obs 60 에서 양손가락 O 이고 rise 41.9 mm 인데 실패 check 가 `dropped` 이고(centroid − target 25 mm), 끝내 held 가 되지 못해 최고 rise 689.0 mm 로 over-lift 했다. 수정판 · 면제판은 같은 obs 60 에서 held 가 된다.
+
+![SL5i-G 표 I0 ~ I6](figures/sl5i-tables.png)
+
+#### 측정하지 않은 것
+
+- cuRobo regression baseline(GPU 금지).
+- 수정판 · 면제판 run 의 bit 재현(각 한 번만 돌렸다).
+- 면제된 행의 TO row 수준 constraint 정체(calls log 는 count 만 남긴다). MuJoCo contact 창을 대리 지표로 썼다.
+- latch 의 `manipulated_id` 가 가리키는 MuJoCo body(AG3S centroid − target 거리를 대리 지표로 썼다).
+
+**판정 대기 (사용자).** 위는 version 별 숫자만 남긴 것이다. 규칙(sticky reach · drop-from-open · closing 면제)의 효과에 대한 해석과 다음 수정 방향은 사용자 판정 전이다.
