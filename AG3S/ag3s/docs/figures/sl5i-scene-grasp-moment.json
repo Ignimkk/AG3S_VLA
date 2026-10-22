@@ -1,0 +1,422 @@
+{
+ "doc": "SL5i-G figure 1 — real scene: same episode, grasp zone 허용판 (pb5) vs the new version, at the grasp moment and at max rise.\n\nRows (I6 cases): LI t0e0 (pb5 vs 파지 인식 수정판 pb6; key obs = pb6 first HELD obs),\n                 LI t0e3 (pb5 vs 파지 인식 + closing 면제판 pb7; key obs = first pb7 call with closing_exempt_rows > 0 = action divergence),\n                 LIBERO10 t5e0 (pb5 vs pb6; key obs = pb6 first HELD obs).\nColumns: pb5 @ key obs | new @ key obs | pb5 @ its max-rise obs | new @ its max-rise obs.\nFrame = agentview raw[::-1]. Overlays: + target (MuJoCo body), o gripper0_eef, x AG3S manipulated centroid\n(grasp.tip_alignment.centroid_m of the last call at or before that obs, base + T_world_base translation), projected with the\nrecorded K / T_world_cam of 'head' at the nearest geometry frame.\nText: latch of the last call at or before that obs, both-finger contact, target rise, centroid - target distance.\n",
+ "panels": [
+  {
+   "set": "LI",
+   "ep": "t0e0",
+   "version": "pb5",
+   "which": "key",
+   "obs": 100,
+   "call": 16,
+   "latch": "closing",
+   "failed_checks": [
+    "reach"
+   ],
+   "both_fingers": true,
+   "rise_mm": 90.5,
+   "centroid_target_mm": 79.61911453916075,
+   "closing_exempt_rows": null,
+   "official": false,
+   "collided": false,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T133339_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C",
+   "target_world": [
+    0.02971,
+    0.21595,
+    0.98886
+   ],
+   "eef_world": [
+    0.03225,
+    0.25809,
+    1.0244
+   ],
+   "centroid_world": [
+    -0.015160000000000062,
+    0.20303,
+    0.92437
+   ],
+   "max_rise_mm": 515.6
+  },
+  {
+   "set": "LI",
+   "ep": "t0e0",
+   "version": "pb6",
+   "which": "key",
+   "obs": 100,
+   "call": 16,
+   "latch": "held",
+   "failed_checks": [],
+   "both_fingers": true,
+   "rise_mm": 90.5,
+   "centroid_target_mm": 79.61911453916075,
+   "closing_exempt_rows": null,
+   "official": true,
+   "collided": false,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261023T024310_1ddb93768ac1_sl5i-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb6-C",
+   "target_world": [
+    0.02971,
+    0.21595,
+    0.98886
+   ],
+   "eef_world": [
+    0.03225,
+    0.25809,
+    1.0244
+   ],
+   "centroid_world": [
+    -0.015160000000000062,
+    0.20303,
+    0.92437
+   ],
+   "max_rise_mm": 94.3
+  },
+  {
+   "set": "LI",
+   "ep": "t0e0",
+   "version": "pb5",
+   "which": "max",
+   "obs": 178,
+   "call": 31,
+   "latch": "closing",
+   "failed_checks": [
+    "reach"
+   ],
+   "both_fingers": true,
+   "rise_mm": 515.6,
+   "centroid_target_mm": 534.1129051052782,
+   "closing_exempt_rows": null,
+   "official": false,
+   "collided": false,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T133339_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C",
+   "target_world": [
+    0.19669,
+    0.22926,
+    1.41397
+   ],
+   "eef_world": [
+    0.16896,
+    0.252,
+    1.46042
+   ],
+   "centroid_world": [
+    -0.015160000000000062,
+    0.20303,
+    0.92437
+   ],
+   "max_rise_mm": 515.6
+  },
+  {
+   "set": "LI",
+   "ep": "t0e0",
+   "version": "pb6",
+   "which": "max",
+   "obs": 98,
+   "call": 15,
+   "latch": "closing",
+   "failed_checks": [
+    "settled"
+   ],
+   "both_fingers": true,
+   "rise_mm": 94.3,
+   "centroid_target_mm": 73.58318489981258,
+   "closing_exempt_rows": null,
+   "official": true,
+   "collided": false,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261023T024310_1ddb93768ac1_sl5i-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb6-C",
+   "target_world": [
+    0.00433,
+    0.22208,
+    0.99272
+   ],
+   "eef_world": [
+    0.0069,
+    0.26485,
+    1.02756
+   ],
+   "centroid_world": [
+    -0.015160000000000062,
+    0.20303,
+    0.92437
+   ],
+   "max_rise_mm": 94.3
+  },
+  {
+   "set": "LI",
+   "ep": "t0e3",
+   "version": "pb5",
+   "which": "key",
+   "obs": 80,
+   "call": 12,
+   "latch": "closing",
+   "failed_checks": [
+    "settled"
+   ],
+   "both_fingers": false,
+   "rise_mm": -1.1,
+   "centroid_target_mm": 41.6369415303286,
+   "closing_exempt_rows": null,
+   "official": false,
+   "collided": false,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T133339_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C",
+   "target_world": [
+    -0.0477,
+    0.20148,
+    0.89754
+   ],
+   "eef_world": [
+    -0.03939,
+    0.23396,
+    0.92666
+   ],
+   "centroid_world": [
+    -0.04842000000000002,
+    0.2049,
+    0.93903
+   ],
+   "max_rise_mm": 320.7
+  },
+  {
+   "set": "LI",
+   "ep": "t0e3",
+   "version": "pb7",
+   "which": "key",
+   "obs": 80,
+   "call": 12,
+   "latch": "closing",
+   "failed_checks": [
+    "settled"
+   ],
+   "both_fingers": false,
+   "rise_mm": -1.1,
+   "centroid_target_mm": 41.6369415303286,
+   "closing_exempt_rows": 42,
+   "official": true,
+   "collided": false,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261023T024340_1ddb93768ac1_sl5i-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb7-C",
+   "target_world": [
+    -0.0477,
+    0.20148,
+    0.89754
+   ],
+   "eef_world": [
+    -0.03939,
+    0.23396,
+    0.92666
+   ],
+   "centroid_world": [
+    -0.04842000000000002,
+    0.2049,
+    0.93903
+   ],
+   "max_rise_mm": 106.9
+  },
+  {
+   "set": "LI",
+   "ep": "t0e3",
+   "version": "pb5",
+   "which": "max",
+   "obs": 219,
+   "call": 39,
+   "latch": "held",
+   "failed_checks": [],
+   "both_fingers": true,
+   "rise_mm": 320.7,
+   "centroid_target_mm": 412.58089461340796,
+   "closing_exempt_rows": null,
+   "official": false,
+   "collided": false,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T133339_a8ad92ef3356_sl5g-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb5-C",
+   "target_world": [
+    0.24734,
+    0.26969,
+    1.2193
+   ],
+   "eef_world": [
+    0.21952,
+    0.25507,
+    1.27974
+   ],
+   "centroid_world": [
+    -0.04842000000000002,
+    0.2049,
+    0.93903
+   ],
+   "max_rise_mm": 320.7
+  },
+  {
+   "set": "LI",
+   "ep": "t0e3",
+   "version": "pb7",
+   "which": "max",
+   "obs": 102,
+   "call": 16,
+   "latch": "held",
+   "failed_checks": [],
+   "both_fingers": true,
+   "rise_mm": 106.9,
+   "centroid_target_mm": 112.50861033716481,
+   "closing_exempt_rows": 0,
+   "official": true,
+   "collided": false,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261023T024340_1ddb93768ac1_sl5i-safelibero-LI-dev-LI-vla_v11ab-V11AB-pb7-C",
+   "target_world": [
+    0.0409,
+    0.22075,
+    1.00558
+   ],
+   "eef_world": [
+    0.04151,
+    0.25634,
+    1.0546
+   ],
+   "centroid_world": [
+    -0.04842000000000002,
+    0.2049,
+    0.93903
+   ],
+   "max_rise_mm": 106.9
+  },
+  {
+   "set": "LIBERO10",
+   "ep": "t5e0",
+   "version": "pb5",
+   "which": "key",
+   "obs": 60,
+   "call": 10,
+   "latch": "closing",
+   "failed_checks": [
+    "dropped"
+   ],
+   "both_fingers": true,
+   "rise_mm": 41.9,
+   "centroid_target_mm": 25.129930362020453,
+   "closing_exempt_rows": null,
+   "official": false,
+   "collided": null,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T150153_a8ad92ef3356_sl5g-libero10-init0-vla_v11ab-V11AB-pb5-C",
+   "target_world": [
+    -0.18928,
+    0.19773,
+    0.9763
+   ],
+   "eef_world": [
+    -0.19429,
+    0.15926,
+    1.0335
+   ],
+   "centroid_world": [
+    -0.18639000000000006,
+    0.2004,
+    0.95148
+   ],
+   "max_rise_mm": 689.0
+  },
+  {
+   "set": "LIBERO10",
+   "ep": "t5e0",
+   "version": "pb6",
+   "which": "key",
+   "obs": 60,
+   "call": 10,
+   "latch": "held",
+   "failed_checks": [],
+   "both_fingers": true,
+   "rise_mm": 41.9,
+   "centroid_target_mm": 25.129930362020453,
+   "closing_exempt_rows": null,
+   "official": true,
+   "collided": null,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261023T032803_1ddb93768ac1_sl5i-libero10-init0-vla_v11ab-V11AB-pb6-C",
+   "target_world": [
+    -0.18928,
+    0.19773,
+    0.9763
+   ],
+   "eef_world": [
+    -0.19429,
+    0.15926,
+    1.0335
+   ],
+   "centroid_world": [
+    -0.18639000000000006,
+    0.2004,
+    0.95148
+   ],
+   "max_rise_mm": 133.7
+  },
+  {
+   "set": "LIBERO10",
+   "ep": "t5e0",
+   "version": "pb5",
+   "which": "max",
+   "obs": 207,
+   "call": 39,
+   "latch": "closing",
+   "failed_checks": [
+    "dropped",
+    "reach"
+   ],
+   "both_fingers": true,
+   "rise_mm": 689.0,
+   "centroid_target_mm": 785.412340684815,
+   "closing_exempt_rows": null,
+   "official": false,
+   "collided": null,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261018T150153_a8ad92ef3356_sl5g-libero10-init0-vla_v11ab-V11AB-pb5-C",
+   "target_world": [
+    0.21497,
+    0.26643,
+    1.62336
+   ],
+   "eef_world": [
+    0.15814,
+    0.22767,
+    1.60898
+   ],
+   "centroid_world": [
+    -0.18639000000000006,
+    0.2004,
+    0.95148
+   ],
+   "max_rise_mm": 689.0
+  },
+  {
+   "set": "LIBERO10",
+   "ep": "t5e0",
+   "version": "pb6",
+   "which": "max",
+   "obs": 79,
+   "call": 13,
+   "latch": "held",
+   "failed_checks": [],
+   "both_fingers": true,
+   "rise_mm": 133.7,
+   "centroid_target_mm": 194.02573282943686,
+   "closing_exempt_rows": null,
+   "official": true,
+   "collided": null,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261023T032803_1ddb93768ac1_sl5i-libero10-init0-vla_v11ab-V11AB-pb6-C",
+   "target_world": [
+    -0.03134,
+    0.19963,
+    1.06812
+   ],
+   "eef_world": [
+    -0.04532,
+    0.16255,
+    1.12478
+   ],
+   "centroid_world": [
+    -0.18639000000000006,
+    0.2004,
+    0.95148
+   ],
+   "max_rise_mm": 133.7
+  }
+ ],
+ "source": [
+  "outputs/verify/SL5i-G/probe/mj_<set>_<v>.json",
+  "outputs/verify/SL5i-G/i2_latch.json",
+  "outputs/verify/SL5i-G/i1_aggregate.json",
+  "run calls logs (grasp.tip_alignment.centroid_m)"
+ ]
+}

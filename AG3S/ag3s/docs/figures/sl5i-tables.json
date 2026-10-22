@@ -1,0 +1,746 @@
+{
+ "source": "outputs/verify/SL5i-G/numbers.json",
+ "tables": {
+  "I0": [
+   [
+    "LI|pb5\n20261018T133339…",
+    "a8ad92ef / False / True",
+    "V11AB-pb5 / C",
+    "equal",
+    "-",
+    "1084 / 1084",
+    "0 / 0 / 0",
+    "own lock"
+   ],
+   [
+    "LI|pb6\n20261023T024310…",
+    "1ddb9376 / False / True",
+    "V11AB-pb6 / C",
+    "+ --grasp-reach-sticky --grasp-drop-from-open",
+    "latch_reach_sticky, latch_drop_from_open",
+    "1049 / 1049",
+    "373 / 383 / 0",
+    "held_by_caller"
+   ],
+   [
+    "LI|pb7\n20261023T024340…",
+    "1ddb9376 / False / True",
+    "V11AB-pb7 / C",
+    "+ --grasp-reach-sticky --grasp-drop-from-open --closing-hand-exempt",
+    "closing_hand_exempt, latch_reach_sticky, latch_drop_from_open",
+    "1012 / 1012",
+    "298 / 308 / 1012",
+    "held_by_caller"
+   ],
+   [
+    "LIBERO10|pb5\n20261018T150153…",
+    "a8ad92ef / False / True",
+    "V11AB-pb5 / C",
+    "equal",
+    "-",
+    "344 / 344",
+    "0 / 0 / 0",
+    "own lock"
+   ],
+   [
+    "LIBERO10|pb6\n20261023T032803…",
+    "1ddb9376 / False / True",
+    "V11AB-pb6 / C",
+    "+ --grasp-reach-sticky --grasp-drop-from-open",
+    "latch_reach_sticky, latch_drop_from_open",
+    "318 / 318",
+    "65 / 65 / 0",
+    "held_by_caller"
+   ],
+   [
+    "LIBERO10|pb7\n20261023T032837…",
+    "1ddb9376 / False / True",
+    "V11AB-pb7 / C",
+    "+ --grasp-reach-sticky --grasp-drop-from-open --closing-hand-exempt",
+    "closing_hand_exempt, latch_reach_sticky, latch_drop_from_open",
+    "325 / 325",
+    "66 / 66 / 325",
+    "held_by_caller"
+   ]
+  ],
+  "I1": [
+   [
+    "LI",
+    "VLA-only",
+    "11/20",
+    "18/20",
+    "2/20",
+    "0 (0)",
+    796,
+    "-",
+    "-",
+    "-",
+    "-",
+    "-"
+   ],
+   [
+    "LI",
+    "grasp zone 허용판 (pb5)",
+    "1/20",
+    "11/20",
+    "1/20",
+    "204 (16)",
+    1084,
+    "0 ",
+    "0 ",
+    10,
+    8,
+    "-"
+   ],
+   [
+    "LI",
+    "파지 인식 수정판 (pb6)",
+    "2/20",
+    "11/20",
+    "2/20",
+    "204 (17)",
+    1049,
+    "1 t0e0",
+    "1 t0e0",
+    10,
+    8,
+    "1 / 0"
+   ],
+   [
+    "LI",
+    "파지 인식 + closing 면제판 (pb7)",
+    "3/20",
+    "8/20",
+    "3/20",
+    "204 (16)",
+    1012,
+    "2 t0e0 t0e3",
+    "2 t0e0 t0e3",
+    10,
+    11,
+    "2 / 0"
+   ],
+   [
+    "L10",
+    "VLA-only",
+    "9/10",
+    "-",
+    "-",
+    "0 (0)",
+    248,
+    "-",
+    "-",
+    "-",
+    "-",
+    "-"
+   ],
+   [
+    "L10",
+    "grasp zone 허용판 (pb5)",
+    "5/10",
+    "-",
+    "-",
+    "15 (4)",
+    344,
+    "0 ",
+    "-",
+    4,
+    "-",
+    "-"
+   ],
+   [
+    "L10",
+    "파지 인식 수정판 (pb6)",
+    "6/10",
+    "-",
+    "-",
+    "14 (4)",
+    318,
+    "1 t5e0",
+    "-",
+    4,
+    "-",
+    "1 / 0"
+   ],
+   [
+    "L10",
+    "파지 인식 + closing 면제판 (pb7)",
+    "6/10",
+    "-",
+    "-",
+    "27 (3)",
+    325,
+    "1 t5e0",
+    "-",
+    4,
+    "-",
+    "2 / 1"
+   ]
+  ],
+  "I2": [
+   [
+    "LI",
+    "grasp zone 허용판 (pb5)",
+    8,
+    "t0e0 t1e2 t2e0 t2e4",
+    "9 (3: t0e1 t1e3 t2e1)",
+    0,
+    "0 (0)",
+    "0 (0)",
+    "0 (0)",
+    213,
+    "1.0 (4 / 4)",
+    "-"
+   ],
+   [
+    "LI",
+    "파지 인식 수정판 (pb6)",
+    10,
+    "t1e2 t2e0",
+    "13 (3: t0e1 t1e3 t2e1)",
+    0,
+    "69 (3)",
+    "71 (1)",
+    "0 (0)",
+    141,
+    "3.0 (4 / 6)",
+    "20/20 / 20/20"
+   ],
+   [
+    "LI",
+    "파지 인식 + closing 면제판 (pb7)",
+    11,
+    "t2e0",
+    "12 (2: t0e1 t1e3)",
+    0,
+    "7 (2)",
+    "67 (0)",
+    "31 (872)",
+    135,
+    "3.0 (4 / 7)",
+    "-"
+   ],
+   [
+    "L10",
+    "grasp zone 허용판 (pb5)",
+    7,
+    "t5e0",
+    "10 (1: t0e0)",
+    0,
+    "0 (0)",
+    "0 (0)",
+    "0 (0)",
+    61,
+    "1.0 (2 / 5)",
+    "-"
+   ],
+   [
+    "L10",
+    "파지 인식 수정판 (pb6)",
+    8,
+    "-",
+    "11 (1: t0e0)",
+    0,
+    "3 (0)",
+    "3 (2)",
+    "0 (0)",
+    27,
+    "1.0 (2 / 6)",
+    "10/10 / 10/10"
+   ],
+   [
+    "L10",
+    "파지 인식 + closing 면제판 (pb7)",
+    8,
+    "-",
+    "11 (1: t0e0)",
+    0,
+    "5 (1)",
+    "3 (2)",
+    "15 (211)",
+    26,
+    "1.0 (2 / 6)",
+    "-"
+   ]
+  ],
+  "I3": [
+   [
+    "LI",
+    "grasp zone 허용판 (pb5)",
+    "10 t0e0 t0e1 t0e3 t1e2 t1e3 t1e4 t2e0 t2e1 t2e2 t2e4",
+    "1158/1916 (0.60)",
+    "806 (0.42)",
+    "189 (179)",
+    "settled:17 reach:179 blocked:53 dropped:42 not_empty:1",
+    "1431 / 243",
+    "957 / 93",
+    "241 (317)",
+    "288"
+   ],
+   [
+    "LI",
+    "파지 인식 수정판 (pb6)",
+    "9 t0e1 t0e3 t1e2 t1e3 t1e4 t2e0 t2e1 t2e2 t2e4",
+    "1053/1793 (0.59)",
+    "724 (0.40)",
+    "119 (67)",
+    "settled:11 reach:67 blocked:48 not_empty:1",
+    "927 / 134",
+    "1294 / 156",
+    "241 (354)",
+    "306"
+   ],
+   [
+    "LI",
+    "파지 인식 + closing 면제판 (pb7)",
+    "7 t0e1 t1e2 t1e4 t2e0 t2e1 t2e2 t2e4",
+    "880/1738 (0.51)",
+    "572 (0.33)",
+    "75 (65)",
+    "settled:14 reach:65 not_empty:1 blocked:3",
+    "530 / 93",
+    "1317 / 307",
+    "326 (364)",
+    "345"
+   ],
+   [
+    "L10",
+    "grasp zone 허용판 (pb5)",
+    "1 t5e0",
+    "197/538 (0.37)",
+    "135 (0.25)",
+    "37 (33)",
+    "dropped:36 reach:33 settled:2",
+    "234 / 50",
+    "174 / 11",
+    "169 (113)",
+    "172"
+   ],
+   [
+    "L10",
+    "파지 인식 수정판 (pb6)",
+    "1 t7e0",
+    "92/456 (0.20)",
+    "48 (0.11)",
+    "2 (0)",
+    "settled:2",
+    "10 / 4",
+    "196 / 18",
+    "169 (121)",
+    "169"
+   ],
+   [
+    "L10",
+    "파지 인식 + closing 면제판 (pb7)",
+    "0 ",
+    "111/427 (0.26)",
+    "58 (0.14)",
+    "4 (0)",
+    "blocked:2 settled:2",
+    "5 / 1",
+    "246 / 44",
+    "183 (126)",
+    "190"
+   ]
+  ],
+  "I4": [
+   [
+    "LI",
+    "t1e4",
+    "C_lifted_overlift / 296 / 12",
+    "C_lifted_overlift / 296 / 12",
+    "C_lifted_overlift / 296 / 12"
+   ],
+   [
+    "LI",
+    "t2e0",
+    "C_lifted_overlift / 926 / -",
+    "C_lifted_overlift / 926 / -",
+    "C_lifted_overlift / 926 / -"
+   ],
+   [
+    "LI",
+    "t2e1",
+    "B_lifted_lost / 350 / 12",
+    "B_lifted_lost / 289 / 12",
+    "C_lifted_overlift / 537 / 11"
+   ],
+   [
+    "LI",
+    "t2e2",
+    "C_lifted_overlift / 454 / 10",
+    "C_lifted_overlift / 454 / 10",
+    "C_lifted_overlift / 280 / 10"
+   ],
+   [
+    "LI",
+    "t2e3",
+    "B_lifted_lost / 145 / 9",
+    "B_lifted_lost / 145 / 9",
+    "B_lifted_lost / 145 / 9"
+   ],
+   [
+    "LI",
+    "t2e4",
+    "C_lifted_overlift / 531 / -",
+    "C_lifted_overlift / 648 / 24",
+    "C_lifted_overlift / 258 / 21"
+   ],
+   [
+    "LI",
+    "t3e0",
+    "A_no_lift_hold / 0 / -",
+    "A_no_lift_hold / 0 / -",
+    "A_no_lift_hold / 0 / -"
+   ],
+   [
+    "LI",
+    "t3e2",
+    "A_no_lift_other / 4 / -",
+    "A_no_lift_other / 4 / -",
+    "A_no_lift_other / 4 / -"
+   ],
+   [
+    "LI",
+    "t3e3",
+    "A_no_lift_other / 0 / -",
+    "A_no_lift_other / 0 / -",
+    "A_no_lift_other / 0 / -"
+   ],
+   [
+    "LI",
+    "t3e4",
+    "A_no_lift_other / 0 / -",
+    "A_no_lift_other / 0 / -",
+    "A_no_lift_other / 0 / -"
+   ],
+   [
+    "L10",
+    "t4e0",
+    "A_no_lift_hold / 0 / -",
+    "A_no_lift_hold / 0 / -",
+    "A_no_lift_hold / 0 / -"
+   ],
+   [
+    "L10",
+    "t6e0",
+    "success / 159 / 15",
+    "success / 159 / 15",
+    "D_lifted_other / 237 / 17"
+   ],
+   [
+    "L10",
+    "t7e0",
+    "D_lifted_other / 243 / 10",
+    "C_lifted_overlift / 262 / 10",
+    "success / 187 / 10"
+   ],
+   [
+    "L10",
+    "t8e0",
+    "B_lifted_lost / 237 / 15",
+    "B_lifted_lost / 237 / 15",
+    "B_lifted_lost / 237 / 15"
+   ],
+   [
+    "L10",
+    "t9e0",
+    "A_no_lift_other / 18 / -",
+    "A_no_lift_other / 18 / -",
+    "A_no_lift_other / 18 / -"
+   ]
+  ],
+  "I4_never_held": [
+   [
+    "LI",
+    "t0e0",
+    "lifted closed:1 dropped:1 settled:15 reach:41 blocked:3",
+    "HELD 도달",
+    "HELD 도달"
+   ],
+   [
+    "LI",
+    "t0e2",
+    "no lift settled:19 closed:1 reach:18 blocked:9",
+    "no lift settled:19 closed:1 reach:18 blocked:9",
+    "no lift settled:19 closed:1 reach:18 blocked:9"
+   ],
+   [
+    "LI",
+    "t0e4",
+    "no lift (closing 없음)",
+    "no lift (closing 없음)",
+    "no lift (closing 없음)"
+   ],
+   [
+    "LI",
+    "t1e0",
+    "no lift settled:26 closed:4 reach:33 blocked:24 not_empty:9",
+    "no lift settled:26 closed:4 reach:33 blocked:24 not_empty:9",
+    "no lift settled:26 closed:4 reach:33 blocked:24 not_empty:9"
+   ],
+   [
+    "LI",
+    "t1e2",
+    "lifted settled:3 blocked:44 reach:42",
+    "lifted settled:3 blocked:44",
+    "HELD 도달"
+   ],
+   [
+    "LI",
+    "t2e0",
+    "lifted dropped:42 reach:43 settled:5 not_empty:1 blocked:3",
+    "lifted reach:43 settled:5 not_empty:1 blocked:3",
+    "lifted reach:43 settled:5 not_empty:1 blocked:3"
+   ],
+   [
+    "LI",
+    "t2e4",
+    "lifted closed:2 dropped:2 settled:11 not_empty:5 blocked:16 reach:37",
+    "HELD 도달",
+    "HELD 도달"
+   ],
+   [
+    "LI",
+    "t3e0",
+    "no lift settled:3 closed:1 reach:33 blocked:31 not_empty:30",
+    "no lift settled:3 closed:1 reach:33 blocked:31 not_empty:30",
+    "no lift settled:3 closed:1 reach:33 blocked:31 not_empty:30"
+   ],
+   [
+    "LI",
+    "t3e1",
+    "no lift settled:4 closed:1 reach:19 blocked:17 not_empty:16",
+    "no lift settled:4 closed:1 reach:19 blocked:17 not_empty:16",
+    "no lift settled:4 closed:1 reach:19 blocked:17 not_empty:16"
+   ],
+   [
+    "LI",
+    "t3e2",
+    "no lift settled:26 closed:3 reach:37 blocked:25 dropped:1 not_empty:11",
+    "no lift settled:26 closed:3 reach:37 blocked:25 dropped:1 not_empty:11",
+    "no lift settled:26 closed:3 reach:37 blocked:25 dropped:1 not_empty:11"
+   ],
+   [
+    "LI",
+    "t3e3",
+    "no lift settled:10 reach:20 blocked:16 not_empty:6",
+    "no lift settled:10 reach:20 blocked:16 not_empty:6",
+    "no lift settled:10 reach:20 blocked:16 not_empty:6"
+   ],
+   [
+    "LI",
+    "t3e4",
+    "no lift settled:1 closed:1 reach:1",
+    "no lift settled:1 closed:1 reach:1",
+    "no lift settled:1 closed:1 reach:1"
+   ],
+   [
+    "L10",
+    "t4e0",
+    "no lift (closing 없음)",
+    "no lift (closing 없음)",
+    "no lift (closing 없음)"
+   ],
+   [
+    "L10",
+    "t5e0",
+    "lifted dropped:34 reach:33",
+    "HELD 도달",
+    "HELD 도달"
+   ],
+   [
+    "L10",
+    "t9e0",
+    "no lift settled:19 closed:1 reach:22 blocked:14 not_empty:3",
+    "no lift settled:19 closed:1 reach:22 blocked:14 not_empty:3",
+    "no lift settled:19 closed:1 reach:22 blocked:14 not_empty:3"
+   ],
+   [
+    "LI",
+    "t1e2 focus",
+    "1st HELD None; closing 45; manip id ['1']; reach [72.6, 172.8] mm; open-cmd [0.0268, 0.1104]",
+    "1st HELD None; closing 45; manip id ['1']; reach [72.6, 172.8] mm; open-cmd [0.0268, 0.1104]",
+    "1st HELD 13; closing 2; manip id ['1']; reach [74.5, 75.2] mm; open-cmd [0.0879, 0.1104]"
+   ],
+   [
+    "LI",
+    "t2e0 focus",
+    "1st HELD None; closing 43; manip id ['1']; reach [399.9, 1039.1] mm; open-cmd [0.0193, 0.0914]",
+    "1st HELD None; closing 43; manip id ['1']; reach [399.9, 1039.1] mm; open-cmd [0.0193, 0.0914]",
+    "1st HELD None; closing 43; manip id ['1']; reach [399.9, 1039.1] mm; open-cmd [0.0193, 0.0914]"
+   ]
+  ],
+  "I5": [
+   [
+    "LI",
+    "grasp zone 허용판 (pb5)",
+    "조건 · 양손가락 X",
+    55,
+    0,
+    23,
+    2,
+    "22 / 20",
+    "0.0",
+    1,
+    32,
+    "t0e0(4,F,n) t0e1(4,F,C) t0e2(9,F,C) t0e3(1,F,n) t1e0(5,F,C) t1e1(1,S,n) t1e3(1,F,C) t1e4(1,F,C) t2e1(6,F,n) …"
+   ],
+   [
+    "LI",
+    "파지 인식 수정판 (pb6)",
+    "조건 · 양손가락 X",
+    53,
+    0,
+    21,
+    2,
+    "20 / 18",
+    "0.0",
+    1,
+    30,
+    "t0e0(2,S,n) t0e1(4,F,C) t0e2(9,F,C) t0e3(1,F,n) t1e0(5,F,C) t1e1(1,S,n) t1e3(1,F,C) t1e4(1,F,C) t2e1(6,F,n) …"
+   ],
+   [
+    "LI",
+    "파지 인식 + closing 면제판 (pb7)",
+    "조건 · 양손가락 X",
+    48,
+    539,
+    17,
+    2,
+    "14 / 12",
+    "0.0",
+    0,
+    25,
+    "t0e0(2,S,n) t0e1(3,F,n) t0e2(9,F,C) t0e3(1,S,n) t1e0(5,F,C) t1e1(1,S,n) t1e3(1,F,n) t1e4(1,F,C) t2e1(3,F,n) …"
+   ],
+   [
+    "LI",
+    "파지 인식 + closing 면제판 (pb7)",
+    "면제 적용 · 양손가락 X",
+    16,
+    539,
+    15,
+    0,
+    "12 / 10",
+    "12.1",
+    0,
+    2,
+    "t0e0(2,S,n) t0e1(1,F,n) t0e3(1,S,n) t1e1(1,S,n) t1e3(1,F,n) t1e4(1,F,C) t2e1(3,F,n) t2e2(1,F,n) t2e3(1,F,n) …"
+   ],
+   [
+    "LI",
+    "파지 인식 + closing 면제판 (pb7)",
+    "면제 적용 · 양손가락 O",
+    15,
+    333,
+    15,
+    0,
+    "14 / 11",
+    "16.2",
+    1,
+    1,
+    "t0e0(3,S,n) t0e3(2,S,n) t1e1(2,S,n) t1e2(1,F,n) t1e3(1,F,n) t1e4(3,F,C) t2e2(1,F,n) t2e3(1,F,n) t2e4(1,F,n)"
+   ],
+   [
+    "L10",
+    "grasp zone 허용판 (pb5)",
+    "조건 · 양손가락 X",
+    16,
+    0,
+    9,
+    0,
+    "8 / 6",
+    "5.1",
+    0,
+    7,
+    "t0e0(1,S,-) t1e0(1,S,-) t2e0(1,S,-) t3e0(1,S,-) t6e0(1,S,-) t7e0(2,F,-) t8e0(2,F,-) t9e0(7,F,-)"
+   ],
+   [
+    "L10",
+    "파지 인식 수정판 (pb6)",
+    "조건 · 양손가락 X",
+    17,
+    0,
+    10,
+    0,
+    "9 / 7",
+    "6.2",
+    0,
+    8,
+    "t0e0(1,S,-) t1e0(1,S,-) t2e0(1,S,-) t3e0(1,S,-) t6e0(1,S,-) t7e0(3,F,-) t8e0(2,F,-) t9e0(7,F,-)"
+   ],
+   [
+    "L10",
+    "파지 인식 + closing 면제판 (pb7)",
+    "조건 · 양손가락 X",
+    16,
+    120,
+    9,
+    0,
+    "8 / 6",
+    "5.1",
+    0,
+    7,
+    "t0e0(1,S,-) t1e0(1,S,-) t2e0(1,S,-) t3e0(1,S,-) t6e0(1,F,-) t7e0(2,S,-) t8e0(2,F,-) t9e0(7,F,-)"
+   ],
+   [
+    "L10",
+    "파지 인식 + closing 면제판 (pb7)",
+    "면제 적용 · 양손가락 X",
+    9,
+    120,
+    9,
+    0,
+    "8 / 6",
+    "13.7",
+    0,
+    0,
+    "t0e0(1,S,-) t1e0(1,S,-) t2e0(1,S,-) t3e0(1,S,-) t6e0(1,F,-) t7e0(2,S,-) t8e0(2,F,-)"
+   ],
+   [
+    "L10",
+    "파지 인식 + closing 면제판 (pb7)",
+    "면제 적용 · 양손가락 O",
+    6,
+    91,
+    6,
+    0,
+    "5 / 5",
+    "14.1",
+    0,
+    1,
+    "t1e0(1,S,-) t2e0(2,S,-) t3e0(1,S,-) t6e0(1,F,-) t8e0(1,F,-)"
+   ]
+  ],
+  "I6": [
+   [
+    "LIBERO10_t5e0",
+    "a|pb6 a|pb7 c|pb6 c|pb7",
+    "False / None / 174 / -",
+    "False / None / 689 / -",
+    "True / None / 134 / 60",
+    "True / None / 134 / 60",
+    "60 / 60"
+   ],
+   [
+    "LI_t0e0",
+    "a|pb6 a|pb7 b|pb6 b|pb7 c|pb6 c|pb7",
+    "False / True / 8 / -",
+    "False / False / 516 / -",
+    "True / False / 94 / 100",
+    "True / False / 94 / 100",
+    "100 / 75"
+   ],
+   [
+    "LI_t0e3",
+    "a|pb7 b|pb7 c|pb7",
+    "False / True / 150 / -",
+    "False / False / 321 / 95",
+    "False / False / 321 / 95",
+    "True / False / 107 / 95",
+    "- / 80"
+   ]
+  ]
+ }
+}

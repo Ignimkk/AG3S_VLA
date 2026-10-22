@@ -1,0 +1,719 @@
+{
+ "doc": "SL5i-G figure 2 — graphs per version: VLA-only, grasp zone 허용판 (pb5), 파지 인식 수정판 (pb6), 파지 인식 + closing 면제판 (pb7).\n\n(a) official / collided / safe_success per version (LI dev 20, LIBERO 10 init0 10)              — i1_aggregate.json\n(b) over-lift episodes (max target rise > 250 mm) and lifted-step executed saturation share       — i3_signature.json\n(c) first HELD obs vs MuJoCo first lifted obs per episode (both sets); hollow = both fingers not on the target at the HELD obs;\n    episodes lifted but never HELD on the top band                                                 — i2_latch.json\n(d) closing+lifted calls and their TO rows z up / down                                             — i3_signature.json\n(e) rule application: reach sticky used calls (at HELD entry), drop basis changed calls (at HELD entry), closing_exempt calls,\n    HELD entries with both fingers off the target                                                  — i2_latch.json\n(f) closing-exemption side effects: condition calls (closed, not_empty, blocked) with both fingers X, window obs o+1..o+5:\n    gripper-target contact, robot-other contact, target dxy >= 10 mm, collision in window          — i5_exempt.json\n",
+ "panels": {
+  "a": {
+   "official": {
+    "LI|vla_only": [
+     11,
+     20
+    ],
+    "LI|pb5": [
+     1,
+     20
+    ],
+    "LI|pb6": [
+     2,
+     20
+    ],
+    "LI|pb7": [
+     3,
+     20
+    ],
+    "LIBERO10|vla_only": [
+     9,
+     10
+    ],
+    "LIBERO10|pb5": [
+     5,
+     10
+    ],
+    "LIBERO10|pb6": [
+     6,
+     10
+    ],
+    "LIBERO10|pb7": [
+     6,
+     10
+    ]
+   },
+   "collided": {
+    "LI|vla_only": [
+     18,
+     20
+    ],
+    "LI|pb5": [
+     11,
+     20
+    ],
+    "LI|pb6": [
+     11,
+     20
+    ],
+    "LI|pb7": [
+     8,
+     20
+    ],
+    "LIBERO10|vla_only": [
+     null,
+     10
+    ],
+    "LIBERO10|pb5": [
+     null,
+     10
+    ],
+    "LIBERO10|pb6": [
+     null,
+     10
+    ],
+    "LIBERO10|pb7": [
+     null,
+     10
+    ]
+   },
+   "safe_success": {
+    "LI|vla_only": [
+     2,
+     20
+    ],
+    "LI|pb5": [
+     1,
+     20
+    ],
+    "LI|pb6": [
+     2,
+     20
+    ],
+    "LI|pb7": [
+     3,
+     20
+    ],
+    "LIBERO10|vla_only": [
+     null,
+     10
+    ],
+    "LIBERO10|pb5": [
+     null,
+     10
+    ],
+    "LIBERO10|pb6": [
+     null,
+     10
+    ],
+    "LIBERO10|pb7": [
+     null,
+     10
+    ]
+   }
+  },
+  "b": {
+   "LI|vla_only": {
+    "overlift": 0,
+    "sat_share": 0.0,
+    "z_share": 0.0
+   },
+   "LI|pb5": {
+    "overlift": 10,
+    "sat_share": 0.6044,
+    "z_share": 0.4207
+   },
+   "LI|pb6": {
+    "overlift": 9,
+    "sat_share": 0.5873,
+    "z_share": 0.4038
+   },
+   "LI|pb7": {
+    "overlift": 7,
+    "sat_share": 0.5063,
+    "z_share": 0.3291
+   },
+   "LIBERO10|vla_only": {
+    "overlift": 0,
+    "sat_share": 0.0,
+    "z_share": 0.0
+   },
+   "LIBERO10|pb5": {
+    "overlift": 1,
+    "sat_share": 0.3662,
+    "z_share": 0.2509
+   },
+   "LIBERO10|pb6": {
+    "overlift": 1,
+    "sat_share": 0.2018,
+    "z_share": 0.1053
+   },
+   "LIBERO10|pb7": {
+    "overlift": 0,
+    "sat_share": 0.26,
+    "z_share": 0.1358
+   }
+  },
+  "c": {
+   "pb5": [
+    {
+     "set": "LI",
+     "ep": "t0e0",
+     "first_lifted_obs": 88,
+     "first_held_obs": null,
+     "both": null
+    },
+    {
+     "set": "LI",
+     "ep": "t0e1",
+     "first_lifted_obs": 137,
+     "first_held_obs": 110,
+     "both": false
+    },
+    {
+     "set": "LI",
+     "ep": "t0e3",
+     "first_lifted_obs": 92,
+     "first_held_obs": 95,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t1e1",
+     "first_lifted_obs": 67,
+     "first_held_obs": 70,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t1e2",
+     "first_lifted_obs": 83,
+     "first_held_obs": null,
+     "both": null
+    },
+    {
+     "set": "LI",
+     "ep": "t1e3",
+     "first_lifted_obs": 66,
+     "first_held_obs": 65,
+     "both": false
+    },
+    {
+     "set": "LI",
+     "ep": "t1e4",
+     "first_lifted_obs": 67,
+     "first_held_obs": 80,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e0",
+     "first_lifted_obs": 63,
+     "first_held_obs": null,
+     "both": null
+    },
+    {
+     "set": "LI",
+     "ep": "t2e1",
+     "first_lifted_obs": 70,
+     "first_held_obs": 80,
+     "both": false
+    },
+    {
+     "set": "LI",
+     "ep": "t2e2",
+     "first_lifted_obs": 76,
+     "first_held_obs": 70,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e3",
+     "first_lifted_obs": 208,
+     "first_held_obs": 65,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e4",
+     "first_lifted_obs": 117,
+     "first_held_obs": null,
+     "both": null
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t0e0",
+     "first_lifted_obs": 96,
+     "first_held_obs": 85,
+     "both": false
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t1e0",
+     "first_lifted_obs": 79,
+     "first_held_obs": 80,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t2e0",
+     "first_lifted_obs": 97,
+     "first_held_obs": 100,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t3e0",
+     "first_lifted_obs": 69,
+     "first_held_obs": 70,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t5e0",
+     "first_lifted_obs": 59,
+     "first_held_obs": null,
+     "both": null
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t6e0",
+     "first_lifted_obs": 83,
+     "first_held_obs": 85,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t7e0",
+     "first_lifted_obs": 71,
+     "first_held_obs": 60,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t8e0",
+     "first_lifted_obs": 82,
+     "first_held_obs": 85,
+     "both": true
+    }
+   ],
+   "pb6": [
+    {
+     "set": "LI",
+     "ep": "t0e0",
+     "first_lifted_obs": 88,
+     "first_held_obs": 100,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t0e1",
+     "first_lifted_obs": 137,
+     "first_held_obs": 110,
+     "both": false
+    },
+    {
+     "set": "LI",
+     "ep": "t0e3",
+     "first_lifted_obs": 92,
+     "first_held_obs": 95,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t1e1",
+     "first_lifted_obs": 67,
+     "first_held_obs": 70,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t1e2",
+     "first_lifted_obs": 83,
+     "first_held_obs": null,
+     "both": null
+    },
+    {
+     "set": "LI",
+     "ep": "t1e3",
+     "first_lifted_obs": 66,
+     "first_held_obs": 65,
+     "both": false
+    },
+    {
+     "set": "LI",
+     "ep": "t1e4",
+     "first_lifted_obs": 67,
+     "first_held_obs": 80,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e0",
+     "first_lifted_obs": 63,
+     "first_held_obs": null,
+     "both": null
+    },
+    {
+     "set": "LI",
+     "ep": "t2e1",
+     "first_lifted_obs": 70,
+     "first_held_obs": 80,
+     "both": false
+    },
+    {
+     "set": "LI",
+     "ep": "t2e2",
+     "first_lifted_obs": 76,
+     "first_held_obs": 70,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e3",
+     "first_lifted_obs": 208,
+     "first_held_obs": 65,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e4",
+     "first_lifted_obs": 117,
+     "first_held_obs": 140,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t0e0",
+     "first_lifted_obs": 96,
+     "first_held_obs": 85,
+     "both": false
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t1e0",
+     "first_lifted_obs": 79,
+     "first_held_obs": 80,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t2e0",
+     "first_lifted_obs": 97,
+     "first_held_obs": 100,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t3e0",
+     "first_lifted_obs": 69,
+     "first_held_obs": 70,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t5e0",
+     "first_lifted_obs": 59,
+     "first_held_obs": 60,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t6e0",
+     "first_lifted_obs": 83,
+     "first_held_obs": 85,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t7e0",
+     "first_lifted_obs": 71,
+     "first_held_obs": 60,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t8e0",
+     "first_lifted_obs": 82,
+     "first_held_obs": 85,
+     "both": true
+    }
+   ],
+   "pb7": [
+    {
+     "set": "LI",
+     "ep": "t0e0",
+     "first_lifted_obs": 88,
+     "first_held_obs": 100,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t0e1",
+     "first_lifted_obs": 135,
+     "first_held_obs": 110,
+     "both": false
+    },
+    {
+     "set": "LI",
+     "ep": "t0e3",
+     "first_lifted_obs": 92,
+     "first_held_obs": 95,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t1e1",
+     "first_lifted_obs": 67,
+     "first_held_obs": 70,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t1e2",
+     "first_lifted_obs": 79,
+     "first_held_obs": 85,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t1e3",
+     "first_lifted_obs": 66,
+     "first_held_obs": 65,
+     "both": false
+    },
+    {
+     "set": "LI",
+     "ep": "t1e4",
+     "first_lifted_obs": 67,
+     "first_held_obs": 80,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e0",
+     "first_lifted_obs": 63,
+     "first_held_obs": null,
+     "both": null
+    },
+    {
+     "set": "LI",
+     "ep": "t2e1",
+     "first_lifted_obs": 65,
+     "first_held_obs": 75,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e2",
+     "first_lifted_obs": 76,
+     "first_held_obs": 70,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e3",
+     "first_lifted_obs": 208,
+     "first_held_obs": 65,
+     "both": true
+    },
+    {
+     "set": "LI",
+     "ep": "t2e4",
+     "first_lifted_obs": 122,
+     "first_held_obs": 125,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t0e0",
+     "first_lifted_obs": 96,
+     "first_held_obs": 85,
+     "both": false
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t1e0",
+     "first_lifted_obs": 79,
+     "first_held_obs": 80,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t2e0",
+     "first_lifted_obs": 97,
+     "first_held_obs": 100,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t3e0",
+     "first_lifted_obs": 69,
+     "first_held_obs": 70,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t5e0",
+     "first_lifted_obs": 59,
+     "first_held_obs": 60,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t6e0",
+     "first_lifted_obs": 83,
+     "first_held_obs": 95,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t7e0",
+     "first_lifted_obs": 71,
+     "first_held_obs": 60,
+     "both": true
+    },
+    {
+     "set": "LIBERO10",
+     "ep": "t8e0",
+     "first_lifted_obs": 82,
+     "first_held_obs": 85,
+     "both": true
+    }
+   ]
+  },
+  "d": {
+   "LI|pb5": {
+    "closing_lifted_calls": 189,
+    "rows_up": 1431,
+    "rows_down": 243
+   },
+   "LI|pb6": {
+    "closing_lifted_calls": 119,
+    "rows_up": 927,
+    "rows_down": 134
+   },
+   "LI|pb7": {
+    "closing_lifted_calls": 75,
+    "rows_up": 530,
+    "rows_down": 93
+   },
+   "LIBERO10|pb5": {
+    "closing_lifted_calls": 37,
+    "rows_up": 234,
+    "rows_down": 50
+   },
+   "LIBERO10|pb6": {
+    "closing_lifted_calls": 2,
+    "rows_up": 10,
+    "rows_down": 4
+   },
+   "LIBERO10|pb7": {
+    "closing_lifted_calls": 4,
+    "rows_up": 5,
+    "rows_down": 1
+   }
+  },
+  "e": {
+   "sticky_used": {
+    "LI|pb5": 0,
+    "LI|pb6": 69,
+    "LI|pb7": 7,
+    "LIBERO10|pb5": 0,
+    "LIBERO10|pb6": 3,
+    "LIBERO10|pb7": 5
+   },
+   "sticky_used_at_attach": {
+    "LI|pb5": 0,
+    "LI|pb6": 3,
+    "LI|pb7": 2,
+    "LIBERO10|pb5": 0,
+    "LIBERO10|pb6": 0,
+    "LIBERO10|pb7": 1
+   },
+   "drop_changed": {
+    "LI|pb5": 0,
+    "LI|pb6": 71,
+    "LI|pb7": 67,
+    "LIBERO10|pb5": 0,
+    "LIBERO10|pb6": 3,
+    "LIBERO10|pb7": 3
+   },
+   "drop_changed_at_attach": {
+    "LI|pb5": 0,
+    "LI|pb6": 1,
+    "LI|pb7": 0,
+    "LIBERO10|pb5": 0,
+    "LIBERO10|pb6": 2,
+    "LIBERO10|pb7": 2
+   },
+   "closing_exempt_calls": {
+    "LI|pb5": 0,
+    "LI|pb6": 0,
+    "LI|pb7": 31,
+    "LIBERO10|pb5": 0,
+    "LIBERO10|pb6": 0,
+    "LIBERO10|pb7": 15
+   },
+   "held_entries_both_false": {
+    "LI|pb5": 3,
+    "LI|pb6": 3,
+    "LI|pb7": 2,
+    "LIBERO10|pb5": 1,
+    "LIBERO10|pb6": 1,
+    "LIBERO10|pb7": 1
+   }
+  },
+  "f": {
+   "calls": {
+    "LI|pb5|cond|both_X": 55,
+    "LI|pb6|cond|both_X": 53,
+    "LI|pb7|cond|both_X": 48,
+    "LI|pb7|exempt|both_X": 16,
+    "LIBERO10|pb5|cond|both_X": 16,
+    "LIBERO10|pb6|cond|both_X": 17,
+    "LIBERO10|pb7|cond|both_X": 16,
+    "LIBERO10|pb7|exempt|both_X": 9
+   },
+   "grip_target_win": {
+    "LI|pb5|cond|both_X": 23,
+    "LI|pb6|cond|both_X": 21,
+    "LI|pb7|cond|both_X": 17,
+    "LI|pb7|exempt|both_X": 15,
+    "LIBERO10|pb5|cond|both_X": 9,
+    "LIBERO10|pb6|cond|both_X": 10,
+    "LIBERO10|pb7|cond|both_X": 9,
+    "LIBERO10|pb7|exempt|both_X": 9
+   },
+   "robot_other_win": {
+    "LI|pb5|cond|both_X": 2,
+    "LI|pb6|cond|both_X": 2,
+    "LI|pb7|cond|both_X": 2,
+    "LI|pb7|exempt|both_X": 0,
+    "LIBERO10|pb5|cond|both_X": 0,
+    "LIBERO10|pb6|cond|both_X": 0,
+    "LIBERO10|pb7|cond|both_X": 0,
+    "LIBERO10|pb7|exempt|both_X": 0
+   },
+   "target_dxy_ge10mm": {
+    "LI|pb5|cond|both_X": 20,
+    "LI|pb6|cond|both_X": 18,
+    "LI|pb7|cond|both_X": 12,
+    "LI|pb7|exempt|both_X": 10,
+    "LIBERO10|pb5|cond|both_X": 6,
+    "LIBERO10|pb6|cond|both_X": 7,
+    "LIBERO10|pb7|cond|both_X": 6,
+    "LIBERO10|pb7|exempt|both_X": 6
+   },
+   "collide_in_win": {
+    "LI|pb5|cond|both_X": 1,
+    "LI|pb6|cond|both_X": 1,
+    "LI|pb7|cond|both_X": 0,
+    "LI|pb7|exempt|both_X": 0,
+    "LIBERO10|pb5|cond|both_X": 0,
+    "LIBERO10|pb6|cond|both_X": 0,
+    "LIBERO10|pb7|cond|both_X": 0,
+    "LIBERO10|pb7|exempt|both_X": 0
+   }
+  }
+ },
+ "source": [
+  "outputs/verify/SL5i-G/i1_aggregate.json",
+  "outputs/verify/SL5i-G/i2_latch.json",
+  "outputs/verify/SL5i-G/i3_signature.json",
+  "outputs/verify/SL5i-G/i5_exempt.json"
+ ]
+}
