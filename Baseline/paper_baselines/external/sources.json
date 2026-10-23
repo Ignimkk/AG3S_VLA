@@ -1,0 +1,50 @@
+{
+  "_comment": "Pinned external sources for Baseline/paper_baselines. fetch_sources.py clones each into external/<name>/ and checks out the exact SHA. HEADs confirmed with git ls-remote on 2026-10-23. License fields are filled from the LICENSE file of the pinned checkout (see license_file); re-run `fetch_sources.py --check` to verify.",
+  "sources": [
+    {
+      "name": "Grounded-SAM-2",
+      "repo": "https://github.com/IDEA-Research/Grounded-SAM-2",
+      "sha": "b7a9c29f196edff0eb54dbe14588d7ae5e3dde28",
+      "role": "grounded_sam2 provider: HF Grounding DINO + SAM 2 recipe; editable-installed as the `sam2` package into .venv-baselines",
+      "license": "Apache-2.0",
+      "license_file": "LICENSE",
+      "used_by": "A"
+    },
+    {
+      "name": "Grounded-Segment-Anything",
+      "repo": "https://github.com/IDEA-Research/Grounded-Segment-Anything",
+      "sha": "126abe633ffe333e16e4a0a4e946bc1003caf757",
+      "role": "reference only: Grounded-SAM v1 demo thresholds / box selection; not executed (its GroundingDINO CUDA op is avoided via HF transformers)",
+      "license": "Apache-2.0",
+      "license_file": "LICENSE",
+      "used_by": "A"
+    },
+    {
+      "name": "yoloe",
+      "repo": "https://github.com/THU-MIG/yoloe",
+      "sha": "40cd606cabdbe2b566d6f14a6b162c89206e9a1b",
+      "role": "reference only: YOLOE text-prompt seg recipe; executed through the pinned ultralytics wheel",
+      "license": "AGPL-3.0",
+      "license_file": "LICENSE",
+      "used_by": "A"
+    },
+    {
+      "name": "TokenCut",
+      "repo": "https://github.com/YangtaoWANG95/TokenCut",
+      "sha": "fed52cd5b60891baefd8ec7110dafa73be816ee1",
+      "role": "B: parity reference for tokencut re-implementation (object_discovery.ncut)",
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "used_by": "B"
+    },
+    {
+      "name": "LocalizationHeads",
+      "repo": "https://github.com/seilk/LocalizationHeads",
+      "sha": "9ffe219d20ec376eb4dd14d42c54bb3299ffdb4a",
+      "role": "B: head selection criteria (Kang et al. CVPR 2025) applied to pi0.5 attention",
+      "license": "none at pinned SHA (no LICENSE file; README states MIT) -- not vendored, re-implemented with citations",
+      "license_file": "LICENSE",
+      "used_by": "B"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Clone bodies are fetched by fetch_sources.py at the pinned SHA and are not tracked.
+*
+!.gitignore
+!sources.json
+!fetch_sources.py
+!README.md

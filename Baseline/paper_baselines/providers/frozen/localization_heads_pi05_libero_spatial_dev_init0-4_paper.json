@@ -1,0 +1,906 @@
+{
+ "schema": "paper_baselines.localization_heads.selection/v1",
+ "method": "localization_heads",
+ "source": {
+  "paper": "Kang et al., Your Large Vision-Language Model Only Needs A Few Attention Heads For Visual Grounding, arXiv:2503.06287, CVPR 2025",
+  "repo": "https://github.com/seilk/LocalizationHeads",
+  "sha": "9ffe219d20ec376eb4dd14d42c54bb3299ffdb4a",
+  "files": [
+   "analyze.py",
+   "bbox.py",
+   "conf/logic/selection_v1.yaml"
+  ],
+  "license": "UNKNOWN (no LICENSE file in the pinned checkout; README states MIT)",
+  "implementation": "partial re-impl (numpy); no code vendored"
+ },
+ "model": "pi05_libero",
+ "attention_definition": {
+  "producer": "benchmark/runners/attention_audit.py (key pooled_f16, shape (calls, L, H, 768))",
+  "query": "last action token of the action expert, Euler denoise step 0 (AGGREGATIONS['last'])",
+  "keys": "768 prefix image tokens; softmax over prefix + suffix keys (image part sums to < 1)",
+  "orientation": "libero_policy (mirrored left-right vs OpenCV/depth image)",
+  "per_camera": "each 16x16 camera block is one P x P image; heads selected per camera"
+ },
+ "config": {
+  "protocol": "paper",
+  "entropy_binarize_threshold": 0.001,
+  "min_keep": 1,
+  "bottom_row_value": 0.05,
+  "min_layer": 2,
+  "top_n_per_sample": 10,
+  "top_k": 3
+ },
+ "dev_split": {
+  "init_states": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "rule": "AG3S_BENCHMARK_LOG.md: LIBERO init 0-4 dev, 5-49 test; selection on dev only",
+  "excluded_non_dev": []
+ },
+ "inputs": [
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t0_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 0,
+   "init_state_index": 0,
+   "calls": 21,
+   "sha256": "6d788188bf26cd489a3d41d28d6feafca59977d26bfd6b702cc4c9b8a7e4b016"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t0_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 0,
+   "init_state_index": 1,
+   "calls": 23,
+   "sha256": "867d56dfcca498998e61dfe2670d219c229900e160041c367343342839ac3a6c"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t0_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 0,
+   "init_state_index": 2,
+   "calls": 15,
+   "sha256": "6f7ec2d4f1074e6ca4809187659ae1a4385da410874740f95c907a6e51738a23"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t0_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 0,
+   "init_state_index": 3,
+   "calls": 16,
+   "sha256": "3d605f8366e9ea4cbc0003f413ffb70bbec2b13241a06cd57765be8474883b8c"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t0_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 0,
+   "init_state_index": 4,
+   "calls": 15,
+   "sha256": "744e6d51478be5313edec3e6d181a1c03fda143ba08ce184d4342d35fd92fe4d"
+  },
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t1_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 1,
+   "init_state_index": 0,
+   "calls": 22,
+   "sha256": "ced4bb7570e2d0a9f198c167e3d0df6d9e6593f1b2354cd87d39f127443110ad"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t1_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 1,
+   "init_state_index": 1,
+   "calls": 20,
+   "sha256": "59abf4a0beb2bf1a1086664b2f8889e191c6e3055cb3907860a4595abcf192e9"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t1_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 1,
+   "init_state_index": 2,
+   "calls": 20,
+   "sha256": "48bb5058aa87215db79f0e01ab4233966a903e0cdf855d4586e6c44d25a4c62a"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t1_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 1,
+   "init_state_index": 3,
+   "calls": 21,
+   "sha256": "f587ff9ed72acc8221507af3893927adea1de48e5df75b9c9affdfb6b0d19524"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t1_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 1,
+   "init_state_index": 4,
+   "calls": 22,
+   "sha256": "4e006a37efcfc6d2ac5a6d08218b4e84d8b309cc9d94a6c077d52c8762e4b0d0"
+  },
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t2_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 2,
+   "init_state_index": 0,
+   "calls": 27,
+   "sha256": "58865ff7f9023947567b5f94c656c302aebe637ac739db112257b3438afd17b6"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t2_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 2,
+   "init_state_index": 1,
+   "calls": 22,
+   "sha256": "51e3bcfeceff69161da05dd560411db3179bb2f1d0dce53e44c4b7051c2d27c8"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t2_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 2,
+   "init_state_index": 2,
+   "calls": 19,
+   "sha256": "273e2cb645b10ffd8a27eb77239c74a4eeb51e1732ea6995df3e235729c66e0f"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t2_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 2,
+   "init_state_index": 3,
+   "calls": 19,
+   "sha256": "1e92f856ab2e8067dd94978b40e3be51b9cd2a885da027f912d217e2d2dbf349"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t2_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 2,
+   "init_state_index": 4,
+   "calls": 20,
+   "sha256": "c29b9e5260e022e56b32ffe8cb458630dd73aef9177bec234ef7a3ad8c9e9fce"
+  },
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t3_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 3,
+   "init_state_index": 0,
+   "calls": 18,
+   "sha256": "47aa309a892bd248766eb51037aaa3f4d8e91f9876d085d83c195fc0e6888e83"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t3_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 3,
+   "init_state_index": 1,
+   "calls": 17,
+   "sha256": "8270faab86ed266375caa03b504a912054c5b3659869f3aa48452293bf64dad6"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t3_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 3,
+   "init_state_index": 2,
+   "calls": 16,
+   "sha256": "5b8dba957af62165a36b27075021ac413a19288548d0e4211f46e8bc8dfafef1"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t3_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 3,
+   "init_state_index": 3,
+   "calls": 18,
+   "sha256": "ae4a4a09a01b68e540f890cc85b6b693aa0058b588b25215c088639fc37ca0ca"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t3_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 3,
+   "init_state_index": 4,
+   "calls": 19,
+   "sha256": "c2328806c4ac9ae3373c8a5fb0a3bef367c7c0477a6cf130ee2789f1afcc4021"
+  },
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t4_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 4,
+   "init_state_index": 0,
+   "calls": 24,
+   "sha256": "ddd5463edc215213e1a01ef4f130bf66702198268dac7efd2d3f04844a9a3891"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t4_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 4,
+   "init_state_index": 1,
+   "calls": 26,
+   "sha256": "ad7a73f83f0ed9fc6e2a401ff97bd2283926f476b8cca271afc46a6032e4d079"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t4_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 4,
+   "init_state_index": 2,
+   "calls": 23,
+   "sha256": "f7964f24790eb09f8c92e8570732537e2e65cf1175fbf6c22fce58a495ea50d4"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t4_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 4,
+   "init_state_index": 3,
+   "calls": 26,
+   "sha256": "201637a20306d77a1fe77a927690043a3397b587af4657d304fb28577b4f55c9"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t4_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 4,
+   "init_state_index": 4,
+   "calls": 26,
+   "sha256": "71cfd2c80ade87a0ede4c8f2a5d2eab7955100409df05d9ff2cc095ab24c8210"
+  },
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t5_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 5,
+   "init_state_index": 0,
+   "calls": 20,
+   "sha256": "cbe43220e1dd3cc87f3701b08fe1df7c6b8471814ca10d7b76ea3812adb10104"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t5_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 5,
+   "init_state_index": 1,
+   "calls": 19,
+   "sha256": "ea11989519c89d7ac4b11d86ec76c0f18d4b96311fb0d25a3137229b21ea40d6"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t5_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 5,
+   "init_state_index": 2,
+   "calls": 18,
+   "sha256": "c96d2c7e32cc41b26f9354513e867d249707fdd9b816aace8861eeb10941a449"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t5_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 5,
+   "init_state_index": 3,
+   "calls": 18,
+   "sha256": "d48824243ed07411c351eb1846e36cdad99d66cec4256d5aea8c3a83d5b1d301"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t5_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 5,
+   "init_state_index": 4,
+   "calls": 18,
+   "sha256": "11631a00ad07438b3da6dc0755a2f7c56e84b1e594d9dbca0f051c02d764c0b5"
+  },
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t6_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 6,
+   "init_state_index": 0,
+   "calls": 21,
+   "sha256": "1e4f33a8650aeb5ce29d5a9e5007753b76ddb6eab44605b9389b30b3ce0f061a"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t6_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 6,
+   "init_state_index": 1,
+   "calls": 21,
+   "sha256": "6daa608ed2d29907f5b688476f7502e3dcffb220ebee63b7309190d6cee68f99"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t6_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 6,
+   "init_state_index": 2,
+   "calls": 20,
+   "sha256": "305d9cd6c63982e5b4a5cdd1c7d9c4ff62ce53343ada007e185b44f635d9c109"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t6_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 6,
+   "init_state_index": 3,
+   "calls": 44,
+   "sha256": "b0084ed7fdc5a389bbc735508e9b93d7f0c9e5c75b4e581fbdb9b1221ac81c62"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t6_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 6,
+   "init_state_index": 4,
+   "calls": 21,
+   "sha256": "ce5cc9caf2773c1853a0186efb45a67d9d5bac06e6cc5e5970932028a07bc3e6"
+  },
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t7_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 7,
+   "init_state_index": 0,
+   "calls": 23,
+   "sha256": "252be4c4edd17a0b7a62e26552aa9e5a35fc0ca01a27a21da608b016f4d3ad15"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t7_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 7,
+   "init_state_index": 1,
+   "calls": 24,
+   "sha256": "6f31d4bd32b5dce513d71cb3e0c0f6cf7c95aefb03d11a761c0613365c7a7d6c"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t7_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 7,
+   "init_state_index": 2,
+   "calls": 25,
+   "sha256": "2cbfe18fd90b129e79498a8798052d8f0150e8db97f70a51cc866baa6bfa4221"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t7_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 7,
+   "init_state_index": 3,
+   "calls": 24,
+   "sha256": "2ff017373e90d1eeb3b48a24d1ed0f1b6f7465590dbd2357b0effd9ea5fecde9"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t7_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 7,
+   "init_state_index": 4,
+   "calls": 24,
+   "sha256": "e4650262e79139b22e3c1e8a510ab5e7e997192ae26a13551a67f64b042245fb"
+  },
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t8_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 8,
+   "init_state_index": 0,
+   "calls": 22,
+   "sha256": "da3597aa1db763b57673c242d2c3aedfa3e545d9be9ef6a6a2749013f4720613"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t8_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 8,
+   "init_state_index": 1,
+   "calls": 20,
+   "sha256": "4f1481479c41ec3badbbe1c9193cbc73d1c69bfabe78955bfde9676d4b8fe04b"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t8_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 8,
+   "init_state_index": 2,
+   "calls": 20,
+   "sha256": "262e8f8851759a0e6d989ffa563f93a8a7ea78762ac229b26970f33b5914df7d"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t8_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 8,
+   "init_state_index": 3,
+   "calls": 20,
+   "sha256": "014692ac751753cac00403ad129346e9a7b9fd2423dbdc884f358ceee935c555"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t8_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 8,
+   "init_state_index": 4,
+   "calls": 19,
+   "sha256": "03b498104fbb80800f47386b878514d22268e476a472abad26edfda39022745f"
+  },
+  {
+   "run": "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+   "attn_npz": "attention/libero_spatial_t9_e0_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 9,
+   "init_state_index": 0,
+   "calls": 23,
+   "sha256": "c9edbc7afab1cf5027c589b2d84d1d1193c353b39fbd1aff9a327961f140cbc2"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t9_e1_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 9,
+   "init_state_index": 1,
+   "calls": 44,
+   "sha256": "7c626c63e382cad7537ca8b7495d51c00521c527b18e4f5621b2c9f808bf14c9"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t9_e2_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 9,
+   "init_state_index": 2,
+   "calls": 24,
+   "sha256": "19d49cbcf73d27a8348cc1c5b5ba01615b84860cb686638094cb1cd5fd336d4d"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t9_e3_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 9,
+   "init_state_index": 3,
+   "calls": 23,
+   "sha256": "96770eccc312508fada08b53faaaa8251802e824ec3a5551ed580566d3a00f2e"
+  },
+  {
+   "run": "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4",
+   "attn_npz": "attention/libero_spatial_t9_e4_attn.npz",
+   "suite": "libero_spatial",
+   "task_id": 9,
+   "init_state_index": 4,
+   "calls": 24,
+   "sha256": "179e79110a1f706e2e2fe617a389c48ace2413cf05a9cb30ec9e06ae6bc29e95"
+  }
+ ],
+ "selection": {
+  "head": {
+   "token_block": [
+    0,
+    256
+   ],
+   "grid": 16,
+   "protocol": "paper",
+   "n_samples": 1094,
+   "num_layers": 18,
+   "num_heads": 8,
+   "selected": [
+    {
+     "layer": 4,
+     "head": 0,
+     "frequency": 1088,
+     "frequency_rate": 0.9945155393053017,
+     "mean_spatial_entropy_when_counted": 0.1391912120537719,
+     "mean_image_attention_sum": 0.7903763095574143
+    },
+    {
+     "layer": 4,
+     "head": 4,
+     "frequency": 1020,
+     "frequency_rate": 0.9323583180987203,
+     "mean_spatial_entropy_when_counted": 0.2185627020301951,
+     "mean_image_attention_sum": 0.7368000626455059
+    },
+    {
+     "layer": 7,
+     "head": 7,
+     "frequency": 927,
+     "frequency_rate": 0.8473491773308958,
+     "mean_spatial_entropy_when_counted": 0.3735049179883292,
+     "mean_image_attention_sum": 0.5460918055373964
+    }
+   ],
+   "ranking_top20": [
+    {
+     "layer": 4,
+     "head": 0,
+     "frequency": 1088,
+     "frequency_rate": 0.9945155393053017,
+     "mean_spatial_entropy_when_counted": 0.1391912120537719,
+     "mean_image_attention_sum": 0.7903763095574143
+    },
+    {
+     "layer": 4,
+     "head": 4,
+     "frequency": 1020,
+     "frequency_rate": 0.9323583180987203,
+     "mean_spatial_entropy_when_counted": 0.2185627020301951,
+     "mean_image_attention_sum": 0.7368000626455059
+    },
+    {
+     "layer": 7,
+     "head": 7,
+     "frequency": 927,
+     "frequency_rate": 0.8473491773308958,
+     "mean_spatial_entropy_when_counted": 0.3735049179883292,
+     "mean_image_attention_sum": 0.5460918055373964
+    },
+    {
+     "layer": 10,
+     "head": 3,
+     "frequency": 818,
+     "frequency_rate": 0.7477148080438757,
+     "mean_spatial_entropy_when_counted": 0.29031572910649217,
+     "mean_image_attention_sum": 0.20991961333825776
+    },
+    {
+     "layer": 12,
+     "head": 3,
+     "frequency": 792,
+     "frequency_rate": 0.7239488117001828,
+     "mean_spatial_entropy_when_counted": 0.1898240449307155,
+     "mean_image_attention_sum": 0.5551791429192754
+    },
+    {
+     "layer": 6,
+     "head": 0,
+     "frequency": 655,
+     "frequency_rate": 0.5987202925045704,
+     "mean_spatial_entropy_when_counted": 0.30860721236774685,
+     "mean_image_attention_sum": 0.6152119327070944
+    },
+    {
+     "layer": 11,
+     "head": 3,
+     "frequency": 651,
+     "frequency_rate": 0.5950639853747715,
+     "mean_spatial_entropy_when_counted": 0.3358239831580278,
+     "mean_image_attention_sum": 0.394947654695354
+    },
+    {
+     "layer": 3,
+     "head": 0,
+     "frequency": 624,
+     "frequency_rate": 0.5703839122486288,
+     "mean_spatial_entropy_when_counted": 0.3520274702265594,
+     "mean_image_attention_sum": 0.6771415470396143
+    },
+    {
+     "layer": 8,
+     "head": 7,
+     "frequency": 542,
+     "frequency_rate": 0.4954296160877514,
+     "mean_spatial_entropy_when_counted": 0.2557115011187558,
+     "mean_image_attention_sum": 0.5574291951041771
+    },
+    {
+     "layer": 4,
+     "head": 1,
+     "frequency": 431,
+     "frequency_rate": 0.3939670932358318,
+     "mean_spatial_entropy_when_counted": 0.5130220377556216,
+     "mean_image_attention_sum": 0.1791659130474767
+    },
+    {
+     "layer": 10,
+     "head": 5,
+     "frequency": 364,
+     "frequency_rate": 0.3327239488117002,
+     "mean_spatial_entropy_when_counted": 0.49977197859075867,
+     "mean_image_attention_sum": 0.1891440162384096
+    },
+    {
+     "layer": 4,
+     "head": 3,
+     "frequency": 364,
+     "frequency_rate": 0.3327239488117002,
+     "mean_spatial_entropy_when_counted": 0.5668083695681227,
+     "mean_image_attention_sum": 0.26131732018163917
+    },
+    {
+     "layer": 4,
+     "head": 6,
+     "frequency": 363,
+     "frequency_rate": 0.33180987202925044,
+     "mean_spatial_entropy_when_counted": 0.605144648150755,
+     "mean_image_attention_sum": 0.25219721130522776
+    },
+    {
+     "layer": 4,
+     "head": 7,
+     "frequency": 340,
+     "frequency_rate": 0.31078610603290674,
+     "mean_spatial_entropy_when_counted": 0.4256618559379968,
+     "mean_image_attention_sum": 0.14275277347407786
+    },
+    {
+     "layer": 6,
+     "head": 1,
+     "frequency": 322,
+     "frequency_rate": 0.2943327239488117,
+     "mean_spatial_entropy_when_counted": 0.3801901380103703,
+     "mean_image_attention_sum": 0.2662194206139287
+    },
+    {
+     "layer": 4,
+     "head": 2,
+     "frequency": 254,
+     "frequency_rate": 0.23217550274223034,
+     "mean_spatial_entropy_when_counted": 0.7114673046389912,
+     "mean_image_attention_sum": 0.37436181078009456
+    },
+    {
+     "layer": 9,
+     "head": 5,
+     "frequency": 204,
+     "frequency_rate": 0.18647166361974407,
+     "mean_spatial_entropy_when_counted": 0.28683654389606666,
+     "mean_image_attention_sum": 0.20450122150468217
+    },
+    {
+     "layer": 13,
+     "head": 1,
+     "frequency": 191,
+     "frequency_rate": 0.1745886654478976,
+     "mean_spatial_entropy_when_counted": 0.3394705154273261,
+     "mean_image_attention_sum": 0.21741627944017022
+    },
+    {
+     "layer": 10,
+     "head": 1,
+     "frequency": 161,
+     "frequency_rate": 0.14716636197440586,
+     "mean_spatial_entropy_when_counted": 0.38385472951995825,
+     "mean_image_attention_sum": 0.2668135291479623
+    },
+    {
+     "layer": 2,
+     "head": 0,
+     "frequency": 156,
+     "frequency_rate": 0.1425959780621572,
+     "mean_spatial_entropy_when_counted": 0.7165663180541907,
+     "mean_image_attention_sum": 0.37254664884842725
+    }
+   ],
+   "criterion1": "chord elbow on dataset-mean head image-attention sums (paper Sec. 4.1)",
+   "criterion2": "paper spatial entropy (> mean, area-weighted, 8-conn), layer >= min_layer",
+   "tau": 0.14275277347407786,
+   "n_eligible": 31
+  },
+  "left_wrist": {
+   "token_block": [
+    256,
+    512
+   ],
+   "grid": 16,
+   "protocol": "paper",
+   "n_samples": 1094,
+   "num_layers": 18,
+   "num_heads": 8,
+   "selected": [
+    {
+     "layer": 5,
+     "head": 5,
+     "frequency": 984,
+     "frequency_rate": 0.8994515539305301,
+     "mean_spatial_entropy_when_counted": 0.20222042180727914,
+     "mean_image_attention_sum": 0.8777029477808985
+    },
+    {
+     "layer": 5,
+     "head": 3,
+     "frequency": 924,
+     "frequency_rate": 0.8446069469835467,
+     "mean_spatial_entropy_when_counted": 0.15633164758088858,
+     "mean_image_attention_sum": 0.9414575411589098
+    },
+    {
+     "layer": 7,
+     "head": 3,
+     "frequency": 905,
+     "frequency_rate": 0.8272394881170019,
+     "mean_spatial_entropy_when_counted": 0.3094153252422966,
+     "mean_image_attention_sum": 0.7803389020877085
+    }
+   ],
+   "ranking_top20": [
+    {
+     "layer": 5,
+     "head": 5,
+     "frequency": 984,
+     "frequency_rate": 0.8994515539305301,
+     "mean_spatial_entropy_when_counted": 0.20222042180727914,
+     "mean_image_attention_sum": 0.8777029477808985
+    },
+    {
+     "layer": 5,
+     "head": 3,
+     "frequency": 924,
+     "frequency_rate": 0.8446069469835467,
+     "mean_spatial_entropy_when_counted": 0.15633164758088858,
+     "mean_image_attention_sum": 0.9414575411589098
+    },
+    {
+     "layer": 7,
+     "head": 3,
+     "frequency": 905,
+     "frequency_rate": 0.8272394881170019,
+     "mean_spatial_entropy_when_counted": 0.3094153252422966,
+     "mean_image_attention_sum": 0.7803389020877085
+    },
+    {
+     "layer": 8,
+     "head": 2,
+     "frequency": 709,
+     "frequency_rate": 0.6480804387568556,
+     "mean_spatial_entropy_when_counted": 0.13112832481923575,
+     "mean_image_attention_sum": 0.9130596444419359
+    },
+    {
+     "layer": 4,
+     "head": 1,
+     "frequency": 697,
+     "frequency_rate": 0.6371115173674589,
+     "mean_spatial_entropy_when_counted": 0.38595079066468363,
+     "mean_image_attention_sum": 0.7818444783116607
+    },
+    {
+     "layer": 7,
+     "head": 7,
+     "frequency": 559,
+     "frequency_rate": 0.5109689213893968,
+     "mean_spatial_entropy_when_counted": 0.3682223995550105,
+     "mean_image_attention_sum": 0.38085644173229855
+    },
+    {
+     "layer": 3,
+     "head": 2,
+     "frequency": 544,
+     "frequency_rate": 0.49725776965265084,
+     "mean_spatial_entropy_when_counted": 0.28809785109339064,
+     "mean_image_attention_sum": 0.8620849169477466
+    },
+    {
+     "layer": 8,
+     "head": 6,
+     "frequency": 514,
+     "frequency_rate": 0.46983546617915906,
+     "mean_spatial_entropy_when_counted": 0.3174239926673114,
+     "mean_image_attention_sum": 0.4771511963342182
+    },
+    {
+     "layer": 9,
+     "head": 5,
+     "frequency": 412,
+     "frequency_rate": 0.376599634369287,
+     "mean_spatial_entropy_when_counted": 0.2407007556195948,
+     "mean_image_attention_sum": 0.42443893492984597
+    },
+    {
+     "layer": 11,
+     "head": 3,
+     "frequency": 400,
+     "frequency_rate": 0.3656307129798903,
+     "mean_spatial_entropy_when_counted": 0.5157354872772505,
+     "mean_image_attention_sum": 0.5532294294951821
+    },
+    {
+     "layer": 10,
+     "head": 3,
+     "frequency": 372,
+     "frequency_rate": 0.340036563071298,
+     "mean_spatial_entropy_when_counted": 0.3896945100656621,
+     "mean_image_attention_sum": 0.6834727981735627
+    },
+    {
+     "layer": 9,
+     "head": 1,
+     "frequency": 349,
+     "frequency_rate": 0.3190127970749543,
+     "mean_spatial_entropy_when_counted": 0.34595615107125166,
+     "mean_image_attention_sum": 0.6348446990606772
+    },
+    {
+     "layer": 12,
+     "head": 4,
+     "frequency": 295,
+     "frequency_rate": 0.2696526508226691,
+     "mean_spatial_entropy_when_counted": 0.2887632723536164,
+     "mean_image_attention_sum": 0.6418748296919863
+    },
+    {
+     "layer": 15,
+     "head": 4,
+     "frequency": 263,
+     "frequency_rate": 0.24040219378427788,
+     "mean_spatial_entropy_when_counted": 0.5737772694488706,
+     "mean_image_attention_sum": 0.702885427629708
+    },
+    {
+     "layer": 4,
+     "head": 2,
+     "frequency": 259,
+     "frequency_rate": 0.236745886654479,
+     "mean_spatial_entropy_when_counted": 0.5141472874110743,
+     "mean_image_attention_sum": 0.496756466149848
+    },
+    {
+     "layer": 13,
+     "head": 3,
+     "frequency": 243,
+     "frequency_rate": 0.22212065813528337,
+     "mean_spatial_entropy_when_counted": 0.3655818500310918,
+     "mean_image_attention_sum": 0.9316788787597712
+    },
+    {
+     "layer": 15,
+     "head": 2,
+     "frequency": 242,
+     "frequency_rate": 0.22120658135283364,
+     "mean_spatial_entropy_when_counted": 0.5308276959733212,
+     "mean_image_attention_sum": 0.7002228294146781
+    },
+    {
+     "layer": 14,
+     "head": 1,
+     "frequency": 231,
+     "frequency_rate": 0.21115173674588666,
+     "mean_spatial_entropy_when_counted": 0.3592592176477193,
+     "mean_image_attention_sum": 0.9433350590290928
+    },
+    {
+     "layer": 7,
+     "head": 2,
+     "frequency": 177,
+     "frequency_rate": 0.16179159049360145,
+     "mean_spatial_entropy_when_counted": 0.4888123152645623,
+     "mean_image_attention_sum": 0.46523573199181495
+    },
+    {
+     "layer": 9,
+     "head": 2,
+     "frequency": 167,
+     "frequency_rate": 0.1526508226691042,
+     "mean_spatial_entropy_when_counted": 0.48248279208097133,
+     "mean_image_attention_sum": 0.5963890974765722
+    }
+   ],
+   "criterion1": "chord elbow on dataset-mean head image-attention sums (paper Sec. 4.1)",
+   "criterion2": "paper spatial entropy (> mean, area-weighted, 8-conn), layer >= min_layer",
+   "tau": 0.2933112883589603,
+   "n_eligible": 49
+  }
+ },
+ "selection_sha256": "b959ce73a09ff250016aa73abdfb468bf288cf77b17544a02b1cad690551d03f",
+ "created_at": "2026-10-23T12:17:20+09:00"
+}
