@@ -4,7 +4,7 @@ Runs in the LIBERO venv (``third_party/openpi/examples/libero/.venv``), NOT the 
 pins numpy 1.22 / robosuite 1.4.1 / mujoco 3.2.3, which are incompatible with the JAX stack.
 
 Required environment:
-    LIBERO_CONFIG_PATH=Baseline/knows_vla/libero_config   # keeps ~/.libero untouched
+    LIBERO_CONFIG_PATH=Baseline/paper_baselines/methods/knows/libero_config   # keeps ~/.libero untouched
     PYTHONPATH=$PWD/third_party/openpi/third_party/libero
     MUJOCO_GL=egl
 """

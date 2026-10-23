@@ -31,11 +31,27 @@ from the original papers.
 | TokenCut (`tokencut`) | [26] | attention/feature-graph object discovery prior (Sec. 2) | YangtaoWANG95/TokenCut @ `fed52cd` | MIT | `re-impl` + parity (B) | B: tests; real DINO ViT-S/16 CPU smoke by A | B |
 | ATS V11AB (`ats_v11ab`, Coarse) | — (previous AG3S) | Tab. 2 "Coarse" row, same frames | this repo, `benchmark/runners/perception_replay.py` runs | — | `existing` (read from a perception run) | wired (`--ats-run`) | `--ats-run <perception run>` |
 | π0.5 only | [18] | closed-loop "VLA only" arm (no grounding) | `benchmark/runners/launch_libero_pi05_only.py` | — | `existing` | existing runs (SL0/SL3/SL5) | see AG3S_BENCHMARK_LOG.md |
-| KNOWS | [17] | Tab. 4 "KNOWS (reported)"; attention-guided safety filter | `Baseline/knows_vla` (P0 probes only) | see its README | `existing` (`partial`) | not moved; probes only | `Baseline/knows_vla/README.md` |
-| VLSA / AEGIS | [10] | Tab. 4 "VLSA (reported)"; SafeLIBERO | `benchmark/SafeLIBERO` @ `2457fee` (submodule) | see its LICENSE | `existing` | not moved | `benchmark/SafeLIBERO/README.md` |
-| SEAM | [31] | related work (chunk smoothing) | `Baseline/seam_vla` | see its README | `existing` | not moved | `Baseline/seam_vla/README.md` |
+| SEAM | [31] | related work (chunk smoothing); not a comparison arm (user 2026-10-23) | `Baseline/seam_vla` | see its README | `existing` | not moved, not used | `Baseline/seam_vla/README.md` |
 
-### Survey only (not implemented; `docs/survey.md`, checked 2026-10-23)
+## Methods — safety filters and sampling guidance (`methods/`, PAPER-METHODS 2026-10-23)
+
+All implement `methods/interface.py` (`SafetyFilter`: action chunk -> modified chunk; `SamplingGuidance`: openpi
+`pi0.sample_actions(guidance_fn=...)` hook, pure JAX, openpi unchanged) and are reachable through `get_method(name)`.
+"Works" = runs end to end on recorded SL3 dev frames and returns a modified chunk (CPU smoke + unit tests).
+Closed-loop rollout and pi0.5-attached GPU smoke are the next step. Details: `PAPER-METHODS-C.impl.md`, `-D.impl.md`.
+
+| method | cite | kind | source @ SHA | license | form | main deviations from the paper |
+|---|---|---|---|---|---|---|
+| KNOWS (`knows`) | [17] | SafetyFilter (ellipsoid EE CBF-QP) | moved from `Baseline/knows_vla` (history kept; old import path kept as an alias because V11AB `stages/geometry.py` uses its `mvee`) | — | `existing` + adapter | earlier P0–P3 re-implementation; obstacle shapes fixed at first call |
+| VLSA / AEGIS (`aegis`) | [10] | SafetyFilter (CBF-QP) | official `benchmark/SafeLIBERO/main/{utils,main_aegis}.py` @ `2457fee` (helpers imported, QP ported with line refs) | see SafeLIBERO LICENSE | `wrapper` | **no VLM / no external API** (GLM step replaced by privileged names + Grounding DINO, generic Grounding DINO, or GT seg); one constraint per obstacle |
+| Multi-link safety filter (`multilink_cbf`) | [1] | SafetyFilter (per-link CBF-QP) | no public code — implemented from the paper | — | `re-impl` (`partial`) | moving-hazard optical flow omitted; Panda links as ellipsoids fitted to the adapter sphere model |
+| OmniGuide (`omniguide`) | [19] | SamplingGuidance (attractor/repeller energy) | `daniilidis-group/OmniGuide` @ `d649d698` + `omniguide-openpi` @ `663f1cb2` | Apache-2.0 (openpi part) | `port` | EE-delta instead of DROID joints; no best-of-N, no subtask monitor |
+| Constrained flow matching (`constrained_flow_matching`) | [5] | SamplingGuidance (CBF-constrained) | `VLA-Safety-ConstrainedFlowMatching` @ `b91153ad` (reference only) | **none** — not copied | `re-impl` | jit SQP instead of SciPy SLSQP; paper uses GT spheres on SafeLIBERO |
+| Lan-o3dp guidance (`lan_o3dp_guidance_adapted`) | [15] | SamplingGuidance (obstacle cost) | `qqianfeng/lan-o3dp` @ `b89c2898` | MIT | `adapted` | guidance only, moved onto pi0.5; **not the original policy's result** |
+| NUDGE (`nudge`) | [9] | SamplingGuidance | no public code — implemented from the paper | — | `re-impl` (`partial`) | hand + finger spheres only, no IK; d_safe 0.02 chosen (not given in paper) |
+| RoboGround / GuidedVLA / OBEYED-VLA | [11] [13] [24] | trained grounding policies | fetched @ `25a86263` / `04be059e` / `bdf25556` | MIT / Apache-2.0 / none | `fetch + README` | need training or own checkpoints; not run |
+
+### Code availability (`docs/survey.md`, checked 2026-10-23)
 
 | cite | method | public code | note |
 |---|---|---|---|
@@ -51,8 +67,8 @@ from the original papers.
 No exemption / All-link exemption ablations map to existing V11AB flags (`--target-field-policy relax` /
 `exclude-all`); see `docs/exemption_ablations.md` (All-link is only meaningful on `--links arms` profiles).
 
-Not moved on purpose: `Baseline/knows_vla`, `Baseline/seam_vla`, `benchmark/SafeLIBERO` keep their paths (existing
-runs and imports depend on them).
+`Baseline/seam_vla` and `benchmark/SafeLIBERO` keep their paths (existing runs and imports depend on them).
+`Baseline/knows_vla` is now only an import alias for `methods/knows`.
 
 ## Layout
 

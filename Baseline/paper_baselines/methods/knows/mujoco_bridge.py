@@ -11,7 +11,7 @@ also why `check_admissibility.py` parses MJCF directly). Everything here is ther
 against a small mesh-free scene built in the tests, and the transport model exercises the same
 code paths with no changes.
 
-    integration/rby1/manipulation/.venv/bin/python -m Baseline.knows_vla.mujoco_bridge --self-test
+    integration/rby1/manipulation/.venv/bin/python -m Baseline.paper_baselines.methods.knows.mujoco_bridge --self-test
 """
 
 from __future__ import annotations
@@ -20,9 +20,9 @@ import dataclasses
 
 import numpy as np
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid
-from Baseline.knows_vla.cbf.filter import ArticulatedBody, Link
-from Baseline.knows_vla.perception.ellipsoid_fit import (
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid
+from Baseline.paper_baselines.methods.knows.cbf.filter import ArticulatedBody, Link
+from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import (
     CameraModel,
     PerceptionMargin,
     complete_backface,

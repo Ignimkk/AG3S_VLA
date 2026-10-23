@@ -1,0 +1,1357 @@
+{
+ "step": "PAPER-BASELINES-2",
+ "date": "2026-10-23",
+ "runs": [
+  {
+   "id": "sl3dev_notrack",
+   "command": "flock -w 3600 /tmp/ag3s-vla-gpu-validation.lock env PYTHONPATH=$PWD .venv-baselines/bin/python -m Baseline.paper_baselines.eval.offline_grounding --source-run 20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0 --scene-gt outputs/verify/SL4/raw/scene --providers gt_oracle grounded_sam grounded_sam2:per_frame yoloe localization_heads:threshold localization_heads:sam_point tokencut:foreground tokencut:attention_overlap --prompt-modes phrase instruction --size default --attention-run 20261012T202459_309e4c6da477_sl3-attention-audit-dev --ats-run 20261012T225820_46a08d6ff644_sl4-perception-dev --save-masks --run-id paper-baselines-2-sl3dev-notrack",
+   "venv": ".venv-baselines",
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261023T134909_bf1403d54bc6_paper-baselines-2-sl3dev-notrack",
+   "sha256": {
+    "frames.jsonl": "05bee04e6e20f3ba6aaf4e583e70611289b1780441621fe79dc59317d0f078e7",
+    "episodes.jsonl": "399aeab952089df1b3ce9fa96b0d42e78f06409626306c1abd7c2b61fc61e052",
+    "summary.json": "b558c9215b5d3602026e946f05ba78104198162a04c78e3b60891271fd8e7425",
+    "provenance.json": "34a080c35762930b9ca7b83a082c135aa6d3e7fdf5b72de856da5077629ca987",
+    "run_manifest.json": "9b00df25832401a0cc85705585becc273576434da1c7e89be34e27e55276101d"
+   },
+   "n_mask_files": 2652,
+   "gpu_wall": {
+    "start_utc": "2026-10-23T04:48:24+00:00",
+    "end_utc": "2026-10-23T07:03:04+00:00",
+    "seconds": 8080
+   },
+   "raw_output": "outputs/verify/PAPER-BASELINES-2/sl3dev/numbers.json",
+   "stdout_log": "outputs/verify/PAPER-BASELINES-2/run2_sl3dev.log",
+   "analysis_script": "outputs/verify/PAPER-BASELINES-2/analyze_run.py",
+   "figure_script": "outputs/verify/PAPER-BASELINES-2/make_figures.py"
+  },
+  {
+   "id": "sl3dev_with_track_FAILED",
+   "command": "same as sl3dev_notrack plus grounded_sam2:track, --run-id paper-baselines-2-sl3dev",
+   "venv": ".venv-baselines",
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261023T133959_bf1403d54bc6_paper-baselines-2-sl3dev",
+   "exit": 1,
+   "partial_frames_jsonl_sha256": "deac2c874c78d12b79c1404c1a5aa759671ceb06e5173cb4230ba5fc60f15b16",
+   "partial_rows": 139,
+   "gpu_wall": {
+    "start_utc": "2026-10-23T04:39:01+00:00",
+    "end_utc": "2026-10-23T04:47:28+00:00",
+    "seconds": 507
+   },
+   "stdout_log": "outputs/verify/PAPER-BASELINES-2/run1_sl3dev.log",
+   "evidence": "outputs/verify/PAPER-BASELINES-2/failed_run1_sl3dev_track_oom/"
+  },
+  {
+   "id": "regression_baseline_legacy",
+   "command": "MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT .venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records /mnt/dev/AG3S_VLA-storage/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms",
+   "venv": ".venv-ag3s",
+   "raw_output": "outputs/verify/PAPER-BASELINES-2/regression/base_legacy.json",
+   "stdout_log": "outputs/verify/PAPER-BASELINES-2/regression/base_legacy.log"
+  }
+ ],
+ "code_state": {
+  "repo": "AG3S_VLA-benchmark",
+  "head": "bf1403d5",
+  "branch": "feature/panda-benchmark",
+  "dirty_files": [
+   "Baseline/paper_baselines/eval/offline_grounding.py",
+   "Baseline/paper_baselines/providers/localization_heads.py",
+   "Baseline/paper_baselines/setup/setup_venv.sh",
+   "Baseline/paper_baselines/setup/requirements-baselines.in",
+   "Baseline/paper_baselines/setup/requirements-baselines.txt",
+   "Baseline/paper_baselines/tests/test_offline_grounding.py",
+   "Baseline/paper_baselines/external/sources.json"
+  ],
+  "file_sha256": "outputs/verify/PAPER-BASELINES-2/code_state.txt",
+  "packages": "torch 2.7.1+cu126, torchvision 0.22.1, transformers 4.53.2, sam-2 1.0 (editable b7a9c29), ultralytics 8.4.184, numpy 2.2.6"
+ },
+ "numbers": {
+  "set": "SL3 dev, libero_spatial t0-9 e0, 10 episodes, 221 evaluated frames, cameras head + left_wrist, --size default, device cuda (H200)",
+  "in_sample": {
+   "localization_heads": true,
+   "detail": {
+    "localization_heads:threshold": {
+     "in_sample": true,
+     "selection_runs": [
+      "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+      "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4"
+     ]
+    },
+    "localization_heads:sam_point": {
+     "in_sample": true,
+     "selection_runs": [
+      "20261012T202459_309e4c6da477_sl3-attention-audit-dev",
+      "20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4"
+     ]
+    }
+   }
+  },
+  "baseline_check": {
+   "violated_start": 14,
+   "frames": 15,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -29.031048280806342
+  },
+  "arms": {
+   "gt_oracle|phrase": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "found_rate": 1.0
+     },
+     "left_wrist": {
+      "iou": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "found_rate": 0.9683257918552036
+     }
+    },
+    "3d_soft_iou": 0.9679245925334878,
+    "3d_soft_precision": 0.9679245925334881,
+    "3d_soft_recall": 1.0,
+    "3d_hard_iou": 0.9758685989910607,
+    "neighbour_leak_voxel_mass_episode_mean": 1.292193177436869,
+    "neighbour_leak_voxel_mass_sum": 272.69753014519114,
+    "neighbour_leak_fraction_pooled": 0.0016461774781636003,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.9944795520717644,
+    "found_any_rate": 1.0,
+    "found_any": [
+     221,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.9036836362305605,
+      "ci95": [
+       0.8757699901477571,
+       0.9323240101870889
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": 0.5751290535333505,
+      "ci95": [
+       0.4228245311076207,
+       0.744246304660372
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.9316046451052946,
+      "ci95": [
+       0.9045259748325334,
+       0.960399160655805
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": -31.87212044799678,
+      "ci95": [
+       -61.709496051349326,
+       -4.516350419038768
+      ],
+      "better": 4,
+      "worse": 6
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 0.3445977345108986,
+     "p95_ms": 0.4701769910752771
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 0.1866249367594719,
+     "p95_ms": 0.2605047542601823
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 0,
+     "rate": 0.0,
+     "n_neighbor_frac_gt_half": 0,
+     "rate_neighbor_frac_gt_half": 0.0
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 221,
+     "n_distractor_major": 0,
+     "rate": 0.0
+    }
+   },
+   "gt_oracle|instruction": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "found_rate": 1.0
+     },
+     "left_wrist": {
+      "iou": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "found_rate": 0.9683257918552036
+     }
+    },
+    "3d_soft_iou": 0.9679245925334878,
+    "3d_soft_precision": 0.9679245925334881,
+    "3d_soft_recall": 1.0,
+    "3d_hard_iou": 0.9758685989910607,
+    "neighbour_leak_voxel_mass_episode_mean": 1.292193177436869,
+    "neighbour_leak_voxel_mass_sum": 272.69753014519114,
+    "neighbour_leak_fraction_pooled": 0.0016461774781636003,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.9944795520717644,
+    "found_any_rate": 1.0,
+    "found_any": [
+     221,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.9036836362305605,
+      "ci95": [
+       0.8757699901477571,
+       0.9323240101870889
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": 0.5751290535333505,
+      "ci95": [
+       0.4228245311076207,
+       0.744246304660372
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.9316046451052946,
+      "ci95": [
+       0.9045259748325334,
+       0.960399160655805
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": -31.87212044799678,
+      "ci95": [
+       -61.709496051349326,
+       -4.516350419038768
+      ],
+      "better": 4,
+      "worse": 6
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 0.35273516550660133,
+     "p95_ms": 0.4221803043037653
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 0.19119726493954659,
+     "p95_ms": 0.24986546486616135
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 0,
+     "rate": 0.0,
+     "n_neighbor_frac_gt_half": 0,
+     "rate_neighbor_frac_gt_half": 0.0
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 221,
+     "n_distractor_major": 0,
+     "rate": 0.0
+    }
+   },
+   "grounded_sam|phrase": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.2805759862316918,
+      "precision": 0.30770206537750555,
+      "recall": 0.30412556201916685,
+      "found_rate": 0.9773755656108597
+     },
+     "left_wrist": {
+      "iou": 0.8415722359012108,
+      "precision": 0.8407949369105993,
+      "recall": 0.8751031673944516,
+      "found_rate": 1.0
+     }
+    },
+    "3d_soft_iou": 0.5146885920266724,
+    "3d_soft_precision": 0.5773877128082795,
+    "3d_soft_recall": 0.7172206273199652,
+    "3d_hard_iou": 0.5164498278178831,
+    "neighbour_leak_voxel_mass_episode_mean": 370.0709163694656,
+    "neighbour_leak_voxel_mass_sum": 81532.26300345671,
+    "neighbour_leak_fraction_pooled": 0.37985940515405797,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.7993462633463516,
+    "found_any_rate": 1.0,
+    "found_any": [
+     221,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.4504476357237449,
+      "ci95": [
+       0.33984704011312244,
+       0.5669687587782385
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": 0.18459217380814194,
+      "ci95": [
+       0.039121962761157425,
+       0.3610119183733559
+      ],
+      "better": 8,
+      "worse": 2
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.6488252724252599,
+      "ci95": [
+       0.5390553174263901,
+       0.7412364360385634
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 336.90660274403194,
+      "ci95": [
+       222.1745373687054,
+       447.06745264557503
+      ],
+      "better": 10,
+      "worse": 0
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 514.3558569252491,
+     "p95_ms": 730.4487423971291
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 243.06045938283205,
+     "p95_ms": 323.8850690890103
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 62,
+     "rate": 0.28054298642533937,
+     "n_neighbor_frac_gt_half": 49,
+     "rate_neighbor_frac_gt_half": 0.22171945701357465
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 221,
+     "n_distractor_major": 22,
+     "rate": 0.09954751131221719
+    }
+   },
+   "grounded_sam|instruction": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.3527712989862101,
+      "precision": 0.36896113090613725,
+      "recall": 0.37810528243235086,
+      "found_rate": 0.9909502262443439
+     },
+     "left_wrist": {
+      "iou": 0.8254623104899098,
+      "precision": 0.8240254404602669,
+      "recall": 0.854329659175772,
+      "found_rate": 1.0
+     }
+    },
+    "3d_soft_iou": 0.545612422648818,
+    "3d_soft_precision": 0.6005377653802644,
+    "3d_soft_recall": 0.7387548156649094,
+    "3d_hard_iou": 0.5475160508180157,
+    "neighbour_leak_voxel_mass_episode_mean": 340.9513915773397,
+    "neighbour_leak_voxel_mass_sum": 75278.7064136937,
+    "neighbour_leak_fraction_pooled": 0.3604956728938496,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.802236403632177,
+    "found_any_rate": 1.0,
+    "found_any": [
+     221,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.48137146634589045,
+      "ci95": [
+       0.36690260105573286,
+       0.5859277401758155
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": 0.20774222638012688,
+      "ci95": [
+       0.06690418057482526,
+       0.3626850422350102
+      ],
+      "better": 8,
+      "worse": 2
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.670359460770204,
+      "ci95": [
+       0.5670228904685307,
+       0.7515606577655786
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 307.78707795190604,
+      "ci95": [
+       196.90496077032915,
+       425.36766633386003
+      ],
+      "better": 10,
+      "worse": 0
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 504.82784770429134,
+     "p95_ms": 542.5667542498559
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 232.73413395509124,
+     "p95_ms": 310.4196851607412
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 55,
+     "rate": 0.248868778280543,
+     "n_neighbor_frac_gt_half": 46,
+     "rate_neighbor_frac_gt_half": 0.2081447963800905
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 221,
+     "n_distractor_major": 20,
+     "rate": 0.09049773755656108
+    }
+   },
+   "grounded_sam2:per_frame|phrase": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.241717219623565,
+      "precision": 0.3335815787857446,
+      "recall": 0.2560174195183784,
+      "found_rate": 0.8597285067873304
+     },
+     "left_wrist": {
+      "iou": 0.8415822938146796,
+      "precision": 0.8447308782822205,
+      "recall": 0.8757916743884335,
+      "found_rate": 0.9683257918552036
+     }
+    },
+    "3d_soft_iou": 0.5110401083192193,
+    "3d_soft_precision": 0.5966551881705273,
+    "3d_soft_recall": 0.6978113343080175,
+    "3d_hard_iou": 0.5130255148113193,
+    "neighbour_leak_voxel_mass_episode_mean": 341.1798651084076,
+    "neighbour_leak_voxel_mass_sum": 75318.60235034123,
+    "neighbour_leak_fraction_pooled": 0.37534686017592206,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.7984136091525893,
+    "found_any_rate": 0.995475113122172,
+    "found_any": [
+     220,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.44679915201629167,
+      "ci95": [
+       0.33903135412740665,
+       0.552518665371883
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": 0.2038596491703899,
+      "ci95": [
+       0.0588021530305727,
+       0.382383144384838
+      ],
+      "better": 8,
+      "worse": 2
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.6294159794133121,
+      "ci95": [
+       0.5294692346546317,
+       0.7081693324840105
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 308.015551482974,
+      "ci95": [
+       181.3601792872706,
+       430.2941311679411
+      ],
+      "better": 9,
+      "worse": 1
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 380.9802159667015,
+     "p95_ms": 433.02046065218747
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 195.6797568127513,
+     "p95_ms": 221.71732699498534
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 56,
+     "rate": 0.25339366515837103,
+     "n_neighbor_frac_gt_half": 46,
+     "rate_neighbor_frac_gt_half": 0.2081447963800905
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 220,
+     "n_distractor_major": 21,
+     "rate": 0.09545454545454546
+    }
+   },
+   "grounded_sam2:per_frame|instruction": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.2858634366526617,
+      "precision": 0.442116880791923,
+      "recall": 0.3015034647295581,
+      "found_rate": 0.8054298642533937
+     },
+     "left_wrist": {
+      "iou": 0.8235510881032335,
+      "precision": 0.8560625744355473,
+      "recall": 0.8533504426275946,
+      "found_rate": 0.9366515837104072
+     }
+    },
+    "3d_soft_iou": 0.5447628695701361,
+    "3d_soft_precision": 0.6427212826593535,
+    "3d_soft_recall": 0.7092296467122273,
+    "3d_hard_iou": 0.5467115777883287,
+    "neighbour_leak_voxel_mass_episode_mean": 292.3353501904917,
+    "neighbour_leak_voxel_mass_sum": 64722.455116782265,
+    "neighbour_leak_fraction_pooled": 0.33875992565978874,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.8215468807594535,
+    "found_any_rate": 0.9909502262443439,
+    "found_any": [
+     219,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.4805219132672086,
+      "ci95": [
+       0.36452869196969845,
+       0.5900057402225569
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": 0.2499257436592161,
+      "ci95": [
+       0.0915842968033361,
+       0.4299121980767108
+      ],
+      "better": 8,
+      "worse": 2
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.6408342918175219,
+      "ci95": [
+       0.5429159824503121,
+       0.7216920073517386
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 259.17103656505805,
+      "ci95": [
+       128.17597588884027,
+       395.96933779857966
+      ],
+      "better": 10,
+      "worse": 0
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 376.8960293382406,
+     "p95_ms": 443.32792977802455
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 194.78088291361928,
+     "p95_ms": 223.47659957595167
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 51,
+     "rate": 0.23076923076923078,
+     "n_neighbor_frac_gt_half": 41,
+     "rate_neighbor_frac_gt_half": 0.18552036199095023
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 219,
+     "n_distractor_major": 20,
+     "rate": 0.091324200913242
+    }
+   },
+   "yoloe|phrase": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.09330228965527607,
+      "precision": 0.1604423299832099,
+      "recall": 0.10392300676318009,
+      "found_rate": 0.6380090497737556
+     },
+     "left_wrist": {
+      "iou": 0.4903170169432453,
+      "precision": 0.7409972839205916,
+      "recall": 0.520168583555617,
+      "found_rate": 0.579185520361991
+     }
+    },
+    "3d_soft_iou": 0.3132344804329331,
+    "3d_soft_precision": 0.5108254469285751,
+    "3d_soft_recall": 0.4237321613393135,
+    "3d_hard_iou": 0.3140602099435904,
+    "neighbour_leak_voxel_mass_episode_mean": 268.1051561442069,
+    "neighbour_leak_voxel_mass_sum": 58262.10546292981,
+    "neighbour_leak_fraction_pooled": 0.4155879469793555,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.630261573095649,
+    "found_any_rate": 0.8506787330316742,
+    "found_any": [
+     188,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.2489935241300055,
+      "ci95": [
+       0.1773346097794935,
+       0.30680252129881125
+      ],
+      "better": 9,
+      "worse": 1
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": 0.11802990792843777,
+      "ci95": [
+       -0.05052511388299004,
+       0.299439504467436
+      ],
+      "better": 7,
+      "worse": 3
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.3553368064446082,
+      "ci95": [
+       0.26380531191538714,
+       0.425017860406956
+      ],
+      "better": 9,
+      "worse": 1
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 234.9408425187732,
+      "ci95": [
+       145.60894626278588,
+       328.11260855396813
+      ],
+      "better": 10,
+      "worse": 0
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 112.11710562929511,
+     "p95_ms": 266.5518469642848
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 49.1643650457263,
+     "p95_ms": 191.61901390179983
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 66,
+     "rate": 0.2986425339366516,
+     "n_neighbor_frac_gt_half": 63,
+     "rate_neighbor_frac_gt_half": 0.2850678733031674
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 188,
+     "n_distractor_major": 45,
+     "rate": 0.2393617021276596
+    }
+   },
+   "yoloe|instruction": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.002083342551873025,
+      "precision": 0.007158871638793053,
+      "recall": 0.016811009073044232,
+      "found_rate": 0.248868778280543
+     },
+     "left_wrist": {
+      "iou": 0.15506658915047872,
+      "precision": 0.7550123925536013,
+      "recall": 0.16556693658201926,
+      "found_rate": 0.19909502262443438
+     }
+    },
+    "3d_soft_iou": 0.10973034541779572,
+    "3d_soft_precision": 0.3770594148683547,
+    "3d_soft_recall": 0.13397730728229545,
+    "3d_hard_iou": 0.1097382519613453,
+    "neighbour_leak_voxel_mass_episode_mean": 84.31027179162935,
+    "neighbour_leak_voxel_mass_sum": 16867.537635451805,
+    "neighbour_leak_fraction_pooled": 0.09103612635441705,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.4073033056500507,
+    "found_any_rate": 0.4434389140271493,
+    "found_any": [
+     98,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.045489389114868134,
+      "ci95": [
+       -0.023403429949981795,
+       0.12265061114156064
+      ],
+      "better": 6,
+      "worse": 4
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": -0.015736124131782672,
+      "ci95": [
+       -0.19789707424618103,
+       0.1568357733661998
+      ],
+      "better": 6,
+      "worse": 4
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.0655819523875901,
+      "ci95": [
+       -0.008070628462741243,
+       0.1449847816518662
+      ],
+      "better": 6,
+      "worse": 4
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 51.145958166195705,
+      "ci95": [
+       -26.391402973818533,
+       156.66012000328664
+      ],
+      "better": 7,
+      "worse": 3
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 160.72251740843058,
+     "p95_ms": 277.7232967782765
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 73.41841515153646,
+     "p95_ms": 194.33512664400038
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 39,
+     "rate": 0.17647058823529413,
+     "n_neighbor_frac_gt_half": 26,
+     "rate_neighbor_frac_gt_half": 0.11764705882352941
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 98,
+     "n_distractor_major": 33,
+     "rate": 0.336734693877551
+    }
+   },
+   "localization_heads:threshold|no_text": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.04177311945070673,
+      "precision": 0.04185547905228306,
+      "recall": 0.7656180554742689,
+      "found_rate": 1.0
+     },
+     "left_wrist": {
+      "iou": 0.23222981402446058,
+      "precision": 0.2630397802844802,
+      "recall": 0.7242356820110406,
+      "found_rate": 1.0
+     }
+    },
+    "3d_soft_iou": 0.07538363122932946,
+    "3d_soft_precision": 0.07636689534962847,
+    "3d_soft_recall": 0.831807541513198,
+    "3d_hard_iou": 0.07597244353507089,
+    "neighbour_leak_voxel_mass_episode_mean": 657.3434713786678,
+    "neighbour_leak_voxel_mass_sum": 144494.80941801233,
+    "neighbour_leak_fraction_pooled": 0.07905996211442508,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.19666796764993727,
+    "found_any_rate": 1.0,
+    "found_any": [
+     221,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.0111426749264019,
+      "ci95": [
+       -0.016912181392853394,
+       0.04119223121465288
+      ],
+      "better": 6,
+      "worse": 4
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": -0.31642864365050893,
+      "ci95": [
+       -0.46924410309523773,
+       -0.1456346130421273
+      ],
+      "better": 3,
+      "worse": 7
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.7634121866184926,
+      "ci95": [
+       0.7333309426016761,
+       0.8023536542990963
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 624.1791577532342,
+      "ci95": [
+       522.6395147489404,
+       732.6629165234217
+      ],
+      "better": 10,
+      "worse": 0
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 3.1873048283159733,
+     "p95_ms": 3.8082195445895195
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 1.6974820755422115,
+     "p95_ms": 2.098901430144906
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 123,
+     "rate": 0.5565610859728507,
+     "n_neighbor_frac_gt_half": 0,
+     "rate_neighbor_frac_gt_half": 0.0
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 221,
+     "n_distractor_major": 10,
+     "rate": 0.04524886877828054
+    }
+   },
+   "localization_heads:sam_point|no_text": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.21905638269714975,
+      "precision": 0.2651421255641406,
+      "recall": 0.27235881143422536,
+      "found_rate": 1.0
+     },
+     "left_wrist": {
+      "iou": 0.28686004418823524,
+      "precision": 0.28607635832437767,
+      "recall": 0.3259063491656159,
+      "found_rate": 1.0
+     }
+    },
+    "3d_soft_iou": 0.19684526448360465,
+    "3d_soft_precision": 0.25535357109128026,
+    "3d_soft_recall": 0.37801599669323266,
+    "3d_hard_iou": 0.1979798140752371,
+    "neighbour_leak_voxel_mass_episode_mean": 191.72567326385771,
+    "neighbour_leak_voxel_mass_sum": 42767.16443618516,
+    "neighbour_leak_fraction_pooled": 0.05132455957942177,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.2649287564479582,
+    "found_any_rate": 1.0,
+    "found_any": [
+     221,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.13260430818067706,
+      "ci95": [
+       0.09984532403588949,
+       0.16470864977980554
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": -0.13744196790885707,
+      "ci95": [
+       -0.2802359710024722,
+       0.021877641291295154
+      ],
+      "better": 3,
+      "worse": 7
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.30962064179852733,
+      "ci95": [
+       0.26361877857482113,
+       0.3524573813237547
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 158.56135963842408,
+      "ci95": [
+       137.2045530392328,
+       179.14142103681695
+      ],
+      "better": 10,
+      "worse": 0
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 325.5168623290956,
+     "p95_ms": 357.6901436317712
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 148.87957694008946,
+     "p95_ms": 219.97175607830286
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 95,
+     "rate": 0.4298642533936652,
+     "n_neighbor_frac_gt_half": 36,
+     "rate_neighbor_frac_gt_half": 0.16289592760180996
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 221,
+     "n_distractor_major": 5,
+     "rate": 0.02262443438914027
+    }
+   },
+   "tokencut:foreground|no_text": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.032924984928384374,
+      "precision": 0.03311612173491222,
+      "recall": 0.5984187674881468,
+      "found_rate": 1.0
+     },
+     "left_wrist": {
+      "iou": 0.5468963591045651,
+      "precision": 0.5535339063350607,
+      "recall": 0.7640947738587249,
+      "found_rate": 1.0
+     }
+    },
+    "3d_soft_iou": 0.08029956592345174,
+    "3d_soft_precision": 0.08138118719044862,
+    "3d_soft_recall": 0.7369330460174401,
+    "3d_hard_iou": 0.08080990275408295,
+    "neighbour_leak_voxel_mass_episode_mean": 474.5223841524333,
+    "neighbour_leak_voxel_mass_sum": 102965.90878529519,
+    "neighbour_leak_fraction_pooled": 0.06795451795404701,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.32066834002343814,
+    "found_any_rate": 1.0,
+    "found_any": [
+     221,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": 0.01605860962052417,
+      "ci95": [
+       -0.02018761328965998,
+       0.05143969262187657
+      ],
+      "better": 6,
+      "worse": 4
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": -0.3114143518096888,
+      "ci95": [
+       -0.46761515928381114,
+       -0.13855694477468586
+      ],
+      "better": 3,
+      "worse": 7
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.6685376911227349,
+      "ci95": [
+       0.5777016666132953,
+       0.7537658244687059
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 441.35807052699965,
+      "ci95": [
+       308.2946268803946,
+       590.9536797126234
+      ],
+      "better": 10,
+      "worse": 0
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 391.7674948461354,
+     "p95_ms": 509.7843900788575
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 204.0844028815627,
+     "p95_ms": 315.212226845324
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 90,
+     "rate": 0.4072398190045249,
+     "n_neighbor_frac_gt_half": 0,
+     "rate_neighbor_frac_gt_half": 0.0
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 221,
+     "n_distractor_major": 15,
+     "rate": 0.06787330316742081
+    }
+   },
+   "tokencut:attention_overlap|no_text": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": {
+     "head": {
+      "iou": 0.04036936895625744,
+      "precision": 0.041807448708125375,
+      "recall": 0.4064150958189371,
+      "found_rate": 1.0
+     },
+     "left_wrist": {
+      "iou": 0.24037280926272658,
+      "precision": 0.24243481176942497,
+      "recall": 0.5249943725567768,
+      "found_rate": 1.0
+     }
+    },
+    "3d_soft_iou": 0.05343237407184074,
+    "3d_soft_precision": 0.05618926539617797,
+    "3d_soft_recall": 0.5387224738407552,
+    "3d_hard_iou": 0.05375922096337606,
+    "neighbour_leak_voxel_mass_episode_mean": 919.1392377421687,
+    "neighbour_leak_voxel_mass_sum": 202920.97463991147,
+    "neighbour_leak_fraction_pooled": 0.07190259061391219,
+    "pred_offgrid_sum": 0.0,
+    "lift_within_10mm": 0.11866717105756079,
+    "found_any_rate": 1.0,
+    "found_any": [
+     221,
+     221
+    ],
+    "paired_vs_ats": {
+     "3d_iou": {
+      "n_episodes": 10,
+      "diff": -0.010808582231086827,
+      "ci95": [
+       -0.03490180455907235,
+       0.011494856768130647
+      ],
+      "better": 5,
+      "worse": 5
+     },
+     "3d_precision": {
+      "n_episodes": 10,
+      "diff": -0.3366062736039594,
+      "ci95": [
+       -0.48262619503722437,
+       -0.17578311146956685
+      ],
+      "better": 2,
+      "worse": 8
+     },
+     "3d_recall": {
+      "n_episodes": 10,
+      "diff": 0.4703271189460498,
+      "ci95": [
+       0.37967020530888856,
+       0.5605130472724149
+      ],
+      "better": 10,
+      "worse": 0
+     },
+     "3d_neighbor_fp": {
+      "n_episodes": 10,
+      "diff": 885.974924116735,
+      "ci95": [
+       797.8649103788987,
+       983.9319071152391
+      ],
+      "better": 10,
+      "worse": 0
+     }
+    },
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 406.4104752615094,
+     "p95_ms": 597.5476022809743
+    },
+    "latency_ms_per_camera_call_excl_first": {
+     "n": 440,
+     "median_ms": 205.87902702391148,
+     "p95_ms": 397.94093035161495
+    },
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 189,
+     "rate": 0.8552036199095022,
+     "n_neighbor_frac_gt_half": 5,
+     "rate_neighbor_frac_gt_half": 0.02262443438914027
+    },
+    "wrong_object_2d_instance": {
+     "n_nonempty_frames": 221,
+     "n_distractor_major": 15,
+     "rate": 0.06787330316742081
+    }
+   },
+   "ats_v11ab|noun_attention": {
+    "n_frames": 221,
+    "n_valid_3d_frames": 221,
+    "n_missing": 0,
+    "n_episodes": 10,
+    "2d": null,
+    "3d_soft_iou": 0.06424095630292756,
+    "3d_soft_precision": 0.3927955390001374,
+    "3d_soft_recall": 0.06839535489470536,
+    "3d_hard_iou": 0.06515133599974623,
+    "neighbour_leak_voxel_mass_episode_mean": 33.16431362543365,
+    "neighbour_leak_voxel_mass_sum": 7378.07422868753,
+    "neighbour_leak_fraction_pooled": 0.24198341189529454,
+    "pred_offgrid_sum": 10524.0,
+    "lift_within_10mm": 0.5352094036346801,
+    "found_any_rate": 0.8099547511312217,
+    "found_any": [
+     179,
+     221
+    ],
+    "paired_vs_ats": null,
+    "latency_ms_per_frame_excl_first": {
+     "n": 220,
+     "median_ms": 94.68775894492865,
+     "p95_ms": 121.0185158997774
+    },
+    "latency_ms_per_camera_call_excl_first": null,
+    "wrong_object_3d_class": {
+     "n_valid": 221,
+     "n_neighbor_gt_tp": 55,
+     "rate": 0.248868778280543,
+     "n_neighbor_frac_gt_half": 46,
+     "rate_neighbor_frac_gt_half": 0.2081447963800905
+    },
+    "wrong_object_2d_instance": null
+   }
+  },
+  "definitions": {
+   "aggregation": "frame -> episode mean -> mean over episodes (harness summary.json)",
+   "neighbour_leak_voxel_mass": "per-frame 3d_neighbor_fp = sum over predicted 5 mm voxels of other_object + destination class fractions",
+   "neighbour_leak_fraction_pooled": "sum(3d_neighbor_fp) / sum(3d_TP + 3d_FP) over valid frames",
+   "paired_vs_ats": "arm - ats_v11ab episode means, paired bootstrap 2000 resamples seed 20261015, 95% percentile CI; 3d_iou equals harness summary paired_3d_iou",
+   "latency": "provider-recorded latency_ms; first frame row of each arm excluded; per frame = sum of 2 cameras; ats_v11ab = V11AB t_process_s (whole process, not grounding only); localization_heads:threshold = mask from recorded attention only (no pi0.5 forward)",
+   "wrong_object_3d_class": "over valid 3D frames: found_any and 3d_neighbor_fp > 3d_TP; variant: 3d_neighbor_fp / pred_voxels > 0.5",
+   "wrong_object_2d_instance": "over frames with non-empty mask: mask pixels (head + left_wrist) on akita_black_bowl_2 (same-category distractor) > mask pixels on target akita_black_bowl_1",
+   "referring_expression_set": "all 10 SL3 dev tasks are libero_spatial 'pick up the black bowl <relation> ...' with two akita_black_bowl instances (target _1, distractor _2); phrase prompt = 'akita black bowl' (all 10 episodes, phrase_from_object), instruction prompt = task_description"
+  },
+  "gt_oracle_3d_iou": 0.9679245925334878,
+  "max_3d_iou_other_arms": 0.545612422648818
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/paper-baselines-2/pb2-sl3dev-scene-overlay.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/paper-baselines-2/pb2-sl3dev-referring-failure.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/paper-baselines-2/pb2-sl3dev-iou-leak.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/paper-baselines-2/pb2-sl3dev-table.png",
+   "kind": "table"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy 16D: 위반으로 시작 14/15, has_target 15/15, frame0 clearance_before -29.031048280806342 mm — skill 의 legacy 기준선과 같다 (2026-10-23 04:37 UTC, CPU)"
+ },
+ "verdict": "기준선 일치. SL3 dev 8 spec x prompt 측정 완료 (12 arm + ATS). grounded_sam2:track 실패 (OOM). SL4b deferred.",
+ "not_measured": [
+  "grounded_sam2:track (SL3, SL4b) — deferred (lead 결정 2026-10-23): OOM, issues 참조",
+  "#2 SL4b dev 40 ep 전체 — deferred (lead 결정 2026-10-23): episode 당 ~700 s 중 대부분이 CPU 쪽 lift/평가, ~8 h lock 점유 추정",
+  "latency 의 GPU 전용 시간 (provider 가 잰 벽시계 ms 를 그대로 씀; CUDA sync 여부는 provider Timer 에 따름)"
+ ],
+ "issues": [
+  "grounded_sam2:track GPU OOM: 첫 SL3 실행에서 libero_spatial_t0_e0 phrase arm, obs 70 (track_frames 71) 까지 기록된 뒤 obs 75 이전 frame 의 add_new_frame (sam2_video_predictor.py:791 torch.cat) 에서 'ixGPU Device 0 OOM 147696150272 / 146800640000' 후 'CUDA error: unrecognized error code' 로 process 전체 종료 (rc 1, 04:47:28 UTC). camera 2 개 x ~71 frame 에 ~147 GB, 약 0.9-1.0 GB/frame/camera 누적. 평가 frame 이 obs 120 이상인 episode 가 있어 현재 code 로는 끝까지 못 돈다. 이 실행은 잠시 GPU 130 GB 공용 한도를 넘었다.",
+  "SAM2 _C.so (mtime 04:25:02 UTC, lead build) 에 sm_70/75/80/86 cubin 만 있고 sm_90 cubin·PTX 가 없다 (cuobjdump --list-elf / --list-ptx). 원인 (lead 확인): Grounded-SAM-2 @b7a9c29 setup.py:101-104 가 -gencode 를 sm_70/75/80/86 으로 고정해 TORCH_CUDA_ARCH_LIST=9.0 이 무시됨. 영향: video predictor fill_holes_in_mask_scores 가 'no kernel image is available' 경고와 함께 생략 (track 경로). SAM2ImagePredictor 는 max_hole_area=0 이라 _C 를 부르지 않는다 (per_frame). provenance 의 sam2_cuda_ext 는 'built' 로 기록된다 (import 성공 기준).",
+  "offline_grounding 은 한 process 에서 모든 provider 를 돌려 한 provider 예외가 run 전체를 멈춘다 — track 을 뺀 8 spec 으로 다시 돌렸다.",
+  "SL3 실행 시간 8080 s 중 provider latency 합은 episode 당 ~100 s, 나머지 ~600 s/episode 는 CPU 쪽 (lift, eval grid, scene-GT lift_check 추정; profile 하지 않음). process CPU ~2.6 core.",
+  "gt_oracle 2D IoU 1.000 이지만 3D soft IoU 0.968 · lift_within_10mm 0.994 (segmentation 이 RGB/depth 보다 한 substep 늦음, A impl.md (4))."
+ ]
+}

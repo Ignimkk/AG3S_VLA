@@ -1,4 +1,49 @@
-# knows_vla — KNOWS reverse-engineering probes
+# KNOWS [17] — `Baseline/paper_baselines/methods/knows`
+
+| item | value |
+|---|---|
+| paper | *Your Model Already Knows: Attention-Guided Safety Filter for Vision-Language-Action Models*, arXiv:2606.09749v1 (main.pdf [17]) |
+| source | **no official code**. This folder is our paper-only reimplementation, moved unchanged from `Baseline/knows_vla` by `git mv` (PAPER-METHODS, 2026-10-23; history preserved) |
+| license | project code (no third-party code) |
+| interface | `adapter.py` → `KnowsSafetyFilter` (`get_method("knows")`), the common `methods/interface.py` `SafetyFilter` |
+| state | CBF-QP (`cbf/`) + tests unchanged and passing after the move (49 passed in `.venv-ag3s`, same test set as before). Adapter runs on recorded SL3 frames (CPU smoke). Closed-loop rollout: next STEP |
+
+## What the adapter does (and what differs from the paper)
+
+`KnowsSafetyFilter.filter(obs, actions)` runs `cbf.filter.SafetyFilter` (paper Eq. 12, `CbfParams()` = paper
+defaults; D1-D7 variants via `cbf_params={...}`) on every action of the chunk:
+
+| step | paper | here |
+|---|---|---|
+| robot geometry | one EE ellipsoid, "calibrated offline" | Franka-hand semi-axes (0.04, 0.04, 0.07) in the EE frame (`offline_filter.DEFAULT_GRIPPER_SEMI_AXES`) |
+| obstacles | ellipsoids from "manipulable object" segmentation, MVEE, shapes frozen at t=0, centroids tracked | same rule; segmentation = simulator GT (`obstacle_source="gt_seg"`, privileged) or target-free clouds from upstream (`"given"`); support surfaces (table) never obstacles |
+| target exclusion (Eq. 4) | attention top-1 object | BDDL target + destination (privileged, `exclude="task_objects"`); `"phase_target"` = `offline_filter --target gt` rule |
+| units | "scaled to physical units" | `a[:3] x 0.05 m`, `a[3:6] x 0.5 rad` (robosuite OSC `output_max`) and back |
+| chunk | per control step | T = 1 per env step reproduces it; T > 1 predicts the EE pose with the measured 0.0115 m / action unit (`safety_common.propagate_ee`) |
+| emergency stop | infeasible QP → zero motion | same (reachable only with `slack_weight`, docs/16) |
+
+Known behaviour inherited from the paper's relaxed normals: the eps box can satisfy a row by tilting the separating
+plane, so the true barrier can still shrink faster than `(1 - gamma) h` (`docs/16-filter-variants.md`; the adapter
+test checks the discrete CBF only for `normals="fixed"`).
+
+## Run
+
+```bash
+source Baseline/paper_baselines/setup/paper_baselines_env.sh      # .venv-baselines has osqp/cvxpy (PAPER-METHODS C)
+CUDA_VISIBLE_DEVICES="" .venv-baselines/bin/python -m pytest Baseline/paper_baselines/methods/knows/tests -q
+CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=1 .venv-baselines/bin/python -m Baseline.paper_baselines.methods.smoke_safety_filters --arms knows
+```
+
+`Baseline.knows_vla` remains importable as a thin alias package (`Baseline/knows_vla/__init__.py`) because
+`AG3S/ag3s/stages/geometry.py` (MVEE reuse), `benchmark/__init__.py` and `scripts/setup/check_workspace.py` still
+name it and may not be edited here. `doc/migration/validation/*.json` keep the old path as provenance.
+
+---
+
+The rest of this file is the original `knows_vla` README (P0 probes; historical commands use the pre-migration
+paths `benchmark.knows_vla` / `src/openpi`).
+
+## knows_vla — KNOWS reverse-engineering probes (original README)
 
 Tooling for the reverse engineering of *Your Model Already Knows: Attention-Guided Safety Filter
 for Vision-Language-Action Models* (arXiv:2606.09749v1). Analysis lives in

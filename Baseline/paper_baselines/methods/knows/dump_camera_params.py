@@ -9,9 +9,9 @@ They are per-task, not global: the depth buffer is normalized and converting it 
 camera. The agentview pose also differs between LIBERO scenes.
 
 Run (LIBERO venv):
-    LIBERO_CONFIG_PATH=$PWD/Baseline/knows_vla/libero_config \
+    LIBERO_CONFIG_PATH=$PWD/Baseline/paper_baselines/methods/knows/libero_config \
     PYTHONPATH=$PWD/third_party/openpi/third_party/libero:$PWD MUJOCO_GL=egl \
-    third_party/openpi/examples/libero/.venv/bin/python -m Baseline.knows_vla.dump_camera_params
+    third_party/openpi/examples/libero/.venv/bin/python -m Baseline.paper_baselines.methods.knows.dump_camera_params
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ import pathlib
 
 import numpy as np
 
-from Baseline.knows_vla.libero_env import LIBERO_ENV_RESOLUTION, make_env
+from Baseline.paper_baselines.methods.knows.libero_env import LIBERO_ENV_RESOLUTION, make_env
 
 
 def params_for(suite: str, task_id: int, resolution: int = LIBERO_ENV_RESOLUTION) -> dict:
@@ -59,7 +59,7 @@ def main() -> None:
     p.add_argument("--suites", nargs="+",
                    default=["libero_spatial", "libero_object", "libero_goal", "libero_10"])
     p.add_argument("--task-ids", type=int, nargs="+", default=[0, 1, 2, 3, 4])
-    p.add_argument("--out", default="Baseline/knows_vla/camera_params.json")
+    p.add_argument("--out", default="Baseline/paper_baselines/methods/knows/camera_params.json")
     a = p.parse_args()
 
     table = {}

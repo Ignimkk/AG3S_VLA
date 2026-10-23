@@ -6,7 +6,7 @@ a plausible height for two revisions before a plot would have shown it pointing 
 figures here always draw the source point cloud underneath the ellipsoid: the gap between them is
 the approximation error the safety filter actually pays for.
 
-    third_party/openpi/.venv/bin/python -m Baseline.knows_vla.visualize_ellipsoids --out data/knows_figs
+    third_party/openpi/.venv/bin/python -m Baseline.paper_baselines.methods.knows.visualize_ellipsoids --out data/knows_figs
 """
 
 from __future__ import annotations
@@ -21,8 +21,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid, barrier, optimal_normal  # noqa: E402
-from Baseline.knows_vla.check_admissibility import (  # noqa: E402
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid, barrier, optimal_normal  # noqa: E402
+from Baseline.paper_baselines.methods.knows.check_admissibility import (  # noqa: E402
     CRATE_SHELL,
     _obj_vertices,
     _parse_mjcf,
@@ -256,7 +256,7 @@ def box_rects(body_name: str, axis: int, value: float):
     plane catches nothing and the "actual geometry" layer would come out empty. Reading the boxes
     back from the MJCF draws what is really there.
     """
-    from Baseline.knows_vla.check_admissibility import _floats  # local: visualisation-only helper
+    from Baseline.paper_baselines.methods.knows.check_admissibility import _floats  # local: visualisation-only helper
 
     keep = [i for i in range(3) if i != axis]
     tree = _parse_mjcf(MJCF_ROOT / "scenes" / "scene_transport.xml")

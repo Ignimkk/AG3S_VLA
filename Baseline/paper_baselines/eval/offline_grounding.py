@@ -10,6 +10,13 @@ Inputs
                  and the lift is checked against the exact target surface (``lift_*`` columns).
   --ats-run      optional ``perception_replay`` run: V11AB ATS target points of the same frames become the
                  pseudo-provider ``ats_v11ab`` (3D rows only; it has no 2D mask).
+  --attention-run optional ``benchmark/runners/attention_audit.py`` run of the same source run (SL3 dev
+                 ``20261012T202459_309e4c6da477_sl3-attention-audit-dev``, SL4b dev
+                 ``20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4``): per-call pi0.5 attention for the
+                 VLA-internal providers ``localization_heads:{threshold,sam_point,sam_box}`` (``pooled_f16``, frozen
+                 heads ``--lh-selection``) and ``tokencut:attention_overlap`` (V11AB cell L8H2 grid). Frames without a
+                 recorded call get ``missing_reason`` rows. These two providers ignore the query text and are scored
+                 once (prompt label ``no_text``).
 
 Per frame and provider (frames = scene-GT frames, else the policy-call frames ``chunk_t``):
   RGB (OpenCV frame = raw[::-1]) -> provider masks per camera -> 2D metrics vs the GT segmentation mask ->
@@ -29,6 +36,9 @@ Run (``.venv-baselines``; GPU only under the shared lock, see README)::
     .venv-baselines/bin/python -m Baseline.paper_baselines.eval.offline_grounding \\
         --source-run 20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0 --scene-gt outputs/verify/SL4/raw/scene \\
         --providers gt_oracle grounded_sam grounded_sam2:per_frame grounded_sam2:track yoloe \\
+                    localization_heads:threshold localization_heads:sam_point tokencut:foreground tokencut:attention_overlap \\
+        --prompt-modes phrase instruction \\
+        --attention-run 20261012T202459_309e4c6da477_sl3-attention-audit-dev \\
         --ats-run 20261012T225820_46a08d6ff644_sl4-perception-dev --run-id paper-baselines-sl3dev
 """
 from __future__ import annotations
@@ -228,22 +238,164 @@ class ATSRun:
                 "latency_ms": float(d["t_process_s"][k]) * 1000.0}
 
 
+# --- recorded pi0.5 attention (VLA-internal providers) ---------------------------------------------------------
+class AttentionRun:
+    """Per-call attention of a ``benchmark/runners/attention_audit.py`` run (``attention/<stem>_attn.npz``).
+
+    Joined to the evaluated frame by ``obs_index`` (= the source episode's ``chunk_t[k]``); the audit's own
+    ``source_run`` and ``npz_sha256`` must match the ``--source-run`` episode (checked, mismatch stops the run).
+    ``aux(stem, t)`` gives, for one policy call, the inputs both VLA-internal providers read:
+
+    * ``localization_heads``: ``attention_pooled`` = ``pooled_f16[k]`` (L, H, 768) float32,
+      ``attention_blocks`` / ``attention_grid`` / ``attention_orientation = "libero_policy"``
+      (= ``providers.localization_heads.aux_from_attention_npz``);
+    * ``tokencut:attention_overlap``: ``attention_map[camera]`` = ``cell_grid_policy[k, i]`` (16 x 16), the V11AB
+      cell (layer 8, head 2, last action token, denoise step 0) in the same ``libero_policy`` orientation.
+    """
+
+    def __init__(self, run: pathlib.Path, source: pathlib.Path):
+        from Baseline.paper_baselines.providers import localization_heads as LH
+
+        self.run, self.source, self._LH = run, source, LH
+        self.index: dict[str, dict] = {}
+        for line in (run / "attention_index.jsonl").read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                self.index[episode_stem(r)] = r
+        self.files: dict[str, dict] = {}
+
+    def check_episode(self, stem: str, npz_sha256: str) -> None:
+        r = self.index.get(stem)
+        if r is None:
+            return
+        if r.get("source_run") != self.source.name:
+            raise ValueError(f"attention run {self.run.name}: {stem} comes from {r.get('source_run')!r}, "
+                             f"not --source-run {self.source.name!r}")
+        if r.get("npz_sha256") and r["npz_sha256"] != npz_sha256:
+            raise ValueError(f"attention run {self.run.name}: {stem} npz sha256 differs from the source episode")
+
+    def episode(self, stem: str) -> dict | None:
+        if stem not in self.files:
+            r = self.index.get(stem)
+            if r is None:
+                self.files[stem] = {"sha256": None, "data": None}
+            else:
+                p = self.run / r["attn_npz"]
+                with np.load(p, allow_pickle=False) as z:
+                    cams = [str(c) for c in z["cameras"]]
+                    d = {"obs_index": z["obs_index"].astype(np.int64), "pooled_f16": z["pooled_f16"],
+                         "cell_grid_policy": z["cell_grid_policy"], "cell_grid_opencv": z["cell_grid_opencv"],
+                         "cameras": cams}
+                self.files[stem] = {"sha256": sha256_file(p), "data": d}
+        return self.files[stem]["data"]
+
+    def call(self, stem: str, t: int) -> int | None:
+        d = self.episode(stem)
+        if d is None:
+            return None
+        hit = np.flatnonzero(d["obs_index"] == int(t))
+        return int(hit[0]) if hit.size else None
+
+    def aux(self, stem: str, t: int) -> dict | None:
+        k = self.call(stem, t)
+        if k is None:
+            return None
+        d = self.episode(stem)
+        aux = self._LH.aux_from_attention_npz(d, k)
+        aux["attention_map"] = {c: d["cell_grid_policy"][k, i].astype(np.float32) for i, c in enumerate(d["cameras"])}
+        aux["attention_call_index"] = k
+        return aux
+
+    def describe(self, stem: str, t: int) -> dict:
+        """Dry-run check of the input grids of one frame."""
+        k = self.call(stem, t)
+        if k is None:
+            return {"attention_call": None}
+        d = self.episode(stem)
+        aux = self.aux(stem, t)
+        pooled = aux["attention_pooled"]
+        out = {"attention_call": k, "attention_pooled_shape": list(pooled.shape),
+               "attention_pooled_finite": bool(np.isfinite(pooled).all())}
+        for i, c in enumerate(d["cameras"]):
+            lo, hi = (int(v) for v in aux["attention_blocks"][c])
+            g = d["cell_grid_policy"][k, i]
+            out[f"{c}_block_mass_L8H2"] = float(pooled[8, 2, lo:hi].sum())
+            # cell grid (float32) vs the same cell inside pooled_f16: equal up to float16 rounding (<= 2^-11 rel.)
+            out[f"{c}_cell_vs_pooled_L8H2_maxabs"] = float(np.abs(pooled[8, 2, lo:hi].reshape(g.shape) - g).max())
+            out[f"{c}_cell_grid_shape"] = list(g.shape)
+            out[f"{c}_cell_grid_mass"] = float(g.sum())
+            # the stored OpenCV grid is the column flip of the policy grid (attention_audit.py)
+            out[f"{c}_cell_opencv_is_unmirrored"] = bool(np.array_equal(d["cell_grid_opencv"][k, i], g[:, ::-1]))
+        return out
+
+    def provenance(self) -> dict:
+        man = self.run / "run_manifest.json"
+        return {"run": str(self.run), "run_manifest_sha256": sha256_file(man) if man.exists() else None,
+                "join": "obs_index of the audit call == evaluated frame; audit source_run / npz_sha256 checked",
+                "localization_heads_input": "pooled_f16[k] (L, H, 768), orientation libero_policy",
+                "tokencut_attention_map": "cell_grid_policy[k, camera] = V11AB cell L8H2, orientation libero_policy",
+                "files": {k: v["sha256"] for k, v in self.files.items()}}
+
+
 # --- providers ------------------------------------------------------------------------------------------------
+#: provider name -> constructor keyword that takes the ``:mode`` suffix of ``--providers``
+MODE_KWARG = {"localization_heads": "mask_mode", "tokencut": "target_select"}
+#: providers that do not read the query text: one arm (prompt label ``no_text``) instead of one per prompt mode
+TEXT_FREE = ("localization_heads", "tokencut")
+DEFAULT_LH_SELECTION = (PROJECT_ROOT / "Baseline/paper_baselines/providers/frozen/"
+                        "localization_heads_pi05_libero_spatial_dev_init0-4_official_code.json")
+
+
 def parse_arm(spec: str) -> tuple[str, dict]:
-    """``name[:mode]`` -> (provider name, kwargs)."""
+    """``name[:mode]`` -> (provider name, constructor kwargs)."""
     name, _, mode = spec.partition(":")
-    kw = {"mode": mode} if mode else {}
+    kw = {MODE_KWARG.get(name, "mode"): mode} if mode else {}
     return name, kw
 
 
-def build_providers(specs, size: str, device: str | None) -> dict[str, Any]:
+def needs_attention(spec: str) -> bool:
+    name, kw = parse_arm(spec)
+    return name == "localization_heads" or (name == "tokencut" and kw.get("target_select") == "attention_overlap")
+
+
+def provider_kwargs(spec: str, size: str, device: str | None, lh_selection=None) -> tuple[str, dict]:
+    """Constructor arguments of one ``--providers`` entry (sizes / devices only where the provider takes them)."""
+    name, kw = parse_arm(spec)
+    if name == "gt_oracle":
+        return name, kw
+    if name == "localization_heads":
+        kw["selection"] = str(lh_selection or DEFAULT_LH_SELECTION)
+        if kw.get("mask_mode", "threshold") != "threshold":
+            from Baseline.paper_baselines import weights as W
+
+            # same SAM v1 weight as grounded_sam at this --size (default sam-vit-huge, smoke sam-vit-base)
+            kw["_sam_weight"] = W.preset("grounded_sam", size)["sam"]
+        if device:
+            kw["_sam_device"] = device
+        return name, kw
+    if name == "tokencut":
+        if device:
+            kw["device"] = device
+        return name, kw
+    kw["size"] = size
+    if device:
+        kw["device"] = device
+    return name, kw
+
+
+def build_providers(specs, size: str, device: str | None, lh_selection=None) -> dict[str, Any]:
     out = {}
     for spec in specs:
-        name, kw = parse_arm(spec)
-        if name != "gt_oracle":
-            kw.update(size=size)
-            if device:
-                kw.update(device=device)
+        name, kw = provider_kwargs(spec, size, device, lh_selection)
+        sam_weight, sam_device = kw.pop("_sam_weight", None), kw.pop("_sam_device", None)
+        if sam_weight is not None:
+            from Baseline.paper_baselines.providers.sam_backend import SamV1Backend
+
+            kw["sam"] = SamV1Backend(sam_weight, device=sam_device)
+        if name == "tokencut" and "device" not in kw:  # TokenCutProvider defaults to cpu; others to default_device()
+            from Baseline.paper_baselines.providers.sam_backend import default_device
+
+            kw["device"] = default_device()
         out[spec] = get_provider(name, **kw)
     return out
 
@@ -286,6 +438,10 @@ def run(args) -> pathlib.Path:
     source = resolve_run(args.source_run)
     scene_dir = pathlib.Path(args.scene_gt).resolve() if args.scene_gt else None
     ats = ATSRun(resolve_run(args.ats_run)) if args.ats_run else None
+    attn = AttentionRun(resolve_run(args.attention_run), source) if args.attention_run else None
+    need_attn = [s for s in args.providers if needs_attention(s)]
+    if need_attn and attn is None and not args.dry_run:
+        raise SystemExit(f"{need_attn} read recorded pi0.5 attention: pass --attention-run <attention_audit run>")
     phrase_map = json.loads(pathlib.Path(args.phrase_map).read_text()) if args.phrase_map else {}
     episodes = [e for e in load_episodes(source) if e["has_geom"] and e["has_npz"]]
     if args.episodes:
@@ -295,8 +451,13 @@ def run(args) -> pathlib.Path:
     if not episodes:
         raise SystemExit("no episode with both <stem>.npz and <stem>_geom.npz")
     cameras = tuple(args.cameras)
-    providers = {} if args.dry_run else build_providers(args.providers, args.size, args.device)
-    arms = [(spec, pm) for spec in providers for pm in args.prompt_modes] if providers else []
+    providers = {} if args.dry_run else build_providers(args.providers, args.size, args.device, args.lh_selection)
+    arms = []
+    for spec in providers:
+        if parse_arm(spec)[0] in TEXT_FREE:  # query text unused: one arm, scored once
+            arms.append((spec, "no_text"))
+        else:
+            arms.extend((spec, pm) for pm in args.prompt_modes)
     out = make_output(args, source)
     inputs: dict[str, Any] = {"source_run": str(source), "files": {}}
     man = source / "run_manifest.json"
@@ -309,6 +470,8 @@ def run(args) -> pathlib.Path:
         inputs["files"][ep.stem] = {"npz": sha256_file(ep_meta["npz_path"]), "geom_npz": sha256_file(ep_meta["geom_path"]),
                                     "scene": ep.scene.sha256 if ep.scene is not None else None,
                                     "target": ep.target["target"], "destination": ep.target.get("destination")}
+        if attn is not None:
+            attn.check_episode(ep.stem, inputs["files"][ep.stem]["npz"])
         frames = ep.eval_frames()
         if args.limit_frames:
             frames = frames[: args.limit_frames]
@@ -327,27 +490,44 @@ def run(args) -> pathlib.Path:
                 gt = {c: int((frs[t]["labels"][c] == M.CLASSES.index("target")).sum()) for c in cameras}
                 row = {**base, "arm": "dry_run", "obs_index": t, "gt_target_pixels": gt,
                        "eval_voxels": int(len(grids[t].packed)), "target_voxel_mass": float(grids[t].target.sum())}
+                if attn is not None:
+                    row.update(attn.describe(ep.stem, t))
+                if ats is not None:
+                    a = ats.points(ep.stem, t)
+                    row["ats_record"] = a is not None
                 frames_f.write(json.dumps(row) + "\n")
                 rows.append(row)
             continue
         for spec, pm in arms:
             prov = providers[spec]
             prov.reset()
-            q = query_for(ep, pm, phrase_map)
+            text_free = pm == "no_text"
+            q = query_for(ep, "phrase" if text_free else pm, phrase_map)
             sequential = parse_arm(spec)[1].get("mode") == "track"
+            uses_attn = needs_attention(spec)
             feed = range(0, max(frames) + 1) if sequential else frames
             for t in feed:
                 fr = frs[t] if t in frs else None
-                rgb = fr["rgb"] if fr is not None else {c: L.opencv_rgb_from_raw(ep.raw[c][t]) for c in cameras}
-                qt = TargetQuery(q.instruction, q.target_phrase, q.prompt_mode, q.episode_id, int(t))
+                row = {**base, "arm": f"{spec}|{pm}", "provider": spec, "prompt_mode": pm,
+                       "prompt": None if text_free else q.prompt, "obs_index": int(t)}
                 aux = {"segmentation": fr["seg"] if fr else {c: ep.seg[c][ep.row(t)] for c in cameras},
                        "target_geom_ids": ep.target_geoms.tolist()}
+                if uses_attn:
+                    a_aux = attn.aux(ep.stem, t)
+                    if a_aux is None:  # no recorded policy call at this frame: scored as missing, not as not-found
+                        if t in eval_set:
+                            row["missing_reason"] = "no_attention_record_for_frame"
+                            frames_f.write(json.dumps(_jsonable(row)) + "\n")
+                            rows.append(row)
+                        continue
+                    aux.update(a_aux)
+                    row["attention_call"] = a_aux["attention_call_index"]
+                rgb = fr["rgb"] if fr is not None else {c: L.opencv_rgb_from_raw(ep.raw[c][t]) for c in cameras}
+                qt = TargetQuery(q.instruction, q.target_phrase, q.prompt_mode, q.episode_id, int(t))
                 res = prov.predict(rgb, qt, aux=aux)
                 validate_results(res, rgb)
                 if t not in eval_set:
                     continue
-                row = {**base, "arm": f"{spec}|{pm}", "provider": spec, "prompt_mode": pm, "prompt": q.prompt,
-                       "obs_index": int(t)}
                 row.update(evaluate_masks(res, fr, grids[t], ep, args.robot_removal, cameras))
                 if args.save_masks:
                     save_masks(out, spec, pm, ep.stem, t, res)
@@ -372,11 +552,25 @@ def run(args) -> pathlib.Path:
     frames_f.close()
     write_summaries(out, rows, cameras, args)
     prov = {"providers": {spec: providers[spec].provenance() for spec in providers},
-            "ats": ats.provenance() if ats else None, "inputs": inputs, "scene_gt": str(scene_dir) if scene_dir else None,
+            "ats": ats.provenance() if ats else None, "attention": attention_provenance(attn, providers),
+            "inputs": inputs, "scene_gt": str(scene_dir) if scene_dir else None,
             "argv": sys.argv, "python": sys.executable,
             "settings": {k: v for k, v in vars(args).items()}, "metric_definition": M.__doc__}
     (out / "provenance.json").write_text(json.dumps(_jsonable(prov), indent=1, default=str) + "\n")
     print(f"[offline_grounding] wrote {out}")
+    return out
+
+
+def attention_provenance(attn, providers) -> dict | None:
+    if attn is None:
+        return None
+    out = attn.provenance()
+    # localization heads were selected on dev audit runs: same run here = in-sample measurement
+    for spec, prov in providers.items():
+        sel = getattr(prov, "selection", None)
+        if isinstance(sel, dict) and "inputs" in sel:
+            used = sorted({i["run"] for i in sel["inputs"]})
+            out.setdefault("selection_in_sample", {})[spec] = {"in_sample": attn.run.name in used, "selection_runs": used}
     return out
 
 
@@ -430,7 +624,12 @@ def write_summaries(out: pathlib.Path, rows: list[dict], cameras, args) -> None:
                 f.write(json.dumps(rec) + "\n")
     for arm, rs in by_arm.items():
         if arm == "dry_run":
-            summary["arms"][arm] = {"n_frames": len(rs)}
+            d: dict[str, Any] = {"n_frames": len(rs), "n_episodes": len({r["episode_id"] for r in rs})}
+            if any("attention_call" in r for r in rs):
+                d["n_frames_with_attention"] = sum(r.get("attention_call") is not None for r in rs)
+            if any("ats_record" in r for r in rs):
+                d["n_frames_with_ats"] = sum(bool(r.get("ats_record")) for r in rs)
+            summary["arms"][arm] = d
             continue
         s: dict[str, Any] = {m: M.aggregate(rs, m) for m in METRICS_3D}
         for c in cameras:
@@ -445,6 +644,7 @@ def write_summaries(out: pathlib.Path, rows: list[dict], cameras, args) -> None:
         s["found_any"] = M.found_rate(bool(r.get("found_any")) for r in rs if "missing_reason" not in r)
         s["latency_total"] = M.latency_stats(r.get("latency_ms_total") for r in rs)
         s["n_frames"], s["n_valid_3d_frames"] = len(rs), len(valid)
+        s["n_missing"] = sum("missing_reason" in r for r in rs)
         summary["arms"][arm] = s
     arms = [a for a in by_arm if a != "dry_run"]
     for a, b in itertools.combinations(arms, 2):
@@ -458,8 +658,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--source-run", required=True)
     ap.add_argument("--scene-gt")
     ap.add_argument("--ats-run")
+    ap.add_argument("--attention-run", help="attention_audit.py run of the same --source-run (localization_heads, "
+                                            "tokencut:attention_overlap)")
+    ap.add_argument("--lh-selection", help=f"frozen localization-heads json (default {DEFAULT_LH_SELECTION.name})")
     ap.add_argument("--providers", nargs="+", default=["gt_oracle"],
-                    help="name[:mode]; grounded_sam2:per_frame / grounded_sam2:track")
+                    help="name[:mode]; grounded_sam2:per_frame|track, localization_heads:threshold|sam_point|sam_box, "
+                         "tokencut:foreground|attention_overlap")
     ap.add_argument("--prompt-modes", nargs="+", default=["phrase"], choices=["phrase", "instruction"])
     ap.add_argument("--size", default="default", choices=["default", "smoke"])
     ap.add_argument("--device", default=None)

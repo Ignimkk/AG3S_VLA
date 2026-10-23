@@ -21,8 +21,8 @@ import dataclasses
 
 import numpy as np
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid
-from Baseline.knows_vla.cbf.filter import RobotBody
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid
+from Baseline.paper_baselines.methods.knows.cbf.filter import RobotBody
 
 
 @dataclasses.dataclass(frozen=True)

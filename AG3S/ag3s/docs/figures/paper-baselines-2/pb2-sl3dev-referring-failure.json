@@ -1,0 +1,50 @@
+{
+ "frame": {
+  "episode_id": "libero_spatial_t5_e0",
+  "obs_index": 105
+ },
+ "panels": {
+  "head|gt_oracle|phrase": {
+   "2d_iou": 1.0,
+   "mask_px": 941,
+   "px_on_target": 941,
+   "px_on_distractor": 0,
+   "found": true
+  },
+  "head|grounded_sam|phrase": {
+   "2d_iou": 0.0,
+   "mask_px": 959,
+   "px_on_target": 0,
+   "px_on_distractor": 959,
+   "found": true
+  },
+  "head|grounded_sam|instruction": {
+   "2d_iou": 0.0,
+   "mask_px": 957,
+   "px_on_target": 0,
+   "px_on_distractor": 957,
+   "found": true
+  },
+  "left_wrist|gt_oracle|phrase": {
+   "2d_iou": 1.0,
+   "mask_px": 7732,
+   "px_on_target": 7732,
+   "px_on_distractor": 0,
+   "found": true
+  },
+  "left_wrist|grounded_sam|phrase": {
+   "2d_iou": 0.0,
+   "mask_px": 14158,
+   "px_on_target": 0,
+   "px_on_distractor": 14158,
+   "found": true
+  },
+  "left_wrist|grounded_sam|instruction": {
+   "2d_iou": 0.0,
+   "mask_px": 14159,
+   "px_on_target": 0,
+   "px_on_distractor": 14159,
+   "found": true
+  }
+ }
+}

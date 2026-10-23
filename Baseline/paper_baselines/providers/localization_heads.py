@@ -40,7 +40,8 @@ What is different from the paper (also in ``docs/catalog_vla_internal.md``)
   camera's 16x16 block is treated as its own P x P image, and heads are selected **per camera**.
 * Samples: LIBERO dev policy calls (init states 0-4 only), not 1,000 RefCOCO images.
 * ``sam_point`` prompts SAM with the attention peak point; the paper prompts SAM with the box. ``sam_box`` is
-  the paper's recipe. Both need Implementer A's SAM wrapper (``grounded_sam.py``).
+  the paper's recipe. Both need Implementer A's SAM v1 wrapper ``providers.sam_backend.SamV1Backend``
+  (``predict_points`` / ``predict_box``; the same backend ``grounded_sam.py`` uses).
 
 Pixel frame: pi05_libero grids are in **policy orientation** (mirrored left-right relative to the adapter's
 OpenCV/depth image, ``AG3S_BENCHMARK_LOG.md`` SL1/SL3). ``aux["attention_orientation"] = "libero_policy"``

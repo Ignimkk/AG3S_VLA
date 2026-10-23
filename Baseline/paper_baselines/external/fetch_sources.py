@@ -6,9 +6,15 @@ detached. The clone bodies are untracked (external/.gitignore). A fetched tree w
 the pinned SHA is reported and, with --force, re-checked-out. No git submodule is created, so the
 checkout index is never touched.
 
+Sources are tagged ``used_by`` (A/B: grounding providers, D: PAPER-METHODS sampling guidance + grounding-policy
+references -- OmniGuide, omniguide-openpi, VLA-Safety-ConstrainedFlowMatching, lan-o3dp, RoboGround, GuidedVLA,
+DRAGON_VLA). A source whose ``license`` field says "not vendored" (no license at the pinned SHA) is fetched for
+reading only: nothing from it may be copied into tracked files.
+
 Usage:
     python Baseline/paper_baselines/external/fetch_sources.py            # fetch all missing
     python Baseline/paper_baselines/external/fetch_sources.py --only TokenCut
+    python Baseline/paper_baselines/external/fetch_sources.py --used-by D   # only the PAPER-METHODS (D) sources
     python Baseline/paper_baselines/external/fetch_sources.py --check    # verify SHA + license file only
 """
 from __future__ import annotations
@@ -79,12 +85,15 @@ def license_info(src: dict) -> dict:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--only", nargs="*", default=None, help="source names to fetch (default: all)")
+    ap.add_argument("--used-by", nargs="*", default=None, help="only sources whose used_by is one of these (A B D ...)")
     ap.add_argument("--check", action="store_true", help="only verify SHAs and license files")
     ap.add_argument("--force", action="store_true", help="re-checkout a tree whose HEAD differs from the pin")
     args = ap.parse_args(argv)
     rc = 0
     for src in load_sources():
         if args.only and src["name"] not in args.only:
+            continue
+        if args.used_by and src.get("used_by") not in args.used_by:
             continue
         if args.check:
             cur = head_sha(source_dir(src["name"]))

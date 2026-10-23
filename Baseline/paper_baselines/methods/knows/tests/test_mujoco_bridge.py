@@ -5,7 +5,7 @@ not compile in this environment: MuJoCo fails to open a different one of its 1,1
 each attempt while Python reads all of them, which is a sandbox interaction rather than a model
 defect. The code paths are identical, so the transport scene substitutes without changes.
 
-    third_party/openpi/.venv/bin/python -m pytest Baseline/knows_vla/tests/test_mujoco_bridge.py -q
+    third_party/openpi/.venv/bin/python -m pytest Baseline/paper_baselines/methods/knows/tests/test_mujoco_bridge.py -q
 """
 
 from __future__ import annotations
@@ -15,9 +15,9 @@ import pytest
 
 mujoco = pytest.importorskip("mujoco")
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid, barrier, optimal_normal  # noqa: E402
-from Baseline.knows_vla.cbf.filter import CbfParams, SafetyFilter  # noqa: E402
-from Baseline.knows_vla.mujoco_bridge import (  # noqa: E402
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid, barrier, optimal_normal  # noqa: E402
+from Baseline.paper_baselines.methods.knows.cbf.filter import CbfParams, SafetyFilter  # noqa: E402
+from Baseline.paper_baselines.methods.knows.mujoco_bridge import (  # noqa: E402
     LinkSpec,
     articulated_body,
     body_ellipsoids,
@@ -133,7 +133,7 @@ def test_occlusion_makes_the_fit_under_estimate(sim):
 
 def test_depth_must_be_declared_metric(sim):
     """MuJoCo already returns metres; treating it as a normalized buffer fails quietly, not loudly."""
-    from Baseline.knows_vla.perception.ellipsoid_fit import fit_objects
+    from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import fit_objects
 
     m, d = _pose(sim, ARM_CLEAR)
     r = mujoco.Renderer(m, 240, 320)

@@ -12,7 +12,7 @@ Target source is a switch so attention error and filter behaviour stay separable
   keep-all  -- like `none`, but also keeps the target: the upper bound on how conservative the
                filter can get
 
-    third_party/openpi/.venv/bin/python -m Baseline.knows_vla.offline_filter
+    third_party/openpi/.venv/bin/python -m Baseline.paper_baselines.methods.knows.offline_filter
 """
 
 from __future__ import annotations
@@ -23,9 +23,9 @@ import pathlib
 
 import numpy as np
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid, barrier, rotate_shape
-from Baseline.knows_vla.cbf.filter import CbfParams, SafetyFilter
-from Baseline.knows_vla.perception.ellipsoid_fit import CameraModel, ObjectTracker, fit_objects
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid, barrier, rotate_shape
+from Baseline.paper_baselines.methods.knows.cbf.filter import CbfParams, SafetyFilter
+from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import CameraModel, ObjectTracker, fit_objects
 
 # robosuite OSC_POSE, control_delta=true, input_max=1:
 #   output_max = [0.05, 0.05, 0.05, 0.5, 0.5, 0.5]
@@ -166,7 +166,7 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--episodes", nargs="+", default=sorted(
         str(q) for q in pathlib.Path("data/knows_p0b").glob("*.npz")))
-    p.add_argument("--camera-params", default="Baseline/knows_vla/camera_params.json")
+    p.add_argument("--camera-params", default="Baseline/paper_baselines/methods/knows/camera_params.json")
     p.add_argument("--target", nargs="+", default=["gt", "none"])
     p.add_argument("--gamma-h", type=float, default=0.5)
     p.add_argument("--eps-normal", type=float, default=0.05)

@@ -14,7 +14,7 @@ the **true** barrier,
 which is what "safe" was supposed to mean. A filter can pass Eq. (8) and fail this, by tilting the
 separating plane instead of moving the robot -- exactly what the epsilon box permits.
 
-    third_party/openpi/.venv/bin/python -m Baseline.knows_vla.compare_variants --limit 6
+    third_party/openpi/.venv/bin/python -m Baseline.paper_baselines.methods.knows.compare_variants --limit 6
 """
 
 from __future__ import annotations
@@ -27,10 +27,10 @@ import time
 
 import numpy as np
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid, barrier, optimal_normal
-from Baseline.knows_vla.cbf.filter import CbfParams, RobotBody, SafetyFilter
-from Baseline.knows_vla.perception.held import HeldObjectTracker, promote
-from Baseline.knows_vla.offline_filter import (
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid, barrier, optimal_normal
+from Baseline.paper_baselines.methods.knows.cbf.filter import CbfParams, RobotBody, SafetyFilter
+from Baseline.paper_baselines.methods.knows.perception.held import HeldObjectTracker, promote
+from Baseline.paper_baselines.methods.knows.offline_filter import (
     DEFAULT_GRIPPER_SEMI_AXES,
     GRIPPER_TOKEN,
     POS_SCALE,
@@ -39,7 +39,7 @@ from Baseline.knows_vla.offline_filter import (
     _axisangle_to_mat,
     gripper_ellipsoid_shape,
 )
-from Baseline.knows_vla.perception.ellipsoid_fit import CameraModel, ObjectTracker, fit_objects
+from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import CameraModel, ObjectTracker, fit_objects
 
 # The OSC action limit. Used both as the delta_c bound and as the yardstick for "how big is this
 # correction", since a correction larger than the controller can execute is not a correction.
@@ -179,7 +179,7 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--episodes", nargs="+", default=sorted(
         str(q) for q in pathlib.Path("data/knows_p0b").glob("*.npz")))
-    p.add_argument("--camera-params", default="Baseline/knows_vla/camera_params.json")
+    p.add_argument("--camera-params", default="Baseline/paper_baselines/methods/knows/camera_params.json")
     p.add_argument("--limit", type=int, default=0)
     p.add_argument("--only", nargs="*", help="subset of variant names")
     p.add_argument("--gripper-semi-axes", type=float, nargs=3, default=list(DEFAULT_GRIPPER_SEMI_AXES))

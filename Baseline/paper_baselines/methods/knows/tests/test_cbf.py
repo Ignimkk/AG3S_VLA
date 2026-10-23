@@ -1,8 +1,8 @@
-"""P1 — CBF-QP unit verification. Covers every check in Baseline/knows_vla/docs/06-repro-plan.md §8.2.
+"""P1 — CBF-QP unit verification. Covers every check in Baseline/paper_baselines/methods/knows/docs/06-repro-plan.md §8.2.
 
 No model, no simulator: pure numerics against the paper's equations.
 
-    third_party/openpi/.venv/bin/python -m pytest Baseline/knows_vla/tests/test_cbf.py -q
+    third_party/openpi/.venv/bin/python -m pytest Baseline/paper_baselines/methods/knows/tests/test_cbf.py -q
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import dataclasses
 import numpy as np
 import pytest
 
-from Baseline.knows_vla.cbf.ellipsoid import (
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import (
     Ellipsoid,
     barrier,
     grad_center,
@@ -22,7 +22,7 @@ from Baseline.knows_vla.cbf.ellipsoid import (
     optimal_normal,
     rotate_shape,
 )
-from Baseline.knows_vla.cbf.filter import (
+from Baseline.paper_baselines.methods.knows.cbf.filter import (
     ArticulatedBody,
     CbfParams,
     HalfSpace,
@@ -78,7 +78,7 @@ def test_barrier_equals_exact_gap_for_spheres():
 def test_gamma_elimination_is_not_a_relaxation_of_collision_freeness():
     """h(n) >= 0 implies a separating offset gamma exists, so Eq. (6) still certifies separation.
 
-    This is the claim in Baseline/knows_vla/docs/03-math.md that the paper's own appendix understates.
+    This is the claim in Baseline/paper_baselines/methods/knows/docs/03-math.md that the paper's own appendix understates.
     """
     rng = np.random.default_rng(3)
     checked = 0
@@ -245,7 +245,7 @@ def test_infeasible_falls_back_to_emergency_stop():
 def test_eps_normal_relaxes_the_constraint_monotonically():
     """Larger eps must let the filter advance further -- eps trades safety for hyperplane agility.
 
-    The paper presents eps only as a smoothness bound; see Baseline/knows_vla/docs/03-math.md.
+    The paper presents eps only as a smoothness bound; see Baseline/paper_baselines/methods/knows/docs/03-math.md.
     """
     robot = Ellipsoid.sphere([0.0, 0, 0], 0.05)
     obstacles = {0: Ellipsoid.from_semi_axes([0.14, 0.02, 0.0], [0.05, 0.03, 0.04])}
@@ -525,7 +525,7 @@ def test_half_space_needs_no_epsilon():
 
 def test_held_object_detected_only_when_it_travels_with_the_hand():
     """A closed gripper is not evidence: it also closes on nothing. Motion agreement is."""
-    from Baseline.knows_vla.perception.held import HeldObjectTracker
+    from Baseline.paper_baselines.methods.knows.perception.held import HeldObjectTracker
 
     trk = HeldObjectTracker()
     eef = np.zeros(3)
@@ -549,7 +549,7 @@ def test_held_object_detected_only_when_it_travels_with_the_hand():
 
 def test_standing_still_is_not_evidence_of_holding():
     """With the arm stationary every object 'follows' it perfectly."""
-    from Baseline.knows_vla.perception.held import HeldObjectTracker
+    from Baseline.paper_baselines.methods.knows.perception.held import HeldObjectTracker
 
     trk = HeldObjectTracker()
     for _ in range(20):
@@ -559,7 +559,7 @@ def test_standing_still_is_not_evidence_of_holding():
 
 def test_promoting_the_held_object_removes_the_structural_violation():
     """Held-as-obstacle forces h < 0; held-as-robot-part does not, and still protects it."""
-    from Baseline.knows_vla.perception.held import promote
+    from Baseline.paper_baselines.methods.knows.perception.held import promote
 
     eef = np.array([0.30, 0.0, 0.90])
     gripper = Ellipsoid.from_semi_axes(eef, [0.04, 0.04, 0.07])
@@ -800,7 +800,7 @@ def test_joint_space_latency_at_rby1_scale():
 
 def test_batched_normals_agree_with_the_scalar_ascent():
     """The batch is an optimisation, not a different algorithm."""
-    from Baseline.knows_vla.cbf.ellipsoid import optimal_normals_batch
+    from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import optimal_normals_batch
 
     rng = np.random.default_rng(3)
     R = [_random_ellipsoid(rng, 0.12) for _ in range(40)]

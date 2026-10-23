@@ -17,9 +17,9 @@ Server (openpi venv, GPU box):
     .venv/bin/python scripts/serve_policy.py --env LIBERO
 
 Client (LIBERO venv):
-    LIBERO_CONFIG_PATH=$PWD/Baseline/knows_vla/libero_config \
+    LIBERO_CONFIG_PATH=$PWD/Baseline/paper_baselines/methods/knows/libero_config \
     PYTHONPATH=$PWD/third_party/openpi/third_party/libero:$PWD MUJOCO_GL=egl \
-    third_party/openpi/examples/libero/.venv/bin/python -m Baseline.knows_vla.eval_closed_loop \
+    third_party/openpi/examples/libero/.venv/bin/python -m Baseline.paper_baselines.methods.knows.eval_closed_loop \
         --filter off on --suite libero_spatial --task-ids 0 1 --episodes 3 --save-video
 """
 
@@ -32,11 +32,11 @@ import pathlib
 
 import numpy as np
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid
-from Baseline.knows_vla.cbf.filter import CbfParams, SafetyFilter
-from Baseline.knows_vla.libero_env import instance_id_to_name, make_env, parse_goal_objects
-from Baseline.knows_vla.offline_filter import DEFAULT_GRIPPER_SEMI_AXES, gripper_ellipsoid_shape
-from Baseline.knows_vla.perception.ellipsoid_fit import CameraModel, ObjectTracker, fit_objects
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid
+from Baseline.paper_baselines.methods.knows.cbf.filter import CbfParams, SafetyFilter
+from Baseline.paper_baselines.methods.knows.libero_env import instance_id_to_name, make_env, parse_goal_objects
+from Baseline.paper_baselines.methods.knows.offline_filter import DEFAULT_GRIPPER_SEMI_AXES, gripper_ellipsoid_shape
+from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import CameraModel, ObjectTracker, fit_objects
 
 POS_SCALE, ROT_SCALE = 0.05, 0.5
 ROBOT_TOKENS = ("Panda", "Mount", "Gripper", "Robot")
@@ -177,7 +177,7 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--host", default="0.0.0.0")
     p.add_argument("--port", type=int, default=8000)
-    p.add_argument("--camera-params", default="Baseline/knows_vla/camera_params.json")
+    p.add_argument("--camera-params", default="Baseline/paper_baselines/methods/knows/camera_params.json")
     p.add_argument("--gamma-h", type=float, default=0.5)
     p.add_argument("--eps-normal", type=float, default=0.05)
     p.add_argument("--w", type=float, default=1.0)

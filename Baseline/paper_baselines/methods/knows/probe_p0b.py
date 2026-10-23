@@ -6,10 +6,10 @@ This is the probe the whole KNOWS analysis hinges on. It replays the rollout rec
 target read from the BDDL goal.
 
 If the paper's (layer 12, head 3) does not beat the head-average here, there is no point building
-the CBF-QP: see Baseline/knows_vla/docs/06-repro-plan.md §8.1.
+the CBF-QP: see Baseline/paper_baselines/methods/knows/docs/06-repro-plan.md §8.1.
 
 Run (openpi venv):
-    JAX_PLATFORMS=cpu third_party/openpi/.venv/bin/python -m Baseline.knows_vla.probe_p0b
+    JAX_PLATFORMS=cpu third_party/openpi/.venv/bin/python -m Baseline.paper_baselines.methods.knows.probe_p0b
 """
 
 from __future__ import annotations

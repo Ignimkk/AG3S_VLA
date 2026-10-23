@@ -32,3 +32,7 @@ omegaconf==2.3.0
 pytest==8.4.1
 setuptools==80.9.0
 wheel==0.45.1
+# PAPER-METHODS C (safety filters): KNOWS CBF-QP uses osqp directly (same version as .venv-ag3s); VLSA/AEGIS and the
+# multi-link filter use cvxpy (official AEGIS: cp.OSQP for the CBF-QP, cp.SCS for the MVEE log-det fit).
+cvxpy==1.7.3
+osqp==1.1.3

@@ -12,9 +12,9 @@ Start the server first (openpi venv):
     uv run scripts/serve_policy.py --env LIBERO
 
 Then (LIBERO venv):
-    LIBERO_CONFIG_PATH=$PWD/Baseline/knows_vla/libero_config \
+    LIBERO_CONFIG_PATH=$PWD/Baseline/paper_baselines/methods/knows/libero_config \
     PYTHONPATH=$PWD/third_party/openpi/third_party/libero:$PWD MUJOCO_GL=egl \
-    third_party/openpi/examples/libero/.venv/bin/python -m Baseline.knows_vla.collect_p0b --max-steps 60
+    third_party/openpi/examples/libero/.venv/bin/python -m Baseline.paper_baselines.methods.knows.collect_p0b --max-steps 60
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ import pathlib
 
 import numpy as np
 
-from Baseline.knows_vla.libero_env import (
+from Baseline.paper_baselines.methods.knows.libero_env import (
     LIBERO_ENV_RESOLUTION,
     instance_id_to_name,
     make_env,

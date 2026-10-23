@@ -13,7 +13,7 @@ IMPORTANT: this is the *offline* filter. Its output is never fed back to the sim
 trajectory shown is the unfiltered one -- the cyan arrow is what the filter *would* have commanded,
 not what happened. A genuine before/after comparison needs closed-loop execution (P3).
 
-    third_party/openpi/.venv/bin/python -m Baseline.knows_vla.render_overlay \
+    third_party/openpi/.venv/bin/python -m Baseline.paper_baselines.methods.knows.render_overlay \
         --episodes data/knows_p0b/libero_spatial_task0_ep0.npz --out data/knows_videos
 """
 
@@ -27,9 +27,9 @@ import cv2
 import imageio.v2 as imageio
 import numpy as np
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid
-from Baseline.knows_vla.cbf.filter import CbfParams, SafetyFilter
-from Baseline.knows_vla.offline_filter import (
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid
+from Baseline.paper_baselines.methods.knows.cbf.filter import CbfParams, SafetyFilter
+from Baseline.paper_baselines.methods.knows.offline_filter import (
     GRIPPER_TOKEN,
     POS_SCALE,
     ROBOT_TOKENS,
@@ -37,7 +37,7 @@ from Baseline.knows_vla.offline_filter import (
     _axisangle_to_mat,
     _gripper_shape,
 )
-from Baseline.knows_vla.perception.ellipsoid_fit import CameraModel, ObjectTracker, fit_objects
+from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import CameraModel, ObjectTracker, fit_objects
 
 TARGET_BGR = (90, 220, 90)
 OBSTACLE_BGR = (70, 70, 235)
@@ -174,7 +174,7 @@ def render(path: pathlib.Path, cams: dict, params: CbfParams, out_dir: pathlib.P
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--episodes", nargs="+", required=True)
-    p.add_argument("--camera-params", default="Baseline/knows_vla/camera_params.json")
+    p.add_argument("--camera-params", default="Baseline/paper_baselines/methods/knows/camera_params.json")
     p.add_argument("--out", default="data/knows_videos")
     p.add_argument("--target", default="gt", choices=["gt", "none"])
     p.add_argument("--fps", type=int, default=10)

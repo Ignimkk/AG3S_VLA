@@ -45,6 +45,69 @@
       "license": "none at pinned SHA (no LICENSE file; README states MIT) -- not vendored, re-implemented with citations",
       "license_file": "LICENSE",
       "used_by": "B"
+    },
+    {
+      "name": "OmniGuide",
+      "repo": "https://github.com/daniilidis-group/OmniGuide",
+      "sha": "d649d69849bfc0c56bc822cdbe1f5f8a9fad2706",
+      "role": "D [19]: umbrella repo (pins omniguide-openpi / omniguide-gr00t submodules); reference only",
+      "license": "none at pinned SHA (no LICENSE file in umbrella repo) -- code lives in omniguide-openpi",
+      "license_file": "LICENSE",
+      "used_by": "D"
+    },
+    {
+      "name": "omniguide-openpi",
+      "repo": "https://github.com/OmniGuide-Code/omniguide-openpi",
+      "sha": "663f1cb2021282cf673fdfd737800b04ba80c893",
+      "role": "D [19]: OmniGuide pi0.5 guidance code (submodule of OmniGuide@d649d698); energy-field / guidance math ported to methods/omniguide",
+      "license": "Apache-2.0",
+      "license_file": "LICENSE",
+      "used_by": "D"
+    },
+    {
+      "name": "VLA-Safety-ConstrainedFlowMatching",
+      "repo": "https://github.com/Dubascudes/VLA-Safety-ConstrainedFlowMatching",
+      "sha": "b91153adc2f40d0ecfd2ae9ece4b6a2aed31dc7e",
+      "role": "D [5]: constrained flow matching reference; license not selected -> NOT vendored, read only",
+      "license": "none (LICENSE file says a license 'has not yet been selected') -- not vendored, read/cite only",
+      "license_file": "LICENSE",
+      "used_by": "D"
+    },
+    {
+      "name": "lan-o3dp",
+      "repo": "https://github.com/qqianfeng/lan-o3dp",
+      "sha": "b89c2898d8548f7dfde63c44eeb733a59f0c5222",
+      "role": "D [15]: obstacle-cost guidance reference for methods/lan_o3dp_guidance_adapted",
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "used_by": "D"
+    },
+    {
+      "name": "RoboGround",
+      "repo": "https://github.com/ZzZZCHS/RoboGround",
+      "sha": "25a862634398bc0407bc7b36b5d8b7c61d7a502b",
+      "role": "D [11]: fetch + README only (trained grounding policy, no checkpoint)",
+      "license": "MIT",
+      "license_file": "LICENSE",
+      "used_by": "D"
+    },
+    {
+      "name": "GuidedVLA",
+      "repo": "https://github.com/GuidedVLA/GuidedVLA",
+      "sha": "04be059e0d6bd448be5cb45fdbafc775f7eb5e38",
+      "role": "D [13]: fetch + README only (trained pi0 policy)",
+      "license": "Apache-2.0 (+ LICENSE_GEMMA.txt)",
+      "license_file": "LICENSE",
+      "used_by": "D"
+    },
+    {
+      "name": "DRAGON_VLA",
+      "repo": "https://github.com/UARK-AICV/DRAGON_VLA",
+      "sha": "bdf25556b65728588080cd5a7245b76d39b24591",
+      "role": "D [24] OBEYED-VLA perception grounding module: fetch + README only; no license -> NOT vendored",
+      "license": "none at pinned SHA (no LICENSE file) -- not vendored, read/cite only",
+      "license_file": "LICENSE",
+      "used_by": "D"
     }
   ]
 }

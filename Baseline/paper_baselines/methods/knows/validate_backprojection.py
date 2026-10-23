@@ -6,7 +6,7 @@ way. So rather than reason about robosuite's IMAGE_CONVENTION plus our own 180-d
 measure: the gripper's own segmentation mask must back-project onto ``robot0_eef_pos``, which the
 episodes already record.
 
-    third_party/openpi/.venv/bin/python -m Baseline.knows_vla.validate_backprojection
+    third_party/openpi/.venv/bin/python -m Baseline.paper_baselines.methods.knows.validate_backprojection
 """
 
 from __future__ import annotations
@@ -17,8 +17,8 @@ import pathlib
 
 import numpy as np
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid
-from Baseline.knows_vla.perception.ellipsoid_fit import (
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid
+from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import (
     CameraModel,
     centroid_of,
     fit_objects,
@@ -98,7 +98,7 @@ def main() -> None:
     p.add_argument("--episodes", nargs="+",
                    default=["data/knows_p0b/libero_spatial_task0_ep0.npz",
                             "data/knows_p0b/libero_object_task0_ep0.npz"])
-    p.add_argument("--camera-params", default="Baseline/knows_vla/camera_params.json")
+    p.add_argument("--camera-params", default="Baseline/paper_baselines/methods/knows/camera_params.json")
     a = p.parse_args()
 
     cams = json.loads(pathlib.Path(a.camera_params).read_text())

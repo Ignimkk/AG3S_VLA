@@ -17,7 +17,7 @@ import dataclasses
 
 import numpy as np
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid
 
 
 def real_depth(depth_buffer: np.ndarray, znear: float, zfar: float) -> np.ndarray:

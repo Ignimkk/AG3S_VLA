@@ -28,7 +28,7 @@ The verdict depends on three modelling choices, so each is a flag rather than a 
   --include-static   whether support surfaces count as obstacles. The paper segments
                      "manipulable objects" (§3.2), so by default they do not.
 
-    third_party/openpi/.venv/bin/python -m Baseline.knows_vla.check_admissibility
+    third_party/openpi/.venv/bin/python -m Baseline.paper_baselines.methods.knows.check_admissibility
 """
 
 from __future__ import annotations
@@ -40,8 +40,8 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
-from Baseline.knows_vla.cbf.ellipsoid import Ellipsoid, barrier, optimal_normal
-from Baseline.knows_vla.perception.ellipsoid_fit import (
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid, barrier, optimal_normal
+from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import (
     PerceptionMargin,
     complete_backface,
     mvee,

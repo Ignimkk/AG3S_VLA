@@ -35,7 +35,7 @@ import numpy as np
 import osqp
 import scipy.sparse as sp
 
-from Baseline.knows_vla.cbf.ellipsoid import (
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import (
     EPS_DENOM,
     Ellipsoid,
     barrier,
