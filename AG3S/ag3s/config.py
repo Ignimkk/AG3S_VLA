@@ -363,6 +363,15 @@ class ClusteringConfig:
     #: ep1908 / ep1992: 114 → 33 / 112 → 34 points at the first closing chunk, carve ball 59.6 → 39.9
     #: mm, and the attach snapshot (held spheres) a 33-point cap.
     closing_keep_geometry: bool = False
+    #: **IFG-FOLLOW — a kept geometry follows the fruit it stands for.** True = while the pick target
+    #: is latched or closing and nothing is attached, a frame that returns the *kept* geometry
+    #: (`subset_kept_anchor` · `unsplit_kept_anchor` · `closing_kept_geometry` · `occluded`) first
+    #: translates it by a fixed-radius sphere fit of this frame's non-support points near it
+    #: (`TargetConfirm.follow_kept`). The kept rules assume the fruit does not move before the grasp;
+    #: IFG-211-GRASP ep211: the palm pushed the apple 22.7 mm before the closing and 36 mm during it
+    #: while the kept geometry stayed at frame 10 — the target-free layer kept the real apple as
+    #: ambiguous and the authorized finger was pushed off it. Off (default) = bit-identical.
+    kept_geometry_follow: bool = False
     #: **T43 T 3(b) — release an identity the exclusion gate keeps refusing.** An integer N = when
     #: `AG3S._exclusion_gate` refuses the manipulated object because it overlaps the destination on
     #: N consecutive grounding calls (and nothing is frozen), the identity is let go at the start of
@@ -524,6 +533,10 @@ class ClusteringConfig:
             raise AG3SConfigError(
                 f"clustering.closing_keep_geometry must be true or false, "
                 f"got {self.closing_keep_geometry!r}")
+        if not isinstance(self.kept_geometry_follow, bool):
+            raise AG3SConfigError(
+                f"clustering.kept_geometry_follow must be true or false, "
+                f"got {self.kept_geometry_follow!r}")
         if not isinstance(self.latched_identity_hold, bool):
             raise AG3SConfigError(
                 f"clustering.latched_identity_hold must be true or false, "

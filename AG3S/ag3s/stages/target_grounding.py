@@ -118,6 +118,16 @@ from AG3S.ag3s.stages.subtask_probe import SubtaskDebounce
 from AG3S.ag3s.types import AttentionPointCloud, GroundingStatus, TargetGeometry
 
 _EPS = 1e-9
+#: IFG-FOLLOW (`clustering.kept_geometry_follow`): the band around the kept sphere's surface whose
+#: points the follow fit reads, the minimum point count, the largest median residual and the largest
+#: shift per frame it accepts, and the inner fraction of residuals each round keeps. Offline on the
+#: 10 apple scenes (IFG-ANCHOR-TRACK, this estimator): centre error to GT median 2.21 / p90 3.24 /
+#: max 4.0 mm vs 2.13 / 36.14 / 36.24 mm for the kept geometry, never on a neighbour fruit (closest 31.3 mm).
+FOLLOW_BAND = 0.015
+FOLLOW_MIN_POINTS = 20
+FOLLOW_MAX_RESIDUAL = 0.004
+FOLLOW_MAX_STEP = 0.030
+FOLLOW_KEEP_FRACTION = 0.7
 #: "Not given" for `TargetConfirm(lost_frames=...)`, where None already means "never lost".
 _FROM_CONFIG = object()
 #: `TargetConfirm(max_opening=UNCHECKED)`: admissibility is not evaluated at all (T20 behaviour).
@@ -418,6 +428,9 @@ class ManipulatedIdentity:
     #: (`gap_mm` = nearest hand sphere surface to the standing geometry) — or None when the caller
     #: gave no hand this frame.
     hand: Optional[dict] = None
+    #: IFG-FOLLOW: this frame's `TargetConfirm.follow_kept` record — `{applied, reason, radius_mm,
+    #: n_points, residual_mm, shift_mm}` — or None when it did not run (always None with the flag off).
+    follow: Optional[dict] = None
 
     @property
     def usable(self) -> bool:
@@ -454,6 +467,8 @@ class ManipulatedIdentity:
             "anchor": None if self.anchor is None else dict(self.anchor),
             "split": None if self.split is None else dict(self.split),
             "hand": None if self.hand is None else dict(self.hand),
+            # IFG-FOLLOW: only when it ran (off = the record keys of before).
+            **({} if self.follow is None else {"follow": dict(self.follow)}),
         }
 
 
@@ -704,6 +719,10 @@ class TargetConfirm:
         self.closing_keep_geometry = bool(getattr(cfg, "closing_keep_geometry", False))
         #: A grasp is in progress and nothing is attached yet (`note_pre_attach_grasp`).
         self._pre_attach_grasp = False
+        # --- IFG-FOLLOW (off by default; off = not read anywhere) ---
+        self.kept_geometry_follow = bool(getattr(cfg, "kept_geometry_follow", False))
+        #: This frame's `follow_kept` record (None when it did not run).
+        self.follow_record: Optional[dict[str, Any]] = None
         # --- T43 T 3(a) · 3(b) (both off by default; off = not read anywhere) ---
         self.latched_identity_hold = bool(getattr(cfg, "latched_identity_hold", False))
         rr = getattr(cfg, "refused_identity_release_frames", None)
@@ -820,6 +839,7 @@ class TargetConfirm:
             anchor=self._anchor_record(),
             split=self._split_snapshot(),
             hand=None if self._hand_record is None else dict(self._hand_record),
+            follow=None if self.follow_record is None else dict(self.follow_record),
         )
 
     @property
@@ -1125,6 +1145,7 @@ class TargetConfirm:
         self._frame += 1
         self._association = None
         self._keep_anchor = False
+        self.follow_record = None   # IFG-FOLLOW: per frame
         self._supersede = False
         self._subtask_blocked = self._subtask_would = None
         self._release_if_placed_home()
@@ -1315,6 +1336,61 @@ class TargetConfirm:
     def observe_seen(self, timestamp: float) -> None:
         """A `subset_kept_anchor` frame: the object was seen at `timestamp`, the geometry stays."""
         self._last_seen_time = float(timestamp)
+
+    def follow_kept(self, points: np.ndarray, usable: Optional[np.ndarray] = None) -> None:
+        """IFG-FOLLOW: translate the kept geometry onto the fruit it stands for.
+
+        Runs only with `clustering.kept_geometry_follow`, while the pick target is latched or closing
+        and nothing is attached, on a frame that is about to return the kept geometry. The kept
+        geometry's surface-fit sphere (centre `c`, radius `r`) is refitted with `r` fixed to this
+        frame's points (`usable`: not support) within `r + FOLLOW_BAND` of `c` — each round keeps the
+        inner `FOLLOW_KEEP_FRACTION` of the residuals `| |p − c| − r |`, so a neighbour touching the
+        fruit does not pull the centre. The shift is taken when at least `FOLLOW_MIN_POINTS` points
+        are in the band, the median kept residual is ≤ `FOLLOW_MAX_RESIDUAL` and the shift is
+        ≤ `FOLLOW_MAX_STEP`; then the geometry, the anchor and the held centroid move by it (shape
+        unchanged). Otherwise nothing moves. The record is `follow_record`.
+        """
+        self.follow_record = None
+        if not self.kept_geometry_follow or self._geometry is None:
+            return
+        if not (self._latched or self._pre_attach_grasp):
+            return
+        from AG3S.ag3s.robot_models.held_object import fit_surface_sphere
+
+        rec: dict[str, Any] = {"applied": False, "reason": None}
+        self.follow_record = rec
+        geom_pts = np.asarray(self._geometry.points, np.float64).reshape(-1, 3)
+        fit = fit_surface_sphere(geom_pts)
+        if fit.method != "surface_fit":
+            rec["reason"] = f"no_surface_fit ({fit.reason})"
+            return
+        c0, r = np.asarray(fit.centre, np.float64), float(fit.radius)
+        pts = np.asarray(points, np.float64).reshape(-1, 3)
+        if usable is not None:
+            pts = pts[np.asarray(usable, bool).reshape(-1)]
+        sel = pts[np.linalg.norm(pts - c0[None, :], axis=1) <= r + FOLLOW_BAND]
+        rec.update({"radius_mm": round(r * 1000.0, 3), "n_points": int(len(sel))})
+        if len(sel) < FOLLOW_MIN_POINTS:
+            rec["reason"] = "too_few_points"
+            return
+        c = fit_fixed_radius_centre(sel, c0, r)
+        res = np.abs(np.linalg.norm(sel - c[None, :], axis=1) - r)
+        residual = float(np.median(res[res <= np.quantile(res, FOLLOW_KEEP_FRACTION)]))
+        shift = c - c0
+        step = float(np.linalg.norm(shift))
+        rec.update({"residual_mm": round(residual * 1000.0, 3), "shift_mm": round(step * 1000.0, 3)})
+        if residual > FOLLOW_MAX_RESIDUAL:
+            rec["reason"] = "residual"
+            return
+        if step > FOLLOW_MAX_STEP:
+            rec["reason"] = "step"
+            return
+        self._geometry = _translated(self._geometry, shift)
+        if self._anchor_geom is not None:
+            self._anchor_geom = _translated(self._anchor_geom, shift)
+        if self._held is not None:
+            self._held = np.asarray(self._held, np.float64).reshape(3) + shift
+        rec["applied"] = True
 
     @property
     def anchor_active(self) -> bool:
@@ -1807,12 +1883,14 @@ def ground_target(
     if decision is not None and decision.cluster is None:
         # The manipulated object is not among this frame's clusters (T20). The leader is *not*
         # named in its place: a hand in front of the apple does not make the crate the object.
+        confirm.follow_kept(points, usable)   # IFG-FOLLOW (off: returns at once)
         return dataclasses.replace(
             _unobserved_result(decision, confirm, tuple(clusters), seeds, peak_index,
                                best.target_score), splits=splits)
     if decision is not None and decision.reason in (SUBSET_KEPT_ANCHOR, UNSPLIT_KEPT_ANCHOR,
                                                     CLOSING_KEPT_GEOMETRY):
         # The object was seen, but only part of it: its anchor geometry stands in (T30 F3b).
+        confirm.follow_kept(points, usable)   # IFG-FOLLOW (off: returns at once)
         return dataclasses.replace(
             _anchor_result(decision, confirm, tuple(clusters), seeds, peak_index,
                            best.target_score, ts), splits=splits)
@@ -1948,6 +2026,50 @@ def _split_metrics(chosen: "ClusterInfo") -> dict[str, float]:
             "attention_split_parent_n_points": float(chosen.split.get("parent_n_points", 0))}
 
 
+def fit_fixed_radius_centre(points: np.ndarray, centre: np.ndarray, radius: float, *,
+                            keep_fraction: float = FOLLOW_KEEP_FRACTION, rounds: int = 20) -> np.ndarray:
+    """IFG-FOLLOW: the centre of a sphere of known `radius` through `points`, started at `centre`.
+
+    Gauss-Newton on `|p − c| − r`, each round on the inner `keep_fraction` of the residuals (a
+    neighbour's points in the band are the outer ones). A one-sided cap converges in a few rounds."""
+    pts = np.asarray(points, np.float64).reshape(-1, 3)
+    c = np.asarray(centre, np.float64).reshape(3).copy()
+    r = float(radius)
+    for _ in range(int(rounds)):
+        dv = pts - c[None, :]
+        dist = np.maximum(np.linalg.norm(dv, axis=1), _EPS)
+        res = dist - r
+        keep = np.abs(res) <= np.quantile(np.abs(res), keep_fraction)
+        jac = -dv[keep] / dist[keep, None]
+        step, *_ = np.linalg.lstsq(jac, -res[keep], rcond=None)
+        c = c + step
+        if float(np.linalg.norm(step)) < 1e-6:
+            break
+    return c
+
+
+def _translated(geom: TargetGeometry, shift: np.ndarray) -> TargetGeometry:
+    """IFG-FOLLOW: `geom` moved by `shift` (points, centroid and bounding sphere; shape unchanged)."""
+    s = np.asarray(shift, np.float64).reshape(3)
+    bg = geom.bounding_geometry
+    return dataclasses.replace(
+        geom, points=np.asarray(geom.points, np.float64).reshape(-1, 3) + s[None, :],
+        centroid=np.asarray(geom.centroid, np.float64).reshape(3) + s,
+        bounding_geometry=dataclasses.replace(bg, center=np.asarray(bg.center, np.float64) + s))
+
+
+def _follow_metrics(confirm: Optional["TargetConfirm"]) -> dict[str, float]:
+    """IFG-FOLLOW: this frame's `follow_kept` record as flat metrics (none when it did not run)."""
+    rec = None if confirm is None else confirm.follow_record
+    if rec is None:
+        return {}
+    out = {"kept_follow_applied": float(bool(rec.get("applied")))}
+    for key in ("shift_mm", "n_points", "residual_mm", "radius_mm"):
+        if rec.get(key) is not None:
+            out[f"kept_follow_{key}"] = float(rec[key])
+    return out
+
+
 def _hand_metrics(decision: Optional[ConfirmDecision]) -> dict[str, float]:
     """T32b S3: hand gap to the standing geometry and whether the hand hid it (flat metrics)."""
     if decision is None or decision.hand_gap_m is None:
@@ -2006,6 +2128,7 @@ def _anchor_result(decision, confirm, clusters, seeds, peak_index, best_score, t
         "manipulated_unsplit_kept_anchor": float(decision.reason == UNSPLIT_KEPT_ANCHOR),
         **_association_metrics(decision.association),
         **_hand_metrics(decision),
+        **_follow_metrics(confirm),
     })
     target = dataclasses.replace(
         last, point_indices=np.zeros(0, np.int64), metrics=metrics,
@@ -2042,6 +2165,7 @@ def _unobserved_result(decision, confirm, clusters, seeds, peak_index, best_scor
         "manipulated_association_rejected": float(decision.reason == ASSOCIATION_REJECTED),
         **_association_metrics(decision.association),
         **_hand_metrics(decision),
+        **_follow_metrics(confirm),
     })
     target = dataclasses.replace(
         last, id=-1, point_indices=np.zeros(0, np.int64), metrics=metrics,

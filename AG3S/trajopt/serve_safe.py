@@ -874,6 +874,8 @@ def t43t_identity_section(args) -> dict:
     out = {}
     if getattr(args, "closing_keep_geometry", False):
         out["closing_keep_geometry"] = True
+    if getattr(args, "kept_geometry_follow", False):
+        out["kept_geometry_follow"] = True   # IFG-FOLLOW
     if getattr(args, "latched_identity_hold", False):
         out["latched_identity_hold"] = True
     if getattr(args, "refused_identity_release", None) is not None:
@@ -1963,6 +1965,10 @@ def build_parser() -> argparse.ArgumentParser:
                     help="T43 T step 2 — 닫는 동안 (closing, attach 전) 조작 대상 기하를 그 프레임 관측으로 "
                          "바꾸지 않는다: 닫기 전 기하 (물체 전체) 가 carve-out 과 attach snapshot 에 남는다. "
                          "기본 off (T30: 동결 중 기하가 관측을 따라감)")
+    ap.add_argument("--kept-geometry-follow", action="store_true",
+                    help="IFG-FOLLOW — 쥐기 직전 · 닫는 중 (attach 전) 유지한 조작 대상 기하 (subset · unsplit · "
+                         "closing kept · occluded) 를 이번 프레임의 지지면 아닌 점에 반지름 고정 구를 맞춰 평행 "
+                         "이동한다 (손에 밀린 과일을 따라간다). 기본 off")
     ap.add_argument("--latched-identity-hold", action="store_true",
                     help="T43 T 3(a) — grasp latch 가 pick 대상을 잠근 동안 (LATCHED · CLOSING) 조작 대상 "
                          "정체는 '안 보임' 만으로 바뀌지 않는다: 물체가 사라졌다는 증거 (제자리 cluster 가 "
@@ -2460,6 +2466,7 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
                  "--w-deflection-rate 와 함께 주십시오")   # IFG-TOB
     t43t_ag3s = [name for name, on in (
         ("--closing-keep-geometry", getattr(args, "closing_keep_geometry", False)),
+        ("--kept-geometry-follow", getattr(args, "kept_geometry_follow", False)),  # IFG-FOLLOW
         ("--target-volume-exempt", getattr(args, "target_volume_exempt", False)),
         ("--latched-identity-hold", getattr(args, "latched_identity_hold", False)),
         ("--refused-identity-release", getattr(args, "refused_identity_release", None) is not None),
