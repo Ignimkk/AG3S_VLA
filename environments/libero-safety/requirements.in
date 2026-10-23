@@ -1,0 +1,29 @@
+# .venv-libero-safety (Python 3.10) -- BM-SETUP-B, 2026-10-23 KST.
+# Official LIBERO-Safety requirements (benchmark/LIBERO-Safety/requirements.txt, extra_requirements.txt), verbatim pins:
+hydra-core==1.2.0
+wandb==0.13.1
+easydict==1.9
+transformers==4.21.1
+opencv-python==4.6.0.66
+robomimic==0.2.0
+einops==0.4.1
+thop==0.1.1-2209072238
+bddl==1.0.1
+future==0.18.2
+matplotlib==3.5.3
+cloudpickle==2.1.0
+gym==0.25.2
+usd-core>=25.5
+imageio[ffmpeg]
+wand
+scikit-image
+# Not pinned by LIBERO-Safety; chosen here (recorded in validated-freeze.txt):
+#  numpy<2      -- env_wrapper.py uses np.float_ (removed in NumPy 2); openpi-client requires <2
+#  mujoco 3.2.3 -- same MuJoCo as .venv-libero (robosuite fork requires >=2.3.0)
+#  torch CPU    -- only torch.load(weights_only=False) of init states (needs torch>=1.13); no GPU in the client
+numpy==1.26.4
+mujoco==3.2.3
+torch==2.2.2+cpu
+scipy
+numba
+websockets>=14
