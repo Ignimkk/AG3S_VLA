@@ -50,7 +50,9 @@ is ``default_bounds()[1]`` (the V11AB effective value) and :func:`diff_against_v
 
 V11AB flags that are not AG3S settings (TO: ``--esdf-margin``, ``--obstacle-margin``, ``--plan-horizon``,
 ``--lookahead*``, ``--qp-eps``, ``--w-deflection-rate``; recording: ``--record-constraints``) are parsed
-and kept in :func:`manifest_entry` but play no part here (closed loop = SL-5).
+and kept in :func:`manifest_entry` but play no part in building AG3S here. The closed-loop server
+(``AG3S/adapters/panda/server.py``) applies them: the TO flags through ``serve_safe.trajopt_config_from_args``
+(SL-5), ``--record-constraints`` / ``--record-constraints-esdf`` through ``server.constraint_recorder`` (SL5j).
 """
 
 from __future__ import annotations
@@ -239,6 +241,28 @@ def version_server_flags(version: str) -> list[str]:
     if version not in AG3S_VERSIONS:
         raise ValueError(f"unknown AG3S version {version!r}; known: {sorted(AG3S_VERSIONS)}")
     return list(AG3S_VERSIONS[version])
+
+
+def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
+    """``{dest: value}`` of ``args`` for every serve_safe option any :data:`AG3S_VERSIONS` entry sets."""
+    from AG3S.trajopt import serve_safe as ss
+
+    actions = ss.build_parser()._option_string_actions
+    dests = sorted({actions[tok].dest for flags in AG3S_VERSIONS.values() for tok in flags if tok.startswith("--")})
+    return {d: _jsonable(getattr(args, d, None)) for d in dests}
+
+
+def match_ag3s_version(args: argparse.Namespace) -> Optional[str]:
+    """The :data:`AG3S_VERSIONS` name whose flags give ``args``'s :func:`version_flag_values`, else ``None``.
+
+    The server only sees the parsed flags (the launcher's ``--ag3s-version`` name is not in its argv); this reads
+    the name back for the record by parsing the V11AB argv + each version's flags the way the server is started.
+    """
+    current = version_flag_values(args)
+    for name, flags in AG3S_VERSIONS.items():
+        if version_flag_values(parse_v11ab_args(argv=v11ab_server_argv() + list(flags))) == current:
+            return name
+    return None
 
 
 def v11ab_server_argv(arm: str = V11AB_ARM) -> list[str]:
@@ -519,6 +543,9 @@ def manifest_entry(arm: str = V11AB_ARM, *, esdf_bounds: str = "panda") -> dict[
         "constructor_differences": constructor_differences(kw),
         "override_reasons": dict(OVERRIDE_REASONS),
         "panda_config": _jsonable(panda.to_dict()),
+        # This string is kept byte for byte (it is in every run manifest). "offline" = this profile / the perception
+        # replay; the closed-loop server applies the TO flags (SL-5) and the recording flags (SL5j,
+        # server.constraint_recorder).
         "not_ag3s_settings": "TO / recording flags (esdf-margin, obstacle-margin, plan-horizon, lookahead*, qp-eps, "
                              "w-deflection-rate, record-constraints) are parsed but not used offline (SL-5)",
     }
@@ -530,5 +557,5 @@ __all__ = [
     "diff_against_v11ab", "effective_config_dict", "manifest_entry", "panda_ag3s_config", "panda_attached_parent_links",
     "panda_esdf_bounds", "panda_overrides", "parse_v11ab_args", "ta_flags", "v11ab_ag3s_config", "v11ab_build_call_source",
     "v11ab_build_kwargs", "v11ab_client_phase", "v11ab_config_dict", "v11ab_required_args", "v11ab_server_argv",
-    "v11ab_server_flags",
+    "v11ab_server_flags", "match_ag3s_version", "version_flag_values",
 ]

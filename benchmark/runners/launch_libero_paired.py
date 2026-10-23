@@ -15,6 +15,14 @@ env reset history is the same because both modes run the same episode order. Aft
 ``paired_summary.json`` is written into the VLA+V11AB run (and referenced from both manifests): per episode the
 official success of each mode and the candidate list (VLA-only failure, VLA+V11AB success).
 
+``--record-constraints {none,occupancy,full}`` (SL5j, default ``none``) appends
+``--record-constraints <run_dir>/server_constraints --record-constraints-esdf <value>`` to the VLA+V11AB server
+argv (``serve_safe``'s per-call constraint record, ``AG3S/ag3s/experiments/sources/constraint_record.py``). The run
+directory exists only after ``create_run``, so the manifest ``settings.server_argv`` carries the ``<run_dir>`` token
+and ``settings.record_constraints`` says so; the resolved argv is the ``role=server`` execution entry. After the
+server stops the launcher counts the chunk files (``launcher_result.record_constraints``). Refused together with
+the ``vla_only`` mode (``--no-safe`` server). With ``none`` the server argv and the settings are unchanged.
+
     source scripts/setup/env.sh
     .venv-ag3s/bin/python benchmark/runners/launch_libero_paired.py --task-ids 0 --episode-ids 0 --run-id sl5b-t0e0
 """
@@ -40,6 +48,9 @@ GPU_LOCK_HELD_ENV = "AG3S_GPU_LOCK_HELD"
 DEFAULT_SPLIT = "dev (LIBERO init 0-4, plan §6.0)"
 MODES = ("vla_only", "vla_v11ab")
 CLIENT_SCRIPT = PROJECT_ROOT / "benchmark/runners/libero_safe_client.py"
+RECORD_CONSTRAINTS_CHOICES = ("none", "occupancy", "full")
+RECORD_CONSTRAINTS_DIRNAME = "server_constraints"
+RUN_DIR_TOKEN = "<run_dir>"  # manifest settings are written before the run directory exists
 
 
 def server_argv(mode: str, checkpoint: str, port: int, version: str = "V11AB") -> list[str]:
@@ -54,6 +65,27 @@ def server_argv(mode: str, checkpoint: str, port: int, version: str = "V11AB") -
     argv[argv.index("--checkpoint") + 1] = checkpoint
     argv[argv.index("--port") + 1] = str(port)
     return argv + ["--robot", "panda"] + profile.version_server_flags(version)
+
+
+def record_constraints_argv(mode: str, run_dir: str | Path, record: str) -> list[str]:
+    """serve_safe flags of ``--record-constraints <record>``; ``[]`` for ``none`` (argv unchanged)."""
+    if record not in RECORD_CONSTRAINTS_CHOICES:
+        raise ValueError(f"--record-constraints must be one of {RECORD_CONSTRAINTS_CHOICES}, got {record!r}")
+    if record == "none":
+        return []
+    if mode != "vla_v11ab":
+        raise ValueError(f"--record-constraints {record} applies to the vla_v11ab server only "
+                         f"(the {mode} server runs --no-safe and builds no constraints)")
+    return ["--record-constraints", f"{run_dir}/{RECORD_CONSTRAINTS_DIRNAME}", "--record-constraints-esdf", record]
+
+
+def record_constraints_summary(run_dir: Path, record: str) -> dict:
+    """What the server left under ``<run_dir>/server_constraints`` (counted after it stopped)."""
+    root = Path(run_dir) / RECORD_CONSTRAINTS_DIRNAME
+    chunks = sorted(root.glob("run_*/chunk_*.npz"))
+    return {"esdf": record, "dir": str(root), "writer_runs": sorted(p.name for p in root.glob("run_*")),
+            "n_chunk_files": len(chunks), "bytes": sum(p.stat().st_size for p in chunks),
+            "meta_json": [p.parent.name for p in sorted(root.glob("run_*/meta.json"))]}
 
 
 def client_argv(run_dir: str, port: int, args) -> list[str]:
@@ -178,6 +210,13 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
     port = l0.choose_port(None)
     s_argv = [str(l0.openpi_python()), "-m", "AG3S.trajopt.serve_safe"] + server_argv(mode, identity["path"], port,
                                                                                        args.ag3s_version)
+    record = getattr(args, "record_constraints", "none")
+    rec_settings = {}
+    if record != "none":
+        rec_settings = {"record_constraints": {
+            "esdf": record, "dir": f"{RUN_DIR_TOKEN}/{RECORD_CONSTRAINTS_DIRNAME}",
+            "argv_note": f"settings.server_argv keeps the {RUN_DIR_TOKEN} token (the run directory does not exist "
+                         "yet); the resolved argv is the role=server execution entry"}}
     settings = {"step": args.step, "condition": mode, "paired_group": args.run_id, "port": port,
                 "panda_conversion_mode": args.conversion if mode == "vla_v11ab" else None,
                 "ag3s_version": args.ag3s_version if mode == "vla_v11ab" else None,
@@ -185,7 +224,8 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
                 "task_ids": args.task_ids, "episode_ids": args.episode_ids, "seed": args.seed,
                 "safety_level": args.safety_level,
                 "policy_seed_rule": "seed*100000 + task_id*1000 + episode_idx (libero_safe_client.episode_seed)",
-                "checkpoint": identity, "server_argv": s_argv, "data_split": args.data_split, **shared}
+                "checkpoint": identity, "server_argv": s_argv + record_constraints_argv(mode, RUN_DIR_TOKEN, record),
+                "data_split": args.data_split, **rec_settings, **shared}
     tag = mode
     if mode == "vla_v11ab":
         tag = f"{mode}-{args.conversion}" if args.ag3s_version == "V11AB" else f"{mode}-{args.ag3s_version}-{args.conversion}"
@@ -193,6 +233,7 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
         tag = f"L{args.safety_level}-{tag}"
     run_dir = create_run(run_id=f"{args.run_id}-{tag}", settings=settings, checkpoint=identity["path"])
     print(f"[{mode}] {run_dir}", flush=True)
+    s_argv = s_argv + record_constraints_argv(mode, run_dir, record)
     c_argv = client_argv(str(run_dir), port, args)
     logs = run_dir / "logs"
     result = {"role": "launcher_result", "mode": mode, "port": port}
@@ -229,6 +270,14 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
     finally:
         if server is not None:
             result["server_returncode"] = l0.stop_own_process(server)
+        if record != "none":
+            try:  # after the server stopped: its background writer has flushed (atexit)
+                result["record_constraints"] = record_constraints_summary(run_dir, record)
+            except OSError as exc:
+                result["record_constraints"] = {"esdf": record, "error": repr(exc)}
+            if not result["record_constraints"].get("n_chunk_files"):
+                print(f"[{mode}] !!! --record-constraints {record}: no chunk file under "
+                      f"{run_dir / RECORD_CONSTRAINTS_DIRNAME} !!!", flush=True)
         if lock is not None:
             result["gpu_lock_released_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
             fcntl.flock(lock, fcntl.LOCK_UN)
@@ -300,6 +349,9 @@ def build_parser() -> argparse.ArgumentParser:
                     help="AG3S version served in vla_v11ab mode (AG3S/adapters/panda/profile.py AG3S_VERSIONS)")
     ap.add_argument("--conversion", choices=("A", "B", "C"), required=True,
                     help="Panda reverse conversion for VLA+V11AB (AG3S/adapters/panda/action.py CONVERSION_MODES)")
+    ap.add_argument("--record-constraints", choices=RECORD_CONSTRAINTS_CHOICES, default="none",
+                    help="vla_v11ab server only: serve_safe --record-constraints <run_dir>/server_constraints "
+                         "--record-constraints-esdf <value> (per-call constraint npz). none = argv unchanged")
     ap.add_argument("--dry-run", action="store_true")
     # protocol constants read by l0.protocol_settings / runtime_schedule
     ap.add_argument("--host", default="127.0.0.1")
@@ -319,10 +371,15 @@ def main(argv=None) -> int:
         raise ValueError("--safety-level is required for SafeLIBERO suites and only for them")
     if args.data_split == DEFAULT_SPLIT and any(e > 4 for e in args.episode_ids):
         raise ValueError("dev split is LIBERO init states 0-4 (plan §6.0); pass --data-split for anything else")
-    identity = l0.checkpoint_identity(Path(args.checkpoint_dir), require=True)
     modes = [m for m in args.modes.split(",") if m]
+    if args.record_constraints != "none" and "vla_only" in modes:
+        raise ValueError(f"--record-constraints {args.record_constraints} cannot run with the vla_only mode "
+                         "(--no-safe server, no constraints); pass --modes vla_v11ab")
+    identity = l0.checkpoint_identity(Path(args.checkpoint_dir), require=True)
     if args.dry_run:
-        print(json.dumps({m: server_argv(m, identity["path"], 0, args.ag3s_version) for m in modes}, indent=1))
+        print(json.dumps({m: server_argv(m, identity["path"], 0, args.ag3s_version)
+                          + record_constraints_argv(m, RUN_DIR_TOKEN, args.record_constraints) for m in modes},
+                         indent=1))
         print(json.dumps(client_argv("<run>", 0, args)))
         print(json.dumps({"protocol": protocol_settings(args), "runtime_schedule": runtime_schedule(args)}, default=str))
         return 0

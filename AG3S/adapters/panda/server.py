@@ -25,6 +25,13 @@ Panda differences from the RB-Y1 server (all recorded in ``panda_server_config.j
 | subtask probe | ``kv_L4_v1`` (RB-Y1) | none | RB-Y1-trained; the gate is inert without a label |
 | gripper | 2 hands, RB-Y1 client convention | 1 hand ``left``, ``panda_finger_joint1 / 0.04`` | Panda |
 | static geometry | ``--static-geometry`` (default none) | none | RB-Y1 shapes |
+
+``--record-constraints DIR`` (SL5j): the same per-call constraint record as the RB-Y1 server
+(``ConstraintRecordWriter(background=True)``, ``AG3S/ag3s/experiments/sources/constraint_record.py``), passed to
+``SafePolicy(recorder=...)`` by :func:`build_safe_server` (:func:`constraint_recorder`, meta in
+:func:`recorder_meta`). :func:`main` closes it when ``serve_forever`` ends -- normally, on SIGINT (the launcher's
+``stop_own_process``) and on SIGTERM (``serve_safe.exit_cleanly_on_sigterm``) -- so the queued chunks are written
+and ``meta.json`` exists. Without the flag the recorder is ``None`` and nothing else changes.
 """
 from __future__ import annotations
 
@@ -195,6 +202,11 @@ class PandaSafeServer:
     def metadata(self):
         return getattr(self._policy, "metadata", {})
 
+    @property
+    def recorder(self):
+        """``SafePolicy``'s ``ConstraintRecordWriter`` (``None`` without ``--record-constraints``)."""
+        return getattr(self._policy, "recorder", None)
+
     def reset(self):
         self._sent.clear()
         self._policy.reset()
@@ -278,6 +290,107 @@ def _replace_horizon_limits(to_config):
     return dataclasses.replace(to_config, horizon=h, limits=lim)
 
 
+def check_record_flags(args) -> None:
+    """``--record-constraints`` checks, before the checkpoint is loaded (same refusals as the RB-Y1 server + one).
+
+    * the ESDF backend must be one the writer can record (``SUPPORTED_ESDF_BACKENDS``, ``serve_safe.py`` RB-Y1
+      branch): otherwise every chunk fails and the run leaves an empty directory;
+    * Panda only: refused with ``--no-safe`` (no ``SafePolicy``, nothing to record; the RB-Y1 server ignores it).
+    """
+    if not getattr(args, "record_constraints", None):
+        return
+    from AG3S.ag3s.experiments.sources.constraint_record import SUPPORTED_ESDF_BACKENDS
+
+    if getattr(args, "no_safe", False):
+        raise SystemExit("--record-constraints 는 --no-safe (VLA-only) Panda server 에서 기록할 것이 없습니다 "
+                         "(SafePolicy 가 없다). 그대로 띄우면 빈 디렉토리만 남습니다")
+    if args.esdf_backend not in SUPPORTED_ESDF_BACKENDS:
+        raise SystemExit(f"--record-constraints 는 esdf backend {args.esdf_backend!r} 의 거리장을 실을 수 없습니다 "
+                         f"(지원: {list(SUPPORTED_ESDF_BACKENDS)}). 그대로 띄우면 청크마다 기록이 실패하고 "
+                         f"**빈 디렉토리**가 남습니다")
+
+
+def recorder_meta(args, to_config, *, conversion: str, ag3s_info: dict) -> dict:
+    """``ConstraintRecordWriter`` meta: the RB-Y1 server's keys (``serve_safe.py`` RB-Y1 branch, same rules for the
+    optional ones) with the Panda's effective values, plus ``robot`` / ``ag3s_version`` / ``version_flags`` /
+    ``conversion`` / Panda geometry. ``grasp_contact`` is added by :func:`build_safe_server` once applied.
+
+    Effective, not argv, where the Panda differs: ``model_xml`` is ``None`` (the Panda reads its URDF; the RB-Y1
+    MJCF in argv is not used), ``joint_limits`` / ``sqp`` / ``plan_horizon`` come from the Panda ``to_config``
+    (``_replace_horizon_limits``), ``subtask.probe`` is ``None`` (no Panda probe). ``sphere_options`` /
+    ``finger_cover`` keep the RB-Y1 rule (key only when given) and ``v11ab_build_kwargs_not_applied`` says they are
+    not applied to the Panda models.
+    """
+    from AG3S.adapters.panda import profile
+    from AG3S.trajopt import serve_safe as ss
+    from AG3S.trajopt.safe_policy import _jsonable
+
+    meta = {"config": args.config, "checkpoint": args.checkpoint, "model_xml": None, "links": args.links,
+            **({"shadow": True} if args.shadow else {}),
+            **({"exclude_links": list(args.exclude_links)} if args.exclude_links else {}),
+            **({"self_collision": False} if args.no_self_collision else {}),
+            **({"target_field_policy": args.target_field_policy} if args.target_field_policy != "relax" else {}),
+            **({"collision": "off"} if args.no_collision else {}),
+            **({"limits": "off"} if args.no_limits else {}),
+            "joint_limits": ss.joint_limits_meta(to_config.limits),
+            "sqp": ss.sqp_meta(to_config.sqp),
+            "plan_horizon": int(to_config.horizon.planned),
+            **({"sphere_options": ss.sphere_options(args)} if ss.sphere_options(args) else {}),
+            **({"gripper_cover": ss.gripper_cover_options(args)} if ss.gripper_cover_options(args) else {}),
+            **({"finger_cover": ss.finger_cover_options(args)} if ss.finger_cover_options(args) else {}),
+            **({"self_filter": ss.self_filter_options(args)} if ss.self_filter_options(args) else {}),
+            "subtask": {"gate": bool(args.subtask_gate), "probe": None},
+            # --- Panda (SL5j) ---
+            "robot": "panda", "robot_urdf": str(pm.PANDA_URDF),
+            "ag3s_version": profile.match_ag3s_version(args),
+            "version_flags": profile.version_flag_values(args),
+            "conversion": {"mode": conversion, "name": pa.CONVERSION_MODES[conversion]},
+            "esdf_backend": args.esdf_backend,
+            "horizon": dict(PANDA_HORIZON),
+            "constraint_links": ag3s_info.get("constraint_links"),
+            "n_constraint_spheres": ag3s_info.get("n_constraint_spheres"),
+            "esdf_bounds": ag3s_info.get("esdf_bounds"),
+            "v11ab_build_kwargs_not_applied": ["constraint_sphere_options", "finger_cover"]}
+    return _jsonable(meta)
+
+
+def constraint_recorder(args, to_config, *, conversion: str, ag3s_info: dict):
+    """``ConstraintRecordWriter`` for ``--record-constraints DIR`` as the RB-Y1 server makes it, else ``None``."""
+    if not getattr(args, "record_constraints", None):
+        return None
+    check_record_flags(args)
+    from AG3S.ag3s.experiments.sources.constraint_record import ConstraintRecordWriter
+
+    # T38 B5 — npz writes off the response path; same content and order; flushed / closed by `main`.
+    recorder = ConstraintRecordWriter(args.record_constraints, esdf_mode=args.record_constraints_esdf,
+                                      background=True,
+                                      meta=recorder_meta(args, to_config, conversion=conversion, ag3s_info=ag3s_info))
+    logging.info("recording AG3S constraint diagnostics to %s (esdf=%s, backend=%s)",
+                 recorder.run_dir, args.record_constraints_esdf, args.esdf_backend)
+    if args.record_constraints_esdf == "occupancy" and args.esdf_backend == "curobo":
+        logging.warning(
+            "!!! --record-constraints-esdf occupancy 는 cuRobo backend 에서 점유 배열을 남기지 않습니다 !!!\n"
+            "    block-sparse TSDF 에는 legacy 의 3 상태(FREE/OCCUPIED/UNKNOWN)에 대응하는 배열이 없습니다. "
+            "격자 메타·계층 정보는 남고, **거리장 자체를 보려면 `full` 을 쓰십시오** (계층마다 float16 격자: "
+            "주 계층 · coarse · target 없는 계층).")
+    return recorder
+
+
+def close_recorder(served) -> Optional[dict]:
+    """Flush and close the served object's recorder (``meta.json``); ``None`` if it has none. Never raises."""
+    recorder = getattr(served, "recorder", None)
+    if recorder is None:
+        return None
+    try:
+        recorder.close()
+    except Exception:  # noqa: BLE001 -- the server is stopping; say it loudly, do not mask the exit cause
+        logging.exception("!!! constraint recorder close failed (%s) — meta.json may be missing !!!",
+                          getattr(recorder, "run_dir", "?"))
+        return {"closed": False}
+    return {"closed": True, "run_dir": str(recorder.run_dir), "n_chunks": recorder.meta.get("n_chunks"),
+            "n_failed": getattr(recorder, "n_failed", 0)}
+
+
 def build_safe_server(policy, args, *, attention_model=None):
     """Everything below the openpi policy (also used by tests with a stub policy and no attention model)."""
     from AG3S.adapters.panda import attention as pat
@@ -300,9 +413,11 @@ def build_safe_server(policy, args, *, attention_model=None):
     attention_fn = ss.attention_extractor(alias=ATTENTION_ALIAS, cameras=ATTENTION_CAMERAS,
                                           transform=lambda _cam, grid: pat.unmirror_grid(np.asarray(grid)))
     mode = conversion_mode()
+    # SL5j — None without --record-constraints (then the SafePolicy arguments are the pre-SL5j ones)
+    recorder = constraint_recorder(args, to_config, conversion=mode, ag3s_info=ag3s_info)
     safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(),
                       grasp_links=dict(profile.PANDA_GRASP_LINKS), hold_links=dict(profile.PANDA_HOLD_LINKS),
-                      static_geometry=None, recorder=None, shadow=bool(getattr(args, "shadow", False)),
+                      static_geometry=None, recorder=recorder, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,
                       finger_map=FingerJointMap(constraint, convention=panda_gripper_convention()), hands=HANDS)
     grasp_contact = ss.apply_grasp_contact_flags(safe, args)  # V11AB-pb4 / pb5 (all off = V11AB)
@@ -318,6 +433,13 @@ def build_safe_server(policy, args, *, attention_model=None):
             "hands": HANDS, "gripper_columns": GRIPPER_COLUMNS, "gripper_convention": panda_gripper_convention().record(),
             "conversion": pa.conventions(), "static_geometry": None,
             "v11ab_build_kwargs_not_applied": ["constraint_sphere_options", "finger_cover"]}
+    if recorder is not None:  # key only when recording (the panda_server_config.json of other runs is unchanged)
+        from AG3S.trajopt.safe_policy import _jsonable
+
+        recorder.meta["grasp_contact"] = _jsonable(grasp_contact)
+        info["record_constraints"] = {"dir": str(args.record_constraints), "run_dir": str(recorder.run_dir),
+                                      "esdf_mode": recorder.esdf_mode, "background": recorder.background,
+                                      "ag3s_version": recorder.meta.get("ag3s_version")}
     return PandaSafeServer(safe, chunk_policy, mode=mode), info
 
 
@@ -338,6 +460,7 @@ def main(args, ap) -> None:
 
     from AG3S.trajopt.policy_seed import SeededPolicy, describe_rng_owner, describe_xla_determinism
 
+    check_record_flags(args)  # SL5j: refuse before the checkpoint is loaded (no-op without --record-constraints)
     policy = _policy_config.create_trained_policy(_config.get_config(args.config), args.checkpoint,
                                                   default_prompt=args.default_prompt)
     record: dict[str, Any] = {"robot": "panda", "config": args.config, "checkpoint": args.checkpoint,
@@ -357,5 +480,16 @@ def main(args, ap) -> None:
     logging.info("panda server: %s", json.dumps({k: record[k] for k in ("mode", "port")}))
     logging.info("%s", describe_rng_owner(served))
     logging.info("%s", describe_xla_determinism(os.environ.get("XLA_FLAGS")))
-    websocket_policy_server.WebsocketPolicyServer(policy=served, host="0.0.0.0", port=args.port,
-                                                  metadata=getattr(served, "metadata", {})).serve_forever()
+    recording = getattr(served, "recorder", None) is not None
+    if recording:
+        from AG3S.trajopt import serve_safe as ss
+
+        ss.exit_cleanly_on_sigterm()  # SIGTERM -> SystemExit, so the `finally` below runs (as the RB-Y1 server)
+    try:
+        websocket_policy_server.WebsocketPolicyServer(policy=served, host="0.0.0.0", port=args.port,
+                                                      metadata=getattr(served, "metadata", {})).serve_forever()
+    finally:
+        # SL5j — normal return, SIGINT (KeyboardInterrupt; launcher `stop_own_process`) and SIGTERM (SystemExit):
+        # write the queued chunks and meta.json. Without a recorder this is a no-op.
+        if recording:
+            logging.info("constraint recorder: %s", close_recorder(served))
