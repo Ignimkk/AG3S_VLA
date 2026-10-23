@@ -1,0 +1,264 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/localization_heads/v1-lh-scene.png",
+ "kind": "scene",
+ "module": "localization_heads",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/figure_dump"
+ ],
+ "note": "",
+ "numbers": {
+  "libero_spatial_t0_e0_0075/head/localization_heads:threshold|no_text": {
+   "arm": "localization_heads:threshold|no_text",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     128.0,
+     48.0,
+     256.0,
+     192.0
+    ]
+   ],
+   "score": 0.03932411968708038,
+   "iou": 0.04592327787707961,
+   "mask_pixels": 14546,
+   "gt_pixels": 668,
+   "peak_xy": [
+    184,
+    136
+   ]
+  },
+  "libero_spatial_t0_e0_0075/head/localization_heads:sam_point|no_text": {
+   "arm": "localization_heads:sam_point|no_text",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     174.0,
+     136.0,
+     209.0,
+     163.0
+    ]
+   ],
+   "score": 0.03932411968708038,
+   "iou": 0.8398950131233596,
+   "mask_pixels": 734,
+   "gt_pixels": 668,
+   "peak_xy": [
+    184,
+    136
+   ]
+  },
+  "libero_spatial_t0_e0_0075/left_wrist/localization_heads:threshold|no_text": {
+   "arm": "localization_heads:threshold|no_text",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     0.0,
+     112.0,
+     176.0,
+     256.0
+    ]
+   ],
+   "score": 0.1158190444111824,
+   "iou": 0.407183839349749,
+   "mask_pixels": 16640,
+   "gt_pixels": 6905,
+   "peak_xy": [
+    120,
+    168
+   ]
+  },
+  "libero_spatial_t0_e0_0075/left_wrist/localization_heads:sam_point|no_text": {
+   "arm": "localization_heads:sam_point|no_text",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     4.0,
+     140.0,
+     138.0,
+     215.0
+    ]
+   ],
+   "score": 0.1158190444111824,
+   "iou": 0.8957918491968672,
+   "mask_pixels": 7376,
+   "gt_pixels": 6905,
+   "peak_xy": [
+    120,
+    168
+   ]
+  },
+  "libero_spatial_t1_e0_0080/head/localization_heads:threshold|no_text": {
+   "arm": "localization_heads:threshold|no_text",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     176.0,
+     48.0,
+     256.0,
+     176.0
+    ]
+   ],
+   "score": 0.16976983845233917,
+   "iou": 0.0559432933478735,
+   "mask_pixels": 9170,
+   "gt_pixels": 513,
+   "peak_xy": [
+    216,
+    119
+   ]
+  },
+  "libero_spatial_t1_e0_0080/head/localization_heads:sam_point|no_text": {
+   "arm": "localization_heads:sam_point|no_text",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     200.0,
+     109.0,
+     233.0,
+     123.0
+    ]
+   ],
+   "score": 0.16976983845233917,
+   "iou": 0.5648312611012434,
+   "mask_pixels": 368,
+   "gt_pixels": 513,
+   "peak_xy": [
+    216,
+    119
+   ]
+  },
+  "libero_spatial_t1_e0_0080/left_wrist/localization_heads:threshold|no_text": {
+   "arm": "localization_heads:threshold|no_text",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     80.0,
+     0.0,
+     256.0,
+     224.0
+    ]
+   ],
+   "score": 0.1733563244342804,
+   "iou": 0.3700681578189498,
+   "mask_pixels": 18107,
+   "gt_pixels": 10437,
+   "peak_xy": [
+    200,
+    0
+   ]
+  },
+  "libero_spatial_t1_e0_0080/left_wrist/localization_heads:sam_point|no_text": {
+   "arm": "localization_heads:sam_point|no_text",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     196.0,
+     0.0,
+     249.0,
+     8.0
+    ]
+   ],
+   "score": 0.1733563244342804,
+   "iou": 0.0,
+   "mask_pixels": 278,
+   "gt_pixels": 10437,
+   "peak_xy": [
+    200,
+    0
+   ]
+  },
+  "libero_spatial_t9_e0_0085/head/localization_heads:threshold|no_text": {
+   "arm": "localization_heads:threshold|no_text",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     32.0,
+     32.0,
+     144.0,
+     128.0
+    ]
+   ],
+   "score": 0.2050626426935196,
+   "iou": 0.11204690831556503,
+   "mask_pixels": 9380,
+   "gt_pixels": 1051,
+   "peak_xy": [
+    87,
+    72
+   ]
+  },
+  "libero_spatial_t9_e0_0085/head/localization_heads:sam_point|no_text": {
+   "arm": "localization_heads:sam_point|no_text",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     66.0,
+     60.0,
+     111.0,
+     91.0
+    ]
+   ],
+   "score": 0.2050626426935196,
+   "iou": 0.8898916967509025,
+   "mask_pixels": 1043,
+   "gt_pixels": 1051,
+   "peak_xy": [
+    87,
+    72
+   ]
+  },
+  "libero_spatial_t9_e0_0085/left_wrist/localization_heads:threshold|no_text": {
+   "arm": "localization_heads:threshold|no_text",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     0.0,
+     64.0,
+     256.0,
+     224.0
+    ]
+   ],
+   "score": 0.1116471067070961,
+   "iou": 0.3221629188905416,
+   "mask_pixels": 20736,
+   "gt_pixels": 9486,
+   "peak_xy": [
+    55,
+    119
+   ]
+  },
+  "libero_spatial_t9_e0_0085/left_wrist/localization_heads:sam_point|no_text": {
+   "arm": "localization_heads:sam_point|no_text",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     10.0,
+     88.0,
+     62.0,
+     139.0
+    ]
+   ],
+   "score": 0.1116471067070961,
+   "iou": 0.0,
+   "mask_pixels": 2090,
+   "gt_pixels": 9486,
+   "peak_xy": [
+    55,
+    119
+   ]
+  }
+ }
+}

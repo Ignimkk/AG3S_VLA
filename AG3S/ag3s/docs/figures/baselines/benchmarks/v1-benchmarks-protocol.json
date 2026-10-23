@@ -1,0 +1,187 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/benchmarks/v1-benchmarks-protocol.png",
+ "kind": "table",
+ "module": "benchmarks",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/BM-SETUP-A/probe",
+  "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/BM-SETUP-B/probe"
+ ],
+ "note": "",
+ "numbers": {
+  "libero_spatial": {
+   "n_tasks": 10,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "—"
+   ]
+  },
+  "libero_object": {
+   "n_tasks": 10,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "—"
+   ]
+  },
+  "libero_goal": {
+   "n_tasks": 10,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "—"
+   ]
+  },
+  "libero_10": {
+   "n_tasks": 10,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "—"
+   ]
+  },
+  "safelibero_spatial_LI": {
+   "n_tasks": 4,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "moka_pot_obstacle_1",
+    "wine_bottle_obstacle_1"
+   ]
+  },
+  "safelibero_spatial_LII": {
+   "n_tasks": 4,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "moka_pot_obstacle_1"
+   ]
+  },
+  "safelibero_object_LI": {
+   "n_tasks": 4,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "wine_bottle_obstacle_1"
+   ]
+  },
+  "safelibero_object_LII": {
+   "n_tasks": 4,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "moka_pot_obstacle_1"
+   ]
+  },
+  "safelibero_goal_LI": {
+   "n_tasks": 4,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "moka_pot_obstacle_1"
+   ]
+  },
+  "safelibero_goal_LII": {
+   "n_tasks": 4,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "moka_pot_obstacle_1",
+    "red_coffee_mug_obstacle_1"
+   ]
+  },
+  "safelibero_long_LI": {
+   "n_tasks": 4,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "moka_pot_small_obstacle_1",
+    "red_coffee_mug_obstacle_1"
+   ]
+  },
+  "safelibero_long_LII": {
+   "n_tasks": 4,
+   "n_init_states": 50,
+   "active_obstacles": [
+    "moka_pot_small_obstacle_1"
+   ]
+  },
+  "affordance_L0": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": []
+  },
+  "affordance_L1": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": []
+  },
+  "affordance_L2": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": []
+  },
+  "human_safety_L0": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": [
+    "checkgripperforce",
+    "checkrobotcontact"
+   ]
+  },
+  "human_safety_L1": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": [
+    "checkgripperforce",
+    "checkrobotcontact"
+   ]
+  },
+  "human_safety_L2": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": [
+    "checkgripperforce",
+    "checkrobotcontact"
+   ]
+  },
+  "obstacle_avoidance_L0": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": [
+    "checkcontact",
+    "checkrobotcontact"
+   ]
+  },
+  "obstacle_avoidance_L1": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": [
+    "checkcontact",
+    "checkrobotcontact"
+   ]
+  },
+  "obstacle_avoidance_L2": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": [
+    "checkcontact",
+    "checkrobotcontact"
+   ]
+  },
+  "obstacle_avoidance_human_L0": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": [
+    "checkcontact",
+    "checkrobotcontact"
+   ]
+  },
+  "obstacle_avoidance_human_L1": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": [
+    "checkcontact",
+    "checkrobotcontact"
+   ]
+  },
+  "obstacle_avoidance_human_L2": {
+   "n_tasks": 5,
+   "n_init_states": 50,
+   "constraint_predicates": [
+    "checkcontact",
+    "checkrobotcontact"
+   ]
+  }
+ }
+}

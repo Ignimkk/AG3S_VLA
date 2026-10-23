@@ -1,0 +1,184 @@
+{
+ "episode_id": "libero_spatial_t2_e0",
+ "prompt_mode": "instruction",
+ "selection_rule": "longest episode",
+ "obs_index": [
+  10,
+  30,
+  55,
+  75,
+  95,
+  120,
+  140
+ ],
+ "panels": {
+  "head|grounded_sam2:per_frame|instruction|10": {
+   "2d_iou": 0.0,
+   "mask_px": 878,
+   "gt_px": 746,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|10": {
+   "2d_iou": 0.0,
+   "mask_px": 893,
+   "gt_px": 746,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|10": {
+   "2d_iou": 0.9826218360408009,
+   "mask_px": 2616,
+   "gt_px": 2632,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|10": {
+   "2d_iou": 0.9578267477203647,
+   "mask_px": 2521,
+   "gt_px": 2632,
+   "found": true
+  },
+  "head|grounded_sam2:per_frame|instruction|30": {
+   "2d_iou": 0.0,
+   "mask_px": 877,
+   "gt_px": 678,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|30": {
+   "2d_iou": 0.0,
+   "mask_px": 891,
+   "gt_px": 678,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|30": {
+   "2d_iou": 0.8716012084592145,
+   "mask_px": 2635,
+   "gt_px": 2321,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|30": {
+   "2d_iou": 0.8465648854961833,
+   "mask_px": 2517,
+   "gt_px": 2321,
+   "found": true
+  },
+  "head|grounded_sam2:per_frame|instruction|55": {
+   "2d_iou": 0.0,
+   "mask_px": 877,
+   "gt_px": 572,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|55": {
+   "2d_iou": 0.0,
+   "mask_px": 891,
+   "gt_px": 572,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|55": {
+   "2d_iou": 0.934252256647963,
+   "mask_px": 8178,
+   "gt_px": 7679,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|55": {
+   "2d_iou": 0.9310893512851898,
+   "mask_px": 8098,
+   "gt_px": 7679,
+   "found": true
+  },
+  "head|grounded_sam2:per_frame|instruction|75": {
+   "2d_iou": 0.0,
+   "mask_px": 877,
+   "gt_px": 659,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|75": {
+   "2d_iou": 0.0,
+   "mask_px": 891,
+   "gt_px": 659,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|75": {
+   "2d_iou": 0.9537607066381156,
+   "mask_px": 14895,
+   "gt_px": 14302,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|75": {
+   "2d_iou": 0.9553758004718571,
+   "mask_px": 14706,
+   "gt_px": 14302,
+   "found": true
+  },
+  "head|grounded_sam2:per_frame|instruction|95": {
+   "2d_iou": 0.0,
+   "mask_px": 877,
+   "gt_px": 481,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|95": {
+   "2d_iou": 0.0,
+   "mask_px": 891,
+   "gt_px": 481,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|95": {
+   "2d_iou": 0.9796870297923563,
+   "mask_px": 13283,
+   "gt_px": 13031,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|95": {
+   "2d_iou": 0.9831035005303834,
+   "mask_px": 13142,
+   "gt_px": 13031,
+   "found": true
+  },
+  "head|grounded_sam2:per_frame|instruction|120": {
+   "2d_iou": 0.0,
+   "mask_px": 876,
+   "gt_px": 768,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|120": {
+   "2d_iou": 0.0,
+   "mask_px": 893,
+   "gt_px": 768,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|120": {
+   "2d_iou": 0.0,
+   "mask_px": 3036,
+   "gt_px": 10037,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|120": {
+   "2d_iou": 0.985632183908046,
+   "mask_px": 10002,
+   "gt_px": 10037,
+   "found": true
+  },
+  "head|grounded_sam2:per_frame|instruction|140": {
+   "2d_iou": 0.9493150684931507,
+   "mask_px": 719,
+   "gt_px": 704,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|140": {
+   "2d_iou": 0.00267379679144385,
+   "mask_px": 46,
+   "gt_px": 704,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|140": {
+   "2d_iou": 0.9868836291913216,
+   "mask_px": 10111,
+   "gt_px": 10036,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|140": {
+   "2d_iou": 0.9852460639667294,
+   "mask_px": 10013,
+   "gt_px": 10036,
+   "found": true
+  }
+ }
+}

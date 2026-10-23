@@ -1,0 +1,97 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/ats_v11ab/v1-ats-cloud-labeling-same-points.png",
+ "kind": "core",
+ "module": "ats_v11ab",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035953_5752c64c7006_baseline-eval-cloud-sl3dev/figure_dump",
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/figure_dump"
+ ],
+ "note": "",
+ "numbers": {
+  "libero_spatial_t0_e0_0045/ats_v11ab|noun_attention": {
+   "n_points": 6198,
+   "n_gt_target": 209,
+   "n_flagged": 0,
+   "tp": 0,
+   "iou": 0.0
+  },
+  "libero_spatial_t0_e0_0045/grounded_sam|phrase": {
+   "n_points": 6198,
+   "n_gt_target": 209,
+   "n_flagged": 200,
+   "tp": 190,
+   "iou": 0.867579908675799
+  },
+  "libero_spatial_t0_e0_0045/grounded_sam2:per_frame|instruction": {
+   "n_points": 6198,
+   "n_gt_target": 209,
+   "n_flagged": 91,
+   "tp": 81,
+   "iou": 0.3698630136986301
+  },
+  "libero_spatial_t0_e0_0045/localization_heads:sam_point|no_text": {
+   "n_points": 6198,
+   "n_gt_target": 209,
+   "n_flagged": 95,
+   "tp": 80,
+   "iou": 0.35714285714285715
+  },
+  "libero_spatial_t0_e0_0045/tokencut:foreground|no_text": {
+   "n_points": 6198,
+   "n_gt_target": 209,
+   "n_flagged": 870,
+   "tp": 146,
+   "iou": 0.1564844587352626
+  },
+  "libero_spatial_t0_e0_0045/gt_oracle|phrase": {
+   "n_points": 6198,
+   "n_gt_target": 209,
+   "n_flagged": 192,
+   "tp": 178,
+   "iou": 0.7982062780269058
+  },
+  "libero_spatial_t8_e0_0045/ats_v11ab|noun_attention": {
+   "n_points": 7722,
+   "n_gt_target": 240,
+   "n_flagged": 142,
+   "tp": 142,
+   "iou": 0.5916666666666667
+  },
+  "libero_spatial_t8_e0_0045/grounded_sam|phrase": {
+   "n_points": 7722,
+   "n_gt_target": 240,
+   "n_flagged": 246,
+   "tp": 231,
+   "iou": 0.9058823529411765
+  },
+  "libero_spatial_t8_e0_0045/grounded_sam2:per_frame|instruction": {
+   "n_points": 7722,
+   "n_gt_target": 240,
+   "n_flagged": 259,
+   "tp": 233,
+   "iou": 0.8759398496240601
+  },
+  "libero_spatial_t8_e0_0045/localization_heads:sam_point|no_text": {
+   "n_points": 7722,
+   "n_gt_target": 240,
+   "n_flagged": 248,
+   "tp": 225,
+   "iou": 0.8555133079847909
+  },
+  "libero_spatial_t8_e0_0045/tokencut:foreground|no_text": {
+   "n_points": 7722,
+   "n_gt_target": 240,
+   "n_flagged": 657,
+   "tp": 234,
+   "iou": 0.35294117647058826
+  },
+  "libero_spatial_t8_e0_0045/gt_oracle|phrase": {
+   "n_points": 7722,
+   "n_gt_target": 240,
+   "n_flagged": 263,
+   "tp": 236,
+   "iou": 0.8838951310861424
+  }
+ }
+}

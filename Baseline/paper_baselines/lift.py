@@ -98,15 +98,24 @@ def backproject_pixels(depth_m: np.ndarray, K: np.ndarray, T_base_cam: np.ndarra
     return pc.points, pc.uv[:, 0].astype(np.int64), pc.uv[:, 1].astype(np.int64)
 
 
+def lift_selection(mask: np.ndarray, u: np.ndarray, v: np.ndarray, depth_shape: tuple[int, int], *,
+                   robot_removal: str = "none", robot_pixels: np.ndarray | None = None) -> np.ndarray:
+    """Boolean selection over the back-projected valid-depth pixels ``(u, v)`` (:func:`backproject_pixels` order):
+    ``points[lift_selection(...)]`` are the lifted mask points. Same robot removal and frame check as
+    :func:`lift_mask`; lets a caller back-project a frame once and lift many masks of it."""
+    mask = apply_robot_removal(mask, robot_removal, robot_pixels)
+    if mask.shape != tuple(depth_shape):
+        raise ValueError(f"mask {mask.shape} and depth {tuple(depth_shape)} must share the pixel frame")
+    return mask[v, u]
+
+
 def lift_mask(mask: np.ndarray, depth_m: np.ndarray, K: np.ndarray, T_base_cam: np.ndarray, *,
               robot_removal: str = "none", robot_pixels: np.ndarray | None = None, range_max: float = RANGE_MAX_M
               ) -> np.ndarray:
     """Base-frame points ``(M, 3)`` of the masked pixels that have valid depth."""
-    mask = apply_robot_removal(mask, robot_removal, robot_pixels)
-    if mask.shape != np.asarray(depth_m).shape:
-        raise ValueError(f"mask {mask.shape} and depth {np.asarray(depth_m).shape} must share the pixel frame")
     pts, u, v = backproject_pixels(depth_m, K, T_base_cam, range_max=range_max)
-    return pts[mask[v, u]]
+    return pts[lift_selection(mask, u, v, np.asarray(depth_m).shape, robot_removal=robot_removal,
+                              robot_pixels=robot_pixels)]
 
 
 def voxel_keys(points: np.ndarray, voxel: float = VOXEL_M) -> np.ndarray:
@@ -123,5 +132,5 @@ def project_points(points_base: np.ndarray, K: np.ndarray, T_base_cam: np.ndarra
 
 
 __all__ = ["POLICY_HW", "RANGE_MAX_M", "ROBOT_REMOVAL", "VOXEL_M", "apply_robot_removal", "backproject_pixels", "lift_mask",
-           "opencv_mask_to_policy", "opencv_rgb_from_raw", "policy_mask_to_opencv", "project_points", "robot_geom_ids",
+           "lift_selection", "opencv_mask_to_policy", "opencv_rgb_from_raw", "policy_mask_to_opencv", "project_points", "robot_geom_ids",
            "voxel_keys"]

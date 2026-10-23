@@ -1,0 +1,79 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/gt_oracle/v1-gt-oracle-metrics.png",
+ "kind": "graph",
+ "module": "gt_oracle",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/summary.json",
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/native_frames.jsonl",
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035953_5752c64c7006_baseline-eval-cloud-sl3dev/summary.json"
+ ],
+ "note": "",
+ "numbers": {
+  "native_all": {
+   "acc05_mask": 1.0,
+   "corloc_any_object": 1.0,
+   "mIoU": 1.0,
+   "oIoU": 1.0,
+   "pixel_acc": 1.0,
+   "fbeta_binary": 1.0,
+   "JF_mean": 1.0
+  },
+  "cloud": {
+   "n_calls": 221,
+   "n_episodes": 10,
+   "iou": {
+    "episode_mean": 0.8502760804522798,
+    "n_episodes": 10,
+    "n_frames": 221
+   },
+   "precision": {
+    "episode_mean": 0.8929448953786544,
+    "n_episodes": 10,
+    "n_frames": 221
+   },
+   "recall": {
+    "episode_mean": 0.9478050212922394,
+    "n_episodes": 10,
+    "n_frames": 221
+   },
+   "neighbour_frac": {
+    "episode_mean": 0.018130970574423512,
+    "n_episodes": 10,
+    "n_frames": 221
+   },
+   "support_frac": {
+    "episode_mean": 0.07302995643334845,
+    "n_episodes": 10,
+    "n_frames": 221
+   },
+   "robot_frac": {
+    "episode_mean": 0.0,
+    "n_episodes": 10,
+    "n_frames": 221
+   },
+   "none_frac": {
+    "episode_mean": 0.0,
+    "n_episodes": 10,
+    "n_frames": 221
+   },
+   "pooled": {
+    "tp": 42925,
+    "fp": 5242,
+    "fn": 2344,
+    "n_pred": 48167,
+    "n_gt": 45269,
+    "pred_neighbour": 824,
+    "iou": 0.8498148918057453,
+    "precision": 0.8911703033197003,
+    "recall": 0.9482206366387594,
+    "neighbour_frac": 0.017107148047418357
+   },
+   "found_rate": {
+    "n": 221,
+    "found": 221,
+    "rate": 1.0
+   }
+  }
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/ats_v11ab/v1-ats-scene-seed-cluster.png",
+ "kind": "scene",
+ "module": "ats_v11ab",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T225820_46a08d6ff644_sl4-perception-dev/perception",
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/figure_dump"
+ ],
+ "note": "",
+ "numbers": {
+  "libero_spatial_t0_e0_0045": {
+   "call_k": 7,
+   "has_target": true,
+   "n_cloud": 6198,
+   "n_seed": 46,
+   "n_target_cluster": 0,
+   "n_support": 4565,
+   "n_target_points": 151,
+   "n_clusters": 1,
+   "target_confidence": 0.24180067121608664,
+   "grounding_status": "ok"
+  },
+  "libero_spatial_t8_e0_0045": {
+   "call_k": 7,
+   "has_target": true,
+   "n_cloud": 7722,
+   "n_seed": 77,
+   "n_target_cluster": 142,
+   "n_support": 5965,
+   "n_target_points": 142,
+   "n_clusters": 1,
+   "target_confidence": 0.2840261189641078,
+   "grounding_status": "ok"
+  },
+  "libero_spatial_t3_e0_0065": {
+   "call_k": 11,
+   "has_target": true,
+   "n_cloud": 5970,
+   "n_seed": 54,
+   "n_target_cluster": 0,
+   "n_support": 4265,
+   "n_target_points": 204,
+   "n_clusters": 2,
+   "target_confidence": 0.46823307216523735,
+   "grounding_status": "ok"
+  }
+ }
+}

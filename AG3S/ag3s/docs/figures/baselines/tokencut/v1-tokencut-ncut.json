@@ -1,0 +1,299 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/tokencut/v1-tokencut-ncut.png",
+ "kind": "core",
+ "module": "tokencut",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/figure_dump",
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/summary.json"
+ ],
+ "note": "",
+ "numbers": {
+  "libero_spatial_t0_e0_0075/head": {
+   "seed": 7,
+   "seed_rc": [
+    0,
+    7
+   ],
+   "bipartition_patches": 60,
+   "component_patches": 60,
+   "mask_pixels": 15360,
+   "same_as_saved": true
+  },
+  "libero_spatial_t0_e0_0075/left_wrist": {
+   "seed": 181,
+   "seed_rc": [
+    11,
+    5
+   ],
+   "bipartition_patches": 34,
+   "component_patches": 32,
+   "mask_pixels": 8192,
+   "same_as_saved": true
+  },
+  "libero_spatial_t4_e0_0085/head": {
+   "seed": 24,
+   "seed_rc": [
+    1,
+    8
+   ],
+   "bipartition_patches": 52,
+   "component_patches": 41,
+   "mask_pixels": 10496,
+   "same_as_saved": true
+  },
+  "libero_spatial_t4_e0_0085/left_wrist": {
+   "seed": 156,
+   "seed_rc": [
+    9,
+    12
+   ],
+   "bipartition_patches": 48,
+   "component_patches": 43,
+   "mask_pixels": 11008,
+   "same_as_saved": true
+  },
+  "tokencut_dino_parity": [
+   {
+    "episode_id": "libero_spatial_t0_e0",
+    "obs_index": 45,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t0_e0",
+    "obs_index": 45,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t0_e0",
+    "obs_index": 75,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t0_e0",
+    "obs_index": 75,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t1_e0",
+    "obs_index": 45,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t1_e0",
+    "obs_index": 45,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t1_e0",
+    "obs_index": 80,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t1_e0",
+    "obs_index": 80,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t2_e0",
+    "obs_index": 55,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t2_e0",
+    "obs_index": 55,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t2_e0",
+    "obs_index": 95,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t2_e0",
+    "obs_index": 95,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t3_e0",
+    "obs_index": 40,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t3_e0",
+    "obs_index": 40,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t3_e0",
+    "obs_index": 65,
+    "camera": "head",
+    "same_as_saved": false
+   },
+   {
+    "episode_id": "libero_spatial_t3_e0",
+    "obs_index": 65,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t4_e0",
+    "obs_index": 50,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t4_e0",
+    "obs_index": 50,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t4_e0",
+    "obs_index": 85,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t4_e0",
+    "obs_index": 85,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t5_e0",
+    "obs_index": 40,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t5_e0",
+    "obs_index": 40,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t5_e0",
+    "obs_index": 75,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t5_e0",
+    "obs_index": 75,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t6_e0",
+    "obs_index": 45,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t6_e0",
+    "obs_index": 45,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t6_e0",
+    "obs_index": 75,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t6_e0",
+    "obs_index": 75,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t7_e0",
+    "obs_index": 45,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t7_e0",
+    "obs_index": 45,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t7_e0",
+    "obs_index": 85,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t7_e0",
+    "obs_index": 85,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t8_e0",
+    "obs_index": 45,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t8_e0",
+    "obs_index": 45,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t8_e0",
+    "obs_index": 80,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t8_e0",
+    "obs_index": 80,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t9_e0",
+    "obs_index": 45,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t9_e0",
+    "obs_index": 45,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t9_e0",
+    "obs_index": 85,
+    "camera": "head",
+    "same_as_saved": true
+   },
+   {
+    "episode_id": "libero_spatial_t9_e0",
+    "obs_index": 85,
+    "camera": "left_wrist",
+    "same_as_saved": true
+   }
+  ]
+ }
+}

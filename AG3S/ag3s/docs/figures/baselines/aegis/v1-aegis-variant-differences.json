@@ -1,0 +1,33 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/aegis/v1-aegis-variant-differences.png",
+ "kind": "graph",
+ "module": "aegis",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T040141_5752c64c7006_baseline-eval-methods-sl3dev/summary_all.json",
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T040141_5752c64c7006_baseline-eval-methods-sl3dev/filters/calls.jsonl"
+ ],
+ "note": "open-loop replay of recorded calls: each filter edits the recorded chunk; later actions of the chunk use the method's own EE prediction (measured gain 0.0115 m/unit); the modified chunk is not executed",
+ "numbers": {
+  "intervention_rate_rows": {
+   "aegis": 0.17918552036199095,
+   "aegis:detector_names": 0.14434389140271492,
+   "aegis:detector_all": 0.11809954751131221
+  },
+  "intervention_rate_calls": {
+   "aegis": 0.26244343891402716,
+   "aegis:detector_names": 0.19909502262443438,
+   "aegis:detector_all": 0.16289592760180996
+  },
+  "da_xyz_l2_mean": {
+   "aegis": 0.06559903614213199,
+   "aegis:detector_names": 0.06997552492382193,
+   "aegis:detector_all": 0.05518058100486889
+  },
+  "n_obstacles_per_call": {
+   "aegis": 5.0,
+   "aegis:detector_names": 2.8597285067873304,
+   "aegis:detector_all": 0.9864253393665159
+  }
+ }
+}

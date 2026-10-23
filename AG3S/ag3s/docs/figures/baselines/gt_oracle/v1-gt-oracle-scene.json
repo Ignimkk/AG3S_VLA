@@ -1,0 +1,76 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/gt_oracle/v1-gt-oracle-scene.png",
+ "kind": "scene",
+ "module": "gt_oracle",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/figure_dump"
+ ],
+ "note": "",
+ "numbers": {
+  "libero_spatial_t0_e0_0075/head": {
+   "gt_pixels": 668,
+   "instance_ids": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "object_instances": [
+    "akita_black_bowl_1",
+    "akita_black_bowl_2",
+    "cookies_1",
+    "glazed_rim_porcelain_ramekin_1",
+    "plate_1"
+   ]
+  },
+  "libero_spatial_t0_e0_0075/left_wrist": {
+   "gt_pixels": 6905,
+   "instance_ids": [
+    0,
+    2,
+    4
+   ],
+   "object_instances": [
+    "akita_black_bowl_1",
+    "akita_black_bowl_2",
+    "cookies_1",
+    "glazed_rim_porcelain_ramekin_1",
+    "plate_1"
+   ]
+  },
+  "libero_spatial_t5_e0_0040/head": {
+   "gt_pixels": 349,
+   "instance_ids": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "object_instances": [
+    "akita_black_bowl_1",
+    "akita_black_bowl_2",
+    "cookies_1",
+    "glazed_rim_porcelain_ramekin_1",
+    "plate_1"
+   ]
+  },
+  "libero_spatial_t5_e0_0040/left_wrist": {
+   "gt_pixels": 4892,
+   "instance_ids": [
+    0,
+    3,
+    4
+   ],
+   "object_instances": [
+    "akita_black_bowl_1",
+    "akita_black_bowl_2",
+    "cookies_1",
+    "glazed_rim_porcelain_ramekin_1",
+    "plate_1"
+   ]
+  }
+ }
+}

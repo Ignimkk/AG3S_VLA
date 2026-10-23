@@ -1,0 +1,69 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/gt_oracle/v1-gt-oracle-lift-check.png",
+ "kind": "core",
+ "module": "gt_oracle",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/figure_dump",
+  "/mnt/dev/AG3S_VLA-benchmark/outputs/verify/SL4/raw/scene"
+ ],
+ "note": "harness 의 lift_within_10mm (PAPER-BASELINES-2) 와 같은 정의는 아니다: 여기서는 scene-GT surface sample 최근접 거리",
+ "numbers": {
+  "frames": {
+   "libero_spatial_t0_e0_0075/head": {
+    "n_points": 668,
+    "within_10mm": 0.9910179640718563,
+    "median_mm": 1.951106189298568,
+    "p95_mm": 3.70137549437105
+   },
+   "libero_spatial_t0_e0_0075/left_wrist": {
+    "n_points": 6905,
+    "within_10mm": 0.9937726285300507,
+    "median_mm": 1.916921790142494,
+    "p95_mm": 3.5111999764836628
+   },
+   "libero_spatial_t5_e0_0040/head": {
+    "n_points": 349,
+    "within_10mm": 0.9512893982808023,
+    "median_mm": 2.068484573648247,
+    "p95_mm": 5.821780703785278
+   },
+   "libero_spatial_t5_e0_0040/left_wrist": {
+    "n_points": 4892,
+    "within_10mm": 0.9936631234668847,
+    "median_mm": 1.9234199891423311,
+    "p95_mm": 3.5720376156722886
+   },
+   "libero_spatial_t3_e0_0065/head": {
+    "n_points": 669,
+    "within_10mm": 0.9850523168908819,
+    "median_mm": 1.9507424502719724,
+    "p95_mm": 3.935290862784113
+   },
+   "libero_spatial_t3_e0_0065/left_wrist": {
+    "n_points": 9954,
+    "within_10mm": 0.9963833634719711,
+    "median_mm": 1.8880212125257883,
+    "p95_mm": 3.460892226523973
+   },
+   "libero_spatial_t8_e0_0045/head": {
+    "n_points": 906,
+    "within_10mm": 0.9966887417218543,
+    "median_mm": 1.9117688011066987,
+    "p95_mm": 3.635092925837633
+   },
+   "libero_spatial_t8_e0_0045/left_wrist": {
+    "n_points": 2881,
+    "within_10mm": 0.9881985421728566,
+    "median_mm": 1.9268222917187705,
+    "p95_mm": 3.6575968268733328
+   }
+  },
+  "pooled": {
+   "n_points": 27224,
+   "within_10mm": 0.9933881868939172,
+   "median_mm": 1.9106146048098864,
+   "p95_mm": 3.5421157433258315
+  }
+ }
+}

@@ -1,0 +1,78 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/knows/v1-knows-offline-metrics.png",
+ "kind": "table",
+ "module": "knows",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T040141_5752c64c7006_baseline-eval-methods-sl3dev/summary_all.json"
+ ],
+ "note": "open-loop replay of recorded calls: each filter edits the recorded chunk; later actions of the chunk use the method's own EE prediction (measured gain 0.0115 m/unit); the modified chunk is not executed",
+ "numbers": {
+  "knows": {
+   "n_calls": 221,
+   "n_episodes": 10,
+   "n_rows": 2210,
+   "intervention_rate_rows": 0.2524886877828054,
+   "intervention_rate_calls": 0.39819004524886875,
+   "da_xyz_l2_mean": 0.10915147033734719,
+   "da_xyz_l2_mean_intervened": 0.3329580347373631,
+   "da_xyz_l2_max": 1.4703944402071267,
+   "da_rot_l2_mean": 0.00020556696028705662,
+   "gripper_unchanged_all": true,
+   "ms_per_call": {
+    "median": 13.258988037705421,
+    "p95": 114.43360894918442,
+    "max": 2015.0786330923438
+   },
+   "solve_ms_step_mean": null,
+   "h_min": -0.17453319064095932,
+   "h_min_call_median": -0.024178912702540273,
+   "h_neg_steps": 1246,
+   "qp_fail_steps": 0,
+   "emergency_stops": 0,
+   "gt_nominal": {
+    "ee_obstacle_min": -0.0240216630365665,
+    "ee_obstacle_neg_rows": 82,
+    "ee_obstacle_neg_calls": 13,
+    "arm_obstacle_min": 0.007902342353197513,
+    "arm_obstacle_neg_rows": 0,
+    "arm_obstacle_neg_calls": 0,
+    "ee_destination_min": -0.01444500336759415,
+    "ee_destination_neg_rows": 39,
+    "ee_destination_neg_calls": 10,
+    "arm_destination_min": 0.05,
+    "arm_destination_neg_rows": 0,
+    "arm_destination_neg_calls": 0,
+    "ee_support_min": -0.021474307036760055,
+    "ee_support_neg_rows": 30,
+    "ee_support_neg_calls": 9,
+    "arm_support_min": 0.05,
+    "arm_support_neg_rows": 0,
+    "arm_support_neg_calls": 0,
+    "ik_pos_err_max_m": 0.06584756832054936
+   },
+   "gt_modified": {
+    "ee_obstacle_min": -0.02323162567539844,
+    "ee_obstacle_neg_rows": 59,
+    "ee_obstacle_neg_calls": 10,
+    "arm_obstacle_min": 0.005216870056519253,
+    "arm_obstacle_neg_rows": 0,
+    "arm_obstacle_neg_calls": 0,
+    "ee_destination_min": -0.014565097215613066,
+    "ee_destination_neg_rows": 38,
+    "ee_destination_neg_calls": 10,
+    "arm_destination_min": 0.05,
+    "arm_destination_neg_rows": 0,
+    "arm_destination_neg_calls": 0,
+    "ee_support_min": -0.021474307036760055,
+    "ee_support_neg_rows": 29,
+    "ee_support_neg_calls": 9,
+    "arm_support_min": 0.05,
+    "arm_support_neg_rows": 0,
+    "arm_support_neg_calls": 0,
+    "ik_pos_err_max_m": 0.06584756832054936
+   },
+   "gt_clearance_change_ee_obstacle_mean": 0.005235173183017688
+  }
+ }
+}

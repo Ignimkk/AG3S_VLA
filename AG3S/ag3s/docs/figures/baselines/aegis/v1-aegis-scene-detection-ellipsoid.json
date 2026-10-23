@@ -1,0 +1,637 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/aegis/v1-aegis-scene-detection-ellipsoid.png",
+ "kind": "scene",
+ "module": "aegis",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T040141_5752c64c7006_baseline-eval-methods-sl3dev/filters/dump",
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0/episodes"
+ ],
+ "note": "open-loop replay of recorded calls: each filter edits the recorded chunk; later actions of the chunk use the method's own EE prediction (measured gain 0.0115 m/unit); the modified chunk is not executed",
+ "numbers": {
+  "episode": "libero_spatial_t4_e0",
+  "call_k": 8,
+  "obs_index": 50,
+  "variants": {
+   "aegis": {
+    "obstacles": [
+     {
+      "name": "akita_black_bowl_2",
+      "center": [
+       0.669,
+       -0.263,
+       0.2438
+      ],
+      "R": [
+       [
+        0.90701,
+        -0.38923,
+        0.16073
+       ],
+       [
+        0.4124,
+        0.89822,
+        -0.15206
+       ],
+       [
+        -0.08518,
+        0.2042,
+        0.97522
+       ]
+      ],
+      "semi_axes": [
+       0.0599,
+       0.0504,
+       0.038
+      ]
+     },
+     {
+      "name": "flat_stove_1",
+      "center": [
+       0.4197,
+       -0.1437,
+       0.015
+      ],
+      "R": [
+       [
+        -0.89837,
+        -0.43891,
+        0.01718
+       ],
+       [
+        0.43894,
+        -0.89851,
+        -0.00203
+       ],
+       [
+        0.01632,
+        0.00572,
+        0.99985
+       ]
+      ],
+      "semi_axes": [
+       0.1004,
+       0.0983,
+       0.0054
+      ]
+     },
+     {
+      "name": "glazed_rim_porcelain_ramekin_1",
+      "center": [
+       0.4571,
+       0.197,
+       0.0211
+      ],
+      "R": [
+       [
+        0.96928,
+        -0.24581,
+        0.00893
+       ],
+       [
+        0.24588,
+        0.96927,
+        -0.00779
+       ],
+       [
+        -0.00674,
+        0.00975,
+        0.99993
+       ]
+      ],
+      "semi_axes": [
+       0.0527,
+       0.0448,
+       0.0181
+      ]
+     },
+     {
+      "name": "wooden_cabinet_1",
+      "center": [
+       0.7302,
+       -0.1783,
+       0.1457
+      ],
+      "R": [
+       [
+        0.85453,
+        0.48393,
+        -0.18864
+       ],
+       [
+        -0.51934,
+        0.79085,
+        -0.32377
+       ],
+       [
+        -0.0075,
+        0.37464,
+        0.92714
+       ]
+      ],
+      "semi_axes": [
+       0.1542,
+       0.154,
+       0.1513
+      ]
+     },
+     {
+      "name": "cookies_1",
+      "center": [
+       0.7445,
+       0.0343,
+       0.0082
+      ],
+      "R": [
+       [
+        -0.14473,
+        -0.98947,
+        -0.00349
+       ],
+       [
+        0.98947,
+        -0.14473,
+        0.00119
+       ],
+       [
+        -0.00169,
+        -0.00328,
+        0.99999
+       ]
+      ],
+      "semi_axes": [
+       0.0308,
+       0.0269,
+       0.0003
+      ]
+     }
+    ],
+    "n_intervened": 10,
+    "h_min": -0.1129,
+    "perception": {
+     "source": "gt_seg",
+     "privileged": true,
+     "excluded": [
+      "akita_black_bowl_1",
+      "plate_1"
+     ],
+     "clouds": {
+      "akita_black_bowl_2": {
+       "n_in": 1038,
+       "workspace": "table",
+       "n_workspace": 745,
+       "n_trim": 596,
+       "n_out": 596,
+       "fitted": true
+      },
+      "cookies_1": {
+       "n_in": 1509,
+       "workspace": "table",
+       "n_workspace": 165,
+       "n_trim": 132,
+       "n_out": 132,
+       "fitted": true
+      },
+      "glazed_rim_porcelain_ramekin_1": {
+       "n_in": 2137,
+       "workspace": "table",
+       "n_workspace": 1074,
+       "n_trim": 859,
+       "n_out": 859,
+       "fitted": true
+      },
+      "wooden_cabinet_1": {
+       "n_in": 4000,
+       "workspace": "table",
+       "n_workspace": 3777,
+       "n_trim": 3021,
+       "n_out": 3021,
+       "fitted": true
+      },
+      "flat_stove_1": {
+       "n_in": 4000,
+       "workspace": "table",
+       "n_workspace": 3036,
+       "n_trim": 2428,
+       "n_out": 2428,
+       "fitted": true
+      }
+     },
+     "detector": {
+      "candidates": [
+       "akita_black_bowl_2",
+       "cookies_1",
+       "glazed_rim_porcelain_ramekin_1",
+       "wooden_cabinet_1",
+       "flat_stove_1"
+      ]
+     },
+     "ms": 888.015135191381,
+     "centroids": {
+      "akita_black_bowl_2": [
+       0.6662,
+       -0.2793,
+       0.2462
+      ],
+      "cookies_1": [
+       0.7245,
+       0.041,
+       0.0057
+      ],
+      "glazed_rim_porcelain_ramekin_1": [
+       0.4564,
+       0.1976,
+       0.0097
+      ],
+      "wooden_cabinet_1": [
+       0.7297,
+       -0.1826,
+       0.1417
+      ],
+      "flat_stove_1": [
+       0.4092,
+       -0.1389,
+       0.0146
+      ]
+     }
+    }
+   },
+   "aegis:detector_names": {
+    "obstacles": [
+     {
+      "name": "glazed_rim_porcelain_ramekin_1",
+      "center": [
+       0.734,
+       -0.1389,
+       0.1806
+      ],
+      "R": [
+       [
+        -0.07211,
+        -0.996,
+        -0.05282
+       ],
+       [
+        0.99036,
+        -0.07778,
+        0.11462
+       ],
+       [
+        -0.11827,
+        -0.04404,
+        0.992
+       ]
+      ],
+      "semi_axes": [
+       0.0922,
+       0.0726,
+       0.0492
+      ]
+     },
+     {
+      "name": "akita_black_bowl_2",
+      "center": [
+       0.7375,
+       -0.1399,
+       0.1804
+      ],
+      "R": [
+       [
+        -0.05436,
+        -0.99472,
+        -0.08702
+       ],
+       [
+        0.99049,
+        -0.06475,
+        0.12142
+       ],
+       [
+        -0.12641,
+        -0.0796,
+        0.98878
+       ]
+      ],
+      "semi_axes": [
+       0.0893,
+       0.0699,
+       0.0488
+      ]
+     },
+     {
+      "name": "flat_stove_1",
+      "center": [
+       0.7524,
+       -0.1771,
+       0.1742
+      ],
+      "R": [
+       [
+        0.70944,
+        -0.1762,
+        0.68238
+       ],
+       [
+        0.4534,
+        0.85538,
+        -0.25051
+       ],
+       [
+        -0.53955,
+        0.48712,
+        0.68673
+       ]
+      ],
+      "semi_axes": [
+       0.1563,
+       0.1498,
+       0.1357
+      ]
+     },
+     {
+      "name": "wooden_cabinet_1",
+      "center": [
+       0.7566,
+       -0.1789,
+       0.1781
+      ],
+      "R": [
+       [
+        0.73839,
+        0.11188,
+        0.66503
+       ],
+       [
+        -0.06599,
+        0.9934,
+        -0.09385
+       ],
+       [
+        -0.67114,
+        0.02541,
+        0.7409
+       ]
+      ],
+      "semi_axes": [
+       0.1556,
+       0.1469,
+       0.131
+      ]
+     }
+    ],
+    "n_intervened": 10,
+    "h_min": -0.13324,
+    "perception": {
+     "source": "detector",
+     "privileged": true,
+     "excluded": [],
+     "clouds": {
+      "akita_black_bowl_2": {
+       "n_in": 1824,
+       "workspace": "table",
+       "n_workspace": 1824,
+       "n_trim": 1459,
+       "n_out": 1459,
+       "fitted": true
+      },
+      "cookies_1": {
+       "n_in": 1776,
+       "workspace": "table",
+       "n_workspace": 3,
+       "n_trim": 2,
+       "n_out": 2,
+       "fitted": false
+      },
+      "glazed_rim_porcelain_ramekin_1": {
+       "n_in": 1872,
+       "workspace": "table",
+       "n_workspace": 1872,
+       "n_trim": 1497,
+       "n_out": 1497,
+       "fitted": true
+      },
+      "wooden_cabinet_1": {
+       "n_in": 4000,
+       "workspace": "table",
+       "n_workspace": 2667,
+       "n_trim": 2133,
+       "n_out": 2133,
+       "fitted": true
+      },
+      "flat_stove_1": {
+       "n_in": 4000,
+       "workspace": "table",
+       "n_workspace": 2619,
+       "n_trim": 2095,
+       "n_out": 2095,
+       "fitted": true
+      }
+     },
+     "detector": {
+      "boxes": {
+       "head": [
+        {
+         "name": "akita_black_bowl_2",
+         "box": [
+          50.7,
+          122.7,
+          99.1,
+          160.8
+         ],
+         "score": 0.41662558913230896
+        },
+        {
+         "name": "cookies_1",
+         "box": [
+          175.8,
+          164.9,
+          223.7,
+          201.8
+         ],
+         "score": 0.37713760137557983
+        },
+        {
+         "name": "glazed_rim_porcelain_ramekin_1",
+         "box": [
+          50.6,
+          122.5,
+          99.2,
+          160.7
+         ],
+         "score": 0.39077678322792053
+        },
+        {
+         "name": "wooden_cabinet_1",
+         "box": [
+          0.0,
+          87.6,
+          123.1,
+          219.7
+         ],
+         "score": 0.6014742255210876
+        },
+        {
+         "name": "flat_stove_1",
+         "box": [
+          0.0,
+          87.2,
+          123.4,
+          219.5
+         ],
+         "score": 0.5535709857940674
+        }
+       ]
+      }
+     },
+     "ms": 44391.99332892895,
+     "centroids": {
+      "akita_black_bowl_2": [
+       0.731,
+       -0.1346,
+       0.1793
+      ],
+      "cookies_1": [
+       0.7095,
+       0.2131,
+       -0.0033
+      ],
+      "glazed_rim_porcelain_ramekin_1": [
+       0.7291,
+       -0.1348,
+       0.1795
+      ],
+      "wooden_cabinet_1": [
+       0.7039,
+       -0.1739,
+       0.1233
+      ],
+      "flat_stove_1": [
+       0.6969,
+       -0.1752,
+       0.1197
+      ]
+     }
+    }
+   },
+   "aegis:detector_all": {
+    "obstacles": [
+     {
+      "name": "object#0",
+      "center": [
+       0.753,
+       -0.1772,
+       0.1754
+      ],
+      "R": [
+       [
+        0.72078,
+        -0.07336,
+        0.68927
+       ],
+       [
+        0.26337,
+        0.94879,
+        -0.17444
+       ],
+       [
+        -0.64118,
+        0.30727,
+        0.70319
+       ]
+      ],
+      "semi_axes": [
+       0.157,
+       0.1476,
+       0.1325
+      ]
+     }
+    ],
+    "n_intervened": 10,
+    "h_min": -0.13216,
+    "perception": {
+     "source": "detector",
+     "privileged": false,
+     "excluded": [],
+     "clouds": {
+      "object#0": {
+       "n_in": 4000,
+       "workspace": "table",
+       "n_workspace": 2669,
+       "n_trim": 2135,
+       "n_out": 2135,
+       "fitted": true
+      },
+      "object#1": {
+       "n_in": 1776,
+       "workspace": "table",
+       "n_workspace": 3,
+       "n_trim": 2,
+       "n_out": 2,
+       "fitted": false
+      },
+      "object#2": {
+       "n_in": 3502,
+       "workspace": "table",
+       "n_workspace": 0,
+       "fitted": false
+      }
+     },
+     "detector": {
+      "boxes": {
+       "head": [
+        {
+         "name": "object#0",
+         "box": [
+          0.0,
+          88.2,
+          122.4,
+          219.8
+         ],
+         "score": 0.36904376745224
+        },
+        {
+         "name": "object#1",
+         "box": [
+          175.6,
+          164.6,
+          223.7,
+          201.9
+         ],
+         "score": 0.35704365372657776
+        },
+        {
+         "name": "object#2",
+         "box": [
+          79.7,
+          0.0,
+          168.6,
+          102.4
+         ],
+         "score": 0.35479211807250977
+        }
+       ]
+      }
+     },
+     "ms": 17419.671864248812,
+     "centroids": {
+      "object#0": [
+       0.7027,
+       -0.1767,
+       0.1232
+      ],
+      "object#1": [
+       0.7095,
+       0.2131,
+       -0.0033
+      ],
+      "object#2": [
+       0.0958,
+       -0.0055,
+       -0.0101
+      ]
+     }
+    }
+   }
+  }
+ }
+}

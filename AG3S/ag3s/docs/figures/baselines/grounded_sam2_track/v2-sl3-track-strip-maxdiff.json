@@ -1,0 +1,184 @@
+{
+ "episode_id": "libero_spatial_t8_e0",
+ "prompt_mode": "instruction",
+ "selection_rule": "largest |track - per-frame| episode 3D IoU",
+ "obs_index": [
+  10,
+  30,
+  45,
+  60,
+  80,
+  100,
+  115
+ ],
+ "panels": {
+  "head|grounded_sam2:per_frame|instruction|10": {
+   "2d_iou": 0.9758771929824561,
+   "mask_px": 896,
+   "gt_px": 906,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|10": {
+   "2d_iou": 0.9803921568627451,
+   "mask_px": 912,
+   "gt_px": 906,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|10": {
+   "2d_iou": null,
+   "mask_px": 1626,
+   "gt_px": 0,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|10": {
+   "2d_iou": null,
+   "mask_px": 1646,
+   "gt_px": 0,
+   "found": true
+  },
+  "head|grounded_sam2:per_frame|instruction|30": {
+   "2d_iou": 0.9758771929824561,
+   "mask_px": 896,
+   "gt_px": 906,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|30": {
+   "2d_iou": 0.980349344978166,
+   "mask_px": 908,
+   "gt_px": 906,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|30": {
+   "2d_iou": 0.9855892949047864,
+   "mask_px": 1917,
+   "gt_px": 1941,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|30": {
+   "2d_iou": 0.0,
+   "mask_px": 1453,
+   "gt_px": 1941,
+   "found": true
+  },
+  "head|grounded_sam2:per_frame|instruction|45": {
+   "2d_iou": 0.9747807017543859,
+   "mask_px": 895,
+   "gt_px": 906,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|45": {
+   "2d_iou": 0.980349344978166,
+   "mask_px": 908,
+   "gt_px": 906,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|45": {
+   "2d_iou": 0.9857737682165163,
+   "mask_px": 2842,
+   "gt_px": 2881,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|45": {
+   "2d_iou": 0.0,
+   "mask_px": 0,
+   "gt_px": 2881,
+   "found": false
+  },
+  "head|grounded_sam2:per_frame|instruction|60": {
+   "2d_iou": 0.7967479674796748,
+   "mask_px": 727,
+   "gt_px": 599,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|60": {
+   "2d_iou": 0.7978436657681941,
+   "mask_px": 735,
+   "gt_px": 599,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|60": {
+   "2d_iou": 0.0,
+   "mask_px": 0,
+   "gt_px": 508,
+   "found": false
+  },
+  "left_wrist|grounded_sam2:track|instruction|60": {
+   "2d_iou": 0.0,
+   "mask_px": 0,
+   "gt_px": 508,
+   "found": false
+  },
+  "head|grounded_sam2:per_frame|instruction|80": {
+   "2d_iou": 0.9015748031496063,
+   "mask_px": 751,
+   "gt_px": 698,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|80": {
+   "2d_iou": 0.9010416666666666,
+   "mask_px": 762,
+   "gt_px": 698,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|80": {
+   "2d_iou": 0.9790209790209791,
+   "mask_px": 9627,
+   "gt_px": 9617,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|80": {
+   "2d_iou": 0.0,
+   "mask_px": 0,
+   "gt_px": 9617,
+   "found": false
+  },
+  "head|grounded_sam2:per_frame|instruction|100": {
+   "2d_iou": 0.8872255489021956,
+   "mask_px": 982,
+   "gt_px": 909,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|100": {
+   "2d_iou": 0.8866995073891626,
+   "mask_px": 1006,
+   "gt_px": 909,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|100": {
+   "2d_iou": 0.9850731215330307,
+   "mask_px": 9861,
+   "gt_px": 9821,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|100": {
+   "2d_iou": 0.0,
+   "mask_px": 0,
+   "gt_px": 9821,
+   "found": false
+  },
+  "head|grounded_sam2:per_frame|instruction|115": {
+   "2d_iou": 0.0,
+   "mask_px": 608,
+   "gt_px": 752,
+   "found": true
+  },
+  "head|grounded_sam2:track|instruction|115": {
+   "2d_iou": 0.8880866425992779,
+   "mask_px": 817,
+   "gt_px": 752,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:per_frame|instruction|115": {
+   "2d_iou": 0.9821572580645161,
+   "mask_px": 9849,
+   "gt_px": 9814,
+   "found": true
+  },
+  "left_wrist|grounded_sam2:track|instruction|115": {
+   "2d_iou": 0.0,
+   "mask_px": 0,
+   "gt_px": 9814,
+   "found": false
+  }
+ }
+}

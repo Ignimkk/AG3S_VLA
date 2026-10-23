@@ -1,0 +1,84 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/benchmarks/v1-benchmarks-metric-definitions.png",
+ "kind": "table",
+ "module": "benchmarks",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "Baseline/paper_baselines/docs/metrics.md"
+ ],
+ "note": "",
+ "numbers": {
+  "rows": [
+   [
+    "LIBERO",
+    "success rate (env goal predicate)",
+    "LIBERO arXiv:2306.03310v2 Sec.5.1",
+    "closed-loop",
+    "task 당 20 rollout, ≤600 step"
+   ],
+   [
+    "LIBERO",
+    "FWT / NBT / AUC (lifelong)",
+    "Sec.5.1 Eq.3",
+    "not-applicable",
+    "frozen policy, lifelong 학습 없음"
+   ],
+   [
+    "SafeLIBERO",
+    "CAR = 무충돌 episode 비율",
+    "VLSA arXiv:2512.11891v2 Sec.V-A",
+    "closed-loop",
+    "충돌 = 장애물 Σ|Δxyz| > 1 mm (main_aegis.py:370)"
+   ],
+   [
+    "SafeLIBERO",
+    "TSR = 시간 내 task 성공 비율",
+    "Sec.V-A",
+    "closed-loop",
+    "충돌해도 episode 계속"
+   ],
+   [
+    "SafeLIBERO",
+    "ETS = 평균 episode 길이 (timeout 포함)",
+    "Sec.V-A",
+    "closed-loop",
+    "Level I / II, scenario 당 50 ep"
+   ],
+   [
+    "LIBERO-Safety",
+    "SR = 위반 없이 goal 완료",
+    "arXiv:2606.23686v2 Sec.4.1, Tab.3",
+    "closed-loop",
+    "위반 시 즉시 종료"
+   ],
+   [
+    "LIBERO-Safety",
+    "CR = 충돌로 인한 종료 비율",
+    "Sec.4.1, Tab.5-6",
+    "closed-loop",
+    ""
+   ],
+   [
+    "LIBERO-Safety",
+    "Execution Time (s)",
+    "Tab.5-6",
+    "closed-loop",
+    ""
+   ],
+   [
+    "LIBERO-Safety",
+    "LDLJ = −ln((T³/v_peak²)∫‖x⃛‖²dt)",
+    "Eq.2",
+    "closed-loop",
+    ""
+   ],
+   [
+    "LIBERO-Safety",
+    "Refusal Rate (SSR suite)",
+    "Tab.4",
+    "not-applicable",
+    "거부 판단, rollout 아님"
+   ]
+  ]
+ }
+}

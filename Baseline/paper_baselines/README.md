@@ -79,12 +79,16 @@ Baseline/paper_baselines/
 ├── weights.py         pinned weights (HF revision / release URL), sha256, presets default (large) / smoke (small)
 ├── providers/         gt_oracle · grounded_sam · grounded_sam2 · yoloe · grounding_dino · sam_backend (A)
 │                      localization_heads · tokencut · frozen/ (B)
-├── eval/              metrics.py (2D, soft voxel IoU, bootstrap) · offline_grounding.py (harness, create_run)
+├── eval/              metrics.py (2D, soft voxel IoU, bootstrap) · offline_grounding.py (harness, create_run) ·
+│                      native_metrics.py (each paper's own metrics) · cloud_labeling.py (fair point-level ATS comparison)
 ├── external/          fetch_sources.py · sources.json · .gitignore (clones untracked)
 ├── setup/             requirements-baselines.in (top pins) · requirements-baselines.txt (lock) · setup_venv.sh ·
 │                      paper_baselines_env.sh
-├── scripts/           smoke_providers.py (A) · b_smoke_*.py (B)
-├── docs/              providers.md (A) · survey.md · exemption_ablations.md · catalog_vla_internal.md (B)
+├── methods/           interface.py · knows · aegis · multilink_cbf · omniguide · constrained_flow_matching ·
+│                      lan_o3dp_guidance_adapted · nudge · roboground/guidedvla/obeyed_vla (README) · evaluate_offline.py
+├── scripts/           smoke_providers.py (A) · b_smoke_*.py (B) · check_track_memory.py (G)
+├── docs/              metrics.md (metric registry per baseline/benchmark) · providers.md · survey.md ·
+│                      exemption_ablations.md · catalog_vla_internal.md
 └── tests/
 ```
 

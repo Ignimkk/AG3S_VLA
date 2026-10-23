@@ -1,0 +1,182 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/yoloe/v1-yoloe-scene.png",
+ "kind": "scene",
+ "module": "yoloe",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/figure_dump"
+ ],
+ "note": "",
+ "numbers": {
+  "libero_spatial_t9_e0_0045/head/yoloe|phrase": {
+   "arm": "yoloe|phrase",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     0.0,
+     94.01,
+     42.77,
+     128.18
+    ],
+    [
+     173.52,
+     114.72,
+     198.38,
+     137.6
+    ],
+    [
+     76.58,
+     96.81,
+     107.47,
+     125.45
+    ]
+   ],
+   "score": 0.5874927639961243,
+   "iou": 0.9131534569983136,
+   "mask_pixels": 1162,
+   "gt_pixels": 1107,
+   "candidate_scores": [
+    0.5874927639961243,
+    0.4327775239944458,
+    0.31855201721191406
+   ]
+  },
+  "libero_spatial_t9_e0_0045/head/yoloe|instruction": {
+   "arm": "yoloe|instruction",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     0.01,
+     86.78,
+     82.11,
+     212.45
+    ]
+   ],
+   "score": 0.5798569917678833,
+   "iou": 0.011571481896229937,
+   "mask_pixels": 7023,
+   "gt_pixels": 1107,
+   "candidate_scores": [
+    0.5798569917678833
+   ]
+  },
+  "libero_spatial_t4_e0_0085/head/yoloe|phrase": {
+   "arm": "yoloe|phrase",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     83.51,
+     81.75,
+     137.91,
+     117.29
+    ],
+    [
+     0.0,
+     89.54,
+     39.25,
+     122.52
+    ],
+    [
+     169.8,
+     114.8,
+     194.33,
+     137.64
+    ]
+   ],
+   "score": 0.4686179459095001,
+   "iou": 0.8662593346911066,
+   "mask_pixels": 1431,
+   "gt_pixels": 1318,
+   "candidate_scores": [
+    0.4686179459095001,
+    0.45885851979255676,
+    0.29345133900642395
+   ]
+  },
+  "libero_spatial_t4_e0_0085/head/yoloe|instruction": {
+   "arm": "yoloe|instruction",
+   "camera": "head",
+   "found": false,
+   "boxes": [],
+   "score": null,
+   "iou": 0.0,
+   "mask_pixels": 0,
+   "gt_pixels": 1318,
+   "candidate_scores": []
+  },
+  "libero_spatial_t0_e0_0045/left_wrist/yoloe|phrase": {
+   "arm": "yoloe|phrase",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     5.42,
+     175.82,
+     119.96,
+     213.95
+    ]
+   ],
+   "score": 0.7207432985305786,
+   "iou": 0.8728534892217756,
+   "mask_pixels": 2715,
+   "gt_pixels": 2411,
+   "candidate_scores": [
+    0.7207432985305786
+   ]
+  },
+  "libero_spatial_t0_e0_0045/left_wrist/yoloe|instruction": {
+   "arm": "yoloe|instruction",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     5.42,
+     175.82,
+     119.96,
+     213.95
+    ]
+   ],
+   "score": 0.5887577533721924,
+   "iou": 0.8728534892217756,
+   "mask_pixels": 2715,
+   "gt_pixels": 2411,
+   "candidate_scores": [
+    0.5887577533721924
+   ]
+  },
+  "libero_spatial_t1_e0_0080/left_wrist/yoloe|phrase": {
+   "arm": "yoloe|phrase",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     119.77,
+     116.01,
+     255.99,
+     214.31
+    ]
+   ],
+   "score": 0.2707940340042114,
+   "iou": 0.9788035798398492,
+   "mask_pixels": 10568,
+   "gt_pixels": 10437,
+   "candidate_scores": [
+    0.2707940340042114
+   ]
+  },
+  "libero_spatial_t1_e0_0080/left_wrist/yoloe|instruction": {
+   "arm": "yoloe|instruction",
+   "camera": "left_wrist",
+   "found": false,
+   "boxes": [],
+   "score": null,
+   "iou": 0.0,
+   "mask_pixels": 0,
+   "gt_pixels": 10437,
+   "candidate_scores": []
+  }
+ }
+}

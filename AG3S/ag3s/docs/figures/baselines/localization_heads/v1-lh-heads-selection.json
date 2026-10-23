@@ -1,0 +1,193 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/localization_heads/v1-lh-heads-selection.png",
+ "kind": "core",
+ "module": "localization_heads",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/figure_dump",
+  "Baseline/paper_baselines/providers/frozen/localization_heads_pi05_libero_spatial_dev_init0-4_official_code.json"
+ ],
+ "note": "",
+ "numbers": {
+  "frame": "libero_spatial_t0_e0_0075",
+  "selection_sha256": "07eb43c39d3e9557d94f1f8679ec438a50ba6a71e1fef93742dfe09e889174f5",
+  "heads": {
+   "head": [
+    "L4H0",
+    "L4H4",
+    "L6H0"
+   ],
+   "left_wrist": [
+    "L8H2",
+    "L5H5",
+    "L7H3"
+   ]
+  },
+  "criteria": {
+   "head": [
+    {
+     "layer": 4,
+     "head": 0,
+     "frequency": 1076,
+     "frequency_rate": 0.9835466179159049,
+     "mean_spatial_entropy_when_counted": 0.04707702893357016,
+     "mean_image_attention_sum": 0.7903763095574143
+    },
+    {
+     "layer": 4,
+     "head": 4,
+     "frequency": 1054,
+     "frequency_rate": 0.9634369287020109,
+     "mean_spatial_entropy_when_counted": 0.08466416911245493,
+     "mean_image_attention_sum": 0.7368000626455059
+    },
+    {
+     "layer": 6,
+     "head": 0,
+     "frequency": 863,
+     "frequency_rate": 0.7888482632541134,
+     "mean_spatial_entropy_when_counted": 0.10885318782079224,
+     "mean_image_attention_sum": 0.6152119327070944
+    },
+    {
+     "layer": 3,
+     "head": 0,
+     "frequency": 763,
+     "frequency_rate": 0.6974405850091407,
+     "mean_spatial_entropy_when_counted": 0.12518241182898152,
+     "mean_image_attention_sum": 0.6771415470396143
+    },
+    {
+     "layer": 7,
+     "head": 7,
+     "frequency": 702,
+     "frequency_rate": 0.6416819012797075,
+     "mean_spatial_entropy_when_counted": 0.15500809454658626,
+     "mean_image_attention_sum": 0.5460918055373964
+    },
+    {
+     "layer": 12,
+     "head": 3,
+     "frequency": 698,
+     "frequency_rate": 0.6380255941499086,
+     "mean_spatial_entropy_when_counted": 0.02012229652793395,
+     "mean_image_attention_sum": 0.5551791429192754
+    },
+    {
+     "layer": 8,
+     "head": 7,
+     "frequency": 577,
+     "frequency_rate": 0.5274223034734917,
+     "mean_spatial_entropy_when_counted": 0.09726531802240196,
+     "mean_image_attention_sum": 0.5574291951041771
+    },
+    {
+     "layer": 11,
+     "head": 3,
+     "frequency": 471,
+     "frequency_rate": 0.4305301645338208,
+     "mean_spatial_entropy_when_counted": 0.19729418388665868,
+     "mean_image_attention_sum": 0.394947654695354
+    },
+    {
+     "layer": 4,
+     "head": 6,
+     "frequency": 434,
+     "frequency_rate": 0.396709323583181,
+     "mean_spatial_entropy_when_counted": 0.2613211002864463,
+     "mean_image_attention_sum": 0.25219721130522776
+    },
+    {
+     "layer": 15,
+     "head": 1,
+     "frequency": 376,
+     "frequency_rate": 0.3436928702010969,
+     "mean_spatial_entropy_when_counted": 0.16950710978252612,
+     "mean_image_attention_sum": 0.3715407955145269
+    }
+   ],
+   "left_wrist": [
+    {
+     "layer": 8,
+     "head": 2,
+     "frequency": 816,
+     "frequency_rate": 0.7458866544789763,
+     "mean_spatial_entropy_when_counted": 0.06724498901209226,
+     "mean_image_attention_sum": 0.9130596444419359
+    },
+    {
+     "layer": 5,
+     "head": 5,
+     "frequency": 813,
+     "frequency_rate": 0.7431444241316271,
+     "mean_spatial_entropy_when_counted": 0.16643835160427217,
+     "mean_image_attention_sum": 0.8777029477808985
+    },
+    {
+     "layer": 7,
+     "head": 3,
+     "frequency": 776,
+     "frequency_rate": 0.7093235831809872,
+     "mean_spatial_entropy_when_counted": 0.17757655099901873,
+     "mean_image_attention_sum": 0.7803389020877085
+    },
+    {
+     "layer": 5,
+     "head": 3,
+     "frequency": 608,
+     "frequency_rate": 0.5557586837294333,
+     "mean_spatial_entropy_when_counted": 0.15763706039099118,
+     "mean_image_attention_sum": 0.9414575411589098
+    },
+    {
+     "layer": 12,
+     "head": 4,
+     "frequency": 553,
+     "frequency_rate": 0.5054844606946983,
+     "mean_spatial_entropy_when_counted": 0.1445602184583444,
+     "mean_image_attention_sum": 0.6418748296919863
+    },
+    {
+     "layer": 10,
+     "head": 3,
+     "frequency": 547,
+     "frequency_rate": 0.5,
+     "mean_spatial_entropy_when_counted": 0.18822359958535567,
+     "mean_image_attention_sum": 0.6834727981735627
+    },
+    {
+     "layer": 9,
+     "head": 5,
+     "frequency": 539,
+     "frequency_rate": 0.4926873857404022,
+     "mean_spatial_entropy_when_counted": 0.08475411674364232,
+     "mean_image_attention_sum": 0.42443893492984597
+    },
+    {
+     "layer": 9,
+     "head": 1,
+     "frequency": 521,
+     "frequency_rate": 0.47623400365630714,
+     "mean_spatial_entropy_when_counted": 0.17525656515426946,
+     "mean_image_attention_sum": 0.6348446990606772
+    },
+    {
+     "layer": 3,
+     "head": 3,
+     "frequency": 360,
+     "frequency_rate": 0.3290676416819013,
+     "mean_spatial_entropy_when_counted": 0.2947041250999771,
+     "mean_image_attention_sum": 0.45829431121484454
+    },
+    {
+     "layer": 14,
+     "head": 1,
+     "frequency": 349,
+     "frequency_rate": 0.3190127970749543,
+     "mean_spatial_entropy_when_counted": 0.22041043820760403,
+     "mean_image_attention_sum": 0.9433350590290928
+    }
+   ]
+  }
+ }
+}

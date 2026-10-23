@@ -1,0 +1,158 @@
+{
+ "figure": "AG3S/ag3s/docs/figures/baselines/grounded_sam/v1-gsam-scene.png",
+ "kind": "scene",
+ "module": "grounded_sam",
+ "step": "BASELINE-EVAL-V1",
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev/figure_dump"
+ ],
+ "note": "",
+ "numbers": {
+  "libero_spatial_t0_e0_0075/head/grounded_sam|phrase": {
+   "arm": "grounded_sam|phrase",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     173.38,
+     135.37,
+     210.09,
+     164.09
+    ]
+   ],
+   "score": 0.5086303949356079,
+   "iou": 0.8385826771653543,
+   "mask_pixels": 733,
+   "gt_pixels": 668
+  },
+  "libero_spatial_t0_e0_0075/head/grounded_sam|instruction": {
+   "arm": "grounded_sam|instruction",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     173.6,
+     135.77,
+     209.96,
+     163.91
+    ]
+   ],
+   "score": 0.4543512463569641,
+   "iou": 0.8372703412073491,
+   "mask_pixels": 732,
+   "gt_pixels": 668
+  },
+  "libero_spatial_t0_e0_0075/left_wrist/grounded_sam|phrase": {
+   "arm": "grounded_sam|phrase",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     2.32,
+     139.41,
+     139.34,
+     215.29
+    ]
+   ],
+   "score": 0.7934155464172363,
+   "iou": 0.899189799442157,
+   "mask_pixels": 7394,
+   "gt_pixels": 6905
+  },
+  "libero_spatial_t0_e0_0075/left_wrist/grounded_sam|instruction": {
+   "arm": "grounded_sam|instruction",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     2.21,
+     139.71,
+     139.44,
+     215.48
+    ]
+   ],
+   "score": 0.5486610531806946,
+   "iou": 0.899189799442157,
+   "mask_pixels": 7394,
+   "gt_pixels": 6905
+  },
+  "libero_spatial_t0_e0_0075/lift": {
+   "n_lift_points": 8127,
+   "n_gt_points": 7573,
+   "n_gt_voxels": 801
+  },
+  "libero_spatial_t2_e0_0055/head/grounded_sam|phrase": {
+   "arm": "grounded_sam|phrase",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     210.29,
+     146.64,
+     250.21,
+     178.84
+    ]
+   ],
+   "score": 0.7079317569732666,
+   "iou": 0.0,
+   "mask_pixels": 860,
+   "gt_pixels": 572
+  },
+  "libero_spatial_t2_e0_0055/head/grounded_sam|instruction": {
+   "arm": "grounded_sam|instruction",
+   "camera": "head",
+   "found": true,
+   "boxes": [
+    [
+     210.53,
+     146.96,
+     250.2,
+     178.68
+    ]
+   ],
+   "score": 0.5804742574691772,
+   "iou": 0.0,
+   "mask_pixels": 860,
+   "gt_pixels": 572
+  },
+  "libero_spatial_t2_e0_0055/left_wrist/grounded_sam|phrase": {
+   "arm": "grounded_sam|phrase",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     115.53,
+     135.68,
+     255.98,
+     215.3
+    ]
+   ],
+   "score": 0.8013418316841125,
+   "iou": 0.9330225711481845,
+   "mask_pixels": 8079,
+   "gt_pixels": 7679
+  },
+  "libero_spatial_t2_e0_0055/left_wrist/grounded_sam|instruction": {
+   "arm": "grounded_sam|instruction",
+   "camera": "left_wrist",
+   "found": true,
+   "boxes": [
+    [
+     115.48,
+     135.76,
+     255.99,
+     215.5
+    ]
+   ],
+   "score": 0.5965734720230103,
+   "iou": 0.9330225711481845,
+   "mask_pixels": 8079,
+   "gt_pixels": 7679
+  },
+  "libero_spatial_t2_e0_0055/lift": {
+   "n_lift_points": 8939,
+   "n_gt_points": 8251,
+   "n_gt_voxels": 734
+  }
+ }
+}

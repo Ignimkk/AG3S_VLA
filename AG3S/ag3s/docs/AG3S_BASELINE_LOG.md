@@ -1,0 +1,1349 @@
+# AG3S Baseline — 논문 비교 baseline · 비교 방법 구성과 측정 기록
+
+> **이 파일의 용도.** `feature/panda-benchmark` 에서 논문(`main.pdf`, CVPR 2027 draft)의 **비교 대상**을 구성하고
+> 측정한 기록이다. 비교 대상은 두 갈래다.
+> (1) **target grounding baseline** — observed target surface 를 external segmenter 나 다른 VLA-internal 방법으로
+> 잡는 방법(Grounded-SAM 계열, YOLOE, localization heads, TokenCut, GT oracle). 논문 Tab. 2 의 "External segmenter" 행과
+> Sec. 4.1 의 비교가 여기서 나온다.
+> (2) **safety method** — 실행 직전에 action 을 고치는 safety filter(KNOWS, VLSA/AEGIS, multi-link)와 denoising 안에서
+> action 을 미는 sampling guidance(OmniGuide, constrained flow matching, Lan-o3dp adapted, NUDGE).
+> 단계 이름은 `BL-0` 부터 이어 쓴다. 2026-10-23 사용자 지시("`AG3S_BASELINE_LOG.md` 를 만들어서 기록")로 신설했다.
+>
+> V11AB(paired v2) 평가의 기록은 [`AG3S_BENCHMARK_LOG.md`](AG3S_BENCHMARK_LOG.md)(SL-0~), RB-Y1 16D 모델의 기록은
+> [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md) 가 맡는다. 세 파일은 대상 · 환경 · 입력이 달라 서로의 숫자를 대신하지 않는다.
+>
+> **수치 규칙.** 이 파일의 모든 수치는 `AG3S/ag3s/docs/handoff/<STEP>.verify.json` 을 출처로 한다. BL-1 의 수치는
+> [`handoff/PAPER-BASELINES-2.verify.json`](handoff/PAPER-BASELINES-2.verify.json) 의 `numbers`(표 · 지표)와
+> `runs` · `issues` · `not_measured`(실행 시각 · 실패 · 미측정)에서만 가져왔다. BL-3 의 수치는 [`handoff/BASELINE-EVAL-V1.verify.json`](handoff/BASELINE-EVAL-V1.verify.json), BL-4 의 수치는 [`handoff/BASELINE-EVAL-V2.verify.json`](handoff/BASELINE-EVAL-V2.verify.json) 의 `numbers` · `issues` · `limitations` · `not_measured` 에서 가져왔고, 두 단계의 구현 경위(`BASELINE-EVAL-F.impl.md` · `-G.impl.md`)는 구성 · 방법 사실만 옮겼다(G 의 속도 · 동일성 수치는 옮기지 않았다). 출처가 없는 숫자는 쓰지 않았고, 필요하면
+> verifier 에게 측정을 요청한다. **implementer 의 smoke 수치(`*.impl.md`)는 이 파일에 옮기지 않는다.** smoke 는 배선
+> 확인이지 측정이 아니기 때문이다. BL-0 · BL-2 는 구성과 test 통과 사실(pass / skip 개수)만 `impl.md` 에서 옮겼다.
+> 식별자(경로 · SHA · commit · sha256)는 verify.json 또는 impl.md 에 있는 것만 옮긴다.
+>
+> **시각.** 모든 시각은 KST(UTC+9)다. verify.json 의 UTC 를 +9 h 로 옮겼다. `create_run` 이 만드는 run dir 이름의 시각은
+> 원래 KST 다(`AG3S_BENCHMARK_LOG.md` SL0 절).
+
+---
+
+## 진행 현황
+
+| 단계 | 범위 | 상태 | 비고 |
+|---|---|---|---|
+| **BL-0** PAPER-BASELINES | `Baseline/paper_baselines/` 신설: 공통 interface · lift · 평가 harness · 6 provider · external sources · 환경 | **구현 · test 완료 (2026-10-23, commit `bf1403d5`), 사용자 판정 대기** | [BL-0](#bl-0--paper-baselines-논문-비교-baseline-폴더-2026-10-23) |
+| **BL-1** PAPER-BASELINES-2 | SL3 dev 10 episode · 221 frame 에서 grounding baseline 8 spec × prompt GPU 측정 (12 arm + ATS) | **측정 완료 (commit `5752c64c`), 사용자 판정 대기.** ~~`grounded_sam2:track` 은 OOM 으로 **미측정**, SL4b 40 episode 는 **deferred**~~ → track · SL4b 40 episode 는 BL-4 에서 측정(2026-10-24) | [BL-1](#bl-1--paper-baselines-2-grounding-baseline-sl3-dev-gpu-측정-2026-10-23) |
+| **BL-2** PAPER-METHODS | `methods/` 신설: safety filter 3 + sampling guidance 4 + 외부 repo 7 fetch. KNOWS 이동 | **구현 · test 완료 (commit `5752c64c`), 사용자 판정 대기.** ~~수치는 BL-3 이후에 채운다~~ → offline(open-loop) 수치는 BL-3 에 채웠다. closed-loop 수치는 BL-5 | [BL-2](#bl-2--paper-methods-논문-비교-방법-methods-구성-2026-10-23) |
+| **BL-3** BASELINE-EVAL V1 | ATS 와의 공정 비교(cloud labeling) · grounding 고유 지표 · methods offline 지표 · module 별 figure | ~~**진행 중** (implementer F → verifier V1, CPU)~~ → **측정 완료 (2026-10-24 KST, CPU), 사용자 판정 대기.** 지표 registry · ATS 공정 비교(cloud labeling) · grounding 고유 지표 · methods offline · benchmark 대표 장면 | [BL-3](#bl-3--baseline-eval-v1-cloud-labeling-공정-비교-고유-지표-methods-offline-2026-10-24) |
+| **BL-4** BASELINE-EVAL V2 | track memory 수정 · 평가 CPU 경로 속도 개선 → SL3 track + SL4b 40 episode 측정 | ~~**진행 중** (implementer G → verifier V2, GPU lock)~~ → **측정 완료 (2026-10-24 KST, GPU), 사용자 판정 대기.** track memory 평탄 · SL3 track · SL4b 40 episode 전체 arm · sm_90 확인 | [BL-4](#bl-4--baseline-eval-v2-track-memory-sl3-track-sl4b-40-episode-2026-10-24) |
+| BL-5 (이름 미정) | methods closed-loop 연결 → benchmark 고유 지표(TSR · CAR · ETS 등) | 미착수 | `benchmark/runners` 수정이 필요해 같은 checkout 의 다른 session 과 조율한 뒤 별도 task 로 한다 |
+
+### 사용자 · lead 결정 기록
+
+| 일자 (KST) | 결정 | 출처 |
+|---|---|---|
+| 2026-10-23 | 논문 baseline 목록을 하나의 폴더로 만든다. 오픈소스가 있으면 가져오고 없으면 일정 부분 구현한다. **Grounded-SAM 은 반드시 포함** | `PAPER-BASELINES.task.md` |
+| 2026-10-23 | 논문의 비교 방법도 같은 폴더에 구성한다. **KNOWS 는 해 둔 것을 그대로 가져오고**, 나머지는 구현하거나 git 에 있으면 가져온다. 기능만 잘 작동하면 된다. **SEAM 은 하지 않는다** | `PAPER-METHODS.task.md` |
+| 2026-10-23 | grounding baseline 의 GPU 측정을 수행한다 | `PAPER-BASELINES-2.task.md` |
+| 2026-10-23 | ~~`grounded_sam2:track` 과 SL4b 40 episode 는 **deferred** (lead)~~ → `BASELINE-EVAL.task.md` 의 순서 2(BL-4)에서 두 측정을 진행(deferred 해제) | `PAPER-BASELINES-2.verify.json` `not_measured` |
+| 2026-10-23 | `AG3S_BASELINE_LOG.md` 를 만들어 기록한다. 권장 순서: ① ATS 와의 공정 비교 · 고유 지표 · methods offline 지표 → ② track memory · 속도 → SL4b → ③ methods closed-loop | `BASELINE-EVAL.task.md` |
+| 2026-10-23 | 각 baseline 과 benchmark 가 요구하는 지표를 **전부** 기록하고 시각 자료(실제 장면 · segmentation · module 의 핵심 기능)를 남긴다. 그래서 BL-3 에 baseline · benchmark 별 지표 표(원 지표 · 우리 측정값 또는 closed-loop / not-applicable)와 module 별 figure 3 종(scene · core · metrics)을 둔다 | 사용자 지시, `BASELINE-EVAL.task.md` |
+| 2026-10-24 | 권장 순서 ①(BL-3) · ②(BL-4)를 진행했다. ③ methods closed-loop 연결은 BL-5 로 남는다 | `BASELINE-EVAL.task.md` |
+
+---
+
+## 용어
+
+기록에 쓰는 말을 여기 모은다. **새 용어를 쓸 때는 여기 추가한다.** (V11AB · ATS · LTE · oracle · phase · dev / test split 등 앞선 로그의 용어는 `AG3S_BENCHMARK_LOG.md` 의 용어 절을 따른다.)
+
+### grounding baseline (BL-0 · BL-1)
+
+| 용어 | 뜻 |
+|---|---|
+| **paper_baselines** | `Baseline/paper_baselines/`. 논문 비교 대상을 한 폴더에 모은 것. 기존 `Baseline/seam_vla`, `benchmark/SafeLIBERO`(VLSA)는 옮기지 않고 catalog 에서 링크만 한다(옮기면 기존 run · import 가 깨진다) |
+| **provider (`TargetMaskProvider`)** | RGB(+ instruction)를 받아 camera 별 **target mask** 를 내는 baseline 의 공통 interface. 검출 실패면 `found=False` 와 빈 mask 를 돌려주고 **지어내지 않는다**(ATS 원칙과 같다). 후보가 여럿이면 score 최고 1 개를 target 으로 고르고 GT 는 선택에 쓰지 않는다 |
+| **lift** | provider 가 낸 2D mask 를 depth · K · `T_base_cam` 으로 base frame 3D 점 · 5 mm voxel 로 올리는 단계. 모든 provider 가 **같은 depth · 같은 back-projection(V11AB `backproject`, range 2 m) · 같은 robot 제거 옵션**을 쓰게 하려고 `lift.py` 한 곳에 모았다. pixel frame 변환(policy 224 mirror ↔ OpenCV)도 여기서만 한다 |
+| **soft voxel · soft IoU** | development branch(`ifg_graph.py` 의 `build_geometry` · `evaluate`)의 정의를 읽기만 하고 같은 식으로 구현했다. eval voxel = 모든 camera 의 유효 depth pixel 을 `floor(p / 5 mm)` 격자에 넣은 합집합. voxel `v` 마다 `t(v)` = 그 voxel 안 pixel 중 target class 의 비율. 예측 voxel 집합 `P` 에 대해 `TP = Σ_{v∈P} t`, `FP = Σ_{v∈P} (1−t)`, `FN = Σ_{v∉P} t`, `IoU = TP / (TP + FP + FN)`. 경계 voxel 은 target · 비-target 이 섞여 있으므로 0/1 로 자르지 않고 비율로 센다. `t ≥ 0.5` 로 자른 판은 **hard IoU** 로 함께 낸다 |
+| **neighbour leak (`neighbour_leak_voxel_mass`)** | 예측 voxel 위에서 **other_object + destination class 의 비율을 합한 값**(= GT 의 비-target 물체 표면에 들어간 예측의 양, voxel mass). 개수가 아니라 비율의 합이라 소수다. frame → episode 평균 → episode 간 평균으로 집계한다. LIBERO 의 fixture(cabinet · stove)와 support(table)는 neighbour 에 넣지 않는다 |
+| **neighbour fraction (pooled)** | `Σ 3d_neighbor_fp / Σ (3d_TP + 3d_FP)` (valid frame 전체를 합쳐서). leak 이 예측 크기에 얼마나 비례하는가를 본다 |
+| **found rate (`found_any`)** | 두 camera 중 하나라도 `found=True` 인 frame 의 비율. 2D 지표의 per-camera `found_rate` 는 그 camera 한 대에 대한 값이다. 2D 지표에서 not-found 인 camera 는 GT 가 보이면 IoU 0 으로, GT 가 안 보이면 값 없음으로 들어간다 |
+| **lift within 10 mm** | lift 된 점 중 scene GT 의 target visual surface 에서 10 mm 이내인 비율. provider 와 무관하게 lift 가 맞는지 보는 독립 검사다 |
+| **wrong-object rate (3D)** | valid 3D frame 중 `found_any` 이고 `3d_neighbor_fp > 3d_TP` 인 비율. 예측이 target 보다 비-target 물체 위에 더 많이 놓인 frame. 변형: `3d_neighbor_fp / 예측 voxel 수 > 0.5` |
+| **wrong-object rate (2D instance)** | mask 가 비어 있지 않은 frame 중, 두 camera 의 mask pixel 이 **같은 종류의 다른 instance**(`akita_black_bowl_2`)에 더 많이 놓인 frame 의 비율 |
+| **referring expression (이 평가의)** | SL3 dev 의 10 task 는 모두 "pick up the black bowl <위치 관계> …" 이고 scene 에 `akita_black_bowl` 이 둘 있다(target `_1`, distractor `_2`). 어느 bowl 인지는 위치 관계 문구로만 구분된다 |
+| **phrase prompt · instruction prompt** | detector 에 주는 text 의 두 모드. phrase = target 이름 명사구(이 평가에서는 10 episode 모두 `akita black bowl`, BDDL 에서 유도), instruction = task 문장 전체 |
+| **text-free arm (`\|no_text`)** | query text 를 읽지 않는 provider(`localization_heads`, `tokencut`)의 arm. prompt mode 마다 같은 결과를 두 번 내지 않고 한 번만 돈다 |
+| **`gt_oracle`** | simulator segmentation(`segmentation_geom`)과 BDDL target geom id 로 만든 mask. 상한선이자 lift 검증용. privileged 다 |
+| **`per_frame` · `track` (Grounded-SAM-2)** | `per_frame` = 매 frame 검출 + SAM 2 image predictor. `track` = 처음 found 된 frame 에서 prompt 한 뒤 SAM 2 video predictor(streaming)로 앞으로 전파한다. **causal** 이어야 하므로 frame t 의 결과가 t 이후 frame 에 의존하지 않는다 |
+| **localization heads** | Kang et al.(CVPR 2025)의 방법: LVLM 의 많은 attention head 중 image 의 물체 위치를 잘 가리키는 소수의 head 를 attention 비율 · spatial entropy · 선택 빈도로 고른다. 여기서는 그 기준을 pi0.5 의 기록된 attention 에 적용한다. mask 모드 `threshold`(선택 head 합 → upsample → 임계), `sam_point`(peak 한 점으로 SAM prompt) |
+| **frozen selection** | dev episode 에서만 고른 head 목록을 json 으로 고정한 것. 편집 여부는 `selection_sha256` 으로 검사한다 |
+| **in-sample** | 측정 집합이 그 방법의 선택 · calibration 에 쓴 집합과 같은 것. 이 경우 수치는 held-out 결과가 아니다. localization heads 의 head 는 SL3 + SL4b dev(init 0–4)에서 골랐고 BL-1 의 측정 집합(SL3 dev, init 0)이 그 안에 있다. BL-3 · BL-4 의 SL3 · SL4b 측정도 모두 in-sample 이고, NUDGE 의 κ 도 SL3 dev 로 calibrate 한 값이라 in-sample 이다(verify `in_sample`) |
+| **TokenCut (`ncut`)** | Wang et al.(CVPR 2022). DINO ViT-S/16 의 마지막 block key feature 로 patch affinity graph 를 만들고 normalized cut 의 2 번째 eigenvector 를 평균으로 이분해 전경을 얻는다. language 를 쓰지 않는다. `foreground` = seed 가 든 connected component(원 방법), `attention_overlap` = noun attention 과 가장 많이 겹치는 component(**원 방법이 아니다**) |
+| **대표점 표현 (ATS)** | V11AB ATS 의 `target_points` 는 voxel-downsample 된 대표점이다. 5 mm voxel 로 모든 pixel 을 세는 이 harness 의 정답 표현과 해상도가 달라 recall 이 구조적으로 낮게 나올 수 있다(A impl.md). BL-1 에서 ATS 행은 이 이유로 **비교에 쓸 수 없다**(아래) → BL-3 에서 같은 cloud 점 위로 다시 비교했다. 표현 차이 외에 `cloud_target` 이 `has_target` call 의 대부분에서 비어 있다는 문제가 드러났다(BL-3 결과 C) |
+| **`pred_offgrid`** | eval voxel 에 없는 예측 voxel. FP 1 로 센다. ATS 점에서만 생긴다 |
+| **paired bootstrap (vs ATS)** | 같은 episode 의 `arm − ATS` episode 평균 차이에 대해 2,000 회 resample, seed 20261015, percentile 95 % 구간. verify.json 의 `better` / `worse` 는 episode 별 차이의 부호 개수다~~(leak 열에서는 차이가 양수인 episode 수가 `better` 로 세어진다 — 지표 방향이 아니라 부호 기준으로 보인다. `_definitions` 에 정의가 없다)~~ → V1 · V2 verify 로 확인: `better` / `worse` 는 diff 가 `> 0` / `< 0`(V2 정의: `1e-9` 기준)인 episode 수다(`metrics.py:183`). 지표 방향이 아니다 |
+
+### methods (BL-2)
+
+| 용어 | 뜻 |
+|---|---|
+| **`SafetyFilter`** | 실행 직전에 action chunk 를 고쳐서 내는 방법의 interface(`methods/interface.py`). `filter(obs, actions) → FilterResult(actions, intervened, info)`. KNOWS · AEGIS · multi-link 가 구현한다 |
+| **`SamplingGuidance`** | flow-matching denoising **안에서** action 을 미는 방법의 interface. `make_guidance_fn(obs, norm)` 이 openpi `pi0.sample_actions` 의 `guidance_fn(x_next, t_next)` hook 에 들어가는 pure JAX 함수를 만든다. `guidance_fn=None`(기본)이면 hook 이 없는 baseline 과 bit 단위로 같다. OmniGuide · constrained flow matching · Lan-o3dp adapted · NUDGE 가 구현한다 |
+| **`SceneObservation`** | 한 policy call 의 관측(RGB · depth · K · `T_base_cam` · q · EE pose · gripper · instruction). GT segmentation · 물체 이름 같은 privileged 입력은 `extras` 에 `privileged/` 접두사 key 로만 넣어 grep 할 수 있게 했다 |
+| **privileged** | simulator GT 에서 온 입력(GT segmentation, BDDL 물체 이름, SafeLIBERO obstacle metadata). 실제 perception 이 아니므로 어디에 썼는지 표시한다 |
+| **CBF · QP** | Control Barrier Function(`h(x) ≥ 0` 이 안전 집합이고 `ḣ ≥ −αh` 를 제약으로 둔다)과, 그 제약 아래서 nominal action 에 가장 가까운 action 을 구하는 quadratic program. KNOWS · AEGIS · multi-link 가 쓴다 |
+| **recorded-chunk 대체 velocity (surrogate sampler)** | pi0.5 network 를 붙이지 않고 guidance 를 CPU 에서 시험하기 위해, 기록된 action chunk 를 목표로 하는 가짜 velocity 로 pi0 와 같은 Euler 적분을 돌리는 것. 양 끝 경우로 `tracking`(velocity 가 목표를 따라감)과 `constant`(수정이 누적됨)가 있다. 실제 network 의 효과가 아니다 |
+| **No exemption · All-link exemption** | 논문의 exemption ablation. No exemption = observed target surface 가 모든 link 에게 obstacle. All-link exemption = accepted target 을 **모든** constraint link 에서 뺀다. V11AB 는 target 을 **허가된 link(gripper)에서만** 뺀다(LTE) |
+| **deferred** | lead 가 이번 측정 범위에서 뺀 것. 실패나 판정이 아니라 일정상 미룬 것이다 |
+
+### 지표 · cloud labeling · methods offline · track memory (BL-3 · BL-4)
+
+| 용어 | 뜻 |
+|---|---|
+| **cloud labeling** | ATS 와 segmenter 를 V11AB 가 그 call 에 만든 **같은 fused / filtered cloud 점** 위에서 비교하는 방법. 점마다 GT · ATS · segmenter label 을 매겨 point IoU · P · R · neighbour 비율을 낸다. harness 의 5 mm voxel 비교와 달리 ATS 의 대표점 표현이 평가 단위가 되지 않는다 |
+| **`cloud_target` · `target_points`** | V11AB perception run 이 기록한 ATS 출력 두 가지. `cloud_target` = fused cloud 점 중 target 으로 flag 한 점, `target_points` = voxel-downsample 된 대표점. SL4 run 에서 `cloud_target` 은 `has_target` 179 call 중 134 call 에서 비어 있다 |
+| **`ats_v11ab_tp_exact` · `ats_v11ab_tp_5mm`** | verifier 보충 ATS 행. cloud 점이 기록된 `target_points` 와 좌표 일치(1 μm 이내) / 5 mm 이내이면 ATS positive 로 센다 |
+| **native metrics (NM)** | `eval/native_metrics.py`. 각 논문 고유의 지표를 저장 mask 에서 사후 계산한다 |
+| **Acc@0.5** | 예측 box 와 GT box 의 IoU ≥ 0.5 이면 정답, 정답 sample 의 비율(REC, localization heads 논문). 여기서는 mask 의 tight box 로 계산하고 detector box 도 같은 값이다 |
+| **CorLoc (any-object / target)** | TokenCut 의 object discovery 지표. 예측 box 가 GT box 중 하나와 IoU ≥ 0.5(code 는 `>= 0.5`)이면 정답. any-object = 장면의 모든 BDDL 물체 instance 의 box 를 GT 로(class-agnostic, 원 정의), target = target box 만(= Acc@0.5 mask) |
+| **mIoU · oIoU (= cIoU)** | mIoU = sample 별 IoU 의 평균. oIoU = Σ교집합 / Σ합집합(cumulative IoU, RES 의 지표) |
+| **pointing game** | 예측 attention 의 최대점이 GT 위(+ tolerance 15 px)이면 hit, hit 비율. tol 0 / tol 15 두 값을 낸다. detector 의 box 중심 hit 은 원 정의의 변형이다 |
+| **Fβ · maxFβ** | Fβ = (1+β²)·P·R / (β²·P + R), code 기준 β² = 0.3. maxFβ = 255 개 threshold 에서 sample 평균 Fβ 의 최댓값. binary mask 는 모든 threshold 에서 같아 평균 Fβ 와 같다 |
+| **J · F · J&F (DAVIS)** | J = region IoU, F = 경계(contour)의 precision / recall 로 만든 F-measure(허용 반경 ceil(0.008·‖(H, W)‖) pixel), J&F = 둘의 평균. J recall = mean(J > 0.5), J decay = 첫 1/4 구간 평균 − 마지막 1/4 구간 평균. 여기서 sequence = (episode, camera), 5 step 간격의 정책 call frame |
+| **temporal IoU** | 연속한 평가 frame 사이 mask IoU. 논문 지표가 아니다 |
+| **`conf` sweep · any-candidate recall** | top-1 box 의 detector score threshold 별 P / R. any-candidate recall = 후보 중 하나라도 GT 를 맞힌 sample 의 비율 |
+| **open-loop replay** | 기록된 chunk 를 method 에 넣어 수정 chunk 를 얻되 실행하지 않는 평가. 수정이 이후 관측에 미치는 영향은 반영되지 않는다 |
+| **개입률 · ‖Δa‖** | 개입률(행) = 수정된 행 / 전체 행(filter: `max\|Δa[:6]\| > 1e-6`, guidance: `\|Δa_xyz\| > 1e-4`), 개입률(call) = 개입 행이 하나라도 있는 call 의 비율. ‖Δa_xyz‖ = 행마다 xyz 의 L2(LIBERO raw action 단위) |
+| **`h` · `h_min` · `h < 0` step** | method 자신의 barrier 값. `h_min` = 최솟값, `h < 0` step = 예측 상태가 제약을 어긴 step 수. method 마다 정의가 달라 서로 비교하지 않는다 |
+| **scene-GT clearance** | 모든 method 에 같은 decode(OSC response, 자세 고정) → DLS IK → cuRobo `franka.yml` sphere 61 개 → scene GT 표면까지 정확한 거리(안쪽 음수) − 반지름, 0.05 m 에서 자른다(cap). EE sphere(hand + finger)와 arm sphere(link 1–7)로 나누고 obstacle 군은 target · destination · 받침대를 뺀 instance 다 |
+| **`scene` · `injected` variant** | guidance 평가의 장애물 두 종류. `scene` = depth lift 에서 privileged target · robot · support · destination mask 를 뺀 점. `injected` = 기록 경로 옆 1 cm 에 반경 3 cm 의 privileged 구를 row 6 에 놓은 합성 시험 |
+| **frozen call (OmniGuide)** | OmniGuide 의 규칙으로 guidance 를 건너뛴 call(`skipped_calls` = `frozen_calls`) |
+| **bounded memory · read window** | `grounded_sam2:track` 의 streaming state 를 다음 frame 이 읽는 범위(read window)만 남기고 버리는 방식(G). window = mask memory 6 frame, object pointer 15 frame(모델 속성에서 계산) |
+| **`track_lost` · `redetect_on_loss`** | track provider 가 target 을 잃었다고 기록한 `not_found_reason`. `redetect_on_loss=false` 이면 잃은 뒤 다시 검출하지 않는다 |
+| **`provider_error` 행** | provider 예외가 난 arm 의 그 episode 남은 평가 frame 을 기록하는 행(`missing_reason="provider_error"`). run 은 다음 arm 으로 계속 간다. `--fail-fast` 가 예전 동작이다 |
+
+---
+
+## 공통 고정 사항 (BL-0 ~ BL-1)
+
+| 항목 | 값 |
+|---|---|
+| branch | `feature/panda-benchmark` |
+| 폴더 | `Baseline/paper_baselines/` (`external/` 는 pinned SHA 로 fetch 하고 clone 본체는 추적하지 않는다. `git submodule add` 는 같은 checkout 의 다른 session 의 index 를 건드려 쓰지 않았다. submodule 전환은 사용자 결정) |
+| venv | 새 `.venv-baselines`(py3.11, checkout 의 `.python`, uv). `.venv-ag3s` · `.venv-openpi-live` 를 오염시키지 않는다 |
+| cache · weights | `HF_HOME` · `TORCH_HOME` · ultralytics weights → checkout `.cache/paper_baselines/` |
+| 평가 입력 | `--capture-segmentation` 이 켜진 rollout run 의 `_geom.npz` + scene GT. segmentation 이 있는 recorded run 은 SL3 dev `20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0`(10 ep)과 SL4b dev `20261013T092537_714c891415d9_sl4b-dev-pi05only-t0-9e1-4`(40 ep) 둘뿐이다. SL1/SL2 replay-seg 는 t0e0 1 ep 씩이고 SL5* closed-loop run 에는 segmentation 이 없다 |
+| 결과 위치 | `AG3S_VLA-storage/results/benchmark/<날짜_commit_run-id>/` (`common/run_artifacts.create_run`). implementer smoke 는 `outputs/paper_baselines_smoke/` |
+| 손대지 않은 것 | `AG3S/**`, `benchmark/runners/**`, `integration/**`, `third_party/**`, `.gitmodules`, 루트 `.gitignore`. V11AB 평가 대상이 바뀌지 않고, 진행 중인 run 을 건드리지 않기 위해서다 |
+
+---
+
+## BL-0 — PAPER-BASELINES: 논문 비교 baseline 폴더 (2026-10-23)
+
+> 2026-10-23 KST. implementer A 작업 11:58–13:00(`.venv-baselines` 준비 12:20), implementer B 같은 날, commit `bf1403d5`(13:21).
+> 원본: [`handoff/PAPER-BASELINES.task.md`](handoff/PAPER-BASELINES.task.md) ·
+> [`-A.impl.md`](handoff/PAPER-BASELINES-A.impl.md) · [`-B.impl.md`](handoff/PAPER-BASELINES-B.impl.md).
+> **이 STEP 은 측정하지 않았다.** 구성과 test 통과 사실만 기록한다. 측정은 BL-1 이다.
+
+### 이 STEP 이 답하는 질문
+
+논문의 "external segmenter" 비교 행(Grounded-SAM 포함)을 **같은 depth · 같은 lift · 같은 지표로** 채울 수 있는 실행 가능한
+baseline 이 이 checkout 에 있는가?
+
+### 왜 지금 필요했나
+
+논문의 핵심 주장 하나는 "observed target surface 를 external segmenter 없이 frozen VLA 의 attention 으로 grounding 한다"이다.
+그런데 비교 숫자가 비어 있었다: Tab. 2 의 "External segmenter" 행, Sec. 4.1 의 TBD("Grounded-SAM / YOLOE masks lifted with the
+same depth"), Fig. 2 의 "Prior: external segmenter" 열. 이 STEP 은 그 비교를 돌릴 수 있는 baseline 과 offline 평가 harness 를 만든다.
+
+```
+RGB(+instruction) ──[provider]──> camera 별 target mask
+                                      │
+depth + K + T_base_cam ──[lift.py]────┴──> base frame 3D 점 · 5 mm voxel ──> eval/metrics.py vs GT
+                                           (같은 점을 LTE / CCR 에 넣는 closed-loop 연결은 다음 STEP)
+```
+
+### 무엇을 만들었나
+
+기존 tracked 파일은 하나도 고치지 않았다(전부 새 파일).
+
+**provider 6 개 + ATS 비교 행**
+
+| baseline | 논문 인용 | 역할 | 출처 repo @ SHA | license | 구현 형태 |
+|---|---|---|---|---|---|
+| `gt_oracle` | — | Tab. 2 의 상한선 · lift 검증 (privileged) | 이 repo(`task_target` + `segmentation_geom`) | — | re-impl |
+| `grounded_sam` | bib 에 아직 없음(본문 Sec. 4.1 이 인용) | Tab. 2 "External segmenter", Fig. 2 prior 열 | IDEA-Research/Grounded-Segment-Anything @ `126abe6` (recipe · threshold) | Apache-2.0 | wrapper: HF Grounding DINO + HF SAM v1 |
+| `grounded_sam2:per_frame` | bib 에 없음 | 같은 행의 현행 recipe | IDEA-Research/Grounded-SAM-2 @ `b7a9c29` | Apache-2.0 | vendored-run (pinned clone 을 `sam2` 로 설치) + HF Grounding DINO |
+| `grounded_sam2:track` | bib 에 없음 | 같은 행의 시간 변형: 한 번 검출 후 SAM 2 streaming tracker | 같음 | Apache-2.0 | vendored-run. `CausalTrack` |
+| `yoloe` | [25] | 실시간 open-vocabulary segmentation | THU-MIG/yoloe @ `40cd606` (recipe), runtime `ultralytics==8.4.184` | **AGPL-3.0** | wrapper |
+| `localization_heads` | [14] | VLA-internal grounding 선행 연구(Sec. 2) | seilk/LocalizationHeads @ `9ffe219` | pinned SHA 에 LICENSE 파일 없음(README 는 MIT) → code 를 가져오지 않고 다시 썼다 | partial re-impl (B) |
+| `tokencut` | [26] | feature graph 기반 object discovery 선행 연구(Sec. 2) | YangtaoWANG95/TokenCut @ `fed52cd` | MIT | re-impl + parity test (B) |
+| `ats_v11ab` (Coarse) | — | Tab. 2 "Coarse" 행, 같은 frame | 이 repo 의 `perception_replay` run | — | existing: perception run 의 `target_points` 를 읽는다(`--ats-run`) |
+
+- 그 밖에 catalog 에 올린 기존 항목: π0.5-only[18](`launch_libero_pi05_only.py`), KNOWS[17](BL-2 에서 이동), VLSA/AEGIS[10](`benchmark/SafeLIBERO`, 이동하지 않음), SEAM[31](관련 연구, 비교 arm 이 아님 — 사용자 지시로 쓰지 않는다).
+- 공통 interface(`interface.py`)는 provider 가 입력 RGB · depth 와 **같은 pixel frame** 의 bool mask 를 내도록 고정한다. 좌우가 뒤집힌 policy 224 image 와 OpenCV image 의 변환은 `lift.py` 한 곳에서만 하고 test 로 고정했다.
+- `eval/offline_grounding.py`(harness)는 recorded `_geom.npz` 위에서 provider → lift → 지표(2D IoU · P · R, 3D soft IoU · P · R, neighbour leak, found rate, latency)를 내고 episode 단위 paired bootstrap 을 한다. `create_run` 으로 `frames.jsonl` · `episodes.jsonl` · `summary.json` · `provenance.json`(provider 와 source run 의 SHA-256)을 쓴다.
+- Grounded-SAM 의 threshold 는 task 예시(box 0.35)가 아니라 **공식 demo 의 기본값**(`grounded_sam_demo.py:165-166` 의 box 0.3 / text 0.25)을 썼다. Grounded-SAM-2 는 0.4 / 0.3, YOLOE 는 conf 0.25 / IoU 0.7. 어느 값도 held-out 결과로 고르지 않았다.
+- weights 는 preset 두 개다: `default`(큰 모델: grounding-dino-base · sam-vit-huge · sam2.1-hiera-large · yoloe-11l-seg)와 `smoke`(작은 모델). id · revision · sha256 을 provenance 에 남긴다. default weights 도 미리 받아 두어 측정 때 다운로드가 필요 없다.
+
+**환경 · external sources**
+
+- `.venv-baselines`: torch 2.7.1+cu126, torchvision 0.22.1, transformers 4.53.2, sam-2 1.0(editable, Grounded-SAM-2 @ `b7a9c29`), ultralytics 8.4.184, numpy 2.2.6 등 lock 으로 고정. 첫 설치에서 NFS copy 오류가 나 lock 전체를 `--reinstall` 로 다시 깔았다. `opencv-python-headless` 대신 `opencv-python` 하나만 pin 했다(ultralytics 가 요구하고 두 package 가 같은 `cv2` 를 덮어쓴다).
+- `external/fetch_sources.py` 가 5 repo 를 pinned SHA 로 shallow fetch 한다: Grounded-SAM-2 `b7a9c29f…`, Grounded-Segment-Anything `126abe63…`, yoloe `40cd606c…`(AGPL-3.0), TokenCut `fed52cd5…`(MIT), LocalizationHeads `9ffe219d…`(LICENSE 파일 없음).
+
+**B 의 문서와 frozen selection**
+
+| 산출물 | 내용 |
+|---|---|
+| `docs/survey.md` | 구현하지 않는 8 편([1] multi-link, [5] constrained flow matching, [9] NUDGE, [11] RoboGround, [13] GuidedVLA, [15] Lan-o3dp, [19] OmniGuide, [24] OBEYED-VLA)의 공개 code · license · checkpoint · 보고 수치 · 통합 비용. primary source 만 썼다. **표의 수치는 WebFetch 로 arXiv HTML 을 요약 추출한 것이어서 논문에 옮기기 전에 PDF 표와 대조해야 한다.** [5] 와 [9] 는 원문 자체에 표 사이 불일치가 있다 |
+| `docs/exemption_ablations.md` | No exemption · All-link exemption 을 현재 V11AB flag 로 표현할 수 있는지 조사(code 수정 없음). 아래 "exemption ablation" 참조 |
+| `docs/catalog_vla_internal.md` | localization heads · TokenCut 의 catalog 행과 **원 논문과 다른 점**(아래) |
+| `providers/frozen/localization_heads_pi05_libero_spatial_dev_init0-4_official_code.json` · `…_paper.json` | dev 50 episode(SL3 audit + SL4b audit)의 policy call 에서 고른 head 목록. 공식 code 방식(기본)과 논문 방식 두 가지. 같은 입력의 run 순서를 바꿔도 `selection_sha256` 이 같았다 |
+
+### 원 방법과 다른 점 (B, 요약)
+
+| 방법 | 차이 | 결과 해석에 미치는 영향 |
+|---|---|---|
+| localization heads | 모델이 LLaVA 계열이 아니라 pi0.5(PaliGemma prefix, 18 layer × 8 head). **query 가 "마지막 text token" 이 아니라 "마지막 action token, denoise step 0"** 이다. 한 장이 아니라 camera 2 대(head · left_wrist)를 각각 16 × 16 으로 보고 camera 별로 head 를 고른다. 표본은 RefCOCO 1,000 장이 아니라 LIBERO Spatial dev 의 policy call 이다. 논문 Sec. 4.2 의 표본 간 빈도 집계는 공식 code 에 없어서 논문 규칙(상위 k = 3)을 썼다. `threshold` mask 는 component 가 여럿이면 모두 포함한다(convex hull 단계는 code 에도 없다). `sam_point` 는 원 방법이 아니다(원은 box → SAM) | "action query → image" 이므로 원 방법의 "text query → image" 결과와 같은 것이 아니다. attention 의 image 몫 합이 1 보다 작아 기준 1 의 절대값을 LLaVA 와 비교할 수 없다 |
+| TokenCut | ncut 은 공식 `object_discovery.ncut` 를 numpy 로 다시 썼고 같은 입력에서 mask · seed · label · bbox 가 같다(parity 7 case). 전경 = **seed 가 든 connected component**(task 문서의 "largest connected component" 가 아니라 공식 code 를 따랐다). LIBERO 256 × 256 → 16 × 16 patch 라 물체가 몇 patch 밖에 안 된다 | 경계가 16 px 단위다. language 를 쓰지 않으므로 여러 물체 장면에서 target 이 아닌 물체를 잡을 수 있다(원 방법의 성질) |
+
+### exemption ablation 설계 (B, code 수정 없음)
+
+| ablation | 현재 V11AB 로 표현? | 방법 | 남는 문제 |
+|---|---|---|---|
+| No exemption | 예 | V11AB argv 뒤에 `--target-field-policy relax` | launcher 가 `AG3S_VERSIONS` 의 이름만 받는다. 수동으로 덧붙이면 server 기록의 version 이름이 `V11AB` 로 **잘못 남는다** |
+| All-link exemption | 예(flag 는 있다) | `--target-field-policy exclude-all` | **V11AB 는 `--links gripper` 라 constraint link 가 전부 contact link 이므로, V11AB 위에서는 target 을 빼는 sphere 집합이 V11AB 와 같다.** 의미 있는 비교는 `--links arms` 판(pb3 이상)에서만 된다. V11AB 위의 `exclude-all` run 을 All-link exemption 의 증거로 쓰면 안 된다 |
+
+최소 code 변경안(실행하지 않음): `AG3S/adapters/panda/profile.py` 의 `AG3S_VERSIONS` 에 항목 추가(기본 off, 기존 version bit-identical). 실제 수정은 run 이 없을 때 다음 STEP 에서 한다. runtime 동작(`relax` 에서 target-free layer 가 없을 때 기록 경로가 빈 값을 견디는지)은 server 를 띄우지 않아 확인하지 못했다. 이 결론은 Panda 단일 팔에만 해당한다(RB-Y1 은 `GRIPPER_LINKS` 에 양손이 들어 있어 sphere 집합이 다를 수 있다).
+
+### 단위 검증
+
+`CUDA_VISIBLE_DEVICES="" OMP_NUM_THREADS=1 .venv-baselines/bin/python -m pytest -q Baseline/paper_baselines/tests`
+
+| 범위 | 결과 (impl.md 의 실제 출력) |
+|---|---|
+| A: interface · lift · metrics · track causality · harness | 29 passed |
+| B: localization heads · TokenCut | 28 passed (`.venv-baselines`). `.venv-ag3s`(torch 없음)에서는 18 passed, 10 skipped (torch parity test) |
+| 전체 `Baseline/paper_baselines/tests` | 57 passed (A 29 + B 28) |
+
+test 가 고정하는 것: not-found 경로, 지어낸 mask 거부, top-1 동점 규칙, 알려진 K · T round-trip, 무효 depth, robot 제거, policy mirror 규약(`camera.policy_to_opencv_pixel` 과 대조), 손으로 계산한 2-voxel soft IoU, bootstrap 재현성, `CausalTrack` 의 causality(fake predictor 로 t 이후 frame 이 달라도 t 까지의 결과가 같은가), TokenCut parity, head 선택의 결정성, localization heads 의 mirror 규칙이 `lift.policy_mask_to_opencv` 와 일치하는가.
+
+CPU smoke 는 provider 별로 recorded frame 1 장에 smallest weights 로 돌려 **배선만** 확인했다(숫자 판정 없음, 이 파일에 옮기지 않는다). 질적 사실 하나: `yoloe-11s-seg` 는 이 256 px LIBERO frame 에서 기본 conf 0.25 를 넘는 instance 가 없었고, 같은 model 이 다른 사진(`bus.jpg`)에서는 검출했다. 큰 모델(11l)은 smoke 에서 돌리지 않았으며 BL-1 에서 측정했다.
+
+### 이 STEP 에서 알게 된 것 (평이한 설명)
+
+- 비교 baseline 을 "같은 depth · 같은 lift · 같은 지표" 로 돌리려면 provider 가 어떤 pixel frame 의 mask 를 내는가부터 고정해야 했다. policy image 는 OpenCV image 의 좌우 반전이라, 변환을 한 곳(`lift.py`)에만 두고 localization heads 의 grid un-mirror 와 일치하는지까지 test 로 묶었다. B 의 mask 에 `lift.policy_mask_to_opencv` 를 **다시 적용하면 두 번 뒤집힌다.**
+- soft IoU 는 정의를 새로 만들지 않고 development branch 의 식을 읽어 같은 식으로 구현했다. 거기에 세 가지를 더했다: (a) eval voxel 밖의 예측 voxel 을 FP 1 로 세는 규칙(`pred_offgrid`), (b) hard 지표 병기, (c) scene GT 로 lift 를 독립 검사하는 `lift within 10 mm`.
+- 논문 bib 에 Grounded-SAM · Grounded-SAM-2 항목이 없다(YOLOE [25] 는 있음). 논문에 비교 행을 쓰기 전에 bib 에 추가해야 한다.
+
+### 측정하지 않은 것 / 열린 항목
+
+| 항목 | 상태 |
+|---|---|
+| GPU 실행 · default weights · latency | 이 STEP 금지 범위. BL-1 에서 측정 |
+| HF Grounding DINO / SAM port 와 원 repo(GroundingDINO CUDA op) 출력의 수치 동등성 | **미확인.** 같은 weights · 같은 threshold 규칙이라는 근거만 있다(`docs/providers.md`) |
+| SAM 2 CUDA extension | 이 commit 시점에는 build 하지 않았다(`SAM2_BUILD_CUDA=0`). video predictor 의 `fill_hole_area=8` 후처리가 경고와 함께 생략된다. BL-1 에서 build 했으나 sm_90 이 빠진 사실이 드러났다 → BL-4 V2 가 재빌드한 `_C.so` 에 sm_90 cubin · PTX 가 들어 있음을 `cuobjdump` 로 확인했다 |
+| DINO ViT-S/16 공식 weight 로 TokenCut | B 단계에서는 weight 가 없어 random-init 로 배선만 봤다. A 가 weight 를 받은 뒤 smoke 에서 `All keys matched successfully` 를 확인했다. 정확도는 BL-1 이 처음 측정 |
+| VLA patch feature 생산자 | 없다(attention audit 은 512-d pooled `kv_feature` 만 남긴다). TokenCut `feature_source="aux"` 는 입력이 없어 쓰지 못한다 |
+| localization heads 의 적용 범위 | `pooled_f16` 이 있는 frame(SL3 · SL4b dev 의 policy call)에서만 돈다. 다른 frame(test split 등)에 쓰려면 같은 runner 로 audit 을 다시 떠야 한다(GPU) |
+| exemption ablation 의 runtime 동작 | 미확인(위) |
+| `survey.md` 표 수치 | PDF 대조 전 |
+
+### 판정
+
+**사용자 판정 대기.** 구현 · test 는 끝났고 측정은 BL-1 이다.
+
+---
+
+## BL-1 — PAPER-BASELINES-2: grounding baseline SL3 dev GPU 측정 (2026-10-23)
+
+> 2026-10-23 KST. implementer E 13:34, verifier 측정 13:37–16:03, commit `5752c64c`(16:09).
+> 원본: [`handoff/PAPER-BASELINES-2.task.md`](handoff/PAPER-BASELINES-2.task.md) · [`-E.impl.md`](handoff/PAPER-BASELINES-2-E.impl.md) ·
+> [`handoff/PAPER-BASELINES-2.verify.json`](handoff/PAPER-BASELINES-2.verify.json). raw 출력은 `outputs/verify/PAPER-BASELINES-2/`.
+> figure: [`figures/paper-baselines-2/`](figures/paper-baselines-2/).
+
+### 이 STEP 이 답하는 질문
+
+같은 depth · 같은 lift · 같은 지표에서 external segmenter(Grounded-SAM 계열 · YOLOE)와 VLA-internal baseline 이
+LIBERO dev frame 의 target 표면을 얼마나 맞히고, V11AB ATS(Coarse)와 비교해 어떤가?
+
+### 타임라인 (KST)
+
+| 시각 | 사건 | 출처 |
+|---|---|---|
+| 13:25 | lead 가 SAM 2 CUDA extension 을 build (`_C.so` mtime 04:25:02 UTC) | verify issues |
+| 13:34 | implementer E: `--attention-run` 등 harness 보강 완료(CPU) | E impl.md |
+| 13:37 | 회귀 기준선 확인(CPU, legacy 16D) — 일치 | verify `baseline_check` |
+| 13:39:01 – 13:47:28 | **run 1** (track 포함, `--run-id paper-baselines-2-sl3dev`) — `grounded_sam2:track` 에서 GPU OOM 으로 종료(exit 1, 507 s, 부분 `frames.jsonl` 139 행) | verify `runs[1]` |
+| 13:48:24 – 16:03:04 | **run 2** (track 제외 8 spec, `--run-id paper-baselines-2-sl3dev-notrack`) — GPU wall 8,080 s. 이 run 이 아래 모든 수치의 출처다 | verify `runs[0]` |
+| 16:09 | commit `5752c64c` | `git log` |
+
+### E 가 harness 에 더한 것 (구현)
+
+- `eval/offline_grounding.py` 에 `--attention-run <attention_audit run>` 을 추가했다. 평가 frame 마다 그 frame 의 policy call 에서 기록한 pi0.5 attention 을 `aux` 로 넘긴다. 짝은 `obs_index` 로 맞추고, audit 의 `source_run` · `npz_sha256` 이 평가 episode 와 다르면 멈춘다.
+- `--providers` 에 `localization_heads:threshold|sam_point|sam_box`, `tokencut:foreground|attention_overlap` 을 쓸 수 있다. `localization_heads` · `tokencut` 은 query text 를 읽지 않으므로 arm 이 `<spec>|no_text` 한 개씩이다.
+- `provenance.json["attention"]["selection_in_sample"]` 이 frozen selection 의 입력에 이 audit run 이 들어 있으면 `true` 를 자동으로 기록한다(아래 in-sample 의 근거).
+- 부수 수정: 모든 provider 에 `size=` 를 넘겨 `localization_heads` · `tokencut` 생성이 TypeError 로 실패하던 것을 provider 별 생성자 인자로 고쳤다. `setup_venv.sh` 의 SAM 2 CUDA build 기본값을 1 로 바꿨다. `localization_heads.py` docstring 의 SAM wrapper 위치를 `sam_backend` 로 고쳤다.
+- dry-run: SL3 dev 와 SL4b dev 모두 평가 frame 전부에 audit call 이 있고(`missing_reason` 행 0 이어야 한다), SL3 dev 는 ATS 기록도 전부 있다.
+- test: `.venv-baselines` 62 passed(전체 `Baseline/paper_baselines/tests`), `.venv-ag3s` 20 passed 2 skipped. E 의 새 test 5 개가 `:mode` → 생성자 인자 매핑, `aux` 값 일치, source run 불일치 시 ValueError, 두 VLA-internal provider 에 같은 `aux` 를 넣었을 때 `validate_results` 통과, 실제 SL3 frame 의 audit join 을 고정한다.
+
+### 실행
+
+```bash
+source scripts/setup/env.sh; source Baseline/paper_baselines/setup/paper_baselines_env.sh
+flock -w 3600 /tmp/ag3s-vla-gpu-validation.lock env PYTHONPATH=$PWD .venv-baselines/bin/python -m Baseline.paper_baselines.eval.offline_grounding \
+  --source-run 20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0 --scene-gt outputs/verify/SL4/raw/scene \
+  --providers gt_oracle grounded_sam grounded_sam2:per_frame yoloe localization_heads:threshold localization_heads:sam_point \
+              tokencut:foreground tokencut:attention_overlap \
+  --prompt-modes phrase instruction --size default \
+  --attention-run 20261012T202459_309e4c6da477_sl3-attention-audit-dev \
+  --ats-run 20261012T225820_46a08d6ff644_sl4-perception-dev --save-masks --run-id paper-baselines-2-sl3dev-notrack
+```
+
+(verify.json `runs[0].command` 에서는 `--providers` 가 `gt_oracle grounded_sam grounded_sam2:per_frame yoloe localization_heads:threshold …` 순서로 기록돼 있다. 위는 가독성을 위해 줄만 나눈 것이다.)
+
+| 항목 | 값 |
+|---|---|
+| 측정 집합 | SL3 dev, `libero_spatial` t0–9 e0 — 10 episode · **221 evaluated frame**, camera head + left_wrist |
+| weights | `--size default` (큰 모델), device cuda (H200) |
+| run dir | `/mnt/dev/AG3S_VLA-storage/results/benchmark/20261023T134909_bf1403d54bc6_paper-baselines-2-sl3dev-notrack` |
+| mask 파일 | 2,652 개(`--save-masks`) |
+| 산출물 sha256 | `frames.jsonl` `05bee04e…078e7`, `episodes.jsonl` `399aeab9…c61e052`, `summary.json` `b558c921…e7425`, `provenance.json` `34a080c3…ca987`, `run_manifest.json` `9b00df25…6101d` |
+| code 상태 | HEAD `bf1403d5` + **dirty 7 파일**(`eval/offline_grounding.py`, `providers/localization_heads.py`, `setup/setup_venv.sh`, `setup/requirements-baselines.in` · `.txt`, `tests/test_offline_grounding.py`, `external/sources.json`). 이 dirty 변경(E · C · D 의 것)은 이후 commit `5752c64c` 에 들어갔다. 파일별 sha256 은 `outputs/verify/PAPER-BASELINES-2/code_state.txt` |
+| packages | torch 2.7.1+cu126, torchvision 0.22.1, transformers 4.53.2, sam-2 1.0(editable `b7a9c29`), ultralytics 8.4.184, numpy 2.2.6 |
+| 분석 · figure script | `outputs/verify/PAPER-BASELINES-2/analyze_run.py`, `make_figures.py` |
+
+**회귀 기준선(legacy 16D, CPU, 13:37)** — 일치. 15 frame 중 위반으로 시작 14, `has_target` 15, frame 0 의 `clearance_before` −29.031 mm. 측정 환경이 성한지 보는 용도다.
+
+### 결과 — Figure
+
+| figure | 종류 | 무엇을 보여 주나 |
+|---|---|---|
+| [`pb2-sl3dev-scene-overlay.png`](figures/paper-baselines-2/pb2-sl3dev-scene-overlay.png) · [`.json`](figures/paper-baselines-2/pb2-sl3dev-scene-overlay.json) | 실제 scene | `libero_spatial_t9_e0` obs 120: arm 간 head 2D IoU 의 퍼짐이 가장 큰 frame 한 장에서, 두 camera 에 12 arm 의 mask 를 겹쳤다(채움 = 예측 mask, 초록 = GT target 윤곽, 주황 = 같은 종류 distractor 윤곽). 패널마다 mask pixel 수와 2D IoU 가 적혀 있고 값은 sidecar 에 있다 |
+| [`pb2-sl3dev-referring-failure.png`](figures/paper-baselines-2/pb2-sl3dev-referring-failure.png) · [`.json`](figures/paper-baselines-2/pb2-sl3dev-referring-failure.json) | 실제 scene | `libero_spatial_t5_e0` obs 105: referring-expression 실패 예시. Grounded-SAM 의 phrase · instruction 두 prompt 모두에서 mask pixel 이 target 이 아니라 same-category distractor(`akita_black_bowl_2`) 위에 놓인 두 camera 의 장면 |
+| [`pb2-sl3dev-iou-leak.png`](figures/paper-baselines-2/pb2-sl3dev-iou-leak.png) · [`.json`](figures/paper-baselines-2/pb2-sl3dev-iou-leak.json) | graph | arm 별 3D soft IoU(왼쪽)와 neighbour leak(오른쪽). 점 = episode 평균 10 개, 막대 = episode 간 평균 |
+| [`pb2-sl3dev-table.png`](figures/paper-baselines-2/pb2-sl3dev-table.png) · [`.json`](figures/paper-baselines-2/pb2-sl3dev-table.json) | 표 | arm × 지표 전체(아래 표들의 그림판) |
+
+![scene overlay](figures/paper-baselines-2/pb2-sl3dev-scene-overlay.png)
+
+![referring-expression failure](figures/paper-baselines-2/pb2-sl3dev-referring-failure.png)
+
+![3D soft IoU and neighbour leak](figures/paper-baselines-2/pb2-sl3dev-iou-leak.png)
+
+![metric table](figures/paper-baselines-2/pb2-sl3dev-table.png)
+
+### 결과 — #1 3D soft IoU · precision · recall (5 mm voxel, episode 평균 → episode 간 평균)
+
+> **ATS 행은 비교에 쓸 수 없다.** ATS 의 `target_points` 는 voxel-downsample 된 **대표점 표현**이라 이 harness 의 5 mm soft voxel 정답과
+> 해상도가 맞지 않는다. 3D soft recall 이 0.068 이고, eval voxel 에 없는 예측 voxel(`pred_offgrid`)이 합계 10,524 개이며
+> `found_any` 가 179 / 221 이다. 표현이 원인이라는 설명은 A 의 impl.md(그리고 lead)의 것이고 이 측정이 원인을 분리하지는 않았다.
+> 그래서 아래 "ATS 대비 paired gain"(#4)도 **표현 차이가 섞인 수치**다. 같은 점 집합 · 같은 해상도 위의 공정 비교는 BL-3 에서 한다. → BL-3 에서 했다(cloud labeling). 이때 `cloud_target` 이 `has_target` call 의 대부분에서 비어 있다는 별도 문제도 확인됐다(BL-3 결과 C).
+
+| arm | 3D soft IoU | soft P | soft R | hard IoU | found any (call 수 / 221) | lift within 10 mm |
+|---|---|---|---|---|---|---|
+| GT oracle (phrase) | 0.968 | 0.968 | 1.000 | 0.976 | 221 / 221 (1.000) | 0.994 |
+| GT oracle (instruction) | 0.968 | 0.968 | 1.000 | 0.976 | 221 / 221 (1.000) | 0.994 |
+| Grounded-SAM (phrase) | 0.515 | 0.577 | 0.717 | 0.516 | 221 / 221 (1.000) | 0.799 |
+| Grounded-SAM (instruction) | 0.546 | 0.601 | 0.739 | 0.548 | 221 / 221 (1.000) | 0.802 |
+| Grounded-SAM-2 per_frame (phrase) | 0.511 | 0.597 | 0.698 | 0.513 | 220 / 221 (0.995) | 0.798 |
+| Grounded-SAM-2 per_frame (instruction) | 0.545 | 0.643 | 0.709 | 0.547 | 219 / 221 (0.991) | 0.822 |
+| YOLOE-11L (phrase) | 0.313 | 0.511 | 0.424 | 0.314 | 188 / 221 (0.851) | 0.630 |
+| YOLOE-11L (instruction) | 0.110 | 0.377 | 0.134 | 0.110 | 98 / 221 (0.443) | 0.407 |
+| localization_heads:threshold (in-sample) | 0.075 | 0.076 | 0.832 | 0.076 | 221 / 221 (1.000) | 0.197 |
+| localization_heads:sam_point (in-sample) | 0.197 | 0.255 | 0.378 | 0.198 | 221 / 221 (1.000) | 0.265 |
+| TokenCut foreground | 0.080 | 0.081 | 0.737 | 0.081 | 221 / 221 (1.000) | 0.321 |
+| TokenCut attention_overlap | 0.053 | 0.056 | 0.539 | 0.054 | 221 / 221 (1.000) | 0.119 |
+| ATS V11AB (Coarse) | 0.064 | 0.393 | 0.068 | 0.065 | 179 / 221 (0.810) | 0.535 |
+
+- `gt_oracle` 의 3D soft IoU 는 0.968 이고 다른 모든 arm 의 최댓값은 0.546 이다(verify.json `gt_oracle_3d_iou` · `max_3d_iou_other_arms`). task 의 통과 기준("gt_oracle 3D soft IoU 가 다른 모든 행보다 높아야 lift 가 성하다")의 입력이다. 판정은 사용자.
+- `gt_oracle` 의 2D IoU 는 1.000 인데 3D soft IoU 는 0.968, lift within 10 mm 는 0.994 다. A 의 impl.md 는 segmentation 이 RGB · depth 보다 한 physics substep 늦게 render 되기 때문이라고 설명한다(`conventions_json`). 이 측정이 그 원인을 따로 확인하지는 않았다.
+- `gt_oracle` 의 phrase · instruction 행이 같은 값인 것은 oracle 이 text 를 읽지 않기 때문이다.
+
+### 결과 — #2 2D 지표 (camera 별)
+
+| arm | head IoU / P / R (found) | left_wrist IoU / P / R (found) |
+|---|---|---|
+| GT oracle (phrase) | 1.000 / 1.000 / 1.000 (1.000) | 1.000 / 1.000 / 1.000 (0.968) |
+| GT oracle (instruction) | 1.000 / 1.000 / 1.000 (1.000) | 1.000 / 1.000 / 1.000 (0.968) |
+| Grounded-SAM (phrase) | 0.281 / 0.308 / 0.304 (0.977) | 0.842 / 0.841 / 0.875 (1.000) |
+| Grounded-SAM (instruction) | 0.353 / 0.369 / 0.378 (0.991) | 0.825 / 0.824 / 0.854 (1.000) |
+| Grounded-SAM-2 per_frame (phrase) | 0.242 / 0.334 / 0.256 (0.860) | 0.842 / 0.845 / 0.876 (0.968) |
+| Grounded-SAM-2 per_frame (instruction) | 0.286 / 0.442 / 0.302 (0.805) | 0.824 / 0.856 / 0.853 (0.937) |
+| YOLOE-11L (phrase) | 0.093 / 0.160 / 0.104 (0.638) | 0.490 / 0.741 / 0.520 (0.579) |
+| YOLOE-11L (instruction) | 0.002 / 0.007 / 0.017 (0.249) | 0.155 / 0.755 / 0.166 (0.199) |
+| localization_heads:threshold (in-sample) | 0.042 / 0.042 / 0.766 (1.000) | 0.232 / 0.263 / 0.724 (1.000) |
+| localization_heads:sam_point (in-sample) | 0.219 / 0.265 / 0.272 (1.000) | 0.287 / 0.286 / 0.326 (1.000) |
+| TokenCut foreground | 0.033 / 0.033 / 0.598 (1.000) | 0.547 / 0.554 / 0.764 (1.000) |
+| TokenCut attention_overlap | 0.040 / 0.042 / 0.406 (1.000) | 0.240 / 0.242 / 0.525 (1.000) |
+| ATS V11AB (Coarse) | - | - |
+
+- 2D 에서 not-found 인 camera 는 GT 가 보이면 IoU 0 으로 들어간다(위 용어). `found` 는 그 camera 의 found rate 다.
+- `gt_oracle` 의 left_wrist found 0.968 은 GT target 이 그 camera 에서 보이지 않는 frame 이 있다는 뜻으로 읽힌다(oracle 의 mask 가 비면 not-found 로 센다).
+
+### 결과 — #3 neighbour leak · wrong-object rate
+
+| arm | neighbour leak (voxel mass, frame 평균 → episode 평균) | neighbour fraction (pooled) | wrong-object 3D (frame 수 / 221, 비율) | wrong-object 3D, neighbour 비율 > 0.5 (frame 수, 비율) | wrong-object 2D instance (frame 수 / 비어 있지 않은 frame, 비율) |
+|---|---|---|---|---|---|
+| GT oracle (phrase) | 1.3 | 0.002 | 0 / 221 (0.000) | 0 (0.000) | 0 / 221 (0.000) |
+| GT oracle (instruction) | 1.3 | 0.002 | 0 / 221 (0.000) | 0 (0.000) | 0 / 221 (0.000) |
+| Grounded-SAM (phrase) | 370.1 | 0.380 | 62 / 221 (0.281) | 49 (0.222) | 22 / 221 (0.100) |
+| Grounded-SAM (instruction) | 341.0 | 0.360 | 55 / 221 (0.249) | 46 (0.208) | 20 / 221 (0.090) |
+| Grounded-SAM-2 per_frame (phrase) | 341.2 | 0.375 | 56 / 221 (0.253) | 46 (0.208) | 21 / 220 (0.095) |
+| Grounded-SAM-2 per_frame (instruction) | 292.3 | 0.339 | 51 / 221 (0.231) | 41 (0.186) | 20 / 219 (0.091) |
+| YOLOE-11L (phrase) | 268.1 | 0.416 | 66 / 221 (0.299) | 63 (0.285) | 45 / 188 (0.239) |
+| YOLOE-11L (instruction) | 84.3 | 0.091 | 39 / 221 (0.176) | 26 (0.118) | 33 / 98 (0.337) |
+| localization_heads:threshold (in-sample) | 657.3 | 0.079 | 123 / 221 (0.557) | 0 (0.000) | 10 / 221 (0.045) |
+| localization_heads:sam_point (in-sample) | 191.7 | 0.051 | 95 / 221 (0.430) | 36 (0.163) | 5 / 221 (0.023) |
+| TokenCut foreground | 474.5 | 0.068 | 90 / 221 (0.407) | 0 (0.000) | 15 / 221 (0.068) |
+| TokenCut attention_overlap | 919.1 | 0.072 | 189 / 221 (0.855) | 5 (0.023) | 15 / 221 (0.068) |
+| ATS V11AB (Coarse) | 33.2 | 0.242 | 55 / 221 (0.249) | 46 (0.208) | - |
+
+### 결과 — #4 ATS 대비 paired gain (episode 단위, 10 episode)
+
+`arm − ATS` 의 episode 평균 차이, paired bootstrap 2,000 회(seed 20261015), 95 % percentile 구간. **ATS 행이 대표점 표현이므로 해석에 주의한다**(#1 의 박스).
+
+| arm | Δ 3D soft IoU [95 % CI] (better / worse) | Δ soft P [95 % CI] (better / worse) | Δ soft R [95 % CI] (better / worse) | Δ neighbour leak [95 % CI] (better / worse) |
+|---|---|---|---|---|
+| GT oracle (phrase) | +0.904 [+0.876, +0.932] (10 / 0) | +0.575 [+0.423, +0.744] (10 / 0) | +0.932 [+0.905, +0.960] (10 / 0) | -31.9 [-61.7, -4.5] (4 / 6) |
+| GT oracle (instruction) | +0.904 [+0.876, +0.932] (10 / 0) | +0.575 [+0.423, +0.744] (10 / 0) | +0.932 [+0.905, +0.960] (10 / 0) | -31.9 [-61.7, -4.5] (4 / 6) |
+| Grounded-SAM (phrase) | +0.450 [+0.340, +0.567] (10 / 0) | +0.185 [+0.039, +0.361] (8 / 2) | +0.649 [+0.539, +0.741] (10 / 0) | +336.9 [+222.2, +447.1] (10 / 0) |
+| Grounded-SAM (instruction) | +0.481 [+0.367, +0.586] (10 / 0) | +0.208 [+0.067, +0.363] (8 / 2) | +0.670 [+0.567, +0.752] (10 / 0) | +307.8 [+196.9, +425.4] (10 / 0) |
+| Grounded-SAM-2 per_frame (phrase) | +0.447 [+0.339, +0.553] (10 / 0) | +0.204 [+0.059, +0.382] (8 / 2) | +0.629 [+0.529, +0.708] (10 / 0) | +308.0 [+181.4, +430.3] (9 / 1) |
+| Grounded-SAM-2 per_frame (instruction) | +0.481 [+0.365, +0.590] (10 / 0) | +0.250 [+0.092, +0.430] (8 / 2) | +0.641 [+0.543, +0.722] (10 / 0) | +259.2 [+128.2, +396.0] (10 / 0) |
+| YOLOE-11L (phrase) | +0.249 [+0.177, +0.307] (9 / 1) | +0.118 [-0.051, +0.299] (7 / 3) | +0.355 [+0.264, +0.425] (9 / 1) | +234.9 [+145.6, +328.1] (10 / 0) |
+| YOLOE-11L (instruction) | +0.045 [-0.023, +0.123] (6 / 4) | -0.016 [-0.198, +0.157] (6 / 4) | +0.066 [-0.008, +0.145] (6 / 4) | +51.1 [-26.4, +156.7] (7 / 3) |
+| localization_heads:threshold (in-sample) | +0.011 [-0.017, +0.041] (6 / 4) | -0.316 [-0.469, -0.146] (3 / 7) | +0.763 [+0.733, +0.802] (10 / 0) | +624.2 [+522.6, +732.7] (10 / 0) |
+| localization_heads:sam_point (in-sample) | +0.133 [+0.100, +0.165] (10 / 0) | -0.137 [-0.280, +0.022] (3 / 7) | +0.310 [+0.264, +0.352] (10 / 0) | +158.6 [+137.2, +179.1] (10 / 0) |
+| TokenCut foreground | +0.016 [-0.020, +0.051] (6 / 4) | -0.311 [-0.468, -0.139] (3 / 7) | +0.669 [+0.578, +0.754] (10 / 0) | +441.4 [+308.3, +591.0] (10 / 0) |
+| TokenCut attention_overlap | -0.011 [-0.035, +0.011] (5 / 5) | -0.337 [-0.483, -0.176] (2 / 8) | +0.470 [+0.380, +0.561] (10 / 0) | +886.0 [+797.9, +983.9] (10 / 0) |
+
+- 3D soft IoU 차이의 구간이 0 을 포함하는 arm: YOLOE-11L(instruction), localization_heads:threshold, TokenCut foreground, TokenCut attention_overlap. 나머지는 구간이 0 위다(`gt_oracle`, Grounded-SAM 계열, YOLOE-11L(phrase), localization_heads:sam_point).
+- soft precision 차이의 구간이 0 아래인 arm: localization_heads:threshold, TokenCut foreground, TokenCut attention_overlap. 0 을 포함하는 arm: YOLOE-11L 둘, localization_heads:sam_point. ATS 의 soft precision 은 0.393, soft recall 은 0.068 이다.
+- phrase 대 instruction 의 차이에는 paired bootstrap 을 따로 하지 않았다(ATS 와의 차이만 구했다). #1 · #3 의 두 prompt 값 차이는 보고만 하고 유의성은 주장하지 않는다.
+
+### 결과 — #5 latency (GPU, 첫 frame 제외)
+
+| arm | frame 당 median / p95 (ms, 두 camera 합, 첫 frame 제외) | camera call 당 median / p95 (ms) |
+|---|---|---|
+| GT oracle (phrase) | 0.3 / 0.5 | 0.2 / 0.3 |
+| GT oracle (instruction) | 0.4 / 0.4 | 0.2 / 0.2 |
+| Grounded-SAM (phrase) | 514.4 / 730.4 | 243.1 / 323.9 |
+| Grounded-SAM (instruction) | 504.8 / 542.6 | 232.7 / 310.4 |
+| Grounded-SAM-2 per_frame (phrase) | 381.0 / 433.0 | 195.7 / 221.7 |
+| Grounded-SAM-2 per_frame (instruction) | 376.9 / 443.3 | 194.8 / 223.5 |
+| YOLOE-11L (phrase) | 112.1 / 266.6 | 49.2 / 191.6 |
+| YOLOE-11L (instruction) | 160.7 / 277.7 | 73.4 / 194.3 |
+| localization_heads:threshold (in-sample) | 3.2 / 3.8 | 1.7 / 2.1 |
+| localization_heads:sam_point (in-sample) | 325.5 / 357.7 | 148.9 / 220.0 |
+| TokenCut foreground | 391.8 / 509.8 | 204.1 / 315.2 |
+| TokenCut attention_overlap | 406.4 / 597.5 | 205.9 / 397.9 |
+| ATS V11AB (Coarse) | 94.7 / 121.0 | - |
+
+- latency 는 provider 가 잰 벽시계 ms 를 그대로 썼다. CUDA sync 여부는 provider `Timer` 를 따른다(GPU 전용 시간은 `not_measured`).
+- ATS 는 V11AB 의 `t_process_s`(**perception 전체 처리**, grounding 단독이 아니다). `localization_heads:threshold` 는 기록된 attention 에서 mask 를 만드는 시간뿐이다(pi0.5 forward 가 들어 있지 않다). 두 값은 다른 provider 의 latency 와 같은 척도가 아니다.
+- 첫 call(warm-up) 제외는 summary 가 아니라 verifier 가 `frames.jsonl` 에서 했다(arm 마다 첫 frame 행 제외, n = 220 frame · 440 camera call).
+
+### 결과 — #6 referring-expression: phrase 대 instruction
+
+SL3 dev 의 10 task 는 모두 two black bowls 이다. phrase prompt 는 `akita black bowl` 이라 두 bowl 을 다 가리킨다. 위치 관계는 instruction 문장에만 있다. 표는 #3 의 wrong-object 열이다(frame 수 / 221).
+
+| provider | wrong-object 3D: phrase → instruction | wrong-object 2D instance: phrase → instruction | 3D soft IoU: phrase → instruction |
+|---|---|---|---|
+| Grounded-SAM | 62 → 55 (0.281 → 0.249) | 22 / 221 → 20 / 221 (0.100 → 0.090) | 0.515 → 0.546 |
+| Grounded-SAM-2 per_frame | 56 → 51 (0.253 → 0.231) | 21 / 220 → 20 / 219 (0.095 → 0.091) | 0.511 → 0.545 |
+| YOLOE-11L | 66 → 39 (0.299 → 0.176) | 45 / 188 → 33 / 98 (0.239 → 0.337) | 0.313 → 0.110 |
+
+- Grounded-SAM 계열은 instruction 에 위치 관계가 들어 있어도 3D wrong-object 가 0.23–0.25 로 남는다(Grounded-SAM 0.281 → 0.249, per_frame 0.253 → 0.231). 원인은 이 측정이 분리하지 않았다(box 후보별 score 분해 없음, score 최고 1 개를 고르는 선택 규칙의 영향 미확인).
+- YOLOE-11L 은 instruction prompt 에서 found rate 가 0.443 으로 떨어져(phrase 0.851) wrong-object 의 분모(frame 수)가 달라진다. 3D wrong-object 가 줄어든 것은 found 가 줄어든 효과가 섞여 있다.
+- ATS 의 wrong-object 3D 는 55 / 221, neighbour 비율 > 0.5 는 46 frame 으로 **Grounded-SAM(instruction)과 두 값이 모두 같다.** ~~같은 frame 인지 우연인지는 확인하지 않았다(verifier 에게 확인을 요청할 항목).~~ → BL-4 V2 가 확인: 두 frame 집합은 같지 않다(55 중 교집합 22, 46 중 교집합 14). 우연의 일치다.
+
+### 결과 — #7 in-sample 표시
+
+`localization_heads:threshold` 와 `localization_heads:sam_point` 는 **`in_sample: true`** 다. head 선택에 쓴 audit run 이 `20261012T202459_309e4c6da477_sl3-attention-audit-dev`(이 측정의 SL3 dev)와 `20261013T094739_714c891415d9_sl4b-attention-audit-dev-e1-4` 이기 때문이다. 이 두 행의 수치는 held-out 이 아니다. `tokencut:attention_overlap` 은 V11AB 의 고정 cell(L8H2, last action token, denoise step 0)의 attention 을 쓰며 head 를 새로 고르지 않는다.
+
+### 실패 · 한계 (verify.json `issues` · `not_measured`)
+
+| # | 사건 | 상세 | 영향 |
+|---|---|---|---|
+| 1 | **`grounded_sam2:track` GPU OOM** | run 1 의 `libero_spatial_t0_e0` phrase arm 에서 obs 70(track_frames 71)까지 기록된 뒤 obs 75 이전 frame 의 `add_new_frame`(`sam2_video_predictor.py:791` 의 `torch.cat`)에서 OOM(147,696,150,272 / 146,800,640,000 byte), 이어 `CUDA error: unrecognized error code` 로 process 전체가 종료(rc 1, 13:47:28). camera 2 대 × 약 71 frame 에 약 147 GB, ~~**frame · camera 당 약 0.9–1.0 GB 가 누적**된다~~ → BL-4 V2 의 직접 측정(unbounded `memory_allocated` 기울기)은 frame 당 137.45 MiB 다. 두 값의 차이 원인은 분리하지 않았다(BL-4 결과 B). 평가 frame 이 obs 120 이상인 episode 가 있어 현재 code 로는 끝까지 못 돈다. 이 실행은 잠시 공용 GPU 한도 130 GB 를 넘었다 | ~~track 은 SL3 · SL4b 모두 **미측정**.~~ → BL-4 에서 SL3 · SL4b 모두 측정했다. 누적 원인은 측정에서 분해하지 않았다. A 의 impl.md 는 streaming state 의 image tensor 가 episode 안에서 계속 쌓인다고(frame 당 1024² float) 미리 적었고, lead 의 BL-4 task 는 memory bank 로 본다. BL-4 의 G 가 memory 상한을 둔다 → 해소(BL-4 결과 B: bounded 는 143 frame 까지 평탄, SL3 · SL4b 모두 OOM 없이 완주) |
+| 2 | **SAM 2 `_C.so` 에 sm_90 이 없다** | `_C.so`(build 13:25 KST)에 sm_70 / 75 / 80 / 86 cubin 만 있고 **sm_90 cubin · PTX 가 없다**(`cuobjdump --list-elf` · `--list-ptx`). 원인(lead 확인): Grounded-SAM-2 `@b7a9c29` 의 `setup.py:101-104` 가 `-gencode` 를 sm_70/75/80/86 으로 고정해 `TORCH_CUDA_ARCH_LIST=9.0` 이 **무시**된다. 영향: video predictor 의 `fill_holes_in_mask_scores` 가 `no kernel image is available` 경고와 함께 생략된다(track 경로). `SAM2ImagePredictor` 는 `max_hole_area=0` 이라 `_C` 를 부르지 않아 **per_frame 은 영향이 없다.** `provenance` 의 `sam2_cuda_ext` 는 import 성공 기준이라 `built` 로 기록된다 | 이번 측정의 `per_frame` 수치에는 영향 없음. track 에만 해당 → 재빌드 후 sm_90 확인(BL-4 결과 A) |
+| 3 | provider 예외 하나가 run 전체를 멈춘다 | `offline_grounding` 은 한 process 에서 모든 provider 를 돌려 한 provider 의 예외가 run 전체를 멈춘다. track 을 뺀 8 spec 으로 다시 돌렸다(run 2) | BL-4 의 G 가 arm 단위로 격리하고 실패 행을 기록하도록 고친다 → 고쳤고 V2 의 두 run 에서 `provider_errors` 가 `[]` 였다 |
+| 4 | 평가 CPU 경로가 느리다 | GPU wall 8,080 s 중 provider latency 합은 episode 당 약 100 s, 나머지 약 600 s / episode 는 CPU 쪽(lift, eval grid, scene-GT `lift_check` 추정; **profile 하지 않았다**). process CPU 약 2.6 core | SL4b 40 episode 는 episode 당 약 700 s, ~~약 8 h 의 lock 점유로 추정되어 **deferred**(lead)~~ → SL4b 40 episode 전체 arm run 이 wall 3,660 s 에 끝났다(BL-4. thread 2 · arm 구성이 달라 속도 개선의 기여는 분리하지 않았다). BL-4 의 G 가 profile 후 vectorize / cache 했다 |
+| 5 | `gt_oracle` 2D 1.000 대 3D 0.968 | 위(#1) | 설명은 A impl.md 의 것 |
+
+**SAM 2 sm_90 재빌드 (기록 시점의 상태).** 이 측정 뒤에 `setup_venv.sh` 가 고쳐졌다. `NVCC_APPEND_FLAGS="-gencode=arch=compute_90,code=sm_90 -gencode=arch=compute_90,code=compute_90"` 를 export 해 nvcc 의 환경 hook 으로 sm_90 cubin 과 PTX 를 덧붙이고, 주석에 `cuobjdump --list-elf external/Grounded-SAM-2/sam2/_C.so` 로 확인하라고 적었다(lead, commit `5752c64c`). `_C.so` 의 mtime 은 측정이 끝난 뒤(16:08 KST)로 갱신되어 있다. ~~**재빌드한 `_C.so` 에 sm_90 이 실제로 들어갔는지는 verify.json 에 없다**(`cuobjdump` 결과 미기록). BL-4 의 V2 가 확인해야 한다.~~ → BL-4 V2 가 확인했다: `cuobjdump --list-elf` 가 sm_70 / 75 / 80 / 86 / **90**, `--list-ptx` 가 sm_90 을 보인다(BL-4 결과 A). 한편 이번 `numbers` 의 어떤 값도 이 재빌드에 의존하지 않는다(per_frame 은 `_C` 를 쓰지 않고, track 은 측정하지 못했다).
+
+### 측정하지 않은 것
+
+| 항목 | 이유 |
+|---|---|
+| `grounded_sam2:track` (SL3, SL4b) | **deferred**(lead 2026-10-23). 위 #1 OOM → BL-4 에서 측정 |
+| SL4b dev 40 episode 전체(`#2` 의 요청) | **deferred**(lead 2026-10-23). episode 당 약 700 s, 약 8 h 의 lock 점유 추정. 평가 CPU 경로 개선(BL-4) 뒤에 한다 → BL-4 에서 측정 |
+| latency 의 GPU 전용 시간 | provider 가 잰 벽시계 ms 를 그대로 썼다 |
+| 판정 기준이 있는 통과 / 실패 | 이 측정은 비교용이다(gt_oracle 만 "다른 모든 행보다 높아야" 기준이 있다) |
+| 공정 비교(같은 점 집합 위의 ATS) | BL-3 → BL-3 에서 측정 |
+| 고유 지표(box Acc@0.5, CorLoc, pointing game, maxFβ, J / F / J&F 등) | BL-3 → BL-3 에서 측정 |
+
+### 열린 항목
+
+1. ~~ATS 와의 공정 비교(V11AB perception run 이 기록한 같은 fused / filtered cloud 위에서 점마다 label) — BL-3.~~ → BL-3 에서 했다.
+2. ~~`grounded_sam2:track` memory 상한 · SL3 track 측정 · SL4b 40 episode — BL-4.~~ → BL-4 에서 했다.
+3. ~~sm_90 재빌드의 `cuobjdump` 확인 — BL-4(V2).~~ → BL-4 에서 확인했다.
+4. ~~ATS 와 Grounded-SAM(instruction)의 wrong-object 값이 일치하는 이유 확인(위 #6).~~ → 우연의 일치였다(BL-4).
+5. localization_heads 를 held-out 위에서 돌리려면 test split 의 attention audit 이 필요하다(GPU).
+6. 논문 bib 에 Grounded-SAM · Grounded-SAM-2 항목 추가(BL-0).
+
+### 판정
+
+**사용자 판정 대기.**
+
+---
+
+## BL-2 — PAPER-METHODS: 논문 비교 방법 `methods/` 구성 (2026-10-23)
+
+> 2026-10-23 KST. implementer C(safety filter 계열) 작성 15:50 경, implementer D(sampling guidance 계열) 같은 날, commit `5752c64c`(16:09).
+> 원본: [`handoff/PAPER-METHODS.task.md`](handoff/PAPER-METHODS.task.md) · [`-C.impl.md`](handoff/PAPER-METHODS-C.impl.md) · [`-D.impl.md`](handoff/PAPER-METHODS-D.impl.md).
+> **이 STEP 은 측정하지 않았다.** 구성 · 원 방법과의 차이 · test 통과 사실만 기록한다. smoke 수치는 `impl.md` 에 있지만 verify.json 이 없으므로 옮기지 않았다. ~~수치는 BL-3 이후에 채운다.~~ → offline 수치는 BL-3 에 채웠다.
+
+### 이 STEP 이 답하는 질문
+
+논문의 비교 · 관련 방법(safety filter · sampling guidance)을 `paper_baselines` 에 구성해, recorded Panda / LIBERO frame 에서
+**끝까지 실행되어 수정된 action chunk 또는 guidance 결과를 내는가**? ("기능이 작동한다"의 기준. closed-loop 연결은 다음 STEP.)
+
+### 무엇을 만들었나
+
+공통 interface 는 `methods/interface.py`(C): `SceneObservation` · `FilterResult` · `SafetyFilter` · `SamplingGuidance`(용어 절)와
+registry `get_method(name)`. contract 검사(`validate_filter_result`)와 openpi `Normalize` 와 같은 식의 `unnormalize_actions` / `normalize_actions` 를 함께 둔다.
+
+| method | 인용 | 종류 | 출처 | license | 구현 형태 | 원 방법과의 주요 차이 |
+|---|---|---|---|---|---|---|
+| **KNOWS** (`knows`) | [17] | `SafetyFilter` (ellipsoid EE CBF-QP) | 기존 `Baseline/knows_vla` 를 `git mv` 로 `methods/knows` 로 이동(history 보존) + `adapter.py` | — | existing + adapter | 공식 code 가 없어 이전 P0–P3 에서 우리가 재구현한 것이다. target 제외는 attention(논문 Eq. 4)이 아니라 privileged BDDL target + destination. 물체 분할은 GT seg. chunk 뒤쪽 action 은 실측 gain 으로 예측한 EE 자세에서 filter |
+| **VLSA / AEGIS** (`aegis`) | [10] | `SafetyFilter` (CBF-QP) | 공식 `benchmark/SafeLIBERO/main/{utils,main_aegis}.py`(submodule, **수정 금지**). helper 는 import, script 안의 per-step QP 는 원 줄 번호를 주석으로 달아 이식 | SafeLIBERO LICENSE | wrapper | **VLM(GLM API) 단계를 쓰지 않았다**(외부 API 금지). 대체: (a) privileged 장애물 이름 + Grounding DINO, (b) Grounding DINO 일반 prompt − target box, (GT) segmentation mask. 장애물마다 constraint row 를 둔다. box crop 에서 Panda sphere(+2 cm) 안의 점을 제거(원본에 없음). open3d DBSCAN → scipy. 원본은 agentview + backview 1024 px, 여기는 head 256 px. QP 실패 시 원본은 `NameError` 로 episode 종료, 여기는 nominal 을 내고 log. 공식 code 의 회전 규약(OSC world-frame 회전을 body-frame ω 로 사용)은 그대로 두었고 검증하지 않았다 |
+| **Multi-link safety filter** (`multilink_cbf`) | [1] | `SafetyFilter` (link 별 CBF-QP) | 공개 code 없음(`survey.md`) → 논문(arXiv:2609.40007) Eq. 2 로 구현 | — | re-impl (partial) | SO-101 5 ellipsoid → Panda gripper / wrist / forearm × 3(adapter sphere model 의 MVEE). **moving-hazard optical-flow 이동 생략**(기본 off = 논문의 "frozen at reset"). VLM 대신 AEGIS 와 같은 대체. scale factor(논문 미기재)는 AEGIS 의 값을 썼다 |
+| **OmniGuide** (`omniguide`) | [19] | `SamplingGuidance` (attractor / repeller energy) | `daniilidis-group/OmniGuide`(code 는 submodule `omniguide-openpi` `663f1cb2…`) | openpi 부분 Apache-2.0, 상위 repo 는 LICENSE 없음 | port | DROID joint velocity + FK → LIBERO EE-delta + OSC response model. network 를 거치는 backprop 을 하지 않는다. ESDF Chebyshev 근사 → 정확한 거리. best-of-N noise 선택과 subtask monitor 생략. LIBERO 에서는 action → 변위 gain 이 작아 attractor 가 약하다(D 의 설명) |
+| **Constrained flow matching** (`constrained_flow_matching`) | [5] | `SamplingGuidance` (CBF 제약 + min-norm 수정) | `Dubascudes/VLA-Safety-ConstrainedFlowMatching` @ `b91153ad…` | **없음 → code 를 복사하지 않았다** | re-impl | 논문 Eq. 7–11 과 repo 기본값을 다시 적었다. SciPy SLSQP → jit SQP(Hildreth). greedy fallback · ellipsoid primitive 없음. obstacle 을 주지 않으면 depth 점 구름 전체가 제약이 된다(원은 SafeLIBERO GT sphere 만) |
+| **Lan-o3dp guidance** (`lan_o3dp_guidance_adapted`) | [15] | `SamplingGuidance` (obstacle cost) | `qqianfeng/lan-o3dp` @ `b89c2898…` | MIT | adapted | 원 policy 는 RLBench 용이고 checkpoint 가 없어 **guidance 만** pi0.5 `guidance_fn` 으로 옮겼다. DDIM → flow, 절대 위치 → EE-delta(pseudo-inverse). **원 방법의 결과가 아니다.** 이름의 `adapted` 가 그 표시 |
+| **NUDGE** (`nudge`) | [9] | `SamplingGuidance` | 공개 code 없음 → 논문(arXiv:2609.35231)으로 구현 | — | re-impl (partial) | hand + finger sphere 22 개와 OSC path 만 본다(팔 link 와 IK 없음). `d_safe` 0.02 는 논문에 값이 없어 우리가 정했다. **κ 는 SL3 dev call 로 calibrate 한 값(`KAPPA_SL3_DEV`)이다** → 이후 SL3 dev 위의 평가는 in-sample 이다 |
+| RoboGround · GuidedVLA · OBEYED-VLA | [11] [13] [24] | 학습이 필요한 grounding policy | `ZzZZCHS/RoboGround` @ `25a86263…`(MIT), `GuidedVLA/GuidedVLA` @ `04be059e…`(Apache-2.0), `UARK-AICV/DRAGON_VLA` @ `bdf25556…`(license 없음) | | fetch + README | 실행하지 않았다. 입력 · checkpoint · 우리 protocol 에 넣으려면 필요한 것만 README 에 적었다 |
+
+- **guidance 의 hook:** openpi 의 `pi0.sample_actions` 에 이미 있는 `guidance_fn(x_next, t_next)`(`third_party/openpi/src/openpi/models/pi0.py:226-283`)에 들어간다. openpi 는 수정하지 않았다. action 은 normalized 공간이라 `norm` 으로 unnormalize / normalize 한다. 네 방법 모두 `enabled=False` 이면 입력 객체를 그대로 돌려준다.
+- **외부 repo 7 개를 full SHA 로 pin 하고 fetch 했다**(요청은 6 개). OmniGuide 의 실제 code 가 submodule `omniguide-openpi` 에 있어 하나를 더 넣었다. **license 가 없는 repo([5] · [24])의 code 는 tracked 파일로 복사하지 않았다**(참조만). `fetch_sources.py --check --used-by D` 결과 7 개 모두 `ok`.
+- **KNOWS 이동의 호환:** 수정 금지 파일이 옛 이름 `Baseline.knows_vla` 를 import 한다(`AG3S/ag3s/stages/geometry.py:188` 이 `mvee` 를 재사용하고, 없으면 조용히 covariance fit 으로 바뀐다. 그 밖에 `benchmark/__init__.py:12`, `scripts/setup/check_workspace.py:19`). 그래서 `Baseline/knows_vla/__init__.py` 를 **호환 alias package**(MetaPathFinder, 새 module 과 같은 module 객체)로 새로 두었다. `doc/migration/validation/*.json` 의 옛 경로는 provenance 기록이라 고치지 않았다.
+- **`.venv-baselines` 설치(C 만):** `cvxpy 1.7.3`, `osqp 1.1.3` 과 의존 6 개(신규 8 개). 기존 package 의 변경 · 재설치 없음. `requirements-baselines.in` / `.txt` 를 갱신했다.
+
+### KNOWS rename 이 commit `88f0c735` 에 섞인 경위
+
+`git mv Baseline/knows_vla Baseline/paper_baselines/methods/knows` 는 implementer C 가 PAPER-METHODS 에서 한 이동이다. `git mv` 는 rename 을 index 에 바로 올리므로, 같은 checkout 의 다른 session 이 BM-SETUP-B(LIBERO-Safety 평가 환경 셋업, 15:46 KST)를 commit 할 때 index 에 올라 있던 이 rename 이 함께 담긴 것으로 보인다(경위는 `git show 88f0c735` 의 파일 목록에서 추정한 것이고, 두 session 이 직접 확인한 기록은 없다).
+
+| commit | 시각 (KST) | 내용 | 상태 |
+|---|---|---|---|
+| `88f0c735` | 15:46 | BM-SETUP-B(LIBERO-Safety)의 파일 + `Baseline/knows_vla/**` → `methods/knows/**` 의 **순수 rename(R100, 내용 무수정)** | 이 commit 의 tree 에는 `Baseline/knows_vla` 가 **없다.** 그런데 `AG3S/ag3s/stages/geometry.py` · `benchmark/__init__.py` · `scripts/setup/check_workspace.py` 는 여전히 `Baseline.knows_vla` 를 참조한다 → **이 commit 단독 checkout 은 `Baseline.knows_vla` import 가 깨진 중간 상태다**(`git ls-tree` · `git grep` 으로 확인) |
+| `5752c64c` | 16:09 | import 이름 · 경로 문자열 갱신(`M`), `adapter.py`, 호환 alias `Baseline/knows_vla/__init__.py` 등 PAPER-METHODS 의 나머지 | 여기서 복구된다. **현재 HEAD 는 정상** |
+
+의미: KNOWS 이동의 history(`git log --follow`)는 `88f0c735` 의 rename 으로 이어지지만, 그 commit message 와 `BM-SETUP-B.impl.md` 는 이 이동을 언급하지 않는다. `git bisect` 에서 `88f0c735` 가 나오면 LIBERO-Safety 변경이 아니라 이 rename 때문에 깨진 것일 수 있다. 이 기록이 그 설명이다. 이후 commit 을 다시 쓸지(squash · 순서 조정)는 사용자 결정이며 이 파일은 사실만 남긴다.
+
+### 단위 검증
+
+| 범위 | 환경 | 결과 (impl.md 의 실제 출력) |
+|---|---|---|
+| KNOWS 이동 전 `Baseline/knows_vla/tests` | `.venv-ag3s`(MuJoCo) | 49 passed (`test_cbf` 42 + `test_mujoco_bridge` 7) |
+| KNOWS 이동 후 `methods/knows/tests`(원 2 파일) | `.venv-ag3s` | 49 passed — test id 집합이 경로 치환 뒤 동일 |
+| C 신규 + KNOWS 원 test | `.venv-baselines`(MuJoCo 없음) | 74 passed, 1 skipped (skip = `test_mujoco_bridge` module) |
+| alias 확인: `tests/ag3s/test_geometry.py` | `.venv-ag3s` | 47 passed (`fit_ellipsoid_mvee` 가 alias 를 통해 KNOWS `mvee` 를 실제로 import 함을 확인) |
+| D: `tests/test_methods_guidance.py` | `.venv-openpi-live`, `JAX_PLATFORMS=cpu` | 35 passed, 1 skipped (skip = OmniGuide × `points` repeller. OmniGuide 가 EE 5 cm 안의 점을 일부러 지우는 원 설계라 이 합성 장면에서는 앞쪽 반구가 사라진다. prim 경우로 대신 확인) |
+
+`.venv-ag3s` · `.venv-baselines` 에는 JAX 가 없어 D 의 test 파일은 skip 된다 — **반드시 `.venv-openpi-live` 로 돌려야 한다.**
+
+test 가 고정하는 것(요약): registry 의 Protocol 만족 · contract 위반 검출 · normalize 왕복 · 공식 AEGIS 함수가 submodule 파일에서 온다는 것 · 공식 gradient 와 유한차분의 일치 · **장애물 1 개 + 직진 action 에서 위반 chunk 는 수정되고 안전한 chunk 는 bit 동일** · multi-link 의 constraint row 가 h 변화량을 예측한다 · **forearm 위 hazard 에서 multi-link 는 개입하고 EE-only AEGIS 는 개입하지 않는다**(multi-link 를 따로 두는 이유) · guidance off 이면 bit 동일 · 장애물이 없으면 identity · repeller 가 waypoint 를 밀어낸다 · CFM 수정 뒤 제약 위반이 해소된다 · NUDGE 가 논문의 flow 식을 따른다.
+
+recorded SL3 frame 의 CPU smoke 는 세 filter 와 네 guidance 모두 **끝까지 실행되어 contract 를 만족하는 수정 chunk 를 냈다**(impl.md). 수치는 `impl.md` 에만 있어 여기에 옮기지 않는다. smoke 가 보인 비수치 사실만 옮긴다.
+- GDINO-tiny 256 px 의 box 는 크고 부정확했다(C). AEGIS 원 해상도(1024 px, backview)와 같은 조건은 재현하지 않았다.
+- NUDGE 는 처음 call 마다 ℓ∞ 로 정규화했더니 scene 의 hand SDF 가 오히려 나빠졌다. 작은 gradient 에도 큰 normalized step 이 걸려 overshoot 하기 때문이었다. 그래서 논문 정의대로 calibration set 의 중앙값(`kappa`)을 기본값으로 바꿨다(D).
+- 모든 guidance 출력이 유한했고 같은 입력을 두 번 돌리면 같은 값이 나왔다(`deterministic`).
+
+### 측정하지 않은 것 / 한계
+
+| 항목 | 상태 |
+|---|---|
+| closed-loop(SafeLIBERO Level I / II, LIBERO)에서의 성공률 · 충돌률 | 다음 STEP(BL-5). `benchmark/runners` 연결이 필요하다. per-step(T = 1) 호출이 원본과 같은 timing 이다 |
+| pi0.5 network 위에서의 guidance 효과 | **미실행.** CPU 에서는 recorded-chunk 대체 velocity 의 양 끝 경우(`tracking` / `constant`)만 봤다. GPU smoke 명령은 `methods/guidance_common/gpu_smoke.py` docstring · README 에 준비했다(verifier 몫). guidance closure 가 scene 을 상수로 잡아 call 마다 다시 trace 되므로 closed-loop 에서는 scene 을 traced 인자로 바꾸는 편이 낫다(D) → BL-3 에서 같은 대체 velocity 로 SL3 dev 221 call 전체를 CPU 에서 측정했다(pi0.5 network 위 효과는 여전히 미실행) |
+| non-privileged 입력 | smoke 는 GT mask(privileged)만 썼다. `extras["target_mask"]` 로 grounding provider 와 연결하는 경로는 code 에만 있다 |
+| SafeLIBERO recorded frame | segmentation 을 기록한 run 이 SL3 LIBERO 뿐이라 smoke 하지 않았다. SafeLIBERO 에서는 `privileged/obstacle_names` 를 env 의 `*obstacle*` joint 이름으로 채워야 한다(`main_aegis.py:238-248`) |
+| 공식 AEGIS 의 ω frame 규약 | 원본 그대로 두고 검증하지 않았다 |
+| CFM 의 ellipsoid primitive · greedy fallback, NUDGE 의 팔 link sphere(IK) | 구현하지 않았다 |
+| KNOWS relaxed normal | 논문 기본 relaxed normal 이 실제 barrier 를 `(1−γ)h` 보다 빨리 줄이는 경우가 있다(KNOWS docs/16 의 기존 측정과 같은 현상, 합성 test 에서도 재현) |
+| `survey.md` 표 수치 | PDF 대조 전 |
+| `methods/README.md`(method 목록) | C / D 공유라 만들지 않았다. 목록은 `Baseline/paper_baselines/README.md` 의 Methods 절에 있다 |
+
+**in-sample 주의(BL-3 이후 측정에서).** NUDGE 의 κ 와 localization heads 의 head 목록은 SL3 dev(와 SL4b dev)로 정한 값이다. 같은 집합 위에서 재면 held-out 이 아니다. 평가 집합을 정할 때 표시해야 한다. → BL-3 · BL-4 의 NUDGE · localization heads 수치는 in-sample 로 표시했다.
+
+### 판정
+
+**사용자 판정 대기.** ~~수치는 BL-3 이후에 채운다.~~ → offline(open-loop) 수치는 BL-3 에 채웠다(결과 E). closed-loop 수치는 BL-5.
+
+---
+
+## BL-3 — BASELINE-EVAL V1: cloud labeling 공정 비교, 고유 지표, methods offline (2026-10-24)
+
+> ~~(진행 중)~~ → 2026-10-24 KST 측정 완료. 아래 "계획"은 착수 시 기록이고, 결과는 그 뒤의 "결과 보고"에 이어 썼다.
+
+> 2026-10-23 KST 시작 지시. 원본: [`handoff/BASELINE-EVAL.task.md`](handoff/BASELINE-EVAL.task.md)(순서 1). ~~**verify.json 이 아직 없어 수치를 쓰지 않는다.**~~ → 수치는 아래 "결과 보고"에 적었다(출처 `BASELINE-EVAL-V1.verify.json`).
+> implementer F(새 파일만, CPU) → verifier V1(CPU)이 `BASELINE-EVAL-V1.verify.json` 과 figure 를 만든다.
+
+**무엇을 하나.** 논문 핵심 주장에 바로 필요한 것을 먼저 한다. BL-1 의 ATS 행은 대표점 표현 때문에 recall 0.068 이라 비교로 쓸 수 없었다. SL3 run 이 저장한 mask 를 다시 쓰므로 CPU 만 든다.
+
+| 하위 항목 | 내용 |
+|---|---|
+| 지표 registry `docs/metrics.md` | 각 원 논문 · benchmark 문서(primary source)에서 지표 정의를 확인한다: 정의(식), 출처(논문 절 · 표 번호 또는 공식 code 줄), 우리가 지금 잴 수 있는가(`offline-now` / `closed-loop` / `not-applicable` 과 이유). 대상: AG3S(ours), Grounded-SAM, Grounded-SAM-2(track), YOLOE, localization heads, TokenCut, GT oracle, VLSA / AEGIS · SafeLIBERO, KNOWS, multi-link, CFM, NUDGE, OmniGuide, Lan-o3dp, LIBERO, SafeLIBERO, LIBERO-Safety |
+| grounding 고유 지표 `eval/native_metrics.py` | SL3 run 의 `--save-masks` 산출물을 사후 계산: box Acc@0.5, CorLoc, pointing game(예측 peak 이 GT 안에 있는가), mIoU / oIoU, maxFβ, J / F / J&F(track 결과가 생기면 같은 code) |
+| **ATS 와의 공정 비교** `eval/cloud_labeling.py` | V11AB perception run 이 기록한 **같은 fused / filtered cloud 점 집합** 위에서 점마다 label 을 매긴다: GT = scene GT 의 가장 가까운 물체(거리 임계 포함), ATS = target flag, 각 segmenter = 그 점이 어느 camera 에서든 mask 안에 투영되는가. 그 위에서 point-level IoU · P · R · neighbour 비율과 paired bootstrap. perception run 이 cloud 를 기록하지 않았다면(`--no-clouds`) 그 사실을 보고하고 대안(ATS target 점을 같은 voxel 로 dilate 하는 등)을 제안만 한다 |
+| methods offline 평가 `methods/evaluate_offline.py` | SL3 dev 10 episode 전체 call 에서 7 method(KNOWS, AEGIS 3 변형, multi-link, OmniGuide, CFM, Lan-o3dp adapted, NUDGE)를 CPU 로 돌린다. 지표: intervention rate, ‖Δa‖, barrier h_min, 제약 위반, QP 실패, solve time, scene GT 기준 예측 EE / link clearance. guidance 는 recorded-chunk 대체 velocity 를 쓰고 그 한계를 산출물에 기록한다. figure 용 dump(ellipsoid · h trace · energy slice · path before / after · attention map · eigenvector)를 남긴다 |
+| figure(규칙 A) | `figures/baselines/<module>/` 에 module 마다 실제 장면 · 핵심 기능 · graph 또는 표 세 종류와 `.json` sidecar. 지표 표는 `docs/metrics.md` 의 모든 행에 "측정값 또는 `closed-loop 에서 측정`" 이 채워진 표 하나 |
+
+수정 금지: `eval/offline_grounding.py`, `providers/grounded_sam2.py`, `lift.py`(G 소유), `AG3S/**`, `benchmark/**`, `third_party/**`.
+
+~~**상태: 진행 중. verify 가 생기면 이어 쓴다. 판정 없음.**~~ → **측정 완료, 사용자 판정 대기.**
+
+### 결과 보고 (2026-10-24 KST)
+
+> 2026-10-24 KST. verifier V1 의 CPU 측정은 03:58 KST(UTC 2026-10-23 18:58)에 시작했다(verify `code_state.note`). run dir 이름의 시각은 KST 다: native `035852`, cloud `035953`, methods `040141`.
+> 원본: [`handoff/BASELINE-EVAL-F.impl.md`](handoff/BASELINE-EVAL-F.impl.md) · [`handoff/BASELINE-EVAL-V1.verify.json`](handoff/BASELINE-EVAL-V1.verify.json). raw 출력은 `outputs/verify/BASELINE-EVAL-V1/`, run dir 은 `AG3S_VLA-storage/results/benchmark/20261024T035852_5752c64c7006_baseline-eval-native-sl3dev` · `…035953_…_baseline-eval-cloud-sl3dev` · `…040141_…_baseline-eval-methods-sl3dev`.
+> 지표 registry: [`Baseline/paper_baselines/docs/metrics.md`](../../../Baseline/paper_baselines/docs/metrics.md). figure: [`figures/baselines/`](figures/baselines/) 아래 `v1-*` 51 개(각각 같은 이름의 `.json` sidecar 가 있다).
+> **판정은 사용자 판정 대기.** 아래는 수치와 관찰 가능한 사실만 적는다.
+
+### 이 STEP 이 답하는 질문 (BL-3)
+
+1. BL-1 에서 "비교로 쓸 수 없다"고 한 ATS 행을, ATS 와 segmenter 가 **같은 점 집합 위에** 놓이게 하면 어떻게 되는가? (cloud labeling)
+2. 각 baseline · benchmark 논문이 요구하는 지표는 무엇이고, 지금 있는 기록(SL3 dev 의 저장 mask · V11AB perception cloud · 기록된 action chunk)으로 얼마나 잴 수 있는가? (registry + 고유 지표)
+3. methods 9 arm 을 recorded π0.5 chunk 에 걸면 offline 지표는 어떻게 나오는가? (open loop)
+
+### 구현 경위 — implementer F (새 파일만, GPU 없음)
+
+기존 tracked 파일은 고치지 않았다(`offline_grounding.py` · `metrics.py` · `lift.py` 는 G 소유라 읽기만 했다). F impl.md 에서 옮긴 구성 사실이다.
+
+| 산출물 | 무엇을 하나 |
+|---|---|
+| [`docs/metrics.md`](../../../Baseline/paper_baselines/docs/metrics.md) | 지표 registry. 대상 21 행(AG3S · grounding 6 · ATS · method 7 · benchmark 3 · pointing game). 항목마다 정의 · 출처(논문 절 · 표 번호 또는 공식 code 줄) · status(`offline-now` / `closed-loop` / `not-applicable`) · 우리 대응 |
+| `eval/native_metrics.py` | SL3 run 의 `--save-masks` 산출물에서 각 논문 고유의 2D 지표를 사후 계산: Acc@0.5, CorLoc, pointing game, mIoU / oIoU(cIoU), maxFβ, J / F / J&F, detector `conf` sweep. J / F 는 pinned Grounded-SAM-2 의 `sav_benchmark.py` 와, saliency 지표는 pinned TokenCut 의 `metric.py` 와 같은 값이 나오는지 test 로 확인 |
+| `eval/cloud_labeling.py` | V11AB perception run 이 기록한 **같은 fused / filtered cloud 점** 위에서 GT · ATS · segmenter 가 점마다 label 을 매기고 point IoU · P · R · neighbour 비율과 ATS 대비 paired bootstrap 을 낸다. SL4 perception run 이 `cloud_points` 를 기록해 두었으므로 대안(`--no-clouds`) 경로는 쓰지 않았다 |
+| `methods/evaluate_offline.py` | `filters` · `guidance` · `summarize` 하위 명령. 모든 method 에 같은 decode(OSC response) · IK · 61 sphere 로 scene GT clearance 를 잰다. guidance 는 recorded-chunk 대체 velocity(BL-2 용어)를 쓴다 |
+| `tests/test_native_metrics.py` · `test_cloud_labeling.py` · `test_evaluate_offline.py` | DAVIS J / F · `seg2bmap` 이 pinned `sav_benchmark.Evaluator` 와, TokenCut maxFβ · Acc · IoU 가 pinned `metric.metrics` 와 같은 값인지, 실제 SL3 frame 의 IoU 가 harness `frames.jsonl` 의 `2d_iou` 와 같은지, 거리 pruning 이 `exact_distance_near` 와 bit 단위로 같은지, trace 판 sampler 가 D 의 `surrogate_sample` 과 bit 단위로 같은지 등을 고정한다 |
+
+F 의 smoke 수치는 옮기지 않았다(수치 규칙). V1 이 test 를 돌렸다: `.venv-baselines` 32 passed 1 skipped, `.venv-openpi-live` 11 passed(verify `unit_tests_F`).
+
+### 실행 — verifier V1 (CPU, worker 1, `CUDA_VISIBLE_DEVICES=''`)
+
+모든 사용 code 의 mtime 이 실행 시작 이전이다(`code_state.note`). 회귀 기준선(legacy 16D, CPU)은 일치했다: 위반으로 시작 14 / 15, `has_target` 15 / 15, frame 0 의 `clearance_before` −29.031 mm.
+
+| run | venv | wall (s) | max RSS (GB) | exit |
+|---|---|---|---|---|
+| native_metrics (`--tokencut-dino`) | `.venv-baselines` | 61.5 | 0.93 | 0 |
+| cloud_labeling | `.venv-baselines` | 107.7 | 0.21 | 0 |
+| methods filters (5 arm) | `.venv-baselines` | 870.4 | 2.51 | 0 |
+| methods guidance (4 method × 2 variant × 2 surrogate) | `.venv-openpi-live`, `JAX_PLATFORMS=cpu` | 3,357.9 | 2.69 | 0 |
+| methods summarize | `.venv-baselines` | 0.3 | 0.03 | 0 |
+| ATS `target_points` 보충 계산 (verifier) | `.venv-baselines` | 93.2 | 0.22 | 0 |
+
+측정 집합은 BL-1 과 같다: SL3 dev, `libero_spatial` t0–9 e0, 10 episode · 221 policy-call frame, camera head + left_wrist. grounding mask 는 BL-1 의 run `20261023T134909_bf1403d54bc6_paper-baselines-2-sl3dev-notrack`, V11AB cloud 는 SL4 perception run `20261012T225820_46a08d6ff644_sl4-perception-dev`, methods 의 chunk 는 SL3 dev run `20261012T163617_ce29b9be5fcb_sl3-dev-pi05only-t0-9e0` 에서 읽었다.
+
+### 결과 A — 지표 registry
+
+각 논문의 원 지표를 primary source(논문 절 · 표 번호, 공식 code 줄)에서 확인해 `metrics.md` 에 정리했다. status 의 뜻은 다음과 같다.
+
+| status | 뜻 |
+|---|---|
+| `offline-now` | 지금 있는 기록만으로 CPU 에서 잰다 |
+| `closed-loop` | rollout(성공 · 충돌 · episode 길이)이 있어야 잰다. BL-5 에서 잰다 |
+| `not-applicable` | 우리 setting 에서 정의가 성립하지 않는다(dataset · 학습 방식 · task 가 다르다). 이유를 적었다 |
+
+lead 초안과 달라진 점 6 개(registry 가 정정한 것):
+1. Localization heads 의 RES 지표는 mIoU / oIoU 가 아니라 **cIoU**(누적 교집합 / 누적 합집합)다. 우리 `oIoU` 가 그것이다.
+2. **pointing game 은 [14] 에 없다.** 원 정의는 Zhang et al. 2016 이고, 우리가 추가한 지표로 표시했다.
+3. Grounded-SAM 의 SegInW AP 가 box AP 인지 mask AP 인지 논문이 밝히지 않는다.
+4. Multi-link [1] 은 link 별 충돌 수를 보고하지 않는다(EE-only 대 multi-link coverage 비교뿐).
+5. CFM [5] 은 제약 위반률을 따로 정의하지 않는다. 자기 제약(B ≥ 0)은 우리가 offline 으로 센다.
+6. KNOWS [17] 는 CAR / TSR 대신 SR / CR / SSR 을 쓴다.
+
+registry 에서 확인하지 못한 것(`metrics.md` §5): 논문 HTML 은 WebFetch 요약으로 읽었고 표의 숫자는 옮기지 않았다. davis2017-evaluation 의 `db_statistics` decay bin 은 pinned clone 이 없어 기억과 요약을 맞춰 구현했다(test 가 bin 경계를 고정). TokenCut 논문 HTML 의 "β = 0.3" 과 code 의 `betta_sq = 0.3`(β² = 0.3)이 달라 code 를 따랐다. Multi-link [1] 의 11 mm 와 공식 SafeLIBERO code 의 1 mm 는 서로 다른 collision 기준이라 closed-loop 비교 때 어느 쪽인지 밝혀야 한다.
+
+![metrics registry overview](figures/baselines/metrics_overview/v1-metrics-registry-overview.png)
+
+### 결과 B — baseline · benchmark 별 지표 표 (사용자 지시 2026-10-23)
+
+원 지표 · status · 우리 측정값(SL3 dev 10 episode, 두 camera 합, `numbers` 의 값)을 한 표에 둔다. "closed-loop 에서 측정"은 BL-5 의 몫이다. (3D soft IoU 등 harness 값은 `BASELINE-EVAL-V2.verify.json` `numbers.sl3` · `numbers.sl4b` 와 BL-1 표에서 같은 값이다.)
+
+| 대상 | 원 지표 (출처) | status | 우리 측정값 · 대응 |
+|---|---|---|---|
+| AG3S (ours) — grounding | observed-surface soft IoU · Prec. · neighbour leak · paired gain (main.pdf Sec. 4.1, Tab. 2) | `offline-now` (benchmark branch 에서는 V11AB ATS 행) | harness(5 mm voxel): ATS 3D soft IoU 0.064, P 0.393, R 0.068, neighbour pooled 0.242. **같은 cloud 점 위(결과 C)**: `cloud_target` IoU 0.082 · P 0.693 (45 call) · R 0.084 · neighbour 0.301, `target_points` 좌표 일치 IoU 0.190, 5 mm IoU 0.258 |
+| AG3S (ours) — task | success · safe success · hold · contact class (Tab. 1), latency (Tab. 3), SafeLIBERO TSR · CAR (Tab. 4) | `closed-loop` | closed-loop 에서 측정 |
+| Grounded-SAM | SegInW zero-shot mean AP (arXiv:2401.14159 Tab. 1) | AP: `not-applicable` (SegInW 없음, referring target 하나) | phrase / instruction: mIoU 0.559 / 0.586, oIoU 0.764 / 0.769, Acc@0.5(detector box) 0.600 / 0.628, J&F 0.547 / 0.576 |
+| Grounded-SAM-2 | J&F (SAM 2 Sec. 6, `sav_benchmark.py:215-303`) | `offline-now` | per_frame J&F 0.527 / 0.540 (SL3, 20 sequence). track J&F: BL-4 — SL3 0.381 / 0.474, SL4b 0.333 / 0.436 |
+| YOLOE [25] | LVIS / COCO AP, AP_r/c/f, FPS (arXiv:2503.07465 Tab. 1–4) | AP: `not-applicable`. 속도: `offline-now` | phrase / instruction: any-candidate recall 0.356 / 0.092, Acc@0.5 0.310 / 0.087. latency median ms / frame: 112.1 / 160.7 (BL-1, H200, SL3); 24.7 / 23.8 (BL-4 SL4b, thread 2 — 두 값은 thread 설정이 달라 비교하지 않는다) |
+| Localization heads [14] | REC Acc@0.5, RES cIoU (arXiv:2503.06287 Tab. 1–2) | `offline-now` (in-sample) | threshold / sam_point: Acc@0.5 0.048 / 0.292, cIoU(oIoU) 0.162 / 0.078, mIoU 0.137 / 0.250 |
+| (추가) pointing game | 최대점이 GT 안(tol 15 px, Zhang et al. 2016) | `offline-now` | tol 0 / 15 px: LH peak 0.283 / 0.543, TokenCut seed 0.359 / 0.361, V11AB attention L8H2 peak 0.198 / 0.411 |
+| TokenCut [26] | CorLoc, maxFβ · IoU · Acc (arXiv:2202.11539 Sec. 4.1, 4.3) | `offline-now` | foreground / attention_overlap: CorLoc any-object 0.386 / 0.303, CorLoc target 0.326 / 0.145, Fβ(binary) 0.319 / 0.157, mIoU 0.289 / 0.137, pixel Acc 0.874 / 0.541. 연속 map maxFβ: LH 결합 map 0.201, V11AB L8H2 0.138 |
+| GT oracle | — (상한) | `offline-now` | native 지표 전부 1.000. harness `lift_within_10mm` 0.994. V1 lift check: 27,224 점 중 10 mm 이내 0.993, median 1.91 mm, p95 3.54 mm. cloud 위 IoU 0.850 · P 0.893 · R 0.948 |
+| ATS V11AB | (AG3S 이전판) | `offline-now` | 결과 C |
+| VLSA / AEGIS [10] | SafeLIBERO CAR · TSR · ETS (arXiv:2512.11891 Sec. V-A; 충돌 판정 `main_aegis.py:370`) | `closed-loop` | closed-loop 에서 측정. offline 대리(결과 E): `aegis` / `detector_names` / `detector_all` 개입률(행) 0.179 / 0.144 / 0.118 |
+| KNOWS [17] | SR · CR · SSR (arXiv:2606.09749 Tab. 1), latency (Tab. 2) | `closed-loop` | closed-loop 에서 측정. offline 개입률(행) 0.252 |
+| Multi-link [1] | collision(hazard 변위 > 11 mm) · contact · safe-success · latency · energy (arXiv:2609.40007 Tab. I–II) | `closed-loop` | closed-loop 에서 측정. offline 개입률(행) 0.160, EE-only AEGIS 가 개입하지 않은 call 에서 개입한 것 2 개(비-gripper binding 0) |
+| CFM [5] | CAR · TSR · ETS (arXiv:2607.01378 Tab. 1–2) | `closed-loop`. 자기 제약 `offline-now` | 위반 행(call 평균) 9.670 → 3.213 (tracking) / 1.204 (constant), scene variant |
+| NUDGE [9] | LIBERO SR · CR, sphere task Coll. Rate · Coll. Ep. (arXiv:2609.35231 Tab. II–III) | `closed-loop`. 자기 cost `offline-now` | `nudge_c_sdf` 0.0176 → 0.0090 (tracking) / 0.0043 (constant), scene variant. **κ 가 in-sample** |
+| OmniGuide [19] | Success Rate · Safety Rate (arXiv:2603.10052 Sec. IV-A) | `closed-loop` | `omniguide_cost` −3.860 → −3.850 (tracking) / −3.788 (constant), scene variant |
+| Lan-o3dp [15] | RLBench 성공률 (arXiv:2407.00451 Sec. IV-A, Tab. II) | 원 지표 `not-applicable`. adapted 는 `closed-loop` | 원 안 waypoint 8.520 → 7.679 (tracking) / 1.489 (constant), scene variant |
+| LIBERO | success rate; FWT · NBT · AUC (arXiv:2306.03310 Sec. 5.1) | SR: `closed-loop`. FWT / NBT / AUC: `not-applicable` (frozen policy) | closed-loop 에서 측정 |
+| SafeLIBERO | CAR · TSR · ETS, Level I / II | `closed-loop` | closed-loop 에서 측정 |
+| LIBERO-Safety | SR · CR · Execution Time · LDLJ (arXiv:2606.23686 Sec. 4.1). Refusal Rate (SSR suite) | SR · CR · time · LDLJ: `closed-loop`. Refusal Rate: `not-applicable` | closed-loop 에서 측정 |
+
+### 결과 C — ATS 와의 cloud labeling 공정 비교
+
+**방법.** V11AB 가 그 call 에 만든 fused / filtered cloud(`cloud_points`)의 같은 점마다 label 을 매긴다.
+- GT: scene GT instance 의 visual surface 까지 정확한 거리 ≤ 10 mm 인 최근접 instance(없으면 robot sphere 10 mm 이내면 robot, 아니면 none). SL4 · SL4b `ats_calibration.label_points` 와 같은 규칙이다.
+- ATS: `cloud_target`(V11AB 가 target 으로 flag 한 cloud 점).
+- segmenter: 그 점을 관측한 camera 의 mask 안에 투영되면 positive(visibility `observed`).
+- 집계: call → episode 평균 → 평균(그리고 pooled). `arm − ATS` paired bootstrap 은 episode 단위 2,000 회, seed 20261015, 95 % percentile. `better` / `worse` 는 **diff 의 부호가 양 / 음인 episode 수**다(지표 방향이 아니다. neighbour 비율에서는 diff > 0 이 "ATS 보다 neighbour 비율이 높다"는 뜻).
+
+![cloud labeling: 같은 점 위의 GT / ATS / segmenter label](figures/baselines/ats_v11ab/v1-ats-cloud-labeling-same-points.png)
+
+**ATS 행의 새 문제 (verify `issues`).** SL4 perception run 의 `cloud_target` 이 **`has_target` 179 call 중 134 call 에서 비어 있다**(`target_points` 는 기록되어 있다). 그래서 `cloud_target` 으로 만든 ATS 행은 positive 가 있는 call 이 **45 call**(found 0.204)이고, **precision · neighbour 비율의 episode 평균은 그 45 call 만으로 계산**되며(표의 `n call`), recall · IoU 는 221 call 전체로 계산된다. 따라서 ATS `cloud_target` 행의 P 0.693 은 45 call 선택 효과가 섞여 있어 다른 arm 의 P(221 call 기준)와 같은 척도가 아니다. 이 원인(왜 비는가)은 측정하지 않았다. 그래서 verifier 가 보충 행 두 개를 같은 점 · 같은 GT class 위에 더했다.
+
+| 보충 행 (verifier, F 의 도구가 아니다) | 정의 | positive 가 있는 call |
+|---|---|---|
+| `ats_v11ab_tp_exact` | `has_target` call 에서 cloud 점이 기록된 `target_points` 와 1 μm 이내(좌표 일치) | 151 / 221 |
+| `ats_v11ab_tp_5mm` | 같음, 5 mm 이내 | 162 / 221 |
+
+F 의 ATS 행과 같은 점 · 같은 class 라는 것은 221 / 221 call 의 `n_points` · `n_pred` · `n_gt` · `tp` 일치로 확인했다(`identity_check`, `all_equal` true). `ats_v11ab_seeds`(attention seed 점 기반)는 F 가 둔 참고 행이다.
+
+![cloud labeling table](figures/baselines/ats_v11ab/v1-ats-cloud-labeling-table.png)
+
+**표 C-1. 같은 cloud 점 위의 지표** (GT 점 수 n_gt 는 pooled 45,269)
+
+| arm | positive 가 있는 call / 221 | IoU | P (n call) | R | neighbour 비율 (n call) | support 비율 | pooled IoU | pooled P | pooled R | pooled neighbour |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ATS V11AB (`cloud_target`) | 45 / 221 | 0.082 | 0.693 (45) | 0.084 | 0.301 (45) | 0.000 | 0.082 | 0.534 | 0.088 | 0.462 |
+| ATS `target_points` (좌표 일치) | 151 / 221 | 0.190 | 0.636 (151) | 0.192 | 0.352 (151) | 0.000 | 0.174 | 0.546 | 0.204 | 0.435 |
+| ATS `target_points` (5 mm) | 162 / 221 | 0.258 | 0.649 (162) | 0.261 | 0.338 (162) | 0.000 | 0.230 | 0.594 | 0.272 | 0.388 |
+| ATS attention seed (참고 행) | 210 / 221 | 0.207 | 0.569 (210) | 0.232 | 0.379 (210) | 0.000 | 0.205 | 0.567 | 0.243 | 0.305 |
+| Grounded-SAM (phrase) | 221 / 221 | 0.459 | 0.528 (221) | 0.660 | 0.413 (221) | 0.046 | 0.404 | 0.503 | 0.673 | 0.439 |
+| Grounded-SAM (instruction) | 221 / 221 | 0.493 | 0.554 (221) | 0.684 | 0.384 (221) | 0.045 | 0.423 | 0.519 | 0.694 | 0.404 |
+| Grounded-SAM-2 per_frame (phrase) | 220 / 221 | 0.451 | 0.545 (220) | 0.642 | 0.382 (220) | 0.061 | 0.403 | 0.511 | 0.657 | 0.419 |
+| Grounded-SAM-2 per_frame (instruction) | 219 / 221 | 0.486 | 0.593 (219) | 0.655 | 0.331 (219) | 0.062 | 0.432 | 0.550 | 0.668 | 0.378 |
+| YOLOE-11L (phrase) | 188 / 221 | 0.285 | 0.481 (188) | 0.406 | 0.444 (188) | 0.053 | 0.283 | 0.450 | 0.432 | 0.470 |
+| YOLOE-11L (instruction) | 98 / 221 | 0.101 | 0.370 (98) | 0.128 | 0.342 (98) | 0.054 | 0.070 | 0.120 | 0.143 | 0.095 |
+| localization_heads:threshold (in-sample) | 221 / 221 | 0.104 | 0.105 (221) | 0.865 | 0.118 (221) | 0.630 | 0.099 | 0.101 | 0.865 | 0.118 |
+| localization_heads:sam_point (in-sample) | 221 / 221 | 0.266 | 0.386 (221) | 0.400 | 0.208 (221) | 0.332 | 0.081 | 0.092 | 0.405 | 0.053 |
+| TokenCut foreground | 221 / 221 | 0.212 | 0.220 (221) | 0.737 | 0.195 (221) | 0.322 | 0.189 | 0.203 | 0.733 | 0.200 |
+| TokenCut attention_overlap | 221 / 221 | 0.075 | 0.078 (221) | 0.543 | 0.166 (221) | 0.594 | 0.034 | 0.035 | 0.560 | 0.082 |
+| GT oracle (두 prompt 같음) | 221 / 221 | 0.850 | 0.893 (221) | 0.948 | 0.018 (221) | 0.073 | 0.850 | 0.891 | 0.948 | 0.017 |
+
+- `support 비율` = 예측 positive 점 중 GT class 가 support(table 면)인 비율의 episode 평균. `robot` · `none` 비율은 ATS · segmenter 모두 0.000–0.001 이었다(`tokencut:attention_overlap` 의 `none` 0.001).
+
+**표 C-2. arm − ATS 의 Δ IoU (ATS 정의 3 가지)** — 95 % CI, (better / worse)
+
+| arm − ATS | Δ IoU, ATS = `cloud_target` [95 % CI] (better / worse) | Δ IoU, ATS = `target_points` 좌표 일치 | Δ IoU, ATS = `target_points` 5 mm |
+|---|---|---|---|
+| ATS attention seed (참고 행) | +0.125 [0.083, 0.163] (9 / 1) | +0.017 [-0.050, 0.093] (4 / 6) | -0.051 [-0.145, 0.055] (3 / 7) |
+| Grounded-SAM (phrase) | +0.377 [0.247, 0.504] (10 / 0) | +0.269 [0.144, 0.411] (9 / 1) | +0.201 [0.068, 0.362] (8 / 2) |
+| Grounded-SAM (instruction) | +0.411 [0.282, 0.533] (10 / 0) | +0.303 [0.174, 0.427] (9 / 1) | +0.236 [0.098, 0.371] (8 / 2) |
+| Grounded-SAM-2 per_frame (phrase) | +0.369 [0.253, 0.486] (10 / 0) | +0.261 [0.143, 0.393] (9 / 1) | +0.193 [0.066, 0.341] (7 / 3) |
+| Grounded-SAM-2 per_frame (instruction) | +0.404 [0.281, 0.519] (10 / 0) | +0.296 [0.168, 0.421] (9 / 1) | +0.228 [0.091, 0.369] (7 / 3) |
+| YOLOE-11L (phrase) | +0.203 [0.121, 0.276] (9 / 1) | +0.095 [0.002, 0.191] (7 / 3) | +0.027 [-0.092, 0.150] (5 / 5) |
+| YOLOE-11L (instruction) | +0.019 [-0.065, 0.110] (6 / 4) | -0.089 [-0.181, 0.001] (4 / 6) | -0.157 [-0.262, -0.051] (3 / 7) |
+| localization_heads:threshold (in-sample) | +0.022 [-0.027, 0.066] (7 / 3) | -0.086 [-0.169, -0.002] (3 / 7) | -0.154 [-0.262, -0.042] (3 / 7) |
+| localization_heads:sam_point (in-sample) | +0.183 [0.150, 0.222] (10 / 0) | +0.076 [0.004, 0.150] (6 / 4) | +0.008 [-0.094, 0.115] (5 / 5) |
+| TokenCut foreground | +0.130 [0.058, 0.193] (8 / 2) | +0.022 [-0.086, 0.122] (6 / 4) | -0.046 [-0.178, 0.085] (4 / 6) |
+| TokenCut attention_overlap | -0.007 [-0.046, 0.028] (6 / 4) | -0.115 [-0.187, -0.043] (3 / 7) | -0.183 [-0.280, -0.082] (2 / 8) |
+| GT oracle (두 prompt 같음) | +0.768 [0.719, 0.813] (10 / 0) | +0.660 [0.576, 0.744] (10 / 0) | +0.593 [0.485, 0.704] (10 / 0) |
+
+**표 C-3. arm − ATS(`cloud_target`) 의 Δ precision · recall · neighbour 비율**
+
+| arm − ATS (`cloud_target`) | Δ precision | Δ recall | Δ neighbour 비율 |
+|---|---|---|---|
+| Grounded-SAM (phrase) | -0.165 [-0.392, 0.109] (2 / 8) | +0.577 [0.451, 0.690] (10 / 0) | +0.111 [-0.157, 0.336] (8 / 2) |
+| Grounded-SAM (instruction) | -0.139 [-0.363, 0.109] (2 / 8) | +0.600 [0.483, 0.698] (10 / 0) | +0.083 [-0.158, 0.299] (8 / 2) |
+| Grounded-SAM-2 per_frame (phrase) | -0.149 [-0.379, 0.124] (2 / 8) | +0.559 [0.442, 0.658] (10 / 0) | +0.080 [-0.190, 0.307] (8 / 2) |
+| Grounded-SAM-2 per_frame (instruction) | -0.100 [-0.344, 0.164] (2 / 8) | +0.571 [0.460, 0.667] (10 / 0) | +0.030 [-0.235, 0.270] (7 / 3) |
+| YOLOE-11L (phrase) | -0.212 [-0.471, 0.078] (3 / 7) | +0.322 [0.228, 0.393] (9 / 1) | +0.143 [-0.145, 0.406] (7 / 3) |
+| YOLOE-11L (instruction) | -0.323 [-0.547, -0.108] (3 / 7) | +0.044 [-0.047, 0.143] (6 / 4) | +0.041 [-0.350, 0.401] (7 / 3) |
+| localization_heads:threshold (in-sample) | -0.588 [-0.831, -0.320] (2 / 8) | +0.782 [0.731, 0.833] (10 / 0) | -0.184 [-0.451, 0.057] (5 / 5) |
+| localization_heads:sam_point (in-sample) | -0.308 [-0.526, -0.065] (3 / 7) | +0.316 [0.284, 0.356] (10 / 0) | -0.094 [-0.312, 0.090] (6 / 4) |
+| TokenCut foreground | -0.473 [-0.726, -0.192] (2 / 8) | +0.653 [0.536, 0.753] (10 / 0) | -0.107 [-0.376, 0.124] (7 / 3) |
+| TokenCut attention_overlap | -0.615 [-0.841, -0.360] (2 / 8) | +0.460 [0.364, 0.553] (10 / 0) | -0.135 [-0.424, 0.115] (6 / 4) |
+| GT oracle (두 prompt 같음) | +0.200 [-0.038, 0.465] (5 / 5) | +0.864 [0.818, 0.906] (10 / 0) | -0.283 [-0.541, -0.046] (5 / 5) |
+
+![paired bootstrap](figures/baselines/ats_v11ab/v1-ats-cloud-labeling-paired-bootstrap.png)
+
+![target_points 보충](figures/baselines/ats_v11ab/v1-ats-cloud-labeling-target-points-supplement.png)
+
+관찰(수치에서 읽히는 것만):
+- Grounded-SAM · Grounded-SAM-2 per_frame 4 arm 은 ATS 를 어느 정의(`cloud_target` · `target_points` 좌표 일치 · 5 mm)로 잡아도 Δ IoU 의 95 % CI 가 0 위다. 같은 점 · 같은 GT 위에서도 이 방향이 유지된다.
+- ATS 정의에 따라 ATS 자체의 IoU 가 0.082 → 0.190 → 0.258 로 움직인다. `cloud_target` 이 비는 call 이 많다는 것이 ATS 행의 수치에 영향을 준다는 뜻이다. BL-1 harness 의 recall 0.068(5 mm voxel)과 이번 recall 0.084(`cloud_target`) · 0.192 · 0.261 은 평가 단위가 달라(voxel 대 cloud 점) 같은 값이 아니다. 표현 차이(대표점 대 cloud 점)와 `cloud_target` 이 비는 것 중 어느 쪽이 얼마나 기여했는지는 이 측정이 분리하지 않았다.
+- precision 은 Δ P 의 CI 가 0 을 포함하는 arm 이 다수이고, better / worse 는 ATS 쪽이 높은 episode 가 더 많다(예: Grounded-SAM phrase 2 / 8). 단 ATS 의 P 는 45 call 기준이다.
+- neighbour 비율의 Δ 는 `gt_oracle` 을 빼고 모든 arm 에서 CI 가 0 을 포함한다.
+- `localization_heads:threshold` · `tokencut:attention_overlap` 은 recall 이 높지만(0.865 / 0.543) precision 이 0.105 / 0.078 이고 예측 positive 중 support 비율이 0.630 / 0.594 다.
+- `gt_oracle` 은 같은 점 위에서 IoU 0.850 · P 0.893 · R 0.948(두 prompt 같음). projection · 경계 때문에 1 이 아니다.
+
+### 결과 D — grounding 고유 지표 (`native_metrics`)
+
+**sample 정의.** (frame, camera) 중 GT target mask 가 비지 않은 것. 못 찾은 arm(빈 mask)은 miss / IoU 0 으로 남는다. GT box 는 GT segmentation 에서 보이는 부분의 tight box 다(amodal box 는 기록에 없다). 집계는 sample 전체 pooled 비율 + episode resample 2,000 회 95 % CI(seed 20261015). 두 camera 합 435 sample(head 221, left_wrist 214). DAVIS 블록(J / F)만 sequence = (episode, camera) 20 개의 평균이고 GT 가 빈 frame 도 포함한다. sequence 의 frame 은 5 step 간격의 정책 call frame 이라 원 benchmark 의 연속 frame 이 아니다.
+
+**표 D-1. box · mask 수준** (Acc@0.5 는 detector box 와 mask box 가 같은 값이다. CorLoc target = Acc@0.5 mask)
+
+| arm | sample 수 | Acc@0.5 (mask box) [95 % CI] | CorLoc any-object [95 % CI] | mIoU | oIoU (= cIoU) | pixel Acc | Fβ (binary mask) |
+|---|---|---|---|---|---|---|---|
+| GT oracle (두 prompt 같음) | 435 | 1.000 [1.000, 1.000] | 1.000 [1.000, 1.000] | 1.000 | 1.000 | 1.000 | 1.000 |
+| Grounded-SAM (phrase) | 435 | 0.600 [0.478, 0.724] | 0.979 [0.950, 0.998] | 0.559 | 0.764 | 0.982 | 0.576 |
+| Grounded-SAM (instruction) | 435 | 0.628 [0.505, 0.743] | 0.986 [0.971, 0.998] | 0.586 | 0.769 | 0.982 | 0.603 |
+| Grounded-SAM-2 per_frame (phrase) | 435 | 0.568 [0.460, 0.673] | 0.910 [0.855, 0.958] | 0.538 | 0.776 | 0.983 | 0.548 |
+| Grounded-SAM-2 per_frame (instruction) | 435 | 0.582 [0.474, 0.679] | 0.869 [0.790, 0.939] | 0.552 | 0.781 | 0.983 | 0.561 |
+| YOLOE-11L (phrase) | 435 | 0.310 [0.240, 0.365] | 0.602 [0.507, 0.711] | 0.287 | 0.356 | 0.952 | 0.293 |
+| YOLOE-11L (instruction) | 435 | 0.087 [0.022, 0.155] | 0.149 [0.058, 0.255] | 0.082 | 0.112 | 0.926 | 0.084 |
+| localization_heads:threshold (in-sample) | 435 | 0.048 [0.014, 0.086] | 0.062 [0.026, 0.102] | 0.137 | 0.162 | 0.778 | 0.179 |
+| localization_heads:sam_point (in-sample) | 435 | 0.292 [0.252, 0.336] | 0.476 [0.438, 0.521] | 0.250 | 0.078 | 0.832 | 0.272 |
+| TokenCut foreground | 435 | 0.326 [0.258, 0.390] | 0.386 [0.342, 0.426] | 0.289 | 0.316 | 0.874 | 0.319 |
+| TokenCut attention_overlap | 435 | 0.145 [0.115, 0.176] | 0.303 [0.230, 0.384] | 0.137 | 0.051 | 0.541 | 0.157 |
+
+**표 D-2. camera 별**
+
+| arm | Acc@0.5 head | Acc@0.5 left_wrist | CorLoc any head | CorLoc any left_wrist | mIoU head | mIoU left_wrist |
+|---|---|---|---|---|---|---|
+| GT oracle | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Grounded-SAM (phrase) | 0.308 | 0.902 | 0.964 | 0.995 | 0.282 | 0.844 |
+| Grounded-SAM (instruction) | 0.385 | 0.879 | 0.982 | 0.991 | 0.352 | 0.827 |
+| Grounded-SAM-2 per_frame (phrase) | 0.267 | 0.879 | 0.860 | 0.963 | 0.243 | 0.843 |
+| Grounded-SAM-2 per_frame (instruction) | 0.312 | 0.860 | 0.805 | 0.935 | 0.288 | 0.824 |
+| YOLOE-11L (phrase) | 0.109 | 0.519 | 0.638 | 0.565 | 0.096 | 0.485 |
+| YOLOE-11L (instruction) | 0.000 | 0.178 | 0.095 | 0.206 | 0.002 | 0.165 |
+| localization_heads:threshold (in-sample) | 0.000 | 0.098 | 0.000 | 0.126 | 0.042 | 0.235 |
+| localization_heads:sam_point (in-sample) | 0.262 | 0.322 | 0.271 | 0.687 | 0.218 | 0.283 |
+| TokenCut foreground | 0.000 | 0.664 | 0.005 | 0.780 | 0.033 | 0.553 |
+| TokenCut attention_overlap | 0.018 | 0.276 | 0.258 | 0.350 | 0.038 | 0.239 |
+
+**표 D-3. pointing game · DAVIS 형 J / F** (pointing: LH = 결합 map peak, TokenCut = seed patch 중심, detector = box 중심(원 정의의 변형이라 표시), J&F 의 `temporal IoU` 는 연속한 평가 frame 사이 mask IoU 로 논문 지표가 아니다)
+
+| arm | pointing game tol 0 / 15 px | J mean | F mean | J&F | J recall | J decay | temporal IoU (예측) | temporal IoU 차이 (예측 대 GT, 절댓값) |
+|---|---|---|---|---|---|---|---|---|
+| GT oracle | - | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | 0.662 | 0.000 |
+| Grounded-SAM (phrase) | 0.595 / 0.605 (box 중심, 변형) | 0.548 | 0.547 | 0.547 | 0.582 | -0.098 | 0.699 | 0.201 |
+| Grounded-SAM (instruction) | 0.618 / 0.632 (box 중심, 변형) | 0.576 | 0.576 | 0.576 | 0.613 | -0.014 | 0.694 | 0.213 |
+| Grounded-SAM-2 per_frame (phrase) | 0.563 / 0.570 (box 중심, 변형) | 0.528 | 0.527 | 0.527 | 0.554 | -0.073 | 0.712 | 0.210 |
+| Grounded-SAM-2 per_frame (instruction) | 0.572 / 0.582 (box 중심, 변형) | 0.541 | 0.540 | 0.540 | 0.568 | 0.000 | 0.716 | 0.214 |
+| YOLOE-11L (phrase) | 0.308 / 0.322 (box 중심, 변형) | 0.287 | 0.287 | 0.287 | 0.310 | 0.066 | 0.740 | 0.302 |
+| YOLOE-11L (instruction) | 0.113 / 0.120 (box 중심, 변형) | 0.092 | 0.110 | 0.101 | 0.097 | -0.027 | 0.889 | 0.332 |
+| localization_heads:threshold (in-sample) | 0.283 / 0.543 | 0.133 | 0.029 | 0.081 | 0.002 | -0.039 | 0.742 | 0.294 |
+| localization_heads:sam_point (in-sample) | 0.283 / 0.543 | 0.250 | 0.354 | 0.302 | 0.275 | 0.041 | 0.302 | 0.421 |
+| TokenCut foreground | 0.359 / 0.361 | 0.280 | 0.151 | 0.215 | 0.317 | -0.201 | 0.690 | 0.247 |
+| TokenCut attention_overlap | 0.359 / 0.361 | 0.136 | 0.157 | 0.147 | 0.140 | 0.020 | 0.589 | 0.373 |
+| LH 결합 attention map (연속) | 0.283 / 0.543 | - | - | - | - | - | - | - |
+| V11AB attention L8H2 (연속) | 0.198 / 0.411 | - | - | - | - | - | - | - |
+
+**표 D-4. 연속 attention map** (provider 의 mask 가 아니라 attention audit 기록에서 다시 만든 map. min-max 정규화 후 maxFβ)
+
+| 연속 map | maxFβ (all) | maxFβ 의 threshold | maxFβ head | maxFβ left_wrist | mIoU (0.5 binarize) | oIoU | pixel Acc |
+|---|---|---|---|---|---|---|---|
+| LH 결합 attention map (연속) | 0.201 | 0.741 | 0.272 | 0.298 | 0.119 | 0.085 | 0.900 |
+| V11AB attention L8H2 (연속) | 0.138 | 0.118 | 0.156 | 0.185 | 0.053 | 0.016 | 0.926 |
+
+**표 D-5. detector `conf` sweep** (저장된 후보는 provider 자신의 `conf` threshold(0.25 등) 이상뿐이라 곡선이 그 threshold 에서 시작한다. `conf` 0 부터의 곡선은 없다)
+
+| arm | any-candidate recall | conf 0.25: P / R (n pred) | conf 0.5 | conf 0.7 |
+|---|---|---|---|---|
+| Grounded-SAM (phrase) | 0.671 | 0.607 / 0.600 (430) | 0.631 / 0.503 (347) | 0.675 / 0.315 (203) |
+| Grounded-SAM (instruction) | 0.676 | 0.630 / 0.628 (433) | 0.708 / 0.384 (236) | 1.000 / 0.016 (7) |
+| Grounded-SAM-2 per_frame (phrase) | 0.579 | 0.622 / 0.568 (397) | 0.631 / 0.503 (347) | 0.675 / 0.315 (203) |
+| Grounded-SAM-2 per_frame (instruction) | 0.582 | 0.669 / 0.582 (378) | 0.708 / 0.384 (236) | 1.000 / 0.016 (7) |
+| YOLOE-11L (phrase) | 0.356 | 0.515 / 0.310 (262) | 0.618 / 0.145 (102) | 0.595 / 0.057 (42) |
+| YOLOE-11L (instruction) | 0.092 | 0.384 / 0.087 (99) | 0.321 / 0.021 (28) | 0.000 / 0.000 (1) |
+
+Grounded-SAM 의 phrase 와 instruction 이 Acc@0.5(mask box)를 맞힌 sample 의 짝 집계(435 sample): 둘 다 246, phrase 만 15, instruction 만 27, 둘 다 틀림 147.
+
+![Grounded-SAM prompt 별 box 선택](figures/baselines/grounded_sam/v1-gsam-prompt-selection.png)
+
+![Localization heads: 선택된 head 의 attention map 과 선택 기준](figures/baselines/localization_heads/v1-lh-heads-selection.png)
+
+![TokenCut: affinity graph 의 2nd eigenvector · bipartition · seed](figures/baselines/tokencut/v1-tokencut-ncut.png)
+
+관찰:
+- harness `frames.jsonl` 의 `2d_iou` 와 `native_metrics` 의 IoU 는 5,220 sample 에서 최대 절대 차이 0.0 이다(`check_vs_harness_2d_iou`).
+- Grounded-SAM · Grounded-SAM-2 per_frame 은 camera 에 따라 크게 갈린다: Acc@0.5 가 left_wrist 에서 0.86–0.90, head 에서 0.27–0.39. CorLoc any-object 는 head 에서도 0.80–0.98 이다(다른 물체의 box 는 맞힌다).
+- TokenCut 의 pointing(seed)은 head 에서 0.000 / 0.005, left_wrist 에서 0.729 다(두 TokenCut arm 이 같은 seed 를 쓴다).
+- localization heads 의 pointing 은 head 0.606 · left_wrist 0.477 (tol 15 px, 두 mask 모드가 같은 peak 를 쓴다)이다. **in-sample** 이다.
+- TokenCut 재계산 parity: DINO ViT-S/16 을 CPU 로 다시 돌려 저장 mask 와 비교한 40 sample 중 39 가 같고 **1 sample 이 달랐다**(`libero_spatial_t3_e0` obs 65 head, `same_as_saved` false). verify.json `issues` 는 이 불일치를 언급하지 않았다. 원인은 측정하지 않았다(verifier 에게 확인을 요청할 항목).
+
+### 결과 E — methods offline 지표 (open loop, SL3 dev 221 call · 2,210 행)
+
+**방법.** 기록된 π0.5 chunk 를 method 마다 call 단위로 돌려 수정 chunk 를 얻는다(상태가 있는 method 는 episode 마다 reset). 수정 chunk 는 **실행하지 않는다**(open loop). filter 는 recorded chunk 를 고치되, chunk 안의 뒤 action 은 method 자기 EE 예측(측정된 gain 0.0115 m / unit) 위에서 filter 한다(공식 per-step 호출이 아니다). guidance 는 π0.5 network 가 아니라 D 의 대체 velocity(기록 chunk 로 가는 직선 flow)를 쓴다. `tracking` 은 이후 denoising step 이 수정을 되돌리는 쪽, `constant` 는 수정이 끝까지 남는 쪽이다. 장애물 variant 는 `scene`(depth lift 에서 privileged target · robot · support · destination mask 를 뺀 점)과 `injected`(기록 경로 옆 1 cm, 반경 3 cm 의 privileged 구를 row 6 에 놓은 D 의 합성 repeller 시험)다. filter 는 5 arm(`aegis` = GT segmentation 장애물, `aegis:detector_names` = Grounding DINO tiny + privileged LIBERO 장애물 이름(VLM 대체), `aegis:detector_all` = Grounding DINO 일반 prompt − target box, `knows`, `multilink_cbf`).
+
+**scene-GT clearance (모든 method 공통 기준).** chunk → OSC response 모델 EE 경로(자세 고정, action ∈ [−1, 1]) → 기록 q 에서 DLS IK → cuRobo `franka.yml` sphere 61 개 → scene GT 표면까지의 정확한 거리(안쪽은 음수) − 반지름, **0.05 m 에서 자른다(cap)**. "obstacle" 군은 target · destination · 받침대(`main_table` 등)를 뺀 instance 다. SL3 dev 는 장애물을 일부러 놓은 장면이 아니므로 obstacle 군은 같은 장면의 다른 물체다. `h` 는 method 마다 정의가 달라(KNOWS = EE ellipsoid–물체 MVEE, AEGIS = 장애물별 최소, multi-link = (body, 장애물) 최소, CFM = 이산 CBF 행) **method 사이에서 비교하지 않는다**.
+
+![methods offline overview](figures/baselines/methods_overview/v1-methods-offline-overview.png)
+
+**표 E-1. filter 의 자기 지표**
+
+| arm | 개입률 (행) | 개입률 (call) | ‖Δa_xyz‖ 평균 | ‖Δa_xyz‖ 최대 | h_min (자기 barrier) | h < 0 step | QP 실패 step | median ms / call (CPU 1 thread) |
+|---|---|---|---|---|---|---|---|---|
+| aegis | 0.179 | 0.262 | 0.066 | 1.604 | -0.1223 | 237 | 0 | 4.7 |
+| aegis:detector_all | 0.118 | 0.163 | 0.055 | 1.701 | -0.1401 | 193 | 0 | 1.5 |
+| aegis:detector_names | 0.144 | 0.199 | 0.070 | 1.709 | -0.1411 | 232 | 0 | 3.1 |
+| knows | 0.252 | 0.398 | 0.109 | 1.470 | -0.1745 | 1246 | 0 | 13.3 |
+| multilink_cbf | 0.160 | 0.258 | 0.053 | 1.558 | -0.1207 | 178 | 0 | 116.4 |
+
+**표 E-2. filter 의 scene-GT clearance** (mm, nominal → 수정 chunk. EE = hand + finger sphere, arm = link 1–7 sphere. IK 위치 오차 최대 `ik_pos_err_max_m` 는 nominal · 수정 모두 0.0658 m, 5 filter 같은 값)
+
+| arm | EE sphere – obstacle 최소 clearance (mm), nominal → 수정 | EE 음수 행 (2,210 행 중) | arm sphere – obstacle 최소 clearance (mm) | arm 음수 행 |
+|---|---|---|---|---|
+| aegis | -24.0 → -15.7 | 82 → 24 | 7.9 → 46.1 | 0 → 0 |
+| aegis:detector_all | -24.0 → -14.4 | 82 → 45 | 7.9 → 48.1 | 0 → 0 |
+| aegis:detector_names | -24.0 → -15.0 | 82 → 33 | 7.9 → 49.8 | 0 → 0 |
+| knows | -24.0 → -23.2 | 82 → 59 | 7.9 → 5.2 | 0 → 0 |
+| multilink_cbf | -24.0 → -17.6 | 82 → 32 | 7.9 → 46.7 | 0 → 0 |
+
+**표 E-3. guidance (`scene` variant)** — 자기 cost / 제약은 call 평균의 전 → 후
+
+| method | surrogate | 개입률 (행) | ‖Δa_xyz‖ 평균 | ‖Δa_xyz‖ 최대 | 자기 cost / 제약, 전 → 후 (call 평균) | GT EE 음수 행 | GT arm 음수 행 | 수정 chunk 의 IK 위치 오차 최대 (m, nominal 은 0.066) | median ms (jit 포함) |
+|---|---|---|---|---|---|---|---|---|---|
+| omniguide | tracking | 0.240 | 0.006 | 0.13 | omniguide_cost: -3.8598 → -3.8497 | 82 → 82 | 0 → 0 (최소 7.9 → 7.9 mm) | 0.066 | 65.0 |
+| omniguide | constant | 0.240 | 0.050 | 0.90 | omniguide_cost: -3.8598 → -3.7877 | 82 → 82 | 0 → 0 (최소 7.9 → 7.9 mm) | 0.066 | 65.0 |
+| constrained_flow_matching | tracking | 0.595 | 1.083 | 14.86 | cfm_min_g: -0.0958 → -0.0215 ; cfm_violated_rows: 9.6697 → 3.2127 | 82 → 43 | 0 → 0 (최소 7.9 → 24.1 mm) | 0.286 | 4151.0 |
+| constrained_flow_matching | constant | 0.814 | 1.434 | 18.82 | cfm_min_g: -0.0958 → -0.0030 ; cfm_violated_rows: 9.6697 → 1.2036 | 82 → 58 | 0 → 3 (최소 7.9 → -7.1 mm) | 1.281 | 4151.0 |
+| lan_o3dp_guidance_adapted | tracking | 0.975 | 0.427 | 2.74 | lan_rows_inside_circle: 8.5204 → 7.6787 | 82 → 80 | 0 → 0 (최소 7.9 → 8.8 mm) | 0.033 | 150.9 |
+| lan_o3dp_guidance_adapted | constant | 0.977 | 6.142 | 46.45 | lan_rows_inside_circle: 8.5204 → 1.4887 | 82 → 71 | 0 → 0 (최소 7.9 → 13.3 mm) | 0.088 | 150.9 |
+| nudge | tracking | 0.879 | 0.804 | 2.64 | nudge_c_sdf: 0.0176 → 0.0090 | 82 → 27 | 0 → 4 (최소 7.9 → -37.7 mm) | 1.579 | 673.7 |
+| nudge | constant | 0.881 | 0.442 | 2.56 | nudge_c_sdf: 0.0176 → 0.0043 | 82 → 34 | 0 → 0 (최소 7.9 → 25.2 mm) | 0.561 | 673.7 |
+
+**표 E-4. guidance (`injected` variant)**
+
+| method | surrogate | 개입률 (행) | ‖Δa_xyz‖ 평균 | ‖Δa_xyz‖ 최대 | 자기 cost / 제약, 전 → 후 (call 평균) | GT EE 음수 행 | GT arm 음수 행 | 수정 chunk 의 IK 위치 오차 최대 (m, nominal 은 0.066) | median ms (jit 포함) |
+|---|---|---|---|---|---|---|---|---|---|
+| omniguide | tracking | 0.240 | 0.019 | 0.36 | omniguide_cost: -10.0017 → -9.9399 | 82 → 82 | 0 → 0 (최소 7.9 → 7.9 mm) | 0.066 | 61.8 |
+| omniguide | constant | 0.240 | 0.137 | 1.60 | omniguide_cost: -10.0017 → -8.8884 | 82 → 82 | 0 → 0 (최소 7.9 → 7.9 mm) | 0.066 | 61.8 |
+| constrained_flow_matching | tracking | 0.845 | 1.100 | 11.54 | cfm_min_g: -0.0963 → 0.0003 ; cfm_violated_rows: 10.0000 → 0.0181 | 82 → 60 | 0 → 1 (최소 7.9 → -0.6 mm) | 0.647 | 3798.8 |
+| constrained_flow_matching | constant | 0.891 | 1.008 | 10.72 | cfm_min_g: -0.0963 → 0.0002 ; cfm_violated_rows: 10.0000 → 1.0226 | 82 → 52 | 0 → 0 (최소 7.9 → 29.0 mm) | 1.367 | 3798.8 |
+| lan_o3dp_guidance_adapted | tracking | 1.000 | 0.575 | 1.99 | lan_rows_inside_circle: 9.0995 → 8.4253 | 82 → 78 | 0 → 0 (최소 7.9 → 7.4 mm) | 0.026 | 142.1 |
+| lan_o3dp_guidance_adapted | constant | 1.000 | 5.747 | 19.86 | lan_rows_inside_circle: 9.0995 → 0.0000 | 82 → 84 | 0 → 2 (최소 7.9 → -6.7 mm) | 0.094 | 142.1 |
+| nudge | tracking | 1.000 | 1.369 | 2.50 | nudge_c_sdf: 0.0316 → 0.0055 | 82 → 19 | 0 → 2 (최소 7.9 → -48.3 mm) | 1.686 | 502.9 |
+| nudge | constant | 1.000 | 0.667 | 2.22 | nudge_c_sdf: 0.0316 → 0.0044 | 82 → 32 | 0 → 0 (최소 7.9 → 3.0 mm) | 1.212 | 502.9 |
+
+관찰:
+- 모든 filter 에서 QP 실패 step 0, gripper action 불변, 비상 정지 0, 모든 guidance 출력이 유한(`finite_all`)이다. trace 판 sampler 는 D 의 `surrogate_sample` 과 16 / 16(arm × variant × surrogate)에서 bit 동일하다(`max_abs` 0.0).
+- nominal(기록 chunk)의 EE sphere 가 obstacle 군 안에 들어간 행이 2,210 행 중 82 행(13 call)이다. 이 값은 filter · guidance 전 기준선이다(SL3 dev 는 장애물 장면이 아니다).
+- AEGIS 세 변형 사이에서 개입률(행)이 0.179 → 0.144 → 0.118 로 다르다(GT segmentation, 이름 + detector, 일반 prompt + detector 순). EE 음수 행은 82 → 24 / 33 / 45 이다.
+- KNOWS 는 EE 음수 행이 82 → 59 이고 arm sphere 의 최소 clearance 가 7.9 → 5.2 mm 로 **줄었다**(AEGIS 변형 · multi-link 는 46–50 mm 로 늘었다). arm 음수 행은 모든 filter 에서 0 이다. `h < 0` step 은 KNOWS 1,246 으로 가장 많지만 h 정의가 달라 비교하지 않는다.
+- multi-link 가 개입했고 EE-only AEGIS(같은 GT segmentation 장애물)는 개입하지 않은 call 이 **2 개**이고 두 call 모두 binding body 가 gripper 다(비-gripper 0, `libero_spatial_t1_e0` obs 65, `libero_spatial_t6_e0` obs 35). 즉 multi-link 를 따로 두는 이유인 forearm 사례는 SL3 dev 에 없다.
+- guidance 가 **arm sphere clearance 를 음수로 만든 경우**가 있다: NUDGE tracking(scene 4 행, 최소 −37.7 mm / injected 2 행, 최소 −48.3 mm), CFM constant(scene 3 행, −7.1 mm), CFM tracking(injected 1 행, −0.6 mm), Lan-o3dp constant(injected 2 행, −6.7 mm). 같은 기록 chunk 의 nominal 은 arm 음수 행 0 이다. 인과(왜 그런지)는 측정하지 않았다. **단 신뢰도 주의:** 수정 chunk 를 decode 한 경로에서 IK 위치 오차 최대(`ik_pos_err_max_m`)가 CFM 0.286–1.367 m, NUDGE 0.561–1.686 m 로 nominal(0.0658 m)보다 훨씬 크다(표 E-3 · E-4 마지막 열 앞 열). IK 가 경로를 따르지 못한 경로 위의 clearance 일 수 있다. verify.json `issues` 는 이것을 언급하지 않았다. OmniGuide 는 nominal 과 같고(0.0658 m) Lan-o3dp 는 0.026–0.095 m 다.
+- OmniGuide 는 2,210 행 중 개입 행이 0.240 이다(53 call 에서만 개입, 168 call 은 `frozen`). EE 음수 행 82 → 82 로 변하지 않았다.
+- Lan-o3dp 의 `constant` surrogate 에서 ‖Δa_xyz‖ 평균이 5.7–6.1, 최대 19.9–46.4 로 action 범위(−1~1, decode 에서 clip)를 크게 넘는다.
+- `ms` 열은 call 마다 closure 를 새로 만드는 jit compile 을 포함한다(실제 sampling 시간이 아니다). `tracking` · `constant` 두 surrogate 는 한 jit 호출에서 같이 계산되어 같은 값이다. detector 두 arm 의 첫 call 시간에는 Grounding DINO tiny CPU 탐지가 포함된다.
+- 이 CPU 측정(03:58 KST 이후)과 V2 의 GPU 측정(SL3 track 03:50–04:00, SL4b 04:00–05:01 KST)이 시간상 겹쳤다. 같은 pod 의 CPU 부하가 위 `ms` 에 영향을 주었는지는 확인하지 않았다.
+
+figure(module 별 3 종은 아래 목록): [KNOWS h(t)](figures/baselines/knows/v1-knows-h-path.png) · [multi-link link 별 h(t)](figures/baselines/multilink_cbf/v1-multilink-link-h.png) · [AEGIS 변형 간 차이](figures/baselines/aegis/v1-aegis-variant-differences.png) · [OmniGuide field slice](figures/baselines/omniguide/v1-omniguide-field-slices-steps.png)
+
+![multi-link: link 별 h(t), 개입 call](figures/baselines/multilink_cbf/v1-multilink-link-h.png)
+
+### 결과 F — benchmark 대표 장면과 지표 정의
+
+LIBERO 4 suite, SafeLIBERO 4 suite × Level I / II, LIBERO-Safety(L0 의 4 task 유형)의 대표 장면을 기존 run 기록 · env render 로 만들고 geom-id segmentation 으로 target(초록)과 obstacle / hazard(빨강)를 표시했다. LIBERO 에는 obstacle 이 없다. SafeLIBERO 의 obstacle 은 active obstacle(README 규칙: 작업공간 안), LIBERO-Safety 의 obstacle 은 BDDL constraint 의 target 이외 인자다(sidecar `note`). suite 별 task 수 · init state 수 · constraint predicate 는 [`v1-benchmarks-protocol.png`](figures/baselines/benchmarks/v1-benchmarks-protocol.png)(sidecar 값이며 verify.json `numbers` 에는 없어 이 파일에 옮기지 않았다)에, 지표 정의 표는 [`v1-benchmarks-metric-definitions.png`](figures/baselines/benchmarks/v1-benchmarks-metric-definitions.png) 에 있다. 지표는 모두 `closed-loop`(또는 `not-applicable`)이라 이번 STEP 에서 측정값이 없다(결과 B).
+
+![benchmark 대표 장면](figures/baselines/benchmarks/v1-benchmarks-scenes.png)
+
+### 검증 장치가 확인한 것
+
+| 장치 | 결과 |
+|---|---|
+| `check_vs_harness_2d_iou` (native IoU 대 harness `2d_iou`) | 5,220 sample, 최대 절대 차이 0.0 |
+| `tokencut_dino_parity` (DINO CPU 재계산 mask 대 저장 mask) | 40 sample 중 39 일치, 1 불일치 (결과 D) |
+| trace 판 guidance sampler 대 `surrogate_sample` | 16 / 16 bit 동일 |
+| 보충 ATS 행의 점 · class 가 F 의 ATS 행과 같은가 | 221 / 221 call 일치 |
+| 회귀 기준선 (legacy 16D) | 일치 |
+| F 의 unit test | `.venv-baselines` 32 passed 1 skipped, `.venv-openpi-live` 11 passed |
+
+### module 별 figure (규칙 A: 실제 장면 · 핵심 기능 · 지표)
+
+경로는 모두 `figures/baselines/<module>/` 이고 같은 이름의 `.json` sidecar 가 있다. `v1-*` 는 BL-3, `v2-*` 는 BL-4.
+
+| module | 실제 장면 · segmentation | 핵심 기능 | 지표 (graph · 표) |
+|---|---|---|---|
+| gt_oracle | [scene](figures/baselines/gt_oracle/v1-gt-oracle-scene.png) | [lift check](figures/baselines/gt_oracle/v1-gt-oracle-lift-check.png) | [metrics](figures/baselines/gt_oracle/v1-gt-oracle-metrics.png) |
+| grounded_sam | [scene](figures/baselines/grounded_sam/v1-gsam-scene.png) | [prompt 별 box 선택](figures/baselines/grounded_sam/v1-gsam-prompt-selection.png) | [native metrics](figures/baselines/grounded_sam/v1-gsam-native-metrics.png) |
+| grounded_sam2 (per_frame) | [scene](figures/baselines/grounded_sam2/v1-gsam2-perframe-scene.png) | [strip + J/F](figures/baselines/grounded_sam2/v1-gsam2-perframe-strip-jf.png) | [native metrics](figures/baselines/grounded_sam2/v1-gsam2-perframe-native-metrics.png) · [DAVIS](figures/baselines/grounded_sam2/v1-gsam2-perframe-davis.png) |
+| grounded_sam2 (track, BL-4) | [strip](figures/baselines/grounded_sam2_track/v2-sl3-track-strip.png) · [max-diff strip](figures/baselines/grounded_sam2_track/v2-sl3-track-strip-maxdiff.png) | [GPU memory](figures/baselines/grounded_sam2_track/v2-sl3-track-gpu-memory.png) | [IoU series](figures/baselines/grounded_sam2_track/v2-sl3-track-iou-series.png) · [표](figures/baselines/grounded_sam2_track/v2-sl3-track-table.png) |
+| yoloe | [scene](figures/baselines/yoloe/v1-yoloe-scene.png) | [conf P/R](figures/baselines/yoloe/v1-yoloe-conf-pr.png) | [native metrics](figures/baselines/yoloe/v1-yoloe-native-metrics.png) |
+| localization_heads | [scene](figures/baselines/localization_heads/v1-lh-scene.png) | [head 선택](figures/baselines/localization_heads/v1-lh-heads-selection.png) | [native metrics](figures/baselines/localization_heads/v1-lh-native-metrics.png) |
+| tokencut | [scene](figures/baselines/tokencut/v1-tokencut-scene.png) | [ncut](figures/baselines/tokencut/v1-tokencut-ncut.png) | [native metrics](figures/baselines/tokencut/v1-tokencut-native-metrics.png) |
+| ats_v11ab | [seed · cluster](figures/baselines/ats_v11ab/v1-ats-scene-seed-cluster.png) | [같은 점 위 label](figures/baselines/ats_v11ab/v1-ats-cloud-labeling-same-points.png) | [표](figures/baselines/ats_v11ab/v1-ats-cloud-labeling-table.png) · [paired](figures/baselines/ats_v11ab/v1-ats-cloud-labeling-paired-bootstrap.png) · [보충](figures/baselines/ats_v11ab/v1-ats-cloud-labeling-target-points-supplement.png) |
+| knows | [ellipsoid](figures/baselines/knows/v1-knows-scene-ellipsoids.png) | [h(t) · path](figures/baselines/knows/v1-knows-h-path.png) | [offline metrics](figures/baselines/knows/v1-knows-offline-metrics.png) |
+| aegis (3 변형) | [detection · ellipsoid](figures/baselines/aegis/v1-aegis-scene-detection-ellipsoid.png) | [h · action · 변형](figures/baselines/aegis/v1-aegis-h-actions-variants.png) | [offline metrics](figures/baselines/aegis/v1-aegis-offline-metrics.png) · [변형 간 차이](figures/baselines/aegis/v1-aegis-variant-differences.png) |
+| multilink_cbf | [link ellipsoid](figures/baselines/multilink_cbf/v1-multilink-scene-link-ellipsoids.png) | [link 별 h(t)](figures/baselines/multilink_cbf/v1-multilink-link-h.png) | [offline metrics](figures/baselines/multilink_cbf/v1-multilink-offline-metrics.png) |
+| omniguide | [경로](figures/baselines/omniguide/v1-omniguide-scene-paths.png) | [field slice · step](figures/baselines/omniguide/v1-omniguide-field-slices-steps.png) | [offline metrics](figures/baselines/omniguide/v1-omniguide-offline-metrics.png) |
+| constrained_flow_matching | [경로](figures/baselines/constrained_flow_matching/v1-constrained-scene-paths.png) | [field slice · step](figures/baselines/constrained_flow_matching/v1-constrained-field-slices-steps.png) | [offline metrics](figures/baselines/constrained_flow_matching/v1-constrained-offline-metrics.png) |
+| lan_o3dp_guidance_adapted | [경로](figures/baselines/lan_o3dp_guidance_adapted/v1-lan-scene-paths.png) | [field slice · step](figures/baselines/lan_o3dp_guidance_adapted/v1-lan-field-slices-steps.png) | [offline metrics](figures/baselines/lan_o3dp_guidance_adapted/v1-lan-offline-metrics.png) |
+| nudge | [경로](figures/baselines/nudge/v1-nudge-scene-paths.png) | [field slice · step](figures/baselines/nudge/v1-nudge-field-slices-steps.png) | [offline metrics](figures/baselines/nudge/v1-nudge-offline-metrics.png) |
+| benchmarks | [대표 장면](figures/baselines/benchmarks/v1-benchmarks-scenes.png) | — | [지표 정의](figures/baselines/benchmarks/v1-benchmarks-metric-definitions.png) · [protocol](figures/baselines/benchmarks/v1-benchmarks-protocol.png) |
+| 총괄 | — | — | [지표 registry](figures/baselines/metrics_overview/v1-metrics-registry-overview.png) · [methods offline](figures/baselines/methods_overview/v1-methods-offline-overview.png) |
+| sl4b (BL-4) | [overlay](figures/baselines/sl4b/v2-sl4b-scene-overlay.png) | — | [IoU · leak](figures/baselines/sl4b/v2-sl4b-iou-leak.png) · [표](figures/baselines/sl4b/v2-sl4b-table.png) |
+
+- scene figure 에 쓴 frame 은 sidecar 에 있다(예: KNOWS = `libero_spatial_t4_e0` call 12 obs 70, multi-link = `libero_spatial_t4_e0` call 8 obs 50, OmniGuide = `libero_spatial_t1_e0` call 6 obs 40 injected).
+- `omniguide` 의 field slice figure 는 첫 패널(배치도)의 두 제목 글자가 겹쳐 있다(외관 결함, 값 영향 없음).
+
+### 실패 · 한계 (verify.json `limitations` · `issues`)
+
+| # | 내용 | 영향 |
+|---|---|---|
+| 1 | **ATS `cloud_target` 이 `has_target` 179 call 중 134 call 에서 비어 있다.** ATS 행이 45 call 로 계산됐다. `target_points` 는 기록되어 있다. verifier 보충 행(좌표 일치 · 5 mm)을 함께 적었다 | ATS 행 해석(결과 C). 왜 비는지는 측정하지 않았다 |
+| 2 | `better` / `worse` 는 diff 의 부호 개수(`metrics.py:183`)다. 지표 방향이 아니다 | BL-1 용어 절의 같은 항목을 고쳤다(용어 절) |
+| 3 | **guidance 는 π0.5 가 아닌 대체 velocity** 를 쓰고 **open loop** 다. 수정 chunk 를 실행하지 않는다. filter 는 chunk 뒤 행을 method 자기 EE 예측으로 filter 한다 | guidance · filter 수치는 실제 closed-loop 효과가 아니다 |
+| 4 | `ms_*` 에 jit compile 이 들어 있다(closure 가 call 마다 재생성) | latency 로 읽지 않는다 |
+| 5 | **`h` 정의가 method 마다 달라 서로 비교할 수 없다** | `h_min` · `h < 0` step 을 method 사이에서 비교하지 않는다 |
+| 6 | **`localization_heads` 의 head 선택과 NUDGE 의 κ 는 in-sample** 이다 | 해당 행은 held-out 이 아니다 |
+| 7 | scene-GT clearance 는 0.05 m 에서 잘린다. 모든 method 에 같은 decode(OSC response, 자세 고정) · DLS IK · 61 sphere 를 쓴다 | method 내부 예측과 다를 수 있다 |
+| 8 | native J / F 의 sequence 는 5 step 간격 정책 call frame 이다 | 원 benchmark(연속 frame)의 J / F 와 값이 같은 의미가 아니다 |
+| 9 | YOLOE `conf` sweep 은 provider `conf` threshold 이상 후보만 저장돼 그 threshold 에서 시작한다 | `conf` 0 부터의 곡선 없음 |
+| 10 | `tracking` · `constant` 두 surrogate 는 한 jit 호출에서 같이 계산되어 `ms_jit_and_sample` 이 같다 | |
+| 11 | detector 두 arm 의 첫 call 시간은 Grounding DINO tiny CPU 탐지를 포함한다 | |
+| 12 | OSQP 의 "Polishing not needed" stdout 이 길게 나온다(F 기록). V1 명령에서 `grep -v` 로 걸렀다 | 로그만 |
+| 13 | TokenCut DINO 재계산 parity 40 중 1 sample 불일치(결과 D). verify `issues` 에는 없다 | 원인 미확인 |
+| 14 | V1 의 CPU 측정과 V2 의 GPU 측정이 시간상 겹쳤다 | `ms` 에 대한 영향 미확인 |
+| 15 | **guidance 의 수정 chunk decode 에서 IK 위치 오차 최대가 CFM · NUDGE 에서 0.29–1.69 m**(nominal 0.0658 m). verify.json `numbers` 에 있고 `issues` 에는 없다 | guidance arm 의 scene-GT clearance(특히 arm sphere 음수 행)를 IK 가 따르지 못한 경로 위의 값으로 읽을 수 있다. 결론에 쓰기 전에 확인이 필요하다 |
+
+### 측정하지 않은 것
+
+| 항목 | 이유 |
+|---|---|
+| `grounded_sam2:track` 의 J / F 시계열 · SL4b | BL-4 (V2) |
+| closed-loop 지표(LIBERO SR, SafeLIBERO CAR / TSR / ETS, LIBERO-Safety SR / CR / time / LDLJ, methods 의 원 지표) | closed-loop 연결 전(BL-5) |
+| YOLOE `conf` 0 부터의 P / R 곡선 | GPU 재실행 필요 |
+| multi-link 의 비-gripper(forearm) binding 사례 | SL3 dev 에 없다(binding body 가 gripper 인 call 2 개뿐) |
+| SegInW AP, LVIS / COCO AP, LIBERO FWT / NBT / AUC, LIBERO-Safety Refusal Rate, Lan-o3dp 원 RLBench SR | `not-applicable` (`metrics.md`) |
+| π0.5 network 위의 guidance 효과 | 대체 velocity 만 사용 |
+| 보충 ATS 행에서 `target_points` 와 cloud 점이 일치하지 않는 call(`has_target` 179 중 `tp_exact` 151, `tp_5mm` 162)의 이유 | 측정하지 않았다 |
+| verifier 가 figure 를 사용자에게 직접 보내는 것 | verifier session 에 파일 전송 tool 이 없어 경로만 보고했다 |
+
+### 열린 항목
+
+1. `cloud_target` 이 `has_target` call 의 대부분(134 / 179)에서 비는 이유 — V11AB perception 쪽 확인. 이유에 따라 ATS 행의 정의(`cloud_target` 대 `target_points`)를 정해야 한다.
+2. TokenCut DINO 재계산 parity 1 sample 불일치의 원인(`libero_spatial_t3_e0` obs 65 head).
+3. guidance 를 π0.5 network 위에서(GPU smoke), filter 를 closed-loop 에서 측정 — BL-5.
+4. NUDGE κ · localization heads 를 held-out 위에서 재측정.
+5. guidance 수정 chunk 의 IK 위치 오차(CFM · NUDGE 최대 1.69 m)가 scene-GT clearance 해석에 미치는 영향 — verifier 에게 확인을 요청할 항목.
+
+### 판정
+
+**사용자 판정 대기.**
+
+
+---
+
+## BL-4 — BASELINE-EVAL V2: track memory, SL3 track, SL4b 40 episode (2026-10-24)
+
+> ~~(진행 중)~~ → 2026-10-24 KST 측정 완료. 아래 "계획"은 착수 시 기록이고, 결과는 그 뒤의 "결과 보고"에 이어 썼다.
+
+> 2026-10-23 KST 시작 지시. 원본: [`handoff/BASELINE-EVAL.task.md`](handoff/BASELINE-EVAL.task.md)(순서 2). ~~**verify.json 이 아직 없어 수치를 쓰지 않는다.**~~ → 수치는 아래 "결과 보고"에 적었다(출처 `BASELINE-EVAL-V2.verify.json`).
+> implementer G(CPU) → verifier V2(GPU, 공용 lock)가 `BASELINE-EVAL-V2.verify.json` 을 만든다.
+
+**무엇을 하나.** BL-1 에서 남은 GPU 측정 두 가지(track, SL4b 40 episode)와 그 선행 수정이다. 속도 개선이 lock 점유 시간을 줄인다.
+
+| 하위 항목 | 내용 |
+|---|---|
+| `grounded_sam2:track` memory 상한 | streaming state 의 memory bank 를 최근 N frame(SAM 2 기본 `num_maskmem` = 7)과 conditioning frame 만 남기도록 정리하고 처리된 이전 frame 의 feature · output 을 버린다. causal 성질을 유지하고 기존 causality test 를 통과해야 한다. CPU 에서 긴 sequence 로 memory 가 평평해지는 것을 보이고, GPU 확인은 V2 가 한다(BL-1 실패 #1 의 해소) |
+| 평가 CPU 경로 속도 개선 | `offline_grounding.py` / `lift.py` / `eval/metrics.py` 를 cProfile 로 profile 해 병목(frame 마다 반복되는 GT voxel 계산, soft voxel 집계 등)을 vectorize · cache 한다. **숫자는 bit 단위로 같아야 한다**(SL3 run 의 `frames.jsonl` 중 1 episode 를 새 code 로 다시 계산해 비교)(BL-1 실패 #4 의 해소) |
+| provider 예외 격리 | arm 단위로 격리하고 실패 행을 기록한 뒤 계속 진행(BL-1 실패 #3) |
+| V2 측정 | SL3 track + SL4b 40 episode 전체 arm(track 포함). 시작 전 `nvidia-smi --query-compute-apps` 가 비어 있음을 확인하고 `flock -w <초> /tmp/ag3s-vla-gpu-validation.lock CMD` 로 돌린다. 시작 전과 후에 같은 pod 의 다른 session 에 알린다. sm_90 재빌드의 `cuobjdump` 확인(BL-1 열린 항목 3)도 포함한다 |
+
+수정 금지: F 의 새 파일, `methods/**`, `AG3S/**`, `benchmark/**`.
+
+~~**상태: 진행 중. verify 가 생기면 이어 쓴다. 판정 없음.**~~ → **측정 완료, 사용자 판정 대기.**
+
+### 결과 보고 (2026-10-24 KST)
+
+> 2026-10-24 KST. verifier V2 의 시각은 UTC 2026-10-23 18:47–20:10(KST +9 h = 03:47–05:10)이다. verify.json 의 `date`(2026-10-23)는 UTC 기준이고 run dir 이름의 시각(`20261024T035117` · `…T040140`)은 KST 다(`date_note`).
+> 원본: [`handoff/BASELINE-EVAL-G.impl.md`](handoff/BASELINE-EVAL-G.impl.md) · [`handoff/BASELINE-EVAL-V2.verify.json`](handoff/BASELINE-EVAL-V2.verify.json). raw 출력은 `outputs/verify/BASELINE-EVAL-V2/`.
+> figure: [`figures/baselines/grounded_sam2_track/`](figures/baselines/grounded_sam2_track/)(`v2-sl3-track-*` 5 개), [`figures/baselines/sl4b/`](figures/baselines/sl4b/)(`v2-sl4b-*` 3 개), 각각 `.json` sidecar.
+> **판정은 사용자 판정 대기.**
+
+### 이 STEP 이 답하는 질문 (BL-4)
+
+1. `grounded_sam2:track` 의 GPU memory 가 episode 길이에 따라 계속 커지던 것(BL-1 실패 #1, OOM)이 해소되었는가? 이제 SL3 의 가장 긴 episode 까지 끝나는가?
+2. SL3 에서 track 은 per_frame 대비 어떤가? (BL-1 에서 미측정)
+3. SL4b dev 40 episode 에서 grounding baseline 전체 arm 은 어떤가? (BL-1 에서 deferred)
+4. BL-1 에서 확인하지 못한 SAM 2 `_C.so` 의 sm_90 이 실제로 들어갔는가?
+
+### 구현 경위 — implementer G (CPU 만)
+
+G impl.md 의 구성 사실만 옮긴다. **G 의 속도 · 동일성 수치(초 · 배율 · 행 수)는 옮기지 않았다**(수치 규칙: impl.md 의 수치는 이 파일에 옮기지 않는다).
+
+| 항목 | 원인 · 고친 것 · 검증 |
+|---|---|
+| `grounded_sam2:track` memory 상한 | **원인:** pinned code 의 `add_new_frame` 이 모든 frame 을 `torch.cat` 으로 `state["images"]` 에 쌓고 모든 frame 의 backbone feature 도 `cached_features` 에 남긴다(`sam2_video_predictor.py:779-802`). **고친 것(provider 쪽, pinned clone 은 수정하지 않음):** 새 frame 을 1-frame batch 로 넘기고(`state["images"]=None` 으로 두면 `torch.cat` 이 일어나지 않는다), infer 뒤에 `cached_features` 를 비우고 창 밖의 non-cond output 을 `output_dict` · `output_dict_per_obj` 에서 지운다. 남기는 것은 prompt(cond) frame, 최근 6 frame 의 mask memory, 최근 15 frame 의 object pointer 다. `CausalTrack(bounded_memory=True)` 가 기본이다. **검증(CPU, hiera-tiny):** bounded 와 unbounded 의 mask 가 bit 단위로 같고(pointer 창을 넘긴 뒤의 frame 포함) state 크기가 창 이후 평평하다. fake predictor 로 causality(t 이후 frame 을 바꿔도 t 까지의 결과가 같다)도 확인 |
+| 평가 CPU 경로 속도 | cProfile 결과 병목은 거의 전부 `lift_check` 였다(arm 마다 target mesh 까지의 거리를 처음부터 다시 계산). (a) frame 마다 모든 유효 depth pixel 의 거리를 한 번만 계산하고 arm 은 자기 mask 로 index 한다. (b) 거리 계산을 reference(`libero_scene_gt.py:212`)와 **결과가 bit 단위로 같은** exact pruning 으로 바꿨다. **검증:** SL3 run 의 `frames.jsonl` 을 새 code 로 다시 계산해 저장 행과 byte 단위로 같았다(GPU provider 는 저장 mask 를 replay, 예외는 `gt_oracle` 의 wall-clock latency 칸). pruning 거리는 synthetic 과 기록 pixel 에서 reference 와 bit 동일. 주의: stored run 은 numpy 2.2.6(`.venv-baselines`)에서 나왔고 numpy 2.4.6(`.venv-ag3s`)에서는 원 code 도 마지막 bit 가 다르다(float sum 구현 차이). 그래서 byte test 는 2.2.6 에서만 돈다 |
+| provider 예외 격리 | provider 하나가 build · reset · predict 에서 예외를 내거나 mask 계약을 어기면 그 arm 의 그 episode 남은 평가 frame 만 `missing_reason="provider_error"` 행으로 기록하고 다음 arm 으로 계속 간다. `--fail-fast` 는 예전 동작(첫 예외에서 중단)이다. `summary.json` 에 `provider_errors`, `provenance.json` 에 `provider_build_errors` |
+
+**track 의 pointer 창을 15 frame 으로 한 이유.** 창은 모델 속성에서 계산한다(`read_window(vp)`, 하드코딩하지 않음). SAM 2 가 다음 frame 에서 실제로 읽는 범위는 두 가지다. mask memory 는 `num_maskmem` 7 에서 6 frame(`memory_temporal_stride_for_eval` 1), object pointer 는 `max_obj_ptrs_in_encoder` 16 에서 15 frame(`sam2_base.py:534-568` mask memory, `:611-620` object pointer; 7 → 6, 16 → 15 의 뺄셈은 현재 frame 몫으로 읽히며 impl.md 는 결과값만 적었다). 지운 frame 을 다음 frame 이 읽으면 결과가 바뀌므로 읽는 범위의 최댓값(pointer 15 frame)을 trim 창으로 잡았다. mask memory 창(6) 밖이고 pointer 창(15) 안인 frame 은 `obj_ptr` · `object_score_logits` 만 남긴다. 이 창을 줄이면 unbounded 와 mask 가 달라질 수 있어, fake predictor test 가 "창 안에서 지워진 것을 읽으면 실패"하도록 읽기 규칙을 `sam2_base.py` 대로 구현해 고정했다. V2 가 기록한 값: `read_window` = {`num_maskmem` 7, `memory_temporal_stride` 1, `mask_memory_frames` 6, `obj_ptr_frames` 15, `frames` 15}.
+
+G 의 impl.md "내가 기대하는 결과" 절은 V2 verifier 가 측정 전에 읽었다(verify `issues`: 한 번의 `cat` 에 그 절이 포함됐다). 측정 명령과 분석 정의는 task · impl 의 명령 절과 BL-1 정의를 따랐다.
+
+### 실행 — verifier V2 (GPU, 공용 lock)
+
+`flock -w 3600 /tmp/ag3s-vla-gpu-validation.lock` 아래 실행, 시작 전 `nvidia-smi` 가 비어 있음을 확인했다. 알림 대상으로 지정된 `ag3s-vla-benchmark-67` 은 `SendMessage` 에서 "No agent named … is reachable" 였다. 제안된 `ag3s-vla-benchmark-1a` 와 `ag3s-vla-development-ed` 에 각 GPU 단계의 시작 · 끝을 보냈다(각 4 회). GPU 4 run 모두 rc 0, `guard_hit` 0(guard 는 `nvidia-smi memory.used` 125,000 MiB). 회귀 기준선(legacy 16D, CPU)은 일치했다(위반으로 시작 14 / 15, `has_target` 15 / 15, frame 0 `clearance_before` −29.031 mm). 첫 시도는 `/usr/bin/time` 이 이 pod 에 없어 rc 127 로 실패했고 `time` 없이 다시 돌렸다.
+
+| run | KST (2026-10-24) | wall (s) | `nvidia-smi` 최대 `memory.used` (MiB, 5 s 표본) | 비고 |
+|---|---|---|---|---|
+| `check_track_memory` t0_e0 head (`sam2.1-hiera-large`, `--frames 150 --compare-frames 40`) | 03:49:09–03:49:30 | 21 | 2,466 | t0_e0 의 기록이 114 frame 뿐이라 bounded 는 114 frame 만 돌았다 |
+| `check_track_memory` t2_e0 head · left_wrist | 03:49:48–03:50:28 | 40 | 22,710 | 가장 긴 SL3 episode(143 frame, 마지막 평가 obs 140). verifier 가 추가 |
+| SL3 dev track (`gt_oracle` · `grounded_sam2:per_frame` · `track` × phrase / instruction + ATS) | 03:50:50–04:00:20 | 570 | 6,702 | run `20261024T035117_5752c64c7006_baseline-eval-v2-sl3dev-track`, mask 파일 1,326 개 |
+| SL4b dev 전체 arm(9 spec: `gt_oracle` · `grounded_sam` · `per_frame` · `track` · `yoloe` · `localization_heads` 2 · `tokencut` 2, × prompt) | 04:00:40–05:01:40 | 3,660 | 15,602 | run `20261024T040140_5752c64c7006_baseline-eval-v2-sl4bdev`, mask 파일 12,222 개 |
+
+- 두 GPU run 은 `OMP/MKL/OPENBLAS_NUM_THREADS=2` 로 돌았다. **BL-1 run 의 thread 설정과 같은지 확인하지 않았다.** latency 를 BL-1 과 비교할 때 이 차이가 섞인다(예: SL4b `tokencut:foreground` median 27.6 ms / frame, BL-1 SL3 391.8 ms / frame).
+- `nvidia-smi memory.used` 는 5 s 간격 표본이라 짧은 최고값을 놓칠 수 있다.
+- SL4b run 의 `source.patch` 에는 SL3 run 에 없던 `Baseline/paper_baselines/README.md` diff 가 있다(다른 session 이 run 사이에 수정). harness 파일(`offline_grounding.py` · `metrics.py` · `lift.py` · `providers/grounded_sam2.py` · `native_metrics.py`)의 sha256 은 실행 전후 같다.
+- SL3 · SL4b 두 run 의 `provider_errors` 는 둘 다 `[]`, `provider_build_errors` 는 둘 다 `{}` 다. 모든 arm 의 `n_missing` · `n_provider_error` 는 0 이다.
+- SL3 · SL4b log 에 SAM 2 `no kernel image is available` 경고는 없다(`no_kernel_image_warning_in_run_logs` 0). torch SDPA 의 Flash / Memory-efficient / CuDNN attention 미사용 UserWarning(`sam2/modeling/sam/transformer.py:270`, float32 입력)이 1 회씩 있다.
+- V1 의 CPU 측정(03:58 KST 시작)과 시간상 겹친다.
+
+### 결과 A — SAM 2 `_C.so` 의 sm_90 (BL-1 열린 항목 3 해소)
+
+| 항목 | 값 |
+|---|---|
+| `cuobjdump --list-elf external/Grounded-SAM-2/sam2/_C.so` | sm_70, sm_75, sm_80, sm_86, **sm_90** |
+| `cuobjdump --list-ptx` | **sm_90** |
+| `_C.so` mtime | 2026-10-23T07:08:47 UTC = 16:08:47 KST (BL-1 측정이 끝난 뒤) |
+| sha256 | `7827c7e1d0b6a065b13a8a8c5b34bc723f15b7d945dbd2be702924307ff00093` |
+| `from sam2 import _C` (`.venv-baselines`, CUDA 가림) | ok (rc 0) |
+| SL3 · SL4b run log 의 `no kernel image is available` 경고 | 0 |
+
+`setup_venv.sh` 가 export 하는 `NVCC_APPEND_FLAGS="-gencode=arch=compute_90,code=sm_90 -gencode=arch=compute_90,code=compute_90"`(BL-1 기록)가 sm_90 cubin 과 PTX 를 덧붙였음이 확인됐다. BL-1 의 track 은 측정하지 못했고 per_frame 은 `_C` 를 쓰지 않으므로 BL-1 수치는 이 재빌드에 의존하지 않는다.
+
+### 결과 B — track GPU memory 평탄성 (BL-1 실패 #1 해소)
+
+`check_track_memory.py` 가 GT mask 로 prompt 를 준 뒤 매 frame `CausalTrack.step` 을 부르고, `torch.cuda.memory_allocated` · `memory_reserved` 와 state footprint 를 기록한다. bounded(G 의 수정) 대 unbounded(원 동작)를 같은 입력으로 비교하고(비교 frame 40), unbounded 는 40 frame 뒤에 멈춘다. 모델은 `sam2.1-hiera-large`, H200.
+
+**표 B-1. bounded (G 의 수정)** — 세 기록의 값이 같아 곡선이 겹친다
+
+| 기록 (camera) | 입력 frame 수 | bounded: `memory_allocated` MiB, 첫 → 끝 | `allocated` 가 일정해진 시점 | bounded `reserved` 최대 MiB | bounded state bytes, 첫 → 끝 | state tensor / non-cond output / `cached_features` / `images` frame (끝) | bounded = unbounded mask 일치 frame |
+|---|---|---|---|---|---|---|---|
+| libero_spatial_t0_e0 head | 114 | 1010.3 → 1047.3 (최대 1047.3) | frame 7 | 1778 | 31,196,164 → 35,930,176 (frame 16 부터 일정) | 109 / 15 / 0 / 1 | 40 / 40 |
+| libero_spatial_t2_e0 head | 143 | 1010.3 → 1047.3 (최대 1047.3) | frame 7 | 1778 | 31,196,164 → 35,930,176 (frame 16 부터 일정) | 109 / 15 / 0 / 1 | 40 / 40 |
+| libero_spatial_t2_e0 left_wrist | 143 | 1042.8 → 1047.3 (최대 1047.3) | frame 7 | 22022 | 31,196,164 → 35,930,176 (frame 16 부터 일정) | 109 / 15 / 0 / 1 | 40 / 40 |
+
+**표 B-2. unbounded (원 동작, 40 frame 까지)** — `allocated` 기울기 = (frame 40 의 값 − frame 2 의 값) / 38
+
+| 기록 (camera) | unbounded: `memory_allocated` MiB, frame 2 → 40 | `allocated` 기울기 MiB / frame | state bytes (40 frame) | state 기울기 MiB / frame | `reserved` MiB (40 frame) |
+|---|---|---|---|---|---|
+| libero_spatial_t0_e0 head | 1154.8 → 6514.6 | 137.45 | 5,740,994,720 | 136.75 | 22022 |
+| libero_spatial_t2_e0 head | 1154.8 → 6514.6 | 137.45 | 5,740,994,720 | 136.75 | 22022 |
+| libero_spatial_t2_e0 left_wrist | 1154.8 → 6506.6 | 137.24 | 5,740,994,720 | 136.75 | 22022 |
+
+![track GPU memory: bounded 대 unbounded](figures/baselines/grounded_sam2_track/v2-sl3-track-gpu-memory.png)
+
+관찰:
+- bounded 는 `memory_allocated` 가 track frame 7 부터 1,047.3 MiB 로 일정하고, state 는 frame 16 부터 일정하다. 143 frame(SL3 의 가장 긴 episode, 마지막 평가 obs 140)까지 늘지 않았다. 끝 상태에서 non-cond output 15 개, `images` 1 frame, `cached_features` 0 이다.
+- unbounded 는 frame 마다 `allocated` 137.45 MiB(head) · 137.24 MiB(left_wrist)씩 늘고 40 frame 에서 6,514.6 MiB 다.
+- bounded 의 mask 는 비교한 40 frame 에서 모두 unbounded 와 같다(세 기록 모두 40 / 40). GPU(CUDA)에서 G 의 CPU 검증 결과가 재현됐다.
+- t2_e0 left_wrist 의 bounded `reserved` 최대 22,022 MiB 는 같은 process 에서 head unbounded 실행 뒤에 돌아 caching allocator 가 앞 실행의 reserved 를 유지한 것이다(`allocated` 는 1,047.3 MiB 로 head 와 같다)(verify `issues`).
+- **BL-1 의 추정 정정.** BL-1 은 OOM 시점의 byte 수(147,696,150,272)에서 "frame · camera 당 약 0.9–1.0 GB 가 누적"이라고 적었다. V2 의 직접 측정(unbounded, `memory_allocated` 기울기)은 137.45 MiB / frame 이다. 두 값은 크게 다르다. BL-1 의 값은 OOM 메시지에서 나눈 추정이었고, 차이의 원인은 이 측정이 분리하지 않았다(BL-1 run 1 은 provider 여러 개와 두 prompt mode 가 한 process 에서 돌았다).
+
+### 결과 C — SL3 dev: track 대 per_frame (10 episode · 221 frame)
+
+BL-1 에서 OOM 으로 미측정이던 `grounded_sam2:track` 을 같은 SL3 dev 집합에서 측정했다. 같은 run 에 `gt_oracle` · `per_frame` · ATS 를 넣어 paired 비교를 가능하게 했다. **재현성:** 이 run 의 `per_frame` 2 arm · `gt_oracle` 2 arm · ATS 는 BL-1 의 notrack run(`20261023T134909_…`)과 221 / 221 행이 latency 칸을 빼고 JSON 단위로 같다(지표 최대 절대 차이 0.0). G 의 수정(속도 개선)이 GPU run 에서도 값을 바꾸지 않았다는 증거로 읽힌다.
+
+| arm | PAPER-BASELINES-2 notrack run 과 JSON 이 같은 행 (latency 제외) / 공통 행 | 지표 최대 절대 차이 |
+|---|---|---|
+| GT oracle (phrase) | 221 / 221 | 0.0 |
+| GT oracle (instruction) | 221 / 221 | 0.0 |
+| Grounded-SAM-2 per_frame (phrase) | 221 / 221 | 0.0 |
+| Grounded-SAM-2 per_frame (instruction) | 221 / 221 | 0.0 |
+| ATS V11AB (harness) | 221 / 221 | 0.0 |
+
+**표 C-1. harness 지표** (5 mm voxel, episode 평균 → 평균, 정의는 BL-1 과 같다)
+
+| arm | 3D soft IoU | soft P | soft R | hard IoU | found any (call) | lift within 10 mm | head 2D IoU (found) | left_wrist 2D IoU (found) | neighbour leak (voxel mass) | neighbour pooled | wrong-object 3D (frame, 비율) | wrong-object 3D, 비율 > 0.5 (frame, 비율) | wrong-object 2D instance (frame / 비어 있지 않은 frame) | latency median / p95 ms / frame |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| GT oracle (phrase) | 0.968 | 0.968 | 1.000 | 0.976 | 221 / 221 | 0.994 | 1.000 (1.000) | 1.000 (0.968) | 1.3 | 0.002 | 0 (0.000) | 0 (0.000) | 0 / 221 (0.000) | 0.2 / 0.4 |
+| Grounded-SAM-2 per_frame (phrase) | 0.511 | 0.597 | 0.698 | 0.513 | 220 / 221 | 0.798 | 0.242 (0.860) | 0.842 (0.968) | 341.2 | 0.375 | 56 (0.253) | 46 (0.208) | 21 / 220 (0.095) | 246.5 / 265.8 |
+| Grounded-SAM-2 per_frame (instruction) | 0.545 | 0.643 | 0.709 | 0.547 | 219 / 221 | 0.822 | 0.286 (0.805) | 0.824 (0.937) | 292.3 | 0.339 | 51 (0.231) | 41 (0.186) | 20 / 219 (0.091) | 241.7 / 253.5 |
+| Grounded-SAM-2 track (phrase) | 0.391 | 0.557 | 0.532 | 0.394 | 221 / 221 | 0.669 | 0.455 (1.000) | 0.288 (0.493) | 294.2 | 0.393 | 71 (0.321) | 54 (0.244) | 43 / 221 (0.195) | 144.2 / 148.3 |
+| Grounded-SAM-2 track (instruction) | 0.490 | 0.671 | 0.627 | 0.493 | 221 / 221 | 0.765 | 0.636 (1.000) | 0.289 (0.493) | 219.2 | 0.305 | 48 (0.217) | 31 (0.140) | 25 / 221 (0.113) | 143.6 / 147.6 |
+| ATS V11AB (harness) | 0.064 | 0.393 | 0.068 | 0.065 | 179 / 221 | 0.535 | - (-) | - (-) | 33.2 | 0.242 | 55 (0.249) | 46 (0.208) | - | 94.7 / 121.0 |
+
+- latency: track 의 값은 **평가 frame 자신의 step 시간만**이다. 평가 frame 사이의 frame(obs 0 부터 마지막 평가 frame 까지 매 frame)도 provider 에 넣지만 행에 시간이 남지 않는다(`not_measured`). per_frame 과 같은 척도가 아니다. per_frame 의 값(246.5 ms)은 BL-1(381.0 ms)과 다르다. 같은 mask 이므로 thread 설정(위) 등 환경 차이일 수 있으나 원인은 확인하지 않았다. ATS 는 V11AB 의 `t_process_s`(perception 전체)다.
+
+**표 C-2. track − per_frame (paired, episode 단위 2,000 회 bootstrap)** — 95 % CI, (better / worse = diff 부호 개수)
+
+| a − b (SL3, 10 episode) | Δ 3D soft IoU | Δ soft P | Δ soft R | Δ neighbour leak | Δ head 2D IoU | Δ left_wrist 2D IoU |
+|---|---|---|---|---|---|---|
+| track (phrase) − per_frame (phrase) | -0.120 [-0.221, -0.025] (2 / 8) | -0.039 [-0.177, 0.093] (3 / 7) | -0.166 [-0.310, -0.050] (2 / 8) | -47.018 [-155.719, 37.768] (6 / 4) | +0.213 [0.000, 0.445] (5 / 2) | -0.553 [-0.807, -0.273] (3 / 7) |
+| track (instruction) − per_frame (instruction) | -0.055 [-0.138, 0.028] (4 / 6) | +0.028 [-0.057, 0.120] (6 / 4) | -0.082 [-0.169, 0.009] (3 / 7) | -73.150 [-175.051, 8.949] (4 / 6) | +0.350 [0.163, 0.550] (7 / 2) | -0.535 [-0.792, -0.258] (3 / 7) |
+| track (instruction) − track (phrase) | +0.098 [-0.001, 0.245] (4 / 2) | +0.114 [-0.002, 0.274] (3 / 3) | +0.095 [0.000, 0.224] (3 / 0) | -74.976 [-183.861, 2.463] (3 / 2) | +0.181 [-0.000, 0.451] (2 / 1) | +0.000 [-0.000, 0.000] (2 / 1) |
+
+**표 C-3. arm − ATS (5 mm voxel harness, 대표점 표현이 섞인 수치 — BL-1 #1 박스 참조)**
+
+| arm − ATS (SL3, 5 mm voxel harness) | Δ 3D soft IoU | Δ soft P | Δ soft R | Δ neighbour leak |
+|---|---|---|---|---|
+| GT oracle (두 prompt 같음) | +0.904 [0.876, 0.932] (10 / 0) | +0.575 [0.423, 0.744] (10 / 0) | +0.932 [0.905, 0.960] (10 / 0) | -31.872 [-61.709, -4.516] (4 / 6) |
+| Grounded-SAM-2 per_frame (phrase) | +0.447 [0.339, 0.553] (10 / 0) | +0.204 [0.059, 0.382] (8 / 2) | +0.629 [0.529, 0.708] (10 / 0) | +308.016 [181.360, 430.294] (9 / 1) |
+| Grounded-SAM-2 per_frame (instruction) | +0.481 [0.365, 0.590] (10 / 0) | +0.250 [0.092, 0.430] (8 / 2) | +0.641 [0.543, 0.722] (10 / 0) | +259.171 [128.176, 395.969] (10 / 0) |
+| Grounded-SAM-2 track (phrase) | +0.327 [0.183, 0.442] (8 / 2) | +0.164 [-0.076, 0.414] (6 / 4) | +0.464 [0.268, 0.611] (8 / 2) | +260.997 [135.520, 382.317] (8 / 2) |
+| Grounded-SAM-2 track (instruction) | +0.425 [0.294, 0.536] (9 / 1) | +0.278 [0.110, 0.467] (8 / 2) | +0.559 [0.404, 0.679] (9 / 1) | +186.021 [71.180, 308.791] (8 / 2) |
+
+**표 C-4. track 의 camera · source 상태**
+
+| 집합 | arm | head `found` | head `track_lost` | head detect 실패 (`no_box_above_threshold`) | left_wrist `found` | left_wrist `track_lost` | left_wrist `track_lost` 가 있는 episode | head `track_lost` 가 있는 episode |
+|---|---|---|---|---|---|---|---|---|
+| SL3 (221 frame · 10 episode) | Grounded-SAM-2 track (phrase) | 221 | 0 | 0 | 109 | 112 | 7 / 10 | 0 |
+| SL3 (221 frame · 10 episode) | Grounded-SAM-2 track (instruction) | 221 | 0 | 0 | 109 | 112 | 7 / 10 | 0 |
+| SL4b (873 frame · 40 episode) | Grounded-SAM-2 track (phrase) | 854 | 19 | 0 | 372 | 501 | 28 / 40 | 4 |
+| SL4b (873 frame · 40 episode) | Grounded-SAM-2 track (instruction) | 866 | 1 | 6 | 333 | 540 | 30 / 40 | 1 |
+
+**표 C-5. 고유 지표 (Acc@0.5 · CorLoc · mIoU · oIoU · J / F / J&F)** — SL3 와 SL4b, per_frame 과 track
+
+| 집합 | arm | camera | sample 수 | Acc@0.5 | CorLoc any | mIoU | oIoU | J | F | J&F | J recall | J decay | temporal IoU 예측 | temporal IoU GT |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| SL3 | Grounded-SAM-2 per_frame (phrase) | all | 435 | 0.568 | 0.910 | 0.538 | 0.776 | 0.528 | 0.527 | 0.527 | 0.554 | -0.073 | 0.712 | 0.662 |
+| SL3 | Grounded-SAM-2 per_frame (phrase) | head | 221 | 0.267 | 0.860 | 0.243 | 0.160 | 0.242 | 0.257 | 0.249 | 0.262 | 0.063 | 0.799 | 0.629 |
+| SL3 | Grounded-SAM-2 per_frame (phrase) | left_wrist | 214 | 0.879 | 0.963 | 0.843 | 0.871 | 0.813 | 0.797 | 0.805 | 0.847 | -0.209 | 0.625 | 0.695 |
+| SL3 | Grounded-SAM-2 per_frame (instruction) | all | 435 | 0.582 | 0.869 | 0.552 | 0.781 | 0.541 | 0.540 | 0.540 | 0.568 | 0.000 | 0.716 | 0.662 |
+| SL3 | Grounded-SAM-2 per_frame (instruction) | head | 221 | 0.312 | 0.805 | 0.288 | 0.206 | 0.286 | 0.300 | 0.293 | 0.306 | 0.221 | 0.813 | 0.629 |
+| SL3 | Grounded-SAM-2 per_frame (instruction) | left_wrist | 214 | 0.860 | 0.935 | 0.824 | 0.865 | 0.796 | 0.779 | 0.787 | 0.830 | -0.220 | 0.619 | 0.695 |
+| SL3 | Grounded-SAM-2 track (phrase) | all | 435 | 0.418 | 0.731 | 0.391 | 0.386 | 0.372 | 0.390 | 0.381 | 0.400 | 0.016 | 0.780 | 0.662 |
+| SL3 | Grounded-SAM-2 track (phrase) | head | 221 | 0.493 | 0.982 | 0.461 | 0.356 | 0.455 | 0.479 | 0.467 | 0.500 | 0.044 | 0.784 | 0.629 |
+| SL3 | Grounded-SAM-2 track (phrase) | left_wrist | 214 | 0.341 | 0.472 | 0.318 | 0.390 | 0.288 | 0.300 | 0.294 | 0.300 | -0.012 | 0.776 | 0.695 |
+| SL3 | Grounded-SAM-2 track (instruction) | all | 435 | 0.501 | 0.724 | 0.472 | 0.404 | 0.462 | 0.485 | 0.474 | 0.500 | 0.024 | 0.764 | 0.662 |
+| SL3 | Grounded-SAM-2 track (instruction) | head | 221 | 0.656 | 0.968 | 0.621 | 0.507 | 0.636 | 0.670 | 0.653 | 0.700 | 0.060 | 0.751 | 0.629 |
+| SL3 | Grounded-SAM-2 track (instruction) | left_wrist | 214 | 0.341 | 0.472 | 0.319 | 0.390 | 0.289 | 0.300 | 0.294 | 0.300 | -0.012 | 0.777 | 0.695 |
+| SL4b | Grounded-SAM-2 per_frame (phrase) | all | 1715 | 0.581 | 0.913 | 0.553 | 0.803 | 0.533 | 0.530 | 0.531 | 0.559 | -0.042 | 0.724 | 0.653 |
+| SL4b | Grounded-SAM-2 per_frame (phrase) | head | 873 | 0.262 | 0.847 | 0.244 | 0.169 | 0.227 | 0.237 | 0.232 | 0.245 | 0.132 | 0.808 | 0.608 |
+| SL4b | Grounded-SAM-2 per_frame (phrase) | left_wrist | 842 | 0.912 | 0.982 | 0.874 | 0.899 | 0.839 | 0.822 | 0.830 | 0.874 | -0.216 | 0.640 | 0.698 |
+| SL4b | Grounded-SAM-2 per_frame (instruction) | all | 1715 | 0.550 | 0.836 | 0.525 | 0.794 | 0.512 | 0.509 | 0.510 | 0.536 | -0.046 | 0.721 | 0.653 |
+| SL4b | Grounded-SAM-2 per_frame (instruction) | head | 873 | 0.227 | 0.727 | 0.211 | 0.149 | 0.207 | 0.216 | 0.211 | 0.222 | 0.128 | 0.817 | 0.608 |
+| SL4b | Grounded-SAM-2 per_frame (instruction) | left_wrist | 842 | 0.886 | 0.948 | 0.849 | 0.887 | 0.817 | 0.801 | 0.809 | 0.850 | -0.221 | 0.624 | 0.698 |
+| SL4b | Grounded-SAM-2 track (phrase) | all | 1715 | 0.373 | 0.689 | 0.348 | 0.284 | 0.326 | 0.341 | 0.333 | 0.350 | 0.016 | 0.801 | 0.653 |
+| SL4b | Grounded-SAM-2 track (phrase) | head | 873 | 0.457 | 0.964 | 0.421 | 0.329 | 0.364 | 0.387 | 0.375 | 0.400 | 0.037 | 0.816 | 0.608 |
+| SL4b | Grounded-SAM-2 track (phrase) | left_wrist | 842 | 0.286 | 0.403 | 0.273 | 0.277 | 0.289 | 0.294 | 0.291 | 0.300 | -0.005 | 0.787 | 0.698 |
+| SL4b | Grounded-SAM-2 track (instruction) | all | 1715 | 0.457 | 0.668 | 0.428 | 0.231 | 0.426 | 0.447 | 0.436 | 0.461 | 0.034 | 0.771 | 0.653 |
+| SL4b | Grounded-SAM-2 track (instruction) | head | 873 | 0.677 | 0.969 | 0.632 | 0.538 | 0.612 | 0.647 | 0.630 | 0.671 | 0.073 | 0.755 | 0.608 |
+| SL4b | Grounded-SAM-2 track (instruction) | left_wrist | 842 | 0.229 | 0.355 | 0.218 | 0.191 | 0.240 | 0.246 | 0.243 | 0.250 | -0.004 | 0.787 | 0.698 |
+
+![track vs per-frame: 대표 episode strip](figures/baselines/grounded_sam2_track/v2-sl3-track-strip.png)
+
+![track vs per-frame: |Δ| 가 가장 큰 episode strip](figures/baselines/grounded_sam2_track/v2-sl3-track-strip-maxdiff.png)
+
+![frame 별 3D soft IoU: per_frame 대 track](figures/baselines/grounded_sam2_track/v2-sl3-track-iou-series.png)
+
+관찰:
+- SL3 에서 track(phrase)의 3D soft IoU 는 0.391, per_frame(phrase)은 0.511 이다. 차이 −0.120(CI −0.221 ~ −0.025, 2 / 8). instruction 은 track 0.490, per_frame 0.545 로 차이 −0.055 (CI −0.138 ~ +0.028, 4 / 6)이다.
+- **camera 별로 방향이 반대다.** head 2D IoU 는 track 이 높다(phrase +0.213, instruction +0.350; CI 하한이 0 이상 / 0 위). left_wrist 2D IoU 는 track 이 크게 낮다(phrase −0.553, instruction −0.535; CI 모두 0 아래).
+- 원인 중 하나로 보이는 사실: track 의 left_wrist 는 **221 frame 중 112 frame 이 `track_lost`**(7 / 10 episode), `found` 는 109 frame(0.493)이다. provider 가 `redetect_on_loss=false` 라 잃은 뒤 다시 검출하지 않는다. head 는 221 frame 모두 `found` 다. SL3 의 phrase · instruction 두 track arm 이 같은 left_wrist 상태 count 를 보인다.
+- track(instruction)의 wrong-object 3D 는 48 / 221(0.217), per_frame(instruction)은 51 / 221(0.231)이다. 2D instance 기준 track(phrase)은 43 / 221(0.195), per_frame(phrase)은 21 / 220(0.095)이다.
+- 같은 mask 로 만든 SL3 의 J&F: track 0.381(phrase) · 0.474(instruction), per_frame 0.527 · 0.540.
+- ATS 대비 Δ 3D soft IoU(harness)는 track 도 CI 가 0 위(phrase +0.327, instruction +0.425)다. 단 ATS 행의 표현 문제(BL-1, BL-3)가 섞인 수치다.
+- 그림에서 확인되는 것(수치는 아님): 대표 strip 의 left_wrist 한 episode 에서 track mask 가 GT target 이 아니라 같은 종류의 distractor 위에 놓인 frame 이 있다(`track-strip-maxdiff`, `libero_spatial_t8_e0`).
+
+### 결과 D — SL4b dev 40 episode 전체 arm (873 frame)
+
+SL4b dev: `libero_spatial` t0–9 e1–4, 40 episode · 873 evaluated frame, camera head + left_wrist, `--size default`, H200. **SL4b 에는 V11AB perception run 이 없어 ATS 행이 없다**(`not_measured`). paired 기준은 `grounded_sam2:per_frame|instruction` 이다. `localization_heads` 의 head 는 SL3 + SL4b dev 의 attention audit 에서 골랐으므로 **이 행은 in-sample** 이다(verify `in_sample` true).
+
+**표 D-1. harness 지표 (13 arm + GT oracle)**
+
+| arm | 3D soft IoU | soft P | soft R | hard IoU | found any (call) | lift within 10 mm | head 2D IoU (found) | left_wrist 2D IoU (found) | neighbour leak (voxel mass) | neighbour pooled | wrong-object 3D (frame, 비율) | wrong-object 3D, 비율 > 0.5 (frame, 비율) | wrong-object 2D instance (frame / 비어 있지 않은 frame) | latency median / p95 ms / frame |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| GT oracle (phrase) | 0.968 | 0.968 | 1.000 | 0.976 | 873 / 873 | 0.995 | 1.000 (1.000) | 1.000 (0.964) | 1.4 | 0.002 | 0 (0.000) | 0 (0.000) | 0 / 873 (0.000) | 0.2 / 0.3 |
+| Grounded-SAM (phrase) | 0.511 | 0.575 | 0.732 | 0.513 | 873 / 873 | 0.808 | 0.268 (0.968) | 0.860 (0.999) | 373.0 | 0.359 | 314 (0.360) | 273 (0.313) | 68 / 873 (0.078) | 449.2 / 543.3 |
+| Grounded-SAM (instruction) | 0.534 | 0.588 | 0.743 | 0.537 | 873 / 873 | 0.815 | 0.320 (0.990) | 0.854 (0.999) | 360.5 | 0.374 | 312 (0.357) | 266 (0.305) | 67 / 873 (0.077) | 445.6 / 519.4 |
+| Grounded-SAM-2 per_frame (phrase) | 0.519 | 0.598 | 0.721 | 0.521 | 873 / 873 | 0.814 | 0.227 (0.848) | 0.869 (0.986) | 351.4 | 0.367 | 299 (0.342) | 244 (0.279) | 72 / 873 (0.082) | 281.2 / 317.9 |
+| Grounded-SAM-2 per_frame (instruction) | 0.528 | 0.632 | 0.698 | 0.530 | 865 / 873 | 0.823 | 0.207 (0.727) | 0.844 (0.948) | 303.4 | 0.344 | 278 (0.318) | 226 (0.259) | 72 / 865 (0.083) | 277.8 / 312.2 |
+| Grounded-SAM-2 track (phrase) | 0.333 | 0.477 | 0.462 | 0.335 | 855 / 873 | 0.596 | 0.364 (0.978) | 0.289 (0.426) | 332.2 | 0.439 | 347 (0.397) | 302 (0.346) | 228 / 855 (0.267) | 147.4 / 153.1 |
+| Grounded-SAM-2 track (instruction) | 0.450 | 0.641 | 0.568 | 0.453 | 873 / 873 | 0.725 | 0.612 (0.992) | 0.240 (0.381) | 220.2 | 0.320 | 255 (0.292) | 211 (0.242) | 142 / 873 (0.163) | 147.2 / 154.4 |
+| YOLOE-11L (phrase) | 0.355 | 0.545 | 0.457 | 0.355 | 746 / 873 | 0.664 | 0.104 (0.614) | 0.539 (0.630) | 255.4 | 0.389 | 276 (0.316) | 253 (0.290) | 175 / 746 (0.235) | 24.7 / 108.7 |
+| YOLOE-11L (instruction) | 0.117 | 0.432 | 0.150 | 0.117 | 405 / 873 | 0.470 | 0.002 (0.297) | 0.172 (0.179) | 89.8 | 0.072 | 151 (0.173) | 76 (0.087) | 103 / 405 (0.254) | 23.8 / 44.4 |
+| localization_heads:threshold (in-sample) | 0.073 | 0.074 | 0.815 | 0.073 | 873 / 873 | 0.190 | 0.039 (1.000) | 0.229 (1.000) | 679.9 | 0.083 | 491 (0.562) | 0 (0.000) | 40 / 873 (0.046) | 2.4 / 3.2 |
+| localization_heads:sam_point (in-sample) | 0.215 | 0.277 | 0.402 | 0.217 | 873 / 873 | 0.285 | 0.240 (1.000) | 0.308 (1.000) | 195.4 | 0.061 | 342 (0.392) | 148 (0.170) | 21 / 873 (0.024) | 271.7 / 340.8 |
+| TokenCut foreground | 0.078 | 0.079 | 0.746 | 0.078 | 873 / 873 | 0.325 | 0.034 (1.000) | 0.577 (1.000) | 466.5 | 0.066 | 355 (0.407) | 4 (0.005) | 60 / 873 (0.069) | 27.6 / 32.5 |
+| TokenCut attention_overlap | 0.072 | 0.075 | 0.557 | 0.073 | 873 / 873 | 0.155 | 0.047 (1.000) | 0.287 (1.000) | 863.7 | 0.074 | 708 (0.811) | 42 (0.048) | 61 / 873 (0.070) | 29.6 / 35.3 |
+
+**표 D-2. arm − `grounded_sam2:per_frame|instruction` (paired, 40 episode)** — 95 % CI, (better / worse)
+
+| arm − Grounded-SAM-2 per_frame (instruction), SL4b 40 episode | Δ 3D soft IoU | Δ soft P | Δ soft R | Δ neighbour leak | Δ head 2D IoU | Δ left_wrist 2D IoU |
+|---|---|---|---|---|---|---|
+| GT oracle (두 prompt 같음) | +0.440 [0.380, 0.499] (40 / 0) | +0.337 [0.264, 0.407] (40 / 0) | +0.302 [0.257, 0.348] (40 / 0) | -302.020 [-373.342, -228.086] (1 / 39) | +0.793 [0.717, 0.862] (40 / 0) | +0.156 [0.117, 0.202] (40 / 0) |
+| Grounded-SAM (phrase) | -0.017 [-0.035, -0.000] (19 / 21) | -0.057 [-0.086, -0.032] (14 / 26) | +0.033 [0.016, 0.052] (33 / 7) | +69.611 [45.718, 97.936] (30 / 10) | +0.061 [0.022, 0.106] (19 / 8) | +0.016 [-0.008, 0.037] (22 / 18) |
+| Grounded-SAM (instruction) | +0.006 [-0.011, 0.019] (28 / 12) | -0.043 [-0.066, -0.023] (16 / 24) | +0.045 [0.028, 0.061] (34 / 6) | +57.082 [39.594, 75.237] (33 / 7) | +0.113 [0.078, 0.152] (27 / 0) | +0.010 [-0.011, 0.028] (23 / 17) |
+| Grounded-SAM-2 per_frame (phrase) | -0.009 [-0.025, 0.006] (18 / 22) | -0.034 [-0.056, -0.014] (18 / 22) | +0.022 [0.003, 0.041] (29 / 10) | +47.962 [27.522, 72.237] (28 / 12) | +0.021 [-0.018, 0.062] (12 / 12) | +0.025 [0.012, 0.041] (35 / 5) |
+| Grounded-SAM-2 track (phrase) | -0.195 [-0.269, -0.121] (8 / 32) | -0.155 [-0.256, -0.061] (13 / 27) | -0.237 [-0.334, -0.142] (11 / 29) | +28.776 [-30.890, 89.249] (24 / 16) | +0.157 [0.038, 0.286] (16 / 11) | -0.555 [-0.697, -0.404] (10 / 30) |
+| Grounded-SAM-2 track (instruction) | -0.078 [-0.136, -0.017] (13 / 27) | +0.009 [-0.053, 0.075] (18 / 22) | -0.130 [-0.198, -0.056] (12 / 28) | -83.223 [-139.749, -34.483] (18 / 22) | +0.405 [0.296, 0.521] (27 / 4) | -0.604 [-0.734, -0.457] (8 / 32) |
+| YOLOE-11L (phrase) | -0.174 [-0.225, -0.122] (6 / 34) | -0.086 [-0.159, -0.010] (12 / 28) | -0.241 [-0.299, -0.185] (4 / 36) | -48.062 [-120.954, 20.278] (23 / 17) | -0.103 [-0.195, -0.016] (10 / 22) | -0.304 [-0.374, -0.241] (0 / 40) |
+| YOLOE-11L (instruction) | -0.411 [-0.475, -0.350] (1 / 39) | -0.206 [-0.341, -0.070] (12 / 27) | -0.548 [-0.597, -0.499] (0 / 40) | -213.667 [-290.970, -139.725] (6 / 34) | -0.204 [-0.281, -0.136] (1 / 26) | -0.672 [-0.743, -0.602] (0 / 40) |
+| localization_heads:threshold (in-sample) | -0.455 [-0.516, -0.396] (0 / 40) | -0.558 [-0.631, -0.487] (0 / 40) | +0.117 [0.052, 0.181] (29 / 11) | +376.470 [277.881, 477.330] (33 / 7) | -0.167 [-0.245, -0.098] (16 / 24) | -0.615 [-0.662, -0.565] (0 / 40) |
+| localization_heads:sam_point (in-sample) | -0.313 [-0.380, -0.246] (4 / 36) | -0.355 [-0.434, -0.272] (4 / 36) | -0.296 [-0.354, -0.234] (4 / 36) | -108.030 [-181.563, -34.115] (17 / 23) | +0.033 [-0.049, 0.110] (24 / 16) | -0.536 [-0.589, -0.476] (0 / 40) |
+| TokenCut foreground | -0.450 [-0.511, -0.391] (0 / 40) | -0.553 [-0.625, -0.481] (0 / 40) | +0.048 [-0.014, 0.108] (24 / 16) | +163.019 [61.391, 276.757] (21 / 19) | -0.173 [-0.251, -0.104] (16 / 24) | -0.266 [-0.313, -0.222] (2 / 38) |
+| TokenCut attention_overlap | -0.456 [-0.521, -0.394] (0 / 40) | -0.556 [-0.632, -0.482] (0 / 40) | -0.141 [-0.203, -0.080] (9 / 31) | +560.271 [455.482, 664.964] (37 / 3) | -0.159 [-0.232, -0.094] (15 / 25) | -0.557 [-0.611, -0.495] (1 / 39) |
+
+**표 D-3. track − per_frame (SL4b)**
+
+| a − b (SL4b, 40 episode) | Δ 3D soft IoU | Δ soft P | Δ soft R | Δ neighbour leak | Δ head 2D IoU | Δ left_wrist 2D IoU |
+|---|---|---|---|---|---|---|
+| track (phrase) − per_frame (phrase) | -0.186 [-0.258, -0.115] (7 / 33) | -0.121 [-0.223, -0.029] (14 / 26) | -0.259 [-0.353, -0.167] (7 / 33) | -19.186 [-81.267, 40.581] (20 / 20) | +0.137 [0.021, 0.262] (16 / 10) | -0.580 [-0.722, -0.432] (9 / 31) |
+| track (instruction) − per_frame (instruction) | -0.078 [-0.136, -0.017] (13 / 27) | +0.009 [-0.053, 0.075] (18 / 22) | -0.130 [-0.198, -0.056] (12 / 28) | -83.223 [-139.749, -34.483] (18 / 22) | +0.405 [0.296, 0.521] (27 / 4) | -0.604 [-0.734, -0.457] (8 / 32) |
+
+![SL4b: 3D soft IoU 와 neighbour leak](figures/baselines/sl4b/v2-sl4b-iou-leak.png)
+
+관찰:
+- 40 episode · 873 frame 에서 `gt_oracle` 의 3D soft IoU 는 0.968 이고 다른 arm 의 최댓값은 Grounded-SAM(instruction) 0.534 다. lift 가 성하다는 task 의 통과 기준 입력이다(판정은 사용자).
+- Grounded-SAM · per_frame 의 3D soft IoU 는 0.511–0.534 로 SL3 dev(0.511–0.546)와 같은 범위다. per_frame(instruction) 대비 Grounded-SAM(phrase)은 Δ −0.017(CI −0.035 ~ −0.000), (instruction)은 +0.006 이다.
+- track 은 phrase 0.333 · instruction 0.450 으로 per_frame 보다 낮다(Δ −0.186 [−0.258, −0.115] · −0.078 [−0.136, −0.017]). SL3 와 같은 방향이다. camera 별로는 head 2D IoU 가 높고(Δ +0.137 · +0.405) left_wrist 2D IoU 가 크게 낮다(Δ −0.580 · −0.604).
+- track 의 left_wrist `track_lost` 는 phrase 501 / 873 frame(28 / 40 episode), instruction 540 / 873 frame(30 / 40 episode)이다. head 는 phrase 19 frame(4 episode), instruction 1 frame(1 episode)이고, instruction 의 head 6 frame 은 track 시작 전 detect 단계의 `no_box_above_threshold` 다.
+- YOLOE-11L 은 phrase 0.355, instruction 0.117 이고 found any 가 0.855 / 0.464 다. `localization_heads` 는 threshold 0.073 / sam_point 0.215(in-sample), TokenCut 은 foreground 0.078 / attention_overlap 0.072 다.
+- neighbour leak 은 TokenCut attention_overlap(863.7)과 `localization_heads:threshold`(679.9)가 가장 크고, 같은 두 arm 의 neighbour pooled 비율(0.074 · 0.083)은 낮고 soft P 가 0.075 · 0.074 이다(예측 voxel 대부분이 target 이 아니다).
+- latency(thread 2, BL-1 과 비교 불가): median ms / frame — `grounded_sam` 449.2 · 445.6, per_frame 281.2 · 277.8, track 147.4 · 147.2(평가 frame 의 step 만), YOLOE 24.7 · 23.8, `localization_heads:threshold` 2.4, `:sam_point` 271.7, TokenCut 27.6 · 29.6.
+
+![SL4b 장면 overlay](figures/baselines/sl4b/v2-sl4b-scene-overlay.png)
+
+### BL-1 열린 항목 4 해소 — ATS 와 Grounded-SAM(instruction)의 wrong-object 일치
+
+SL3 notrack run 에서 ATS 와 Grounded-SAM(instruction)의 wrong-object 3D 가 둘 다 55 / 221(기준 `3d_neighbor_fp > 3d_TP`)이고 변형 기준(neighbour 비율 > 0.5)도 둘 다 46 이다. verifier 가 frame 집합을 대조했다(`scribe_check`).
+
+| 규칙 | ATS | Grounded-SAM(instruction) | 교집합 | ATS 만 | Grounded-SAM 만 | 같은 집합? |
+|---|---|---|---|---|---|---|
+| `3d_neighbor_fp > 3d_TP` | 55 | 55 | 22 | 33 | 33 | 아니오 |
+| neighbour 비율 > 0.5 | 46 | 46 | 14 | 32 | 32 | 아니오 |
+
+두 값이 같은 것은 **우연의 일치**였다(frame 집합이 다르다).
+
+### 실행 시간과 lock 점유 (BL-1 실패 #3 · #4 의 결과)
+
+- SL4b 40 episode 전체 arm run 이 wall 3,660 s(61 분)에 끝났다. BL-1 은 episode 당 약 700 s, 약 8 h 로 추정해 deferred 했다. BL-4 의 측정은 arm 구성(track 포함)이 다르고 thread 설정이 달라(2) G 의 속도 개선의 기여를 분리하지 않았다.
+- SL3 track run 은 wall 570 s 다(BL-1 의 notrack run 은 8,080 s, arm 구성이 다름).
+- 두 run 에서 provider 예외 격리가 작동할 일이 없었다(`provider_errors` `[]`).
+
+### 실패 · 한계 (verify.json `issues` · `not_measured`)
+
+| # | 내용 | 영향 |
+|---|---|---|
+| 1 | **track left_wrist 의 `track_lost`**: SL3 221 중 112 frame(7 / 10 episode), SL4b phrase 501 / 873(28 / 40), instruction 540 / 873(30 / 40). provider 는 `redetect_on_loss=false` | track 의 left_wrist 수치는 "잃은 뒤 다시 찾지 않는" 설정의 결과다 |
+| 2 | **V2 GPU run 은 thread 2 로 돌았다.** BL-1 run 의 thread 설정과 같은지 확인하지 않았다 | latency 를 BL-1(PAPER-BASELINES-2)과 비교할 때 thread 차이가 섞인다 |
+| 3 | **V2 verifier 가 측정 전에 G 의 impl.md "내가 기대하는 결과" 절을 읽었다** | 측정 명령 · 분석 정의는 task · impl 명령 절과 BL-1 정의를 따랐다. 기대가 분석 선택에 영향을 주었을 가능성은 배제하지 못한다 |
+| 4 | `check_track_memory --frames 150` 에서 t0_e0 는 기록이 114 frame 뿐이라 bounded 114 frame 만 돌았다 | 가장 긴 SL3 episode(t2_e0, 143 frame)를 head · left_wrist 로 한 번 더 돌렸다 |
+| 5 | t2_e0 left_wrist 의 bounded `reserved` 최대 22,022 MiB 는 앞 실행(head unbounded)의 reserved 를 caching allocator 가 유지한 것 | `allocated`(1,047.3 MiB)로 읽는다 |
+| 6 | `nvidia-smi memory.used` 는 5 s 표본이라 짧은 최고값을 놓칠 수 있다. 125,000 MiB guard 는 걸리지 않았다 | |
+| 7 | track latency 는 평가 frame 의 step 시간만이다(사이 frame 은 행에 시간이 없다) | per_frame 과 같은 척도가 아니다 |
+| 8 | SL4b 에 ATS 행이 없다. SL4b `source.patch` 에 다른 session 의 `README.md` diff 가 있다 | harness 파일의 sha256 은 실행 전후 같다 |
+| 9 | 알림 대상 `ag3s-vla-benchmark-67` 이 도달 불가였다 | 제안된 두 session 에 알렸다 |
+| 10 | `localization_heads` 는 SL3 · SL4b 모두 in-sample 이다 | 이 행은 held-out 이 아니다 |
+| 11 | V2 의 `native_metrics` 는 `--no-maps` 로 돌렸다 | 연속 map arm · TokenCut DINO 재계산은 V1 범위 |
+
+### 측정하지 않은 것
+
+| 항목 | 이유 |
+|---|---|
+| SL4b ATS(`ats_v11ab`) 행 | SL4b 에는 V11AB perception run 이 없다 |
+| track 의 평가 frame 사이 frame 시간 | 행에 기록되지 않는다 |
+| closed-loop 지표(TSR · CAR · ETS 등) | BL-5 |
+| `redetect_on_loss=true`(잃은 뒤 재검출) 변형의 track | 측정하지 않았다 |
+| BL-1 과 같은 thread 로 latency 재측정 | thread 설정 확인 필요 |
+
+### 열린 항목
+
+1. track 의 left_wrist `track_lost` 가 왜 이렇게 많은가(가려짐 · 시야 이탈로 보이나 이 측정이 분리하지 않았다), `redetect_on_loss` 의 효과.
+2. latency 를 BL-1 과 같은 thread 로 다시 재거나 thread 영향을 분리한다.
+3. SL4b held-out(test split)에서 localization heads 재측정(attention audit 필요, GPU).
+4. 논문 bib 에 Grounded-SAM · Grounded-SAM-2 항목 추가(BL-0 부터 열려 있음).
+
+### 판정
+
+**사용자 판정 대기.**
+

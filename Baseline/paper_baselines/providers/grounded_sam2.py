@@ -16,6 +16,20 @@ Modes:
   frames after t change. ``reset()`` (episode boundary) drops the state. A lost track (empty mask) is reported as
   ``found=False``; re-detection after loss is off by default (``redetect_on_loss``) to keep the recipe.
 
+Bounded track memory (``bounded_memory=True``, default; BASELINE-EVAL). The pinned streaming code keeps everything:
+``add_new_frame`` ``torch.cat``s every preprocessed frame into ``state["images"]`` and caches every frame's backbone
+features in ``state["cached_features"]`` (``sam2_video_predictor.py:779-802``), and ``output_dict`` keeps every
+frame's output. That grew by ~0.9 GB per frame and camera on the GPU (PAPER-BASELINES-2 OOM at obs ~71). The model
+only ever reads, for the next frame ``f``: the conditioning (prompt) frame outputs, the mask memories of the
+``num_maskmem - 1`` previous frames (``sam2_base.py:534-568``; frame ``f-1`` and every ``memory_temporal_stride``-th
+frame back to ``f - 1 - (num_maskmem-2) * stride``) and the object pointers of the ``max_obj_ptrs_in_encoder - 1``
+previous frames (``sam2_base.py:611-620``), plus its own features. :class:`CausalTrack` therefore, without changing the
+pinned clone, (1) passes each new frame to ``add_new_frame`` as a one-frame batch and restores the true frame index
+and ``num_frames`` (so no ``torch.cat`` over the history), (2) drops the cached features once a frame is inferred,
+(3) keeps non-conditioning outputs only inside that read window (outside the mask-memory window only ``obj_ptr`` and
+``object_score_logits``). The masks are the same as with the unbounded state (``tests/test_grounded_sam2_track.py``;
+real SAM 2.1 check: ``scripts/check_track_memory.py``) and the state stops growing after the window.
+
 The harness must call ``predict`` on consecutive frames in time order for ``track`` (``eval/offline_grounding.py``
 feeds every recorded frame up to the last evaluated one).
 """
@@ -36,11 +50,31 @@ MODES = ("per_frame", "track")
 OBJ_ID = 1
 
 
-class CausalTrack:
-    """One camera's streaming SAM 2 video state (only past + current frames ever enter it)."""
+def read_window(video_predictor) -> dict:
+    """How far back (in frames) the next frame reads the stored outputs of the pinned SAM 2 model."""
+    nm = int(getattr(video_predictor, "num_maskmem", 7))
+    stride = int(getattr(video_predictor, "memory_temporal_stride_for_eval", 1))
+    mem = 1 + max(nm - 2, 0) * stride if nm > 1 else 0
+    ptr = int(getattr(video_predictor, "max_obj_ptrs_in_encoder", 16)) - 1 \
+        if getattr(video_predictor, "use_obj_ptrs_in_encoder", True) else 0
+    return {"num_maskmem": nm, "memory_temporal_stride": stride, "mask_memory_frames": mem, "obj_ptr_frames": ptr,
+            "frames": max(mem, ptr)}
 
-    def __init__(self, video_predictor):
+
+#: output keys kept for a frame that is only inside the object-pointer window
+PTR_ONLY_KEYS = ("obj_ptr", "object_score_logits")
+
+
+class CausalTrack:
+    """One camera's streaming SAM 2 video state (only past + current frames ever enter it).
+
+    ``bounded_memory``: keep only what the next frame can read (module docstring); ``False`` = the pinned code's
+    unbounded state (kept for the equivalence check)."""
+
+    def __init__(self, video_predictor, bounded_memory: bool = True):
         self.vp = video_predictor
+        self.bounded = bool(bounded_memory)
+        self.window = read_window(video_predictor)
         self.state = None
         self.n_frames = 0
         self.prompt_frame = None
@@ -48,23 +82,95 @@ class CausalTrack:
     def start(self, image: np.ndarray, mask: np.ndarray) -> np.ndarray:
         self.state = self.vp.init_state()
         self.state["video_height"], self.state["video_width"] = image.shape[:2]
-        idx = self.vp.add_new_frame(self.state, image)
+        self.n_frames = 0
+        idx = self._add_frame(image)
         self.vp.reset_state(self.state)
         self.vp.add_new_mask(self.state, idx, OBJ_ID, mask)
         self.n_frames, self.prompt_frame = 1, idx
         return self._infer(idx)
 
     def step(self, image: np.ndarray) -> np.ndarray:
-        idx = self.vp.add_new_frame(self.state, image)
+        idx = self._add_frame(image)
         self.n_frames += 1
         return self._infer(idx)
+
+    def _add_frame(self, image: np.ndarray) -> int:
+        n = self.n_frames  # frames already in the state = index of the new frame
+        if not self.bounded or n == 0:
+            return self.vp.add_new_frame(self.state, image)
+        st = self.state
+        # add_new_frame starts a new one-frame batch when there is no image tensor (no torch.cat over the history);
+        # it then returns index 0 / num_frames 1, so the true index and frame count are restored here.
+        st["images"] = None
+        idx = self.vp.add_new_frame(st, image)
+        if idx != n:
+            feats = st.get("cached_features")
+            if feats is not None and idx in feats:
+                feats[n] = feats.pop(idx)
+        st["num_frames"] = n + 1
+        return n
 
     def _infer(self, idx: int) -> np.ndarray:
         _, obj_ids, masks = self.vp.infer_single_frame(inference_state=self.state, frame_idx=idx)
         k = list(obj_ids).index(OBJ_ID)
         m = masks[k]
         m = m.detach().float().cpu().numpy() if hasattr(m, "detach") else np.asarray(m, np.float32)
+        if self.bounded:
+            self._trim(idx)
         return np.asarray(m).reshape(m.shape[-2:]) > 0.0
+
+    def _trim(self, idx: int) -> None:
+        """After frame ``idx``: drop what frame ``idx + 1`` (and later) can no longer read."""
+        st = self.state
+        feats = st.get("cached_features")
+        if feats:
+            feats.clear()  # every later frame brings its own features; an inferred frame is never revisited
+        keep_from = idx + 1 - self.window["frames"]
+        mem_from = idx + 1 - self.window["mask_memory_frames"]
+        containers = [st["output_dict"]] if "output_dict" in st else []
+        containers += list(st.get("output_dict_per_obj", {}).values())
+        for c in containers:
+            nc = c["non_cond_frame_outputs"]
+            for f in list(nc):
+                if f < keep_from:
+                    del nc[f]
+                elif f < mem_from and set(nc[f]) - set(PTR_ONLY_KEYS):
+                    nc[f] = {k: nc[f][k] for k in PTR_ONLY_KEYS if k in nc[f]}
+        tracked = st.get("frames_already_tracked")
+        if tracked:
+            cond = set(st.get("output_dict", {}).get("cond_frame_outputs", {}))
+            for f in [f for f in tracked if f < keep_from and f not in cond]:
+                del tracked[f]
+
+
+def state_footprint(state) -> dict:
+    """Tensors / arrays reachable from a track state: ``{"n_tensors", "bytes"}`` (shared storages counted once)."""
+    seen, out = set(), {"n_tensors": 0, "bytes": 0}
+
+    def walk(x):
+        if isinstance(x, dict):
+            for v in x.values():
+                walk(v)
+        elif isinstance(x, (list, tuple)):
+            for v in x:
+                walk(v)
+        elif hasattr(x, "untyped_storage"):  # torch tensor
+            out["n_tensors"] += 1
+            st = x.untyped_storage()
+            key = ("t", st.data_ptr(), st.nbytes())
+            if key not in seen:
+                seen.add(key)
+                out["bytes"] += int(st.nbytes())
+        elif isinstance(x, np.ndarray):
+            out["n_tensors"] += 1
+            base = x if x.base is None else x.base
+            key = ("n", id(base))
+            if key not in seen:
+                seen.add(key)
+                out["bytes"] += int(np.asarray(base).nbytes)
+
+    walk(state)
+    return out
 
 
 class GroundedSAM2Provider:
@@ -73,7 +179,7 @@ class GroundedSAM2Provider:
     def __init__(self, mode: str = "per_frame", size: str = "default", device: str | None = None,
                  box_threshold: float = BOX_THRESHOLD, text_threshold: float = TEXT_THRESHOLD,
                  detector_weight: str | None = None, sam2_weight: str | None = None, redetect_on_loss: bool = False,
-                 _video_predictor=None, _detector=None, _sam=None):
+                 bounded_memory: bool = True, _video_predictor=None, _detector=None, _sam=None):
         # _video_predictor / _detector / _sam: test injection only (tests/test_grounded_sam2_track.py)
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
@@ -82,6 +188,7 @@ class GroundedSAM2Provider:
 
         p = W.preset("grounded_sam2", size)
         self.mode, self.size, self.redetect_on_loss = mode, size, bool(redetect_on_loss)
+        self.bounded_memory = bool(bounded_memory)
         self.box_threshold, self.text_threshold = float(box_threshold), float(text_threshold)
         self.sam2_weight = sam2_weight or p["sam2"]
         self.detector = _detector or GroundingDinoDetector(detector_weight or p["detector"], device)
@@ -104,6 +211,7 @@ class GroundedSAM2Provider:
                 "selection_rule": SELECTION_RULE, "redetect_on_loss": self.redetect_on_loss,
                 "track_rule": "detect until first found frame, prompt video predictor with that SAM2 mask (add_new_mask), "
                               "then infer_single_frame on each new frame; causal (no future frames)" if self.mode == "track" else None,
+                "track_memory": ({"bounded": self.bounded_memory, **read_window(self.vp)} if self.mode == "track" else None),
                 "sam2_cuda_ext": _sam2_cuda_ext(),
                 "detector": self.detector.provenance(), "sam2": self.sam.provenance()}
 
@@ -132,7 +240,7 @@ class GroundedSAM2Provider:
                     det = self._detect_segment(cam, img, query)
                     mask = det[4]
                     if self.mode == "track" and det[3] is not None and mask is not None and mask.any():
-                        tr = self.tracks.setdefault(cam, CausalTrack(self.vp))
+                        tr = self.tracks.setdefault(cam, CausalTrack(self.vp, self.bounded_memory))
                         mask = tr.start(img, mask)
             if det is None:  # tracked frame
                 extras = {"prompt": query.prompt, "source": "track", "track_frames": tr.n_frames}
@@ -169,4 +277,5 @@ def _sam2_cuda_ext() -> str:
                 "with a warning; mask decoder outputs are otherwise unchanged")
 
 
-__all__ = ["BOX_THRESHOLD", "CausalTrack", "GroundedSAM2Provider", "MODES", "TEXT_THRESHOLD"]
+__all__ = ["BOX_THRESHOLD", "CausalTrack", "GroundedSAM2Provider", "MODES", "TEXT_THRESHOLD", "read_window",
+           "state_footprint"]

@@ -24,6 +24,15 @@ Per frame and provider (frames = scene-GT frames, else the policy-call frames ``
   (union over cameras) -> soft / hard voxel metrics on the frame's eval grid (``eval/metrics.py``).
   ``grounded_sam2:track`` is fed every recorded frame from 0 up to the last evaluated frame in time order
   (causal), but scored only on the evaluated frames.
+  The back-projection of each frame and the lift-check distance of every valid depth pixel to the target surface are
+  computed once per frame (``FrameGeometry``) and indexed by each arm's mask; the distance uses an exact pruning of
+  the reference ``point_triangles_distance_near`` (same numbers bit for bit, ``tests/test_offline_grounding_speed.py``).
+
+Provider failures are isolated per arm and episode: an exception of a provider (construction, ``reset``,
+``predict`` or a broken mask contract) turns that arm's remaining evaluated frames of the episode into rows with
+``missing_reason = "provider_error"`` (+ ``provider_error``, ``provider_error_obs_index``); the run goes on with
+the next arm. ``summary.json`` lists them (``provider_errors``, per-arm ``n_provider_error``). ``--fail-fast``
+restores the old stop-at-first-exception behaviour.
 
 Outputs (``common.run_artifacts.create_run`` under AG3S_VLA-storage/results/benchmark/, or ``--out-dir`` below
 ``outputs/`` for smoke): ``frames.jsonl`` (one row per frame x provider-arm), ``episodes.jsonl`` (episode means),
@@ -50,6 +59,7 @@ import os
 import pathlib
 import sys
 import time
+import traceback
 from typing import Any
 
 import numpy as np
@@ -157,6 +167,7 @@ class Episode:
         self.robot_geoms = L.robot_geom_ids(self.tables["model_geom_bodyid"], self.tables["model_body_names"])
         self.target_geoms = np.asarray(self.target["instances_geom_ids"][self.target["target"]], np.int64)
         self._target_tri = {}
+        self._geometry: dict[int, FrameGeometry] = {}
 
     def eval_frames(self) -> list[int]:
         return [int(t) for t in (self.scene.frames if self.scene is not None else self.chunk_t)]
@@ -188,6 +199,14 @@ class Episode:
             tri = [self.scene.triangles_base(srow, g) for g in inst.visual_geoms]
             self._target_tri[t] = np.concatenate(tri) if tri else np.zeros((0, 3, 3))
         return self._target_tri[t]
+
+    def geometry(self, fr: dict) -> "FrameGeometry":
+        """Back-projection + lift-check distances of one frame (from ``fr = frame(t)``), built once per frame and
+        shared by every provider arm (the per-arm work is then an index into it)."""
+        t = int(fr["obs_index"])
+        if t not in self._geometry:
+            self._geometry[t] = FrameGeometry(fr, self.cameras, self.target_triangles(t))
+        return self._geometry[t]
 
 
 def query_for(ep: Episode, prompt_mode: str, phrase_map: dict) -> TargetQuery:
@@ -383,54 +402,227 @@ def provider_kwargs(spec: str, size: str, device: str | None, lh_selection=None)
     return name, kw
 
 
-def build_providers(specs, size: str, device: str | None, lh_selection=None) -> dict[str, Any]:
+def build_providers(specs, size: str, device: str | None, lh_selection=None, errors: dict | None = None) -> dict[str, Any]:
+    """``{spec: provider}``. With ``errors`` (a dict), a provider whose construction raises is left out and its error
+    is stored as ``errors[spec]`` (its arms then get ``provider_error`` rows); without it the exception propagates."""
     out = {}
     for spec in specs:
-        name, kw = provider_kwargs(spec, size, device, lh_selection)
-        sam_weight, sam_device = kw.pop("_sam_weight", None), kw.pop("_sam_device", None)
-        if sam_weight is not None:
-            from Baseline.paper_baselines.providers.sam_backend import SamV1Backend
+        try:
+            name, kw = provider_kwargs(spec, size, device, lh_selection)
+            sam_weight, sam_device = kw.pop("_sam_weight", None), kw.pop("_sam_device", None)
+            if sam_weight is not None:
+                from Baseline.paper_baselines.providers.sam_backend import SamV1Backend
 
-            kw["sam"] = SamV1Backend(sam_weight, device=sam_device)
-        if name == "tokencut" and "device" not in kw:  # TokenCutProvider defaults to cpu; others to default_device()
-            from Baseline.paper_baselines.providers.sam_backend import default_device
+                kw["sam"] = SamV1Backend(sam_weight, device=sam_device)
+            if name == "tokencut" and "device" not in kw:  # TokenCutProvider defaults to cpu; others to default_device()
+                from Baseline.paper_baselines.providers.sam_backend import default_device
 
-            kw["device"] = default_device()
-        out[spec] = get_provider(name, **kw)
+                kw["device"] = default_device()
+            out[spec] = get_provider(name, **kw)
+        except Exception as e:  # noqa: BLE001
+            if errors is None:
+                raise
+            errors[spec] = _error_text(e)
+            print(f"[offline_grounding] provider {spec} could not be built:\n{traceback.format_exc()}", file=sys.stderr, flush=True)
+            _release_device_memory()
     return out
+
+
+def arm_list(specs, prompt_modes) -> list[tuple[str, str]]:
+    arms = []
+    for spec in dict.fromkeys(specs):
+        if parse_arm(spec)[0] in TEXT_FREE:  # query text unused: one arm, scored once
+            arms.append((spec, "no_text"))
+        else:
+            arms.extend((spec, pm) for pm in prompt_modes)
+    return arms
+
+
+# --- provider failures (isolated per arm and episode) -----------------------------------------------------------
+class ProviderFailure(Exception):
+    """A provider raised (or broke the mask contract) at ``obs_index``; the arm's remaining frames of the episode
+    become ``provider_error`` rows and the run goes on with the next arm."""
+
+    def __init__(self, obs_index: int | None, cause: BaseException):
+        super().__init__(f"obs {obs_index}: {_error_text(cause)}")
+        self.obs_index, self.cause = obs_index, cause
+
+
+def _error_text(e: BaseException) -> str:
+    return f"{type(e).__name__}: {e}"[:2000]
+
+
+def _release_device_memory() -> None:
+    """After a failure: drop Python references, then the CUDA cache (only if torch is already loaded)."""
+    import gc
+
+    gc.collect()
+    torch = sys.modules.get("torch")
+    if torch is not None:
+        try:
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:  # noqa: BLE001  (a broken CUDA context must not stop the run either)
+            pass
+
+
+# --- lift check: distance of lifted points to the exact target surface ------------------------------------------
+#: margin (m) of the exact pruning in :func:`point_triangles_distance_near_pruned`; float64 rounding of the bounds is
+#: ~1e-16 m, so a pair is only dropped when its distance exceeds the kept minimum by >= 1 um.
+PRUNE_MARGIN_M = 1e-6
+#: a triangle with ``|ab x ac| <= SLIVER_RATIO * (longest edge)^2`` is treated as degenerate (never pruned, never used
+#: as an upper bound). Above it the solved closest point has a rounding error <~ 1e-16 / SLIVER_RATIO^2 * edge
+#: (<= 1e-12 m here), far below ``PRUNE_MARGIN_M``.
+SLIVER_RATIO = 1e-3
+
+
+def point_triangles_distance_near_pruned(p: np.ndarray, tri: np.ndarray, max_distance: float, *,
+                                         margin: float = PRUNE_MARGIN_M) -> np.ndarray:
+    """Same result as ``benchmark.evaluators.libero_scene_gt.point_triangles_distance_near`` (bit for bit; checked by
+    ``tests/test_offline_grounding_speed.py`` on synthetic soups and recorded frames), solving far fewer pairs.
+
+    The reference solves every (point, triangle) pair with ``|p - c_t| <= r_t + max_distance`` (centroid ``c_t``,
+    circumradius ``r_t``) with ``closest_points_pairwise`` and keeps the minimum. Here, for regular triangles:
+    ``ub(p) = min_t |p - c_t|`` bounds the minimum from above (a centroid lies on its triangle) and
+    ``|p - c_t| - r_t`` bounds pair ``t`` from below, so a pair with ``|p - c_t| - r_t > min(ub, max_distance) + margin``
+    can be neither the minimum nor ``<= max_distance`` and is not solved. Degenerate (sliver) triangles, whose solved
+    closest point need not lie on the triangle, neither bound nor get pruned: their candidate pairs are exactly the
+    reference's (same KD-tree query on the same points). Every kept pair is solved by the same element-wise
+    ``closest_points_pairwise`` and reduced with the same ``min``; distances ``> max_distance`` are ``inf``.
+    """
+    from scipy.spatial import cKDTree
+
+    from benchmark.evaluators.libero_scene_gt import closest_points_pairwise
+
+    p = np.asarray(p, np.float64).reshape(-1, 3)
+    tri = np.asarray(tri, np.float64).reshape(-1, 3, 3)
+    out = np.full(len(p), np.inf)
+    md = float(max_distance)
+    if not len(tri) or not len(p):
+        return out
+    lo, hi = tri.min(1), tri.max(1)
+    keep = np.all((hi >= p.min(0) - md) & (lo <= p.max(0) + md), axis=1)
+    if not keep.any():
+        return out
+    tri = tri[keep]
+    centre = tri.mean(1)
+    radius = np.sqrt(((tri - centre[:, None]) ** 2).sum(-1)).max(1)
+    e = np.stack([tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0], tri[:, 2] - tri[:, 1]], 1)
+    emax2 = (e ** 2).sum(-1).max(1)
+    degenerate = np.linalg.norm(np.cross(e[:, 0], e[:, 1]), axis=1) <= SLIVER_RATIO * emax2
+    pairs_p, pairs_t = [], []
+    J = np.flatnonzero(degenerate)
+    if J.size:  # the reference's candidate rule and call, restricted to these triangles
+        lists = cKDTree(p).query_ball_point(centre[J], radius[J] + md + 1e-12)
+        n = np.fromiter((len(x) for x in lists), np.int64, count=len(lists))
+        if n.sum():
+            pairs_t.append(J[np.repeat(np.arange(len(J)), n)])
+            pairs_p.append(np.fromiter((i for x in lists for i in x), np.int64, count=int(n.sum())))
+    R = np.flatnonzero(~degenerate)
+    if R.size:
+        # points with no regular centroid within max_distance + r_max have no regular triangle within max_distance
+        dnn, _ = cKDTree(centre[R]).query(p, k=1, distance_upper_bound=md + float(radius[R].max()) + margin)
+        act = np.flatnonzero(np.isfinite(dnn))
+        pa = p[act]
+        bound = np.minimum(dnn[act], md) + margin
+        # radius classes keep the ball queries small (most triangles are much smaller than max_distance)
+        edges = md * np.array([1 / 32, 1 / 16, 1 / 8, 1 / 4, 1 / 2, 1.0, np.inf])
+        cls = np.searchsorted(edges, radius[R])
+        for k in np.unique(cls) if act.size else ():
+            Jk = R[cls == k]
+            lists = cKDTree(centre[Jk]).query_ball_point(pa, bound + float(radius[Jk].max()))
+            n = np.fromiter((len(x) for x in lists), np.int64, count=len(lists))
+            if not n.sum():
+                continue
+            a = np.repeat(np.arange(len(pa)), n)
+            b = Jk[np.fromiter((j for x in lists for j in x), np.int64, count=int(n.sum()))]
+            ok = np.sqrt(((pa[a] - centre[b]) ** 2).sum(-1)) - radius[b] <= bound[a]
+            pairs_p.append(act[a[ok]])
+            pairs_t.append(b[ok])
+    if not pairs_p:
+        return out
+    a, b = np.concatenate(pairs_p), np.concatenate(pairs_t)
+    if not len(a):
+        return out
+    cp = closest_points_pairwise(p[a], tri[b, 0], tri[b, 1], tri[b, 2])
+    np.minimum.at(out, a, np.sqrt(((cp - p[a]) ** 2).sum(-1)))
+    out[out > md] = np.inf
+    return out
+
+
+def lift_check_from_distances(d: np.ndarray) -> dict:
+    """``lift_*`` columns from the per-point distances (``inf`` beyond ``LIFT_CHECK_MM``)."""
+    if not len(d):
+        return {}
+    within = np.isfinite(d)
+    return {"lift_n_points": int(len(d)), "lift_within_10mm": float(within.mean()),
+            "lift_dist_median_mm": float(np.median(d[within]) * 1000.0) if within.any() else None}
 
 
 def lift_check(points: np.ndarray, tri) -> dict:
     """Distance of lifted points to the exact target surface (scene GT): independent check of the lift."""
     if tri is None or not len(points):
         return {}
-    from benchmark.evaluators.libero_scene_gt import point_triangles_distance_near
+    return lift_check_from_distances(point_triangles_distance_near_pruned(points, tri, LIFT_CHECK_MM / 1000.0))
 
-    d = point_triangles_distance_near(points, tri, LIFT_CHECK_MM / 1000.0)
-    within = np.isfinite(d)
-    return {"lift_n_points": int(len(points)), "lift_within_10mm": float(within.mean()),
-            "lift_dist_median_mm": float(np.median(d[within]) * 1000.0) if within.any() else None}
+
+class FrameGeometry:
+    """One evaluated frame, shared by all provider arms: per camera the back-projection of every valid depth pixel
+    (``lift.backproject_pixels``) and, computed once on first use, the lift-check distance of each of those points.
+
+    A provider's lifted points are the rows ``points[sel]`` of the back-projection (``lift.lift_selection``), and the
+    reference distance of a point does not depend on which other points are queried with it, so indexing the
+    per-pixel distances gives the same ``lift_*`` values as ``lift_check(lifted points)``.
+    """
+
+    def __init__(self, fr: dict, cameras, tri):
+        self.cameras, self.tri = tuple(cameras), tri
+        self.shape = {c: np.asarray(fr["depth_m"][c]).shape for c in self.cameras}
+        self.backprojected = {c: L.backproject_pixels(fr["depth_m"][c], fr["K"][c], fr["T"][c]) for c in self.cameras}
+        self._distance: dict[str, np.ndarray] = {}
+
+    def points(self, c: str) -> np.ndarray:
+        return self.backprojected[c][0]
+
+    def selection(self, c: str, mask, robot_removal: str, robot_pixels) -> np.ndarray:
+        _, u, v = self.backprojected[c]
+        return L.lift_selection(mask, u, v, self.shape[c], robot_removal=robot_removal, robot_pixels=robot_pixels)
+
+    def pixel_distance(self, c: str) -> np.ndarray:
+        if c not in self._distance:
+            self._distance[c] = point_triangles_distance_near_pruned(self.points(c), self.tri, LIFT_CHECK_MM / 1000.0)
+        return self._distance[c]
+
+    def lift_check(self, selections: dict) -> dict:
+        """``lift_check`` of the points ``points(c)[selections[c]]`` concatenated in camera order."""
+        if self.tri is None or not sum(int(np.count_nonzero(s)) for s in selections.values()):
+            return {}
+        return lift_check_from_distances(np.concatenate([self.pixel_distance(c)[selections[c]] for c in selections]))
 
 
 def evaluate_masks(results, fr, grid, ep: Episode, robot_removal: str, cameras) -> dict:
     row: dict[str, Any] = {"cameras": {}}
-    keys, pts_all = [], []
+    geo = ep.geometry(fr)
+    keys, sels = [], {}
     for c in cameras:
         r = results[c]
         gt = fr["labels"][c] == M.CLASSES.index("target")
         m2 = M.mask_metrics_2d(r.mask, gt)
         row["cameras"][c] = {**r.summary(), **{f"2d_{k}": v for k, v in m2.items()}}
-        pts = L.lift_mask(r.mask, fr["depth_m"][c], fr["K"][c], fr["T"][c], robot_removal=robot_removal,
-                          robot_pixels=fr["robot"][c])
-        pts_all.append(pts)
-        keys.append(L.voxel_keys(pts))
+        sels[c] = geo.selection(c, r.mask, robot_removal, fr["robot"][c])
+        keys.append(L.voxel_keys(geo.points(c)[sels[c]]))
     keys = np.concatenate(keys) if keys else np.zeros((0, 3), np.int64)
     row.update({f"3d_{k}": v for k, v in M.voxel_metrics(grid, keys).items()})
-    pts_all = np.concatenate(pts_all) if pts_all else np.zeros((0, 3))
-    row.update(lift_check(pts_all, ep.target_triangles(fr["obs_index"])))
+    row.update(geo.lift_check(sels))
     row["found_any"] = any(results[c].found for c in cameras)
     row["latency_ms_total"] = float(sum(results[c].latency_ms for c in cameras))
     return row
+
+
+def eval_grid(ep: Episode, fr: dict, cameras) -> M.EvalGrid:
+    geo = ep.geometry(fr)
+    return M.build_eval_grid([{"depth_m": fr["depth_m"][c], "K": fr["K"][c], "T_base_cam": fr["T"][c],
+                               "labels": fr["labels"][c], "backprojected": geo.backprojected[c]} for c in cameras])
 
 
 # --- main loop ------------------------------------------------------------------------------------------------
@@ -451,21 +643,25 @@ def run(args) -> pathlib.Path:
     if not episodes:
         raise SystemExit("no episode with both <stem>.npz and <stem>_geom.npz")
     cameras = tuple(args.cameras)
-    providers = {} if args.dry_run else build_providers(args.providers, args.size, args.device, args.lh_selection)
-    arms = []
-    for spec in providers:
-        if parse_arm(spec)[0] in TEXT_FREE:  # query text unused: one arm, scored once
-            arms.append((spec, "no_text"))
-        else:
-            arms.extend((spec, pm) for pm in args.prompt_modes)
+    build_errors: dict[str, str] = {}
+    providers = {} if args.dry_run else build_providers(args.providers, args.size, args.device, args.lh_selection,
+                                                        errors=None if args.fail_fast else build_errors)
+    arms = [] if args.dry_run else arm_list(args.providers, args.prompt_modes)
     out = make_output(args, source)
     inputs: dict[str, Any] = {"source_run": str(source), "files": {}}
     man = source / "run_manifest.json"
     inputs["source_run_manifest_sha256"] = sha256_file(man) if man.exists() else None
     frames_f = (out / "frames.jsonl").open("x")
     rows = []
+
+    def emit(row: dict) -> None:
+        frames_f.write(json.dumps(_jsonable(row)) + "\n")
+        frames_f.flush()
+        rows.append(row)
+
     t0 = time.time()
     for ep_meta in episodes:
+        t_ep = time.time()
         ep = Episode(ep_meta, cameras, scene_dir)
         inputs["files"][ep.stem] = {"npz": sha256_file(ep_meta["npz_path"]), "geom_npz": sha256_file(ep_meta["geom_path"]),
                                     "scene": ep.scene.sha256 if ep.scene is not None else None,
@@ -475,13 +671,8 @@ def run(args) -> pathlib.Path:
         frames = ep.eval_frames()
         if args.limit_frames:
             frames = frames[: args.limit_frames]
-        eval_set = set(frames)
-        grids, frs = {}, {}
-        for t in frames:
-            fr = ep.frame(t)
-            frs[t] = fr
-            grids[t] = M.build_eval_grid([{"depth_m": fr["depth_m"][c], "K": fr["K"][c], "T_base_cam": fr["T"][c],
-                                           "labels": fr["labels"][c]} for c in cameras])
+        frs = {t: ep.frame(t) for t in frames}
+        grids = {t: eval_grid(ep, frs[t], cameras) for t in frames}
         base = {"episode_id": ep.stem, "suite": ep_meta["suite"], "task_id": int(ep_meta["task_id"]),
                 "episode_idx": int(ep_meta["episode_idx"]), "rollout_status": ep_meta.get("status"),
                 "robot_removal": args.robot_removal}
@@ -495,63 +686,22 @@ def run(args) -> pathlib.Path:
                 if ats is not None:
                     a = ats.points(ep.stem, t)
                     row["ats_record"] = a is not None
-                frames_f.write(json.dumps(row) + "\n")
-                rows.append(row)
+                emit(row)
             continue
         for spec, pm in arms:
-            prov = providers[spec]
-            prov.reset()
-            text_free = pm == "no_text"
-            q = query_for(ep, "phrase" if text_free else pm, phrase_map)
-            sequential = parse_arm(spec)[1].get("mode") == "track"
-            uses_attn = needs_attention(spec)
-            feed = range(0, max(frames) + 1) if sequential else frames
-            for t in feed:
-                fr = frs[t] if t in frs else None
-                row = {**base, "arm": f"{spec}|{pm}", "provider": spec, "prompt_mode": pm,
-                       "prompt": None if text_free else q.prompt, "obs_index": int(t)}
-                aux = {"segmentation": fr["seg"] if fr else {c: ep.seg[c][ep.row(t)] for c in cameras},
-                       "target_geom_ids": ep.target_geoms.tolist()}
-                if uses_attn:
-                    a_aux = attn.aux(ep.stem, t)
-                    if a_aux is None:  # no recorded policy call at this frame: scored as missing, not as not-found
-                        if t in eval_set:
-                            row["missing_reason"] = "no_attention_record_for_frame"
-                            frames_f.write(json.dumps(_jsonable(row)) + "\n")
-                            rows.append(row)
-                        continue
-                    aux.update(a_aux)
-                    row["attention_call"] = a_aux["attention_call_index"]
-                rgb = fr["rgb"] if fr is not None else {c: L.opencv_rgb_from_raw(ep.raw[c][t]) for c in cameras}
-                qt = TargetQuery(q.instruction, q.target_phrase, q.prompt_mode, q.episode_id, int(t))
-                res = prov.predict(rgb, qt, aux=aux)
-                validate_results(res, rgb)
-                if t not in eval_set:
-                    continue
-                row.update(evaluate_masks(res, fr, grids[t], ep, args.robot_removal, cameras))
-                if args.save_masks:
-                    save_masks(out, spec, pm, ep.stem, t, res)
-                frames_f.write(json.dumps(_jsonable(row)) + "\n")
-                frames_f.flush()
-                rows.append(row)
+            for row in arm_rows(ep, spec, pm, providers.get(spec), frames, frs, grids, base, cameras=cameras,
+                                phrase_map=phrase_map, attn=attn, robot_removal=args.robot_removal,
+                                build_error=build_errors.get(spec), fail_fast=args.fail_fast,
+                                save=(lambda sp, p_, st, t, res: save_masks(out, sp, p_, st, t, res)) if args.save_masks else None):
+                emit(row)
         if ats is not None:
-            for t in frames:
-                a = ats.points(ep.stem, t)
-                row = {**base, "arm": "ats_v11ab|noun_attention", "provider": "ats_v11ab", "prompt_mode": "noun_attention",
-                       "obs_index": int(t)}
-                if a is None:
-                    row["missing_reason"] = "no_ats_record_for_frame"
-                else:
-                    pts = a["points"] if a["found"] else np.zeros((0, 3))
-                    row.update({f"3d_{k}": v for k, v in M.voxel_metrics(grids[t], L.voxel_keys(pts)).items()})
-                    row.update(lift_check(pts, ep.target_triangles(t)))
-                    row.update(found_any=a["found"], latency_ms_total=a["latency_ms"])
-                frames_f.write(json.dumps(_jsonable(row)) + "\n")
-                rows.append(row)
-        print(f"[offline_grounding] {ep.stem}: {len(frames)} frames, {time.time() - t0:.1f}s", flush=True)
+            for row in ats_rows(ats, ep, frames, grids, base):
+                emit(row)
+        print(f"[offline_grounding] {ep.stem}: {len(frames)} frames, episode {time.time() - t_ep:.1f}s, "
+              f"total {time.time() - t0:.1f}s", flush=True)
     frames_f.close()
     write_summaries(out, rows, cameras, args)
-    prov = {"providers": {spec: providers[spec].provenance() for spec in providers},
+    prov = {"providers": {spec: providers[spec].provenance() for spec in providers}, "provider_build_errors": build_errors,
             "ats": ats.provenance() if ats else None, "attention": attention_provenance(attn, providers),
             "inputs": inputs, "scene_gt": str(scene_dir) if scene_dir else None,
             "argv": sys.argv, "python": sys.executable,
@@ -559,6 +709,100 @@ def run(args) -> pathlib.Path:
     (out / "provenance.json").write_text(json.dumps(_jsonable(prov), indent=1, default=str) + "\n")
     print(f"[offline_grounding] wrote {out}")
     return out
+
+
+def arm_rows(ep: Episode, spec: str, pm: str, prov, frames, frs, grids, base: dict, *, cameras, phrase_map: dict,
+             attn=None, robot_removal: str = "none", build_error: str | None = None, fail_fast: bool = False, save=None):
+    """Rows of one provider arm on one episode (one per evaluated frame), in time order.
+
+    ``grounded_sam2:track`` is fed every recorded frame from 0 to the last evaluated frame (causal) and scored on the
+    evaluated ones. If the provider raises (or breaks the mask contract) the remaining evaluated frames of this arm
+    and episode become ``missing_reason = "provider_error"`` rows carrying the error, the provider is reset and the
+    caller goes on with the next arm (``fail_fast`` re-raises instead). Errors of the evaluation itself propagate.
+    """
+    text_free = pm == "no_text"
+    q = query_for(ep, "phrase" if text_free else pm, phrase_map)
+    head = {**base, "arm": f"{spec}|{pm}", "provider": spec, "prompt_mode": pm, "prompt": None if text_free else q.prompt}
+    eval_set = set(frames)
+    done: set[int] = set()
+
+    def failure_rows(t_fail, err: str):
+        for t in frames:
+            if t not in done and (t_fail is None or t >= t_fail):
+                yield {**head, "obs_index": int(t), "missing_reason": "provider_error", "provider_error": err,
+                       "provider_error_obs_index": t_fail}
+
+    if prov is None:
+        yield from failure_rows(None, f"provider not built: {build_error}")
+        return
+    sequential = parse_arm(spec)[1].get("mode") == "track"
+    uses_attn = needs_attention(spec)
+    feed = range(0, max(frames) + 1) if sequential else frames
+    failure = None
+    try:
+        _call_provider(None, prov.reset)
+        for t in feed:
+            fr = frs[t] if t in frs else None
+            row = {**head, "obs_index": int(t)}
+            aux = {"segmentation": fr["seg"] if fr else {c: ep.seg[c][ep.row(t)] for c in cameras},
+                   "target_geom_ids": ep.target_geoms.tolist()}
+            if uses_attn:
+                a_aux = attn.aux(ep.stem, t)
+                if a_aux is None:  # no recorded policy call at this frame: scored as missing, not as not-found
+                    if t in eval_set:
+                        row["missing_reason"] = "no_attention_record_for_frame"
+                        done.add(t)
+                        yield row
+                    continue
+                aux.update(a_aux)
+                row["attention_call"] = a_aux["attention_call_index"]
+            rgb = fr["rgb"] if fr is not None else {c: L.opencv_rgb_from_raw(ep.raw[c][t]) for c in cameras}
+            qt = TargetQuery(q.instruction, q.target_phrase, q.prompt_mode, q.episode_id, int(t))
+            res = _call_provider(t, lambda: prov.predict(rgb, qt, aux=aux))
+            _call_provider(t, lambda: validate_results(res, rgb))
+            if t not in eval_set:
+                continue
+            row.update(evaluate_masks(res, fr, grids[t], ep, robot_removal, cameras))
+            if save is not None:
+                save(spec, pm, ep.stem, t, res)
+            done.add(t)
+            yield row
+    except ProviderFailure as e:
+        if fail_fast:
+            raise e.cause from e
+        print(f"[offline_grounding] {head['arm']} {ep.stem}: provider failed at obs {e.obs_index}; remaining frames "
+              f"recorded as provider_error\n" + "".join(traceback.format_exception(e.cause)), file=sys.stderr, flush=True)
+        failure = (e.obs_index, _error_text(e.cause))
+        e.cause.__traceback__ = None  # the traceback's frames can hold device tensors
+    if failure is not None:  # outside the except block: the exception and its frames are released by now
+        try:
+            prov.reset()  # drop the failed state (e.g. a track's memory bank) before the next arm
+        except Exception:  # noqa: BLE001
+            pass
+        _release_device_memory()
+        yield from failure_rows(*failure)
+
+
+def _call_provider(t, fn):
+    try:
+        return fn()
+    except Exception as e:  # noqa: BLE001
+        raise ProviderFailure(t, e) from e
+
+
+def ats_rows(ats: "ATSRun", ep: Episode, frames, grids, base: dict):
+    for t in frames:
+        a = ats.points(ep.stem, t)
+        row = {**base, "arm": "ats_v11ab|noun_attention", "provider": "ats_v11ab", "prompt_mode": "noun_attention",
+               "obs_index": int(t)}
+        if a is None:
+            row["missing_reason"] = "no_ats_record_for_frame"
+        else:
+            pts = a["points"] if a["found"] else np.zeros((0, 3))
+            row.update({f"3d_{k}": v for k, v in M.voxel_metrics(grids[t], L.voxel_keys(pts)).items()})
+            row.update(lift_check(pts, ep.target_triangles(t)))
+            row.update(found_any=a["found"], latency_ms_total=a["latency_ms"])
+        yield row
 
 
 def attention_provenance(attn, providers) -> dict | None:
@@ -645,7 +889,16 @@ def write_summaries(out: pathlib.Path, rows: list[dict], cameras, args) -> None:
         s["latency_total"] = M.latency_stats(r.get("latency_ms_total") for r in rs)
         s["n_frames"], s["n_valid_3d_frames"] = len(rs), len(valid)
         s["n_missing"] = sum("missing_reason" in r for r in rs)
+        s["n_provider_error"] = sum(r.get("missing_reason") == "provider_error" for r in rs)
         summary["arms"][arm] = s
+    errs: dict[tuple, dict] = {}
+    for r in rows:
+        if r.get("missing_reason") == "provider_error":
+            e = errs.setdefault((r["arm"], r["episode_id"]), {"arm": r["arm"], "episode_id": r["episode_id"],
+                                                              "obs_index": r.get("provider_error_obs_index"),
+                                                              "error": r["provider_error"], "n_frames": 0})
+            e["n_frames"] += 1
+    summary["provider_errors"] = list(errs.values())
     arms = [a for a in by_arm if a != "dry_run"]
     for a, b in itertools.combinations(arms, 2):
         summary["paired_3d_iou"][f"{a} - {b}"] = M.paired_bootstrap(M.episode_means(by_arm[a], "3d_iou"),
@@ -675,6 +928,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--phrase-map", help="json {bddl object name or phrase: prompt phrase}")
     ap.add_argument("--save-masks", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="inputs + GT + eval grid only, no provider")
+    ap.add_argument("--fail-fast", action="store_true",
+                    help="stop the run at the first provider exception (default: record provider_error rows for that "
+                         "arm and episode, go on with the next arm)")
     ap.add_argument("--run-id")
     ap.add_argument("--out-dir", help="write here (below outputs/) instead of create_run; for smoke")
     return ap

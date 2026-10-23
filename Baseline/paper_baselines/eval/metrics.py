@@ -87,10 +87,17 @@ class EvalGrid:
 
 def build_eval_grid(cameras: Sequence[Mapping], *, classes: Sequence[str] = CLASSES, voxel: float = VOXEL_M,
                     range_max: float = RANGE_MAX_M) -> EvalGrid:
-    """``cameras``: ``[{"depth_m", "K", "T_base_cam", "labels" (H, W) int class index}, ...]`` (same frame as depth)."""
+    """``cameras``: ``[{"depth_m", "K", "T_base_cam", "labels" (H, W) int class index}, ...]`` (same frame as depth).
+
+    A camera may carry ``"backprojected": (points, u, v)`` = :func:`lift.backproject_pixels` of the same depth / K / T
+    at this ``range_max`` (computed once per frame by the caller and re-used); it is then not back-projected again.
+    """
     P, L = [], []
     for cam in cameras:
-        pts, u, v = backproject_pixels(cam["depth_m"], cam["K"], cam["T_base_cam"], range_max=range_max)
+        if cam.get("backprojected") is not None:
+            pts, u, v = cam["backprojected"]
+        else:
+            pts, u, v = backproject_pixels(cam["depth_m"], cam["K"], cam["T_base_cam"], range_max=range_max)
         P.append(pts)
         L.append(np.asarray(cam["labels"])[v, u].astype(np.int64))
     P = np.concatenate(P) if P else np.zeros((0, 3))
