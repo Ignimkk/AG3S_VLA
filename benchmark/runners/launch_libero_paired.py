@@ -23,6 +23,12 @@ and ``settings.record_constraints`` says so; the resolved argv is the ``role=ser
 server stops the launcher counts the chunk files (``launcher_result.record_constraints``). Refused together with
 the ``vla_only`` mode (``--no-safe`` server). With ``none`` the server argv and the settings are unchanged.
 
+BM-SETUP-A: every suite of ``benchmark/configs/suites.json`` (LIBERO spatial / object / goal / 10, SafeLIBERO spatial /
+object / goal / long x Level I / II) runs through the same launcher; task / episode ids and registry split labels are
+checked against the suite before anything starts (``suite_registry.check_selection``). ``--safelibero-step-budget
+main_aegis`` (opt-in) runs the official main_aegis.py step budget; the default keeps the SL5c protocol and leaves the
+client argv and the manifest settings unchanged. Batches of jobs: ``benchmark/runners/eval_matrix.py``.
+
     source scripts/setup/env.sh
     .venv-ag3s/bin/python benchmark/runners/launch_libero_paired.py --task-ids 0 --episode-ids 0 --run-id sl5b-t0e0
 """
@@ -51,6 +57,8 @@ CLIENT_SCRIPT = PROJECT_ROOT / "benchmark/runners/libero_safe_client.py"
 RECORD_CONSTRAINTS_CHOICES = ("none", "occupancy", "full")
 RECORD_CONSTRAINTS_DIRNAME = "server_constraints"
 RUN_DIR_TOKEN = "<run_dir>"  # manifest settings are written before the run directory exists
+SAFELIBERO_STEP_BUDGETS = ("total_incl_wait", "main_aegis")  # = libero_safe_client.SAFELIBERO_STEP_BUDGETS
+SAFELIBERO_DEFAULT_STEP_BUDGET = "total_incl_wait"
 
 
 def server_argv(mode: str, checkpoint: str, port: int, version: str = "V11AB") -> list[str]:
@@ -88,12 +96,19 @@ def record_constraints_summary(run_dir: Path, record: str) -> dict:
             "meta_json": [p.parent.name for p in sorted(root.glob("run_*/meta.json"))]}
 
 
+def step_budget(args) -> str:
+    """``--safelibero-step-budget`` (BM-SETUP-A); namespaces built before it existed get the default."""
+    return getattr(args, "safelibero_step_budget", SAFELIBERO_DEFAULT_STEP_BUDGET)
+
+
 def client_argv(run_dir: str, port: int, args) -> list[str]:
+    budget = step_budget(args)  # appended only when not the default: default argv unchanged
     return [str(l0.libero_python()), str(CLIENT_SCRIPT), "--run-dir", str(run_dir), "--host", "127.0.0.1",
             "--port", str(port), "--task-suite-name", args.task_suite_name,
             "--task-ids", ",".join(map(str, args.task_ids)), "--episode-ids", ",".join(map(str, args.episode_ids)),
             "--seed", str(args.seed)] + (["--capture-segmentation"] if args.capture_segmentation else []) + (
-                ["--safety-level", args.safety_level] if args.safety_level else [])
+                ["--safety-level", args.safety_level] if args.safety_level else []) + (
+                ["--safelibero-step-budget", budget] if budget != SAFELIBERO_DEFAULT_STEP_BUDGET else [])
 
 
 def _is_safelibero(args) -> bool:
@@ -113,6 +128,13 @@ def protocol_settings(args) -> dict:
                 "max_steps": total - sc.SAFELIBERO_NUM_STEPS_WAIT, "num_steps_wait": sc.SAFELIBERO_NUM_STEPS_WAIT,
                 "loop": f"t < max_steps + num_steps_wait = {total} (wait steps counted)",
                 "safelibero": sc.safelibero_protocol()})
+    budget = step_budget(args)
+    if budget != SAFELIBERO_DEFAULT_STEP_BUDGET:  # default: the keys above, unchanged
+        rec = sc.safelibero_step_budget_record(args.task_suite_name, budget)
+        out.update({"max_steps": rec["policy_steps"],
+                    "loop": f"t < max_steps + num_steps_wait = {rec['policy_steps'] + rec['num_steps_wait']} "
+                            "(wait steps counted; main_aegis budget: wait on top of the total)",
+                    "safelibero_step_budget": rec})
     return out
 
 
@@ -204,6 +226,16 @@ def versions() -> dict:
             "openpi_python": l0.interpreter_info(l0.openpi_python(), l0.OPENPI_PACKAGES)}
 
 
+def run_tag(mode: str, args) -> str:
+    """Suffix of the run id of ``mode``: ``<run-id>-<tag>`` (the run directory ends with it)."""
+    tag = mode
+    if mode == "vla_v11ab":
+        tag = f"{mode}-{args.conversion}" if args.ag3s_version == "V11AB" else f"{mode}-{args.ag3s_version}-{args.conversion}"
+    if args.safety_level:
+        tag = f"L{args.safety_level}-{tag}"
+    return tag
+
+
 def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
     from common.run_artifacts import create_run, record_execution
 
@@ -226,12 +258,7 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
                 "policy_seed_rule": "seed*100000 + task_id*1000 + episode_idx (libero_safe_client.episode_seed)",
                 "checkpoint": identity, "server_argv": s_argv + record_constraints_argv(mode, RUN_DIR_TOKEN, record),
                 "data_split": args.data_split, **rec_settings, **shared}
-    tag = mode
-    if mode == "vla_v11ab":
-        tag = f"{mode}-{args.conversion}" if args.ag3s_version == "V11AB" else f"{mode}-{args.ag3s_version}-{args.conversion}"
-    if args.safety_level:
-        tag = f"L{args.safety_level}-{tag}"
-    run_dir = create_run(run_id=f"{args.run_id}-{tag}", settings=settings, checkpoint=identity["path"])
+    run_dir = create_run(run_id=f"{args.run_id}-{run_tag(mode, args)}", settings=settings, checkpoint=identity["path"])
     print(f"[{mode}] {run_dir}", flush=True)
     s_argv = s_argv + record_constraints_argv(mode, run_dir, record)
     c_argv = client_argv(str(run_dir), port, args)
@@ -352,6 +379,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--record-constraints", choices=RECORD_CONSTRAINTS_CHOICES, default="none",
                     help="vla_v11ab server only: serve_safe --record-constraints <run_dir>/server_constraints "
                          "--record-constraints-esdf <value> (per-call constraint npz). none = argv unchanged")
+    ap.add_argument("--safelibero-step-budget", choices=SAFELIBERO_STEP_BUDGETS, default=SAFELIBERO_DEFAULT_STEP_BUDGET,
+                    help="SafeLIBERO only: total_incl_wait (SL5c protocol, default; argv and settings unchanged) or "
+                         "main_aegis (main_aegis.py as written: the total is the policy-step budget after the wait)")
     ap.add_argument("--dry-run", action="store_true")
     # protocol constants read by l0.protocol_settings / runtime_schedule
     ap.add_argument("--host", default="127.0.0.1")
@@ -371,6 +401,12 @@ def main(argv=None) -> int:
         raise ValueError("--safety-level is required for SafeLIBERO suites and only for them")
     if args.data_split == DEFAULT_SPLIT and any(e > 4 for e in args.episode_ids):
         raise ValueError("dev split is LIBERO init states 0-4 (plan §6.0); pass --data-split for anything else")
+    if args.safelibero_step_budget != SAFELIBERO_DEFAULT_STEP_BUDGET and not _is_safelibero(args):
+        raise ValueError("--safelibero-step-budget applies to SafeLIBERO suites only")
+    from benchmark.runners import suite_registry  # BM-SETUP-A: refuse ids outside the suite before any GPU work
+
+    suite_registry.check_selection(args.task_suite_name, args.safety_level, args.task_ids, args.episode_ids,
+                                   args.data_split)
     modes = [m for m in args.modes.split(",") if m]
     if args.record_constraints != "none" and "vla_only" in modes:
         raise ValueError(f"--record-constraints {args.record_constraints} cannot run with the vla_only mode "

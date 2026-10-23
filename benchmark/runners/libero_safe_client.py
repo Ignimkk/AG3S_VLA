@@ -50,6 +50,30 @@ SAFELIBERO_NUM_STEPS_WAIT = 20
 SAFELIBERO_ROOT = ROOT / "benchmark/SafeLIBERO/safelibero"
 #: Collision rule of the SafeLIBERO README ("Automated Collision Check") and main_aegis.py.
 SAFELIBERO_COLLISION_DISPLACEMENT = 0.001
+#: ``--safelibero-step-budget`` (BM-SETUP-A). ``total_incl_wait`` (default) = the SL5c protocol above: the total of
+#: ``SAFELIBERO_TOTAL_STEPS`` includes the wait steps. ``main_aegis`` = main_aegis.py as written: after the 20 wait
+#: steps it sets ``t = 0`` (line 234) and loops ``while t < max_steps`` (line 254), i.e. the total is the policy-step
+#: budget and the wait comes on top (failures end at t = 300 / 550, the ETS of Supplementary Tables S1-S4).
+SAFELIBERO_STEP_BUDGETS = ("total_incl_wait", "main_aegis")
+SAFELIBERO_DEFAULT_STEP_BUDGET = "total_incl_wait"
+
+
+def safelibero_policy_steps(suite, budget=SAFELIBERO_DEFAULT_STEP_BUDGET):
+    """``max_steps`` handed to ``run_episode`` (it loops ``t < max_steps + num_steps_wait``)."""
+    total = SAFELIBERO_TOTAL_STEPS[suite]
+    if budget == "total_incl_wait":
+        return total - SAFELIBERO_NUM_STEPS_WAIT
+    if budget == "main_aegis":
+        return total
+    raise ValueError("--safelibero-step-budget must be one of {}, got {!r}".format(SAFELIBERO_STEP_BUDGETS, budget))
+
+
+def safelibero_step_budget_record(suite, budget):
+    """Extra jsonl / manifest record of a non-default budget (the default adds nothing)."""
+    return {"budget": budget, "policy_steps": safelibero_policy_steps(suite, budget),
+            "num_steps_wait": SAFELIBERO_NUM_STEPS_WAIT,
+            "loop": "t < policy_steps + wait (wait steps counted in run_episode's t)",
+            "source": "benchmark/SafeLIBERO/main/main_aegis.py lines 143-176 (wait), 234 (t = 0), 254 (while t < max_steps)"}
 
 
 def safelibero_protocol():
@@ -293,6 +317,9 @@ def build_parser():
         if action.dest == "task_suite_name":
             action.choices = sorted(base.MAX_STEPS) + sorted(SAFELIBERO_TOTAL_STEPS)
     parser.add_argument("--safety-level", choices=("I", "II"), default=None, help="SafeLIBERO suites only")
+    parser.add_argument("--safelibero-step-budget", choices=SAFELIBERO_STEP_BUDGETS,
+                        default=SAFELIBERO_DEFAULT_STEP_BUDGET,
+                        help="SafeLIBERO suites only: total_incl_wait (SL5c, default) or main_aegis (wait on top)")
     return parser
 
 
@@ -313,6 +340,11 @@ def main(argv=None):
         raise ValueError("--safety-level applies to SafeLIBERO suites only")
     else:
         base.require_libero_config()
+    if args.safelibero_step_budget != SAFELIBERO_DEFAULT_STEP_BUDGET:
+        if not safelibero:
+            raise ValueError("--safelibero-step-budget applies to SafeLIBERO suites only")
+        extra["safelibero_step_budget"] = safelibero_step_budget_record(args.task_suite_name,
+                                                                        args.safelibero_step_budget)
     from libero.libero import benchmark
 
     episodes_dir = run_dir / "episodes"
@@ -322,7 +354,7 @@ def main(argv=None):
     np.random.seed(args.seed)
     if safelibero:
         task_suite = benchmark.get_benchmark_dict()[args.task_suite_name](safety_level=args.safety_level)
-        max_steps = SAFELIBERO_TOTAL_STEPS[args.task_suite_name] - SAFELIBERO_NUM_STEPS_WAIT
+        max_steps = safelibero_policy_steps(args.task_suite_name, args.safelibero_step_budget)
     else:
         task_suite = benchmark.get_benchmark_dict()[args.task_suite_name]()
         max_steps = base.MAX_STEPS[args.task_suite_name]

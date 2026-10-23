@@ -40,8 +40,12 @@ LIBERO_ROOT = PROJECT_ROOT / "benchmark/LIBERO/libero/libero"
 BDDL_ROOT = LIBERO_ROOT / "bddl_files"
 TASK_MAP_FILE = LIBERO_ROOT / "benchmark/libero_suite_task_map.py"
 BENCHMARK_INIT_FILE = LIBERO_ROOT / "benchmark/__init__.py"
-#: BDDL fixtures whose MuJoCo body does not carry the fixture name (robosuite arena table).
-FIXTURE_BODY_ALIASES = {"main_table": ("table",)}
+#: BDDL fixtures whose MuJoCo body is not ``<name>_<part>``: the robosuite arena table (``main_table``; LIBERO 10
+#: kitchen scenes call it ``kitchen_table``) and the arena bodies named exactly like the fixture (``study_table``,
+#: ``floor`` of the LIBERO Object / SafeLIBERO Object floor scenes). BM-SETUP-A probe: these three did not resolve
+#: by the prefix rule; LIBERO Spatial uses only ``main_table`` (entry unchanged).
+FIXTURE_BODY_ALIASES = {"main_table": ("table",), "kitchen_table": ("table",), "study_table": ("study_table",),
+                        "floor": ("floor",)}
 #: Goal predicates whose first argument is the object that is moved / acted on.
 OBJECT_FIRST_PREDICATES = ("on", "in")
 
