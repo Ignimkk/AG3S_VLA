@@ -4048,3 +4048,9 @@ class: A no-lift(A_hold 는 최장 HOLD 연속 ≥ 5 call) · B lifted_lost · C
 - latch 의 `manipulated_id` 가 가리키는 MuJoCo body(AG3S centroid − target 거리를 대리 지표로 썼다).
 
 **판정 대기 (사용자).** 위는 version 별 숫자만 남긴 것이다. 규칙(sticky reach · drop-from-open · closing 면제)의 효과에 대한 해석과 다음 수정 방향은 사용자 판정 전이다.
+
+---
+
+## 문제 · 해결 정리 문서 신설 (2026-10-23)
+
+사용자 지시(2026-10-23)로 지금까지 benchmark 에서 겪은 문제와 해결 방법을 문제별로 다시 모은 문서를 새로 만들었다: [`AG3S_BENCHMARK_ISSUES.md`](AG3S_BENCHMARK_ISSUES.md) (환경 · Panda adapter · 평가 · 알고리즘 개선판 · 미해결, 37 항목). 이 로그가 시간순 정본이고, 새 문서는 이 로그와 `handoff/*.verify.json` 에서 옮긴 요약 · 색인이다.
