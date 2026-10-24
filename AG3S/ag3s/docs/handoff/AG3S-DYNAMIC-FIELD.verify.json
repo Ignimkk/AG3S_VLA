@@ -1,0 +1,389 @@
+{
+ "step": "AG3S-DYNAMIC-FIELD",
+ "task": "AG3S/ag3s/docs/handoff/AG3S-DYNAMIC-FIELD.task.md",
+ "date": "2026-10-24",
+ "written": "2026-10-24 00:55 KST (lead; replay 실행 · 집계 · 그림)",
+ "what": "같은 closed-loop 기록(사과 10 장면, 새 비교 기준 구성)의 관측을 거리장 builder 에 다시 넣어, 거리장이 움직인 물체를 따라가는지 다섯 구성으로 비교한 offline replay. closed-loop 성공률은 재지 않았다.",
+ "records": {
+  "input_kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE",
+  "configuration": "NBCTS (= 이전 최선 구성 + 사과 표면 점 빼기 + 놓은 뒤 인증)",
+  "episodes": [
+   "56",
+   "126",
+   "211",
+   "250",
+   "309",
+   "320",
+   "753",
+   "954",
+   "1668",
+   "1837"
+  ]
+ },
+ "variants": {
+  "off": "현재 서버 그대로",
+  "D1_carve": "보이는 빈 공간 비우기 (--free-space-carve)",
+  "D2_robot_free": "로봇 몸 공간 비우기 (--robot-occupied-free)",
+  "D1_D2": "둘 다",
+  "D0_curobo_decay": "cuRobo 감쇠 비교 (--tsdf-time-decay 0.99 --tsdf-frustum-decay 0.8)"
+ },
+ "runs": [
+  {
+   "id": "full_a",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T160932+0900_8da37119afd3_cfabfe9ace2e/verify/AG3S-DYNAMIC-FIELD/run_full.sh (off, D1_carve; D2_robot_free 는 중단 뒤 run_rest.sh)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T160932+0900_8da37119afd3_cfabfe9ace2e/verify/AG3S-DYNAMIC-FIELD/full_a"
+  },
+  {
+   "id": "full_c",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T160932+0900_8da37119afd3_cfabfe9ace2e/verify/AG3S-DYNAMIC-FIELD/run_rest.sh (D2_robot_free, D0_curobo_decay)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T160932+0900_8da37119afd3_cfabfe9ace2e/verify/AG3S-DYNAMIC-FIELD/full_c"
+  },
+  {
+   "id": "full_d",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T160932+0900_8da37119afd3_cfabfe9ace2e/verify/AG3S-DYNAMIC-FIELD/run_rest.sh (D1_D2)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T160932+0900_8da37119afd3_cfabfe9ace2e/verify/AG3S-DYNAMIC-FIELD/full_d"
+  },
+  {
+   "id": "figures",
+   "command": "MUJOCO_GL=osmesa .venv-openpi-live/bin/python -m AG3S.ag3s.experiments.studies.dynamic_field_figures --verify /mnt/dev/AG3S_VLA-storage/results/development/20261023T160932+0900_8da37119afd3_cfabfe9ace2e/verify/AG3S-DYNAMIC-FIELD --kit /mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE --configuration NBCTS --fig AG3S/ag3s/docs/figures/dynamic-field",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T160932+0900_8da37119afd3_cfabfe9ace2e/verify/AG3S-DYNAMIC-FIELD/figures.log"
+  }
+ ],
+ "definitions": {
+  "stale": "main 5 mm TSDF 표면 band voxel 중 가장 가까운 GT 표면(바닥 평면 포함)과 로봇 구에서 15 mm 넘게 먼 voxel. 요청마다 합산",
+  "stale_memory": "stale 중 움직이는 물체가 이전 요청에 있던 자리(5 mm grid 기억) 15 mm 안",
+  "missed": "workspace(과일에서 0.25 m 안) GT 표본점 중 거리장이 10 mm 넘게 멀다고 보는 비율. visible / occluded_seen_before / never_seen",
+  "fidelity_gate": "off replay 의 거친 20 mm 층이 서버 기록 esdf_coarse_distance 와 같아야 함 (첫 닫힘 전 요청). 미세 층은 기록에 없어 비교하지 않음",
+  "criterion": "결과 전 고정: stale −50% 이상 그리고 missed(visible, occluded_seen_before 각각) +1 pp 이하",
+  "clearing_delay": "task 에 정한 '물체별 비움 지연'은 물체별로 재지 않았다. 대신 장면별 stale_memory 가 처음 20 을 넘은 뒤 다시 20 이하로 내려간 장면 수를 대리값으로 남긴다"
+ },
+ "numbers": {
+  "summary": {
+   "off": {
+    "stale": 803522,
+    "stale_memory": 108136,
+    "band": 28601197,
+    "ms_median": 20.34,
+    "ms_p95": 23.13,
+    "missed": {
+     "visible": {
+      "n_far": 858079,
+      "n": 9615635,
+      "frac": 0.0892
+     },
+     "occluded_seen_before": {
+      "n_far": 439575,
+      "n": 1998867,
+      "frac": 0.2199
+     },
+     "never_seen": {
+      "n_far": 7350020,
+      "n": 8701318,
+      "frac": 0.8447
+     }
+    },
+    "fidelity_coarse": {
+     "n": 167,
+     "mean_mm_median": 0.0,
+     "frac_over_5mm_max": 0.0
+    }
+   },
+   "D1_carve": {
+    "stale": 463734,
+    "stale_memory": 49481,
+    "band": 28002728,
+    "ms_median": 122.49,
+    "ms_p95": 133.33,
+    "missed": {
+     "visible": {
+      "n_far": 899175,
+      "n": 9615635,
+      "frac": 0.0935
+     },
+     "occluded_seen_before": {
+      "n_far": 458124,
+      "n": 1998867,
+      "frac": 0.2292
+     },
+     "never_seen": {
+      "n_far": 7375950,
+      "n": 8701318,
+      "frac": 0.8477
+     }
+    },
+    "fidelity_coarse": {
+     "n": 167,
+     "mean_mm_median": 1.1815,
+     "frac_over_5mm_max": 0.177488
+    }
+   },
+   "D2_robot_free": {
+    "stale": 774994,
+    "stale_memory": 80064,
+    "band": 28530642,
+    "ms_median": 503.09,
+    "ms_p95": 610.82,
+    "missed": {
+     "visible": {
+      "n_far": 862214,
+      "n": 9615635,
+      "frac": 0.0897
+     },
+     "occluded_seen_before": {
+      "n_far": 449223,
+      "n": 1998867,
+      "frac": 0.2247
+     },
+     "never_seen": {
+      "n_far": 7351714,
+      "n": 8701318,
+      "frac": 0.8449
+     }
+    },
+    "fidelity_coarse": {
+     "n": 167,
+     "mean_mm_median": 0.0,
+     "frac_over_5mm_max": 0.001461
+    }
+   },
+   "D0_curobo_decay": {
+    "stale": 735344,
+    "stale_memory": 83961,
+    "band": 28946431,
+    "ms_median": 23.44,
+    "ms_p95": 26.09,
+    "missed": {
+     "visible": {
+      "n_far": 648465,
+      "n": 9615635,
+      "frac": 0.0674
+     },
+     "occluded_seen_before": {
+      "n_far": 441434,
+      "n": 1998867,
+      "frac": 0.2208
+     },
+     "never_seen": {
+      "n_far": 7325186,
+      "n": 8701318,
+      "frac": 0.8418
+     }
+    },
+    "fidelity_coarse": {
+     "n": 167,
+     "mean_mm_median": 0.9099,
+     "frac_over_5mm_max": 0.210023
+    }
+   },
+   "D1_D2": {
+    "stale": 446337,
+    "stale_memory": 32168,
+    "band": 27953637,
+    "ms_median": 596.51,
+    "ms_p95": 691.18,
+    "missed": {
+     "visible": {
+      "n_far": 903261,
+      "n": 9615635,
+      "frac": 0.0939
+     },
+     "occluded_seen_before": {
+      "n_far": 467696,
+      "n": 1998867,
+      "frac": 0.234
+     },
+     "never_seen": {
+      "n_far": 7377581,
+      "n": 8701318,
+      "frac": 0.8479
+     }
+    },
+    "fidelity_coarse": {
+     "n": 167,
+     "mean_mm_median": 1.1815,
+     "frac_over_5mm_max": 0.177597
+    }
+   }
+  },
+  "table": {
+   "off": {
+    "stale": 803522,
+    "stale_change_pct": 0.0,
+    "memory": 108136,
+    "memory_change_pct": 0.0,
+    "missed_visible_pp": 0.0,
+    "missed_occluded_seen_pp": 0.0,
+    "ms_median": 20.34,
+    "ms_p95": 23.13,
+    "meets_criterion": false
+   },
+   "D1_carve": {
+    "stale": 463734,
+    "stale_change_pct": -42.29,
+    "memory": 49481,
+    "memory_change_pct": -54.24,
+    "missed_visible_pp": 0.43,
+    "missed_occluded_seen_pp": 0.93,
+    "ms_median": 122.49,
+    "ms_p95": 133.33,
+    "meets_criterion": false
+   },
+   "D2_robot_free": {
+    "stale": 774994,
+    "stale_change_pct": -3.55,
+    "memory": 80064,
+    "memory_change_pct": -25.96,
+    "missed_visible_pp": 0.05,
+    "missed_occluded_seen_pp": 0.48,
+    "ms_median": 503.09,
+    "ms_p95": 610.82,
+    "meets_criterion": false
+   },
+   "D1_D2": {
+    "stale": 446337,
+    "stale_change_pct": -44.45,
+    "memory": 32168,
+    "memory_change_pct": -70.25,
+    "missed_visible_pp": 0.47,
+    "missed_occluded_seen_pp": 1.41,
+    "ms_median": 596.51,
+    "ms_p95": 691.18,
+    "meets_criterion": false
+   },
+   "D0_curobo_decay": {
+    "stale": 735344,
+    "stale_change_pct": -8.48,
+    "memory": 83961,
+    "memory_change_pct": -22.36,
+    "missed_visible_pp": -2.18,
+    "missed_occluded_seen_pp": 0.09,
+    "ms_median": 23.44,
+    "ms_p95": 26.09,
+    "meets_criterion": false
+   }
+  },
+  "clearing_proxy": {
+   "off": {
+    "final_memory_per_scene": {
+     "56": 941,
+     "126": 975,
+     "211": 169,
+     "250": 965,
+     "309": 1578,
+     "320": 1108,
+     "753": 950,
+     "954": 934,
+     "1668": 885,
+     "1837": 1226
+    },
+    "scenes_with_memory": 10,
+    "scenes_memory_back_to_20_or_less": 1
+   },
+   "D1_carve": {
+    "final_memory_per_scene": {
+     "56": 375,
+     "126": 235,
+     "211": 165,
+     "250": 285,
+     "309": 241,
+     "320": 329,
+     "753": 458,
+     "954": 300,
+     "1668": 395,
+     "1837": 259
+    },
+    "scenes_with_memory": 10,
+    "scenes_memory_back_to_20_or_less": 1
+   },
+   "D2_robot_free": {
+    "final_memory_per_scene": {
+     "56": 667,
+     "126": 931,
+     "211": 56,
+     "250": 701,
+     "309": 1290,
+     "320": 616,
+     "753": 712,
+     "954": 383,
+     "1668": 640,
+     "1837": 987
+    },
+    "scenes_with_memory": 10,
+    "scenes_memory_back_to_20_or_less": 1
+   },
+   "D1_D2": {
+    "final_memory_per_scene": {
+     "56": 323,
+     "126": 218,
+     "211": 52,
+     "250": 232,
+     "309": 221,
+     "320": 249,
+     "753": 369,
+     "954": 166,
+     "1668": 217,
+     "1837": 231
+    },
+    "scenes_with_memory": 10,
+    "scenes_memory_back_to_20_or_less": 1
+   },
+   "D0_curobo_decay": {
+    "final_memory_per_scene": {
+     "56": 780,
+     "126": 613,
+     "211": 1,
+     "250": 861,
+     "309": 1004,
+     "320": 954,
+     "753": 889,
+     "954": 762,
+     "1668": 514,
+     "1837": 867
+    },
+    "scenes_with_memory": 10,
+    "scenes_memory_back_to_20_or_less": 2
+   }
+  },
+  "scene_ep126_r25_in_view": {
+   "off": {
+    "request": 25,
+    "state": "held",
+    "n_band_in_view": 30468,
+    "n_stale_memory_in_view": 247,
+    "n_stale_other_in_view": 754
+   },
+   "D1_D2": {
+    "request": 25,
+    "state": "held",
+    "n_band_in_view": 29797,
+    "n_stale_memory_in_view": 30,
+    "n_stale_other_in_view": 698
+   }
+  },
+  "fidelity_gate_off": {
+   "n": 167,
+   "mean_mm_median": 0.0,
+   "frac_over_5mm_max": 0.0
+  }
+ },
+ "figures": [
+  "AG3S/ag3s/docs/figures/dynamic-field/dynamic-field-table.png",
+  "AG3S/ag3s/docs/figures/dynamic-field/dynamic-field-timeseries.png",
+  "AG3S/ag3s/docs/figures/dynamic-field/dynamic-field-scene-ep126-r25.png"
+ ],
+ "verdict": {
+  "D1_carve": "below",
+  "D2_robot_free": "below",
+  "D1_D2": "below",
+  "D0_curobo_decay": "below"
+ },
+ "not_measured": [
+  "closed-loop 성공 · 실제 접촉",
+  "물체별 비움 지연(대리값만)",
+  "stale 중 옛 기억이 아닌 약 86% 의 출처 분해"
+ ],
+ "limits": [
+  "offline replay: 관측은 off 구성으로 찍힌 기록이라 구성이 바뀌어도 로봇 궤적은 같다",
+  "GT 표본 간격과 얇은 geom(상자 벽 · 탁자 모서리)이 '그 밖' 잔상에 섞일 수 있다"
+ ]
+}

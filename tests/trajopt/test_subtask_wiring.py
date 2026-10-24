@@ -164,7 +164,8 @@ def test_build_ag3s_puts_the_gate_in_the_config():
     src = inspect.getsource(serve_safe.build_ag3s)
     assert "**subtask_config_section(subtask_gate, subtask_probe_path)" in src
     main = inspect.getsource(serve_safe.main)
-    assert "subtask_gate=args.subtask_gate" in main
+    # `main` builds AG3S through `ag3s_from_args` (AG3S-DYNAMIC-FIELD)
+    assert "subtask_gate=args.subtask_gate" in inspect.getsource(serve_safe.ag3s_from_args)
     assert 'subtask_probe=args.subtask_probe or "default"' in main
     assert '"subtask": {"gate": bool(args.subtask_gate)' in main
 

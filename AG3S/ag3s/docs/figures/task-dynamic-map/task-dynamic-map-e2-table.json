@@ -1,0 +1,79 @@
+{
+ "judgement": {
+  "2_moved_old_main": {
+   "base": 1277,
+   "value": 65,
+   "reduction": 0.9491,
+   "pass": true
+  },
+  "3_missed_main_visible_pp": {
+   "value": 0.216,
+   "pass": true
+  },
+  "3_missed_main_occluded_seen_before_pp": {
+   "value": 0.767,
+   "pass": true
+  },
+  "3_missed_hand_visible_pp": {
+   "value": 0.22,
+   "pass": true
+  },
+  "3_missed_hand_occluded_seen_before_pp": {
+   "value": 0.951,
+   "pass": true
+  },
+  "4_success": {
+   "base": 14,
+   "value": 16,
+   "pass": true
+  },
+  "4_forbidden_episodes": {
+   "base": 3,
+   "value": 3,
+   "pass": true
+  },
+  "adopt": true
+ },
+ "rows": [
+  [
+   "2_moved_old_main",
+   "1277",
+   "94.9% \u2193 \u2713"
+  ],
+  [
+   "3_missed_main_visible_pp",
+   "\u2014",
+   "0.216 \u2713"
+  ],
+  [
+   "3_missed_main_occluded_seen_before_pp",
+   "\u2014",
+   "0.767 \u2713"
+  ],
+  [
+   "3_missed_hand_visible_pp",
+   "\u2014",
+   "0.22 \u2713"
+  ],
+  [
+   "3_missed_hand_occluded_seen_before_pp",
+   "\u2014",
+   "0.951 \u2713"
+  ],
+  [
+   "4_success",
+   "14",
+   "16 \u2713"
+  ],
+  [
+   "4_forbidden_episodes",
+   "3",
+   "3 \u2713"
+  ],
+  [
+   "adopt",
+   "",
+   "\ucc44\ud0dd"
+  ]
+ ]
+}

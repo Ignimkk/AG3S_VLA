@@ -2143,12 +2143,14 @@ class AG3S:
                 # when that exclusion is on (the default `ball` never builds it: same calls as before).
                 # T44c A5: the target-free coarse tier reads the same evidence (shared coarse voxels
                 # keep their obstacle seeds) — with `ball` too.
+                # AG3S-TASK-DYNAMIC-MAP ①: the target TSDF's pixel ownership reads the same evidence (any policy).
                 nontarget = None
                 if (cfg.esdf.backend == "curobo"
-                        and (getattr(cfg.esdf, "target_exclusion", "ball") == "ball_owned"
-                             or bool(getattr(cfg.esdf, "target_free_coarse", False)))
                         and manipulated_geometry is not None
-                        and self.config.constraint.excludes_target_from_field):
+                        and (((getattr(cfg.esdf, "target_exclusion", "ball") == "ball_owned"
+                               or bool(getattr(cfg.esdf, "target_free_coarse", False)))
+                              and self.config.constraint.excludes_target_from_field)
+                             or bool(getattr(cfg.esdf, "target_layer", False)))):
                     nontarget = self._nontarget_points(cloud, support_mask, manipulated_geometry)
                 # T44e A8: the support plane's inlier points the target-free coarse tier removes its
                 # seeds by — only with `target_free_coarse_support == "exclude"` (default `keep`: same call).
@@ -3092,6 +3094,11 @@ class AG3S:
         if cfg.backend == "curobo" and self._attached is not None and robot_state is not None \
                 and self.free_held_traces and self.constraint_robot_model is not None:
             held_free = self._held_free_points(robot_state, support_surfaces, destination_points)
+        # AG3S-DYNAMIC-FIELD D2: the volume the robot body occupies now → free (off: None, the call as before).
+        robot_free = None
+        if cfg.backend == "curobo" and bool(getattr(cfg, "robot_occupied_free", False)) \
+                and robot_state is not None:
+            robot_free = self._robot_free_spheres(robot_state, support_surfaces, destination_points)
         attached_points = None
         if (held_free is None and self._attached is not None and robot_state is not None
                 and self.constraint_robot_model is not None):
@@ -3156,7 +3163,14 @@ class AG3S:
             # T44e A8b: points within the RANSAC inlier threshold of the plane are not footprint evidence.
             support_evidence["inlier_threshold_m"] = float(
                 self.config.support_surface.distance_threshold)
+        # AG3S-TASK-DYNAMIC-MAP ① · ② (off: None, the call as before).
+        target_layer = (self._target_layer_request(points, nontarget, support_surfaces)
+                        if cfg.backend == "curobo" and bool(getattr(cfg, "target_layer", False)) else None)
+        roi_points = ([points, destination_points]
+                      if cfg.backend == "curobo" and bool(getattr(cfg, "roi_carve", False)) else None)
         field = self._esdf_builder.update(depth_cameras, target_points=points,
+                                          **({} if target_layer is None else {"target_layer": target_layer}),
+                                          **({} if roi_points is None else {"roi_points": roi_points}),
                                           exclude_target=False,
                                           **({} if window_request is None
                                              else {"fine_window": window_request}),
@@ -3171,6 +3185,9 @@ class AG3S:
                                           # T32 H3: the held object's old traces → free.
                                           **({} if held_free is None
                                              else {"held_free_points": held_free}),
+                                          # AG3S-DYNAMIC-FIELD D2 (only when on).
+                                          **({} if robot_free is None
+                                             else {"robot_free_spheres": robot_free}),
                                           labelled_points=labelled,
                                           # 아는 정적 기하 — **주입**이다. AG3S 는 무엇이 벽이고
                                           # 무엇이 선반인지 알 수 없다 (phase·목적지와 같은 계약).
@@ -3226,6 +3243,34 @@ class AG3S:
                 and bool(getattr(field, "has_target_free", False)),
                 margin=self._fine_window_pads()[0])
         return field, notes
+
+    def _target_layer_request(self, points, nontarget, support_surfaces):
+        """AG3S-TASK-DYNAMIC-MAP ① — this frame's `TargetLayerRequest` (`esdf.target_layer` only).
+
+        Held (attached) → `held=True` (the builder resets the target TSDF and routes nothing). No manipulated
+        points → an empty request (also a reset). Otherwise the manipulated points, the non-target evidence
+        (`_nontarget_points`), the floor = support plane under the object + one fine voxel (`_guard_pad`, the
+        `TargetBall` rule: never the table) and the centre = surface-sphere fit (else the point mean) for ①-b.
+        """
+        from AG3S.ag3s.fields.curobo_builder import TargetLayerRequest
+        from AG3S.ag3s.robot_models.held_object import fit_surface_sphere
+
+        cfg = self.config.esdf
+        if self._attached is not None:
+            return TargetLayerRequest(held=True)
+        if points is None or not len(points):
+            return TargetLayerRequest()
+        pts = np.asarray(points, np.float64).reshape(-1, 3)
+        mo = self._max_opening
+        fit = fit_surface_sphere(pts, max_radius=0.5 * mo.value_m if mo.known else None)
+        centre = fit.centre.copy() if fit.accepted else pts.mean(axis=0)
+        z_plane = self._support_plane_z(support_surfaces, centre)
+        return TargetLayerRequest(
+            target_points=pts,
+            nontarget_points=None if nontarget is None else nontarget["points"],
+            tol=float(cfg.target_layer_pixel_tol),
+            z_floor=None if z_plane is None else float(z_plane) + self._guard_pad(),
+            centre=centre)
 
     def _nontarget_points(self, cloud, support_mask, geometry) -> dict:
         """T44 I1 — the observed **non-target** points `ball_owned` compares against.
@@ -3361,6 +3406,36 @@ class AG3S:
         z_min = None if z_plane is None else float(z_plane) + spacing
         pts = sphere_volume_points(spheres, spacing, z_min=z_min)
         return pts if len(pts) else None
+
+    def _robot_free_spheres(self, robot_state, support_surfaces, destination_points):
+        """AG3S-DYNAMIC-FIELD D2 — the robot body now, as the spheres whose occupied TSDF voxels the builder frees.
+
+        The self-filter model's spheres at `robot_state` (the whole body the depth mask removes, plus the
+        held spheres while attached), each shrunk by `esdf.robot_free_shrink` so an object the fingers
+        touch keeps its surface. Per sphere the floor is the support plane under it + pad (never a hole in
+        the table); voxels within two pads of the destination are kept (the crate is never eroded) — the
+        `_held_free_points` rules. The builder tests only its occupied voxels (`inside_robot_spheres`), so
+        no volume is sampled. None when there is no model or nothing remains.
+        """
+        model = self._frame_filter_model
+        if model is None:
+            return None
+        centers, radii = model.sphere_centers_numeric(np.asarray(robot_state, np.float64))
+        c = np.asarray(centers, np.float64).reshape(-1, 3)
+        r = np.asarray(radii, np.float64).reshape(-1) - float(getattr(self.config.esdf, "robot_free_shrink", 0.005))
+        keep = r > 0.0
+        if not keep.any():
+            return None
+        c, r = c[keep], r[keep]
+        pad = self._guard_pad()
+        z_min = np.full(len(c), -np.inf)
+        for i, ci in enumerate(c):   # the floor under each sphere (the body spans the table edge)
+            z_plane = self._support_plane_z(support_surfaces, ci)
+            if z_plane is not None:
+                z_min[i] = float(z_plane) + pad
+        dest = (None if destination_points is None or not len(destination_points)
+                else np.asarray(destination_points, np.float64).reshape(-1, 3))
+        return {"centres": c, "radii": r, "z_min": z_min, "destination": dest, "dest_pad": 2.0 * pad}
 
     def _held_free_points(self, robot_state, support_surfaces, destination_points):
         """Points whose TSDF voxels are set **free** this frame (T32 H3), or None.

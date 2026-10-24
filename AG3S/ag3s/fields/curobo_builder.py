@@ -89,6 +89,7 @@ from AG3S.ag3s.fields.device_field import layer_from_device
 from AG3S.ag3s.fields.esdf import CameraDepth, VoxelGrid, default_bounds
 from AG3S.ag3s.fields.observation import probe_from_cameras
 from AG3S.ag3s.fields.provenance import FieldProvenance
+from AG3S.ag3s.types import TARGET_LABEL
 
 __all__ = ["CuroboFieldBuilder", "TargetBall", "OwnedEvidence", "OWNED_CLASSES", "ATTACHED_LABEL", "unpack_site_linear",
            "CoarseFreeSpec", "CUROBO_SEED_BAND_VOXELS", "coarse_exclusion_params", "COARSE_SIGN_FLOORS",
@@ -96,7 +97,8 @@ __all__ = ["CuroboFieldBuilder", "TargetBall", "OwnedEvidence", "OWNED_CLASSES",
            "WINDOW_PLACEMENTS", "NONTARGET_EVIDENCES", "nontarget_surface_evidence",
            "OracleVisibleEvidence", "oracle_candidates", "oracle_visible_split", "oracle_cell_keys",
            "SurfaceProtectEvidence", "surface_protect_split",   # IFG-CL2
-           "oracle_band_masks"]
+           "oracle_band_masks",
+           "TargetLayerRequest", "target_owned", "target_pixel_mask", "roi_boxes", "in_boxes"]   # TASK-DYNAMIC-MAP
 
 #: 쥔 물체에 붙이는 내부 라벨. 호출자의 `labelled_points` 이름과 겹치면 안 되므로 밑줄로 감싼다.
 ATTACHED_LABEL = "__attached__"
@@ -402,6 +404,263 @@ def coarse_exclusion_params(ball: "TargetBall", voxel_size: float, spec: CoarseF
 
 #: `ball_owned` 분류 이름 — `_ball_owned_split` 의 키, 기록의 ijk 키 접미와 같다.
 OWNED_CLASSES = ("target", "nontarget", "ambiguous", "unowned")
+
+
+def seen_through(points: np.ndarray, cameras: Sequence[Any], margin: float, *,
+                 depth_min: float = 0.0, depth_max: float = float("inf"),
+                 footprint_voxel: Optional[float] = None, footprint_pad_px: int = 1,
+                 footprint_robot: str = "block") -> tuple[np.ndarray, dict]:
+    """AG3S-DYNAMIC-FIELD D1 — which `points` (N, 3, base frame) a depth ray of this frame passed through.
+
+    A point is seen through when, in at least one camera, it projects inside the image in front of the
+    camera and the observed z-depth of that pixel is more than `margin` beyond the point's own depth. The
+    camera then saw *past* it, so nothing opaque is there. Pixels under `robot_mask`, zero / non-finite
+    depth and depth outside `[depth_min, depth_max]` decide nothing (unobserved stays as it was) — so a
+    fruit hidden behind the hand is never cleared. Pinhole z-depth, `T_base_cam` camera→base, as
+    `stages.reconstruction.backproject`. Nearest pixel; pure numpy (the CPU tests read it).
+
+    AG3S-TASK-DYNAMIC-MAP (`footprint_voxel`, off = None): instead of the nearest pixel, every pixel of the point's
+    projected voxel footprint — a square of radius ``ceil(0.5 · fx · footprint_voxel / z) + footprint_pad_px`` px —
+    must be valid (in range, not robot, inside the image) and see more than `margin` past the point. At an object's
+    silhouette the nearest pixel can already see the background; the footprint keeps such edge voxels (thin objects).
+    `footprint_robot`: ``block`` (a robot pixel anywhere in the footprint decides nothing) or ``ignore`` (robot pixels of the
+    footprint do not count, but the nearest pixel itself must not be robot and must see past — what the hand hides is still
+    never cleared).
+
+    Returns `(mask (N,) bool, {camera name: n seen through})`.
+    """
+    p = np.asarray(points, np.float64).reshape(-1, 3)
+    out = np.zeros(len(p), bool)
+    per = {}
+    for cam in cameras:
+        if footprint_voxel is not None:
+            hit = _seen_through_footprint(p, cam, margin, depth_min, depth_max, float(footprint_voxel),
+                                          int(footprint_pad_px), robot=str(footprint_robot))
+            out[hit] = True
+            per[str(getattr(cam, "name", "camera"))] = int(len(hit))
+            continue
+        d = np.asarray(cam.depth, np.float64)
+        h, w = d.shape[:2]
+        K = np.asarray(cam.camera_intrinsics, np.float64)
+        T = np.asarray(cam.T_base_cam, np.float64)
+        pc = (p - T[:3, 3][None, :]) @ T[:3, :3]          # base -> camera
+        z = pc[:, 2]
+        front = z > 1e-6
+        u = np.full(len(p), -1, np.int64)
+        v = np.full(len(p), -1, np.int64)
+        u[front] = np.rint(K[0, 0] * pc[front, 0] / z[front] + K[0, 2]).astype(np.int64)
+        v[front] = np.rint(K[1, 1] * pc[front, 1] / z[front] + K[1, 2]).astype(np.int64)
+        inside = front & (u >= 0) & (u < w) & (v >= 0) & (v < h)
+        idx = np.flatnonzero(inside)
+        obs = d[v[idx], u[idx]]
+        ok = np.isfinite(obs) & (obs > 0.0) & (obs >= depth_min) & (obs <= depth_max)
+        mask = getattr(cam, "robot_mask", None)
+        if mask is not None:
+            ok &= ~np.asarray(mask, bool)[v[idx], u[idx]]
+        hit = idx[ok & (obs - z[idx] > float(margin))]
+        out[hit] = True
+        per[str(getattr(cam, "name", "camera"))] = int(len(hit))
+    return out, per
+
+
+#: the largest footprint radius (px) `_seen_through_footprint` evaluates — a voxel nearer than that is not carved
+FOOTPRINT_MAX_PX = 8
+
+
+def _seen_through_footprint(p, cam, margin, depth_min, depth_max, voxel, pad_px, robot: str = "block") -> np.ndarray:
+    """Indices of `p` that one camera saw through over the whole projected voxel footprint (`seen_through`)."""
+    from scipy.ndimage import minimum_filter
+
+    d = np.asarray(cam.depth, np.float64)
+    h, w = d.shape[:2]
+    K = np.asarray(cam.camera_intrinsics, np.float64)
+    T = np.asarray(cam.T_base_cam, np.float64)
+    good = np.isfinite(d) & (d > 0.0) & (d >= depth_min) & (d <= depth_max)
+    mask = getattr(cam, "robot_mask", None)
+    rmask = None if mask is None else np.asarray(mask, bool)
+    if rmask is not None:
+        good &= ~rmask
+    d0 = np.where(good, d, 0.0)          # an undecided pixel anywhere in the footprint → min 0 → not seen through
+    dc = d0                              # the nearest pixel: robot / invalid → 0 (decides nothing)
+    if robot == "ignore" and rmask is not None:
+        d0 = np.where(rmask, np.inf, d0)  # robot pixels of the footprint do not count
+    pc = (p - T[:3, 3][None, :]) @ T[:3, :3]
+    z = pc[:, 2]
+    front = z > 1e-6
+    u = np.full(len(p), -1, np.int64)
+    v = np.full(len(p), -1, np.int64)
+    u[front] = np.rint(K[0, 0] * pc[front, 0] / z[front] + K[0, 2]).astype(np.int64)
+    v[front] = np.rint(K[1, 1] * pc[front, 1] / z[front] + K[1, 2]).astype(np.int64)
+    idx = np.flatnonzero(front & (u >= 0) & (u < w) & (v >= 0) & (v < h))
+    if not len(idx):
+        return idx
+    r = np.ceil(0.5 * max(K[0, 0], K[1, 1]) * voxel / z[idx]).astype(np.int64) + int(pad_px)
+    obs = np.zeros(len(idx))
+    for rv in np.unique(r):
+        if rv > FOOTPRINT_MAX_PX:
+            continue                      # too near (footprint too large to judge) → leave it
+        dm = minimum_filter(d0, size=2 * int(rv) + 1, mode="constant", cval=0.0)
+        sel = r == rv
+        obs[sel] = dm[v[idx[sel]], u[idx[sel]]]
+    centre = dc[v[idx], u[idx]]
+    return idx[(obs > 0.0) & np.isfinite(obs) & (obs - z[idx] > float(margin))
+               & (centre > 0.0) & (centre - z[idx] > float(margin))]
+
+
+def inside_robot_spheres(points: np.ndarray, spheres: dict) -> np.ndarray:
+    """AG3S-DYNAMIC-FIELD D2 — which `points` (N, 3) lie inside the robot's (shrunk) spheres this frame.
+
+    `spheres = {"centres": (S, 3), "radii": (S,), "z_min": (S,), "destination": (D, 3) | None, "dest_pad": m}`
+    (pipeline `_robot_free_spheres`). A point counts when it is inside a sphere **and** not below that sphere's
+    floor (`z_min`, the support plane under it + pad: never a hole in the table) and not within `dest_pad` of
+    a destination point (the crate is never eroded). Pure numpy / scipy (the CPU tests read it).
+    """
+    from scipy.spatial import cKDTree
+
+    p = np.asarray(points, np.float64).reshape(-1, 3)
+    c = np.asarray(spheres["centres"], np.float64).reshape(-1, 3)
+    r = np.asarray(spheres["radii"], np.float64).reshape(-1)
+    zmin = np.asarray(spheres["z_min"], np.float64).reshape(-1)
+    out = np.zeros(len(p), bool)
+    if not len(p) or not len(c):
+        return out
+    k = min(16, len(c))
+    d, i = cKDTree(c).query(p, k=k, distance_upper_bound=float(r.max()) + 1e-9)
+    d, i = d.reshape(len(p), -1), i.reshape(len(p), -1)
+    valid = i < len(c)
+    ii = np.where(valid, i, 0)
+    hit = valid & (d <= r[ii]) & (p[:, 2][:, None] >= zmin[ii])
+    out = hit.any(axis=1)
+    dest = spheres.get("destination")
+    if out.any() and dest is not None and len(dest):
+        dd, _ = cKDTree(np.asarray(dest, np.float64).reshape(-1, 3)).query(
+            p[out], distance_upper_bound=float(spheres.get("dest_pad", 0.0)))
+        idx = np.flatnonzero(out)
+        out[idx[np.isfinite(dd)]] = False
+    return out
+
+
+@dataclasses.dataclass
+class TargetLayerRequest:
+    """AG3S-TASK-DYNAMIC-MAP ① — what the target-only TSDF needs this frame (pipeline `_target_layer_request`).
+
+    `target_points` = this frame's manipulated points (the observed or followed geometry). A pixel or voxel is
+    the target's when its nearest evidence point is a target point within `tol` and it is at or above `z_floor`
+    (support plane + one fine voxel: never the table) — `target_owned`. `nontarget_points` = the observed
+    non-target cloud (`AG3S._nontarget_points`), the competing evidence; `None` = only `tol` and `z_floor` decide.
+    `centre` = the object's centre this frame (surface-sphere fit, else the point mean) — the move test of ①-b.
+    `held` = the object is attached: the target TSDF is reset and unused (the held object is the robot's).
+    """
+
+    target_points: Optional[np.ndarray] = None
+    nontarget_points: Optional[np.ndarray] = None
+    tol: float = 0.010
+    z_floor: Optional[float] = None
+    centre: Optional[np.ndarray] = None
+    held: bool = False
+
+    def __post_init__(self) -> None:
+        for name in ("target_points", "nontarget_points"):
+            p = getattr(self, name)
+            if p is not None:
+                p = np.asarray(p, np.float64).reshape(-1, 3)
+                object.__setattr__(self, name, p if len(p) else None)
+        if not (np.isfinite(float(self.tol)) and float(self.tol) > 0.0):
+            raise ValueError(f"tol 은 양수여야 합니다: {self.tol}")
+        if self.centre is None and self.target_points is not None:
+            object.__setattr__(self, "centre", self.target_points.mean(axis=0))
+
+    @property
+    def active(self) -> bool:
+        return not self.held and self.target_points is not None
+
+
+def target_owned(points: np.ndarray, target_points: Optional[np.ndarray],
+                 nontarget_points: Optional[np.ndarray], tol, z_floor: Optional[float]) -> np.ndarray:
+    """AG3S-TASK-DYNAMIC-MAP ① — which `points` (N, 3) belong to the target.
+
+    A point is the target's when a target point is within `tol` (scalar or per point (N,)), its nearest
+    target point is strictly closer than its nearest non-target point (the `ball_owned` ownership rule,
+    T44 I1; a tie stays an obstacle), and it is at or above `z_floor`. Pure numpy / scipy (the CPU tests read it).
+    """
+    from scipy.spatial import cKDTree
+
+    p = np.asarray(points, np.float64).reshape(-1, 3)
+    out = np.zeros(len(p), bool)
+    if not len(p) or target_points is None or not len(target_points):
+        return out
+    tol = np.broadcast_to(np.asarray(tol, np.float64), (len(p),))
+    dt, _ = cKDTree(np.asarray(target_points, np.float64).reshape(-1, 3)).query(
+        p, distance_upper_bound=float(tol.max()) + 1e-12)
+    cand = np.isfinite(dt) & (dt <= tol)
+    if z_floor is not None:
+        cand &= p[:, 2] >= float(z_floor)
+    if cand.any() and nontarget_points is not None and len(nontarget_points):
+        idx = np.flatnonzero(cand)
+        dn, _ = cKDTree(np.asarray(nontarget_points, np.float64).reshape(-1, 3)).query(
+            p[idx], distance_upper_bound=float(dt[idx].max()) + 1e-12)
+        out[idx[dt[idx] < dn]] = True
+        return out
+    return cand
+
+
+def target_pixel_mask(depth: np.ndarray, K: np.ndarray, T_base_cam: np.ndarray,
+                      request: TargetLayerRequest, *, depth_min: float = 0.0,
+                      depth_max: float = float("inf")) -> np.ndarray:
+    """AG3S-TASK-DYNAMIC-MAP ① — the `(H, W)` bool mask of this camera's pixels that go to the target TSDF.
+
+    `depth` is the robot-masked z-depth the TSDF integrates (masked pixels are 0 and decide nothing). Each
+    valid pixel is back-projected (`seen_through`'s pinhole convention, pixel ``u ↔ fx·x/z + cx``) and kept
+    when `target_owned`. Pixels outside the target points' box ± `tol` are not tested.
+    """
+    d = np.asarray(depth, np.float64)
+    mask = np.zeros(d.shape[:2], bool)
+    tp = request.target_points
+    if tp is None:
+        return mask
+    valid = np.isfinite(d) & (d > 0.0) & (d >= depth_min) & (d <= depth_max)
+    v, u = np.nonzero(valid)
+    if not len(v):
+        return mask
+    K = np.asarray(K, np.float64)
+    T = np.asarray(T_base_cam, np.float64)
+    z = d[v, u]
+    pc = np.stack([(u - K[0, 2]) * z / K[0, 0], (v - K[1, 2]) * z / K[1, 1], z], axis=1)
+    pb = pc @ T[:3, :3].T + T[:3, 3][None, :]
+    lo = tp.min(axis=0) - float(request.tol)
+    hi = tp.max(axis=0) + float(request.tol)
+    box = np.all((pb >= lo) & (pb <= hi), axis=1)
+    if not box.any():
+        return mask
+    own = target_owned(pb[box], tp, request.nontarget_points, float(request.tol), request.z_floor)
+    sel = np.flatnonzero(box)[own]
+    mask[v[sel], u[sel]] = True
+    return mask
+
+
+def roi_boxes(point_sets: Sequence[Optional[np.ndarray]], pad: float,
+              boxes: Sequence[tuple] = ()) -> list[tuple[np.ndarray, np.ndarray]]:
+    """AG3S-TASK-DYNAMIC-MAP ② — the region of interest as AABBs: each point set's box ± `pad`, each given box ± `pad`."""
+    out = []
+    for p in point_sets:
+        if p is None:
+            continue
+        p = np.asarray(p, np.float64).reshape(-1, 3)
+        if len(p):
+            out.append((p.min(axis=0) - float(pad), p.max(axis=0) + float(pad)))
+    for lo, hi in boxes:
+        out.append((np.asarray(lo, np.float64).reshape(3) - float(pad),
+                    np.asarray(hi, np.float64).reshape(3) + float(pad)))
+    return out
+
+
+def in_boxes(points: np.ndarray, boxes: Sequence[tuple]) -> np.ndarray:
+    """Which `points` (N, 3) lie inside any `(lo, hi)` box."""
+    p = np.asarray(points, np.float64).reshape(-1, 3)
+    out = np.zeros(len(p), bool)
+    for lo, hi in boxes:
+        out |= np.all((p >= np.asarray(lo)) & (p <= np.asarray(hi)), axis=1)
+    return out
 
 
 def _nearest(points: np.ndarray, queries: np.ndarray) -> np.ndarray:
@@ -1054,6 +1313,11 @@ class CuroboFieldBuilder:
         #: (`EsdfConfig.fine_truncation`) — the fine and target-free tiers are seeded from it, the
         #: coarse tier from `_mapper` as before. `None` when the two truncations agree (one TSDF).
         self._fine_mapper = None
+        #: AG3S-TASK-DYNAMIC-MAP ①: the target-only TSDF (fine truncation), made on the first frame
+        #: that routes target pixels to it. `_target_anchor` = the object centre when it was last reset
+        #: (①-b: a move beyond `esdf.target_layer_reset_m` resets it); `None` = empty.
+        self._target_mapper = None
+        self._target_anchor: Optional[np.ndarray] = None
         self._image_hw = image_hw
         self._frames = 0
         self._bounds = self._resolve_bounds(config, bounds)
@@ -1165,6 +1429,9 @@ class CuroboFieldBuilder:
             self._mapper.reset()
         if self._fine_mapper is not None:
             self._fine_mapper.reset()
+        if self._target_mapper is not None:
+            self._target_mapper.reset()
+        self._target_anchor = None
         self._frames = 0
         self._label_names = ()
 
@@ -1187,7 +1454,10 @@ class CuroboFieldBuilder:
                support_seed_evidence: Optional[dict] = None,
                owned_nontarget_points: Optional[np.ndarray] = None,
                oracle_evidence: Optional[OracleVisibleEvidence] = None,
-               surface_protect: Optional[SurfaceProtectEvidence] = None) -> CuroboEsdfField:
+               surface_protect: Optional[SurfaceProtectEvidence] = None,
+               robot_free_spheres: Optional[dict] = None,
+               target_layer: Optional[TargetLayerRequest] = None,
+               roi_points: Optional[Sequence[Optional[np.ndarray]]] = None) -> CuroboEsdfField:
         """`EsdfBuilder.update` 와 같은 계약. 돌려주는 것은 `CuroboEsdfField` 다.
 
         `exclude_target` 는 **지원하지 않는다.** E1 이 그것을 폐기했다 — 필드는 익명이라
@@ -1223,6 +1493,11 @@ class CuroboFieldBuilder:
         `nontarget_points` 를 방식과 무관하게 읽는다 (공유 voxel 보존). 수는 `stats["target_free"]["coarse"]`,
         ijk 는 `field.coarse_exclusion_trace`.
 
+        `target_layer` (AG3S-TASK-DYNAMIC-MAP ①, `esdf.target_layer` 일 때만) 가 오면 target pixel 을 정적 TSDF 대신
+        target 전용 TSDF 에 적분하고, 본 계층 = `min(정적, target)`, target 없는 계층 = 정적 계층 그대로다 (공 · ownership
+        제외를 하지 않는다). `roi_points` (②, `esdf.roi_carve` 일 때만) 는 관심 영역의 점 집합들이다 — 그 상자 ± `roi_pad` 와
+        `fine_window` 의 손 경로 상자 ± `roi_pad` 안에서만 보이는 빈 공간을 지운다. 둘 다 `None` (기본) 이면 예전 호출과 같다.
+
         `support_seed_evidence` (T44e A8) 는 `esdf.target_free_coarse_support` 가 `"exclude"` · (A8b) `"exclude_target"` 일 때만 읽는다 —
         공 아래 지원면의 `{"points": (P, 3) inlier 점, "plane": [n, offset]}` (pipeline `_support_seed_evidence`).
         없으면 지원면 seed 를 지우지 않고 (keep 과 같음) 그 사실을 `stats["target_free"]["coarse"]["support"]` 에 남긴다.
@@ -1231,6 +1506,11 @@ class CuroboFieldBuilder:
         # 프로세스(`.venv-ag3s`)의 테스트가 이것을 실제로 받아 볼 수 있어야 한다 (T7b 의
         # `announce_diagnostic_scope` 를 함수로 뺀 것과 같은 이유).
         self._check_target_free_request(target_free_points, target_points)
+        # AG3S-TASK-DYNAMIC-MAP: the arguments come only with their config switch — never silently ignored.
+        if target_layer is not None and not bool(getattr(self.config, "target_layer", False)):
+            raise ValueError("target_layer 요청이 왔는데 esdf.target_layer 가 꺼져 있습니다")
+        if roi_points is not None and not bool(getattr(self.config, "roi_carve", False)):
+            raise ValueError("roi_points 가 왔는데 esdf.roi_carve 가 꺼져 있습니다")
         if surface_protect is not None:   # IFG-CL2 — protection of the `ball_owned` fine split only
             if oracle_evidence is not None:
                 raise ValueError("surface_protect 와 oracle_evidence 는 함께 올 수 없습니다 (미세 분할이 둘 중 하나다)")
@@ -1267,6 +1547,13 @@ class CuroboFieldBuilder:
         # 읽기만 한다 (`CameraProjectIntegrator.integrate` 는 `wp.from_torch` 로 읽는다; 테스트가
         # 적분 전후 바이트와 두 업로드 대비 TSDF 비트 동일을 확인한다).
         prepared = self._observations(cameras, dev)
+        # AG3S-TASK-DYNAMIC-MAP ①: target pixels go to the target TSDF only (off: `prepared` as is).
+        tl_stats = None
+        target_prepared = None
+        t_tl = time.monotonic()
+        if target_layer is not None:
+            prepared, target_prepared, tl_stats = self._target_layer_route(prepared, target_layer, cameras)
+        tl_active = target_layer is not None and target_layer.active
         per_camera = self._integrate(mapper, prepared)
         # T32 H4-fix: the fine tiers read their own TSDF (fine truncation), integrated from the
         # same depth. `None` = one TSDF for all tiers (the pre-T32 build).
@@ -1274,7 +1561,9 @@ class CuroboFieldBuilder:
         if self._fine_mapper is not None:
             self._integrate(self._fine_mapper, prepared, contribution=False)
             itg_fine = self._fine_mapper.integrator
-        del prepared
+        if target_prepared is not None:
+            self._integrate(self._target_mapper, target_prepared, contribution=False)
+        del prepared, target_prepared
         # T32 H3: the held object's old traces are set **free** in the TSDF(s) — after this frame's
         # integration, before the tiers are seeded (see `_free_tsdf_points`).
         freed = {}
@@ -1283,6 +1572,56 @@ class CuroboFieldBuilder:
             freed["coarse_tsdf"] = self._free_tsdf_points(itg, fp, self.coarse_truncation)
             if itg_fine is not None:
                 freed["fine_tsdf"] = self._free_tsdf_points(itg_fine, fp, self.fine_truncation)
+        # AG3S-DYNAMIC-FIELD — both off by default (no key in the stats then: bit-identical).
+        dynamic = {}
+        if robot_free_spheres is not None and len(robot_free_spheres.get("centres", ())):
+            # D2: occupied voxels inside the robot body now (shrunk spheres, pipeline `_robot_free_spheres`).
+            dynamic["robot_free"] = {"n_spheres": int(len(robot_free_spheres["centres"])),
+                                     "coarse_tsdf": self._free_inside_robot(itg, robot_free_spheres,
+                                                                            self.coarse_truncation)}
+            if itg_fine is not None:
+                dynamic["robot_free"]["fine_tsdf"] = self._free_inside_robot(itg_fine, robot_free_spheres,
+                                                                             self.fine_truncation)
+        if bool(getattr(cfg, "free_space_carve", False)):
+            # D1: occupied voxels a depth ray of this frame passed through.
+            margin_cfg = getattr(cfg, "free_space_carve_margin", None)
+            dynamic["carve"] = {"coarse_tsdf": self._carve_seen_through(
+                itg, cameras, self.coarse_truncation, margin_cfg)}
+            if itg_fine is not None:
+                dynamic["carve"]["fine_tsdf"] = self._carve_seen_through(
+                    itg_fine, cameras, self.fine_truncation, margin_cfg)
+        # AG3S-TASK-DYNAMIC-MAP ①: what the static TSDFs hold of the target (integrated before it was routed) → free.
+        if tl_active:
+            tl_stats["n_static_freed"] = {
+                "coarse_tsdf": self._free_target_in_static(itg, target_layer, self.coarse_truncation)}
+            if itg_fine is not None:
+                tl_stats["n_static_freed"]["fine_tsdf"] = self._free_target_in_static(
+                    itg_fine, target_layer, self.fine_truncation)
+        # AG3S-TASK-DYNAMIC-MAP ②: visible free space → free, inside the region of interest only.
+        roi_stats = None
+        if roi_points is not None:
+            t_roi = time.monotonic()
+            pad = float(getattr(cfg, "roi_pad", 0.10))
+            path = []
+            if fine_window is not None:
+                path = list(fine_window.step_boxes())
+                mb = fine_window.manipulated_box()
+                if mb is not None:
+                    path.append(mb)
+            path_box = ([] if not path else
+                        [(np.min([b[0] for b in path], axis=0), np.max([b[1] for b in path], axis=0))])
+            boxes = roi_boxes(list(roi_points), pad, path_box)
+            roi_stats = {"pad_m": pad,
+                         "boxes": [[[round(float(v), 4) for v in lo], [round(float(v), 4) for v in hi]]
+                                   for lo, hi in boxes]}
+            if boxes:
+                roi_stats["coarse_tsdf"] = self._roi_carve(itg, cameras, boxes, self.coarse_truncation)
+                if itg_fine is not None:
+                    roi_stats["fine_tsdf"] = self._roi_carve(itg_fine, cameras, boxes, self.fine_truncation)
+                if self._target_mapper is not None and self._target_anchor is not None:
+                    roi_stats["target_tsdf"] = self._roi_carve(self._target_mapper.integrator, cameras, boxes,
+                                                               self.fine_truncation)
+            roi_stats["ms"] = round((time.monotonic() - t_roi) * 1e3, 3)
 
         # 미세 계층 창의 배치 (T21, 지침 §5.1). **창의 배치는 손이 정하고, 제외할 물체는
         # manipulated 가 정한다** — 둘을 한 점(attention centroid)에 묶지 않는다. T14 seq 12–21 에서
@@ -1317,6 +1656,11 @@ class CuroboFieldBuilder:
         label_names = tuple(seeds)
 
         tiers = self._build_tiers(itg, attached, dev, torch, itg_fine=itg_fine)
+        # AG3S-TASK-DYNAMIC-MAP ①: the target TSDF's tiers on the same grids (its own integrator — no shared buffer).
+        target_tiers: list[_Tier] = []
+        if tl_active and self._target_anchor is not None:
+            titg = self._target_mapper.integrator
+            target_tiers = self._build_tiers(titg, None, dev, torch, itg_fine=titg)
 
         # **target 없는 미세 계층.** 본 계층을 다 만든 **뒤에** 따로 만든다 — 같은 버퍼
         # (`_site_index`, `feature_tensor`)를 재사용하므로 (함정 4) 사이에 끼면 본 계층의 값이
@@ -1325,7 +1669,13 @@ class CuroboFieldBuilder:
         free_ms = 0.0
         free_points = (None if target_free_points is None
                        else np.asarray(target_free_points, np.float64).reshape(-1, 3))
-        if free_points is not None and len(free_points):
+        if tl_active and free_points is not None and len(free_points):
+            # AG3S-TASK-DYNAMIC-MAP ①: the static fine tier **is** the target-free tier — the target never
+            # entered it, so nothing is excluded (no ball, no ownership split). Copied before the composition.
+            free_tiers = [_Tier(name="fine_no_target", values=t.values.clone(), site_linear=None,
+                                origin=t.origin, voxel_size=t.voxel_size, extra={"target_layer": True})
+                          for t in tiers if t.name == "fine"]
+        elif free_points is not None and len(free_points):
             # 위의 `_check_target_free_request` 가 미세 계층을 만들 수 있음을 이미 보장한다 —
             # 조용히 0 겹으로 지나가는 길이 없다.
             t0 = time.monotonic()
@@ -1373,7 +1723,14 @@ class CuroboFieldBuilder:
         # 일이다 (사용자 판정 1-6). 미세 target-free 계층 **뒤에** 만든다 (같은 버퍼 — 함정 4).
         coarse_free_tier = None
         coarse_stats: dict = {"mode": "off"}
-        if bool(getattr(cfg, "target_free_coarse", False)) and free_tiers:
+        if bool(getattr(cfg, "target_free_coarse", False)) and free_tiers and tl_active:
+            # AG3S-TASK-DYNAMIC-MAP ①: the static coarse tier, as the fine one above.
+            coarse_free_tier = next((_Tier(name="coarse_no_target", values=t.values.clone(), site_linear=None,
+                                           origin=t.origin, voxel_size=t.voxel_size,
+                                           extra={"target_layer": True})
+                                     for t in tiers if t.name == "coarse"), None)
+            coarse_stats = {"mode": "target_layer", "name": "coarse_no_target"}
+        elif bool(getattr(cfg, "target_free_coarse", False)) and free_tiers:
             if target_free_ball is None:
                 coarse_stats = {"mode": "skipped_no_ball",
                                 "why": "target-free 미세 계층이 점 제외로 물러났다 — 거친 계층은 "
@@ -1413,6 +1770,21 @@ class CuroboFieldBuilder:
                         coarse_stats.get("n_seeds_in_ball"),
                         coarse_stats.get("n_removed"), coarse_stats.get("n_shared_kept"))
 
+        # AG3S-TASK-DYNAMIC-MAP ①: the main tiers (links without contact authority) see static ∪ target =
+        # min(static, target) — E1: the not-yet-held target is never gone for the whole body.
+        target_closer: dict[str, Any] = {}
+        for st, tt in zip(tiers, target_tiers):
+            if (st.name != tt.name or tuple(st.values.shape) != tuple(tt.values.shape)
+                    or not np.allclose(st.origin, tt.origin, atol=1e-9)):
+                raise RuntimeError(f"target TSDF 계층 {tt.name} 이 정적 계층 {st.name} 과 격자가 다릅니다 — "
+                                   "합성하지 않고 멈춥니다")
+            closer = tt.values < st.values
+            st.values = torch.minimum(st.values, tt.values)
+            target_closer[st.name] = closer
+        if tl_stats is not None:
+            tl_stats["n_target_closer"] = {k: int(v.sum()) for k, v in target_closer.items()}
+            tl_stats["ms"] = round((time.monotonic() - t_tl) * 1e3, 3)
+
         layers = []
         # 씨앗 KD-tree 는 **update 당 한 번** 짓는다 (T38 B3). 예전에는 계층마다 같은 점으로
         # 다시 지었다 — 트리는 점이 같으면 같으므로 답도 같다.
@@ -1423,6 +1795,14 @@ class CuroboFieldBuilder:
                              voxel_size=tier.voxel_size)
             label_grid = self._labels_from_sites(tier, grid, seeds, label_names,
                                                  seed_index=seed_index)
+            closer = target_closer.get(tier.name)
+            if closer is not None and label_grid is not None and TARGET_LABEL in label_names:
+                # ①: where the target TSDF answers, the nearest surface is the target (the static sites lack it).
+                idx = label_names.index(TARGET_LABEL)
+                if isinstance(label_grid, np.ndarray):
+                    label_grid[closer.detach().cpu().numpy()] = idx
+                else:
+                    label_grid[closer] = idx
             # 격자는 GPU 에 남는다 — 필드는 질의점에서만 답한다 (`DeviceEsdfField`).
             layer = layer_from_device(tier.values, tier.origin, tier.voxel_size,
                                       labels=label_grid, label_names=label_names)
@@ -1461,6 +1841,12 @@ class CuroboFieldBuilder:
         stats["held_free"] = {"n_points": (0 if held_free_points is None
                                            else int(len(held_free_points))),
                               "n_voxels_freed": freed}
+        if dynamic:   # AG3S-DYNAMIC-FIELD D1 · D2 (only when one is on)
+            stats["dynamic"] = dynamic
+        if tl_stats is not None:   # AG3S-TASK-DYNAMIC-MAP ① (only when on)
+            stats["target_layer"] = tl_stats
+        if roi_stats is not None:   # AG3S-TASK-DYNAMIC-MAP ② (only when on)
+            stats["roi_carve"] = roi_stats
         # **창이 어디에, 왜 놓였나** (T21 §3). 미세 계층이 없으면 `basis=None` 으로 싣는다 —
         # 키가 프레임마다 있어야 "창이 없었다" 와 "기록이 없다" 가 구별된다. 권한 link 질의점의
         # 계층별 수는 필드가 다 만들어진 뒤 pipeline 이 더한다 (`authorized_query`).
@@ -1476,7 +1862,8 @@ class CuroboFieldBuilder:
             "label": target_free_label,
             # **무엇으로 지웠는지 기록에 남긴다** (T13). `"points"` 로 남은 프레임은 사과가
             # 안 지워진 프레임이다 — 그 구별이 없으면 두 실행을 나란히 읽을 수 없다.
-            "mode": ("oracle_visible" if oracle_evidence is not None and free_tiers   # T46e
+            "mode": ("target_layer" if tl_active and free_tiers   # AG3S-TASK-DYNAMIC-MAP ①
+                     else "oracle_visible" if oracle_evidence is not None and free_tiers   # T46e
                      else "ball" if target_free_ball is not None
                      else ("points" if free_points is not None and len(free_points) else "none")),
             "ball": None if target_free_ball is None else target_free_ball.summary(),
@@ -1900,6 +2287,211 @@ class CuroboFieldBuilder:
                 if ex.get("n_ambiguous_removed") is not None:
                     log.warning("    T46 F2 owned_ambiguous = **remove** — ambiguous seed %d 개도 지웠다 "
                                 "(제거 수에 포함).", int(ex["n_ambiguous_removed"]))
+
+    @staticmethod
+    def occupied_voxels(itg, *, band_voxels: float = CUROBO_SEED_BAND_VOXELS, surface_only: bool = False,
+                        boxes: Optional[Sequence[tuple]] = None, with_sdf: bool = False):
+        """Observed occupied voxels of one TSDF: `(block_pool_idx, local_idx, centres (N, 3) base frame)`.
+
+        Occupied = weight > 0 and `tsdf ≤ band_voxels · vs` (the band cuRobo seeds the ESDF from, and
+        everything behind it); `surface_only` keeps `|tsdf| ≤ band_voxels · vs`. Indexing is the inverse of
+        `_free_tsdf_points`'s. Empty arrays when nothing is allocated. (AG3S-DYNAMIC-FIELD: D1 and the replay.)
+
+        AG3S-TASK-DYNAMIC-MAP: `boxes` (`(lo, hi)` AABBs) keeps only the blocks that overlap one before any
+        voxel is read (the voxels are then filtered to the boxes too); `with_sdf` appends the voxels' TSDF
+        value (m) as a fourth array. Both off = the call as before.
+        """
+        import torch
+
+        empty = (np.zeros(0, np.int64), np.zeros(0, np.int64), np.zeros((0, 3)))
+        if with_sdf:
+            empty = empty + (np.zeros(0),)
+        ts = itg.tsdf
+        data = ts.data if hasattr(ts, "data") else ts
+        bd = data.block_data
+        n_alloc = int(data.num_allocated.detach().cpu().reshape(-1)[0])
+        if n_alloc <= 0 or bd.dim() != 3 or bd.shape[1] <= 1:
+            return empty
+        bs = int(round(bd.shape[1] ** (1.0 / 3.0)))
+        D, H, W = (int(v) for v in itg.grid_shape)
+        vs = float(itg.voxel_size)
+        origin = itg.origin.detach().cpu().numpy().reshape(-1)[:3].astype(np.float64)
+        coords = data.block_coords.detach().cpu().numpy().reshape(-1, 3)[:n_alloc].astype(np.int64)
+        slots = data.block_to_hash_slot.detach().cpu().numpy()[:n_alloc]
+        live = np.flatnonzero(slots >= 0)
+        grid = np.array([W, H, D], np.int64)
+        offsets = ((grid + bs - 1) // bs) // 2
+        if boxes is not None and live.size:
+            # the block's AABB (voxel faces) against each box — no voxel of a disjoint block is read
+            blo = origin + ((coords[live] + offsets) * bs - 0.5 * grid).astype(np.float64) * vs
+            bhi = blo + bs * vs
+            keep = np.zeros(len(live), bool)
+            for lo, hi in boxes:
+                keep |= np.all((bhi >= np.asarray(lo)) & (blo <= np.asarray(hi)), axis=1)
+            live = live[keep]
+        if not live.size:
+            return empty
+        t_live = torch.as_tensor(live, device=bd.device, dtype=torch.long)
+        w = bd[t_live, :, 1].float()
+        s = bd[t_live, :, 0].float()
+        band = float(band_voxels) * vs * w
+        occ = (w > 0) & ((s.abs() <= band) if surface_only else (s <= band))
+        nz = torch.nonzero(occ, as_tuple=True)
+        bi, li = (t.detach().cpu().numpy() for t in nz)
+        if not len(bi):
+            return empty
+        loc = np.stack([li % bs, (li // bs) % bs, li // (bs * bs)], axis=1)
+        g = (coords[live[bi]] + offsets) * bs + loc
+        centres = origin + (g.astype(np.float64) + 0.5 - 0.5 * grid) * vs
+        out = (live[bi], li, centres)
+        if with_sdf:
+            out = out + ((s[nz] / w[nz]).detach().cpu().numpy().astype(np.float64),)
+        if boxes is not None:
+            inside = in_boxes(centres, boxes)
+            out = tuple(a[inside] for a in out)
+        return out
+
+    # -- AG3S-TASK-DYNAMIC-MAP ---------------------------------------------------------
+    @staticmethod
+    def _masked_observation(obs, mask, *, keep: bool):
+        """A copy of a cuRobo `CameraObservation` whose depth keeps only (`keep`) or drops the `(H, W)` mask pixels.
+
+        Dropped pixels are 0 = unobserved, the robot-mask convention. The original tensor is not written.
+        """
+        import torch
+        from curobo._src.types.camera import CameraObservation
+
+        d = obs.depth_image
+        m = torch.as_tensor(np.asarray(mask, bool), device=d.device)[None]
+        depth = torch.where(m if keep else ~m, d, torch.zeros_like(d))
+        return CameraObservation(name=obs.name, depth_image=depth, rgb_image=obs.rgb_image,
+                                 intrinsics=obs.intrinsics, pose=obs.pose, depth_to_meter=1.0)
+
+    def _target_layer_route(self, prepared, request: "TargetLayerRequest", cameras):
+        """① — split this frame's observations: target pixels → the target TSDF, the rest → the static TSDFs.
+
+        Returns `(static_prepared, target_prepared | None, stats)`. Also does ①-b: resets the target TSDF when
+        it is empty, when the object is held (then nothing is routed), or when the object's centre moved more
+        than `esdf.target_layer_reset_m` from where it was at the last reset.
+        """
+        cfg = self.config
+        stats: dict = {"held": bool(request.held), "tol_m": round(float(request.tol), 6),
+                       "z_floor": None if request.z_floor is None else round(float(request.z_floor), 6)}
+        if not request.active:
+            if self._target_anchor is not None and self._target_mapper is not None:
+                self._target_mapper.reset()
+                stats["reset"] = "held" if request.held else "no_target"
+            self._target_anchor = None
+            stats.update(n_target_px=0, active=False)
+            return prepared, None, stats
+        if self._target_mapper is None:
+            self._target_mapper = self._make_mapper(cameras, self.fine_truncation)
+        centre = np.asarray(request.centre, np.float64).reshape(3)
+        reset = None
+        if self._target_anchor is None:
+            reset = "first"
+        else:
+            shift = float(np.linalg.norm(centre - self._target_anchor))
+            stats["centre_shift_mm"] = round(shift * 1e3, 3)
+            if shift > float(getattr(cfg, "target_layer_reset_m", 0.010)):
+                reset = "moved"
+        if reset is not None:
+            self._target_mapper.reset()
+            self._target_anchor = centre.copy()
+        stats["reset"] = reset
+        static, target = [], []
+        n_px = {}
+        for cam, depth, obs in prepared:
+            m = target_pixel_mask(depth, cam.camera_intrinsics, cam.T_base_cam, request,
+                                  depth_min=float(cfg.depth_min), depth_max=float(cfg.depth_max))
+            n_px[str(cam.name)] = int(m.sum())
+            if m.any():
+                static.append((cam, depth, self._masked_observation(obs, m, keep=False)))
+                target.append((cam, depth, self._masked_observation(obs, m, keep=True)))
+            else:
+                static.append((cam, depth, obs))
+        stats.update(active=True, n_target_px=int(sum(n_px.values())), per_camera_px=n_px)
+        return static, (target or None), stats
+
+    def _free_target_in_static(self, itg, request: "TargetLayerRequest", truncation: float) -> int:
+        """① — set free the static TSDF voxels that are the target's (`target_owned`).
+
+        Clears what was integrated before the target was routed (frames before it was confirmed). Band voxels
+        count within `tol` + half a voxel diagonal of a target point; voxels behind a surface (tsdf < 0) within
+        this TSDF's truncation — without them the inside of the object stays negative and makes a new zero
+        crossing (a shell). Ownership against the non-target evidence and `z_floor` as for pixels.
+        """
+        tp = request.target_points
+        vs = float(itg.voxel_size)
+        reach = max(float(request.tol) + 0.5 * np.sqrt(3.0) * vs, float(truncation))
+        box = [(tp.min(axis=0) - reach, tp.max(axis=0) + reach)]
+        pool, li, centres, sdf = self.occupied_voxels(itg, boxes=box, with_sdf=True)
+        if not len(pool):
+            return 0
+        tol = np.where(sdf < 0.0, float(truncation), float(request.tol) + 0.5 * np.sqrt(3.0) * vs)
+        own = target_owned(centres, tp, request.nontarget_points, tol, request.z_floor)
+        self._set_free(itg, pool[own], li[own], truncation)
+        return int(own.sum())
+
+    def _roi_carve(self, itg, cameras, boxes, truncation: float) -> dict:
+        """② — `_carve_seen_through` restricted to the occupied voxels inside the region of interest `boxes`."""
+        pool, li, centres = self.occupied_voxels(itg, boxes=boxes)
+        if not len(pool):
+            return {"n_roi_occupied": 0, "n_freed": 0}
+        vs = float(itg.voxel_size)
+        margin_cfg = getattr(self.config, "free_space_carve_margin", None)
+        m = float(margin_cfg) if margin_cfg is not None else float(truncation) + vs
+        cfg = self.config
+        fp = bool(getattr(cfg, "roi_carve_footprint", False))
+        hit, per = seen_through(centres, cameras, m, depth_min=float(cfg.depth_min),
+                                depth_max=float(cfg.depth_max),
+                                **({} if not fp else {"footprint_voxel": vs,
+                                                      "footprint_pad_px": int(getattr(cfg, "roi_carve_footprint_pad_px", 1)),
+                                                      "footprint_robot": str(getattr(cfg, "roi_carve_footprint_robot", "block"))}))
+        self._set_free(itg, pool[hit], li[hit], truncation)
+        return {"n_roi_occupied": int(len(pool)), "n_freed": int(hit.sum()), "margin_m": round(m, 6),
+                "per_camera": per, **({"footprint": True} if fp else {})}
+
+    def _carve_seen_through(self, itg, cameras, truncation: float, margin: Optional[float]) -> dict:
+        """AG3S-DYNAMIC-FIELD D1 — set **free** every occupied voxel of this TSDF that a depth ray passed through.
+
+        `occupied_voxels` → `seen_through` per voxel centre with margin = `margin` or this TSDF's truncation +
+        one voxel (the band integration itself already rewrites) → written as `_free_tsdf_points` writes
+        (`+truncation`, weight kept). Returns `{n_occupied, n_freed, margin_m, per_camera}`.
+        """
+        pool, li, centres = self.occupied_voxels(itg)
+        if not len(pool):
+            return {"n_occupied": 0, "n_freed": 0, "per_camera": {}}
+        vs = float(itg.voxel_size)
+        m = float(margin) if margin is not None else float(truncation) + vs
+        cfg = self.config
+        hit, per = seen_through(centres, cameras, m, depth_min=float(cfg.depth_min),
+                                depth_max=float(cfg.depth_max))
+        self._set_free(itg, pool[hit], li[hit], truncation)
+        return {"n_occupied": int(len(pool)), "n_freed": int(hit.sum()), "margin_m": round(m, 6),
+                "per_camera": per}
+
+    def _free_inside_robot(self, itg, spheres: dict, truncation: float) -> dict:
+        """AG3S-DYNAMIC-FIELD D2 — set **free** the occupied voxels of this TSDF inside the robot's shrunk spheres."""
+        pool, li, centres = self.occupied_voxels(itg)
+        if not len(pool):
+            return {"n_occupied": 0, "n_freed": 0}
+        hit = inside_robot_spheres(centres, spheres)
+        self._set_free(itg, pool[hit], li[hit], truncation)
+        return {"n_occupied": int(len(pool)), "n_freed": int(hit.sum())}
+
+    @staticmethod
+    def _set_free(itg, pool: np.ndarray, li: np.ndarray, truncation: float) -> None:
+        """Write voxels `(block pool index, local index)` as `_free_tsdf_points` does: `+truncation`, weight kept."""
+        if not len(pool):
+            return
+        import torch
+
+        ts = itg.tsdf
+        bd = (ts.data if hasattr(ts, "data") else ts).block_data
+        tb = torch.as_tensor(pool, device=bd.device, dtype=torch.long)
+        tl = torch.as_tensor(li, device=bd.device, dtype=torch.long)
+        bd[tb, tl, 0] = (bd[tb, tl, 1].float() * float(truncation)).to(bd.dtype)
 
     @staticmethod
     def _free_tsdf_points(itg, points: np.ndarray, truncation: float) -> int:

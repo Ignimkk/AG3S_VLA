@@ -940,6 +940,60 @@ def target_exclusion_section(args) -> dict:
 # T44 I1 (A1) — end
 
 
+def dynamic_field_section(args) -> dict:
+    """AG3S-DYNAMIC-FIELD — `esdf` keys for the given flags only (none given = `{}`, config as is)."""
+    out: dict = {}
+    if getattr(args, "free_space_carve", False):
+        out["free_space_carve"] = True
+    if getattr(args, "free_space_carve_margin_mm", None) is not None:
+        out["free_space_carve_margin"] = float(args.free_space_carve_margin_mm) / 1000.0
+    if getattr(args, "robot_occupied_free", False):
+        out["robot_occupied_free"] = True
+    if getattr(args, "robot_free_shrink_mm", None) is not None:
+        out["robot_free_shrink"] = float(args.robot_free_shrink_mm) / 1000.0
+    if getattr(args, "tsdf_time_decay", None) is not None:   # D0 (comparison): cuRobo native decay
+        out["time_decay"] = float(args.tsdf_time_decay)
+    if getattr(args, "tsdf_frustum_decay", None) is not None:
+        out["frustum_decay"] = float(args.tsdf_frustum_decay)
+    # AG3S-TASK-DYNAMIC-MAP ① · ②
+    if getattr(args, "target_layer", False):
+        out["target_layer"] = True
+    if getattr(args, "target_layer_tol_mm", None) is not None:
+        out["target_layer_pixel_tol"] = float(args.target_layer_tol_mm) / 1000.0
+    if getattr(args, "target_layer_reset_mm", None) is not None:
+        out["target_layer_reset_m"] = float(args.target_layer_reset_mm) / 1000.0
+    if getattr(args, "roi_carve", False):
+        out["roi_carve"] = True
+    if getattr(args, "roi_pad_mm", None) is not None:
+        out["roi_pad"] = float(args.roi_pad_mm) / 1000.0
+    if getattr(args, "roi_carve_footprint", False):
+        out["roi_carve_footprint"] = True
+    if getattr(args, "roi_carve_footprint_pad_px", None) is not None:
+        out["roi_carve_footprint_pad_px"] = int(args.roi_carve_footprint_pad_px)
+    if getattr(args, "roi_carve_footprint_robot", None) is not None:
+        out["roi_carve_footprint_robot"] = str(args.roi_carve_footprint_robot)
+    if roi_carve_serving_default(args):
+        out.update(ROI_CARVE_SERVING_DEFAULT)
+    return out
+
+
+#: AG3S-TASK-DYNAMIC-MAP E4 (2026-10-24, task §10 · user ruling): the adopted region-of-interest carve — what a cuRobo AG3S
+#: server runs when no carve flag is given. `--no-roi-carve` = none of these keys (the esdf config as before).
+ROI_CARVE_SERVING_DEFAULT = {"roi_carve": True, "roi_carve_footprint": True, "roi_carve_footprint_pad_px": 0,
+                             "roi_carve_footprint_robot": "ignore"}
+_ROI_CARVE_FLAGS = ("roi_carve", "roi_pad_mm", "roi_carve_footprint", "roi_carve_footprint_pad_px", "roi_carve_footprint_robot")
+
+
+def roi_carve_serving_default(args) -> bool:
+    """True when the serving default applies: cuRobo field, AG3S on (no `--no-safe` / `--no-perception`), no carve flag at all
+    and no `--no-roi-carve`. Any explicit carve flag keeps its old meaning (the kits that name `--roi-carve` are unchanged)."""
+    if getattr(args, "no_roi_carve", False) or getattr(args, "esdf_backend", "legacy") != "curobo":
+        return False
+    if getattr(args, "no_safe", False) or getattr(args, "no_perception", False):
+        return False
+    return not any(getattr(args, n, None) not in (None, False) for n in _ROI_CARVE_FLAGS)
+
+
 # T44c A5 — begin
 def target_free_coarse_section(args) -> dict:
     """T44c A5 — `--target-free-coarse` → `{"target_free_coarse": True}` (안 줬으면 `{}`, config 그대로).
@@ -1007,6 +1061,54 @@ def held_permission_overrides(args) -> dict:
     n = getattr(args, "held_permission_parent_links", None)
     return {} if n is None else {"held_permission_parent_links": int(n)}
 # T44b A4 — end
+
+
+def ag3s_from_args(args, *, plan_horizon_steps, rows_per_step):
+    """The server's AG3S from its parsed flags (`main` builds it this way; offline replays reuse it)."""
+    if getattr(args, "esdf_backend", "legacy") == "curobo":   # AG3S-TASK-DYNAMIC-MAP E4: say which carve this server runs
+        sec = dynamic_field_section(args)
+        logging.warning("AG3S roi_carve: %s", (
+            "ON (serving default: footprint · pad 0 px · robot pixels ignored — --no-roi-carve turns it off)"
+            if roi_carve_serving_default(args) else
+            "OFF (--no-roi-carve)" if getattr(args, "no_roi_carve", False) else
+            f"ON (explicit flags: {({k: v for k, v in sec.items() if k.startswith('roi')})})" if sec.get("roi_carve") else "OFF"))
+    return build_ag3s(args.model_xml, voxel=args.voxel,
+                      range_max=args.range_max, links=args.links,
+                      backend=args.esdf_backend,
+                      fine_voxel=args.fine_voxel,
+                      tsdf_voxel=args.tsdf_voxel,
+                      attached_sign_threshold=args.attached_sign_threshold,
+                      max_field_age_sec=args.max_field_age_sec,
+                      exclude_links=args.exclude_links,
+                      constraint_sphere_options=sphere_options(args),
+                      gripper_cover=gripper_cover_options(args),
+                      finger_cover=finger_cover_options(args),
+                      palm_cover=palm_cover_options(args),  # T45 A10
+                      wrist_cover=wrist_cover_options(args),  # T46f A14
+                      self_collision=not args.no_self_collision,
+                      target_field_policy=args.target_field_policy,
+                      plan_horizon_steps=plan_horizon_steps,
+                      rows_per_step=rows_per_step,
+                      self_filter=self_filter_options(args),
+                      subtask_gate=args.subtask_gate,
+                      subtask_probe_path=args.subtask_probe,
+                      held_body_cover=args.held_body_cover,
+                      # T44b A4 — split keys join the identity keys (checked by assert_ag3s_config).
+                      identity={**t43t_identity_section(args),
+                                **split_identity_section(args),
+                                **placed_no_seed_section(args)} or None,  # T46c A12
+                      target_exclusion=({**target_exclusion_section(args),   # T44 I1 (A1)
+                                         **dynamic_field_section(args),   # AG3S-DYNAMIC-FIELD
+                                         **target_free_coarse_section(args),  # T44c A5
+                                         **target_free_coarse_sign_section(args),  # T44c A6
+                                         **target_free_coarse_support_section(args)}  # T44e A8
+                                        or None),
+                      contact=nonauthorized_target_margin_section(args) or None,  # T44e A9
+                      held_free_observed_pad=(
+                          None if args.held_free_observed_mm is None
+                          else float(args.held_free_observed_mm) / 1000.0),
+                      # IFG-S2SERVE — 켰을 때만 (기본 off = None, AG3S 호출이 예전 그대로).
+                      confidence_gate=confidence_gate_from_args(args))
 
 
 def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
@@ -1732,6 +1834,46 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--owned-unowned", choices=("remove", "keep"), default=None,
                     help="T44 I1 — ball-owned: unowned seed 를 지우나 (remove, 기본) 두나 (keep)")
     # T44 I1 (A1) — end
+    # AG3S-DYNAMIC-FIELD — begin
+    ap.add_argument("--free-space-carve", action="store_true",
+                    help="AG3S-DYNAMIC-FIELD D1 — 적분 뒤, 이번 프레임 depth 광선이 지나간 TSDF 점유 voxel 을 free 로 "
+                         "(보이는 빈 공간에 남은 옛 표면을 지운다; 로봇 mask · 무효 depth 화소는 판단하지 않는다). 기본 off")
+    ap.add_argument("--free-space-carve-margin-mm", type=float, default=None, metavar="MM",
+                    help="D1 여유 (관측 depth − voxel 깊이 > MM 이면 지나간 것). 기본: 그 TSDF 의 truncation + 한 voxel")
+    ap.add_argument("--robot-occupied-free", action="store_true",
+                    help="AG3S-DYNAMIC-FIELD D2 — 이번 프레임 self-filter 로봇 구(전신)를 줄인 부피 안의 TSDF voxel 을 "
+                         "free 로 (손에 가려 다시 관측되지 않는, 손이 밀어낸 물체의 옛 자리). 기본 off")
+    ap.add_argument("--robot-free-shrink-mm", type=float, default=None, metavar="MM",
+                    help="D2 구 반지름 축소량 (기본 config esdf.robot_free_shrink = 5 mm)")
+    ap.add_argument("--tsdf-time-decay", type=float, default=None, metavar="A",
+                    help="AG3S-DYNAMIC-FIELD D0 (비교용) — cuRobo 전체 voxel 감쇠 (esdf.time_decay, 1.0 = 끔)")
+    ap.add_argument("--tsdf-frustum-decay", type=float, default=None, metavar="A",
+                    help="D0 (비교용) — cuRobo 카메라 시야 안 감쇠 (esdf.frustum_decay; depth 를 보지 않는다, 1.0 = 끔)")
+    # AG3S-DYNAMIC-FIELD — end
+    # AG3S-TASK-DYNAMIC-MAP — begin
+    ap.add_argument("--target-layer", action="store_true",
+                    help="AG3S-TASK-DYNAMIC-MAP ① — manipulated 물체의 pixel 을 정적 TSDF 대신 target 전용 TSDF 에 적분 "
+                         "(본 계층 = min(정적, target), 손이 보는 target 없는 계층 = 정적). 물체가 옮겨지면 target TSDF 를 "
+                         "다시 만든다. --kept-geometry-follow 와 함께만. 기본 off")
+    ap.add_argument("--target-layer-tol-mm", type=float, default=None, metavar="MM",
+                    help="① pixel · voxel 소유 거리 (기본 config esdf.target_layer_pixel_tol = 10 mm)")
+    ap.add_argument("--target-layer-reset-mm", type=float, default=None, metavar="MM",
+                    help="① 물체 중심 이동 판정 (기본 config esdf.target_layer_reset_m = 10 mm)")
+    ap.add_argument("--roi-carve", action="store_true",
+                    help="AG3S-TASK-DYNAMIC-MAP ② — manipulated 물체 · 목적지 · 손 실행 경로 상자 ± pad 안에서만 이번 "
+                         "depth 광선이 지나간 TSDF 점유 voxel 을 free 로. 명시하면 가장자리 보존 없는 판정 (E2). "
+                         "carve flag 를 하나도 안 주면 cuRobo AG3S 서버는 채택 형태 (가장자리 보존 · 여유 0 px · robot 무시, E4) 로 켠다")
+    ap.add_argument("--no-roi-carve", action="store_true",
+                    help="② 를 끈다 — serving 기본값 이전과 같은 esdf 설정 (AG3S-TASK-DYNAMIC-MAP E4 이전 구성 재현용)")
+    ap.add_argument("--roi-pad-mm", type=float, default=None, metavar="MM",
+                    help="② 관심 영역 여유 (기본 config esdf.roi_pad = 100 mm)")
+    ap.add_argument("--roi-carve-footprint", action="store_true",
+                    help="② 의 판정을 voxel 의 투영 영역 전체로 (가는 물체 가장자리 보존). --roi-carve 와 함께만. 기본 off")
+    ap.add_argument("--roi-carve-footprint-pad-px", type=int, default=None, metavar="PX",
+                    help="② 영역 판정의 여유 pixel (기본 config esdf.roi_carve_footprint_pad_px = 1)")
+    ap.add_argument("--roi-carve-footprint-robot", choices=("block", "ignore"), default=None,
+                    help="② 영역 안 robot pixel: block (판정 보류, 기본) · ignore (세지 않음; 가장 가까운 pixel 은 robot 아니고 뒤를 봐야 함)")
+    # AG3S-TASK-DYNAMIC-MAP — end
     # T46 F1 · F2 — begin
     ap.add_argument("--nontarget-evidence", choices=("proximity", "surface"), default=None,
                     help="T46 F1 — ball-owned 미세 계층의 non-target 근거. proximity (기본: config "
@@ -2467,6 +2609,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
     t43t_ag3s = [name for name, on in (
         ("--closing-keep-geometry", getattr(args, "closing_keep_geometry", False)),
         ("--kept-geometry-follow", getattr(args, "kept_geometry_follow", False)),  # IFG-FOLLOW
+        ("--free-space-carve / --robot-occupied-free / --tsdf-*-decay / --target-layer / --roi-carve",
+         bool(dynamic_field_section(args))),  # AG3S-DYNAMIC-FIELD · AG3S-TASK-DYNAMIC-MAP
         ("--target-volume-exempt", getattr(args, "target_volume_exempt", False)),
         ("--latched-identity-hold", getattr(args, "latched_identity_hold", False)),
         ("--refused-identity-release", getattr(args, "refused_identity_release", None) is not None),
@@ -2490,6 +2634,28 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ap.error(f"--held-cover-cap-mm 는 0 이상의 mm 입니다 (받은 값 {args.held_cover_cap_mm})")
     if getattr(args, "hold_follow_to", None) is not None and args.hold_follow_to < 1:
         ap.error(f"--hold-follow-to 는 1 이상의 청크 수입니다 (받은 값 {args.hold_follow_to})")
+    # AG3S-TASK-DYNAMIC-MAP: both act on the cuRobo TSDFs; ① needs the followed geometry — without it a pushed
+    # object's pixels miss the frozen geometry and enter the static TSDF (task §3).
+    if ((getattr(args, "target_layer", False) or getattr(args, "roi_carve", False))
+            and getattr(args, "esdf_backend", None) != "curobo"):
+        ap.error("--target-layer · --roi-carve 는 cuRobo TSDF 에 걸립니다 (--esdf-backend curobo)")
+    if getattr(args, "no_roi_carve", False) and any(getattr(args, n, None) not in (None, False) for n in _ROI_CARVE_FLAGS):
+        ap.error("--no-roi-carve 와 관심 영역 지우기 flag (--roi-carve · --roi-pad-mm · --roi-carve-footprint*) 는 함께 쓸 수 없습니다")
+    if ((getattr(args, "roi_carve_footprint_pad_px", None) is not None or getattr(args, "roi_carve_footprint_robot", None) is not None)
+            and not getattr(args, "roi_carve_footprint", False)):
+        ap.error("--roi-carve-footprint-pad-px · --roi-carve-footprint-robot 는 --roi-carve-footprint 의 설정입니다 — 함께 주십시오")
+    if getattr(args, "roi_carve_footprint_pad_px", None) is not None and args.roi_carve_footprint_pad_px < 0:
+        ap.error(f"--roi-carve-footprint-pad-px 는 0 이상입니다 (받은 값 {args.roi_carve_footprint_pad_px})")
+    if getattr(args, "roi_carve_footprint", False) and not getattr(args, "roi_carve", False):
+        ap.error("--roi-carve-footprint 는 --roi-carve 의 판정 방식입니다 — 함께 주십시오")
+    if getattr(args, "target_layer", False) and not getattr(args, "kept_geometry_follow", False):
+        ap.error("--target-layer 는 --kept-geometry-follow 와 함께만 씁니다 (밀린 물체의 pixel 이 고정 형상과 "
+                 "맞지 않아 정적 TSDF 로 들어간다)")
+    for flag, name in (("--target-layer-tol-mm", "target_layer_tol_mm"),
+                       ("--target-layer-reset-mm", "target_layer_reset_mm"), ("--roi-pad-mm", "roi_pad_mm")):
+        v = getattr(args, name, None)
+        if v is not None and not (math.isfinite(v) and v > 0.0):
+            ap.error(f"{flag} 는 양수 mm 입니다 (받은 값 {v})")
     if (getattr(args, "held_free_observed_mm", None) is not None
             and getattr(args, "esdf_backend", None) != "curobo"):
         ap.error("--held-free-observed-mm 는 cuRobo TSDF 의 voxel 을 비웁니다 (--esdf-backend curobo)")
@@ -3312,42 +3478,8 @@ def main() -> None:
 
         served = SafePolicy(
             served_policy,
-            ag3s=build_ag3s(args.model_xml, voxel=args.voxel,
-                            range_max=args.range_max, links=args.links,
-                            backend=args.esdf_backend,
-                            fine_voxel=args.fine_voxel,
-                            tsdf_voxel=args.tsdf_voxel,
-                            attached_sign_threshold=args.attached_sign_threshold,
-                            max_field_age_sec=args.max_field_age_sec,
-                            exclude_links=args.exclude_links,
-                            constraint_sphere_options=sphere_options(args),
-                            gripper_cover=gripper_cover_options(args),
-                            finger_cover=finger_cover_options(args),
-                            palm_cover=palm_cover_options(args),  # T45 A10
-                            wrist_cover=wrist_cover_options(args),  # T46f A14
-                            self_collision=not args.no_self_collision,
-                            target_field_policy=args.target_field_policy,
-                            plan_horizon_steps=horizon.planned,
-                            rows_per_step=to_config.reduction.rows_per_step,
-                            self_filter=self_filter_options(args),
-                            subtask_gate=args.subtask_gate,
-                            subtask_probe_path=args.subtask_probe,
-                            held_body_cover=args.held_body_cover,
-                            # T44b A4 — split keys join the identity keys (checked by assert_ag3s_config).
-                            identity={**t43t_identity_section(args),
-                                      **split_identity_section(args),
-                                      **placed_no_seed_section(args)} or None,  # T46c A12
-                            target_exclusion=({**target_exclusion_section(args),   # T44 I1 (A1)
-                                               **target_free_coarse_section(args),  # T44c A5
-                                               **target_free_coarse_sign_section(args),  # T44c A6
-                                               **target_free_coarse_support_section(args)}  # T44e A8
-                                              or None),
-                            contact=nonauthorized_target_margin_section(args) or None,  # T44e A9
-                            held_free_observed_pad=(
-                                None if args.held_free_observed_mm is None
-                                else float(args.held_free_observed_mm) / 1000.0),
-                            # IFG-S2SERVE — 켰을 때만 (기본 off = None, AG3S 호출이 예전 그대로).
-                            confidence_gate=confidence_gate_from_args(args)),
+            ag3s=ag3s_from_args(args, plan_horizon_steps=horizon.planned,
+                                rows_per_step=to_config.reduction.rows_per_step),
             static_geometry=load_static_geometry(args.static_geometry, args.model_xml,
                                                  links=args.links),
             to_config=to_config,

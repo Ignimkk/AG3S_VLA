@@ -519,7 +519,8 @@ def test_build_ag3s_forwards_the_flags_into_pointcloud():
     src = inspect.getsource(serve_safe.build_ag3s)
     assert '"pointcloud": {"range_max": range_max, **dict(self_filter or {})}' in src
     assert "announce_self_filter(ag3s.self_filter_settings()" in src
-    assert "self_filter=self_filter_options(args)" in inspect.getsource(serve_safe.main)
+    # `main` builds AG3S through `ag3s_from_args` (AG3S-DYNAMIC-FIELD: the offline replays reuse it)
+    assert "self_filter=self_filter_options(args)" in inspect.getsource(serve_safe.ag3s_from_args)
 
 
 def test_start_log_default_is_one_line_and_says_yaml_does_not_reach(arm, caplog):

@@ -303,7 +303,7 @@ def test_cli_refusals(monkeypatch, capsys):
 def test_main_passes_the_split_keys_into_build_ag3s():
     from AG3S.trajopt import serve_safe
 
-    src = inspect.getsource(serve_safe.main)
+    src = inspect.getsource(serve_safe.ag3s_from_args)   # `main` builds AG3S through it (AG3S-DYNAMIC-FIELD)
     assert "split_identity_section(args)" in src
     src_to = inspect.getsource(serve_safe.trajopt_config_from_args)
     assert "held_permission_overrides(args)" in src_to

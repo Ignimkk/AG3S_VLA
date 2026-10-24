@@ -317,6 +317,20 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **place-stop (`--stop-after-place 2.5`)** | place (target 중심이 crate 안 ∧ 사용 손 gripper 열림 ≥ 0.5) 뒤 2.5 s 에서 closed-loop 기록을 끝내는 규칙 (사용자 규칙 2026-10-21). 기존 E0 · C1aN 기록은 같은 규칙으로 잘라 다시 센다 (truncation recount) |
 | **McNemar exact p** | 짝지은 2 × 2 에서 한쪽만 성공한 episode (discordant pair) 만으로 계산하는 exact 양측 p |
 
+**AG3S-TASK-DYNAMIC-MAP (2026-10-24 추가)** — 작업 영역 동적 거리장의 용어. (이 STEP 은 [`AG3S_TSDF_DYNAMIC_LOG.md`](AG3S_TSDF_DYNAMIC_LOG.md) 로 옮겨 이어 쓴다. 새 용어는 그쪽 "용어" 절에 추가한다.) (ATS · HSR · LTE · CCR 은 "AG3S-TASK-DYNAMIC-MAP" 절 §8 에서 풀었다.)
+
+| 용어 | 뜻 |
+|---|---|
+| **stale residue (옛 자리 잔상)** | 거리장의 surface voxel (`\|기록값\| ≤ voxel 반 칸`) 중 현재 GT 표면 · 로봇 구에서 15 mm 넘게 멀고, 10 mm 넘게 떠난 물체의 이전 자세 GT 표면 15 mm 안에 있는 것. target (사과) 의 것과 다른 movable body 의 것을 따로 센다 |
+| **target 전용 TSDF (`--target-layer`)** | target pixel 만 적분하는 별도 TSDF. 권한 없는 link 의 층 = `min(정적, target)`, 권한 있는 손의 층 = 정적만 |
+| **이동 감지 reset** | target 전용 TSDF 를 reset 한 frame 의 manipulated 중심과 이번 중심이 10 mm 넘게 다르면 target TSDF 를 reset 하고 다시 적분하는 규칙 |
+| **관심 영역 지우기 (`--roi-carve`)** | 관심 영역 (manipulated 점 ± 0.10 m ∪ 목적지 점 ± 0.10 m ∪ 미세 창 상자) 안의 점유 voxel 에만 "depth ray 가 지나간 자리는 빈 공간" 판정을 거는 것 |
+| **forgotten obstacle (잊은 실제 장애물)** | GT 표면 표본 (로봇 · 쥔 물체 제외) 중 거리장이 10 mm 넘게 멀다고 보는 비율. **visible** = 지금 카메라에 보이는 점, **occluded-seen-before** = 지금은 가려졌으나 전에 보인 점 |
+| **main fine layer · hand layer** | 서버가 기록한 거리장의 두 층. main fine layer (`esdf_distance`) = 권한 없는 link 가 읽는 층, hand layer (`esdf_free_distance`) = target 접촉 권한이 있는 손이 읽는 층 |
+| **금지 접촉 (forbidden contact)** | MuJoCo replay 에서 이웃 과일 · 바구니 · 탁자 · 놓을 곳 기둥과의 접촉, 또는 권한 없는 link 의 target 접촉이 한 control row 이상 있는 것 |
+| **기준 구성 (AG3S-TASK-DYNAMIC-MAP)** | 이웃 과일과 붙은 target 떼어 내기 + 사과 표면 점 빼기 구성 + `--kept-geometry-follow`. 그 위에 target 전용 TSDF · 관심 영역 지우기 · 둘 다를 얹어 비교한다 |
+| **E2 (이 STEP 의 추가 실험)** | 관심 영역 지우기 구성 하나를 VLA 단독 성공 사과 18 장면 전부로 넓혀 기준 구성과 다시 비교한 것. 판정은 결과 전에 고정 (task §8) |
+
 ## 진행 현황 — T47 이후
 
 | 게이트 | 무엇을 묻나 | 상태 |
@@ -352,6 +366,7 @@ target 을 가리키는가, 명사 token query 가 더 나은가)과 **frozen VL
 | **CL4** extent (DT-02, LTE 고정 X1–X4) · 접촉 정책 (DT-05A, oracle 고정 X4 대 G4) closed-loop, 최종 형상 (1,349 구 + palm cover), 90 run | 같은 identity · 형상에서 extent 처리와 link 별 접촉 처리의 실행 효과 | **측정 완료 (2026-10-15).** success_ct (P): ball 10 · oracle-visible 9 · ball_owned+F1 7 · ball_owned 5 · global+oracle 7 / 18. link 별 구분의 실행상 차이 관측 안 됨. CL3 (기존 형상) 보다 전체 성공이 낮아 원인 진단 중 (X2G). 아래 "CL4" 절 |
 | **T63** cuRobo v2 `TrajectoryOptimizer` (B0) 와 우리 항을 1–2 개씩 누적한 B1–B4 (λ ∈ {1, 100, 10⁴}) 대 우리 TO (CCR), offline 고정 입력 (사과 24 장면 run 중 10 episode · 750 chunk, 같은 평가기) | 같은 입력 · 같은 지표에서 cuRobo 의 trajectory optimization 과 우리 TO 가 어떻게 다른가 (어느 쪽이 낫다고 미리 정하지 않음) | ~~**측정 완료 (2026-10-21, 명령 궤적만, 사용자 판정 5 로 closed-loop 결정).**~~ **종료 (사용자 판정 3, 2026-10-22 — T63b 결과 후 cuRobo 비교 종료, 아래 T63b 행).** 측정은 2026-10-21 완료, 명령 궤적만. **2026-10-22 정정: 아래 "관통" 은 10 mm 여유를 포함한 인증 clearance 위반이고 물리 관통이 아니다.** 인증 위반 chunk exec8 (all 750): reference 129 · `to_recorded` 48 · cuRobo 14 후보 145–153, 후보만 위반 97–105 대 `to_recorded` 만 위반 0–1. **물리 관통 chunk exec8 (T63b [V]): reference 86 · `to_recorded` 44 · cuRobo 14 후보 43–48.** TCP 변경량 exec8 `to_recorded` 7.2 mm 대 cuRobo 14.8–20.6 mm. warm solve median B0 57 · B1 64 · B2 70–73 · B3 82–84 · B4 111–121 ms (GPU, `to_recorded` 162 ms server CPU). 한계: 명령 궤적만 · 평가기 충실도 22 / 750 chunk 가 0.01 mm 초과 (최대 15 mm) · solve 순서 의존 (최대 0.175 rad) · finger 열림 chunk 당 한 값. 아래 "T63" 절 |
 | **T63b** cuRobo B0 (CR0) · 여유를 맞춘 B0m (CR0m) 을 서버 TO 자리에 넣은 10 episode closed-loop (E0 · C1aN 은 IFG-APPLE 기록 재사용) + T63 후보의 물리 clearance 재집계 | cuRobo 를 TO 자리에 넣어 실제 궤적 기준 contact · 성공 · HOLD 가 어떻게 달라지는가 (어느 쪽이 낫다고 미리 정하지 않음), T63 의 "관통" 은 물리 관통인가 | **측정 완료 · 종료 (2026-10-22 기록, 사용자 판정 3 으로 cuRobo 비교 종료).** (a) offline 750 chunk 물리 관통 exec8: reference 86 · `to_recorded` 44 · B0 44 · B0m 48 (인증 위반은 129 · 48 · 146 · 143). (b) closed-loop 10 episode (같은 장면 · seed, place + 2.5 s 로 자른 E0 · C1aN): **CR0m 0 / 10 성공 (모두 `no_grasp`)**, E0 10 / 10, C1aN 5 / 10 (paired McNemar p: 대 C1aN 0.0625 · 대 E0 0.00195). 장애물 접촉 행은 세 arm 모두 0, HOLD chunk CR0m 148 (6 run) · C1aN 91 (7 run). CR0m 10 run 중 8 run 은 chunk 의 앞 8 step 에 close 명령이 한 번도 없다. no_grasp 원인은 미확인 후보로만 남겼다. 한계: 10 장면 · 서버 1 개 순서 고정 · place-stop 실제 발동 없음 · B0m 계산 시간 66.7 ms 전부 초과. 아래 "T63b" 절 |
+| **AG3S-TASK-DYNAMIC-MAP** (이름으로 예약, 2026-10-23) 옮겨진 물체의 옛 자리 잔상을 지우는 target 전용 TSDF (`--target-layer`) · 관심 영역 지우기 (`--roi-carve`), 둘 다 기본 꺼짐. 사과 VLA 단독 성공 10 장면 × 4 구성 closed-loop + 추가 실험 E2 (18 장면) | target 의 옛 자리 · 밀린 물체의 옛 자리를 거리장에서 지우면서, 가려졌을 뿐 실제로 있는 장애물을 잊지 않을 수 있는가 | **측정 완료 (2026-10-24, 사전 고정 판정 적용).** 1차 (10 장면): 세 구성 모두 **미채택** — target 전용 TSDF: 기준 3 (main · occluded-seen-before +1.111 pp) · 4 (금지 접촉 episode 2 > 1) 미달, 관심 영역 지우기: 기준 4 만 미달, 둘 다: 기준 1 (target residue −81 % / −76 %) · 3 (hand · occluded-seen-before +1.061 pp) · 4 미달. E2 (18 장면, 관심 영역 지우기만): **채택** — 기준 2 (다른 물체 residue 1,277 → 65, −94.9 %) · 3 (최대 +0.951 pp, 한도 근처) · 4 (성공 14 → 16, 금지 접촉 episode 3 → 3) 통과. **serving 기본값은 꺼짐 유지.** 진단: 954 바나나 접촉 (LTE (Link-specific Target Exemption, link 별 target 제외 거리장) + CCR (Constrained Chunk Refinement, TrajOpt 궤적 수정)), forgotten obstacle 증가는 놓을 곳 기둥에 몰림 (원인 층 LTE). 서버 거리장 단계 중앙값 95.5 / 344 / 225 / 441 ms. 한계: 10 · 18 episode, seed 1 개, 기준 구성이 954 · 1668 에서 놓기 미도달. 아래 "AG3S-TASK-DYNAMIC-MAP" 절. **이후 (E3 가장자리 보존 — 미채택, 완화 진행 중) 는 [`AG3S_TSDF_DYNAMIC_LOG.md`](AG3S_TSDF_DYNAMIC_LOG.md) 에 이어 쓴다** |
 
 > T46 까지의 게이트 표는 [`AG3S_T0T6_LOG.md` 의 "진행 현황"](AG3S_T0T6_LOG.md#진행-현황--t0t6) 에 있다.
 
@@ -422,6 +437,8 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | T63b — **closed-loop 기록은 place 뒤 2.5 s 에서 끝낸다 (client `--stop-after-place 2.5`). E0 · C1aN 기존 기록도 같은 규칙으로 잘라 (place + 2.5 s) 다시 센다. 성공 · grasp 판정은 바뀌지 않아야 하고 verifier 가 이 10 장면에서 확인한다** | 사용자 규칙 (2026-10-21, `.claude/ag3s-rules.md`). 귀가 구간 data 는 필요 없다. 결과: 20 run 중 place 검출 15, success · grasp · PRIMARY · `place_t` 변경 0 (T63b 절 §9.5) | 16D |
 | T63b — **여유를 맞춘 B0m 먼저 (① offline 750 chunk B0m ② ep126 smoke ③ 통과하면 10 episode CR0m). B0m = B0 + cuRobo world 의 비-target 거리에서 server 와 같은 `obstacle_margin` (10 mm) 을 뺀 것 (우리 TO 와 같은 행 규칙, 목적함수 항 추가 아님). T63 기록은 용어 정정 ("관통" → "인증 clearance 위반 (10 mm 여유 포함)") + 저장 궤적에서 여유를 뺀 물리 clearance (< 0 = 실제 관통) 를 모든 후보에 대해 CPU 로 다시 센다. 물리 clearance = `obstacle_margin` · contact margin 을 0 으로 둔 signed distance, target 면제는 contact policy 그대로. smoke 통과 기준 = crash 없음 ∧ 끝에서 연속 HOLD ≥ 20 chunk 없음 (성공은 기준 아님)** | 사용자 판정 2 (2026-10-21, CR0 ep126 smoke 후 — T63 평가기 clearance 가 10 mm 여유를 포함함을 발견). 결과 전에 고정 | 16D |
 | T63b — **cuRobo 비교 (T63 · T63b) 를 여기서 종료한다. 진행 지연 가설 확인 (offline CPU) 과 B1 λ=10⁴ closed-loop 는 하지 않는다. 미확인으로 남김: no_grasp 원인 가설 (B0 에는 VLA 중간 경로 추종 항이 없어 실행 구간에서 손이 덜 나아가고, VLA 의 닫기 명령이 실행 창 (앞 8 step) 에 들어오지 않는다)** | 사용자 판정 3 (2026-10-22 KST 새벽, `T63b.verify.json` 결과 후). 근거 제시 수치: offline 750 chunk 물리 관통 (실행 구간) 우리 TO 기록 44 · B0 44 · B0m 48 · VLA 원본 86, closed-loop 10 episode CR0m 0 / 10 (모두 no_grasp) · E0 10 / 10 · C1aN 5 / 10, 장애물 접촉 행 세 arm 모두 0 | 16D |
+| AG3S-TASK-DYNAMIC-MAP — **target 전용 TSDF (① + 이동 감지 reset) 부터 구현, 관심 영역 (target · 놓을 곳 · 그 사이 경로) 안의 보이는 빈 공간 지우기 (②) 를 함께 한 STEP · 4 구성 (기준 / + ① / + ② / + ①② ) 으로 비교한다. 관심 영역 = 세 영역의 합 (pad 0.10 m), 판정 기준은 결과 전 고정 (task §5), `AG3S-CORE-EVALUATION` 의 세 구성 비교에는 넣지 않는다** | 사용자 판정 (2026-10-23, [`handoff/AG3S-TASK-DYNAMIC-MAP.task.md`](handoff/AG3S-TASK-DYNAMIC-MAP.task.md) §0) | 16D |
+| AG3S-TASK-DYNAMIC-MAP — **1차 미채택 판정은 바꾸지 않고, 954 이웃 과일 접촉 진단 · 가려졌던 장애물 잊음의 물체별 진단 · 관심 영역 지우기를 18 장면으로 넓힌 E2 (판정 결과 전 고정) 를 진행한다. E2 에서 관심 영역 지우기가 사전 기준을 통과해 이 STEP 의 판정은 "채택", serving 기본값은 꺼짐 유지 (변경은 사용자 판정)** | 사용자 (2026-10-24 "사과 잔상을 제외하고는 거의 다 아슬아슬 — 나쁘지 않다", 권장 방향 진행), task §6a · §8 · §8a | 16D |
 
 ---
 
@@ -488,6 +505,9 @@ T47 이후에 판정된 것이고, 다시 판정하지 않는다.
 | 54 (T63b 가 추가) | **place-stop 의 실제 발동** — `check_run` 의 `place_stop` 분기와 client `--stop-after-place` 가 실제 run 에서 발동한 적이 없다 (CR0m 10 run · impl smoke 2 개 모두 place 없음). E0 · C1aN 의 place + 2.5 s 는 replay 상태 규칙으로만 구했다 | `T63b.verify.json` `not_measured` | **측정 안 됨** (place 에 도달하는 run 에서 처음 확인) |
 | 55 (T63b 가 추가) | **B0m parity 를 750 chunk 로 확대 · solve 순서를 바꾼 재실행 · 물리 기준 paired count** (같은 chunk 가 둘 다 관통하는지) | `T63b.verify.json` `not_measured` (parity 는 150 chunk 만, 순서는 ep126 1 episode 만 대조, paired 는 계산 안 함) | **측정 안 됨 (종료)** |
 | 56 (T63b 가 추가) | **진행 지연 가설 확인 (offline CPU) · B1 λ=10⁴ closed-loop** | 사용자 판정 3 (2026-10-22) | **하지 않기로 함 (사용자 판정 3)** |
+| 57 (AG3S-TASK-DYNAMIC-MAP 이 추가) | **가는 물체 (놓을 곳 기둥, 반지름 15 mm) 가장자리가 관심 영역 지우기에서 지워지는 기전과 가장자리 보존 수정** — main occluded-seen-before 0.29 % → 20.12 %, E2 hand occluded-seen-before 최대 +0.951 pp (한도 1 pp 근처). 가설: 가장 가까운 pixel 하나로 판정해 물체 가장자리 pixel 이 배경 depth 를 본다 | `AG3S-TASK-DYNAMIC-MAP.verify.json` `diag_missed_by_body_every_3rd_chunk`, `not_measured` | **측정 안 됨** (기전은 가설). ~~수정은 별도 STEP 후보~~ → 수정 (`--roi-carve-footprint`) 은 E3 에서 시험했고 미채택 — [`AG3S_TSDF_DYNAMIC_LOG.md`](AG3S_TSDF_DYNAMIC_LOG.md) 재측정 대기 1 · 2 |
+| 58 (AG3S-TASK-DYNAMIC-MAP 이 추가) | **둘 다 구성 211 · 250 에서 정적 TSDF 로 새어 든 사과 pixel 의 기전 · target 전용 TSDF 단독 비용** — 가설: 가려진 동안 추종 형상과 실제 사과가 어긋나 pixel 배정이 누락된다. `target_layer.ms` 는 routing 시작 → 층 합성까지라 단독 비용이 아니다 | `AG3S-TASK-DYNAMIC-MAP.verify.json` `not_measured` | **측정 안 됨** |
+| 59 (AG3S-TASK-DYNAMIC-MAP 이 추가) | **seed 반복 · 10 episode 넘는 표본, 954 의 바나나 접촉을 hand layer 누락과 직접 잇는 시험, 기준 구성의 954 · 1668 놓기 미도달 원인** — 기준 3 의 E2 최댓값이 한도 근처라 표본이 늘면 결과가 바뀔 수 있는지 확인하지 않았다 | `AG3S-TASK-DYNAMIC-MAP.verify.json` `limits`, `not_measured`, `verdict.facts` | **측정 안 됨** |
 
 ---
 
@@ -5949,3 +5969,263 @@ CR0m 은 어느 run 도 place 에 도달하지 않아 600 step 전체가 window 
 - B0m 의 offline 750 chunk 실패 (252 대 B0 144) 와 인증 최악 행이 step 0–1 의 `ee_finger_l1` 인 이유 (impl 의 추정 "시작 자세가 이미 10 mm 여유 안") 는 확인하지 않았다.
 
 **되돌아올 지점.** 종료한 것을 다시 열 신호: (a) no_grasp 원인 시험이 필요해질 때 — B1 (VLA tracking 항, λ=10⁴) closed-loop, 진행 지연 가설의 offline CPU 확인, (b) cuRobo 를 실시간 TO 후보로 다시 볼 때 — B0m 의 wall 113 ms · 인증 CPU 86 ms 를 66.7 ms 안으로 줄이는 설계, (c) 물리 기준 paired count 가 필요할 때 — 후보별 궤적이 저장되어 있으므로 (`verify/T63b/b0m_offline/` 과 T63 의 `curobo_merged`) 재풀이 없이 CPU 로 셀 수 있어 보인다 (계산해 보지 않았다). 재측정 대기 표에 항목 52–56 을 추가했고 50–51 에 주석을 달았다 (위).
+
+---
+
+## AG3S-TASK-DYNAMIC-MAP — 옮겨진 물체의 옛 자리를 거리장에서 지우되, 가려진 실제 장애물은 잊지 않을 수 있는가 (closed-loop 10 장면 × 4 구성 + 추가 실험 18 장면, 2026-10-23 ~ 24 KST)
+
+> **이 STEP 은 [`AG3S_TSDF_DYNAMIC_LOG.md`](AG3S_TSDF_DYNAMIC_LOG.md) 로 옮겨 이어 쓴다 (2026-10-24 사용자 지시). 이 절은 1차 · 진단 · E2 까지의 원본이고, E3 (가장자리 보존, 미채택) 이후는 새 문서에만 있다. 수치가 다르면 새 문서가 우선한다.**
+
+> 작성: ag3s-scribe, **2026-10-24 14:42 KST** (`date -u` 05:42 UTC + 9 h). 근거 (정본): [`handoff/AG3S-TASK-DYNAMIC-MAP.task.md`](handoff/AG3S-TASK-DYNAMIC-MAP.task.md) (설계 · 판정 기준 · 결과 전 수정 · 사용자 판정, §0–§8a), [`handoff/AG3S-TASK-DYNAMIC-MAP.verify.json`](handoff/AG3S-TASK-DYNAMIC-MAP.verify.json) (lead 가 직접 측정, 최종 수정 2026-10-24 14:17 KST). 이 STEP 은 STEP 번호 대신 이름으로 예약했다 (2026-10-23, 같은 pod 의 다른 세션 4 개에 알림).
+> **수치 출처 표기.** `[V]` = `verify.json` 의 `numbers` (표 아래에 키를 적는다). `[D]` = 같은 `numbers` 의 값에서 이 절이 계산한 값 (식을 적는다). `[T]` = task 의 정의 · 사용자 판정. `[H]` = 측정하지 않은 가설 (`verify.json` `not_measured`). 이 절은 **구현과 측정의 기록**이고, 문장은 `verify.json` `verdict` 가 말하는 범위를 넘지 않는다.
+> **이 STEP 의 판정과 serving 기본값.** 아래의 "채택 · 미채택" 은 task §5 · §8 에 결과 전에 고정한 기준을 적용한 이 STEP 의 판정이다. 기본값 변경이 아니다 — 두 flag 모두 serving 에서 **꺼짐을 유지**하고, 기본값 변경은 사용자 판정으로 한다.
+> **앞선 STEP 의 위치.** 이 STEP 은 `AG3S-DYNAMIC-FIELD` ([`task`](handoff/AG3S-DYNAMIC-FIELD.task.md) · [`verify.json`](handoff/AG3S-DYNAMIC-FIELD.verify.json)) 의 후속 연구 축이고, 기준 구성은 `IFG-APPLE-NBC-TARGETSURFACE` ([`verify.json`](handoff/IFG-APPLE-NBC-TARGETSURFACE.verify.json)) 위에 `IFG-211-GRASP` ([`task`](handoff/IFG-211-GRASP.task.md), commit `8da37119`) 의 형상 추종을 얹은 것이다. 이 세 STEP 은 이 로그에 절이 없다 (링크만 한다).
+
+### 1. 목적
+
+target 을 집기 전 · 집은 뒤 옮기는 동안, **사과나 다른 물체가 밀려 비어 버린 옛 자리**가 거리장에 남으면 TrajOpt 는 지금 없는 물체를 피하려고 궤적을 고친다. 그 옛 자리 잔상 (stale residue) 을 지우는 것이 목적이다. 동시에 **손에 가려졌을 뿐 실제로 있는 장애물은 잊으면 안 된다**.
+
+측정된 출발점 [T] (task §1, 모두 앞선 측정의 사실이다):
+
+| 사실 | 출처 |
+|---|---|
+| cuRobo TSDF 는 이번 depth 표면 ± truncation 을 지나는 block 만 갱신한다. 그 앞의 보이는 빈 공간에 남은 옛 표면은 그대로다. cuRobo 의 동적 처리는 depth 를 보지 않는 시간 · 시야 감쇠뿐이다 | `third_party/curobo/.../builder_camera_integrate.py:154-159, 543-556`, `wp_decay.py` |
+| 사과가 302 mm 떠난 뒤에도 그 자리가 −6.7 mm 로 점유, 8 frame 내내 자유가 되지 않았다 (F20) | `config.py:1030-1036` |
+| 잡기 전 211 장면에서 손바닥이 사과를 22.7 mm (닫기 전) · 36 mm (닫는 중) 밀었다. 기준 구성에서 형상은 옛 자리에 고정됨 | `IFG-211-GRASP` |
+| 장면 전체 "보이는 빈 공간 비우기" 는 옛 기억 잔상 −54.2 %, 처리 시간 20.3 → 122.5 ms | `AG3S-DYNAMIC-FIELD.verify.json` |
+
+**앞 측정의 한계 [T].** `AG3S-DYNAMIC-FIELD` 의 offline replay 는 서버의 쥔 물체 처리를 빠뜨렸고 (끔 구성 잔상의 98.4 % 가 닫힌 뒤 구간), 가려졌던 점 잊음이 fine layer 에서 +1.22 pp 였다. 그래서 이 STEP 은 replay 가 아니라 **closed-loop 서버가 기록한 실제 거리장을 같은 chunk 의 MuJoCo ground truth 와 비교**한다.
+
+### 2. 선행 연구와의 관계 (요약 — 전체 표는 [task §2](handoff/AG3S-TASK-DYNAMIC-MAP.task.md))
+
+| 우리 구성 요소 | 가장 가까운 선행 연구 | 가져온 것 | 다른 점 |
+|---|---|---|---|
+| target 전용 TSDF | Panoptic Multi-TSDFs (ICRA 2022) · TSDF++ (ICRA 2021) · nvblox human layer (ICRA 2024) · open-vocabulary shared autonomy 의 target dynamic layer (arXiv 2607.17323) | 물체를 변화의 단위로 둔다. 움직이는 것은 정적 지도에 넣지 않고 별도 층에 둔다 | 물체 identity 를 외부 panoptic segmenter 가 아니라 VLA attention 이 정한다. 층을 link 별 권한으로 고른다 |
+| 이동 감지 reset | Panoptic Multi-TSDFs 변화 감지 · POCD (RSS 2022) · Khronos (RSS 2024) | 물체가 바뀌면 그 물체의 submap 만 다시 만든다 | 변화 판정이 확률 갱신이 아니라 고정 형상 재맞춤 이동량 (기본 10 mm) 이다 |
+| 관심 영역 안 보이는 빈 공간 지우기 | ReFusion (IROS 2019) · Dynablox (RA-L 2023) · DUFOMap (RA-L 2024) · OctoMap / MoveIt ray clearing | depth ray 가 지나간 자리는 빈 공간이다 | 장면 전체가 아니라 작업이 지나갈 영역에만 건다. Dynablox 의 다중 frame 신뢰도는 넣지 않았다 |
+| (대조) 시간 감쇠 | cuRoboV2 (arXiv 2603.05493) · nvblox occupancy decay | — | 쓰지 않는다. 가려진 실제 장애물을 함께 잊는다 |
+
+### 3. 변경 (모두 기본 꺼짐 — 꺼짐이면 출력 · 기록 키 bit-identical, test 로 보임)
+
+| flag | 하는 일 | 같이 필요한 것 |
+|---|---|---|
+| `--target-layer` (`esdf.target_layer`) | robot mask 밖 유효 depth pixel 중 이번 frame 의 manipulated 점 (target 후보) 에서 voxel 1 칸 안이고 지지면 + pad 위인 pixel 을 **target 전용 TSDF** 에만 적분하고 나머지는 정적 TSDF 로 보낸다. 정적 TSDF 에 먼저 들어간 target 표면은 free 로 쓴다. 권한 없는 link 의 층 = `min(정적, target)`, 권한 있는 손의 층 = 정적만. 쥔 뒤에는 target TSDF 를 reset 하고 쓰지 않는다 | `--kept-geometry-follow` (없으면 설정 검증에서 거부) |
+| (같은 flag 의 이동 감지 reset) | target TSDF 를 reset 한 frame 의 manipulated 중심과 이번 중심이 10 mm 넘게 다르면 target TSDF 를 reset 하고 이번 frame 의 target pixel 로 다시 적분 | `--kept-geometry-follow` |
+| `--roi-carve` (`esdf.roi_carve`) | 관심 영역 (manipulated 점 ± 0.10 m ∪ 목적지 점 ± 0.10 m ∪ 미세 창 상자) 안의 점유 voxel 에만 "보이는 빈 공간 지우기" 판정 (카메라마다 투영해 관측 depth 가 voxel 깊이보다 margin 넘게 멀면 free) 을 건다. 탁자 아래는 빼지 않는다 | — |
+| `--kept-geometry-follow` (기존, commit `8da37119`) | 쥐기 직전 · 닫는 중 고정 형상이 손에 밀린 과일을 따라간다 | — |
+
+기록 키는 `esdf_stats.target_layer = {n_target_px, n_static_freed, reset, reset_reason, centre_shift_mm, build_ms}` · `esdf_stats.roi_carve = {n_roi_occupied, n_freed, roi_boxes, ms}` 이다 (켰을 때만). 코드: `AG3S/ag3s/fields/curobo_builder.py` · `AG3S/ag3s/runtime/pipeline.py` · `AG3S/ag3s/config.py` · `AG3S/trajopt/serve_safe.py`, test `tests/ag3s/test_task_dynamic_map.py` 14 passed (GPU 4 포함) [V `code_state.tests`]. `tests/ag3s` + `tests/trajopt` CPU 는 3708 passed · 7 failed 이고 7 개 모두 이 STEP 이전부터의 실패다 (6 개는 미 commit WIP 의 `serve_safe.main` → `ag3s_from_args` 이동으로 깨진 소스 문자열 test, 1 개 `test_t43t_replay::test_off_is_bit_identical…` 는 깨끗한 HEAD worktree 에서도 실패) [V `code_state`, T task §5b].
+
+**이 절에서 쓰는 구성 이름 (처음에 정의한다 — 내부 코드명 대신).**
+
+| 이름 | 무엇 | `verify.json` 키 |
+|---|---|---|
+| **기준 구성** | 이웃 과일과 붙은 target 떼어 내기 + 사과 표면 점 빼기 구성 (`IFG-APPLE-NBC-TARGETSURFACE`) + `--kept-geometry-follow`. 네 구성이 모두 follow 위에서 비교되도록 follow 를 기준에 포함했다 | `B` |
+| **target 전용 TSDF 구성** | 기준 구성 + `--target-layer` | `B_TL` |
+| **관심 영역 지우기 구성** | 기준 구성 + `--roi-carve` | `B_ROI` |
+| **둘 다 구성** | 기준 구성 + `--target-layer --roi-carve` | `B_TL_ROI` |
+
+### 4. 실험과 사전 고정한 판정
+
+**장면.** `IFG-APPLE-NBC-TARGETSURFACE` 와 같은 **사과 VLA 단독 성공 10 장면** (episode 56, 126, 211, 250, 309, 320, 753, 954, 1668, 1837; 211 · 320 · 954 는 놓을 곳 기둥 포함), 같은 policy seed, 결과를 보고 바꾸지 않았다 [T task §4]. 네 구성 × 10 = 40 episode, client `--stop-after-place 2.5`, server `--record-constraints`. run `20261024T034606+0900_8da37119afd3_31d9b16e3c97` (working tree = HEAD `8da37119` + 미 commit `AG3S-DYNAMIC-FIELD` · 이 STEP 코드, `snapshot_tdm`) [V `records`, `code_state`]. 순서: CPU test → GPU smoke 1 episode → 40 episode → 기록 분석. smoke (둘 다 구성, episode 56) 는 통과했고 첫 chunk 가 reference 와 max abs diff 0.0 이었다 [V `smoke_B_TL_ROI_ep56`].
+
+**측정하는 것.** 서버가 기록한 거리장의 두 층 — 권한 없는 link 가 읽는 **main fine layer** (`esdf_distance`) 와 권한 있는 손이 읽는 **hand layer** (`esdf_free_distance`) — 을 같은 chunk 의 MuJoCo ground truth 와 비교한다. 평가용 관심 영역은 GT 로 고정한다 (사과 처음 GT 표면 ∪ 바구니 상자 ± 0.10 m, ∪ 사과 현재 GT 표면 ± 0.10 m) — 구성마다 같은 영역이다 [T task §5a].
+
+| 지표 | 정의 (chunk 마다, 평가용 관심 영역 안) |
+|---|---|
+| 주 지표 | task success, 금지 접촉 (이웃 과일 · 바구니 · 탁자 · 놓을 곳 기둥 · 권한 없는 link 의 target 접촉, MuJoCo 실제 접촉) episode 수 |
+| target stale residue (옛 자리 잔상) | surface voxel (`\|기록값\| ≤ voxel 반 칸`) 중 현재 GT 표면 · 로봇 구에서 15 mm 넘게 멀고, target 이 그 episode 의 10 mm 넘게 떠난 이전 자세의 GT 표면 15 mm 안인 것. main fine layer · hand layer 각각 |
+| 움직인 다른 물체의 stale residue | 같은 정의, target 이 아닌 movable body. main fine layer |
+| forgotten obstacle (잊은 실제 장애물) | GT 표면 표본 (로봇 · 쥔 물체 제외) 중 거리장이 10 mm 넘게 멀다고 보는 비율. 지금 보이는 점 (visible) · 가려졌으나 전에 보인 점 (occluded-seen-before) 각각, 두 층 각각 |
+| 비용 | 서버 로그의 거리장 단계 (`profile_ms.esdf`) 시간 |
+
+**미리 정한 판정 (구성마다 기준 구성 대비, 10 episode 합) [T task §5, §5a].** 이 기준은 이번에 정한 연구 의사결정 기준이고 기존 측정이나 분야 표준이 아니다.
+
+| 기준 | 내용 | 적용 구성 |
+|---|---|---|
+| 1 | target stale residue 가 90 % 이상 감소 — main fine layer · hand layer **각각** | target 전용 TSDF 를 가진 구성 |
+| 2 | 움직인 다른 물체 stale residue 가 50 % 이상 감소 (main fine layer) | 관심 영역 지우기를 가진 구성 |
+| 3 | forgotten obstacle 이 기준 구성 대비 +1 pp 이하 — visible · occluded-seen-before × 두 층, 네 값 각각 | 모든 구성 (하나라도 어기면 그 구성은 채택하지 않는다) |
+| 4 | 성공 수가 기준 구성보다 적지 않고, 금지 접촉 episode 가 기준 구성보다 많지 않을 것 (10 episode 이므로 우수성 주장은 하지 않는다) | 모든 구성 |
+
+기준 1–3 을 만족하고 4 를 지키면 채택한다. 기준 구성의 해당 stale residue 가 0 이면 "판정 불가" 로 적는다 (통과로 세지 않음). 처리 시간은 판정에 넣지 않고 기록한다.
+
+**결과 전 수정 (2026-10-24 04:2x KST, 네 구성 rollout 전) [T task §5a].** 평가 도구를 기존 기록 (211, follow 끈 기준 구성의 이전 run) 에 먼저 돌려 정의를 점검했고, 네 구성의 결과는 아직 없었다.
+
+| 바꾼 것 | 이유 |
+|---|---|
+| residue 를 "점유 ≤ 0 voxel" 대신 **surface voxel** 로 센다 | ≤ 0 은 탁자 판 · 물체 내부 · 관측면 뒤 음수 띠를 세어 chunk 마다 약 1 만 voxel 이 "잔상" 으로 잡혔다 |
+| "옛 자리" = 물체가 **10 mm 넘게 떠난** 이전 자세만 | 바구니가 free joint 라 움직이지 않았는데도 기억에 들어가 옆의 그림자 seed 가 chunk 마다 13 ↔ 1,174 로 깜빡였다 |
+| GT 장면에 client 와 같은 장애물 profile 배치 | 211 · 320 · 954 의 놓을 곳 기둥이 GT 에 없으면 forgotten obstacle 에서 빠진다 |
+| 판정 1 을 두 층 각각으로 | 이전 기록 211 에서 사과가 밀린 뒤 target 옛 자리 잔상이 main fine layer 21,219 · hand layer 38 (75 chunk 합) 이었다 — 손이 보는 층의 것은 공 제외가 이미 지우고, 남는 것은 손 외 link 가 보는 층이다 [V `reference_trial_NBCTS_ep211`] |
+
+### 5. 1차 결과 — 10 장면 × 4 구성 (판정 · 이전 대비)
+
+그림 (모두 verifier 가 만든 것, 링크만 한다): ![bars](figures/task-dynamic-map/task-dynamic-map-bars.png) ([sidecar](figures/task-dynamic-map/task-dynamic-map-bars.json)) · ![table](figures/task-dynamic-map/task-dynamic-map-table.png) ([sidecar](figures/task-dynamic-map/task-dynamic-map-table.json)) · ![scene](figures/task-dynamic-map/task-dynamic-map-scene-ep954.png) ([sidecar](figures/task-dynamic-map/task-dynamic-map-scene-ep954.json)). 보기 폴더 (git 제외): `outputs/2026-10-24_작업영역_동적거리장/` (장면별 영상 · 검증 결과).
+
+**5.1 closed-loop** [V `closed_loop`; 성공 · 금지 접촉 episode]
+
+| 구성 | 성공 / 10 | 금지 접촉 episode | 금지 접촉 없는 성공 | 금지 접촉이 난 episode (접촉 행 수) |
+|---|---|---|---|---|
+| 기준 구성 | 7 | 1 | 7 | 211 (이웃 과일 10 · 탁자 4) |
+| target 전용 TSDF | 9 | 2 | 8 | 211 (이웃 과일 3), 954 (바구니 4) |
+| 관심 영역 지우기 | 9 | 2 | 8 | 211 (탁자 3), 954 (이웃 과일 34) |
+| 둘 다 | 9 | 2 | 8 | 250 (이웃 과일 13), 954 (이웃 과일 31) |
+
+사실 [V `verdict.facts`]: 기준 구성은 954 · 1668 에서 사과를 잡지 못해 **놓기 단계에 가지 않았다**. 세 구성에서 늘어난 금지 접촉 episode (954) 는 놓기 단계에서 났다. 즉 기준 구성의 금지 접촉 1 은 "놓기 단계까지 간 episode 가 더 적은" 조건에서 센 값이다. (둘 다 구성의 211 은 성공이지만 기록이 place-stop 이 아닌 full 로 끝났다 — `n_place_stop` 8.)
+
+**5.2 거리장 지표** [V `field`, `field_per_episode`]. 합은 10 episode 의 chunk 합이고, 구성마다 궤적이 갈라져 chunk 수 (main fine layer 440 / 385 / 352 / 397) 가 다르다.
+
+| 지표 (평가용 관심 영역 안) | 기준 구성 | target 전용 TSDF | 관심 영역 지우기 | 둘 다 |
+|---|---|---|---|---|
+| target stale residue — main fine layer (voxel) | 46,734 | 2,142 | 2,579 | 8,882 |
+| 〃 기준 대비 [D = 1 − 값/46,734] | — | −95.4 % | −94.5 % | −81.0 % |
+| target stale residue — hand layer (voxel) | 23,938 | 762 | 539 | 5,728 |
+| 〃 기준 대비 [D = 1 − 값/23,938] | — | −96.8 % | −97.7 % | −76.1 % |
+| 움직인 다른 물체 stale residue — main fine layer (voxel) | 919 | 107,044 | 65 | 37 |
+| forgotten obstacle, main, visible (%) | 0.794 | 1.159 | 1.085 | 1.145 |
+| forgotten obstacle, main, occluded-seen-before (%) | 0.567 | 1.678 | 1.413 | 1.399 |
+| forgotten obstacle, hand, visible (%) | 0.798 | 0.624 | 0.908 | 1.086 |
+| forgotten obstacle, hand, occluded-seen-before (%) | 0.563 | 0.799 | 1.335 | 1.624 |
+
+**5.3 판정 — 세 구성 모두 미채택** [V `judgement`, `verdict`]. 미리 정한 판정은 바뀌지 않았다.
+
+| 구성 | 기준 1 (target residue −90 %) | 기준 2 (다른 물체 residue −50 %) | 기준 3 (forgotten obstacle +1 pp 이하) | 기준 4 (성공 ≥ 기준, 금지 접촉 ≤ 기준) | 판정 |
+|---|---|---|---|---|---|
+| target 전용 TSDF | 통과 (−95.4 % / −96.8 %) | 적용 안 됨 | **미달**: main · occluded-seen-before **+1.111 pp** (나머지 세 값 −0.174 ~ +0.365 pp) | 성공 9 ≥ 7 통과, 금지 접촉 episode **2 > 1 미달** | 미채택 |
+| 관심 영역 지우기 | 적용 안 됨 | 통과 (−92.9 %: 919 → 65) | 통과 (최대 +0.846 pp, main · occluded-seen-before) | 성공 9 ≥ 7 통과, 금지 접촉 episode **2 > 1 미달** | 미채택 (기준 4 만 미달) |
+| 둘 다 | **미달** (main −81.0 %, hand −76.1 %) | 통과 (−96.0 %: 919 → 37) | **미달**: hand · occluded-seen-before **+1.061 pp** (나머지 세 값 +0.288 ~ +0.832 pp) | 성공 9 ≥ 7 통과, 금지 접촉 episode **2 > 1 미달** | 미채택 (기준 1 · 3 · 4 미달) |
+
+사용자 판정 (2026-10-24) [T task §6a]: "사과 잔상을 제외하고는 거의 다 아슬아슬 — 나쁘지 않다" → 권장 방향으로 진행: ① 954 이웃 과일 접촉 진단, ② 가려졌던 장애물 잊음 증가의 원인 (물체별), ③ 판정 기준을 미리 고정하고 표본을 늘려 재비교 (아래 §6 · §7).
+
+**5.4 사실 (원인으로 읽지 않는다)** [V `verdict.facts`, `diagnosis_954_B_TL`]
+
+- target 전용 TSDF 구성의 다른 물체 stale residue 107,044 는 **954 한 장면이 전부**다 (바구니가 27 mm 밀렸고, 10 mm 를 처음 넘은 request 는 49; 같은 장면에서 사과는 최대 386 mm 이동). 기준 구성은 954 에서 사과를 잡지 못했으므로 같은 상황이 만들어지지 않았다 (기준 구성의 값 919 는 다른 장면 합).
+- 둘 다 구성의 target stale residue 8,882 중 **211 · 250 두 장면이 8,486**이다. 둘 다 재파지가 이어지며 manipulated 가 occluded 로 유지되고 중심 이동이 10 mm 미만이라 target TSDF reset 이 드물었다.
+- 장면 그림의 두 panel (episode 954, request 59) 은 같은 request 번호지만 **궤적이 갈라져** 사과 위치가 다르다 (기준 구성: 처음 위치에서 16.6 mm, target 전용 TSDF 구성: 302.1 mm). 옛 자리 표면 voxel 144 → 22 는 같은 상태에서의 효과 비교가 아니라 이 장면의 그림이다. 효과의 판정은 5.2 의 10 장면 합으로 한다 [V `figures`, sidecar].
+
+### 6. 진단 두 가지와 추가 실험 E2 (관심 영역 지우기, 18 장면)
+
+진단은 코드를 고치지 않고 같은 기록으로 했다. 진단 결과는 E2 의 설계를 바꾸지 않았다 (task §8: 코드 · snapshot · kit · 서버 인자는 1차와 같다) [T task §8].
+
+**6.1 진단 ① — episode 954 의 이웃 과일 접촉** [V `diag_954_neighbour_contact`]
+
+| 항목 | 값 |
+|---|---|
+| 접촉 쌍 · chunk | `ee_finger_r2` ↔ banana (바나나), chunk 13–21 (사과를 쥐는 구간) |
+| 접촉 행 수 | 관심 영역 지우기 구성 34, 둘 다 구성 31 (둘 다 닿았다) |
+| 겹침 (관통) 최대 | 1.9 mm (관심 영역 지우기 구성) |
+| server 설정 | `--neighbour-contact-mm 20` — 손가락이 이웃 장애물과 120 mm 안에서 최대 20 mm 겹치는 것을 허용 |
+| 손 근처 (60 mm 안) 바나나 표면이 hand layer 에서 빠진 비율 | 기준 구성 0.00–0.03 (닫는 chunk 에서 0.14) · 관심 영역 지우기 0.08–0.21 · 둘 다 0.02–0.07 |
+
+**6.2 진단 ② — forgotten obstacle 증가는 어느 물체에서 났는가** [V `diag_missed_by_body_every_3rd_chunk`, 3 chunk 마다 표본 · 분수는 [D = 놓친 표본 / 전체 표본, main fine layer]. 진단 대상 장면 범위는 `verify.json` 에 적혀 있지 않다]
+
+| 물체 | visible: 기준 구성 → 관심 영역 지우기 | occluded-seen-before: 기준 구성 → 관심 영역 지우기 |
+|---|---|---|
+| **놓을 곳 기둥 (obstacle, 반지름 15 mm)** | 196/30,964 = 0.63 % → 1,993/22,268 = **8.95 %** | 29/9,834 = 0.29 % → 1,493/7,419 = **20.12 %** |
+| 바구니 (crate) | 11,989/1,035,547 = 1.16 % → 12,841/855,885 = 1.50 % | 2,256/372,098 = 0.61 % → 4,708/302,284 = 1.56 % |
+| 바나나 | 1,832/32,451 = 5.65 % → 409/25,902 = 1.58 % | 970/11,685 = 8.30 % → 854/12,909 = 6.62 % |
+| 배 | 8/14,143 = 0.06 % → 37/11,681 = 0.32 % | 23/11,647 = 0.20 % → 75/5,534 = 1.36 % |
+| 오렌지 | 5/3,537 = 0.14 % → 12/3,270 = 0.37 % | 11/1,010 = 1.09 % → 11/928 = 1.19 % |
+| 탁자 | 4/758,314 → 120/622,867 (0.00 % → 0.02 %) | 6/191,094 → 309/139,405 (0.00 % → 0.22 %) |
+
+hand layer 의 놓을 곳 기둥도 같은 방향이다: visible 192/28,933 = 0.66 % → 1,692/18,796 = 9.00 %, occluded-seen-before 24/9,232 = 0.26 % → 983/6,115 = 16.08 % [D]. 바나나는 관심 영역 지우기에서 visible · occluded-seen-before 모두 줄었다 (잊음이 모든 물체에서 늘지는 않았다).
+
+**6.3 추가 실험 E2 — 관심 영역 지우기 구성 하나만, 표본을 18 장면으로** (결과 전 고정, 2026-10-24 13:3x KST) [T task §8]
+
+| 항목 | 내용 |
+|---|---|
+| 구성 | 기준 구성 · 관심 영역 지우기 구성 두 개만. 코드 · snapshot · kit · 서버 인자는 1차와 같다 |
+| 장면 | IFG-APPLE 풀 24 장면 중 VLA 단독 성공 18 장면 **전부** = 1차 10 장면 + 새 8 장면 (1345, 1596, 121, 119, 325, 901, 572, 850; 901 · 572 · 850 은 놓을 곳 기둥). 새 8 장면만 돌리고 1차 10 장면 기록과 합쳤다 (16 episode 추가) |
+| 판정 | 기준 2 (다른 물체 residue −50 %) · 3 (forgotten obstacle +1 pp 이하, 네 값) · 4 (성공 ≥ 기준, 금지 접촉 episode ≤ 기준). 넷 다 지키면 "관심 영역 지우기" 채택. target stale residue 는 기록만 (이 구성은 target 전용 TSDF 가 아니다). 1차의 미달 판정은 그대로 남는다 — E2 는 별도 판정이며 1차를 덮지 않는다 |
+
+그림: ![e2-bars](figures/task-dynamic-map/task-dynamic-map-e2-bars.png) ([sidecar](figures/task-dynamic-map/task-dynamic-map-e2-bars.json)) · ![e2-table](figures/task-dynamic-map/task-dynamic-map-e2-table.png) ([sidecar](figures/task-dynamic-map/task-dynamic-map-e2-table.json)). 보기 폴더: `outputs/2026-10-24_관심영역지우기_18장면/`.
+
+**6.4 E2 결과 — 관심 영역 지우기 채택 (이 STEP 의 판정)** [V `e2_18_scenes`]
+
+| 지표 (18 장면 합) | 기준 구성 | 관심 영역 지우기 | 변화 / 판정 |
+|---|---|---|---|
+| 성공 | 14 / 18 | 16 / 18 | 기준 4 통과 (16 ≥ 14) |
+| 금지 접촉 episode | 3 | 3 | 기준 4 통과 (3 ≤ 3) |
+| 금지 접촉 없는 성공 | 13 | 14 | — |
+| 움직인 다른 물체 stale residue, main (voxel) | 1,277 | 65 | −94.9 % — 기준 2 통과 (≥ −50 %) |
+| forgotten obstacle, main, visible (%) | 1.210 | 1.425 | +0.216 pp — 기준 3 통과 |
+| forgotten obstacle, main, occluded-seen-before (%) | 0.506 | 1.274 | +0.767 pp — 기준 3 통과 |
+| forgotten obstacle, hand, visible (%) | 1.253 | 1.473 | +0.220 pp — 기준 3 통과 |
+| forgotten obstacle, hand, occluded-seen-before (%) | 0.544 | 1.495 | **+0.951 pp — 기준 3 통과 (한도 1 pp 에 가깝다)** |
+| (기록만) target stale residue, main / hand (voxel) | 50,377 / 26,220 | 6,007 / 710 | [D = 1 − 6,007/50,377 = −88.1 % / 1 − 710/26,220 = −97.3 %] 이 구성은 target 용 판정 대상이 아니다 |
+| 서버 거리장 단계 중앙값 (ms) · p95 | 109.7 · 265.09 | 238.51 · 597.44 | 비용 (판정에 넣지 않음) |
+
+금지 접촉이 난 episode 는 두 구성 모두 3 개이지만 **같은 3 개가 아니다** [V `e2_18_scenes.closed_loop_runs`]:
+
+| 구성 | 금지 접촉 episode (접촉 행 수) | 성공하지 못한 episode |
+|---|---|---|
+| 기준 구성 | 1345 (이웃 과일 27), 211 (이웃 과일 10 · 탁자 4), 850 (바구니 2) | 1668, 211, 850, 954 |
+| 관심 영역 지우기 | 1345 (이웃 과일 19), 211 (탁자 3), 954 (이웃 과일 34) | 211, 850 |
+
+954 는 기준 구성에서 사과를 잡지 못해 (접촉 행 0) 놓기 단계까지 가지 않았고, 관심 영역 지우기에서는 놓기까지 갔으나 6.1 의 바나나 접촉이 났다. 판정은 이 STEP 의 사전 기준 문자 그대로의 적용이고, 18 episode 규모이므로 우수성 주장은 하지 않는다 (task §5 기준 4).
+
+### 7. 이전 대비 (before → after) 와 기준점
+
+기준점: **직전 구성 = 기준 구성** (같은 run · 같은 장면 · 같은 seed 에서 함께 돌렸다). V11AB (benchmark 의 기준 모델) 와의 비교는 이 STEP 에서 하지 않았다 — 장면이 사과 VLA 단독 성공 풀이고 평가는 서버 거리장 · GT 비교라서 V11AB 의 benchmark 지표로 읽을 수 없다.
+
+| 변경 (flag, 기본 꺼짐) | 지표 | before (기준 구성) | after | 판정 |
+|---|---|---|---|---|
+| target 전용 TSDF (10 장면) | target stale residue main / hand | 46,734 / 23,938 | 2,142 / 762 | 기준 1 통과 |
+| 〃 | forgotten obstacle main occluded-seen-before | 0.567 % | 1.678 % (+1.111 pp) | 기준 3 미달 |
+| 〃 | 금지 접촉 episode | 1 | 2 | 기준 4 미달 |
+| 관심 영역 지우기 (10 장면) | 다른 물체 stale residue main | 919 | 65 | 기준 2 통과 |
+| 〃 | 금지 접촉 episode | 1 | 2 | 기준 4 미달 |
+| 둘 다 (10 장면) | target stale residue main / hand | 46,734 / 23,938 | 8,882 / 5,728 | 기준 1 미달 (−81.0 % / −76.1 %) |
+| 관심 영역 지우기 (18 장면) | 다른 물체 stale residue main | 1,277 | 65 | 기준 2 통과 |
+| 〃 | forgotten obstacle hand occluded-seen-before | 0.544 % | 1.495 % (+0.951 pp) | 기준 3 통과 (한도 근처) |
+| 〃 | 성공 · 금지 접촉 episode | 14 · 3 | 16 · 3 | 기준 4 통과 |
+
+**개선인가.** 관심 영역 지우기는 stale residue 를 크게 줄였고 (다른 물체 −94.9 %) 사전 기준 네 개를 모두 통과했다. 그러나 forgotten obstacle 은 모든 층 · 상태에서 늘었다 (+0.216 ~ +0.951 pp). target 전용 TSDF 는 target stale residue 를 줄였지만 (−95 % 대) 다른 물체 residue · forgotten obstacle · 금지 접촉에서 기준을 못 지켰고, 두 flag 를 함께 쓰면 target stale residue 감소가 −81 % / −76 % 로 줄었다. 아래 §8 의 원인은 그 증상이 어느 구성 요소에서 났는지의 표다.
+
+### 8. 실패 · 한계 정리 — 구성 요소별 (증상 위치 ≠ 원인 위치일 때 둘 다)
+
+구성 요소: ATS (Attention-based Target Segmentation, attention 으로 target 분할 · 추적) · HSR (Hidden-state Sub-task Recognition, 작업 단계 · 쥠 판단) · LTE (Link-specific Target Exemption, link 별 target 제외 거리장) · CCR (Constrained Chunk Refinement, TrajOpt 궤적 수정 · HOLD).
+
+| 증상 | 증상 위치 | 원인 위치 | 근거 · 상태 |
+|---|---|---|---|
+| 954 에서 손가락이 바나나에 닿음 (겹침 최대 1.9 mm, chunk 13–21) | 실행 접촉 (MuJoCo replay) | **LTE + CCR** — 손 근처 바나나 표면의 hand layer 누락이 기준 구성 0–3 % 에서 관심 영역 지우기 8–21 % (LTE 의 hand layer 입력), server 에는 `--neighbour-contact-mm 20` (이웃 장애물과 최대 20 mm 겹침 허용) 설정이 있고 관측된 겹침 최대 1.9 mm 는 그 안이다 (CCR 설정). 둘 다 구성 (2–7 %) 도 닿았다 | [V `diag_954_neighbour_contact`] 사용자 지시의 층 분류. 바나나 표면이 hand layer 에서 빠지는 **기전은 측정하지 않았다** |
+| 관심 영역 지우기에서 forgotten obstacle 증가 | 거리장 (main fine layer · hand layer) | **LTE** — 놓을 곳 기둥 (반지름 15 mm) 에 몰림: main occluded-seen-before 0.29 % → 20.12 %, visible 0.63 % → 8.95 % | [V `diag_missed_by_body_every_3rd_chunk`], task §8a. 다음 수정 후보: 가는 물체 가장자리 보존. 기전은 가설 [H]: 가장 가까운 pixel 하나로 판정해 물체 가장자리 pixel 이 배경 depth 를 본다 (`not_measured`, 측정 안 함) |
+| 둘 다 구성에서 target stale residue 가 −81 % / −76 % 에 그침 (211 · 250 이 8,486 / 8,882) | 거리장 (target 전용 TSDF 층 합성 입력) | target TSDF 의 이동 감지 reset 규칙 (이번 STEP 의 새 구성 요소) — 재파지로 manipulated 가 occluded 로 유지되고 중심 이동이 10 mm 미만이라 reset 이 드물었다. manipulated 점은 ATS 가 만든다 | [V `verdict.facts`]. 분류 중 ATS 부분은 기록자 정리 [I]. 정적 TSDF 로 새어 든 사과 pixel 의 기전 (가설 [H]: 가려진 동안 추종 형상과 실제 사과가 어긋나 pixel 배정 누락) 은 측정 안 함 |
+| target 전용 TSDF 구성에서 다른 물체 stale residue 107,044 | 거리장 (main fine layer) | 이 구성은 사과만 별도 층으로 다룬다 — 바구니가 밀린 옛 자리는 지우는 장치가 없다 (954 의 바구니 27 mm 이동, request 49). 바구니 접촉 4 행이 이 구성의 954 에서 났다 (바구니 27 mm 이동과 같은 장면이고, 접촉이 이동의 원인인지는 이 STEP 에서 따로 보지 않았다) | [V `diagnosis_954_B_TL`, `verdict.facts`]. 한 장면이 전부이므로 일반화하지 않는다 |
+| 기준 구성이 954 · 1668 에서 사과를 잡지 못함 | 실행 (놓기 단계 미도달) | 이 STEP 이 조사하지 않았다 | [V `verdict.facts`]. 이 때문에 구성 간 금지 접촉 episode 수가 같은 단계에서 센 값이 아니다 |
+
+### 9. 비용
+
+서버 거리장 단계 (`profile_ms.esdf`) 중앙값 · p95 [V `closed_loop.*.esdf_ms`, `e2_18_scenes.closed_loop.*.esdf_ms`]:
+
+| 구성 | 10 장면 요청 수 | 중앙값 (ms) | p95 (ms) |
+|---|---|---|---|
+| 기준 구성 | 440 | 95.5 | 261.94 |
+| target 전용 TSDF | 385 | 344.14 | 571.26 |
+| 관심 영역 지우기 | 352 | 224.89 | 601.96 |
+| 둘 다 | 397 | 441.4 | 779.78 |
+| (E2, 18 장면) 기준 구성 | 736 | 109.7 | 265.09 |
+| (E2, 18 장면) 관심 영역 지우기 | 635 | 238.51 | 597.44 |
+
+E2 의 중앙값 비는 238.51 / 109.7 = 2.17 배 [D]. smoke (둘 다 구성, episode 56 1 개) 에서 기록된 `target_layer.ms` 중앙값 280.8 ms · `roi_carve.ms` 중앙값 35.0 ms (최대 318.95) 였다 [V `smoke_B_TL_ROI_ep56`]. `target_layer.ms` 는 routing 시작부터 층 합성까지의 시간이라 target 전용 TSDF 단독 비용이 아니다 [V `not_measured`]. 처리 시간은 판정에 넣지 않았다.
+
+### 10. 한계 · 측정하지 않은 것 · 되돌아올 지점
+
+**한계 [V `limits`].**
+
+1. 10 episode (E2 는 18), seed 1 개. 구성 간 궤적이 갈라져 거리장 지표의 분모 (chunk · 장면 상태) 가 구성마다 다르다.
+2. 평가용 관심 영역은 GT 사과 · 바구니 기준이고 알고리즘의 관심 영역과 다르다.
+3. surface voxel 정의가 관측면 뒤 그림자 seed 도 stale residue 에 섞는다. residue 총량은 판정에 쓰지 않았다.
+4. 기준 3 의 E2 최댓값 +0.951 pp (hand layer, occluded-seen-before) 는 한도 1 pp 에 가깝다. 표본이 늘면 한도를 넘을 수 있는지는 확인하지 않았다.
+
+**측정하지 않은 것 [V `not_measured`].** (a) 둘 다 구성 211 · 250 에서 정적 TSDF 로 새어 든 사과 pixel 의 기전 (가설: 가려진 동안 추종 형상과 실제 사과가 어긋나 pixel 배정 누락). (b) target 전용 TSDF 단독 비용. (c) seed 반복 · 10 episode 넘는 표본 (E2 가 관심 영역 지우기만 18 로 늘렸다). (d) 가는 물체 가장자리가 지워지는 기전 (가설: 가장 가까운 pixel 하나로 판정해 물체 가장자리 pixel 이 배경 depth 를 본다).
+
+**되돌아올 지점 [T task §6, 전환 신호].**
+
+| 신호 | 다음 |
+|---|---|
+| target pixel 배정이 이웃 과일 표면을 target 으로 가져가 forgotten obstacle 이 오르면 | tol 을 줄이거나 attention surface 의 pixel 판정으로 바꾼다 |
+| 관심 영역 지우기가 가려졌던 점을 더 잊으면 (기준 3 근처 +0.951 pp 포함) | Dynablox 식 다중 frame 확인 (연속 k frame ray 통과) 또는 가는 물체 가장자리 보존 — 별도 STEP 으로 제안 |
+| 손에 가려진 이웃 물체의 옛 자리 | Lost & Found · POCD 식 상호작용 구간 표시 (별도 STEP) |
+| serving 기본값 변경 | 사용자 판정 (이 STEP 은 flag 를 꺼짐으로 둔다) |

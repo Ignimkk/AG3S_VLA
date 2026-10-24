@@ -306,5 +306,5 @@ def test_build_ag3s_takes_a_contact_section():
 
     sig = inspect.signature(serve_safe.build_ag3s)
     assert sig.parameters["contact"].default is None
-    src = inspect.getsource(serve_safe.main)
+    src = inspect.getsource(serve_safe.ag3s_from_args)   # `main` builds AG3S through it (AG3S-DYNAMIC-FIELD)
     assert "contact=nonauthorized_target_margin_section(args) or None" in src

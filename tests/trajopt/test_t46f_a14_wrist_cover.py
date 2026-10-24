@@ -153,7 +153,7 @@ def test_cli_default_passes_nothing():
         assert serve_safe.wrist_cover_options(p.parse_args(BASE_ARGV + ["--links", links])) is None
     with pytest.raises(SystemExit):   # overflow 만 주면 아무 일도 안 한다 → 거절
         serve_safe.wrist_cover_options(p.parse_args(BASE_ARGV + ["--wrist-cover-overflow", "5"]))
-    src = inspect.getsource(serve_safe.main)
+    src = inspect.getsource(serve_safe.ag3s_from_args)   # `main` builds AG3S through it (AG3S-DYNAMIC-FIELD)
     assert "wrist_cover=wrist_cover_options(args)" in src
 
 

@@ -1,0 +1,42 @@
+{
+ "configurations": [
+  "B",
+  "B_ROI"
+ ],
+ "target_old_main": [
+  50377,
+  6007
+ ],
+ "target_old_hand": [
+  26220,
+  710
+ ],
+ "moved_old_main": [
+  1277,
+  65
+ ],
+ "missed_occluded_main_pct": [
+  0.5063063245118581,
+  1.2735874659185793
+ ],
+ "missed_occluded_hand_pct": [
+  0.5441222886021595,
+  1.4947569948445867
+ ],
+ "n_success": [
+  14,
+  16
+ ],
+ "n_success_without_forbidden": [
+  13,
+  14
+ ],
+ "n_forbidden": [
+  3,
+  3
+ ],
+ "esdf_ms": [
+  109.7,
+  238.51
+ ]
+}

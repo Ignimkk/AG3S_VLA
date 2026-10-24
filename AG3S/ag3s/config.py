@@ -1042,6 +1042,46 @@ class EsdfConfig:
     #: 가중치가 이보다 낮아진 복셀은 **다시 미관측**으로 돌린다. 감쇠를 켰을 때 "잊는다" 가
     #: 실제로 뜻하는 것.
     min_weight: float = 0.0
+    #: **AG3S-DYNAMIC-FIELD D1 — 보이는 빈 공간 비우기.** True = 적분 뒤, 각 TSDF 의 점유 voxel
+    #: (표면 띠 안 또는 음수) 을 카메라마다 투영해 그 화소의 관측 depth 가 voxel 깊이보다
+    #: `free_space_carve_margin` 넘게 멀면 (광선이 그 voxel 을 지나갔다) free 로 만든다. 로봇 mask ·
+    #: depth 무효 화소는 판단하지 않는다 (관측 없음 = 그대로). cuRobo 감쇠와 달리 depth 를 본다 —
+    #: 시야 안에서 가려진 물체는 지우지 않는다. TSDF 는 관측 표면의 truncation 띠만 갱신하므로, 그
+    #: 앞의 보이는 빈 공간에 남은 옛 표면이 지금은 지워지지 않는다 (IFG-UNKNOWN: 실패 장면 활성 제약의
+    #: 44.1%). 꺼짐(기본) = 비트 동일.
+    free_space_carve: bool = False
+    #: D1 의 여유 (m). None = 그 TSDF 의 truncation + 한 voxel.
+    free_space_carve_margin: float | None = None
+    #: **AG3S-DYNAMIC-FIELD D2 — 로봇 몸이 차지한 공간 비우기.** True = 이번 프레임 self-filter 로봇 구
+    #: (전신) 를 `robot_free_shrink` 만큼 줄인 부피 안의 TSDF voxel 을 free 로 만든다 (로봇이 지금
+    #: 거기 있으니 다른 물체는 없다). 손에 가려 다시 관측되지 않는 자리 (손이 밀어낸 물체의 옛 자리)
+    #: 를 비운다. 지지면 아래 · 목적지 근처는 빼는 `_held_free_points` 규칙을 따른다. 꺼짐 = 비트 동일.
+    robot_occupied_free: bool = False
+    #: D2 의 구 반지름 축소량 (m). 손가락이 닿은 물체 표면을 지우지 않기 위한 것.
+    robot_free_shrink: float = 0.005
+    #: **AG3S-TASK-DYNAMIC-MAP ① — target 전용 TSDF.** True = manipulated 물체의 pixel (가장 가까운 근거 점이 target
+    #: 점이고 `target_layer_pixel_tol` 안, 지지면 + 미세 voxel 위) 을 정적 TSDF 대신 따로 둔 target TSDF 에 적분한다.
+    #: 본 계층 = min(정적, target), target 없는 계층 = 정적 계층 (공 · ownership 제외 없음). 쥐면 target TSDF 를
+    #: 비우고 쓰지 않는다. 물체 중심이 마지막 reset 때보다 `target_layer_reset_m` 넘게 옮겨지면 다시 만든다 (①-b).
+    #: serving 에서는 `clustering.kept_geometry_follow` 와 함께만 켠다 (`serve_safe`). 꺼짐(기본) = 비트 동일.
+    target_layer: bool = False
+    #: ① 의 pixel · voxel 소유 거리 (m). target 점 간격 (중앙 약 5 mm, p90 약 8 mm, 2026-10-23 기록) 을 덮는 값.
+    target_layer_pixel_tol: float = 0.010
+    #: ①-b 의 이동 판정 (m).
+    target_layer_reset_m: float = 0.010
+    #: **AG3S-TASK-DYNAMIC-MAP ② — 관심 영역 안 보이는 빈 공간 지우기.** True = manipulated 점 · 목적지 점 · 권한 link
+    #: 실행 경로 상자 각각 ± `roi_pad` 안의 점유 voxel 에만 D1 (`free_space_carve`) 판정을 건다. 꺼짐(기본) = 비트 동일.
+    roi_carve: bool = False
+    roi_pad: float = 0.10
+    #: ② 의 판정을 voxel 의 화면 영역 전체로 — 투영 영역 (반 voxel + `roi_carve_footprint_pad_px`) 의 모든 pixel 이 유효하고
+    #: voxel 보다 margin 넘게 뒤를 봤을 때만 지운다. 가장 가까운 pixel 하나로는 물체 가장자리 pixel 이 배경을 보아 가는 물체
+    #: (놓을 곳 기둥 반지름 15 mm) 가장자리가 지워졌다 (task §8a 진단). 꺼짐(기본) = 비트 동일.
+    roi_carve_footprint: bool = False
+    roi_carve_footprint_pad_px: int = 1
+    #: ② 영역 판정에서 robot mask pixel 을 어떻게 셀지: ``block`` (영역에 하나라도 있으면 판정 보류, E3) · ``ignore`` (영역의 robot pixel 은
+    #: 세지 않되 가장 가까운 pixel 자체는 robot 이 아니고 뒤를 봐야 한다 — 손이 가린 것은 여전히 지우지 않는다).
+    roi_carve_footprint_robot: str = "block"
+    ROI_CARVE_FOOTPRINT_ROBOT = ("block", "ignore")
     #: Recompute the distance transform only inside the changed region, padded by `max_distance`.
     incremental: bool = True
     #: Side of the cube the local update works in, in voxels. Smaller blocks recompute less but
@@ -1418,6 +1458,35 @@ class EsdfConfig:
                 raise AG3SConfigError(f"esdf.{name} 는 (0, 1] 이어야 합니다: {v}")
         if self.min_weight < 0.0:
             raise AG3SConfigError(f"esdf.min_weight 는 0 이상이어야 합니다: {self.min_weight}")
+        # AG3S-DYNAMIC-FIELD D1 · D2
+        for name in ("free_space_carve", "robot_occupied_free"):
+            if not isinstance(getattr(self, name), bool):
+                raise AG3SConfigError(f"esdf.{name} 는 true 또는 false 여야 합니다: {getattr(self, name)!r}")
+        if self.free_space_carve_margin is not None and not (
+                math.isfinite(float(self.free_space_carve_margin)) and float(self.free_space_carve_margin) > 0.0):
+            raise AG3SConfigError(
+                f"esdf.free_space_carve_margin 는 양수이거나 None 이어야 합니다: {self.free_space_carve_margin}")
+        if not (math.isfinite(float(self.robot_free_shrink)) and float(self.robot_free_shrink) >= 0.0):
+            raise AG3SConfigError(f"esdf.robot_free_shrink 는 0 이상이어야 합니다: {self.robot_free_shrink}")
+        if (self.free_space_carve or self.robot_occupied_free) and self.backend != "curobo":
+            raise AG3SConfigError("esdf.free_space_carve · robot_occupied_free 는 curobo backend 의 TSDF 에만 걸린다")
+        # AG3S-TASK-DYNAMIC-MAP ① · ②
+        if not isinstance(self.roi_carve_footprint_pad_px, int) or isinstance(self.roi_carve_footprint_pad_px, bool) \
+                or self.roi_carve_footprint_pad_px < 0:
+            raise AG3SConfigError(f"esdf.roi_carve_footprint_pad_px 는 0 이상의 정수여야 합니다: {self.roi_carve_footprint_pad_px!r}")
+        if self.roi_carve_footprint_robot not in self.ROI_CARVE_FOOTPRINT_ROBOT:
+            raise AG3SConfigError(f"esdf.roi_carve_footprint_robot 는 {self.ROI_CARVE_FOOTPRINT_ROBOT} 중 하나여야 합니다: {self.roi_carve_footprint_robot!r}")
+        if self.roi_carve_footprint and not self.roi_carve:
+            raise AG3SConfigError("esdf.roi_carve_footprint 는 esdf.roi_carve 의 판정 방식이다 — roi_carve 와 함께 켠다")
+        for name in ("target_layer", "roi_carve", "roi_carve_footprint"):
+            if not isinstance(getattr(self, name), bool):
+                raise AG3SConfigError(f"esdf.{name} 는 true 또는 false 여야 합니다: {getattr(self, name)!r}")
+        for name in ("target_layer_pixel_tol", "target_layer_reset_m", "roi_pad"):
+            v = float(getattr(self, name))
+            if not (math.isfinite(v) and v > 0.0):
+                raise AG3SConfigError(f"esdf.{name} 는 양수여야 합니다: {getattr(self, name)!r}")
+        if (self.target_layer or self.roi_carve) and self.backend != "curobo":
+            raise AG3SConfigError("esdf.target_layer · roi_carve 는 curobo backend 의 TSDF 에만 걸린다")
         if self.voxel_size <= 0.0:
             raise AG3SConfigError(f"esdf.voxel_size must be > 0, got {self.voxel_size}")
         if self.truncation_voxels <= 0.0:
