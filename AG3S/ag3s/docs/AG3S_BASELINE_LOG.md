@@ -14,7 +14,7 @@
 >
 > **수치 규칙.** 이 파일의 모든 수치는 `AG3S/ag3s/docs/handoff/<STEP>.verify.json` 을 출처로 한다. BL-1 의 수치는
 > [`handoff/PAPER-BASELINES-2.verify.json`](handoff/PAPER-BASELINES-2.verify.json) 의 `numbers`(표 · 지표)와
-> `runs` · `issues` · `not_measured`(실행 시각 · 실패 · 미측정)에서만 가져왔다. BL-3 의 수치는 [`handoff/BASELINE-EVAL-V1.verify.json`](handoff/BASELINE-EVAL-V1.verify.json), BL-4 의 수치는 [`handoff/BASELINE-EVAL-V2.verify.json`](handoff/BASELINE-EVAL-V2.verify.json) 의 `numbers` · `issues` · `limitations` · `not_measured` 에서 가져왔고, 두 단계의 구현 경위(`BASELINE-EVAL-F.impl.md` · `-G.impl.md`)는 구성 · 방법 사실만 옮겼다(G 의 속도 · 동일성 수치는 옮기지 않았다). 출처가 없는 숫자는 쓰지 않았고, 필요하면
+> `runs` · `issues` · `not_measured`(실행 시각 · 실패 · 미측정)에서만 가져왔다. BL-3 의 수치는 [`handoff/BASELINE-EVAL-V1.verify.json`](handoff/BASELINE-EVAL-V1.verify.json), BL-4 의 수치는 [`handoff/BASELINE-EVAL-V2.verify.json`](handoff/BASELINE-EVAL-V2.verify.json) 의 `numbers` · `issues` · `limitations` · `not_measured` 에서 가져왔고, 두 단계의 구현 경위(`BASELINE-EVAL-F.impl.md` · `-G.impl.md`)는 구성 · 방법 사실만 옮겼다(G 의 속도 · 동일성 수치는 옮기지 않았다). BL-5 의 수치는 [`handoff/ATS-CLOUD-DIAG-V4.verify.json`](handoff/ATS-CLOUD-DIAG-V4.verify.json) 의 `numbers` · `runs` · `issues` · `not_measured` 에서 가져왔다. 원인 진단의 근거(`파일:줄` · 경로)는 `ATS-CLOUD-DIAG-H.impl.md`, 구현은 `ATS-CLOUD-DIAG-J.impl.md` 에서 옮겼고 H 의 예비 수치는 옮기지 않았다. 출처가 없는 숫자는 쓰지 않았고, 필요하면
 > verifier 에게 측정을 요청한다. **implementer 의 smoke 수치(`*.impl.md`)는 이 파일에 옮기지 않는다.** smoke 는 배선
 > 확인이지 측정이 아니기 때문이다. BL-0 · BL-2 는 구성과 test 통과 사실(pass / skip 개수)만 `impl.md` 에서 옮겼다.
 > 식별자(경로 · SHA · commit · sha256)는 verify.json 또는 impl.md 에 있는 것만 옮긴다.
@@ -30,10 +30,11 @@
 |---|---|---|---|
 | **BL-0** PAPER-BASELINES | `Baseline/paper_baselines/` 신설: 공통 interface · lift · 평가 harness · 6 provider · external sources · 환경 | **구현 · test 완료 (2026-10-23, commit `bf1403d5`), 사용자 판정 대기** | [BL-0](#bl-0--paper-baselines-논문-비교-baseline-폴더-2026-10-23) |
 | **BL-1** PAPER-BASELINES-2 | SL3 dev 10 episode · 221 frame 에서 grounding baseline 8 spec × prompt GPU 측정 (12 arm + ATS) | **측정 완료 (commit `5752c64c`), 사용자 판정 대기.** ~~`grounded_sam2:track` 은 OOM 으로 **미측정**, SL4b 40 episode 는 **deferred**~~ → track · SL4b 40 episode 는 BL-4 에서 측정(2026-10-24) | [BL-1](#bl-1--paper-baselines-2-grounding-baseline-sl3-dev-gpu-측정-2026-10-23) |
-| **BL-2** PAPER-METHODS | `methods/` 신설: safety filter 3 + sampling guidance 4 + 외부 repo 7 fetch. KNOWS 이동 | **구현 · test 완료 (commit `5752c64c`), 사용자 판정 대기.** ~~수치는 BL-3 이후에 채운다~~ → offline(open-loop) 수치는 BL-3 에 채웠다. closed-loop 수치는 BL-5 | [BL-2](#bl-2--paper-methods-논문-비교-방법-methods-구성-2026-10-23) |
+| **BL-2** PAPER-METHODS | `methods/` 신설: safety filter 3 + sampling guidance 4 + 외부 repo 7 fetch. KNOWS 이동 | **구현 · test 완료 (commit `5752c64c`), 사용자 판정 대기.** ~~수치는 BL-3 이후에 채운다~~ → offline(open-loop) 수치는 BL-3 에 채웠다. closed-loop 수치는 ~~BL-5~~ → BL-6 | [BL-2](#bl-2--paper-methods-논문-비교-방법-methods-구성-2026-10-23) |
 | **BL-3** BASELINE-EVAL V1 | ATS 와의 공정 비교(cloud labeling) · grounding 고유 지표 · methods offline 지표 · module 별 figure | ~~**진행 중** (implementer F → verifier V1, CPU)~~ → **측정 완료 (2026-10-24 KST, CPU), 사용자 판정 대기.** 지표 registry · ATS 공정 비교(cloud labeling) · grounding 고유 지표 · methods offline · benchmark 대표 장면 | [BL-3](#bl-3--baseline-eval-v1-cloud-labeling-공정-비교-고유-지표-methods-offline-2026-10-24) |
 | **BL-4** BASELINE-EVAL V2 | track memory 수정 · 평가 CPU 경로 속도 개선 → SL3 track + SL4b 40 episode 측정 | ~~**진행 중** (implementer G → verifier V2, GPU lock)~~ → **측정 완료 (2026-10-24 KST, GPU), 사용자 판정 대기.** track memory 평탄 · SL3 track · SL4b 40 episode 전체 arm · sm_90 확인 | [BL-4](#bl-4--baseline-eval-v2-track-memory-sl3-track-sl4b-40-episode-2026-10-24) |
-| BL-5 (이름 미정) | methods closed-loop 연결 → benchmark 고유 지표(TSR · CAR · ETS 등) | 미착수 | `benchmark/runners` 수정이 필요해 같은 checkout 의 다른 session 과 조율한 뒤 별도 task 로 한다 |
+| **BL-5** ATS-CLOUD-DIAG | V11AB `cloud_target` 이 비는 원인 진단 · cloud labeling 의 ATS 표현 옵션(`--ats-repr` · `--ats-tol`) · 표현별 공정 비교 재계산 · stale geometry 와 GT 의 거리 | **측정 완료 (2026-10-24 KST, CPU), 사용자 판정 대기.** 코드(J)는 commit 하지 않은 working tree 판 | [BL-5](#bl-5--ats-cloud-diag-v11ab-cloud_target-이-비는-원인-진단과-ats-표현별-공정-비교-재계산-2026-10-24) |
+| ~~BL-5 (이름 미정)~~ → **BL-6** CLOSED-LOOP-METHODS | methods closed-loop 연결 → benchmark 고유 지표(TSR · CAR · ETS 등) | ~~미착수~~ → **진행 중** (implementer I → verifier V3). 이 기록은 verify.json 이 나온 뒤 쓴다 | 원본 [`handoff/CLOSED-LOOP-METHODS.task.md`](handoff/CLOSED-LOOP-METHODS.task.md). `benchmark/runners` 는 고치지 않고 `Baseline/paper_baselines/closed_loop/` 의 새 server · launcher 로 붙인다는 것이 task 의 설계 원칙이다 |
 
 ### 사용자 · lead 결정 기록
 
@@ -45,7 +46,9 @@
 | 2026-10-23 | ~~`grounded_sam2:track` 과 SL4b 40 episode 는 **deferred** (lead)~~ → `BASELINE-EVAL.task.md` 의 순서 2(BL-4)에서 두 측정을 진행(deferred 해제) | `PAPER-BASELINES-2.verify.json` `not_measured` |
 | 2026-10-23 | `AG3S_BASELINE_LOG.md` 를 만들어 기록한다. 권장 순서: ① ATS 와의 공정 비교 · 고유 지표 · methods offline 지표 → ② track memory · 속도 → SL4b → ③ methods closed-loop | `BASELINE-EVAL.task.md` |
 | 2026-10-23 | 각 baseline 과 benchmark 가 요구하는 지표를 **전부** 기록하고 시각 자료(실제 장면 · segmentation · module 의 핵심 기능)를 남긴다. 그래서 BL-3 에 baseline · benchmark 별 지표 표(원 지표 · 우리 측정값 또는 closed-loop / not-applicable)와 module 별 figure 3 종(scene · core · metrics)을 둔다 | 사용자 지시, `BASELINE-EVAL.task.md` |
-| 2026-10-24 | 권장 순서 ①(BL-3) · ②(BL-4)를 진행했다. ③ methods closed-loop 연결은 BL-5 로 남는다 | `BASELINE-EVAL.task.md` |
+| 2026-10-24 | 권장 순서 ①(BL-3) · ②(BL-4)를 진행했다. ③ methods closed-loop 연결은 ~~BL-5~~ → BL-6 으로 남는다(BL-5 번호는 ATS-CLOUD-DIAG 가 쓴다) | `BASELINE-EVAL.task.md` |
+| 2026-10-24 | 사용자 지시 "네 진행하세요": (a) methods closed-loop 연결(BL-6)과 (b) ATS 진단(BL-5)을 진행한다 | `CLOSED-LOOP-METHODS.task.md` · `ATS-CLOUD-DIAG.task.md` |
+| 2026-10-24 | **lead 결정(사용자 판정 전)**: 공정 비교의 ATS 주 표현은 **exclusion geometry 를 같은 cloud 에 5 mm 로 대응시킨 것**, `cloud_target` 은 fresh-only 진단 행, exact · 10 mm 는 sensitivity 행. 기본값을 지금과 같게 두는 옵션 추가라 기존 수치는 바뀌지 않는다 | `ATS-CLOUD-DIAG.task.md` "후속" 절 |
 
 ---
 
@@ -100,6 +103,13 @@
 | **cloud labeling** | ATS 와 segmenter 를 V11AB 가 그 call 에 만든 **같은 fused / filtered cloud 점** 위에서 비교하는 방법. 점마다 GT · ATS · segmenter label 을 매겨 point IoU · P · R · neighbour 비율을 낸다. harness 의 5 mm voxel 비교와 달리 ATS 의 대표점 표현이 평가 단위가 되지 않는다 |
 | **`cloud_target` · `target_points`** | V11AB perception run 이 기록한 ATS 출력 두 가지. `cloud_target` = fused cloud 점 중 target 으로 flag 한 점, `target_points` = voxel-downsample 된 대표점. SL4 run 에서 `cloud_target` 은 `has_target` 179 call 중 134 call 에서 비어 있다 |
 | **`ats_v11ab_tp_exact` · `ats_v11ab_tp_5mm`** | verifier 보충 ATS 행. cloud 점이 기록된 `target_points` 와 좌표 일치(1 μm 이내) / 5 mm 이내이면 ATS positive 로 센다 |
+| **stand-in (V11AB)** | 이번 frame cloud 에서 새로 찾은 cluster 대신 **이전 frame 에 관측한 geometry** 로 V11AB 가 target 을 보고하는 경우. anchor(이번 cluster 가 anchor 의 부분집합이라 anchor geometry 를 유지) 와 occluded(target 이 가려져 마지막 관측 geometry 를 유지)가 있다. 이번 cloud 의 점이 아니므로 `point_indices` 가 비어 있다 |
+| **geometry frame** | stand-in 이 가진 geometry 를 마지막으로 관측한 call. frames.jsonl `manipulated.anchor.geometry_frame` |
+| **exclusion geometry** | V11AB 가 ESDF 에서 target 으로 제외하는 점 집합(`target-free` layer 를 만들 때 쓴다). has_target call 에서는 `target_points`, has_target=False 이지만 `manipulated_state` 가 있는 call 에서는 episode 안의 직전 has_target call 의 `target_points` 다 |
+| **ATS 표현 (`--ats-repr`)** | cloud labeling 에서 ATS positive 점을 세우는 방법. `cloud_target` = V11AB 가 flag 한 cloud 점(현행, 기본), `target_points` = 기록된 대표점에서 tol 이내인 cloud 점(has_target call 만), `exclusion` = exclusion geometry 에서 tol 이내인 cloud 점. `--ats-tol` 기본 0.005 m |
+| **call 범주 (fresh · anchor · occluded · excluded_no_target · no_admissible)** | npz 만으로 정한다. `fresh` = has_target 이고 `target_indices` 길이 > 0. `anchor` / `occluded` = has_target 이고 길이 0 이며 `manipulated_state` 가 visible / occluded. `excluded_no_target` = has_target=False, `manipulated_state` ≠ "", episode 안에 이전 has_target call 이 있음. `no_admissible` = 나머지 has_target=False(SL4 에서 4 call 모두 grounding_status `no_admissible`) |
+| **`d_surfc_mm` · `pt_med_mm` · `frac_10` · `shift_body_mm`** | stale geometry 와 GT 의 거리 지표(V4). `d_surfc_mm` = \|mean(exclusion geometry) − mean(그 시점 GT target visual surface 표본)\|. `pt_med_mm` = call 마다 exclusion 점 각각에서 GT target visual surface 까지 정확한 거리의 median. `frac_10` = exclusion 점 중 GT surface 10 mm 이내인 비율. `shift_body_mm` = GT target body 위치의 (그 call − geometry frame) 이동 거리 |
+| **wrong-object (V4 정의)** | geometry frame 에서 exclusion 점 중 BDDL target 으로 라벨된(가장 가까운 scene instance 가 10 mm 이내) 비율이 50 % 미만인 call. SL4c 의 오선택과 같은 현상을 call 단위로 센 것이다. 이 call 의 `shift_body_mm` 는 BDDL target 의 이동이지 ATS 가 잡은 물체의 이동이 아니다 |
 | **native metrics (NM)** | `eval/native_metrics.py`. 각 논문 고유의 지표를 저장 mask 에서 사후 계산한다 |
 | **Acc@0.5** | 예측 box 와 GT box 의 IoU ≥ 0.5 이면 정답, 정답 sample 의 비율(REC, localization heads 논문). 여기서는 mask 의 tight box 로 계산하고 detector box 도 같은 값이다 |
 | **CorLoc (any-object / target)** | TokenCut 의 object discovery 지표. 예측 box 가 GT box 중 하나와 IoU ≥ 0.5(code 는 `>= 0.5`)이면 정답. any-object = 장면의 모든 BDDL 물체 instance 의 box 를 GT 로(class-agnostic, 원 정의), target = target box 만(= Acc@0.5 mask) |
@@ -331,7 +341,7 @@ flock -w 3600 /tmp/ag3s-vla-gpu-validation.lock env PYTHONPATH=$PWD .venv-baseli
 
 ### 결과 — #1 3D soft IoU · precision · recall (5 mm voxel, episode 평균 → episode 간 평균)
 
-> **ATS 행은 비교에 쓸 수 없다.** ATS 의 `target_points` 는 voxel-downsample 된 **대표점 표현**이라 이 harness 의 5 mm soft voxel 정답과
+> ~~**ATS 행은 비교에 쓸 수 없다.**~~ → harness(5 mm voxel) 행 자체는 그대로 쓰지 않는다. ATS 의 비교는 같은 cloud 점 위의 cloud labeling(BL-3)으로 옮겼고, 거기서 쓸 ATS 표현은 BL-5 에서 lead 가 exclusion 5 mm 로 정했다(사용자 판정 대기). 아래는 BL-1 측정 당시의 기록이다. ATS 의 `target_points` 는 voxel-downsample 된 **대표점 표현**이라 이 harness 의 5 mm soft voxel 정답과
 > 해상도가 맞지 않는다. 3D soft recall 이 0.068 이고, eval voxel 에 없는 예측 voxel(`pred_offgrid`)이 합계 10,524 개이며
 > `found_any` 가 179 / 221 이다. 표현이 원인이라는 설명은 A 의 impl.md(그리고 lead)의 것이고 이 측정이 원인을 분리하지는 않았다.
 > 그래서 아래 "ATS 대비 paired gain"(#4)도 **표현 차이가 섞인 수치**다. 같은 점 집합 · 같은 해상도 위의 공정 비교는 BL-3 에서 한다. → BL-3 에서 했다(cloud labeling). 이때 `cloud_target` 이 `has_target` call 의 대부분에서 비어 있다는 별도 문제도 확인됐다(BL-3 결과 C).
@@ -562,7 +572,7 @@ recorded SL3 frame 의 CPU smoke 는 세 filter 와 네 guidance 모두 **끝까
 
 | 항목 | 상태 |
 |---|---|
-| closed-loop(SafeLIBERO Level I / II, LIBERO)에서의 성공률 · 충돌률 | 다음 STEP(BL-5). `benchmark/runners` 연결이 필요하다. per-step(T = 1) 호출이 원본과 같은 timing 이다 |
+| closed-loop(SafeLIBERO Level I / II, LIBERO)에서의 성공률 · 충돌률 | 다음 STEP(~~BL-5~~ → BL-6). `benchmark/runners` 연결이 필요하다. per-step(T = 1) 호출이 원본과 같은 timing 이다 |
 | pi0.5 network 위에서의 guidance 효과 | **미실행.** CPU 에서는 recorded-chunk 대체 velocity 의 양 끝 경우(`tracking` / `constant`)만 봤다. GPU smoke 명령은 `methods/guidance_common/gpu_smoke.py` docstring · README 에 준비했다(verifier 몫). guidance closure 가 scene 을 상수로 잡아 call 마다 다시 trace 되므로 closed-loop 에서는 scene 을 traced 인자로 바꾸는 편이 낫다(D) → BL-3 에서 같은 대체 velocity 로 SL3 dev 221 call 전체를 CPU 에서 측정했다(pi0.5 network 위 효과는 여전히 미실행) |
 | non-privileged 입력 | smoke 는 GT mask(privileged)만 썼다. `extras["target_mask"]` 로 grounding provider 와 연결하는 경로는 code 에만 있다 |
 | SafeLIBERO recorded frame | segmentation 을 기록한 run 이 SL3 LIBERO 뿐이라 smoke 하지 않았다. SafeLIBERO 에서는 `privileged/obstacle_names` 를 env 의 `*obstacle*` joint 이름으로 채워야 한다(`main_aegis.py:238-248`) |
@@ -576,7 +586,7 @@ recorded SL3 frame 의 CPU smoke 는 세 filter 와 네 guidance 모두 **끝까
 
 ### 판정
 
-**사용자 판정 대기.** ~~수치는 BL-3 이후에 채운다.~~ → offline(open-loop) 수치는 BL-3 에 채웠다(결과 E). closed-loop 수치는 BL-5.
+**사용자 판정 대기.** ~~수치는 BL-3 이후에 채운다.~~ → offline(open-loop) 수치는 BL-3 에 채웠다(결과 E). closed-loop 수치는 ~~BL-5~~ → BL-6.
 
 ---
 
@@ -650,7 +660,7 @@ F 의 smoke 수치는 옮기지 않았다(수치 규칙). V1 이 test 를 돌렸
 | status | 뜻 |
 |---|---|
 | `offline-now` | 지금 있는 기록만으로 CPU 에서 잰다 |
-| `closed-loop` | rollout(성공 · 충돌 · episode 길이)이 있어야 잰다. BL-5 에서 잰다 |
+| `closed-loop` | rollout(성공 · 충돌 · episode 길이)이 있어야 잰다. ~~BL-5~~ → BL-6 에서 잰다 |
 | `not-applicable` | 우리 setting 에서 정의가 성립하지 않는다(dataset · 학습 방식 · task 가 다르다). 이유를 적었다 |
 
 lead 초안과 달라진 점 6 개(registry 가 정정한 것):
@@ -667,7 +677,7 @@ registry 에서 확인하지 못한 것(`metrics.md` §5): 논문 HTML 은 WebFe
 
 ### 결과 B — baseline · benchmark 별 지표 표 (사용자 지시 2026-10-23)
 
-원 지표 · status · 우리 측정값(SL3 dev 10 episode, 두 camera 합, `numbers` 의 값)을 한 표에 둔다. "closed-loop 에서 측정"은 BL-5 의 몫이다. (3D soft IoU 등 harness 값은 `BASELINE-EVAL-V2.verify.json` `numbers.sl3` · `numbers.sl4b` 와 BL-1 표에서 같은 값이다.)
+원 지표 · status · 우리 측정값(SL3 dev 10 episode, 두 camera 합, `numbers` 의 값)을 한 표에 둔다. "closed-loop 에서 측정"은 ~~BL-5~~ → BL-6 의 몫이다. (3D soft IoU 등 harness 값은 `BASELINE-EVAL-V2.verify.json` `numbers.sl3` · `numbers.sl4b` 와 BL-1 표에서 같은 값이다.)
 
 | 대상 | 원 지표 (출처) | status | 우리 측정값 · 대응 |
 |---|---|---|---|
@@ -986,7 +996,7 @@ LIBERO 4 suite, SafeLIBERO 4 suite × Level I / II, LIBERO-Safety(L0 의 4 task 
 
 | # | 내용 | 영향 |
 |---|---|---|
-| 1 | **ATS `cloud_target` 이 `has_target` 179 call 중 134 call 에서 비어 있다.** ATS 행이 45 call 로 계산됐다. `target_points` 는 기록되어 있다. verifier 보충 행(좌표 일치 · 5 mm)을 함께 적었다 | ATS 행 해석(결과 C). 왜 비는지는 측정하지 않았다 |
+| 1 | **ATS `cloud_target` 이 `has_target` 179 call 중 134 call 에서 비어 있다.** ATS 행이 45 call 로 계산됐다. `target_points` 는 기록되어 있다. verifier 보충 행(좌표 일치 · 5 mm)을 함께 적었다 | ATS 행 해석(결과 C). ~~왜 비는지는 측정하지 않았다~~ → BL-5 에서 진단 |
 | 2 | `better` / `worse` 는 diff 의 부호 개수(`metrics.py:183`)다. 지표 방향이 아니다 | BL-1 용어 절의 같은 항목을 고쳤다(용어 절) |
 | 3 | **guidance 는 π0.5 가 아닌 대체 velocity** 를 쓰고 **open loop** 다. 수정 chunk 를 실행하지 않는다. filter 는 chunk 뒤 행을 method 자기 EE 예측으로 filter 한다 | guidance · filter 수치는 실제 closed-loop 효과가 아니다 |
 | 4 | `ms_*` 에 jit compile 이 들어 있다(closure 가 call 마다 재생성) | latency 로 읽지 않는다 |
@@ -1007,19 +1017,19 @@ LIBERO 4 suite, SafeLIBERO 4 suite × Level I / II, LIBERO-Safety(L0 의 4 task 
 | 항목 | 이유 |
 |---|---|
 | `grounded_sam2:track` 의 J / F 시계열 · SL4b | BL-4 (V2) |
-| closed-loop 지표(LIBERO SR, SafeLIBERO CAR / TSR / ETS, LIBERO-Safety SR / CR / time / LDLJ, methods 의 원 지표) | closed-loop 연결 전(BL-5) |
+| closed-loop 지표(LIBERO SR, SafeLIBERO CAR / TSR / ETS, LIBERO-Safety SR / CR / time / LDLJ, methods 의 원 지표) | closed-loop 연결 전(~~BL-5~~ → BL-6) |
 | YOLOE `conf` 0 부터의 P / R 곡선 | GPU 재실행 필요 |
 | multi-link 의 비-gripper(forearm) binding 사례 | SL3 dev 에 없다(binding body 가 gripper 인 call 2 개뿐) |
 | SegInW AP, LVIS / COCO AP, LIBERO FWT / NBT / AUC, LIBERO-Safety Refusal Rate, Lan-o3dp 원 RLBench SR | `not-applicable` (`metrics.md`) |
 | π0.5 network 위의 guidance 효과 | 대체 velocity 만 사용 |
-| 보충 ATS 행에서 `target_points` 와 cloud 점이 일치하지 않는 call(`has_target` 179 중 `tp_exact` 151, `tp_5mm` 162)의 이유 | 측정하지 않았다 |
+| ~~보충 ATS 행에서 `target_points` 와 cloud 점이 일치하지 않는 call(`has_target` 179 중 `tp_exact` 151, `tp_5mm` 162)의 이유~~ → | BL-5 에서 진단했다. 그 call 은 stand-in(이전 frame geometry)이다(H 진단). 28 / 17 call 의 범주 분해는 V4 가 재측정하지 않아 이 기록에 옮기지 않았다 |
 | verifier 가 figure 를 사용자에게 직접 보내는 것 | verifier session 에 파일 전송 tool 이 없어 경로만 보고했다 |
 
 ### 열린 항목
 
-1. `cloud_target` 이 `has_target` call 의 대부분(134 / 179)에서 비는 이유 — V11AB perception 쪽 확인. 이유에 따라 ATS 행의 정의(`cloud_target` 대 `target_points`)를 정해야 한다.
+1. ~~`cloud_target` 이 `has_target` call 의 대부분(134 / 179)에서 비는 이유 — V11AB perception 쪽 확인. 이유에 따라 ATS 행의 정의(`cloud_target` 대 `target_points`)를 정해야 한다.~~ → BL-5 에서 확인했다. V11AB 가 stand-in 을 target 으로 쓰고 그 `point_indices` 가 비기 때문이며 기록 버그가 아니다. ATS 행의 정의는 lead 가 exclusion 5 mm 로 정했다(사용자 판정 대기).
 2. TokenCut DINO 재계산 parity 1 sample 불일치의 원인(`libero_spatial_t3_e0` obs 65 head).
-3. guidance 를 π0.5 network 위에서(GPU smoke), filter 를 closed-loop 에서 측정 — BL-5.
+3. guidance 를 π0.5 network 위에서(GPU smoke), filter 를 closed-loop 에서 측정 — ~~BL-5~~ → BL-6.
 4. NUDGE κ · localization heads 를 held-out 위에서 재측정.
 5. guidance 수정 chunk 의 IK 위치 오차(CFM · NUDGE 최대 1.69 m)가 scene-GT clearance 해석에 미치는 영향 — verifier 에게 확인을 요청할 항목.
 
@@ -1332,7 +1342,7 @@ SL3 notrack run 에서 ATS 와 Grounded-SAM(instruction)의 wrong-object 3D 가 
 |---|---|
 | SL4b ATS(`ats_v11ab`) 행 | SL4b 에는 V11AB perception run 이 없다 |
 | track 의 평가 frame 사이 frame 시간 | 행에 기록되지 않는다 |
-| closed-loop 지표(TSR · CAR · ETS 등) | BL-5 |
+| closed-loop 지표(TSR · CAR · ETS 등) | ~~BL-5~~ → BL-6 |
 | `redetect_on_loss=true`(잃은 뒤 재검출) 변형의 track | 측정하지 않았다 |
 | BL-1 과 같은 thread 로 latency 재측정 | thread 설정 확인 필요 |
 
@@ -1347,3 +1357,311 @@ SL3 notrack run 에서 ATS 와 Grounded-SAM(instruction)의 wrong-object 3D 가 
 
 **사용자 판정 대기.**
 
+---
+
+## BL-5 — ATS-CLOUD-DIAG: V11AB `cloud_target` 이 비는 원인 진단과 ATS 표현별 공정 비교 재계산 (2026-10-24)
+
+> 2026-10-24 KST. 진단 H 14:55, 구현 J 15:12, 측정 V4 15:16 이후(run dir 이름의 시각이 KST 다: `20261024T151602` ~ `…T152242`, 마지막 run 의 wall 244 s).
+> 원본: [`handoff/ATS-CLOUD-DIAG.task.md`](handoff/ATS-CLOUD-DIAG.task.md) · [`-H.impl.md`](handoff/ATS-CLOUD-DIAG-H.impl.md)(진단) · [`-J.impl.md`](handoff/ATS-CLOUD-DIAG-J.impl.md)(구현) · [`handoff/ATS-CLOUD-DIAG-V4.verify.json`](handoff/ATS-CLOUD-DIAG-V4.verify.json)(측정). raw 출력은 `outputs/verify/ATS-CLOUD-DIAG-V4/`.
+> figure: [`figures/baselines/ats_v11ab/`](figures/baselines/ats_v11ab/) 의 `v4-*` 4 개(각각 같은 이름의 `.json` sidecar). 이 기록은 링크만 한다.
+> 대상: SL3 dev `libero_spatial` t0–9 e0, 10 episode · 221 policy call(BL-3 과 같은 집합). V11AB cloud = SL4 perception run `20261012T225820_46a08d6ff644_sl4-perception-dev`, segmenter mask = `20261023T134909_bf1403d54bc6_paper-baselines-2-sl3dev-notrack`, scene GT = `outputs/verify/SL4/raw/scene`.
+> **판정은 사용자 판정 대기.** 아래는 수치와 관찰 가능한 사실만 적는다. `cloud_target` 이 비는 원인(H 진단, lead 확인)을 제외하고 측정 결과의 인과 해석은 적지 않는다.
+
+### 이 STEP 이 답하는 질문 (BL-5)
+
+BL-3 결과 C 에서 V11AB perception run 의 `cloud_target` 이 `has_target` 179 call 중 134 call 에서 비었고, 그래서 ATS 행이 45 call 로만 계산됐다.
+
+1. 왜 `cloud_target` 이 비는가? 기록 경로(`perception_replay`)의 문제인가, V11AB 산출물 구조의 문제인가?
+2. 공정 비교에 쓸 ATS 표현은 무엇이고, 표현을 바꾸면 ATS 행과 segmenter 와의 paired 비교는 어떻게 달라지는가?
+3. V11AB 가 ESDF 에서 target 으로 빼는 영역(exclusion geometry)은 그 시점의 GT target 위치와 얼마나 어긋나는가?
+
+### 경위
+
+| 역할 | 한 일 | 산출물 |
+|---|---|---|
+| implementer H (진단, code 수정 없음, CPU) | 기록된 npz 와 code 를 읽어 원인을 진단하고 표현 대안을 비교했다. 분석 script 와 진단 그림은 `outputs/ats_cloud_diag/` 에만 두었다 | `ATS-CLOUD-DIAG-H.impl.md` |
+| lead (2026-10-24, 사용자 \"진행하세요\" 의 범위) | H 의 진단을 받아 표현 결정(아래)과 J · V4 task 를 냈다 | `ATS-CLOUD-DIAG.task.md` \"후속\" 절 |
+| implementer J | `eval/cloud_labeling.py` 에 `--ats-repr {cloud_target,target_points,exclusion}`(기본 `cloud_target`)와 `--ats-tol`(기본 0.005 m)을 추가했다 | `ATS-CLOUD-DIAG-J.impl.md` |
+| verifier V4 (CPU, worker 1, `CUDA_VISIBLE_DEVICES=''`) | exclusion exact / 5 mm / 10 mm 와 `cloud_target` 을 돌리고 segmenter arm 과의 paired bootstrap · 범주별 표 · stale geometry 와 GT 의 거리 분포 · figure 4 개를 만들었다 | `ATS-CLOUD-DIAG-V4.verify.json` |
+
+**결정(lead, 사용자 판정 전).** 공정 비교의 ATS 주 표현은 **(b+) exclusion geometry 를 같은 cloud 에 5 mm 로 대응시킨 것**이다. (a) `cloud_target` 은 fresh-only 진단 행으로 남기고, exact · 10 mm 는 sensitivity 행이다. 5 mm 는 V11AB fusion voxel 10 mm(`fusion.fusion_voxel_size_m = 0.01`, H 가 221 / 221 call 에서 확인)의 반 폭이다(H 의 근거). 기본값은 지금과 같아서 기존 수치(BL-3)는 바뀌지 않는다.
+
+### 구현 (J)
+
+| 파일 | 내용 |
+|---|---|
+| `Baseline/paper_baselines/eval/cloud_labeling.py` | 옵션 `--ats-repr` · `--ats-tol`. `exclusion` 은 has_target call 에서 `target_points`, has_target=False 이고 `manipulated_state` 가 있는 call 에서 episode 안의 직전 has_target call 의 `target_points` 를 이어 붙인 것에서 tol 이내인 cloud 점을 ATS positive 로 센다. carry 한 call 에서 centroid 오차가 1e-5 m 이상이거나 없으면 `ValueError` 로 멈춘다. call 범주를 새 파일 `ats_calls.jsonl` 에 매 run 마다 기록한다. 기본이 아닌 run 은 `calls.jsonl` 의 모든 행에 `ats_call_cat` 를 넣고, summary 에 `ats_by_category` 를 넣는다. 기본 run 은 `calls.jsonl` 이 V1 과 byte 동일해야 하므로 `ats_call_cat` 를 넣지 않는다 |
+| `Baseline/paper_baselines/tests/test_cloud_labeling.py` | test 5 개(parametrize 포함 8 case) 추가. J 의 보고: `.venv-baselines` 에서 **15 passed**(기존 7 + 새 8) |
+
+위 두 파일은 **commit 하지 않은 working tree 판**이다(HEAD `3c677553`). V4 가 이 판으로 측정했다(`code_state`, sha256 은 `outputs/verify/ATS-CLOUD-DIAG-V4/code_state_sha256.txt`).
+
+### 원인 — `cloud_target` 이 비는 이유 (H 진단, code 근거)
+
+**결론(H, lead 확인).** 기록 버그가 아니다. V11AB 는 일부 frame 에서 target 을 이번 frame cloud 에서 새로 찾은 cluster 가 아니라 **이전 frame 에 관측한 geometry(stand-in: anchor 또는 occluded)** 로 보고한다. 그 geometry 가 ESDF 의 target 제외에 들어간다. stand-in 의 `point_indices` 는 비어 있다(그 점들은 이번 cloud 의 점이 아니다). `perception_replay` 는 `cloud_target` 을 `point_indices` 로만 세우므로 stand-in call 에서 flag 가 0 개가 되어 `cloud_target` 이 0 이다.
+
+| 점검 | H 가 확인한 것 | 근거(commit `46a08d6f` 기준) |
+|---|---|---|
+| `--no-clouds` 였나 | 아니다. `save_clouds: true`, npz 에 `cloud_points` · `cloud_target` 이 있다 | `run_manifest.json` |
+| 다른 cloud 에 flag 를 달았나 | 아니다. grounding 과 replay 가 같은 `debug[\"filtered_cloud\"]` 를 쓴다 | `pipeline.py:1475` · `:1513` · `:1852`, `perception_replay.py:385` |
+| flag 를 세우는 규칙 | `target_flag[target.point_indices] = True` 뿐이다. `target_indices` 도 같은 배열이다 | `perception_replay.py:420-422`, `:404` (HEAD 에서 `:629-631`, `:610`) |
+| stand-in 의 `point_indices` | 설계상 비어 있다. docstring: \"point_indices is empty (none of *this* cloud's points are it)\" | `target_grounding.py:1959` (`_anchor_result`), `:1995` (`_unobserved_result`), `:1966-1971` |
+| stand-in 으로 가는 분기 | `decision.cluster is None` 이면 `_unobserved_result`(occluded 또는 lost), `decision.reason` 이 `SUBSET_KEPT_ANCHOR` · `UNSPLIT_KEPT_ANCHOR` · `CLOSING_KEPT_GEOMETRY` 이면 `_anchor_result` | `target_grounding.py:1764-1777` |
+| ESDF 가 받는 geometry | `manipulated_geometry` 를 받아 그 `target.points` 로 `TARGET_LABEL` 과 target-free layer 를 만든다 | `pipeline.py:1542` · `:1679` · `:2511` · `:2547` · `:2566` |
+| has_target=False 인데 제외가 계속되는 경우 | no-target 분기 note: \"contact permission and target exclusion keep its last observed geometry\" | `pipeline.py:1597-1602` |
+
+`파일:줄` 은 H 가 읽은 것이고 V4 가 줄 번호를 다시 확인하지는 않았다. 아래 V4 측정은 이 진단과 맞는 데이터 성질을 확인한다.
+
+**V4 가 확인한 데이터 성질.**
+
+| 확인 | V4 결과 |
+|---|---|
+| stand-in call 의 geometry frame 이 그 call 자신이 아닌가 | stand-in 134 call 전부 `geometry_frame ≠ self`. fresh 45 call 은 전부 `geometry_frame = self` |
+| exclusion geometry 가 geometry frame 의 `target_points` 와 byte 동일한가 | 217 / 217 call(exclusion geometry 가 있는 call = 221 − no_admissible 4) |
+| `excluded_no_target` 에서 이어 붙인 직전 has_target call(`carried_from`)이 geometry frame 과 같은가 | 38 call 중 37 call 이 **다르다** |
+| exclusion geometry 의 centroid 오차 최대(`checks.centroid_err_max_mm`) | 5e-06 mm |
+| GT target 위치 기록(`gt_target_position`)과 scene GT 의 차이 최대 | 0.0 mm |
+| V4 범주 대 H `calls_diag` 범주 | 221 call 모두 대응(fresh 45 · anchor 62 · occluded 72 · excluded_no_target 38 · no_admissible 4). `shift_body_mm` 은 H 의 `gt_target_shift_since_geom_mm` 와 217 call 에서 최대 차이 0 mm, geometry frame 불일치 0 |
+| `cloud_target` run 의 `calls.jsonl` 이 V1(`…035953_…_baseline-eval-cloud-sl3dev`)과 같은가 | sha256 동일 → 기본 옵션이 BL-3 수치를 바꾸지 않았다 |
+| exclusion run 3 개의 mask arm 행 · 범주 수 · re-aggregation | 모든 run 에서 일치(`consistency`) |
+| 회귀 기준선(legacy 16D, CPU) | 일치: 위반으로 시작 14 / 15, `has_target` 15 / 15, frame 0 의 `clearance_before` −29.031 mm |
+
+### 실행 (V4, CPU, worker 1)
+
+`.venv-baselines`, `HF_HUB_OFFLINE=1`, `MUJOCO_GL=osmesa`. 각 run 의 명령은 V1 과 같고 `--ats-repr` · `--ats-tol` 만 다르다(`--dump-figure-data --dump-per-episode 2`).
+
+| run (`create_run` 의 run-id) | 옵션 | wall (s) | max RSS (GB) | exit |
+|---|---|---|---|---|
+| `ats-cloud-exclusion-5mm-sl3dev` (`…T151602_3c6775531841_…`) | `--ats-repr exclusion --ats-tol 0.005` | 145.0 | 0.197 | 0 |
+| `ats-cloud-exclusion-exact-sl3dev` (`…T151826_…`) | `--ats-repr exclusion --ats-tol 1e-6` | 134.4 | 0.207 | 0 |
+| `ats-cloud-exclusion-10mm-sl3dev` (`…T152040_…`) | `--ats-repr exclusion --ats-tol 0.010` | 121.4 | 0.211 | 0 |
+| `ats-cloud-cloudtarget-sl3dev` (`…T152242_…`) | `--ats-repr cloud_target` | 244.2 | 0.336 | 0 |
+
+run dir 은 `AG3S_VLA-storage/results/benchmark/` 아래다. 같은 pod 에서 다른 session 의 GPU server · rollout · pytest 가 돌고 있었으나 이 단계는 CPU 결정적 계산이고 기준선은 일치했다(`issues`).
+
+### 결과 A — call 범주와 ATS 표현별 positive 수
+
+V4 `category_counts`: **fresh 45 · anchor 62 · occluded 72 · excluded_no_target 38 · no_admissible 4**(합 221). 범주 정의는 용어 절의 \"call 범주\" 를 본다. `cloud_target` 의 positive 는 fresh 45 call 에만 있고 나머지 4 범주에는 0 이다. exclusion 5 mm 는 fresh 45 · anchor 62 · occluded 55 · excluded_no_target 15 call 에 positive 가 있다(아래 표 B-1).
+
+![call 범주 시계열과 거리](figures/baselines/ats_v11ab/v4-ats-call-category-series.png)
+
+(위 figure: episode 별 call 범주(색 띠), exclusion geometry 와 GT target 의 거리 · GT target 이동(선), wrong-object call 표시(▼), 하단은 범주별 거리 분포.)
+
+**표 B-1. 범주별 ATS 지표 — exclusion 5 mm(주 표현)와 `cloud_target`** (episode 평균, P · neighbour 는 positive 가 있는 call 만, pooled 는 call 전체를 합친 값)
+
+| 범주 | call (episode) | ATS found (exclusion 5 mm) | IoU | P (n call) | R | neighbour | pooled P | pooled R | pooled neighbour | `cloud_target` found |
+|---|---|---|---|---|---|---|---|---|---|---|
+| fresh | 45 (10) | 45 / 45 | 0.504 | 0.692 (45) | 0.515 | 0.302 | 0.536 | 0.415 | 0.460 | 45 / 45 |
+| anchor | 62 (10) | 62 / 62 | 0.357 | 0.676 (62) | 0.359 | 0.324 | 0.864 | 0.525 | 0.136 | 0 / 62 |
+| occluded | 72 (9) | 55 / 72 | 0.131 | 0.609 (55) | 0.132 | 0.374 | 0.297 | 0.113 | 0.641 | 0 / 72 |
+| excluded_no_target | 38 (9) | 15 / 38 | 0.005 | 0.400 (15) | 0.005 | 0.566 | 0.027 | 0.006 | 0.826 | 0 / 38 |
+| no_admissible | 4 (1) | 0 / 4 | 0.000 | — (0) | 0.000 | — | — | 0.000 | — | 0 / 4 |
+
+**표 B-2. 범주별 IoU 의 ATS 표현 간 변화** (found / call · IoU)
+
+| 범주 | exact found / IoU | 5 mm found / IoU | 10 mm found / IoU | `cloud_target` found / IoU |
+|---|---|---|---|---|
+| fresh | 45 / 45 · 0.495 | 45 / 45 · 0.504 | 45 / 45 · 0.551 | 45 / 45 · 0.495 |
+| anchor | 56 / 62 · 0.225 | 62 / 62 · 0.357 | 62 / 62 · 0.484 | 0 / 62 · 0.000 |
+| occluded | 50 / 72 · 0.085 | 55 / 72 · 0.131 | 64 / 72 · 0.181 | 0 / 72 · 0.000 |
+| excluded_no_target | 14 / 38 · 0.000 | 15 / 38 · 0.005 | 31 / 38 · 0.019 | 0 / 38 · 0.000 |
+| no_admissible | 0 / 4 · 0.000 | 0 / 4 · 0.000 | 0 / 4 · 0.000 | 0 / 4 · 0.000 |
+
+**표 B-3. 범주별 segmenter 와의 paired 비교** (같은 cloud 점 · 같은 GT. Δ IoU = arm − ATS(exclusion 5 mm), 95 % CI, (better / worse) = diff 가 양 / 음인 episode 수. 범주별 paired 는 그 범주 call 이 있는 episode 만 쓴다: occluded 9 · excluded_no_target 9 · no_admissible 1 episode)
+
+| 범주 | call (ep) | ATS IoU | GSAM (instruction) IoU · Δ IoU [CI] (b / w) | GSAM-2 per_frame (instruction) IoU · Δ IoU [CI] (b / w) | GT oracle IoU · Δ IoU [CI] (b / w) | YOLOE (phrase) IoU · Δ IoU [CI] (b / w) |
+|---|---|---|---|---|---|---|
+| fresh | 45 (10) | 0.504 | 0.507 · +0.003 [-0.222, +0.220] (5 / 5) | 0.516 · +0.012 [-0.244, +0.251] (5 / 5) | 0.868 · +0.364 [+0.188, +0.561] (8 / 2) | 0.335 · -0.168 [-0.377, +0.023] (3 / 7) |
+| anchor | 62 (10) | 0.357 | 0.458 · +0.101 [-0.068, +0.262] (6 / 4) | 0.449 · +0.092 [-0.082, +0.257] (7 / 3) | 0.846 · +0.489 [+0.319, +0.666] (10 / 0) | 0.251 · -0.106 [-0.284, +0.107] (2 / 7) |
+| occluded | 72 (9) | 0.131 | 0.544 · +0.413 [+0.229, +0.574] (8 / 1) | 0.534 · +0.404 [+0.223, +0.568] (8 / 1) | 0.862 · +0.731 [+0.640, +0.810] (9 / 0) | 0.283 · +0.152 [-0.025, +0.308] (7 / 2) |
+| excluded_no_target | 38 (9) | 0.005 | 0.523 · +0.519 [+0.303, +0.730] (8 / 0) | 0.476 · +0.471 [+0.287, +0.646] (8 / 0) | 0.825 · +0.821 [+0.798, +0.848] (9 / 0) | 0.279 · +0.274 [+0.168, +0.382] (8 / 0) |
+| no_admissible | 4 (1) | 0.000 | 0.723 · +0.723 [+0.723, +0.723] (1 / 0) | 0.719 · +0.719 [+0.719, +0.719] (1 / 0) | 0.943 · +0.943 [+0.943, +0.943] (1 / 0) | 0.578 · +0.578 [+0.578, +0.578] (1 / 0) |
+
+![범주별 표](figures/baselines/ats_v11ab/v4-ats-category-table.png)
+
+관찰:
+- `cloud_target` 은 anchor 62 · occluded 72 · excluded_no_target 38 · no_admissible 4 call 에서 positive 가 0 개다.
+- exclusion 5 mm 의 IoU(episode 평균)는 fresh 0.504 · anchor 0.357 · occluded 0.131 · excluded_no_target 0.005 다. pooled precision 은 anchor 0.864 · occluded 0.297 · excluded_no_target 0.027, pooled neighbour 비율은 anchor 0.136 · occluded 0.641 · excluded_no_target 0.826 다.
+- fresh 범주에서 Grounded-SAM · Grounded-SAM-2(instruction)의 Δ IoU 는 +0.003 · +0.012 이고 CI 가 0 을 포함한다(5 / 5). occluded · excluded_no_target 범주에서는 CI 가 0 위다(Grounded-SAM-2 instruction +0.404 · +0.471).
+- Grounded-SAM · Grounded-SAM-2(instruction) · GT oracle 의 Δ IoU 는 fresh < anchor < occluded < excluded_no_target 순으로 커진다(예: Grounded-SAM instruction +0.003 · +0.101 · +0.413 · +0.519).
+
+### 결과 B — ATS 표현 × 지표
+
+**표 C. 같은 cloud 점 위의 ATS 표현별 지표** (221 call, 10 episode, episode 평균. 아래 3 행은 같은 점의 segmenter 행이다)
+
+| ATS 표현 | positive 가 있는 call / 221 | IoU | P (n call) | R | neighbour 비율 | pooled IoU / P / R | pooled neighbour |
+|---|---|---|---|---|---|---|---|
+| exclusion 5 mm (**주 표현**) | 177 / 221 | 0.259 | 0.633 (177) | 0.262 | 0.353 | 0.224 / 0.551 / 0.273 | 0.421 |
+| exclusion exact (1e-6 m, sensitivity) | 165 / 221 | 0.190 | 0.620 (165) | 0.192 | 0.367 | 0.169 / 0.499 / 0.204 | 0.472 |
+| exclusion 10 mm (sensitivity) | 202 / 221 | 0.324 | 0.524 (202) | 0.333 | 0.327 | 0.273 / 0.572 / 0.343 | 0.375 |
+| `cloud_target` (fresh-only 진단) | 45 / 221 | 0.082 | 0.693 (45) | 0.084 | 0.301 | 0.082 / 0.534 / 0.088 | 0.462 |
+| (참고) ATS attention seed | 210 / 221 | 0.207 | 0.569 (210) | 0.232 | 0.379 | 0.205 / 0.567 / 0.243 | 0.305 |
+| Grounded-SAM-2 per_frame (instruction) (같은 점) | 219 / 221 | 0.486 | 0.593 (219) | 0.655 | 0.331 | 0.432 / 0.550 / 0.668 | 0.378 |
+| Grounded-SAM (instruction) (같은 점) | 221 / 221 | 0.493 | 0.554 (221) | 0.684 | 0.384 | 0.423 / 0.519 / 0.694 | 0.404 |
+| GT oracle (같은 점) | 221 / 221 | 0.850 | 0.893 (221) | 0.948 | 0.018 | 0.850 / 0.891 / 0.948 | 0.017 |
+
+![ATS 표현 × 지표 표](figures/baselines/ats_v11ab/v4-ats-repr-table.png)
+
+관찰:
+- ATS 의 IoU(episode 평균)는 표현에 따라 0.082(`cloud_target`) → 0.190(exclusion exact) → 0.259(5 mm) → 0.324(10 mm) 로 움직인다. positive 가 있는 call 은 45 → 165 → 177 → 202 / 221 이다.
+- `cloud_target` run 의 ATS 행은 BL-3 표 C-1 의 ATS `cloud_target` 행(45 / 221, IoU 0.082, P 0.693, R 0.084)과 같다.
+- ATS 의 P 는 `cloud_target` 에서 45 call, 5 mm 에서 177 call 로 계산된 값이다. positive 가 있는 call 집합이 달라 두 값을 같은 척도로 읽을 수 없다(BL-3 결과 C 의 지적과 같은 성질).
+- `(b)` `target_points` 표현의 run(`--ats-repr target_points`)은 돌리지 않았다. BL-3 의 verifier 보충 행(좌표 일치 151 / 221 · 5 mm 162 / 221)이 그 표현의 이전 측정이다.
+
+### 결과 C — segmenter 와의 paired bootstrap (12 arm)
+
+방법은 BL-3 과 같다: episode 단위 2,000 회 resample, seed 20261015, 95 % percentile. 기준(ATS) 표현만 바꿨다. `arm − ATS` 이므로 Δ > 0 은 arm 이 높다는 뜻이다. `cloud_target` 열은 BL-3 표 C-2 의 첫 열과 같은 값이다(V4 `consistency`: `cloud_target` run 의 `calls.jsonl` 이 V1 과 byte 동일).
+
+**표 D-1. Δ IoU — ATS 표현 4 가지** (95 % CI, (better / worse))
+
+| arm − ATS | Δ IoU, ATS = exclusion 5 mm (**주**) | exclusion exact | exclusion 10 mm | `cloud_target` (fresh-only) |
+|---|---|---|---|---|
+| Grounded-SAM-2 per_frame (instruction) | +0.227 [+0.090, +0.368] (7 / 3) | +0.296 [+0.168, +0.421] (9 / 1) | +0.161 [+0.012, +0.318] (7 / 3) | +0.404 [+0.281, +0.519] (10 / 0) |
+| Grounded-SAM-2 per_frame (phrase) | +0.192 [+0.064, +0.340] (7 / 3) | +0.261 [+0.143, +0.393] (9 / 1) | +0.127 [-0.016, +0.291] (6 / 4) | +0.369 [+0.253, +0.486] (10 / 0) |
+| Grounded-SAM (instruction) | +0.235 [+0.097, +0.370] (8 / 2) | +0.303 [+0.174, +0.427] (9 / 1) | +0.169 [+0.023, +0.318] (7 / 3) | +0.411 [+0.282, +0.533] (10 / 0) |
+| Grounded-SAM (phrase) | +0.200 [+0.067, +0.361] (8 / 2) | +0.269 [+0.144, +0.411] (9 / 1) | +0.135 [-0.015, +0.311] (6 / 4) | +0.377 [+0.247, +0.504] (10 / 0) |
+| GT oracle (instruction) | +0.592 [+0.484, +0.704] (10 / 0) | +0.660 [+0.576, +0.744] (10 / 0) | +0.526 [+0.399, +0.661] (10 / 0) | +0.768 [+0.719, +0.813] (10 / 0) |
+| GT oracle (phrase) | +0.592 [+0.484, +0.704] (10 / 0) | +0.660 [+0.576, +0.744] (10 / 0) | +0.526 [+0.399, +0.661] (10 / 0) | +0.768 [+0.719, +0.813] (10 / 0) |
+| localization_heads:sam_point (in-sample) | +0.007 [-0.095, +0.114] (5 / 5) | +0.076 [+0.004, +0.150] (6 / 4) | -0.059 [-0.187, +0.074] (4 / 6) | +0.183 [+0.150, +0.222] (10 / 0) |
+| localization_heads:threshold (in-sample) | -0.155 [-0.264, -0.042] (3 / 7) | -0.086 [-0.169, -0.002] (3 / 7) | -0.220 [-0.350, -0.082] (3 / 7) | +0.022 [-0.027, +0.066] (7 / 3) |
+| TokenCut attention_overlap | -0.184 [-0.282, -0.082] (2 / 8) | -0.115 [-0.187, -0.044] (3 / 7) | -0.250 [-0.370, -0.124] (2 / 8) | -0.007 [-0.046, +0.028] (6 / 4) |
+| TokenCut foreground | -0.047 [-0.180, +0.084] (4 / 6) | +0.022 [-0.086, +0.122] (6 / 4) | -0.113 [-0.260, +0.044] (3 / 7) | +0.130 [+0.058, +0.193] (8 / 2) |
+| YOLOE-11L (instruction) | -0.158 [-0.263, -0.052] (3 / 7) | -0.089 [-0.181, +0.001] (4 / 6) | -0.223 [-0.340, -0.105] (3 / 7) | +0.019 [-0.065, +0.110] (6 / 4) |
+| YOLOE-11L (phrase) | +0.026 [-0.093, +0.149] (5 / 5) | +0.095 [+0.002, +0.191] (7 / 3) | -0.040 [-0.175, +0.110] (5 / 5) | +0.203 [+0.121, +0.276] (9 / 1) |
+| (참고) ATS `cloud_target` 행 | -0.176 [-0.262, -0.091] (0 / 8) | -0.108 [-0.159, -0.055] (0 / 8) | -0.242 [-0.352, -0.132] (0 / 8) | — |
+| (참고) ATS attention seed 행 | -0.052 [-0.147, +0.054] (3 / 7) | +0.017 [-0.050, +0.093] (4 / 6) | -0.117 [-0.235, +0.011] (3 / 7) | +0.125 [+0.083, +0.163] (9 / 1) |
+
+**표 D-2. 주 표현(exclusion 5 mm) 기준 Δ precision · recall · neighbour 비율**
+
+| arm − ATS (exclusion 5 mm) | Δ precision | Δ recall | Δ neighbour 비율 |
+|---|---|---|---|
+| Grounded-SAM-2 per_frame (instruction) | -0.040 [-0.264, +0.212] (3 / 7) | +0.393 [+0.278, +0.520] (10 / 0) | -0.022 [-0.254, +0.195] (5 / 5) |
+| Grounded-SAM-2 per_frame (phrase) | -0.088 [-0.308, +0.169] (3 / 7) | +0.381 [+0.267, +0.514] (10 / 0) | +0.029 [-0.212, +0.240] (7 / 3) |
+| Grounded-SAM (instruction) | -0.079 [-0.288, +0.154] (3 / 7) | +0.422 [+0.308, +0.544] (10 / 0) | +0.032 [-0.177, +0.230] (7 / 3) |
+| Grounded-SAM (phrase) | -0.105 [-0.324, +0.155] (3 / 7) | +0.399 [+0.275, +0.545] (10 / 0) | +0.060 [-0.183, +0.263] (7 / 3) |
+| GT oracle (instruction) | +0.260 [+0.029, +0.522] (6 / 4) | +0.686 [+0.575, +0.801] (10 / 0) | -0.335 [-0.585, -0.119] (4 / 6) |
+| GT oracle (phrase) | +0.260 [+0.029, +0.522] (6 / 4) | +0.686 [+0.575, +0.801] (10 / 0) | -0.335 [-0.585, -0.119] (4 / 6) |
+| localization_heads:sam_point (in-sample) | -0.247 [-0.472, -0.000] (3 / 7) | +0.138 [+0.036, +0.243] (8 / 2) | -0.145 [-0.354, +0.042] (4 / 6) |
+| localization_heads:threshold (in-sample) | -0.528 [-0.756, -0.263] (3 / 7) | +0.604 [+0.510, +0.704] (10 / 0) | -0.235 [-0.492, -0.015] (4 / 6) |
+| TokenCut attention_overlap | -0.555 [-0.775, -0.304] (2 / 8) | +0.282 [+0.179, +0.382] (9 / 1) | -0.186 [-0.475, +0.059] (4 / 6) |
+| TokenCut foreground | -0.413 [-0.649, -0.141] (3 / 7) | +0.475 [+0.321, +0.621] (10 / 0) | -0.158 [-0.415, +0.064] (6 / 4) |
+| YOLOE-11L (instruction) | -0.263 [-0.464, -0.079] (3 / 7) | -0.133 [-0.248, -0.014] (3 / 7) | -0.011 [-0.355, +0.316] (6 / 4) |
+| YOLOE-11L (phrase) | -0.152 [-0.410, +0.138] (3 / 7) | +0.144 [+0.024, +0.260] (7 / 3) | +0.091 [-0.187, +0.344] (7 / 3) |
+| (참고) ATS `cloud_target` 행 | +0.060 [+0.005, +0.138] (4 / 1) | -0.178 [-0.263, -0.092] (0 / 8) | -0.051 [-0.135, +0.009] (2 / 4) |
+| (참고) ATS attention seed 행 | -0.064 [-0.253, +0.134] (4 / 6) | -0.029 [-0.136, +0.088] (4 / 6) | +0.026 [-0.186, +0.214] (6 / 4) |
+
+관찰:
+- 주 표현(5 mm)에서 Grounded-SAM · Grounded-SAM-2 4 arm 과 GT oracle 2 arm 의 Δ IoU 는 CI 가 0 위다. Grounded-SAM(instruction)의 Δ IoU 는 `cloud_target` +0.411 → exact +0.303 → 5 mm +0.235 → 10 mm +0.169 로 줄고, 10 mm 에서 Grounded-SAM(phrase) · Grounded-SAM-2(phrase)의 CI 는 0 을 포함한다.
+- 주 표현(5 mm)에서 CI 가 0 아래인 arm 은 `localization_heads:threshold` · `TokenCut attention_overlap` · `YOLOE-11L (instruction)` 이다. CI 가 0 을 포함하는 arm 은 `localization_heads:sam_point` · `TokenCut foreground` · `YOLOE-11L (phrase)` 다. `cloud_target` 기준에서는 같은 6 arm 중 `localization_heads:threshold`(+0.022) · `TokenCut attention_overlap`(−0.007) · `YOLOE-11L (instruction)`(+0.019)의 CI 가 0 을 포함하고, 나머지 3 arm(+0.183 · +0.130 · +0.203)은 CI 가 0 위였다.
+- 주 표현(5 mm)에서 Grounded-SAM 계열 4 arm 의 Δ recall 은 +0.381 ~ +0.422 로 CI 가 0 위다. Δ precision · Δ neighbour 비율은 CI 가 0 을 포함한다. GT oracle 은 Δ precision +0.260, Δ neighbour −0.335 로 CI 가 0 을 포함하지 않는다.
+- 주 표현 기준 ATS `cloud_target` 행은 ATS exclusion 5 mm 행보다 IoU 가 −0.176 [−0.262, −0.091] 낮다(0 / 8). attention seed 참고 행은 −0.052 [−0.147, +0.054] 다.
+- BL-3 표 C-2 의 셋째 열(`target_points` 5 mm 기준)과 이 표의 5 mm 열은 ATS 정의가 다르다(has_target call 만 대 이어 붙인 geometry 포함). 예: Grounded-SAM(instruction) +0.236 대 +0.235.
+
+### 결과 D — stale geometry 와 GT 의 거리
+
+V11AB 가 ESDF 에서 target 으로 빼는 영역(exclusion geometry)을 그 call 시점의 GT target 과 비교했다. 거리 지표의 정의는 용어 절의 `d_surfc_mm` 항목을 본다. 점 geometry 만 쟀고 ESDF voxel footprint 는 재지 않았다(`not_measured`). `shift_body_mm` 는 BDDL target 의 이동이다. fresh 는 geometry frame 이 그 call 자신이므로 `shift_body_mm` = 0 이다.
+
+![stale geometry 와 GT target 의 장면](figures/baselines/ats_v11ab/v4-ats-stale-geometry-scene.png)
+
+(위 figure: 위부터 anchor `t2_e0` call 15 — geometry frame call 0 · GT 이동 0 mm · `d_surfc` 5 mm, occluded `t7_e0` call 22 — geometry frame call 3 · GT 이동 471 mm · `d_surfc` 464 mm, excluded_no_target `t9_e0` call 19 — geometry frame call 0 · wrong-object · GT 이동 420 mm · `d_surfc` 458 mm. 열: head camera 투영, 위에서 본 base frame, 옆에서 본 base frame. 주황 점은 exclusion geometry, 노랑 = geometry frame 시점의 GT target, 파랑 = 이번 call 의 GT target.)
+
+**표 E-1. 범주별 거리 분포** (단위 mm. 전 call)
+
+| 범주 | call | `d_surfc_mm` median / p95 / max | `pt_med_mm` median / p95 | `frac_10` median / mean | `shift_body_mm` median / p95 / max | geometry 이후 call 수 median / max |
+|---|---|---|---|---|---|---|
+| fresh | 45 | 51.4 / 404.9 / 411.2 | 0.9 / 373.0 | 0.82 / 0.52 | 0.0 / 0.0 / 0.0 | 0 / 0 |
+| anchor | 62 | 11.6 / 91.9 / 301.3 | 0.6 / 73.3 | 1.00 / 0.82 | 0.0 / 61.0 / 141.2 | 4 / 17 |
+| occluded | 72 | 127.3 / 372.6 / 464.1 | 92.6 / 339.5 | 0.00 / 0.31 | 15.5 / 319.3 / 471.3 | 5 / 26 |
+| excluded_no_target | 38 | 211.3 / 440.4 / 458.0 | 180.2 / 394.4 | 0.00 / 0.04 | 166.8 / 415.7 / 445.4 | 12 / 23 |
+| no_admissible | 4 | (exclusion geometry 없음) | | | | |
+
+**표 E-2. right-object 대 wrong-object 로 나눈 분포** (wrong-object = geometry frame 에서 exclusion 점 중 BDDL target 으로 라벨된 비율 < 50 %. V4 정의)
+
+| 범주 | call | `d_surfc_mm` median / p95 / max | `pt_med_mm` median / p95 | `frac_10` median / mean | `shift_body_mm` median / p95 / max | geometry 이후 call 수 median / max |
+|---|---|---|---|---|---|---|
+| fresh · right-object | 24 | 11.4 / 50.4 / 67.1 | 0.5 / 0.9 | 1.00 / 0.97 | 0.0 / 0.0 / 0.0 | 0 / 0 |
+| anchor · right-object | 55 | 11.5 / 19.6 / 35.3 | 0.5 / 9.4 | 1.00 / 0.93 | 0.0 / 16.1 / 44.6 | 5 / 17 |
+| occluded · right-object | 53 | 67.1 / 320.8 / 464.1 | 17.0 / 275.3 | 0.29 / 0.42 | 35.6 / 327.5 / 471.3 | 6 / 26 |
+| excluded_no_target · right-object | 29 | 159.6 / 393.5 / 439.4 | 130.1 / 353.3 | 0.00 / 0.05 | 165.4 / 398.7 / 445.4 | 12 / 23 |
+| fresh · wrong-object | 21 | 381.9 / 409.7 / 411.2 | 345.6 / 382.1 | 0.00 / 0.00 | 0.0 / 0.0 / 0.0 | 0 / 0 |
+| anchor · wrong-object | 7 | 92.4 / 255.8 / 301.3 | 73.8 / 200.4 | 0.00 / 0.00 | 61.5 / 132.6 / 141.2 | 1 / 3 |
+| occluded · wrong-object | 19 | 356.6 / 379.2 / 439.1 | 319.4 / 345.7 | 0.00 / 0.00 | 0.0 / 126.4 / 313.5 | 4 / 17 |
+| excluded_no_target · wrong-object | 9 | 402.8 / 453.2 / 458.0 | 371.7 / 403.8 | 0.00 / 0.00 | 168.3 / 398.3 / 420.5 | 14 / 19 |
+
+**표 E-3. geometry frame 이후 GT target 의 이동 구간별 call 수**
+
+| 범주 | 0–1 mm | 1–5 mm | 5–10 mm | 10–50 mm | ≥ 50 mm | 합 |
+|---|---|---|---|---|---|---|
+| fresh | 45 | 0 | 0 | 0 | 0 | 45 |
+| anchor | 44 | 2 | 4 | 7 | 5 | 62 |
+| occluded | 31 | 1 | 2 | 10 | 28 | 72 |
+| excluded_no_target | 0 | 0 | 0 | 3 | 35 | 38 |
+
+**표 E-4. wrong-object call 에서 ATS 가 잡은 instance 기준 거리** (V4: majority instance 1 개 기준)
+
+| 범주 (wrong-object call) | call | ATS 가 쥔 instance 의 이동 `ats_object_shift_surfc_mm` median / max | 그 instance 표면까지 `d_surfc_mm` median / max | `frac_10` median / mean |
+|---|---|---|---|---|
+| fresh | 21 | 0.0000 / 0.0000 | 5.2 / 8.8 | 1.00 / 0.99 |
+| anchor | 7 | 0.0000 / 0.0003 | 5.3 / 8.8 | 1.00 / 0.99 |
+| occluded | 19 | 0.0010 / 0.0010 | 6.3 / 8.8 | 0.91 / 0.95 |
+| excluded_no_target | 9 | 0.0010 / 0.0010 | 6.3 / 6.3 | 0.91 / 0.92 |
+
+**표 E-5. wrong-object call 의 episode 분포** (합 56 call. instance 는 t4 · t6 의 `plate_1` 23 call, t9 의 `akita_black_bowl_2` 20 + `plate_1` 3 call, t5 의 `akita_black_bowl_2` 10 call)
+
+| episode | wrong-object call: fresh | anchor | occluded | excluded_no_target | 합 |
+|---|---|---|---|---|---|
+| libero_spatial_t4_e0 | 16 | 3 | 0 | 1 | 20 |
+| libero_spatial_t5_e0 | 2 | 2 | 6 | 0 | 10 |
+| libero_spatial_t6_e0 | 1 | 1 | 1 | 0 | 3 |
+| libero_spatial_t9_e0 | 2 | 1 | 12 | 8 | 23 |
+
+관찰(수치에서 읽히는 것만):
+- **occluded 72 call**: GT target 이 geometry frame 이후 10 mm 넘게 움직인 call 이 38 개(10–50 mm 10 + ≥ 50 mm 28)이고, 이동 median 15.5 mm · p95 319.3 mm · max 471.3 mm 다. exclusion geometry 와 GT surface 거리의 median 은 127.3 mm(`d_surfc_mm`)이고 `frac_10` median 은 0.00 이다.
+- **excluded_no_target 38 call**: 이동이 10 mm 넘는 call 이 38 / 38(10–50 mm 3 + ≥ 50 mm 35)이다. 이동 median 166.8 mm · p95 415.7 mm · max 445.4 mm, `d_surfc_mm` median 211.3 mm, `frac_10` median 0.00(mean 0.04)이다. geometry frame 이후 call 수의 median 은 12(max 23)다.
+- **anchor 62 call**: `d_surfc_mm` median 11.6 mm, `frac_10` median 1.00, 이동 median 0.0 mm · p95 61.0 mm · max 141.2 mm. 이동이 10 mm 넘는 call 은 12 개(10–50 mm 7 + ≥ 50 mm 5)다.
+- **right-object 만 보면**: occluded 53 call 의 이동 median 35.6 mm · p95 327.5 mm · max 471.3 mm, `d_surfc_mm` median 67.1 mm. excluded_no_target 29 call 의 이동 median 165.4 mm · p95 398.7 mm · max 445.4 mm, `d_surfc_mm` median 159.6 mm.
+- **wrong-object 56 call**(fresh 21 · anchor 7 · occluded 19 · excluded_no_target 9; episode t4 20 · t5 10 · t6 3 · t9 23): exclusion 점이 BDDL target surface 10 mm 안에 든 비율(`frac_10`)이 전 범주에서 median 0.00 이다. ATS 가 잡은 instance 기준으로는 `d_surfc_mm` median 5.2 ~ 6.3 mm, 그 instance 의 이동은 최대 0.0010 mm 다(표 E-4).
+- fresh 45 call 에서 `d_surfc_mm` 의 max 411.2 mm 는 wrong-object 21 call 의 max 와 같다(wrong-object median 381.9 mm). fresh right-object 24 call 은 median 11.4 mm · max 67.1 mm 다.
+- geometry frame 이후 call 수: occluded 는 median 5 · max 26, excluded_no_target 은 median 12 · max 23 이다(call 간격은 obs 5 개: `obs_since` median 25 · 60).
+
+### 이 STEP 에서 알게 된 것 (평이한 설명)
+
+1. `cloud_target` 이 비는 call 은 V11AB 가 target 을 **이번 cloud 에서 새로 찾지 못하고 이전 geometry 를 유지한** call 이다. 그 geometry 는 ESDF 에는 target 으로 들어간다(exclusion geometry 가 geometry frame 의 `target_points` 와 217 / 217 call 에서 byte 동일). 그래서 \"비어 있음\" 은 기록 누락이 아니라 ATS 의 출력 구조다.
+2. 같은 점 위에서 ATS 를 어떻게 세우느냐에 따라 ATS 의 IoU 가 0.082 ~ 0.324 로 움직인다. segmenter 와의 paired Δ IoU 의 부호는 Grounded-SAM 계열 · GT oracle 에서 유지되고 크기는 줄었다. 다른 arm 에서는 CI 의 위치가 표현에 따라 바뀐다(결과 C).
+3. occluded · excluded_no_target call 에서 exclusion geometry 와 그 시점 GT target 은 크게 벗어나 있다(결과 D). wrong-object call 에서는 geometry 가 BDDL target 이 아닌 다른 instance 위에 있다.
+
+### 실패 · 한계 (verify.json `issues` · `not_measured`)
+
+| # | 내용 | 영향 |
+|---|---|---|
+| 1 | **V4 가 J impl.md 의 \"내가 기대하는 결과\" 절을 측정 전에 읽었다**(파일 전체를 한 번에 읽음). 수치는 run 산출물에서 직접 집계했다 | 기대가 분석 선택에 영향을 주었을 가능성은 배제하지 못한다 |
+| 2 | **측정 code 는 commit 되지 않은 working tree 판이다**(`eval/cloud_labeling.py`, J 변경, mtime 15:02 KST, V4 run 보다 앞섬) | 재현에는 같은 working tree 가 필요하다. sha256 은 `code_state_sha256.txt` |
+| 3 | excluded_no_target 38 call 중 37 call 에서 `carried_from ≠ geometry_frame`. 거리 계산의 geometry frame 은 frames.jsonl `manipulated.anchor.geometry_frame`(217 / 217 존재)을 썼다 | `carried_from`(직전 has_target call)과 geometry frame 은 다른 개념이다 |
+| 4 | fresh 45 call 중 21 call 이 wrong-object 이다. 그래서 fresh 거리 분포의 p95 · max 는 이 call 들이다. right / wrong 으로 나눈 분포를 같이 냈다 | 범주 전체의 거리 요약만 읽으면 wrong-object 가 섞여 있다 |
+| 5 | wrong-object 정의는 V4 의 것이다(geometry frame 시점 exclusion 점의 nearest-instance label, 10 mm, 50 %) | call 수 fresh 21 · anchor 7 · occluded 19 · excluded_no_target 9 는 이 정의의 값이다 |
+| 6 | 범주별 paired bootstrap 은 그 범주 call 이 있는 episode 만 쓴다(occluded 9 · excluded_no_target 9 · no_admissible 1 episode) | no_admissible 의 CI 는 episode 1 개라 폭이 없다 |
+| 7 | `gt_oracle|instruction` 과 `gt_oracle|phrase` 는 모든 지표가 같다 | 표에 두 행을 모두 적었다 |
+| 8 | 같은 pod 에 다른 session 의 GPU server · rollout · pytest 가 돌고 있었다 | 이 단계는 CPU 결정적 계산이고 기준선 수치는 일치했다 |
+
+### 측정하지 않은 것 (`not_measured`)
+
+| 항목 | 상태 |
+|---|---|
+| (b) `target_points` 표현 run(`--ats-repr target_points`, J 의 선택 명령) | 돌리지 않았다 |
+| ESDF / target-free layer 의 voxel footprint 와 GT 의 차이 | 점 geometry 만 쟀다 |
+| stale geometry 가 closed-loop 결과(충돌 · 성공)에 주는 영향 | 재지 않았다 |
+| wrong-object call 에서 ATS 물체 기준 거리 | majority instance 1 개로만 계산했다 |
+| no_admissible 4 call 의 거리 | exclusion geometry 가 없어 거리 항목이 없다 |
+| H 의 예비 수치 중 V4 가 다시 재지 않은 것(`target_points` 대응 실패 28 / 17 call 의 범주 · 이동 구간, camera mask 별 exact 일치 점 수, 범주별 `target_points` 대응률 등) | 이 기록에 옮기지 않았다 |
+
+### 열린 항목
+
+1. ATS 주 표현(exclusion 5 mm)의 사용자 확정. 현재는 lead 결정이다.
+2. 이 결과를 논문의 ATS 행(Tab. 2)에 어느 표현으로 쓸지 — 사용자 판정.
+3. J 의 변경(`eval/cloud_labeling.py` · test)을 commit 할지 — 사용자 판정 후.
+4. exclusion geometry 와 GT 의 어긋남이 ESDF voxel footprint 와 closed-loop 결과에 미치는 영향 — 측정하려면 verifier 에게 요청한다.
+5. `target_points` 표현 run 의 필요 여부.
+6. H 가 제안한 다음 perception run 용 기록 옵션(`record_ats_geometry`, 기본 off, `perception_replay.py`)의 도입 여부 — 현재는 필요하지 않다(H).
+
+### 판정
+
+**사용자 판정 대기.**

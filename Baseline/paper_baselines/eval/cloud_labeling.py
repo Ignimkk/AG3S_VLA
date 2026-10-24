@@ -15,7 +15,21 @@ Per policy call ``k`` (obs_index ``t``) and cloud point ``x``:
   collision-sphere surface (the perception run's ``sph_all_*``), else ``none``. Instance -> class: BDDL target ->
   ``target``, destination -> ``destination``, other object -> ``other_object``, support fixture (table) ->
   ``support``, other fixture -> ``fixture``, robot pedestal -> ``mount``;
-* **ATS** -- ``cloud_target[x]`` (the points of the V11AB target cluster; empty when ``has_target`` is False);
+* **ATS** -- ``--ats-repr`` (ATS-CLOUD-DIAG; the chosen one is the ``ats_v11ab`` row = the paired reference):
+
+  - ``cloud_target`` (default, BASELINE-EVAL F): ``cloud_target[x]`` -- the points of a target cluster found in
+    *this* cloud ("fresh-only"; empty for stand-in targets and when ``has_target`` is False);
+  - ``target_points``: ``x`` within ``--ats-tol`` (5 mm) of a recorded ``target_points`` point (has_target calls) --
+    the V11AB target geometry, including the stand-ins (earlier-frame geometry, empty ``point_indices``);
+  - ``exclusion``: as ``target_points``, plus the has_target=False calls whose manipulated geometry the ESDF still
+    excludes (``manipulated_state`` set): the last has_target call's ``target_points`` of the episode carried
+    forward (checked per call: its centroid == ``manipulated_centroid`` within 1e-5 m) -- the target region cuRobo
+    actually received. Non-default runs add the ``cloud_target`` flags as the ``ats_v11ab_cloud_target`` row.
+
+  Every call gets a category (``ats_calls.jsonl``; non-default runs also add ``ats_call_cat`` to every row):
+  ``fresh`` (has_target, non-empty ``target_indices``), ``anchor`` (stand-in, ``manipulated_state`` visible),
+  ``occluded`` (stand-in, occluded), ``excluded_no_target`` (has_target False, geometry carried forward),
+  ``no_admissible`` (has_target False, nothing excluded; SL4: grounding_status ``no_admissible``), ``other``.
   ``ats_v11ab_seeds`` = ``cloud_seed`` (attention seeds, reference row);
 * **segmenter arm** -- ``x`` is positive if it projects into the arm's saved mask in **any** camera that observed it
   (``visibility="observed"``: the fused point's camera bitmask ``cloud_camera_mask``, head = 1, left_wrist = 2;
@@ -34,6 +48,9 @@ Run (``.venv-baselines`` or ``.venv-ag3s``, CPU)::
     PYTHONPATH=$PWD .venv-baselines/bin/python -m Baseline.paper_baselines.eval.cloud_labeling \\
         --ats-run 20261012T225820_46a08d6ff644_sl4-perception-dev \\
         --grounding-run 20261023T134909_bf1403d54bc6_paper-baselines-2-sl3dev-notrack --run-id baseline-eval-cloud-sl3dev
+
+    # ATS-CLOUD-DIAG fair-comparison row: the ESDF-excluded geometry matched to the cloud at 5 mm
+    ... --ats-repr exclusion --ats-tol 0.005 --run-id <id>
 """
 from __future__ import annotations
 
@@ -59,8 +76,15 @@ POINT_CLASSES = ("target", "destination", "other_object", "fixture", "support", 
 NEIGHBOUR = ("other_object", "destination")
 ATS_ARM = "ats_v11ab|noun_attention"
 ATS_SEED_ARM = "ats_v11ab_seeds|noun_attention"
+ATS_CT_ARM = "ats_v11ab_cloud_target|noun_attention"  # cloud_target flags when --ats-repr is not cloud_target
 PAIRED_METRICS = ("iou", "precision", "recall", "neighbour_frac")
 _CLOUD_KEYS = ("cloud_points", "cloud_camera_mask", "cloud_target", "cloud_seed")
+ATS_REPRS = ("cloud_target", "target_points", "exclusion")
+ATS_TOL_M = 0.005  # half the V11AB fusion voxel (fusion.fusion_voxel_size_m = 0.01)
+ATS_CATEGORIES = ("fresh", "anchor", "occluded", "excluded_no_target", "no_admissible", "other")
+CARRY_CENTROID_TOL_M = 1e-5
+_ATS_GEOM_KEYS = ("target_points", "target_points_offsets", "target_indices_offsets", "manipulated_state",
+                  "manipulated_centroid", "grounding_status")
 
 
 # --- pure functions ------------------------------------------------------------------------------------------------
@@ -146,6 +170,49 @@ def ragged(P: Mapping[str, np.ndarray], key: str, k: int) -> np.ndarray:
     return P[key][o[k]:o[k + 1]]
 
 
+def flags_near(points: np.ndarray, geom: np.ndarray | None, tol: float) -> np.ndarray:
+    """``(N,)`` bool: the cloud point lies within ``tol`` (+1e-9) of a point of ``geom`` (None / empty -> none)."""
+    from scipy.spatial import cKDTree
+
+    pts = np.asarray(points, np.float64).reshape(-1, 3)
+    f = np.zeros(len(pts), bool)
+    if geom is not None and len(geom) and len(pts):
+        d, _ = cKDTree(np.asarray(geom, np.float64).reshape(-1, 3)).query(pts, distance_upper_bound=tol + 1e-9)
+        f = np.isfinite(d) & (d <= tol + 1e-9)
+    return f
+
+
+def ats_episode_geometry(has_target: Sequence[bool], n_target_indices: Sequence[int], manip_state: Sequence[str],
+                         target_points: Sequence[np.ndarray], manip_centroid: Sequence[np.ndarray] | None = None) -> list:
+    """Per call of one episode (in order): ATS call category and target geometries.
+
+    ``tp`` = the recorded ``target_points`` (has_target calls, else None); ``excl`` = the geometry the ESDF excludes:
+    ``tp`` on has_target calls, on has_target=False calls with ``manipulated_state`` set the last has_target call's
+    ``target_points`` (``carried_from`` = that call; ``carry_centroid_err_m`` = |its mean - manipulated_centroid|).
+    """
+    out, last, last_k = [], None, None
+    for k, has in enumerate(has_target):
+        state = str(manip_state[k])
+        tp = np.asarray(target_points[k], np.float64).reshape(-1, 3)
+        rec: dict[str, Any] = {"tp": None, "excl": None, "carried_from": None, "carry_centroid_err_m": None}
+        if has:
+            rec["tp"] = rec["excl"] = tp
+            last, last_k = tp, k
+            if int(n_target_indices[k]) > 0:
+                rec["cat"] = "fresh"
+            else:
+                rec["cat"] = {"visible": "anchor", "occluded": "occluded"}.get(state, "other")
+        elif state and last is not None:
+            rec.update(cat="excluded_no_target", excl=last, carried_from=last_k)
+            if manip_centroid is not None:
+                c = np.asarray(manip_centroid[k], np.float64)
+                rec["carry_centroid_err_m"] = float(np.linalg.norm(last.mean(0) - c)) if len(last) else None
+        else:
+            rec["cat"] = "no_admissible"
+        out.append(rec)
+    return out
+
+
 def aggregate_arm(rows: Sequence[Mapping]) -> dict:
     from Baseline.paper_baselines.eval import metrics as M
 
@@ -178,6 +245,21 @@ def summarize(rows: Sequence[Mapping], ref_arm: str = ATS_ARM) -> dict:
     return out
 
 
+def summarize_by_category(rows: Sequence[Mapping], arms: Sequence[str] = (ATS_ARM, ATS_CT_ARM)) -> dict:
+    """``{category: {"n_calls", arm: aggregate_arm}}`` over rows carrying ``ats_call_cat`` (non-default runs)."""
+    out: dict[str, Any] = {}
+    for cat in ATS_CATEGORIES:
+        sel = [r for r in rows if r.get("ats_call_cat") == cat]
+        if not sel:
+            continue
+        out[cat] = {"n_calls": len({(r["episode_id"], r["call_k"]) for r in sel})}
+        for a in arms:
+            rs = [r for r in sel if r["arm"] == a]
+            if rs:
+                out[cat][a] = aggregate_arm(rs)
+    return out
+
+
 # --- per episode -------------------------------------------------------------------------------------------------------
 class PerceptionEpisode:
     """The arrays of one ``perception/<stem>_perception.npz`` this evaluation needs (clouds, flags, robot spheres)."""
@@ -189,6 +271,7 @@ class PerceptionEpisode:
                 raise LookupError(f"{path.name}: no cloud_points (perception run recorded with --no-clouds)")
             keep = ["obs_index", "geom_row", "has_target", "sph_all_center", "sph_all_radius"]
             keep += [k for c in _CLOUD_KEYS for k in (c, c + "_offsets")]
+            keep += list(_ATS_GEOM_KEYS)
             self.P = {k: z[k] for k in keep if k in files}
         self.path = path
         if not np.array_equal(self.P["cloud_points_offsets"], self.P["cloud_camera_mask_offsets"]):
@@ -206,6 +289,22 @@ class PerceptionEpisode:
                 "has_target": has, "geom_row": int(P["geom_row"][k]),
                 "robot_c": np.asarray(P["sph_all_center"][k], np.float64) if "sph_all_center" in P else None,
                 "robot_r": np.asarray(P["sph_all_radius"], np.float64) if "sph_all_radius" in P else None}
+
+    def ats_geometry(self) -> list:
+        """:func:`ats_episode_geometry` of this episode (+ ``grounding_status`` / ``manipulated_state`` / sizes)."""
+        P = self.P
+        missing = [k for k in _ATS_GEOM_KEYS[:5] if k not in P]
+        if missing:
+            raise LookupError(f"{self.path.name}: no {missing} (needed for --ats-repr target_points / exclusion)")
+        n = len(P["obs_index"])
+        ti = np.diff(P["target_indices_offsets"])
+        geo = ats_episode_geometry(P["has_target"], ti, P["manipulated_state"],
+                                   [ragged(P, "target_points", k) for k in range(n)], P["manipulated_centroid"])
+        for k, g in enumerate(geo):
+            g.update(grounding_status=str(P["grounding_status"][k]) if "grounding_status" in P else None,
+                     manipulated_state=str(P["manipulated_state"][k]), n_target_indices=int(ti[k]),
+                     n_target_points=int(np.diff(P["target_points_offsets"])[k]))
+        return geo
 
 
 def robot_surface_distance(points: np.ndarray, centres: np.ndarray, radii: np.ndarray, chunk: int = 20000) -> np.ndarray:
@@ -265,22 +364,37 @@ def run(args) -> pathlib.Path:
         stems = stems[: args.limit_episodes]
     settings = {"ats_run": str(ats_run), "grounding_run": str(grun) if grun else None, "source_run": str(source),
                 "scene_gt": str(scene_dir), "mask_arms": mask_arms, "episodes": stems, "visibility": args.visibility,
-                "near_m": args.near, "depth_tol_m": args.depth_tol, "argv": sys.argv}
+                "near_m": args.near, "depth_tol_m": args.depth_tol, "ats_repr": args.ats_repr,
+                "ats_tol_m": args.ats_tol, "argv": sys.argv}
+    if args.ats_repr not in ATS_REPRS:
+        raise SystemExit(f"--ats-repr must be one of {ATS_REPRS}")
+    if not args.ats_tol >= 0:
+        raise SystemExit("--ats-tol must be >= 0")
+    default_repr = args.ats_repr == "cloud_target"
     # a perception run without clouds: report and stop before creating an output directory
     first = ats_run / "perception" / f"{stems[0]}_perception.npz"
     try:
-        PerceptionEpisode(first)
+        pe0 = PerceptionEpisode(first)
     except LookupError as e:
         print(json.dumps({"no_clouds": str(e), "proposal": NO_CLOUD_PROPOSAL}, indent=1))
         raise SystemExit(2)
+    if not default_repr:
+        pe0.ats_geometry()  # LookupError before an output directory exists
     out = make_output(args.run_id, args.out_dir, settings, "Baseline/paper_baselines/eval/cloud_labeling.py")
     from benchmark.evaluators.libero_scene_gt import SceneGT
 
     rows_f = (out / "calls.jsonl").open("x")
+    cats_f = (out / "ats_calls.jsonl").open("x")
     rows: list[dict] = []
     t0 = time.time()
     for stem in stems:
         pe = PerceptionEpisode(ats_run / "perception" / f"{stem}_perception.npz")
+        try:
+            geo = pe.ats_geometry()
+        except LookupError:
+            if not default_repr:
+                raise
+            geo = None  # an older perception run: cloud_target only, no categories
         scene = SceneGT(scene_dir / f"scene_{stem}.npz")
         geom_path = source / "episodes" / f"{stem}_geom.npz"
         with np.load(geom_path, allow_pickle=False) as g:
@@ -295,7 +409,19 @@ def run(args) -> pathlib.Path:
             c = pe.call(k)
             cls = gt_classes(c["points"], scene, t, c["robot_c"], c["robot_r"], args.near)
             base = {"episode_id": stem, "call_k": int(k), "obs_index": t, "has_target": c["has_target"]}
-            arm_flags = {ATS_ARM: c["ats"], ATS_SEED_ARM: c["seed"]}
+            g = geo[k] if geo is not None else None
+            if default_repr:  # BASELINE-EVAL F rows, byte for byte
+                arm_flags = {ATS_ARM: c["ats"], ATS_SEED_ARM: c["seed"]}
+            else:
+                err = g["carry_centroid_err_m"]
+                if args.ats_repr == "exclusion" and g["carried_from"] is not None \
+                        and (err is None or err >= CARRY_CENTROID_TOL_M):
+                    raise ValueError(f"{stem} call {k}: carried-forward geometry (call {g['carried_from']}) centroid is "
+                                     f"{err} m from manipulated_centroid -- not what the ESDF got")
+                geom = g["tp"] if args.ats_repr == "target_points" else g["excl"]
+                base["ats_call_cat"] = g["cat"]
+                arm_flags = {ATS_ARM: flags_near(c["points"], geom, args.ats_tol), ATS_CT_ARM: c["ats"],
+                             ATS_SEED_ARM: c["seed"]}
             r_ = c["geom_row"]
             K = {cam: Kall[cam][r_] for cam in args.cameras}
             T = {cam: Tall[cam][r_] for cam in args.cameras}
@@ -312,6 +438,14 @@ def run(args) -> pathlib.Path:
                 row = {**base, "arm": arm, **point_metrics(flags, cls)}
                 rows_f.write(json.dumps(row) + "\n")
                 rows.append(row)
+            crow = {"episode_id": stem, "call_k": int(k), "obs_index": t, "has_target": c["has_target"],
+                    "ats_repr": args.ats_repr, "n_cloud": int(len(c["points"])), "n_cloud_target": int(c["ats"].sum()),
+                    "n_ats_pred": int(np.count_nonzero(arm_flags[ATS_ARM]))}
+            if g is not None:
+                crow.update(ats_call_cat=g["cat"], **{q: g[q] for q in (
+                    "grounding_status", "manipulated_state", "n_target_indices", "n_target_points", "carried_from",
+                    "carry_centroid_err_m")})
+            cats_f.write(json.dumps(crow) + "\n")
             if k in dump_calls:
                 d = out / "figure_dump"
                 d.mkdir(exist_ok=True)
@@ -320,9 +454,13 @@ def run(args) -> pathlib.Path:
                                     arms=np.array(list(arm_flags)), flags=np.stack([arm_flags[a] for a in arm_flags]),
                                     geom_row=np.int64(r_), meta_json=np.array(json.dumps({**base, "source_run": str(source)})))
         rows_f.flush()
+        cats_f.flush()
         print(f"[cloud_labeling] {stem}: {len(calls)} calls, {time.time() - t0:.1f}s", flush=True)
     rows_f.close()
+    cats_f.close()
     summary = summarize(rows)
+    if not default_repr:
+        summary["ats_by_category"] = summarize_by_category(rows)
     summary.update(settings=settings, definitions=__doc__)
     (out / "summary.json").write_text(json.dumps(summary, indent=1, default=float) + "\n")
     print(f"[cloud_labeling] wrote {out}")
@@ -359,6 +497,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--visibility", default="observed", choices=VISIBILITY)
     ap.add_argument("--near", type=float, default=NEAR_M)
     ap.add_argument("--depth-tol", type=float, default=DEPTH_TOL_M)
+    ap.add_argument("--ats-repr", default="cloud_target", choices=ATS_REPRS,
+                    help="ATS positive set (ATS-CLOUD-DIAG): cloud_target = fresh cluster only (BASELINE-EVAL F, "
+                         "default); target_points / exclusion = cloud points within --ats-tol of the target geometry")
+    ap.add_argument("--ats-tol", type=float, default=ATS_TOL_M,
+                    help="m, for --ats-repr target_points / exclusion (exact: 1e-6)")
     ap.add_argument("--episodes", nargs="*")
     ap.add_argument("--limit-episodes", type=int)
     ap.add_argument("--limit-calls", type=int)
