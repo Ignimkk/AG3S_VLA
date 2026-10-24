@@ -16,6 +16,27 @@ Nothing in ``cbf/`` changes; this adapter only maps one policy call onto it, fol
   step reproduces the per-step filter.
 
 ``CbfParams()`` defaults reproduce the paper (Eq. 12 as written); pass ``cbf_params={...}`` for the D1-D7 variants.
+
+Track identity (CLOSED-LOOP-FIX, ``associate``): the paper keeps one track per object (shape frozen at t=0, centroid
+re-measured, **held at the last position while occluded**, identity swaps re-associated by an HSV histogram match;
+§3.2, ``perception/ellipsoid_fit.ObjectTracker``). Source names are stable for ``gt_seg`` (instance names) but not for
+``detector`` (``object#j`` = j-th box by score, re-ranked every call) or ``given`` (``depth#j`` = j-th largest
+component). ``associate="centroid"`` (default for those sources) matches each frozen track to the nearest current
+cloud centroid (Hungarian, gate ``assoc_gate_m``; centroid distance replaces the colour histogram, which the box
+crops cannot provide) and holds unmatched tracks at their last centroid. ``associate="name"`` (default for
+``gt_seg`` / ``ellipsoids``) is the previous behaviour (match by name, unmatched -> t=0 centroid).
+
+Per-step diagnostics (``info["steps"][k]``, ``diagnostics=True``; nothing here feeds back into the QP):
+
+* ``min_h`` -- Eq. (6) ``h(n)`` at the **stored** separating normal (the QP's own row value, before the step's
+  ``delta_n``), at the EE pose before row ``k`` along the **filtered** chunk (row 0 = measured pose, rows k > 0 =
+  ``propagate_ee`` of the filtered rows 0..k-1). This is the quantity the closed-loop ``h_min`` / ``h_neg_steps`` count;
+* ``h_star`` / ``h_star_next`` -- the true separation ``max_n h(n)`` (``optimal_normals_batch``) before the row and
+  after the QP's step ``(delta_c, delta_theta)``; ``h_star_next_nominal`` -- after the nominal step instead;
+* ``cbf_ok`` -- docs/16 §1 condition on the true barrier, every obstacle: ``h*_next >= (1 - gamma_h) h*``;
+* ``relax_m`` / ``need_m`` (binding row = min ``h(n)``): ``eps * ||grad_n h||_1`` (what tilting the normal inside the
+  Eq. 12 box can supply, ``cbf.filter.effective_margin``) vs ``gamma_h * max(-h, 0)`` (what Eq. 7 demands of an
+  overlapping pair). ``relax_m >= need_m`` = the row can be met by ``delta_n`` alone (docs/11 §4).
 """
 from __future__ import annotations
 
@@ -25,7 +46,8 @@ import time
 import numpy as np
 
 from Baseline.paper_baselines.methods.interface import FilterResult, SceneObservation, register_method
-from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import Ellipsoid
+from Baseline.paper_baselines.methods.knows.cbf.ellipsoid import (Ellipsoid, barrier, grad_normal, initial_normal,
+                                                                  optimal_normals_batch, rotate_shape)
 from Baseline.paper_baselines.methods.knows.cbf.filter import CbfParams, SafetyFilter as KnowsCbfFilter
 from Baseline.paper_baselines.methods.knows.perception.ellipsoid_fit import mvee
 from Baseline.paper_baselines.methods.safety_common import (OSC_POS_SCALE, OSC_ROT_SCALE, POS_GAIN_M, ROT_GAIN_RAD,
@@ -38,10 +60,18 @@ GRIPPER_SEMI_AXES = (0.04, 0.04, 0.07)
 class KnowsSafetyFilter:
     name = "knows"
 
+    ASSOCIATE = ("auto", "name", "centroid")
+
     def __init__(self, obstacle_source: str = "gt_seg", *, cbf_params: dict | CbfParams | None = None,
                  gripper_semi_axes=GRIPPER_SEMI_AXES, exclude: str = "task_objects", track_centroids: bool = True,
                  pos_gain: float = POS_GAIN_M, rot_gain: float = ROT_GAIN_RAD, intervene_tol: float = 1e-6,
+                 associate: str = "auto", assoc_gate_m: float = 0.10, diagnostics: bool = True,
                  **source_kwargs):
+        if associate not in self.ASSOCIATE:
+            raise ValueError(f"associate must be one of {self.ASSOCIATE}")
+        if associate == "auto":
+            associate = "name" if obstacle_source in ("gt_seg", "ellipsoids") else "centroid"
+        self.associate, self.assoc_gate_m, self.diagnostics = associate, float(assoc_gate_m), bool(diagnostics)
         if isinstance(cbf_params, CbfParams):
             self.params = cbf_params
         else:
@@ -65,6 +95,10 @@ class KnowsSafetyFilter:
                 "obstacle": (self.source.provenance() if self.source is not None
                              else {"obstacle_source": "ellipsoids", "privileged": False}),
                 "obstacle_fit": "KNOWS mvee (Khachiyan), shapes frozen at first call, centroids tracked",
+                "track_identity": {"associate": self.associate, "gate_m": self.assoc_gate_m,
+                                   "unmatched_track": "hold last centroid" if self.associate == "centroid"
+                                   else "t=0 centroid"},
+                "diagnostics": self.diagnostics,
                 "units": {"pos_scale": OSC_POS_SCALE, "rot_scale": OSC_ROT_SCALE},
                 "chunk": {"pos_gain_m": self.pos_gain, "rot_gain_rad": self.rot_gain}}
 
@@ -72,7 +106,24 @@ class KnowsSafetyFilter:
         self.cbf.reset()
         self.shapes: dict[str, Ellipsoid] | None = None
         self.mean0: dict[str, np.ndarray] = {}
+        self.last_c: dict[str, np.ndarray] = {}
         self.perception_info: dict = {}
+
+    def _match(self, clouds: dict[str, np.ndarray]) -> tuple[dict[str, str], dict]:
+        """Track -> current cloud name: Hungarian on centroid distance (last known centroid), gated."""
+        from scipy.optimize import linear_sum_assignment
+
+        tracks = list(self.shapes)
+        names = list(clouds)
+        if not tracks or not names:
+            return {}, {"matched": 0, "unmatched_tracks": len(tracks), "unmatched_clouds": len(names)}
+        ref = np.stack([self.last_c[t] for t in tracks])
+        cur = np.stack([clouds[n].mean(0) for n in names])
+        D = np.linalg.norm(ref[:, None, :] - cur[None, :, :], axis=-1)
+        r, c = linear_sum_assignment(D)
+        m = {tracks[i]: names[j] for i, j in zip(r, c) if D[i, j] <= self.assoc_gate_m}
+        return m, {"matched": len(m), "unmatched_tracks": len(tracks) - len(m), "unmatched_clouds": len(names) - len(m),
+                   "pairs": {t: [n, round(float(D[tracks.index(t), names.index(n)]), 4)] for t, n in m.items()}}
 
     # --- obstacles ---------------------------------------------------------------------------------------------------
     def _obstacles(self, obs: SceneObservation) -> dict[str, Ellipsoid]:
@@ -84,7 +135,8 @@ class KnowsSafetyFilter:
             return out
         t0 = time.perf_counter()
         clouds = self.source(obs)
-        if self.shapes is None:
+        first = self.shapes is None
+        if first:
             self.shapes = {}
             for name, pts in clouds.points.items():
                 try:
@@ -93,16 +145,62 @@ class KnowsSafetyFilter:
                     continue
                 self.shapes[name] = Ellipsoid(c, Q)
                 self.mean0[name] = pts.mean(0)
+                self.last_c[name] = pts.mean(0)
         cur = {}
-        for name, E in self.shapes.items():
-            c = E.c
-            if self.track_centroids and name in clouds.points:  # ObjectTracker: shape frozen, centroid moves
-                c = E.c + (clouds.points[name].mean(0) - self.mean0[name])
-            cur[name] = Ellipsoid(c, E.Q)
+        assoc = None
+        if self.associate == "centroid":
+            m, assoc = (({n: n for n in self.shapes}, {"matched": len(self.shapes), "first_call": True}) if first
+                        else self._match(clouds.points))
+            for name, E in self.shapes.items():
+                if self.track_centroids and name in m:  # ObjectTracker: shape frozen, centroid moves
+                    self.last_c[name] = clouds.points[m[name]].mean(0)
+                # unmatched (occluded / not detected): hold the last known centroid (paper §3.2)
+                cur[name] = Ellipsoid(E.c + (self.last_c[name] - self.mean0[name]), E.Q)
+        else:
+            for name, E in self.shapes.items():
+                c = E.c
+                if self.track_centroids and name in clouds.points:  # ObjectTracker: shape frozen, centroid moves
+                    c = E.c + (clouds.points[name].mean(0) - self.mean0[name])
+                cur[name] = Ellipsoid(c, E.Q)
         self.perception_info = {"source": clouds.source, "privileged": clouds.privileged, "excluded": clouds.excluded,
                                 "n_points": {k: int(len(v)) for k, v in clouds.points.items()},
+                                "associate": self.associate, "association": assoc,
                                 "ms": (time.perf_counter() - t0) * 1e3}
         return cur
+
+    def _diagnose(self, robot: Ellipsoid, obstacles: dict[str, Ellipsoid], res, dc_nom, dth_nom, stored: dict) -> dict:
+        """True-barrier view of one step (see module docstring); read-only w.r.t. the filter state."""
+        p = self.params
+        keys = sorted(obstacles, key=repr)
+        if not keys:
+            return {}
+        obs_l = [obstacles[k] for k in keys]
+
+        def h_star(R):
+            N = optimal_normals_batch([R] * len(keys), obs_l, inits=[None] * len(keys), iters=400)
+            return np.array([barrier(n, R, o) for n, o in zip(N, obs_l)])
+
+        def moved(dc, dth):
+            return Ellipsoid(robot.c + np.asarray(dc, np.float64), rotate_shape(robot.Q, np.asarray(dth, np.float64)))
+
+        hb = h_star(robot)
+        ha = h_star(moved(res.delta_c, res.delta_theta))
+        hn = h_star(moved(dc_nom, dth_nom))
+        ok = ha >= (1.0 - p.gamma_h) * hb - 1e-9
+        out = {"h_star": float(hb.min()), "h_star_next": float(ha.min()), "h_star_next_nominal": float(hn.min()),
+               "cbf_ok": bool(ok.all()), "n_cbf_violated": int(np.count_nonzero(~ok))}
+        if res.h.size:  # binding row = min h(n): what delta_n alone could supply vs what Eq. 7 asks
+            i = int(np.argmin(res.h))
+            key = res.rows[i] if i < len(res.rows) else None
+            okey = key[1] if key is not None else None
+            n = stored.get(key) if key is not None else None
+            if okey in obstacles and n is None:
+                n = initial_normal(robot, obstacles[okey])  # first sight: the row used the centre-to-centre normal
+            if okey in obstacles and n is not None:
+                g = grad_normal(n, robot, obstacles[okey])
+                out.update(relax_m=float(p.eps_normal * np.abs(g).sum()) if p.normals == "relaxed" else 0.0,
+                           need_m=float(p.gamma_h * max(-float(res.h[i]), 0.0)), binding_obstacle=str(okey))
+        return out
 
     # --- filter --------------------------------------------------------------------------------------------------------
     def filter(self, obs: SceneObservation, actions: np.ndarray) -> FilterResult:
@@ -118,6 +216,7 @@ class KnowsSafetyFilter:
             R = T_ee[:3, :3]
             robot = Ellipsoid(T_ee[:3, 3], R @ self.Q_local @ R.T)
             dc_nom, dth_nom = a[:3] * OSC_POS_SCALE, a[3:6] * OSC_ROT_SCALE
+            stored = self.cbf.normals() if self.diagnostics else None  # normals the QP rows use (before delta_n)
             res = self.cbf(robot, obstacles, dc_nom, dth_nom)
             new = a.copy()
             if res.status != "no_obstacles":
@@ -127,9 +226,12 @@ class KnowsSafetyFilter:
                 new[:6] = a[:6]  # solver round-off on an inactive QP is not an intervention
             out[k] = new
             intervened[k] = diff > self.intervene_tol
-            info["steps"].append({"status": res.status, "feasible": bool(res.feasible), "emergency_stop": bool(res.emergency_stop),
-                                  "min_h": float(res.h.min()) if res.h.size else None,
-                                  "binding": [str(r[1]) for r, h in zip(res.rows, res.h) if h < 0.05][:4]})
+            step = {"status": res.status, "feasible": bool(res.feasible), "emergency_stop": bool(res.emergency_stop),
+                    "min_h": float(res.h.min()) if res.h.size else None,
+                    "binding": [str(r[1]) for r, h in zip(res.rows, res.h) if h < 0.05][:4]}
+            if self.diagnostics and res.status != "no_obstacles":
+                step.update(self._diagnose(robot, obstacles, res, dc_nom, dth_nom, stored))
+            info["steps"].append(step)
             T_ee = propagate_ee(T_ee, new, self.pos_gain, self.rot_gain)
         return FilterResult(out, intervened, info)
 

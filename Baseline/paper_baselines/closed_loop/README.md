@@ -29,7 +29,7 @@ metrics.py: TSR / CAR / ETS (official), SL5c safe success, KNOWS SR / CR / SSR, 
 | `knows` | filter | GDINO "object" boxes − target box (`--obstacles detector`) or depth components (`depth`) | GDINO target box | attention target exclusion (Eq. 4) → detector box |
 | `aegis` | filter | same | same | GLM-4.5V naming → generic GDINO prompt (= offline `aegis:detector_all`) |
 | `multilink_cbf` | filter | same | same | moving-hazard flow omitted |
-| `omniguide`, `constrained_flow_matching`, `lan_o3dp_guidance_adapted`, `nudge` | guidance | depth lift (− robot, − table, − target box), padded to 1024 points (Lan-o3dp unpadded) | GDINO target box (`--target detector`) or none | post-Euler hook, `x0_hat` from the sampling noise; CFM paper uses GT spheres |
+| `omniguide`, `constrained_flow_matching`, `lan_o3dp_guidance_adapted`, `nudge` | guidance | depth lift (− robot, − table, − target box), padded to 1024 points | GDINO target box (`--target detector`) or none | post-Euler hook, `x0_hat` from the sampling noise; CFM paper uses GT spheres |
 
 Filters edit the whole 10-row chunk at the policy call (later rows on the method's EE prediction); the client
 executes rows 0-4 (replan 5), as for VLA-only and V11AB. The original filters run every env step.
@@ -40,6 +40,26 @@ executes rows 0-4 (replan 5), as for VLA-only and V11AB. The original filters ru
 through a fixed `jax.pure_callback` hook on the JAX CPU backend (`--guidance-exec callback`, default), compiled
 once per jaxpr structure. `--guidance-exec inline` instead passes the closure constants into the jitted sampler
 (recompiles the sampler when the structure changes). Both give the same chunk (`tests/test_server_identity.py`).
+
+## CLOSED-LOOP-FIX (2026-10-24) — what changed before the pilot
+
+| arm | V3 symptom | cause | change (original method's rule) |
+|---|---|---|---|
+| `lan_o3dp_guidance_adapted` | served `|a|` up to 27.28, 183 executed rows `|xyz| > 1` | `1/max(1-t, 0.1)` push accumulates in pi0.5's unclamped sampler | port of DDIM `clip_sample`: field on the clamped `x0_hat`, push limited so the implied clean chunk stays in the LIBERO action box (raw `[-1, 1]`); circles padded to 16, FAR padding ignored (one compile) |
+| `knows` | `h_min` -0.447, 419 `h<0` steps, `qp_fail` 0 | (a) detector names re-ranked per call -> frozen shapes on the wrong centroids; unseen tracks reset to t=0; (b) paper Eq. 12 relaxed normals (eps box) can meet a violated row by tilting the normal (docs/11 §4) and has no infeasible case (docs/16 D3) | (a) tracks matched by nearest centroid, held at the last centroid while unseen (paper §3.2); (b) kept (paper behaviour), measured per step: `h_star*`, `cbf_ok`, `relax_m` vs `need_m` |
+| `omniguide` | 38 / 56 calls skipped, 10 jit compiles | per-call target box (moves with the held bowl, wrong head-camera boxes) kept the freeze zone on; EE-clearance drop and conditional terms changed the jaxpr | episode-cached target (original: VLM + SAM2 once per subtask), exit test on the cloud cached at entry; FAR instead of drop, 0/1 weights (one compile) |
+
+Latency keys (`serve_method.LATENCY_KEYS`): `ms.total` = wall time in `MethodServer.infer` (what the client waits
+for, minus transport), `ms.diagnostics` = logging-only work after the chunk is final, `ms.method` = `total -
+diagnostics`. `ms.serve` now equals `total` (in V2 / V3 records it was `total - diagnostics`); `metrics.py` reads
+`total` and `total - diagnostics` for both. Guidance diagnostics use a jitted fixed-shape distance
+(`path_metrics_fast`). New per-call keys: `served_max_abs_xyz`, `served_rows_out_of_range`, `guidance.ctx`
+(OmniGuide freeze / target, Lan-o3dp circles), KNOWS `*_steps` diagnostics and `filter_obstacles`.
+
+CPU replay harness: `serve_method --fake-source-key nominal` replays a method run's own observations with the VLA
+chunks that run's method saw (`method_calls/ep*_seed*.npz`), `--fake-kind constant` is the surrogate sampler that
+keeps every push (worst case for accumulation), `AG3S_SIDECAR_DETECTION_CACHE=<dir>` memoises Grounding DINO on disk
+(replays only). Details and before / after numbers: `AG3S/ag3s/docs/handoff/CLOSED-LOOP-FIX-K.impl.md`.
 
 ## Commands
 

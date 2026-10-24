@@ -37,6 +37,8 @@ dist/
 /paper/tools/bin/
 core
 core.*
+# core.* is for core dumps; this source module happens to match it.
+!Baseline/paper_baselines/methods/guidance_common/core.py
 
 # External OpenPI input aliases; restored by prepare_legacy_artifacts.py.
 /third_party/openpi/assets

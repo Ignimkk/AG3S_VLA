@@ -43,10 +43,54 @@ from Baseline.paper_baselines.closed_loop import arms as A  # noqa: E402
 GUIDE_TOL_RAW = 1e-4  # = evaluate_offline.GUIDE_TOL_RAW (D's intervened-row rule)
 NORM_REL = "assets/physical-intelligence/libero/norm_stats.json"
 DEFAULT_SCENE_KW = {"voxel": 0.02, "max_points": 1024, "workspace_radius": 0.6, "remove_table": False}
-#: methods whose numpy preparation reads every obstacle point's extent: FAR padding points (1 km away,
-#: ``guidance_common.geometry.FAR``) would blow up Lan-o3dp's xy cluster grid. Unpadded = the guidance function is
-#: recompiled when the point count changes (cheap with --guidance-exec callback; the pi0.5 sampler is not).
-NO_PADDING = {"lan_o3dp_guidance_adapted"}
+#: methods whose obstacle cloud is not padded to ``max_points``. Empty since CLOSED-LOOP-FIX: Lan-o3dp's circle
+#: preparation now ignores the FAR padding points (``obstacle_circles``), so every guidance arm sees one shape.
+NO_PADDING: set[str] = set()
+#: per-call method context recorded in ``row["guidance"]["ctx"]`` (scalars / short lists of ``method.last_ctx``)
+CTX_KEYS = ("skip", "frozen", "freeze_min_dist_m", "freeze_cached_dist_m", "target_source", "n_target_points",
+            "attract", "collision", "n_clearance_dropped", "gripper_closed", "n_circles", "circles", "x0_mode")
+#: per-step filter diagnostics copied from ``info["steps"]`` (KNOWS adapter, CLOSED-LOOP-FIX) as ``<key>_steps``
+STEP_KEYS = ("h_star", "h_star_next", "h_star_next_nominal", "cbf_ok", "relax_m", "need_m", "binding_obstacle")
+#: ``row["ms"]`` keys. ``total`` = wall time inside ``MethodServer.infer`` = what the client waits for (minus
+#: transport); ``diagnostics`` = logging-only work done after the chunk is final (guidance h, path metrics);
+#: ``method`` = ``total - diagnostics`` (the latency the method itself adds); ``serve`` = ``total`` (kept for readers
+#: of the V2 / V3 records, where it meant ``total - diagnostics``).
+LATENCY_KEYS = ("total", "diagnostics", "method", "serve")
+
+
+_SD_JIT = None
+
+
+def _sd_jit():
+    """Jitted ``geometry.signed_distance`` on the JAX CPU backend (one compile per padded shape)."""
+    global _SD_JIT
+    if _SD_JIT is None:
+        import jax
+
+        from Baseline.paper_baselines.methods.guidance_common.geometry import signed_distance
+
+        _SD_JIT = jax.jit(signed_distance)
+    return _SD_JIT
+
+
+def path_metrics_fast(raw: np.ndarray, scene, H: int) -> dict:
+    """``guidance_common.evaluation.path_metrics`` with a jitted, fixed-shape distance (diagnostics only)."""
+    from Baseline.paper_baselines.methods.guidance_common.kinematics import EEPathModel
+
+    pm = EEPathModel(H=H, p0=scene.ee_pos, R_bw=scene.R_bw, y_prev=scene.y_prev)
+    p = pm.numpy(np.clip(raw[:, :3], -1, 1))
+    o = scene.obstacles
+    if o.empty:
+        return {"ee_min_sdf_m": None, "hand_min_sdf_m": None}
+    import jax
+
+    hs = p[:, None, :] + (scene.hand_c - scene.ee_pos[None])[None]
+    q = np.concatenate([p, hs.reshape(-1, 3)]).astype(np.float32)
+    with jax.default_device(jax.devices("cpu")[0]):  # same backend as the guidance callback, off the GPU
+        oj = o.padded(max(1, len(o.points))).as_jax()
+        d = np.asarray(_sd_jit()(jax.numpy.asarray(q), oj), np.float64)
+    sd, hsd = d[:H], d[H:].reshape(H, -1) - scene.hand_r[None]
+    return {"ee_min_sdf_m": float(sd.min()), "hand_min_sdf_m": float(hsd.min())}
 
 
 def storage_root() -> pathlib.Path:
@@ -197,8 +241,13 @@ class MethodServer:
         served = np.asarray(result["actions"])
         if served.ndim == 2 and served.shape[0]:
             self.last_gripper = float(served[min(4, served.shape[0] - 1), 6])  # last executed row (replan 5)
-        row["ms"]["total"] = (time.perf_counter() - t0) * 1e3
-        row["ms"]["serve"] = row["ms"]["total"] - row["ms"].get("diagnostics", 0.0)  # latency without logging metrics
+        row["ms"]["total"] = (time.perf_counter() - t0) * 1e3  # = client-visible server time (LATENCY_KEYS)
+        row["ms"].setdefault("diagnostics", 0.0)
+        row["ms"]["method"] = row["ms"]["total"] - row["ms"]["diagnostics"]
+        row["ms"]["serve"] = row["ms"]["total"]
+        sx = served.astype(np.float64)[:, :3] if served.ndim == 2 and served.shape[0] else np.zeros((0, 3))
+        row["served_max_abs_xyz"] = float(np.abs(sx).max()) if sx.size else None
+        row["served_rows_out_of_range"] = int(np.count_nonzero(np.abs(sx).max(1) > 1.0)) if sx.size else 0
         self.recorder.add(row, nominal, served)
         self.n_calls += 1
         result["panda/mode"] = f"method:{self.arm['arm']}"
@@ -238,6 +287,21 @@ class MethodServer:
             row["intervened"] = iv.tolist()
             row.update({k: v for k, v in filter_step_info(self.arm["method"], r["info"]).items()
                         if k in ("h_steps", "h_min", "h_neg_steps", "qp_status", "qp_fail", "emergency_stops")})
+            steps = r["info"].get("steps") or []
+            for key in STEP_KEYS:
+                if any(key in st for st in steps):
+                    row[f"{key}_steps"] = [st.get(key) for st in steps]
+            if "h_star_steps" in row:  # KNOWS: the true separation max_n h(n) next to the QP's own h(n_stored)
+                hs = [v for v in row["h_star_steps"] if v is not None]
+                row["h_star_min"] = min(hs) if hs else None
+                row["h_star_neg_steps"] = sum(v < 0 for v in hs)
+                row["cbf_violated_steps"] = sum(v is False for v in row.get("cbf_ok_steps", []))
+                rel, need = row.get("relax_m_steps", []), row.get("need_m_steps", [])
+                row["relaxation_covers_need_steps"] = sum(1 for a, b in zip(rel, need)
+                                                          if a is not None and b is not None and b > 0 and a >= b)
+            obst = r["info"].get("obstacles")
+            if isinstance(obst, dict):
+                row["filter_obstacles"] = {k: {"c": v.get("c"), "semi_axes": v.get("semi_axes")} for k, v in obst.items()}
             row["filter_perception"] = r["info"].get("perception")
             row["ms"].update({"perception": (t_perc - t_pol) * 1e3, "sidecar_roundtrip": (t_f - t_perc) * 1e3,
                               "filter": r.get("ms")})
@@ -253,7 +317,6 @@ class MethodServer:
     def _guidance_call(self, obs, row, seq, t0, **kwargs):
         from Baseline.paper_baselines.closed_loop.perception import scene_points
         from Baseline.paper_baselines.methods.evaluate_offline import delta_stats
-        from Baseline.paper_baselines.methods.guidance_common.evaluation import path_metrics
         from Baseline.paper_baselines.methods.guidance_common.scene import build_scene
 
         scene, sobs, err = None, None, None
@@ -289,6 +352,9 @@ class MethodServer:
         row["ms"] = {"perception": (t_perc - t0) * 1e3, "policy_and_guidance": (t_s - t_perc) * 1e3,
                      **{f"guided_{k}": v for k, v in (g.get("ms") or {}).items()}}
         row["guidance"] = {k: g.get(k) for k in ("guided", "identity_reason", "jaxpr_key", "n_consts", "cache", "skip")}
+        ctx = getattr(self.method, "last_ctx", None) if scene is not None else None
+        if isinstance(ctx, dict):
+            row["guidance"]["ctx"] = {k: ctx[k] for k in CTX_KEYS if k in ctx}
         row["denoise_steps"] = g.get("denoise_steps")
         t_d = time.perf_counter()
         if nominal is not None:
@@ -298,7 +364,7 @@ class MethodServer:
             row["intervened"] = iv.tolist()
             if scene is not None:
                 H = served.shape[0]
-                mb, mg = path_metrics(nom, scene, H), path_metrics(served.astype(np.float64), scene, H)
+                mb, mg = path_metrics_fast(nom, scene, H), path_metrics_fast(served.astype(np.float64), scene, H)
                 row["h_nominal"] = {"ee_min_sdf_m": mb["ee_min_sdf_m"], "hand_min_sdf_m": mb["hand_min_sdf_m"]}
                 row["h_served"] = {"ee_min_sdf_m": mg["ee_min_sdf_m"], "hand_min_sdf_m": mg["hand_min_sdf_m"]}
                 row["h_min"] = mg["hand_min_sdf_m"]
@@ -334,7 +400,8 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
         if args.fake_policy != "none":
             from Baseline.paper_baselines.closed_loop.fake_policy import FakePolicy
 
-            policy = FakePolicy(norm, source=args.fake_policy, run_dir=args.fake_source_run)
+            policy = FakePolicy(norm, source=args.fake_policy, run_dir=args.fake_source_run, kind=args.fake_kind,
+                                source_key=args.fake_source_key)
         else:
             from openpi.policies import policy_config as _policy_config
             from openpi.training import config as _config
@@ -386,7 +453,8 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
                           recorder=CallRecorder(rec_dir), record_nominal=not args.no_record_nominal,
                           scene_kwargs=json.loads(args.scene_kwargs) if args.scene_kwargs else None)
     info.update({"config": args.config, "checkpoint": str(ckpt), "fake_policy": args.fake_policy,
-                 "fake_source_run": args.fake_source_run, "record_dir": None if rec_dir is None else str(rec_dir),
+                 "fake_source_run": args.fake_source_run, "fake_source_key": args.fake_source_key,
+                 "fake_kind": args.fake_kind, "record_dir": None if rec_dir is None else str(rec_dir),
                  "scene_kwargs": server.scene_kwargs, "record_nominal": not args.no_record_nominal,
                  "action_convention": "pi05_libero EE delta chunk (H=10); client executes rows 0-4 (replan 5), "
                                       "same as serve_safe --robot panda"})
@@ -412,6 +480,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--fake-policy", choices=("none", "constant", "recorded"), default="none",
                     help="CPU smoke: no checkpoint; constant descent or a recorded run's chunks")
     ap.add_argument("--fake-source-run", default=None, help="run dir of --fake-policy recorded")
+    ap.add_argument("--fake-source-key", choices=("actions_response", "nominal"), default="actions_response",
+                    help="recorded chunks: the served chunks (episodes/*_calls.npz) or a method run's nominal "
+                         "(method_calls/ep*_seed*.npz)")
+    ap.add_argument("--fake-kind", choices=("tracking", "constant"), default="tracking",
+                    help="CPU surrogate velocity field of the guided sampler (guidance_common.core.surrogate_sample)")
     ap.add_argument("--record-dir", default=None, help="default: $AG3S_RUN_DIR")
     return ap
 

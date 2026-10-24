@@ -22,7 +22,9 @@ guide = ∂cost/∂x0_hat ; row 별 norm 을 ≤ 1.0 으로 clip ;  x_next ← x
 - `p_k`: decode 된 EE (grip site) path. `q_kw`: hand frame 의 wrist probe 4점.
 - obstacle (repeller): 비-target 기하. 기본은 depth lift 다. 전체 pixel 에서 target, robot, ignore mask 를 빼고, EE 에서 5 cm (gripper open) 또는 10 cm (closed) 안의 점도 뺀다.
 - target (attractor): `extras["target_points"]` 또는 target mask lift 를 쓴다. A 의 grounding provider 결과, ATS, GT (privileged) 중 하나다.
-- freeze zone: EE 가 target 점에서 0.1 m 안에 들어오면 guidance 를 끈다. hysteresis 상태는 call 사이에 유지하고, `reset()` 으로 지운다.
+- freeze zone: EE 가 target 점에서 0.1 m 안에 들어오면 guidance 를 끈다. 나가는 판정은 **들어갈 때 저장한 점 구름** 으로 한다 (원 `_update_freeze_zone`, `cached_task_relevant_pcd`). 상태는 call 사이에 유지하고, `reset()` 으로 지운다.
+- target 기억 (`target_cache="episode"`, 기본, CLOSED-LOOP-FIX): 원 방법은 VLM pointer + SAM2 를 subtask 마다 한 번 돌리고 그 점을 cache 한다 (`_apply_vlm_sam2_filter`, `cache_stale` 은 subtask 가 바뀔 때만 참). sim config 는 subtask monitor 를 끄므로 episode 당 한 번이다. 여기서도 episode 의 첫 target 검출 (비어 있으면 다음 call 에 다시) 을 저장해 attractor 와 freeze zone 에 쓴다. `target_cache="call"` 은 이전 동작 (매 call 검출) 이다.
+- 고정 구조 (CLOSED-LOOP-FIX): EE clearance 안의 점은 지우지 않고 FAR 로 옮긴다. collision / attract 항은 조건문 대신 0/1 상수 가중치로 곱한다. 그래서 1024 점으로 padding 한 scene 에서 jaxpr 이 call 마다 같고 compile 은 server 당 1 회다.
 - `guidance_types=("collision",)` 로 collision 만 켤 수 있다. 원 `collision*.yaml` 과 같은 설정이다.
 
 ## 원 방법과 다른 점
@@ -35,6 +37,8 @@ guide = ∂cost/∂x0_hat ; row 별 norm 을 ≤ 1.0 으로 clip ;  x_next ← x
 | point cloud: VGGT 또는 depth + SAM2 / CLIP 으로 target 과 arm 을 걸러낸다 | 우리 wire depth + target mask (provider 또는 GT) + robot mask |
 | attractor: VLM pointer + SAM2 로 찾은 target centroid | grounding provider 또는 GT target 점의 centroid |
 | best-of-N 초기 noise 선택 (`num_init_candidates`) | 생략한다 (model 을 N 번 돌려야 함) |
+| freeze zone 판정 점: 이번 call 의 unguided chunk 첫 waypoint 의 tip (`endpos_tip[0:1]`) | 현재 EE (grip site) 위치. 차이는 action 한 step (약 1 cm) 이다 |
+| target 점: SAM2 mask (target 하나) | Grounding DINO target box 를 lift 한 점 (box 안의 다른 물체·배경이 섞일 수 있다). episode 첫 검출을 cache 한다 |
 | subtask monitor / VLM progress tracker | 생략한다 |
 
 **크기 차이 주의.** LIBERO 에서 action 1 단위가 만드는 EE 이동은 steady state 에서 약 0.0125 m/step 이다. DROID joint velocity 의 tip 이동보다 약 10배 작다.

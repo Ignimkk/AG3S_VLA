@@ -127,9 +127,17 @@ def method_calls(run: str | pathlib.Path) -> dict | None:
     n_rows = sum(int(r["T"]) for r in rows_T)
     n_iv = sum(int(r["n_intervened"]) for r in rows_T)
     exec_iv = sum(sum(bool(v) for v in (r.get("intervened") or [])[:5]) for r in rows_T)  # rows 0-4 are executed
-    tot = [float(r["ms"].get("serve", r["ms"].get("total"))) for r in rows
-           if r.get("ms", {}).get("serve", r.get("ms", {}).get("total")) is not None]
+    # latency (serve_method.LATENCY_KEYS): server = ms.total (client-visible; same key in V3 and later records),
+    # method = total - diagnostics (logging-only work after the chunk is final)
+    tot = [float(r["ms"]["total"]) for r in rows if (r.get("ms") or {}).get("total") is not None]
+    meth = [float(r["ms"]["total"]) - float(r["ms"].get("diagnostics") or 0.0) for r in rows
+            if (r.get("ms") or {}).get("total") is not None]
+    diag = [float(r["ms"].get("diagnostics") or 0.0) for r in rows if (r.get("ms") or {}).get("total") is not None]
     hmin = [r["h_min"] for r in rows if r.get("h_min") is not None]
+    hstar = [r["h_star_min"] for r in rows if r.get("h_star_min") is not None]
+    g = [r["guidance"] for r in rows if isinstance(r.get("guidance"), dict)]
+    caches = [x.get("cache") or {} for x in g]
+    smax = [r["served_max_abs_xyz"] for r in rows if r.get("served_max_abs_xyz") is not None]
     return {"n_calls": len(rows), "n_episodes": len({r.get("episode") for r in rows}),
             "intervention_rate_rows": _rate(n_iv, n_rows),
             "intervention_rate_calls": _rate(sum(bool(r.get("call_intervened")) for r in rows_T), len(rows_T)),
@@ -139,7 +147,20 @@ def method_calls(run: str | pathlib.Path) -> dict | None:
             "h_min": min(hmin) if hmin else None, "h_neg_steps": sum(int(r.get("h_neg_steps") or 0) for r in rows),
             "qp_fail": sum(int(r.get("qp_fail") or 0) for r in rows),
             "fallbacks": sum(r.get("fallback") is not None for r in rows),
-            "server_ms_p50": _pct(tot, 0.5), "server_ms_p95": _pct(tot, 0.95), "server_ms_max": max(tot) if tot else None}
+            "server_ms_p50": _pct(tot, 0.5), "server_ms_p95": _pct(tot, 0.95), "server_ms_max": max(tot) if tot else None,
+            "method_ms_p50": _pct(meth, 0.5), "method_ms_p95": _pct(meth, 0.95),
+            "diagnostics_ms_p50": _pct(diag, 0.5), "diagnostics_ms_max": max(diag) if diag else None,
+            # KNOWS true separation (CLOSED-LOOP-FIX diagnostics; absent in older records)
+            "h_star_min": min(hstar) if hstar else None,
+            "h_star_neg_steps": sum(int(r.get("h_star_neg_steps") or 0) for r in rows) if hstar else None,
+            "cbf_violated_steps": sum(int(r.get("cbf_violated_steps") or 0) for r in rows) if hstar else None,
+            "relaxation_covers_need_steps": (sum(int(r.get("relaxation_covers_need_steps") or 0) for r in rows)
+                                             if hstar else None),
+            # guidance: skipped calls, guidance compiles in the episode(s), served action range
+            "guidance_skipped_calls": sum(bool(x.get("skip")) for x in g) if g else None,
+            "guidance_compiles": max((int(c.get("compiles") or 0) for c in caches), default=None) if g else None,
+            "served_max_abs_xyz": max(smax) if smax else None,
+            "served_rows_out_of_range": sum(int(r.get("served_rows_out_of_range") or 0) for r in rows) if smax else None}
 
 
 def paired(rows: list[dict], ref_rows: list[dict]) -> dict:

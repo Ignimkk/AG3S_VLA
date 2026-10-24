@@ -17,6 +17,7 @@ defaults; D1-D7 variants via `cbf_params={...}`) on every action of the chunk:
 |---|---|---|
 | robot geometry | one EE ellipsoid, "calibrated offline" | Franka-hand semi-axes (0.04, 0.04, 0.07) in the EE frame (`offline_filter.DEFAULT_GRIPPER_SEMI_AXES`) |
 | obstacles | ellipsoids from "manipulable object" segmentation, MVEE, shapes frozen at t=0, centroids tracked | same rule; segmentation = simulator GT (`obstacle_source="gt_seg"`, privileged) or target-free clouds from upstream (`"given"`); support surfaces (table) never obstacles |
+| track identity (§3.2) | one track per object; swaps re-associated by HSV histogram; occluded track frozen at its last position | `associate="centroid"` (default for `detector` / `given`, whose names are re-ranked per call): Hungarian on centroid distance, gate 0.10 m, unmatched track held at its last centroid (CLOSED-LOOP-FIX). `"name"` (default for `gt_seg`): match by instance name, unmatched -> t=0 centroid (previous behaviour) |
 | target exclusion (Eq. 4) | attention top-1 object | BDDL target + destination (privileged, `exclude="task_objects"`); `"phase_target"` = `offline_filter --target gt` rule |
 | units | "scaled to physical units" | `a[:3] x 0.05 m`, `a[3:6] x 0.5 rad` (robosuite OSC `output_max`) and back |
 | chunk | per control step | T = 1 per env step reproduces it; T > 1 predicts the EE pose with the measured 0.0115 m / action unit (`safety_common.propagate_ee`) |
@@ -24,7 +25,15 @@ defaults; D1-D7 variants via `cbf_params={...}`) on every action of the chunk:
 
 Known behaviour inherited from the paper's relaxed normals: the eps box can satisfy a row by tilting the separating
 plane, so the true barrier can still shrink faster than `(1 - gamma) h` (`docs/16-filter-variants.md`; the adapter
-test checks the discrete CBF only for `normals="fixed"`).
+test checks the discrete CBF only for `normals="fixed"`). Eq. (12) has no bound on `delta_c`, so the QP is never
+infeasible and `qp_fail` / emergency stops stay 0 with the paper defaults (docs/16 D3).
+
+What the closed-loop `h` is (CLOSED-LOOP-FIX, `info["steps"][k]`): `min_h` = Eq. (6) `h(n)` at the **stored**
+separating normal = the QP's own row value before the step's `delta_n`, at the EE pose before row `k` along the
+**filtered** chunk (row 0 = measured pose). Because the stored normal lags the optimum, `h(n) <= h* = max_n h(n)`;
+`h_star` / `h_star_next` (after the QP step) / `h_star_next_nominal` report the true separation, `cbf_ok` the
+docs/16 condition on it, `relax_m` / `need_m` what tilting the normal can supply vs what Eq. (7) demands of an
+overlapping pair. `diagnostics=False` skips them (the served chunk is the same either way, tested).
 
 ## Run
 

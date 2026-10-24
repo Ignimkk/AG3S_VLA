@@ -14,6 +14,10 @@ Ops (request ``{"op": ..., ...}`` -> reply ``{"ok": True, ...}`` or ``{"ok": Fal
 | ``filter`` | ``obs`` (``wire_obs.obs_to_dict``), ``actions`` (T, 7) | ``actions``, ``intervened``, ``info``, ``ms`` |
 | ``target`` | ``obs``, ``cameras``, thresholds | per camera top-1 ``box`` / ``score`` of ``obs.target_phrase``, ``ms`` |
 | ``ping`` / ``close`` | -- | versions / -- |
+
+``AG3S_SIDECAR_DETECTION_CACHE=<dir>`` (CPU replay only, CLOSED-LOOP-FIX): every ``detect`` result is stored under
+``sha1(rgb bytes, shape, text, thresholds, weight)`` and re-read on a hit, so two replays of the same recorded
+frames see the same boxes without running Grounding DINO twice. Unset (default, every closed-loop run): no cache.
 """
 from __future__ import annotations
 
@@ -94,6 +98,42 @@ class SidecarClient:
 
 # =============================================================================================================
 # sidecar side (.venv-baselines)
+class CachedDetector:
+    """``detect`` memoised on disk (see module docstring); same signature and return types as the wrapped detector."""
+
+    def __init__(self, inner, root: str | os.PathLike, weight: str):
+        self.inner, self.root, self.weight = inner, pathlib.Path(root), str(weight)
+        self.root.mkdir(parents=True, exist_ok=True)
+        self.stats = {"hits": 0, "misses": 0}
+
+    def provenance(self) -> dict:
+        p = dict(self.inner.provenance()) if hasattr(self.inner, "provenance") else {}
+        p["replay_cache"] = str(self.root)
+        return p
+
+    def detect(self, rgb, text, box_threshold, text_threshold):
+        import hashlib
+        import json
+
+        a = np.ascontiguousarray(np.asarray(rgb))
+        h = hashlib.sha1(a.tobytes())
+        h.update(json.dumps([list(a.shape), str(a.dtype), str(text), float(box_threshold), float(text_threshold),
+                             self.weight]).encode())
+        f = self.root / f"{h.hexdigest()}.npz"
+        if f.exists():
+            with np.load(f, allow_pickle=False) as z:
+                self.stats["hits"] += 1
+                return np.asarray(z["boxes"]), np.asarray(z["scores"]), [str(x) for x in z["phrases"]]
+        boxes, scores, phrases = self.inner.detect(rgb, text, box_threshold, text_threshold)
+        boxes, scores, phrases = np.asarray(boxes).reshape(-1, 4), np.asarray(scores).reshape(-1), list(phrases)
+        tmp = f.with_suffix(".tmp.npz")
+        np.savez(tmp, boxes=np.asarray(boxes).reshape(-1, 4), scores=np.asarray(scores).reshape(-1),
+                 phrases=np.asarray([str(x) for x in phrases], dtype=str).reshape(-1))  # dtypes kept (float32)
+        os.replace(tmp, f)
+        self.stats["misses"] += 1
+        return boxes, scores, phrases
+
+
 class _State:
     def __init__(self):
         self.filter = None
@@ -106,6 +146,9 @@ class _State:
             from Baseline.paper_baselines.providers.grounding_dino import GroundingDinoDetector
 
             self.detector = GroundingDinoDetector(self.det_cfg["weight"], device=self.det_cfg["device"])
+            cache = os.environ.get("AG3S_SIDECAR_DETECTION_CACHE")
+            if cache:
+                self.detector = CachedDetector(self.detector, cache, self.det_cfg["weight"])
         return self.detector
 
 

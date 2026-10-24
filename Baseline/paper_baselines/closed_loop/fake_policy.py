@@ -10,6 +10,9 @@ Chunk sources:
 * ``recorded`` -- the chunks a recorded run's server returned (``episodes/<stem>_calls.npz`` ``actions_response``),
   looked up by the episode's ``policy_seed`` (decoded task / episode) and the request's ``ag3s/seq``. With the
   recorded VLA-only run of the same task / init / seed, ``--method none`` replays that run's actions exactly.
+  ``source_key="nominal"`` reads a **method** run's unguided / unfiltered chunks instead
+  (``method_calls/ep<k>_seed<s>.npz`` ``nominal``, by ``seq``): replaying a filter / guidance run's own observations
+  with the VLA chunks that run's method saw (CLOSED-LOOP-FIX CPU replay).
 
 ``infer`` returns the source chunk itself (``exact``); the guided path samples D's surrogate flow towards it
 (``tracking``: unguided = target up to ~1e-7).
@@ -30,9 +33,15 @@ def decode_policy_seed(policy_seed: int | None) -> dict:
     return {"policy_seed": ps, "seed": ps // 100000, "task_id": (ps % 100000) // 1000, "episode_idx": ps % 1000}
 
 
+SOURCE_KEYS = ("actions_response", "nominal")
+
+
 class RecordedChunks:
-    def __init__(self, run_dir: str | pathlib.Path):
+    def __init__(self, run_dir: str | pathlib.Path, source_key: str = "actions_response"):
+        if source_key not in SOURCE_KEYS:
+            raise ValueError(f"source_key must be one of {SOURCE_KEYS}")
         self.run_dir = pathlib.Path(run_dir)
+        self.source_key = source_key
         self.by_seed: dict[int, str] = {}
         for line in (self.run_dir / "episodes.jsonl").read_text().splitlines():
             if not line.strip():
@@ -46,27 +55,39 @@ class RecordedChunks:
     def chunks(self, policy_seed: int) -> np.ndarray:
         stem = self.by_seed[int(policy_seed)]
         if stem not in self._cache:
-            with np.load(self.run_dir / "episodes" / f"{stem}_calls.npz") as z:
-                self._cache[stem] = np.asarray(z["actions_response"], np.float64)
+            if self.source_key == "nominal":
+                path = sorted((self.run_dir / "method_calls").glob(f"ep*_seed{int(policy_seed)}.npz"))
+                if len(path) != 1:
+                    raise FileNotFoundError(f"method_calls/ep*_seed{policy_seed}.npz: {len(path)} files in {self.run_dir}")
+                with np.load(path[0]) as z:
+                    seq, nom = np.asarray(z["seq"], np.int64), np.asarray(z["nominal"], np.float64)
+                out = np.full((int(seq.max()) + 1,) + nom.shape[1:], np.nan)
+                out[seq] = nom
+                self._cache[stem] = out
+            else:
+                with np.load(self.run_dir / "episodes" / f"{stem}_calls.npz") as z:
+                    self._cache[stem] = np.asarray(z["actions_response"], np.float64)
         return self._cache[stem]
 
     def chunk(self, policy_seed: int | None, seq: int) -> np.ndarray | None:
         if policy_seed is None or int(policy_seed) not in self.by_seed:
             return None
         c = self.chunks(policy_seed)
-        return c[int(seq)].copy() if int(seq) < len(c) else None
+        if int(seq) >= len(c) or not np.all(np.isfinite(c[int(seq)])):
+            return None
+        return c[int(seq)].copy()
 
 
 class FakePolicy:
     def __init__(self, norm: dict, *, source: str = "constant", run_dir: str | None = None, H: int = 10, D: int = 32,
-                 kind: str = "tracking", num_steps: int = 10, exact: bool = True):
+                 kind: str = "tracking", num_steps: int = 10, exact: bool = True, source_key: str = "actions_response"):
         import jax
 
         if source not in ("constant", "recorded"):
             raise ValueError("source must be constant | recorded")
         self.norm, self.source, self.H, self.D = norm, source, int(H), int(D)
         self.kind, self.num_steps, self.exact = kind, int(num_steps), bool(exact)
-        self.recorded = RecordedChunks(run_dir) if source == "recorded" else None
+        self.recorded = RecordedChunks(run_dir, source_key) if source == "recorded" else None
         self._rng = jax.random.key(0)
         self.context = {"policy_seed": None, "seq": 0}
         self.n_missing = 0
@@ -74,8 +95,9 @@ class FakePolicy:
 
     @property
     def metadata(self) -> dict:
-        return {"fake": True, "source": self.source,
-                "run": None if self.recorded is None else str(self.recorded.run_dir)}
+        return {"fake": True, "source": self.source, "kind": self.kind,
+                "run": None if self.recorded is None else str(self.recorded.run_dir),
+                "source_key": None if self.recorded is None else self.recorded.source_key}
 
     def reset(self) -> None:
         pass
@@ -119,4 +141,4 @@ class FakePolicy:
         return out
 
 
-__all__ = ["FakePolicy", "RecordedChunks", "decode_policy_seed"]
+__all__ = ["FakePolicy", "RecordedChunks", "SOURCE_KEYS", "decode_policy_seed"]
