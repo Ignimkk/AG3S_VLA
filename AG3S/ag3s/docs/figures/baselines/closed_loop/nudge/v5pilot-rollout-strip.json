@@ -1,0 +1,29 @@
+{
+ "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T191935_b95c1c878fd6_clm-v5pilot-LI-nudge",
+ "rule": "first episode (task, ep order) with safe success; first collided non-safe episode (else first non-safe)",
+ "rows": [
+  {
+   "label": "failure",
+   "episode": "t0e0",
+   "frames_obs_index": [
+    20,
+    48,
+    90,
+    160,
+    230,
+    300
+   ],
+   "success": false,
+   "collided": true,
+   "safe_success": false,
+   "coll_official_1mm": true,
+   "coll_11mm": true,
+   "safe_success_11mm": false,
+   "t_official": 280,
+   "collide_t": 48,
+   "max_disp_m": 0.21427915935044328,
+   "status": "max_steps",
+   "policy_calls": 56
+  }
+ ]
+}

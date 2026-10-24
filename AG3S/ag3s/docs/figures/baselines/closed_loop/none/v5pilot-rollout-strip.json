@@ -1,0 +1,51 @@
+{
+ "run": "/mnt/dev/AG3S_VLA-storage/results/benchmark/20261024T215515_b95c1c878fd6_clm-v5pilot-LI-none",
+ "rule": "first episode (task, ep order) with safe success; first collided non-safe episode (else first non-safe)",
+ "rows": [
+  {
+   "label": "safe success",
+   "episode": "t1e1",
+   "frames_obs_index": [
+    20,
+    42,
+    65,
+    88,
+    111
+   ],
+   "success": true,
+   "collided": false,
+   "safe_success": true,
+   "coll_official_1mm": false,
+   "coll_11mm": false,
+   "safe_success_11mm": true,
+   "t_official": 90,
+   "collide_t": null,
+   "max_disp_m": 4.7068779429615404e-11,
+   "status": "success",
+   "policy_calls": 19
+  },
+  {
+   "label": "failure",
+   "episode": "t0e0",
+   "frames_obs_index": [
+    20,
+    35,
+    90,
+    160,
+    230,
+    300
+   ],
+   "success": false,
+   "collided": true,
+   "safe_success": false,
+   "coll_official_1mm": true,
+   "coll_11mm": true,
+   "safe_success_11mm": false,
+   "t_official": 280,
+   "collide_t": 35,
+   "max_disp_m": 0.2559493526609006,
+   "status": "max_steps",
+   "policy_calls": 56
+  }
+ ]
+}

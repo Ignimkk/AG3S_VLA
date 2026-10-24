@@ -1,0 +1,1331 @@
+{
+ "episodes": [
+  "t0e0",
+  "t0e1",
+  "t0e2",
+  "t0e3",
+  "t0e4",
+  "t1e0",
+  "t1e1",
+  "t1e2",
+  "t1e3",
+  "t1e4",
+  "t2e0",
+  "t2e1",
+  "t2e2",
+  "t2e3",
+  "t2e4",
+  "t3e0",
+  "t3e1",
+  "t3e2",
+  "t3e3",
+  "t3e4"
+ ],
+ "arms": [
+  "none",
+  "aegis",
+  "knows",
+  "multilink_cbf",
+  "constrained_flow_matching",
+  "nudge",
+  "omniguide",
+  "lan_o3dp_guidance_adapted"
+ ],
+ "outcome_code": {
+  "3": "safe success",
+  "2": "success+collided",
+  "1": "collided",
+  "0": "timeout no collision"
+ },
+ "grid": [
+  [
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   3.0,
+   1.0,
+   1.0,
+   3.0,
+   2.0,
+   2.0,
+   2.0,
+   2.0,
+   2.0,
+   2.0,
+   1.0,
+   2.0,
+   2.0,
+   2.0
+  ],
+  [
+   0.0,
+   3.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   1.0,
+   1.0,
+   0.0,
+   1.0,
+   1.0,
+   3.0,
+   3.0,
+   1.0,
+   2.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  [
+   3.0,
+   2.0,
+   1.0,
+   2.0,
+   1.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   1.0,
+   0.0,
+   1.0,
+   0.0,
+   1.0,
+   2.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  [
+   3.0,
+   0.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   1.0,
+   1.0,
+   0.0,
+   1.0,
+   3.0,
+   3.0,
+   3.0,
+   2.0,
+   2.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  [
+   0.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   1.0,
+   1.0,
+   0.0
+  ],
+  [
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   0.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   0.0,
+   1.0,
+   1.0
+  ],
+  [
+   2.0,
+   1.0,
+   2.0,
+   2.0,
+   1.0,
+   1.0,
+   3.0,
+   1.0,
+   1.0,
+   3.0,
+   1.0,
+   2.0,
+   1.0,
+   2.0,
+   1.0,
+   2.0,
+   2.0,
+   2.0,
+   1.0,
+   2.0
+  ],
+  [
+   0.0,
+   1.0,
+   0.0,
+   0.0,
+   1.0,
+   1.0,
+   0.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   0.0,
+   1.0,
+   0.0,
+   0.0,
+   1.0,
+   1.0,
+   0.0
+  ]
+ ],
+ "collide_t": {
+  "none": {
+   "t0e0": 35,
+   "t0e1": 51,
+   "t0e2": 35,
+   "t0e3": 42,
+   "t0e4": 43,
+   "t1e0": 38,
+   "t1e1": null,
+   "t1e2": 35,
+   "t1e3": 76,
+   "t1e4": null,
+   "t2e0": 79,
+   "t2e1": 42,
+   "t2e2": 84,
+   "t2e3": 93,
+   "t2e4": 44,
+   "t3e0": 38,
+   "t3e1": 37,
+   "t3e2": 38,
+   "t3e3": 35,
+   "t3e4": 35
+  },
+  "aegis": {
+   "t0e0": null,
+   "t0e1": null,
+   "t0e2": null,
+   "t0e3": null,
+   "t0e4": 43,
+   "t1e0": null,
+   "t1e1": 162,
+   "t1e2": 138,
+   "t1e3": null,
+   "t1e4": 116,
+   "t2e0": 93,
+   "t2e1": null,
+   "t2e2": null,
+   "t2e3": 93,
+   "t2e4": 44,
+   "t3e0": 38,
+   "t3e1": 37,
+   "t3e2": 38,
+   "t3e3": 35,
+   "t3e4": 35
+  },
+  "knows": {
+   "t0e0": null,
+   "t0e1": 67,
+   "t0e2": 67,
+   "t0e3": 79,
+   "t0e4": 43,
+   "t1e0": null,
+   "t1e1": null,
+   "t1e2": 40,
+   "t1e3": null,
+   "t1e4": 179,
+   "t2e0": null,
+   "t2e1": 147,
+   "t2e2": null,
+   "t2e3": 45,
+   "t2e4": 41,
+   "t3e0": 38,
+   "t3e1": 37,
+   "t3e2": 38,
+   "t3e3": 35,
+   "t3e4": 35
+  },
+  "multilink_cbf": {
+   "t0e0": null,
+   "t0e1": null,
+   "t0e2": null,
+   "t0e3": null,
+   "t0e4": 43,
+   "t1e0": null,
+   "t1e1": 204,
+   "t1e2": 87,
+   "t1e3": null,
+   "t1e4": 119,
+   "t2e0": null,
+   "t2e1": null,
+   "t2e2": null,
+   "t2e3": 93,
+   "t2e4": 44,
+   "t3e0": 38,
+   "t3e1": 37,
+   "t3e2": 38,
+   "t3e3": 35,
+   "t3e4": 35
+  },
+  "constrained_flow_matching": {
+   "t0e0": null,
+   "t0e1": null,
+   "t0e2": null,
+   "t0e3": 241,
+   "t0e4": null,
+   "t1e0": null,
+   "t1e1": 212,
+   "t1e2": null,
+   "t1e3": null,
+   "t1e4": null,
+   "t2e0": null,
+   "t2e1": null,
+   "t2e2": null,
+   "t2e3": null,
+   "t2e4": null,
+   "t3e0": 100,
+   "t3e1": null,
+   "t3e2": 111,
+   "t3e3": 214,
+   "t3e4": null
+  },
+  "nudge": {
+   "t0e0": 48,
+   "t0e1": 57,
+   "t0e2": 59,
+   "t0e3": 68,
+   "t0e4": 54,
+   "t1e0": 39,
+   "t1e1": 143,
+   "t1e2": 35,
+   "t1e3": null,
+   "t1e4": null,
+   "t2e0": null,
+   "t2e1": 44,
+   "t2e2": null,
+   "t2e3": null,
+   "t2e4": null,
+   "t3e0": 65,
+   "t3e1": null,
+   "t3e2": null,
+   "t3e3": 35,
+   "t3e4": 97
+  },
+  "omniguide": {
+   "t0e0": 41,
+   "t0e1": 53,
+   "t0e2": 50,
+   "t0e3": 37,
+   "t0e4": 44,
+   "t1e0": 38,
+   "t1e1": null,
+   "t1e2": 35,
+   "t1e3": 89,
+   "t1e4": null,
+   "t2e0": 83,
+   "t2e1": 42,
+   "t2e2": 89,
+   "t2e3": 97,
+   "t2e4": 45,
+   "t3e0": 38,
+   "t3e1": 66,
+   "t3e2": 38,
+   "t3e3": 36,
+   "t3e4": 67
+  },
+  "lan_o3dp_guidance_adapted": {
+   "t0e0": null,
+   "t0e1": 55,
+   "t0e2": null,
+   "t0e3": null,
+   "t0e4": 44,
+   "t1e0": 41,
+   "t1e1": null,
+   "t1e2": 39,
+   "t1e3": 131,
+   "t1e4": 73,
+   "t2e0": 36,
+   "t2e1": 43,
+   "t2e2": 39,
+   "t2e3": null,
+   "t2e4": 40,
+   "t3e0": null,
+   "t3e1": null,
+   "t3e2": 70,
+   "t3e3": 50,
+   "t3e4": null
+  }
+ },
+ "paired_vs_none": {
+  "aegis": {
+   "safe_success": {
+    "arm": 3,
+    "ref": 2,
+    "arm_only": 3,
+    "ref_only": 2,
+    "arm_only_eps": [
+     [
+      0,
+      1
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "diff_rate": 0.05,
+    "boot95_diff_rate": [
+     -0.15,
+     0.25
+    ],
+    "exact_sign_p_two_sided": 1.0
+   },
+   "success": {
+    "arm": 4,
+    "ref": 11,
+    "arm_only": 1,
+    "ref_only": 8,
+    "arm_only_eps": [
+     [
+      0,
+      1
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      0
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "diff_rate": -0.35,
+    "boot95_diff_rate": [
+     -0.6,
+     -0.1
+    ],
+    "exact_sign_p_two_sided": 0.0390625
+   },
+   "collided": {
+    "arm": 12,
+    "ref": 18,
+    "arm_only": 2,
+    "ref_only": 8,
+    "arm_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ]
+    ],
+    "diff_rate": -0.3,
+    "boot95_diff_rate": [
+     -0.55,
+     0.0
+    ],
+    "exact_sign_p_two_sided": 0.109375
+   }
+  },
+  "knows": {
+   "safe_success": {
+    "arm": 1,
+    "ref": 2,
+    "arm_only": 1,
+    "ref_only": 2,
+    "arm_only_eps": [
+     [
+      0,
+      0
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "diff_rate": -0.05,
+    "boot95_diff_rate": [
+     -0.2,
+     0.1
+    ],
+    "exact_sign_p_two_sided": 1.0
+   },
+   "success": {
+    "arm": 4,
+    "ref": 11,
+    "arm_only": 3,
+    "ref_only": 10,
+    "arm_only_eps": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      3
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      0
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "diff_rate": -0.35,
+    "boot95_diff_rate": [
+     -0.65,
+     0.0
+    ],
+    "exact_sign_p_two_sided": 0.09228515625
+   },
+   "collided": {
+    "arm": 14,
+    "ref": 18,
+    "arm_only": 1,
+    "ref_only": 5,
+    "arm_only_eps": [
+     [
+      1,
+      4
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      0,
+      0
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      2
+     ]
+    ],
+    "diff_rate": -0.2,
+    "boot95_diff_rate": [
+     -0.45,
+     0.0
+    ],
+    "exact_sign_p_two_sided": 0.21875
+   }
+  },
+  "multilink_cbf": {
+   "safe_success": {
+    "arm": 4,
+    "ref": 2,
+    "arm_only": 4,
+    "ref_only": 2,
+    "arm_only_eps": [
+     [
+      0,
+      0
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "diff_rate": 0.1,
+    "boot95_diff_rate": [
+     -0.15,
+     0.35
+    ],
+    "exact_sign_p_two_sided": 0.6875
+   },
+   "success": {
+    "arm": 6,
+    "ref": 11,
+    "arm_only": 1,
+    "ref_only": 6,
+    "arm_only_eps": [
+     [
+      0,
+      0
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      3,
+      0
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "diff_rate": -0.25,
+    "boot95_diff_rate": [
+     -0.5,
+     0.0
+    ],
+    "exact_sign_p_two_sided": 0.125
+   },
+   "collided": {
+    "arm": 11,
+    "ref": 18,
+    "arm_only": 2,
+    "ref_only": 9,
+    "arm_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ]
+    ],
+    "diff_rate": -0.35,
+    "boot95_diff_rate": [
+     -0.65,
+     -0.05
+    ],
+    "exact_sign_p_two_sided": 0.0654296875
+   }
+  },
+  "constrained_flow_matching": {
+   "safe_success": {
+    "arm": 0,
+    "ref": 2,
+    "arm_only": 0,
+    "ref_only": 2,
+    "arm_only_eps": [],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "diff_rate": -0.1,
+    "boot95_diff_rate": [
+     -0.25,
+     0.0
+    ],
+    "exact_sign_p_two_sided": 0.5
+   },
+   "success": {
+    "arm": 0,
+    "ref": 11,
+    "arm_only": 0,
+    "ref_only": 11,
+    "arm_only_eps": [],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      0
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "diff_rate": -0.55,
+    "boot95_diff_rate": [
+     -0.75,
+     -0.35
+    ],
+    "exact_sign_p_two_sided": 0.0009765625
+   },
+   "collided": {
+    "arm": 5,
+    "ref": 18,
+    "arm_only": 1,
+    "ref_only": 14,
+    "arm_only_eps": [
+     [
+      1,
+      1
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      1
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "diff_rate": -0.65,
+    "boot95_diff_rate": [
+     -0.9,
+     -0.4
+    ],
+    "exact_sign_p_two_sided": 0.0009765625
+   }
+  },
+  "nudge": {
+   "safe_success": {
+    "arm": 0,
+    "ref": 2,
+    "arm_only": 0,
+    "ref_only": 2,
+    "arm_only_eps": [],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "diff_rate": -0.1,
+    "boot95_diff_rate": [
+     -0.25,
+     0.0
+    ],
+    "exact_sign_p_two_sided": 0.5
+   },
+   "success": {
+    "arm": 0,
+    "ref": 11,
+    "arm_only": 0,
+    "ref_only": 11,
+    "arm_only_eps": [],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      0
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "diff_rate": -0.55,
+    "boot95_diff_rate": [
+     -0.75,
+     -0.35
+    ],
+    "exact_sign_p_two_sided": 0.0009765625
+   },
+   "collided": {
+    "arm": 12,
+    "ref": 18,
+    "arm_only": 1,
+    "ref_only": 7,
+    "arm_only_eps": [
+     [
+      1,
+      1
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      1
+     ],
+     [
+      3,
+      2
+     ]
+    ],
+    "diff_rate": -0.3,
+    "boot95_diff_rate": [
+     -0.55,
+     -0.05
+    ],
+    "exact_sign_p_two_sided": 0.0703125
+   }
+  },
+  "omniguide": {
+   "safe_success": {
+    "arm": 2,
+    "ref": 2,
+    "arm_only": 0,
+    "ref_only": 0,
+    "arm_only_eps": [],
+    "ref_only_eps": [],
+    "diff_rate": 0.0,
+    "boot95_diff_rate": [
+     0.0,
+     0.0
+    ],
+    "exact_sign_p_two_sided": null
+   },
+   "success": {
+    "arm": 11,
+    "ref": 11,
+    "arm_only": 4,
+    "ref_only": 4,
+    "arm_only_eps": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      3,
+      1
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      2
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      3
+     ]
+    ],
+    "diff_rate": 0.0,
+    "boot95_diff_rate": [
+     -0.3,
+     0.3
+    ],
+    "exact_sign_p_two_sided": 1.0
+   },
+   "collided": {
+    "arm": 18,
+    "ref": 18,
+    "arm_only": 0,
+    "ref_only": 0,
+    "arm_only_eps": [],
+    "ref_only_eps": [],
+    "diff_rate": 0.0,
+    "boot95_diff_rate": [
+     0.0,
+     0.0
+    ],
+    "exact_sign_p_two_sided": null
+   }
+  },
+  "lan_o3dp_guidance_adapted": {
+   "safe_success": {
+    "arm": 0,
+    "ref": 2,
+    "arm_only": 0,
+    "ref_only": 2,
+    "arm_only_eps": [],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ]
+    ],
+    "diff_rate": -0.1,
+    "boot95_diff_rate": [
+     -0.25,
+     0.0
+    ],
+    "exact_sign_p_two_sided": 0.5
+   },
+   "success": {
+    "arm": 0,
+    "ref": 11,
+    "arm_only": 0,
+    "ref_only": 11,
+    "arm_only_eps": [],
+    "ref_only_eps": [
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      0
+     ],
+     [
+      3,
+      2
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "diff_rate": -0.55,
+    "boot95_diff_rate": [
+     -0.75,
+     -0.35
+    ],
+    "exact_sign_p_two_sided": 0.0009765625
+   },
+   "collided": {
+    "arm": 12,
+    "ref": 18,
+    "arm_only": 1,
+    "ref_only": 7,
+    "arm_only_eps": [
+     [
+      1,
+      4
+     ]
+    ],
+    "ref_only_eps": [
+     [
+      0,
+      0
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      0
+     ],
+     [
+      3,
+      1
+     ],
+     [
+      3,
+      4
+     ]
+    ],
+    "diff_rate": -0.3,
+    "boot95_diff_rate": [
+     -0.55,
+     -0.05
+    ],
+    "exact_sign_p_two_sided": 0.0703125
+   }
+  }
+ },
+ "n_boot": 10000
+}

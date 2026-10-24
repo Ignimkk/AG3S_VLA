@@ -14,7 +14,7 @@
 >
 > **수치 규칙.** 이 파일의 모든 수치는 `AG3S/ag3s/docs/handoff/<STEP>.verify.json` 을 출처로 한다. BL-1 의 수치는
 > [`handoff/PAPER-BASELINES-2.verify.json`](handoff/PAPER-BASELINES-2.verify.json) 의 `numbers`(표 · 지표)와
-> `runs` · `issues` · `not_measured`(실행 시각 · 실패 · 미측정)에서만 가져왔다. BL-3 의 수치는 [`handoff/BASELINE-EVAL-V1.verify.json`](handoff/BASELINE-EVAL-V1.verify.json), BL-4 의 수치는 [`handoff/BASELINE-EVAL-V2.verify.json`](handoff/BASELINE-EVAL-V2.verify.json) 의 `numbers` · `issues` · `limitations` · `not_measured` 에서 가져왔고, 두 단계의 구현 경위(`BASELINE-EVAL-F.impl.md` · `-G.impl.md`)는 구성 · 방법 사실만 옮겼다(G 의 속도 · 동일성 수치는 옮기지 않았다). BL-5 의 수치는 [`handoff/ATS-CLOUD-DIAG-V4.verify.json`](handoff/ATS-CLOUD-DIAG-V4.verify.json) 의 `numbers` · `runs` · `issues` · `not_measured` 에서 가져왔다. 원인 진단의 근거(`파일:줄` · 경로)는 `ATS-CLOUD-DIAG-H.impl.md`, 구현은 `ATS-CLOUD-DIAG-J.impl.md` 에서 옮겼고 H 의 예비 수치는 옮기지 않았다. BL-6 의 수치는 [`handoff/CLOSED-LOOP-METHODS-V3.verify.json`](handoff/CLOSED-LOOP-METHODS-V3.verify.json) 의 `numbers` · `runs` · `code_state` · `issues` · `not_measured` 에서 가져왔다. 구현 구조 · 설계 결정 · privileged 여부 · 원 방법과의 차이는 `CLOSED-LOOP-METHODS.task.md` · `-I.impl.md` · `Baseline/paper_baselines/closed_loop/README.md` 에서 옮겼고, `-I.impl.md` 의 CPU smoke 수치는 옮기지 않았다(bit 재현 사실만). 출처가 없는 숫자는 쓰지 않았고, 필요하면
+> `runs` · `issues` · `not_measured`(실행 시각 · 실패 · 미측정)에서만 가져왔다. BL-3 의 수치는 [`handoff/BASELINE-EVAL-V1.verify.json`](handoff/BASELINE-EVAL-V1.verify.json), BL-4 의 수치는 [`handoff/BASELINE-EVAL-V2.verify.json`](handoff/BASELINE-EVAL-V2.verify.json) 의 `numbers` · `issues` · `limitations` · `not_measured` 에서 가져왔고, 두 단계의 구현 경위(`BASELINE-EVAL-F.impl.md` · `-G.impl.md`)는 구성 · 방법 사실만 옮겼다(G 의 속도 · 동일성 수치는 옮기지 않았다). BL-5 의 수치는 [`handoff/ATS-CLOUD-DIAG-V4.verify.json`](handoff/ATS-CLOUD-DIAG-V4.verify.json) 의 `numbers` · `runs` · `issues` · `not_measured` 에서 가져왔다. 원인 진단의 근거(`파일:줄` · 경로)는 `ATS-CLOUD-DIAG-H.impl.md`, 구현은 `ATS-CLOUD-DIAG-J.impl.md` 에서 옮겼고 H 의 예비 수치는 옮기지 않았다. BL-6 의 수치는 [`handoff/CLOSED-LOOP-METHODS-V3.verify.json`](handoff/CLOSED-LOOP-METHODS-V3.verify.json) 의 `numbers` · `runs` · `code_state` · `issues` · `not_measured` 에서 가져왔다. 구현 구조 · 설계 결정 · privileged 여부 · 원 방법과의 차이는 `CLOSED-LOOP-METHODS.task.md` · `-I.impl.md` · `Baseline/paper_baselines/closed_loop/README.md` 에서 옮겼고, `-I.impl.md` 의 CPU smoke 수치는 옮기지 않았다(bit 재현 사실만). BL-7 의 수치는 [`handoff/CLOSED-LOOP-FIX-V5.verify.json`](handoff/CLOSED-LOOP-FIX-V5.verify.json) 의 `numbers` · `runs` · `code_state` · `issues` · `not_measured` 에서만 가져왔다. 수정의 원인 · 원 방법의 정의 · 수정 내용은 [`handoff/CLOSED-LOOP-FIX-K.impl.md`](handoff/CLOSED-LOOP-FIX-K.impl.md) 에서 사실만 옮겼고 그 안의 CPU replay 수치(전후 표)는 옮기지 않았다. 출처가 없는 숫자는 쓰지 않았고, 필요하면
 > verifier 에게 측정을 요청한다. **implementer 의 smoke 수치(`*.impl.md`)는 이 파일에 옮기지 않는다.** smoke 는 배선
 > 확인이지 측정이 아니기 때문이다. BL-0 · BL-2 는 구성과 test 통과 사실(pass / skip 개수)만 `impl.md` 에서 옮겼다.
 > 식별자(경로 · SHA · commit · sha256)는 verify.json 또는 impl.md 에 있는 것만 옮긴다.
@@ -34,7 +34,8 @@
 | **BL-3** BASELINE-EVAL V1 | ATS 와의 공정 비교(cloud labeling) · grounding 고유 지표 · methods offline 지표 · module 별 figure | ~~**진행 중** (implementer F → verifier V1, CPU)~~ → **측정 완료 (2026-10-24 KST, CPU), 사용자 판정 대기.** 지표 registry · ATS 공정 비교(cloud labeling) · grounding 고유 지표 · methods offline · benchmark 대표 장면 | [BL-3](#bl-3--baseline-eval-v1-cloud-labeling-공정-비교-고유-지표-methods-offline-2026-10-24) |
 | **BL-4** BASELINE-EVAL V2 | track memory 수정 · 평가 CPU 경로 속도 개선 → SL3 track + SL4b 40 episode 측정 | ~~**진행 중** (implementer G → verifier V2, GPU lock)~~ → **측정 완료 (2026-10-24 KST, GPU), 사용자 판정 대기.** track memory 평탄 · SL3 track · SL4b 40 episode 전체 arm · sm_90 확인 | [BL-4](#bl-4--baseline-eval-v2-track-memory-sl3-track-sl4b-40-episode-2026-10-24) |
 | **BL-5** ATS-CLOUD-DIAG | V11AB `cloud_target` 이 비는 원인 진단 · cloud labeling 의 ATS 표현 옵션(`--ats-repr` · `--ats-tol`) · 표현별 공정 비교 재계산 · stale geometry 와 GT 의 거리 | **측정 완료 (2026-10-24 KST, CPU), 사용자 판정 대기.** 코드(J)는 commit 하지 않은 working tree 판 | [BL-5](#bl-5--ats-cloud-diag-v11ab-cloud_target-이-비는-원인-진단과-ats-표현별-공정-비교-재계산-2026-10-24) |
-| ~~BL-5 (이름 미정)~~ → **BL-6** CLOSED-LOOP-METHODS | methods closed-loop 연결 → benchmark 고유 지표(TSR · CAR · ETS 등) | ~~미착수~~ ~~**진행 중** (implementer I → verifier V3). 이 기록은 verify.json 이 나온 뒤 쓴다~~ → **구현 · GPU smoke 완료 (2026-10-24 KST, commit `16d0eea1`), 사용자 판정 대기.** 8 arm 1 episode smoke 까지만 했다. **pilot(20 episode × 8 arm)은 아직 돌리지 않았다** | [BL-6](#bl-6--closed-loop-methods-methods-를-safelibero-closed-loop-에-연결--gpu-smoke-2026-10-24). 원본 [`handoff/CLOSED-LOOP-METHODS.task.md`](handoff/CLOSED-LOOP-METHODS.task.md). `benchmark/runners` 는 고치지 않고 `Baseline/paper_baselines/closed_loop/` 의 새 server · launcher 로 붙였다 |
+| ~~BL-5 (이름 미정)~~ → **BL-6** CLOSED-LOOP-METHODS | methods closed-loop 연결 → benchmark 고유 지표(TSR · CAR · ETS 등) | ~~미착수~~ ~~**진행 중** (implementer I → verifier V3). 이 기록은 verify.json 이 나온 뒤 쓴다~~ → **구현 · GPU smoke 완료 (2026-10-24 KST, commit `16d0eea1`), 사용자 판정 대기.** 8 arm 1 episode smoke 까지만 했다. ~~**pilot(20 episode × 8 arm)은 아직 돌리지 않았다**~~ → pilot 은 pilot 전 수정(BL-7) 뒤에 BL-7 에서 돌렸다. 이 STEP 의 issue 1 · 3 · 4 · 5 는 BL-7 이 다룬다 | [BL-6](#bl-6--closed-loop-methods-methods-를-safelibero-closed-loop-에-연결--gpu-smoke-2026-10-24). 원본 [`handoff/CLOSED-LOOP-METHODS.task.md`](handoff/CLOSED-LOOP-METHODS.task.md). `benchmark/runners` 는 고치지 않고 `Baseline/paper_baselines/closed_loop/` 의 새 server · launcher 로 붙였다 |
+| **BL-7** CLOSED-LOOP-FIX | pilot 전 3 arm(lan_o3dp · knows · omniguide) 수정 → 수정 3 arm GPU smoke 재확인 → SafeLIBERO spatial L I dev 20 episode × 8 arm pilot | **구현 · smoke · pilot 측정 완료 (2026-10-24 KST, commit `b95c1c87`), 사용자 판정 대기.** 8 job 모두 rc 0 · 160 episode · fallback 0. 20 episode pilot 이라 p 값 · CI 는 있는 그대로만 적고 해석하지 않는다 | [BL-7](#bl-7--closed-loop-fix-pilot-전-3-arm-수정--smoke-재확인--pilot-20-episode--8-arm-2026-10-24). 원본 [`handoff/CLOSED-LOOP-FIX.task.md`](handoff/CLOSED-LOOP-FIX.task.md) |
 
 ### 사용자 · lead 결정 기록
 
@@ -50,6 +51,9 @@
 | 2026-10-24 | 사용자 지시 "네 진행하세요": (a) methods closed-loop 연결(BL-6)과 (b) ATS 진단(BL-5)을 진행한다 | `CLOSED-LOOP-METHODS.task.md` · `ATS-CLOUD-DIAG.task.md` |
 | 2026-10-24 | **BL-6 pilot 은 smoke 뒤 멈췄다.** task 의 규칙("시간이 4 h 를 넘을 것으로 보이면 smoke 뒤 lead 에게 추정 시간을 알리고 기다린다")에 따라, verifier 추정이 순차 6.63 h · 2 job 병렬 3.35 h 로 나온 뒤 pilot 을 실행하지 않았다. pilot 실행 여부와 job 구성은 사용자 결정 대기 | `CLOSED-LOOP-METHODS.task.md` · `CLOSED-LOOP-METHODS-V3.verify.json` `not_measured` |
 | 2026-10-24 | **lead 결정(사용자 판정 전)**: 공정 비교의 ATS 주 표현은 **exclusion geometry 를 같은 cloud 에 5 mm 로 대응시킨 것**, `cloud_target` 은 fresh-only 진단 행, exact · 10 mm 는 sensitivity 행. 기본값을 지금과 같게 두는 옵션 추가라 기존 수치는 바뀌지 않는다 | `ATS-CLOUD-DIAG.task.md` "후속" 절 |
+| 2026-10-24 | **사용자 판정 "먼저 수정 후 pilot"**: BL-6 의 3 문제(lan_o3dp action 크기 · knows 의 h<0 와 qp_fail 0 · omniguide skip 과 재compile)를 CPU 에서 먼저 고친 뒤 pilot(SafeLIBERO spatial L I dev 20 episode × 8 arm)을 돌린다. BL-6 의 "pilot 실행 여부 · 구성은 사용자 결정 대기" 에 대한 답이다 | `CLOSED-LOOP-FIX.task.md` |
+| 2026-10-24 | **lead go (pilot 시작 전)**: 수정 3 arm 의 GPU smoke 에서 knows · omniguide 의 \|a\| 가 1 을 넘는 것(knows served 최대 1.434, omniguide 1.0084)은 **원 방법의 성질로 보고 known issue 로 기록한 뒤 pilot 을 시작한다.** robosuite OSC 가 입력을 [-1, 1] 로 자르기 때문이다(`base_controller.py:120`, `osc_pose.json:3`). | `CLOSED-LOOP-FIX-V5.verify.json` `issues` · `numbers.robosuite_osc_clip` |
+| 2026-10-24 | `Baseline/paper_baselines/methods/guidance_common/core.py` 는 `.gitignore` 의 `core.*`(core dump pattern)에 걸려 한 번도 git 에 올라간 적이 없었다. commit `b95c1c87`(19:05 KST)이 `.gitignore` 에 2 줄을 더하고 이 파일을 추가했다 | `CLOSED-LOOP-FIX-K.impl.md` "git 주의", `git show --stat b95c1c87` |
 
 ---
 
@@ -146,6 +150,23 @@
 | **guided call · skip call · jit compile** | guidance arm 의 call 기록. guided = `guidance_fn` 이 실제로 chunk 를 바꾼 call, skip = method 규칙으로 identity 가 된 call(OmniGuide 의 freeze zone 등), jit compile = 한 episode 안에서 guidance 구조 변화로 JAX 가 새로 compile 한 횟수 |
 | **`ms.serve` · client round-trip** | server 가 응답을 만든 시간(`diagnostics` 제외)과 client 가 request 를 보내고 응답을 받은 시간. 둘의 차이는 응답 전후의 전송 · 진단 기록 시간이다 |
 | **ref run (`--ref-run`)** | 같은 episode 를 paired 로 비교하려고 지정하는 기존 run. 여기서는 SL5c LI VLA-only(`20261014T180105_61f44671805b_sl5c-safelibero-spatial-dev-LI-vla_only`) |
+
+### closed-loop fix · pilot (BL-7)
+
+| 용어 | 뜻 |
+|---|---|
+| **pilot (BL-7)** | SafeLIBERO spatial Level I dev 의 20 episode(task 0–3 × episode 0–4, seed 7, 280 policy step + wait 20 step) × 8 arm. SL5c 의 VLA-only · V11AB 기록과 같은 episode 집합이다. 20 episode 라 통계 검정력이 작다(아래 "paired") |
+| **served · executed (chunk)** | served = method 가 server 에서 내보낸 action chunk 전체(행 10 개). executed = 그중 client 가 실제로 env 에 넣은 행(chunk 의 0–4 행, wait 제외). 이 기록의 `executed max \|xyz\|` 는 robosuite OSC 가 자르기 전의 값이다 |
+| **OSC clip** | robosuite 의 operational space controller 가 입력 action 을 `[-1, 1]`(`input_min` / `input_max`)로 자르는 것(`base_controller.py:120`, `osc_pose.json:3`). \|a\| 가 1 을 넘는 행도 실제 제어에서는 1 로 실행된다 |
+| **`clip_sample` (lan_o3dp)** | Lan-o3dp 의 DDIM scheduler 가 예측 `pred_original_sample`(x0)을 `[-1, 1]` 로 자르는 옵션(`scheduling_ddim.py:296-297`). 원 repo 의 모든 workspace config 가 `True` 다. pi0.5 sampler 에는 이것이 없어서 BL-6 의 guidance push 가 쌓였다. BL-7 은 guidance 가 더한 부분만 `pi05_libero` quantile stats 로 normalized 한 action box 안에 남도록 제한한다 |
+| **relaxed normal (KNOWS Eq. 12)** | KNOWS 의 CBF 행에서 separating normal 을 ε box(ε = 0.05) 안에서 기울여 `δc` 를 건드리지 않고 행을 만족시키는 자유도. `h < 0` 인 행도 normal 을 기울이는 것만으로 만족될 수 있어 filter 가 사실상 비활성이 된다. KNOWS `docs/11 §4` 에 이미 기록된 논문의 성질이다 |
+| **`h(n_stored)` · `h*` (KNOWS)** | `h(n_stored)`(= `min_h` · `h_min`) = QP 가 쓰는 행 값, 저장된 normal 에서의 Eq. 6 `h`. `h*` = `maxₙ h(n)` = 진짜 분리 거리. `h(n_stored) ≤ h*`. 그래서 `h(n_stored) < 0` 은 겹침이 아니라 normal 이 최적값을 따라가지 못한 것일 수 있다. `h_star_neg_steps` = `h* < 0`(실제로 겹친) step 수 |
+| **`cbf_violated_steps` · `relaxation_covers_need_steps`** | `cbf_violated_steps` = docs/16 §1 조건(모든 obstacle 에서 `h*_next ≥ (1−γ)h*`)을 어긴 step 수. `relaxation_covers_need_steps` = `relax_m ≥ need_m` 인 step 수(`relax_m = ε‖∇ₙh‖₁`, `need_m = γ_h·\|h\|`), 즉 normal 기울이기만으로 충족되는 행 |
+| **track association (KNOWS adapter)** | 첫 call 의 ellipsoid 를 물체별 track 으로 유지하는 방식. BL-7 은 Hungarian 으로 track 의 마지막 centroid 와 현재 cloud centroid 를 잇는다(gate 0.10 m). 안 맞은 track 은 마지막 centroid 를 유지(freeze)한다. detector 가 call 마다 이름(`object#j`)을 다시 매기므로 이름으로 잇던 BL-6 판과 다르다 |
+| **freeze zone · target cache (OmniGuide)** | freeze zone = EE 가 target 점에 가까이 가면(들어갈 때 점을 저장하고) guidance 를 끄는 구간. 나갈 때는 저장한 점과의 거리로 판정한다. target cache = target 점을 episode 에 한 번 검출해 저장하는 것(`target_cache="episode"`). BL-6 판은 매 call 검출한 점을 썼다(`"call"`) |
+| **`ms.total` · `ms.method` · `ms.diagnostics` · `ms.serve`** | `ms.total` = `MethodServer.infer` 의 wall time(client 가 기다리는 시간, 전송 제외). `ms.diagnostics` = chunk 확정 뒤의 기록용 계산. `ms.method` = `total − diagnostics`. **`ms.serve` 는 BL-7 에서 `total` 과 같게 바뀌었다**(BL-6 V3 기록에서는 `total − diagnostics`). 비교는 `ms.total` · `ms.method` 로 한다 |
+| **paired (arm vs none)** | 같은 (task, episode) 20 쌍에서 arm 과 `none` 의 결과를 맞춘다. `+a / −b` = arm 에만 사건이 있는 episode 수 a / `none` 에만 있는 episode 수 b(불일치 쌍). **exact sign test** = 불일치 쌍만으로 한 양측 이항 검정(McNemar exact, `p`). 불일치가 0 이면 `p` 가 정의되지 않아 `-` 로 쓴다. **bootstrap CI** = episode 평균 차이(arm − none)의 percentile 95 % 구간, 10,000 회 resample, `numpy default_rng(0)` |
+| **working set (pod)** | cgroup `memory.current − inactive_file`. 공용 pod 규칙은 working set + 추정 ≤ 64 GiB(= 65,536 MiB) 다 |
 
 ---
 
@@ -1946,11 +1967,11 @@ pilot = SafeLIBERO spatial Level I dev 20 episode(task 0–3 × ep 0–4, SL5c �
 
 | # | 내용 | 영향 |
 |---|---|---|
-| 1 | **`lan_o3dp_guidance_adapted` 의 served chunk 가 매우 크다.** served chunk 의 xyz \|a\| 최대 **27.28**(nominal 최대 0.96), 실행된 280 행 중 **183 행**에 \|xyz\| > 1 인 성분이 있고 `da_xyz_l2_max` 는 27.63(‖Δa_xyz‖ 평균 2.755). raw: `method_calls/ep000_seed700000.npz`(run `20261024T163341_16d0eea18e44_clm-v3smoke-LI-lan_o3dp_guidance_adapted`). 개입률은 행 · call 모두 1.0 이고 fallback 은 0 이다. replay(결과 B)에서도 served hand min SDF 가 call 3–5 에서 음수다 | 이 값이 구현 · 설정 · 방법의 어느 쪽에서 오는지 이 단계에서 판정하지 못했다. 이 arm 의 pilot 수치는 이 확인 전에 해석하지 않는다 |
+| 1 | **`lan_o3dp_guidance_adapted` 의 served chunk 가 매우 크다.** served chunk 의 xyz \|a\| 최대 **27.28**(nominal 최대 0.96), 실행된 280 행 중 **183 행**에 \|xyz\| > 1 인 성분이 있고 `da_xyz_l2_max` 는 27.63(‖Δa_xyz‖ 평균 2.755). raw: `method_calls/ep000_seed700000.npz`(run `20261024T163341_16d0eea18e44_clm-v3smoke-LI-lan_o3dp_guidance_adapted`). 개입률은 행 · call 모두 1.0 이고 fallback 은 0 이다. replay(결과 B)에서도 served hand min SDF 가 call 3–5 에서 음수다 | ~~이 값이 구현 · 설정 · 방법의 어느 쪽에서 오는지 이 단계에서 판정하지 못했다. 이 arm 의 pilot 수치는 이 확인 전에 해석하지 않는다~~ → BL-7 이 원인(push 누적, sampler 에 `clip_sample` 없음)을 고쳤다 |
 | 2 | `lan_o3dp_guidance_adapted`: 공식 1 mm 규칙으로 t = 72 충돌(최대 변위 0.0054 m)인데 multi-link 11 mm 규칙으로는 충돌률 0 | 두 충돌 기준이 갈리는 경우다. 표에 두 값을 모두 적었다 |
-| 3 | **`knows` 의 `h_min` −0.4469, `h_neg_steps` 419 인데 `qp_fail` 0, fallback 0.** replay calls 0–5 에서도 6 call 모두 `h_min` < 0 | 같은 episode 에서 공식 CAR 1 · KNOWS CR 0 이다. `h` 가 음수인 step 에서 QP 가 실패로 기록되지 않았다. 이 단계에서 원인을 확인하지 않았다 |
-| 4 | **`omniguide` 는 56 call 중 38 call 에서 guidance 를 건너뛰었다**(`identity_reason` = `method skip: freeze zone / nothing to avoid`, guided 18). 한 episode 안에서 **jit 재compile 10 회**(`lan_o3dp` 7 회, `nudge` · `constrained_flow_matching` 1 회) | 개입률이 0.321(행 · call 동일)이다. impl.md 는 `inline` 방식에서 OmniGuide 의 점 수가 call 마다 달라 재compile 이 잦을 수 있다고 예상했다. 이 smoke 는 `callback` 방식이었고 10 회였다. 원인은 확인하지 않았다. pilot 시간 추정에는 smoke 의 실측이 들어 있다 |
-| 5 | **guidance arm 은 client round-trip p50 이 server `ms.serve` p50 보다 0.3–1.4 s 길다**: `nudge` 1,130 대 820, `omniguide` 833 대 531, `lan_o3dp` 2,087 대 647, `constrained_flow_matching` 2,260 대 1,978 ms. filter arm 과 `none` 은 차이가 약 5 ms 다(예: `none` 90 대 85, `knows` 301 대 296) | client 의 시간에는 `ms.serve` 에서 빠진 server 의 진단(`diagnostics`) 시간이 들어 있다. 응답 지연을 논문 latency(Tab. 3)에 쓸 때는 어느 쪽을 쓸지 정해야 한다 |
+| 3 | **`knows` 의 `h_min` −0.4469, `h_neg_steps` 419 인데 `qp_fail` 0, fallback 0.** replay calls 0–5 에서도 6 call 모두 `h_min` < 0 | ~~같은 episode 에서 공식 CAR 1 · KNOWS CR 0 이다. `h` 가 음수인 step 에서 QP 가 실패로 기록되지 않았다. 이 단계에서 원인을 확인하지 않았다~~ → BL-7 이 확인했다(relaxed normal 은 논문 성질, track 순간이동은 adapter 결함) |
+| 4 | **`omniguide` 는 56 call 중 38 call 에서 guidance 를 건너뛰었다**(`identity_reason` = `method skip: freeze zone / nothing to avoid`, guided 18). 한 episode 안에서 **jit 재compile 10 회**(`lan_o3dp` 7 회, `nudge` · `constrained_flow_matching` 1 회) | 개입률이 0.321(행 · call 동일)이다. impl.md 는 `inline` 방식에서 OmniGuide 의 점 수가 call 마다 달라 재compile 이 잦을 수 있다고 예상했다. 이 smoke 는 `callback` 방식이었고 10 회였다. ~~원인은 확인하지 않았다.~~ → BL-7 이 원인을 확인하고 고쳤다. pilot 시간 추정에는 smoke 의 실측이 들어 있다 |
+| 5 | **guidance arm 은 client round-trip p50 이 server `ms.serve` p50 보다 0.3–1.4 s 길다**: `nudge` 1,130 대 820, `omniguide` 833 대 531, `lan_o3dp` 2,087 대 647, `constrained_flow_matching` 2,260 대 1,978 ms. filter arm 과 `none` 은 차이가 약 5 ms 다(예: `none` 90 대 85, `knows` 301 대 296) | client 의 시간에는 `ms.serve` 에서 빠진 server 의 진단(`diagnostics`) 시간이 들어 있다. 응답 지연을 논문 latency(Tab. 3)에 쓸 때는 어느 쪽을 쓸지 정해야 한다 → BL-7 이 `ms.total` · `ms.method` · `ms.diagnostics` 로 나눠 기록한다 |
 | 6 | **첫 call 지연이 크다**: client round-trip 이 guidance 4 arm 26.7–28.4 s, filter 3 arm 4.2–4.6 s, `none` 2.7 s | 결과 D 에 첫 call 을 별도 열로 적었다. episode 시간 · pilot 추정에는 포함된다 |
 | 7 | **smoke 도중 HEAD 가 바뀌었다.** V3 시작 시 HEAD `3c677553`, 끝 시 `16d0eea1`. commit `16d0eea1` 은 2026-10-24 16:01:27 KST(replay 단계 중)에 다른 session 이 올렸다. `git diff 3c677553..16d0eea1` 은 `benchmark/` · `AG3S/adapters` · `AG3S/trajopt` · `third_party/` 의 파일을 건드리지 않고 `Baseline/paper_baselines/closed_loop/`(그 전에는 untracked)와 docs 를 더한다. closed-loop smoke 의 run 이름이 `16d0eea18e44` 이다. 각 GPU 단계 전에 `git status --short benchmark adapters openpi` 는 비어 있었다(3 회) | 시각으로 보면 identity(15:59–16:00)와 replay 의 시작은 commit 전, closed-loop smoke 는 commit 뒤다. commit 전후 `closed_loop/` 내용이 같은지는 verify.json 에 명시가 없다. 끝 시점 dirty 파일 4 개(`.claude/agents/ag3s-scribe.md` · `Baseline/paper_baselines/eval/cloud_labeling.py` · `Baseline/paper_baselines/tests/test_cloud_labeling.py` · `CLAUDE.md`)는 `closed_loop/` 밖이다 |
 | 8 | V3 가 GPU 종료 시 알린 메시지의 "GPU peak 약 11–12 GB" 는 실측(whole-GPU memory.used 최대 11,186 MiB)과 표현이 다르다 | 이 기록은 실측 11,186 MiB 를 쓴다 |
@@ -1959,8 +1980,8 @@ pilot = SafeLIBERO spatial Level I dev 20 episode(task 0–3 × ep 0–4, SL5c �
 
 | 항목 | 상태 |
 |---|---|
-| **pilot (20 episode × 8 arm)** | 돌리지 않았다(지시 · 추정 > 4 h). 사용자 결정 |
-| 2 job 병렬의 느려짐 | 추정이 "느려짐 없음" 가정이다 |
+| ~~**pilot (20 episode × 8 arm)**~~ | ~~돌리지 않았다(지시 · 추정 > 4 h). 사용자 결정~~ → BL-7 에서 돌렸다 |
+| 2 job 병렬의 느려짐 | 추정이 "느려짐 없음" 가정이다 → BL-7 pilot 이 2 job 병렬로 돌았다. 1 job 대비 outcome 동일성은 여전히 `none` 만 확인했다 |
 | KNOWS · NUDGE CR 을 contact step 비율로, OmniGuide safety rate | `metrics.py` 가 `not_available` 로 표시한다(step 별 contact log 필요) |
 | `--guidance-exec inline` 의 GPU 실행 | `callback` 만 돌렸다 |
 | server 대 sidecar 의 process 별 GPU memory | whole-GPU `memory.used` 와 app 합계만 1 s 로 sampling 했다 |
@@ -1969,13 +1990,435 @@ pilot = SafeLIBERO spatial Level I dev 20 episode(task 0–3 × ep 0–4, SL5c �
 
 ### 열린 항목
 
-1. **pilot 실행 여부와 구성** — 순차 6.63 h / 2 job 3.35 h(가정 의존). 사용자 결정.
-2. `lan_o3dp_guidance_adapted` 의 served chunk 크기(|a| 최대 27.28) 점검을 pilot 전에 할지.
-3. `knows` 의 `h_min` < 0 · `h_neg_steps` 419 와 `qp_fail` 0 의 관계 점검.
-4. `omniguide` 의 skip 38 call · jit 재compile 10 회 — pilot 시간과 `--guidance-exec inline` 선택에 영향.
-5. 논문 latency 에 `ms.serve` 와 client round-trip 중 무엇을 쓸지(issue 5).
+1. ~~**pilot 실행 여부와 구성** — 순차 6.63 h / 2 job 3.35 h(가정 의존). 사용자 결정.~~ → 사용자 판정 "먼저 수정 후 pilot" 으로 BL-7 에서 2 job 병렬로 돌렸다.
+2. ~~`lan_o3dp_guidance_adapted` 의 served chunk 크기(|a| 최대 27.28) 점검을 pilot 전에 할지.~~ → BL-7 에서 고쳤다.
+3. ~~`knows` 의 `h_min` < 0 · `h_neg_steps` 419 와 `qp_fail` 0 의 관계 점검.~~ → BL-7 에서 확인했다.
+4. ~~`omniguide` 의 skip 38 call · jit 재compile 10 회 — pilot 시간과 `--guidance-exec inline` 선택에 영향.~~ → BL-7 에서 고쳤다(`inline` 은 여전히 돌리지 않았다).
+5. ~~논문 latency 에 `ms.serve` 와 client round-trip 중 무엇을 쓸지(issue 5).~~ → key 를 나눴다(BL-7). 논문에 무엇을 쓸지는 여전히 열려 있다.
 6. privileged 변형, Level II · 다른 suite · LIBERO-Safety 로의 확장.
 7. `closed_loop/` 변경과 BL-5 의 J 변경(`eval/cloud_labeling.py` · test, 여전히 working tree)의 commit 정리 — 사용자 판정 후.
+
+### 판정
+
+**사용자 판정 대기.**
+
+---
+
+## BL-7 — CLOSED-LOOP-FIX: pilot 전 3 arm 수정 · smoke 재확인 · pilot 20 episode × 8 arm (2026-10-24)
+
+> 2026-10-24 KST. 구현 implementer K(commit `b95c1c87`, 2026-10-24 19:05:18 KST), 검증 verifier V5 19:06–22:18 KST(GPU lock 점유는 smoke 19:08:26–19:16:21, pilot 19:19:02–22:18:32, 아래 "실행").
+> 원본: [`handoff/CLOSED-LOOP-FIX.task.md`](handoff/CLOSED-LOOP-FIX.task.md) · [`-K.impl.md`](handoff/CLOSED-LOOP-FIX-K.impl.md)(원인 · 수정) · [`handoff/CLOSED-LOOP-FIX-V5.verify.json`](handoff/CLOSED-LOOP-FIX-V5.verify.json)(측정). raw 출력: `outputs/verify/CLOSED-LOOP-FIX-V5/`(smoke · pilot 시계열, `pilot_numbers.json` · `smoke_numbers.json`)와 `AG3S_VLA-storage/results/benchmark/20261024T19*–21*_b95c1c878fd6_clm-v5{smoke,pilot}-LI-<arm>/`.
+> figure: [`figures/baselines/closed_loop/`](figures/baselines/closed_loop/) 의 `v5smoke-*` · `v5pilot-*` 와 `<arm>/v5pilot-*`(각각 같은 이름의 `.json` sidecar). 이 기록은 링크만 한다.
+> 대상: SafeLIBERO spatial Level I dev, seed 7, 280 policy step(+ wait 20 step), non-privileged arm 8 개. smoke = task 0 episode 0(`t0e0`) 1 episode × 수정 3 arm. pilot = task 0–3 × episode 0–4, 20 episode × 8 arm, 2 job 병렬. 기준 비교 run = SL5c LI VLA-only(`20261014T180105_61f44671805b_sl5c-safelibero-spatial-dev-LI-vla_only`).
+> **판정은 사용자 판정 대기.** **20 episode pilot 이라 p 값 · CI 는 있는 그대로 적고 해석(유의성 · 원인 · 우열)은 쓰지 않는다.** arm 의 값 차이가 method 의 효과인지 우연인지, 구현 차이인지는 이 기록이 갖고 있는 숫자로 판정하지 못한다.
+
+### 이 STEP 이 답하는 질문 (BL-7)
+
+BL-6 에서 pilot 은 사용자 결정 대기였고, smoke 에서 세 arm 의 이상 신호가 있었다(lan_o3dp 의 served \|a\| 최대 27.28, knows 의 `h_min` −0.447 인데 `qp_fail` 0, omniguide 의 skip 38 / 56 call 과 jit 재compile 10 회). 사용자 판정은 "먼저 수정 후 pilot" 이었다.
+
+1. 세 이상 신호의 원인은 무엇이고, 원 방법의 정의에 맞춰 어떻게 고쳤는가?
+2. 수정 뒤 GPU smoke 에서 신호가 사라졌는가? 수정하지 않은 5 arm 의 출력은 그대로인가?
+3. SafeLIBERO spatial L I dev 20 episode 에서 8 arm 의 공식 지표(TSR · CAR · ETS), SL5c safe success, KNOWS SR · CR · SSR, 11 mm 기준, 개입률, latency 는 얼마인가? `none` 은 SL5c VLA-only 녹화와 같은가?
+
+### 경위
+
+| 역할 | 한 일 | 산출물 |
+|---|---|---|
+| 사용자 (2026-10-24) | "먼저 수정 후 pilot" | `CLOSED-LOOP-FIX.task.md` |
+| lead | 3 문제의 수정 범위 · 수용 기준(\|a\| ≤ 1, h 강제 확인, compile 1 회, 다른 arm 불변, `none` · filter identity 의 bit 동일성)을 정했다. 수정 금지 범위: `benchmark/**` · `AG3S/**` · `third_party/**` · SafeLIBERO | `CLOSED-LOOP-FIX.task.md` |
+| implementer K | 원인을 CPU replay 로 재현한 뒤 3 arm 을 고쳤다. GPU 는 쓰지 않았다 | `CLOSED-LOOP-FIX-K.impl.md`, commit `b95c1c87` |
+| lead (smoke 뒤, pilot 전) | smoke 에서 knows · omniguide 의 \|a\| 가 1 을 넘는 것은 원 방법의 성질로 보고 known issue 로 기록한 뒤 pilot 을 시작했다(결정 기록 참조) | — |
+| verifier V5 | 수정 3 arm GPU smoke → 20 episode × 8 arm pilot → 지표 · figure | `CLOSED-LOOP-FIX-V5.verify.json`, `figures/baselines/closed_loop/v5*` |
+
+### 수정 — 원인과 내용 (K, 사실만)
+
+세 문제는 BL-6 의 smoke(`t0e0`)에서 나온 신호였고, K 는 V3 의 입력을 CPU 에서 다시 재생해(같은 신호가 재현됨을 확인한 뒤) 원인을 찾았다. **K 의 CPU replay 수치는 이 기록에 옮기지 않는다.** GPU closed-loop 의 수치는 아래 "결과 A" · "결과 B" 에 있다.
+
+**1. lan_o3dp_guidance_adapted — served action 의 크기**
+
+| | 내용 |
+|---|---|
+| 원인 | `guidance.py` 가 push `da / max(1 − t_next, 0.1)` 를 매 denoising step 의 `x_next` 에 더하는데 상한이 없었다. t = 0.9 step 의 계수는 10 배다. pi0.5 sampler(`pi0.sample_actions`)는 x0 를 자르지 않아서, network 가 되돌리지 않는 만큼 push 가 쌓였다. normalized ↔ raw 변환과 `step_m` 은 맞다고 확인했다 |
+| 원 방법 (`qqianfeng/lan-o3dp@b89c2898`) | `scheduling_ddim.py:296-297` — `clip_sample` 이면 `pred_original_sample` 을 [-1, 1] 로 자른다. `:313-316` — `prev_sample[..., :2] += ngrad · 0.03 / sqrt(ᾱ_prev)`. 모든 workspace config 가 `clip_sample: True`. gradient 는 잘린 x0 에서 계산한다(`diffusion_unet_pcd_policy.py:151-166`). 따라서 원 출력은 [-1, 1] + 마지막 push 한 번 안에 있다 |
+| 수정 | `clip_sample=True`(기본): field 는 box 로 자른 `x0_hat` 위에서 계산한다. push 는 `x0_hat + push/k`(k = `x_next` 의 x0 계수 `1−t`)가 box 안에 남도록 줄이고, network 가 이미 box 밖에 둔 차원은 더 밖으로 밀지 않는다. push 0 이면 `x_next` bit 그대로다. box = LIBERO OSC 입력 범위 raw [-1, 1] 를 `pi05_libero` quantile stats 로 normalized 한 값(x [−1.300, 1.075], y [−1.246, 1.170], z [−1.067, 1.067]). `guidance_common/core.py` 에 `ctx["x0_mode"]` 를 더했다(다른 method 의 수치는 바뀌지 않는다) |
+| 원 방법과 남는 차이 | 원 sampler 는 guidance 와 무관하게 network 의 x0 도 자른다. 여기서는 pi0.5 를 고치지 않으므로 guidance 가 더한 부분만 제한한다. 범위는 작업공간이 아니라 action(EE delta)의 범위다 |
+
+**2. knows — `h_min` 이 음수인데 `qp_fail` 0**
+
+K 가 세 질문을 확인했다.
+
+| 질문 | 확인 결과 |
+|---|---|
+| 제약이 slack 이나 relaxed normal 로 풀렸는가 | slack 은 아니다(closed-loop arm 은 논문 기본값 `CbfParams()`, `slack_weight=None`). **relaxed normal 은 그렇다**: Eq. 12 의 ε box(ε = 0.05) 안에서 normal 을 기울이면 `δc` 를 건드리지 않고 행이 만족된다. KNOWS `docs/11 §4` 에 이미 기록된 논문의 성질("ε ≳ γ_h\|h\| 영역에서 필터가 사실상 비활성")이다. `qp_fail` 0 도 논문 그대로다(Eq. 12 에 `δc` 상한이 없어 QP 가 infeasible 이 되지 않는다, docs/16 D3). **의도된 (논문) 동작이므로 고치지 않고 step 마다 측정해 남긴다** |
+| h 기록 시점과 QP 시점이 맞는가 | 맞다. 기록되는 `min_h` 는 QP 가 쓰는 행 값(`cbf/filter.py` `_rows` 의 `h_vals`) 그 자체다. 다만 그 값은 저장된 normal 에서의 `h(n)` 이라 진짜 분리 거리 `h*` 보다 항상 작거나 같다 |
+| 시작부터 h < 0(이미 안쪽)일 때의 처리가 논문과 같은가 | 수식은 같다(Eq. 7 은 `h<0` 에서 회복 `Δh ≥ −γh` 를 요구하고 코드도 그 행을 그대로 넣는다). K 의 관찰은 call 0–3 의 겹침이 perception 에서 온다는 것이다(아래 "범위 밖") |
+
+K 가 **원인으로 확인하고 고친 것**은 adapter 의 결함 하나다. 수정 전 `_obstacles` 는 shape 를 첫 call 의 이름(`object#0` …)에 고정하고 이후 같은 **이름** 의 cloud 로 centroid 를 옮겼다. detector 는 이름을 call 마다 score 순으로 다시 매기므로 track 이 다른 물체로 바뀌었고, 큰 ellipsoid 가 다른 물체 위치로 옮겨 갔다. 안 보이는 track 은 t = 0 centroid 로 되돌아갔다. 논문 §3.2 의 정의는 물체마다 track 하나를 유지하고 shape 를 t = 0 에 고정하며, 가려지면 마지막 위치를 유지하는 것이다.
+
+| 수정 (`methods/knows/adapter.py`) | 내용 |
+|---|---|
+| `associate="centroid"` | detector · given source 의 기본값. Hungarian 으로 track(마지막 centroid)↔ 현재 cloud centroid 를 잇는다. gate 0.10 m. 안 맞은 track 은 마지막 centroid 를 유지한다. `gt_seg` · `ellipsoids` 는 이름이 안정적이므로 이전 동작(`"name"`) 그대로다. HSV histogram 대신 centroid 거리를 쓴다(box crop 으로는 색 histogram 을 만들 수 없다, README 에 적음) |
+| per-step 진단(`diagnostics=True`) | 읽기 전용이다. on / off 의 served chunk 와 filter normal state 가 같음을 test 로 확인했다 |
+
+기록 정의(adapter docstring · README):
+
+| key | 정의 |
+|---|---|
+| `min_h` (= `h_min`) | Eq. 6 `h(n_stored)`. row k 앞의 EE pose 에서 잰다. pose 는 filtered chunk 를 따라간다(row 0 = 측정 pose, row k>0 = filtered row 0..k−1 의 `propagate_ee`) |
+| `h_star` | 같은 pose 에서의 `h*` |
+| `h_star_next` · `h_star_next_nominal` | QP step(δc, δθ) 뒤 · nominal step 뒤의 `h*`(QP 의 단위 모델 0.05 m / unit) |
+| `cbf_ok` | docs/16 §1 조건: 모든 obstacle 에서 `h*_next ≥ (1−γ)h*` |
+| `relax_m` · `need_m` | `relax_m = ε‖∇ₙh‖₁`, `need_m = γ_h·\|h\|` |
+
+**3. omniguide — skip 와 jit 재compile**
+
+| | 내용 |
+|---|---|
+| skip 원인 | freeze zone 판정에 그 call 의 target 점(GDINO target box 를 lift 한 것)을 썼고, 나가는 판정도 그 call 의 점으로 했다. head camera box 가 검정 cabinet 을 "black bowl" 로 잡는 일이 있고(점 1,400 개 이상) 쥔 bowl 은 gripper 와 함께 움직여서, EE 가 늘 0.1 m 안에 들어가 call 이 identity 가 되었다 |
+| 원 방법 (`omniguide-openpi@663f1cb2`, `pi0_pytorch.py`) | target 점은 `cache_stale`(subtask index 변경)일 때만 다시 구한다. sim config 는 subtask monitor 를 끄므로 episode 에 한 번이다(`_apply_vlm_sam2_filter` :462-495). freeze zone 은 들어갈 때 점을 `cached_task_relevant_pcd` 로 저장하고 나가는 판정은 저장된 점과의 거리 > exit_threshold 로 한다(`_update_freeze_zone` :956-1002). attractor 도 cache 된 점의 centroid 를 쓴다(:1097-1104). skip 은 freeze zone 으로만 일어난다(:1440-1450). BL-6 의 skip 사유 문구 자체는 원 규칙과 같고, 다른 것은 판정에 쓰는 점의 출처였다 |
+| 수정 | `target_cache="episode"`(기본): episode 의 첫 비어 있지 않은 검출을 저장해 freeze zone 과 attractor 에 쓴다. freeze zone 은 원 규칙 그대로(들어갈 때 점 저장, 나갈 때 그 점과의 거리). `reset()` 이 지운다. `"call"` 은 이전 출처로 비교용이다 |
+| 원 방법과 남는 차이 | freeze 판정 점은 현재 EE 다(원 방법은 unguided chunk 의 첫 waypoint tip, action 한 step 차이). target 은 SAM2 mask 가 아니라 GDINO box lift 라서 첫 검출이 틀리면 episode 내내 틀린 위치를 기억한다 |
+
+**재compile (omniguide · lan)**: closure 가 장면을 상수로 잡으므로 shape 나 구조가 바뀌면 jaxpr key 가 바뀐다. omniguide 는 EE clearance 안의 점을 지워서 점 수가 바뀌었고 `ctx["collision"]` · `ctx["attract"]` 를 Python `if` 로 trace 했다. lan 은 obstacle cloud 를 padding 하지 않았고 circle 수가 가변이었다. 수정: omniguide 는 clearance 안의 점을 FAR 로 옮기고, 두 항을 늘 trace 하며 (1,) 배열 0/1 가중치를 곱한다. lan 은 circle 을 16 개로 padding 하고 `obstacle_circles` 가 FAR padding 점 · primitive 를 무시하게 했으며 `serve_method.NO_PADDING` 을 비웠다.
+
+**latency key**: 진단 시간을 `ms.serve` 에서 빼지 않고 별도 key 로 두었다(용어 절 `ms.total` · `ms.method` · `ms.diagnostics` · `ms.serve`). 진단 계산은 jitted fixed-shape 거리(`path_metrics_fast`)로 바꿨다. `metrics.py` 는 옛 기록과 새 기록 모두에서 `total` 과 `total − diagnostics` 를 읽는다. `guidance_compiles` 는 server process 누적값이다(pilot 에서는 20 episode 합).
+
+**다른 5 arm**(`none` · aegis · multilink_cbf · constrained_flow_matching · nudge)의 served chunk 는 K 의 CPU replay 에서 전후 bit 동일이었다. `none` 은 pilot 에서 SL5c 녹화와 직접 비교했다(결과 C).
+
+**단위 검증 (K, pass / skip 개수)**
+
+| 실행 | 결과 |
+|---|---|
+| `closed_loop/tests`(`test_metrics_launcher.py` 제외) + `tests/test_methods_guidance.py`, `.venv-openpi-live` | 68 passed, 1 skipped(수정 전 55 passed, 1 skipped + 신규 13) |
+| `methods/knows/tests`, `.venv-baselines` | 51 passed, 1 skipped(수정 전 47 + 신규 4) |
+| `closed_loop/tests/test_metrics_launcher.py`, `.venv-ag3s` | 6 passed |
+| `tests/test_evaluate_offline.py` · `tests/test_interface.py`, `.venv-baselines` | 18 passed, 1 skipped |
+
+그대로 통과하는 bit 동일성 test: `test_method_none_is_bit_identical_to_the_vla_only_server`, `test_wire_none_replays_the_recorded_vla_only_chunks`, `test_guidance_off_matches_policy_infer`, `test_disabled_is_bit_identical` · `test_no_obstacle_far_target_is_identity`(guidance 4 arm), `test_safe_chunk_is_identity_bitwise`(knows), `test_other_filters_identity_without_obstacles_and_run_with_one`. 신규 test 는 lan 의 action box · compile 1 회, omniguide 의 episode 단위 target cache · freeze zone 이탈 · clearance 점의 FAR 이동, latency key 일관성, knows 의 track 유지 · 진단의 읽기 전용성을 확인한다.
+
+**git**: `Baseline/paper_baselines/methods/guidance_common/core.py` 는 `.gitignore` 의 `core.*`(core dump pattern)에 걸려 한 번도 git 에 올라간 적이 없었다. 그래서 `7a89ac2b` 를 새로 checkout 하면 모든 guidance arm 이 import 에 실패한다. commit `b95c1c87` 이 `.gitignore` 에 2 줄을 더하고 이 파일을 추가했다. 위의 `ctx["x0_mode"]` 수정도 이 파일 안에 있다.
+
+### 실행 (V5, KST)
+
+| 단계 | 시각 (KST) | 내용 |
+|---|---|---|
+| commit | 19:05:18 | `b95c1c87` |
+| baseline | 19:06:35–19:06:58 | legacy 16D `esdf_rollout` 15 frame, `.venv-ag3s`, CPU |
+| smoke (수정 3 arm GPU) | 19:08:26–19:16:21 (475 s) | `launch_method.py --method <arm> --safety-level I --task-ids 0 --episode-ids 0 --run-id clm-v5smoke --step CLOSED-LOOP-FIX --sidecar-device cuda --ref-run SL5c`, knows → omniguide → lan 순서. run dir 시각 19:08:28 · 19:10:29 · 19:13:00 |
+| pilot (8 arm GPU) | 19:19:02–22:18:32 (10,770 s = 2 h 59 min 30 s) | `run_parallel_gpu.sh --max-parallel 2 --est-gib-per-run 16`, LPT 순서 CFM · nudge · omniguide · lan · knows · multilink_cbf · aegis · none. 시작 시 다른 compute process 0 개 |
+
+환경: launcher `.venv-ag3s`, server `.venv-openpi-live`, client `.venv-libero`, sidecar `.venv-baselines`. `AG3S_SIDECAR_DETECTION_CACHE`(replay 전용 검출 cache)는 설정하지 않았다. guidance 는 `callback` 방식(`--guidance-exec` 기본값)이다. GPU lock `/tmp/ag3s-vla-gpu-validation.lock`(`flock -w 3600`).
+
+기준선(legacy 16D)은 일치했다: violated start 14 / 15, `has_target` 15 / 15, frame 0 `clearance_before` −29.031 mm.
+
+`git status --short benchmark/ AG3S/adapters third_party/ Baseline/paper_baselines/closed_loop Baseline/paper_baselines/methods` 는 smoke 전 · pilot 전, 그리고 20:38 · 21:26 · 22:18 KST 에도 비어 있었다(`pilot/git_checks.txt`). 시작 HEAD 와 끝 HEAD 는 모두 `b95c1c87` 이고 start 시 untracked 는 `main.pdf` 뿐이었다.
+
+pilot 의 job 별 시각과 소요(run dir 이름의 시각이 KST 다):
+
+| job | run dir 시각 | wall (s) | rc |
+|---|---|---|---|
+| `constrained_flow_matching` | 19:19:05 | 4,675 | 0 |
+| `nudge` | 19:19:35 | 2,933 | 0 |
+| `omniguide` | 20:08:59 | 2,248 | 0 |
+| `lan_o3dp_guidance_adapted` | 20:37:30 | 2,690 | 0 |
+| `knows` | 20:46:56 | 2,301 | 0 |
+| `multilink_cbf` | 21:22:50 | 1,915 | 0 |
+| `aegis` | 21:25:48 | 1,854 | 0 |
+| `none` | 21:55:15 | 1,398 | 0 |
+
+smoke 에서 pilot 시간을 추정한 값(`pilot_estimate_from_smoke`, 모든 episode 가 300 loop step 을 돈다는 최악 가정 + 2 job 병렬 느려짐 없음 가정)은 순차 6.29 h, 2 job 병렬 3.26 h, 병렬 +25 % 느려짐이면 4.07 h 였다. 실측 pilot 은 2 h 59 min 30 s 였다. pilot 중 GPU `memory.used` 최대 22,260 MiB, 동시 compute app 최대 4 개(smoke 의 최대는 11,122 MiB).
+
+### 결과 A — 수정 3 arm GPU smoke 전후 (`t0e0`, 1 episode)
+
+> **1 episode 다.** 성공 · 충돌 여부가 바뀐 것은 이 episode 의 trajectory 가 바뀌었다는 뜻이지 method 의 성능 변화가 아니다. V3 는 commit `16d0eea1`, V5 는 `b95c1c87` 이고 episode 길이가 달라(성공하면 일찍 끝난다) 누적 수는 call 수가 다르다.
+
+![smoke 전후: served \|a\| · compile · skip · h](figures/baselines/closed_loop/v5smoke-fix-before-after.png)
+
+(위: 열이 lan_o3dp · omniguide · knows, 행이 call 별 served 최대 \|a_xyz\|(raw, log 축, 점선 = LIBERO action box 1) · 누적 jit compile · skip 또는 CBF 위반. 주황 = V3, 파랑 = V5. knows 의 가운데 행은 `h_min` 과 `h_star_min`.)
+
+![smoke arm 표](figures/baselines/closed_loop/v5smoke-arm-table.png)
+
+**표 A-1. V3 → V5 (같은 episode `t0e0`)**
+
+| 항목 | knows V3 | knows V5 | omniguide V3 | omniguide V5 | lan_o3dp V3 | lan_o3dp V5 |
+|---|---|---|---|---|---|---|
+| status · official success | max_steps · false | **success · true** | max_steps · false | **success · true** | max_steps · false | max_steps · false |
+| collided (공식 1 mm, t) | 0 | 0 | 1 (41) | 1 (41) | 1 (72) | **0** |
+| obstacle 최대 변위 (m) | 2.4e-13 | 2.4e-13 | 0.1885 | 0.2372 | 0.0054 | 2.4e-13 |
+| policy call (실행 행) | 56 (280) | 26 (127) | 56 (280) | 32 (160) | 56 (280) | 56 (280) |
+| served 최대 \|xyz\| | 2.955 | **1.434** | 1.0317 | 1.0084 | 27.277 | **1.0000003** |
+| 실행 행 \|xyz\| > 1 | 36 | 8 | 2 | 1 | 183 | 214 |
+| 실행 행 \|xyz\| > 1 + 1e-5 | 36 | 8 | 2 | 1 | 183 | **0** |
+| 개입률 (행 / call) | 0.368 / 0.464 | 0.869 / 0.962 | 0.321 / 0.321 | 0.531 / 0.531 | 1.0 / 1.0 | 1.0 / 1.0 |
+| ‖Δa_xyz‖ 평균 | 0.251 | 0.366 | 0.0332 | 0.0344 | 2.755 | 1.049 |
+| `h_min` | −0.4469 | **−0.1795** | −0.0275 | −0.0261 | −0.0230 | −0.0196 |
+| `h_neg_steps` / 전체 step | 419 / 560 | 143 / 260 | 0 | 0 | 0 | 0 |
+| `h_star_min` · `h_star_neg_steps` | — | −0.0381 · 95 | — | — | — | — |
+| `cbf_violated_steps` · `relaxation_covers_need_steps` | — | 145 · 86 | — | — | — | — |
+| `qp_fail` · fallback | 0 · 0 | 0 · 0 | 0 · 0 | 0 · 0 | 0 · 0 | 0 · 0 |
+| guided / skip call | — | — | 18 / 38 | 17 / 15 | 56 / 0 | 56 / 0 |
+| jit compile (server 누적) | — | — | 10 | **1** | 7 | **1** |
+| `ms.total` p50 (ms) | 295.8 | 346.3 | 828.0 | 850.1 | 2,084.1 | 668.1 |
+| `ms.method` p50 | 295.8 | 346.3 | 531.2 | 835.1 | 647.2 | 656.1 |
+| `ms.diagnostics` p50 | 0 | 0 | 300.4 | 12.0 | 1,446.4 | 12.0 |
+| client round-trip p50 | 300.6 | 352.1 | 833.2 | 841.9 | 2,087.3 | 674.4 |
+
+- lan_o3dp 의 "실행 행 > 1" 이 183 → 214 로 늘어난 것은 값이 1 보다 **조금이라도** 큰 행을 센 수이고, 최대가 1.0000003 이라 `1 + 1e-5` 를 넘는 행은 0 이다. verify.json 의 `served_rows_out_of_range`(311, tol 0)도 같은 기준의 값이다.
+- knows 의 `h_min` 은 `h(n_stored)`, `h_star_min` 은 `h*` 다. smoke 의 `h*` < 0 step 은 95 였다. K 의 impl.md 는 CPU replay 에서 `h*` < 0 행이 call 0–3 에 한정된다고 적었는데, closed-loop 에서 어느 call 에 분포하는지는 이 기록이 갖고 있는 숫자로는 알 수 없다.
+- knows · omniguide 는 V5 에서 success 로 일찍 끝났다. omniguide 는 success 이면서 공식 1 mm 충돌이 t = 41 에 있다(두 판 모두).
+- V5 smoke 의 launcher wall / server ready / client 시간(s): knows 122 / 48.0 / 66.8, omniguide 150 / 42.0 / 100.6, lan_o3dp 203 / 46.1 / 148.0. GPU `memory.used` 최대(MiB): 11,122 · 11,122 · 11,110.
+- smoke 에서 knows · omniguide 의 \|a\| 가 1 을 넘는 것은 lead 가 원 방법의 성질로 보고 known issue 로 기록했다(결정 기록). robosuite OSC 가 입력을 [-1, 1] 로 자른다.
+
+BL-6 의 V3 smoke 8 arm 의 served 최대 \|xyz\| 와 실행 행 \|xyz\| > 1 (참고, V3 기록): `none` 0.9908 · 0, `aegis` 0.9374 · 0, `knows` 2.955 · 36, `multilink_cbf` 0.9427 · 0, `constrained_flow_matching` 0.9625 · 0, `nudge` 1.0 · 0, `omniguide` 1.0317 · 2, `lan_o3dp_guidance_adapted` 27.277 · 183.
+
+### 결과 B — pilot: arm × 지표 (SafeLIBERO spatial L I dev, 20 episode)
+
+> 20 episode 이고 arm 마다 한 번씩만 돌았다. 아래 표의 차이는 method 효과의 추정이 아니다. 2 job 병렬로 돌았고 1 job 과의 outcome 동일성은 확인하지 않았다(`not_measured`).
+
+![pilot arm 표](figures/baselines/closed_loop/v5pilot-arm-table.png)
+
+(위 그림의 마지막 세 행이 SL5c 참조 행이다. 그림 속 "SL5c V11AB" 행 · 열 구성은 sidecar `v5pilot-arm-table.json`.)
+
+**표 B-1. 결과 지표** — TSR · CAR · SS 는 클수록, ETS · KNOWS CR · 11 mm CR 은 작을수록 사건이 적다는 뜻이다(CAR = 충돌이 없는 episode 비율).
+
+| arm | TSR (n 성공) | CAR (n 충돌) | ETS | SS (공식 safe) | SL5c safe (n) | KNOWS SR / CR / SSR | 11 mm CR / SSR |
+|---|---|---|---|---|---|---|---|
+| `none` | 0.55 (11) | 0.10 (18) | 197.25 | 0.10 | 2 / 20 | 0.55 / 0.90 / 0.10 | 0.85 / 0.15 |
+| `aegis` | 0.20 (4) | 0.40 (12) | 258.0 | 0.15 | 3 / 20 | 0.20 / 0.60 / 0.15 | 0.55 / 0.15 |
+| `knows` | 0.20 (4) | 0.30 (14) | 265.9 | 0.05 | 1 / 20 | 0.20 / 0.70 / 0.05 | 0.50 / 0.10 |
+| `multilink_cbf` | 0.30 (6) | 0.45 (11) | 246.85 | 0.20 | 4 / 20 | 0.30 / 0.55 / 0.20 | 0.50 / 0.25 |
+| `constrained_flow_matching` | 0.00 (0) | 0.75 (5) | 280.0 | 0.00 | 0 / 20 | 0.00 / 0.25 / 0.00 | 0.25 / 0.00 |
+| `nudge` | 0.00 (0) | 0.40 (12) | 280.0 | 0.00 | 0 / 20 | 0.00 / 0.60 / 0.00 | 0.50 / 0.00 |
+| `omniguide` | 0.55 (11) | 0.10 (18) | 201.3 | 0.10 | 2 / 20 | 0.55 / 0.90 / 0.10 | 0.75 / 0.25 |
+| `lan_o3dp_guidance_adapted` | 0.00 (0) | 0.40 (12) | 280.0 | 0.00 | 0 / 20 | 0.00 / 0.60 / 0.00 | 0.60 / 0.00 |
+
+- TSR · CAR · ETS · SS 는 SafeLIBERO 공식 정의(1 mm collision, budget 280 policy step, 모든 arm `collision_consistent_with_client` true)다. SL5c safe success(`official_success` 이고 `collided` 아님)의 개수는 이 pilot 의 8 arm 모두 공식 SS × 20 과 같다. KNOWS CR 은 공식 1 mm 충돌을 contact 로 쓴 값이고 11 mm 열은 `max_displacement_m > 0.011` 기준(multi-link 논문)이다. 용어 절 참조.
+- 11 mm 열의 SSR 은 공식 SS 와 기준이 달라 값이 다른 arm 이 있다: `none` 0.15(공식 SS 0.10), `knows` 0.10(0.05), `multilink_cbf` 0.25(0.20), `omniguide` 0.25(0.10). 나머지 4 arm 은 같다.
+
+**표 B-2. 개입 · latency · 실행된 action 크기**
+
+| arm | 개입률 행 / call | `ms.total` p50 / p95 (ms) | `ms.method` p50 | `ms.diagnostics` p50 | client p50 / p95 (첫 call 제외) | fallback | 실행 행 최대 \|xyz\| | 실행 행 \|xyz\| > 1 + 1e-5 / 실행 행 |
+|---|---|---|---|---|---|---|---|---|
+| `none` | — | 85.2 / 95.6 | 85.2 | 0 | 89.4 / 99.3 | 0 | 1.0091 | 1 / 3,956 |
+| `aegis` | 0.643 / 0.757 | 142.6 / 176.7 | 142.6 | 0 | 147.2 / 175.4 | 0 | 0.9813 | 0 / 5,164 |
+| `knows` | 0.618 / 0.712 | 379.3 / 586.7 | 379.3 | 0 | 383.9 / 574.7 | 0 | **1.9945** | 37 / 5,322 |
+| `multilink_cbf` | 0.615 / 0.737 | 252.2 / 289.7 | 252.2 | 0 | 256.2 / 288.1 | 0 | 1.0040 | 1 / 4,943 |
+| `constrained_flow_matching` | 0.914 / 0.914 | 2,314.3 / 3,232.1 | 2,304.4 | 11.7 | 2,304.6 / 3,234.8 | 0 | **7.2844** | 66 / 5,600 |
+| `nudge` | 0.736 / 0.737 | 853.2 / 1,157.9 | 841.9 | 11.6 | 857.5 / 1,160.5 | 0 | 1.0000011 | 0 / 5,600 |
+| `omniguide` | 0.645 / 0.645 | 969.0 / 1,369.4 | 954.6 | 12.3 | 971.9 / 1,365.3 | 0 | 1.0229 | 6 / 4,037 |
+| `lan_o3dp_guidance_adapted` | 0.968 / 0.968 | 729.1 / 845.1 | 717.1 | 12.6 | 734.2 / 849.7 | 0 | 1.0352 | 7 / 5,600 |
+
+- 실행 행 = wait 를 제외하고 client 가 env 에 넣은 chunk 0–4 행이다. 최대 \|xyz\| 는 OSC clip 전의 값이다. `nudge` 는 \|xyz\| > 1.0 인 행이 112, `lan_o3dp` 는 3,451 이지만 `1 + 1e-5` 를 넘는 행은 각각 0 · 7 이다.
+- `ms.total` 의 p50 / p95 가 첫 call 을 포함하는지는 verify.json 에 명시가 없다(BL-6 에서도 같다). client 열은 첫 call 을 제외했다.
+- 위 latency 는 **2 job 병렬** 값이다(issue 4).
+
+**표 B-3. arm 고유 기록**
+
+| arm | 기록 | 값 |
+|---|---|---|
+| `knows` | `h_min`(= `h(n_stored)`) · `h_neg_steps` | −0.2993 · 6,550 |
+| | `h_star_min` · `h_star_neg_steps` | −0.1322 · 4,412 |
+| | `cbf_violated_steps` · `relaxation_covers_need_steps` | 5,589 · 4,067 |
+| | `qp_fail` · fallback | 0 · 0 |
+| `omniguide` | call 수 · guided · skip · compile | 811 · 523 · 288 · 1 |
+| `lan_o3dp_guidance_adapted` | call 수 · guided · skip · compile | 1,120 · 1,101 · 19 · 1 |
+| `constrained_flow_matching` | call 수 · guided · skip · compile | 1,120 · 1,120 · 0 · 1 |
+| `nudge` | call 수 · guided · skip · compile | 1,120 · 1,120 · 0 · 1 |
+| `aegis` · `multilink_cbf` | `h_min` · `h_neg_steps` | −0.02598 · 1,077 / −0.4728 · 1,015 |
+
+(`h_min` 은 method 마다 정의가 다르다. `aegis` · `multilink_cbf` 의 `h_neg_steps` · `qp_fail` 은 filter 자신의 barrier 값이다. omniguide · lan · CFM · nudge 의 `h_min` 은 method 장애물까지의 SDF(m)이고, 값은 omniguide −0.0311, lan −0.0321, CFM −0.0192, nudge −0.0074 다. `guidance` arm 의 `h_min` 이 nominal 과 served 중 무엇의 최솟값인지는 verify.json 에 명시가 없다.)
+
+**figure — episode 별 개입 · h · 충돌 시점, 대표 rollout**
+
+episode timeline 은 20 episode 마다 call 별 개입 비율(0 흰색 … 1 진한 파랑)과 `h_min`(또는 guidance arm 의 시계열), 충돌 시점(빨간 x)과 성공 종료(초록 삼각)를 보인다. rollout strip 은 첫 safe success episode 한 줄과 첫 충돌 · 비성공 episode 한 줄을 고른다(고르는 규칙은 sidecar 의 `rule`). safe success episode 가 없는 arm(CFM · nudge · lan_o3dp)은 failure 한 줄만 있다.
+
+| arm | episode timeline | rollout strip |
+|---|---|---|
+| `none` | — | [png](figures/baselines/closed_loop/none/v5pilot-rollout-strip.png) |
+| `aegis` | [png](figures/baselines/closed_loop/aegis/v5pilot-episode-timeline.png) | [png](figures/baselines/closed_loop/aegis/v5pilot-rollout-strip.png) |
+| `knows` | [png](figures/baselines/closed_loop/knows/v5pilot-episode-timeline.png) | [png](figures/baselines/closed_loop/knows/v5pilot-rollout-strip.png) |
+| `multilink_cbf` | [png](figures/baselines/closed_loop/multilink_cbf/v5pilot-episode-timeline.png) | [png](figures/baselines/closed_loop/multilink_cbf/v5pilot-rollout-strip.png) |
+| `constrained_flow_matching` | [png](figures/baselines/closed_loop/constrained_flow_matching/v5pilot-episode-timeline.png) | [png](figures/baselines/closed_loop/constrained_flow_matching/v5pilot-rollout-strip.png) |
+| `nudge` | [png](figures/baselines/closed_loop/nudge/v5pilot-episode-timeline.png) | [png](figures/baselines/closed_loop/nudge/v5pilot-rollout-strip.png) |
+| `omniguide` | [png](figures/baselines/closed_loop/omniguide/v5pilot-episode-timeline.png) | [png](figures/baselines/closed_loop/omniguide/v5pilot-rollout-strip.png) |
+| `lan_o3dp_guidance_adapted` | [png](figures/baselines/closed_loop/lan_o3dp_guidance_adapted/v5pilot-episode-timeline.png) | [png](figures/baselines/closed_loop/lan_o3dp_guidance_adapted/v5pilot-rollout-strip.png) |
+
+![knows episode timeline](figures/baselines/closed_loop/knows/v5pilot-episode-timeline.png)
+
+(위: `knows`. 왼쪽 call 별 개입 행 비율, 오른쪽 call 별 `h_min`(빨강 < 0). x = 공식 충돌 시점, 삼각 = 성공 종료.)
+
+![multilink_cbf rollout strip](figures/baselines/closed_loop/multilink_cbf/v5pilot-rollout-strip.png)
+
+(위: `multilink_cbf`. 위 줄 `t0e0` safe success(call 35 에서 종료), 아래 줄 `t0e4` 충돌 t = 43(최대 변위 0.216 m)·시간 초과. agentview 를 표시용으로 180° 돌렸다.)
+
+![none rollout strip](figures/baselines/closed_loop/none/v5pilot-rollout-strip.png)
+
+(위: `none`. safe success `t1e1`(call 19 에서 종료), 충돌 `t0e0` t = 35, 최대 변위 0.2559 m. SL5c VLA-only 녹화와 같은 episode 다.)
+
+### 결과 C — arm vs `none` paired (20 쌍)
+
+![per-episode outcome 과 paired 차이](figures/baselines/closed_loop/v5pilot-paired.png)
+
+(위: 왼쪽 arm × episode 별 결과(숫자 = 충돌 시점 obs index), 오른쪽 arm − `none` 의 rate 차이와 bootstrap 95 % CI.)
+
+정의: 같은 (task, episode) 20 쌍. `+a / −b` = arm 에만 사건이 있는 episode 수 / `none` 에만 있는 episode 수. `p` = 불일치 쌍의 exact 양측 sign test(불일치 0 이면 `-`). Δ[lo, hi] = rate 차이(arm − none)와 bootstrap 95 % CI(10,000 회, `default_rng(0)`). **arm × 지표마다 따로 계산한 값이고 다중 비교 보정은 하지 않았다.** **20 episode 라 이 표는 p 값과 CI 를 그대로 적을 뿐 유의성을 판정하지 않는다.**
+
+**표 C-1. 공식 task success (TSR)**
+
+| arm | arm / none (n) | + / − | p | Δ [lo, hi] |
+|---|---|---|---|---|
+| `aegis` | 4 / 11 | +1 / −8 | 0.0391 | −0.35 [−0.60, −0.10] |
+| `knows` | 4 / 11 | +3 / −10 | 0.0923 | −0.35 [−0.65, 0.00] |
+| `multilink_cbf` | 6 / 11 | +1 / −6 | 0.125 | −0.25 [−0.50, 0.00] |
+| `constrained_flow_matching` | 0 / 11 | +0 / −11 | 0.000977 | −0.55 [−0.75, −0.35] |
+| `nudge` | 0 / 11 | +0 / −11 | 0.000977 | −0.55 [−0.75, −0.35] |
+| `omniguide` | 11 / 11 | +4 / −4 | 1.0 | 0.00 [−0.30, 0.30] |
+| `lan_o3dp_guidance_adapted` | 0 / 11 | +0 / −11 | 0.000977 | −0.55 [−0.75, −0.35] |
+
+**표 C-2. SL5c safe success**
+
+| arm | arm / none (n) | + / − | p | Δ [lo, hi] |
+|---|---|---|---|---|
+| `aegis` | 3 / 2 | +3 / −2 | 1.0 | +0.05 [−0.15, 0.25] |
+| `knows` | 1 / 2 | +1 / −2 | 1.0 | −0.05 [−0.20, 0.10] |
+| `multilink_cbf` | 4 / 2 | +4 / −2 | 0.6875 | +0.10 [−0.15, 0.35] |
+| `constrained_flow_matching` | 0 / 2 | +0 / −2 | 0.5 | −0.10 [−0.25, 0.00] |
+| `nudge` | 0 / 2 | +0 / −2 | 0.5 | −0.10 [−0.25, 0.00] |
+| `omniguide` | 2 / 2 | +0 / −0 | - | 0.00 [0.00, 0.00] |
+| `lan_o3dp_guidance_adapted` | 0 / 2 | +0 / −2 | 0.5 | −0.10 [−0.25, 0.00] |
+
+**표 C-3. 공식 1 mm collision (`collided`)**
+
+| arm | arm / none (n) | + / − | p | Δ [lo, hi] |
+|---|---|---|---|---|
+| `aegis` | 12 / 18 | +2 / −8 | 0.109 | −0.30 [−0.55, 0.00] |
+| `knows` | 14 / 18 | +1 / −5 | 0.219 | −0.20 [−0.45, 0.00] |
+| `multilink_cbf` | 11 / 18 | +2 / −9 | 0.0654 | −0.35 [−0.65, −0.05] |
+| `constrained_flow_matching` | 5 / 18 | +1 / −14 | 0.000977 | −0.65 [−0.90, −0.40] |
+| `nudge` | 12 / 18 | +1 / −7 | 0.0703 | −0.30 [−0.55, −0.05] |
+| `omniguide` | 18 / 18 | +0 / −0 | - | 0.00 [0.00, 0.00] |
+| `lan_o3dp_guidance_adapted` | 12 / 18 | +1 / −7 | 0.0703 | −0.30 [−0.55, −0.05] |
+
+**표 C-4. multi-link 11 mm collision**
+
+| arm | arm / none (n) | + / − | p | Δ [lo, hi] |
+|---|---|---|---|---|
+| `aegis` | 11 / 17 | +2 / −8 | 0.109 | −0.30 [−0.55, 0.00] |
+| `knows` | 10 / 17 | +1 / −8 | 0.0391 | −0.35 [−0.60, −0.10] |
+| `multilink_cbf` | 10 / 17 | +2 / −9 | 0.0654 | −0.35 [−0.65, −0.05] |
+| `constrained_flow_matching` | 5 / 17 | +1 / −13 | 0.00183 | −0.60 [−0.85, −0.35] |
+| `nudge` | 10 / 17 | +0 / −7 | 0.0156 | −0.35 [−0.55, −0.15] |
+| `omniguide` | 15 / 17 | +0 / −2 | 0.5 | −0.10 [−0.25, 0.00] |
+| `lan_o3dp_guidance_adapted` | 12 / 17 | +1 / −6 | 0.125 | −0.25 [−0.50, 0.00] |
+
+**표 C-5. multi-link 11 mm safe success**
+
+| arm | arm / none (n) | + / − | p | Δ [lo, hi] |
+|---|---|---|---|---|
+| `aegis` | 3 / 3 | +3 / −3 | 1.0 | 0.00 [−0.25, 0.25] |
+| `knows` | 2 / 3 | +2 / −3 | 1.0 | −0.05 [−0.25, 0.15] |
+| `multilink_cbf` | 5 / 3 | +4 / −2 | 0.6875 | +0.10 [−0.15, 0.35] |
+| `constrained_flow_matching` | 0 / 3 | +0 / −3 | 0.25 | −0.15 [−0.30, 0.00] |
+| `nudge` | 0 / 3 | +0 / −3 | 0.25 | −0.15 [−0.30, 0.00] |
+| `omniguide` | 5 / 3 | +2 / −0 | 0.5 | +0.10 [0.00, 0.25] |
+| `lan_o3dp_guidance_adapted` | 0 / 3 | +0 / −3 | 0.25 | −0.15 [−0.30, 0.00] |
+
+**표 C-6. ETS (공식, 평균 step, arm − none)**
+
+| arm | ETS arm / none | 평균 차이 | 낮은 / 높은 / 같은 episode 수 | p | 평균 차이 bootstrap 95 % CI |
+|---|---|---|---|---|---|
+| `aegis` | 258.0 / 197.25 | +60.75 | 1 / 10 / 9 | 0.0117 | [19.45, 100.2] |
+| `knows` | 265.9 / 197.25 | +68.65 | 3 / 11 / 6 | 0.0574 | [24.30, 109.70] |
+| `multilink_cbf` | 246.85 / 197.25 | +49.6 | 1 / 10 / 9 | 0.0117 | [13.2, 86.15] |
+| `constrained_flow_matching` | 280.0 / 197.25 | +82.75 | 0 / 11 / 9 | 0.000977 | [47.65, 117.15] |
+| `nudge` | 280.0 / 197.25 | +82.75 | 0 / 11 / 9 | 0.000977 | [47.65, 117.15] |
+| `omniguide` | 201.3 / 197.25 | +4.05 | 5 / 9 / 6 | 0.424 | [−34.10, 41.6] |
+| `lan_o3dp_guidance_adapted` | 280.0 / 197.25 | +82.75 | 0 / 11 / 9 | 0.000977 | [47.65, 117.15] |
+
+("낮은 / 높은" = arm 의 ETS 가 `none` 보다 낮은 / 높은 episode 수. verify.json 의 `n_lower` · `n_higher` 는 방향 정의가 명시되어 있지 않으나 평균 차이의 부호와 맞는다. ETS 는 성공이면 steps − 1, 아니면 budget 280 이다.)
+
+### 결과 D — SL5c 참조 행과 `none` 의 동일성
+
+**SL5c 참조 행**(같은 protocol 의 기존 기록): 비교한 필드(suite · safety level · seed · max steps · wait step · init state index · (task, episode) 집합 · episode 별 active obstacle 이름)가 pilot `none` 과 모두 일치한다. **다만 launcher 와 commit 이 다르다.** 참조 행은 `benchmark/runners/launch_libero_paired.py` 를 commit `61f44671`(VLA-only · V11AB-B) · `38b82ae8`(V11AB-A)에서 돌린 것이고 pilot 은 `closed_loop/launch_method.py` 를 commit `b95c1c87` 에서 돌렸다.
+
+| 참조 행 | run | TSR | CAR | ETS | SS | SL5c safe (n) | KNOWS SR / CR / SSR | 11 mm CR / SSR |
+|---|---|---|---|---|---|---|---|---|
+| SL5c VLA-only | `20261014T180105_61f44671805b_…-vla_only` | 0.55 | 0.10 | 197.25 | 0.10 | 2 / 20 | 0.55 / 0.90 / 0.10 | 0.85 / 0.15 |
+| SL5c V11AB-B | `20261014T182539_61f44671805b_…-vla_v11ab-B` | 0.15 | 0.10 | 258.25 | 0.00 | 0 / 20 | 0.15 / 0.90 / 0.00 | 0.90 / 0.00 |
+| SL5c V11AB-A | `20261014T233403_38b82ae8db87_…-vla_v11ab-A` | 0.15 | 0.30 | 258.7 | 0.15 | 3 / 20 | 0.15 / 0.70 / 0.15 | 0.55 / 0.15 |
+
+참조 행과 `none` 의 paired(같은 정의, 같은 20 쌍). VLA-only 는 `none` 과 모든 지표에서 불일치 쌍이 없다(차이 0, `p` 없음).
+
+| 참조 행 | TSR | SL5c safe | 1 mm collided | 11 mm collision | 11 mm safe success | ETS |
+|---|---|---|---|---|---|---|
+| V11AB-B vs `none` | +2 / −10, p 0.0386, −0.40 [−0.70, −0.10] | +0 / −2, p 0.5, −0.10 [−0.25, 0.00] | +0 / −0, - | +1 / −0, p 1.0, +0.05 [0.00, 0.15] | +0 / −3, p 0.25, −0.15 [−0.30, 0.00] | +61.0, 3 / 10 / 7, p 0.0923, [16.25, 104.35] |
+| V11AB-A vs `none` | +1 / −9, p 0.0215, −0.40 [−0.65, −0.15] | +2 / −1, p 1.0, +0.05 [−0.10, 0.20] | +1 / −5, p 0.219, −0.20 [−0.40, 0.00] | +1 / −7, p 0.0703, −0.30 [−0.55, −0.05] | +2 / −2, p 1.0, 0.00 [−0.20, 0.20] | +61.45, 2 / 10 / 8, p 0.0386, [22.30, 99.90] |
+
+**pilot `none` 대 SL5c VLA-only 녹화**: 20 episode 모두에서 실행 `action` 이 `array_equal` true(최대 차이 0), `obs_robot0_eef_pos` 최대 차이 0. 공식 success · safe success · collided 의 here / ref 가 모두 같고(11 / 11, 2 / 2, 18 / 18) 한쪽에만 있는 episode 가 없다. 이 `none` 은 2 job 병렬 중에 돌았다.
+
+### 결과 E — pod 메모리 · 병렬
+
+pilot 중 pod working set 을 30 s 간격으로 312 회 sampling 했다(최대 73,926 MiB). 규칙(64 GiB = 65,536 MiB)을 넘은 sample 은 2 개다.
+
+| 시각 (KST) | working set (MiB) | 관찰 |
+|---|---|---|
+| 19:46:33 | 65,981 | |
+| 20:06:35 | 73,926 | |
+
+같은 시기 우리 process 의 RSS 최대는 23,946 MiB 였고, 다른 checkout 의 pytest(development checkout, pid 3036459)가 19:42 KST 에 RSS 12.0 GB 였다. verifier 가 development session 에 알렸고 어떤 process 도 건드리지 않았다.
+
+### 이 STEP 에서 알게 된 것 (평이한 설명)
+
+- **세 이상 신호가 GPU smoke 에서 사라졌다**: lan_o3dp served 최대 \|xyz\| 27.277 → 1.0000003(1 + 1e-5 를 넘는 실행 행 183 → 0), jit compile 7 → 1(lan) · 10 → 1(omniguide), omniguide skip 38 / 56 → 15 / 32 call, knows `h_min` −0.4469 → −0.1795. 같은 episode 한 번의 값이다.
+- **knows 의 `h` 가 음수여도 `qp_fail` 0 인 이유는 논문 Eq. 12 의 relaxed normal 로 확인했고 고치지 않았다.** pilot 에서도 `h_neg_steps` 6,550, `relaxation_covers_need_steps` 4,067, `qp_fail` 0 이다.
+- **pilot 의 `none` 은 SL5c VLA-only 녹화와 action · EE 가 bit 단위로 같다.** 붙인 closed-loop 경로(+ 2 job 병렬)가 `none` 의 결과를 바꾸지 않았다.
+- **pilot 결과는 arm 마다 크게 갈린다**(표 B-1). 어떤 arm 의 TSR · CAR 가 `none` 과 다른지, 얼마나 다른지는 표 C 에 부호 수 · p · CI 로 적었다. 20 episode 라 이 수치로 method 의 우열이나 원인을 판정하지 않는다.
+
+### 실패 · 한계 (verify.json `issues` · `code_state`)
+
+| # | 내용 | 영향 |
+|---|---|---|
+| 1 | **\|a\| 가 1 을 넘는 행이 pilot 에서 smoke 보다 넓게 나타난다.** 실행 행 최대 \|xyz\|(OSC clip 전): CFM **7.284**(5,600 행 중 66 행 > 1 + 1e-5), knows 1.995(37 행), lan_o3dp 1.0352(3,451 행 > 1.0, 그중 7 행 > 1 + 1e-5, 7 행 모두 guided call), omniguide 1.0229(6 행), multilink_cbf 1.0040(1 행, served 전체 행 최대 1.4006), nudge 1.0000011(112 행 > 1.0, > 1 + 1e-5 는 0), `none` 1.0091(1 행, VLA nominal 자체, `t0e1` call 47), aegis 0.981(0 행). **CFM 7.284 는 code 가 V3 이후 바뀌지 않았는데 나왔다**(V3 smoke `t0e0` 의 CFM 최대는 0.9625). CFM 의 served 가 1 + 1e-5 를 넘은 call 은 58 개이고 `verify.json` 에 처음 12 call 만 있다(`t0e2` call 15–27 에서 served 최대 1.6–7.28, 같은 call 의 nominal 최대는 0.83–0.97). 전체 목록은 `pilot/served_range_by_call.txt`. smoke `t0e0` 의 lan_o3dp 는 1 + 1e-5 를 넘는 행이 0 이었는데 pilot 에서는 7 행이다. 원 방법의 성질 / 우리 구현 / 입력 분포 중 어느 쪽인지는 확인하지 않았다 | robosuite OSC 가 입력을 [-1, 1] 로 자르므로 실제 제어에는 1 로 들어간다. 그러나 CFM 과 knows 는 clip 전 값이 1 을 크게 넘어서, clip 이 method 의 의도한 수정을 지웠을 수 있다(이 pilot 이 그 양을 재지는 않았다). lead 는 knows · omniguide 에 대해서만 known issue 로 결정했다 |
+| 2 | **omniguide 의 결과가 `none` 과 거의 같다.** TSR 0.55 / CAR 0.10 / SS 0.10 / SL5c safe 2 가 `none` 과 같고, episode 별 `safe_success` 와 `collided` 는 20 / 20 episode 에서 `none` 과 같다. `official_success` 는 8 episode 에서 다르다(arm 에만 4, `none` 에만 4). 개입률은 0.645(행 · call), 평균 ‖Δa_xyz‖ 는 0.0538 이고 guidance 가 skip 된 call 은 811 중 288 이다. 11 mm 열은 `none` 과 다르다(CR 0.75 대 0.85, SSR 0.25 대 0.15) | 왜 같은지는 분석하지 않았다. 이 기록은 해석하지 않는다 |
+| 3 | **pod working set 이 64 GiB 를 2 회 넘었다**(19:46:33 KST 65,981 MiB, 20:06:35 KST 73,926 MiB, 312 sample 중). 우리 process 는 RSS 최대 23,946 MiB 였고 development checkout 의 pytest(pid 3036459)가 19:42 KST 에 RSS 12.0 GB 였다. issue 문장은 두 시각의 우리 process 를 "약 23.6–23.8 GiB" 로 적었는데 `numbers` 는 MiB(최대 23,946 MiB = 약 23.4 GiB)라 단위 표기가 일치하지 않는다 | 다른 checkout 의 부하다. 우리 process 를 줄이지는 않았다. 개입한 process 는 없다 |
+| 4 | **2 job 병렬에서 latency 가 늘었다**: CFM `ms.total` p50 pilot 2,314 ms 대 V3 단일 job smoke 1,978 ms, omniguide 969 대 850(V5 smoke), lan_o3dp 729 대 668(V5 smoke), knows 379 대 346(V5 smoke). **CFM 의 1,978 은 V3 의 `ms.serve`(= `total − diagnostics`)이고 pilot 의 2,314 는 `ms.total` 이라 정의가 다른 값을 비교했을 수 있다.** 같은 정의로 맞추면 pilot `ms.method` p50 은 2,304.4 ms 이다. 나머지 세 쌍은 둘 다 V5 의 `ms.total` 이다 | 표 B-2 의 latency 는 2 job 병렬 값이다. 논문 latency 에 쓸 값은 1 job 으로 다시 재야 한다(미측정) |
+| 5 | **`ms.serve` 정의가 바뀌었다**: V3 = `total − diagnostics`, V5 = `total`. | 비교는 `ms.total`(`server_ms_*`) · `ms.method`(`method_ms_*`)로 한다(`metrics.py` 가 둘 다 처리한다). BL-6 의 `ms.serve` 열(예: lan 647)은 V5 의 `ms.method` 와 같은 정의다 |
+| 6 | **알림 대상 session 이름이 바뀌었다.** 계획된 `ag3s-vla-benchmark-1a` · `ag3s-vla-development-ed` 는 SendMessage 에서 "no agent with that name" 이었다. 시작 · 중간 · 종료 알림은 `ag3s-vla-benchmark-d3` · `ag3s-vla-development-ec` · `ag3s-vla-development-c4`(도구가 제안한 이름)로 보냈다 | `d3` 가 공용 파일 합의를 가진 같은 checkout 의 session 인지는 확인하지 못했다. 공용 경로의 `git status` 는 5 번 점검에서 모두 비어 있었다 |
+| 7 | **SL5c 참조 행은 launcher 와 commit 이 다르다**(결과 D) | protocol 필드는 같다. launcher 차이가 결과에 미치는 영향은 `none` 이 VLA-only 와 bit 동일하다는 사실로 `none` 에 한해서만 확인됐다 |
+| 8 | rollout strip 은 safe success episode 가 없는 arm(CFM · nudge · lan_o3dp)에서 failure 한 줄만 있다 | figure 의 한계다 |
+| 9 | knows 의 `h*` < 0 step 이 pilot 에서 4,412(smoke 95)이다. K 가 관찰한 진짜 겹침의 원인(perception)이 pilot 에서도 같은지는 이 기록의 숫자로 알 수 없다 | 아래 "범위 밖" |
+
+### 범위 밖으로 남긴 것 (K impl.md)
+
+- **AEGIS · KNOWS · multi-link 가 공통으로 쓰는 filter 의 장애물 cloud 품질**(`safety_common.ObstacleCloudSource._detect`, 이번 수정 범위 밖):
+  - GDINO box crop 에 **depth trim 이 없다**(`gt_seg` 경로에는 있다). 그래서 배경 depth 가 섞인다.
+  - `all_objects` 의 이름 `object#j` 가 camera 마다 j 를 다시 세서, head 와 wrist 의 서로 다른 물체가 한 cloud 로 합쳐진다.
+  - 그 결과 call 0 의 obstacle ellipsoid 반축이 **최대 0.77 m** 이고 시작부터 EE 가 그 안에 있다(`h*` < 0).
+- guidance arm 의 target box: head camera 가 cabinet 을 "black bowl" 로 잡는 경우가 있어 target 제외(perception)와 OmniGuide 의 첫 target cache 가 틀릴 수 있다.
+- knows 의 \|xyz\| > 1: 논문 Eq. 12 에 `δc` 상한이 없다(`max_delta_pos=None`, docs/16). 논문 정의라 그대로 뒀다. omniguide 의 served 가 1 을 약간 넘는 것도 OmniGuide 자체의 `factor·guide` 로 생기고 원 방법에도 action clamp 가 없다.
+
+### 측정하지 않은 것 (`not_measured`)
+
+| 항목 | 상태 |
+|---|---|
+| NUDGE CR(contact step 비율), OmniGuide safety rate | `metrics.py` 가 `not_available` 로 표시한다(step 별 contact log 필요) |
+| server 대 sidecar 의 process 별 GPU memory | whole-GPU `memory.used` 와 per-app 목록을 2 s 로 sampling 했다 |
+| 2 job 대 1 job 의 pilot outcome 동일성 | `none` 만 SL5c 와 `array_equal` 로 확인했다 |
+| privileged 변형 · Level II · 다른 suite · 20 episode 초과 | 하지 않았다 |
+| `--guidance-exec inline` | 돌리지 않았다(`callback` 만) |
+| 1 job 에서의 latency | pilot 은 2 job 병렬이다(issue 4) |
+| `h*` < 0 step 의 call 별 분포(closed-loop) | verify.json 의 `numbers` 에 없다 |
+| K 의 수정 전 · 후 CPU replay 비교 | 이 기록에 옮기지 않았다(impl.md 에 있다) |
+
+### 열린 항목
+
+1. 이 pilot 의 8 arm 결과를 사용자가 판정한다(해석은 위에 쓰지 않았다).
+2. 표 B-2 의 `ms.total` 은 2 job 병렬 값이다. 논문 latency 로 쓰려면 1 job 측정이 필요하다. issue 4 의 CFM 비교(`ms.total` 대 V3 `ms.serve`)의 정의 일치는 verifier 에게 확인을 요청한다.
+3. issue 1: CFM · knows 의 clip 전 \|a\| 가 1 을 크게 넘는 것을 어떻게 다룰지(known issue 로 둘지). lan_o3dp 가 smoke 와 pilot 에서 다른 이유.
+4. issue 2: omniguide 가 `none` 과 거의 같은 이유의 분석 여부.
+5. 범위 밖 항목(filter 장애물 cloud 의 depth trim · camera 간 이름 합침, guidance target box)의 수정 여부 — 사용자 결정.
+6. pilot 규모 확대(episode 수, Level II, 다른 suite)와 privileged 변형 — 사용자 결정.
+7. `closed_loop/` · `methods/` 의 commit 정리와 verifier 의 figure(`figures/baselines/closed_loop/v5*`, 현재 untracked)의 commit — 사용자 판정 후.
 
 ### 판정
 
