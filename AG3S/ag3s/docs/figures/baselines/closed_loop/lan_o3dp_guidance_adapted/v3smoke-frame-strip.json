@@ -1,0 +1,17 @@
+{
+ "run": "20261024T163341_16d0eea18e44_clm-v3smoke-LI-lan_o3dp_guidance_adapted",
+ "frames_obs_index": [
+  20,
+  60,
+  72,
+  120,
+  200,
+  300
+ ],
+ "collide_t": 72,
+ "collided": true,
+ "obstacle": "moka_pot_obstacle_1",
+ "max_displacement_m": 0.005425605268982045,
+ "official_success": false,
+ "image_display": "obs images rotated 180 deg ([::-1, ::-1]) for display"
+}

@@ -1,0 +1,16 @@
+{
+ "run": "20261024T161250_16d0eea18e44_clm-v3smoke-LI-aegis",
+ "frames_obs_index": [
+  20,
+  60,
+  120,
+  200,
+  300
+ ],
+ "collide_t": null,
+ "collided": false,
+ "obstacle": "moka_pot_obstacle_1",
+ "max_displacement_m": 2.3512441993389643e-13,
+ "official_success": false,
+ "image_display": "obs images rotated 180 deg ([::-1, ::-1]) for display"
+}

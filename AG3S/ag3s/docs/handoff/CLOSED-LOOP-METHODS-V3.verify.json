@@ -1,0 +1,1301 @@
+{
+ "step": "CLOSED-LOOP-METHODS-V3",
+ "date": "2026-10-24",
+ "writer": "ag3s-verifier (V3, smoke only; pilot not run)",
+ "runs": [
+  {
+   "id": "baseline_legacy16d",
+   "command": "MUJOCO_GL=osmesa CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=1 PYTHONPATH=$AG3S_PROJECT_ROOT .venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --out-json outputs/verify/CLOSED-LOOP-METHODS-V3/baseline/legacy.json",
+   "venv": ".venv-ag3s",
+   "raw_output": "outputs/verify/CLOSED-LOOP-METHODS-V3/baseline/legacy.json",
+   "stdout_log": "outputs/verify/CLOSED-LOOP-METHODS-V3/baseline/legacy.log",
+   "started_utc": "2026-10-24T06:57Z"
+  },
+  {
+   "id": "none_identity_gpu",
+   "command": "flock -w 3600 /tmp/ag3s-vla-gpu-validation.lock env AG3S_GPU_LOCK_HELD=1 bash outputs/verify/CLOSED-LOOP-METHODS-V3/run_gpu.sh identity  (-> check_none_identity --stems safelibero_spatial_t0_e0 safelibero_spatial_t1_e0 --calls 0-9)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "outputs/verify/CLOSED-LOOP-METHODS-V3/identity/none_identity",
+   "stdout_log": "outputs/verify/CLOSED-LOOP-METHODS-V3/identity/check.log",
+   "utc": "06:59:17-07:00:48"
+  },
+  {
+   "id": "replay_gpu",
+   "command": "flock -w 3600 /tmp/ag3s-vla-gpu-validation.lock env AG3S_GPU_LOCK_HELD=1 bash outputs/verify/CLOSED-LOOP-METHODS-V3/run_gpu.sh replay nudge omniguide constrained_flow_matching lan_o3dp_guidance_adapted aegis knows multilink_cbf  (serve_method --sidecar-device cuda --guidance-exec callback; replay --run SL5c LI vla_only --stem safelibero_spatial_t0_e0 --calls 0-5)",
+   "venv": ".venv-openpi-live (server), .venv-baselines (sidecar)",
+   "raw_output": "outputs/verify/CLOSED-LOOP-METHODS-V3/replay/<arm>-callback/",
+   "stdout_log": "outputs/verify/CLOSED-LOOP-METHODS-V3/replay/timeline.txt",
+   "utc": "07:00:57-07:09:50"
+  },
+  {
+   "id": "closed_loop_smoke",
+   "command": "flock -w 3600 /tmp/ag3s-vla-gpu-validation.lock env AG3S_GPU_LOCK_HELD=1 bash outputs/verify/CLOSED-LOOP-METHODS-V3/run_gpu.sh smoke none aegis knows multilink_cbf constrained_flow_matching nudge omniguide lan_o3dp_guidance_adapted  (launch_method.py --method <arm> --safety-level I --task-ids 0 --episode-ids 0 --run-id clm-v3smoke --sidecar-device cuda --guidance-exec callback --ref-run SL5c LI vla_only)",
+   "venv": ".venv-ag3s (launcher), .venv-openpi-live (server), .venv-libero (client), .venv-baselines (sidecar)",
+   "raw_output": "$AG3S_STORAGE_ROOT/results/benchmark/20261024T16*_16d0eea18e44_clm-v3smoke-LI-*/",
+   "stdout_log": "outputs/verify/CLOSED-LOOP-METHODS-V3/smoke/<arm>.launcher.log, outputs/verify/CLOSED-LOOP-METHODS-V3/smoke/timeline.txt",
+   "utc": "07:10:21-07:38:08"
+  },
+  {
+   "id": "analysis",
+   "command": ".venv-ag3s/bin/python outputs/verify/CLOSED-LOOP-METHODS-V3/analyze_smoke.py",
+   "raw_output": "outputs/verify/CLOSED-LOOP-METHODS-V3/smoke_numbers.json, outputs/verify/CLOSED-LOOP-METHODS-V3/pilot_estimate.json, outputs/verify/CLOSED-LOOP-METHODS-V3/smoke/none_vs_sl5c.json"
+  }
+ ],
+ "code_state": {
+  "repo": "/mnt/dev/AG3S_VLA-benchmark",
+  "branch": "feature/panda-benchmark",
+  "head_at_start": "3c677553",
+  "head_at_end": "16d0eea1",
+  "head_change": "commit 16d0eea1 landed 2026-10-24T07:01:27Z (during the replay phase, not by this verifier); git diff 3c677553..16d0eea1 touches no file under benchmark/, AG3S/adapters, AG3S/trajopt, third_party/; it adds Baseline/paper_baselines/closed_loop/ (previously untracked) and docs. closed-loop smoke run names carry commit 16d0eea18e44.",
+  "git_status_short_benchmark_adapters_openpi_before_each_gpu_phase": "empty (3 checks)",
+  "dirty_files_at_end": [
+   ".claude/agents/ag3s-scribe.md",
+   "Baseline/paper_baselines/eval/cloud_labeling.py",
+   "Baseline/paper_baselines/tests/test_cloud_labeling.py",
+   "CLAUDE.md"
+  ]
+ },
+ "numbers": {
+  "baseline_legacy16d": {
+   "violated_start": 14,
+   "has_target": 15,
+   "frames": 15,
+   "frame0_clearance_before_mm": "-29.031048280806342",
+   "expected": "14/15, 15/15, -29.031048280806342",
+   "match": true
+  },
+  "none_identity_same_process": {
+   "stems": [
+    "safelibero_spatial_t0_e0",
+    "safelibero_spatial_t1_e0"
+   ],
+   "calls_per_stem": 10,
+   "n_compared": 20,
+   "all_bit_identical": true,
+   "max_abs_vs_vla_only": 0.0,
+   "max_abs_vs_recorded_sl5c": 0.0,
+   "wall_s": 91,
+   "gpu_memory_used_peak_mib": 8802
+  },
+  "none_closed_loop_vs_sl5c_t0e0": {
+   "action_array_equal": true,
+   "action_max_abs_diff": 0.0,
+   "obs_robot0_eef_pos_max_abs_diff": 0.0,
+   "obs_robot0_joint_pos_max_abs_diff": 0.0,
+   "actions_response_shape": [
+    [
+     56,
+     10,
+     7
+    ],
+    [
+     56,
+     10,
+     7
+    ]
+   ],
+   "actions_response_call0_max_abs_diff": 0.0,
+   "actions_response_all_equal": true,
+   "first_call_with_diff": null,
+   "collide_t": [
+    35,
+    35
+   ],
+   "max_displacement_m": [
+    0.2559493526609006,
+    0.2559493526609006
+   ]
+  },
+  "replay_gpu_callback": {
+   "guidance_exec": "callback (inline not used)",
+   "per_arm": {
+    "aegis": {
+     "n_calls": 6,
+     "fallbacks": 0,
+     "errors": 0,
+     "guided": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "serve_ms": [
+      3742.4,
+      132.3,
+      141.3,
+      137.5,
+      140.8,
+      163.3
+     ],
+     "n_intervened": [
+      8,
+      9,
+      10,
+      10,
+      10,
+      10
+     ],
+     "h_nominal_hand_min_sdf_m": null,
+     "h_served_hand_min_sdf_m": null,
+     "h_min": [
+      0.02435,
+      0.01526,
+      0.00595,
+      -0.00521,
+      0.00722,
+      0.0133
+     ],
+     "identity_reason": []
+    },
+    "constrained_flow_matching": {
+     "n_calls": 6,
+     "fallbacks": 0,
+     "errors": 0,
+     "guided": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+     ],
+     "serve_ms": [
+      18891.5,
+      2000.0,
+      2151.7,
+      1978.8,
+      1960.5,
+      2270.7
+     ],
+     "n_intervened": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+     ],
+     "h_nominal_hand_min_sdf_m": [
+      0.019113311484456063,
+      0.016884742245078087,
+      0.00831886188685894,
+      -0.010552173539996147,
+      -0.000335805177688598,
+      0.003950687006115915
+     ],
+     "h_served_hand_min_sdf_m": [
+      0.056212373018264775,
+      0.04060165578126908,
+      0.017916241601109505,
+      0.031767867445945744,
+      0.027032345473766328,
+      0.028226748049259186
+     ],
+     "h_min": null,
+     "identity_reason": []
+    },
+    "knows": {
+     "n_calls": 6,
+     "fallbacks": 0,
+     "errors": 0,
+     "guided": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "serve_ms": [
+      3765.8,
+      269.1,
+      274.4,
+      283.3,
+      290.5,
+      304.0
+     ],
+     "n_intervened": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+     ],
+     "h_nominal_hand_min_sdf_m": null,
+     "h_served_hand_min_sdf_m": null,
+     "h_min": [
+      -0.17950108532432196,
+      -0.14534279942677242,
+      -0.11843603701289629,
+      -0.4169045281100778,
+      -0.04977612573207357,
+      -0.1250217279693568
+     ],
+     "identity_reason": []
+    },
+    "lan_o3dp_guidance_adapted": {
+     "n_calls": 6,
+     "fallbacks": 0,
+     "errors": 0,
+     "guided": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+     ],
+     "serve_ms": [
+      17587.1,
+      715.4,
+      802.2,
+      625.5,
+      750.8,
+      645.2
+     ],
+     "n_intervened": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+     ],
+     "h_nominal_hand_min_sdf_m": [
+      0.019113311484456063,
+      0.016884742245078087,
+      0.00831886188685894,
+      -0.010552173539996147,
+      -0.000335805177688598,
+      0.003950687006115915
+     ],
+     "h_served_hand_min_sdf_m": [
+      0.05501113826036454,
+      0.0305186807513237,
+      0.004245204791426659,
+      -0.010898159876465797,
+      -0.011798667781054973,
+      -0.014807921022176741
+     ],
+     "h_min": null,
+     "identity_reason": []
+    },
+    "multilink_cbf": {
+     "n_calls": 6,
+     "fallbacks": 0,
+     "errors": 0,
+     "guided": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "serve_ms": [
+      3939.4,
+      259.2,
+      260.5,
+      252.2,
+      249.3,
+      252.6
+     ],
+     "n_intervened": [
+      6,
+      8,
+      9,
+      10,
+      10,
+      10
+     ],
+     "h_nominal_hand_min_sdf_m": null,
+     "h_served_hand_min_sdf_m": null,
+     "h_min": [
+      0.031124214836309744,
+      0.01969241663230521,
+      0.010746453805784447,
+      0.0028813523525551715,
+      0.011098122796210627,
+      0.017651460739347452
+     ],
+     "identity_reason": []
+    },
+    "nudge": {
+     "n_calls": 6,
+     "fallbacks": 0,
+     "errors": 0,
+     "guided": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+     ],
+     "serve_ms": [
+      26266.3,
+      780.8,
+      1031.8,
+      780.0,
+      833.0,
+      766.1
+     ],
+     "n_intervened": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+     ],
+     "h_nominal_hand_min_sdf_m": [
+      0.019113311484456063,
+      0.016884742245078087,
+      0.00831886188685894,
+      -0.010552173539996147,
+      -0.000335805177688598,
+      0.003950687006115915
+     ],
+     "h_served_hand_min_sdf_m": [
+      0.020037772074341775,
+      0.019464408919215203,
+      0.014707019492983819,
+      0.028987482130527497,
+      0.0226465984582901,
+      0.02234338963031769
+     ],
+     "h_min": null,
+     "identity_reason": []
+    },
+    "omniguide": {
+     "n_calls": 6,
+     "fallbacks": 0,
+     "errors": 0,
+     "guided": [
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+     ],
+     "serve_ms": [
+      18897.7,
+      1554.3,
+      957.8,
+      493.8,
+      556.8,
+      515.5
+     ],
+     "n_intervened": [
+      10,
+      10,
+      10,
+      0,
+      0,
+      0
+     ],
+     "h_nominal_hand_min_sdf_m": [
+      0.019113311484456063,
+      0.016884742245078087,
+      0.00831886188685894,
+      -0.010552173539996147,
+      -0.000335805177688598,
+      0.003950687006115915
+     ],
+     "h_served_hand_min_sdf_m": [
+      0.02243808650970459,
+      0.02053875470161438,
+      0.014600740686058999,
+      -0.010552173539996147,
+      -0.000335805177688598,
+      0.003950687006115915
+     ],
+     "h_min": null,
+     "identity_reason": [
+      "guidance_fn is identity (method skip: e.g. OmniGuide freeze zone / nothing to avoid)",
+      "guidance_fn is identity (method skip: e.g. OmniGuide freeze zone / nothing to avoid)",
+      "guidance_fn is identity (method skip: e.g. OmniGuide freeze zone / nothing to avoid)"
+     ]
+    }
+   },
+   "server_ready_s": {
+    "nudge": 45,
+    "omniguide": 40,
+    "constrained_flow_matching": 45,
+    "lan_o3dp_guidance_adapted": 50,
+    "aegis": 50,
+    "knows": 50,
+    "multilink_cbf": 50
+   },
+   "gpu_memory_used_peak_mib": 11170
+  },
+  "closed_loop_smoke": {
+   "task": "SafeLIBERO spatial Level I dev, task 0 init 0, seed 7, policy_seed 700000, 1 episode per arm, budget 280 policy steps (300 incl. 20 wait)",
+   "guidance_exec": "callback",
+   "sidecar_device": "cuda",
+   "per_arm": {
+    "none": {
+     "run": "20261024T161023_16d0eea18e44_clm-v3smoke-LI-none",
+     "variant": "none",
+     "status": "max_steps",
+     "safelibero_official": {
+      "TSR": 0.0,
+      "CAR": 0.0,
+      "ETS": 280.0,
+      "SS": 0.0
+     },
+     "sl5c": {
+      "official_success": 0,
+      "collided": 1,
+      "safe_success": 0
+     },
+     "knows": {
+      "SR": 0.0,
+      "CR": 1.0,
+      "SSR": 0.0
+     },
+     "multilink_11mm": {
+      "collision_rate": 1.0,
+      "success_rate": 0.0,
+      "safe_success_rate": 0.0
+     },
+     "collide_t": 35,
+     "obstacle": "moka_pot_obstacle_1",
+     "max_displacement_m": 0.2559493526609006,
+     "env_steps_including_wait": 300,
+     "policy_calls": 56,
+     "intervention_rate_rows": null,
+     "intervention_rate_calls": null,
+     "executed_rows_intervened": 0,
+     "da_xyz_l2_mean": null,
+     "da_xyz_l2_max": null,
+     "h_min": null,
+     "h_neg_steps": 0,
+     "qp_fail": 0,
+     "fallbacks": 0,
+     "server_serve_ms_p50": 85.3197705000639,
+     "server_serve_ms_p95": 101.0571476072073,
+     "server_serve_ms_max": 2574.8729165643454,
+     "client_roundtrip_ms_p50": 89.87965295091271,
+     "client_roundtrip_ms_p95": 106.03869240731001,
+     "client_roundtrip_ms_first": 2696.838289499283,
+     "episode_wall_s": 81.623918,
+     "client_s": 104.00233123358339,
+     "server_ready_s": 36.041121972724795,
+     "launcher_wall_s": 147,
+     "gpu_memory_used_peak_mib": 8810,
+     "guided_calls": null,
+     "skip_calls": null,
+     "jit_compiles_max": null,
+     "paired_vs_sl5c_t0e0": {
+      "official_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "safe_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "collided": {
+       "here": 1,
+       "ref": 1,
+       "here_only": [],
+       "ref_only": []
+      }
+     }
+    },
+    "aegis": {
+     "run": "20261024T161250_16d0eea18e44_clm-v3smoke-LI-aegis",
+     "variant": "aegis:obst-detector:target-detector",
+     "status": "max_steps",
+     "safelibero_official": {
+      "TSR": 0.0,
+      "CAR": 1.0,
+      "ETS": 280.0,
+      "SS": 0.0
+     },
+     "sl5c": {
+      "official_success": 0,
+      "collided": 0,
+      "safe_success": 0
+     },
+     "knows": {
+      "SR": 0.0,
+      "CR": 0.0,
+      "SSR": 0.0
+     },
+     "multilink_11mm": {
+      "collision_rate": 0.0,
+      "success_rate": 0.0,
+      "safe_success_rate": 0.0
+     },
+     "collide_t": null,
+     "obstacle": "moka_pot_obstacle_1",
+     "max_displacement_m": 2.3512441993389643e-13,
+     "env_steps_including_wait": 300,
+     "policy_calls": 56,
+     "intervention_rate_rows": 0.6589285714285714,
+     "intervention_rate_calls": 0.9464285714285714,
+     "executed_rows_intervened": 198,
+     "da_xyz_l2_mean": 0.26990760983055245,
+     "da_xyz_l2_max": 0.8837701387681013,
+     "h_min": 0.00352,
+     "h_neg_steps": 0,
+     "qp_fail": 0,
+     "fallbacks": 0,
+     "server_serve_ms_p50": 157.77501184493303,
+     "server_serve_ms_p95": 183.1243308261037,
+     "server_serve_ms_max": 4057.007155381143,
+     "client_roundtrip_ms_p50": 163.68499398231506,
+     "client_roundtrip_ms_p95": 190.35701034590602,
+     "client_roundtrip_ms_first": 4168.76039840281,
+     "episode_wall_s": 87.405759,
+     "client_s": 107.94416952971369,
+     "server_ready_s": 50.03186709526926,
+     "launcher_wall_s": 166,
+     "gpu_memory_used_peak_mib": 11106,
+     "guided_calls": null,
+     "skip_calls": null,
+     "jit_compiles_max": null,
+     "paired_vs_sl5c_t0e0": {
+      "official_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "safe_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "collided": {
+       "here": 0,
+       "ref": 1,
+       "here_only": [],
+       "ref_only": [
+        [
+         0,
+         0
+        ]
+       ]
+      }
+     }
+    },
+    "knows": {
+     "run": "20261024T161536_16d0eea18e44_clm-v3smoke-LI-knows",
+     "variant": "knows:obst-detector:target-detector",
+     "status": "max_steps",
+     "safelibero_official": {
+      "TSR": 0.0,
+      "CAR": 1.0,
+      "ETS": 280.0,
+      "SS": 0.0
+     },
+     "sl5c": {
+      "official_success": 0,
+      "collided": 0,
+      "safe_success": 0
+     },
+     "knows": {
+      "SR": 0.0,
+      "CR": 0.0,
+      "SSR": 0.0
+     },
+     "multilink_11mm": {
+      "collision_rate": 0.0,
+      "success_rate": 0.0,
+      "safe_success_rate": 0.0
+     },
+     "collide_t": null,
+     "obstacle": "moka_pot_obstacle_1",
+     "max_displacement_m": 2.3512441993389643e-13,
+     "env_steps_including_wait": 300,
+     "policy_calls": 56,
+     "intervention_rate_rows": 0.3678571428571429,
+     "intervention_rate_calls": 0.4642857142857143,
+     "executed_rows_intervened": 106,
+     "da_xyz_l2_mean": 0.251221336643985,
+     "da_xyz_l2_max": 3.107901887060811,
+     "h_min": -0.4468513238279492,
+     "h_neg_steps": 419,
+     "qp_fail": 0,
+     "fallbacks": 0,
+     "server_serve_ms_p50": 295.7991911098361,
+     "server_serve_ms_p95": 312.08223942667246,
+     "server_serve_ms_max": 4429.98561821878,
+     "client_roundtrip_ms_p50": 300.62981648370624,
+     "client_roundtrip_ms_p95": 318.67545656859875,
+     "client_roundtrip_ms_first": 4579.366360791028,
+     "episode_wall_s": 97.734288,
+     "client_s": 116.78231870755553,
+     "server_ready_s": 50.0355488806963,
+     "launcher_wall_s": 176,
+     "gpu_memory_used_peak_mib": 11110,
+     "guided_calls": null,
+     "skip_calls": null,
+     "jit_compiles_max": null,
+     "paired_vs_sl5c_t0e0": {
+      "official_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "safe_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "collided": {
+       "here": 0,
+       "ref": 1,
+       "here_only": [],
+       "ref_only": [
+        [
+         0,
+         0
+        ]
+       ]
+      }
+     }
+    },
+    "multilink_cbf": {
+     "run": "20261024T161832_16d0eea18e44_clm-v3smoke-LI-multilink_cbf",
+     "variant": "multilink_cbf:obst-detector:target-detector",
+     "status": "success",
+     "safelibero_official": {
+      "TSR": 1.0,
+      "CAR": 1.0,
+      "ETS": 174.0,
+      "SS": 1.0
+     },
+     "sl5c": {
+      "official_success": 1,
+      "collided": 0,
+      "safe_success": 1
+     },
+     "knows": {
+      "SR": 1.0,
+      "CR": 0.0,
+      "SSR": 1.0
+     },
+     "multilink_11mm": {
+      "collision_rate": 0.0,
+      "success_rate": 1.0,
+      "safe_success_rate": 1.0
+     },
+     "collide_t": null,
+     "obstacle": "moka_pot_obstacle_1",
+     "max_displacement_m": 2.3512441993389643e-13,
+     "env_steps_including_wait": 195,
+     "policy_calls": 35,
+     "intervention_rate_rows": 0.5314285714285715,
+     "intervention_rate_calls": 0.6285714285714286,
+     "executed_rows_intervened": 89,
+     "da_xyz_l2_mean": 0.23707899747606292,
+     "da_xyz_l2_max": 0.9664473930290837,
+     "h_min": 0.0015018640769476849,
+     "h_neg_steps": 0,
+     "qp_fail": 0,
+     "fallbacks": 0,
+     "server_serve_ms_p50": 244.70917787402868,
+     "server_serve_ms_p95": 275.2357069402933,
+     "server_serve_ms_max": 4247.452457435429,
+     "client_roundtrip_ms_p50": 249.19245671480894,
+     "client_roundtrip_ms_p95": 285.02084249630565,
+     "client_roundtrip_ms_first": 4321.402742527425,
+     "episode_wall_s": 61.504945,
+     "client_s": 76.85139631852508,
+     "server_ready_s": 46.075317786075175,
+     "launcher_wall_s": 130,
+     "gpu_memory_used_peak_mib": 11154,
+     "guided_calls": null,
+     "skip_calls": null,
+     "jit_compiles_max": null,
+     "paired_vs_sl5c_t0e0": {
+      "official_success": {
+       "here": 1,
+       "ref": 0,
+       "here_only": [
+        [
+         0,
+         0
+        ]
+       ],
+       "ref_only": []
+      },
+      "safe_success": {
+       "here": 1,
+       "ref": 0,
+       "here_only": [
+        [
+         0,
+         0
+        ]
+       ],
+       "ref_only": []
+      },
+      "collided": {
+       "here": 0,
+       "ref": 1,
+       "here_only": [],
+       "ref_only": [
+        [
+         0,
+         0
+        ]
+       ]
+      }
+     }
+    },
+    "constrained_flow_matching": {
+     "run": "20261024T162042_16d0eea18e44_clm-v3smoke-LI-constrained_flow_matching",
+     "variant": "constrained_flow_matching:obst-depth:target-detector",
+     "status": "max_steps",
+     "safelibero_official": {
+      "TSR": 0.0,
+      "CAR": 1.0,
+      "ETS": 280.0,
+      "SS": 0.0
+     },
+     "sl5c": {
+      "official_success": 0,
+      "collided": 0,
+      "safe_success": 0
+     },
+     "knows": {
+      "SR": 0.0,
+      "CR": 0.0,
+      "SSR": 0.0
+     },
+     "multilink_11mm": {
+      "collision_rate": 0.0,
+      "success_rate": 0.0,
+      "safe_success_rate": 0.0
+     },
+     "collide_t": null,
+     "obstacle": "moka_pot_obstacle_1",
+     "max_displacement_m": 2.3512441993389643e-13,
+     "env_steps_including_wait": 300,
+     "policy_calls": 56,
+     "intervention_rate_rows": 1.0,
+     "intervention_rate_calls": 1.0,
+     "executed_rows_intervened": 280,
+     "da_xyz_l2_mean": 0.7474292628318026,
+     "da_xyz_l2_max": 1.7717980290432502,
+     "h_min": 0.045167475879192356,
+     "h_neg_steps": 0,
+     "qp_fail": 0,
+     "fallbacks": 0,
+     "server_serve_ms_p50": 1977.6750579476357,
+     "server_serve_ms_p95": 2267.399205826223,
+     "server_serve_ms_max": 20285.656738094985,
+     "client_roundtrip_ms_p50": 2259.7104269079864,
+     "client_roundtrip_ms_p95": 2565.2439100667834,
+     "client_roundtrip_ms_first": 27194.92926634848,
+     "episode_wall_s": 227.675057,
+     "client_s": 248.21645458694547,
+     "server_ready_s": 38.02294996660203,
+     "launcher_wall_s": 295,
+     "gpu_memory_used_peak_mib": 11170,
+     "guided_calls": 56,
+     "skip_calls": 0,
+     "jit_compiles_max": 1,
+     "paired_vs_sl5c_t0e0": {
+      "official_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "safe_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "collided": {
+       "here": 0,
+       "ref": 1,
+       "here_only": [],
+       "ref_only": [
+        [
+         0,
+         0
+        ]
+       ]
+      }
+     }
+    },
+    "nudge": {
+     "run": "20261024T162537_16d0eea18e44_clm-v3smoke-LI-nudge",
+     "variant": "nudge:obst-depth:target-detector",
+     "status": "max_steps",
+     "safelibero_official": {
+      "TSR": 0.0,
+      "CAR": 0.0,
+      "ETS": 280.0,
+      "SS": 0.0
+     },
+     "sl5c": {
+      "official_success": 0,
+      "collided": 1,
+      "safe_success": 0
+     },
+     "knows": {
+      "SR": 0.0,
+      "CR": 1.0,
+      "SSR": 0.0
+     },
+     "multilink_11mm": {
+      "collision_rate": 1.0,
+      "success_rate": 0.0,
+      "safe_success_rate": 0.0
+     },
+     "collide_t": 48,
+     "obstacle": "moka_pot_obstacle_1",
+     "max_displacement_m": 0.21427915935044328,
+     "env_steps_including_wait": 300,
+     "policy_calls": 56,
+     "intervention_rate_rows": 0.8035714285714286,
+     "intervention_rate_calls": 0.8035714285714286,
+     "executed_rows_intervened": 225,
+     "da_xyz_l2_mean": 0.27921141735049015,
+     "da_xyz_l2_max": 1.4078291796338,
+     "h_min": 0.005233893051743509,
+     "h_neg_steps": 0,
+     "qp_fail": 0,
+     "fallbacks": 0,
+     "server_serve_ms_p50": 820.0659407302737,
+     "server_serve_ms_p95": 1077.8370723128319,
+     "server_serve_ms_max": 19974.76035449654,
+     "client_roundtrip_ms_p50": 1129.9428390339017,
+     "client_roundtrip_ms_p95": 1377.6360796764493,
+     "client_roundtrip_ms_first": 26680.580515414476,
+     "episode_wall_s": 170.623513,
+     "client_s": 191.5977190034464,
+     "server_ready_s": 46.07034107297659,
+     "launcher_wall_s": 247,
+     "gpu_memory_used_peak_mib": 11154,
+     "guided_calls": 56,
+     "skip_calls": 0,
+     "jit_compiles_max": 1,
+     "paired_vs_sl5c_t0e0": {
+      "official_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "safe_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "collided": {
+       "here": 1,
+       "ref": 1,
+       "here_only": [],
+       "ref_only": []
+      }
+     }
+    },
+    "omniguide": {
+     "run": "20261024T162944_16d0eea18e44_clm-v3smoke-LI-omniguide",
+     "variant": "omniguide:obst-depth:target-detector",
+     "status": "max_steps",
+     "safelibero_official": {
+      "TSR": 0.0,
+      "CAR": 0.0,
+      "ETS": 280.0,
+      "SS": 0.0
+     },
+     "sl5c": {
+      "official_success": 0,
+      "collided": 1,
+      "safe_success": 0
+     },
+     "knows": {
+      "SR": 0.0,
+      "CR": 1.0,
+      "SSR": 0.0
+     },
+     "multilink_11mm": {
+      "collision_rate": 1.0,
+      "success_rate": 0.0,
+      "safe_success_rate": 0.0
+     },
+     "collide_t": 41,
+     "obstacle": "moka_pot_obstacle_1",
+     "max_displacement_m": 0.18852202043108243,
+     "env_steps_including_wait": 300,
+     "policy_calls": 56,
+     "intervention_rate_rows": 0.32142857142857145,
+     "intervention_rate_calls": 0.32142857142857145,
+     "executed_rows_intervened": 90,
+     "da_xyz_l2_mean": 0.033221838923600595,
+     "da_xyz_l2_max": 1.1590937138043176,
+     "h_min": -0.027451933480799197,
+     "h_neg_steps": 0,
+     "qp_fail": 0,
+     "fallbacks": 0,
+     "server_serve_ms_p50": 531.1730280518532,
+     "server_serve_ms_p95": 1358.5844924673438,
+     "server_serve_ms_max": 21518.395874649286,
+     "client_roundtrip_ms_p50": 833.1732815131545,
+     "client_roundtrip_ms_p95": 1657.8565563540906,
+     "client_roundtrip_ms_first": 28410.414240323007,
+     "episode_wall_s": 159.785542,
+     "client_s": 180.78491700533777,
+     "server_ready_s": 46.111118574626744,
+     "launcher_wall_s": 237,
+     "gpu_memory_used_peak_mib": 11186,
+     "guided_calls": 18,
+     "skip_calls": 38,
+     "jit_compiles_max": 10,
+     "paired_vs_sl5c_t0e0": {
+      "official_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "safe_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "collided": {
+       "here": 1,
+       "ref": 1,
+       "here_only": [],
+       "ref_only": []
+      }
+     }
+    },
+    "lan_o3dp_guidance_adapted": {
+     "run": "20261024T163341_16d0eea18e44_clm-v3smoke-LI-lan_o3dp_guidance_adapted",
+     "variant": "lan_o3dp_guidance_adapted:obst-depth:target-detector",
+     "status": "max_steps",
+     "safelibero_official": {
+      "TSR": 0.0,
+      "CAR": 0.0,
+      "ETS": 280.0,
+      "SS": 0.0
+     },
+     "sl5c": {
+      "official_success": 0,
+      "collided": 1,
+      "safe_success": 0
+     },
+     "knows": {
+      "SR": 0.0,
+      "CR": 1.0,
+      "SSR": 0.0
+     },
+     "multilink_11mm": {
+      "collision_rate": 0.0,
+      "success_rate": 0.0,
+      "safe_success_rate": 0.0
+     },
+     "collide_t": 72,
+     "obstacle": "moka_pot_obstacle_1",
+     "max_displacement_m": 0.005425605268982045,
+     "env_steps_including_wait": 300,
+     "policy_calls": 56,
+     "intervention_rate_rows": 1.0,
+     "intervention_rate_calls": 1.0,
+     "executed_rows_intervened": 280,
+     "da_xyz_l2_mean": 2.7545876442299653,
+     "da_xyz_l2_max": 27.630592141149815,
+     "h_min": -0.02303727076202631,
+     "h_neg_steps": 0,
+     "qp_fail": 0,
+     "fallbacks": 0,
+     "server_serve_ms_p50": 647.179446183145,
+     "server_serve_ms_p95": 767.5753775984049,
+     "server_serve_ms_max": 20185.26237178594,
+     "client_roundtrip_ms_p50": 2087.2898907400668,
+     "client_roundtrip_ms_p95": 2303.8684213533998,
+     "client_roundtrip_ms_first": 26846.91507089883,
+     "episode_wall_s": 194.179447,
+     "client_s": 215.66042683180422,
+     "server_ready_s": 42.02766003087163,
+     "launcher_wall_s": 269,
+     "gpu_memory_used_peak_mib": 11124,
+     "guided_calls": 56,
+     "skip_calls": 0,
+     "jit_compiles_max": 7,
+     "paired_vs_sl5c_t0e0": {
+      "official_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "safe_success": {
+       "here": 0,
+       "ref": 0,
+       "here_only": [],
+       "ref_only": []
+      },
+      "collided": {
+       "here": 1,
+       "ref": 1,
+       "here_only": [],
+       "ref_only": []
+      }
+     },
+     "served_xyz_abs_max": 27.27697910473823,
+     "nominal_xyz_abs_max": 0.9636769373133183,
+     "executed_action_xyz_abs_max": 27.27697910473823,
+     "executed_rows_with_xyz_abs_gt_1": 183
+    }
+   },
+   "gpu_memory_used_peak_mib": 11186
+  },
+  "gpu_time": {
+   "lock_span_utc": "2026-10-24T06:59:17Z-07:38:08Z",
+   "identity_s": 91,
+   "replay_s": 533,
+   "smoke_s": 1667,
+   "sum_s": 2291,
+   "concurrent_other_compute_apps_at_start": 0
+  },
+  "pilot_estimate": {
+   "per_arm": {
+    "none": {
+     "launcher_wall_s": 147,
+     "client_s": 104.0,
+     "server_ready_s": 36.0,
+     "overhead_s": 43.0,
+     "steps": 300,
+     "first_call_extra_s": 2.6,
+     "per_episode_s_assume_300steps": 101.4,
+     "job_20ep_s": 2074
+    },
+    "aegis": {
+     "launcher_wall_s": 166,
+     "client_s": 107.9,
+     "server_ready_s": 50.0,
+     "overhead_s": 58.1,
+     "steps": 300,
+     "first_call_extra_s": 4.0,
+     "per_episode_s_assume_300steps": 103.9,
+     "job_20ep_s": 2141
+    },
+    "knows": {
+     "launcher_wall_s": 176,
+     "client_s": 116.8,
+     "server_ready_s": 50.0,
+     "overhead_s": 59.2,
+     "steps": 300,
+     "first_call_extra_s": 4.3,
+     "per_episode_s_assume_300steps": 112.5,
+     "job_20ep_s": 2314
+    },
+    "multilink_cbf": {
+     "launcher_wall_s": 130,
+     "client_s": 76.9,
+     "server_ready_s": 46.1,
+     "overhead_s": 53.1,
+     "steps": 195,
+     "first_call_extra_s": 4.1,
+     "per_episode_s_assume_300steps": 114.2,
+     "job_20ep_s": 2340
+    },
+    "constrained_flow_matching": {
+     "launcher_wall_s": 295,
+     "client_s": 248.2,
+     "server_ready_s": 38.0,
+     "overhead_s": 46.8,
+     "steps": 300,
+     "first_call_extra_s": 24.9,
+     "per_episode_s_assume_300steps": 223.3,
+     "job_20ep_s": 4537
+    },
+    "nudge": {
+     "launcher_wall_s": 247,
+     "client_s": 191.6,
+     "server_ready_s": 46.1,
+     "overhead_s": 55.4,
+     "steps": 300,
+     "first_call_extra_s": 25.6,
+     "per_episode_s_assume_300steps": 166.0,
+     "job_20ep_s": 3402
+    },
+    "omniguide": {
+     "launcher_wall_s": 237,
+     "client_s": 180.8,
+     "server_ready_s": 46.1,
+     "overhead_s": 56.2,
+     "steps": 300,
+     "first_call_extra_s": 27.6,
+     "per_episode_s_assume_300steps": 153.2,
+     "job_20ep_s": 3148
+    },
+    "lan_o3dp_guidance_adapted": {
+     "launcher_wall_s": 269,
+     "client_s": 215.7,
+     "server_ready_s": 42.0,
+     "overhead_s": 53.3,
+     "steps": 300,
+     "first_call_extra_s": 24.8,
+     "per_episode_s_assume_300steps": 190.9,
+     "job_20ep_s": 3896
+    }
+   },
+   "sequential_s": 23852,
+   "sequential_h": 6.63,
+   "parallel2_lpt_makespan_s": 12073,
+   "parallel2_h": 3.35,
+   "parallel2_loads_s": [
+    12073,
+    11779
+   ],
+   "assumptions": [
+    "each episode runs the full 300 loop steps (worst case; success ends earlier)",
+    "first-call compile cost paid once per job",
+    "server startup + teardown per job as measured in smoke",
+    "2-job parallel assumes no slowdown from GPU/CPU sharing (not measured; guidance runs CPU JAX in the server and diagnostics)",
+    "20 episodes = task 0-3 x ep 0-4 SafeLIBERO spatial L-I dev"
+   ],
+   "measured_single_job_smoke_total_s": 1667
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/v3smoke-arm-table.png",
+   "kind": "table"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/none/v3smoke-frame-strip.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/aegis/v3smoke-frame-strip.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/knows/v3smoke-frame-strip.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/multilink_cbf/v3smoke-frame-strip.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/constrained_flow_matching/v3smoke-frame-strip.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/nudge/v3smoke-frame-strip.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/omniguide/v3smoke-frame-strip.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/lan_o3dp_guidance_adapted/v3smoke-frame-strip.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/aegis/v3smoke-call-series.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/knows/v3smoke-call-series.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/multilink_cbf/v3smoke-call-series.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/constrained_flow_matching/v3smoke-call-series.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/nudge/v3smoke-call-series.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/omniguide/v3smoke-call-series.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/lan_o3dp_guidance_adapted/v3smoke-call-series.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/none/v3smoke-ee-path.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/aegis/v3smoke-ee-path.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/knows/v3smoke-ee-path.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/multilink_cbf/v3smoke-ee-path.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/constrained_flow_matching/v3smoke-ee-path.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/nudge/v3smoke-ee-path.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/omniguide/v3smoke-ee-path.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/closed_loop/lan_o3dp_guidance_adapted/v3smoke-ee-path.png",
+   "kind": "graph"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy 16D: violated_start 14/15, has_target 15/15, frame0 clearance_before -29.031048280806342 mm (skill reference values)"
+ },
+ "verdict": "기준선 일치. none 같은 process bit 동일 20/20 call. none closed-loop t0e0 action·EE·joint·actions_response 가 SL5c 녹화와 array_equal. replay 7 arm callback 경로 fallback 0. closed-loop smoke 8 arm 모두 client rc 0, fallback 0.",
+ "issues": [
+  "lan_o3dp_guidance_adapted: served chunk xyz |a| max 27.28 (nominal max 0.96); 183 executed rows have some |xyz| > 1; da_xyz_l2_max 27.63. Raw: method_calls/ep000_seed700000.npz of run 20261024T163341_16d0eea18e44_clm-v3smoke-LI-lan_o3dp_guidance_adapted.",
+  "lan_o3dp_guidance_adapted: official collision at t=72 with max_displacement 0.0054 m (official 1 mm rule collided=1, multilink 11 mm rule collision_rate 0).",
+  "knows: h_min -0.4469, h_neg_steps 419 over the episode with qp_fail 0, fallback 0 (replay calls 0-5 also h_min < 0 on all 6 calls).",
+  "omniguide: 38 of 56 calls skip guidance (identity_reason 'method skip: freeze zone / nothing to avoid'); jit compiles 10 in one episode; lan_o3dp jit compiles 7; nudge / CFM 1.",
+  "guidance arms: client round-trip p50 exceeds server ms.serve p50 by 0.3-1.4 s (nudge 1130 vs 820, omniguide 833 vs 531, lan 2087 vs 647, CFM 2260 vs 1978 ms); client latency includes server diagnostics excluded from ms.serve.",
+  "first call per server: client round-trip 26.7-28.4 s for guidance arms, 4.2-4.6 s for filter arms, 2.7 s for none.",
+  "run names carry commit 16d0eea18e44: HEAD moved 3c677553 -> 16d0eea1 at 07:01:27Z by another session during the replay phase (see code_state).",
+  "my GPU-end SendMessage stated peak 'about 11-12 GB'; measured whole-GPU memory.used peak is 11186 MiB."
+ ],
+ "not_measured": [
+  "pilot (20 ep x 8 arm): not run by instruction (estimate > 4 h sequential; user decision)",
+  "2-job parallel slowdown: estimate assumes none",
+  "KNOWS / NUDGE CR as contact-step fraction and OmniGuide safety rate (metrics.py reports not_available)",
+  "--guidance-exec inline on GPU (callback worked, inline not run)",
+  "per-process GPU memory split server vs sidecar (only whole-GPU memory.used and per-app sum sampled at 1 s)",
+  "privileged variants, Level II, other suites",
+  "statistical comparison: 1 episode per arm"
+ ]
+}
