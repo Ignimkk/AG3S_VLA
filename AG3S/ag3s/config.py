@@ -1082,6 +1082,11 @@ class EsdfConfig:
     #: 세지 않되 가장 가까운 pixel 자체는 robot 이 아니고 뒤를 봐야 한다 — 손이 가린 것은 여전히 지우지 않는다).
     roi_carve_footprint_robot: str = "block"
     ROI_CARVE_FOOTPRINT_ROBOT = ("block", "ignore")
+    #: **AG3S-ROI-CARVE-GPU** — where ② judges: ``cpu`` (기본, numpy · scipy — 점유 voxel 을 host 로 내린다) 또는 ``cuda``
+    #: (같은 판정을 torch 로 GPU 에서 — 점유 voxel · 투영 · 영역 최솟값 filter 가 GPU 에 머물고 개수만 host 로 온다).
+    #: 판정 규칙은 같다 (float64 투영의 마지막 bit 차이만 가능, `roi_carve_profile --compare-gpu` 로 잰다).
+    roi_carve_device: str = "cpu"
+    ROI_CARVE_DEVICE = ("cpu", "cuda")
     #: Recompute the distance transform only inside the changed region, padded by `max_distance`.
     incremental: bool = True
     #: Side of the cube the local update works in, in voxels. Smaller blocks recompute less but
@@ -1478,6 +1483,10 @@ class EsdfConfig:
             raise AG3SConfigError(f"esdf.roi_carve_footprint_robot 는 {self.ROI_CARVE_FOOTPRINT_ROBOT} 중 하나여야 합니다: {self.roi_carve_footprint_robot!r}")
         if self.roi_carve_footprint and not self.roi_carve:
             raise AG3SConfigError("esdf.roi_carve_footprint 는 esdf.roi_carve 의 판정 방식이다 — roi_carve 와 함께 켠다")
+        if self.roi_carve_device not in self.ROI_CARVE_DEVICE:
+            raise AG3SConfigError(f"esdf.roi_carve_device 는 {self.ROI_CARVE_DEVICE} 중 하나여야 합니다: {self.roi_carve_device!r}")
+        if self.roi_carve_device != "cpu" and not self.roi_carve:
+            raise AG3SConfigError("esdf.roi_carve_device 는 esdf.roi_carve 의 실행 위치다 — roi_carve 와 함께 켠다")
         for name in ("target_layer", "roi_carve", "roi_carve_footprint"):
             if not isinstance(getattr(self, name), bool):
                 raise AG3SConfigError(f"esdf.{name} 는 true 또는 false 여야 합니다: {getattr(self, name)!r}")

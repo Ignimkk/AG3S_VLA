@@ -1,0 +1,33 @@
+{
+ "episode": 1345,
+ "request": 13,
+ "chunk": "chunk_00042.npz",
+ "geom": 1052,
+ "geom_to_orange_min_mm": 0.764,
+ "contact_region_n": 30,
+ "contact_region_centre_base_m": [
+  0.473,
+  0.2908,
+  0.87
+ ],
+ "contact_region_outside_nearest_sphere_mm": [
+  9.272,
+  14.821
+ ],
+ "sphere_radius_mm": {
+  "ee_finger_l1": [
+   2.54,
+   8.44
+  ],
+  "ee_finger_l2": [
+   2.54,
+   8.44
+  ],
+  "ee_left": [
+   5.7,
+   6.22
+  ]
+ },
+ "slice_z_m": 0.8697,
+ "field": "esdf_distance (main fine layer, recorded)"
+}

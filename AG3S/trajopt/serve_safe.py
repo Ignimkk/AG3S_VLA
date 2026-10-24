@@ -974,13 +974,16 @@ def dynamic_field_section(args) -> dict:
         out["roi_carve_footprint_robot"] = str(args.roi_carve_footprint_robot)
     if roi_carve_serving_default(args):
         out.update(ROI_CARVE_SERVING_DEFAULT)
+    if getattr(args, "roi_carve_device", None) is not None:   # AG3S-ROI-CARVE-GPU: where ② judges (not a carve flag)
+        out["roi_carve_device"] = str(args.roi_carve_device)
     return out
 
 
 #: AG3S-TASK-DYNAMIC-MAP E4 (2026-10-24, task §10 · user ruling): the adopted region-of-interest carve — what a cuRobo AG3S
 #: server runs when no carve flag is given. `--no-roi-carve` = none of these keys (the esdf config as before).
+#: AG3S-ROI-CARVE-GPU (2026-10-25, task G1–G3): judged on the GPU — the same voxels freed, `--roi-carve-device cpu` = numpy.
 ROI_CARVE_SERVING_DEFAULT = {"roi_carve": True, "roi_carve_footprint": True, "roi_carve_footprint_pad_px": 0,
-                             "roi_carve_footprint_robot": "ignore"}
+                             "roi_carve_footprint_robot": "ignore", "roi_carve_device": "cuda"}
 _ROI_CARVE_FLAGS = ("roi_carve", "roi_pad_mm", "roi_carve_footprint", "roi_carve_footprint_pad_px", "roi_carve_footprint_robot")
 
 
@@ -1071,7 +1074,8 @@ def ag3s_from_args(args, *, plan_horizon_steps, rows_per_step):
             "ON (serving default: footprint · pad 0 px · robot pixels ignored — --no-roi-carve turns it off)"
             if roi_carve_serving_default(args) else
             "OFF (--no-roi-carve)" if getattr(args, "no_roi_carve", False) else
-            f"ON (explicit flags: {({k: v for k, v in sec.items() if k.startswith('roi')})})" if sec.get("roi_carve") else "OFF"))
+            f"ON (explicit flags: {({k: v for k, v in sec.items() if k.startswith('roi')})})" if sec.get("roi_carve") else "OFF")
+            + (f" · judged on {sec.get('roi_carve_device', 'cpu')}" if sec.get("roi_carve") else ""))
     return build_ag3s(args.model_xml, voxel=args.voxel,
                       range_max=args.range_max, links=args.links,
                       backend=args.esdf_backend,
@@ -1873,6 +1877,9 @@ def build_parser() -> argparse.ArgumentParser:
                     help="② 영역 판정의 여유 pixel (기본 config esdf.roi_carve_footprint_pad_px = 1)")
     ap.add_argument("--roi-carve-footprint-robot", choices=("block", "ignore"), default=None,
                     help="② 영역 안 robot pixel: block (판정 보류, 기본) · ignore (세지 않음; 가장 가까운 pixel 은 robot 아니고 뒤를 봐야 함)")
+    ap.add_argument("--roi-carve-device", choices=("cpu", "cuda"), default=None,
+                    help="AG3S-ROI-CARVE-GPU — ② 판정을 어디서: cpu (numpy · scipy) · cuda (torch, 같은 판정). "
+                         "기본 config esdf.roi_carve_device. carve flag 가 아니라 serving 기본값을 끄지 않는다")
     # AG3S-TASK-DYNAMIC-MAP — end
     # T46 F1 · F2 — begin
     ap.add_argument("--nontarget-evidence", choices=("proximity", "surface"), default=None,
@@ -2639,6 +2646,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
     if ((getattr(args, "target_layer", False) or getattr(args, "roi_carve", False))
             and getattr(args, "esdf_backend", None) != "curobo"):
         ap.error("--target-layer · --roi-carve 는 cuRobo TSDF 에 걸립니다 (--esdf-backend curobo)")
+    if getattr(args, "no_roi_carve", False) and getattr(args, "roi_carve_device", None) not in (None, "cpu"):
+        ap.error("--roi-carve-device 는 관심 영역 지우기의 실행 위치입니다 — --no-roi-carve 와 함께 쓸 수 없습니다")
     if getattr(args, "no_roi_carve", False) and any(getattr(args, n, None) not in (None, False) for n in _ROI_CARVE_FLAGS):
         ap.error("--no-roi-carve 와 관심 영역 지우기 flag (--roi-carve · --roi-pad-mm · --roi-carve-footprint*) 는 함께 쓸 수 없습니다")
     if ((getattr(args, "roi_carve_footprint_pad_px", None) is not None or getattr(args, "roi_carve_footprint_robot", None) is not None)

@@ -3,6 +3,7 @@
 > **이 파일은 동적 TSDF · 거리장 축의 정본 로그다 (2026-10-24 개설, 사용자 지시: "로그는 새로운 문서에 작성 — TSDF 다이나믹 이런 느낌으로").**
 > 작성: ag3s-scribe, **2026-10-24 17:3x KST** (`date -u` 08:28 UTC + 9 h).
 > E4 (가장자리 보존 완화 · serving 기본값 켬) 추가: **2026-10-24 19:3x KST** (`date -u` 10:29 UTC + 9 h).
+> `AG3S-ROI-CARVE-GPU` (§13: 관심 영역 지우기의 비용 원인 측정 · GPU 판정 · 1345 접촉 진단, 앞 요약의 미측정 주장 정정) 추가: **2026-10-25 04:5x KST** (`date -u` 2026-10-24 19:52 UTC + 9 h).
 > 앞으로 이 축의 STEP 은 여기에 이어 쓴다. `AG3S_T47_LOG.md` 5973 줄 이후에 있던 `AG3S-TASK-DYNAMIC-MAP` 의 1차 · 진단 · E2 기록은 이 문서로 옮겨 왔고 (그쪽은 줄을 지우지 않았다), E3 · E4 는 이 문서에만 있다.
 
 **프로젝트 목적.** AG3S 에서 VLA 의 visual attention 으로 target 과 obstacle 을 구분하고, target 을 충돌 대상에서 제외한 3D 환경 정보를 cuRobo 의 TSDF/ESDF 파이프라인으로 전달하는 전체 시스템을 구축한다. 이 문서는 그 중 **거리장이 시간에 따라 바뀌는 세계를 따라가는가** — 물체가 옮겨진 뒤 옛 자리의 잔상을 지우되, 손에 가려졌을 뿐 실제로 있는 장애물은 잊지 않는가 — 를 다룬다.
@@ -12,12 +13,12 @@
 | 항목 | 내용 |
 |---|---|
 | 정본 여부 | **동적 TSDF · 거리장 축의 정본 로그 (이어 쓰는 파일).** 이 축의 새 STEP · 추가 실험은 여기에 쓴다 |
-| 범위 | 옮겨진 물체의 옛 자리 지우기, target 전용 TSDF (`--target-layer`), 관심 영역 지우기 (`--roi-carve`) 와 그 개선 (`--roi-carve-footprint` 등). 현재 STEP = `AG3S-TASK-DYNAMIC-MAP` (1차 · 진단 · E2 · E3 · E4) |
+| 범위 | 옮겨진 물체의 옛 자리 지우기, target 전용 TSDF (`--target-layer`), 관심 영역 지우기 (`--roi-carve`) 와 그 개선 (`--roi-carve-footprint` 등). 현재 STEP = `AG3S-TASK-DYNAMIC-MAP` (1차 · 진단 · E2 · E3 · E4), `AG3S-ROI-CARVE-GPU` (§13) |
 | 다른 로그와의 관계 | [`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) (attention head · HSR · cuRobo 비교 등 T47 이후 STEP 의 정본) 와 [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md) (T46 까지) 는 이 문서가 쓰지 않는 다른 축이다. T47 로그 "AG3S-TASK-DYNAMIC-MAP" 절 (5973 줄 이후) 은 1차 · 진단 · E2 의 **원본**으로 남아 있고, 이 문서가 그것을 옮겨 이어 쓴다. 두 문서의 수치가 다르면 **이 문서가 우선**한다 |
-| 정본 숫자 | [`handoff/AG3S-TASK-DYNAMIC-MAP.verify.json`](handoff/AG3S-TASK-DYNAMIC-MAP.verify.json) 의 `numbers` 만 (lead 가 직접 측정). 설계 · 결과 전 고정 기준 · 사용자 판정: [`handoff/AG3S-TASK-DYNAMIC-MAP.task.md`](handoff/AG3S-TASK-DYNAMIC-MAP.task.md) |
+| 정본 숫자 | [`handoff/AG3S-TASK-DYNAMIC-MAP.verify.json`](handoff/AG3S-TASK-DYNAMIC-MAP.verify.json) 의 `numbers` 만 (lead 가 직접 측정). 설계 · 결과 전 고정 기준 · 사용자 판정: [`handoff/AG3S-TASK-DYNAMIC-MAP.task.md`](handoff/AG3S-TASK-DYNAMIC-MAP.task.md). **§13 의 숫자는** [`handoff/AG3S-ROI-CARVE-GPU.verify.json`](handoff/AG3S-ROI-CARVE-GPU.verify.json) 의 `numbers` (설계 · 기준: [`task`](handoff/AG3S-ROI-CARVE-GPU.task.md)) |
 | 앞선 STEP | `AG3S-DYNAMIC-FIELD` ([`task`](handoff/AG3S-DYNAMIC-FIELD.task.md) · [`verify.json`](handoff/AG3S-DYNAMIC-FIELD.verify.json)), `IFG-APPLE-NBC-TARGETSURFACE` ([`verify.json`](handoff/IFG-APPLE-NBC-TARGETSURFACE.verify.json)), `IFG-211-GRASP` ([`task`](handoff/IFG-211-GRASP.task.md), commit `8da37119`). 이 로그에 절이 없다 (링크만 한다) |
 | 수치 출처 표기 | `[V]` = `verify.json` 의 `numbers` (키를 적는다). `[D]` = 같은 `numbers` 에서 이 문서가 계산한 값 (식을 적는다). `[T]` = task 문서의 정의 · 사용자 판정 · lead 전달. `[H]` = 측정하지 않은 가설. `[I]` = 기록자의 정리 |
-| 판정과 serving 기본값 | 이 문서의 "채택 · 미채택" 은 task 에 **결과 전에 고정한 기준**을 적용한 STEP 판정이다. ~~서버 기본값은 모든 flag 가 꺼짐이고, 변경은 사용자 판정으로 한다~~ → **E4 채택으로 serving 기본값을 켰다 (2026-10-24, §8.7).** 켜지는 조건은 `--esdf-backend curobo` + AG3S 켬 + 관심 영역 flag 없음, 끄기는 `--no-roi-carve`, `EsdfConfig` 코드 기본값은 꺼짐 유지 |
+| 판정과 serving 기본값 | 이 문서의 "채택 · 미채택" 은 task 에 **결과 전에 고정한 기준**을 적용한 STEP 판정이다. ~~서버 기본값은 모든 flag 가 꺼짐이고, 변경은 사용자 판정으로 한다~~ → **E4 채택으로 serving 기본값을 켰다 (2026-10-24, §8.7).** 켜지는 조건은 `--esdf-backend curobo` + AG3S 켬 + 관심 영역 flag 없음, 끄기는 `--no-roi-carve`, `EsdfConfig` 코드 기본값은 꺼짐 유지. **2026-10-25: 관심 영역 지우기의 점유 voxel 판정을 GPU (`roi_carve_device: cuda`) 로 하는 것도 serving 기본값에 포함했다 (§13, 사전 고정 G1–G3 통과). 되돌리기는 `--roi-carve-device cpu`. `EsdfConfig` 코드 기본값은 `cpu`** |
 
 ## 용어
 
@@ -42,6 +43,9 @@
 | **판정 보류 (`--roi-carve-footprint-robot ignore`)** | 투영 영역 안에 robot mask pixel 이 하나라도 있으면 그 voxel 의 지우기 판정을 보류하던 규칙 (E3) 에서, 영역 안 robot pixel 을 보류 사유로 세지 않는 것. 가장 가까운 pixel 자체는 robot 이 아니고 voxel 보다 margin 넘게 뒤를 봐야 지운다 (손이 직접 가린 자리는 지우지 않는다) |
 | **E2 · E3 · E4** | E2 = 관심 영역 지우기 구성을 VLA 단독 성공 사과 18 장면 전부로 넓혀 기준 구성과 다시 비교 (task §8). E3 = 가장자리 보존 구성을 같은 18 장면에서 시험 (task §9). E4 = 가장자리 보존 완화 구성을 같은 18 장면에서 시험 (task §10). 판정은 모두 결과 전에 고정 |
 | **합성 장면 test** | 30 mm 기둥을 depth 로 직접 그려 판정이 기둥 옆면 표본을 잃는지 보는 단위 test (`test_roi_carve_footprint_keeps_a_thin_post`). 실제 서버 rollout 이 아니다 |
+| **GPU 판정 (`--roi-carve-device cuda`)** | 관심 영역 지우기의 점유 voxel 선택 · 투영 · 영역 최솟값 · 쓰기를 CPU (numpy · scipy) 대신 GPU (torch) 에서 하는 것. 판정 규칙은 같고 host 로는 개수만 온다 (§13.2). `esdf.roi_carve_device`, 코드 기본 `cpu`, serving 기본 `cuda` |
+| **접촉 부위 (contact region)** | 손 mesh geom 의 표본점 중 그 geom 이 물체에 가장 가까이 간 순간의 최근접 거리에서 2 mm 안에 있는 것 (§13.6) |
+| **구 모델 밖 거리 (outside nearest sphere)** | 접촉 부위의 한 점 p 에서 기록된 AG3S 로봇 구 전부에 대해 `\|p − c\| − r` 의 최솟값. 양수이면 어떤 구에도 들어가지 않는다 (§13.6) |
 | **ATS · HSR · LTE · CCR** | ATS (Attention-based Target Segmentation, attention 으로 target 분할 · 추적) · HSR (Hidden-state Sub-task Recognition, 작업 단계 · 쥠 판단) · LTE (Link-specific Target Exemption, link 별 target 제외 거리장) · CCR (Constrained Chunk Refinement, TrajOpt 궤적 수정 · HOLD) |
 
 ## 진행 현황
@@ -53,6 +57,7 @@
 | **E2** 관심 영역 지우기 구성만 18 장면 | 표본을 넓혀도 사전 기준 2 · 3 · 4 를 지키는가 | **측정 완료 (2026-10-24) — 채택 (사전 기준 적용).** 기준 2 (−94.9 %) · 3 (최대 +0.951 pp, 한도 근처) · 4 (성공 14 → 16, 금지 접촉 episode 3 → 3) 통과. ~~serving 기본값은 꺼짐 유지~~ (E4 에서 가장자리 보존 완화 구성으로 교체되어 켜졌다, §8.7). 아래 §6.3–6.4 |
 | **E3** 가장자리 보존 (`--roi-carve-footprint`), 18 장면 | 놓을 곳 기둥 가장자리 보존이 forgotten obstacle 증가를 고치고 기준 2 · 3 · 4 를 지키는가 | **측정 완료 (2026-10-24) — 미채택.** 판정 (b) 기둥 놓친 표면 17.64 % → 1.76 % (−90 %) 통과, 그러나 기준 2 (다른 물체 옛 자리 잔상 −10.3 %) · 기준 4 (금지 접촉 episode 4 > 3) 미달. 관심 영역 지우기의 채택 형태는 E2 의 그대로 유지. 아래 §7 |
 | **E4** 가장자리 보존 완화 (`--roi-carve-footprint-robot ignore` + `--roi-carve-footprint-pad-px 0`), 18 장면 | E3 에서 옛 자리가 지워지지 않게 된 것을 되돌리면서 기둥 보존을 유지할 수 있는가 | **측정 완료 (2026-10-24) — 채택 (사전 기준 적용).** (a) 기준 2 (다른 물체 옛 자리 잔상 1,277 → 584, −54.3 %) · 기준 3 (네 값 모두 기준 구성보다 낮음) · 기준 4 (성공 15 ≥ 14, 금지 접촉 episode 1 ≤ 3), (b) 기둥 놓친 표면 17.64 % → 2.19 % (−87.6 %). **serving 기본값을 켰다.** 비용: 서버 거리장 단계 중앙값 303.19 ms (기준 구성 109.7 ms 의 2.76 배). 아래 §8 |
+| **AG3S-ROI-CARVE-GPU** 관심 영역 지우기 비용 원인 측정 (R1–R4) + GPU 판정 (G1–G3) | 앞 요약의 미측정 주장 (비용 원인 · 제약 생성 380 ms · 1345 접촉 · target TSDF 누출 원인) 을 측정하거나 거두고, 가장 큰 비용 부분을 GPU 로 옮겨도 판정이 같은가 | **측정 완료 (2026-10-25).** G1 (지울 voxel 집합 차이 0) · G2 (replay 중앙값 207.73 → 26.09 ms) · G3 (1345 서버 32 chunk 궤적 · 거리장 동일) 통과 → serving 기본값에 `roi_carve_device: cuda` 포함. 1345 접촉은 왼손 몸체 mesh 와 오렌지 (바나나 아님, §13.6), 원인은 구 모델 범위 + 이웃 접촉 허용을 **분리하지 못함**. R5 는 측정하지 않음. 아래 §13 |
 
 ## 물려받은 결정
 
@@ -65,6 +70,7 @@
 | (2026-10-24) "수행하세요" → 가장자리 보존 flag (기본 꺼짐) | 서버 기본값은 이 수정이 확인될 때까지 꺼짐. 로그는 새 문서에 | task §9 |
 | (2026-10-24) E3 결과 뒤: 가장자리 보존 완화를 시도하고, 통과하면 서버 기본값을 켜고 아니면 꺼짐 유지 → **E4 통과, 켰다 (§8.7)** | 완화 = 영역 안 robot mask pixel 을 판정 보류 사유에서 빼고 영역 여유 0 pixel | lead 전달 [T]; 결과 전 고정 판정은 task §10 |
 | (2026-10-24) E4 채택 → serving 기본값 켬. 켜기 전 핵심 평가 세션 알림, 그 세션은 checkout 에서 새 kit 을 만들 때 `--no-roi-carve` 를 manifest 에 명시 | 관심 영역 지우기의 채택 형태 = 가장자리 보존 완화 구성 (E2 의 관심 영역 지우기 → 교체). `EsdfConfig` 코드 기본값은 꺼짐 유지 | task §10 · §10a, `serve_safe.ROI_CARVE_SERVING_DEFAULT` |
+| (2026-10-25) "GPU 변환 전에 원인 측정이 중요하다면 먼저 수행하고, 해결 방법이 (가) 이면 그대로 진행", "로그와 다른 점에서 작성된 것을 해결" | 이 세션은 관심 영역 지우기만 GPU 로 옮긴다 (나머지 느린 단계는 핵심 평가 세션 몫). 앞 요약과 로그가 다른 네 항목은 측정하거나 근거 없는 주장을 거둔다. 판정 기준 G1–G3 은 결과 전에 고정 | [`task`](handoff/AG3S-ROI-CARVE-GPU.task.md) §0 · §1 · §4 |
 
 ## 재측정 대기
 
@@ -74,13 +80,13 @@
 |---|---|---|---|
 | 1 (T47 #57) | **가는 물체 가장자리가 지워지는 기전** — 가설 [H]: 가장 가까운 pixel 하나로 판정해 물체 가장자리 pixel 이 배경 depth 를 본다. 합성 장면 test 에서 depth 를 0.5 pixel 중심으로 그리면 기존 판정이 기둥 옆면 표본의 10.7 % 를 잃고 영역 판정은 0 % (정수 중심이면 둘 다 0 %). **실제 서버의 반 pixel 어긋남은 측정하지 않았다** | `verify.json` `e3_18_scenes.synthetic_post_test`, `not_measured` | E3 에서 기둥 놓친 표면이 −90 % 로 줄어 가설과 같은 방향이지만, 기전을 직접 재지는 않았다. **측정 안 됨** |
 | 2 | **E3 에서 이웃 물체의 옛 자리가 남은 기전과 E4 에서의 장면별 값** (1345 · 1668; E3 327 · 783, 기준 구성 358 · 857, 관심 영역 지우기 0 · 0) — 가설 [H]: 영역 판정이 손 근처 robot mask pixel 을 포함해 판정을 보류한다 | `verify.json` `e4_18_scenes.judgement.a2_moved_old_main` (18 장면 합 584 만. 장면별 값 없음) | **합계만 있다**: 다른 물체 옛 자리 잔상 E3 1,145 → E4 584. 1345 · 1668 이 얼마로 줄었는지는 `verify.json` 에 없다 → **장면별 재측정 대기.** robot 처리와 영역 반지름을 함께 바꿔 가설을 분리하지 못했고 (§8.6), 합성 장면에는 로봇이 없다 |
-| 3 (T47 #58) | 둘 다 구성 211 · 250 에서 정적 TSDF 로 새어 든 사과 pixel 의 기전, target 전용 TSDF 단독 비용 (`target_layer.ms` 는 routing 시작 → 층 합성까지) | `verify.json` `not_measured` | **측정 안 됨** |
+| 3 (T47 #58) | 둘 다 구성 211 · 250 에서 정적 TSDF 로 새어 든 사과 pixel 의 기전, target 전용 TSDF 단독 비용 (`target_layer.ms` 는 routing 시작 → 층 합성까지) | `verify.json` `not_measured` | **측정 안 됨.** 앞 세션 요약의 "원인 = target 추적" 단정은 근거가 없어 거둔다 (§13.8 R5) |
 | 4 (T47 #59) | seed 반복 · 18 episode 넘는 표본, 954 의 바나나 접촉을 hand layer 누락과 직접 잇는 시험, 기준 구성의 954 · 1668 놓기 미도달 원인 | `verify.json` `limits`, `not_measured` | **측정 안 됨** |
 | 5 | **E3 의 753 탁자 접촉 (78 row) 원인** — 기준 구성 · 관심 영역 지우기 구성의 753 에는 금지 접촉이 없었다 | `verify.json` `e3_18_scenes.closed_loop_runs` | E4 에서는 753 의 탁자 접촉이 0 row 다 (재측정 대기 8). **원인은 측정 안 됨** |
 | ~~6~~ | ~~가장자리 보존 완화의 closed-loop 결과 (§8)~~ | `verify.json` `e4_18_scenes` | **완료 (2026-10-24, 채택).** §8 |
 | ~~7~~ | ~~서버 기본값 켜기~~ | task §10a | **켰다 (2026-10-24).** §8.7. 이 축에 남은 일은 아래 8 · 9 |
-| 8 | **E4 의 남은 금지 접촉 (1345 이웃 과일 27 row)** 와 E3 의 753 탁자 접촉이 E4 에서 0 row 가 된 이유 | `verify.json` `e4_18_scenes.closed_loop_runs` | **측정 안 됨** (접촉 사실만 있다) |
-| 9 | **완화가 기둥 외 물체 (손에 가려진 이웃 과일 등) 를 더 잊는지**, 서버 거리장 단계 비용 증가 (중앙값 303.19 ms) 가 어느 단계에서 나는지, 기준 2 가 한도 근처 (−54.3 %) 인 것이 seed · 표본에 따라 뒤집히는지 | `verify.json` `diag18_missed_by_body_B_ROI_FPR` (물체별 값은 있으나 판정에 쓰지 않았다), `not_measured` | **측정 안 됨** |
+| 8 | ~~**E4 의 남은 금지 접촉 (1345 이웃 과일 27 row)**~~ → **E4 의 남은 금지 접촉 (1345, 왼손 몸체 mesh ↔ 오렌지 27 row, 바나나 아님)** 와 E3 의 753 탁자 접촉이 E4 에서 0 row 가 된 이유 | `verify.json` `e4_18_scenes.closed_loop_runs`, `AG3S-ROI-CARVE-GPU.verify.json` `R4_ep1345_neighbour_contact` | 1345 부분은 **§13.6 에서 측정**: 접촉 쌍 · 거리장 상태 · 구 모델 밖 거리는 사실, 원인은 구 모델 범위 + 이웃 접촉 허용 설정이 함께 있고 **분리 안 됨**. 753 부분은 **측정 안 됨** |
+| 9 | **완화가 기둥 외 물체 (손에 가려진 이웃 과일 등) 를 더 잊는지**, ~~서버 거리장 단계 비용 증가 (중앙값 303.19 ms) 가 어느 단계에서 나는지~~ → **비용 단계 분해는 §13.4 에서 측정했다**, 기준 2 가 한도 근처 (−54.3 %) 인 것이 seed · 표본에 따라 뒤집히는지 | `verify.json` `diag18_missed_by_body_B_ROI_FPR` (물체별 값은 있으나 판정에 쓰지 않았다), `not_measured` | 비용 분해: **측정 완료 (§13.4)**. 나머지 (기둥 외 물체 잊음 · 기준 2 의 seed 민감도): **측정 안 됨** |
 
 ---
 
@@ -374,7 +380,7 @@ target 의 옛 자리 잔상도 관심 영역 지우기 구성보다 많다 (6,0
 
 - 1345 · 1668 에서 관심 영역 지우기 구성의 옛 자리 잔상 0 · 0 이 가장자리 보존 구성에서 327 · 783 (기준 구성 358 · 857) 이 됐다 [T task §9a].
 - 합성 장면의 0.5 pixel 중심 결과 (기존 판정 10.7 % 손실 → 영역 판정 0 %) 는 실제 rollout 에서의 기둥 −90 % 와 방향이 같다. 합성 결과가 실제 감소의 기전임을 보인 것은 아니다 (가설 근거로만).
-- 금지 접촉 episode 의 구성 (211 탁자 · 753 탁자 78 행 · 954 바나나 · 1345 바나나) [V `closed_loop_runs`].
+- 금지 접촉 episode 의 구성 (211 탁자 · 753 탁자 78 행 · 954 바나나 · ~~1345 바나나~~ → 1345 이웃 과일 (오렌지, §13.6 에서 확인)) [V `closed_loop_runs`].
 
 ### 8. 추가 실험 E4 — 가장자리 보존 완화 (`--roi-carve-footprint-robot ignore`), 18 장면 (2026-10-24 KST, 기록 19:3x KST) — 채택, serving 기본값 켬
 
@@ -430,7 +436,7 @@ forgotten obstacle 값은 `e4_18_scenes.field` 의 `missed_frac` (main visible 0
 
 - 다른 물체 옛 자리 잔상은 가장자리 보존 1,145 → 완화 584 (절반)로 줄었지만, **관심 영역 지우기의 65 만큼은 지우지 못한다** (584 는 65 의 약 9 배 [D = 584/65]). 기준 2 의 한도 −50 % 에 −54.3 % 로 통과했다 — 여유가 3.4 pp 다.
 - 기둥은 가장자리 보존 때보다 약간 더 놓친다 (main occluded-seen-before 1.76 → 2.19 %, 기준 구성 1.17 %). 기준 구성과 같아졌다고 쓰지 않는다.
-- 금지 접촉 episode 는 4 → 1 이다. 남은 1 개는 1345 의 이웃 과일 (바나나) 27 row 로, 기준 구성 · 가장자리 보존에서도 같은 장면에서 27 row 였다 [V `closed_loop_runs`; E2 의 관심 영역 지우기는 19 row]. E3 의 753 탁자 접촉 (78 row) 은 완화에서 0 row 다. 접촉이 없어진 **원인은 보지 않았다** (구성마다 궤적이 갈라진다).
+- 금지 접촉 episode 는 4 → 1 이다. 남은 1 개는 1345 의 이웃 과일 ~~(바나나)~~ → **(오렌지; 왼손 몸체 mesh 와의 접촉, §13.6)** 27 row 로, 기준 구성 · 가장자리 보존에서도 같은 장면에서 27 row 였다 [V `closed_loop_runs`; E2 의 관심 영역 지우기는 19 row]. E3 의 753 탁자 접촉 (78 row) 은 완화에서 0 row 다. 접촉이 없어진 **원인은 보지 않았다** (구성마다 궤적이 갈라진다).
 - 실패한 episode 는 211 · 850 · 954 로 3 개 (성공 15) [V `closed_loop_runs`].
 - 사과 (target) 옛 자리 잔상은 기준 구성 대비 main −87.1 % (50,377 → 6,508), hand −91.2 % (26,220 → 2,298) [D]. 이 구성은 target 용 판정 대상이 아니다 (§6.3 과 같다).
 
@@ -443,7 +449,7 @@ forgotten obstacle 값은 `e4_18_scenes.field` 의 `missed_frac` (main visible 0
 | 가장자리 보존 | 704 | 267.54 | 815.87 | 2.44 배 |
 | **가장자리 보존 완화** | 683 | **303.19** | **885.3** | **2.76 배** (+193.49 ms) |
 
-완화 구성은 가장자리 보존 대비 중앙값 1.13 배, 관심 영역 지우기 대비 1.27 배, p95 는 기준 구성 대비 3.34 배 [D]. 판정에 넣지 않았지만 **serving 기본값으로 켜면 모든 요청이 이 비용을 낸다.** 늘어난 시간이 어느 단계 (투영 영역 판정 · 반경 · robot 처리) 에서 나는지는 측정하지 않았다.
+완화 구성은 가장자리 보존 대비 중앙값 1.13 배, 관심 영역 지우기 대비 1.27 배, p95 는 기준 구성 대비 3.34 배 [D]. 판정에 넣지 않았지만 **serving 기본값으로 켜면 모든 요청이 이 비용을 낸다.** ~~늘어난 시간이 어느 단계 (투영 영역 판정 · 반경 · robot 처리) 에서 나는지는 측정하지 않았다.~~ → **측정했다 (§13.4): 늘어난 시간은 관심 영역 지우기 자체이고 (거리장 단계에서 그것을 뺀 값은 기준 구성과 같은 크기), 그 안에서는 영역 최솟값 filter 가 가장 크다. 이 비용은 `--roi-carve-device cuda` 로 줄였다 (§13.5, serving 기본).**
 
 **8.5 이전 대비 (before → after)**
 
@@ -468,13 +474,14 @@ forgotten obstacle 값은 `e4_18_scenes.field` 의 `missed_frac` (main visible 0
 | 이전 설정으로 | `--no-roi-carve` — 이전 esdf 설정 (관심 영역 지우기 없음) |
 | 바뀌지 않는 것 | `--no-safe` · `--no-perception` · legacy backend 는 이전 의미 그대로. 관심 영역 flag 를 하나라도 직접 주면 그 값 그대로 (기본값을 덧씌우지 않는다). **`EsdfConfig` 의 코드 기본값은 꺼짐 유지** — 켜진 것은 serving 의 flag 해석뿐이다 |
 | 확인하는 법 | 서버 시작 로그의 `AG3S roi_carve: …` 한 줄 |
+| **(2026-10-25 추가) 판정 장치** | 위 기본값은 이제 `roi_carve_device: cuda` 도 포함한다 (GPU 판정, §13 의 G1–G3 통과 후). 되돌리기는 `--roi-carve-device cpu`. 코드 기본값 `EsdfConfig.roi_carve_device` 는 `cpu` 유지. 이 18 장면 판정 (E4) 자체는 CPU 판정으로 한 측정이고, GPU 판정이 같은 voxel 을 지우는지는 §13 에서 따로 확인했다 |
 | 알림 | 켜기 전에 핵심 평가 세션 (`ag3s-vla-development-c4`) 에 알렸다. 그 세션의 kit 은 snapshot 이라 영향이 없고, checkout 에서 새로 띄우는 실행은 바뀐다. 그 세션은 checkout 에서 kit 을 새로 만들 때 `--no-roi-carve` 를 manifest 에 명시한다고 답했다 [T task §10a] |
 | 주의 | 2026-10-24 이전의 기록 · 실행 (`AG3S_T47_LOG.md` 의 STEP 포함) 은 모두 꺼짐 상태의 측정이다. 이후 flag 없이 띄운 서버의 기록을 이전 기록과 비교할 때는 시작 로그를 먼저 본다. 켠 것의 근거는 이 절의 18 장면 · seed 1 개 판정이다 (§8.5 의 한계) |
 
 **8.8 사실 · 가설 구분**
 
 - 사실 [V]: §8.2–§8.4 의 표 값. 판정 (a) · (b) 통과. serving 기본값은 켜졌다.
-- 가설 [H]: 옛 자리 잔상 감소의 기전 (robot mask 판정 보류 제거 · 영역 반지름 축소 중 어느 것인가), 753 탁자 접촉이 사라진 이유, 1345 바나나 27 row 의 원인.
+- 가설 [H]: 옛 자리 잔상 감소의 기전 (robot mask 판정 보류 제거 · 영역 반지름 축소 중 어느 것인가), 753 탁자 접촉이 사라진 이유, ~~1345 바나나 27 row 의 원인~~ → 1345 의 왼손 몸체 ↔ 오렌지 27 row 의 원인 (접촉 쌍 · 거리장 상태는 §13.6 에서 측정, 원인 분리는 안 됨).
 - 측정하지 않은 것: 완화가 **손에 가려진 이웃 과일** (기둥이 아닌 물체) 을 더 잊는지 — (b) 는 기둥만 본다. 바구니 · 바나나 등 물체별 놓친 표면은 `diag18_missed_by_body_B_ROI_FPR` 에 있으나 이 로그에서 판정에 쓰지 않았다.
 
 ### 9. 이전 대비 (before → after) 와 기준점 — 1차 · E2
@@ -505,7 +512,7 @@ forgotten obstacle 값은 `e4_18_scenes.field` 의 `missed_frac` (main visible 0
 | 관심 영역 지우기에서 forgotten obstacle 증가 | 거리장 (main fine layer · hand layer) | **LTE** — 놓을 곳 기둥 (반지름 15 mm) 에 몰림: main occluded-seen-before 0.29 % → 20.12 %, visible 0.63 % → 8.95 % (10 장면), 18 장면 진단에서 1.17 % → 17.64 % (occluded-seen-before) | [V `diag_missed_by_body_every_3rd_chunk`, `e3_18_scenes.diag18_missed_by_body`], task §8a. E3 의 가장자리 보존이 이 증상을 −90 % 로 줄였다 (§7). 기전은 가설 [H]: 가장 가까운 pixel 하나로 판정해 물체 가장자리 pixel 이 배경 depth 를 본다 (직접 측정 안 함) |
 | 가장자리 보존에서 이웃 물체의 옛 자리 잔상이 남음 (1345 · 1668, 다른 물체 residue 65 → 1,145) | 거리장 (main fine layer) | **LTE** (거리장 층 입력의 지우기 판정) — 영역 판정이 지우기를 보류한 것 | [V `judgement.a2_moved_old_main`], [T task §9a]. 기전은 가설 [H]: 영역 안 robot mask pixel 이 판정을 보류한다 (측정 안 함). **E4 완화 (§8) 에서 18 장면 합 1,145 → 584 로 줄었다 (장면별 값 없음, 두 변경을 분리하지 않음, 관심 영역 지우기의 65 에는 못 미침)** |
 | 가장자리 보존에서 753 탁자 접촉 (78 행) | 실행 접촉 (MuJoCo replay) | **미확인** — 기준 · 관심 영역 지우기 구성의 753 에는 접촉이 없었다. E4 완화의 753 은 0 행 | [V `e3_18_scenes.closed_loop_runs`, `e4_18_scenes.closed_loop_runs`]. 원인 · 층을 보지 않았다 |
-| E4 완화에서도 1345 에 이웃 과일 (바나나) 접촉 27 행 | 실행 접촉 (MuJoCo replay) | **미확인** — 기준 구성 · 가장자리 보존에서도 같은 27 행, 관심 영역 지우기는 19 행. 층 (LTE · CCR) 을 보지 않았다 | [V `e4_18_scenes.closed_loop_runs`, `e2_18_scenes`, `e3_18_scenes`]. 954 의 같은 종류 접촉 진단 (§6.1) 은 이 장면에 하지 않았다 |
+| ~~E4 완화에서도 1345 에 이웃 과일 (바나나) 접촉 27 행~~ → **E4 완화에서도 1345 에 왼손 몸체 mesh (geom 1052, EE_BODY_L) ↔ 오렌지 접촉 27 행 (바나나 아님, 손가락 아님)** | 실행 접촉 (MuJoCo replay) | ~~미확인~~ → **로봇 구 모델의 범위 + CCR 의 이웃 접촉 허용 설정 — 둘 다 있고 분리하지 않았다** (반사실 실행 없음). LTE (거리장) 는 측정 범위에서 원인이 아니다: 오렌지는 거리장에 있다. 접촉 부위가 기록된 어떤 구에서도 9–25 mm 밖이고, 허용이 켜진 요청에서 finger_l1 의 계획 clearance 가 음수였다. VLA 단독 · 모든 구성에서도 같은 쌍 | [V `R4_ep1345_neighbour_contact`] (§13.6). 기준 구성 · 가장자리 보존 27 행, 관심 영역 지우기 19 행 (`e4_18_scenes`, `e2_18_scenes`, `e3_18_scenes`) |
 | 완화에서 관심 영역 지우기보다 옛 자리가 더 남음 (다른 물체 residue 65 → 584) | 거리장 (main fine layer) | **LTE** (영역 판정) — 완화가 "손이 직접 가린 자리는 지우지 않는다" 를 유지하므로 일부가 남는 것은 설계 범위일 수 있다 [H] | [V `e4_18_scenes.judgement`]. 기전 측정 안 함 |
 | 둘 다 구성에서 target stale residue 가 −81 % / −76 % 에 그침 (211 · 250 이 8,486 / 8,882) | 거리장 (target 전용 TSDF 층 합성 입력) | target TSDF 의 이동 감지 reset 규칙 (이번 STEP 의 새 구성 요소) — 재파지로 manipulated 가 occluded 로 유지되고 중심 이동이 10 mm 미만이라 reset 이 드물었다. manipulated 점은 ATS 가 만든다 | [V `verdict.facts`]. 분류 중 ATS 부분은 기록자 정리 [I]. 정적 TSDF 로 새어 든 사과 pixel 의 기전 (가설 [H]: 가려진 동안 추종 형상과 실제 사과가 어긋나 pixel 배정 누락) 은 측정 안 함 |
 | target 전용 TSDF 구성에서 다른 물체 stale residue 107,044 | 거리장 (main fine layer) | 이 구성은 사과만 별도 층으로 다룬다 — 바구니가 밀린 옛 자리는 지우는 장치가 없다 (954 의 바구니 27 mm 이동, request 49). 바구니 접촉 4 행이 이 구성의 954 에서 났다 (바구니 27 mm 이동과 같은 장면이고, 접촉이 이동의 원인인지는 따로 보지 않았다) | [V `diagnosis_954_B_TL`, `verdict.facts`]. 한 장면이 전부이므로 일반화하지 않는다 |
@@ -528,6 +535,8 @@ forgotten obstacle 값은 `e4_18_scenes.field` 의 `missed_frac` (main visible 0
 
 E2 의 중앙값 비는 238.51 / 109.7 = 2.17 배, 가장자리 보존은 267.54 / 109.7 = 2.44 배, **E4 완화는 303.19 / 109.7 = 2.76 배 (+193.49 ms), p95 는 885.3 / 265.09 = 3.34 배 [D, `e4_18_scenes.closed_loop.B_ROI_FPR.esdf_ms`]. 기준 구성보다 늘었고, serving 기본값이 켜져 모든 요청이 낸다 (§8.4).** smoke (둘 다 구성, episode 56 1 개) 에서 기록된 `target_layer.ms` 중앙값 280.8 ms · `roi_carve.ms` 중앙값 35.0 ms (최대 318.95) 였다 [V `smoke_B_TL_ROI_ep56`]. `target_layer.ms` 는 routing 시작부터 층 합성까지의 시간이라 target 전용 TSDF 단독 비용이 아니다 [V `not_measured`]. 처리 시간은 판정에 넣지 않았다.
 
+**(2026-10-25 추가)** 위 단계 시간의 원인 분해 (거리장 단계 = 관심 영역 지우기 + 나머지) 와 GPU 판정 뒤의 시간은 §13.4 · §13.5 에 있다. 이 절의 CPU 판정 값 (303.19 ms 등) 은 E4 기록 그대로이고 바뀌지 않는다.
+
 ### 12. 한계 · 측정하지 않은 것 · 되돌아올 지점
 
 **한계 [V `limits`].**
@@ -539,7 +548,7 @@ E2 의 중앙값 비는 238.51 / 109.7 = 2.17 배, 가장자리 보존은 267.54
 5. E3 의 금지 접촉 episode 3 → 4 는 한 episode 차이이고, 기준 구성이 954 · 1668 에서 놓기에 도달하지 못해 같은 단계에서 센 값이 아니다. E4 의 4 → 1 도 같은 18 episode · seed 1 개의 차이다.
 6. E4 의 기준 2 는 −54.3 % 로 한도 −50 % 에 가깝고, serving 기본값은 이 한 번의 판정으로 켰다. 표본이 늘거나 seed 가 바뀌면 뒤집힐 수 있는지는 확인하지 않았다.
 
-**측정하지 않은 것 [V `not_measured`].** (a) 둘 다 구성 211 · 250 에서 정적 TSDF 로 새어 든 사과 pixel 의 기전. (b) target 전용 TSDF 단독 비용. (c) seed 반복 · 18 episode 넘는 표본. (d) 가는 물체 가장자리가 지워지는 기전 (가설: 가장 가까운 pixel 하나로 판정해 물체 가장자리 pixel 이 배경 depth 를 본다) 과 실제 서버 depth 의 반 pixel 어긋남. (e) 가장자리 보존에서 이웃 물체의 옛 자리가 지워지지 않는 기전. (f) E3 의 753 탁자 접촉 원인. (g) E4 에서 robot 처리와 영역 반지름 변경의 개별 효과, 1345 · 1668 장면별 옛 자리 잔상, 1345 바나나 접촉 원인. (h) 완화가 기둥 외 물체를 더 잊는지 · 비용 증가의 단계별 원인.
+**측정하지 않은 것 [V `not_measured`].** (a) 둘 다 구성 211 · 250 에서 정적 TSDF 로 새어 든 사과 pixel 의 기전. (b) target 전용 TSDF 단독 비용. (c) seed 반복 · 18 episode 넘는 표본. (d) 가는 물체 가장자리가 지워지는 기전 (가설: 가장 가까운 pixel 하나로 판정해 물체 가장자리 pixel 이 배경 depth 를 본다) 과 실제 서버 depth 의 반 pixel 어긋남. (e) 가장자리 보존에서 이웃 물체의 옛 자리가 지워지지 않는 기전. (f) E3 의 753 탁자 접촉 원인. (g) E4 에서 robot 처리와 영역 반지름 변경의 개별 효과, 1345 · 1668 장면별 옛 자리 잔상, ~~1345 바나나 접촉 원인~~ → 1345 접촉의 원인 분리 (§13.6: 접촉 쌍은 왼손 몸체 ↔ 오렌지로 확인, 구 모델 범위와 허용 설정 중 무엇이 원인인지는 분리 안 됨). (h) 완화가 기둥 외 물체를 더 잊는지 · ~~비용 증가의 단계별 원인~~ (→ 측정함, §13.4).
 
 **되돌아올 지점 [T task §6, 전환 신호].**
 
@@ -550,5 +559,183 @@ E2 의 중앙값 비는 238.51 / 109.7 = 2.17 배, 가장자리 보존은 267.54
 | 손에 가려진 이웃 물체의 옛 자리 | Lost & Found · POCD 식 상호작용 구간 표시 (별도 STEP) |
 | ~~§8 의 완화가 통과하지 못하면 → 서버 기본값은 꺼짐 유지, 관심 영역 지우기 구성이 이 STEP 의 채택 형태로 남는다~~ | E4 가 통과했다. 이 행은 쓰이지 않는다 |
 | ~~serving 기본값 변경 → 사용자 판정 (이 STEP 은 flag 를 꺼짐으로 둔다)~~ | **켰다 (2026-10-24, §8.7).** 되돌릴 때는 `--no-roi-carve` |
-| 서버 거리장 단계 중앙값이 기준 구성의 2.76 배 (303.19 ms) 라 시간 예산이 문제가 되면 | 단계별 시간 (투영 영역 판정 · 반경) 을 재고 영역 반경 상한 (8 pixel) · 판정 대상 voxel 수를 줄이는 쪽을 검토한다 [H, 측정 안 함] |
+| 서버 거리장 단계 중앙값이 기준 구성의 2.76 배 (303.19 ms) 라 시간 예산이 문제가 되면 | ~~단계별 시간 (투영 영역 판정 · 반경) 을 재고 영역 반경 상한 (8 pixel) · 판정 대상 voxel 수를 줄이는 쪽을 검토한다 [H, 측정 안 함]~~ → 단계별 시간을 쟀고 (§13.4) 관심 영역 지우기를 GPU 로 옮겼다 (§13.5, serving 기본 `cuda`). 되돌릴 때는 `--roi-carve-device cpu` |
 | 핵심 평가에서 켠 기본값 때문에 이전 kit 과 비교가 어긋나면 | 서버 시작 로그 `AG3S roi_carve: …` 로 켜짐 여부를 확인하고 manifest 에 `--no-roi-carve` 를 명시한다 |
+
+### 13. AG3S-ROI-CARVE-GPU — 관심 영역 지우기의 비용 원인과 GPU 판정, 1345 이웃 과일 접촉 진단 (2026-10-25 KST)
+
+작성 **2026-10-25 04:5x KST** (`date -u` 2026-10-24 19:52 UTC + 9 h). 측정자: lead (직접 측정, 순차 작업). 이 절의 숫자는 [`handoff/AG3S-ROI-CARVE-GPU.verify.json`](handoff/AG3S-ROI-CARVE-GPU.verify.json) 의 `numbers` 이고, 설계 · 결과 전 고정 기준 · 사용자 판정은 [`task`](handoff/AG3S-ROI-CARVE-GPU.task.md) 이다. 원시 기록 run: `20261025T035831+0900_8da37119afd3_f082f20e9463` (`verify/AG3S-ROI-CARVE-GPU/`). 앞선 작업은 commit `f7c1c84c` (동적 거리장 묶음, §1–§12). 보기 폴더 (git 제외): `outputs/2026-10-25_관심영역지우기_GPU판정/`.
+
+**13.1 목적 — 앞 세션 요약이 로그와 달랐던 네 주장을 측정하거나 거둔다** [T task §0 · §1]
+
+앞 세션 요약은 아래 주장을 했지만 이 로그에서는 모두 측정되지 않은 상태였다 (§8.4 · 재측정 대기 9 · §10). 사용자 판정 (2026-10-25): "GPU 변환 전에 원인 측정이 중요하다면 먼저 수행하고, 해결 방법이 (가) 이면 그대로 진행", "로그와 다른 점에서 작성된 것을 해결".
+
+| # | 앞 요약의 주장 | 이 STEP 의 처리 | 결과 위치 |
+|---|---|---|---|
+| R1 | 거리장 단계 110 → 303 ms 의 원인 = CPU 세 부분 (target pixel 판정 · 점유 voxel host 내리기 · 광선 판정) | 서버 기록 집계 + offline replay 단계별 시간 | §13.4 |
+| R2 | 위 세 부분 중 "target pixel 판정" | 코드 확인 | §13.4 |
+| R3 | 서버 한 chunk 의 "제약 생성 약 380 ms · target 찾기 약 80 ms" | stage 중첩 확인 후 거리장 단계를 뺀 값 | §13.4 |
+| R4 | 1345 "손가락이 바나나를 스칩니다, 원인은 궤적 쪽 이웃 접촉 허용 설정" | 954 진단 (§6.1) 과 같은 항목을 1345 에 측정 | §13.6 |
+| R5 | target 전용 TSDF 의 사과 pixel 이 정적 TSDF 로 새는 원인 = target 추적 | **측정하지 않는다** (serving 에서 target 전용 TSDF 는 꺼짐). 단정만 거둔다 | §13.8 |
+
+**13.2 변경 (flag, 코드 기본 꺼짐 = CPU)** [T task §3, V `code_state`]
+
+| 항목 | 내용 |
+|---|---|
+| `esdf.roi_carve_device` / `--roi-carve-device {cpu,cuda}` | `cuda`: 점유 voxel 선택 · 중심 · 상자 판정, 투영 · 영역 최솟값 (`max_pool2d` 로 같은 `minimum_filter(mode=constant, cval=0)`), 쓰기를 GPU 에서 한다. host 로는 개수만 온다. depth 는 update 마다 한 번 올린다. 판정 규칙은 CPU 와 같다. float64 투영의 연산 순서가 BLAS 와 달라 마지막 bit 에서 경계가 갈릴 수 있어 G1 에서 쟀다 |
+| 코드 기본값 | `EsdfConfig` = `cpu` |
+| serving 기본값 | `serve_safe.ROI_CARVE_SERVING_DEFAULT` 에 `roi_carve_device: cuda` 를 더했다 (§13.5 의 G1–G3 통과 후). 핵심 평가 세션 (`ag3s-vla-development-c4`) 에 켜기 전에 알렸고 동의를 받았다 [T lead 전달]. **되돌리기: `--roi-carve-device cpu`** |
+| 제약 | `--roi-carve-device` 는 관심 영역 지우기 flag 가 아니다 (serving 기본값을 끄지 않는다). `--no-roi-carve` 와 `cuda` 는 함께 쓸 수 없다 [T task §3] |
+| 신규 측정 도구 | `AG3S/ag3s/experiments/studies/roi_carve_profile.py` (offline replay 단계별 시간 · CPU/GPU 판정 비교). test [V `numbers.tests`]: CPU 회귀 (`.venv-ag3s`, `tests/ag3s` 2 shard + `tests/trajopt`, 최종 working tree) 3724 passed · 55 skipped · 1 failed — 실패 1 개는 `test_t43t_replay::test_off_is_bit_identical_to_the_pre_fix_commit` 로 깨끗한 HEAD worktree 에서도 실패하는 이전부터의 것 (§3). 소스 문자열 test 6 개는 f7c1c84c 에서 고쳤다. GPU (`.venv-openpi-live`): `test_roi_carve_gpu.py` 8 passed (min filter = scipy r 0..8, `seen_through_gpu` = `seen_through` 3 random scene × 5 mode, builder 거리장 cpu · cuda bit 동일), `test_task_dynamic_map.py` + `test_dynamic_field.py` 29 passed |
+
+**13.3 실험 — 결과 전 고정 기준** [T task §2 · §4 · §5]
+
+| 실험 | 내용 |
+|---|---|
+| 서버 기록 집계 (R1 · R3) | E2 기준 구성 · 관심 영역 지우기 · E3 · E4 의 closed-loop 기록 전 chunk (target 전용 TSDF 층 chunk 제외) 의 `profile_ms.*` 와 `esdf_stats.roi_carve.ms`. "거리장 단계 − 관심 영역 지우기" 가 기준 구성의 거리장 단계와 같은 크기이면 증가분은 관심 영역 지우기다 |
+| offline replay (R1) | E4 18 장면 policy record (요청별 depth 3 대 · K · T · qpos) 를 E4 서버 argv 의 builder 에 차례로 넣고, 관심 영역은 서버가 그 요청에 기록한 상자를 쓴다. 관심 영역 지우기의 부분을 CUDA synchronize 로 잰다. replay TSDF 는 서버의 쥔 물체 처리 · target 제외를 빠뜨리므로 시간 절대값은 서버와 다를 수 있고 비율로 읽는다 |
+| R4 | E4 기록 1345 에서 접촉 쌍 · chunk 구간 · 접촉 행 수 · 최대 겹침, 그 chunk 의 서버 설정, 접촉 근처 이웃 과일 표면이 거리장에서 빠진 비율, TrajOpt 결과. **측정이 가리키는 만큼만 원인 층을 적는다 (측정으로 정해지지 않으면 "미확인" 유지)** |
+
+| 판정 (결과 전 고정) | 내용 |
+|---|---|
+| G1 동등성 | E4 18 장면 replay 의 모든 요청 · 두 TSDF 에서, 같은 TSDF 상태에 대한 CPU 판정과 GPU 판정의 **지울 voxel 집합이 같다 (차이 0 개)**. 하나라도 다르면 serving 기본값을 바꾸지 않는다 |
+| G2 속도 | 같은 replay 에서 관심 영역 지우기 시간 (두 TSDF 합, GPU 는 depth 업로드 포함) 중앙값이 CPU 대비 50 % 이상 줄고 p95 도 줄어든다 |
+| G3 서버 경로 | `--roi-carve-device cuda` 서버 smoke (closed-loop 1 episode, E4 와 같은 장면 · seed) 가 정상 종료하고 기록의 `roi_carve.device = cuda`. 서버 `profile_ms.esdf` 를 E4 같은 장면과 나란히 적는다. **성공 · 접촉은 판정에 쓰지 않는다 (1 episode)** |
+
+G1 · G2 · G3 모두 통과하면 serving 기본값에 `roi_carve_device: cuda` 를 더한다.
+
+**13.4 결과 — 비용 원인 (R1 · R2 · R3)**
+
+그림 (verifier 가 만든 것, 링크만 한다): ![cost](figures/roi-carve-gpu/roi-carve-gpu-cost.png) ([sidecar](figures/roi-carve-gpu/roi-carve-gpu-cost.json)). 왼쪽 = 서버 기록의 거리장 단계 (파랑 = 관심 영역 지우기를 뺀 나머지, 주황 = 관심 영역 지우기), 오른쪽 = replay 한 번의 부분별 시간 (CPU 와 GPU).
+
+**(i) 서버 기록: 늘어난 시간은 관심 영역 지우기 자체다** [V `R1_server_records`; 값은 chunk 마다 잰 것의 통계. 평균 · 중앙값 열은 서로 더하지 않는다]
+
+| 구성 (18 장면) | chunk 수 | 거리장 단계 중앙값 (ms) | 관심 영역 지우기 중앙값 | (거리장 단계 − 관심 영역 지우기) 중앙값 | 거리장 단계 평균 | 관심 영역 지우기 평균 | (거리장 단계 − 관심 영역 지우기) 평균 |
+|---|---|---|---|---|---|---|---|
+| 기준 구성 | 736 | 109.7 | 0.0 | 109.7 | 138.32 | 0.0 | 138.32 |
+| 관심 영역 지우기 [E2] | 635 | 238.51 | 75.23 | 112.63 | 288.47 | 140.02 | 148.45 |
+| 가장자리 보존 [E3] | 704 | 267.54 | 119.85 | 97.28 | 390.89 | 255.9 | 134.99 |
+| 가장자리 보존 완화 [E4, serving 기본] | 683 | 303.19 | 144.59 | 96.83 | 444.43 | 311.6 | 132.84 |
+
+읽는 법: E4 에서 "거리장 단계 − 관심 영역 지우기" 평균은 132.84 ms 로 기준 구성 138.32 ms 와 같은 크기다 (차이 −5.48 ms [D = 132.84 − 138.32]). 평균 증가분 306.11 ms [D = 444.43 − 138.32] 는 관심 영역 지우기 평균 311.6 ms 와 같은 크기다. 즉 **110 → 303 ms 의 증가는 관심 영역 지우기가 낸 것이고, 거리장 단계의 나머지는 늘지 않았다.**
+
+**(ii) offline replay: 관심 영역 지우기 안에서 가장 큰 부분은 영역 최솟값 filter 다** [V `R1_replay_cpu`; 683 요청 (18 장면), 두 TSDF 합. 점유 voxel 수 중앙값 164,750]
+
+| 부분 | 평균 (ms) | 비중 [D = 평균 / 311.02] | 무엇 |
+|---|---|---|---|
+| 영역 최솟값 filter (`footprint.filter`, scipy `minimum_filter`) | 169.15 | 54.4 % | 투영 영역 판정 중 pixel 영역의 최솟값 |
+| 투영 · 비교 (`judge`) | 102.5 | 33.0 % | [D = `seen_through` 평균 271.655 − filter 169.153]. voxel 을 카메라에 투영해 깊이를 비교하는 나머지 |
+| voxel 중심 · 상자 (host 계산, `occupied.host`) | 29.62 | 9.5 % | 점유 voxel 의 host 계산 |
+| 나머지 (복사 · 쓰기 등) | 9.75 | 3.1 % | [D = 311.017 − 271.655 − 29.616] |
+| 합 (`roi_carve_total`) | 311.02 | 100 % | 중앙값 207.73, p95 765.67 ms |
+
+- 앞 요약의 "점유 voxel host 내리기" 는 큰 부분이 아니다: 점유 voxel 의 device → host 복사 (`occupied.d2h`) 는 중앙값 0.46 ms · p95 0.993 ms 였다 [V]. host 에서의 계산은 평균 29.62 ms (9.5 %) 다.
+- 앞 요약의 세 부분에 없던 **영역 최솟값 filter 가 가장 큰 부분 (54.4 %)** 이다.
+- replay 합의 평균 311.02 ms 는 서버 E4 기록의 관심 영역 지우기 평균 311.6 ms 와 같은 크기이나 중앙값은 207.73 대 144.59 ms 로 다르다 [V]. replay TSDF 가 서버의 쥔 물체 처리 · target 제외를 빠뜨리므로 (limits) 비율로 읽는다. 같은 요청의 서버 쪽 점유 voxel 수는 `verify.json` 에 없어 작업량 일치는 확인하지 않았다.
+
+**(iii) R2 — "target pixel 판정" 은 이 구성에서 실행되지 않는다** [V `R2_target_pixel_judgement`]: `target_pixel_mask` 는 `_target_layer_route` 에서만 실행되고, `CuroboFieldBuilder.update` 는 `esdf.target_layer` 가 꺼져 있으면 target 층 요청을 거부한다. E4 · serving 은 `--target-layer` 없이 돈다. 따라서 앞 요약이 든 원인 중 하나가 아니다.
+
+**(iv) R3 — "제약 생성 약 380 ms" 는 거리장 단계를 포함한 값이다** [V `R3_constraint_generation_contains_esdf`]: `esdf` stage 가 `constraint_generation` stage 안에 중첩되어 있다 (`pipeline.py` 8b).
+
+| 구성 | 제약 생성 중앙값 (ms) | (제약 생성 − 거리장 단계) 중앙값 | target grounding 중앙값 |
+|---|---|---|---|
+| 기준 구성 | 154.43 | 14.6 | 78.0 |
+| 관심 영역 지우기 [E2] | 302.66 | 14.5 | 88.13 |
+| 가장자리 보존 [E3] | 300.11 | 14.0 | 78.73 |
+| 가장자리 보존 완화 [E4] | 368.04 | 13.9 | 89.43 |
+
+제약 생성에서 거리장 단계를 뺀 값은 구성과 무관하게 약 14 ms 다. E4 의 제약 생성 중앙값 368.04 ms 는 약 380 ms 에 가깝지만 **거리장 단계 (중앙값 303.19 ms) 를 포함한 값이다.** target grounding 중앙값은 78.0–89.43 ms 로 "약 80 ms" 와 같은 크기다.
+
+**13.5 결과 — GPU 판정 (G1 · G2 · G3)**
+
+그림: ![table](figures/roi-carve-gpu/roi-carve-gpu-table.png) ([sidecar](figures/roi-carve-gpu/roi-carve-gpu-table.json)).
+
+| 판정 | 기준 (결과 전 고정) | 결과 [V] | 통과 |
+|---|---|---|---|
+| G1 동등성 | 지울 voxel 집합 차이 0 | 1,366 번 비교 [D = 683 요청 × 두 TSDF]. 판정한 voxel CPU 136,598,151 = GPU 136,598,151, 지울 voxel CPU 381,533 = GPU 381,533, `cpu_only` 0 · `gpu_only` 0 (`G1_equivalence`) | **통과** |
+| G2 속도 | 중앙값 −50 % 이상, p95 감소 | 중앙값 207.73 → 26.09 ms (−87.4 %), p95 765.67 → 101.61 ms (−86.7 %). GPU 값 = 판정 + depth 업로드 (`G2_speed`; −87.4 % = 1 − 26.09 / 207.73 [D]) | **통과** |
+| G3 서버 경로 | 정상 종료 · `roi_carve.device = cuda`, 거리장 단계 시간을 E4 와 나란히 | 1345 (seed 13453) `--roi-carve-device cuda` 서버 smoke 정상 종료 (client 는 t = 211 에서 place, `--stop-after-place 2.5`), 기록의 `device = cuda`, 32 chunk (E4 도 32) | **통과** |
+
+G2 의 GPU 값 분해 (replay, 평균 · 중앙값 · p95, ms) [V `replay_gpu`]: 판정 · 쓰기 `roi_carve_total` 32.522 · 18.711 · 92.009, depth 업로드 `gpu_cameras` 15.645 · 2.905 · 60.757, 합 (업로드 포함) 중앙값 26.09 · p95 101.61. 평균 합은 48.17 ms [D = 32.522 + 15.645] 로 CPU 평균 311.02 ms 의 15.5 % [D = 48.17 / 311.02] 다.
+
+G3 의 서버 거리장 단계 · 관심 영역 지우기 시간 (같은 장면 1345 의 E4 CPU 기록과 나란히, ms) [V `G3_server_smoke`]:
+
+| | 거리장 단계 중앙값 · p95 · 평균 | 관심 영역 지우기 중앙값 · p95 · 평균 |
+|---|---|---|
+| E4 CPU (첫 chunk 제외) | 259.12 · 800.72 · 399.03 | 121.56 · 683.72 · 285.77 |
+| `cuda` (첫 chunk 제외) | 127.74 · 227.77 · 139.19 | 12.84 · 96.16 · 24.62 |
+| 변화 [D = 1 − cuda / E4] | 중앙값 −50.7 % · p95 −71.6 % | 중앙값 −89.4 % |
+| (참고) 첫 chunk 포함 | cuda 131.82 · 272.51 · 486.85 / E4 259.89 · 880.34 · 455.96 | cuda 12.86 · 97.58 · 27.69 / E4 121.32 · 682.03 · 280.55 |
+| **첫 chunk 의 거리장 단계** | **cuda 11,264.27 / E4 2,220.88** | — |
+
+**첫 chunk 값은 시작 비용이다**: smoke 의 1345 는 그 서버의 첫 episode 였고 (CUDA · kernel 시작), E4 에서는 그 서버의 두 번째 episode 였다 [V `first_chunk_esdf_ms.note`]. 그래서 시간 비교는 첫 chunk 를 뺀 값 (`without_first_chunk`) 으로 읽고, 첫 chunk 포함 평균 (cuda 486.85 > E4 455.96) 은 이 시작 비용이 섞인 값이라 비교에 쓰지 않는다. 같은 smoke 에서 32 chunk 모두 E4 와 비교해 `refined_chunk` · `esdf_distance` · `esdf_coarse_distance` · 관심 영역 지우기 개수가 **동일** (각 32 / 32) 했다 [V `identical_*`]. 성공 · 접촉은 판정에 쓰지 않았다 (1 episode).
+
+→ G1 · G2 · G3 모두 통과, **serving 기본값에 `roi_carve_device: cuda` 를 더했다.**
+
+**13.6 결과 — 1345 이웃 과일 접촉 진단 (R4): 접촉은 왼손 몸체 mesh 와 오렌지다**
+
+그림: ![scene](figures/roi-carve-gpu/roi-carve-gpu-scene-ep1345.png) ([sidecar](figures/roi-carve-gpu/roi-carve-gpu-scene-ep1345.json)). episode 1345, 요청 13 (chunk `chunk_00042.npz`, 가장자리 보존 완화 구성). 왼쪽 = 옆에서 (x–z), 가운데 = 위에서 (x–y), 오른쪽 = main fine layer 단면 (z = 0.870 m, 검은 선 = 0 mm). 단면 높이는 왼쪽 panel 의 점선이다. 주황 점 = 오렌지 GT 표면, 보라 점 = 왼손 몸체 mesh (geom 1052), 빨간 점 = 접촉 부위, 원 = AG3S 로봇 구 (파랑 `ee_finger_l1`, 초록 `ee_finger_l2`, 노랑 `ee_left`).
+
+**(i) 접촉의 사실** [V `R4_ep1345_neighbour_contact`]
+
+| 항목 | 값 |
+|---|---|
+| 접촉 쌍 (E4, MuJoCo replay) | `EE_BODY_L` geom #1052 (**왼손 몸체 mesh**) ↔ `orange_geom`. 손가락 ↔ 바나나가 **아니다** |
+| 접촉 행 · 구간 | 27 행, t = 101–127, chunk 12–15. 최소 거리 −0.569 mm, 최대 힘 53.27 N |
+| 다른 구성의 같은 접촉 | 기준 구성 27 행 · 관심 영역 지우기 19 행 · 가장자리 보존 27 행 · 가장자리 보존 완화 27 행 |
+| VLA 단독 (E0) | 같은 쌍 `EE_BODY_L` ↔ orange, 31 행, t = 150–180 (`IFG-APPLE/replay/runs_E0_E0_ep1345_s13453.json`) |
+
+즉 이 접촉은 **VLA 단독에서도 나고, 이 STEP 이 본 모든 AG3S 구성에서도 난다.**
+
+**(ii) 요청별 측정 (E4, 요청 11–17 = t_step 12–18)** [V `per_request_E4`]. 접촉 부위 = 그 요청에서 손 geom 의 표본점 중 오렌지 최근접 거리에서 2 mm 안의 것 (표본 수는 "부위 표본"). "구 모델 밖" = 그 표본점에서 기록된 AG3S 구 전부에 대한 `|p − c| − r` 의 최솟값의 범위. 오렌지 표면 표본이 거리장에서 잊혀진 비율은 "visible" (지금 카메라에 보이는 점) 만 적는다.
+
+| 요청 | 손 geom ↔ 오렌지 GT 최소 거리 (mm) | 부위 표본 | 구 모델 밖 (mm) | 가장 가까운 구 (link: 표본) | 그 link 의 계획 clearance 최솟값 (mm) | 이웃 접촉 허용 | 잊음 visible, main 층 | 잊음 visible, hand 층 | TrajOpt |
+|---|---|---|---|---|---|---|---|---|---|
+| 11 | 57.23 | 60 | 12.05–16.74 | l1: 60 | −0.158 | 꺼짐 | 0.0 % | 0.34 % | optimal |
+| 12 | 26.57 | 54 | 10.13–16.96 | l1: 54 | −3.52 | 켜짐 | 0.0 % | 0.70 % | optimal |
+| 13 | 0.76 | 30 | 9.27–14.82 | l1: 30 | +0.128 | 켜짐 | 0.0 % | 2.01 % | optimal |
+| 14 | 1.16 | 27 | 9.11–19.08 | l1: 27 | −2.462 | 켜짐 | 0.0 % | 0.41 % | optimal |
+| 15 | 1.90 | 48 | 10.74–24.08 | l1: 48 | −0.406 | 켜짐 | 0.0 % | 1.71 % | optimal |
+| 16 | 1.53 | 11 | 13.33–17.85 | l1: 11 | −0.843 | 켜짐 | 0.0 % | 1.96 % | feasible |
+| 17 | 7.28 | 36 | 15.34–25.01 | l1: 16, ee_left: 20 | l1 −2.476, ee_left +20.233 | 켜짐 | **13.03 %** | **16.90 %** | feasible |
+
+(l1 = `ee_finger_l1`. 오렌지 표면 중 지금 보이는 비율은 0.39–0.49. main 층에서 오렌지 표면의 거리장 최솟값 (`esdf_at_neighbour.min_mm`) 은 −7.07 ~ −11.18 mm 로 모두 음수, 즉 오렌지 자리는 점유로 읽힌다.) 가장 가까운 구의 반지름: `ee_finger_l1` · `ee_finger_l2` 2.54–8.44 mm, `ee_left` 5.7–6.22 mm [V `scene_figure.sphere_radius_mm`]. 이웃 접촉 허용 설정 = `--neighbour-contact-mm 20`: 손가락 구 (`ee_finger_l1` · `ee_finger_l2`) 가 target 근처 (파지 전) 에서 이웃 장애물과 20 mm 까지 겹칠 수 있다. 요청 12–17 에서 켜져 있었다 [V `neighbour_contact_setting`]. 기준 구성 기록 (`per_request_B_contact_region`) 의 구 모델 밖 거리 · 계획 clearance 도 같은 크기다 (예: 요청 11 `12.05–16.735` · −0.158, 요청 12 `10.132–16.956` · −3.52).
+
+**(iii) 원인 위치 — 측정이 가리키는 만큼만**
+
+| 구성 요소 | 측정이 말하는 것 | 판정 |
+|---|---|---|
+| LTE (link 별 target 제외 거리장) · 거리장 | 오렌지는 거리장에 있다: 요청 11–16 에서 main 층 visible 잊음 0.0 %, hand 층 0.34–2.01 %, 오렌지 자리 거리장 최솟값 음수. 요청 17 에서만 main 13.03 % · hand 16.90 % 로 잊는다 | 요청 11–16 에서는 원인이 **아니다**. 요청 17 의 잊음이 접촉에 영향을 주었는지는 보지 않았다 |
+| 로봇 구 모델의 범위 (TrajOpt 가 쓰는 구) | 접촉 부위는 기록된 어떤 구에서도 9.1–25.0 mm 밖이다 (요청 11–17 전체 범위; 요청 11–16 은 9.1–24.1 mm). 가장 가까운 구도 반지름 8.44 mm 이하다. 즉 손 몸체의 이 자리는 구로 덮이지 않는다 | 원인 **후보로 있다** |
+| CCR (TrajOpt 궤적 수정) 의 이웃 접촉 허용 설정 | 허용 (20 mm) 이 요청 12–17 에서 켜져 있었고, 가장 가까운 구 `ee_finger_l1` 의 계획 clearance 는 7 개 요청 중 6 개에서 음수 (−0.158 ~ −3.52 mm, 허용 20 mm 안) 였다 | 원인 **후보로 있다** |
+
+**구 모델 범위와 허용 설정은 둘 다 있고 서로 분리하지 않았다** (둘 중 하나만 바꾼 반사실 실행 (counterfactual run) 이 없다). 앞 요약의 "원인은 궤적 쪽 이웃 접촉 허용 설정" 은 접촉 쌍 (손가락 ↔ 바나나) 이 틀렸고, 원인 하나로 정한 것도 근거가 없다. 허용이 켜져 있고 손가락 구의 clearance 가 음수였다는 부분만 측정으로 확인된다.
+
+**13.7 이전 대비 (before → after)**
+
+기준점: 직전 구성 = CPU 판정의 가장자리 보존 완화 구성 (E4, 채택), 바탕 = 기준 구성. V11AB 와의 비교는 하지 않는다 (§9 의 사유와 같다).
+
+| 변경 (flag, 코드 기본 꺼짐) | 지표 | before (CPU, E4) | after (`--roi-carve-device cuda`) | 판정 |
+|---|---|---|---|---|
+| `esdf.roi_carve_device = cuda` | 지울 voxel 집합 (replay 1,366 번) | CPU 381,533 | GPU 381,533, 차이 0 | G1 통과 |
+| 〃 | 관심 영역 지우기 시간, 중앙값 · p95 (replay, 두 TSDF 합, 업로드 포함) | 207.73 · 765.67 ms | 26.09 · 101.61 ms (−87.4 % · −86.7 %) | G2 통과 |
+| 〃 | 서버 거리장 단계 중앙값 · p95 (1345 1 episode, 첫 chunk 제외) | 259.12 · 800.72 ms | 127.74 · 227.77 ms (−50.7 % · −71.6 %) | G3 통과 |
+| 〃 | 서버 관심 영역 지우기 중앙값 (1345 1 episode, 첫 chunk 제외) | 121.56 ms | 12.84 ms (−89.4 %) | — |
+| 〃 | 서버 기록 chunk (1345, 32 개) | — | 궤적 · 거리장 · 개수 모두 E4 와 동일 | G3 통과 |
+
+**개선인가.** **속도에 대해서는 그렇다: 결과 전 고정 기준 세 개를 모두 지켰다.** 판정 결과는 바뀌지 않았다 (replay 의 지울 voxel 집합 동일, 1345 의 32 chunk 동일). 따라서 §8 의 E4 판정 (성공 · 금지 접촉 · stale residue) 이 바뀔 근거는 이 측정에 없지만, **18 장면 closed-loop 을 `cuda` 로 다시 돌리지는 않았다.** 서버 시간은 한 episode (1345, 32 chunk) 의 값이라 18 장면 중앙값 303.19 ms 와 직접 비교하지 않는다. 서버 시작 직후 첫 chunk 는 `cuda` 에서 11,264.27 ms 로 느리다 (시작 비용).
+
+**13.8 사실 · 가설 구분**
+
+- 사실 [V]: §13.4 · §13.5 · §13.6 의 표 값. 거리장 단계 증가분 = 관심 영역 지우기, 그 안의 가장 큰 부분 = 영역 최솟값 filter (replay 평균 54.4 %). `target_pixel_mask` 는 이 구성에서 실행되지 않는다. 제약 생성은 거리장 단계를 포함한다. G1–G3 통과. 1345 접촉 쌍은 왼손 몸체 ↔ 오렌지이고 VLA 단독 · 모든 구성에서 난다.
+- 가설 [H]: 구 모델의 범위 (9–25 mm 밖) 와 이웃 접촉 허용 (20 mm) 중 무엇이 1345 접촉을 낳는가 — 둘 다 있고 분리하지 않았다. 영역 최솟값 filter 가 큰 이유는 측정하지 않았다.
+- **R5 (target 전용 TSDF 의 사과 pixel 이 정적 TSDF 로 새는 원인 = target 추적) 는 이 STEP 에서 측정하지 않았다.** 앞 요약의 단정만 거둔다. 재측정 대기 3 의 상태 (기전 측정 안 됨) 는 그대로다.
+
+**13.9 측정하지 않은 것 · 한계** [V `not_measured`, `limits`]
+
+1. 구 모델 범위 (9–25 mm) 와 이웃 접촉 허용 (20 mm) 중 어느 것 하나만으로 1345 접촉이 막혔을지 — 반사실 실행 없음.
+2. R5: target 전용 TSDF 누출의 기전 (serving 에서 target 전용 TSDF 꺼짐).
+3. GPU 판정을 closed-loop 1 episode (1345) 보다 많이 돌려 보는 것. G3 는 1 episode 이고 18 장면 증거는 offline replay 다.
+4. replay 의 TSDF 는 서버의 쥔 물체 처리 · target 제외를 빠뜨린다 (점유 voxel 수 중앙값 164,750 는 replay 의 값이고, 서버 쪽 값은 `verify.json` 에 없어 작업량 일치를 확인하지 않았다). 시간의 절대값은 서버와 다를 수 있다 (중앙값 207.73 대 서버 144.59 ms).
+5. G3 의 시간 비교는 첫 chunk (시작 비용 11,264.27 ms) 를 뺀 값이다. 시작 비용이 서버 수명 동안 한 번만 나는지는 이 smoke 1 개로만 본다.
+6. 1345 의 요청별 진단에서 요청 17 의 거리장 잊음 (13.03 % · 16.90 %) 의 원인과 접촉에 대한 영향. 요청별 `link_planned_clearance_min_mm` 중 요청 단위 최솟값 (14.69–21.45 mm) 은 정의가 `verify.json` 에 없어 이 로그가 해석하지 않는다 (위 표의 값은 접촉 부위의 가장 가까운 구 link 값만 썼다).

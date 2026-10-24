@@ -507,6 +507,96 @@ def _seen_through_footprint(p, cam, margin, depth_min, depth_max, voxel, pad_px,
                & (centre > 0.0) & (centre - z[idx] > float(margin))]
 
 
+# -- AG3S-ROI-CARVE-GPU: `seen_through` on the GPU ------------------------------------------------------
+def gpu_cameras(cameras: Sequence[Any], device, depth_min: float, depth_max: float) -> list[dict]:
+    """The cameras of this frame as float64 tensors on `device` — uploaded once per update, read by every TSDF's judgement.
+
+    `good` = finite, positive and in `[depth_min, depth_max]` (the pixels that may decide), robot pixels not removed yet.
+    """
+    import torch
+
+    out = []
+    for cam in cameras:
+        d = torch.as_tensor(np.asarray(cam.depth, np.float64), device=device)
+        mask = getattr(cam, "robot_mask", None)
+        K = np.asarray(cam.camera_intrinsics, np.float64)
+        T = np.asarray(cam.T_base_cam, np.float64)
+        out.append({"name": str(getattr(cam, "name", "camera")), "d": d,
+                    "good": torch.isfinite(d) & (d > 0.0) & (d >= depth_min) & (d <= depth_max),
+                    "robot": None if mask is None else torch.as_tensor(np.asarray(mask, bool), device=device),
+                    "K": K, "R": torch.as_tensor(T[:3, :3], device=device), "t": torch.as_tensor(T[:3, 3], device=device)})
+    return out
+
+
+def _project_gpu(p, cam: dict):
+    """`seen_through`'s pinhole projection on (N, 3) float64 `p`: `(z, u, v, inside)` (u, v = -1 behind the camera)."""
+    import torch
+
+    q = p - cam["t"][None, :]
+    R = cam["R"]
+    pc = q[:, 0:1] * R[0][None, :] + q[:, 1:2] * R[1][None, :] + q[:, 2:3] * R[2][None, :]   # base -> camera
+    z = pc[:, 2]
+    K = cam["K"]
+    h, w = cam["d"].shape[:2]
+    front = z > 1e-6
+    zf = torch.where(front, z, torch.ones_like(z))
+    u = torch.where(front, torch.round(float(K[0, 0]) * pc[:, 0] / zf + float(K[0, 2])), torch.full_like(z, -1.0)).long()
+    v = torch.where(front, torch.round(float(K[1, 1]) * pc[:, 1] / zf + float(K[1, 2])), torch.full_like(z, -1.0)).long()
+    return z, u, v, front & (u >= 0) & (u < w) & (v >= 0) & (v < h)
+
+
+def _min_filter_gpu(img, radius: int):
+    """`scipy.ndimage.minimum_filter(img, size=2 r + 1, mode="constant", cval=0)` of a 2-D float64 tensor."""
+    import torch.nn.functional as F
+
+    x = F.pad(img[None, None], (radius, radius, radius, radius), value=0.0)
+    return -F.max_pool2d(-x, kernel_size=2 * radius + 1, stride=1)[0, 0]
+
+
+def seen_through_gpu(points, cams: list[dict], margin: float, *, footprint_voxel: Optional[float] = None,
+                     footprint_pad_px: int = 1, footprint_robot: str = "block"):
+    """`seen_through` with the points (N, 3 float64 tensor) and the cameras (`gpu_cameras`) on the GPU — the same rule.
+
+    Returns `(mask (N,) bool tensor, {camera name: n seen through as a 0-d tensor})` — nothing is read back here.
+    """
+    import torch
+
+    out = torch.zeros(len(points), dtype=torch.bool, device=points.device)
+    per = {}
+    for cam in cams:
+        z, u, v, inside = _project_gpu(points, cam)
+        idx = torch.nonzero(inside, as_tuple=True)[0]
+        ui, vi, zi = u[idx], v[idx], z[idx]
+        good, rmask = cam["good"], cam["robot"]
+        if footprint_voxel is None:
+            obs = cam["d"][vi, ui]
+            ok = good[vi, ui]
+            if rmask is not None:
+                ok = ok & ~rmask[vi, ui]
+            hit = idx[ok & (obs - zi > float(margin))]
+        else:
+            if rmask is not None:
+                good = good & ~rmask
+            d0 = torch.where(good, cam["d"], torch.zeros_like(cam["d"]))   # undecided → min 0 → not seen through
+            dc = d0
+            if footprint_robot == "ignore" and rmask is not None:
+                d0 = torch.where(rmask, torch.full_like(d0, float("inf")), d0)
+            K = cam["K"]
+            r = torch.ceil(0.5 * max(K[0, 0], K[1, 1]) * float(footprint_voxel) / zi).long() + int(footprint_pad_px)
+            obs = torch.zeros_like(zi)
+            for rv in torch.unique(r).tolist():
+                if rv > FOOTPRINT_MAX_PX:
+                    continue
+                sel = r == rv
+                obs[sel] = _min_filter_gpu(d0, int(rv))[vi[sel], ui[sel]]
+            centre = dc[vi, ui]
+            hit = idx[(obs > 0.0) & torch.isfinite(obs) & (obs - zi > float(margin))
+                      & (centre > 0.0) & (centre - zi > float(margin))]
+        out[hit] = True
+        per[cam["name"]] = torch.as_tensor(hit.numel(), device=points.device)
+    return out, per
+
+
 def inside_robot_spheres(points: np.ndarray, spheres: dict) -> np.ndarray:
     """AG3S-DYNAMIC-FIELD D2 — which `points` (N, 3) lie inside the robot's (shrunk) spheres this frame.
 
@@ -1615,12 +1705,15 @@ class CuroboFieldBuilder:
                          "boxes": [[[round(float(v), 4) for v in lo], [round(float(v), 4) for v in hi]]
                                    for lo, hi in boxes]}
             if boxes:
-                roi_stats["coarse_tsdf"] = self._roi_carve(itg, cameras, boxes, self.coarse_truncation)
+                # AG3S-ROI-CARVE-GPU: the depth goes up once for every TSDF's judgement (`cpu`: None, the numpy judgement)
+                gcams = (None if str(getattr(cfg, "roi_carve_device", "cpu")) == "cpu" else
+                         gpu_cameras(cameras, dev, float(cfg.depth_min), float(cfg.depth_max)))
+                roi_stats["coarse_tsdf"] = self._roi_carve(itg, cameras, boxes, self.coarse_truncation, gcams)
                 if itg_fine is not None:
-                    roi_stats["fine_tsdf"] = self._roi_carve(itg_fine, cameras, boxes, self.fine_truncation)
+                    roi_stats["fine_tsdf"] = self._roi_carve(itg_fine, cameras, boxes, self.fine_truncation, gcams)
                 if self._target_mapper is not None and self._target_anchor is not None:
                     roi_stats["target_tsdf"] = self._roi_carve(self._target_mapper.integrator, cameras, boxes,
-                                                               self.fine_truncation)
+                                                               self.fine_truncation, gcams)
             roi_stats["ms"] = round((time.monotonic() - t_roi) * 1e3, 3)
 
         # 미세 계층 창의 배치 (T21, 지침 §5.1). **창의 배치는 손이 정하고, 제외할 물체는
@@ -2433,8 +2526,84 @@ class CuroboFieldBuilder:
         self._set_free(itg, pool[own], li[own], truncation)
         return int(own.sum())
 
-    def _roi_carve(self, itg, cameras, boxes, truncation: float) -> dict:
-        """② — `_carve_seen_through` restricted to the occupied voxels inside the region of interest `boxes`."""
+    @staticmethod
+    def occupied_voxels_gpu(itg, *, boxes: Sequence[tuple], band_voxels: float = CUROBO_SEED_BAND_VOXELS):
+        """`occupied_voxels(itg, boxes=boxes)` kept on the GPU: `(block_pool_idx, local_idx, centres (N, 3) float64)` tensors.
+
+        AG3S-ROI-CARVE-GPU. The same blocks, voxels and centres (the same float64 arithmetic, element by element); only the
+        allocated-block count is read back.
+        """
+        import torch
+
+        ts = itg.tsdf
+        data = ts.data if hasattr(ts, "data") else ts
+        bd = data.block_data
+        dev = bd.device
+        empty = (torch.zeros(0, dtype=torch.long, device=dev), torch.zeros(0, dtype=torch.long, device=dev),
+                 torch.zeros((0, 3), dtype=torch.float64, device=dev))
+        n_alloc = int(data.num_allocated.detach().reshape(-1)[0].item())
+        if n_alloc <= 0 or bd.dim() != 3 or bd.shape[1] <= 1:
+            return empty
+        bs = int(round(bd.shape[1] ** (1.0 / 3.0)))
+        D, H, W = (int(v) for v in itg.grid_shape)
+        vs = float(itg.voxel_size)
+        origin = itg.origin.detach().reshape(-1)[:3].to(dev).double()
+        coords = data.block_coords.detach().reshape(-1, 3)[:n_alloc].long()
+        live = torch.nonzero(data.block_to_hash_slot.detach()[:n_alloc] >= 0, as_tuple=True)[0]
+        grid = torch.tensor([W, H, D], dtype=torch.long, device=dev)
+        offsets = ((grid + bs - 1) // bs) // 2
+        lo_hi = [(torch.as_tensor(np.asarray(lo, np.float64), device=dev), torch.as_tensor(np.asarray(hi, np.float64), device=dev))
+                 for lo, hi in boxes]
+        blo = origin + (((coords[live] + offsets) * bs).double() - 0.5 * grid.double()) * vs
+        bhi = blo + bs * vs
+        keep = torch.zeros(len(live), dtype=torch.bool, device=dev)
+        for lo, hi in lo_hi:
+            keep |= torch.all((bhi >= lo) & (blo <= hi), dim=1)
+        live = live[keep]
+        w = bd[live, :, 1].float()
+        s = bd[live, :, 0].float()
+        occ = (w > 0) & (s <= float(band_voxels) * vs * w)
+        bi, li = torch.nonzero(occ, as_tuple=True)
+        loc = torch.stack([li % bs, (li // bs) % bs, li // (bs * bs)], dim=1)
+        g = (coords[live[bi]] + offsets) * bs + loc
+        centres = origin + (g.double() + 0.5 - 0.5 * grid.double()) * vs
+        inside = torch.zeros(len(centres), dtype=torch.bool, device=dev)
+        for lo, hi in lo_hi:
+            inside |= torch.all((centres >= lo) & (centres <= hi), dim=1)
+        return live[bi][inside], li[inside], centres[inside]
+
+    def _roi_judge_gpu(self, itg, cams: list[dict], boxes, truncation: float):
+        """② on the GPU: `(pool, local, hit, {camera: n}, margin)` tensors for this TSDF (`gpu_cameras` of this frame)."""
+        pool, li, centres = self.occupied_voxels_gpu(itg, boxes=boxes)
+        vs = float(itg.voxel_size)
+        margin_cfg = getattr(self.config, "free_space_carve_margin", None)
+        m = float(margin_cfg) if margin_cfg is not None else float(truncation) + vs
+        cfg = self.config
+        fp = bool(getattr(cfg, "roi_carve_footprint", False))
+        hit, per = seen_through_gpu(centres, cams, m,
+                                    **({} if not fp else {"footprint_voxel": vs,
+                                                          "footprint_pad_px": int(getattr(cfg, "roi_carve_footprint_pad_px", 1)),
+                                                          "footprint_robot": str(getattr(cfg, "roi_carve_footprint_robot", "block"))}))
+        return pool, li, hit, per, m
+
+    def _roi_carve(self, itg, cameras, boxes, truncation: float, gpu_cams: Optional[list] = None) -> dict:
+        """② — `_carve_seen_through` restricted to the occupied voxels inside the region of interest `boxes`.
+
+        `gpu_cams` (`gpu_cameras`, AG3S-ROI-CARVE-GPU, `esdf.roi_carve_device = "cuda"`): the same judgement on the GPU.
+        """
+        if gpu_cams is not None:
+            import torch
+
+            pool, li, hit, per, m = self._roi_judge_gpu(itg, gpu_cams, boxes, truncation)
+            self._set_free(itg, pool[hit], li[hit], truncation)
+            counts = torch.stack([torch.as_tensor(len(pool), device=hit.device), hit.sum()]
+                                 + [per[k] for k in per]).tolist()   # the one read-back
+            fp = bool(getattr(self.config, "roi_carve_footprint", False))
+            if not counts[0]:
+                return {"n_roi_occupied": 0, "n_freed": 0}
+            return {"n_roi_occupied": int(counts[0]), "n_freed": int(counts[1]), "margin_m": round(m, 6),
+                    "per_camera": {k: int(c) for k, c in zip(per, counts[2:])}, **({"footprint": True} if fp else {}),
+                    "device": "cuda"}
         pool, li, centres = self.occupied_voxels(itg, boxes=boxes)
         if not len(pool):
             return {"n_roi_occupied": 0, "n_freed": 0}

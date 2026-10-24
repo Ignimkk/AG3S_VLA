@@ -186,7 +186,8 @@ def test_roi_carve_serving_default():
 
     sec = lambda *a: serve_safe.dynamic_field_section(serve_safe.build_parser().parse_args([*BASE_ARGV, *a]))  # noqa: E731
     assert sec("--esdf-backend", "curobo") == serve_safe.ROI_CARVE_SERVING_DEFAULT == {
-        "roi_carve": True, "roi_carve_footprint": True, "roi_carve_footprint_pad_px": 0, "roi_carve_footprint_robot": "ignore"}
+        "roi_carve": True, "roi_carve_footprint": True, "roi_carve_footprint_pad_px": 0, "roi_carve_footprint_robot": "ignore",
+        "roi_carve_device": "cuda"}                                         # AG3S-ROI-CARVE-GPU
     assert sec("--esdf-backend", "curobo", "--no-roi-carve") == {}          # = the esdf config before the default
     assert sec() == {}                                                      # legacy field
     assert sec("--esdf-backend", "curobo", "--no-safe") == {}
