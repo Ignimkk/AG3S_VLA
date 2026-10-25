@@ -936,6 +936,14 @@ def main():
         help="fruits initially placed inside the crate; requires --fruit-layout-index",
     )
     ap.add_argument(
+        "--remove-objects",
+        nargs="+",
+        choices=FRUIT_TYPES,
+        default=None,
+        help="randomized 16-D episodes: park these non-target fruits on the floor after the reset "
+             "(off the table and out of the cameras). Off by default",
+    )
+    ap.add_argument(
         "--fruit-basket-offset",
         type=float,
         default=0.0,
@@ -1252,6 +1260,19 @@ def main():
                   f"({args.target_offset_xy[0]:+.3f}, {args.target_offset_xy[1]:+.3f}) m")
         # T46f pilot — end
         reset_randomized_scene(m, d, randomized_episode)
+        if args.remove_objects:
+            # OCC-APPLE (2026-10-25): park non-target fruits on the floor, out of the cameras, before the warm-up.
+            # The reset above is unchanged, so every other object keeps its pose.
+            bad = [o for o in args.remove_objects if o == randomized_episode["target_fruit"]]
+            if bad:
+                ap.error(f"--remove-objects must not name the target fruit {bad[0]!r}")
+            for k, obj in enumerate(args.remove_objects):
+                jid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, f"{obj}_free")
+                qa, va = int(m.jnt_qposadr[jid]), int(m.jnt_dofadr[jid])
+                d.qpos[qa:qa + 7] = [-1.5, -2.5 - 0.3 * k, 0.1, 1.0, 0.0, 0.0, 0.0]
+                d.qvel[va:va + 6] = 0.0
+            mujoco.mj_forward(m, d)
+            print(f"  removed    : {list(args.remove_objects)} parked on the floor (off the table)")
         split = randomized_split_of(args.episode_index)
         print(
             f"  scene      : episode {args.episode_index} ({split}) "
