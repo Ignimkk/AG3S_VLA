@@ -14,7 +14,7 @@
 >
 > **수치 규칙.** 이 파일의 모든 수치는 `AG3S/ag3s/docs/handoff/<STEP>.verify.json` 을 출처로 한다. BL-1 의 수치는
 > [`handoff/PAPER-BASELINES-2.verify.json`](handoff/PAPER-BASELINES-2.verify.json) 의 `numbers`(표 · 지표)와
-> `runs` · `issues` · `not_measured`(실행 시각 · 실패 · 미측정)에서만 가져왔다. BL-3 의 수치는 [`handoff/BASELINE-EVAL-V1.verify.json`](handoff/BASELINE-EVAL-V1.verify.json), BL-4 의 수치는 [`handoff/BASELINE-EVAL-V2.verify.json`](handoff/BASELINE-EVAL-V2.verify.json) 의 `numbers` · `issues` · `limitations` · `not_measured` 에서 가져왔고, 두 단계의 구현 경위(`BASELINE-EVAL-F.impl.md` · `-G.impl.md`)는 구성 · 방법 사실만 옮겼다(G 의 속도 · 동일성 수치는 옮기지 않았다). BL-5 의 수치는 [`handoff/ATS-CLOUD-DIAG-V4.verify.json`](handoff/ATS-CLOUD-DIAG-V4.verify.json) 의 `numbers` · `runs` · `issues` · `not_measured` 에서 가져왔다. 원인 진단의 근거(`파일:줄` · 경로)는 `ATS-CLOUD-DIAG-H.impl.md`, 구현은 `ATS-CLOUD-DIAG-J.impl.md` 에서 옮겼고 H 의 예비 수치는 옮기지 않았다. BL-6 의 수치는 [`handoff/CLOSED-LOOP-METHODS-V3.verify.json`](handoff/CLOSED-LOOP-METHODS-V3.verify.json) 의 `numbers` · `runs` · `code_state` · `issues` · `not_measured` 에서 가져왔다. 구현 구조 · 설계 결정 · privileged 여부 · 원 방법과의 차이는 `CLOSED-LOOP-METHODS.task.md` · `-I.impl.md` · `Baseline/paper_baselines/closed_loop/README.md` 에서 옮겼고, `-I.impl.md` 의 CPU smoke 수치는 옮기지 않았다(bit 재현 사실만). BL-7 의 수치는 [`handoff/CLOSED-LOOP-FIX-V5.verify.json`](handoff/CLOSED-LOOP-FIX-V5.verify.json) 의 `numbers` · `runs` · `code_state` · `issues` · `not_measured` 에서만 가져왔다. 수정의 원인 · 원 방법의 정의 · 수정 내용은 [`handoff/CLOSED-LOOP-FIX-K.impl.md`](handoff/CLOSED-LOOP-FIX-K.impl.md) 에서 사실만 옮겼고 그 안의 CPU replay 수치(전후 표)는 옮기지 않았다. 출처가 없는 숫자는 쓰지 않았고, 필요하면
+> `runs` · `issues` · `not_measured`(실행 시각 · 실패 · 미측정)에서만 가져왔다. BL-3 의 수치는 [`handoff/BASELINE-EVAL-V1.verify.json`](handoff/BASELINE-EVAL-V1.verify.json), BL-4 의 수치는 [`handoff/BASELINE-EVAL-V2.verify.json`](handoff/BASELINE-EVAL-V2.verify.json) 의 `numbers` · `issues` · `limitations` · `not_measured` 에서 가져왔고, 두 단계의 구현 경위(`BASELINE-EVAL-F.impl.md` · `-G.impl.md`)는 구성 · 방법 사실만 옮겼다(G 의 속도 · 동일성 수치는 옮기지 않았다). BL-5 의 수치는 [`handoff/ATS-CLOUD-DIAG-V4.verify.json`](handoff/ATS-CLOUD-DIAG-V4.verify.json) 의 `numbers` · `runs` · `issues` · `not_measured` 에서 가져왔다. 원인 진단의 근거(`파일:줄` · 경로)는 `ATS-CLOUD-DIAG-H.impl.md`, 구현은 `ATS-CLOUD-DIAG-J.impl.md` 에서 옮겼고 H 의 예비 수치는 옮기지 않았다. BL-6 의 수치는 [`handoff/CLOSED-LOOP-METHODS-V3.verify.json`](handoff/CLOSED-LOOP-METHODS-V3.verify.json) 의 `numbers` · `runs` · `code_state` · `issues` · `not_measured` 에서 가져왔다. 구현 구조 · 설계 결정 · privileged 여부 · 원 방법과의 차이는 `CLOSED-LOOP-METHODS.task.md` · `-I.impl.md` · `Baseline/paper_baselines/closed_loop/README.md` 에서 옮겼고, `-I.impl.md` 의 CPU smoke 수치는 옮기지 않았다(bit 재현 사실만). BL-7 의 수치는 [`handoff/CLOSED-LOOP-FIX-V5.verify.json`](handoff/CLOSED-LOOP-FIX-V5.verify.json) 의 `numbers` · `runs` · `code_state` · `issues` · `not_measured` 에서만 가져왔다. 수정의 원인 · 원 방법의 정의 · 수정 내용은 [`handoff/CLOSED-LOOP-FIX-K.impl.md`](handoff/CLOSED-LOOP-FIX-K.impl.md) 에서 사실만 옮겼고 그 안의 CPU replay 수치(전후 표)는 옮기지 않았다. BL-8 의 수치는 [`handoff/BASELINE-BENCH-READY-V6.verify.json`](handoff/BASELINE-BENCH-READY-V6.verify.json) 의 `numbers` · `runs` · `code_state` · `issues` · `not_measured` 에서만 가져왔다. 구현 사실(원인 · 원 방법 · 수정 · 원 방법과의 차이)은 [`BASELINE-BENCH-READY-L.impl.md`](handoff/BASELINE-BENCH-READY-L.impl.md) · [`-M.impl.md`](handoff/BASELINE-BENCH-READY-M.impl.md) 에서, 결정과 맥락은 [`BASELINE-BENCH-READY.task.md`](handoff/BASELINE-BENCH-READY.task.md) 에서 옮겼고 두 impl 의 CPU replay · CPU episode 수치는 옮기지 않았다(bit 동일성 사실과 test pass / skip 개수만). 출처가 없는 숫자는 쓰지 않았고, 필요하면
 > verifier 에게 측정을 요청한다. **implementer 의 smoke 수치(`*.impl.md`)는 이 파일에 옮기지 않는다.** smoke 는 배선
 > 확인이지 측정이 아니기 때문이다. BL-0 · BL-2 는 구성과 test 통과 사실(pass / skip 개수)만 `impl.md` 에서 옮겼다.
 > 식별자(경로 · SHA · commit · sha256)는 verify.json 또는 impl.md 에 있는 것만 옮긴다.
@@ -36,6 +36,7 @@
 | **BL-5** ATS-CLOUD-DIAG | V11AB `cloud_target` 이 비는 원인 진단 · cloud labeling 의 ATS 표현 옵션(`--ats-repr` · `--ats-tol`) · 표현별 공정 비교 재계산 · stale geometry 와 GT 의 거리 | **측정 완료 (2026-10-24 KST, CPU), 사용자 판정 대기.** 코드(J)는 commit 하지 않은 working tree 판 | [BL-5](#bl-5--ats-cloud-diag-v11ab-cloud_target-이-비는-원인-진단과-ats-표현별-공정-비교-재계산-2026-10-24) |
 | ~~BL-5 (이름 미정)~~ → **BL-6** CLOSED-LOOP-METHODS | methods closed-loop 연결 → benchmark 고유 지표(TSR · CAR · ETS 등) | ~~미착수~~ ~~**진행 중** (implementer I → verifier V3). 이 기록은 verify.json 이 나온 뒤 쓴다~~ → **구현 · GPU smoke 완료 (2026-10-24 KST, commit `16d0eea1`), 사용자 판정 대기.** 8 arm 1 episode smoke 까지만 했다. ~~**pilot(20 episode × 8 arm)은 아직 돌리지 않았다**~~ → pilot 은 pilot 전 수정(BL-7) 뒤에 BL-7 에서 돌렸다. 이 STEP 의 issue 1 · 3 · 4 · 5 는 BL-7 이 다룬다 | [BL-6](#bl-6--closed-loop-methods-methods-를-safelibero-closed-loop-에-연결--gpu-smoke-2026-10-24). 원본 [`handoff/CLOSED-LOOP-METHODS.task.md`](handoff/CLOSED-LOOP-METHODS.task.md). `benchmark/runners` 는 고치지 않고 `Baseline/paper_baselines/closed_loop/` 의 새 server · launcher 로 붙였다 |
 | **BL-7** CLOSED-LOOP-FIX | pilot 전 3 arm(lan_o3dp · knows · omniguide) 수정 → 수정 3 arm GPU smoke 재확인 → SafeLIBERO spatial L I dev 20 episode × 8 arm pilot | **구현 · smoke · pilot 측정 완료 (2026-10-24 KST, commit `b95c1c87`), 사용자 판정 대기.** 8 job 모두 rc 0 · 160 episode · fallback 0. 20 episode pilot 이라 p 값 · CI 는 있는 그대로만 적고 해석하지 않는다 | [BL-7](#bl-7--closed-loop-fix-pilot-전-3-arm-수정--smoke-재확인--pilot-20-episode--8-arm-2026-10-24). 원본 [`handoff/CLOSED-LOOP-FIX.task.md`](handoff/CLOSED-LOOP-FIX.task.md) |
+| **BL-8** BASELINE-BENCH-READY | 인식 경로 depth trim · CFM action box · privileged GT 장애물 변형 · benchmark job 생성 · GPU smoke(L_smoke 9 job · gt_smoke 9 job · suite_smoke 36 job) | **구현 · GPU smoke 완료 (2026-10-25 KST, commit `a63f2864` · `98004d0d`), 사용자 판정 대기.** 54 job 모두 rc 0 · fallback 0. **모든 수치는 n = 1(`t0e0`)이다. 성능 비교가 아니라 배선 · 입력 기록 확인이다.** 시뮬레이션의 GT 탁자 높이와의 비교, impl V6 step 1 CPU 재확인은 하지 않았다 | [BL-8](#bl-8--baseline-bench-ready-인식-경로-depth-trim--cfm-action-box--privileged-gt-장애물-변형--benchmark-job-생성--gpu-smoke-2026-10-25). 원본 [`handoff/BASELINE-BENCH-READY.task.md`](handoff/BASELINE-BENCH-READY.task.md). 전체 benchmark 실험은 benchmark 단계에서 한다(사용자 지시) |
 
 ### 사용자 · lead 결정 기록
 
@@ -54,6 +55,12 @@
 | 2026-10-24 | **사용자 판정 "먼저 수정 후 pilot"**: BL-6 의 3 문제(lan_o3dp action 크기 · knows 의 h<0 와 qp_fail 0 · omniguide skip 과 재compile)를 CPU 에서 먼저 고친 뒤 pilot(SafeLIBERO spatial L I dev 20 episode × 8 arm)을 돌린다. BL-6 의 "pilot 실행 여부 · 구성은 사용자 결정 대기" 에 대한 답이다 | `CLOSED-LOOP-FIX.task.md` |
 | 2026-10-24 | **lead go (pilot 시작 전)**: 수정 3 arm 의 GPU smoke 에서 knows · omniguide 의 \|a\| 가 1 을 넘는 것(knows served 최대 1.434, omniguide 1.0084)은 **원 방법의 성질로 보고 known issue 로 기록한 뒤 pilot 을 시작한다.** robosuite OSC 가 입력을 [-1, 1] 로 자르기 때문이다(`base_controller.py:120`, `osc_pose.json:3`). | `CLOSED-LOOP-FIX-V5.verify.json` `issues` · `numbers.robosuite_osc_clip` |
 | 2026-10-24 | `Baseline/paper_baselines/methods/guidance_common/core.py` 는 `.gitignore` 의 `core.*`(core dump pattern)에 걸려 한 번도 git 에 올라간 적이 없었다. commit `b95c1c87`(19:05 KST)이 `.gitignore` 에 2 줄을 더하고 이 파일을 추가했다 | `CLOSED-LOOP-FIX-K.impl.md` "git 주의", `git show --stat b95c1c87` |
+| 2026-10-25 | **사용자 지시**: "권장 순서로 진행. baseline 방법들은 benchmark 에서 실험할 예정." 그래서 전체 suite × level 실험은 benchmark 단계(사용자)에서 하고, 이 STEP 은 모든 조합의 job 을 만들 수 있게 하고 조합마다 1 episode smoke 까지만 한다 | `BASELINE-BENCH-READY.task.md` |
+| 2026-10-25 | **lead 권장 순서**: (a) 인식 경로 수정 + CFM action 범위 진단 → (c) privileged 변형 → (b) benchmark job 생성. 근거: (a) 는 pilot 수치를 흐리는 구현 문제라 전체 실험 전에 고쳐야 한다(검출 상자에 depth trim 이 없어 ellipsoid 가 최대 0.77 m, CFM 의 executed \|xyz\| 가 7.28 까지). (c) 는 원 논문 조건(AEGIS 의 VLM 이름, CFM 의 GT sphere 등)과 같은 행이 있어야 Tab. 4 "reported" 행과 비교할 수 있다. (b) 는 실제 실험이 benchmark 단계이므로 job 생성과 조합별 1 episode smoke 까지만 | `BASELINE-BENCH-READY.task.md` |
+| 2026-10-25 | **lead 결정 `gt_obstacle_set`**: `gt_seg` 의 기본은 `all_non_target`(지금 동작), `obstacle_names`(`privileged/obstacle_names` 에 있는 물체만)는 sensitivity 변형이다 | `BASELINE-BENCH-READY-L.impl.md` |
+| 2026-10-25 | **같은 checkout 의 benchmark session 과의 합의**: client 수정은 flag `--emit-privileged-obstacles` 하나(기본 off, off 일 때 byte 동일)이고, 그쪽 test 한 줄(`tests/benchmark/test_bm_setup_a_identity.py` 에서 새 parser key `emit_privileged_obstacles` 를 비교에서 제외)을 같은 commit 에 묶는다 | commit `a63f2864` message, `BASELINE-BENCH-READY-M.impl.md` |
+| 2026-10-25 | **lead 추가 요청**: 모든 arm 의 `extras["suite"]` 를 server 가 넣는다(`--suite`). V5 동작은 `--no-suite-extras` 로 되돌리고, 이것과 L 의 `crop_mode="box"` · `action_box=false` 를 `<arm>@v5` preset 으로 묶는다 | `BASELINE-BENCH-READY-M.impl.md` |
+| 2026-10-25 | **GPU lock 양보 2 회**: 사용자 지시를 받은 development session 의 요청으로 verifier 가 공용 lock 을 두 번 넘겼다(19:23:46 KST gt_smoke 종료 뒤, 20:00:11 KST suite_smoke 일시 정지). 일시 정지 · 재개 시각과 jobs 분할은 BL-8 "GPU lock 양보 경위" | `BASELINE-BENCH-READY-V6.verify.json` `numbers.gpu` |
 
 ---
 
@@ -167,6 +174,31 @@
 | **`ms.total` · `ms.method` · `ms.diagnostics` · `ms.serve`** | `ms.total` = `MethodServer.infer` 의 wall time(client 가 기다리는 시간, 전송 제외). `ms.diagnostics` = chunk 확정 뒤의 기록용 계산. `ms.method` = `total − diagnostics`. **`ms.serve` 는 BL-7 에서 `total` 과 같게 바뀌었다**(BL-6 V3 기록에서는 `total − diagnostics`). 비교는 `ms.total` · `ms.method` 로 한다 |
 | **paired (arm vs none)** | 같은 (task, episode) 20 쌍에서 arm 과 `none` 의 결과를 맞춘다. `+a / −b` = arm 에만 사건이 있는 episode 수 a / `none` 에만 있는 episode 수 b(불일치 쌍). **exact sign test** = 불일치 쌍만으로 한 양측 이항 검정(McNemar exact, `p`). 불일치가 0 이면 `p` 가 정의되지 않아 `-` 로 쓴다. **bootstrap CI** = episode 평균 차이(arm − none)의 percentile 95 % 구간, 10,000 회 resample, `numpy default_rng(0)` |
 | **working set (pod)** | cgroup `memory.current − inactive_file`. 공용 pod 규칙은 working set + 추정 ≤ 64 GiB(= 65,536 MiB) 다 |
+
+### 인식 경로 · CFM action box · privileged · job 생성 (BL-8)
+
+| 용어 | 뜻 |
+|---|---|
+| **`t0e0` · n = 1** | task 0, episode 0 의 1 episode. BL-8 의 모든 수치가 이 한 episode 의 값이다. 성능 비교가 아니다 |
+| **`crop_mode` (`box` · `depth_trim`)** | filter arm(aegis · knows · multilink)이 Grounding DINO 검출 상자에서 장애물 cloud 를 만드는 방식. `box` = 상자 안의 모든 depth 점에서 robot sphere 만 뺀다(BL-7 까지의 동작). `depth_trim`(새 기본) = 아래 단계로 상자 중심의 물체 하나만 남긴다 |
+| **support plane · `support_z`** | 외부 카메라(head)의 전체 lift 에서 가장 밀한 수평면의 높이(base frame). `depth_trim` 이 그 위 1.5 cm 이하와 0.58 m 초과의 점을 지울 때 쓴다. AEGIS workspace box 의 z 범위를 suite 이름 없이 대신한다. non-privileged 추정이다 |
+| **center component** | 1 cm voxel 26-연결 성분 중 검출 상자의 중앙 40 % 창에 든 점을 가장 많이 가진 성분. 창이 비면 상자 중심에 가장 가까운 성분 |
+| **3D association** | 상자 · 카메라마다 나온 cloud 를 3D 위치(centroid 거리 ≤ 5 cm, 또는 작은 cloud 의 50 % 이상이 1 cm 안에 겹침)로 같은 물체인지 판단해 합치는 것. 옛 방식은 이름 `object#j` 의 j 를 카메라마다 다시 세어 합쳤다 |
+| **Panda 받침 envelope** | `depth_trim` 이 지우는 robot 받침 영역(base frame 에서 r_xy 0.18 m, z < 0.16 m). robot sphere model 의 가장 낮은 구가 z 0.085 m 라 받침을 덮지 못해서 따로 둔다 |
+| **MVEE (KNOWS 의 ellipsoid)** | minimum volume enclosing ellipsoid. KNOWS 가 장애물 cloud 에 맞추는 타원체. BL-8 은 반축(semi-axes)을 비교한다 |
+| **AEGIS workspace box** | AEGIS 원 code 가 suite 이름으로 고르는 world 좌표의 작업 영역(탁자 scene 은 z 0.92–1.5 m, \|x\|, \|y\| < 0.3 m)으로, 탁자면과 배경을 자른다. 이 기록의 `workspace` 열은 server 가 받은 suite 에서 고른 값(`table` · `living_room` · `floor`)이다 |
+| **`extras["suite"]` · `--suite` · `--no-suite-extras`** | server 가 `SceneObservation.extras` 에 suite 이름을 넣는 것(모든 arm). BL-7 까지는 없었다. `--no-suite-extras` 가 BL-7 동작이다 |
+| **`<arm>@v5` preset** | BL-7(V5)의 동작을 재현하는 조합: `crop_mode="box"`(CFM 은 `action_box=false`) + `--no-suite-extras` + run tag `v5` |
+| **`action_box` (CFM)** | CFM guidance 가 served chunk 를 LIBERO OSC 입력 범위 raw [-1, 1](`pi05_libero` quantile stats 로 normalized)의 box 안에 두는 option. 원 CFM 에는 없다. lan 의 `clip_sample` 과 같은 규칙으로 구현했다 |
+| **`gt_obstacle_set`** | `gt_seg` 가 어떤 물체를 장애물로 볼지: `all_non_target`(기본, target 이 아닌 모든 instance), `obstacle_names`(`privileged/obstacle_names` 에 있는 물체만. 원 논문 조건과 비교하는 sensitivity) |
+| **privileged 변형 (`<arm>:gt[-source]`)** | GT 장애물을 쓰는 변형. source: `names`(GT 이름을 GDINO prompt 로, aegis) · `seg`(GT segmentation, knows · multilink) · `spheres`(GT collision geom 을 감싸는 구, CFM) · `repo`(CFM repo 규칙의 geom, CFM) · `geoms`(collision geom 을 primitive 로, nudge · omniguide · lan). manifest 에 `privileged: true` 가 남는다 |
+| **`--emit-privileged-obstacles`** | client flag(기본 off). 켜면 request 에 SafeLIBERO 장애물 GT 가 실린다. 꺼져 있으면 request · 기록 파일이 수정 전 client 와 byte 단위로 같다. `--capture-segmentation` 이 함께 켜지면 GT segmentation 도 실린다 |
+| **`active == monitor_obstacle`** | privileged 요약에서 그 call 의 active obstacle(SafeLIBERO env 에서 장면 안에 있는 obstacle)이 client 의 `CollisionMonitor` 가 보는 obstacle 과 같은지. 같은 call 수 / privileged 기록이 있는 call 수로 쓴다 |
+| **`jobs.py` (`plan` · `smoke` · `aggregate`)** | `closed_loop/jobs.py`. arm × suite × level × task × split 의 job 목록(`jobs.txt` + `plan.json`)을 `run_parallel_gpu.sh` 형식으로 만들고, 끝난 run 을 suite × level × arm 별 공식 지표와 `none` 대비 paired 로 집계한다. `smoke` = 12 조합 × (`none`, `aegis`, `constrained_flow_matching`) `t0e0` |
+| **L_smoke · gt_smoke · suite_smoke** | V6 의 세 GPU phase. L_smoke = 고친 4 arm 의 새 기본 대 `@v5`(9 job), gt_smoke = privileged 8 변형 + `none`(9 job), suite_smoke = 12 suite × level × 3 arm(36 job) |
+| **S / F · `coll` · `no coll`** | suite_smoke 표의 칸. S / F = 그 1 episode 의 official success 여부, `coll` / `no coll` = SafeLIBERO 의 충돌 판정(LIBERO 4 suite 는 충돌 지표가 없다) |
+| **`T_world_base`** | world frame 에서 robot base 의 pose. `support_z`(base frame)에 base 의 z 를 더하면 world z 다(표의 값으로 확인) |
+| **LIBERO problem class (`Tabletop` · `LivingRoom` · `Floor`)** | LIBERO suite 의 장면 종류. 탁자 · 바닥 높이 상수(`table_offset`, `floor_offset`)가 problem class 마다 정해져 있다 |
 
 ---
 
@@ -2390,7 +2422,7 @@ pilot 중 pod working set 을 30 s 간격으로 312 회 sampling 했다(최대 7
 
 ### 범위 밖으로 남긴 것 (K impl.md)
 
-- **AEGIS · KNOWS · multi-link 가 공통으로 쓰는 filter 의 장애물 cloud 품질**(`safety_common.ObstacleCloudSource._detect`, 이번 수정 범위 밖):
+- ~~**AEGIS · KNOWS · multi-link 가 공통으로 쓰는 filter 의 장애물 cloud 품질**(`safety_common.ObstacleCloudSource._detect`, 이번 수정 범위 밖):~~ → BL-8 에서 `crop_mode="depth_trim"`(기본) · 3D association 으로 수정했다. 아래 세 줄은 BL-7 시점의 기록이고, "head · wrist 합침" 줄은 BL-8 구현 A 에서 정정했다(BL-7 closed-loop 의 `cameras` 는 head 만이었다):
   - GDINO box crop 에 **depth trim 이 없다**(`gt_seg` 경로에는 있다). 그래서 배경 depth 가 섞인다.
   - `all_objects` 의 이름 `object#j` 가 camera 마다 j 를 다시 세서, head 와 wrist 의 서로 다른 물체가 한 cloud 로 합쳐진다.
   - 그 결과 call 0 의 obstacle ellipsoid 반축이 **최대 0.77 m** 이고 시작부터 EE 가 그 안에 있다(`h*` < 0).
@@ -2416,9 +2448,466 @@ pilot 중 pod working set 을 30 s 간격으로 312 회 sampling 했다(최대 7
 2. 표 B-2 의 `ms.total` 은 2 job 병렬 값이다. 논문 latency 로 쓰려면 1 job 측정이 필요하다. issue 4 의 CFM 비교(`ms.total` 대 V3 `ms.serve`)의 정의 일치는 verifier 에게 확인을 요청한다.
 3. issue 1: CFM · knows 의 clip 전 \|a\| 가 1 을 크게 넘는 것을 어떻게 다룰지(known issue 로 둘지). lan_o3dp 가 smoke 와 pilot 에서 다른 이유.
 4. issue 2: omniguide 가 `none` 과 거의 같은 이유의 분석 여부.
-5. 범위 밖 항목(filter 장애물 cloud 의 depth trim · camera 간 이름 합침, guidance target box)의 수정 여부 — 사용자 결정.
+5. ~~범위 밖 항목(filter 장애물 cloud 의 depth trim · camera 간 이름 합침, guidance target box)의 수정 여부 — 사용자 결정.~~ → filter 장애물 cloud 의 depth trim · 3D association 은 BL-8 에서 수정했다. guidance target box(head 카메라가 cabinet 을 "black bowl" 로 잡는 경우)는 고치지 않았다.
 6. pilot 규모 확대(episode 수, Level II, 다른 suite)와 privileged 변형 — 사용자 결정.
 7. `closed_loop/` · `methods/` 의 commit 정리와 verifier 의 figure(`figures/baselines/closed_loop/v5*`, 현재 untracked)의 commit — 사용자 판정 후.
+
+### 판정
+
+**사용자 판정 대기.**
+
+
+---
+
+## BL-8 — BASELINE-BENCH-READY: 인식 경로 depth trim · CFM action box · privileged GT 장애물 변형 · benchmark job 생성 · GPU smoke (2026-10-25)
+
+> 2026-10-25 KST. 구현 implementer M(commit `a63f2864`, 18:01:50 KST)과 implementer L(commit `98004d0d`, 18:20:12 KST), 검증 verifier V6 18:21–20:57 KST(GPU lock 점유는 L_smoke 18:24:11, gt_smoke 18:42:17, suite_smoke 19:27:16 부터, 아래 "실행").
+> 원본: [`handoff/BASELINE-BENCH-READY.task.md`](handoff/BASELINE-BENCH-READY.task.md) · [`-L.impl.md`](handoff/BASELINE-BENCH-READY-L.impl.md)(인식 경로 · CFM) · [`-M.impl.md`](handoff/BASELINE-BENCH-READY-M.impl.md)(privileged · jobs) · [`handoff/BASELINE-BENCH-READY-V6.verify.json`](handoff/BASELINE-BENCH-READY-V6.verify.json)(측정). raw 출력: `outputs/verify/BASELINE-BENCH-READY/`(`L_smoke/` · `gt_smoke/` · `suite_smoke/` · `suite_smoke_resume/` 의 `numbers.json` · `aggregate.json` · log)와 `AG3S_VLA-storage/results/benchmark/20261025T18*–20*_98004d0dc416_blbr-{L,gt}-smoke-*`, `…_blb-smoke-*`(run dir 시각이 KST 다).
+> figure: [`figures/baselines/bench_ready/`](figures/baselines/bench_ready/) 의 `v6-*`(각각 같은 이름의 `.json` sidecar). 이 기록은 링크만 한다.
+> 대상: SafeLIBERO spatial Level I dev task 0 episode 0(`t0e0`)의 L_smoke 9 job · gt_smoke 9 job, 그리고 LIBERO 4 suite + SafeLIBERO 4 suite × Level I / II = 12 조합 × {`none`, `aegis`, `constrained_flow_matching`} = 36 job(suite_smoke). 모든 run 이 split 은 dev 이고 2 job 병렬(`--max-parallel 2 --est-gib-per-run 16`)이다.
+> **판정은 사용자 판정 대기.** **이 STEP 의 모든 수치는 n = 1(`t0e0`, 1 episode)이다. smoke 는 배선과 입력 기록을 확인하는 것이지 arm 의 성능 비교가 아니다.** 아래 표의 success · collision · TSR · CAR 는 그 1 episode 의 값이고, 값이 다른 것을 method 의 우열이나 원인으로 읽지 않는다.
+
+### 이 STEP 이 답하는 질문 (BL-8)
+
+BL-7 의 pilot 뒤에, 사용자는 baseline 방법들을 benchmark(전체 suite × level 실험)에서 돌리겠다고 지시했다. 그 전에 구현 쪽에 남아 있던 문제를 lead 의 권장 순서대로 다뤘다.
+
+1. **인식 경로(filter arm)의 장애물 cloud**: AEGIS · KNOWS · multi-link 가 Grounding DINO 검출 상자 안의 점을 그대로 장애물로 써서 call 0 의 KNOWS ellipsoid 반축이 최대 0.77 m 였다(BL-7 "범위 밖" 첫 항목). 고쳤고, 같은 입력에서 반축이 어떻게 변했는가?
+2. **CFM 의 action 범위**: BL-7 pilot 에서 CFM 의 실행 행 최대 \|xyz\| 가 7.284 였다(BL-7 실패 #1). 범위 제약을 넣은 뒤 served · 실행 \|xyz\| 는 어떤가?
+3. **privileged 변형**: 원 논문 조건(AEGIS 의 VLM 이 준 장애물 이름, CFM 의 SafeLIBERO GT sphere 등)과 같은 행을 non-privileged 행 옆에 둘 수 있는가? 모든 변형이 GT 장애물을 실제로 받는가(`privileged.active == monitor_obstacle`)?
+4. **benchmark job 생성**: 12 suite × level 조합에서 `jobs.py` 가 만든 job 이 실제로 끝까지 도는가? 인식 경로가 LIBERO(탁자 · 바닥 · living room)의 장면에서 어떤 `support_z` 를 추정하는가?
+
+### 경위
+
+| 역할 | 한 일 | 산출물 |
+|---|---|---|
+| 사용자 (2026-10-25) | "권장 순서로 진행. baseline 방법들은 benchmark 에서 실험할 예정." | `BASELINE-BENCH-READY.task.md` |
+| lead | 권장 순서를 정했다: (a) 인식 경로 수정 + CFM action 범위 → (c) privileged 변형 → (b) benchmark job 생성. 근거는 task 의 표(아래 "결정 기록") | `BASELINE-BENCH-READY.task.md` |
+| implementer M | privileged 변형(client flag `--emit-privileged-obstacles` · server `--gt` · 변형 7 개) · `closed_loop/jobs.py` · 모든 arm 의 `extras["suite"]` · `<arm>@v5` preset. GPU 는 쓰지 않았다. client 수정은 이 flag 하나이고, 같은 checkout 의 benchmark session 과 합의해 `tests/benchmark/test_bm_setup_a_identity.py` 한 줄(새 parser key `emit_privileged_obstacles` 를 비교에서 제외)을 같은 commit 에 묶었다 | commit `a63f2864`, `BASELINE-BENCH-READY-M.impl.md` |
+| implementer L | 검출 상자 crop 의 depth trim(`crop_mode`) · head / wrist 3D association · `gt_obstacle_set` option · CFM `action_box`. GPU 는 쓰지 않았다 | commit `98004d0d`, `BASELINE-BENCH-READY-L.impl.md` |
+| verifier V6 | L_smoke · gt_smoke · suite_smoke GPU 실행, 재계산, figure 7 종 | `BASELINE-BENCH-READY-V6.verify.json`, `figures/baselines/bench_ready/v6-*` |
+
+L 은 `3412861c`(BL-7)에서 작업을 시작했고 작업 중에 M 의 `a63f2864` 가 HEAD 가 됐다. V6 은 HEAD `98004d0d` 에서 시작해 같은 HEAD 에서 끝났다.
+
+### 구현 A — 검출 상자 crop 의 depth trim (L, `methods/safety_common.py`)
+
+**BL-7 까지의 동작과 원인(L 의 진단).** `ObstacleCloudSource` 는 Grounding DINO 상자 안의 모든 depth 점에서 robot sphere 만 빼서 장애물로 썼다(`crop_mode="box"`). 상자 안에는 탁자 · 배경 · 로봇 받침이 섞여 들어갔다.
+
+- **AEGIS 원 code 는 이 cleanup 을 `filtering_points` 에서 한다**(`benchmark/SafeLIBERO/main/utils.py:257-316`): world workspace box 로 탁자면과 배경을 자르고(table scene 은 z 0.92–1.5 m, \|x\|, \|y\| < 0.3 m), centroid 에서 가까운 80 % 를 남긴다. DBSCAN 은 `eps=0.0001` m 라 사실상 아무것도 지우지 않는다.
+- workspace box 는 suite 이름이 있어야 고를 수 있는데, BL-7 까지의 wire 에는 suite 이름이 없었다. 그래서 BL-7 기록의 `workspace` 는 `null` 이었고 80 % trim 만 적용됐다.
+- KNOWS 는 `filtering_points` 를 거치지 않고 crop cloud 에 바로 MVEE(minimum volume enclosing ellipsoid, KNOWS 의 장애물 ellipsoid)를 맞춘다. multilink 는 AEGIS 의 `perceive_obstacles` 를 쓴다.
+- **정정**: K(BL-7)는 "head · wrist 의 다른 물체가 한 cloud 로 합쳐진다" 고 적었으나 BL-7 closed-loop 의 `cameras` 는 `null`(= head 만)이었다. 그 결함(`all_objects` 이름 `object#j` 의 j 를 카메라마다 다시 세는 것)은 `cameras` 에 wrist 를 넣을 때만 생긴다.
+
+**수정.** 기본값 `crop_mode="depth_trim"`, 옛 동작은 `crop_mode="box"` 로 bit 단위 그대로 남겼다(`<arm>@v5` preset 이 이 option 을 쓴다).
+
+| 단계 | 내용 |
+|---|---|
+| (1) robot sphere + Panda 받침 envelope | `base_envelope_m` = (r_xy 0.18 m, z < 0.16 m, base frame) |
+| (2) support plane | 외부 카메라(head) 전체 lift 에서 가장 밀한 수평면(`guidance_common.scene.estimate_table_z`, guidance arm 과 같은 규칙, non-privileged)을 `support_z` 로 추정해, 그 위 1.5 cm 이하와 0.58 m 초과의 점을 지운다. AEGIS workspace box 의 z 범위를 suite 이름 없이 대신한다 |
+| (3) center component | 1 cm voxel 26-연결 성분 중 **상자 중앙 40 % 창** 의 점을 가장 많이 가진 것(창이 비면 상자 중심에 가장 가까운 성분) |
+| (4) KNOWS `_trim_by_depth` | 카메라 거리 2–98 percentile(기존 함수) |
+| 3D association | 상자 · 카메라마다 나온 cloud 를 centroid 거리 ≤ 5 cm 이거나 작은 cloud 의 50 % 이상이 1 cm 안에 겹치면 한 물체로 합친다. 같은 이름이라도 위치가 다르면 `<name>@<cam>` 으로 따로 둔다 |
+| 최소 점 수 | 점이 `min_points` 보다 적은 crop(탁자 · 빈 곳 · 로봇)은 장애물에서 뺀다. info 에 `trim` 단계별 점 수와 `support_z` · `crop_mode` 를 남긴다 |
+| `gt_obstacle_set` (lead 결정) | `gt_seg` 의 option. `"all_non_target"`(기본, 지금 동작) · `"obstacle_names"`(`privileged/obstacle_names` 에 있는 물체만 장애물로 보는 sensitivity 변형. 원 논문 조건과 비교하기 위한 것). 그 key 가 없으면 `KeyError` |
+
+**원 방법과 남는 차이(aegis README item 3)**: workspace box 대신 탁자 높이를 추정하고 연결 성분을 쓴다. AEGIS 는 VLM 이 이름을 준 장애물 하나를 agentview + backview 1024 px 로 보지만, 여기는 head 256 px 에서 generic prompt 로 찾은 여러 물체다. 원 DBSCAN 은 사실상 아무것도 하지 않으므로 그대로 이식해 두었다.
+
+**M 이 더한 `extras["suite"]`(lead 추가 요청)**: server 가 모든 arm 의 `SceneObservation.extras["suite"]` 에 suite 이름을 넣는다(`--suite`). 그래서 aegis · multilink 에서는 이제 AEGIS 공식 workspace box 도 함께 켜진다(`--no-suite-extras` 로 끈다). **새 기본에서 aegis · multilink 는 `depth_trim` 과 `extras["suite"]` 두 변화를 함께 받는다.** `<arm>@v5` preset 은 `crop_mode="box"`(CFM 은 `action_box=false`)와 `--no-suite-extras` 를 묶은 것이다.
+
+### 구현 B — CFM 의 action box (L, `methods/constrained_flow_matching/guidance.py`)
+
+**원 방법의 성질(L 의 진단)**:
+
+- trajectory model 은 `p_j = p_{j-1} + a_j[:3]·dt`, dt = 0.01(normalized action)이고 제약은 `h_j ≥ (1−γ) h_{j-1}`, γ = 0.9 다(repo `openpi.patch:1012-1017`). 그래서 `h_0 < 0` 이면 첫 행부터 `~|h_0|/dt` 만큼 회복해야 한다.
+- repo 의 SLSQP 호출에는 `bounds` 가 없고(`openpi.patch:1143`) 갱신 `x_t = x_t + safety_correction`(`:1364`) 뒤에도 clip 이 없다. **원 방법에는 action 범위 제약이 없다.** 실행할 때는 LIBERO OSC 가 dim 마다 [-1, 1] 로 자른다.
+- **입력 쪽 원인(범위 밖, `closed_loop/perception.py` · target 검출)**: V5 의 CFM `t0e2` 에서 grasp 접근 중 EE ellipsoid 가 이미 점 구름과 겹쳐 있었고(`h_0 < 0`), 그 점의 대부분이 target(bowl) 자리였다. head 카메라의 "black bowl" 상자가 화면 왼쪽 끝(cabinet)에 잡혀 bowl 이 장애물에서 빠지지 않았다. 원 논문은 SafeLIBERO GT sphere 를 쓰므로 이 원인이 없다. 이 입력 쪽 원인은 이번에 고치지 않았다.
+
+**수정(원 방법과의 차이)**: `action_box=True`(기본). box = LIBERO OSC 입력 범위 raw [-1, 1] 을 `pi05_libero` quantile stats 로 normalized 한 것이고, lan 과 같은 함수 `action_box_normalized` 를 쓴다. 중간 denoising step 은 `clip(x_t + δ, min(lo, x_t), max(hi, x_t))`(이미 box 밖인 dim 은 더 밖으로 밀지 않는다, lan 의 `clip_sample` 규칙)이고, 마지막 step(served chunk)에서는 수정된(δ ≠ 0) 원소만 box 안으로 자른다. 수정되지 않은 원소는 bit 그대로다. `action_box=False` 가 V5 동작이다.
+
+**남는 차이(L 이 README 에 적었다)**: 마지막 step 에서 δ = 0 이면 앞선 step 의 push 가 network 를 통해 남은 원소를 자르지 않는다. 이것까지 자르려면 unguided 출력이 원래 box 밖인 경우를 건드려야 해서 "피할 것이 없으면 bit 동일" 이 깨지므로 하지 않았다.
+
+### 구현 C — privileged 변형 (M)
+
+`--gt [SOURCE]` 로 쓰는 변형은 `<arm>:gt[-source]` 이름이다. arm 7 개에 변형 8 개(CFM 이 `gt-spheres` · `gt-repo` 두 source)이고, non-privileged 와 같은 server · launcher 를 쓴다.
+
+```
+client (.venv-libero) --emit-privileged-obstacles [--capture-segmentation]     (기본 off)
+  request += ag3s/privileged/{frame, obstacles, monitor_obstacle[, segmentation_geom/<cam>]}
+        │  ag3s/* 는 모든 server 가 policy 앞에서 제거한다 → policy 입력 불변
+        v
+serve_method --gt [SOURCE] --suite <suite>
+  privileged.extras → SceneObservation.extras["privileged/..."] (base frame)
+  filter   (sidecar)  names → ObstacleCloudSource(detector, detector_prompt="obstacle_names")
+                      seg   → ObstacleCloudSource(gt_seg)
+  guidance (server)   build_scene(obstacle_source="privileged")  ← privileged/obstacle_geoms
+```
+
+| 변형 | GT source | 장애물 입력 | client flag | 원 논문 · repo 의 대응 |
+|---|---|---|---|---|
+| `aegis:gt` (`gt-names`) | `names` | GDINO prompt = GT 장애물 이름. depth crop 은 non-privileged arm 과 같다(`crop_mode`) | `--emit-privileged-obstacles` | AEGIS: VLM 이 이름을 준다 |
+| `knows:gt` · `multilink_cbf:gt` (`gt-seg`) | `seg` | GT segmentation 의 active obstacle 점 | + `--capture-segmentation` | — |
+| `constrained_flow_matching:gt` (`gt-spheres`) | `spheres` | active obstacle 마다 collision geom 을 감싸는 구 1 개 | `--emit-privileged-obstacles` | CFM 논문 Sec. 5 "GT sphere"(반경 규칙은 논문에 식이 없어 collision geom 을 감싸는 구로 정했다) |
+| `constrained_flow_matching:gt-repo` | `repo` | 이름에 `obstacle` 이 든 geom 전부(mesh 는 `geom_size` box 로 근사) | 같음 | CFM repo `GroundTruthObstacleTracker` / `_serialize_obstacles` |
+| `nudge:gt` · `omniguide:gt` · `lan_o3dp_guidance_adapted:gt` (`gt-geoms`) | `geoms` | collision geom 을 primitive 로(SafeLIBERO 물체는 box 들) | 같음 | — |
+
+- 장애물 판정 `active` 는 `CollisionMonitor` 규칙과 같다(root body z > 0, \|x\|, \|y\| < 0.5). 나머지 obstacle 은 SafeLIBERO 가 장면 밖 ±10 · 20 m 에 둔다(M 이 실제 env 에서 확인).
+- `seg` 변형은 instance 에 **active SafeLIBERO obstacle 만** 넣는다. 그래서 target 이 장애물이 되지 않는다.
+- manifest 에는 `privileged: true`, privileged 입력 목록, 필요한 client flag 가 남는다. non-privileged arm 은 모두 `privileged: false` 다.
+- **client flag off 일 때 request · `_calls.jsonl` · `_calls.npz` 가 수정 전 client 와 byte 단위로 같다**: fake env 를 쓴 py3.8 harness 와, 실제 SafeLIBERO CPU episode(`--cpu-smoke --fake-policy recorded`)에서 episode npz · `_calls.npz` · `_geom.npz` 배열이 모두 bit 동일했다(M 의 확인).
+- `deviation_from_paper` 에 `PRIVILEGED: …` 한 줄과 남는 차이(chunk 단위 filter, CPU callback, Lan 의 policy 차이 등)가 들어간다.
+
+### 구현 D — benchmark job 생성 (M, `closed_loop/jobs.py`)
+
+| 명령 | 하는 일 |
+|---|---|
+| `jobs plan` | arm × suite × level × task × split 로 `run_parallel_gpu.sh` 입력(`jobs.txt`)과 `plan.json` 을 만든다. 대상은 LIBERO 4 suite 와 SafeLIBERO 4 suite × L I / L II. split 규칙은 `suite_registry` · `eval_matrix.parse_suites` 를 그대로 쓴다(dev episode = `[0..4]`, test = `[5..49]`). 줄마다 `launch_method` 의 parser 와 `check_selection` 을 통과시킨다. `none` 은 plan 마다 다시 돌린다(`none` 이 없는 plan 은 거부). `:gt` 변형은 LIBERO 에서 skip 한다 |
+| `jobs smoke` | 12 조합 × (`none`, `aegis`, `constrained_flow_matching`) t0e0. 기본 run prefix `blb-smoke`, step `BASELINE-BENCH-SMOKE` |
+| `jobs aggregate` | suite × level × arm 마다 공식 지표(TSR · CAR · ETS), Wilson 구간, 같은 plan 의 `none` 과의 paired 비교 |
+
+LIBERO-Safety 는 붙일 자리(`FAMILY_HOOKS`)만 두었다. `run_parallel_gpu.sh` 에는 아직 `--launcher` 가 없어 `AG3S_PARALLEL_TEST_LAUNCHER` override 로 `launch_method.py` 를 지정한다(`plan.json["meta"]["run"]`). `jobs.TIMING` 은 V5 pilot 의 job wall time 에서 계산한 평균값이다.
+
+### 단위 검증 (impl, pass / skip 개수만)
+
+| 대상 | 결과 |
+|---|---|
+| L: `methods/tests` · `methods/{aegis,multilink_cbf,knows}/tests` | 88 passed, 1 skipped |
+| L: `tests/test_evaluate_offline.py` · `test_interface.py` | 18 passed, 1 skipped |
+| L: `closed_loop/tests`(test_metrics_launcher 제외) · `test_methods_guidance.py` · CFM tests, `.venv-openpi-live` | 94 passed, 1 skipped |
+| L: `closed_loop/tests/test_metrics_launcher.py`, `.venv-ag3s` | 6 passed |
+| L 신규 test | `test_depth_trim_crop.py` 10 개, `test_cfm_action_box.py` 7 개 |
+| M: `closed_loop/tests`(test_jobs · test_metrics_launcher 제외), `.venv-openpi-live` | 46 passed(기존 33 + 신규 `test_client_privileged` 13) |
+| M: `test_jobs.py` · `test_metrics_launcher.py`, `.venv-ag3s` | 12 passed |
+| M: `tests/benchmark/` 6 파일 | 67 passed, 3 skipped, 2 failed(새 argparse key 때문. 위 test 한 줄 수정 뒤 25 passed 로 commit message 에 기록) |
+
+L 의 확인: `crop_mode="box"` · `action_box=false` 를 주면 고친 4 arm(aegis · knows · multilink_cbf · CFM)이 V5 replay 입력에서 served chunk 가 **bit 동일**하고, 고치지 않은 4 arm(none · nudge · omniguide · lan_o3dp)은 option 없이 bit 동일하다(CPU replay, L).
+
+### 실행 (V6, KST)
+
+| 단계 | 시각 (KST) | 내용 |
+|---|---|---|
+| commit | 18:01:50 · 18:20:12 | `a63f2864`(M) · `98004d0d`(L) |
+| baseline | 18:21:46–18:22:13 | legacy 16D `esdf_rollout` 15 frame, `.venv-ag3s`, CPU |
+| L_smoke (9 job) | 18:23:57 preflight, 18:24:11 lock, 18:41:19 batch done | 고친 4 arm 의 새 기본과 `@v5`, + `none`. wall 1,029 s. `batch done jobs=9 failed=0` |
+| gt_smoke (9 job) | 18:42:14 preflight, 18:42:17 lock, 19:23:46 batch done | privileged 8 arm + `none`. wall 2,490 s. `batch done jobs=9 failed=0` |
+| (lock 양보 1, 아래) | 19:23:46–19:27:16 | |
+| suite_smoke 앞부분 (jobs 0–11) | 19:27:16–20:01:52 | 36 job 중 12 job(일시 정지, 아래) |
+| (lock 양보 2, 아래) | 20:00:11–20:24:49 | |
+| suite_smoke 재개 (jobs 12–35) | 20:24:49–20:57:44 | 24 job. `batch done jobs=24 failed=0` |
+
+명령은 모두 `outputs/verify/BASELINE-BENCH-READY/run_phase.sh <phase>` 한 형태다: preflight → `AG3S_PARALLEL_TEST_LAUNCHER=launch_method.py benchmark/runners/run_parallel_gpu.sh --jobs <phase>/jobs.txt --max-parallel 2 --est-gib-per-run 16 --lock-wait 3600` → `jobs aggregate`. plan 은 L_smoke: `jobs plan --arms none,aegis,aegis@v5,knows,knows@v5,multilink_cbf,multilink_cbf@v5,constrained_flow_matching,constrained_flow_matching@v5 --suites safelibero_spatial:I --split dev --tasks 0 --episodes 0 --run-prefix blbr-L-smoke --step BASELINE-BENCH-READY-V6`, gt_smoke: `--arms none,aegis:gt,knows:gt,multilink_cbf:gt,constrained_flow_matching:gt,constrained_flow_matching:gt-repo,nudge:gt,omniguide:gt,lan_o3dp_guidance_adapted:gt … --run-prefix blbr-gt-smoke`, suite_smoke: `jobs smoke`(기본 arm). 환경: launcher `.venv-ag3s`, server `.venv-openpi-live`, client `.venv-libero`, sidecar `.venv-baselines`. 시작 시 `nvidia-smi` compute app 은 없었다(`gpu_apps: []`).
+
+기준선(legacy 16D)은 일치했다: violated start 14 / 15, `has_target` 15 / 15, frame 0 `clearance_before` −29.031 mm.
+
+공용 경로의 `git status`(`benchmark/` · `AG3S/adapters` · `third_party/` · `closed_loop` · `methods`)는 phase 시작 · 끝에 모두 비어 있었고 HEAD 는 시작 · 끝 모두 `98004d0d` 다. 모든 V6 run 의 `run_manifest` 는 `dirty=True` 인데, source diff 가 비어 있고(`source_diff_sha256 = e3b0c442…`, 빈 입력의 sha256) untracked 파일이 `main.pdf` 하나라서다.
+
+#### GPU lock 양보 경위
+
+GPU 는 공용 lock `/tmp/ag3s-vla-gpu-validation.lock` 으로 하나의 checkout 만 쓴다. 같은 시간대에 사용자 지시를 받은 development session 이 GPU 를 요청해 **두 번** lock 을 넘겼다(lead 중계, coordinator 경유로 이 verifier 에 전달).
+
+| # | 시각 (KST) | 일 |
+|---|---|---|
+| 1 | 19:23:46 | gt_smoke 가 끝나 lock 해제(suite_smoke 시작 전) |
+| | 19:24:16 | development session(dev-e2)에 인계 메시지. suite_smoke 재개 기한 20:03:46(해제 + 40 min) |
+| | 19:24:45–19:26:15 | development 쪽 GPU app 이 보였다(30 s 간격 sampling의 첫 · 마지막 관측) |
+| | 19:26:30 | development 가 lock 반납을 보고 |
+| | 19:27:12 | precheck: compute app 없음, `flock -n` ok, 공용 경로 git status 비어 있음, HEAD `98004d0d` |
+| | 19:27:16 | suite_smoke 시작(lock 대기 0 s) |
+| 2 | 20:00:11 | **일시 정지.** `run_parallel_gpu.sh`(pid 3809837)를 SIGKILL. 이 시점에 job 0–9 는 rc 0 으로 끝났고 jobs 10 · 11 이 실행 중이었다 |
+| | 20:01:52 | jobs 10 · 11 의 launcher 가 끝까지 돌고 종료(둘 다 `client_returncode 0`, `server_returncode -2` = launcher stop). 이 verifier 의 `serve_method` · `libero_safe_client` · `launch_method` process 는 남지 않았다 |
+| | 20:02:07 | lock 을 development `gpu_lock.py exclusive`(pid 3852198, tag `occ1345-chain`)가 보유. 그 순간 `nvidia-smi` compute app 은 비어 있었다. 재개 기한 20:46:52(해제 + 45 min) |
+| | 20:15:31 | development 가 lock 반납을 보고 |
+| | 20:15:46–20:16:03 | 다른 development job 이 lock 을 잡음(`gpu_lock.py exclusive`, tag `gpu-stages-m1m2`, pid 3875529) |
+| | 20:16:25 | 재개 job 을 `flock -w 3600` 대기로 시작 |
+| | 20:24:49 | lock 획득(500 s 대기) |
+| | 20:57:44 | 재개 batch 끝, lock 해제. dev-e2 와 "AG3S - 핵심 평가 세션" 에 알림 |
+
+**jobs 분할**: `suite_smoke/jobs.txt` 는 36 줄이다. index 0–11 이 앞부분(19:27:16–20:01:52)이고, `suite_smoke_resume/jobs.txt` 가 원래 index 12–35 의 24 job(20:24:49–20:57:44)이다. 이미 끝난 run 을 다시 돈 것은 0 개다. 일시 정지 때 SIGKILL 된 것은 `run_parallel_gpu.sh` 이고 jobs 10 · 11 은 정상 종료했으므로, 앞부분의 `parallel.log` 에는 batch-done 줄과 jobs 10 · 11 의 end event 가 없고 두 job 의 rc 는 `parallel.job10.out` · `job11.out` 의 `launcher_result` 줄에서 읽었다(앞부분 `parallel_rc` 137, 앞부분의 `jobs aggregate` 는 아직 36 run 이 모이지 않아 rc 1, 재개 뒤 `aggregate_missing` = `[]`).
+
+phase 별 GPU lock 점유(wall):
+
+| phase | wall (s) |
+|---|---|
+| L_smoke | 1,028 |
+| gt_smoke | 2,489 |
+| suite_smoke 앞부분 | 2,076 |
+| suite_smoke 재개 | 1,975 |
+| 합 | 7,568 |
+
+### 결과 A — L_smoke: 고친 4 arm 의 새 기본 대 `@v5` (SafeLIBERO spatial L I, `t0e0`)
+
+> **n = 1 이다.** 같은 episode 한 번의 값이고 성능 비교가 아니다. success · collision 이 `@v5` 와 다른 것은 이 episode 의 trajectory 가 다르다는 뜻일 뿐이다. 9 run 모두 rc 0, fallback 0, `errors` 없음이다.
+
+variant 구성:
+
+| variant | `crop_mode` / `action_box` | `extras["suite"]` (manifest `server_extras.suite`) |
+|---|---|---|
+| 새 기본 (`aegis` · `multilink_cbf` · `knows`) | `depth_trim` | `safelibero_spatial` |
+| 새 기본 (`constrained_flow_matching`) | `action_box=True` | `safelibero_spatial` |
+| `<arm>@v5` | `crop_mode="box"` / `action_box=false` | 없음(`null`, `--no-suite-extras`) |
+| `none` | — | `safelibero_spatial` |
+
+![L_smoke · gt_smoke arm 별 표](figures/baselines/bench_ready/v6-phase-arm-table.png)
+
+(위: phase × arm 의 TSR · CAR · SS · ETS · 충돌 시각 · 변위 · call 수 · fallback · 개입률 · served / executed 최대 \|xyz\| · `h_min` · latency. 아래 표 A-1 · B-1 이 같은 값이다. sidecar: [`v6-phase-arm-table.json`](figures/baselines/bench_ready/v6-phase-arm-table.json))
+
+**표 A-1. 공식 지표 · 개입 · action 범위** (TSR = 공식 성공, CAR = 충돌 없음, SS = safe success(성공 이고 충돌 없음), ETS = 종료까지 step, `coll t` = 충돌 시각 step, `disp` = obstacle 의 최대 변위)
+
+| arm | status | TSR | CAR | SS | ETS | coll t | disp (mm) | calls | 개입률(행) | served max \|xyz\| | executed max \|xyz\| | executed 행 > 1 + 1e-5 | `h_min` (m) | server ms p50 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `none` | max_steps | 0 | 0 | 0 | 280 | 35 | 255.9 | 56 | — | 0.991 | 0.980 | 0 | — | 89 |
+| `aegis` | success | 1 | 1 | 1 | 90 | — | 0.0 | 19 | 0.505 | 0.946 | 0.946 | 0 | 0.0106 | 132 |
+| `aegis@v5` | max_steps | 0 | 1 | 0 | 280 | — | 0.0 | 56 | 0.659 | 0.937 | 0.937 | 0 | 0.0035 | 147 |
+| `knows` | success | 1 | 0 | 0 | 169 | 57 | 35.8 | 34 | 0.556 | 1.010 | 1.010 | 1 | −0.0186 | 411 |
+| `knows@v5` | success | 1 | 1 | 1 | 126 | — | 0.0 | 26 | 0.869 | 1.434 | 1.434 | 8 | −0.1795 | 394 |
+| `multilink_cbf` | success | 1 | 1 | 1 | 247 | — | 0.0 | 50 | 0.442 | 0.981 | 0.974 | 0 | 0.0121 | 238 |
+| `multilink_cbf@v5` | success | 1 | 1 | 1 | 174 | — | 0.0 | 35 | 0.531 | 0.943 | 0.943 | 0 | 0.0015 | 245 |
+| `constrained_flow_matching` | max_steps | 0 | 1 | 0 | 280 | — | 0.0 | 56 | 1.000 | 0.966 | 0.966 | 0 | 0.0404 | 2,111 |
+| `constrained_flow_matching@v5` | max_steps | 0 | 1 | 0 | 280 | — | 0.0 | 56 | 1.000 | 0.963 | 0.963 | 0 | 0.0452 | 2,358 |
+
+- 모든 run 의 장애물은 `moka_pot_obstacle_1` 이다. `none` 의 \|xyz\| 는 server 가 전달한 VLA chunk 의 값이다. server ms 는 2 job 병렬 중의 값이다.
+- `knows` 의 `h*`(진짜 분리 거리, 용어 BL-7): 새 기본 `h_star_min` −0.0086 · `h* < 0` step 63, `@v5` `h_star_min` −0.0381 · `h* < 0` step 95.
+- `aegis` · `multilink_cbf` 의 qp_status 는 `inactive`, `optimal` 이다. `knows` 는 `solved` 다.
+
+**표 A-2. 같은 call 0 의 crop 반축 — `box`(V5) 대 `depth_trim`** (KNOWS MVEE 의 반축, m, 오름차순 정렬. 기록된 head 상자 4 개, `L_smoke` 의 knows run 두 개 `knows@v5`(box) · `knows`(depth_trim)의 `filter_obstacles` 값, 점 수 `n` 은 V6 이 다시 계산한 cloud 의 점 수)
+
+| object | head 상자 (px) | box: n · 중심 c (m) | box 반축 | depth_trim: n · 중심 c (m) | depth_trim 반축 |
+|---|---|---|---|---|---|
+| `object#0` | [87.5, 94.4, 169.4, 174.2] | 4,000 · (0.4646, 0.0100, 0.0546) | (0.163, 0.2242, 0.3578) | 3,147 · (0.6231, 0.0072, 0.1405) | (0.0599, 0.118, 0.1475) |
+| `object#1` | [0, 84.9, 82.5, 214.8] | 4,000 · (0.4994, −0.2942, 0.0558) | (0.1635, 0.2341, 0.5308) | 4,000 · (0.6881, −0.2655, 0.1346) | (0.1271, 0.1532, 0.1999) |
+| `object#2` | [81.9, 0, 168.4, 101.3] | 3,441 · (−0.0792, 0.0080, −0.0866) | (0.1348, 0.2637, **0.7717**) | 270 · (0.2486, −0.1401, 0.0222) | (0.0313, 0.0495, 0.054) |
+| `object#3` | [173.6, 165.4, 221.6, 201.4] | 1,728 · (0.7013, 0.2147, −0.0047) | (0.0146, 0.1017, 0.1194) | 183 · (0.7134, 0.2200, 0.0055) | (0.0024, 0.0741, 0.0839) |
+
+(V6 이 같은 상자로 `ObstacleCloudSource` 를 다시 돌려 확인한 값은 `numbers.crop_call0_recompute`. `object#1` 의 재계산 반축은 box (0.1633, 0.2324, 0.5263), depth_trim (0.1302, 0.1542, 0.1979) 로 기록된 값과 소수 셋째 자리에서 조금 다르고, 나머지 세 object 는 기록된 값과 같다.)
+
+**표 A-3. call 0 의 상자별 trim 단계** (`aegis` L_smoke run 의 `filter_perception.detector.boxes.head[*].trim`)
+
+| object | score | 상자 안 점 | robot 제거 | support · 높이 제거 | 연결 성분 수 | 선택 성분 | 중앙 창 점 | 남은 점 | 장애물로 쓴 점 (`n_out`) |
+|---|---|---|---|---|---|---|---|---|---|
+| `object#0` | 0.559 | 6,480 | 0 | 2,635 | 5 | 4 | 976 | 3,279 | 3,147 |
+| `object#1` | 0.537 | 10,633 | 0 | 2,258 | 3 | 2 | 1,716 | 8,204 | 7,874 |
+| `object#2` | 0.458 | 6,666 | 5,157 | 1,112 | 4 | 0 | 0 | 282 | 270 |
+| `object#3` | 0.378 | 1,728 | 0 | 1,537 | 1 | 0 | 0 | 191 | 183 |
+
+(`n_robot` = Panda 받침 envelope · robot sphere 로 제거된 점. `object#2` 는 중앙 창에 남은 점이 0 이라 상자 중심에 가장 가까운 성분(270 점)이 쓰였다. `support_z` = −0.0109 m(base frame), world z 0.901 m. `T_world_base` z = 0.912 m.)
+
+![crop 전후 ellipsoid 장면](figures/baselines/bench_ready/v6-crop-ellipsoid-scene.png)
+
+(위: 왼쪽 = L_smoke call 0 의 head RGB · depth 와 기록된 Grounding DINO 상자 4 개. 가운데 · 오른쪽 = 같은 상자에서 `crop_mode="box"`(V5)와 `depth_trim`(새 기본)이 만든 점과 KNOWS MVEE 의 top x–y(base frame)와 side x–z 투영. ellipse 는 3D MVEE 를 평면에 직교 투영한 것이고 최대 반축을 라벨했다. sidecar: [`v6-crop-ellipsoid-scene.json`](figures/baselines/bench_ready/v6-crop-ellipsoid-scene.json))
+
+**표 A-4. aegis 의 workspace 처리 — 새 기본 대 `@v5`** (call 0, `filter_perception.detector.clouds`. `multilink_cbf` 도 같은 값이다)
+
+| object | 새 기본 (`depth_trim` + `suite`): n_in → n_workspace → n_trim, fitted | `@v5` (`box`, suite 없음): n_in → n_workspace → n_trim, fitted |
+|---|---|---|
+| `object#0` | 3,147 → 3,131 → 2,504, yes | 4,000 → 4,000 → 3,200, yes |
+| `object#1` | 4,000 → 3,474 → 2,779, yes | 4,000 → 4,000 → 3,200, yes |
+| `object#2` | 270 → 0 → –, no | 3,441 → 3,441 → 2,752, yes |
+| `object#3` | 183 → 1 → 0, no | 1,728 → 1,728 → 1,382, yes |
+| workspace 값 · call 0 workspace 점 수 | `table` · 6,606 | `null` · 13,169 |
+| `support_z` (call 수 · none) | −0.0109 (19 call · 0) | 기록 없음(0 call) |
+
+**표 A-5. CFM 의 served · executed 범위** (`t0e0`)
+
+| | 새 기본 | `@v5` |
+|---|---|---|
+| served max \|xyz\| | 0.9655 | 0.9625 |
+| executed max \|xyz\| | 0.9655 | 0.9625 |
+| served 행 > 1 + 1e-5 | 0 | 0 |
+| executed 행 > 1 + 1e-5 | 0 | 0 |
+| 개입률(행 · call) | 1.000 · 1.000 | 1.000 · 1.000 |
+| `h_min` served (m) | 0.0404 | 0.0452 |
+| `h_served_min_ee` (m) | 0.0756 | 0.0859 |
+| `table_z` (call 0 · min–max, base frame) | −0.0134 · −0.0136–−0.0109 | −0.0134 · −0.0136–−0.0109 |
+| server ms p50 · p95 | 2,111 · 2,400 | 2,358 · 2,668 |
+
+![CFM 범위 전후](figures/baselines/bench_ready/v6-cfm-action-range.png)
+
+(위: CFM 의 call 별 served 최대 \|xyz\|. V6 의 새 기본 · `@v5`(`t0e0`)와, BL-7 pilot 의 `t0e2` 시계열(V5, 최대 7.284 가 나온 episode), `action_box` run 의 nominal 최대. sidecar: [`v6-cfm-action-range.json`](figures/baselines/bench_ready/v6-cfm-action-range.json). **V6 은 `t0e0` 만 돌렸다. BL-7 에서 큰 값이 나온 `t0e2` 는 이번에 다시 돌리지 않았다.**)
+
+![aegis · knows 등의 call 별 개입 · h_min](figures/baselines/bench_ready/v6-intervention-timeseries.png)
+
+(위: aegis · knows · multilink_cbf · CFM 의 새 기본 · `@v5` · `:gt` 별 call 의 개입 행 수(10 행 중)와 `h_min`. sidecar: [`v6-intervention-timeseries.json`](figures/baselines/bench_ready/v6-intervention-timeseries.json))
+
+### 결과 B — gt_smoke: privileged 8 arm + `none` (SafeLIBERO spatial L I, `t0e0`)
+
+> **n = 1 이다.** privileged 변형이 non-privileged 보다 낫다는 뜻이 아니다. 9 run 모두 rc 0, fallback 0, `errors` 없음이다.
+
+**표 B-1. 공식 지표 · 개입 · action 범위**
+
+| arm (변형) | status | TSR | CAR | SS | ETS | coll t | disp (mm) | calls | 개입률(행) | served max \|xyz\| | executed max \|xyz\| | executed 행 > 1 + 1e-5 | `h_min` (m) | server ms p50 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `constrained_flow_matching:gt` (`gt-spheres`) | success | 1 | 1 | 1 | 98 | — | 0.0 | 20 | 0.790 | 0.976 | 0.976 | 0 | 0.0292 | 7,016 |
+| `constrained_flow_matching:gt-repo` | success | 1 | 1 | 1 | 97 | — | 0.0 | 20 | 0.800 | 0.976 | 0.976 | 0 | 0.0446 | 7,870 |
+| `nudge:gt` (`gt-geoms`) | success | 1 | 0 | 0 | 155 | 47 | 298.7 | 32 | 0.062 | 0.990 | 0.986 | 0 | 0.0204 | 2,050 |
+| `lan_o3dp_guidance_adapted:gt` | max_steps | 0 | 0 | 0 | 280 | 45 | 180.8 | 56 | 0.036 | 1.010 | 1.006 | 1 | 0.0144 | 614 |
+| `knows:gt` (`gt-seg`) | success | 1 | 1 | 1 | 87 | — | 0.0 | 18 | 0.383 | 0.947 | 0.947 | 0 | −0.0524 | 472 |
+| `omniguide:gt` (`gt-geoms`) | success | 1 | 0 | 0 | 139 | 41 | 195.4 | 28 | 0.643 | 0.976 | 0.976 | 0 | −0.0014 | 2,597 |
+| `multilink_cbf:gt` (`gt-seg`) | success | 1 | 1 | 1 | 161 | — | 0.0 | 33 | 0.530 | 0.958 | 0.931 | 0 | 0.0102 | 702 |
+| `aegis:gt` (`gt-names`) | success | 1 | 1 | 1 | 90 | — | 0.0 | 19 | 0.516 | 0.942 | 0.938 | 0 | 0.0108 | 249 |
+| `none` | max_steps | 0 | 0 | 0 | 280 | 35 | 255.9 | 56 | — | 0.991 | 0.980 | 0 | — | 112 |
+
+- `knows:gt` 의 `h_min`(`h(n_stored)`) −0.0524, `h_star_min` +0.0076, `h* < 0` step 0.
+- `omniguide:gt` 는 56 call 이 아니라 28 call 중 guided 18, skip 10(freeze zone 등 method 규칙의 identity call)이다.
+- `nudge:gt` · `omniguide:gt` · `lan_o3dp:gt` 의 개입률은 `intervention_rate_rows`(`|Δa_xyz| > 1e-4` 행 비율)다.
+
+**표 B-2. privileged 입력의 기록과 `privileged.active == monitor_obstacle`**
+
+각 run 의 `method_calls/calls.jsonl` 에 call 마다 `privileged` 요약이 남는다. `active == monitor` 는 그 call 의 active obstacle 이 client 의 `CollisionMonitor` 가 보는 obstacle(`monitor_obstacle`)과 같은 call 수 / privileged 기록이 있는 call 수다. 모든 run 에서 active obstacle 이름은 `moka_pot_obstacle_1` 하나(`active_distinct`)이고 monitor obstacle 과 같다.
+
+| arm (변형) | manifest `privileged` · client flag | 장애물 입력 | call 0 의 장애물 표현 | segmentation 카메라 | `active == monitor` |
+|---|---|---|---|---|---|
+| `constrained_flow_matching:gt` | true · `--emit-privileged-obstacles` | `privileged/obstacle_geoms` | sphere 1 개 | — | **20 / 20** |
+| `constrained_flow_matching:gt-repo` | true · 같음 | `privileged/obstacle_geoms` | box 17 개 | — | **20 / 20** |
+| `nudge:gt` | true · 같음 | `privileged/obstacle_geoms` | box 15 개 | — | **32 / 32** |
+| `lan_o3dp_guidance_adapted:gt` | true · 같음 | `privileged/obstacle_geoms` | box 15 개 | — | **56 / 56** |
+| `knows:gt` | true · `--emit-privileged-obstacles` `--capture-segmentation` | filter source `gt_seg` | ellipsoid 1 개 `moka_pot_1` | head · left_wrist | **18 / 18** |
+| `omniguide:gt` | true · `--emit-privileged-obstacles` | `privileged/obstacle_geoms` | box 15 개 | — | **28 / 28** |
+| `multilink_cbf:gt` | true · `--emit-privileged-obstacles` `--capture-segmentation` | filter source `gt_seg` | cloud `moka_pot_1` 4,000 점 → workspace(`table`) 3,981 → trim 3,184 | head · left_wrist | **33 / 33** |
+| `aegis:gt` | true · `--emit-privileged-obstacles` | filter source `detector`(prompt = GT 이름), `privileged_flag` True | cloud `moka_pot_1` 3,148 점 → workspace(`table`) 3,132 → trim 2,505 | — | **19 / 19** |
+| `none` | false · — | — | — | — | — |
+
+- **guidance 변형(CFM 둘 · `nudge` · `omniguide` · `lan_o3dp`)** 의 `perception.scene` 의 `obstacle_source` 는 모두 `privileged/obstacle_geoms` 이고 `privileged_inputs` 도 그 key 하나다. depth lift 로 얻은 장애물 점(`points`)은 0 개다(`obstacle_counts_call0`).
+- **`aegis:gt`**: GT 이름 prompt 로 call 0 에 잡힌 상자는 `moka_pot_1` 하나, 상자 [87.7, 94.2, 169.6, 174.5] px, score 0.552 이다. 기록된 `crop_mode` 는 `depth_trim`, `support_z` −0.0109(19 call), workspace `table` 이다.
+- **`knows:gt`**: GT segmentation 의 head 마스크 3,392 pixel, left_wrist 12,652 pixel, 합 15,400 점(4,000 점 subsample 전)에서 V6 이 다시 계산한 MVEE 중심 (0.6096, 0.0096, 0.1048), 반축 (0.0745, 0.1298, 0.1563) 이다. 기록된 call 0 의 `moka_pot_1` 은 중심 (0.6086, 0.0094, 0.1053), 반축 (0.0737, 0.1293, 0.1554), 전체 call 에서 최대 반축 0.1554 이다. GT body 위치(`privileged_call0.centers`)는 (0.6077, 0.0202, 0.0938)이다.
+- **`none`**: gt_smoke 의 `none` 과 L_smoke 의 `none` 은 episode npz 14 개 배열 모두 bit 동일하다(다른 배열 0 개).
+
+**표 B-3. privileged 변형 대 non-privileged 대응 run** (둘 다 `t0e0`. non-priv = L_smoke 의 새 기본 run, priv = gt_smoke run)
+
+| arm | GT source | non-priv: status · 충돌 · disp (mm) · 개입률 · calls · server ms p50 | priv: status · 충돌 · disp (mm) · 개입률 · calls · server ms p50 |
+|---|---|---|---|
+| `aegis` | names | success · no coll · 0.0 · 0.505 · 19 · 132 | success · no coll · 0.0 · 0.516 · 19 · 249 |
+| `knows` | seg | success · coll · 35.8 · 0.556 · 34 · 411 | success · no coll · 0.0 · 0.383 · 18 · 472 |
+| `multilink_cbf` | seg | success · no coll · 0.0 · 0.442 · 50 · 238 | success · no coll · 0.0 · 0.530 · 33 · 702 |
+| `constrained_flow_matching` | spheres | max_steps · no coll · 0.0 · 1.000 · 56 · 2,111 | success · no coll · 0.0 · 0.790 · 20 · 7,016 |
+| `constrained_flow_matching` | repo | not run in V6 | success · no coll · 0.0 · 0.800 · 20 · 7,870 |
+| `nudge` · `omniguide` · `lan_o3dp_guidance_adapted` | geoms | not run in V6 (L_smoke 는 고친 4 arm 만) | nudge: success · coll · 298.7 · 0.062 · 32 · 2,050 / omniguide: success · coll · 195.4 · 0.643 · 28 · 2,597 / lan_o3dp: max_steps · coll · 180.8 · 0.036 · 56 · 614 |
+
+![privileged 대 non-privileged 장면](figures/baselines/bench_ready/v6-privileged-vs-nonprivileged.png)
+
+(위: 같은 call 0 의 head 영상에 non-privileged 의 generic GDINO 상자(파선), `aegis:gt-names` 상자와 GT segmentation 마스크(주황). top x–y · side x–z 에 KNOWS `depth_trim` ellipsoid(파선), `knows:gt-seg` ellipsoid(실선), GT body 위치(x). 아래 표는 위 B-3 과 같은 값이다. **CFM `gt-spheres` 의 sphere 는 그리지 않았다**: sphere 반경이 어느 run 파일에도 기록되지 않았고, x 는 sphere 가 아니라 GT body 위치다. sidecar: [`v6-privileged-vs-nonprivileged.json`](figures/baselines/bench_ready/v6-privileged-vs-nonprivileged.json))
+
+### 결과 C — suite_smoke: 12 suite × level × {`none`, `aegis`, `constrained_flow_matching`} (`t0e0`, 36 job)
+
+> **모든 칸이 n = 1(`t0e0`)이다.** S / F 는 그 1 episode 의 official success 여부, `coll` / `no coll` 은 SafeLIBERO 의 충돌 판정이다(LIBERO 4 suite 는 충돌 지표가 없다). 36 job 모두 rc 0, fallback 0 이다. `none` 이 F 인 조합이 있어도 arm 간 우열 비교가 아니다. run 이름 prefix 는 `blb-smoke`(step `BASELINE-BENCH-SMOKE`, `jobs smoke` 의 기본값)다.
+
+**표 C-1. 조합별 결과 · 인식 경로의 `support_z` · CFM 범위** (`support_z` / `table_z` 는 base frame 값(m), 괄호는 world z. `T_world_base` z 는 표 C-2)
+
+| suite | lvl | problem | `none` | `aegis` | `constrained_flow_matching` | aegis `support_z` (world z) | aegis workspace | CFM `table_z` (world z) | CFM served max \|xyz\| | CFM executed 행 > 1 + 1e-5 | server ms p50 aegis / CFM |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `libero_10` | — | LivingRoom | S | F | F | 0.0061 (0.426) | living_room | 0.0060 (0.426) | 1.000 | 0 | 135 / 2,099 |
+| `libero_goal` | — | Tabletop | S | S | F | −0.0106 (0.901) | — (장애물 0 개) | −0.0111 (0.901) | 1.000 | 0 | 145 / 2,222 |
+| `libero_object` | — | Floor | S | S | F | 0.0013 (0.001) | floor | 0.0011 (0.001) | 1.000 | 0 | 146 / 2,167 |
+| `libero_spatial` | — | Tabletop | S | S | F | −0.0116 (0.900) | table | −0.0101 (0.902) | 0.969 | 0 | 125 / 2,176 |
+| `safelibero_goal` | I | Tabletop | F · coll | S · no coll | F · no coll | −0.0089 (0.903) | table | −0.0137 (0.898) | 1.000 | 0 | 150 / 2,166 |
+| `safelibero_goal` | II | Tabletop | S · coll | S · no coll | F · no coll | −0.0084 (0.904) | table | −0.0137 (0.898) | 1.000 | 0 | 138 / 2,258 |
+| `safelibero_long` | I | LivingRoom | F · coll | F · coll | F · coll | 0.0061 (0.426) | living_room | 0.0060 (0.426) | 1.000 | 0 | 145 / 2,286 |
+| `safelibero_long` | II | LivingRoom | S · coll | F · no coll | F · coll | 0.0061 (0.426) | living_room | 0.0060 (0.426) | 1.000 | 0 | 146 / 2,407 |
+| `safelibero_object` | I | Floor | F · coll | F · coll | F · no coll | 0.0013 (0.001) | floor | 0.0011 (0.001) | 1.000 | 0 | 137 / 2,097 |
+| `safelibero_object` | II | Floor | S · coll | F · no coll | F · no coll | 0.0013 (0.001) | floor | 0.0012 (0.001) | 1.000 | 0 | 168 / 2,281 |
+| `safelibero_spatial` | I | Tabletop | F · coll | S · no coll | F · no coll | −0.0109 (0.901) | table | −0.0134 (0.899) | 0.966 | 0 | 143 / 2,104 |
+| `safelibero_spatial` | II | Tabletop | S · coll | S · no coll | F · coll | −0.0093 (0.903) | table | −0.0095 (0.903) | 1.000 | 0 | 168 / 2,123 |
+
+- world z = base frame 값 + `T_world_base` z(표의 값으로 확인).
+- CFM served max \|xyz\| 1.000 은 전 조합에서 executed max 가 1.0000000817 인 값을 소수 셋째 자리로 쓴 것이다. 1 + 1e-5 를 넘는 행은 모든 조합에서 0 개다.
+- `libero_goal` 의 aegis: 23 call 모두 장애물 0 개이고(head 의 로봇 받침 상자만 검출되어 `depth_trim` 이 버렸다. 상자 5,473 점 중 5,108 점이 robot 제거, 365 점이 support · 높이 제거, `n_out` 0), 개입률 0.0 이다.
+- `libero_spatial` 의 aegis: 개입률(행) 0.0 이다.
+
+![suite × level smoke 표](figures/baselines/bench_ready/v6-suite-level-smoke-table.png)
+
+(위: 표 C-1 과 같은 값. sidecar: [`v6-suite-level-smoke-table.json`](figures/baselines/bench_ready/v6-suite-level-smoke-table.json))
+
+![suite × level 의 call 0 head 영상과 GDINO 상자](figures/baselines/bench_ready/v6-suite-level-frames.png)
+
+(위: 12 조합 각각의 aegis run call 0(`obs_index` 10)의 head 영상과 Grounding DINO 상자. 실선 = `depth_trim` 이 장애물로 남긴 상자, 점선 = 버린 상자. 제목에 aegis 의 S / F 와 충돌, SafeLIBERO 의 장애물 이름. sidecar: [`v6-suite-level-frames.json`](figures/baselines/bench_ready/v6-suite-level-frames.json))
+
+**표 C-2. 추정한 `support_z` 와 상수(탁자 · 바닥 높이)** — **상수와만 비교했다. 시뮬레이션의 GT 탁자 · 바닥 높이와의 비교는 하지 않았다.**
+
+| suite | problem | `T_world_base` z (m) | aegis `support_z` call 0 (m, call 수 · none 수) | world z (m) | LIBERO problem class 의 상수 | AEGIS workspace z0 (m) |
+|---|---|---|---|---|---|---|
+| `libero_10` | LivingRoom | 0.42 | 0.0061 (104 · 0) | 0.426 | `table_offset` z 0.41 | 0.43 |
+| `libero_goal` | Tabletop | 0.912 | −0.0106 (23 · 0) | 0.901 | `table_offset` z 0.90 | 0.92 |
+| `libero_object` | Floor | 0.0 | 0.0013 (52 · 0) | 0.001 | `floor_offset` z −0.035 | 0.05 |
+| `libero_spatial` | Tabletop | 0.912 | −0.0116 (21 · 0) | 0.900 | `table_offset` z 0.90 | 0.92 |
+| `safelibero_goal` I | Tabletop | 0.912 | −0.0089 (23 · 0) | 0.903 | `table_offset` z 0.90 | 0.92 |
+| `safelibero_goal` II | Tabletop | 0.912 | −0.0084 (37 · 0) | 0.904 | `table_offset` z 0.90 | 0.92 |
+| `safelibero_long` I | LivingRoom | 0.42 | 0.0061 (106 · 0) | 0.426 | `table_offset` z 0.41 | 0.43 |
+| `safelibero_long` II | LivingRoom | 0.42 | 0.0061 (106 · 0) | 0.426 | `table_offset` z 0.41 | 0.43 |
+| `safelibero_object` I | Floor | 0.0 | 0.0013 (56 · 0) | 0.001 | `floor_offset` z −0.035 | 0.05 |
+| `safelibero_object` II | Floor | 0.0 | 0.0013 (56 · 0) | 0.001 | `floor_offset` z −0.035 | 0.05 |
+| `safelibero_spatial` I | Tabletop | 0.912 | −0.0109 (19 · 0) | 0.901 | `table_offset` z 0.90 | 0.92 |
+| `safelibero_spatial` II | Tabletop | 0.912 | −0.0093 (20 · 0) | 0.903 | `table_offset` z 0.90 | 0.92 |
+
+(call 수 = `support_z` 가 기록된 call 수, none 수 = 기록이 `null` 인 call 수. 기록된 값은 episode 안에서 `min = max = median` 이다(aegis 의 `support_z`는 4 자리로 기록됨). CFM 의 `table_z` 는 call 마다 값이 조금 다르고, 조합 안의 min–max 는 sidecar `v6-suite-level-smoke-table.json` 의 `per_combo` 에 있다.)
+
+**표 C-3. arm 의 action 이 `none` 과 처음 달라지는 step** (`first_differing_step`, 같은 조합의 `none` 과 비교. `identical` = 두 run 의 실행 action 이 모두 같고 길이도 같다)
+
+| suite | lvl | `aegis` | `constrained_flow_matching` |
+|---|---|---|---|
+| `libero_10` | — | 39 | 35 |
+| `libero_goal` | — | identical | 10 |
+| `libero_object` | — | 113 | 30 |
+| `libero_spatial` | — | identical | 35 |
+| `safelibero_goal` | I | 28 | 20 |
+| `safelibero_goal` | II | 23 | 20 |
+| `safelibero_long` | I | 259 | 30 |
+| `safelibero_long` | II | 20 | 20 |
+| `safelibero_object` | I | 126 | 20 |
+| `safelibero_object` | II | 28 | 20 |
+| `safelibero_spatial` | I | 22 | 20 |
+| `safelibero_spatial` | II | 20 | 20 |
+
+### 결과 D — pod 메모리 · GPU
+
+pod working set(`memory.current − inactive_file`)을 phase 안에서는 60 s, 인계 · 일시 정지 구간에서는 30 s 간격으로 sampling 했다. 규칙(64 GiB)을 넘은 sample 은 0 개다.
+
+| 구간 | sample 수 | working set 최대 (GiB) | 그 시각 (KST) | GPU `memory.used` 최대 (MiB) |
+|---|---|---|---|---|
+| L_smoke | 18 | 38.43 | 18:29:11 | 22,340 |
+| gt_smoke | 42 | 47.35 | 18:54:20 | 19,858 |
+| suite_smoke 앞부분 | 33 | 39.39 | 19:39:15 | 22,356 |
+| suite_smoke 재개 | 42 | 42.69 | 20:27:29 | 22,268 |
+| 인계 구간 19:24–19:27 | 6 | 26.89 | 19:25:15 | — |
+| 일시 정지 구간 20:00–20:16 | 34 | 35.25 | 20:00:22 | — |
+
+### 이 STEP 에서 알게 된 것 (평이한 설명)
+
+- **같은 call 0 입력에서 KNOWS ellipsoid 의 최대 반축이** `box` 대 `depth_trim` 으로 `object#0` 0.358 → 0.148 m, `object#1` 0.531 → 0.200 m, `object#2` 0.772 → 0.054 m, `object#3` 0.119 → 0.084 m 이다(표 A-2). call 0 한 번의 입력에서의 값이다.
+- **12 suite × level 조합 36 job 이 모두 끝까지 돌았다**(rc 0, fallback 0). 인식 경로가 추정한 `support_z`(base frame)는 Tabletop 에서 −0.0116 ~ −0.0084 m, LivingRoom 에서 0.0061 m, Floor 에서 0.0013 m 였고, world z 로 옮기면 0.426 m(LivingRoom) · 0.900–0.904 m(Tabletop) · 0.001 m(Floor)다(표 C-2).
+- **privileged 8 변형 모두가 GT 장애물을 받았다**: `privileged.active` 가 `monitor_obstacle` 과 같은 call 이 각 run 의 모든 privileged call 이다(표 B-2).
+- **고친 4 arm 의 새 기본과 `@v5` 의 served · executed 행은** 이 `t0e0` 에서 `knows` 만 1 + 1e-5 를 넘는 행이 있다(새 기본 1 행 1.0099, `@v5` 8 행 최대 1.434, 표 A-1). CFM 은 두 설정 모두 0 행이다. BL-7 실패 #1 에 적힌 V3 smoke `t0e0` 의 CFM 최대는 0.9625 였다.
+- 36 job 의 wall time 과 server ms 는 2 job 병렬 값이다.
+
+### 실패 · 한계 (verify.json `issues`)
+
+| # | 내용 | 영향 |
+|---|---|---|
+| 1 | **`knows` 의 `calls.jsonl` 에 `filter_perception.detector` 가 없다.** 그래서 knows 의 `support_z` · `crop_mode` · 상자별 `boxes` 가 기록되지 않는다(aegis · multilink 는 기록된다). knows 의 `crop_mode` 는 server argv(`--method-kwargs` 없음 = 기본)로만 알 수 있고, 점 수 270 / 183 이 aegis run 의 `depth_trim` crop 크기와 같다 | 표 A-1 의 knows 행에 `support_z` 가 없다. 표 A-2 의 knows `depth_trim` 반축은 `filter_obstacles`(ellipsoid) 기록에서 왔다 |
+| 2 | **\|xyz\| 가 1 을 넘는 실행 행**: L_smoke `knows`(새 기본) 1 행 max 1.0099(1 + 1e-3 초과, 1 + 1e-2 미만)와 `h_star_min` −0.0086 · `h* < 0` step 63, `knows@v5` 8 행 max 1.434. gt_smoke `lan_o3dp_guidance_adapted:gt` 1 행 max 1.0059 | robosuite OSC 가 [-1, 1] 로 자르므로 실제 제어에는 1 로 들어간다(BL-7 용어 "OSC clip"). 이 지표를 줄이는 수정은 이번 범위가 아니다(knows Eq. 12 의 relaxed normal 은 BL-7 에서 논문의 성질로 기록) |
+| 3 | **CFM `gt-spheres` 의 sphere 반경이 어느 run 파일에도 기록되지 않았다.** `calls.jsonl` 의 `privileged` 요약에는 `centers` · `n_geoms` · `geoms_shape` 만 있다 | privileged figure 는 GT body 위치를 그렸고 sphere 는 그리지 않았다 |
+| 4 | **aegis 가 `libero_goal`(23 call 모두 장애물 0 개, head 의 로봇 받침 상자만 검출되어 `depth_trim` 이 버림, 개입 0)과 `libero_spatial`(개입률 0.0)에서 같은 조합의 `none` 과 실행 action 이 bit 동일하다.** 다른 10 조합은 aegis 의 action 이 달라진다(표 C-3) | 이 두 조합의 aegis 행은 `none` 과 같은 결과다 |
+| 5 | **모든 V6 run 의 `run_manifest` 가 `dirty=True` 다**: source diff 는 비어 있다(sha256 `e3b0c442…`). untracked 파일은 `main.pdf` 뿐이다 | 코드 상태는 HEAD `98004d0d` 와 같다 |
+| 6 | **suite_smoke 36 run 의 prefix 와 step 이 `blb-smoke` · `BASELINE-BENCH-SMOKE` 다**(`jobs smoke` 의 기본값). L_smoke · gt_smoke 는 `blbr-L-smoke` · `blbr-gt-smoke`, step `BASELINE-BENCH-READY-V6` 다 | run 이름으로 phase 를 가른다 |
+| 7 | **suite_smoke 의 앞부분 `parallel.log` 에 batch-done 줄이 없고 jobs 10 · 11 의 end event 가 없다.** 일시 정지 때 `run_parallel_gpu.sh` 를 SIGKILL 했기 때문이다. 두 job 의 rc 는 `parallel.job10.out` · `job11.out` 의 `launcher_result` 줄에서 읽었다(`client_returncode` 0, `server_returncode` −2 = launcher stop) | 36 run 모두의 `rc` 는 0 이고 `aggregate_missing` 은 `[]` 다. 이미 끝난 run 을 다시 돈 것은 0 개 |
+| 8 | **lock 이 한 번 development job 에 넘어갔다**(20:15:46 KST, `gpu_lock.py exclusive` tag `gpu-stages-m1m2`). 재개가 500 s 대기했다. dev-e2 의 "end" 메시지와 lead 의 중계는 coordinator 를 통해서만 이 verifier 에 도달했다. 두 번째 양보에서는 20:01:52 에 lock 을 풀자 곧 development `gpu_lock.py exclusive`(pid 3852198)가 잡았다 | 일정만 늦췄다. 측정값에는 영향이 없다(2 job 병렬 값이라는 점은 그대로) |
+
+### 측정하지 않은 것 (`not_measured`)
+
+| 항목 | 상태 |
+|---|---|
+| impl V6 step 1(unit test 와 L 의 CPU replay `summarize.py`)의 CPU 재확인 | **다시 돌리지 않았다.** 위 "단위 검증" 은 impl 이 적은 pass / skip 개수다 |
+| M V6 step 4(선택, `v5_check`)와 L V6 step 3(선택, 20 episode pilot 재측정) | 돌리지 않았다 |
+| 시뮬레이션의 GT 탁자 · 바닥 높이와의 비교 | **하지 않았다.** `support_z` 는 LIBERO problem class 의 상수(`table_offset` · `floor_offset`)와 AEGIS workspace z0 와만 비교했다(표 C-2) |
+| CFM `gt-spheres` 의 sphere 반경 | 기록되지 않아 측정하지 못했다 |
+| LIBERO-Safety suite | `FAMILY_HOOKS` 자리만 있다 |
+| 다중 episode 통계 | **모든 수치가 n = 1(task 0, episode 0)이다** |
+| filter arm 의 wrist 카메라 | 기본(head 만)만 돌렸다 |
+| BL-7 에서 CFM 의 큰 \|xyz\|(최대 7.284)가 나온 episode(`t0e2`) 재측정 | 하지 않았다(V6 은 `t0e0` 만) |
+
+### 열린 항목
+
+1. 이 smoke 결과(L_smoke · gt_smoke · suite_smoke)를 사용자가 판정한다(해석은 위에 쓰지 않았다).
+2. **benchmark 전체 실험**은 사용자 지시대로 benchmark 단계에서 돌린다. 형식은 M impl "V6 명령 5" 에 있다(`jobs plan --arms none,aegis,knows,multilink_cbf,constrained_flow_matching,nudge,omniguide,lan_o3dp_guidance_adapted,aegis:gt,constrained_flow_matching:gt --suites all --split test --tasks-per-job 2 …`). 실행하지 않았다.
+3. 추가 측정이 필요하면 verifier 에게 요청한다: (a) CFM `t0e2` 재측정(BL-7 의 큰 \|xyz\| 가 새 기본에서 어떤지), (b) 시뮬레이션 GT 탁자 · 바닥 높이와 `support_z` 의 비교, (c) CFM `gt-spheres` 반경 기록, (d) impl V6 step 1 의 CPU 재확인, (e) knows 의 `filter_perception.detector` 기록.
+4. aegis · multilink 가 새 기본에서 `depth_trim` 과 `extras["suite"]` 두 변화를 함께 받는다. 둘을 나눠 보려면 `aegis@v5` · `aegis --no-suite-extras` · `aegis` 의 비교(M impl 의 V5 재현 확인, 선택)가 필요하다. 하지 않았다.
+5. `BASELINE-BENCH-READY-V6.verify.json` 과 `figures/baselines/bench_ready/` 는 untracked 다. 사용자 판정 후 commit 한다.
 
 ### 판정
 

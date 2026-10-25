@@ -1,0 +1,5842 @@
+{
+ "step": "BASELINE-BENCH-READY-V6",
+ "date": "2026-10-25",
+ "writer": "ag3s-verifier (V6: GPU smoke of L / M; L_smoke 9, gt_smoke 9, suite_smoke 36 jobs)",
+ "runs": [
+  {
+   "id": "baseline_legacy16d",
+   "command": "MUJOCO_GL=osmesa CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=1 PYTHONPATH=$AG3S_PROJECT_ROOT .venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --out-json outputs/verify/BASELINE-BENCH-READY/baseline/legacy_base.json",
+   "venv": ".venv-ag3s",
+   "raw_output": "outputs/verify/BASELINE-BENCH-READY/baseline/legacy_base.json",
+   "stdout_log": "outputs/verify/BASELINE-BENCH-READY/baseline/legacy_base.log",
+   "utc": [
+    "2026-10-25T09:21:46Z",
+    "2026-10-25T09:22:13Z"
+   ]
+  },
+  {
+   "id": "L_smoke",
+   "command": "outputs/verify/BASELINE-BENCH-READY/run_phase.sh L_smoke  (preflight -> AG3S_PARALLEL_TEST_LAUNCHER=launch_method.py benchmark/runners/run_parallel_gpu.sh --jobs L_smoke/jobs.txt --max-parallel 2 --est-gib-per-run 16 --lock-wait 3600 -> jobs aggregate); plan: jobs plan --arms none,aegis,aegis@v5,knows,knows@v5,multilink_cbf,multilink_cbf@v5,constrained_flow_matching,constrained_flow_matching@v5 --suites safelibero_spatial:I --split dev --tasks 0 --episodes 0 --run-prefix blbr-L-smoke --step BASELINE-BENCH-READY-V6",
+   "venv": ".venv-ag3s (jobs, launcher), .venv-openpi-live (server), .venv-libero (client), .venv-baselines (sidecar)",
+   "raw_output": "$AG3S_STORAGE_ROOT/results/benchmark/<run> (see numbers.<phase>.arms.*.run)",
+   "stdout_log": "outputs/verify/BASELINE-BENCH-READY/L_smoke/parallel.log, L_smoke/parallel.job<i>.out, L_smoke/preflight.txt, L_smoke/pod_mem.csv, L_smoke.phase.log",
+   "analysis": "outputs/verify/BASELINE-BENCH-READY/analyze.py L_smoke -> L_smoke/numbers.json, L_smoke/table.txt; L_smoke/aggregate.json/.md"
+  },
+  {
+   "id": "gt_smoke",
+   "command": "outputs/verify/BASELINE-BENCH-READY/run_phase.sh gt_smoke  (preflight -> AG3S_PARALLEL_TEST_LAUNCHER=launch_method.py benchmark/runners/run_parallel_gpu.sh --jobs gt_smoke/jobs.txt --max-parallel 2 --est-gib-per-run 16 --lock-wait 3600 -> jobs aggregate); plan: jobs plan --arms none,aegis:gt,knows:gt,multilink_cbf:gt,constrained_flow_matching:gt,constrained_flow_matching:gt-repo,nudge:gt,omniguide:gt,lan_o3dp_guidance_adapted:gt --suites safelibero_spatial:I --split dev --tasks 0 --episodes 0 --run-prefix blbr-gt-smoke --step BASELINE-BENCH-READY-V6",
+   "venv": ".venv-ag3s (jobs, launcher), .venv-openpi-live (server), .venv-libero (client), .venv-baselines (sidecar)",
+   "raw_output": "$AG3S_STORAGE_ROOT/results/benchmark/<run> (see numbers.<phase>.arms.*.run)",
+   "stdout_log": "outputs/verify/BASELINE-BENCH-READY/gt_smoke/parallel.log, gt_smoke/parallel.job<i>.out, gt_smoke/preflight.txt, gt_smoke/pod_mem.csv, gt_smoke.phase.log",
+   "analysis": "outputs/verify/BASELINE-BENCH-READY/analyze.py gt_smoke -> gt_smoke/numbers.json, gt_smoke/table.txt; gt_smoke/aggregate.json/.md"
+  },
+  {
+   "id": "suite_smoke",
+   "command": "outputs/verify/BASELINE-BENCH-READY/run_phase.sh suite_smoke  (preflight -> AG3S_PARALLEL_TEST_LAUNCHER=launch_method.py benchmark/runners/run_parallel_gpu.sh --jobs suite_smoke/jobs.txt --max-parallel 2 --est-gib-per-run 16 --lock-wait 3600 -> jobs aggregate); plan: jobs smoke --out-dir outputs/verify/BASELINE-BENCH-READY/suite_smoke (defaults: arms none,aegis,constrained_flow_matching; run prefix blb-smoke; step BASELINE-BENCH-SMOKE)",
+   "venv": ".venv-ag3s (jobs, launcher), .venv-openpi-live (server), .venv-libero (client), .venv-baselines (sidecar)",
+   "raw_output": "$AG3S_STORAGE_ROOT/results/benchmark/<run> (see numbers.<phase>.arms.*.run)",
+   "stdout_log": "outputs/verify/BASELINE-BENCH-READY/suite_smoke/parallel.log, suite_smoke/parallel.job<i>.out, suite_smoke/preflight.txt, suite_smoke/pod_mem.csv, suite_smoke.phase.log",
+   "analysis": "outputs/verify/BASELINE-BENCH-READY/analyze.py suite_smoke -> suite_smoke/numbers.json, suite_smoke/table.txt; suite_smoke/aggregate.json/.md"
+  },
+  {
+   "id": "figures",
+   "command": "outputs/verify/BASELINE-BENCH-READY/figs/{crop_data.py,priv_data.py} (.venv-baselines), figs/{fig_crop,fig_cfm,fig_priv,fig_iv,fig_phase_table,fig_suite}.py (.venv-ag3s)",
+   "raw_output": "outputs/verify/BASELINE-BENCH-READY/figs/"
+  }
+ ],
+ "code_state": {
+  "repo": "/mnt/dev/AG3S_VLA-benchmark",
+  "branch": "feature/panda-benchmark",
+  "head_at_start": "98004d0d",
+  "head_at_end": "98004d0d",
+  "git_status_shared_paths": {
+   "L_smoke": [
+    "[]",
+    "[]"
+   ],
+   "gt_smoke": [
+    "[]",
+    "[]"
+   ],
+   "suite_smoke": [
+    "[]",
+    "[]"
+   ]
+  },
+  "untracked_at_start": [
+   "main.pdf"
+  ],
+  "run_manifest_dirty": "True in every V6 run; source_diff_sha256 = e3b0c442... (empty diff), untracked_sha256 = {main.pdf}"
+ },
+ "numbers": {
+  "baseline_legacy16d": {
+   "violated_start": 14,
+   "has_target": 15,
+   "frames": 15,
+   "frame0_clearance_before_mm": "-29.031048280806342",
+   "feasible": 15,
+   "expected": "14/15, 15/15, -29.031048280806342",
+   "match": true
+  },
+  "phases": {
+   "L_smoke": {
+    "meta": {
+     "lock_acquired_utc": "2026-10-25T09:24:11Z",
+     "batch_done_utc": "2026-10-25T09:41:19Z",
+     "batch_line": "batch done jobs=9 failed=0; releasing lock",
+     "utc": "2026-10-25T09:23:57Z",
+     "head": "98004d0dc4160ad41011dba47b892cc2ca1f2387",
+     "gpu_apps": "[]",
+     "git_status_shared": "[]",
+     "git_status_all": "[?? main.pdf;]",
+     "parallel_rc": "0",
+     "wall_s": "1029",
+     "end_utc": "2026-10-25T09:41:19Z",
+     "head_end": "98004d0dc4160ad41011dba47b892cc2ca1f2387",
+     "git_status_shared_end": "[]",
+     "aggregate_rc": "0",
+     "pod_working_set_gib": {
+      "samples_60s": 18,
+      "max": 38.43,
+      "max_at_utc": "2026-10-25T09:29:11Z",
+      "min": 20.5,
+      "over_64": 0,
+      "over64_log": null
+     },
+     "gpu_total_used_mib_max": 22340,
+     "gpu_wall_s": 1028.0
+    },
+    "arms": {
+     "safelibero_spatial|I|constrained_flow_matching": {
+      "run": "20261025T182413_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 315.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 1.0,
+      "intervention_rate_calls": 1.0,
+      "h_min": 0.04037456208467484,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9655224837683437,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9655224837683437,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 2111.3517098128796,
+      "server_ms_p95": 2400.000909343362,
+      "client_latency_ms_p50": 2108.616485260427,
+      "client_latency_ms_first": 20238.504672423005,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "None",
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 1024,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 56,
+        "none": 0,
+        "min": -0.013593107051504478,
+        "max": -0.010878793284092539,
+        "call0": -0.013443255884606466
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.07556012272834778
+      }
+     },
+     "safelibero_spatial|I|constrained_flow_matching@v5": {
+      "run": "20261025T182444_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching-v5",
+      "rc": 0,
+      "job_wall_s": 315.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 1.0,
+      "intervention_rate_calls": 1.0,
+      "h_min": 0.045167475879192356,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9625360647019147,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9625360647019147,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 2358.4194146096706,
+      "server_ms_p95": 2668.339495547116,
+      "client_latency_ms_p50": 2363.8885696418583,
+      "client_latency_ms_first": 24981.73097334802,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": null
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 1024,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 56,
+        "none": 0,
+        "min": -0.013570246639682227,
+        "max": -0.010878524377327215,
+        "call0": -0.013443255884606466
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.0858922079205513
+      }
+     },
+     "safelibero_spatial|I|knows": {
+      "run": "20261025T183001_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-knows",
+      "rc": 0,
+      "job_wall_s": 197.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 0.0,
+       "ETS": 169.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": true,
+      "collide_t": 57,
+      "max_displacement_m": 0.03577825977604768,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 34,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.5558823529411765,
+      "intervention_rate_calls": 0.7352941176470589,
+      "h_min": -0.018555300196968293,
+      "h_star_min": -0.008634258038201103,
+      "h_star_neg_steps": 63,
+      "served_max_abs_xyz": 1.0098894432624579,
+      "served_rows_gt_1_plus_1e-5": 1,
+      "executed_max_abs_xyz": 1.0098894432624579,
+      "executed_rows_gt_1_plus_1e-5": 1,
+      "executed_rows_n": 170,
+      "server_ms_p50": 410.6828570365906,
+      "server_ms_p95": 459.97463166713715,
+      "client_latency_ms_p50": 419.44014467298985,
+      "client_latency_ms_first": 3969.8714213445783,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "None"
+       ],
+       "support_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "median": null,
+        "call0": null
+       },
+       "workspace_values": [],
+       "n_workspace_points_call0": 0,
+       "filter_obstacles_max_semi_axis_all_calls": 0.1999,
+       "qp_status": [
+        "solved"
+       ],
+       "filter_obstacles_call0": {
+        "object#0": {
+         "c": [
+          0.6231,
+          0.0072,
+          0.1405
+         ],
+         "semi_axes": [
+          0.0599,
+          0.118,
+          0.1475
+         ]
+        },
+        "object#1": {
+         "c": [
+          0.6881,
+          -0.2655,
+          0.1346
+         ],
+         "semi_axes": [
+          0.1271,
+          0.1532,
+          0.1999
+         ]
+        },
+        "object#2": {
+         "c": [
+          0.2486,
+          -0.1401,
+          0.0222
+         ],
+         "semi_axes": [
+          0.0313,
+          0.0495,
+          0.054
+         ]
+        },
+        "object#3": {
+         "c": [
+          0.7134,
+          0.22,
+          0.0055
+         ],
+         "semi_axes": [
+          0.0024,
+          0.0741,
+          0.0839
+         ]
+        }
+       },
+       "clouds_call0": null
+      }
+     },
+     "safelibero_spatial|I|knows@v5": {
+      "run": "20261025T183030_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-knows-v5",
+      "rc": 0,
+      "job_wall_s": 137.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 126.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 26,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.8692307692307693,
+      "intervention_rate_calls": 0.9615384615384616,
+      "h_min": -0.17950108532432196,
+      "h_star_min": -0.03812651684596163,
+      "h_star_neg_steps": 95,
+      "served_max_abs_xyz": 1.43429836917071,
+      "served_rows_gt_1_plus_1e-5": 8,
+      "executed_max_abs_xyz": 1.43429836917071,
+      "executed_rows_gt_1_plus_1e-5": 8,
+      "executed_rows_n": 127,
+      "server_ms_p50": 393.57346948236227,
+      "server_ms_p95": 530.6300353258848,
+      "client_latency_ms_p50": 401.08857676386833,
+      "client_latency_ms_first": 4572.6258009672165,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": null
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "None"
+       ],
+       "support_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "median": null,
+        "call0": null
+       },
+       "workspace_values": [],
+       "n_workspace_points_call0": 0,
+       "filter_obstacles_max_semi_axis_all_calls": 0.7717,
+       "qp_status": [
+        "solved"
+       ],
+       "filter_obstacles_call0": {
+        "object#0": {
+         "c": [
+          0.4646,
+          0.01,
+          0.0546
+         ],
+         "semi_axes": [
+          0.163,
+          0.2242,
+          0.3578
+         ]
+        },
+        "object#1": {
+         "c": [
+          0.4994,
+          -0.2942,
+          0.0558
+         ],
+         "semi_axes": [
+          0.1635,
+          0.2341,
+          0.5308
+         ]
+        },
+        "object#2": {
+         "c": [
+          -0.0792,
+          0.008,
+          -0.0866
+         ],
+         "semi_axes": [
+          0.1348,
+          0.2637,
+          0.7717
+         ]
+        },
+        "object#3": {
+         "c": [
+          0.7013,
+          0.2147,
+          -0.0047
+         ],
+         "semi_axes": [
+          0.0146,
+          0.1017,
+          0.1194
+         ]
+        }
+       },
+       "clouds_call0": null
+      }
+     },
+     "safelibero_spatial|I|multilink_cbf": {
+      "run": "20261025T183315_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-multilink_cbf",
+      "rc": 0,
+      "job_wall_s": 186.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 247.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 50,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.442,
+      "intervention_rate_calls": 0.62,
+      "h_min": 0.012109455872471604,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.981363734609187,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9736109751868248,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 248,
+      "server_ms_p50": 238.0720879882574,
+      "server_ms_p95": 284.9945919588208,
+      "client_latency_ms_p50": 243.9638120122254,
+      "client_latency_ms_first": 4242.165893316269,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 50,
+        "none": 0,
+        "min": -0.0109,
+        "max": -0.0109,
+        "median": -0.0109,
+        "call0": -0.0109
+       },
+       "workspace_values": [
+        "table"
+       ],
+       "n_workspace_points_call0": 6606,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 3147,
+         "workspace": "table",
+         "n_workspace": 3131,
+         "n_trim": 2504,
+         "n_out": 2504,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 4000,
+         "workspace": "table",
+         "n_workspace": 3474,
+         "n_trim": 2779,
+         "n_out": 2779,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 270,
+         "workspace": "table",
+         "n_workspace": 0,
+         "fitted": false
+        },
+        "object#3": {
+         "n_in": 183,
+         "workspace": "table",
+         "n_workspace": 1,
+         "n_trim": 0,
+         "fitted": false
+        }
+       }
+      }
+     },
+     "safelibero_spatial|I|multilink_cbf@v5": {
+      "run": "20261025T183347_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-multilink_cbf-v5",
+      "rc": 0,
+      "job_wall_s": 125.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 174.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 35,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.5314285714285715,
+      "intervention_rate_calls": 0.6285714285714286,
+      "h_min": 0.0015018640769476849,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9427349737334249,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9427349737334249,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 175,
+      "server_ms_p50": 244.7780929505825,
+      "server_ms_p95": 278.00096198916435,
+      "client_latency_ms_p50": 248.3233828097582,
+      "client_latency_ms_first": 4181.609117425978,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": null
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "box"
+       ],
+       "support_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "median": null,
+        "call0": null
+       },
+       "workspace_values": [
+        "None"
+       ],
+       "n_workspace_points_call0": 13169,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 4000,
+         "workspace": null,
+         "n_workspace": 4000,
+         "n_trim": 3200,
+         "n_out": 3200,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 4000,
+         "workspace": null,
+         "n_workspace": 4000,
+         "n_trim": 3200,
+         "n_out": 3200,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 3441,
+         "workspace": null,
+         "n_workspace": 3441,
+         "n_trim": 2752,
+         "n_out": 2752,
+         "fitted": true
+        },
+        "object#3": {
+         "n_in": 1728,
+         "workspace": null,
+         "n_workspace": 1728,
+         "n_trim": 1382,
+         "n_out": 1382,
+         "fitted": true
+        }
+       }
+      }
+     },
+     "safelibero_spatial|I|aegis": {
+      "run": "20261025T183621_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-aegis",
+      "rc": 0,
+      "job_wall_s": 119.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 90.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 19,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.5052631578947369,
+      "intervention_rate_calls": 0.5789473684210527,
+      "h_min": 0.01064,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9456792230846879,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9456792230846879,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 91,
+      "server_ms_p50": 132.03981891274452,
+      "server_ms_p95": 147.33278565108776,
+      "client_latency_ms_p50": 136.02528162300587,
+      "client_latency_ms_first": 4187.671596184373,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 19,
+        "none": 0,
+        "min": -0.0109,
+        "max": -0.0109,
+        "median": -0.0109,
+        "call0": -0.0109
+       },
+       "workspace_values": [
+        "table"
+       ],
+       "n_workspace_points_call0": 6606,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 3147,
+         "workspace": "table",
+         "n_workspace": 3131,
+         "n_trim": 2504,
+         "n_out": 2504,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 4000,
+         "workspace": "table",
+         "n_workspace": 3474,
+         "n_trim": 2779,
+         "n_out": 2779,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 270,
+         "workspace": "table",
+         "n_workspace": 0,
+         "fitted": false
+        },
+        "object#3": {
+         "n_in": 183,
+         "workspace": "table",
+         "n_workspace": 1,
+         "n_trim": 0,
+         "fitted": false
+        }
+       }
+      }
+     },
+     "safelibero_spatial|I|aegis@v5": {
+      "run": "20261025T183653_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-aegis-v5",
+      "rc": 0,
+      "job_wall_s": 156.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.6589285714285714,
+      "intervention_rate_calls": 0.9464285714285714,
+      "h_min": 0.00352,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9373512403118008,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9373512403118008,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 147.09732960909605,
+      "server_ms_p95": 174.2265960201621,
+      "client_latency_ms_p50": 150.44423658400774,
+      "client_latency_ms_first": 4232.499252073467,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": null
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "box"
+       ],
+       "support_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "median": null,
+        "call0": null
+       },
+       "workspace_values": [
+        "None"
+       ],
+       "n_workspace_points_call0": 13169,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 4000,
+         "workspace": null,
+         "n_workspace": 4000,
+         "n_trim": 3200,
+         "n_out": 3200,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 4000,
+         "workspace": null,
+         "n_workspace": 4000,
+         "n_trim": 3200,
+         "n_out": 3200,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 3441,
+         "workspace": null,
+         "n_workspace": 3441,
+         "n_trim": 2752,
+         "n_out": 2752,
+         "fitted": true
+        },
+        "object#3": {
+         "n_in": 1728,
+         "workspace": null,
+         "n_workspace": 1728,
+         "n_trim": 1382,
+         "n_out": 1382,
+         "fitted": true
+        }
+       }
+      }
+     },
+     "safelibero_spatial|I|none": {
+      "run": "20261025T183850_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-none",
+      "rc": 0,
+      "job_wall_s": 150.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 35,
+      "max_displacement_m": 0.2559493526609006,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.990755252301097,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.979994811888814,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 89.29372392594814,
+      "server_ms_p95": 105.44189717620611,
+      "client_latency_ms_p50": 94.29455175995827,
+      "client_latency_ms_first": 2788.822720758617,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912
+     }
+    },
+    "aggregate": "outputs/verify/BASELINE-BENCH-READY/L_smoke/aggregate.json",
+    "aggregate_missing": []
+   },
+   "gt_smoke": {
+    "meta": {
+     "lock_acquired_utc": "2026-10-25T09:42:17Z",
+     "batch_done_utc": "2026-10-25T10:23:46Z",
+     "batch_line": "batch done jobs=9 failed=0; releasing lock",
+     "utc": "2026-10-25T09:42:14Z",
+     "head": "98004d0dc4160ad41011dba47b892cc2ca1f2387",
+     "gpu_apps": "[]",
+     "git_status_shared": "[]",
+     "git_status_all": "[?? main.pdf;]",
+     "parallel_rc": "0",
+     "wall_s": "2490",
+     "end_utc": "2026-10-25T10:23:46Z",
+     "head_end": "98004d0dc4160ad41011dba47b892cc2ca1f2387",
+     "git_status_shared_end": "[]",
+     "aggregate_rc": "0",
+     "pod_working_set_gib": {
+      "samples_60s": 42,
+      "max": 47.35,
+      "max_at_utc": "2026-10-25T09:54:20Z",
+      "min": 18.94,
+      "over_64": 0,
+      "over64_log": null
+     },
+     "gpu_total_used_mib_max": 19858,
+     "gpu_wall_s": 2489.0
+    },
+    "arms": {
+     "safelibero_spatial|I|constrained_flow_matching:gt": {
+      "run": "20261025T184219_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching-gt-spheres",
+      "rc": 0,
+      "job_wall_s": 533.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 98.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 20,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.79,
+      "intervention_rate_calls": 0.8,
+      "h_min": 0.029208041667938233,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9758602292573452,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9758602292573452,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 99,
+      "server_ms_p50": 7015.7021172344685,
+      "server_ms_p95": 17786.186226643622,
+      "client_latency_ms_p50": 6697.779723908752,
+      "client_latency_ms_first": 33117.032527923584,
+      "manifest_privileged": true,
+      "manifest_client_flags": [
+       "--emit-privileged-obstacles"
+      ],
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 20,
+       "obstacle_source": [
+        "privileged/obstacle_geoms"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [
+        "privileged/obstacle_geoms"
+       ],
+       "obstacle_counts_call0": {
+        "points": 0,
+        "spheres": 1,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "call0": null
+       },
+       "guided_calls": 20,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.07342572510242462
+      },
+      "privileged": {
+       "n_calls_with_privileged": 20,
+       "calls_active_equals_monitor": 20,
+       "geoms_shape": [
+        "sphere"
+       ],
+       "n_geoms": [
+        1
+       ],
+       "segmentation": [
+        "[]"
+       ],
+       "active_distinct": [
+        "[\"moka_pot_obstacle_1\"]"
+       ]
+      }
+     },
+     "safelibero_spatial|I|constrained_flow_matching:gt-repo": {
+      "run": "20261025T184255_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching-gt-repo",
+      "rc": 0,
+      "job_wall_s": 534.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 97.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 20,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.8,
+      "intervention_rate_calls": 0.8,
+      "h_min": 0.04460238653421402,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9757691221292016,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9757691221292016,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 98,
+      "server_ms_p50": 7869.576148688793,
+      "server_ms_p95": 17299.76404737681,
+      "client_latency_ms_p50": 7395.700491499156,
+      "client_latency_ms_first": 37964.30336404592,
+      "manifest_privileged": true,
+      "manifest_client_flags": [
+       "--emit-privileged-obstacles"
+      ],
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 20,
+       "obstacle_source": [
+        "privileged/obstacle_geoms"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [
+        "privileged/obstacle_geoms"
+       ],
+       "obstacle_counts_call0": {
+        "points": 0,
+        "spheres": 0,
+        "boxes": 17,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "call0": null
+       },
+       "guided_calls": 20,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.08732860535383224
+      },
+      "privileged": {
+       "n_calls_with_privileged": 20,
+       "calls_active_equals_monitor": 20,
+       "geoms_shape": [
+        "repo"
+       ],
+       "n_geoms": [
+        17
+       ],
+       "segmentation": [
+        "[]"
+       ],
+       "active_distinct": [
+        "[\"moka_pot_obstacle_1\"]"
+       ]
+      }
+     },
+     "safelibero_spatial|I|nudge:gt": {
+      "run": "20261025T185147_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-nudge-gt-geoms",
+      "rc": 0,
+      "job_wall_s": 508.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 0.0,
+       "ETS": 155.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": true,
+      "collide_t": 47,
+      "max_displacement_m": 0.29872129966873656,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 32,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.0625,
+      "intervention_rate_calls": 0.0625,
+      "h_min": 0.02036398643255234,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9898235940576792,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9856400708756446,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 156,
+      "server_ms_p50": 2049.956588074565,
+      "server_ms_p95": 3806.9486571475863,
+      "client_latency_ms_p50": 1987.02592542395,
+      "client_latency_ms_first": 19993.246513418853,
+      "manifest_privileged": true,
+      "manifest_client_flags": [
+       "--emit-privileged-obstacles"
+      ],
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 32,
+       "obstacle_source": [
+        "privileged/obstacle_geoms"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [
+        "privileged/obstacle_geoms"
+       ],
+       "obstacle_counts_call0": {
+        "points": 0,
+        "spheres": 0,
+        "boxes": 15,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "call0": null
+       },
+       "guided_calls": 32,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.03136075288057327
+      },
+      "privileged": {
+       "n_calls_with_privileged": 32,
+       "calls_active_equals_monitor": 32,
+       "geoms_shape": [
+        "collision"
+       ],
+       "n_geoms": [
+        15
+       ],
+       "segmentation": [
+        "[]"
+       ],
+       "active_distinct": [
+        "[\"moka_pot_obstacle_1\"]"
+       ]
+      }
+     },
+     "safelibero_spatial|I|lan_o3dp_guidance_adapted:gt": {
+      "run": "20261025T185219_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-lan_o3dp_guidance_adapted-gt-geoms",
+      "rc": 0,
+      "job_wall_s": 621.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 45,
+      "max_displacement_m": 0.18082822360841005,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.03571428571428571,
+      "intervention_rate_calls": 0.03571428571428571,
+      "h_min": 0.014382399499416353,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0103902458826304,
+      "served_rows_gt_1_plus_1e-5": 3,
+      "executed_max_abs_xyz": 1.0055303821696042,
+      "executed_rows_gt_1_plus_1e-5": 1,
+      "executed_rows_n": 280,
+      "server_ms_p50": 614.3511654809117,
+      "server_ms_p95": 2211.1367266625166,
+      "client_latency_ms_p50": 610.6984615325928,
+      "client_latency_ms_first": 19924.36590883881,
+      "manifest_privileged": true,
+      "manifest_client_flags": [
+       "--emit-privileged-obstacles"
+      ],
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "privileged/obstacle_geoms"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [
+        "privileged/obstacle_geoms"
+       ],
+       "obstacle_counts_call0": {
+        "points": 0,
+        "spheres": 0,
+        "boxes": 15,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "call0": null
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.03352472186088562
+      },
+      "privileged": {
+       "n_calls_with_privileged": 56,
+       "calls_active_equals_monitor": 56,
+       "geoms_shape": [
+        "collision"
+       ],
+       "n_geoms": [
+        15
+       ],
+       "segmentation": [
+        "[]"
+       ],
+       "active_distinct": [
+        "[\"moka_pot_obstacle_1\"]"
+       ]
+      }
+     },
+     "safelibero_spatial|I|knows:gt": {
+      "run": "20261025T190046_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-knows-gt-seg",
+      "rc": 0,
+      "job_wall_s": 438.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 87.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 18,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.38333333333333336,
+      "intervention_rate_calls": 0.5555555555555556,
+      "h_min": -0.052401010031814035,
+      "h_star_min": 0.007620007138313956,
+      "h_star_neg_steps": 0,
+      "served_max_abs_xyz": 0.9467381434695721,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9467381434695721,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 88,
+      "server_ms_p50": 471.5776303783059,
+      "server_ms_p95": 1982.9364279285073,
+      "client_latency_ms_p50": 946.7426841147244,
+      "client_latency_ms_first": 6256.8765711039305,
+      "manifest_privileged": true,
+      "manifest_client_flags": [
+       "--emit-privileged-obstacles",
+       "--capture-segmentation"
+      ],
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "gt_seg"
+       ],
+       "privileged_flag": [
+        "True"
+       ],
+       "crop_mode": [
+        "None"
+       ],
+       "support_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "median": null,
+        "call0": null
+       },
+       "workspace_values": [],
+       "n_workspace_points_call0": 0,
+       "filter_obstacles_max_semi_axis_all_calls": 0.1554,
+       "qp_status": [
+        "solved"
+       ],
+       "filter_obstacles_call0": {
+        "moka_pot_1": {
+         "c": [
+          0.6086,
+          0.0094,
+          0.1053
+         ],
+         "semi_axes": [
+          0.0737,
+          0.1293,
+          0.1554
+         ]
+        }
+       },
+       "clouds_call0": null
+      },
+      "privileged": {
+       "n_calls_with_privileged": 18,
+       "calls_active_equals_monitor": 18,
+       "geoms_shape": [
+        "collision"
+       ],
+       "n_geoms": [
+        15
+       ],
+       "segmentation": [
+        "[\"head\", \"left_wrist\"]"
+       ],
+       "active_distinct": [
+        "[\"moka_pot_obstacle_1\"]"
+       ]
+      }
+     },
+     "safelibero_spatial|I|omniguide:gt": {
+      "run": "20261025T190311_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-omniguide-gt-geoms",
+      "rc": 0,
+      "job_wall_s": 577.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 0.0,
+       "ETS": 139.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": true,
+      "collide_t": 41,
+      "max_displacement_m": 0.19541090575983924,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 28,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.6428571428571429,
+      "intervention_rate_calls": 0.6428571428571429,
+      "h_min": -0.0013708714991807931,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9758634696134328,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9758634696134328,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 140,
+      "server_ms_p50": 2597.0855467021465,
+      "server_ms_p95": 15614.495476707816,
+      "client_latency_ms_p50": 2482.7294452115893,
+      "client_latency_ms_first": 109819.53914649785,
+      "manifest_privileged": true,
+      "manifest_client_flags": [
+       "--emit-privileged-obstacles"
+      ],
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 28,
+       "obstacle_source": [
+        "privileged/obstacle_geoms"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [
+        "privileged/obstacle_geoms"
+       ],
+       "obstacle_counts_call0": {
+        "points": 0,
+        "spheres": 0,
+        "boxes": 15,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 28,
+        "none": 0,
+        "min": -0.013814536407533506,
+        "max": -0.008699298660685195,
+        "call0": -0.013443255884606466
+       },
+       "guided_calls": 18,
+       "skip_calls": 10,
+       "identity_reasons": [
+        "guidance_fn is identity (method skip: e.g. OmniGuide freeze zone / nothing to avoid)"
+       ],
+       "h_served_min_ee": 0.02896907366812229
+      },
+      "privileged": {
+       "n_calls_with_privileged": 28,
+       "calls_active_equals_monitor": 28,
+       "geoms_shape": [
+        "collision"
+       ],
+       "n_geoms": [
+        15
+       ],
+       "segmentation": [
+        "[]"
+       ],
+       "active_distinct": [
+        "[\"moka_pot_obstacle_1\"]"
+       ]
+      }
+     },
+     "safelibero_spatial|I|multilink_cbf:gt": {
+      "run": "20261025T190833_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-multilink_cbf-gt-seg",
+      "rc": 0,
+      "job_wall_s": 503.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 161.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 33,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.5303030303030303,
+      "intervention_rate_calls": 0.7575757575757576,
+      "h_min": 0.01020936719530279,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9576871498823164,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9308761283601834,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 162,
+      "server_ms_p50": 702.1813290193677,
+      "server_ms_p95": 2675.456236116588,
+      "client_latency_ms_p50": 729.5236112549901,
+      "client_latency_ms_first": 8202.546017244458,
+      "manifest_privileged": true,
+      "manifest_client_flags": [
+       "--emit-privileged-obstacles",
+       "--capture-segmentation"
+      ],
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "gt_seg"
+       ],
+       "privileged_flag": [
+        "True"
+       ],
+       "crop_mode": [
+        "None"
+       ],
+       "support_z": {
+        "n": 0,
+        "none": 0,
+        "min": null,
+        "max": null,
+        "median": null,
+        "call0": null
+       },
+       "workspace_values": [
+        "table"
+       ],
+       "n_workspace_points_call0": 3981,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "moka_pot_1": {
+         "n_in": 4000,
+         "workspace": "table",
+         "n_workspace": 3981,
+         "n_trim": 3184,
+         "n_out": 3184,
+         "fitted": true
+        }
+       }
+      },
+      "privileged": {
+       "n_calls_with_privileged": 33,
+       "calls_active_equals_monitor": 33,
+       "geoms_shape": [
+        "collision"
+       ],
+       "n_geoms": [
+        15
+       ],
+       "segmentation": [
+        "[\"head\", \"left_wrist\"]"
+       ],
+       "active_distinct": [
+        "[\"moka_pot_obstacle_1\"]"
+       ]
+      }
+     },
+     "safelibero_spatial|I|aegis:gt": {
+      "run": "20261025T191318_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-aegis-gt-names",
+      "rc": 0,
+      "job_wall_s": 348.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 90.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 19,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.5157894736842106,
+      "intervention_rate_calls": 0.631578947368421,
+      "h_min": 0.0108,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9417020714272261,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9376597481091021,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 91,
+      "server_ms_p50": 249.01244323700666,
+      "server_ms_p95": 1290.721707046032,
+      "client_latency_ms_p50": 254.50465455651283,
+      "client_latency_ms_first": 11058.825287036598,
+      "manifest_privileged": true,
+      "manifest_client_flags": [
+       "--emit-privileged-obstacles"
+      ],
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "True"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 19,
+        "none": 0,
+        "min": -0.0109,
+        "max": -0.0109,
+        "median": -0.0109,
+        "call0": -0.0109
+       },
+       "workspace_values": [
+        "table"
+       ],
+       "n_workspace_points_call0": 3132,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "moka_pot_1": {
+         "n_in": 3148,
+         "workspace": "table",
+         "n_workspace": 3132,
+         "n_trim": 2505,
+         "n_out": 2505,
+         "fitted": true
+        }
+       }
+      },
+      "privileged": {
+       "n_calls_with_privileged": 19,
+       "calls_active_equals_monitor": 19,
+       "geoms_shape": [
+        "collision"
+       ],
+       "n_geoms": [
+        15
+       ],
+       "segmentation": [
+        "[]"
+       ],
+       "active_distinct": [
+        "[\"moka_pot_obstacle_1\"]"
+       ]
+      }
+     },
+     "safelibero_spatial|I|none": {
+      "run": "20261025T191724_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-none",
+      "rc": 0,
+      "job_wall_s": 385.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 35,
+      "max_displacement_m": 0.2559493526609006,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.990755252301097,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.979994811888814,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 111.8308026343584,
+      "server_ms_p95": 693.7549710273743,
+      "client_latency_ms_p50": 117.30023706331849,
+      "client_latency_ms_first": 4088.674735277891,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912
+     }
+    },
+    "aggregate": "outputs/verify/BASELINE-BENCH-READY/gt_smoke/aggregate.json",
+    "aggregate_missing": []
+   },
+   "suite_smoke": {
+    "meta": {
+     "lock_acquired_utc": "2026-10-25T10:27:16Z",
+     "utc": "2026-10-25T10:27:12Z",
+     "head": "98004d0dc4160ad41011dba47b892cc2ca1f2387",
+     "gpu_apps": "[]",
+     "git_status_shared": "[]",
+     "git_status_all": "[?? main.pdf;]",
+     "parallel_rc": "137",
+     "wall_s": "1975",
+     "end_utc": "2026-10-25T11:00:09Z",
+     "head_end": "98004d0dc4160ad41011dba47b892cc2ca1f2387",
+     "git_status_shared_end": "[]",
+     "aggregate_rc": "1",
+     "pod_working_set_gib": {
+      "samples_60s": 33,
+      "max": 39.39,
+      "max_at_utc": "2026-10-25T10:39:15Z",
+      "min": 19.13,
+      "over_64": 0,
+      "over64_log": null
+     },
+     "gpu_total_used_mib_max": 22356,
+     "batch_done_utc": null,
+     "paused_utc": "2026-10-25T11:00:11Z (run_parallel_gpu.sh SIGKILL), last launchers exited 2026-10-25T11:01:52Z",
+     "gpu_wall_s": 2076.0
+    },
+    "arms": {
+     "safelibero_long|I|constrained_flow_matching": {
+      "run": "20261025T192717_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LI-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 433.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 530.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 32,
+      "max_displacement_m": 0.20229296787498288,
+      "obstacle": "red_coffee_mug_obstacle_1",
+      "policy_calls": 106,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.7452830188679245,
+      "intervention_rate_calls": 0.7452830188679245,
+      "h_min": -0.014260118946433066,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 530,
+      "server_ms_p50": 2285.5184776708484,
+      "server_ms_p95": 2564.483202062547,
+      "client_latency_ms_p50": 2290.8962639048696,
+      "client_latency_ms_first": 20927.47814115137,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_long"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.42,
+      "guidance": {
+       "n_calls": 106,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "None",
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 349,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 106,
+        "none": 0,
+        "min": 0.005607097913067025,
+        "max": 0.006156807558588273,
+        "call0": 0.006002755283733971
+       },
+       "guided_calls": 106,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.018772972747683525
+      }
+     },
+     "safelibero_long|II|constrained_flow_matching": {
+      "run": "20261025T192748_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LII-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 433.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 530.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 464,
+      "max_displacement_m": 0.026043970011212166,
+      "obstacle": "moka_pot_small_obstacle_1",
+      "policy_calls": 106,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.7641509433962265,
+      "intervention_rate_calls": 0.7641509433962265,
+      "h_min": 0.018973411932587624,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 530,
+      "server_ms_p50": 2406.602737493813,
+      "server_ms_p95": 2783.318491652608,
+      "client_latency_ms_p50": 2414.8867400363088,
+      "client_latency_ms_first": 16042.74368006736,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_long"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.42,
+      "guidance": {
+       "n_calls": 106,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 506,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 106,
+        "none": 0,
+        "min": 0.005433228821518941,
+        "max": 0.006058271331423236,
+        "call0": 0.006049201842892797
+       },
+       "guided_calls": 106,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.031957052648067474
+      }
+     },
+     "libero_10|None|constrained_flow_matching": {
+      "run": "20261025T193501_98004d0dc416_blb-smoke-libero_10-dev-t0-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 390.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 0.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 104,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.9519230769230769,
+      "intervention_rate_calls": 0.9519230769230769,
+      "h_min": -0.011030145049095153,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 520,
+      "server_ms_p50": 2099.082845263183,
+      "server_ms_p95": 2489.228163845837,
+      "client_latency_ms_p50": 2101.3182238675654,
+      "client_latency_ms_first": 20140.371514484286,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_10"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.42,
+      "guidance": {
+       "n_calls": 104,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 441,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 104,
+        "none": 0,
+        "min": 0.0059705741427334424,
+        "max": 0.006008398534091297,
+        "call0": 0.0060027880044482935
+       },
+       "guided_calls": 104,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.03582458943128586
+      }
+     },
+     "libero_goal|None|constrained_flow_matching": {
+      "run": "20261025T193533_98004d0dc416_blb-smoke-libero_goal-dev-t0-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 260.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 0.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 60,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.6333333333333333,
+      "intervention_rate_calls": 0.6333333333333333,
+      "h_min": -0.02274172858148813,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 300,
+      "server_ms_p50": 2221.687232144177,
+      "server_ms_p95": 2599.7830918058753,
+      "client_latency_ms_p50": 2228.893463499844,
+      "client_latency_ms_first": 17427.652313373983,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_goal"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 60,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 768,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 60,
+        "none": 0,
+        "min": -0.011965943906976223,
+        "max": -0.010617589621531445,
+        "call0": -0.011129130805169217
+       },
+       "guided_calls": 60,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.0012437570840120316
+      }
+     },
+     "safelibero_spatial|I|constrained_flow_matching": {
+      "run": "20261025T194023_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 308.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 1.0,
+      "intervention_rate_calls": 1.0,
+      "h_min": 0.04037456208467484,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9655224837683437,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9655224837683437,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 2104.2571207508445,
+      "server_ms_p95": 2561.432438902557,
+      "client_latency_ms_p50": 2110.1004062220454,
+      "client_latency_ms_first": 21412.96856664121,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "None",
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 1024,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 56,
+        "none": 0,
+        "min": -0.013593107051504478,
+        "max": -0.010878793284092539,
+        "call0": -0.013443255884606466
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.07556012272834778
+      }
+     },
+     "safelibero_spatial|II|constrained_flow_matching": {
+      "run": "20261025T194201_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LII-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 300.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 265,
+      "max_displacement_m": 0.0026535240480432265,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 1.0,
+      "intervention_rate_calls": 1.0,
+      "h_min": -0.02738824202865362,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 2122.8530230000615,
+      "server_ms_p95": 2479.0610605850816,
+      "client_latency_ms_p50": 2122.4763696081936,
+      "client_latency_ms_first": 21807.031829841435,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 1018,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 56,
+        "none": 0,
+        "min": -0.011114416869911124,
+        "max": -0.008765018102342835,
+        "call0": -0.009495739232353972
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.03379867970943451
+      }
+     },
+     "safelibero_object|I|constrained_flow_matching": {
+      "run": "20261025T194601_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LI-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 273.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 1.1829395031165424e-06,
+      "obstacle": "wine_bottle_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.8928571428571429,
+      "intervention_rate_calls": 0.8928571428571429,
+      "h_min": 0.0002671646624803556,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 2096.9073632732034,
+      "server_ms_p95": 2733.4090545773506,
+      "client_latency_ms_p50": 2100.488402415067,
+      "client_latency_ms_first": 22534.082085825503,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_object"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.0,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 548,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 56,
+        "none": 0,
+        "min": 0.0005599457390840285,
+        "max": 0.001135873188913459,
+        "call0": 0.001135873188913459
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.04827306419610977
+      }
+     },
+     "safelibero_object|II|constrained_flow_matching": {
+      "run": "20261025T194732_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LII-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 276.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 8.241234385959512e-09,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.9464285714285714,
+      "intervention_rate_calls": 0.9464285714285714,
+      "h_min": -0.0031464995145797717,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 2280.9035880491138,
+      "server_ms_p95": 2582.8460762277246,
+      "client_latency_ms_p50": 2288.674756884575,
+      "client_latency_ms_first": 22011.508031748235,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_object"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.0,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 731,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 56,
+        "none": 0,
+        "min": 0.0009910887411642884,
+        "max": 0.0012434170300513192,
+        "call0": 0.0011725358533880386
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.04080142825841904
+      }
+     },
+     "safelibero_goal|I|constrained_flow_matching": {
+      "run": "20261025T195104_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LI-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 295.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.2748428141206034e-11,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 1.0,
+      "intervention_rate_calls": 1.0,
+      "h_min": 0.011772951051592827,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 2165.624707005918,
+      "server_ms_p95": 2568.494400009513,
+      "client_latency_ms_p50": 2163.4734044782817,
+      "client_latency_ms_first": 21768.741057254374,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_goal"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 1024,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 56,
+        "none": 0,
+        "min": -0.013677222511856834,
+        "max": -0.008829910939737201,
+        "call0": -0.013677222511856834
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.044106632471084595
+      }
+     },
+     "safelibero_goal|II|constrained_flow_matching": {
+      "run": "20261025T195238_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LII-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": 292.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.2748518346826785e-11,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.9821428571428571,
+      "intervention_rate_calls": 0.9821428571428571,
+      "h_min": -0.014760209307074546,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 2258.1011094152927,
+      "server_ms_p95": 2729.1551008820534,
+      "client_latency_ms_p50": 2264.138397295028,
+      "client_latency_ms_first": 22568.527000956237,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_goal"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "None",
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 1024,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 56,
+        "none": 0,
+        "min": -0.013691182082256968,
+        "max": -0.008557809324157367,
+        "call0": -0.013691182082256968
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.01006050780415535
+      }
+     },
+     "libero_object|None|constrained_flow_matching": {
+      "run": "20261025T195629_98004d0dc416_blb-smoke-libero_object-dev-t0-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": null,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 0.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.7857142857142857,
+      "intervention_rate_calls": 0.7857142857142857,
+      "h_min": -0.018162939816713332,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 1.0000000817427634,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 1.0000000817427634,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 2167.209685780108,
+      "server_ms_p95": 2554.251963272691,
+      "client_latency_ms_p50": 2173.84391464293,
+      "client_latency_ms_first": 22133.677353151143,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_object"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.0,
+      "guidance": {
+       "n_calls": 56,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 437,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 56,
+        "none": 0,
+        "min": 0.0010042039027237104,
+        "max": 0.0012170308473424263,
+        "call0": 0.0011181788339151844
+       },
+       "guided_calls": 56,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.0634830966591835
+      },
+      "rc_source": "launcher_result client_returncode 0 (parallel.job10/11.out); no end event after the pause SIGKILL"
+     },
+     "libero_spatial|None|constrained_flow_matching": {
+      "run": "20261025T195801_98004d0dc416_blb-smoke-libero_spatial-dev-t0-constrained_flow_matching",
+      "rc": 0,
+      "job_wall_s": null,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 0.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 44,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.8863636363636364,
+      "intervention_rate_calls": 0.8863636363636364,
+      "h_min": 0.052883386552333836,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9694057121106384,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9604060924696921,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 220,
+      "server_ms_p50": 2175.6270956248045,
+      "server_ms_p95": 2451.055104844272,
+      "client_latency_ms_p50": 2178.965652361512,
+      "client_latency_ms_first": 22010.490527376533,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "guidance": {
+       "n_calls": 44,
+       "obstacle_source": [
+        "obstacle_points"
+       ],
+       "target_source": [
+        "target_points"
+       ],
+       "privileged_inputs": [],
+       "obstacle_counts_call0": {
+        "points": 793,
+        "spheres": 0,
+        "boxes": 0,
+        "cylinders": 0
+       },
+       "table_z": {
+        "n": 44,
+        "none": 0,
+        "min": -0.011683547052797501,
+        "max": -0.010086894849829775,
+        "call0": -0.010086894849829775
+       },
+       "guided_calls": 44,
+       "skip_calls": 0,
+       "identity_reasons": [],
+       "h_served_min_ee": 0.08219818770885468
+      },
+      "rc_source": "launcher_result client_returncode 0 (parallel.job10/11.out); no end event after the pause SIGKILL"
+     },
+     "safelibero_long|I|aegis": {
+      "run": "20261025T202451_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LI-aegis",
+      "rc": 0,
+      "job_wall_s": 202.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 530.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 32,
+      "max_displacement_m": 0.3110090771646709,
+      "obstacle": "red_coffee_mug_obstacle_1",
+      "policy_calls": 106,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.5358490566037736,
+      "intervention_rate_calls": 0.5566037735849056,
+      "h_min": -0.00976,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9310482093436716,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.8981012742718457,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 530,
+      "server_ms_p50": 145.47754917293787,
+      "server_ms_p95": 240.9301670268178,
+      "client_latency_ms_p50": 149.85864982008934,
+      "client_latency_ms_first": 4069.8571735993028,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_long"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.42,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 106,
+        "none": 0,
+        "min": 0.0061,
+        "max": 0.0061,
+        "median": 0.0061,
+        "call0": 0.0061
+       },
+       "workspace_values": [
+        "living_room"
+       ],
+       "n_workspace_points_call0": 3765,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 4000,
+         "workspace": "living_room",
+         "n_workspace": 3765,
+         "n_trim": 3012,
+         "n_out": 3012,
+         "fitted": true
+        }
+       }
+      }
+     },
+     "safelibero_long|II|aegis": {
+      "run": "20261025T202522_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LII-aegis",
+      "rc": 0,
+      "job_wall_s": 201.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 530.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 1.567862334731461e-08,
+      "obstacle": "moka_pot_small_obstacle_1",
+      "policy_calls": 106,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.7273584905660377,
+      "intervention_rate_calls": 0.8584905660377359,
+      "h_min": -0.02964,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9309993805295227,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9309993805295227,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 530,
+      "server_ms_p50": 146.17574028670788,
+      "server_ms_p95": 247.19609878957272,
+      "client_latency_ms_p50": 150.96750995144248,
+      "client_latency_ms_first": 4387.7247069031,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_long"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.42,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 106,
+        "none": 0,
+        "min": 0.0061,
+        "max": 0.0061,
+        "median": 0.0061,
+        "call0": 0.0061
+       },
+       "workspace_values": [
+        "living_room"
+       ],
+       "n_workspace_points_call0": 8303,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 4000,
+         "workspace": "living_room",
+         "n_workspace": 3765,
+         "n_trim": 3012,
+         "n_out": 3012,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 792,
+         "workspace": "living_room",
+         "n_workspace": 792,
+         "n_trim": 633,
+         "n_out": 633,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 1036,
+         "workspace": "living_room",
+         "n_workspace": 1036,
+         "n_trim": 828,
+         "n_out": 828,
+         "fitted": true
+        },
+        "object#3": {
+         "n_in": 2710,
+         "workspace": "living_room",
+         "n_workspace": 2710,
+         "n_trim": 2168,
+         "n_out": 2168,
+         "fitted": true
+        }
+       }
+      }
+     },
+     "libero_10|None|aegis": {
+      "run": "20261025T202843_98004d0dc416_blb-smoke-libero_10-dev-t0-aegis",
+      "rc": 0,
+      "job_wall_s": 171.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 0.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 104,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.49615384615384617,
+      "intervention_rate_calls": 0.5769230769230769,
+      "h_min": -0.00436,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9523386896767616,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9523386896767616,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 520,
+      "server_ms_p50": 135.3553244844079,
+      "server_ms_p95": 170.5479733645916,
+      "client_latency_ms_p50": 139.9660292081535,
+      "client_latency_ms_first": 4303.1799187883735,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_10"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.42,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 104,
+        "none": 0,
+        "min": 0.0061,
+        "max": 0.0061,
+        "median": 0.0061,
+        "call0": 0.0061
+       },
+       "workspace_values": [
+        "living_room"
+       ],
+       "n_workspace_points_call0": 6901,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 4000,
+         "workspace": "living_room",
+         "n_workspace": 3752,
+         "n_trim": 3001,
+         "n_out": 3001,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 427,
+         "workspace": "living_room",
+         "n_workspace": 427,
+         "n_trim": 341,
+         "n_out": 341,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 1455,
+         "workspace": "living_room",
+         "n_workspace": 1455,
+         "n_trim": 1164,
+         "n_out": 1164,
+         "fitted": true
+        },
+        "object#3": {
+         "n_in": 545,
+         "workspace": "living_room",
+         "n_workspace": 545,
+         "n_trim": 436,
+         "n_out": 436,
+         "fitted": true
+        },
+        "object#4": {
+         "n_in": 722,
+         "workspace": "living_room",
+         "n_workspace": 722,
+         "n_trim": 577,
+         "n_out": 577,
+         "fitted": true
+        }
+       }
+      }
+     },
+     "safelibero_long|I|none": {
+      "run": "20261025T202913_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LI-none",
+      "rc": 0,
+      "job_wall_s": 171.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 530.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 32,
+      "max_displacement_m": 0.3110090771646709,
+      "obstacle": "red_coffee_mug_obstacle_1",
+      "policy_calls": 106,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9864017598161696,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9864017598161696,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 530,
+      "server_ms_p50": 89.2113046720624,
+      "server_ms_p95": 135.6712570413947,
+      "client_latency_ms_p50": 93.53937162086368,
+      "client_latency_ms_first": 2645.66451869905,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_long"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.42
+     },
+     "safelibero_long|II|none": {
+      "run": "20261025T203204_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LII-none",
+      "rc": 0,
+      "job_wall_s": 129.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 0.0,
+       "ETS": 266.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": true,
+      "collide_t": 29,
+      "max_displacement_m": 0.4089780550554355,
+      "obstacle": "moka_pot_small_obstacle_1",
+      "policy_calls": 54,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9487832368936537,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.94782722011137,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 267,
+      "server_ms_p50": 91.85074921697378,
+      "server_ms_p95": 126.57769955694675,
+      "client_latency_ms_p50": 97.94102050364017,
+      "client_latency_ms_first": 2903.545167297125,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_long"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.42
+     },
+     "libero_10|None|none": {
+      "run": "20261025T203236_98004d0dc416_blb-smoke-libero_10-dev-t0-none",
+      "rc": 0,
+      "job_wall_s": 128.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 1.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.96247273573637,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.96247273573637,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 88.65912538021803,
+      "server_ms_p95": 113.46601136028767,
+      "client_latency_ms_p50": 92.9872184060514,
+      "client_latency_ms_first": 2755.3746178746223,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_10"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.42
+     },
+     "libero_goal|None|aegis": {
+      "run": "20261025T203443_98004d0dc416_blb-smoke-libero_goal-dev-t0-aegis",
+      "rc": 0,
+      "job_wall_s": 121.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 1.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 23,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.0,
+      "intervention_rate_calls": 0.0,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9593850298069716,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9593850298069716,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 113,
+      "server_ms_p50": 145.15002444386482,
+      "server_ms_p95": 153.86180486530066,
+      "client_latency_ms_p50": 151.49462409317493,
+      "client_latency_ms_first": 4213.058711960912,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_goal"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 23,
+        "none": 0,
+        "min": -0.0106,
+        "max": -0.0106,
+        "median": -0.0106,
+        "call0": -0.0106
+       },
+       "workspace_values": [],
+       "n_workspace_points_call0": 0,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {}
+      }
+     },
+     "safelibero_spatial|I|aegis": {
+      "run": "20261025T203517_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LI-aegis",
+      "rc": 0,
+      "job_wall_s": 120.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 90.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.3512441993389643e-13,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 19,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.5052631578947369,
+      "intervention_rate_calls": 0.5789473684210527,
+      "h_min": 0.01064,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9456792230846879,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9456792230846879,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 91,
+      "server_ms_p50": 142.51976646482944,
+      "server_ms_p95": 163.87231927365065,
+      "client_latency_ms_p50": 147.666878066957,
+      "client_latency_ms_first": 4273.760532028973,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 19,
+        "none": 0,
+        "min": -0.0109,
+        "max": -0.0109,
+        "median": -0.0109,
+        "call0": -0.0109
+       },
+       "workspace_values": [
+        "table"
+       ],
+       "n_workspace_points_call0": 6606,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 3147,
+         "workspace": "table",
+         "n_workspace": 3131,
+         "n_trim": 2504,
+         "n_out": 2504,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 4000,
+         "workspace": "table",
+         "n_workspace": 3474,
+         "n_trim": 2779,
+         "n_out": 2779,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 270,
+         "workspace": "table",
+         "n_workspace": 0,
+         "fitted": false
+        },
+        "object#3": {
+         "n_in": 183,
+         "workspace": "table",
+         "n_workspace": 1,
+         "n_trim": 0,
+         "fitted": false
+        }
+       }
+      }
+     },
+     "safelibero_spatial|II|aegis": {
+      "run": "20261025T203714_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LII-aegis",
+      "rc": 0,
+      "job_wall_s": 138.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 99.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 1.9122063307785986e-10,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 20,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.555,
+      "intervention_rate_calls": 0.7,
+      "h_min": 0.00452,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.990457698223114,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9900429682884214,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 100,
+      "server_ms_p50": 167.60545503348112,
+      "server_ms_p95": 208.70465319603682,
+      "client_latency_ms_p50": 171.8691517598927,
+      "client_latency_ms_first": 4565.764052793384,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 20,
+        "none": 0,
+        "min": -0.0093,
+        "max": -0.0093,
+        "median": -0.0093,
+        "call0": -0.0093
+       },
+       "workspace_values": [
+        "table"
+       ],
+       "n_workspace_points_call0": 7503,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 4000,
+         "workspace": "table",
+         "n_workspace": 3502,
+         "n_trim": 2801,
+         "n_out": 2801,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 4000,
+         "workspace": "table",
+         "n_workspace": 4000,
+         "n_trim": 3200,
+         "n_out": 3200,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 84,
+         "workspace": "table",
+         "n_workspace": 1,
+         "n_trim": 0,
+         "fitted": false
+        }
+       }
+      }
+     },
+     "safelibero_object|I|aegis": {
+      "run": "20261025T203748_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LI-aegis",
+      "rc": 0,
+      "job_wall_s": 137.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 27,
+      "max_displacement_m": 0.24440722011365035,
+      "obstacle": "wine_bottle_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.43392857142857144,
+      "intervention_rate_calls": 0.5714285714285714,
+      "h_min": -0.00094,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.8809820444605349,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.8768520246765612,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 137.1848564594984,
+      "server_ms_p95": 179.450417868793,
+      "client_latency_ms_p50": 142.42606470361352,
+      "client_latency_ms_first": 4129.164028912783,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_object"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.0,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 56,
+        "none": 0,
+        "min": 0.0013,
+        "max": 0.0013,
+        "median": 0.0013,
+        "call0": 0.0013
+       },
+       "workspace_values": [
+        "floor"
+       ],
+       "n_workspace_points_call0": 1730,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 2703,
+         "workspace": "floor",
+         "n_workspace": 1730,
+         "n_trim": 1384,
+         "n_out": 1384,
+         "fitted": true
+        }
+       }
+      }
+     },
+     "safelibero_object|II|aegis": {
+      "run": "20261025T204002_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LII-aegis",
+      "rc": 0,
+      "job_wall_s": 166.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 1.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 8.241234081054756e-09,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.8714285714285714,
+      "intervention_rate_calls": 0.9642857142857143,
+      "h_min": -0.0216,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.7995567929298428,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.7995567929298428,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 167.69189573824406,
+      "server_ms_p95": 216.61850716918707,
+      "client_latency_ms_p50": 173.4734014607966,
+      "client_latency_ms_first": 4834.886875934899,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_object"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.0,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 56,
+        "none": 0,
+        "min": 0.0013,
+        "max": 0.0013,
+        "median": 0.0013,
+        "call0": 0.0013
+       },
+       "workspace_values": [
+        "floor"
+       ],
+       "n_workspace_points_call0": 5478,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 647,
+         "workspace": "floor",
+         "n_workspace": 508,
+         "n_trim": 406,
+         "n_out": 406,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 2930,
+         "workspace": "floor",
+         "n_workspace": 2930,
+         "n_trim": 2344,
+         "n_out": 2344,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 665,
+         "workspace": "floor",
+         "n_workspace": 495,
+         "n_trim": 396,
+         "n_out": 396,
+         "fitted": true
+        },
+        "object#3": {
+         "n_in": 368,
+         "workspace": "floor",
+         "n_workspace": 267,
+         "n_trim": 213,
+         "n_out": 213,
+         "fitted": true
+        },
+        "object#4": {
+         "n_in": 3109,
+         "workspace": "floor",
+         "n_workspace": 1278,
+         "n_trim": 1022,
+         "n_out": 1022,
+         "fitted": true
+        }
+       }
+      }
+     },
+     "safelibero_goal|I|aegis": {
+      "run": "20261025T204034_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LI-aegis",
+      "rc": 0,
+      "job_wall_s": 104.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 111.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 2.274865018581096e-11,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 23,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.6,
+      "intervention_rate_calls": 0.782608695652174,
+      "h_min": 0.00656,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9491536059980391,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9426498310704229,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 112,
+      "server_ms_p50": 149.590197019279,
+      "server_ms_p95": 186.43602915108204,
+      "client_latency_ms_p50": 155.72342090308666,
+      "client_latency_ms_first": 3943.973514251411,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_goal"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 23,
+        "none": 0,
+        "min": -0.0089,
+        "max": -0.0089,
+        "median": -0.0089,
+        "call0": -0.0089
+       },
+       "workspace_values": [
+        "table"
+       ],
+       "n_workspace_points_call0": 6377,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 3144,
+         "workspace": "table",
+         "n_workspace": 2822,
+         "n_trim": 2257,
+         "n_out": 2257,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 4000,
+         "workspace": "table",
+         "n_workspace": 3553,
+         "n_trim": 2842,
+         "n_out": 2842,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 73,
+         "workspace": "table",
+         "n_workspace": 2,
+         "n_trim": 1,
+         "n_out": 1,
+         "fitted": false
+        }
+       }
+      }
+     },
+     "safelibero_goal|II|aegis": {
+      "run": "20261025T204247_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LII-aegis",
+      "rc": 0,
+      "job_wall_s": 169.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 1.0,
+       "ETS": 184.0,
+       "SS": 1.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": false,
+      "collide_t": null,
+      "max_displacement_m": 0.00020430892659888122,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 37,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.3837837837837838,
+      "intervention_rate_calls": 0.6486486486486487,
+      "h_min": 0.00489,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9421700235408544,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9393548245191574,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 185,
+      "server_ms_p50": 138.1218647584319,
+      "server_ms_p95": 190.37250895053148,
+      "client_latency_ms_p50": 143.57385970652103,
+      "client_latency_ms_first": 4117.912973277271,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_goal"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 37,
+        "none": 0,
+        "min": -0.0084,
+        "max": -0.0084,
+        "median": -0.0084,
+        "call0": -0.0084
+       },
+       "workspace_values": [
+        "table"
+       ],
+       "n_workspace_points_call0": 8132,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 3149,
+         "workspace": "table",
+         "n_workspace": 3135,
+         "n_trim": 2508,
+         "n_out": 2508,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 4000,
+         "workspace": "table",
+         "n_workspace": 3588,
+         "n_trim": 2870,
+         "n_out": 2870,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 2229,
+         "workspace": "table",
+         "n_workspace": 1409,
+         "n_trim": 1127,
+         "n_out": 1127,
+         "fitted": true
+        }
+       }
+      }
+     },
+     "libero_object|None|aegis": {
+      "run": "20261025T204321_98004d0dc416_blb-smoke-libero_object-dev-t0-aegis",
+      "rc": 0,
+      "job_wall_s": 107.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 1.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 52,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.6019230769230769,
+      "intervention_rate_calls": 0.6346153846153846,
+      "h_min": -0.01239,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9202517334495782,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9189600716676711,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 257,
+      "server_ms_p50": 145.92209924012423,
+      "server_ms_p95": 186.95550505071878,
+      "client_latency_ms_p50": 150.4118819721043,
+      "client_latency_ms_first": 4039.0192372724414,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_object"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.0,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 52,
+        "none": 0,
+        "min": 0.0013,
+        "max": 0.0013,
+        "median": 0.0013,
+        "call0": 0.0013
+       },
+       "workspace_values": [
+        "floor"
+       ],
+       "n_workspace_points_call0": 2537,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive",
+        "optimal"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 544,
+         "workspace": "floor",
+         "n_workspace": 379,
+         "n_trim": 303,
+         "n_out": 303,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 2789,
+         "workspace": "floor",
+         "n_workspace": 1769,
+         "n_trim": 1415,
+         "n_out": 1415,
+         "fitted": true
+        },
+        "object#2": {
+         "n_in": 527,
+         "workspace": "floor",
+         "n_workspace": 389,
+         "n_trim": 311,
+         "n_out": 311,
+         "fitted": true
+        }
+       }
+      }
+     },
+     "libero_goal|None|none": {
+      "run": "20261025T204536_98004d0dc416_blb-smoke-libero_goal-dev-t0-none",
+      "rc": 0,
+      "job_wall_s": 88.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 1.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 23,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9593850298069716,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9593850298069716,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 113,
+      "server_ms_p50": 85.17201710492373,
+      "server_ms_p95": 90.62305185943842,
+      "client_latency_ms_p50": 89.3497271463275,
+      "client_latency_ms_first": 2900.5771139636636,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_goal"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912
+     },
+     "libero_spatial|None|aegis": {
+      "run": "20261025T204610_98004d0dc416_blb-smoke-libero_spatial-dev-t0-aegis",
+      "rc": 0,
+      "job_wall_s": 102.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 1.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 21,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": 0.0,
+      "intervention_rate_calls": 0.0,
+      "h_min": 0.1273,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9694057121106384,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9656269612596035,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 104,
+      "server_ms_p50": 124.73164033144712,
+      "server_ms_p95": 150.78065264970064,
+      "client_latency_ms_p50": 130.43255265802145,
+      "client_latency_ms_first": 3837.017842568457,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912,
+      "filter": {
+       "source": [
+        "detector"
+       ],
+       "privileged_flag": [
+        "False"
+       ],
+       "crop_mode": [
+        "depth_trim"
+       ],
+       "support_z": {
+        "n": 21,
+        "none": 0,
+        "min": -0.0116,
+        "max": -0.0116,
+        "median": -0.0116,
+        "call0": -0.0116
+       },
+       "workspace_values": [
+        "table"
+       ],
+       "n_workspace_points_call0": 3482,
+       "filter_obstacles_max_semi_axis_all_calls": null,
+       "qp_status": [
+        "inactive"
+       ],
+       "filter_obstacles_call0": null,
+       "clouds_call0": {
+        "object#0": {
+         "n_in": 4000,
+         "workspace": "table",
+         "n_workspace": 3481,
+         "n_trim": 2784,
+         "n_out": 2784,
+         "fitted": true
+        },
+        "object#1": {
+         "n_in": 229,
+         "workspace": "table",
+         "n_workspace": 1,
+         "n_trim": 0,
+         "fitted": false
+        }
+       }
+      }
+     },
+     "safelibero_spatial|I|none": {
+      "run": "20261025T204734_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LI-none",
+      "rc": 0,
+      "job_wall_s": 190.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 35,
+      "max_displacement_m": 0.2559493526609006,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.990755252301097,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.979994811888814,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 98.09389058500528,
+      "server_ms_p95": 386.81239169090986,
+      "client_latency_ms_p50": 103.58074167743325,
+      "client_latency_ms_first": 5834.766319952905,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912
+     },
+     "safelibero_spatial|II|none": {
+      "run": "20261025T204819_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LII-none",
+      "rc": 0,
+      "job_wall_s": 115.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 0.0,
+       "ETS": 123.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": true,
+      "collide_t": 25,
+      "max_displacement_m": 0.5851084709417356,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 25,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9862758510873317,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9862758510873317,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 124,
+      "server_ms_p50": 90.28718899935484,
+      "server_ms_p95": 523.2554385438561,
+      "client_latency_ms_p50": 94.99492775648832,
+      "client_latency_ms_first": 2740.214344114065,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912
+     },
+     "safelibero_object|I|none": {
+      "run": "20261025T205044_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LI-none",
+      "rc": 0,
+      "job_wall_s": 122.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 27,
+      "max_displacement_m": 0.24440722011365035,
+      "obstacle": "wine_bottle_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.8809820444605349,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.8768520246765612,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 83.31787120550871,
+      "server_ms_p95": 90.80581367015839,
+      "client_latency_ms_p50": 88.11888191848993,
+      "client_latency_ms_first": 3714.272703975439,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_object"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.0
+     },
+     "safelibero_object|II|none": {
+      "run": "20261025T205114_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LII-none",
+      "rc": 0,
+      "job_wall_s": 122.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 0.0,
+       "ETS": 151.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": true,
+      "collide_t": 108,
+      "max_displacement_m": 0.6060898500902199,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 31,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.8975935439938305,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.8939091473857164,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 152,
+      "server_ms_p50": 88.81608489900827,
+      "server_ms_p95": 103.46565395593643,
+      "client_latency_ms_p50": 93.94400473684072,
+      "client_latency_ms_first": 2730.911166407168,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_object"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.0
+     },
+     "safelibero_goal|I|none": {
+      "run": "20261025T205316_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LI-none",
+      "rc": 0,
+      "job_wall_s": 158.0,
+      "status": "max_steps",
+      "official_success": false,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 0.0,
+       "CAR": 0.0,
+       "ETS": 280.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 0.0,
+      "collided": true,
+      "collide_t": 40,
+      "max_displacement_m": 0.2428443135221635,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 56,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9491536059980391,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9426498310704229,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 280,
+      "server_ms_p50": 94.27609387785196,
+      "server_ms_p95": 133.787726983428,
+      "client_latency_ms_p50": 98.95304031670094,
+      "client_latency_ms_first": 2796.9253174960613,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_goal"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912
+     },
+     "safelibero_goal|II|none": {
+      "run": "20261025T205347_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LII-none",
+      "rc": 0,
+      "job_wall_s": 97.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": {
+       "TSR": 1.0,
+       "CAR": 0.0,
+       "ETS": 142.0,
+       "SS": 0.0,
+       "n": 1
+      },
+      "libero_SR": 1.0,
+      "collided": true,
+      "collide_t": 49,
+      "max_displacement_m": 0.004569688999025746,
+      "obstacle": "moka_pot_obstacle_1",
+      "policy_calls": 29,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9271757603460549,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9185516825680137,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 143,
+      "server_ms_p50": 89.19125981628895,
+      "server_ms_p95": 125.22937823086977,
+      "client_latency_ms_p50": 93.73262245208025,
+      "client_latency_ms_first": 2789.849172346294,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "safelibero_goal"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912
+     },
+     "libero_object|None|none": {
+      "run": "20261025T205554_98004d0dc416_blb-smoke-libero_object-dev-t0-none",
+      "rc": 0,
+      "job_wall_s": 90.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 1.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 27,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9202517334495782,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9189600716676711,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 132,
+      "server_ms_p50": 99.62311200797558,
+      "server_ms_p95": 177.68087144941092,
+      "client_latency_ms_p50": 104.95556984096766,
+      "client_latency_ms_first": 8273.136009462178,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_object"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.0
+     },
+     "libero_spatial|None|none": {
+      "run": "20261025T205628_98004d0dc416_blb-smoke-libero_spatial-dev-t0-none",
+      "rc": 0,
+      "job_wall_s": 82.0,
+      "status": "success",
+      "official_success": true,
+      "error": null,
+      "safelibero_official": null,
+      "libero_SR": 1.0,
+      "collided": null,
+      "collide_t": null,
+      "max_displacement_m": null,
+      "obstacle": null,
+      "policy_calls": 21,
+      "fallbacks": 0,
+      "fallback_reasons": [],
+      "errors": [],
+      "intervention_rate_rows": null,
+      "intervention_rate_calls": null,
+      "h_min": null,
+      "h_star_min": null,
+      "h_star_neg_steps": null,
+      "served_max_abs_xyz": 0.9694057121106384,
+      "served_rows_gt_1_plus_1e-5": 0,
+      "executed_max_abs_xyz": 0.9656269612596035,
+      "executed_rows_gt_1_plus_1e-5": 0,
+      "executed_rows_n": 104,
+      "server_ms_p50": 91.58054646104574,
+      "server_ms_p95": 108.99730119854212,
+      "client_latency_ms_p50": 96.5543007478118,
+      "client_latency_ms_first": 2840.7536623999476,
+      "manifest_privileged": false,
+      "manifest_client_flags": null,
+      "manifest_server_extras": {
+       "suite": "libero_spatial"
+      },
+      "manifest_dirty": true,
+      "T_world_base_z": 0.912
+     }
+    },
+    "aggregate": "outputs/verify/BASELINE-BENCH-READY/suite_smoke/aggregate.json",
+    "meta_resume": {
+     "lock_acquired_utc": "2026-10-25T11:24:49Z",
+     "batch_done_utc": "2026-10-25T11:57:44Z",
+     "batch_line": "batch done jobs=24 failed=0; releasing lock",
+     "utc": "2026-10-25T11:16:25Z",
+     "head": "98004d0dc4160ad41011dba47b892cc2ca1f2387",
+     "gpu_apps": "[]",
+     "git_status_shared": "[]",
+     "git_status_all": "[?? main.pdf;]",
+     "parallel_rc": "0",
+     "wall_s": "2476",
+     "end_utc": "2026-10-25T11:57:44Z",
+     "head_end": "98004d0dc4160ad41011dba47b892cc2ca1f2387",
+     "git_status_shared_end": "[]",
+     "aggregate_rc": "0",
+     "pod_working_set_gib": {
+      "samples_60s": 42,
+      "max": 42.69,
+      "max_at_utc": "2026-10-25T11:27:29Z",
+      "min": 19.75,
+      "over_64": 0,
+      "over64_log": null
+     },
+     "gpu_total_used_mib_max": 22268,
+     "gpu_wall_s": 1975.0
+    },
+    "aggregate_missing": []
+   }
+  },
+  "gpu": {
+   "phase_wall_s": {
+    "L_smoke": 1028.0,
+    "gt_smoke": 2489.0,
+    "suite_smoke": 2076.0,
+    "suite_smoke_resume": 1975.0
+   },
+   "total_wall_s": 7568.0,
+   "handoff_between_gt_and_suite": [
+    "gt_smoke_end_utc=2026-10-25T10:23:46Z lock_released; handoff_msg_to_dev_e2_utc=2026-10-25T10:24:16Z; deadline_suite_smoke_utc=2026-10-25T11:03:46Z",
+    "dev_e2_end_relay: lock released 10:26:30Z (dev-reported); precheck_utc=2026-10-25T10:27:12Z apps=[] flock_n=ok git_shared=[] head=98004d0d; dev_gpu_app_seen_first=2026-10-25T10:24:45Z last=2026-10-25T10:26:15Z (handoff_watch.csv, 30 s sampling)",
+    "suite_smoke_start_utc=2026-10-25T10:27:16Z (lock acquired after 0s)",
+    "suite_smoke_pause: run_parallel_gpu.sh pid 3809837 SIGKILL at 2026-10-25T11:00:11Z while jobs 10,11 running (launchers 3846073, 3848987 left to finish); jobs 0-9 done rc=0",
+    "suite_smoke_pause: jobs 10,11 launchers exited 2026-10-25T11:01:52Z (client_returncode 0 both, server_returncode -2 = launcher stop); no own serve_method/libero_safe_client/launch_method left",
+    "lock_after_pause: 2026-10-25T11:02:07Z held by development gpu_lock.py exclusive pid 3852198 (tag occ1345-chain, serve_safe pid 3854363); our flock -n busy, nvidia-smi compute apps empty at that instant",
+    "resume_deadline_if_no_relay: 2026-10-25T11:46:52Z (lock released 11:01:52Z + 45 min)",
+    "dev_e2_end_relay_2: lock released 11:15:31Z (dev-reported); at 11:16:03Z lock held by another development job gpu_lock.py exclusive tag gpu-stages-m1m2 (pid 3875529, AG3S-GPU-STAGES M1_server); resume launched 2026-10-25T11:16:25Z waiting on flock -w 3600",
+    "suite_smoke_resume_start_utc=2026-10-25T11:24:49Z (lock acquired after 500 s wait behind gpu-stages-m1m2); jobs split: suite_smoke/jobs.txt indices 0-11 ran 10:27:16-11:01:52Z, suite_smoke_resume/jobs.txt = original indices 12-35",
+    "suite_smoke_resume_end_utc=2026-10-25T11:57:44Z (batch done 24/24 rc=0, lock released); notified dev-e2 and 'AG3S - 핵심 평가 세션'"
+   ]
+  },
+  "crop_call0_recompute": {
+   "obs_index": 20,
+   "chunk_t": 20,
+   "boxes_head": [
+    {
+     "box": [
+      87.5,
+      94.4,
+      169.4,
+      174.2
+     ],
+     "score": 0.5592545866966248,
+     "trim": {
+      "n_box": 6480,
+      "n_robot": 0,
+      "n_support_or_high": 2635,
+      "n_components": 5,
+      "chosen": 4,
+      "n_center": 976,
+      "center_votes": 929,
+      "n_kept": 3279,
+      "n_out": 3147
+     },
+     "name": "object#0"
+    },
+    {
+     "box": [
+      0.0,
+      84.9,
+      82.5,
+      214.8
+     ],
+     "score": 0.5368657112121582,
+     "trim": {
+      "n_box": 10633,
+      "n_robot": 0,
+      "n_support_or_high": 2258,
+      "n_components": 3,
+      "chosen": 2,
+      "n_center": 1716,
+      "center_votes": 1716,
+      "n_kept": 8204,
+      "n_out": 7874
+     },
+     "name": "object#1"
+    },
+    {
+     "box": [
+      81.9,
+      0.0,
+      168.4,
+      101.3
+     ],
+     "score": 0.4576822817325592,
+     "trim": {
+      "n_box": 6666,
+      "n_robot": 5157,
+      "n_support_or_high": 1112,
+      "n_components": 4,
+      "chosen": 0,
+      "n_center": 0,
+      "n_kept": 282,
+      "n_out": 270
+     },
+     "name": "object#2"
+    },
+    {
+     "box": [
+      173.6,
+      165.4,
+      221.6,
+      201.4
+     ],
+     "score": 0.378214031457901,
+     "trim": {
+      "n_box": 1728,
+      "n_robot": 0,
+      "n_support_or_high": 1537,
+      "n_components": 1,
+      "chosen": 0,
+      "n_center": 0,
+      "n_kept": 191,
+      "n_out": 183
+     },
+     "name": "object#3"
+    }
+   ],
+   "T_world_base": [
+    [
+     1.0,
+     0.0,
+     0.0,
+     -0.66
+    ],
+    [
+     0.0,
+     1.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0,
+     0.912
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "box": {
+    "info_support_z": null,
+    "objects": {
+     "object#0": {
+      "n": 4000,
+      "c": [
+       0.4646,
+       0.01,
+       0.0546
+      ],
+      "semi_axes_sorted": [
+       0.163,
+       0.2242,
+       0.3578
+      ],
+      "logged_semi_axes_sorted_v6_knows": [
+       0.163,
+       0.2242,
+       0.3578
+      ],
+      "logged_c_v6_knows": [
+       0.4646,
+       0.01,
+       0.0546
+      ]
+     },
+     "object#1": {
+      "n": 4000,
+      "c": [
+       0.5016,
+       -0.2958,
+       0.0563
+      ],
+      "semi_axes_sorted": [
+       0.1633,
+       0.2324,
+       0.5263
+      ],
+      "logged_semi_axes_sorted_v6_knows": [
+       0.1635,
+       0.2341,
+       0.5308
+      ],
+      "logged_c_v6_knows": [
+       0.4994,
+       -0.2942,
+       0.0558
+      ]
+     },
+     "object#2": {
+      "n": 3441,
+      "c": [
+       -0.0792,
+       0.008,
+       -0.0866
+      ],
+      "semi_axes_sorted": [
+       0.1348,
+       0.2637,
+       0.7717
+      ],
+      "logged_semi_axes_sorted_v6_knows": [
+       0.1348,
+       0.2637,
+       0.7717
+      ],
+      "logged_c_v6_knows": [
+       -0.0792,
+       0.008,
+       -0.0866
+      ]
+     },
+     "object#3": {
+      "n": 1728,
+      "c": [
+       0.7013,
+       0.2147,
+       -0.0047
+      ],
+      "semi_axes_sorted": [
+       0.0146,
+       0.1017,
+       0.1194
+      ],
+      "logged_semi_axes_sorted_v6_knows": [
+       0.0146,
+       0.1017,
+       0.1194
+      ],
+      "logged_c_v6_knows": [
+       0.7013,
+       0.2147,
+       -0.0047
+      ]
+     }
+    }
+   },
+   "depth_trim": {
+    "info_support_z": -0.0109,
+    "objects": {
+     "object#0": {
+      "n": 3147,
+      "c": [
+       0.6231,
+       0.0072,
+       0.1405
+      ],
+      "semi_axes_sorted": [
+       0.0599,
+       0.118,
+       0.1475
+      ],
+      "logged_semi_axes_sorted_v6_knows": [
+       0.0599,
+       0.118,
+       0.1475
+      ],
+      "logged_c_v6_knows": [
+       0.6231,
+       0.0072,
+       0.1405
+      ]
+     },
+     "object#1": {
+      "n": 4000,
+      "c": [
+       0.6882,
+       -0.268,
+       0.1335
+      ],
+      "semi_axes_sorted": [
+       0.1302,
+       0.1542,
+       0.1979
+      ],
+      "logged_semi_axes_sorted_v6_knows": [
+       0.1271,
+       0.1532,
+       0.1999
+      ],
+      "logged_c_v6_knows": [
+       0.6881,
+       -0.2655,
+       0.1346
+      ]
+     },
+     "object#2": {
+      "n": 270,
+      "c": [
+       0.2486,
+       -0.1401,
+       0.0222
+      ],
+      "semi_axes_sorted": [
+       0.0313,
+       0.0495,
+       0.054
+      ],
+      "logged_semi_axes_sorted_v6_knows": [
+       0.0313,
+       0.0495,
+       0.054
+      ],
+      "logged_c_v6_knows": [
+       0.2486,
+       -0.1401,
+       0.0222
+      ]
+     },
+     "object#3": {
+      "n": 183,
+      "c": [
+       0.7134,
+       0.22,
+       0.0055
+      ],
+      "semi_axes_sorted": [
+       0.0024,
+       0.0741,
+       0.0839
+      ],
+      "logged_semi_axes_sorted_v6_knows": [
+       0.0024,
+       0.0741,
+       0.0839
+      ],
+      "logged_c_v6_knows": [
+       0.7134,
+       0.22,
+       0.0055
+      ]
+     }
+    }
+   }
+  },
+  "privileged_gt_seg_recompute": {
+   "run": "20261025T190046_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-knows-gt-seg",
+   "obs_index": 20,
+   "active": "moka_pot_obstacle_1",
+   "bodies": [
+    "moka_pot_obstacle_1_main"
+   ],
+   "n_geom_ids": 17,
+   "mask_pixels": {
+    "head": 3392,
+    "left_wrist": 12652
+   },
+   "n_points": 15400,
+   "mvee_c": [
+    0.6096,
+    0.0096,
+    0.1048
+   ],
+   "mvee_semi_axes_sorted": [
+    0.0745,
+    0.1298,
+    0.1563
+   ],
+   "logged_filter_obstacles_call0": {
+    "moka_pot_1": {
+     "c": [
+      0.6086,
+      0.0094,
+      0.1053
+     ],
+     "semi_axes": [
+      0.0737,
+      0.1293,
+      0.1554
+     ]
+    }
+   },
+   "privileged_call0": {
+    "active": [
+     "moka_pot_obstacle_1"
+    ],
+    "n_objects": 6,
+    "monitor_obstacle": "moka_pot_obstacle_1",
+    "n_geoms": 15,
+    "geoms_shape": "collision",
+    "segmentation": [
+     "head",
+     "left_wrist"
+    ],
+    "centers": {
+     "moka_pot_1": [
+      0.6077,
+      0.0202,
+      0.0938
+     ]
+    }
+   },
+   "cameras": [
+    "head",
+    "left_wrist"
+   ],
+   "note": "safety_common._gt_seg steps (backproject + depth_trim per camera) without the 4000-point random subsample"
+  },
+  "none_run_determinism_L_vs_gt": {
+   "runs": [
+    "20261025T183850_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-none",
+    "20261025T191724_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-none"
+   ],
+   "episode_npz_arrays": 14,
+   "arrays_differ": 0
+  },
+  "suite_level_table": {
+   "rows": [
+    [
+     "suite",
+     "lvl",
+     "problem",
+     "none",
+     "aegis",
+     "aegis fb",
+     "aegis support_z (base)",
+     "-> world z",
+     "aegis workspace",
+     "CFM",
+     "CFM fb",
+     "CFM table_z (base)",
+     "-> world z",
+     "CFM served max",
+     "CFM exe >1",
+     "srv ms p50 a/C"
+    ],
+    [
+     "libero_10",
+     "-",
+     "LivingRoom",
+     "S",
+     "F",
+     "0",
+     "0.0061",
+     "0.426",
+     "living_room",
+     "F",
+     "0",
+     "0.0060",
+     "0.426",
+     "1.000",
+     "0",
+     "135 / 2099"
+    ],
+    [
+     "libero_goal",
+     "-",
+     "Tabletop",
+     "S",
+     "S",
+     "0",
+     "-0.0106",
+     "0.901",
+     "-",
+     "F",
+     "0",
+     "-0.0111",
+     "0.901",
+     "1.000",
+     "0",
+     "145 / 2222"
+    ],
+    [
+     "libero_object",
+     "-",
+     "Floor",
+     "S",
+     "S",
+     "0",
+     "0.0013",
+     "0.001",
+     "floor",
+     "F",
+     "0",
+     "0.0011",
+     "0.001",
+     "1.000",
+     "0",
+     "146 / 2167"
+    ],
+    [
+     "libero_spatial",
+     "-",
+     "Tabletop",
+     "S",
+     "S",
+     "0",
+     "-0.0116",
+     "0.900",
+     "table",
+     "F",
+     "0",
+     "-0.0101",
+     "0.902",
+     "0.969",
+     "0",
+     "125 / 2176"
+    ],
+    [
+     "safelibero_goal",
+     "I",
+     "Tabletop",
+     "F / coll",
+     "S / no coll",
+     "0",
+     "-0.0089",
+     "0.903",
+     "table",
+     "F / no coll",
+     "0",
+     "-0.0137",
+     "0.898",
+     "1.000",
+     "0",
+     "150 / 2166"
+    ],
+    [
+     "safelibero_goal",
+     "II",
+     "Tabletop",
+     "S / coll",
+     "S / no coll",
+     "0",
+     "-0.0084",
+     "0.904",
+     "table",
+     "F / no coll",
+     "0",
+     "-0.0137",
+     "0.898",
+     "1.000",
+     "0",
+     "138 / 2258"
+    ],
+    [
+     "safelibero_long",
+     "I",
+     "LivingRoom",
+     "F / coll",
+     "F / coll",
+     "0",
+     "0.0061",
+     "0.426",
+     "living_room",
+     "F / coll",
+     "0",
+     "0.0060",
+     "0.426",
+     "1.000",
+     "0",
+     "145 / 2286"
+    ],
+    [
+     "safelibero_long",
+     "II",
+     "LivingRoom",
+     "S / coll",
+     "F / no coll",
+     "0",
+     "0.0061",
+     "0.426",
+     "living_room",
+     "F / coll",
+     "0",
+     "0.0060",
+     "0.426",
+     "1.000",
+     "0",
+     "146 / 2407"
+    ],
+    [
+     "safelibero_object",
+     "I",
+     "Floor",
+     "F / coll",
+     "F / coll",
+     "0",
+     "0.0013",
+     "0.001",
+     "floor",
+     "F / no coll",
+     "0",
+     "0.0011",
+     "0.001",
+     "1.000",
+     "0",
+     "137 / 2097"
+    ],
+    [
+     "safelibero_object",
+     "II",
+     "Floor",
+     "S / coll",
+     "F / no coll",
+     "0",
+     "0.0013",
+     "0.001",
+     "floor",
+     "F / no coll",
+     "0",
+     "0.0012",
+     "0.001",
+     "1.000",
+     "0",
+     "168 / 2281"
+    ],
+    [
+     "safelibero_spatial",
+     "I",
+     "Tabletop",
+     "F / coll",
+     "S / no coll",
+     "0",
+     "-0.0109",
+     "0.901",
+     "table",
+     "F / no coll",
+     "0",
+     "-0.0134",
+     "0.899",
+     "0.966",
+     "0",
+     "143 / 2104"
+    ],
+    [
+     "safelibero_spatial",
+     "II",
+     "Tabletop",
+     "S / coll",
+     "S / no coll",
+     "0",
+     "-0.0093",
+     "0.903",
+     "table",
+     "F / coll",
+     "0",
+     "-0.0095",
+     "0.903",
+     "1.000",
+     "0",
+     "168 / 2123"
+    ]
+   ],
+   "per_combo": [
+    {
+     "suite": "libero_10",
+     "level": null,
+     "problem_class": "LivingRoom",
+     "nominal_support": "table_offset z 0.41",
+     "aegis_workspace_z0": 0.43,
+     "T_world_base_z": 0.42,
+     "aegis_support_z": {
+      "n": 104,
+      "none": 0,
+      "min": 0.0061,
+      "max": 0.0061,
+      "median": 0.0061,
+      "call0": 0.0061
+     },
+     "cfm_table_z": {
+      "n": 104,
+      "none": 0,
+      "min": 0.0059705741427334424,
+      "max": 0.006008398534091297,
+      "call0": 0.0060027880044482935
+     },
+     "runs": {
+      "none": "20261025T203236_98004d0dc416_blb-smoke-libero_10-dev-t0-none",
+      "aegis": "20261025T202843_98004d0dc416_blb-smoke-libero_10-dev-t0-aegis",
+      "constrained_flow_matching": "20261025T193501_98004d0dc416_blb-smoke-libero_10-dev-t0-constrained_flow_matching"
+     },
+     "row": [
+      "libero_10",
+      "-",
+      "LivingRoom",
+      "S",
+      "F",
+      "0",
+      "0.0061",
+      "0.426",
+      "living_room",
+      "F",
+      "0",
+      "0.0060",
+      "0.426",
+      "1.000",
+      "0",
+      "135 / 2099"
+     ]
+    },
+    {
+     "suite": "libero_goal",
+     "level": null,
+     "problem_class": "Tabletop",
+     "nominal_support": "table_offset z 0.90",
+     "aegis_workspace_z0": 0.92,
+     "T_world_base_z": 0.912,
+     "aegis_support_z": {
+      "n": 23,
+      "none": 0,
+      "min": -0.0106,
+      "max": -0.0106,
+      "median": -0.0106,
+      "call0": -0.0106
+     },
+     "cfm_table_z": {
+      "n": 60,
+      "none": 0,
+      "min": -0.011965943906976223,
+      "max": -0.010617589621531445,
+      "call0": -0.011129130805169217
+     },
+     "runs": {
+      "none": "20261025T204536_98004d0dc416_blb-smoke-libero_goal-dev-t0-none",
+      "aegis": "20261025T203443_98004d0dc416_blb-smoke-libero_goal-dev-t0-aegis",
+      "constrained_flow_matching": "20261025T193533_98004d0dc416_blb-smoke-libero_goal-dev-t0-constrained_flow_matching"
+     },
+     "row": [
+      "libero_goal",
+      "-",
+      "Tabletop",
+      "S",
+      "S",
+      "0",
+      "-0.0106",
+      "0.901",
+      "-",
+      "F",
+      "0",
+      "-0.0111",
+      "0.901",
+      "1.000",
+      "0",
+      "145 / 2222"
+     ]
+    },
+    {
+     "suite": "libero_object",
+     "level": null,
+     "problem_class": "Floor",
+     "nominal_support": "floor_offset z -0.035",
+     "aegis_workspace_z0": 0.05,
+     "T_world_base_z": 0.0,
+     "aegis_support_z": {
+      "n": 52,
+      "none": 0,
+      "min": 0.0013,
+      "max": 0.0013,
+      "median": 0.0013,
+      "call0": 0.0013
+     },
+     "cfm_table_z": {
+      "n": 56,
+      "none": 0,
+      "min": 0.0010042039027237104,
+      "max": 0.0012170308473424263,
+      "call0": 0.0011181788339151844
+     },
+     "runs": {
+      "none": "20261025T205554_98004d0dc416_blb-smoke-libero_object-dev-t0-none",
+      "aegis": "20261025T204321_98004d0dc416_blb-smoke-libero_object-dev-t0-aegis",
+      "constrained_flow_matching": "20261025T195629_98004d0dc416_blb-smoke-libero_object-dev-t0-constrained_flow_matching"
+     },
+     "row": [
+      "libero_object",
+      "-",
+      "Floor",
+      "S",
+      "S",
+      "0",
+      "0.0013",
+      "0.001",
+      "floor",
+      "F",
+      "0",
+      "0.0011",
+      "0.001",
+      "1.000",
+      "0",
+      "146 / 2167"
+     ]
+    },
+    {
+     "suite": "libero_spatial",
+     "level": null,
+     "problem_class": "Tabletop",
+     "nominal_support": "table_offset z 0.90",
+     "aegis_workspace_z0": 0.92,
+     "T_world_base_z": 0.912,
+     "aegis_support_z": {
+      "n": 21,
+      "none": 0,
+      "min": -0.0116,
+      "max": -0.0116,
+      "median": -0.0116,
+      "call0": -0.0116
+     },
+     "cfm_table_z": {
+      "n": 44,
+      "none": 0,
+      "min": -0.011683547052797501,
+      "max": -0.010086894849829775,
+      "call0": -0.010086894849829775
+     },
+     "runs": {
+      "none": "20261025T205628_98004d0dc416_blb-smoke-libero_spatial-dev-t0-none",
+      "aegis": "20261025T204610_98004d0dc416_blb-smoke-libero_spatial-dev-t0-aegis",
+      "constrained_flow_matching": "20261025T195801_98004d0dc416_blb-smoke-libero_spatial-dev-t0-constrained_flow_matching"
+     },
+     "row": [
+      "libero_spatial",
+      "-",
+      "Tabletop",
+      "S",
+      "S",
+      "0",
+      "-0.0116",
+      "0.900",
+      "table",
+      "F",
+      "0",
+      "-0.0101",
+      "0.902",
+      "0.969",
+      "0",
+      "125 / 2176"
+     ]
+    },
+    {
+     "suite": "safelibero_goal",
+     "level": "I",
+     "problem_class": "Tabletop",
+     "nominal_support": "table_offset z 0.90",
+     "aegis_workspace_z0": 0.92,
+     "T_world_base_z": 0.912,
+     "aegis_support_z": {
+      "n": 23,
+      "none": 0,
+      "min": -0.0089,
+      "max": -0.0089,
+      "median": -0.0089,
+      "call0": -0.0089
+     },
+     "cfm_table_z": {
+      "n": 56,
+      "none": 0,
+      "min": -0.013677222511856834,
+      "max": -0.008829910939737201,
+      "call0": -0.013677222511856834
+     },
+     "runs": {
+      "none": "20261025T205316_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LI-none",
+      "aegis": "20261025T204034_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LI-aegis",
+      "constrained_flow_matching": "20261025T195104_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LI-constrained_flow_matching"
+     },
+     "row": [
+      "safelibero_goal",
+      "I",
+      "Tabletop",
+      "F / coll",
+      "S / no coll",
+      "0",
+      "-0.0089",
+      "0.903",
+      "table",
+      "F / no coll",
+      "0",
+      "-0.0137",
+      "0.898",
+      "1.000",
+      "0",
+      "150 / 2166"
+     ]
+    },
+    {
+     "suite": "safelibero_goal",
+     "level": "II",
+     "problem_class": "Tabletop",
+     "nominal_support": "table_offset z 0.90",
+     "aegis_workspace_z0": 0.92,
+     "T_world_base_z": 0.912,
+     "aegis_support_z": {
+      "n": 37,
+      "none": 0,
+      "min": -0.0084,
+      "max": -0.0084,
+      "median": -0.0084,
+      "call0": -0.0084
+     },
+     "cfm_table_z": {
+      "n": 56,
+      "none": 0,
+      "min": -0.013691182082256968,
+      "max": -0.008557809324157367,
+      "call0": -0.013691182082256968
+     },
+     "runs": {
+      "none": "20261025T205347_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LII-none",
+      "aegis": "20261025T204247_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LII-aegis",
+      "constrained_flow_matching": "20261025T195238_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LII-constrained_flow_matching"
+     },
+     "row": [
+      "safelibero_goal",
+      "II",
+      "Tabletop",
+      "S / coll",
+      "S / no coll",
+      "0",
+      "-0.0084",
+      "0.904",
+      "table",
+      "F / no coll",
+      "0",
+      "-0.0137",
+      "0.898",
+      "1.000",
+      "0",
+      "138 / 2258"
+     ]
+    },
+    {
+     "suite": "safelibero_long",
+     "level": "I",
+     "problem_class": "LivingRoom",
+     "nominal_support": "table_offset z 0.41",
+     "aegis_workspace_z0": 0.43,
+     "T_world_base_z": 0.42,
+     "aegis_support_z": {
+      "n": 106,
+      "none": 0,
+      "min": 0.0061,
+      "max": 0.0061,
+      "median": 0.0061,
+      "call0": 0.0061
+     },
+     "cfm_table_z": {
+      "n": 106,
+      "none": 0,
+      "min": 0.005607097913067025,
+      "max": 0.006156807558588273,
+      "call0": 0.006002755283733971
+     },
+     "runs": {
+      "none": "20261025T202913_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LI-none",
+      "aegis": "20261025T202451_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LI-aegis",
+      "constrained_flow_matching": "20261025T192717_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LI-constrained_flow_matching"
+     },
+     "row": [
+      "safelibero_long",
+      "I",
+      "LivingRoom",
+      "F / coll",
+      "F / coll",
+      "0",
+      "0.0061",
+      "0.426",
+      "living_room",
+      "F / coll",
+      "0",
+      "0.0060",
+      "0.426",
+      "1.000",
+      "0",
+      "145 / 2286"
+     ]
+    },
+    {
+     "suite": "safelibero_long",
+     "level": "II",
+     "problem_class": "LivingRoom",
+     "nominal_support": "table_offset z 0.41",
+     "aegis_workspace_z0": 0.43,
+     "T_world_base_z": 0.42,
+     "aegis_support_z": {
+      "n": 106,
+      "none": 0,
+      "min": 0.0061,
+      "max": 0.0061,
+      "median": 0.0061,
+      "call0": 0.0061
+     },
+     "cfm_table_z": {
+      "n": 106,
+      "none": 0,
+      "min": 0.005433228821518941,
+      "max": 0.006058271331423236,
+      "call0": 0.006049201842892797
+     },
+     "runs": {
+      "none": "20261025T203204_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LII-none",
+      "aegis": "20261025T202522_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LII-aegis",
+      "constrained_flow_matching": "20261025T192748_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LII-constrained_flow_matching"
+     },
+     "row": [
+      "safelibero_long",
+      "II",
+      "LivingRoom",
+      "S / coll",
+      "F / no coll",
+      "0",
+      "0.0061",
+      "0.426",
+      "living_room",
+      "F / coll",
+      "0",
+      "0.0060",
+      "0.426",
+      "1.000",
+      "0",
+      "146 / 2407"
+     ]
+    },
+    {
+     "suite": "safelibero_object",
+     "level": "I",
+     "problem_class": "Floor",
+     "nominal_support": "floor_offset z -0.035",
+     "aegis_workspace_z0": 0.05,
+     "T_world_base_z": 0.0,
+     "aegis_support_z": {
+      "n": 56,
+      "none": 0,
+      "min": 0.0013,
+      "max": 0.0013,
+      "median": 0.0013,
+      "call0": 0.0013
+     },
+     "cfm_table_z": {
+      "n": 56,
+      "none": 0,
+      "min": 0.0005599457390840285,
+      "max": 0.001135873188913459,
+      "call0": 0.001135873188913459
+     },
+     "runs": {
+      "none": "20261025T205044_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LI-none",
+      "aegis": "20261025T203748_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LI-aegis",
+      "constrained_flow_matching": "20261025T194601_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LI-constrained_flow_matching"
+     },
+     "row": [
+      "safelibero_object",
+      "I",
+      "Floor",
+      "F / coll",
+      "F / coll",
+      "0",
+      "0.0013",
+      "0.001",
+      "floor",
+      "F / no coll",
+      "0",
+      "0.0011",
+      "0.001",
+      "1.000",
+      "0",
+      "137 / 2097"
+     ]
+    },
+    {
+     "suite": "safelibero_object",
+     "level": "II",
+     "problem_class": "Floor",
+     "nominal_support": "floor_offset z -0.035",
+     "aegis_workspace_z0": 0.05,
+     "T_world_base_z": 0.0,
+     "aegis_support_z": {
+      "n": 56,
+      "none": 0,
+      "min": 0.0013,
+      "max": 0.0013,
+      "median": 0.0013,
+      "call0": 0.0013
+     },
+     "cfm_table_z": {
+      "n": 56,
+      "none": 0,
+      "min": 0.0009910887411642884,
+      "max": 0.0012434170300513192,
+      "call0": 0.0011725358533880386
+     },
+     "runs": {
+      "none": "20261025T205114_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LII-none",
+      "aegis": "20261025T204002_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LII-aegis",
+      "constrained_flow_matching": "20261025T194732_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LII-constrained_flow_matching"
+     },
+     "row": [
+      "safelibero_object",
+      "II",
+      "Floor",
+      "S / coll",
+      "F / no coll",
+      "0",
+      "0.0013",
+      "0.001",
+      "floor",
+      "F / no coll",
+      "0",
+      "0.0012",
+      "0.001",
+      "1.000",
+      "0",
+      "168 / 2281"
+     ]
+    },
+    {
+     "suite": "safelibero_spatial",
+     "level": "I",
+     "problem_class": "Tabletop",
+     "nominal_support": "table_offset z 0.90",
+     "aegis_workspace_z0": 0.92,
+     "T_world_base_z": 0.912,
+     "aegis_support_z": {
+      "n": 19,
+      "none": 0,
+      "min": -0.0109,
+      "max": -0.0109,
+      "median": -0.0109,
+      "call0": -0.0109
+     },
+     "cfm_table_z": {
+      "n": 56,
+      "none": 0,
+      "min": -0.013593107051504478,
+      "max": -0.010878793284092539,
+      "call0": -0.013443255884606466
+     },
+     "runs": {
+      "none": "20261025T204734_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LI-none",
+      "aegis": "20261025T203517_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LI-aegis",
+      "constrained_flow_matching": "20261025T194023_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching"
+     },
+     "row": [
+      "safelibero_spatial",
+      "I",
+      "Tabletop",
+      "F / coll",
+      "S / no coll",
+      "0",
+      "-0.0109",
+      "0.901",
+      "table",
+      "F / no coll",
+      "0",
+      "-0.0134",
+      "0.899",
+      "0.966",
+      "0",
+      "143 / 2104"
+     ]
+    },
+    {
+     "suite": "safelibero_spatial",
+     "level": "II",
+     "problem_class": "Tabletop",
+     "nominal_support": "table_offset z 0.90",
+     "aegis_workspace_z0": 0.92,
+     "T_world_base_z": 0.912,
+     "aegis_support_z": {
+      "n": 20,
+      "none": 0,
+      "min": -0.0093,
+      "max": -0.0093,
+      "median": -0.0093,
+      "call0": -0.0093
+     },
+     "cfm_table_z": {
+      "n": 56,
+      "none": 0,
+      "min": -0.011114416869911124,
+      "max": -0.008765018102342835,
+      "call0": -0.009495739232353972
+     },
+     "runs": {
+      "none": "20261025T204819_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LII-none",
+      "aegis": "20261025T203714_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LII-aegis",
+      "constrained_flow_matching": "20261025T194201_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LII-constrained_flow_matching"
+     },
+     "row": [
+      "safelibero_spatial",
+      "II",
+      "Tabletop",
+      "S / coll",
+      "S / no coll",
+      "0",
+      "-0.0093",
+      "0.903",
+      "table",
+      "F / coll",
+      "0",
+      "-0.0095",
+      "0.903",
+      "1.000",
+      "0",
+      "168 / 2123"
+     ]
+    }
+   ]
+  },
+  "pod_working_set_gib": {
+   "L_smoke": {
+    "samples_60s": 18,
+    "max": 38.43,
+    "max_at_utc": "2026-10-25T09:29:11Z",
+    "min": 20.5,
+    "over_64": 0,
+    "over64_log": null
+   },
+   "gt_smoke": {
+    "samples_60s": 42,
+    "max": 47.35,
+    "max_at_utc": "2026-10-25T09:54:20Z",
+    "min": 18.94,
+    "over_64": 0,
+    "over64_log": null
+   },
+   "suite_smoke": {
+    "samples_60s": 33,
+    "max": 39.39,
+    "max_at_utc": "2026-10-25T10:39:15Z",
+    "min": 19.13,
+    "over_64": 0,
+    "over64_log": null
+   },
+   "suite_smoke_resume": {
+    "samples_60s": 42,
+    "max": 42.69,
+    "max_at_utc": "2026-10-25T11:27:29Z",
+    "min": 19.75,
+    "over_64": 0,
+    "over64_log": null
+   },
+   "handoff_window_10:24-10:27Z_30s": {
+    "samples": 6,
+    "max_gib": 26.89,
+    "max_at_utc": "2026-10-25T10:25:15Z"
+   },
+   "pause_window_11:00-11:16Z_30s": {
+    "samples": 34,
+    "max_gib": 35.25,
+    "max_at_utc": "2026-10-25T11:00:22Z"
+   },
+   "limit_gib": 64,
+   "samples_over_64": 0,
+   "sampling": "memory.current - inactive_file, /sys/fs/cgroup (pod), 60 s in phases, 30 s in handoff/pause windows"
+  },
+  "suite_smoke_actions_vs_none": {
+   "safelibero_long|I|constrained_flow_matching": {
+    "len_arm": 550,
+    "len_none": 550,
+    "identical_actions": false,
+    "first_differing_step": 30
+   },
+   "safelibero_long|II|constrained_flow_matching": {
+    "len_arm": 550,
+    "len_none": 287,
+    "identical_actions": false,
+    "first_differing_step": 20
+   },
+   "libero_10|None|constrained_flow_matching": {
+    "len_arm": 530,
+    "len_none": 290,
+    "identical_actions": false,
+    "first_differing_step": 35
+   },
+   "libero_goal|None|constrained_flow_matching": {
+    "len_arm": 310,
+    "len_none": 123,
+    "identical_actions": false,
+    "first_differing_step": 10
+   },
+   "safelibero_spatial|I|constrained_flow_matching": {
+    "len_arm": 300,
+    "len_none": 300,
+    "identical_actions": false,
+    "first_differing_step": 20
+   },
+   "safelibero_spatial|II|constrained_flow_matching": {
+    "len_arm": 300,
+    "len_none": 144,
+    "identical_actions": false,
+    "first_differing_step": 20
+   },
+   "safelibero_object|I|constrained_flow_matching": {
+    "len_arm": 300,
+    "len_none": 300,
+    "identical_actions": false,
+    "first_differing_step": 20
+   },
+   "safelibero_object|II|constrained_flow_matching": {
+    "len_arm": 300,
+    "len_none": 172,
+    "identical_actions": false,
+    "first_differing_step": 20
+   },
+   "safelibero_goal|I|constrained_flow_matching": {
+    "len_arm": 300,
+    "len_none": 300,
+    "identical_actions": false,
+    "first_differing_step": 20
+   },
+   "safelibero_goal|II|constrained_flow_matching": {
+    "len_arm": 300,
+    "len_none": 163,
+    "identical_actions": false,
+    "first_differing_step": 20
+   },
+   "libero_object|None|constrained_flow_matching": {
+    "len_arm": 290,
+    "len_none": 142,
+    "identical_actions": false,
+    "first_differing_step": 30
+   },
+   "libero_spatial|None|constrained_flow_matching": {
+    "len_arm": 230,
+    "len_none": 114,
+    "identical_actions": false,
+    "first_differing_step": 35
+   },
+   "safelibero_long|I|aegis": {
+    "len_arm": 550,
+    "len_none": 550,
+    "identical_actions": false,
+    "first_differing_step": 259
+   },
+   "safelibero_long|II|aegis": {
+    "len_arm": 550,
+    "len_none": 287,
+    "identical_actions": false,
+    "first_differing_step": 20
+   },
+   "libero_10|None|aegis": {
+    "len_arm": 530,
+    "len_none": 290,
+    "identical_actions": false,
+    "first_differing_step": 39
+   },
+   "libero_goal|None|aegis": {
+    "len_arm": 123,
+    "len_none": 123,
+    "identical_actions": true,
+    "first_differing_step": null
+   },
+   "safelibero_spatial|I|aegis": {
+    "len_arm": 111,
+    "len_none": 300,
+    "identical_actions": false,
+    "first_differing_step": 22
+   },
+   "safelibero_spatial|II|aegis": {
+    "len_arm": 120,
+    "len_none": 144,
+    "identical_actions": false,
+    "first_differing_step": 20
+   },
+   "safelibero_object|I|aegis": {
+    "len_arm": 300,
+    "len_none": 300,
+    "identical_actions": false,
+    "first_differing_step": 126
+   },
+   "safelibero_object|II|aegis": {
+    "len_arm": 300,
+    "len_none": 172,
+    "identical_actions": false,
+    "first_differing_step": 28
+   },
+   "safelibero_goal|I|aegis": {
+    "len_arm": 132,
+    "len_none": 300,
+    "identical_actions": false,
+    "first_differing_step": 28
+   },
+   "safelibero_goal|II|aegis": {
+    "len_arm": 205,
+    "len_none": 163,
+    "identical_actions": false,
+    "first_differing_step": 23
+   },
+   "libero_object|None|aegis": {
+    "len_arm": 267,
+    "len_none": 142,
+    "identical_actions": false,
+    "first_differing_step": 113
+   },
+   "libero_spatial|None|aegis": {
+    "len_arm": 114,
+    "len_none": 114,
+    "identical_actions": true,
+    "first_differing_step": null
+   }
+  },
+  "suite_smoke_jobs_split": {
+   "suite_smoke/jobs.txt": "36 lines; indices 0-11 ran 10:27:16Z-11:01:52Z (run_parallel_gpu.sh SIGKILL 11:00:11Z after jobs 10/11 had started; both ran to the end, client_returncode 0)",
+   "suite_smoke_resume/jobs.txt": "original indices 12-35 (24 jobs), 11:24:49Z-11:57:44Z, all rc=0",
+   "rerun_of_completed_runs": 0
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-cfm-action-range.png",
+   "sidecar": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-cfm-action-range.json",
+   "kind": "graph+table"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-crop-ellipsoid-scene.png",
+   "sidecar": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-crop-ellipsoid-scene.json",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-intervention-timeseries.png",
+   "sidecar": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-intervention-timeseries.json",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-phase-arm-table.png",
+   "sidecar": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-phase-arm-table.json",
+   "kind": "table"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-privileged-vs-nonprivileged.png",
+   "sidecar": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-privileged-vs-nonprivileged.json",
+   "kind": "scene+table"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-suite-level-frames.png",
+   "sidecar": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-suite-level-frames.json",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-suite-level-smoke-table.png",
+   "sidecar": "AG3S/ag3s/docs/figures/baselines/bench_ready/v6-suite-level-smoke-table.json",
+   "kind": "table"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "violated_start 14/15, has_target 15/15, frame0 clearance_before -29.031048280806342 mm"
+ },
+ "verdict": "기준선 일치. 사실 기록만 (판정은 lead 와 사용자).",
+ "issues": [
+  "knows (filter) calls.jsonl has no filter_perception.detector -> support_z / crop_mode / boxes are not recorded for knows (aegis and multilink_cbf record them); knows crop_mode is visible only through server_argv (no --method-kwargs = default) and n_points (270 / 183 = depth_trim crop sizes of the aegis run)",
+  "L_smoke knows (depth_trim default): 1 executed row with max|xyz| 1.0099 (> 1 + 1e-3, < 1 + 1e-2); h_star_min -0.0086, h_star_neg_steps 63; knows@v5: 8 executed rows > 1, max 1.434",
+  "gt_smoke lan_o3dp_guidance_adapted:gt: 1 executed row with max|xyz| 1.0059",
+  "CFM :gt-spheres sphere radius is not written to any run file (calls.jsonl privileged summary has centers / n_geoms / geoms_shape only); the privileged figure shows the GT body position, not the sphere",
+  "aegis on libero_goal t0e0: 0 obstacles in all 23 calls (only the robot-base box detected, dropped by depth_trim); intervention 0; executed actions bit-identical to none. aegis on libero_spatial t0e0: actions bit-identical to none (intervention_rate_rows 0.0)",
+  "every V6 run_manifest has dirty=True: source diff empty (sha256 e3b0c442...), untracked main.pdf",
+  "jobs.py smoke defaults: run prefix blb-smoke and step BASELINE-BENCH-SMOKE (not BASELINE-BENCH-READY-V6) for the 36 suite_smoke runs",
+  "suite_smoke parallel.log has no batch-done line and no end events for jobs 10/11 (run_parallel_gpu.sh killed at the lead-requested pause); their rc is taken from the launcher_result lines in parallel.job10/11.out",
+  "suite_smoke: lock taken 11:15:46Z by another development job (gpu_lock.py exclusive tag gpu-stages-m1m2) right after dev-e2's release; resume waited 500 s",
+  "development-e2 'end' message and lead relays reached this agent only through the coordinator; the second handoff took the lock immediately at 11:01:52Z (gpu_lock.py exclusive pid 3852198)"
+ ],
+ "not_measured": [
+  "impl V6 step 1 CPU re-check (unit tests and L replay summarize.py) - not re-run",
+  "M V6 step 4 (optional v5_check) and L V6 step 3 (optional 20-ep pilot) - not run",
+  "GT table / floor height by simulation: support_z is compared only with the LIBERO problem-class constants (table_offset / floor_offset) and the AEGIS workspace z0",
+  "CFM gt-spheres sphere radius",
+  "LIBERO-Safety suites (FAMILY_HOOKS slot only)",
+  "multi-episode statistics: every number is n = 1 (task 0, episode 0)",
+  "wrist camera in the filter arms (default head only)"
+ ]
+}

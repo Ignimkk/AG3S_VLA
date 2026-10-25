@@ -1,0 +1,992 @@
+[
+ {
+  "suite": "libero_10",
+  "level": null,
+  "run": "20261025T202843_98004d0dc416_blb-smoke-libero_10-dev-t0-aegis",
+  "obs_index": 10,
+  "boxes_head_call0": [
+   {
+    "box": [
+     77.7,
+     0.0,
+     177.5,
+     102.8
+    ],
+    "score": 0.4810923933982849,
+    "trim": {
+     "n_box": 9711,
+     "n_robot": 8133,
+     "n_support_or_high": 1186,
+     "n_components": 5,
+     "chosen": 1,
+     "n_center": 30,
+     "center_votes": 15,
+     "n_kept": 29,
+     "n_out": 27
+    },
+    "name": null
+   },
+   {
+    "box": [
+     198.8,
+     112.3,
+     256.0,
+     196.2
+    ],
+    "score": 0.40121251344680786,
+    "trim": {
+     "n_box": 4788,
+     "n_robot": 0,
+     "n_support_or_high": 408,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 782,
+     "center_votes": 782,
+     "n_kept": 4380,
+     "n_out": 4204
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     140.9,
+     178.4,
+     160.1,
+     208.0
+    ],
+    "score": 0.391015887260437,
+    "trim": {
+     "n_box": 570,
+     "n_robot": 0,
+     "n_support_or_high": 125,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 84,
+     "center_votes": 84,
+     "n_kept": 445,
+     "n_out": 427
+    },
+    "name": "object#1"
+   },
+   {
+    "box": [
+     2.0,
+     130.3,
+     38.1,
+     186.1
+    ],
+    "score": 0.38953232765197754,
+    "trim": {
+     "n_box": 2016,
+     "n_robot": 0,
+     "n_support_or_high": 499,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 308,
+     "center_votes": 308,
+     "n_kept": 1517,
+     "n_out": 1455
+    },
+    "name": "object#2"
+   },
+   {
+    "box": [
+     31.1,
+     180.4,
+     57.1,
+     211.4
+    ],
+    "score": 0.3674297034740448,
+    "trim": {
+     "n_box": 806,
+     "n_robot": 0,
+     "n_support_or_high": 224,
+     "n_components": 2,
+     "chosen": 1,
+     "n_center": 120,
+     "center_votes": 120,
+     "n_kept": 569,
+     "n_out": 545
+    },
+    "name": "object#3"
+   },
+   {
+    "box": [
+     134.9,
+     119.2,
+     160.0,
+     156.9
+    ],
+    "score": 0.35656675696372986,
+    "trim": {
+     "n_box": 950,
+     "n_robot": 0,
+     "n_support_or_high": 196,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 165,
+     "center_votes": 165,
+     "n_kept": 754,
+     "n_out": 722
+    },
+    "name": "object#4"
+   }
+  ]
+ },
+ {
+  "suite": "libero_goal",
+  "level": null,
+  "run": "20261025T203443_98004d0dc416_blb-smoke-libero_goal-dev-t0-aegis",
+  "obs_index": 10,
+  "boxes_head_call0": [
+   {
+    "box": [
+     88.6,
+     0.0,
+     168.9,
+     87.3
+    ],
+    "score": 0.5234042406082153,
+    "trim": {
+     "n_box": 5473,
+     "n_robot": 5108,
+     "n_support_or_high": 365,
+     "n_out": 0
+    },
+    "name": null
+   }
+  ]
+ },
+ {
+  "suite": "libero_object",
+  "level": null,
+  "run": "20261025T204321_98004d0dc416_blb-smoke-libero_object-dev-t0-aegis",
+  "obs_index": 10,
+  "boxes_head_call0": [
+   {
+    "box": [
+     96.3,
+     0.0,
+     164.6,
+     88.3
+    ],
+    "score": 0.5607789158821106,
+    "trim": {
+     "n_box": 5293,
+     "n_robot": 4679,
+     "n_support_or_high": 614,
+     "n_out": 0
+    },
+    "name": null
+   },
+   {
+    "box": [
+     126.1,
+     150.6,
+     149.6,
+     184.3
+    ],
+    "score": 0.46107161045074463,
+    "trim": {
+     "n_box": 792,
+     "n_robot": 0,
+     "n_support_or_high": 224,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 130,
+     "center_votes": 130,
+     "n_kept": 568,
+     "n_out": 544
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     175.2,
+     105.6,
+     236.8,
+     165.7
+    ],
+    "score": 0.44868093729019165,
+    "trim": {
+     "n_box": 3720,
+     "n_robot": 0,
+     "n_support_or_high": 795,
+     "n_components": 2,
+     "chosen": 0,
+     "n_center": 576,
+     "center_votes": 576,
+     "n_kept": 2907,
+     "n_out": 2789
+    },
+    "name": "object#1"
+   },
+   {
+    "box": [
+     88.3,
+     118.6,
+     107.8,
+     161.8
+    ],
+    "score": 0.4165082573890686,
+    "trim": {
+     "n_box": 860,
+     "n_robot": 0,
+     "n_support_or_high": 301,
+     "n_components": 2,
+     "chosen": 1,
+     "n_center": 136,
+     "center_votes": 136,
+     "n_kept": 549,
+     "n_out": 527
+    },
+    "name": "object#2"
+   }
+  ]
+ },
+ {
+  "suite": "libero_spatial",
+  "level": null,
+  "run": "20261025T204610_98004d0dc416_blb-smoke-libero_spatial-dev-t0-aegis",
+  "obs_index": 10,
+  "boxes_head_call0": [
+   {
+    "box": [
+     0.0,
+     84.9,
+     82.6,
+     214.7
+    ],
+    "score": 0.5060694217681885,
+    "trim": {
+     "n_box": 10633,
+     "n_robot": 0,
+     "n_support_or_high": 2246,
+     "n_components": 3,
+     "chosen": 2,
+     "n_center": 1716,
+     "center_votes": 1716,
+     "n_kept": 8216,
+     "n_out": 7886
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     173.6,
+     165.4,
+     221.6,
+     201.4
+    ],
+    "score": 0.3791004419326782,
+    "trim": {
+     "n_box": 1728,
+     "n_robot": 0,
+     "n_support_or_high": 1489,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 0,
+     "n_kept": 239,
+     "n_out": 229
+    },
+    "name": "object#1"
+   }
+  ]
+ },
+ {
+  "suite": "safelibero_goal",
+  "level": "I",
+  "run": "20261025T204034_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LI-aegis",
+  "obs_index": 20,
+  "boxes_head_call0": [
+   {
+    "box": [
+     166.3,
+     79.6,
+     246.9,
+     170.1
+    ],
+    "score": 0.5609912276268005,
+    "trim": {
+     "n_box": 6769,
+     "n_robot": 0,
+     "n_support_or_high": 2955,
+     "n_components": 4,
+     "chosen": 3,
+     "n_center": 1004,
+     "center_votes": 1001,
+     "n_kept": 3276,
+     "n_out": 3144
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     88.6,
+     0.0,
+     167.8,
+     87.3
+    ],
+    "score": 0.5179139375686646,
+    "trim": {
+     "n_box": 5516,
+     "n_robot": 5155,
+     "n_support_or_high": 361,
+     "n_out": 0
+    },
+    "name": null
+   },
+   {
+    "box": [
+     0.0,
+     89.9,
+     86.1,
+     209.8
+    ],
+    "score": 0.4735562801361084,
+    "trim": {
+     "n_box": 10320,
+     "n_robot": 0,
+     "n_support_or_high": 999,
+     "n_components": 4,
+     "chosen": 2,
+     "n_center": 1632,
+     "center_votes": 1632,
+     "n_kept": 8851,
+     "n_out": 8497
+    },
+    "name": "object#1"
+   },
+   {
+    "box": [
+     111.0,
+     173.9,
+     159.5,
+     213.3
+    ],
+    "score": 0.36692535877227783,
+    "trim": {
+     "n_box": 1911,
+     "n_robot": 0,
+     "n_support_or_high": 1834,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 0,
+     "n_kept": 77,
+     "n_out": 73
+    },
+    "name": "object#2"
+   }
+  ]
+ },
+ {
+  "suite": "safelibero_goal",
+  "level": "II",
+  "run": "20261025T204247_98004d0dc416_blb-smoke-safelibero_goal-dev-t0-LII-aegis",
+  "obs_index": 20,
+  "boxes_head_call0": [
+   {
+    "box": [
+     142.8,
+     79.3,
+     223.6,
+     172.3
+    ],
+    "score": 0.6164412498474121,
+    "trim": {
+     "n_box": 7089,
+     "n_robot": 120,
+     "n_support_or_high": 3237,
+     "n_components": 6,
+     "chosen": 5,
+     "n_center": 1101,
+     "center_votes": 1036,
+     "n_kept": 3281,
+     "n_out": 3149
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     88.7,
+     0.0,
+     167.8,
+     87.3
+    ],
+    "score": 0.5315505862236023,
+    "trim": {
+     "n_box": 5516,
+     "n_robot": 5155,
+     "n_support_or_high": 361,
+     "n_out": 0
+    },
+    "name": null
+   },
+   {
+    "box": [
+     0.0,
+     89.8,
+     86.1,
+     209.7
+    ],
+    "score": 0.4901735186576843,
+    "trim": {
+     "n_box": 10320,
+     "n_robot": 0,
+     "n_support_or_high": 1049,
+     "n_components": 4,
+     "chosen": 2,
+     "n_center": 1632,
+     "center_votes": 1632,
+     "n_kept": 8801,
+     "n_out": 8449
+    },
+    "name": "object#1"
+   },
+   {
+    "box": [
+     206.6,
+     178.9,
+     256.0,
+     219.2
+    ],
+    "score": 0.4077554941177368,
+    "trim": {
+     "n_box": 1960,
+     "n_robot": 0,
+     "n_support_or_high": 1924,
+     "n_components": 2,
+     "chosen": 0,
+     "n_center": 0,
+     "n_kept": 23,
+     "n_out": 21
+    },
+    "name": null
+   },
+   {
+    "box": [
+     12.1,
+     26.2,
+     89.4,
+     133.7
+    ],
+    "score": 0.38995465636253357,
+    "trim": {
+     "n_box": 6333,
+     "n_robot": 0,
+     "n_support_or_high": 209,
+     "n_components": 4,
+     "chosen": 0,
+     "n_center": 1248,
+     "center_votes": 751,
+     "n_kept": 2323,
+     "n_out": 2229
+    },
+    "name": "object#2"
+   }
+  ]
+ },
+ {
+  "suite": "safelibero_long",
+  "level": "I",
+  "run": "20261025T202451_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LI-aegis",
+  "obs_index": 20,
+  "boxes_head_call0": [
+   {
+    "box": [
+     198.1,
+     112.5,
+     256.0,
+     197.3
+    ],
+    "score": 0.45919930934906006,
+    "trim": {
+     "n_box": 4872,
+     "n_robot": 0,
+     "n_support_or_high": 431,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 816,
+     "center_votes": 816,
+     "n_kept": 4441,
+     "n_out": 4263
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     87.0,
+     0.0,
+     181.9,
+     102.7
+    ],
+    "score": 0.44250473380088806,
+    "trim": {
+     "n_box": 8907,
+     "n_robot": 8116,
+     "n_support_or_high": 760,
+     "n_components": 3,
+     "chosen": 1,
+     "n_center": 0,
+     "n_kept": 12,
+     "n_out": 10
+    },
+    "name": null
+   }
+  ]
+ },
+ {
+  "suite": "safelibero_long",
+  "level": "II",
+  "run": "20261025T202522_98004d0dc416_blb-smoke-safelibero_long-dev-t0-LII-aegis",
+  "obs_index": 20,
+  "boxes_head_call0": [
+   {
+    "box": [
+     87.1,
+     0.0,
+     181.8,
+     102.5
+    ],
+    "score": 0.39996129274368286,
+    "trim": {
+     "n_box": 8812,
+     "n_robot": 7981,
+     "n_support_or_high": 697,
+     "n_components": 3,
+     "chosen": 1,
+     "n_center": 0,
+     "n_kept": 12,
+     "n_out": 10
+    },
+    "name": null
+   },
+   {
+    "box": [
+     198.3,
+     112.6,
+     256.0,
+     197.2
+    ],
+    "score": 0.39389580488204956,
+    "trim": {
+     "n_box": 4872,
+     "n_robot": 0,
+     "n_support_or_high": 425,
+     "n_components": 2,
+     "chosen": 0,
+     "n_center": 782,
+     "center_votes": 782,
+     "n_kept": 4441,
+     "n_out": 4263
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     64.7,
+     88.3,
+     87.7,
+     137.9
+    ],
+    "score": 0.35883238911628723,
+    "trim": {
+     "n_box": 1150,
+     "n_robot": 69,
+     "n_support_or_high": 255,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 180,
+     "center_votes": 180,
+     "n_kept": 826,
+     "n_out": 792
+    },
+    "name": "object#1"
+   },
+   {
+    "box": [
+     68.9,
+     152.5,
+     99.9,
+     197.8
+    ],
+    "score": 0.35865992307662964,
+    "trim": {
+     "n_box": 1426,
+     "n_robot": 0,
+     "n_support_or_high": 346,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 234,
+     "center_votes": 234,
+     "n_kept": 1080,
+     "n_out": 1036
+    },
+    "name": "object#2"
+   },
+   {
+    "box": [
+     134.6,
+     93.7,
+     199.9,
+     162.0
+    ],
+    "score": 0.351934015750885,
+    "trim": {
+     "n_box": 4420,
+     "n_robot": 308,
+     "n_support_or_high": 1231,
+     "n_components": 4,
+     "chosen": 1,
+     "n_center": 676,
+     "center_votes": 676,
+     "n_kept": 2824,
+     "n_out": 2710
+    },
+    "name": "object#3"
+   }
+  ]
+ },
+ {
+  "suite": "safelibero_object",
+  "level": "I",
+  "run": "20261025T203748_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LI-aegis",
+  "obs_index": 20,
+  "boxes_head_call0": [
+   {
+    "box": [
+     94.0,
+     0.0,
+     162.3,
+     88.0
+    ],
+    "score": 0.5367669463157654,
+    "trim": {
+     "n_box": 5312,
+     "n_robot": 4633,
+     "n_support_or_high": 672,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 0,
+     "n_kept": 7,
+     "n_out": 7
+    },
+    "name": null
+   },
+   {
+    "box": [
+     173.9,
+     103.6,
+     234.4,
+     161.5
+    ],
+    "score": 0.39484328031539917,
+    "trim": {
+     "n_box": 3480,
+     "n_robot": 0,
+     "n_support_or_high": 643,
+     "n_components": 2,
+     "chosen": 0,
+     "n_center": 552,
+     "center_votes": 552,
+     "n_kept": 2817,
+     "n_out": 2703
+    },
+    "name": "object#0"
+   }
+  ]
+ },
+ {
+  "suite": "safelibero_object",
+  "level": "II",
+  "run": "20261025T204002_98004d0dc416_blb-smoke-safelibero_object-dev-t0-LII-aegis",
+  "obs_index": 20,
+  "boxes_head_call0": [
+   {
+    "box": [
+     56.3,
+     122.0,
+     78.1,
+     162.4
+    ],
+    "score": 0.5481632947921753,
+    "trim": {
+     "n_box": 880,
+     "n_robot": 0,
+     "n_support_or_high": 205,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 144,
+     "center_votes": 144,
+     "n_kept": 675,
+     "n_out": 647
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     136.9,
+     61.0,
+     181.1,
+     141.9
+    ],
+    "score": 0.4946940541267395,
+    "trim": {
+     "n_box": 3564,
+     "n_robot": 143,
+     "n_support_or_high": 713,
+     "n_components": 5,
+     "chosen": 2,
+     "n_center": 594,
+     "center_votes": 594,
+     "n_kept": 2607,
+     "n_out": 2501
+    },
+    "name": "object#1"
+   },
+   {
+    "box": [
+     127.0,
+     135.6,
+     148.2,
+     181.8
+    ],
+    "score": 0.47560355067253113,
+    "trim": {
+     "n_box": 966,
+     "n_robot": 0,
+     "n_support_or_high": 207,
+     "n_components": 2,
+     "chosen": 1,
+     "n_center": 171,
+     "center_votes": 171,
+     "n_kept": 693,
+     "n_out": 665
+    },
+    "name": "object#2"
+   },
+   {
+    "box": [
+     100.1,
+     86.6,
+     116.0,
+     123.4
+    ],
+    "score": 0.4373703598976135,
+    "trim": {
+     "n_box": 576,
+     "n_robot": 54,
+     "n_support_or_high": 138,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 84,
+     "center_votes": 84,
+     "n_kept": 384,
+     "n_out": 368
+    },
+    "name": "object#3"
+   },
+   {
+    "box": [
+     190.4,
+     111.7,
+     256.0,
+     173.8
+    ],
+    "score": 0.42369797825813293,
+    "trim": {
+     "n_box": 4092,
+     "n_robot": 0,
+     "n_support_or_high": 853,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 650,
+     "center_votes": 650,
+     "n_kept": 3239,
+     "n_out": 3109
+    },
+    "name": "object#4"
+   },
+   {
+    "box": [
+     94.0,
+     0.0,
+     162.3,
+     87.5
+    ],
+    "score": 0.40971699357032776,
+    "trim": {
+     "n_box": 5312,
+     "n_robot": 4329,
+     "n_support_or_high": 528,
+     "n_components": 3,
+     "chosen": 2,
+     "n_center": 0,
+     "n_kept": 447,
+     "n_out": 429
+    },
+    "name": "object#1"
+   }
+  ]
+ },
+ {
+  "suite": "safelibero_spatial",
+  "level": "I",
+  "run": "20261025T203517_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LI-aegis",
+  "obs_index": 20,
+  "boxes_head_call0": [
+   {
+    "box": [
+     87.5,
+     94.4,
+     169.4,
+     174.2
+    ],
+    "score": 0.5592545866966248,
+    "trim": {
+     "n_box": 6480,
+     "n_robot": 0,
+     "n_support_or_high": 2635,
+     "n_components": 5,
+     "chosen": 4,
+     "n_center": 976,
+     "center_votes": 929,
+     "n_kept": 3279,
+     "n_out": 3147
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     0.0,
+     84.9,
+     82.5,
+     214.8
+    ],
+    "score": 0.5368657112121582,
+    "trim": {
+     "n_box": 10633,
+     "n_robot": 0,
+     "n_support_or_high": 2258,
+     "n_components": 3,
+     "chosen": 2,
+     "n_center": 1716,
+     "center_votes": 1716,
+     "n_kept": 8204,
+     "n_out": 7874
+    },
+    "name": "object#1"
+   },
+   {
+    "box": [
+     81.9,
+     0.0,
+     168.4,
+     101.3
+    ],
+    "score": 0.4576822817325592,
+    "trim": {
+     "n_box": 6666,
+     "n_robot": 5157,
+     "n_support_or_high": 1112,
+     "n_components": 4,
+     "chosen": 0,
+     "n_center": 0,
+     "n_kept": 282,
+     "n_out": 270
+    },
+    "name": "object#2"
+   },
+   {
+    "box": [
+     173.6,
+     165.4,
+     221.6,
+     201.4
+    ],
+    "score": 0.378214031457901,
+    "trim": {
+     "n_box": 1728,
+     "n_robot": 0,
+     "n_support_or_high": 1537,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 0,
+     "n_kept": 191,
+     "n_out": 183
+    },
+    "name": "object#3"
+   }
+  ]
+ },
+ {
+  "suite": "safelibero_spatial",
+  "level": "II",
+  "run": "20261025T203714_98004d0dc416_blb-smoke-safelibero_spatial-dev-t0-LII-aegis",
+  "obs_index": 20,
+  "boxes_head_call0": [
+   {
+    "box": [
+     0.0,
+     84.9,
+     82.6,
+     214.7
+    ],
+    "score": 0.4998740255832672,
+    "trim": {
+     "n_box": 10633,
+     "n_robot": 0,
+     "n_support_or_high": 2282,
+     "n_components": 3,
+     "chosen": 2,
+     "n_center": 1716,
+     "center_votes": 1716,
+     "n_kept": 8181,
+     "n_out": 7853
+    },
+    "name": "object#0"
+   },
+   {
+    "box": [
+     81.6,
+     0.0,
+     177.0,
+     168.8
+    ],
+    "score": 0.4121290445327759,
+    "trim": {
+     "n_box": 13497,
+     "n_robot": 3232,
+     "n_support_or_high": 3208,
+     "n_components": 6,
+     "chosen": 3,
+     "n_center": 2187,
+     "center_votes": 2089,
+     "n_kept": 5555,
+     "n_out": 5332
+    },
+    "name": "object#1"
+   },
+   {
+    "box": [
+     173.6,
+     165.4,
+     221.6,
+     201.4
+    ],
+    "score": 0.36180469393730164,
+    "trim": {
+     "n_box": 1728,
+     "n_robot": 0,
+     "n_support_or_high": 1640,
+     "n_components": 1,
+     "chosen": 0,
+     "n_center": 0,
+     "n_kept": 88,
+     "n_out": 84
+    },
+    "name": "object#2"
+   }
+  ]
+ }
+]

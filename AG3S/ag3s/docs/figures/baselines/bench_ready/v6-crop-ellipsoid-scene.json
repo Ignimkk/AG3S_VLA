@@ -1,0 +1,287 @@
+{
+ "source_run_boxes": "20261025T183621_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-aegis (call 0)",
+ "knows_logged_runs": {
+  "depth_trim": "20261025T183001_..._LI-knows",
+  "box": "20261025T183030_..._LI-knows-v5"
+ },
+ "recompute": "outputs/verify/BASELINE-BENCH-READY/figs/crop_data.py (.venv-baselines, ObstacleCloudSource + knows mvee)",
+ "projection": "ellipse = orthogonal projection of the 3D MVEE onto the plane (sub-block of Q)",
+ "box": {
+  "info_support_z": null,
+  "objects": {
+   "object#0": {
+    "n": 4000,
+    "c": [
+     0.4646,
+     0.01,
+     0.0546
+    ],
+    "semi_axes_sorted": [
+     0.163,
+     0.2242,
+     0.3578
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.163,
+     0.2242,
+     0.3578
+    ],
+    "logged_c_v6_knows": [
+     0.4646,
+     0.01,
+     0.0546
+    ]
+   },
+   "object#1": {
+    "n": 4000,
+    "c": [
+     0.5016,
+     -0.2958,
+     0.0563
+    ],
+    "semi_axes_sorted": [
+     0.1633,
+     0.2324,
+     0.5263
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.1635,
+     0.2341,
+     0.5308
+    ],
+    "logged_c_v6_knows": [
+     0.4994,
+     -0.2942,
+     0.0558
+    ]
+   },
+   "object#2": {
+    "n": 3441,
+    "c": [
+     -0.0792,
+     0.008,
+     -0.0866
+    ],
+    "semi_axes_sorted": [
+     0.1348,
+     0.2637,
+     0.7717
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.1348,
+     0.2637,
+     0.7717
+    ],
+    "logged_c_v6_knows": [
+     -0.0792,
+     0.008,
+     -0.0866
+    ]
+   },
+   "object#3": {
+    "n": 1728,
+    "c": [
+     0.7013,
+     0.2147,
+     -0.0047
+    ],
+    "semi_axes_sorted": [
+     0.0146,
+     0.1017,
+     0.1194
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.0146,
+     0.1017,
+     0.1194
+    ],
+    "logged_c_v6_knows": [
+     0.7013,
+     0.2147,
+     -0.0047
+    ]
+   }
+  }
+ },
+ "depth_trim": {
+  "info_support_z": -0.0109,
+  "objects": {
+   "object#0": {
+    "n": 3147,
+    "c": [
+     0.6231,
+     0.0072,
+     0.1405
+    ],
+    "semi_axes_sorted": [
+     0.0599,
+     0.118,
+     0.1475
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.0599,
+     0.118,
+     0.1475
+    ],
+    "logged_c_v6_knows": [
+     0.6231,
+     0.0072,
+     0.1405
+    ]
+   },
+   "object#1": {
+    "n": 4000,
+    "c": [
+     0.6882,
+     -0.268,
+     0.1335
+    ],
+    "semi_axes_sorted": [
+     0.1302,
+     0.1542,
+     0.1979
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.1271,
+     0.1532,
+     0.1999
+    ],
+    "logged_c_v6_knows": [
+     0.6881,
+     -0.2655,
+     0.1346
+    ]
+   },
+   "object#2": {
+    "n": 270,
+    "c": [
+     0.2486,
+     -0.1401,
+     0.0222
+    ],
+    "semi_axes_sorted": [
+     0.0313,
+     0.0495,
+     0.054
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.0313,
+     0.0495,
+     0.054
+    ],
+    "logged_c_v6_knows": [
+     0.2486,
+     -0.1401,
+     0.0222
+    ]
+   },
+   "object#3": {
+    "n": 183,
+    "c": [
+     0.7134,
+     0.22,
+     0.0055
+    ],
+    "semi_axes_sorted": [
+     0.0024,
+     0.0741,
+     0.0839
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.0024,
+     0.0741,
+     0.0839
+    ],
+    "logged_c_v6_knows": [
+     0.7134,
+     0.22,
+     0.0055
+    ]
+   }
+  }
+ },
+ "boxes_head": [
+  {
+   "box": [
+    87.5,
+    94.4,
+    169.4,
+    174.2
+   ],
+   "score": 0.5592545866966248,
+   "trim": {
+    "n_box": 6480,
+    "n_robot": 0,
+    "n_support_or_high": 2635,
+    "n_components": 5,
+    "chosen": 4,
+    "n_center": 976,
+    "center_votes": 929,
+    "n_kept": 3279,
+    "n_out": 3147
+   },
+   "name": "object#0"
+  },
+  {
+   "box": [
+    0.0,
+    84.9,
+    82.5,
+    214.8
+   ],
+   "score": 0.5368657112121582,
+   "trim": {
+    "n_box": 10633,
+    "n_robot": 0,
+    "n_support_or_high": 2258,
+    "n_components": 3,
+    "chosen": 2,
+    "n_center": 1716,
+    "center_votes": 1716,
+    "n_kept": 8204,
+    "n_out": 7874
+   },
+   "name": "object#1"
+  },
+  {
+   "box": [
+    81.9,
+    0.0,
+    168.4,
+    101.3
+   ],
+   "score": 0.4576822817325592,
+   "trim": {
+    "n_box": 6666,
+    "n_robot": 5157,
+    "n_support_or_high": 1112,
+    "n_components": 4,
+    "chosen": 0,
+    "n_center": 0,
+    "n_kept": 282,
+    "n_out": 270
+   },
+   "name": "object#2"
+  },
+  {
+   "box": [
+    173.6,
+    165.4,
+    221.6,
+    201.4
+   ],
+   "score": 0.378214031457901,
+   "trim": {
+    "n_box": 1728,
+    "n_robot": 0,
+    "n_support_or_high": 1537,
+    "n_components": 1,
+    "chosen": 0,
+    "n_center": 0,
+    "n_kept": 191,
+    "n_out": 183
+   },
+   "name": "object#3"
+  }
+ ]
+}

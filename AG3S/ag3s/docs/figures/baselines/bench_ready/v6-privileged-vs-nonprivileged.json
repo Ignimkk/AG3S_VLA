@@ -1,0 +1,359 @@
+{
+ "table": [
+  [
+   "arm",
+   "GT source",
+   "non-priv: status / coll",
+   "disp mm",
+   "iv rate",
+   "calls",
+   "srv ms p50",
+   "priv: status / coll",
+   "disp mm",
+   "iv rate",
+   "calls",
+   "srv ms p50",
+   "active==monitor"
+  ],
+  [
+   "aegis:gt",
+   "names",
+   "success / no coll",
+   "0.0",
+   "0.505",
+   "19",
+   "132",
+   "success / no coll",
+   "0.0",
+   "0.516",
+   "19",
+   "249",
+   "19/19"
+  ],
+  [
+   "knows:gt",
+   "seg",
+   "success / coll",
+   "35.8",
+   "0.556",
+   "34",
+   "411",
+   "success / no coll",
+   "0.0",
+   "0.383",
+   "18",
+   "472",
+   "18/18"
+  ],
+  [
+   "multilink_cbf:gt",
+   "seg",
+   "success / no coll",
+   "0.0",
+   "0.442",
+   "50",
+   "238",
+   "success / no coll",
+   "0.0",
+   "0.530",
+   "33",
+   "702",
+   "33/33"
+  ],
+  [
+   "CFM:gt",
+   "spheres",
+   "max_steps / no coll",
+   "0.0",
+   "1.000",
+   "56",
+   "2111",
+   "success / no coll",
+   "0.0",
+   "0.790",
+   "20",
+   "7016",
+   "20/20"
+  ],
+  [
+   "CFM:gt-repo",
+   "repo",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "success / no coll",
+   "0.0",
+   "0.800",
+   "20",
+   "7870",
+   "20/20"
+  ],
+  [
+   "nudge:gt",
+   "geoms",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "success / coll",
+   "298.7",
+   "0.062",
+   "32",
+   "2050",
+   "32/32"
+  ],
+  [
+   "omniguide:gt",
+   "geoms",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "success / coll",
+   "195.4",
+   "0.643",
+   "28",
+   "2597",
+   "28/28"
+  ],
+  [
+   "lan_o3dp:gt",
+   "geoms",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "not run in V6",
+   "max_steps / coll",
+   "180.8",
+   "0.036",
+   "56",
+   "614",
+   "56/56"
+  ],
+  [
+   "none",
+   "-",
+   "max_steps / coll",
+   "255.9",
+   "-",
+   "56",
+   "89",
+   "max_steps / coll",
+   "255.9",
+   "-",
+   "56",
+   "112",
+   "-"
+  ]
+ ],
+ "gt_seg_recompute": {
+  "run": "20261025T190046_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-knows-gt-seg",
+  "obs_index": 20,
+  "active": "moka_pot_obstacle_1",
+  "bodies": [
+   "moka_pot_obstacle_1_main"
+  ],
+  "n_geom_ids": 17,
+  "mask_pixels": {
+   "head": 3392,
+   "left_wrist": 12652
+  },
+  "n_points": 15400,
+  "mvee_c": [
+   0.6096,
+   0.0096,
+   0.1048
+  ],
+  "mvee_semi_axes_sorted": [
+   0.0745,
+   0.1298,
+   0.1563
+  ],
+  "logged_filter_obstacles_call0": {
+   "moka_pot_1": {
+    "c": [
+     0.6086,
+     0.0094,
+     0.1053
+    ],
+    "semi_axes": [
+     0.0737,
+     0.1293,
+     0.1554
+    ]
+   }
+  },
+  "privileged_call0": {
+   "active": [
+    "moka_pot_obstacle_1"
+   ],
+   "n_objects": 6,
+   "monitor_obstacle": "moka_pot_obstacle_1",
+   "n_geoms": 15,
+   "geoms_shape": "collision",
+   "segmentation": [
+    "head",
+    "left_wrist"
+   ],
+   "centers": {
+    "moka_pot_1": [
+     0.6077,
+     0.0202,
+     0.0938
+    ]
+   }
+  },
+  "cameras": [
+   "head",
+   "left_wrist"
+  ],
+  "note": "safety_common._gt_seg steps (backproject + depth_trim per camera) without the 4000-point random subsample"
+ },
+ "aegis_gt_names_box_call0": [
+  {
+   "box": [
+    87.7,
+    94.2,
+    169.6,
+    174.5
+   ],
+   "score": 0.5519158840179443,
+   "trim": {
+    "n_box": 6560,
+    "n_robot": 0,
+    "n_support_or_high": 2710,
+    "n_components": 6,
+    "chosen": 5,
+    "n_center": 976,
+    "center_votes": 929,
+    "n_kept": 3280,
+    "n_out": 3148
+   },
+   "name": "moka_pot_1"
+  }
+ ],
+ "nonpriv_knows_depth_trim_call0": {
+  "info_support_z": -0.0109,
+  "objects": {
+   "object#0": {
+    "n": 3147,
+    "c": [
+     0.6231,
+     0.0072,
+     0.1405
+    ],
+    "semi_axes_sorted": [
+     0.0599,
+     0.118,
+     0.1475
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.0599,
+     0.118,
+     0.1475
+    ],
+    "logged_c_v6_knows": [
+     0.6231,
+     0.0072,
+     0.1405
+    ]
+   },
+   "object#1": {
+    "n": 4000,
+    "c": [
+     0.6882,
+     -0.268,
+     0.1335
+    ],
+    "semi_axes_sorted": [
+     0.1302,
+     0.1542,
+     0.1979
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.1271,
+     0.1532,
+     0.1999
+    ],
+    "logged_c_v6_knows": [
+     0.6881,
+     -0.2655,
+     0.1346
+    ]
+   },
+   "object#2": {
+    "n": 270,
+    "c": [
+     0.2486,
+     -0.1401,
+     0.0222
+    ],
+    "semi_axes_sorted": [
+     0.0313,
+     0.0495,
+     0.054
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.0313,
+     0.0495,
+     0.054
+    ],
+    "logged_c_v6_knows": [
+     0.2486,
+     -0.1401,
+     0.0222
+    ]
+   },
+   "object#3": {
+    "n": 183,
+    "c": [
+     0.7134,
+     0.22,
+     0.0055
+    ],
+    "semi_axes_sorted": [
+     0.0024,
+     0.0741,
+     0.0839
+    ],
+    "logged_semi_axes_sorted_v6_knows": [
+     0.0024,
+     0.0741,
+     0.0839
+    ],
+    "logged_c_v6_knows": [
+     0.7134,
+     0.22,
+     0.0055
+    ]
+   }
+  }
+ },
+ "runs_nonpriv": {
+  "constrained_flow_matching": "20261025T182413_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching",
+  "constrained_flow_matching@v5": "20261025T182444_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching-v5",
+  "knows": "20261025T183001_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-knows",
+  "knows@v5": "20261025T183030_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-knows-v5",
+  "multilink_cbf": "20261025T183315_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-multilink_cbf",
+  "multilink_cbf@v5": "20261025T183347_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-multilink_cbf-v5",
+  "aegis": "20261025T183621_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-aegis",
+  "aegis@v5": "20261025T183653_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-aegis-v5",
+  "none": "20261025T183850_98004d0dc416_blbr-L-smoke-safelibero_spatial-dev-t0-LI-none"
+ },
+ "runs_priv": {
+  "constrained_flow_matching:gt": "20261025T184219_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching-gt-spheres",
+  "constrained_flow_matching:gt-repo": "20261025T184255_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-constrained_flow_matching-gt-repo",
+  "nudge:gt": "20261025T185147_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-nudge-gt-geoms",
+  "lan_o3dp_guidance_adapted:gt": "20261025T185219_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-lan_o3dp_guidance_adapted-gt-geoms",
+  "knows:gt": "20261025T190046_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-knows-gt-seg",
+  "omniguide:gt": "20261025T190311_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-omniguide-gt-geoms",
+  "multilink_cbf:gt": "20261025T190833_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-multilink_cbf-gt-seg",
+  "aegis:gt": "20261025T191318_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-aegis-gt-names",
+  "none": "20261025T191724_98004d0dc416_blbr-gt-smoke-safelibero_spatial-dev-t0-LI-none"
+ }
+}
