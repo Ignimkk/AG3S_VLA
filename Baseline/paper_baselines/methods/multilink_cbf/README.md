@@ -24,7 +24,7 @@ G_k = J_k J_ee^+,   W = I_6/25,  W_z = I_3,  alpha = 10,  OSQP via CVXPY
 | `u_nom` = policy delta-pose × fixed scale (not given) | `u = 5 a[:6]` (AEGIS scale), output `a[:6] = u / 5`; base-frame twist (robosuite OSC rotation delta is world-frame) |
 | `zdot_nom` "inherited from AEGIS" | `10 dh/dz`, `z` integrated with `dt = 0.05` and renormalised |
 | infeasible QP → nominal action, logged | same |
-| hazard: Qwen3-VL names it, Grounding DINO boxes, depth crops, workspace / outlier / density filters, MVEE, at reset | AEGIS perception of `methods/aegis` (`perceive_obstacles`): `gt_seg` (privileged, default), `detector` (Grounding DINO + privileged names or generic prompt), `ellipsoids` (given). No VLM |
+| hazard: Qwen3-VL names it, Grounding DINO boxes, depth crops, workspace / outlier / density filters, MVEE, at reset | AEGIS perception of `methods/aegis` (`perceive_obstacles`): `gt_seg` (privileged, default), `detector` (Grounding DINO + privileged names or generic prompt), `ellipsoids` (given). No VLM. Detector crop `crop_mode="depth_trim"` (default) / `"box"` (V5) and `gt_obstacle_set` as in `methods/aegis/README.md` item 3 |
 | **moving hazards**: centre carried by sparse LK optical flow every 5 steps, with gates and template re-search | **omitted.** Option `track_centers=True` re-measures each hazard's point-cloud centroid at every call and shifts the frozen ellipsoid (centre-only model, re-perception instead of flow). Default off = the paper's "frozen at reset" ablation |
 | edge deployment (prefix trimming, 5 flow steps) | not applicable (filter only) |
 

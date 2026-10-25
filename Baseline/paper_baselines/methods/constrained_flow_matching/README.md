@@ -45,6 +45,7 @@ CAR 은 충돌이 없는 episode 비율이고 TSR 은 task 성공률이다. epis
 | `eef_pos` 는 robosuite world frame | base frame 의 `ee_pose` 를 쓴다 (LIBERO 는 회전이 같아 결과가 같다) |
 | 기본 trajectory model `integrator` (Δt · normalized action) | 기본값은 원과 같다. `path_model="osc_response"` 로 OSC response model 을 고를 수 있다 |
 | `bellcurve`, `posthoc` schedule | 둘 다 구현했다 (`posthoc` 은 `posthoc_correct()` 로 최종 chunk 에 한 번 적용한다) |
+| action 범위: SLSQP 에 `bounds` 가 없고 갱신 뒤 clip 도 없다. 실행 때 LIBERO OSC 가 [-1, 1] 로 자른다 | **`action_box=True` (기본, BASELINE-BENCH-READY)**: 수정된 chunk `x_t + δ` 의 위치 3 dim 을 LIBERO OSC 입력 범위 [-1, 1] (policy stats 로 normalized) 안으로 자른다. network 가 이미 범위 밖에 둔 dim 은 더 밖으로 밀지 않는다 (lan 의 `clip_sample` 규칙). 위반이 없으면 δ = 0 이라 unguided 와 bit 동일하다. `action_box=False` 가 V5 동작이다 (V5 pilot served \|xyz\| 최대 7.28: EE ellipsoid 가 이미 점 구름과 겹친 `h_0 < 0` 에서 Δt = 0.01 이라 1 cm 회복에 normalized 1 이 필요하다) |
 
 ## 작동 증거 (CPU)
 

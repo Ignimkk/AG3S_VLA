@@ -21,6 +21,19 @@ code is copied here; only the update rule and the default parameters are restate
 Here the SLSQP solve is replaced by a jit-able SQP: ``n_outer`` linearisations of the constraints (``jax.jacfwd``),
 each solved exactly for the minimum-norm point with Hildreth's dual coordinate ascent (``n_sweeps`` sweeps). The greedy
 fallback is not ported (the last SQP iterate is returned).
+
+Action box (``action_box=True``, BASELINE-BENCH-READY; **not in the original**): the original QP has no bound on
+``delta`` (SLSQP without ``bounds``, no clip after the update; the LIBERO OSC clips the executed action to [-1, 1] per
+dimension). Its trajectory model integrates the normalized action with ``dt = 0.01`` (one normalized unit = 1 cm of
+predicted path), so an EE ellipsoid (6 / 12 / 11 cm) that already overlaps an obstacle (``h_0 < 0``) asks for a
+recovery of ``~|h_0| / dt`` normalized units in the first rows, and the post-Euler corrections of the ten steps add up
+(V5 pilot: served |xyz| up to 7.28). With the box, the corrected chunk ``x_t + delta`` is clipped into the LIBERO
+OSC input range [-1, 1] (normalized with the policy's stats, ``lan_o3dp_guidance_adapted.action_box_normalized``);
+during the denoising steps a dimension already outside is not pushed further out (the Lan-o3dp ``clip_sample`` rule
+used by ``lan_o3dp_guidance_adapted``); at the last step (the served chunk) every corrected entry is clipped into the
+box, so pushes of earlier steps that the network carried along cannot leave it either. No violation -> ``delta = 0``
+-> bit-identical to the unguided state, as before.
+``action_box=False`` is the V5 behaviour.
 """
 from __future__ import annotations
 
@@ -70,15 +83,21 @@ class ConstrainedFlowMatchingGuidance(GuidanceBase):
     def default_params(cls) -> dict:
         return {"safety_margin": 0.01, "min_guidance_time": 0.0, "dt": 0.01, "eef_ellipsoid_radii": (0.06, 0.12, 0.11),
                 "cbf_gamma": 0.9, "guidance_schedule": "flat", "guidance_scale": 1.0, "bell_peak_tau": 0.45,
-                "bell_width": 0.20, "bell_min_tau": 0.05, "bell_max_tau": 0.85, "n_outer": 4, "n_sweeps": 60}
+                "bell_width": 0.20, "bell_min_tau": 0.05, "bell_max_tau": 0.85, "n_outer": 4, "n_sweeps": 60,
+                "action_box": True}
 
     def path_for(self, H: int, scene: GuidanceScene) -> EEPathModel:
         return EEPathModel(H=H, p0=scene.ee_pos, R_bw=scene.R_bw, model=self.path_model, y_prev=scene.y_prev,
                            dt=float(self.params["dt"]))
 
     def _prepare(self, scene: GuidanceScene, obs, norm) -> dict:
-        return {"obstacles": scene.obstacles.padded().as_jax(), "skip": scene.obstacles.empty,
-                "radii": np.asarray(self.params["eef_ellipsoid_radii"], np.float64)}
+        ctx = {"obstacles": scene.obstacles.padded().as_jax(), "skip": scene.obstacles.empty,
+               "radii": np.asarray(self.params["eef_ellipsoid_radii"], np.float64)}
+        if self.params["action_box"]:
+            from Baseline.paper_baselines.methods.lan_o3dp_guidance_adapted.guidance import action_box_normalized
+
+            ctx["box_lo"], ctx["box_hi"] = action_box_normalized(norm)
+        return ctx
 
     def time_scale(self, tau):
         """``_guidance_time_scale`` on the flow time *before* the Euler step (``tau = t_next + 1/num_steps``)."""
@@ -141,11 +160,30 @@ class ConstrainedFlowMatchingGuidance(GuidanceBase):
         return jnp.where(violated, delta, jnp.zeros_like(delta)), violated
 
     def _guide_one(self, x_next, x0, t_next, ctx, path):
+        import jax.numpy as jnp
+
         P = self.params
         delta, _ = self.correction(x0, ctx, path)
         tau = t_next + 1.0 / self.num_steps
         scale = self.time_scale(tau) * P["guidance_scale"]
-        return x_next.at[:, :3].add(scale * delta)
+        push = scale * delta
+        if not P["action_box"]:
+            return x_next.at[:, :3].add(push)
+        lo = jnp.asarray(ctx["box_lo"], x0.dtype)[None]
+        hi = jnp.asarray(ctx["box_hi"], x0.dtype)[None]
+        cur = x0[:, :3]
+        if ctx.get("x0_mode") != "noise":  # original: the post-Euler state itself is the chunk (x0 = x_next)
+            xn = x_next[:, :3]
+            # intermediate steps: never push a dimension further out of the box than the state already is
+            mid = jnp.clip(xn + push, jnp.minimum(lo, xn), jnp.maximum(hi, xn))
+            # last step (the served chunk): every corrected entry ends inside the box (pushes of earlier steps that
+            # the network carried along are bounded too); uncorrected entries stay bit-identical
+            last = jnp.where(push != 0, jnp.clip(xn + push, lo, hi), xn)
+            final = t_next < 0.5 / self.num_steps
+            return x_next.at[:, :3].set(jnp.where(final, last, mid))
+        k = jnp.maximum(1.0 - t_next, 1e-3)  # x0 coefficient of x_next (Lan-o3dp rule, x0_mode="noise" only)
+        new = jnp.clip(cur + push / k, jnp.minimum(lo, cur), jnp.maximum(hi, cur))
+        return x_next.at[:, :3].add((new - cur) * k)
 
     def posthoc_correct(self, x, ctx=None, scene=None):
         """``guidance_schedule="posthoc"``: one correction of a final chunk ``x (b, H, D)`` (after sampling)."""
@@ -155,8 +193,14 @@ class ConstrainedFlowMatchingGuidance(GuidanceBase):
         ctx = ctx or self.last_ctx
         scene = scene or self.last_scene
         path = self.path_for(x.shape[-2], scene)
-        d = jax.vmap(lambda xb: self.correction(xb, ctx, path)[0])(jnp.asarray(x))
-        return jnp.asarray(x).at[..., :3].add(self.params["guidance_scale"] * d)
+        x = jnp.asarray(x)
+        d = jax.vmap(lambda xb: self.correction(xb, ctx, path)[0])(x)
+        if not self.params["action_box"]:
+            return x.at[..., :3].add(self.params["guidance_scale"] * d)
+        lo, hi = jnp.asarray(ctx["box_lo"], x.dtype), jnp.asarray(ctx["box_hi"], x.dtype)
+        cur = x[..., :3]
+        new = jnp.clip(cur + self.params["guidance_scale"] * d, jnp.minimum(lo, cur), jnp.maximum(hi, cur))
+        return x.at[..., :3].set(new)
 
 
 __all__ = ["ConstrainedFlowMatchingGuidance", "SCHEDULES", "ellipsoid_clearance"]

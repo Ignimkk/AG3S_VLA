@@ -35,6 +35,15 @@
 3. **Box crops: robot points removed** (`robot_filter=True`): crop points within sphere radius + 2 cm of the Panda
    collision spheres at `q` are dropped (kinematics, not GT). Without it Grounding DINO boxes that cover the arm
    (seen on SL3 call 0) put an obstacle ellipsoid on the gripper.
+   **Crop (`crop_mode`, BASELINE-BENCH-READY):** `"depth_trim"` (default) keeps only the object at the box centre:
+   robot spheres + Panda base envelope removed, support plane (estimated table height) and points > 0.58 m above it
+   removed, the 26-connected component (1 cm grid) under the central 40 % of the box kept, range percentiles 2-98.
+   This stands in for the official `filtering_points` workspace box, which needs the suite name (not on the closed-loop
+   wire: V5 records `workspace: null`, so in V5 nothing but the 80 % trim was applied). The official DBSCAN
+   (`eps = 1e-4` m) is a no-op in practice and stays as ported. Per-box clouds are associated in 3D across boxes and
+   cameras before merging. `"box"` = the whole box (CLOSED-LOOP-FIX V5, ellipsoid semi-axis up to 0.77 m at V5 call 0).
+   `gt_seg` obstacle set (`gt_obstacle_set`): `"all_non_target"` (default) or `"obstacle_names"` (only
+   `privileged/obstacle_names`: SafeLIBERO's designated obstacle, as the official layer sees one VLM-named obstacle).
 4. **Chunks**: the official layer filters one action per env step with the measured EE pose. A chunk (T > 1) is
    filtered sequentially with the EE pose predicted by the measured gain 0.0115 m / action unit / step
    (`safety_common.POS_GAIN_M`); call with T = 1 per env step to reproduce the official timing.
