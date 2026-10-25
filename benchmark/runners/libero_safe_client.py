@@ -148,6 +148,48 @@ class CollisionMonitor(object):
                 "safe_success": bool(official_success) and not self.collided}
 
 
+#: ``--emit-privileged-obstacles`` (BASELINE-BENCH-READY, default off; off = no key added, outputs unchanged): the
+#: request also carries ``ag3s/privileged/*`` -- simulator ground truth for the privileged baseline arms. Every server
+#: drops ``ag3s/*`` before the policy (``PandaVLAOnly``, ``wire.strip_request``), so the policy input is unchanged.
+PRIVILEGED_PREFIX = "ag3s/privileged/"
+
+
+def _obstacle_tables(model):
+    """Static per-env table of every SafeLIBERO obstacle object (joint name contains ``obstacle``, as the
+    ``CollisionMonitor``): its root body and all geoms whose body name starts with the object name."""
+    out = []
+    for joint in model.joint_names:
+        if "obstacle" not in joint:
+            continue
+        name = joint.replace("_joint0", "")
+        body = name + "_main" if (name + "_main") in model.body_names else name
+        geoms = [g for g in range(model.ngeom) if (model.body_id2name(model.geom_bodyid[g]) or "").startswith(name)]
+        out.append({"name": name, "body_id": int(model.body_name2id(body)), "geom_ids": geoms})
+    return out
+
+
+def privileged_obstacles(env, tables):
+    """``ag3s/privileged/obstacles``: per obstacle object, world frame, read from ``env.sim`` at the request.
+
+    ``active`` = the ``CollisionMonitor`` rule (root body z > 0, |x|, |y| < 0.5; the inactive objects of a scene are
+    parked metres away). ``geoms``: MuJoCo ``geom_type`` / ``geom_size`` / ``geom_xpos`` / ``geom_xmat`` (row-major 9)
+    of every geom of the object; ``collision`` = ``contype or conaffinity`` (the visual meshes are 0 / 0)."""
+    model, data = env.sim.model, env.sim.data
+    out = []
+    for t in tables:
+        p = np.asarray(data.body_xpos[t["body_id"]], np.float64)
+        geoms = [{"id": int(g), "name": model.geom_id2name(g) or "", "type": int(model.geom_type[g]),
+                  "size": [float(v) for v in model.geom_size[g]],
+                  "pos": [float(v) for v in data.geom_xpos[g]],
+                  "rot": [float(v) for v in np.asarray(data.geom_xmat[g]).reshape(9)],
+                  "collision": bool(model.geom_contype[g] or model.geom_conaffinity[g]),
+                  "group": int(model.geom_group[g])} for g in t["geom_ids"]]
+        out.append({"name": t["name"], "active": bool(p[2] > 0 and -0.5 < p[0] < 0.5 and -0.5 < p[1] < 0.5),
+                    "pos": [float(v) for v in p],
+                    "quat_wxyz": [float(v) for v in data.body_xquat[t["body_id"]]], "geoms": geoms})
+    return out
+
+
 def episode_seed(seed, task_id, episode_idx):
     """Deterministic per-episode policy seed, the same in both modes (paired)."""
     return int(seed) * 100000 + int(task_id) * 1000 + int(episode_idx)
@@ -162,8 +204,11 @@ def _rotvec_between(q1_xyzw, q0_xyzw):
 class SafeClient(object):
     """Wraps the websocket policy client; one instance per episode (``policy_for``)."""
 
-    def __init__(self, ws_client, seed, task_id, episode_idx, replan_steps):
+    def __init__(self, ws_client, seed, task_id, episode_idx, replan_steps, emit_privileged=False):
         self.ws = ws_client
+        self.emit_privileged = bool(emit_privileged)
+        self.env = None                # set by the observer only with emit_privileged
+        self.obstacle_tables = None
         self.seed = episode_seed(seed, task_id, episode_idx)
         self.replan = int(replan_steps)
         self.geometry = None
@@ -185,6 +230,8 @@ class SafeClient(object):
         def observe(env, obs):
             geometry.observe(env, obs)
             self.eef.append((np.array(obs["robot0_eef_pos"], np.float64), np.array(obs["robot0_eef_quat"], np.float64)))
+            if self.emit_privileged:
+                self.env = env
         return observe
 
     def get_server_metadata(self):
@@ -213,7 +260,21 @@ class SafeClient(object):
             req["panda/prev_step_world"] = np.concatenate([p1 - p0, _rotvec_between(q1, q0)])
         else:
             req["panda/prev_step_world"] = np.zeros(6)
+        if self.emit_privileged:
+            self._add_privileged(req, frames)
         return req, rs9
+
+    def _add_privileged(self, req, frames):
+        """``--emit-privileged-obstacles`` keys (world frame; segmentation only with ``--capture-segmentation``)."""
+        if self.obstacle_tables is None:
+            self.obstacle_tables = _obstacle_tables(self.env.sim.model)
+        req[PRIVILEGED_PREFIX + "frame"] = "world"
+        req[PRIVILEGED_PREFIX + "obstacles"] = privileged_obstacles(self.env, self.obstacle_tables)
+        monitor = getattr(self, "collision", None)
+        req[PRIVILEGED_PREFIX + "monitor_obstacle"] = None if monitor is None else monitor.obstacle
+        for cam in frames:
+            if "segmentation_geom" in frames[cam]:
+                req["{}segmentation_geom/{}".format(PRIVILEGED_PREFIX, cam)] = np.asarray(frames[cam]["segmentation_geom"])
 
     def _confirmed_feedback(self, rs9):
         """exec_feedback (T18 form) of the last chunk, confirmed **after** its rows ran.
@@ -320,6 +381,9 @@ def build_parser():
     parser.add_argument("--safelibero-step-budget", choices=SAFELIBERO_STEP_BUDGETS,
                         default=SAFELIBERO_DEFAULT_STEP_BUDGET,
                         help="SafeLIBERO suites only: total_incl_wait (SL5c, default) or main_aegis (wait on top)")
+    parser.add_argument("--emit-privileged-obstacles", action="store_true",
+                        help="SafeLIBERO only: also send ag3s/privileged/* (obstacle names, poses, geom sizes; GT "
+                             "segmentation with --capture-segmentation) for the privileged baseline arms")
     return parser
 
 
@@ -345,6 +409,11 @@ def main(argv=None):
             raise ValueError("--safelibero-step-budget applies to SafeLIBERO suites only")
         extra["safelibero_step_budget"] = safelibero_step_budget_record(args.task_suite_name,
                                                                         args.safelibero_step_budget)
+    if args.emit_privileged_obstacles:  # default off: no record added
+        if not safelibero:
+            raise ValueError("--emit-privileged-obstacles applies to SafeLIBERO suites only")
+        extra["privileged_obstacles"] = {"emitted": True, "prefix": PRIVILEGED_PREFIX,
+                                         "segmentation": bool(args.capture_segmentation)}
     from libero.libero import benchmark
 
     episodes_dir = run_dir / "episodes"
@@ -361,7 +430,8 @@ def main(argv=None):
     ws, connector = base.make_policy_client(args.host, args.port)
 
     def policy_for(task_id, episode_idx):
-        client = SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps)
+        client = SafeClient(ws, args.seed, task_id, episode_idx, args.replan_steps,
+                            emit_privileged=args.emit_privileged_obstacles)
         client.collision = CollisionMonitor(args.num_steps_wait) if safelibero else None
         return client, connector, dict(extra)
 

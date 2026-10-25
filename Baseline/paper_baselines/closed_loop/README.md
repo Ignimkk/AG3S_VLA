@@ -21,7 +21,7 @@ launch_method.py (.venv-ag3s)  create_run · GPU lock · suite registry · lp.cl
 metrics.py: TSR / CAR / ETS (official), SL5c safe success, KNOWS SR / CR / SSR, multi-link 11 mm, per-call stats
 ```
 
-## Arms (`arms.py`) — all non-privileged
+## Arms (`arms.py`) — non-privileged unless `--gt`
 
 | arm | family | obstacles | target exclusion | main deviations (all arms: no VLM / API; perception from the wire only) |
 |---|---|---|---|---|
@@ -33,6 +33,30 @@ metrics.py: TSR / CAR / ETS (official), SL5c safe success, KNOWS SR / CR / SSR, 
 
 Filters edit the whole 10-row chunk at the policy call (later rows on the method's EE prediction); the client
 executes rows 0-4 (replan 5), as for VLA-only and V11AB. The original filters run every env step.
+
+## Privileged variants (`--gt`) and benchmark jobs (BASELINE-BENCH-READY, 2026-10-25)
+
+`launch_method.py --method <arm> --gt [SOURCE]` = the original papers' perception condition: SafeLIBERO ground-truth
+obstacles. The client sends them only with `libero_safe_client.py --emit-privileged-obstacles` (default off; off = byte
+identical, `tests/test_client_privileged.py`), the launcher adds the flag (and `--capture-segmentation` for `seg`).
+Wire `ag3s/privileged/*` (world frame) -> `privileged.extras` -> `SceneObservation.extras["privileged/..."]` (base frame).
+Manifest: `settings.arm.privileged = true`, `privileged_inputs`, `client_flags`.
+
+| source | arms (default) | obstacles |
+|---|---|---|
+| `names` | `aegis` | Grounding DINO prompted with the active obstacle names (AEGIS's VLM output) |
+| `seg` | `knows`, `multilink_cbf` | GT segmentation of the active obstacle objects (`obstacle_source="gt_seg"`) |
+| `spheres` | `constrained_flow_matching` | one enclosing sphere per active obstacle (CFM paper) |
+| `geoms` | `nudge`, `omniguide`, `lan_o3dp_guidance_adapted` | collision geoms as primitives; `repo` = CFM repo rule (mesh -> box) |
+
+Every arm also gets `extras["suite"]` (`--suite`, AEGIS's official workspace box; `--no-suite-extras` = V5).
+
+`jobs.py plan --arms none,aegis,aegis:gt,... --suites all --split dev|test --run-prefix P --out-dir D` writes
+`run_parallel_gpu.sh` lines of this launcher (registry split labels, checked by the launcher's parser);
+`jobs.py smoke` = every suite x level, t0 e0; `jobs.py aggregate --plan D/plan.json` = per suite x level x arm metrics
+and pairing with the plan's own (re-run) `none`. `<arm>@v5` reproduces the V5 pilot behaviour (box crop, CFM without
+action box, no suite extras). Until `run_parallel_gpu.sh` has `--launcher`, run with
+`AG3S_PARALLEL_TEST_LAUNCHER="$PWD/.venv-ag3s/bin/python $PWD/Baseline/paper_baselines/closed_loop/launch_method.py"`.
 
 ## Guidance execution
 

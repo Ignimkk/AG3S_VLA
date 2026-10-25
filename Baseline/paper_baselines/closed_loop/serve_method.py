@@ -4,7 +4,8 @@
 ```
 libero_safe_client.py (.venv-libero, unchanged)  --request (policy keys + ag3s/* geometry + panda/*)-->
   MethodServer.infer
-    wire_obs.scene_observation(request)                         (non-privileged SceneObservation)
+    wire_obs.scene_observation(request)                         (non-privileged SceneObservation;
+                                                                 --gt: + privileged.extras(request), ag3s/privileged/*)
     none     : PandaVLAOnly(SeededPolicy(policy)).infer(request)  = the VLA-only server, byte for byte
     filter   : same call -> nominal chunk -> sidecar(.venv-baselines).filter(obs, chunk) -> chunk
     guidance : PandaVLAOnly(SeededPolicy(GuidedPolicy(policy))) -> pi0.sample_actions(guidance_fn=method)
@@ -152,7 +153,8 @@ class MethodServer:
 
     def __init__(self, inner, arm: dict, *, method=None, sidecar=None, norm: dict | None = None, backend=None,
                  recorder: CallRecorder | None = None, scene_kwargs: dict | None = None,
-                 perception_kwargs: dict | None = None, record_nominal: bool = True, target_cameras=None):
+                 perception_kwargs: dict | None = None, record_nominal: bool = True, target_cameras=None,
+                 suite: str | None = None):
         from AG3S.adapters.panda.server import PandaVLAOnly
         from AG3S.trajopt.policy_seed import SeededPolicy
 
@@ -162,6 +164,7 @@ class MethodServer:
         self.scene_kwargs = {**DEFAULT_SCENE_KW, **(scene_kwargs or {})}
         self.perception_kwargs = dict(perception_kwargs or {})
         self.target_cameras = list(target_cameras) if target_cameras else None
+        self.suite = suite  # extras["suite"] (AEGIS's official workspace box per suite; non-privileged)
         self.guided = None
         if self.family == "guidance":
             from Baseline.paper_baselines.closed_loop.guided import GuidedPolicy
@@ -254,10 +257,19 @@ class MethodServer:
         result["timing_ms"] = {k: round(float(v), 3) for k, v in row["ms"].items()}
         return result
 
-    def _scene_obs(self, obs, seq):
+    def _scene_obs(self, obs, seq, row=None):
         from Baseline.paper_baselines.closed_loop.wire_obs import scene_observation
 
-        return scene_observation(obs, last_gripper_cmd=self.last_gripper, seq=seq)
+        sobs = scene_observation(obs, last_gripper_cmd=self.last_gripper, seq=seq)
+        if self.suite:
+            sobs.extras["suite"] = self.suite
+        if self.arm.get("privileged"):  # --gt: simulator GT from the client's ag3s/privileged/* keys
+            from Baseline.paper_baselines.closed_loop import privileged as P
+
+            sobs.extras.update(P.extras(obs, sobs.extras["T_world_base"], shape=self.arm.get("gt_geom_shape") or "collision"))
+            if row is not None:
+                row["privileged"] = P.summary(sobs.extras)
+        return sobs
 
     def _filter_call(self, obs, row, seq, t0, **kwargs):
         from Baseline.paper_baselines.closed_loop.perception import clusters, scene_points
@@ -269,7 +281,7 @@ class MethodServer:
         A0 = np.asarray(result["actions"])
         row["ms"] = {"policy": (t_pol - t0) * 1e3}
         try:
-            sobs = self._scene_obs(obs, seq)
+            sobs = self._scene_obs(obs, seq, row)
             if self.arm["obstacles"] == "depth":
                 masks, tinfo = self._target_masks(sobs)
                 sp = scene_points(sobs, target_masks=masks, **self.perception_kwargs)
@@ -321,13 +333,25 @@ class MethodServer:
 
         scene, sobs, err = None, None, None
         try:
-            sobs = self._scene_obs(obs, seq)
-            masks, tinfo = self._target_masks(sobs)
-            sp = scene_points(sobs, target_masks=masks, **self.perception_kwargs)
-            sobs.extras["obstacle_points"] = sp["obstacle_points"]
-            sobs.extras["target_points"] = sp["target_points"]
+            sobs = self._scene_obs(obs, seq, row)
             kw = {k: v for k, v in self.scene_kwargs.items()}
-            scene = build_scene(sobs, obstacle_source="points", **kw)
+            if self.arm.get("privileged"):  # GT primitives; the depth lift only for a target the method reads
+                if self.arm.get("target") == "detector":
+                    masks, tinfo = self._target_masks(sobs)
+                    sp = scene_points(sobs, target_masks=masks, **self.perception_kwargs)
+                    sobs.extras["target_points"] = sp["target_points"]
+                    sp_info = sp["info"]
+                else:
+                    tinfo, sp_info = {"target": "none"}, {}
+                    sobs.extras["target_points"] = np.zeros((0, 3))  # no depth lift in build_scene
+                scene = build_scene(sobs, obstacle_source="privileged", **kw)
+                sp = {"info": sp_info}
+            else:
+                masks, tinfo = self._target_masks(sobs)
+                sp = scene_points(sobs, target_masks=masks, **self.perception_kwargs)
+                sobs.extras["obstacle_points"] = sp["obstacle_points"]
+                sobs.extras["target_points"] = sp["target_points"]
+                scene = build_scene(sobs, obstacle_source="points", **kw)
             if self.arm["method"] not in NO_PADDING:  # fixed shapes -> one guidance compile per structure
                 scene.obstacles = scene.obstacles.padded(int(kw.get("max_points", 1024)), 4)
             row["perception"] = {**sp["info"], **tinfo, "scene": scene.info}
@@ -393,7 +417,7 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
     """Everything below the openpi policy (tests pass a fake ``policy``)."""
     from Baseline.paper_baselines.methods.interface import get_method, jsonable
 
-    arm = A.resolve(args.method, args.obstacles, args.target)
+    arm = A.resolve(args.method, args.obstacles, args.target, getattr(args, "gt", None))
     ckpt = pathlib.Path(args.checkpoint or default_checkpoint())
     norm = load_norm(ckpt) if arm["family"] == "guidance" or args.fake_policy != "none" else None
     if policy is None:
@@ -425,7 +449,15 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
         det = {"weight": args.detector_weight, "device": args.sidecar_device}
         if arm["family"] == "filter":
             kw = dict(method_kwargs)
-            if arm["obstacles"] == "detector":
+            if arm.get("gt_source") == "names":  # AEGIS's VLM names -> SafeLIBERO GT obstacle names
+                kw.setdefault("obstacle_source", "detector")
+                kw.setdefault("detector_prompt", "obstacle_names")
+                kw.setdefault("detector_device", args.sidecar_device)
+                kw.setdefault("detector_weight", args.detector_weight)
+            elif arm.get("gt_source") == "seg":
+                kw.setdefault("obstacle_source", "gt_seg")
+                kw.setdefault("exclude", "task_objects")  # target / destination are None: nothing excluded
+            elif arm["obstacles"] == "detector":
                 kw.setdefault("obstacle_source", "detector")
                 kw.setdefault("detector_prompt", "all_objects")
                 kw.setdefault("detector_device", args.sidecar_device)
@@ -451,11 +483,12 @@ def build_server(args, *, policy=None, record_root=None) -> tuple[MethodServer, 
     rec_dir = None if run is None else pathlib.Path(run) / "method_calls"
     server = MethodServer(policy, arm, method=method, sidecar=sidecar, norm=norm, backend=backend,
                           recorder=CallRecorder(rec_dir), record_nominal=not args.no_record_nominal,
-                          scene_kwargs=json.loads(args.scene_kwargs) if args.scene_kwargs else None)
+                          scene_kwargs=json.loads(args.scene_kwargs) if args.scene_kwargs else None,
+                          suite=args.suite)
     info.update({"config": args.config, "checkpoint": str(ckpt), "fake_policy": args.fake_policy,
                  "fake_source_run": args.fake_source_run, "fake_source_key": args.fake_source_key,
                  "fake_kind": args.fake_kind, "record_dir": None if rec_dir is None else str(rec_dir),
-                 "scene_kwargs": server.scene_kwargs, "record_nominal": not args.no_record_nominal,
+                 "scene_kwargs": server.scene_kwargs, "suite": args.suite, "record_nominal": not args.no_record_nominal,
                  "action_convention": "pi05_libero EE delta chunk (H=10); client executes rows 0-4 (replan 5), "
                                       "same as serve_safe --robot panda"})
     return server, info
@@ -466,6 +499,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--method", required=True, choices=sorted(A.ARMS))
     ap.add_argument("--obstacles", choices=A.OBSTACLE_SOURCES, default=None, help="filters: detector (default) | depth")
     ap.add_argument("--target", choices=A.TARGET_SOURCES, default=None, help="target exclusion: detector (default) | none")
+    ap.add_argument("--gt", nargs="?", const="default", default=None,
+                    help="privileged variant (arms.GT_SOURCES; no value = arms.GT_DEFAULT); needs the client's "
+                         "--emit-privileged-obstacles")
+    ap.add_argument("--suite", default=None, help="task suite -> SceneObservation.extras['suite'] (launcher sets it)")
     ap.add_argument("--config", default="pi05_libero")
     ap.add_argument("--checkpoint", default=None)
     ap.add_argument("--default-prompt", default=None)

@@ -1,8 +1,18 @@
 """Closed-loop arms: which method, which family, which (non-)privileged inputs, how it differs from the paper.
 
-An arm = ``--method`` + ``--obstacles`` + ``--target``. Everything here is **non-privileged** (the SafeLIBERO wire carries
-RGB / depth / K / T / q only: no GT segmentation, no obstacle names). Privileged variants need a client change and are
-left to the user (task "되돌아올 지점").
+An arm = ``--method`` + ``--obstacles`` + ``--target`` (+ ``--gt``). Without ``--gt`` everything is **non-privileged**
+(the SafeLIBERO wire carries RGB / depth / K / T / q only). ``--gt [SOURCE]`` (BASELINE-BENCH-READY) is the privileged
+variant: simulator ground-truth obstacles from ``libero_safe_client.py --emit-privileged-obstacles`` (``privileged.py``),
+the original papers' conditions (AEGIS: obstacle names given to the detector in place of the VLM; CFM: SafeLIBERO GT
+spheres); the manifest records ``privileged: true`` and the privileged inputs.
+
+| ``--gt`` source | family | obstacles | client flags |
+|---|---|---|---|
+| ``names``  | filter   | Grounding DINO prompted with the active SafeLIBERO obstacle names (AEGIS's VLM output replaced by GT names), depth crop as the non-privileged arm | ``--emit-privileged-obstacles`` |
+| ``seg``    | filter   | GT segmentation of the active obstacle objects (``ObstacleCloudSource(gt_seg)``) | ``--emit-privileged-obstacles --capture-segmentation`` |
+| ``geoms``  | guidance | the active obstacles' collision geoms as primitives (``privileged/obstacle_geoms``) | ``--emit-privileged-obstacles`` |
+| ``repo``   | guidance | the CFM repo rule: every geom named ``*obstacle*``, a mesh as the box of its ``geom_size`` | ``--emit-privileged-obstacles`` |
+| ``spheres``| guidance | one enclosing sphere per active obstacle object (CFM paper: "GT sphere") | ``--emit-privileged-obstacles`` |
 
 | family | where the method acts | process |
 |---|---|---|
@@ -17,6 +27,29 @@ import dataclasses
 FAMILIES = ("none", "filter", "guidance")
 OBSTACLE_SOURCES = ("detector", "depth")  # filters; guidance always uses the depth lift
 TARGET_SOURCES = ("detector", "none")
+GT_SOURCES = {"filter": ("names", "seg"), "guidance": ("geoms", "repo", "spheres")}
+#: ``--gt`` without a value: the source closest to each original paper
+GT_DEFAULT = {"aegis": "names", "knows": "seg", "multilink_cbf": "seg", "constrained_flow_matching": "spheres",
+              "nudge": "geoms", "omniguide": "geoms", "lan_o3dp_guidance_adapted": "geoms"}
+#: ``privileged.obstacle_geoms`` shape of a guidance ``--gt`` source
+GT_GEOM_SHAPE = {"geoms": "collision", "repo": "repo", "spheres": "sphere"}
+#: guidance arms whose method reads the target (OmniGuide's attractor); the others get ``--target none`` under ``--gt``
+TARGET_READERS = ("omniguide",)
+#: arm-specific deviations that remain under ``--gt``
+GT_EXTRA_DEVIATIONS = {"multilink_cbf": ("moving-hazard optical flow omitted",),
+                       "lan_o3dp_guidance_adapted": ("not the original policy's result",),
+                       "knows": ("no target exclusion step: only the SafeLIBERO obstacles are instances (paper: VLA "
+                                 "attention, Eq. 4)",)}
+GT_DESCRIPTION = {
+    "names": "obstacle names = the active SafeLIBERO obstacle objects (privileged/obstacle_names) -> Grounding DINO "
+             "prompt (detector_prompt='obstacle_names'), depth crop; replaces the paper's VLM naming",
+    "seg": "obstacles = GT segmentation of the active SafeLIBERO obstacle objects (privileged/segmentation_geom + "
+           "instances_geom_ids, obstacle_source='gt_seg')",
+    "geoms": "obstacles = collision geoms of the active SafeLIBERO obstacle objects as primitives "
+             "(privileged/obstacle_geoms, base frame)",
+    "repo": "obstacles = CFM repo rule (every geom named *obstacle*, mesh -> box of geom_size; "
+            "live_viewer.GroundTruthObstacleTracker)",
+    "spheres": "obstacles = one enclosing sphere per active SafeLIBERO obstacle object (CFM paper Sec. 5 GT sphere)"}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -65,10 +98,47 @@ ARMS: dict[str, Arm] = {a.name: a for a in (
 )}
 
 
-def resolve(name: str, obstacles: str | None = None, target: str | None = None) -> dict:
+def resolve_gt(name: str, gt: str | None, obstacles: str | None = None, target: str | None = None) -> dict:
+    """Privileged (``--gt``) arm record. ``gt="default"`` = :data:`GT_DEFAULT`."""
+    a = ARMS[name]
+    if a.family == "none":
+        raise ValueError("--gt does not apply to --method none")
+    src = GT_DEFAULT[name] if gt == "default" else gt
+    if src not in GT_SOURCES[a.family]:
+        raise ValueError(f"--gt for a {a.family} arm must be one of {GT_SOURCES[a.family]}, got {src!r}")
+    if obstacles is not None:
+        raise ValueError("--obstacles and --gt are exclusive (--gt sets the obstacle source)")
+    tgt = target if target is not None else ("detector" if name in TARGET_READERS else "none")
+    if a.family == "filter" and tgt != "none":
+        raise ValueError("a --gt filter arm has no target exclusion (only the SafeLIBERO obstacles are obstacles)")
+    if tgt not in TARGET_SOURCES:
+        raise ValueError(f"--target must be one of {TARGET_SOURCES}")
+    inputs = {"names": ["obstacle_names"], "seg": ["segmentation_geom", "instances_geom_ids"],
+              "geoms": ["obstacle_geoms"], "repo": ["obstacle_geoms"], "spheres": ["obstacle_geoms"]}[src]
+    if a.family == "filter":
+        dev = [COMMON_FILTER_DEVIATIONS[0]]
+        if src == "names":
+            dev.append("RGB / depth from the SafeLIBERO wire (head + wrist 256 px depth, 224 px policy RGB "
+                       "re-mirrored and resized to 256 px)")
+    else:
+        dev = [COMMON_GUIDANCE_DEVIATIONS[0], COMMON_GUIDANCE_DEVIATIONS[2]]
+    dev.append("PRIVILEGED: " + GT_DESCRIPTION[src])
+    dev += list(GT_EXTRA_DEVIATIONS.get(name, ()))
+    if tgt == "detector":
+        dev.append("target (attractor) = Grounding DINO target box of the instruction phrase (non-privileged)")
+    return {"arm": name, "variant": f"{name}:gt-{src}", "family": a.family, "method": a.method, "cite": a.cite,
+            "obstacles": f"gt-{src}", "target": tgt, "privileged": True, "gt_source": src,
+            "gt_geom_shape": GT_GEOM_SHAPE.get(src), "privileged_inputs": inputs,
+            "client_flags": ["--emit-privileged-obstacles"] + (["--capture-segmentation"] if src == "seg" else []),
+            "deviation_from_paper": dev}
+
+
+def resolve(name: str, obstacles: str | None = None, target: str | None = None, gt: str | None = None) -> dict:
     """Arm record for the manifest (method, family, effective perception, privileged, deviations)."""
     if name not in ARMS:
         raise KeyError(f"unknown arm {name!r}; available: {sorted(ARMS)}")
+    if gt is not None:
+        return resolve_gt(name, gt, obstacles, target)
     a = ARMS[name]
     obst = obstacles if obstacles is not None else a.default_obstacles
     tgt = target if target is not None else a.default_target
@@ -97,4 +167,19 @@ def resolve(name: str, obstacles: str | None = None, target: str | None = None) 
             "deviation_from_paper": list(a.deviation) + extra}
 
 
-__all__ = ["ARMS", "Arm", "FAMILIES", "OBSTACLE_SOURCES", "TARGET_SOURCES", "resolve"]
+def arm_spec(spec: str) -> dict:
+    """``jobs.py`` arm spec -> launcher arguments: ``<arm>`` | ``<arm>:gt`` | ``<arm>:gt-<source>``."""
+    name, _, rest = spec.partition(":")
+    if name not in ARMS:
+        raise KeyError(f"unknown arm {name!r} in {spec!r}; available: {sorted(ARMS)}")
+    if not rest:
+        return {"method": name, "gt": None, "rec": resolve(name)}
+    if rest == "gt":
+        return {"method": name, "gt": "default", "rec": resolve(name, gt="default")}
+    if rest.startswith("gt-"):
+        return {"method": name, "gt": rest[3:], "rec": resolve(name, gt=rest[3:])}
+    raise ValueError(f"arm spec {spec!r}: expected <arm>, <arm>:gt or <arm>:gt-<source>")
+
+
+__all__ = ["ARMS", "Arm", "FAMILIES", "GT_DEFAULT", "GT_SOURCES", "OBSTACLE_SOURCES", "TARGET_SOURCES", "arm_spec",
+           "resolve", "resolve_gt"]

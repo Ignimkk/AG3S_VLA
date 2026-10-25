@@ -205,7 +205,7 @@ base.make_policy_client = lambda h, p: (object(), "fake")
 def run_tasks(args, run_dir, jsonl, task_suite, max_steps, policy_for, observer_for=None, after_episode=None):
     client, connector, extra = policy_for(args.task_ids[0], args.episode_ids[0])
     seen.update({"max_steps": max_steps, "extra": extra, "n_tasks": task_suite.n_tasks,
-                 "args": {k: v for k, v in sorted(vars(args).items()) if k != "safelibero_step_budget"},
+                 "args": {k: v for k, v in sorted(vars(args).items()) if k not in ("safelibero_step_budget", "emit_privileged_obstacles")},
                  "collision": None if client.collision is None else client.collision.wait,
                  "policy_seed": client.seed})
     return 0

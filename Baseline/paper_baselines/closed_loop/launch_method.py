@@ -10,7 +10,8 @@ keyword, arguments taken from its own parser so later options keep their default
    inherited descriptor, like ``run_parallel_gpu.sh``) and no other GPU compute process -- skipped with ``--cpu-smoke``;
 3. ``serve_method`` (``.venv-openpi-live``) on a free port, ``AG3S_RUN_DIR`` set (it logs ``method_calls/``);
 4. the **unchanged** client ``benchmark/runners/libero_safe_client.py`` (``.venv-libero``) with
-   ``launch_libero_paired.client_argv`` -> same tasks / init states / seed / per-episode ``policy_seed`` as SL5c;
+   ``launch_libero_paired.client_argv`` -> same tasks / init states / seed / per-episode ``policy_seed`` as SL5c
+   (a ``--gt`` arm appends its ``client_flags``: ``--emit-privileged-obstacles`` [``--capture-segmentation``]);
 5. server stopped (SIGINT), ``closed_loop_metrics.json`` (``metrics.summarize``, optionally paired with ``--ref-run``).
 
     source scripts/setup/env.sh
@@ -75,6 +76,8 @@ def server_argv(args, port: int, checkpoint: str | None) -> list[str]:
     argv = [str(l0.openpi_python()), "-m", SERVER_MODULE, "--method", args.method, "--port", str(port),
             "--config", args.config, "--guidance-exec", args.guidance_exec, "--sidecar-device", args.sidecar_device,
             "--detector-weight", args.detector_weight]
+    if not args.no_suite_extras:
+        argv += ["--suite", args.task_suite_name]
     if checkpoint:
         argv += ["--checkpoint", checkpoint]
     for flag, value in (("--obstacles", args.obstacles), ("--target", args.target),
@@ -89,7 +92,22 @@ def server_argv(args, port: int, checkpoint: str | None) -> list[str]:
             argv += ["--fake-source-run", str(resolve_run(args.fake_source_run))]
     if args.no_record_nominal:
         argv.append("--no-record-nominal")
+    if args.gt is not None:
+        argv += ["--gt", args.gt]
     return argv
+
+
+def resolve_arm(args) -> dict:
+    return A.resolve(args.method, args.obstacles, args.target, args.gt)
+
+
+def method_client_argv(args, run_dir: str, port: int, pargs) -> list[str]:
+    """``lp.client_argv`` (= the SL5c client argv) + the client flags a ``--gt`` arm needs (none otherwise)."""
+    flags = resolve_arm(args).get("client_flags") or []
+    if "--capture-segmentation" in flags:
+        pargs = argparse.Namespace(**{**vars(pargs), "capture_segmentation": True})
+    argv = lp.client_argv(run_dir=run_dir, port=port, args=pargs)
+    return argv + [f for f in flags if f not in argv]
 
 
 def server_env(args, run_dir: Path) -> dict:
@@ -106,7 +124,8 @@ def server_env(args, run_dir: Path) -> dict:
 
 
 def run_tag(args) -> str:
-    tag = args.method if not args.tag else f"{args.method}-{args.tag}"
+    tag = args.method if args.gt is None else f"{args.method}-gt-{resolve_arm(args)['gt_source']}"
+    tag = tag if not args.tag else f"{tag}-{args.tag}"
     return f"L{args.safety_level}-{tag}" if args.safety_level else tag
 
 
@@ -136,7 +155,7 @@ def run(args) -> Path:
     from Baseline.paper_baselines.closed_loop import metrics
     from common.run_artifacts import create_run, record_execution
 
-    arm = A.resolve(args.method, args.obstacles, args.target)
+    arm = resolve_arm(args)
     pargs = paired_namespace(args)
     identity = l0.checkpoint_identity(Path(args.checkpoint_dir), require=not args.cpu_smoke)
     ckpt = identity.get("path") if identity else None
@@ -147,14 +166,15 @@ def run(args) -> Path:
                 "task_ids": args.task_ids, "episode_ids": args.episode_ids, "seed": args.seed,
                 "safety_level": args.safety_level, "data_split": args.data_split,
                 "policy_seed_rule": "seed*100000 + task_id*1000 + episode_idx (libero_safe_client.episode_seed)",
-                "checkpoint": identity, "server_argv": s_argv, "cpu_smoke": bool(args.cpu_smoke),
+                "checkpoint": identity, "server_argv": s_argv,
+                "server_extras": {"suite": None if args.no_suite_extras else args.task_suite_name}, "cpu_smoke": bool(args.cpu_smoke),
                 "fake_policy": args.fake_policy, "fake_source_run": args.fake_source_run,
                 "action_convention": "pi05_libero EE-delta chunk H=10, client executes rows 0-4 (replan 5) as VLA-only "
                                      "/ V11AB", "versions": lp.versions()}
     run_dir = create_run(run_id=f"{args.run_id}-{run_tag(args)}", settings=settings,
                          checkpoint=None if args.cpu_smoke else ckpt)
     print(f"[{arm['variant']}] {run_dir}", flush=True)
-    c_argv = lp.client_argv(run_dir=str(run_dir), port=port, args=pargs)
+    c_argv = method_client_argv(args, str(run_dir), port, pargs)
     logs = run_dir / "logs"
     result = {"role": "launcher_result", "arm": arm["variant"], "port": port}
     server, lock = None, None
@@ -201,6 +221,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--method", required=True, choices=sorted(A.ARMS))
     ap.add_argument("--obstacles", choices=A.OBSTACLE_SOURCES, default=None)
     ap.add_argument("--target", choices=A.TARGET_SOURCES, default=None)
+    ap.add_argument("--gt", nargs="?", const="default", default=None,
+                    help="privileged variant: SafeLIBERO GT obstacles (arms.GT_SOURCES; no value = arms.GT_DEFAULT)")
+    ap.add_argument("--no-suite-extras", action="store_true",
+                    help="do not hand extras['suite'] to the methods (the V5 behaviour: AEGIS workspace box off)")
     ap.add_argument("--tag", default=None, help="extra run-id suffix (e.g. obst-depth)")
     ap.add_argument("--task-suite-name", default="safelibero_spatial")
     ap.add_argument("--task-ids", type=lambda s: [int(x) for x in s.split(",")], required=True)
@@ -246,12 +270,14 @@ def main(argv=None) -> int:
     elif args.fake_policy != "none":
         raise ValueError("--fake-policy is a CPU smoke option (add --cpu-smoke)")
     check_selection(args)
-    A.resolve(args.method, args.obstacles, args.target)
+    arm = resolve_arm(args)
+    if arm.get("privileged") and not args.task_suite_name.startswith("safelibero"):
+        raise ValueError("--gt needs a SafeLIBERO suite (the obstacle ground truth comes from SafeLIBERO)")
     if args.dry_run:
         pargs = paired_namespace(args)
         print(json.dumps({"server": server_argv(args, 0, "<checkpoint>"),
-                          "client": lp.client_argv(run_dir="<run>", port=0, args=pargs),
-                          "arm": A.resolve(args.method, args.obstacles, args.target),
+                          "client": method_client_argv(args, "<run>", 0, pargs),
+                          "arm": arm, "run_tag": run_tag(args),
                           "protocol": lp.protocol_settings(pargs)}, indent=1, default=str))
         return 0
     if not args.cpu_smoke and lp.gpu_lock_held_by_caller():
