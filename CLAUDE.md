@@ -73,8 +73,12 @@ KST 날짜·commit·UUID run 아래로 저장한다. 서버와 client가 같은 
 `export AG3S_RUN_DIR="$(.venv-openpi-live/bin/python -m common.run_output)"`를 한 번 실행한다.
 OpenPI `--record`는 run의 `policy_records/session_*/step_N.npy`에 쓰며 과거 recording link를 사용하지 않는다.
 
-GPU 검증은 다른 checkout과 동시에 실행하지 않는다. `/tmp/ag3s-vla-gpu-validation.lock`을
-공유하고 `nvidia-smi`에서 기존 compute process가 없는지 확인한 뒤 시작한다.
+GPU 작업은 모든 checkout이 `/tmp/ag3s-vla-gpu-validation.lock`을 `scripts/setup/gpu_lock.py`로 잡고 시작한다
+(사용자 판정 2026-10-25, 두 단계). **독점**(`exclusive`): 결과가 벽시계 시간에 의존하거나 시간을 재는 작업 —
+TrajOpt가 들어가는 closed-loop(serve_safe safe mode, `time_budget_ms`가 강제 상한), 지연 시간·runtime 측정.
+**공유**(`shared`): 결과가 벽시계와 무관한 작업 — VLA 단독(`--no-safe`), offline 추출·replay, 시간을 보고하지 않는 smoke.
+공유 작업은 GPU 사용량 + 예상치 ≤ 120 GiB이면 함께 돈다. 줄 서 있는 독점 요청 뒤의 공유 요청은 기다린다.
+예: `python3 scripts/setup/gpu_lock.py exclusive --est-gib 30 --tag 실험이름 -- bash launch.sh`, 상태는 `gpu_lock.py status`.
 `OPENPI_DATA_HOME`·CUDA/Warp/JAX/Torch cache는 자기 checkout 아래다.
 `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 유지한다.
 

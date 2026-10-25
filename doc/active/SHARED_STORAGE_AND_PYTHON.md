@@ -133,22 +133,34 @@ ALOHA 전체 호환성이나 신규 training 완료를 주장하지 않는다.
 2026-10-12 KST 설치 후 cuRobo 회귀 기준선 10/15 · 15/15 · −9.171877401271193 mm가 PYTHONPATH 우회 없이 일치했다
 (`results/development/20261012T110000+0900_f14ae3e6b62b_469dfaac099c/verify/env-curobo/`).
 
-## Cache와 GPU 직렬 검증
+## Cache와 GPU lock (독점 / 공유)
 
 `env.sh`는 자기 checkout의 `.cache/openpi`, `.cache/huggingface`, `.cache/cuda`, `.cache/warp`,
 `.cache/jax`, `.cache/torch-extensions`를 설정한다. 이전 terminal의 `/mnt/dev/work` 기본값은 제거한다.
 `XLA_PYTHON_CLIENT_PREALLOCATE=false`, `XLA_FLAGS=--xla_gpu_enable_command_buffer=`를 유지한다.
 
-GPU 검증 전 `nvidia-smi` compute process를 확인하고 양쪽 checkout이 같은 advisory lock을 사용한다.
-현재 H200 한 장에서는 OpenPI와 cuRobo 검증을 순서대로 실행한다.
+모든 checkout이 같은 advisory lock `/tmp/ag3s-vla-gpu-validation.lock`을 `scripts/setup/gpu_lock.py`로 잡는다
+(사용자 판정 2026-10-25: 독점 / 공유 두 단계, H200 한 장을 함께 쓴다).
 Lock을 사용하지 않는 외부 실행을 통제하거나 기존 process를 종료하지 않는다.
 
+| 단계 | 언제 | 동시에 도는 것 |
+|---|---|---|
+| `exclusive` (`flock -x`) | 결과가 벽시계 시간에 의존하거나 시간을 잰다: TrajOpt 가 들어가는 closed-loop (serve_safe safe mode 의 `SqpConfig.time_budget_ms` 는 강제 상한이라 GPU 가 느려지면 SQP 반복 수와 closed-loop 결과가 바뀐다), 지연 시간 · runtime 측정 | 없음 |
+| `shared` (`flock -s`) | 결과가 벽시계와 무관: VLA 단독 (`serve_safe --no-safe`), offline 추출 · replay, 시간을 보고하지 않는 smoke · 학습 | 다른 공유 작업 (메모리 허용 조건 안에서) |
+
+- 허용 조건 (두 단계 공통, gate 를 잡은 채 확인): `nvidia-smi memory.used + 예상치 ≤ 120 GiB` 그리고 ledger 에 올라 있는 실행 중 작업의 예상치 합 + 예상치 ≤ 120 GiB. 아니면 기다린다
+- 줄 서기: 모든 요청은 `/tmp/ag3s-vla-gpu-gate.lock` 을 지나간다. 독점 요청은 기다리는 동안 gate 를 쥐므로, 뒤에 온 공유 요청이 끼어들어 독점 요청을 굶기지 않는다
+- 자식 process 가 lock descriptor 를 물려받는다: wrapper 가 죽어도 자식이 사는 동안 lock 이 유지된다. 자식 환경에 `AG3S_GPU_LOCK_MODE`, `AG3S_GPU_LOCK_HELD=1` 이 들어간다
+- 기존 `flock /tmp/ag3s-vla-gpu-validation.lock CMD` 는 독점 holder 로 계속 올바르게 동작한다 (gate 를 거치지 않으므로 줄 서기 보장만 없다)
+- 기존 kit 의 "lock 이 잡혀 있는가" 검사 (`flock -n LOCK true` 가 실패해야 함) 는 공유로 잡아도 그대로 통과한다
+- test: `tests/test_gpu_lock.py`
+
 ```bash
-# 올바른 형태 (둘 중 하나)
-flock -w 600 /tmp/ag3s-vla-gpu-validation.lock CMD ...
-( flock -w 600 9 || exit 13; CMD ... ) 9>/tmp/ag3s-vla-gpu-validation.lock
-# 잘못된 형태: `flock -w 600 9 CMD ... 9>/tmp/...` — flock 이 `9` 를 파일 이름으로 읽어 cwd 의 ./9 를 잠근다
-# 확인: lock 을 잡은 상태에서 다른 shell 의 `flock -n /tmp/ag3s-vla-gpu-validation.lock true` 가 실패해야 한다
+python3 scripts/setup/gpu_lock.py exclusive --est-gib 30 --tag occ-ag3s -- bash launch_ag3s.sh     # AG3S closed-loop
+python3 scripts/setup/gpu_lock.py shared --est-gib 20 --tag occ-vla --wait-max-s 3600 -- bash launch_vla.sh
+python3 scripts/setup/gpu_lock.py status      # lock 상태 · gate · GPU 사용량 · 실행 중 holder (ledger)
+# 예상치(--est-gib): serve_safe safe mode 서버 + client 약 20–30 GiB, --no-safe 서버 약 17 GiB
+# 잘못된 형태 (legacy): `flock -w 600 9 CMD ... 9>/tmp/...` — flock 이 `9` 를 파일 이름으로 읽어 cwd 의 ./9 를 잠근다
 ```
 검증 command·raw output·input identity는 최신 보고서와 verify manifest에 기록한다.
 
