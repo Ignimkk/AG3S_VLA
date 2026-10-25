@@ -8,6 +8,8 @@ gripper columns), and compared with the MuJoCo scene of the same request (base f
                              neighbour's GT surface (the clearance the TrajOpt rows would see from a perfect field)
   contact_region_outside_mm  the body's samples within 2 mm of its closest approach: min over all spheres of |p − c| − r
                              (> 0 = the sphere model does not cover the touching part)
+  palm_to_target_mm          the palm link's (`--palm-link`) spheres to the target's GT surface: min |p − c| − r — how much room
+                             the palm spheres leave around the object to be grasped
 
   MUJOCO_GL=osmesa .venv-openpi-live/bin/python -m AG3S.ag3s.experiments.studies.sphere_coverage_check \
       --kit <V> --configuration B_ROI_FPR --argv-file <argv.txt> --episode 1345 --requests 11 12 13 14 15 16 17 \
@@ -35,6 +37,8 @@ def main(argv=None) -> int:
     ap.add_argument("--requests", nargs="+", type=int, required=True)
     ap.add_argument("--body", required=True, help="MuJoCo body whose collision geoms are the touching part")
     ap.add_argument("--neighbour", required=True)
+    ap.add_argument("--target", default="apple")
+    ap.add_argument("--palm-link", default="ee_left")
     ap.add_argument("--variant", action="append", required=True, help="NAME=extra server flags")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
@@ -53,6 +57,7 @@ def main(argv=None) -> int:
     geoms = [g for g in range(m.ngeom) if m.geom_bodyid[g] == body and (m.geom_contype[g] or m.geom_conaffinity[g])]
     local = {g: gt._sample_local(g) for g in geoms}
     nb_idx = [i for i, (k, n, b) in enumerate(gt.kind) if n == a.neighbour]
+    tg_idx = [i for i, (k, n, b) in enumerate(gt.kind) if n == a.target]
     out = {"episode": a.episode, "body": a.body, "n_geoms": len(geoms), "neighbour": a.neighbour, "variants": {}}
     for spec in a.variant:
         name, _, flags = spec.partition("=")
@@ -80,9 +85,13 @@ def main(argv=None) -> int:
             outside = (np.linalg.norm(gp[close][:, None] - c[None], axis=2) - r[None]).min(axis=1)
             s2n = np.linalg.norm(nb[:, None] - c[grip][None], axis=2) - r[grip][None]
             k_near = grip[int(np.unravel_index(np.argmin(s2n), s2n.shape)[1])]
+            tg = np.vstack([samples[i] for i in tg_idx])
+            palm = [k for k, n in enumerate(names) if n == a.palm_link]
+            p2t = (np.linalg.norm(tg[:, None] - c[palm][None], axis=2) - r[palm][None]).min()
             rows.append({"request": j, "geom_to_neighbour_mm": round(float(dn.min()) * 1e3, 3),
                          "spheres_to_neighbour_mm": round(float(s2n.min()) * 1e3, 3), "nearest_sphere_link": names[k_near],
                          "contact_region_outside_mm": [round(float(outside.min()) * 1e3, 3), round(float(outside.max()) * 1e3, 3)],
+                         "palm_to_target_mm": round(float(p2t) * 1e3, 3), "n_palm_spheres": len(palm), "n_spheres": len(names),
                          "gripper_radius_mm": [round(float(r[grip].min()) * 1e3, 2), round(float(r[grip].max()) * 1e3, 2)]})
             print(name, json.dumps(rows[-1]), flush=True)
         out["variants"][name] = {"flags": flags, "rows": rows}

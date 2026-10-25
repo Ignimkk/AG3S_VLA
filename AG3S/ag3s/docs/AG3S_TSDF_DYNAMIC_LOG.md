@@ -5,6 +5,7 @@
 > E4 (가장자리 보존 완화 · serving 기본값 켬) 추가: **2026-10-24 19:3x KST** (`date -u` 10:29 UTC + 9 h).
 > `AG3S-ROI-CARVE-GPU` (§13: 관심 영역 지우기의 비용 원인 측정 · GPU 판정 · 1345 접촉 진단, 앞 요약의 미측정 주장 정정) 추가: **2026-10-25 04:5x KST** (`date -u` 2026-10-24 19:52 UTC + 9 h).
 > `AG3S-NBC-1345` (§14: 1345 오렌지 접촉의 원인 분리 — 이웃 접촉 허용 vs 손바닥 구 모델, 반사실 실행 3 조건) 추가: **2026-10-25 17:4x KST** (`date -u` 08:45 UTC + 9 h).
+> `AG3S-PALM-COVER-1345` (§15: 손바닥 mesh 에 맞춘 구 `--palm-cover on` 으로 1345 오렌지 접촉을 막으면서 쥐기를 지키는가 — 단계 1 실패, §14 의 쥐기 상실 가설 정정, 서버 기록 `clearance` 의 층 주의) 추가: **2026-10-25 18:2x KST** (`date -u` 09:25 UTC + 9 h).
 > 앞으로 이 축의 STEP 은 여기에 이어 쓴다. `AG3S_T47_LOG.md` 5973 줄 이후에 있던 `AG3S-TASK-DYNAMIC-MAP` 의 1차 · 진단 · E2 기록은 이 문서로 옮겨 왔고 (그쪽은 줄을 지우지 않았다), E3 · E4 는 이 문서에만 있다.
 
 **프로젝트 목적.** AG3S 에서 VLA 의 visual attention 으로 target 과 obstacle 을 구분하고, target 을 충돌 대상에서 제외한 3D 환경 정보를 cuRobo 의 TSDF/ESDF 파이프라인으로 전달하는 전체 시스템을 구축한다. 이 문서는 그 중 **거리장이 시간에 따라 바뀌는 세계를 따라가는가** — 물체가 옮겨진 뒤 옛 자리의 잔상을 지우되, 손에 가려졌을 뿐 실제로 있는 장애물은 잊지 않는가 — 를 다룬다.
@@ -14,9 +15,9 @@
 | 항목 | 내용 |
 |---|---|
 | 정본 여부 | **동적 TSDF · 거리장 축의 정본 로그 (이어 쓰는 파일).** 이 축의 새 STEP · 추가 실험은 여기에 쓴다 |
-| 범위 | 옮겨진 물체의 옛 자리 지우기, target 전용 TSDF (`--target-layer`), 관심 영역 지우기 (`--roi-carve`) 와 그 개선 (`--roi-carve-footprint` 등). 현재 STEP = `AG3S-TASK-DYNAMIC-MAP` (1차 · 진단 · E2 · E3 · E4), `AG3S-ROI-CARVE-GPU` (§13), `AG3S-NBC-1345` (§14) |
+| 범위 | 옮겨진 물체의 옛 자리 지우기, target 전용 TSDF (`--target-layer`), 관심 영역 지우기 (`--roi-carve`) 와 그 개선 (`--roi-carve-footprint` 등). 현재 STEP = `AG3S-TASK-DYNAMIC-MAP` (1차 · 진단 · E2 · E3 · E4), `AG3S-ROI-CARVE-GPU` (§13), `AG3S-NBC-1345` (§14), `AG3S-PALM-COVER-1345` (§15) |
 | 다른 로그와의 관계 | [`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) (attention head · HSR · cuRobo 비교 등 T47 이후 STEP 의 정본) 와 [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md) (T46 까지) 는 이 문서가 쓰지 않는 다른 축이다. T47 로그 "AG3S-TASK-DYNAMIC-MAP" 절 (5973 줄 이후) 은 1차 · 진단 · E2 의 **원본**으로 남아 있고, 이 문서가 그것을 옮겨 이어 쓴다. 두 문서의 수치가 다르면 **이 문서가 우선**한다 |
-| 정본 숫자 | [`handoff/AG3S-TASK-DYNAMIC-MAP.verify.json`](handoff/AG3S-TASK-DYNAMIC-MAP.verify.json) 의 `numbers` 만 (lead 가 직접 측정). 설계 · 결과 전 고정 기준 · 사용자 판정: [`handoff/AG3S-TASK-DYNAMIC-MAP.task.md`](handoff/AG3S-TASK-DYNAMIC-MAP.task.md). **§13 의 숫자는** [`handoff/AG3S-ROI-CARVE-GPU.verify.json`](handoff/AG3S-ROI-CARVE-GPU.verify.json) 의 `numbers` (설계 · 기준: [`task`](handoff/AG3S-ROI-CARVE-GPU.task.md)). **§14 의 숫자는** [`handoff/AG3S-NBC-1345.verify.json`](handoff/AG3S-NBC-1345.verify.json) 의 `numbers` (설계 · 결과 전 고정 판정: [`task`](handoff/AG3S-NBC-1345.task.md)) |
+| 정본 숫자 | [`handoff/AG3S-TASK-DYNAMIC-MAP.verify.json`](handoff/AG3S-TASK-DYNAMIC-MAP.verify.json) 의 `numbers` 만 (lead 가 직접 측정). 설계 · 결과 전 고정 기준 · 사용자 판정: [`handoff/AG3S-TASK-DYNAMIC-MAP.task.md`](handoff/AG3S-TASK-DYNAMIC-MAP.task.md). **§13 의 숫자는** [`handoff/AG3S-ROI-CARVE-GPU.verify.json`](handoff/AG3S-ROI-CARVE-GPU.verify.json) 의 `numbers` (설계 · 기준: [`task`](handoff/AG3S-ROI-CARVE-GPU.task.md)). **§14 의 숫자는** [`handoff/AG3S-NBC-1345.verify.json`](handoff/AG3S-NBC-1345.verify.json) 의 `numbers` (설계 · 결과 전 고정 판정: [`task`](handoff/AG3S-NBC-1345.task.md)). **§15 의 숫자는** [`handoff/AG3S-PALM-COVER-1345.verify.json`](handoff/AG3S-PALM-COVER-1345.verify.json) 의 `numbers` (설계 · 결과 전 고정 판정: [`task`](handoff/AG3S-PALM-COVER-1345.task.md)) |
 | 앞선 STEP | `AG3S-DYNAMIC-FIELD` ([`task`](handoff/AG3S-DYNAMIC-FIELD.task.md) · [`verify.json`](handoff/AG3S-DYNAMIC-FIELD.verify.json)), `IFG-APPLE-NBC-TARGETSURFACE` ([`verify.json`](handoff/IFG-APPLE-NBC-TARGETSURFACE.verify.json)), `IFG-211-GRASP` ([`task`](handoff/IFG-211-GRASP.task.md), commit `8da37119`). 이 로그에 절이 없다 (링크만 한다) |
 | 수치 출처 표기 | `[V]` = `verify.json` 의 `numbers` (키를 적는다). `[D]` = 같은 `numbers` 에서 이 문서가 계산한 값 (식을 적는다). `[T]` = task 문서의 정의 · 사용자 판정 · lead 전달. `[H]` = 측정하지 않은 가설. `[I]` = 기록자의 정리 |
 | 판정과 serving 기본값 | 이 문서의 "채택 · 미채택" 은 task 에 **결과 전에 고정한 기준**을 적용한 STEP 판정이다. ~~서버 기본값은 모든 flag 가 꺼짐이고, 변경은 사용자 판정으로 한다~~ → **E4 채택으로 serving 기본값을 켰다 (2026-10-24, §8.7).** 켜지는 조건은 `--esdf-backend curobo` + AG3S 켬 + 관심 영역 flag 없음, 끄기는 `--no-roi-carve`, `EsdfConfig` 코드 기본값은 꺼짐 유지. **2026-10-25: 관심 영역 지우기의 점유 voxel 판정을 GPU (`roi_carve_device: cuda`) 로 하는 것도 serving 기본값에 포함했다 (§13, 사전 고정 G1–G3 통과). 되돌리기는 `--roi-carve-device cpu`. `EsdfConfig` 코드 기본값은 `cpu`** |
@@ -50,6 +51,10 @@
 | **이웃 접촉 허용 (`--neighbour-contact-mm 20`)** | target 근처 (파지 전) 에서 손가락 구 (`ee_finger_l1` · `ee_finger_l2`) 가 이웃 장애물과 20 mm 까지 겹쳐도 된다는 TrajOpt 설정. 손바닥 구 (`ee_left`) 에는 걸리지 않는다 [T task `AG3S-NBC-1345` §1]. §14 의 "허용 끔" 조건은 이 flag 를 뺀 것 |
 | **손바닥 구 모델 (palm spheres)** | AG3S 가 TrajOpt 제약에 쓰는 로봇 구 중 손바닥 link (`ee_left` · `ee_right`) 의 것. 현재 구 반지름 5.7–6.22 mm (capsule 배율을 줄인 값), URDF 굵기 (`--capsule-radius-scale-link ee_left=1.0 ee_right=1.0`) 이면 33.53 mm. §14 의 "손바닥 구 URDF 굵기" 조건은 이것을 바꾼 것 |
 | **설계 확인 (offline coverage check)** | 요청 시점의 관절 · 손가락 열림을 MuJoCo GT mesh 와 AG3S 구 모델에 각각 넣어 "구 모델이 보는 손 – 이웃 물체 거리" 와 "실제 mesh 거리" 를 비교하는 계산. rollout 이 아니다 (`sphere_coverage_check.py`) |
+| **palm cover (`--palm-cover on`)** | 손바닥 link (`ee_left` · `ee_right`) 의 구를 MJCF 손바닥 collision mesh 겉면에 맞춰 다시 만드는 기존 flag (T45 A10, 기본 꺼짐, overflow 5 mm). 손바닥 구가 23 → 121 개, 전체 구가 270 → 466 개 [V `offline_coverage`]. 손바닥 겉면 표본 중 구 밖 비율 0.946 → 0.00028 [T task `AG3S-PALM-COVER-1345` §0, `AG3S_T47_LOG.md` 4651 줄] |
+| **target 접촉 권한 link (permission mask)** | target (사과) 를 거리장에서 제외한 층 (hand layer) 을 읽는 link. 손 쪽 구들이다. §15 에서 palm cover 의 손바닥 구 121 개가 모두 여기에 든다 (`target_field_exclude` True) |
+| **TrajOpt 수정량 (deflection)** | chunk 마다 `max \|refined − reference\|` (rad). TrajOpt 가 VLA 가 낸 reference action chunk 를 관절마다 최대 얼마나 고쳤는가 (그림 y 축 [V sidecar]) |
+| **손바닥이 TrajOpt 최악 행인 chunk** | 서버가 기록한 그 chunk 의 최대 위반 쌍의 link 가 손바닥 구 (`ee_left`) 인 chunk. 기록 `clearance` 배열의 최솟값이 아니라 TrajOpt 의 최악 행 (`worst_link`) 이다 |
 | **ATS · HSR · LTE · CCR** | ATS (Attention-based Target Segmentation, attention 으로 target 분할 · 추적) · HSR (Hidden-state Sub-task Recognition, 작업 단계 · 쥠 판단) · LTE (Link-specific Target Exemption, link 별 target 제외 거리장) · CCR (Constrained Chunk Refinement, TrajOpt 궤적 수정 · HOLD) |
 
 ## 진행 현황
@@ -63,6 +68,7 @@
 | **E4** 가장자리 보존 완화 (`--roi-carve-footprint-robot ignore` + `--roi-carve-footprint-pad-px 0`), 18 장면 | E3 에서 옛 자리가 지워지지 않게 된 것을 되돌리면서 기둥 보존을 유지할 수 있는가 | **측정 완료 (2026-10-24) — 채택 (사전 기준 적용).** (a) 기준 2 (다른 물체 옛 자리 잔상 1,277 → 584, −54.3 %) · 기준 3 (네 값 모두 기준 구성보다 낮음) · 기준 4 (성공 15 ≥ 14, 금지 접촉 episode 1 ≤ 3), (b) 기둥 놓친 표면 17.64 % → 2.19 % (−87.6 %). **serving 기본값을 켰다.** 비용: 서버 거리장 단계 중앙값 303.19 ms (기준 구성 109.7 ms 의 2.76 배). 아래 §8 |
 | **AG3S-ROI-CARVE-GPU** 관심 영역 지우기 비용 원인 측정 (R1–R4) + GPU 판정 (G1–G3) | 앞 요약의 미측정 주장 (비용 원인 · 제약 생성 380 ms · 1345 접촉 · target TSDF 누출 원인) 을 측정하거나 거두고, 가장 큰 비용 부분을 GPU 로 옮겨도 판정이 같은가 | **측정 완료 (2026-10-25).** G1 (지울 voxel 집합 차이 0) · G2 (replay 중앙값 207.73 → 26.09 ms) · G3 (1345 서버 32 chunk 궤적 · 거리장 동일) 통과 → serving 기본값에 `roi_carve_device: cuda` 포함. 1345 접촉은 왼손 몸체 mesh 와 오렌지 (바나나 아님, §13.6), ~~원인은 구 모델 범위 + 이웃 접촉 허용을 **분리하지 못함**~~ → 분리는 §14 에서 했다. R5 는 측정하지 않음. 아래 §13 |
 | **AG3S-NBC-1345** 1345 오렌지 접촉의 원인 분리 (이웃 접촉 허용 끔 · 손바닥 구 URDF 굵기 · 둘 다, 1345 · seed 13453, 조건마다 1 episode) | 구 모델 범위와 이웃 접촉 허용 중 무엇이 오렌지 접촉을 낳는가 | **측정 완료 (2026-10-25), 사용자 판정 대기.** 허용만 끄면 접촉이 남는다 (27 → 40 row, 성공 유지). 손바닥 구만 URDF 굵기로 하면 0 row 이나 **사과를 쥐지 못한다** (no_grasp). 결과 전 고정 표의 행에 따라 원인 = 구 모델이 손바닥을 덮지 못함 (제약 기하), 허용 단독은 아님. 1 장면 · 조건마다 1 episode. 고치는 방법은 정하지 않았다. 아래 §14 |
+| **AG3S-PALM-COVER-1345** 손바닥 mesh 에 맞춘 구 (`--palm-cover on`, 기존 flag) 로 1345 오렌지 접촉을 막으면서 쥐기를 지키는가 (offline 덮임 확인 → 1345 · seed 13453 1 episode → 통과 시 18 장면) | 손바닥을 mesh 겉면에 맞게 덮으면 접촉 0 row 와 성공이 함께 되는가 | **단계 1 측정 완료 (2026-10-25) — 사전 고정 기준으로 실패, 단계 2 (18 장면) 는 미실행.** offline 은 접촉 부위가 모두 구 안에 든다 (구 밖 거리 −4.87 ~ −0.09 mm). 1345 에서 손–오렌지 접촉 0 row 이나 `no_grasp` (닫기 3 회). 쥐기 실패 지점 = TrajOpt 의 최악 행이 손바닥 구이고 손 층에서 그 근처 표면이 오렌지 (사과는 그 층에서 빠져 있다). 1 episode. 사용자 판정 대기. 아래 §15 |
 
 ## 물려받은 결정
 
@@ -90,7 +96,7 @@
 | 5 | **E3 의 753 탁자 접촉 (78 row) 원인** — 기준 구성 · 관심 영역 지우기 구성의 753 에는 금지 접촉이 없었다 | `verify.json` `e3_18_scenes.closed_loop_runs` | E4 에서는 753 의 탁자 접촉이 0 row 다 (재측정 대기 8). **원인은 측정 안 됨** |
 | ~~6~~ | ~~가장자리 보존 완화의 closed-loop 결과 (§8)~~ | `verify.json` `e4_18_scenes` | **완료 (2026-10-24, 채택).** §8 |
 | ~~7~~ | ~~서버 기본값 켜기~~ | task §10a | **켰다 (2026-10-24).** §8.7. 이 축에 남은 일은 아래 8 · 9 |
-| 8 | ~~**E4 의 남은 금지 접촉 (1345 이웃 과일 27 row)**~~ → **E4 의 남은 금지 접촉 (1345, 왼손 몸체 mesh ↔ 오렌지 27 row, 바나나 아님)** 와 E3 의 753 탁자 접촉이 E4 에서 0 row 가 된 이유 | `verify.json` `e4_18_scenes.closed_loop_runs`, `AG3S-ROI-CARVE-GPU.verify.json` `R4_ep1345_neighbour_contact` | 1345 부분은 **§13.6 에서 측정**: 접촉 쌍 · 거리장 상태 · 구 모델 밖 거리는 사실, ~~원인은 구 모델 범위 + 이웃 접촉 허용 설정이 함께 있고 **분리 안 됨**~~ → **§14 에서 분리했다 (2026-10-25)**: 허용만 끄면 접촉이 남고 (40 row), 손바닥 구를 URDF 굵기로 하면 접촉이 없지만 쥐기를 잃는다. 원인 층 = 구 모델 (제약 기하). 고치는 방법은 **미정** (§14.9). 753 부분은 **측정 안 됨** |
+| 8 | ~~**E4 의 남은 금지 접촉 (1345 이웃 과일 27 row)**~~ → **E4 의 남은 금지 접촉 (1345, 왼손 몸체 mesh ↔ 오렌지 27 row, 바나나 아님)** 와 E3 의 753 탁자 접촉이 E4 에서 0 row 가 된 이유 | `verify.json` `e4_18_scenes.closed_loop_runs`, `AG3S-ROI-CARVE-GPU.verify.json` `R4_ep1345_neighbour_contact` | 1345 부분은 **§13.6 에서 측정**: 접촉 쌍 · 거리장 상태 · 구 모델 밖 거리는 사실, ~~원인은 구 모델 범위 + 이웃 접촉 허용 설정이 함께 있고 **분리 안 됨**~~ → **§14 에서 분리했다 (2026-10-25)**: 허용만 끄면 접촉이 남고 (40 row), 손바닥 구를 URDF 굵기로 하면 접촉이 없지만 쥐기를 잃는다. 원인 층 = 구 모델 (제약 기하). 고치는 방법은 **미정** (§14.9). 753 부분은 **측정 안 됨**. **손바닥 mesh 에 맞춘 구 (palm cover) 는 §15 에서 시험했다 (2026-10-25): 접촉 0 row 이나 쥐기 실패 (1 episode)** |
 | 9 | **완화가 기둥 외 물체 (손에 가려진 이웃 과일 등) 를 더 잊는지**, ~~서버 거리장 단계 비용 증가 (중앙값 303.19 ms) 가 어느 단계에서 나는지~~ → **비용 단계 분해는 §13.4 에서 측정했다**, 기준 2 가 한도 근처 (−54.3 %) 인 것이 seed · 표본에 따라 뒤집히는지 | `verify.json` `diag18_missed_by_body_B_ROI_FPR` (물체별 값은 있으나 판정에 쓰지 않았다), `not_measured` | 비용 분해: **측정 완료 (§13.4)**. 나머지 (기둥 외 물체 잊음 · 기준 2 의 seed 민감도): **측정 안 됨** |
 
 ---
@@ -707,6 +713,8 @@ G3 의 서버 거리장 단계 · 관심 영역 지우기 시간 (같은 장면 
 
 (l1 = `ee_finger_l1`. 오렌지 표면 중 지금 보이는 비율은 0.39–0.49. main 층에서 오렌지 표면의 거리장 최솟값 (`esdf_at_neighbour.min_mm`) 은 −7.07 ~ −11.18 mm 로 모두 음수, 즉 오렌지 자리는 점유로 읽힌다.) 가장 가까운 구의 반지름: `ee_finger_l1` · `ee_finger_l2` 2.54–8.44 mm, `ee_left` 5.7–6.22 mm [V `scene_figure.sphere_radius_mm`]. 이웃 접촉 허용 설정 = `--neighbour-contact-mm 20`: 손가락 구 (`ee_finger_l1` · `ee_finger_l2`) 가 target 근처 (파지 전) 에서 이웃 장애물과 20 mm 까지 겹칠 수 있다. 요청 12–17 에서 켜져 있었다 [V `neighbour_contact_setting`]. 기준 구성 기록 (`per_request_B_contact_region`) 의 구 모델 밖 거리 · 계획 clearance 도 같은 크기다 (예: 요청 11 `12.05–16.735` · −0.158, 요청 12 `10.132–16.956` · −3.52).
 
+**주의 (2026-10-25 추가, §15.5): 위 표의 "계획 clearance" 와 §13.6 · §14.2 가 서버 기록 `clearance` 배열에서 읽은 값은 모든 구가 main layer (`esdf_distance`) 를 읽은 값이다. target 접촉 권한이 있는 link (손) 의 구가 TrajOpt 에서 실제로 최적화하는 층 (hand layer) 의 값이 아니다** [V `AG3S-PALM-COVER-1345.verify.json` `findings`]. 그래서 이 표의 clearance 로 "TrajOpt 가 그 link 에서 얼마나 위반했는가" 를 읽으면 안 된다. 이 절의 옛 숫자는 고치지 않고 이 주의만 더한다. 이 배열에서 손바닥 구 clearance 를 읽은 §15 의 값 (예: `worst_palm_clearance_mm`) 도 같은 한계가 있다.
+
 **(iii) 원인 위치 — 측정이 가리키는 만큼만**
 
 | 구성 요소 | 측정이 말하는 것 | 판정 |
@@ -847,7 +855,7 @@ run 을 하기 전에, 요청 시점의 관절 · 손가락 열림으로 "AG3S �
 | 증상 | 증상 위치 | 원인 위치 | 근거 · 상태 |
 |---|---|---|---|
 | 왼손 몸체 mesh ↔ 오렌지 접촉 (27 row, 1345) | 실행 접촉 (MuJoCo replay) | **CCR 의 제약 기하 — 로봇 구 모델이 손바닥 mesh 를 덮지 못함.** 이웃 접촉 허용은 단독 원인이 아니다 | [V `results`, `verdict_pre_fixed_table`], 사실 (1 장면 · 조건마다 1 episode) |
-| 손바닥 구 URDF 굵기에서 사과를 쥐지 못함 | 실행 (쥐기 단계) | **미확인** — 가설 [H]: URDF 굵기 구가 손바닥 mesh 를 과하게 덮어 사과에 다가가는 것을 막는다 | [V `scene_request13`] 은 기준 run 자세 한 곳의 기하만 보인다 |
+| 손바닥 구 URDF 굵기에서 사과를 쥐지 못함 | 실행 (쥐기 단계) | **미확인** — ~~가설 [H]: URDF 굵기 구가 손바닥 mesh 를 과하게 덮어 사과에 다가가는 것을 막는다~~ → §15 (2026-10-25) 에서 같은 run 의 서버 기록으로 확인했다: TrajOpt 의 최악 행이 손바닥 구 (`ee_left`) 이고 손 층에서 그 근처 표면은 사과가 아니라 **오렌지** 다 (요청 12–15). 기록이 보이는 것은 "최악 행 근처 표면이 오렌지" 까지이고, 그래서 접근이 틀어졌다는 것은 해석이다 (§15.8 의 [I]·[H]). 손바닥 구 ↔ 사과 0.55 mm 는 요청 13 한 곳의 기하 사실로 남는다 | [V `scene_request13`] 은 기준 run 자세 한 곳의 기하만 보인다. 정정 근거: `AG3S-PALM-COVER-1345.verify.json` `numbers.worst_row_PALM_urdf` |
 
 사실 [V]:
 
@@ -858,13 +866,13 @@ run 을 하기 전에, 요청 시점의 관절 · 손가락 열림으로 "AG3S �
 
 가설 [H]:
 
-- URDF 굵기 구가 **쥐기를 잃는 이유** 라는 것 — 위 기하 사실은 그럴듯한 설명이지만, 손바닥 구 조건 run 안에서 어느 link 의 구가 어느 요청에서 제약을 위반해 사과 접근을 막았는지 확인하지 않았다 (손바닥 구 조건은 접촉 row 가 없고 사과 접촉 row 는 있으며 (68 row), 접근 자체가 완전히 막힌 것은 아니다).
+- ~~URDF 굵기 구가 **쥐기를 잃는 이유** 라는 것 — 위 기하 사실은 그럴듯한 설명이지만,~~ → **§15 에서 확인하여 이 가설은 거둔다** (구가 사과 가까이 붙어서 쥐기를 잃었다는 설명은 최악 행 근처 표면이 오렌지라는 기록과 맞지 않는다). 아래 원문은 당시 기록이다: 위 기하 사실은 그럴듯한 설명이지만, 손바닥 구 조건 run 안에서 어느 link 의 구가 어느 요청에서 제약을 위반해 사과 접근을 막았는지 확인하지 않았다 (손바닥 구 조건은 접촉 row 가 없고 사과 접촉 row 는 있으며 (68 row), 접근 자체가 완전히 막힌 것은 아니다).
 - "허용 끔" 에서 접촉 row 가 늘어난 (27 → 40) 기전 — 측정하지 않았다. 궤적이 조건 사이에 갈라지므로 (`limits`) 같은 자세에서의 비교가 아니다.
 - 손바닥 구 조건의 0 row 가 "구가 손을 오렌지에서 떼었다" 인지 "궤적이 달라져 오렌지 가까이 가지 않았다" 인지 — 조건 run 의 손 – 오렌지 최소 거리 (접촉 없을 때의 값) 는 `verify.json` 에 없어 구별하지 않았다. 고정 판정표가 접촉 row 수로 판정하므로 판정은 유효하나, 0 row 의 강도는 쥐기가 성립한 run (기준 · 허용 끔) 의 값보다 약하다 [I].
 
 **14.8 측정하지 않은 것 · 한계** [V `not_measured`, `limits`]
 
-1. **손바닥 mesh 에 맞춘 구 집합 (URDF capsule 보다 촘촘한 것) — 만들지 않았다.** URDF 굵기는 mesh 를 과하게 덮는다 (요청 13 에서 손바닥 구 ↔ 사과 0.55 mm). 중간 굵기 (현재와 URDF 사이의 배율) 도 run 하지 않았다 — coverage check 의 손가락 배율 0.35 는 offline 계산이고 손바닥 배율이 아니다.
+1. **손바닥 mesh 에 맞춘 구 집합 (URDF capsule 보다 촘촘한 것) — 이 STEP 에서는 만들지 않았다** (→ 이미 있던 `--palm-cover on` 으로 §15 에서 돌렸다). URDF 굵기는 mesh 를 과하게 덮는다 (요청 13 에서 손바닥 구 ↔ 사과 0.55 mm). 중간 굵기 (현재와 URDF 사이의 배율) 도 run 하지 않았다 — coverage check 의 손가락 배율 0.35 는 offline 계산이고 손바닥 배율이 아니다.
 2. **다른 장면 — 1 장면 진단이다.** 1345 한 장면 · 조건마다 1 episode (seed 13453), 반복 없음.
 3. **핵심 평가의 link 집합 (`--links gripper_wrist`) — 측정하지 않았다.** 이 STEP 은 `--links gripper` 로 돌렸다. 핵심 평가에서 같은 결과가 나오는지는 모른다.
 4. 조건 사이에 궤적이 갈라진다 (`limits`). 접촉 row 수 · 닫기 횟수는 같은 자세에서의 비교가 아니다.
@@ -876,7 +884,172 @@ run 을 하기 전에, 요청 시점의 관절 · 손가락 열림으로 "AG3S �
 
 | 후보 | 근거 | 확인할 것 · 전환 신호 |
 |---|---|---|
-| 손바닥 mesh 에 맞춘 구 집합 (URDF capsule 보다 얇게) 을 만들어 같은 3 조건 중 "손바닥 구" 만 다시 돌린다 | §14.2 coverage (현재 10–13 mm 밖 → URDF 굵기 −1.4 ~ −2.3 mm) 와 §14.6 (URDF 굵기에서 쥐기 상실) 사이의 중간 | 접촉 0 row 이면서 `ok` 로 쥐는가. 사과 쪽 구 ↔ 사과 거리가 0.55 mm 처럼 붙지 않는가 |
+| 손바닥 mesh 에 맞춘 구 집합 (URDF capsule 보다 얇게) 을 만들어 같은 3 조건 중 "손바닥 구" 만 다시 돌린다 | §14.2 coverage (현재 10–13 mm 밖 → URDF 굵기 −1.4 ~ −2.3 mm) 와 §14.6 (URDF 굵기에서 쥐기 상실) 사이의 중간 | 접촉 0 row 이면서 `ok` 로 쥐는가. 사과 쪽 구 ↔ 사과 거리가 0.55 mm 처럼 붙지 않는가. **→ 이 후보는 §15 에서 `--palm-cover on` 으로 시험했다: 접촉 0 row, `no_grasp`** |
 | 손바닥 배율을 현재와 1.0 사이에서 몇 단계로 돌린다 | §14.6 | 접촉이 사라지는 배율과 쥐기를 잃는 배율이 겹치는가 |
 | 1345 한 장면 밖에서 같은 접촉이 나는지 (다른 장면의 오렌지 · 이웃 과일 접촉) | §14.8 의 2 | 같은 쌍 (`EE_BODY_L` ↔ 이웃 과일) 이 다른 장면에서도 나면 구 모델 쪽 수정이 일반 문제 |
 | 핵심 평가의 link 집합 (`--links gripper_wrist`) 에서 같은 coverage 를 본다 | §14.8 의 3 | link 집합이 다르면 손바닥 구가 구 모델에 포함되는지부터 다시 본다 |
+
+### 15. AG3S-PALM-COVER-1345 — 손바닥 mesh 에 맞춘 구 (palm cover) 로 1345 오렌지 접촉을 막으면서 쥐기를 지키는가 (2026-10-25 KST)
+
+작성 **2026-10-25 18:2x KST** (`date -u` 09:25 UTC + 9 h). 측정자: lead (직접 실행, 순차 작업). 이 절의 숫자는 [`handoff/AG3S-PALM-COVER-1345.verify.json`](handoff/AG3S-PALM-COVER-1345.verify.json) 의 `numbers` 이고, 조건 · 단계 · 판정은 결과를 보기 전에 [`task`](handoff/AG3S-PALM-COVER-1345.task.md) 에 고정했다. 사용자 판정 (2026-10-25): "권장하는 대로 수행" = 손바닥 mesh 에 맞춘 구, 기본 꺼짐 flag, offline 덮임 확인 → 1345 → 18 장면 [T task 머리글]. 원시 기록 run: `20261025T035831+0900_8da37119afd3_f082f20e9463` (`verify/AG3S-PALM-COVER-1345/`, 기준 조건은 같은 run 의 `verify/AG3S-ROI-CARVE-GPU-SMOKE/`, 손바닥 URDF 굵기 조건은 `verify/AG3S-NBC-1345/`). 앞선 STEP: `AG3S-NBC-1345` (§14, 원인 = 구 모델이 손바닥을 덮지 못함, 손바닥 구를 URDF 굵기로 키우면 쥐기를 잃음). 보기 폴더 (git 제외): `outputs/2026-10-25_손바닥구_palmcover/`.
+
+**15.1 목적**
+
+§14 는 1345 오렌지 접촉의 원인 층을 "구 모델이 손바닥을 덮지 못함" 으로 가렸지만, 손바닥 구를 URDF 굵기 (반지름 33.53 mm) 로 키운 조건은 접촉 0 row 를 얻는 대신 사과를 쥐지 못했다 (§14.6). 이 STEP 은 그 사이에 있는 후보 — 손바닥 구를 굵게 하는 것이 아니라 **손바닥 mesh 겉면에 맞춰** 덮는 것 — 가 **오렌지 접촉 0 row 와 쥐기 (성공) 를 함께 얻는가** 를 묻는다. 새 구성은 만들지 않았고 이미 있는 flag 를 썼다.
+
+**15.2 사용한 것 — 기존 flag, 새 코드 없음** [T task §0]
+
+| 항목 | 내용 |
+|---|---|
+| flag | `--palm-cover on` (T45 A10, **기본 꺼짐**). 손바닥 (`ee_<side>`) 구를 MJCF 손바닥 collision mesh 겉면에 다시 만든다 (overflow 5 mm). 이 STEP 에서 코드를 바꾸지 않았다 |
+| 이전 덮임 audit | 손바닥 겉면 표본의 구 밖 비율 0.946 → 0.00028 (T46f A14 audit, [`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) 4651 줄) |
+| 구성 (closed-loop) | serving 기본 구성 (이웃 과일과 붙은 target 떼어 내기 + 사과 표면 점 빼기 + 관심 영역 지우기 가장자리 보존 완화, GPU 판정, §8 · §13) + `--palm-cover on`. 1345 · seed 13453, 1 episode [V `records.arm_PC`] |
+| 이미 기록된 위험 | CL4 (palm cover + 손목 구 + 다른 변경을 동시에 켠 구성) 에서 손바닥 구가 TrajOpt 최악 행 (target-free 층) 이 된 chunk 가 18 쌍 합 CL3 21 → 109 · 95 로 늘고 성공이 낮았다. 형상만의 효과를 가르는 X2G 의 결과는 기록에 없다 ([`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) 5256–5257 줄, [`CL4.task.md`](handoff/CL4.task.md)) |
+
+**15.3 결과 전 고정한 단계와 판정** [T task §1 · §2]
+
+| 단계 | 내용 | 통과 조건 |
+|---|---|---|
+| 1 offline 덮임 확인 | `sphere_coverage_check.py` (rollout 아님). 요청 12–16 에서 접촉 부위가 구 안에 드는지, 손바닥 구 → 사과 거리. 변형 5 개: 지금 · 손바닥 URDF 굵기 · palm cover · `--links gripper_wrist` · `--links gripper_wrist` + palm cover | (기록) |
+| 1 closed-loop | palm cover 구성 · 1345 · seed 13453 · 1 episode | **손–오렌지 접촉 0 row 그리고 성공.** 둘 중 하나라도 아니면 단계 2 로 가지 않고 결과를 보고한다 |
+| 2 18 장면 | E2 · E3 · E4 와 같은 VLA 단독 성공 사과 18 장면 | 성공 ≥ 15 / 18, 금지 접촉 episode ≤ 1, 손–이웃 과일 접촉 row 합 < E4 의 18 장면 합. 모두 지켜야 채택 제안. 기록만: TrajOpt 풀이 시간 · 서버 시작 시간 · 손바닥이 최악 행인 chunk 수 |
+
+통과해도 serving 기본값은 사용자 판정으로 바꾼다. 실패한 장면은 ATS · HSR · LTE · CCR (§용어) 중 원인 위치를 적는다.
+
+**15.4 결과 — offline 덮임 확인 (요청 12–16, 1345 E4 기록)** [V `offline_coverage`]
+
+그림 (verifier 가 만든 것, 링크만 한다): 장면 ![scene](figures/palm-cover/palm-cover-1345-scene.png) ([sidecar](figures/palm-cover/palm-cover-1345-scene.json)). episode 1345 요청 13, 위에서 본 왼손 (x–y 평면). 왼쪽 = 지금 구 모델 (손바닥 구 23 개), 오른쪽 = palm cover (121 개). 주황 점 = 오렌지, 초록 점 = 사과, 보라 점 = 왼손 몸체 mesh, 빨간 점 = 접촉 부위, 노란 원 = AG3S 손바닥 구. 같은 요청 13 의 기준 run 자세에 두 구 모델을 각각 씌운 것이다.
+
+| 변형 (flag) | 손바닥 구 · 전체 구 | 접촉 부위의 구 밖 거리 (mm, 요청 12–16 전체 범위) | 구 모델 ↔ 오렌지 (mm), 요청 12 · 13 · 14 · 15 · 16 | 손바닥 구 ↔ 사과 (mm), 요청 12 · 13 · 14 · 15 · 16 | 가장 가까운 구 link |
+|---|---|---|---|---|---|
+| 지금 (없음) | 23 · 270 | 8.09 ~ 26.42 | 29.61 · 10.18 · 11.13 · 11.68 · 13.35 | 53.47 · 27.74 · 24.18 · 22.97 · 23.60 | `ee_finger_l1` |
+| 손바닥 URDF 굵기 (`--capsule-radius-scale-link ee_left=1.0 ee_right=1.0`) | 23 · 270 | −5.37 ~ 5.97 | 18.81 · −2.28 · −2.33 · −2.31 · −1.43 | 26.28 · 0.56 · −3.00 · −4.22 · −3.59 | `ee_left` |
+| **palm cover** (`--palm-cover on`) | 121 · 466 | **−4.87 ~ −0.09** | 25.32 · −1.67 · −2.71 · −3.07 · −2.01 | 30.51 · 5.36 · 1.15 · −0.95 · −3.61 | `ee_left` |
+| `--links gripper_wrist` 만 | 23 · 1,153 | 8.09 ~ 26.42 (**지금과 같다**) | 지금과 같다 | 지금과 같다 | `ee_finger_l1` |
+| `--links gripper_wrist` + palm cover | 121 · 1,349 | −4.87 ~ −0.09 (palm cover 와 같다) | palm cover 와 같다 | palm cover 와 같다 | `ee_left` |
+
+(실제 mesh ↔ 오렌지 거리 [V `geom_to_neighbour_mm`]: 26.57 · 0.76 · 1.16 · 1.90 · 1.53 mm. 음수 = 구가 그 표면 안으로 들어간다. 장면 그림 sidecar 의 요청 13: 손바닥 구 ↔ 오렌지 25.02 → −1.67 mm, ↔ 사과 27.74 → 5.36 mm.)
+
+읽는 법 (사실 [V]):
+
+- palm cover 는 접촉 부위의 모든 표본점을 구 안에 넣는다 (구 밖 거리 최댓값 −0.09 mm). URDF 굵기는 같은 부위에서 최대 5.97 mm 구 밖에 표본점이 남는다.
+- **`--links gripper_wrist` 만으로는 손바닥을 덮지 못한다.** 다섯 요청 모두 값이 지금 구성과 같다 (손바닥 구 23 개, 가장 가까운 구 `ee_finger_l1`). 전체 구가 1,153 개로 늘어도 접촉 부위에 가까운 구는 늘지 않았다. `gripper_wrist` + palm cover 는 palm cover 단독과 같다. 이 비교는 offline 이고 closed-loop 은 돌리지 않았다.
+- palm cover 의 손바닥 구는 사과와도 가까워진다: 손바닥 구 ↔ 사과 거리가 요청 15 · 16 에서 −0.95 · −3.61 mm (구가 사과 GT 표면 안으로 들어감). 구에는 5 mm overflow 가 있다. 이 구들이 closed-loop 에서 사과를 장애물로 보는지는 15.7 에서 본다.
+
+**15.5 결과 — 1345 closed-loop (palm cover 구성, 1 episode)** [V `closed_loop_1345`]
+
+그림: 표 ![table](figures/palm-cover/palm-cover-1345-table.png) ([sidecar](figures/palm-cover/palm-cover-1345-table.json)), TrajOpt 수정량 ![deflection](figures/palm-cover/palm-cover-1345-deflection.png) ([sidecar](figures/palm-cover/palm-cover-1345-deflection.json)). 수정량 그림은 chunk 1–30 만 그렸다. 파랑 = 지금 구 모델 (기준), 주황 = 손바닥 URDF 굵기, 초록 = palm cover. 동그라미 = 손바닥이 TrajOpt 최악 행인 chunk, 점선 = 닫기 시작 (기준 t = 17, palm cover t = 20, URDF 굵기 t = 24 [V sidecar `state`]).
+
+| 조건 | 손–오렌지 접촉 row | 성공 | 쥐기 (`failure_mode`) | 닫기 시도 | TrajOpt 수정량 최댓값, latched chunk 중 (rad) | 손바닥이 최악 행인 chunk (분모 = 오른쪽 열) | latched chunk (t ≥ 12, episode 전체) |
+|---|---|---|---|---|---|---|---|
+| 기준 (지금 구 · 허용 20 mm, `B_ROI_FPR`) | 27 | 성공 | `ok` | 1 회 | 0.0058 | 0 | 5 |
+| 손바닥 URDF 굵기 (§14 `PALM`) | **0** | **실패** | `no_grasp` | 7 회 | 0.071 | 13 | 41 |
+| **palm cover (`PC`)** | **0** | **실패** | **`no_grasp`** | **3 회** | **0.0779** | **8** | 48 |
+
+palm cover 는 episode 가 step 한계까지 갔다 [V `stage1_verdict`]. 기준의 27 row 는 §13.6 · §14.4 와 같은 값이다.
+
+열 정의 [V `closed_loop_1345_definitions`]: **window** = grasp state 가 latched 이고 `t_step ≥ 12` 인 chunk 전부, **episode 전체** (닫기 실패 뒤 다시 접근한 chunk 포함. 그림은 `t_step ≤ 30` 만 보인다). 수정량 최댓값 = 그 window 에서 `max \|refined − reference\|` (처음 16 row, arm 14 열). 손바닥이 최악 행인 chunk = 그 window 의 chunk 중 TrajOpt `max_violation_pair` 의 link 가 `ee_left` 인 것 (분모 `n_latched_chunks_from_t12`). 즉 palm cover 는 48 chunk 중 8 개, URDF 굵기는 41 중 13 개, 기준은 5 중 0 개다. 이전 표 머리글의 "닫기 전" 은 이 window 가 아니라서 고쳤다.
+
+**15.6 판정 — 단계 1 실패, 단계 2 (18 장면) 는 돌리지 않았다** [V `stage1_verdict`, T task §1]
+
+> 손–오렌지 접촉은 0 row 였으나 **쥐지 못했다** (`no_grasp`, 닫기 3 회). 결과 전 고정 조건 "접촉 0 row **그리고** 성공" 의 둘째가 아니므로 **단계 1 실패**, 고정한 대로 단계 2 (18 장면) 로 가지 않았다. 기록만 하기로 한 항목 (TrajOpt 풀이 시간 · 서버 시작 시간) 은 단계 2 를 돌리지 않아 `verify.json` 에 값이 없다.
+
+이전 대비 (before → after). 기준점: 직전 구성 = serving 기본 구성 (§8 · §13, 손바닥 구 23 개). V11AB 와의 비교는 하지 않는다 (§9 의 사유와 같다). 손바닥 URDF 굵기 조건 (§14) 을 같은 열에 나란히 둔다.
+
+| 지표 | before (지금 구) | after (palm cover) | 참고: 손바닥 URDF 굵기 |
+|---|---|---|---|
+| 손–오렌지 접촉 row | 27 | **0** | 0 |
+| 성공 · 쥐기 | 성공 · `ok` | **실패 · `no_grasp`** | 실패 · `no_grasp` |
+| 닫기 시도 | 1 회 | 3 회 | 7 회 |
+| TrajOpt 수정량 최댓값, latched chunk (t ≥ 12, episode 전체) | 0.0058 rad | 0.0779 rad | 0.071 rad |
+| 손바닥이 최악 행인 latched chunk (t ≥ 12, episode 전체) | 0 / 5 | 8 / 48 | 13 / 41 |
+
+**개선이 아니다.** 접촉을 없앴으나 이 STEP 의 목표 (접촉을 막으면서 쥐기를 지킨다) 의 절반만 이루었고, §14 의 손바닥 URDF 굵기와 같은 실패 모드로 갔다. 닫기 시도는 URDF 굵기의 7 회보다 적은 3 회다 (기준 1 회).
+
+**15.7 쥐기 실패 지점 — TrajOpt 의 최악 행은 손바닥 구이고, 손 층에서 그 근처 표면은 오렌지다**
+
+(i) 권한 · 층 [V `findings`]
+
+- permission mask 는 palm cover 의 손바닥 구 121 개를 **모두 target 접촉 권한 link** (`target_field_exclude` True) 로 표시한다. 즉 이 구들은 target (사과) 를 거리장에서 뺀 hand layer 를 읽고, 사과는 이 구들에게 장애물이 아니다.
+- hand layer 에서 사과가 빠져 있다 [V `hand_vs_main_layer_at_apple_PC`, 요청 13–19]: 사과 voxel 이 점유로 읽히는 비율이 손바닥 구 근처에서 hand layer 0.0 (요청 13–19 전부) 대 main layer 0.793–1.0, 사과 전체로는 요청 11–19 에서 hand layer 0.058–0.139 대 main layer 0.546–0.826.
+
+(ii) TrajOpt 가 어디를 어떻게 고쳤나 [V `findings`, `closed_loop_1345`]
+
+- latched chunk (t ≥ 12, episode 전체; 정의 [V `closed_loop_1345_definitions.window`]) 중 TrajOpt 의 최악 행이 손바닥 구인 chunk 가 palm cover 48 개 중 8 개 (기준 5 개 중 0 개), 그 chunk 들의 수정량 최댓값이 0.0779 rad (기준 0.0058 rad) [V `findings`, 두 번째].
+- 처음 접근 (t ≤ 30, 그림의 범위) 만 보면 수정량 최댓값은 palm cover 0.060 rad 대 기준 0.006 rad 이다 [V `findings`, 두 번째]. sidecar 에서 palm cover 의 최악 link 는 t = 12–19 에서 `ee_left` (손바닥) 이고, 이 구간 수정량은 0.0061 (t = 12) → 0.0598 (t = 15) → 0.0201 rad (t = 19) 로 오른다. 기준은 latched 인 t = 12–16 에서 0.0023–0.0058 rad, 최악 link 는 `ee_finger_l1`. 0.0779 · 0.071 은 닫기 실패 뒤 다시 접근한 chunk 까지 포함한 episode 전체의 최댓값이라 그림의 값과 다르다 (이전에 "풀지 못했다" 고 적은 불일치는 window 정의로 풀렸다).
+
+(iii) 최악 행 근처의 손 층 표면은 누구의 것인가 [V `worst_row_PC`, `worst_row_PALM_urdf`]. 손바닥 구의 최악 행 근처 (35 mm 이내, URDF 조건은 50 mm 이내) 의 hand layer surface voxel 을 GT (MuJoCo 실제 표면) 로 가장 가까운 물체에 귀속했다 (8 mm 이내).
+
+| 요청 | 12 | 13 | 14 | 15 | 16 | 17 | 18 |
+|---|---|---|---|---|---|---|---|
+| palm cover: 최악 link | `ee_left` | `ee_left` | `ee_left` | `ee_left` | `ee_left` | `ee_left` | `ee_left` |
+| `worst_clearance_mm` (mm; TrajOpt `max_violation_pair.clearance_m`, 그 행 자신의 층 = target 접촉 권한 link 는 target-free (hand) layer [V `closed_loop_1345_definitions`]) | 3.9 | 1.2 | 4.8 | 4.8 | 4.9 | 5.0 | 5.0 |
+| hand layer surface voxel, 35 mm 이내 | 31 | 31 | 2 | 7 | 6 | 6 | 3 |
+| 그중 오렌지 (8 mm 이내) | 29 | 30 | 2 | 7 | 6 | 6 | 3 |
+| 그중 사과 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| (참고) main layer 에서 사과 · 오렌지 voxel | 15 · 30 | 18 · 65 | 129 · 28 | 122 · 32 | 89 · 23 | 95 · 24 | 53 · 11 |
+
+(요청 12 의 나머지 2 개, 13 의 1 개는 어떤 GT 에도 8 mm 안에 들지 않았다 (`none`). main layer 의 참고 행은 최악 행 근처 35 mm 안의 surface voxel 이고 사과 voxel 이 들어 있다. `worst_obstacle` 열은 요청 12 는 없고 13–18 은 `target` 으로 기록되나, 이 로그는 그 라벨을 귀속에 쓰지 않았다 — GT 귀속만 썼다 [V `limits`].)
+
+손바닥 URDF 굵기 run 도 같다 [V `worst_row_PALM_urdf`]: 요청 12–16 의 최악 link 는 `ee_left` 이고 (요청 11–19 전부 `ee_left`, 20–22 는 `ee_finger_l1`), 그 근처 hand layer 표면은 요청 12 · 13 · 14 · 15 · 16 에서 오렌지 3 · 1 · 1 · 24 · 1 voxel, 요청 11 · 17–19 는 빈 집합, 요청 20–22 는 탁자 (523 · 523 · 588 voxel).
+
+(iv) palm cover 의 최악 손바닥 구가 GT 에서 가장 가까운 물체 [V `palm_sphere_nearest_gt_PC`]. 거리 = 최악 손바닥 구의 **표면** (`|p − c| − r`) 에서 각 GT 물체의 가장 가까운 표면 표본까지 [V `closed_loop_1345_definitions`].
+
+| 요청 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 |
+|---|---|---|---|---|---|---|---|---|---|
+| 가장 가까운 GT (mm) | 오렌지 55.3 | 사과 40.0 | 사과 17.1 | 사과 5.2 | 사과 2.8 | 사과 1.6 | 사과 3.2 | 사과 0.8 | 사과 17.1 |
+| 오렌지까지 (mm) | 55.3 | 64.5 | 49.1 | 35.3 | 28.9 | 26.0 | 27.3 | 26.2 | 45.9 |
+
+즉 **가장 가까운 것은 사과 (0.8–5.2 mm, 요청 14–18) 이고 오렌지는 26–35 mm 다.** 그런데 TrajOpt 가 읽는 hand layer 에서 사과는 빠져 있으므로 그 층의 근처 표면은 오렌지뿐이다.
+
+**주의 — 서버 기록 `clearance` 배열은 main layer 다.** `worst_palm_clearance_mm` (요청 11–19 에서 −4.3 ~ −16.9 mm, 표에 싣지 않았다) 는 서버 기록의 `clearance` 배열에서 읽은 값이고, 이 배열은 **모든 구에 대해 main layer 를 읽은 값**이라 target 접촉 권한 link 의 구에 대해 TrajOpt 가 최적화하는 값 (hand layer) 이 아니다 [V `findings`, 네 번째]. 그래서 손바닥 구의 음수 clearance (−16.9 mm 등) 는 "사과를 장애물로 보는 main layer 에서 손바닥 구가 사과 안에 있다" 는 뜻일 뿐 TrajOpt 가 그 위반을 풀었다는 뜻이 아니다. 반면 (iii) 의 `worst_clearance_mm` 은 TrajOpt 의 최악 행 자신의 층에서 온 값이라 이 한계가 없다 (`closed_loop_1345_definitions`). §13.6 의 계획 clearance 에는 배열의 한계가 있다 (그 절에 주의를 더했다).
+
+**15.8 사실 · 가설 · 해석 구분**
+
+사실 [V]:
+
+- palm cover 는 접촉 부위를 모두 구 안에 넣는다 (offline). `--links gripper_wrist` 만으로는 접촉 부위 근처 구가 늘지 않는다 (offline, 지금과 같은 값).
+- 1345 에서 palm cover 는 손–오렌지 접촉 0 row, 그러나 `no_grasp` (닫기 3 회, step 한계). 단계 1 실패.
+- 손바닥 구 121 개는 모두 target 접촉 권한 link 이고 hand layer 에서 사과는 빠져 있다. latched chunk (t ≥ 12, episode 전체) 48 개 중 8 개에서 TrajOpt 의 최악 행이 손바닥 구이고 수정량 최댓값 0.0779 rad (기준 5 개 중 0 개 · 0.0058 rad; 처음 접근 t ≤ 30 만 보면 0.060 대 0.006 rad).
+- 최악 행 근처 hand layer 표면은 오렌지다 (요청 12–18 의 palm cover, 요청 12–16 의 URDF 굵기). 사과 표면은 그 층에 없다.
+
+해석 [I] (기록이 말하는 것의 범위 안에서 한 정리이고 측정이 아니다):
+
+- 손바닥 구가 hand layer 의 오렌지를 피하려고 TrajOpt 가 팔 자세를 많이 고쳤고 (수정량 증가), 그렇게 바뀐 접근에서는 VLA 의 reference 가 쥘 수 있던 자세와 달라져 닫기를 3 번 시도하고도 쥐지 못했다. "오렌지를 피하면 VLA 가 쥘 수 없는 다른 접근이 된다" 는 이 해석은 직접 측정하지 않았다.
+
+가설 [H] (측정하지 않음):
+
+- 손바닥 구의 5 mm overflow · 구 수 증가 (23 → 121) · 구 반지름이 사과 접근 자세를 막는다.
+- 오렌지 쪽 제약을 지키면서 사과를 쥘 수 있는 자세 공간이 1345 에서 좁다.
+- 이 접촉이 VLA 단독에서도 난다는 §13.6 의 사실과 이 쥐기 실패가 관련이 있는지 (오렌지가 손바닥 옆에 놓인 장면 배치의 문제인지).
+
+정정 [§14]: ~~URDF 굵기 구가 사과에 가까이 붙어 (손바닥 구 ↔ 사과 0.55 mm) 쥐기를 잃었다는 §14 의 가설 [H]~~ → 손바닥 URDF 굵기 run 에서도 TrajOpt 의 최악 행은 `ee_left` 이고 그 근처 hand layer 표면은 오렌지다 (요청 12–16). 사과는 그 층에서 빠져 있으므로 "구가 사과에 붙어서 제약에 걸렸다" 는 설명은 기록과 맞지 않아 §14.7 에서 거두었다 (14.8 의 1 에는 이 STEP 으로 가는 포인터를 더했다). 손바닥 구 ↔ 사과 0.55 mm 는 요청 13 한 곳의 기하 사실로 남는다.
+
+**15.9 실패 정리 — 구성 요소별**
+
+| 증상 | 증상 위치 | 원인 위치 | 근거 · 상태 |
+|---|---|---|---|
+| palm cover 에서 `no_grasp` (닫기 3 회) | 실행 (쥐기 단계) | **CCR (TrajOpt) 의 제약 기하 + 거리장 층의 결합**: 최악 행이 손바닥 구 (제약 기하), 그 근처 hand layer 표면이 오렌지 (LTE, link 별 target 제외 거리장이 사과를 빼고 오렌지를 남긴 층). LTE 의 층 자체는 설계대로 (사과 제외) 동작한다 | 사실: 최악 행 · 수정량 · 근처 표면 [V]. 이 둘이 쥐기 실패를 낳았다는 인과는 해석 [I], 직접 측정 안 함 |
+| 접촉 0 row | 실행 접촉 | 구 모델이 손바닥 mesh 를 덮은 것 (§14 와 같은 원인 층) | 사실 [V], 1 episode |
+| 서버 기록 `clearance` 가 손바닥 구에서 음수 (−16.9 mm 등) | 서버 기록 | 기록 층 (main layer 로 읽는 `clearance` 배열) — 손바닥 구의 TrajOpt 값이 아니다 | 사실 [V `findings`] |
+
+**15.10 측정하지 않은 것 · 한계** [V `not_measured`, `limits`]
+
+1. **오렌지를 피하는 어떤 손바닥 구 모델이든 1345 에서 쥘 수 있는지** — VLA 와 다른 접근에서 쥘 수 있는지 측정하지 않았다 (해석 [I] 의 근거가 없는 부분).
+2. 다른 장면 — 단계 2 (18 장면) 를 돌리지 않았다. 1345 한 장면 · 1 episode (seed 13453), 반복 없음.
+3. `--links gripper_wrist` closed-loop — offline 만 보았다. 핵심 평가의 link 집합에서 같은 결과가 나오는지 모른다.
+4. 단계 2 의 기록 항목 (TrajOpt 풀이 시간 · 서버 시작 시간) — 값이 없다. 구가 270 → 466 개로 늘어 TrajOpt 비용이 얼마나 늘었는지는 이 STEP 에서 재지 않았다.
+5. ~~`max_deflection_before_close_rad` · `palm_worst_row_chunks_before_close` 의 구간 정의와 그림 (chunk 1–30) 의 값이 맞지 않는 점~~ → window 정의가 `verify.json` `closed_loop_1345_definitions` 에 추가되어 풀렸다 (15.5 · 15.7 (ii)). 남는 한계: 지표 이름의 "before_close" 는 window 와 다르다 (표 머리글은 고쳤다).
+6. TrajOpt 의 `max_violation_pair` 의 `obstacle` 라벨 (`target`) 은 귀속에 쓰지 않았다. hand layer surface voxel 의 GT 귀속만 썼다.
+7. 15.4 의 palm cover 가 사과 GT 표면 안으로 들어가는 (−0.95 · −3.61 mm) 구 자세가 closed-loop 의 쥐기 접근을 막았는지.
+
+**15.11 다음 — 사용자 판정 대기**
+
+단계 2 는 고정한 대로 돌리지 않았다. 아래는 결과가 가리키는 후보이고 **고르지 않았다** (사용자 판정). 이 로그가 어느 것을 권하지 않는다.
+
+| 후보 | 근거 | 확인할 것 · 전환 신호 |
+|---|---|---|
+| 손바닥 구를 이대로 쓰지 않고, 접촉 0 row 와 쥐기가 함께 되는 손바닥 모델이 있는지부터 묻는다 (15.10 의 1) | §14.6 · §15.6: 두 손바닥 조건 (URDF 굵기 · palm cover) 모두 접촉 0 row 와 `no_grasp` | 1345 에서 오렌지를 피하면서 쥘 수 있는 접근이 존재하는지 (VLA 단독의 접근과 다른 자세) |
+| 1345 의 오렌지 접촉이 VLA 단독에서도 난다 (§13.6, 31 row) 는 것을 고려해, 이 접촉을 구 모델로 막는 것이 목표인지 판정한다 | §13.6 | 목표를 "접촉 0" 에서 다른 지표 (쥐기 성공 우선 등) 로 바꿀지 |
+| 다른 장면에서 같은 쌍 (`EE_BODY_L` ↔ 이웃 과일) 접촉이 나는지 본다 | §14.9 의 3 번째, §15.10 의 2 | 일반 문제인지 1345 한 장면의 배치 문제인지 |
+| `--links gripper_wrist` 를 closed-loop 으로 본다 | §15.4 offline: gripper_wrist 만으로는 지금과 같다 | 핵심 평가에서도 손바닥이 덮이지 않는지 |

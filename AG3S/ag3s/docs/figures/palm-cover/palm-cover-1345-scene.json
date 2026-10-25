@@ -1,0 +1,26 @@
+{
+ "request": 13,
+ "variants": {
+  "current": {
+   "flags": "",
+   "n_palm_spheres": 23,
+   "contact_region_outside_mm": [
+    9.32,
+    14.73
+   ],
+   "palm_to_orange_mm": 25.02,
+   "palm_to_apple_mm": 27.74
+  },
+  "palm_cover": {
+   "flags": "--palm-cover on",
+   "n_palm_spheres": 121,
+   "contact_region_outside_mm": [
+    -3.42,
+    -0.09
+   ],
+   "palm_to_orange_mm": -1.67,
+   "palm_to_apple_mm": 5.36
+  }
+ },
+ "geom_to_orange_mm": 0.76
+}
