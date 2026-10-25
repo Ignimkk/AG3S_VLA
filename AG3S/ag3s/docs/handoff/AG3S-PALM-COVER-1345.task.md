@@ -39,3 +39,16 @@
 - `AG3S/ag3s/docs/handoff/AG3S-PALM-COVER-1345.verify.json`, 그림 `AG3S/ag3s/docs/figures/palm-cover/`
 - 로그: `AG3S/ag3s/docs/AG3S_TSDF_DYNAMIC_LOG.md` §15
 - 보기: `outputs/2026-10-25_손바닥구_palmcover/`
+
+## 4. 사용자 판정 (2026-10-25, 결과 뒤)
+
+"권장 방안으로 넘어갑시다" → **1345 의 손바닥–오렌지 접촉은 알려진 한계로 기록하고 동적 거리장 축을 마무리한다. 다음은 핵심 평가
+(`AG3S-CORE-EVALUATION`, 핵심 평가 세션 담당).** 핵심 평가 보고에는 "palm cover 없는 구성 (`gripper` · `gripper_wrist` 모두) 은 손바닥
+mesh 의 접촉을 제약에서 보지 못한다 — 1345 에서 손바닥 몸체가 이웃 과일에 닿는 것은 VLA 단독에도 있는 접촉이다" 를 명시한다.
+
+### 추후에 해 볼 방법 (사용자 지시로 정리, 지금은 실행하지 않는다)
+
+| # | 방법 | 묻는 것 | 설계 초안 (실행 전에 다시 고정) | 비용 · 위험 |
+|---|---|---|---|---|
+| F1 | **palm cover 를 18 장면에 돌린다** | 1345 만 예외인가 — 다른 장면에서는 손바닥 접촉을 줄이면서 쥐기를 지키는가 | E4 serving 구성 + `--palm-cover on`, E2–E4 와 같은 VLA 단독 성공 사과 18 장면 · 같은 seed, 기준 = E4 기록. 주 지표: 성공 수 · 금지 접촉 episode · 손–이웃 과일 접촉 row 합 · 손바닥 접촉 row. 기록: TrajOpt 수정량 · 풀이 시간 (구 270 → 466) · 서버 시작 시간 | 18 episode · 서버 2 대 ≈ 1 h. 이번 단계 1 의 "실패면 중단" 규칙을 바꾸는 것이므로 사용자 판정 필요. CL4 에서 palm cover 를 포함한 구성의 성공이 낮았던 기록 (`AG3S_T47_LOG.md` 5256) 이 있다 |
+| F2 | **palm cover + 손바닥에도 작은 이웃 접촉 허용** | 손바닥을 정확히 보되, 쥐기 직전 손바닥이 이웃 물체를 수 mm 스치는 것을 허용하면 쥐기를 지키면서 겹침 깊이를 제한할 수 있는가 | 지금 IFG-NBC 허용 (`--neighbour-contact-mm`, 손가락 구만, target 120 mm 안, latched · closing) 을 손바닥 구로 넓히는 새 flag (기본 꺼짐), 깊이 후보 2 · 5 mm. 1345 1 episode → 통과하면 18 장면. 주 지표: 손–오렌지 최대 겹침 · 접촉 row, 성공 | 구현 필요 (TrajOpt `linearize` 의 neighbour-contact 행 선택에 손바닥 link 추가). 허용이므로 접촉 자체는 남을 수 있다 — "막기" 가 아니라 "깊이 제한" 이다 |
