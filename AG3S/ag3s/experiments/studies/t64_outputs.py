@@ -28,8 +28,13 @@ def main(v: pathlib.Path, o: pathlib.Path) -> None:
     A = json.loads((v / "partA/partA.json").read_text())
     Bj = json.loads((v / "partB_v/partB.json").read_text())
     (o / "videos").mkdir(exist_ok=True)
+    import subprocess
+
     for f in sorted((v / "partB_v/videos").glob("*.mp4")):
-        shutil.copy2(f, o / "videos" / f.name)
+        # H.264 (yuv420p, faststart) like the other outputs videos — OpenCV's mp4v (MPEG-4 Part 2) does not play in
+        # VS Code / browsers
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(f), "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                        "-movflags", "+faststart", str(o / "videos" / f.name)], check=True)
     cols = figstyle.CATEGORICAL
 
     # 1. timelines (truth / HSR / rule) for every episode
