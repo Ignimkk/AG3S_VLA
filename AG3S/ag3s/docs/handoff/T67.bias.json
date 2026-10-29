@@ -1,0 +1,74 @@
+{
+ "crate|+10mm": {
+  "n_frames": 827,
+  "median_bias_mm": 2.63,
+  "p10": 0.61,
+  "p90": 6.52
+ },
+ "crate|+15mm": {
+  "n_frames": 847,
+  "median_bias_mm": 2.97,
+  "p10": 1.27,
+  "p90": 7.55
+ },
+ "crate|+20mm": {
+  "n_frames": 850,
+  "median_bias_mm": 3.21,
+  "p10": 1.57,
+  "p90": 8.01
+ },
+ "neighbour fruit|+10mm": {
+  "n_frames": 447,
+  "median_bias_mm": 0.68,
+  "p10": -0.77,
+  "p90": 1.78
+ },
+ "neighbour fruit|+15mm": {
+  "n_frames": 447,
+  "median_bias_mm": 1.02,
+  "p10": -0.64,
+  "p90": 2.31
+ },
+ "neighbour fruit|+20mm": {
+  "n_frames": 447,
+  "median_bias_mm": 1.2,
+  "p10": -0.47,
+  "p90": 2.59
+ },
+ "post/hurdle|+10mm": {
+  "n_frames": 54,
+  "median_bias_mm": 3.42,
+  "p10": 2.58,
+  "p90": 3.98
+ },
+ "post/hurdle|+15mm": {
+  "n_frames": 54,
+  "median_bias_mm": 3.13,
+  "p10": 2.54,
+  "p90": 3.7
+ },
+ "post/hurdle|+20mm": {
+  "n_frames": 54,
+  "median_bias_mm": 3.15,
+  "p10": 2.52,
+  "p90": 3.73
+ },
+ "table|+10mm": {
+  "n_frames": 191,
+  "median_bias_mm": 4.95,
+  "p10": 2.61,
+  "p90": 6.74
+ },
+ "table|+15mm": {
+  "n_frames": 191,
+  "median_bias_mm": 4.95,
+  "p10": 2.73,
+  "p90": 6.74
+ },
+ "table|+20mm": {
+  "n_frames": 191,
+  "median_bias_mm": 5.35,
+  "p10": 2.9,
+  "p90": 7.1
+ }
+}

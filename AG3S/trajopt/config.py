@@ -1035,6 +1035,21 @@ class CollisionBackendConfig:
     neighbour_palm_contact_depth: float = 0.0
     neighbour_palm_contact_radius: float = 0.12
     neighbour_palm_contact_gate: float = 0.06
+    #: **T67 ③ — IFG-NBC on at depth 0** (`serve_safe --neighbour-contact-mm 0`). `False` (default) = IFG-NBC is on
+    #: iff `neighbour_contact_depth > 0` (the rule before T67, bit-identical; the key is also left out of `to_dict`).
+    #: `True` = IFG-NBC is on with `neighbour_contact_depth` as given, including 0: the window's finger–neighbour rows
+    #: then require `d − r ≥ 0` (no overlap allowed, no clearance asked) instead of `obstacle_margin`.
+    neighbour_contact_at_zero: bool = False
+    #: **T67 ① — support-surface offset of the fine layers (m).** `0.0` (default) = off (bit-identical; the key is also
+    #: left out of `to_dict`). On, a robot row (not held) that `_obstacle_rows` classes `support` (table / floor plane)
+    #: and whose distance was answered by a fine tier (`answer_tier` ∈ {`fine`, `target_free`}: the 5 mm main layer or
+    #: the 5 mm target-free layer) reads `d + offset`; the gradient is unchanged. Obstacle, target and held rows, and
+    #: rows answered by the coarse (20 mm) layer, the window edge, the analytic channel or outside the grid keep `d`.
+    #: Every step, every robot row; the solver's merit, final check and look-ahead read the same `_esdf_clearance`.
+    #: Why: the fine field's table top stands ~5 mm above the real one (`handoff/T67.bias.json`, median 4.95 mm over
+    #: 191 frames). Needs `obstacle_margin > 0` (the class table) and not `obstacle_margin_support` (no support class).
+    #: Final experiment value 0.004 (`--support-surface-offset-mm 4`).
+    support_surface_offset: float = 0.0
     #: **T43 HM — the held object's rows get the same classification and margin as the robot's.**
     #: Once grasped the object is part of the robot (user, 2026-10-07): a held query row whose
     #: nearest field surface is an obstacle gets `max(its margin, obstacle_margin)`, exactly like a
@@ -1113,7 +1128,7 @@ class CollisionBackendConfig:
             raise ValueError(f"collision.backend must be one of {self.BACKENDS}, got {self.backend!r}")
         if self.esdf_margin < 0.0:
             raise ValueError(f"collision.esdf_margin must be >= 0, got {self.esdf_margin}")
-        for name in ("neighbour_contact_depth", "neighbour_palm_contact_depth"):
+        for name in ("neighbour_contact_depth", "neighbour_palm_contact_depth", "support_surface_offset"):
             v = getattr(self, name)
             if not (math.isfinite(v) and v >= 0.0):
                 raise TrajOptConfigError(f"collision.{name} must be a finite value >= 0, got {v}")
@@ -1125,6 +1140,9 @@ class CollisionBackendConfig:
         if not self.obstacle_margin >= 0.0:
             raise ValueError(
                 f"collision.obstacle_margin must be >= 0, got {self.obstacle_margin}")
+        if not isinstance(self.neighbour_contact_at_zero, bool):
+            raise TrajOptConfigError(
+                f"collision.neighbour_contact_at_zero must be a bool, got {self.neighbour_contact_at_zero!r}")
         if not isinstance(self.esdf_host_mirror, bool):
             raise ValueError(
                 f"collision.esdf_host_mirror must be a bool, got {self.esdf_host_mirror!r}")
@@ -1321,6 +1339,10 @@ _OMIT_WHEN_DEFAULT = {("cost", "grasp_goal_window"): "close", ("cost", "continui
 _OMIT_WHEN_DEFAULT.update({("collision", "neighbour_palm_contact_depth"): 0.0,
                            ("collision", "neighbour_palm_contact_radius"): 0.12,
                            ("collision", "neighbour_palm_contact_gate"): 0.06})
+#: T67 — IFG-NBC at depth 0 and the support-surface offset: without `--neighbour-contact-mm 0` /
+#: `--support-surface-offset-mm` the config dump keeps the keys it had before the options existed.
+_OMIT_WHEN_DEFAULT.update({("collision", "neighbour_contact_at_zero"): False,
+                           ("collision", "support_surface_offset"): 0.0})
 #: AG3S-CORE-EVAL-G1 — the geometric grasp options (merged from `feature/geo-grasp`): without `--geo-*` flags the
 #: config dump (`--record-constraints` meta `trajopt_config`) keeps the keys it had before the merge.
 _OMIT_WHEN_DEFAULT.update({("cost", k): v for k, v in {

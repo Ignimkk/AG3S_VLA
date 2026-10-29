@@ -1087,7 +1087,8 @@ class SafePolicy:
             # IFG-TOA: same place, same final latch state — the pre-grasp palm anchor.
             anchor = self._grasp_anchor_gate(np.asarray(newest.robot_state, np.float64), manipulators)
             if anchor is not None and self.hsr6 is not None:
-                anchor = self._hsr6_a4_gate(anchor)       # AG3S-CORE-EVAL-HSR6 ④ (off: never called)
+                anchor = self._hsr6_a4_gate(anchor, np.asarray(newest.robot_state, np.float64),
+                                            manipulators)  # AG3S-CORE-EVAL-HSR6 ④ (off: never called)
             if anchor is not None:
                 context["grasp_anchor"] = anchor
             else:
@@ -1153,7 +1154,7 @@ class SafePolicy:
                  field=getattr(constraint_set, "esdf", None))
         geo_state = geo.anchor_state() if self.hsr6 is not None else None
         anchor = geo.anchor(q_now, chunk)
-        if anchor is not None and not self._hsr6_objective_ok():
+        if anchor is not None and not self._hsr6_objective_ok(q_now, manipulators):
             # AG3S-CORE-EVAL-HSR6 ④ — G1 produced its goal; HSR6 is not grasp: the slot stays empty this chunk.
             geo.withdraw_anchor(geo_state, f"hsr6 objective gate: phase {self._hsr6_phase()}")
             self._hsr6_changed("objective", True, {"g1_withdrawn": True})
@@ -1198,7 +1199,8 @@ class SafePolicy:
             "probe": record.get("probe") if isinstance(record, dict) else None,
             "flags": self.hsr6.names(),
             # H4 — per flag that is on: did it change a decision of the current rule on this request
-            "changed": {name: False for name in self.hsr6.names()},
+            # (T67 `objective_window` widens ④ and has no decision of its own: no key)
+            "changed": {name: False for name in self.hsr6.names() if name != "objective_window"},
             "detail": {},
         }
 
@@ -1210,13 +1212,35 @@ class SafePolicy:
 
         return phase_of(self._pending.get("hsr6"))
 
-    def _hsr6_objective_ok(self) -> bool:
-        """④ — True when the objective terms may stay (flag off, or HSR6 = grasp)."""
+    def _hsr6_objective_ok(self, q_now: Optional[np.ndarray] = None, manipulators=None) -> bool:
+        """④ — True when the objective terms may stay (flag off, or HSR6 = grasp).
+
+        T67 ② (`Hsr6Flags.objective_window`): also HSR6 = approach with the A6 "grasp moment" window open at `q_now`
+        (`_hsr6_objective_window`). Without `q_now` the window cannot be measured and stays closed."""
         if self.hsr6 is None or not self.hsr6.objective:
             return True
-        from AG3S.trajopt.hsr6 import objective_allowed
+        from AG3S.trajopt.hsr6 import OBJECTIVE_WINDOW_PHASE, objective_allowed
 
-        return objective_allowed(self._hsr6_phase())
+        phase = self._hsr6_phase()
+        window = None
+        if getattr(self.hsr6, "objective_window", False) and phase == OBJECTIVE_WINDOW_PHASE:
+            window = self._hsr6_objective_window(q_now, manipulators)
+        return objective_allowed(phase, window=window)
+
+    def _hsr6_objective_window(self, q_now: Optional[np.ndarray], manipulators) -> bool:
+        """T67 ② — the A6 "grasp moment" window (`_grasp_moment_window`, gate `collision.neighbour_palm_contact_gate`)
+        for ④ on an approach request. Record: `summary_json.hsr6.detail.objective.window` (`open`, `gate_mm`, `latch`,
+        `hand` · `link` · `site_to_target_mm` when measured, `reason` when closed)."""
+        gate = float(self.to_config.collision.neighbour_palm_contact_gate)
+        rec: dict[str, Any] = {"open": False, "gate_mm": round(gate * 1000.0, 1),
+                               "latch": getattr(self._latch.phase, "value", str(self._latch.phase))}
+        if q_now is None:
+            rec["reason"] = "no q_now"
+        else:
+            rec["open"] = self._grasp_moment_window(np.asarray(q_now, np.float64), manipulators, gate, rec) is not None
+        if self._last_hsr6:
+            self._last_hsr6["detail"].setdefault("objective", {})["window"] = rec
+        return bool(rec["open"])
 
     def _hsr6_changed(self, rule: str, changed: bool, detail: Optional[dict] = None) -> None:
         rec = self._last_hsr6
@@ -1226,9 +1250,10 @@ class SafePolicy:
         if detail:
             rec["detail"].setdefault(rule, {}).update(detail)
 
-    def _hsr6_a4_gate(self, anchor):
-        """④ — the A4 close-row goal the existing rule gave this chunk, or None when HSR6 is not grasp."""
-        if self._hsr6_objective_ok():
+    def _hsr6_a4_gate(self, anchor, q_now: Optional[np.ndarray] = None, manipulators=None):
+        """④ — the A4 close-row goal the existing rule gave this chunk, or None when HSR6 is not grasp (T67 ②: or the
+        approach window is closed)."""
+        if self._hsr6_objective_ok(q_now, manipulators):
             return anchor
         if isinstance(self._last_grasp_anchor, dict):
             self._last_grasp_anchor.update(active=False, hsr6_withdrawn=True)
@@ -1962,7 +1987,8 @@ class SafePolicy:
         col = self.to_config.collision
         depth = float(getattr(col, "neighbour_contact_depth", 0.0) or 0.0)
         self._last_neighbour_contact = {}
-        if depth <= 0.0:
+        at_zero = bool(getattr(col, "neighbour_contact_at_zero", False))     # T67 ③ (`--neighbour-contact-mm 0`)
+        if depth <= 0.0 and not at_zero:
             return None
         from AG3S.ag3s.constraints.attached import _link_pose_numeric
 
@@ -1993,13 +2019,16 @@ class SafePolicy:
         if not mask.any():
             rec["reason"] = f"no sphere of a link {prefix}*"
             return None
-        if not self._hsr6_objective_ok():
+        if not self._hsr6_objective_ok(q_now, manipulators):
             # AG3S-CORE-EVAL-HSR6 ④ — the existing rule allows the neighbour contact; HSR6 is not grasp: withheld.
             rec.update(hsr6_withdrawn=True, reason=f"hsr6 objective gate: phase {self._hsr6_phase()}")
             self._hsr6_changed("objective", True, {"nbc_withdrawn": True})
             return None
         rec.update(active=True, links=sorted({n for n, m in zip(names, mask) if m}), n_spheres=int(mask.sum()))
-        return {"links_mask": mask, "depth": depth, "centre": centre, "radius": float(col.neighbour_contact_radius)}
+        out = {"links_mask": mask, "depth": depth, "centre": centre, "radius": float(col.neighbour_contact_radius)}
+        if at_zero and depth <= 0.0:
+            out["at_zero"] = True          # T67 ③ — on at depth 0 (the linearizer reads depth 0 alone as off)
+        return out
 
     def _neighbour_palm_contact_gate(self, q_now: np.ndarray, manipulators) -> Optional[dict]:
         """AG3S-CORE-EVAL-A6 — this chunk's `SceneSnapshot.neighbour_palm_contact`, or None. Only with
@@ -2024,6 +2053,25 @@ class SafePolicy:
         self._last_neighbour_palm_contact = rec
         if isinstance(self._last_grasp_record, dict) and self._last_grasp_record:
             self._last_grasp_record["neighbour_palm_contact"] = rec
+        win = self._grasp_moment_window(q_now, manipulators, float(col.neighbour_palm_contact_gate), rec)
+        if win is None:
+            return None
+        link, centre = win
+        mask = palm_contact_rows(self.constraint_robot_model, link)
+        if not mask.any():
+            rec["reason"] = f"no sphere on the link {link}"
+            return None
+        rec.update(active=True, n_spheres=int(mask.sum()))
+        return {"links_mask": mask, "depth": depth, "centre": centre,
+                "radius": float(col.neighbour_palm_contact_radius)}
+
+    def _grasp_moment_window(self, q_now: np.ndarray, manipulators, gate: float,
+                             rec: dict[str, Any]) -> Optional[tuple[str, np.ndarray]]:
+        """The "grasp moment" window of AG3S-CORE-EVAL-A6 (shared with T67 ②'s ④ window): `(hold link, target
+        centroid)` when open, else None. Open = latch `latched` / `closing`, a manipulated object, no revoked attach, and
+        the grasping hand's hold link site (`hold_site_position`, MJCF `left_ee` / `right_ee`) at `q_now` within `gate`
+        (m) of the object's centroid. Fills `rec`: `reason` when closed; `hand` · `link` · `site_to_target_mm` once
+        measured."""
         phase = self._latch.phase
         manip = getattr(self.ag3s, "manipulated", None)
         if phase not in (GraspPhase.LATCHED, GraspPhase.CLOSING) or manip is None:
@@ -2038,16 +2086,10 @@ class SafePolicy:
         site = hold_site_position(self.constraint_robot_model, q_now, link)
         dist = float(np.linalg.norm(site - centre))
         rec.update(hand=hand, link=str(link), site_to_target_mm=round(dist * 1000.0, 1))
-        if dist > float(col.neighbour_palm_contact_gate):
+        if dist > float(gate):
             rec["reason"] = "palm outside the gate"
             return None
-        mask = palm_contact_rows(self.constraint_robot_model, link)
-        if not mask.any():
-            rec["reason"] = f"no sphere on the link {link}"
-            return None
-        rec.update(active=True, n_spheres=int(mask.sum()))
-        return {"links_mask": mask, "depth": depth, "centre": centre,
-                "radius": float(col.neighbour_palm_contact_radius)}
+        return link, centre
 
     def _neighbour_palm_contact_result(self) -> None:
         """AG3S-CORE-EVAL-A6 — after the solve: what the returned trajectory's final check relaxed

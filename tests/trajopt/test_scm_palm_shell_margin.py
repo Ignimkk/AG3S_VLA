@@ -120,7 +120,9 @@ def test_config_default_absent_from_to_dict_and_validated():
     assert "palm_shell_margin" not in d["collision"]
     # AG3S-CORE-EVAL-A6: the palm neighbour-contact keys are also left out while off (same rule, `_OMIT_WHEN_DEFAULT`).
     a6 = {"neighbour_palm_contact_depth", "neighbour_palm_contact_radius", "neighbour_palm_contact_gate"}
-    assert set(d["collision"]) == {f.name for f in dataclasses.fields(CollisionConfig)} - {"palm_shell_margin"} - a6
+    # T67: IFG-NBC at depth 0 and the support-surface offset too (same rule).
+    t67 = {"neighbour_contact_at_zero", "support_surface_offset"}
+    assert set(d["collision"]) == {f.name for f in dataclasses.fields(CollisionConfig)} - {"palm_shell_margin"} - a6 - t67
     assert TrajOptConfig.from_dict(d) == c                                   # round trip
     on = TrajOptConfig.from_dict({"collision": {**base, "palm_shell_margin": 0.005}})
     assert on.to_dict()["collision"]["palm_shell_margin"] == 0.005

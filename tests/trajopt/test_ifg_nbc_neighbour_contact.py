@@ -135,5 +135,8 @@ def test_config_and_cli():
     args = serve_safe.build_parser().parse_args([*BASE_ARGV, "--neighbour-contact-mm", "20"])
     assert serve_safe.trajopt_config_from_args(args).collision.neighbour_contact_depth == pytest.approx(0.020)
     assert serve_safe.trajopt_config_from_args(serve_safe.build_parser().parse_args(BASE_ARGV)).collision.neighbour_contact_depth == 0.0
+    # T67 ③: 0 is "on, no overlap allowed" (`neighbour_contact_at_zero`); off is the flag left out; < 0 is refused
+    zero = serve_safe.trajopt_config_from_args(serve_safe.build_parser().parse_args([*BASE_ARGV, "--neighbour-contact-mm", "0"]))
+    assert zero.collision.neighbour_contact_depth == 0.0 and zero.collision.neighbour_contact_at_zero is True
     with pytest.raises(SystemExit):
-        serve_safe.trajopt_config_from_args(serve_safe.build_parser().parse_args([*BASE_ARGV, "--neighbour-contact-mm", "0"]))
+        serve_safe.trajopt_config_from_args(serve_safe.build_parser().parse_args([*BASE_ARGV, "--neighbour-contact-mm", "-1"]))

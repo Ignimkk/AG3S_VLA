@@ -1713,7 +1713,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--neighbour-contact-mm", type=float, default=None, metavar="MM",
                     help="IFG-NBC — 쥐기 전(latched · closing) 손바닥이 target 중심 150 mm 안이면, 쥐는 손의 손가락 구가 "
                          "target 120 mm 안에서 이웃 물체(target · 지지면 · 쥔 물체가 아닌 장애물)와 MM 까지 겹치는 것을 "
-                         "허용한다 (가볍게 밀면서 잡기). 손바닥 · 팔 · 탁자 · 운반은 그대로. 기본 off")
+                         "허용한다 (가볍게 밀면서 잡기). 손바닥 · 팔 · 탁자 · 운반은 그대로. MM ≥ 0: 0 = 켜짐, 그 행의 요구가 "
+                         "d − r ≥ 0 (겹침 허용 0 · 여유 0, T67 ③). 끄려면 flag 를 생략한다. 기본 off")
     ap.add_argument("--neighbour-palm-contact-mm", type=float, default=None, metavar="MM",
                     help="AG3S-CORE-EVAL-A6 — 쥐는 순간 (latch latched · closing, HELD 아님, 손바닥 site (left_ee · "
                          "right_ee) 가 target 중심 60 mm 안) 쥐는 손의 손바닥 구 (ee_<side> 손 몸체 구 + 손바닥 껍질 구) 가 target 120 mm 안에서 이웃 "
@@ -1950,6 +1951,16 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--hsr6-objective", action="store_true",
                     help="AG3S-CORE-EVAL-HSR6 ④ — 손가락 이웃 접촉 허용 (--neighbour-contact-mm) 과 닫는 행 목표 (A4 "
                          "--grasp-anchor · G1 --geo-grasp) 를 지금 규칙 ∧ HSR6 = grasp 일 때만 준다. 기본 off")
+    ap.add_argument("--hsr6-objective-window", action="store_true",
+                    help="T67 ② — --hsr6-objective 가 손가락 이웃 허용 · A4 · G1 을 허락하는 조건을 'HSR6 = grasp' 에서 "
+                         "'HSR6 = grasp, 또는 HSR6 = approach ∧ latch latched · closing ∧ 쥐는 손 손바닥 site (left_ee · "
+                         "right_ee) 가 target 중심 60 mm 안 (A6 와 같은 창)' 으로 넓힌다. 기록 hsr6.detail.objective.window. "
+                         "--hsr6-objective 와 함께만. 기본 off")
+    ap.add_argument("--support-surface-offset-mm", type=float, default=None, metavar="B",
+                    help="T67 ① — TrajOpt 가 지지면 (탁자 · 바닥) 으로 분류한 로봇 행에서, 정밀 계층 (esdf 5 mm · "
+                         "target-free 5 mm) 이 답한 거리에 B mm 를 더한다 (기울기 그대로). 장애물 · target · 쥔 물체 행과 "
+                         "거친 계층 (2 cm) 은 그대로. B > 0, --obstacle-margin M (> 0) 과 함께, --obstacle-margin-support "
+                         "와는 함께 못 준다. 기록 to.metrics.support_surface_offset. 최종 실험값 4. 기본 off")
     ap.add_argument("--hsr6-probe", default=None, metavar="NPZ",
                     help="AG3S-CORE-EVAL-HSR6 — 6 단계 probe (안 주면 동봉 AG3S/ag3s/asset/subtask_probe/hsr6_t64_kv_L4.npz "
                          "= T64 partA probe_6.npz). --hsr6-* 와 함께만")
@@ -2702,7 +2713,8 @@ def hsr6_flags_from_args(args):
     flags = Hsr6Flags(attach_assist=bool(getattr(args, "hsr6_attach_assist", False)),
                       held_gate=bool(getattr(args, "hsr6_held_gate", False)),
                       target_exempt=bool(getattr(args, "hsr6_target_exempt", False)),
-                      objective=bool(getattr(args, "hsr6_objective", False)))
+                      objective=bool(getattr(args, "hsr6_objective", False)),
+                      objective_window=bool(getattr(args, "hsr6_objective_window", False)))
     return flags if flags.on else None
 
 
@@ -2725,6 +2737,8 @@ def reject_hsr6_flags(ap: argparse.ArgumentParser, args) -> None:
     if _label_unavailable(args):
         ap.error("--hsr6-* 는 attention 서버가 싣는 kv_L4 feature 와 SafePolicy 가 필요합니다 (--no-safe · "
                  "--no-attention · --no-perception 과 함께 줄 수 없습니다)")
+    if flags.objective_window and not flags.objective:
+        ap.error("--hsr6-objective-window 는 --hsr6-objective (④) 의 시점을 넓힙니다 — 함께 주십시오")
     if flags.held_gate and not getattr(args, "held_body_cover", False):
         ap.error("--hsr6-held-gate 가 거두는 허용 (쥔 몸통 구의 지지면 들어올림) 은 --held-body-cover 의 것입니다 — "
                  "함께 주십시오")
@@ -3337,15 +3351,30 @@ def obstacle_overrides(args) -> dict:
     nbc = getattr(args, "neighbour_contact_mm", None)
     if nbc is not None:
         # IFG-NBC — light contact of the grasping fingers with a neighbour object near the target.
-        if not float(nbc) > 0.0:
-            raise SystemExit(f"--neighbour-contact-mm 은 0 보다 커야 합니다: {nbc}")
+        if not float(nbc) >= 0.0:
+            raise SystemExit(f"--neighbour-contact-mm 은 0 이상이어야 합니다: {nbc}")
         out["neighbour_contact_depth"] = float(nbc) / 1000.0
+        if float(nbc) == 0.0:
+            # T67 ③ — 0 is "on, no overlap allowed" (not "off": off is the flag left out).
+            out["neighbour_contact_at_zero"] = True
     npc = getattr(args, "neighbour_palm_contact_mm", None)
     if npc is not None:
         # AG3S-CORE-EVAL-A6 — light contact of the grasping palm with a neighbour object at the grasp moment.
         if not float(npc) > 0.0:
             raise SystemExit(f"--neighbour-palm-contact-mm 은 0 보다 커야 합니다: {npc}")
         out["neighbour_palm_contact_depth"] = float(npc) / 1000.0
+    sso = getattr(args, "support_surface_offset_mm", None)
+    if sso is not None:
+        # T67 ① — the fine layers' support-surface offset.
+        if not (math.isfinite(float(sso)) and float(sso) > 0.0):
+            raise SystemExit(f"--support-surface-offset-mm 은 0 보다 커야 합니다: {sso}")
+        if margin <= 0.0:
+            raise SystemExit("--support-surface-offset-mm 은 --obstacle-margin M (> 0) 과 함께 줘야 합니다 — 지지면 분류 "
+                             "(_obstacle_rows) 가 그때만 돈다")
+        if getattr(args, "obstacle_margin_support", False):
+            raise SystemExit("--support-surface-offset-mm 은 --obstacle-margin-support 와 함께 줄 수 없습니다 — 그때는 "
+                             "어느 행도 지지면으로 분류되지 않아 아무 일도 하지 않습니다")
+        out["support_surface_offset"] = float(sso) / 1000.0
     return out
 
 
@@ -3935,6 +3964,15 @@ def main() -> None:
                 "TO neighbour contact (IFG-NBC): fingers may overlap a neighbour obstacle by %.0f mm within %.0f mm of "
                 "the target, palm within %.0f mm, pre-grasp only", c_.neighbour_contact_depth * 1000,
                 c_.neighbour_contact_radius * 1000, c_.neighbour_contact_gate * 1000)
+        if getattr(to_config.collision, "neighbour_contact_at_zero", False):
+            logging.warning(
+                "TO neighbour contact (IFG-NBC, T67 ③): ON at depth 0 — the window's finger–neighbour rows require "
+                "d − r ≥ 0 (no overlap, no clearance) instead of the obstacle margin")
+        if float(getattr(to_config.collision, "support_surface_offset", 0.0)) > 0.0:
+            logging.warning(
+                "TO support surface offset (T67 ①): +%.1f mm on robot rows classed support (table / floor) whose "
+                "distance a fine tier answered (fine · target_free); gradient unchanged; obstacle / target / held rows "
+                "and the coarse layer unchanged", to_config.collision.support_surface_offset * 1000)
         if float(getattr(to_config.collision, "neighbour_palm_contact_depth", 0.0)) > 0.0:
             c_ = to_config.collision
             logging.warning(
