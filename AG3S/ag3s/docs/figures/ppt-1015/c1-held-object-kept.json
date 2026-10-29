@@ -1,0 +1,18 @@
+{
+ "frame": "T54c_ep1817_f020",
+ "camera": "right wrist",
+ "panels": {
+  "fk": {
+   "target_px_removed": 4061,
+   "iou": 0.5522860337073592,
+   "recall": 0.5522860337073592,
+   "precision": 1.0
+  },
+  "rm": {
+   "target_px_removed": 219,
+   "iou": 0.9609984068984219,
+   "recall": 0.9767068306429548,
+   "precision": 0.983539705076707
+  }
+ }
+}

@@ -1,0 +1,873 @@
+{
+ "counts": {
+  "occlusion": {
+   "B0": {
+    "safe": 6,
+    "contact_runs": 1,
+    "n": 18
+   },
+   "B2c": {
+    "safe": 8,
+    "contact_runs": 1,
+    "n": 18
+   },
+   "C0F": {
+    "safe": 9,
+    "contact_runs": 1,
+    "n": 18
+   }
+  },
+  "regression": {
+   "B0": {
+    "safe": 14,
+    "contact_runs": 1,
+    "n": 18
+   },
+   "B2c": {
+    "safe": 15,
+    "contact_runs": 2,
+    "n": 18
+   },
+   "C0F": {
+    "safe": 12,
+    "contact_runs": 4,
+    "n": 18
+   }
+  }
+ },
+ "verdict": {
+  "occ_safe_ge_7": true,
+  "reg_safe_ge_14": true,
+  "contact_runs_le_1_each": false,
+  "pass": false
+ },
+ "report_only": {
+  "time_p95_le_533": true
+ },
+ "changes_vs_B0": {
+  "occlusion": {
+   "121": "쥐지 못함 → 안전한 성공",
+   "122": "들 때 미끄러짐 → 안전한 성공"
+  },
+  "regression": {
+   "850": "실패(full) → 안전한 성공",
+   "954": "실패(full) → 금지 접촉(basket)"
+  }
+ },
+ "timing_limits": {
+  "B0": {
+   "requests": 1711,
+   "to_plus_geo_ms_p50": 41.6,
+   "p95": 92.0,
+   "max": 454.2,
+   "requests_with_limit_overshoot": 15
+  },
+  "B2c": {
+   "requests": 1589,
+   "to_plus_geo_ms_p50": 66.8,
+   "p95": 234.6,
+   "max": 626.6,
+   "requests_with_limit_overshoot": 17
+  }
+ },
+ "correction_activity": {
+  "occlusion 111": {
+   "requests": 32,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 113": {
+   "requests": 30,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 122": {
+   "requests": 35,
+   "correct_chunks": 3,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 131": {
+   "requests": 33,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 133": {
+   "requests": 32,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 312": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 5
+  },
+  "occlusion 321": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 323": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 332": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 112": {
+   "requests": 32,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 121": {
+   "requests": 33,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 123": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 132": {
+   "requests": 34,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 311": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 313": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 322": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 331": {
+   "requests": 12,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 333": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 2
+  },
+  "regression 56": {
+   "requests": 29,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 211": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 2
+  },
+  "regression 1837": {
+   "requests": 25,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 320": {
+   "requests": 31,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "regression 753": {
+   "requests": 33,
+   "correct_chunks": 2,
+   "limit_overshoot_requests": 0
+  },
+  "regression 954": {
+   "requests": 75,
+   "correct_chunks": 2,
+   "limit_overshoot_requests": 2
+  },
+  "regression 309": {
+   "requests": 32,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 250": {
+   "requests": 28,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 1668": {
+   "requests": 34,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 126": {
+   "requests": 29,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 1345": {
+   "requests": 32,
+   "correct_chunks": 2,
+   "limit_overshoot_requests": 0
+  },
+  "regression 1596": {
+   "requests": 29,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 121": {
+   "requests": 30,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "regression 119": {
+   "requests": 30,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 325": {
+   "requests": 33,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 901": {
+   "requests": 32,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "regression 572": {
+   "requests": 31,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "regression 850": {
+   "requests": 33,
+   "correct_chunks": 3,
+   "limit_overshoot_requests": 0
+  }
+ },
+ "table": {
+  "occlusion": {
+   "111": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L1_s13453"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L1_s13453"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L1_s13453"
+    }
+   },
+   "112": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L1_s23453"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L1_s23453"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L1_s23453"
+    }
+   },
+   "113": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L1_s33453"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L1_s33453"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L1_s33453"
+    }
+   },
+   "121": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case1_L2_s13453"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L2_s13453"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L2_s13453"
+    }
+   },
+   "122": {
+    "B0": {
+     "cls": "fail",
+     "word": "들 때 미끄러짐",
+     "run": "case1_L2_s23453"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L2_s23453"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L2_s23453"
+    }
+   },
+   "123": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case1_L2_s33453"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case1_L2_s33453"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L2_s33453"
+    }
+   },
+   "131": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L3_s13453"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L3_s13453"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L3_s13453"
+    }
+   },
+   "132": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L3_s23453"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L3_s23453"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L3_s23453"
+    }
+   },
+   "133": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L3_s33453"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L3_s33453"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "case1_L3_s33453"
+    }
+   },
+   "311": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L1_s13453"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L1_s13453"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L1_s13453"
+    }
+   },
+   "312": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L1_s23453"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L1_s23453"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L1_s23453"
+    }
+   },
+   "313": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L1_s33453"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L1_s33453"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L1_s33453"
+    }
+   },
+   "321": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L2_s13453"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L2_s13453"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L2_s13453"
+    }
+   },
+   "322": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L2_s23453"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L2_s23453"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L2_s23453"
+    }
+   },
+   "323": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L2_s33453"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L2_s33453"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L2_s33453"
+    }
+   },
+   "331": {
+    "B0": {
+     "cls": "contact",
+     "word": "장애물 접촉",
+     "run": "case3_L3_s13453"
+    },
+    "B2c": {
+     "cls": "contact",
+     "word": "장애물 접촉",
+     "run": "case3_L3_s13453"
+    },
+    "C0F": {
+     "cls": "contact",
+     "word": "장애물 접촉",
+     "run": "case3_L3_s13453"
+    }
+   },
+   "332": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L3_s23453"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L3_s23453"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L3_s23453"
+    }
+   },
+   "333": {
+    "B0": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L3_s33453"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L3_s33453"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "쥐지 못함",
+     "run": "case3_L3_s33453"
+    }
+   }
+  },
+  "regression": {
+   "56": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep56_s563"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep56_s563"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep56_s563"
+    }
+   },
+   "119": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep119_s1193"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep119_s1193"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "실패(full)",
+     "run": "B_ROI_FPR_ep119_s1193"
+    }
+   },
+   "121": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep121_s1213"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep121_s1213"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep121_s1213"
+    }
+   },
+   "126": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep126_s1263"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep126_s1263"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep126_s1263"
+    }
+   },
+   "211": {
+    "B0": {
+     "cls": "fail",
+     "word": "실패(full)",
+     "run": "B_ROI_FPR_ep211_s2113"
+    },
+    "B2c": {
+     "cls": "fail",
+     "word": "실패(full)",
+     "run": "B_ROI_FPR_ep211_s2113"
+    },
+    "C0F": {
+     "cls": "contact",
+     "word": "금지 접촉(neighbour_fruit) · 성공",
+     "run": "B_ROI_FPR_ep211_s2113"
+    }
+   },
+   "250": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep250_s2503"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep250_s2503"
+    },
+    "C0F": {
+     "cls": "fail",
+     "word": "실패(full)",
+     "run": "B_ROI_FPR_ep250_s2503"
+    }
+   },
+   "309": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep309_s3093"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep309_s3093"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep309_s3093"
+    }
+   },
+   "320": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep320_s3203"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep320_s3203"
+    },
+    "C0F": {
+     "cls": "contact",
+     "word": "금지 접촉(basket)",
+     "run": "B_ROI_FPR_ep320_s3203"
+    }
+   },
+   "325": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep325_s3253"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep325_s3253"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep325_s3253"
+    }
+   },
+   "572": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep572_s5723"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep572_s5723"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep572_s5723"
+    }
+   },
+   "753": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep753_s7533"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep753_s7533"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep753_s7533"
+    }
+   },
+   "850": {
+    "B0": {
+     "cls": "fail",
+     "word": "실패(full)",
+     "run": "B_ROI_FPR_ep850_s8503"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep850_s8503"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep850_s8503"
+    }
+   },
+   "901": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep901_s9013"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep901_s9013"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep901_s9013"
+    }
+   },
+   "954": {
+    "B0": {
+     "cls": "fail",
+     "word": "실패(full)",
+     "run": "B_ROI_FPR_ep954_s9543"
+    },
+    "B2c": {
+     "cls": "contact",
+     "word": "금지 접촉(basket)",
+     "run": "B_ROI_FPR_ep954_s9543"
+    },
+    "C0F": {
+     "cls": "contact",
+     "word": "금지 접촉(neighbour_fruit) · 성공",
+     "run": "B_ROI_FPR_ep954_s9543"
+    }
+   },
+   "1345": {
+    "B0": {
+     "cls": "contact",
+     "word": "금지 접촉(neighbour_fruit) · 성공",
+     "run": "B_ROI_FPR_ep1345_s13453"
+    },
+    "B2c": {
+     "cls": "contact",
+     "word": "금지 접촉(neighbour_fruit) · 성공",
+     "run": "B_ROI_FPR_ep1345_s13453"
+    },
+    "C0F": {
+     "cls": "contact",
+     "word": "금지 접촉(neighbour_fruit) · 성공",
+     "run": "B_ROI_FPR_ep1345_s13453"
+    }
+   },
+   "1596": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep1596_s15963"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep1596_s15963"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep1596_s15963"
+    }
+   },
+   "1668": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep1668_s16683"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep1668_s16683"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep1668_s16683"
+    }
+   },
+   "1837": {
+    "B0": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep1837_s18373"
+    },
+    "B2c": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep1837_s18373"
+    },
+    "C0F": {
+     "cls": "safe",
+     "word": "안전한 성공",
+     "run": "B_ROI_FPR_ep1837_s18373"
+    }
+   }
+  }
+ }
+}

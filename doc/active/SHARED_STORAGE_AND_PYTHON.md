@@ -35,6 +35,9 @@ Development는 자기 source와 독립 환경을 사용한다. Benchmark checkou
 `AG3S_RESULTS_ROOT=$AG3S_STORAGE_ROOT/results/development`를 설정한다.
 `common.run_output`은 결과 root를 독립 검증하고 KST 날짜·source commit·UUID로 run을 생성한다.
 기존 `outputs/` 폴더는 현재 writer의 기본 저장 위치로 사용하지 않는다.
+예외 (2026-10-23 사용자 지시): 사람이 볼 영상 · 검증 결과는 checkout `outputs/<YYYY-MM-DD>_<실험 설명>/`(git 제외)에 만든다.
+`common.experiment_view`가 storage run의 영상을 hard link로 걸고 README(실험 설명 · 결과 표 · 원시 기록 경로)를 쓴다.
+원시 기록(서버 기록 · replay · checkpoint)은 위 run 규칙 그대로 storage에 둔다.
 과거 Git source 비교는 자기 `.runtime/legacy-*` frozen fixture를 사용한다.
 Checkpoint·dataset과 과거 결과의 절대경로·SHA는 provenance로 그대로 보존한다.
 

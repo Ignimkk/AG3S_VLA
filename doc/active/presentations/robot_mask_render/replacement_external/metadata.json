@@ -1,0 +1,40 @@
+{
+  "qpos_source": "/mnt/dev/AG3S_VLA-development/doc/active/presentations/palm_shell_distance/scene_render/geometry.npz",
+  "camera": {
+    "azimuth": 55,
+    "elevation": -20,
+    "distance": 0.29,
+    "lookat": [
+      0.4763491537266298,
+      0.2935934182258983,
+      0.8945603294829344
+    ],
+    "width": 1000,
+    "height": 800
+  },
+  "comparison": "sphere-only versus render-only; no union",
+  "sphere_model": "self-filter build_robot_model, NOT TrajOpt thin spheres",
+  "sphere_count": 587,
+  "sphere_mask_px": 179963,
+  "render_only_px": 164404,
+  "sphere_only_exclusive_px": 15560,
+  "render_only_exclusive_px": 1,
+  "renderer": {
+    "cameras": {
+      "external_1345": {
+        "n_robot_px": 164404,
+        "n_rendered_px": 165409,
+        "render_ms": 818.759
+      }
+    },
+    "pose": {
+      "fingers": "measured",
+      "finger_q": {
+        "gripper_finger_l1": -0.04499,
+        "gripper_finger_r1": -0.04494
+      }
+    },
+    "ms": 818.958
+  },
+  "note": "Offline visualization at synthetic external view of recorded pose. Actual robot mask is evaluated in sensor views. No serving configuration changes."
+}

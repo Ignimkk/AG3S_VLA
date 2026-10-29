@@ -1,0 +1,433 @@
+{
+ "figure": "t59-phase-class-bars-W2.png",
+ "kind": "graph",
+ "korean_labels": true,
+ "inputs_sha256": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_frames_W2.jsonl": "5af017f3537e3de33a108fceb14c351a5828670280f100e6147638f00151dee6",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_w2_stats.json": "e1c9b1f89242aca34722a6551f27f0193a099868d7ed86509b7af060f1d50033",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_w2_window.json": "9e65d7dfe27c46c0bfe20807c9b15e00bfa35dd652343d1fc9dab9c929864594",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/select.json": "15e0bed9a6a0df8880e49b7ffffe6a2040b00ec3a81b1afe91895fa9f4f06cc5"
+ },
+ "unit": "fraction of frames; stacked = episode mean (episodes with >= 1 frame of the phase, equal weight); CI = episode bootstrap B 10000 seed 5407",
+ "window": "no placed -> W1 end; placed -> first frame >= first placed with used-arm ready distance <= 0.2 rad (inclusive); not reached -> episode end (t59_w2_window.json)",
+ "panels": {
+  "pre": {
+   "U": {
+    "n_frames": 477,
+    "n_episodes": 16,
+    "target": {
+     "count": 403,
+     "episode_mean": 0.8245010055044952,
+     "episode_mean_ci95": [
+      0.6902082628944375,
+      0.9269885043570513
+     ],
+     "pooled": 0.8448637316561844,
+     "pooled_ci95": [
+      0.7188689824231993,
+      0.9342670302396968
+     ]
+    },
+    "other_object": {
+     "count": 59,
+     "episode_mean": 0.14528825506856757,
+     "episode_mean_ci95": [
+      0.052897887864310884,
+      0.2791810290993769
+     ],
+     "pooled": 0.12368972746331237,
+     "pooled_ci95": [
+      0.04900125930590022,
+      0.24160067873303162
+     ]
+    },
+    "table": {
+     "count": 4,
+     "episode_mean": 0.006578947368421052,
+     "episode_mean_ci95": [
+      0.0,
+      0.019736842105263157
+     ],
+     "pooled": 0.008385744234800839,
+     "pooled_ci95": [
+      0.0,
+      0.02790860302488207
+     ]
+    },
+    "no_target": {
+     "count": 11,
+     "episode_mean": 0.023631792058516198,
+     "episode_mean_ci95": [
+      0.0,
+      0.053944618599791015
+     ],
+     "pooled": 0.023060796645702306,
+     "pooled_ci95": [
+      0.0,
+      0.057259938920569714
+     ]
+    }
+   },
+   "Sg": {
+    "n_frames": 477,
+    "n_episodes": 16,
+    "target": {
+     "count": 430,
+     "episode_mean": 0.8947368421052632,
+     "episode_mean_ci95": [
+      0.7467105263157895,
+      1.0
+     ],
+     "pooled": 0.9014675052410901,
+     "pooled_ci95": [
+      0.7506404035932969,
+      1.0
+     ]
+    },
+    "other_object": {
+     "count": 46,
+     "episode_mean": 0.10361842105263158,
+     "episode_mean_ci95": [
+      0.0,
+      0.25
+     ],
+     "pooled": 0.09643605870020965,
+     "pooled_ci95": [
+      0.0,
+      0.24672489082969432
+     ]
+    },
+    "no_target": {
+     "count": 1,
+     "episode_mean": 0.001644736842105263,
+     "episode_mean_ci95": [
+      0.0,
+      0.004934210526315789
+     ],
+     "pooled": 0.0020964360587002098,
+     "pooled_ci95": [
+      0.0,
+      0.006977150756220517
+     ]
+    }
+   },
+   "S": {
+    "n_frames": 477,
+    "n_episodes": 16,
+    "target": {
+     "count": 430,
+     "episode_mean": 0.8947368421052632,
+     "episode_mean_ci95": [
+      0.7467105263157895,
+      1.0
+     ],
+     "pooled": 0.9014675052410901,
+     "pooled_ci95": [
+      0.7506404035932969,
+      1.0
+     ]
+    },
+    "other_object": {
+     "count": 46,
+     "episode_mean": 0.10361842105263158,
+     "episode_mean_ci95": [
+      0.0,
+      0.25
+     ],
+     "pooled": 0.09643605870020965,
+     "pooled_ci95": [
+      0.0,
+      0.24672489082969432
+     ]
+    },
+    "no_target": {
+     "count": 1,
+     "episode_mean": 0.001644736842105263,
+     "episode_mean_ci95": [
+      0.0,
+      0.004934210526315789
+     ],
+     "pooled": 0.0020964360587002098,
+     "pooled_ci95": [
+      0.0,
+      0.006977150756220517
+     ]
+    }
+   }
+  },
+  "held": {
+   "U": {
+    "n_frames": 106,
+    "n_episodes": 10,
+    "target": {
+     "count": 69,
+     "episode_mean": 0.590970695970696,
+     "episode_mean_ci95": [
+      0.3924192890442891,
+      0.7624458874458875
+     ],
+     "pooled": 0.6509433962264151,
+     "pooled_ci95": [
+      0.4956482569526048,
+      0.782608695652174
+     ]
+    },
+    "other_object": {
+     "count": 31,
+     "episode_mean": 0.3540642690642691,
+     "episode_mean_ci95": [
+      0.1825784064420428,
+      0.5568930375180374
+     ],
+     "pooled": 0.29245283018867924,
+     "pooled_ci95": [
+      0.15702074218117,
+      0.44660194174757284
+     ]
+    },
+    "no_target": {
+     "count": 6,
+     "episode_mean": 0.054965034965034965,
+     "episode_mean_ci95": [
+      0.0,
+      0.1212121212121212
+     ],
+     "pooled": 0.05660377358490566,
+     "pooled_ci95": [
+      0.0,
+      0.125
+     ]
+    }
+   },
+   "Sg": {
+    "n_frames": 106,
+    "n_episodes": 10,
+    "target": {
+     "count": 100,
+     "episode_mean": 0.8615384615384615,
+     "episode_mean_ci95": [
+      0.6345784023668639,
+      1.0
+     ],
+     "pooled": 0.9433962264150944,
+     "pooled_ci95": [
+      0.8420922355393434,
+      1.0
+     ]
+    },
+    "other_object": {
+     "count": 6,
+     "episode_mean": 0.13846153846153847,
+     "episode_mean_ci95": [
+      0.0,
+      0.3654215976331356
+     ],
+     "pooled": 0.05660377358490566,
+     "pooled_ci95": [
+      0.0,
+      0.15790776446065638
+     ]
+    }
+   },
+   "S": {
+    "n_frames": 106,
+    "n_episodes": 10,
+    "target": {
+     "count": 16,
+     "episode_mean": 0.1356010656010656,
+     "episode_mean_ci95": [
+      0.09337778293135436,
+      0.1729138982710411
+     ],
+     "pooled": 0.1509433962264151,
+     "pooled_ci95": [
+      0.11864406779661017,
+      0.18
+     ]
+    },
+    "other_object": {
+     "count": 90,
+     "episode_mean": 0.8643989343989343,
+     "episode_mean_ci95": [
+      0.8270861017289588,
+      0.9066222170686455
+     ],
+     "pooled": 0.8490566037735849,
+     "pooled_ci95": [
+      0.82,
+      0.8813559322033898
+     ]
+    }
+   }
+  },
+  "placed": {
+   "U": {
+    "n_frames": 153,
+    "n_episodes": 9,
+    "target": {
+     "count": 100,
+     "episode_mean": 0.5262345679012346,
+     "episode_mean_ci95": [
+      0.25555082070707075,
+      0.7923137626262624
+     ],
+     "pooled": 0.6535947712418301,
+     "pooled_ci95": [
+      0.3230769230769231,
+      0.841728650977523
+     ]
+    },
+    "other_object": {
+     "count": 17,
+     "episode_mean": 0.17839506172839506,
+     "episode_mean_ci95": [
+      0.06349206349206349,
+      0.3083428030303029
+     ],
+     "pooled": 0.1111111111111111,
+     "pooled_ci95": [
+      0.04205607476635514,
+      0.26563331117021266
+     ]
+    },
+    "destination": {
+     "count": 4,
+     "episode_mean": 0.02974186307519641,
+     "episode_mean_ci95": [
+      0.0,
+      0.08417508417508418
+     ],
+     "pooled": 0.026143790849673203,
+     "pooled_ci95": [
+      0.0,
+      0.06666666666666667
+     ]
+    },
+    "table": {
+     "count": 5,
+     "episode_mean": 0.05679012345679012,
+     "episode_mean_ci95": [
+      0.0,
+      0.15555555555555556
+     ],
+     "pooled": 0.032679738562091505,
+     "pooled_ci95": [
+      0.0,
+      0.12699134199134188
+     ]
+    },
+    "no_target": {
+     "count": 27,
+     "episode_mean": 0.20883838383838385,
+     "episode_mean_ci95": [
+      0.08680555555555555,
+      0.34187996031746026
+     ],
+     "pooled": 0.17647058823529413,
+     "pooled_ci95": [
+      0.05624824438202247,
+      0.3150722156045264
+     ]
+    }
+   },
+   "Sg": {
+    "n_frames": 153,
+    "n_episodes": 9,
+    "target": {
+     "count": 28,
+     "episode_mean": 0.31040965207631876,
+     "episode_mean_ci95": [
+      0.19433107112794612,
+      0.41805555555555557
+     ],
+     "pooled": 0.1830065359477124,
+     "pooled_ci95": [
+      0.08384825444420647,
+      0.41379310344827586
+     ]
+    },
+    "other_object": {
+     "count": 6,
+     "episode_mean": 0.01515151515151515,
+     "episode_mean_ci95": [
+      0.0,
+      0.045557851239667914
+     ],
+     "pooled": 0.0392156862745098,
+     "pooled_ci95": [
+      0.0,
+      0.09278350515463918
+     ]
+    },
+    "no_target": {
+     "count": 119,
+     "episode_mean": 0.674438832772166,
+     "episode_mean_ci95": [
+      0.5811858164983165,
+      0.7724255050505051
+     ],
+     "pooled": 0.7777777777777778,
+     "pooled_ci95": [
+      0.5862068965517241,
+      0.8604651162790697
+     ]
+    }
+   },
+   "S": {
+    "n_frames": 153,
+    "n_episodes": 9,
+    "other_object": {
+     "count": 34,
+     "episode_mean": 0.3255611672278339,
+     "episode_mean_ci95": [
+      0.22757449494949492,
+      0.4188141835016835
+     ],
+     "pooled": 0.2222222222222222,
+     "pooled_ci95": [
+      0.13953488372093023,
+      0.41379310344827586
+     ]
+    },
+    "no_target": {
+     "count": 119,
+     "episode_mean": 0.674438832772166,
+     "episode_mean_ci95": [
+      0.5811858164983165,
+      0.7724255050505051
+     ],
+     "pooled": 0.7777777777777778,
+     "pooled_ci95": [
+      0.5862068965517241,
+      0.8604651162790697
+     ]
+    }
+   }
+  }
+ },
+ "excluded_phase_post": {
+  "reason": "post is unchanged from W1 (W2 adds placed frames only): n_frames 14, n_episodes 2; see T59.verify.json numbers.W2"
+ },
+ "S_no_target_breakdown": {
+  "S": {
+   "pre": {
+    "released": 1
+   },
+   "held": {},
+   "post": {},
+   "placed": {
+    "released": 119
+   }
+  },
+  "Sg": {
+   "pre": {
+    "released": 1
+   },
+   "held": {},
+   "post": {},
+   "placed": {
+    "released": 119
+   }
+  }
+ }
+}

@@ -1,0 +1,233 @@
+{
+ "figure": "t59-ppt-timeline-ep1809-key-N1.png",
+ "episode": "ep1809",
+ "target": "banana",
+ "used_arm": "left",
+ "figsize_in": [
+  16,
+  9
+ ],
+ "dpi": 150,
+ "inputs_sha256": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_frames_W2.jsonl": "5af017f3537e3de33a108fceb14c351a5828670280f100e6147638f00151dee6",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_w2_window.json": "9e65d7dfe27c46c0bfe20807c9b15e00bfa35dd652343d1fc9dab9c929864594"
+ },
+ "script": "AG3S/ag3s/docs/figures/ppt-1013/t59_key_N1.py (derived from verify/T59/p/t59_w2_key_figs_ep1809.py)",
+ "window_frames": [
+  0,
+  39
+ ],
+ "W2_end_reason": "ready (dist <= 0.2 rad)",
+ "ready_dist_at_W2_end_rad": 0.1005012925427514,
+ "colour_source": "t59_fig_common.py (CLS_COLOR, PHASE_COLOR, HSR_COLOR), same as t59-ppt-timeline-ep1809-W2.png",
+ "rows_top_to_bottom": {
+  "physical phase": "phase",
+  "HSR confirmed label": "S_hsr_label",
+  "phase-unsplit (U)": "U_class",
+  "phase-split, current system (Sg)": "S_class_at_geometry_frame"
+ },
+ "row_runs": {
+  "phase": [
+   {
+    "value": "pre",
+    "frames": [
+     0,
+     19
+    ],
+    "n": 20
+   },
+   {
+    "value": "held",
+    "frames": [
+     20,
+     29
+    ],
+    "n": 10
+   },
+   {
+    "value": "placed",
+    "frames": [
+     30,
+     39
+    ],
+    "n": 10
+   }
+  ],
+  "S_hsr_label": [
+   {
+    "value": "None",
+    "frames": [
+     0,
+     1
+    ],
+    "n": 2
+   },
+   {
+    "value": "pick",
+    "frames": [
+     2,
+     21
+    ],
+    "n": 20
+   },
+   {
+    "value": "place",
+    "frames": [
+     22,
+     34
+    ],
+    "n": 13
+   },
+   {
+    "value": "home",
+    "frames": [
+     35,
+     39
+    ],
+    "n": 5
+   }
+  ],
+  "U_class": [
+   {
+    "value": "target",
+    "frames": [
+     0,
+     18
+    ],
+    "n": 19
+   },
+   {
+    "value": "other_object",
+    "frames": [
+     19,
+     25
+    ],
+    "n": 7
+   },
+   {
+    "value": "no_target",
+    "frames": [
+     26,
+     26
+    ],
+    "n": 1
+   },
+   {
+    "value": "target",
+    "frames": [
+     27,
+     28
+    ],
+    "n": 2
+   },
+   {
+    "value": "no_target",
+    "frames": [
+     29,
+     29
+    ],
+    "n": 1
+   },
+   {
+    "value": "target",
+    "frames": [
+     30,
+     39
+    ],
+    "n": 10
+   }
+  ],
+  "S_class_at_geometry_frame": [
+   {
+    "value": "target",
+    "frames": [
+     0,
+     34
+    ],
+    "n": 35
+   },
+   {
+    "value": "no_target",
+    "frames": [
+     35,
+     39
+    ],
+    "n": 5
+   }
+  ]
+ },
+ "annotation_a": {
+  "definition": "held frames with U_class != target",
+  "held_frame_range": [
+   20,
+   29
+  ],
+  "n_held": 10,
+  "N": 8,
+  "frames_U_not_target": [
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   29
+  ],
+  "U_by_frame": {
+   "20": "other_object",
+   "21": "other_object",
+   "22": "other_object",
+   "23": "other_object",
+   "24": "other_object",
+   "25": "other_object",
+   "26": "no_target",
+   "27": "target",
+   "28": "target",
+   "29": "no_target"
+  }
+ },
+ "annotation_b": {
+  "definition": "N=1 released frames (Sg_N1 == no_target); count U_class == target",
+  "frame_range": [
+   33,
+   39
+  ],
+  "n_frames": 7,
+  "M": 7,
+  "U_by_frame": {
+   "33": "target",
+   "34": "target",
+   "35": "target",
+   "36": "target",
+   "37": "target",
+   "38": "target",
+   "39": "target"
+  }
+ },
+ "N1_counterfactual": {
+  "note": "illustration only, not a measurement of an N=1 server; serving ran subtask_confirm_frames=3",
+  "hsr_row": "S_hsr_argmax per frame",
+  "release_rule": "first frame with argmax==home and S_subtask_placed_seen and not S_decision_frozen",
+  "release_frame_N1": 33,
+  "release_frame_N3_actual": 35,
+  "changed_hsr_frames": [
+   20,
+   21,
+   33,
+   34
+  ],
+  "changed_Sg_frames": [
+   33,
+   34
+  ]
+ },
+ "dropped_from_old_figure": [
+  "serving latch row",
+  "HSR probability curves",
+  "selection-rule sentence",
+  "dotted W1-end line",
+  "triangle markers"
+ ],
+ "label_note": "no_target shown as 'none' in Korean ('없음'); ASCII fallback 'none' if no CJK font"
+}

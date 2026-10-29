@@ -1,0 +1,69 @@
+{
+  "rows": [
+    {
+      "method": "VLA 단독",
+      "tcp_rel_apple_t0_mm": [
+        -3.7720604521376266,
+        14.65058132752789,
+        12.315450192967425
+      ],
+      "first_close_step": 144,
+      "outcome": "성공"
+    },
+    {
+      "method": "AG3S 기준",
+      "tcp_rel_apple_t0_mm": [
+        12.866069011793435,
+        38.05391160136451,
+        22.867671536170754
+      ],
+      "first_close_step": 146,
+      "outcome": "실패"
+    },
+    {
+      "method": "목표 위치 고정",
+      "tcp_rel_apple_t0_mm": [
+        5,
+        15,
+        25
+      ],
+      "first_close_step": 113,
+      "outcome": "실패"
+    },
+    {
+      "method": "손목 가중치",
+      "tcp_rel_apple_t0_mm": [
+        0.4500805644752637,
+        37.205597146199146,
+        21.90001479668846
+      ],
+      "first_close_step": 146,
+      "outcome": "실패"
+    },
+    {
+      "method": "손목 가중치 + 접촉 허용",
+      "tcp_rel_apple_t0_mm": [
+        -7.29698966477732,
+        16.180305482836054,
+        11.356929028764728
+      ],
+      "first_close_step": 146,
+      "outcome": "성공"
+    }
+  ],
+  "sources": [
+    {
+      "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/ifg-split/ifg-goal-drift-ep954.json",
+      "sha256": "3a0797c9b951c90035c62c7ad5dee3fa34a433fa9e29f6d72e4adc0d918b6635"
+    },
+    {
+      "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/IFG-APPLE-TOA2.verify.json",
+      "sha256": "915c93c59aeacc719b82f6d4928b422d1dbb9e82fe9fca5cfa8f65a6af993dc4"
+    },
+    {
+      "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/IFG-APPLE-NBC.verify.json",
+      "sha256": "e88d53e6666b17dcb355229d37ff4a26d7edc9fd66e3c19003391f18718f4dda"
+    }
+  ],
+  "note": "Anchor values are rounded in the source. Values are recorded first-close TCP coordinates, not a newly simulated measurement."
+}

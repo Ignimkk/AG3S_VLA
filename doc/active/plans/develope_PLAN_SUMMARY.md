@@ -1,5 +1,7 @@
 # develope_PLAN 요약 — Benchmark · Baseline · 실물 로봇 · 실험 목록
 
+> **2026-10-23 우선 적용:** [한 페이지 연구 범위](AG3S_RESEARCH_SCOPE_20261023_KO.md)와 [핵심 평가 task](../../../AG3S/ag3s/docs/handoff/AG3S-CORE-EVALUATION.task.md)를 먼저 읽는다. 아래는 이전 계획 요약이며, 이번 회차의 후보·비교·종료 기준은 새 문서에 고정했다.
+
 작성: 2026-10-07 KST · 상태: `PLANNED` (아직 아무것도 실행하지 않음)
 원본: [develope_PLAN.md](develope_PLAN.md) (638줄) · [SAFELIBERO_PLAN.md](paper/notes/SAFELIBERO_PLAN.md) · baseline 원문 정리 [REFERENCE_ANALYSIS_R2.md](paper/notes/REFERENCE_ANALYSIS_R2.md)
 용도: 이후 Claude Code에 "1·2번을 구현·검증해 달라"고 넘길 때의 입력 문서.

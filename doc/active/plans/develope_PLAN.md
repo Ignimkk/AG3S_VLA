@@ -1,9 +1,11 @@
 # AG3S VLA — 구현·실험·확인·검증·논문 작성 계획
 
+> **2026-10-23 연구 범위 고정:** 이번 평가 회차는 [한 페이지 연구 범위](AG3S_RESEARCH_SCOPE_20261023_KO.md)와 [핵심 평가·종료 기준](../../../AG3S/ag3s/docs/handoff/AG3S-CORE-EVALUATION.task.md)을 먼저 따른다. §0.10의 의미→기하→접촉 연결을 유지하되, 실패별 확장을 제한하고 핵심 후보·비교군·수정/실험 예산을 고정했다. 아래 기존 계획과 완료 기록은 보존한다. [검토 근거·읽은 문서](../reviews/AG3S_SCOPE_DECISION_20261023_KO.md).
+
 작성: 2026-10-07 18:44 KST  
 수정: 2026-10-12 KST — 기여 강화 방향과 논문 표현 전략 반영
 
-문서 상태: `PLANNED / PAPER-FIRST` — 0.10절이 최신 연구·집필 우선순위이며, 나머지는 선택해서 사용하는 상세 작업 명세
+문서 상태: `PLANNED / PAPER-FIRST` — 이번 평가 회차는 위 2026-10-23 범위 결정을 우선 적용한다. 0.10절의 연구 방향은 유지하며, 나머지는 선택해서 사용하는 상세 작업 명세다.
 
 대상 원고: [main.pdf](paper/latex/build/main.pdf)  
 목적: VLA의 task grounding을 접촉 판단에 사용할 수 있는 3D target geometry로 구체화하고, 필요한 대상 접촉과 인접 장애물 보존을 함께 다루는 기여를 구현·실험·논문 표현으로 강화한다.
@@ -562,7 +564,7 @@ python3 paper/tools/analysis/validate_manifests.py
 
 ### 8.3 S6 완료 기준
 
-정량 claim마다 experiment/result/metric ID, raw source hash, verify key, sample unit, denominator, uncertainty, limitation이 연결되어야 한다. 누락 범위는 `UNKNOWN`/`NOT_MEASURED`로 남긴다. 검증된 범위만 본문 수치로 사용하며, candidate와 pilot은 final result에 합쳐 표본 수를 늘리지 않는다.
+정량 claim마다 experiment/result/metric ID 또는 계산·가정 근거, sample unit, denominator, uncertainty, limitation을 연결한다. 누락 범위는 `UNKNOWN`/`NOT_MEASURED`로 표시한다. 등록·검증 여부는 본문 사용을 제한하지 않으며 candidate와 pilot을 합칠 때는 구성과 표본 수 산정 방식을 명시한다.
 
 ## 9. Figure와 Table 제작 명세
 

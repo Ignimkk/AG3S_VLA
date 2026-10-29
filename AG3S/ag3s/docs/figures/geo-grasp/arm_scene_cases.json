@@ -1,0 +1,50 @@
+{
+ "121_r41_c2_executed": {
+  "arm": {
+   "dist_mm": 50.0,
+   "link": null,
+   "obstacle": null
+  },
+  "hand": {
+   "dist_mm": 50.0,
+   "link": null,
+   "obstacle": null
+  }
+ },
+ "121_r41_c2_candidate": {
+  "arm": {
+   "dist_mm": -27.4,
+   "link": "FT_SENSOR_L",
+   "obstacle": "pick_obstacle_post_0"
+  },
+  "hand": {
+   "dist_mm": -1.1,
+   "link": "EE_BODY_L",
+   "obstacle": "pick_obstacle_post_0"
+  }
+ },
+ "323_r68_c0_executed": {
+  "arm": {
+   "dist_mm": 50.0,
+   "link": null,
+   "obstacle": null
+  },
+  "hand": {
+   "dist_mm": 50.0,
+   "link": null,
+   "obstacle": null
+  }
+ },
+ "323_r68_c0_candidate": {
+  "arm": {
+   "dist_mm": -6.7,
+   "link": "FT_SENSOR_L",
+   "obstacle": "pick_obstacle_overbar_0"
+  },
+  "hand": {
+   "dist_mm": 7.7,
+   "link": "EE_BODY_L",
+   "obstacle": "pick_obstacle_overbar_0"
+  }
+ }
+}

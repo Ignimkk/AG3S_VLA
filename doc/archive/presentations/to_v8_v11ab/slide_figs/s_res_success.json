@@ -1,0 +1,14 @@
+{
+ "arms": [
+  "V8",
+  "V11A",
+  "V11AB"
+ ],
+ "success_ct": [
+  8,
+  8,
+  12
+ ],
+ "n": 14,
+ "source": "T43V11ABC.verify.json via AG3S_T0T6_LOG.md T43 13"
+}

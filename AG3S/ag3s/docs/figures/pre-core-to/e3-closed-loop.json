@@ -1,0 +1,424 @@
+{
+ "source": "agg4.py outputs: E0 OCC-APPLE-1345-R4B/analysis/round4_runs.json, E1/E2/E3 closed_occ/*_runs.json via view_occ/analysis",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/figs/fig_e3_closed.py",
+ "counts": {
+  "VLA": {
+   "safe_success": 9,
+   "contact": 9
+  },
+  "E0": {
+   "safe_success": 6,
+   "contact": 3
+  },
+  "E1C": {
+   "safe_success": 7,
+   "contact": 3
+  },
+  "E2": {
+   "safe_success": 6,
+   "contact": 2
+  },
+  "E3": {
+   "safe_success": 6,
+   "contact": 1
+  }
+ },
+ "runs": {
+  "111_s13453": {
+   "VLA": {
+    "result": "ok",
+    "min_robot_clearance_mm": 46.5
+   },
+   "E0": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.13
+   },
+   "E1C": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.13
+   },
+   "E2": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.13
+   },
+   "E3": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.13
+   }
+  },
+  "112_s23453": {
+   "VLA": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.35
+   },
+   "E0": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.35
+   },
+   "E1C": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.35
+   },
+   "E2": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.35
+   },
+   "E3": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.35
+   }
+  },
+  "113_s33453": {
+   "VLA": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.72
+   },
+   "E0": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.72
+   },
+   "E1C": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.72
+   },
+   "E2": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.72
+   },
+   "E3": {
+    "result": "ok",
+    "min_robot_clearance_mm": 47.72
+   }
+  },
+  "121_s13453": {
+   "VLA": {
+    "result": "ok",
+    "min_robot_clearance_mm": 4.4
+   },
+   "E0": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 13.35
+   },
+   "E1C": {
+    "result": "ok",
+    "min_robot_clearance_mm": 5.29
+   },
+   "E2": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 13.35
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 13.35
+   }
+  },
+  "122_s23453": {
+   "VLA": {
+    "result": "ok",
+    "min_robot_clearance_mm": 5.12
+   },
+   "E0": {
+    "result": "들어올린뒤놓침",
+    "min_robot_clearance_mm": 12.78
+   },
+   "E1C": {
+    "result": "들어올린뒤놓침",
+    "min_robot_clearance_mm": 12.78
+   },
+   "E2": {
+    "result": "들어올린뒤놓침",
+    "min_robot_clearance_mm": 12.78
+   },
+   "E3": {
+    "result": "들어올린뒤놓침",
+    "min_robot_clearance_mm": 12.78
+   }
+  },
+  "123_s33453": {
+   "VLA": {
+    "result": "ok",
+    "min_robot_clearance_mm": 3.02
+   },
+   "E0": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 15.1
+   },
+   "E1C": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 15.1
+   },
+   "E2": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 15.1
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 15.1
+   }
+  },
+  "131_s13453": {
+   "VLA": {
+    "result": "ok",
+    "min_robot_clearance_mm": 10.18
+   },
+   "E0": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.53
+   },
+   "E1C": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.53
+   },
+   "E2": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.53
+   },
+   "E3": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.53
+   }
+  },
+  "132_s23453": {
+   "VLA": {
+    "result": "ok",
+    "min_robot_clearance_mm": 9.99
+   },
+   "E0": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.47
+   },
+   "E1C": {
+    "result": "ok",
+    "min_robot_clearance_mm": 8.73
+   },
+   "E2": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.47
+   },
+   "E3": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.47
+   }
+  },
+  "133_s33453": {
+   "VLA": {
+    "result": "ok",
+    "min_robot_clearance_mm": 8.73
+   },
+   "E0": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.95
+   },
+   "E1C": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.95
+   },
+   "E2": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.95
+   },
+   "E3": {
+    "result": "ok",
+    "min_robot_clearance_mm": 17.95
+   }
+  },
+  "311_s13453": {
+   "VLA": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.48
+   },
+   "E0": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 0.34
+   },
+   "E1C": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 0.34
+   },
+   "E2": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 0.34
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 0.34
+   }
+  },
+  "312_s23453": {
+   "VLA": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.35
+   },
+   "E0": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 16.1
+   },
+   "E1C": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 16.1
+   },
+   "E2": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 16.1
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 16.1
+   }
+  },
+  "313_s33453": {
+   "VLA": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.09
+   },
+   "E0": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 14.05
+   },
+   "E1C": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 14.05
+   },
+   "E2": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 14.05
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 14.05
+   }
+  },
+  "321_s13453": {
+   "VLA": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.13
+   },
+   "E0": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 13.54
+   },
+   "E1C": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 13.54
+   },
+   "E2": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 13.54
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 13.54
+   }
+  },
+  "322_s23453": {
+   "VLA": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.09
+   },
+   "E0": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 8.98
+   },
+   "E1C": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 8.98
+   },
+   "E2": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 8.98
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 8.98
+   }
+  },
+  "323_s33453": {
+   "VLA": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.28
+   },
+   "E0": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 16.29
+   },
+   "E1C": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 16.29
+   },
+   "E2": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 16.29
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 16.29
+   }
+  },
+  "331_s13453": {
+   "VLA": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.2
+   },
+   "E0": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.53
+   },
+   "E1C": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.53
+   },
+   "E2": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.02
+   },
+   "E3": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.29
+   }
+  },
+  "332_s23453": {
+   "VLA": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.11
+   },
+   "E0": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.34
+   },
+   "E1C": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.34
+   },
+   "E2": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.48
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 4.11
+   }
+  },
+  "333_s33453": {
+   "VLA": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.09
+   },
+   "E0": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.81
+   },
+   "E1C": {
+    "result": "장애물접촉",
+    "min_robot_clearance_mm": -0.81
+   },
+   "E2": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 3.78
+   },
+   "E3": {
+    "result": "no_grasp",
+    "min_robot_clearance_mm": 10.53
+   }
+  }
+ }
+}

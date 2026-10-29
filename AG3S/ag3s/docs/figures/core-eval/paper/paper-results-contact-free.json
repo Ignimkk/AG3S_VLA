@@ -1,0 +1,41 @@
+{
+ "counts": {
+  "(a) Occluded target (6 runs)|VLA": [
+   6,
+   6
+  ],
+  "(a) Occluded target (6 runs)|E3": [
+   1,
+   6
+  ],
+  "(a) Occluded target (6 runs)|SCM": [
+   4,
+   6
+  ],
+  "(a) Occluded target (6 runs)|CORE": [
+   5,
+   6
+  ],
+  "(b) Clutter, no obstacle (12 runs)|VLA": [
+   4,
+   12
+  ],
+  "(b) Clutter, no obstacle (12 runs)|E3": [
+   7,
+   12
+  ],
+  "(b) Clutter, no obstacle (12 runs)|SCM": [
+   6,
+   12
+  ],
+  "(b) Clutter, no obstacle (12 runs)|CORE": [
+   7,
+   12
+  ],
+  "support|VLA": 5,
+  "support|E3": 0,
+  "support|SCM": 0,
+  "support|CORE": 0
+ },
+ "definition": "(a) success and no robot-post contact; (b) success, no forbidden contact (neighbour fruit / post / unauthorised link-target) and no robot-table / basket contact (core-evaluation task \u00a74); (c) runs with any robot-table / basket contact. 2 draws per scene (no perturbation, 1e-6 rad first-chunk perturbation seed 1); earlier configurations are existing records of the same scenes and draws."
+}

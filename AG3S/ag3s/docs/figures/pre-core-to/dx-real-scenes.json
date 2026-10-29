@@ -1,0 +1,15 @@
+{
+ "scenes": {
+  "331_E3_contact": {
+   "t": 88,
+   "M1_planned_mm": 13.3,
+   "M2_actual_mm": -0.5
+  },
+  "321_E3_close": {
+   "t": 302,
+   "palm_apple_mm": 230.04731951868533,
+   "wrist_out_of_view_requests": 25
+  }
+ },
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/DX/dx_figs.py"
+}

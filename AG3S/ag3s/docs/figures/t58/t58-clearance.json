@@ -1,0 +1,71 @@
+{
+ "definitions": "T58 figures (rule A: real scene, graph, table) from agg/t58_summary.json + the recorded mp4 (600 frames = 1 per control row).\nusage: fig_t58.py SUMMARY_JSON OUT_DIR   -> t58-scene.png / t58-clearance.png / t58-table.png + same-name .json sidecars\nscene     : per episode: the placement (OFF run, t=0), OFF at its first robot-post MuJoCo contact row, ON at its first contact row\n            (obstacle runs stop at the first contact, so the videos are shorter than 600 frames). Third-person front camera of the client recording (avoidance arrow overlay drawn by the client).\nclearance : robot-to-post signed distance (certified GJK, cap 0.30 m) per control row; solid = run with the post, dashed = no-obstacle\n            run with the same post placed virtually (the path the policy took without seeing it). <= 0 = penetration on the replayed kinematics.\ntable     : task success, grasp_t / place_t, HOLD chunks, robot-post contact rows (hand / other links, MuJoCo replay), max contact force,\n            minimum clearance, non-target fruit contact rows.",
+ "per_episode": {
+  "1925": {
+   "obs/E0": {
+    "min_clear_robot_mm": 4.167088318436042,
+    "t_min": 83,
+    "grasp_t": null
+   },
+   "obs/ON": {
+    "min_clear_robot_mm": 1.8630021677540354,
+    "t_min": 75,
+    "grasp_t": null
+   },
+   "noobs/E0": {
+    "min_clear_robot_mm": -35.67376105750395,
+    "t_min": 133,
+    "grasp_t": 168
+   },
+   "noobs/ON": {
+    "min_clear_robot_mm": -25.623923400284298,
+    "t_min": 124,
+    "grasp_t": 136
+   }
+  },
+  "1830": {
+   "obs/E0": {
+    "min_clear_robot_mm": 0.8748312945654795,
+    "t_min": 54,
+    "grasp_t": null
+   },
+   "obs/ON": {
+    "min_clear_robot_mm": 0.43687679098371657,
+    "t_min": 55,
+    "grasp_t": null
+   },
+   "noobs/E0": {
+    "min_clear_robot_mm": -43.87536239111377,
+    "t_min": 112,
+    "grasp_t": 112
+   },
+   "noobs/ON": {
+    "min_clear_robot_mm": -46.612183383059836,
+    "t_min": 137,
+    "grasp_t": 144
+   }
+  },
+  "1623": {
+   "obs/E0": {
+    "min_clear_robot_mm": 0.782280956711896,
+    "t_min": 96,
+    "grasp_t": null
+   },
+   "obs/ON": {
+    "min_clear_robot_mm": 0.2280674597579778,
+    "t_min": 94,
+    "grasp_t": null
+   },
+   "noobs/E0": {
+    "min_clear_robot_mm": -34.66728545759631,
+    "t_min": 164,
+    "grasp_t": 176
+   },
+   "noobs/ON": {
+    "min_clear_robot_mm": -34.59809958386003,
+    "t_min": 103,
+    "grasp_t": 160
+   }
+  }
+ }
+}

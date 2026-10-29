@@ -1,0 +1,257 @@
+{
+ "figure": "t59-ppt-scene-ep1809.png",
+ "episode": "ep1809",
+ "figsize_in": [
+  20,
+  11.25
+ ],
+ "dpi": 120,
+ "inputs_sha256": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_frames_W2.jsonl": "5af017f3537e3de33a108fceb14c351a5828670280f100e6147638f00151dee6",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_w2_window.json": "9e65d7dfe27c46c0bfe20807c9b15e00bfa35dd652343d1fc9dab9c929864594",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/select.json": "15e0bed9a6a0df8880e49b7ffffe6a2040b00ec3a81b1afe91895fa9f4f06cc5",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_w2_stats.json": "e1c9b1f89242aca34722a6551f27f0193a099868d7ed86509b7af060f1d50033"
+ },
+ "scene_inputs_sha256": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/scene/ep1809_f20.npz": "79dc5ac566c6dee16e77a5d71268700ffa73b07e22aa2afb33995165058d1679",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/scene/ep1809_f20.json": "0ca1796f3e9e82099cd8445627c7927d3076974a58b742e4b60cfe9671ca13f1",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/scene/ep1809_f35.npz": "93a05f79fb8122965ddeb9fb4ec0e333729396605d86f5d6ff45b8b30c191bf6",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/scene/ep1809_f35.json": "2028a7ea1246a401b341214c8f4fa1e640b578b1f34b5092d93ed629b6e48827",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/scene/ep1809_f39.npz": "08b4c929d921f44b1d7217bf709f697d955da748ece22c19222b3c235d89997b",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/scene/ep1809_f39.json": "ee9ed40ae4c7bbcb6e586c2be89156d1d585008ee2b6cd4a7c18f585ebf1a4c7"
+ },
+ "selection_rule_episode": "representative = successful episode that returned within 0.2 rad of the ready pose, max number of held frames with U != target, tie -> smaller episode number (user decision 2026-10-13; ep1839, ep1866 excluded: not returned)",
+ "frame_selection_rule": {
+  "i": "first held frame with U_class != target",
+  "ii": "among placed frames with serving released (S_manipulated_present False, S_attached False, S_hsr_label home): first frame where U chose a cluster (U_chosen_n > 0, U_class != no_target); fallback = first released frame (fallback not used)",
+  "iii": "W2 end frame (first frame within 0.2 rad of the ready pose after first placed)"
+ },
+ "frames": [
+  {
+   "frame": 20,
+   "t_step": 160,
+   "phase": "held",
+   "latch": "held",
+   "attached": true,
+   "HSR_label": "pick",
+   "U_class": "other_object",
+   "Sg_class": "target",
+   "S_class_same_frame": "target",
+   "U_chosen_n": 107,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 107,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   },
+   "U_centroid_m": [
+    0.547684907913208,
+    0.3075987696647644,
+    0.866388738155365
+   ],
+   "U_reproduces_stored_T54_row": {
+    "chosen_rank": true,
+    "identity_correct": true,
+    "identity_label": true,
+    "pre_split_digest": true,
+    "post_split_digest": true,
+    "has_target": true,
+    "n_candidates": true,
+    "chosen_n": true
+   },
+   "S_manipulated_present": true,
+   "S_manipulated_state": "occluded",
+   "S_manipulated_centroid": [
+    0.45504930163354057,
+    0.29968369417486873,
+    0.8518879307284348
+   ],
+   "S_target_points_n": 69,
+   "ready_dist_rad": 1.5202305182614062,
+   "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8291_20261013T010854/server_constraints/run_0000/chunk_00020.npz",
+   "gt_object_pos_base": {
+    "apple": [
+     0.5547205345804567,
+     0.3065438351152671,
+     0.8500042707781462
+    ],
+    "banana": [
+     0.4449500469434017,
+     0.32151859879164146,
+     0.8514182535779304
+    ],
+    "orange": [
+     0.5434979905919592,
+     -0.3267008869691586,
+     0.8487613261079253
+    ],
+    "pear": [
+     0.46507693924984145,
+     -0.32394655446585635,
+     0.8555725639568187
+    ],
+    "crate": [
+     0.514537339888332,
+     0.01108343312080012,
+     0.8799905187416482
+    ]
+   }
+  },
+  {
+   "frame": 35,
+   "t_step": 280,
+   "phase": "placed",
+   "latch": "placed",
+   "attached": false,
+   "HSR_label": "home",
+   "U_class": "target",
+   "Sg_class": "no_target",
+   "S_class_same_frame": "no_target",
+   "U_chosen_n": 73,
+   "U_chosen_counts": {
+    "target": 73,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   },
+   "U_centroid_m": [
+    0.5186626315116882,
+    -0.03711867332458496,
+    0.8606871366500854
+   ],
+   "U_reproduces_stored_T54_row": {
+    "chosen_rank": true,
+    "identity_correct": true,
+    "identity_label": true,
+    "pre_split_digest": true,
+    "post_split_digest": true,
+    "has_target": true,
+    "n_candidates": true,
+    "chosen_n": true
+   },
+   "S_manipulated_present": false,
+   "S_manipulated_state": null,
+   "S_manipulated_centroid": null,
+   "S_target_points_n": 0,
+   "ready_dist_rad": 0.7602052400278259,
+   "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8291_20261013T010854/server_constraints/run_0000/chunk_00035.npz",
+   "gt_object_pos_base": {
+    "apple": [
+     0.554458187986904,
+     0.3066129538635111,
+     0.8500006798294159
+    ],
+    "banana": [
+     0.516966406340613,
+     -0.03563028890191123,
+     0.8500041237995682
+    ],
+    "orange": [
+     0.5434924272402496,
+     -0.3266589548755535,
+     0.8487408478510107
+    ],
+    "pear": [
+     0.46495707103911543,
+     -0.3239361132066524,
+     0.8555724636815918
+    ],
+    "crate": [
+     0.514344905238687,
+     0.011089364122867035,
+     0.8799894974787449
+    ]
+   }
+  },
+  {
+   "frame": 39,
+   "t_step": 312,
+   "phase": "placed",
+   "latch": "placed",
+   "attached": false,
+   "HSR_label": "home",
+   "U_class": "target",
+   "Sg_class": "no_target",
+   "S_class_same_frame": "no_target",
+   "U_chosen_n": 91,
+   "U_chosen_counts": {
+    "target": 89,
+    "other_object": 0,
+    "table": 0,
+    "destination": 2,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   },
+   "U_centroid_m": [
+    0.520228385925293,
+    -0.035795826464891434,
+    0.8575859665870667
+   ],
+   "U_reproduces_stored_T54_row": {
+    "chosen_rank": true,
+    "identity_correct": true,
+    "identity_label": true,
+    "pre_split_digest": true,
+    "post_split_digest": true,
+    "has_target": true,
+    "n_candidates": true,
+    "chosen_n": true
+   },
+   "S_manipulated_present": false,
+   "S_manipulated_state": null,
+   "S_manipulated_centroid": null,
+   "S_target_points_n": 0,
+   "ready_dist_rad": 0.1005012925427514,
+   "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8291_20261013T010854/server_constraints/run_0000/chunk_00039.npz",
+   "gt_object_pos_base": {
+    "apple": [
+     0.5545450671777103,
+     0.30645940411918027,
+     0.8499969909767092
+    ],
+    "banana": [
+     0.517029758034696,
+     -0.035812783931585636,
+     0.8499725235198732
+    ],
+    "orange": [
+     0.5435051858379111,
+     -0.3268515713022815,
+     0.8487492870093685
+    ],
+    "pear": [
+     0.46495243396612557,
+     -0.32413532396972633,
+     0.855571297425707
+    ],
+    "crate": [
+     0.5144010421173979,
+     0.010913137481761993,
+     0.8799895777240858
+    ]
+   }
+  }
+ ],
+ "released_frames_in_window": [
+  35,
+  36,
+  37,
+  38,
+  39
+ ],
+ "render": "MuJoCo replay of recorded qpos, MUJOCO_GL=osmesa, 480x640 (t59_scene_render.py ep1809 20 35 39, .venv-ag3s)",
+ "U_source": "T54 current-condition L8H2 grounding re-run on CPU, reproduces stored T54 row (all 8 checked fields True for the 3 frames)",
+ "S_source": "T53 server chunk of the same frame (target_points) and S_manipulated_centroid; none drawn when S_manipulated_present is False",
+ "U_virtual_note": "U's chosen cluster is display only; no field was built from it",
+ "esdf_cross_section": "omitted (presentation figure)"
+}

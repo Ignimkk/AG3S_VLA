@@ -1,0 +1,67 @@
+{
+ "key": "E3reg/B_ROI_FPR_ep250_s2503",
+ "request": 9,
+ "t_step": 10,
+ "policy_step": 72,
+ "geometry_version": {
+  "request_seq": 9,
+  "manipulated_id": 0,
+  "manipulated_state": "visible",
+  "observed_frame": 9,
+  "n_points": 125,
+  "point_indices_sha1": "22ee99bfcd7f"
+ },
+ "ball_centre_m": [
+  0.4693506092294243,
+  -0.3242889316325029,
+  0.8471408855341978
+ ],
+ "ball_radius_mm": 55.605,
+ "fit_radius_mm": 34.0,
+ "f1_limit_mm": 44.0,
+ "voxel_mm": 5.0,
+ "n_full_surface_voxels_85mm": 1362,
+ "n_free_surface_voxels_85mm": 268,
+ "n_removed_voxels": 1094,
+ "n_ambiguous_kept_voxels": 81,
+ "n_ambiguous_on_stem": 45,
+ "n_free_surface_voxels_on_stem_leaf_8mm": 45,
+ "of_which_outside_ball": 0,
+ "n_target_points": 125,
+ "target_pts_on_stem_leaf_4mm": 12,
+ "target_pts_to_gt_apple_surface_mm_p50_p90": [
+  1.32,
+  2.0
+ ],
+ "cloud_pts_90mm": 129,
+ "cloud_to_gt_apple_mm_p50": 0.822548957217772,
+ "target_pts_to_cloud_mm_p50_p90": [
+  4.73,
+  21.64
+ ],
+ "stem_cloud_pts": 13,
+ "stem_cloud_dropped_as_target": 9,
+ "stem_cloud_left_nontarget_beyond_f1": 2,
+ "stem_left_points": [
+  {
+   "xyz": [
+    0.4649531841278076,
+    -0.3183612823486328,
+    0.8907009363174438
+   ],
+   "to_nearest_target_pt_mm": 5.03,
+   "to_ball_centre_mm": 44.18
+  },
+  {
+   "xyz": [
+    0.47851553559303284,
+    -0.32002416253089905,
+    0.8903005719184875
+   ],
+   "to_nearest_target_pt_mm": 5.92,
+   "to_ball_centre_mm": 44.33
+  }
+ ],
+ "panels_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/LTE/viz_stem",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/LTE/viz_stem_fig.py"
+}

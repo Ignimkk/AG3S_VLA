@@ -1,0 +1,86 @@
+{
+ "run": "121",
+ "decision_request": 9,
+ "views": [
+  "x-y (top)",
+  "x-z (side)"
+ ],
+ "n_candidates": 0,
+ "state": {
+  "request": 9,
+  "phase": "latched",
+  "target_id": 0,
+  "target_state": "visible",
+  "event": "kept (unmatched)",
+  "centre_shift_mm": 0.06,
+  "tracked_checks": {
+   "scene_hits": 0,
+   "target_hits": 0,
+   "approach_hits": 0
+  },
+  "tracked_ik": {
+   "iterations": 0,
+   "pos_err_mm": 1.222,
+   "rot_err_deg": 0.61,
+   "converged": true,
+   "seed_index": 0,
+   "n_seeds_tried": 1
+  },
+  "valid": true,
+  "reason": "ok",
+  "grasp": {
+   "grasp_id": 1,
+   "position": [
+    0.48409,
+    0.35238,
+    0.95336
+   ],
+   "open_width_mm": 68.79,
+   "width_mm": 58.79,
+   "since_request": 6,
+   "key": 0.17659
+  },
+  "n_switches": 1,
+  "n_invalidations": 0
+ },
+ "candidate_stats": {
+  "selection": "vla",
+  "n_target_points_raw": 339,
+  "n_target_points": 228,
+  "centre": [
+   0.53478,
+   0.3157,
+   0.84926
+  ],
+  "centre_method": "sphere",
+  "sphere_radius_mm": 33.6,
+  "recheck_only": true,
+  "n_scene_points_near": 3120,
+  "compute_ms": 5.08
+ },
+ "selected_gt": {
+  "contact_err_mm": [
+   1.61,
+   0.11
+  ],
+  "gt_normal_angle_deg": [
+   40.2,
+   20.1
+  ],
+  "gt_apple_hits": 0,
+  "gt_obstacle_hits": 0,
+  "ok_contact": true,
+  "ok_antipodal": false,
+  "ok_free": true,
+  "gt_valid": false,
+  "grasp_id": 1,
+  "vla_pos_err_mm": 25.5,
+  "vla_rot_err_deg": 9.4,
+  "position": [
+   0.48409,
+   0.35238,
+   0.95336
+  ]
+ },
+ "n_memory_points": 339
+}

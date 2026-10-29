@@ -1,0 +1,101 @@
+{
+ "step": "AG3S-GEO-GRASP",
+ "written": "2026-10-26 KST (before any closed-loop run)",
+ "status": "FIXED 2026-10-26 23:25 KST before the pilot (user ruling: time budget only, then pilot)",
+ "settings": {
+  "B0": "E3 server flags (snapshot_e3c) unchanged",
+  "B1": "B0 + --geo-grasp",
+  "B2": "B1 + --geo-track-scale 0.25 --geo-continuity-off (carry restore 3 requests)"
+ },
+ "cost_geo_defaults": {
+  "geo_grasp": false,
+  "geo_grasp_selection": "vla",
+  "geo_grasp_mu": 0.8,
+  "geo_w_pos": 2000.0,
+  "geo_w_rot": 5.0,
+  "geo_approach_radius": 0.15,
+  "geo_approach_step": 0.06,
+  "geo_close_tol_pos": 0.01,
+  "geo_close_tol_rot_deg": 15.0,
+  "geo_close_timeout": 8,
+  "geo_close_hold_radius": 0.03,
+  "geo_track_scale": 1.0,
+  "geo_continuity_off": false,
+  "geo_carry_requests": 3
+ },
+ "candidate_config": {
+  "voxel": 0.004,
+  "scene_voxel": 0.005,
+  "normal_radius": 0.012,
+  "min_neighbours": 6,
+  "max_curvature": 0.06,
+  "friction_mu": 0.8,
+  "normal_margin_deg": 5.0,
+  "min_width": 0.01,
+  "opening_clearance": 0.01,
+  "support_radius": 0.008,
+  "min_support": 4,
+  "support_normal_deg": 30.0,
+  "pair_centre_sep": 0.006,
+  "pair_axis_sep_deg": 15.0,
+  "max_pairs": 16,
+  "n_roll": 8,
+  "vla_roll_samples": 3,
+  "vla_roll_step": 0.39269908169872414,
+  "depths": [
+   0.098,
+   0.115
+  ],
+  "pregrasp_offset": 0.06,
+  "approach_samples": 4,
+  "scene_margin": 0.005,
+  "target_margin": -0.001,
+  "target_shell_points": 400,
+  "max_ik": 8,
+  "ik_accept": 3,
+  "time_budget_ms": 150.0,
+  "max_candidates": 8,
+  "selection": "vla",
+  "vla_rot_weight": 0.05,
+  "geometric_tie": 0.03,
+  "match_pos": 0.012,
+  "match_rot_deg": 20.0,
+  "switch_margin": 0.015,
+  "max_centre_jump": 0.04,
+  "refresh_every": 4,
+  "closing_reselect_budget": 1
+ },
+ "memory": {
+  "voxel": 0.003,
+  "max_jump": 0.03,
+  "max_points": 6000,
+  "max_surface_gap": 0.007
+ },
+ "ik": {
+  "joint_limits": "MJCF jnt_range (model_transport.xml)",
+  "max_iterations": 100,
+  "abort_after": 25,
+  "abort_pos_m": 0.02,
+  "pos_tol_m": 0.002,
+  "rot_tol_deg": 2.0,
+  "seeds": "policy close-row config, wrist +-90 deg, q_now",
+  "prebuilt_at_server_start": true
+ },
+ "compute_budget": {
+  "full_generation_every_requests": 4,
+  "ik_accept": 3,
+  "max_ik": 8,
+  "note": "full generation on an invalid tracked grasp or every 4 requests; otherwise a re-check (~6 ms)"
+ },
+ "gpu_seed_path": "6-D goal: the cuRobo seed cost has the position term only (recorded per chunk as gpu_goal_note)",
+ "code": "run 20261026T204126+0900_b3b69311f948_8d603092427b snapshot_geo (snapshot_geo_head.txt)",
+ "pilot2": {
+  "fixed": "2026-10-27 01:30 KST",
+  "code": "snapshot_geo2",
+  "B1c": "--geo-grasp --geo-goal-mode correct",
+  "B2c": "--geo-grasp --geo-goal-mode correct --geo-track-scale 0.25 --geo-continuity-off",
+  "geo_correct_pos": 0.04,
+  "geo_correct_rot_deg": 20.0,
+  "geo_close_gate": "selected (unused in correct mode)"
+ }
+}

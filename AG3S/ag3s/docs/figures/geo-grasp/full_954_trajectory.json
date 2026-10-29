@@ -1,0 +1,19 @@
+{
+ "run": "B_ROI_FPR_ep954_s9543",
+ "correction_t": [
+  120,
+  128
+ ],
+ "held_declared_t": 184,
+ "hand_crate_contact_rows": [
+  185,
+  193
+ ],
+ "max_force_N": 187.5,
+ "crate_y_shift_mm": 280.1,
+ "apple_rise_mm": {
+  "B0": 24.1,
+  "B2c": 2.8
+ },
+ "first_divergence_t": 123
+}
