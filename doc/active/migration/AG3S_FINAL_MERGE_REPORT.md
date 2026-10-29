@@ -80,11 +80,28 @@ merge 로 고친 test: `tests/benchmark/test_panda_sl4.py` (served build call �
 
 ### (3) Panda V11AB smoke
 
-<!-- MERGE-SMOKE-RESULTS -->
+- merge commit `dd23560f` 에서 `benchmark/runners/run_parallel_gpu.sh` (독점 GPU lock, 동시 2) 로 3 run 을 돌렸다 (2026-10-29 15:31–15:52 KST).
+- 기준 · 비교 방법은 결과 전에 고정했다: merge 전 같은 protocol 의 run (libero_spatial task 0–9, episode 0, seed 7) 과 SL5h-G G0 방식으로 비교 (episode npz 의 모든 array 를 key · dtype · shape · byte 단위로, `episodes.jsonl` 과 calls jsonl 의 모든 leaf).
+
+| 조건 | merge 전 기준 run | merge 후 run | npz array 동일 | 공식 성공 (전 → 후) | 다른 기록 |
+|---|---|---|---|---|---|
+| V11AB-pb7 · 변환 C | `20261023T032837_1ddb93768ac1_sl5i-libero10-init0-vla_v11ab-V11AB-pb7-C` | `20261029T153138_dd23560ff1f9_merge-smoke-v11ab-pb7-C-vla_v11ab-V11AB-pb7-C` | **550 / 550** | 6 → 6 | 시각 · 지연 · timing, `attached_at` 시각 |
+| V11AB · 변환 B | `20261014T171250_1df077b8a699_sl5b-libero10-init0-r2-vla_v11ab-B` | `20261029T153206_dd23560ff1f9_merge-smoke-v11ab-B-vla_v11ab-B` | **550 / 550** | 3 → 3 | 같음 |
+| VLA 단독 | `20261017T170230_38722284e2fa_sl5f-libero10-init0-vla_only` | `20261029T154521_dd23560ff1f9_merge-smoke-vla-only-vla_only` | **500 / 500** | 9 → 9 | 시각 · 지연 |
+
+- 서버 argv 에 `--no-roi-carve --blas-threads 0` (`V11AB_PRE_MERGE_DEFAULTS`) 이 들어갔고, 최종 구성 flag 거절 guard 에 걸리지 않고 기동했다.
+- run manifest 의 `dirty = True` 는 untracked `main.pdf` (논문 컴파일본) 때문이다. 추적 파일 diff 는 없다.
+- 한계: 각 조건 10 episode 한 묶음이다. SafeLIBERO · LIBERO-Safety 와 pb1~pb6 개별 version 은 다시 돌리지 않았다 (pb7 은 pb1~pb6 flag 를 모두 포함한다).
+- 결과 폴더: checkout `outputs/2026-10-29_AG3S최종구성merge_V11AB동일성검증/` (표 · 그래프 · 실제 장면 · README, git 제외).
 
 ## 원시 기록
 
-<!-- MERGE-RAW -->
+- `results/benchmark/20261029T153138_dd23560ff1f9_merge-smoke-v11ab-pb7-C-vla_v11ab-V11AB-pb7-C/verify/AG3S-FINAL-MERGE/`
+  - `tools/`: hunk 해결 도구, 표면 비교 (`dump_surface.py` · `diff_surface.py`), RB-Y1 재풀이 (`fin_replay.py` = A6 `a2_replay.py` 사본), smoke 비교 (`bitcompare.py`).
+  - `surface/`: merge 전 · 후 V11AB · pb1~pb7 parse 결과 · TrajOpt config · build kwargs · Panda AG3S config.
+  - `rby1_replay/`: 두 tree 의 refined (`main/`, `merged/`), 로그, `fin_compare.json`, 재풀이에 쓴 tree id.
+  - `tests/`: `tests/trajopt` 전체 로그.
+  - `smoke/`: jobs 파일, batch 로그, 비교 결과 `cmp_*.json`, `summary.json`.
 
 ## 다음 (최종 구성을 Panda 에서 실험하기 전에 사용자 판정 필요)
 
