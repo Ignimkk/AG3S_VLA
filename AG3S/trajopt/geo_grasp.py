@@ -61,7 +61,14 @@ def chord_offset(contacts, surface) -> Optional[float]:
 
 class GeoGraspController:
     def __init__(self, cost, constraint_robot_model, layout, hold_links: dict, gripper_columns, closed_below: float,
-                 limits_cfg, horizon: int, execution_length: int):
+                 limits_cfg, horizon: int, execution_length: int, gripper_specs: Optional[dict] = None,
+                 arm_joints: Optional[dict] = None):
+        """SL6-A A8 — `gripper_specs` `{hand: ParallelGripperSpec}` (None = `gripper.spec_for`, the RB-Y1 hand) and
+        `arm_joints` `{hand: (arm joint names)}` (None = the joints named `{hand}_arm_*`, RB-Y1). With `arm_joints` the
+        IK uses the constraint model's URDF limits (the TO's limits on a robot that has no MJCF limits file). A spec
+        with a `frame` (its gripper frame differs from the hold-link frame, Panda) is handled here: every hand pose
+        this controller compares with a grasp is the gripper-frame pose, and every goal it hands out (IK target,
+        `GraspAnchor.goal_R`) is converted back to the hold-link frame."""
         from AG3S.ag3s.grasp.candidates import GeoGraspConfig
 
         self.cost = cost
@@ -80,6 +87,9 @@ class GeoGraspController:
                                    obstacle_source=str(getattr(cost, "geo_obstacle_source", "points")),
                                    **({} if getattr(cost, "geo_time_budget_ms", None) is None
                                       else {"time_budget_ms": float(cost.geo_time_budget_ms)}))
+        self.gripper_specs = None if gripper_specs is None else dict(gripper_specs)
+        self.arm_joints = None if arm_joints is None else {str(h): tuple(str(n) for n in v)
+                                                           for h, v in dict(arm_joints).items()}
         self._iks: dict[str, Any] = {}
         self._planners: dict[str, Any] = {}
         self._shapes: dict[str, Any] = {}
@@ -114,14 +124,51 @@ class GeoGraspController:
             from AG3S.trajopt.limits import limits_model_xml
 
             names = list(self.model.joint_names)
-            idx = [i for i, n in enumerate(names) if n.startswith(f"{hand}_arm_")]
-            try:
-                lim = mjcf_limits(limits_model_xml(self.limits_cfg), [names[i] for i in idx])
-            except Exception:   # noqa: BLE001 — no MJCF: the URDF limits (narrower wrist; said in the record)
-                lim = None
+            arm = self._arm_names(hand)
+            idx = ([i for i, n in enumerate(names) if n.startswith(f"{hand}_arm_")] if arm is None
+                   else [names.index(n) for n in arm])
+            if arm is not None:
+                lim = None      # SL6-A A8: an injected robot uses its constraint model's (URDF) limits, as its TO
+            else:
+                try:
+                    lim = mjcf_limits(limits_model_xml(self.limits_cfg), [names[i] for i in idx])
+                except Exception:   # noqa: BLE001 — no MJCF: the URDF limits (narrower wrist; said in the record)
+                    lim = None
             self._iks[hand] = (LinkPoseIK(self.model, self.hold_links.get(hand, f"ee_{hand}"), idx, limits=lim), idx,
                                "mjcf" if lim is not None else "urdf")
         return self._iks[hand]
+
+    def _arm_names(self, hand: str) -> Optional[tuple]:
+        """SL6-A A8 — the injected arm joints of `hand`, or None (the RB-Y1 `{hand}_arm_` rule)."""
+        return None if self.arm_joints is None else self.arm_joints.get(str(hand))
+
+    def _spec(self, hand: str):
+        """The gripper spec of `hand`: injected (SL6-A A8) or the RB-Y1 one (`gripper.spec_for`)."""
+        from AG3S.ag3s.grasp.gripper import spec_for
+
+        if self.gripper_specs is not None and str(hand) in self.gripper_specs:
+            return self.gripper_specs[str(hand)]
+        return spec_for(hand)
+
+    def _frame(self, hand: str) -> Optional[np.ndarray]:
+        """`R_HG` (gripper frame axes in the hold-link frame) of `hand`'s spec, or None (identity, RB-Y1)."""
+        f = getattr(self._spec(hand), "frame", None)
+        return None if f is None else np.asarray(f, np.float64).reshape(3, 3)
+
+    def _hand_pose(self, q_full: np.ndarray, hand: str) -> np.ndarray:
+        """The grasping hand's pose in the **gripper frame** (`gripper.py` convention): the hold-link pose, rotated by
+        the spec's `frame` when it has one (SL6-A A8; RB-Y1: the hold-link pose itself)."""
+        T = self._pose(q_full, self.hold_links.get(hand, f"ee_{hand}"))
+        F = self._frame(hand)
+        if F is not None:
+            T = T.copy()
+            T[:3, :3] = T[:3, :3] @ F
+        return T
+
+    def _to_hold(self, R: np.ndarray, hand: str) -> np.ndarray:
+        """A gripper-frame rotation as the hold link's rotation (inverse of `_hand_pose`)."""
+        F = self._frame(hand)
+        return R if F is None else np.asarray(R, np.float64) @ F.T
 
     def _arm_shapes(self, hand: str) -> dict:
         """The wrist / arm occupancy shapes of `hand` from the MJCF (task §3g-1), built once (~7 s)."""
@@ -138,10 +185,10 @@ class GeoGraspController:
 
     def _planner(self, hand: str):
         if hand not in self._planners:
-            from AG3S.ag3s.grasp.gripper import spec_for, with_wrist
+            from AG3S.ag3s.grasp.gripper import with_wrist
             from AG3S.ag3s.grasp.planner import GeoGraspPlanner
 
-            spec = spec_for(hand)
+            spec = self._spec(hand)
             arm_fn = None
             if self.gcfg.wrist_check:
                 spec = with_wrist(spec, self._arm_shapes(hand)["wrist"], self.gcfg.scene_margin)
@@ -198,7 +245,7 @@ class GeoGraspController:
         c = self.close_row(chunk, hand)
         row = c if c is not None else min(15, len(chunk) - 1)
         q_vla = self._chunk_q(chunk, row, q_now)
-        T_vla = self._pose(q_vla, link)
+        T_vla = self._hand_pose(q_vla, hand)
         target_id = None if manip is None else int(manip.id)
         state = None if manip is None else str(getattr(manip, "state", None))
         geom = None if manip is None else getattr(manip, "geometry", None)
@@ -211,7 +258,13 @@ class GeoGraspController:
             if ref is not None and len(ref):
                 d, _ = cKDTree(ref).query(scene, distance_upper_bound=0.005)
                 scene = scene[~np.isfinite(d)]
-        ik_fn = lambda T, seed: ik.solve_seeds(T, q_now, ik.wrist_seeds(seed, extra=[q_now[idx]]))  # noqa: E731
+        if self._frame(hand) is None:
+            ik_fn = lambda T, seed: ik.solve_seeds(T, q_now, ik.wrist_seeds(seed, extra=[q_now[idx]]))  # noqa: E731
+        else:
+            def ik_fn(T, seed, hand=hand):   # SL6-A A8: a gripper-frame goal -> the hold link's goal
+                Th = np.array(T, np.float64, copy=True)
+                Th[:3, :3] = self._to_hold(Th[:3, :3], hand)
+                return ik.solve_seeds(Th, q_now, ik.wrist_seeds(seed, extra=[q_now[idx]]))
         self._q_now = np.asarray(q_now, np.float64)
         self._field_fn, field_note = None, None
         if self.gcfg.obstacle_source == "field":
@@ -274,7 +327,7 @@ class GeoGraspController:
             rec["reason"] = "no valid grasp"
             return None
         link = self.hold_links.get(self._hand, f"ee_{self._hand}")
-        T_hand = self._pose(q_now, link)
+        T_hand = self._hand_pose(q_now, self._hand)
         R_goal = nearest_symmetric(g.T[:3, :3], T_hand[:3, :3])
         c = self.close_row(chunk, self._hand)
         H = self.horizon
@@ -317,7 +370,8 @@ class GeoGraspController:
                    grasp_id=int(g.grasp_id),
                    hand_to_goal_mm=round(float(np.linalg.norm(T_hand[:3, 3] - goal)) * 1000, 1))
         return GraspAnchor(link=link, goal=np.asarray(goal, np.float64), close_row=close_row, w_tcp=0.0,
-                           w_goal=float(cost.geo_w_pos), goal_rows=rows_n, goal_R=R_goal, w_rot=float(cost.geo_w_rot),
+                           w_goal=float(cost.geo_w_pos), goal_rows=rows_n, goal_R=self._to_hold(R_goal, self._hand),
+                           w_rot=float(cost.geo_w_rot),
                            explicit_rows=rows, goal_kind=kind, tol_pos=float(cost.geo_close_tol_pos),
                            tol_rot=math.radians(float(cost.geo_close_tol_rot_deg)))
 
@@ -338,7 +392,7 @@ class GeoGraspController:
             return None
         link = self.hold_links.get(self._hand, f"ee_{self._hand}")
         q_now = np.asarray(q_now, np.float64)
-        T_vla = self._pose(self._chunk_q(chunk, c, q_now), link)
+        T_vla = self._hand_pose(self._chunk_q(chunk, c, q_now), self._hand)
         pool = []
         if self.selected is not None:
             pool.append(("tracked", self.selected.T, self.selected.grasp_id, getattr(self.selected, "contacts", None)))
@@ -377,7 +431,8 @@ class GeoGraspController:
         rec.update(active=True, kind="correct", goal_m=[round(float(v), 5) for v in T[:3, 3]],
                    rows=f"{rows_n} from close row {c}", grasp_id=int(gid))
         return GraspAnchor(link=link, goal=np.asarray(T[:3, 3], np.float64), close_row=c, w_tcp=0.0,
-                           w_goal=float(cost.geo_w_pos), goal_rows=rows_n, goal_R=R_goal, w_rot=float(cost.geo_w_rot),
+                           w_goal=float(cost.geo_w_pos), goal_rows=rows_n, goal_R=self._to_hold(R_goal, self._hand),
+                           w_rot=float(cost.geo_w_rot),
                            goal_kind="correct", tol_pos=float(cost.geo_close_tol_pos),
                            tol_rot=math.radians(float(cost.geo_close_tol_rot_deg)))
 
@@ -415,6 +470,9 @@ class GeoGraspController:
         else:
             return None
         rec["scale"] = round(k, 4)
+        arm = self._arm_names(self._hand)
+        if arm is not None:   # SL6-A A8: the injected arm joints
+            return np.array([k if str(nm) in set(arm) else 1.0 for nm in nq_opt_names], np.float64)
         return np.array([k if str(nm).startswith(f"{self._hand}_arm_") else 1.0 for nm in nq_opt_names], np.float64)
 
     def continuity_off(self) -> Optional[str]:
@@ -458,8 +516,7 @@ class GeoGraspController:
                 rec["by"] = "no correction this chunk: the policy's close"
                 self.deferred = 0
                 return refined, None
-            link = self.hold_links.get(hand, f"ee_{hand}")
-            T = self._pose(self._chunk_q(refined, c, q_now), link)
+            T = self._hand_pose(self._chunk_q(refined, c, q_now), hand)
             gp, gR = self._correct_goal
             dp = float(np.linalg.norm(T[:3, 3] - gp))
             dr = grasp_rot_angle(T[:3, :3], gR)
@@ -481,8 +538,7 @@ class GeoGraspController:
             return out, None
         from AG3S.ag3s.grasp.candidates import close_pose_check
 
-        link = self.hold_links.get(hand, f"ee_{hand}")
-        T = self._pose(self._chunk_q(refined, c, q_now), link)
+        T = self._hand_pose(self._chunk_q(refined, c, q_now), hand)
         rec["close_row"] = c
         ok, why = False, "no grasp goal"
         if g is not None:

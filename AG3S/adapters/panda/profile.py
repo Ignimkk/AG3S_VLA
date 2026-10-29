@@ -86,7 +86,9 @@ LOG_ONLY_BUILD_KEYWORDS = ("plan_horizon_steps", "rows_per_step")
 #: :func:`v11ab_config_dict` does not assemble. Off (None / empty) they change nothing; on, the copy would drop them, so
 #: it refuses instead until their Panda port is decided (palm/wrist/shell covers, target exclusion incl. ROI carve,
 #: non-authorised target margin, confidence gate).
-UNPORTED_BUILD_KEYWORDS = ("palm_cover", "wrist_cover", "palm_shell", "target_exclusion", "contact", "confidence_gate")
+#: SL6-A A10 (2026-10-29): ``palm_shell`` (A5) and ``target_exclusion`` (A2: target exclusion, ROI carve, non-target
+#: evidence) are ported -- :func:`v11ab_config_dict` / :func:`build_panda_ag3s` apply them as ``build_ag3s`` does.
+UNPORTED_BUILD_KEYWORDS = ("palm_cover", "wrist_cover", "contact", "confidence_gate")
 
 #: Panda grasp links per hand (``safe_policy.DEFAULT_GRASP_LINKS`` shape): reach is measured from the
 #: first finger, the pair is the two fingers.
@@ -242,18 +244,97 @@ AG3S_VERSIONS: dict[str, tuple[str, ...]] = {
 }
 
 
-def version_server_flags(version: str) -> list[str]:
+# --- SL6-A: the AG3S final configuration on the Panda ("Panda 최종 구성", task SL6 §1) --------------------------------
+#: The RB-Y1 final server argv (``AG3S-CORE-EVAL-A6.impl.md`` §3) minus the V11AB server flags it starts with (= the
+#: final-configuration flags added since V11AB), minus G1 / A4 (:data:`G1A4_FLAGS`), plus the Panda decisions of task
+#: SL6 §6: ``--hsr6-objective-scope nbc`` (A9), the Panda attention cell ``noun_target:L8H6`` (SL6-B head re-selection,
+#: replaces RB-Y1's ``L10H7``) and A12 ``--continuity-after-grasp --deflection-rate-after-grasp``. ``--hsr6-probe`` is
+#: added by :func:`version_server_flags` (default :data:`PANDA_HSR6_PROBE`, SL6-B B4); the Panda server refuses the HSR6
+#: flags without a probe (A10).
+#: ``--plan-horizon 16`` stays as in V11AB; the Panda server replaces the horizon (H 10, K 5, plan 10, ``PANDA_HORIZON``).
+#: No pb1-pb7 flag and no :data:`V11AB_PRE_MERGE_DEFAULTS` (ROI carve on, BLAS 1): user ruling 2026-10-29.
+FINAL_CONFIG_FLAGS: tuple[str, ...] = (
+    "--to-fast-eval", "--esdf-host-mirror", "--target-exclusion", "ball-owned", "--owned-max-dist-voxels", "3",
+    "--attention-split-radius-mm", "12", "--attention-split-ratio-source", "raw", "--target-permission-strict",
+    "--attention-source", "noun_target:L8H6", "--attention-split-partition", "--split-supersedes-anchor",
+    "--wrist-track-scale", "0.1", "--neighbour-contact-mm", "20", "--nontarget-evidence", "surface",
+    "--placed-no-seed-certify", "--kept-geometry-follow", "--roi-carve", "--roi-carve-footprint",
+    "--roi-carve-footprint-pad-px", "0", "--roi-carve-footprint-robot", "ignore", "--roi-carve-device", "cuda",
+    "--blas-threads", "1", "--to-multi-seed", "16", "--to-gpu-seeds", "curobo", "--to-gpu-seeds-check", "first-pass",
+    "--palm-shell", "on", "--palm-shell-margin", "5", "--hsr6-attach-assist", "--hsr6-held-gate",
+    "--hsr6-target-exempt", "--hsr6-objective", "--neighbour-palm-contact-mm", "10",
+    "--hsr6-objective-scope", "nbc",
+    # A12 (user ruling 2026-10-29 ~20:40 KST, task SL6 §0 / §1): continuity and deflection-rate terms off before the
+    # grasp (latch searching / latched / closing), on from held -- not in the RB-Y1 measured final configuration
+    "--continuity-after-grasp", "--deflection-rate-after-grasp")
+#: The geometric grasp correction (G1) and the grasp-goal term (A4), as in the RB-Y1 final argv (task SL6 §6 "작동판").
+G1A4_FLAGS: tuple[str, ...] = (
+    "--grasp-anchor", "2000", "--grasp-anchor-path-weight", "0", "--geo-grasp", "--geo-goal-mode", "correct",
+    "--geo-track-scale", "0.25", "--geo-continuity-off")
+#: Versions that are the final configuration (no `V11AB_PRE_MERGE_DEFAULTS`, the Panda HSR6 probe required).
+FINAL_CONFIG_VERSIONS: tuple[str, ...] = ("AG3S-final-panda", "AG3S-final-panda-g1a4")
+AG3S_VERSIONS["AG3S-final-panda"] = FINAL_CONFIG_FLAGS                       # G1 · A4 removed ("제거판")
+AG3S_VERSIONS["AG3S-final-panda-g1a4"] = FINAL_CONFIG_FLAGS + G1A4_FLAGS     # G1 · A4 kept ("작동판")
+#: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
+#: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
+PANDA_HSR6_PROBE = ("/mnt/dev/AG3S_VLA-storage/results/benchmark/20261029T192223_5ea56af44722_sl6b-hsr6-panda-labels/"
+                    "probe/hsr6_panda_kv_L4.npz")
+PANDA_HSR6_PROBE_SHA256 = "e2bdd1290f5770ce16ad0235ff261a1d343757e37a321047708cd85ded498029"
+#: Options a final version takes per run (not part of the version's identity in :func:`match_ag3s_version`).
+FINAL_RUN_PARAMETERS: tuple[str, ...] = ("hsr6_probe", "attention_source")
+
+
+def is_final_version(version: str) -> bool:
+    return str(version) in FINAL_CONFIG_VERSIONS
+
+
+def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
+                         attention_source: Optional[str] = None) -> list[str]:
+    """The version's serve_safe flags. A final version (SL6-A) takes ``hsr6_probe`` (default :data:`PANDA_HSR6_PROBE`)
+    and may replace its ``--attention-source`` cell; the V11AB family takes neither."""
     if version not in AG3S_VERSIONS:
         raise ValueError(f"unknown AG3S version {version!r}; known: {sorted(AG3S_VERSIONS)}")
-    return list(AG3S_VERSIONS[version])
+    flags = list(AG3S_VERSIONS[version])
+    if not is_final_version(version):
+        if hsr6_probe is not None or attention_source is not None:
+            raise ValueError(f"{version}: --hsr6-probe / --attention-source apply to {list(FINAL_CONFIG_VERSIONS)} only")
+        return flags
+    hsr6_probe = PANDA_HSR6_PROBE if hsr6_probe is None else hsr6_probe
+    if not hsr6_probe:
+        raise ValueError(f"{version} needs the Panda HSR6 probe (--hsr6-probe FILE; the RB-Y1 probe is refused on the "
+                         "Panda)")
+    if attention_source is not None:
+        flags[flags.index("--attention-source") + 1] = str(attention_source)
+    return flags + ["--hsr6-probe", str(hsr6_probe)]
 
 
-def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
-    """``{dest: value}`` of ``args`` for every serve_safe option any :data:`AG3S_VERSIONS` entry sets."""
+def version_server_argv(version: str, arm: str = V11AB_ARM) -> list[str]:
+    """The base argv a version is served with: the V11AB argv, with :data:`V11AB_PRE_MERGE_DEFAULTS` for the V11AB
+    family and without them for a final version (SL6-A A1)."""
+    return v11ab_server_argv(arm, pre_merge=not is_final_version(version))
+
+
+def _version_dests(names) -> list[str]:
     from AG3S.trajopt import serve_safe as ss
 
     actions = ss.build_parser()._option_string_actions
-    dests = sorted({actions[tok].dest for flags in AG3S_VERSIONS.values() for tok in flags if tok.startswith("--")})
+    return sorted({actions[tok].dest for n in names for tok in AG3S_VERSIONS[n] if tok.startswith("--")})
+
+
+def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
+    """``{dest: value}`` of ``args`` for every serve_safe option any V11AB-family :data:`AG3S_VERSIONS` entry sets,
+    plus (SL6-A) every option of the final versions when ``args`` sets one of those away from its parser default --
+    so a V11AB / pb server records exactly the keys it recorded before the final versions existed."""
+    from AG3S.trajopt import serve_safe as ss
+
+    family = [n for n in AG3S_VERSIONS if not is_final_version(n)]
+    dests = _version_dests(family)
+    final = [d for d in _version_dests(FINAL_CONFIG_VERSIONS) if d not in set(dests)]
+    parser = ss.build_parser()
+    actions = parser._option_string_actions
+    pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
+    if any(getattr(args, d, None) != parser.get_default(d) for d in final if d not in pinned):
+        dests = sorted(set(dests) | set(final))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
@@ -261,11 +342,18 @@ def match_ag3s_version(args: argparse.Namespace) -> Optional[str]:
     """The :data:`AG3S_VERSIONS` name whose flags give ``args``'s :func:`version_flag_values`, else ``None``.
 
     The server only sees the parsed flags (the launcher's ``--ag3s-version`` name is not in its argv); this reads
-    the name back for the record by parsing the V11AB argv + each version's flags the way the server is started.
+    the name back for the record by parsing each version's argv (:func:`version_server_argv` + its flags) the way the
+    server is started. A final version's per-run options (:data:`FINAL_RUN_PARAMETERS`) are not compared; a version
+    whose argv this host cannot parse (e.g. ``--to-gpu-seeds`` without a GPU) is skipped.
     """
-    current = version_flag_values(args)
+    current = {k: v for k, v in version_flag_values(args).items() if k not in FINAL_RUN_PARAMETERS}
     for name, flags in AG3S_VERSIONS.items():
-        if version_flag_values(parse_v11ab_args(argv=v11ab_server_argv() + list(flags))) == current:
+        try:
+            parsed = parse_v11ab_args(argv=version_server_argv(name) + list(flags))
+        except SystemExit:
+            continue
+        values = {k: v for k, v in version_flag_values(parsed).items() if k not in FINAL_RUN_PARAMETERS}
+        if values == current:
             return name
     return None
 
@@ -277,10 +365,13 @@ def match_ag3s_version(args: argparse.Namespace) -> Optional[str]:
 V11AB_PRE_MERGE_DEFAULTS: tuple[str, ...] = ("--no-roi-carve", "--blas-threads", "0")
 
 
-def v11ab_server_argv(arm: str = V11AB_ARM) -> list[str]:
+def v11ab_server_argv(arm: str = V11AB_ARM, *, pre_merge: bool = True) -> list[str]:
+    """The V11AB server argv (+ :data:`V11AB_PRE_MERGE_DEFAULTS`; ``pre_merge=False``: without them -- the base of
+    the final-configuration versions, SL6-A)."""
     req = v11ab_required_args()
     return ["--config", req["config"], "--checkpoint", "<not loaded: perception only>",
-            "--model-xml", req["model_xml"], "--port", "0", *v11ab_server_flags(arm), *V11AB_PRE_MERGE_DEFAULTS]
+            "--model-xml", req["model_xml"], "--port", "0", *v11ab_server_flags(arm),
+            *(V11AB_PRE_MERGE_DEFAULTS if pre_merge else ())]
 
 
 def parse_v11ab_args(arm: str = V11AB_ARM, argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
@@ -372,6 +463,9 @@ def v11ab_config_dict(kw: Mapping[str, Any]) -> tuple[dict, Optional[dict]]:
     if backend == "curobo":
         esdf["fine_voxel_size"] = kw.get("fine_voxel") or None
         esdf["tsdf_voxel_size"] = kw.get("tsdf_voxel") or None
+    if kw.get("target_exclusion"):
+        # SL6-A A2 — `build_ag3s`: `esdf.update(target_exclusion)` (only the keys a flag gave; none = as before)
+        esdf.update(dict(kw["target_exclusion"]))
     max_age = kw.get("max_field_age_sec")
     timing = {} if max_age is None else {"max_field_age_sec": max_age}
     data = {
@@ -532,7 +626,10 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
     kw = v11ab_build_kwargs(parse_v11ab_args()) if kw is None else dict(kw)
     v11ab = v11ab_ag3s_config(kw)
     config = panda_ag3s_config(v11ab, esdf_bounds=esdf_bounds, extra_overrides=extra_overrides)
-    models = models or pm.build_panda_models(kw.get("links", "gripper"))
+    # SL6-A A5 — `--palm-shell` (`kw["palm_shell"]`, key only when on): the Panda palm shell appended to the
+    # constraint model (`model.build_panda_constraint_model`). Off: the V11AB models, unchanged.
+    shell = {"palm_shell": dict(kw["palm_shell"])} if kw.get("palm_shell") else {}
+    models = models or pm.build_panda_models(kw.get("links", "gripper"), **shell)
     parents = panda_attached_parent_links()
     ag3s = AG3S(config, robot_model=models.self_filter, constraint_robot_model=models.constraint,
                 attached_parent_links=parents)
@@ -540,6 +637,13 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         _, identity = v11ab_config_dict(kw)
         ss.assert_ag3s_config(ag3s.config, collision_backend="esdf", esdf_backend=kw.get("backend", "legacy"),
                               clustering=dict(identity or {}))
+    target_exclusion = dict(kw.get("target_exclusion") or {})
+    if target_exclusion:
+        # SL6-A A2 — `build_ag3s`'s survival check: the keys a flag gave must be in the AG3S the server runs.
+        lost = {k: getattr(ag3s.config.esdf, k) for k, v in target_exclusion.items()
+                if getattr(ag3s.config.esdf, k) != v}
+        if lost:
+            raise RuntimeError(f"AG3S esdf config is not what the server asked for: {lost}, asked {target_exclusion}")
     if kw.get("held_body_cover"):
         ag3s.held_body_cover = True
     if kw.get("held_free_observed_pad") is not None:
@@ -555,6 +659,11 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
             "held_free_observed_pad": ag3s.held_free_observed_pad,
             "reach_at_capture": bool(getattr(ag3s, "reach_at_capture", False)),
             "gripper_max_opening": ag3s.max_opening.record() if hasattr(ag3s.max_opening, "record") else None}
+    # SL6-A — keys only when on (the V11AB / pb panda_server_config.json is unchanged)
+    if target_exclusion:
+        info["target_exclusion"] = _jsonable(target_exclusion)
+    if getattr(models.constraint, "palm_shell_report", None) is not None:
+        info["palm_shell"] = _jsonable(models.constraint.palm_shell_report)
     return ag3s, info
 
 
@@ -593,4 +702,6 @@ __all__ = [
     "panda_esdf_bounds", "panda_overrides", "parse_v11ab_args", "ta_flags", "v11ab_ag3s_config", "v11ab_build_call_source",
     "v11ab_build_kwargs", "v11ab_client_phase", "v11ab_config_dict", "v11ab_required_args", "v11ab_server_argv",
     "v11ab_server_flags", "match_ag3s_version", "version_flag_values",
+    "FINAL_CONFIG_FLAGS", "FINAL_CONFIG_VERSIONS", "G1A4_FLAGS", "PANDA_HSR6_PROBE", "PANDA_HSR6_PROBE_SHA256", "is_final_version", "version_server_argv",
+    "version_server_flags",
 ]

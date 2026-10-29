@@ -247,22 +247,57 @@ def build_panda_self_filter_model(cover_path: str | pathlib.Path = PANDA_SELF_FI
 
 
 def build_panda_constraint_model(link_filter: Optional[Sequence[str]] = PANDA_ARM_LINKS, *,
-                                 sphere_options: Optional[Mapping[str, Any]] = None, urdf=None):
+                                 sphere_options: Optional[Mapping[str, Any]] = None, urdf=None,
+                                 palm_shell: Optional[Mapping[str, Any]] = None):
     """Constraint model: ``franka.yml`` spheres of ``link_filter`` links, **no covers**.
 
     Default ``PANDA_ARM_LINKS`` (RB-Y1 ``build_constraint_robot_model`` default ``ARM_LINKS``);
     V11AB serves ``gripper`` -> ``panda_constraint_link_filter("gripper")``. ``None`` = whole robot.
     ``sphere_options`` go to `UrdfSphereChain` unchanged (note: the spheres are zero-length capsules
     with role ``collision``, so ``capsule_radius_scale`` scales their radius).
+
+    ``palm_shell`` (SL6-A A5, ``serve_safe --palm-shell``; None / empty = the model above, unchanged): the committed
+    Panda palm shell (``hand_geometry.PALM_SHELL_JSON``, RB-Y1's rule on the Panda hand) **appended after** every other
+    sphere (role ``palm_shell``, link ``panda_hand``), as RB-Y1's ``build_constraint_robot_model`` appends its shell --
+    the shell-less model is the exact prefix. ``hands`` ``both`` / ``left`` (the one Panda hand); the overflow and
+    grasp-face cosine are the committed file's (5 mm, 0.5): another value is refused (it would need a refit).
+    ``model.palm_shell_report`` records what was appended.
     """
     from AG3S.ag3s.robot_models.urdf_sphere_chain import UrdfSphereChain
 
     urdf = urdf or load_panda_urdf()
     spheres = franka_sphere_capsules(urdf.links)
     check_link_set(link_filter, sphere_links=[c.link for c in spheres], what="constraint link_filter")
-    return UrdfSphereChain(urdf, PANDA_ARM_JOINTS, extra_capsules=spheres,
-                           link_filter=None if link_filter is None else tuple(link_filter),
-                           **dict(sphere_options or {}))
+    shell, report = [], None
+    if palm_shell:
+        from AG3S.adapters.panda import hand_geometry as hg
+
+        opts = dict(palm_shell)
+        hands = str(opts.pop("hands", "both"))
+        if hands not in hg.PALM_SHELL_HANDS:
+            raise ValueError(f"Panda palm_shell hands must be one of {sorted(hg.PALM_SHELL_HANDS)} (one hand), got {hands!r}")
+        shell, document = hg.load_palm_shell()
+        fitted = document["provenance"]["constants"]
+        for key, name in (("overflow", "overflow"), ("face_cos", "face_cos")):
+            if key in opts and abs(float(opts.pop(key)) - float(fitted[name])) > 1e-12:
+                raise ValueError(f"Panda palm_shell {key} differs from the committed shell's {fitted[name]} "
+                                 "(refit with AG3S.adapters.panda.hand_geometry)")
+        if opts:
+            raise ValueError(f"Panda palm_shell: unknown keys {sorted(opts)}")
+        if link_filter is not None and hg.PALM_LINK not in set(link_filter):
+            raise ValueError(f"palm_shell needs {hg.PALM_LINK} in the constraint links {list(link_filter)}")
+        report = {"options": {"hands": hands, "overflow": float(fitted["overflow"]), "face_cos": float(fitted["face_cos"])},
+                  "source": str(hg.PALM_SHELL_JSON.relative_to(PROJECT_ROOT)),
+                  "shell_digest": document["provenance"]["shell_digest"],
+                  "geometry_digest": document["provenance"]["geometry_digest"],
+                  "links": {hg.PALM_LINK: {**document["report"].get(hg.PALM_LINK, {}), **hg.palm_shell_table(shell)}}}
+    model = UrdfSphereChain(urdf, PANDA_ARM_JOINTS, extra_capsules=spheres + list(shell),
+                            link_filter=None if link_filter is None else tuple(link_filter),
+                            **dict(sphere_options or {}))
+    if report is not None:
+        report.update(n_spheres_before=int(model.n_spheres) - len(shell), n_spheres_after=int(model.n_spheres))
+        model.palm_shell_report = report
+    return model
 
 
 # --- robot_state -> model -----------------------------------------------------------------------------
@@ -367,9 +402,11 @@ class PandaModels:
     constraint: Any
 
 
-def build_panda_models(constraint_links: str = "gripper") -> PandaModels:
+def build_panda_models(constraint_links: str = "gripper", *, palm_shell: Optional[Mapping[str, Any]] = None) -> PandaModels:
+    """``palm_shell`` (SL6-A A5): see :func:`build_panda_constraint_model`; None = the V11AB models."""
+    shell = {"palm_shell": dict(palm_shell)} if palm_shell else {}
     return PandaModels(self_filter=build_panda_self_filter_model(),
-                       constraint=build_panda_constraint_model(panda_constraint_link_filter(constraint_links)))
+                       constraint=build_panda_constraint_model(panda_constraint_link_filter(constraint_links), **shell))
 
 
 __all__ = [

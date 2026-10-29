@@ -64,6 +64,11 @@ class ParallelGripperSpec:
     wrist: tuple = ()
     #: boundary points (hold-link frame) of the undilated wrist shapes — where a distance field is queried (task §3j).
     wrist_surface: Optional[np.ndarray] = None
+    #: SL6-A A8 — the **gripper frame** of this spec (the convention above: x = closing, -z = approach) when it is not
+    #: the hold-link frame: ``R_HG`` (3 x 3, rows; columns = the gripper axes in hold-link coordinates), same origin.
+    #: None (RB-Y1) = the hold-link frame itself. Every number of the spec is in the gripper frame; the caller
+    #: (`geo_grasp.GeoGraspController`) converts hand poses with it.
+    frame: Optional[tuple] = None
 
     def surface_points(self, opening: float, step: float = 0.005, wrist: bool = False) -> np.ndarray:
         """Boundary points of the palm and both fingers at `opening` (and the wrist with `wrist`), hold-link frame."""
@@ -102,6 +107,28 @@ RBY1_LEFT = ParallelGripperSpec(
 
 #: Same hand on the right arm (mirror-identical in its own frame).
 RBY1_RIGHT = dataclasses.replace(RBY1_LEFT, hold_link="ee_right")
+
+
+#: SL6-A A8 — the LIBERO Panda hand (robosuite 1.4.1 ``PandaGripper``), hold link ``panda_hand`` (= MuJoCo
+#: ``robot0_right_hand``). The Panda hand frame closes along **y** (``panda_finger_joint1`` axis +y, joint2 -y) and
+#: approaches along **+z** (fingers at z +52.4 mm, ``panda_grip_site`` at +97 mm), so the gripper frame of the
+#: convention above is ``x_G = y_H``, ``y_G = x_H``, ``z_G = -z_H`` (`PANDA_FRAME`). Numbers = the collision geometry of
+#: the LIBERO export (``benchmark/adapters/libero_panda/robot_geometry.py export --source libero``) measured in that
+#: frame by ``AG3S.adapters.panda.hand_geometry.measure_gripper_spec`` (test ``test_panda_gripper_spec_matches_export``):
+#: pad = the robosuite pad box (z_H 85.4-101.4 mm, x_H +-8.0 mm, 0.5 mm proud of the finger mesh) united with the flat
+#: inner face of the finger mesh down to the tip (z_H 106.1 mm) -> ``pad_z`` (-106.1, -85.4) mm, half-width 8.0 mm;
+#: pad faces 79.0 mm apart at the open stop (finger joints 0.04 m; 2 x 40 mm minus the 0.5 mm pads);
+#: finger thickness = the finger mesh behind the pad face over the pad z range; palm = the hand collision mesh box.
+PANDA_FRAME: tuple = ((0.0, 1.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, -1.0))
+PANDA_LEFT = ParallelGripperSpec(
+    hold_link="panda_hand",
+    max_opening=0.0790,
+    pad_half_y=0.0080,
+    pad_z=(-0.1061, -0.0854),
+    finger_thickness=0.0213,
+    palm=Box((-0.1040, -0.0316, -0.0660), (0.1004, 0.0316, 0.0259)),
+    frame=PANDA_FRAME,
+)
 
 
 def spec_for(hand: str) -> ParallelGripperSpec:
@@ -153,4 +180,4 @@ def measure_from_mjcf(model_xml: str, hand: str = "left") -> dict:
     return {"pad": pad, "palm": palm}
 
 
-__all__ = ["Box", "ParallelGripperSpec", "RBY1_LEFT", "RBY1_RIGHT", "spec_for", "with_wrist", "measure_from_mjcf"]
+__all__ = ["Box", "ParallelGripperSpec", "PANDA_FRAME", "PANDA_LEFT", "RBY1_LEFT", "RBY1_RIGHT", "spec_for", "with_wrist", "measure_from_mjcf"]

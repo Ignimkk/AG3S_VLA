@@ -72,7 +72,9 @@ def _args(mod, argv):
 @pytest.mark.parametrize("case", sorted(CASES))
 def test_argv_and_settings_identical(lp, lp_old, case):
     new, old = _args(lp, CASES[case]), _args(lp_old, CASES[case])
-    assert {k: v for k, v in vars(new).items() if k != "safelibero_step_budget"} == vars(old)
+    # SL6-A launcher options (final-configuration versions only) are left out while not given (None)
+    assert {k: v for k, v in vars(new).items() if k != "safelibero_step_budget"
+            and not (k in ("hsr6_probe", "attention_source") and v is None)} == vars(old)
     assert new.safelibero_step_budget == "total_incl_wait"
     for mode in ("vla_only", "vla_v11ab"):
         assert lp.server_argv(mode, "/ckpt", 7, new.ag3s_version) == lp_old.server_argv(mode, "/ckpt", 7, old.ag3s_version)

@@ -651,7 +651,9 @@ class TrajectoryOptimizer:
         else:
             away = None
         # the palm: the hold link whose chain shares the most joints with the violating sphere's (the anchor's first)
-        names = ([anchor.link] if anchor is not None else []) + [l for l in MS.PALM_LINKS
+        # SL6-A A3: `palm_links` (instance attribute set by `SafePolicy(palm_links=)`, else `MS.PALM_LINKS` = RB-Y1)
+        palms = tuple(self.__dict__.get("palm_links") or MS.PALM_LINKS)
+        names = ([anchor.link] if anchor is not None else []) + [l for l in palms
                                                                   if anchor is None or l != anchor.link]
         cache = self.__dict__.setdefault("_anchor_fk", {})
         best = None

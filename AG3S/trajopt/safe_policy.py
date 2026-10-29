@@ -77,13 +77,25 @@ def hold_links_for(grasp_links: Optional[dict] = None,
 #: requests 11–14, task §2 basis of 60 mm); the hold link origin is 100 mm behind it (97–132 mm on the same requests).
 HOLD_LINK_SITE_OFFSET_M = (0.0, 0.0, -0.100)
 
+#: SL6-A A9 — `SafePolicy(hsr6_objective_scope=)` / `serve_safe --hsr6-objective-scope`: what HSR6 ④ withholds.
+HSR6_OBJECTIVE_SCOPES = ("all", "nbc")
 
-def hold_site_position(robot_model, q: np.ndarray, hold_link: str) -> np.ndarray:
-    """AG3S-CORE-EVAL-A6 — `(3,)` the hold link site (`HOLD_LINK_SITE_OFFSET_M` in the hold link frame) at `q`."""
+
+def hold_site_position(robot_model, q: np.ndarray, hold_link: str,
+                       offset: Optional[Sequence[float]] = None) -> np.ndarray:
+    """AG3S-CORE-EVAL-A6 — `(3,)` the hold link site (`offset` in the hold link frame, default
+    `HOLD_LINK_SITE_OFFSET_M` = RB-Y1) at `q`. SL6-A: another robot passes its own site (Panda `panda_grip_site`)."""
     from AG3S.ag3s.constraints.attached import _link_pose_numeric
 
     T = np.asarray(_link_pose_numeric(robot_model, q, hold_link), np.float64)
-    return T[:3, :3] @ np.asarray(HOLD_LINK_SITE_OFFSET_M, np.float64) + T[:3, 3]
+    site = HOLD_LINK_SITE_OFFSET_M if offset is None else offset
+    return T[:3, :3] @ np.asarray(site, np.float64) + T[:3, 3]
+
+
+#: SL6-A — the RB-Y1 rule for the arm joints of a hand (index j = 0..6 within the arm): `{hand}_arm_{j}` (IFG-TOW
+#: `cost.wrist_track_joints`, G1 IK / tracking). Another robot passes `SafePolicy(arm_joint_names={hand: (7 names)})`.
+def rby1_arm_joint_name(hand: str, j: int) -> str:
+    return f"{hand}_arm_{int(j)}"
 
 
 def palm_contact_rows(robot_model, hold_link: str) -> np.ndarray:
@@ -170,6 +182,14 @@ class SafePolicy:
     _last_hsr6: dict = {}
     #: AG3S-CORE-EVAL-A6 — same reason (test doubles built without `__init__` read "no palm allowance record").
     _last_neighbour_palm_contact: dict = {}
+    #: SL6-A — robot injections, class defaults = the RB-Y1 behaviour (test doubles built without `__init__` too):
+    #: HSR6 ④ scope (`"all"`: NBC, A4 and G1 withheld unless HSR6 = grasp), the arm joints by hand (None = the
+    #: `{hand}_arm_{j}` rule), the NBC finger links by hand (None = grasp link minus trailing digits), the A6 site
+    #: (None = `HOLD_LINK_SITE_OFFSET_M`).
+    hsr6_objective_scope: str = "all"
+    arm_joint_names: Optional[dict] = None
+    neighbour_finger_links: Optional[dict] = None
+    hold_site_offset_m: Optional[tuple] = None
 
     def __init__(self, policy, *, ag3s, to_config: Optional[TrajOptConfig] = None,
                  attention_fn: Optional[Callable[[dict, dict], dict]] = None,
@@ -190,7 +210,13 @@ class SafePolicy:
                  task_gate: str = "off",
                  task_gate_tau: Optional[float] = None,
                  held_3d: Any = None,
-                 hsr6: Any = None):
+                 hsr6: Any = None,
+                 hsr6_objective_scope: str = "all",
+                 arm_joint_names: Optional[dict] = None,
+                 neighbour_finger_links: Optional[dict] = None,
+                 hold_site_offset_m: Optional[Sequence[float]] = None,
+                 palm_links: Optional[Sequence[str]] = None,
+                 geo_gripper: Optional[dict] = None):
         # SL5a — robot injection points (`layout`, `gripper_columns`, `finger_map`, `hands`). All None
         # (default) = the RB-Y1 behaviour below, unchanged: `ChunkLayout.rby1(model.joint_names)`,
         # `wire.gripper_columns(nq_opt // 2)`, `FingerJointMap` from the RB-Y1 client convention, and the
@@ -202,6 +228,21 @@ class SafePolicy:
         #: AG3S-CORE-EVAL-HSR6 — the four uses of the 6-phase probe (`hsr6.Hsr6Flags`, `serve_safe --hsr6-*`). None or
         #: every flag off = off: no `result["hsr6"]` is read, every decision / record as before.
         self.hsr6 = hsr6 if (hsr6 is not None and bool(getattr(hsr6, "on", False))) else None
+        #: SL6-A A9 — what HSR6 ④ (`--hsr6-objective`) withholds: `"all"` (default, AG3S-CORE-EVAL-HSR6) = the finger
+        #: neighbour contact (NBC), the grasp-goal anchor (A4) and the geometric grasp goal (G1); `"nbc"` = NBC only.
+        if hsr6_objective_scope not in HSR6_OBJECTIVE_SCOPES:
+            raise ValueError(f"hsr6_objective_scope must be one of {HSR6_OBJECTIVE_SCOPES}, got {hsr6_objective_scope!r}")
+        self.hsr6_objective_scope = str(hsr6_objective_scope)
+        # SL6-A A3 — robot injections. None (default) = the RB-Y1 rule at each use (bit-identical): `{hand}_arm_{j}`
+        # (IFG-TOW wrist joints, G1 IK / tracking), the NBC finger links = the grasp link name minus its trailing
+        # digits, the A6 site `HOLD_LINK_SITE_OFFSET_M`. `palm_links` / `geo_gripper` are applied below (multi-seed
+        # palm, G1 gripper spec).
+        self.arm_joint_names = (None if arm_joint_names is None else
+                                {str(h): tuple(str(n) for n in v) for h, v in dict(arm_joint_names).items()})
+        self.neighbour_finger_links = (None if neighbour_finger_links is None else
+                                       {str(h): tuple(str(n) for n in v) for h, v in dict(neighbour_finger_links).items()})
+        self.hold_site_offset_m = (None if hold_site_offset_m is None
+                                   else tuple(float(v) for v in hold_site_offset_m))
         #: this request's HSR6 record (`summary_json.hsr6`): phase, probabilities, and which rule changed a decision.
         self._last_hsr6: dict[str, Any] = {}
         #: IFG-S2SERVE — the training-free 3D held rule (`held_3d.Held3DRule`, `serve_safe --held-3d-rule on`), ANDed
@@ -448,7 +489,16 @@ class SafePolicy:
             self._geo = GeoGraspController(
                 self.to_config.cost, self.constraint_robot_model, self.layout, self.hold_links, self.gripper_columns,
                 float(self._latch.config.gripper_closed_below), self.to_config.limits,
-                horizon=int(self.to_config.horizon.planned), execution_length=int(self.to_config.horizon.execution_length))
+                horizon=int(self.to_config.horizon.planned), execution_length=int(self.to_config.horizon.execution_length),
+                # SL6-A A8 — only when injected (None = the RB-Y1 gripper spec and `{hand}_arm_` joints, as before)
+                **({"gripper_specs": dict(geo_gripper)} if geo_gripper else {}),
+                **({"arm_joints": dict(self.arm_joint_names)} if self.arm_joint_names is not None else {}))
+        if palm_links is not None:
+            # SL6-A A3 — the hold links multi-seed (`sqp._seed_geometry`) tries as "the palm" (default
+            # `multi_seed.PALM_LINKS` = the RB-Y1 palms). Set on both optimizers (the window optimizer seeds too).
+            for opt in (self.refiner.optimizer, getattr(self.refiner.optimizer, "window_optimizer", None)):
+                if opt is not None:
+                    opt.palm_links = tuple(str(n) for n in palm_links)
 
     # --- BasePolicy 인터페이스 -----------------------------------------------------------
     @property
@@ -511,6 +561,8 @@ class SafePolicy:
                                     "grip_closed": float(self.held_3d.grip_closed)}
         if self.hsr6 is not None:
             meta["hsr6"] = {"flags": self.hsr6.names()}     # AG3S-CORE-EVAL-HSR6 — same rule: only when on
+            if self.hsr6_objective_scope != "all":
+                meta["hsr6"]["objective_scope"] = self.hsr6_objective_scope   # SL6-A A9 (key only when not default)
         return meta
 
     def _confidence_gate_on(self) -> bool:
@@ -1209,7 +1261,7 @@ class SafePolicy:
                  field=getattr(constraint_set, "esdf", None))
         geo_state = geo.anchor_state() if self.hsr6 is not None else None
         anchor = geo.anchor(q_now, chunk)
-        if anchor is not None and not self._hsr6_objective_ok():
+        if anchor is not None and not self._hsr6_objective_ok("g1"):
             # AG3S-CORE-EVAL-HSR6 ④ — G1 produced its goal; HSR6 is not grasp: the slot stays empty this chunk.
             geo.withdraw_anchor(geo_state, f"hsr6 objective gate: phase {self._hsr6_phase()}")
             self._hsr6_changed("objective", True, {"g1_withdrawn": True})
@@ -1257,6 +1309,8 @@ class SafePolicy:
             "changed": {name: False for name in self.hsr6.names()},
             "detail": {},
         }
+        if getattr(self, "hsr6_objective_scope", "all") != "all":
+            self._last_hsr6["objective_scope"] = self.hsr6_objective_scope   # SL6-A A9 (key only when not default)
 
     def _hsr6_phase(self) -> Optional[str]:
         """This request's HSR6 phase (raw argmax), None without a label or with HSR6 off."""
@@ -1266,13 +1320,21 @@ class SafePolicy:
 
         return phase_of(self._pending.get("hsr6"))
 
-    def _hsr6_objective_ok(self) -> bool:
-        """④ — True when the objective terms may stay (flag off, or HSR6 = grasp)."""
+    def _hsr6_objective_ok(self, term: str = "nbc") -> bool:
+        """④ — True when the objective term `term` (`"nbc"` · `"a4"` · `"g1"`) may stay (flag off, or HSR6 = grasp).
+
+        SL6-A A9: with `hsr6_objective_scope = "nbc"` the A4 / G1 goals are never withheld; a request where the
+        default scope (`"all"`) would have withheld one is recorded (`hsr6.detail.objective.<term>_kept_by_scope`)
+        without counting as a change. Scope `"all"` (default) = the rule as before for every term."""
         if self.hsr6 is None or not self.hsr6.objective:
             return True
         from AG3S.trajopt.hsr6 import objective_allowed
 
-        return objective_allowed(self._hsr6_phase())
+        ok = objective_allowed(self._hsr6_phase())
+        if not ok and term != "nbc" and getattr(self, "hsr6_objective_scope", "all") == "nbc":
+            self._hsr6_changed("objective", False, {f"{term}_kept_by_scope": True})
+            return True
+        return ok
 
     def _hsr6_changed(self, rule: str, changed: bool, detail: Optional[dict] = None) -> None:
         rec = self._last_hsr6
@@ -1284,7 +1346,7 @@ class SafePolicy:
 
     def _hsr6_a4_gate(self, anchor):
         """④ — the A4 close-row goal the existing rule gave this chunk, or None when HSR6 is not grasp."""
-        if self._hsr6_objective_ok():
+        if self._hsr6_objective_ok("a4"):
             return anchor
         if isinstance(self._last_grasp_anchor, dict):
             self._last_grasp_anchor.update(active=False, hsr6_withdrawn=True)
@@ -2131,13 +2193,19 @@ class SafePolicy:
         if dist > float(col.neighbour_contact_gate):
             rec["reason"] = "palm outside the gate"
             return None
-        prefix = str(parent_link).rstrip("0123456789")
         names = [str(n) for n in self.constraint_robot_model.sphere_link_names]
-        mask = np.array([n.startswith(prefix) for n in names], bool)
+        fingers = (self.neighbour_finger_links or {}).get(hand) if self.neighbour_finger_links is not None else None
+        if fingers is None:
+            prefix = str(parent_link).rstrip("0123456789")      # RB-Y1 rule: `ee_finger_l1` -> `ee_finger_l*`
+            mask = np.array([n.startswith(prefix) for n in names], bool)
+            what = f"a link {prefix}*"
+        else:
+            mask = np.array([n in set(fingers) for n in names], bool)   # SL6-A A3: the injected finger links
+            what = f"the links {list(fingers)}"
         if not mask.any():
-            rec["reason"] = f"no sphere of a link {prefix}*"
+            rec["reason"] = f"no sphere of {what}"
             return None
-        if not self._hsr6_objective_ok():
+        if not self._hsr6_objective_ok("nbc"):
             # AG3S-CORE-EVAL-HSR6 ④ — the existing rule allows the neighbour contact; HSR6 is not grasp: withheld.
             rec.update(hsr6_withdrawn=True, reason=f"hsr6 objective gate: phase {self._hsr6_phase()}")
             self._hsr6_changed("objective", True, {"nbc_withdrawn": True})
@@ -2179,7 +2247,7 @@ class SafePolicy:
         hand, parent_link, _ = self._grasp_hand(manipulators)
         link = self.hold_links.get(hand, parent_link)
         centre = np.asarray(manip.centroid, np.float64).reshape(3)
-        site = hold_site_position(self.constraint_robot_model, q_now, link)
+        site = hold_site_position(self.constraint_robot_model, q_now, link, self.hold_site_offset_m)
         dist = float(np.linalg.norm(site - centre))
         rec.update(hand=hand, link=str(link), site_to_target_mm=round(dist * 1000.0, 1))
         if dist > float(col.neighbour_palm_contact_gate):
@@ -2240,7 +2308,9 @@ class SafePolicy:
             rec["reason"] = "palm outside the radius"
             return None
         names = [str(self.layout.joint_names[i]) for i in self.layout.q_indices]
-        wanted = {f"{hand}_arm_{int(j)}" for j in cost.wrist_track_joints}
+        arm = (self.arm_joint_names or {}).get(hand) if self.arm_joint_names is not None else None
+        wanted = ({rby1_arm_joint_name(hand, j) for j in cost.wrist_track_joints} if arm is None
+                  else {arm[int(j)] for j in cost.wrist_track_joints})     # SL6-A A3: injected arm joints
         scale = np.array([s if n in wanted else 1.0 for n in names], np.float64)
         rec.update(active=True, joints=[n for n in names if n in wanted])
         return scale

@@ -249,6 +249,14 @@ class PandaSafeServer:
                                                            for k in range(n)))
         return rec
 
+    def _g1_deferred(self) -> bool:
+        """SL6-A A8 — did the geometric grasp (``SafePolicy._geo``) defer the close on the chunk just refined."""
+        geo = getattr(self._policy, "_geo", None)
+        if geo is None:
+            return False
+        gate = (getattr(geo, "last", None) or {}).get("close_gate") or {}
+        return bool(gate.get("applied")) and gate.get("decision") == "defer"
+
     def infer(self, obs: dict, **kwargs) -> dict:
         obs = dict(obs)
         if obs.get("ag3s/reset"):
@@ -260,6 +268,10 @@ class PandaSafeServer:
         if conv is None or reference is None:
             raise RuntimeError("SafePolicy returned no reference chunk for the Panda conversion")
         actions, rec = pa.joint_chunk_to_delta_chunk(self.chunk_policy.kin, conv, refined, reference, mode=self.mode)
+        deferred = self._g1_deferred()
+        if deferred:
+            # SL6-A A8 — G1 deferred the close on this chunk: send the refined (open) gripper rows (G1 off: never here)
+            actions, rec["g1_deferred_close"] = pa.apply_deferred_close(actions, refined, reference)
         real = pa.realisation_record(self.chunk_policy.kin, conv, actions, np.asarray(refined, np.float64),
                                      PANDA_HORIZON["execution_length"])
         # response-model EE positions (robot base frame) for the executed rows of the actions sent
@@ -295,42 +307,56 @@ def _replace_horizon_limits(to_config):
 #: part without a word. :func:`check_unported_flags` refuses any of them set away from its parser default. Allowed:
 #: ``--run-dir``, ``--blas-threads`` (applied by ``serve_safe.main`` before the Panda branch) and ``--no-roi-carve``
 #: (``profile.V11AB_PRE_MERGE_DEFAULTS``). Remove a name only together with its Panda port.
+#: SL6-A A10 (2026-10-29): the options of the AG3S final configuration (``AG3S-CORE-EVAL-A6.impl.md`` §3) are ported
+#: (:data:`PORTED_FINAL_CONFIG_DESTS`) and no longer here; every other merge option still is.
 UNPORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
+    'confidence_gate', 'confidence_gate_threshold', 'free_space_carve', 'free_space_carve_margin_mm',
+    'geo_arm_check', 'geo_carry_requests', 'geo_close_gate', 'geo_close_timeout', 'geo_close_tol_deg',
+    'geo_close_tol_mm', 'geo_correct_deg', 'geo_correct_max_offset', 'geo_correct_mm', 'geo_grasp_mu',
+    'geo_grasp_selection', 'geo_obstacle_memory', 'geo_obstacle_source', 'geo_time_budget_ms', 'geo_w_pos',
+    'geo_w_rot', 'geo_wrist_check', 'grasp_anchor_radius_mm', 'grasp_goal_box', 'grasp_goal_window', 'held_3d_max_m',
+    'held_3d_rule', 'held_permission_parent_links', 'hybrid_identity', 'hybrid_other_exclude_voxels',
+    'latch_carry_from_closing', 'latch_reach_hand_relative', 'latch_reach_kept_unseen',
+    'nonauthorized_target_margin', 'nontarget_shell_voxels', 'oracle_extent_identity', 'oracle_max_dist_voxels',
+    'owned_ambiguous', 'owned_tie_voxels', 'owned_unowned', 'palm_cover', 'palm_cover_overflow',
+    'palm_shell_overflow', 'profile_substages', 'qp_backend', 'recovery_retreat', 'robot_free_shrink_mm',
+    'robot_mask', 'robot_occupied_free', 'roi_pad_mm', 'stem_cap_bottom_fit_frac', 'stem_cap_radius_mm',
+    'stem_cap_top_mm', 'target_extent', 'target_free_coarse', 'target_free_coarse_sign_floor',
+    'target_free_coarse_support', 'target_layer', 'target_layer_reset_mm', 'target_layer_tol_mm', 'target_stem_cap',
+    'task_gate', 'task_gate_shadow', 'task_probe', 'tsdf_frustum_decay', 'tsdf_time_decay', 'wrist_cover_overflow',
+)
+#: SL6-A A10 — the final-configuration options this server now applies (A1-A9, A12); listed for the record and the test.
+PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'attention_source', 'attention_split_partition', 'attention_split_radius_mm', 'attention_split_ratio_source',
-    'confidence_gate', 'confidence_gate_threshold', 'continuity_after_grasp', 'deflection_rate_after_grasp',
-    'free_space_carve', 'free_space_carve_margin_mm', 'geo_arm_check', 'geo_carry_requests', 'geo_close_gate',
-    'geo_close_timeout', 'geo_close_tol_deg', 'geo_close_tol_mm', 'geo_continuity_off', 'geo_correct_deg',
-    'geo_correct_max_offset', 'geo_correct_mm', 'geo_goal_mode', 'geo_grasp', 'geo_grasp_mu', 'geo_grasp_selection',
-    'geo_obstacle_memory', 'geo_obstacle_source', 'geo_time_budget_ms', 'geo_track_scale', 'geo_w_pos', 'geo_w_rot',
-    'geo_wrist_check', 'grasp_anchor', 'grasp_anchor_path_weight', 'grasp_anchor_radius_mm', 'grasp_goal_box',
-    'grasp_goal_window', 'held_3d_max_m', 'held_3d_rule', 'held_permission_parent_links', 'hsr6_attach_assist',
-    'hsr6_held_gate', 'hsr6_objective', 'hsr6_probe', 'hsr6_target_exempt', 'hybrid_identity',
-    'hybrid_other_exclude_voxels', 'kept_geometry_follow', 'latch_carry_from_closing', 'latch_reach_hand_relative',
-    'latch_reach_kept_unseen', 'neighbour_contact_mm', 'neighbour_palm_contact_mm', 'nonauthorized_target_margin',
-    'nontarget_evidence', 'nontarget_shell_voxels', 'oracle_extent_identity', 'oracle_max_dist_voxels',
-    'owned_ambiguous', 'owned_max_dist_voxels', 'owned_tie_voxels', 'owned_unowned', 'palm_cover',
-    'palm_cover_overflow', 'palm_shell', 'palm_shell_margin', 'palm_shell_overflow', 'placed_no_seed_certify',
-    'profile_substages', 'qp_backend', 'recovery_retreat', 'robot_free_shrink_mm', 'robot_mask',
-    'robot_occupied_free', 'roi_carve', 'roi_carve_device', 'roi_carve_footprint', 'roi_carve_footprint_pad_px',
-    'roi_carve_footprint_robot', 'roi_pad_mm', 'split_supersedes_anchor', 'stem_cap_bottom_fit_frac',
-    'stem_cap_radius_mm', 'stem_cap_top_mm', 'target_exclusion', 'target_extent', 'target_free_coarse',
-    'target_free_coarse_sign_floor', 'target_free_coarse_support', 'target_layer', 'target_layer_reset_mm',
-    'target_layer_tol_mm', 'target_permission_strict', 'target_stem_cap', 'task_gate', 'task_gate_shadow',
-    'task_probe', 'to_gpu_seeds', 'to_gpu_seeds_check', 'to_multi_seed', 'tsdf_frustum_decay', 'tsdf_time_decay',
-    'wrist_cover_overflow', 'wrist_track_scale',
+    'continuity_after_grasp', 'deflection_rate_after_grasp', 'geo_continuity_off', 'geo_goal_mode', 'geo_grasp',
+    'geo_track_scale', 'grasp_anchor', 'grasp_anchor_path_weight', 'hsr6_attach_assist', 'hsr6_held_gate',
+    'hsr6_objective', 'hsr6_probe', 'hsr6_target_exempt', 'kept_geometry_follow', 'neighbour_contact_mm',
+    'neighbour_palm_contact_mm', 'nontarget_evidence', 'owned_max_dist_voxels', 'palm_shell', 'palm_shell_margin',
+    'placed_no_seed_certify', 'roi_carve', 'roi_carve_device', 'roi_carve_footprint', 'roi_carve_footprint_pad_px',
+    'roi_carve_footprint_robot', 'split_supersedes_anchor', 'target_exclusion', 'target_permission_strict',
+    'to_gpu_seeds', 'to_gpu_seeds_check', 'to_multi_seed', 'wrist_track_scale',
 )
 
 
 def check_unported_flags(args, ap) -> None:
-    """Refuse a final-configuration option the Panda server would not apply as the RB-Y1 server does."""
+    """Refuse a final-configuration option the Panda server would not apply as the RB-Y1 server does, and (SL6-A)
+    the ported ones in a form the Panda cannot run: an HSR6 flag without ``--hsr6-probe`` (the default probe is the
+    RB-Y1 one, A10), ``--palm-shell right`` (the Panda is the one ``left`` hand)."""
     from AG3S.trajopt import serve_safe as ss
 
     parser = ap if ap is not None else ss.build_parser()
     bad = sorted(d for d in UNPORTED_FINAL_CONFIG_DESTS
                  if hasattr(args, d) and getattr(args, d) != parser.get_default(d))
+    message = None
     if bad:
         message = ("--robot panda: not ported to the Panda server yet (AG3S final-configuration merge 2026-10-29): "
                    + ", ".join("--" + d.replace("_", "-") for d in bad))
+    elif ss.hsr6_flags_from_args(args) is not None and not getattr(args, "hsr6_probe", None):
+        message = ("--robot panda: --hsr6-* needs --hsr6-probe FILE (the Panda probe, SL6-B B4); the default probe is "
+                   "the RB-Y1 one (kv_L4 of another policy and robot)")
+    elif getattr(args, "palm_shell", "off") not in (None, "off", "on", "left"):
+        message = f"--robot panda: --palm-shell {args.palm_shell} (the Panda is the single left hand; use on / left)"
+    if message:
         if ap is None:
             raise ValueError(message)
         ap.error(message)
@@ -385,7 +411,14 @@ def recorder_meta(args, to_config, *, conversion: str, ag3s_info: dict) -> dict:
             **({"gripper_cover": ss.gripper_cover_options(args)} if ss.gripper_cover_options(args) else {}),
             **({"finger_cover": ss.finger_cover_options(args)} if ss.finger_cover_options(args) else {}),
             **({"self_filter": ss.self_filter_options(args)} if ss.self_filter_options(args) else {}),
-            "subtask": {"gate": bool(args.subtask_gate), "probe": None},
+            "subtask": {"gate": bool(args.subtask_gate), "probe": None,
+                        # SL6-A A11 — key only when on (as the RB-Y1 meta); inert on the Panda (no `home` label)
+                        **({"placed_no_seed_certify": True, "placed_no_seed_certify_inert_on_panda": True}
+                           if getattr(args, "placed_no_seed_certify", False) else {})},
+            # SL6-A — the RB-Y1 meta keys of the final configuration, only when on (V11AB / pb meta unchanged)
+            **({"palm_shell": ss.palm_shell_options(args)} if ss.palm_shell_options(args) else {}),
+            **ss.t57a_record_meta(args),
+            **ss.hsr6_record_meta(args),
             # --- Panda (SL5j) ---
             "robot": "panda", "robot_urdf": str(pm.PANDA_URDF),
             "ag3s_version": profile.match_ag3s_version(args),
@@ -437,8 +470,129 @@ def close_recorder(served) -> Optional[dict]:
             "n_failed": getattr(recorder, "n_failed", 0)}
 
 
-def build_safe_server(policy, args, *, attention_model=None):
-    """Everything below the openpi policy (also used by tests with a stub policy and no attention model)."""
+#: SL6-A A3 — the Panda values of SafePolicy's robot injections (defaults there = RB-Y1). ``arm_joint_names`` index j
+#: (0-6) = the RB-Y1 ``{hand}_arm_{j}``: IFG-TOW's wrist joints (4, 5, 6) are ``panda_joint5..7``, the same wrist set.
+PANDA_ARM_JOINT_NAMES = {pm.MANIPULATOR_SIDE: tuple(pm.PANDA_ARM_JOINTS)}
+#: IFG-NBC finger links (RB-Y1: the grasp link minus its digits, ``ee_finger_l*``): the Panda grasp pair, both fingers.
+PANDA_NEIGHBOUR_FINGER_LINKS = {pm.MANIPULATOR_SIDE: tuple(pm.PANDA_FINGER_LINKS)}
+#: The SafePolicy note for the A11 feature that has no Panda label.
+PLACED_NO_SEED_INERT = ("--placed-no-seed-certify certifies no_seed frames after PLACED in the 3-class subtask label "
+                        "'home' (ag3s/types.py); the Panda server has no 3-class subtask probe (subtask label None), so "
+                        "the rule never fires: inert on panda (not fixed, task SL6 A11)")
+#: AttentionPolicy noun rule of the LIBERO prompts (SL6-B B1, ``attention_source.NounTokens.from_config(rule=)``).
+PANDA_NOUN_RULE = "libero"
+
+
+def panda_gpu_seed_robot():
+    """SL6-A A4 — the cuRobo seed batch's robot constants for the Panda: adapter URDF, base ``panda_link0`` (fixed
+    root: the world needs no per-chunk pose), tool frame ``panda_hand`` (the hold link the grasp goal names)."""
+    from AG3S.trajopt.gpu_seeds import GpuSeedRobot
+
+    return GpuSeedRobot(name="panda", urdf=str(pm.PANDA_URDF), base_link="panda_link0", tool_frames=("panda_hand",),
+                        fk_root_link="panda_link0")
+
+
+def safe_policy_injections() -> dict:
+    """SL6-A A3 / A6 / A8 — the Panda geometry for SafePolicy's injection points (each changes nothing while its
+    feature is off, so a V11AB / pb server is unchanged)."""
+    from AG3S.adapters.panda import hand_geometry as hg
+    from AG3S.adapters.panda import profile
+    from AG3S.ag3s.grasp.gripper import PANDA_LEFT
+
+    return {"arm_joint_names": dict(PANDA_ARM_JOINT_NAMES),
+            "neighbour_finger_links": dict(PANDA_NEIGHBOUR_FINGER_LINKS),
+            "hold_site_offset_m": tuple(hg.PANDA_HOLD_SITE_OFFSET_M),
+            "palm_links": tuple(profile.PANDA_HOLD_LINKS.values()),
+            "geo_gripper": {pm.MANIPULATOR_SIDE: PANDA_LEFT}}
+
+
+def _noun_tokens(config_name: str):
+    """``NounTokens`` with the LIBERO rule when the attention-source module offers one (SL6-B B1), else the default
+    (fruit) rule -- recorded by the caller."""
+    import inspect
+
+    from AG3S.trajopt.attention_source import NounTokens
+
+    if "rule" in inspect.signature(NounTokens.from_config).parameters:
+        return NounTokens.from_config(config_name, rule=PANDA_NOUN_RULE), PANDA_NOUN_RULE
+    logging.warning("!!! attention_source.NounTokens has no LIBERO rule: the noun lookup uses the fruit rule !!!")
+    return NounTokens.from_config(config_name), "fruit"
+
+
+def attention_policy_kwargs(args, *, tokenizer: bool = True) -> tuple[dict, dict]:
+    """SL6-A A1 — ``(AttentionPolicy keyword args, record)`` as the RB-Y1 ``serve_safe.main`` builds them (T57-A
+    attention source, AG3S-CORE-EVAL-HSR6 probe); ``({}, {})`` when every one of those flags is off (the V11AB
+    AttentionPolicy). The task gate / confidence gate stay unported (refused before this). ``tokenizer=False`` (no
+    attention model: tests, ``--no-attention``) skips the noun tokens (they need the policy's SentencePiece model)."""
+    from AG3S.trajopt import serve_safe as ss
+
+    kw: dict = {}
+    rec: dict = {}
+    if getattr(args, "attention_source", None):
+        from AG3S.trajopt.attention_source import log_source, parse_attention_source
+
+        source = parse_attention_source(args.attention_source)
+        kw = {"attention_source": source, "task_probe": None, "default_prompt": args.default_prompt}
+        rec["attention_source"] = source.label
+        if source.is_noun:
+            if tokenizer:
+                kw["noun_tokens"], rec["noun_rule"] = _noun_tokens(args.config)
+            else:
+                rec["noun_rule"] = "not built (no attention model)"
+        log_source(source, None)
+    flags = ss.hsr6_flags_from_args(args)
+    if flags is not None:
+        from AG3S.trajopt.hsr6 import load_hsr6_probe
+
+        import hashlib
+        import pathlib
+
+        kw["hsr6_probe"] = load_hsr6_probe(args.hsr6_probe)
+        rec["hsr6_probe"] = {"path": str(args.hsr6_probe), "name": getattr(kw["hsr6_probe"], "name", None),
+                             "type": type(kw["hsr6_probe"]).__name__,
+                             "classes": list(getattr(kw["hsr6_probe"], "classes", ()) or ()),
+                             "sha256": hashlib.sha256(pathlib.Path(args.hsr6_probe).read_bytes()).hexdigest()}
+        logging.warning("HSR6 (panda): probe %s (%s) · uses %s · raw argmax per request · objective scope %s",
+                        rec["hsr6_probe"]["name"], args.hsr6_probe, flags.names(),
+                        getattr(args, "hsr6_objective_scope", "all"))
+    return kw, rec
+
+
+def gpu_seeds_setup(safe, to_config, *, warm_up: bool) -> Optional[dict]:
+    """SL6-A A4 — with ``--to-gpu-seeds`` (else None): the Panda robot for the seed batches and, with ``warm_up``, the
+    batches built and their CUDA graphs captured before the first chunk (RB-Y1 ``serve_safe.main``). A build that fails
+    does **not** stop the server (each triggered chunk then solves the seeds on the CPU, `gpu_seeds.solve_seeds`) but is
+    said loudly here and recorded (``warm_up_error``) -- not only in the per-chunk record."""
+    if getattr(to_config.sqp, "gpu_seeds", "off") == "off":
+        return None
+    from AG3S.trajopt import gpu_seeds as gs
+
+    robot = panda_gpu_seed_robot()
+    gs.set_robot(safe.refiner.optimizer, robot)
+    rec: dict = {"backend": str(to_config.sqp.gpu_seeds), "check": str(getattr(to_config.sqp, "gpu_seeds_check", "all")),
+                 "n_seeds": int(getattr(to_config.sqp, "multi_seed", 0) or 0), "robot": robot.record(),
+                 "warm_up": None}
+    if not warm_up:
+        rec["warm_up"] = "skipped (caller)"
+        return rec
+    try:
+        rec["warm_up"] = gs.warm_up(safe.refiner.optimizer)
+        logging.warning("TO GPU seeds warm-up (panda): %s", rec["warm_up"])
+    except Exception as exc:  # noqa: BLE001 - the server stays up (CPU seeds per chunk), loudly
+        rec["warm_up_error"] = f"{type(exc).__name__}: {exc}"
+        logging.warning("!!! TO GPU seeds (panda): the cuRobo seed batch could not be built — %s. Every chunk that "
+                        "triggers multi-seed will solve the %d seeds on the CPU (gpu_seeds.solve_seeds fallback) !!!",
+                        rec["warm_up_error"], rec["n_seeds"])
+    return rec
+
+
+def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool = True):
+    """Everything below the openpi policy (also used by tests with a stub policy and no attention model).
+
+    SL6-A: the final-configuration options are wired as the RB-Y1 ``serve_safe.main`` wires them -- attention source
+    and HSR6 probe into ``AttentionPolicy``, ``hsr6=`` / ``hsr6_objective_scope=`` into ``SafePolicy``, the GPU seed
+    warm-up (``gpu_warm_up``; tests on a CPU host pass False) -- each only when its flag is on, plus the Panda
+    geometry for SafePolicy's robot injections (:func:`safe_policy_injections`)."""
     from AG3S.adapters.panda import attention as pat
     from AG3S.adapters.panda import profile
     from AG3S.ag3s.robot_models.gripper_state import FingerJointMap
@@ -448,10 +602,11 @@ def build_safe_server(policy, args, *, attention_model=None):
     kw = profile.v11ab_build_kwargs(args)
     ag3s, ag3s_info = profile.build_panda_ag3s(kw=kw)
     served_policy = policy
+    attn_kw, attn_rec = attention_policy_kwargs(args, tokenizer=attention_model is not None)
     if attention_model is not None:
         from AG3S.trajopt.attention_policy import AttentionPolicy
 
-        served_policy = AttentionPolicy(policy, attention_model, subtask_probe=None)
+        served_policy = AttentionPolicy(policy, attention_model, subtask_probe=None, **attn_kw)
     constraint = ag3s.constraint_robot_model
     kin = pa.PandaKinematics(constraint)
     chunk_policy = ChunkToJointPolicy(served_policy, kin)
@@ -461,12 +616,25 @@ def build_safe_server(policy, args, *, attention_model=None):
     mode = conversion_mode()
     # SL5j — None without --record-constraints (then the SafePolicy arguments are the pre-SL5j ones)
     recorder = constraint_recorder(args, to_config, conversion=mode, ag3s_info=ag3s_info)
+    hsr6 = ss.hsr6_flags_from_args(args)
+    scope = getattr(args, "hsr6_objective_scope", "all")
+    # SL6-A — SafePolicy's Panda geometry + the HSR6 arguments only with a final-configuration option on: a V11AB / pb
+    # server constructs SafePolicy with exactly the pre-SL6 arguments (tests/benchmark/test_panda_sl5j_recorder.py).
+    final_kw = ({**safe_policy_injections(), **({"hsr6": hsr6} if hsr6 is not None else {}),
+                 **({"hsr6_objective_scope": scope} if scope != "all" else {})}
+                if final_options_on(args) else {})
     safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(),
                       grasp_links=dict(profile.PANDA_GRASP_LINKS), hold_links=dict(profile.PANDA_HOLD_LINKS),
                       static_geometry=None, recorder=recorder, shadow=bool(getattr(args, "shadow", False)),
                       layout=pa.panda_chunk_layout(constraint.joint_names), gripper_columns=GRIPPER_COLUMNS,
-                      finger_map=FingerJointMap(constraint, convention=panda_gripper_convention()), hands=HANDS)
+                      finger_map=FingerJointMap(constraint, convention=panda_gripper_convention()), hands=HANDS,
+                      **final_kw)
     grasp_contact = ss.apply_grasp_contact_flags(safe, args)  # V11AB-pb4 / pb5 (all off = V11AB)
+    gpu = gpu_seeds_setup(safe, to_config, warm_up=gpu_warm_up)
+    inert = []
+    if getattr(args, "placed_no_seed_certify", False):
+        inert.append({"flag": "--placed-no-seed-certify", "why": PLACED_NO_SEED_INERT})
+        logging.warning("!!! %s !!!", PLACED_NO_SEED_INERT)
     info = {"ag3s": ag3s_info, "horizon": PANDA_HORIZON, "grasp_contact": grasp_contact, "conversion_mode": {"mode": mode, "name": pa.CONVERSION_MODES[mode]},
             "latch": {"empty_below": panda_latch_config().empty_below, "calibration": str(GRIPPER_CALIBRATION),
                       "calibration_record": gripper_calibration()},
@@ -479,14 +647,88 @@ def build_safe_server(policy, args, *, attention_model=None):
             "hands": HANDS, "gripper_columns": GRIPPER_COLUMNS, "gripper_convention": panda_gripper_convention().record(),
             "conversion": pa.conventions(), "static_geometry": None,
             "v11ab_build_kwargs_not_applied": ["constraint_sphere_options", "finger_cover"]}
+    final = final_config_record(args, safe, to_config, attn_rec, gpu, inert)
+    if final:   # SL6-A — key only with a final-configuration option on (V11AB / pb config unchanged)
+        info["final_config"] = final
     if recorder is not None:  # key only when recording (the panda_server_config.json of other runs is unchanged)
         from AG3S.trajopt.safe_policy import _jsonable
 
         recorder.meta["grasp_contact"] = _jsonable(grasp_contact)
+        if final:
+            recorder.meta["final_config"] = _jsonable(final)
         info["record_constraints"] = {"dir": str(args.record_constraints), "run_dir": str(recorder.run_dir),
                                       "esdf_mode": recorder.esdf_mode, "background": recorder.background,
                                       "ag3s_version": recorder.meta.get("ag3s_version")}
     return PandaSafeServer(safe, chunk_policy, mode=mode), info
+
+
+def final_options_on(args) -> list[str]:
+    """SL6-A — the ported final-configuration options ``args`` sets away from their parser default (``[]`` for every
+    V11AB / pb argv)."""
+    from AG3S.trajopt import serve_safe as ss
+
+    parser = ss.build_parser()
+    return sorted(d for d in PORTED_FINAL_CONFIG_DESTS + ("hsr6_objective_scope",)
+                  if getattr(args, d, None) != parser.get_default(d))
+
+
+def final_config_record(args, safe, to_config, attn_rec: dict, gpu: Optional[dict], inert: list) -> dict:
+    """SL6-A — what the Panda server applies of the AG3S final configuration (VA4 config dump): ``{}`` when no
+    final-configuration option is on (every ported dest at its parser default)."""
+    from AG3S.adapters.panda import hand_geometry as hg
+    from AG3S.adapters.panda import profile
+    from AG3S.trajopt import serve_safe as ss
+    from AG3S.trajopt.safe_policy import _jsonable
+
+    on = final_options_on(args)
+    if not on:
+        return {}
+    col = to_config.collision
+    shell = getattr(safe.constraint_robot_model, "palm_shell_report", None)
+    return _jsonable({
+        "version": profile.match_ag3s_version(args),
+        "options_on": on,
+        "attention": attn_rec,
+        "hsr6": None if safe.hsr6 is None else {"flags": safe.hsr6.names(), "objective_scope": safe.hsr6_objective_scope,
+                                                "probe": getattr(args, "hsr6_probe", None)},
+        "palm_shell": None if shell is None else {
+            "n_spheres": shell["n_spheres_after"] - shell["n_spheres_before"],
+            "n_spheres_before": shell["n_spheres_before"], "n_spheres_after": shell["n_spheres_after"],
+            "table": shell["links"][hg.PALM_LINK], "source": shell["source"], "shell_digest": shell["shell_digest"],
+            "margin_m": getattr(col, "palm_shell_margin", None)},
+        "neighbour_palm_contact": None if not float(getattr(col, "neighbour_palm_contact_depth", 0.0) or 0.0) > 0.0 else {
+            "site": "panda_grip_site", "site_offset_m": list(hg.PANDA_HOLD_SITE_OFFSET_M), "hold_link": hg.PALM_LINK,
+            "depth_m": float(col.neighbour_palm_contact_depth), "radius_m": float(col.neighbour_palm_contact_radius),
+            "gate_m": float(col.neighbour_palm_contact_gate),
+            "palm_rows": int(sum(1 for n in safe.constraint_robot_model.sphere_link_names if n == hg.PALM_LINK))},
+        "neighbour_contact": None if not float(getattr(col, "neighbour_contact_depth", 0.0) or 0.0) > 0.0 else {
+            "finger_links": safe.neighbour_finger_links, "depth_m": float(col.neighbour_contact_depth)},
+        "wrist_track": None if float(getattr(to_config.cost, "wrist_track_scale", 1.0)) >= 1.0 else {
+            "joints": [safe.arm_joint_names[pm.MANIPULATOR_SIDE][int(j)] for j in to_config.cost.wrist_track_joints],
+            "scale": float(to_config.cost.wrist_track_scale)},
+        "multi_seed": None if int(getattr(to_config.sqp, "multi_seed", 0) or 0) <= 0 else {
+            "n": int(to_config.sqp.multi_seed), "palm_links": list(safe.refiner.optimizer.__dict__.get("palm_links", ()))},
+        "gpu_seeds": gpu,
+        "geo_grasp": None if safe._geo is None else {
+            "spec": safe._geo._spec(pm.MANIPULATOR_SIDE).hold_link,
+            "frame_R_HG": safe._geo._spec(pm.MANIPULATOR_SIDE).frame,
+            "max_opening_m": safe._geo._spec(pm.MANIPULATOR_SIDE).max_opening,
+            "arm_joints": list(safe._geo._arm_names(pm.MANIPULATOR_SIDE) or ()),
+            "gripper_column_override": "refined gripper column sent on chunks where G1 deferred the close "
+                                       "(action.apply_deferred_close)"},
+        # A12 — the continuity / deflection-rate terms off before the grasp (latch searching · latched · closing)
+        "before_grasp_terms_off": {
+            "continuity_after_grasp": bool(getattr(to_config.cost, "continuity_after_grasp", False)),
+            "deflection_rate_after_grasp": bool(getattr(to_config.cost, "deflection_rate_after_grasp", False)),
+            "w_continuity": float(to_config.cost.w_continuity),
+            "w_deflection_rate": float(getattr(to_config.cost, "w_deflection_rate", 0.0) or 0.0),
+            "geo_continuity_off": bool(getattr(to_config.cost, "geo_continuity_off", False))},
+        "grasp_anchor": None if float(getattr(to_config.cost, "w_grasp_goal", 0.0) or 0.0) <= 0.0 else {
+            "w_grasp_goal": float(to_config.cost.w_grasp_goal), "gripper_column": int(pa.GRIPPER_COLUMN)},
+        "inert_on_panda": inert,
+        "request_count_rules_unchanged": "hold_follow_to / geo_close_timeout / geo_carry_requests / HSR6 raw argmax are "
+                                         "request counts; Panda requests are 0.25 s apart (RB-Y1 0.53 s)",
+    })
 
 
 def _write_config(record: dict) -> Optional[str]:

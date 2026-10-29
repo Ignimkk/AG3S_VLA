@@ -32,7 +32,8 @@ refined path under the same model differs by ``Dx_k = (Dy_k - alpha Dy_{k-1}) / 
 ``a'_k = a_k + Dx_k / scale`` (world frame; position and rotation separately). A row whose refined joints equal the reference bit for bit (float32, as
 sent on the wire) **and** whose previous row did too is returned as the **original action, bit for bit**, so a
 chunk V11AB leaves alone is executed exactly as VLA-only would. Clipping to ``[-1, 1]`` after the correction
-is recorded per component (``saturated``). The gripper column is always the original.
+is recorded per component (``saturated``). The gripper column is the original, except on a chunk where the geometric
+grasp (G1) deferred the close (SL6-A A8, ``apply_deferred_close``).
 """
 from __future__ import annotations
 
@@ -325,6 +326,23 @@ def joint_chunk_to_delta_chunk(kin: PandaKinematics, conv: Conversion, refined: 
            "max_abs_joint_change_rad": float(np.max(np.abs(np.asarray(Qs[:H], np.float64)
                                                              - np.asarray(Qr[:H], np.float64)))) if H else 0.0}
     return out, rec
+
+
+def apply_deferred_close(actions: np.ndarray, refined: np.ndarray, reference: np.ndarray) -> tuple[np.ndarray, dict]:
+    """SL6-A A8 — the geometric grasp (G1, ``geo_grasp.close_gate``) deferred the policy's close on this chunk: the
+    refined joint chunk keeps the gripper column (7) open from the close row, but the reverse conversion sends the
+    policy's gripper value (``a[6]``) unchanged -- the robot would close anyway. Here every row whose refined gripper
+    value differs from the reference gets ``a[6] = clip(1 - 2 g)`` (the inverse of ``g = (1 - clip(a6)) / 2``); the
+    other rows keep their bits. Called only on a deferred chunk (G1 off: never)."""
+    out = np.array(actions, copy=True)
+    g_ref = np.asarray(reference, np.float64)[:, GRIPPER_COLUMN]
+    g_new = np.asarray(refined, np.float64)[:, GRIPPER_COLUMN]
+    H = min(out.shape[0], g_ref.shape[0], g_new.shape[0])
+    rows = [k for k in range(H) if np.float32(g_new[k]) != np.float32(g_ref[k])]
+    for k in rows:
+        out[k, 6] = np.clip(1.0 - 2.0 * g_new[k], -OSC_INPUT_CLIP, OSC_INPUT_CLIP).astype(out.dtype)
+    return out, {"rows": rows, "a6_policy": [float(np.asarray(actions)[k, 6]) for k in rows],
+                 "a6_sent": [float(out[k, 6]) for k in rows]}
 
 
 def predict_ee_path(kin: PandaKinematics, conv: Conversion, actions: np.ndarray, response: Optional[dict] = None):

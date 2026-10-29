@@ -1974,6 +1974,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--hsr6-objective", action="store_true",
                     help="AG3S-CORE-EVAL-HSR6 ④ — 손가락 이웃 접촉 허용 (--neighbour-contact-mm) 과 닫는 행 목표 (A4 "
                          "--grasp-anchor · G1 --geo-grasp) 를 지금 규칙 ∧ HSR6 = grasp 일 때만 준다. 기본 off")
+    ap.add_argument("--hsr6-objective-scope", choices=("all", "nbc"), default="all",
+                    help="SL6-A A9 — --hsr6-objective 가 거두는 범위. all (기본, AG3S-CORE-EVAL-HSR6 그대로) = 손가락 이웃 접촉 "
+                         "허용 · A4 · G1 닫는 행 목표 모두 HSR6 = grasp 일 때만. nbc = 손가락 이웃 접촉 허용에만 적용하고 A4 · "
+                         "G1 목표는 막지 않는다 (막혔을 요청은 hsr6.detail.objective.<a4|g1>_kept_by_scope 로 기록)")
     ap.add_argument("--hsr6-probe", default=None, metavar="NPZ",
                     help="AG3S-CORE-EVAL-HSR6 — 6 단계 probe (안 주면 동봉 AG3S/ag3s/asset/subtask_probe/hsr6_t64_kv_L4.npz "
                          "= T64 partA probe_6.npz). --hsr6-* 와 함께만")
@@ -2771,7 +2775,10 @@ def hsr6_record_meta(args) -> dict:
     if flags is None:
         return {}
     return {"hsr6": {"flags": flags.names(), "probe": getattr(args, "hsr6_probe", None) or "shipped:hsr6_t64_kv_L4",
-                     "decision": "raw argmax per request"}}
+                     "decision": "raw argmax per request",
+                     # SL6-A A9 — key only when not the default scope
+                     **({"objective_scope": args.hsr6_objective_scope}
+                        if getattr(args, "hsr6_objective_scope", "all") != "all" else {})}}
 
 
 def reject_hsr6_flags(ap: argparse.ArgumentParser, args) -> None:
@@ -2780,6 +2787,8 @@ def reject_hsr6_flags(ap: argparse.ArgumentParser, args) -> None:
     if flags is None:
         if getattr(args, "hsr6_probe", None):
             ap.error("--hsr6-probe 는 --hsr6-* 사용처와 함께만 읽힙니다")
+        if getattr(args, "hsr6_objective_scope", "all") != "all":
+            ap.error("--hsr6-objective-scope 는 --hsr6-objective 가 거두는 범위입니다 — --hsr6-objective 와 함께만")
         return
     if _label_unavailable(args):
         ap.error("--hsr6-* 는 attention 서버가 싣는 kv_L4 feature 와 SafePolicy 가 필요합니다 (--no-safe · "
@@ -2787,6 +2796,8 @@ def reject_hsr6_flags(ap: argparse.ArgumentParser, args) -> None:
     if flags.held_gate and not getattr(args, "held_body_cover", False):
         ap.error("--hsr6-held-gate 가 거두는 허용 (쥔 몸통 구의 지지면 들어올림) 은 --held-body-cover 의 것입니다 — "
                  "함께 주십시오")
+    if getattr(args, "hsr6_objective_scope", "all") != "all" and not flags.objective:
+        ap.error("--hsr6-objective-scope 는 --hsr6-objective 가 거두는 범위입니다 — --hsr6-objective 와 함께만")
     if flags.objective and not (getattr(args, "neighbour_contact_mm", None) is not None
                                 or getattr(args, "grasp_anchor", None) is not None
                                 or getattr(args, "grasp_goal_box", None) is not None
@@ -4086,6 +4097,9 @@ def main() -> None:
             **({"held_3d": held_3d_from_args(args)} if getattr(args, "held_3d_rule", "off") == "on" else {}),
             # AG3S-CORE-EVAL-HSR6 — 켰을 때만 (기본 off = 인자 없음).
             **({"hsr6": hsr6_flags_from_args(args)} if hsr6_flags_from_args(args) is not None else {}),
+            # SL6-A A9 — 기본 (all) 이 아닐 때만.
+            **({"hsr6_objective_scope": args.hsr6_objective_scope}
+               if getattr(args, "hsr6_objective_scope", "all") != "all" else {}),
         )
         apply_grasp_contact_flags(served, args)
         # **어느 모드로 떠 있는지 시작할 때 크게 말한다.** legacy backend 경고와 같은 이유다 —

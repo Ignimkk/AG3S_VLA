@@ -54,6 +54,7 @@ globally on import; the rest of the server keeps its own setting).
 
 from __future__ import annotations
 
+import dataclasses
 import time
 import traceback
 from typing import Any, Mapping, Optional
@@ -65,6 +66,46 @@ BACKENDS = ("off", "curobo")
 CUROBO_BASE_LINK = "link_torso_5"
 #: Tool frames whose origin the goal term can read (cuRobo returns the poses of these links).
 TOOL_FRAMES = ("ee_left", "ee_right")
+
+
+@dataclasses.dataclass(frozen=True)
+class GpuSeedRobot:
+    """SL6-A A4 — the robot-specific constants of the cuRobo seed batch. `RBY1_ROBOT` (default) = the constants above.
+
+    `urdf` is read only when the constraint model's `UrdfModel` carries no path (`None` = the shipped RB-Y1 URDF);
+    `base_link` = cuRobo's base (the world is posed in its frame per chunk); `tool_frames` = the links whose origin
+    the grasp-goal term reads. Another robot sets its own with `set_robot(optimizer, robot)`."""
+
+    name: str
+    urdf: Optional[str]
+    base_link: str
+    tool_frames: tuple
+    fk_root_link: str = "base"
+
+    def record(self) -> dict[str, Any]:
+        return {"name": self.name, "urdf": self.urdf, "base_link": self.base_link,
+                "tool_frames": list(self.tool_frames), "fk_root_link": self.fk_root_link}
+
+
+RBY1_ROBOT = GpuSeedRobot(name="rby1", urdf=None, base_link=CUROBO_BASE_LINK, tool_frames=TOOL_FRAMES)
+
+
+def robot_of(optimizer) -> GpuSeedRobot:
+    """The optimizer's `GpuSeedRobot` (`set_robot`), else `RBY1_ROBOT`."""
+    return getattr(optimizer, "__dict__", {}).get("gpu_seed_robot") or RBY1_ROBOT
+
+
+def set_robot(optimizer, robot: GpuSeedRobot) -> None:
+    """SL6-A A4 — use `robot`'s constants for `optimizer`'s (and its look-ahead window optimizer's) seed batches.
+    Must be called before the first batch is built (a cached batch would keep the old robot)."""
+    for opt in (optimizer, getattr(optimizer, "window_optimizer", None)):
+        if opt is None:
+            continue
+        if opt.__dict__.get("_gpu_batches"):
+            raise RuntimeError("set_robot after a cuRobo seed batch was built: the cached batch keeps the old robot")
+        opt.gpu_seed_robot = robot
+
+
 #: cuRobo's L-BFGS settings: `trajopt/lbfgs_bspline_trajopt.yml` (line search, step scale, epsilon) with the history
 #: and the iteration count sized for our 14 × H variables; `fixed_iters` so every chunk does the same work.
 LBFGS_SETTINGS: dict[str, Any] = {
@@ -108,9 +149,11 @@ WORLD_GAPS = (
 # robot spec of the live constraint model (T63 `export_inputs.robot_spec`, without the server argv)
 # =====================================================================================================
 
-def robot_spec(robot, layout, limits, dt: float) -> dict[str, Any]:
+def robot_spec(robot, layout, limits, dt: float, gpu_robot: Optional[GpuSeedRobot] = None) -> dict[str, Any]:
     """The T63 `robot_spec` dict for `curobo_v2.spec` / `robot_world`, read from the live `UrdfSphereChain` and the
-    TO's own `JointLimits` (no model rebuild from argv: the spheres are the served ones whatever flags built them)."""
+    TO's own `JointLimits` (no model rebuild from argv: the spheres are the served ones whatever flags built them).
+    `gpu_robot` (SL6-A A4): the robot constants (None = `RBY1_ROBOT`)."""
+    gr = gpu_robot or RBY1_ROBOT
     names = [str(robot.joint_names[int(i)]) for i in layout.q_indices]
     spheres = [{"index": i, "link": str(link), "center": [float(v) for v in centre], "radius": float(radius)}
                for i, (link, centre, radius) in enumerate(robot._local_spheres)]
@@ -125,6 +168,8 @@ def robot_spec(robot, layout, limits, dt: float) -> dict[str, Any]:
     import pathlib
 
     urdf = getattr(robot.model, "path", None)
+    if urdf is None and gr.urdf is not None:
+        urdf = gr.urdf          # SL6-A A4: the injected robot's URDF (Panda: `panda_libero.urdf`)
     if urdf is None:
         # `UrdfModel` keeps no path; every constraint model here is built on the shipped RB-Y1 URDF (as the T63 exporter)
         from AG3S.ag3s.robot_models.urdf_sphere_chain import RBY1_URDF
@@ -138,7 +183,7 @@ def robot_spec(robot, layout, limits, dt: float) -> dict[str, Any]:
 
     return {
         "urdf_path": str(pathlib.Path(urdf).resolve()),
-        "fk_root_link": "base", "curobo_base_link": CUROBO_BASE_LINK,
+        "fk_root_link": gr.fk_root_link, "curobo_base_link": gr.base_link,
         "model_joint_names": [str(n) for n in robot.joint_names],
         "arm_joint_names": names,
         "finger_joints": fingers,
@@ -326,11 +371,12 @@ class CuroboSeedBatch:
         self.limits = optimizer.limits
         self.n, self.horizon, self.nq = n, H, int(optimizer.layout.nq_opt)
         self.lookahead_from = optimizer.lookahead_from
-        self.spec = robot_spec(robot, optimizer.layout, optimizer.limits, float(cfg.horizon.dt))
+        self.robot = robot_of(optimizer)          # SL6-A A4 (default RB-Y1)
+        self.spec = robot_spec(robot, optimizer.layout, optimizer.limits, float(cfg.horizon.dt), self.robot)
         outside = [s["link"] for s in self.spec["spheres"]
-                   if not _descends(robot, s["link"], CUROBO_BASE_LINK)]
+                   if not _descends(robot, s["link"], self.robot.base_link)]
         if outside:
-            raise ValueError(f"spheres on links outside the {CUROBO_BASE_LINK} subtree: {sorted(set(outside))}")
+            raise ValueError(f"spheres on links outside the {self.robot.base_link} subtree: {sorted(set(outside))}")
         self.dev = device_cfg(device)
         # `robot_world.build_robot_cfg`, with both palms as tool frames even when they carry no sphere (the goal term
         # reads their origin; T63's dict names them only when they have spheres)
@@ -340,7 +386,7 @@ class CuroboSeedBatch:
 
         cfg_dict = S.robot_cfg_dict(self.spec)
         urdf_links = set(getattr(robot.model, "links", ()) or ())
-        cfg_dict["robot_cfg"]["kinematics"]["tool_frames"] = [f for f in TOOL_FRAMES if f in urdf_links] or \
+        cfg_dict["robot_cfg"]["kinematics"]["tool_frames"] = [f for f in self.robot.tool_frames if f in urdf_links] or \
             cfg_dict["robot_cfg"]["kinematics"]["tool_frames"]
         self.robot_cfg = RobotCfg.create(cfg_dict, self.dev)
         apply_limits(self.robot_cfg, self.spec)
@@ -469,7 +515,7 @@ class CuroboSeedBatch:
             prow[int(self.lookahead_from):] = 0.0   # a support plane is never a look-ahead row (`_clearances_from`)
         self.plane_rows.copy_(t(prow[None]))
         # frame: cuRobo's base = link_torso_5; the world, the planes and the goal are in our base frame
-        T = np.asarray(robot.link_pose(q_now, CUROBO_BASE_LINK), np.float64)
+        T = np.asarray(robot.link_pose(q_now, self.robot.base_link), np.float64)
         self.R.copy_(t(T[:3, :3]))
         self.t.copy_(t(T[:3, 3]))
         n = np.zeros((MAX_PLANES, 3))
@@ -568,7 +614,9 @@ class CuroboSeedBatch:
                 "num_particles": self.num_particles, "world": "composed_world b0m",
                 "collision_weight": float(self.w_coll[0]), "activation_m": ACTIVATION_M,
                 "limit_weight": LIMIT_WEIGHT, "limit_shrink": LIMIT_SHRINK, "tool_frames": self.tool_frames,
-                "n_spheres": self.n_spheres, "build_ms": round(self.build_ms, 1), "gaps": list(WORLD_GAPS)}
+                "n_spheres": self.n_spheres, "build_ms": round(self.build_ms, 1), "gaps": list(WORLD_GAPS),
+                # SL6-A A4: the robot only when it is not the default (the RB-Y1 record is unchanged)
+                **({"robot": self.robot.record()} if self.robot is not RBY1_ROBOT else {})}
 
 
 def _descends(robot, link: str, root: str) -> bool:
@@ -751,7 +799,7 @@ def _synthetic_solve(optimizer, batch: CuroboSeedBatch) -> dict[str, Any]:
     robot = optimizer.linearizer.robot_model
     q_model = np.zeros(len(robot.joint_names))
     q_model[np.asarray(optimizer.layout.q_indices)] = q
-    T = np.asarray(robot.link_pose(q_model, CUROBO_BASE_LINK), np.float64)
+    T = np.asarray(robot.link_pose(q_model, batch.robot.base_link), np.float64)
 
     def layer(shape, vs, origin):
         return types.SimpleNamespace(grid=types.SimpleNamespace(origin=np.asarray(origin, np.float64), voxel_size=vs,
@@ -776,5 +824,5 @@ def _synthetic_solve(optimizer, batch: CuroboSeedBatch) -> dict[str, Any]:
     return {"optimize_ms": rec["optimize_ms"], "finite": rec["finite"]}
 
 
-__all__ = ["BACKENDS", "CuroboSeedBatch", "available", "LBFGS_SETTINGS", "WORLD_GAPS", "anchor_terms_for", "batch_for", "check",
+__all__ = ["BACKENDS", "CuroboSeedBatch", "GpuSeedRobot", "RBY1_ROBOT", "robot_of", "set_robot", "available", "LBFGS_SETTINGS", "WORLD_GAPS", "anchor_terms_for", "batch_for", "check",
            "robot_spec", "solve_seeds", "warm_up"]

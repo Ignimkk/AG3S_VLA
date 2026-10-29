@@ -61,18 +61,32 @@ SAFELIBERO_STEP_BUDGETS = ("total_incl_wait", "main_aegis")  # = libero_safe_cli
 SAFELIBERO_DEFAULT_STEP_BUDGET = "total_incl_wait"
 
 
-def server_argv(mode: str, checkpoint: str, port: int, version: str = "V11AB") -> list[str]:
+def server_argv(mode: str, checkpoint: str, port: int, version: str = "V11AB", **version_options) -> list[str]:
+    """``version_options`` (SL6-A, final-configuration versions only): ``hsr6_probe`` (required) and
+    ``attention_source`` -> ``profile.version_server_flags``. A final version's base argv carries no
+    ``V11AB_PRE_MERGE_DEFAULTS`` (``profile.version_server_argv``); the V11AB family is unchanged."""
     from AG3S.adapters.panda import profile
 
     if mode == "vla_only":
         rby1_xml = profile.v11ab_server_argv()[profile.v11ab_server_argv().index("--model-xml") + 1]
         return ["--config", "pi05_libero", "--checkpoint", checkpoint, "--model-xml", rby1_xml, "--port", str(port),
                 "--robot", "panda", "--no-safe"]
-    argv = list(profile.v11ab_server_argv())
+    argv = list(profile.version_server_argv(version))
     argv[argv.index("--config") + 1] = "pi05_libero"
     argv[argv.index("--checkpoint") + 1] = checkpoint
     argv[argv.index("--port") + 1] = str(port)
-    return argv + ["--robot", "panda"] + profile.version_server_flags(version)
+    return argv + ["--robot", "panda"] + profile.version_server_flags(version, **version_options)
+
+
+def version_options(args) -> dict:
+    """SL6-A — ``--hsr6-probe`` / ``--attention-source`` as ``server_argv`` keywords; ``{}`` when neither is given (the
+    call is then the pre-SL6 one, so a launcher that replaces ``server_argv`` keeps working for the V11AB family)."""
+    out = {}
+    if getattr(args, "hsr6_probe", None):
+        out["hsr6_probe"] = str(args.hsr6_probe)
+    if getattr(args, "attention_source", None):
+        out["attention_source"] = str(args.attention_source)
+    return out
 
 
 def record_constraints_argv(mode: str, run_dir: str | Path, record: str) -> list[str]:
@@ -241,7 +255,8 @@ def run_mode(mode: str, args, identity: dict, shared: dict) -> Path:
 
     port = l0.choose_port(None)
     s_argv = [str(l0.openpi_python()), "-m", "AG3S.trajopt.serve_safe"] + server_argv(mode, identity["path"], port,
-                                                                                       args.ag3s_version)
+                                                                                       args.ag3s_version,
+                                                                                       **version_options(args))
     record = getattr(args, "record_constraints", "none")
     rec_settings = {}
     if record != "none":
@@ -374,6 +389,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--safety-level", choices=("I", "II"), default=None, help="SafeLIBERO suites only")
     ap.add_argument("--ag3s-version", default="V11AB",
                     help="AG3S version served in vla_v11ab mode (AG3S/adapters/panda/profile.py AG3S_VERSIONS)")
+    ap.add_argument("--hsr6-probe", default=None, metavar="NPZ",
+                    help="SL6-A — the Panda HSR6 probe for the final-configuration versions (default profile.PANDA_HSR6_PROBE, "
+                         "SL6-B B4); refused by the other versions")
+    ap.add_argument("--attention-source", default=None, metavar="SPEC",
+                    help="SL6-A — replace the final-configuration version's --attention-source cell (SL6-B head "
+                         "re-selection); final versions only")
     ap.add_argument("--conversion", choices=("A", "B", "C"), required=True,
                     help="Panda reverse conversion for VLA+V11AB (AG3S/adapters/panda/action.py CONVERSION_MODES)")
     ap.add_argument("--record-constraints", choices=RECORD_CONSTRAINTS_CHOICES, default="none",
@@ -401,6 +422,9 @@ def main(argv=None) -> int:
         raise ValueError("--safety-level is required for SafeLIBERO suites and only for them")
     if args.data_split == DEFAULT_SPLIT and any(e > 4 for e in args.episode_ids):
         raise ValueError("dev split is LIBERO init states 0-4 (plan §6.0); pass --data-split for anything else")
+    from AG3S.adapters.panda import profile as _profile   # SL6-A: refuse a bad version / probe before any GPU work
+
+    _profile.version_server_flags(args.ag3s_version, **version_options(args))
     if args.safelibero_step_budget != SAFELIBERO_DEFAULT_STEP_BUDGET and not _is_safelibero(args):
         raise ValueError("--safelibero-step-budget applies to SafeLIBERO suites only")
     from benchmark.runners import suite_registry  # BM-SETUP-A: refuse ids outside the suite before any GPU work
@@ -413,7 +437,7 @@ def main(argv=None) -> int:
                          "(--no-safe server, no constraints); pass --modes vla_v11ab")
     identity = l0.checkpoint_identity(Path(args.checkpoint_dir), require=True)
     if args.dry_run:
-        print(json.dumps({m: server_argv(m, identity["path"], 0, args.ag3s_version)
+        print(json.dumps({m: server_argv(m, identity["path"], 0, args.ag3s_version, **version_options(args))
                           + record_constraints_argv(m, RUN_DIR_TOKEN, args.record_constraints) for m in modes},
                          indent=1))
         print(json.dumps(client_argv("<run>", 0, args)))

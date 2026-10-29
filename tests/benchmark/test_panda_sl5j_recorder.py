@@ -162,6 +162,8 @@ def test_every_version_is_read_back():
     from AG3S.adapters.panda import profile as pf
 
     for version in pf.AG3S_VERSIONS:
+        if pf.is_final_version(version):
+            continue   # SL6-A final versions: cuRobo argv + GPU probe (tests/benchmark/test_sl6a_panda_final.py)
         assert pf.match_ag3s_version(_args(version)) == version
     assert pf.match_ag3s_version(_args("V11AB", ["--grasp-zone-mm", "7"])) is None
 

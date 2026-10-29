@@ -141,11 +141,19 @@ def geom_mesh(tables: dict, g: int) -> tuple[np.ndarray, np.ndarray]:
                           tables["geom_quat"][g])
 
 
-def build_mujoco_model(tables: dict, surfaces: Sequence[str] = DEFAULT_SURFACES):
+def build_mujoco_model(tables: dict, surfaces: Sequence[str] = DEFAULT_SURFACES, *, collidable: bool = False,
+                       joints: bool = False):
     """MuJoCo model of the robot subtree with only the ``surfaces`` geoms, as meshes in body frames.
 
     Returns ``(mujoco.MjModel, {mjcf body name: [geom names]})``. No joints: the covers are fitted
     per body in its link frame, and `static_urdf_ancestor` only needs the fixed chain.
+
+    SL6-A A5 (both default off = the self-filter cover model above, unchanged): ``collidable`` gives the geoms
+    ``contype = conaffinity = 1`` -- the V11AB collision-surface sampler (`gripper_cover._geom_pieces`) skips geoms with
+    both 0, which is right for visual-only geoms of an MJCF but here every geom is collision geometry by construction
+    (``surfaces``); ``joints`` adds the export's joints (hinge / slide, axis, position, range), so "rigidly attached"
+    (`gripper_cover._rigid_neighbours`, the hidden-face rule) means what it means on the robot: the hand, ``panda_link7``
+    and the eef frame are one rigid group, the fingers are not.
     """
     import mujoco
 
@@ -168,6 +176,20 @@ def build_mujoco_model(tables: dict, surfaces: Sequence[str] = DEFAULT_SURFACES)
         parent = bodies[mjcf_body_name(parents[k])]
         bodies[target] = parent.add_body(name=target, pos=[float(x) for x in tables["body_pos"][k]],
                                          quat=[float(x) for x in tables["body_quat"][k]])
+    if joints:
+        kinds = {3: mujoco.mjtJoint.mjJNT_HINGE, 2: mujoco.mjtJoint.mjJNT_SLIDE}
+        for j, jname in enumerate(tables["joint_names"]):
+            kind = int(tables["joint_type"][j])
+            if kind not in kinds:
+                raise ValueError(f"joint {jname}: type {kind} is neither hinge nor slide")
+            body = mjcf_body_name(names[int(tables["joint_body"][j])])
+            jnt = bodies[body].add_joint(name=str(jname), type=kinds[kind],
+                                         axis=[float(x) for x in tables["joint_axis"][j]],
+                                         pos=[float(x) for x in tables["joint_pos"][j]])
+            if bool(tables["joint_limited"][j]):
+                jnt.range = [float(x) for x in tables["joint_range"][j]]
+                jnt.limited = mujoco.mjtLimited.mjLIMITED_TRUE
+    flag = 1 if collidable else 0
     geoms_by_body: dict[str, list[str]] = {}
     for g in surface_geoms(tables, surfaces):
         body = mjcf_body_name(names[int(tables["geom_body"][g])])
@@ -179,7 +201,7 @@ def build_mujoco_model(tables: dict, surfaces: Sequence[str] = DEFAULT_SURFACES)
                              userface=np.asarray(faces, np.int64).reshape(-1).tolist())
         mesh.inertia = mujoco.mjtMeshInertia.mjMESH_INERTIA_SHELL
         bodies[body].add_geom(name=str(tables["geom_names"][g]), type=mujoco.mjtGeom.mjGEOM_MESH, meshname=mesh_name,
-                              contype=0, conaffinity=0)
+                              contype=flag, conaffinity=flag)
         geoms_by_body.setdefault(body, []).append(str(tables["geom_names"][g]))
     return spec.compile(), geoms_by_body
 
