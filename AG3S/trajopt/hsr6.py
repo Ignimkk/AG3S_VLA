@@ -34,11 +34,14 @@ from typing import Any, Mapping, Optional
 
 import numpy as np
 
+from AG3S.ag3s.stages.subtask_probe import SubtaskProbe
+
 __all__ = [
     "EXEMPT_PHASES",
     "HELD_WITHDRAW_PHASES",
     "HOLD_PHASES",
     "Hsr6Flags",
+    "Hsr6SubsetProbe",
     "OBJECTIVE_PHASE",
     "PHASES6",
     "PROBE_NAME",
@@ -46,6 +49,7 @@ __all__ = [
     "attach_assist_ok",
     "default_probe_path",
     "held_allowance",
+    "is_ordered_subset",
     "load_hsr6_probe",
     "objective_allowed",
     "phase_of",
@@ -72,16 +76,50 @@ def default_probe_path() -> pathlib.Path:
     return pathlib.Path(__file__).resolve().parents[1] / "ag3s" / "asset" / "subtask_probe" / f"{PROBE_NAME}.npz"
 
 
-def load_hsr6_probe(path: Optional[str | pathlib.Path] = None):
-    """The 6-phase probe as a `SubtaskProbe` (same `proba` as the serving HSR). Refuses a wrong class order / dim."""
-    from AG3S.ag3s.stages.subtask_probe import SubtaskProbe
+def is_ordered_subset(classes, full=PHASES6) -> bool:
+    """SL6 B2 — `classes` are ≥ 2 distinct phases of `full`, in `full`'s order."""
+    classes = tuple(str(c) for c in classes)
+    if len(classes) < 2 or len(set(classes)) != len(classes) or not set(classes) <= set(full):
+        return False
+    idx = [full.index(c) for c in classes]
+    return idx == sorted(idx)
 
+
+def load_hsr6_probe(path: Optional[str | pathlib.Path] = None):
+    """The 6-phase probe as a `SubtaskProbe` (same `proba` as the serving HSR). Refuses a wrong class order / dim.
+
+    SL6 B2: a probe whose ``classes`` are an ordered subset of `PHASES6` (Panda: no retreat) is accepted and
+    wrapped in `Hsr6SubsetProbe` — its `predict` reports every phase of `PHASES6`, the absent ones with
+    probability 0, so `phase_of` never picks one and a rule that needs it (③ retreat) never fires. A probe
+    with exactly `PHASES6` is returned as the plain `SubtaskProbe` (RB-Y1 unchanged)."""
     probe = SubtaskProbe.load(default_probe_path() if path is None else path)
-    if tuple(probe.classes) != PHASES6:
-        raise ValueError(f"HSR6 probe {path or default_probe_path()}: classes {probe.classes} != {PHASES6}")
+    if tuple(probe.classes) != PHASES6 and not is_ordered_subset(probe.classes):
+        raise ValueError(f"HSR6 probe {path or default_probe_path()}: classes {probe.classes} are neither "
+                         f"{PHASES6} nor an ordered subset of it")
     if probe.dim != 512:
         raise ValueError(f"HSR6 probe {path or default_probe_path()}: dim {probe.dim} != 512 (kv_L4)")
+    if tuple(probe.classes) != PHASES6:
+        return Hsr6SubsetProbe(probe)
     return probe
+
+
+class Hsr6SubsetProbe(SubtaskProbe):
+    """SL6 B2 — a `SubtaskProbe` over an ordered subset of `PHASES6`; `predict` pads the absent phases with
+    probability 0.0 (`absent`), the argmax is over the probe's own classes (= `SubtaskProbe.predict`)."""
+
+    def __init__(self, probe: SubtaskProbe):
+        super().__init__(probe.mean, probe.scale, probe.coef, probe.intercept, classes=probe.classes,
+                         name=probe.name)
+        self.absent = tuple(c for c in PHASES6 if c not in self.classes)
+
+    def predict(self, x: np.ndarray) -> dict[str, Any]:
+        out = super().predict(x)
+        own = out["p"]
+        out["p"] = {c: (float(own[c]) if c in own else 0.0) for c in PHASES6}
+        return out
+
+    def record(self) -> dict[str, Any]:
+        return {**super().record(), "phases_absent": list(self.absent)}
 
 
 @dataclasses.dataclass(frozen=True)

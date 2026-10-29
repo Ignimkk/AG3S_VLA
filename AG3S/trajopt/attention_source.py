@@ -58,6 +58,7 @@ __all__ = [
     "T55_PROBE_MD5", "T55_PROBE_REL", "TASK_GATE_MODES", "TASK_PROBE_FEATURE", "TASK_PROBE_TAU",
     "TASK_PROBE_PERSIST", "cell_maps", "default_task_probe_path", "load_noun_probe", "noun_lookup",
     "parse_attention_source", "prefix_noun_impl", "prompt_noun", "v_rows_impl",
+    "LiberoNoun", "NOUN_RULES", "PHRASE_STOP_WORDS", "clean_prompt", "libero_prompt_noun", "token_char_spans",
     "IFG_PREFIX_L8_KEY", "RESID_LAYER", "prefix_resid_loop", "resid_block_impl",
 ]
 
@@ -165,23 +166,188 @@ def prompt_noun(prompt: Optional[str]) -> tuple[Optional[str], str]:
     return found[0], ""
 
 
+# ------------------------------------------------------------------------------ SL6 B1: LIBERO target noun
+#
+# Rule (SL6.task.md §3 B1, fixed by the lead): in ``"pick up the <target phrase> ... and place it <prep> the
+# <destination phrase>"`` the **head word** (last noun) of the target phrase is the target noun and the **last
+# tokenizer piece** of that word is the query row. Operational reading (no POS tagger in the server):
+#   * the sentence must match `_LIBERO_PICK_PLACE` (case-insensitive; the tokenizer's own cleaning first);
+#   * the target phrase = the words after "pick up the" up to the first word of `PHRASE_STOP_WORDS` (the
+#     "..." of the rule: "between the plate …", "next to …", "on the stove", "in the top drawer …", "from table
+#     center"); its head word = the last word of that span; the destination head word is found the same way;
+#   * the head word is located **by character span** in the tokenized prompt (pieces decoded, ``▁`` = space),
+#     so a destination noun that occurs twice ("… the plate … on the plate") cannot be taken for the target;
+#   * the word must start and end on piece boundaries; its last piece's text index -> prefix row ``768 + i``.
+# A sentence the rule does not cover keeps today's rule (fruit + basket) with both reasons recorded; no target
+# is ever guessed. Only `NounTokens(rule="libero")` reaches this code (default ``"fruit"`` = the T57 lookup
+# unchanged — RB-Y1 bit-identical).
+
+#: `NounTokens.rule` values. ``fruit`` = T57-A (default); ``libero`` = SL6 B1 rule first, then the fruit rule.
+NOUN_RULES = ("fruit", "libero")
+_LIBERO_PICK_PLACE = re.compile(
+    r"^\s*pick up the (?P<target>.+?) and place it (?P<prep>[a-z]+(?: [a-z]+)*?) the (?P<dest>.+?)\s*[.!]?\s*$",
+    re.IGNORECASE)
+#: Words that end a noun phrase (prepositions / relative words). The head word is the word before the first one.
+PHRASE_STOP_WORDS = frozenset({
+    "between", "next", "from", "on", "in", "inside", "into", "onto", "at", "near", "of", "under", "beside",
+    "behind", "above", "below", "over", "to", "with", "by", "and", "that", "which"})
+_WORD = re.compile(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*")
+
+
+@dataclasses.dataclass(frozen=True)
+class LiberoNoun:
+    """The B1 parse of one prompt (character offsets into the cleaned prompt)."""
+
+    target: Optional[str]
+    target_span: Optional[tuple[int, int]]
+    destination: Optional[str]
+    destination_span: Optional[tuple[int, int]]
+    error: str = ""
+
+    @property
+    def ok(self) -> bool:
+        return self.target is not None and not self.error
+
+
+def clean_prompt(prompt: str) -> str:
+    """`PaligemmaTokenizer.tokenize`'s cleaning (`third_party/openpi/src/openpi/models/tokenizer.py:23`)."""
+    return prompt.strip().replace("_", " ").replace("\n", " ")
+
+
+def _phrase_head(text: str, start: int, end: int) -> tuple[Optional[str], Optional[tuple[int, int]], str]:
+    """Head word of the phrase ``text[start:end]``: the last word before the first stop word."""
+    words = [(m.group(0), start + m.start(), start + m.end()) for m in _WORD.finditer(text[start:end])]
+    if not words:
+        return None, None, "empty phrase"
+    cut = next((i for i, (w, _, _) in enumerate(words) if w.lower() in PHRASE_STOP_WORDS), len(words))
+    if cut == 0:
+        return None, None, f"phrase {text[start:end]!r} starts with the stop word {words[0][0]!r}"
+    w, a, b = words[cut - 1]
+    return w, (a, b), ""
+
+
+def libero_prompt_noun(prompt: Optional[str]) -> LiberoNoun:
+    """SL6 B1 — target / destination head words of a LIBERO pick-and-place prompt (spans in `clean_prompt`)."""
+    if not isinstance(prompt, str) or not prompt.strip():
+        return LiberoNoun(None, None, None, None, "no prompt")
+    text = clean_prompt(prompt)
+    m = _LIBERO_PICK_PLACE.match(text)
+    if m is None:
+        return LiberoNoun(None, None, None, None,
+                          f"prompt is not 'pick up the <target> ... and place it <prep> the <destination>': {prompt!r}")
+    tw, tspan, terr = _phrase_head(text, m.start("target"), m.end("target"))
+    dw, dspan, derr = _phrase_head(text, m.start("dest"), m.end("dest"))
+    if terr:
+        return LiberoNoun(None, None, dw, dspan, f"target phrase: {terr}")
+    if derr:
+        return LiberoNoun(tw, tspan, None, None, f"destination phrase: {derr}")
+    return LiberoNoun(tw, tspan, dw, dspan, "")
+
+
+def _piece_text(piece: str) -> str:
+    """SentencePiece piece -> the text it stands for (``▁`` -> space, byte pieces ``<0xNN>`` -> the byte)."""
+    m = re.fullmatch(r"<0x([0-9A-Fa-f]{2})>", piece)
+    if m:
+        return chr(int(m.group(1), 16))
+    return piece.replace("▁", " ")
+
+
+def token_char_spans(token_ids: np.ndarray, mask: np.ndarray, sp) -> tuple[str, list[tuple[int, int]]]:
+    """Decoded text of the valid tokens after ``<bos>`` and each token's ``[start, end)`` in it (index 0 =
+    ``<bos>`` gets ``(0, 0)``)."""
+    ids = np.asarray(token_ids).reshape(-1)
+    valid = np.flatnonzero(np.asarray(mask, bool).reshape(-1))
+    spans, parts, pos = [], [], 0
+    for k, i in enumerate(valid):
+        if k == 0:
+            spans.append((0, 0))
+            continue
+        t = _piece_text(str(sp.id_to_piece(int(ids[i]))))
+        parts.append(t)
+        spans.append((pos, pos + len(t)))
+        pos += len(t)
+    return "".join(parts), spans
+
+
+def _word_tokens(spans: Sequence[tuple[int, int]], text: str, a: int, b: int) -> tuple[Optional[list[int]], str]:
+    """Token indices covering the word ``text[a:b]`` exactly (first token may carry the leading space)."""
+    over = [i for i, (s, e) in enumerate(spans) if e > a and s < b and e > s]
+    if not over:
+        return None, "no token covers the word"
+    s0 = spans[over[0]][0]
+    if not (s0 == a or (s0 == a - 1 and text[s0] == " ")):
+        return None, f"word starts inside token {over[0]} ({spans[over[0]]} vs word {a})"
+    if spans[over[-1]][1] != b:
+        return None, f"word ends inside token {over[-1]} ({spans[over[-1]]} vs word end {b})"
+    return over, ""
+
+
+def _libero_lookup(toks: np.ndarray, mask: np.ndarray, prompt: str, tokens: "NounTokens",
+                   parsed: LiberoNoun, n_valid: int) -> "NounLookup":
+    """B1 rows ``[target last piece, destination last piece, last valid text]`` (`QUERY_NAMES` order)."""
+    from AG3S.ag3s.experiments.studies import t49_noun_query_core as core
+
+    def bad(why: str) -> NounLookup:
+        return NounLookup(parsed.target, False, why, None, None, n_valid, rule="libero",
+                          destination=parsed.destination)
+
+    if tokens.sp is None:
+        return bad("libero noun rule needs the tokenizer (NounTokens.sp)")
+    valid = np.flatnonzero(mask)
+    if valid.size == 0:
+        return bad("no valid text token")
+    if not np.array_equal(valid, np.arange(valid.size)):
+        return bad("valid text tokens are not a prefix of the sequence")
+    if int(toks[0]) != int(tokens.bos):
+        return bad(f"text token 0 is {int(toks[0])}, not <bos> {int(tokens.bos)}")
+    text, spans = token_char_spans(toks, mask, tokens.sp)
+    cleaned = clean_prompt(prompt)
+    base = text.find(cleaned)
+    if base < 0:
+        base = text.find(cleaned.lower())
+    if base < 0:
+        return bad(f"prompt text not found in the decoded tokens: {text!r}")
+    rows_idx = []
+    pieces = {}
+    for role, span in (("target", parsed.target_span), ("destination", parsed.destination_span)):
+        idx, err = _word_tokens(spans, text, base + span[0], base + span[1])
+        if err:
+            return bad(f"{role} {cleaned[span[0]:span[1]]!r}: {err}")
+        rows_idx.append(int(idx[-1]))
+        pieces[role] = [str(tokens.sp.id_to_piece(int(toks[i]))) for i in idx]
+    pos = {"target": rows_idx[0], "basket": rows_idx[1], "last_text": int(valid[-1])}
+    return NounLookup(parsed.target, True, "", core.prefix_rows(pos), int(pos["target"]), n_valid, rule="libero",
+                      destination=parsed.destination, pieces=pieces)
+
+
 @dataclasses.dataclass(frozen=True)
 class NounTokens:
     """Piece ids the lookup needs: ``{fruit…, "basket": id}`` and ``<bos>`` (`t49_noun_query_extract.
-    noun_ids_for` / ``sp.bos_id()``)."""
+    noun_ids_for` / ``sp.bos_id()``). SL6 B1: ``rule="libero"`` (default ``"fruit"`` = T57-A unchanged) also
+    holds the SentencePiece processor `sp` (anything with ``id_to_piece``) for the LIBERO head-word rule."""
 
     ids: Mapping[str, int]
     bos: int
+    rule: str = "fruit"
+    sp: Any = dataclasses.field(default=None, compare=False, repr=False)
+
+    def __post_init__(self):
+        if self.rule not in NOUN_RULES:
+            raise ValueError(f"noun rule {self.rule!r} is not one of {NOUN_RULES}")
 
     @classmethod
-    def from_config(cls, config_name: str) -> "NounTokens":
+    def from_config(cls, config_name: str, *, rule: str = "fruit") -> "NounTokens":
         """From the SentencePiece model the policy's `TokenizePrompt` uses. Raises when a noun is not one
-        piece (`t49_noun_query_core.piece_ids`) — at server start, not on the first request."""
+        piece (`t49_noun_query_core.piece_ids`) — at server start, not on the first request. ``rule="libero"``
+        (SL6 B1, Panda) keeps the processor for the head-word rule; the default builds exactly the T57 object."""
         from AG3S.ag3s.experiments.studies import t49_noun_query_core as core
         from AG3S.ag3s.experiments.studies import t49_noun_query_extract as nx
 
         sp = nx.sentencepiece_of(config_name)
-        return cls(ids=dict(nx.noun_ids_for(sp, core.FRUITS)), bos=int(sp.bos_id()))
+        ids = dict(nx.noun_ids_for(sp, core.FRUITS))
+        if rule == "fruit":
+            return cls(ids=ids, bos=int(sp.bos_id()))
+        return cls(ids=ids, bos=int(sp.bos_id()), rule=rule, sp=sp)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -192,34 +358,52 @@ class NounLookup:
     rows: Optional[np.ndarray]          # (3,) int32 prefix rows, `QUERY_NAMES` order; None unless ok
     token_index: Optional[int]          # text index of the target noun; None unless ok
     n_text_valid: int
+    #: SL6 B1 — which rule produced this lookup; only ``"libero"`` adds keys to `record` (fruit = T57 record).
+    rule: str = "fruit"
+    destination: Optional[str] = None
+    pieces: Optional[Mapping[str, Sequence[str]]] = None
 
     def record(self) -> dict[str, Any]:
-        return {"noun": self.noun, "noun_ok": bool(self.ok), "noun_error": self.error,
-                "token_index": self.token_index,
-                "prefix_row": None if self.rows is None else int(self.rows[0]),
-                "n_text_valid": int(self.n_text_valid)}
+        out = {"noun": self.noun, "noun_ok": bool(self.ok), "noun_error": self.error,
+               "token_index": self.token_index,
+               "prefix_row": None if self.rows is None else int(self.rows[0]),
+               "n_text_valid": int(self.n_text_valid)}
+        if self.rule != "fruit":
+            out.update({"noun_rule": self.rule, "destination_noun": self.destination,
+                        "destination_row": None if self.rows is None else int(self.rows[1]),
+                        "noun_pieces": None if self.pieces is None else {k: list(v) for k, v in self.pieces.items()}})
+        return out
 
 
 def noun_lookup(inputs: Mapping[str, Any], prompt: Optional[str], tokens: NounTokens) -> NounLookup:
     """The target-noun row of one request: `prompt_noun`, then `t49_noun_query_extract.lookup` on the
     tokenized prompt of `inputs` (the policy's input transform output, no batch axis) — exactly the T53 /
-    T55 ``feature_frame`` call (target, basket, last_text; any error -> not ok)."""
+    T55 ``feature_frame`` call (target, basket, last_text; any error -> not ok). With ``tokens.rule ==
+    "libero"`` (SL6 B1) a prompt the LIBERO pick-and-place rule covers is looked up by that rule first."""
     from AG3S.ag3s.experiments.studies import t49_noun_query_core as core
     from AG3S.ag3s.experiments.studies import t49_noun_query_extract as nx
 
     toks = np.asarray(inputs["tokenized_prompt"]).reshape(-1)
     mask = np.asarray(inputs["tokenized_prompt_mask"]).reshape(-1).astype(bool)
     n_valid = int(mask.sum())
+    libero_why = ""
+    if getattr(tokens, "rule", "fruit") == "libero":
+        parsed = libero_prompt_noun(prompt)
+        if parsed.ok:
+            return _libero_lookup(toks, mask, str(prompt), tokens, parsed, n_valid)
+        libero_why = f"libero rule: {parsed.error}; "
+    # libero mode, sentence outside the B1 rule: the fruit rule, recorded as such (``noun_rule`` "libero:fruit")
+    kw = {"rule": "libero:fruit"} if libero_why else {}
     noun, why = prompt_noun(prompt)
     if noun is None:
-        return NounLookup(None, False, why, None, None, n_valid)
+        return NounLookup(None, False, libero_why + why, None, None, n_valid, **kw)
     if noun not in tokens.ids or core.DESTINATION_NOUN not in tokens.ids:
         return NounLookup(noun, False, f"no piece id for {noun!r} / {core.DESTINATION_NOUN!r}", None, None,
-                          n_valid)
+                          n_valid, **kw)
     pos, err = nx.lookup(toks, mask, noun, dict(tokens.ids), int(tokens.bos))
     if err:
-        return NounLookup(noun, False, "; ".join(err), None, None, n_valid)
-    return NounLookup(noun, True, "", core.prefix_rows(pos), int(pos["target"]), n_valid)
+        return NounLookup(noun, False, libero_why + "; ".join(err), None, None, n_valid, **kw)
+    return NounLookup(noun, True, "", core.prefix_rows(pos), int(pos["target"]), n_valid, **kw)
 
 
 # ------------------------------------------------------------------------------ maps
