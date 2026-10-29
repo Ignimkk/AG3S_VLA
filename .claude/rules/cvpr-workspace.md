@@ -13,7 +13,7 @@ paths:
 4. `paper/evidence/CLAIMS.md`, `EXPERIMENTS.md`, `RESULTS.md`, `METRICS.md`
 5. `paper/notes/PAPER_STORY.md`와 `paper/experiments/manifests/README.md`
 6. `${AG3S_PROJECT_ROOT}/paper/paper_structure_setup.md`
-7. `paper/notes/CLAUDE_WORKFLOW.md`: skill 선택·Evidence gate·검토 역할 소유권
+7. `paper/notes/CLAUDE_WORKFLOW.md`: skill 선택·Evidence tracking·검토 역할 소유권
 8. 해당 Step의 나머지 정책·Evidence·연구 계획 문서
 
 한 번에 1 Step만 수행하고, 완료 후 수정 이유와 검증 결과를 보고한다.
@@ -36,19 +36,18 @@ Root `${AG3S_PROJECT_ROOT}/CLAUDE.md`는 사용자가 복원한 기존 내용을
   `paper/evidence/PAPER_LOG.md`가 생성되면 논문 작성·evidence 처리 기록을 그곳에 남긴다.
 - 기존 AG3S 실행 로그, figure 저장 규칙, 구현·검증 역할은 연구 구현 작업에 적용한다.
   논문 환경 구성만을 위해 연구 실행 로그를 변경하지 않는다.
-- 계획과 가설은 검증 결과와 구분한다. 준비 원문의 method·성과 문장을 검증 사실로 옮기지 않는다.
+- 계획·가설·측정·파생·추정·placeholder를 서로 구분해 표시한다.
 
 ## Evidence와 정책
 
-- 논문 evidence는 `REGISTERED` manifest와 실제 16-D array·source audit가 확인되고
-  validator를 통과한 experiment의 해당 scope만 사용한다. Manifest 존재만으로 사용을 허용하지 않는다.
-  14-D 결과를 논문 evidence에 포함하지 않는다. 파일명만으로 experiment 설정을 추정하지 않는다.
-- `HYPOTHESIS`와 `CANDIDATE`를 검증된 claim으로 쓰지 않는다. Missing metric은 0이 아니다.
+- 논문에는 등록·검증 여부와 관계없이 측정값, 파생값, 추정값, 계획값과 placeholder를 사용할 수 있다.
+  각 항목에 자료 유형, provenance, 검증 상태, dimension과 scope를 표시하고 파일명만으로 설정을 추정하지 않는다.
+- `HYPOTHESIS`와 `CANDIDATE`는 그 상태를 표시한다. Missing metric은 0이 아니다.
   Task outcome과 collision·safe success를 구분하고, 유의하지 않은 차이로 성능 유지를 주장하지 않는다.
-- Source identity나 metric/config가 달라지면 result의 사용을 중단하고 re-audit한다.
-  기존 결과를 current main, 다른 task·geometry 범위 또는 real robot의 성과로 옮기지 않는다.
-- 수치와 주장은 원래 research log, verify.json 또는 동등한 검증 자료까지 추적할 수 있어야 한다.
-  `evidence/` 문서는 원자료의 출처를 보존하며, 없는 결과를 만들지 않는다.
+- Source identity나 metric/config가 달라지면 그 차이를 표시하고 필요하면 re-audit한다.
+  기존 결과를 다른 snapshot·task·geometry 또는 real robot 범위로 해석할 때 그 전환을 명시한다.
+- 수치와 주장은 research log, verify.json, 계산식, 가정 또는 작성 근거까지 추적할 수 있어야 한다.
+  `evidence/` 문서는 출처와 자료 유형을 보존하며, 표시 없이 자료 성격을 바꾸지 않는다.
 - citation, DOI, baseline, 통계적 유의성, 구현 세부 사항을 확인 없이 생성하지 않는다.
 - CVPR 규정과 일정은 공식 출처로 확인하고 `CONFIRMED_2027`, `PROVISIONAL_2026`,
   `UNKNOWN`으로 구분한다. 원문에 적힌 일정과 Author Kit 상태도 검증 대상이다.

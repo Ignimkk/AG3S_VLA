@@ -39,4 +39,7 @@ effort: high
   `.venv-curobo`(py3.11.16, numpy 1.26.4) 가 TSDF/ESDF **생산만**.
 - 자산 경로는 심볼릭 링크로 맞추지 않는다 — `AG3S/ag3s/runtime/asset_path.py` 가 찾는다.
 - cuRobo 를 만질 때는 `curobo-esdf` skill 을 먼저 읽는다 (함정 5개).
+- **새 기능은 기본 꺼짐 flag 로 넣는다.** 꺼짐이면 출력과 기록 키가 이전과 같아야 하고, 그것을 test 로 보인다 (사용자 지적, `.claude/ag3s-rules.md` "실험 원칙").
+- **고치는 위치는 원인 층에 맞춘다.** 궤적 원인(손 밀림 · HOLD 같은 TrajOpt 결정)은 TrajOpt 에서, 관측 · 기하 원인(이웃 물체 병합 · 고정 형상 · tracker 오인)은 AG3S 핵심에서 고친다. task 문서에 적힌 구성 요소(ATS · HSR · LTE · CCR)를 벗어나면 lead 에게 먼저 묻는다 (2026-10-20).
+- **worktree 에서 test 할 때:** `env.sh` 가 main checkout 으로 `cd` 하고 pytest 는 `pythonpath = ["."]` 이다. 바꾼 module 의 `__file__` 이 worktree 를 가리키는지 확인한 뒤 결과를 믿는다 (2026-10-14).
 - **왼손 손가락 이름이 MJCF 와 URDF 에서 서로 바뀌어 있다** (T43 OC, 2026-10-07): MJCF `ee_finger_l2` (geom 1086) = URDF `ee_finger_l1`, MJCF `ee_finger_l1` (geom 1079) = URDF `ee_finger_l2`. 오른손 (`r1`/`r2`) 은 같다. MuJoCo 접촉 · 재생 (MJCF 이름) 과 TO 구 · server 기록 (URDF 이름) 을 이름으로 짝지으면 틀린다 — 위치로 대조하거나 이 표로 바꿔 쓴다. (TK 가 이것으로 +57/67 mm 를 잘못 보고했다.)

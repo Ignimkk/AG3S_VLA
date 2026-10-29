@@ -6,6 +6,29 @@
     "third_party/openpi/src",
     "third_party/openpi/packages/openpi-client/src"
   ],
+  "latex-workshop.latex.outDir": "%DIR%/build",
+  "latex-workshop.latex.recipe.default": "Tectonic (cached)",
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "Tectonic (cached)",
+      "tools": ["tectonic-cached"]
+    }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "tectonic-cached",
+      "command": "/mnt/dev/AG3S_VLA-development/paper/tools/bin/tectonic",
+      "args": [
+        "--only-cached",
+        "--untrusted",
+        "--synctex",
+        "--keep-logs",
+        "--keep-intermediates",
+        "--outdir=%OUTDIR%",
+        "%DOC_EXT%"
+      ]
+    }
+  ],
   "files.watcherExclude": {
     "**/.git/objects/**": true,
     "**/.venv*/**": true,

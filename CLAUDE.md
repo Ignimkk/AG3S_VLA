@@ -9,6 +9,7 @@ feature/ag3s-development는 v2 이후 전체 개선 이력과 현재 WIP를 포�
 기존 /mnt/dev/work의 Claude session은 새 코드 작업에 resume하지 말고 새 세션을 시작한다.
 공유 input은 별도 AG3S_VLA-storage에 있다. 기존 /mnt/dev/work는 현재 실행에 필요하지 않은 이전 checkout이다.
 새 코드는 자기 checkout에서 수정한다. 새 output은 별도 storage의 results/development/<날짜_commit_run-id>/에 생성한다. source scripts/setup/env.sh로 경로를 설정한다.
+사람이 볼 영상 · 검증 결과는 checkout `outputs/<YYYY-MM-DD>_<실험 설명>/`(git 제외)에 `python -m common.experiment_view`로 만든다 (2026-10-23 사용자 지시).
 아래에 남은 과거 진행 기록은 source-manifest와 실제 branch를 기준으로 해석한다.
 Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았다.
 
@@ -51,7 +52,7 @@ Sub-agent의 상세 역할과 작업 범위는 `.claude/agents/`의 정의를 �
 
 - **`ag3s-implementer`** — AG3S/trajopt code 구현과 unit test를 담당하고 구현 결과를 `impl.md`로 전달한다.
 - **`ag3s-verifier`** — 구현 결과를 독립적으로 검증하고 raw output, 수치, figure 및 `verify.json`을 생성한다.
-- **`ag3s-scribe`** — 검증된 결과를 바탕으로 log, 계획서 및 paper를 작성한다.
+- **`ag3s-scribe`** — 출처와 자료 유형을 표시해 log, 계획서 및 paper를 작성한다.
 
 새로운 session을 시작하면 `.claude/agents/`를 확인하고, 작업 성격에 맞는 sub-agent를 사용하여
 구현, 검증, 기록을 수행한다. 각 sub-agent는 자신에게 정의된 file ownership과 작업 범위를 지킨다.

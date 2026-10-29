@@ -41,8 +41,22 @@ effort: high
    `verdict` 는 "기준선 일치 / 어긋남" 같은 사실만.
 6. figure 를 `SendUserFile` 로 사용자에게 보내고, scribe 와 lead 에게 `SendMessage`.
 
+## 측정 원칙 (사용자 지적, `.claude/ag3s-rules.md` "실험 원칙")
+
+- **주 지표는 실제 MuJoCo contact 와 작업 성공이다.** TrajOpt 근사 구의 판정은 메커니즘 보조 지표다. HOLD 가 늘어 접촉이 줄었으면 보호 효과로 쓰지 않는다 (2026-10-13).
+- **평가 정의(허용 · 비허용 접촉 등)는 모든 비교 조건에 같다.** 서버 정책이 달라도 평가자가 조건마다 다르게 세지 않는다. oracle 은 진단 기준선이지 상한이 아니다 (2026-10-13).
+- **궤적 · 실패 분석은 실제 궤적 기준이다.** `traj.npz` `measured_qpos` 나 physics replay 를 쓰고, 명령 궤적(reference / refined chunk FK)은 함께 보인다. MuJoCo kp · damping 때문에 명령 ≠ 실제다 (2026-10-20).
+- **판정 규칙 · 분류 정의 · 허용오차는 계산 전에** `verify.json` `definitions` 에 적는다. 결과를 본 뒤 바꾸면 바꾼 이유와 이전 수치를 함께 남긴다. 허용오차는 "0" 이 아니라 "허용오차 이내 + 원시 max + 정한 시점"으로 쓴다 (2026-10-14).
+- **closed-loop 기록 · 영상은 place 판정 2.5 초 뒤에 끝낸다** (사용자 2026-10-21 · 10-23). 모든 client(VLA 단독 기준 run 포함)에 `--stop-after-place 2.5` 를 붙이고, 새 kit 의 `client_args.py` · `check_run.py` · `run_chain.sh` 가 그것을 확인하게 한다. place 에 이르지 못한 run 만 `--max-steps` 까지 기록한다(실패 분석용). 규칙 전 기록(40 s)을 비교에 쓰면 그 사실을 README · 보고에 적는다.
+- **비교 구간은 두 조건에 같게 자른다.** 예: place 뒤 2.5 초에서 끝난 기록과 끝까지 기록된 기준을 비교하면, 둘 다 place + 2.5 초까지로 자른다 (2026-10-22).
+- **영상 · 검증 결과는 checkout `outputs/<YYYY-MM-DD>_<실험 설명>/` 에 만든다.** closed-loop 영상은 `python -m common.experiment_view` 로 장면별 · 구성별 이름(`<순번>_<구성 설명>_<결과>.mp4`)과 README 를 만들고, 그 실험의 verify.json · 그림 사본도 둔다. 원시 기록(서버 기록 · replay)은 storage run 에 둔다 (2026-10-23).
+- **outputs 는 offline 비교 · closed-loop · 진단 모두, 결과를 넘기기 전에 만든다** (2026-10-26 사용자 재지시): 영상 + 실제 씬 그림 + 그래프 + 표 + README. verify.json 에 outputs 폴더 경로를 적는다.
+- 보고 · `notes` · 그림 제목에는 구성 코드 대신 "무슨 실험이고 무엇을 썼는지"를 쓴다 (2026-10-22).
+
 ## 함정
 
+- **출력 경로에 쓰는 셸 변수가 비어 있지 않은지 먼저 확인한다.** 절대 경로를 쓴다 (2026-10-21: 빈 변수로 filesystem 루트에 `/w2.out` 이 생겼다).
+- **CPU worker ≤ 4 는 pod 전체 기준이다.** 다른 세션이 이미 더 띄운 것을 근거로 늘리지 않는다. 세는 것은 process 수가 아니라 실제 계산 worker 수다 (2026-10-14).
 - `compute_esdf()` 결과는 다음 호출 전에 `detach().clone()` 로 복사한다.
 - 첫 `compute_esdf` 호출 시간(약 1500 ms)은 JIT 다 — **인용하지 말 것.**
 - 프레임별 여유거리와 SQP 반복 수는 기준선이 아니다. `sqp.time_budget_ms` 가 벽시계
