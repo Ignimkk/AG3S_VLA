@@ -1,9 +1,9 @@
 {
- "_comment": "numbers only; Part B judgement waits for the user's check of the physics truth (videos)",
+ "_comment": "numbers only; Part B judged after the user's check of the physics truth (videos), 2026-10-29",
  "step": "T64",
  "date": "2026-10-29",
  "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261029T013324+0900_b3b69311f948_7da63daefa49",
- "status": "Part A/B/C measured; Part B not judged (truth check pending)",
+ "status": "Part A/B/C measured and judged (user confirmed the truth definition 2026-10-29)",
  "numbers": {
   "partA": {
    "decision": "6 phases",
@@ -521,5 +521,11 @@
    }
   }
  },
- "outputs": "outputs/2026-10-29_HSR_6단계_단계구분_학습데이터_closedloop기록"
+ "outputs": "outputs/2026-10-29_HSR_6단계_단계구분_학습데이터_closedloop기록",
+ "verdict": {
+  "better_phasing_ci_lower_gt_0": false,
+  "lead_value": false,
+  "complement_value_partC": true,
+  "summary": "no added value over the strong rule for phase accuracy or early boundary detection; added value for recovering missed attaches (Part C)"
+ }
 }
