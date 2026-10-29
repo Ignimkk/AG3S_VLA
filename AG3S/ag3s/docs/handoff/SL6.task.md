@@ -18,6 +18,8 @@
 | 2026-10-30 (~01:30 KST, §6 smoke 결과 뒤) | **G1 · A4 는 Panda 최종 구성에서 제거 확정** (§6 규칙: 작동판 1 vs 제거판 0). G1 은 581 call 중 0 회 작동해 시험되지 않았다는 사실과 함께 기록한다. G1 후보 실패 원인은 따로 조사하지 않는다 |
 | 2026-10-30 (~01:30 KST) | §6 실패가 이전 pb 원인과 같다 (쥔 bowl 을 latch 가 인식 못함 · 가려진 bowl 의 reach 를 마지막 본 자리로 잼 · HELD 전 TrajOpt 가 손을 위로 밈) → **pb1 · pb6 · pb7 을 Panda 최종 구성에 더한다** (`--reach-at-capture`, `--grasp-reach-sticky --grasp-drop-from-open`, `--closing-hand-exempt`). pb2–pb5 는 넣지 않는다 |
 | 2026-10-30 (~01:30 KST) | **target 신호를 action attention (`action:last:L8H2`, pb7 과 같은 기본 경로) 으로 되돌린다.** 명사 attention L8H6 은 §6 장면에서 같은 bowl 둘을 구분하지 못했다 (50 mm 안 3/11, 못 찾음 2 vs pb7 5/11 · 0) |
+| 2026-10-30 (~07:00 KST, §8 결과 · task 1 충돌 진단 뒤) | §8 2판 미채택 (안전 성공 1 = pb7, 충돌 6 > 5). 진단 (`outputs/2026-10-30_task1충돌진단_Panda최종구성2판/`): t1e1 · t1e4 충돌은 TrajOpt 수정이 conversion C 에서 ±1 포화 action 이 된 직후였고, 2판 충돌 6 개 중 4 개는 팔 링크 (link6 · 7) 접촉이었다. **2판에는 pb7 누적판의 pb2–pb5 가 빠져 있었다** (lead 의 정의 실수: pb7 고유 flag 만 넣음) → **3판 = pb7 의 flag 9 개 전체를 넣는다** |
+| 2026-10-30 (~07:00 KST) | **연속성 항과 꺾임 변화율 항을 전 구간에서 끈다** (`--w-continuity 0 --w-deflection-rate 0`, after-grasp flag 2 개는 뺀다). t1e1 의 20 mm 수정은 HELD 가 되어 두 항이 켜진 첫 call 에서 나왔다. 3판에 함께 넣고 한 번의 smoke 로 본다 (두 변경의 효과는 분리하지 않는다) |
 
 ## 1. Panda 최종 구성 (이식 대상) 의 정의
 
@@ -158,6 +160,38 @@
   - 실패 원인 층.
   - §6 제거판 · pb7 대비 전이표.
 - 결과 보기: `outputs/2026-10-30_Panda최종구성2판_쥠인식pb_SafeLIBERO-LI-dev11/`.
+
+### 8.1 결과 (2026-10-30 03:40 KST) · 진단 (06:50 KST)
+
+- 2판: 안전 성공 1 · 공식 성공 2 · 충돌 6 · HOLD 38 / 574. **판정: 미채택** (충돌 6 > pb7 5). `outputs/2026-10-30_Panda최종구성2판_쥠인식pb_SafeLIBERO-LI-dev11/`.
+- task 1 충돌 진단 (CPU, 기록 재생): `outputs/2026-10-30_task1충돌진단_Panda최종구성2판/`.
+  - t1e1: HELD 전환 call 의 수정 20 mm → 포화 action → 들고 있던 bowl 이 storage box 에 닿음 (substep 재현).
+  - t1e4: CLOSING 중 수정 24 mm → 포화 action → HOLD 뒤 관성 → 손 본체가 mug 에 닿음.
+  - 2판 충돌 접촉 몸체: 팔 링크 4 · 손 1 · bowl 1. pb7: 팔 링크 2 · 손가락 1 · bowl 2.
+
+## 9. SL6-E — Panda 최종 구성 3판 smoke (결과 전 고정, 사용자 판정 2026-10-30 ~07:00 KST)
+
+**3판의 정의:** profile key `AG3S-final-panda-v3`.
+- = 2판에서 `--continuity-after-grasp --deflection-rate-after-grasp` 를 뺀다.
+- \+ V11AB-pb7 의 flag 9 개 전체: `--reach-at-capture --minimal-intervention-mm 10 --links arms --held-hand-exempt --latch-phase --grasp-zone-mm 10 --grasp-reach-sticky --grasp-drop-from-open --closing-hand-exempt` (pb1 · pb6 · pb7 의 4 개는 2판에 이미 있다; 같은 flag 를 두 번 넣지 않는다).
+- \+ `--w-continuity 0 --w-deflection-rate 0` (연속성 · 꺾임 변화율 항 전 구간 끔).
+- 나머지 (action attention L8H2, HSR6-Panda probe, scope `nbc`, 변환 C) 는 2판 그대로.
+
+**구현 · CPU 확인 (lead):**
+- E1 — `profile.py` 에 3판을 등록한다. 기존 판 (V11AB 계열 · 1판 · 작동판 · 2판) argv 는 바꾸지 않는다.
+- E2 — 단위 test: 3판 argv 정의, 기존 판 불변, argparse 결과 (`links = arms`, `minimal_intervention_mm = 10`, `w_continuity = 0`, `w_deflection_rate = 0`, after-grasp 둘 꺼짐).
+- E3 — CPU 기동: 최종 구성 flag 와 pb2–pb5 가 함께 받아들여지는지 (금지 조합 · 미이식 flag 검사), SafePolicy 에 pb 기능 · 무게 0 이 들어갔는지, 손바닥 껍질 구가 팔 링크 모델 위에서 붙는지.
+- E4 — launcher dry-run 으로 서버 인자를 확인한다.
+
+**smoke (lead, GPU 독점, 동시 1 job):**
+- 장면 · seed: §6 · §8 과 같은 11 episode. 3판만 새로 돌린다.
+- 주 지표: safe success.
+- **판정 (결과 전 고정, §8 과 같은 기준):** 아래 둘을 모두 만족하면 3판을 Panda 최종 구성으로 삼고 다음 단계 (더 큰 평가) 를 제안한다.
+  - 3판 safe success ≥ pb7 (1).
+  - 3판 충돌 episode ≤ pb7 (5).
+- 아니면 실패 원인 층을 다시 적고 사용자에게 묻는다.
+- **함께 보고 (판정에 쓰지 않음):** 공식 성공 · HOLD call, 처음 닫는 시점 target 정답 수, "쥔 bowl 미인식" episode 수, **포화 action step 수**, **충돌마다 장애물에 닿은 몸체** (기록 재생), 2판 · pb7 대비 전이표, 실패 원인 층.
+- 결과 보기: `outputs/2026-10-30_Panda최종구성3판_pb7전체_연속성꺾임끔_SafeLIBERO-LI-dev11/`.
 
 ## 7. 산출물
 

@@ -284,11 +284,23 @@ GRASP_RECOGNITION_PB_FLAGS: tuple[str, ...] = (
 _i = FINAL_CONFIG_FLAGS.index("--attention-source")
 FINAL_CONFIG_V2_FLAGS: tuple[str, ...] = FINAL_CONFIG_FLAGS[:_i] + FINAL_CONFIG_FLAGS[_i + 2:] + GRASP_RECOGNITION_PB_FLAGS
 del _i
+#: SL6-E (user ruling 2026-10-30 ~07:00 KST, task SL6 §0 / §9): the SL6-C task-1 collisions followed TrajOpt corrections
+#: that conversion C saturated, 4 of 2판's 6 collisions were arm links outside the gripper-only model, and 2판 had only
+#: pb1 / pb6 / pb7's own flags of the cumulative V11AB-pb7 (pb2-pb5 missing). The continuity and deflection-rate terms
+#: are switched off in every phase (t1e1's correction came on the first HELD call, when both terms switched on).
+CONTINUITY_DEFLECTION_OFF_FLAGS: tuple[str, ...] = ("--w-continuity", "0", "--w-deflection-rate", "0")
+_after = ("--continuity-after-grasp", "--deflection-rate-after-grasp")
+_v2_kept = tuple(t for t in FINAL_CONFIG_V2_FLAGS if t not in _after + GRASP_RECOGNITION_PB_FLAGS)
+#: "Panda 최종 구성 3판" = 2판 − the two after-grasp flags + the nine V11AB-pb7 flags + both terms off.
+FINAL_CONFIG_V3_FLAGS: tuple[str, ...] = _v2_kept + AG3S_VERSIONS["V11AB-pb7"] + CONTINUITY_DEFLECTION_OFF_FLAGS
+del _after, _v2_kept
 #: Versions that are the final configuration (no `V11AB_PRE_MERGE_DEFAULTS`, the Panda HSR6 probe required).
-FINAL_CONFIG_VERSIONS: tuple[str, ...] = ("AG3S-final-panda", "AG3S-final-panda-g1a4", "AG3S-final-panda-v2")
+FINAL_CONFIG_VERSIONS: tuple[str, ...] = ("AG3S-final-panda", "AG3S-final-panda-g1a4", "AG3S-final-panda-v2",
+                                          "AG3S-final-panda-v3")
 AG3S_VERSIONS["AG3S-final-panda"] = FINAL_CONFIG_FLAGS                       # G1 · A4 removed ("제거판")
 AG3S_VERSIONS["AG3S-final-panda-g1a4"] = FINAL_CONFIG_FLAGS + G1A4_FLAGS     # G1 · A4 kept ("작동판")
 AG3S_VERSIONS["AG3S-final-panda-v2"] = FINAL_CONFIG_V2_FLAGS                 # "2판" (SL6-C)
+AG3S_VERSIONS["AG3S-final-panda-v3"] = FINAL_CONFIG_V3_FLAGS                 # "3판" (SL6-E)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 PANDA_HSR6_PROBE = ("/mnt/dev/AG3S_VLA-storage/results/benchmark/20261029T192223_5ea56af44722_sl6b-hsr6-panda-labels/"
@@ -350,6 +362,9 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
+    # SL6-E: a final version may re-set a V11AB base option (3판 --w-deflection-rate 0 over the base 20); the base
+    # value alone is not a final option
+    pinned |= {actions[t].dest for t in v11ab_server_argv(pre_merge=False) if t in actions}
     if any(getattr(args, d, None) != parser.get_default(d) for d in final if d not in pinned):
         dests = sorted(set(dests) | set(final))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}

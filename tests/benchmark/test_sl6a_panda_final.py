@@ -467,3 +467,56 @@ def test_v2_builds_on_cpu(gpu_ok, monkeypatch):
     assert safe.latch_phase is False and safe.held_hand_exempt is False and safe.grasp_zone_allowance is None  # no pb4/5
     assert safe.to_config.horizon.planned == 10 and safe.to_config.horizon.execution_length == 5
     json.dumps(info, default=str)
+
+
+def test_v3_flags_are_v2_plus_all_pb7_and_terms_off(gpu_ok):
+    from AG3S.adapters.panda import profile as pf
+
+    v3 = list(pf.AG3S_VERSIONS["AG3S-final-panda-v3"])
+    v2 = list(pf.AG3S_VERSIONS["AG3S-final-panda-v2"])
+    pb7 = list(pf.AG3S_VERSIONS["V11AB-pb7"])
+    kept = [t for t in v2 if t not in ("--continuity-after-grasp", "--deflection-rate-after-grasp",
+                                       *pf.GRASP_RECOGNITION_PB_FLAGS)]
+    assert v3 == kept + pb7 + ["--w-continuity", "0", "--w-deflection-rate", "0"]
+    flags = [t for t in v3 if t.startswith("--")]
+    assert len(flags) == len(set(flags))                                     # no flag twice
+    assert "--attention-source" not in v3 and "--continuity-after-grasp" not in v3
+    # earlier versions unchanged
+    assert pf.AG3S_VERSIONS["AG3S-final-panda-v2"] == pf.FINAL_CONFIG_V2_FLAGS
+    assert pb7 == ["--reach-at-capture", "--minimal-intervention-mm", "10", "--links", "arms", "--held-hand-exempt",
+                   "--latch-phase", "--grasp-zone-mm", "10", "--grasp-reach-sticky", "--grasp-drop-from-open",
+                   "--closing-hand-exempt"]
+    args = _final_args("AG3S-final-panda-v3")
+    assert args.links == "arms" and args.minimal_intervention_mm == 10.0
+    assert args.w_continuity == 0.0 and args.w_deflection_rate == 0.0        # base argv's 20 is overridden
+    assert not args.continuity_after_grasp and not args.deflection_rate_after_grasp
+    assert pf.match_ag3s_version(args) == "AG3S-final-panda-v3"
+
+
+def test_v3_builds_on_cpu(gpu_ok, monkeypatch):
+    from AG3S.adapters.panda import server as ps
+
+    monkeypatch.setenv("AG3S_PANDA_CONVERSION", "C")
+    args = _final_args("AG3S-final-panda-v3")
+    ps.check_unported_flags(args, None)
+    served, info = ps.build_safe_server(_Stub(), args, gpu_warm_up=False)
+    safe = served._policy
+    fc = info["final_config"]
+    assert fc["version"] == "AG3S-final-panda-v3"
+    assert fc["hsr6"]["objective_scope"] == "nbc" and fc["palm_shell"]["n_spheres"] == 111
+    assert safe._geo is None and fc["grasp_anchor"] is None                  # G1 · A4 removed
+    # pb1-pb7 all on
+    assert safe.ag3s.reach_at_capture is True
+    assert safe.latch_phase is True and safe.held_hand_exempt is True and safe.grasp_zone_allowance is not None
+    assert safe._latch.config.reach_sticky is True and safe._latch.config.drop_from_open is True
+    assert safe.closing_hand_exempt is True
+    assert safe.to_config.sqp.minimal_intervention == pytest.approx(0.010)
+    # both terms off in every phase
+    assert safe.to_config.cost.w_continuity == 0.0 and safe.to_config.cost.w_deflection_rate == 0.0
+    assert not safe.to_config.cost.continuity_after_grasp and not safe.to_config.cost.deflection_rate_after_grasp
+    # arm links in the constraint model, palm shell on top of it
+    assert set(info["ag3s"]["constraint_links"]) == {f"panda_link{i}" for i in range(1, 8)} | {
+        "panda_hand", "panda_leftfinger", "panda_rightfinger"}
+    assert info["ag3s"]["n_constraint_spheres"] == 133 + 37
+    assert safe.to_config.horizon.planned == 10 and safe.to_config.horizon.execution_length == 5
+    json.dumps(info, default=str)
