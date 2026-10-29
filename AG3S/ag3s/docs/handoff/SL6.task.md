@@ -15,6 +15,10 @@
 | 2026-10-29 | smoke 장면 · 판정 기준은 §6 그대로 고정 |
 | 2026-10-29 (~20:40 KST) | **Panda 최종 구성은 물체를 쥐기 전에 연속성 항 · 꺾임 변화율 항을 끈다** (`--continuity-after-grasp --deflection-rate-after-grasp`, 단계 판정 = grasp latch: searching · latched · closing 에서 끔, held 부터 씀). RB-Y1 에서 측정한 최종 구성에는 없던 설정이다 (그때는 넓힌 목표 항 · 껍질 구와 묶여 한 번 시험되어 미채택, NOT_ADOPTED N13) → Panda 결과를 RB-Y1 결과와 나란히 쓸 때 이 차이를 적는다 |
 
+| 2026-10-30 (~01:30 KST, §6 smoke 결과 뒤) | **G1 · A4 는 Panda 최종 구성에서 제거 확정** (§6 규칙: 작동판 1 vs 제거판 0). G1 은 581 call 중 0 회 작동해 시험되지 않았다는 사실과 함께 기록한다. G1 후보 실패 원인은 따로 조사하지 않는다 |
+| 2026-10-30 (~01:30 KST) | §6 실패가 이전 pb 원인과 같다 (쥔 bowl 을 latch 가 인식 못함 · 가려진 bowl 의 reach 를 마지막 본 자리로 잼 · HELD 전 TrajOpt 가 손을 위로 밈) → **pb1 · pb6 · pb7 을 Panda 최종 구성에 더한다** (`--reach-at-capture`, `--grasp-reach-sticky --grasp-drop-from-open`, `--closing-hand-exempt`). pb2–pb5 는 넣지 않는다 |
+| 2026-10-30 (~01:30 KST) | **target 신호를 action attention (`action:last:L8H2`, pb7 과 같은 기본 경로) 으로 되돌린다.** 명사 attention L8H6 은 §6 장면에서 같은 bowl 둘을 구분하지 못했다 (50 mm 안 3/11, 못 찾음 2 vs pb7 5/11 · 0) |
+
 ## 1. Panda 최종 구성 (이식 대상) 의 정의
 
 - = RB-Y1 최종 서버 argv (A6.impl §3) 를 Panda 기하로 옮긴 것 + 역변환 C (`lag_inverse_tracking`, adapter) + `--robot panda`.
@@ -110,6 +114,50 @@
   - 실패 episode 마다 원인 층 (ATS · HSR · LTE · CCR) 과, 이전 pb 가 고친 원인과 같은지 (같으면 해당 pb 추가를 제안).
 - 11 episode × 1 회라 효과 크기를 판정하지 않는다. 위 규칙만 적용한다.
 - 결과 보기: `outputs/2026-10-29_Panda최종구성_G1A4포함제거_SafeLIBERO-LI-dev11/` (영상 `common.experiment_view`, 실제 씬, 그래프, 표, README).
+
+### 6.1 결과 (2026-10-30 01:20 KST)
+
+- `outputs/2026-10-29_Panda최종구성_G1A4포함제거_SafeLIBERO-LI-dev11/` (README · summary.json).
+- 안전 성공: 제거판 0 · 작동판 1 → **제거**. 8/11 episode 는 두 판 bit 동일.
+- 실패 원인 층:
+  - ATS 8 (다른 물체 6 · 못 찾음 2).
+  - HSR → CCR 5 (쥔 bowl 미인식 → TrajOpt 위로 밈).
+  - 충돌 3 (원인 층 미진단).
+
+## 8. SL6-C — Panda 최종 구성 2판 smoke (결과 전 고정, 사용자 판정 2026-10-30)
+
+**2판의 정의:** profile key `AG3S-final-panda-v2`.
+- = §1 Panda 최종 구성 (G1 · A4 없음)
+- `--attention-source noun_target:L8H6` 를 뺀다 → 기본 `action:last:L8H2` (pb7 과 같은 경로).
+- \+ `--reach-at-capture` (pb1) · `--grasp-reach-sticky --grasp-drop-from-open` (pb6) · `--closing-hand-exempt` (pb7).
+- 나머지 (HSR6-Panda probe, scope `nbc`, 쥐기 전 연속성 · 꺾임 항 끔, 변환 C) 는 그대로.
+
+**구현 · CPU 확인 (lead):**
+- C1 — `profile.py` 에 2판을 등록한다. 기존 판의 argv 는 바꾸지 않는다.
+  - attention flag 가 없는 판에 run 의 `--attention-source` 를 주면 덧붙인다.
+- C2 — 단위 test 를 둔다. 확인 항목:
+  - 2판 argv = §1 판 − attention 2 token + pb flag 4 개.
+  - 기존 판 argv 는 그대로.
+- C3 — CPU 기동 (VA4 방식): parse · 금지 조합 · 미이식 flag 검사 · config dump.
+  - pb flag 가 SafePolicy 에 들어갔는지 확인한다 (`grasp contact rules` 기록, `reach_at_capture`).
+- C4 — GPU 전에 V11AB-pb7 argv 가 바뀌지 않았음을 확인한다 (C2 test).
+
+**smoke (lead, GPU 독점, 동시 1 job):**
+- 장면 · seed: §6 과 같은 11 episode.
+- 실행: 2판만 새로 돌린다. 비교는 §6 제거판 · pb7 (SL5i-G) · VLA 단독 (SL5f) 기존 run 으로 한다.
+- 주 지표: safe success.
+- **판정 (결과 전 고정):** 아래 둘을 모두 만족하면 2판을 Panda 최종 구성으로 삼고 다음 단계 (더 큰 평가) 를 제안한다.
+  - 2판 safe success ≥ pb7 (1).
+  - 2판 충돌 episode ≤ pb7 (5).
+- 아니면 실패 원인 층을 다시 적고 사용자에게 묻는다.
+- **함께 보고 (판정에 쓰지 않음):**
+  - 공식 성공 · HOLD call.
+  - target 선택 오차 (첫 기록 call, 50 mm 기준) · target 못 찾은 episode.
+  - "쥔 bowl 미인식" episode 수 (MuJoCo 에서 target bowl 이 2 cm 이상 들리고 손과 9 cm 안인 frame > 20 ∧ 첫 닫기 뒤 latch CLOSING / LATCHED call > 5).
+  - 그 구간의 Σ (실행 z − VLA z).
+  - 실패 원인 층.
+  - §6 제거판 · pb7 대비 전이표.
+- 결과 보기: `outputs/2026-10-30_Panda최종구성2판_쥠인식pb_SafeLIBERO-LI-dev11/`.
 
 ## 7. 산출물
 
