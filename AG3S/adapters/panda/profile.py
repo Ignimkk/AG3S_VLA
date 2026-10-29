@@ -271,10 +271,24 @@ FINAL_CONFIG_FLAGS: tuple[str, ...] = (
 G1A4_FLAGS: tuple[str, ...] = (
     "--grasp-anchor", "2000", "--grasp-anchor-path-weight", "0", "--geo-grasp", "--geo-goal-mode", "correct",
     "--geo-track-scale", "0.25", "--geo-continuity-off")
+#: SL6-C (user ruling 2026-10-30, task SL6 §0 / §8): the SL6 smoke failures repeated the causes pb1 / pb6 / pb7 fixed
+#: (the latch did not recognise the held bowl: reach measured at the occluded bowl's last-seen centroid, the latch
+#: stayed CLOSING, TrajOpt pushed the hand up before HELD). pb2-pb5 are not added.
+GRASP_RECOGNITION_PB_FLAGS: tuple[str, ...] = (
+    "--reach-at-capture",                                    # pb1
+    "--grasp-reach-sticky", "--grasp-drop-from-open",        # pb6
+    "--closing-hand-exempt")                                 # pb7
+#: "Panda 최종 구성 2판" = the G1 · A4-removed final version without its ``--attention-source`` (back to the default
+#: ``action:last:L8H2``, the V11AB-pb7 path: the noun cell L8H6 could not tell the two black bowls apart, SL6 §6.1)
+#: + :data:`GRASP_RECOGNITION_PB_FLAGS`.
+_i = FINAL_CONFIG_FLAGS.index("--attention-source")
+FINAL_CONFIG_V2_FLAGS: tuple[str, ...] = FINAL_CONFIG_FLAGS[:_i] + FINAL_CONFIG_FLAGS[_i + 2:] + GRASP_RECOGNITION_PB_FLAGS
+del _i
 #: Versions that are the final configuration (no `V11AB_PRE_MERGE_DEFAULTS`, the Panda HSR6 probe required).
-FINAL_CONFIG_VERSIONS: tuple[str, ...] = ("AG3S-final-panda", "AG3S-final-panda-g1a4")
+FINAL_CONFIG_VERSIONS: tuple[str, ...] = ("AG3S-final-panda", "AG3S-final-panda-g1a4", "AG3S-final-panda-v2")
 AG3S_VERSIONS["AG3S-final-panda"] = FINAL_CONFIG_FLAGS                       # G1 · A4 removed ("제거판")
 AG3S_VERSIONS["AG3S-final-panda-g1a4"] = FINAL_CONFIG_FLAGS + G1A4_FLAGS     # G1 · A4 kept ("작동판")
+AG3S_VERSIONS["AG3S-final-panda-v2"] = FINAL_CONFIG_V2_FLAGS                 # "2판" (SL6-C)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 PANDA_HSR6_PROBE = ("/mnt/dev/AG3S_VLA-storage/results/benchmark/20261029T192223_5ea56af44722_sl6b-hsr6-panda-labels/"
@@ -304,7 +318,10 @@ def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
         raise ValueError(f"{version} needs the Panda HSR6 probe (--hsr6-probe FILE; the RB-Y1 probe is refused on the "
                          "Panda)")
     if attention_source is not None:
-        flags[flags.index("--attention-source") + 1] = str(attention_source)
+        if "--attention-source" in flags:
+            flags[flags.index("--attention-source") + 1] = str(attention_source)
+        else:                                                    # a version on the default cell (SL6-C v2)
+            flags += ["--attention-source", str(attention_source)]
     return flags + ["--hsr6-probe", str(hsr6_probe)]
 
 

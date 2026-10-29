@@ -420,3 +420,50 @@ def test_v11ab_family_keeps_both_terms(monkeypatch):
         served, _ = ps.build_safe_server(_Stub(), _args(version))
         cost = served._policy.to_config.cost
         assert not cost.continuity_after_grasp and not cost.deflection_rate_after_grasp
+
+
+# ------------------------------------------------------------------------------------------------ SL6-C 2판
+def test_v2_flags_are_final_without_noun_cell_plus_pb167(gpu_ok):
+    from AG3S.adapters.panda import profile as pf
+
+    v2 = list(pf.AG3S_VERSIONS["AG3S-final-panda-v2"])
+    base = list(pf.FINAL_CONFIG_FLAGS)
+    i = base.index("--attention-source")
+    assert base[i:i + 2] == ["--attention-source", "noun_target:L8H6"]
+    assert v2 == base[:i] + base[i + 2:] + ["--reach-at-capture", "--grasp-reach-sticky", "--grasp-drop-from-open",
+                                            "--closing-hand-exempt"]
+    names = lambda flags: {t for t in flags if t.startswith("--")}
+    assert "--attention-source" not in v2 and not names(pf.G1A4_FLAGS) & names(v2)
+    # the earlier versions are unchanged
+    assert pf.AG3S_VERSIONS["AG3S-final-panda"] == pf.FINAL_CONFIG_FLAGS
+    assert pf.AG3S_VERSIONS["AG3S-final-panda-g1a4"] == pf.FINAL_CONFIG_FLAGS + pf.G1A4_FLAGS
+    assert pf.AG3S_VERSIONS["V11AB-pb7"][-1] == "--closing-hand-exempt" and "--hsr6-objective" not in \
+        pf.AG3S_VERSIONS["V11AB-pb7"]
+    # a run's attention cell is appended (v2 has none of its own)
+    assert pf.version_server_flags("AG3S-final-panda-v2", hsr6_probe="/p.npz")[-2:] == ["--hsr6-probe", "/p.npz"]
+    f = pf.version_server_flags("AG3S-final-panda-v2", hsr6_probe="/p.npz", attention_source="noun_target:L8H6")
+    assert f[f.index("--attention-source") + 1] == "noun_target:L8H6"
+    assert pf.match_ag3s_version(_final_args("AG3S-final-panda-v2")) == "AG3S-final-panda-v2"
+
+
+def test_v2_builds_on_cpu(gpu_ok, monkeypatch):
+    from AG3S.adapters.panda import server as ps
+
+    monkeypatch.setenv("AG3S_PANDA_CONVERSION", "C")
+    args = _final_args("AG3S-final-panda-v2")
+    assert args.attention_source is None                                     # default cell = action:last:L8H2
+    ps.check_unported_flags(args, None)
+    served, info = ps.build_safe_server(_Stub(), args, gpu_warm_up=False)
+    safe = served._policy
+    fc = info["final_config"]
+    assert fc["version"] == "AG3S-final-panda-v2"
+    assert fc["hsr6"]["objective_scope"] == "nbc" and fc["palm_shell"]["n_spheres"] == 111
+    assert fc["before_grasp_terms_off"]["continuity_after_grasp"] is True
+    assert safe._geo is None and fc["grasp_anchor"] is None                  # G1 · A4 removed
+    # pb1: AG3S reach gate at the capture state; pb6: latch options; pb7: closing exemption
+    assert safe.ag3s.reach_at_capture is True
+    assert safe._latch.config.reach_sticky is True and safe._latch.config.drop_from_open is True
+    assert safe.closing_hand_exempt is True
+    assert safe.latch_phase is False and safe.held_hand_exempt is False and safe.grasp_zone_allowance is None  # no pb4/5
+    assert safe.to_config.horizon.planned == 10 and safe.to_config.horizon.execution_length == 5
+    json.dumps(info, default=str)
