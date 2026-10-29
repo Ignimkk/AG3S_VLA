@@ -251,3 +251,7 @@ python -m AG3S.trajopt.serve_safe --config pi05_rby1_randomized_pick_place_16d_l
    - **주의 — 기하 보정 · 쥐기 목표 항 (A4) 은 이 구성에서 0 요청이다.**
      - HSR ④ 가 닫는 순간 목표를 HSR6 = grasp 일 때만 켜는데, 닫기 전 HSR6 는 approach 다.
      - 그래서 측정된 성공은 기하 보정 · A4 없이 나온 것이다. 논문에 이 두 항의 기여를 주장하지 않는다.
+6. **최종 구성 확정 (사용자 판정 2026-10-29 ~13:40 KST): 측정한 그대로 확정한다.**
+   - 서버 인자는 `AG3S-CORE-EVAL-A6.impl.md` §3 의 한 줄 그대로다. 코드는 commit `cc0d527f` (= `snapshot_final2`).
+   - 기하 보정 · 쥐기 목표 항 flag 는 남기되 ④ 때문에 작동하지 않는다. 논문에서 그 기여를 주장하지 않는다.
+   - 이 구성으로 main → benchmark branch 에 보내고 benchmark · baseline 비교를 한다. 방식: merge --no-ff 2 단계 (사용자).
