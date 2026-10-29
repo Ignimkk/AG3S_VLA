@@ -13,10 +13,12 @@
 | 2026-10-29 | HSR6 는 **retreat 없이** 학습해도 된다. **가장 빨리 실험할 수 있는 방법** 을 쓴다 → 새 rollout 없이 기존 dev 기록으로 학습 · 선택 (§3 · §4) |
 | 2026-10-29 | Panda 최종 구성에 기존 Panda 개선판 (pb1–pb7) 은 **넣지 않는다**. smoke 에서 이전과 같은 이유 (SL5b reach 재측정, latch 가 closing 에 머묾, over-lift 등) 로 실패하면 그때 해당 pb 를 더하는 것을 제안한다 (자동으로 넣지 않는다) |
 | 2026-10-29 | smoke 장면 · 판정 기준은 §6 그대로 고정 |
+| 2026-10-29 (~20:40 KST) | **Panda 최종 구성은 물체를 쥐기 전에 연속성 항 · 꺾임 변화율 항을 끈다** (`--continuity-after-grasp --deflection-rate-after-grasp`, 단계 판정 = grasp latch: searching · latched · closing 에서 끔, held 부터 씀). RB-Y1 에서 측정한 최종 구성에는 없던 설정이다 (그때는 넓힌 목표 항 · 껍질 구와 묶여 한 번 시험되어 미채택, NOT_ADOPTED N13) → Panda 결과를 RB-Y1 결과와 나란히 쓸 때 이 차이를 적는다 |
 
 ## 1. Panda 최종 구성 (이식 대상) 의 정의
 
 - = RB-Y1 최종 서버 argv (A6.impl §3) 를 Panda 기하로 옮긴 것 + 역변환 C (`lag_inverse_tracking`, adapter) + `--robot panda`.
+- + `--continuity-after-grasp --deflection-rate-after-grasp` (사용자 판정 2026-10-29, 두 smoke 판 모두).
 - pb1–pb7 flag 없음. `V11AB_PRE_MERGE_DEFAULTS` (`--no-roi-carve --blas-threads 0`) 도 붙이지 않는다 (최종 구성은 ROI carve 켬 · BLAS 1).
 - Panda 가 이미 다르게 쓰는 값은 그대로: horizon H 10 · K 5 · 20 Hz · plan 10 (`--plan-horizon 16` 은 10 으로 대체), 관절 한계 = adapter URDF.
 - **요청 수로 정한 값은 바꾸지 않는다** (`--hold-follow-to 3`, G1 `geo_close_timeout` · `geo_carry_requests`, HSR6 raw argmax). Panda 요청 간격은 0.25 s (RB-Y1 0.53 s) 라 시간으로는 절반이다 → 한계로 기록한다.
@@ -40,6 +42,7 @@
 | A8 | 기하 grasp 보정 (G1) | `AG3S/ag3s/grasp/gripper.py` 에 Panda `ParallelGripperSpec` (MJCF 에서 측정: 손가락 pad, 최대 개도 0.08, 손바닥 box). frame 규약 차이 (RB-Y1: x = 닫는 방향, −z = 접근; Panda hand: y = 닫는 방향, +z = 접근) 를 spec 의 frame 변환으로 맞춘다. IK 관절 선택 prefix (`geo_grasp.py:117`, `:418`) 를 주입한다. **역변환이 gripper 열을 VLA 값 그대로 보내는 문제 (`action.py:257`)**: G1 이 닫기를 미룬 chunk 에서만 refined gripper 열을 보낸다 (G1 꺼짐 = bit 동일) |
 | A9 | HSR ④ 적용 범위 flag (새, 기본 = 지금) | `--hsr6-objective-scope {all,nbc}`, 기본 `all` = 지금 규칙 (NBC · A4 · G1 모두 HSR6 = grasp 일 때만). `nbc` = ④ 를 손가락 이웃 접촉 허용에만 적용하고 A4 · G1 닫는 행 목표는 막지 않는다. RB-Y1 기본 동작 bit 동일 |
 | A10 | 거절 목록 | 이식한 dest 만 `UNPORTED_FINAL_CONFIG_DESTS` · `UNPORTED_BUILD_KEYWORDS` 에서 뺀다. `--hsr6-probe` 는 Panda 에서 **필수** (기본값 = RB-Y1 probe → 거절) |
+| A12 | 쥐기 전 연속성 · 꺾임 항 끔 | `continuity_after_grasp` · `deflection_rate_after_grasp` 를 거절 목록에서 빼고 두 Panda 최종 구성 version 에 넣는다 (cost-only, latch 단계 판정이라 Panda 기하 이식 없음). `--geo-continuity-off` 와 함께 parse · config 검사가 통과하는지 VA4 에서 확인 |
 | A11 | 단계 label 없는 기능 | `placed_no_seed_certify` 는 3-class `home` label 이 필요해 Panda 에서 작동하지 않는다 (`types.py:1062-1075`). 고치지 않고 서버 시작 log 와 config 에 "inert on panda" 로 적는다 |
 
 ### 2.1 검증 (결과 전 고정)
@@ -94,7 +97,7 @@
 ## 6. G1 · A4 포함 / 제거 smoke (결과 전 고정, 사용자 판정 2026-10-29)
 
 - **장면:** SafeLIBERO spatial Level I dev 중 VLA 단독이 공식 성공한 11 episode — t1e1, t1e4, t2e0, t2e1, t2e2, t2e3, t2e4, t3e0, t3e2, t3e3, t3e4 (SL5i-G verify `I1`). 그중 VLA 단독이 장애물과 충돌한 것 9 (safe success 는 t1e1 · t1e4 둘). 같은 init · policy seed (paired).
-- **두 판** (둘 다 Panda 최종 구성 + `--hsr6-objective-scope nbc`, 차이는 A4 · G1 flag 뿐):
+- **두 판** (둘 다 Panda 최종 구성 + `--hsr6-objective-scope nbc` + 쥐기 전 연속성 · 꺾임 항 끔, 차이는 A4 · G1 flag 뿐):
   - **제거판:** `--grasp-anchor` · `--geo-*` 없음.
   - **작동판:** + `--grasp-anchor 2000 --grasp-anchor-path-weight 0 --geo-grasp --geo-goal-mode correct --geo-track-scale 0.25 --geo-continuity-off` (대체 방식: 기하 후보가 있으면 G1, 없으면 A4).
 - **주 지표:** safe success (공식 성공 ∧ 장애물 충돌 없음, SafeLIBERO 판정기).
