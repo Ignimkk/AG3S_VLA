@@ -10,7 +10,7 @@ Per variant: verdict (classification), apple (GT centre + 34 mm) inside the carv
 fingertip midpoint at the last planned step (refined vs reference; radial > 0 = pushed away from the fruit),
 and the robot rows on the recorded **main** field whose nearest surface point is outside the ball (bar, table,
 crate ...): min clearance and the number below -0.1 mm."""
-from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import rebase_legacy_paths, workspace_path as _ag3s_workspace_path
 import ast, json, sys, pathlib, dataclasses, glob
 from concurrent.futures import ProcessPoolExecutor
 import numpy as np
@@ -18,7 +18,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
 U = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T43/U/raw'))
 S = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T43/S/raw'))
-IX = {**json.load(open(S / "chunk_index_t40t41.json")), **json.load(open(U / "chunk_index_t43v_t42_2.json"))}
+IX = rebase_legacy_paths({**json.load(open(S / "chunk_index_t40t41.json")), **json.load(open(U / "chunk_index_t43v_t42_2.json"))})
 XML = _ag3s_workspace_path('robots/rby1/description/models/rby1a/mujoco/model_transport.xml')
 APPLE_R = 0.034
 

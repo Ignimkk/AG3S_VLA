@@ -1,0 +1,574 @@
+{
+ "source_scene": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/scene",
+ "frames": [
+  {
+   "key": "ep1856",
+   "frame": 24,
+   "category": "N_ok_L8H2_wrong",
+   "t_step": 192,
+   "grasp_state": "pre",
+   "topdown_window_xy_m": [
+    [
+     0.06750164435136119,
+     -0.3860838711261749
+    ],
+    [
+     1.0087923315001537,
+     0.5552068160226176
+    ]
+   ],
+   "target_px_per_camera": [
+    367,
+    0,
+    0
+   ],
+   "arms": {
+    "L8H2": {
+     "n_clusters": 5,
+     "chosen_rank": 0,
+     "identity_correct": false,
+     "chosen_cluster_purity": 0.0,
+     "coverage": 0.0,
+     "chosen__other_object": 120,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     },
+     "candidates": [
+      {
+       "rank": 0,
+       "n": 120,
+       "plurality": "other_object",
+       "n_target": 0,
+       "n_other_object": 120,
+       "target_score": 0.22376622927397224,
+       "admissible": true
+      },
+      {
+       "rank": 1,
+       "n": 70,
+       "plurality": "target",
+       "n_target": 70,
+       "n_other_object": 0,
+       "target_score": 0.16571782615257794,
+       "admissible": true
+      },
+      {
+       "rank": 2,
+       "n": 1856,
+       "plurality": "destination",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.12970844643027288,
+       "admissible": false
+      },
+      {
+       "rank": 3,
+       "n": 53,
+       "plurality": "other_object",
+       "n_target": 0,
+       "n_other_object": 53,
+       "target_score": 0.06848298807363726,
+       "admissible": true
+      },
+      {
+       "rank": 4,
+       "n": 122,
+       "plurality": "other_object",
+       "n_target": 0,
+       "n_other_object": 122,
+       "target_score": 0.013061154205598344,
+       "admissible": true
+      }
+     ]
+    },
+    "N": {
+     "n_clusters": 3,
+     "chosen_rank": 0,
+     "identity_correct": true,
+     "chosen_cluster_purity": 1.0,
+     "coverage": 1.0,
+     "chosen__other_object": 0,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     },
+     "candidates": [
+      {
+       "rank": 0,
+       "n": 70,
+       "plurality": "target",
+       "n_target": 70,
+       "n_other_object": 0,
+       "target_score": 0.4981999552270492,
+       "admissible": true
+      },
+      {
+       "rank": 1,
+       "n": 53,
+       "plurality": "other_object",
+       "n_target": 0,
+       "n_other_object": 53,
+       "target_score": 0.13749848822168786,
+       "admissible": true
+      },
+      {
+       "rank": 2,
+       "n": 1856,
+       "plurality": "destination",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.053060153813128216,
+       "admissible": false
+      }
+     ]
+    }
+   }
+  },
+  {
+   "key": "ep1816",
+   "frame": 34,
+   "category": "N_ok_L8H2_wrong",
+   "t_step": 272,
+   "grasp_state": "placed",
+   "topdown_window_xy_m": [
+    [
+     0.2070918547276478,
+     -0.36749905347824097
+    ],
+    [
+     0.756464025505733,
+     0.1818731172998442
+    ]
+   ],
+   "target_px_per_camera": [
+    227,
+    0,
+    2530
+   ],
+   "arms": {
+    "L8H2": {
+     "n_clusters": 8,
+     "chosen_rank": 0,
+     "identity_correct": false,
+     "chosen_cluster_purity": 0.0,
+     "coverage": 0.0,
+     "chosen__other_object": 47,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     },
+     "candidates": [
+      {
+       "rank": 0,
+       "n": 47,
+       "plurality": "other_object",
+       "n_target": 0,
+       "n_other_object": 47,
+       "target_score": 0.20936835177332136,
+       "admissible": true
+      },
+      {
+       "rank": 1,
+       "n": 1749,
+       "plurality": "destination",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.13589714836412817,
+       "admissible": false
+      },
+      {
+       "rank": 2,
+       "n": 84,
+       "plurality": "target",
+       "n_target": 84,
+       "n_other_object": 0,
+       "target_score": 0.09731549730638976,
+       "admissible": true
+      },
+      {
+       "rank": 3,
+       "n": 115,
+       "plurality": "other_object",
+       "n_target": 0,
+       "n_other_object": 115,
+       "target_score": 0.042183650958783694,
+       "admissible": true
+      },
+      {
+       "rank": 4,
+       "n": 114,
+       "plurality": "other_object",
+       "n_target": 0,
+       "n_other_object": 114,
+       "target_score": 0.014913779453144888,
+       "admissible": true
+      },
+      {
+       "rank": 5,
+       "n": 419,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.014654231564441655,
+       "admissible": false
+      },
+      {
+       "rank": 6,
+       "n": 159,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.0045809298296677296,
+       "admissible": true
+      },
+      {
+       "rank": 7,
+       "n": 551,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.0035673126495198693,
+       "admissible": true
+      }
+     ]
+    },
+    "N": {
+     "n_clusters": 4,
+     "chosen_rank": 0,
+     "identity_correct": true,
+     "chosen_cluster_purity": 1.0,
+     "coverage": 1.0,
+     "chosen__other_object": 0,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     },
+     "candidates": [
+      {
+       "rank": 0,
+       "n": 84,
+       "plurality": "target",
+       "n_target": 84,
+       "n_other_object": 0,
+       "target_score": 0.3591332489508851,
+       "admissible": true
+      },
+      {
+       "rank": 1,
+       "n": 1749,
+       "plurality": "destination",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.19173847667044527,
+       "admissible": false
+      },
+      {
+       "rank": 2,
+       "n": 551,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.0020414635187243815,
+       "admissible": true
+      },
+      {
+       "rank": 3,
+       "n": 578,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.0006400872464142855,
+       "admissible": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "key": "ep1814",
+   "frame": 23,
+   "category": "L8H2_ok_N_wrong",
+   "t_step": 184,
+   "grasp_state": "pre",
+   "topdown_window_xy_m": [
+    [
+     0.2343544728431073,
+     -0.5759524501720718
+    ],
+    [
+     0.7343544728431073,
+     -0.07595245017207175
+    ]
+   ],
+   "target_px_per_camera": [
+    57,
+    0,
+    13087
+   ],
+   "arms": {
+    "L8H2": {
+     "n_clusters": 3,
+     "chosen_rank": 0,
+     "identity_correct": true,
+     "chosen_cluster_purity": 1.0,
+     "coverage": 1.0,
+     "chosen__other_object": 0,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     },
+     "candidates": [
+      {
+       "rank": 0,
+       "n": 43,
+       "plurality": "target",
+       "n_target": 43,
+       "n_other_object": 0,
+       "target_score": 0.6660988656781375,
+       "admissible": true
+      },
+      {
+       "rank": 1,
+       "n": 62,
+       "plurality": "other_object",
+       "n_target": 0,
+       "n_other_object": 62,
+       "target_score": 0.3644429307306853,
+       "admissible": true
+      },
+      {
+       "rank": 2,
+       "n": 1672,
+       "plurality": "destination",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.01658928393649018,
+       "admissible": false
+      }
+     ]
+    },
+    "N": {
+     "n_clusters": 4,
+     "chosen_rank": 0,
+     "identity_correct": false,
+     "chosen_cluster_purity": 0.4095238095238095,
+     "coverage": 1.0,
+     "chosen__other_object": 62,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     },
+     "candidates": [
+      {
+       "rank": 0,
+       "n": 105,
+       "plurality": "other_object",
+       "n_target": 43,
+       "n_other_object": 62,
+       "target_score": 0.7375206685780662,
+       "admissible": true
+      },
+      {
+       "rank": 1,
+       "n": 1672,
+       "plurality": "destination",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.09788955369226443,
+       "admissible": false
+      },
+      {
+       "rank": 2,
+       "n": 624,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.01171660453382977,
+       "admissible": true
+      },
+      {
+       "rank": 3,
+       "n": 535,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.001938028033942261,
+       "admissible": true
+      }
+     ]
+    }
+   }
+  },
+  {
+   "key": "ep1831",
+   "frame": 31,
+   "category": "both_wrong",
+   "t_step": 248,
+   "grasp_state": "placed",
+   "topdown_window_xy_m": [
+    [
+     0.23718369896761216,
+     -0.5439732670783997
+    ],
+    [
+     0.9337040186513896,
+     0.15254705260537785
+    ]
+   ],
+   "target_px_per_camera": [
+    358,
+    2554,
+    1675
+   ],
+   "arms": {
+    "L8H2": {
+     "n_clusters": 2,
+     "chosen_rank": 1,
+     "identity_correct": false,
+     "chosen_cluster_purity": 0.0,
+     "coverage": 0.0,
+     "chosen__other_object": 84,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     },
+     "candidates": [
+      {
+       "rank": 0,
+       "n": 1602,
+       "plurality": "destination",
+       "n_target": 108,
+       "n_other_object": 0,
+       "target_score": 0.1890466591608222,
+       "admissible": false
+      },
+      {
+       "rank": 1,
+       "n": 84,
+       "plurality": "other_object",
+       "n_target": 0,
+       "n_other_object": 84,
+       "target_score": 0.06617160244417214,
+       "admissible": true
+      }
+     ]
+    },
+    "N": {
+     "n_clusters": 7,
+     "chosen_rank": 6,
+     "identity_correct": false,
+     "chosen_cluster_purity": 0.0,
+     "coverage": 0.0,
+     "chosen__other_object": 0,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     },
+     "candidates": [
+      {
+       "rank": 0,
+       "n": 1602,
+       "plurality": "destination",
+       "n_target": 108,
+       "n_other_object": 0,
+       "target_score": 0.1860831661621593,
+       "admissible": false
+      },
+      {
+       "rank": 1,
+       "n": 27,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.09818087770538222,
+       "admissible": false
+      },
+      {
+       "rank": 2,
+       "n": 41,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.08959119002246797,
+       "admissible": false
+      },
+      {
+       "rank": 3,
+       "n": 34,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.0056094285612239385,
+       "admissible": false
+      },
+      {
+       "rank": 4,
+       "n": 50,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.004352333151337541,
+       "admissible": false
+      },
+      {
+       "rank": 5,
+       "n": 401,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.0039127206661450096,
+       "admissible": false
+      },
+      {
+       "rank": 6,
+       "n": 118,
+       "plurality": "table",
+       "n_target": 0,
+       "n_other_object": 0,
+       "target_score": 0.002715926078676418,
+       "admissible": true
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "legend": {
+  "map": "raw 16x16 map normalised to its 3-camera max (blue ramp); row 1 L8H2 (serving), row 2 noun L10H7 (arm N)",
+  "outlines": "GT target (green), GT neighbour fruit = other_object (orange), GT crate (purple)",
+  "right_panels": "top-down base-frame XY of that arm's fused-cloud points inside a square window (GT target centre +- 0.25 m, widened to contain both arms' chosen clusters + 0.05 m), GT point-label colours; grey dashed = that arm's candidate cluster hulls (index = rank); blue = L8H2 choice, red = N choice; star = GT target centre"
+ }
+}

@@ -1,0 +1,591 @@
+{
+ "panels": {
+  "IFG-APPLE-SPLIT": {
+   "k": 12,
+   "state": "latched",
+   "hold": true,
+   "n_active_ref": 22,
+   "source_counts": {
+    "crate_post": 1,
+    "target": 18,
+    "unknown": 3
+   },
+   "camera": {
+    "lookat": [
+     0.4784,
+     0.2927,
+     0.8694
+    ],
+    "distance": 0.55,
+    "azimuth": 180,
+    "elevation": -30
+   },
+   "gt_target_centre": [
+    0.4783531316039523,
+    0.2926769762806737,
+    0.8494272990064237
+   ],
+   "palm_target_gt_mm": 177.6,
+   "rows": [
+    {
+     "p": [
+      0.45881,
+      0.2492,
+      0.9248
+     ],
+     "src": "crate",
+     "link": "ee_finger_l1",
+     "step": 3,
+     "h_mm": -0.284,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48489,
+      0.26099,
+      0.8793
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 4,
+     "h_mm": -0.462,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47892,
+      0.26195,
+      0.87063
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 5,
+     "h_mm": -3.524,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48032,
+      0.26446,
+      0.86913
+     ],
+     "src": "unknown",
+     "link": "ee_finger_l1",
+     "step": 5,
+     "h_mm": -3.246,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47984,
+      0.26232,
+      0.86699
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 6,
+     "h_mm": -7.431,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47596,
+      0.26378,
+      0.87031
+     ],
+     "src": "unknown",
+     "link": "ee_finger_l1",
+     "step": 6,
+     "h_mm": -2.432,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47897,
+      0.26144,
+      0.86166
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -23.019,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47102,
+      0.26205,
+      0.87008
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -4.223,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48022,
+      0.25952,
+      0.8713
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -2.706,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48481,
+      0.2605,
+      0.86472
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -4.467,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.4751,
+      0.26291,
+      0.865
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -1.363,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.46715,
+      0.26352,
+      0.87341
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -0.069,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48038,
+      0.26395,
+      0.86017
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -16.978,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47924,
+      0.25968,
+      0.87182
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -2.189,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.4695,
+      0.26702,
+      0.86763
+     ],
+     "src": "unknown",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -1.41,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47878,
+      0.26609,
+      0.83614
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 13,
+     "h_mm": -15.0,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47755,
+      0.26287,
+      0.83643
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 14,
+     "h_mm": -17.183,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.49047,
+      0.26236,
+      0.84157
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 14,
+     "h_mm": -17.346,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47896,
+      0.26538,
+      0.83494
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 14,
+     "h_mm": -15.0,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.477,
+      0.26206,
+      0.83582
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 15,
+     "h_mm": -17.183,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48992,
+      0.26155,
+      0.84094
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 15,
+     "h_mm": -18.636,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.4784,
+      0.26457,
+      0.83433
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 15,
+     "h_mm": -15.0,
+     "layer": "target_free"
+    }
+   ]
+  },
+  "IFG-APPLE-NBC": {
+   "k": 12,
+   "state": "latched",
+   "hold": true,
+   "n_active_ref": 22,
+   "source_counts": {
+    "crate_post": 1,
+    "target": 18,
+    "unknown": 3
+   },
+   "camera": {
+    "lookat": [
+     0.4784,
+     0.2927,
+     0.8694
+    ],
+    "distance": 0.55,
+    "azimuth": 180,
+    "elevation": -30
+   },
+   "gt_target_centre": [
+    0.4783531316039523,
+    0.2926769762806737,
+    0.8494272990064237
+   ],
+   "palm_target_gt_mm": 177.6,
+   "rows": [
+    {
+     "p": [
+      0.45881,
+      0.2492,
+      0.9248
+     ],
+     "src": "crate",
+     "link": "ee_finger_l1",
+     "step": 3,
+     "h_mm": -0.284,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48489,
+      0.26099,
+      0.8793
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 4,
+     "h_mm": -0.462,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47892,
+      0.26195,
+      0.87063
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 5,
+     "h_mm": -3.524,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48032,
+      0.26446,
+      0.86913
+     ],
+     "src": "unknown",
+     "link": "ee_finger_l1",
+     "step": 5,
+     "h_mm": -3.246,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47984,
+      0.26232,
+      0.86699
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 6,
+     "h_mm": -7.431,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47596,
+      0.26378,
+      0.87031
+     ],
+     "src": "unknown",
+     "link": "ee_finger_l1",
+     "step": 6,
+     "h_mm": -2.432,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47897,
+      0.26144,
+      0.86166
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -23.019,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47102,
+      0.26205,
+      0.87008
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -4.223,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48022,
+      0.25952,
+      0.8713
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -2.706,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48481,
+      0.2605,
+      0.86472
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -4.467,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.4751,
+      0.26291,
+      0.865
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -1.363,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.46715,
+      0.26352,
+      0.87341
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -0.069,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48038,
+      0.26395,
+      0.86017
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -16.978,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47924,
+      0.25968,
+      0.87182
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -2.189,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.4695,
+      0.26702,
+      0.86763
+     ],
+     "src": "unknown",
+     "link": "ee_finger_l1",
+     "step": 7,
+     "h_mm": -1.41,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47878,
+      0.26609,
+      0.83614
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 13,
+     "h_mm": -15.0,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47755,
+      0.26287,
+      0.83643
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 14,
+     "h_mm": -17.183,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.49047,
+      0.26236,
+      0.84157
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 14,
+     "h_mm": -17.346,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.47896,
+      0.26538,
+      0.83494
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 14,
+     "h_mm": -15.0,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.477,
+      0.26206,
+      0.83582
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 15,
+     "h_mm": -17.183,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.48992,
+      0.26155,
+      0.84094
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 15,
+     "h_mm": -18.636,
+     "layer": "target_free"
+    },
+    {
+     "p": [
+      0.4784,
+      0.26457,
+      0.83433
+     ],
+     "src": "target",
+     "link": "ee_finger_l1",
+     "step": 15,
+     "h_mm": -15.0,
+     "layer": "target_free"
+    }
+   ]
+  }
+ },
+ "script": "AG3S/ag3s/experiments/studies/ifg_precheck_a.py"
+}

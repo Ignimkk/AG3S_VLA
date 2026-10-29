@@ -1,0 +1,10 @@
+{
+ "frame": "T53_ep1842_f016",
+ "cameras": [
+  "zed_left",
+  "wrist_cam_l",
+  "wrist_cam_r"
+ ],
+ "map": "N (L10H7)",
+ "note": "p_in_* = re-rendered policy cameras, p_att_* = with noun attention"
+}

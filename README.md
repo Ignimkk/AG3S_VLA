@@ -5,7 +5,7 @@ KNOWS/SEAM: `Baseline`; LIBERO/SafeLIBERO/LIBERO-Safety: `benchmark`.
 RB-Y1: `integration/rby1`, robot assets: `robots/rby1/description`.
 Modified OpenPI is vendored with its original history at `third_party/openpi`.
 
-Read [branch and merge rules](doc/BRANCHES.md), [migration manifest](doc/migration/source-manifest.json)
+Read [branch and merge rules](doc/active/BRANCHES.md), [migration manifest](doc/active/migration/source-manifest.json)
 and [environment setup](environments/README.md) before development.
 Two independent clones use the same `AG3S_VLA` origin. No remote was pushed during migration.
 

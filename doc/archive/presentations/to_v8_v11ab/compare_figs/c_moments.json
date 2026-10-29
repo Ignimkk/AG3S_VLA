@@ -1,0 +1,94 @@
+{
+ "source_numbers": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T071304+0900_cf38c9dbca7b_c2a4f0214bb3/verify/PPT_TO_V11AB/raw/ppt_numbers.json",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T071304+0900_cf38c9dbca7b_c2a4f0214bb3/verify/PPT_TO_V11AB/p/fig_compare.py",
+ "causes": {
+  "i": "(i) 계획 clear, 실제만 진입",
+  "ii": "(ii) TO 위반 미해결",
+  "iii": "(iii) ESDF 거리 오차",
+  "iv_held": "(iv) margin 0 행 (쥔 사과)",
+  "v_coverage": "(v) 구 coverage",
+  "v_no_to_row": "(v) 그 행의 TO 구 없음"
+ },
+ "moments_by_cause": {
+  "i": [
+   87.0,
+   90.0,
+   20.0
+  ],
+  "ii": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "iii": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "iv_held": [
+   2.0,
+   2.0,
+   0.0
+  ],
+  "v_coverage": [
+   0.0,
+   6.0,
+   0.0
+  ],
+  "v_no_to_row": [
+   0.0,
+   9.0,
+   0.0
+  ]
+ },
+ "moments_total": [
+  89,
+  107,
+  20
+ ],
+ "moments_contact": [
+  10,
+  12,
+  0
+ ],
+ "moments_hold": [
+  0,
+  0,
+  0
+ ],
+ "C_minus_M_median_mm": [
+  13.940706194248989,
+  10.081053192089229,
+  10.445837587524078
+ ],
+ "C_minus_M_p90_mm": [
+  30.491520654577467,
+  28.735212985713858,
+  29.951171281468387
+ ],
+ "C_minus_M_n": [
+  1413,
+  2269,
+  1638
+ ],
+ "height_C_median_mm": [
+  19.563659236443655,
+  18.339502901814964,
+  19.9303715132918
+ ],
+ "height_M_median_mm": [
+  3.846152287714011,
+  6.6603183061269,
+  13.55326397066281
+ ],
+ "height_n": [
+  13,
+  10,
+  14
+ ],
+ "arms": [
+  "V8",
+  "V11A",
+  "V11AB"
+ ]
+}

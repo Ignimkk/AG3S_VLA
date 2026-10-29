@@ -5,10 +5,18 @@ paths:
 
 # 기록 규칙 — 이 파일들을 만질 때만 들어온다
 
-**`AG3S_T0T6_LOG.md` 가 정본이다. 여기에 이어 쓴다. 새 기록 파일을 만들지 않는다** (규칙 D).
-단, Panda/LIBERO 계열 benchmark 단계(SL-0~, P1~)는 사용자 지시(2026-10-12)로 `AG3S/ag3s/docs/AG3S_BENCHMARK_LOG.md` 가 정본이다.
+**benchmark checkout 의 정본 로그 (2026-10-29 main merge 뒤에도 그대로):**
+
+| 파일 | 상태 | 규칙 |
+|---|---|---|
+| `AG3S_BENCHMARK_LOG.md` | Panda/LIBERO 계열 benchmark 정본 (사용자 지시 2026-10-12) | SL-0~ · P1~ 단계를 **여기에 이어 쓴다** |
+| `AG3S_BASELINE_LOG.md` | 논문 비교 baseline 정본 (2026-10-23 신설) | BL-0~ 단계를 **여기에 이어 쓴다** |
+| `AG3S_T47_LOG.md` | RB-Y1 최신 정본 — T47 이후 STEP (development checkout 이 씀) | 이 checkout 에서는 링크만 |
+| `AG3S_T0T6_LOG.md` | RB-Y1 이전 정본 — T0 ~ T46 | 이 checkout 에서는 링크만. T46 이전 결정의 출처 |
+
 옛 `AG3S_REVIEW_LOG.md` 는 모듈 검토 국면의 archive 다 — 2026-09-24 부터 이어 쓰지 않는다.
 발견 번호(`E3`·`F19`·`C5`·`N2` …)의 **원 측정**을 찾을 때만 그리로 간다.
+그 밖의 새 기록 파일은 만들지 않는다 (규칙 D). 옛 로그의 근거는 **링크**한다 — 옮겨 적지 않는다.
 
 **병렬 세션에서는 이 파일의 writer 가 `ag3s-scribe` 하나다.** 다른 역할이 로그를 고치면
 같은 절을 두 번 쓰거나 서로 덮어쓴다. 네가 scribe 가 아니면 `AG3S/ag3s/docs/handoff/` 로 넘겨라.

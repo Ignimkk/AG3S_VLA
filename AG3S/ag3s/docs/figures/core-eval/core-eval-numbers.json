@@ -1,0 +1,988 @@
+{
+ "core-eval-outcomes": {
+  "outcomes": {
+   "가림121|VLA|k0": "성공",
+   "가림122|VLA|k0": "성공",
+   "가림123|VLA|k0": "성공",
+   "가림121|VLA|k1": "성공",
+   "가림122|VLA|k1": "성공",
+   "가림123|VLA|k1": "성공",
+   "가림121|E3|k0": "쥐지 못함",
+   "가림122|E3|k0": "들어올린 뒤 놓침",
+   "가림123|E3|k0": "쥐지 못함",
+   "가림121|E3|k1": "들어올린 뒤 놓침",
+   "가림122|E3|k1": "들어올린 뒤 놓침",
+   "가림123|E3|k1": "성공",
+   "가림121|SCM|k0": "성공",
+   "가림122|SCM|k0": "성공",
+   "가림123|SCM|k0": "쥐지 못함",
+   "가림121|SCM|k1": "성공",
+   "가림122|SCM|k1": "쥐지 못함",
+   "가림123|SCM|k1": "성공",
+   "가림121|CORE|k0": "성공",
+   "가림122|CORE|k0": "성공",
+   "가림123|CORE|k0": "성공",
+   "가림121|CORE|k1": "성공",
+   "가림122|CORE|k1": "들어올린 뒤 놓침",
+   "가림123|CORE|k1": "성공",
+   "회귀119|VLA|k0": "성공",
+   "회귀250|VLA|k0": "성공",
+   "회귀320|VLA|k0": "성공",
+   "회귀850|VLA|k0": "성공",
+   "회귀954|VLA|k0": "금지 접촉: 이웃 과일",
+   "회귀211|VLA|k0": "금지 접촉: 이웃 과일",
+   "회귀119|VLA|k1": "성공",
+   "회귀250|VLA|k1": "성공",
+   "회귀320|VLA|k1": "성공",
+   "회귀850|VLA|k1": "성공",
+   "회귀954|VLA|k1": "금지 접촉: 이웃 과일",
+   "회귀211|VLA|k1": "성공",
+   "회귀119|E3|k0": "성공",
+   "회귀250|E3|k0": "성공",
+   "회귀320|E3|k0": "성공",
+   "회귀850|E3|k0": "못 놓음",
+   "회귀954|E3|k0": "쥐지 못함",
+   "회귀211|E3|k0": "못 놓음",
+   "회귀119|E3|k1": "성공",
+   "회귀250|E3|k1": "성공",
+   "회귀320|E3|k1": "성공",
+   "회귀850|E3|k1": "성공",
+   "회귀954|E3|k1": "쥐지 못함",
+   "회귀211|E3|k1": "쥐지 못함",
+   "회귀119|SCM|k0": "성공",
+   "회귀250|SCM|k0": "성공",
+   "회귀320|SCM|k0": "성공",
+   "회귀850|SCM|k0": "성공",
+   "회귀954|SCM|k0": "금지 접촉: 이웃 과일",
+   "회귀211|SCM|k0": "금지 접촉: 이웃 과일",
+   "회귀119|SCM|k1": "쥐지 못함",
+   "회귀250|SCM|k1": "성공",
+   "회귀320|SCM|k1": "성공",
+   "회귀850|SCM|k1": "못 놓음",
+   "회귀954|SCM|k1": "금지 접촉: 이웃 과일",
+   "회귀211|SCM|k1": "쥐지 못함",
+   "회귀119|CORE|k0": "성공",
+   "회귀250|CORE|k0": "성공",
+   "회귀320|CORE|k0": "성공",
+   "회귀850|CORE|k0": "성공",
+   "회귀954|CORE|k0": "금지 접촉: 이웃 과일",
+   "회귀211|CORE|k0": "금지 접촉: 이웃 과일",
+   "회귀119|CORE|k1": "쥐지 못함",
+   "회귀250|CORE|k1": "성공",
+   "회귀320|CORE|k1": "성공",
+   "회귀850|CORE|k1": "쥐지 못함",
+   "회귀954|CORE|k1": "금지 접촉: 이웃 과일",
+   "회귀211|CORE|k1": "성공"
+  },
+  "table_or_basket": {
+   "회귀119|VLA|k0": false,
+   "회귀250|VLA|k0": true,
+   "회귀320|VLA|k0": true,
+   "회귀850|VLA|k0": false,
+   "회귀954|VLA|k0": false,
+   "회귀211|VLA|k0": false,
+   "회귀119|VLA|k1": false,
+   "회귀250|VLA|k1": true,
+   "회귀320|VLA|k1": true,
+   "회귀850|VLA|k1": false,
+   "회귀954|VLA|k1": false,
+   "회귀211|VLA|k1": true,
+   "회귀119|E3|k0": false,
+   "회귀250|E3|k0": false,
+   "회귀320|E3|k0": false,
+   "회귀850|E3|k0": false,
+   "회귀954|E3|k0": false,
+   "회귀211|E3|k0": false,
+   "회귀119|E3|k1": false,
+   "회귀250|E3|k1": false,
+   "회귀320|E3|k1": false,
+   "회귀850|E3|k1": false,
+   "회귀954|E3|k1": false,
+   "회귀211|E3|k1": false,
+   "회귀119|SCM|k0": false,
+   "회귀250|SCM|k0": false,
+   "회귀320|SCM|k0": false,
+   "회귀850|SCM|k0": false,
+   "회귀954|SCM|k0": false,
+   "회귀211|SCM|k0": false,
+   "회귀119|SCM|k1": false,
+   "회귀250|SCM|k1": false,
+   "회귀320|SCM|k1": false,
+   "회귀850|SCM|k1": false,
+   "회귀954|SCM|k1": false,
+   "회귀211|SCM|k1": false,
+   "회귀119|CORE|k0": false,
+   "회귀250|CORE|k0": false,
+   "회귀320|CORE|k0": false,
+   "회귀850|CORE|k0": false,
+   "회귀954|CORE|k0": false,
+   "회귀211|CORE|k0": false,
+   "회귀119|CORE|k1": false,
+   "회귀250|CORE|k1": false,
+   "회귀320|CORE|k1": false,
+   "회귀850|CORE|k1": false,
+   "회귀954|CORE|k1": false,
+   "회귀211|CORE|k1": false
+  },
+  "totals": {
+   "가림 기둥 (3 장면 × 2)|VLA": {
+    "k": 6,
+    "n": 6,
+    "wilson95": [
+     0.61,
+     1.0
+    ]
+   },
+   "가림 기둥 (3 장면 × 2)|E3": {
+    "k": 1,
+    "n": 6,
+    "wilson95": [
+     0.03,
+     0.564
+    ]
+   },
+   "가림 기둥 (3 장면 × 2)|SCM": {
+    "k": 4,
+    "n": 6,
+    "wilson95": [
+     0.3,
+     0.903
+    ]
+   },
+   "가림 기둥 (3 장면 × 2)|CORE": {
+    "k": 5,
+    "n": 6,
+    "wilson95": [
+     0.436,
+     0.97
+    ]
+   },
+   "장애물 없음 (6 장면 × 2)|VLA": {
+    "k": 9,
+    "n": 12,
+    "wilson95": [
+     0.468,
+     0.911
+    ]
+   },
+   "장애물 없음 (6 장면 × 2)|E3": {
+    "k": 7,
+    "n": 12,
+    "wilson95": [
+     0.32,
+     0.807
+    ]
+   },
+   "장애물 없음 (6 장면 × 2)|SCM": {
+    "k": 6,
+    "n": 12,
+    "wilson95": [
+     0.254,
+     0.746
+    ]
+   },
+   "장애물 없음 (6 장면 × 2)|CORE": {
+    "k": 7,
+    "n": 12,
+    "wilson95": [
+     0.32,
+     0.807
+    ]
+   }
+  },
+  "type_counts": {
+   "VLA": {
+    "성공": 15,
+    "금지 접촉: 이웃 과일": 3
+   },
+   "E3": {
+    "쥐지 못함": 5,
+    "들어올린 뒤 놓침": 3,
+    "성공": 8,
+    "못 놓음": 2
+   },
+   "SCM": {
+    "성공": 10,
+    "쥐지 못함": 4,
+    "못 놓음": 1,
+    "금지 접촉: 이웃 과일": 3
+   },
+   "CORE": {
+    "성공": 12,
+    "들어올린 뒤 놓침": 1,
+    "쥐지 못함": 2,
+    "금지 접촉: 이웃 과일": 3
+   }
+  },
+  "sources": {
+   "VLA|0": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/RP/agg_E3_closed_occ_VLA_rep1.json",
+   "VLA|1": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/agg_occ_VLA_k1.json",
+   "E3|0": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_occ/e3_runs.json",
+   "E3|1": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/agg_occ_E3_k1.json",
+   "SCM|0": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/agg_occ_SCM_k0.json",
+   "SCM|1": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/agg_occ_SCM_k1.json",
+   "CORE|0": "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/OCC/agg_occ_k0.json",
+   "CORE|1": "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/OCC/agg_occ_k1.json",
+   "VLA|0|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/RP/VLA_rep1/agg/e3_closed_loop_reg.json",
+   "VLA|1|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_VLA_k1/agg/e3_closed_loop_reg.json",
+   "E3|0|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_reg/agg/e3_closed_loop_reg.json",
+   "E3|1|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3_k1/agg/e3_closed_loop_reg.json",
+   "SCM|0|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_SCM_k0/agg/e3_closed_loop_reg.json",
+   "SCM|1|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_SCM_k1/agg/e3_closed_loop_reg.json",
+   "CORE|0|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/REG_k0/agg/e3_closed_loop_reg.json",
+   "CORE|1|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/REG_k1/agg/e3_closed_loop_reg.json"
+  }
+ },
+ "core-eval-ats": {
+  "examples": {
+   "가림121_k0": {
+    "request": 14,
+    "precision_5mm": 0.88,
+    "ball_centre_err_mm": 16.8,
+    "n_target_points": 108,
+    "majority_object": "apple",
+    "manip_state": "occluded"
+   },
+   "회귀954_k0": {
+    "request": 61,
+    "precision_5mm": 0.913,
+    "ball_centre_err_mm": 17.1,
+    "n_target_points": 104,
+    "majority_object": "apple",
+    "manip_state": "occluded"
+   }
+  },
+  "per_run": {
+   "가림121_k0": {
+    "n_pre": 15,
+    "precision_median": 0.889,
+    "centre_err_median_mm": 18.5,
+    "centre_err_max_mm": 19.3,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.67,
+    "vis_centroid_median_mm": 5.5,
+    "head_visible_median": 0.249
+   },
+   "가림121_k1": {
+    "n_pre": 15,
+    "precision_median": 0.912,
+    "centre_err_median_mm": 17.9,
+    "centre_err_max_mm": 19.1,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.706,
+    "vis_centroid_median_mm": 5.3,
+    "head_visible_median": 0.249
+   },
+   "가림122_k0": {
+    "n_pre": 15,
+    "precision_median": 0.894,
+    "centre_err_median_mm": 17.6,
+    "centre_err_max_mm": 19.5,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.748,
+    "vis_centroid_median_mm": 5.5,
+    "head_visible_median": 0.246
+   },
+   "가림122_k1": {
+    "n_pre": 27,
+    "precision_median": 0.883,
+    "centre_err_median_mm": 17.2,
+    "centre_err_max_mm": 19.1,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.744,
+    "vis_centroid_median_mm": 5.0,
+    "head_visible_median": 0.245
+   },
+   "가림123_k0": {
+    "n_pre": 13,
+    "precision_median": 0.885,
+    "centre_err_median_mm": 17.9,
+    "centre_err_max_mm": 19.2,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.722,
+    "vis_centroid_median_mm": 5.2,
+    "head_visible_median": 0.245
+   },
+   "가림123_k1": {
+    "n_pre": 14,
+    "precision_median": 0.8815,
+    "centre_err_median_mm": 17.95,
+    "centre_err_max_mm": 19.2,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.7605,
+    "vis_centroid_median_mm": 5.55,
+    "head_visible_median": 0.244
+   },
+   "회귀119_k0": {
+    "n_pre": 15,
+    "precision_median": 0.895,
+    "centre_err_median_mm": 16.5,
+    "centre_err_max_mm": 18.1,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.692,
+    "vis_centroid_median_mm": 7.0,
+    "head_visible_median": 0.453
+   },
+   "회귀119_k1": {
+    "n_pre": 15,
+    "precision_median": 0.887,
+    "centre_err_median_mm": 16.6,
+    "centre_err_max_mm": 18.2,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.699,
+    "vis_centroid_median_mm": 7.1,
+    "head_visible_median": 0.453
+   },
+   "회귀250_k0": {
+    "n_pre": 12,
+    "precision_median": 0.777,
+    "centre_err_median_mm": 28.35,
+    "centre_err_max_mm": 32.9,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.22,
+    "vis_centroid_median_mm": 26.25,
+    "head_visible_median": 0.443
+   },
+   "회귀250_k1": {
+    "n_pre": 11,
+    "precision_median": 0.824,
+    "centre_err_median_mm": 16.1,
+    "centre_err_max_mm": 32.9,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.643,
+    "vis_centroid_median_mm": 8.3,
+    "head_visible_median": 0.445
+   },
+   "회귀320_k0": {
+    "n_pre": 16,
+    "precision_median": 0.8895,
+    "centre_err_median_mm": 17.4,
+    "centre_err_max_mm": 18.2,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.6545000000000001,
+    "vis_centroid_median_mm": 5.45,
+    "head_visible_median": 0.44
+   },
+   "회귀320_k1": {
+    "n_pre": 16,
+    "precision_median": 0.897,
+    "centre_err_median_mm": 17.45,
+    "centre_err_max_mm": 18.3,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.67,
+    "vis_centroid_median_mm": 5.45,
+    "head_visible_median": 0.441
+   },
+   "회귀850_k0": {
+    "n_pre": 16,
+    "precision_median": 0.91,
+    "centre_err_median_mm": 16.95,
+    "centre_err_max_mm": 19.6,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.7204999999999999,
+    "vis_centroid_median_mm": 6.35,
+    "head_visible_median": 0.4495
+   },
+   "회귀850_k1": {
+    "n_pre": 16,
+    "precision_median": 0.9155,
+    "centre_err_median_mm": 17.1,
+    "centre_err_max_mm": 19.6,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.716,
+    "vis_centroid_median_mm": 6.550000000000001,
+    "head_visible_median": 0.4495
+   },
+   "회귀954_k0": {
+    "n_pre": 62,
+    "precision_median": 0.491,
+    "centre_err_median_mm": 30.75,
+    "centre_err_max_mm": 55.7,
+    "no_target": 0,
+    "wrong_object": 31,
+    "recall_median": 0.635,
+    "vis_centroid_median_mm": 18.6,
+    "head_visible_median": 0.4
+   },
+   "회귀954_k1": {
+    "n_pre": 24,
+    "precision_median": 0.907,
+    "centre_err_median_mm": 17.2,
+    "centre_err_max_mm": 18.8,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.7044999999999999,
+    "vis_centroid_median_mm": 7.0,
+    "head_visible_median": 0.2965
+   },
+   "회귀211_k0": {
+    "n_pre": 75,
+    "precision_median": 0.826,
+    "centre_err_median_mm": 23.549999999999997,
+    "centre_err_max_mm": 26.9,
+    "no_target": 29,
+    "wrong_object": 0,
+    "recall_median": 0.4225,
+    "vis_centroid_median_mm": 19.65,
+    "head_visible_median": 0.374
+   },
+   "회귀211_k1": {
+    "n_pre": 21,
+    "precision_median": 0.821,
+    "centre_err_median_mm": 22.1,
+    "centre_err_max_mm": 24.7,
+    "no_target": 0,
+    "wrong_object": 0,
+    "recall_median": 0.545,
+    "vis_centroid_median_mm": 13.9,
+    "head_visible_median": 0.457
+   }
+  },
+  "precision_all_median": 0.882,
+  "centre_err_all_median_mm": 17.9,
+  "n_pre_requests": 369,
+  "recall_all_median": 0.68,
+  "vis_centroid_all_median_mm": 7.2,
+  "occlusion_head_visible_median": 0.245,
+  "clear_head_visible_median": 0.421,
+  "note_centre": "ball / point centroid of a one-sided view sits ~r/2 (16.6 mm for r 33 mm) in front of the apple centre by construction; the visible-surface centroid error removes that bias",
+  "no_target_total": 29,
+  "wrong_object_total": 31,
+  "definition": "pick-phase requests before the first two-finger contact; precision = target points within 5 mm of GT apple collision-surface samples; centre error = |ball centre − GT apple body origin|"
+ },
+ "core-eval-hsr": {
+  "per_run": {
+   "가림121_k0": {
+    "phase_agreement": 0.9629629629629629,
+    "place_gt": 16,
+    "place_pred": 17,
+    "place_delay": 1,
+    "held_gt_lift": 16,
+    "two_finger_gt": 15,
+    "held_pred": 16,
+    "held_delay_vs_lift": 0,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 27,
+    "placed_pred": 28,
+    "false_held_before_contact": 0
+   },
+   "가림121_k1": {
+    "phase_agreement": 0.9655172413793104,
+    "place_gt": 17,
+    "place_pred": 18,
+    "place_delay": 1,
+    "held_gt_lift": 17,
+    "two_finger_gt": 15,
+    "held_pred": 16,
+    "held_delay_vs_lift": -1,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 29,
+    "placed_pred": 31,
+    "false_held_before_contact": 0
+   },
+   "가림122_k0": {
+    "phase_agreement": 0.9655172413793104,
+    "place_gt": 17,
+    "place_pred": 18,
+    "place_delay": 1,
+    "held_gt_lift": 17,
+    "two_finger_gt": 15,
+    "held_pred": 16,
+    "held_delay_vs_lift": -1,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 29,
+    "placed_pred": 31,
+    "false_held_before_contact": 0
+   },
+   "가림122_k1": {
+    "phase_agreement": 0.9393939393939394,
+    "place_gt": 29,
+    "place_pred": 31,
+    "place_delay": 2,
+    "held_gt_lift": 29,
+    "two_finger_gt": 27,
+    "held_pred": 28,
+    "held_delay_vs_lift": -1,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 33,
+    "placed_pred": 36,
+    "false_held_before_contact": 0
+   },
+   "가림123_k0": {
+    "phase_agreement": 0.9615384615384616,
+    "place_gt": 14,
+    "place_pred": 15,
+    "place_delay": 1,
+    "held_gt_lift": 14,
+    "two_finger_gt": 13,
+    "held_pred": 14,
+    "held_delay_vs_lift": 0,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 26,
+    "placed_pred": 29,
+    "false_held_before_contact": 0
+   },
+   "가림123_k1": {
+    "phase_agreement": 1.0,
+    "place_gt": 16,
+    "place_pred": 16,
+    "place_delay": 0,
+    "held_gt_lift": 16,
+    "two_finger_gt": 14,
+    "held_pred": 15,
+    "held_delay_vs_lift": -1,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 28,
+    "placed_pred": 30,
+    "false_held_before_contact": 1
+   },
+   "회귀119_k0": {
+    "phase_agreement": 0.9090909090909091,
+    "place_gt": 16,
+    "place_pred": 18,
+    "place_delay": 2,
+    "held_gt_lift": 16,
+    "two_finger_gt": 15,
+    "held_pred": 16,
+    "held_delay_vs_lift": 0,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 22,
+    "placed_pred": 23,
+    "false_held_before_contact": 0
+   },
+   "회귀119_k1": {
+    "phase_agreement": 0.49333333333333335,
+    "place_gt": null,
+    "place_pred": 17,
+    "place_delay": null,
+    "held_gt_lift": null,
+    "two_finger_gt": 15,
+    "held_pred": null,
+    "held_delay_vs_lift": null,
+    "held_delay_vs_two_finger": null,
+    "release_gt": null,
+    "placed_pred": null,
+    "false_held_before_contact": 0
+   },
+   "회귀250_k0": {
+    "phase_agreement": 0.92,
+    "place_gt": 14,
+    "place_pred": 16,
+    "place_delay": 2,
+    "held_gt_lift": 14,
+    "two_finger_gt": 12,
+    "held_pred": 13,
+    "held_delay_vs_lift": -1,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 25,
+    "placed_pred": 26,
+    "false_held_before_contact": 0
+   },
+   "회귀250_k1": {
+    "phase_agreement": 0.9565217391304348,
+    "place_gt": 13,
+    "place_pred": 14,
+    "place_delay": 1,
+    "held_gt_lift": 13,
+    "two_finger_gt": 11,
+    "held_pred": 12,
+    "held_delay_vs_lift": -1,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 23,
+    "placed_pred": 25,
+    "false_held_before_contact": 0
+   },
+   "회귀320_k0": {
+    "phase_agreement": 0.9655172413793104,
+    "place_gt": 18,
+    "place_pred": 19,
+    "place_delay": 1,
+    "held_gt_lift": 18,
+    "two_finger_gt": 16,
+    "held_pred": 17,
+    "held_delay_vs_lift": -1,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 29,
+    "placed_pred": 30,
+    "false_held_before_contact": 0
+   },
+   "회귀320_k1": {
+    "phase_agreement": 0.9655172413793104,
+    "place_gt": 18,
+    "place_pred": 19,
+    "place_delay": 1,
+    "held_gt_lift": 18,
+    "two_finger_gt": 16,
+    "held_pred": 18,
+    "held_delay_vs_lift": 0,
+    "held_delay_vs_two_finger": 2,
+    "release_gt": 29,
+    "placed_pred": 30,
+    "false_held_before_contact": 0
+   },
+   "회귀850_k0": {
+    "phase_agreement": 1.0,
+    "place_gt": 18,
+    "place_pred": 18,
+    "place_delay": 0,
+    "held_gt_lift": 18,
+    "two_finger_gt": 16,
+    "held_pred": 17,
+    "held_delay_vs_lift": -1,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 27,
+    "placed_pred": 30,
+    "false_held_before_contact": 0
+   },
+   "회귀850_k1": {
+    "phase_agreement": 0.6133333333333333,
+    "place_gt": null,
+    "place_pred": 18,
+    "place_delay": null,
+    "held_gt_lift": null,
+    "two_finger_gt": 16,
+    "held_pred": 17,
+    "held_delay_vs_lift": null,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": null,
+    "placed_pred": null,
+    "false_held_before_contact": 0
+   },
+   "회귀954_k0": {
+    "phase_agreement": 0.6133333333333333,
+    "place_gt": null,
+    "place_pred": 25,
+    "place_delay": null,
+    "held_gt_lift": null,
+    "two_finger_gt": 62,
+    "held_pred": null,
+    "held_delay_vs_lift": null,
+    "held_delay_vs_two_finger": null,
+    "release_gt": null,
+    "placed_pred": null,
+    "false_held_before_contact": 0
+   },
+   "회귀954_k1": {
+    "phase_agreement": 0.7733333333333333,
+    "place_gt": null,
+    "place_pred": 33,
+    "place_delay": null,
+    "held_gt_lift": null,
+    "two_finger_gt": 24,
+    "held_pred": null,
+    "held_delay_vs_lift": null,
+    "held_delay_vs_two_finger": null,
+    "release_gt": null,
+    "placed_pred": null,
+    "false_held_before_contact": 0
+   },
+   "회귀211_k0": {
+    "phase_agreement": 0.5066666666666667,
+    "place_gt": null,
+    "place_pred": 38,
+    "place_delay": null,
+    "held_gt_lift": null,
+    "two_finger_gt": null,
+    "held_pred": 37,
+    "held_delay_vs_lift": null,
+    "held_delay_vs_two_finger": null,
+    "release_gt": null,
+    "placed_pred": 44,
+    "false_held_before_contact": 7
+   },
+   "회귀211_k1": {
+    "phase_agreement": 0.9705882352941176,
+    "place_gt": 23,
+    "place_pred": 24,
+    "place_delay": 1,
+    "held_gt_lift": 23,
+    "two_finger_gt": 21,
+    "held_pred": 22,
+    "held_delay_vs_lift": -1,
+    "held_delay_vs_two_finger": 1,
+    "release_gt": 34,
+    "placed_pred": 35,
+    "false_held_before_contact": 0
+   }
+  },
+  "definition": "GT held = both active-hand finger bodies touch the apple and it rose >= 20 mm since the first request; GT place = from first GT held until the fingers leave the apple; HSR phase = summary.subtask.label (None counted as pick); HSR grasp = summary.grasp.state",
+  "phase_agreement_median": 0.9590301003344481
+ },
+ "core-eval-lte": {
+  "examples": {
+   "가림121_k0": {
+    "request": 14,
+    "removed_by_class": {
+     "none": 135,
+     "apple": 579,
+     "robot": 124,
+     "apple_inside": 212,
+     "apple_stem_leaf": 29
+    },
+    "apple_left_frac": 0.063,
+    "clearance_now_mm": {
+     "hand_body": 28.8,
+     "finger": 10.0,
+     "palm_shell": 7.2
+    },
+    "n_hand_spheres": 303
+   },
+   "회귀954_k0": {
+    "request": 61,
+    "removed_by_class": {
+     "fruit": 5,
+     "none": 250,
+     "apple": 556,
+     "robot": 131,
+     "apple_inside": 227,
+     "apple_stem_leaf": 30
+    },
+    "apple_left_frac": 0.289,
+    "clearance_now_mm": {
+     "hand_body": 43.9,
+     "finger": 5.1,
+     "palm_shell": 16.4
+    },
+    "n_hand_spheres": 303
+   }
+  },
+  "apple_left_frac_median": 0.175,
+  "removed_by_class_total": {
+   "apple": 210443,
+   "none": 59846,
+   "apple_inside": 75771,
+   "apple_stem_leaf": 18217,
+   "robot": 9163,
+   "fruit": 6883
+  },
+  "forbidden_class_removed_per_run": {
+   "가림121_k0": 0,
+   "가림121_k1": 0,
+   "가림122_k0": 0,
+   "가림122_k1": 0,
+   "가림123_k0": 0,
+   "가림123_k1": 0,
+   "회귀119_k0": 2,
+   "회귀119_k1": 4,
+   "회귀250_k0": 884,
+   "회귀250_k1": 1055,
+   "회귀320_k0": 4,
+   "회귀320_k1": 4,
+   "회귀850_k0": 17,
+   "회귀850_k1": 22,
+   "회귀954_k0": 1242,
+   "회귀954_k1": 422,
+   "회귀211_k0": 1988,
+   "회귀211_k1": 1239
+  },
+  "definition": "pre-grasp requests; apple left = GT apple samples whose main-layer value is within 1 voxel and target-free value within 1 voxel; removed voxels classed by nearest GT surface within 8 mm (stem/leaf visual meshes and robot surface included; inside the apple radius = TSDF band)"
+ },
+ "core-eval-ccr": {
+  "examples": {
+   "가림121_k0": {
+    "request": 14,
+    "palm_dev_mm": 25.94,
+    "dq_max_deg": 6.134,
+    "n_violating_rows": 421,
+    "solve_ms": 130.64986653625965
+   },
+   "회귀954_k0": {
+    "request": 22,
+    "palm_dev_mm": 24.48,
+    "dq_max_deg": 6.102,
+    "n_violating_rows": 0,
+    "solve_ms": 68.16199887543917
+   }
+  },
+  "grasp_goal": {
+   "runs_active": 16,
+   "requests_active": 49,
+   "requests_reduced_gt_0p5mm": 26,
+   "ref_err_median_mm": 9.24,
+   "res_err_median_mm": 6.07,
+   "definition": "to.metrics.grasp_anchor with non-empty goal_rows; ref / res = palm distance to the frozen goal on the goal rows for the VLA reference / the refined chunk"
+  },
+  "per_run": {
+   "가림121_k0": {
+    "requests": 31,
+    "modified": 30,
+    "hold": 0,
+    "goal_active": 1,
+    "violating_reference": 6,
+    "palm_dev_median_mm": 5.45,
+    "solve_ms_median": 96.73144575208426
+   },
+   "가림121_k1": {
+    "requests": 34,
+    "modified": 33,
+    "hold": 0,
+    "goal_active": 1,
+    "violating_reference": 6,
+    "palm_dev_median_mm": 5.225,
+    "solve_ms_median": 106.15838645026088
+   },
+   "가림122_k0": {
+    "requests": 33,
+    "modified": 32,
+    "hold": 0,
+    "goal_active": 1,
+    "violating_reference": 7,
+    "palm_dev_median_mm": 6.61,
+    "solve_ms_median": 71.18439115583897
+   },
+   "가림122_k1": {
+    "requests": 75,
+    "modified": 74,
+    "hold": 0,
+    "goal_active": 11,
+    "violating_reference": 19,
+    "palm_dev_median_mm": 8.76,
+    "solve_ms_median": 88.92892673611641
+   },
+   "가림123_k0": {
+    "requests": 31,
+    "modified": 30,
+    "hold": 0,
+    "goal_active": 1,
+    "violating_reference": 6,
+    "palm_dev_median_mm": 12.38,
+    "solve_ms_median": 66.88896380364895
+   },
+   "가림123_k1": {
+    "requests": 32,
+    "modified": 31,
+    "hold": 0,
+    "goal_active": 2,
+    "violating_reference": 7,
+    "palm_dev_median_mm": 8.815,
+    "solve_ms_median": 102.50717913731933
+   },
+   "회귀119_k0": {
+    "requests": 27,
+    "modified": 26,
+    "hold": 0,
+    "goal_active": 2,
+    "violating_reference": 5,
+    "palm_dev_median_mm": 2.83,
+    "solve_ms_median": 54.77684922516346
+   },
+   "회귀119_k1": {
+    "requests": 75,
+    "modified": 74,
+    "hold": 0,
+    "goal_active": 2,
+    "violating_reference": 5,
+    "palm_dev_median_mm": 6.01,
+    "solve_ms_median": 68.49009729921818
+   },
+   "회귀250_k0": {
+    "requests": 29,
+    "modified": 27,
+    "hold": 0,
+    "goal_active": 1,
+    "violating_reference": 6,
+    "palm_dev_median_mm": 3.24,
+    "solve_ms_median": 68.30411683768034
+   },
+   "회귀250_k1": {
+    "requests": 28,
+    "modified": 27,
+    "hold": 0,
+    "goal_active": 0,
+    "violating_reference": 5,
+    "palm_dev_median_mm": 1.77,
+    "solve_ms_median": 60.77585928142071
+   },
+   "회귀320_k0": {
+    "requests": 34,
+    "modified": 32,
+    "hold": 0,
+    "goal_active": 1,
+    "violating_reference": 5,
+    "palm_dev_median_mm": 2.75,
+    "solve_ms_median": 67.82679073512554
+   },
+   "회귀320_k1": {
+    "requests": 33,
+    "modified": 30,
+    "hold": 0,
+    "goal_active": 1,
+    "violating_reference": 6,
+    "palm_dev_median_mm": 2.37,
+    "solve_ms_median": 67.9553896188736
+   },
+   "회귀850_k0": {
+    "requests": 32,
+    "modified": 31,
+    "hold": 0,
+    "goal_active": 2,
+    "violating_reference": 5,
+    "palm_dev_median_mm": 2.205,
+    "solve_ms_median": 68.08507768437266
+   },
+   "회귀850_k1": {
+    "requests": 75,
+    "modified": 73,
+    "hold": 0,
+    "goal_active": 4,
+    "violating_reference": 4,
+    "palm_dev_median_mm": 6.21,
+    "solve_ms_median": 68.33399832248688
+   },
+   "회귀954_k0": {
+    "requests": 75,
+    "modified": 74,
+    "hold": 0,
+    "goal_active": 6,
+    "violating_reference": 12,
+    "palm_dev_median_mm": 4.41,
+    "solve_ms_median": 67.98530276864767
+   },
+   "회귀954_k1": {
+    "requests": 75,
+    "modified": 72,
+    "hold": 9,
+    "goal_active": 8,
+    "violating_reference": 17,
+    "palm_dev_median_mm": 4.93,
+    "solve_ms_median": 70.0591467320919
+   },
+   "회귀211_k0": {
+    "requests": 75,
+    "modified": 75,
+    "hold": 0,
+    "goal_active": 0,
+    "violating_reference": 24,
+    "palm_dev_median_mm": 8.51,
+    "solve_ms_median": 66.91629253327847
+   },
+   "회귀211_k1": {
+    "requests": 38,
+    "modified": 37,
+    "hold": 0,
+    "goal_active": 5,
+    "violating_reference": 12,
+    "palm_dev_median_mm": 4.9399999999999995,
+    "solve_ms_median": 72.93546758592129
+   }
+  },
+  "solve_ms_median": 70.02273900434375,
+  "solve_ms_p95": 164.38340344466266,
+  "infer_ms_median": 731.6247224807739,
+  "infer_ms_p95": 904.4932246208191
+ }
+}

@@ -27,6 +27,16 @@ OSQP factorization and warm start carry over as they do online — `--mode serve
 Also per solve: wall (`wall_ms` = server-equivalent: the harness label time removed, `wall_raw_ms` as measured) and CPU (`time.process_time`) totals, the call counts of `fk` / `esdf_clearance`
 / `osqp`, the returned trajectory's SHA-1 (bit-identity checks between settings) and the status.
 Pod load: `/proc/loadavg` and the cgroup's `cpu.stat` throttling before and after each run.
+
+AG3S-PRE-CORE-TO E1 (`--settings-module AG3S.trajopt.experiments.e1_goal`, settings `E0` · `E1C` · `E1B10` ·
+`E1B20` · `TOA`): a setting that switches the grasp-goal gate on gets the anchor rebuilt from the record
+(`e1_goal.rebuild_gates`, the server's `SafePolicy._grasp_anchor_gate`); every setting then also records
+`grasp_anchor` (the optimizer's record) and `goal_eval` (palm vs the rebuilt goal), and each chunk `grasp_goal` (the
+gate record). `--replay-wrist-track` hands every setting the recorded IFG-TOW scale. Without either, nothing changes.
+
+AG3S-PRE-CORE-TO E2 (`--settings-module AG3S.trajopt.experiments.e2_multi_seed`, settings `E2_16/32/64` ·
+`E1C_E2_16/32/64` + the E1 ones): a setting with `sqp.multi_seed > 0` records `multi_seed` (the optimizer's record:
+triggered, candidates, chosen, total ms) and builds the probe gate for `goal_eval`. `solve_ms` includes the seeds.
 """
 
 from __future__ import annotations
@@ -272,6 +282,7 @@ def prepare_field(scene, device: str):
 
 
 def run_timing(key: str, entry: dict, cli) -> dict[str, Any]:
+    from AG3S.trajopt.experiments import e1_goal as E1
     from AG3S.trajopt.experiments import ta_offline as TA
     from AG3S.trajopt.refiner import TrajOptChunkRefiner
 
@@ -301,6 +312,26 @@ def run_timing(key: str, entry: dict, cli) -> dict[str, Any]:
                            "variants": {v: cfgs[v].to_dict() for v in names},
                            "server_args": {v: list(extra_of[v]) for v in names if extra_of[v]},
                            "load_before": _cgroup_cpu(), "chunks": []}
+    for v in names:
+        if getattr(cfgs[v].sqp, "gpu_seeds", "off") != "off":
+            # AG3S-PRE-CORE-TO E3-b: the GPU seed batches built and their CUDA graphs captured before the first chunk,
+            # as the server does at start-up (`serve_safe`); the record says what that cost
+            from AG3S.trajopt import gpu_seeds as GS
+
+            out.setdefault("gpu_seeds_warm_up", {})[v] = GS.warm_up(refiners[v].optimizer)
+    # AG3S-PRE-CORE-TO E1 — the grasp-goal gate rebuilt from the record (`e1_goal`), only when a setting switches it
+    # on; `None` otherwise (every solve and every output key as before).
+    gates = None
+    # AG3S-PRE-CORE-TO E2: a multi-seed setting also gets the probe gate (`goal_eval`, the summary's goal criterion).
+    multi_seed_on = {v for v in names if int(getattr(cfgs[v].sqp, "multi_seed", 0) or 0) > 0}
+    if any(E1.grasp_on(cfgs[v].cost) for v in names) or multi_seed_on:
+        costs = {v: cfgs[v].cost for v in names if E1.grasp_on(cfgs[v].cost)}
+        costs["_probe"] = E1.probe_cost(run.base_cfg.cost)
+        gates = E1.rebuild_gates(run, costs)
+        out["grasp_goal_gate"] = {"tool": "AG3S.trajopt.experiments.e1_goal", "variants": sorted(costs)}
+    replay_tow = bool(getattr(cli, "replay_wrist_track", False))
+    if replay_tow:
+        out["replay_wrist_track"] = True
     seqs = sorted(run.chunks)
     if cli.max_chunks:
         seqs = seqs[cli.first_chunk:cli.first_chunk + cli.max_chunks]
@@ -343,6 +374,15 @@ def run_timing(key: str, entry: dict, cli) -> dict[str, Any]:
                                "recorded_to_ms": (s.get("to") or {}).get("solve_ms"),
                                "prewarm_ms": prewarm_ms,
                                "variants": {}}
+        probe = None
+        if gates is not None:
+            probe, probe_rec = gates["_probe"].get(seq, (None, {"skipped": "not seen by the gate"}))
+            rec["grasp_goal"] = {**probe_rec, "anchor": E1.anchor_summary(probe)}
+        tow = None
+        if replay_tow:
+            # IFG-TOW as the recorded server applied it (`to.metrics.joint_track_scale`, absent = not active)
+            tow = TA.lit(((s.get("to") or {}).get("metrics") or {}).get("joint_track_scale"))   # recorded as text
+            rec["joint_track_scale"] = tow
         order = names[ci % len(names):] + names[:ci % len(names)]
         for rep in range(cli.repeat):
             for v in (order if rep % 2 == 0 else list(reversed(order))):
@@ -363,6 +403,10 @@ def run_timing(key: str, entry: dict, cli) -> dict[str, Any]:
                         and ctx.get("previous_physical_chunk") is not None):
                     # online, the continuity reference is this setting's own last chunk
                     ctx["previous_physical_chunk"] = own_prev[v]
+                if gates is not None and v in gates and gates[v].get(seq, (None,))[0] is not None:
+                    ctx["grasp_anchor"] = gates[v][seq][0]          # E1: the rebuilt anchor of this setting
+                if tow is not None:
+                    ctx["joint_track_scale"] = np.asarray(tow, np.float64)
                 CLOCK.reset()
                 CLOCK.enabled = True
                 c0 = time.process_time()
@@ -399,6 +443,18 @@ def run_timing(key: str, entry: dict, cli) -> dict[str, Any]:
                         qp_iterations=m.get("qp_iterations"),
                         sqp_iterations=m.get("sqp_iterations"),
                         traj8=traj[:, :8].tolist() if cli.keep_traj else None)
+                    if gates is not None:
+                        # E1: the optimizer's anchor record and the palm vs the rebuilt goal (every setting)
+                        entry_v["grasp_anchor"] = m.get("grasp_anchor")
+                        entry_v["goal_eval"] = E1.goal_eval(
+                            solver_run[v], probe, traj, solver_run[v].layout.chunk_to_trajectory(inp["ref_chunk"]),
+                            q_now)
+                    if v in multi_seed_on:
+                        # E2: the optimizer's multi-seed record (triggered, candidates, chosen, total ms)
+                        entry_v["multi_seed"] = m.get("multi_seed")
+                    if cfg.qp.solver == "osqp-cuda":
+                        # E3-a: the CUDA QP backend's counts over this solve (CUDA solved / failed, CPU fall-backs)
+                        entry_v["qp_backend"] = m.get("qp_backend")
         out["chunks"].append(rec)
         inp["z"].close()
         for a, _ in alt_inp.values():
@@ -432,6 +488,9 @@ def main(argv=None) -> None:
     ap.add_argument("--progress", action="store_true")
     ap.add_argument("--max-chunks", type=int, default=0)
     ap.add_argument("--first-chunk", type=int, default=0)
+    ap.add_argument("--replay-wrist-track", action="store_true",
+                    help="AG3S-PRE-CORE-TO E1: hand every setting the recorded IFG-TOW tracking scale "
+                         "(`to.metrics.joint_track_scale`) as the server did. Default off (as before)")
     cli = ap.parse_args(argv)
     if cli.mode == "server" and cli.repeat != 1:
         raise SystemExit("--repeat > 1 needs --mode reset: a server-mode repeat would warm-start from "

@@ -1,0 +1,16 @@
+{
+ "frame_id": "T54c_ep1817_f020",
+ "camera": "wrist_cam_r",
+ "panels": {
+  "top1-only-ns:N": {
+   "iou": 0.5522860337073592,
+   "recall": 0.5522860337073592,
+   "precision": 1.0
+  },
+  "top1-only-ns+rm:N": {
+   "iou": 0.9609984068984219,
+   "recall": 0.9767068306429548,
+   "precision": 0.983539705076707
+  }
+ }
+}

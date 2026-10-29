@@ -1,0 +1,60 @@
+{
+ "a_V8_carry_apple_palm_D_profile_by_k_median_mm": [
+  7.40943773532246,
+  10.401968527902351,
+  11.393080219680353,
+  13.289641964674725,
+  13.33390230671411,
+  15.607052160299016,
+  15.600270196967225,
+  15.520982592909927
+ ],
+ "a_source": "AG3S/ag3s/docs/handoff/T43XM.verify.json numbers.arms.V8.carry_apple",
+ "b_mm": {
+  "TO_binding_clearance_above_margin_V8_median": 4.6,
+  "command_minus_actual_height_V8": 15.8,
+  "source": "T43XM via log T43 11"
+ },
+ "c_alternatives_H14": {
+  "V8": {
+   "S_old": 13,
+   "S_CT": 8,
+   "finger_release_contact_runs": 9,
+   "HOLD_chunks": 6
+  },
+  "V9 servo model을 TO에": {
+   "S_old": 2,
+   "S_CT": 2,
+   "finger_release_contact_runs": 0,
+   "HOLD_chunks": 17
+  },
+  "V10 쥔 사과 행에 margin": {
+   "S_old": 10,
+   "S_CT": 9,
+   "finger_release_contact_runs": 7,
+   "HOLD_chunks": 52
+  }
+ },
+ "c_source": "T43V9 / T43V10.verify.json via log T43 9-10",
+ "d_offline_TA": {
+  "variants": [
+   "base (V8)",
+   "A",
+   "A + B",
+   "A + B + C"
+  ],
+  "servo_pred_hurdle_clearance_p10_mm": [
+   -0.56,
+   -0.49,
+   2.94,
+   2.85
+  ],
+  "contacts_cleared_of_22": [
+   9,
+   9,
+   15,
+   15
+  ],
+  "source": "T43 TA implementer offline (open loop), log T43 12-1"
+ }
+}

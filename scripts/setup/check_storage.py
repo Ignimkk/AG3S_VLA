@@ -18,7 +18,7 @@ def main():
     parser.add_argument("--hash-artifacts", action="store_true")
     args = parser.parse_args()
     storage = shared_storage_root()
-    assert storage.is_dir(), f"Provision shared inputs at {storage}; see doc/SHARED_STORAGE_AND_PYTHON.md"
+    assert storage.is_dir(), f"Provision shared inputs at {storage}; see doc/active/SHARED_STORAGE_AND_PYTHON.md"
     assert not storage.is_relative_to(OLD), storage
     manifest = json.loads((ROOT / "experiments/manifests/shared-storage.json").read_text())
     for entry in manifest["inputs"]:

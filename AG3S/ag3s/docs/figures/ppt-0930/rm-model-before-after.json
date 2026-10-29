@@ -1,0 +1,366 @@
+{
+ "panels": {
+  "before_wrist_cam_l": {
+   "crop_uv": [
+    0,
+    640,
+    150,
+    480
+   ],
+   "apple_px_visible": 2497,
+   "apple_px_erased": 2497,
+   "apple_px_kept": 0,
+   "robot_px_visible": 16086,
+   "robot_px_masked": 16086,
+   "robot_px_leaked": 0,
+   "other_px_erased": 2790,
+   "other_erased_by_body": {
+    "crate": 2790
+   },
+   "apple_erased_by_link_overlapping": {
+    "link_left_arm_5": 2497,
+    "ee_left": 656,
+    "ee_finger_l1": 2497,
+    "ee_finger_l2": 2497
+   },
+   "spheres_outlined_in_crop": 31,
+   "sphere_silhouette_px_in_crop": 211200
+  },
+  "before_zed_left": {
+   "crop_uv": [
+    110,
+    370,
+    200,
+    335
+   ],
+   "apple_px_visible": 378,
+   "apple_px_erased": 378,
+   "apple_px_kept": 0,
+   "robot_px_visible": 63034,
+   "robot_px_masked": 63034,
+   "robot_px_leaked": 0,
+   "other_px_erased": 1908,
+   "other_erased_by_body": {
+    "office": 1329,
+    "table": 24,
+    "crate": 456,
+    "orange": 99
+   },
+   "apple_erased_by_link_overlapping": {
+    "link_left_arm_5": 378,
+    "ee_left": 168,
+    "ee_finger_l1": 281,
+    "ee_finger_l2": 253
+   },
+   "spheres_outlined_in_crop": 65,
+   "sphere_silhouette_px_in_crop": 35100
+  },
+  "before_side_view": {
+   "spheres_within_0p22m_of_apple": 47,
+   "arm5_urdf_spheres_within": 3,
+   "finger_gap_mm_mujoco": 95.84944492891415
+  },
+  "now_wrist_cam_l": {
+   "crop_uv": [
+    0,
+    640,
+    150,
+    480
+   ],
+   "apple_px_visible": 2497,
+   "apple_px_erased": 0,
+   "apple_px_kept": 2497,
+   "robot_px_visible": 16086,
+   "robot_px_masked": 16086,
+   "robot_px_leaked": 0,
+   "other_px_erased": 0,
+   "other_erased_by_body": {},
+   "apple_erased_by_link_overlapping": {},
+   "spheres_outlined_in_crop": 59,
+   "sphere_silhouette_px_in_crop": 211200
+  },
+  "now_zed_left": {
+   "crop_uv": [
+    110,
+    370,
+    200,
+    335
+   ],
+   "apple_px_visible": 378,
+   "apple_px_erased": 0,
+   "apple_px_kept": 378,
+   "robot_px_visible": 63034,
+   "robot_px_masked": 63034,
+   "robot_px_leaked": 0,
+   "other_px_erased": 14,
+   "other_erased_by_body": {
+    "crate": 14
+   },
+   "apple_erased_by_link_overlapping": {},
+   "spheres_outlined_in_crop": 167,
+   "sphere_silhouette_px_in_crop": 35100
+  },
+  "now_side_view": {
+   "spheres_within_0p22m_of_apple": 114,
+   "arm5_urdf_spheres_within": 0,
+   "finger_gap_mm_mujoco": 95.84944492891415
+  }
+ },
+ "provenance": {
+  "record": "/mnt/dev/work/outputs/live_test/20260928_t14/execute_ep1807/frames.jsonl",
+  "planning_seq": 13,
+  "t_step": 96,
+  "xml": "/mnt/dev/work/pi05_TO_hybrid/rby1_description/models/rby1a/mujoco/model_transport.xml",
+  "pose": "d.qpos = record row qpos, qvel = 0, mj_forward (= policy_record.pose_scene)",
+  "benchmark_git_head": "cee8f84d2ce205b445a4462d38d3ff360210d077",
+  "benchmark_code_used": "working tree (uncommitted changes in: ag3s/experiments/reports/grounding_report.py, ag3s/experiments/sources/mujoco_source.py, ag3s/robot_models/urdf_sphere_chain.py)",
+  "interpreter": "/mnt/dev/work/.venv-openpi-live/bin/python (MUJOCO_GL=osmesa)",
+  "decision": "stages/robot_filter.filter_robot_points, target guard off; every valid depth px back-projected, no stride",
+  "gt": "TransportScene.capture(cam).body_ids; robot = bodies with rootid of 'base'",
+  "drivers": [
+   "/mnt/dev/work/outputs/verify/rm-model-compare/compute.py",
+   "/mnt/dev/work/outputs/verify/rm-model-compare/dump_head.py",
+   "/mnt/dev/work/outputs/verify/rm-model-compare/plot.py"
+  ]
+ },
+ "models": {
+  "before": {
+   "constructor": "UrdfSphereChain(parse_urdf(RBY1_URDF) [all URDF capsules incl. link_*_arm_5], extra_capsules=gap_filling_capsules(model), fixed_joint_values=head@fresh MjData)",
+   "finger_joints": {
+    "gripper_finger_l1": 0.0,
+    "gripper_finger_l2": 0.0,
+    "gripper_finger_r1": 0.0,
+    "gripper_finger_r2": 0.0
+   },
+   "finger_joints_source": "construction default 0.0 (closed)",
+   "inflation_m": 0.05,
+   "n_spheres": 218,
+   "spheres_by_role": {
+    "collision": 218
+   },
+   "arm5_urdf_spheres": 10,
+   "crosscheck_vs_HEAD_tree_build_robot_model": {
+    "benchmark_from": "/mnt/dev/work/outputs/verify/T28/p3/0f/tree_HEAD/benchmark/__init__.py",
+    "n_spheres_head": 218,
+    "n_spheres_before": 218,
+    "same_count": true,
+    "max_abs_centre_diff_m": 0.0,
+    "max_abs_radius_diff_m": 0.0,
+    "links_equal": true
+   }
+  },
+  "now": {
+   "constructor": "grounding_report.build_robot_model(TransportScene.attach(model, fresh MjData)) + mujoco_source.set_finger_joints_from_scene(scene@t96, robot)",
+   "finger_joints": {
+    "gripper_finger_l1": -0.04492460259900019,
+    "gripper_finger_l2": 0.04492460259900019,
+    "gripper_finger_r1": -0.04499886545654343,
+    "gripper_finger_r2": 0.04499886545654343
+   },
+   "finger_joints_source": "FingerJointMap(openings_from_mujoco) at the recorded pose",
+   "inflation_m": 0.0,
+   "n_spheres": 587,
+   "spheres_by_role": {
+    "collision": 208,
+    "self_filter_cover": 379
+   },
+   "arm5_urdf_spheres": 0
+  }
+ },
+ "cameras_full_frame": {
+  "wrist_cam_l": {
+   "apple_px_visible": 2497,
+   "robot_px_visible": 16086,
+   "other_px_visible": 288617,
+   "valid_px": 307200,
+   "before": {
+    "apple_px_kept": 0,
+    "apple_px_erased": 2497,
+    "robot_px_masked": 16086,
+    "robot_px_leaked": 0,
+    "other_px_erased": 2790,
+    "other_erased_by_body": {
+     "crate": 2790
+    },
+    "robot_leaked_by_body": {},
+    "apple_erased_by_link": {
+     "link_left_arm_5": 2497,
+     "ee_left": 656,
+     "ee_finger_l1": 2497,
+     "ee_finger_l2": 2497
+    },
+    "filter_stats": {
+     "n_in": 307200,
+     "n_removed": 21373,
+     "n_out": 285827,
+     "enabled": true,
+     "guard_enabled": false,
+     "guard_active": false,
+     "guard_radius": 0.0,
+     "guard_centroid": null,
+     "n_guard_protected": 0
+    },
+    "wall_s": 0.209
+   },
+   "now": {
+    "apple_px_kept": 2497,
+    "apple_px_erased": 0,
+    "robot_px_masked": 16086,
+    "robot_px_leaked": 0,
+    "other_px_erased": 0,
+    "other_erased_by_body": {},
+    "robot_leaked_by_body": {},
+    "apple_erased_by_link": {},
+    "filter_stats": {
+     "n_in": 307200,
+     "n_removed": 16086,
+     "n_out": 291114,
+     "enabled": true,
+     "guard_enabled": false,
+     "guard_active": false,
+     "guard_radius": 0.0,
+     "guard_centroid": null,
+     "n_guard_protected": 0
+    },
+    "wall_s": 0.09
+   }
+  },
+  "zed_left": {
+   "apple_px_visible": 378,
+   "robot_px_visible": 63034,
+   "other_px_visible": 243788,
+   "valid_px": 307200,
+   "before": {
+    "apple_px_kept": 0,
+    "apple_px_erased": 378,
+    "robot_px_masked": 63034,
+    "robot_px_leaked": 0,
+    "other_px_erased": 1908,
+    "other_erased_by_body": {
+     "office": 1329,
+     "table": 24,
+     "crate": 456,
+     "orange": 99
+    },
+    "robot_leaked_by_body": {},
+    "apple_erased_by_link": {
+     "link_left_arm_5": 378,
+     "ee_left": 168,
+     "ee_finger_l1": 281,
+     "ee_finger_l2": 253
+    },
+    "filter_stats": {
+     "n_in": 307200,
+     "n_removed": 65320,
+     "n_out": 241880,
+     "enabled": true,
+     "guard_enabled": false,
+     "guard_active": false,
+     "guard_radius": 0.0,
+     "guard_centroid": null,
+     "n_guard_protected": 0
+    },
+    "wall_s": 0.189
+   },
+   "now": {
+    "apple_px_kept": 378,
+    "apple_px_erased": 0,
+    "robot_px_masked": 63034,
+    "robot_px_leaked": 0,
+    "other_px_erased": 14,
+    "other_erased_by_body": {
+     "crate": 14
+    },
+    "robot_leaked_by_body": {},
+    "apple_erased_by_link": {},
+    "filter_stats": {
+     "n_in": 307200,
+     "n_removed": 63048,
+     "n_out": 244152,
+     "enabled": true,
+     "guard_enabled": false,
+     "guard_active": false,
+     "guard_radius": 0.0,
+     "guard_centroid": null,
+     "n_guard_protected": 0
+    },
+    "wall_s": 0.092
+   }
+  },
+  "wrist_cam_r": {
+   "apple_px_visible": 0,
+   "robot_px_visible": 16038,
+   "other_px_visible": 291162,
+   "valid_px": 307200,
+   "before": {
+    "apple_px_kept": 0,
+    "apple_px_erased": 0,
+    "robot_px_masked": 16038,
+    "robot_px_leaked": 0,
+    "other_px_erased": 4159,
+    "other_erased_by_body": {
+     "crate": 4159
+    },
+    "robot_leaked_by_body": {},
+    "apple_erased_by_link": {},
+    "filter_stats": {
+     "n_in": 307200,
+     "n_removed": 20197,
+     "n_out": 287003,
+     "enabled": true,
+     "guard_enabled": false,
+     "guard_active": false,
+     "guard_radius": 0.0,
+     "guard_centroid": null,
+     "n_guard_protected": 0
+    },
+    "wall_s": 0.183
+   },
+   "now": {
+    "apple_px_kept": 0,
+    "apple_px_erased": 0,
+    "robot_px_masked": 16038,
+    "robot_px_leaked": 0,
+    "other_px_erased": 0,
+    "other_erased_by_body": {},
+    "robot_leaked_by_body": {},
+    "apple_erased_by_link": {},
+    "filter_stats": {
+     "n_in": 307200,
+     "n_removed": 16038,
+     "n_out": 291162,
+     "enabled": true,
+     "guard_enabled": false,
+     "guard_active": false,
+     "guard_radius": 0.0,
+     "guard_centroid": null,
+     "n_guard_protected": 0
+    },
+    "wall_s": 0.085
+   }
+  }
+ },
+ "check_vs_earlier_figure": {
+  "figure": "figures/t14/t14-selffilter-erases-target.json",
+  "wrist_cam_l_before_apple_visible_erased": [
+   2497,
+   2497
+  ],
+  "zed_left_before_apple_visible_erased": [
+   378,
+   378
+  ],
+  "earlier_values": {
+   "wrist_cam_l": [
+    2497,
+    2497
+   ],
+   "zed_left": [
+    378,
+    378
+   ],
+   "self_filter_spheres": 218
+  }
+ },
+ "drawing": "sphere outline = exact tangent-cone silhouette of radius (r + inflation); fill = union of ray-sphere hits; side view orthographic in the plane (finger closing axis, approach axis) through the apple centre, spheres with centre < 0.22 m of the apple"
+}

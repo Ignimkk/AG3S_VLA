@@ -1,0 +1,441 @@
+{
+ "artifact": "fig01_teaser",
+ "pdf": "paper/figures/cvpr_v1/fig01_teaser.pdf",
+ "png": "paper/figures/cvpr_v1/fig01_teaser.png",
+ "size_in": [
+  6.875,
+  2.88
+ ],
+ "aspect": 2.387,
+ "textwidth_in": 6.875,
+ "raster_dpi_in_pdf": 400,
+ "png_dpi": 300,
+ "fonts": {
+  "family": "DejaVu Sans",
+  "math": "stix",
+  "pdf_fonttype": 42,
+  "min_pt": 7.0,
+  "max_pt": 8.0,
+  "n_text_items": 35,
+  "floor_pt": 7.0
+ },
+ "layout_audit": {
+  "tolerance_pt": 1.0,
+  "min_text_to_panel_border_in": 0.05,
+  "violations": {
+   "text_text": 0,
+   "text_segment": 0,
+   "panel_border": 0,
+   "badge_heights": 0
+  },
+  "n_segments_checked": 3,
+  "n_panels": 8,
+  "n_texts": 35
+ },
+ "script": "paper/tools/plotting/cvpr_v1_compose.py",
+ "generated": "2026-10-23T02:55:05+00:00",
+ "git_head": "8da37119afd3b8ae1aaaa09315066c34c880857d",
+ "printed_numbers": [
+  {
+   "text": "34",
+   "meaning": "held-out episodes",
+   "value": 34,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/main_success/B/iou/n_episodes"
+  },
+  {
+   "text": "2,523",
+   "meaning": "held-out frames",
+   "value": 2523,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/main_success/B/n_valid_frames"
+  },
+  {
+   "text": "0.773",
+   "meaning": "target-surface IoU  \u2191 baseline G:N",
+   "value": 0.7730478249129286,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/main_success/G:N/iou/episode_mean"
+  },
+  {
+   "text": "0.891",
+   "meaning": "target-surface IoU  \u2191 ours B",
+   "value": 0.8908732856842837,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/main_success/B/iou/episode_mean"
+  },
+  {
+   "text": "176,070",
+   "meaning": "neighbor-surface leakage  \u2193 baseline G:N",
+   "value": 176069.9713933181,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/main_success/G:N/neighbor_fp_sum"
+  },
+  {
+   "text": "13,582",
+   "meaning": "neighbor-surface leakage  \u2193 ours B",
+   "value": 13581.713534193286,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/main_success/B/neighbor_fp_sum"
+  },
+  {
+   "text": "\u221292 %",
+   "meaning": "neighbour FP mass reduction, B vs G:N",
+   "value": 92.28618405130909,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "100*(1 - /main_success/B/neighbor_fp_sum / /main_success/G:N/neighbor_fp_sum)"
+  },
+  {
+   "text": "14",
+   "meaning": "paired runs",
+   "value": 14,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T43W.verify.json",
+   "key": "/numbers/summary_per_arm/E0~1H/n"
+  },
+  {
+   "text": "0 / 14",
+   "meaning": "task success (contact rule), VLA only",
+   "value": 0,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T43W.verify.json",
+   "key": "/numbers/summary_per_arm/E0~1H/success"
+  },
+  {
+   "text": "7 / 14",
+   "meaning": "task success (contact rule), VLA + AG3S",
+   "value": 7,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/agg.json",
+   "key": "/arms/SURF/S_contact"
+  },
+  {
+   "text": "target 0.61",
+   "meaning": "centered prefix-L8 cosine to the remembered region (illustration, dev episode)",
+   "source": "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/p_memory.json",
+   "key": "/scores"
+  },
+  {
+   "text": "fruit 0.11",
+   "meaning": "centered prefix-L8 cosine to the remembered region (illustration, dev episode)",
+   "source": "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/p_memory.json",
+   "key": "/scores"
+  }
+ ],
+ "number_sources": {
+  "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T43W.verify.json": "59e158d5c5ea11b37ce546fa60b427718c01e8ae39160483abbae9b2aba41417",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json": "b5fd560a7ec7c184b379734ec37a576cc6174b0d768d7725f1822e9bf4d34bdd",
+  "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/p_memory.json": "75bfc57586aedb74c9ce5012edda414afc82fdef1390b250da71f920b07604b6",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/agg.json": "dcfbea1f03eb0fcdf2b5de4c8128870f91ac9306c65dd81402704a5de5071fc2"
+ },
+ "assets": {
+  "vla_pick": {
+   "file": "paper/figures/cvpr_v1/assets/vla_pick.png",
+   "sha256": "9c67ab446d9cc6b69e888e6d99f1dbe08ae39025ec991144b794eb3a3348b9dc",
+   "crops": [],
+   "sidecar": "paper/figures/cvpr_v1/assets/vla_pick.json",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1968_s19681",
+   "note": "VLA only, grasp moment (grasp_t = 200 in T43W.verify.json numbers.per_run); the apple is lifted beside the bar",
+   "episode": 1968,
+   "control_step": 200,
+   "arm": "E0"
+  },
+  "vla_carry_fail": {
+   "file": "paper/figures/cvpr_v1/assets/vla_carry_fail.png",
+   "sha256": "df07e4dcae459020a0c727c9f615de38bfacb6f0ca443f9f91822372936608bd",
+   "crops": [],
+   "sidecar": "paper/figures/cvpr_v1/assets/vla_carry_fail.json",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1968_s19681",
+   "note": "VLA only, last recorded control step (n_control = 235): finger/bar contact -> client obstacle stop; red marker = closest gripper/bar point (mj_geomDistance)",
+   "episode": 1968,
+   "control_step": 234,
+   "arm": "E0"
+  },
+  "ag3s_pick": {
+   "file": "paper/figures/cvpr_v1/assets/ag3s_pick.png",
+   "sha256": "517aedefe3b5bbec26c1659ba61505facc5816da9f3d9dab6d58463bc17afee7",
+   "crops": [],
+   "sidecar": "paper/figures/cvpr_v1/assets/ag3s_pick.json",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/runs/SURF/SURF_ep1968_s19681",
+   "note": "VLA + AG3S (SURF), apple just lifted (attach_t = 144, grasp_t = 160 in IFG-HURDLE agg.json)",
+   "episode": 1968,
+   "control_step": 156,
+   "arm": "SURF"
+  },
+  "ag3s_carry": {
+   "file": "paper/figures/cvpr_v1/assets/ag3s_carry.png",
+   "sha256": "c06535f01c40a8e4639470757fe3ed604cb526d040509c4e0068d6aeebc8c107",
+   "crops": [],
+   "sidecar": "paper/figures/cvpr_v1/assets/ag3s_carry.json",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/runs/SURF/SURF_ep1968_s19681",
+   "note": "VLA + AG3S (SURF), tool centre directly above the bar line (y = 0.104 m vs bar y = 0.1058 m); between grasp_t 160 and place_t 256",
+   "episode": 1968,
+   "control_step": 196,
+   "arm": "SURF"
+  },
+  "p_memory": {
+   "file": "paper/figures/ifg_overview/assets/p_memory.png",
+   "sha256": "942abc6e87134c5145fe0f7ffbfb066bab16a53e4b6f04f6d8d4fa6ef7b1f435",
+   "crops": [
+    [
+     0.24,
+     0.26,
+     1.0,
+     0.62
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/p_memory.json",
+   "frame": "T53_ep1842_f025",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Centered prefix-L8 cosine of candidate regions (M4 carry) to the region remembered at M1 approach.",
+   "episode": "T53_ep1842"
+  },
+  "t_noun_attention": {
+   "file": "paper/figures/ifg_overview/assets/t_noun_attention.png",
+   "sha256": "d12d92397e69aaaae661d7862bfedd0a976d2fd2afdc73752b0c591fc2ce25e3",
+   "crops": [
+    [
+     0.0,
+     0.3,
+     1.0,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/t_noun_attention.json",
+   "frame": "T53_ep1842_f016",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Policy camera re-rendered at high resolution; 16x16 noun-attention map upsampled; gold = seed patches.",
+   "episode": "T53_ep1842"
+  },
+  "t_surface_v2": {
+   "file": "paper/figures/cvpr_v1/assets/t_surface_v2.png",
+   "sha256": "adb018b6ca546dec5c9eef02861fe9b80c890059d1ae31174b365bc06f927626",
+   "crops": [
+    [
+     0.08,
+     0.15,
+     0.92,
+     0.95
+    ]
+   ],
+   "sidecar": "paper/figures/cvpr_v1/assets/t_surface_v2.json",
+   "frame": "T53_ep1842_f016",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Observed target surface (orange nodes) and the touching neighbour's observed surface (blue nodes). object meshes tinted for legibility: target 'pear' orange, touching neighbour(s) ['orange'] light blue; overlaid nodes = recomputed 5 mm observed-surface nodes (orange = selected target surface, blue = protected neighbour)"
+  },
+  "t_permission_v2": {
+   "file": "paper/figures/cvpr_v1/assets/t_permission_v2.png",
+   "sha256": "df51dc33585abd356c468e536b3ed9e037f462f7adbc268e410b5794022a41a3",
+   "crops": [
+    [
+     0.08,
+     0.15,
+     0.92,
+     0.95
+    ]
+   ],
+   "sidecar": "paper/figures/cvpr_v1/assets/t_permission_v2.json",
+   "frame": "T53_ep1842_f016",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Configured contact rule, visualised: only the active-hand links (gold) may enter the target surface; the neighbour (blue) stays an obstacle for every link. object meshes tinted for legibility: target 'pear' orange, touching neighbour(s) ['orange'] light blue; overlaid nodes = recomputed 5 mm observed-surface nodes (orange = selected target surface, blue = protected neighbour)"
+  }
+ },
+ "registration_status": "numbers copied from raw summary.json / verify.json / agg.json as listed; they are not yet registered in paper/evidence/RESULTS.md (planned EXP003 held-out locked, EXP004 closed-loop hurdle)",
+ "variant": "with closed-loop rows",
+ "layout": "2x2 hurdle scenes (left) + measured box (right) + how strip (bottom); authored at text width",
+ "baseline_label": "Coarse = previous grounding (radius growth + clustering + ball exemption + sphere/capsule robot filter), arm G:N",
+ "scenes": {
+  "vla_pick": {
+   "asset": "paper/figures/cvpr_v1/assets/vla_pick.png",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1968_s19681",
+   "episode": 1968,
+   "seed": 19681,
+   "profile": "t43p2_overbar",
+   "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json",
+   "model_xml": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml",
+   "control_step": 200,
+   "n_control_steps": 235,
+   "path_from_step": 120,
+   "camera": {
+    "lookat": [
+     0.56,
+     0.24,
+     0.94
+    ],
+    "dist": 0.72,
+    "az": 150,
+    "el": -18
+   },
+   "gripper_bar_distance_m": 0.16964635553092863,
+   "apple_xyz_m": [
+    0.5673827912358076,
+    0.3085184279749246,
+    0.9040011707798106
+   ],
+   "left_tool_centre_xyz_m": [
+    0.563277116213214,
+    0.3089786901624167,
+    0.9153671298857268
+   ],
+   "note": "VLA only, grasp moment (grasp_t = 200 in T43W.verify.json numbers.per_run); the apple is lifted beside the bar",
+   "sources": {
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1968_s19681/frames.jsonl": "a21cae5ccc47f346388198a23fd9ea94bb602aa117b3fb85415650fc9c24ed76",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json": "85669e4a8c5a7083463185067fabd4d9c107c0e06de865f998eff28596217edf",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml": "3cae2c26333a1730a23b847dbd3de45a42c164e95d9c8aacd9936bbf94d34dad"
+   },
+   "renderer": "MuJoCo 3.11.0 replay of the recorded qpos (no re-simulation); OSMesa, CPU",
+   "script": "paper/tools/plotting/cvpr_v1_fig1_scenes.py"
+  },
+  "vla_carry_fail": {
+   "asset": "paper/figures/cvpr_v1/assets/vla_carry_fail.png",
+   "arm": "E0",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1968_s19681",
+   "episode": 1968,
+   "seed": 19681,
+   "profile": "t43p2_overbar",
+   "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json",
+   "model_xml": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml",
+   "control_step": 234,
+   "n_control_steps": 235,
+   "path_from_step": 154,
+   "camera": {
+    "lookat": [
+     0.55,
+     0.15,
+     1.02
+    ],
+    "dist": 0.85,
+    "az": 150,
+    "el": -15
+   },
+   "gripper_bar_distance_m": 0.0005330151974180328,
+   "apple_xyz_m": [
+    0.5516708430015861,
+    0.16369421901013603,
+    1.0582415614561715
+   ],
+   "left_tool_centre_xyz_m": [
+    0.548307693285296,
+    0.16396182586132224,
+    1.0796823353652356
+   ],
+   "note": "VLA only, last recorded control step (n_control = 235): finger/bar contact -> client obstacle stop; red marker = closest gripper/bar point (mj_geomDistance)",
+   "sources": {
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1968_s19681/frames.jsonl": "a21cae5ccc47f346388198a23fd9ea94bb602aa117b3fb85415650fc9c24ed76",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json": "85669e4a8c5a7083463185067fabd4d9c107c0e06de865f998eff28596217edf",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml": "3cae2c26333a1730a23b847dbd3de45a42c164e95d9c8aacd9936bbf94d34dad"
+   },
+   "renderer": "MuJoCo 3.11.0 replay of the recorded qpos (no re-simulation); OSMesa, CPU",
+   "script": "paper/tools/plotting/cvpr_v1_fig1_scenes.py"
+  },
+  "ag3s_pick": {
+   "asset": "paper/figures/cvpr_v1/assets/ag3s_pick.png",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/runs/SURF/SURF_ep1968_s19681",
+   "episode": 1968,
+   "seed": 19681,
+   "profile": "t43p2_overbar",
+   "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json",
+   "model_xml": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml",
+   "control_step": 156,
+   "n_control_steps": 600,
+   "path_from_step": 76,
+   "camera": {
+    "lookat": [
+     0.56,
+     0.24,
+     0.94
+    ],
+    "dist": 0.72,
+    "az": 150,
+    "el": -18
+   },
+   "gripper_bar_distance_m": 0.15351782908430622,
+   "apple_xyz_m": [
+    0.5816427441856039,
+    0.2960803788115019,
+    0.9151443529492025
+   ],
+   "left_tool_centre_xyz_m": [
+    0.5795911326426066,
+    0.29566634025629535,
+    0.9255176062840638
+   ],
+   "note": "VLA + AG3S (SURF), apple just lifted (attach_t = 144, grasp_t = 160 in IFG-HURDLE agg.json)",
+   "sources": {
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/runs/SURF/SURF_ep1968_s19681/frames.jsonl": "053c3cc9b10ff8d2c491a04001c297975294bbbbfd549cdba53ae4e19d2d5038",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json": "85669e4a8c5a7083463185067fabd4d9c107c0e06de865f998eff28596217edf",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml": "3cae2c26333a1730a23b847dbd3de45a42c164e95d9c8aacd9936bbf94d34dad"
+   },
+   "renderer": "MuJoCo 3.11.0 replay of the recorded qpos (no re-simulation); OSMesa, CPU",
+   "script": "paper/tools/plotting/cvpr_v1_fig1_scenes.py"
+  },
+  "ag3s_carry": {
+   "asset": "paper/figures/cvpr_v1/assets/ag3s_carry.png",
+   "arm": "SURF",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/runs/SURF/SURF_ep1968_s19681",
+   "episode": 1968,
+   "seed": 19681,
+   "profile": "t43p2_overbar",
+   "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json",
+   "model_xml": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml",
+   "control_step": 196,
+   "n_control_steps": 600,
+   "path_from_step": 116,
+   "camera": {
+    "lookat": [
+     0.55,
+     0.15,
+     1.02
+    ],
+    "dist": 0.85,
+    "az": 150,
+    "el": -15
+   },
+   "gripper_bar_distance_m": 0.04796258393219685,
+   "apple_xyz_m": [
+    0.5839064066459919,
+    0.10360218485372841,
+    1.119467949654484
+   ],
+   "left_tool_centre_xyz_m": [
+    0.5806730028812049,
+    0.10388613100281621,
+    1.133013868956852
+   ],
+   "note": "VLA + AG3S (SURF), tool centre directly above the bar line (y = 0.104 m vs bar y = 0.1058 m); between grasp_t 160 and place_t 256",
+   "sources": {
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/runs/SURF/SURF_ep1968_s19681/frames.jsonl": "053c3cc9b10ff8d2c491a04001c297975294bbbbfd549cdba53ae4e19d2d5038",
+    "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json": "85669e4a8c5a7083463185067fabd4d9c107c0e06de865f998eff28596217edf",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml": "3cae2c26333a1730a23b847dbd3de45a42c164e95d9c8aacd9936bbf94d34dad"
+   },
+   "renderer": "MuJoCo 3.11.0 replay of the recorded qpos (no re-simulation); OSMesa, CPU",
+   "script": "paper/tools/plotting/cvpr_v1_fig1_scenes.py"
+  }
+ },
+ "scene_choice": "episode 1968, seed 19681 for both rows (paired). VLA only = T43 W E0 run (2026-10-05); VLA + AG3S = IFG-HURDLE SURF run (2026-10-17), same episode, seed, obstacle config and profile. Both rows show two moments of ONE run each. The VLA-only run grasps the apple (as 11/14 E0 runs do) and is stopped when the hand contacts the bar during the carry (13/14 E0 runs end in an obstacle stop); the SURF run is success_ct with no hurdle or neighbour contact rows.",
+ "closed_loop_note": "E0 arm recorded 2026-10-05 (T43 W, numbers.summary_per_arm['E0/H']); SURF arm recorded 2026-10-17 (IFG-HURDLE agg.json arms.SURF.S_contact); same 7 episodes x 2 seeds. Coarse-extent ablation C1a S_contact = 11/14 (not printed on the figure).",
+ "held_out_arms": {
+  "baseline": "G:N (radius + clustering style reference, rounds/R6 arm G:N)",
+  "ours": "B (A + temporal identity switch)",
+  "A_without_memory": {
+   "iou": 0.876093971555441,
+   "neighbor_fp": 46329.299182381736,
+   "reduction_pct": 73.68699567804897,
+   "paired_A_minus_GN": {
+    "n_episodes": 34,
+    "diff": 0.10304614664251237,
+    "ci95": [
+     0.08323494981427215,
+     0.12313285145943233
+    ],
+    "better": 34,
+    "worse": 0
+   }
+  },
+  "precision": {
+   "GN": 0.8941035687057404,
+   "B": 0.9656474792528674
+  }
+ },
+ "how_strip": "IFG development episode T53 ep1842; panels 2 and 4 re-rendered (cvpr_v1_fig3_assets.py: target mesh tinted orange, neighbour blue, nodes unchanged); panel 3 raster labels replaced by vector text",
+ "dev_set_numbers_omitted": "0.837 / 0.893 (dev) intentionally not printed"
+}

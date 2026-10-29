@@ -82,6 +82,11 @@ V11AB_ARM = "V11AB"
 #: ``build_ag3s`` keywords that only feed a start-up log line (``announce_row_budget``) and need the TO
 #: config of SL-5; not evaluated here.
 LOG_ONLY_BUILD_KEYWORDS = ("plan_horizon_steps", "rows_per_step")
+#: ``build_ag3s`` keywords added by the AG3S final-configuration merge (main 3ff415d5, 2026-10-29) that
+#: :func:`v11ab_config_dict` does not assemble. Off (None / empty) they change nothing; on, the copy would drop them, so
+#: it refuses instead until their Panda port is decided (palm/wrist/shell covers, target exclusion incl. ROI carve,
+#: non-authorised target margin, confidence gate).
+UNPORTED_BUILD_KEYWORDS = ("palm_cover", "wrist_cover", "palm_shell", "target_exclusion", "contact", "confidence_gate")
 
 #: Panda grasp links per hand (``safe_policy.DEFAULT_GRASP_LINKS`` shape): reach is measured from the
 #: first finger, the pair is the two fingers.
@@ -265,10 +270,17 @@ def match_ag3s_version(args: argparse.Namespace) -> Optional[str]:
     return None
 
 
+#: serve_safe flags that keep V11AB's own defaults on the code after the AG3S final-configuration merge (main
+#: 3ff415d5, 2026-10-29). That code turns the ROI carve on by default for a cuRobo field
+#: (`serve_safe.roi_carve_serving_default`) and limits OpenBLAS to 1 thread (`--blas-threads`, default 1); V11AB
+#: (``start_server.sh``) ran with neither. Pinned here so "V11AB" and every V11AB-pb<N> stay the pre-merge server.
+V11AB_PRE_MERGE_DEFAULTS: tuple[str, ...] = ("--no-roi-carve", "--blas-threads", "0")
+
+
 def v11ab_server_argv(arm: str = V11AB_ARM) -> list[str]:
     req = v11ab_required_args()
     return ["--config", req["config"], "--checkpoint", "<not loaded: perception only>",
-            "--model-xml", req["model_xml"], "--port", "0", *v11ab_server_flags(arm)]
+            "--model-xml", req["model_xml"], "--port", "0", *v11ab_server_flags(arm), *V11AB_PRE_MERGE_DEFAULTS]
 
 
 def parse_v11ab_args(arm: str = V11AB_ARM, argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
@@ -282,22 +294,37 @@ def parse_v11ab_args(arm: str = V11AB_ARM, argv: Optional[Sequence[str]] = None)
     return args
 
 
+def _calls(fn: ast.FunctionDef, name: str) -> list[ast.Call]:
+    return [n for n in ast.walk(fn) if isinstance(n, ast.Call) and getattr(n.func, "id", None) == name]
+
+
 def _main_build_call() -> ast.Call:
+    """The served AG3S's ``build_ag3s(...)`` call. Since the AG3S final-configuration merge (main 3ff415d5,
+    2026-10-29) ``serve_safe.main`` builds it through ``ag3s_from_args`` (one call), which holds the one
+    ``build_ag3s`` call; before it the call was in ``main`` itself. Both layouts are checked, never guessed."""
     tree = ast.parse(SERVE_SAFE.read_text())
-    main = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "main")
-    calls = [n for n in ast.walk(main) if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "build_ag3s"]
-    if len(calls) != 1:
-        raise ValueError(f"serve_safe.main has {len(calls)} build_ag3s calls; expected 1")
+    fns = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+    in_main = _calls(fns["main"], "build_ag3s")
+    if in_main:
+        if len(in_main) != 1:
+            raise ValueError(f"serve_safe.main has {len(in_main)} build_ag3s calls; expected 1")
+        return in_main[0]
+    via = _calls(fns["main"], "ag3s_from_args")
+    calls = _calls(fns["ag3s_from_args"], "build_ag3s") if "ag3s_from_args" in fns else []
+    if len(via) != 1 or len(calls) != 1:
+        raise ValueError(f"serve_safe.main has {len(via)} ag3s_from_args calls and ag3s_from_args "
+                         f"{len(calls)} build_ag3s calls; expected 1 and 1")
     return calls[0]
 
 
 def v11ab_build_call_source() -> dict[str, str]:
-    """``{keyword: source expression}`` of ``serve_safe.main``'s ``build_ag3s(...)`` call."""
-    return {k.arg: ast.unparse(k.value) for k in _main_build_call().keywords}
+    """``{keyword: source expression}`` of the served ``build_ag3s(...)`` call (``**`` entries under ``"**<i>"``)."""
+    return {(k.arg if k.arg is not None else f"**{i}"): ast.unparse(k.value)
+            for i, k in enumerate(_main_build_call().keywords)}
 
 
 def v11ab_build_kwargs(args: argparse.Namespace) -> dict[str, Any]:
-    """The keywords ``serve_safe.main`` passes to ``build_ag3s`` for ``args`` (log-only ones omitted).
+    """The keywords the server passes to ``build_ag3s`` for ``args`` (log-only ones omitted).
 
     Each expression is evaluated in serve_safe's module namespace with ``args`` bound -- the call is read,
     not restated.
@@ -310,7 +337,11 @@ def v11ab_build_kwargs(args: argparse.Namespace) -> dict[str, Any]:
     for keyword in _main_build_call().keywords:
         if keyword.arg in LOG_ONLY_BUILD_KEYWORDS:
             continue
-        out[keyword.arg] = eval(compile(ast.Expression(keyword.value), str(SERVE_SAFE), "eval"), namespace)  # noqa: S307
+        value = eval(compile(ast.Expression(keyword.value), str(SERVE_SAFE), "eval"), namespace)  # noqa: S307
+        if keyword.arg is None:   # ``**{...}`` (a key only when its flag is on)
+            out.update(value)
+        else:
+            out[keyword.arg] = value
     return out
 
 
@@ -323,6 +354,10 @@ def v11ab_config_dict(kw: Mapping[str, Any]) -> tuple[dict, Optional[dict]]:
     """
     from AG3S.trajopt import serve_safe as ss
 
+    unported = {k: kw[k] for k in UNPORTED_BUILD_KEYWORDS if kw.get(k) not in (None, {}, False)}
+    if unported:
+        raise ValueError(f"build_ag3s keywords not ported to the Panda profile yet: {unported} (AG3S final-configuration "
+                         "merge 2026-10-29; this copy would drop them silently)")
     policy = ss.resolve_target_field_policy(kw.get("target_field_policy", "relax"))
     constraint_section: dict = {}
     if not kw.get("self_collision", True):

@@ -1,0 +1,113 @@
+{
+ "a": {
+  "C1a_ep12_s122": {
+   "t_c": 117,
+   "d_at_tc_mm": 42.29085348653562,
+   "min_d_before_tc_mm": 42.19386660820615
+  },
+  "C1bp_ep12_s122": {
+   "t_c": 205,
+   "d_at_tc_mm": 59.30301202055076,
+   "min_d_before_tc_mm": 41.058766623578975
+  },
+  "C2p_ep12_s122": {
+   "t_c": 144,
+   "d_at_tc_mm": 153.75865674336475,
+   "min_d_before_tc_mm": 63.61091289461501
+  },
+  "C1a_ep104_s1041": {
+   "t_c": 104,
+   "d_at_tc_mm": 37.66543111220436,
+   "min_d_before_tc_mm": 37.67912668846145
+  },
+  "C1bp_ep104_s1041": {
+   "t_c": 104,
+   "d_at_tc_mm": 38.37325234028595,
+   "min_d_before_tc_mm": 38.36709231805757
+  },
+  "C2p_ep104_s1041": {
+   "t_c": 124,
+   "d_at_tc_mm": 72.01432664123433,
+   "min_d_before_tc_mm": 61.26502498254184
+  }
+ },
+ "b": {
+  "C1a": {
+   "n": 72,
+   "median_finite_mm": 0.0,
+   "n_above_40mm": 0,
+   "n_gt_5mm": 24
+  },
+  "C1b' coarse OFF": {
+   "n": 72,
+   "median_finite_mm": 0.0,
+   "n_above_40mm": 0,
+   "n_gt_5mm": 24
+  },
+  "C1b' served": {
+   "n": 72,
+   "median_finite_mm": 8.000000000000007,
+   "n_above_40mm": 8,
+   "n_gt_5mm": 49
+  },
+  "C2' served": {
+   "n": 72,
+   "median_finite_mm": 9.000000000000007,
+   "n_above_40mm": 12,
+   "n_gt_5mm": 55
+  }
+ },
+ "c": {
+  "n": 108,
+  "n_tfc_worst": 48,
+  "median_mm": 0.0,
+  "n_gt_1mm": 34,
+  "n_gt_3mm": 21
+ },
+ "d": {
+  "C1b' reference": 37.533858014013745,
+  "C1b' recorded": 42.53698695233382,
+  "C2' reference": 50.629512802304056,
+  "C2' recorded": 67.40830692508433,
+  "re-solve served": 69.70288540454644,
+  "re-solve look-ahead off": 68.68078131402129,
+  "re-solve coarse off": 69.96646878508058,
+  "re-solve target removed for all links": 61.92434444922715,
+  "re-solve target removed + look-ahead off": 60.55325866501552,
+  "re-solve pre-A9 (non-auth 50 mm)": 101.0884413185754
+ },
+ "e": {
+  "C1bp": {
+   "n": 108,
+   "median_mm": 0.0,
+   "p90_mm": 10.379999999999999,
+   "n_gt_10mm": 13
+  },
+  "C2p": {
+   "n": 206,
+   "median_mm": 6.984999999999992,
+   "p90_mm": 37.900000000000006,
+   "n_gt_10mm": 90
+  }
+ },
+ "f": {
+  "C1bp": {
+   "linearize": 13.9205,
+   "assemble": 5.5504999999999995,
+   "qp": 11.495999999999999,
+   "check": 57.928,
+   "solve": 160.34385561943054
+  },
+  "C2p": {
+   "linearize": 76.3875,
+   "assemble": 5.8665,
+   "qp": 25.896500000000003,
+   "check": 188.481,
+   "solve": 402.87242736667395
+  }
+ },
+ "source": {
+  "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef",
+  "raw": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T115801+0900_07f0bfe7737d_74d38da5091c/verify/T44/CLA"
+ }
+}

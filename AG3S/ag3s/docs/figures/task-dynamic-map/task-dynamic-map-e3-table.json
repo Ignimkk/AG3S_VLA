@@ -1,0 +1,96 @@
+{
+ "judgement": {
+  "a2_moved_old_main": {
+   "base": 1277,
+   "value": 1145,
+   "reduction": 0.1034,
+   "pass": false
+  },
+  "a3_missed_main_visible_pp": {
+   "value": -0.26,
+   "pass": true
+  },
+  "a3_missed_main_occluded_seen_before_pp": {
+   "value": -0.081,
+   "pass": true
+  },
+  "a3_missed_hand_visible_pp": {
+   "value": -0.391,
+   "pass": true
+  },
+  "a3_missed_hand_occluded_seen_before_pp": {
+   "value": -0.114,
+   "pass": true
+  },
+  "a4_success": {
+   "base": 14,
+   "value": 15,
+   "pass": true
+  },
+  "a4_forbidden_episodes": {
+   "base": 3,
+   "value": 4,
+   "pass": false
+  },
+  "b_post_missed_occluded_main_vs_B_ROI": {
+   "base": 17.64,
+   "value": 1.764,
+   "reduction": 0.9,
+   "pass": true
+  },
+  "a_all": false,
+  "adopt_footprint": false
+ },
+ "rows": [
+  [
+   "a2_moved_old_main",
+   "1277",
+   "10.3% \u2193 \u2717"
+  ],
+  [
+   "a3_missed_main_visible_pp",
+   "\u2014",
+   "-0.26 \u2713"
+  ],
+  [
+   "a3_missed_main_occluded_seen_before_pp",
+   "\u2014",
+   "-0.081 \u2713"
+  ],
+  [
+   "a3_missed_hand_visible_pp",
+   "\u2014",
+   "-0.391 \u2713"
+  ],
+  [
+   "a3_missed_hand_occluded_seen_before_pp",
+   "\u2014",
+   "-0.114 \u2713"
+  ],
+  [
+   "a4_success",
+   "14",
+   "15 \u2713"
+  ],
+  [
+   "a4_forbidden_episodes",
+   "3",
+   "4 \u2717"
+  ],
+  [
+   "b_post_missed_occluded_main_vs_B_ROI",
+   "17.64",
+   "90.0% \u2193 \u2713"
+  ],
+  [
+   "a_all",
+   "",
+   "\u2717"
+  ],
+  [
+   "adopt_footprint",
+   "",
+   "\u2717"
+  ]
+ ]
+}

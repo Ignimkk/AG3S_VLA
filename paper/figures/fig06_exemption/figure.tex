@@ -1,0 +1,46 @@
+% !TEX root = ../../latex/main.tex
+% F06: link-specific allowed collision (schematic, not measured data). DRAFT 1.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[font=\scriptsize, line width=0.5pt]
+\tikzset{
+  obj/.style={draw, circle, fill=orange!35, minimum size=9mm, inner sep=0},
+  dis/.style={draw, circle, fill=gray!25, minimum size=8mm, inner sep=0},
+  link/.style={draw, rounded corners=1pt, fill=blue!15, minimum height=3.2mm},
+  band/.style={dashed, red!70!black},
+}
+% panel (a): shared field, target present
+\begin{scope}[xshift=0cm]
+  \fill[gray!18] (-1.9,-0.9) rectangle (1.9,-0.5);
+  \node[obj] (t) at (-0.55,0) {};
+  \node[dis] (o) at (1.15,0) {};
+  \draw[band] (t) circle (7.2mm);
+  \draw[band] (o) circle (6.6mm);
+  \node[link,rotate=-35,minimum width=9mm] (f) at (-1.2,1.1) {};
+  \node[font=\tiny] at (-0.55,0) {T};
+  \node[font=\tiny] at (1.15,0) {O};
+  \node[align=center] at (0,-1.5) {(a) field $d$ from all depth:\\the target repels the finger};
+\end{scope}
+% panel (b): link-specific
+\begin{scope}[xshift=4.3cm]
+  \fill[gray!18] (-1.9,-0.9) rectangle (1.9,-0.5);
+  \node[obj,densely dotted] (t) at (-0.55,0) {};
+  \node[dis] (o) at (1.15,0) {};
+  \draw[band] (o) circle (6.6mm);
+  \draw[band,opacity=.45] (t) circle (7.2mm);
+  \node[link,rotate=-35,minimum width=9mm] (f) at (-1.2,1.1) {};
+  \node[link,minimum width=11mm,fill=blue!6] (e) at (0.2,1.35) {};
+  \node[font=\tiny] at (-0.55,0) {T};
+  \node[font=\tiny] at (1.15,0) {O};
+  \node[font=\tiny,above=0.5mm of e] {other link: $d$};
+  \node[font=\tiny,left=0.2mm of f,xshift=-1mm] {finger: $\dfree$};
+  \node[align=center] at (0,-1.5) {(b) $\dfree$ for contact links;\\$d$ for every other query};
+\end{scope}
+\end{tikzpicture}
+\caption{Link-specific allowed collision (schematic). Dashed rings mark the clearance a link must keep.
+(a) In the shared field the target (T) and a distractor (O) both repel the finger, so the grasp
+is forbidden. (b) The field is unchanged for every query except those of the palm and
+fingers of the grasping hand, which read the target-free ESDF: the target no longer repels them, but it still repels
+any other link (faint ring), and the distractor still repels everyone.}
+\label{fig:exemption}
+\end{figure}

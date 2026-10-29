@@ -1,0 +1,143 @@
+{
+ "precision": {
+  "latched": {
+   "n": 456,
+   "median": 0.7727,
+   "p10": 0.6301,
+   "p90": 0.8221,
+   "min": 0.0,
+   "max": 0.8684,
+   "n_stale": 15,
+   "median_nonstale": 0.7745
+  },
+  "closing": {
+   "n": 213,
+   "median": 0.643,
+   "p10": 0.0,
+   "p90": 0.7846,
+   "min": 0.0,
+   "max": 0.8076,
+   "n_stale": 53,
+   "median_nonstale": 0.6703
+  }
+ },
+ "recall": {
+  "latched": {
+   "n": 442,
+   "median": 0.7877,
+   "p10": 0.432,
+   "p90": 0.9418,
+   "min": 0.125,
+   "max": 0.9681,
+   "n_stale": 1,
+   "median_nonstale": 0.7878
+  },
+  "closing": {
+   "n": 170,
+   "median": 0.5775,
+   "p10": 0.2527,
+   "p90": 0.8109,
+   "min": 0.0,
+   "max": 0.91,
+   "n_stale": 10,
+   "median_nonstale": 0.5851
+  }
+ },
+ "residual_voxels": {
+  "latched": {
+   "n": 442,
+   "median": 250.0,
+   "p10": 60.1,
+   "p90": 750.9,
+   "min": 33.0,
+   "max": 1056.0,
+   "n_stale": 1,
+   "median_nonstale": 251.0
+  },
+  "closing": {
+   "n": 170,
+   "median": 483.0,
+   "p10": 107.0,
+   "p90": 872.2,
+   "min": 59.0,
+   "max": 1016.0,
+   "n_stale": 10,
+   "median_nonstale": 516.5
+  }
+ },
+ "residual_surface_points": {
+  "latched": {
+   "n": 456,
+   "median": 5.0,
+   "p10": 0.0,
+   "p90": 21.0,
+   "min": 0.0,
+   "max": 28.0,
+   "n_stale": 15,
+   "median_nonstale": 6.0
+  },
+  "closing": {
+   "n": 213,
+   "median": 6.0,
+   "p10": 0.0,
+   "p90": 22.0,
+   "min": 0.0,
+   "max": 29.0,
+   "n_stale": 53,
+   "median_nonstale": 12.0
+  }
+ },
+ "neighbour_lost_frac": {
+  "latched": {
+   "n": 439,
+   "median": 0.0,
+   "p10": 0.0,
+   "p90": 0.069,
+   "min": 0.0,
+   "max": 0.2667,
+   "n_stale": 15,
+   "median_nonstale": 0.0
+  },
+  "closing": {
+   "n": 201,
+   "median": 0.0,
+   "p10": 0.0,
+   "p90": 0.069,
+   "min": 0.0,
+   "max": 0.2,
+   "n_stale": 53,
+   "median_nonstale": 0.0
+  }
+ },
+ "removed_composition": {
+  "latched": {
+   "n_voxels": 452400,
+   "target<=5mm": 0.7203,
+   "target5-10mm": 0.1482,
+   "neighbour": 0.0116,
+   "fruit_other": 0.0,
+   "table": 0.0431,
+   "crate": 0.0,
+   "obstacle": 0.0,
+   "other": 0.0,
+   "no_surface<=10mm": 0.0768
+  },
+  "closing": {
+   "n_voxels": 195273,
+   "target<=5mm": 0.5194,
+   "target5-10mm": 0.1257,
+   "neighbour": 0.0072,
+   "fruit_other": 0.0,
+   "table": 0.0686,
+   "crate": 0.0,
+   "obstacle": 0.0,
+   "other": 0.0,
+   "no_surface<=10mm": 0.279
+  }
+ },
+ "n_requests": {
+  "latched": 456,
+  "closing": 213
+ },
+ "script": "AG3S/ag3s/experiments/studies/ifg_audit_lte.py"
+}

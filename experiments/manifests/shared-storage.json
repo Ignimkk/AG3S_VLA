@@ -160,10 +160,10 @@
     {
       "target": "third_party/openpi/assets",
       "storage_relative_path": "assets/openpi"
-    },
-    {
-      "target": "third_party/openpi/policy_records",
-      "storage_relative_path": "recordings/policy_records"
     }
-  ]
+  ],
+  "historical_recordings": {
+    "policy_records": "recordings/policy_records",
+    "policy": "Read-only input. Active PolicyRecorder writes per-run results/development only."
+  }
 }

@@ -1,0 +1,40 @@
+{
+ "key": "demo_ep0060_f104",
+ "identity": "gt_label",
+ "hull": 0,
+ "slab_y_m": -0.3096074390411378,
+ "n_interior_points_hull": 1329,
+ "n_slab_points": 158,
+ "panels": {
+  "fine TSDF state (5 mm, trunc 30 mm)": {
+   "observed_sdf<0": 34,
+   "unobserved": 124
+  },
+  "main fine layer (5 mm)": {
+   "neg": 16,
+   "pos": 123,
+   "zero": 19
+  },
+  "coarse layer (20 mm, trunc 60 mm)": {
+   "neg": 24,
+   "pos": 128,
+   "zero": 6
+  },
+  "main composite = min(coarse, fine)": {
+   "neg": 39,
+   "pos": 106,
+   "zero": 13
+  },
+  "target-free tier, ball (raw)": {
+   "neg": 16,
+   "pos": 123,
+   "zero": 19
+  },
+  "target-free query, ball\nmin(f, max(d, b))": {
+   "neg": 16,
+   "pos": 123,
+   "zero": 19
+  }
+ },
+ "selection": "demo frame (gt_label) with the most target-free (ball) positive interior points at depth >= 10 mm"
+}

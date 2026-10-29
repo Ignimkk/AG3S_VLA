@@ -1,0 +1,252 @@
+{
+ "counts": {
+  "occlusion": {
+   "B0": {
+    "safe": 6,
+    "contact_runs": 1,
+    "n": 18
+   },
+   "B2c": {
+    "safe": 8,
+    "contact_runs": 1,
+    "n": 18
+   },
+   "C0F": {
+    "safe": 9,
+    "contact_runs": 1,
+    "n": 18
+   }
+  },
+  "regression": {
+   "B0": {
+    "safe": 14,
+    "contact_runs": 1,
+    "n": 18
+   },
+   "B2c": {
+    "safe": 15,
+    "contact_runs": 2,
+    "n": 18
+   },
+   "C0F": {
+    "safe": 12,
+    "contact_runs": 4,
+    "n": 18
+   }
+  }
+ },
+ "verdict": {
+  "occ_safe_ge_7": true,
+  "reg_safe_ge_14": true,
+  "contact_runs_le_1_each": false,
+  "pass": false
+ },
+ "timing_limits": {
+  "B0": {
+   "requests": 1711,
+   "to_plus_geo_ms_p50": 41.6,
+   "p95": 92.0,
+   "max": 454.2,
+   "requests_with_limit_overshoot": 15
+  },
+  "B2c": {
+   "requests": 1589,
+   "to_plus_geo_ms_p50": 66.8,
+   "p95": 234.6,
+   "max": 626.6,
+   "requests_with_limit_overshoot": 17
+  }
+ },
+ "correction_activity": {
+  "occlusion 111": {
+   "requests": 32,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 113": {
+   "requests": 30,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 122": {
+   "requests": 35,
+   "correct_chunks": 3,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 131": {
+   "requests": 33,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 133": {
+   "requests": 32,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 312": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 5
+  },
+  "occlusion 321": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 323": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 332": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 112": {
+   "requests": 32,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 121": {
+   "requests": 33,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 123": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 132": {
+   "requests": 34,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 311": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 313": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 322": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 1
+  },
+  "occlusion 331": {
+   "requests": 12,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "occlusion 333": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 2
+  },
+  "regression 56": {
+   "requests": 29,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 211": {
+   "requests": 75,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 2
+  },
+  "regression 1837": {
+   "requests": 25,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 320": {
+   "requests": 31,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "regression 753": {
+   "requests": 33,
+   "correct_chunks": 2,
+   "limit_overshoot_requests": 0
+  },
+  "regression 954": {
+   "requests": 75,
+   "correct_chunks": 2,
+   "limit_overshoot_requests": 2
+  },
+  "regression 309": {
+   "requests": 32,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 250": {
+   "requests": 28,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 1668": {
+   "requests": 34,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 126": {
+   "requests": 29,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 1345": {
+   "requests": 32,
+   "correct_chunks": 2,
+   "limit_overshoot_requests": 0
+  },
+  "regression 1596": {
+   "requests": 29,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 121": {
+   "requests": 30,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "regression 119": {
+   "requests": 30,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 325": {
+   "requests": 33,
+   "correct_chunks": 0,
+   "limit_overshoot_requests": 0
+  },
+  "regression 901": {
+   "requests": 32,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "regression 572": {
+   "requests": 31,
+   "correct_chunks": 1,
+   "limit_overshoot_requests": 0
+  },
+  "regression 850": {
+   "requests": 33,
+   "correct_chunks": 3,
+   "limit_overshoot_requests": 0
+  }
+ },
+ "changes_vs_B0": {
+  "occlusion": {
+   "121": "쥐지 못함 → 안전한 성공",
+   "122": "들 때 미끄러짐 → 안전한 성공"
+  },
+  "regression": {
+   "850": "실패(full) → 안전한 성공",
+   "954": "실패(full) → 금지 접촉(basket)"
+  }
+ }
+}

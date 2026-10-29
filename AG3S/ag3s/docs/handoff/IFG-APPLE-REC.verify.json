@@ -1,0 +1,255 @@
+{
+ "step": "IFG-APPLE-REC",
+ "written": "2026-10-21 KST (lead; CPU analysis after a 56-min GPU run)",
+ "plain_names": {
+  "E0": "VLA 단독",
+  "SPL": "기존 방식 + target 분리 수정",
+  "SPLE": "SPL + 교착 · 빈 손 후퇴 · 재시도 (--recovery-retreat)"
+ },
+ "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-REC",
+ "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-REC/agg4arm (copies; E0 = IFG-APPLE, SPL = IFG-APPLE-SPLIT records)",
+ "gpu_window_utc": [
+  "2026-10-21T05:41:51",
+  "2026-10-21T06:37:50"
+ ],
+ "smoke": {
+  "passed": true,
+  "first_chunk_max_abs_diff_vs_E0": 5.867937691306224e-08
+ },
+ "code": "snapshot_rec tree d63c7292e83dd766fda7a1ae2fd07b7fd22a419b (HEAD f15e5872 + uncommitted IFG changes; also another session's unimported WIP AG3S/trajopt/curobo_v2/)",
+ "scripts": [
+  "AG3S/ag3s/experiments/studies/ifg_rec_recovery.py",
+  "<agg>/p/agg3.py (AGG_ARMS=SPL,SPLE and E0,SPLE)"
+ ],
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-rec-recovery.png"
+ ],
+ "numbers": {
+  "success": {
+   "E0": 10,
+   "SPL": 7,
+   "SPLE": 7
+  },
+  "paired_SPL_vs_SPLE": {
+   "both": 7,
+   "only_SPL": 0,
+   "only_SPLE": 0,
+   "neither": 3
+  },
+  "paired_E0_vs_SPLE": {
+   "both": 7,
+   "only_E0": 3,
+   "only_SPLE": 0,
+   "mcnemar_exact_p": 0.25
+  },
+  "retries_of_incomplete_runs": 0,
+  "recovery": {
+   "56": {
+    "armed": [],
+    "ended": [],
+    "skipped": [],
+    "retreat_requests": 0,
+    "max_hold_streak": 0,
+    "max_empty_streak": 0
+   },
+   "211": {
+    "armed": [
+     {
+      "request": 29,
+      "reason": "empty_grasp",
+      "palm_to_target_mm": 316.4,
+      "retreat_target_frame": 29,
+      "retreat_target_palm_to_target_mm": 321.9
+     },
+     {
+      "request": 59,
+      "reason": "empty_grasp",
+      "palm_to_target_mm": 372.8,
+      "retreat_target_frame": 59,
+      "retreat_target_palm_to_target_mm": 380.9
+     }
+    ],
+    "ended": [
+     {
+      "request": 33,
+      "ended": "reached",
+      "requests": 3
+     },
+     {
+      "request": 63,
+      "ended": "reached",
+      "requests": 3
+     }
+    ],
+    "skipped": [],
+    "retreat_requests": 6,
+    "max_hold_streak": 2,
+    "max_empty_streak": 2
+   },
+   "1837": {
+    "armed": [],
+    "ended": [],
+    "skipped": [],
+    "retreat_requests": 0,
+    "max_hold_streak": 0,
+    "max_empty_streak": 0
+   },
+   "320": {
+    "armed": [
+     {
+      "request": 46,
+      "reason": "empty_grasp",
+      "palm_to_target_mm": 170.8,
+      "retreat_target_frame": 46,
+      "retreat_target_palm_to_target_mm": 160.1
+     }
+    ],
+    "ended": [
+     {
+      "request": 49,
+      "ended": "reached",
+      "requests": 2
+     }
+    ],
+    "skipped": [],
+    "retreat_requests": 2,
+    "max_hold_streak": 0,
+    "max_empty_streak": 2
+   },
+   "753": {
+    "armed": [],
+    "ended": [],
+    "skipped": [],
+    "retreat_requests": 0,
+    "max_hold_streak": 0,
+    "max_empty_streak": 0
+   },
+   "954": {
+    "armed": [
+     {
+      "request": 22,
+      "reason": "empty_grasp",
+      "palm_to_target_mm": 310.6,
+      "retreat_target_frame": 22,
+      "retreat_target_palm_to_target_mm": 229.0
+     },
+     {
+      "request": 41,
+      "reason": "empty_grasp",
+      "palm_to_target_mm": 315.1,
+      "retreat_target_frame": 41,
+      "retreat_target_palm_to_target_mm": 240.7
+     }
+    ],
+    "ended": [
+     {
+      "request": 26,
+      "ended": "reached",
+      "requests": 3
+     },
+     {
+      "request": 46,
+      "ended": "reached",
+      "requests": 4
+     }
+    ],
+    "skipped": [
+     58,
+     59,
+     60,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71
+    ],
+    "retreat_requests": 7,
+    "max_hold_streak": 0,
+    "max_empty_streak": 10
+   },
+   "309": {
+    "armed": [],
+    "ended": [],
+    "skipped": [],
+    "retreat_requests": 0,
+    "max_hold_streak": 0,
+    "max_empty_streak": 0
+   },
+   "250": {
+    "armed": [],
+    "ended": [],
+    "skipped": [],
+    "retreat_requests": 0,
+    "max_hold_streak": 0,
+    "max_empty_streak": 0
+   },
+   "1668": {
+    "armed": [],
+    "ended": [],
+    "skipped": [],
+    "retreat_requests": 0,
+    "max_hold_streak": 1,
+    "max_empty_streak": 0
+   },
+   "126": {
+    "armed": [],
+    "ended": [],
+    "skipped": [],
+    "retreat_requests": 0,
+    "max_hold_streak": 0,
+    "max_empty_streak": 0
+   }
+  },
+  "palm_to_target_at_each_close_start_mm": {
+   "56": [
+    106.0
+   ],
+   "211": [
+    71.8,
+    179.7,
+    268.9
+   ],
+   "1837": [
+    103.0
+   ],
+   "320": [
+    105.2,
+    131.3,
+    110.0,
+    102.2
+   ],
+   "753": [
+    107.3
+   ],
+   "954": [
+    91.4,
+    155.7,
+    181.3
+   ],
+   "309": [
+    101.9
+   ],
+   "250": [
+    103.2
+   ],
+   "1668": [
+    100.9
+   ],
+   "126": [
+    101.8
+   ]
+  }
+ },
+ "diagnosis": {
+  "false_alarms": "0 of the 7 successes armed a retreat (no trigger, no change in outcome or HOLD count)",
+  "deadlock_trigger": "never fired: ep211 max consecutive whole-chunk collision HOLD streak 2 (threshold 3); ep1668 1",
+  "empty_grasp_trigger": "fired on all 3 failures (211 x2, 954 x2, 320 x1) but late: palm already 316 / 373 (211), 311 / 315 (954), 171 (320) mm from the target -- the policy had lifted the empty hand before the fingers counted as settled",
+  "retreat": "the latest pose >= 120 mm from the target was the current pose or 1 request back (retreat target palm 160-381 mm): 2-4 retreat requests per retreat, 0.09-0.47 rad to go at the first retreat request of the first retreats; the retreat did not return the hand to a pre-grasp pose",
+  "retry": "the policy re-approached and closed again after each retreat, but short of the apple: palm at the close start 156 / 181 mm (954) and 180 / 269 mm (211) vs 101-107 mm in the 7 successes and 91 / 72 mm at the first close of 954 / 211; 320 closes at 102-131 mm and still misses",
+  "next": "(a) detect at the close (finger opening at the closed limit and not blocked) instead of after settling; (b) retreat to the pose before the closing started (searched backward from the closing start), not from now; whether a retry then closes at the right place is open"
+ }
+}

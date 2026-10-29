@@ -1,0 +1,188 @@
+{
+  "audited_at": "2026-10-05T15:01:47+00:00",
+  "submission_ready": false,
+  "scope": "Workspace and draft validation; not submission authorization",
+  "checks": [
+    {
+      "name": "structure_and_claude_config",
+      "status": "PASS",
+      "details": {
+        "claude_characters": {
+          "CLAUDE.md": 181,
+          "paper/CLAUDE.md": 156
+        },
+        "skills": [
+          "cvpr-write",
+          "cvpr-evidence",
+          "cvpr-experiment",
+          "cvpr-figure",
+          "cvpr-reference-analysis",
+          "cvpr-review",
+          "cvpr-compliance"
+        ],
+        "read_only_agents": [
+          "literature-analyst",
+          "evidence-auditor",
+          "cvpr-reviewer"
+        ],
+        "submission_documents": [
+          "README",
+          "SUBMISSION_CHECKLIST",
+          "ANONYMITY_CHECKLIST",
+          "PAGE_LIMIT_CHECKLIST",
+          "REFERENCES_CHECKLIST",
+          "SUPPLEMENTARY_CHECKLIST",
+          "FINAL_AUDIT"
+        ],
+        "runtime_invocation": "NOT_CHECKED"
+      }
+    },
+    {
+      "name": "documents_links_and_syntax",
+      "status": "PASS",
+      "details": {
+        "markdown_files": 63,
+        "local_links": 321,
+        "json_files": 18,
+        "python_files": 3
+      }
+    },
+    {
+      "name": "evidence_template_and_artifacts",
+      "status": "PASS",
+      "details": {
+        "source_validator_output": [
+          "{\"experiment_id\": \"EXP001\", \"status\": \"PASS\", \"evidence_scope\": \"DESCRIPTIVE_TASK_OUTCOME_ONLY\", \"runs\": 96, \"pairs\": 48, \"results\": [\"R001\", \"R002\", \"R003\"], \"source_linked_results\": [\"R001\", \"R002\", \"R003\"]}",
+          "PASS kit, working styles, manifests, artifact hashes and T00 source counts"
+        ],
+        "registered_results": [
+          "R001",
+          "R002",
+          "R003"
+        ],
+        "evidence_scope": "DESCRIPTIVE_TASK_OUTCOME_ONLY",
+        "artifact_ids": [
+          "A01",
+          "F01",
+          "F02",
+          "F03",
+          "F04",
+          "F05",
+          "T00",
+          "T01",
+          "T02",
+          "T03",
+          "T04"
+        ],
+        "scientific_validity": "NOT_CERTIFIED"
+      }
+    },
+    {
+      "name": "preserved_files",
+      "status": "PASS",
+      "details": {
+        "baseline_file": "/tmp/cvpr_step6_preserved.json",
+        "file_count": 33
+      }
+    },
+    {
+      "name": "draft_pdf_inspection",
+      "status": "PASS",
+      "details": {
+        "main": {
+          "path": "paper/latex/build/step6/main.pdf",
+          "sha256": "745950ddf5c7d0dd81445a6a86d0c4e05109a0655894b033da767a481f2ca45a",
+          "pages": 3,
+          "tex_log_sha256": "cd06c68d0b43e9d93cee0eda71b926d4e588b6a9559939f0458b07c85ce7501f",
+          "compiler_log_sha256": "f33be6b77c9f69e5947990d1e958d7cd39339a8fda326187870a79c076c47726",
+          "source_sha256": {
+            "paper/latex/preamble.tex": "6211fef1d2d59cbe500a867e6f4176472e9baee963c910936be95adde9249177",
+            "paper/latex/metadata.tex": "086642881f7699d2d1f37e139a32e4f09f9dc68a5553929ebfc30fafeb240359",
+            "paper/latex/main.tex": "e1885da88449ffed9d672bce86da7a80780591e9477a92a419707f869ab03e9e",
+            "paper/latex/sections/00_abstract.tex": "f34cd1abdae4103635ea1505e8137a43efc7d0e17852a4210ccf1286132c2309",
+            "paper/latex/sections/05_conclusion.tex": "37eebc45c1e398d0b2dde5460686c7522d3f834db0c3ea86db485763ad0de08e",
+            "paper/latex/sections/04_experiments.tex": "bf921316f2cd4feaeabfb8d445b5f7634bd2f646fc8bf32f9f9fe9be862d9f06",
+            "paper/latex/sections/03_method.tex": "ae8a57db5526c9206e83d1697971d63f305bf0c9a5cfcfbc994707341d961ab4",
+            "paper/latex/sections/02_related_work.tex": "bcbd21a418977d8f9bb6df6989846830502b9528621f872e637f1f181db1d5d1",
+            "paper/latex/sections/06_limitations.tex": "71a41964cca1a169ee9ceb28dc843f824ace4d167b36ff8e7017e5dfba5b4733",
+            "paper/latex/sections/01_introduction.tex": "0ef2b611ad5ad76f870a6df6631c079547c95ef883ca7abc891eb9561e33ac19",
+            "paper/figures/fig04_qualitative/figure.tex": "3386dcd37dd9501d6582057f0ba1409f59dd5fda869773f053f4069fe29dd935",
+            "paper/figures/fig03_attention_to_3d/figure.tex": "ade570bd7847965baa50bd7a0de6f32afce48d7a276dd91e858f2c8fff7161eb",
+            "paper/figures/fig05_analysis/figure.tex": "8adcb808adeccb08083f043bd298d6a35e10cba6e740871a81a15ade6b643b90",
+            "paper/figures/fig01_teaser/figure.tex": "17f676fdce40160eb0954396c279427053bfdb0681424082c56f370fd7372f96",
+            "paper/figures/fig02_overview/figure.tex": "dd97ba40dc81f7fcd4038987dd39e03bb0d69ce5678e82b292bf342e37ebc8a9",
+            "paper/tables/table04_efficiency/table.tex": "a53111c0ef6114712c2ce5c3185d964c25089ce86ef7095ced3f8098f41a3ba2",
+            "paper/tables/table01_main/table.tex": "974f5137431b3ee195402d915e683444e2a9ab643fc2bc1bc02f5275fc7d9b3a",
+            "paper/tables/table03_ablation/table.tex": "aacf555006bcbac1e6b1f2cd49a787bd9f97ee1636a10ba7c45a9f31df6c0c7a",
+            "paper/tables/table00_descriptive/table.tex": "78a03676c10e54a9c8a4a678919c2943fd7fb256398b4a193dec3c3134084a31",
+            "paper/tables/table02_generalization/table.tex": "c60f4227fb8844dd115b13ff43c8fe2d1cd461644daf95ed137507b1eb7dbb61",
+            "paper/algorithms/algorithm01_safe_vla.tex": "d2751faabb43f5a0b077a07607c063ae35211573ac6c505f8195a754a54f8f2c",
+            "paper/supplementary/supplementary.tex": "5401e4a503dac6f37147246c10df2abed5d257e47dc65b45b26e8fdc1669059a",
+            "paper/supplementary/experiments/protocol.tex": "09772d718d5e31ffe253a23d47d93b2cf9e2f885a6753f4eda1e3d331d12d728"
+          },
+          "letter_page": true,
+          "fonts": [
+            "AKHCZK+CMSY10",
+            "BZIVMZ+NimbusSanL-Bold",
+            "IHAIZV+NimbusSanL-Regu",
+            "IXFAWU+NimbusRomNo9L-Medi",
+            "TQTHRL+NimbusRomNo9L-Regu",
+            "YEUUOC+NimbusRomNo9L-ReguItal"
+          ],
+          "embedded_fonts": true,
+          "limited_anonymity_scan": "PASS",
+          "full_anonymity": "NOT_CHECKED",
+          "supplementary_title": false,
+          "registered_task_counts_present": true,
+          "unmeasured_marker_present": true
+        },
+        "supplementary": {
+          "path": "paper/supplementary/build/step6/supplementary.pdf",
+          "sha256": "2d20c70942ff3a4fd713a77cdeff1bdf6fbc8b34300b490246abe3828ca7fa0f",
+          "pages": 1,
+          "tex_log_sha256": "85ac764e31ffe2c2e6950c64ff5fb5f5081c400acb21724a7ef699af13d0443b",
+          "compiler_log_sha256": "d2eda277dc5b94235303c3e415799edeab6a5b03ee37bbf44900d6bdd9d80465",
+          "source_sha256": {
+            "paper/latex/preamble.tex": "6211fef1d2d59cbe500a867e6f4176472e9baee963c910936be95adde9249177",
+            "paper/latex/metadata.tex": "086642881f7699d2d1f37e139a32e4f09f9dc68a5553929ebfc30fafeb240359",
+            "paper/latex/main.tex": "e1885da88449ffed9d672bce86da7a80780591e9477a92a419707f869ab03e9e",
+            "paper/latex/sections/00_abstract.tex": "f34cd1abdae4103635ea1505e8137a43efc7d0e17852a4210ccf1286132c2309",
+            "paper/latex/sections/05_conclusion.tex": "37eebc45c1e398d0b2dde5460686c7522d3f834db0c3ea86db485763ad0de08e",
+            "paper/latex/sections/04_experiments.tex": "bf921316f2cd4feaeabfb8d445b5f7634bd2f646fc8bf32f9f9fe9be862d9f06",
+            "paper/latex/sections/03_method.tex": "ae8a57db5526c9206e83d1697971d63f305bf0c9a5cfcfbc994707341d961ab4",
+            "paper/latex/sections/02_related_work.tex": "bcbd21a418977d8f9bb6df6989846830502b9528621f872e637f1f181db1d5d1",
+            "paper/latex/sections/06_limitations.tex": "71a41964cca1a169ee9ceb28dc843f824ace4d167b36ff8e7017e5dfba5b4733",
+            "paper/latex/sections/01_introduction.tex": "0ef2b611ad5ad76f870a6df6631c079547c95ef883ca7abc891eb9561e33ac19",
+            "paper/figures/fig04_qualitative/figure.tex": "3386dcd37dd9501d6582057f0ba1409f59dd5fda869773f053f4069fe29dd935",
+            "paper/figures/fig03_attention_to_3d/figure.tex": "ade570bd7847965baa50bd7a0de6f32afce48d7a276dd91e858f2c8fff7161eb",
+            "paper/figures/fig05_analysis/figure.tex": "8adcb808adeccb08083f043bd298d6a35e10cba6e740871a81a15ade6b643b90",
+            "paper/figures/fig01_teaser/figure.tex": "17f676fdce40160eb0954396c279427053bfdb0681424082c56f370fd7372f96",
+            "paper/figures/fig02_overview/figure.tex": "dd97ba40dc81f7fcd4038987dd39e03bb0d69ce5678e82b292bf342e37ebc8a9",
+            "paper/tables/table04_efficiency/table.tex": "a53111c0ef6114712c2ce5c3185d964c25089ce86ef7095ced3f8098f41a3ba2",
+            "paper/tables/table01_main/table.tex": "974f5137431b3ee195402d915e683444e2a9ab643fc2bc1bc02f5275fc7d9b3a",
+            "paper/tables/table03_ablation/table.tex": "aacf555006bcbac1e6b1f2cd49a787bd9f97ee1636a10ba7c45a9f31df6c0c7a",
+            "paper/tables/table00_descriptive/table.tex": "78a03676c10e54a9c8a4a678919c2943fd7fb256398b4a193dec3c3134084a31",
+            "paper/tables/table02_generalization/table.tex": "c60f4227fb8844dd115b13ff43c8fe2d1cd461644daf95ed137507b1eb7dbb61",
+            "paper/algorithms/algorithm01_safe_vla.tex": "d2751faabb43f5a0b077a07607c063ae35211573ac6c505f8195a754a54f8f2c",
+            "paper/supplementary/supplementary.tex": "5401e4a503dac6f37147246c10df2abed5d257e47dc65b45b26e8fdc1669059a",
+            "paper/supplementary/experiments/protocol.tex": "09772d718d5e31ffe253a23d47d93b2cf9e2f885a6753f4eda1e3d331d12d728"
+          },
+          "letter_page": true,
+          "fonts": [
+            "BZIVMZ+NimbusSanL-Bold",
+            "IHAIZV+NimbusSanL-Regu",
+            "IXFAWU+NimbusRomNo9L-Medi",
+            "TQTHRL+NimbusRomNo9L-Regu"
+          ],
+          "embedded_fonts": true,
+          "limited_anonymity_scan": "PASS",
+          "full_anonymity": "NOT_CHECKED",
+          "supplementary_title": true,
+          "registered_task_counts_present": false,
+          "unmeasured_marker_present": false
+        }
+      }
+    }
+  ],
+  "status": "PASS_DRAFT_CHECKS"
+}

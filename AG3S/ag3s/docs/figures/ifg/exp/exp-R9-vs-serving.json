@@ -1,0 +1,15 @@
+{
+ "rule": "largest and smallest IoU(candidate) - IoU(B0+render mask) frame",
+ "rows": {
+  "candidate ahead": {
+   "frame": "T54c_ep1806_f026",
+   "iou_b0": 0.0,
+   "iou_candidate": 1.0
+  },
+  "B0 ahead": {
+   "frame": "T54c_ep1825_f028",
+   "iou_b0": 1.0,
+   "iou_candidate": 0.0
+  }
+ }
+}

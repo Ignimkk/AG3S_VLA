@@ -1,0 +1,293 @@
+{
+ "artifact": "fig06_episode_strip",
+ "pdf": "paper/figures/cvpr_v1/fig06_episode_strip.pdf",
+ "png": "paper/figures/cvpr_v1/fig06_episode_strip.png",
+ "size_in": [
+  6.875,
+  1.8
+ ],
+ "aspect": 3.819,
+ "textwidth_in": 6.875,
+ "raster_dpi_in_pdf": 400,
+ "png_dpi": 300,
+ "fonts": {
+  "family": "DejaVu Sans",
+  "math": "stix",
+  "pdf_fonttype": 42,
+  "min_pt": 7.0,
+  "max_pt": 7.5,
+  "n_text_items": 33,
+  "floor_pt": 7.0
+ },
+ "script": "paper/tools/plotting/cvpr_v1_compose.py",
+ "generated": "2026-10-18T09:25:24+00:00",
+ "git_head": "f15e587290f6b099bb2be9b4dc137cacf62c9db5",
+ "printed_numbers": [
+  {
+   "text": "1.00",
+   "meaning": "surface IoU at M1_approach (recomputed offline, dev episode)",
+   "source": "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/tp_episode.json",
+   "key": "/moments/M1_approach/iou_recomputed"
+  },
+  {
+   "text": "1.00",
+   "meaning": "surface IoU at M2_pre_grasp (recomputed offline, dev episode)",
+   "source": "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/tp_episode.json",
+   "key": "/moments/M2_pre_grasp/iou_recomputed"
+  },
+  {
+   "text": "0.97",
+   "meaning": "surface IoU at M3_grasp (recomputed offline, dev episode)",
+   "source": "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/tp_episode.json",
+   "key": "/moments/M3_grasp/iou_recomputed"
+  },
+  {
+   "text": "0.94",
+   "meaning": "surface IoU at M4_carry (recomputed offline, dev episode)",
+   "source": "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/tp_episode.json",
+   "key": "/moments/M4_carry/iou_recomputed"
+  },
+  {
+   "text": "0.96",
+   "meaning": "surface IoU at M5_pre_place (recomputed offline, dev episode)",
+   "source": "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/tp_episode.json",
+   "key": "/moments/M5_pre_place/iou_recomputed"
+  },
+  {
+   "text": "1.00",
+   "meaning": "surface IoU at M6_post_place (recomputed offline, dev episode)",
+   "source": "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/tp_episode.json",
+   "key": "/moments/M6_post_place/iou_recomputed"
+  },
+  {
+   "text": "0.98",
+   "meaning": "surface IoU at M7_retreat (recomputed offline, dev episode)",
+   "source": "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/tp_episode.json",
+   "key": "/moments/M7_retreat/iou_recomputed"
+  }
+ ],
+ "number_sources": {
+  "/mnt/dev/AG3S_VLA-development/paper/figures/ifg_overview/assets/tp_episode.json": "f00c132e6686a527b3652eee91c0f7a2d6659e7415b3214667da8d465b95ff63"
+ },
+ "assets": {
+  "p_strip_M1_approach": {
+   "file": "paper/figures/ifg_overview/assets/p_strip_M1_approach.png",
+   "sha256": "c090e959d053482bb97cf4675bd1366e8509de934e3d0ae4c7c5b77d6b0f5b18",
+   "crops": [
+    [
+     0.1,
+     0.0,
+     0.9,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/p_strip_M1_approach.json",
+   "frame": "T53_ep1842_f010",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Key-moment close-up with the recomputed target surface.",
+   "episode": "T53_ep1842"
+  },
+  "p_strip_M2_pre_grasp": {
+   "file": "paper/figures/ifg_overview/assets/p_strip_M2_pre_grasp.png",
+   "sha256": "50e56200de5a5abfd77f205c4b6b13234b14aa5c04ec4aafe629e450204e822c",
+   "crops": [
+    [
+     0.1,
+     0.0,
+     0.9,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/p_strip_M2_pre_grasp.json",
+   "frame": "T53_ep1842_f016",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Key-moment close-up with the recomputed target surface.",
+   "episode": "T53_ep1842"
+  },
+  "p_strip_M3_grasp": {
+   "file": "paper/figures/ifg_overview/assets/p_strip_M3_grasp.png",
+   "sha256": "d92c8b38c8129f0558b294152b1d4309484420e22a193f80862cdf6b7085ddbf",
+   "crops": [
+    [
+     0.1,
+     0.0,
+     0.9,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/p_strip_M3_grasp.json",
+   "frame": "T53_ep1842_f020",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Key-moment close-up with the recomputed target surface.",
+   "episode": "T53_ep1842"
+  },
+  "p_strip_M4_carry": {
+   "file": "paper/figures/ifg_overview/assets/p_strip_M4_carry.png",
+   "sha256": "50078bebf7fd26de5b587d3bd3ea5afa0b1df7577ea59d1a53d9475d235c1f7b",
+   "crops": [
+    [
+     0.1,
+     0.0,
+     0.9,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/p_strip_M4_carry.json",
+   "frame": "T53_ep1842_f025",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Key-moment close-up with the recomputed target surface.",
+   "episode": "T53_ep1842"
+  },
+  "p_strip_M5_pre_place": {
+   "file": "paper/figures/ifg_overview/assets/p_strip_M5_pre_place.png",
+   "sha256": "f9b228a2ccf0bbc32bf6a1234d75cc82bf0318c682c324f23dad11fc6cf8d5de",
+   "crops": [
+    [
+     0.1,
+     0.0,
+     0.9,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/p_strip_M5_pre_place.json",
+   "frame": "T53_ep1842_f031",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Key-moment close-up with the recomputed target surface.",
+   "episode": "T53_ep1842"
+  },
+  "p_strip_M6_post_place": {
+   "file": "paper/figures/ifg_overview/assets/p_strip_M6_post_place.png",
+   "sha256": "592e4b456b85bdf2390fe8fa810df5a072ad5497eefd029825a1dd04ad7a1caf",
+   "crops": [
+    [
+     0.1,
+     0.0,
+     0.9,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/p_strip_M6_post_place.json",
+   "frame": "T53_ep1842_f032",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Key-moment close-up with the recomputed target surface.",
+   "episode": "T53_ep1842"
+  },
+  "p_strip_M7_retreat": {
+   "file": "paper/figures/ifg_overview/assets/p_strip_M7_retreat.png",
+   "sha256": "969582ce3271cfea79d3ad5c170bf3ccaa7822c2412b889171a0eae59c81352a",
+   "crops": [
+    [
+     0.1,
+     0.0,
+     0.9,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/p_strip_M7_retreat.json",
+   "frame": "T53_ep1842_f037",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Key-moment close-up with the recomputed target surface.",
+   "episode": "T53_ep1842"
+  }
+ },
+ "registration_status": "numbers copied from raw summary.json / verify.json / agg.json as listed; they are not yet registered in paper/evidence/RESULTS.md (planned EXP003 held-out locked, EXP004 closed-loop hurdle)",
+ "layout": "7 key-moment close-ups (left) + vector re-plot of the phase / grasp inputs from p_phase_signals.json (right)",
+ "episode": "T53_ep1842",
+ "instruction": "Put the pear in the basket.",
+ "phase_rows": [
+  {
+   "frame_id": "T53_ep1842_f010",
+   "moment": "M1_approach",
+   "grasp_state": "pre",
+   "hand_d": 0.1372800216685555,
+   "height": 0.8673280928065702,
+   "grip": 0.9992353916168213,
+   "hsr": [
+    0.998976469039917,
+    0.0007165691931731999,
+    0.00030695172608830035
+   ]
+  },
+  {
+   "frame_id": "T53_ep1842_f016",
+   "moment": "M2_pre_grasp",
+   "grasp_state": "pre",
+   "hand_d": 0.08151479313365217,
+   "height": 0.8759423878954015,
+   "grip": 0.9990293979644775,
+   "hsr": [
+    0.9985781311988831,
+    0.0011022588005289435,
+    0.00031963130459189415
+   ]
+  },
+  {
+   "frame_id": "T53_ep1842_f020",
+   "moment": "M3_grasp",
+   "grasp_state": "held",
+   "hand_d": 0.07978575959090078,
+   "height": 0.8812900559058514,
+   "grip": 0.6703956127166748,
+   "hsr": [
+    0.5244198441505432,
+    0.47516655921936035,
+    0.00041359433089382946
+   ]
+  },
+  {
+   "frame_id": "T53_ep1842_f025",
+   "moment": "M4_carry",
+   "grasp_state": "held",
+   "hand_d": 0.08163906605370778,
+   "height": 1.1078105722977816,
+   "grip": 0.6683445572853088,
+   "hsr": [
+    0.030234696343541145,
+    0.9696926474571228,
+    7.263637235155329e-05
+   ]
+  },
+  {
+   "frame_id": "T53_ep1842_f031",
+   "moment": "M5_pre_place",
+   "grasp_state": "held",
+   "hand_d": 0.08759703932439243,
+   "height": 0.9728039452390436,
+   "grip": 0.6661964654922485,
+   "hsr": [
+    0.00045627084909938276,
+    0.9988644123077393,
+    0.0006793282809667289
+   ]
+  },
+  {
+   "frame_id": "T53_ep1842_f032",
+   "moment": "M6_post_place",
+   "grasp_state": "placed",
+   "hand_d": 0.17909494970693268,
+   "height": 0.8730372394126404,
+   "grip": 0.9458708167076111,
+   "hsr": [
+    0.0007291628862731159,
+    0.9886624813079834,
+    0.010608377866446972
+   ]
+  },
+  {
+   "frame_id": "T53_ep1842_f037",
+   "moment": "M7_retreat",
+   "grasp_state": "placed",
+   "hand_d": 0.3444257259908141,
+   "height": 0.8662718686875316,
+   "grip": 0.9991894960403442,
+   "hsr": [
+    9.337399387732148e-05,
+    0.00017268671945203096,
+    0.9997339248657227
+   ]
+  }
+ ],
+ "phase_source": "paper/figures/ifg_overview/assets/p_phase_signals.json",
+ "is_measured_result": false,
+ "scope": "one development episode; qualitative"
+}

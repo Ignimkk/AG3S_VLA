@@ -1,0 +1,104 @@
+{
+  "status": "design_budget_not_implemented_collector",
+  "source_inventory": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T150325+0900_ddc7a00060c4_d857a08dcb63/vla_dump/inventory_frame022.json",
+  "units": "bytes and decimal MB; uncompressed tensor payload",
+  "assumptions": {
+    "cameras": 3,
+    "patches_per_camera": 256,
+    "prefix_slots": 968,
+    "named_query_rows": 3,
+    "layers": 18,
+    "query_heads": 8,
+    "kv_heads": 1,
+    "action_horizon": 50,
+    "action_dim": 32,
+    "denoise_steps": 10,
+    "bulk_dtype": "float16; retain original dtype separately if float16 overflows"
+  },
+  "core_components_bytes": {
+    "inputs.npz": 1813467,
+    "embed.npz": 3965896,
+    "outputs.npz": 12800,
+    "derived.npz": 8212,
+    "siglip_encoded": 1769472,
+    "prefix_resid_out_L4_L8_L12": 11894784,
+    "prefix_final_hidden": 3964928,
+    "prefix_KV_cache_canonical": 17842176,
+    "prefix_attention_named_rows_3": 836352,
+    "suffix_attention_step0_all": 14659200,
+    "suffix_attention_L8H2_steps1_to9": 916200,
+    "suffix_V_all_steps": 4608000,
+    "flow_xt_vt_time": 128040
+  },
+  "shape_components_fp16": {
+    "siglip_encoded": [
+      3,
+      256,
+      1152
+    ],
+    "prefix_resid_out_L4_L8_L12": [
+      3,
+      968,
+      2048
+    ],
+    "prefix_final_hidden": [
+      968,
+      2048
+    ],
+    "prefix_KV_cache_canonical": [
+      2,
+      18,
+      968,
+      256
+    ],
+    "prefix_attention_named_rows_3": [
+      18,
+      8,
+      3,
+      968
+    ],
+    "suffix_attention_step0_all": [
+      18,
+      8,
+      50,
+      1018
+    ],
+    "suffix_attention_L8H2_steps1_to9": [
+      9,
+      50,
+      1018
+    ],
+    "suffix_V_all_steps": [
+      10,
+      18,
+      50,
+      256
+    ]
+  },
+  "profiles": {
+    "core": {
+      "bytes": 62419527,
+      "decimal_MB": 62.419527,
+      "decimal_GB_for_100_frames": 6.2419527,
+      "fraction_of_full": 0.015189411270687701
+    },
+    "survey": {
+      "bytes": 193436127,
+      "decimal_MB": 193.436127,
+      "decimal_GB_for_100_frames": 19.3436127,
+      "fraction_of_full": 0.04707150196142911
+    },
+    "full_current": {
+      "bytes": 4109410555,
+      "decimal_MB": 4109.410555,
+      "decimal_GB_for_100_frames": 410.9410555,
+      "fraction_of_full": 1.0
+    }
+  },
+  "optional_geometry_payload_bytes": {
+    "registered_depth_float32_3x480x640": 3686400,
+    "raw_rgb_uint8_3x480x640": 2764800
+  },
+  "excluded": "container/header/metadata overhead, GT, extra raw observations, compression ratio, normals/point clouds, variable noun spans",
+  "note": "Store geometry/raw observations once by immutable reference when already recorded; do not duplicate generated point clouds."
+}

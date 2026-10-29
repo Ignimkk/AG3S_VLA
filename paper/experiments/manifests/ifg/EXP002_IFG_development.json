@@ -1,0 +1,21 @@
+{
+  "schema_version": "IFG_OFFLINE_1",
+  "experiment_id": "EXP002",
+  "status": "REGISTERED",
+  "evidence_scope": "OFFLINE_DEVELOPMENT_GROUNDING_AND_SUPERVISED_PROBING",
+  "state_dimension": 16,
+  "action_dimension": 16,
+  "validator": "paper/tools/analysis/audit_ifg_evidence.py",
+  "audit": "paper/experiments/summaries/EXP002_IFG_audit.json",
+  "audit_sha256": "ca28f1a379dd05ca717474998384a7603fb77b35493a7bab6d9c214cb78be474",
+  "limitations": [
+    "All 32 episodes used for development; no held-out claims.",
+    "Simulated replay depth; 180 selected key frames, not continuous video.",
+    "Surface FP is a proxy, not executed contact or permission-builder output.",
+    "Phase accuracy is pooled frames; paired differences are episode means.",
+    "Confidence has only six wrong-choice events and a history-dependent 147-frame cohort.",
+    "Option B is adopted; the switching effect is inconclusive and combined switching/gating/phase performance is unmeasured.",
+    "Phase height is centroid z minus a floor-dominated support median, not table-relative height.",
+    "No new rollout, policy inference, or simulation is run in this audit."
+  ]
+}

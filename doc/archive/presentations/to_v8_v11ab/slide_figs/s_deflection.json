@@ -1,0 +1,14 @@
+{
+ "V8_carry_apple_palm_D_profile_by_k_median_mm": [
+  7.40943773532246,
+  10.401968527902351,
+  11.393080219680353,
+  13.289641964674725,
+  13.33390230671411,
+  15.607052160299016,
+  15.600270196967225,
+  15.520982592909927
+ ],
+ "note": "one median profile repeated over 3 chunks for illustration",
+ "source": "AG3S/ag3s/docs/handoff/T43XM.verify.json"
+}

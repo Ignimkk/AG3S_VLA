@@ -1,7 +1,10 @@
 import dataclasses
 import functools
 import logging
+from common.run_output import configure_run_logging
 import platform
+import os
+from common.workspace import PROJECT_ROOT
 from typing import Any
 
 import etils.epath as epath
@@ -192,6 +195,7 @@ def train_step(
 
 
 def main(config: _config.TrainConfig):
+    configure_run_logging("train_jax")
     init_logging()
     logging.info(f"Running on: {platform.node()}")
 
@@ -200,7 +204,7 @@ def main(config: _config.TrainConfig):
             f"Batch size {config.batch_size} must be divisible by the number of devices {jax.device_count()}."
         )
 
-    jax.config.update("jax_compilation_cache_dir", str(epath.Path("~/.cache/jax").expanduser()))
+    jax.config.update("jax_compilation_cache_dir", os.environ.get("JAX_COMPILATION_CACHE_DIR", str(PROJECT_ROOT / ".cache/jax")))
 
     rng = jax.random.key(config.seed)
     train_rng, init_rng = jax.random.split(rng)

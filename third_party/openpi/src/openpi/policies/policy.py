@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 import logging
 import pathlib
+import threading
 import time
 from typing import Any, TypeAlias
 
@@ -113,13 +114,26 @@ class Policy(BasePolicy):
 class PolicyRecorder(_base_policy.BasePolicy):
     """Records the policy's behavior to disk."""
 
-    def __init__(self, policy: _base_policy.BasePolicy, record_dir: str):
+    def __init__(self, policy: _base_policy.BasePolicy, record_dir: str | pathlib.Path):
         self._policy = policy
 
+        # Benchmark checkout (merge of main 3ff415d5, 2026-10-29): the caller chooses the destination inside its
+        # benchmark run (`serve_policy` -> `common.run_artifacts.ensure_run` / `output_path`, whose manifest pins the
+        # commit). An existing directory is refused instead of opening a new `session_*` below it, so one record
+        # directory is always one server start.
         logging.info(f"Dumping policy records to: {record_dir}")
         self._record_dir = pathlib.Path(record_dir)
         self._record_dir.mkdir(parents=True, exist_ok=False)
         self._record_step = 0
+        self._record_lock = threading.Lock()
+
+    @property
+    def record_dir(self) -> pathlib.Path:
+        return self._record_dir
+
+    @property
+    def metadata(self) -> dict[str, Any]:
+        return self._policy.metadata
 
     @override
     def infer(self, obs: dict) -> dict:  # type: ignore[misc]
@@ -128,9 +142,10 @@ class PolicyRecorder(_base_policy.BasePolicy):
         data = {"inputs": obs, "outputs": results}
         data = flax.traverse_util.flatten_dict(data, sep="/")
 
-        output_path = self._record_dir / f"step_{self._record_step}"
-        self._record_step += 1
-
-        with output_path.with_suffix(".npy").open("xb") as stream:
+        with self._record_lock:
+            output_path = self._record_dir / f"step_{self._record_step}.npy"
+            self._record_step += 1
+        # Exclusive creation is a final guard against accidental overwrite.
+        with output_path.open("xb") as stream:
             np.save(stream, np.asarray(data))
         return results

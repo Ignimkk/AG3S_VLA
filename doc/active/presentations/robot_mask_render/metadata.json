@@ -1,0 +1,58 @@
+{
+  "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP-E4/runs/B_ROI_FPR/B_ROI_FPR_ep1345_s13453/ag3s/run_0000/step_00013.npz",
+  "code_snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/snapshot_sc",
+  "self_filter_spheres": 587,
+  "pointcloud_config": {
+    "voxel_size": 0.005,
+    "self_filter": true,
+    "max_points": 200000,
+    "depth_min": 0.05,
+    "depth_max": 3.0,
+    "range_max": 2.0,
+    "depth_scale": 1.0,
+    "self_filter_inflation": 0.0,
+    "self_filter_inflation_by_link": {},
+    "self_filter_target_guard_radius": 0.0,
+    "subsample_seed": 0,
+    "cap_strategy": "voxel",
+    "cap_voxel_growth": 1.26,
+    "cap_max_iterations": 12
+  },
+  "render": {
+    "cameras": {
+      "zed_left": {
+        "n_robot_px": 60659,
+        "n_rendered_px": 60724,
+        "render_ms": 665.169
+      },
+      "wrist_cam_l": {
+        "n_robot_px": 15862,
+        "n_rendered_px": 28051,
+        "render_ms": 22.787
+      }
+    },
+    "pose": {
+      "fingers": "measured",
+      "finger_q": {
+        "gripper_finger_l1": -0.04499,
+        "gripper_finger_r1": -0.04494
+      }
+    },
+    "ms": 688.35
+  },
+  "cameras": {
+    "zed_left": {
+      "sphere_px": 61078,
+      "render_px": 60659,
+      "added_px": 0,
+      "union_px": 61078
+    },
+    "wrist_cam_l": {
+      "sphere_px": 11561,
+      "render_px": 15862,
+      "added_px": 6046,
+      "union_px": 17607
+    }
+  },
+  "note": "Same recorded depth/K/T used for both masks; full-resolution RGB re-rendered at recorded qpos. This is an offline mask comparison, not a closed-loop rerun."
+}

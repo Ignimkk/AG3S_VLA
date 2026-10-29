@@ -1,0 +1,4923 @@
+{
+ "step": "T43LB3",
+ "date_utc": "2026-10-10T03:51:22+00:00",
+ "verdict": "run counts only; interpretation not included",
+ "settings": {
+  "server": "E0 --no-safe, subtask gate off via --no-safe (as LB), no obstacle",
+  "snapshot": "/mnt/dev/work-t43v11",
+  "client": "600 steps, warmup 1000, --policy-seed = 10*ep+rep",
+  "success_rule": "T42 definition B (analyze_t42 success AND grasp_robust robust_grasp)",
+  "scope": [
+   "banana_left",
+   "banana_right",
+   "pear_left"
+  ],
+  "cap_total_tried_per_group": 40,
+  "banana_order": "LB ranks 1-10 (already tried), LB3 ranks 11-30, then random sample (pool minus ranks 1-30; seed in groups.*.random_sample) up to total 40; ranks 31-40 not tried for banana (cap given to the random sample)",
+  "pear_left_order": "LB ranks 1-10, LB3 ranks 11-40",
+  "stop_rule": "group stops when LB+LB3 combined has 2 episodes 3/3 (pear_left already had 1440 from LB)",
+  "waves": "rep1 in waves; rep2 only for rep1 ok; rep3 only for rep1+2 ok (LB convention)"
+ },
+ "metadata": {
+  "split_bounds_from_dataset": {
+   "train": {
+    "first": 0,
+    "last": 1599,
+    "n": 1600
+   },
+   "validation": {
+    "first": 1600,
+    "last": 1799,
+    "n": 200
+   },
+   "test": {
+    "first": 1800,
+    "last": 1999,
+    "n": 200
+   }
+  },
+  "pool_total_train": 1600,
+  "n_run_manifest_mismatch_split_fruit_arm": 0,
+  "mismatch_runs": [],
+  "all_candidates_train_and_fruit_arm_match_metadata": true
+ },
+ "numbers": {
+  "groups": {
+   "banana_left": {
+    "pool_size_train": 200,
+    "lb": {
+     "tried": 10,
+     "rep1_ok": 2,
+     "rep1_2_ok": 0,
+     "three_of_three_n": 0,
+     "three_of_three": [],
+     "n_runs_valid": 12,
+     "failure_mode_rep1": {
+      "ok": 2,
+      "no_grasp": 3,
+      "regrasp": 0,
+      "slip_at_lift": 4,
+      "slip_in_transport": 1,
+      "not_placed": 0
+     },
+     "failure_mode_all_runs": {
+      "ok": 2,
+      "no_grasp": 4,
+      "regrasp": 0,
+      "slip_at_lift": 4,
+      "slip_in_transport": 2,
+      "not_placed": 0
+     }
+    },
+    "lb3": {
+     "tried": 30,
+     "rep1_ok": 10,
+     "rep1_2_ok": 1,
+     "three_of_three_n": 0,
+     "three_of_three": [],
+     "n_runs_valid": 41,
+     "failure_mode_rep1": {
+      "ok": 10,
+      "no_grasp": 14,
+      "regrasp": 2,
+      "slip_at_lift": 4,
+      "slip_in_transport": 0,
+      "not_placed": 0
+     },
+     "failure_mode_all_runs": {
+      "ok": 11,
+      "no_grasp": 17,
+      "regrasp": 2,
+      "slip_at_lift": 9,
+      "slip_in_transport": 2,
+      "not_placed": 0
+     }
+    },
+    "combined": {
+     "tried": 40,
+     "rep1_ok": 12,
+     "rep1_2_ok": 1,
+     "three_of_three_n": 0,
+     "three_of_three": [],
+     "n_runs_valid": 53,
+     "failure_mode_rep1": {
+      "ok": 12,
+      "no_grasp": 17,
+      "regrasp": 2,
+      "slip_at_lift": 8,
+      "slip_in_transport": 1,
+      "not_placed": 0
+     },
+     "failure_mode_all_runs": {
+      "ok": 13,
+      "no_grasp": 21,
+      "regrasp": 2,
+      "slip_at_lift": 13,
+      "slip_in_transport": 4,
+      "not_placed": 0
+     }
+    },
+    "lb3_tried_ranked": [
+     876,
+     1466,
+     506,
+     1423,
+     1359,
+     148,
+     778,
+     267,
+     441,
+     542,
+     1095,
+     962,
+     1170,
+     1502,
+     906,
+     609,
+     414,
+     497,
+     378,
+     251
+    ],
+    "lb3_tried_random": [
+     1028,
+     616,
+     304,
+     1326,
+     5,
+     384,
+     374,
+     568,
+     458,
+     910
+    ],
+    "lb3_untried_ranks_31_40": [
+     799,
+     1494,
+     1439,
+     432,
+     127,
+     1488,
+     488,
+     1028,
+     48,
+     1430
+    ],
+    "random_sample": {
+     "rng_seed": 20261009,
+     "rng": "numpy default_rng(seed).permutation(pool minus ranks 1-30)",
+     "order_first_10": [
+      568,
+      304,
+      1326,
+      1028,
+      458,
+      384,
+      616,
+      910,
+      374,
+      5
+     ],
+     "tried": [
+      1028,
+      616,
+      304,
+      1326,
+      5,
+      384,
+      374,
+      568,
+      458,
+      910
+     ]
+    },
+    "cap": 40,
+    "new_adopted_lb3": [],
+    "combined_three_of_three": [],
+    "adopted_combined": []
+   },
+   "banana_right": {
+    "pool_size_train": 200,
+    "lb": {
+     "tried": 10,
+     "rep1_ok": 5,
+     "rep1_2_ok": 2,
+     "three_of_three_n": 0,
+     "three_of_three": [],
+     "n_runs_valid": 17,
+     "failure_mode_rep1": {
+      "ok": 5,
+      "no_grasp": 2,
+      "regrasp": 1,
+      "slip_at_lift": 2,
+      "slip_in_transport": 0,
+      "not_placed": 0
+     },
+     "failure_mode_all_runs": {
+      "ok": 7,
+      "no_grasp": 2,
+      "regrasp": 3,
+      "slip_at_lift": 5,
+      "slip_in_transport": 0,
+      "not_placed": 0
+     }
+    },
+    "lb3": {
+     "tried": 30,
+     "rep1_ok": 15,
+     "rep1_2_ok": 5,
+     "three_of_three_n": 1,
+     "three_of_three": [
+      1175
+     ],
+     "n_runs_valid": 50,
+     "failure_mode_rep1": {
+      "ok": 15,
+      "no_grasp": 3,
+      "regrasp": 1,
+      "slip_at_lift": 5,
+      "slip_in_transport": 6,
+      "not_placed": 0
+     },
+     "failure_mode_all_runs": {
+      "ok": 21,
+      "no_grasp": 3,
+      "regrasp": 1,
+      "slip_at_lift": 13,
+      "slip_in_transport": 12,
+      "not_placed": 0
+     }
+    },
+    "combined": {
+     "tried": 40,
+     "rep1_ok": 20,
+     "rep1_2_ok": 7,
+     "three_of_three_n": 1,
+     "three_of_three": [
+      1175
+     ],
+     "n_runs_valid": 67,
+     "failure_mode_rep1": {
+      "ok": 20,
+      "no_grasp": 5,
+      "regrasp": 2,
+      "slip_at_lift": 7,
+      "slip_in_transport": 6,
+      "not_placed": 0
+     },
+     "failure_mode_all_runs": {
+      "ok": 28,
+      "no_grasp": 5,
+      "regrasp": 4,
+      "slip_at_lift": 18,
+      "slip_in_transport": 12,
+      "not_placed": 0
+     }
+    },
+    "lb3_tried_ranked": [
+     464,
+     1436,
+     1395,
+     1056,
+     999,
+     765,
+     44,
+     836,
+     1175,
+     500,
+     1052,
+     7,
+     1480,
+     271,
+     1458,
+     479,
+     349,
+     531,
+     1511,
+     122
+    ],
+    "lb3_tried_random": [
+     275,
+     461,
+     293,
+     739,
+     557,
+     629,
+     1321,
+     996,
+     1550,
+     1112
+    ],
+    "lb3_untried_ranks_31_40": [
+     635,
+     140,
+     1354,
+     493,
+     6,
+     1009,
+     1273,
+     1165,
+     977,
+     1576
+    ],
+    "random_sample": {
+     "rng_seed": 20261010,
+     "rng": "numpy default_rng(seed).permutation(pool minus ranks 1-30)",
+     "order_first_10": [
+      557,
+      275,
+      461,
+      293,
+      739,
+      1550,
+      996,
+      1112,
+      629,
+      1321
+     ],
+     "tried": [
+      275,
+      461,
+      293,
+      739,
+      557,
+      629,
+      1321,
+      996,
+      1550,
+      1112
+     ]
+    },
+    "cap": 40,
+    "new_adopted_lb3": [
+     1175
+    ],
+    "combined_three_of_three": [
+     1175
+    ],
+    "adopted_combined": [
+     1175
+    ]
+   },
+   "pear_left": {
+    "pool_size_train": 200,
+    "lb": {
+     "tried": 10,
+     "rep1_ok": 1,
+     "rep1_2_ok": 1,
+     "three_of_three_n": 1,
+     "three_of_three": [
+      1440
+     ],
+     "n_runs_valid": 12,
+     "failure_mode_rep1": {
+      "ok": 1,
+      "no_grasp": 7,
+      "regrasp": 0,
+      "slip_at_lift": 0,
+      "slip_in_transport": 1,
+      "not_placed": 1
+     },
+     "failure_mode_all_runs": {
+      "ok": 3,
+      "no_grasp": 7,
+      "regrasp": 0,
+      "slip_at_lift": 0,
+      "slip_in_transport": 1,
+      "not_placed": 1
+     }
+    },
+    "lb3": {
+     "tried": 20,
+     "rep1_ok": 7,
+     "rep1_2_ok": 4,
+     "three_of_three_n": 1,
+     "three_of_three": [
+      880
+     ],
+     "n_runs_valid": 27,
+     "failure_mode_rep1": {
+      "ok": 7,
+      "no_grasp": 10,
+      "regrasp": 0,
+      "slip_at_lift": 1,
+      "slip_in_transport": 2,
+      "not_placed": 0
+     },
+     "failure_mode_all_runs": {
+      "ok": 12,
+      "no_grasp": 12,
+      "regrasp": 0,
+      "slip_at_lift": 1,
+      "slip_in_transport": 2,
+      "not_placed": 0
+     }
+    },
+    "combined": {
+     "tried": 30,
+     "rep1_ok": 8,
+     "rep1_2_ok": 5,
+     "three_of_three_n": 2,
+     "three_of_three": [
+      1440,
+      880
+     ],
+     "n_runs_valid": 39,
+     "failure_mode_rep1": {
+      "ok": 8,
+      "no_grasp": 17,
+      "regrasp": 0,
+      "slip_at_lift": 1,
+      "slip_in_transport": 3,
+      "not_placed": 1
+     },
+     "failure_mode_all_runs": {
+      "ok": 15,
+      "no_grasp": 19,
+      "regrasp": 0,
+      "slip_at_lift": 1,
+      "slip_in_transport": 3,
+      "not_placed": 1
+     }
+    },
+    "lb3_tried_ranked": [
+     439,
+     880,
+     1197,
+     779,
+     588,
+     642,
+     1454,
+     272,
+     1372,
+     674,
+     1554,
+     1492,
+     226,
+     1433,
+     167,
+     254,
+     1358,
+     645,
+     1132,
+     1429
+    ],
+    "lb3_tried_random": [],
+    "lb3_untried_ranks_31_40": [],
+    "random_sample": null,
+    "cap": 40,
+    "new_adopted_lb3": [
+     880
+    ],
+    "combined_three_of_three": [
+     1440,
+     880
+    ],
+    "adopted_combined": [
+     1440,
+     880
+    ]
+   }
+  },
+  "adopted_combined_LB_LB3": {
+   "apple_left": [
+    745,
+    1031
+   ],
+   "apple_right": [
+    394,
+    274
+   ],
+   "orange_left": [
+    418,
+    205
+   ],
+   "orange_right": [
+    1256,
+    482
+   ],
+   "pear_left": [
+    1440,
+    880
+   ],
+   "pear_right": [
+    375,
+    596
+   ],
+   "banana_left": [],
+   "banana_right": [
+    1175
+   ]
+  },
+  "three_of_three_all_LB_LB3": {
+   "banana_left": [],
+   "banana_right": [
+    1175
+   ],
+   "pear_left": [
+    1440,
+    880
+   ]
+  },
+  "n_tried_total_lb3": 80,
+  "n_valid_runs_done_lb3": 118,
+  "invalid_attempt_count": 1,
+  "invalid_attempts": [
+   {
+    "file": "E0_ep739_s7391.client.log.20261010T030154",
+    "safe_error_counts": [],
+    "safe_error_max": 0,
+    "connection_error": true,
+    "last_lines": [
+     "websockets.exceptions.ConnectionClosedError: received 1011 (internal error) keepalive ping timeout; then sent 1011 (internal error) keepalive ping timeout",
+     "exit=1"
+    ],
+    "rerun_done": true
+   }
+  ],
+  "invalid_all_rerun_and_done": true,
+  "audit_valid_runs_with_safe_error_or_conn_error": [],
+  "pod": {
+   "n_samples": 233,
+   "first_sample_utc": "2026-10-09T23:52:55+00:00",
+   "last_sample_utc": "2026-10-10T03:51:06+00:00",
+   "loadavg1_min": 13.82,
+   "loadavg1_median": 36.5,
+   "loadavg1_max": 368.42,
+   "working_set_gib_max": 70.79325103759766,
+   "gpu_used_mib_max_sampled_60s": 35972
+  },
+  "servers": {
+   "n_started": 12,
+   "items": [
+    {
+     "dir": "server_8280_20261009T235311",
+     "gpu_total_used_mib_max": 21236,
+     "gpu_used_before_mib": 0
+    },
+    {
+     "dir": "server_8280_20261010T004817",
+     "gpu_total_used_mib_max": 36236,
+     "gpu_used_before_mib": 0
+    },
+    {
+     "dir": "server_8280_20261010T014646",
+     "gpu_total_used_mib_max": 28412,
+     "gpu_used_before_mib": 15134
+    },
+    {
+     "dir": "server_8280_20261010T023656",
+     "gpu_total_used_mib_max": 18022,
+     "gpu_used_before_mib": 0
+    },
+    {
+     "dir": "server_8280_20261010T032022",
+     "gpu_total_used_mib_max": 18022,
+     "gpu_used_before_mib": 0
+    },
+    {
+     "dir": "server_8280_20261010T034146",
+     "gpu_total_used_mib_max": 17476,
+     "gpu_used_before_mib": 0
+    },
+    {
+     "dir": "server_8281_20261009T235331",
+     "gpu_total_used_mib_max": 21236,
+     "gpu_used_before_mib": 8732
+    },
+    {
+     "dir": "server_8281_20261010T004838",
+     "gpu_total_used_mib_max": 36236,
+     "gpu_used_before_mib": 10822
+    },
+    {
+     "dir": "server_8281_20261010T014709",
+     "gpu_total_used_mib_max": 28412,
+     "gpu_used_before_mib": 14375
+    },
+    {
+     "dir": "server_8281_20261010T023716",
+     "gpu_total_used_mib_max": 18022,
+     "gpu_used_before_mib": 8732
+    },
+    {
+     "dir": "server_8281_20261010T032042",
+     "gpu_total_used_mib_max": 18022,
+     "gpu_used_before_mib": 9162
+    },
+    {
+     "dir": "server_8281_20261010T034206",
+     "gpu_total_used_mib_max": 17476,
+     "gpu_used_before_mib": 9162
+    }
+   ],
+   "gpu_total_used_mib_max_2s": 36236
+  }
+ },
+ "episodes": {
+  "502": {
+   "episode": 502,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 1,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.1157936686274772,
+   "layout_index": 6,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 5021,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep502_s5021"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "415": {
+   "episode": 415,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 2,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11292677916424437,
+   "layout_index": 15,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4151,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep415_s4151"
+    },
+    {
+     "rep": 2,
+     "seed": 4152,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep415_s4152"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_in_transport"
+   ]
+  },
+  "1044": {
+   "episode": 1044,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 3,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11198229676810526,
+   "layout_index": 4,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 10441,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1044_s10441"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "31": {
+   "episode": 31,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 4,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11097784765244821,
+   "layout_index": 15,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 311,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep31_s311"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "630": {
+   "episode": 630,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 5,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11045699764817979,
+   "layout_index": 6,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 6301,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep630_s6301"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "950": {
+   "episode": 950,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 6,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11033748838948618,
+   "layout_index": 6,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 9501,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep950_s9501"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1179": {
+   "episode": 1179,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 7,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.10982696814407653,
+   "layout_index": 11,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 11791,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1179_s11791"
+    },
+    {
+     "rep": 2,
+     "seed": 11792,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1179_s11792"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "no_grasp"
+   ]
+  },
+  "666": {
+   "episode": 666,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 8,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.10921218239308289,
+   "layout_index": 10,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 6661,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep666_s6661"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "965": {
+   "episode": 965,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 9,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.10844822555791314,
+   "layout_index": 5,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 9651,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep965_s9651"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "1413": {
+   "episode": 1413,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 10,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.10834842439523519,
+   "layout_index": 5,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14131,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1413_s14131"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "876": {
+   "episode": 876,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 11,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10828035708867048,
+   "layout_index": 12,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 8761,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep876_s8761"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1466": {
+   "episode": 1466,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 12,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10793335102182271,
+   "layout_index": 10,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14661,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1466_s14661"
+    },
+    {
+     "rep": 2,
+     "seed": 14662,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1466_s14662"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_in_transport"
+   ]
+  },
+  "506": {
+   "episode": 506,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 13,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10791851613643504,
+   "layout_index": 10,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 5061,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep506_s5061"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1423": {
+   "episode": 1423,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 14,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10789584157292621,
+   "layout_index": 15,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14231,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1423_s14231"
+    },
+    {
+     "rep": 2,
+     "seed": 14232,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1423_s14232"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "1359": {
+   "episode": 1359,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 15,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10787566719265292,
+   "layout_index": 15,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 13591,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1359_s13591"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "148": {
+   "episode": 148,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 16,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10751972537320766,
+   "layout_index": 4,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 1481,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep148_s1481"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "778": {
+   "episode": 778,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 17,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10741135073398897,
+   "layout_index": 10,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 7781,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep778_s7781"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "267": {
+   "episode": 267,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 18,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10730968436334157,
+   "layout_index": 11,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2671,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep267_s2671"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "441": {
+   "episode": 441,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 19,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10706282585122626,
+   "layout_index": 9,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4411,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep441_s4411"
+    },
+    {
+     "rep": 2,
+     "seed": 4412,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep441_s4412"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "no_grasp"
+   ]
+  },
+  "542": {
+   "episode": 542,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 20,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10667202086325174,
+   "layout_index": 14,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 5421,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep542_s5421"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1095": {
+   "episode": 1095,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 21,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.1066208069196627,
+   "layout_index": 7,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 10951,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1095_s10951"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "962": {
+   "episode": 962,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 22,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10593806725238107,
+   "layout_index": 2,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 9621,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep962_s9621"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1170": {
+   "episode": 1170,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 23,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10558607900291588,
+   "layout_index": 2,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 11701,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1170_s11701"
+    },
+    {
+     "rep": 2,
+     "seed": 11702,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1170_s11702"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "1502": {
+   "episode": 1502,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 24,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10522670805095072,
+   "layout_index": 14,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 15021,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1502_s15021"
+    },
+    {
+     "rep": 2,
+     "seed": 15022,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1502_s15022"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "906": {
+   "episode": 906,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 25,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10500860465319024,
+   "layout_index": 10,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 9061,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep906_s9061"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "609": {
+   "episode": 609,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 26,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10490680776122209,
+   "layout_index": 1,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 6091,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep609_s6091"
+    },
+    {
+     "rep": 2,
+     "seed": 6092,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep609_s6092"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "414": {
+   "episode": 414,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 27,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10446118347730889,
+   "layout_index": 14,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4141,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep414_s4141"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "497": {
+   "episode": 497,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 28,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10401565401544144,
+   "layout_index": 1,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4971,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep497_s4971"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "378": {
+   "episode": 378,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 29,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10397943735816233,
+   "layout_index": 10,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 3781,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "regrasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep378_s3781"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "regrasp"
+   ]
+  },
+  "251": {
+   "episode": 251,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 30,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10385756733449904,
+   "layout_index": 11,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2511,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep251_s2511"
+    },
+    {
+     "rep": 2,
+     "seed": 2512,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep251_s2512"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_in_transport"
+   ]
+  },
+  "1028": {
+   "episode": 1028,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 38,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.10286082399558151,
+   "layout_index": 4,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 10281,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1028_s10281"
+    },
+    {
+     "rep": 2,
+     "seed": 10282,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1028_s10282"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "no_grasp"
+   ]
+  },
+  "616": {
+   "episode": 616,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 65,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.09771667577281781,
+   "layout_index": 8,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 6161,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep616_s6161"
+    },
+    {
+     "rep": 2,
+     "seed": 6162,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep616_s6162"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "304": {
+   "episode": 304,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 73,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.09671314391632607,
+   "layout_index": 0,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 3041,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep304_s3041"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "1326": {
+   "episode": 1326,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 101,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.09138260423543425,
+   "layout_index": 14,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 13261,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1326_s13261"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "5": {
+   "episode": 5,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 123,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.08735583822607397,
+   "layout_index": 5,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 51,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep5_s51"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "384": {
+   "episode": 384,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 144,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.0842301144527894,
+   "layout_index": 0,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 3841,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep384_s3841"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "374": {
+   "episode": 374,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 147,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.08387299237782089,
+   "layout_index": 6,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 3741,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep374_s3741"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "568": {
+   "episode": 568,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 148,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.0838143610604412,
+   "layout_index": 8,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 5681,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep568_s5681"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "458": {
+   "episode": 458,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 157,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.08191592112434559,
+   "layout_index": 10,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4581,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "regrasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep458_s4581"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "regrasp"
+   ]
+  },
+  "910": {
+   "episode": 910,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "left",
+   "rank_in_pool": 192,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.07577290744118247,
+   "layout_index": 14,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 9101,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep910_s9101"
+    },
+    {
+     "rep": 2,
+     "seed": 9102,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep910_s9102"
+    },
+    {
+     "rep": 3,
+     "seed": 9103,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep910_s9103"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "no_grasp"
+   ]
+  },
+  "1503": {
+   "episode": 1503,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 1,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11715803422612558,
+   "layout_index": 15,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 15031,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1503_s15031"
+    },
+    {
+     "rep": 2,
+     "seed": 15032,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "regrasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1503_s15032"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "regrasp"
+   ]
+  },
+  "351": {
+   "episode": 351,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 2,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11473404447874228,
+   "layout_index": 15,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 3511,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep351_s3511"
+    },
+    {
+     "rep": 2,
+     "seed": 3512,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep351_s3512"
+    },
+    {
+     "rep": 3,
+     "seed": 3513,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep351_s3513"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "212": {
+   "episode": 212,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 3,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11433024951122957,
+   "layout_index": 4,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2121,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "regrasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep212_s2121"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "regrasp"
+   ]
+  },
+  "452": {
+   "episode": 452,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 4,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11392909014141211,
+   "layout_index": 4,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4521,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep452_s4521"
+    },
+    {
+     "rep": 2,
+     "seed": 4522,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep452_s4522"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "235": {
+   "episode": 235,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 5,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.1136899299817271,
+   "layout_index": 11,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2351,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep235_s2351"
+    },
+    {
+     "rep": 2,
+     "seed": 2352,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep235_s2352"
+    },
+    {
+     "rep": 3,
+     "seed": 2353,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep235_s2353"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "496": {
+   "episode": 496,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 6,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11359437472714044,
+   "layout_index": 0,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4961,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep496_s4961"
+    },
+    {
+     "rep": 2,
+     "seed": 4962,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "regrasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep496_s4962"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "regrasp"
+   ]
+  },
+  "1221": {
+   "episode": 1221,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 7,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11354759437786428,
+   "layout_index": 5,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 12211,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1221_s12211"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1528": {
+   "episode": 1528,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 8,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11310748459655529,
+   "layout_index": 8,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 15281,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1528_s15281"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "1400": {
+   "episode": 1400,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 9,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11239825947273387,
+   "layout_index": 8,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14001,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1400_s14001"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "343": {
+   "episode": 343,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 10,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11213830851176591,
+   "layout_index": 7,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 3431,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep343_s3431"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "464": {
+   "episode": 464,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 11,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.1114441106851322,
+   "layout_index": 0,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4641,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep464_s4641"
+    },
+    {
+     "rep": 2,
+     "seed": 4642,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep464_s4642"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_in_transport"
+   ]
+  },
+  "1436": {
+   "episode": 1436,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 12,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.11142012465340367,
+   "layout_index": 12,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14361,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1436_s14361"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "1395": {
+   "episode": 1395,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 13,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.1111297809043553,
+   "layout_index": 3,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 13951,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1395_s13951"
+    },
+    {
+     "rep": 2,
+     "seed": 13952,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1395_s13952"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "1056": {
+   "episode": 1056,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 14,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.11040383397930521,
+   "layout_index": 0,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 10561,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1056_s10561"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "999": {
+   "episode": 999,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 15,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.11019004588546101,
+   "layout_index": 7,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 9991,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep999_s9991"
+    },
+    {
+     "rep": 2,
+     "seed": 9992,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep999_s9992"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_in_transport"
+   ]
+  },
+  "765": {
+   "episode": 765,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 16,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.1097171936632085,
+   "layout_index": 13,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 7651,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep765_s7651"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "44": {
+   "episode": 44,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 17,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10944017650908652,
+   "layout_index": 12,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 441,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep44_s441"
+    },
+    {
+     "rep": 2,
+     "seed": 442,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep44_s442"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "836": {
+   "episode": 836,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 18,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10900195183027692,
+   "layout_index": 4,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 8361,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep836_s8361"
+    },
+    {
+     "rep": 2,
+     "seed": 8362,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep836_s8362"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "1175": {
+   "episode": 1175,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 19,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10858995715516233,
+   "layout_index": 7,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 11751,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1175_s11751"
+    },
+    {
+     "rep": 2,
+     "seed": 11752,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1175_s11752"
+    },
+    {
+     "rep": 3,
+     "seed": 11753,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1175_s11753"
+    }
+   ],
+   "n_ok_B": 3,
+   "three_of_three": true,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "ok"
+   ]
+  },
+  "500": {
+   "episode": 500,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 20,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10817199904878344,
+   "layout_index": 4,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 5001,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "regrasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep500_s5001"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "regrasp"
+   ]
+  },
+  "1052": {
+   "episode": 1052,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 21,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.1081300408408783,
+   "layout_index": 12,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 10521,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1052_s10521"
+    },
+    {
+     "rep": 2,
+     "seed": 10522,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1052_s10522"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_in_transport"
+   ]
+  },
+  "7": {
+   "episode": 7,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 22,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.1075613877192462,
+   "layout_index": 7,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 71,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep7_s71"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "1480": {
+   "episode": 1480,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 23,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.1075447238555663,
+   "layout_index": 8,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14801,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1480_s14801"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "271": {
+   "episode": 271,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 24,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10748366421875472,
+   "layout_index": 15,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2711,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep271_s2711"
+    },
+    {
+     "rep": 2,
+     "seed": 2712,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep271_s2712"
+    },
+    {
+     "rep": 3,
+     "seed": 2713,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep271_s2713"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "slip_in_transport"
+   ]
+  },
+  "1458": {
+   "episode": 1458,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 25,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10720406191203763,
+   "layout_index": 2,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14581,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1458_s14581"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "479": {
+   "episode": 479,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 26,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10719326921528233,
+   "layout_index": 15,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4791,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep479_s4791"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "349": {
+   "episode": 349,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 27,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10682671848943029,
+   "layout_index": 13,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 3491,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep349_s3491"
+    },
+    {
+     "rep": 2,
+     "seed": 3492,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep349_s3492"
+    },
+    {
+     "rep": 3,
+     "seed": 3493,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep349_s3493"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "531": {
+   "episode": 531,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 28,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10678076085367633,
+   "layout_index": 3,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 5311,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep531_s5311"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "1511": {
+   "episode": 1511,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 29,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10528875133104201,
+   "layout_index": 7,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 15111,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1511_s15111"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  },
+  "122": {
+   "episode": 122,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 30,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10515228463480951,
+   "layout_index": 10,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 1221,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep122_s1221"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "275": {
+   "episode": 275,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 51,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.10162340774939593,
+   "layout_index": 3,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2751,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep275_s2751"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "461": {
+   "episode": 461,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 61,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.09959301339120129,
+   "layout_index": 13,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4611,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep461_s4611"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "293": {
+   "episode": 293,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 94,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.09374220100851051,
+   "layout_index": 5,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2931,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep293_s2931"
+    },
+    {
+     "rep": 2,
+     "seed": 2932,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep293_s2932"
+    },
+    {
+     "rep": 3,
+     "seed": 2933,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep293_s2933"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "739": {
+   "episode": 739,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 99,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.09224445847036011,
+   "layout_index": 3,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 7391,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep739_s7391"
+    },
+    {
+     "rep": 2,
+     "seed": 7392,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep739_s7392"
+    },
+    {
+     "rep": 3,
+     "seed": 7393,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep739_s7393"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "557": {
+   "episode": 557,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 102,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.0916461389312174,
+   "layout_index": 13,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 5571,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep557_s5571"
+    },
+    {
+     "rep": 2,
+     "seed": 5572,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep557_s5572"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_in_transport"
+   ]
+  },
+  "629": {
+   "episode": 629,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 114,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.09013300678802405,
+   "layout_index": 5,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 6291,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep629_s6291"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1321": {
+   "episode": 1321,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 133,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.08746349732825685,
+   "layout_index": 9,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 13211,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1321_s13211"
+    },
+    {
+     "rep": 2,
+     "seed": 13212,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1321_s13212"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_in_transport"
+   ]
+  },
+  "996": {
+   "episode": 996,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 134,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.08737454840541382,
+   "layout_index": 4,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 9961,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep996_s9961"
+    },
+    {
+     "rep": 2,
+     "seed": 9962,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep996_s9962"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "1550": {
+   "episode": 1550,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 161,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.0826725572577744,
+   "layout_index": 14,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 15501,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1550_s15501"
+    },
+    {
+     "rep": 2,
+     "seed": 15502,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1550_s15502"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "slip_at_lift"
+   ]
+  },
+  "1112": {
+   "episode": 1112,
+   "split": "train",
+   "fruit": "banana",
+   "arm": "right",
+   "rank_in_pool": 188,
+   "selection": "lb3_random",
+   "crowd_score_m": 0.07555205139140825,
+   "layout_index": 8,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 11121,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "banana",
+     "manifest_arm": "right",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1112_s11121"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "983": {
+   "episode": 983,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 1,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11855159583337542,
+   "layout_index": 7,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 9831,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": true,
+     "failure_mode": "not_placed",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep983_s9831"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "not_placed"
+   ]
+  },
+  "79": {
+   "episode": 79,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 2,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11503724629779702,
+   "layout_index": 15,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 791,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep79_s791"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1211": {
+   "episode": 1211,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 3,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11478845554296824,
+   "layout_index": 11,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 12111,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1211_s12111"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "417": {
+   "episode": 417,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 4,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.1141638329101209,
+   "layout_index": 1,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4171,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep417_s4171"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "536": {
+   "episode": 536,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 5,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11362373671541696,
+   "layout_index": 8,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 5361,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep536_s5361"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "35": {
+   "episode": 35,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 6,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.1130531370594377,
+   "layout_index": 3,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 351,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep35_s351"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1440": {
+   "episode": 1440,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 7,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11222513901947287,
+   "layout_index": 0,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14401,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1440_s14401"
+    },
+    {
+     "rep": 2,
+     "seed": 14402,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1440_s14402"
+    },
+    {
+     "rep": 3,
+     "seed": 14403,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1440_s14403"
+    }
+   ],
+   "n_ok_B": 3,
+   "three_of_three": true,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "ok"
+   ]
+  },
+  "1330": {
+   "episode": 1330,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 8,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.1121048750085384,
+   "layout_index": 2,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 13301,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1330_s13301"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1203": {
+   "episode": 1203,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 9,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11169789542677167,
+   "layout_index": 3,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 12031,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1203_s12031"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "1451": {
+   "episode": 1451,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 10,
+   "selection": "lb_rank_1_10",
+   "crowd_score_m": 0.11167187119530148,
+   "layout_index": 11,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14511,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1451_s14511"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "439": {
+   "episode": 439,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 11,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.11151980611263633,
+   "layout_index": 7,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 4391,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep439_s4391"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "880": {
+   "episode": 880,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 12,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.1105780774182659,
+   "layout_index": 0,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 8801,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep880_s8801"
+    },
+    {
+     "rep": 2,
+     "seed": 8802,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep880_s8802"
+    },
+    {
+     "rep": 3,
+     "seed": 8803,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep880_s8803"
+    }
+   ],
+   "n_ok_B": 3,
+   "three_of_three": true,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "ok"
+   ]
+  },
+  "1197": {
+   "episode": 1197,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 13,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.11043618664043055,
+   "layout_index": 13,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 11971,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1197_s11971"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "779": {
+   "episode": 779,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 14,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10977223741588756,
+   "layout_index": 11,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 7791,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep779_s7791"
+    },
+    {
+     "rep": 2,
+     "seed": 7792,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep779_s7792"
+    },
+    {
+     "rep": 3,
+     "seed": 7793,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep779_s7793"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok",
+    "no_grasp"
+   ]
+  },
+  "588": {
+   "episode": 588,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 15,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10959374417337885,
+   "layout_index": 12,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 5881,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep588_s5881"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "642": {
+   "episode": 642,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 16,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.1094317493754898,
+   "layout_index": 2,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 6421,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep642_s6421"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1454": {
+   "episode": 1454,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 17,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10925862462181195,
+   "layout_index": 14,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14541,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1454_s14541"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "272": {
+   "episode": 272,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 18,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10883920830367158,
+   "layout_index": 0,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2721,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep272_s2721"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1372": {
+   "episode": 1372,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 19,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10873041432331622,
+   "layout_index": 12,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 13721,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1372_s13721"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "674": {
+   "episode": 674,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 20,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10860329052593204,
+   "layout_index": 2,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 6741,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep674_s6741"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "1554": {
+   "episode": 1554,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 21,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10673801457910863,
+   "layout_index": 2,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 15541,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1554_s15541"
+    },
+    {
+     "rep": 2,
+     "seed": 15542,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1554_s15542"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "no_grasp"
+   ]
+  },
+  "1492": {
+   "episode": 1492,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 22,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10659482818711234,
+   "layout_index": 4,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14921,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1492_s14921"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "226": {
+   "episode": 226,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 23,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10592898905710377,
+   "layout_index": 2,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2261,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep226_s2261"
+    },
+    {
+     "rep": 2,
+     "seed": 2262,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep226_s2262"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok"
+   ]
+  },
+  "1433": {
+   "episode": 1433,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 24,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10582915673315173,
+   "layout_index": 9,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14331,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1433_s14331"
+    },
+    {
+     "rep": 2,
+     "seed": 14332,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1433_s14332"
+    }
+   ],
+   "n_ok_B": 2,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok",
+    "ok"
+   ]
+  },
+  "167": {
+   "episode": 167,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 25,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10491931076260455,
+   "layout_index": 7,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 1671,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep167_s1671"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "254": {
+   "episode": 254,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 26,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10468350822980667,
+   "layout_index": 14,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 2541,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep254_s2541"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok"
+   ]
+  },
+  "1358": {
+   "episode": 1358,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 27,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10391793256146893,
+   "layout_index": 14,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 13581,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": false,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "no_grasp",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1358_s13581"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "no_grasp"
+   ]
+  },
+  "645": {
+   "episode": 645,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 28,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10378017758049941,
+   "layout_index": 5,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 6451,
+     "E0_ok_B": true,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": true,
+     "failure_mode": "ok",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep645_s6451"
+    }
+   ],
+   "n_ok_B": 1,
+   "three_of_three": false,
+   "failure_modes": [
+    "ok"
+   ]
+  },
+  "1132": {
+   "episode": 1132,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 29,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10360848420322528,
+   "layout_index": 12,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 11321,
+     "E0_ok_B": false,
+     "success": true,
+     "grasp": true,
+     "place": true,
+     "robust_B": false,
+     "failure_mode": "slip_in_transport",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1132_s11321"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_in_transport"
+   ]
+  },
+  "1429": {
+   "episode": 1429,
+   "split": "train",
+   "fruit": "pear",
+   "arm": "left",
+   "rank_in_pool": 30,
+   "selection": "lb3_ranked",
+   "crowd_score_m": 0.10351754048203622,
+   "layout_index": 5,
+   "seeds": [
+    {
+     "rep": 1,
+     "seed": 14291,
+     "E0_ok_B": false,
+     "success": false,
+     "grasp": true,
+     "place": false,
+     "robust_B": false,
+     "failure_mode": "slip_at_lift",
+     "source": "LB3",
+     "manifest_split": "train",
+     "manifest_fruit": "pear",
+     "manifest_arm": "left",
+     "run_dir": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1429_s14291"
+    }
+   ],
+   "n_ok_B": 0,
+   "three_of_three": false,
+   "failure_modes": [
+    "slip_at_lift"
+   ]
+  }
+ }
+}

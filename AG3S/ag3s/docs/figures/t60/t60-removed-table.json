@@ -1,0 +1,55 @@
+{
+ "CL2": {
+  "runs": 72,
+  "success": 40,
+  "P": 40,
+  "P_agree": 72,
+  "H": 26,
+  "rows": 43200,
+  "frames": 5400,
+  "rows_removed_P": 12940,
+  "rows_removed_H": 7889,
+  "frames_removed_P": 1603,
+  "frames_removed_H": 976
+ },
+ "CL3": {
+  "runs": 54,
+  "success": 40,
+  "P": 40,
+  "P_agree": 54,
+  "H": 28,
+  "rows": 32400,
+  "frames": 4050,
+  "rows_removed_P": 13290,
+  "rows_removed_H": 8545,
+  "frames_removed_P": 1648,
+  "frames_removed_H": 1057
+ },
+ "T53": {
+  "runs": 16,
+  "success": 9,
+  "P": 9,
+  "P_agree": 16,
+  "H": 8,
+  "rows": 9600,
+  "frames": 1200,
+  "rows_removed_P": 2917,
+  "rows_removed_H": 2271,
+  "frames_removed_P": 362,
+  "frames_removed_H": 280
+ },
+ "all": {
+  "runs": 142,
+  "success": 89,
+  "P": 89,
+  "P_agree": 142,
+  "H": 62,
+  "rows": 85200,
+  "frames": 10650,
+  "rows_removed_P": 29147,
+  "rows_removed_H": 18705,
+  "frames_removed_P": 3613,
+  "frames_removed_H": 2313
+ },
+ "T53_proxy_frames_removed": 401
+}

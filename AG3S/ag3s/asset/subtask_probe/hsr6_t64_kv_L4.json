@@ -1,0 +1,14 @@
+{
+ "name": "hsr6_t64_kv_L4",
+ "created": "2026-10-29",
+ "writer": "AG3S/ag3s/experiments/studies/t64_phase6.py (T64 Part A, session B), copied unchanged for serving by AG3S-CORE-EVAL-HSR6",
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261029T013324+0900_b3b69311f948_7da63daefa49/verify/T64/partA/probe_6.npz",
+ "md5": "f0bb92aaf6869276c37786d6d2351917",
+ "classes": ["approach", "grasp", "lift", "transport", "placement", "retreat"],
+ "class_from_phase_index": {"approach": "0-2 (+ recovery 20-22)", "grasp": "3-4", "lift": "5", "transport": "6",
+                            "placement": "7-9", "retreat": "10-13"},
+ "feature": {"key": "kv_L4", "dim": 512, "same_as": "kv_L4_v1.json feature (the serving HSR feature, no extra forward)"},
+ "model": {"pipeline": "StandardScaler + multinomial LogisticRegression", "C": 0.03,
+           "apply": "p = softmax(((x - mean) / scale) @ coef.T + intercept), float64 (SubtaskProbe.proba)"},
+ "decision": "raw argmax per request (no debounce)"
+}

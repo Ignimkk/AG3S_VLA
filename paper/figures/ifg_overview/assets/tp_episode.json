@@ -1,0 +1,41 @@
+{
+ "episode": "T53_ep1842",
+ "moments": {
+  "M1_approach": {
+   "frame": "T53_ep1842_f010",
+   "iou_recomputed": 1.0,
+   "iou_row": 1.0
+  },
+  "M2_pre_grasp": {
+   "frame": "T53_ep1842_f016",
+   "iou_recomputed": 1.0,
+   "iou_row": 1.0
+  },
+  "M3_grasp": {
+   "frame": "T53_ep1842_f020",
+   "iou_recomputed": 0.9731412833730052,
+   "iou_row": 0.9731412833730052
+  },
+  "M4_carry": {
+   "frame": "T53_ep1842_f025",
+   "iou_recomputed": 0.9433256555280348,
+   "iou_row": 0.9433256555280348
+  },
+  "M5_pre_place": {
+   "frame": "T53_ep1842_f031",
+   "iou_recomputed": 0.9640925134294491,
+   "iou_row": 0.9640925134294491
+  },
+  "M6_post_place": {
+   "frame": "T53_ep1842_f032",
+   "iou_recomputed": 0.9978401727861771,
+   "iou_row": 0.9978401727861771
+  },
+  "M7_retreat": {
+   "frame": "T53_ep1842_f037",
+   "iou_recomputed": 0.9840182648401826,
+   "iou_row": 0.9840182648401826
+  }
+ },
+ "active_hand": "R"
+}

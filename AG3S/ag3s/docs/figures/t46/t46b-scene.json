@@ -1,0 +1,99 @@
+{
+ "source_chunks": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T220712+0900_de2042e9be89_ead5f3483344/verify/T46b/raw/chunks.jsonl",
+ "pair": "ep11_s111",
+ "seq": 36,
+ "seed_rule": "attention_values >= percentile 95 (attention.seed_percentile default, seed_threshold None); usable = ~support_mask (pipeline exclude_mask)",
+ "panels": {
+  "C1a": {
+   "run": "C1a_ep11_s111",
+   "seq": 36,
+   "t": 280,
+   "video_frame": 284,
+   "server_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1a/server_8291_20261012T081924/server_constraints/run_0000/chunk_00185.npz",
+   "grasp_state": "placed",
+   "grounding_status": "subtask_gated",
+   "n_clusters": 3,
+   "subtask_label": "home",
+   "subtask_placed_seen": true,
+   "hold": false,
+   "reason_kinds": [
+    "subtask_no_target"
+   ],
+   "to_status": "optimal",
+   "n_points": 36059,
+   "n_seeds_z_lt_0p4": 1751,
+   "n_seeds_z_ge_0p4": 52,
+   "view_xlim": [
+    0.25,
+    1.15
+   ],
+   "view_ylim": [
+    -0.65,
+    0.65
+   ],
+   "seed_cut_p95": 0.7051887869834894,
+   "n_seeds_p95": 1803,
+   "n_seeds_off_support": 7,
+   "n_support_points": 32337,
+   "destination_aabb": [
+    [
+     0.45669,
+     -0.22205,
+     0.82938
+    ],
+    [
+     0.64067,
+     0.19823,
+     0.97834
+    ]
+   ],
+   "f1_present": false
+  },
+  "C1aF1": {
+   "run": "C1aF1_ep11_s111",
+   "seq": 36,
+   "t": 280,
+   "video_frame": 284,
+   "server_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1aF1/server_8290_20261012T085150/server_constraints/run_0000/chunk_00185.npz",
+   "grasp_state": "placed",
+   "grounding_status": "no_seed",
+   "n_clusters": 0,
+   "subtask_label": "home",
+   "subtask_placed_seen": true,
+   "hold": true,
+   "reason_kinds": [
+    "uncertified",
+    "budget_only"
+   ],
+   "to_status": "violated",
+   "n_points": 36225,
+   "n_seeds_z_lt_0p4": 1731,
+   "n_seeds_z_ge_0p4": 81,
+   "view_xlim": [
+    0.25,
+    1.15
+   ],
+   "view_ylim": [
+    -0.65,
+    0.65
+   ],
+   "seed_cut_p95": 0.6179246306419373,
+   "n_seeds_p95": 1812,
+   "n_seeds_off_support": 0,
+   "n_support_points": 32468,
+   "destination_aabb": [
+    [
+     0.45672,
+     -0.22095,
+     0.82946
+    ],
+    [
+     0.64055,
+     0.19801,
+     0.97836
+    ]
+   ],
+   "f1_present": false
+  }
+ }
+}

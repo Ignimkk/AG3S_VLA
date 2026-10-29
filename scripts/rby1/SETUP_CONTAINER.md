@@ -1,4 +1,4 @@
-> 현재 AG3S_VLA setup 정본은 `doc/SHARED_STORAGE_AND_PYTHON.md`다. 아래 경로와 14D 실행 기록은 이전 구성의 참고 자료이며 현재 checkout의 설치 명령으로 그대로 사용하지 않는다.
+> 현재 AG3S_VLA setup 정본은 `doc/active/SHARED_STORAGE_AND_PYTHON.md`다. 아래 경로와 14D 실행 기록은 이전 구성의 참고 자료이며 현재 checkout의 설치 명령으로 그대로 사용하지 않는다.
 
 # pi05_TO_hybrid 컨테이너 세팅 가이드
 

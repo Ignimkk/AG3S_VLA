@@ -26,6 +26,7 @@ Multi-Node Training:
 import dataclasses
 import gc
 import logging
+from common.run_output import configure_run_logging
 import os
 import platform
 import shutil
@@ -623,6 +624,7 @@ def train_loop(config: _config.TrainConfig):
 
 
 def main():
+    configure_run_logging("train_pytorch")
     init_logging()
     config = _config.cli()
     train_loop(config)

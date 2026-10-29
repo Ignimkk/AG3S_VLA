@@ -1,0 +1,876 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T225350+0900_cf38c9dbca7b_f739ac556e8a/verify/T54b/test/analysis/t54_summary.json",
+ "unit": "identity rate, episode mean over target frames (episodes with >=1 frame in the phase); bar = episode bootstrap 95% CI of the arm mean (seed 5407, B 10000)",
+ "panels": [
+  {
+   "phase": "all",
+   "conditions": {
+    "hold": {
+     "L8H2": {
+      "mean_pct": 43.67370892018779,
+      "ci95_pct": [
+       28.373767605633805,
+       60.0825410798122
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "N": {
+      "mean_pct": 43.67370892018779,
+      "ci95_pct": [
+       28.373767605633805,
+       60.0825410798122
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "A": {
+      "mean_pct": 42.25704225352113,
+      "ci95_pct": [
+       26.472828638497646,
+       59.291285211267606
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "B": {
+      "mean_pct": 43.67370892018779,
+      "ci95_pct": [
+       28.373767605633805,
+       60.0825410798122
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "L12H4": {
+      "mean_pct": 48.840375586854464,
+      "ci95_pct": [
+       32.166666666666664,
+       65.72268192488262
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "A-L12H4": {
+      "mean_pct": 42.25704225352113,
+      "ci95_pct": [
+       26.472828638497646,
+       59.291285211267606
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "N-k3": {
+      "mean_pct": 40.840375586854464,
+      "ci95_pct": [
+       24.506866197183097,
+       58.42256455399062
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "A-k3": {
+      "mean_pct": 29.176056338028168,
+      "ci95_pct": [
+       14.76511150234742,
+       45.5493838028169
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     }
+    },
+    "hold_attach": {
+     "L8H2": {
+      "mean_pct": 42.31220657276995,
+      "ci95_pct": [
+       27.083333333333336,
+       58.63295187793426
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "N": {
+      "mean_pct": 42.31220657276995,
+      "ci95_pct": [
+       27.083333333333336,
+       58.63295187793426
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "A": {
+      "mean_pct": 40.89553990610328,
+      "ci95_pct": [
+       25.132042253521124,
+       57.97887323943662
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "B": {
+      "mean_pct": 42.31220657276995,
+      "ci95_pct": [
+       27.083333333333336,
+       58.63295187793426
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "L12H4": {
+      "mean_pct": 47.390845070422536,
+      "ci95_pct": [
+       30.855575117370886,
+       64.35704225352113
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "A-L12H4": {
+      "mean_pct": 40.974178403755865,
+      "ci95_pct": [
+       25.38262910798122,
+       57.890845070422536
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "N-k3": {
+      "mean_pct": 39.64553990610329,
+      "ci95_pct": [
+       23.58125,
+       56.992370892018776
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     },
+     "A-k3": {
+      "mean_pct": 28.426056338028165,
+      "ci95_pct": [
+       14.13262910798122,
+       44.97620305164318
+      ],
+      "n_episodes": 16,
+      "n_frames": 1178
+     }
+    }
+   }
+  },
+  {
+   "phase": "pre",
+   "conditions": {
+    "hold": {
+     "L8H2": {
+      "mean_pct": 87.5014005602241,
+      "ci95_pct": [
+       70.91666666666667,
+       99.28571428571429
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "N": {
+      "mean_pct": 87.5014005602241,
+      "ci95_pct": [
+       70.91666666666667,
+       99.28571428571429
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "A": {
+      "mean_pct": 81.2514005602241,
+      "ci95_pct": [
+       62.1547619047619,
+       98.52941176470588
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "B": {
+      "mean_pct": 87.5014005602241,
+      "ci95_pct": [
+       70.91666666666667,
+       99.28571428571429
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "L12H4": {
+      "mean_pct": 92.66806722689076,
+      "ci95_pct": [
+       79.7998949579832,
+       100.0
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "A-L12H4": {
+      "mean_pct": 81.2514005602241,
+      "ci95_pct": [
+       62.1547619047619,
+       98.52941176470588
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "N-k3": {
+      "mean_pct": 79.56144957983193,
+      "ci95_pct": [
+       61.525735294117645,
+       95.22058823529412
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "A-k3": {
+      "mean_pct": 60.24619222689076,
+      "ci95_pct": [
+       37.56529017857143,
+       82.10018382352942
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     }
+    },
+    "hold_attach": {
+     "L8H2": {
+      "mean_pct": 85.26834779964616,
+      "ci95_pct": [
+       69.09014839488427,
+       97.31195290616246
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "N": {
+      "mean_pct": 85.26834779964616,
+      "ci95_pct": [
+       69.09014839488427,
+       97.31195290616246
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "A": {
+      "mean_pct": 79.01834779964616,
+      "ci95_pct": [
+       60.19178921568628,
+       95.32746301645656
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "B": {
+      "mean_pct": 85.26834779964616,
+      "ci95_pct": [
+       69.09014839488427,
+       97.31195290616246
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "L12H4": {
+      "mean_pct": 90.34572875202713,
+      "ci95_pct": [
+       77.11006261057055,
+       98.34292763157895
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "A-L12H4": {
+      "mean_pct": 78.92906208536046,
+      "ci95_pct": [
+       60.101615021008406,
+       95.2251593482788
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "N-k3": {
+      "mean_pct": 77.64089681925401,
+      "ci95_pct": [
+       60.015634214212,
+       92.79605263157895
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     },
+     "A-k3": {
+      "mean_pct": 58.54885375202712,
+      "ci95_pct": [
+       36.24698464912281,
+       79.89560182625681
+      ],
+      "n_episodes": 16,
+      "n_frames": 594
+     }
+    }
+   }
+  },
+  {
+   "phase": "held",
+   "conditions": {
+    "hold": {
+     "L8H2": {
+      "mean_pct": 5.126262626262626,
+      "ci95_pct": [
+       2.10955710955711,
+       8.333333333333332
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "N": {
+      "mean_pct": 5.126262626262626,
+      "ci95_pct": [
+       2.10955710955711,
+       8.333333333333332
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "A": {
+      "mean_pct": 5.126262626262626,
+      "ci95_pct": [
+       2.10955710955711,
+       8.333333333333332
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "B": {
+      "mean_pct": 5.126262626262626,
+      "ci95_pct": [
+       2.10955710955711,
+       8.333333333333332
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "L12H4": {
+      "mean_pct": 5.126262626262626,
+      "ci95_pct": [
+       2.10955710955711,
+       8.333333333333332
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "A-L12H4": {
+      "mean_pct": 5.126262626262626,
+      "ci95_pct": [
+       2.10955710955711,
+       8.333333333333332
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "N-k3": {
+      "mean_pct": 4.431818181818182,
+      "ci95_pct": [
+       1.4681186868686873,
+       7.765151515151516
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "A-k3": {
+      "mean_pct": 4.292929292929292,
+      "ci95_pct": [
+       1.3888888888888888,
+       7.644628099173553
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     }
+    },
+    "hold_attach": {
+     "L8H2": {
+      "mean_pct": 1.3888888888888888,
+      "ci95_pct": [
+       0.0,
+       4.545454545454546
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "N": {
+      "mean_pct": 1.3888888888888888,
+      "ci95_pct": [
+       0.0,
+       4.545454545454546
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "A": {
+      "mean_pct": 1.3888888888888888,
+      "ci95_pct": [
+       0.0,
+       4.545454545454546
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "B": {
+      "mean_pct": 1.3888888888888888,
+      "ci95_pct": [
+       0.0,
+       4.545454545454546
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "L12H4": {
+      "mean_pct": 1.3888888888888888,
+      "ci95_pct": [
+       0.0,
+       4.545454545454546
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "A-L12H4": {
+      "mean_pct": 2.5793650793650795,
+      "ci95_pct": [
+       0.0,
+       6.25
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "N-k3": {
+      "mean_pct": 1.3888888888888888,
+      "ci95_pct": [
+       0.0,
+       4.545454545454546
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     },
+     "A-k3": {
+      "mean_pct": 1.3888888888888888,
+      "ci95_pct": [
+       0.0,
+       4.545454545454546
+      ],
+      "n_episodes": 12,
+      "n_frames": 113
+     }
+    }
+   }
+  },
+  {
+   "phase": "post",
+   "conditions": {
+    "hold": {
+     "L8H2": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "N": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "A": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "B": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "L12H4": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "A-L12H4": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "N-k3": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "A-k3": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     }
+    },
+    "hold_attach": {
+     "L8H2": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "N": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "A": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "B": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "L12H4": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "A-L12H4": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "N-k3": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     },
+     "A-k3": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 3,
+      "n_frames": 70
+     }
+    }
+   }
+  },
+  {
+   "phase": "placed",
+   "conditions": {
+    "hold": {
+     "L8H2": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "N": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "A": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "B": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "L12H4": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "A-L12H4": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "N-k3": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "A-k3": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     }
+    },
+    "hold_attach": {
+     "L8H2": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "N": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "A": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "B": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "L12H4": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "A-L12H4": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "N-k3": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     },
+     "A-k3": {
+      "mean_pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.0
+      ],
+      "n_episodes": 9,
+      "n_frames": 401
+     }
+    }
+   }
+  },
+  {
+   "phase": "held_other_hand",
+   "conditions": {
+    "hold": {
+     "L8H2": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "N": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "A": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "B": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "L12H4": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "A-L12H4": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "N-k3": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "A-k3": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     }
+    },
+    "hold_attach": {
+     "L8H2": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "N": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "A": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "B": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "L12H4": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "A-L12H4": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "N-k3": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     },
+     "A-k3": {
+      "mean_pct": null,
+      "ci95_pct": null,
+      "n_episodes": 0,
+      "n_frames": 0
+     }
+    }
+   }
+  }
+ ]
+}

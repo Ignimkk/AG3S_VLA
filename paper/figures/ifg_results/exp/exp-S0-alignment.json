@@ -1,0 +1,18 @@
+{
+ "frame": "T53_ep1839_f023",
+ "rule": "frame family of the protocol's debug frame022",
+ "cameras": {
+  "head": {
+   "valid_depth": 0.8548502604166667,
+   "robot_px": 58249
+  },
+  "left wrist": {
+   "valid_depth": 0.9803190104166667,
+   "robot_px": 9986
+  },
+  "right wrist": {
+   "valid_depth": 0.9803190104166667,
+   "robot_px": 13926
+  }
+ }
+}

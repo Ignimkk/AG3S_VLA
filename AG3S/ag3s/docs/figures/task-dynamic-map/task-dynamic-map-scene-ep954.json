@@ -1,0 +1,26 @@
+{
+ "episode": 954,
+ "request": 59,
+ "panels": {
+  "B": {
+   "n_band_surface": 3080,
+   "n_old_place_surface": 144,
+   "apple_shift_from_first_mm": 16.6,
+   "z_band_m": [
+    0.835,
+    0.91
+   ],
+   "layer": "esdf_distance (main fine)"
+  },
+  "B_TL": {
+   "n_band_surface": 8964,
+   "n_old_place_surface": 22,
+   "apple_shift_from_first_mm": 302.1,
+   "z_band_m": [
+    0.835,
+    0.91
+   ],
+   "layer": "esdf_distance (main fine)"
+  }
+ }
+}

@@ -1,0 +1,36 @@
+{
+ "rows": {
+  "B_ROI_FPR": {
+   "hand_orange_rows": 27,
+   "success": true,
+   "failure_mode": "ok",
+   "n_close_cycles": 1,
+   "max_deflection_before_close_rad": 0.0058,
+   "palm_worst_row_chunks_before_close": 0,
+   "n_latched_chunks_from_t12": 5
+  },
+  "PALM": {
+   "hand_orange_rows": 0,
+   "success": false,
+   "failure_mode": "no_grasp",
+   "n_close_cycles": 7,
+   "max_deflection_before_close_rad": 0.071,
+   "palm_worst_row_chunks_before_close": 13,
+   "n_latched_chunks_from_t12": 41
+  },
+  "PC": {
+   "hand_orange_rows": 0,
+   "success": false,
+   "failure_mode": "no_grasp",
+   "n_close_cycles": 3,
+   "max_deflection_before_close_rad": 0.0779,
+   "palm_worst_row_chunks_before_close": 8,
+   "n_latched_chunks_from_t12": 48
+  }
+ },
+ "definitions": {
+  "window": "every chunk whose grasp state is latched with t_step >= 12, over the whole episode — includes re-approaches after failed closes",
+  "max_deflection_before_close_rad": "max over that window of max |refined - reference| over the first 16 rows and 14 arm columns",
+  "palm_worst_row_chunks_before_close": "chunks of that window whose TrajOpt max_violation_pair link is ee_left (out of n_latched_chunks_from_t12)"
+ }
+}

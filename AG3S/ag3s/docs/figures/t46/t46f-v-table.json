@@ -1,0 +1,29 @@
+{
+ "rows": [
+  [
+   "audit: wrist coverage / overflow / hand intrusion / auth overlap / frame (pre-fixed THRESHOLDS)",
+   "PASS",
+   "all 6 wrist links pass; FT reachable max outside 1.88 / 1.55 mm (<= 2.5); hand intrusion within 0.001 mm"
+  ],
+  [
+   "audit: wrist-palm-cover overlap <= palm protrusion",
+   "PASS",
+   "FT 4.36 / 4.73 mm <= 5.12 mm"
+  ],
+  [
+   "palm (EE_BODY) coverage, reachable samples outside spheres (no pre-fixed threshold)",
+   "reported",
+   "palm off 94.6 % (max 54.4 mm) -> on 0.028 % (max 0.33 mm)"
+  ],
+  [
+   "experiment poses (CL3 54 runs, 4,050 rows), final shape: (a) (b) (c) frame",
+   "PASS",
+   "(a) 0.00057 mm <= 0.001; (b) 4.73 <= 5.12 mm; (c) 0 / 1,309,649 pts; frame 0.00064 mm"
+  ],
+  [
+   "TO time: median per-chunk ratio <= 2.0",
+   "FAIL",
+   "median 2.65, p90 3.21; time_budget_hit 0 / 0; violated 60 / 60"
+  ]
+ ]
+}

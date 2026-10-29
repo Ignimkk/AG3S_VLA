@@ -1,0 +1,29 @@
+{
+  "sources": [
+    {
+      "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep954_s9543/third_person_front.mp4",
+      "sha256": "0f5fa0296b2a807fbd72b704687b723f9e5c1830ec1bec81993b3c6d4b7b0559",
+      "frames_zero_based": [
+        96,
+        144,
+        180
+      ],
+      "fps": 15
+    },
+    {
+      "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep954_s9543/third_person_front.mp4",
+      "sha256": "4aad0f09bf1ab836363b089214f2f8cc82203ec40b24c5a6231661e35ee5ecc8",
+      "frames_zero_based": [
+        96,
+        146,
+        180
+      ],
+      "fps": 15
+    }
+  ],
+  "note": "Original decoded frames; times are video timestamps. Closing indices from ifg-goal-drift-ep954.json.",
+  "closing_source": {
+    "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/ifg-split/ifg-goal-drift-ep954.json",
+    "sha256": "3a0797c9b951c90035c62c7ad5dee3fa34a433fa9e29f6d72e4adc0d918b6635"
+  }
+}

@@ -1,0 +1,1793 @@
+{
+ "numbers": {
+  "E0": 10,
+  "SPL": 7,
+  "SPLN": 7,
+  "SPL_vs_SPLN": {
+   "both": 6,
+   "only_SPL": 1,
+   "only_SPLN": 1,
+   "neither": 2,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 1.0,
+   "rate_SPL": 0.7,
+   "rate_SPLN": 0.7,
+   "diff_SPLN_minus_SPL": 0.0,
+   "ci95_bootstrap": [
+    -0.3,
+    0.3
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "E0_vs_SPLN": {
+   "both": 7,
+   "only_E0": 3,
+   "only_SPLN": 0,
+   "neither": 0,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 0.25,
+   "rate_E0": 1.0,
+   "rate_SPLN": 0.7,
+   "diff_SPLN_minus_E0": -0.3,
+   "ci95_bootstrap": [
+    -0.6,
+    0.0
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "E0_vs_SPL": {
+   "both": 7,
+   "only_E0": 3,
+   "only_SPL": 0,
+   "neither": 0,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 0.25,
+   "rate_E0": 1.0,
+   "rate_SPL": 0.7,
+   "diff_SPL_minus_E0": -0.3,
+   "ci95_bootstrap": [
+    -0.6,
+    0.0
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  }
+ },
+ "rows": [
+  {
+   "episode": 56,
+   "stratum": "clear",
+   "side": "right",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "close_k": 11,
+     "max_push_mm_near_close": 26.4,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "unknown",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target"
+     ],
+     "target_residual_violations_near_close": 5
+    },
+    "SPLN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "close_k": 11,
+     "max_push_mm_near_close": 31.3,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "unknown",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target"
+     ],
+     "target_residual_violations_near_close": 4
+    }
+   }
+  },
+  {
+   "episode": 211,
+   "stratum": "place",
+   "side": "left",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 8
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6,
+     "neighbour_rows": 34,
+     "close_k": 20,
+     "max_push_mm_near_close": 40.3,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 7,
+     "worst_bodies_near_close": [
+      "crate",
+      "table",
+      "crate",
+      "table",
+      "table",
+      "crate",
+      "banana"
+     ],
+     "target_residual_violations_near_close": 0
+    },
+    "SPLN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 7,
+     "neighbour_rows": 114,
+     "close_k": 17,
+     "max_push_mm_near_close": 101.1,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "unknown",
+      "unknown",
+      "banana",
+      "banana",
+      "banana",
+      "unknown",
+      "crate"
+     ],
+     "target_residual_violations_near_close": 0
+    }
+   }
+  },
+  {
+   "episode": 1837,
+   "stratum": "clear",
+   "side": "right",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 15,
+     "neighbour_rows": 0,
+     "close_k": 9,
+     "max_push_mm_near_close": 32.6,
+     "hold_requests_near_close": 0,
+     "gate_open_near_close": 1,
+     "worst_bodies_near_close": [
+      "unknown",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "crate"
+     ],
+     "target_residual_violations_near_close": 5
+    },
+    "SPLN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "close_k": 9,
+     "max_push_mm_near_close": 24.3,
+     "hold_requests_near_close": 0,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "unknown",
+      "target",
+      "target",
+      "target",
+      "target",
+      "pear",
+      "target"
+     ],
+     "target_residual_violations_near_close": 2
+    }
+   }
+  },
+  {
+   "episode": 320,
+   "stratum": "place",
+   "side": "right",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "close_k": 15,
+     "max_push_mm_near_close": 155.1,
+     "hold_requests_near_close": 0,
+     "gate_open_near_close": 1,
+     "worst_bodies_near_close": [
+      "unknown",
+      "target",
+      "target",
+      "target",
+      "banana",
+      "unknown",
+      "table"
+     ],
+     "target_residual_violations_near_close": 3
+    },
+    "SPLN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 7,
+     "neighbour_rows": 0,
+     "close_k": 15,
+     "max_push_mm_near_close": 9.5,
+     "hold_requests_near_close": 2,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target"
+     ],
+     "target_residual_violations_near_close": 5
+    }
+   }
+  },
+  {
+   "episode": 753,
+   "stratum": "clear",
+   "side": "right",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "close_k": 15,
+     "max_push_mm_near_close": 73.1,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 1,
+     "worst_bodies_near_close": [
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "unknown"
+     ],
+     "target_residual_violations_near_close": 6
+    },
+    "SPLN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "close_k": 13,
+     "max_push_mm_near_close": 25.0,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "unknown",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target"
+     ],
+     "target_residual_violations_near_close": 4
+    }
+   }
+  },
+  {
+   "episode": 954,
+   "stratum": "place",
+   "side": "right",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 17
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "close_k": 18,
+     "max_push_mm_near_close": 28.4,
+     "hold_requests_near_close": 0,
+     "gate_open_near_close": 5,
+     "worst_bodies_near_close": [
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "target",
+      "unknown"
+     ],
+     "target_residual_violations_near_close": 0
+    },
+    "SPLN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "close_k": 18,
+     "max_push_mm_near_close": 29.9,
+     "hold_requests_near_close": 0,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "target",
+      "unknown"
+     ],
+     "target_residual_violations_near_close": 0
+    }
+   }
+  },
+  {
+   "episode": 309,
+   "stratum": "clear",
+   "side": "right",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "close_k": 15,
+     "max_push_mm_near_close": 25.0,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 2,
+     "worst_bodies_near_close": [
+      "unknown",
+      "unknown",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target"
+     ],
+     "target_residual_violations_near_close": 4
+    },
+    "SPLN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "close_k": 15,
+     "max_push_mm_near_close": 24.7,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "unknown",
+      "unknown",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target"
+     ],
+     "target_residual_violations_near_close": 4
+    }
+   }
+  },
+  {
+   "episode": 250,
+   "stratum": "clear",
+   "side": "right",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "close_k": 10,
+     "max_push_mm_near_close": 13.1,
+     "hold_requests_near_close": 0,
+     "gate_open_near_close": 1,
+     "worst_bodies_near_close": [
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "banana"
+     ],
+     "target_residual_violations_near_close": 6
+    },
+    "SPLN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "close_k": 10,
+     "max_push_mm_near_close": 13.6,
+     "hold_requests_near_close": 0,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "target",
+      "banana"
+     ],
+     "target_residual_violations_near_close": 4
+    }
+   }
+  },
+  {
+   "episode": 1668,
+   "stratum": "clear",
+   "side": "right",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "close_k": 13,
+     "max_push_mm_near_close": 81.5,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 6,
+     "worst_bodies_near_close": [
+      "pear",
+      "target",
+      "target",
+      "pear",
+      "pear",
+      "target",
+      "pear"
+     ],
+     "target_residual_violations_near_close": 3
+    },
+    "SPLN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 19,
+     "close_k": 15,
+     "max_push_mm_near_close": 15.3,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "pear",
+      "target",
+      "pear",
+      "target",
+      "target",
+      "target",
+      "target"
+     ],
+     "target_residual_violations_near_close": 5
+    }
+   }
+  },
+  {
+   "episode": 126,
+   "stratum": "clear",
+   "side": "left",
+   "cfg": {
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "close_k": 11,
+     "max_push_mm_near_close": 38.2,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 7,
+     "worst_bodies_near_close": [
+      "unknown",
+      "unknown",
+      "unknown",
+      "target",
+      "target",
+      "target",
+      "pear"
+     ],
+     "target_residual_violations_near_close": 3
+    },
+    "SPLN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "close_k": 11,
+     "max_push_mm_near_close": 106.9,
+     "hold_requests_near_close": 1,
+     "gate_open_near_close": 0,
+     "worst_bodies_near_close": [
+      "unknown",
+      "unknown",
+      "unknown",
+      "target",
+      "unknown",
+      "target",
+      "unknown"
+     ],
+     "target_residual_violations_near_close": 2
+    }
+   }
+  }
+ ],
+ "windows": {
+  "56": {
+   "SPL": [
+    {
+     "k": 7,
+     "to_push_mm": 0.5,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 12.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 8,
+     "to_push_mm": 1.9,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 3.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 9,
+     "to_push_mm": 10.5,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -8.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 8.1,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -2.8,
+     "grasp": "latched"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 3.5,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -5.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -9.8,
+     "grasp": "closing"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 26.4,
+     "hold": 1,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 15.9,
+     "grasp": "held"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 7,
+     "to_push_mm": 0.6,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 34.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 8,
+     "to_push_mm": 0.7,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 16.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 9,
+     "to_push_mm": 8.8,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 4.3,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 9.1,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 1.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 5.8,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 1.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -14.1,
+     "grasp": "closing"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 31.3,
+     "hold": 1,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 18.2,
+     "grasp": "held"
+    }
+   ]
+  },
+  "211": {
+   "SPL": [
+    {
+     "k": 16,
+     "to_push_mm": 13.8,
+     "hold": 0,
+     "worst_body": "crate",
+     "reference_clearance_min_mm": 0.3,
+     "grasp": "latched"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 2.5,
+     "hold": 0,
+     "worst_body": "table",
+     "reference_clearance_min_mm": -1.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 18,
+     "to_push_mm": 5.9,
+     "hold": 0,
+     "worst_body": "crate",
+     "reference_clearance_min_mm": -2.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 19,
+     "to_push_mm": 5.0,
+     "hold": 0,
+     "worst_body": "table",
+     "reference_clearance_min_mm": -3.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 20,
+     "to_push_mm": 3.7,
+     "hold": 0,
+     "worst_body": "table",
+     "reference_clearance_min_mm": -4.0,
+     "grasp": "latched"
+    },
+    {
+     "k": 21,
+     "to_push_mm": 40.3,
+     "hold": 0,
+     "worst_body": "crate",
+     "reference_clearance_min_mm": 1.2,
+     "grasp": "closing"
+    },
+    {
+     "k": 22,
+     "to_push_mm": 0.0,
+     "hold": 1,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": -0.9,
+     "grasp": "closing"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 13,
+     "to_push_mm": 101.1,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 31.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 14,
+     "to_push_mm": 7.1,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 28.0,
+     "grasp": "latched"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 12.2,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 15.0,
+     "grasp": "latched"
+    },
+    {
+     "k": 16,
+     "to_push_mm": 10.0,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 1.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 4.7,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 8.5,
+     "grasp": "latched"
+    },
+    {
+     "k": 18,
+     "to_push_mm": 67.4,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 1.3,
+     "grasp": "closing"
+    },
+    {
+     "k": 19,
+     "to_push_mm": 60.1,
+     "hold": 1,
+     "worst_body": "crate",
+     "reference_clearance_min_mm": -3.5,
+     "grasp": "held"
+    }
+   ]
+  },
+  "1837": {
+   "SPL": [
+    {
+     "k": 5,
+     "to_push_mm": 0.6,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 14.3,
+     "grasp": "latched"
+    },
+    {
+     "k": 6,
+     "to_push_mm": 1.2,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 1.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 7,
+     "to_push_mm": 5.5,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -1.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 8,
+     "to_push_mm": 3.4,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -2.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 9,
+     "to_push_mm": 2.4,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -0.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 32.6,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -10.2,
+     "grasp": "closing"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 12.3,
+     "hold": 0,
+     "worst_body": "crate",
+     "reference_clearance_min_mm": 26.4,
+     "grasp": "held"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 5,
+     "to_push_mm": 0.6,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 29.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 6,
+     "to_push_mm": 1.8,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 8.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 7,
+     "to_push_mm": 5.5,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 4.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 8,
+     "to_push_mm": 3.4,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 0.5,
+     "grasp": "latched"
+    },
+    {
+     "k": 9,
+     "to_push_mm": 24.3,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 6.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 22.4,
+     "hold": 0,
+     "worst_body": "pear",
+     "reference_clearance_min_mm": 8.8,
+     "grasp": "closing"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 8.6,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 30.9,
+     "grasp": "closing"
+    }
+   ]
+  },
+  "320": {
+   "SPL": [
+    {
+     "k": 11,
+     "to_push_mm": 1.0,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 8.8,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 1.2,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 2.3,
+     "grasp": "latched"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 3.5,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -4.0,
+     "grasp": "latched"
+    },
+    {
+     "k": 14,
+     "to_push_mm": 2.9,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -6.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": -6.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 16,
+     "to_push_mm": 155.1,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": -6.1,
+     "grasp": "closing"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 128.0,
+     "hold": 0,
+     "worst_body": "table",
+     "reference_clearance_min_mm": 15.2,
+     "grasp": "closing"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 11,
+     "to_push_mm": 1.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 19.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 1.1,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 6.3,
+     "grasp": "latched"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 6.6,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -2.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 14,
+     "to_push_mm": 9.5,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -12.9,
+     "grasp": "latched"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 0.0,
+     "hold": 1,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -3.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 16,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -12.2,
+     "grasp": "closing"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 0.0,
+     "hold": 1,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -13.0,
+     "grasp": "closing"
+    }
+   ]
+  },
+  "753": {
+   "SPL": [
+    {
+     "k": 11,
+     "to_push_mm": 0.7,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -2.0,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 4.5,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -0.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 8.6,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 0.8,
+     "grasp": "latched"
+    },
+    {
+     "k": 14,
+     "to_push_mm": 5.2,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 0.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 1.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 3.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 16,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -9.9,
+     "grasp": "closing"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 73.1,
+     "hold": 1,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 36.3,
+     "grasp": "held"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 9,
+     "to_push_mm": 0.7,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 28.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 0.7,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 15.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 10.4,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 1.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 7.9,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 1.9,
+     "grasp": "latched"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 3.4,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 2.9,
+     "grasp": "latched"
+    },
+    {
+     "k": 14,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -10.3,
+     "grasp": "closing"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 25.0,
+     "hold": 1,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 15.0,
+     "grasp": "held"
+    }
+   ]
+  },
+  "954": {
+   "SPL": [
+    {
+     "k": 14,
+     "to_push_mm": 15.9,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 1.8,
+     "grasp": "latched"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 11.0,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 1.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 16,
+     "to_push_mm": 6.0,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 3.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": -1.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 18,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 0.8,
+     "grasp": "latched"
+    },
+    {
+     "k": 19,
+     "to_push_mm": 28.4,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 5.9,
+     "grasp": "closing"
+    },
+    {
+     "k": 20,
+     "to_push_mm": 19.8,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 42.4,
+     "grasp": "closing"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 14,
+     "to_push_mm": 11.1,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 10.9,
+     "grasp": "latched"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 9.8,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 8.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 16,
+     "to_push_mm": 8.5,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 4.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 6.2,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 3.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 18,
+     "to_push_mm": 2.8,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 4.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 19,
+     "to_push_mm": 29.9,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 11.8,
+     "grasp": "closing"
+    },
+    {
+     "k": 20,
+     "to_push_mm": 20.9,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 45.7,
+     "grasp": "closing"
+    }
+   ]
+  },
+  "309": {
+   "SPL": [
+    {
+     "k": 11,
+     "to_push_mm": 0.5,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 10.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 0.5,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 3.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 3.4,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 0.9,
+     "grasp": "latched"
+    },
+    {
+     "k": 14,
+     "to_push_mm": 2.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -0.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 0.9,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -0.3,
+     "grasp": "latched"
+    },
+    {
+     "k": 16,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -19.5,
+     "grasp": "closing"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 25.0,
+     "hold": 1,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 12.9,
+     "grasp": "held"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 11,
+     "to_push_mm": 0.5,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 31.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 0.5,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 9.0,
+     "grasp": "latched"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 3.4,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 3.5,
+     "grasp": "latched"
+    },
+    {
+     "k": 14,
+     "to_push_mm": 2.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 0.9,
+     "grasp": "latched"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 0.9,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -0.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 16,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -19.5,
+     "grasp": "closing"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 24.7,
+     "hold": 1,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 14.9,
+     "grasp": "held"
+    }
+   ]
+  },
+  "250": {
+   "SPL": [
+    {
+     "k": 6,
+     "to_push_mm": 1.1,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 1.3,
+     "grasp": "latched"
+    },
+    {
+     "k": 7,
+     "to_push_mm": 0.3,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -5.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 8,
+     "to_push_mm": 9.5,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -8.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 9,
+     "to_push_mm": 7.8,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -5.8,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 3.9,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -0.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -13.3,
+     "grasp": "closing"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 13.1,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 9.4,
+     "grasp": "held"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 6,
+     "to_push_mm": 1.1,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 19.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 7,
+     "to_push_mm": 0.3,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 2.5,
+     "grasp": "latched"
+    },
+    {
+     "k": 8,
+     "to_push_mm": 9.5,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 2.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 9,
+     "to_push_mm": 7.8,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 0.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 3.9,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -0.0,
+     "grasp": "latched"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -13.3,
+     "grasp": "closing"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 13.6,
+     "hold": 0,
+     "worst_body": "banana",
+     "reference_clearance_min_mm": 9.5,
+     "grasp": "held"
+    }
+   ]
+  },
+  "1668": {
+   "SPL": [
+    {
+     "k": 9,
+     "to_push_mm": 5.8,
+     "hold": 0,
+     "worst_body": "pear",
+     "reference_clearance_min_mm": -2.0,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 9.6,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -13.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 11.3,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -6.8,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "pear",
+     "reference_clearance_min_mm": -4.9,
+     "grasp": "latched"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 0.0,
+     "hold": 1,
+     "worst_body": "pear",
+     "reference_clearance_min_mm": -5.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 14,
+     "to_push_mm": 17.6,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -18.7,
+     "grasp": "closing"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 81.5,
+     "hold": 0,
+     "worst_body": "pear",
+     "reference_clearance_min_mm": 21.6,
+     "grasp": "held"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 11,
+     "to_push_mm": 15.1,
+     "hold": 0,
+     "worst_body": "pear",
+     "reference_clearance_min_mm": 2.6,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 15.2,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 3.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "pear",
+     "reference_clearance_min_mm": -7.3,
+     "grasp": "latched"
+    },
+    {
+     "k": 14,
+     "to_push_mm": 15.3,
+     "hold": 1,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -3.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 15,
+     "to_push_mm": 10.1,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 0.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 16,
+     "to_push_mm": 6.9,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -4.5,
+     "grasp": "closing"
+    },
+    {
+     "k": 17,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -12.0,
+     "grasp": "closing"
+    }
+   ]
+  },
+  "126": {
+   "SPL": [
+    {
+     "k": 7,
+     "to_push_mm": 1.5,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 16.0,
+     "grasp": "latched"
+    },
+    {
+     "k": 8,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 5.4,
+     "grasp": "latched"
+    },
+    {
+     "k": 9,
+     "to_push_mm": 3.2,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 1.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 12.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -10.8,
+     "grasp": "latched"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -10.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 0.0,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -13.4,
+     "grasp": "closing"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 38.2,
+     "hold": 1,
+     "worst_body": "pear",
+     "reference_clearance_min_mm": 15.0,
+     "grasp": "held"
+    }
+   ],
+   "SPLN": [
+    {
+     "k": 7,
+     "to_push_mm": 1.9,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 16.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 8,
+     "to_push_mm": 1.2,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 18.7,
+     "grasp": "latched"
+    },
+    {
+     "k": 9,
+     "to_push_mm": 2.8,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 11.2,
+     "grasp": "latched"
+    },
+    {
+     "k": 10,
+     "to_push_mm": 2.3,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": 0.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 11,
+     "to_push_mm": 1.3,
+     "hold": 0,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 1.1,
+     "grasp": "latched"
+    },
+    {
+     "k": 12,
+     "to_push_mm": 16.2,
+     "hold": 0,
+     "worst_body": "target",
+     "reference_clearance_min_mm": -14.9,
+     "grasp": "closing"
+    },
+    {
+     "k": 13,
+     "to_push_mm": 106.9,
+     "hold": 1,
+     "worst_body": "unknown",
+     "reference_clearance_min_mm": 10.7,
+     "grasp": "held"
+    }
+   ]
+  }
+ },
+ "definitions": "IFG-APPLE-LOOKAHEADOFF — does the T43 TA (A) hurdle look-ahead break VLA-alone-success grasps? CPU only, read only.\n\n  MUJOCO_GL=osmesa PYTHONPATH=.:integration/rby1/manipulation/src .venv-ag3s/bin/python -m       AG3S.ag3s.experiments.studies.ifg_lookahead_off --run <IFG-APPLE run> --fig AG3S/ag3s/docs/figures/ifg-split\n\n10 VLA-alone-success apple scenes (seeds.json of the kit). Three configurations on the same episode / seed: VLA alone (IFG-APPLE E0),\ntarget split (IFG-APPLE-SPLIT SPL, look-ahead on), target split without the look-ahead (SPLN). Primary = locked contact-free success (agg3.py\nover the copies in <kit>/agg3arm). Per run, around the first close command (requests kc-4 .. kc+2, kc = the request whose rows contain the\nfirst gripper command < 0.5): the largest commanded TCP push of TrajOpt (refined vs reference, executed rows, FK at the teleop keyframe),\nHOLD requests, look-ahead gate open requests, and the GT body nearest to the occupied voxel behind the worst row (`ifg_regression_trace`).\n",
+ "sources": {
+  "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-LOOKAHEADOFF",
+  "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-LOOKAHEADOFF/agg3arm",
+  "script": "AG3S/ag3s/experiments/studies/ifg_lookahead_off.py"
+ }
+}

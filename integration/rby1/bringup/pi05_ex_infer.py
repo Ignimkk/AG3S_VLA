@@ -4,6 +4,7 @@ The production-style single-run entry point remains ``pi05_infer.py``.  This
 copy adds block-grid and atomic fruit experiments with tabular/visual reports.
 """
 from common.workspace import workspace_path as _ag3s_workspace_path
+from common.run_output import add_run_dir_argument, configure_run_logging, prepare_run_outputs
 
 import argparse
 import csv
@@ -944,6 +945,7 @@ def write_atomic_experiment_report(results_path, output_dir):
 
 def main():
     ap = argparse.ArgumentParser()
+    add_run_dir_argument(ap)
     ap.add_argument("--model", choices=list(MODELS.keys()), default="droid",
                     help="which pi0.5 variant to load")
     ap.add_argument("--prompt", default="put the red block in the brown box with your right hand",
@@ -1039,7 +1041,7 @@ def main():
     ap.add_argument(
         "--atomic-output-dir",
         type=pathlib.Path,
-        default=pathlib.Path("outputs/rby1_atomic_eval"),
+        default=pathlib.Path("atomic_eval"),
     )
     ap.add_argument(
         "--atomic-record",
@@ -1077,7 +1079,7 @@ def main():
     ap.add_argument(
         "--grid-output-dir",
         type=pathlib.Path,
-        default=pathlib.Path("data/rby1_grid_eval"),
+        default=pathlib.Path("grid_eval"),
         help="results.jsonl and optional per-trial artifacts",
     )
     ap.add_argument(
@@ -1107,6 +1109,16 @@ def main():
         help="do not skip trial_ids already present in results.jsonl",
     )
     args = ap.parse_args()
+    try:
+        prepare_run_outputs(args, {
+            "record": "videos/rollout.mp4", "trajectory_out": "trajectories/rollout.npz",
+            "record_inputs": "policy_inputs", "atomic_output_dir": "atomic_eval",
+            "grid_output_dir": "grid_eval",
+        })
+        configure_run_logging("pi05_ex_infer")
+    except (ValueError, OSError) as exc:
+        ap.error(str(exc))
+    print(f"run outputs: {args.run_dir}")
 
     if args.grid_record_all:
         args.grid_record = True

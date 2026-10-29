@@ -1,0 +1,126 @@
+{
+ "source": "AG3S/ag3s/docs/handoff/AG3S-PRE-CORE-TO.verify.json#/numbers/P0d",
+ "stages": {
+  "scene_reconstruction": {
+   "default": {
+    "n": 31,
+    "median": 53.74,
+    "p95": 62.48,
+    "mean": 53.97
+   },
+   "openblas1": {
+    "n": 31,
+    "median": 42.57,
+    "p95": 50.51,
+    "mean": 43.27
+   }
+  },
+  "support_surface": {
+   "default": {
+    "n": 31,
+    "median": 8.0,
+    "p95": 10.1,
+    "mean": 8.14
+   },
+   "openblas1": {
+    "n": 31,
+    "median": 4.75,
+    "p95": 5.77,
+    "mean": 4.86
+   }
+  },
+  "target_grounding": {
+   "default": {
+    "n": 31,
+    "median": 30.49,
+    "p95": 100.36,
+    "mean": 36.47
+   },
+   "openblas1": {
+    "n": 31,
+    "median": 14.13,
+    "p95": 20.27,
+    "mean": 13.17
+   }
+  },
+  "esdf": {
+   "default": {
+    "n": 31,
+    "median": 151.31,
+    "p95": 203.29,
+    "mean": 137.88
+   },
+   "openblas1": {
+    "n": 31,
+    "median": 67.38,
+    "p95": 93.37,
+    "mean": 71.44
+   }
+  },
+  "constraint_generation": {
+   "default": {
+    "n": 31,
+    "median": 187.93,
+    "p95": 259.53,
+    "mean": 185.12
+   },
+   "openblas1": {
+    "n": 31,
+    "median": 76.46,
+    "p95": 102.88,
+    "mean": 80.77
+   }
+  },
+  "to.solve_ms": {
+   "default": {
+    "n": 31,
+    "median": 135.76,
+    "p95": 537.78,
+    "mean": 220.52
+   },
+   "openblas1": {
+    "n": 31,
+    "median": 36.35,
+    "p95": 73.74,
+    "mean": 40.47
+   }
+  }
+ },
+ "table": [
+  [
+   "",
+   "thread 기본값",
+   "OPENBLAS=1"
+  ],
+  [
+   "TrajOpt 풀이 중앙값 ms",
+   135.76,
+   36.35
+  ],
+  [
+   "TrajOpt 풀이 p95 ms",
+   537.78,
+   73.74
+  ],
+  [
+   "로봇 명령 동일 chunk",
+   "32 / 32",
+   ""
+  ],
+  [
+   "replay 18장면 풀이 중앙값 ms",
+   119.78,
+   43.44
+  ],
+  [
+   "replay CPU 시간 중앙값 ms",
+   2458.98,
+   44.07
+  ],
+  [
+   "replay 결과 동일 chunk",
+   "683 / 683",
+   ""
+  ]
+ ]
+}

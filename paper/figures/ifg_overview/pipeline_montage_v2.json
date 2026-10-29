@@ -1,0 +1,43 @@
+{
+ "figure": "paper/figures/ifg_overview/pipeline_montage_v2.png",
+ "script": "paper/tools/plotting/ifg_teaser_pipeline_compose.py",
+ "episode": "T53_ep1842",
+ "surface_iou": {
+  "M1_approach": 1.0,
+  "M2_pre_grasp": 1.0,
+  "M3_grasp": 0.9731412833730052,
+  "M4_carry": 0.9433256555280348,
+  "M5_pre_place": 0.9640925134294491,
+  "M6_post_place": 0.9978401727861771,
+  "M7_retreat": 0.9840182648401826
+ },
+ "memory_scores": [
+  [
+   0.608,
+   "target"
+  ],
+  [
+   0.418,
+   "other_object"
+  ],
+  [
+   0.112,
+   "other_object"
+  ],
+  [
+   0.106,
+   "other_object"
+  ],
+  [
+   0.071,
+   "destination"
+  ]
+ ],
+ "region_iou": 1.0,
+ "robot_mask": {
+  "render_px": 70255,
+  "sphere_only_px": 49023
+ },
+ "is_measured_result": false,
+ "scope": "one development episode; contact interface and CCR are downstream and not evaluated with this output"
+}

@@ -1,0 +1,931 @@
+{
+ "_comment": "numbers and paths only; no interpretation. Rates are fractions unless *_pp.",
+ "step": "T55b",
+ "date": "2026-10-14",
+ "git_head": "903ea16764c1697361faf240ec3c986bbd0e9b51",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T222232+0900_903ea16764c1_eb761f984d83",
+ "verify_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T222232+0900_903ea16764c1_eb761f984d83/verify/T55b",
+ "status": "done",
+ "inputs": {
+  "t55_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55",
+  "K": 2,
+  "persistence": "causal",
+  "latch_mode": "reground"
+ },
+ "reproduces_published": "n_p_grasp · false_reject (natural, instruction) and P_task n_pos · false_reject per condition equal T55.verify.json test.primary_reground (asserted in t55b_held_fn)",
+ "numbers": {
+  "by_condition": {
+   "natural": {
+    "n_p_grasp": 111,
+    "n_held": 111,
+    "n_held_false": 0,
+    "held_false_by_cause": {},
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 8,
+     "other": 103
+    },
+    "held_false_reach_mm": null,
+    "held_false_held_fruit_mm": null,
+    "held_true_reach_mm": {
+     "n": 111,
+     "min": 50.26,
+     "median": 274.38,
+     "max": 483.3
+    },
+    "reach_limit_mm": [
+     120.0
+    ],
+    "held_false_with_p_task": 0
+   },
+   "instruction": {
+    "n_p_grasp": 333,
+    "n_held": 216,
+    "n_held_false": 117,
+    "held_false_by_cause": {
+     "closing|reach|manipulated=noun": 97,
+     "closing|dropped+reach|manipulated=noun": 11,
+     "latched|-|manipulated=noun": 9
+    },
+    "held_false_manipulated_is": {
+     "noun": 117
+    },
+    "held_true_manipulated_is": {
+     "held": 18,
+     "noun": 81,
+     "other": 117
+    },
+    "held_false_reach_mm": {
+     "n": 117,
+     "min": 162.54,
+     "median": 529.74,
+     "max": 741.84
+    },
+    "held_false_held_fruit_mm": {
+     "n": 105,
+     "min": 50.71814666041283,
+     "median": 55.863628472924766,
+     "max": 72.68176309353625
+    },
+    "held_true_reach_mm": {
+     "n": 216,
+     "min": 48.74,
+     "median": 274.85,
+     "max": 477.3
+    },
+    "reach_limit_mm": [
+     120.0
+    ],
+    "held_false_with_p_task": 0
+   }
+  },
+  "attach_manipulated_is": {
+   "natural": {
+    "noun": 11,
+    "no_p_grasp": 4,
+    "other": 1
+   },
+   "instruction": {
+    "never_held": 10,
+    "held": 18,
+    "noun": 5,
+    "no_p_grasp": 13,
+    "other": 2
+   }
+  },
+  "gate_limit_p_task_held_false": {
+   "natural": {
+    "n_p_task": 111,
+    "n_p_task_held_false": 0
+   },
+   "instruction": {
+    "n_p_task": 0,
+    "n_p_task_held_false": 0
+   },
+   "empty": {
+    "n_p_task": 0,
+    "n_p_task_held_false": 0
+   },
+   "slip": {
+    "n_p_task": 20,
+    "n_p_task_held_false": 20
+   }
+  },
+  "per_trace": [
+   {
+    "key": "ep1804",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "apple",
+    "n_p_grasp": 12,
+    "n_held": 12,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 1,
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1804",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 12,
+    "n_held": 0,
+    "n_held_false": 12,
+    "held_false_manipulated_is": {
+     "noun": 12
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1804",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 12,
+    "n_held": 12,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "noun": 11
+    }
+   },
+   {
+    "key": "ep1804",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 12,
+    "n_held": 12,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1809",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "banana",
+    "n_p_grasp": 10,
+    "n_held": 10,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 1,
+     "other": 9
+    }
+   },
+   {
+    "key": "ep1809",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 10,
+    "n_held": 0,
+    "n_held_false": 10,
+    "held_false_manipulated_is": {
+     "noun": 10
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1809",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 10,
+    "n_held": 0,
+    "n_held_false": 10,
+    "held_false_manipulated_is": {
+     "noun": 10
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1809",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 10,
+    "n_held": 10,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "other": 9
+    }
+   },
+   {
+    "key": "ep1815",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "apple",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 1,
+     "other": 10
+    }
+   },
+   {
+    "key": "ep1815",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 11,
+    "n_held": 0,
+    "n_held_false": 11,
+    "held_false_manipulated_is": {
+     "noun": 11
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1815",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "noun": 10
+    }
+   },
+   {
+    "key": "ep1815",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "other": 10
+    }
+   },
+   {
+    "key": "ep1822",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "banana",
+    "n_p_grasp": 6,
+    "n_held": 6,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 1,
+     "other": 5
+    }
+   },
+   {
+    "key": "ep1822",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 6,
+    "n_held": 2,
+    "n_held_false": 4,
+    "held_false_manipulated_is": {
+     "noun": 4
+    },
+    "held_true_manipulated_is": {
+     "noun": 2
+    }
+   },
+   {
+    "key": "ep1822",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 6,
+    "n_held": 0,
+    "n_held_false": 6,
+    "held_false_manipulated_is": {
+     "noun": 6
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1822",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 6,
+    "n_held": 0,
+    "n_held_false": 6,
+    "held_false_manipulated_is": {
+     "noun": 6
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1839",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "orange",
+    "n_p_grasp": 14,
+    "n_held": 14,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 2,
+     "other": 12
+    }
+   },
+   {
+    "key": "ep1839",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 14,
+    "n_held": 14,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 2,
+     "noun": 12
+    }
+   },
+   {
+    "key": "ep1839",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 14,
+    "n_held": 0,
+    "n_held_false": 14,
+    "held_false_manipulated_is": {
+     "noun": 14
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1839",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 14,
+    "n_held": 14,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 2,
+     "other": 12
+    }
+   },
+   {
+    "key": "ep1840",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "banana",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1840",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1840",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1840",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1842",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "pear",
+    "n_p_grasp": 12,
+    "n_held": 12,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 1,
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1842",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 12,
+    "n_held": 12,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1842",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 12,
+    "n_held": 0,
+    "n_held_false": 12,
+    "held_false_manipulated_is": {
+     "noun": 12
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1842",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 12,
+    "n_held": 12,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 12
+    }
+   },
+   {
+    "key": "ep1843",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "apple",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1843",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1843",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1843",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1845",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "pear",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1845",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 11,
+    "n_held": 0,
+    "n_held_false": 11,
+    "held_false_manipulated_is": {
+     "noun": 11
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1845",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 11,
+    "n_held": 1,
+    "n_held_false": 10,
+    "held_false_manipulated_is": {
+     "noun": 10
+    },
+    "held_true_manipulated_is": {
+     "noun": 1
+    }
+   },
+   {
+    "key": "ep1845",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "other": 10
+    }
+   },
+   {
+    "key": "ep1848",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "orange",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1848",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1848",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1848",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1849",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "banana",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1849",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1849",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1849",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1851",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "orange",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1851",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1851",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1851",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1853",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "pear",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1853",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1853",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1853",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 0,
+    "n_held": 0,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1860",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "orange",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1860",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1860",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 11
+    }
+   },
+   {
+    "key": "ep1860",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1862",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "apple",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1862",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 11,
+    "n_held": 0,
+    "n_held_false": 11,
+    "held_false_manipulated_is": {
+     "noun": 11
+    },
+    "held_true_manipulated_is": {}
+   },
+   {
+    "key": "ep1862",
+    "prompt_tag": "instr_orange",
+    "condition": "instruction",
+    "noun": "orange",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "other": 10
+    }
+   },
+   {
+    "key": "ep1862",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 11,
+    "n_held": 11,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "noun": 10
+    }
+   },
+   {
+    "key": "ep1866",
+    "prompt_tag": "orig",
+    "condition": "natural",
+    "noun": "orange",
+    "n_p_grasp": 13,
+    "n_held": 13,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "noun": 1,
+     "other": 12
+    }
+   },
+   {
+    "key": "ep1866",
+    "prompt_tag": "instr_apple",
+    "condition": "instruction",
+    "noun": "apple",
+    "n_p_grasp": 13,
+    "n_held": 13,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 2,
+     "other": 11
+    }
+   },
+   {
+    "key": "ep1866",
+    "prompt_tag": "instr_banana",
+    "condition": "instruction",
+    "noun": "banana",
+    "n_p_grasp": 13,
+    "n_held": 13,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 1,
+     "noun": 12
+    }
+   },
+   {
+    "key": "ep1866",
+    "prompt_tag": "instr_pear",
+    "condition": "instruction",
+    "noun": "pear",
+    "n_p_grasp": 13,
+    "n_held": 13,
+    "n_held_false": 0,
+    "held_false_manipulated_is": {},
+    "held_true_manipulated_is": {
+     "held": 2,
+     "other": 11
+    }
+   }
+  ]
+ },
+ "not_measured": [
+  "whether the attached geometry of the 5 instruction traces that attached with manipulated = noun fruit is the held fruit",
+  "a latch variant that measures reach to the object between the fingers (no re-run)",
+  "SL5b (occluded stale centroid) — A's T46g"
+ ]
+}

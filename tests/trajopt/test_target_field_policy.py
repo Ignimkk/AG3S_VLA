@@ -606,7 +606,8 @@ def test_the_server_flag_defaults_to_relax_and_says_nothing(caplog):
         ["--config", "c", "--checkpoint", "k", "--model-xml", "m.xml"])
     assert args.target_field_policy == "relax"
     assert resolve_target_field_policy(args.target_field_policy) == "relax"
-    assert target_field_policy_choices() == ("relax", "exclude-authorized", "exclude-all")
+    # T46f A14 — `none` (예외 없음) 이 맨 뒤에 붙었다. 기본 (첫 항목) 은 그대로 relax.
+    assert target_field_policy_choices() == ("relax", "exclude-authorized", "exclude-all", "none")
     with caplog.at_level(logging.WARNING):
         # T27: 기본 범위가 `gripper` 다 — "기본 실행은 조용하다" 는 그 범위로 잰다.
         announce_diagnostic_scope(links="gripper", self_collision=True, link_scales={})

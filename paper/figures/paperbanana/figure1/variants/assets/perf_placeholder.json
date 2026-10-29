@@ -1,0 +1,18 @@
+{
+ "values": {
+  "Task success": [
+   45,
+   85
+  ],
+  "Collision-free": [
+   40,
+   95
+  ],
+  "Safe success": [
+   25,
+   82
+  ]
+ },
+ "is_measured_result": false,
+ "note": "PLACEHOLDER layout values; keep the placeholder label or replace with sourced values whose status is shown"
+}

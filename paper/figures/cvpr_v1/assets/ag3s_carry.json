@@ -1,0 +1,42 @@
+{
+ "asset": "paper/figures/cvpr_v1/assets/ag3s_carry.png",
+ "arm": "SURF",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/runs/SURF/SURF_ep1968_s19681",
+ "episode": 1968,
+ "seed": 19681,
+ "profile": "t43p2_overbar",
+ "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json",
+ "model_xml": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml",
+ "control_step": 196,
+ "n_control_steps": 600,
+ "path_from_step": 116,
+ "camera": {
+  "lookat": [
+   0.55,
+   0.15,
+   1.02
+  ],
+  "dist": 0.85,
+  "az": 150,
+  "el": -15
+ },
+ "gripper_bar_distance_m": 0.04796258393219685,
+ "apple_xyz_m": [
+  0.5839064066459919,
+  0.10360218485372841,
+  1.119467949654484
+ ],
+ "left_tool_centre_xyz_m": [
+  0.5806730028812049,
+  0.10388613100281621,
+  1.133013868956852
+ ],
+ "note": "VLA + AG3S (SURF), tool centre directly above the bar line (y = 0.104 m vs bar y = 0.1058 m); between grasp_t 160 and place_t 256",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/runs/SURF/SURF_ep1968_s19681/frames.jsonl": "053c3cc9b10ff8d2c491a04001c297975294bbbbfd549cdba53ae4e19d2d5038",
+  "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json": "85669e4a8c5a7083463185067fabd4d9c107c0e06de865f998eff28596217edf",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml": "3cae2c26333a1730a23b847dbd3de45a42c164e95d9c8aacd9936bbf94d34dad"
+ },
+ "renderer": "MuJoCo 3.11.0 replay of the recorded qpos (no re-simulation); OSMesa, CPU",
+ "script": "paper/tools/plotting/cvpr_v1_fig1_scenes.py"
+}

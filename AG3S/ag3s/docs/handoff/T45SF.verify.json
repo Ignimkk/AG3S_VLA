@@ -1,0 +1,1026 @@
+{
+ "_comment": "ag3s-verifier. numbers and paths only.",
+ "step": "T45-SF (D-SF: palm cover HOLD surface identity)",
+ "date": "2026-10-12 KST",
+ "runs": [
+  {
+   "id": "repro",
+   "command": "JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa OMP_NUM_THREADS=1 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/SF/p/vt45.py --mode cmp --names <run> --first-chunk <seq-2> --max-chunks 2 --out $RUN/verify/T45/SF/raw/repro{,_close}  (p/run_repro.sh A|B|C)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/SF/raw/repro/, raw/repro_close/, repro_check.json, repro_check_close.json",
+   "stdout_log": "verify/T45/SF/logs/repro_{A,B,C}.log, check_repro.log"
+  },
+  {
+   "id": "diag",
+   "command": "nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/SF/p/sf_diag.py --name <run> --seq <seq> --out $RUN/verify/T45/SF/raw/diag  (p/run_diag.sh A|B, 2 workers)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/SF/raw/diag/<run>_s<seq>.{json,npz}",
+   "stdout_log": "verify/T45/SF/logs/diag_<run>_<seq>.log"
+  },
+  {
+   "id": "post",
+   "command": "p/sf_post.py <run> <seq> (p/run_post.sh A)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/SF/raw/post/<run>_s<seq>.json",
+   "stdout_log": "verify/T45/SF/logs/post_*.log"
+  },
+  {
+   "id": "selffilter",
+   "command": "p/sf_selffilter.py (p/run_post.sh A)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/SF/raw/selffilter.json",
+   "stdout_log": "verify/T45/SF/logs/selffilter.log"
+  },
+  {
+   "id": "survey",
+   "command": "p/sf_survey.py (p/run_post.sh B)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/SF/raw/survey.json, raw/survey_summary.json",
+   "stdout_log": "verify/T45/SF/logs/survey.log"
+  },
+  {
+   "id": "figures",
+   "command": "p/sf_figs.py --force",
+   "venv": ".venv-openpi-live",
+   "raw_output": "AG3S/ag3s/docs/figures/t45/t45sf-*.{png,json}",
+   "stdout_log": "verify/T45/SF/logs/figs.log"
+  }
+ ],
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040704+0900_f14ae3e6b62b_a1eaf5e25786",
+ "code_state": {
+  "repo": "/mnt/dev/AG3S_VLA-development",
+  "branch": "feature/ag3s-development",
+  "head": "f14ae3e6b62bc0c5fca7b00d361e96c14fb2762e",
+  "dirty_files": [
+   "AG3S/ag3s/docs/handoff/T44e.task.md",
+   "AG3S/ag3s/docs/handoff/T45.task.md (lead, before this step)"
+  ],
+  "env": "CPU only (JAX_PLATFORMS=cpu, CUDA_VISIBLE_DEVICES=), nice 19, <=2 workers; inputs read-only: results/workspace/verify/T45/V (raw/cmp npz, index_c1a.json, p/), results/workspace/verify/T44/CL/runs/C1a (server_constraints chunk npz, frames.jsonl, server_proc.txt). Recorded --model-xml (/mnt/dev/work-t44cl/...) replaced by robots/rby1/description/.../model_transport.xml (p/sfcommon.py); md5 of 14/16 rby1_description files in the C1a preflight equal (model_transport.xml, rby1.xml, scene_transport.xml equal; 2 unequal = *pick_place_obstacles.xml, not used). V scripts copied to verify/T45/SF/p/ (vt45.py rewritten to AG3S.*), originals in p/orig_V/ (paths rewritten, not run)."
+ },
+ "baseline_check": {
+  "matched": true,
+  "note": "regression-baseline not run (.venv-ag3s forbidden by T44/T45 rules, GPU reserved for CL2). Replacement: re-solve of the 8 V-T45 new-HOLD chunks in this checkout, refined-chunk sha1 equal to V-T45 raw/cmp for base and PC in 8/8 (n_collision equal 8/8). Self-filter reproduction: emulated n_masked_px vs recorded esdf_stats.per_camera.n_masked_px over all frames of the 8 cases: max abs diff 146 px (one camera-frame), others <= 30 px."
+ },
+ "numbers": {
+  "cases": {
+   "C1a_ep0_s2:13": {
+    "set": "pre8",
+    "v_t45_worst4": false,
+    "target_fruit": "orange",
+    "hand": "left",
+    "n_collision_rows_PC": 62,
+    "collision_by_link": {
+     "ee_finger_l1": 62
+    },
+    "collision_by_tier": {
+     "target_free": 62
+    },
+    "rows_to_mm_min_med_max": [
+     -14.000481481398905,
+     -3.0737365167269264,
+     -0.1294576309848836
+    ],
+    "rows_max_abs_d_free_minus_d_main_mm": 11.905028999386484,
+    "n_blocking_voxels": 154,
+    "blocking_main_le0": 154,
+    "blocking_free_le0": 39,
+    "blocking_in_exclusion_trace": {
+     "removed": 81,
+     "nontarget_kept": 1,
+     "ambiguous": 15,
+     "unowned_kept": 0
+    },
+    "emul_rows_lt_minus_tol": {
+     "M0": 35,
+     "M1": 35,
+     "M2": 35,
+     "M0c": 34,
+     "M1c": 34
+    },
+    "emul_M0_sign_agree_frac": 0.9540306647744664,
+    "emul_M0_d_rows_rec_minus_emul_mm_min_med_max": [
+     -5.811087005715403,
+     -3.675549014102126,
+     -1.2095510537498237
+    ],
+    "emul_M0_abs_diff_mm_median_p90_within_30mm": [
+     4.1399989277124405,
+     6.179272197186947
+    ],
+    "blocking_unobserved_in_current_frame_only": 63,
+    "attr_weight_share": {
+     "target": 1.0
+    },
+    "dominant_class_counts": {
+     "unattributed": 33,
+     "target": 121
+    },
+    "dominant_class_x_nearest_body": {
+     "target": {
+      "orange": 121
+     },
+     "unattributed": {
+      "orange": 33
+     }
+    },
+    "target_attributed_dist_to_current_target_mm": {
+     "n": 121,
+     "median": 2.854183470945217,
+     "p90": 8.933696342019541,
+     "max": 14.725297725161193
+    },
+    "other_attributed_dist_to_current_other_fruits_mm": null,
+    "blocking_n_farther_than_6mm_from_all_bodies": 36,
+    "fruit_max_displacement_mm": {
+     "apple": 0.08,
+     "banana": 0.02,
+     "orange": 0.0,
+     "pear": 0.11
+    },
+    "ag3s_target_points_nearest_fruit": {
+     "orange": 95
+    },
+    "robot_kept_points_valid_depth_current_frame": 0,
+    "robot_kept_attr_weight": 0.0,
+    "masked_px_emul_vs_rec": {
+     "n_camera_frames": 39,
+     "n_equal": 20,
+     "max_abs_diff_px": 22
+    },
+    "base_palm_gap_to_blocking_mm_min": 36.87986463619562,
+    "PC_palm_gap_to_blocking_mm_min": 13.794207649182065,
+    "base_palm_min_to_mm": 28.473552089288493,
+    "PC_palm_min_to_mm": 1.5071320707954245,
+    "n_collision_base_own": 0,
+    "n_collision_base_traj_under_PC_model": 85
+   },
+   "C1a_ep104_s1041:15": {
+    "set": "pre8",
+    "v_t45_worst4": true,
+    "target_fruit": "pear",
+    "hand": "left",
+    "n_collision_rows_PC": 98,
+    "collision_by_link": {
+     "ee_left": 98
+    },
+    "collision_by_tier": {
+     "target_free": 98
+    },
+    "rows_to_mm_min_med_max": [
+     -11.597325973665882,
+     -4.899082594937576,
+     -0.1386882447395824
+    ],
+    "rows_max_abs_d_free_minus_d_main_mm": 17.047363980634813,
+    "n_blocking_voxels": 421,
+    "blocking_main_le0": 421,
+    "blocking_free_le0": 144,
+    "blocking_in_exclusion_trace": {
+     "removed": 241,
+     "nontarget_kept": 0,
+     "ambiguous": 15,
+     "unowned_kept": 0
+    },
+    "emul_rows_lt_minus_tol": {
+     "M0": 88,
+     "M1": 88,
+     "M2": 88,
+     "M0c": 10,
+     "M1c": 10
+    },
+    "emul_M0_sign_agree_frac": 0.9556643546851625,
+    "emul_M0_d_rows_rec_minus_emul_mm_min_med_max": [
+     -6.676154022250153,
+     -2.875858528684432,
+     -0.00028400897296096406
+    ],
+    "emul_M0_abs_diff_mm_median_p90_within_30mm": [
+     3.566209226846695,
+     6.179272197186947
+    ],
+    "blocking_unobserved_in_current_frame_only": 403,
+    "attr_weight_share": {
+     "target": 0.9054668415889988,
+     "other_fruit": 0.09453315841100118
+    },
+    "dominant_class_counts": {
+     "unattributed": 89,
+     "target": 212,
+     "other_fruit": 120
+    },
+    "dominant_class_x_nearest_body": {
+     "unattributed": {
+      "apple": 26,
+      "EE_BODY_L": 50,
+      "pear": 13
+     },
+     "other_fruit": {
+      "apple": 118,
+      "EE_BODY_L": 2
+     },
+     "target": {
+      "pear": 154,
+      "EE_BODY_L": 58
+     }
+    },
+    "target_attributed_dist_to_current_target_mm": {
+     "n": 212,
+     "median": 3.5258634473827764,
+     "p90": 7.392505401927627,
+     "max": 12.4633617360785
+    },
+    "other_attributed_dist_to_current_other_fruits_mm": {
+     "n": 120,
+     "median": 2.085634047735232,
+     "p90": 5.450049585740044,
+     "max": 8.392205019463512
+    },
+    "blocking_n_farther_than_6mm_from_all_bodies": 42,
+    "fruit_max_displacement_mm": {
+     "apple": 0.1,
+     "banana": 0.03,
+     "orange": 0.15,
+     "pear": 6.06
+    },
+    "ag3s_target_points_nearest_fruit": {
+     "pear": 137
+    },
+    "robot_kept_points_valid_depth_current_frame": 0,
+    "robot_kept_attr_weight": 0.0,
+    "masked_px_emul_vs_rec": {
+     "n_camera_frames": 45,
+     "n_equal": 22,
+     "max_abs_diff_px": 29
+    },
+    "base_palm_gap_to_blocking_mm_min": 25.702108800958936,
+    "PC_palm_gap_to_blocking_mm_min": -13.755267506485321,
+    "base_palm_min_to_mm": 18.268658932672917,
+    "PC_palm_min_to_mm": -11.597325973665882,
+    "n_collision_base_own": 0,
+    "n_collision_base_traj_under_PC_model": 58
+   },
+   "C1a_ep123_s1231:11": {
+    "set": "pre8",
+    "v_t45_worst4": false,
+    "target_fruit": "orange",
+    "hand": "right",
+    "n_collision_rows_PC": 5,
+    "collision_by_link": {
+     "ee_right": 5
+    },
+    "collision_by_tier": {
+     "target_free": 5
+    },
+    "rows_to_mm_min_med_max": [
+     -0.7699939409061048,
+     -0.682370194532685,
+     -0.42805987333565354
+    ],
+    "rows_max_abs_d_free_minus_d_main_mm": 3.7166808723789884,
+    "n_blocking_voxels": 18,
+    "blocking_main_le0": 18,
+    "blocking_free_le0": 6,
+    "blocking_in_exclusion_trace": {
+     "removed": 13,
+     "nontarget_kept": 0,
+     "ambiguous": 5,
+     "unowned_kept": 0
+    },
+    "emul_rows_lt_minus_tol": {
+     "M0": 5,
+     "M1": 5,
+     "M2": 5,
+     "M0c": 3,
+     "M1c": 3
+    },
+    "emul_M0_sign_agree_frac": 0.9794833765912743,
+    "emul_M0_d_rows_rec_minus_emul_mm_min_med_max": [
+     -3.6823784776040327,
+     -3.530351779057313,
+     -3.366880772246561
+    ],
+    "emul_M0_abs_diff_mm_median_p90_within_30mm": [
+     0.8572544902563095,
+     4.999999888241291
+    ],
+    "blocking_unobserved_in_current_frame_only": 13,
+    "attr_weight_share": {
+     "target": 1.0
+    },
+    "dominant_class_counts": {
+     "unattributed": 5,
+     "target": 13
+    },
+    "dominant_class_x_nearest_body": {
+     "unattributed": {
+      "orange": 5
+     },
+     "target": {
+      "orange": 13
+     }
+    },
+    "target_attributed_dist_to_current_target_mm": {
+     "n": 13,
+     "median": 5.244544871526784,
+     "p90": 6.210483891640272,
+     "max": 6.868340145571105
+    },
+    "other_attributed_dist_to_current_other_fruits_mm": null,
+    "blocking_n_farther_than_6mm_from_all_bodies": 7,
+    "fruit_max_displacement_mm": {
+     "apple": 0.0,
+     "banana": 0.59,
+     "orange": 0.71,
+     "pear": 0.11
+    },
+    "ag3s_target_points_nearest_fruit": {
+     "banana": 48,
+     "orange": 92
+    },
+    "robot_kept_points_valid_depth_current_frame": 0,
+    "robot_kept_attr_weight": 0.0,
+    "masked_px_emul_vs_rec": {
+     "n_camera_frames": 33,
+     "n_equal": 19,
+     "max_abs_diff_px": 17
+    },
+    "base_palm_gap_to_blocking_mm_min": 40.684509465887835,
+    "PC_palm_gap_to_blocking_mm_min": 7.197252746159833,
+    "base_palm_min_to_mm": 35.425156489950474,
+    "PC_palm_min_to_mm": -0.7699939409061048,
+    "n_collision_base_own": 0,
+    "n_collision_base_traj_under_PC_model": 5
+   },
+   "C1a_ep12_s121:13": {
+    "set": "pre8",
+    "v_t45_worst4": false,
+    "target_fruit": "apple",
+    "hand": "left",
+    "n_collision_rows_PC": 7,
+    "collision_by_link": {
+     "ee_finger_l1": 7
+    },
+    "collision_by_tier": {
+     "target_free": 7
+    },
+    "rows_to_mm_min_med_max": [
+     -2.3772075603606337,
+     -0.8256049185801015,
+     -0.3680234300420214
+    ],
+    "rows_max_abs_d_free_minus_d_main_mm": 0.0,
+    "n_blocking_voxels": 13,
+    "blocking_main_le0": 13,
+    "blocking_free_le0": 9,
+    "blocking_in_exclusion_trace": {
+     "removed": 4,
+     "nontarget_kept": 0,
+     "ambiguous": 9,
+     "unowned_kept": 0
+    },
+    "emul_rows_lt_minus_tol": {
+     "M0": 0,
+     "M1": 0,
+     "M2": 0,
+     "M0c": 0,
+     "M1c": 0
+    },
+    "emul_M0_sign_agree_frac": 0.9305506685432794,
+    "emul_M0_d_rows_rec_minus_emul_mm_min_med_max": [
+     -3.613408526250174,
+     -3.51171820860555,
+     -3.21479080637003
+    ],
+    "emul_M0_abs_diff_mm_median_p90_within_30mm": [
+     3.822936676442623,
+     6.470629945397377
+    ],
+    "blocking_unobserved_in_current_frame_only": 10,
+    "attr_weight_share": {
+     "target": 1.0
+    },
+    "dominant_class_counts": {
+     "unattributed": 2,
+     "target": 11
+    },
+    "dominant_class_x_nearest_body": {
+     "unattributed": {
+      "apple": 2
+     },
+     "target": {
+      "apple": 11
+     }
+    },
+    "target_attributed_dist_to_current_target_mm": {
+     "n": 11,
+     "median": 1.2496868808819759,
+     "p90": 2.68345530710537,
+     "max": 4.53995060970782
+    },
+    "other_attributed_dist_to_current_other_fruits_mm": null,
+    "blocking_n_farther_than_6mm_from_all_bodies": 0,
+    "fruit_max_displacement_mm": {
+     "apple": 4.21,
+     "banana": 0.02,
+     "orange": 0.15,
+     "pear": 0.11
+    },
+    "ag3s_target_points_nearest_fruit": {
+     "apple": 110
+    },
+    "robot_kept_points_valid_depth_current_frame": 0,
+    "robot_kept_attr_weight": 0.0,
+    "masked_px_emul_vs_rec": {
+     "n_camera_frames": 39,
+     "n_equal": 20,
+     "max_abs_diff_px": 25
+    },
+    "base_palm_gap_to_blocking_mm_min": 33.7694712373296,
+    "PC_palm_gap_to_blocking_mm_min": 16.069098639987743,
+    "base_palm_min_to_mm": 14.294008296966274,
+    "PC_palm_min_to_mm": 3.41927023287838,
+    "n_collision_base_own": 0,
+    "n_collision_base_traj_under_PC_model": 11
+   },
+   "C1a_ep30_s302:14": {
+    "set": "pre8",
+    "v_t45_worst4": true,
+    "target_fruit": "apple",
+    "hand": "right",
+    "n_collision_rows_PC": 83,
+    "collision_by_link": {
+     "ee_right": 83
+    },
+    "collision_by_tier": {
+     "target_free": 83
+    },
+    "rows_to_mm_min_med_max": [
+     -6.459164997767261,
+     -2.104729569870253,
+     -0.12224520829622575
+    ],
+    "rows_max_abs_d_free_minus_d_main_mm": 4.2151427717538565,
+    "n_blocking_voxels": 90,
+    "blocking_main_le0": 90,
+    "blocking_free_le0": 54,
+    "blocking_in_exclusion_trace": {
+     "removed": 36,
+     "nontarget_kept": 0,
+     "ambiguous": 0,
+     "unowned_kept": 0
+    },
+    "emul_rows_lt_minus_tol": {
+     "M0": 71,
+     "M1": 71,
+     "M2": 71,
+     "M0c": 0,
+     "M1c": 0
+    },
+    "emul_M0_sign_agree_frac": 0.9584301746463909,
+    "emul_M0_d_rows_rec_minus_emul_mm_min_med_max": [
+     -4.215569868734663,
+     -2.3754149651072263,
+     3.5899987266974542
+    ],
+    "emul_M0_abs_diff_mm_median_p90_within_30mm": [
+     4.007123410701752,
+     5.490824580192566
+    ],
+    "blocking_unobserved_in_current_frame_only": 69,
+    "attr_weight_share": {
+     "target": 0.5306684165908294,
+     "other_fruit": 0.4693315834091706
+    },
+    "dominant_class_counts": {
+     "unattributed": 44,
+     "target": 8,
+     "other_fruit": 38
+    },
+    "dominant_class_x_nearest_body": {
+     "unattributed": {
+      "pear": 7,
+      "EE_BODY_R": 23,
+      "apple": 14
+     },
+     "other_fruit": {
+      "EE_BODY_R": 6,
+      "pear": 32
+     },
+     "target": {
+      "apple": 8
+     }
+    },
+    "target_attributed_dist_to_current_target_mm": {
+     "n": 8,
+     "median": 1.4891710761035752,
+     "p90": 3.085454220286822,
+     "max": 3.607840029291806
+    },
+    "other_attributed_dist_to_current_other_fruits_mm": {
+     "n": 38,
+     "median": 1.9281851320320655,
+     "p90": 5.234783957889976,
+     "max": 9.804217384617782
+    },
+    "blocking_n_farther_than_6mm_from_all_bodies": 6,
+    "fruit_max_displacement_mm": {
+     "apple": 0.22,
+     "banana": 0.01,
+     "orange": 0.15,
+     "pear": 0.06
+    },
+    "ag3s_target_points_nearest_fruit": {
+     "apple": 114
+    },
+    "robot_kept_points_valid_depth_current_frame": 0,
+    "robot_kept_attr_weight": 0.0,
+    "masked_px_emul_vs_rec": {
+     "n_camera_frames": 42,
+     "n_equal": 25,
+     "max_abs_diff_px": 16
+    },
+    "base_palm_gap_to_blocking_mm_min": 25.590043085627734,
+    "PC_palm_gap_to_blocking_mm_min": 1.1918055098701468,
+    "base_palm_min_to_mm": 16.468856740041762,
+    "PC_palm_min_to_mm": -6.459164997767261,
+    "n_collision_base_own": 0,
+    "n_collision_base_traj_under_PC_model": 83
+   },
+   "C1a_ep3_s31:28": {
+    "set": "pre8",
+    "v_t45_worst4": true,
+    "target_fruit": "orange",
+    "hand": "right",
+    "n_collision_rows_PC": 216,
+    "collision_by_link": {
+     "ee_right": 216
+    },
+    "collision_by_tier": {
+     "target_free": 216
+    },
+    "rows_to_mm_min_med_max": [
+     -17.782591731156494,
+     -9.638486067324708,
+     -0.27666177341887677
+    ],
+    "rows_max_abs_d_free_minus_d_main_mm": 4.163051432696701,
+    "n_blocking_voxels": 389,
+    "blocking_main_le0": 389,
+    "blocking_free_le0": 365,
+    "blocking_in_exclusion_trace": {
+     "removed": 34,
+     "nontarget_kept": 0,
+     "ambiguous": 0,
+     "unowned_kept": 0
+    },
+    "emul_rows_lt_minus_tol": {
+     "M0": 206,
+     "M1": 206,
+     "M2": 206,
+     "M0c": 0,
+     "M1c": 0
+    },
+    "emul_M0_sign_agree_frac": 0.959026334026334,
+    "emul_M0_d_rows_rec_minus_emul_mm_min_med_max": [
+     -5.9250462440104155,
+     -2.211501516382918,
+     0.004175225595461074
+    ],
+    "emul_M0_abs_diff_mm_median_p90_within_30mm": [
+     0.007126480340957642,
+     4.999999888241291
+    ],
+    "blocking_unobserved_in_current_frame_only": 319,
+    "attr_weight_share": {
+     "target": 0.8502980183974026,
+     "other_fruit": 0.14970198160259734
+    },
+    "dominant_class_counts": {
+     "unattributed": 16,
+     "target": 324,
+     "other_fruit": 49
+    },
+    "dominant_class_x_nearest_body": {
+     "target": {
+      "EE_BODY_R": 273,
+      "orange": 51
+     },
+     "unattributed": {
+      "EE_BODY_R": 16
+     },
+     "other_fruit": {
+      "orange": 49
+     }
+    },
+    "target_attributed_dist_to_current_target_mm": {
+     "n": 324,
+     "median": 25.826220637399793,
+     "p90": 46.428010916223286,
+     "max": 58.651968216529845
+    },
+    "other_attributed_dist_to_current_other_fruits_mm": {
+     "n": 49,
+     "median": 48.61481635507005,
+     "p90": 55.31921244913628,
+     "max": 59.04406294902507
+    },
+    "blocking_n_farther_than_6mm_from_all_bodies": 138,
+    "fruit_max_displacement_mm": {
+     "apple": 0.22,
+     "banana": 61.32,
+     "orange": 68.52,
+     "pear": 0.16
+    },
+    "ag3s_target_points_nearest_fruit": {
+     "banana": 59,
+     "orange": 40
+    },
+    "robot_kept_points_valid_depth_current_frame": 0,
+    "robot_kept_attr_weight": 0.0,
+    "masked_px_emul_vs_rec": {
+     "n_camera_frames": 84,
+     "n_equal": 30,
+     "max_abs_diff_px": 25
+    },
+    "base_palm_gap_to_blocking_mm_min": 14.825389670828956,
+    "PC_palm_gap_to_blocking_mm_min": -7.828507865482464,
+    "base_palm_min_to_mm": 4.963753637863508,
+    "PC_palm_min_to_mm": -17.782591731156494,
+    "n_collision_base_own": 0,
+    "n_collision_base_traj_under_PC_model": 186
+   },
+   "C1a_ep12_s121:15": {
+    "set": "close",
+    "v_t45_worst4": false,
+    "target_fruit": "apple",
+    "hand": "left",
+    "n_collision_rows_PC": 9,
+    "collision_by_link": {
+     "ee_left": 6,
+     "ee_finger_l2": 3
+    },
+    "collision_by_tier": {
+     "target_free": 9
+    },
+    "rows_to_mm_min_med_max": [
+     -5.461242267957868,
+     -0.9359357066702646,
+     -0.15981812343125906
+    ],
+    "rows_max_abs_d_free_minus_d_main_mm": 14.500507200543144,
+    "n_blocking_voxels": 185,
+    "blocking_main_le0": 185,
+    "blocking_free_le0": 53,
+    "blocking_in_exclusion_trace": {
+     "removed": 115,
+     "nontarget_kept": 0,
+     "ambiguous": 5,
+     "unowned_kept": 0
+    },
+    "emul_rows_lt_minus_tol": {
+     "M0": 3,
+     "M1": 3,
+     "M2": 3,
+     "M0c": 5,
+     "M1c": 5
+    },
+    "emul_M0_sign_agree_frac": 0.9458621541501976,
+    "emul_M0_d_rows_rec_minus_emul_mm_min_med_max": [
+     -6.933858134934627,
+     -5.684272514069954,
+     -2.944862130195896
+    ],
+    "emul_M0_abs_diff_mm_median_p90_within_30mm": [
+     3.0682366341352463,
+     5.006102845072746
+    ],
+    "blocking_unobserved_in_current_frame_only": 95,
+    "attr_weight_share": {
+     "target": 0.986953238368635,
+     "crate": 0.013046761631364954
+    },
+    "dominant_class_counts": {
+     "unattributed": 38,
+     "target": 138,
+     "crate": 9
+    },
+    "dominant_class_x_nearest_body": {
+     "unattributed": {
+      "EE_BODY_L": 6,
+      "apple": 16,
+      "ee_finger_l1": 16
+     },
+     "crate": {
+      "EE_BODY_L": 9
+     },
+     "target": {
+      "apple": 131,
+      "ee_finger_l1": 7
+     }
+    },
+    "target_attributed_dist_to_current_target_mm": {
+     "n": 138,
+     "median": 2.847807187031962,
+     "p90": 6.753073208328426,
+     "max": 10.572898824446524
+    },
+    "other_attributed_dist_to_current_other_fruits_mm": null,
+    "blocking_n_farther_than_6mm_from_all_bodies": 44,
+    "fruit_max_displacement_mm": {
+     "apple": 4.22,
+     "banana": 0.02,
+     "orange": 0.15,
+     "pear": 0.12
+    },
+    "ag3s_target_points_nearest_fruit": {
+     "apple": 110
+    },
+    "robot_kept_points_valid_depth_current_frame": 0,
+    "robot_kept_attr_weight": 0.0,
+    "masked_px_emul_vs_rec": {
+     "n_camera_frames": 45,
+     "n_equal": 22,
+     "max_abs_diff_px": 146
+    },
+    "base_palm_gap_to_blocking_mm_min": 22.219189188930297,
+    "PC_palm_gap_to_blocking_mm_min": 4.260095362155067,
+    "base_palm_min_to_mm": 12.41447370721579,
+    "PC_palm_min_to_mm": -5.461242267957868,
+    "n_collision_base_own": 0,
+    "n_collision_base_traj_under_PC_model": 56
+   },
+   "C1a_ep54_s542:20": {
+    "set": "close",
+    "v_t45_worst4": true,
+    "target_fruit": "apple",
+    "hand": "right",
+    "n_collision_rows_PC": 95,
+    "collision_by_link": {
+     "ee_right": 75,
+     "ee_finger_r2": 20
+    },
+    "collision_by_tier": {
+     "target_free": 95
+    },
+    "rows_to_mm_min_med_max": [
+     -9.91149215340049,
+     -3.8418557281060615,
+     -0.10782596713852961
+    ],
+    "rows_max_abs_d_free_minus_d_main_mm": 12.10447400239789,
+    "n_blocking_voxels": 270,
+    "blocking_main_le0": 270,
+    "blocking_free_le0": 127,
+    "blocking_in_exclusion_trace": {
+     "removed": 141,
+     "nontarget_kept": 0,
+     "ambiguous": 13,
+     "unowned_kept": 0
+    },
+    "emul_rows_lt_minus_tol": {
+     "M0": 86,
+     "M1": 86,
+     "M2": 86,
+     "M0c": 20,
+     "M1c": 20
+    },
+    "emul_M0_sign_agree_frac": 0.9604010025062657,
+    "emul_M0_d_rows_rec_minus_emul_mm_min_med_max": [
+     -4.988433539908372,
+     -3.039753335405706,
+     -0.009480454943372116
+    ],
+    "emul_M0_abs_diff_mm_median_p90_within_30mm": [
+     2.03598290681839,
+     7.071067579090595
+    ],
+    "blocking_unobserved_in_current_frame_only": 202,
+    "attr_weight_share": {
+     "target": 0.860279935975927,
+     "other_fruit": 0.13972006402407297
+    },
+    "dominant_class_counts": {
+     "unattributed": 38,
+     "target": 135,
+     "other_fruit": 97
+    },
+    "dominant_class_x_nearest_body": {
+     "other_fruit": {
+      "orange": 82,
+      "EE_BODY_R": 15
+     },
+     "unattributed": {
+      "orange": 3,
+      "EE_BODY_R": 6,
+      "apple": 22,
+      "ee_finger_r2": 7
+     },
+     "target": {
+      "apple": 120,
+      "ee_finger_r2": 11,
+      "EE_BODY_R": 4
+     }
+    },
+    "target_attributed_dist_to_current_target_mm": {
+     "n": 135,
+     "median": 2.739859884049913,
+     "p90": 6.812936418064147,
+     "max": 11.919122312352918
+    },
+    "other_attributed_dist_to_current_other_fruits_mm": {
+     "n": 97,
+     "median": 2.6311382350085997,
+     "p90": 4.904300750717754,
+     "max": 6.802427429989362
+    },
+    "blocking_n_farther_than_6mm_from_all_bodies": 23,
+    "fruit_max_displacement_mm": {
+     "apple": 2.59,
+     "banana": 0.02,
+     "orange": 0.15,
+     "pear": 0.14
+    },
+    "ag3s_target_points_nearest_fruit": {
+     "apple": 117
+    },
+    "robot_kept_points_valid_depth_current_frame": 0,
+    "robot_kept_attr_weight": 0.0,
+    "masked_px_emul_vs_rec": {
+     "n_camera_frames": 60,
+     "n_equal": 36,
+     "max_abs_diff_px": 30
+    },
+    "base_palm_gap_to_blocking_mm_min": 33.549498195575296,
+    "PC_palm_gap_to_blocking_mm_min": -3.3586690183332566,
+    "base_palm_min_to_mm": 23.686260067953317,
+    "PC_palm_min_to_mm": -9.91149215340049,
+    "n_collision_base_own": 0,
+    "n_collision_base_traj_under_PC_model": 102
+   }
+  },
+  "repro_sha1_equal_target_chunks": {
+   "n_chunks": 8,
+   "base_sha1_equal": 8,
+   "PC_sha1_equal": 8,
+   "raw": "repro_check.json, repro_check_close.json"
+  },
+  "tsdf_emulation": {
+   "source": "third_party/curobo builder_camera_integrate.py:114-190,470-562; wp_integrate_common.py:61-105; builder_esdf.py:107-133,269-300",
+   "tsdf_voxel_m": 0.005,
+   "truncation_m": 0.03,
+   "block": 8,
+   "bounds": "esdf.default_bounds() -0.3/-0.9/0 .. 1.2/0.9/1.6",
+   "frames": "every planning frame 1..seq of the episode, 3 cameras, 480x640 MuJoCo re-render at recorded qpos",
+   "M0": "server self-filter 587 spheres inflation 0",
+   "M1": "M0 + every robot-body pixel",
+   "M2": "M0 + palm-cover spheres (466 model ee_left/ee_right)",
+   "M0c": "M0, current frame only",
+   "M1c": "M1, current frame only"
+  },
+  "self_filter_model": {
+   "built_at": [
+    "AG3S/trajopt/serve_safe.py:955 filter_robot = build_robot_model(scene)",
+    "AG3S/ag3s/experiments/reports/grounding_report.py:71-102 build_robot_model",
+    "AG3S/ag3s/experiments/sources/mujoco_source.py:565 gap_filling_capsules (UNCOVERED_LINKS :510), :908 self_filter_covering_capsules",
+    "AG3S/trajopt/serve_safe.py:1094 AG3S(config, robot_model=filter_robot, ...)",
+    "AG3S/ag3s/runtime/pipeline.py:2229-2248 _depth_robot_mask -> AG3S/ag3s/stages/robot_filter.py:486 depth_robot_mask",
+    "AG3S/ag3s/fields/curobo_builder.py:1309-1313 robot pixels -> depth 0"
+   ],
+   "palm_cover_path": [
+    "AG3S/trajopt/serve_safe.py:963-966 cover['palm_cover'] -> build_constraint_robot_model only",
+    "AG3S/ag3s/experiments/reports/grounding_report.py:257-283"
+   ],
+   "inflation_m": 0.0,
+   "inflation_default_at": "AG3S/ag3s/config.py:577",
+   "target_guard_radius_default_at": "AG3S/ag3s/config.py:600 (0.0; server log 'target guard 끔')",
+   "server_log": "results/workspace/verify/T44/CL/runs/C1a/server_8280_20261010T180326/serve_safe.log:83,110 (self-filter 587 spheres, inflation 0.0 mm)",
+   "palm_spheres": {
+    "self_filter": {
+     "n": 24,
+     "radius_mm_min": 26.847823737023667,
+     "radius_mm_max": 36.84484896248445,
+     "radius_mm_median": 34.08171342203499,
+     "roles": {
+      "collision": 12,
+      "self_filter_cover": 12
+     }
+    },
+    "constraint_PC_466": {
+     "n": 121,
+     "radius_mm_min": 5.000448389365512,
+     "radius_mm_max": 28.965807088528997,
+     "radius_mm_median": 13.565260403522736,
+     "roles": {
+      "palm_body": 121
+     }
+    },
+    "constraint_base_270": {
+     "n": 23,
+     "radius_mm_min": 5.704428607174148,
+     "radius_mm_max": 6.222712430054244,
+     "radius_mm_median": 6.12932871330379,
+     "roles": {
+      "collision": 23
+     }
+    }
+   },
+   "palm_mjcf_surface_outside_self_filter_frac_max": 1.1538461538461538e-05,
+   "palm_mjcf_surface_outside_self_filter_mm_max": 0.6918523368107665,
+   "palm_mjcf_surface_outside_PC_palm_frac_max": 0.01194423076923077,
+   "palm_mjcf_surface_outside_PC_palm_mm_max": 7.6916185647820035,
+   "palm_mjcf_surface_outside_base_palm_frac_max": 0.8411596153846154,
+   "PC_palm_volume_cm3": 451.69526070386405,
+   "PC_palm_volume_frac_not_inside_self_filter_range": [
+    7.806279371126133e-05,
+    0.00020447284345047922
+   ]
+  },
+  "survey_off_record_q_now": {
+   "all": {
+    "base": {
+     "n_chunks": 1350,
+     "chunks_gap_free_lt0": 0,
+     "chunks_gap_main_lt0": 0,
+     "chunks_occ_vox_inside_palm_gt0": 0,
+     "occ_vox_inside_palm_total": 0,
+     "gap_free_mm_min": 11.502111589609177,
+     "gap_free_mm_median": 87.62390534665741
+    },
+    "PC": {
+     "n_chunks": 1350,
+     "chunks_gap_free_lt0": 35,
+     "chunks_gap_main_lt0": 91,
+     "chunks_occ_vox_inside_palm_gt0": 90,
+     "occ_vox_inside_palm_total": 6202,
+     "gap_free_mm_min": -14.449837850818994,
+     "gap_free_mm_median": 80.2005160511533
+    }
+   },
+   "pre8_close": {
+    "base": {
+     "n_chunks": 162,
+     "chunks_gap_free_lt0": 0,
+     "chunks_gap_main_lt0": 0,
+     "chunks_occ_vox_inside_palm_gt0": 0,
+     "occ_vox_inside_palm_total": 0,
+     "gap_free_mm_min": 11.502111589609177,
+     "gap_free_mm_median": 38.28104382993118
+    },
+    "PC": {
+     "n_chunks": 162,
+     "chunks_gap_free_lt0": 19,
+     "chunks_gap_main_lt0": 58,
+     "chunks_occ_vox_inside_palm_gt0": 57,
+     "occ_vox_inside_palm_total": 4583,
+     "gap_free_mm_min": -14.449837850818994,
+     "gap_free_mm_median": 25.934009921544728
+    }
+   }
+  },
+  "summary_counts_8_cases": {
+   "M1_equal_M0_rows": 8,
+   "M2_equal_M0_rows": 8,
+   "robot_kept_attr_weight_zero": 8,
+   "table_attr_weight_zero": 8,
+   "target_share_ge_0.5": 8,
+   "other_fruit_share_gt_0": 4,
+   "fruit_max_displacement_gt_10mm": 1,
+   "rows_answered_by_target_free_tier_all": 8,
+   "n_collision_base_own_zero": 8
+  },
+  "answers": {
+   "Q1a_robot_self_points_past_self_filter": "반박 — M1(로봇 픽셀 전부 제거) 위반 행 = M0 in 8/8; 막는 voxel 의 robot_kept 기여 가중 0 in 8/8; 현재 프레임 robot_kept 유효 depth 점 0 in 8/8",
+   "Q1b_tsdf_afterimage": "확인 1/8 (C1a_ep3_s31:28, worst4): orange 68.5 mm · banana 61.3 mm 이동, target 기여 voxel → 현재 orange 표면 중앙 25.8 mm, M0c 206→0 행. 반박 7/8: 과일 최대 이동 <= 6.1 mm, 기여 voxel → 현재 과일 표면 중앙 1.2–5.2 mm",
+   "Q1c_table_or_neighbour_fruit": "table 반박 (가중 0 in 8/8). 이웃 과일 확인 4/8 (ep104:15 0.09, ep30:14 0.47, ep3:28 0.15, ep54:20 0.14 가중 비율); 이산화 편향 크기 모름 (기록 d − 재현 d 중앙 −2.2…−5.7 mm)",
+   "Q1d_other": "확인 — episode target 과일 자신의 표면 (가중 비율 >= 0.53 in 8/8), 행은 전부 target_free tier 가 답함, target-free 층에 남은 막는 voxel 6–365",
+   "Q2_self_filter_model_palm_cover": "self-filter 손바닥 = 24 구 (r 26.8–36.8 mm), palm cover 반영 안 됨 (serve_safe.py:963-966 → 제약 모델만); palm MJCF 표면 밖 비율 <= 1.2e-5 (최대 0.69 mm)",
+   "Q3_self_filter_with_palm_cover_offline": "반박 — M2 위반 행 = M0 in 8/8 (코드 수정 없이 CPU TSDF 재현)",
+   "Q4_same_residual_with_palm_cover_off": "확인 — 같은 기록 field; base 손바닥 구 → 막는 voxel 최소 14.8–40.7 mm, base own collision 0 in 8/8, base 궤적을 PC 모델로 재면 5–186 행; 조사: q_now 에서 PC 손바닥 구 안 점유 voxel 57/162 (pre8+close) chunk, base 0/162"
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t45/t45sf-scene.png",
+   "kind": "scene",
+   "sidecar": "t45sf-scene.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t45/t45sf-graph.png",
+   "kind": "graph",
+   "sidecar": "t45sf-graph.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t45/t45sf-table.png",
+   "kind": "table",
+   "sidecar": "t45sf-table.json"
+  }
+ ],
+ "verdict": "V-T45 재현 일치 (target chunk sha1 8/8). 항목별 확인/반박/모름은 numbers.answers. 판정은 lead 와 사용자.",
+ "not_measured": [
+  "GPU cuRobo TSDF re-integration (CPU emulation only; emulated vs recorded fine ESDF sign agreement 0.93–0.98, recorded d at rows 2.2–5.7 mm (median) closer than emulated)",
+  "coarse 20 mm tier and the target-free layer were not emulated (main fine layer only)",
+  "client-side depth noise / render differences beyond n_masked_px check (valid-pixel counts differ: emul ~262k vs rec ~247k head)",
+  "closed-loop effect of any self-filter change",
+  "chunks other than the 8 V-T45 new-HOLD chunks for the TSDF attribution (survey covers 1350 chunks at q_now only)"
+ ]
+}

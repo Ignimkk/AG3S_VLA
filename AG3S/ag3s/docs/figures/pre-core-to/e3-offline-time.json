@@ -1,0 +1,43 @@
+{
+ "source": "AG3S/ag3s/docs/handoff/AG3S-PRE-CORE-TO.verify.json#/numbers/E3_offline; raw /mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/{b,b_fp}/offline_occ",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/figs/fig_e3_offline.py",
+ "per_config": {
+  "지금serving (표준 풀이만)": {
+   "n": 68,
+   "resolved": 0,
+   "median_ms": 123.7,
+   "p95_ms": 350.6,
+   "le_533ms": 68
+  },
+  "CPU 초기값 16개": {
+   "n": 68,
+   "resolved": 68,
+   "median_ms": 4197.4,
+   "p95_ms": 4908.7,
+   "le_533ms": 0
+  },
+  "cuRobo 초기값 16개, 검사 전부": {
+   "n": 68,
+   "resolved": 68,
+   "median_ms": 542.8,
+   "p95_ms": 779.3,
+   "le_533ms": 31
+  },
+  "cuRobo 초기값 16개, 검사 줄이기": {
+   "n": 68,
+   "resolved": 68,
+   "median_ms": 302.3,
+   "p95_ms": 528.0,
+   "le_533ms": 65
+  },
+  "GPU QP (OSQP CUDA) 초기값 16개": {
+   "n": 68,
+   "resolved": 68,
+   "median_ms": 58298.8,
+   "p95_ms": 72316.9,
+   "le_533ms": 0
+  }
+ },
+ "window_ms": 533,
+ "trajectory_sha1_equal_all_vs_first_pass": "967/967 (S-OCC), 683/683 (S-REG)"
+}

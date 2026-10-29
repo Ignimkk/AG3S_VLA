@@ -1,0 +1,634 @@
+{
+ "gaps_merged": [
+  {
+   "key": "demo_ep0001_f068",
+   "mesh_gap_mm": 22.6,
+   "cloud_gap_mm": 24.86
+  },
+  {
+   "key": "demo_ep0001_f080",
+   "mesh_gap_mm": 22.6,
+   "cloud_gap_mm": 27.76
+  },
+  {
+   "key": "demo_ep0001_f092",
+   "mesh_gap_mm": 22.6,
+   "cloud_gap_mm": 28.98
+  },
+  {
+   "key": "demo_ep0001_f104",
+   "mesh_gap_mm": 22.6,
+   "cloud_gap_mm": 28.21
+  },
+  {
+   "key": "demo_ep0002_f068",
+   "mesh_gap_mm": 16.4,
+   "cloud_gap_mm": 21.35
+  },
+  {
+   "key": "demo_ep0002_f080",
+   "mesh_gap_mm": 16.4,
+   "cloud_gap_mm": 24.44
+  },
+  {
+   "key": "demo_ep0002_f092",
+   "mesh_gap_mm": 16.4,
+   "cloud_gap_mm": 23.12
+  },
+  {
+   "key": "demo_ep0002_f104",
+   "mesh_gap_mm": 16.4,
+   "cloud_gap_mm": 23.64
+  },
+  {
+   "key": "demo_ep0003_f068",
+   "mesh_gap_mm": 5.26,
+   "cloud_gap_mm": 12.49
+  },
+  {
+   "key": "demo_ep0003_f080",
+   "mesh_gap_mm": 5.26,
+   "cloud_gap_mm": 10.87
+  },
+  {
+   "key": "demo_ep0003_f092",
+   "mesh_gap_mm": 5.26,
+   "cloud_gap_mm": 11.03
+  },
+  {
+   "key": "demo_ep0003_f104",
+   "mesh_gap_mm": 5.26,
+   "cloud_gap_mm": 12.71
+  },
+  {
+   "key": "demo_ep0011_f068",
+   "mesh_gap_mm": 19.75,
+   "cloud_gap_mm": 27.53
+  },
+  {
+   "key": "demo_ep0011_f080",
+   "mesh_gap_mm": 19.75,
+   "cloud_gap_mm": 27.53
+  },
+  {
+   "key": "demo_ep0012_f068",
+   "mesh_gap_mm": 15.61,
+   "cloud_gap_mm": 25.93
+  },
+  {
+   "key": "demo_ep0022_f068",
+   "mesh_gap_mm": 14.74,
+   "cloud_gap_mm": 18.95
+  },
+  {
+   "key": "demo_ep0022_f080",
+   "mesh_gap_mm": 14.74,
+   "cloud_gap_mm": 19.2
+  },
+  {
+   "key": "demo_ep0022_f092",
+   "mesh_gap_mm": 14.74,
+   "cloud_gap_mm": 25.48
+  },
+  {
+   "key": "demo_ep0022_f104",
+   "mesh_gap_mm": 14.74,
+   "cloud_gap_mm": 28.53
+  },
+  {
+   "key": "demo_ep0027_f068",
+   "mesh_gap_mm": 4.63,
+   "cloud_gap_mm": 8.85
+  },
+  {
+   "key": "demo_ep0027_f080",
+   "mesh_gap_mm": 4.63,
+   "cloud_gap_mm": 11.48
+  },
+  {
+   "key": "demo_ep0027_f092",
+   "mesh_gap_mm": 4.63,
+   "cloud_gap_mm": 11.78
+  },
+  {
+   "key": "demo_ep0027_f104",
+   "mesh_gap_mm": 4.63,
+   "cloud_gap_mm": 11.78
+  },
+  {
+   "key": "demo_ep0058_f068",
+   "mesh_gap_mm": 22.65,
+   "cloud_gap_mm": 25.21
+  },
+  {
+   "key": "demo_ep0058_f080",
+   "mesh_gap_mm": 22.65,
+   "cloud_gap_mm": 25.45
+  },
+  {
+   "key": "demo_ep0058_f092",
+   "mesh_gap_mm": 22.65,
+   "cloud_gap_mm": 25.97
+  },
+  {
+   "key": "demo_ep0058_f104",
+   "mesh_gap_mm": 22.65,
+   "cloud_gap_mm": 25.34
+  },
+  {
+   "key": "demo_ep0060_f068",
+   "mesh_gap_mm": 8.33,
+   "cloud_gap_mm": 17.49
+  },
+  {
+   "key": "demo_ep0060_f080",
+   "mesh_gap_mm": 8.33,
+   "cloud_gap_mm": 18.97
+  },
+  {
+   "key": "demo_ep0067_f068",
+   "mesh_gap_mm": 13.62,
+   "cloud_gap_mm": 17.4
+  },
+  {
+   "key": "demo_ep0067_f080",
+   "mesh_gap_mm": 13.62,
+   "cloud_gap_mm": 18.11
+  },
+  {
+   "key": "demo_ep0067_f092",
+   "mesh_gap_mm": 13.62,
+   "cloud_gap_mm": 19.37
+  },
+  {
+   "key": "demo_ep0067_f104",
+   "mesh_gap_mm": 13.62,
+   "cloud_gap_mm": 19.82
+  },
+  {
+   "key": "demo_ep0100_f068",
+   "mesh_gap_mm": 14.6,
+   "cloud_gap_mm": 24.1
+  }
+ ],
+ "gaps_not_merged": [
+  {
+   "key": "demo_ep0000_f068",
+   "mesh_gap_mm": 28.72,
+   "cloud_gap_mm": 39.24
+  },
+  {
+   "key": "demo_ep0000_f080",
+   "mesh_gap_mm": 28.72,
+   "cloud_gap_mm": 40.06
+  },
+  {
+   "key": "demo_ep0000_f092",
+   "mesh_gap_mm": 28.72,
+   "cloud_gap_mm": 64.47
+  },
+  {
+   "key": "demo_ep0000_f104",
+   "mesh_gap_mm": 28.72,
+   "cloud_gap_mm": 64.41
+  },
+  {
+   "key": "demo_ep0005_f068",
+   "mesh_gap_mm": 14.8,
+   "cloud_gap_mm": 32.56
+  },
+  {
+   "key": "demo_ep0005_f080",
+   "mesh_gap_mm": 14.8,
+   "cloud_gap_mm": 32.56
+  },
+  {
+   "key": "demo_ep0005_f092",
+   "mesh_gap_mm": 14.8,
+   "cloud_gap_mm": 70.55
+  },
+  {
+   "key": "demo_ep0005_f104",
+   "mesh_gap_mm": 14.8,
+   "cloud_gap_mm": 69.56
+  },
+  {
+   "key": "demo_ep0011_f092",
+   "mesh_gap_mm": 19.75,
+   "cloud_gap_mm": 51.86
+  },
+  {
+   "key": "demo_ep0011_f104",
+   "mesh_gap_mm": 19.75,
+   "cloud_gap_mm": 51.72
+  },
+  {
+   "key": "demo_ep0012_f080",
+   "mesh_gap_mm": 15.61,
+   "cloud_gap_mm": 25.23
+  },
+  {
+   "key": "demo_ep0012_f092",
+   "mesh_gap_mm": 15.61,
+   "cloud_gap_mm": 48.86
+  },
+  {
+   "key": "demo_ep0012_f104",
+   "mesh_gap_mm": 15.61,
+   "cloud_gap_mm": 49.03
+  },
+  {
+   "key": "demo_ep0015_f068",
+   "mesh_gap_mm": 29.46,
+   "cloud_gap_mm": 32.13
+  },
+  {
+   "key": "demo_ep0015_f080",
+   "mesh_gap_mm": 29.46,
+   "cloud_gap_mm": 31.59
+  },
+  {
+   "key": "demo_ep0015_f092",
+   "mesh_gap_mm": 29.46,
+   "cloud_gap_mm": 32.3
+  },
+  {
+   "key": "demo_ep0015_f104",
+   "mesh_gap_mm": 29.46,
+   "cloud_gap_mm": 31.91
+  },
+  {
+   "key": "demo_ep0026_f068",
+   "mesh_gap_mm": 6.91,
+   "cloud_gap_mm": 35.39
+  },
+  {
+   "key": "demo_ep0026_f080",
+   "mesh_gap_mm": 6.91,
+   "cloud_gap_mm": 33.83
+  },
+  {
+   "key": "demo_ep0026_f092",
+   "mesh_gap_mm": 6.91,
+   "cloud_gap_mm": 67.35
+  },
+  {
+   "key": "demo_ep0026_f104",
+   "mesh_gap_mm": 6.91,
+   "cloud_gap_mm": 70.93
+  },
+  {
+   "key": "demo_ep0030_f068",
+   "mesh_gap_mm": 25.57,
+   "cloud_gap_mm": 42.75
+  },
+  {
+   "key": "demo_ep0030_f080",
+   "mesh_gap_mm": 25.57,
+   "cloud_gap_mm": 42.75
+  },
+  {
+   "key": "demo_ep0030_f092",
+   "mesh_gap_mm": 25.57,
+   "cloud_gap_mm": 59.94
+  },
+  {
+   "key": "demo_ep0030_f104",
+   "mesh_gap_mm": 25.57,
+   "cloud_gap_mm": 59.45
+  },
+  {
+   "key": "demo_ep0060_f092",
+   "mesh_gap_mm": 8.33,
+   "cloud_gap_mm": 52.38
+  },
+  {
+   "key": "demo_ep0060_f104",
+   "mesh_gap_mm": 8.33,
+   "cloud_gap_mm": 55.66
+  },
+  {
+   "key": "demo_ep0100_f080",
+   "mesh_gap_mm": 14.6,
+   "cloud_gap_mm": 25.73
+  },
+  {
+   "key": "demo_ep0100_f092",
+   "mesh_gap_mm": 14.6,
+   "cloud_gap_mm": 61.2
+  },
+  {
+   "key": "demo_ep0100_f104",
+   "mesh_gap_mm": 14.6,
+   "cloud_gap_mm": 53.72
+  }
+ ],
+ "ratio": [
+  {
+   "key": "demo_ep0027_f068",
+   "gt": null,
+   "vla": null,
+   "gt_reason": "one_component",
+   "vla_reason": "one_component"
+  },
+  {
+   "key": "demo_ep0003_f080",
+   "gt": null,
+   "vla": null,
+   "gt_reason": "one_component",
+   "vla_reason": "one_component"
+  },
+  {
+   "key": "demo_ep0003_f092",
+   "gt": null,
+   "vla": null,
+   "gt_reason": "one_component",
+   "vla_reason": "one_component"
+  },
+  {
+   "key": "demo_ep0027_f080",
+   "gt": null,
+   "vla": null,
+   "gt_reason": "one_component",
+   "vla_reason": "one_component"
+  },
+  {
+   "key": "demo_ep0027_f092",
+   "gt": null,
+   "vla": null,
+   "gt_reason": "one_component",
+   "vla_reason": "one_component"
+  },
+  {
+   "key": "demo_ep0027_f104",
+   "gt": null,
+   "vla": null,
+   "gt_reason": "one_component",
+   "vla_reason": "one_component"
+  },
+  {
+   "key": "demo_ep0003_f068",
+   "gt": null,
+   "vla": null,
+   "gt_reason": "one_component",
+   "vla_reason": "one_component"
+  },
+  {
+   "key": "demo_ep0003_f104",
+   "gt": null,
+   "vla": null,
+   "gt_reason": "one_component",
+   "vla_reason": "one_component"
+  },
+  {
+   "key": "demo_ep0067_f068",
+   "gt": 1.556,
+   "vla": 3.305,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0060_f068",
+   "gt": 1.118,
+   "vla": 3349.025,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0067_f080",
+   "gt": 0.812,
+   "vla": 5.226,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0022_f068",
+   "gt": 1.182,
+   "vla": 1.956,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "attention_not_discriminative"
+  },
+  {
+   "key": "demo_ep0060_f080",
+   "gt": 1.017,
+   "vla": 4982.864,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0022_f080",
+   "gt": 1.11,
+   "vla": 3.261,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0067_f092",
+   "gt": 0.775,
+   "vla": 1.935,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "attention_not_discriminative"
+  },
+  {
+   "key": "demo_ep0067_f104",
+   "gt": 0.801,
+   "vla": 0.644,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "attention_not_discriminative"
+  },
+  {
+   "key": "demo_ep0002_f068",
+   "gt": 1.609,
+   "vla": 5.628,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0002_f092",
+   "gt": 1.141,
+   "vla": 7.688,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0002_f104",
+   "gt": 1.141,
+   "vla": 3.086,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0100_f068",
+   "gt": 0.926,
+   "vla": 1686.863,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0002_f080",
+   "gt": 1.086,
+   "vla": 10.516,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0001_f068",
+   "gt": 1.361,
+   "vla": 4.706,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0058_f068",
+   "gt": 0.782,
+   "vla": 3.552,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0058_f104",
+   "gt": 0.821,
+   "vla": 4.575,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0058_f080",
+   "gt": 0.809,
+   "vla": 14.434,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0022_f092",
+   "gt": 0.923,
+   "vla": 1.316,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "attention_not_discriminative"
+  },
+  {
+   "key": "demo_ep0012_f068",
+   "gt": 0.91,
+   "vla": 3139.306,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0058_f092",
+   "gt": 0.809,
+   "vla": 5.273,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0011_f068",
+   "gt": 1.303,
+   "vla": 6373.626,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0011_f080",
+   "gt": 1.272,
+   "vla": 3691.501,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0001_f080",
+   "gt": 0.912,
+   "vla": 10.151,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  },
+  {
+   "key": "demo_ep0001_f104",
+   "gt": 1.081,
+   "vla": 0.645,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "attention_not_discriminative"
+  },
+  {
+   "key": "demo_ep0022_f104",
+   "gt": 0.929,
+   "vla": 0.967,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "attention_not_discriminative"
+  },
+  {
+   "key": "demo_ep0001_f092",
+   "gt": 1.054,
+   "vla": 2.923,
+   "gt_reason": "attention_not_discriminative",
+   "vla_reason": "split"
+  }
+ ],
+ "candidates_vla": {
+  "current: recluster15 + ratio2 (norm att)": {
+   "att_pure_complete": 20,
+   "oracle_pure_complete": 26,
+   "wrong_pick": 0,
+   "nonmerged_complete": 30
+  },
+  "A: recluster12 + ratio2": {
+   "att_pure_complete": 22,
+   "oracle_pure_complete": 28,
+   "wrong_pick": 0,
+   "nonmerged_complete": 30
+  },
+  "A: recluster15 + ratio2 (raw att)": {
+   "att_pure_complete": 22,
+   "oracle_pure_complete": 26,
+   "wrong_pick": 0,
+   "nonmerged_complete": 30
+  },
+  "A: recluster12 + ratio2 (raw att)": {
+   "att_pure_complete": 24,
+   "oracle_pure_complete": 28,
+   "wrong_pick": 0,
+   "nonmerged_complete": 30
+  },
+  "A: recluster10 + ratio2": {
+   "att_pure_complete": 19,
+   "oracle_pure_complete": 23,
+   "wrong_pick": 0,
+   "nonmerged_complete": 29
+  },
+  "A: dbscan eps20": {
+   "att_pure_complete": 18,
+   "oracle_pure_complete": 20,
+   "wrong_pick": 2,
+   "nonmerged_complete": 30
+  },
+  "B: convexity + raw ratio2 gate": {
+   "att_pure_complete": 22,
+   "oracle_pure_complete": 26,
+   "wrong_pick": 0,
+   "nonmerged_complete": 30
+  },
+  "B: sphere + raw ratio2 gate": {
+   "att_pure_complete": 22,
+   "oracle_pure_complete": 27,
+   "wrong_pick": 0,
+   "nonmerged_complete": 30
+  },
+  "B: colour + raw ratio2 gate": {
+   "att_pure_complete": 24,
+   "oracle_pure_complete": 29,
+   "wrong_pick": 0,
+   "nonmerged_complete": 30
+  },
+  "B: attention min-cut (raw)": {
+   "att_pure_complete": 0,
+   "oracle_pure_complete": 0,
+   "wrong_pick": 2,
+   "nonmerged_complete": 23
+  },
+  "A+B: recluster12 | colour (union of cuts) + raw ratio2 gate": {
+   "att_pure_complete": 26,
+   "oracle_pure_complete": 31,
+   "wrong_pick": 0,
+   "nonmerged_complete": 30
+  }
+ }
+}

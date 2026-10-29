@@ -99,6 +99,7 @@ from typing import Any, Optional
 import numpy as np
 
 from AG3S.ag3s.config import KDTREE_WORKERS, ClusteringConfig
+from AG3S.ag3s.runtime import substage
 from AG3S.ag3s.stages.admissibility import (
     Admissibility,
     Association,
@@ -118,6 +119,16 @@ from AG3S.ag3s.stages.subtask_probe import SubtaskDebounce
 from AG3S.ag3s.types import AttentionPointCloud, GroundingStatus, TargetGeometry
 
 _EPS = 1e-9
+#: IFG-FOLLOW (`clustering.kept_geometry_follow`): the band around the kept sphere's surface whose
+#: points the follow fit reads, the minimum point count, the largest median residual and the largest
+#: shift per frame it accepts, and the inner fraction of residuals each round keeps. Offline on the
+#: 10 apple scenes (IFG-ANCHOR-TRACK, this estimator): centre error to GT median 2.21 / p90 3.24 /
+#: max 4.0 mm vs 2.13 / 36.14 / 36.24 mm for the kept geometry, never on a neighbour fruit (closest 31.3 mm).
+FOLLOW_BAND = 0.015
+FOLLOW_MIN_POINTS = 20
+FOLLOW_MAX_RESIDUAL = 0.004
+FOLLOW_MAX_STEP = 0.030
+FOLLOW_KEEP_FRACTION = 0.7
 #: "Not given" for `TargetConfirm(lost_frames=...)`, where None already means "never lost".
 _FROM_CONFIG = object()
 #: `TargetConfirm(max_opening=UNCHECKED)`: admissibility is not evaluated at all (T20 behaviour).
@@ -138,6 +149,11 @@ SUBSET_KEPT_ANCHOR = "subset_kept_anchor"
 #: and the cluster at its place is a cluster that may again be several objects but could not be
 #: split this frame — the anchor is kept, the object counts as seen (T31b).
 UNSPLIT_KEPT_ANCHOR = "unsplit_kept_anchor"
+#: `ConfirmDecision.reason` when, before a grasp, the held object's cluster is the target component of
+#: an attention split while the anchor was adopted unsplit (merged with a neighbour): the split
+#: component replaces the anchor instead of counting as a hand-occluded subset (IFG-SPLIT,
+#: `clustering.split_supersedes_anchor`).
+SPLIT_SUPERSEDED_ANCHOR = "split_superseded_anchor"
 #: T43 T step 2 (`clustering.closing_keep_geometry`): a grasp is closing (frozen, nothing attached
 #: yet) — the object has not moved, the fingers only hide it; the pre-closing geometry stands in.
 CLOSING_KEPT_GEOMETRY = "closing_kept_geometry"
@@ -413,6 +429,9 @@ class ManipulatedIdentity:
     #: (`gap_mm` = nearest hand sphere surface to the standing geometry) — or None when the caller
     #: gave no hand this frame.
     hand: Optional[dict] = None
+    #: IFG-FOLLOW: this frame's `TargetConfirm.follow_kept` record — `{applied, reason, radius_mm,
+    #: n_points, residual_mm, shift_mm}` — or None when it did not run (always None with the flag off).
+    follow: Optional[dict] = None
 
     @property
     def usable(self) -> bool:
@@ -449,6 +468,8 @@ class ManipulatedIdentity:
             "anchor": None if self.anchor is None else dict(self.anchor),
             "split": None if self.split is None else dict(self.split),
             "hand": None if self.hand is None else dict(self.hand),
+            # IFG-FOLLOW: only when it ran (off = the record keys of before).
+            **({} if self.follow is None else {"follow": dict(self.follow)}),
         }
 
 
@@ -673,6 +694,14 @@ class TargetConfirm:
         self._anchor_kept = 0
         #: This frame kept the anchor (`observe` must not replace the geometry).
         self._keep_anchor = False
+        #: IFG-SPLIT: a split target replaces an unsplit anchor (`clustering.split_supersedes_anchor`),
+        #: and this frame's `observe` does so.
+        self.split_supersedes = bool(cfg.split_supersedes_anchor)
+        self._supersede = False
+        #: … and only when the split component is at least this much shorter (largest extent) than
+        #: the anchor: what was cut off is a neighbour, not a part of the object the hand shadows
+        #: (IFG-APPLE ep1313: a lone apple cut 113 → 59 + 34 points as the hand came, 72.7 → 61.7 mm).
+        self.supersede_min_drop = float(cfg.attention_partition_min_drop)
         #: T31b: this frame's split record (`note_split`), None until grounding reports one.
         self._split: Optional[dict] = None
         # --- hand occlusion (T32b S3) ---
@@ -691,6 +720,10 @@ class TargetConfirm:
         self.closing_keep_geometry = bool(getattr(cfg, "closing_keep_geometry", False))
         #: A grasp is in progress and nothing is attached yet (`note_pre_attach_grasp`).
         self._pre_attach_grasp = False
+        # --- IFG-FOLLOW (off by default; off = not read anywhere) ---
+        self.kept_geometry_follow = bool(getattr(cfg, "kept_geometry_follow", False))
+        #: This frame's `follow_kept` record (None when it did not run).
+        self.follow_record: Optional[dict[str, Any]] = None
         # --- T43 T 3(a) · 3(b) (both off by default; off = not read anywhere) ---
         self.latched_identity_hold = bool(getattr(cfg, "latched_identity_hold", False))
         rr = getattr(cfg, "refused_identity_release_frames", None)
@@ -807,6 +840,7 @@ class TargetConfirm:
             anchor=self._anchor_record(),
             split=self._split_snapshot(),
             hand=None if self._hand_record is None else dict(self._hand_record),
+            follow=None if self.follow_record is None else dict(self.follow_record),
         )
 
     @property
@@ -1029,7 +1063,9 @@ class TargetConfirm:
         dec = split_by_attention(
             pts, np.asarray(att, np.float64), np.arange(len(pts)), max_opening=opening,
             radius=float(config.attention_split_radius), min_points=int(config.min_points),
-            min_ratio=float(config.attention_split_ratio))
+            min_ratio=float(config.attention_split_ratio),
+            partition=bool(config.attention_split_partition),
+            partition_min_drop=float(config.attention_partition_min_drop))
         if dec is None:
             event["skipped"] = "not_triggered"
             return event
@@ -1110,13 +1146,16 @@ class TargetConfirm:
         self._frame += 1
         self._association = None
         self._keep_anchor = False
+        self.follow_record = None   # IFG-FOLLOW: per frame
+        self._supersede = False
         self._subtask_blocked = self._subtask_would = None
         self._release_if_placed_home()
         if self.refused_release_frames is not None:
             self._release_if_refused()
         self._latched_hold = False
         self._hand_occluded, self._hand_gap = False, self._take_hand()
-        adm = self._assess_frame(clusters, points)
+        with substage.part("grounding.confirm_admissibility"):
+            adm = self._assess_frame(clusters, points)
         candidates = (list(range(len(clusters))) if adm is None
                       else [i for i, a in enumerate(adm) if a.admissible])
         # SUBTASK-c: a confirmed place / home label means no new manipulated object. Not while a
@@ -1151,9 +1190,16 @@ class TargetConfirm:
             # Before a grasp the object has not moved, so the nearest cluster is it only if it sits
             # within the object's own radius and has its size (T30 F3). A rejected cluster is not
             # the held object this frame; it may still be a challenger under the T26 switch rule.
-            self._association = self._associate(clusters[held_rank], points)
+            with substage.part("grounding.confirm_association"):
+                self._association = self._associate(clusters[held_rank], points)
             if self._association is not None and not self._association.accepted:
                 reason, held_rank = ASSOCIATION_REJECTED, None
+            elif (self._association is not None and self._association.subset
+                  and self._split_over_unsplit_anchor(clusters[held_rank])):
+                # IFG-SPLIT: the part is the target the attention split cut out of this frame's
+                # cluster, and the anchor was adopted merged — the rest of the anchor is the
+                # neighbour, not a part the hand hides. The split component becomes the anchor.
+                reason, self._supersede = SPLIT_SUPERSEDED_ANCHOR, True
             elif self._association is not None and self._association.subset:
                 # It is the object, but it shows only part of the anchor (the hand hides the rest):
                 # the anchor stays the exclusion geometry, the object counts as seen (T30 F3b).
@@ -1275,7 +1321,8 @@ class TargetConfirm:
             else None)
         decision = self.last.mode if self.last is not None else None
         source = ("observed" if self.frozen
-                  else decision if decision in ("first", "switch") else "refined")
+                  else decision if decision in ("first", "switch")
+                  else "split_superseded" if self._supersede else "refined")
         self._geometry_source, self._geometry_frame = source, self._frame
         self._anchor_kept = 0
         if source != "refined" or self._anchor_geom is None:
@@ -1292,6 +1339,61 @@ class TargetConfirm:
     def observe_seen(self, timestamp: float) -> None:
         """A `subset_kept_anchor` frame: the object was seen at `timestamp`, the geometry stays."""
         self._last_seen_time = float(timestamp)
+
+    def follow_kept(self, points: np.ndarray, usable: Optional[np.ndarray] = None) -> None:
+        """IFG-FOLLOW: translate the kept geometry onto the fruit it stands for.
+
+        Runs only with `clustering.kept_geometry_follow`, while the pick target is latched or closing
+        and nothing is attached, on a frame that is about to return the kept geometry. The kept
+        geometry's surface-fit sphere (centre `c`, radius `r`) is refitted with `r` fixed to this
+        frame's points (`usable`: not support) within `r + FOLLOW_BAND` of `c` — each round keeps the
+        inner `FOLLOW_KEEP_FRACTION` of the residuals `| |p − c| − r |`, so a neighbour touching the
+        fruit does not pull the centre. The shift is taken when at least `FOLLOW_MIN_POINTS` points
+        are in the band, the median kept residual is ≤ `FOLLOW_MAX_RESIDUAL` and the shift is
+        ≤ `FOLLOW_MAX_STEP`; then the geometry, the anchor and the held centroid move by it (shape
+        unchanged). Otherwise nothing moves. The record is `follow_record`.
+        """
+        self.follow_record = None
+        if not self.kept_geometry_follow or self._geometry is None:
+            return
+        if not (self._latched or self._pre_attach_grasp):
+            return
+        from AG3S.ag3s.robot_models.held_object import fit_surface_sphere
+
+        rec: dict[str, Any] = {"applied": False, "reason": None}
+        self.follow_record = rec
+        geom_pts = np.asarray(self._geometry.points, np.float64).reshape(-1, 3)
+        fit = fit_surface_sphere(geom_pts)
+        if fit.method != "surface_fit":
+            rec["reason"] = f"no_surface_fit ({fit.reason})"
+            return
+        c0, r = np.asarray(fit.centre, np.float64), float(fit.radius)
+        pts = np.asarray(points, np.float64).reshape(-1, 3)
+        if usable is not None:
+            pts = pts[np.asarray(usable, bool).reshape(-1)]
+        sel = pts[np.linalg.norm(pts - c0[None, :], axis=1) <= r + FOLLOW_BAND]
+        rec.update({"radius_mm": round(r * 1000.0, 3), "n_points": int(len(sel))})
+        if len(sel) < FOLLOW_MIN_POINTS:
+            rec["reason"] = "too_few_points"
+            return
+        c = fit_fixed_radius_centre(sel, c0, r)
+        res = np.abs(np.linalg.norm(sel - c[None, :], axis=1) - r)
+        residual = float(np.median(res[res <= np.quantile(res, FOLLOW_KEEP_FRACTION)]))
+        shift = c - c0
+        step = float(np.linalg.norm(shift))
+        rec.update({"residual_mm": round(residual * 1000.0, 3), "shift_mm": round(step * 1000.0, 3)})
+        if residual > FOLLOW_MAX_RESIDUAL:
+            rec["reason"] = "residual"
+            return
+        if step > FOLLOW_MAX_STEP:
+            rec["reason"] = "step"
+            return
+        self._geometry = _translated(self._geometry, shift)
+        if self._anchor_geom is not None:
+            self._anchor_geom = _translated(self._anchor_geom, shift)
+        if self._held is not None:
+            self._held = np.asarray(self._held, np.float64).reshape(3) + shift
+        rec["applied"] = True
 
     @property
     def anchor_active(self) -> bool:
@@ -1400,6 +1502,22 @@ class TargetConfirm:
                                  distance=self.anchor_distance,
                                  min_coverage=float(self.anchor_coverage))
         return assoc
+
+    def _split_over_unsplit_anchor(self, cluster: "ClusterInfo") -> bool:
+        """IFG-SPLIT: `cluster` is the target component of an attention split, the anchor is not a
+        split component (it was adopted merged), and the component's largest extent is at least
+        `supersede_min_drop` shorter than the anchor's. Off unless `split_supersedes_anchor`."""
+        anchor = self._anchor_geom
+        if not (self.split_supersedes and not self.frozen and anchor is not None
+                and not anchor.metrics.get("attention_split", 0.0)
+                and cluster.split is not None and cluster.split.get("role") == "target"):
+            return False
+        a_ext = (self._anchor_extents if self._anchor_extents is not None
+                 else principal_extents(anchor.points))
+        c_ext = cluster.principal_extents
+        if c_ext is None or a_ext is None or len(c_ext) != 3 or len(a_ext) != 3:
+            return False
+        return bool(float(np.max(a_ext)) - float(np.max(c_ext)) >= self.supersede_min_drop)
 
     def _unsplit_over_split_anchor(self, cluster: "ClusterInfo") -> bool:
         """T31b: the anchor came from an attention split and `cluster` is a triggered cluster the
@@ -1677,7 +1795,8 @@ def ground_target(
         usable &= ~np.asarray(exclude_mask, bool).reshape(-1)
 
     seed_mask = np.zeros(n, bool)
-    seed_mask[extract_seeds(attention, cfg, seed_percentile, seed_threshold)] = True
+    with substage.part("grounding.seeds"):
+        seed_mask[extract_seeds(attention, cfg, seed_percentile, seed_threshold)] = True
     seed_mask &= usable
     seeds = np.nonzero(seed_mask)[0]
     if seeds.size == 0:
@@ -1694,17 +1813,20 @@ def ground_target(
     else:
         candidate_idx = np.nonzero(usable)[0]
         local_seed = np.searchsorted(candidate_idx, seeds)
-        grown_local = grow_region(points[candidate_idx], local_seed, cfg.eps)
+        with substage.part("grounding.grow"):
+            grown_local = grow_region(points[candidate_idx], local_seed, cfg.eps)
         grown = candidate_idx[grown_local]
         if grown.size == 0:
             _unseen(confirm)
             return GroundingResult(None, GroundingStatus.NO_CLUSTER, seed_indices=seeds,
                                    attention_peak_index=peak_index)
 
-        if cfg.method == "dbscan":
-            labels = dbscan(points[grown], cfg.eps, cfg.min_points)
-        else:
-            labels = connected_components_3d(points[grown], cfg.region_growing_radius or cfg.eps)
+        with substage.part("grounding.components"):
+            if cfg.method == "dbscan":
+                labels = dbscan(points[grown], cfg.eps, cfg.min_points)
+            else:
+                labels = connected_components_3d(points[grown],
+                                                 cfg.region_growing_radius or cfg.eps)
 
         groups = {}
         for label in np.unique(labels):
@@ -1722,15 +1844,20 @@ def ground_target(
 
     # T31b: a cluster that may be several objects is split by attention before anything is scored,
     # so the components compete — and are excluded or kept — as the separate objects they are.
-    members, splits = _split_groups(
-        [idx for _, idx in sorted(groups.items())], points, attention, cfg, confirm,
-        enabled=cfg.use_3d_connectivity)
+    with substage.part("grounding.split"):
+        members, splits = _split_groups(
+            [idx for _, idx in sorted(groups.items())], points, attention, cfg, confirm,
+            enabled=cfg.use_3d_connectivity,
+            # T44b A4: the ratio gate on the pre-normalisation attention (`raw` only; default None).
+            ratio_attention=(attention_cloud.raw_attention
+                             if cfg.attention_split_ratio_source == "raw" else None))
 
-    clusters = [
-        dataclasses.replace(
-            _score_cluster(i, idx, member_points, member_attention, peak_point, cfg), split=info)
-        for i, (idx, info) in enumerate(members)
-    ]
+    with substage.part("grounding.score"):
+        clusters = [
+            dataclasses.replace(
+                _score_cluster(i, idx, member_points, member_attention, peak_point, cfg), split=info)
+            for i, (idx, info) in enumerate(members)
+        ]
     # Deterministic ordering: score descending, ties broken by the lowest member index.
     clusters.sort(key=lambda c: (-c.target_score, int(c.point_indices[0])))
     best = clusters[0]
@@ -1751,7 +1878,8 @@ def ground_target(
     # Which candidate wins. Without a `confirm` this is rank 1 and the frame stands alone, which is
     # what every direct caller gets and what makes this function reproducible from one frame. With
     # one, a challenger has to lead `target_confirm_frames` frames running before the target moves.
-    decision = confirm.select(clusters, points=points) if confirm is not None else None
+    with substage.part("grounding.confirm"):
+        decision = confirm.select(clusters, points=points) if confirm is not None else None
     if decision is not None and decision.mode == NO_ADMISSIBLE:
         # Nothing held yet and no cluster may become the manipulated object (T26) — e.g. the crate
         # is all attention found. The leader is not named, whatever its score.
@@ -1765,12 +1893,16 @@ def ground_target(
     if decision is not None and decision.cluster is None:
         # The manipulated object is not among this frame's clusters (T20). The leader is *not*
         # named in its place: a hand in front of the apple does not make the crate the object.
+        with substage.part("grounding.confirm"):
+            confirm.follow_kept(points, usable)   # IFG-FOLLOW (off: returns at once)
         return dataclasses.replace(
             _unobserved_result(decision, confirm, tuple(clusters), seeds, peak_index,
                                best.target_score), splits=splits)
     if decision is not None and decision.reason in (SUBSET_KEPT_ANCHOR, UNSPLIT_KEPT_ANCHOR,
                                                     CLOSING_KEPT_GEOMETRY):
         # The object was seen, but only part of it: its anchor geometry stands in (T30 F3b).
+        with substage.part("grounding.confirm"):
+            confirm.follow_kept(points, usable)   # IFG-FOLLOW (off: returns at once)
         return dataclasses.replace(
             _anchor_result(decision, confirm, tuple(clusters), seeds, peak_index,
                            best.target_score, ts), splits=splits)
@@ -1828,19 +1960,25 @@ def ground_target(
     )
     if confirm is not None:
         # The manipulated object's latest observation — what an `occluded` frame falls back on.
-        confirm.observe(target, attention=attention[chosen.point_indices])
+        with substage.part("grounding.confirm"):
+            confirm.observe(target, attention=attention[chosen.point_indices])
     return GroundingResult(
         target, GroundingStatus.OK, tuple(clusters), seeds, peak_index, best.target_score,
         splits=splits,
     )
 
 
-def _split_groups(groups, points, attention, cfg, confirm, *, enabled):
+def _split_groups(groups, points, attention, cfg, confirm, *, enabled, ratio_attention=None):
     """T31b: split the triggered clusters of this frame (`stages/attention_split.py`).
 
     Returns `([(member_indices, ClusterInfo.split), ...], splits)` — the parents in their grown
     order, each replaced by its components (target first) when the split was taken — and reports
     the frame's record to `confirm`.
+
+    `ratio_attention` (T44b A4): the pre-normalisation attention the ratio gate reads when
+    `clustering.attention_split_ratio_source` is `raw`; None = the normalised attention (T31b).
+    With `raw` asked and no raw attention on the cloud the gate falls back to the normalised one
+    and the frame's record says `ratio_source: "normalized_fallback"`.
     """
     if confirm is not None:
         opening, skipped = confirm.split_opening(cfg)
@@ -1856,7 +1994,9 @@ def _split_groups(groups, points, attention, cfg, confirm, *, enabled):
     for idx in groups:
         dec = None if opening is None else split_by_attention(
             points, attention, idx, max_opening=opening, radius=float(cfg.attention_split_radius),
-            min_points=int(cfg.min_points), min_ratio=float(cfg.attention_split_ratio))
+            min_points=int(cfg.min_points), min_ratio=float(cfg.attention_split_ratio),
+            ratio_attention=ratio_attention, partition=bool(cfg.attention_split_partition),
+            partition_min_drop=float(cfg.attention_partition_min_drop))
         if dec is None:
             out.append((idx, None))
             continue
@@ -1881,6 +2021,9 @@ def _split_groups(groups, points, attention, cfg, confirm, *, enabled):
             "n_triggered": len(decisions),
             "n_split": sum(1 for d in decisions if d.accepted),
             "decisions": [d.record() for d in decisions],
+            # T44b A4: only when the config asks for raw (the default record is T31b's).
+            **({} if cfg.attention_split_ratio_source != "raw" else {
+                "ratio_source": "raw" if ratio_attention is not None else "normalized_fallback"}),
         })
     return out, tuple(decisions)
 
@@ -1894,6 +2037,50 @@ def _split_metrics(chosen: "ClusterInfo") -> dict[str, float]:
     return {"attention_split": 1.0,
             "attention_split_target": float(chosen.split.get("role") == "target"),
             "attention_split_parent_n_points": float(chosen.split.get("parent_n_points", 0))}
+
+
+def fit_fixed_radius_centre(points: np.ndarray, centre: np.ndarray, radius: float, *,
+                            keep_fraction: float = FOLLOW_KEEP_FRACTION, rounds: int = 20) -> np.ndarray:
+    """IFG-FOLLOW: the centre of a sphere of known `radius` through `points`, started at `centre`.
+
+    Gauss-Newton on `|p − c| − r`, each round on the inner `keep_fraction` of the residuals (a
+    neighbour's points in the band are the outer ones). A one-sided cap converges in a few rounds."""
+    pts = np.asarray(points, np.float64).reshape(-1, 3)
+    c = np.asarray(centre, np.float64).reshape(3).copy()
+    r = float(radius)
+    for _ in range(int(rounds)):
+        dv = pts - c[None, :]
+        dist = np.maximum(np.linalg.norm(dv, axis=1), _EPS)
+        res = dist - r
+        keep = np.abs(res) <= np.quantile(np.abs(res), keep_fraction)
+        jac = -dv[keep] / dist[keep, None]
+        step, *_ = np.linalg.lstsq(jac, -res[keep], rcond=None)
+        c = c + step
+        if float(np.linalg.norm(step)) < 1e-6:
+            break
+    return c
+
+
+def _translated(geom: TargetGeometry, shift: np.ndarray) -> TargetGeometry:
+    """IFG-FOLLOW: `geom` moved by `shift` (points, centroid and bounding sphere; shape unchanged)."""
+    s = np.asarray(shift, np.float64).reshape(3)
+    bg = geom.bounding_geometry
+    return dataclasses.replace(
+        geom, points=np.asarray(geom.points, np.float64).reshape(-1, 3) + s[None, :],
+        centroid=np.asarray(geom.centroid, np.float64).reshape(3) + s,
+        bounding_geometry=dataclasses.replace(bg, center=np.asarray(bg.center, np.float64) + s))
+
+
+def _follow_metrics(confirm: Optional["TargetConfirm"]) -> dict[str, float]:
+    """IFG-FOLLOW: this frame's `follow_kept` record as flat metrics (none when it did not run)."""
+    rec = None if confirm is None else confirm.follow_record
+    if rec is None:
+        return {}
+    out = {"kept_follow_applied": float(bool(rec.get("applied")))}
+    for key in ("shift_mm", "n_points", "residual_mm", "radius_mm"):
+        if rec.get(key) is not None:
+            out[f"kept_follow_{key}"] = float(rec[key])
+    return out
 
 
 def _hand_metrics(decision: Optional[ConfirmDecision]) -> dict[str, float]:
@@ -1954,6 +2141,7 @@ def _anchor_result(decision, confirm, clusters, seeds, peak_index, best_score, t
         "manipulated_unsplit_kept_anchor": float(decision.reason == UNSPLIT_KEPT_ANCHOR),
         **_association_metrics(decision.association),
         **_hand_metrics(decision),
+        **_follow_metrics(confirm),
     })
     target = dataclasses.replace(
         last, point_indices=np.zeros(0, np.int64), metrics=metrics,
@@ -1990,6 +2178,7 @@ def _unobserved_result(decision, confirm, clusters, seeds, peak_index, best_scor
         "manipulated_association_rejected": float(decision.reason == ASSOCIATION_REJECTED),
         **_association_metrics(decision.association),
         **_hand_metrics(decision),
+        **_follow_metrics(confirm),
     })
     target = dataclasses.replace(
         last, id=-1, point_indices=np.zeros(0, np.int64), metrics=metrics,
@@ -1999,6 +2188,7 @@ def _unobserved_result(decision, confirm, clusters, seeds, peak_index, best_scor
 
 __all__ = [
     "ASSOCIATION_REJECTED",
+    "SPLIT_SUPERSEDED_ANCHOR",
     "SUBSET_KEPT_ANCHOR",
     "UNSPLIT_KEPT_ANCHOR",
     "INADMISSIBLE_MATCH",

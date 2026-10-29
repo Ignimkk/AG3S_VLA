@@ -1,0 +1,70 @@
+{
+ "rows": [
+  [
+   "T47 label-free common top-3 (d0 last, cam τ)",
+   "L4H1 · L2H0 · L14H5",
+   "L4H1 · L14H5 · L3H3",
+   "L4H1 · L14H5 · L3H3"
+  ],
+  [
+   "T47 GT-oracle top-3 (selection records)",
+   "L8H3 · L10H7 · L12H4",
+   "L10H7 · L12H4 · L8H7",
+   "L10H7 · L12H4 · L8H7"
+  ],
+  [
+   "T47 common top-3 held-out on_target σ0 (L8H2)",
+   "0/60 (55/60)",
+   "43/60 (55/60)",
+   "43/60 (55/60)"
+  ],
+  [
+   "T49 noun target GT top-3 (primary)",
+   "L8H6 · L5H4 · L4H2",
+   "L8H6 · L5H4 · L4H2",
+   "L8H6 · L5H4 · L4H2"
+  ],
+  [
+   "T49 noun target label-free top-3 (secondary)",
+   "L4H7 · L4H6 · L8H6",
+   "L4H7 · L4H6 · L7H7",
+   "L4H7 · L4H6 · L7H7"
+  ],
+  [
+   "T49 basket GT top-3 (primary)",
+   "L8H6 · L4H2 · L8H0",
+   "L8H6 · L4H2 · L8H0",
+   "L8H6 · L4H2 · L8H0"
+  ],
+  [
+   "T49 basket label-free top-3 (secondary)",
+   "L4H7 · L8H2 · L8H0",
+   "L4H7 · L4H6 · L8H2",
+   "L4H7 · L4H6 · L8H2"
+  ],
+  [
+   "T51 P4 selected (gt label)",
+   "last:L12H4",
+   "mean:L10H7",
+   "mean:L12H4"
+  ],
+  [
+   "T51 P2 3D top-1 (gt, scene mean)",
+   "last:L12H4 0.691",
+   "mean:L10H7 0.652",
+   "mean:L12H4 0.628"
+  ],
+  [
+   "T51 P4 selected (self label)",
+   "last:L12H3",
+   "last:L12H3",
+   "last:L12H3"
+  ],
+  [
+   "T51 P2 3D top-1 (self, scene mean)",
+   "last:L12H3 1.000",
+   "last:L12H3 1.000",
+   "last:L12H3 1.000"
+  ]
+ ]
+}

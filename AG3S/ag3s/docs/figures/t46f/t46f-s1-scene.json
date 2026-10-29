@@ -1,0 +1,24 @@
+[
+ {
+  "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/runs/C2p/R/C2p_ep3_s31",
+  "row": 199,
+  "ft_target_mm": 23.586550932702572,
+  "camera": {
+   "lookat": "target body",
+   "distance": 0.45,
+   "azimuth": 200,
+   "elevation": -35
+  }
+ },
+ {
+  "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1a/R/C1a_ep3_s31",
+  "row": 144,
+  "ft_target_mm": 76.47204842628399,
+  "camera": {
+   "lookat": "target body",
+   "distance": 0.45,
+   "azimuth": 200,
+   "elevation": -35
+  }
+ }
+]

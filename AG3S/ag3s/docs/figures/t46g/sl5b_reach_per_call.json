@@ -1,0 +1,9952 @@
+{
+ "definition": {
+  "closing_call": "call whose grasp.evidence.checks is non-empty (latch in CLOSING, checks evaluated)",
+  "reach_only": "closing call whose only failing check is reach",
+  "geometry_frame": "grasp.alignment.geometry_frame; frame f is the observation of call seq f (verified: age 0 calls have geometry_frame = seq-1)",
+  "cf_hand_rel_mm": "|p_k - H_k H_g^-1 c_k|: stale centroid c_k moved rigidly with panda_hand from the obs of geometry frame g to call k; p = panda_leftfinger origin; FK from panda_libero.urdf at robot_state (reproduces logged reach_mm, see fk_reach_abs_err_mm_max)",
+  "cf_at_geom_frame_mm": "|p_g - c_k|: reach evaluated with the hand pose of the frame where the geometry was observed",
+  "cf_true_moved_mm": "|p_k - (c_k + (o_k - o_g))|: stale centroid shifted by the sim displacement of the manipulated object body (ground truth, translation only)",
+  "carried": "object body pose in panda_hand frame drifted <= 20 mm since geometry frame AND object moved >= 20 mm (3D) since geometry frame (sim_state_image)",
+  "manipulated_object": "free MuJoCo body nearest (3D) to AG3S manipulated centroid at the geometry frame of the first closing call",
+  "lifted_objects_sim": "free bodies whose z rose >= 20 mm above their z at call 0 obs",
+  "hold_nearest_body": "INFERRED attribution: free MuJoCo body nearest to the violating sphere point (verdict_reasons[].evidence.row.point_m, planned step) at the call's obs",
+  "classification_A": "no attach; >=1 reach-only closing call with object occluded, carried by the hand, hand-relative reach <= 120 mm; >=1 gripper<->esdf collision HOLD after the first reach-only refusal whose violating point is nearest to the manipulated object",
+  "classification_rule_v1_lift": "first rule (lift >= 20 mm instead of carried); gives the same A/not-A split on all 18 failed episodes"
+ },
+ "panels": {
+  "V11AB-B/libero_spatial_t2_e0": {
+   "classification": "A",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 331.34,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 332.0
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 319.87,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 331.4
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 305.84,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 319.9
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 295.52,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 305.9
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 270.34,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 295.5
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 222.53,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 270.3
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 168.88,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 222.5
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 119.66,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 168.9
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 84.13,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 119.7
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 87.26,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.1
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 92.6,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 87.3
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 80.15,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 92.6
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 66.47,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 80.1
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 56.25,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 66.8
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 58.75,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 63.6
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 66.41,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 65.3
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 84.91,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 128.22,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 189.87,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 246.07,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 278.19,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 306.86,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 319.88,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 331.21,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 338.58,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 345.38,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 347.67,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 359.26,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.9
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 339.94,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.9
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 322.99,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.9
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 331.5,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 333.92,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 338.06,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 340.06,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 341.04,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 341.52,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 341.76,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 341.86,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 341.91,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 341.93,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 341.95,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 341.95,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 341.96,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    }
+   ]
+  },
+  "V11AB-B/libero_spatial_t3_e0": {
+   "classification": "A",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 370.4,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 381.0
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 343.32,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 377.4
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 311.66,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 344.4
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 285.19,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 311.7
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 253.58,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.6
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 201.9,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 250.1
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 152.27,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 201.9
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 108.85,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 152.3
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 59.31,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "dropped"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 108.8
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 45.65,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 59.5
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 61.06,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 51.4
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 102.55,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.6
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 167.26,
+     "state": "visible",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 216.97,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.6
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 240.53,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 262.24,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.6
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 264.84,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.6
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 269.79,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.6
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 264.83,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.6
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 262.92,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.6
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 271.5,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 101.7
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 264.02,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.1
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 280.17,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.2
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 282.03,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.2
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 264.89,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 244.68,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 237.38,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 232.43,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 231.56,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 231.28,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 231.11,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 231.01,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 230.96,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 230.92,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.5
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 230.89,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 230.88,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 230.86,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 230.85,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 230.84,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 230.82,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 230.81,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 230.8,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 230.79,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    }
+   ]
+  },
+  "V11AB-B/libero_spatial_t4_e0": {
+   "classification": "B",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 380.06,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.0
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 407.25,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 435.2,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 464.74,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 491.22,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 505.15,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 506.0,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 493.73,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 479.37,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 464.34,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 459.82,
+     "state": "occluded",
+     "fails": [
+      "closed",
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 364.9
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 441.31,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 353.2
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 421.99,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 342.6
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 448.54,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 341.6
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 453.64,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 344.5
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 456.12,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 358.1
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 451.05,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 355.6
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 430.91,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 343.4
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 458.44,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 341.7
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 465.55,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 342.7
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 464.01,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 355.1
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 470.02,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 363.8
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 452.79,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 356.0
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 457.09,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 359.0
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 466.84,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 364.2
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 452.76,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 364.5
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 424.55,
+     "state": "occluded",
+     "fails": [
+      "closed",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 363.0
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 398.09,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 351.5
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 397.49,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 346.3
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 405.52,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 342.0
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 437.15,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 341.5
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 447.2,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 349.4
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 445.31,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 362.4
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 412.47,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 364.3
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 393.94,
+     "state": "occluded",
+     "fails": [
+      "closed",
+      "dropped",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.3
+    }
+   ]
+  },
+  "V11AB-B/libero_spatial_t5_e0": {
+   "classification": "B",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 367.83,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 376.2
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 338.58,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 376.2
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 298.1,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 376.2
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 258.22,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 376.3
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 243.95,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 376.3
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 267.52,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 375.8
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 279.62,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 372.2
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 85.42,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.3
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 95.15,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 121.99,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.5
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 167.42,
+     "state": "visible",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.9
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 214.15,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.9
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 246.61,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.9
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 277.65,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.8
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 299.86,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.8
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 318.71,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.8
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 319.47,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.8
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 301.61,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.8
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 278.74,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.8
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 275.06,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.8
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 279.16,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "dropped",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 127.0
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 290.65,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 138.5
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 294.58,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 140.3
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 287.78,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 140.5
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 274.17,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 140.6
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 272.8,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 135.1
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 284.55,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 123.2
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 290.58,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 120.9
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 300.4,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 120.7
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 283.68,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 126.7
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 243.08,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 138.4
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 243.24,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 132.4
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 252.33,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 122.1
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 270.88,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.2
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 294.22,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.1
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 321.43,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.1
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 333.56,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.1
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 338.0,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.1
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 331.64,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.1
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 337.38,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.1
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 312.94,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.1
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 313.45,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.1
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 321.1,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 121.1
+    }
+   ]
+  },
+  "V11AB-B/libero_spatial_t6_e0": {
+   "classification": "A",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 414.88,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 431.5
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 375.65,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 431.5
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 334.3,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 431.5
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 300.22,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 344.8
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 254.74,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 302.3
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 211.32,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 256.6
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 174.09,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 215.3
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 132.74,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 174.3
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 89.0,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 132.9
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 53.62,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 89.4
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 49.74,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 54.7
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 65.97,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 59.7
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 99.8,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 156.16,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 219.33,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 269.17,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 308.34,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 336.88,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 342.54,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 348.23,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 353.37,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 358.73,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 360.5,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 360.55,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 352.03,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 347.37,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.3
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 341.41,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.6
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 345.74,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 362.51,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.3
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 351.94,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.3
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 349.49,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 340.99,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 336.11,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 340.05,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 345.17,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 356.79,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.3
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 355.54,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.3
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 349.67,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.3
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 336.02,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.3
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 329.11,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 325.92,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 325.8,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 324.38,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    }
+   ]
+  },
+  "V11AB-B/libero_spatial_t8_e0": {
+   "classification": "A",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 507.47,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 515.0
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 472.55,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 515.1
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 430.65,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 515.3
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 385.75,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 515.4
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 345.91,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 515.4
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 315.97,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 515.5
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 285.42,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 317.0
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 238.02,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.9
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 191.28,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 237.8
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 153.81,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 191.9
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 125.86,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 153.8
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 108.3,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 118.6
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 71.87,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 87.9
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 77.51,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.6
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 120.51,
+     "state": "visible",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.5
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 173.47,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.5
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 210.47,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 223.93,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 216.62,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 225.1,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 218.83,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 213.92,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 202.39,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.5
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 179.56,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.5
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 166.48,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.5
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 143.75,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.5
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 140.89,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 78.6
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 143.5,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 78.5
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 154.74,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 78.4
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 179.44,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 78.4
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 198.05,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 78.3
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 207.05,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 78.3
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 195.79,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 78.1
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 189.9,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 78.0
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 190.05,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.9
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 190.28,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.7
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 190.14,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 190.23,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 190.3,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 190.35,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 190.39,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 190.42,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 190.45,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 77.4
+    }
+   ]
+  },
+  "V11AB-B/libero_spatial_t9_e0": {
+   "classification": "B",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 302.69,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.3
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 334.77,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.3
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 357.19,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.2
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 377.42,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.2
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 401.62,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.1
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 422.18,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.1
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 413.86,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.1
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 377.14,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 346.08,
+     "state": "occluded",
+     "fails": [
+      "closed",
+      "dropped",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 283.9
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 341.79,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 289.5
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 356.14,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 297.8
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 388.62,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 417.48,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 435.79,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 450.42,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 468.47,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 488.54,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 508.75,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 518.43,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 521.0,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 532.69,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.1
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 523.55,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 529.84,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 550.33,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 574.07,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 592.48,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 585.53,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 571.63,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 566.51,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 557.77,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 556.03,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 555.52,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 555.38,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 555.31,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 555.3,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 555.29,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 555.29,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 555.29,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 555.28,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 555.28,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 555.27,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 555.27,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 555.27,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.2
+    }
+   ]
+  },
+  "V11AB-A/libero_spatial_t0_e0": {
+   "classification": "A",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 400.13,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 404.4
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 375.33,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 400.2
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 359.51,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 375.4
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 344.05,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 359.6
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 310.01,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 344.1
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 266.0,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 344.1
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 214.13,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 266.1
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 162.19,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 214.2
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 109.78,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 162.2
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 82.22,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 98.5
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 64.05,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 64.1
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 83.7,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 62.3
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 123.42,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 176.69,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 207.51,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 200.5,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 227.96,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 273.4,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 303.57,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 298.58,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 299.12,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 315.24,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 311.85,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 319.91,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 337.99,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 342.65,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 325.96,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 346.76,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 357.05,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 372.22,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 297.25,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 227.6,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 193.88,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 217.25,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 231.18,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 242.75,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 248.09,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 250.31,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 251.14,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 251.16,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 250.78,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 250.29,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 249.84,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    }
+   ]
+  },
+  "V11AB-A/libero_spatial_t1_e0": {
+   "classification": "B",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 390.43,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 405.8
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 359.86,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 405.9
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 337.62,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 406.1
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 354.04,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 376.8
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 328.06,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 352.4
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 303.25,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 330.6
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 276.47,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 303.3
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 255.51,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 275.6
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 231.93,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 255.5
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 191.44,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 231.9
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 142.81,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 191.4
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 97.44,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 142.8
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 79.52,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "dropped"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 97.6
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 77.58,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 72.2
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 80.47,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.0
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 122.99,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 80.4
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 119.08,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 123.4
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 76.05,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 124.2
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 73.29,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "dropped",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 82.1
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 77.14,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 78.2
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 99.99,
+     "state": "occluded",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.5
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 136.28,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 85.3
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 120.96,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 80.9
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 104.47,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 74.0
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 91.0,
+     "state": "occluded",
+     "fails": [
+      "closed",
+      "dropped",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.4
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 92.61,
+     "state": "occluded",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 76.9
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 110.6,
+     "state": "occluded",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.2
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 139.57,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 85.1
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 170.2,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 85.2
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 176.14,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.2
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 193.47,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.8
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 210.94,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 85.2
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 215.13,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.2
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 213.58,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 210.48,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 76.0
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 205.51,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.4
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 212.74,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.4
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 213.16,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.3
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 214.53,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.3
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 189.82,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.3
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 163.25,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.3
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 140.45,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.3
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 124.89,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.3
+    }
+   ]
+  },
+  "V11AB-A/libero_spatial_t2_e0": {
+   "classification": "A",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 331.34,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 332.0
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 319.79,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 331.4
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 308.85,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 319.8
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 306.51,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 308.9
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 285.47,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 306.5
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 240.42,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 285.5
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 190.55,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 240.4
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 137.92,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 190.6
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 96.25,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 137.9
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 90.83,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 96.2
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 99.57,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 90.8
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 93.76,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 99.6
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 75.85,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 93.8
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 62.13,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 75.8
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 57.0,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 62.8
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 62.84,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 65.4
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 73.54,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.3
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 100.68,
+     "state": "occluded",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 151.81,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 214.44,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 247.74,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 278.56,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.2
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 297.22,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 322.12,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 337.02,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 326.82,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 312.67,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 311.34,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 310.69,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 310.45,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 310.34,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 310.3,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 310.28,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 310.27,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 310.26,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 310.25,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 310.25,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 310.24,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 310.24,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 310.23,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 310.23,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 310.23,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 310.22,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.0
+    }
+   ]
+  },
+  "V11AB-A/libero_spatial_t4_e0": {
+   "classification": "B",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 380.06,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.0
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 407.19,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 441.19,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 473.71,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 494.5,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 505.72,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 515.5,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 515.68,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 516.12,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.1
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 496.93,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 479.48,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 470.65,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 463.97,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 458.76,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 457.25,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 456.73,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 456.56,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 456.5,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 456.49,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 456.48,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 456.47,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 456.47,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 456.46,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 456.45,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 456.45,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 456.44,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 456.44,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 456.44,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 456.43,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 456.43,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 456.42,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 456.42,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 456.42,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 456.41,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 456.41,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 365.2
+    }
+   ]
+  },
+  "V11AB-A/libero_spatial_t6_e0": {
+   "classification": "B",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 414.88,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 431.5
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 377.18,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 431.5
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 344.76,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 431.5
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 318.47,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 355.7
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 279.53,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 321.5
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 237.68,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 278.0
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 205.23,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 243.3
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 169.74,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 205.0
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 149.93,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 169.8
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 123.23,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 150.2
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 54.87,
+     "state": "visible",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 123.2
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 44.96,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 55.6
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 46.02,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 48.2
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 46.9,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 51.9
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 57.43,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": true,
+     "detach": false,
+     "cf_hand_rel_mm": 46.7
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 64.74,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": true,
+     "cf_hand_rel_mm": 49.5
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 69.11,
+     "state": "visible",
+     "fails": [
+      "dropped",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 63.9
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 83.85,
+     "state": "visible",
+     "fails": [
+      "dropped"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 69.5
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 112.71,
+     "state": "visible",
+     "fails": [
+      "dropped",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.6
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 135.77,
+     "state": "occluded",
+     "fails": [
+      "dropped",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 85.4
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 159.69,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 86.1
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 211.5,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 86.8
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 248.04,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 87.4
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 245.13,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 87.9
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 249.4,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 88.7
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 249.06,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 89.5
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 204.42,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 90.3
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 163.94,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 90.8
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 162.31,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 91.4
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 104.65,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": true,
+     "detach": false,
+     "cf_hand_rel_mm": 91.8
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 89.32,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 92.4
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 92.21,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 93.0
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 93.34,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 93.5
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 93.44,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": true,
+     "cf_hand_rel_mm": 94.0
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 93.53,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 94.5
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 93.92,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 95.0
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 93.37,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 98.1
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 92.97,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 101.2
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 93.32,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 101.8
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 93.74,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.2
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 94.12,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 94.37,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.6
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 94.41,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.8
+    }
+   ]
+  },
+  "V11AB-A/libero_spatial_t7_e0": {
+   "classification": "B",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 256.76,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 267.4
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 235.66,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 259.1
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 190.38,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 235.5
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 135.04,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 188.4
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 91.27,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 135.6
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 65.79,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 91.5
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 81.17,
+     "state": "occluded",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 92.9
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 107.95,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 70.5
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 98.47,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.9
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 106.98,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 113.7,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 125.48,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 129.39,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 135.81,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 145.19,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.7
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 132.32,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 70.1
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 115.41,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 80.6
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 99.65,
+     "state": "occluded",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 76.3
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 82.1,
+     "state": "occluded",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.5
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 93.1,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 112.95,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 151.28,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.9
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 155.74,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 191.42,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.9
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 207.47,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 230.35,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.9
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 241.38,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 217.95,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 75.7
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 188.97,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.8
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 215.77,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 258.47,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.8
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 270.94,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.1
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 322.03,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.9
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 318.2,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 71.6
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 286.5,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 82.0
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 272.74,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 283.03,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.0
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 308.69,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.2
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 330.77,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.3
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 343.6,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.3
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 355.25,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.4
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 366.14,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.5
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 363.53,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.6
+    }
+   ]
+  },
+  "V11AB-A/libero_spatial_t8_e0": {
+   "classification": "C",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 507.47,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 515.0
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 473.66,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 515.1
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 435.16,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 515.3
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 387.27,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 425.1
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 352.2,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 387.5
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 327.9,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 352.5
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 302.56,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 327.9
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 260.37,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 300.5
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 219.07,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 261.0
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 186.41,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 220.4
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 156.45,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 186.4
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 129.04,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 156.5
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 108.41,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 125.4
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 76.82,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 89.9
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 62.01,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 70.2
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 68.13,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": true,
+     "detach": false,
+     "cf_hand_rel_mm": 62.1
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 100.39,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 62.0
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 153.16,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.8
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 191.64,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.7
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 215.06,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.5
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 210.57,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.4
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 192.09,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.5
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 178.58,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.5
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 172.05,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.6
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 160.12,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.7
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 151.72,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 62.8
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 124.34,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 67.0
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 114.85,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 82.0
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 118.62,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 91.6
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 103.14,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": true,
+     "cf_hand_rel_mm": 92.4
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 76.67,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 85.3
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 61.33,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 72.2
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 60.61,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 62.0
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 92.92,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.4
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 129.86,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.2
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 167.41,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.2
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 201.84,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.0
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 185.53,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 60.8
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 177.66,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 60.9
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 164.27,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.0
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 166.69,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.2
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 153.7,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.0
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 163.26,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 61.2
+    }
+   ]
+  },
+  "V11AB-A/libero_spatial_t9_e0": {
+   "classification": "B",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 302.69,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.3
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 334.62,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.3
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 360.1,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.2
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 388.97,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.2
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 412.01,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.1
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 427.58,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.1
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 435.39,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 446.48,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 432.41,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 410.07,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 387.42,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 371.72,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 372.48,
+     "state": "occluded",
+     "fails": [],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 367.53,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 364.81,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 286.0
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 373.68,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 294.7
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 397.11,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.6
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 424.45,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "not_empty",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.9
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 447.24,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 295.0
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 465.29,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 286.3
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 466.45,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.5
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 458.8,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.4
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 435.96,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.3
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 414.78,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.1
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 390.15,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.1
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 386.56,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 283.9
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 385.22,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 284.0
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 391.52,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 287.4
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 384.66,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 296.4
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 388.64,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.6
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 414.17,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.6
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 436.83,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.6
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 466.13,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.5
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 495.3,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.5
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 520.53,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.5
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 527.57,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.5
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 514.42,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.5
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 518.01,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.5
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 512.61,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.5
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 508.61,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.5
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 499.83,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.6
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 491.86,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.6
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 483.21,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 298.5
+    }
+   ]
+  },
+  "smoke4-A/libero_spatial_t0_e0": {
+   "classification": "A",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 400.13,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 404.4
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 375.33,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 400.2
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 359.51,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 375.4
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 343.99,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 359.6
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 310.47,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 344.0
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 268.25,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 310.5
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 212.83,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 268.3
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 154.62,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 212.9
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 105.98,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "dropped"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 154.4
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 82.52,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "dropped"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 90.5
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 71.95,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 69.0
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 84.88,
+     "state": "occluded",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 68.6
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 123.48,
+     "state": "visible",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 172.13,
+     "state": "occluded",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 199.91,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 197.35,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 190.28,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 186.57,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 163.88,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 157.22,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 165.33,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 167.51,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.1
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 172.74,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 84.0
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 175.46,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 176.8,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 177.45,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 177.76,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 177.9,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 177.95,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 177.98,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 178.0,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 178.0,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 178.0,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 178.01,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 178.01,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 178.01,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 178.02,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 178.02,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 178.02,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 178.03,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 178.03,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 178.03,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 178.04,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    }
+   ]
+  },
+  "smoke4-B/libero_spatial_t0_e0": {
+   "classification": "C",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 400.13,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 404.4
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 374.41,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 400.2
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 352.71,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 400.3
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 330.81,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 352.8
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 286.94,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 330.9
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 231.38,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 285.9
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 163.36,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 231.4
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 112.75,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "dropped"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 161.9
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 96.2,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 97.4
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 103.42,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 86.5
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 145.06,
+     "state": "visible",
+     "fails": [
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.9
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 172.05,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "reach",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 145.1
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 146.93,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 172.7
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 94.22,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 155.4
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 79.32,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.0
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 68.67,
+     "state": "visible",
+     "fails": [
+      "closed",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 62.6
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 65.23,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 58.8
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 97.43,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 65.0
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 138.86,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 65.0
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 155.87,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 65.0
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 184.22,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 65.0
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 152.25,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 65.0
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 137.66,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 65.0
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 136.78,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 65.0
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 133.01,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 64.9
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 127.89,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 64.9
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 111.71,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": true,
+     "detach": false,
+     "cf_hand_rel_mm": 68.7
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 112.61,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 73.7
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 147.74,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 89.5
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 170.35,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 92.0
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 177.43,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": true,
+     "cf_hand_rel_mm": 92.2
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 150.86,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 92.3
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 127.11,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 88.0
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 124.05,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 90.5
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 92.23,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 96.4
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 73.6,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 75.9
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 81.0,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 80.4
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 112.52,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 95.1
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 110.28,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 114.3
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 125.45,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 114.5
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 94.7,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 125.6
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 102.34,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 94.8
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 83.88,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 102.4
+    }
+   ]
+  },
+  "smoke5-A/libero_spatial_t0_e0": {
+   "classification": "A",
+   "calls": [
+    {
+     "seq": 0,
+     "obs": 10,
+     "reach_mm": null,
+     "state": null,
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": null
+    },
+    {
+     "seq": 1,
+     "obs": 15,
+     "reach_mm": 400.13,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 404.4
+    },
+    {
+     "seq": 2,
+     "obs": 20,
+     "reach_mm": 375.33,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 400.2
+    },
+    {
+     "seq": 3,
+     "obs": 25,
+     "reach_mm": 359.51,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 375.4
+    },
+    {
+     "seq": 4,
+     "obs": 30,
+     "reach_mm": 344.05,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 359.6
+    },
+    {
+     "seq": 5,
+     "obs": 35,
+     "reach_mm": 310.01,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 344.1
+    },
+    {
+     "seq": 6,
+     "obs": 40,
+     "reach_mm": 266.0,
+     "state": "occluded",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 344.1
+    },
+    {
+     "seq": 7,
+     "obs": 45,
+     "reach_mm": 214.13,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 266.1
+    },
+    {
+     "seq": 8,
+     "obs": 50,
+     "reach_mm": 162.19,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 214.2
+    },
+    {
+     "seq": 9,
+     "obs": 55,
+     "reach_mm": 109.78,
+     "state": "visible",
+     "fails": [],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 162.2
+    },
+    {
+     "seq": 10,
+     "obs": 60,
+     "reach_mm": 82.22,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 98.5
+    },
+    {
+     "seq": 11,
+     "obs": 65,
+     "reach_mm": 64.05,
+     "state": "visible",
+     "fails": [
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 64.1
+    },
+    {
+     "seq": 12,
+     "obs": 70,
+     "reach_mm": 83.7,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "settled"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 62.3
+    },
+    {
+     "seq": 13,
+     "obs": 75,
+     "reach_mm": 123.42,
+     "state": "visible",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 14,
+     "obs": 80,
+     "reach_mm": 176.69,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 15,
+     "obs": 85,
+     "reach_mm": 207.51,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 16,
+     "obs": 90,
+     "reach_mm": 200.5,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 17,
+     "obs": 95,
+     "reach_mm": 227.96,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 18,
+     "obs": 100,
+     "reach_mm": 273.4,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.6
+    },
+    {
+     "seq": 19,
+     "obs": 105,
+     "reach_mm": 303.57,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 20,
+     "obs": 110,
+     "reach_mm": 298.58,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 21,
+     "obs": 115,
+     "reach_mm": 299.12,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 22,
+     "obs": 120,
+     "reach_mm": 315.24,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 23,
+     "obs": 125,
+     "reach_mm": 311.85,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 24,
+     "obs": 130,
+     "reach_mm": 319.91,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 25,
+     "obs": 135,
+     "reach_mm": 337.99,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 26,
+     "obs": 140,
+     "reach_mm": 342.65,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 27,
+     "obs": 145,
+     "reach_mm": 325.96,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 28,
+     "obs": 150,
+     "reach_mm": 346.76,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 29,
+     "obs": 155,
+     "reach_mm": 357.05,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 30,
+     "obs": 160,
+     "reach_mm": 372.22,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.9
+    },
+    {
+     "seq": 31,
+     "obs": 165,
+     "reach_mm": 297.25,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 32,
+     "obs": 170,
+     "reach_mm": 227.6,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 33,
+     "obs": 175,
+     "reach_mm": 193.88,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": false,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 34,
+     "obs": 180,
+     "reach_mm": 217.25,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 35,
+     "obs": 185,
+     "reach_mm": 231.18,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 36,
+     "obs": 190,
+     "reach_mm": 242.75,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 37,
+     "obs": 195,
+     "reach_mm": 248.09,
+     "state": "occluded",
+     "fails": [
+      "blocked",
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.7
+    },
+    {
+     "seq": 38,
+     "obs": 200,
+     "reach_mm": 250.31,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 39,
+     "obs": 205,
+     "reach_mm": 251.14,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 40,
+     "obs": 210,
+     "reach_mm": 251.16,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 41,
+     "obs": 215,
+     "reach_mm": 250.78,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 42,
+     "obs": 220,
+     "reach_mm": 250.29,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    },
+    {
+     "seq": 43,
+     "obs": 225,
+     "reach_mm": 249.84,
+     "state": "occluded",
+     "fails": [
+      "reach"
+     ],
+     "hold": true,
+     "attach": false,
+     "detach": false,
+     "cf_hand_rel_mm": 83.8
+    }
+   ]
+  }
+ }
+}

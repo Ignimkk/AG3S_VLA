@@ -1,0 +1,194 @@
+{
+ "examples": {
+  "가림121_k0": {
+   "request": 14,
+   "palm_dev_mm": 25.94,
+   "dq_max_deg": 6.134,
+   "n_violating_rows": 421,
+   "solve_ms": 130.64986653625965
+  },
+  "회귀954_k0": {
+   "request": 22,
+   "palm_dev_mm": 24.48,
+   "dq_max_deg": 6.102,
+   "n_violating_rows": 0,
+   "solve_ms": 68.16199887543917
+  }
+ },
+ "grasp_goal": {
+  "runs_active": 16,
+  "requests_active": 49,
+  "requests_reduced_gt_0p5mm": 26,
+  "ref_err_median_mm": 9.24,
+  "res_err_median_mm": 6.07,
+  "definition": "to.metrics.grasp_anchor with non-empty goal_rows; ref / res = palm distance to the frozen goal on the goal rows for the VLA reference / the refined chunk"
+ },
+ "per_run": {
+  "가림121_k0": {
+   "requests": 31,
+   "modified": 30,
+   "hold": 0,
+   "goal_active": 1,
+   "violating_reference": 6,
+   "palm_dev_median_mm": 5.45,
+   "solve_ms_median": 96.73144575208426
+  },
+  "가림121_k1": {
+   "requests": 34,
+   "modified": 33,
+   "hold": 0,
+   "goal_active": 1,
+   "violating_reference": 6,
+   "palm_dev_median_mm": 5.225,
+   "solve_ms_median": 106.15838645026088
+  },
+  "가림122_k0": {
+   "requests": 33,
+   "modified": 32,
+   "hold": 0,
+   "goal_active": 1,
+   "violating_reference": 7,
+   "palm_dev_median_mm": 6.61,
+   "solve_ms_median": 71.18439115583897
+  },
+  "가림122_k1": {
+   "requests": 75,
+   "modified": 74,
+   "hold": 0,
+   "goal_active": 11,
+   "violating_reference": 19,
+   "palm_dev_median_mm": 8.76,
+   "solve_ms_median": 88.92892673611641
+  },
+  "가림123_k0": {
+   "requests": 31,
+   "modified": 30,
+   "hold": 0,
+   "goal_active": 1,
+   "violating_reference": 6,
+   "palm_dev_median_mm": 12.38,
+   "solve_ms_median": 66.88896380364895
+  },
+  "가림123_k1": {
+   "requests": 32,
+   "modified": 31,
+   "hold": 0,
+   "goal_active": 2,
+   "violating_reference": 7,
+   "palm_dev_median_mm": 8.815,
+   "solve_ms_median": 102.50717913731933
+  },
+  "회귀119_k0": {
+   "requests": 27,
+   "modified": 26,
+   "hold": 0,
+   "goal_active": 2,
+   "violating_reference": 5,
+   "palm_dev_median_mm": 2.83,
+   "solve_ms_median": 54.77684922516346
+  },
+  "회귀119_k1": {
+   "requests": 75,
+   "modified": 74,
+   "hold": 0,
+   "goal_active": 2,
+   "violating_reference": 5,
+   "palm_dev_median_mm": 6.01,
+   "solve_ms_median": 68.49009729921818
+  },
+  "회귀250_k0": {
+   "requests": 29,
+   "modified": 27,
+   "hold": 0,
+   "goal_active": 1,
+   "violating_reference": 6,
+   "palm_dev_median_mm": 3.24,
+   "solve_ms_median": 68.30411683768034
+  },
+  "회귀250_k1": {
+   "requests": 28,
+   "modified": 27,
+   "hold": 0,
+   "goal_active": 0,
+   "violating_reference": 5,
+   "palm_dev_median_mm": 1.77,
+   "solve_ms_median": 60.77585928142071
+  },
+  "회귀320_k0": {
+   "requests": 34,
+   "modified": 32,
+   "hold": 0,
+   "goal_active": 1,
+   "violating_reference": 5,
+   "palm_dev_median_mm": 2.75,
+   "solve_ms_median": 67.82679073512554
+  },
+  "회귀320_k1": {
+   "requests": 33,
+   "modified": 30,
+   "hold": 0,
+   "goal_active": 1,
+   "violating_reference": 6,
+   "palm_dev_median_mm": 2.37,
+   "solve_ms_median": 67.9553896188736
+  },
+  "회귀850_k0": {
+   "requests": 32,
+   "modified": 31,
+   "hold": 0,
+   "goal_active": 2,
+   "violating_reference": 5,
+   "palm_dev_median_mm": 2.205,
+   "solve_ms_median": 68.08507768437266
+  },
+  "회귀850_k1": {
+   "requests": 75,
+   "modified": 73,
+   "hold": 0,
+   "goal_active": 4,
+   "violating_reference": 4,
+   "palm_dev_median_mm": 6.21,
+   "solve_ms_median": 68.33399832248688
+  },
+  "회귀954_k0": {
+   "requests": 75,
+   "modified": 74,
+   "hold": 0,
+   "goal_active": 6,
+   "violating_reference": 12,
+   "palm_dev_median_mm": 4.41,
+   "solve_ms_median": 67.98530276864767
+  },
+  "회귀954_k1": {
+   "requests": 75,
+   "modified": 72,
+   "hold": 9,
+   "goal_active": 8,
+   "violating_reference": 17,
+   "palm_dev_median_mm": 4.93,
+   "solve_ms_median": 70.0591467320919
+  },
+  "회귀211_k0": {
+   "requests": 75,
+   "modified": 75,
+   "hold": 0,
+   "goal_active": 0,
+   "violating_reference": 24,
+   "palm_dev_median_mm": 8.51,
+   "solve_ms_median": 66.91629253327847
+  },
+  "회귀211_k1": {
+   "requests": 38,
+   "modified": 37,
+   "hold": 0,
+   "goal_active": 5,
+   "violating_reference": 12,
+   "palm_dev_median_mm": 4.9399999999999995,
+   "solve_ms_median": 72.93546758592129
+  }
+ },
+ "solve_ms_median": 70.02273900434375,
+ "solve_ms_p95": 164.38340344466266,
+ "infer_ms_median": 731.6247224807739,
+ "infer_ms_p95": 904.4932246208191
+}

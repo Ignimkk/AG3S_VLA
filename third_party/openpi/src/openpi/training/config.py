@@ -515,7 +515,7 @@ class TrainConfig:
     # Base directory for config assets (e.g., norm stats).
     assets_base_dir: str = "./assets"
     # Base directory for checkpoints.
-    checkpoint_base_dir: str = "./checkpoints"
+    checkpoint_base_dir: str | None = None
 
     # Random seed that will be used by random generators during training.
     seed: int = 42
@@ -561,7 +561,11 @@ class TrainConfig:
         """Get the checkpoint directory for this config."""
         if not self.exp_name:
             raise ValueError("--exp_name must be set")
-        return (pathlib.Path(self.checkpoint_base_dir) / self.name / self.exp_name).resolve()
+        from common.run_output import allocate_run_dir, resolve_output_path
+
+        run_dir = allocate_run_dir()
+        base = resolve_output_path(self.checkpoint_base_dir, run_dir=run_dir, default_name="checkpoints")
+        return resolve_output_path(base / self.name / self.exp_name, run_dir=run_dir, default_name="checkpoints")
 
     @property
     def trainable_filter(self) -> nnx.filterlib.Filter:

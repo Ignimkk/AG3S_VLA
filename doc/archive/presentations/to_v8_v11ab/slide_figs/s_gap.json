@@ -1,0 +1,17 @@
+{
+ "median_mm": [
+  0.0,
+  15.1,
+  20.0
+ ],
+ "p90_mm": [
+  0.0,
+  31.0,
+  31.1
+ ],
+ "lag_rows": {
+  "V8": 1.9,
+  "E0": 1.95
+ },
+ "source": "T43TK.verify.json via AG3S_T0T6_LOG.md T43 8-1"
+}

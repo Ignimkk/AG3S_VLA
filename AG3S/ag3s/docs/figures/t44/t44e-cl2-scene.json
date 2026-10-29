@@ -1,0 +1,99 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/agg.json",
+ "blocks": {
+  "ep12_s122_C1a_C1bp": {
+   "times": [
+    108,
+    222,
+    599
+   ],
+   "labels": [
+    "first hand-target contact",
+    "release step",
+    "end of run"
+   ],
+   "C1a": {
+    "frame_idx_t108": 108,
+    "frame_idx_t222": 222,
+    "frame_idx_t599": 599
+   },
+   "C1bp": {
+    "frame_idx_t108": 108,
+    "frame_idx_t222": 222,
+    "frame_idx_t599": 599
+   }
+  },
+  "ep123_s1232_C1a_C1bp": {
+   "times": [
+    106,
+    231,
+    599
+   ],
+   "labels": [
+    "first hand-target contact",
+    "release step",
+    "end of run"
+   ],
+   "C1a": {
+    "frame_idx_t106": 106,
+    "frame_idx_t231": 231,
+    "frame_idx_t599": 599
+   },
+   "C1bp": {
+    "frame_idx_t106": 106,
+    "frame_idx_t231": 231,
+    "frame_idx_t599": 599
+   }
+  },
+  "ep110_s1101_C1bp_C2p": {
+   "times": [
+    112,
+    132,
+    162
+   ],
+   "labels": [
+    "20 steps before first hand-fruit_other contact (C2')",
+    "first hand-fruit_other contact (C2')",
+    "30 steps after"
+   ],
+   "C1bp": {
+    "frame_idx_t112": 112,
+    "frame_idx_t132": 132,
+    "frame_idx_t162": 162
+   },
+   "C2p": {
+    "frame_idx_t112": 112,
+    "frame_idx_t132": 132,
+    "frame_idx_t162": 162
+   }
+  }
+ },
+ "run_dirs": {
+  "ep12_s122_C1a_C1bp": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/runs/C1a/R/C1a_ep12_s122",
+   "C1bp": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/runs/C1bp/R/C1bp_ep12_s122"
+  },
+  "ep123_s1232_C1a_C1bp": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/runs/C1a/R/C1a_ep123_s1232",
+   "C1bp": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/runs/C1bp/R/C1bp_ep123_s1232"
+  },
+  "ep110_s1101_C1bp_C2p": {
+   "C1bp": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/runs/C1bp/R/C1bp_ep110_s1101",
+   "C2p": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/runs/C2p/R/C2p_ep110_s1101"
+  }
+ },
+ "replay_json": {
+  "ep12_s122_C1a_C1bp": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/replay/C1a_R_C1a_ep12_s122.json",
+   "C1bp": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/replay/C1bp_R_C1bp_ep12_s122.json"
+  },
+  "ep123_s1232_C1a_C1bp": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/replay/C1a_R_C1a_ep123_s1232.json",
+   "C1bp": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/replay/C1bp_R_C1bp_ep123_s1232.json"
+  },
+  "ep110_s1101_C1bp_C2p": {
+   "C1bp": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/replay/C1bp_R_C1bp_ep110_s1101.json",
+   "C2p": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/replay/C2p_R_C2p_ep110_s1101.json"
+  }
+ }
+}

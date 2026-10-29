@@ -1,0 +1,72 @@
+{
+ "aggregate": "scene",
+ "columns": [
+  "stage",
+  "numbers",
+  "notes"
+ ],
+ "rows": [
+  [
+   "P1 filter (label-free, aggregation-independent)",
+   "eligible 242/384; excluded by reason (any camera): low_mass 109, fixed_patch_sink 16, broad_map 27",
+   "unchanged from record-mean run (same filter.json)"
+  ],
+  [
+   "P2 2D (scene mean)",
+   "GT 2D-lift top-1 last:L12H3 (15.22); 3D candidates GT 20, self 23",
+   "GT / self top-16 preselection identical to record-mean run"
+  ],
+  [
+   "P2 3D GT identity (scene mean, primary)",
+   "top-3: last:L12H4 0.6913; mean:L12H4 0.6909; last:L10H7 0.6069",
+   "last:L8H2 (forced, P1-excluded, not ranked) scene mean 0.5858; record-mean (deviation) top-1 mean:L12H4"
+  ],
+  [
+   "P3 scene bootstrap (B=1000)",
+   "last:L12H4: P(rank1) 0.429 (exact 0.4355), P(top3) 0.879, CI [0.515, 0.840]",
+   "stable_single_cell False; rank-1 tie rate 0.099; next P(rank1): mean:L12H4 0.256, mean:L10H7 0.232, last:L12H3 0.080"
+  ],
+  [
+   "P4 k (scene LOSO, scene-mean fold ranker)",
+   "CV mean k1 0.586 [0.405, 0.772] / k2 0.596 [0.412, 0.786] / k3 0.647 [0.481, 0.812]",
+   "best k=3; diff k3-k1 0.061 CI [-0.119, 0.296] -> k*=1 last:L12H4; nested mean 0.586; k_inner [1, 1, 1, 1, 2]; record-mean run k*=1 mean:L12H4"
+  ],
+  [
+   "P5 held-out GT identity (held-out scene mean)",
+   "selected last:L12H4: 0.911 (scenes scene1800 0.867, scene1850 0.867, scene1900 1.000; record mean 0.900)",
+   "last:L8H2: 0.911 (scenes scene1800 0.867, scene1850 0.867, scene1900 1.000; record mean 0.900); self-selected last:L12H3: 0.911"
+  ],
+  [
+   "P6 ablation (held-out scene mean)",
+   "random 20: median 0.756, p05 0.022, p95 0.912; share >= selected 0.10",
+   "paper3 s0 0.000, s1 0.000; head avg 0.867; T47 oracle3 0.911; restricted oracle mean:L8H2 0.911"
+  ],
+  [
+   "self label vs GT (scene mean)",
+   "P2 top-1 self last:L12H3 / GT last:L12H4; top-3 overlap 1; P4 same combo False",
+   "cross P(rank1): self-label P of GT top-1 0.279, GT P of self top-1 0.080; held-out self-minus-GT 0.000 on 4/4 records"
+  ],
+  [
+   "annotation curve (GT, exploratory)",
+   "reference top-3 ['last:L12H4', 'mean:L12H4', 'last:L10H7']; P(same top-1) n=40 0.685, n=120 0.550; P(top-1 in ref) n=40 0.962",
+   "frames pooled; n=539 (all) P(same top-1) 0.000"
+  ],
+  [
+   "LIBERO P2-P3 (2D lift, task mean, 20 tasks)",
+   "top-3: mean:L12H3 23.35; last:L12H3 22.23; first:L12H3 20.21",
+   "task bootstrap top-1 mean:L12H3 P(rank1) 1.000; task mean = episode mean (max abs diff < 1e-14, top-20 order identical)"
+  ]
+ ],
+ "sources": [
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/filter/filter.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/gt/score3d/score3d__scene.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/gt/bootstrap/bootstrap__scene.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/gt/ksel/ksel__scene.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/heldout/heldout__scene.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/ablation/ablation__scene.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/compare/compare__scene.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/gt/annotate/annotate__scene.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/libero/score2d__task.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/libero/bootstrap__task.json"
+ ]
+}

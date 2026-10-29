@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import pathlib
 import sys
 
@@ -372,10 +373,22 @@ def diff(a, b, where="") -> list[str]:
     return out
 
 
+def _strip_source_lines(value):
+    """``file.py:<line>`` -> ``file.py`` in provenance strings (a constant's definition line moves with any edit of its
+    file; the 2026-10-29 main merge moved the RB-Y1 client constants from line 127 to 130)."""
+    if isinstance(value, dict):
+        return {k: _strip_source_lines(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_strip_source_lines(v) for v in value]
+    if isinstance(value, str):
+        return re.sub(r"(\.py):\d+", r"\1", value)
+    return value
+
+
 def check_fixture(path=FIXTURE) -> list[str]:
     requests, chunks, attention, golden, _ = load_fixture(path)
     current = json.loads(json.dumps(run(requests, chunks, attention)))
-    return diff(_drop_wall_clock(golden), _drop_wall_clock(current))
+    return diff(_strip_source_lines(_drop_wall_clock(golden)), _strip_source_lines(_drop_wall_clock(current)))
 
 
 # --- serve_safe level -----------------------------------------------------------------------------------
@@ -439,9 +452,40 @@ def write_serve_safe_fixture(path=SERVE_SAFE_FIXTURE) -> None:
         json.dump(serve_safe_record(), stream, indent=1, sort_keys=True)
 
 
+#: Keys the AG3S final-configuration merge (main 3ff415d5, 2026-10-29) added to this surface, with their value at the
+#: merge, and the three `build_ag3s` keyword expressions it moved into `serve_safe.ag3s_from_args` (same values).
+MERGE_SURFACE = ROOT / "tests/trajopt/data/ag3s_final_merge_surface.json"
+
+
+def _drop_merge_defaults(current: dict, golden: dict) -> tuple[dict, dict]:
+    """Leave the merge-added keys out **only while they keep their merge-time value** (as `PB_DEFAULT_OFF`): a key that
+    is switched on, a changed default, or any change of a pre-merge key still shows up."""
+    merge = json.loads(MERGE_SURFACE.read_text())
+    current = json.loads(json.dumps(current))
+    golden = json.loads(json.dumps(golden))
+    for name in ("bare", "v11ab"):
+        for sec in ("namespace", "trajopt_config", "build_kwargs"):
+            for key, value in merge[name][sec].items():
+                *parents, leaf = key.split("/")
+                node = current[name][sec]
+                for part in parents:
+                    node = node.get(part, {})
+                if leaf in node and node[leaf] == value:
+                    del node[leaf]
+        call = current[name]["build_call"]
+        for key, value in merge[name]["build_call_added"].items():
+            if call.get(key) == value:
+                del call[key]
+        for key, moved in merge["build_call_moved"].items():
+            if call.get(key) == moved["after"] and golden[name]["build_call"].get(key) == moved["before"]:
+                golden[name]["build_call"][key] = moved["after"]
+    return current, golden
+
+
 def check_serve_safe_fixture(path=SERVE_SAFE_FIXTURE) -> list[str]:
     golden = json.loads(pathlib.Path(path).read_text())
     current = json.loads(json.dumps(serve_safe_record(), sort_keys=True))
+    current, golden = _drop_merge_defaults(current, golden)
     return diff(golden, current)
 
 

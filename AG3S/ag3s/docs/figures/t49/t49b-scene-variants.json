@@ -1,0 +1,727 @@
+{
+ "exploratory": true,
+ "panels": [
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_high",
+   "source": "noun_gt_k1_s0",
+   "target_mass_share_cam": 0.001424428027321033,
+   "cam_peak_patch": [
+    9,
+    4
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k1_s0",
+   "target_mass_share_cam": 0.7705347379008293,
+   "cam_peak_patch": [
+    14,
+    7
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k1_s0",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    0,
+    1
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s0",
+   "target_mass_share_cam": 0.0009874175794480184,
+   "cam_peak_patch": [
+    9,
+    4
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s0",
+   "target_mass_share_cam": 0.7334776639120633,
+   "cam_peak_patch": [
+    15,
+    8
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s0",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    13,
+    8
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.000562969607117965,
+   "cam_peak_patch": [
+    10,
+    5
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.5843976740982924,
+   "cam_peak_patch": [
+    15,
+    8
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    13,
+    8
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_high",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0001927000167615822,
+   "cam_peak_patch": [
+    10,
+    7
+   ],
+   "joint_peak": [
+    1,
+    10,
+    9
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_left_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.126243329193593,
+   "cam_peak_patch": [
+    10,
+    9
+   ],
+   "joint_peak": [
+    1,
+    10,
+    9
+   ]
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "camera": "cam_right_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    0,
+    13
+   ],
+   "joint_peak": [
+    1,
+    10,
+    9
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_high",
+   "source": "noun_gt_k1_s0",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    13,
+    1
+   ],
+   "joint_peak": [
+    1,
+    14,
+    8
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k1_s0",
+   "target_mass_share_cam": 0.6041786791592254,
+   "cam_peak_patch": [
+    14,
+    8
+   ],
+   "joint_peak": [
+    1,
+    14,
+    8
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k1_s0",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    15,
+    7
+   ],
+   "joint_peak": [
+    1,
+    14,
+    8
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s0",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    14,
+    1
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s0",
+   "target_mass_share_cam": 0.5660296049459236,
+   "cam_peak_patch": [
+    15,
+    8
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s0",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    15,
+    7
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    14,
+    1
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.2594016387482538,
+   "cam_peak_patch": [
+    15,
+    8
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    15,
+    7
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_high",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    10,
+    0
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_left_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.23736933279724853,
+   "cam_peak_patch": [
+    14,
+    7
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ]
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "camera": "cam_right_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    15,
+    7
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_high",
+   "source": "noun_gt_k1_s0",
+   "target_mass_share_cam": 0.0006296539490660159,
+   "cam_peak_patch": [
+    10,
+    8
+   ],
+   "joint_peak": [
+    1,
+    13,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k1_s0",
+   "target_mass_share_cam": 0.7133911212564122,
+   "cam_peak_patch": [
+    13,
+    7
+   ],
+   "joint_peak": [
+    1,
+    13,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k1_s0",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    10,
+    1
+   ],
+   "joint_peak": [
+    1,
+    13,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s0",
+   "target_mass_share_cam": 0.009804269155451927,
+   "cam_peak_patch": [
+    10,
+    8
+   ],
+   "joint_peak": [
+    1,
+    13,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s0",
+   "target_mass_share_cam": 0.6262506573936657,
+   "cam_peak_patch": [
+    13,
+    7
+   ],
+   "joint_peak": [
+    1,
+    13,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s0",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    14,
+    1
+   ],
+   "joint_peak": [
+    1,
+    13,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.002874219491701313,
+   "cam_peak_patch": [
+    10,
+    8
+   ],
+   "joint_peak": [
+    1,
+    13,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.46645868221038866,
+   "cam_peak_patch": [
+    13,
+    7
+   ],
+   "joint_peak": [
+    1,
+    13,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    11,
+    1
+   ],
+   "joint_peak": [
+    1,
+    13,
+    7
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_high",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0022403939073272956,
+   "cam_peak_patch": [
+    9,
+    7
+   ],
+   "joint_peak": [
+    1,
+    14,
+    2
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_left_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.032160766065097476,
+   "cam_peak_patch": [
+    14,
+    2
+   ],
+   "joint_peak": [
+    1,
+    14,
+    2
+   ]
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "camera": "cam_right_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    12,
+    1
+   ],
+   "joint_peak": [
+    1,
+    14,
+    2
+   ]
+  }
+ ],
+ "outcomes": [
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "t_step": 104,
+   "phase_group": "post_grasp",
+   "source": "noun_gt_k1_s0",
+   "on_target": true,
+   "identity_correct": true,
+   "identity_label": "target",
+   "chosen_cluster_purity": 1.0,
+   "nontarget_seed_loss": 0
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "t_step": 104,
+   "phase_group": "post_grasp",
+   "source": "noun_gt_k3_s0",
+   "on_target": true,
+   "identity_correct": true,
+   "identity_label": "target",
+   "chosen_cluster_purity": 1.0,
+   "nontarget_seed_loss": 0
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "t_step": 104,
+   "phase_group": "post_grasp",
+   "source": "noun_gt_k3_s1",
+   "on_target": true,
+   "identity_correct": false,
+   "identity_label": "other_object",
+   "chosen_cluster_purity": 0.4551282051282051,
+   "nontarget_seed_loss": 85
+  },
+  {
+   "record": "ep1900",
+   "frame": 13,
+   "t_step": 104,
+   "phase_group": "post_grasp",
+   "source": "l8h2",
+   "on_target": true,
+   "identity_correct": true,
+   "identity_label": "target",
+   "chosen_cluster_purity": 1.0,
+   "nontarget_seed_loss": 0
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "t_step": 32,
+   "phase_group": "pre_grasp",
+   "source": "noun_gt_k1_s0",
+   "on_target": true,
+   "identity_correct": true,
+   "identity_label": "target",
+   "chosen_cluster_purity": 1.0,
+   "nontarget_seed_loss": 0
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "t_step": 32,
+   "phase_group": "pre_grasp",
+   "source": "noun_gt_k3_s0",
+   "on_target": true,
+   "identity_correct": true,
+   "identity_label": "target",
+   "chosen_cluster_purity": 1.0,
+   "nontarget_seed_loss": 0
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "t_step": 32,
+   "phase_group": "pre_grasp",
+   "source": "noun_gt_k3_s1",
+   "on_target": false,
+   "identity_correct": false,
+   "identity_label": "other_object",
+   "chosen_cluster_purity": 0.0,
+   "nontarget_seed_loss": 106
+  },
+  {
+   "record": "ep1800",
+   "frame": 4,
+   "t_step": 32,
+   "phase_group": "pre_grasp",
+   "source": "l8h2",
+   "on_target": true,
+   "identity_correct": true,
+   "identity_label": "target",
+   "chosen_cluster_purity": 1.0,
+   "nontarget_seed_loss": 0
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "t_step": 96,
+   "phase_group": "post_grasp",
+   "source": "noun_gt_k1_s0",
+   "on_target": true,
+   "identity_correct": false,
+   "identity_label": "other_object",
+   "chosen_cluster_purity": 0.46534653465346537,
+   "nontarget_seed_loss": 54
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "t_step": 96,
+   "phase_group": "post_grasp",
+   "source": "noun_gt_k3_s0",
+   "on_target": true,
+   "identity_correct": false,
+   "identity_label": "other_object",
+   "chosen_cluster_purity": 0.46534653465346537,
+   "nontarget_seed_loss": 54
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "t_step": 96,
+   "phase_group": "post_grasp",
+   "source": "noun_gt_k3_s1",
+   "on_target": true,
+   "identity_correct": false,
+   "identity_label": "other_object",
+   "chosen_cluster_purity": 0.46534653465346537,
+   "nontarget_seed_loss": 54
+  },
+  {
+   "record": "headfix",
+   "frame": 12,
+   "t_step": 96,
+   "phase_group": "post_grasp",
+   "source": "l8h2",
+   "on_target": true,
+   "identity_correct": true,
+   "identity_label": "target",
+   "chosen_cluster_purity": 1.0,
+   "nontarget_seed_loss": 0
+  }
+ ]
+}

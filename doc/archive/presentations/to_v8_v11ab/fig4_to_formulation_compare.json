@@ -1,0 +1,18 @@
+{
+ "V8_flags": "--obstacle-margin 0.010 --esdf-margin 0 --finger-cover both ... (plan_horizon = execution window 8)",
+ "V11AB_added_flags": "--plan-horizon 16 --lookahead obstacles --lookahead-gate-mm 20 --qp-eps 1e-4 --w-deflection-rate 20",
+ "weights": {
+  "w_track": 1.0,
+  "w_smooth": 0.05,
+  "w_continuity": 0.5,
+  "w_slack": 1000.0,
+  "w_deflection_rate_V11AB": 20
+ },
+ "sqp": {
+  "min_iterations": 3,
+  "trust_radius_rad": 0.15,
+  "osqp_eps_V8": 0.001,
+  "osqp_eps_V11AB": 0.0001
+ },
+ "source": "AG3S/trajopt/problem.py, config.py, sqp.py, linearize.py; T43V8/T43V11ABC.verify.json server cmdline"
+}

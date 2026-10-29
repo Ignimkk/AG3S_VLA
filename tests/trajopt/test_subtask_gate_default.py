@@ -125,9 +125,11 @@ def test_main_resolves_before_anything_reads_the_gate_and_logs_the_line():
     assert i_reject < i_resolve
     assert src.index("logging.basicConfig") < i_resolve  # the line reaches the start log
     assert "logging.info(gate_note)" in src
+    # AG3S-DYNAMIC-FIELD: `main` builds AG3S through `ag3s_from_args`, which reads the gate — its call counts as a read
+    assert "subtask_gate=args.subtask_gate" in inspect.getsource(serve_safe.ag3s_from_args)
     first_read = min(src.index(k) for k in ("if args.subtask_gate else",
                                              "bool(args.subtask_gate)",
-                                             "subtask_gate=args.subtask_gate"))
+                                             "ag3s_from_args("))
     assert i_resolve < first_read
     # the record manifest keeps `subtask.gate` (now the resolved bool)
     assert '"subtask": {"gate": bool(args.subtask_gate)' in src

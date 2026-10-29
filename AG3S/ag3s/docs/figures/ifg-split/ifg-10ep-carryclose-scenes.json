@@ -1,0 +1,108 @@
+{
+ "frames": [
+  {
+   "episode": 1404,
+   "cfg": "SPLK",
+   "t_row": 485,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN/runs/SPLK/SPLK_ep1404_s14043"
+  },
+  {
+   "episode": 1404,
+   "cfg": "SPLK",
+   "t_row": 545,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN/runs/SPLK/SPLK_ep1404_s14043"
+  },
+  {
+   "episode": 1404,
+   "cfg": "SPLC",
+   "t_row": 485,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-CARRYCLOSE/runs/SPLC/SPLC_ep1404_s14043"
+  },
+  {
+   "episode": 1404,
+   "cfg": "SPLC",
+   "t_row": 545,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-CARRYCLOSE/runs/SPLC/SPLC_ep1404_s14043"
+  },
+  {
+   "episode": 211,
+   "cfg": "SPLK",
+   "t_row": 229,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN/runs/SPLK/SPLK_ep211_s2113"
+  },
+  {
+   "episode": 211,
+   "cfg": "SPLK",
+   "t_row": 289,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN/runs/SPLK/SPLK_ep211_s2113"
+  },
+  {
+   "episode": 211,
+   "cfg": "SPLC",
+   "t_row": 229,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-CARRYCLOSE/runs/SPLC/SPLC_ep211_s2113"
+  },
+  {
+   "episode": 211,
+   "cfg": "SPLC",
+   "t_row": 289,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-CARRYCLOSE/runs/SPLC/SPLC_ep211_s2113"
+  }
+ ]
+}

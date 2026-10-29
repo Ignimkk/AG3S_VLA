@@ -1,0 +1,333 @@
+{
+ "B1 case1_L2_s13453": {
+  "requests": 75,
+  "goal_kinds": {
+   "toward pre-grasp": 10,
+   "pre-grasp": 44,
+   "grasp": 1
+  },
+  "no_goal_reasons": {
+   "no valid grasp": 15,
+   "palm outside the approach radius": 3
+  },
+  "gate": {
+   "defer": 5
+  },
+  "geo_failed": [],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   50.6,
+   50.8,
+   51.7,
+   52.0,
+   52.6
+  ],
+  "geo_ms_p95": 179.0,
+  "geo_ms_max": 195.14,
+  "to_ms_p95": 138.4
+ },
+ "B1 case1_L2_s23453": {
+  "requests": 75,
+  "goal_kinds": {
+   "toward pre-grasp": 26,
+   "pre-grasp": 12,
+   "grasp": 2
+  },
+  "no_goal_reasons": {
+   "no valid grasp": 17,
+   "palm outside the approach radius": 14,
+   "closing away from the grasp": 2
+  },
+  "gate": {
+   "defer": 1,
+   "close": 1
+  },
+  "geo_failed": [],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   314.0,
+   39.0,
+   60.0,
+   60.0,
+   93.3
+  ],
+  "geo_ms_p95": 180.4,
+  "geo_ms_max": 188.87,
+  "to_ms_p95": 201.8
+ },
+ "B1 case1_L2_s33453": {
+  "requests": 16,
+  "goal_kinds": {
+   "toward pre-grasp": 2,
+   "pre-grasp": 6
+  },
+  "no_goal_reasons": {
+   "no valid grasp": 3,
+   "palm outside the approach radius": 3
+  },
+  "gate": {},
+  "geo_failed": [],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   39.3,
+   30.0,
+   40.6,
+   42.7,
+   36.1
+  ],
+  "geo_ms_p95": 170.4,
+  "geo_ms_max": 179.92,
+  "to_ms_p95": 170.9
+ },
+ "B1 case3_L2_s13453": {
+  "requests": 75,
+  "goal_kinds": {
+   "toward pre-grasp": 8,
+   "pre-grasp": 1
+  },
+  "no_goal_reasons": {
+   "no valid grasp": 31,
+   "close deferred 9 requests (> 8)": 29,
+   "palm outside the approach radius": 4
+  },
+  "gate": {
+   "defer": 9
+  },
+  "geo_failed": [
+   "close deferred 9 requests (> 8)"
+  ],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   60.0,
+   60.0,
+   60.0,
+   60.0,
+   55.3
+  ],
+  "geo_ms_p95": 142.0,
+  "geo_ms_max": 170.41,
+  "to_ms_p95": 200.3
+ },
+ "B1 case3_L2_s23453": {
+  "requests": 27,
+  "goal_kinds": {
+   "toward pre-grasp": 8,
+   "pre-grasp": 4,
+   "grasp": 4
+  },
+  "no_goal_reasons": {
+   "palm outside the approach radius": 5,
+   "no valid grasp": 4
+  },
+  "gate": {
+   "defer": 2
+  },
+  "geo_failed": [],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   81.3,
+   32.3,
+   75.2,
+   75.0,
+   68.0
+  ],
+  "geo_ms_p95": 165.1,
+  "geo_ms_max": 184.0,
+  "to_ms_p95": 277.8
+ },
+ "B1 case3_L2_s33453": {
+  "requests": 75,
+  "goal_kinds": {
+   "toward pre-grasp": 15,
+   "pre-grasp": 7
+  },
+  "no_goal_reasons": {
+   "no valid grasp": 45,
+   "palm outside the approach radius": 6
+  },
+  "gate": {
+   "defer": 5
+  },
+  "geo_failed": [],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   52.0,
+   50.9,
+   49.1,
+   44.9,
+   45.5
+  ],
+  "geo_ms_p95": 172.9,
+  "geo_ms_max": 178.19,
+  "to_ms_p95": 148.4
+ },
+ "B2 case1_L2_s13453": {
+  "requests": 75,
+  "goal_kinds": {
+   "toward pre-grasp": 1,
+   "pre-grasp": 5
+  },
+  "no_goal_reasons": {
+   "close deferred 9 requests (> 8)": 48,
+   "no valid grasp": 16,
+   "palm outside the approach radius": 3
+  },
+  "gate": {
+   "defer": 9
+  },
+  "geo_failed": [
+   "close deferred 9 requests (> 8)"
+  ],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   59.0,
+   37.5,
+   25.9,
+   18.7,
+   23.6
+  ],
+  "geo_ms_p95": 160.4,
+  "geo_ms_max": 183.3,
+  "to_ms_p95": 121.1
+ },
+ "B2 case1_L2_s23453": {
+  "requests": 75,
+  "goal_kinds": {
+   "toward pre-grasp": 2,
+   "pre-grasp": 5,
+   "grasp": 1
+  },
+  "no_goal_reasons": {
+   "no valid grasp": 52,
+   "close deferred 9 requests (> 8)": 12,
+   "palm outside the approach radius": 1
+  },
+  "gate": {
+   "defer": 9
+  },
+  "geo_failed": [
+   "close deferred 9 requests (> 8)"
+  ],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   12.2,
+   32.2,
+   25.6,
+   17.7,
+   105.7
+  ],
+  "geo_ms_p95": 163.5,
+  "geo_ms_max": 181.74,
+  "to_ms_p95": 163.9
+ },
+ "B2 case1_L2_s33453": {
+  "requests": 75,
+  "goal_kinds": {
+   "toward pre-grasp": 2,
+   "pre-grasp": 4,
+   "grasp": 1
+  },
+  "no_goal_reasons": {
+   "close deferred 9 requests (> 8)": 52,
+   "no valid grasp": 11,
+   "palm outside the approach radius": 3
+  },
+  "gate": {
+   "defer": 9
+  },
+  "geo_failed": [
+   "close deferred 9 requests (> 8)"
+  ],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   45.5,
+   33.1,
+   25.2,
+   27.3,
+   133.9
+  ],
+  "geo_ms_p95": 164.3,
+  "geo_ms_max": 192.23,
+  "to_ms_p95": 116.3
+ },
+ "B2 case3_L2_s13453": {
+  "requests": 75,
+  "goal_kinds": {
+   "toward pre-grasp": 6
+  },
+  "no_goal_reasons": {
+   "no valid grasp": 63,
+   "palm outside the approach radius": 4
+  },
+  "gate": {
+   "defer": 3
+  },
+  "geo_failed": [],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   60.0,
+   60.0,
+   60.0,
+   60.0,
+   60.0
+  ],
+  "geo_ms_p95": 142.1,
+  "geo_ms_max": 170.41,
+  "to_ms_p95": 215.4
+ },
+ "B2 case3_L2_s23453": {
+  "requests": 75,
+  "goal_kinds": {
+   "toward pre-grasp": 11
+  },
+  "no_goal_reasons": {
+   "no valid grasp": 49,
+   "close deferred 9 requests (> 8)": 8,
+   "palm outside the approach radius": 5
+  },
+  "gate": {
+   "defer": 9
+  },
+  "geo_failed": [
+   "close deferred 9 requests (> 8)"
+  ],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   60.0,
+   60.0,
+   60.0,
+   60.0,
+   60.0
+  ],
+  "geo_ms_p95": 140.9,
+  "geo_ms_max": 186.15,
+  "to_ms_p95": 171.4
+ },
+ "B2 case3_L2_s33453": {
+  "requests": 63,
+  "goal_kinds": {
+   "toward pre-grasp": 41,
+   "grasp": 5
+  },
+  "no_goal_reasons": {
+   "no valid grasp": 7,
+   "palm outside the approach radius": 6,
+   "chunk starts closed": 2
+  },
+  "gate": {
+   "defer": 5
+  },
+  "geo_failed": [],
+  "geo_hold_requests": 0,
+  "hand_to_goal_mm_last5": [
+   60.0,
+   60.0,
+   60.0,
+   60.0,
+   111.4
+  ],
+  "geo_ms_p95": 179.0,
+  "geo_ms_max": 187.0,
+  "to_ms_p95": 163.0
+ }
+}

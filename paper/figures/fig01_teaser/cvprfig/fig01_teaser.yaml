@@ -1,0 +1,76 @@
+# F01 teaser (CVPR-Figure spec, draft). Claim: with AG3S the frozen VLA grasps the
+# instructed object while still avoiding the obstacle next to it.
+# Real crops: cvprfig_assets (see assets.json). Comparison frames are placeholders
+# until matched runs are registered; demo frames are stand-ins (see figure.json).
+figure:
+  id: fig01_teaser
+  venue: cvpr
+  width: double
+  font: times
+  pad_top: 2
+
+layout: row
+gap: 12
+
+panels:
+  - id: p_demo
+    title: "(a) Closed-loop execution with AG3S"
+    title_align: left
+    frame: none
+    valign: top
+    body:
+      - col:
+          gap: 4
+          align: start
+          body:
+            - {id: instr, shape: text, text: "*\u201cPut the apple in the basket.\u201d*", size: 6.6}
+            - row:
+                gap: 3
+                align: start
+                body:
+                  - {id: d1, shape: image, src: ../../cvprfig_assets/demo_start.png, w: 84, caption: "Start", caption_size: 6.2}
+                  - {id: d2, shape: image, src: ../../cvprfig_assets/demo_reach.png, w: 84, caption: "Contact links reach target", caption_size: 6.2}
+                  - {id: d3, shape: image, src: ../../cvprfig_assets/demo_lift.png, w: 84, caption: "Grasp and lift", caption_size: 6.2}
+                  - {id: d4, shape: image, src: ../../cvprfig_assets/demo_place.png, w: 84, caption: "Place in basket", caption_size: 6.2}
+            - row:
+                gap: 9
+                align: center
+                body:
+                  - {id: s_attn, shape: image, src: ../../cvprfig_assets/attn_left_wrist.png, w: 54, caption: "VLA attention", caption_size: 6.2}
+                  - {id: s_tgt, shape: image, w: 66, h: 54, text: "3D target vs.\nobstacle split\n(pending)", caption: "Target extent", caption_size: 6.2}
+                  - {id: s_field, shape: image, src: ../../cvprfig_assets/esdf_fine_xz.png, w: 64, caption: "Link-specific field", caption_size: 6.2}
+                  - {id: s_note, shape: text, text: "No external\nsegmenter;\nVLA stays frozen", size: 6.4, italic: true}
+
+  - id: p_cmp
+    title: "(b) Same scene, three controllers"
+    title_align: left
+    frame: none
+    valign: top
+    body:
+      - col:
+          gap: 5
+          align: start
+          body:
+            - row:
+                gap: 5
+                align: center
+                body:
+                  - {id: c1_img, shape: image, w: 54, h: 40, text: "pending run", size: 6}
+                  - {id: c1, text: "VLA only:\ncollides with obstacle", role: baseline, size: 6.6}
+            - row:
+                gap: 5
+                align: center
+                body:
+                  - {id: c2_img, shape: image, w: 54, h: 40, text: "pending run", size: 6}
+                  - {id: c2, text: "Geometry-only filter:\nrefuses the grasp", role: baseline, size: 6.6}
+            - row:
+                gap: 5
+                align: center
+                body:
+                  - {id: c3_img, shape: image, w: 54, h: 40, text: "pending run", size: 6}
+                  - {id: c3, text: "**AG3S:** grasps target,\navoids obstacle", role: ours, size: 6.6}
+
+edges:
+  - {from: s_attn, to: s_tgt, color: gold.deep}
+  - {from: s_tgt, to: s_field, color: gold.deep}
+

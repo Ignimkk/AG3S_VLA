@@ -1,0 +1,4226 @@
+{
+ "audit": "CVPR_V1_evidence_audit",
+ "generated_by": "paper/tools/analysis/audit_cvpr_v1_evidence.py",
+ "status": "PASS",
+ "float_tolerance": 0.0005,
+ "verification_level": "REGISTERED_SOURCE_LINKED",
+ "verification_note": "Numbers re-read from the source JSON at the recorded pointer and sha256-pinned. Not a 16-D manifest validation: no array headers, no per-run re-aggregation, no rollout or model execution.",
+ "experiments": {
+  "EXP003": {
+   "results": [
+    "R008",
+    "R009",
+    "R010",
+    "R011",
+    "R012"
+   ],
+   "status": "REGISTERED_SOURCE_LINKED",
+   "scope": "IFG held-out locked grounding; 34 successful-rollout episodes, 2,523 valid frames (clear 13 / adjacent 12 / place 9); offline replay evaluation with settings locked before evaluation"
+  },
+  "EXP004": {
+   "results": [
+    "R013",
+    "R014",
+    "R015",
+    "R016",
+    "R017",
+    "R018"
+   ],
+   "status": "REGISTERED_SOURCE_LINKED",
+   "scope": "T43 H hurdle set, 7 episodes x 2 seeds, profile t43p2_overbar; E0 recorded 2026-10-05 (T43 W code state), V8/V11A/V11AB 2026-10-07 (T43 V11 code state), C1a/C1aN/SURF 2026-10-17 (IFG-HURDLE); same episodes and seeds, different code states"
+  },
+  "EXP005": {
+   "results": [
+    "R019",
+    "R020",
+    "R021"
+   ],
+   "status": "REGISTERED_SOURCE_LINKED; EXPLORATORY_SELECTION_CONDITIONED",
+   "scope": "34 seed pairs selected from collector episodes in which C1a succeeded; C1aN vs SURF closed-loop, same cuRobo/TrajOpt flags"
+  },
+  "EXP006": {
+   "results": [
+    "R022",
+    "R023",
+    "R024",
+    "R025",
+    "R026"
+   ],
+   "status": "REGISTERED_SOURCE_LINKED (context only)",
+   "scope": "Context results for Limitations: T58 adjacent post, CL4 extent/policy arms, T46d gripper-scope degeneracy, CL2 C0, T53 test 16"
+  }
+ },
+ "per_result": {
+  "R008": {
+   "n": 44,
+   "n_pass": 44,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R009": {
+   "n": 22,
+   "n_pass": 22,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R010": {
+   "n": 38,
+   "n_pass": 38,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R011": {
+   "n": 18,
+   "n_pass": 18,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R012": {
+   "n": 14,
+   "n_pass": 14,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R013": {
+   "n": 15,
+   "n_pass": 15,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R014": {
+   "n": 26,
+   "n_pass": 26,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R015": {
+   "n": 10,
+   "n_pass": 10,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R016": {
+   "n": 51,
+   "n_pass": 51,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R017": {
+   "n": 18,
+   "n_pass": 17,
+   "n_fail": 0,
+   "n_worklog": 1,
+   "status": "PASS (+1 source=worklog, text-presence only)"
+  },
+  "R018": {
+   "n": 13,
+   "n_pass": 13,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R019": {
+   "n": 32,
+   "n_pass": 31,
+   "n_fail": 0,
+   "n_worklog": 1,
+   "status": "PASS (+1 source=worklog, text-presence only)"
+  },
+  "R020": {
+   "n": 20,
+   "n_pass": 19,
+   "n_fail": 0,
+   "n_worklog": 1,
+   "status": "PASS (+1 source=worklog, text-presence only)"
+  },
+  "R021": {
+   "n": 24,
+   "n_pass": 24,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R022": {
+   "n": 29,
+   "n_pass": 29,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R023": {
+   "n": 33,
+   "n_pass": 33,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R024": {
+   "n": 14,
+   "n_pass": 14,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R025": {
+   "n": 5,
+   "n_pass": 5,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  },
+  "R026": {
+   "n": 8,
+   "n_pass": 8,
+   "n_fail": 0,
+   "n_worklog": 0,
+   "status": "PASS"
+  }
+ },
+ "n_checks": 434,
+ "n_pass": 431,
+ "n_fail": 0,
+ "n_worklog": 3,
+ "sources": {
+  "HS": {
+   "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "sha256": "b5fd560a7ec7c184b379734ec37a576cc6174b0d768d7725f1822e9bf4d34bdd",
+   "bytes": 27195
+  },
+  "HF": {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/ifg/ifg-heldout-locked.json",
+   "sha256": "453496f86ed7227313d8fc3a34eca90089859f91d903e37a88963832a8fe25b2",
+   "bytes": 4071
+  },
+  "TW": {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T43W.verify.json",
+   "sha256": "59e158d5c5ea11b37ce546fa60b427718c01e8ae39160483abbae9b2aba41417",
+   "bytes": 706025
+  },
+  "TV": {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T43V11AB.verify.json",
+   "sha256": "693f7de281a00c9f409daa5c32bc51c7de5b440f17b49dbb656274da5c860315",
+   "bytes": 334150
+  },
+  "HA": {
+   "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/agg.json",
+   "sha256": "dcfbea1f03eb0fcdf2b5de4c8128870f91ac9306c65dd81402704a5de5071fc2",
+   "bytes": 136214
+  },
+  "HT": {
+   "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/verify/IFG-HURDLE/timing.json",
+   "sha256": "5b6441b77bae660a408c6a4c733524b589da751014432f4198e03fd851b107b4",
+   "bytes": 2784172
+  },
+  "CA": {
+   "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T042508+0900_f15e587290f6_86dde89fb754/verify/IFG-CL1/agg.json",
+   "sha256": "dfda86f57fc4c7456df206e8d131447c8538ce6b280d59982c3fcbfb443d0b17",
+   "bytes": 174022
+  },
+  "CT": {
+   "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T042508+0900_f15e587290f6_86dde89fb754/verify/IFG-CL1/timing.json",
+   "sha256": "c7f9e7819d071025befb6b11f011ef4bb576bc03f9a9007e98fb236ebfb2498a",
+   "bytes": 4967863
+  },
+  "T58": {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "sha256": "f29e63a87cc86dae3fb763bae05711f65c525f06ccc406e878e423838825031a",
+   "bytes": 22764
+  },
+  "CL4": {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/CL4.verify.json",
+   "sha256": "0d42d094ec358921f750367f6a2802503d705463aac95010fa550d2bc8bb82db",
+   "bytes": 44670
+  },
+  "T46d": {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T46d.verify.json",
+   "sha256": "d73701d501d79b800a016186da96c75b2646bf4171c07e16e910ae4e08607f26",
+   "bytes": 242530
+  },
+  "CL2": {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T44e-CL2.verify.json",
+   "sha256": "1b4de8a3c6f2c3dedd7117299bcd213001b83aa790b1608663ddadf52d090d0a",
+   "bytes": 227787
+  },
+  "T53": {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T53.verify.json",
+   "sha256": "6a7804b82fcbc0296225ac06d0b55dbdb8e11bbe6d58247ca01a426a0fc47f52",
+   "bytes": 44578
+  },
+  "WL": {
+   "path": "/mnt/dev/AG3S_VLA-development/doc/reviews/vla_dump_20261015/WORKLOG_S0S3_KO.md",
+   "sha256": "a79d14c6c5e3c2e341ff3ec2657c783b73c501b49242601e15b6a6fb5971563f",
+   "bytes": 72157
+  }
+ },
+ "checks": [
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/G:N/iou/episode_mean",
+   "registered": 0.7730478249129286,
+   "kind": "float",
+   "found": 0.7730478249129286,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/G:N/precision/episode_mean",
+   "registered": 0.8941035687057404,
+   "kind": "float",
+   "found": 0.8941035687057404,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/G:N/recall/episode_mean",
+   "registered": 0.8381835766308009,
+   "kind": "float",
+   "found": 0.8381835766308009,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/G:N/iou/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/G:N/n_valid_frames",
+   "registered": 2523,
+   "kind": "count",
+   "found": 2523,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/iou/episode_mean",
+   "registered": 0.8320612510959661,
+   "kind": "float",
+   "found": 0.8320612510959661,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/precision/episode_mean",
+   "registered": 0.9552711342181999,
+   "kind": "float",
+   "found": 0.9552711342181999,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/recall/episode_mean",
+   "registered": 0.8355078746336647,
+   "kind": "float",
+   "found": 0.8355078746336647,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/iou/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/n_valid_frames",
+   "registered": 2523,
+   "kind": "count",
+   "found": 2523,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A/iou/episode_mean",
+   "registered": 0.876093971555441,
+   "kind": "float",
+   "found": 0.876093971555441,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A/precision/episode_mean",
+   "registered": 0.9490830942021894,
+   "kind": "float",
+   "found": 0.9490830942021894,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A/recall/episode_mean",
+   "registered": 0.8838479458205702,
+   "kind": "float",
+   "found": 0.8838479458205702,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A/iou/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/A/n_valid_frames",
+   "registered": 2523,
+   "kind": "count",
+   "found": 2523,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/B/iou/episode_mean",
+   "registered": 0.8908732856842837,
+   "kind": "float",
+   "found": 0.8908732856842837,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/B/precision/episode_mean",
+   "registered": 0.9656474792528674,
+   "kind": "float",
+   "found": 0.9656474792528674,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/B/recall/episode_mean",
+   "registered": 0.8986232884658625,
+   "kind": "float",
+   "found": 0.8986232884658625,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/B/iou/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/main_success/B/n_valid_frames",
+   "registered": 2523,
+   "kind": "count",
+   "found": 2523,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/clear/A/iou/n_episodes",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/adjacent/A/iou/n_episodes",
+   "registered": 12,
+   "kind": "count",
+   "found": 12,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/place/A/iou/n_episodes",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/clear/A/n_valid_frames",
+   "registered": 966,
+   "kind": "count",
+   "found": 966,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/adjacent/A/n_valid_frames",
+   "registered": 892,
+   "kind": "count",
+   "found": 892,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/place/A/n_valid_frames",
+   "registered": 665,
+   "kind": "count",
+   "found": 665,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/n_frames_total",
+   "registered": 3196,
+   "kind": "count",
+   "found": 3196,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/skipped/s0_invalid",
+   "registered": 29,
+   "kind": "count",
+   "found": 29,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/skipped/no_prep",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/failure_appendix/A/iou/n_episodes",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/failure_appendix/A/n_valid_frames",
+   "registered": 659,
+   "kind": "count",
+   "found": 659,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/clear/A/iou/episode_mean",
+   "registered": 0.9045400208022639,
+   "kind": "float",
+   "found": 0.9045400208022639,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/adjacent/A/iou/episode_mean",
+   "registered": 0.8538756627971203,
+   "kind": "float",
+   "found": 0.8538756627971203,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/place/A/iou/episode_mean",
+   "registered": 0.8646296454322352,
+   "kind": "float",
+   "found": 0.8646296454322352,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/clear/G:N/iou/episode_mean",
+   "registered": 0.8146361930179686,
+   "kind": "float",
+   "found": 0.8146361930179686,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/adjacent/G:N/iou/episode_mean",
+   "registered": 0.7685631795479471,
+   "kind": "float",
+   "found": 0.7685631795479471,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/place/G:N/iou/episode_mean",
+   "registered": 0.7189552648034018,
+   "kind": "float",
+   "found": 0.7189552648034018,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/clear/B/iou/episode_mean",
+   "registered": 0.9000382395052716,
+   "kind": "float",
+   "found": 0.9000382395052716,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/adjacent/B/iou/episode_mean",
+   "registered": 0.8822170362604757,
+   "kind": "float",
+   "found": 0.8822170362604757,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HS",
+   "pointer": "/by_stratum/place/B/iou/episode_mean",
+   "registered": 0.8891766849523789,
+   "kind": "float",
+   "found": 0.8891766849523789,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HF",
+   "pointer": "/source",
+   "registered": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "kind": "str",
+   "found": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HF",
+   "pointer": "/main_success/A/iou/episode_mean",
+   "registered": 0.876093971555441,
+   "kind": "float",
+   "found": 0.876093971555441,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HF",
+   "pointer": "/main_success/G:N/iou/episode_mean",
+   "registered": 0.7730478249129286,
+   "kind": "float",
+   "found": 0.7730478249129286,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R008",
+   "source": "HF",
+   "pointer": "/main_success/B/iou/episode_mean",
+   "registered": 0.8908732856842837,
+   "kind": "float",
+   "found": 0.8908732856842837,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/G:N/neighbor_fp_sum",
+   "registered": 176069.9713933181,
+   "kind": "float",
+   "found": 176069.9713933181,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/G:N/support_fp_sum",
+   "registered": 794.1824287812866,
+   "kind": "float",
+   "found": 794.1824287812866,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/G:N/robot_fp_sum",
+   "registered": 226.91838952046052,
+   "kind": "float",
+   "found": 226.91838952046052,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/G:N/FP_sum",
+   "registered": 177091.97938555796,
+   "kind": "float",
+   "found": 177091.97938555796,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/G:N/TP_sum",
+   "registered": 646534.020614443,
+   "kind": "float",
+   "found": 646534.020614443,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/neighbor_fp_sum",
+   "registered": 46237.61075299564,
+   "kind": "float",
+   "found": 46237.61075299564,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/support_fp_sum",
+   "registered": 502.3729128190385,
+   "kind": "float",
+   "found": 502.3729128190385,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/robot_fp_sum",
+   "registered": 175.16828806817324,
+   "kind": "float",
+   "found": 175.16828806817324,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/FP_sum",
+   "registered": 46915.702689606966,
+   "kind": "float",
+   "found": 46915.702689606966,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A-fk/TP_sum",
+   "registered": 647208.2973103941,
+   "kind": "float",
+   "found": 647208.2973103941,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A/neighbor_fp_sum",
+   "registered": 46329.299182381736,
+   "kind": "float",
+   "found": 46329.299182381736,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A/support_fp_sum",
+   "registered": 552.2908453349412,
+   "kind": "float",
+   "found": 552.2908453349412,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A/robot_fp_sum",
+   "registered": 2640.379443738322,
+   "kind": "float",
+   "found": 2640.379443738322,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A/FP_sum",
+   "registered": 49529.18917135399,
+   "kind": "float",
+   "found": 49529.18917135399,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/A/TP_sum",
+   "registered": 673792.8108286464,
+   "kind": "float",
+   "found": 673792.8108286464,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/B/neighbor_fp_sum",
+   "registered": 13581.713534193286,
+   "kind": "float",
+   "found": 13581.713534193286,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/B/support_fp_sum",
+   "registered": 517.4040243042206,
+   "kind": "float",
+   "found": 517.4040243042206,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/B/robot_fp_sum",
+   "registered": 2604.9563646802735,
+   "kind": "float",
+   "found": 2604.9563646802735,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/B/FP_sum",
+   "registered": 16711.370546153663,
+   "kind": "float",
+   "found": 16711.370546153663,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "HS",
+   "pointer": "/main_success/B/TP_sum",
+   "registered": 676155.6294538468,
+   "kind": "float",
+   "found": 676155.6294538468,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - G:N/diff",
+   "registered": 0.10304614664251237,
+   "kind": "float",
+   "found": 0.10304614664251237,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - G:N/ci95/0",
+   "registered": 0.08323494981427215,
+   "kind": "float",
+   "found": 0.08323494981427215,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - G:N/ci95/1",
+   "registered": 0.12313285145943233,
+   "kind": "float",
+   "found": 0.12313285145943233,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - G:N/better",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - G:N/worse",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - G:N/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - A-fk/diff",
+   "registered": 0.04403272045947481,
+   "kind": "float",
+   "found": 0.04403272045947481,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - A-fk/ci95/0",
+   "registered": 0.03801383050689502,
+   "kind": "float",
+   "found": 0.03801383050689502,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - A-fk/ci95/1",
+   "registered": 0.050055427622609866,
+   "kind": "float",
+   "found": 0.050055427622609866,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - A-fk/better",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - A-fk/worse",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/A - A-fk/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - A/diff",
+   "registered": 0.014779314128842732,
+   "kind": "float",
+   "found": 0.014779314128842732,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - A/ci95/0",
+   "registered": -0.0116789100514432,
+   "kind": "float",
+   "found": -0.0116789100514432,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - A/ci95/1",
+   "registered": 0.03944222857471973,
+   "kind": "float",
+   "found": 0.03944222857471973,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - A/better",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - A/worse",
+   "registered": 6,
+   "kind": "count",
+   "found": 6,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - A/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - G:N/diff",
+   "registered": 0.11782546077135511,
+   "kind": "float",
+   "found": 0.11782546077135511,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - G:N/ci95/0",
+   "registered": 0.08271813740590676,
+   "kind": "float",
+   "found": 0.08271813740590676,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - G:N/ci95/1",
+   "registered": 0.15130667079948473,
+   "kind": "float",
+   "found": 0.15130667079948473,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - G:N/better",
+   "registered": 32,
+   "kind": "count",
+   "found": 32,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - G:N/worse",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_iou/B - G:N/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_precision/A - A-fk/diff",
+   "registered": -0.006188040016010591,
+   "kind": "float",
+   "found": -0.006188040016010591,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_precision/A - A-fk/ci95/0",
+   "registered": -0.009116464059697633,
+   "kind": "float",
+   "found": -0.009116464059697633,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_precision/A - A-fk/ci95/1",
+   "registered": -0.004231042636771202,
+   "kind": "float",
+   "found": -0.004231042636771202,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_precision/A - A-fk/better",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_precision/A - A-fk/worse",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_recall/A - A-fk/diff",
+   "registered": 0.04834007118690548,
+   "kind": "float",
+   "found": 0.04834007118690548,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_recall/A - A-fk/ci95/0",
+   "registered": 0.041713586127408664,
+   "kind": "float",
+   "found": 0.041713586127408664,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_recall/A - A-fk/ci95/1",
+   "registered": 0.05489205054611608,
+   "kind": "float",
+   "found": 0.05489205054611608,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_recall/A - A-fk/better",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/paired_recall/A - A-fk/worse",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/main_success/B_switch_frames",
+   "registered": 125,
+   "kind": "count",
+   "found": 125,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/by_stratum/clear/paired_iou/B - A/diff",
+   "registered": -0.004501781296992498,
+   "kind": "float",
+   "found": -0.004501781296992498,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/by_stratum/adjacent/paired_iou/B - A/diff",
+   "registered": 0.0283413734633552,
+   "kind": "float",
+   "found": 0.0283413734633552,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R010",
+   "source": "HS",
+   "pointer": "/by_stratum/place/paired_iou/B - A/diff",
+   "registered": 0.02454703952014366,
+   "kind": "float",
+   "found": 0.02454703952014366,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/pre/G:N/iou/episode_mean",
+   "registered": 0.8749510904201444,
+   "kind": "float",
+   "found": 0.8749510904201444,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/pre/A-fk/iou/episode_mean",
+   "registered": 0.9075024099794847,
+   "kind": "float",
+   "found": 0.9075024099794847,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/pre/A/iou/episode_mean",
+   "registered": 0.9698507944447411,
+   "kind": "float",
+   "found": 0.9698507944447411,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/pre/B/iou/episode_mean",
+   "registered": 0.9673310030050492,
+   "kind": "float",
+   "found": 0.9673310030050492,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/pre/A/n_valid_frames",
+   "registered": 706,
+   "kind": "count",
+   "found": 706,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/pre/A/iou/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/held/G:N/iou/episode_mean",
+   "registered": 0.5377397793127421,
+   "kind": "float",
+   "found": 0.5377397793127421,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/held/A-fk/iou/episode_mean",
+   "registered": 0.64040778567183,
+   "kind": "float",
+   "found": 0.64040778567183,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/held/A/iou/episode_mean",
+   "registered": 0.8475770155578735,
+   "kind": "float",
+   "found": 0.8475770155578735,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/held/B/iou/episode_mean",
+   "registered": 0.8411570863823252,
+   "kind": "float",
+   "found": 0.8411570863823252,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/held/A/n_valid_frames",
+   "registered": 326,
+   "kind": "count",
+   "found": 326,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/held/A/iou/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/placed/G:N/iou/episode_mean",
+   "registered": 0.7767709801403806,
+   "kind": "float",
+   "found": 0.7767709801403806,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/placed/A-fk/iou/episode_mean",
+   "registered": 0.8449822910803859,
+   "kind": "float",
+   "found": 0.8449822910803859,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/placed/A/iou/episode_mean",
+   "registered": 0.845807102001963,
+   "kind": "float",
+   "found": 0.845807102001963,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/placed/B/iou/episode_mean",
+   "registered": 0.8728342906503719,
+   "kind": "float",
+   "found": 0.8728342906503719,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/placed/A/n_valid_frames",
+   "registered": 1491,
+   "kind": "count",
+   "found": 1491,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R011",
+   "source": "HS",
+   "pointer": "/by_grasp_state/placed/A/iou/n_episodes",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/threshold",
+   "registered": 0.5904207590672415,
+   "kind": "float",
+   "found": 0.5904207590672415,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/n_frames",
+   "registered": 2420,
+   "kind": "count",
+   "found": 2420,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/wrong_choices",
+   "registered": 100,
+   "kind": "count",
+   "found": 100,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/alerts",
+   "registered": 238,
+   "kind": "count",
+   "found": 238,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/alerts_on_wrong",
+   "registered": 85,
+   "kind": "count",
+   "found": 85,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/wrong_caught_ratio",
+   "registered": 0.85,
+   "kind": "float",
+   "found": 0.85,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/false_alarms",
+   "registered": 153,
+   "kind": "count",
+   "found": 153,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/fp_removed_ratio",
+   "registered": 0.8788327204996255,
+   "kind": "float",
+   "found": 0.8788327204996255,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/tp_lost_ratio",
+   "registered": 0.06698843965768998,
+   "kind": "float",
+   "found": 0.06698843965768998,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_success/auroc_wrong",
+   "registered": 0.9251551724137931,
+   "kind": "float",
+   "found": 0.9251551724137931,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_all/n_frames",
+   "registered": 3068,
+   "kind": "count",
+   "found": 3068,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_all/wrong_choices",
+   "registered": 178,
+   "kind": "count",
+   "found": 178,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HS",
+   "pointer": "/gate_all/auroc_wrong",
+   "registered": 0.9242758835193033,
+   "kind": "float",
+   "found": 0.9242758835193033,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R012",
+   "source": "HF",
+   "pointer": "/gate/auroc_wrong",
+   "registered": 0.9251551724137931,
+   "kind": "float",
+   "found": 0.9251551724137931,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/date",
+   "registered": "2026-10-05 (E0",
+   "kind": "contains",
+   "found": "2026-10-05 (E0 / V1 / V3 / V4, incident); 2026-10-06 (V5 rerun, blind round, final aggregation)",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/settings/E0",
+   "registered": "server --no-safe; client no safe flags",
+   "kind": "str",
+   "found": "server --no-safe; client no safe flags",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/code_state/snapshot_1/arms",
+   "registered": "E0 V1 V3 V4",
+   "kind": "str",
+   "found": "E0 V1 V3 V4",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/code_state/snapshot_1/snapshot_txt/1",
+   "registered": "089516ef9c23be2a1d390d0eb8d6f8990b75d7c6",
+   "kind": "contains",
+   "found": "benchmark git archive 089516ef9c23be2a1d390d0eb8d6f8990b75d7c6 (HEAD; working tree had uncommitted .py edits by others: not included)",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/n",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/success",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/grasp",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/place",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/runs_obstacle_stop",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/runs_client_robot_collision",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/runs_client_payload_collision",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/hold_chunks",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/runs_with_physics_replay_contact",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R013",
+   "source": "TW",
+   "pointer": "/numbers/summary_per_arm/E0~1H/round_trip_ms_pooled/median",
+   "registered": 199.33629035949707,
+   "kind": "float",
+   "found": 199.33629035949707,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/date",
+   "registered": "2026-10-07",
+   "kind": "str",
+   "found": "2026-10-07",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/code_state/head",
+   "registered": "3ca1b21",
+   "kind": "str",
+   "found": "3ca1b21",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V8/success",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V8/grasp",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V8/place",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V8/released",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V8/success_rel",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V8/success_ct",
+   "registered": 8,
+   "kind": "count",
+   "found": 8,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/totals_old_rule/H/V8/n",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11A/success",
+   "registered": 10,
+   "kind": "count",
+   "found": 10,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11A/grasp",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11A/place",
+   "registered": 10,
+   "kind": "count",
+   "found": 10,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11A/released",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11A/success_rel",
+   "registered": 10,
+   "kind": "count",
+   "found": 10,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11A/success_ct",
+   "registered": 8,
+   "kind": "count",
+   "found": 8,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/totals_old_rule/H/V11A/n",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11AB/success",
+   "registered": 12,
+   "kind": "count",
+   "found": 12,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11AB/grasp",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11AB/place",
+   "registered": 12,
+   "kind": "count",
+   "found": 12,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11AB/released",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11AB/success_rel",
+   "registered": 12,
+   "kind": "count",
+   "found": 12,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_totals_by_rule/V11AB/success_ct",
+   "registered": 12,
+   "kind": "count",
+   "found": 12,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/totals_old_rule/H/V11AB/n",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_pairs_z4_ct_rule/V11AB_vs_V8/success_ct/A_only",
+   "registered": 5,
+   "kind": "count",
+   "found": 5,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_pairs_z4_ct_rule/V11AB_vs_V8/success_ct/B_only",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R014",
+   "source": "TV",
+   "pointer": "/numbers/H_pairs_z4_ct_rule/V11AB_vs_V8/success_ct/mcnemar_exact_p",
+   "registered": 0.21875,
+   "kind": "float",
+   "found": 0.21875,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R015",
+   "source": "TV",
+   "pointer": "/numbers/contact_table_by_body_phase/0/body",
+   "registered": "apple",
+   "kind": "str",
+   "found": "apple",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R015",
+   "source": "TV",
+   "pointer": "/numbers/contact_table_by_body_phase/0/phase",
+   "registered": "carry",
+   "kind": "str",
+   "found": "carry",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R015",
+   "source": "TV",
+   "pointer": "/numbers/contact_table_by_body_phase/0/n_runs/V8",
+   "registered": 5,
+   "kind": "count",
+   "found": 5,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R015",
+   "source": "TV",
+   "pointer": "/numbers/contact_table_by_body_phase/0/n_runs/V11A",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R015",
+   "source": "TV",
+   "pointer": "/numbers/contact_table_by_body_phase/0/n_runs/V11AB",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R015",
+   "source": "TV",
+   "pointer": "/numbers/contact_table_by_body_phase/0/n_rows/V8",
+   "registered": 10,
+   "kind": "count",
+   "found": 10,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R015",
+   "source": "TV",
+   "pointer": "/numbers/contact_table_by_body_phase/0/n_rows/V11A",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R015",
+   "source": "TV",
+   "pointer": "/numbers/contact_table_by_body_phase/0/n_rows/V11AB",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R015",
+   "source": "TV",
+   "pointer": "/numbers/contact_table_by_body_phase/0/max_pen_mm/V11AB",
+   "registered": 0.0,
+   "kind": "float",
+   "found": 0.0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/n_items",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/n_runs_scored",
+   "registered": 42,
+   "kind": "count",
+   "found": 42,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/n",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/S_old",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/S_contact",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/grasp",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/pre_release_contact_runs",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/post_release_contact_runs",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/nonauth_target_runs",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/obstacle_stop_runs",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/hold_chunks_sum",
+   "registered": 86,
+   "kind": "count",
+   "found": 86,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/completion_s/median",
+   "registered": 16.533333333333335,
+   "kind": "float",
+   "found": 16.533333333333335,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/completion_s/n",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/n",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/S_old",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/S_contact",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/grasp",
+   "registered": 13,
+   "kind": "count",
+   "found": 13,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/pre_release_contact_runs",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/post_release_contact_runs",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/nonauth_target_runs",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/obstacle_stop_runs",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/hold_chunks_sum",
+   "registered": 82,
+   "kind": "count",
+   "found": 82,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/completion_s/median",
+   "registered": 16.533333333333335,
+   "kind": "float",
+   "found": 16.533333333333335,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/completion_s/n",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/n",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/S_old",
+   "registered": 8,
+   "kind": "count",
+   "found": 8,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/S_contact",
+   "registered": 7,
+   "kind": "count",
+   "found": 7,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/grasp",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/pre_release_contact_runs",
+   "registered": 3,
+   "kind": "count",
+   "found": 3,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/post_release_contact_runs",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/nonauth_target_runs",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/obstacle_stop_runs",
+   "registered": 3,
+   "kind": "count",
+   "found": 3,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/hold_chunks_sum",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/completion_s/median",
+   "registered": 15.2,
+   "kind": "float",
+   "found": 15.2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/completion_s/n",
+   "registered": 8,
+   "kind": "count",
+   "found": 8,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/failure_mode/ok",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/failure_mode/slip_in_transport",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/failure_mode/no_grasp",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1a/failure_mode/not_placed",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/failure_mode/ok",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/failure_mode/slip_in_transport",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/failure_mode/no_grasp",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/C1aN/failure_mode/not_placed",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/failure_mode/ok",
+   "registered": 8,
+   "kind": "count",
+   "found": 8,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/failure_mode/no_grasp",
+   "registered": 5,
+   "kind": "count",
+   "found": 5,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/failure_mode/slip_at_lift",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/T43_V11AB_reference/n",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/T43_V11AB_reference/S_old",
+   "registered": 12,
+   "kind": "count",
+   "found": 12,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/T43_V11AB_reference/S_contact",
+   "registered": 12,
+   "kind": "count",
+   "found": 12,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/surface_applied_sum",
+   "registered": 510,
+   "kind": "count",
+   "found": 510,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R016",
+   "source": "HA",
+   "pointer": "/arms/SURF/surface_layer_chunks_sum",
+   "registered": 580,
+   "kind": "count",
+   "found": 580,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success_ct/n_pairs",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success_ct/both",
+   "registered": 6,
+   "kind": "count",
+   "found": 6,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success_ct/C1aN_only",
+   "registered": 5,
+   "kind": "count",
+   "found": 5,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success_ct/SURF_only",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success_ct/neither",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success_ct/mcnemar_exact_p",
+   "registered": 0.21875,
+   "kind": "float",
+   "found": 0.21875,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success/n_pairs",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success/both",
+   "registered": 7,
+   "kind": "count",
+   "found": 7,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success/C1aN_only",
+   "registered": 4,
+   "kind": "count",
+   "found": 4,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success/SURF_only",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success/neither",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1aN_vs_SURF/success/mcnemar_exact_p",
+   "registered": 0.375,
+   "kind": "float",
+   "found": 0.375,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1a_vs_C1aN/success_ct/both",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1a_vs_C1aN/success_ct/C1a_only",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1a_vs_C1aN/success_ct/C1aN_only",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1a_vs_C1aN/success_ct/neither",
+   "registered": 3,
+   "kind": "count",
+   "found": 3,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R017",
+   "source": "HA",
+   "pointer": "/pairs/C1a_vs_C1aN/success_ct/mcnemar_exact_p",
+   "registered": 1.0,
+   "kind": "float",
+   "found": 1.0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/budget_ms",
+   "registered": 533.3333333333334,
+   "kind": "float",
+   "found": 533.3333333333334,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/C1a/n_requests",
+   "registered": 976,
+   "kind": "count",
+   "found": 976,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/C1a/stages/client_round_trip/median",
+   "registered": 1256.0148239135742,
+   "kind": "float",
+   "found": 1256.0148239135742,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/C1a/stages/client_round_trip/p95",
+   "registered": 2034.055233001709,
+   "kind": "float",
+   "found": 2034.055233001709,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/C1a/stages/server_total/median",
+   "registered": 910.2747109718621,
+   "kind": "float",
+   "found": 910.2747109718621,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/C1aN/n_requests",
+   "registered": 976,
+   "kind": "count",
+   "found": 976,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/C1aN/stages/client_round_trip/median",
+   "registered": 1177.14262008667,
+   "kind": "float",
+   "found": 1177.14262008667,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/C1aN/stages/client_round_trip/p95",
+   "registered": 2151.6876816749573,
+   "kind": "float",
+   "found": 2151.6876816749573,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/C1aN/stages/server_total/median",
+   "registered": 855.4650004953146,
+   "kind": "float",
+   "found": 855.4650004953146,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/SURF/n_requests",
+   "registered": 973,
+   "kind": "count",
+   "found": 973,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/SURF/stages/client_round_trip/median",
+   "registered": 3330.8560848236084,
+   "kind": "float",
+   "found": 3330.8560848236084,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/SURF/stages/client_round_trip/p95",
+   "registered": 4978.579664230347,
+   "kind": "float",
+   "found": 4978.579664230347,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R018",
+   "source": "HT",
+   "pointer": "/summary/SURF/stages/server_total/median",
+   "registered": 2998.2956275343895,
+   "kind": "float",
+   "found": 2998.2956275343895,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/n_seeds",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/C1a_reference/n",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/C1a_reference/n_success",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/C1aN/n_runs",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/C1aN/n_success",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/C1aN/n_primary",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/SURF/n_runs",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/SURF/n_success",
+   "registered": 28,
+   "kind": "count",
+   "found": 28,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/SURF/n_primary",
+   "registered": 28,
+   "kind": "count",
+   "found": 28,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_primary/both",
+   "registered": 28,
+   "kind": "count",
+   "found": 28,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_primary/only_C1aN",
+   "registered": 6,
+   "kind": "count",
+   "found": 6,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_primary/only_SURF",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_primary/neither",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_primary/missing",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_primary/mcnemar_exact_p",
+   "registered": 0.03125,
+   "kind": "float",
+   "found": 0.03125,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_success/both",
+   "registered": 28,
+   "kind": "count",
+   "found": 28,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_success/only_C1aN",
+   "registered": 6,
+   "kind": "count",
+   "found": 6,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_success/only_SURF",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_success/neither",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_success/missing",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/pair_success/mcnemar_exact_p",
+   "registered": 0.03125,
+   "kind": "float",
+   "found": 0.03125,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/SURF/failure_modes/no_grasp",
+   "registered": 5,
+   "kind": "count",
+   "found": 5,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/SURF/failure_modes/not_placed",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/SURF/failure_modes/ok",
+   "registered": 25,
+   "kind": "count",
+   "found": 25,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/C1aN/failure_modes/ok",
+   "registered": 27,
+   "kind": "count",
+   "found": 27,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/by_stratum/clear/pair_primary/only_C1aN",
+   "registered": 4,
+   "kind": "count",
+   "found": 4,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/by_stratum/adjacent/pair_primary/only_C1aN",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/by_stratum/place/pair_primary/only_C1aN",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/by_stratum/clear/pair_primary/both",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/by_stratum/adjacent/pair_primary/both",
+   "registered": 11,
+   "kind": "count",
+   "found": 11,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R019",
+   "source": "CA",
+   "pointer": "/by_stratum/place/pair_primary/both",
+   "registered": 8,
+   "kind": "count",
+   "found": 8,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/C1aN/hold_chunks_sum",
+   "registered": 50,
+   "kind": "count",
+   "found": 50,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF/hold_chunks_sum",
+   "registered": 19,
+   "kind": "count",
+   "found": 19,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/C1aN/runs_with_hold",
+   "registered": 23,
+   "kind": "count",
+   "found": 23,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF/runs_with_hold",
+   "registered": 8,
+   "kind": "count",
+   "found": 8,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/C1aN/completion_s/median",
+   "registered": 16.0,
+   "kind": "float",
+   "found": 16.0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/C1aN/completion_s/n",
+   "registered": 34,
+   "kind": "count",
+   "found": 34,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF/completion_s/median",
+   "registered": 14.666666666666668,
+   "kind": "float",
+   "found": 14.666666666666668,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF/completion_s/n",
+   "registered": 28,
+   "kind": "count",
+   "found": 28,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/C1aN/n_neighbour",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF/n_neighbour",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/C1aN/n_nonauth_target",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF/n_nonauth_target",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/C1aN/n_obstacle",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF/n_obstacle",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF_diagnostics/n_chunks",
+   "registered": 2550,
+   "kind": "count",
+   "found": 2550,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF_diagnostics/n_applied",
+   "registered": 908,
+   "kind": "count",
+   "found": 908,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF_diagnostics/oracle_not_applied_why/identity_unresolved",
+   "registered": 43,
+   "kind": "count",
+   "found": 43,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF_diagnostics/oracle_not_applied_why/attention_surface_abstained (no_region)",
+   "registered": 8,
+   "kind": "count",
+   "found": 8,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R020",
+   "source": "CA",
+   "pointer": "/SURF_diagnostics/oracle_not_applied_why/no_target_free_layer",
+   "registered": 1591,
+   "kind": "count",
+   "found": 1591,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/budget_ms",
+   "registered": 533.3333333333334,
+   "kind": "float",
+   "found": 533.3333333333334,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/C1aN/n_requests",
+   "registered": 2516,
+   "kind": "count",
+   "found": 2516,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/n_requests",
+   "registered": 2516,
+   "kind": "count",
+   "found": 2516,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/C1aN/stages/client_round_trip/median",
+   "registered": 1137.4754905700684,
+   "kind": "float",
+   "found": 1137.4754905700684,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/C1aN/stages/client_round_trip/p95",
+   "registered": 1923.847734928131,
+   "kind": "float",
+   "found": 1923.847734928131,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/client_round_trip/median",
+   "registered": 2857.689142227173,
+   "kind": "float",
+   "found": 2857.689142227173,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/client_round_trip/p95",
+   "registered": 3623.0645775794983,
+   "kind": "float",
+   "found": 3623.0645775794983,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/C1aN/stages/server_total/median",
+   "registered": 796.4624175801873,
+   "kind": "float",
+   "found": 796.4624175801873,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/server_total/median",
+   "registered": 2586.567224934697,
+   "kind": "float",
+   "found": 2586.567224934697,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/profile_attention_surface/median",
+   "registered": 1663.4485451504588,
+   "kind": "float",
+   "found": 1663.4485451504588,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/surface_build/median",
+   "registered": 827.567,
+   "kind": "float",
+   "found": 827.567,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/surface_solve/median",
+   "registered": 285.10400000000004,
+   "kind": "float",
+   "found": 285.10400000000004,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/surface_codes/median",
+   "registered": 383.465,
+   "kind": "float",
+   "found": 383.465,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/surface_codes/n",
+   "registered": 2487,
+   "kind": "count",
+   "found": 2487,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/profile_robot_render_mask/median",
+   "registered": 158.57859468087554,
+   "kind": "float",
+   "found": 158.57859468087554,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/render_ms_record/median",
+   "registered": 157.227,
+   "kind": "float",
+   "found": 157.227,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/C1aN/stages/client_round_trip/frac_over_budget",
+   "registered": 1.0,
+   "kind": "float",
+   "found": 1.0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/client_round_trip/frac_over_budget",
+   "registered": 1.0,
+   "kind": "float",
+   "found": 1.0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/C1aN/stages/server_infer_vla_plus_attention/median",
+   "registered": 235.64596055075526,
+   "kind": "float",
+   "found": 235.64596055075526,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/server_infer_vla_plus_attention/median",
+   "registered": 220.51269887015224,
+   "kind": "float",
+   "found": 220.51269887015224,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/C1aN/stages/server_ag3s/median",
+   "registered": 288.6834470555186,
+   "kind": "float",
+   "found": 288.6834470555186,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/server_ag3s/median",
+   "registered": 2142.0471272431314,
+   "kind": "float",
+   "found": 2142.0471272431314,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/C1aN/stages/server_trajopt/median",
+   "registered": 187.97238916158676,
+   "kind": "float",
+   "found": 187.97238916158676,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R021",
+   "source": "CT",
+   "pointer": "/summary/SURF/stages/server_trajopt/median",
+   "registered": 153.17066758871078,
+   "kind": "float",
+   "found": 153.17066758871078,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/date",
+   "registered": "2026-10-13",
+   "kind": "str",
+   "found": "2026-10-13",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/verdict",
+   "registered": "robot-post contact in 6/6 runs (E0 3/3, ON 3/3)",
+   "kind": "contains",
+   "found": "Without obstacle: E0 3/3 and ON 3/3 success (ON ep1830 2 HOLD chunks). With the post: robot-post contact in 6/6 runs (E0 3/3, ON 3/3), all hand-obstacle (EE_BODY_L/R or ee_finger_r1 mesh), first contact t E0 83/54/96 vs ON 75/55/94; ON had 0 HOLD chunks and every executed chunk budget_only. ON diagnosis: post observed in every chunk (49-198 cloud points); ep1830: 1484-2054 post voxels removed from the target-free layer in every chunk (target exclusion); ep1925 / ep1623: not removed (13 voxels in the last 1925 chunk), TO final clearance 4.7-5.2 mm in the last chunks; in all three the real hand point closest to the post lies 12.7-38.8 mm outside the hand constraint spheres.",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/verdict",
+   "registered": "12.7-38.8 mm outside the hand constraint spheres",
+   "kind": "contains",
+   "found": "Without obstacle: E0 3/3 and ON 3/3 success (ON ep1830 2 HOLD chunks). With the post: robot-post contact in 6/6 runs (E0 3/3, ON 3/3), all hand-obstacle (EE_BODY_L/R or ee_finger_r1 mesh), first contact t E0 83/54/96 vs ON 75/55/94; ON had 0 HOLD chunks and every executed chunk budget_only. ON diagnosis: post observed in every chunk (49-198 cloud points); ep1830: 1484-2054 post voxels removed from the target-free layer in every chunk (target exclusion); ep1925 / ep1623: not removed (13 voxels in the last 1925 chunk), TO final clearance 4.7-5.2 mm in the last chunks; in all three the real hand point closest to the post lies 12.7-38.8 mm outside the hand constraint spheres.",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1E0_ep1925_s19251/success",
+   "registered": false,
+   "kind": "str",
+   "found": false,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/noobs~1E0_ep1925_s19251/success",
+   "registered": true,
+   "kind": "str",
+   "found": true,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1E0_ep1925_s19251/obstacle_rows_by_class/hand-obstacle",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1E0_ep1925_s19251/qpos_mismatch_rows",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1ON_ep1925_s19251/success",
+   "registered": false,
+   "kind": "str",
+   "found": false,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/noobs~1ON_ep1925_s19251/success",
+   "registered": true,
+   "kind": "str",
+   "found": true,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1ON_ep1925_s19251/obstacle_rows_by_class/hand-obstacle",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1ON_ep1925_s19251/qpos_mismatch_rows",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1E0_ep1830_s18301/success",
+   "registered": false,
+   "kind": "str",
+   "found": false,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/noobs~1E0_ep1830_s18301/success",
+   "registered": true,
+   "kind": "str",
+   "found": true,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1E0_ep1830_s18301/obstacle_rows_by_class/hand-obstacle",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1E0_ep1830_s18301/qpos_mismatch_rows",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1ON_ep1830_s18301/success",
+   "registered": false,
+   "kind": "str",
+   "found": false,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/noobs~1ON_ep1830_s18301/success",
+   "registered": true,
+   "kind": "str",
+   "found": true,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1ON_ep1830_s18301/obstacle_rows_by_class/hand-obstacle",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1ON_ep1830_s18301/qpos_mismatch_rows",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1E0_ep1623_s16231/success",
+   "registered": false,
+   "kind": "str",
+   "found": false,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/noobs~1E0_ep1623_s16231/success",
+   "registered": true,
+   "kind": "str",
+   "found": true,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1E0_ep1623_s16231/obstacle_rows_by_class/hand-obstacle",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1E0_ep1623_s16231/qpos_mismatch_rows",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1ON_ep1623_s16231/success",
+   "registered": false,
+   "kind": "str",
+   "found": false,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/noobs~1ON_ep1623_s16231/success",
+   "registered": true,
+   "kind": "str",
+   "found": true,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1ON_ep1623_s16231/obstacle_rows_by_class/hand-obstacle",
+   "registered": 1,
+   "kind": "count",
+   "found": 1,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R022",
+   "source": "T58",
+   "pointer": "/numbers/runs/obs~1ON_ep1623_s16231/qpos_mismatch_rows",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/date",
+   "registered": "2026-10-15",
+   "kind": "str",
+   "found": "2026-10-15",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/execution/runs",
+   "registered": 90,
+   "kind": "count",
+   "found": 90,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/execution/done",
+   "registered": 90,
+   "kind": "count",
+   "found": 90,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X1/success",
+   "registered": 10,
+   "kind": "count",
+   "found": 10,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X1/success_ct",
+   "registered": 10,
+   "kind": "count",
+   "found": 10,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X1/FT_target_contact_runs_any_window",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/FT_target_contact_runs/X1",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X2/success",
+   "registered": 7,
+   "kind": "count",
+   "found": 7,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X2/success_ct",
+   "registered": 5,
+   "kind": "count",
+   "found": 5,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X2/FT_target_contact_runs_any_window",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/FT_target_contact_runs/X2",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X3/success",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X3/success_ct",
+   "registered": 7,
+   "kind": "count",
+   "found": 7,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X3/FT_target_contact_runs_any_window",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/FT_target_contact_runs/X3",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X4/success",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X4/success_ct",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/X4/FT_target_contact_runs_any_window",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/FT_target_contact_runs/X4",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/G4/success",
+   "registered": 7,
+   "kind": "count",
+   "found": 7,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/G4/success_ct",
+   "registered": 7,
+   "kind": "count",
+   "found": 7,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/arms/G4/FT_target_contact_runs_any_window",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/FT_target_contact_runs/G4",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/pairs_agg/X4_vs_G4/success_ct/n_pairs",
+   "registered": 18,
+   "kind": "count",
+   "found": 18,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/pairs_agg/X4_vs_G4/success_ct/both",
+   "registered": 5,
+   "kind": "count",
+   "found": 5,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/pairs_agg/X4_vs_G4/success_ct/A_only",
+   "registered": 4,
+   "kind": "count",
+   "found": 4,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/pairs_agg/X4_vs_G4/success_ct/B_only",
+   "registered": 2,
+   "kind": "count",
+   "found": 2,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/pairs_agg/X4_vs_G4/success_ct/neither",
+   "registered": 7,
+   "kind": "count",
+   "found": 7,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/pairs_agg/X4_vs_G4/success_ct/A_total",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/pairs_agg/X4_vs_G4/success_ct/B_total",
+   "registered": 7,
+   "kind": "count",
+   "found": 7,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/pairs_agg/X4_vs_G4/success_ct/mcnemar_exact_p",
+   "registered": 0.6875,
+   "kind": "float",
+   "found": 0.6875,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/before/CL2_C0/success",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R023",
+   "source": "CL4",
+   "pointer": "/numbers/before/CL2_C0/success_ct",
+   "registered": 12,
+   "kind": "count",
+   "found": 12,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/date",
+   "registered": "2026-10-12",
+   "kind": "str",
+   "found": "2026-10-12",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C1aF1/pre8close/nonauth_rows_evaluated",
+   "registered": 349920,
+   "kind": "count",
+   "found": 349920,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C1aF1/pre8close/nonauth_rows_near_tgt_plan16",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C1aF1/pre8close/nonauth_rows_near_tgt_exec",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C1aF1/pre8close/chunks",
+   "registered": 162,
+   "kind": "count",
+   "found": 162,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C1a/pre8close/nonauth_rows_evaluated",
+   "registered": 349920,
+   "kind": "count",
+   "found": 349920,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C1a/pre8close/nonauth_rows_near_tgt_plan16",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C1a/pre8close/nonauth_rows_near_tgt_exec",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C1a/pre8close/chunks",
+   "registered": 162,
+   "kind": "count",
+   "found": 162,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C2p/pre8close/nonauth_rows_evaluated",
+   "registered": 349920,
+   "kind": "count",
+   "found": 349920,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C2p/pre8close/nonauth_rows_near_tgt_plan16",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C2p/pre8close/nonauth_rows_near_tgt_exec",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/numbers/item1_degeneracy_gripper_scope/C2p/pre8close/chunks",
+   "registered": 162,
+   "kind": "count",
+   "found": 162,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R024",
+   "source": "T46d",
+   "pointer": "/verdict_facts/gripper_scope_degenerate_nonauth_rows_near_target",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R025",
+   "source": "CL2",
+   "pointer": "/date",
+   "registered": "2026-10-12",
+   "kind": "str",
+   "found": "2026-10-12",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R025",
+   "source": "CL2",
+   "pointer": "/numbers/arms/C0/t1_success/n_runs",
+   "registered": 18,
+   "kind": "count",
+   "found": 18,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R025",
+   "source": "CL2",
+   "pointer": "/numbers/arms/C0/t1_success/task_success",
+   "registered": 14,
+   "kind": "count",
+   "found": 14,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R025",
+   "source": "CL2",
+   "pointer": "/numbers/arms/C0/t1_success/success_ct",
+   "registered": 12,
+   "kind": "count",
+   "found": 12,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R025",
+   "source": "CL2",
+   "pointer": "/numbers/arms/C0/t4_hold/hold_chunks_total",
+   "registered": 101,
+   "kind": "count",
+   "found": 101,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R026",
+   "source": "T53",
+   "pointer": "/date",
+   "registered": "2026-10-13",
+   "kind": "str",
+   "found": "2026-10-13",
+   "status": "PASS"
+  },
+  {
+   "result_id": "R026",
+   "source": "T53",
+   "pointer": "/numbers/n_episodes",
+   "registered": 16,
+   "kind": "count",
+   "found": 16,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R026",
+   "source": "T53",
+   "pointer": "/numbers/runs_complete",
+   "registered": 16,
+   "kind": "count",
+   "found": 16,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R026",
+   "source": "T53",
+   "pointer": "/numbers/task_success",
+   "registered": 9,
+   "kind": "count",
+   "found": 9,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R026",
+   "source": "T53",
+   "pointer": "/numbers/success_ct",
+   "registered": 7,
+   "kind": "count",
+   "found": 7,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R026",
+   "source": "T53",
+   "pointer": "/numbers/hold_chunks_total",
+   "registered": 37,
+   "kind": "count",
+   "found": 37,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R026",
+   "source": "T53",
+   "pointer": "/numbers/hold_runs",
+   "registered": 10,
+   "kind": "count",
+   "found": 10,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R026",
+   "source": "T53",
+   "pointer": "/numbers/replay_qpos_mismatch_rows_total",
+   "registered": 0,
+   "kind": "count",
+   "found": 0,
+   "status": "PASS"
+  },
+  {
+   "result_id": "R009",
+   "source": "derived",
+   "pointer": "1 - /main_success/A/neighbor_fp_sum / /main_success/G:N/neighbor_fp_sum",
+   "registered": {
+    "value": 0.7368699567804897
+   },
+   "kind": "derived",
+   "found": {
+    "value": 0.7368699567804897
+   },
+   "status": "PASS",
+   "note": "DERIVED"
+  },
+  {
+   "result_id": "R009",
+   "source": "derived",
+   "pointer": "1 - /main_success/B/neighbor_fp_sum / /main_success/G:N/neighbor_fp_sum",
+   "registered": {
+    "value": 0.922861840513091
+   },
+   "kind": "derived",
+   "found": {
+    "value": 0.922861840513091
+   },
+   "status": "PASS",
+   "note": "DERIVED"
+  },
+  {
+   "result_id": "R013",
+   "source": "derived",
+   "pointer": "counts over /numbers/per_run keys with prefix E0/H/ (expected n 14, success 0, grasp 11, place 0, obstacle_stop 13)",
+   "registered": {
+    "n": 14,
+    "success": 0,
+    "grasp": 11,
+    "place": 0,
+    "obstacle_stop": 13
+   },
+   "kind": "derived",
+   "found": {
+    "n": 14,
+    "success": 0,
+    "grasp": 11,
+    "place": 0,
+    "obstacle_stop": 13
+   },
+   "status": "PASS",
+   "note": "DERIVED"
+  },
+  {
+   "result_id": "R015",
+   "source": "derived",
+   "pointer": "len(/numbers/ct_contact_fail_among_old_success/<arm>) (expected V8 5, V11A 2, V11AB 0)",
+   "registered": {
+    "V8": 5,
+    "V11A": 2,
+    "V11AB": 0
+   },
+   "kind": "derived",
+   "found": {
+    "V8": 5,
+    "V11A": 2,
+    "V11AB": 0
+   },
+   "status": "PASS",
+   "note": "DERIVED"
+  },
+  {
+   "result_id": "R022",
+   "source": "derived",
+   "pointer": "sum(/numbers/runs/obs~1*/obstacle_rows_by_class) > 0 (expected 6 of 6; E0 3, ON 3)",
+   "registered": {
+    "with_post_runs": 6,
+    "with_post_contact": 6,
+    "E0": 3,
+    "ON": 3
+   },
+   "kind": "derived",
+   "found": {
+    "with_post_runs": 6,
+    "with_post_contact": 6,
+    "E0": 3,
+    "ON": 3
+   },
+   "status": "PASS",
+   "note": "DERIVED"
+  },
+  {
+   "result_id": "R022",
+   "source": "derived",
+   "pointer": "min/max over /numbers/on_diagnosis/*/cover_rows/*/closest_point_outside_spheres_mm (expected 12.72 / 38.8)",
+   "registered": {
+    "min": 12.72,
+    "max": 38.8
+   },
+   "kind": "derived",
+   "found": {
+    "min": 12.72,
+    "max": 38.8,
+    "n_rows": 19
+   },
+   "status": "PASS",
+   "note": "DERIVED"
+  },
+  {
+   "result_id": "R019",
+   "source": "WL",
+   "pointer": "EXP005 registered interpretation sentence (WORKLOG 2026-10-18 14:30)",
+   "registered": "C1a가 성공한 34개 조건에서 C1aN은 34개, SURF는 28개를 성공했다. 이는 기준선 성공 사례의 보존 여부를 보여주지만, 성공 여부로 선별하지 않은 전체 장면에서의 성능 차이를 추정하지는 못한다.",
+   "kind": "worklog_text",
+   "found": true,
+   "status": "source=worklog",
+   "text_present": true
+  },
+  {
+   "result_id": "R017",
+   "source": "WL",
+   "pointer": "WORKLOG 2026-10-17 23:40 discordant-pair wording that differs from agg.json (JSON is authoritative)",
+   "registered": "C1aN vs SURF: C1aN만 성공 6, SURF만 성공 2, p = 0.22",
+   "kind": "worklog_text",
+   "found": true,
+   "status": "source=worklog",
+   "text_present": true
+  },
+  {
+   "result_id": "R020",
+   "source": "WL",
+   "pointer": "WORKLOG 2026-10-17 03:30 completion-time scope wording (\"둘 다 성공 28쌍\"); agg.json C1aN median is over n=34",
+   "registered": "완료 시간 median (둘 다 성공 28쌍)",
+   "kind": "worklog_text",
+   "found": true,
+   "status": "source=worklog",
+   "text_present": true
+  }
+ ]
+}

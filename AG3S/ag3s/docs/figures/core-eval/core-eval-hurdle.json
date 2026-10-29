@@ -1,0 +1,138 @@
+{
+ "success": {
+  "vla": 0,
+  "ag3s": 6
+ },
+ "hurdle_contact": {
+  "vla": 12,
+  "ag3s": 2
+ },
+ "per_scene": {
+  "119": {
+   "vla_k0": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 29.2
+   },
+   "vla_k1": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 29.2
+   },
+   "ag3s_k0": {
+    "label": "성공",
+    "max_hand_height_above_table_cm": 35.7
+   },
+   "ag3s_k1": {
+    "label": "성공",
+    "max_hand_height_above_table_cm": 31.9
+   }
+  },
+  "211": {
+   "vla_k0": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 28.8
+   },
+   "vla_k1": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 28.3
+   },
+   "ag3s_k0": {
+    "label": "이웃과일접촉",
+    "max_hand_height_above_table_cm": 32.7
+   },
+   "ag3s_k1": {
+    "label": "못놓음",
+    "max_hand_height_above_table_cm": 32.2
+   }
+  },
+  "250": {
+   "vla_k0": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 28.7
+   },
+   "vla_k1": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 28.7
+   },
+   "ag3s_k0": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 45.6
+   },
+   "ag3s_k1": {
+    "label": "성공",
+    "max_hand_height_above_table_cm": 47.2
+   }
+  },
+  "320": {
+   "vla_k0": {
+    "label": "쥐지못함",
+    "max_hand_height_above_table_cm": 28.4
+   },
+   "vla_k1": {
+    "label": "쥐지못함",
+    "max_hand_height_above_table_cm": 28.5
+   },
+   "ag3s_k0": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 37.7
+   },
+   "ag3s_k1": {
+    "label": "성공",
+    "max_hand_height_above_table_cm": 37.7
+   }
+  },
+  "850": {
+   "vla_k0": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 29.4
+   },
+   "vla_k1": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 29.9
+   },
+   "ag3s_k0": {
+    "label": "성공",
+    "max_hand_height_above_table_cm": 31.4
+   },
+   "ag3s_k1": {
+    "label": "성공",
+    "max_hand_height_above_table_cm": 31.9
+   }
+  },
+  "954": {
+   "vla_k0": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 29.1
+   },
+   "vla_k1": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 29.0
+   },
+   "ag3s_k0": {
+    "label": "쥐지못함",
+    "max_hand_height_above_table_cm": 34.1
+   },
+   "ag3s_k1": {
+    "label": "쥐지못함",
+    "max_hand_height_above_table_cm": 36.7
+   }
+  },
+  "1345": {
+   "vla_k0": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 28.7
+   },
+   "vla_k1": {
+    "label": "허들접촉",
+    "max_hand_height_above_table_cm": 28.7
+   },
+   "ag3s_k0": {
+    "label": "쥐지못함",
+    "max_hand_height_above_table_cm": 34.1
+   },
+   "ag3s_k1": {
+    "label": "못놓음",
+    "max_hand_height_above_table_cm": 38.8
+   }
+  }
+ }
+}

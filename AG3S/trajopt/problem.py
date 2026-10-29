@@ -65,10 +65,12 @@ class QpProblem:
     horizon: int
     row_blocks: dict[str, tuple[int, int]] = dataclasses.field(default_factory=dict)
     n_kinematic_slack: int = 0
+    #: AG3S-PRE-CORE-TO E1-B — goal-box slacks (`grasp_anchor.add_goal_box`), after every other variable. 0 = none.
+    n_goal_slack: int = 0
 
     @property
     def n_var(self) -> int:
-        return self.n_q + self.n_slack + self.n_kinematic_slack
+        return self.n_q + self.n_slack + self.n_kinematic_slack + self.n_goal_slack
 
     def split(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """``z -> (Q[nq, H], s[n_slack])``. Kinematic slacks are diagnostics, read by `kinematic_slack`."""
@@ -79,13 +81,19 @@ class QpProblem:
     def kinematic_slack(self, z: np.ndarray) -> np.ndarray:
         """How far the solution had to break the robot's own velocity/acceleration limits."""
         z = np.asarray(z, np.float64).reshape(-1)
-        return z[self.n_q + self.n_slack :]
+        return z[self.n_q + self.n_slack : self.n_q + self.n_slack + self.n_kinematic_slack]
+
+    def goal_slack(self, z: np.ndarray) -> np.ndarray:
+        """E1-B — the goal-box slacks (m), empty without a goal box."""
+        z = np.asarray(z, np.float64).reshape(-1)
+        start = self.n_q + self.n_slack + self.n_kinematic_slack
+        return z[start : start + self.n_goal_slack]
 
     def flatten(self, Q: np.ndarray, slack: Optional[np.ndarray] = None) -> np.ndarray:
         """``(Q[nq, H], s) -> z``. The inverse of `split`, for warm starts."""
         Q = np.asarray(Q, np.float64)
         s = np.zeros(self.n_slack) if slack is None else np.asarray(slack, np.float64).reshape(-1)
-        return np.concatenate([Q.T.reshape(-1), s, np.zeros(self.n_kinematic_slack)])
+        return np.concatenate([Q.T.reshape(-1), s, np.zeros(self.n_kinematic_slack + self.n_goal_slack)])
 
 
 def difference_operator(nq: int, horizon: int, order: int) -> sp.csr_matrix:
@@ -264,6 +272,7 @@ def build_problem(
     deflection_history: Optional[np.ndarray] = None,
     command_history: Optional[np.ndarray] = None,
     servo_accel_bound: Optional[np.ndarray] = None,
+    joint_track_scale: Optional[np.ndarray] = None,
 ) -> QpProblem:
     """The QP around `iterate`, tracking `reference`, with room for `n_slack` collision rows.
 
@@ -311,6 +320,9 @@ def build_problem(
     # can be worth less. `track_decay = 1.0` keeps every step equal, which is the default.
     decay = cost.track_decay ** np.arange(horizon, dtype=np.float64)
     track_w = np.repeat(cost.w_track * decay, nq)  # step-major, so repeat per step
+    if joint_track_scale is not None:
+        # IFG-TOW: per-joint scale of the tracking weight (a joint scaled below 1 is the cheaper one to move).
+        track_w = track_w * np.tile(np.asarray(joint_track_scale, np.float64).reshape(nq), horizon)
 
     diag = track_w.copy()
     linear = -track_w * reference.T.reshape(-1)
@@ -499,6 +511,7 @@ def objective(
     servo_accel_bound: Optional[np.ndarray] = None,
     max_step_change: Optional[np.ndarray] = None,
     max_step: Optional[np.ndarray] = None,
+    joint_track_scale: Optional[np.ndarray] = None,
 ) -> float:
     """The cost `build_problem` encodes, evaluated directly.
 
@@ -514,7 +527,9 @@ def objective(
     reference = np.asarray(reference, np.float64)
     cost = config.cost
     decay = cost.track_decay ** np.arange(Q.shape[1], dtype=np.float64)
-    value = float(cost.w_track * np.sum(decay * np.sum((Q - reference) ** 2, axis=0)))
+    scale = (np.ones((Q.shape[0], 1)) if joint_track_scale is None
+             else np.asarray(joint_track_scale, np.float64).reshape(-1, 1))   # IFG-TOW
+    value = float(cost.w_track * np.sum(decay * np.sum(scale * (Q - reference) ** 2, axis=0)))
     if cost.w_smooth > 0.0 and Q.shape[1] > 2:
         value += float(cost.w_smooth * np.sum(np.diff(Q, n=2, axis=1) ** 2))
     if previous_chunk is not None and cost.w_continuity > 0.0:

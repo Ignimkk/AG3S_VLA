@@ -1,0 +1,34 @@
+{
+ "Before (serving AG3S, B0)": [
+  "VLA attention map\n(16x16 per camera)",
+  "lift to 3D points\n(1 cm voxels)",
+  "robot removal:\nFK sphere volumes",
+  "seeds: top 5% points\ngrow 3 cm + DBSCAN",
+  "pick cluster by\nattention score",
+  "target cluster + ball\n-> contact exemption"
+ ],
+ "Original plan (A+F+3D)": [
+  "noun attention\ntop-5 patch seeds",
+  "VLA internal feature\nprototype (cosine)",
+  "depth surface graph\n(5 mm nodes)",
+  "feature in edges\n+ feature evidence",
+  "energy minimisation\n(continuous)",
+  "target surface"
+ ],
+ "Now (dev candidate)": [
+  "noun attention seeds\n(table pixels excluded)",
+  "depth surface graph\n(edges only along\ncontinuous depth)",
+  "robot removal: rendered\nrobot depth match",
+  "energy: seed=1, table=0\n-> keep top seed region",
+  "safety gate: feature\nmemory agreement",
+  "phase / held from\nHSR + gripper + 3D"
+ ],
+ "Next (planned)": [
+  "held-out episodes\n(locked settings)",
+  "region -> exclusion\ngeometry / permission",
+  "gate -> keep uncertain\nregion as obstacle",
+  "phase-dependent link\ncontact constraints",
+  "closed-loop + occlusion\ntest (separate)",
+  "strong baselines:\nGrounded SAM / GT mask"
+ ]
+}

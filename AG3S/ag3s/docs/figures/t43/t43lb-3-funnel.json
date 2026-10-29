@@ -1,0 +1,54 @@
+{
+ "groups": [
+  "apple_left",
+  "apple_right",
+  "orange_left",
+  "orange_right",
+  "pear_left",
+  "pear_right",
+  "banana_left",
+  "banana_right"
+ ],
+ "stages": {
+  "tried (rep1)": [
+   10,
+   5,
+   5,
+   5,
+   10,
+   10,
+   10,
+   10
+  ],
+  "rep1 ok": [
+   7,
+   4,
+   3,
+   4,
+   1,
+   6,
+   2,
+   5
+  ],
+  "rep1+2 ok": [
+   3,
+   4,
+   3,
+   3,
+   1,
+   4,
+   0,
+   2
+  ],
+  "3/3 ok": [
+   2,
+   4,
+   2,
+   3,
+   1,
+   4,
+   0,
+   0
+  ]
+ }
+}

@@ -1,0 +1,267 @@
+{
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b",
+ "source": "render/<run>__E0.npz, render/<run>__edits.npz",
+ "predictions": "score/predictions.csv (p = pick/place/home)",
+ "panels": [
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1807",
+   "host_record": 23,
+   "t_step": 184,
+   "family": "E0",
+   "phys_state": "held",
+   "used_gripper_state": 0.7205050239415947,
+   "penetration_mm": null,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.0,
+    "cam_left_wrist": 0.0,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "place",
+    "p_pick_place_home": [
+     9.77639e-05,
+     0.999878,
+     2.45776e-05
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "place"
+   }
+  },
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1807",
+   "host_record": 23,
+   "t_step": 184,
+   "family": "E1",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.45702920890223303,
+   "penetration_mm": 0.012988634716215586,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.22435028698979592,
+    "cam_left_wrist": 6.456984747023809,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "place",
+    "p_pick_place_home": [
+     0.495814,
+     0.497683,
+     0.00650343
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "place"
+   }
+  },
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1807",
+   "host_record": 23,
+   "t_step": 184,
+   "family": "E1s",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.7205050239415947,
+   "penetration_mm": 0.012988634716215586,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.20854591836734693,
+    "cam_left_wrist": 4.410667782738095,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "pick",
+    "p_pick_place_home": [
+     0.958721,
+     0.0385299,
+     0.00274896
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "place"
+   }
+  },
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1807",
+   "host_record": 23,
+   "t_step": 184,
+   "family": "E1z",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.0,
+   "penetration_mm": 0.012988634716215586,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.22435028698979592,
+    "cam_left_wrist": 7.53054581207483,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "pick",
+    "p_pick_place_home": [
+     0.930205,
+     0.0595111,
+     0.0102841
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "place"
+   }
+  },
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1807",
+   "host_record": 23,
+   "t_step": 184,
+   "family": "E2",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.45702920890223303,
+   "penetration_mm": 0.012988634716215586,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.21860384778911565,
+    "cam_left_wrist": 6.375358737244898,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "pick",
+    "p_pick_place_home": [
+     0.797531,
+     0.195585,
+     0.00688363
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "place"
+   }
+  },
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1850",
+   "host_record": 14,
+   "t_step": 112,
+   "family": "E0",
+   "phys_state": "held",
+   "used_gripper_state": 0.5040991634997344,
+   "penetration_mm": null,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.0,
+    "cam_left_wrist": 0.0,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "place",
+    "p_pick_place_home": [
+     0.00189378,
+     0.99805,
+     5.62321e-05
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "pick"
+   }
+  },
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1850",
+   "host_record": 14,
+   "t_step": 112,
+   "family": "E1",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.45702920890223303,
+   "penetration_mm": 0.006713378929101843,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.06556919642857142,
+    "cam_left_wrist": 2.899772799744898,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "place",
+    "p_pick_place_home": [
+     0.079945,
+     0.919522,
+     0.000533303
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "pick"
+   }
+  },
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1850",
+   "host_record": 14,
+   "t_step": 112,
+   "family": "E1s",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.5040991634997344,
+   "penetration_mm": 0.006713378929101843,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.06556919642857142,
+    "cam_left_wrist": 1.6371439200680271,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "place",
+    "p_pick_place_home": [
+     0.0455899,
+     0.95373,
+     0.000680222
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "pick"
+   }
+  },
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1850",
+   "host_record": 14,
+   "t_step": 112,
+   "family": "E1z",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.0,
+   "penetration_mm": 0.006713378929101843,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.06556919642857142,
+    "cam_left_wrist": 5.704672884778912,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "pick",
+    "p_pick_place_home": [
+     0.975995,
+     0.0222334,
+     0.00177185
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "pick"
+   }
+  },
+  {
+   "figure": "t48b-scene-held-edits",
+   "run": "ep1850",
+   "host_record": 14,
+   "t_step": 112,
+   "family": "E2",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.45702920890223303,
+   "penetration_mm": 0.006713378929101843,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.0625531462585034,
+    "cam_left_wrist": 2.658561862244898,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "place",
+    "p_pick_place_home": [
+     0.0208802,
+     0.978894,
+     0.000225508
+    ],
+    "rule": "place",
+    "proxy": "place",
+    "frame_index": "pick"
+   }
+  }
+ ]
+}

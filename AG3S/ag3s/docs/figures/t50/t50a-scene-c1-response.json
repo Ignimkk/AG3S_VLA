@@ -1,0 +1,378 @@
+{
+ "source": [
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/lora/full/sensitivity/frames.csv",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/lora/full/probe/predictions_valcv.csv",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/feat/full/val"
+ ],
+ "selection_rule": "sort host frames by full__r; take largest/smallest overall and among original place/home, one per episode (distinct episodes)",
+ "frames": [
+  {
+   "selection": "largest full r (any class)",
+   "unit": "ep_001632",
+   "host": 3,
+   "clock": 18,
+   "original_class": "pick",
+   "distances": {
+    "full__d_c1": 0.102524,
+    "full__d_c1p": 0.0714667,
+    "full__r": 1.43457,
+    "text__d_c1": 0.159574,
+    "text__d_c1p": 0.131426,
+    "text__r": 1.21417,
+    "image__d_c1": 0.0691629,
+    "image__d_c1p": 0.0211384,
+    "image__r": 3.27191
+   },
+   "rows": [
+    {
+     "variant": "C0",
+     "sub": "",
+     "prompt": "Place the banana into the basket.",
+     "pred": "pick",
+     "p": [
+      1.0,
+      2.06316e-14,
+      8.11437e-08
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1",
+     "sub": "apple",
+     "prompt": "Place the apple into the basket.",
+     "pred": "pick",
+     "p": [
+      1.0,
+      1.39256e-14,
+      1.20508e-08
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1",
+     "sub": "orange",
+     "prompt": "Place the orange into the basket.",
+     "pred": "pick",
+     "p": [
+      1.0,
+      2.30743e-14,
+      2.99352e-08
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1",
+     "sub": "pear",
+     "prompt": "Place the pear into the basket.",
+     "pred": "pick",
+     "p": [
+      1.0,
+      1.23851e-13,
+      2.83048e-07
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1p",
+     "sub": "T0",
+     "prompt": "Pick up the banana and place it in the basket.",
+     "pred": "pick",
+     "p": [
+      1.0,
+      4.22523e-15,
+      1.91872e-10
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1p",
+     "sub": "T2",
+     "prompt": "Put the banana in the basket.",
+     "pred": "pick",
+     "p": [
+      0.999992,
+      1.21483e-12,
+      7.55768e-06
+     ],
+     "gt": "pick"
+    }
+   ]
+  },
+  {
+   "selection": "largest full r (orig. place/home)",
+   "unit": "ep_001764",
+   "host": 48,
+   "clock": 288,
+   "original_class": "home",
+   "distances": {
+    "full__d_c1": 0.0641361,
+    "full__d_c1p": 0.0686069,
+    "full__r": 0.934835,
+    "text__d_c1": 0.104374,
+    "text__d_c1p": 0.12207,
+    "text__r": 0.85503,
+    "image__d_c1": 0.0336759,
+    "image__d_c1p": 0.0149688,
+    "image__r": 2.24973
+   },
+   "rows": [
+    {
+     "variant": "C0",
+     "sub": "",
+     "prompt": "Put the banana in the basket.",
+     "pred": "home",
+     "p": [
+      0.0746818,
+      1.38411e-09,
+      0.925318
+     ],
+     "gt": "home"
+    },
+    {
+     "variant": "C1",
+     "sub": "apple",
+     "prompt": "Put the apple in the basket.",
+     "pred": "pick",
+     "p": [
+      0.816677,
+      1.33748e-09,
+      0.183323
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1",
+     "sub": "orange",
+     "prompt": "Put the orange in the basket.",
+     "pred": "pick",
+     "p": [
+      0.99127,
+      1.64158e-09,
+      0.00873005
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1",
+     "sub": "pear",
+     "prompt": "Put the pear in the basket.",
+     "pred": "pick",
+     "p": [
+      0.950919,
+      2.30204e-10,
+      0.0490807
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1p",
+     "sub": "T0",
+     "prompt": "Pick up the banana and place it in the basket.",
+     "pred": "pick",
+     "p": [
+      0.6591,
+      2.25615e-10,
+      0.3409
+     ],
+     "gt": "home"
+    },
+    {
+     "variant": "C1p",
+     "sub": "T1",
+     "prompt": "Place the banana into the basket.",
+     "pred": "home",
+     "p": [
+      0.242058,
+      5.33744e-11,
+      0.757942
+     ],
+     "gt": "home"
+    }
+   ]
+  },
+  {
+   "selection": "smallest full r (any class)",
+   "unit": "ep_001688",
+   "host": 34,
+   "clock": 204,
+   "original_class": "place",
+   "distances": {
+    "full__d_c1": 0.0329923,
+    "full__d_c1p": 0.0818072,
+    "full__r": 0.403293,
+    "text__d_c1": 0.0517975,
+    "text__d_c1p": 0.131802,
+    "text__r": 0.392996,
+    "image__d_c1": 0.0106811,
+    "image__d_c1p": 0.0142949,
+    "image__r": 0.747202
+   },
+   "rows": [
+    {
+     "variant": "C0",
+     "sub": "",
+     "prompt": "Pick up the pear and place it in the basket.",
+     "pred": "pick",
+     "p": [
+      0.898709,
+      0.100856,
+      0.000435397
+     ],
+     "gt": "place"
+    },
+    {
+     "variant": "C1",
+     "sub": "apple",
+     "prompt": "Pick up the apple and place it in the basket.",
+     "pred": "pick",
+     "p": [
+      0.718893,
+      0.280772,
+      0.000335112
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1",
+     "sub": "banana",
+     "prompt": "Pick up the banana and place it in the basket.",
+     "pred": "pick",
+     "p": [
+      0.780513,
+      0.218941,
+      0.000545477
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1",
+     "sub": "orange",
+     "prompt": "Pick up the orange and place it in the basket.",
+     "pred": "pick",
+     "p": [
+      0.885977,
+      0.113963,
+      6.01286e-05
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1p",
+     "sub": "T1",
+     "prompt": "Place the pear into the basket.",
+     "pred": "pick",
+     "p": [
+      0.821753,
+      0.177352,
+      0.00089487
+     ],
+     "gt": "place"
+    },
+    {
+     "variant": "C1p",
+     "sub": "T2",
+     "prompt": "Put the pear in the basket.",
+     "pred": "pick",
+     "p": [
+      0.768422,
+      0.230823,
+      0.000755829
+     ],
+     "gt": "place"
+    }
+   ]
+  },
+  {
+   "selection": "smallest full r (orig. place/home)",
+   "unit": "ep_001636",
+   "host": 34,
+   "clock": 204,
+   "original_class": "place",
+   "distances": {
+    "full__d_c1": 0.0316045,
+    "full__d_c1p": 0.0773539,
+    "full__r": 0.40857,
+    "text__d_c1": 0.0497398,
+    "text__d_c1p": 0.125932,
+    "text__r": 0.394975,
+    "image__d_c1": 0.0112234,
+    "image__d_c1p": 0.0141943,
+    "image__r": 0.790693
+   },
+   "rows": [
+    {
+     "variant": "C0",
+     "sub": "",
+     "prompt": "Pick up the pear and place it in the basket.",
+     "pred": "place",
+     "p": [
+      0.210437,
+      0.789522,
+      4.02001e-05
+     ],
+     "gt": "place"
+    },
+    {
+     "variant": "C1",
+     "sub": "apple",
+     "prompt": "Pick up the apple and place it in the basket.",
+     "pred": "place",
+     "p": [
+      0.113334,
+      0.886662,
+      4.4864e-06
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1",
+     "sub": "banana",
+     "prompt": "Pick up the banana and place it in the basket.",
+     "pred": "place",
+     "p": [
+      0.361885,
+      0.638105,
+      1.06308e-05
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1",
+     "sub": "orange",
+     "prompt": "Pick up the orange and place it in the basket.",
+     "pred": "pick",
+     "p": [
+      0.763939,
+      0.23606,
+      5.4631e-07
+     ],
+     "gt": "pick"
+    },
+    {
+     "variant": "C1p",
+     "sub": "T1",
+     "prompt": "Place the pear into the basket.",
+     "pred": "place",
+     "p": [
+      0.0498864,
+      0.950105,
+      8.98977e-06
+     ],
+     "gt": "place"
+    },
+    {
+     "variant": "C1p",
+     "sub": "T2",
+     "prompt": "Put the pear in the basket.",
+     "pred": "place",
+     "p": [
+      0.0244812,
+      0.975513,
+      5.35974e-06
+     ],
+     "gt": "place"
+    }
+   ]
+  }
+ ]
+}

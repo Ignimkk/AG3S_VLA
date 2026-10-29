@@ -1,0 +1,15 @@
+{
+ "labels": [
+  "계획은 clear,\n실제만 진입 (servo lag)",
+  "TO가 위반을\n풀지 못함",
+  "ESDF 거리 오차",
+  "margin 0 행\n(쥔 사과)"
+ ],
+ "values": [
+  232,
+  0,
+  0,
+  2
+ ],
+ "source": "T43HX.verify.json via AG3S_T0T6_LOG.md T43 8-3"
+}

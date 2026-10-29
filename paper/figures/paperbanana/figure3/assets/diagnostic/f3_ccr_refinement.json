@@ -1,0 +1,18 @@
+{
+ "asset": "paper/figures/paperbanana/figure3/assets/f3_ccr_refinement.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_assets.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00161.npz": "2a8fca082d00e8ace2a71b25fbf71fc7d28a4472aecc34f88b7fc53b6b8fb720"
+ },
+ "note": "Right-arm joints of the policy reference chunk and the SQP-refined chunk over the planned rows (8 executed + 8 look-ahead), chunk with the largest deviation in this run.",
+ "is_measured_result": false,
+ "generated": true,
+ "chunk": 11,
+ "max_abs_deviation_rad": 0.05374312400817871,
+ "to_status": "feasible",
+ "verdict": [
+  "budget_only"
+ ]
+}

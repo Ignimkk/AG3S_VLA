@@ -1,0 +1,17 @@
+Figure 1 (variant B, limitation first), CVPR page 1, full text width (about 1.65:1). Follow the reference image closely. Two horizontal bands: a light red band for what existing approaches get wrong, and a light gold band for AG3S. Clean academic style, photographic panels with thin coloured frames, bold sans-serif titles, no icons, no shadows.
+
+Top band, title in red: "Existing approaches cannot tell needed contact from collision". Three equal photographic panels, each with a red border and a red badge at the bottom-left:
+(a) "VLA only": a dual-arm robot carries a red apple straight into a red arch-shaped hurdle bar; a red glow marks the hit and a red line shows the hand's path. Badge: "x no 3D constraint: hits the hurdle".
+(b) "Geometry-only safety filter": close-up of a gold-tinted gripper above a target fruit and a touching neighbour fruit, both covered by solid blue voxels (everything is an obstacle). Badge: "x target is an obstacle: grasp refused".
+(c) "Global target exclusion": the same close-up with a translucent red ball around the target. The voxels inside the ball, including the near side of the neighbour, are faint red ghosts. Badge: "x neighbour erased: unsafe contact".
+
+Bottom band, title in dark gold: "AG3S: ground the target in 3D, allow contact only where the task needs it".
+Left half: three small panels joined by gold arrows, each with a bold title above:
+"VLA attention" (wrist-camera view with a warm heat glow on the target), "Boundary-preserving extent" (the gold gripper above the two fruits; only the target's voxels are removed, shown as faint orange, and the neighbour keeps solid blue voxels), "Contact links only" (front view of the robot; the grasping hand's collision spheres are a gold chain, the other hand's are grey).
+Under them, three short bullets:
+- the frozen VLA's own attention picks the target (no segmenter)
+- depth gives its observed extent; the touching neighbour is kept
+- only the grasping links may enter that extent; the hurdle stays an obstacle
+Right half: a gold arrow leads to two larger photographic outcome panels with gold borders and green badges: "check pick next to an obstacle" (apple lifted beside the hurdle, gold hand path) and "check place over the hurdle" (gold path arcing over the hurdle into the basket).
+
+Colours: target orange #E8711A, obstacle voxels blue #2E75B6, ours and contact links gold #D9A406, failure red #C62828, success green #2E7D32. No numbers or charts. Keep text to the phrases given.

@@ -1,0 +1,14 @@
+{
+ "asset": "paper/figures/paperbanana/figure1/assets/f1_key_grasp.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_render.py",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00020.npz": "6f0addc84e4b7554fdc02157bd8a2892e5e59f74248903f9d46f30cdafa4870f"
+ },
+ "note": "Replay of recorded state, chunk 20 (control step 160).",
+ "is_measured_result": false,
+ "chunk": 20,
+ "gt_grasp_state": "held"
+}

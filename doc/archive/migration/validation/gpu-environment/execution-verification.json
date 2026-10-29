@@ -1,0 +1,239 @@
+{
+  "openpi": {
+    "date_kst": "2026-10-12T00:38:22.250576+09:00",
+    "python": "3.11.16 (main, Sep  1 2026, 14:18:37) [Clang 22.1.3 ]",
+    "executable": "/mnt/dev/AG3S_VLA-development/.venv-openpi-live/bin/python",
+    "gpu_apps_before": "",
+    "versions": {
+      "openpi": "0.1.0",
+      "openpi-client": "0.1.0",
+      "jax": "0.5.3",
+      "jaxlib": "0.5.3",
+      "torch": "2.7.1",
+      "numpy": "1.26.4",
+      "flax": "0.10.2",
+      "orbax-checkpoint": "0.11.13",
+      "mujoco": "3.11.0"
+    },
+    "origins": {
+      "openpi": "/mnt/dev/AG3S_VLA-development/third_party/openpi/src/openpi/__init__.py",
+      "openpi_client": "/mnt/dev/AG3S_VLA-development/third_party/openpi/packages/openpi-client/src/openpi_client/__init__.py",
+      "AG3S": "/mnt/dev/AG3S_VLA-development/AG3S/__init__.py",
+      "common": "/mnt/dev/AG3S_VLA-development/common/__init__.py"
+    },
+    "checkpoint": {
+      "path": "/mnt/dev/AG3S_VLA-storage/checkpoints/rby1/pi05_rby1_randomized_pick_place_16d_lora/rby1_randomized_pick_place_16d_30k_xla_retry_20260923/29999",
+      "load_seconds": 38.405814772471786,
+      "input_files": 28,
+      "infer_0": {
+        "wall_seconds": 34.24653040897101,
+        "actions_shape": [
+          50,
+          16
+        ],
+        "actions_min": -2.041592454915703,
+        "actions_max": 1.607069710574479,
+        "actions_sum": -117.31382973006185,
+        "all_finite": true
+      },
+      "infer_1": {
+        "wall_seconds": 0.08846944477409124,
+        "actions_shape": [
+          50,
+          16
+        ],
+        "actions_min": -2.2459476431692957,
+        "actions_max": 1.6037618100622006,
+        "actions_sum": -111.73140460078233,
+        "all_finite": true
+      }
+    },
+    "recording": {
+      "session_dirs": [
+        "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/policy_records/session_vln24kx4",
+        "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/policy_records/session__a7e0y46",
+        "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/policy_records/session_2rtvhuf6"
+      ],
+      "distinct_sessions": 3,
+      "actual_policy_records": 2,
+      "concurrent_records": 8,
+      "first_record_sha256": "d828cafea92f47185e0bd0e26417a587cb8f4e8f2fa5635bd3e304459cffbf92",
+      "first_record_unchanged": true,
+      "all_under_run": true
+    },
+    "torch_gpu": {
+      "name": "NVIDIA H200 NVL",
+      "cuda_runtime": "12.6",
+      "capability": [
+        9,
+        0
+      ],
+      "sum": 3680.0
+    },
+    "jax_devices": [
+      {
+        "name": "cuda:0",
+        "kind": "NVIDIA H200 NVL",
+        "platform": "gpu"
+      }
+    ],
+    "jax_gpu_sum": 3680.0,
+    "observation": {
+      "source": "/mnt/dev/AG3S_VLA-storage/recordings/run_16d_ep1800/step_00000.npz",
+      "sha256": "619f429c8a28245297f5c2862514018b1490805d58fc671e2df2ceb00230d641",
+      "prompt": "Place the apple into the basket.",
+      "state_shape": [
+        16
+      ],
+      "images": {
+        "cam_high": {
+          "shape": [
+            3,
+            224,
+            224
+          ],
+          "dtype": "uint8"
+        },
+        "cam_left_wrist": {
+          "shape": [
+            3,
+            224,
+            224
+          ],
+          "dtype": "uint8"
+        },
+        "cam_right_wrist": {
+          "shape": [
+            3,
+            224,
+            224
+          ],
+          "dtype": "uint8"
+        }
+      }
+    },
+    "inputs_unchanged": {
+      "observation_sha256": true,
+      "meta_sha256": true,
+      "checkpoint_file_metadata": true
+    },
+    "video": {
+      "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/videos/recorded-policy-input.mp4",
+      "size": 11251,
+      "source_frames": 15,
+      "fps": 5,
+      "kind": "recorded input visualization"
+    }
+  },
+  "curobo": {
+    "executable": "/mnt/dev/AG3S_VLA-development/.venv-curobo/bin/python",
+    "python": "3.11.16 (main, Sep  1 2026, 14:18:37) [Clang 22.1.3 ]",
+    "origin": "/mnt/dev/AG3S_VLA-development/third_party/curobo/curobo/__init__.py",
+    "versions": {
+      "torch": "2.7.1",
+      "nvidia-curobo": "0.8.0.post1.dev43",
+      "cuda-core": "1.2.0",
+      "warp-lang": "1.17.0",
+      "numpy": "1.26.4"
+    },
+    "gpu": "NVIDIA H200 NVL",
+    "torch_cuda": "12.6",
+    "gpu_apps_before": "",
+    "surface_count": 3528,
+    "tsdf_allocated_blocks": 110,
+    "esdf_shape": [
+      128,
+      128,
+      128
+    ],
+    "esdf_values": 2097152,
+    "esdf_finite_values": 2097152,
+    "esdf_min_m": -0.034637451171875,
+    "esdf_max_m": 1.7373046875,
+    "esdf_negative_values": 3872,
+    "second_esdf_steady_ms": 0.5346769466996193,
+    "first_copy_unchanged": true,
+    "second_equal_first": true,
+    "scene": "Synthetic 16x16 depth plane at 1 metre; compatibility smoke test"
+  },
+  "historical_records": {
+    "files": 114,
+    "bytes": 52225743,
+    "same_manifest": true,
+    "changed_files": [],
+    "new_files": []
+  },
+  "transformer_patch_files": [
+    {
+      "source": "third_party/openpi/src/openpi/models_pytorch/transformers_replace/models/siglip/check.py",
+      "installed": ".venv-openpi-live/lib/python3.11/site-packages/transformers/models/siglip/check.py",
+      "source_sha256": "466e8eb7887ac5ccc98118a3169298d6ab65a284d834bae74751e3854dbc4245",
+      "installed_sha256": "466e8eb7887ac5ccc98118a3169298d6ab65a284d834bae74751e3854dbc4245"
+    },
+    {
+      "source": "third_party/openpi/src/openpi/models_pytorch/transformers_replace/models/siglip/modeling_siglip.py",
+      "installed": ".venv-openpi-live/lib/python3.11/site-packages/transformers/models/siglip/modeling_siglip.py",
+      "source_sha256": "ef2e99500f263fdd78db9d4d9a255e29d844eb92f53c25ad640f8056700ef84b",
+      "installed_sha256": "ef2e99500f263fdd78db9d4d9a255e29d844eb92f53c25ad640f8056700ef84b"
+    },
+    {
+      "source": "third_party/openpi/src/openpi/models_pytorch/transformers_replace/models/gemma/configuration_gemma.py",
+      "installed": ".venv-openpi-live/lib/python3.11/site-packages/transformers/models/gemma/configuration_gemma.py",
+      "source_sha256": "26fd0d0f52730ab32b6f337eb73ae9a26cb71ae0915bc49eced1d0e2ed8d0ec6",
+      "installed_sha256": "26fd0d0f52730ab32b6f337eb73ae9a26cb71ae0915bc49eced1d0e2ed8d0ec6"
+    },
+    {
+      "source": "third_party/openpi/src/openpi/models_pytorch/transformers_replace/models/gemma/modeling_gemma.py",
+      "installed": ".venv-openpi-live/lib/python3.11/site-packages/transformers/models/gemma/modeling_gemma.py",
+      "source_sha256": "17eeb54e277939e58cd6f8a92719a275e36baf0c9f463b2754227d42f87aedde",
+      "installed_sha256": "17eeb54e277939e58cd6f8a92719a275e36baf0c9f463b2754227d42f87aedde"
+    },
+    {
+      "source": "third_party/openpi/src/openpi/models_pytorch/transformers_replace/models/paligemma/modeling_paligemma.py",
+      "installed": ".venv-openpi-live/lib/python3.11/site-packages/transformers/models/paligemma/modeling_paligemma.py",
+      "source_sha256": "c945d330b829264f927f3ee5339f977238631772de07a28e855e265bb85fd53c",
+      "installed_sha256": "c945d330b829264f927f3ee5339f977238631772de07a28e855e265bb85fd53c"
+    }
+  ],
+  "curobo_environment_paths": {
+    "environment": "/mnt/dev/AG3S_VLA-development/.venv-curobo",
+    "pyvenv_cfg": "home = /mnt/dev/AG3S_VLA-development/.python/cpython-3.11.16-linux-x86_64-gnu/bin\nimplementation = CPython\nuv = 0.12.13\nversion_info = 3.11.16\ninclude-system-site-packages = false\n",
+    "legacy_symlinks": [],
+    "legacy_editables": []
+  },
+  "raw_root": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification",
+  "torch_build": {
+    "torch___version__": "2.7.1+cu126",
+    "torch_cuda_runtime": "12.6",
+    "origin": "/mnt/dev/AG3S_VLA-development/.venv-openpi-live/lib/python3.11/site-packages/torch/__init__.py"
+  },
+  "final_writer_cpu_regression": {
+    "measured_utc": "2026-10-11T15:50:53.300823+00:00",
+    "tests": 43,
+    "passed": 43,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 22.916,
+    "jax_platforms": "cpu",
+    "test_files": [
+      "tests/test_run_output.py",
+      "tests/test_policy_record_output.py",
+      "tests/ag3s/test_record_timing.py"
+    ],
+    "log": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/final-final-cpu-pytest.log",
+    "junit": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/verification/final-final-cpu-junit.xml",
+    "test_file_sha256": {
+      "tests/test_run_output.py": "dc06a5b34b330a4af0f6914b1820e6ffbad7d48c4c61f5d0c69bf82fd61dad10",
+      "tests/test_policy_record_output.py": "d4e70963537bed5a69a921d75af0198ea2c6c57e5607db1f9e066a8a3c58f99b",
+      "tests/ag3s/test_record_timing.py": "3483b600b52c7f0e6f7793da5ce024711d97e230b40e676cc3e40ed4597fa2a9"
+    }
+  },
+  "final_code_hash_validation": {
+    "manifest": "/mnt/dev/AG3S_VLA-development/doc/migration/validation/gpu-environment/validated-code-state.json",
+    "checked": 16,
+    "matched": 16,
+    "mismatches": [],
+    "includes_norm_stats": true
+  }
+}

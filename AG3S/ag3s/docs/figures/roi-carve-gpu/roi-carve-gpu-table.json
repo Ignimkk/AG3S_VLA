@@ -1,0 +1,40 @@
+{
+ "rows": [
+  [
+   "G1 동등성",
+   "CPU · GPU 지울 voxel 집합 같음",
+   "판정 136,598,151 voxel · 1366 번, 지울 voxel 381,533 vs 381,533, 차이 0",
+   "통과"
+  ],
+  [
+   "G2 속도",
+   "중앙값 −50 % 이상, p95 감소",
+   "중앙값 207.73 → 26.09 ms (-87.4 %), p95 765.67 → 101.61 ms (-86.7 %)",
+   "통과"
+  ],
+  [
+   "G3 서버 경로",
+   "1 episode 정상 종료 · device = cuda",
+   "1345 (E4 와 같은 seed) 정상 종료 · device cuda · 32 chunk 모두 E4 와 궤적 · 거리장 bit 동일. 거리장 단계 중앙값 259.12 → 127.74 ms, p95 800.72 → 227.77 ms (첫 chunk 제외)",
+   "통과"
+  ]
+ ],
+ "gpu_compare": {
+  "n_calls": 1366,
+  "n_judged_cpu": 136598151,
+  "n_judged_gpu": 136598151,
+  "n_hit_cpu": 381533,
+  "n_hit_gpu": 381533,
+  "cpu_only": 0,
+  "gpu_only": 0
+ },
+ "replay_cpu_total_ms": 3,
+ "replay_gpu_total_ms": {
+  "median": 26.09,
+  "p95": 101.61
+ },
+ "smoke": {
+  "text": "1345 (E4 와 같은 seed) 정상 종료 · device cuda · 32 chunk 모두 E4 와 궤적 · 거리장 bit 동일. 거리장 단계 중앙값 259.12 → 127.74 ms, p95 800.72 → 227.77 ms (첫 chunk 제외)",
+  "verdict": "통과"
+ }
+}

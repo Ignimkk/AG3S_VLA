@@ -1,0 +1,59 @@
+{
+ "key": "ep1804",
+ "frame": 25,
+ "K": 2,
+ "used_arm": "right",
+ "resim_npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55/resim/test/ep1804__E0.npz",
+ "phys_state": {
+  "apple": "held",
+  "banana": "on_table",
+  "orange": "on_table",
+  "pear": "on_table"
+ },
+ "phys_hand": {
+  "apple": "right",
+  "banana": "",
+  "orange": "",
+  "pear": ""
+ },
+ "prompts": {
+  "orig": {
+   "prompt": "Put the apple in the basket.",
+   "noun": "apple",
+   "P_grasp": true,
+   "P_task": true,
+   "reground_phase": "held",
+   "HELD": true,
+   "hsr_p_place_feat": 0.9956228252882031,
+   "hsr_p_place_attention_pass": 0.9956228252882031,
+   "hsr_flag": true,
+   "noun_p": 0.9584073880982446,
+   "noun_ok": true,
+   "noun_flag": true,
+   "task_ready_strong": true,
+   "task_ready_hsr": true,
+   "task_ready_noun": true,
+   "perception_npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55/perception/test/t55-legacy/ep1804__E0__orig.npz",
+   "feat_npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55/feat/test/ep1804__E0__orig.npz"
+  },
+  "instr_pear": {
+   "prompt": "Put the pear in the basket.",
+   "noun": "pear",
+   "P_grasp": true,
+   "P_task": false,
+   "reground_phase": "held",
+   "HELD": true,
+   "hsr_p_place_feat": 0.9948560997830158,
+   "hsr_p_place_attention_pass": 0.9948560997830158,
+   "hsr_flag": true,
+   "noun_p": 0.00020559891400100474,
+   "noun_ok": true,
+   "noun_flag": false,
+   "task_ready_strong": true,
+   "task_ready_hsr": true,
+   "task_ready_noun": false,
+   "perception_npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55/perception/test/t55-legacy/ep1804__E0__instr_pear.npz",
+   "feat_npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55/feat/test/ep1804__E0__instr_pear.npz"
+  }
+ }
+}

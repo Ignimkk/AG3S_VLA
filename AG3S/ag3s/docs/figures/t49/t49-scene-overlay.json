@@ -1,0 +1,876 @@
+{
+ "sigma": 1,
+ "k": 3,
+ "cells": {
+  "noun_gt": [
+   [
+    8,
+    6
+   ],
+   [
+    5,
+    4
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "noun_lf": [
+   [
+    4,
+    7
+   ],
+   [
+    4,
+    6
+   ],
+   [
+    8,
+    6
+   ]
+  ],
+  "basket_gt": [
+   [
+    8,
+    6
+   ],
+   [
+    4,
+    2
+   ],
+   [
+    8,
+    0
+   ]
+  ],
+  "basket_lf": [
+   [
+    4,
+    7
+   ],
+   [
+    8,
+    2
+   ],
+   [
+    8,
+    0
+   ]
+  ],
+  "t47_oracle3_action": [
+   [
+    8,
+    3
+   ],
+   [
+    10,
+    7
+   ],
+   [
+    12,
+    4
+   ]
+  ],
+  "l8h2_action": [
+   [
+    8,
+    2
+   ]
+  ]
+ },
+ "panels": [
+  {
+   "record": "ep1800",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    14,
+    1
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ],
+   "target_px": 0,
+   "crate_px": 0
+  },
+  {
+   "record": "ep1800",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.30695523886848014,
+   "crate_mass_share_cam": 0.004216008430772782,
+   "cam_peak_patch": [
+    15,
+    8
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ],
+   "target_px": 2978,
+   "crate_px": 47716
+  },
+  {
+   "record": "ep1800",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.10865076383823254,
+   "cam_peak_patch": [
+    15,
+    7
+   ],
+   "joint_peak": [
+    1,
+    15,
+    8
+   ],
+   "target_px": 0,
+   "crate_px": 39641
+  },
+  {
+   "record": "ep1800",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_high",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    15,
+    10
+   ],
+   "joint_peak": [
+    2,
+    10,
+    1
+   ],
+   "target_px": 0,
+   "crate_px": 0
+  },
+  {
+   "record": "ep1800",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_left_wrist",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.005270262336903128,
+   "crate_mass_share_cam": 0.8152249692488974,
+   "cam_peak_patch": [
+    9,
+    13
+   ],
+   "joint_peak": [
+    2,
+    10,
+    1
+   ],
+   "target_px": 2978,
+   "crate_px": 47716
+  },
+  {
+   "record": "ep1800",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_right_wrist",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.7922035321657127,
+   "cam_peak_patch": [
+    10,
+    1
+   ],
+   "joint_peak": [
+    2,
+    10,
+    1
+   ],
+   "target_px": 0,
+   "crate_px": 39641
+  },
+  {
+   "record": "ep1800",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_high",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    10,
+    0
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ],
+   "target_px": 0,
+   "crate_px": 0
+  },
+  {
+   "record": "ep1800",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_left_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.18018969449817968,
+   "crate_mass_share_cam": 2.697028637575437e-05,
+   "cam_peak_patch": [
+    14,
+    7
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ],
+   "target_px": 2978,
+   "crate_px": 47716
+  },
+  {
+   "record": "ep1800",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_right_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.15557480949968375,
+   "cam_peak_patch": [
+    15,
+    7
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ],
+   "target_px": 0,
+   "crate_px": 39641
+  },
+  {
+   "record": "ep1800",
+   "frame": 11,
+   "t_step": 88,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    0,
+    1
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ],
+   "target_px": 0,
+   "crate_px": 0
+  },
+  {
+   "record": "ep1800",
+   "frame": 11,
+   "t_step": 88,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.42577927927609605,
+   "crate_mass_share_cam": 0.011701527035241159,
+   "cam_peak_patch": [
+    14,
+    7
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ],
+   "target_px": 6244,
+   "crate_px": 74475
+  },
+  {
+   "record": "ep1800",
+   "frame": 11,
+   "t_step": 88,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.10363992295059839,
+   "cam_peak_patch": [
+    15,
+    7
+   ],
+   "joint_peak": [
+    1,
+    14,
+    7
+   ],
+   "target_px": 0,
+   "crate_px": 39975
+  },
+  {
+   "record": "ep1800",
+   "frame": 11,
+   "t_step": 88,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_high",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    14,
+    11
+   ],
+   "joint_peak": [
+    2,
+    11,
+    0
+   ],
+   "target_px": 0,
+   "crate_px": 0
+  },
+  {
+   "record": "ep1800",
+   "frame": 11,
+   "t_step": 88,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_left_wrist",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.020747525191152954,
+   "crate_mass_share_cam": 0.5981906740815527,
+   "cam_peak_patch": [
+    2,
+    14
+   ],
+   "joint_peak": [
+    2,
+    11,
+    0
+   ],
+   "target_px": 6244,
+   "crate_px": 74475
+  },
+  {
+   "record": "ep1800",
+   "frame": 11,
+   "t_step": 88,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_right_wrist",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.8242695196205503,
+   "cam_peak_patch": [
+    11,
+    0
+   ],
+   "joint_peak": [
+    2,
+    11,
+    0
+   ],
+   "target_px": 0,
+   "crate_px": 39975
+  },
+  {
+   "record": "ep1800",
+   "frame": 11,
+   "t_step": 88,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_high",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.0,
+   "cam_peak_patch": [
+    14,
+    11
+   ],
+   "joint_peak": [
+    1,
+    13,
+    8
+   ],
+   "target_px": 0,
+   "crate_px": 0
+  },
+  {
+   "record": "ep1800",
+   "frame": 11,
+   "t_step": 88,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_left_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.1432114242086831,
+   "crate_mass_share_cam": 0.0007472068789333215,
+   "cam_peak_patch": [
+    13,
+    8
+   ],
+   "joint_peak": [
+    1,
+    13,
+    8
+   ],
+   "target_px": 6244,
+   "crate_px": 74475
+  },
+  {
+   "record": "ep1800",
+   "frame": 11,
+   "t_step": 88,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_right_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.17528529264297565,
+   "cam_peak_patch": [
+    15,
+    7
+   ],
+   "joint_peak": [
+    1,
+    13,
+    8
+   ],
+   "target_px": 0,
+   "crate_px": 39975
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.012672007879167878,
+   "crate_mass_share_cam": 0.18226536643626473,
+   "cam_peak_patch": [
+    9,
+    5
+   ],
+   "joint_peak": [
+    1,
+    14,
+    8
+   ],
+   "target_px": 243,
+   "crate_px": 12144
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.23608275907437223,
+   "crate_mass_share_cam": 0.004139527156178144,
+   "cam_peak_patch": [
+    14,
+    8
+   ],
+   "joint_peak": [
+    1,
+    14,
+    8
+   ],
+   "target_px": 2452,
+   "crate_px": 13368
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.18509989555529793,
+   "cam_peak_patch": [
+    12,
+    8
+   ],
+   "joint_peak": [
+    1,
+    14,
+    8
+   ],
+   "target_px": 0,
+   "crate_px": 33960
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_high",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.003609483669964372,
+   "crate_mass_share_cam": 0.5624486091326711,
+   "cam_peak_patch": [
+    10,
+    8
+   ],
+   "joint_peak": [
+    0,
+    10,
+    8
+   ],
+   "target_px": 243,
+   "crate_px": 12144
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_left_wrist",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.015259009275142284,
+   "crate_mass_share_cam": 0.42935467641262,
+   "cam_peak_patch": [
+    13,
+    15
+   ],
+   "joint_peak": [
+    0,
+    10,
+    8
+   ],
+   "target_px": 2452,
+   "crate_px": 13368
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_right_wrist",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.5247846623424695,
+   "cam_peak_patch": [
+    10,
+    0
+   ],
+   "joint_peak": [
+    0,
+    10,
+    8
+   ],
+   "target_px": 0,
+   "crate_px": 33960
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_high",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.07578965870197862,
+   "crate_mass_share_cam": 0.059392907139510835,
+   "cam_peak_patch": [
+    9,
+    5
+   ],
+   "joint_peak": [
+    1,
+    12,
+    8
+   ],
+   "target_px": 243,
+   "crate_px": 12144
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_left_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.03439812382520598,
+   "crate_mass_share_cam": 0.00014854572818218638,
+   "cam_peak_patch": [
+    12,
+    8
+   ],
+   "joint_peak": [
+    1,
+    12,
+    8
+   ],
+   "target_px": 2452,
+   "crate_px": 13368
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "phase_group": "pre_grasp",
+   "camera": "cam_right_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.5066460233032432,
+   "cam_peak_patch": [
+    12,
+    1
+   ],
+   "joint_peak": [
+    1,
+    12,
+    8
+   ],
+   "target_px": 0,
+   "crate_px": 33960
+  },
+  {
+   "record": "ep1850",
+   "frame": 12,
+   "t_step": 96,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_high",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0005789390377595584,
+   "crate_mass_share_cam": 0.16369273043671734,
+   "cam_peak_patch": [
+    9,
+    5
+   ],
+   "joint_peak": [
+    1,
+    12,
+    7
+   ],
+   "target_px": 20,
+   "crate_px": 12112
+  },
+  {
+   "record": "ep1850",
+   "frame": 12,
+   "t_step": 96,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_left_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.3805840038450432,
+   "crate_mass_share_cam": 0.001395174066224888,
+   "cam_peak_patch": [
+    12,
+    7
+   ],
+   "joint_peak": [
+    1,
+    12,
+    7
+   ],
+   "target_px": 8560,
+   "crate_px": 2743
+  },
+  {
+   "record": "ep1850",
+   "frame": 12,
+   "t_step": 96,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_right_wrist",
+   "source": "noun_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.18393882633507633,
+   "cam_peak_patch": [
+    12,
+    8
+   ],
+   "joint_peak": [
+    1,
+    12,
+    7
+   ],
+   "target_px": 0,
+   "crate_px": 34515
+  },
+  {
+   "record": "ep1850",
+   "frame": 12,
+   "t_step": 96,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_high",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.0002360095768942763,
+   "crate_mass_share_cam": 0.5268075568608964,
+   "cam_peak_patch": [
+    10,
+    8
+   ],
+   "joint_peak": [
+    0,
+    10,
+    8
+   ],
+   "target_px": 20,
+   "crate_px": 12112
+  },
+  {
+   "record": "ep1850",
+   "frame": 12,
+   "t_step": 96,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_left_wrist",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.04067061658978774,
+   "crate_mass_share_cam": 0.07211866771350375,
+   "cam_peak_patch": [
+    12,
+    15
+   ],
+   "joint_peak": [
+    0,
+    10,
+    8
+   ],
+   "target_px": 8560,
+   "crate_px": 2743
+  },
+  {
+   "record": "ep1850",
+   "frame": 12,
+   "t_step": 96,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_right_wrist",
+   "source": "basket_gt_k3_s1",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.6410256606900856,
+   "cam_peak_patch": [
+    11,
+    0
+   ],
+   "joint_peak": [
+    0,
+    10,
+    8
+   ],
+   "target_px": 0,
+   "crate_px": 34515
+  },
+  {
+   "record": "ep1850",
+   "frame": 12,
+   "t_step": 96,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_high",
+   "source": "l8h2",
+   "target_mass_share_cam": 2.965209692743828e-05,
+   "crate_mass_share_cam": 0.8246189209510398,
+   "cam_peak_patch": [
+    10,
+    8
+   ],
+   "joint_peak": [
+    1,
+    14,
+    3
+   ],
+   "target_px": 20,
+   "crate_px": 12112
+  },
+  {
+   "record": "ep1850",
+   "frame": 12,
+   "t_step": 96,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_left_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.00023712528470770544,
+   "crate_mass_share_cam": 0.018963762741691245,
+   "cam_peak_patch": [
+    14,
+    3
+   ],
+   "joint_peak": [
+    1,
+    14,
+    3
+   ],
+   "target_px": 8560,
+   "crate_px": 2743
+  },
+  {
+   "record": "ep1850",
+   "frame": 12,
+   "t_step": 96,
+   "phase": "grasp",
+   "phase_group": "post_grasp",
+   "camera": "cam_right_wrist",
+   "source": "l8h2",
+   "target_mass_share_cam": 0.0,
+   "crate_mass_share_cam": 0.587956878616514,
+   "cam_peak_patch": [
+    15,
+    1
+   ],
+   "joint_peak": [
+    1,
+    14,
+    3
+   ],
+   "target_px": 0,
+   "crate_px": 34515
+  }
+ ]
+}

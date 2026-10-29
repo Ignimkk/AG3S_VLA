@@ -1,0 +1,673 @@
+{
+ "urdf": {
+  "121": {
+   "obstacle_bodies": [
+    "crate",
+    "pick_obstacle_post_0"
+   ],
+   "n_full_requests": 19,
+   "n_candidates": 33,
+   "arm_hit_grasp": 26,
+   "arm_hit_pre": 25,
+   "arm_hit_any": 26,
+   "arm_hit_any_5mm": 18,
+   "arm_hit_any_20mm": 9,
+   "hand_gt_hit": 6,
+   "decision_request": 9,
+   "decision_selected": {
+    "grasp_id": 1,
+    "q_grasp": [
+     -0.588981,
+     0.469056,
+     0.137454,
+     -0.590699,
+     1.053668,
+     0.960777,
+     -2.96706
+    ],
+    "q_pre": [
+     -0.372992,
+     0.536554,
+     0.16429,
+     -1.060167,
+     1.018882,
+     1.152883,
+     -2.740024
+    ],
+    "grasp": {
+     "pen_mm": 0.5,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_post_0",
+     "links_hit": [
+      "link_left_arm_5"
+     ]
+    },
+    "pre": {
+     "pen_mm": -2.1,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_post_0",
+     "links_hit": []
+    }
+   },
+   "decision_vla_close": {
+    "pen_mm": 16.0,
+    "link": "link_left_arm_5",
+    "obstacle": "pick_obstacle_post_0",
+    "links_hit": [
+     "link_left_arm_5"
+    ]
+   },
+   "selected_arm_hit_requests": 55,
+   "n_requests_with_selected": 66,
+   "seconds": 5.5
+  },
+  "122": {
+   "obstacle_bodies": [
+    "crate",
+    "pick_obstacle_post_0"
+   ],
+   "n_full_requests": 5,
+   "n_candidates": 10,
+   "arm_hit_grasp": 5,
+   "arm_hit_pre": 4,
+   "arm_hit_any": 5,
+   "arm_hit_any_5mm": 3,
+   "arm_hit_any_20mm": 0,
+   "hand_gt_hit": 3,
+   "decision_request": 8,
+   "decision_selected": {
+    "grasp_id": 0,
+    "q_grasp": [
+     -0.560767,
+     0.603481,
+     -0.267185,
+     -0.772252,
+     1.169818,
+     0.915178,
+     -2.96706
+    ],
+    "q_pre": [
+     -0.376546,
+     0.57365,
+     0.070455,
+     -1.183219,
+     0.913496,
+     1.217018,
+     -2.897786
+    ],
+    "grasp": {
+     "pen_mm": 3.1,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_post_0",
+     "links_hit": [
+      "link_left_arm_5"
+     ]
+    },
+    "pre": {
+     "pen_mm": 2.5,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_post_0",
+     "links_hit": [
+      "link_left_arm_5"
+     ]
+    }
+   },
+   "decision_vla_close": {
+    "pen_mm": 6.1,
+    "link": "link_left_arm_5",
+    "obstacle": "pick_obstacle_post_0",
+    "links_hit": [
+     "link_left_arm_5"
+    ]
+   },
+   "selected_arm_hit_requests": 8,
+   "n_requests_with_selected": 13,
+   "seconds": 2.3
+  },
+  "123": {
+   "obstacle_bodies": [
+    "crate",
+    "pick_obstacle_post_0"
+   ],
+   "n_full_requests": 19,
+   "n_candidates": 26,
+   "arm_hit_grasp": 25,
+   "arm_hit_pre": 24,
+   "arm_hit_any": 25,
+   "arm_hit_any_5mm": 16,
+   "arm_hit_any_20mm": 9,
+   "hand_gt_hit": 8,
+   "decision_request": 7,
+   "decision_selected": {
+    "grasp_id": 0,
+    "q_grasp": [
+     -0.447938,
+     0.400236,
+     0.239114,
+     -0.763946,
+     1.060879,
+     0.868619,
+     -2.913508
+    ],
+    "q_pre": [
+     -0.238332,
+     0.447017,
+     0.256463,
+     -1.179693,
+     1.032271,
+     1.038051,
+     -2.717608
+    ],
+    "grasp": {
+     "pen_mm": 2.9,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_post_0",
+     "links_hit": [
+      "link_left_arm_5"
+     ]
+    },
+    "pre": {
+     "pen_mm": 2.8,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_post_0",
+     "links_hit": [
+      "link_left_arm_5"
+     ]
+    }
+   },
+   "decision_vla_close": {
+    "pen_mm": 2.5,
+    "link": "link_left_arm_5",
+    "obstacle": "pick_obstacle_post_0",
+    "links_hit": [
+     "link_left_arm_5"
+    ]
+   },
+   "selected_arm_hit_requests": 72,
+   "n_requests_with_selected": 72,
+   "seconds": 5.2
+  },
+  "321": {
+   "obstacle_bodies": [
+    "crate",
+    "pick_obstacle_overbar_0",
+    "pick_obstacle_overbar_0_leg_left",
+    "pick_obstacle_overbar_0_leg_right"
+   ],
+   "n_full_requests": 21,
+   "n_candidates": 44,
+   "arm_hit_grasp": 18,
+   "arm_hit_pre": 18,
+   "arm_hit_any": 18,
+   "arm_hit_any_5mm": 11,
+   "arm_hit_any_20mm": 5,
+   "hand_gt_hit": 4,
+   "decision_request": 15,
+   "decision_selected": {
+    "grasp_id": 0,
+    "q_grasp": [
+     -0.598304,
+     0.465169,
+     0.282868,
+     -0.466448,
+     1.156882,
+     0.946833,
+     -2.907467
+    ],
+    "q_pre": [
+     -0.332344,
+     0.502542,
+     0.285554,
+     -1.010462,
+     1.108026,
+     1.12843,
+     -2.619861
+    ],
+    "grasp": {
+     "pen_mm": -11.0,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_overbar_0",
+     "links_hit": []
+    },
+    "pre": {
+     "pen_mm": -11.9,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_overbar_0",
+     "links_hit": []
+    }
+   },
+   "decision_vla_close": {
+    "pen_mm": 56.1,
+    "link": "link_left_arm_5",
+    "obstacle": "pick_obstacle_overbar_0",
+    "links_hit": [
+     "link_left_arm_5"
+    ]
+   },
+   "selected_arm_hit_requests": 21,
+   "n_requests_with_selected": 68,
+   "seconds": 5.5
+  },
+  "322": {
+   "obstacle_bodies": [
+    "crate",
+    "pick_obstacle_overbar_0",
+    "pick_obstacle_overbar_0_leg_left",
+    "pick_obstacle_overbar_0_leg_right"
+   ],
+   "n_full_requests": 20,
+   "n_candidates": 48,
+   "arm_hit_grasp": 39,
+   "arm_hit_pre": 38,
+   "arm_hit_any": 39,
+   "arm_hit_any_5mm": 28,
+   "arm_hit_any_20mm": 6,
+   "hand_gt_hit": 5,
+   "decision_request": 13,
+   "decision_selected": {
+    "grasp_id": 1,
+    "q_grasp": [
+     -0.392604,
+     0.446664,
+     0.103028,
+     -0.906556,
+     0.992092,
+     0.875676,
+     -2.714232
+    ],
+    "q_pre": [
+     -0.203454,
+     0.525326,
+     0.125862,
+     -1.297031,
+     0.973176,
+     1.029557,
+     -2.526111
+    ],
+    "grasp": {
+     "pen_mm": -2.7,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_overbar_0",
+     "links_hit": []
+    },
+    "pre": {
+     "pen_mm": -2.4,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_overbar_0",
+     "links_hit": []
+    }
+   },
+   "decision_vla_close": {
+    "pen_mm": 67.3,
+    "link": "link_left_arm_5",
+    "obstacle": "pick_obstacle_overbar_0",
+    "links_hit": [
+     "link_left_arm_5"
+    ]
+   },
+   "selected_arm_hit_requests": 37,
+   "n_requests_with_selected": 69,
+   "seconds": 5.0
+  },
+  "323": {
+   "obstacle_bodies": [
+    "crate",
+    "pick_obstacle_overbar_0",
+    "pick_obstacle_overbar_0_leg_left",
+    "pick_obstacle_overbar_0_leg_right"
+   ],
+   "n_full_requests": 19,
+   "n_candidates": 27,
+   "arm_hit_grasp": 12,
+   "arm_hit_pre": 12,
+   "arm_hit_any": 12,
+   "arm_hit_any_5mm": 8,
+   "arm_hit_any_20mm": 4,
+   "hand_gt_hit": 3,
+   "decision_request": 11,
+   "decision_selected": {
+    "grasp_id": 2,
+    "q_grasp": null,
+    "q_pre": [
+     -0.565478,
+     0.650705,
+     -0.166384,
+     -0.956729,
+     1.010259,
+     1.1954,
+     -2.657787
+    ],
+    "grasp": null,
+    "pre": {
+     "pen_mm": 19.4,
+     "link": "link_left_arm_5",
+     "obstacle": "pick_obstacle_overbar_0",
+     "links_hit": [
+      "link_left_arm_5"
+     ]
+    }
+   },
+   "decision_vla_close": {
+    "pen_mm": 73.7,
+    "link": "link_left_arm_5",
+    "obstacle": "pick_obstacle_overbar_0",
+    "links_hit": [
+     "link_left_arm_5"
+    ]
+   },
+   "selected_arm_hit_requests": 67,
+   "n_requests_with_selected": 71,
+   "seconds": 6.8
+  }
+ },
+ "mujoco": {
+  "runs": {
+   "121": {
+    "n_candidates": 33,
+    "arm_pen_any": 6,
+    "arm_pen_any_5mm": 5,
+    "hand_pen_any": 5,
+    "executed_arm_pen_rows": 0,
+    "executed_arm_min_mm": 27.0,
+    "vla_close_arm_min_mm": 22.2,
+    "decision_selected": {
+     "grasp": {
+      "arm": {
+       "dist_mm": 45.3,
+       "link": "FT_SENSOR_L",
+       "obstacle": "pick_obstacle_post_0"
+      },
+      "hand": {
+       "dist_mm": 13.7,
+       "link": "EE_BODY_L",
+       "obstacle": "pick_obstacle_post_0"
+      }
+     },
+     "pre": {
+      "arm": {
+       "dist_mm": 50.0,
+       "link": null,
+       "obstacle": null
+      },
+      "hand": {
+       "dist_mm": 17.2,
+       "link": "ee_finger_l2",
+       "obstacle": "pick_obstacle_post_0"
+      }
+     }
+    },
+    "decision_vla_close": {
+     "arm": {
+      "dist_mm": 22.2,
+      "link": "FT_SENSOR_L",
+      "obstacle": "pick_obstacle_post_0"
+     },
+     "hand": {
+      "dist_mm": 6.3,
+      "link": "EE_BODY_L",
+      "obstacle": "pick_obstacle_post_0"
+     }
+    },
+    "n_arm_geoms": 244,
+    "n_obstacle_geoms": 14,
+    "seconds": 5.1
+   },
+   "122": {
+    "n_candidates": 10,
+    "arm_pen_any": 0,
+    "arm_pen_any_5mm": 0,
+    "hand_pen_any": 0,
+    "executed_arm_pen_rows": 0,
+    "executed_arm_min_mm": 30.5,
+    "vla_close_arm_min_mm": 34.7,
+    "decision_selected": {
+     "grasp": {
+      "arm": {
+       "dist_mm": 40.8,
+       "link": "FT_SENSOR_L",
+       "obstacle": "pick_obstacle_post_0"
+      },
+      "hand": {
+       "dist_mm": 13.8,
+       "link": "EE_BODY_L",
+       "obstacle": "pick_obstacle_post_0"
+      }
+     },
+     "pre": {
+      "arm": {
+       "dist_mm": 50.0,
+       "link": null,
+       "obstacle": null
+      },
+      "hand": {
+       "dist_mm": 20.9,
+       "link": "ee_finger_l2",
+       "obstacle": "pick_obstacle_post_0"
+      }
+     }
+    },
+    "decision_vla_close": {
+     "arm": {
+      "dist_mm": 34.7,
+      "link": "FT_SENSOR_L",
+      "obstacle": "pick_obstacle_post_0"
+     },
+     "hand": {
+      "dist_mm": 11.9,
+      "link": "EE_BODY_L",
+      "obstacle": "pick_obstacle_post_0"
+     }
+    },
+    "n_arm_geoms": 244,
+    "n_obstacle_geoms": 14,
+    "seconds": 4.0
+   },
+   "123": {
+    "n_candidates": 26,
+    "arm_pen_any": 5,
+    "arm_pen_any_5mm": 4,
+    "hand_pen_any": 6,
+    "executed_arm_pen_rows": 0,
+    "executed_arm_min_mm": 29.7,
+    "vla_close_arm_min_mm": 38.3,
+    "decision_selected": {
+     "grasp": {
+      "arm": {
+       "dist_mm": 41.6,
+       "link": "FT_SENSOR_L",
+       "obstacle": "pick_obstacle_post_0"
+      },
+      "hand": {
+       "dist_mm": 13.2,
+       "link": "EE_BODY_L",
+       "obstacle": "pick_obstacle_post_0"
+      }
+     },
+     "pre": {
+      "arm": {
+       "dist_mm": 50.0,
+       "link": null,
+       "obstacle": null
+      },
+      "hand": {
+       "dist_mm": 11.4,
+       "link": "ee_finger_l2",
+       "obstacle": "pick_obstacle_post_0"
+      }
+     }
+    },
+    "decision_vla_close": {
+     "arm": {
+      "dist_mm": 38.3,
+      "link": "FT_SENSOR_L",
+      "obstacle": "pick_obstacle_post_0"
+     },
+     "hand": {
+      "dist_mm": 16.1,
+      "link": "EE_BODY_L",
+      "obstacle": "pick_obstacle_post_0"
+     }
+    },
+    "n_arm_geoms": 244,
+    "n_obstacle_geoms": 14,
+    "seconds": 3.9
+   },
+   "321": {
+    "n_candidates": 44,
+    "arm_pen_any": 0,
+    "arm_pen_any_5mm": 0,
+    "hand_pen_any": 2,
+    "executed_arm_pen_rows": 0,
+    "executed_arm_min_mm": 50.0,
+    "vla_close_arm_min_mm": 50.0,
+    "decision_selected": {
+     "grasp": {
+      "arm": {
+       "dist_mm": 50.0,
+       "link": null,
+       "obstacle": null
+      },
+      "hand": {
+       "dist_mm": 30.3,
+       "link": "EE_BODY_L",
+       "obstacle": "pick_obstacle_overbar_0_leg_left"
+      }
+     },
+     "pre": {
+      "arm": {
+       "dist_mm": 50.0,
+       "link": null,
+       "obstacle": null
+      },
+      "hand": {
+       "dist_mm": 35.3,
+       "link": "EE_BODY_L",
+       "obstacle": "pick_obstacle_overbar_0_leg_left"
+      }
+     }
+    },
+    "decision_vla_close": {
+     "arm": {
+      "dist_mm": 50.0,
+      "link": null,
+      "obstacle": null
+     },
+     "hand": {
+      "dist_mm": -20.1,
+      "link": "EE_BODY_L",
+      "obstacle": "pick_obstacle_overbar_0"
+     }
+    },
+    "n_arm_geoms": 244,
+    "n_obstacle_geoms": 16,
+    "seconds": 4.0
+   },
+   "322": {
+    "n_candidates": 48,
+    "arm_pen_any": 1,
+    "arm_pen_any_5mm": 1,
+    "hand_pen_any": 2,
+    "executed_arm_pen_rows": 0,
+    "executed_arm_min_mm": 50.0,
+    "vla_close_arm_min_mm": 21.8,
+    "decision_selected": {
+     "grasp": {
+      "arm": {
+       "dist_mm": 44.4,
+       "link": "FT_SENSOR_L",
+       "obstacle": "pick_obstacle_overbar_0"
+      },
+      "hand": {
+       "dist_mm": 22.2,
+       "link": "EE_BODY_L",
+       "obstacle": "pick_obstacle_overbar_0_leg_left"
+      }
+     },
+     "pre": {
+      "arm": {
+       "dist_mm": 50.0,
+       "link": null,
+       "obstacle": null
+      },
+      "hand": {
+       "dist_mm": 21.7,
+       "link": "ee_finger_l2",
+       "obstacle": "pick_obstacle_overbar_0_leg_left"
+      }
+     }
+    },
+    "decision_vla_close": {
+     "arm": {
+      "dist_mm": 21.8,
+      "link": "FT_SENSOR_L",
+      "obstacle": "pick_obstacle_overbar_0"
+     },
+     "hand": {
+      "dist_mm": -20.8,
+      "link": "EE_BODY_L",
+      "obstacle": "pick_obstacle_overbar_0"
+     }
+    },
+    "n_arm_geoms": 244,
+    "n_obstacle_geoms": 16,
+    "seconds": 4.1
+   },
+   "323": {
+    "n_candidates": 27,
+    "arm_pen_any": 1,
+    "arm_pen_any_5mm": 1,
+    "hand_pen_any": 1,
+    "executed_arm_pen_rows": 0,
+    "executed_arm_min_mm": 50.0,
+    "vla_close_arm_min_mm": 1.6,
+    "decision_selected": {
+     "grasp": null,
+     "pre": {
+      "arm": {
+       "dist_mm": 49.0,
+       "link": "FT_SENSOR_L",
+       "obstacle": "pick_obstacle_overbar_0"
+      },
+      "hand": {
+       "dist_mm": 15.8,
+       "link": "EE_BODY_L",
+       "obstacle": "pick_obstacle_overbar_0"
+      }
+     }
+    },
+    "decision_vla_close": {
+     "arm": {
+      "dist_mm": 1.6,
+      "link": "FT_SENSOR_L",
+      "obstacle": "pick_obstacle_overbar_0"
+     },
+     "hand": {
+      "dist_mm": -29.3,
+      "link": "EE_BODY_L",
+      "obstacle": "pick_obstacle_overbar_0"
+     }
+    },
+    "n_arm_geoms": 244,
+    "n_obstacle_geoms": 16,
+    "seconds": 3.6
+   }
+  },
+  "total": {
+   "n_candidates": 188,
+   "arm_pen_any": 13,
+   "arm_pen_any_5mm": 11,
+   "hand_pen_any": 16,
+   "executed_arm_pen_rows": 0,
+   "decision_selected_arm_pen_runs": 0,
+   "arm_pen_any_frac": 0.0691,
+   "instrument_ok": true,
+   "verdict_real_problem": true
+  }
+ },
+ "urdf_vs_mujoco": {
+  "n": 188,
+  "urdf_positive": 125,
+  "both_positive": 13,
+  "urdf_only": 112
+ }
+}

@@ -1,0 +1,59 @@
+{
+ "columns": [
+  "stage",
+  "numbers",
+  "notes"
+ ],
+ "rows": [
+  [
+   "P1 filter (label-free)",
+   "eligible 242/384 cells; cells excluded by reason (any camera): low_mass 109, fixed_patch_sink 16, broad_map 27",
+   "last:L8H2 excluded (cam_high low_mass, mass median 0.0063); paper top-3 excluded (L4H1, L2H0 broad_map; L14H5 sink); T47 oracle top-3 eligible"
+  ],
+  [
+   "P2 2D (GT)",
+   "2D-lift top-1 last:L12H3 (19.8); 3D candidates GT 20, self 23, union 27",
+   "top-16 identical under record mean and scene mean"
+  ],
+  [
+   "P2 3D (GT identity)",
+   "scene mean (pre-reg.): last:L12H4 0.6913; record mean (code, deviation): mean:L12H4 0.6819",
+   "last:L8H2 3D record mean 0.591 (scored, not ranked)"
+  ],
+  [
+   "P3 scene bootstrap",
+   "scene mean: P(rank1) last:L12H4 0.429, top3 0.879, CI [0.515, 0.840]",
+   "record mean (code): mean:L12H4 P(rank1) 0.388; stable_single_cell False"
+  ],
+  [
+   "P4 k (scene LOSO, code=record mean)",
+   "CV mean k1 0.586 / k2 0.596 / k3 0.537; diff k2-k1 CI [0.000, 0.024]",
+   "k*=1 -> mean:L12H4; nested mean 0.586; k_inner all 1"
+  ],
+  [
+   "P5 held-out (GT identity)",
+   "selected mean:L12H4: 0.900 | last:L8H2: 0.900 | self-selected last:L12H3: 0.900",
+   "same scene 0.867 / new scene 0.933 (all three identical per record); L8H2 parity vs T47b 60/60"
+  ],
+  [
+   "P6 ablation (held-out)",
+   "random 20: median 0.733, p05 0.033, p95 0.901; share >= selected 0.10",
+   "paper3 s0 0.000, s1 0.000; head avg 0.867; T47 oracle3 0.900; restricted oracle mean:L8H2 0.900"
+  ],
+  [
+   "self label",
+   "grasp event in 6/10 records; cam_high err median 2.3-5.3 px; target moved before grasp max 0.18-1.47 cm",
+   "self top-1 last:L12H3 (GT mean:L12H4); top-3 overlap 1; self_identity 1.0 for top cells, rank-1 tie rate 1.0 (2D-lift tie-break decides); held-out diff 0.000 on 4/4 records"
+  ],
+  [
+   "annotation curve (GT, exploratory)",
+   "P(same top-1) n=40 0.245, n=120 0.448; P(top-1 in ref top-3) n=40 0.940",
+   "frames pooled, record-mean reference"
+  ],
+  [
+   "LIBERO P1-P3 (2D primary)",
+   "eligible 287/384; top-1 mean:L12H3 lift 23.35, P(rank1) 1.00; P(top3)=1.0 for L12H3 (mean/last/first)",
+   "mean:L8H2 rank 16 (eligible); last:L8H2 P1-excluded (agentview low_mass), lift rank 4 of 384, KNOWS-hit rank 1"
+  ]
+ ]
+}

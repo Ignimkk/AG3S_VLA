@@ -1,0 +1,24 @@
+{
+ "asset": "paper/figures/paperbanana/figure3/assets/f3_attached_object.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_assets.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00169.npz": "3e28cd45c397434566cf807a4f4e3e3a274df137aa9a1ae316f5cb590f425344"
+ },
+ "note": "After the grasp latch reaches HELD, the target becomes an attached sphere on the hand that queries the scene field.",
+ "is_measured_result": false,
+ "generated": true,
+ "chunk": 19,
+ "attached": [
+  {
+   "centre_m": [
+    0.47553,
+    -0.311713,
+    0.87223
+   ],
+   "radius_mm": 40.412
+  }
+ ],
+ "parent_link": "ee_right"
+}

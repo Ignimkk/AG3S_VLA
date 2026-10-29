@@ -17,7 +17,7 @@ A0 lead ──<G>.task.md──► A1 ──<G>.impl.md──► A2 ──<G>.ve
 |---|---|---|---|
 | **A0** lead | opus · high | `<G>.task.md` · PLAN · 판정 진행 · **긴 실행 직접 기동** | 코드·문서·figure 를 직접 고치기 |
 | **A1** 구현 | opus · high | `AG3S/**/*.py` · `Baseline/**/*.py` · `benchmark/**/*.py` · `integration/**/*.py` · `common/**/*.py` · `tests/**` · `<G>.impl.md` | 측정, 로그 쓰기 |
-| **A2** 검증 | opus · high | `AG3S/ag3s/docs/figures/**` · `<G>.verify.json` · `outputs/verify/**` | 코드 수정, 해석·판정 쓰기 |
+| **A2** 검증 | opus · high | `AG3S/ag3s/docs/figures/**` · `<G>.verify.json` · `${AG3S_RUN_DIR}/verify/**` | 코드 수정, 해석·판정 쓰기 |
 | **A3** 기록 | sonnet · high | `AG3S/ag3s/docs/*.md` · `references/legacy-papers/**` | 코드, 실험, figure |
 
 ## 남은 게이트 — 누가 붙나

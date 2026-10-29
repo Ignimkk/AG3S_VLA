@@ -1,0 +1,129 @@
+% !TEX root = ../main.tex
+\section{Method}
+\label{sec:method}
+\sys\ has four stages (Fig.~\ref{fig:pipeline}): ATS grounds the target's identity and observed extent and tracks identity over time (Secs.~\ref{sec:grounding}--\ref{sec:memory}); HSR estimates task phase and, separately, physical attachment (Sec.~\ref{sec:phase}); LTE turns both into link- and state-specific distance fields (Sec.~\ref{sec:contact}); CCR tracks the action chunk under those fields and executes a verified prefix (Sec.~\ref{sec:refine}).
+
+\subsection{Task-conditioned contact representation}
+\label{sec:overview}
+At request $t$ a frozen VLA predicts an action chunk $A_t=\pi_\theta(I_t,q_t,l)$ from RGB views $I_t$, robot state $q_t$, and instruction $l$. The geometric layer additionally receives synchronized depth, camera calibration, and a robot model, and reads attention and hidden features from an instrumented copy of the same frozen checkpoint. It maintains a target identity $j_t$, the target's observed surface set $\mathcal T_t$, a validity flag $v_t$ (grounding present and not under alert), a task phase $s_t$, and a physical grasp state $z_t$. The active arm, the contact-link set $\mathcal L$, and the permitted placement support are task inputs, not inferred affordances.
+
+These quantities define one distance field $\delta_{i,t}$ for \emph{each} query sphere $i$ of the robot or of an attached object. For sphere centre $c_i(q)$, radius $r_i$, and margin $\mu_i$, the clearance constraint at waypoint $k$ is
+\begin{equation}
+ h_{ik}(q_k)=\delta_{i,t}\big(c_i(q_k)\big)-r_i-\mu_i\geq0.
+ \label{eq:clearance}
+\end{equation}
+The method is the construction of $\delta_{i,t}$: a finger approaching the target reads a field from which the accepted target surface has been removed, while the wrist, the other arm, and the carried object read the full scene.
+
+\subsection{ATS: grounding the observed target surface}
+\label{sec:grounding}
+\paragraph{Surface-matched robot removal.}
+The usual sphere or capsule mask discards a whole volume around the hand, and with it the fruit between the fingers, exactly the surface a grasp must later touch. We instead render the robot's depth $\widehat D^v_{\mathrm{robot},t}$ at the measured configuration and remove a pixel only when it agrees with the rendered robot surface,
+\begin{equation}
+ |D_t^v(u)-\widehat D^v_{\mathrm{robot},t}(u)|\leq\epsilon_r .
+ \label{eq:selfmask}
+\end{equation}
+A held object whose depth differs from the rendered gripper by more than $\epsilon_r$ survives.
+
+\paragraph{Depth-continuous surface graph.}
+Valid non-robot pixels are lifted into a common robot frame with each camera's pose at capture time and voxelized into nodes with centroids $x_i$, normals $n_i$, and pixel-to-patch associations. A radius or nearest-neighbor graph would connect two fruits that touch; we admit an edge only when neighboring \emph{image} pixels connect its nodes, their depth jump is below a threshold, and the nodes are close in 3D, so proximity alone cannot bridge a visible depth discontinuity. Admitted edges carry
+\begin{equation}
+ w_{ij}=\exp\!\left(-\frac{\|x_i-x_j\|^2}{\sigma_x^2}
+ -\frac{1-|n_i^\top n_j|}{\sigma_n}\right),
+ \label{eq:affinity}
+\end{equation}
+with the normal term omitted where local PCA cannot estimate one. A RANSAC support plane supplies negative membership evidence and remains protected scene geometry; no semantic label is used.
+
+\paragraph{Attention seeds with conserved patch mass.}
+A fixed noun-to-image attention head of the frozen VLA scores image patches $a_p$. Lifting the attention peak directly marks a few depth samples and flickers between frames; copying a patch's score to every sample under it lets large, far surfaces outvote the small object the noun refers to. We keep the top-ranked eligible patches $\mathcal P$, those with enough non-robot, non-support pixels, and distribute each patch's normalized score over the nodes it observes in proportion to pixel share,
+\begin{equation}
+ \lambda_i^+=\sum_{p\in\mathcal P}\frac{N_{ip}}{N_p}\,
+ \frac{a_p}{\max_{r\in\mathcal P}a_r},
+ \label{eq:mass}
+\end{equation}
+where $N_p$ counts retained pixels in patch $p$ and $N_{ip}$ those on node $i$. A patch thus carries one unit of evidence however many samples it covers. Without valid seeds no new target region is authorized.
+
+\paragraph{Seeded membership.}
+Let $\lambda_i^-=1$ on support nodes and $0$ elsewhere, $\Lambda_{ii}=\lambda_i^++\lambda_i^-$, and $y_i=\lambda_i^+/\Lambda_{ii}$ where $\Lambda_{ii}>0$. With graph Laplacian $L_{\mathcal G}$ of the surface graph $\mathcal G$, the membership $m^*$ solves
+\begin{equation}
+\begin{split}
+ m^*&=\arg\min_m\,(m-y)^\top\Lambda(m-y)+m^\top L_{\mathcal G}\,m,\\
+ (\Lambda+L_{\mathcal G})\,m^*&=\Lambda y .
+\end{split}
+ \label{eq:energy}
+\end{equation}
+Geometry decides where evidence can flow; the unaries decide which surface receives it. Components without unary evidence stay unknown rather than defaulting to free space. Thresholding $m^*$ and keeping the connected region with the greatest seed mass yields the base surface $\mathcal T_t^0$. The graph deliberately uses no visual-feature edge or prototype unary: Sec.~\ref{sec:featureresults} shows that, once robot removal and seeding are right, they do not improve the boundary.
+
+\subsection{ATS: temporal identity and consistency}
+\label{sec:memory}
+Region identity and fine membership need different spatial information, so we use internal features for the former and the depth graph for the latter. Raw VLA patch features are dominated by a component shared by the whole frame, so every region in a scene scores cosine $\approx0.97$ against every other (Fig.~\ref{fig:overview}). Centering removes it. For unit patch feature $u_{p,t}$, frame mean $\bar u_t$, and the pixel count $b_p(R)$ of region $R$ in patch $p$,
+\begin{equation}
+ \widetilde u_{p,t}=\operatorname{norm}(u_{p,t}-\bar u_t),\qquad
+ g_t(R)=\operatorname{norm}\!\Big(\sum_p b_p(R)\,\widetilde u_{p,t}\Big).
+ \label{eq:descriptor}
+\end{equation}
+
+\paragraph{Identity reassociation.}
+We store the first valid base-region descriptor as the reference $g_\star$. Candidates $\mathcal C_t$ are the size-filtered connected components of the non-robot, non-support graph, and $R_t^\star$ is the candidate most similar to the reference. When attention has drifted to another object, $R_t^\star$ replaces the base region if it lies in a different component and wins by a margin,
+\begin{equation}
+ g_t(R_t^\star)^\top g_\star-g_t(\mathcal T_t^0)^\top g_\star\geq\kappa .
+ \label{eq:switch}
+\end{equation}
+The switch chooses among observed regions and never redraws a boundary; it is suspended once attachment locks the carried identity. The variant without reassociation is our matched ablation.
+
+\paragraph{Consistency and permission.}
+A separate causal memory chain scores the selected region against the previously accepted one, $c_t=g_t(\mathcal T_t)^\top g_{\mathrm{chain},t-1}$. A score below a fixed threshold raises an \emph{alert}: the region is still tracked, but no new contact exception is granted on it. Missing history counts as unavailable, not as agreement, and a switched region is scored before its geometry can be authorized. Descriptor memory stores identity only; it never licenses removing unseen or stale surfaces.
+
+\subsection{HSR: task phase and physical attachment}
+\label{sec:phase}
+Which contact rule applies depends on what the policy is doing. A policy fine-tuned for action emits no language, so we read the stage of the task from its features with a linear probe on pooled prefix key/value features $f_t$, fitted on simulator phase labels of development episodes,
+\begin{equation}
+ p_t=\operatorname{softmax}\!\big(W\,(f_t-\bar f)/\sigma_f+b\big),
+ \label{eq:probe}
+\end{equation}
+over the labels \emph{pick}, \emph{place}, and \emph{home}; only the normalization and the classifier are fitted. The probe follows the image and ignores the state string, so a second regularized linear classifier, fitted on the same labels, adds what it cannot see: the probe's log-probabilities, gripper opening, the target-centroid distance to the nearer hand, centroid height over the estimated support, and log region size. Its confirmed output is the phase $s_t$. Estimates must persist across consecutive observations before any rule changes: a confirmed \emph{pick} permits adopting a target and eligible reassociation, \emph{place} freezes the manipulated identity, and \emph{home} clears it only after a physical release.
+
+A phase prediction is intent, not contact. An independent grasp state $z_t\in\{\textsc{free},\textsc{held},\textsc{uncertain}\}$ is maintained from measured gripper opening, executed commands, and target--hand motion consistency. Only confirmed attachment activates carried geometry, and conflicting observations leave $z_t$ uncertain, which blocks every new permissive transition. The state machine thus separates \emph{what the policy appears to be doing} from \emph{what is physically moving with the hand}.
+
+\subsection{LTE: surface-supported contact constraints}
+\label{sec:contact}
+\label{sec:exemption}
+\paragraph{Only the accepted surface is removable.}
+Deleting a ball around the target frees the neighbor touching it and any unobserved space inside. We remove only samples that the accepted surface backs. With scene samples $\mathcal S_t$, accepted target surface $\mathcal T_t$, competing surfaces $\mathcal N_t$ including protected supports, and their nearest-surface distances $d_T,d_N$,
+\begin{equation}
+\begin{split}
+ \mathcal X_t=\big\{x\in\mathcal S_t\cap\mathcal B_t:\;&
+ d_T(x)\leq\rho,\\
+ &d_T(x)+\tau<d_N(x),\; \nu_t(x)=1\big\},
+\end{split}
+ \label{eq:region}
+\end{equation}
+where $\mathcal B_t$ merely bounds the search, $\rho$ bounds the distance to the accepted surface, $\tau$ reserves a boundary band, and $\nu_t$ requires accepted membership, current observation, and no veto by a support or competing surface. Ambiguous samples stay in the field; a remembered identity cannot override absent spatial evidence.
+
+\paragraph{Link-dependent fields.}
+The scene field $d_t$ is built with cuRobo~\cite{sundaralingam2026curobov2}: the robot-masked depth of all views is integrated into a truncated signed distance field (TSDF) at 5\,mm, from which a Euclidean signed distance field (ESDF) is computed on a coarse 20\,mm grid over the workspace and on a fine 5\,mm window that follows the swept hand; a query reads the minimum of the two. LTE builds the alternative $d_t^{\setminus\mathcal X}$ inside the fine window without erasing any voxel: the surface voxels that seed the distance transform are dropped where they belong to $\mathcal X_t$, the transform is propagated from the remaining surfaces, and the sign is corrected where the removed surface used to lie. Every other surface, including the neighbor touching the target, still seeds both fields. Before attachment,
+\begin{equation}
+ \delta_{i,t}(x)=
+ \begin{cases}
+ d_t^{\setminus\mathcal X}(x), & i\in\mathcal L\ \land\ e_t=1,\\
+ d_t(x), & \text{otherwise},
+ \end{cases}
+ \label{eq:linkquery}
+\end{equation}
+where $e_t=v_t\land[s_t\in\mathcal S_{\mathrm{ok}}]$ requires valid grounding without alert and a permitted phase. Outside the local field's window every query falls back to the full scene, unknown space is never granted an exception, and because $\mathcal X_t$ is rebuilt from current samples, retracting membership restores the constraint on the next request.
+
+\paragraph{Grasp, carry, and release.}
+A confirmed grasp transforms the accepted pre-closure target geometry into the hand frame as attached query spheres; the object's own surface voxels stop seeding the scene field by the same seed exclusion, not by clearing a volume, and the attached spheres query the remaining environment together with the robot's. A configured placement rule may permit object--support contact at the destination without exempting any robot link from that support. On confirmed release the stored geometry returns to the scene; an uncertain release blocks new permissive transitions, so a stale attachment never leaves an empty region behind.
+
+\subsection{CCR: refining and checking the action prefix}
+\label{sec:refine}
+Refining one command at a time leaves the rest of the chunk unchecked; refining the whole chunk against a fixed scene commits to stale geometry. CCR refines the first $J$ waypoints $Q$ of the reference $Q^{\mathrm{ref}}$ and executes a shorter prefix:
+\begin{equation}
+\begin{split}
+ \min_Q\quad &w_{\mathrm t}\|Q-Q^{\mathrm{ref}}\|_F^2
+ +w_{\mathrm s}\|\Delta^2Q\|_F^2
+ +w_{\mathrm c}\|Q_{\mathcal O}-\bar Q^{\mathrm{prev}}_{\mathcal O}\|_F^2\\
+ \text{s.t.}\quad &h_{ik}(q_k)\geq0\ \ \forall i,k,\qquad Q\in\mathcal Q .
+\end{split}
+ \label{eq:qp}
+\end{equation}
+$\mathcal Q$ imposes joint and motion limits and $\mathcal O$ is the overlap with the previous plan, aligned by execution feedback so that the continuity term compares plans for the same future interval. Sequential quadratic programming linearizes clearance within a trust region and solves each subproblem with OSQP~\cite{stellato2020osqp}. The first $K\leq J$ rows are the candidate prefix; the rest is look-ahead. A separate check recomputes the nonlinear distances of every robot and attached sphere at the prefix waypoints and at interpolated configurations from the measured pose, against the same geometry snapshot and state the refiner used. If it fails the client \textsc{holds}, keeping the measured arm pose and a grasp-consistent gripper command until a new observation arrives; otherwise the prefix is executed. A hold is an intervention, not a success, and is counted as such.

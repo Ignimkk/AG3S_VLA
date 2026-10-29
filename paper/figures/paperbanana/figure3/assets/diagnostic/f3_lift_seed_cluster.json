@@ -1,0 +1,16 @@
+{
+ "asset": "paper/figures/paperbanana/figure3/assets/f3_lift_seed_cluster.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_assets.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa"
+ },
+ "note": "Top view of the fused cloud with normalised attention, top-5% seeds (teal rings), and the selected target cluster.",
+ "is_measured_result": false,
+ "generated": true,
+ "chunk": 17,
+ "n_seeds": 139,
+ "n_target_points": 120,
+ "grounding_status": "ok"
+}

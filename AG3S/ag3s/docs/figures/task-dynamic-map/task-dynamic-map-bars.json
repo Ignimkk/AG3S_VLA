@@ -1,0 +1,44 @@
+{
+ "configurations": [
+  "B",
+  "B_TL",
+  "B_ROI",
+  "B_TL_ROI"
+ ],
+ "target_old_main": [
+  46734,
+  2142,
+  2579,
+  8882
+ ],
+ "target_old_hand": [
+  23938,
+  762,
+  539,
+  5728
+ ],
+ "moved_old_main": [
+  919,
+  107044,
+  65,
+  37
+ ],
+ "missed_occluded_main_pp": [
+  0.0,
+  1.1106,
+  0.8459,
+  0.8319
+ ],
+ "missed_visible_main_pp": [
+  0.0,
+  0.3647000000000001,
+  0.2911,
+  0.3509
+ ],
+ "esdf_ms_median": [
+  95.5,
+  344.14,
+  224.89,
+  441.4
+ ]
+}

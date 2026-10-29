@@ -1,0 +1,42 @@
+{
+ "asset": "paper/figures/cvpr_v1/assets/vla_carry_fail.png",
+ "arm": "E0",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1968_s19681",
+ "episode": 1968,
+ "seed": 19681,
+ "profile": "t43p2_overbar",
+ "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json",
+ "model_xml": "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml",
+ "control_step": 234,
+ "n_control_steps": 235,
+ "path_from_step": 154,
+ "camera": {
+  "lookat": [
+   0.55,
+   0.15,
+   1.02
+  ],
+  "dist": 0.85,
+  "az": 150,
+  "el": -15
+ },
+ "gripper_bar_distance_m": 0.0005330151974180328,
+ "apple_xyz_m": [
+  0.5516708430015861,
+  0.16369421901013603,
+  1.0582415614561715
+ ],
+ "left_tool_centre_xyz_m": [
+  0.548307693285296,
+  0.16396182586132224,
+  1.0796823353652356
+ ],
+ "note": "VLA only, last recorded control step (n_control = 235): finger/bar contact -> client obstacle stop; red marker = closest gripper/bar point (mj_geomDistance)",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1968_s19681/frames.jsonl": "a21cae5ccc47f346388198a23fd9ea94bb602aa117b3fb85415650fc9c24ed76",
+  "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1968_s19681.json": "85669e4a8c5a7083463185067fabd4d9c107c0e06de865f998eff28596217edf",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261017T171201+0900_f15e587290f6_137b5f75d9e3/snapshot/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml": "3cae2c26333a1730a23b847dbd3de45a42c164e95d9c8aacd9936bbf94d34dad"
+ },
+ "renderer": "MuJoCo 3.11.0 replay of the recorded qpos (no re-simulation); OSMesa, CPU",
+ "script": "paper/tools/plotting/cvpr_v1_fig1_scenes.py"
+}

@@ -1,4 +1,5 @@
 from common.workspace import workspace_path as _ag3s_workspace_path
+from common.run_output import add_run_dir_argument, configure_run_logging, prepare_run_outputs
 import argparse
 import contextlib
 import json
@@ -52,9 +53,11 @@ from rby1_manipulation.simulation.pick_place_obstacles import (
 )
 from rby1_manipulation.simulation.transport_scene import (
     CRATE_JOINT,
+    OBJECT_BODIES,
     OBJECT_JOINTS,
     load_layout_config,
 )
+from rby1_manipulation.evaluation.transport import object_in_crate
 
 MODELS = {
     "droid": {
@@ -338,6 +341,17 @@ def hold_keyframe_pose(m, d):
         d.ctrl[actuator] = d.qpos[m.jnt_qposadr[joint]]
 
 
+# T46f pilot — begin
+def apply_target_offset_xy(record, offset_xy):
+    """T46f 변형 배치 pilot: target 과일의 초기 xy 만 옮긴 **새** record 를 돌려준다 (원 record 는 그대로)."""
+    tgt = record["target_fruit"]
+    pose = [float(v) for v in record["initial_fruit_poses"][tgt]]
+    pose[0] += float(offset_xy[0])
+    pose[1] += float(offset_xy[1])
+    return dict(record, initial_fruit_poses=dict(record["initial_fruit_poses"], **{tgt: pose}))
+# T46f pilot — end
+
+
 def reset_randomized_scene(m, d, record, settle_seconds=1.5):
     """Restore the exact initial state the recorded episode started from.
 
@@ -617,6 +631,70 @@ def apply_action(action_format, action, d, idx, act):
     raise ValueError(f"unknown action_format: {action_format}")
 
 
+def oracle_target_of(randomized_episode, ap):
+    """T46e A13 — the GT target body for `--safe-oracle-seg` (the randomized episode's `target_fruit`).
+
+    Refuses (ap.error) when there is none: an oracle run without a known target would label nothing as the
+    target and the server would fall back to the estimated extent on every frame.
+    """
+    target = (randomized_episode or {}).get("target_fruit")
+    if not target:
+        ap.error("--safe-oracle-seg needs the episode's target_fruit (a randomized 16-D episode)")
+    return str(target)
+
+
+# AG3S-PRE-CORE-TO PT — first-chunk perturbation (default off). Rolls the same scene / seed out as
+# nearby draws: a fixed 7-vector (uniform ±R from its own `default_rng(K)`; no other RNG is touched)
+# is added to the used arm's joint targets of the action applied in control steps 0..7.
+#: 16-D action slices of each arm's 7 joint targets (grippers 7 / 15 are not in them).
+PERTURB_ARM_SLICES_16D = {"left": slice(0, 7), "right": slice(8, 15)}
+#: Control steps 0..PERTURB_STEPS-1 are perturbed = the first chunk's executed rows.
+PERTURB_STEPS = OPEN_LOOP_HORIZON
+
+
+def first_chunk_perturb_error(radius, seed):
+    """Argument check for `--first-chunk-perturb-rad R --perturb-seed K`; returns a message or None."""
+    if radius is None and seed is None:
+        return None
+    if radius is None:
+        return "--perturb-seed only does something together with --first-chunk-perturb-rad"
+    if seed is None:
+        return "--first-chunk-perturb-rad requires --perturb-seed"
+    if not (np.isfinite(radius) and radius > 0.0):
+        return f"--first-chunk-perturb-rad must be a finite value > 0, got {radius}"
+    if seed < 0:
+        return f"--perturb-seed must be >= 0, got {seed}"
+    return None
+
+
+def first_chunk_perturb_vector(radius, seed):
+    """The 7 joint offsets (rad): uniform in [-radius, radius) from a private `default_rng(seed)`."""
+    return np.random.default_rng(int(seed)).uniform(-float(radius), float(radius), size=7)
+
+
+def make_first_chunk_perturb(radius, seed, used_arm):
+    """The perturbation spec (None = off). `used_arm` must be 'left' or 'right'."""
+    if radius is None:
+        return None
+    if used_arm not in PERTURB_ARM_SLICES_16D:
+        raise ValueError(f"used arm must be 'left' or 'right', got {used_arm!r}")
+    return {"radius": float(radius), "seed": int(seed), "arm": str(used_arm),
+            "vector": first_chunk_perturb_vector(radius, seed)}
+
+
+def perturb_first_chunk_action(action, t_step, perturb):
+    """`action` + the perturbation on the used arm's 7 joints for `t_step` < PERTURB_STEPS.
+
+    Off (`perturb` None) or later steps: returns `action` itself (same object, untouched). On: a new
+    float64 array; `action` (possibly a row view of the chunk) is never written.
+    """
+    if perturb is None or t_step >= PERTURB_STEPS:
+        return action
+    out = np.array(action, dtype=np.float64, copy=True)
+    out[PERTURB_ARM_SLICES_16D[perturb["arm"]]] += perturb["vector"]
+    return out
+
+
 def validate_rby1_observation(obs, *, log=False):
     """Validate the raw 14-D/three-camera interface sent to the policy."""
     state = np.asarray(obs.get("state"))
@@ -728,6 +806,7 @@ def build_seam_session(policy, mcfg, seam_config_path):
 
 def main():
     ap = argparse.ArgumentParser()
+    add_run_dir_argument(ap)
     ap.add_argument("--model", choices=list(MODELS.keys()), default="droid",
                     help="which pi0.5 variant to load")
     ap.add_argument("--prompt", default=DEFAULT_PROMPT,
@@ -740,6 +819,21 @@ def main():
              "validation and 1800-1999 test, so the default is the first held-out "
              "test scene. The episode's own prompt is used unless --prompt is given.")
     ap.add_argument("--max-steps", type=int, default=-1)
+    ap.add_argument(
+        "--stop-after-place", type=float, default=None, metavar="SEC",
+        help="IFG (user, 2026-10-21) — end the episode SEC seconds after the place: the first control step where the "
+             "episode's target fruit centre is inside the crate (rby1_manipulation.evaluation.transport.object_in_crate, "
+             "the analysis rule) and the used arm's applied gripper is open (>= 0.5). Logs '[place] stop after place'. "
+             "Off (default): run to --max-steps. Needs a randomized 16D episode.")
+    ap.add_argument(
+        "--first-chunk-perturb-rad", type=float, default=None, metavar="R",
+        help="AG3S-PRE-CORE-TO PT — add a fixed 7-vector (each entry uniform in ±R rad, drawn once from "
+             "numpy default_rng(--perturb-seed)) to the used arm's 7 joint targets of the action applied in "
+             "control steps 0-7 (the first chunk's executed rows; grippers and the other arm untouched). The "
+             "perturbed action goes to ctrl and to executed_actions. Off (default). Needs a randomized 16D episode.")
+    ap.add_argument(
+        "--perturb-seed", type=int, default=None, metavar="K",
+        help="AG3S-PRE-CORE-TO PT — seed of the --first-chunk-perturb-rad vector (required with it)")
     ap.add_argument("--headless", action="store_true")
     ap.add_argument(
         "--view",
@@ -774,6 +868,11 @@ def main():
                          "프레임마다 그대로 기록된다. 서버도 `--shadow` 로 떠 있어야 하고, "
                          "짝이 안 맞으면 즉시 죽는다. timeout·오래된 응답·서버 오류는 shadow "
                          "에서도 hold 다")
+    ap.add_argument("--safe-oracle-seg", action="store_true",
+                    help="T46e A13 (진단 oracle) — 요청마다 카메라별 MuJoCo GT segmentation code 영상을 싣는다 "
+                         "(이 episode 의 target_fruit = code 1, 다른 과일 · 정적 물체 · 로봇을 구별; capture 가 이미 "
+                         "렌더한 것이라 추가 렌더 없음). 서버가 --target-extent oracle-visible 일 때 필요하다 — 그 "
+                         "서버에 이 flag 없이 붙으면 접속 즉시 죽는다. --safe-remote 와 randomized 16-D episode 에서만")
     ap.add_argument("--safe-timeout", type=float, default=2.0, metavar="SEC",
                     help="서버 응답 제한 시간. 넘으면 hold")
     # T23 — 실행 게이트와 HOLD. 세 flag 모두 기본값이 새 동작이고, `legacy` 가 T23 전 동작이다.
@@ -898,12 +997,32 @@ def main():
         help="fruits initially placed inside the crate; requires --fruit-layout-index",
     )
     ap.add_argument(
+        "--remove-objects",
+        nargs="+",
+        choices=FRUIT_TYPES,
+        default=None,
+        help="randomized 16-D episodes: park these non-target fruits on the floor after the reset "
+             "(off the table and out of the cameras). Off by default",
+    )
+    ap.add_argument(
         "--fruit-basket-offset",
         type=float,
         default=0.0,
         help="move non-preloaded fruits this many metres radially away from the basket "
              "during a fruit-grid reset (inference-only; requires --fruit-layout-index)",
     )
+    # T46f pilot — begin
+    ap.add_argument(
+        "--target-offset-xy",
+        type=float,
+        nargs=2,
+        default=None,
+        metavar=("DX", "DY"),
+        help="T46f 변형 배치 pilot — 16D randomized episode 의 target 과일 초기 위치를 world x · y 로 "
+             "DX · DY m 만큼 옮긴다 (z · 자세 · 다른 물체 그대로, settle 은 기존 그대로). 진단용, 기본 off. "
+             "--model rby1_randomized_pick_place_16d 에서만",
+    )
+    # T46f pilot — end
     ap.add_argument(
         "--seed",
         type=int,
@@ -938,6 +1057,17 @@ def main():
                     help="(T42) with --viz-avoidance-arrow: also a blue arrow along the obstacle "
                          "normal at the gripper's closest point (MuJoCo ground truth, within 10 cm)")
     args = ap.parse_args()
+    try:
+        prepare_run_outputs(args, {
+            "record": "videos/rollout.mp4", "trajectory_out": "trajectories/rollout.npz",
+            "record_inputs": "policy_inputs", "record_ag3s": "ag3s_records",
+            "trace": "logs/trace", "record_constraints": "constraints",
+            "record_frames": "frames",
+        })
+        configure_run_logging("pi05_infer")
+    except (ValueError, OSError) as exc:
+        ap.error(str(exc))
+    print(f"run outputs: {args.run_dir}")
 
     if args.start_delay < 0:
         ap.error("--start-delay must be non-negative")
@@ -945,12 +1075,22 @@ def main():
         ap.error(f"--warmup-steps must be >= 0, got {args.warmup_steps}")
     if args.policy_seed is not None and not 0 <= args.policy_seed < POLICY_SEED_LIMIT:
         ap.error(f"--policy-seed must be in [0, 2**32), got {args.policy_seed}")
+    _perturb_err = first_chunk_perturb_error(args.first_chunk_perturb_rad, args.perturb_seed)
+    if _perturb_err is not None:
+        ap.error(_perturb_err)
     if args.speed < 0:
         ap.error("--speed must be non-negative (0 = unlimited)")
     if args.obstacle_stop_distance < 0:
         ap.error("--obstacle-stop-distance must be non-negative")
     if not np.isfinite(args.fruit_basket_offset) or args.fruit_basket_offset < 0:
         ap.error("--fruit-basket-offset must be a finite non-negative distance")
+    # T46f pilot — begin
+    if args.target_offset_xy is not None:
+        if args.model != "rby1_randomized_pick_place_16d":
+            ap.error("--target-offset-xy requires --model rby1_randomized_pick_place_16d")
+        if not all(np.isfinite(v) and abs(v) <= 0.10 for v in args.target_offset_xy):
+            ap.error("--target-offset-xy values must be finite and within ±0.10 m")
+    # T46f pilot — end
     if args.fruit_layout_index is not None and args.model != "rby1_transport_14d":
         ap.error("--fruit-layout-index requires --model rby1_transport_14d")
     if args.fruit_layout_index is None and (
@@ -1051,6 +1191,8 @@ def main():
     if args.safe_gate == "off" and args.safe_shadow:
         ap.error("--safe-gate off executes the REFINED chunk; --safe-shadow executes the policy "
                  "REFERENCE chunk. They are different experiments — pick one")
+    if args.safe_oracle_seg and not args.safe_remote:
+        ap.error("--safe-oracle-seg only does something together with --safe-remote (the server reads it)")
     if args.safe_shadow and not args.safe_remote:
         ap.error("--safe-shadow requires --safe-remote: shadow means the server runs the whole "
                  "pipeline and the robot executes the policy's own chunk. Without the server "
@@ -1174,7 +1316,27 @@ def main():
             randomized_episode = load_randomized_episode(args.episode_index)
         except (FileNotFoundError, ValueError) as exc:
             ap.error(str(exc))
+        # T46f pilot — begin
+        if args.target_offset_xy is not None:
+            tgt = randomized_episode["target_fruit"]
+            randomized_episode = apply_target_offset_xy(randomized_episode, args.target_offset_xy)
+            print(f"  [T46f pilot] target {tgt} initial xy moved by "
+                  f"({args.target_offset_xy[0]:+.3f}, {args.target_offset_xy[1]:+.3f}) m")
+        # T46f pilot — end
         reset_randomized_scene(m, d, randomized_episode)
+        if args.remove_objects:
+            # OCC-APPLE (2026-10-25): park non-target fruits on the floor, out of the cameras, before the warm-up.
+            # The reset above is unchanged, so every other object keeps its pose.
+            bad = [o for o in args.remove_objects if o == randomized_episode["target_fruit"]]
+            if bad:
+                ap.error(f"--remove-objects must not name the target fruit {bad[0]!r}")
+            for k, obj in enumerate(args.remove_objects):
+                jid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, f"{obj}_free")
+                qa, va = int(m.jnt_qposadr[jid]), int(m.jnt_dofadr[jid])
+                d.qpos[qa:qa + 7] = [-1.5, -2.5 - 0.3 * k, 0.1, 1.0, 0.0, 0.0, 0.0]
+                d.qvel[va:va + 6] = 0.0
+            mujoco.mj_forward(m, d)
+            print(f"  removed    : {list(args.remove_objects)} parked on the floor (off the table)")
         split = randomized_split_of(args.episode_index)
         print(
             f"  scene      : episode {args.episode_index} ({split}) "
@@ -1367,6 +1529,9 @@ def main():
             trace_dir=args.trace,
             shadow=args.safe_shadow,
             gate=args.safe_gate,
+            # T46e A13 — the episode's GT target for the oracle segmentation (only with --safe-oracle-seg).
+            **({"oracle_target": oracle_target_of(randomized_episode, ap)}
+               if args.safe_oracle_seg else {}),
         )
         hold_ctl = HoldController(mode=args.safe_hold_mode,
                                   max_hold_chunks=args.safe_max_hold_chunks)
@@ -1437,6 +1602,9 @@ def main():
                            mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g)
                            for g in policy_hidden_geoms]}
                       if args.obstacle_policy_hidden else {}),
+                   # T46f pilot — only when on (off: the manifest is the one from before).
+                   **({"episode_target_offset_xy": [float(v) for v in args.target_offset_xy]}
+                      if args.target_offset_xy is not None else {}),
                    "fruit_layout_index": args.fruit_layout_index,
                    "fruit_slot_order": list(args.fruit_slot_order or ()),
                    "fruit_preloaded": list(args.fruit_preloaded or ()),
@@ -1452,7 +1620,9 @@ def main():
                     # T23 — 게이트 · HOLD 방식 · 연속 HOLD 한도.
                     "safe_gate": args.safe_gate,
                     "safe_hold_mode": args.safe_hold_mode,
-                    "safe_max_hold_chunks": args.safe_max_hold_chunks},
+                    "safe_max_hold_chunks": args.safe_max_hold_chunks,
+                    # T46e A13 — 켰을 때만 키가 생긴다 (GT segmentation 을 실은 run).
+                    **({"safe_oracle_seg": True} if args.safe_oracle_seg else {})},
             # 거리장 설정은 **서버가** 들고 있다. 여기서는 클라이언트가 아는 것만 적고,
             # 서버가 실제로 무엇을 썼는지는 프레임마다 응답의 `field.backend` 가 답한다 —
             # 그쪽이 T0 의 "실제로 사용된 backend provenance" 다.
@@ -1701,6 +1871,31 @@ def main():
     # dividing by --speed lets 0.5 play at half speed, etc. speed<=0 disables pacing.
     sim_seconds_per_action = steps_per_action * m.opt.timestep
     wall_seconds_per_action = (sim_seconds_per_action / args.speed) if args.speed > 0 else 0.0
+
+    #: IFG `--stop-after-place` — filled by the loop (`placed_t`, `stop_t`); None = off.
+    place_stop = None
+    if args.stop_after_place is not None:
+        if not args.stop_after_place >= 0.0:
+            ap.error(f"--stop-after-place must be >= 0 s, got {args.stop_after_place}")
+        if randomized_episode is None or randomized_episode.get("used_arm") not in ("left", "right"):
+            ap.error("--stop-after-place needs a randomized 16D episode (target fruit and used arm)")
+        place_stop = {"fruit": str(randomized_episode["target_fruit"]), "arm": str(randomized_episode["used_arm"]),
+                      "grip_index": 0 if randomized_episode["used_arm"] == "left" else 1,
+                      "after_steps": int(round(args.stop_after_place * CTRL_HZ)), "placed_t": None, "stop_t": None}
+        print(f"[place] --stop-after-place {args.stop_after_place:.1f} s: {place_stop['fruit']} in the crate with the "
+              f"{place_stop['arm']} gripper open ends the episode {place_stop['after_steps']} steps later")
+
+    #: AG3S-PRE-CORE-TO PT `--first-chunk-perturb-rad` — None = off (the loop leaves `action` untouched).
+    first_chunk_perturb = None
+    if args.first_chunk_perturb_rad is not None:
+        if (mcfg["action_format"] != "rby1_16d" or randomized_episode is None
+                or randomized_episode.get("used_arm") not in PERTURB_ARM_SLICES_16D):
+            ap.error("--first-chunk-perturb-rad needs a randomized 16D episode (used arm, 16-D action)")
+        first_chunk_perturb = make_first_chunk_perturb(args.first_chunk_perturb_rad, args.perturb_seed,
+                                                       str(randomized_episode["used_arm"]))
+        print(f"[perturb] first chunk: steps 0-{PERTURB_STEPS - 1} {first_chunk_perturb['arm']} arm joints "
+              f"+= v (R={first_chunk_perturb['radius']:g} rad, seed={first_chunk_perturb['seed']}) "
+              f"v={np.array2string(first_chunk_perturb['vector'], precision=3, max_line_width=10**6)}")
 
     def loop_body():
         chunk = None
@@ -1997,6 +2192,9 @@ def main():
                     print(f"[shadow] t={t_step} verdict UNSAFE, executing the reference chunk "
                           f"anyway — {safe_client.last_reason}")
                 action = np.asarray(chunk[chunk_step], dtype=np.float64)
+            # AG3S-PRE-CORE-TO PT — off: `action` is returned as is. On (steps 0..7): a perturbed copy,
+            # which is what goes to ctrl and to executed_actions (bare policy, safe client, or HOLD alike).
+            action = perturb_first_chunk_action(action, t_step, first_chunk_perturb)
             apply_action(mcfg["action_format"], action, d, idx, act)
             # **실제로 `d.ctrl` 에 들어간 값** (T18). HOLD 면 청크가 아니라 `rby1_state()` 다.
             # 청크의 행(`planned_row`)은 HOLD 여도 함께 남긴다 — "제안됐으나 실행 안 됨" 을
@@ -2103,6 +2301,23 @@ def main():
                 )
                 break
 
+            if place_stop is not None:
+                # IFG — the task is done at the place; what follows (return home) is not recorded.
+                if place_stop["placed_t"] is None:
+                    grip = None if _applied is None else float(_applied["gripper"][place_stop["grip_index"]])
+                    if (grip is not None and grip >= 0.5
+                            and object_in_crate(m, d, OBJECT_BODIES[place_stop["fruit"]])):
+                        place_stop["placed_t"] = t_step
+                        print(f"[place] placed at t={t_step} ({place_stop['fruit']} in the crate, "
+                              f"{place_stop['arm']} gripper {grip:.2f}); stopping after "
+                              f"{place_stop['after_steps']} more steps")
+                if (place_stop["placed_t"] is not None
+                        and t_step >= place_stop["placed_t"] + place_stop["after_steps"]):
+                    place_stop["stop_t"] = t_step
+                    print(f"[place] stop after place: placed t={place_stop['placed_t']} stop t={t_step} "
+                          f"({args.stop_after_place:.1f} s)")
+                    break
+
             chunk_step += 1
             if ctx is not None and not ctx.is_running():
                 break
@@ -2187,6 +2402,19 @@ def main():
                 # T43 X — only when on.
                 **({"obstacle_policy_hidden": np.asarray(True)}
                    if args.obstacle_policy_hidden else {}),
+                # IFG --stop-after-place — only when on (-1 = not reached).
+                **({"stop_after_place_s": np.asarray(args.stop_after_place, dtype=np.float64),
+                    "place_detect_t": np.asarray(-1 if place_stop["placed_t"] is None else place_stop["placed_t"],
+                                                 dtype=np.int64),
+                    "place_stop_t": np.asarray(-1 if place_stop["stop_t"] is None else place_stop["stop_t"],
+                                               dtype=np.int64)}
+                   if place_stop is not None else {}),
+                # AG3S-PRE-CORE-TO PT — only when on.
+                **({"perturb_rad": np.asarray(first_chunk_perturb["radius"], dtype=np.float64),
+                    "perturb_seed": np.asarray(first_chunk_perturb["seed"], dtype=np.int64),
+                    "perturb_vector": np.asarray(first_chunk_perturb["vector"], dtype=np.float64),
+                    "perturb_arm": np.asarray(first_chunk_perturb["arm"])}
+                   if first_chunk_perturb is not None else {}),
             )
             print(f"saving trajectory ({len(executed_actions)} executed steps) -> {trajectory_path}")
 

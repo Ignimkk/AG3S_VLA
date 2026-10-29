@@ -1,0 +1,1162 @@
+{
+ "figure": "t59-timeline-ep1839-W2.png",
+ "kind": "graph",
+ "episode": "ep1839",
+ "korean_labels": true,
+ "inputs_sha256": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_frames_W2.jsonl": "5af017f3537e3de33a108fceb14c351a5828670280f100e6147638f00151dee6",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_w2_stats.json": "e1c9b1f89242aca34722a6551f27f0193a099868d7ed86509b7af060f1d50033",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_w2_window.json": "9e65d7dfe27c46c0bfe20807c9b15e00bfa35dd652343d1fc9dab9c929864594",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/select.json": "15e0bed9a6a0df8880e49b7ffffe6a2040b00ec3a81b1afe91895fa9f4f06cc5"
+ },
+ "selection_rule": "success episode with the largest number of held frames (in window) where U != target; tie -> smaller episode number (T59.task.md, fixed before results)",
+ "window": {
+  "success": true,
+  "target": "orange",
+  "used_arm": "right",
+  "n_frames": 75,
+  "first_placed": 31,
+  "W1_end": 31,
+  "W1_end_reason": "placed",
+  "q_ready": [
+   -0.31155936066012563,
+   -0.35417275597035214,
+   0.026082603216526185,
+   -1.9548196609906703,
+   -0.2772797167333446,
+   1.5003742562339055,
+   -1.5956141862369468
+  ],
+  "ready_dist_frame0_rad": 0.0003735585299817349,
+  "rec_qpos_vs_inference_states_max_abs_rad": 0.0,
+  "ready_dist_at_first_placed_rad": 0.9091894793087757,
+  "min_ready_dist_from_first_placed_rad": 0.25142019786488284,
+  "argmin_frame_from_first_placed": 46,
+  "W2_end": 74,
+  "W2_end_reason": "not reached -> episode end",
+  "W2_reached_ready": false,
+  "frames_after_first_placed": 43,
+  "supplementary_control_step": {
+   "first_control_step_le_thr_from_8xfirst_placed": null,
+   "min_dist_rad_from_8xfirst_placed": 0.2481657185363658
+  },
+  "n_W2": 75,
+  "n_added_vs_W1": 43,
+  "n_cut_W2": 0
+ },
+ "window_rule_W2": "no placed -> W1 end; placed -> first frame >= first placed with used-arm ready distance <= 0.2 rad (inclusive); not reached -> episode end (t59_w2_window.json)",
+ "rows_top_to_bottom": [
+  "physical phase",
+  "S latch (S_grasp_state, +att)",
+  "S HSR p",
+  "S HSR confirmed label",
+  "U_class",
+  "Sg = S_class_at_geometry_frame",
+  "S = S_class (same frame)",
+  "used-arm ready distance (rad), dashed = 0.2 rad"
+ ],
+ "difference_from_W1_figure": {
+  "original": "AG3S/ag3s/docs/figures/t59/t59-timeline-ep1839.png",
+  "window": "W2 (frame 0-74) instead of W1 (0-31)",
+  "row_order": "Sg row placed before S row (Sg = main definition, user decision 1)",
+  "added": [
+   "bottom row: used-arm ready distance with 0.2 rad line and min marker",
+   "dotted vertical line at W1 end"
+  ],
+  "run labels": "drawn for runs >= 3 frames (W1 figure: >= 2)"
+ },
+ "segments": {
+  "phase": {
+   "pre": [
+    [
+     0,
+     16
+    ]
+   ],
+   "held": [
+    [
+     17,
+     30
+    ]
+   ],
+   "placed": [
+    [
+     31,
+     74
+    ]
+   ]
+  },
+  "latch": {
+   "searching": [
+    [
+     0,
+     1
+    ]
+   ],
+   "latched": [
+    [
+     2,
+     15
+    ]
+   ],
+   "closing": [
+    [
+     16,
+     16
+    ]
+   ],
+   "held+att": [
+    [
+     17,
+     31
+    ]
+   ],
+   "placed": [
+    [
+     32,
+     74
+    ]
+   ]
+  },
+  "S_decision_latched": {
+   "False": [
+    [
+     0,
+     2
+    ],
+    [
+     17,
+     74
+    ]
+   ],
+   "True": [
+    [
+     3,
+     16
+    ]
+   ]
+  },
+  "hsr_label": {
+   "None": [
+    [
+     0,
+     1
+    ]
+   ],
+   "pick": [
+    [
+     2,
+     18
+    ]
+   ],
+   "place": [
+    [
+     19,
+     33
+    ]
+   ],
+   "home": [
+    [
+     34,
+     74
+    ]
+   ]
+  },
+  "U": {
+   "target": [
+    [
+     0,
+     14
+    ],
+    [
+     25,
+     29
+    ],
+    [
+     31,
+     40
+    ],
+    [
+     44,
+     46
+    ],
+    [
+     55,
+     55
+    ],
+    [
+     57,
+     57
+    ],
+    [
+     61,
+     74
+    ]
+   ],
+   "other_object": [
+    [
+     15,
+     24
+    ],
+    [
+     30,
+     30
+    ],
+    [
+     41,
+     43
+    ]
+   ],
+   "no_target": [
+    [
+     47,
+     54
+    ],
+    [
+     56,
+     56
+    ],
+    [
+     58,
+     60
+    ]
+   ]
+  },
+  "Sg": {
+   "target": [
+    [
+     0,
+     33
+    ]
+   ],
+   "no_target": [
+    [
+     34,
+     74
+    ]
+   ]
+  },
+  "S": {
+   "target": [
+    [
+     0,
+     19
+    ]
+   ],
+   "other_object": [
+    [
+     20,
+     33
+    ]
+   ],
+   "no_target": [
+    [
+     34,
+     74
+    ]
+   ]
+  }
+ },
+ "frames": [
+  {
+   "frame": 0,
+   "phase": "pre",
+   "latch": "searching",
+   "S_decision_latched": false,
+   "hsr_label": null,
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.0003735585299817349
+  },
+  {
+   "frame": 1,
+   "phase": "pre",
+   "latch": "searching",
+   "S_decision_latched": false,
+   "hsr_label": null,
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.007514702289032587
+  },
+  {
+   "frame": 2,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": false,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.05106187269622646
+  },
+  {
+   "frame": 3,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.07811082477335668
+  },
+  {
+   "frame": 4,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.16159293837142386
+  },
+  {
+   "frame": 5,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.28760653379903844
+  },
+  {
+   "frame": 6,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.4129256477131631
+  },
+  {
+   "frame": 7,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.4866531441119335
+  },
+  {
+   "frame": 8,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.49602948405666425
+  },
+  {
+   "frame": 9,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.4791962784797972
+  },
+  {
+   "frame": 10,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.5798934547837536
+  },
+  {
+   "frame": 11,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.6779904779766218
+  },
+  {
+   "frame": 12,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.8037987468933421
+  },
+  {
+   "frame": 13,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.9710087838375451
+  },
+  {
+   "frame": 14,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "target",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 1.022093043598135
+  },
+  {
+   "frame": 15,
+   "phase": "pre",
+   "latch": "latched",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 1.0715877448947058
+  },
+  {
+   "frame": 16,
+   "phase": "pre",
+   "latch": "closing",
+   "S_decision_latched": true,
+   "hsr_label": "pick",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 1.072149288072367
+  },
+  {
+   "frame": 17,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "pick",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 1.175346079988332
+  },
+  {
+   "frame": 18,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "pick",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 1.1726013950145924
+  },
+  {
+   "frame": 19,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "target",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.9388200073914924
+  },
+  {
+   "frame": 20,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.6573105539674338
+  },
+  {
+   "frame": 21,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.5681726009651692
+  },
+  {
+   "frame": 22,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.5748067139889926
+  },
+  {
+   "frame": 23,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.4520768434361119
+  },
+  {
+   "frame": 24,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.36806638924806123
+  },
+  {
+   "frame": 25,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "target",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.38801431402279624
+  },
+  {
+   "frame": 26,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "target",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.5939780692413879
+  },
+  {
+   "frame": 27,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "target",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.775421515316086
+  },
+  {
+   "frame": 28,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "target",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.7736511359546833
+  },
+  {
+   "frame": 29,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "target",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.7990630658991196
+  },
+  {
+   "frame": 30,
+   "phase": "held",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "other_object",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.8867445125623458
+  },
+  {
+   "frame": 31,
+   "phase": "placed",
+   "latch": "held+att",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "target",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.9091894793087757
+  },
+  {
+   "frame": 32,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "target",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.9131042404167161
+  },
+  {
+   "frame": 33,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "place",
+   "U": "target",
+   "Sg": "target",
+   "S": "other_object",
+   "S_no_target_kind": null,
+   "ready_dist_rad": 0.814752734835847
+  },
+  {
+   "frame": 34,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.7648027422577751
+  },
+  {
+   "frame": 35,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.7990647651931483
+  },
+  {
+   "frame": 36,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.8085254020260969
+  },
+  {
+   "frame": 37,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.8150696055685547
+  },
+  {
+   "frame": 38,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.8151949744561433
+  },
+  {
+   "frame": 39,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.8107377126169858
+  },
+  {
+   "frame": 40,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.7701621881308256
+  },
+  {
+   "frame": 41,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "other_object",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.6970898589522961
+  },
+  {
+   "frame": 42,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "other_object",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.6894351841513817
+  },
+  {
+   "frame": 43,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "other_object",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.6547277675440197
+  },
+  {
+   "frame": 44,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.4398941568874956
+  },
+  {
+   "frame": 45,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.25999219047491706
+  },
+  {
+   "frame": 46,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.25142019786488284
+  },
+  {
+   "frame": 47,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.25874777197022675
+  },
+  {
+   "frame": 48,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.26258452899065327
+  },
+  {
+   "frame": 49,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2639339109252761
+  },
+  {
+   "frame": 50,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.26801708511751154
+  },
+  {
+   "frame": 51,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2680498259739551
+  },
+  {
+   "frame": 52,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.26974028602595307
+  },
+  {
+   "frame": 53,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.27110307788865506
+  },
+  {
+   "frame": 54,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2748685686421708
+  },
+  {
+   "frame": 55,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.27581553451306684
+  },
+  {
+   "frame": 56,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.27639425090247144
+  },
+  {
+   "frame": 57,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2778870708935119
+  },
+  {
+   "frame": 58,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2800262342131231
+  },
+  {
+   "frame": 59,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.28207670153520714
+  },
+  {
+   "frame": 60,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "no_target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.28309436453595543
+  },
+  {
+   "frame": 61,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2848014757622211
+  },
+  {
+   "frame": 62,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.28831161834965946
+  },
+  {
+   "frame": 63,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2923659546708109
+  },
+  {
+   "frame": 64,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2936736011693298
+  },
+  {
+   "frame": 65,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2961487436468069
+  },
+  {
+   "frame": 66,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.29629759356024893
+  },
+  {
+   "frame": 67,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2972236738192377
+  },
+  {
+   "frame": 68,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2978173157550183
+  },
+  {
+   "frame": 69,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.29960424267639646
+  },
+  {
+   "frame": 70,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.29908827160453805
+  },
+  {
+   "frame": 71,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.2990317191452641
+  },
+  {
+   "frame": 72,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.3000855087016151
+  },
+  {
+   "frame": 73,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.30134957313019517
+  },
+  {
+   "frame": 74,
+   "phase": "placed",
+   "latch": "placed",
+   "S_decision_latched": false,
+   "hsr_label": "home",
+   "U": "target",
+   "Sg": "no_target",
+   "S": "no_target",
+   "S_no_target_kind": "released",
+   "ready_dist_rad": 0.3020126880880851
+  }
+ ]
+}

@@ -1,0 +1,170 @@
+{
+ "timing_rows": [
+  [
+   "TO time (ms)",
+   "off",
+   "on",
+   "on \u2212 off"
+  ],
+  [
+   "median",
+   "37.8",
+   "49.6",
+   "+11.8"
+  ],
+  [
+   "p90",
+   "63.1",
+   "91.0",
+   "+27.9"
+  ],
+  [
+   "p99",
+   "176.6",
+   "232.7",
+   "+56.1"
+  ],
+  [
+   "CPU p90 (process time)",
+   "65.9",
+   "96.6",
+   "+30.7"
+  ],
+  [
+   "p90 vs V11AB TP 69.2",
+   "-6.1",
+   "+21.8",
+   ""
+  ],
+  [
+   "SQP iterations (mean)",
+   "2.78",
+   "2.76",
+   ""
+  ],
+  [
+   "QP iterations (mean / p90)",
+   "288 / 525",
+   "366 / 700",
+   ""
+  ],
+  [
+   "spheres S / rows per eval (S \u00d7 16)",
+   "270 / 4320",
+   "466 / 7456",
+   "x1.73"
+  ],
+  [
+   "core rows / solve (mean)",
+   "13883",
+   "24174",
+   "x1.74"
+  ],
+  [
+   "field points / solve (mean)",
+   "38726",
+   "66748",
+   "x1.72"
+  ]
+ ],
+ "grasp_rows": [
+  [
+   "pre-grasp 8 chunks x 18 (n = 144)",
+   "off",
+   "on",
+   "on \u2212 off"
+  ],
+  [
+   "refined diff, joint max (deg): median / p90 / max",
+   "",
+   "0.10 / 2.35 / 13.13",
+   ""
+  ],
+  [
+   "HOLD candidate chunks (n_collision > 0)",
+   "1",
+   "6",
+   "new 6 / resolved 1"
+  ],
+  [
+   "status violated chunks",
+   "1",
+   "6",
+   "worse 6 / better 1"
+  ],
+  [
+   "collision rows (sum)",
+   "7",
+   "471",
+   ""
+  ],
+  [
+   "palm is worst row (chunks)",
+   "10",
+   "54",
+   ""
+  ],
+  [
+   "palm min TO clearance per chunk: median (mm)",
+   "28.1",
+   "9.4",
+   ""
+  ],
+  [
+   "palm min gap to target (mm): min over chunks",
+   "17.4",
+   "-13.5",
+   ""
+  ],
+  [
+   "palm queries with target gap < 0 / < 10 / < 20 mm",
+   "0 / 0 / 18",
+   "1847 / 5795 / 13393",
+   "of 139392 (on)"
+  ],
+  [
+   "palm min gap to table (mm)",
+   "43.4",
+   "27.5",
+   ""
+  ],
+  [
+   "palm min gap to other obstacle pts (mm)",
+   "24.9",
+   "7.0",
+   ""
+  ],
+  [
+   "palm rows reading target-free layer (chunks)",
+   "144/144",
+   "144/144",
+   ""
+  ]
+ ],
+ "criteria_rows": [
+  [
+   "pass-criteria numbers (not a verdict)",
+   "value"
+  ],
+  [
+   "TO p90 on \u2212 off (ms, same chunks, alternating)",
+   "+27.9"
+  ],
+  [
+   "TO p90 on vs V11AB TP 69.2 (ms)",
+   "+21.8"
+  ],
+  [
+   "TO p90 on vs C1a recorded p90 (ms)",
+   "-409.9  (recorded 501)"
+  ],
+  [
+   "pre-grasp new HOLD (on only)",
+   "6"
+  ],
+  [
+   "pre-grasp verdict worse (new HOLD or status worse)",
+   "6"
+  ]
+ ]
+}

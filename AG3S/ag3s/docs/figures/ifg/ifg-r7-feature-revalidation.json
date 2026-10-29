@@ -1,0 +1,1154 @@
+{
+ "FGe-Q:siglip_encoded+top1": {
+  "iou": {
+   "a": [
+    "FGe-Q:siglip_encoded+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.871751855027096,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.02140992692677116,
+   "ci95": [
+    -0.047362771652960746,
+    -0.0009385545547276928
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 12
+  },
+  "recall": {
+   "a": [
+    "FGe-Q:siglip_encoded+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.893286556227255,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.02144152094360159,
+   "ci95": [
+    -0.04737350799175451,
+    -0.0009545736274146533
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 12
+  }
+ },
+ "FGe-Q:projector+top1": {
+  "iou": {
+   "a": [
+    "FGe-Q:projector+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8934443237663088,
+   "mean_b": 0.8931617819538672,
+   "diff": 0.0002825418124416147,
+   "ci95": [
+    -0.00010510095864854976,
+    0.0008379371837408576
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 4
+  },
+  "recall": {
+   "a": [
+    "FGe-Q:projector+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.9149790249664677,
+   "mean_b": 0.9147280771708566,
+   "diff": 0.00025094779561117553,
+   "ci95": [
+    -0.00015092760454145398,
+    0.000805530506589417
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 4
+  }
+ },
+ "FGe-Q:prefix_L4+top1": {
+  "iou": {
+   "a": [
+    "FGe-Q:prefix_L4+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8932480731147339,
+   "mean_b": 0.8931617819538672,
+   "diff": 8.629116086664515e-05,
+   "ci95": [
+    -4.133618008940604e-05,
+    0.0002497655300262035
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 2
+  },
+  "recall": {
+   "a": [
+    "FGe-Q:prefix_L4+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.9148143683317232,
+   "mean_b": 0.9147280771708566,
+   "diff": 8.629116086663474e-05,
+   "ci95": [
+    -4.133618008940612e-05,
+    0.0002497655300261962
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 2
+  }
+ },
+ "FGe-Q:prefix_L8+top1": {
+  "iou": {
+   "a": [
+    "FGe-Q:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8933336785228327,
+   "mean_b": 0.8931617819538672,
+   "diff": 0.00017189656896563626,
+   "ci95": [
+    -8.891558760498333e-05,
+    0.0005051340734678032
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 3
+  },
+  "recall": {
+   "a": [
+    "FGe-Q:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.9148999737398221,
+   "mean_b": 0.9147280771708566,
+   "diff": 0.0001718965689656328,
+   "ci95": [
+    -8.891558760499695e-05,
+    0.0005051340734678065
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 3
+  }
+ },
+ "FGe-Q:prefix_L12+top1": {
+  "iou": {
+   "a": [
+    "FGe-Q:prefix_L12+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8935068190529956,
+   "mean_b": 0.8931617819538672,
+   "diff": 0.000345037099128441,
+   "ci95": [
+    -8.982094272679525e-05,
+    0.0009746430093604193
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 4
+  },
+  "recall": {
+   "a": [
+    "FGe-Q:prefix_L12+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.9150415202531545,
+   "mean_b": 0.9147280771708566,
+   "diff": 0.0003134430822980018,
+   "ci95": [
+    -0.00013554588208438125,
+    0.0009335138975979691
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 4
+  }
+ },
+ "FGu-Q:siglip_encoded+top1": {
+  "iou": {
+   "a": [
+    "FGu-Q:siglip_encoded+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8311513016017373,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.062010480352129846,
+   "ci95": [
+    -0.09661100643136518,
+    -0.02549503212728394
+   ],
+   "episodes_a_better": 3,
+   "episodes_b_better": 26
+  },
+  "recall": {
+   "a": [
+    "FGu-Q:siglip_encoded+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.8450104685930913,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.06971760857776524,
+   "ci95": [
+    -0.09905543562849678,
+    -0.0423585341183363
+   ],
+   "episodes_a_better": 2,
+   "episodes_b_better": 27
+  }
+ },
+ "FGu-Q:projector+top1": {
+  "iou": {
+   "a": [
+    "FGu-Q:projector+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.823134658468905,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.0700271234849622,
+   "ci95": [
+    -0.10616703829758647,
+    -0.031561198000471885
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 24
+  },
+  "recall": {
+   "a": [
+    "FGu-Q:projector+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.8381180066195699,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.07661007055128663,
+   "ci95": [
+    -0.10807377899222695,
+    -0.04579986823202399
+   ],
+   "episodes_a_better": 3,
+   "episodes_b_better": 24
+  }
+ },
+ "FGu-Q:prefix_L4+top1": {
+  "iou": {
+   "a": [
+    "FGu-Q:prefix_L4+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8259363683535603,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.06722541360030684,
+   "ci95": [
+    -0.10212171810114878,
+    -0.029948402136096345
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 25
+  },
+  "recall": {
+   "a": [
+    "FGu-Q:prefix_L4+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.8404402568219116,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.07428782034894497,
+   "ci95": [
+    -0.10555723852083572,
+    -0.04564576418799604
+   ],
+   "episodes_a_better": 3,
+   "episodes_b_better": 25
+  }
+ },
+ "FGu-Q:prefix_L8+top1": {
+  "iou": {
+   "a": [
+    "FGu-Q:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8272115949432215,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.0659501870106457,
+   "ci95": [
+    -0.101176442937759,
+    -0.028681120678563626
+   ],
+   "episodes_a_better": 3,
+   "episodes_b_better": 26
+  },
+  "recall": {
+   "a": [
+    "FGu-Q:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.8428128217935952,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.07191525537726136,
+   "ci95": [
+    -0.10316843418512957,
+    -0.042268982573275146
+   ],
+   "episodes_a_better": 2,
+   "episodes_b_better": 26
+  }
+ },
+ "FGu-Q:prefix_L12+top1": {
+  "iou": {
+   "a": [
+    "FGu-Q:prefix_L12+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.7895647357130036,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.10359704624086362,
+   "ci95": [
+    -0.14450093450337262,
+    -0.05817564097568672
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 28
+  },
+  "recall": {
+   "a": [
+    "FGu-Q:prefix_L12+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.8005100580915148,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.11421801907934184,
+   "ci95": [
+    -0.15017295584356238,
+    -0.08025831816360425
+   ],
+   "episodes_a_better": 0,
+   "episodes_b_better": 28
+  }
+ },
+ "FG-Q:siglip_encoded+top1": {
+  "iou": {
+   "a": [
+    "FG-Q:siglip_encoded+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.7974541436097113,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.09570763834415587,
+   "ci95": [
+    -0.1318178294812415,
+    -0.055334224938982476
+   ],
+   "episodes_a_better": 2,
+   "episodes_b_better": 29
+  },
+  "recall": {
+   "a": [
+    "FG-Q:siglip_encoded+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.8092938343170692,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.10543424285378734,
+   "ci95": [
+    -0.13540638162122892,
+    -0.0767387278001835
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 30
+  }
+ },
+ "FG-Q:projector+top1": {
+  "iou": {
+   "a": [
+    "FG-Q:projector+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8203289316305088,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.07283285032335837,
+   "ci95": [
+    -0.10921470501507166,
+    -0.03406833689829563
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 24
+  },
+  "recall": {
+   "a": [
+    "FG-Q:projector+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.8352838167056558,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.07944426046520084,
+   "ci95": [
+    -0.11164852499298462,
+    -0.04856778283782805
+   ],
+   "episodes_a_better": 3,
+   "episodes_b_better": 24
+  }
+ },
+ "FG-Q:prefix_L4+top1": {
+  "iou": {
+   "a": [
+    "FG-Q:prefix_L4+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8251564686681918,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.06800531328567544,
+   "ci95": [
+    -0.10297854452867529,
+    -0.03065045982008888
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 26
+  },
+  "recall": {
+   "a": [
+    "FG-Q:prefix_L4+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.839701340317667,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.07502673685318964,
+   "ci95": [
+    -0.10637822374967765,
+    -0.046271716464379914
+   ],
+   "episodes_a_better": 2,
+   "episodes_b_better": 27
+  }
+ },
+ "FG-Q:prefix_L8+top1": {
+  "iou": {
+   "a": [
+    "FG-Q:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.8258450015719654,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.06731678038190185,
+   "ci95": [
+    -0.10252307480653966,
+    -0.030116246472229685
+   ],
+   "episodes_a_better": 2,
+   "episodes_b_better": 27
+  },
+  "recall": {
+   "a": [
+    "FG-Q:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.8414525123213636,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.07327556484949291,
+   "ci95": [
+    -0.104707312608158,
+    -0.0437755068628992
+   ],
+   "episodes_a_better": 2,
+   "episodes_b_better": 26
+  }
+ },
+ "FG-Q:prefix_L12+top1": {
+  "iou": {
+   "a": [
+    "FG-Q:prefix_L12+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.7872603124198914,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.10590146953397571,
+   "ci95": [
+    -0.1466579263445191,
+    -0.060639947251680516
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 28
+  },
+  "recall": {
+   "a": [
+    "FG-Q:prefix_L12+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.7983663428711699,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.11636173429968669,
+   "ci95": [
+    -0.15257613415390275,
+    -0.08231986908179122
+   ],
+   "episodes_a_better": 0,
+   "episodes_b_better": 28
+  }
+ },
+ "FG-R:siglip_encoded+top1": {
+  "iou": {
+   "a": [
+    "FG-R:siglip_encoded+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.7474707143904041,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.145691067563463,
+   "ci95": [
+    -0.18762997747661128,
+    -0.10248206992262905
+   ],
+   "episodes_a_better": 2,
+   "episodes_b_better": 29
+  },
+  "recall": {
+   "a": [
+    "FG-R:siglip_encoded+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.7602755540242652,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.15445252314659133,
+   "ci95": [
+    -0.1898169779451525,
+    -0.1203841896946451
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 30
+  }
+ },
+ "FG-R:projector+top1": {
+  "iou": {
+   "a": [
+    "FG-R:projector+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.7454265352660363,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.14773524668783075,
+   "ci95": [
+    -0.18575649375203263,
+    -0.10757057293264094
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 30
+  },
+  "recall": {
+   "a": [
+    "FG-R:projector+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.7648945311756498,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.1498335459952067,
+   "ci95": [
+    -0.1879448527820794,
+    -0.11439121700620118
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 30
+  }
+ },
+ "FG-R:prefix_L4+top1": {
+  "iou": {
+   "a": [
+    "FG-R:prefix_L4+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.7438359586691413,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.14932582328472588,
+   "ci95": [
+    -0.18656537130481424,
+    -0.10960690162184006
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 30
+  },
+  "recall": {
+   "a": [
+    "FG-R:prefix_L4+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.7608466162213886,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.15388146094946795,
+   "ci95": [
+    -0.18855223862581164,
+    -0.12029601414677187
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 30
+  }
+ },
+ "FG-R:prefix_L8+top1": {
+  "iou": {
+   "a": [
+    "FG-R:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.7547115454603821,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.13845023649348515,
+   "ci95": [
+    -0.17757070829927885,
+    -0.09580980533483625
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 29
+  },
+  "recall": {
+   "a": [
+    "FG-R:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.7727398040411748,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.14198827312968176,
+   "ci95": [
+    -0.17849654336434193,
+    -0.10607694207852339
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 29
+  }
+ },
+ "FG-R:prefix_L12+top1": {
+  "iou": {
+   "a": [
+    "FG-R:prefix_L12+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.735812478391435,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.1573493035624322,
+   "ci95": [
+    -0.19902402661565066,
+    -0.11275914020061997
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 30
+  },
+  "recall": {
+   "a": [
+    "FG-R:prefix_L12+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.7486723020318877,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.16605577513896888,
+   "ci95": [
+    -0.2035424007043594,
+    -0.1292576876247641
+   ],
+   "episodes_a_better": 0,
+   "episodes_b_better": 31
+  }
+ },
+ "G-R+top1": {
+  "iou": {
+   "a": [
+    "G-R+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.83235724148728,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.060804540466587134,
+   "ci95": [
+    -0.09077041658438498,
+    -0.03357403965201823
+   ],
+   "episodes_a_better": 4,
+   "episodes_b_better": 13
+  },
+  "recall": {
+   "a": [
+    "G-R+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.8746061092117898,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.0401219679590666,
+   "ci95": [
+    -0.07381864030044172,
+    -0.008896952341484559
+   ],
+   "episodes_a_better": 6,
+   "episodes_b_better": 11
+  }
+ },
+ "FG-Q-shuffle:prefix_L8+top1": {
+  "iou": {
+   "a": [
+    "FG-Q-shuffle:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.48542924228077283,
+   "mean_b": 0.8931617819538672,
+   "diff": -0.4077325396730943,
+   "ci95": [
+    -0.48392516335271557,
+    -0.328496932817125
+   ],
+   "episodes_a_better": 1,
+   "episodes_b_better": 30
+  },
+  "recall": {
+   "a": [
+    "FG-Q-shuffle:prefix_L8+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.487188991535631,
+   "mean_b": 0.9147280771708566,
+   "diff": -0.4275390856352256,
+   "ci95": [
+    -0.49659453358408,
+    -0.3597855969757762
+   ],
+   "episodes_a_better": 0,
+   "episodes_b_better": 31
+  }
+ },
+ "G-Q:O+top1": {
+  "iou": {
+   "a": [
+    "G-Q:O+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.9176988753598216,
+   "mean_b": 0.8931617819538672,
+   "diff": 0.024537093405954512,
+   "ci95": [
+    0.004064585483150855,
+    0.050581125159380076
+   ],
+   "episodes_a_better": 10,
+   "episodes_b_better": 0
+  },
+  "recall": {
+   "a": [
+    "G-Q:O+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.9394507939264426,
+   "mean_b": 0.9147280771708566,
+   "diff": 0.024722716755586113,
+   "ci95": [
+    0.004064585483150868,
+    0.050958929682082904
+   ],
+   "episodes_a_better": 10,
+   "episodes_b_better": 0
+  }
+ },
+ "FG-Q:prefix_L8:O+top1": {
+  "iou": {
+   "a": [
+    "FG-Q:prefix_L8:O+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "iou",
+   "n_episodes": 32,
+   "mean_a": 0.9008943033752672,
+   "mean_b": 0.8931617819538672,
+   "diff": 0.007732521421400032,
+   "ci95": [
+    -0.019745666888643317,
+    0.03911940554725312
+   ],
+   "episodes_a_better": 7,
+   "episodes_b_better": 21
+  },
+  "recall": {
+   "a": [
+    "FG-Q:prefix_L8:O+top1",
+    0.5,
+    "voxel"
+   ],
+   "b": [
+    "G-Q+top1",
+    0.5,
+    "voxel"
+   ],
+   "metric": "recall",
+   "n_episodes": 32,
+   "mean_a": 0.914745660336579,
+   "mean_b": 0.9147280771708566,
+   "diff": 1.758316572245816e-05,
+   "ci95": [
+    -0.02444113888881082,
+    0.028417042684152957
+   ],
+   "episodes_a_better": 6,
+   "episodes_b_better": 21
+  }
+ }
+}

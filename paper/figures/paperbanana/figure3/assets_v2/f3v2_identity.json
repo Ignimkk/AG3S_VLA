@@ -1,0 +1,135 @@
+{
+ "script": "paper/tools/plotting/fig3_v2_identity.py",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "memory_frame": "T53_ep1842_f010",
+ "current_frame": "T53_ep1842_f016",
+ "feature": "prefix_L8 patch features of the frozen VLA, centered by the frame mean, pooled by region pixel count, unit norm",
+ "camera_memory": {
+  "lookat": [
+   0.47556404541864283,
+   -0.3050645234533868,
+   0.8704817580642739
+  ],
+  "dist": 0.42,
+  "az": 150,
+  "el": -34
+ },
+ "camera_now": {
+  "lookat": [
+   0.47963297776847463,
+   -0.30540420374397725,
+   0.8790829468356353
+  ],
+  "dist": 0.48,
+  "az": 150,
+  "el": -34
+ },
+ "candidates": [
+  {
+   "class": "target",
+   "nodes": 247,
+   "centered_cosine_to_memory": 0.8695
+  },
+  {
+   "class": "other_object",
+   "nodes": 306,
+   "centered_cosine_to_memory": 0.5779
+  },
+  {
+   "class": "other_object",
+   "nodes": 205,
+   "centered_cosine_to_memory": 0.1452
+  },
+  {
+   "class": "destination",
+   "nodes": 838,
+   "centered_cosine_to_memory": 0.1282
+  },
+  {
+   "class": "other_object",
+   "nodes": 359,
+   "centered_cosine_to_memory": 0.1169
+  },
+  {
+   "class": "destination",
+   "nodes": 25,
+   "centered_cosine_to_memory": 0.1039
+  },
+  {
+   "class": "destination",
+   "nodes": 175,
+   "centered_cosine_to_memory": 0.0972
+  },
+  {
+   "class": "destination",
+   "nodes": 305,
+   "centered_cosine_to_memory": 0.0053
+  },
+  {
+   "class": "support",
+   "nodes": 82,
+   "centered_cosine_to_memory": -0.0411
+  },
+  {
+   "class": "destination",
+   "nodes": 4866,
+   "centered_cosine_to_memory": -0.2062
+  },
+  {
+   "class": "support",
+   "nodes": 21,
+   "centered_cosine_to_memory": -0.4214
+  },
+  {
+   "class": "support",
+   "nodes": 38,
+   "centered_cosine_to_memory": -0.446
+  }
+ ],
+ "codes": {
+  "rows": [
+   "memory",
+   "target",
+   "other_object",
+   "other_object"
+  ],
+  "dims": [
+   1967,
+   1343,
+   1842,
+   2019,
+   738,
+   1177,
+   1978,
+   382,
+   845,
+   604,
+   1577,
+   50,
+   1150,
+   492,
+   169,
+   394,
+   1870,
+   1961,
+   214,
+   1861,
+   1492,
+   1218,
+   871,
+   1671,
+   68,
+   1865,
+   1334,
+   370,
+   629,
+   2016,
+   1705,
+   849
+  ],
+  "rule": "dimensions with the largest |memory descriptor|; colour PuOr_r symmetric at the largest |value| shown"
+ },
+ "colour_now": "grey (cos <= 0) -> orange (highest cos), t = (cos / max cos)^2",
+ "is_measured_result": false,
+ "note": "Illustration from one recorded frame pair; no number printed in any image."
+}

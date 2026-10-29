@@ -1,0 +1,111 @@
+{
+ "demo_start": {
+  "source": "/mnt/dev/AG3S_VLA-storage/results/rby1/rollouts/ep1807_apple.mp4",
+  "source_sha256": "ab7c82874719caec5a5fe919df80c327fb6384681adc142bb0b75ffbeac82dc0",
+  "frame_index": 0,
+  "crop_xyxy": [
+   150,
+   0,
+   550,
+   420
+  ],
+  "note": "third-person render; controller configuration of this rollout not registered",
+  "sha256": "97a93da7aafcdcc66e8f1eefddd11e928c74a38dbb7848a0721752eb171711d9"
+ },
+ "demo_reach": {
+  "source": "/mnt/dev/AG3S_VLA-storage/results/rby1/rollouts/ep1807_apple.mp4",
+  "source_sha256": "ab7c82874719caec5a5fe919df80c327fb6384681adc142bb0b75ffbeac82dc0",
+  "frame_index": 120,
+  "crop_xyxy": [
+   150,
+   0,
+   550,
+   420
+  ],
+  "note": "third-person render; controller configuration of this rollout not registered",
+  "sha256": "3a5b8e21001066d07841371e5d5d93a59fd5358af4c92df68a093b166da01d2a"
+ },
+ "demo_lift": {
+  "source": "/mnt/dev/AG3S_VLA-storage/results/rby1/rollouts/ep1807_apple.mp4",
+  "source_sha256": "ab7c82874719caec5a5fe919df80c327fb6384681adc142bb0b75ffbeac82dc0",
+  "frame_index": 150,
+  "crop_xyxy": [
+   150,
+   0,
+   550,
+   420
+  ],
+  "note": "third-person render; controller configuration of this rollout not registered",
+  "sha256": "562d983ce26acb1ca82acdc55475ac0b2a3e1305dccd3337c82e0efbf56fd0d3"
+ },
+ "demo_place": {
+  "source": "/mnt/dev/AG3S_VLA-storage/results/rby1/rollouts/ep1807_apple.mp4",
+  "source_sha256": "ab7c82874719caec5a5fe919df80c327fb6384681adc142bb0b75ffbeac82dc0",
+  "frame_index": 210,
+  "crop_xyxy": [
+   150,
+   0,
+   550,
+   420
+  ],
+  "note": "third-person render; controller configuration of this rollout not registered",
+  "sha256": "d6afcacd643faa74f75eaead6e3f7c4b373b182657dc2f260fb2cfd21d90c812"
+ },
+ "policy_cam_high": {
+  "source": "/mnt/dev/AG3S_VLA-storage/results/workspace/live_test/20260925_headfix16d/records/run_0000/run_0000/step_00005.npz",
+  "source_sha256": "5145d78f4baacad58ec69bec884b7e95646bfde6d4e6bcf7f389e1e937df0037",
+  "key": "image_cam_high",
+  "t_step": 40,
+  "note": "224x224 policy input (headfix record, held-out, apple)",
+  "sha256": "a8a8d230b1d13a8d4d6f733118a04aa6ceea1289a10028be6d095e0f6adc66f6"
+ },
+ "policy_cam_left_wrist": {
+  "source": "/mnt/dev/AG3S_VLA-storage/results/workspace/live_test/20260925_headfix16d/records/run_0000/run_0000/step_00005.npz",
+  "source_sha256": "5145d78f4baacad58ec69bec884b7e95646bfde6d4e6bcf7f389e1e937df0037",
+  "key": "image_cam_left_wrist",
+  "t_step": 40,
+  "note": "224x224 policy input (headfix record, held-out, apple)",
+  "sha256": "4d9424afcf04c36f7008d1bf8728d74d0571580ef0d3d7990fb290daa45629dc"
+ },
+ "policy_cam_right_wrist": {
+  "source": "/mnt/dev/AG3S_VLA-storage/results/workspace/live_test/20260925_headfix16d/records/run_0000/run_0000/step_00005.npz",
+  "source_sha256": "5145d78f4baacad58ec69bec884b7e95646bfde6d4e6bcf7f389e1e937df0037",
+  "key": "image_cam_right_wrist",
+  "t_step": 40,
+  "note": "224x224 policy input (headfix record, held-out, apple)",
+  "sha256": "264d8282cfcbf305c4fa68d26a4aa9219f5dfe96269418dcdffd69acbd98e782"
+ },
+ "attn_left_wrist": {
+  "source": "AG3S/ag3s/docs/figures/t47/t47-scene-overlay.png",
+  "source_sha256": "b5d6045273eb78f13f504859c289cc7d00606ef4f50d18b38921cf0c63b1c664",
+  "crop_xyxy": [
+   722,
+   349,
+   917,
+   543
+  ],
+  "sha256": "9aad86429f6ad05f144e3f94928d6d02d285598eded8e312c6829b13be772718"
+ },
+ "merged_cluster_topview": {
+  "source": "AG3S/ag3s/docs/figures/t47/t47b-scene-identity.png",
+  "source_sha256": "1337385a560199f4489729c3387b23cb4925c0c815d4253bb4e90d30750fa54c",
+  "crop_xyxy": [
+   950,
+   880,
+   1350,
+   1280
+  ],
+  "sha256": "a5bb3acd7889b3fd35f727ac321378280008b64701423452de41855db768f74a"
+ },
+ "esdf_fine_xz": {
+  "source": "AG3S/ag3s/docs/figures/t31/t31-d4-slices-E3b_ep1807_r1-t240.png",
+  "source_sha256": "9a298cc50fc191c5786726b44c7c0b4a5b16981b7a256a929bd753fb8b546ec6",
+  "crop_xyxy": [
+   86,
+   1250,
+   558,
+   1662
+  ],
+  "sha256": "2bbba0ad5419fbeee73eeead10a09c63d4371c9f10bac9f5f9807f6f9fcd39fe"
+ }
+}

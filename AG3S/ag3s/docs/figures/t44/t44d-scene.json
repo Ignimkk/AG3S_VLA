@@ -1,0 +1,85 @@
+{
+ "source": "/mnt/dev/work/outputs/verify/T44/CL/agg.json",
+ "blocks": {
+  "ep0_s1": {
+   "times": [
+    104,
+    430,
+    600
+   ],
+   "labels": [
+    "first hand-target contact",
+    "C0 release step",
+    "end of run"
+   ],
+   "C0": {
+    "frame_idx_t104": 104,
+    "frame_idx_t430": 430,
+    "frame_idx_t600": 599
+   },
+   "C1b": {
+    "frame_idx_t104": 104,
+    "frame_idx_t430": 430,
+    "frame_idx_t600": 599
+   }
+  },
+  "ep12_s122": {
+   "times": [
+    109,
+    222,
+    600
+   ],
+   "labels": [
+    "first hand-target contact",
+    "C0 release step",
+    "end of run"
+   ],
+   "C0": {
+    "frame_idx_t109": 109,
+    "frame_idx_t222": 222,
+    "frame_idx_t600": 599
+   },
+   "C1b": {
+    "frame_idx_t109": 109,
+    "frame_idx_t222": 222,
+    "frame_idx_t600": 599
+   }
+  },
+  "ep30_s302": {
+   "times": [
+    94,
+    114,
+    144
+   ],
+   "labels": [
+    "20 steps before first hand-fruit_other contact (C1b)",
+    "first hand-fruit_other contact (C1b)",
+    "30 steps after"
+   ],
+   "C0": {
+    "frame_idx_t94": 94,
+    "frame_idx_t114": 114,
+    "frame_idx_t144": 144
+   },
+   "C1b": {
+    "frame_idx_t94": 94,
+    "frame_idx_t114": 114,
+    "frame_idx_t144": 144
+   }
+  }
+ },
+ "run_dirs": {
+  "ep0_s1": {
+   "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep0_s1",
+   "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep0_s1"
+  },
+  "ep12_s122": {
+   "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep12_s122",
+   "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep12_s122"
+  },
+  "ep30_s302": {
+   "C0": "/mnt/dev/work/outputs/verify/T44/CL/runs/C0/R/C0_ep30_s302",
+   "C1b": "/mnt/dev/work/outputs/verify/T44/CL/runs/C1b/R/C1b_ep30_s302"
+  }
+ }
+}

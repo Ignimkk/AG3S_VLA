@@ -1,0 +1,483 @@
+{
+ "source_agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/agg.json",
+ "seeds": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/seeds.json",
+ "rows": [
+  {
+   "slot": 0,
+   "episode": 1840,
+   "seed": 18401,
+   "target": "banana",
+   "arm": "right",
+   "success": false,
+   "success_ct": false,
+   "grasp": false,
+   "place": false,
+   "failure_mode": "no_grasp",
+   "n_hold_chunks": 5,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 44
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 44
+   },
+   "release_t": null,
+   "wall_s": 301.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1840_s18401"
+  },
+  {
+   "slot": 1,
+   "episode": 1809,
+   "seed": 18091,
+   "target": "banana",
+   "arm": "left",
+   "success": true,
+   "success_ct": true,
+   "grasp": true,
+   "place": true,
+   "failure_mode": "ok",
+   "n_hold_chunks": 0,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 92
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 92
+   },
+   "release_t": 240,
+   "wall_s": 280.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1809_s18091"
+  },
+  {
+   "slot": 2,
+   "episode": 1842,
+   "seed": 18421,
+   "target": "pear",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "grasp": true,
+   "place": true,
+   "failure_mode": "ok",
+   "n_hold_chunks": 1,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 115
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 115
+   },
+   "release_t": 252,
+   "wall_s": 266.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421"
+  },
+  {
+   "slot": 3,
+   "episode": 1843,
+   "seed": 18431,
+   "target": "apple",
+   "arm": "right",
+   "success": false,
+   "success_ct": false,
+   "grasp": false,
+   "place": false,
+   "failure_mode": "no_grasp",
+   "n_hold_chunks": 15,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 89
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 89
+   },
+   "release_t": null,
+   "wall_s": 281.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1843_s18431"
+  },
+  {
+   "slot": 4,
+   "episode": 1860,
+   "seed": 18601,
+   "target": "orange",
+   "arm": "left",
+   "success": true,
+   "success_ct": true,
+   "grasp": true,
+   "place": true,
+   "failure_mode": "ok",
+   "n_hold_chunks": 2,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 106
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 106
+   },
+   "release_t": 215,
+   "wall_s": 278.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1860_s18601"
+  },
+  {
+   "slot": 5,
+   "episode": 1845,
+   "seed": 18451,
+   "target": "pear",
+   "arm": "left",
+   "success": true,
+   "success_ct": true,
+   "grasp": true,
+   "place": true,
+   "failure_mode": "ok",
+   "n_hold_chunks": 0,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 115
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 115
+   },
+   "release_t": 245,
+   "wall_s": 275.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1845_s18451"
+  },
+  {
+   "slot": 6,
+   "episode": 1862,
+   "seed": 18621,
+   "target": "apple",
+   "arm": "right",
+   "success": true,
+   "success_ct": false,
+   "grasp": true,
+   "place": true,
+   "failure_mode": "ok",
+   "n_hold_chunks": 1,
+   "contact_rows": {
+    "hand-fruit_other": 11,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 95
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 11,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 95
+   },
+   "release_t": 228,
+   "wall_s": 292.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1862_s18621"
+  },
+  {
+   "slot": 7,
+   "episode": 1815,
+   "seed": 18151,
+   "target": "apple",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "grasp": true,
+   "place": true,
+   "failure_mode": "ok",
+   "n_hold_chunks": 3,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 102
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 102
+   },
+   "release_t": 235,
+   "wall_s": 298.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1815_s18151"
+  },
+  {
+   "slot": 8,
+   "episode": 1848,
+   "seed": 18481,
+   "target": "orange",
+   "arm": "left",
+   "success": false,
+   "success_ct": false,
+   "grasp": false,
+   "place": false,
+   "failure_mode": "no_grasp",
+   "n_hold_chunks": 0,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 13
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 13
+   },
+   "release_t": null,
+   "wall_s": 301.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1848_s18481"
+  },
+  {
+   "slot": 9,
+   "episode": 1849,
+   "seed": 18491,
+   "target": "banana",
+   "arm": "right",
+   "success": false,
+   "success_ct": false,
+   "grasp": true,
+   "place": false,
+   "failure_mode": "slip_at_lift",
+   "n_hold_chunks": 1,
+   "contact_rows": {
+    "hand-fruit_other": 13,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 33
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 13,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 33
+   },
+   "release_t": 478,
+   "wall_s": 281.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1849_s18491"
+  },
+  {
+   "slot": 10,
+   "episode": 1866,
+   "seed": 18661,
+   "target": "orange",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "grasp": true,
+   "place": true,
+   "failure_mode": "ok",
+   "n_hold_chunks": 1,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 128
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 128
+   },
+   "release_t": 240,
+   "wall_s": 289.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1866_s18661"
+  },
+  {
+   "slot": 11,
+   "episode": 1851,
+   "seed": 18511,
+   "target": "orange",
+   "arm": "left",
+   "success": false,
+   "success_ct": false,
+   "grasp": false,
+   "place": false,
+   "failure_mode": "no_grasp",
+   "n_hold_chunks": 2,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 31
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 31
+   },
+   "release_t": null,
+   "wall_s": 277.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1851_s18511"
+  },
+  {
+   "slot": 12,
+   "episode": 1804,
+   "seed": 18041,
+   "target": "apple",
+   "arm": "right",
+   "success": true,
+   "success_ct": false,
+   "grasp": true,
+   "place": true,
+   "failure_mode": "ok",
+   "n_hold_chunks": 6,
+   "contact_rows": {
+    "hand-fruit_other": 5,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 116
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 5,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 116
+   },
+   "release_t": 261,
+   "wall_s": 271.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1804_s18041"
+  },
+  {
+   "slot": 13,
+   "episode": 1853,
+   "seed": 18531,
+   "target": "pear",
+   "arm": "left",
+   "success": false,
+   "success_ct": false,
+   "grasp": false,
+   "place": false,
+   "failure_mode": "no_grasp",
+   "n_hold_chunks": 0,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 211
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 211
+   },
+   "release_t": null,
+   "wall_s": 278.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1853_s18531"
+  },
+  {
+   "slot": 14,
+   "episode": 1822,
+   "seed": 18221,
+   "target": "banana",
+   "arm": "right",
+   "success": false,
+   "success_ct": false,
+   "grasp": true,
+   "place": false,
+   "failure_mode": "regrasp",
+   "n_hold_chunks": 0,
+   "contact_rows": {
+    "hand-fruit_other": 2,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 65
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 2,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 65
+   },
+   "release_t": 408,
+   "wall_s": 291.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1822_s18221"
+  },
+  {
+   "slot": 15,
+   "episode": 1839,
+   "seed": 18391,
+   "target": "orange",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "grasp": true,
+   "place": true,
+   "failure_mode": "ok",
+   "n_hold_chunks": 0,
+   "contact_rows": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 118
+   },
+   "contact_rows_pre_release": {
+    "hand-fruit_other": 0,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0,
+    "hand-target": 118
+   },
+   "release_t": 245,
+   "wall_s": 262.0,
+   "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1839_s18391"
+  }
+ ],
+ "totals": {
+  "n": 16,
+  "success": 9,
+  "success_ct": 7,
+  "hold_chunks": 37,
+  "hold_runs": 10,
+  "contact_rows_pre_release": {
+   "hand-fruit_other": 31,
+   "robot_other-target": 0,
+   "robot_other-fruit_other": 0
+  },
+  "contact_rows": {
+   "hand-fruit_other": 31,
+   "robot_other-target": 0,
+   "robot_other-fruit_other": 0
+  },
+  "runs_with_pre_release_contact": {
+   "hand-fruit_other": 4,
+   "robot_other-target": 0,
+   "robot_other-fruit_other": 0
+  },
+  "wall_s_sum": 4521.0
+ },
+ "contact_classes": [
+  "hand-fruit_other",
+  "robot_other-target",
+  "robot_other-fruit_other"
+ ],
+ "definitions": "success = analyze_t42 (grasp dz >= 50 mm and target in crate at the last planning row); success_ct = agg_cl.py (success, release rule, no pre-release contact in the three classes); HOLD = planning rows whose control rows were not all executed; contact rows = replay_contacts.py control rows with >= 1 contact sub-step"
+}

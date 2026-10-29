@@ -1,0 +1,23 @@
+Figure 1 (variant A, performance teaser), CVPR page 1, full text width (about 1.6:1). Follow the reference image closely. Clean academic style: white background, photographic panels with thin coloured frames, rounded colour bands behind rows, bold sans-serif labels, no icons, no drop shadows.
+
+Message: a frozen vision-language-action (VLA) policy alone collides when the target sits next to an obstacle or a hurdle blocks the carry path; with AG3S the same policy picks and places successfully.
+
+Main area (left three quarters), a 2 x 2 grid of photographic frames of a white-and-black dual-arm robot at a wooden table with a basket, a red apple (the target), a pear beside it, and a red arch-shaped bar (the hurdle) standing over the edge of the basket. All four frames show the same scene and the same hurdle.
+- Column headers: "Pick: obstacle next to the target" and "Place: hurdle on the carry path".
+- Row 1 on a light red band, row label "VLA only" in red, written vertically.
+  Left: the gripper reaches for the apple and hits the red bar (a red glow marks the contact; a red line shows the hand's path). Badge: "x collides -> pick fails".
+  Right: the hand carries the apple straight into the hurdle bar (red glow, red path). Badge: "x hits the hurdle -> place fails".
+- Row 2 on a light gold band, row label "VLA + AG3S (ours)" in dark gold.
+  Left: the apple is grasped and lifted next to the hurdle without touching it (gold path). Badge: "check avoids, then grasps".
+  Right: a gold path arcs up and over the hurdle into the basket while the apple is carried. Badge: "check clears the hurdle, places".
+Failure badges are red, success badges green. Frames of row 2 have gold borders.
+
+Bottom strip, titled "How", four small panels joined by gold arrows:
+1 "VLA attention": wrist-camera view with a warm heat glow on the target fruit.
+2 "3D target grounding": the target's points in orange next to the touching neighbour's points in blue.
+3 "Sub-task recognition (HSR)": three probability curves (pick, place, home) switching over time on pastel bands.
+4 "Link-specific contact field": the gold gripper above blue voxels; the target's voxels are removed, the neighbour's are kept.
+
+Right column, a light grey rounded box titled "Performance": three compact horizontal bar pairs, "Task success (%)", "Collision-free (%)" and "Safe success (%)", each with a grey bar for "VLA only" and a gold bar for "+ AG3S". Under the box, in italics: "frozen VLA, no extra training, no external segmenter". The bar values are placeholders; draw the bars as in the reference.
+
+Colours: target orange #E8711A, obstacle blue #2E75B6, ours and contact links gold #D9A406, failure red #C62828, success green #2E7D32, baseline grey #9E9E9E. Keep text to the phrases given; no extra panels.

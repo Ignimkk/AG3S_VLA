@@ -1,0 +1,1112 @@
+{
+ "figure": "t59-timeline-ep1839.png",
+ "episode": "ep1839",
+ "selection": {
+  "rule_episode": "success episode with the largest number of held frames (in window) where U != target; tie -> smaller episode number (T59.task.md, fixed before results)",
+  "candidates": [
+   {
+    "key": "ep1839",
+    "episode": 1839,
+    "held_U_not_target": 9,
+    "held_frames": 14
+   },
+   {
+    "key": "ep1809",
+    "episode": 1809,
+    "held_U_not_target": 8,
+    "held_frames": 10
+   },
+   {
+    "key": "ep1842",
+    "episode": 1842,
+    "held_U_not_target": 4,
+    "held_frames": 12
+   },
+   {
+    "key": "ep1860",
+    "episode": 1860,
+    "held_U_not_target": 4,
+    "held_frames": 11
+   },
+   {
+    "key": "ep1845",
+    "episode": 1845,
+    "held_U_not_target": 3,
+    "held_frames": 11
+   },
+   {
+    "key": "ep1866",
+    "episode": 1866,
+    "held_U_not_target": 3,
+    "held_frames": 13
+   },
+   {
+    "key": "ep1815",
+    "episode": 1815,
+    "held_U_not_target": 2,
+    "held_frames": 11
+   },
+   {
+    "key": "ep1862",
+    "episode": 1862,
+    "held_U_not_target": 2,
+    "held_frames": 11
+   },
+   {
+    "key": "ep1804",
+    "episode": 1804,
+    "held_U_not_target": 1,
+    "held_frames": 12
+   }
+  ],
+  "representative": "ep1839"
+ },
+ "window": {
+  "target": "orange",
+  "success": true,
+  "n_frames": 75,
+  "first_placed": 31,
+  "first_hsr_home": 34,
+  "window_end": 31,
+  "window_end_reason": "placed",
+  "n_window": 32,
+  "n_cut": 43,
+  "cut_phase_counts": {
+   "placed": 43
+  },
+  "placed_present": true,
+  "used_arm": "right"
+ },
+ "korean_labels": true,
+ "frames": [
+  {
+   "frame": 0,
+   "t_step": 0,
+   "phase": "pre",
+   "S_grasp_state": "searching",
+   "S_attached": false,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.9987905400128928,
+    "place": 0.00025850383364174254,
+    "home": 0.0009509561534655428
+   },
+   "S_hsr_label": null,
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.01867932752974277,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.01867932752974277,
+   "S_geometry_frame": 0,
+   "U_chosen_counts": {
+    "target": 71,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 1,
+   "t_step": 8,
+   "phase": "pre",
+   "S_grasp_state": "searching",
+   "S_attached": false,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.998697660301106,
+    "place": 0.00021290443502270526,
+    "home": 0.0010894352638712522
+   },
+   "S_hsr_label": null,
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.018864780033659684,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.018864780033659684,
+   "S_geometry_frame": 1,
+   "U_chosen_counts": {
+    "target": 72,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 2,
+   "t_step": 16,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.9988657513724657,
+    "place": 0.00021764532752092638,
+    "home": 0.0009166033000133464
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.018688015983064462,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.018688015983064462,
+   "S_geometry_frame": 2,
+   "U_chosen_counts": {
+    "target": 71,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 3,
+   "t_step": 24,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9989052363084842,
+    "place": 0.0002307501697801649,
+    "home": 0.0008640135217357121
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.01742011657242512,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.01742011657242512,
+   "S_geometry_frame": 3,
+   "U_chosen_counts": {
+    "target": 74,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 4,
+   "t_step": 32,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9989585561720864,
+    "place": 0.00021896878949009956,
+    "home": 0.0008224750384237058
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.01651134436780911,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.01651134436780911,
+   "S_geometry_frame": 4,
+   "U_chosen_counts": {
+    "target": 84,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 5,
+   "t_step": 40,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9994559228831861,
+    "place": 0.00025383622230081644,
+    "home": 0.00029024089451315234
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.015293621037075166,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.015293621037075166,
+   "S_geometry_frame": 5,
+   "U_chosen_counts": {
+    "target": 92,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 6,
+   "t_step": 48,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9990506349715624,
+    "place": 0.0006546846026550395,
+    "home": 0.0002946804257822984
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.015288684924572119,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.015288684924572119,
+   "S_geometry_frame": 6,
+   "U_chosen_counts": {
+    "target": 90,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 7,
+   "t_step": 56,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9983579694082706,
+    "place": 0.0012639061119771452,
+    "home": 0.0003781244797521785
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.01540196087916637,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.01540196087916637,
+   "S_geometry_frame": 7,
+   "U_chosen_counts": {
+    "target": 94,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 8,
+   "t_step": 64,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9985604995519662,
+    "place": 0.001028548752350386,
+    "home": 0.00041095169568353574
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.014962980605089908,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.014962980605089908,
+   "S_geometry_frame": 8,
+   "U_chosen_counts": {
+    "target": 94,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 9,
+   "t_step": 72,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9990434600428928,
+    "place": 0.0005837631619734311,
+    "home": 0.00037277679513388756
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.015535129734220785,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.015535129734220785,
+   "S_geometry_frame": 9,
+   "U_chosen_counts": {
+    "target": 93,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 10,
+   "t_step": 80,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9994827841639623,
+    "place": 0.0003085119080949798,
+    "home": 0.00020870392794279468
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.015592701112823067,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.015592701112823067,
+   "S_geometry_frame": 10,
+   "U_chosen_counts": {
+    "target": 94,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 11,
+   "t_step": 88,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9992565511439157,
+    "place": 0.0003409848146241277,
+    "home": 0.0004024640414600869
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.01552564380929049,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.01552564380929049,
+   "S_geometry_frame": 11,
+   "U_chosen_counts": {
+    "target": 94,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 12,
+   "t_step": 96,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9985987003052973,
+    "place": 0.0007795449569340607,
+    "home": 0.000621754737768566
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.015584456717853927,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.015584456717853927,
+   "S_geometry_frame": 12,
+   "U_chosen_counts": {
+    "target": 77,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 13,
+   "t_step": 104,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9985856152886222,
+    "place": 0.0009087410011500404,
+    "home": 0.000505643710227614
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.015569982431389849,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.015569982431389849,
+   "S_geometry_frame": 13,
+   "U_chosen_counts": {
+    "target": 56,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 14,
+   "t_step": 112,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9993322207679052,
+    "place": 0.0004080886981244031,
+    "home": 0.00025969053397031304
+   },
+   "S_hsr_label": "pick",
+   "U_class": "target",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.015548368130303403,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.015548368130303403,
+   "S_geometry_frame": 14,
+   "U_chosen_counts": {
+    "target": 54,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 15,
+   "t_step": 120,
+   "phase": "pre",
+   "S_grasp_state": "latched",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.9979285087291179,
+    "place": 0.001872566354467538,
+    "home": 0.0001989249164145072
+   },
+   "S_hsr_label": "pick",
+   "U_class": "other_object",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.015552897052049736,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.015552897052049736,
+   "S_geometry_frame": 15,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 107,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 16,
+   "t_step": 128,
+   "phase": "pre",
+   "S_grasp_state": "closing",
+   "S_attached": false,
+   "S_decision_latched": true,
+   "S_hsr_p": {
+    "pick": 0.670254061829552,
+    "place": 0.3291908965417676,
+    "home": 0.0005550416286803953
+   },
+   "S_hsr_label": "pick",
+   "U_class": "other_object",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.016267967418631336,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 107,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 17,
+   "t_step": 136,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.11402118273296284,
+    "place": 0.8856222160153217,
+    "home": 0.0003566012517154562
+   },
+   "S_hsr_label": "pick",
+   "U_class": "other_object",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.016532795811827747,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 105,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 18,
+   "t_step": 144,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.09118775530656512,
+    "place": 0.9085327445909537,
+    "home": 0.0002795001024813858
+   },
+   "S_hsr_label": "pick",
+   "U_class": "other_object",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.013033818504518619,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 103,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 19,
+   "t_step": 152,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.0014593911140453086,
+    "place": 0.9985292374657704,
+    "home": 1.1371420184179194e-05
+   },
+   "S_hsr_label": "place",
+   "U_class": "other_object",
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.06636868917724134,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 103,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 20,
+   "t_step": 160,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.00020192784128279632,
+    "place": 0.9997909994679876,
+    "home": 7.072690729786907e-06
+   },
+   "S_hsr_label": "place",
+   "U_class": "other_object",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09067225396260677,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 105,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 21,
+   "t_step": 168,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.00033766023317933835,
+    "place": 0.9996558670513567,
+    "home": 6.472715463937738e-06
+   },
+   "S_hsr_label": "place",
+   "U_class": "other_object",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09062910400777133,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 105,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 22,
+   "t_step": 176,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.0013300519075195207,
+    "place": 0.9986518714128787,
+    "home": 1.80766796018291e-05
+   },
+   "S_hsr_label": "place",
+   "U_class": "other_object",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.0907265984950281,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 106,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 23,
+   "t_step": 184,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.0026806026841456267,
+    "place": 0.9972955064918435,
+    "home": 2.389082401081548e-05
+   },
+   "S_hsr_label": "place",
+   "U_class": "other_object",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09075961166647223,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 101,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 24,
+   "t_step": 192,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.008482414877399914,
+    "place": 0.9914350804103977,
+    "home": 8.2504712202369e-05
+   },
+   "S_hsr_label": "place",
+   "U_class": "other_object",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09065130867563273,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 96,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 25,
+   "t_step": 200,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.0011195016064927945,
+    "place": 0.998670515948999,
+    "home": 0.0002099824445081293
+   },
+   "S_hsr_label": "place",
+   "U_class": "target",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09056088881485579,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 35,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 26,
+   "t_step": 208,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.000495457571623974,
+    "place": 0.9992270210629499,
+    "home": 0.0002775213654261206
+   },
+   "S_hsr_label": "place",
+   "U_class": "target",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09053801753862564,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 40,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 27,
+   "t_step": 216,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.00012392133209531997,
+    "place": 0.9995752585521439,
+    "home": 0.00030082011576085775
+   },
+   "S_hsr_label": "place",
+   "U_class": "target",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09047979641370593,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 41,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 28,
+   "t_step": 224,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.00010263416748675939,
+    "place": 0.9992783729177499,
+    "home": 0.000618992914763485
+   },
+   "S_hsr_label": "place",
+   "U_class": "target",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09047075494140967,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 38,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 29,
+   "t_step": 232,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.0001158965772516208,
+    "place": 0.9980657826195062,
+    "home": 0.0018183208032422952
+   },
+   "S_hsr_label": "place",
+   "U_class": "target",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09049188180701664,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 38,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 30,
+   "t_step": 240,
+   "phase": "held",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 6.011800114647597e-05,
+    "place": 0.9992769405051568,
+    "home": 0.0006629414936966709
+   },
+   "S_hsr_label": "place",
+   "U_class": "other_object",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09051978284539317,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 39,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  },
+  {
+   "frame": 31,
+   "t_step": 248,
+   "phase": "placed",
+   "S_grasp_state": "held",
+   "S_attached": true,
+   "S_decision_latched": false,
+   "S_hsr_p": {
+    "pick": 0.00031996880097333677,
+    "place": 0.9883795123321172,
+    "home": 0.011300518866909597
+   },
+   "S_hsr_label": "place",
+   "U_class": "target",
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.0904481871722706,
+   "S_nearest_object_at_geometry_frame": "orange",
+   "S_nearest_dist_at_geometry_frame_m": 0.016267967418631336,
+   "S_geometry_frame": 16,
+   "U_chosen_counts": {
+    "target": 60,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   }
+  }
+ ],
+ "counts": {
+  "held_U_not_target": 9,
+  "held_frames": 14
+ },
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_frames.jsonl"
+}

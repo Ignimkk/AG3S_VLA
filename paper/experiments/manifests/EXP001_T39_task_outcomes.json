@@ -1,0 +1,4505 @@
+{
+  "schema_version": 1,
+  "experiment_id": "EXP001",
+  "title": "T39 paired descriptive task outcomes",
+  "status": "REGISTERED",
+  "evidence_scope": "DESCRIPTIVE_TASK_OUTCOME_ONLY",
+  "action_dimension": 16,
+  "state_dimension": 16,
+  "policy": {
+    "config": "pi05_rby1_randomized_pick_place_16d_lora",
+    "checkpoint_path": "/mnt/dev/work/pi05_TO_hybrid/checkpoints/pi05_rby1_randomized_pick_place_16d_lora/rby1_randomized_pick_place_16d_30k_xla_retry_20260923/29999",
+    "checkpoint_content_hash_status": "NOT_AUDITED",
+    "model": "rby1_randomized_pick_place_16d"
+  },
+  "conditions": [
+    {
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "label": "VLA only, T39 snapshot",
+      "server_flags": "--no-safe"
+    },
+    {
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "label": "AG3S + cuRobo ESDF + SQP/OSQP + gate/HOLD, T39 snapshot",
+      "server_flags": "--links gripper --target-field-policy exclude-authorized --esdf-margin 0 --no-self-collision --capsule-radius-scale 0.05 --sphere-spacing 0.4 --max-spheres-per-capsule 32",
+      "client_flags": "--safe-phase approach --safe-manipulators left --safe-gate reasons --safe-hold-mode fixed"
+    }
+  ],
+  "design": {
+    "mode": "closed_loop_simulation",
+    "unit": "episode_policy_seed_pair",
+    "paired": true,
+    "pair_count": 48,
+    "run_count": 96,
+    "episode_ids": [
+      1800,
+      1807,
+      1808,
+      1818,
+      1819,
+      1824,
+      1828,
+      1836,
+      1863,
+      1878,
+      1887,
+      1888,
+      1896,
+      1914,
+      1925,
+      1927,
+      1939,
+      1965,
+      1967,
+      1968,
+      1976,
+      1982,
+      1983,
+      1995
+    ],
+    "seeds_per_episode": 2,
+    "warmup_steps": 1000,
+    "max_control_steps": 600,
+    "executed_chunk_length": 8,
+    "recorded_split": "test",
+    "split_independence_status": "NOT_AUDITED",
+    "obstacle_profile": "clear",
+    "target": "apple",
+    "arm": "left"
+  },
+  "code_state": {
+    "snapshot": "/mnt/dev/work-o1",
+    "benchmark": {
+      "branch": "o1-eval",
+      "head": "9fab500"
+    },
+    "pi05_TO_hybrid": {
+      "rby1_bringup_commit": "22d8dae"
+    },
+    "code_md5": "outputs/verify/T39/p/code_md5_s20.txt",
+    "xla_flags": "--xla_gpu_enable_command_buffer= --xla_gpu_autotune_level=0"
+  },
+  "sources": [
+    {
+      "role": "verify",
+      "path": "benchmark/ag3s/docs/handoff/T39.verify.json",
+      "sha256": "74a172b64af191f71b94557952678bb9bafc2604a43fcded14d9712832b8a78d"
+    },
+    {
+      "role": "analysis",
+      "path": "outputs/verify/T39/s23/analysis.json",
+      "sha256": "480702d6bac6d38b56176ecfcae2005dc77e1f6fa5794ad29b69d5a12312307e"
+    },
+    {
+      "role": "execution_config",
+      "path": "outputs/verify/T39/p/env.sh",
+      "sha256": "068db81a58f30aab6ee692a53ebf8fe355379baa1b166018830a579aed033181"
+    },
+    {
+      "role": "server_command",
+      "path": "outputs/verify/T39/p/start_server.sh",
+      "sha256": "fc121c32a1898fb88cc7a4186f6078dd794a0cc82e91419eabb35d3662c2013a"
+    },
+    {
+      "role": "client_command",
+      "path": "outputs/verify/T39/p/run_client.sh",
+      "sha256": "485ab5ec9718eed10d613f08b8fe4779424089c3b0f813547c1592846ecde17c"
+    },
+    {
+      "role": "code_inventory",
+      "path": "outputs/verify/T39/p/code_md5_s20.txt",
+      "sha256": "03b631d856b5de49089601f1ae0505646e8e064b1dc0dfa1d563f4982a3aeba1"
+    },
+    {
+      "role": "research_log",
+      "path": "benchmark/ag3s/docs/AG3S_T0T6_LOG.md",
+      "hash_scope": "section",
+      "section_heading": "## T39 — O1 큰 N: E0 (VLA 단독) 대 E3b (AG3S + cuRobo ESDF + TO, gate · HOLD) 를 같은 noise 로 짝지어 (2026-10-02)",
+      "sha256": "e8a029ea3b9b6aa2045706bac07b587d6160023e033c58b1da567ee837455b9d"
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "E0_ep1800_s18001",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1800,
+      "policy_seed": 18001,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1800_s18001",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1800_s18001/manifest.json",
+          "sha256": "406562a3a0cb97c5f6fd14effcc985147be320ff07ea7b421328dd80a64b2315"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1800_s18001/traj.npz",
+          "sha256": "bcc0afd4664eef90c77f680c7c307a9fc2915f1c057109c2e5107c4d7dd93352"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1800_s18001/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1800_s18001.check.json",
+          "sha256": "33e93809f7b9a4fa7bc6fb2e57fd62458f3ec217f70241e144d6ac95c4c4b950"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1800_s18002",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1800,
+      "policy_seed": 18002,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1800_s18002",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1800_s18002/manifest.json",
+          "sha256": "63c60238bd20a041cc1c5ee2acb8437d8bd76fc2feb31bc37120b17c34201755"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1800_s18002/traj.npz",
+          "sha256": "9fd44e8ec674f9829b91de45f0295c8510542f006677aa4c305e3b351de8cd99"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1800_s18002/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1800_s18002.check.json",
+          "sha256": "b708f86780579b8c945d0beae26573bb09146d14e5f69eb319418439005ef8f8"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1807_s18071",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1807,
+      "policy_seed": 18071,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1807_s18071",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1807_s18071/manifest.json",
+          "sha256": "429db8dd505ebc514766f2850de39dae851a96cb2d8179a3f8d2a68c57753f8c"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1807_s18071/traj.npz",
+          "sha256": "0cdcd91503737f17ad6e5fd7e2b126592b1c0ea9ba156e2781fcc87d0d6a11ef"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1807_s18071/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1807_s18071.check.json",
+          "sha256": "dfa61ff1ea8fa95acb5c7d96b8deafa76e06d4d9ffa69afbdf66f780cf6390cb"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1807_s18072",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1807,
+      "policy_seed": 18072,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1807_s18072",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1807_s18072/manifest.json",
+          "sha256": "d315e522a05785bc6150a056b644dafe242efb95edeff2266e9a94a353860cdc"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1807_s18072/traj.npz",
+          "sha256": "1f58992cea490187c736cf6ee670f9d604960acce3424ed376f6c62cbbb019f2"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1807_s18072/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1807_s18072.check.json",
+          "sha256": "79dbaf8d5d902d20150328786aac27011a3a614e30356790581596fe2606a26d"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1808_s18081",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1808,
+      "policy_seed": 18081,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1808_s18081",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1808_s18081/manifest.json",
+          "sha256": "9c44fdd91b312427bb5826b7c4e0d03031c157d640aaf8606a13ff55eada39dc"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1808_s18081/traj.npz",
+          "sha256": "20b34420cceacf846ec9b2fb8a3aeabfa64f3f40bd1fec0835c62131a362c45a"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1808_s18081/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1808_s18081.check.json",
+          "sha256": "f19ec25a5d7442484528c4a45db69284beeaa4bfd342119a9e374637f910981c"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1808_s18082",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1808,
+      "policy_seed": 18082,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1808_s18082",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1808_s18082/manifest.json",
+          "sha256": "d3ee939d79ad4e1dd24c9a708a29b44da9876ca822850cd6d4b54bad5e7513e8"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1808_s18082/traj.npz",
+          "sha256": "34494118df64c0a158354ea21e1e42b67932f89fe90bf07325bcfe6b5486b421"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1808_s18082/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1808_s18082.check.json",
+          "sha256": "4250ed5eb98cb0d0f270458875f90841c8bc4f3482ab8695f6f32411167c3d14"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1818_s18181",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1818,
+      "policy_seed": 18181,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1818_s18181",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1818_s18181/manifest.json",
+          "sha256": "d8f5683a061a177ce4b9ad5c4061bf5655b9db90b93ab766c676808726d8d9fa"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1818_s18181/traj.npz",
+          "sha256": "609f20f00c0eac3db43e7d1b09eb413971a1e6897d039d140a07dca2b6f8cfe1"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1818_s18181/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1818_s18181.check.json",
+          "sha256": "691724838ec6d6595e346707075005ec74b699957c83b931f38af77ed0e45edb"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1818_s18182",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1818,
+      "policy_seed": 18182,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1818_s18182",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1818_s18182/manifest.json",
+          "sha256": "e3d24913a077cad6166ffb17d1489b3e9a98cd298a19cfe9c976ea2b922b1d25"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1818_s18182/traj.npz",
+          "sha256": "b220bb616214bea6362b788f95ca9705e1aaa707e9935ae621a73a9dd880c5c7"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1818_s18182/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1818_s18182.check.json",
+          "sha256": "512f134761023d56685de53236d5e25d71f2a30b090b0aab28654dc0f7e3af94"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1819_s18191",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1819,
+      "policy_seed": 18191,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1819_s18191",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1819_s18191/manifest.json",
+          "sha256": "be35cfdfb6b1da0f98d3084e276e0d96a70d5d4f5e034c8dea3912f26e97dcda"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1819_s18191/traj.npz",
+          "sha256": "01f53c5fab2cde7d237500dd138f2eaf7aa021570348a481566c8d6fff81ca88"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1819_s18191/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1819_s18191.check.json",
+          "sha256": "4634a3aa904a069b2bbd52c2a95e94aa2abf4b96ce790520ee3c8cc414f8395e"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1819_s18192",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1819,
+      "policy_seed": 18192,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1819_s18192",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1819_s18192/manifest.json",
+          "sha256": "f5a300623efd8e555a7571e4d06b71d434373c512d861e2ab0891bbf88be7d2f"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1819_s18192/traj.npz",
+          "sha256": "450f57e53d164418b641b53ae9faa4e1ab0fe4410a57e39042060c3b8d9093df"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1819_s18192/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1819_s18192.check.json",
+          "sha256": "3ad7001bc1d864d7930d02f97f348f8708cb32a27b71a81400da1733334c31b4"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1824_s18241",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1824,
+      "policy_seed": 18241,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1824_s18241",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1824_s18241/manifest.json",
+          "sha256": "e11e971769eb84d67c276caa4a0f74cb2034bea11e60c945d21375fbd80ea205"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1824_s18241/traj.npz",
+          "sha256": "5cfc98d42df11f182c6955cc4909a17ff3e28740ec7841a3ed08432cc1fb6292"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1824_s18241/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1824_s18241.check.json",
+          "sha256": "9101c630e26c114747b735af016edb0afb2be86649f47f101a5f4c40d7a3a3ca"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1824_s18242",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1824,
+      "policy_seed": 18242,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1824_s18242",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1824_s18242/manifest.json",
+          "sha256": "29cc94691baebaf83a77454692810f8c5cd9a84cf64bad1d629f6481c2394d67"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1824_s18242/traj.npz",
+          "sha256": "3e98f6dd9bf87d8836027d47515cfd6099a91e7fdd0ae27d8bb2cfce15fa90a2"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1824_s18242/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1824_s18242.check.json",
+          "sha256": "8d9461abcf436650adf72a350f6850ae5dbf21fb4587f2a5e62580f7c5f3bb99"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1828_s18281",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1828,
+      "policy_seed": 18281,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1828_s18281",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1828_s18281/manifest.json",
+          "sha256": "53de99e83f2bc8d4529c89daf197afd12043e6c40846874eca3ca32cc7fd83e5"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1828_s18281/traj.npz",
+          "sha256": "cd6f8301bd253a2f83eae128d33753d7e1eb1fbc6ee4f8211b173ab6c6181a55"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1828_s18281/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1828_s18281.check.json",
+          "sha256": "b71fd1c1ccf225783424f413612bdc25417104463700683eac069bcebbb0a346"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1828_s18282",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1828,
+      "policy_seed": 18282,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1828_s18282",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1828_s18282/manifest.json",
+          "sha256": "46191fcc2c75b084ba8e811996232705df1b5d622a0c53e83924193252026731"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1828_s18282/traj.npz",
+          "sha256": "a1ff2be145c2ecb6b213984e5d88c6c81fd323512084f289e8dfeef4b2b69f24"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1828_s18282/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1828_s18282.check.json",
+          "sha256": "e10387e734ac85d2d36a04c0be8bd47ea57d40263f8091c16d6d39eaae248674"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1836_s18361",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1836,
+      "policy_seed": 18361,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1836_s18361",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1836_s18361/manifest.json",
+          "sha256": "94f97ffa66f6bff87038b2f83e3406f375e8ad2ea6c1f422f79b411fb502e6b0"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1836_s18361/traj.npz",
+          "sha256": "3e56275328e6cc8774e2f0cc61fc20cc4cf7eeec4b598bd37885d60edbdc8fab"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1836_s18361/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1836_s18361.check.json",
+          "sha256": "d9efa7143761f48112c4518a5b713d93b6a1e536ae16f01c8944b299cc7cf831"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1836_s18362",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1836,
+      "policy_seed": 18362,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1836_s18362",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1836_s18362/manifest.json",
+          "sha256": "6e9e04e90f1754af0874e9fc326a87a5f8da07ca8b0691c4200894f7bd88e348"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1836_s18362/traj.npz",
+          "sha256": "ec04e5301d4ca1cc8e5e6262e180c074f7049d193eebac5bcd60b1f464f503fa"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1836_s18362/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1836_s18362.check.json",
+          "sha256": "e79574ec95b9027614a8dbd53139ca3d102ca52d0da752b2990ca0332667b4b2"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1863_s18631",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1863,
+      "policy_seed": 18631,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1863_s18631",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1863_s18631/manifest.json",
+          "sha256": "608a21ae58f72a5527ddd452bf0aa921419da394a55249123ae0b32ef5e5e071"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1863_s18631/traj.npz",
+          "sha256": "49accc83a8dec0a9ccc7a907fc41b46a5f8458e5821e042e7f49cc2c0b9d3278"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1863_s18631/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1863_s18631.check.json",
+          "sha256": "ddba0295ece2952606532081e0a170d8c4747dbc48f2c9d7f1126a5e92152914"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1863_s18632",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1863,
+      "policy_seed": 18632,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1863_s18632",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1863_s18632/manifest.json",
+          "sha256": "04c0f7bd022d3cac962f19d0962269c9b4bad56c3f98208ee8af6e7faf674afa"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1863_s18632/traj.npz",
+          "sha256": "5f33480a5c486467944d55d77d635d3e7cea5787c4f3914cf5320203daa4f7c0"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1863_s18632/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1863_s18632.check.json",
+          "sha256": "73ad4d02e2b5fde21c58090f3d9ad42f4d772f0b322b9fe1d5bfcbf5b6dde390"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1878_s18781",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1878,
+      "policy_seed": 18781,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1878_s18781",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1878_s18781/manifest.json",
+          "sha256": "b8e0bf029a314d6c7c52e5441af163e12598283377bfdbdb13624315d89e9a86"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1878_s18781/traj.npz",
+          "sha256": "9c34169f6c7a231bfc861a9009bae631acc314e28356ecfa1d4420f2ecda9c53"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1878_s18781/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1878_s18781.check.json",
+          "sha256": "5cfad11390c3d4d70ba789bbc46842a729821116ff18e972ff1b4f8fa12805fb"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1878_s18782",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1878,
+      "policy_seed": 18782,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1878_s18782",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1878_s18782/manifest.json",
+          "sha256": "7c8d6d0e7c24af36fc3a924a72359d08529723702856751da4101018cd12094c"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1878_s18782/traj.npz",
+          "sha256": "75b82cb2fe4d57ef1118099c435ad43c41a0dafb31880ea1781223de1bac813c"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1878_s18782/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1878_s18782.check.json",
+          "sha256": "895e4e4d10bb83299c3e85813b7402cce2e0f5346507c58712701a6cf11ab7c3"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1887_s18871",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1887,
+      "policy_seed": 18871,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1887_s18871",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1887_s18871/manifest.json",
+          "sha256": "504442a2670a81be604c0cfd3fa6486e9e4c223b79997bf42f2a9c9077424de5"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1887_s18871/traj.npz",
+          "sha256": "2a3407e0c0b71e9a56d881096f96fe3fecaebb367e44cd1381fcd62c7b729b7d"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1887_s18871/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1887_s18871.check.json",
+          "sha256": "be0b55dd436c785d571dcf1918640e697787965dba2cd539b9eb04f75132559c"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1887_s18872",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1887,
+      "policy_seed": 18872,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1887_s18872",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1887_s18872/manifest.json",
+          "sha256": "1c48555e1bc30cea01977378be5c3dff8a0cfb00e782c46a6a450fde0a8263ec"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1887_s18872/traj.npz",
+          "sha256": "dded2cec99f94c72c801defbec253c0aca1e995ebd4b268a4b883b5ade59ce1e"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1887_s18872/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1887_s18872.check.json",
+          "sha256": "53f569a05919fe8830a370c45ea27d2294b7841bfa6f101541b8a876a9e1e456"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1888_s18881",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1888,
+      "policy_seed": 18881,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1888_s18881",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1888_s18881/manifest.json",
+          "sha256": "3a6bf46300bcd6a16d8536e7302cd60d07ed35e7b6ed85b4fb452d487d7e5cf8"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1888_s18881/traj.npz",
+          "sha256": "425b3daed9fb4047adccc517b4f73156e03c53f8c43cad260baeed5020c3d35f"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1888_s18881/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1888_s18881.check.json",
+          "sha256": "350f692d48761781404ddb7b2ee041001bfa591e4a4b4d71f4b8c39118f81027"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1888_s18882",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1888,
+      "policy_seed": 18882,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1888_s18882",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1888_s18882/manifest.json",
+          "sha256": "5344550e2c182308e8f9db5fa85c448de3b014a79cec8b5c008a855920f4f3db"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1888_s18882/traj.npz",
+          "sha256": "0353b2897a67e1332e14d3978528a7d7fa9fd6262f49ac59c776fe8ae8836b5e"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1888_s18882/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1888_s18882.check.json",
+          "sha256": "3ad5555b28a3b663ace2341c295a4283f01a9eaf9101f978dbe45ee9512a6c13"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1896_s18961",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1896,
+      "policy_seed": 18961,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1896_s18961",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1896_s18961/manifest.json",
+          "sha256": "89058e0c9e8482a1d96eff08bf58aaa7a55a899a18efea0931bb2f3beef47369"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1896_s18961/traj.npz",
+          "sha256": "1da60286b8e24afa3a2c58e50e7dde4f80d9f818a3f2da016cb944a88cd1b560"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1896_s18961/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1896_s18961.check.json",
+          "sha256": "5d69a0128a181ed0af31c7e25a68bdf5d5b8a39ad8f57ffc8146059f3f053e83"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1896_s18962",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1896,
+      "policy_seed": 18962,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1896_s18962",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1896_s18962/manifest.json",
+          "sha256": "289dd6780dc3b44ca79c2150dbb0084ba56af234536f8049a40709d087976e2e"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1896_s18962/traj.npz",
+          "sha256": "8b1d6d08735e177f0c7e7c2d9edd2dfeef8c994b90b92d5a22120dc1acbf4f8a"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1896_s18962/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1896_s18962.check.json",
+          "sha256": "c0547b9afdc1da09a727470d149512f9a38cceca15c3ed99fdd6ff42a468acec"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1914_s19141",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1914,
+      "policy_seed": 19141,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1914_s19141",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1914_s19141/manifest.json",
+          "sha256": "d1237f0092f66d1d2e000121c39370b32878545245e921a25c334ee7c96a1729"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1914_s19141/traj.npz",
+          "sha256": "069291689394fbf41420a46c7732f83e04865250a7395c75ce5192fbc4eb8b1a"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1914_s19141/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1914_s19141.check.json",
+          "sha256": "c96c6d67bdfb7fb30257377b179b4d3bb566c0c48a6895949dd45021205c62d5"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1914_s19142",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1914,
+      "policy_seed": 19142,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1914_s19142",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1914_s19142/manifest.json",
+          "sha256": "b28ce65748e3e1307bc050844ab0d6e421f3222f9a2269f8ce18eef46c8c915d"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1914_s19142/traj.npz",
+          "sha256": "410e50d932bc54abfe2f497355d02830f7ba69e727ef93e5cbbfdd2237c1b5cf"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1914_s19142/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1914_s19142.check.json",
+          "sha256": "a29b679855e3b9c9e44e2c64f1fee08a5d5374650856f151829b947b78095017"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1925_s19251",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1925,
+      "policy_seed": 19251,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1925_s19251",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1925_s19251/manifest.json",
+          "sha256": "b02594c6ff7061a30006157aaef0a09643952c07b7a88e2a4cc921090a2dec79"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1925_s19251/traj.npz",
+          "sha256": "388708d3d4da4bc33bb57b1be0c34a4a30c7cb1a861d8127827ab94157b180fc"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1925_s19251/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1925_s19251.check.json",
+          "sha256": "5c2abfa8e9f085af5504643765e87a97ece9ee1fbb30b618710735e28bb8dc91"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1925_s19252",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1925,
+      "policy_seed": 19252,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1925_s19252",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1925_s19252/manifest.json",
+          "sha256": "f631aa98b3d9531e7d44f14fe7da6b011b0c7e7dedc93b55b079c03c13f36ee0"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1925_s19252/traj.npz",
+          "sha256": "f935bfe6c6c8db58c8c7aa3889431a2c8d7950d6ded21c23f7bcce6dbda034d2"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1925_s19252/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1925_s19252.check.json",
+          "sha256": "da734c27e017a5e1f9d21f3441e2187ba31966fdc8663d04e5033893773b4d3d"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1927_s19271",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1927,
+      "policy_seed": 19271,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1927_s19271",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1927_s19271/manifest.json",
+          "sha256": "e7d308d6f4c410d33b3645f85ed7f9f0483b498d16d201195b9a8ce49d093dbe"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1927_s19271/traj.npz",
+          "sha256": "52b4ef979ea433adf626db14fe03c665d2a9ac5abae98a05f4838d09e11c20a1"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1927_s19271/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1927_s19271.check.json",
+          "sha256": "e183c58715a48a865ce342736c4c54d6f931dfa9b13179c88527a38a404ac0e0"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1927_s19272",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1927,
+      "policy_seed": 19272,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1927_s19272",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1927_s19272/manifest.json",
+          "sha256": "d345a7380cb54f17a4741cdf0f24e7c910dcbc5575514a1720e8b88efb827cc8"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1927_s19272/traj.npz",
+          "sha256": "2d92f4ca80886670b4ac6cbef964c650ab69b78f4c6c00e4e3109333d2107e18"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1927_s19272/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1927_s19272.check.json",
+          "sha256": "3e958a8d6b932a2eeba13f8b0f7bf89441bf539f671fcf62a4bbf4d13e9d80b6"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1939_s19391",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1939,
+      "policy_seed": 19391,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1939_s19391",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1939_s19391/manifest.json",
+          "sha256": "cc9037a2b88918492c8e2978cf7e234c8210e2257f194ece2b41bb66fef5ab38"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1939_s19391/traj.npz",
+          "sha256": "35176b3e69ee1fe7a1d84a9add74f67ff75c5cc3c2e3f4c239f1eafa987201ee"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1939_s19391/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1939_s19391.check.json",
+          "sha256": "f5efa3f9baa8550fb22bdde439fb74c35c7da6fc196266acaa3a30a6f0fcde06"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1939_s19392",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1939,
+      "policy_seed": 19392,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1939_s19392",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1939_s19392/manifest.json",
+          "sha256": "17abb445dae174f4609d04be02c2752abc1f039a7bf69c0d57d7c65d048bc49c"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1939_s19392/traj.npz",
+          "sha256": "18b67976b0a7e0272c593a88e879f17966fc115125d0fb75a907dbdd7827ea56"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1939_s19392/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1939_s19392.check.json",
+          "sha256": "b5250cea0640b1e0b8976a4a6a25a463a2f727d9bcece8417a5a72a31e019388"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1965_s19651",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1965,
+      "policy_seed": 19651,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1965_s19651",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1965_s19651/manifest.json",
+          "sha256": "53240345982c65d94307be5177d048e4bfcb419a03321f7c0d36348ad8cc6b3f"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1965_s19651/traj.npz",
+          "sha256": "788159fc2c530b044580bf827ee29c4aceee6ceaa15002e34c495ee9111f90e4"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1965_s19651/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1965_s19651.check.json",
+          "sha256": "d03e7ff8a904730f7180f97072e46e7b236bb2aa4bc994abf48ec774301ef633"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1965_s19652",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1965,
+      "policy_seed": 19652,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1965_s19652",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1965_s19652/manifest.json",
+          "sha256": "23d4a3bd3bed538a9fe0b496a6b5f0cf5f655e7b268910eebbfb44f308c40c2e"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1965_s19652/traj.npz",
+          "sha256": "e5c7a4b7bffbe56817618a966b8ea0715dac2708970f0d5628d81b9791d99ab3"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1965_s19652/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1965_s19652.check.json",
+          "sha256": "556ed997df787a797b860282e38f2d530df54bdac3da7a498a06f74a687f6591"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1967_s19671",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1967,
+      "policy_seed": 19671,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1967_s19671",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1967_s19671/manifest.json",
+          "sha256": "c553209de28bb3575fa9b29c472f18f62bf116a946c3c0a399990d57b9171119"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1967_s19671/traj.npz",
+          "sha256": "8cdfccaf9b00fd8c76e2efb3a24102c44bd9a36ac493875187d26f69aa84e88c"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1967_s19671/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1967_s19671.check.json",
+          "sha256": "17e82f8537ff7ca55a2aaae6b39776aef88c6c0e653a27c0cc4c3f254253ef3a"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1967_s19672",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1967,
+      "policy_seed": 19672,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1967_s19672",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1967_s19672/manifest.json",
+          "sha256": "63d0a7cadcec734478bd8a27b216c519623c2d7c9e671605edc544e3b7208480"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1967_s19672/traj.npz",
+          "sha256": "0be8b51de50f2da60288cf057d6a0f4eb8aece7754ba6a67889b0718fa001ace"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1967_s19672/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1967_s19672.check.json",
+          "sha256": "c0538ab0d6dc83a4b3a349ed757cf4c5821918aec8d151fad568074ec7f832bb"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1968_s19681",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1968,
+      "policy_seed": 19681,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1968_s19681",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1968_s19681/manifest.json",
+          "sha256": "98e3dd4fd5601a35cd2f07e5452d9d9f64482adabc143b909e9b2ac941ff1318"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1968_s19681/traj.npz",
+          "sha256": "da51d0efd81ad81ba58b5e13566be338aa9fdec2ea2ed40212595b5fe1a97f1c"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1968_s19681/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1968_s19681.check.json",
+          "sha256": "916c13e006bd9eafe87be98219c28fd8bba6a65867fe7bcebea0fc74cb851f22"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1968_s19682",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1968,
+      "policy_seed": 19682,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1968_s19682",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1968_s19682/manifest.json",
+          "sha256": "f29919f4264b6ebb9c64976a82223465706ecbf67b9ba8750d1bf86e12bbcd76"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1968_s19682/traj.npz",
+          "sha256": "34f8c2f0b10a7b82a39d4595168a525775c7745058f4b6e2c1796574a5cb3e87"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1968_s19682/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1968_s19682.check.json",
+          "sha256": "1483cf2ba4499c5c1c3c39c2c254705c770f0d2fd672e1c64546460740ecdbe3"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1976_s19761",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1976,
+      "policy_seed": 19761,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1976_s19761",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1976_s19761/manifest.json",
+          "sha256": "59bb86556eaa56ad20bb08e338af0c81b7fe8d0a85f608464c6a931888edda59"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1976_s19761/traj.npz",
+          "sha256": "e7cda846df976907d74d88d832825ff6091f7dae2c12cd6b11506ca4ce0fb8ff"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1976_s19761/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1976_s19761.check.json",
+          "sha256": "e0e94be38f8acd53c55dddfa7f224ec1aa13ca3aa9d4ed860b2a41dc60a58c48"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1976_s19762",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1976,
+      "policy_seed": 19762,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1976_s19762",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1976_s19762/manifest.json",
+          "sha256": "d2f70f1ea01ffef090ade34b228f0ccb1f6e87a30140038528c3fd393c56d4e1"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1976_s19762/traj.npz",
+          "sha256": "61eb445e110869a57a4a88a85b42a30234c8a988a15702b4ca55761f426165ea"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1976_s19762/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1976_s19762.check.json",
+          "sha256": "6392dadf96353a01e1dfca8d8e49ac65d6207c518a68046c3793bfbcad04c807"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1982_s19821",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1982,
+      "policy_seed": 19821,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1982_s19821",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1982_s19821/manifest.json",
+          "sha256": "f20b60f45557765dc0911a81b9f77cd3e266a425e1f1417c51a6623385a158ec"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1982_s19821/traj.npz",
+          "sha256": "ca35228c19bef73ef2ab307e984c4bd1840e9f563d734c10ddd5f0b3701ef2a7"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1982_s19821/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1982_s19821.check.json",
+          "sha256": "96e28b4c3e358087824417dc4f3aeed60d3cf731fd4f40cf37a3f3413b9b4e31"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1982_s19822",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1982,
+      "policy_seed": 19822,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1982_s19822",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1982_s19822/manifest.json",
+          "sha256": "a17a39c32c4646182d8a064e2bb974b69f0db2297b2d26d4560643910198476c"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1982_s19822/traj.npz",
+          "sha256": "7b1918632c4c1dfad6040624e945902bd4511f6988dea2499352ff0604ee1412"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1982_s19822/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1982_s19822.check.json",
+          "sha256": "fec740498041ac18288d2222bffae6e432fb17678b24c4e4940dcf6af1886c20"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1983_s19831",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1983,
+      "policy_seed": 19831,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1983_s19831",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1983_s19831/manifest.json",
+          "sha256": "6fe03878dfe43b84dd45dc67c4429c6a1b6b01b7a1692047906ac028e081f5db"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1983_s19831/traj.npz",
+          "sha256": "1b51570742b9bed14fb31e101d92cd10789aa79746064dbca3cd53b42943fe18"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1983_s19831/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1983_s19831.check.json",
+          "sha256": "80a68808a53625ba5480e9feb2da552b8171ef4f5aa022bcd5132edc49aa8f07"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1983_s19832",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1983,
+      "policy_seed": 19832,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1983_s19832",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1983_s19832/manifest.json",
+          "sha256": "7aa29afcb196a1fb2e91767e998894743160a46b4223eca469e34c6d32242276"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1983_s19832/traj.npz",
+          "sha256": "395bc7e6862b0fb45737486d19b968026c3c4f32cd67ee3dc34cd71b736b0de0"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1983_s19832/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1983_s19832.check.json",
+          "sha256": "207b48b5ec169912f238e077f98d7687d9b0e88f19d1982b8ff772f3eee462ec"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1995_s19951",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1995,
+      "policy_seed": 19951,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1995_s19951",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1995_s19951/manifest.json",
+          "sha256": "2da4676a88f8e3dd77dcdac19ea5eaed77399ddab67bc7d508d91956d447e76f"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1995_s19951/traj.npz",
+          "sha256": "176e8b5e896d020ba0f4acf6b20d6af7fd682db699a023f69d89471405a8819b"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1995_s19951/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1995_s19951.check.json",
+          "sha256": "4f8c0a30e7e4534de8d27f189eae61b2e96a8dd9e2554cf37e592295912048fc"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E0_ep1995_s19952",
+      "condition_id": "E0",
+      "baseline_id": "B001",
+      "episode_id": 1995,
+      "policy_seed": 19952,
+      "raw_directory": "outputs/verify/T39/runs/E0/E0_ep1995_s19952",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1995_s19952/manifest.json",
+          "sha256": "eaf069ce2dce3146b7129910c673a341edcd7f8f6cd02cb8ab8f2fb4e872cea2"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1995_s19952/traj.npz",
+          "sha256": "0ebe6b4a1387780dded8b6ba3f26788a0f86dfa2d30b820636f3d838acc92d8c"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1995_s19952/completeness.json",
+          "sha256": "de753c856179433f102893352355ce4ea19df7fb37fb8f53697d622d21408fc9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E0/E0_ep1995_s19952.check.json",
+          "sha256": "d8b60841e88974375aa29bcb4f9fe08f25aeabdd681ff07734eff9827cc0398c"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1800_s18001",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1800,
+      "policy_seed": 18001,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18001",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18001/manifest.json",
+          "sha256": "913103be7c2cfb60cccf47fbecdccf0846e9be15e7ade40b2a6bf646b387026a"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18001/traj.npz",
+          "sha256": "c4ac2cc9711e27c3006bb6f1b2f6e1d675e057071bc58c1ed07576c91b53b207"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18001/completeness.json",
+          "sha256": "8de3e7ddd12817d2fa9ccbd4d69ba0e7df869540beacc7c92394157ae9e02d7d"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18001.check.json",
+          "sha256": "51a568f2055bed50f9a2bb5517c2ccb881005564b4a36e2fb7e1ac543f450297"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1800_s18002",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1800,
+      "policy_seed": 18002,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18002",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18002/manifest.json",
+          "sha256": "bca64bc442086c8fcf556f565cc0c0d54b62ef0af76d8479cf757e1409bec503"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18002/traj.npz",
+          "sha256": "fcfac3930fab13b1831b6bd93b31617068f5feb08f035de35bf5fed79dd84df4"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18002/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1800_s18002.check.json",
+          "sha256": "aaf9d3625180c54ba152b879c46901f9cc784e81722bcf4e25669751700031de"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1807_s18071",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1807,
+      "policy_seed": 18071,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18071",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18071/manifest.json",
+          "sha256": "a356b16dbcfa4d3fa2ff68db3930edf4970c477b7eded3447deeca4ed0e7cde3"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18071/traj.npz",
+          "sha256": "47dd7ddfc613932db55003bac2ea1041a12d5b6ec1dbd792f1d744d30a2d65c0"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18071/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18071.check.json",
+          "sha256": "ab3b6c447615833d765c0def4bdb4f5d768f8677410172cb76693a8681dc367d"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1807_s18072",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1807,
+      "policy_seed": 18072,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18072",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18072/manifest.json",
+          "sha256": "17272e4bb0c1ad65547b437087db2818b65fb8d52f5026a88b352fa96db45138"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18072/traj.npz",
+          "sha256": "39825dd30354f3444e2a8cefae5f25a0ade7f33ff45e907e89d038bc270f77d6"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18072/completeness.json",
+          "sha256": "6e9176868d6b2b38ae65b4da95c7329430e72cb752dcb0f60eaf5201eb537163"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1807_s18072.check.json",
+          "sha256": "b847fd62a29275fe84c060e2e50cf15395508500f2c8c92183e71e62467c6cdb"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1808_s18081",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1808,
+      "policy_seed": 18081,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18081",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18081/manifest.json",
+          "sha256": "773ef24708a0a725cf67f7b0a881a2a60671adf1002319c9e63baff50c037b03"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18081/traj.npz",
+          "sha256": "6cbdf9309b700d67c65d9cf42a931c87ca77349d5eb6cca35be9ad379327c4cd"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18081/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18081.check.json",
+          "sha256": "f30c8cffdb079a3f8c2a9dc7bd9f6d65f68a6ff4d5142a8b59e50e385a2d8dfe"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1808_s18082",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1808,
+      "policy_seed": 18082,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18082",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18082/manifest.json",
+          "sha256": "20ce9967175c8a932c86bc51f2835ddecc384a604f436f13ccc1b032b083fa80"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18082/traj.npz",
+          "sha256": "9d1bf645027f09889a3bed97faaaacbe35da10e753234acb62265fe5f4b0f1f6"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18082/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1808_s18082.check.json",
+          "sha256": "3a84dd6d5db02c0619b8e4d95aaf897f70a24205dda789eec46d23a87ca76ad5"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1818_s18181",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1818,
+      "policy_seed": 18181,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18181",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18181/manifest.json",
+          "sha256": "6623afa0bbafad50d8903ff2e66afee7223a73eae9e9100c4bbda9c2d3970b34"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18181/traj.npz",
+          "sha256": "53f3469b0828e6980c55b2559c83907434f9dd947e7e1e86c68f0cae16dcd18f"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18181/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18181.check.json",
+          "sha256": "6108764f1565b5b351e87392baa6d17560b8ab4174d766bb1582e1e5bc88799d"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1818_s18182",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1818,
+      "policy_seed": 18182,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18182",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18182/manifest.json",
+          "sha256": "9f4796774a787e145be362160ad5a38f0568e4c0d8027f38d2a13be39f379b07"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18182/traj.npz",
+          "sha256": "c045e86c7c0719655e020964107021bd61c4978b9cf0a5791c1b5b7dfef8571a"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18182/completeness.json",
+          "sha256": "8de3e7ddd12817d2fa9ccbd4d69ba0e7df869540beacc7c92394157ae9e02d7d"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1818_s18182.check.json",
+          "sha256": "4dac294f9c2313b52ada681f98d59c80503ed784b473ad3ecc4e2aadc0578ac3"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1819_s18191",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1819,
+      "policy_seed": 18191,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18191",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18191/manifest.json",
+          "sha256": "98dab4a720a9d1a6a4d65fc095ed40d23d25ffd190e789dce6dd4f1c4ad8109d"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18191/traj.npz",
+          "sha256": "5a97160b89773877cf4628eff32e17554b5470c09ad56cca4b5c2113034ffe37"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18191/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18191.check.json",
+          "sha256": "5aed290ec56a2440299e7ec13844428e7f7967291f67410706418c1b8130967a"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1819_s18192",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1819,
+      "policy_seed": 18192,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18192",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18192/manifest.json",
+          "sha256": "a1aca0d39ecef9ef1a000719f679555d32e97bab8c79841b8396aa439a55c158"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18192/traj.npz",
+          "sha256": "97fe16e02dc62d3fa2428a7b92dd5ec9a76518da72d0b991cb7fb3e8d81905e2"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18192/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1819_s18192.check.json",
+          "sha256": "b87d7b04f4611756501171c242b8f306294555881aa25f4dc47fcaba783cebc1"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1824_s18241",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1824,
+      "policy_seed": 18241,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18241",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18241/manifest.json",
+          "sha256": "e06bb8ef924c77eacb9a15c657fe8268cf92da6e25755f2fc6f282acd6c01fa1"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18241/traj.npz",
+          "sha256": "70c17da3259096010650f79b5f216ae2a5b982c93f8352fb98105a60ee698504"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18241/completeness.json",
+          "sha256": "59b909fd198e87326ae444dfed1103a78983e7cffbe0e7f374b3b0216be2fa4e"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18241.check.json",
+          "sha256": "46ebfb74b4396eef4cb4235eb79f4b68337fc83a630c9f2dd856ace8d8acecf5"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1824_s18242",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1824,
+      "policy_seed": 18242,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18242",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18242/manifest.json",
+          "sha256": "16a598a73734e023b071e167b8568ef6077593293f7ece64cfb219a82316fd45"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18242/traj.npz",
+          "sha256": "b453bb39cafe4605a2ad2fb2f1370ff4e4c922171a6dbcfa88203d0ff3d51f9a"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18242/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1824_s18242.check.json",
+          "sha256": "d075cb2f1c74b698b841f19596b005156514bcdb01ab5c6b7a02414f58fd401d"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1828_s18281",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1828,
+      "policy_seed": 18281,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18281",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18281/manifest.json",
+          "sha256": "df5da5c8a211d216077a5bc0f00dfe5778ca8b278cf06c770b72dc78617d8230"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18281/traj.npz",
+          "sha256": "edf10d4672fa7af37f5463ed27477b929f7ec0a6dbaccd25df20222505153f2b"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18281/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18281.check.json",
+          "sha256": "93f2802c7ff183b7b7d0629d4c8532cb8f190616a125b7e5e45e470f117eda2d"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1828_s18282",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1828,
+      "policy_seed": 18282,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18282",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18282/manifest.json",
+          "sha256": "9e6c34179a0656cd983920fea49d4d684765a7e353d75bfe06a339dfb0e96c0f"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18282/traj.npz",
+          "sha256": "ff215d5eee381ba8fa1daedab1134f34861acf7c7aee1cbd92367da895441fe8"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18282/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1828_s18282.check.json",
+          "sha256": "fab9d70e04100ba1f6da759c4ddad13899be68474d0bad4c8d22ec875e265927"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1836_s18361",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1836,
+      "policy_seed": 18361,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18361",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18361/manifest.json",
+          "sha256": "3cf791f0fe6a53baaab1732dcbc3a7d85848157011a1936e15ee9230927f9022"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18361/traj.npz",
+          "sha256": "92341246843f24864b6262979e79907d6d93278977176f07af385dc70a863600"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18361/completeness.json",
+          "sha256": "a5a18780bd24b6259719464118b19a389e838893507478022f97416d4ac111ed"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18361.check.json",
+          "sha256": "75e3a52fb561e7878032801ca8817cd73598b723153014b03039a89d02232ef1"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1836_s18362",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1836,
+      "policy_seed": 18362,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18362",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18362/manifest.json",
+          "sha256": "9a09960f4443bfa1dc43082e1defee08dd44b0d4b9e11719f6730d221ac61477"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18362/traj.npz",
+          "sha256": "fb54187da01063356cb8ab60160d781aa2efca7cfad067f38895ac71fddaada0"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18362/completeness.json",
+          "sha256": "9a0294e35e67285e4a8b81a357c5f1f55da83a8706c657b0987b69c6dca84df7"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1836_s18362.check.json",
+          "sha256": "5919edd2303bc6b6b8849a8d0b380975753530d62befdb025f71c6992fefa6dc"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1863_s18631",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1863,
+      "policy_seed": 18631,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18631",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18631/manifest.json",
+          "sha256": "535520127542390b03a0e3788e3e9a78e3760604736860e3a3763125a8c68c30"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18631/traj.npz",
+          "sha256": "90420dbe4aa536cfe3cc0236b33bd4ded23187e20e24a2fff6df06291e8cf601"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18631/completeness.json",
+          "sha256": "8d84fb417a65b39d86dad7b3773f4a37db1ca10d85aeac059c273b8fc3324cb6"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18631.check.json",
+          "sha256": "c17703383767a0d99a9995d9b0fc82f58f7a4290594aadde044d46c4f8eefc8f"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1863_s18632",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1863,
+      "policy_seed": 18632,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18632",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18632/manifest.json",
+          "sha256": "e87cc6d6535e75268daf05c9cf4c24c5f48329f25191eb8fa466e42dcafaec1b"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18632/traj.npz",
+          "sha256": "c00325ee8ffabd00214fac0c0cae4983c3eb36019077e739374fffb91aace26a"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18632/completeness.json",
+          "sha256": "0762d8f6b548d5fd52e4f78102198fd966b3b5db1a345965ff9060d82c811863"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1863_s18632.check.json",
+          "sha256": "052c727f85470a6f87a660bb07f2e08b690309592b8a2e395a3da2ac8b4f9f97"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1878_s18781",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1878,
+      "policy_seed": 18781,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18781",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18781/manifest.json",
+          "sha256": "77a5473e44024c75eeb3a6284c0535afdebfb35cd3f1e345cfbf1e74641d1e71"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18781/traj.npz",
+          "sha256": "389423e24b8fc38c5b90747302b878b6b48e12e7c98b4b90ea98b483b5f77871"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18781/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18781.check.json",
+          "sha256": "1972463e703645843a138c89f43671e468e9cab65c6135703d59670bd0ea41e7"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1878_s18782",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1878,
+      "policy_seed": 18782,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18782",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18782/manifest.json",
+          "sha256": "d763d666fe8c2a4b2b1b81b46bf69cbba1e7a1ed83463a32b02b16c1fbafeee8"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18782/traj.npz",
+          "sha256": "f967a814816ed09efe351c4200adfac7a839174c3cb38ecc190c42964181837d"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18782/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1878_s18782.check.json",
+          "sha256": "66171ae34186bebf769fbb39e069a9e28fce48a0e6caa403037128639df8e771"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1887_s18871",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1887,
+      "policy_seed": 18871,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18871",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18871/manifest.json",
+          "sha256": "2a061d6d580172fcb38f44349020ad70f70099b81597334be38d480e1dc496ad"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18871/traj.npz",
+          "sha256": "8f811cdd5d2ab16bbfc03fd167b7b243d39042d607da988c82933ffc54c3941a"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18871/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18871.check.json",
+          "sha256": "6b1ba39173df2aa1fb31294097e134fac2f398fad1e52009cb089b73af026012"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1887_s18872",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1887,
+      "policy_seed": 18872,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18872",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18872/manifest.json",
+          "sha256": "a01f178eb69ef0896e50696473ad0b758b0690312ce0ddf8b165d3fe0c8fd04c"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18872/traj.npz",
+          "sha256": "3462f350b36a1009af1034cf2a5c9a7db81809f3604e43ece71b11bc76cc65fb"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18872/completeness.json",
+          "sha256": "8de3e7ddd12817d2fa9ccbd4d69ba0e7df869540beacc7c92394157ae9e02d7d"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1887_s18872.check.json",
+          "sha256": "980f9ff19b93dc565175ce3010b50f1cf7e3b771e86c9d3da08cb1e4233369fc"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1888_s18881",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1888,
+      "policy_seed": 18881,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18881",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18881/manifest.json",
+          "sha256": "966e498117ea11f8086df2a9b85d980e2bea0685f36388f39c5390828c2277f0"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18881/traj.npz",
+          "sha256": "6c500cd7798c2ac0135406d94786db5dd529251f37d13c9d3ed432f15047573d"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18881/completeness.json",
+          "sha256": "b458cd8281cd8c066669902ee35d6908460d3491b5859d3dfb5995c79f6247b9"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18881.check.json",
+          "sha256": "079eb6de6652fb4abf8897b5bc409f71c6229fa3de544b9001b8a2b424faee43"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1888_s18882",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1888,
+      "policy_seed": 18882,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18882",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18882/manifest.json",
+          "sha256": "b32213d9e4a5f6284f9417ba1c56c05def529a0d2c80e50023e6e1566cc67ef8"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18882/traj.npz",
+          "sha256": "14877e2f48fd3f4387a365e69212cf82e9afec562741db0fca6f2723dd9546e9"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18882/completeness.json",
+          "sha256": "59b909fd198e87326ae444dfed1103a78983e7cffbe0e7f374b3b0216be2fa4e"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1888_s18882.check.json",
+          "sha256": "3aa23504135031e31f8162ad164441a959e60f5bff2307b1068561b195d0266a"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1896_s18961",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1896,
+      "policy_seed": 18961,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18961",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18961/manifest.json",
+          "sha256": "66e9a9a57f646d2d8d00e638f85672c28df82f49579f1a9e20cbfa72dc84f244"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18961/traj.npz",
+          "sha256": "0b5b8f5701b02c8b698eacd2d337bf9b17f2e8bcd643bf44c8c216a5962742d9"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18961/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18961.check.json",
+          "sha256": "cbb89f2ce8d880085902b5e68c4a26196bea9b0b3d6900b2e2132207c4026c1b"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1896_s18962",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1896,
+      "policy_seed": 18962,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18962",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18962/manifest.json",
+          "sha256": "d8187839bcd09284887064b31b0fa36ca0718f1aff2abc38c8918f1b51dfb654"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18962/traj.npz",
+          "sha256": "0c0c1ba6f83c16f4b271a1aebcebba994e8fed67071096887cd5fbadbceb9166"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18962/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1896_s18962.check.json",
+          "sha256": "f3f750064f9242d5433c526ae7a6ece5672a195ac6051f5601f08a5f276bb22b"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1914_s19141",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1914,
+      "policy_seed": 19141,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19141",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19141/manifest.json",
+          "sha256": "f6e562991be500a68189997cab9e3df0c0bfa1f6c02f2ae5f0df9285bc6024d4"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19141/traj.npz",
+          "sha256": "87e42bd9f8dbb84aaa26db308c9875f14f14b6a2901a6d1c10d16bb4cea71696"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19141/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19141.check.json",
+          "sha256": "d8aad198ec45bee73ca22165c3013b26794d53101d49a094669d671ae6d41f7a"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1914_s19142",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1914,
+      "policy_seed": 19142,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19142",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19142/manifest.json",
+          "sha256": "03a88545c35387f44fe1182207746290c5f744ffae69d1cf992fa5f6e29e1fde"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19142/traj.npz",
+          "sha256": "4af596f7d1eddf9aca5337577c19d9bc2b4ee45d0c21cb9aea71338601c302fb"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19142/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1914_s19142.check.json",
+          "sha256": "beb60d453f5565b7f9ce5c89f8d649adcd9e371caa4cb9c30471ab8de2d60c2a"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1925_s19251",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1925,
+      "policy_seed": 19251,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19251",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19251/manifest.json",
+          "sha256": "0b092bb3b27968a1f1ed09505443b85e32de606c3e133b966ccff1bdac83f30e"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19251/traj.npz",
+          "sha256": "c0262b1bf69103c439fbb49fb0c3a65756e613f2675212c8fac8f56e3a126926"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19251/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19251.check.json",
+          "sha256": "ebeac87a2abb12dd4db248ed11c9dd73f6cd73755623cfe31ac9f3468af8d20c"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1925_s19252",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1925,
+      "policy_seed": 19252,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19252",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19252/manifest.json",
+          "sha256": "1ffd65273dbdb896db4428a4e0fa18ee738d09d64f597c217fd742254751d5f9"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19252/traj.npz",
+          "sha256": "3107b70c9b48f4197494030b72c771feb2a206f910148d7b4a57fdbbd949248d"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19252/completeness.json",
+          "sha256": "8de3e7ddd12817d2fa9ccbd4d69ba0e7df869540beacc7c92394157ae9e02d7d"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1925_s19252.check.json",
+          "sha256": "cd6008a8487a0cb070190677ac6c5bc856d2a7bc2ce55c0940666549cc61c937"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1927_s19271",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1927,
+      "policy_seed": 19271,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19271",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19271/manifest.json",
+          "sha256": "56a1f2b34ce92efa73aed90d32bfdb2da3f2d24ffd689133b44e5332ff0efb56"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19271/traj.npz",
+          "sha256": "d8f2448e01ed91273f4105cc64f2c208074759dbcc8538d6716e1aeca94d8087"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19271/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19271.check.json",
+          "sha256": "5d4149671460cee6adbead53ad526662e2e8f37d8556f5a104700e255801a2ed"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1927_s19272",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1927,
+      "policy_seed": 19272,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19272",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19272/manifest.json",
+          "sha256": "bef79d1ce154bbeed8a5951e0559365e2b0f5c08b4c5e24652752b576c5bc0e8"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19272/traj.npz",
+          "sha256": "56c321c9fb99964dc203d0a84377c89c1acdf69090c0ff5b4c67028cda881c6e"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19272/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1927_s19272.check.json",
+          "sha256": "07146dc80dfa83f5a85751231297876622c2bcf4980ffb4d064bf7193dc35141"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1939_s19391",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1939,
+      "policy_seed": 19391,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19391",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19391/manifest.json",
+          "sha256": "e0f09588f57372929bcbb1e1662f546f33aab0f1d9ded6ef755c75a01c1f8e2d"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19391/traj.npz",
+          "sha256": "22f9d2b4117f50006eccee5bafac4fac28f231f30428467a1a76a4d8032d5074"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19391/completeness.json",
+          "sha256": "3c9a828eeb420e87a6dee67fcaba17cb0c761cad747f852a097351175d41bd3c"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19391.check.json",
+          "sha256": "d99e7a1ddcc46ebe4d990ba381e17c4694acd2b918473eb6e7cf5b3d5595fedf"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1939_s19392",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1939,
+      "policy_seed": 19392,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19392",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19392/manifest.json",
+          "sha256": "23f7f9472f69280332bc14ca8314a335d0ca12d77f505565f437462991bfe755"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19392/traj.npz",
+          "sha256": "5486a95f8e20ab0841c83c8a71bf280509feea7f87a947df2e606d91ff4568d8"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19392/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1939_s19392.check.json",
+          "sha256": "93ee87a26610acc16e2ababe1cd77c69b6dd03784496e8099b17692c691922e8"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1965_s19651",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1965,
+      "policy_seed": 19651,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19651",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19651/manifest.json",
+          "sha256": "29ee2b8e63e65b4682ce7c235507242c7f484b5184d918dc1c50c21f2999b3ed"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19651/traj.npz",
+          "sha256": "00636964a74ad4b35addcf865cbc38e093acb4e306ac66826de635aee7e52e0d"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19651/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19651.check.json",
+          "sha256": "8e55006b958db65e8804834e4d78671cfe79514fd4913ddac16a11d48c933c23"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1965_s19652",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1965,
+      "policy_seed": 19652,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19652",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19652/manifest.json",
+          "sha256": "f2596fc750406538cd3b18cb5afc014bdf6d982207d7a3c5403d24351dae22a9"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19652/traj.npz",
+          "sha256": "97b54f53f3b51784aecaf6e05c3b18a5b0ebefcfdfe572e9689f4e5ecebe6bd5"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19652/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1965_s19652.check.json",
+          "sha256": "e10f220024f248fbdad581b3e01588b4a204b39f41e524e902712548504eb1e3"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1967_s19671",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1967,
+      "policy_seed": 19671,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19671",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19671/manifest.json",
+          "sha256": "8354ba9e3855b8dd5a3db5b7aa9042b7525650e1f46fb2180125820a76b4ebaf"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19671/traj.npz",
+          "sha256": "38887af24991dabbb7cc3c5a95843792f83aa01ba326cd325e7f4fc278dfa93f"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19671/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19671.check.json",
+          "sha256": "ccbeaa85f31f7a469cfec224259f38944837dc621441a04094bceededdfd0522"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1967_s19672",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1967,
+      "policy_seed": 19672,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19672",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19672/manifest.json",
+          "sha256": "9ece801c606142f00917b22df2e2609d9acdb3c2f9696e9af39b36defa946d09"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19672/traj.npz",
+          "sha256": "550d2737b8b237ef1f84f899ba442809b7b624cfed09ade6013448f73bd7ebdb"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19672/completeness.json",
+          "sha256": "8de3e7ddd12817d2fa9ccbd4d69ba0e7df869540beacc7c92394157ae9e02d7d"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1967_s19672.check.json",
+          "sha256": "92275b9e8284b7290ddceb137663d933146ef4707d35d137a7016ad02512f40b"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1968_s19681",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1968,
+      "policy_seed": 19681,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19681",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19681/manifest.json",
+          "sha256": "365fa6d3aab9152fe57cb734ea49726ebba94c1f5288925bd763329c7e386b10"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19681/traj.npz",
+          "sha256": "e5dc06b9e0473b7c25c951c1374aa2db69e97f56c488dba36882fcb5069225a9"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19681/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19681.check.json",
+          "sha256": "9bf0d47684b0ea2d88a105a4481e92d74321c3a17d5e662cd70cf9bb5d91f633"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1968_s19682",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1968,
+      "policy_seed": 19682,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19682",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19682/manifest.json",
+          "sha256": "ba7bc043f17cfafada3decc0d766307e1d0c79322b25de926d358f197b127dca"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19682/traj.npz",
+          "sha256": "5bcdf1892a513e9023cf93488de2ba6115b85ec99623f9b17857639414f18e14"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19682/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1968_s19682.check.json",
+          "sha256": "48df4f7a75c588ede2a81bec31b6bdb43ee16abbaec6e6d1453e71a49f034827"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1976_s19761",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1976,
+      "policy_seed": 19761,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19761",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19761/manifest.json",
+          "sha256": "f260d8aec2b6e647f838f83b8a39f2e3bd043c9cb48f7fef10a939d85e6ccaeb"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19761/traj.npz",
+          "sha256": "ea038320c1fa8938bac9d53e7fccab8edd63c669f1ef7af327e47f20c743446d"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19761/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19761.check.json",
+          "sha256": "7b912172258591581d276962bf992ea63aa191e8805a9d1f7947749f9dee4a24"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1976_s19762",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1976,
+      "policy_seed": 19762,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19762",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19762/manifest.json",
+          "sha256": "fa205514fd074f52d62e7187dcd999eff2f743ea0254b0e4a0f8a28b3779def0"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19762/traj.npz",
+          "sha256": "856447803058e54caa1bb41f4f999fa982f23206e095b00c632149de3442d663"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19762/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1976_s19762.check.json",
+          "sha256": "b1216395ca153e8e2e691e0eb2fd8a94d30a8610093f2bc284723e24db498fe4"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1982_s19821",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1982,
+      "policy_seed": 19821,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19821",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19821/manifest.json",
+          "sha256": "a9f39f6a0fdff2b87147bf53a457188d961fdadeff7339f011010dedd50edecf"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19821/traj.npz",
+          "sha256": "f5f7730a071b84abff2b4f19bd2e9a369982ba44a1f0ef9c04af6f183714d520"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19821/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19821.check.json",
+          "sha256": "27cdc2fab7209ea1e89d113513a4007604e2c29037722115d168f242f8e0e8b1"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1982_s19822",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1982,
+      "policy_seed": 19822,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19822",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19822/manifest.json",
+          "sha256": "502664100f74ef396981e8d6c56c3f38ef3306aacbbe9ef62d0d29cb2231b4ea"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19822/traj.npz",
+          "sha256": "c2b0e202290af19b55b67016b69ce1641ad65c2041bff17c5da42454cda545e1"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19822/completeness.json",
+          "sha256": "5578aa2a7467cd3ef04ae667dd70d2c32bde3dcd5fafc218cbbf948f50d86083"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1982_s19822.check.json",
+          "sha256": "d193c1b31ab460255d3eb8aede9c6d10b66a64d6c734b9fcd27aa8c74f0eb047"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1983_s19831",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1983,
+      "policy_seed": 19831,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19831",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19831/manifest.json",
+          "sha256": "d1d915a4b9bd0bea3721d94d22a655fad1f4209ab4aba11dd41ad237058ee067"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19831/traj.npz",
+          "sha256": "192336873dd76e4227ae938cd965b4b09b381b23ec92ab2f2a1a28bc4560a9db"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19831/completeness.json",
+          "sha256": "307022c4446fba047ff9485884ec79aab6ec34dc5235bafb60bd4a5797fec1c2"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19831.check.json",
+          "sha256": "c75d1faf476557eac6c15255c54e375674f90a1c36bca61ac96f12a028441b90"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1983_s19832",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1983,
+      "policy_seed": 19832,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19832",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19832/manifest.json",
+          "sha256": "fed070fb16b8b3cd84baaacf217fbab3eb3abf24dd7510c625cd26b37aa04b63"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19832/traj.npz",
+          "sha256": "609bbd0c61622196e167f4227350969001fca04b4a5fe86bbdde93cb1643337c"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19832/completeness.json",
+          "sha256": "59b909fd198e87326ae444dfed1103a78983e7cffbe0e7f374b3b0216be2fa4e"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1983_s19832.check.json",
+          "sha256": "49828bcfafb4d98b6944b57453597fef0fc3028fd80ad5653e8a8fb2d022f40c"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1995_s19951",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1995,
+      "policy_seed": 19951,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19951",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19951/manifest.json",
+          "sha256": "b0310f82e8c83f9f338ebbc31d6905155c5e572f5b494793e0062bae48c53221"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19951/traj.npz",
+          "sha256": "2149b405619d1fa17fa5ee79b693ff0fbe0cd0b3bf1d445c6e1ef3feccfa9dc5"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19951/completeness.json",
+          "sha256": "181dee62d357bd8855d721719df7b7dfe027de29af54f0fdf10ebc20c16a074f"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19951.check.json",
+          "sha256": "3940b6a1f29c80a38b3876246b26fc6ba127a52c4e9e81429f8108861bd2b625"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    },
+    {
+      "run_id": "E3b_ep1995_s19952",
+      "condition_id": "E3b",
+      "baseline_id": "B002",
+      "episode_id": 1995,
+      "policy_seed": 19952,
+      "raw_directory": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19952",
+      "assets": [
+        {
+          "role": "run_manifest",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19952/manifest.json",
+          "sha256": "9788011ee24a8694fbf21b7b246046ffa383b44f19d6cc3724b6e0e7f26b0f15"
+        },
+        {
+          "role": "trajectory",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19952/traj.npz",
+          "sha256": "6a6552fd2ee83b4e2af097a6deda9eb24b00a597080bfb4e1d633c930cf7d188"
+        },
+        {
+          "role": "completeness",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19952/completeness.json",
+          "sha256": "8de3e7ddd12817d2fa9ccbd4d69ba0e7df869540beacc7c92394157ae9e02d7d"
+        },
+        {
+          "role": "run_check",
+          "path": "outputs/verify/T39/runs/E3b/E3b_ep1995_s19952.check.json",
+          "sha256": "0a567103c5c73191967afeee3f2eade086dd9f5980296a6ce624e50515a45f8e"
+        }
+      ],
+      "dimension_evidence": {
+        "executed_actions.npy": [
+          600,
+          16
+        ],
+        "inference_states.npy": [
+          75,
+          16
+        ],
+        "predicted_chunks.npy": [
+          75,
+          50,
+          16
+        ]
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "result_id": "R001",
+      "metric_id": "M001",
+      "condition_id": "E0",
+      "source_path": "benchmark/ag3s/docs/handoff/T39.verify.json",
+      "source_sha256": "74a172b64af191f71b94557952678bb9bafc2604a43fcded14d9712832b8a78d",
+      "json_pointer": "/numbers/E0/n_success",
+      "value": 30,
+      "denominator": {
+        "json_pointer": "/numbers/E0/n_runs",
+        "value": 48
+      }
+    },
+    {
+      "result_id": "R002",
+      "metric_id": "M001",
+      "condition_id": "E3b",
+      "source_path": "benchmark/ag3s/docs/handoff/T39.verify.json",
+      "source_sha256": "74a172b64af191f71b94557952678bb9bafc2604a43fcded14d9712832b8a78d",
+      "json_pointer": "/numbers/E3b/n_success",
+      "value": 29,
+      "denominator": {
+        "json_pointer": "/numbers/E3b/n_runs",
+        "value": 48
+      }
+    },
+    {
+      "result_id": "R003",
+      "metric_id": "M001_PAIRED",
+      "condition_id": null,
+      "source_path": "benchmark/ag3s/docs/handoff/T39.verify.json",
+      "source_sha256": "74a172b64af191f71b94557952678bb9bafc2604a43fcded14d9712832b8a78d",
+      "json_pointer": "/numbers/paired_2x2/success",
+      "value": {
+        "both": 22,
+        "E0_only": 8,
+        "E3b_only": 7,
+        "neither": 11,
+        "n_pairs": 48,
+        "mcnemar_exact_p": 1.0
+      },
+      "denominator": null
+    }
+  ],
+  "limitations": [
+    "Only recorded task outcomes for the T39 snapshot and clear-scene test episodes are registered.",
+    "No collision-rate, safe-success, full-body safety, grounding accuracy, latency or real-robot evidence is registered here.",
+    "The reported exact McNemar p-value does not establish equivalence or non-inferiority.",
+    "Two seeds from an episode are nested observations, not independent task instances.",
+    "The test split label is recorded metadata; independence from training/tuning has not been audited.",
+    "Checkpoint identity is recorded from the execution config; a content hash of the model weights has not been audited.",
+    "Physical contacts and geometry have not been recomputed in this paper setup step."
+  ],
+  "audit": {
+    "kind": "READ_ONLY_SOURCE_AUDIT",
+    "recorded_at": "2026-10-05T19:36:42+09:00",
+    "path": "paper/experiments/summaries/EXP001_source_audit.json",
+    "scope": "File identity, 16-D array headers, metadata, completion and source pointers; not a rerun of the scientific experiment."
+  }
+}

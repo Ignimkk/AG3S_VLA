@@ -1,0 +1,38 @@
+{
+ "A8": {
+  "success": 12,
+  "forbidden": 3,
+  "mech_total": {
+   "goal_A4": 49,
+   "requests": 832,
+   "hold": 9
+  }
+ },
+ "G1": {
+  "success": 9,
+  "forbidden": 4,
+  "mech_total": {
+   "goal_A4": 27,
+   "requests": 972,
+   "goal_GEO": 20
+  }
+ },
+ "HSR": {
+  "success": 12,
+  "forbidden": 2,
+  "mech_total": {
+   "phase_approach": 438,
+   "hsr6_objective": 183,
+   "phase_grasp": 32,
+   "hsr6_held_gate": 14,
+   "hold": 4,
+   "phase_lift": 89,
+   "phase_transport": 107,
+   "phase_placement": 121,
+   "hsr6_target_exempt": 73,
+   "phase_retreat": 83,
+   "requests": 870,
+   "hsr6_attach_assist": 2
+  }
+ }
+}

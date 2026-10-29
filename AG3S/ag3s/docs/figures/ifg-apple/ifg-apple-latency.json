@@ -1,0 +1,87 @@
+{
+ "budget_ms": 533.3333333333334,
+ "per_arm": {
+  "E0": {
+   "n_runs": 24,
+   "n_requests": 1776,
+   "client_round_trip_ms": {
+    "n": 1776,
+    "median": 123.05474281311035,
+    "p95": 245.41819095611572,
+    "max": 2203.234910964966,
+    "n_over_533ms": 51,
+    "frac_over_533ms": 0.028716216216216218
+   },
+   "server_total_ms": {},
+   "stage_median_ms": {
+    "server_ag3s": null,
+    "server_infer_vla_plus_attention": null,
+    "server_trajopt": null,
+    "profile_constraint_generation": null,
+    "to_solve_ms": null,
+    "point_cloud": null,
+    "profile_esdf": null,
+    "profile_target_grounding": null,
+    "profile_scene_reconstruction": null,
+    "constraint_other": null,
+    "profile_support_surface": null,
+    "ag3s_unprofiled": null,
+    "server_other": null,
+    "profile_attention_lifting": null,
+    "profile_robot_self_filter": null
+   }
+  },
+  "C1aN": {
+   "n_runs": 24,
+   "n_requests": 1776,
+   "client_round_trip_ms": {
+    "n": 1776,
+    "median": 893.3110237121582,
+    "p95": 1387.855350971222,
+    "max": 1702.345371246338,
+    "n_over_533ms": 1776,
+    "frac_over_533ms": 1.0
+   },
+   "server_total_ms": {
+    "n": 1776,
+    "median": 649.8598521575332,
+    "p95": 1081.750500947237,
+    "max": 1383.4503646939993,
+    "n_over_533ms": 1566,
+    "frac_over_533ms": 0.8817567567567568
+   },
+   "stage_median_ms": {
+    "server_ag3s": 258.2229869440198,
+    "server_infer_vla_plus_attention": 198.92844464629889,
+    "server_trajopt": 160.97900830209255,
+    "profile_constraint_generation": 140.30076889321208,
+    "to_solve_ms": 134.28320223465562,
+    "point_cloud": 126.11244292929769,
+    "profile_esdf": 115.63266674056649,
+    "profile_target_grounding": 70.30912581831217,
+    "profile_scene_reconstruction": 44.750618282705545,
+    "constraint_other": 11.279805563390255,
+    "profile_support_surface": 7.504226639866829,
+    "ag3s_unprofiled": 2.0284075289964676,
+    "server_other": 0.326287467032671,
+    "profile_attention_lifting": 0.0075623393058776855,
+    "profile_robot_self_filter": 0.0
+   }
+  }
+ },
+ "surf_minus_c1an": {
+  "client_round_trip": {
+   "distribution": {
+    "median": 770.2562808990479,
+    "p90": 1109.7491979599,
+    "p95": 1142.4371600151062
+   },
+   "per_seed_median_diff": {
+    "n_seeds": 24,
+    "median": 748.4104633331299,
+    "min": 303.27725410461426,
+    "max": 1232.9223155975342
+   }
+  }
+ }
+}

@@ -1,0 +1,116 @@
+{
+ "groups": {
+  "pre (W1)": {
+   "n_frames": 477,
+   "n_episodes": 16,
+   "mass2d_episode_mean": {
+    "target": 0.10569400601174203,
+    "destination": 0.05716393660514123,
+    "other_object": 0.0030193625191709175,
+    "robot_gripper": 0.05150452342870138,
+    "robot": 0.0012141700718503684,
+    "support": 0.7676992307189512,
+    "background": 0.01370477155101996
+   },
+   "seed3d_episode_mean": {
+    "target": 0.3596014593748469,
+    "destination": 0.41668796486077697,
+    "other_object": 0.12172226427108936,
+    "table": 0.09488377524667238,
+    "robot": 0.0,
+    "other": 0.007104536246614462
+   },
+   "U_class": {
+    "target": 403,
+    "other_object": 59,
+    "no_target": 11,
+    "table": 4
+   },
+   "stage_U_not_target": {
+    "S4_choice_fail": 12,
+    "S1_no_target_seed": 22,
+    "S2m_target_merged_minority": 32,
+    "S2g_target_not_grown": 5,
+    "S0_target_not_in_cloud": 3
+   }
+  },
+  "held (W1)": {
+   "n_frames": 106,
+   "n_episodes": 10,
+   "mass2d_episode_mean": {
+    "target": 0.020644045170019686,
+    "destination": 0.47345794175208383,
+    "other_object": 0.0020762758168957215,
+    "robot_gripper": 0.036400327378185555,
+    "robot": 0.0030370909980365684,
+    "support": 0.4210678192626015,
+    "background": 0.04331649951612866
+   },
+   "seed3d_episode_mean": {
+    "target": 0.0450485081687473,
+    "destination": 0.9157388247259579,
+    "other_object": 0.039036954493033925,
+    "table": 0.0,
+    "robot": 0.0,
+    "other": 0.0001757126122608356
+   },
+   "U_class": {
+    "target": 69,
+    "other_object": 31,
+    "no_target": 6
+   },
+   "stage_U_not_target": {
+    "S4_choice_fail": 18,
+    "S1_no_target_seed": 17,
+    "S2m_target_merged_minority": 2
+   }
+  },
+  "placed, S released (W2)": {
+   "n_frames": 119,
+   "n_episodes": 9,
+   "mass2d_episode_mean": {
+    "target": 0.019335144126231482,
+    "destination": 0.3945269228542306,
+    "other_object": 0.0014697299355646374,
+    "robot_gripper": 0.06388745046285102,
+    "robot": 0.028802423427387272,
+    "support": 0.1239902968163829,
+    "background": 0.3679880325058947
+   },
+   "seed3d_episode_mean": {
+    "target": 0.13706518169028314,
+    "destination": 0.8509396238713721,
+    "other_object": 0.00964561359895773,
+    "table": 0.0023495808393871214,
+    "robot": 0.0,
+    "other": 0.0
+   },
+   "U_class": {
+    "no_target": 25,
+    "table": 5,
+    "target": 81,
+    "other_object": 7,
+    "destination": 1
+   },
+   "stage_U_not_target": {
+    "S1_no_target_seed": 26,
+    "S2m_target_merged_minority": 9,
+    "S4_choice_fail": 3
+   }
+  }
+ },
+ "definitions": {
+  "map": "T53 attention npz, denoise 0, agg last, layer 8, head 2 (= serving last:L8H2); parity with serving chunk attention_head/left/right: 1200/1200 frames rel max abs diff <= 1e-2",
+  "mass2d": "t47_head_metrics.map_scores class_mass per camera with GT class_cov, pooled over 3 cameras weighted by each camera's raw map sum; episode mean (equal weight)",
+  "seed3d": "T54 row seed__<class> / seed_n (B2 point labels), episode mean",
+  "stages": "first that applies for U_class != target: S0 n_target_obs == 0; S1 seed__target == 0; S2g/S2m no target-plurality cluster (target points in no cluster / in a non-target-plurality cluster); S3 target candidate inadmissible (0 frames); S4 admissible target candidate exists, other cluster named",
+  "groups": "pre / held: W1 window; placed, S released: W2 window, phase placed, S_no_target_kind == released"
+ },
+ "source": {
+  "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/diag/p/t59_diag_fig.py",
+  "data": [
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/diag/t59_diag_extra.json",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/diag/t59_diag.json"
+  ]
+ }
+}

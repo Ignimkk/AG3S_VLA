@@ -1,0 +1,64 @@
+{
+ "key": "ep1807",
+ "frame": 22,
+ "rows": {
+  "E0": {
+   "phys_state": {
+    "apple": "held",
+    "banana": "on_table",
+    "orange": "on_table",
+    "pear": "on_table"
+   },
+   "phys_hand": {
+    "apple": "left",
+    "banana": "",
+    "orange": "",
+    "pear": ""
+   },
+   "target": "apple",
+   "used_arm": "left",
+   "raw_p_grasp": true,
+   "raw_p_task": true,
+   "reground_phase": "held",
+   "kv_l4_subtask": {
+    "argmax": "place",
+    "p": {
+     "home": 2.5564782871109903e-05,
+     "pick": 0.00018154624834644357,
+     "place": 0.9997928889687826
+    },
+    "probe": "kv_L4_v1"
+   },
+   "resim_npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55/resim/dev/ep1807__E0.npz"
+  },
+  "empty_L0O0_park": {
+   "phys_state": {
+    "apple": "other",
+    "banana": "on_table",
+    "orange": "on_table",
+    "pear": "on_table"
+   },
+   "phys_hand": {
+    "apple": "",
+    "banana": "",
+    "orange": "",
+    "pear": ""
+   },
+   "target": "apple",
+   "used_arm": "left",
+   "raw_p_grasp": false,
+   "raw_p_task": false,
+   "reground_phase": "closing",
+   "kv_l4_subtask": {
+    "argmax": "place",
+    "p": {
+     "home": 0.004806746342655248,
+     "pick": 0.20074892281093523,
+     "place": 0.7944443308464095
+    },
+    "probe": "kv_L4_v1"
+   },
+   "resim_npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T171325+0900_cf38c9dbca7b_2ebfd8a5a43c/verify/T55/resim/dev/ep1807__empty_L0O0_park.npz"
+  }
+ }
+}

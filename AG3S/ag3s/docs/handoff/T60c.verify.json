@@ -1,0 +1,526 @@
+{
+ "_comment": "numbers only",
+ "step": "T60c",
+ "date": "2026-10-14",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223348+0900_cf38c9dbca7b_8aef81831126",
+ "runs": [
+  {
+   "id": "chain",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T223348+0900_cf38c9dbca7b_8aef81831126/verify/T60c/chain_t51b.sh {full,P,H} (t60_t51b.py wrapping t51b_study; --t51-dir = T60 step3 T51_<W>, --t47-dir = T60 step3 T47_<W> for P / H)"
+  }
+ ],
+ "code_state": {
+  "head": "cf38c9dbca7b2c6d78935a67a1edc6fc2ed6d3ac",
+  "new_files": [
+   "AG3S/ag3s/experiments/studies/t60_t51b.py",
+   "AG3S/ag3s/experiments/studies/t60c_build_verify.py"
+  ]
+ },
+ "cache_checks": [
+  "T51b row cache copied per window; only cell-named sources (no paper3_s1) — checked at start",
+  "replay options checked against the T60 T51 __scene payloads (check_replay_opts)",
+  "P rows copied to H before H (cp -n), paper3_s1 deleted"
+ ],
+ "numbers": {
+  "full": {
+   "heldout_named": {
+    "action_best_gt": "last:L12H4",
+    "noun_best_gt": "noun_target:L10H7",
+    "combined_best_gt": "last:L12H4",
+    "action_best_self": "last:L12H3",
+    "noun_best_self": "noun_target:L8H6",
+    "combined_best_self": "noun_target:L8H6",
+    "l8h2": "last:L8H2"
+   },
+   "heldout_scene_mean_gt_identity": {
+    "action_best_gt": 0.911111,
+    "noun_best_gt": 0.866667,
+    "combined_best_gt": 0.911111,
+    "action_best_self": 0.911111,
+    "noun_best_self": 0.877778,
+    "combined_best_self": 0.877778,
+    "l8h2": 0.911111
+   },
+   "heldout_by_scene": {
+    "action_best_gt": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "noun_best_gt": {
+     "same_scene": 0.733333,
+     "new_scene": 0.933333
+    },
+    "combined_best_gt": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "action_best_self": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "noun_best_self": {
+     "same_scene": 0.766667,
+     "new_scene": 0.933333
+    },
+    "combined_best_self": {
+     "same_scene": 0.766667,
+     "new_scene": 0.933333
+    },
+    "l8h2": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    }
+   },
+   "omegas": {
+    "action_t51": {
+     "gt": {
+      "selected": "last:L12H4",
+      "selected_family": "action",
+      "ksel_nested_mean": 0.585563,
+      "score3d_top1": "last:L12H4",
+      "score3d_top1_value": 0.69131,
+      "bootstrap_top1": "last:L12H4",
+      "bootstrap_p_rank1": 0.429,
+      "bootstrap_stable": false,
+      "n_candidates_3d": 20
+     },
+     "self": {
+      "selected": "last:L12H3",
+      "selected_family": "action",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "last:L12H3",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "last:L12H3",
+      "bootstrap_p_rank1": 0.72,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 23
+     }
+    },
+    "noun": {
+     "gt": {
+      "selected": "noun_target:L10H7",
+      "selected_family": "noun",
+      "ksel_nested_mean": 0.591056,
+      "score3d_top1": "noun_target:L10H7",
+      "score3d_top1_value": 0.595723,
+      "bootstrap_top1": "noun_target:L10H7",
+      "bootstrap_p_rank1": 0.687,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 18
+     },
+     "self": {
+      "selected": "noun_target:L8H6",
+      "selected_family": "noun",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "noun_target:L8H6",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "noun_target:L8H6",
+      "bootstrap_p_rank1": 0.529,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 20
+     }
+    },
+    "combined": {
+     "gt": {
+      "selected": "last:L12H4",
+      "selected_family": "action",
+      "ksel_nested_mean": 0.605976,
+      "score3d_top1": "last:L12H4",
+      "score3d_top1_value": 0.69131,
+      "bootstrap_top1": "last:L12H4",
+      "bootstrap_p_rank1": 0.753,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 22
+     },
+     "self": {
+      "selected": "noun_target:L8H6",
+      "selected_family": "noun",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "noun_target:L8H6",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "noun_target:L8H6",
+      "bootstrap_p_rank1": 0.529,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 23
+     }
+    }
+   }
+  },
+  "P": {
+   "heldout_named": {
+    "action_best_gt": "mean:L10H7",
+    "noun_best_gt": "noun_target:L10H7",
+    "combined_best_gt": "last:L8H7",
+    "action_best_self": "last:L12H3",
+    "noun_best_self": "noun_target:L8H6",
+    "combined_best_self": "noun_target:L8H6",
+    "l8h2": "last:L8H2"
+   },
+   "heldout_scene_mean_gt_identity": {
+    "action_best_gt": 0.9,
+    "noun_best_gt": 0.866667,
+    "combined_best_gt": 0.911111,
+    "action_best_self": 0.911111,
+    "noun_best_self": 0.877778,
+    "combined_best_self": 0.877778,
+    "l8h2": 0.911111
+   },
+   "heldout_by_scene": {
+    "action_best_gt": {
+     "same_scene": 0.833333,
+     "new_scene": 0.933333
+    },
+    "noun_best_gt": {
+     "same_scene": 0.733333,
+     "new_scene": 0.933333
+    },
+    "combined_best_gt": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "action_best_self": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "noun_best_self": {
+     "same_scene": 0.766667,
+     "new_scene": 0.933333
+    },
+    "combined_best_self": {
+     "same_scene": 0.766667,
+     "new_scene": 0.933333
+    },
+    "l8h2": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    }
+   },
+   "omegas": {
+    "action_t51": {
+     "gt": {
+      "selected": "mean:L10H7",
+      "selected_family": "action",
+      "ksel_nested_mean": 0.643788,
+      "score3d_top1": "mean:L10H7",
+      "score3d_top1_value": 0.651788,
+      "bootstrap_top1": "mean:L10H7",
+      "bootstrap_p_rank1": 0.701,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 21
+     },
+     "self": {
+      "selected": "last:L12H3",
+      "selected_family": "action",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "last:L12H3",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "last:L12H3",
+      "bootstrap_p_rank1": 0.72,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 23
+     }
+    },
+    "noun": {
+     "gt": {
+      "selected": "noun_target:L10H7",
+      "selected_family": "noun",
+      "ksel_nested_mean": 0.605357,
+      "score3d_top1": "noun_target:L10H7",
+      "score3d_top1_value": 0.618084,
+      "bootstrap_top1": "noun_target:L10H7",
+      "bootstrap_p_rank1": 0.409,
+      "bootstrap_stable": false,
+      "n_candidates_3d": 22
+     },
+     "self": {
+      "selected": "noun_target:L8H6",
+      "selected_family": "noun",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "noun_target:L8H6",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "noun_target:L8H6",
+      "bootstrap_p_rank1": 0.529,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 20
+     }
+    },
+    "combined": {
+     "gt": {
+      "selected": "last:L8H7",
+      "selected_family": "action",
+      "ksel_nested_mean": 0.605357,
+      "score3d_top1": "last:L8H7",
+      "score3d_top1_value": 0.63869,
+      "bootstrap_top1": "last:L8H7",
+      "bootstrap_p_rank1": 0.555,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 26
+     },
+     "self": {
+      "selected": "noun_target:L8H6",
+      "selected_family": "noun",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "noun_target:L8H6",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "noun_target:L8H6",
+      "bootstrap_p_rank1": 0.529,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 23
+     }
+    }
+   }
+  },
+  "H": {
+   "heldout_named": {
+    "action_best_gt": "mean:L12H4",
+    "noun_best_gt": "noun_target:L10H7",
+    "combined_best_gt": "last:L12H4",
+    "action_best_self": "last:L12H3",
+    "noun_best_self": "noun_target:L8H6",
+    "combined_best_self": "noun_target:L8H6",
+    "l8h2": "last:L8H2"
+   },
+   "heldout_scene_mean_gt_identity": {
+    "action_best_gt": 0.911111,
+    "noun_best_gt": 0.866667,
+    "combined_best_gt": 0.911111,
+    "action_best_self": 0.911111,
+    "noun_best_self": 0.877778,
+    "combined_best_self": 0.877778,
+    "l8h2": 0.911111
+   },
+   "heldout_by_scene": {
+    "action_best_gt": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "noun_best_gt": {
+     "same_scene": 0.733333,
+     "new_scene": 0.933333
+    },
+    "combined_best_gt": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "action_best_self": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "noun_best_self": {
+     "same_scene": 0.766667,
+     "new_scene": 0.933333
+    },
+    "combined_best_self": {
+     "same_scene": 0.766667,
+     "new_scene": 0.933333
+    },
+    "l8h2": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    }
+   },
+   "omegas": {
+    "action_t51": {
+     "gt": {
+      "selected": "mean:L12H4",
+      "selected_family": "action",
+      "ksel_nested_mean": 0.60849,
+      "score3d_top1": "mean:L12H4",
+      "score3d_top1_value": 0.627538,
+      "bootstrap_top1": "mean:L12H4",
+      "bootstrap_p_rank1": 0.613,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 20
+     },
+     "self": {
+      "selected": "last:L12H3",
+      "selected_family": "action",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "last:L12H3",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "last:L12H3",
+      "bootstrap_p_rank1": 0.72,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 22
+     }
+    },
+    "noun": {
+     "gt": {
+      "selected": "noun_target:L10H7",
+      "selected_family": "noun",
+      "ksel_nested_mean": 0.570816,
+      "score3d_top1": "noun_target:L10H7",
+      "score3d_top1_value": 0.578361,
+      "bootstrap_top1": "noun_target:L10H7",
+      "bootstrap_p_rank1": 0.407,
+      "bootstrap_stable": false,
+      "n_candidates_3d": 23
+     },
+     "self": {
+      "selected": "noun_target:L8H6",
+      "selected_family": "noun",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "noun_target:L8H6",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "noun_target:L8H6",
+      "bootstrap_p_rank1": 0.529,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 20
+     }
+    },
+    "combined": {
+     "gt": {
+      "selected": "last:L12H4",
+      "selected_family": "action",
+      "ksel_nested_mean": 0.58266,
+      "score3d_top1": "last:L12H4",
+      "score3d_top1_value": 0.615993,
+      "bootstrap_top1": "last:L12H4",
+      "bootstrap_p_rank1": 0.769,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 27
+     },
+     "self": {
+      "selected": "noun_target:L8H6",
+      "selected_family": "noun",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "noun_target:L8H6",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "noun_target:L8H6",
+      "bootstrap_p_rank1": 0.529,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 23
+     }
+    }
+   }
+  },
+  "published": {
+   "heldout_named": {
+    "action_best_gt": "last:L12H4",
+    "noun_best_gt": "noun_target:L10H7",
+    "combined_best_gt": "last:L12H4",
+    "action_best_self": "last:L12H3",
+    "noun_best_self": "noun_target:L8H6",
+    "combined_best_self": "noun_target:L8H6",
+    "l8h2": "last:L8H2"
+   },
+   "heldout_scene_mean_gt_identity": {
+    "action_best_gt": 0.911111,
+    "noun_best_gt": 0.866667,
+    "combined_best_gt": 0.911111,
+    "action_best_self": 0.911111,
+    "noun_best_self": 0.877778,
+    "combined_best_self": 0.877778,
+    "l8h2": 0.911111
+   },
+   "heldout_by_scene": {
+    "action_best_gt": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "noun_best_gt": {
+     "same_scene": 0.733333,
+     "new_scene": 0.933333
+    },
+    "combined_best_gt": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "action_best_self": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    },
+    "noun_best_self": {
+     "same_scene": 0.766667,
+     "new_scene": 0.933333
+    },
+    "combined_best_self": {
+     "same_scene": 0.766667,
+     "new_scene": 0.933333
+    },
+    "l8h2": {
+     "same_scene": 0.866667,
+     "new_scene": 0.933333
+    }
+   },
+   "omegas": {
+    "action_t51": {
+     "gt": {
+      "selected": "last:L12H4",
+      "selected_family": "action",
+      "ksel_nested_mean": 0.585563,
+      "score3d_top1": "last:L12H4",
+      "score3d_top1_value": 0.69131,
+      "bootstrap_top1": "last:L12H4",
+      "bootstrap_p_rank1": 0.429,
+      "bootstrap_stable": false,
+      "n_candidates_3d": 20
+     },
+     "self": {
+      "selected": "last:L12H3",
+      "selected_family": "action",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "last:L12H3",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "last:L12H3",
+      "bootstrap_p_rank1": 0.72,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 23
+     }
+    },
+    "noun": {
+     "gt": {
+      "selected": "noun_target:L10H7",
+      "selected_family": "noun",
+      "ksel_nested_mean": 0.591056,
+      "score3d_top1": "noun_target:L10H7",
+      "score3d_top1_value": 0.595723,
+      "bootstrap_top1": "noun_target:L10H7",
+      "bootstrap_p_rank1": 0.687,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 18
+     },
+     "self": {
+      "selected": "noun_target:L8H6",
+      "selected_family": "noun",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "noun_target:L8H6",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "noun_target:L8H6",
+      "bootstrap_p_rank1": 0.529,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 20
+     }
+    },
+    "combined": {
+     "gt": {
+      "selected": "last:L12H4",
+      "selected_family": "action",
+      "ksel_nested_mean": 0.605976,
+      "score3d_top1": "last:L12H4",
+      "score3d_top1_value": 0.69131,
+      "bootstrap_top1": "last:L12H4",
+      "bootstrap_p_rank1": 0.753,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 22
+     },
+     "self": {
+      "selected": "noun_target:L8H6",
+      "selected_family": "noun",
+      "ksel_nested_mean": 1.0,
+      "score3d_top1": "noun_target:L8H6",
+      "score3d_top1_value": 1.0,
+      "bootstrap_top1": "noun_target:L8H6",
+      "bootstrap_p_rank1": 0.529,
+      "bootstrap_stable": true,
+      "n_candidates_3d": 23
+     }
+    }
+   }
+  },
+  "full_equals_published": "every T51b scene json equal within 1e-9 (heldout_compare differs only in path strings)"
+ },
+ "not_measured": [
+  "T61 (pre-registered head selection) — draft only, awaiting decisions"
+ ]
+}

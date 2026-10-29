@@ -1,0 +1,42 @@
+{
+  "template_only": true,
+  "schema_version": "ag3s-improvement-round-v1",
+  "round_id": null,
+  "parent_id": null,
+  "failure_id": null,
+  "allowed_failure_ids": [
+    "F0",
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+    "F5",
+    "F6",
+    "F7",
+    "F8"
+  ],
+  "evidence_paths": [],
+  "hypothesis": null,
+  "changed_fields": {},
+  "control_arms": [],
+  "predicted_effect": null,
+  "regression_risks": [],
+  "selection_rule": {
+    "fixed_reference_id": null,
+    "false_exemption_difference_max": 0.0,
+    "recall_difference_min": -0.02,
+    "objective": "episode_macro_3d_iou",
+    "minimum_practical_effect": null,
+    "runtime_budget": null,
+    "full_dev_regression_required": true
+  },
+  "split_hash": null,
+  "code_hash": null,
+  "config_hash": null,
+  "evaluation_surface_hash": null,
+  "status": "pending_registration",
+  "result_paths": [],
+  "decision": null,
+  "next_action": null,
+  "instructions": "Copy per hypothesis before execution; resolve fields and record actual results after execution. This file is not an executable runner."
+}

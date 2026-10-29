@@ -1,0 +1,199 @@
+{
+ "definitions": "T58 figures (rule A: real scene, graph, table) from agg/t58_summary.json + the recorded mp4 (600 frames = 1 per control row).\nusage: fig_t58.py SUMMARY_JSON OUT_DIR   -> t58-scene.png / t58-clearance.png / t58-table.png + same-name .json sidecars\nscene     : per episode: the placement (OFF run, t=0), OFF at its first robot-post MuJoCo contact row, ON at its first contact row\n            (obstacle runs stop at the first contact, so the videos are shorter than 600 frames). Third-person front camera of the client recording (avoidance arrow overlay drawn by the client).\nclearance : robot-to-post signed distance (certified GJK, cap 0.30 m) per control row; solid = run with the post, dashed = no-obstacle\n            run with the same post placed virtually (the path the policy took without seeing it). <= 0 = penetration on the replayed kinematics.\ntable     : task success, grasp_t / place_t, HOLD chunks, robot-post contact rows (hand / other links, MuJoCo replay), max contact force,\n            minimum clearance, non-target fruit contact rows.",
+ "t_contact": {
+  "1925_OFF": 83,
+  "1925_ON": 75,
+  "1830_OFF": 54,
+  "1830_ON": 55,
+  "1623_OFF": 96,
+  "1623_ON": 94
+ },
+ "panels": {
+  "1925": {
+   "col0_OFF": {
+    "t": 0,
+    "video_frame": 0,
+    "video_frames": 84,
+    "obstacle_first_t": 83,
+    "obstacle_max_force_N": 161.28068196121922,
+    "obstacle_entry": [
+     {
+      "slot": "post_0",
+      "position": [
+       0.48867932173508927,
+       0.2713348,
+       0.82
+      ],
+      "yaw": 0.0,
+      "height": 0.14,
+      "radius": 0.02
+     }
+    ]
+   },
+   "col1_OFF": {
+    "t": 83,
+    "video_frame": 83,
+    "video_frames": 84,
+    "obstacle_first_t": 83,
+    "obstacle_max_force_N": 161.28068196121922,
+    "obstacle_entry": [
+     {
+      "slot": "post_0",
+      "position": [
+       0.48867932173508927,
+       0.2713348,
+       0.82
+      ],
+      "yaw": 0.0,
+      "height": 0.14,
+      "radius": 0.02
+     }
+    ]
+   },
+   "col2_ON": {
+    "t": 75,
+    "video_frame": 75,
+    "video_frames": 76,
+    "obstacle_first_t": 75,
+    "obstacle_max_force_N": 64.58272141188037,
+    "obstacle_entry": [
+     {
+      "slot": "post_0",
+      "position": [
+       0.48867932173508927,
+       0.2713348,
+       0.82
+      ],
+      "yaw": 0.0,
+      "height": 0.14,
+      "radius": 0.02
+     }
+    ]
+   }
+  },
+  "1830": {
+   "col0_OFF": {
+    "t": 0,
+    "video_frame": 0,
+    "video_frames": 55,
+    "obstacle_first_t": 54,
+    "obstacle_max_force_N": 165.32807574963022,
+    "obstacle_entry": [
+     {
+      "slot": "post_0",
+      "position": [
+       0.3844264217350893,
+       0.33149259999999997,
+       0.82
+      ],
+      "yaw": 0.0,
+      "height": 0.26,
+      "radius": 0.02
+     }
+    ]
+   },
+   "col1_OFF": {
+    "t": 54,
+    "video_frame": 54,
+    "video_frames": 55,
+    "obstacle_first_t": 54,
+    "obstacle_max_force_N": 165.32807574963022,
+    "obstacle_entry": [
+     {
+      "slot": "post_0",
+      "position": [
+       0.3844264217350893,
+       0.33149259999999997,
+       0.82
+      ],
+      "yaw": 0.0,
+      "height": 0.26,
+      "radius": 0.02
+     }
+    ]
+   },
+   "col2_ON": {
+    "t": 55,
+    "video_frame": 55,
+    "video_frames": 56,
+    "obstacle_first_t": 55,
+    "obstacle_max_force_N": 166.01414764791704,
+    "obstacle_entry": [
+     {
+      "slot": "post_0",
+      "position": [
+       0.3844264217350893,
+       0.33149259999999997,
+       0.82
+      ],
+      "yaw": 0.0,
+      "height": 0.26,
+      "radius": 0.02
+     }
+    ]
+   }
+  },
+  "1623": {
+   "col0_OFF": {
+    "t": 0,
+    "video_frame": 0,
+    "video_frames": 97,
+    "obstacle_first_t": 96,
+    "obstacle_max_force_N": 97.4390996772142,
+    "obstacle_entry": [
+     {
+      "slot": "post_0",
+      "position": [
+       0.3861386982253126,
+       -0.34405966388768217,
+       0.82
+      ],
+      "yaw": 0.0,
+      "height": 0.1,
+      "radius": 0.02
+     }
+    ]
+   },
+   "col1_OFF": {
+    "t": 96,
+    "video_frame": 96,
+    "video_frames": 97,
+    "obstacle_first_t": 96,
+    "obstacle_max_force_N": 97.4390996772142,
+    "obstacle_entry": [
+     {
+      "slot": "post_0",
+      "position": [
+       0.3861386982253126,
+       -0.34405966388768217,
+       0.82
+      ],
+      "yaw": 0.0,
+      "height": 0.1,
+      "radius": 0.02
+     }
+    ]
+   },
+   "col2_ON": {
+    "t": 94,
+    "video_frame": 94,
+    "video_frames": 95,
+    "obstacle_first_t": 94,
+    "obstacle_max_force_N": 76.39259352517345,
+    "obstacle_entry": [
+     {
+      "slot": "post_0",
+      "position": [
+       0.3861386982253126,
+       -0.34405966388768217,
+       0.82
+      ],
+      "yaw": 0.0,
+      "height": 0.1,
+      "radius": 0.02
+     }
+    ]
+   }
+  }
+ }
+}

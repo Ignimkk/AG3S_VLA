@@ -1,0 +1,2009 @@
+{
+ "step": "IFG-211-GRASP",
+ "task": "AG3S/ag3s/docs/handoff/IFG-211-GRASP.task.md",
+ "date": "2026-10-23",
+ "written": "2026-10-23 KST (verifier)",
+ "records": {
+  "새 비교 기준 구성": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/runs/NBCTS/NBCTS_ep211_s2113",
+  "이전 최선 구성": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC/runs/SPLT/SPLT_ep211_s2113",
+  "VLA 단독": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep211_s2113"
+ },
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "command": "MUJOCO_GL=osmesa PYTHONPATH=$AG3S_PROJECT_ROOT .venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/baseline/legacy_base.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/baseline/legacy_base.log"
+  },
+  {
+   "id": "replays",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/p/run_replays.sh (p/replay_grasp.py x3, CPU, 2 workers then 1)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/replay",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/replay/*.log"
+  },
+  {
+   "id": "analysis",
+   "command": "p/analyze_grasp.py /mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/analysis.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/analysis.log"
+  },
+  {
+   "id": "substitution_extra",
+   "command": "CL_SNAP=snapshot_ts p/cf_replay.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/cf/cf_new_baseline.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/cf/cf_new_baseline.log"
+  },
+  {
+   "id": "renders",
+   "command": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/p/run_renders.sh (p/render_closeup.py)",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/frames"
+  },
+  {
+   "id": "figures",
+   "command": "PYTHONPATH=checkout p/make_outputs.py /mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP AG3S/ag3s/docs/figures/ifg-split",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/extra_numbers.json"
+  }
+ ],
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP",
+ "code_state": {
+  "repo": "AG3S_VLA-development",
+  "head": "6e80823a",
+  "dirty_files": "working tree as git status at session start (no code edited by verifier); replays use the run snapshots snapshot_ts / snapshot_nbc / snapshot of run 20261019T132719+0900_f15e587290f6_11408fd6d27f",
+  "script_location_note": "task asked AG3S/ag3s/experiments/studies/ifg_211_grasp.py; verifier does not write AG3S/**/*.py — scripts are in /mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/p/ (replay_grasp.py, analyze_grasp.py, cf_replay.py, render_closeup.py, make_outputs.py) for implementer promotion"
+ },
+ "baseline_check": {
+  "matched": true,
+  "legacy": {
+   "start_violated": 14,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -29.031048280806342
+  },
+  "curobo": "not run (CPU-only task)",
+  "files": [
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/baseline/legacy_base_summary.json"
+  ]
+ },
+ "definitions": {
+  "_written": "before any G1-G6 number was computed (verifier, 2026-10-23 KST = date -u + 9 h)",
+  "records": {
+   "새 비교 기준 구성": "IFG-APPLE-NBC-TARGETSURFACE runs/NBCTS/NBCTS_ep211_s2113 (server_8292_20261022T151357 run_0000 chunks 0-74)",
+   "이전 최선 구성": "IFG-APPLE-NBC runs/SPLT/SPLT_ep211_s2113 (server_8292_20261021T100938 run_0000 chunks 0-74)",
+   "VLA 단독": "IFG-APPLE runs/E0/E0_ep211_s2113 (no server)"
+  },
+  "actual_trajectory": "MuJoCo replay of each record (pi05_infer reset with episode / seed / obstacle profile of the record, 1000 warm-up steps, then every recorded control row's applied_ctrl for spa sub-steps, run snapshot of that record). Fidelity = rows whose recorded qpos differs from the replay pre-step qpos (must be 0). All positions are post-step states of the row = measured trajectory.",
+  "apple_frame": "origin = GT apple body centre (body 'apple') at the same row; axes = world axes: 앞 = +x (away from the robot), 옆 = +y, 위 = +z; mm",
+  "points": {
+   "fingertip_k": "distal face centre of the pad box geom of MJCF finger body ee_finger_l1 (geom 1079) and ee_finger_l2 (geom 1086): geom centre + R_geom[:,i] * size_i * sign, i = geom axis most aligned with the approach axis, sign toward the approach direction. MJCF ee_finger_l1 = URDF ee_finger_l2 and MJCF ee_finger_l2 = URDF ee_finger_l1 (names swapped on the left hand); figures label them by MJCF body + URDF alias",
+   "pad_k": "centre of the same pad geom",
+   "tip_mid": "midpoint of the two fingertips",
+   "palm": "origin of body EE_BODY_L (MJCF hand base, = URDF ee_left link origin used by the earlier palm-apple numbers)",
+   "tcp": "site left_ee",
+   "approach_axis": "unit vector link_left_arm_6 origin -> EE_BODY_L origin"
+  },
+  "close_start": "t_close = first control row whose applied left gripper command < 0.5 (also reported: first row < 0.9)",
+  "windows": {
+   "G1_abs": "t = 200..300 for all three records",
+   "G_rel": "t_close - 30 .. t_close + 70 of each record (own close)"
+  },
+  "G2_contacts": "every sub-step MuJoCo contact (d.contact, collision geoms) with one geom in the active hand (subtree EE_BODY_L + both finger subtrees); partner classes: apple, banana, orange, pear, table (body 'table'), crate, obstacle (obstacle manager geoms), robot_other, other. Per finger body: fingerL1 / fingerL2 / palm (rest of the hand). Per row: sub-steps in contact, min dist, max normal force. first contact t per (hand part, partner). Also apple-banana / apple-table contacts.",
+  "G3_gripper": "command = applied_ctrl gripper[0] (1 = open); actual opening = qpos(gripper_finger_l1) / RBY1_GRIPPER_OPEN; finger stop t = first row >= t_close with |opening(t) - opening(t-1)| < 0.005 for 3 consecutive rows; blocked = at the stop row opening - command > 0.05; blocking partner = partners in contact with either finger subtree at the stop row (and 2 rows around)",
+  "G4_apple": "GT apple centre displacement from its position at t_close - 10: |d| 3D, xy, z per row; roll = rotation angle of the apple quaternion vs t_close - 10 (deg)",
+  "G5_server": "per request k (planning row) of the two AG3S records: TrajOpt edit = max over executed rows 0-7 of |FK_tip_mid(refined row) - FK_tip_mid(reference row)| and |FK_tcp ...| (FK on the replay state at the chunk start row with the left arm 7 joints and the gripper of the row; mm); executed source = which of reference / refined is closer to the client applied_ctrl arm rows (max abs rad); HOLD = exec_feedback n_hold of the next request / client hold rows; grasp state / transition / attach / detach / rejected / attach_revoked / evidence.checks / note; subtask p(pick); tip_alignment now / plan_close d3",
+  "G6_plan": "per request k: VLA chunk before TrajOpt (server reference_chunk for the AG3S records, traj.npz predicted_chunks for VLA 단독; equality of predicted_chunks vs reference_chunk checked) -> first row with left gripper < 0.5 = planned close row; FK (replay state at the chunk start row, left arm joints + gripper of that row) -> planned tip_mid and palm in the apple frame of the chunk start row; requests skipped when no close row",
+  "cause_criteria": {
+   "a": "TRUE if in [t_close - 10, t_stop] the first contact of a finger subtree is with a non-apple partner (banana / orange / pear / table / crate / obstacle / other), or the fingers are blocked (G3) with a non-apple partner in contact at the stop row",
+   "b": "TRUE if GT apple centre moves >= 10 mm (3D) from t_close - 10 within [t_close - 10, t_close + 40] AND >= 1 hand-apple contact row in that window",
+   "c": "TRUE if for the request whose executed rows contain t_close the VLA planned close-row tip_mid - apple centre distance (3D) exceeds the VLA 단독 value (its own close request) by >= 20 mm; also reported: planned tip_mid in the apple frame for all three",
+   "d": "TRUE if in a request whose executed rows overlap [t_close, t_stop] the TrajOpt edit of tip_mid (refined vs reference, executed rows) is >= 10 mm, or a HOLD row lies in [t_close, t_stop], or the executed chunk is the refined one and the actual tip_mid moves >= 10 mm relative to the apple frame during [t_close, t_stop]",
+   "d_note": "the last clause alone (actual motion) does not mark (d) without the refined chunk being executed",
+   "e": "TRUE if after t_close there is a request with physical grasp evidence (both finger subtrees in contact with the apple in >= 3 consecutive rows) whose grasp state is not attached / held, followed within 3 requests by a HOLD or a TrajOpt tip_mid edit >= 10 mm; or attach_revoked / rejected after t_close followed by a HOLD; or the applied gripper command differs from the VLA chunk gripper by > 0.1 in [t_close, t_close + 40]",
+   "f": "TRUE if none of a-e is TRUE; reported facts: closed opening at t_stop, tip_mid - apple at t_close and t_stop, finger pad - apple geom distance at t_stop"
+  },
+  "thresholds_fixed": {
+   "apple_push_mm": 10,
+   "to_edit_mm": 10,
+   "plan_excess_mm": 20,
+   "stop_delta_norm": 0.005,
+   "blocked_norm": 0.05,
+   "gripper_override": 0.1
+  }
+ },
+ "definitions_sha1_written_before_numbers": "9dd667c662e04cef3b4682653eb5d8ae5342aa64",
+ "numbers": {
+  "replay_qpos_mismatch_rows": {
+   "새 비교 기준 구성": 0,
+   "이전 최선 구성": 0,
+   "VLA 단독": 0
+  },
+  "cause_verdicts": {
+   "a": false,
+   "b": true,
+   "c": false,
+   "d": false,
+   "e": true,
+   "f": false
+  },
+  "cause_values": {
+   "a": {
+    "verdict": false,
+    "first_finger_contact": {
+     "t": 234,
+     "partners": [
+      [
+       "fingerL1",
+       "apple",
+       "apple_geom"
+      ],
+      [
+       "fingerL2",
+       "apple",
+       "apple_geom"
+      ]
+     ]
+    },
+    "first_is_nonapple": false,
+    "blocked": true,
+    "blocked_by_nonapple": false,
+    "stop_partners": [
+     [
+      "fingerL1",
+      "apple",
+      "apple_geom"
+     ],
+     [
+      "fingerL2",
+      "apple",
+      "apple_geom"
+     ]
+    ],
+    "palm_contacts_window": [
+     "palm-apple"
+    ]
+   },
+   "b": {
+    "verdict": true,
+    "apple_push_max_mm": 16.84,
+    "hand_apple_rows": 25
+   },
+   "c": {
+    "verdict": false,
+    "new_close_k": 29,
+    "new_plan_close_row": 1,
+    "new_plan_tip_mid_apple_mm": [
+     37.3,
+     -4.8,
+     -5.6
+    ],
+    "new_plan_tip_mid_dist_mm": 38.0,
+    "vla_alone_close_k": 23,
+    "vla_alone_plan_close_row": 0,
+    "vla_alone_plan_tip_mid_apple_mm": [
+     22.0,
+     3.1,
+     -9.5
+    ],
+    "vla_alone_plan_tip_mid_dist_mm": 24.2,
+    "excess_mm": 13.8,
+    "prev_best_close_k": 20,
+    "prev_best_plan_tip_mid_apple_mm": [
+     105.7,
+     -2.0,
+     4.2
+    ],
+    "prev_best_plan_tip_mid_dist_mm": 105.8
+   },
+   "d": {
+    "verdict": false,
+    "requests": [
+     29
+    ],
+    "max_to_edit_tip_mid_mm": 3.5,
+    "max_to_edit_tcp_mm": 3.4,
+    "hold_rows": 0,
+    "requests_executed_refined": [
+     29
+    ],
+    "actual_tip_mid_motion_apple_frame_tc_to_stop_mm": 5.1
+   },
+   "e": {
+    "verdict": true,
+    "both_finger_apple_contact_runs_ge3": [
+     [
+      234,
+      245
+     ]
+    ],
+    "unacknowledged_grasp_then_change": true,
+    "revoked_or_rejected_k": [],
+    "revoked_then_hold": false,
+    "max_applied_grip_minus_vla_grip": 0.006,
+    "grasp_states_from_close": [
+     [
+      29,
+      "latched"
+     ],
+     [
+      30,
+      "closing"
+     ],
+     [
+      31,
+      "closing"
+     ],
+     [
+      32,
+      "closing"
+     ],
+     [
+      33,
+      "closing"
+     ],
+     [
+      34,
+      "closing"
+     ],
+     [
+      35,
+      "closing"
+     ],
+     [
+      36,
+      "closing"
+     ],
+     [
+      37,
+      "closing"
+     ],
+     [
+      38,
+      "closing"
+     ],
+     [
+      39,
+      "closing"
+     ],
+     [
+      40,
+      "closing"
+     ]
+    ],
+    "attach_any": false,
+    "held_any": false
+   },
+   "f": {
+    "verdict": false,
+    "opening_at_stop": 0.698,
+    "cmd_at_stop": 0.0,
+    "tip_mid_at_close_mm": [
+     32.0,
+     -2.7,
+     -11.1
+    ],
+    "tip_mid_at_stop_mm": [
+     33.6,
+     -7.1,
+     -9.0
+    ],
+    "pad_gaps_at_stop_mm": [
+     -0.3,
+     -0.3
+    ]
+   }
+  },
+  "first_contact_timeline": {
+   "새 비교 기준 구성": {
+    "t_close": 233,
+    "t_finger_stop": 236,
+    "opening_at_stop": 0.698,
+    "blocked": true,
+    "stop_partners": [
+     "apple"
+    ],
+    "contact_events_whole_run": {
+     "fingerL2-apple": {
+      "first_t": 94,
+      "last_t": 247,
+      "rows": 24,
+      "max_force_N": 100.68
+     },
+     "palm-apple": {
+      "first_t": 108,
+      "last_t": 241,
+      "rows": 128,
+      "max_force_N": 39.99
+     },
+     "fingerL1-apple": {
+      "first_t": 234,
+      "last_t": 245,
+      "rows": 12,
+      "max_force_N": 110.67
+     }
+    },
+    "both_fingers_on_apple_first_run": [
+     234,
+     245
+    ]
+   },
+   "이전 최선 구성": {
+    "t_close": 163,
+    "t_finger_stop": 169,
+    "opening_at_stop": 0.532,
+    "blocked": true,
+    "stop_partners": [
+     "banana"
+    ],
+    "contact_events_whole_run": {
+     "palm-apple": {
+      "first_t": 127,
+      "last_t": 161,
+      "rows": 34,
+      "max_force_N": 67.65
+     },
+     "fingerL1-banana": {
+      "first_t": 165,
+      "last_t": 178,
+      "rows": 27,
+      "max_force_N": 42.25
+     },
+     "fingerL2-banana": {
+      "first_t": 165,
+      "last_t": 178,
+      "rows": 17,
+      "max_force_N": 72.39
+     },
+     "fingerL2-apple": {
+      "first_t": 537,
+      "last_t": 599,
+      "rows": 50,
+      "max_force_N": 113.96
+     },
+     "fingerL1-apple": {
+      "first_t": 557,
+      "last_t": 599,
+      "rows": 43,
+      "max_force_N": 115.85
+     }
+    },
+    "both_fingers_on_apple_first_run": [
+     557,
+     599
+    ]
+   },
+   "VLA 단독": {
+    "t_close": 184,
+    "t_finger_stop": 187,
+    "opening_at_stop": 0.733,
+    "blocked": true,
+    "stop_partners": [
+     "apple",
+     "banana"
+    ],
+    "contact_events_whole_run": {
+     "fingerL1-apple": {
+      "first_t": 185,
+      "last_t": 291,
+      "rows": 107,
+      "max_force_N": 134.14
+     },
+     "fingerL2-apple": {
+      "first_t": 185,
+      "last_t": 291,
+      "rows": 107,
+      "max_force_N": 125.34
+     },
+     "fingerL1-banana": {
+      "first_t": 186,
+      "last_t": 199,
+      "rows": 8,
+      "max_force_N": 1.74
+     }
+    },
+    "both_fingers_on_apple_first_run": [
+     185,
+     291
+    ]
+   }
+  },
+  "close_compare": {
+   "새 비교 기준 구성": {
+    "t_close": 233,
+    "close_request_k": 29,
+    "at_close": {
+     "tip_mid_mm": [
+      32.0,
+      -2.7,
+      -11.1
+     ],
+     "tip_mid_dist_mm": 34.0,
+     "palm_dist_mm": 105.8,
+     "tcp_dist_mm": 17.6,
+     "tip1_mm": [
+      42.2,
+      39.4,
+      -3.7
+     ],
+     "tip2_mm": [
+      21.8,
+      -44.7,
+      -18.5
+     ]
+    },
+    "at_stop": {
+     "t": 236,
+     "tip_mid_mm": [
+      33.6,
+      -7.1,
+      -9.0
+     ],
+     "palm_dist_mm": 106.7,
+     "opening": 0.698,
+     "pad1_apple_gap_mm": -0.3,
+     "pad2_apple_gap_mm": -0.3
+    },
+    "apple_disp_from_t0_at_close_mm": 22.6,
+    "apple_disp_from_t0_max_before_close_mm": 22.6,
+    "apple_dz_from_t0_at_close_plus40_mm": 0.0,
+    "banana_disp_from_t0_at_close_mm": 21.0,
+    "apple_banana_contact_rows_before_close": 89,
+    "palm_apple_contact_rows_before_close": 124,
+    "finger_apple_contact_rows_before_close": 10,
+    "contact_fingerL1_apple_mm_first8": [
+     16.6,
+     27.0,
+     6.2
+    ],
+    "contact_fingerL2_apple_mm_first8": [
+     -0.4,
+     -32.8,
+     -3.0
+    ],
+    "contact_midpoint_apple_mm": [
+     8.1,
+     -2.9,
+     1.6
+    ],
+    "contact_midpoint_offset_mm": 8.7,
+    "contact_chord_mm": 62.8,
+    "both_fingers_on_apple_first_run": [
+     234,
+     245
+    ]
+   },
+   "이전 최선 구성": {
+    "t_close": 163,
+    "close_request_k": 20,
+    "at_close": {
+     "tip_mid_mm": [
+      97.5,
+      -0.0,
+      -4.7
+     ],
+     "tip_mid_dist_mm": 97.6,
+     "palm_dist_mm": 88.7,
+     "tcp_dist_mm": 75.7,
+     "tip1_mm": [
+      108.8,
+      40.3,
+      9.0
+     ],
+     "tip2_mm": [
+      86.2,
+      -40.3,
+      -18.3
+     ]
+    },
+    "at_stop": {
+     "t": 169,
+     "tip_mid_mm": [
+      101.1,
+      5.7,
+      3.2
+     ],
+     "palm_dist_mm": 95.5,
+     "opening": 0.532,
+     "pad1_apple_gap_mm": 42.5,
+     "pad2_apple_gap_mm": 18.1
+    },
+    "apple_disp_from_t0_at_close_mm": 6.1,
+    "apple_disp_from_t0_max_before_close_mm": 7.5,
+    "apple_dz_from_t0_at_close_plus40_mm": 0.0,
+    "banana_disp_from_t0_at_close_mm": 0.7,
+    "apple_banana_contact_rows_before_close": 3,
+    "palm_apple_contact_rows_before_close": 34,
+    "finger_apple_contact_rows_before_close": 0,
+    "both_fingers_on_apple_first_run": [
+     557,
+     599
+    ]
+   },
+   "VLA 단독": {
+    "t_close": 184,
+    "close_request_k": 23,
+    "at_close": {
+     "tip_mid_mm": [
+      15.8,
+      1.4,
+      -16.3
+     ],
+     "tip_mid_dist_mm": 22.7,
+     "palm_dist_mm": 112.0,
+     "tcp_dist_mm": 13.2,
+     "tip1_mm": [
+      34.5,
+      41.0,
+      -9.8
+     ],
+     "tip2_mm": [
+      -3.0,
+      -38.1,
+      -22.8
+     ]
+    },
+    "at_stop": {
+     "t": 187,
+     "tip_mid_mm": [
+      14.3,
+      -4.3,
+      -16.6
+     ],
+     "palm_dist_mm": 111.7,
+     "opening": 0.733,
+     "pad1_apple_gap_mm": -0.4,
+     "pad2_apple_gap_mm": -0.3
+    },
+    "apple_disp_from_t0_at_close_mm": 0.5,
+    "apple_disp_from_t0_max_before_close_mm": 0.5,
+    "apple_dz_from_t0_at_close_plus40_mm": 222.1,
+    "banana_disp_from_t0_at_close_mm": 0.0,
+    "apple_banana_contact_rows_before_close": 0,
+    "palm_apple_contact_rows_before_close": 0,
+    "finger_apple_contact_rows_before_close": 0,
+    "contact_fingerL1_apple_mm_first8": [
+     8.4,
+     32.1,
+     1.6
+    ],
+    "contact_fingerL2_apple_mm_first8": [
+     -8.7,
+     -32.9,
+     -1.8
+    ],
+    "contact_midpoint_apple_mm": [
+     -0.2,
+     -0.4,
+     -0.1
+    ],
+    "contact_midpoint_offset_mm": 0.5,
+    "contact_chord_mm": 67.3,
+    "both_fingers_on_apple_first_run": [
+     185,
+     291
+    ]
+   }
+  },
+  "G5_G6_requests": {
+   "새 비교 기준 구성": [
+    {
+     "k": 24,
+     "exec_rows": [
+      192,
+      199
+     ],
+     "plan_close_row": 19,
+     "plan_tip_mid_apple_mm": [
+      40.4,
+      -1.6,
+      -8.0
+     ],
+     "plan_tip_mid_dist_mm": 41.2,
+     "to_edit_tip_mid_mm": 2.6,
+     "to_edit_tip_mid_vec_mm": [
+      0.8,
+      0.3,
+      2.4
+     ],
+     "to_edit_tcp_mm": 2.6,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": "target",
+      "tier": "target_free",
+      "clearance_m": 0.004958596973276087,
+      "step": 6
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.99732962228658,
+     "pre_close_request": true
+    },
+    {
+     "k": 25,
+     "exec_rows": [
+      200,
+      207
+     ],
+     "plan_close_row": 15,
+     "plan_tip_mid_apple_mm": [
+      40.0,
+      -0.6,
+      -5.2
+     ],
+     "plan_tip_mid_dist_mm": 40.3,
+     "to_edit_tip_mid_mm": 4.3,
+     "to_edit_tip_mid_vec_mm": [
+      -0.7,
+      4.1,
+      0.8
+     ],
+     "to_edit_tcp_mm": 4.1,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": "target",
+      "tier": "target_free",
+      "clearance_m": 0.004975365816113957,
+      "step": 7
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.9979947259673655,
+     "pre_close_request": true
+    },
+    {
+     "k": 26,
+     "exec_rows": [
+      208,
+      215
+     ],
+     "plan_close_row": 13,
+     "plan_tip_mid_apple_mm": [
+      39.6,
+      -2.3,
+      -4.2
+     ],
+     "plan_tip_mid_dist_mm": 39.9,
+     "to_edit_tip_mid_mm": 2.2,
+     "to_edit_tip_mid_vec_mm": [
+      -0.3,
+      2.1,
+      0.7
+     ],
+     "to_edit_tcp_mm": 2.1,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": "target",
+      "tier": "target_free",
+      "clearance_m": 0.004980579684903593,
+      "step": 7
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.9955668181341154,
+     "pre_close_request": true
+    },
+    {
+     "k": 27,
+     "exec_rows": [
+      216,
+      223
+     ],
+     "plan_close_row": 12,
+     "plan_tip_mid_apple_mm": [
+      40.6,
+      -2.6,
+      -3.1
+     ],
+     "plan_tip_mid_dist_mm": 40.8,
+     "to_edit_tip_mid_mm": 0.6,
+     "to_edit_tip_mid_vec_mm": [
+      -0.5,
+      -0.3,
+      0.0
+     ],
+     "to_edit_tcp_mm": 0.6,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": "target",
+      "tier": "target_free",
+      "clearance_m": 0.005004667149973869,
+      "step": 1
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.9971314798123158,
+     "pre_close_request": true
+    },
+    {
+     "k": 28,
+     "exec_rows": [
+      224,
+      231
+     ],
+     "plan_close_row": 14,
+     "plan_tip_mid_apple_mm": [
+      37.3,
+      -1.5,
+      -9.1
+     ],
+     "plan_tip_mid_dist_mm": 38.4,
+     "to_edit_tip_mid_mm": 4.5,
+     "to_edit_tip_mid_vec_mm": [
+      1.3,
+      -3.8,
+      2.0
+     ],
+     "to_edit_tcp_mm": 4.3,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": "target",
+      "tier": "target_free",
+      "clearance_m": 0.003531617984180984,
+      "step": 6
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.993669948599807,
+     "pre_close_request": true
+    },
+    {
+     "k": 29,
+     "exec_rows": [
+      232,
+      239
+     ],
+     "plan_close_row": 1,
+     "plan_tip_mid_apple_mm": [
+      37.3,
+      -4.8,
+      -5.6
+     ],
+     "plan_tip_mid_dist_mm": 38.0,
+     "to_edit_tip_mid_mm": 3.5,
+     "to_edit_tip_mid_vec_mm": [
+      2.1,
+      -0.2,
+      2.8
+     ],
+     "to_edit_tcp_mm": 3.4,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_left",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.004952327447452108,
+      "step": 1
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.9929225939500815,
+     "pre_close_request": true
+    },
+    {
+     "k": 30,
+     "exec_rows": [
+      240,
+      247
+     ],
+     "plan_close_row": null,
+     "plan_tip_mid_apple_mm": null,
+     "plan_tip_mid_dist_mm": null,
+     "to_edit_tip_mid_mm": 17.4,
+     "to_edit_tip_mid_vec_mm": [
+      1.8,
+      17.1,
+      -2.5
+     ],
+     "to_edit_tcp_mm": 16.1,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "closing",
+     "transition": true,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {
+      "settled": false,
+      "closed": true,
+      "dropped": true,
+      "not_empty": true,
+      "blocked": true,
+      "manipulated": true,
+      "reach": true
+     },
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": "target",
+      "tier": "target_free",
+      "clearance_m": 0.005023234969666069,
+      "step": 4
+     },
+     "to_initial_violation_m": 0.003347337587684296,
+     "to_lookahead_gate": "open",
+     "p_pick": 0.2238096823953835,
+     "pre_close_request": false
+    },
+    {
+     "k": 31,
+     "exec_rows": [
+      248,
+      255
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      48.4,
+      -1.6,
+      48.7
+     ],
+     "plan_tip_mid_dist_mm": 68.7,
+     "to_edit_tip_mid_mm": 18.9,
+     "to_edit_tip_mid_vec_mm": [
+      4.6,
+      16.3,
+      8.4
+     ],
+     "to_edit_tcp_mm": 17.2,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "closing",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {
+      "settled": false,
+      "closed": true,
+      "dropped": true,
+      "not_empty": true,
+      "blocked": true,
+      "manipulated": true,
+      "reach": true
+     },
+     "to_worst_pair": {
+      "link": "ee_left",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.019177502174764327,
+      "step": 3
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.3434854565504942,
+     "pre_close_request": false
+    },
+    {
+     "k": 32,
+     "exec_rows": [
+      256,
+      263
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      61.2,
+      16.7,
+      135.9
+     ],
+     "plan_tip_mid_dist_mm": 150.0,
+     "to_edit_tip_mid_mm": 13.9,
+     "to_edit_tip_mid_vec_mm": [
+      2.9,
+      11.3,
+      7.6
+     ],
+     "to_edit_tcp_mm": 12.7,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "closing",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {
+      "settled": false,
+      "closed": true,
+      "dropped": true,
+      "not_empty": true,
+      "blocked": false,
+      "manipulated": true,
+      "reach": false
+     },
+     "to_worst_pair": {
+      "link": "ee_left",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.04118308140059925,
+      "step": 0
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.6175083699719272,
+     "pre_close_request": false
+    },
+    {
+     "k": 33,
+     "exec_rows": [
+      264,
+      271
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      53.6,
+      7.0,
+      204.4
+     ],
+     "plan_tip_mid_dist_mm": 211.5,
+     "to_edit_tip_mid_mm": 4.8,
+     "to_edit_tip_mid_vec_mm": [
+      -1.5,
+      0.3,
+      4.6
+     ],
+     "to_edit_tcp_mm": 4.8,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "closing",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {
+      "settled": false,
+      "closed": true,
+      "dropped": true,
+      "not_empty": true,
+      "blocked": false,
+      "manipulated": true,
+      "reach": false
+     },
+     "to_worst_pair": {
+      "link": "ee_finger_r2",
+      "obstacle": null,
+      "tier": "coarse",
+      "clearance_m": 0.058332080588322476,
+      "step": 3
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.496193533201891,
+     "pre_close_request": false
+    },
+    {
+     "k": 34,
+     "exec_rows": [
+      272,
+      279
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      36.8,
+      6.9,
+      248.3
+     ],
+     "plan_tip_mid_dist_mm": 251.1,
+     "to_edit_tip_mid_mm": 11.2,
+     "to_edit_tip_mid_vec_mm": [
+      1.5,
+      -4.2,
+      -10.3
+     ],
+     "to_edit_tcp_mm": 11.1,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "closing",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {
+      "settled": true,
+      "closed": true,
+      "dropped": true,
+      "not_empty": true,
+      "blocked": false,
+      "manipulated": true,
+      "reach": false
+     },
+     "to_worst_pair": {
+      "link": "ee_finger_r2",
+      "obstacle": null,
+      "tier": "coarse",
+      "clearance_m": 0.0580409975182495,
+      "step": 0
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.6750273127392803,
+     "pre_close_request": false
+    },
+    {
+     "k": 35,
+     "exec_rows": [
+      280,
+      287
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      34.4,
+      5.6,
+      255.2
+     ],
+     "plan_tip_mid_dist_mm": 257.6,
+     "to_edit_tip_mid_mm": 11.3,
+     "to_edit_tip_mid_vec_mm": [
+      0.9,
+      -1.2,
+      -11.2
+     ],
+     "to_edit_tcp_mm": 11.2,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "closing",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {
+      "settled": false,
+      "closed": true,
+      "dropped": true,
+      "not_empty": true,
+      "blocked": false,
+      "manipulated": true,
+      "reach": false
+     },
+     "to_worst_pair": {
+      "link": "ee_finger_r2",
+      "obstacle": null,
+      "tier": "coarse",
+      "clearance_m": 0.05886017456000372,
+      "step": 3
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.3577038522370588,
+     "pre_close_request": false
+    }
+   ],
+   "이전 최선 구성": [
+    {
+     "k": 15,
+     "exec_rows": [
+      120,
+      127
+     ],
+     "plan_close_row": 29,
+     "plan_tip_mid_apple_mm": [
+      63.4,
+      10.6,
+      -14.9
+     ],
+     "plan_tip_mid_dist_mm": 66.0,
+     "to_edit_tip_mid_mm": 41.0,
+     "to_edit_tip_mid_vec_mm": [
+      28.4,
+      -20.0,
+      21.8
+     ],
+     "to_edit_tcp_mm": 39.1,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_left",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.0009843313399069981,
+      "step": 2
+     },
+     "to_initial_violation_m": 0.00681206266813091,
+     "to_lookahead_gate": "open",
+     "p_pick": 0.9974621496018073,
+     "pre_close_request": true
+    },
+    {
+     "k": 16,
+     "exec_rows": [
+      128,
+      135
+     ],
+     "plan_close_row": 19,
+     "plan_tip_mid_apple_mm": [
+      85.8,
+      3.7,
+      3.5
+     ],
+     "plan_tip_mid_dist_mm": 86.0,
+     "to_edit_tip_mid_mm": 12.7,
+     "to_edit_tip_mid_vec_mm": [
+      10.4,
+      -0.7,
+      7.3
+     ],
+     "to_edit_tcp_mm": 11.6,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": "target",
+      "tier": "target_free",
+      "clearance_m": 0.005667520003948507,
+      "step": 6
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.9978014454773134,
+     "pre_close_request": true
+    },
+    {
+     "k": 17,
+     "exec_rows": [
+      136,
+      143
+     ],
+     "plan_close_row": 21,
+     "plan_tip_mid_apple_mm": [
+      87.5,
+      3.2,
+      -0.1
+     ],
+     "plan_tip_mid_dist_mm": 87.6,
+     "to_edit_tip_mid_mm": 3.5,
+     "to_edit_tip_mid_vec_mm": [
+      1.3,
+      2.4,
+      2.2
+     ],
+     "to_edit_tcp_mm": 3.2,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.004945733348003143,
+      "step": 4
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.9974005386607159,
+     "pre_close_request": true
+    },
+    {
+     "k": 18,
+     "exec_rows": [
+      144,
+      151
+     ],
+     "plan_close_row": 19,
+     "plan_tip_mid_apple_mm": [
+      94.4,
+      0.3,
+      -0.5
+     ],
+     "plan_tip_mid_dist_mm": 94.4,
+     "to_edit_tip_mid_mm": 4.1,
+     "to_edit_tip_mid_vec_mm": [
+      1.5,
+      -0.4,
+      3.8
+     ],
+     "to_edit_tcp_mm": 4.2,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.004961829958018204,
+      "step": 2
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "open",
+     "p_pick": 0.9972572868957986,
+     "pre_close_request": true
+    },
+    {
+     "k": 19,
+     "exec_rows": [
+      152,
+      159
+     ],
+     "plan_close_row": 18,
+     "plan_tip_mid_apple_mm": [
+      101.5,
+      1.7,
+      1.5
+     ],
+     "plan_tip_mid_dist_mm": 101.5,
+     "to_edit_tip_mid_mm": 4.0,
+     "to_edit_tip_mid_vec_mm": [
+      1.5,
+      -0.2,
+      3.6
+     ],
+     "to_edit_tcp_mm": 4.1,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.004935340526482621,
+      "step": 4
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.996947050390195,
+     "pre_close_request": true
+    },
+    {
+     "k": 20,
+     "exec_rows": [
+      160,
+      167
+     ],
+     "plan_close_row": 3,
+     "plan_tip_mid_apple_mm": [
+      105.7,
+      -2.0,
+      4.2
+     ],
+     "plan_tip_mid_dist_mm": 105.8,
+     "to_edit_tip_mid_mm": 2.2,
+     "to_edit_tip_mid_vec_mm": [
+      0.3,
+      2.1,
+      0.7
+     ],
+     "to_edit_tcp_mm": 2.1,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": false,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.004986234673887353,
+      "step": 5
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.9967259501211014,
+     "pre_close_request": true
+    },
+    {
+     "k": 21,
+     "exec_rows": [
+      168,
+      175
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      107.1,
+      7.5,
+      14.4
+     ],
+     "plan_tip_mid_dist_mm": 108.4,
+     "to_edit_tip_mid_mm": 7.6,
+     "to_edit_tip_mid_vec_mm": [
+      7.5,
+      -0.2,
+      -1.4
+     ],
+     "to_edit_tcp_mm": 7.0,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "closing",
+     "transition": true,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {
+      "settled": false,
+      "closed": true,
+      "dropped": true,
+      "not_empty": true,
+      "blocked": true,
+      "manipulated": true,
+      "reach": true
+     },
+     "to_worst_pair": {
+      "link": "ee_left",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.0054179966385929385,
+      "step": 7
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "open",
+     "p_pick": 0.11289016053517943,
+     "pre_close_request": false
+    },
+    {
+     "k": 22,
+     "exec_rows": [
+      176,
+      183
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      134.0,
+      11.3,
+      98.5
+     ],
+     "plan_tip_mid_dist_mm": 166.7,
+     "to_edit_tip_mid_mm": 24.2,
+     "to_edit_tip_mid_vec_mm": [
+      -24.1,
+      1.4,
+      -0.7
+     ],
+     "to_edit_tcp_mm": 23.3,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "held",
+     "transition": true,
+     "attach": true,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {
+      "settled": true,
+      "closed": true,
+      "dropped": true,
+      "not_empty": true,
+      "blocked": true,
+      "manipulated": true,
+      "reach": true
+     },
+     "to_worst_pair": {
+      "link": "attached:ee_left[1]",
+      "obstacle": null,
+      "tier": "fine",
+      "clearance_m": 0.005060814032560666,
+      "step": 2
+     },
+     "to_initial_violation_m": 0.018804086306888908,
+     "to_lookahead_gate": "open",
+     "p_pick": 0.003003907088419093,
+     "pre_close_request": false
+    },
+    {
+     "k": 23,
+     "exec_rows": [
+      184,
+      191
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      124.6,
+      7.1,
+      177.8
+     ],
+     "plan_tip_mid_dist_mm": 217.2,
+     "to_edit_tip_mid_mm": 5.7,
+     "to_edit_tip_mid_vec_mm": [
+      -1.2,
+      -0.0,
+      5.6
+     ],
+     "to_edit_tcp_mm": 5.6,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "latched",
+     "transition": true,
+     "attach": false,
+     "attach_revoked": {
+      "reasons": [
+       "opening_dropped",
+       "not_blocked"
+      ],
+      "held_observation": null,
+      "anchor": {
+       "manipulated_id": 0,
+       "active": false,
+       "source": "first",
+       "since_frame": 0,
+       "kept_frames": 5,
+       "extents_mm": [
+        45.9,
+        53.3,
+        65.6
+       ],
+       "radius_mm": 41.8,
+       "n_points": 80,
+       "centroid": [
+        0.4929282735135495,
+        0.2910607675695595,
+        0.8693196331754034
+       ],
+       "geometry_source": "refined",
+       "geometry_frame": 10,
+       "from_split": true,
+       "release_split": null
+      }
+     },
+     "rejected": null,
+     "evidence_checks": {},
+     "to_worst_pair": {
+      "link": "ee_finger_l1",
+      "obstacle": null,
+      "tier": "target_free",
+      "clearance_m": 0.059354475387457646,
+      "step": 0
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.19940955630299786,
+     "pre_close_request": false
+    },
+    {
+     "k": 24,
+     "exec_rows": [
+      192,
+      199
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      106.3,
+      8.4,
+      242.9
+     ],
+     "plan_tip_mid_dist_mm": 265.2,
+     "to_edit_tip_mid_mm": 7.1,
+     "to_edit_tip_mid_vec_mm": [
+      -0.3,
+      -5.4,
+      -4.6
+     ],
+     "to_edit_tcp_mm": 6.9,
+     "executed_source": "refined",
+     "hold_rows": 0,
+     "grasp_state": "closing",
+     "transition": true,
+     "attach": false,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": {
+      "settled": false,
+      "closed": true,
+      "dropped": false,
+      "not_empty": true,
+      "blocked": false,
+      "manipulated": true,
+      "reach": false
+     },
+     "to_worst_pair": {
+      "link": "ee_finger_r2",
+      "obstacle": null,
+      "tier": "coarse",
+      "clearance_m": 0.061512656150667595,
+      "step": 7
+     },
+     "to_initial_violation_m": 0.0,
+     "to_lookahead_gate": "closed",
+     "p_pick": 0.525171619062994,
+     "pre_close_request": false
+    }
+   ],
+   "VLA 단독": [
+    {
+     "k": 18,
+     "exec_rows": [
+      144,
+      151
+     ],
+     "plan_close_row": 39,
+     "plan_tip_mid_apple_mm": [
+      19.3,
+      1.7,
+      -7.0
+     ],
+     "plan_tip_mid_dist_mm": 20.6,
+     "to_edit_tip_mid_mm": null,
+     "to_edit_tip_mid_vec_mm": null,
+     "to_edit_tcp_mm": null,
+     "executed_source": null,
+     "hold_rows": 0,
+     "grasp_state": null,
+     "transition": null,
+     "attach": null,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": null,
+     "to_worst_pair": null,
+     "to_initial_violation_m": null,
+     "to_lookahead_gate": null,
+     "p_pick": null,
+     "pre_close_request": true
+    },
+    {
+     "k": 19,
+     "exec_rows": [
+      152,
+      159
+     ],
+     "plan_close_row": 32,
+     "plan_tip_mid_apple_mm": [
+      17.9,
+      6.0,
+      -13.3
+     ],
+     "plan_tip_mid_dist_mm": 23.1,
+     "to_edit_tip_mid_mm": null,
+     "to_edit_tip_mid_vec_mm": null,
+     "to_edit_tcp_mm": null,
+     "executed_source": null,
+     "hold_rows": 0,
+     "grasp_state": null,
+     "transition": null,
+     "attach": null,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": null,
+     "to_worst_pair": null,
+     "to_initial_violation_m": null,
+     "to_lookahead_gate": null,
+     "p_pick": null,
+     "pre_close_request": true
+    },
+    {
+     "k": 20,
+     "exec_rows": [
+      160,
+      167
+     ],
+     "plan_close_row": 24,
+     "plan_tip_mid_apple_mm": [
+      19.8,
+      2.5,
+      -8.3
+     ],
+     "plan_tip_mid_dist_mm": 21.6,
+     "to_edit_tip_mid_mm": null,
+     "to_edit_tip_mid_vec_mm": null,
+     "to_edit_tcp_mm": null,
+     "executed_source": null,
+     "hold_rows": 0,
+     "grasp_state": null,
+     "transition": null,
+     "attach": null,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": null,
+     "to_worst_pair": null,
+     "to_initial_violation_m": null,
+     "to_lookahead_gate": null,
+     "p_pick": null,
+     "pre_close_request": true
+    },
+    {
+     "k": 21,
+     "exec_rows": [
+      168,
+      175
+     ],
+     "plan_close_row": 18,
+     "plan_tip_mid_apple_mm": [
+      18.6,
+      1.4,
+      -13.5
+     ],
+     "plan_tip_mid_dist_mm": 23.0,
+     "to_edit_tip_mid_mm": null,
+     "to_edit_tip_mid_vec_mm": null,
+     "to_edit_tcp_mm": null,
+     "executed_source": null,
+     "hold_rows": 0,
+     "grasp_state": null,
+     "transition": null,
+     "attach": null,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": null,
+     "to_worst_pair": null,
+     "to_initial_violation_m": null,
+     "to_lookahead_gate": null,
+     "p_pick": null,
+     "pre_close_request": true
+    },
+    {
+     "k": 22,
+     "exec_rows": [
+      176,
+      183
+     ],
+     "plan_close_row": 12,
+     "plan_tip_mid_apple_mm": [
+      22.3,
+      3.3,
+      -10.8
+     ],
+     "plan_tip_mid_dist_mm": 25.0,
+     "to_edit_tip_mid_mm": null,
+     "to_edit_tip_mid_vec_mm": null,
+     "to_edit_tcp_mm": null,
+     "executed_source": null,
+     "hold_rows": 0,
+     "grasp_state": null,
+     "transition": null,
+     "attach": null,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": null,
+     "to_worst_pair": null,
+     "to_initial_violation_m": null,
+     "to_lookahead_gate": null,
+     "p_pick": null,
+     "pre_close_request": true
+    },
+    {
+     "k": 23,
+     "exec_rows": [
+      184,
+      191
+     ],
+     "plan_close_row": 0,
+     "plan_tip_mid_apple_mm": [
+      22.0,
+      3.1,
+      -9.5
+     ],
+     "plan_tip_mid_dist_mm": 24.2,
+     "to_edit_tip_mid_mm": null,
+     "to_edit_tip_mid_vec_mm": null,
+     "to_edit_tcp_mm": null,
+     "executed_source": null,
+     "hold_rows": 0,
+     "grasp_state": null,
+     "transition": null,
+     "attach": null,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": null,
+     "to_worst_pair": null,
+     "to_initial_violation_m": null,
+     "to_lookahead_gate": null,
+     "p_pick": null,
+     "pre_close_request": true
+    },
+    {
+     "k": 24,
+     "exec_rows": [
+      192,
+      199
+     ],
+     "plan_close_row": null,
+     "plan_tip_mid_apple_mm": null,
+     "plan_tip_mid_dist_mm": null,
+     "to_edit_tip_mid_mm": null,
+     "to_edit_tip_mid_vec_mm": null,
+     "to_edit_tcp_mm": null,
+     "executed_source": null,
+     "hold_rows": 0,
+     "grasp_state": null,
+     "transition": null,
+     "attach": null,
+     "attach_revoked": null,
+     "rejected": null,
+     "evidence_checks": null,
+     "to_worst_pair": null,
+     "to_initial_violation_m": null,
+     "to_lookahead_gate": null,
+     "p_pick": null,
+     "pre_close_request": false
+    }
+   ]
+  },
+  "G4_apple_after_close_new_baseline": [
+   {
+    "t": 233,
+    "rel_close": 0,
+    "d3_mm": 2.51,
+    "dxy_mm": 2.51,
+    "dz_mm": 0.05,
+    "rot_deg": 3.55,
+    "apple_z_m": 0.8503
+   },
+   {
+    "t": 238,
+    "rel_close": 5,
+    "d3_mm": 2.56,
+    "dxy_mm": 2.54,
+    "dz_mm": -0.32,
+    "rot_deg": 4.05,
+    "apple_z_m": 0.85
+   },
+   {
+    "t": 243,
+    "rel_close": 10,
+    "d3_mm": 4.38,
+    "dxy_mm": 4.38,
+    "dz_mm": 0.14,
+    "rot_deg": 4.2,
+    "apple_z_m": 0.8504
+   },
+   {
+    "t": 244,
+    "rel_close": 11,
+    "d3_mm": 6.47,
+    "dxy_mm": 6.06,
+    "dz_mm": 2.25,
+    "rot_deg": 4.79,
+    "apple_z_m": 0.8525
+   },
+   {
+    "t": 245,
+    "rel_close": 12,
+    "d3_mm": 8.9,
+    "dxy_mm": 8.73,
+    "dz_mm": -1.73,
+    "rot_deg": 3.94,
+    "apple_z_m": 0.8486
+   },
+   {
+    "t": 246,
+    "rel_close": 13,
+    "d3_mm": 12.48,
+    "dxy_mm": 12.48,
+    "dz_mm": -0.35,
+    "rot_deg": 7.0,
+    "apple_z_m": 0.8499
+   },
+   {
+    "t": 247,
+    "rel_close": 14,
+    "d3_mm": 14.14,
+    "dxy_mm": 14.13,
+    "dz_mm": -0.4,
+    "rot_deg": 8.44,
+    "apple_z_m": 0.8499
+   },
+   {
+    "t": 248,
+    "rel_close": 15,
+    "d3_mm": 16.84,
+    "dxy_mm": 16.83,
+    "dz_mm": -0.33,
+    "rot_deg": 13.27,
+    "apple_z_m": 0.85
+   },
+   {
+    "t": 253,
+    "rel_close": 20,
+    "d3_mm": 15.8,
+    "dxy_mm": 15.8,
+    "dz_mm": -0.29,
+    "rot_deg": 16.15,
+    "apple_z_m": 0.85
+   },
+   {
+    "t": 273,
+    "rel_close": 40,
+    "d3_mm": 16.38,
+    "dxy_mm": 16.38,
+    "dz_mm": -0.3,
+    "rot_deg": 16.39,
+    "apple_z_m": 0.85
+   },
+   {
+    "t": 303,
+    "rel_close": 70,
+    "d3_mm": 16.43,
+    "dxy_mm": 16.42,
+    "dz_mm": -0.29,
+    "rot_deg": 16.39,
+    "apple_z_m": 0.85
+   }
+  ],
+  "substitution_extra_open_loop": [
+   {
+    "variant": "refined_all",
+    "T0": 232,
+    "T1": 272,
+    "reference_requests": [],
+    "qpos_mismatch_rows_before_T0": 0,
+    "last_row_both_fingers_on_apple": 245,
+    "end_apple_dz_mm": -0.27
+   },
+   {
+    "variant": "reference_k29_k33",
+    "T0": 232,
+    "T1": 272,
+    "reference_requests": [
+     29,
+     30,
+     31,
+     32,
+     33
+    ],
+    "qpos_mismatch_rows_before_T0": 0,
+    "last_row_both_fingers_on_apple": 271,
+    "end_apple_dz_mm": 237.71
+   },
+   {
+    "variant": "reference_k30_k33",
+    "T0": 240,
+    "T1": 272,
+    "reference_requests": [
+     30,
+     31,
+     32,
+     33
+    ],
+    "qpos_mismatch_rows_before_T0": 0,
+    "last_row_both_fingers_on_apple": 245,
+    "end_apple_dz_mm": -0.05
+   },
+   {
+    "variant": "reference_k31_k33",
+    "T0": 248,
+    "T1": 272,
+    "reference_requests": [
+     31,
+     32,
+     33
+    ],
+    "qpos_mismatch_rows_before_T0": 0,
+    "last_row_both_fingers_on_apple": null,
+    "end_apple_dz_mm": 0.1
+   },
+   {
+    "variant": "reference_k29_only",
+    "T0": 232,
+    "T1": 272,
+    "reference_requests": [
+     29
+    ],
+    "qpos_mismatch_rows_before_T0": 0,
+    "last_row_both_fingers_on_apple": 271,
+    "end_apple_dz_mm": 238.59
+   },
+   {
+    "variant": "reference_k29_k30",
+    "T0": 232,
+    "T1": 272,
+    "reference_requests": [
+     29,
+     30
+    ],
+    "qpos_mismatch_rows_before_T0": 0,
+    "last_row_both_fingers_on_apple": 255,
+    "end_apple_dz_mm": -446.78
+   },
+   {
+    "variant": "blend_k29_w0.25",
+    "T0": 232,
+    "T1": 272,
+    "reference_requests": {
+     "29": 0.25
+    },
+    "qpos_mismatch_rows_before_T0": 0,
+    "last_row_both_fingers_on_apple": 271,
+    "end_apple_dz_mm": 236.75
+   },
+   {
+    "variant": "blend_k29_w0.5",
+    "T0": 232,
+    "T1": 272,
+    "reference_requests": {
+     "29": 0.5
+    },
+    "qpos_mismatch_rows_before_T0": 0,
+    "last_row_both_fingers_on_apple": 245,
+    "end_apple_dz_mm": -0.27
+   },
+   {
+    "variant": "blend_k29_w0.75",
+    "T0": 232,
+    "T1": 272,
+    "reference_requests": {
+     "29": 0.75
+    },
+    "qpos_mismatch_rows_before_T0": 0,
+    "last_row_both_fingers_on_apple": 244,
+    "end_apple_dz_mm": -0.25
+   }
+  ],
+  "G1_full_series": "AG3S/ag3s/docs/figures/ifg-split/ifg-211-grasp-timeseries.json (G1_abs_200_300 and relative window)"
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/ifg-split/ifg-211-grasp-scene.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/ifg-split/ifg-211-grasp-timeseries.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/ifg-split/ifg-211-grasp-table.png",
+   "kind": "table"
+  }
+ ],
+ "verdict": "기준선 일치 (legacy 14/15 · 15/15 · -29.031048280806342 mm). 재생 qpos 불일치 0/600 행 (세 기록). 원인 기준 판정값: a FALSE, b TRUE, c FALSE, d FALSE, e TRUE, f FALSE.",
+ "not_measured": [
+  "cuRobo regression baseline (GPU; task CPU only)",
+  "closed-loop counterfactual (substitution is open-loop, VLA not re-queried)",
+  "which server rule produced the k30-k31 refined rows beyond the recorded worst pair / lookahead gate fields"
+ ]
+}

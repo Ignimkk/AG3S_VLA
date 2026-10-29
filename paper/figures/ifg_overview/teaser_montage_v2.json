@@ -1,0 +1,31 @@
+{
+ "figure": "paper/figures/ifg_overview/teaser_montage_v2.png",
+ "script": "paper/tools/plotting/ifg_teaser_pipeline_compose.py",
+ "layout": "paperbanana figure1 variant A (failure vs success, how strip, measured box)",
+ "scenes": {
+  "vla_pick_fail": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1982_s19822",
+  "vla_place_fail": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1982_s19823",
+  "ag3s_pick_ok": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19822",
+  "ag3s_place_ok": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19823"
+ },
+ "scene_note": "T43 ep1982 overbar paired runs: E0 (VLA only) vs V11AB (earlier AG3S configuration); not configuration B",
+ "measured": {
+  "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/rounds/R9/paired_summary.json",
+  "radius_clustering": {
+   "iou": 0.8365522778501142,
+   "precision": 0.8650935897862577,
+   "recall": 0.9100206011126375,
+   "neighbor_fp": 30.462874212184875,
+   "robot_fp": 9.31391640500772
+  },
+  "ag3s_surface_graph": {
+   "iou": 0.8931617819538672,
+   "precision": 0.9380096672768123,
+   "recall": 0.9147280771708566,
+   "neighbor_fp": 27.58936230742297,
+   "robot_fp": 1.5858130519215456
+  }
+ },
+ "how_episode": "T53_ep1842",
+ "is_measured_result": true
+}

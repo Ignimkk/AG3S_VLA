@@ -1,10 +1,10 @@
 """T43 T 3(c) evidence — for every adoption (decision first/switch) in the recorded runs, the adopted
 geometry's lowest / highest point above the table plane and its extents. Records only."""
-from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import rebase_legacy_paths, workspace_path as _ag3s_workspace_path
 import json, sys, pathlib, collections
 import numpy as np
 S = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T43/S/raw'))
-IX = {**json.load(open(S / "chunk_index_t42.json")), **json.load(open(S / "chunk_index_t40t41.json"))}
+IX = rebase_legacy_paths({**json.load(open(S / "chunk_index_t42.json")), **json.load(open(S / "chunk_index_t40t41.json"))})
 TABLE = 0.8216
 rows = []
 for rd, ix in IX.items():

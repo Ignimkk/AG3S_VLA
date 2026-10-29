@@ -1,0 +1,11 @@
+{
+  "project": "/mnt/dev/AG3S_VLA-development",
+  "storage": "/mnt/dev/AG3S_VLA-storage",
+  "legacy_namespace": "/mnt/dev/AG3S_VLA-storage/legacy-inputs",
+  "input_roots": 35,
+  "linked_artifacts": 8,
+  "interpreter": "/mnt/dev/AG3S_VLA-development/.venv-openpi-live/bin/python",
+  "python": "3.11.16",
+  "old_workspace_symlinks": [],
+  "artifact_sha256_checked": true
+}

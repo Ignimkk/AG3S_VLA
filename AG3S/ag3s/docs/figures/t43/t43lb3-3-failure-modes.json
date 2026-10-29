@@ -1,0 +1,40 @@
+{
+ "groups": [
+  "banana_left",
+  "banana_right",
+  "pear_left"
+ ],
+ "rep1_failure_mode_counts": {
+  "ok": [
+   12,
+   20,
+   8
+  ],
+  "no_grasp": [
+   17,
+   5,
+   17
+  ],
+  "regrasp": [
+   2,
+   2,
+   0
+  ],
+  "slip_at_lift": [
+   8,
+   7,
+   1
+  ],
+  "slip_in_transport": [
+   1,
+   6,
+   3
+  ],
+  "not_placed": [
+   0,
+   0,
+   1
+  ]
+ },
+ "source": "/mnt/dev/work/benchmark/ag3s/docs/handoff/T43LB3.verify.json"
+}

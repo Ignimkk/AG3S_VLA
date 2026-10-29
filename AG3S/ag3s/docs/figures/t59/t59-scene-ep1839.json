@@ -1,0 +1,334 @@
+{
+ "figure": "t59-scene-ep1839.png",
+ "episode": "ep1839",
+ "frames_rule": "pre = lower-median pre frame of the window; held = first and last held frame with U != target (verifier, fixed before rendering)",
+ "frames": [
+  {
+   "frame": 8,
+   "t_step": 64,
+   "phase": "pre",
+   "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8291_20261013T010854/server_constraints/run_0000/chunk_00608.npz",
+   "U_class": "target",
+   "U_chosen_counts": {
+    "target": 94,
+    "other_object": 0,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   },
+   "U_chosen_n": 94,
+   "U_centroid_m": [
+    0.46779006719589233,
+    -0.3312058448791504,
+    0.8621943593025208
+   ],
+   "U_reproduces_stored_T54_row": {
+    "chosen_rank": true,
+    "identity_correct": true,
+    "identity_label": true,
+    "pre_split_digest": true,
+    "post_split_digest": true,
+    "has_target": true,
+    "n_candidates": true,
+    "chosen_n": true
+   },
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.014962980605089908,
+   "S_geometry_frame": 8,
+   "S_manipulated_centroid": [
+    0.4678671756408476,
+    -0.3311844697168942,
+    0.8622138857313714
+   ],
+   "S_manipulated_state": "visible",
+   "S_attached": false,
+   "S_target_points_n": 94,
+   "S_grasp_state": "latched",
+   "S_hsr_label": "pick",
+   "S_exclusion_source": "manipulated",
+   "gt_object_pos_base": {
+    "apple": [
+     0.5550525734768129,
+     -0.30366708934288483,
+     0.8499997103479724
+    ],
+    "banana": [
+     0.5499880870386689,
+     0.3050191622650046,
+     0.8433256236200638
+    ],
+    "orange": [
+     0.4680811321779336,
+     -0.33773512405375594,
+     0.848762717048038
+    ],
+    "pear": [
+     0.4599877360525716,
+     0.33033276314409626,
+     0.8555725924723219
+    ],
+    "crate": [
+     0.5107002920072777,
+     -0.0035992274961989326,
+     0.8799903742299252
+    ]
+   },
+   "slices": {
+    "esdf": {
+     "origin": [
+      0.13163065433502197,
+      -0.6570135104656221,
+      0.7178164672851561
+     ],
+     "voxel": 0.005,
+     "shape": [
+      128,
+      128,
+      128
+     ],
+     "k": 29,
+     "z_m": 0.8628164672851562,
+     "field_at_U_points": {
+      "n_in_grid": 94,
+      "n_points": 94,
+      "min_m": -0.005001068115234375,
+      "median_m": 0.0
+     }
+    },
+    "esdf_free": {
+     "origin": [
+      0.13163065433502197,
+      -0.6570135104656221,
+      0.7178164672851561
+     ],
+     "voxel": 0.005,
+     "shape": [
+      128,
+      128,
+      128
+     ],
+     "k": 29,
+     "z_m": 0.8628164672851562,
+     "field_at_U_points": {
+      "n_in_grid": 94,
+      "n_points": 94,
+      "min_m": 0.005001068115234375,
+      "median_m": 0.0239715576171875
+     }
+    }
+   }
+  },
+  {
+   "frame": 17,
+   "t_step": 136,
+   "phase": "held",
+   "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8291_20261013T010854/server_constraints/run_0000/chunk_00617.npz",
+   "U_class": "other_object",
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 105,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   },
+   "U_chosen_n": 105,
+   "U_centroid_m": [
+    0.5499911308288574,
+    -0.2973538935184479,
+    0.867365300655365
+   ],
+   "U_reproduces_stored_T54_row": {
+    "chosen_rank": true,
+    "identity_correct": true,
+    "identity_label": true,
+    "pre_split_digest": true,
+    "post_split_digest": true,
+    "has_target": true,
+    "n_candidates": true,
+    "chosen_n": true
+   },
+   "S_class": "target",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "orange",
+   "S_nearest_dist_m": 0.016532795811827747,
+   "S_geometry_frame": 16,
+   "S_manipulated_centroid": [
+    0.46880008468972184,
+    -0.3298257928942239,
+    0.862068101501418
+   ],
+   "S_manipulated_state": "occluded",
+   "S_attached": true,
+   "S_target_points_n": 93,
+   "S_grasp_state": "held",
+   "S_hsr_label": "pick",
+   "S_exclusion_source": "attached",
+   "gt_object_pos_base": {
+    "apple": [
+     0.5548552833373824,
+     -0.30361128295673895,
+     0.8500048811913974
+    ],
+    "banana": [
+     0.5499851076311493,
+     0.30499394184984907,
+     0.8433244423647044
+    ],
+    "orange": [
+     0.4846559963886158,
+     -0.3263494809287365,
+     0.8589314381992645
+    ],
+    "pear": [
+     0.4599547688458874,
+     0.3302411681920085,
+     0.8555733683029175
+    ],
+    "crate": [
+     0.5107178380134616,
+     -0.0036162165982651304,
+     0.8799906887617487
+    ]
+   },
+   "slices": {
+    "esdf": {
+     "origin": [
+      0.1427801501750946,
+      -0.6399347829818727,
+      0.5851277661323546
+     ],
+     "voxel": 0.005,
+     "shape": [
+      128,
+      128,
+      128
+     ],
+     "k": 56,
+     "z_m": 0.8651277661323546,
+     "field_at_U_points": {
+      "n_in_grid": 105,
+      "n_points": 105,
+      "min_m": -0.005001068115234375,
+      "median_m": 0.0
+     }
+    },
+    "esdf_free": null
+   }
+  },
+  {
+   "frame": 30,
+   "t_step": 240,
+   "phase": "held",
+   "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8291_20261013T010854/server_constraints/run_0000/chunk_00630.npz",
+   "U_class": "other_object",
+   "U_chosen_counts": {
+    "target": 0,
+    "other_object": 39,
+    "table": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   },
+   "U_chosen_n": 39,
+   "U_centroid_m": [
+    0.5711953043937683,
+    -0.2830982506275177,
+    0.8587391972541809
+   ],
+   "U_reproduces_stored_T54_row": {
+    "chosen_rank": true,
+    "identity_correct": true,
+    "identity_label": true,
+    "pre_split_digest": true,
+    "post_split_digest": true,
+    "has_target": true,
+    "n_candidates": true,
+    "chosen_n": true
+   },
+   "S_class": "other_object",
+   "S_class_at_geometry_frame": "target",
+   "S_nearest_object": "apple",
+   "S_nearest_dist_m": 0.09051978284539317,
+   "S_geometry_frame": 16,
+   "S_manipulated_centroid": [
+    0.46880008468972184,
+    -0.3298257928942239,
+    0.862068101501418
+   ],
+   "S_manipulated_state": "occluded",
+   "S_attached": true,
+   "S_target_points_n": 93,
+   "S_grasp_state": "held",
+   "S_hsr_label": "place",
+   "S_exclusion_source": "attached",
+   "gt_object_pos_base": {
+    "apple": [
+     0.554588979299168,
+     -0.30358663287206267,
+     0.8500014893257534
+    ],
+    "banana": [
+     0.5500025371490934,
+     0.3049442888284649,
+     0.8433328018383238
+    ],
+    "orange": [
+     0.4739847337905385,
+     -0.07329359034842604,
+     0.9590492012334171
+    ],
+    "pear": [
+     0.45995552638730275,
+     0.33023867943333235,
+     0.855571864237555
+    ],
+    "crate": [
+     0.5107280325804102,
+     -0.0035711678205782083,
+     0.879990123717158
+    ]
+   },
+   "slices": {
+    "esdf": {
+     "origin": [
+      0.1288772177696228,
+      -0.4788343507051468,
+      0.6621302914619445
+     ],
+     "voxel": 0.005,
+     "shape": [
+      128,
+      128,
+      128
+     ],
+     "k": 39,
+     "z_m": 0.8571302914619445,
+     "field_at_U_points": {
+      "n_in_grid": 39,
+      "n_points": 39,
+      "min_m": -0.00707244873046875,
+      "median_m": 0.0
+     }
+    },
+    "esdf_free": null
+   }
+  }
+ ],
+ "U_virtual_note": "U's chosen cluster is shown as points / footprint only. No field was built from it (virtual, not constructed).",
+ "render": "MuJoCo replay of recorded qpos (policy_record.pose_scene), MUJOCO_GL=osmesa, 480x640",
+ "U_source": "T54 current-condition L8H2 grounding re-run on CPU (t59_scene_render.py), reproduces stored T54 row (chosen_rank, identity, digests)",
+ "S_source": "T53 server chunk of the same frame: target_points (manipulated points) and summary manipulated.centroid",
+ "star_colour": "class of the manipulated centroid at its geometry frame (S_class_at_geometry_frame)",
+ "xy_panel_centre": "midpoint of GT target and crate at frame 0, +-0.36 m",
+ "esdf": "recorded serving fine tier esdf_distance / esdf_free_distance (float16, metres, origin = centre of voxel 0), xy slice at z = U chosen-cluster centroid z (nearest voxel layer)"
+}

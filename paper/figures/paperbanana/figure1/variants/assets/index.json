@@ -1,0 +1,58 @@
+{
+ "vla_pick_fail": {
+  "asset": "paper/figures/paperbanana/figure1/variants/assets/vla_pick_fail.png",
+  "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1982_s19822",
+  "profile": "t43p2_overbar",
+  "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1982_s19822.json",
+  "control_step": 197,
+  "path_from_step": 90,
+  "gripper_hurdle_distance_m": -7.893622260868836e-05,
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1982_s19822/frames.jsonl": "0fa3b0e2dbecd97bda4ab36ae0e249fc97fa8370d7fd6698a2602bee0b42442c"
+  },
+  "note": "MuJoCo replay of the recorded qpos with the run's hurdle; left tool-centre path by FK.",
+  "script": "paper/tools/plotting/paperbanana_fig1_scenes.py"
+ },
+ "ag3s_pick_ok": {
+  "asset": "paper/figures/paperbanana/figure1/variants/assets/ag3s_pick_ok.png",
+  "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19822",
+  "profile": "t43p2_overbar",
+  "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1982_s19822.json",
+  "control_step": 140,
+  "path_from_step": 60,
+  "gripper_hurdle_distance_m": 0.13955607247984989,
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19822/frames.jsonl": "069043a202bb84931a9c8540fbb3cb2aa460c0b2ccfbb407a174269a13b94c13"
+  },
+  "note": "MuJoCo replay of the recorded qpos with the run's hurdle; left tool-centre path by FK.",
+  "script": "paper/tools/plotting/paperbanana_fig1_scenes.py"
+ },
+ "vla_place_fail": {
+  "asset": "paper/figures/paperbanana/figure1/variants/assets/vla_place_fail.png",
+  "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1982_s19823",
+  "profile": "t43p2_overbar",
+  "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1982_s19822.json",
+  "control_step": 245,
+  "path_from_step": 150,
+  "gripper_hurdle_distance_m": 0.0006357050985374129,
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1982_s19823/frames.jsonl": "a19e510f679e21056caf37a41a933c8e8953c58442fe9c9c3416e01e592d8d07"
+  },
+  "note": "MuJoCo replay of the recorded qpos with the run's hurdle; left tool-centre path by FK.",
+  "script": "paper/tools/plotting/paperbanana_fig1_scenes.py"
+ },
+ "ag3s_place_ok": {
+  "asset": "paper/figures/paperbanana/figure1/variants/assets/ag3s_place_ok.png",
+  "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19823",
+  "profile": "t43p2_overbar",
+  "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1982_s19822.json",
+  "control_step": 212,
+  "path_from_step": 120,
+  "gripper_hurdle_distance_m": 0.14554293492932865,
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19823/frames.jsonl": "959aa2632ccde0d8a02a8c80df2f6afec470acdf963c25ebd55a27521358e2c0"
+  },
+  "note": "MuJoCo replay of the recorded qpos with the run's hurdle; left tool-centre path by FK.",
+  "script": "paper/tools/plotting/paperbanana_fig1_scenes.py"
+ }
+}

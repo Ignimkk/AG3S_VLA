@@ -1,0 +1,947 @@
+{
+ "per_link_open": {
+  "ee_right": {
+   "mjcf_body": "EE_BODY_R",
+   "n_geoms": 25,
+   "n_surface_samples_exposed": 141217,
+   "n_hidden_by_rigid_neighbour": 15691,
+   "spheres_own": {
+    "n": 23,
+    "r_mm_min": 5.704428607174148,
+    "r_mm_max": 6.222712430054244
+   },
+   "own_spheres_vs_mjcf": {
+    "n": 141217,
+    "frac_out": 0.9386122067456467,
+    "frac_out_gt1mm": 0.9036659892222608,
+    "frac_out_gt2p5mm": 0.8481415127073936,
+    "frac_out_gt5mm": 0.7665720132845195,
+    "out_median_mm": 14.761940278034254,
+    "out_p95_mm": 39.64881107263786,
+    "out_max_mm": 54.37295186266215,
+    "all_p95_mm": 39.19047120806415
+   },
+   "hand_union_vs_mjcf": {
+    "n": 141217,
+    "frac_out": 0.9250940042629429,
+    "frac_out_gt1mm": 0.887286941373914,
+    "frac_out_gt2p5mm": 0.8306294567934456,
+    "frac_out_gt5mm": 0.7482031200209607,
+    "out_median_mm": 14.177105993365783,
+    "out_p95_mm": 38.17469375298451,
+    "out_max_mm": 50.60163630402256,
+    "all_p95_mm": 37.92006569634281
+   },
+   "source_capsules": [
+    {
+     "r_mm": 32.984978846961006,
+     "L_mm": 84.0024825288504
+    },
+    {
+     "r_mm": 28.360181749415844,
+     "L_mm": 66.30448596102958
+    },
+    {
+     "r_mm": 32.78882245856654,
+     "L_mm": 82.68407974281162
+    }
+   ],
+   "source_capsules_vs_mjcf": {
+    "n": 141217,
+    "frac_out": 0.20531522408775146,
+    "frac_out_gt1mm": 0.1907843956464165,
+    "frac_out_gt2p5mm": 0.17012824235042523,
+    "frac_out_gt5mm": 0.13811368319678224,
+    "out_median_mm": 7.914765944976053,
+    "out_p95_mm": 20.706302957139453,
+    "out_max_mm": 27.6680696957249,
+    "all_p95_mm": 12.987914046641091
+   },
+   "own_spheres_vs_source_capsule_surface": {
+    "n": 13151,
+    "frac_out": 1.0,
+    "frac_out_gt1mm": 1.0,
+    "frac_out_gt2p5mm": 1.0,
+    "frac_out_gt5mm": 1.0,
+    "out_median_mm": 26.76226641690672,
+    "out_p95_mm": 27.148579282466528,
+    "out_max_mm": 27.30346849690919,
+    "all_p95_mm": 27.148579282466528
+   },
+   "excess": {
+    "union_volume_cm3": 21.146,
+    "union_outside_geom_cm3": 8.22,
+    "frac_union_outside_geom": 0.3887260001891611,
+    "protrusion_max_mm": 8.593986653336026,
+    "geom_hull_volume_cm3_upper": 355.86131120923034
+   }
+  },
+  "ee_finger_r1": {
+   "mjcf_body": "ee_finger_r1",
+   "n_geoms": 5,
+   "n_surface_samples_exposed": 15355,
+   "n_hidden_by_rigid_neighbour": 0,
+   "spheres_own": {
+    "n": 56,
+    "r_mm_min": 2.5364404053166574,
+    "r_mm_max": 8.44165711358702
+   },
+   "own_spheres_vs_mjcf": {
+    "n": 15355,
+    "frac_out": 0.0010420058612829698,
+    "frac_out_gt1mm": 0.0,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.037129935948116644,
+    "out_p95_mm": 0.06992028345923938,
+    "out_max_mm": 0.07473594823145975,
+    "all_p95_mm": -0.44125161880494995
+   },
+   "hand_union_vs_mjcf": {
+    "n": 15355,
+    "frac_out": 0.0010420058612829698,
+    "frac_out_gt1mm": 0.0,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.037129935948116644,
+    "out_p95_mm": 0.06992028345923938,
+    "out_max_mm": 0.07473594823145975,
+    "all_p95_mm": -0.44125161880494995
+   },
+   "source_capsules": [
+    {
+     "r_mm": 14.431327330729328,
+     "L_mm": 32.700360818369106
+    },
+    {
+     "r_mm": 12.965197936954532,
+     "L_mm": 30.007559806108457
+    },
+    {
+     "r_mm": 17.616534916675366,
+     "L_mm": 25.068139657378257
+    }
+   ],
+   "source_capsules_vs_mjcf": {
+    "n": 15355,
+    "frac_out": 0.016541843047867145,
+    "frac_out_gt1mm": 0.0010420058612829698,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.3899689326162057,
+    "out_p95_mm": 1.0182423081852432,
+    "out_max_mm": 1.1098523728936323,
+    "all_p95_mm": -1.3432073261129678
+   },
+   "own_spheres_vs_source_capsule_surface": {
+    "n": 15923,
+    "frac_out": 0.9272122087546316,
+    "frac_out_gt1mm": 0.9024053256295924,
+    "frac_out_gt2p5mm": 0.8575017270614834,
+    "frac_out_gt5mm": 0.6663317214092822,
+    "out_median_mm": 7.5636098617422665,
+    "out_p95_mm": 14.837402526740608,
+    "out_max_mm": 17.28241989473496,
+    "all_p95_mm": 14.648857399693304
+   },
+   "excess": {
+    "union_volume_cm3": 25.944,
+    "union_outside_geom_cm3": 8.533,
+    "frac_union_outside_geom": 0.32890070921985815,
+    "protrusion_max_mm": 2.5484351870305457,
+    "geom_hull_volume_cm3_upper": 17.40565694112012
+   }
+  },
+  "ee_finger_r2": {
+   "mjcf_body": "ee_finger_r2",
+   "n_geoms": 5,
+   "n_surface_samples_exposed": 15349,
+   "n_hidden_by_rigid_neighbour": 0,
+   "spheres_own": {
+    "n": 56,
+    "r_mm_min": 2.5364404053166574,
+    "r_mm_max": 8.44165711358702
+   },
+   "own_spheres_vs_mjcf": {
+    "n": 15349,
+    "frac_out": 0.000651508241579256,
+    "frac_out_gt1mm": 0.0,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.033790775293724304,
+    "out_p95_mm": 0.07885870387520445,
+    "out_max_mm": 0.08947260807950011,
+    "all_p95_mm": -0.45979026007002655
+   },
+   "hand_union_vs_mjcf": {
+    "n": 15349,
+    "frac_out": 0.000651508241579256,
+    "frac_out_gt1mm": 0.0,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.033790775293724304,
+    "out_p95_mm": 0.07885870387520445,
+    "out_max_mm": 0.08947260807950011,
+    "all_p95_mm": -0.45979026007002655
+   },
+   "source_capsules": [
+    {
+     "r_mm": 14.431327330729328,
+     "L_mm": 32.70036081836922
+    },
+    {
+     "r_mm": 12.965197936954532,
+     "L_mm": 30.007559806108425
+    },
+    {
+     "r_mm": 17.616534916675366,
+     "L_mm": 25.068139657378122
+    }
+   ],
+   "source_capsules_vs_mjcf": {
+    "n": 15349,
+    "frac_out": 0.015505896149586293,
+    "frac_out_gt1mm": 0.000651508241579256,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.3789581950337413,
+    "out_p95_mm": 0.9689061501762138,
+    "out_max_mm": 1.0935279483319065,
+    "all_p95_mm": -1.3638218150030297
+   },
+   "own_spheres_vs_source_capsule_surface": {
+    "n": 15979,
+    "frac_out": 0.9274673008323424,
+    "frac_out_gt1mm": 0.9001814882032668,
+    "frac_out_gt2p5mm": 0.8535577946054196,
+    "frac_out_gt5mm": 0.6661868702672258,
+    "out_median_mm": 7.6992924409974615,
+    "out_p95_mm": 14.715934834372414,
+    "out_max_mm": 17.283366190335435,
+    "all_p95_mm": 14.463614903091855
+   },
+   "excess": {
+    "union_volume_cm3": 25.956,
+    "union_outside_geom_cm3": 8.548,
+    "frac_union_outside_geom": 0.32932655262752353,
+    "protrusion_max_mm": 2.5581663253102076,
+    "geom_hull_volume_cm3_upper": 17.405656941120053
+   }
+  },
+  "ee_left": {
+   "mjcf_body": "EE_BODY_L",
+   "n_geoms": 25,
+   "n_surface_samples_exposed": 141009,
+   "n_hidden_by_rigid_neighbour": 15877,
+   "spheres_own": {
+    "n": 23,
+    "r_mm_min": 5.704428607174148,
+    "r_mm_max": 6.222712430054244
+   },
+   "own_spheres_vs_mjcf": {
+    "n": 141009,
+    "frac_out": 0.9384791041706557,
+    "frac_out_gt1mm": 0.9040415859980568,
+    "frac_out_gt2p5mm": 0.8494706011673013,
+    "frac_out_gt5mm": 0.7687239821571673,
+    "out_median_mm": 14.787178434433576,
+    "out_p95_mm": 39.61659551302669,
+    "out_max_mm": 54.32136775951084,
+    "all_p95_mm": 39.1293439100786
+   },
+   "hand_union_vs_mjcf": {
+    "n": 141009,
+    "frac_out": 0.9254090164457588,
+    "frac_out_gt1mm": 0.8880426072094689,
+    "frac_out_gt2p5mm": 0.8325851541390975,
+    "frac_out_gt5mm": 0.7508315072087597,
+    "out_median_mm": 14.183524543459798,
+    "out_p95_mm": 38.15989676350492,
+    "out_max_mm": 50.7206470096162,
+    "all_p95_mm": 37.940482100956565
+   },
+   "source_capsules": [
+    {
+     "r_mm": 32.984978846961006,
+     "L_mm": 84.00248252885055
+    },
+    {
+     "r_mm": 28.360181749415844,
+     "L_mm": 66.30448596102967
+    },
+    {
+     "r_mm": 32.78882245856654,
+     "L_mm": 82.68407974281149
+    }
+   ],
+   "source_capsules_vs_mjcf": {
+    "n": 141009,
+    "frac_out": 0.20514293413895568,
+    "frac_out_gt1mm": 0.19037082739399613,
+    "frac_out_gt2p5mm": 0.16948563566864527,
+    "frac_out_gt5mm": 0.13803374252707273,
+    "out_median_mm": 7.956495637680132,
+    "out_p95_mm": 20.704289753529082,
+    "out_max_mm": 27.66181951498,
+    "all_p95_mm": 12.993164376715402
+   },
+   "own_spheres_vs_source_capsule_surface": {
+    "n": 13131,
+    "frac_out": 1.0,
+    "frac_out_gt1mm": 1.0,
+    "frac_out_gt2p5mm": 1.0,
+    "frac_out_gt5mm": 1.0,
+    "out_median_mm": 26.76226641690671,
+    "out_p95_mm": 27.148757299938755,
+    "out_max_mm": 27.303438980830684,
+    "all_p95_mm": 27.148757299938755
+   },
+   "excess": {
+    "union_volume_cm3": 21.168,
+    "union_outside_geom_cm3": 8.283,
+    "frac_union_outside_geom": 0.3912981859410431,
+    "protrusion_max_mm": 8.659987549164109,
+    "geom_hull_volume_cm3_upper": 355.86131120923096
+   }
+  },
+  "ee_finger_l1": {
+   "mjcf_body": "ee_finger_l2",
+   "n_geoms": 5,
+   "n_surface_samples_exposed": 15357,
+   "n_hidden_by_rigid_neighbour": 0,
+   "spheres_own": {
+    "n": 56,
+    "r_mm_min": 2.5364404053166574,
+    "r_mm_max": 8.44165711358702
+   },
+   "own_spheres_vs_mjcf": {
+    "n": 15357,
+    "frac_out": 0.0008465195025070001,
+    "frac_out_gt1mm": 0.0,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.03910883708245581,
+    "out_p95_mm": 0.09682884486487299,
+    "out_max_mm": 0.11905696177828395,
+    "all_p95_mm": -0.44792186337171075
+   },
+   "hand_union_vs_mjcf": {
+    "n": 15357,
+    "frac_out": 0.0008465195025070001,
+    "frac_out_gt1mm": 0.0,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.03910883708245581,
+    "out_p95_mm": 0.09682884486487299,
+    "out_max_mm": 0.11905696177828395,
+    "all_p95_mm": -0.44792186337171075
+   },
+   "source_capsules": [
+    {
+     "r_mm": 14.431327330729328,
+     "L_mm": 32.70036081836924
+    },
+    {
+     "r_mm": 12.965197936954532,
+     "L_mm": 30.007559806108436
+    },
+    {
+     "r_mm": 17.616534916675366,
+     "L_mm": 25.068139657378037
+    }
+   ],
+   "source_capsules_vs_mjcf": {
+    "n": 15357,
+    "frac_out": 0.01426059777300254,
+    "frac_out_gt1mm": 0.0008465195025070001,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.39113102554616186,
+    "out_p95_mm": 1.017333857903559,
+    "out_max_mm": 1.0942389246619624,
+    "all_p95_mm": -1.384372721883894
+   },
+   "own_spheres_vs_source_capsule_surface": {
+    "n": 15928,
+    "frac_out": 0.9280512305374183,
+    "frac_out_gt1mm": 0.9008036162732296,
+    "frac_out_gt2p5mm": 0.8566675037669513,
+    "frac_out_gt5mm": 0.6632973380210949,
+    "out_median_mm": 7.5422534998399335,
+    "out_p95_mm": 14.629605963047261,
+    "out_max_mm": 17.278787545138584,
+    "all_p95_mm": 14.397171363731784
+   },
+   "excess": {
+    "union_volume_cm3": 25.916,
+    "union_outside_geom_cm3": 8.512,
+    "frac_union_outside_geom": 0.3284457478005865,
+    "protrusion_max_mm": 2.556446779739133,
+    "geom_hull_volume_cm3_upper": 17.405656941120117
+   }
+  },
+  "ee_finger_l2": {
+   "mjcf_body": "ee_finger_l1",
+   "n_geoms": 5,
+   "n_surface_samples_exposed": 15364,
+   "n_hidden_by_rigid_neighbour": 0,
+   "spheres_own": {
+    "n": 56,
+    "r_mm_min": 2.5364404053166574,
+    "r_mm_max": 8.44165711358702
+   },
+   "own_spheres_vs_mjcf": {
+    "n": 15364,
+    "frac_out": 0.0007159593855766728,
+    "frac_out_gt1mm": 0.0,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.04660061176702413,
+    "out_p95_mm": 0.09384500574458834,
+    "out_max_mm": 0.11421791248393022,
+    "all_p95_mm": -0.452755338088935
+   },
+   "hand_union_vs_mjcf": {
+    "n": 15364,
+    "frac_out": 0.0007159593855766728,
+    "frac_out_gt1mm": 0.0,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.04660061176702413,
+    "out_p95_mm": 0.09384500574458834,
+    "out_max_mm": 0.11421791248393022,
+    "all_p95_mm": -0.452755338088935
+   },
+   "source_capsules": [
+    {
+     "r_mm": 14.431327330729328,
+     "L_mm": 32.700360818369184
+    },
+    {
+     "r_mm": 12.965197936954532,
+     "L_mm": 30.007559806108357
+    },
+    {
+     "r_mm": 17.616534916675366,
+     "L_mm": 25.068139657378087
+    }
+   ],
+   "source_capsules_vs_mjcf": {
+    "n": 15364,
+    "frac_out": 0.014709711012757094,
+    "frac_out_gt1mm": 0.001041395469929706,
+    "frac_out_gt2p5mm": 0.0,
+    "frac_out_gt5mm": 0.0,
+    "out_median_mm": 0.3817354081433596,
+    "out_p95_mm": 1.038779195870252,
+    "out_max_mm": 1.1106894487473429,
+    "all_p95_mm": -1.410532852371136
+   },
+   "own_spheres_vs_source_capsule_surface": {
+    "n": 16017,
+    "frac_out": 0.928763189111569,
+    "frac_out_gt1mm": 0.9031653867765499,
+    "frac_out_gt2p5mm": 0.8587126178435412,
+    "frac_out_gt5mm": 0.6668539676593619,
+    "out_median_mm": 7.648756423942999,
+    "out_p95_mm": 14.62467476185095,
+    "out_max_mm": 17.277751733377972,
+    "all_p95_mm": 14.443149371424159
+   },
+   "excess": {
+    "union_volume_cm3": 25.961000000000002,
+    "union_outside_geom_cm3": 8.583,
+    "frac_union_outside_geom": 0.3306113015677362,
+    "protrusion_max_mm": 2.5893420250123818,
+    "geom_hull_volume_cm3_upper": 17.405656941120053
+   }
+  }
+ },
+ "candidates": {
+  "server": {
+   "n_spheres_total": 270,
+   "per_link_n": {
+    "ee_finger_l1": 56,
+    "ee_finger_l2": 56,
+    "ee_finger_r1": 56,
+    "ee_finger_r2": 56,
+    "ee_left": 23,
+    "ee_right": 23
+   },
+   "palm_body_report": null,
+   "ee_right_open": {
+    "spheres_own": {
+     "n": 23,
+     "r_mm_min": 5.704428607174148,
+     "r_mm_max": 6.222712430054244
+    },
+    "own_spheres_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.9386122067456467,
+     "frac_out_gt1mm": 0.9036659892222608,
+     "frac_out_gt2p5mm": 0.8481415127073936,
+     "frac_out_gt5mm": 0.7665720132845195,
+     "out_median_mm": 14.761940278034254,
+     "out_p95_mm": 39.64881107263786,
+     "out_max_mm": 54.37295186266215,
+     "all_p95_mm": 39.19047120806415
+    },
+    "hand_union_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.9250940042629429,
+     "frac_out_gt1mm": 0.887286941373914,
+     "frac_out_gt2p5mm": 0.8306294567934456,
+     "frac_out_gt5mm": 0.7482031200209607,
+     "out_median_mm": 14.177105993365783,
+     "out_p95_mm": 38.17469375298451,
+     "out_max_mm": 50.60163630402256,
+     "all_p95_mm": 37.92006569634281
+    },
+    "excess": {
+     "union_volume_cm3": 21.146,
+     "union_outside_geom_cm3": 8.22,
+     "frac_union_outside_geom": 0.3887260001891611,
+     "protrusion_max_mm": 8.593986653336026,
+     "geom_hull_volume_cm3_upper": 355.86131120923034
+    },
+    "channel": {
+     "finger_inner_half_gap_mm": 49.658999717772204,
+     "palm_mesh_tipmost_in_channel_mm": 73.69039997175395,
+     "palm_spheres_tipmost_in_channel_mm": 69.31111913279375,
+     "fingertip_tipmost_mm": 133.84100220175557,
+     "palm_spheres_lateral_reach_mm": 65.57267286469354,
+     "palm_mesh_lateral_reach_mm": 63.69300205177138
+    }
+   },
+   "ee_right_half": {
+    "spheres_own": {
+     "n": 23,
+     "r_mm_min": 5.704428607174148,
+     "r_mm_max": 6.222712430054244
+    },
+    "own_spheres_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.9386122067456467,
+     "frac_out_gt1mm": 0.9036659892222608,
+     "frac_out_gt2p5mm": 0.8481415127073936,
+     "frac_out_gt5mm": 0.7665720132845195,
+     "out_median_mm": 14.761940278034254,
+     "out_p95_mm": 39.64881107263786,
+     "out_max_mm": 54.37295186266215,
+     "all_p95_mm": 39.19047120806415
+    },
+    "hand_union_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.9275582968056254,
+     "frac_out_gt1mm": 0.8889935347727257,
+     "frac_out_gt2p5mm": 0.8221460589022568,
+     "frac_out_gt5mm": 0.7238080401084855,
+     "out_median_mm": 12.562161496961405,
+     "out_p95_mm": 29.516265305934603,
+     "out_max_mm": 37.05122826354538,
+     "all_p95_mm": 29.20843289608334
+    },
+    "excess": {
+     "union_volume_cm3": 21.146,
+     "union_outside_geom_cm3": 8.22,
+     "frac_union_outside_geom": 0.3887260001891611,
+     "protrusion_max_mm": 8.593986653336026,
+     "geom_hull_volume_cm3_upper": 355.86131120923034
+    },
+    "channel": {
+     "finger_inner_half_gap_mm": 24.658999717737736,
+     "palm_mesh_tipmost_in_channel_mm": 73.69039993797722,
+     "palm_spheres_tipmost_in_channel_mm": 14.528659371792765,
+     "fingertip_tipmost_mm": 133.84100220163646,
+     "palm_spheres_lateral_reach_mm": 65.57267286469057,
+     "palm_mesh_lateral_reach_mm": 63.693002051771394
+    }
+   }
+  },
+  "palm_scale1": {
+   "n_spheres_total": 270,
+   "per_link_n": {
+    "ee_finger_l1": 56,
+    "ee_finger_l2": 56,
+    "ee_finger_r1": 56,
+    "ee_finger_r2": 56,
+    "ee_left": 23,
+    "ee_right": 23
+   },
+   "palm_body_report": null,
+   "ee_right_open": {
+    "spheres_own": {
+     "n": 23,
+     "r_mm_min": 28.893419057323356,
+     "r_mm_max": 33.52627264471523
+    },
+    "own_spheres_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.20026625689541627,
+     "frac_out_gt1mm": 0.18607533087376166,
+     "frac_out_gt2p5mm": 0.16565994179171062,
+     "frac_out_gt5mm": 0.13322758591387723,
+     "out_median_mm": 7.713762231853487,
+     "out_p95_mm": 20.325333080538904,
+     "out_max_mm": 27.13340273934235,
+     "all_p95_mm": 12.597370144752574
+    },
+    "hand_union_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.20026625689541627,
+     "frac_out_gt1mm": 0.18607533087376166,
+     "frac_out_gt2p5mm": 0.16565994179171062,
+     "frac_out_gt5mm": 0.13322758591387723,
+     "out_median_mm": 7.713762231853487,
+     "out_p95_mm": 20.325333080538904,
+     "out_max_mm": 27.13340273934235,
+     "all_p95_mm": 12.597370144752574
+    },
+    "excess": {
+     "union_volume_cm3": 1018.635,
+     "union_outside_geom_cm3": 743.392,
+     "frac_union_outside_geom": 0.7297923201146632,
+     "protrusion_max_mm": 35.36716223634099,
+     "geom_hull_volume_cm3_upper": 355.86131120923034
+    },
+    "channel": {
+     "finger_inner_half_gap_mm": 49.658999717772204,
+     "palm_mesh_tipmost_in_channel_mm": 73.69039997175395,
+     "palm_spheres_tipmost_in_channel_mm": 107.425550421692,
+     "fingertip_tipmost_mm": 133.84100220175557,
+     "palm_spheres_lateral_reach_mm": 92.87623307935452,
+     "palm_mesh_lateral_reach_mm": 63.69300205177138
+    }
+   },
+   "ee_right_half": {
+    "spheres_own": {
+     "n": 23,
+     "r_mm_min": 28.893419057323356,
+     "r_mm_max": 33.52627264471523
+    },
+    "own_spheres_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.20026625689541627,
+     "frac_out_gt1mm": 0.18607533087376166,
+     "frac_out_gt2p5mm": 0.16565994179171062,
+     "frac_out_gt5mm": 0.13322758591387723,
+     "out_median_mm": 7.713762231853487,
+     "out_p95_mm": 20.325333080538904,
+     "out_max_mm": 27.13340273934235,
+     "all_p95_mm": 12.597370144752574
+    },
+    "hand_union_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.1995227203523655,
+     "frac_out_gt1mm": 0.18500605451185057,
+     "frac_out_gt2p5mm": 0.16438530771790932,
+     "frac_out_gt5mm": 0.1315705616179355,
+     "out_median_mm": 7.575950735837282,
+     "out_p95_mm": 19.862675514321243,
+     "out_max_mm": 26.159923819151643,
+     "all_p95_mm": 12.30908727138129
+    },
+    "excess": {
+     "union_volume_cm3": 1018.635,
+     "union_outside_geom_cm3": 743.392,
+     "frac_union_outside_geom": 0.7297923201146632,
+     "protrusion_max_mm": 35.36716223634099,
+     "geom_hull_volume_cm3_upper": 355.86131120923034
+    },
+    "channel": {
+     "finger_inner_half_gap_mm": 24.658999717737736,
+     "palm_mesh_tipmost_in_channel_mm": 73.69039993797722,
+     "palm_spheres_tipmost_in_channel_mm": 96.49826954766819,
+     "fingertip_tipmost_mm": 133.84100220163646,
+     "palm_spheres_lateral_reach_mm": 92.87623307935155,
+     "palm_mesh_lateral_reach_mm": 63.693002051771394
+    }
+   }
+  },
+  "palm_body_o2.5": {
+   "n_spheres_total": 1114,
+   "per_link_n": {
+    "ee_finger_l1": 56,
+    "ee_finger_l2": 56,
+    "ee_finger_r1": 56,
+    "ee_finger_r2": 56,
+    "ee_left": 445,
+    "ee_right": 445
+   },
+   "palm_body_report": {
+    "ee_right": {
+     "n": 445,
+     "r_mm": [
+      2.507033941957217,
+      26.4253663191991
+     ],
+     "build_s": 63.77346110343933,
+     "n_spheres": 445,
+     "overflow_mm": 2.5,
+     "n_targets": 35287,
+     "n_uncovered": 0,
+     "max_gap_mm": 0.0,
+     "overflow_sampled_mm": 2.7331386783034675
+    },
+    "ee_left": {
+     "n": 445,
+     "r_mm": [
+      2.507033941957217,
+      26.4253663191991
+     ],
+     "build_s": 2.9325485229492188e-05,
+     "n_spheres": 445,
+     "overflow_mm": 2.5,
+     "n_targets": 35287,
+     "n_uncovered": 0,
+     "max_gap_mm": 0.0,
+     "overflow_sampled_mm": 2.7331386783034675
+    }
+   },
+   "ee_right_open": {
+    "spheres_own": {
+     "n": 445,
+     "r_mm_min": 2.507033941957217,
+     "r_mm_max": 26.4253663191991
+    },
+    "own_spheres_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.0009134877528909409,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.0376741344949548,
+     "out_p95_mm": 0.17356418359484102,
+     "out_max_mm": 0.32728740289148484,
+     "all_p95_mm": -0.5356815669857568
+    },
+    "hand_union_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.0008993251520709264,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.037918202194241454,
+     "out_p95_mm": 0.174469056233643,
+     "out_max_mm": 0.32728740289148484,
+     "all_p95_mm": -0.5409500622011268
+    },
+    "excess": {
+     "union_volume_cm3": 401.958,
+     "union_outside_geom_cm3": 46.243,
+     "frac_union_outside_geom": 0.11504435786823498,
+     "protrusion_max_mm": 2.600351898845213,
+     "geom_hull_volume_cm3_upper": 355.86131120923034
+    },
+    "channel": {
+     "finger_inner_half_gap_mm": 49.658999717772204,
+     "palm_mesh_tipmost_in_channel_mm": 73.69039997175395,
+     "palm_spheres_tipmost_in_channel_mm": 76.26365452844622,
+     "fingertip_tipmost_mm": 133.84100220175557,
+     "palm_spheres_lateral_reach_mm": 66.2130877222911,
+     "palm_mesh_lateral_reach_mm": 63.69300205177138
+    }
+   },
+   "ee_right_half": {
+    "spheres_own": {
+     "n": 445,
+     "r_mm_min": 2.507033941957217,
+     "r_mm_max": 26.4253663191991
+    },
+    "own_spheres_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.0009134877528909409,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.0376741344949548,
+     "out_p95_mm": 0.17356418359484102,
+     "out_max_mm": 0.32728740289148484,
+     "all_p95_mm": -0.5356815669857568
+    },
+    "hand_union_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.0009064064524809336,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.037796168344598126,
+     "out_p95_mm": 0.17401661991424203,
+     "out_max_mm": 0.32728740289148484,
+     "all_p95_mm": -0.53819034424843
+    },
+    "excess": {
+     "union_volume_cm3": 401.958,
+     "union_outside_geom_cm3": 46.243,
+     "frac_union_outside_geom": 0.11504435786823498,
+     "protrusion_max_mm": 2.600351898845213,
+     "geom_hull_volume_cm3_upper": 355.86131120923034
+    },
+    "channel": {
+     "finger_inner_half_gap_mm": 24.658999717737736,
+     "palm_mesh_tipmost_in_channel_mm": 73.69039993797722,
+     "palm_spheres_tipmost_in_channel_mm": 76.26352149705313,
+     "fingertip_tipmost_mm": 133.84100220163646,
+     "palm_spheres_lateral_reach_mm": 66.21308772228409,
+     "palm_mesh_lateral_reach_mm": 63.693002051771394
+    }
+   }
+  },
+  "palm_body_o5": {
+   "n_spheres_total": 466,
+   "per_link_n": {
+    "ee_finger_l1": 56,
+    "ee_finger_l2": 56,
+    "ee_finger_r1": 56,
+    "ee_finger_r2": 56,
+    "ee_left": 121,
+    "ee_right": 121
+   },
+   "palm_body_report": {
+    "ee_right": {
+     "n": 121,
+     "r_mm": [
+      5.000448389365512,
+      28.965807088528997
+     ],
+     "build_s": 24.31385374069214,
+     "n_spheres": 121,
+     "overflow_mm": 5.0,
+     "n_targets": 35287,
+     "n_uncovered": 0,
+     "max_gap_mm": 0.0,
+     "overflow_sampled_mm": 5.118223476175807
+    },
+    "ee_left": {
+     "n": 121,
+     "r_mm": [
+      5.000448389365512,
+      28.965807088528997
+     ],
+     "build_s": 4.124641418457031e-05,
+     "n_spheres": 121,
+     "overflow_mm": 5.0,
+     "n_targets": 35287,
+     "n_uncovered": 0,
+     "max_gap_mm": 0.0,
+     "overflow_sampled_mm": 5.118223476175807
+    }
+   },
+   "ee_right_open": {
+    "spheres_own": {
+     "n": 121,
+     "r_mm_min": 5.000448389365512,
+     "r_mm_max": 28.965807088528997
+    },
+    "own_spheres_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.00036822762132037926,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.04049940847328237,
+     "out_p95_mm": 0.15811027544659156,
+     "out_max_mm": 0.16732768799804926,
+     "all_p95_mm": -1.1479441627114875
+    },
+    "hand_union_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.00036114632091037197,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.042725901126850624,
+     "out_p95_mm": 0.15842755579687817,
+     "out_max_mm": 0.16732768799804926,
+     "all_p95_mm": -1.1563061482400647
+    },
+    "excess": {
+     "union_volume_cm3": 451.486,
+     "union_outside_geom_cm3": 95.794,
+     "frac_union_outside_geom": 0.21217490686311424,
+     "protrusion_max_mm": 5.043331603319827,
+     "geom_hull_volume_cm3_upper": 355.86131120923034
+    },
+    "channel": {
+     "finger_inner_half_gap_mm": 49.658999717772204,
+     "palm_mesh_tipmost_in_channel_mm": 73.69039997175395,
+     "palm_spheres_tipmost_in_channel_mm": 78.76351664536877,
+     "fingertip_tipmost_mm": 133.84100220175557,
+     "palm_spheres_lateral_reach_mm": 67.84635197431493,
+     "palm_mesh_lateral_reach_mm": 63.69300205177138
+    }
+   },
+   "ee_right_half": {
+    "spheres_own": {
+     "n": 121,
+     "r_mm_min": 5.000448389365512,
+     "r_mm_max": 28.965807088528997
+    },
+    "own_spheres_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.00036822762132037926,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.04049940847328237,
+     "out_p95_mm": 0.15811027544659156,
+     "out_max_mm": 0.16732768799804926,
+     "all_p95_mm": -1.1479441627114875
+    },
+    "hand_union_vs_mjcf": {
+     "n": 141217,
+     "frac_out": 0.0003540650205003647,
+     "frac_out_gt1mm": 0.0,
+     "frac_out_gt2p5mm": 0.0,
+     "frac_out_gt5mm": 0.0,
+     "out_median_mm": 0.038204256275767984,
+     "out_p95_mm": 0.15874483614716478,
+     "out_max_mm": 0.16732768799804926,
+     "all_p95_mm": -1.1772314191283015
+    },
+    "excess": {
+     "union_volume_cm3": 451.486,
+     "union_outside_geom_cm3": 95.794,
+     "frac_union_outside_geom": 0.21217490686311424,
+     "protrusion_max_mm": 5.043331603319827,
+     "geom_hull_volume_cm3_upper": 355.86131120923034
+    },
+    "channel": {
+     "finger_inner_half_gap_mm": 24.658999717737736,
+     "palm_mesh_tipmost_in_channel_mm": 73.69039993797722,
+     "palm_spheres_tipmost_in_channel_mm": 78.76351408980075,
+     "fingertip_tipmost_mm": 133.84100220163646,
+     "palm_spheres_lateral_reach_mm": 67.84635197431696,
+     "palm_mesh_lateral_reach_mm": 63.693002051771394
+    }
+   }
+  }
+ },
+ "history": [
+  [
+   "T6f",
+   "capsule_radius_scale \uc190\uc7a1\uc774 \ub3c4\uc785 (\uae30\ubcf8 1.0, \ube44\ud2b8 \ub3d9\uc77c)",
+   "AG3S_T0T6_LOG.md:2825-2830"
+  ],
+  [
+   "T28 (2026-09-28)",
+   "\uc0ac\uc6a9\uc790 Q5 '\uad6c\uac00 \ub108\ubb34 \ucee4\uc11c\uc778\uac00 \u2014 \ucd5c\ub300\ud55c \uc791\uac8c'; live 0.2 (\uc190\uac00\ub77d 4.7 \u00b7 \uc190\ubc14\ub2e5 8.9 mm) \u2192 0.05",
+   "T28.task.md:15,63,90"
+  ],
+  [
+   "T28 P1-3a",
+   "1.0: \uc67c\uc190 \uc190\uac00\ub77d \uad6c \uc0ac\uc774 \u221228.5 mm (\uacb9\uce68) \u00b7 palm \uc815\uc810 100 % \uc548 / 0.05: +2.35 mm \u00b7 palm \uc815\uc810 10.6 % \uc548",
+   "T28.verify.partial.json P1-3a"
+  ],
+  [
+   "T8e",
+   "\uc190\ubc14\ub2e5\uc744 \uc81c\uc57d\uc5d0 \ub123\uc73c\uba74 (ee_left, crate) 18 \ud589 \u22126.07 mm \uac00 \ub0a8\uc74c (palm r_crit 29.76 mm)",
+   "T8e.verify.json:12323"
+  ],
+  [
+   "T43 R / FC",
+   "\uc190\uac00\ub77d\ub9cc FC \ub85c \uad50\uccb4 (\uad6c 122\u2192270, TO CPU \uc911\uc559 \u00d71.4\u20131.7); \uc190\ubc14\ub2e5\uc740 0.05 \ucd95\uc120 \uc0ac\uc2ac \uadf8\ub300\ub85c. --gripper-cover \ub294 \uc190\ubc14\ub2e5 567 \uad6c",
+   "AG3S_T0T6_LOG.md:5907-5921 \u00b7 T43R.impl.md:53-56"
+  ]
+ ]
+}

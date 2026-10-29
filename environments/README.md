@@ -17,7 +17,7 @@ Model weights and additional upstream assets are not downloaded as part of repos
 Shared inputs default to the sibling `AG3S_VLA-storage` directory via `AG3S_STORAGE_ROOT`.
 `AG3S_LEGACY_STORAGE` is a derived compatibility alias to its `legacy-inputs` namespace;
 it no longer selects an old source checkout. New caches, LIBERO configuration and outputs
-default to the current checkout. See `doc/SHARED_STORAGE_AND_PYTHON.md` for interpreter selection. Historical evidence paths
+default to the current checkout. See `doc/active/SHARED_STORAGE_AND_PYTHON.md` for interpreter selection. Historical evidence paths
 inside archived documentation and verification JSON were preserved, not falsified as new runs.
 
 CPU bootstrap: `bash scripts/setup/create_cpu_env.sh` installs Python 3.11.16 and
@@ -41,5 +41,15 @@ pass `.venv-curobo` for a separate producer. Both use own-root Python 3.11.16 an
 copied wheel installations without system-site-packages. Historical inventory constraints
 and validated transitive constraints are committed separately. The one documented
 metadata exception is gym-aloha's MuJoCo <3 requirement; live MuJoCo is 3.11.0.
-See `doc/migration/LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md` for checks and limits.
+See `doc/active/migration/LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md` for checks and limits.
 The development checkout's environment was not modified.
+
+## Files from the development checkout (2026-10-29 main merge)
+
+The AG3S final-configuration merge brought the development checkout's own environment files:
+`environments/curobo/requirements-live.txt`, `environments/curobo/resolved.txt`,
+`environments/openpi-live/constraints.txt` and `scripts/setup/create_gpu_env.sh`. They describe the development
+venvs and are kept for reference only. This checkout's verified venvs stay on the files above
+(`environments/openpi-live/requirements.txt`, `inventory-constraints.txt`, `validated-constraints.txt`,
+`environments/curobo/live-requirements.txt`, `validated-constraints.txt`, `environments/libero*/`, created by
+`scripts/setup/create_live_env.sh`).

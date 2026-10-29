@@ -1,0 +1,633 @@
+{
+ "mujoco": {
+  "off": {
+   "runs": {
+    "121": {
+     "n_candidates": 38,
+     "arm_pen_any": 6,
+     "arm_pen_any_5mm": 5,
+     "hand_pen_any": 5,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 27.0,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 46.1,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_post_0"
+       },
+       "hand": {
+        "dist_mm": 14.4,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 18.4,
+        "link": "ee_finger_l2",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 14,
+     "seconds": 5.3
+    },
+    "122": {
+     "n_candidates": 10,
+     "arm_pen_any": 0,
+     "arm_pen_any_5mm": 0,
+     "hand_pen_any": 0,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 30.5,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 41.4,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_post_0"
+       },
+       "hand": {
+        "dist_mm": 14.8,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 22.9,
+        "link": "ee_finger_l2",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 14,
+     "seconds": 4.0
+    },
+    "123": {
+     "n_candidates": 27,
+     "arm_pen_any": 5,
+     "arm_pen_any_5mm": 4,
+     "hand_pen_any": 6,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 29.7,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 41.6,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_post_0"
+       },
+       "hand": {
+        "dist_mm": 13.2,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 11.2,
+        "link": "ee_finger_l2",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 14,
+     "seconds": 3.9
+    },
+    "321": {
+     "n_candidates": 50,
+     "arm_pen_any": 0,
+     "arm_pen_any_5mm": 0,
+     "hand_pen_any": 2,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 50.0,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 29.7,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 35.4,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 16,
+     "seconds": 4.2
+    },
+    "322": {
+     "n_candidates": 54,
+     "arm_pen_any": 1,
+     "arm_pen_any_5mm": 1,
+     "hand_pen_any": 2,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 50.0,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 44.5,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_overbar_0"
+       },
+       "hand": {
+        "dist_mm": 22.5,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 22.1,
+        "link": "ee_finger_l2",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 16,
+     "seconds": 4.0
+    },
+    "323": {
+     "n_candidates": 32,
+     "arm_pen_any": 1,
+     "arm_pen_any_5mm": 1,
+     "hand_pen_any": 1,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 50.0,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 19.4,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_overbar_0"
+       },
+       "hand": {
+        "dist_mm": 22.4,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_overbar_0"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 46.7,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_overbar_0"
+       },
+       "hand": {
+        "dist_mm": 12.7,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_overbar_0"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 16,
+     "seconds": 4.0
+    }
+   },
+   "total": {
+    "n_candidates": 211,
+    "arm_pen_any": 13,
+    "arm_pen_any_5mm": 11,
+    "hand_pen_any": 16,
+    "executed_arm_pen_rows": 0,
+    "decision_selected_arm_pen_runs": 0,
+    "arm_pen_any_frac": 0.0616,
+    "instrument_ok": true,
+    "verdict_real_problem": true
+   }
+  },
+  "on": {
+   "runs": {
+    "121": {
+     "n_candidates": 31,
+     "arm_pen_any": 0,
+     "arm_pen_any_5mm": 0,
+     "hand_pen_any": 0,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 27.0,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 46.1,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_post_0"
+       },
+       "hand": {
+        "dist_mm": 14.4,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 18.4,
+        "link": "ee_finger_l2",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 14,
+     "seconds": 7.8
+    },
+    "122": {
+     "n_candidates": 10,
+     "arm_pen_any": 0,
+     "arm_pen_any_5mm": 0,
+     "hand_pen_any": 0,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 30.5,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 41.4,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_post_0"
+       },
+       "hand": {
+        "dist_mm": 14.8,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 22.9,
+        "link": "ee_finger_l2",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 14,
+     "seconds": 3.2
+    },
+    "123": {
+     "n_candidates": 25,
+     "arm_pen_any": 0,
+     "arm_pen_any_5mm": 0,
+     "hand_pen_any": 0,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 29.7,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 41.6,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_post_0"
+       },
+       "hand": {
+        "dist_mm": 13.2,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 11.2,
+        "link": "ee_finger_l2",
+        "obstacle": "pick_obstacle_post_0"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 14,
+     "seconds": 4.1
+    },
+    "321": {
+     "n_candidates": 52,
+     "arm_pen_any": 0,
+     "arm_pen_any_5mm": 0,
+     "hand_pen_any": 0,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 50.0,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 29.7,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 35.4,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 16,
+     "seconds": 4.2
+    },
+    "322": {
+     "n_candidates": 56,
+     "arm_pen_any": 0,
+     "arm_pen_any_5mm": 0,
+     "hand_pen_any": 0,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 50.0,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 44.5,
+        "link": "FT_SENSOR_L",
+        "obstacle": "pick_obstacle_overbar_0"
+       },
+       "hand": {
+        "dist_mm": 22.5,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 22.1,
+        "link": "ee_finger_l2",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 16,
+     "seconds": 4.2
+    },
+    "323": {
+     "n_candidates": 37,
+     "arm_pen_any": 0,
+     "arm_pen_any_5mm": 0,
+     "hand_pen_any": 0,
+     "executed_arm_pen_rows": 0,
+     "executed_arm_min_mm": 50.0,
+     "vla_close_arm_min_mm": null,
+     "decision_selected": {
+      "grasp": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 22.7,
+        "link": "EE_BODY_L",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      },
+      "pre": {
+       "arm": {
+        "dist_mm": 50.0,
+        "link": null,
+        "obstacle": null
+       },
+       "hand": {
+        "dist_mm": 24.2,
+        "link": "ee_finger_l2",
+        "obstacle": "pick_obstacle_overbar_0_leg_left"
+       }
+      }
+     },
+     "decision_vla_close": null,
+     "n_arm_geoms": 244,
+     "n_obstacle_geoms": 16,
+     "seconds": 4.2
+    }
+   },
+   "total": {
+    "n_candidates": 211,
+    "arm_pen_any": 0,
+    "arm_pen_any_5mm": 0,
+    "hand_pen_any": 0,
+    "executed_arm_pen_rows": 0,
+    "decision_selected_arm_pen_runs": 0,
+    "arm_pen_any_frac": 0.0,
+    "instrument_ok": true,
+    "verdict_real_problem": false
+   }
+  }
+ },
+ "summary_vla": {
+  "off": {
+   "decision_gt_valid_runs": 3,
+   "decision_with_grasp_runs": 6,
+   "n_runs": 6,
+   "pre_grasp_requests": 375,
+   "requests_with_grasp": 359,
+   "requests_grasp_gt_valid": 239,
+   "requests_without_grasp": 16,
+   "no_grasp_reasons": {
+    "no candidate: candidates not computed": 1,
+    "grasp lost while closing (no candidate)": 2,
+    "no candidate: no IK solution": 12,
+    "no candidate: no antipodal pair": 1
+   },
+   "gt_fail_counts": {
+    "contact": 16,
+    "antipodal": 76,
+    "free": 78
+   },
+   "full_generation_ms": {
+    "n": 113,
+    "median": 176.1,
+    "p95": 283.2,
+    "max": 346.3
+   },
+   "recheck_ms": {
+    "n": 261,
+    "median": 6.0,
+    "p95": 8.5
+   },
+   "switches": 7,
+   "invalidations": 12,
+   "decision_vla_pos_err_mm": [
+    25.5,
+    25.3,
+    6.7,
+    111.9,
+    108.3,
+    48.9
+   ],
+   "decision_vla_rot_err_deg": [
+    9.4,
+    26.4,
+    5.6,
+    19.5,
+    15.4,
+    33.4
+   ]
+  },
+  "on": {
+   "decision_gt_valid_runs": 2,
+   "decision_with_grasp_runs": 6,
+   "n_runs": 6,
+   "pre_grasp_requests": 375,
+   "requests_with_grasp": 360,
+   "requests_grasp_gt_valid": 224,
+   "requests_without_grasp": 15,
+   "no_grasp_reasons": {
+    "no candidate: candidates not computed": 1,
+    "grasp lost while closing (no candidate)": 2,
+    "no candidate: no IK solution": 11,
+    "no candidate: no antipodal pair": 1
+   },
+   "gt_fail_counts": {
+    "contact": 16,
+    "antipodal": 98,
+    "free": 63
+   },
+   "full_generation_ms": {
+    "n": 112,
+    "median": 326.8,
+    "p95": 449.9,
+    "max": 631.3
+   },
+   "recheck_ms": {
+    "n": 262,
+    "median": 91.7,
+    "p95": 101.2
+   },
+   "switches": 5,
+   "invalidations": 9,
+   "decision_vla_pos_err_mm": [
+    25.5,
+    25.3,
+    6.7,
+    111.9,
+    108.3,
+    87.6
+   ],
+   "decision_vla_rot_err_deg": [
+    9.4,
+    26.4,
+    5.6,
+    19.5,
+    15.4,
+    20.2
+   ]
+  }
+ },
+ "full_generation_ms": {
+  "off": {
+   "n": 110,
+   "median": 177.2,
+   "p95": 283.2,
+   "max": 346.3
+  },
+  "on": {
+   "n": 109,
+   "median": 328.1,
+   "p95": 450.1,
+   "max": 631.3
+  }
+ },
+ "component_median_ms": {
+  "off": {
+   "pairs_ms": 7.5,
+   "checks_ms": 102.7,
+   "ik_ms": 69.1,
+   "compute_ms": 176.0,
+   "n_scene_points_near": 2612.5
+  },
+  "on": {
+   "pairs_ms": 41.2,
+   "checks_ms": 144.1,
+   "ik_ms": 95.5,
+   "compute_ms": 278.7,
+   "n_scene_points_near": 5412.0,
+   "n_scene_points_arm_median": 60000.0
+  }
+ }
+}

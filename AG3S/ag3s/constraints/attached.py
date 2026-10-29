@@ -85,6 +85,26 @@ def parent_reach(robot_model: RobotCollisionModel, robot_state: np.ndarray, pare
     return float(np.linalg.norm(c - T[:3, 3]))
 
 
+# T46g — begin
+def carried_point(robot_model: RobotCollisionModel, q_from: np.ndarray, q_to: np.ndarray,
+                  link: str, point) -> np.ndarray:
+    """`point` (base, at state `q_from`) carried rigidly with `link` to state `q_to` (SL5b):
+
+        p_to = T_base_link(q_to) · T_base_link(q_from)⁻¹ · p_from
+
+    The held object is assumed fixed in `link` between the two states — the same assumption the
+    attach snapshot makes from attach on (T32 H2 rides the hold link). Finger joints that are model
+    parameters (T29) take the model's **current** values in both poses, so pass a link they do not
+    move (the palm) when the opening changed in between.
+    """
+    T_from = _link_pose_numeric(robot_model, q_from, link)
+    T_to = _link_pose_numeric(robot_model, q_to, link)
+    p = np.asarray(point, np.float64).reshape(3)
+    local = T_from[:3, :3].T @ (p - T_from[:3, 3])
+    return T_to[:3, :3] @ local + T_to[:3, 3]
+# T46g — end
+
+
 def attached_reach(attached: AttachedCollisionGeometry) -> Optional[float]:
     """이미 parent 프레임에 있는 기하의 centroid 가 parent 원점에서 얼마나 먼가 (m). 기하가 없으면 `None`.
 
@@ -386,6 +406,7 @@ __all__ = [
     "AttachRejected",
     "attach_from_target",
     "attached_reach",
+    "carried_point",  # T46g
     "attached_spheres",
     "base_frame_points",
     "base_frame_spheres",

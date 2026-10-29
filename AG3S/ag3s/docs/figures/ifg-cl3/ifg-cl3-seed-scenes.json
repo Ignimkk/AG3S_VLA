@@ -1,0 +1,127 @@
+{
+ "seeds_sha256": "88f6b37ed2208287b1461725a19f7e104029bc6c9098a8c5fe44f7e322190f2b",
+ "seeds_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/seeds.json",
+ "scenes": {
+  "1803": {
+   "stratum": "adjacent",
+   "obstacle": {
+    "slot": "post_0",
+    "position": [
+     0.6470961628740177,
+     -0.299623413227528,
+     0.82
+    ],
+    "height": 0.1,
+    "radius": 0.015
+   },
+   "verify_state": {
+    "ROBOT": 0.14196670249205431,
+    "FRUITS": 0.13961695935533952,
+    "CRATE": 0.08413077393477489,
+    "TARGET": 0.04469411708129138,
+    "TARGET_horizontal_gap": 0.04469411707859445,
+    "client_robot_clearance_arms": 0.14196670249205431,
+    "client_object_clearance": 0.04469411708129138,
+    "head_occlusion": 0.0,
+    "head_target_px": 59,
+    "head_target_px_parked": 59
+   },
+   "head_target_px_render": 59
+  },
+  "1407": {
+   "stratum": "adjacent",
+   "obstacle": {
+    "slot": "post_0",
+    "position": [
+     0.3807318891289719,
+     0.2636769327552339,
+     0.82
+    ],
+    "height": 0.1,
+    "radius": 0.015
+   },
+   "verify_state": {
+    "ROBOT": 0.13116399623539837,
+    "FRUITS": 0.13093721093026364,
+    "CRATE": 0.05157336070212333,
+    "TARGET": 0.05213380758757467,
+    "TARGET_horizontal_gap": 0.05213380758682647,
+    "client_robot_clearance_arms": 0.13116399623539837,
+    "client_object_clearance": 0.05157336070212333,
+    "head_occlusion": 0.008695652173912993,
+    "head_target_px": 114,
+    "head_target_px_parked": 115
+   },
+   "head_target_px_render": 114
+  },
+  "1034": {
+   "stratum": "place",
+   "obstacle": {
+    "slot": "crate_post_0",
+    "position": [
+     0.6466896508475368,
+     -0.00514529840833014,
+     0.82
+    ],
+    "height": 0.18,
+    "radius": 0.015
+   },
+   "verify_state": {
+    "ROBOT": 0.2300021396338528,
+    "FRUITS": 0.2889662334972076,
+    "CRATE": 0.03000310848607222,
+    "TARGET": 0.2806953866473567,
+    "TARGET_horizontal_gap": 0.2806953866469589,
+    "client_robot_clearance_arms": 0.2300021396338528,
+    "client_object_clearance": 0.03000310848607222
+   },
+   "head_target_px_render": 83
+  },
+  "188": {
+   "stratum": "place",
+   "obstacle": {
+    "slot": "crate_post_0",
+    "position": [
+     0.4064715145076754,
+     0.0183386001876297,
+     0.82
+    ],
+    "height": 0.18,
+    "radius": 0.015
+   },
+   "verify_state": {
+    "ROBOT": 0.17905403345955348,
+    "FRUITS": 0.2698388032630959,
+    "CRATE": 0.030000080579097185,
+    "TARGET": 0.26440427609563333,
+    "TARGET_horizontal_gap": 0.26440427609562067,
+    "client_robot_clearance_arms": 0.17905403345955348,
+    "client_object_clearance": 0.030000080579097185
+   },
+   "head_target_px_render": 53
+  }
+ },
+ "render": {
+  "front": {
+   "lookat": [
+    0.45,
+    0,
+    0.85
+   ],
+   "distance": 1.7,
+   "azimuth": 180,
+   "elevation": -18,
+   "size": [
+    480,
+    360
+   ]
+  },
+  "head": {
+   "camera": "zed_left",
+   "size": [
+    224,
+    224
+   ]
+  }
+ }
+}

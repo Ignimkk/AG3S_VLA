@@ -1,0 +1,146 @@
+{
+  "research_step": "R1",
+  "verified_at": "2026-10-06T00:43:12+09:00",
+  "entries": [
+    {
+      "reference_id": "RW001",
+      "citation_key": "yang2025lohovla",
+      "local_path": "papers/LoHoVLA.pdf",
+      "pdf_pages": 17,
+      "local_version": "2506.00411v1",
+      "version_basis": "First-page arXiv stamp",
+      "primary_url": "https://arxiv.org/abs/2506.00411v1",
+      "first_public_date": "2025-05-31",
+      "record_latest_version": "v1",
+      "content_pages_read": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        17
+      ],
+      "citation_type": "arXiv preprint",
+      "peer_reviewed_venue": "NOT_VERIFIED",
+      "sha256": "8b3bdfaf7f51d13dab2d7784143673fd7c954bebe27a14be8b19dd85af5570e8",
+      "verified_at": "2026-10-06T00:43:12+09:00",
+      "remote_pdf_byte_identity": "NOT_CHECKED",
+      "content_review_scope": "Listed core sections/pages; not exhaustive full-paper reproduction audit",
+      "selection_status": "CANDIDATE_USER_SELECTION_PENDING"
+    },
+    {
+      "reference_id": "RW002",
+      "citation_key": "sundaralingam2026curobov2",
+      "local_path": "papers/cuRoboV2_ Dynamics-Aware Motion Generation with Depth-Fused Distance Fields for High-DoF Robots.pdf",
+      "pdf_pages": 52,
+      "local_version": "2603.05493v2",
+      "version_basis": "First-page arXiv stamp",
+      "primary_url": "https://arxiv.org/abs/2603.05493v2",
+      "first_public_date": "2026-03-05",
+      "record_latest_version": "v2",
+      "version_public_date": "2026-04-16",
+      "pdf_cover_date": "2026-04-17",
+      "content_pages_read": [
+        1,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        18,
+        20,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        37,
+        38
+      ],
+      "citation_type": "technical report / arXiv preprint",
+      "peer_reviewed_venue": "NOT_VERIFIED",
+      "sha256": "2402fb08516e6fa4d82118f75d8338b26eae41f6e473cb3dc0826e67f0f46b2b",
+      "verified_at": "2026-10-06T00:43:12+09:00",
+      "remote_pdf_byte_identity": "NOT_CHECKED",
+      "content_review_scope": "Listed core sections/pages; not exhaustive full-paper reproduction audit",
+      "selection_status": "CANDIDATE_USER_SELECTION_PENDING"
+    },
+    {
+      "reference_id": "RW003",
+      "citation_key": "sundaralingam2023curobo",
+      "local_path": "papers/curobo_report_v1.pdf",
+      "pdf_pages": 62,
+      "local_version": "UNKNOWN",
+      "version_basis": "No explicit arXiv version stamp; filename is not version evidence",
+      "primary_url": "https://arxiv.org/abs/2310.17274",
+      "first_public_date": "2023-10-26",
+      "record_latest_version": "v2",
+      "record_latest_version_date": "2023-11-03",
+      "content_pages_read": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        14,
+        15,
+        25,
+        27,
+        32,
+        33
+      ],
+      "citation_type": "technical report / arXiv preprint",
+      "peer_reviewed_venue": "NOT_ASSIGNED_TO_REPORT",
+      "related_initial_conference_paper": {
+        "title": "CuRobo: Parallelized Collision-Free Robot Motion Generation",
+        "venue": "ICRA 2023",
+        "doi": "10.1109/ICRA48891.2023.10160765",
+        "relation": "Official docs distinguish initial implementation without minimum-jerk optimization; not the report citation"
+      },
+      "sha256": "d0f72571c33e0475e659b9224025fcb3143d2821df8d269fccb74e198e14c9d3",
+      "verified_at": "2026-10-06T00:43:12+09:00",
+      "remote_pdf_byte_identity": "NOT_CHECKED",
+      "content_review_scope": "Listed core sections/pages; not exhaustive full-paper reproduction audit",
+      "selection_status": "CANDIDATE_USER_SELECTION_PENDING"
+    }
+  ],
+  "additional_primary_urls": [
+    "https://nvlabs.github.io/curobo/latest/technical_reports.html",
+    "https://github.com/NVlabs/curobo"
+  ],
+  "novelty_status": "UNVERIFIED",
+  "citation_build_audit": {
+    "bibtex_keys": [
+      "yang2025lohovla",
+      "sundaralingam2026curobov2",
+      "sundaralingam2023curobo"
+    ],
+    "cited_keys": [
+      "sundaralingam2023curobo",
+      "sundaralingam2026curobov2",
+      "yang2025lohovla"
+    ],
+    "rendered_bibliography_keys": [
+      "sundaralingam2023curobo",
+      "sundaralingam2026curobov2",
+      "yang2025lohovla"
+    ],
+    "status": "PASS",
+    "scope": "Three current entries; not citation sufficiency/novelty certification"
+  },
+  "selection_status": "CANDIDATE_USER_SELECTION_PENDING",
+  "selection_note": "User has not selected prior-work papers and will provide a shortlist later; R1 sources and current manuscript citations are exploratory/provisional."
+}

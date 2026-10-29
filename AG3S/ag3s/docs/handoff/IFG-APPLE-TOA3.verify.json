@@ -1,0 +1,452 @@
+{
+ "step": "IFG-APPLE-TOA3",
+ "written": "2026-10-21 KST (lead; CPU analysis after a 54-min GPU run)",
+ "plain_names": {
+  "SPLA": "SPL + 잡을 지점 고정 (--grasp-anchor 2000, 목표 행 3) + 안전 우선 대체 풀이"
+ },
+ "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-TOA3",
+ "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-TOA3/agg4arm",
+ "gpu_window_utc": [
+  "2026-10-20T19:24:29",
+  "2026-10-20T20:18:12"
+ ],
+ "code": "snapshot_toa3 tree 7da7599acd6f2342689d3b8bd4dea7ccae9adf51 (also holds another session's unimported WIP AG3S/trajopt/curobo_v2/)",
+ "scripts": [
+  "AG3S/ag3s/experiments/studies/ifg_to_variants.py"
+ ],
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-to-variants.png"
+ ],
+ "numbers": {
+  "success_by_variant": {
+   "E0": 10,
+   "SPL": 7,
+   "SPLN": 7,
+   "SPLD": 7,
+   "TOA2": 7,
+   "TOA3": 7
+  },
+  "table": {
+   "E0": {
+    "56": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "211": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "1837": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 0
+    },
+    "320": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "753": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "954": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "309": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "250": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "1668": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "126": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "SPL": {
+    "56": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "211": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6
+    },
+    "1837": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 15
+    },
+    "320": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "753": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1
+    },
+    "954": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "309": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "250": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "1668": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "126": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    }
+   },
+   "SPLN": {
+    "56": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "211": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 7
+    },
+    "1837": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "320": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 7
+    },
+    "753": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "954": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "309": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "250": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "1668": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2
+    },
+    "126": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    }
+   },
+   "SPLD": {
+    "56": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 5
+    },
+    "211": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 9
+    },
+    "1837": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 1
+    },
+    "320": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2
+    },
+    "753": {
+     "primary": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 7
+    },
+    "954": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 4
+    },
+    "309": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "250": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 7
+    },
+    "1668": {
+     "primary": false,
+     "failure_mode": "not_placed",
+     "hold_chunks": 0
+    },
+    "126": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "TOA2": {
+    "56": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 4
+    },
+    "211": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 63
+    },
+    "1837": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 4
+    },
+    "320": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "753": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "954": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "309": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "250": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3
+    },
+    "1668": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 8
+    },
+    "126": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    }
+   },
+   "TOA3": {
+    "56": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "211": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 49
+    },
+    "1837": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 4
+    },
+    "320": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "753": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "954": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "309": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "250": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2
+    },
+    "1668": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 2
+    },
+    "126": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    }
+   }
+  },
+  "toa3_fallback_requests": {
+   "56": {
+    "plain": 1,
+    "anchored": 1
+   },
+   "211": {
+    "plain": 15,
+    "anchored": 36
+   },
+   "1837": {
+    "plain": 0,
+    "anchored": 1
+   },
+   "320": {
+    "plain": 1,
+    "anchored": 0
+   },
+   "753": {
+    "plain": 0,
+    "anchored": 1
+   },
+   "954": {
+    "plain": 0,
+    "anchored": 0
+   },
+   "309": {
+    "plain": 0,
+    "anchored": 0
+   },
+   "250": {
+    "plain": 1,
+    "anchored": 0
+   },
+   "1668": {
+    "plain": 1,
+    "anchored": 2
+   },
+   "126": {
+    "plain": 0,
+    "anchored": 1
+   }
+  },
+  "paired": {
+   "SPL_vs_SPLA": {
+    "both": 6,
+    "only_SPL": 1,
+    "only_SPLA": 1,
+    "neither": 2,
+    "missing": 0,
+    "n_pairs": 10,
+    "mcnemar_exact_p": 1.0,
+    "rate_SPL": 0.7,
+    "rate_SPLA": 0.7,
+    "diff_SPLA_minus_SPL": 0.0,
+    "ci95_bootstrap": [
+     -0.3,
+     0.3
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   },
+   "E0_vs_SPLA": {
+    "both": 7,
+    "only_E0": 3,
+    "only_SPLA": 0,
+    "neither": 0,
+    "missing": 0,
+    "n_pairs": 10,
+    "mcnemar_exact_p": 0.25,
+    "rate_E0": 1.0,
+    "rate_SPLA": 0.7,
+    "diff_SPLA_minus_E0": -0.3,
+    "ci95_bootstrap": [
+     -0.6,
+     0.0
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   }
+  },
+  "ep211": {
+   "hold_chunks": 49,
+   "fallback_requests": {
+    "plain": 15,
+    "anchored": 36
+   },
+   "plain_violation_mm_after_k12": "19.3-27.2 (many equal to the anchored: both returned the reference)"
+  },
+  "ep1668": {
+   "fallback_k12_k13": "anchored 10.78 / 8.2 mm = plain (both returned the reference)",
+   "failure_mode": "no_grasp"
+  },
+  "ep954": {
+   "fallback_requests": 0,
+   "failure_mode": "no_grasp"
+  }
+ },
+ "diagnosis": {
+  "fallback": "works as written but cannot rescue ep211: from request 12 the plain re-solve also leaves 19-27 mm (both solves return the reference); the anchor (active from 95 mm to the goal) kept the hand on the policy path into a pose no 3-iteration solve escapes, HOLD -> same chunk -> HOLD; target split without the anchor had translated 54 mm at request 14 and avoided that pose",
+  "overall": "five TrajOpt variants (look-ahead off, rate term after grasp, anchor, anchor + fallback) all 7/10 on the 10 VLA-success scenes; which scenes fail changes, the count does not; the two place-stratum banana scenes 211 / 954 never succeed"
+ }
+}

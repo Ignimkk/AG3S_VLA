@@ -1,0 +1,27 @@
+{
+  "artifact_id": "F04",
+  "status": "DEVELOPMENT_QUALITATIVE",
+  "selection": "Illustrative held-target mask failure, not random or representative sampling.",
+  "frame": "T54c_ep1817_f020",
+  "input_sha256": {
+    "paper/figures/ifg_results/robot_mask_example.png": "303583422122d717e616e8b467f2bea064621e6f026497d7043f529558150403",
+    "AG3S/ag3s/docs/figures/ifg/ifg-scene-r6-T54c_ep1817_f020.png": "303583422122d717e616e8b467f2bea064621e6f026497d7043f529558150403",
+    "AG3S/ag3s/docs/figures/ifg/ifg-scene-r6-T54c_ep1817_f020.json": "937bbc2bd01b8f4455a2c4aa6331002101fc81b7d324f1b84b06be2ba864c0b7"
+  },
+  "source_metrics": {
+    "frame_id": "T54c_ep1817_f020",
+    "camera": "wrist_cam_r",
+    "panels": {
+      "top1-only-ns:N": {
+        "iou": 0.5522860337073592,
+        "recall": 0.5522860337073592,
+        "precision": 1.0
+      },
+      "top1-only-ns+rm:N": {
+        "iou": 0.9609984068984219,
+        "recall": 0.9767068306429548,
+        "precision": 0.983539705076707
+      }
+    }
+  }
+}

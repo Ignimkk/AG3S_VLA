@@ -1,0 +1,27 @@
+{
+ "asset": "paper/figures/paperbanana/figure3/assets/f3_attached_object.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_render.py",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00169.npz": "3e28cd45c397434566cf807a4f4e3e3a274df137aa9a1ae316f5cb590f425344",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00019.npz": "0b5ca463f284038317bdc687ba08bca7a30660c3855a4faab3e4c4e42b2f7d84",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00026.npz": "9d5e5b5eea91b95a1316be4bd2428dffb2811c4876396e558ee50edc2b6c0742"
+ },
+ "note": "Attached-object sphere recorded at attach (chunk 19), carried rigidly with the hand link (FK) and shown during carry.",
+ "is_measured_result": false,
+ "attach_chunk": 19,
+ "carry_chunk": 26,
+ "spheres": [
+  {
+   "centre_m": [
+    0.47553,
+    -0.311713,
+    0.87223
+   ],
+   "radius_mm": 40.412
+  }
+ ],
+ "parent_link": "ee_right"
+}

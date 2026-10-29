@@ -22,7 +22,7 @@ esdf_clearance` 로 잰다 (기록 거리장 · 기록 refined 계획 · `esdf_m
 """
 
 from __future__ import annotations
-from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import rebase_legacy_paths, workspace_path as _ag3s_workspace_path
 
 import dataclasses
 import functools
@@ -97,7 +97,7 @@ class Run:
     """One recorded run: rebuild its first attach (off / on) and evaluate the TO's held rows."""
 
     def __init__(self, rel: str, index: str = "chunk_index_t40t41.json"):
-        idx = json.loads((S_RAW / index).read_text())
+        idx = rebase_legacy_paths(json.loads((S_RAW / index).read_text()))
         self.key = str(V / rel)
         ix = idx[self.key]
         rd = pathlib.Path(self.key)
@@ -113,7 +113,7 @@ class Run:
         self.attach_seq = next(s for s in sorted(self.summ)
                                if (self.summ[s].get("grasp") or {}).get("attach"))
         self.recorded = self.summ[self.attach_seq]["grasp"]["attached"]["held"]
-        self.truth = json.loads((S_RAW / "held_runs_all.json").read_text())["runs"].get(self.key)
+        self.truth = rebase_legacy_paths(json.loads((S_RAW / "held_runs_all.json").read_text()))["runs"].get(self.key)
         self.off = self.rebuild(False)
         self.on = self.rebuild(True)
 

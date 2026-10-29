@@ -1,0 +1,17 @@
+{
+ "asset": "paper/figures/paperbanana/figure1/assets/f1_contact_scene.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_render.py",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00168.npz": "ae80283b4a9794bcaa235e4477088975e620399fc70aa02e069440232ded2c0c",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00018.npz": "08cdb8ab45127776a704d921a1f0c30f65c96fdb2c239dd641d4493c5a136210",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/gt/ep1842.grasp.npz": "1ca3b47ae1f060b26c9062eabb707f8d3016dd169f1de15805cbce7b8c1c19e3"
+ },
+ "note": "Closing chunk: contact links (gold) on the target cluster; GT records finger contact with the pear here.",
+ "is_measured_result": false,
+ "chunk": 18,
+ "gt_touching": "ee_finger_r1|ee_finger_r2|table",
+ "latch": "closing"
+}

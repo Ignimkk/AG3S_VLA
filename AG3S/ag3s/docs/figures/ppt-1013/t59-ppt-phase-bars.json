@@ -1,0 +1,194 @@
+{
+ "figure": "t59-ppt-phase-bars.png",
+ "korean_labels": true,
+ "figsize_in": [
+  16,
+  9
+ ],
+ "dpi": 150,
+ "inputs_sha256": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_frames.jsonl": "8151e4b4c1060cecded589d58022a5e8cbb442ac0048b6fa472794a547506069",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_stats.json": "3f96467ee6ceffd8b01eeda54d5ca2a3180dce83945a8a56d1ccab7b6835f3b6",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/build.json": "55c1422ce25d362f91228819b779862087068a6f06f23e698cd2f4ee487e6016",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/select.json": "15e0bed9a6a0df8880e49b7ffffe6a2040b00ec3a81b1afe91895fa9f4f06cc5",
+  "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T59.verify.json": "7dc98b8b6140f374ad777b8dbb2d0174f227e60ea567a96a186e112154d957fd"
+ },
+ "unit": "fraction of in-window frames; bar = episode mean (episodes with >= 1 frame of the phase, equal weight); error bar = episode bootstrap 95% CI (B 10000, seed 5407) of the target fraction, drawn at the top of the target segment (target is the bottom segment of each stack)",
+ "window": "frame 0 .. min(first placed, first HSR confirmed home), inclusive (T59.task.md user decision 4)",
+ "conditions": {
+  "U": "U_class, current-frame attention, phase-unsplit",
+  "Sg": "S_class_at_geometry_frame (user decision 1: main serving-side class definition)"
+ },
+ "bars": {
+  "pre": {
+   "U": {
+    "n_frames": 477,
+    "n_episodes": 16,
+    "episode_mean": {
+     "target": 0.8245010055044951,
+     "other_object": 0.1452882550685676,
+     "destination": 0.0,
+     "table": 0.006578947368421052,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.023631792058516198
+    },
+    "count": {
+     "target": 403,
+     "other_object": 59,
+     "destination": 0,
+     "table": 4,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 11
+    },
+    "target_ci95": [
+     0.6902082628944375,
+     0.9269885043570513
+    ],
+    "target_pooled": 0.8448637316561844,
+    "target_pooled_ci95": [
+     0.7188689824231993,
+     0.9342670302396968
+    ]
+   },
+   "Sg": {
+    "n_frames": 477,
+    "n_episodes": 16,
+    "episode_mean": {
+     "target": 0.8947368421052632,
+     "other_object": 0.10361842105263158,
+     "destination": 0.0,
+     "table": 0.0,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.001644736842105263
+    },
+    "count": {
+     "target": 430,
+     "other_object": 46,
+     "destination": 0,
+     "table": 0,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 1
+    },
+    "target_ci95": [
+     0.7467105263157895,
+     1.0
+    ],
+    "target_pooled": 0.9014675052410901,
+    "target_pooled_ci95": [
+     0.7506404035932969,
+     1.0
+    ]
+   }
+  },
+  "held": {
+   "U": {
+    "n_frames": 106,
+    "n_episodes": 10,
+    "episode_mean": {
+     "target": 0.590970695970696,
+     "other_object": 0.354064269064269,
+     "destination": 0.0,
+     "table": 0.0,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.054965034965034965
+    },
+    "count": {
+     "target": 69,
+     "other_object": 31,
+     "destination": 0,
+     "table": 0,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 6
+    },
+    "target_ci95": [
+     0.3924192890442891,
+     0.7624458874458875
+    ],
+    "target_pooled": 0.6509433962264151,
+    "target_pooled_ci95": [
+     0.4956482569526048,
+     0.782608695652174
+    ]
+   },
+   "Sg": {
+    "n_frames": 106,
+    "n_episodes": 10,
+    "episode_mean": {
+     "target": 0.8615384615384615,
+     "other_object": 0.13846153846153847,
+     "destination": 0.0,
+     "table": 0.0,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.0
+    },
+    "count": {
+     "target": 100,
+     "other_object": 6,
+     "destination": 0,
+     "table": 0,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 0
+    },
+    "target_ci95": [
+     0.6345784023668639,
+     1.0
+    ],
+    "target_pooled": 0.9433962264150944,
+    "target_pooled_ci95": [
+     0.8420922355393434,
+     1.0
+    ]
+   }
+  }
+ },
+ "check_against_inputs": {
+  "recomputed_from_t59_frames_vs_T59.verify.json_and_t59_stats.json": "episode_mean and count equal for every drawn class; CI taken from T59.verify.json numbers.main_16_episodes (identical to t59_stats.json)",
+  "max_abs_episode_mean_diff": 1.1102230246251565e-16
+ },
+ "excluded_phase_post": {
+  "reason": "post has too few episodes/frames for an episode-level CI: n_episodes (U, Sg) = {'U': 2, 'Sg': 2}, n_frames = {'U': 14, 'Sg': 14}; excluded by request (see T59.verify.json post entries for the numbers)"
+ },
+ "difference_from_original": {
+  "original": "AG3S/ag3s/docs/figures/t59/t59-phase-class-bars.png",
+  "dropped": [
+   "phase post",
+   "condition S (same-frame GT)",
+   "lower row (per-class CI + pooled diamonds)"
+  ],
+  "kept": "class colours (CLS_COLOR), stack order, episode-mean values, n frame/episode",
+  "changed": "1 row x 2 panels; error bar only for the target fraction, on the bar; Sg replaces 'S geometry frame'; 16:9, base font 13 pt",
+  "user_decision": "T59.task.md user decision 1"
+ }
+}

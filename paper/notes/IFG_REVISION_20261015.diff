@@ -1,0 +1,815 @@
+--- before/paper/latex/sections/00_abstract.tex
++++ after/paper/latex/sections/00_abstract.tex
+@@ -1,14 +1,4 @@
+ % !TEX root = ../main.tex
+ \begin{abstract}
+-Manipulation requires selective contact: a robot must touch the intended object while avoiding the surfaces around it.
+-Localizing that object is insufficient. A correct target identity can still yield an unsafe contact exception if its
+-geometric extent absorbs a nearby obstacle, especially under occlusion. We present \sys, a method that converts the
+-internal signals of a frozen vision-language-action (VLA) policy and calibrated depth into task-conditioned 3D contact
+-geometry. Its central principle is to separate \emph{which object is intended}, \emph{which observed surfaces belong to
+-it}, and \emph{which links may touch those surfaces}. Attention selects the target; visibility-aware geometric and
+- temporal evidence delimit its contact region without removing uncertain neighboring surfaces. The recovered geometry
+-configures link-specific collision queries and changes from a scene object to attached geometry after a confirmed
+-grasp. A constrained refinement layer checks the action prefix actually sent to the robot. The policy remains frozen,
+-and target geometry requires no external segmentation network. Our planned evaluation will isolate identification,
+-extent, and contact handling, and assess their effects on task completion, forbidden contact, and execution cost.
++A manipulation policy must touch its target while preserving nearby obstacles as collision geometry. This requires more than identifying the right object: a coarse target region can also exempt the wrong surface. We introduce \sys, a framework for grounding observed target surfaces from a frozen vision-language-action policy and calibrated depth, without an external segmentation model. Its central design separates semantic selection, surface membership, and contact permission. Noun attention provides sparse seeds; a multi-view depth graph recovers spatial extent through observed surface continuity; internal visual features are evaluated separately as temporal identity checks. A surface-matched robot filter preserves objects between the fingers, and a contact interface restricts target exceptions to designated links and task states. On 180 selected frames from 32 development episodes, the surface method improves episode-mean 3D IoU from 0.837 to 0.893 under the same robot mask. Controlled feature ablations show that direct feature fusion provides no consistent boundary improvement, motivating a distinct role for identity consistency. These development results motivate independent evaluation of grounding generalization and closed-loop contact benefits.
+ \end{abstract}
+--- before/paper/latex/sections/01_introduction.tex
++++ after/paper/latex/sections/01_introduction.tex
+@@ -1,55 +1,20 @@
+ % !TEX root = ../main.tex
+ \section{Introduction}
+-\label{sec:introduction}
++\label{sec:intro}
++To pick up an apple beside a post, a robot must allow its fingers to touch the apple while keeping the post, wrist, and arm subject to collision constraints. After grasping, the apple itself becomes geometry that must avoid the environment. The object identity is unchanged, but the permitted interaction changes. This creates a visual grounding problem with a physical consequence: \emph{which observed surfaces belong to the object that may be contacted, and which must remain protected?}
+ 
+-A robot picking an apple must make contact with the apple and avoid the post beside it. Its fingers may touch the
+-fruit; its wrist must not strike either object. Once grasped, the apple becomes part of the moving geometry, and after
+-release it returns to the scene. The physical surface is the same, but its role in collision checking changes with
+-the task, the robot link, and the state of interaction. \emph{Where a robot should look is therefore different from
+-where it may touch.}
++Vision-language-action (VLA) policies provide task-conditioned action proposals~\cite{black2024pi0,intelligence2025pi05}. Geometric wrappers can refine those proposals, but their behavior depends on the geometry supplied to them. Selecting the correct object is insufficient if its bounding volume includes a neighboring obstacle. Likewise, removing a conservative robot volume can erase a held object between the fingers. The relevant error is therefore not only a wrong target identity, but also a wrong assignment of scene surfaces to a contact exception.
+ 
+-Vision-language-action (VLA) policies generate manipulation actions from images and instructions
+-\cite{black2024pi0,intelligence2025pi05,nvidia2025gr00t}. Geometric refinement can expose surrounding surfaces as explicit
+-constraints on those actions~\cite{wu2025momanipvla,sundaralingam2026curobov2}. Connecting these representations introduces
+-a difficult ambiguity. Treating every surface as forbidden blocks intentional grasp contact. Removing the target from
+-a shared collision map permits contact by links that should avoid it. Worse, identifying the correct apple does not
+-guarantee that the region removed from the map contains only the apple. A coarse bounding volume, a merged point-cloud
+-component, or a stale estimate under occlusion can silently erase the nearby post.
++Recent work makes this distinction increasingly pertinent. KNOWS already extracts target information from internal VLA attention and combines it with externally segmented geometry~\cite{park2026knows}. RoboGround and OBEYED-VLA show the value of object-focused intermediate representations for robot policies~\cite{huang2025roboground,vo2026obeyed}. AFI uses spatial affordance fields to intervene on VLA execution~\cite{xu2026afi}. These methods motivate grounding for action, but do not make generic visual segmentation equivalent to contact authorization. Conversely, a segmentation error is not evidence that an external segmenter is intrinsically unsuitable: perception and contact handling must be compared under matched downstream conditions.
+ 
+-This is a problem of \emph{contact-target extent}, beyond target localization. Attention-guided target selection already
+-appears in KNOWS, which ranks objects supplied by an external segmenter~\cite{park2026knows}; external grounding and
+-target-mask exclusion also support collision-aware execution~\cite{hu2026vlsa,wu2025momanipvla}. These ideas establish
+-useful interfaces between semantics and geometry. Our focus is the next step: recovering observed target extent from
+-the policy's own signals and depth, maintaining its boundary during partial visibility, and translating that extent
+-into selective contact constraints.
++We introduce \sys\ to study the interface between policy-internal visual evidence and observed 3D contact geometry. Our design assigns different responsibilities to signals with different spatial resolution. Noun attention identifies promising target patches. Depth supplies the observed surface topology needed to distinguish neighboring objects. A graph energy propagates seed evidence across those surfaces, while explicit support negatives and region selection limit target extent. Robot pixels are removed only when rendered robot depth agrees with the observation. The output is an observed surface region, rather than a ball interpreted as object membership.
+ 
+-We present \sys\ (Fig.~\ref{fig:teaser}), built around three distinct decisions: \emph{identity}, \emph{extent}, and
+-\emph{permission}. VLA attention provides evidence for identity. Multi-view geometry determines which surfaces support
+-that identity, while temporal memory preserves the object through occlusion without freezing an incorrect boundary.
+-Only supported target geometry receives a contact exception; neighboring and ambiguous surfaces remain obstacles.
+-Finally, configured contact rules determine which links can use that exception. An attention score never directly
+-deletes an obstacle or authorizes a robot link.
++An initially appealing alternative is to strengthen this graph with internal visual-feature similarity. Our development experiments do not support that assumption. With the improved geometric pipeline held fixed, feature edges have little effect for four of five tested representations, while prototype unaries often remove valid target surfaces or favor the wrong component. The diagnostics point to a mismatch between patch-level descriptors and fine surface boundaries. This motivates using features at a different level: a region descriptor can check temporal identity consistency without dictating each voxel's membership. The latter use remains exploratory, particularly because the present confidence analysis contains only six wrong-choice events.
+ 
+-This separation also resolves a temporal tension. Stable manipulation requires remembering the target when the hand
+-occludes it, yet persistent memory must not preserve an obstacle accidentally merged into the target. \sys\ therefore
+-maintains identity and surface membership separately: identity can persist while newly visible geometry corrects its
+-extent. A lightweight sub-task probe on frozen VLA features guides identity updates, while physical grasp feedback
+-controls attachment and release. The same target geometry then supports approach, carrying, and placement without
+-becoming a permanent hole in the collision map.
+-
+-Our contributions are organized around this representation and its consequences:
++Our contributions are threefold:
+ \begin{itemize}
+-\item \textbf{Boundary-preserving 3D target grounding.} We combine VLA attention with multi-view geometry and temporal
+-membership updates to construct an observed contact region without an external segmentation network. The formulation
+-separates identity persistence from extent correction and retains ambiguous neighboring surfaces.
+-\item \textbf{Grounding-to-contact constraints.} We convert this region into link- and phase-specific collision queries,
+-including a grasp-confirmed transfer to attached geometry, and use them to refine and check the executed action prefix.
+-The connection makes grounding errors explicit at the point where they alter permissible motion.
+-\item \textbf{A mechanism-focused evaluation design.} We specify paired experiments that isolate target identification,
+-extent estimation, and contact handling under a common controller. These experiments will establish which changes
+-improve safe task completion and which merely increase stopping; the empirical contribution awaits their results.
++\item An attention-seeded observed-surface construction that combines depth-continuous connectivity, patch-mass-preserving seeds, support negatives, and surface-matched robot removal without fitting a segmentation model or updating the VLA.
++\item A controlled analysis of where internal features help or fail: matched-mask extent comparisons, feature-edge and feature-unary ablations, boundary diagnostics, and exploratory temporal identity checks.
++\item An explicit interface from supported target surfaces to link-specific contact exceptions, together with an evaluation design that separates grounding quality from downstream contact outcomes.
+ \end{itemize}
+-
+-The underlying VLA is frozen after embodiment adaptation. A small phase probe is trained separately, and internal
+-signals are read through an additional extraction pass. Thus, our claim concerns constructing contact geometry from
+-a frozen policy, rather than training a new collision-avoidance policy or eliminating all auxiliary learning.
++The current empirical scope is offline development evaluation. Under the same rendered robot mask, the proposed extent pipeline improves 3D IoU by 5.7 percentage points over radius growth and clustering. The contact interface defines the intended downstream use; this result does not establish collision reduction or safe task completion.
+--- before/paper/latex/sections/02_related_work.tex
++++ after/paper/latex/sections/02_related_work.tex
+@@ -1,35 +1,14 @@
+ % !TEX root = ../main.tex
+-% Existing bibliography and scoped source checks: notes/DRAFT10_REVISION.md.
+ \section{Related Work}
+ \label{sec:related}
+-\paragraph{VLA policies and geometric refinement.}
+-VLAs provide task-conditioned action proposals~\cite{black2024pi0,intelligence2025pi05,nvidia2025gr00t}.
+-MoManipVLA transfers VLA trajectories to mobile manipulation through geometric optimization~\cite{wu2025momanipvla},
+-while cuRobo and cuRoboV2 support motion generation and distance-field queries
+-\cite{sundaralingam2023curobo,sundaralingam2026curobov2}. We use this policy-plus-refinement structure. Our methodological
+-focus is the construction and lifetime of the contact geometry supplied to refinement, rather than a new trajectory
+-optimizer or distance-field representation.
++\paragraph{Visual grounding for robot policies.}
++RoboGround learns to use grounding masks as an intermediate representation~\cite{huang2025roboground}. OBEYED-VLA separates object-centric perceptual grounding from action reasoning and uses geometry-focused observations~\cite{vo2026obeyed}. GuidedVLA specializes action-attention heads using supervision~\cite{jia2026guidedvla}. These approaches establish that task-relevant visual structure can support manipulation. Our setting instead keeps the policy frozen and extracts an observed target surface for a geometric wrapper. We do not claim that removing an external segmenter alone improves accuracy, latency, or task performance.
+ 
+-\paragraph{Internal grounding and target extent.}
+-Attention heads in frozen vision-language models can localize referred objects~\cite{kang2025fewheads}.
+-KNOWS uses VLA attention to select among segmenter-produced objects and applies an ellipsoid-based safety filter
+-\cite{park2026knows}. VLSA uses external visual grounding for action filtering~\cite{hu2026vlsa}, and Lan-o3dp combines
+-language-guided decomposition and segmentation with collision-aware execution~\cite{li2025lano3dp}.
+-\sys\ instead constructs target extent in observed depth. Its distinguishing question is how to maintain the boundary
+-of a contact exception when attention is coarse, an obstacle adjoins the target, or the target becomes occluded.
+-Attention selects among geometric hypotheses; it is not itself a surface-membership mask.
++\paragraph{Internal attention and feature graphs.}
++Selected attention heads can localize referred objects~\cite{kang2025fewheads}, and KNOWS already uses internal VLA attention for target selection~\cite{park2026knows}. Feature graphs are also established: TokenCut applies normalized cuts to self-supervised transformer features for object discovery~\cite{wang2022tokencut}. Our contribution is not a new graph solver or the first reuse of attention. It is a specific construction of policy-seeded observed surfaces, and a controlled investigation of whether the policy's patch descriptors should determine their boundaries. Our seed-conditioned quadratic energy differs from unsupervised spectral object discovery, but uses standard graph regularization.
+ 
+-\paragraph{Contact-dependent collision representations.}
+-MoManipVLA excludes the target mask from its real-world ESDF~\cite{wu2025momanipvla}. AutoMoMa incorporates manipulated
+-objects into the robot representation during whole-body planning~\cite{niu2026automoma}; WBAG includes whole-body and
+-grasp-dependent attached geometry in VLA filtering~\cite{zhen2026wbag}. Link-dependent collision permissions and attached
+-objects are established planning tools. We use them to expose the consequences of visual grounding: the recovered
+-target extent determines which scene surfaces can be exempted, for which configured links, and for how long. Our
+-evaluation covers an audited set of relevant hand and arm links, without claiming whole-body protection.
++\paragraph{Geometric guidance and contact constraints.}
++MoManipVLA refines VLA trajectories through geometric optimization~\cite{wu2025momanipvla}; VLSA and KNOWS add safety-oriented filtering~\cite{hu2026vlsa,park2026knows}. AFI detects memory traps and intervenes using spatial affordance fields~\cite{xu2026afi}. These are related uses of geometry with different intervention mechanisms. Whole-body and attached-object constraints already appear in AutoMoMa and WBAG~\cite{niu2026automoma,zhen2026wbag}. We use link-specific permission and attachment as downstream requirements, not as independently new planning primitives. The distinguishing issue is which observed surfaces are eligible for exclusion from each collision query.
+ 
+ \paragraph{Task state from frozen representations.}
+-Sub-task prediction appears in learned VLA architectures~\cite{intelligence2025pi05,yang2025lohovla}, and probing studies
+-recover progress-related information from frozen VLA features~\cite{bhardwaj2026progress,zhang2026frozenvlas}.
+-Our supervised phase probe supports target-memory updates. Grasp feedback separately determines physical attachment.
+-We treat the probe as a supporting component and will compare it against a strong grasp-state/history rule with the
+-same geometry and controller, rather than assuming that phase classification implies reliable contact reasoning.
++Probing work recovers progress-related information from VLA representations~\cite{bhardwaj2026progress,zhang2026frozenvlas}. Our supervised sub-task probe is auxiliary. We test whether gripper state and target--hand geometry improve phase classification, and distinguish those predictions from physical confirmation of attachment. A phase label neither specifies a contact affordance nor certifies a successful grasp.
+--- before/paper/latex/sections/03_method.tex
++++ after/paper/latex/sections/03_method.tex
+@@ -1,172 +1,109 @@
+ % !TEX root = ../main.tex
+-% Prospective completed-method specification; assumptions are mapped in the revision note.
+ \section{Method}
+ \label{sec:method}
+-\sys\ constructs a task-conditioned contact representation between a frozen VLA and a geometric action refiner.
+-Figure~\ref{fig:overview} presents its organizing principle; Figure~\ref{fig:fig03_attention_to_3d} shows the data flow.
+-The representation separates target identity, observed extent, and contact permission, so that uncertainty in one
+-cannot silently become authority in another.
++\sys\ separates three quantities: target identity, observed surface membership, and contact permission (Fig.~\ref{fig:teaser}). Sections~\ref{sec:grounding}--\ref{sec:phase} describe implemented offline components. Section~\ref{sec:contact} defines their downstream contact interface, which is not exercised by the present grounding evaluation.
+ 
++\subsection{Inputs and output contract}
++\label{sec:overview}
++A frozen VLA predicts an action chunk $A_t=\pi_\theta(I_t,q_t,l)$ from three RGB views, robot state $q_t$, and instruction $l$. The geometric layer additionally receives synchronized depth $D_t^v$, intrinsics $K^v$, camera poses $T_t^v$, and the robot model. Depth does not enter the policy. The current embodiment has 16 physical state/action coordinates; padded internal policy tensors are not additional robot degrees of freedom.
+ 
+-\subsection{Task-conditioned contact geometry}
+-\label{sec:overview}
+-At request $t$, a frozen policy predicts a length-$H$ action chunk $A_t=\pi_\theta(o_t,l)$ from RGB observations,
+-proprioception, and instruction $l$. Calibrated depth is an additional input to our geometric layer. The active arm
+-and allowed contact-link set $\mathcal L$ are configured for the task; they are not learned affordances.
+-We maintain a target identity $j_t$, supported target surfaces $\mathcal T_t$, neighboring surfaces $\mathcal N_t$,
+-a phase estimate $s_t$, and physical grasp state $z_t$. These variables determine a distance query $\delta_{i,t}$
+-for each modeled robot or attached-object sphere $i$. With center $c_i(q)$ and radius $r_i$, the clearance residual is
++The grounding output is a set $\mathcal T_t$ of observed target voxels. It is not a completed object mesh, a physical contact state, or a collision-free action. Non-selected scene surfaces remain available to the collision representation. The target noun in the instruction fixes the manipulated object throughout this study; noun attention is not assumed to switch automatically to a placement destination as the task progresses.
++
++\subsection{Attention-seeded observed surfaces}
++\label{sec:grounding}
++\paragraph{Surface-matched robot removal.}
++At the recorded joint configuration, we render depth $\widehat D_{\mathrm{robot},t}^v$ using only robot-body meshes. A valid observed pixel is classified as robot when both depths exist and
+ \begin{equation}
+- h_{ik}=\delta_{i,t}(c_i(q_k))-r_i-m_i,
+- \label{eq:clearance}
++ |D_t^v(u)-\widehat D_{\mathrm{robot},t}^v(u)|\leq\epsilon_r.
++ \label{eq:selfmask}
+ \end{equation}
+-where $m_i$ includes the prescribed clearance margin. Consequently, $h_{ik}\geq0$ already includes that margin; it must
+-not be compared against $m_i$ again. Our central construction is $\delta_{i,t}$, which preserves the surrounding scene
+-while allowing a designated link to contact supported target surfaces.
++We use $\epsilon_r=10$\,mm. Unlike deleting every point inside an enclosing robot volume, this test can retain an object between the fingers when its observed surface differs from the robot surface. It depends on calibration and geometric accuracy and can still remove a nearby object within the tolerance.
+ 
+-\subsection{Boundary-preserving target grounding}
+-\label{sec:grounding}
+-Attention-based Target Segmentation (ATS) grounds internal visual evidence in depth. It outputs a supported contact
+-region and its validity, rather than treating a target center or bounding volume as a complete object mask.
+-
+-\paragraph{Visibility-aware multi-view evidence.}
+-An instrumented extraction pass of the same frozen checkpoint reads instruction-conditioned image attention
+-$\alpha_t^v$ and hidden features for camera $v$. The attention query and layer/head are selected on development data
+-and held fixed during evaluation. We lift valid depth pixels into the robot frame:
++\paragraph{Observed surface graph.}
++Valid non-robot pixels within 2\,m are back-projected into the robot base frame:
+ \begin{equation}
+  x_t^v(u)=T_t^v\!\left[D_t^v(u)(K^v)^{-1}\widetilde u\right].
+  \label{eq:lift}
+ \end{equation}
+-Here $T_t^v$ uses the camera pose at capture time, including wrist-camera motion. Robot self-points are filtered, and
+-support surfaces are retained as protected scene geometry. Attention is normalized within each view using fixed
+-calibration statistics before fusion.
++All views share a 5\,mm voxel grid. Nodes store centroids $x_i$, local normals $n_i$, and the contributing pixel-to-patch associations. An edge is admitted only if a pair of neighboring image pixels connects the two nodes, their depth difference is at most 10\,mm, and the node centroids are at most 15\,mm apart. Thus, proximity in 3D alone cannot create an edge across a visible depth discontinuity. Multi-view observations can still share a voxel, so this construction does not guarantee separation below the voxel scale.
+ 
+-For a candidate surface point $x$, let $\omega_t^v(x)\in[0,1]$ encode valid depth, projection consistency, and visibility
+-from a depth-consistency test. Occluded or invalid observations receive zero weight. Fused attention is
++For admitted edges, the geometric affinity is
+ \begin{equation}
+- a_t(x)=\frac{\sum_v\omega_t^v(x)\alpha_t^v(\Pi_t^v x)}
+- {\sum_v\omega_t^v(x)+\epsilon}.
+- \label{eq:views}
++ w_{ij}=\exp\!\left[-\frac{\|x_i-x_j\|^2}{\sigma_x^2}
++ -\frac{1-|n_i^\top n_j|}{\sigma_n}\right],
++ \label{eq:affinity}
+ \end{equation}
+-An unsupported point is marked unknown, not assigned negative target evidence. Thus, a visible wrist view can supply
+-evidence when the head view is occluded; increasing wrist weight alone cannot resolve a geometrically ambiguous
+-boundary. If all views lack support, the system relies on bounded memory or withdraws the contact exception.
++with $\sigma_x=10$\,mm and $\sigma_n=0.2$. Normals are estimated by local PCA; the normal term is omitted when unavailable. RANSAC identifies support nodes. These nodes supply negative evidence for target membership while remaining part of the protected scene.
+ 
+-\paragraph{Identity selection without attention-shaped geometry.}
+-We build geometric candidate regions from the full non-support cloud using density connectivity and local
+-surface/depth discontinuities~\cite{ester1996dbscan}. Attention seeds and ranks these regions, but low-attention points
+-remain available both for extent recovery and for obstacle reconstruction. We score each candidate using attention
+-averaged over supported voxels, geometric plausibility, and association to the previous target. A candidate does not
+-win solely by containing more points. Insufficient separation from a competing candidate leads to abstention.
+-A persistent identity change requires new geometric and task evidence; ambiguous components are not automatically
+-merged into the selected object.
++\paragraph{Patch-mass-preserving seeds.}
++The fixed noun attention head is prefix layer 10, head 7 (zero-based). The three views provide 768 image patches, with a $16\times16$ patch grid per view. We select the five highest-attention eligible patches; eligibility requires at least 60 non-robot, non-support pixels. This prevents a high-attention patch dominated by the support from automatically becoming a target seed.
+ 
+-\paragraph{Separate identity memory from surface membership.}
+-Target memory stores an identity together with individually supported surface voxels, timestamps, and visibility.
+-Geometric association and grasp-conditioned motion align these voxels across requests. A currently visible surface
+-can gain or lose target membership as additional views reveal the boundary; this update does not require changing the
+-object identity. Occluded surfaces retain prior membership only within a fixed age and motion-consistency budget.
+-A contradicted or stale surface loses exemption eligibility while remaining represented as occupied or uncertain
+-scene geometry. This prevents the common failure in which target persistence also makes an early target--obstacle
+-merge permanent.
++Let $a_p$ be attention for selected patch $p$, $N_p$ its retained pixel count, and $N_{ip}$ the count assigned to node $i$. The positive unary weight is
++\begin{equation}
++ \lambda_i^+=\sum_{p\in\mathcal P}
++ \frac{N_{ip}}{N_p}\frac{a_p}{\max_{r\in\mathcal P}a_r}.
++ \label{eq:mass}
++\end{equation}
++Each patch contributes a fixed mass divided among its nodes, rather than repeating its full score at every depth point. A 15\,cm region of interest around seeded nodes bounds the graph solve. This region limits computation; it is not itself an object mask.
+ 
+-\paragraph{Evidence-limited exclusion.}
+-Let $\mathcal S_t$ be occupied seeds used to construct the scene field. Let $\mathcal T_t^+$ contain currently supported
+-or still-valid remembered target surface samples, and $\mathcal N_t$ contain competing surfaces, including protected
+-supports. Define their nearest-surface distances $d_T(x)$ and $d_N(x)$. We remove only
++\paragraph{Membership and region selection.}
++Let $\lambda_i^-=1$ for support nodes and zero otherwise, $\Lambda_{ii}=\lambda_i^++\lambda_i^-$, and $s_i=\lambda_i^+/\Lambda_{ii}$ wherever the denominator is nonzero. With graph Laplacian $L$, we minimize
+ \begin{equation}
+-\begin{split}
+- \mathcal R_t=\{x\in\mathcal S_t\cap\mathcal B_t:\;&d_T(x)\leq\rho,\quad d_T(x)+\tau<d_N(x),\\
+- &v_t(x)=1\},
+-\end{split}
+-\label{eq:region}
++ E(m)=(m-s)^\top\Lambda(m-s)+\lambda m^\top Lm,
++ \qquad \lambda=1.
++ \label{eq:energy}
+ \end{equation}
+-where $\mathcal B_t$ is a conservative target bounding volume, $\rho$ is the local surface-support radius, and $\tau$
+-reserves a boundary band. The validity predicate $v_t$ requires accepted target membership, current or unexpired
+-observation support, and no support-plane or competing-surface veto. The bounding volume limits the search; it does
+-not authorize removal. Ties, conflicting labels, and insufficient observations keep a seed outside $\mathcal R_t$.
+-The field is rebuilt from the remaining seeds, so previously excluded neighbors can be restored.
++On connected components with unary evidence, the solution satisfies
++\begin{equation}
++ (\Lambda+\lambda L)m=\Lambda s.
++ \label{eq:solve}
++\end{equation}
++Nonnegative affinities and bounded unary targets give a solution in $[0,1]$ up to numerical error. Components without unary evidence are marked unknown rather than assigned target membership. Among connected regions of $m_i\geq0.5$, we retain the region with the largest positive seed mass $\sum_i\lambda_i^+$. No eligible seed produces an empty target output. This is a continuous graph-energy solve followed by region selection, not a binary minimum-cut algorithm.
+ 
+-This formulation distinguishes two errors: selecting the wrong identity, and removing non-target geometry despite a
+-correct identity. It cannot manufacture a boundary absent from every observation. In that case it withholds the
+-ambiguous exception, which may prevent progress but avoids granting contact permission from missing evidence.
++\subsection{What should internal features control?}
++\label{sec:features}
++A descriptor can encode object identity without resolving every surface boundary. We therefore evaluate two distinct uses instead of assuming that every signal should be fused into membership.
+ 
++\paragraph{Boundary fusion ablations.}
++We extract unit patch features from the SigLIP output, visual projector, and prefix layers 4, 8, and 12. Node features are normalized pixel-weighted mixtures of contributing patch features. Feature edges multiply Eq.~\eqref{eq:affinity} by $\exp(-\|f_i-f_j\|^2/\sigma_f^2)$, with $\sigma_f=0.5$. Prototype unaries map cosine similarity to the attention-seed prototype into $[0,1]$ using seed and scene reference scores, with unary coefficient 0.1. We compare edges alone, unaries alone, both, and feature-conditioned region growing. These are tested alternatives; the selected extent method uses geometry edges and seed/support unaries only.
+ 
+-\subsection{Phase guidance and physical grasp state}
++\paragraph{Temporal identity consistency.}
++As an exploratory alternative, let $u_{p,t}$ be a unit patch feature. We center and renormalize it within each frame,
++\begin{equation}
++ \widetilde u_{p,t}=\operatorname{norm}\!\left(u_{p,t}-\overline u_t\right),\quad
++ g_t=\operatorname{norm}\!\left(\sum_p b_{p,t}\widetilde u_{p,t}\right),
++\end{equation}
++where $b_{p,t}$ counts pixels of the selected region in patch $p$. Agreement $c_t=g_t^\top g_{\mathrm{mem}}$ measures consistency with a past selected region. The first-reference variant retains the first available descriptor. The chain variant uses the preceding final selection from the memory-association arm, including its 0.1 cosine-margin switch rule. Neither uses future frames or ground-truth identity for memory updates.
++
++A low score can nominate a frame for abstention. In the offline analysis, abstention replaces the prediction by the empty set and measures removed false-positive and lost true-positive voxel mass. It does not execute a controller or a contact-permission update. The centered prefix-layer-8 chain score and development threshold $0.5904$ are frozen for subsequent evaluation. Missing history is reported separately; initial frames are not silently counted as reliable. These cosines are consistency scores, not calibrated safety probabilities, and an incorrect remembered identity can remain self-consistent.
++
++\subsection{Auxiliary phase and grasp inference}
+ \label{sec:phase}
+-Hidden-state Sub-task Recognition (HSR) predicts \emph{pick}, \emph{place}, and \emph{home} from pooled image/text features
+-$f_t$ of the extraction pass:
++The existing hidden-state sub-task recognition (HSR) probe reads prefix layer-4 KV features and predicts \emph{pick}, \emph{place}, and \emph{home}. We test an additional supervised logistic model using HSR log-probabilities, the minimum of the two gripper-state coordinates, and three geometric relations: distance from the selected region centroid to the nearer hand proxy, height relative to nearby support, and log region size. The hand proxy is computed from downstream gripper-body positions by forward kinematics; it is not a measured contact point.
++
++Inputs are standardized within each training fold. We fix L2 regularization to 1 and evaluate leave-one-episode-out predictions. Recorded grasp-state annotations define phase labels: pre/post-grasp states map to \emph{pick}, held to \emph{place}, and placed to \emph{home}. A separate binary task predicts held versus not held. This evaluates coarse state classification on selected moments, not arbitrary task reasoning or transition timing. The VLA remains frozen, but these auxiliary classifiers are supervised.
++
++\subsection{From target surfaces to contact permission}
++\label{sec:contact}
++The intended downstream interface consumes $\mathcal T_t$, its validity, a task state, and physical grasp feedback. For occupied scene samples $\mathcal S_t$, only samples supported by accepted target membership are eligible for exclusion:
+ \begin{equation}
+- p_t=\operatorname{softmax}\!\left(W((f_t-\mu)/\sigma)+b\right).
+- \label{eq:probe}
++ \mathcal R_t\subseteq\mathcal S_t\cap\operatorname{supp}(\mathcal T_t).
++ \label{eq:region}
+ \end{equation}
+-Only the normalization statistics and linear probe are fitted using independently annotated demonstrations; the VLA
+-weights remain fixed. A label is confirmed across consecutive requests. Confirmed \emph{pick} permits persistent target
+-adoption; \emph{place} suppresses identity switching; \emph{home} clears completed target memory after physical release.
+-Surface correction remains active within a retained identity. Uncertain phase predictions cannot create a new
+-exception. Probe labels describe task intent, not proof of successful grasp or placement.
++Unknown samples and protected supports are not authorized by this rule. A coarse outer bound may accelerate queries but must not enlarge $\mathcal R_t$. Let $\mathcal L_t$ be the configured contact-link set and $g_t^{\mathrm{permit}}$ a validity/state gate. The per-link field is
++\begin{equation}
++ \delta_{i,t}=\begin{cases}
++ d(\,\cdot\,;\mathcal S_t\setminus\mathcal R_t), & i\in\mathcal L_t,\ g_t^{\mathrm{permit}}=1,\\
++ d(\,\cdot\,;\mathcal S_t), & \text{otherwise},
++ \end{cases}
++ \label{eq:fields}
++\end{equation}
++where $d$ denotes a collision-distance field rebuilt from the specified occupied samples. This keeps the same target protected for non-contact links. With robot query sphere center $c_i(q_k)$, radius $r_i$, and margin $\mu_i$, a refiner can impose
++\begin{equation}
++ \delta_{i,t}(c_i(q_k))-r_i-\mu_i\geq0.
++ \label{eq:clearance}
++\end{equation}
+ 
+-An independent state machine combines executed gripper commands, measured opening, target-to-hand consistency, and
+-release evidence. Only a confirmed \textsc{held} state creates attached geometry. Detected slip withdraws attachment
+-and permissive updates; release restores the object to the scene representation. Where available observations cannot
+-resolve the physical state, the system retains conservative geometry and rejects motion requiring a new permission.
+-This separation prevents a premature \emph{place} prediction from turning an ungrasped object into robot geometry.
++During approach, contact remains restricted; grasp permits only designated finger links. Confirmed attachment adds carried-object queries against the environment. Placement may authorize specified object--support contact before the object returns to scene geometry. These are configured interaction rules, not affordances inferred from noun attention. Attachment requires physical evidence beyond a phase prediction.
+ 
+-\subsection{Link-specific fields and attached geometry}
+-\label{sec:exemption}
+-The scene field $d_t$ is constructed from self-filtered depth using a TSDF-to-ESDF pipeline
+-\cite{sundaralingam2026curobov2}. Before attachment, the target remains in this field. Link-specific Target Exemption
+-(LTE) also constructs a local field $d_t^{\setminus\mathcal R}$ with only the seeds in $\mathcal R_t$ removed. Within its
+-valid query window, the link-dependent distance is
+-\begin{equation}
+- \delta_{i,t}(x)=
+- \begin{cases}
+- d_t^{\setminus\mathcal R}(x), & i\in\mathcal L\ \land\ e_t=1,\\
+- d_t(x), & \text{otherwise},
+- \end{cases}
+- \label{eq:linkquery}
+-\end{equation}
+-where $e_t$ requires a valid target and a permitted pre-attachment contact state. Queries outside the local window
+-use the scene field; insufficient field support invalidates execution rather than extending the exemption.
+-Neighboring surfaces survive in both fields. The wrist and other non-contact links still query the target itself.
+-
+-On confirmed grasp, supported pre-closure target geometry is transformed into the hand frame and represented by
+-attached query spheres. Its confidently assigned geometry is removed from the environment's self-obstacle layer,
+-while the attached spheres query the remaining environment. This removal uses target ownership rather than clearing
+-the entire enclosing ball. A configured placement rule permits object--support contact only at the destination and
+-appropriate stage; it does not exempt the robot from that support. Upon release, retained geometry is immediately
+-returned to the scene and updated with new depth, avoiding a gap while waiting for reobservation.
+-
+-The robot query model covers palm, fingers, wrist, and the arm links relevant to the evaluated motions. Sphere unions
+-are audited against collision meshes across the evaluated joint and gripper configurations. The same geometry is
+-used in all contact-rule comparisons: adding a missing palm cover is a modeling correction, not evidence that LTE
+-outperforms global exclusion. Attached-object coverage is audited separately. The final link list and residual
+-coverage errors will accompany the evaluated snapshot.
+-
+-\subsection{Refining the executed action prefix}
+-\label{sec:refine}
+-Constrained Chunk Refinement (CCR) optimizes $J$ arm-joint waypoints with tracking, smoothness, and execution-aligned
+-continuity terms:
+-\begin{equation}
+-\begin{split}
+- E(Q)={}&w_{\mathrm t}\|Q-Q^{\mathrm{ref}}\|_F^2+w_{\mathrm s}\|\Delta^2Q\|_F^2\\
+- &+w_{\mathrm c}\|Q_{\mathcal O}-\bar Q^{\mathrm{prev}}_{\mathcal O}\|_F^2.
+-\end{split}
+-\label{eq:qp}
+-\end{equation}
+-Here $\mathcal O$ contains only valid overlap with previously executed motion, aligned by client feedback. Sequential
+-quadratic programming linearizes Eq.~\ref{eq:clearance} within a trust region, using slack for intermediate feasibility
+-and OSQP for the QP subproblems~\cite{stellato2020osqp}. Joint and motion limits constrain the candidate. Additional
+-look-ahead rows expose approaching obstacles, but only the first $K\leq J$ rows are sent before replanning.
+-
+-A post-check recomputes nonlinear clearance for all configured spheres along that executed prefix, including
+-interpolated samples, and verifies limits and geometry validity. Approval requires nonnegative margin residuals;
+-optimization slack or improvement over the initial pose does not waive the check. Otherwise the client issues
+-\textsc{hold}, retaining the measured arm pose and a grasp-state-consistent gripper command, and requests a new
+-observation. HOLD is reported as an intervention, not successful avoidance or guaranteed safety.
+-
+-The RB-Y1 instantiation uses an embodiment-adapted $\pi_{0.5}$, two 7-DoF arms and two gripper channels, $H=50$, $K=8$,
+-and $J=16$. A 15\,Hz execution rate gives a nominal 533\,ms prefix duration. These are configuration values, not measured
+-latencies. End-to-end timing includes action serving, the separate attention/feature pass, geometry, refinement, and
+-communication. Checks concern observed geometry and the audited model at sampled configurations; they do not
+-establish continuous-time, whole-body, or force-based safety.
++Existing chunk refinement can consume these fields while tracking the VLA proposal and checking the executed prefix. Our present study neither integrates the new surface output into that permission builder nor measures its closed-loop effects. Consequently, reduced surface false positives are a relevant diagnostic for this interface, not proof of fewer forbidden contacts. Continuous collision checking, unseen surfaces, contact forces, and slip require additional mechanisms.
+--- before/paper/latex/sections/04_experiments.tex
++++ after/paper/latex/sections/04_experiments.tex
+@@ -1,122 +1,117 @@
+ % !TEX root = ../main.tex
+-% All evaluation below is a future plan. No placeholder is a measured result.
+-\section{Planned Experiments}
++\section{Development Evaluation}
+ \label{sec:experiments}
+-The evaluation will test whether improved contact geometry increases task completion without forbidden contact,
+-and isolate the mechanism responsible. All comparisons and results in this section are planned. We will freeze the
+-implementation, scene-generation rules, input contract, tuning split, sample budget, and primary contrasts before
+-held-out evaluation. No trial will be selected because it favors the proposed method.
++We evaluate three questions: does observed-surface grounding improve extent under a matched robot mask; does adding internal-feature similarity improve that boundary; and can the same representations support identity or task-state checks? All numerical results below are development observations, not held-out performance estimates.
+ 
+-\subsection{Tasks, comparisons, and measurement}
+-\paragraph{Three complementary settings.}
+-SafeLIBERO~\cite{hu2026vlsa} will provide the primary public-benchmark comparison after its observation/action adapter is
+-validated. RB-Y1 simulation in MuJoCo~\cite{todorov2012mujoco} will support controlled target--obstacle, occlusion, carrying,
+-and placement experiments with contact-level ground truth. A real RB-Y1 study will demonstrate execution feasibility
+-and sensor limitations; it will not be used to claim comparative superiority without matched trials. On each platform,
+-we will document policy checkpoint, camera/depth access, embodiment adaptation, and probe training data separately.
++\subsection{Data, controls, and measurement}
++\paragraph{Data and scope.}
++The study contains 180 selected key frames from 32 RB-Y1 simulation episodes, drawn from two previously inspected rollout sets (16 episodes each). Successful episodes contribute approach, grasp, carry, placement, and retreat moments; failed episodes contribute selected failure moments. All episodes are designated development data. They use the recorded “clear” obstacle profile and four fruit targets (apple, banana, orange, and pear), with left- and right-arm examples. The policy is the frozen, embodiment-adapted $\pi_{0.5}$ checkpoint; this set does not establish clutter or added-obstacle robustness. Because the original records contain no depth, we reconstruct simulated depth by replaying recorded states in MuJoCo~\cite{todorov2012mujoco}. Camera transforms, planar-depth conventions, and label alignment are checked before evaluation. Simulator target labels are used for evaluation and development decisions, not supplied to the grounding algorithm at inference.
+ 
+-\paragraph{Baselines and parity.}
+-We will compare the same frozen VLA with and without \sys, and select reproducible implementations of VLSA, KNOWS,
+-and WBAG~\cite{hu2026vlsa,park2026knows,zhen2026wbag} for direct comparison. Checkpoint, episodes, seeds, observation access,
+-termination, and tuning budgets will be matched where possible. Privileged inputs and reimplementations will be
+-identified explicitly. Incompatible published numbers will remain in separate reporting blocks. Component studies
+-will share CCR, collision geometry, grasp-state logic, and execution settings unless that component is the intervention.
++\paragraph{Metric and aggregation.}
++We evaluate observed surfaces on a common 5\,mm voxel grid, with one unit of occupancy per voxel. Let $y_i\in[0,1]$ be the fraction of target-labeled observations in voxel $i$ and $\widehat y_i\in\{0,1\}$ the predicted membership. Then
++\begin{equation}
++ \mathrm{TP}=\sum_i y_i\widehat y_i,\quad
++ \mathrm{FP}=\sum_i(1-y_i)\widehat y_i,\quad
++ \mathrm{FN}=\sum_i y_i(1-\widehat y_i).
++\end{equation}
++IoU is $\mathrm{TP}/(\mathrm{TP}+\mathrm{FP}+\mathrm{FN})$. We average frame metrics within an episode, then average episodes. Paired intervals resample episodes 2,000 times with seed 20261015. Repeated use of these data for method selection means that the intervals describe this development comparison; they are not independent confirmatory significance tests. False-positive surface mass is a proxy for potentially excessive contact exclusion. The actual permission builder and executed contact outcomes are not evaluated.
+ 
+-\paragraph{Outcomes and contacts.}
+-We will report task success, any forbidden contact, and \emph{safe success}: successful trials containing no forbidden
+-contact within the evaluation interval. Allowed object--link--stage pairs will be fixed independently of the field
+-under test. Simulator contact logs and replay will provide the primary contact labels. We will also report first
+-contact time, force summaries, HOLD frequency/duration, timeout rate, trajectory deviation, and total completion time.
+-Stops and incomplete trials will remain in the denominator. Paired differences and 95\% confidence intervals will
+-respect shared episodes and seeds; frame counts will not substitute for independent trials. The trial budget and
+-aggregation unit will be preregistered after a separate development pilot.
++\paragraph{Baselines.}
++The reference uses the same noun attention, 1\,cm point fusion, top-5\% lifted-attention seeds, 3\,cm radius growth and DBSCAN~\cite{ester1996dbscan}, and attention-based cluster selection. We evaluate its selected region and its enclosing ball separately. Each frame resets the reference state; temporal hold behavior is not tested. The proposed method uses the fixed settings in Sec.~\ref{sec:grounding}. Both pipelines are tested with the original sphere/capsule robot-volume filter and with the same rendered surface mask. This controls robot removal, but the extent comparison still includes the joint effects of voxel resolution, seeds, connectivity, and region selection; it is not an isolated test of the graph solver.
+ 
+-\paragraph{Completion without inference tails.}
+-The primary placement endpoint $P$ will require release and stable residence of the object in the receptacle over a
+-fixed confirmation interval. A separately reported return endpoint $R$ will additionally require a stable entry into
+-a tolerance region around a ready posture after $P$; exact joint equality will not be required. Pose and dwell thresholds
+-will be calibrated on development demonstrations, then frozen. Neither endpoint will be defined by HSR's \emph{home}
+-label. We will stop observation requests and inference at the chosen confirmed endpoint. For the return condition,
+-placement-prefix outcomes will also be reported. Failed, stopped, and never-completed trials will retain their full
+-valid interval up to failure or the fixed timeout. Logs crossing an endpoint will be cropped by executed control time,
+-without discarding earlier contacts or counting post-completion predictions as task errors.
++\subsection{Extent improves beyond robot-mask replacement}
++\label{sec:extentresults}
++\begin{table}[t]
++\centering
++\caption{\textbf{Matched-mask surface grounding.} Episode-mean development metrics on 180 frames / 32 episodes. ``Volume'' and ``render'' denote robot removal. Empty predictions contribute zero IoU/recall; precision is undefined and omitted for 5, 1, 3, 1, and 3 frames in row order.}
++\label{tab:extent}
++\small
++\begin{tabular}{llccc}
++\toprule
++Extent & Mask & IoU & Prec. & Recall\\
++\midrule
++Radius + clustering & Volume & .785 & .896 & .828\\
++Surface graph & Volume & .817 & .947 & .831\\
++Radius + clustering & Render & .837 & .865 & .910\\
++\textbf{Surface graph} & Render & \textbf{.893} & \textbf{.938} & .915\\
++Enclosing ball & Render & .778 & .809 & .903\\
++\bottomrule
++\end{tabular}
++\end{table}
+ 
+-\begin{table*}[t]
+-\centering\small
+-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}Xlcccc@{}}
++Replacing the robot mask improves both methods (Table~\ref{tab:extent}). For radius growth and clustering, IoU increases from 0.785 to 0.837. For the surface graph, it increases from 0.817 to 0.893. This shows why comparing only the original baseline with the final method would overattribute the full gain to extent recovery.
++
++Under the same rendered mask, the surface method improves IoU by $0.057$ with a development interval of $[0.006,0.103]$; it improves 27 episodes and worsens five. The corresponding precision difference is $+0.073$ $[0.017,0.121]$, while the recall difference is $+0.005$ $[-0.041,0.047]$. The evidence therefore favors reduced extra surface membership more clearly than increased target coverage. Because precision omits undefined empty predictions, IoU remains the primary matched metric.
++
++Performance varies by moment. After placement and during retreat, frame-mean IoU improves from 0.758 to 0.911 and from 0.617 to 0.882, respectively. However, on the failed-grasp after-close moment it falls from 0.920 to 0.745. Surface continuity and seed selection do not resolve every target ambiguity. The enclosing-ball result further shows that an extent estimate and the volume used to authorize contact are distinct design choices. These observations concern surface membership, not a measured reduction in collisions.
++
++\begin{figure*}[t]
++\centering
++\includegraphics[width=\textwidth]{../figures/ifg_results/robot_mask_example.png}
++\caption{\textbf{Robot removal can erase the held target.} Recorded development example from a right-wrist view. The first two panels show robot-mask overlays; the last two project the evaluated target predictions (green: true positive; orange: false positive; blue: false negative). With the extent method fixed, switching from volume-based removal to rendered-depth matching improves this frame's 3D IoU from 0.552 to 0.961. This selected example illustrates the mask effect; the separate, matched-mask extent comparison is in Table~\ref{tab:extent}.}
++\label{fig:robotmask}
++\end{figure*}
++
++\subsection{Feature similarity does not reliably refine boundaries}
++\label{sec:featureresults}
++\begin{table}[t]
++\centering
++\caption{\textbf{Feature fusion with the improved geometry fixed.} Episode-mean development IoU; all rows use the rendered robot mask and largest-seed-mass region selection. Prefix L8 is shown for a controlled comparison. Oracle seeds are diagnostic inputs, not deployable methods or a universal performance bound.}
++\label{tab:features}
++\small
++\begin{tabular}{lc}
+ \toprule
+-Method & Comparison status & Success $\uparrow$ & Contact $\downarrow$ & Safe success $\uparrow$ & Latency $\downarrow$\\
++Membership construction & IoU\\
+ \midrule
+-Frozen VLA & Planned paired run & -- & -- & -- & --\\
+-VLA + \sys & Planned paired run & -- & -- & -- & --\\
+-VLSA / KNOWS / WBAG & Pending adapter/input parity & -- & -- & -- & --\\
++Geometry + attention seeds & .893\\
+++ Feature edges & .893\\
+++ Prototype unary & .827\\
+++ Feature edges and unary & .826\\
++Feature-conditioned region growing & .755\\
++Geometry region growing & .832\\
++Edges + unary, shuffled features & .485\\
++Geometry, oracle target seeds & .918\\
+ \bottomrule
+-\end{tabularx}
+-\caption{Planned main comparison. Each selected baseline will receive its own row, and each platform, suite, and
+-termination protocol its own reporting block. Dashes indicate unmeasured quantities. Final rows will include trial
+-counts, input access, uncertainty, and result provenance.}
+-\label{tab:main}
+-\end{table*}
++\end{tabular}
++\end{table}
+ 
+-\subsection{Separating grounding from contact handling}
+-\paragraph{Identity and extent.}
+-We will evaluate target identity accuracy separately from target-surface coverage and the fraction of neighboring
+-obstacle geometry incorrectly removed. With identity held fixed, we will compare ball exclusion, geometric clustering,
+-and the proposed membership-constrained region. Predicted/oracle identity crossed with predicted/oracle extent will
+-localize each source of error. Oracle geometry and external masks will be diagnostic inputs, not undisclosed inputs
+-to the deployed method. Every geometric comparison will be followed by matched closed-loop trials to connect field
+-errors to grasp access, collision, and safe success.
++Table~\ref{tab:features} tests feature integration after improving the geometric parent. This avoids rejecting features only because an earlier baseline had weak seeds or robot removal. Across projector and prefix layers 4, 8, and 12, feature edges yield IoUs of 0.893--0.894, with no meaningful observed gain. SigLIP feature edges reduce IoU to 0.872. Across all five representations, prototype unaries yield 0.790--0.831 and combined edges/unaries yield 0.787--0.826. Feature-conditioned growing also underperforms geometry-only growing. Shuffling features substantially worsens the combined method, showing that the descriptors carry structure, but that this structure is not sufficient to improve the chosen boundary construction.
+ 
+-\paragraph{Occlusion and boundary recovery.}
+-We will vary target--obstacle separation, obstacle shape, head/wrist occlusion, and depth noise using a scene rule fixed
+-before outcomes are inspected. We will compare head-only, fixed multi-view fusion, and visibility-aware fusion; then
+-compare no memory, frozen target geometry, and identity-preserving extent updates. Measurements will include obstacle
+-retention, retained target coverage, erroneous membership lifetime, recovery after reappearance, and HOLD duration.
+-Cases with no useful view will test abstention explicitly. Existing near-target failure scenes will remain a named
+-regression set, while held-out scenes will determine generalization.
++The diagnostics identify two plausible failure mechanisms. First, an average 42.4\% of target nodes have a pixel-weighted target fraction below 50\% across their contributing patches. Among the 100 frames with target/non-target boundary edges, an average 73.5\% of those edges share the same dominant patch. Coarse patch descriptors therefore often lack a distinct feature boundary at a measured surface boundary. These are descriptive associations, not an impossibility result for all internal representations.
+ 
+-\paragraph{Permission and attachment.}
+-Using identical target geometry and audited robot spheres, we will compare no target exemption, global exclusion, and
+-link-specific exclusion. Scenes will include wrist/arm approaches that make non-contact-link constraints relevant.
+-We will then toggle attached-object queries under matched grasp-state logic and evaluate carrying-path contacts.
+-Sphere coverage and surface-membership errors will be logged separately, so collision-model repairs are not
+-misattributed to target grounding.
++Second, the prototype inherits seed errors and can mis-rank otherwise valid regions. In 48 multi-region frames, seed-mass ranking selects the correct region in 42 cases; prefix-layer-8 and projector prototype rankings do so in 34 and 32. The development evidence supports retaining noun seeds and geometric extent as the primary method, rather than making feature fusion mandatory.
+ 
+-\paragraph{Phase and execution support.}
+-We will compare HSR against a strong gripper-state/history rule and no phase guidance while fixing attachment logic.
+-Held-out object, instruction, and occlusion conditions will test phase confusion and downstream stale-exception errors.
+-Any independent HSR claim will depend on improved contact outcomes beyond the strong rule. With geometry fixed, we
+-will also compare prefix refinement and its post-check variants, logging minimum margin residuals and false approvals.
+-These supporting studies will be secondary to the grounding and permission contrasts.
++\subsection{Features as identity checks; geometry as state evidence}
++\paragraph{Exploratory identity consistency.}
++We define a wrong choice as selected-region IoU below 0.1 when the target is visible. On the same 147 frames with available history and comparison scores, centered prefix-layer-8 chain agreement gives wrong-choice AUROC 0.998, versus 0.900 for the fraction of seed mass in the selected region. The larger 179-frame feature-free cohort has AUROC 0.914 and is not used as a matched comparator.
++
++At the development tenth-percentile threshold, 15 of 147 frames are withheld, including all six wrong choices. This removes 81.6\% of false-positive voxel mass while losing 6.0\% of true-positive mass in this cohort. These are pooled voxel-mass fractions after emptying predictions, not contact-rate reductions. Only six error events are available; the threshold was selected on development data, history is sampled sparsely, and the memory chain can itself drift. This is a candidate reliability signal requiring independent evaluation.
++
++\paragraph{Supervised phase inference.}
++Table~\ref{tab:phase} reports pooled frame accuracy from leave-one-episode-out predictions. Adding geometric relations to HSR and gripper state increases accuracy from 0.878 to 0.939. The separately computed episode-mean paired gain is $0.067$ $[0.015,0.118]$; it differs from the pooled difference because episodes have different numbers of selected frames. Adding memory agreement does not improve phase accuracy (0.933). For binary held-state classification, gripper-plus-geometry logistic regression reaches 0.922, versus 0.828 for a gripper-threshold rule. These results support geometric relations as auxiliary state evidence, not as a substitute for contact sensing.
+ 
+ \begin{table}[t]
+-\centering\small
+-\begin{tabularx}{\columnwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
++\centering
++\caption{\textbf{Auxiliary phase prediction.} Pooled accuracy over 180 selected frames. LR denotes supervised logistic regression with leave-one-episode-out fitting. Development-informed upstream grounding and feature choices remain fixed across folds, so this is not a held-out evaluation of the entire pipeline.}
++\label{tab:phase}
++\small
++\begin{tabular}{lc}
+ \toprule
+-Factor & Controlled comparison and primary diagnostic\\
++Phase predictor & Accuracy\\
+ \midrule
+-Identity & Geometric / attention / oracle selection; identity accuracy\\
+-Extent & Ball / cluster / proposed / oracle; target coverage and neighbor removal\\
+-Visibility & Head / fixed fusion / visibility-aware; occlusion errors\\
+-Memory & None / frozen extent / corrected extent; erroneous membership lifetime\\
+-Permission & No exemption / global / link-specific; contacts by link\\
+-Attachment & Off / on with fixed grasp state; carried-object contacts\\
+-Phase & No gate / strong rule / HSR; stale exceptions and safe success\\
++HSR argmax & .783\\
++LR: HSR & .856\\
++LR: HSR + gripper & .878\\
++LR: HSR + gripper + geometry & \textbf{.939}\\
+++ Memory agreement & .933\\
+ \bottomrule
+-\end{tabularx}
+-\caption{Planned interventions under a matched controller. Geometry coverage, sensing, and termination will be shared
+-within each comparison. Full-system safe success will accompany intermediate diagnostics.}
+-\label{tab:ablation}
++\end{tabular}
+ \end{table}
+ 
+-\subsection{Runtime, reporting, and claim decisions}
+-We will measure policy serving, additional extraction, probe, ATS, field construction, CCR, and communication cost,
+-including median and tail end-to-end latency on stated hardware. Simulation that waits for inference will be separated
+-from wall-clock deployment tests. We will report deadline misses relative to the execution horizon rather than infer
+-real-time operation from command frequency.
++\subsection{Locked validation and downstream comparison}
++\label{sec:next}
++The extent settings, auxiliary models, and confidence threshold are frozen before subsequent held-out collection. The primary planned set consists of new, simulator-successful rollouts; in-distribution scenes are allowed, previously analyzed episodes are excluded, and failed rollouts are retained for separate reporting. This estimates grounding conditional on rollout success, not unconditional task success or out-of-distribution robustness. Target-occlusion conditions are exploratory tests, reported separately rather than pooled into the primary result or method-adoption decision.
+ 
+-The final results section will fill Table~\ref{tab:main} with paired outcomes, then use Table~\ref{tab:ablation} to explain
+-which representation changes caused them. Qualitative examples will be chosen by a declared rule and include failures.
+-An increase in HOLDs alone will not support a performance claim. If extent accuracy improves without safe-success
+-gains, we will report the remaining controller or coverage bottleneck. If HSR does not outperform the strong rule,
+-it will remain an optional component. Only supported findings will replace the prospective empirical contribution.
++To test the contact interface, the decisive comparison holds the collision representation, permitted links, refiner, and execution checks fixed while varying perception: a strong external segmenter with multi-view fusion and tracking, our internal-attention surface construction, and oracle visible target masks. A crossed comparison with the original contact handling separates perception gains from downstream geometry gains. External methods receive the same observations and a disclosed development-tuning budget. KNOWS is a relevant full-system reference, but adapting it to this embodiment must be documented separately from a reproduction of its published setting.
++
++A separate, prospectively defined closed-loop study must count all attempted episodes and measure task completion, forbidden contacts, safe completion, abstention duration, target loss, and end-to-end latency. It must distinguish robot--environment, attached-object--environment, and explicitly allowed contacts. Oracle masks diagnose perception limitations; they need not upper-bound success under a fixed controller. No values for these unperformed comparisons are implied by the development tables.
+--- before/paper/latex/sections/05_conclusion.tex
++++ after/paper/latex/sections/05_conclusion.tex
+@@ -1,9 +1,3 @@
+ % !TEX root = ../main.tex
+ \section{Conclusion}
+-\sys\ connects frozen VLA representations to selective physical interaction through task-conditioned 3D contact
+-geometry. Its organizing principle separates intended identity, supported extent, and permitted contact. Multi-view
+-and temporal evidence maintain a correctable target boundary; link-specific queries and physical grasp feedback
+-carry that geometry through approach, transport, and release. The resulting method makes the spatial consequences
+-of grounding explicit in the constraints applied to executed actions. The planned evaluation will determine when
+-this representation improves safe task completion and quantify the limits imposed by visibility, geometry coverage,
+-and computation. Comparative findings remain to be established.
++\sys\ grounds observed target surfaces by assigning semantic selection to internal attention and spatial membership to depth continuity. Matched-mask development comparisons support this construction, while feature ablations show that more semantic similarity does not automatically yield a better boundary. Temporal feature agreement and target--hand geometry offer distinct, auxiliary uses of the extracted representations. The resulting surface representation provides a concrete interface for selective contact; independent evaluation must establish whether its offline gains translate into safer execution.
+--- before/paper/latex/sections/06_limitations.tex
++++ after/paper/latex/sections/06_limitations.tex
+@@ -1,11 +1,3 @@
+ % !TEX root = ../main.tex
+ \section{Limitations}
+-The method depends on calibrated, synchronized depth and a collision model that covers the evaluated robot surfaces.
+-Unseen obstacles, calibration error, and geometry outside that coverage remain failure modes. Surface membership
+-estimates observed extent; they do not reconstruct hidden object shape. A fully occluded or inseparable target can
+-therefore cause conservative stopping, and the current formulation does not actively move cameras to resolve it.
+-Contact-link and destination rules are configured rather than learned, limiting transfer to interactions requiring
+-new contact semantics. Attention selection and probe calibration may also need adaptation across policies and
+-embodiments. Finally, sampled kinematic clearance is not a force constraint or a continuous-time safety certificate;
+-latency, compliant contact, and dynamic obstacles require additional treatment. The prospective improvements in this
+-draft require implementation-parity checks and the planned experiments before performance conclusions can be drawn.
++The current evidence uses simulated replay depth and selected moments from 32 development episodes. Adaptive method selection, sparse temporal sampling, and six wrong-choice events limit generalization and confidence conclusions. We reconstruct observed surfaces only: occlusion, missing depth, calibration error, and sub-voxel contacts remain unresolved. The graph does not complete hidden geometry or guarantee a correct boundary. Robot-depth matching relies on accurate meshes and kinematics. Auxiliary phase models require supervision, and their labels describe a restricted pick--place sequence. The proposed contact interface has not yet been evaluated with the new surface output in closed loop; neither physical safety, runtime suitability, nor superiority to external segmentation has been established.
+--- before/paper/latex/main.tex
++++ after/paper/latex/main.tex
+@@ -14,8 +14,7 @@
+ \g@addto@macro\@maketitle{%
+   \input{../figures/fig01_teaser/figure}%
+   \begin{center}
+-  \textbf{PROSPECTIVE METHOD DRAFT --- RESULTS PENDING}\\
+-  Methods assume completed improvements; experiments describe planned evaluation.
++  \textit{Working draft: development evidence; held-out and closed-loop evaluation pending.}
+   \end{center}
+ }
+ \makeatother
+@@ -25,10 +24,9 @@
+ \input{../figures/fig02_overview/figure}
+ \input{sections/00_abstract}
+ \input{sections/01_introduction}
+-% Queue the pipeline early so it appears at the top of the Method page.
+-\input{../figures/fig03_attention_to_3d/figure}
+ \input{sections/02_related_work}
+ \input{sections/03_method}
++\input{../figures/fig03_attention_to_3d/figure}
+ \input{sections/04_experiments}
+ \input{sections/05_conclusion}
+ \input{sections/06_limitations}
+--- before/paper/latex/metadata.tex
++++ after/paper/latex/metadata.tex
+@@ -2,5 +2,5 @@
+ \def\paperID{*****} % Replace with the actual registered OpenReview paper ID.
+ \def\confName{CVPR}
+ \def\confYear{2027} % Local target year; does NOT make this a 2027 official kit.
+-\title{AG3S: Grounding Where to Touch\\with Task-Conditioned 3D Contact Geometry}% Prospective completed-method draft.
++\title{AG3S: Grounding Target Surfaces\\for Selective Contact in Vision-Language-Action Policies}% Observed-surface grounding; development evidence.
+ \author{Anonymous Authors}
+--- before/paper/latex/references.bib
++++ after/paper/latex/references.bib
+@@ -354,3 +354,38 @@
+   booktitle = {IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+   year = {2026}
+ }
++
++% IFG revision: primary abstract/publisher records checked 2026-10-15.
++@misc{huang2025roboground,
++ author = {Haifeng Huang and Xinyi Chen and Yilun Chen and Hao Li and Xiaoshen Han and Zehan Wang and Tai Wang and Jiangmiao Pang and Zhou Zhao},
++ title = {{RoboGround}: Robotic Manipulation with Grounded Vision-Language Priors},
++ year = {2025},
++ howpublished = {arXiv preprint arXiv:2504.21530},
++ eprint = {2504.21530}, archivePrefix = {arXiv}
++}
++@inproceedings{xu2026afi,
++ author = {Siyu Xu and Zijian Wang and Yunke Wang and Chenghao Xia and Tao Huang and Chang Xu},
++ title = {Affordance Field Intervention: Enabling {VLAs} to Escape Memory Traps in Robotic Manipulation},
++ booktitle = {IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
++ year = {2026}
++}
++@misc{vo2026obeyed,
++ author = {Khoa Vo and Taisei Hanyu and Yuki Ikebe and Trong Thang Pham and Nhat Chung and Minh Nhat Vu and Duy Nguyen Ho Minh and Anh Nguyen and Anthony Gunderman and Chase Rainwater and Ngan Le},
++ title = {Clutter-Robust Vision-Language-Action Models through Object-Centric and Geometry Grounding},
++ year = {2026},
++ howpublished = {arXiv preprint arXiv:2512.22519, version 2},
++ eprint = {2512.22519}, archivePrefix = {arXiv}
++}
++@misc{jia2026guidedvla,
++ author = {Xiaosong Jia and Bowen Yang and Zuhao Ge and Xian Nie and Yuchen Zhou and Cunxin Fan and Yufeng Li and Yilin Chai and Chao Jing and Zijian Liang and Qingwen Bu and Haidong Cao and Chao Wu and Qifeng Li and Zhenjie Yang and Chenhe Zhang and Hongyang Li and Zuxuan Wu and Junchi Yan and Yu-Gang Jiang},
++ title = {{GuidedVLA}: Specifying Task-Relevant Factors via Plug-and-Play Action Attention Specialization},
++ year = {2026},
++ howpublished = {arXiv preprint arXiv:2605.12369},
++ eprint = {2605.12369}, archivePrefix = {arXiv}
++}
++@inproceedings{wang2022tokencut,
++ author = {Yangtao Wang and Xi Shen and Shell Xu Hu and Yuan Yuan and James L. Crowley and Dominique Vaufreydaz},
++ title = {Self-Supervised Transformers for Unsupervised Object Discovery Using Normalized Cut},
++ booktitle = {IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
++ year = {2022}, pages = {14543--14553}
++}
+--- before/paper/figures/fig01_teaser/figure.tex
++++ after/paper/figures/fig01_teaser/figure.tex
+@@ -1,12 +1,36 @@
+-% Complete source image, including the lower method strip; no crop.
+-% This non-floating teaser is included in the full-width title block.
++% Native vector schematic; no synthetic or illustrative performance data.
+ \begin{minipage}{\textwidth}
+ \centering
+ \captionsetup{type=figure,hypcap=false}
+-\includegraphics[width=0.75\textwidth]{../figures/paperbanana/figure1/variants/variant_A_performance.png}
+-\caption{\textbf{Touch the target. Preserve the obstacle. Protect the carried object.}
+-Intended behavior for grasping beside an obstacle and carrying past a hurdle, with the grounding-to-contact pipeline
+-below. Scenes and performance bars are illustrative placeholders, not measured comparisons. The image's
+-``no extra training'' refers to the frozen VLA; the HSR probe is trained separately.}
++\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small]
++\definecolor{targetgreen}{RGB}{35,135,107}
++\definecolor{protectred}{RGB}{186,76,65}
++\definecolor{policyblue}{RGB}{36,105,145}
++\foreach \x/\title in {0/1. Identify the object,5.65/2. Recover its surface,11.3/3. Authorize contact}{
++ \fill[black!3,rounded corners=3pt] (\x,0) rectangle +(5.4,3.1);
++ \node[anchor=north,font=\small\bfseries] at (\x+2.7,2.98) {\title};
++ \draw[black!25,line width=1pt] (\x+.35,.85)--(\x+5.05,.85);
++ \fill[targetgreen!22] (\x+2.2,1.5) circle (.63);
++ \draw[targetgreen,line width=1.2pt] (\x+2.2,1.5) circle (.63);
++ \fill[protectred!55] (\x+3.2,.85) rectangle +(0.65,1.25);
++}
++\draw[policyblue,dashed,thick] (2.6,1.5) ellipse (1.65 and 1.0);
++\node[policyblue,font=\footnotesize] at (1.25,2.3) {coarse target bound};
++\node[align=center,font=\footnotesize] at (2.7,.37) {The right identity can still\\include the wrong obstacle.};
++\foreach \a in {0,20,...,340}{
++ \fill[targetgreen] ({7.85+.60*cos(\a)},{1.5+.60*sin(\a)}) circle (.037);
++}
++\draw[protectred,thick] (8.85,.85) rectangle +(0.65,1.25);
++\node[targetgreen,font=\footnotesize] at (7.55,2.32) {observed target};
++\node[align=center,font=\footnotesize] at (8.35,.37) {Attention seeds the object;\\depth preserves the boundary.};
++\draw[policyblue,line width=3pt] (12.55,2.3)--(12.55,1.5)--(12.85,1.5);
++\draw[policyblue,line width=3pt] (14.4,2.3)--(14.4,1.5)--(14.15,1.5);
++\fill[targetgreen] (12.88,1.5) circle (.085);
++\fill[targetgreen] (14.12,1.5) circle (.085);
++\node[policyblue,font=\footnotesize] at (13.5,2.48) {designated fingers};
++\node[align=center,font=\footnotesize] at (14,.37) {Permission is link- and state-specific.\\Other surfaces remain protected.};
++\end{tikzpicture}
++\caption{\textbf{Identity, extent, and permission are different decisions.}
++\sys\ uses internal noun attention to seed an observed 3D surface graph. The selected surface defines the intended extent of a contact exception; a coarse bound does not. The final panel illustrates the downstream contact interface, whose closed-loop benefit remains unmeasured. All panels are schematic.}
+ \label{fig:teaser}
+ \end{minipage}
+--- before/paper/figures/fig02_overview/figure.tex
++++ after/paper/figures/fig02_overview/figure.tex
+@@ -1,12 +1,28 @@
+-% Crop the source headline, which assigns configured permissions to the VLA itself.
+ \begin{figure*}[t]
+ \centering
+-\includegraphics[width=\textwidth,trim=0 0 0 31.764bp,clip]{../figures/paperbanana/figure2/reference_montage_v2.png}
+-\caption{\textbf{From task relevance to selective contact.}
+-The conceptual overview separates target grounding, link-specific permission, and the changing role of the object.
+-The lower panels contrast design choices, rather than describing every prior method.
+-The frozen VLA supplies visual evidence and phase features; configured contact rules and physical grasp feedback
+-supply permission and attachment decisions. RGB enters the policy, while calibrated depth supports the geometric
+-layer. C1--C3 denote explanatory axes, not three claims of independently novel modules.}
++\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small,
++ box/.style={draw=black!30,rounded corners=3pt,fill=black!3,align=center,minimum height=1.05cm,text width=3.25cm},
++ flow/.style={->,thick,draw=black!65}]
++\node[box,fill=blue!5] (policy) at (1.8,2.0) {\textbf{Frozen VLA}\\RGB, state, instruction};
++\node[box,fill=blue!5] (seed) at (6.05,2.0) {\textbf{Noun attention}\\Eligible patch seeds};
++\node[box,fill=green!6] (graph) at (10.3,2.0) {\textbf{Surface membership}\\Graph energy + region selection};
++\node[box,fill=green!6] (region) at (14.55,2.0) {\textbf{Observed target}\\5\,mm surface voxels};
++\node[box] (depth) at (1.8,.15) {\textbf{Depth + robot model}\\Calibrated views and FK};
++\node[box] (geometry) at (6.05,.15) {\textbf{Surface construction}\\Robot-depth mask; support;\\depth-continuous edges};
++\node[box,fill=blue!5] (feature) at (10.3,-1.65) {\textbf{Internal features}\\Temporal identity check\\(exploratory)};
++\node[box,dashed,fill=orange!6] (contact) at (14.55,-1.65) {\textbf{Contact interface}\\Configured links, phase,\\physical grasp feedback};
++\draw[flow] (policy)--(seed);
++\draw[flow] (seed)--(graph);
++\draw[flow] (graph)--(region);
++\draw[flow] (depth)--(geometry);
++\draw[flow] (geometry.east)-|(graph.south);
++\draw[flow] (geometry.north)--(seed.south);
++\draw[flow] (region.south)--(contact.north);
++\draw[flow,dashed] (feature)--(contact);
++\node[align=left,anchor=west,font=\footnotesize,text width=7cm] at (.05,-1.65)
++ {\textbf{Measured offline:} surface membership, identity consistency,\\and auxiliary phase classification.\\\textbf{Pending:} integration and executed-contact evaluation.};
++\end{tikzpicture}
++\caption{\textbf{Different evidence for different decisions.}
++Attention supplies semantic seeds and calibrated depth supplies surface connectivity. Internal descriptors are tested both as membership cues and, separately, as temporal consistency scores. The selected extent method does not require feature-based boundary fusion. The dashed contact block is the intended integration interface, not an evaluated closed-loop result.}
+ \label{fig:overview}
+ \end{figure*}
+--- before/paper/figures/fig03_attention_to_3d/figure.tex
++++ after/paper/figures/fig03_attention_to_3d/figure.tex
+@@ -1,12 +1,9 @@
+ \begin{figure*}[t]
+ \centering
+-\includegraphics[width=\textwidth]{../figures/paperbanana/figure3/reference_montage.png}
+-\caption{\textbf{The AG3S pipeline.}
+-A separate extraction pass of the frozen checkpoint supplies attention and probe features. Multi-view depth grounds
+-candidate geometry; supported membership determines the contact exception within an outer bound. Link-specific
+-fields and grasp-confirmed attached geometry constrain chunk refinement, followed by an executed-prefix post-check.
+-The path and phase traces illustrate data flow, not evaluated performance. The schematic long \emph{home} tail is not
+-an evaluation interval: logging and inference stop at confirmed placement or ready-posture return
+-(Sec.~\ref{sec:experiments}). The VLA consumes RGB and state; depth is used by the geometry layer.}
++\includegraphics[width=\textwidth]{../figures/ifg_results/results.pdf}
++\caption{\textbf{Measured development evidence.}
++(a) The rendered robot mask improves both methods; the proposed extent pipeline retains an advantage when the mask is matched.
++(b) With that improved geometry fixed, prefix-layer-8 feature edges leave IoU nearly unchanged, while prototype unaries and feature-conditioned growing reduce it.
++All bars show episode-mean observed-surface IoU over 32 development episodes; they do not report held-out segmentation or physical safety.}
+ \label{fig:fig03_attention_to_3d}
+ \end{figure*}

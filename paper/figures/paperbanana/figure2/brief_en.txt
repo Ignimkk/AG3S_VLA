@@ -1,0 +1,17 @@
+Figure 2, overview of AG3S, full text width (about 1.7:1). Follow the reference image closely. Two parts: (a) a comparison of pipelines on top, (b) AG3S stepping through one concrete scene below. Clean academic style: white background, rounded colour cards, small flat block diagrams, photographic panels with thin frames, bold sans-serif titles. No icons, no shadows.
+
+Scene used everywhere: a white-and-black dual-arm robot at a wooden table; a red apple (the target) with a pear beside it; a basket; a red arch-shaped bar standing over the basket edge (the hurdle). Instruction: "Put the apple in the basket."
+
+(a) "AG3S vs. existing pipelines": three cards side by side, each with a title, a 3-5 block flow diagram and an outcome photo with a badge.
+1. "End-to-end VLA" (light red card). Flow: "RGB + instruction" -> "VLA" -> "actions". Note: "no 3D geometry; contact is never checked". Photo: the hand carries the apple into the red bar; red path line and red glow at the hit. Red badge: "x collides with the hurdle".
+2. "VLA + geometric safety filter" (light red card). Flow: "RGB-D" -> "ESDF of all surfaces"; "VLA"; both feed "safety filter on actions". Note: "target is an obstacle too, or removed for every link by an external segmenter". Photo: blue voxels cover the bar, the basket, the pear and the apple alike. Red badge: "x target repels the fingers: grasp blocked".
+3. "AG3S (ours)" (light gold card, highlighted). Flow: "RGB-D + instruction" -> "frozen VLA" -> "attention -> 3D target" and "sub-task (HSR)" -> "task- & link-conditioned field" -> "CCR". Note: "the VLA's own attention picks the target; only the grasping links may touch it". Photo: a gold path carries the apple up and over the red bar into the basket. Green badge: "check grasps the target, clears the hurdle".
+
+(b) "AG3S on one scene", five panels in a row joined by gold arrows, numbered titles, a one-line caption under each:
+1 "Frozen-VLA attention": the wrist-camera view with a warm heat glow on the apple. Caption: "attention of the frozen policy peaks on the apple".
+2 "3D target grounding": side view of the table; the apple is covered by orange points, the pear by blue points, and the bar and basket by small grey points. Caption: "apple cluster (orange) vs. touching pear (blue) and the bar".
+3 "Task- & link-conditioned field": the same view drawn as voxels; the apple's voxels are faint orange (removed for the contact links only), while the pear, the bar and the basket stay solid blue; the descending gripper carries gold collision spheres. Caption: "orange: removed for contact links only; bar and pear stay obstacles".
+4 "Sub-task & grasp state": a small chart, with a coloured band of grasp states (latched, held, placed) above three probability curves (pick, place, home) over time. Caption: "target locked while placing; held object attached".
+5 "Constrained chunk refinement": the hand holding the apple above the red bar; a dark dashed line (policy) and a gold line with dots (refined) for the tool path; a translucent purple sphere around the apple (attached object). Caption: "dashed: policy; gold: refined; purple: attached object".
+
+Colours: ours gold #D9A406 (pale #FFF2CC), failure red #C62828, success green #2E7D32, target orange #E8711A, obstacles blue #2E75B6, VLA pale navy #C9DCF0, sub-task pale orange #FBE5D6, controller pale purple #E4DFEC. No numbers. Keep text to the phrases given.

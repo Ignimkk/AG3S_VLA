@@ -1,0 +1,374 @@
+{
+ "m4": {
+  "S_grasp_state": {
+   "pre": {
+    "searching": 32,
+    "latched": 269,
+    "closing": 149,
+    "held": 13,
+    "placed": 14
+   },
+   "held": {
+    "held": 106
+   },
+   "post": {
+    "latched": 4,
+    "closing": 9,
+    "held": 1
+   },
+   "placed": {
+    "held": 9
+   }
+  },
+  "S_decision_latched": {
+   "pre": {
+    "False": 75,
+    "True": 402
+   },
+   "held": {
+    "False": 106
+   },
+   "post": {
+    "True": 13,
+    "False": 1
+   },
+   "placed": {
+    "False": 9
+   }
+  },
+  "S_grasp_active": {
+   "pre": {
+    "False": 315,
+    "True": 162
+   },
+   "held": {
+    "True": 106
+   },
+   "post": {
+    "False": 4,
+    "True": 10
+   },
+   "placed": {
+    "True": 9
+   }
+  },
+  "S_attached": {
+   "pre": {
+    "False": 464,
+    "True": 13
+   },
+   "held": {
+    "True": 106
+   },
+   "post": {
+    "False": 13,
+    "True": 1
+   },
+   "placed": {
+    "True": 9
+   }
+  },
+  "S_manipulated_state": {
+   "pre": {
+    "visible": 412,
+    "occluded": 64,
+    "None": 1
+   },
+   "held": {
+    "occluded": 104,
+    "visible": 2
+   },
+   "post": {
+    "visible": 11,
+    "occluded": 3
+   },
+   "placed": {
+    "occluded": 9
+   }
+  },
+  "S_hsr_label": {
+   "pre": {
+    "None": 32,
+    "pick": 381,
+    "place": 60,
+    "home": 4
+   },
+   "held": {
+    "pick": 19,
+    "place": 87
+   },
+   "post": {
+    "place": 13,
+    "home": 1
+   },
+   "placed": {
+    "place": 9
+   }
+  },
+  "S_hsr_argmax": {
+   "pre": {
+    "pick": 401,
+    "place": 64,
+    "home": 12
+   },
+   "held": {
+    "place": 104,
+    "pick": 2
+   },
+   "post": {
+    "place": 11,
+    "home": 3
+   },
+   "placed": {
+    "place": 9
+   }
+  },
+  "S_hsr_p_mean": {
+   "pre": {
+    "pick": 0.8232350085564447,
+    "place": 0.1499106493679358,
+    "home": 0.026854342075619497,
+    "n": 477
+   },
+   "held": {
+    "pick": 0.0206747456632224,
+    "place": 0.9789206209714842,
+    "home": 0.00040463336529340495,
+    "n": 106
+   },
+   "post": {
+    "pick": 0.009767909373745842,
+    "place": 0.8051867777181532,
+    "home": 0.18504531290810095,
+    "n": 14
+   },
+   "placed": {
+    "pick": 0.00039573998945204454,
+    "place": 0.9719121778894484,
+    "home": 0.027692082121099453,
+    "n": 9
+   }
+  }
+ },
+ "rows": [
+  [
+   "pre",
+   "477",
+   "latched 269, closing 149, searching 32, placed 14, held 13",
+   "True 402, False 75",
+   "False 315, True 162",
+   "False 464, True 13",
+   "pick 381, place 60, None 32, home 4",
+   "0.823 / 0.150 / 0.027"
+  ],
+  [
+   "held",
+   "106",
+   "held 106",
+   "False 106",
+   "True 106",
+   "True 106",
+   "place 87, pick 19",
+   "0.021 / 0.979 / 0.000"
+  ],
+  [
+   "post",
+   "14",
+   "closing 9, latched 4, held 1",
+   "True 13, False 1",
+   "True 10, False 4",
+   "False 13, True 1",
+   "place 13, home 1",
+   "0.010 / 0.805 / 0.185"
+  ],
+  [
+   "placed",
+   "9",
+   "held 9",
+   "False 9",
+   "True 9",
+   "True 9",
+   "place 9",
+   "0.000 / 0.972 / 0.028"
+  ]
+ ],
+ "window_rows": [
+  [
+   "ep1840",
+   "banana",
+   "failure",
+   "None",
+   "37",
+   "37 (home)",
+   "38",
+   "37",
+   "pre 37"
+  ],
+  [
+   "ep1809",
+   "banana",
+   "success",
+   "30",
+   "35",
+   "30 (placed)",
+   "31",
+   "44",
+   "placed 44"
+  ],
+  [
+   "ep1842",
+   "pear",
+   "success",
+   "32",
+   "35",
+   "32 (placed)",
+   "33",
+   "42",
+   "placed 42"
+  ],
+  [
+   "ep1843",
+   "apple",
+   "failure",
+   "None",
+   "None",
+   "74 (episode_end)",
+   "75",
+   "0",
+   "\u2013"
+  ],
+  [
+   "ep1860",
+   "orange",
+   "success",
+   "27",
+   "31",
+   "27 (placed)",
+   "28",
+   "47",
+   "placed 47"
+  ],
+  [
+   "ep1845",
+   "pear",
+   "success",
+   "31",
+   "35",
+   "31 (placed)",
+   "32",
+   "43",
+   "placed 43"
+  ],
+  [
+   "ep1862",
+   "apple",
+   "success",
+   "29",
+   "32",
+   "29 (placed)",
+   "30",
+   "45",
+   "placed 45"
+  ],
+  [
+   "ep1815",
+   "apple",
+   "success",
+   "30",
+   "33",
+   "30 (placed)",
+   "31",
+   "44",
+   "placed 44"
+  ],
+  [
+   "ep1848",
+   "orange",
+   "failure",
+   "None",
+   "32",
+   "32 (home)",
+   "33",
+   "42",
+   "pre 42"
+  ],
+  [
+   "ep1849",
+   "banana",
+   "failure",
+   "None",
+   "34",
+   "34 (home)",
+   "35",
+   "40",
+   "post 40"
+  ],
+  [
+   "ep1866",
+   "orange",
+   "success",
+   "31",
+   "37",
+   "31 (placed)",
+   "32",
+   "43",
+   "placed 43"
+  ],
+  [
+   "ep1851",
+   "orange",
+   "failure",
+   "None",
+   "None",
+   "74 (episode_end)",
+   "75",
+   "0",
+   "\u2013"
+  ],
+  [
+   "ep1804",
+   "apple",
+   "success",
+   "33",
+   "36",
+   "33 (placed)",
+   "34",
+   "41",
+   "placed 41"
+  ],
+  [
+   "ep1853",
+   "pear",
+   "failure",
+   "None",
+   "37",
+   "37 (home)",
+   "38",
+   "37",
+   "pre 36, held 1"
+  ],
+  [
+   "ep1822",
+   "banana",
+   "failure",
+   "None",
+   "28",
+   "28 (home)",
+   "29",
+   "46",
+   "post 24, pre 16, held 6"
+  ],
+  [
+   "ep1839",
+   "orange",
+   "success",
+   "31",
+   "34",
+   "31 (placed)",
+   "32",
+   "43",
+   "placed 43"
+  ]
+ ],
+ "n_excluded_alignment": 0
+}

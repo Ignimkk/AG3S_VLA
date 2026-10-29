@@ -1,0 +1,20 @@
+{
+  "episode": 1345,
+  "seed": 13453,
+  "request": 13,
+  "t_step": 104,
+  "qpos_source": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP-E4/runs/B_ROI_FPR/B_ROI_FPR_ep1345_s13453/ag3s/run_0000/step_00013.npz",
+  "model_source": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/snapshot_sc",
+  "old_palm_spheres": 23,
+  "added_left_shell_spheres": 168,
+  "total_robot_spheres": 438,
+  "contact_distance_mm": -0.2667759308551036,
+  "contact_point_world": [
+    0.4763491537266298,
+    0.2935934182258983,
+    0.8695603294829344
+  ],
+  "contact_point_to_old_spheres_mm": 26.2471990081708,
+  "contact_point_to_shell_spheres_mm": -0.15981753423106915,
+  "note": "Same recorded qpos and scene in all panels. Render-only alpha and sphere overlays. No optimization or ESDF recomputation."
+}

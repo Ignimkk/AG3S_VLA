@@ -1,0 +1,20 @@
+{
+ "asset": "paper/figures/paperbanana/figure1/assets/f1_grasp_contact.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_assets.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00168.npz": "ae80283b4a9794bcaa235e4477088975e620399fc70aa02e069440232ded2c0c",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/gt/ep1842.grasp.npz": "1ca3b47ae1f060b26c9062eabb707f8d3016dd169f1de15805cbce7b8c1c19e3"
+ },
+ "note": "Robot query spheres at the closing chunk; GT records finger contact with the pear at this step.",
+ "is_measured_result": false,
+ "generated": true,
+ "chunk": 18,
+ "gt_touching": "ee_finger_r1|ee_finger_r2|table",
+ "gt_finger_contact_lr": [
+  0,
+  2
+ ],
+ "latch_state": "closing"
+}

@@ -1,0 +1,17 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/p_robot_mask.png",
+ "frame": "T53_ep1842_f025",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T53_ep1842_f025.npz": "6d8dc3c6277fcb464c5b72e64cb2f45ec8a768aea67393a9bb792aa4b6e68d65"
+ },
+ "note": "Active wrist camera while carrying: purple = rendered robot-surface mask; red = pixels the sphere/capsule volume filter removes in addition (incl. the held fruit).",
+ "is_measured_result": false,
+ "episode": "T53_ep1842",
+ "moment": "M4_carry",
+ "camera": "wrist_cam_r",
+ "render_px": 70255,
+ "sphere_only_px": 49023
+}

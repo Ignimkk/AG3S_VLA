@@ -1,0 +1,166 @@
+{
+ "header": [
+  "condition (gt_label)",
+  "ball\noff",
+  "ball\nguard",
+  "ball\nplane",
+  "bo_d3\noff",
+  "bo_d3\nguard",
+  "bo_d3\nplane"
+ ],
+ "rows": [
+  [
+   "1  target-interior negatives (demo)",
+   "2021",
+   "11180",
+   "2302",
+   "2257",
+   "11331",
+   "2694"
+  ],
+  [
+   "1  same, lb",
+   "1872",
+   "10615",
+   "2279",
+   "2124",
+   "10805",
+   "2814"
+  ],
+  [
+   "1  same, demo, identity gt",
+   "2027",
+   "11196",
+   "2569",
+   "2371",
+   "11605",
+   "3261"
+  ],
+  [
+   "2  distractor frames with clearance >= margin (demo, /64)",
+   "54",
+   "17",
+   "17",
+   "54",
+   "17",
+   "17"
+  ],
+  [
+   "2  same, points (demo)",
+   "3895",
+   "2701",
+   "2701",
+   "3847",
+   "2701",
+   "2701"
+  ],
+  [
+   "2  same, lb frames (/48)",
+   "2",
+   "0",
+   "0",
+   "2",
+   "0",
+   "0"
+  ],
+  [
+   "3  table band (plane-30 mm..plane) optimistic flips (demo)",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0"
+  ],
+  [
+   "3  table band: value > off (demo)",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0"
+  ],
+  [
+   "3  table top 0-10 mm: value > off (demo)",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0"
+  ],
+  [
+   "3  table top 0-10 mm: negatives (demo)",
+   "2609",
+   "32501",
+   "20944",
+   "2603",
+   "32496",
+   "21559"
+  ],
+  [
+   "4  q below margin, queries (demo last 2, cross)",
+   "0",
+   "62",
+   "59",
+   "0",
+   "62",
+   "59"
+  ],
+  [
+   "4  same, frames (/32)",
+   "0",
+   "13",
+   "10",
+   "0",
+   "13",
+   "10"
+  ],
+  [
+   "5  new > old (all sets, demo+lb)",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0"
+  ],
+  [
+   "5  new < min(old, d_main) (all sets, demo+lb)",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0"
+  ],
+  [
+   "value-gradient: cos median (same branch)",
+   "-",
+   "0.9797",
+   "0.9812",
+   "-",
+   "0.98",
+   "0.9811"
+  ],
+  [
+   "value-gradient: composed grad != coarse-layer grad, D+T+grid pts",
+   "-",
+   "2",
+   "0",
+   "-",
+   "2",
+   "2"
+  ],
+  [
+   "coarse build ms p90 (dedicated pass)",
+   "-",
+   "4.78",
+   "5.56",
+   "-",
+   "5.25",
+   "6.07"
+  ]
+ ]
+}

@@ -1,0 +1,142 @@
+{
+ "off": {
+  "selected_gt": {
+   "contact_err_mm": [
+    0.77,
+    0.82
+   ],
+   "gt_normal_angle_deg": [
+    33.0,
+    26.0
+   ],
+   "gt_apple_hits": 0,
+   "gt_obstacle_hits": 0,
+   "ok_contact": true,
+   "ok_antipodal": true,
+   "ok_free": true,
+   "gt_valid": true,
+   "grasp_id": 2,
+   "vla_pos_err_mm": 48.9,
+   "vla_rot_err_deg": 33.4,
+   "position": [
+    0.50145,
+    0.33882,
+    0.96302
+   ],
+   "q_grasp": [
+    -0.855147,
+    0.503293,
+    -0.289349,
+    -0.260441,
+    1.177378,
+    0.925111,
+    -2.96706
+   ],
+   "q_pre": [
+    -0.574365,
+    0.661077,
+    -0.200575,
+    -0.956306,
+    1.031198,
+    1.185186,
+    -2.641293
+   ]
+  },
+  "mujoco": {
+   "grasp": {
+    "arm": {
+     "dist_mm": 19.4,
+     "link": "FT_SENSOR_L",
+     "obstacle": "pick_obstacle_overbar_0"
+    },
+    "hand": {
+     "dist_mm": 22.4,
+     "link": "EE_BODY_L",
+     "obstacle": "pick_obstacle_overbar_0"
+    }
+   },
+   "pre": {
+    "arm": {
+     "dist_mm": 46.7,
+     "link": "FT_SENSOR_L",
+     "obstacle": "pick_obstacle_overbar_0"
+    },
+    "hand": {
+     "dist_mm": 12.7,
+     "link": "EE_BODY_L",
+     "obstacle": "pick_obstacle_overbar_0"
+    }
+   }
+  }
+ },
+ "on": {
+  "selected_gt": {
+   "contact_err_mm": [
+    3.19,
+    1.11
+   ],
+   "gt_normal_angle_deg": [
+    35.8,
+    45.6
+   ],
+   "gt_apple_hits": 0,
+   "gt_obstacle_hits": 0,
+   "ok_contact": true,
+   "ok_antipodal": false,
+   "ok_free": true,
+   "gt_valid": false,
+   "grasp_id": 1,
+   "vla_pos_err_mm": 87.6,
+   "vla_rot_err_deg": 20.2,
+   "position": [
+    0.46323,
+    0.35581,
+    0.94822
+   ],
+   "q_grasp": [
+    -0.389241,
+    0.405641,
+    0.236942,
+    -0.85827,
+    1.056091,
+    0.888665,
+    -2.778647
+   ],
+   "q_pre": [
+    -0.189151,
+    0.456346,
+    0.257279,
+    -1.252944,
+    1.029729,
+    1.0414,
+    -2.586486
+   ]
+  },
+  "mujoco": {
+   "grasp": {
+    "arm": {
+     "dist_mm": 50.0,
+     "link": null,
+     "obstacle": null
+    },
+    "hand": {
+     "dist_mm": 22.7,
+     "link": "EE_BODY_L",
+     "obstacle": "pick_obstacle_overbar_0_leg_left"
+    }
+   },
+   "pre": {
+    "arm": {
+     "dist_mm": 50.0,
+     "link": null,
+     "obstacle": null
+    },
+    "hand": {
+     "dist_mm": 24.2,
+     "link": "ee_finger_l2",
+     "obstacle": "pick_obstacle_overbar_0_leg_left"
+    }
+   }
+  }
+ }
+}

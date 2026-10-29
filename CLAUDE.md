@@ -2,14 +2,16 @@
 
 현재 작업 경로는 이 파일이 속한 독립 checkout이다. `git rev-parse --show-toplevel`,
 `git branch --show-current`, `git rev-parse HEAD`, `git remote -v`를 먼저 확인한다.
-`doc/BRANCHES.md`와 `doc/migration/source-manifest.json`에서 branch 목적·source 기준을 읽는다.
-main은 paired v2 기반 V11AB, feature/panda-benchmark는 그 benchmark 평가,
+`doc/active/BRANCHES.md`와 `doc/active/migration/source-manifest.json`에서 branch 목적·source 기준을 읽는다.
+main은 2026-10-29부터 AG3S 최종 구성 기준(V11AB는 tag base/v11ab-monorepo), feature/panda-benchmark는 그 benchmark 평가,
 feature/ag3s-development는 v2 이후 전체 개선 이력과 현재 WIP를 포함한다.
-개선 branch 전체를 benchmark branch에 merge하면 V11AB 평가 대상이 바뀐다.
+개선 branch 전체를 benchmark branch에 merge하면 V11AB 평가 대상이 바뀐다 (2026-10-29 사용자 판정으로 의도적으로 merge — `doc/active/BRANCHES.md` "main 갱신").
 기존 /mnt/dev/work의 Claude session은 새 코드 작업에 resume하지 말고 새 세션을 시작한다.
 공유 input은 별도 AG3S_VLA-storage에 있다. 기존 /mnt/dev/work는 현재 실행에 필요하지 않은 이전 checkout이다.
 새 코드는 자기 checkout에서 수정한다. 새 benchmark output은
 AG3S_VLA-storage/results/benchmark/<날짜_commit_run-id>/에 격리한다. source scripts/setup/env.sh로 경로를 설정한다.
+(`common/run_artifacts.py`와 2026-10-29 merge로 들어온 `common/run_output.py` 모두 이 checkout에서는 results/benchmark에 쓴다.)
+사람이 볼 영상 · 검증 결과는 checkout `outputs/<YYYY-MM-DD>_<실험 설명>/`(git 제외)에 `python -m common.experiment_view`로 만든다 (2026-10-23 사용자 지시).
 아래에 남은 과거 진행 기록은 source-manifest와 실제 branch를 기준으로 해석한다.
 Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았다.
 
@@ -25,11 +27,16 @@ Panda adapter와 benchmark rollout 구현·평가는 아직 시작하지 않았�
 
 ## 진행내용 파악
 
-1. `AG3S/ag3s/docs/AG3S_T0T6_LOG.md` — **정본.** 16D 모델 위의 T0→T6 실행 기록.
-   맨 위의 **용어 · 진행 현황 · 물려받은 결정 · 재측정 대기** 네 표를 먼저 읽으면 현재 위치를 알 수 있다.
-   Panda/LIBERO 계열 benchmark 진행 기록은 `AG3S/ag3s/docs/AG3S_BENCHMARK_LOG.md` (2026-10-12 신설, SL-0부터).
+1. `AG3S/ag3s/docs/AG3S_BENCHMARK_LOG.md` — **이 checkout의 정본.** Panda/LIBERO 계열 benchmark 진행 기록 (2026-10-12 신설, SL-0부터).
    논문 비교 baseline(`Baseline/paper_baselines/`) 구현·측정 기록은 `AG3S/ag3s/docs/AG3S_BASELINE_LOG.md` (2026-10-23 신설, BL-0부터).
-2. `AG3S/ag3s/docs/AG3S_CUROBO_LIVE_TEST_PLAN.md` — T0~T6 실행 계획과 gate별 판정 항목.
+2. RB-Y1 16D 기록 (development checkout이 씀, 여기서는 근거로 읽고 링크만): `AG3S/ag3s/docs/AG3S_T47_LOG.md`(T47 이후 최신 정본) ·
+   `AG3S/ag3s/docs/AG3S_T0T6_LOG.md`(T0~T46 이전 정본, 맨 위의 **용어 · 진행 현황 · 물려받은 결정 · 재측정 대기** 표).
+3. **AG3S 최종 구성 (2026-10-29 main merge로 들어옴):** spec 정본 `doc/active/reviews/AG3S_decision/ADOPTED_KO.md` §A8 "A8 최종 구성 확정" 6,
+   서버 인자 `AG3S/ag3s/docs/handoff/AG3S-CORE-EVAL-A6.impl.md` §3, branch 설명 `doc/active/BRANCHES.md` "main 갱신".
+   최종 구성 flag는 모두 기본 꺼짐이다. `--robot panda`에는 아직 이식하지 않았고 Panda 서버가 거절한다
+   (`AG3S/adapters/panda/server.py` `UNPORTED_FINAL_CONFIG_DESTS`). V11AB·V11AB-pb1~pb7은 merge 전 서버 그대로다
+   (`AG3S/adapters/panda/profile.py` `V11AB_PRE_MERGE_DEFAULTS`).
+4. `AG3S/ag3s/docs/AG3S_CUROBO_LIVE_TEST_PLAN.md` — T0~T6 실행 계획과 gate별 판정 항목 (이전 국면 계획).
 
 ## 반드시 지켜야 할 규칙
 
@@ -45,7 +52,7 @@ Sub-agent의 상세 역할과 작업 범위는 `.claude/agents/`의 정의를 �
 
 - **`ag3s-implementer`** — AG3S/trajopt code 구현과 unit test를 담당하고 구현 결과를 `impl.md`로 전달한다.
 - **`ag3s-verifier`** — 구현 결과를 독립적으로 검증하고 raw output, 수치, figure 및 `verify.json`을 생성한다.
-- **`ag3s-scribe`** — 검증된 결과를 바탕으로 log, 계획서 및 paper를 작성한다.
+- **`ag3s-scribe`** — 출처와 자료 유형을 표시해 log, 계획서 및 paper를 작성한다.
 
 새로운 session을 시작하면 `.claude/agents/`를 확인하고, 작업 성격에 맞는 sub-agent를 사용하여
 구현, 검증, 기록을 수행한다. 각 sub-agent는 자신에게 정의된 file ownership과 작업 범위를 지킨다.
@@ -59,7 +66,7 @@ Sub-agent의 상세 역할과 작업 범위는 `.claude/agents/`의 정의를 �
 기존 workspace의 venv를 복사하거나 새 Python code의 import 경로로 사용하지 않는다.
 Checkpoint·dataset·녹화 자료는 `AG3S_STORAGE_ROOT`(기본: checkout 옆 `AG3S_VLA-storage`)에서 읽는다.
 `AG3S_LEGACY_STORAGE`는 그 아래 `legacy-inputs`를 가리키는 호환 alias다.
-`doc/SHARED_STORAGE_AND_PYTHON.md`가 현재 storage·interpreter 설정의 정본이다.
+`doc/active/SHARED_STORAGE_AND_PYTHON.md`가 storage·interpreter 설정의 정본이다 (development 기준 문서; 이 checkout은 맨 위 benchmark 절의 차이를 따른다).
 기존 “OpenPI submodule 내부의 venv를 쓴다”는 지침은 현재 통합 구조에 적용하지 않는다.
 OpenPI fork는 `third_party/openpi/`에 직접 추적된다.
 
@@ -81,10 +88,13 @@ CPU worker는 세션당 ≤ 2(pod 전체 ≤ 4), 서버 ≤ 2, GPU ≤ 130 GB. �
 긴 GPU 작업 시작 전·종료 후에는 같은 pod의 다른 세션(ListAgents)에 알린다.
 이 benchmark checkout의 VLA 환경·checkpoint loading은 검증했다. Action sampling·closed-loop
 rollout과 Panda robot/camera adapter는 다음 단계다.
-최초 Migration 기록은 `doc/migration/IMPLEMENTATION_REPORT.md`, 후속 storage 경로 분리 결과는
-`doc/migration/STORAGE_IMPLEMENTATION_REPORT.md`에 기록한다. 현재 경로/환경은 후속 문서가 우선한다.
+최초 Migration 기록은 `doc/archive/migration/IMPLEMENTATION_REPORT.md`, 후속 storage 경로 분리 결과는
+`doc/archive/migration/STORAGE_IMPLEMENTATION_REPORT.md`에 기록한다. 현재 경로/환경은 후속 문서가 우선한다.
 기존 단계 로그는 그 로그의 source 기준과 실제 branch가 일치할 때만 이어 쓴다.
 
-Benchmark live 최신 검증: `doc/migration/LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md`.
+Benchmark live 최신 검증: `doc/active/migration/LIVE_ENVIRONMENT_IMPLEMENTATION_REPORT.md`.
 기존 `/mnt/dev/work` process는 보고만 하고 종료하지 않는다. Archived V11 postprocessing
 helper는 아직 미복원이며 online 환경 검증을 전체 평가 완료로 해석하지 않는다.
+GPU lock은 2026-10-25 사용자 판정으로 독점·공유 두 단계다 (`scripts/setup/gpu_lock.py`, 2026-10-29 merge로 이 checkout에도 들어옴).
+TrajOpt가 들어가는 closed-loop(V11AB 계열 포함)는 독점, VLA 단독·offline 추출·시간을 보고하지 않는 smoke는 공유가 가능하다.
+plain `flock`은 그대로 올바른 독점 holder다 (`benchmark/runners/run_parallel_gpu.sh`).

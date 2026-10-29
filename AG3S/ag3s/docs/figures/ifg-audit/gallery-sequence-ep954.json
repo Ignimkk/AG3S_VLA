@@ -1,0 +1,912 @@
+{
+ "episode": 954,
+ "frames": [
+  {
+   "k": 2,
+   "gt_stage": "approach",
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "n_target_points": 115,
+   "authorized_links": [
+    "ee_finger_r1",
+    "ee_finger_r2",
+    "ee_right"
+   ]
+  },
+  {
+   "k": 12,
+   "gt_stage": "approach",
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "n_target_points": 124,
+   "authorized_links": [
+    "ee_finger_r1",
+    "ee_finger_r2",
+    "ee_right"
+   ]
+  },
+  {
+   "k": 19,
+   "gt_stage": "grasp",
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "occluded",
+   "n_target_points": 124,
+   "authorized_links": [
+    "ee_finger_r1",
+    "ee_finger_r2",
+    "ee_right"
+   ]
+  },
+  {
+   "k": 32,
+   "gt_stage": "grasp",
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "occluded",
+   "n_target_points": 124,
+   "authorized_links": [
+    "ee_finger_r1",
+    "ee_finger_r2",
+    "ee_right"
+   ]
+  },
+  {
+   "k": 43,
+   "gt_stage": "grasp",
+   "latch": "latched",
+   "probe": "home",
+   "tracked": "visible",
+   "n_target_points": 124,
+   "authorized_links": [
+    "ee_finger_r1",
+    "ee_finger_r2",
+    "ee_right"
+   ]
+  },
+  {
+   "k": 65,
+   "gt_stage": "grasp",
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "n_target_points": 124,
+   "authorized_links": [
+    "ee_finger_r1",
+    "ee_finger_r2",
+    "ee_right"
+   ]
+  }
+ ],
+ "series": [
+  {
+   "k": 0,
+   "t": 0,
+   "att_share": 0.19569120287253142,
+   "precision": 0.9401709401709402,
+   "n_target": 117,
+   "latch": "searching",
+   "probe": "None",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 1,
+   "t": 8,
+   "att_share": 0.18825561312607944,
+   "precision": 0.9482758620689655,
+   "n_target": 116,
+   "latch": "searching",
+   "probe": "None",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 2,
+   "t": 16,
+   "att_share": 0.1911504424778761,
+   "precision": 0.9391304347826087,
+   "n_target": 115,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 3,
+   "t": 24,
+   "att_share": 0.1853146853146853,
+   "precision": 0.9482758620689655,
+   "n_target": 116,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 4,
+   "t": 32,
+   "att_share": 0.19257950530035337,
+   "precision": 0.9487179487179487,
+   "n_target": 117,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 5,
+   "t": 40,
+   "att_share": 0.1799660441426146,
+   "precision": 0.9557522123893806,
+   "n_target": 113,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 6,
+   "t": 48,
+   "att_share": 0.15902140672782875,
+   "precision": 0.9655172413793104,
+   "n_target": 116,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 7,
+   "t": 56,
+   "att_share": 0.16299559471365638,
+   "precision": 0.9516129032258065,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 8,
+   "t": 64,
+   "att_share": 0.16039279869067102,
+   "precision": 0.9516129032258065,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 9,
+   "t": 72,
+   "att_share": 0.17,
+   "precision": 0.9516129032258065,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 10,
+   "t": 80,
+   "att_share": 0.18968692449355432,
+   "precision": 0.9516129032258065,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 11,
+   "t": 88,
+   "att_share": 0.09329829172141918,
+   "precision": 0.9516129032258065,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 12,
+   "t": 96,
+   "att_share": 0.1218568665377176,
+   "precision": 0.9516129032258065,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 13,
+   "t": 104,
+   "att_share": 0.07289719626168224,
+   "precision": 0.9516129032258065,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 14,
+   "t": 112,
+   "att_share": 0.046632124352331605,
+   "precision": 0.9516129032258065,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 15,
+   "t": 120,
+   "att_share": 0.032407407407407406,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 16,
+   "t": 128,
+   "att_share": 0.034954407294832825,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 17,
+   "t": 136,
+   "att_share": 0.033381712626995644,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 18,
+   "t": 144,
+   "att_share": 0.043478260869565216,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "approach"
+  },
+  {
+   "k": 19,
+   "t": 152,
+   "att_share": 0.00945945945945946,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 20,
+   "t": 160,
+   "att_share": 0.19495412844036697,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 21,
+   "t": 168,
+   "att_share": 0.1695906432748538,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 22,
+   "t": 176,
+   "att_share": 0.1619047619047619,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 23,
+   "t": 184,
+   "att_share": 0.1638418079096045,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 24,
+   "t": 192,
+   "att_share": 0.16634799235181644,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 25,
+   "t": 200,
+   "att_share": 0.1634980988593156,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 26,
+   "t": 208,
+   "att_share": 0.1509090909090909,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 27,
+   "t": 216,
+   "att_share": 0.15162454873646208,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 28,
+   "t": 224,
+   "att_share": 0.0049261083743842365,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 29,
+   "t": 232,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 30,
+   "t": 240,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 31,
+   "t": 248,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 32,
+   "t": 256,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 33,
+   "t": 264,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 34,
+   "t": 272,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "place",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 35,
+   "t": 280,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "place",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 36,
+   "t": 288,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "place",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 37,
+   "t": 296,
+   "att_share": 0.017699115044247787,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "home",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 38,
+   "t": 304,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "home",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 39,
+   "t": 312,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "home",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 40,
+   "t": 320,
+   "att_share": 0.0,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "home",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 41,
+   "t": 328,
+   "att_share": 0.002053388090349076,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "home",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 42,
+   "t": 336,
+   "att_share": 0.0918918918918919,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "home",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 43,
+   "t": 344,
+   "att_share": 0.1797752808988764,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "home",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 44,
+   "t": 352,
+   "att_share": 0.1709090909090909,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "home",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 45,
+   "t": 360,
+   "att_share": 0.16974169741697417,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 46,
+   "t": 368,
+   "att_share": 0.1875,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 47,
+   "t": 376,
+   "att_share": 0.19172932330827067,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 48,
+   "t": 384,
+   "att_share": 0.17353951890034364,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 49,
+   "t": 392,
+   "att_share": 0.17850953206239167,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 50,
+   "t": 400,
+   "att_share": 0.21031746031746032,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 51,
+   "t": 408,
+   "att_share": 0.15109034267912771,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 52,
+   "t": 416,
+   "att_share": 0.1611842105263158,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 53,
+   "t": 424,
+   "att_share": 0.15552099533437014,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 54,
+   "t": 432,
+   "att_share": 0.17413793103448275,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 55,
+   "t": 440,
+   "att_share": 0.16934046345811052,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 56,
+   "t": 448,
+   "att_share": 0.18703703703703703,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 57,
+   "t": 456,
+   "att_share": 0.14505119453924914,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 58,
+   "t": 464,
+   "att_share": 0.10073260073260074,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 59,
+   "t": 472,
+   "att_share": 0.05631067961165048,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 60,
+   "t": 480,
+   "att_share": 0.03764320785597381,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 61,
+   "t": 488,
+   "att_share": 0.028616852146263912,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 62,
+   "t": 496,
+   "att_share": 0.02364864864864865,
+   "precision": 0.9596774193548387,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 63,
+   "t": 504,
+   "att_share": 0.01568627450980392,
+   "precision": 0.9435483870967742,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 64,
+   "t": 512,
+   "att_share": 0.01164294954721863,
+   "precision": 0.8951612903225806,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 65,
+   "t": 520,
+   "att_share": 0.009650180940892641,
+   "precision": 0.8870967741935484,
+   "n_target": 124,
+   "latch": "latched",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 66,
+   "t": 528,
+   "att_share": 0.0073937153419593345,
+   "precision": 0.8790322580645161,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 67,
+   "t": 536,
+   "att_share": 0.0,
+   "precision": 0.7580645161290323,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 68,
+   "t": 544,
+   "att_share": 0.0,
+   "precision": 0.782258064516129,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 69,
+   "t": 552,
+   "att_share": 0.0,
+   "precision": 0.8225806451612904,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 70,
+   "t": 560,
+   "att_share": 0.0,
+   "precision": 0.8951612903225806,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "occluded",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 71,
+   "t": 568,
+   "att_share": 0.18372093023255814,
+   "precision": 0.8467741935483871,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 72,
+   "t": 576,
+   "att_share": 0.17671517671517672,
+   "precision": 0.8629032258064516,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "pick",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 73,
+   "t": 584,
+   "att_share": 0.17540322580645162,
+   "precision": 0.8629032258064516,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  },
+  {
+   "k": 74,
+   "t": 592,
+   "att_share": 0.17177914110429449,
+   "precision": 0.8629032258064516,
+   "n_target": 124,
+   "latch": "closing",
+   "probe": "place",
+   "tracked": "visible",
+   "gt_stage": "grasp"
+  }
+ ],
+ "definitions": "IFG audit gallery \u2014 the observation modules (ATS \u00b7 HSR \u00b7 LTE) on the real scene, 3rd-person view. CPU only, read only.\n\n  MUJOCO_GL=osmesa PYTHONPATH=.:integration/rby1/manipulation/src .venv-ag3s/bin/python -m       AG3S.ag3s.experiments.studies.ifg_audit_gallery --run <IFG-APPLE run> --fig AG3S/ag3s/docs/figures/ifg-audit --eps 250 954 56\n\nRecords: IFG-APPLE-SPLIT arm SPL (target split, current serving observation path). Per request k: the client planning row (full\nMuJoCo qpos) and the server chunk record (`chunk_dir/chunk_{k+offset}.npz`, `server_chunk_alignment`).\n\nCamera: the recording camera of `pi05_infer.py --view front` (free camera, lookat (0.45, 0, 0.85), distance 1.7 m, azimuth 180 deg,\nelevation -18 deg, fovy from the model), rendered from the planning-row qpos of request k (the state the server saw).\n\n1. `gallery-esdf-ep<E>.png` \u2014 per instant: LEFT the ESDF on the horizontal plane at the target centre height (carry: crate-wall\n   height, 4 cm above the crate origin), sampled at the pixels of the same camera (each pixel ray meets the plane; grey = no hit\n   within 0.6 m); RIGHT the real scene from the same camera. While held the target is excluded from GT (it is part of the robot).\n   Layer: target-free (what the grasping fingers query) while the latch is searching / latched / closing, else main.\n   Black line = field 0, grey dashed = 10 mm (obstacle margin), white dashed = GT 0 (probe-sphere `mj_geomDistance` to the collision\n   geoms of fruits, crate, table, shelf; the target fruit excluded for the target-free layer; robot excluded as the field's\n   self-filter does). Runtime-added obstacles (e.g. the 'place' profile crate post) are not in the base model, so not in GT.\n2. `gallery-sequence-ep<E>.png` \u2014 real-scene frames over the episode with: VLA attention (points with attention >= 0.5, colour =\n   value), the selected target cluster (green), the tracked target centre and exclusion radius (`manipulated`), the hand collision\n   spheres (cyan = links allowed to touch the target, grey = other hand); text = GT stage / HSR latch / probe label / tracked state.\n   Bottom: per request, attention share on the target and target-cluster precision (both vs the GT apple as a sphere of its\n   collision radius, 10 mm tolerance), with the GT stage, latch and probe as bands.\n",
+ "script": "AG3S/ag3s/experiments/studies/ifg_audit_gallery.py"
+}

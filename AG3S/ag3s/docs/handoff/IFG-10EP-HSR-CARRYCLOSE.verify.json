@@ -1,0 +1,496 @@
+{
+ "step": "IFG-10EP-HSR-CARRYCLOSE",
+ "written": "2026-10-20 KST (lead; CPU analysis after a 41-min GPU run)",
+ "plain_names": {
+  "SPLK": "기존 방식 + target 분리 + 손 기준 쥠 거리 + 닫는 동안 유지한 형상은 관측 아님",
+  "SPLC": "SPLK + 닫기 시작한 요청부터 손과 함께 옮기기 (HSR2: --latch-carry-from-closing)"
+ },
+ "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-CARRYCLOSE",
+ "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-CARRYCLOSE/agg5arm (copies, no symlink)",
+ "scenes_rule": "same 10 scenes and seeds as IFG-10EP-TARGETSPLIT-HANDREACH; diagnostic, not a success-rate sample",
+ "gpu_window_utc": [
+  "2026-10-20T13:00:40",
+  "2026-10-20T13:41:18"
+ ],
+ "smoke": {
+  "passed": true,
+  "first_chunk_max_abs_diff_vs_E0": 1.0104745928884995e-07
+ },
+ "code": "snapshot_hsr2 tree cddd230c22d37d62634593186d287ea0f6ad507c (runtime delta vs snapshot_hsr: config.py, safe_policy.py, serve_safe.py)",
+ "tests": "tests/trajopt/test_ifg_hsr_carry_from_closing.py 4 passed; related trajopt/ag3s tests 157 passed, 1 skipped",
+ "scripts": [
+  "AG3S/ag3s/experiments/studies/ifg_10ep_carryclose.py",
+  "AG3S/ag3s/experiments/studies/ifg_regression_trace.py"
+ ],
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-10ep-carryclose.png",
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-10ep-carryclose-scenes.png"
+ ],
+ "numbers": {
+  "C1aN": 4,
+  "SPL": 6,
+  "SPLR": 7,
+  "SPLK": 9,
+  "SPLC": 8,
+  "paired_C1aN_vs_SPLC": {
+   "both": 3,
+   "only_C1aN": 1,
+   "only_SPLC": 5,
+   "neither": 1,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 0.21875,
+   "rate_C1aN": 0.4,
+   "rate_SPLC": 0.8,
+   "diff_SPLC_minus_C1aN": 0.4,
+   "ci95_bootstrap": [
+    0.0,
+    0.8
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "paired_SPL_vs_SPLC": {
+   "both": 6,
+   "only_SPL": 0,
+   "only_SPLC": 2,
+   "neither": 2,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 0.5,
+   "rate_SPL": 0.6,
+   "rate_SPLC": 0.8,
+   "diff_SPLC_minus_SPL": 0.2,
+   "ci95_bootstrap": [
+    0.0,
+    0.5
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "paired_SPLR_vs_SPLC": {
+   "both": 7,
+   "only_SPLR": 0,
+   "only_SPLC": 1,
+   "neither": 2,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 1.0,
+   "rate_SPLR": 0.7,
+   "rate_SPLC": 0.8,
+   "diff_SPLC_minus_SPLR": 0.1,
+   "ci95_bootstrap": [
+    0.0,
+    0.3
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "paired_SPLK_vs_SPLC": {
+   "both": 8,
+   "only_SPLK": 1,
+   "only_SPLC": 0,
+   "neither": 1,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 1.0,
+   "rate_SPLK": 0.9,
+   "rate_SPLC": 0.8,
+   "diff_SPLC_minus_SPLK": -0.1,
+   "ci95_bootstrap": [
+    -0.3,
+    0.0
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "per_episode": {
+   "250": {
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 12,
+      "lift_m": 0.0013755504145206432
+     },
+     "attached_requests": 13,
+     "revokes": 0,
+     "carried_err_mm_first": 17.996476915001143,
+     "held_occupied_after_2": 2,
+     "max_to_push_mm_closing_lift": 14.43919583539849
+    },
+    "SPLC": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 12,
+      "lift_m": 0.0013755504145206432
+     },
+     "attached_requests": 13,
+     "revokes": 0,
+     "carried_err_mm_first": 16.936165200125163,
+     "held_occupied_after_2": 2,
+     "max_to_push_mm_closing_lift": 14.500788805717587
+    }
+   },
+   "211": {
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 23,
+      "lift_m": 2.8201548509021457e-05
+     },
+     "attached_requests": 12,
+     "revokes": 1,
+     "carried_err_mm_first": 40.380501133089744,
+     "held_occupied_after_2": 2,
+     "max_to_push_mm_closing_lift": 88.24007598008129
+    },
+    "SPLC": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 5,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 23,
+      "lift_m": 2.8201548509021457e-05
+     },
+     "attached_requests": 2,
+     "revokes": 1,
+     "carried_err_mm_first": 31.667459626023206,
+     "held_occupied_after_2": 0,
+     "max_to_push_mm_closing_lift": 56.46162216637142
+    }
+   },
+   "572": {
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 15,
+      "lift_m": 7.225873560345875e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 15.212706381657908,
+     "held_occupied_after_2": 1,
+     "max_to_push_mm_closing_lift": 33.08893987284701
+    },
+    "SPLC": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 15,
+      "lift_m": 7.225873560345875e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 14.763229048247728,
+     "held_occupied_after_2": 1,
+     "max_to_push_mm_closing_lift": 33.08893987284701
+    }
+   },
+   "1345": {
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 18,
+      "lift_m": 0.07375020709913416
+     },
+     "attached_requests": 7,
+     "revokes": 0,
+     "carried_err_mm_first": 16.255447144433898,
+     "held_occupied_after_2": 1,
+     "max_to_push_mm_closing_lift": 114.50425994074762
+    },
+    "SPLC": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 18,
+      "lift_m": 0.07375020709913416
+     },
+     "attached_requests": 7,
+     "revokes": 0,
+     "carried_err_mm_first": 17.335021774230988,
+     "held_occupied_after_2": 1,
+     "max_to_push_mm_closing_lift": 114.50425994074762
+    }
+   },
+   "126": {
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 13,
+      "lift_m": 8.168230955341027e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 17.356808497924362,
+     "held_occupied_after_2": 2,
+     "max_to_push_mm_closing_lift": 38.185804155303
+    },
+    "SPLC": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 13,
+      "lift_m": 8.168230955341027e-05
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 15.534056069575689,
+     "held_occupied_after_2": 2,
+     "max_to_push_mm_closing_lift": 38.18572535903753
+    }
+   },
+   "423": {
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 16,
+      "lift_m": 0.1051840858216403
+     },
+     "attached_requests": 12,
+     "revokes": 0,
+     "carried_err_mm_first": 12.176292399911196,
+     "held_occupied_after_2": 1,
+     "max_to_push_mm_closing_lift": 46.663207676792
+    },
+    "SPLC": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 16,
+      "lift_m": 0.1051840858216403
+     },
+     "attached_requests": 7,
+     "revokes": 0,
+     "carried_err_mm_first": 21.539667838205194,
+     "held_occupied_after_2": 1,
+     "max_to_push_mm_closing_lift": 46.663207676792
+    }
+   },
+   "831": {
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 22,
+      "lift_m": 0.09301944086533032
+     },
+     "attached_requests": 12,
+     "revokes": 0,
+     "carried_err_mm_first": 21.759449815804956,
+     "held_occupied_after_2": 2,
+     "max_to_push_mm_closing_lift": 120.6160359313096
+    },
+    "SPLC": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 22,
+      "lift_m": 0.09301944086533032
+     },
+     "attached_requests": 13,
+     "revokes": 0,
+     "carried_err_mm_first": 19.07357341183538,
+     "held_occupied_after_2": 3,
+     "max_to_push_mm_closing_lift": 120.6160359313096
+    }
+   },
+   "936": {
+    "SPLK": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 2,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 27,
+      "lift_m": 0.16834454912118368
+     },
+     "attached_requests": 10,
+     "revokes": 0,
+     "carried_err_mm_first": 17.737652488609164,
+     "held_occupied_after_2": 0,
+     "max_to_push_mm_closing_lift": 130.2898631976224
+    },
+    "SPLC": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 2,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 27,
+      "lift_m": 0.16834454912118368
+     },
+     "attached_requests": 9,
+     "revokes": 0,
+     "carried_err_mm_first": 18.402154286666466,
+     "held_occupied_after_2": 0,
+     "max_to_push_mm_closing_lift": 130.2898631976224
+    }
+   },
+   "1582": {
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 17,
+      "lift_m": 6.248698859290247e-05
+     },
+     "attached_requests": 11,
+     "revokes": 0,
+     "carried_err_mm_first": 15.178199786153824,
+     "held_occupied_after_2": 2,
+     "max_to_push_mm_closing_lift": 27.40883974509432
+    },
+    "SPLC": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 17,
+      "lift_m": 6.248698859290247e-05
+     },
+     "attached_requests": 9,
+     "revokes": 0,
+     "carried_err_mm_first": 13.220895454355684,
+     "held_occupied_after_2": 1,
+     "max_to_push_mm_closing_lift": 25.763932349309712
+    }
+   },
+   "1404": {
+    "SPLK": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 3,
+     "lifted_not_attached_chunks": 7,
+     "first_attach": {
+      "k": 55,
+      "lift_m": 0.006669451563923068
+     },
+     "attached_requests": 1,
+     "revokes": 1,
+     "carried_err_mm_first": 55.55780938262066,
+     "held_occupied_after_2": 0,
+     "max_to_push_mm_closing_lift": 222.3115004401474
+    },
+    "SPLC": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 55,
+      "lift_m": 0.006669451563923068
+     },
+     "attached_requests": 14,
+     "revokes": 0,
+     "carried_err_mm_first": 19.359798464290456,
+     "held_occupied_after_2": 2,
+     "max_to_push_mm_closing_lift": 204.7996624534779
+    }
+   }
+  },
+  "ep1404": {
+   "SPLC_attach_k": 55,
+   "SPLC_carry_start": "closing_start",
+   "closing_start_frame": 54,
+   "seen_frame": 44,
+   "SPLC_revokes": 0,
+   "SPLK_revokes": 1,
+   "SPLC_carried_err_mm_first3": [
+    19,
+    22,
+    22
+   ],
+   "SPLC_hold_chunks": 0,
+   "SPLK_hold_chunks": 3
+  },
+  "ep423_SPLC": {
+   "primary": true,
+   "carried_err_mm_first3": [
+    22,
+    22,
+    25
+   ],
+   "held_occupied_after_2": 0
+  },
+  "ep211": {
+   "first_executed_difference_SPLK_vs_SPLC_step": 184,
+   "both_attach_k": 23,
+   "both_revoked_k": 25,
+   "revoke_reasons": [
+    "opening_dropped",
+    "not_blocked"
+   ],
+   "trace_SPL_and_SPLC_identical_to_k22": true,
+   "approach_reference_clearance_mm_k14": -44.1,
+   "approach_TO_push_mm_k14_k16": [
+    53.7,
+    28.3,
+    13.8
+   ],
+   "k21_TO_status": "violated (collision), refined -8.8 mm",
+   "k22_hold": "unsafe [collision] 8.8 mm penetration remains, ee_left <-> esdf (answer_excludes_target)",
+   "k22_worst_row_body": "banana",
+   "E0": "success at first close t=184, neighbour contact rows 8"
+  }
+ },
+ "diagnosis": {
+  "ep1404": "carry from the closing start (54) instead of the approach pin (44): attach at 55 on the right place, no revoke, lifted held — the IFG-10EP-HSR-KEPTUNSEEN regression is gone",
+  "ep423": "still fixed (success, no held-apple occupancy after 2 requests)",
+  "ep211": "not caused by this flag: SPL / SPLR / SPLK / SPLC all fail the first grasp the same way (TO cannot clear a banana collision at the closing chunk -> HOLD while closing -> attach revoked); the outcome then depends on the regrasp (SPLK succeeded on it, SPLC did not)",
+  "ep936": "unchanged (closing-chunk TO push 130 mm, slip in transport)"
+ }
+}

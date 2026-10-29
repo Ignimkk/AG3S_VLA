@@ -1,0 +1,5377 @@
+{
+ "step": "IFG-AUDIT-HSR",
+ "written": "2026-10-21 21:18 KST",
+ "data": {
+  "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f",
+  "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT",
+  "arm": "SPL",
+  "n_runs": 24,
+  "runs": [
+   "SPL_ep56_s563",
+   "SPL_ep119_s1193",
+   "SPL_ep121_s1213",
+   "SPL_ep126_s1263",
+   "SPL_ep211_s2113",
+   "SPL_ep250_s2503",
+   "SPL_ep309_s3093",
+   "SPL_ep320_s3203",
+   "SPL_ep325_s3253",
+   "SPL_ep342_s3423",
+   "SPL_ep421_s4213",
+   "SPL_ep526_s5263",
+   "SPL_ep572_s5723",
+   "SPL_ep753_s7533",
+   "SPL_ep850_s8503",
+   "SPL_ep901_s9013",
+   "SPL_ep954_s9543",
+   "SPL_ep979_s9793",
+   "SPL_ep1222_s12223",
+   "SPL_ep1313_s13133",
+   "SPL_ep1345_s13453",
+   "SPL_ep1596_s15963",
+   "SPL_ep1668_s16683",
+   "SPL_ep1837_s18373"
+  ],
+  "server_chunk_dirs": [
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/server_8292_20261020T014332/server_constraints/run_0000",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/server_8292_20261020T015045/server_constraints/run_0000",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/server_8293_20261020T015105/server_constraints/run_0000"
+  ],
+  "in_crate_rule": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/p/analyze_t42.py"
+ },
+ "definitions": {
+  "doc": "IFG-AUDIT-HSR: how accurately and how fast the AG3S stage trackers (grasp latch + sub-task probe) follow the true task\nstage on recorded closed-loop runs. CPU only, read only (inputs are never written).\n\n  cd /mnt/dev/AG3S_VLA-development; PYTHONPATH=.:integration/rby1/manipulation/src .venv-ag3s/bin/python       -m AG3S.ag3s.experiments.studies.ifg_audit_hsr --run <RUN> --fig AG3S/ag3s/docs/figures/ifg-audit\n\nInputs (24 apple scenes, arm SPL = current serving): <RUN>/verify/IFG-APPLE-SPLIT\n  replay/runs_SPL_SPL_ep*.npz   per control step (600): apple_pos, crate_pos/quat, grip_cmd (used arm, 1 = open),\n                                cnt_apple-hand, finger_open_norm, plan_index\n  replay/runs_SPL_SPL_ep*.json  server_chunk_alignment.block -> request k is chunk_dir/chunk_{k+offset:05d}.npz\n  server chunk npz summary_json  grasp (latch), subtask (probe), manipulated\n  analysis/SPL_ep*.json         success / failure_mode (cross-check only)\n  p/analyze_t42.py              in_crate rule (imported, not copied)\n\nGT definitions (per control step t, 15 Hz; request k is evaluated at its planning step t = 8k):\n  close cycle   [s, e): s = a step with grip_cmd < 0.5 (closing command), e = first later step with grip_cmd >= 0.9 (open command).\n                The carry command is ~0.58, so 0.5 cannot mark the end of a close.\n  lift onset    first step t where, for LIFT_L = 5 consecutive steps, apple z >= z0 + 10 mm AND cnt_apple-hand > 0\n                (z0 = apple z at step 0).\n  release       first step s > lift onset with cnt_apple-hand == 0 for REL_N = 8 consecutive steps (contact lost and not\n                regained within one chunk). HELD = [lift onset, release).\n  place         if the apple is in the crate (kit in_crate rule) at step 599: start of that final in-crate streak, but not\n                earlier than the last release. home onset = first step >= place with grip_cmd >= 0.9.\n  stage(t)      APPROACH      t < first closing command, or between close cycles before any lift (re-approach)\n                CLOSING       inside a close cycle that contains a lift onset, before the lift\n                FAILED_GRASP  inside a close cycle that contains no lift onset, before any lift\n                HELD          [lift onset, release)\n                RELEASED      [last release, place) when the apple ends in the crate (falling into the crate)\n                DROPPED       after a release, apple not (yet) placed and not RELEASED\n                PLACED        [place, home onset);  HOME  [home onset, end)\n  task phase    pick = APPROACH, CLOSING, FAILED_GRASP, DROPPED; place = HELD, RELEASED; home = PLACED, HOME.\n  latch phase   searching / latched / closing -> pick; held -> place; placed -> home.\nLatency: GT event at step t_e; first request able to observe it k_GT = ceil(t_e / 8); latency in requests = k_latch - k_GT,\nin seconds = (8 k_latch - t_e) / 15.\n",
+  "constants": {
+   "CLOSE_TH": 0.5,
+   "OPEN_TH": 0.9,
+   "LIFT_DZ_m": 0.01,
+   "LIFT_L_steps": 5,
+   "REL_N_steps": 8,
+   "steps_per_request": 8,
+   "hz": 15.0
+  },
+  "latch_ok": {
+   "APPROACH": [
+    "latched",
+    "searching"
+   ],
+   "CLOSING": [
+    "closing"
+   ],
+   "HELD": [
+    "held"
+   ],
+   "PLACED": [
+    "placed"
+   ],
+   "HOME": [
+    "placed"
+   ],
+   "FAILED_GRASP": [
+    "closing",
+    "latched"
+   ],
+   "DROPPED": [
+    "closing",
+    "latched",
+    "searching"
+   ]
+  },
+  "stage_phase": {
+   "APPROACH": "pick",
+   "CLOSING": "pick",
+   "FAILED_GRASP": "pick",
+   "DROPPED": "pick",
+   "HELD": "place",
+   "RELEASED": "place",
+   "PLACED": "home",
+   "HOME": "home"
+  },
+  "latch_phase": {
+   "searching": "pick",
+   "latched": "pick",
+   "closing": "pick",
+   "held": "place",
+   "placed": "home"
+  },
+  "precision_recall_classes": {
+   "pre-grasp (searching+latched)": {
+    "latch": [
+     "latched",
+     "searching"
+    ],
+    "gt": [
+     "APPROACH"
+    ]
+   },
+   "closing": {
+    "latch": [
+     "closing"
+    ],
+    "gt": [
+     "CLOSING"
+    ]
+   },
+   "held": {
+    "latch": [
+     "held"
+    ],
+    "gt": [
+     "HELD"
+    ]
+   },
+   "placed": {
+    "latch": [
+     "placed"
+    ],
+    "gt": [
+     "HOME",
+     "PLACED"
+    ]
+   }
+  }
+ },
+ "scripts": [
+  "AG3S/ag3s/experiments/studies/ifg_audit_hsr.py"
+ ],
+ "figures": {
+  "timelines": "AG3S/ag3s/docs/figures/ifg-audit/ifg_audit_hsr_timelines.png",
+  "confusion": "AG3S/ag3s/docs/figures/ifg-audit/ifg_audit_hsr_confusion.png",
+  "latency": "AG3S/ag3s/docs/figures/ifg-audit/ifg_audit_hsr_latency.png"
+ },
+ "numbers": {
+  "n_runs": 24,
+  "n_requests": 1800,
+  "n_kit_success": 18,
+  "gt_stage_counts_requests": {
+   "APPROACH": 508,
+   "CLOSING": 46,
+   "HELD": 195,
+   "RELEASED": 0,
+   "PLACED": 8,
+   "HOME": 854,
+   "FAILED_GRASP": 179,
+   "DROPPED": 10
+  },
+  "gt_vs_kit": {
+   "runs_with_gt_place": 18,
+   "runs_with_gt_lift": 19,
+   "place_mismatch_vs_kit_success": []
+  },
+  "latch": {
+   "confusion": {
+    "rows": [
+     "APPROACH",
+     "CLOSING",
+     "HELD",
+     "RELEASED",
+     "PLACED",
+     "HOME",
+     "FAILED_GRASP",
+     "DROPPED"
+    ],
+    "cols": [
+     "searching",
+     "latched",
+     "closing",
+     "held",
+     "placed"
+    ],
+    "M": [
+     [
+      55,
+      447,
+      6,
+      0,
+      0
+     ],
+     [
+      0,
+      7,
+      22,
+      17,
+      0
+     ],
+     [
+      0,
+      0,
+      0,
+      195,
+      0
+     ],
+     [
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      0,
+      0,
+      3,
+      5
+     ],
+     [
+      0,
+      0,
+      0,
+      23,
+      831
+     ],
+     [
+      0,
+      1,
+      176,
+      2,
+      0
+     ],
+     [
+      0,
+      1,
+      9,
+      0,
+      0
+     ]
+    ],
+    "latch_state_outside_cols": 0
+   },
+   "accuracy_main": {
+    "def": "GT in APPROACH/CLOSING/HELD/PLACED/HOME, correct per LATCH_OK",
+    "n": 1611,
+    "correct": 1555,
+    "acc": 0.9652
+   },
+   "accuracy_all_scored": {
+    "def": "all GT stages except RELEASED",
+    "n": 1800,
+    "correct": 1742,
+    "acc": 0.9678
+   },
+   "phase_accuracy": {
+    "n": 1800,
+    "correct": 1755,
+    "acc": 0.975
+   },
+   "precision_recall": {
+    "pre-grasp (searching+latched)": {
+     "gt": [
+      "APPROACH"
+     ],
+     "tp": 502,
+     "n_pred_main": 509,
+     "n_pred_all": 511,
+     "n_true": 508,
+     "precision_main": 0.9862,
+     "precision_all": 0.9824,
+     "recall": 0.9882
+    },
+    "closing": {
+     "gt": [
+      "CLOSING"
+     ],
+     "tp": 22,
+     "n_pred_main": 28,
+     "n_pred_all": 213,
+     "n_true": 46,
+     "precision_main": 0.7857,
+     "precision_all": 0.1033,
+     "recall": 0.4783
+    },
+    "held": {
+     "gt": [
+      "HELD"
+     ],
+     "tp": 195,
+     "n_pred_main": 238,
+     "n_pred_all": 240,
+     "n_true": 195,
+     "precision_main": 0.8193,
+     "precision_all": 0.8125,
+     "recall": 1.0
+    },
+    "placed": {
+     "gt": [
+      "HOME",
+      "PLACED"
+     ],
+     "tp": 836,
+     "n_pred_main": 836,
+     "n_pred_all": 836,
+     "n_true": 862,
+     "precision_main": 1.0,
+     "precision_all": 1.0,
+     "recall": 0.9698
+    }
+   }
+  },
+  "latency": {
+   "latch_closing_vs_close_cmd": {
+    "requests": {
+     "n": 24,
+     "median": 0.0,
+     "p90": 1.0,
+     "max": 1.0,
+     "min": -1.0
+    },
+    "seconds": {
+     "n": 24,
+     "median": 0.3333,
+     "p90": 0.5333,
+     "max": 0.5333,
+     "min": -0.5333
+    },
+    "per_run": [
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 12,
+      "t_event": 88,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": 0,
+      "s": 0.4667,
+      "k_latch": 15,
+      "t_event": 113,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": 0,
+      "s": 0.2667,
+      "k_latch": 14,
+      "t_event": 108,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": 0,
+      "s": 0.2667,
+      "k_latch": 12,
+      "t_event": 92,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 21,
+      "t_event": 163,
+      "run": "SPL_ep211_s2113"
+     },
+     {
+      "req": 0,
+      "s": 0.4667,
+      "k_latch": 11,
+      "t_event": 81,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 16,
+      "t_event": 120,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 16,
+      "t_event": 123,
+      "run": "SPL_ep320_s3203"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 15,
+      "t_event": 112,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 0,
+      "s": 0.2667,
+      "k_latch": 14,
+      "t_event": 108,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": 0,
+      "s": 0.1333,
+      "k_latch": 19,
+      "t_event": 150,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": 0,
+      "s": 0.0667,
+      "k_latch": 18,
+      "t_event": 143,
+      "run": "SPL_ep526_s5263"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 14,
+      "t_event": 107,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": 0,
+      "s": 0.2667,
+      "k_latch": 16,
+      "t_event": 124,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": 0,
+      "s": 0.2,
+      "k_latch": 17,
+      "t_event": 133,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": 0,
+      "s": 0.0667,
+      "k_latch": 14,
+      "t_event": 111,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 19,
+      "t_event": 146,
+      "run": "SPL_ep954_s9543"
+     },
+     {
+      "req": 0,
+      "s": 0.2667,
+      "k_latch": 25,
+      "t_event": 196,
+      "run": "SPL_ep979_s9793"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 15,
+      "t_event": 112,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": -1,
+      "s": -0.5333,
+      "k_latch": 18,
+      "t_event": 152,
+      "run": "SPL_ep1313_s13133"
+     },
+     {
+      "req": 0,
+      "s": 0.0667,
+      "k_latch": 16,
+      "t_event": 127,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 12,
+      "t_event": 88,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 14,
+      "t_event": 104,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 10,
+      "t_event": 74,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": []
+   },
+   "latch_attach_vs_lift": {
+    "requests": {
+     "n": 19,
+     "median": -1.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "min": -41.0
+    },
+    "seconds": {
+     "n": 19,
+     "median": -0.2,
+     "p90": 0.34663999999999995,
+     "max": 0.4,
+     "min": -21.4667
+    },
+    "per_run": [
+     {
+      "req": -1,
+      "s": -0.2667,
+      "k_latch": 13,
+      "t_event": 108,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": -1,
+      "s": -0.1333,
+      "k_latch": 16,
+      "t_event": 130,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 15,
+      "t_event": 115,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 13,
+      "t_event": 107,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": -41,
+      "s": -21.4667,
+      "k_latch": 23,
+      "t_event": 506,
+      "run": "SPL_ep211_s2113"
+     },
+     {
+      "req": -1,
+      "s": -0.3333,
+      "k_latch": 12,
+      "t_event": 101,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": -1,
+      "s": -0.4,
+      "k_latch": 17,
+      "t_event": 142,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": -1,
+      "s": -0.1333,
+      "k_latch": 16,
+      "t_event": 130,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 15,
+      "t_event": 114,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": -3,
+      "s": -1.1333,
+      "k_latch": 21,
+      "t_event": 185,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 15,
+      "t_event": 123,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": -1,
+      "s": -0.1333,
+      "k_latch": 17,
+      "t_event": 138,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": -2,
+      "s": -0.6,
+      "k_latch": 18,
+      "t_event": 153,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 16,
+      "t_event": 131,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 16,
+      "t_event": 131,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 18,
+      "t_event": 138,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": -1,
+      "s": -0.1333,
+      "k_latch": 13,
+      "t_event": 106,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": -1,
+      "s": -0.0667,
+      "k_latch": 15,
+      "t_event": 121,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 11,
+      "t_event": 83,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": []
+   },
+   "latch_placed_vs_place": {
+    "requests": {
+     "n": 18,
+     "median": 1.0,
+     "p90": 2.0,
+     "max": 2.0,
+     "min": 1.0
+    },
+    "seconds": {
+     "n": 18,
+     "median": 0.9333,
+     "p90": 1.2333200000000002,
+     "max": 1.4667,
+     "min": 0.6667
+    },
+    "per_run": [
+     {
+      "req": 2,
+      "s": 1.1333,
+      "k_latch": 27,
+      "t_event": 199,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 29,
+      "t_event": 210,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 27,
+      "t_event": 205,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": 1,
+      "s": 0.8667,
+      "k_latch": 27,
+      "t_event": 203,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": 2,
+      "s": 1.1333,
+      "k_latch": 25,
+      "t_event": 183,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": 2,
+      "s": 1.1333,
+      "k_latch": 31,
+      "t_event": 231,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": 1,
+      "s": 0.9333,
+      "k_latch": 30,
+      "t_event": 226,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 1,
+      "s": 0.9333,
+      "k_latch": 27,
+      "t_event": 202,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": 2,
+      "s": 1.1333,
+      "k_latch": 36,
+      "t_event": 271,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": 2,
+      "s": 1.0667,
+      "k_latch": 29,
+      "t_event": 216,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 31,
+      "t_event": 237,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": 2,
+      "s": 1.0667,
+      "k_latch": 33,
+      "t_event": 248,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 29,
+      "t_event": 221,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 30,
+      "t_event": 229,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 1,
+      "s": 0.8667,
+      "k_latch": 26,
+      "t_event": 195,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 27,
+      "t_event": 205,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": 1,
+      "s": 0.6667,
+      "k_latch": 27,
+      "t_event": 206,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 23,
+      "t_event": 162,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": []
+   },
+   "latch_closing_vs_lifting_close_cmd": {
+    "requests": {
+     "n": 19,
+     "median": 0.0,
+     "p90": 1.0,
+     "max": 1.0,
+     "min": 0.0
+    },
+    "seconds": {
+     "n": 19,
+     "median": 0.4,
+     "p90": 0.5333,
+     "max": 0.5333,
+     "min": 0.0667
+    },
+    "per_run": [
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 12,
+      "t_event": 88,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": 0,
+      "s": 0.4667,
+      "k_latch": 15,
+      "t_event": 113,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": 0,
+      "s": 0.2667,
+      "k_latch": 14,
+      "t_event": 108,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": 0,
+      "s": 0.2667,
+      "k_latch": 12,
+      "t_event": 92,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 63,
+      "t_event": 496,
+      "run": "SPL_ep211_s2113"
+     },
+     {
+      "req": 0,
+      "s": 0.4667,
+      "k_latch": 11,
+      "t_event": 81,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 16,
+      "t_event": 120,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 15,
+      "t_event": 112,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 0,
+      "s": 0.2667,
+      "k_latch": 14,
+      "t_event": 108,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": 0,
+      "s": 0.1333,
+      "k_latch": 19,
+      "t_event": 150,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 14,
+      "t_event": 107,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": 0,
+      "s": 0.2667,
+      "k_latch": 16,
+      "t_event": 124,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": 0,
+      "s": 0.2,
+      "k_latch": 17,
+      "t_event": 133,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": 0,
+      "s": 0.0667,
+      "k_latch": 14,
+      "t_event": 111,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 15,
+      "t_event": 112,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 0,
+      "s": 0.0667,
+      "k_latch": 16,
+      "t_event": 127,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 12,
+      "t_event": 88,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": 1,
+      "s": 0.5333,
+      "k_latch": 14,
+      "t_event": 104,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 10,
+      "t_event": 74,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": []
+   },
+   "probe_label_place_vs_lift": {
+    "requests": {
+     "n": 19,
+     "median": 2.0,
+     "p90": 2.0,
+     "max": 2.0,
+     "min": -37.0
+    },
+    "seconds": {
+     "n": 19,
+     "median": 1.4,
+     "p90": 1.4667,
+     "max": 1.4667,
+     "min": -19.3333
+    },
+    "per_run": [
+     {
+      "req": 1,
+      "s": 0.8,
+      "k_latch": 15,
+      "t_event": 108,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 17,
+      "t_event": 130,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": 1,
+      "s": 0.8667,
+      "k_latch": 16,
+      "t_event": 115,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 16,
+      "t_event": 107,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": -37,
+      "s": -19.3333,
+      "k_latch": 27,
+      "t_event": 506,
+      "run": "SPL_ep211_s2113"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 14,
+      "t_event": 101,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": 2,
+      "s": 1.2,
+      "k_latch": 20,
+      "t_event": 142,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 19,
+      "t_event": 130,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 17,
+      "t_event": 114,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": -2,
+      "s": -0.6,
+      "k_latch": 22,
+      "t_event": 185,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 18,
+      "t_event": 123,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 20,
+      "t_event": 138,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": 1,
+      "s": 1.0,
+      "k_latch": 21,
+      "t_event": 153,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 19,
+      "t_event": 131,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 19,
+      "t_event": 131,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 20,
+      "t_event": 138,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 16,
+      "t_event": 106,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": 1,
+      "s": 1.0,
+      "k_latch": 17,
+      "t_event": 121,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 13,
+      "t_event": 83,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": [
+     {
+      "run": "SPL_ep526_s5263",
+      "k_module": 22,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k_module": 22,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k_module": 27,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k_module": 23,
+      "t_event": null
+     }
+    ]
+   },
+   "probe_label_home_vs_place": {
+    "requests": {
+     "n": 18,
+     "median": 4.0,
+     "p90": 4.300000000000001,
+     "max": 10.0,
+     "min": 3.0
+    },
+    "seconds": {
+     "n": 18,
+     "median": 2.16665,
+     "p90": 2.6933200000000004,
+     "max": 5.6667,
+     "min": 1.6667
+    },
+    "per_run": [
+     {
+      "req": 4,
+      "s": 2.2,
+      "k_latch": 29,
+      "t_event": 199,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": 4,
+      "s": 2.5333,
+      "k_latch": 31,
+      "t_event": 210,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": 4,
+      "s": 2.3333,
+      "k_latch": 30,
+      "t_event": 205,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": 4,
+      "s": 2.4667,
+      "k_latch": 30,
+      "t_event": 203,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": 3,
+      "s": 1.6667,
+      "k_latch": 26,
+      "t_event": 183,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": 4,
+      "s": 2.2,
+      "k_latch": 33,
+      "t_event": 231,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": 3,
+      "s": 2.0,
+      "k_latch": 32,
+      "t_event": 226,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 3,
+      "s": 2.0,
+      "k_latch": 29,
+      "t_event": 202,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": 3,
+      "s": 1.6667,
+      "k_latch": 37,
+      "t_event": 271,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": 4,
+      "s": 2.1333,
+      "k_latch": 31,
+      "t_event": 216,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": 3,
+      "s": 1.8,
+      "k_latch": 33,
+      "t_event": 237,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": 4,
+      "s": 2.1333,
+      "k_latch": 35,
+      "t_event": 248,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": 4,
+      "s": 2.3333,
+      "k_latch": 32,
+      "t_event": 221,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": 3,
+      "s": 1.8,
+      "k_latch": 32,
+      "t_event": 229,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 10,
+      "s": 5.6667,
+      "k_latch": 35,
+      "t_event": 195,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": 3,
+      "s": 1.8,
+      "k_latch": 29,
+      "t_event": 205,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": 4,
+      "s": 2.2667,
+      "k_latch": 30,
+      "t_event": 206,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 5,
+      "s": 3.0667,
+      "k_latch": 26,
+      "t_event": 162,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": [
+     {
+      "run": "SPL_ep211_s2113",
+      "k_module": 43,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k_module": 36,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k_module": 37,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k_module": 35,
+      "t_event": null
+     }
+    ]
+   },
+   "probe_argmax_place_vs_lift": {
+    "requests": {
+     "n": 19,
+     "median": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "min": -43.0
+    },
+    "seconds": {
+     "n": 19,
+     "median": 0.1333,
+     "p90": 0.4,
+     "max": 0.4,
+     "min": -22.5333
+    },
+    "per_run": [
+     {
+      "req": -1,
+      "s": -0.2667,
+      "k_latch": 13,
+      "t_event": 108,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": -2,
+      "s": -0.6667,
+      "k_latch": 15,
+      "t_event": 130,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 14,
+      "t_event": 115,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": -2,
+      "s": -0.7333,
+      "k_latch": 12,
+      "t_event": 107,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": -43,
+      "s": -22.5333,
+      "k_latch": 21,
+      "t_event": 506,
+      "run": "SPL_ep211_s2113"
+     },
+     {
+      "req": -1,
+      "s": -0.3333,
+      "k_latch": 12,
+      "t_event": 101,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": 0,
+      "s": 0.1333,
+      "k_latch": 18,
+      "t_event": 142,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 17,
+      "t_event": 130,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 15,
+      "t_event": 114,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": -4,
+      "s": -1.6667,
+      "k_latch": 20,
+      "t_event": 185,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 16,
+      "t_event": 123,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 18,
+      "t_event": 138,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": -3,
+      "s": -1.1333,
+      "k_latch": 17,
+      "t_event": 153,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 17,
+      "t_event": 131,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 17,
+      "t_event": 131,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 18,
+      "t_event": 138,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 14,
+      "t_event": 106,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": -1,
+      "s": -0.0667,
+      "k_latch": 15,
+      "t_event": 121,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 11,
+      "t_event": 83,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": [
+     {
+      "run": "SPL_ep320_s3203",
+      "k_module": 17,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k_module": 20,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k_module": 20,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k_module": 25,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k_module": 18,
+      "t_event": null
+     }
+    ]
+   },
+   "probe_argmax_home_vs_place": {
+    "requests": {
+     "n": 18,
+     "median": 2.0,
+     "p90": 2.3000000000000007,
+     "max": 8.0,
+     "min": 1.0
+    },
+    "seconds": {
+     "n": 18,
+     "median": 1.1,
+     "p90": 1.6266900000000004,
+     "max": 4.6,
+     "min": 0.6
+    },
+    "per_run": [
+     {
+      "req": 2,
+      "s": 1.1333,
+      "k_latch": 27,
+      "t_event": 199,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 29,
+      "t_event": 210,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": 2,
+      "s": 1.2667,
+      "k_latch": 28,
+      "t_event": 205,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 28,
+      "t_event": 203,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": 1,
+      "s": 0.6,
+      "k_latch": 24,
+      "t_event": 183,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": 2,
+      "s": 1.1333,
+      "k_latch": 31,
+      "t_event": 231,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": 1,
+      "s": 0.9333,
+      "k_latch": 30,
+      "t_event": 226,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 1,
+      "s": 0.9333,
+      "k_latch": 27,
+      "t_event": 202,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": 1,
+      "s": 0.6,
+      "k_latch": 35,
+      "t_event": 271,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": 2,
+      "s": 1.0667,
+      "k_latch": 29,
+      "t_event": 216,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 31,
+      "t_event": 237,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": 2,
+      "s": 1.0667,
+      "k_latch": 33,
+      "t_event": 248,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": 2,
+      "s": 1.2667,
+      "k_latch": 30,
+      "t_event": 221,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 30,
+      "t_event": 229,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 8,
+      "s": 4.6,
+      "k_latch": 33,
+      "t_event": 195,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 27,
+      "t_event": 205,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": 2,
+      "s": 1.2,
+      "k_latch": 28,
+      "t_event": 206,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 3,
+      "s": 2.0,
+      "k_latch": 24,
+      "t_event": 162,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": [
+     {
+      "run": "SPL_ep211_s2113",
+      "k_module": 41,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k_module": 34,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k_module": 35,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k_module": 73,
+      "t_event": null
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k_module": 33,
+      "t_event": null
+     }
+    ]
+   },
+   "latch_attach_vs_lift_same_cycle": {
+    "requests": {
+     "n": 19,
+     "median": -1.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "min": -3.0
+    },
+    "seconds": {
+     "n": 19,
+     "median": -0.1333,
+     "p90": 0.4,
+     "max": 0.4,
+     "min": -1.1333
+    },
+    "per_run": [
+     {
+      "req": -1,
+      "s": -0.2667,
+      "k_latch": 13,
+      "t_event": 108,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": -1,
+      "s": -0.1333,
+      "k_latch": 16,
+      "t_event": 130,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 15,
+      "t_event": 115,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 13,
+      "t_event": 107,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 64,
+      "t_event": 506,
+      "run": "SPL_ep211_s2113"
+     },
+     {
+      "req": -1,
+      "s": -0.3333,
+      "k_latch": 12,
+      "t_event": 101,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": -1,
+      "s": -0.4,
+      "k_latch": 17,
+      "t_event": 142,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": -1,
+      "s": -0.1333,
+      "k_latch": 16,
+      "t_event": 130,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 15,
+      "t_event": 114,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": -3,
+      "s": -1.1333,
+      "k_latch": 21,
+      "t_event": 185,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 15,
+      "t_event": 123,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": -1,
+      "s": -0.1333,
+      "k_latch": 17,
+      "t_event": 138,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": -2,
+      "s": -0.6,
+      "k_latch": 18,
+      "t_event": 153,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 16,
+      "t_event": 131,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 16,
+      "t_event": 131,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 18,
+      "t_event": 138,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": -1,
+      "s": -0.1333,
+      "k_latch": 13,
+      "t_event": 106,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": -1,
+      "s": -0.0667,
+      "k_latch": 15,
+      "t_event": 121,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 11,
+      "t_event": 83,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": []
+   },
+   "probe_label_place_vs_lift_same_cycle": {
+    "requests": {
+     "n": 19,
+     "median": 2.0,
+     "p90": 2.0,
+     "max": 2.0,
+     "min": -2.0
+    },
+    "seconds": {
+     "n": 19,
+     "median": 1.4,
+     "p90": 1.4667,
+     "max": 1.4667,
+     "min": -0.6
+    },
+    "per_run": [
+     {
+      "req": 1,
+      "s": 0.8,
+      "k_latch": 15,
+      "t_event": 108,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 17,
+      "t_event": 130,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": 1,
+      "s": 0.8667,
+      "k_latch": 16,
+      "t_event": 115,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 16,
+      "t_event": 107,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": 1,
+      "s": 0.9333,
+      "k_latch": 65,
+      "t_event": 506,
+      "run": "SPL_ep211_s2113"
+     },
+     {
+      "req": 1,
+      "s": 0.7333,
+      "k_latch": 14,
+      "t_event": 101,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": 2,
+      "s": 1.2,
+      "k_latch": 20,
+      "t_event": 142,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 19,
+      "t_event": 130,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 17,
+      "t_event": 114,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": -2,
+      "s": -0.6,
+      "k_latch": 22,
+      "t_event": 185,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 18,
+      "t_event": 123,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 20,
+      "t_event": 138,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": 1,
+      "s": 1.0,
+      "k_latch": 21,
+      "t_event": 153,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 19,
+      "t_event": 131,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 19,
+      "t_event": 131,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 20,
+      "t_event": 138,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": 2,
+      "s": 1.4667,
+      "k_latch": 16,
+      "t_event": 106,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": 1,
+      "s": 1.0,
+      "k_latch": 17,
+      "t_event": 121,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 2,
+      "s": 1.4,
+      "k_latch": 13,
+      "t_event": 83,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": []
+   },
+   "probe_argmax_place_vs_lift_same_cycle": {
+    "requests": {
+     "n": 19,
+     "median": 0.0,
+     "p90": 0.0,
+     "max": 0.0,
+     "min": -4.0
+    },
+    "seconds": {
+     "n": 19,
+     "median": 0.1333,
+     "p90": 0.4,
+     "max": 0.4,
+     "min": -1.6667
+    },
+    "per_run": [
+     {
+      "req": -1,
+      "s": -0.2667,
+      "k_latch": 13,
+      "t_event": 108,
+      "run": "SPL_ep56_s563"
+     },
+     {
+      "req": -2,
+      "s": -0.6667,
+      "k_latch": 15,
+      "t_event": 130,
+      "run": "SPL_ep119_s1193"
+     },
+     {
+      "req": -1,
+      "s": -0.2,
+      "k_latch": 14,
+      "t_event": 115,
+      "run": "SPL_ep121_s1213"
+     },
+     {
+      "req": -2,
+      "s": -0.7333,
+      "k_latch": 12,
+      "t_event": 107,
+      "run": "SPL_ep126_s1263"
+     },
+     {
+      "req": -1,
+      "s": -0.1333,
+      "k_latch": 63,
+      "t_event": 506,
+      "run": "SPL_ep211_s2113"
+     },
+     {
+      "req": -1,
+      "s": -0.3333,
+      "k_latch": 12,
+      "t_event": 101,
+      "run": "SPL_ep250_s2503"
+     },
+     {
+      "req": 0,
+      "s": 0.1333,
+      "k_latch": 18,
+      "t_event": 142,
+      "run": "SPL_ep309_s3093"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 17,
+      "t_event": 130,
+      "run": "SPL_ep325_s3253"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 15,
+      "t_event": 114,
+      "run": "SPL_ep342_s3423"
+     },
+     {
+      "req": -4,
+      "s": -1.6667,
+      "k_latch": 20,
+      "t_event": 185,
+      "run": "SPL_ep421_s4213"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 16,
+      "t_event": 123,
+      "run": "SPL_ep572_s5723"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 18,
+      "t_event": 138,
+      "run": "SPL_ep753_s7533"
+     },
+     {
+      "req": -3,
+      "s": -1.1333,
+      "k_latch": 17,
+      "t_event": 153,
+      "run": "SPL_ep850_s8503"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 17,
+      "t_event": 131,
+      "run": "SPL_ep901_s9013"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 17,
+      "t_event": 131,
+      "run": "SPL_ep1222_s12223"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 18,
+      "t_event": 138,
+      "run": "SPL_ep1345_s13453"
+     },
+     {
+      "req": 0,
+      "s": 0.4,
+      "k_latch": 14,
+      "t_event": 106,
+      "run": "SPL_ep1596_s15963"
+     },
+     {
+      "req": -1,
+      "s": -0.0667,
+      "k_latch": 15,
+      "t_event": 121,
+      "run": "SPL_ep1668_s16683"
+     },
+     {
+      "req": 0,
+      "s": 0.3333,
+      "k_latch": 11,
+      "t_event": 83,
+      "run": "SPL_ep1837_s18373"
+     }
+    ],
+    "one_side_only": []
+   }
+  },
+  "false_events": {
+   "attach_not_held": {
+    "count": 15,
+    "runs": [
+     "SPL_ep119_s1193",
+     "SPL_ep1222_s12223",
+     "SPL_ep126_s1263",
+     "SPL_ep1596_s15963",
+     "SPL_ep1668_s16683",
+     "SPL_ep211_s2113",
+     "SPL_ep250_s2503",
+     "SPL_ep309_s3093",
+     "SPL_ep325_s3253",
+     "SPL_ep421_s4213",
+     "SPL_ep56_s563",
+     "SPL_ep572_s5723",
+     "SPL_ep753_s7533",
+     "SPL_ep850_s8503",
+     "SPL_ep901_s9013"
+    ],
+    "events": [
+     {
+      "run": "SPL_ep56_s563",
+      "k": 13,
+      "t": 104,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": -0.2,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.722,
+      "lift_t": 108,
+      "steps_to_lift": 4,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep119_s1193",
+      "k": 16,
+      "t": 128,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": -0.1,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.722,
+      "lift_t": 130,
+      "steps_to_lift": 2,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep126_s1263",
+      "k": 13,
+      "t": 104,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": 0.1,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.714,
+      "lift_t": 107,
+      "steps_to_lift": 3,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 23,
+      "t": 184,
+      "gt": "FAILED_GRASP",
+      "gt_window_pm1req": [
+       "FAILED_GRASP"
+      ],
+      "dz_mm": 0.0,
+      "contact_t": false,
+      "contact_prev_chunk": false,
+      "finger_open_t": 0.47,
+      "lift_t": 506,
+      "steps_to_lift": 322,
+      "held_within_pm1req": false
+     },
+     {
+      "run": "SPL_ep250_s2503",
+      "k": 12,
+      "t": 96,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": 1.4,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.721,
+      "lift_t": 101,
+      "steps_to_lift": 5,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep309_s3093",
+      "k": 17,
+      "t": 136,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": -0.4,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.717,
+      "lift_t": 142,
+      "steps_to_lift": 6,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep325_s3253",
+      "k": 16,
+      "t": 128,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": -0.1,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.714,
+      "lift_t": 130,
+      "steps_to_lift": 2,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep421_s4213",
+      "k": 21,
+      "t": 168,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING"
+      ],
+      "dz_mm": -0.1,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.726,
+      "lift_t": 185,
+      "steps_to_lift": 17,
+      "held_within_pm1req": false
+     },
+     {
+      "run": "SPL_ep572_s5723",
+      "k": 15,
+      "t": 120,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": 0.1,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.724,
+      "lift_t": 123,
+      "steps_to_lift": 3,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep753_s7533",
+      "k": 17,
+      "t": 136,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": 0.0,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.726,
+      "lift_t": 138,
+      "steps_to_lift": 2,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep850_s8503",
+      "k": 18,
+      "t": 144,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING"
+      ],
+      "dz_mm": -0.1,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.743,
+      "lift_t": 153,
+      "steps_to_lift": 9,
+      "held_within_pm1req": false
+     },
+     {
+      "run": "SPL_ep901_s9013",
+      "k": 16,
+      "t": 128,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": 0.1,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.713,
+      "lift_t": 131,
+      "steps_to_lift": 3,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep1222_s12223",
+      "k": 16,
+      "t": 128,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": 0.0,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.733,
+      "lift_t": 131,
+      "steps_to_lift": 3,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep1596_s15963",
+      "k": 13,
+      "t": 104,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": -0.1,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.714,
+      "lift_t": 106,
+      "steps_to_lift": 2,
+      "held_within_pm1req": true
+     },
+     {
+      "run": "SPL_ep1668_s16683",
+      "k": 15,
+      "t": 120,
+      "gt": "CLOSING",
+      "gt_window_pm1req": [
+       "CLOSING",
+       "HELD"
+      ],
+      "dz_mm": 4.9,
+      "contact_t": true,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.723,
+      "lift_t": 121,
+      "steps_to_lift": 1,
+      "held_within_pm1req": true
+     }
+    ],
+    "count_tolerant_pm1req": 3,
+    "breakdown": {
+     "gt_CLOSING_contact_lift_within_2req": 13,
+     "gt_CLOSING_other": 1,
+     "gt_FAILED_GRASP": 1,
+     "gt_DROPPED": 0,
+     "gt_other": 0,
+     "no_hand_contact_at_t": 1
+    }
+   },
+   "revoke_while_held": {
+    "count": 0,
+    "runs": [],
+    "events": []
+   },
+   "held_to_latched_or_closing": {
+    "count": 2,
+    "runs": [
+     "SPL_ep211_s2113"
+    ],
+    "events": [
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 25,
+      "t": 200,
+      "gt": "FAILED_GRASP",
+      "gt_window_pm1req": [
+       "FAILED_GRASP"
+      ],
+      "dz_mm": 0.0,
+      "contact_t": false,
+      "contact_prev_chunk": false,
+      "finger_open_t": 0.416,
+      "lift_t": 506,
+      "steps_to_lift": 306,
+      "to": "latched",
+      "note": "attach_revoked — 쥔 상태가 아니다: opening_dropped, not_blocked (attach 뒤 실행 청크 1/4) — detach(), 대상 잠금은 유지 (feedback seq 25)"
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 65,
+      "t": 520,
+      "gt": "DROPPED",
+      "gt_window_pm1req": [
+       "DROPPED",
+       "HELD"
+      ],
+      "dz_mm": 2.4,
+      "contact_t": false,
+      "contact_prev_chunk": true,
+      "finger_open_t": 0.591,
+      "lift_t": 506,
+      "steps_to_lift": -14,
+      "to": "latched",
+      "note": "attach_revoked — 쥔 상태가 아니다: opening_dropped, not_blocked (attach 뒤 실행 청크 1/4) — detach(), 대상 잠금은 유지 (feedback seq 65)"
+     }
+    ]
+   },
+   "relatch_other_target": {
+    "count": 0,
+    "runs": [],
+    "events": []
+   },
+   "manipulated_switch": {
+    "count": 0,
+    "runs": [],
+    "events": []
+   },
+   "counts_total": {
+    "attach": 20,
+    "revoked": 2,
+    "transitions": 79
+   },
+   "transition_counts": {
+    "latched->closing": 32,
+    "closing->held": 20,
+    "held->placed": 18,
+    "held->latched": 2,
+    "closing->latched": 7
+   }
+  },
+  "probe_argmax": {
+   "confusion": {
+    "rows": [
+     "pick",
+     "place",
+     "home"
+    ],
+    "cols": [
+     "pick",
+     "place",
+     "home",
+     "None"
+    ],
+    "M": [
+     [
+      560,
+      153,
+      30,
+      0
+     ],
+     [
+      0,
+      195,
+      0,
+      0
+     ],
+     [
+      17,
+      40,
+      805,
+      0
+     ]
+    ]
+   },
+   "accuracy_labeled": {
+    "n": 1800,
+    "correct": 1560,
+    "acc": 0.8667
+   },
+   "accuracy_all": {
+    "n": 1800,
+    "correct": 1560,
+    "acc": 0.8667
+   },
+   "n_none": 0,
+   "per_stage_correct": {
+    "APPROACH": [
+     462,
+     508
+    ],
+    "CLOSING": [
+     32,
+     46
+    ],
+    "HELD": [
+     195,
+     195
+    ],
+    "RELEASED": [
+     0,
+     0
+    ],
+    "PLACED": [
+     0,
+     8
+    ],
+    "HOME": [
+     805,
+     854
+    ],
+    "FAILED_GRASP": [
+     60,
+     179
+    ],
+    "DROPPED": [
+     6,
+     10
+    ]
+   }
+  },
+  "probe_label": {
+   "confusion": {
+    "rows": [
+     "pick",
+     "place",
+     "home"
+    ],
+    "cols": [
+     "pick",
+     "place",
+     "home",
+     "None"
+    ],
+    "M": [
+     [
+      538,
+      130,
+      27,
+      48
+     ],
+     [
+      28,
+      167,
+      0,
+      0
+     ],
+     [
+      14,
+      76,
+      772,
+      0
+     ]
+    ]
+   },
+   "accuracy_labeled": {
+    "n": 1752,
+    "correct": 1477,
+    "acc": 0.843
+   },
+   "accuracy_all": {
+    "n": 1800,
+    "correct": 1477,
+    "acc": 0.8206
+   },
+   "n_none": 48,
+   "per_stage_correct": {
+    "APPROACH": [
+     408,
+     508
+    ],
+    "CLOSING": [
+     44,
+     46
+    ],
+    "HELD": [
+     167,
+     195
+    ],
+    "RELEASED": [
+     0,
+     0
+    ],
+    "PLACED": [
+     0,
+     8
+    ],
+    "HOME": [
+     772,
+     854
+    ],
+    "FAILED_GRASP": [
+     82,
+     179
+    ],
+    "DROPPED": [
+     4,
+     10
+    ]
+   },
+   "label_changes_per_run": {
+    "SPL_ep56_s563": 2,
+    "SPL_ep119_s1193": 2,
+    "SPL_ep121_s1213": 2,
+    "SPL_ep126_s1263": 2,
+    "SPL_ep211_s2113": 5,
+    "SPL_ep250_s2503": 2,
+    "SPL_ep309_s3093": 2,
+    "SPL_ep320_s3203": 0,
+    "SPL_ep325_s3253": 2,
+    "SPL_ep342_s3423": 2,
+    "SPL_ep421_s4213": 2,
+    "SPL_ep526_s5263": 4,
+    "SPL_ep572_s5723": 2,
+    "SPL_ep753_s7533": 2,
+    "SPL_ep850_s8503": 2,
+    "SPL_ep901_s9013": 2,
+    "SPL_ep954_s9543": 4,
+    "SPL_ep979_s9793": 5,
+    "SPL_ep1222_s12223": 2,
+    "SPL_ep1313_s13133": 4,
+    "SPL_ep1345_s13453": 2,
+    "SPL_ep1596_s15963": 2,
+    "SPL_ep1668_s16683": 2,
+    "SPL_ep1837_s18373": 5
+   },
+   "place_label_never_but_gt_lift": [],
+   "place_label_without_gt_lift": [
+    "SPL_ep526_s5263",
+    "SPL_ep954_s9543",
+    "SPL_ep979_s9793",
+    "SPL_ep1313_s13133"
+   ]
+  },
+  "probe_vs_latch": {
+   "all_requests": {
+    "both_right": 1460,
+    "latch_right_probe_wrong": 247,
+    "probe_right_latch_wrong": 17,
+    "both_wrong": 28,
+    "probe_none": 48
+   },
+   "gt_held_requests": {
+    "both_right": 167,
+    "latch_right_probe_wrong": 28,
+    "probe_right_latch_wrong": 0,
+    "both_wrong": 0,
+    "probe_none": 0
+   },
+   "disagree_requests": 264,
+   "probe_place_latch_not_held": {
+    "count": 178,
+    "by_gt": {
+     "APPROACH": 25,
+     "CLOSING": 0,
+     "HELD": 0,
+     "RELEASED": 0,
+     "PLACED": 5,
+     "HOME": 45,
+     "FAILED_GRASP": 97,
+     "DROPPED": 6
+    },
+    "by_latch": {
+     "searching": 0,
+     "latched": 24,
+     "closing": 104,
+     "held": 0,
+     "placed": 50
+    },
+    "runs": {
+     "SPL_ep119_s1193": 2,
+     "SPL_ep121_s1213": 3,
+     "SPL_ep1222_s12223": 2,
+     "SPL_ep126_s1263": 3,
+     "SPL_ep1313_s13133": 29,
+     "SPL_ep1345_s13453": 9,
+     "SPL_ep1596_s15963": 2,
+     "SPL_ep1668_s16683": 3,
+     "SPL_ep1837_s18373": 7,
+     "SPL_ep211_s2113": 22,
+     "SPL_ep250_s2503": 1,
+     "SPL_ep309_s3093": 2,
+     "SPL_ep325_s3253": 2,
+     "SPL_ep342_s3423": 2,
+     "SPL_ep421_s4213": 1,
+     "SPL_ep526_s5263": 18,
+     "SPL_ep56_s563": 2,
+     "SPL_ep572_s5723": 2,
+     "SPL_ep753_s7533": 2,
+     "SPL_ep850_s8503": 2,
+     "SPL_ep901_s9013": 3,
+     "SPL_ep954_s9543": 17,
+     "SPL_ep979_s9793": 42
+    },
+    "events": [
+     {
+      "run": "SPL_ep56_s563",
+      "k": 27,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.5
+     },
+     {
+      "run": "SPL_ep56_s563",
+      "k": 28,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.5
+     },
+     {
+      "run": "SPL_ep119_s1193",
+      "k": 29,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.0
+     },
+     {
+      "run": "SPL_ep119_s1193",
+      "k": 30,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.9
+     },
+     {
+      "run": "SPL_ep121_s1213",
+      "k": 27,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.8
+     },
+     {
+      "run": "SPL_ep121_s1213",
+      "k": 28,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.8
+     },
+     {
+      "run": "SPL_ep121_s1213",
+      "k": 29,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.8
+     },
+     {
+      "run": "SPL_ep126_s1263",
+      "k": 27,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.3
+     },
+     {
+      "run": "SPL_ep126_s1263",
+      "k": 28,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.9
+     },
+     {
+      "run": "SPL_ep126_s1263",
+      "k": 29,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 27,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 28,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 29,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 30,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 31,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 32,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 33,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 34,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 35,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 36,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 37,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 38,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 39,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 40,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 41,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 42,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 65,
+      "latch": "latched",
+      "gt": "DROPPED",
+      "dz_mm": 2.4
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 66,
+      "latch": "closing",
+      "gt": "DROPPED",
+      "dz_mm": 3.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 67,
+      "latch": "closing",
+      "gt": "DROPPED",
+      "dz_mm": -0.1
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 68,
+      "latch": "closing",
+      "gt": "DROPPED",
+      "dz_mm": 0.4
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 69,
+      "latch": "closing",
+      "gt": "DROPPED",
+      "dz_mm": 1.0
+     },
+     {
+      "run": "SPL_ep211_s2113",
+      "k": 70,
+      "latch": "closing",
+      "gt": "DROPPED",
+      "dz_mm": 0.6
+     },
+     {
+      "run": "SPL_ep250_s2503",
+      "k": 25,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.8
+     },
+     {
+      "run": "SPL_ep309_s3093",
+      "k": 31,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.4
+     },
+     {
+      "run": "SPL_ep309_s3093",
+      "k": 32,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.1
+     },
+     {
+      "run": "SPL_ep325_s3253",
+      "k": 30,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 11.7
+     },
+     {
+      "run": "SPL_ep325_s3253",
+      "k": 31,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 10.1
+     },
+     {
+      "run": "SPL_ep342_s3423",
+      "k": 27,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.9
+     },
+     {
+      "run": "SPL_ep342_s3423",
+      "k": 28,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.0
+     },
+     {
+      "run": "SPL_ep421_s4213",
+      "k": 36,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.8
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 22,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 23,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 24,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 25,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 26,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 27,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 28,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 29,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 30,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 31,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 32,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 33,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 34,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 35,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 71,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 72,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 73,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep526_s5263",
+      "k": 74,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep572_s5723",
+      "k": 29,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.9
+     },
+     {
+      "run": "SPL_ep572_s5723",
+      "k": 30,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.9
+     },
+     {
+      "run": "SPL_ep753_s7533",
+      "k": 31,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.9
+     },
+     {
+      "run": "SPL_ep753_s7533",
+      "k": 32,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.2
+     },
+     {
+      "run": "SPL_ep850_s8503",
+      "k": 33,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.8
+     },
+     {
+      "run": "SPL_ep850_s8503",
+      "k": 34,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.8
+     },
+     {
+      "run": "SPL_ep901_s9013",
+      "k": 29,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.7
+     },
+     {
+      "run": "SPL_ep901_s9013",
+      "k": 30,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.7
+     },
+     {
+      "run": "SPL_ep901_s9013",
+      "k": 31,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.9
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 22,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 23,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 24,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 25,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 26,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 27,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 28,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 29,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 30,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 31,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 32,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 33,
+      "latch": "closing",
+      "gt": "APPROACH",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 34,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 35,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 36,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 73,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep954_s9543",
+      "k": 74,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.5
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 27,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 28,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 29,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 33,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 34,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 35,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 39,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 40,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 41,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 42,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 43,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 44,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 45,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 46,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 47,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 48,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 49,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 50,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 51,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 52,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 53,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 54,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 55,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 56,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 57,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 58,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 59,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 60,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 61,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 62,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 63,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 64,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 65,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 66,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 67,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 68,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 69,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 70,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 71,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 72,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 73,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep979_s9793",
+      "k": 74,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1222_s12223",
+      "k": 30,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 10.1
+     },
+     {
+      "run": "SPL_ep1222_s12223",
+      "k": 31,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.3
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 23,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 24,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 25,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 26,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 27,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 28,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 29,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 30,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 31,
+      "latch": "closing",
+      "gt": "APPROACH",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 32,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 33,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 34,
+      "latch": "latched",
+      "gt": "APPROACH",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 58,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 59,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 60,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 61,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 62,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 63,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 64,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 65,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 66,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 67,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 68,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 69,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 70,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 71,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 72,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 73,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": -0.0
+     },
+     {
+      "run": "SPL_ep1313_s13133",
+      "k": 74,
+      "latch": "closing",
+      "gt": "FAILED_GRASP",
+      "dz_mm": 0.0
+     },
+     {
+      "run": "SPL_ep1345_s13453",
+      "k": 26,
+      "latch": "placed",
+      "gt": "PLACED",
+      "dz_mm": 9.8
+     },
+     {
+      "run": "SPL_ep1345_s13453",
+      "k": 27,
+      "latch": "placed",
+      "gt": "PLACED",
+      "dz_mm": 9.9
+     },
+     {
+      "run": "SPL_ep1345_s13453",
+      "k": 28,
+      "latch": "placed",
+      "gt": "PLACED",
+      "dz_mm": 9.9
+     },
+     {
+      "run": "SPL_ep1345_s13453",
+      "k": 29,
+      "latch": "placed",
+      "gt": "PLACED",
+      "dz_mm": 9.9
+     },
+     {
+      "run": "SPL_ep1345_s13453",
+      "k": 30,
+      "latch": "placed",
+      "gt": "PLACED",
+      "dz_mm": 9.9
+     },
+     {
+      "run": "SPL_ep1345_s13453",
+      "k": 31,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.9
+     },
+     {
+      "run": "SPL_ep1345_s13453",
+      "k": 32,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.9
+     },
+     {
+      "run": "SPL_ep1345_s13453",
+      "k": 33,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.9
+     },
+     {
+      "run": "SPL_ep1345_s13453",
+      "k": 34,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.9
+     },
+     {
+      "run": "SPL_ep1596_s15963",
+      "k": 27,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.9
+     },
+     {
+      "run": "SPL_ep1596_s15963",
+      "k": 28,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 9.8
+     },
+     {
+      "run": "SPL_ep1668_s16683",
+      "k": 27,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 7.8
+     },
+     {
+      "run": "SPL_ep1668_s16683",
+      "k": 28,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.0
+     },
+     {
+      "run": "SPL_ep1668_s16683",
+      "k": 29,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 8.0
+     },
+     {
+      "run": "SPL_ep1837_s18373",
+      "k": 23,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 10.4
+     },
+     {
+      "run": "SPL_ep1837_s18373",
+      "k": 24,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 10.4
+     },
+     {
+      "run": "SPL_ep1837_s18373",
+      "k": 25,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 10.4
+     },
+     {
+      "run": "SPL_ep1837_s18373",
+      "k": 29,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 10.4
+     },
+     {
+      "run": "SPL_ep1837_s18373",
+      "k": 30,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 10.4
+     },
+     {
+      "run": "SPL_ep1837_s18373",
+      "k": 31,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 10.4
+     },
+     {
+      "run": "SPL_ep1837_s18373",
+      "k": 32,
+      "latch": "placed",
+      "gt": "HOME",
+      "dz_mm": 10.4
+     }
+    ]
+   }
+  },
+  "memory_held": {
+   "n_gt_held_requests": 195,
+   "latch_counts": {
+    "searching": 0,
+    "latched": 0,
+    "closing": 0,
+    "held": 195,
+    "placed": 0
+   },
+   "manipulated_state_counts": {
+    "visible": 0,
+    "occluded": 195,
+    "kept": 0,
+    "None": 0
+   },
+   "manipulated_state_when_latch_held": {
+    "visible": 0,
+    "occluded": 195,
+    "kept": 0,
+    "None": 0
+   },
+   "latch_changes_inside_gt_held": [],
+   "latch_held_after_first_attach_in_run": {
+    "n": 195,
+    "held": 195
+   },
+   "manipulated_state_all_requests": {
+    "visible": 549,
+    "occluded": 461,
+    "kept": 0,
+    "None": 790
+   },
+   "manipulated_state_by_gt": {
+    "APPROACH": {
+     "visible": 435,
+     "occluded": 73,
+     "kept": 0,
+     "None": 0
+    },
+    "CLOSING": {
+     "visible": 29,
+     "occluded": 17,
+     "kept": 0,
+     "None": 0
+    },
+    "HELD": {
+     "visible": 0,
+     "occluded": 195,
+     "kept": 0,
+     "None": 0
+    },
+    "RELEASED": {
+     "visible": 0,
+     "occluded": 0,
+     "kept": 0,
+     "None": 0
+    },
+    "PLACED": {
+     "visible": 0,
+     "occluded": 8,
+     "kept": 0,
+     "None": 0
+    },
+    "HOME": {
+     "visible": 0,
+     "occluded": 64,
+     "kept": 0,
+     "None": 790
+    },
+    "FAILED_GRASP": {
+     "visible": 85,
+     "occluded": 94,
+     "kept": 0,
+     "None": 0
+    },
+    "DROPPED": {
+     "visible": 0,
+     "occluded": 10,
+     "kept": 0,
+     "None": 0
+    }
+   },
+   "manipulated_id_switch_during_held": 0
+  },
+  "failure_notes": {
+   "SPL_ep211_s2113": [
+    "실행 피드백 없음 (no chunk has run yet in this episode) — 파지 상태 그대로 (searching), 계획값으로 attach 하지 않는다",
+    "닫힘 시도: 실행된 닫힘 명령 5 스텝 (feedback seq 21); 닫힘 시도 — 파지 미확인: settled (손가락이 아직 움직인다: 직전 요청과 차 0.502 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled (손가락이 아직 움직인다: 직전 요청과 차 0.021 ≥ 0.02)",
+    "파지 확인 — attach(manipulated id=0): 개도 1.000→0.470 (정지: 직전 요청과 차 0.0074 < 0.02), 명령 0.002, reach 39.0 mm ≤ 120 mm, feedback seq 23",
+    "attach_revoked — 쥔 상태가 아니다: opening_dropped, not_blocked (attach 뒤 실행 청크 1/4) — detach(), 대상 잠금은 유지 (feedback seq 25)",
+    "닫힘 시도: 실행된 닫힘 명령 8 스텝 (feedback seq 26); 닫힘 시도 — 파지 미확인: settled, dropped, blocked, reach (손가락이 아직 움직인다: 직전 요청과 차 0.041 ≥ 0.02)"
+   ],
+   "SPL_ep320_s3203": [
+    "실행 피드백 없음 (no chunk has run yet in this episode) — 파지 상태 그대로 (searching), 계획값으로 attach 하지 않는다",
+    "닫힘 시도: 실행된 닫힘 명령 5 스텝 (feedback seq 16); 닫힘 시도 — 파지 미확인: settled (손가락이 아직 움직인다: 직전 요청과 차 0.274 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled (손가락이 아직 움직인다: 직전 요청과 차 0.025 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled (손가락이 아직 움직인다: 직전 요청과 차 0.046 ≥ 0.02)",
+    "닫힘 시도 포기: 명령 1.000 · 개도 0.992 가 다시 열렸다 — attach 없음",
+    "닫힘 시도: 실행된 닫힘 명령 2 스텝 (feedback seq 24); 닫힘 시도 — 파지 미확인: settled (손가락이 아직 움직인다: 직전 요청과 차 0.257 ≥ 0.02)"
+   ],
+   "SPL_ep526_s5263": [
+    "실행 피드백 없음 (no chunk has run yet in this episode) — 파지 상태 그대로 (searching), 계획값으로 attach 하지 않는다",
+    "닫힘 시도: 실행된 닫힘 명령 1 스텝 (feedback seq 18); 닫힘 시도 — 파지 미확인: settled, closed (손가락이 아직 움직인다: 직전 요청과 차 0.121 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled (손가락이 아직 움직인다: 직전 요청과 차 0.525 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled, blocked (손가락이 아직 움직인다: 직전 요청과 차 0.084 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: blocked, reach (빈손 닫힘으로 보인다)",
+    "닫힘 시도 — 파지 미확인: settled, blocked, reach (손가락이 아직 움직인다: 직전 요청과 차 0.029 ≥ 0.02)"
+   ],
+   "SPL_ep954_s9543": [
+    "실행 피드백 없음 (no chunk has run yet in this episode) — 파지 상태 그대로 (searching), 계획값으로 attach 하지 않는다",
+    "닫힘 시도: 실행된 닫힘 명령 6 스텝 (feedback seq 19); 닫힘 시도 — 파지 미확인: settled (손가락이 아직 움직인다: 직전 요청과 차 0.597 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled, blocked (손가락이 아직 움직인다: 직전 요청과 차 0.038 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: blocked, reach (빈손 닫힘으로 보인다)",
+    "닫힘 시도 — 파지 미확인: blocked, reach (빈손 닫힘으로 보인다)",
+    "닫힘 시도 — 파지 미확인: blocked, reach (빈손 닫힘으로 보인다)"
+   ],
+   "SPL_ep979_s9793": [
+    "실행 피드백 없음 (no chunk has run yet in this episode) — 파지 상태 그대로 (searching), 계획값으로 attach 하지 않는다",
+    "닫힘 시도: 실행된 닫힘 명령 4 스텝 (feedback seq 25); 닫힘 시도 — 파지 미확인: settled (손가락이 아직 움직인다: 직전 요청과 차 0.322 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled, blocked (손가락이 아직 움직인다: 직전 요청과 차 0.121 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled, blocked, reach (손가락이 아직 움직인다: 직전 요청과 차 0.137 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled, blocked, reach (손가락이 아직 움직인다: 직전 요청과 차 0.022 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled, blocked, reach (손가락이 아직 움직인다: 직전 요청과 차 0.080 ≥ 0.02)"
+   ],
+   "SPL_ep1313_s13133": [
+    "실행 피드백 없음 (no chunk has run yet in this episode) — 파지 상태 그대로 (searching), 계획값으로 attach 하지 않는다",
+    "닫힘 시도: 실행된 닫힘 명령 7 스텝 (feedback seq 18); 닫힘 시도 — 파지 미확인: settled, blocked (손가락이 아직 움직인다: 직전 요청과 차 0.185 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled, blocked (손가락이 아직 움직인다: 직전 요청과 차 0.211 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled, blocked, reach (손가락이 아직 움직인다: 직전 요청과 차 0.087 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: settled, blocked, reach (손가락이 아직 움직인다: 직전 요청과 차 0.027 ≥ 0.02)",
+    "닫힘 시도 — 파지 미확인: blocked, reach (빈손 닫힘으로 보인다)"
+   ]
+  }
+ },
+ "per_run": [
+  {
+   "run": "SPL_ep56_s563",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 88,
+    "close_cycles": [
+     [
+      88,
+      198
+     ]
+    ],
+    "lift_close_t": 88,
+    "lift_t": 108,
+    "lifts": [
+     [
+      108,
+      199
+     ]
+    ],
+    "release_t": 199,
+    "place_t": 199,
+    "home_t": 199,
+    "dz_max_contact_mm": 243.5630465496442
+   },
+   "gt_stage_counts": {
+    "APPROACH": 11,
+    "CLOSING": 3,
+    "HELD": 11,
+    "HOME": 50
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 10,
+    "closing": 1,
+    "held": 14,
+    "placed": 48
+   },
+   "label_counts": {
+    "pick": 13,
+    "place": 14,
+    "home": 46,
+    "None": 2
+   },
+   "attach_k": [
+    13
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllcHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaacccHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkLLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvoooooooooooooooo----------------------------------------------"
+  },
+  {
+   "run": "SPL_ep119_s1193",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 113,
+    "close_cycles": [
+     [
+      113,
+      215
+     ],
+     [
+      216,
+      219
+     ]
+    ],
+    "lift_close_t": 113,
+    "lift_t": 130,
+    "lifts": [
+     [
+      130,
+      209
+     ]
+    ],
+    "release_t": 209,
+    "place_t": 210,
+    "home_t": 215,
+    "dz_max_contact_mm": 246.7386400061018
+   },
+   "gt_stage_counts": {
+    "APPROACH": 15,
+    "CLOSING": 2,
+    "HELD": 10,
+    "HOME": 48
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 13,
+    "closing": 1,
+    "held": 13,
+    "placed": 46
+   },
+   "label_counts": {
+    "pick": 15,
+    "place": 14,
+    "home": 44,
+    "None": 2
+   },
+   "attach_k": [
+    16
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "sslllllllllllllcHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaaaccHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkLLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvooovooooooooooooooo--------------------------------------------"
+  },
+  {
+   "run": "SPL_ep121_s1213",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 108,
+    "close_cycles": [
+     [
+      108,
+      204
+     ]
+    ],
+    "lift_close_t": 108,
+    "lift_t": 115,
+    "lifts": [
+     [
+      115,
+      205
+     ]
+    ],
+    "release_t": 205,
+    "place_t": 205,
+    "home_t": 205,
+    "dz_max_contact_mm": 239.23648508294303
+   },
+   "gt_stage_counts": {
+    "APPROACH": 14,
+    "CLOSING": 1,
+    "HELD": 11,
+    "HOME": 49
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 12,
+    "closing": 1,
+    "held": 12,
+    "placed": 48
+   },
+   "label_counts": {
+    "pick": 14,
+    "place": 14,
+    "home": 45,
+    "None": 2
+   },
+   "attach_k": [
+    15
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllllcHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaacHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkLLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvooooooooooooooo---------------------------------------------"
+  },
+  {
+   "run": "SPL_ep126_s1263",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 92,
+    "close_cycles": [
+     [
+      92,
+      202
+     ]
+    ],
+    "lift_close_t": 92,
+    "lift_t": 107,
+    "lifts": [
+     [
+      107,
+      203
+     ]
+    ],
+    "release_t": 203,
+    "place_t": 203,
+    "home_t": 203,
+    "dz_max_contact_mm": 241.2938033103609
+   },
+   "gt_stage_counts": {
+    "APPROACH": 12,
+    "CLOSING": 2,
+    "HELD": 12,
+    "HOME": 49
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 10,
+    "closing": 1,
+    "held": 14,
+    "placed": 48
+   },
+   "label_counts": {
+    "pick": 14,
+    "place": 14,
+    "home": 45,
+    "None": 2
+   },
+   "attach_k": [
+    13
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllcHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaccHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkLLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvooooooooooooooooo---------------------------------------------"
+  },
+  {
+   "run": "SPL_ep211_s2113",
+   "kit_success": false,
+   "kit_failure_mode": "regrasp",
+   "gt_events": {
+    "first_close_t": 163,
+    "close_cycles": [
+     [
+      163,
+      307
+     ],
+     [
+      496,
+      592
+     ]
+    ],
+    "lift_close_t": 496,
+    "lift_t": 506,
+    "lifts": [
+     [
+      506,
+      514
+     ]
+    ],
+    "release_t": 514,
+    "place_t": null,
+    "home_t": null,
+    "dz_max_contact_mm": 79.17524771085682
+   },
+   "gt_stage_counts": {
+    "APPROACH": 44,
+    "CLOSING": 2,
+    "HELD": 1,
+    "FAILED_GRASP": 18,
+    "DROPPED": 10
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 45,
+    "closing": 25,
+    "held": 3
+   },
+   "label_counts": {
+    "pick": 45,
+    "place": 22,
+    "home": 6,
+    "None": 2
+   },
+   "attach_k": [
+    23,
+    64
+   ],
+   "revoke_k": [
+    25,
+    65
+   ],
+   "label_changes": 5,
+   "latch_seq": "sslllllllllllllllllllccHHlcccccccccccccllllllllllllllllllllllllcHlccccccccc",
+   "gt_seq": "aaaaaaaaaaaaaaaaaaaaaFFFFFFFFFFFFFFFFFFaaaaaaaaaaaaaaaaaaaaaaaccHDDDDDDDDDD",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkkkkkkkkLLLLLLLLLLLLLLLLhhhhhhkkkkkkkkkkkkkkkkLLLLLLkkkk",
+   "man_seq": "vvvvvvvvvvvvvvvvvoooooooovvvvvvvvoooooovovvoooovvvvvvvvvvvvvvvvvooooooooooo"
+  },
+  {
+   "run": "SPL_ep250_s2503",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 81,
+    "close_cycles": [
+     [
+      81,
+      182
+     ]
+    ],
+    "lift_close_t": 81,
+    "lift_t": 101,
+    "lifts": [
+     [
+      101,
+      183
+     ]
+    ],
+    "release_t": 183,
+    "place_t": 183,
+    "home_t": 183,
+    "dz_max_contact_mm": 242.98774977158655
+   },
+   "gt_stage_counts": {
+    "APPROACH": 11,
+    "CLOSING": 2,
+    "HELD": 10,
+    "HOME": 52
+   },
+   "latch_counts": {
+    "searching": 4,
+    "latched": 7,
+    "closing": 1,
+    "held": 13,
+    "placed": 50
+   },
+   "label_counts": {
+    "pick": 12,
+    "place": 12,
+    "home": 49,
+    "None": 2
+   },
+   "attach_k": [
+    12
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "sssslllllllcHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaccHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvoooooooooooooo-------------------------------------------------"
+  },
+  {
+   "run": "SPL_ep309_s3093",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 120,
+    "close_cycles": [
+     [
+      120,
+      230
+     ]
+    ],
+    "lift_close_t": 120,
+    "lift_t": 142,
+    "lifts": [
+     [
+      142,
+      231
+     ]
+    ],
+    "release_t": 231,
+    "place_t": 231,
+    "home_t": 231,
+    "dz_max_contact_mm": 249.37595109041644
+   },
+   "gt_stage_counts": {
+    "APPROACH": 15,
+    "CLOSING": 3,
+    "HELD": 11,
+    "HOME": 46
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 14,
+    "closing": 1,
+    "held": 14,
+    "placed": 44
+   },
+   "label_counts": {
+    "pick": 18,
+    "place": 13,
+    "home": 42,
+    "None": 2
+   },
+   "attach_k": [
+    17
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllllllcHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaaacccHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvvvoooooooooooooooo------------------------------------------"
+  },
+  {
+   "run": "SPL_ep320_s3203",
+   "kit_success": false,
+   "kit_failure_mode": "no_grasp",
+   "gt_events": {
+    "first_close_t": 123,
+    "close_cycles": [
+     [
+      123,
+      144
+     ],
+     [
+      190,
+      232
+     ],
+     [
+      311,
+      600
+     ]
+    ],
+    "lift_close_t": null,
+    "lift_t": null,
+    "lifts": [],
+    "release_t": null,
+    "place_t": null,
+    "home_t": null,
+    "dz_max_contact_mm": 14.602973910636475
+   },
+   "gt_stage_counts": {
+    "APPROACH": 32,
+    "FAILED_GRASP": 43
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 28,
+    "closing": 45
+   },
+   "label_counts": {
+    "pick": 73,
+    "None": 2
+   },
+   "attach_k": [],
+   "revoke_k": [],
+   "label_changes": 0,
+   "latch_seq": "ssllllllllllllllccclllllcccccclllllllllcccccccccccccccccccccccccccccccccccc",
+   "gt_seq": "aaaaaaaaaaaaaaaaFFaaaaaaFFFFFaaaaaaaaaaFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+   "man_seq": "vvvvvvvvvvvvvvvvvvooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+  },
+  {
+   "run": "SPL_ep325_s3253",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 112,
+    "close_cycles": [
+     [
+      112,
+      225
+     ]
+    ],
+    "lift_close_t": 112,
+    "lift_t": 130,
+    "lifts": [
+     [
+      130,
+      226
+     ]
+    ],
+    "release_t": 226,
+    "place_t": 226,
+    "home_t": 226,
+    "dz_max_contact_mm": 244.00733626506553
+   },
+   "gt_stage_counts": {
+    "APPROACH": 14,
+    "CLOSING": 3,
+    "HELD": 12,
+    "HOME": 46
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 13,
+    "closing": 1,
+    "held": 14,
+    "placed": 45
+   },
+   "label_counts": {
+    "pick": 17,
+    "place": 13,
+    "home": 43,
+    "None": 2
+   },
+   "attach_k": [
+    16
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "sslllllllllllllcHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaacccHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkkkLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvvoooooooooooooooo-------------------------------------------"
+  },
+  {
+   "run": "SPL_ep342_s3423",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 108,
+    "close_cycles": [
+     [
+      108,
+      201
+     ]
+    ],
+    "lift_close_t": 108,
+    "lift_t": 114,
+    "lifts": [
+     [
+      114,
+      202
+     ]
+    ],
+    "release_t": 202,
+    "place_t": 202,
+    "home_t": 202,
+    "dz_max_contact_mm": 233.13215888486803
+   },
+   "gt_stage_counts": {
+    "APPROACH": 14,
+    "CLOSING": 1,
+    "HELD": 11,
+    "HOME": 49
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 12,
+    "closing": 1,
+    "held": 12,
+    "placed": 48
+   },
+   "label_counts": {
+    "pick": 15,
+    "place": 12,
+    "home": 46,
+    "None": 2
+   },
+   "attach_k": [
+    15
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllllcHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaacHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvoooooooooooooo----------------------------------------------"
+  },
+  {
+   "run": "SPL_ep421_s4213",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 150,
+    "close_cycles": [
+     [
+      150,
+      270
+     ]
+    ],
+    "lift_close_t": 150,
+    "lift_t": 185,
+    "lifts": [
+     [
+      185,
+      271
+     ]
+    ],
+    "release_t": 271,
+    "place_t": 271,
+    "home_t": 271,
+    "dz_max_contact_mm": 245.08443960142534
+   },
+   "gt_stage_counts": {
+    "APPROACH": 19,
+    "CLOSING": 5,
+    "HELD": 10,
+    "HOME": 41
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 17,
+    "closing": 2,
+    "held": 15,
+    "placed": 39
+   },
+   "label_counts": {
+    "pick": 20,
+    "place": 15,
+    "home": 38,
+    "None": 2
+   },
+   "attach_k": [
+    21
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "sslllllllllllllllllccHHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaaaaaaacccccHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkkkLLLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvvvvvvvoooooooooooooooo--------------------------------------"
+  },
+  {
+   "run": "SPL_ep526_s5263",
+   "kit_success": false,
+   "kit_failure_mode": "no_grasp",
+   "gt_events": {
+    "first_close_t": 143,
+    "close_cycles": [
+     [
+      143,
+      251
+     ],
+     [
+      520,
+      600
+     ]
+    ],
+    "lift_close_t": null,
+    "lift_t": null,
+    "lifts": [],
+    "release_t": null,
+    "place_t": null,
+    "home_t": null,
+    "dz_max_contact_mm": -8.201168633092948e-07
+   },
+   "gt_stage_counts": {
+    "APPROACH": 51,
+    "FAILED_GRASP": 24
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 49,
+    "closing": 24
+   },
+   "label_counts": {
+    "pick": 50,
+    "place": 18,
+    "home": 5,
+    "None": 2
+   },
+   "attach_k": [],
+   "revoke_k": [],
+   "label_changes": 4,
+   "latch_seq": "ssllllllllllllllllcccccccccccccclllllllllllllllllllllllllllllllllcccccccccc",
+   "gt_seq": "aaaaaaaaaaaaaaaaaaFFFFFFFFFFFFFFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaFFFFFFFFFF",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkkkLLLLLLLLLLLLLLhhhhhkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkLLLL",
+   "man_seq": "vvvvvvvvvvvvvvvooovovvvvvvoovovvvvvvooovvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+  },
+  {
+   "run": "SPL_ep572_s5723",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 107,
+    "close_cycles": [
+     [
+      107,
+      215
+     ]
+    ],
+    "lift_close_t": 107,
+    "lift_t": 123,
+    "lifts": [
+     [
+      123,
+      216
+     ]
+    ],
+    "release_t": 216,
+    "place_t": 216,
+    "home_t": 217,
+    "dz_max_contact_mm": 241.06976267371482
+   },
+   "gt_stage_counts": {
+    "APPROACH": 14,
+    "CLOSING": 2,
+    "HELD": 11,
+    "PLACED": 1,
+    "HOME": 47
+   },
+   "latch_counts": {
+    "searching": 7,
+    "latched": 7,
+    "closing": 1,
+    "held": 14,
+    "placed": 46
+   },
+   "label_counts": {
+    "pick": 16,
+    "place": 13,
+    "home": 44,
+    "None": 2
+   },
+   "attach_k": [
+    15
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssssssslllllllcHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaaccHHHHHHHHHHHPhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkkLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvoooooooooooooooo--------------------------------------------"
+  },
+  {
+   "run": "SPL_ep753_s7533",
+   "kit_success": true,
+   "kit_failure_mode": "slip_at_lift",
+   "gt_events": {
+    "first_close_t": 124,
+    "close_cycles": [
+     [
+      124,
+      236
+     ]
+    ],
+    "lift_close_t": 124,
+    "lift_t": 138,
+    "lifts": [
+     [
+      138,
+      237
+     ]
+    ],
+    "release_t": 237,
+    "place_t": 237,
+    "home_t": 237,
+    "dz_max_contact_mm": 239.28552968654793
+   },
+   "gt_stage_counts": {
+    "APPROACH": 16,
+    "CLOSING": 2,
+    "HELD": 12,
+    "HOME": 45
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 14,
+    "closing": 1,
+    "held": 14,
+    "placed": 44
+   },
+   "label_counts": {
+    "pick": 18,
+    "place": 13,
+    "home": 42,
+    "None": 2
+   },
+   "attach_k": [
+    17
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllllllcHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaaaaccHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvvvoooooooooooooooo------------------------------------------"
+  },
+  {
+   "run": "SPL_ep850_s8503",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 133,
+    "close_cycles": [
+     [
+      133,
+      247
+     ]
+    ],
+    "lift_close_t": 133,
+    "lift_t": 153,
+    "lifts": [
+     [
+      153,
+      248
+     ]
+    ],
+    "release_t": 248,
+    "place_t": 248,
+    "home_t": 248,
+    "dz_max_contact_mm": 239.9562834491351
+   },
+   "gt_stage_counts": {
+    "APPROACH": 17,
+    "CLOSING": 3,
+    "HELD": 11,
+    "HOME": 44
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 15,
+    "closing": 1,
+    "held": 15,
+    "placed": 42
+   },
+   "label_counts": {
+    "pick": 19,
+    "place": 14,
+    "home": 40,
+    "None": 2
+   },
+   "attach_k": [
+    18
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "sslllllllllllllllcHHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaaaaacccHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkkLLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvvvvooooooooooooooooo----------------------------------------"
+  },
+  {
+   "run": "SPL_ep901_s9013",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 111,
+    "close_cycles": [
+     [
+      111,
+      220
+     ]
+    ],
+    "lift_close_t": 111,
+    "lift_t": 131,
+    "lifts": [
+     [
+      131,
+      221
+     ]
+    ],
+    "release_t": 221,
+    "place_t": 221,
+    "home_t": 221,
+    "dz_max_contact_mm": 244.56871387524293
+   },
+   "gt_stage_counts": {
+    "APPROACH": 14,
+    "CLOSING": 3,
+    "HELD": 11,
+    "HOME": 47
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 12,
+    "closing": 2,
+    "held": 13,
+    "placed": 46
+   },
+   "label_counts": {
+    "pick": 17,
+    "place": 13,
+    "home": 43,
+    "None": 2
+   },
+   "attach_k": [
+    16
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllllccHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaacccHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkkkLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvvoooooooooooooooo-------------------------------------------"
+  },
+  {
+   "run": "SPL_ep954_s9543",
+   "kit_success": false,
+   "kit_failure_mode": "no_grasp",
+   "gt_events": {
+    "first_close_t": 146,
+    "close_cycles": [
+     [
+      146,
+      261
+     ],
+     [
+      527,
+      600
+     ]
+    ],
+    "lift_close_t": null,
+    "lift_t": null,
+    "lifts": [],
+    "release_t": null,
+    "place_t": null,
+    "home_t": null,
+    "dz_max_contact_mm": 0.9190180911862189
+   },
+   "gt_stage_counts": {
+    "APPROACH": 52,
+    "FAILED_GRASP": 23
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 49,
+    "closing": 24
+   },
+   "label_counts": {
+    "pick": 48,
+    "place": 17,
+    "home": 8,
+    "None": 2
+   },
+   "attach_k": [],
+   "revoke_k": [],
+   "label_changes": 4,
+   "latch_seq": "sslllllllllllllllllcccccccccccccccllllllllllllllllllllllllllllllllccccccccc",
+   "gt_seq": "aaaaaaaaaaaaaaaaaaaFFFFFFFFFFFFFFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaFFFFFFFFF",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkkkLLLLLLLLLLLLLLLhhhhhhhhkkkkkkkkkkkkkkkkkkkkkkkkkkkkLL",
+   "man_seq": "vvvvvvvvvvvvvvoooooovvvvvvvvvoooooooovvvvvvvvvvvvvvvvvvvvvvoooooooooooovvvv"
+  },
+  {
+   "run": "SPL_ep979_s9793",
+   "kit_success": false,
+   "kit_failure_mode": "no_grasp",
+   "gt_events": {
+    "first_close_t": 196,
+    "close_cycles": [
+     [
+      196,
+      517
+     ],
+     [
+      520,
+      522
+     ]
+    ],
+    "lift_close_t": null,
+    "lift_t": null,
+    "lifts": [],
+    "release_t": null,
+    "place_t": null,
+    "home_t": null,
+    "dz_max_contact_mm": 2.4333435725969466
+   },
+   "gt_stage_counts": {
+    "APPROACH": 34,
+    "FAILED_GRASP": 41
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 32,
+    "closing": 41
+   },
+   "label_counts": {
+    "pick": 31,
+    "place": 42,
+    "None": 2
+   },
+   "attach_k": [],
+   "revoke_k": [],
+   "label_changes": 5,
+   "latch_seq": "sslllllllllllllllllllllllccccccccccccccccccccccccccccccccccccccccclllllllll",
+   "gt_seq": "aaaaaaaaaaaaaaaaaaaaaaaaaFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFaaaaaaaaa",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkkkkkkkkLLLkkkLLLkkkLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",
+   "man_seq": "vvvvvvvvvvvvvvvvvvvvvvvooovvvvvvvvvvvvvvvvooooooooooooooooooooooooooooooooo"
+  },
+  {
+   "run": "SPL_ep1222_s12223",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 112,
+    "close_cycles": [
+     [
+      112,
+      228
+     ]
+    ],
+    "lift_close_t": 112,
+    "lift_t": 131,
+    "lifts": [
+     [
+      131,
+      229
+     ]
+    ],
+    "release_t": 229,
+    "place_t": 229,
+    "home_t": 229,
+    "dz_max_contact_mm": 238.89606034587572
+   },
+   "gt_stage_counts": {
+    "APPROACH": 14,
+    "CLOSING": 3,
+    "HELD": 12,
+    "HOME": 46
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 13,
+    "closing": 1,
+    "held": 14,
+    "placed": 45
+   },
+   "label_counts": {
+    "pick": 17,
+    "place": 13,
+    "home": 43,
+    "None": 2
+   },
+   "attach_k": [
+    16
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "sslllllllllllllcHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaacccHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkkkLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvvoooooooooooooooo-------------------------------------------"
+  },
+  {
+   "run": "SPL_ep1313_s13133",
+   "kit_success": false,
+   "kit_failure_mode": "no_grasp",
+   "gt_events": {
+    "first_close_t": 152,
+    "close_cycles": [
+     [
+      152,
+      246
+     ],
+     [
+      456,
+      591
+     ],
+     [
+      592,
+      600
+     ]
+    ],
+    "lift_close_t": null,
+    "lift_t": null,
+    "lifts": [],
+    "release_t": null,
+    "place_t": null,
+    "home_t": null,
+    "dz_max_contact_mm": 0.07715395408258718
+   },
+   "gt_stage_counts": {
+    "APPROACH": 45,
+    "FAILED_GRASP": 30
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 40,
+    "closing": 33
+   },
+   "label_counts": {
+    "pick": 36,
+    "place": 29,
+    "home": 8,
+    "None": 2
+   },
+   "attach_k": [],
+   "revoke_k": [],
+   "label_changes": 4,
+   "latch_seq": "ssllllllllllllllllccccccccccccccllllllllllllllllllllllllccccccccccccccccccc",
+   "gt_seq": "aaaaaaaaaaaaaaaaaaaFFFFFFFFFFFFaaaaaaaaaaaaaaaaaaaaaaaaaaFFFFFFFFFFFFFFFFFF",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkkkkLLLLLLLLLLLLhhhhhhhhkkkkkkkkkkkkkkkLLLLLLLLLLLLLLLLL",
+   "man_seq": "vvvvvvvvvvvvvvvooooovvvvvvooovvovvvooooovvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
+  },
+  {
+   "run": "SPL_ep1345_s13453",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 127,
+    "close_cycles": [
+     [
+      127,
+      245
+     ]
+    ],
+    "lift_close_t": 127,
+    "lift_t": 138,
+    "lifts": [
+     [
+      138,
+      193
+     ]
+    ],
+    "release_t": 193,
+    "place_t": 195,
+    "home_t": 245,
+    "dz_max_contact_mm": 252.1176563379528
+   },
+   "gt_stage_counts": {
+    "APPROACH": 16,
+    "CLOSING": 2,
+    "HELD": 7,
+    "PLACED": 6,
+    "HOME": 44
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 14,
+    "closing": 2,
+    "held": 8,
+    "placed": 49
+   },
+   "label_counts": {
+    "pick": 18,
+    "place": 15,
+    "home": 40,
+    "None": 2
+   },
+   "attach_k": [
+    18
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllllllccHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaaaaaccHHHHHHHPPPPPPhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkkkkLLLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvovvvooooooooooooooooo----------------------------------------"
+  },
+  {
+   "run": "SPL_ep1596_s15963",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 88,
+    "close_cycles": [
+     [
+      88,
+      204
+     ]
+    ],
+    "lift_close_t": 88,
+    "lift_t": 106,
+    "lifts": [
+     [
+      106,
+      205
+     ]
+    ],
+    "release_t": 205,
+    "place_t": 205,
+    "home_t": 205,
+    "dz_max_contact_mm": 246.05976775391048
+   },
+   "gt_stage_counts": {
+    "APPROACH": 11,
+    "CLOSING": 3,
+    "HELD": 12,
+    "HOME": 49
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 10,
+    "closing": 1,
+    "held": 14,
+    "placed": 48
+   },
+   "label_counts": {
+    "pick": 14,
+    "place": 13,
+    "home": 46,
+    "None": 2
+   },
+   "attach_k": [
+    13
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllcHHHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaacccHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvoooooooooooooooo----------------------------------------------"
+  },
+  {
+   "run": "SPL_ep1668_s16683",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 104,
+    "close_cycles": [
+     [
+      104,
+      205
+     ]
+    ],
+    "lift_close_t": 104,
+    "lift_t": 121,
+    "lifts": [
+     [
+      121,
+      206
+     ]
+    ],
+    "release_t": 206,
+    "place_t": 206,
+    "home_t": 206,
+    "dz_max_contact_mm": 231.01450277530833
+   },
+   "gt_stage_counts": {
+    "APPROACH": 13,
+    "CLOSING": 3,
+    "HELD": 10,
+    "HOME": 49
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 12,
+    "closing": 1,
+    "held": 12,
+    "placed": 48
+   },
+   "label_counts": {
+    "pick": 15,
+    "place": 13,
+    "home": 45,
+    "None": 2
+   },
+   "attach_k": [
+    15
+   ],
+   "revoke_k": [],
+   "label_changes": 2,
+   "latch_seq": "ssllllllllllllcHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaaaaacccHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkkkkkLLLLLLLLLLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "man_seq": "vvvvvvvvvvvvvvvooooooooooooooo---------------------------------------------"
+  },
+  {
+   "run": "SPL_ep1837_s18373",
+   "kit_success": true,
+   "kit_failure_mode": "ok",
+   "gt_events": {
+    "first_close_t": 74,
+    "close_cycles": [
+     [
+      74,
+      170
+     ]
+    ],
+    "lift_close_t": 74,
+    "lift_t": 83,
+    "lifts": [
+     [
+      83,
+      161
+     ]
+    ],
+    "release_t": 161,
+    "place_t": 162,
+    "home_t": 170,
+    "dz_max_contact_mm": 239.81204375709984
+   },
+   "gt_stage_counts": {
+    "APPROACH": 10,
+    "CLOSING": 1,
+    "HELD": 10,
+    "PLACED": 1,
+    "HOME": 53
+   },
+   "latch_counts": {
+    "searching": 2,
+    "latched": 8,
+    "closing": 1,
+    "held": 12,
+    "placed": 52
+   },
+   "label_counts": {
+    "pick": 25,
+    "place": 17,
+    "home": 31,
+    "None": 2
+   },
+   "attach_k": [
+    11
+   ],
+   "revoke_k": [],
+   "label_changes": 5,
+   "latch_seq": "ssllllllllcHHHHHHHHHHHHPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+   "gt_seq": "aaaaaaaaaacHHHHHHHHHHPhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+   "label_seq": "--kkkkkkkkkkkLLLLLLLLLLLLLhhhLLLLhhhhhhhhhhhhhhhhhhhhhhhhhhhhkkkkkkkkkkkkkk",
+   "man_seq": "vvvvvvvvvovooooooooooooooo-------------------------------------------------"
+  }
+ ],
+ "notes": [
+  "GT HELD needs a lift (dz >= 10 mm with hand contact for 5 steps); the latch attaches when the closed fingers settle on the object, before the lift. Negative attach latency and 'attach while GT not HELD' in CLOSING follow from this definition: 13 of 15 such attaches had hand contact at the request and a GT lift within 2 requests.",
+  "GT close = grip_cmd < 0.5. The latch uses its own command threshold; in SPL_ep1313 the command ramped 0.88 -> 0.56 and the latch counted 7 closing steps (last command 0.75) one request before grip_cmd crossed 0.5 (latency -1 request).",
+  "Latency floor: the latch decides from execution feedback of the previous chunk, so a GT event inside chunk k is first visible at request k+1; latency in requests counts from ceil(t_event / 8).",
+  "latch_attach_vs_lift and probe_*_place_vs_lift take the first event in the run; *_same_cycle take the first event at or after the close command of the cycle that produced the lift (SPL_ep211 first attach was in a failed cycle: min -41.0 requests).",
+  "RELEASED has 0 requests and PLACED only 8: the apple is put into the crate while held, and the reopen command (PLACED -> HOME) follows within about one request.",
+  "manipulated.state takes only visible / occluded / None in these 1800 requests; 'kept' never occurs.",
+  "Probe label is None for the first 2 requests of every run (debounce warm-up); accuracy_labeled excludes them, accuracy_all counts them wrong.",
+  "GT 'lift' with L=1 would add a 2-step 14.6 mm rise in SPL_ep320 (slipped); with L=5 it is FAILED_GRASP."
+ ]
+}

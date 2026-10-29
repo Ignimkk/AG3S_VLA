@@ -1,0 +1,25 @@
+Figure 1, CVPR page-1 teaser, full text width (about 2.1:1). Follow the reference image closely; it is the intended layout, built from recorded data. Clean academic style: white background, photographic panels with thin light-grey frames, flat colour chips, sans-serif labels in sentence case, no drop shadows, no icons, no extra robots or objects.
+
+Message: a frozen vision-language-action (VLA) policy grasps the instructed fruit even though another fruit touches it, because its own attention is lifted into a 3D target whose boundary decides where the fingers may make contact.
+
+Top line, centred, italic: "Put the pear in the basket."
+
+Row 1, the demo strip (about 55 percent of the height). Four equal photographic frames of a white-and-black dual-arm mobile manipulator at a wooden table, with a basket (crate) in the middle, a green pear with an orange touching it on the left, and other fruit on the right. Each frame has a dark rounded label in its top-left corner: "1 Approach", "2 Grasp", "3 Carry", "4 Release". Small dark arrows join the frames. Keep the frames photographic (use the reference crops); do not redraw the robot.
+
+A thin grey caption under the strip: "Closed-loop execution of a frozen VLA with AG3S".
+
+Row 2, three photographic close-ups joined by gold arrows, each with a bold title above:
+1. "VLA attention on the wrist view": the robot's wrist-camera image, looking down at the pear and the orange, with a soft yellow-to-red heat glow on the top of the pear.
+2. "3D target grounding": close-up of the open gripper above the pear; the pear is covered by small orange spheres (the target point cloud) and the touching orange by small blue spheres (the neighbour). The fruit meshes are faded so the points read clearly.
+3. "Contact only on the target": side close-up at the moment of grasp; the gripper fingers are tinted gold and close on the orange points while the blue neighbour points stay untouched.
+
+Right of row 2, a light grey rounded box titled "What AG3S adds" with four short bullets:
+- Frozen VLA attention picks the target
+- Depth gives its observed 3D extent
+- Only contact links may touch that extent
+- The touching neighbour stays an obstacle
+Under the bullets, four colour chips: target object (orange #E8711A), neighbour (blue #2E75B6), contact links (gold #D9A406), attention (red-orange #E05A1A).
+
+Colour code, shared with Figures 2 and 3: target orange #E8711A, neighbour/obstacle blue #2E75B6, contact links gold #D9A406, other links grey #7F7F7F.
+
+Do not add numbers, charts, success rates or a baseline comparison; Figure 2 carries the comparison. Do not invent objects, extra panels or extra text.

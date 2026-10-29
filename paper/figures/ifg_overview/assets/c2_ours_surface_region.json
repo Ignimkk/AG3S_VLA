@@ -1,0 +1,23 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/c2_ours_surface_region.png",
+ "frame": "T53_ep1849_f018",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T53_ep1849_f018.npz": "5309d6bf7be78e7b124a93b87cad9c814abf7b4c46e6101b90b8b5b7d2918e37"
+ },
+ "note": "Depth-continuous surface graph, top-1 seed-mass region; neighbour surfaces stay blue (protected).",
+ "is_measured_result": false,
+ "iou": 0.9801561483409239,
+ "camera": {
+  "lookat": [
+   0.5060318281451047,
+   -0.3203170698797875,
+   0.8613438600564569
+  ],
+  "dist": 0.5,
+  "az": 180,
+  "el": -42
+ }
+}

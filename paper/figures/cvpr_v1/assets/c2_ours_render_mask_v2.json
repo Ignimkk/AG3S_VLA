@@ -1,0 +1,30 @@
+{
+ "asset": "paper/figures/cvpr_v1/assets/c2_ours_render_mask_v2.png",
+ "frame": "T54c_ep1817_f020",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/cvpr_v1_fig3_assets.py",
+ "replaces": "paper/figures/ifg_overview/assets/c2_ours_render_mask.json",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T54c_ep1817_f020.npz": "d73816c42cd7bd0cdd856de092c84f6f186d7725f2f64aa3712a276cd4ab949f",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/labels/T54c_ep1817_f020.npz": "5b82a419567082df8b368286cbd7df39e51be0277617c2a9b411469201703aae"
+ },
+ "note": "Observed target nodes left after the rendered robot-surface mask (orange nodes). Mesh tinted: target 'apple' orange.",
+ "is_measured_result": false,
+ "camera": {
+  "lookat": [
+   0.49538925518341864,
+   -0.3144876184400392,
+   0.9011736666010908
+  ],
+  "dist": 0.36,
+  "az": 180,
+  "el": -25
+ },
+ "target": "apple",
+ "target_nodes_render": 183,
+ "tinted": {
+  "target": "apple",
+  "neighbours": []
+ }
+}

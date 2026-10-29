@@ -1,0 +1,175 @@
+{
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b",
+ "source": "render/<run>__E0.npz, render/<run>__edits.npz",
+ "predictions": "score/predictions.csv (p = pick/place/home)",
+ "panels": [
+  {
+   "figure": "t48b-scene-e3-phantom",
+   "run": "ep1807",
+   "fruit": "apple",
+   "host_record": 10,
+   "t_step": 80,
+   "family": "E0",
+   "phys_state": "on_table",
+   "used_gripper_state": 1.000000885129932,
+   "penetration_mm": null,
+   "template_src": null,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.0,
+    "cam_left_wrist": 0.0,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "pick",
+    "p_pick_place_home": [
+     0.994319,
+     0.00220091,
+     0.00348023
+    ],
+    "rule": "pick",
+    "proxy": "pick",
+    "frame_index": "pick"
+   }
+  },
+  {
+   "figure": "t48b-scene-e3-phantom",
+   "run": "ep1807",
+   "fruit": "apple",
+   "host_record": 10,
+   "t_step": 80,
+   "family": "E3",
+   "phys_state": "held",
+   "used_gripper_state": 0.7221174597740172,
+   "penetration_mm": 0.009393500815548196,
+   "template_src": "ep1807:31",
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.255773012329932,
+    "cam_left_wrist": 9.128016050170068,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "place",
+    "p_pick_place_home": [
+     0.000156677,
+     0.999809,
+     3.40257e-05
+    ],
+    "rule": "place",
+    "proxy": "pick",
+    "frame_index": "pick"
+   }
+  },
+  {
+   "figure": "t48b-scene-e3-phantom",
+   "run": "ep1850",
+   "fruit": "banana",
+   "host_record": 5,
+   "t_step": 40,
+   "family": "E0",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.9999390745873045,
+   "penetration_mm": null,
+   "template_src": null,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.0,
+    "cam_left_wrist": 0.0,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "pick",
+    "p_pick_place_home": [
+     0.998618,
+     0.00070102,
+     0.000680777
+    ],
+    "rule": "pick",
+    "proxy": "pick",
+    "frame_index": "pick"
+   }
+  },
+  {
+   "figure": "t48b-scene-e3-phantom",
+   "run": "ep1850",
+   "fruit": "banana",
+   "host_record": 5,
+   "t_step": 40,
+   "family": "E3",
+   "phys_state": "held",
+   "used_gripper_state": 0.5059996902942657,
+   "penetration_mm": 0.11297492609489118,
+   "template_src": "ep1850:14",
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.09834715136054421,
+    "cam_left_wrist": 7.69651493409864,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "place",
+    "p_pick_place_home": [
+     0.000957924,
+     0.999014,
+     2.76628e-05
+    ],
+    "rule": "place",
+    "proxy": "pick",
+    "frame_index": "pick"
+   }
+  },
+  {
+   "figure": "t48b-scene-e3-phantom",
+   "run": "ep1900",
+   "fruit": "pear",
+   "host_record": 10,
+   "t_step": 80,
+   "family": "E0",
+   "phys_state": "on_table",
+   "used_gripper_state": 0.9999633820307219,
+   "penetration_mm": null,
+   "template_src": null,
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.0,
+    "cam_left_wrist": 0.0,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "pick",
+    "p_pick_place_home": [
+     0.998538,
+     0.000170529,
+     0.00129115
+    ],
+    "rule": "pick",
+    "proxy": "pick",
+    "frame_index": "pick"
+   }
+  },
+  {
+   "figure": "t48b-scene-e3-phantom",
+   "run": "ep1900",
+   "fruit": "pear",
+   "host_record": 10,
+   "t_step": 80,
+   "family": "E3",
+   "phys_state": "held",
+   "used_gripper_state": 0.6547223091125488,
+   "penetration_mm": 1.586648409230036,
+   "template_src": "pad_midpoint",
+   "mad_vs_E0_per_cam": {
+    "cam_high": 0.12768388605442177,
+    "cam_left_wrist": 7.835332961309524,
+    "cam_right_wrist": 0.0
+   },
+   "pred": {
+    "probe": "place",
+    "p_pick_place_home": [
+     0.00192813,
+     0.998046,
+     2.54411e-05
+    ],
+    "rule": "place",
+    "proxy": "pick",
+    "frame_index": "pick"
+   }
+  }
+ ]
+}

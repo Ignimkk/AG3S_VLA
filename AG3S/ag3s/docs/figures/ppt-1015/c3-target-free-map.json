@@ -1,0 +1,18 @@
+{
+ "src": "/mnt/dev/AG3S_VLA-storage/results/workspace/live_test/20260928_t17/server_constraints/run_0000/chunk_00000.npz",
+ "target_centroid_m": [
+  0.5612,
+  0.3184,
+  0.8674
+ ],
+ "voxel_m": 0.005,
+ "esdf_distance": {
+  "k_index": 63,
+  "occupied_voxels_in_slice": 1079
+ },
+ "esdf_free_distance": {
+  "k_index": 63,
+  "occupied_voxels_in_slice": 941
+ },
+ "note": "existing serving target-free layer (ball-based target); illustrates the interface only"
+}

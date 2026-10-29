@@ -1,0 +1,222 @@
+{
+ "case1_L2_s13453": {
+  "B0": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 13.3,
+   "t_close": 117,
+   "finger_gap_after_close_mm": 70.0,
+   "apple_rise_mm": 4.9,
+   "geo_failed": null,
+   "video": "1_기존E3_실패-쥐지못함.mp4"
+  },
+  "B1": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 5.6,
+   "t_close": 186,
+   "finger_gap_after_close_mm": 95.7,
+   "apple_rise_mm": 0.1,
+   "geo_failed": [],
+   "video": "2_기하6D목표_실패-쥐지못함.mp4"
+  },
+  "B2": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 13.7,
+   "t_close": 125,
+   "finger_gap_after_close_mm": 96.0,
+   "apple_rise_mm": 2.3,
+   "geo_failed": [
+    "close deferred 9 requests (> 8)"
+   ],
+   "video": "3_기하6D목표_추종조절_실패-쥐지못함_기하제어실패.mp4"
+  }
+ },
+ "case1_L2_s23453": {
+  "B0": {
+   "success": false,
+   "failure": "slip",
+   "contact": false,
+   "min_clearance_mm": 12.8,
+   "t_close": 112,
+   "finger_gap_after_close_mm": 70.4,
+   "apple_rise_mm": 243.3,
+   "geo_failed": null,
+   "video": "1_기존E3_실패-들때미끄러짐.mp4"
+  },
+  "B1": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 4.5,
+   "t_close": 577,
+   "finger_gap_after_close_mm": null,
+   "apple_rise_mm": 0.1,
+   "geo_failed": [],
+   "video": "2_기하6D목표_실패-쥐지못함.mp4"
+  },
+  "B2": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 18.4,
+   "t_close": 210,
+   "finger_gap_after_close_mm": 89.5,
+   "apple_rise_mm": 2.7,
+   "geo_failed": [
+    "close deferred 9 requests (> 8)"
+   ],
+   "video": "3_기하6D목표_추종조절_실패-쥐지못함_기하제어실패.mp4"
+  }
+ },
+ "case1_L2_s33453": {
+  "B0": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 15.1,
+   "t_close": 96,
+   "finger_gap_after_close_mm": 49.0,
+   "apple_rise_mm": 0.3,
+   "geo_failed": null,
+   "video": "1_기존E3_실패-쥐지못함.mp4"
+  },
+  "B1": {
+   "success": false,
+   "failure": "contact",
+   "contact": true,
+   "min_clearance_mm": -0.3,
+   "t_close": null,
+   "finger_gap_after_close_mm": null,
+   "apple_rise_mm": 0.0,
+   "geo_failed": [],
+   "video": "2_기하6D목표_실패-장애물접촉.mp4"
+  },
+  "B2": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 17.8,
+   "t_close": 110,
+   "finger_gap_after_close_mm": 95.9,
+   "apple_rise_mm": 0.0,
+   "geo_failed": [
+    "close deferred 9 requests (> 8)"
+   ],
+   "video": "3_기하6D목표_추종조절_실패-쥐지못함_기하제어실패.mp4"
+  }
+ },
+ "case3_L2_s13453": {
+  "B0": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 13.5,
+   "t_close": 302,
+   "finger_gap_after_close_mm": 48.9,
+   "apple_rise_mm": 0.0,
+   "geo_failed": null,
+   "video": "1_기존E3_실패-쥐지못함.mp4"
+  },
+  "B1": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 8.8,
+   "t_close": 220,
+   "finger_gap_after_close_mm": 94.4,
+   "apple_rise_mm": 0.0,
+   "geo_failed": [
+    "close deferred 9 requests (> 8)"
+   ],
+   "video": "2_기하6D목표_실패-쥐지못함_기하제어실패.mp4"
+  },
+  "B2": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 26.1,
+   "t_close": 278,
+   "finger_gap_after_close_mm": 94.4,
+   "apple_rise_mm": 0.0,
+   "geo_failed": [],
+   "video": "3_기하6D목표_추종조절_실패-쥐지못함.mp4"
+  }
+ },
+ "case3_L2_s23453": {
+  "B0": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 9.0,
+   "t_close": 178,
+   "finger_gap_after_close_mm": 47.0,
+   "apple_rise_mm": 0.0,
+   "geo_failed": null,
+   "video": "1_기존E3_실패-쥐지못함.mp4"
+  },
+  "B1": {
+   "success": false,
+   "failure": "contact",
+   "contact": true,
+   "min_clearance_mm": -0.3,
+   "t_close": 209,
+   "finger_gap_after_close_mm": null,
+   "apple_rise_mm": 0.0,
+   "geo_failed": [],
+   "video": "2_기하6D목표_실패-장애물접촉.mp4"
+  },
+  "B2": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 24.3,
+   "t_close": 269,
+   "finger_gap_after_close_mm": 93.9,
+   "apple_rise_mm": 0.0,
+   "geo_failed": [
+    "close deferred 9 requests (> 8)"
+   ],
+   "video": "3_기하6D목표_추종조절_실패-쥐지못함_기하제어실패.mp4"
+  }
+ },
+ "case3_L2_s33453": {
+  "B0": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 16.3,
+   "t_close": 409,
+   "finger_gap_after_close_mm": 45.3,
+   "apple_rise_mm": 0.0,
+   "geo_failed": null,
+   "video": "1_기존E3_실패-쥐지못함.mp4"
+  },
+  "B1": {
+   "success": false,
+   "failure": "no_grasp",
+   "contact": false,
+   "min_clearance_mm": 4.6,
+   "t_close": 389,
+   "finger_gap_after_close_mm": 87.0,
+   "apple_rise_mm": 0.0,
+   "geo_failed": [],
+   "video": "2_기하6D목표_실패-쥐지못함.mp4"
+  },
+  "B2": {
+   "success": false,
+   "failure": "contact",
+   "contact": true,
+   "min_clearance_mm": -0.3,
+   "t_close": 151,
+   "finger_gap_after_close_mm": 91.9,
+   "apple_rise_mm": 0.0,
+   "geo_failed": [],
+   "video": "3_기하6D목표_추종조절_실패-장애물접촉.mp4"
+  }
+ }
+}

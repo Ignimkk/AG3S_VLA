@@ -1,0 +1,436 @@
+{
+ "runs": {
+  "neighbour/954/serving/d0": {
+   "ref_i_mm": {
+    "nbr": 7.92,
+    "obst": 50.0,
+    "table": 14.16,
+    "crate": 50.0,
+    "apple": 2.0,
+    "arm_obst": 50.0
+   },
+   "ref_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 90.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 1.054,
+    "open_end": 0.64,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": -0.124,
+    "hand_apple": 268.0
+   },
+   "gt_rule": 1,
+   "gt_dev_mm": 4.93,
+   "gt_dev_deg": 0.0,
+   "gt_pick_i_mm": {
+    "nbr": 5.54,
+    "obst": 50.0,
+    "table": 0.0,
+    "crate": 50.0,
+    "apple": 3.68,
+    "arm_obst": 50.0
+   },
+   "gt_pick_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 0.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.131,
+    "open_end": 0.713,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": -0.081,
+    "hand_apple": 252.0
+   },
+   "obs": {
+    "request_t_step": 144,
+    "n_obs_ok": 881,
+    "reference_obs_mm": -0.63,
+    "reference_obs_link": "ee_finger_r2",
+    "pick_dev": 4.32,
+    "pick_obs_mm": 0.85,
+    "pick_gt_rule1": false,
+    "pick_gt_rule2": false,
+    "agree": false
+   }
+  },
+  "neighbour/954/serving/d2": {
+   "ref_i_mm": {
+    "nbr": 4.79,
+    "obst": 50.0,
+    "table": 12.15,
+    "crate": 50.0,
+    "apple": 1.79,
+    "arm_obst": 50.0
+   },
+   "ref_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 54.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.555,
+    "open_end": 0.692,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": -0.007,
+    "hand_apple": 258.0
+   },
+   "gt_rule": 1,
+   "gt_dev_mm": 4.85,
+   "gt_dev_deg": 0.0,
+   "gt_pick_i_mm": {
+    "nbr": 7.91,
+    "obst": 50.0,
+    "table": 12.26,
+    "crate": 50.0,
+    "apple": -0.68,
+    "arm_obst": 50.0
+   },
+   "gt_pick_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 0.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.131,
+    "open_end": 0.664,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": 0.129,
+    "hand_apple": 297.0
+   },
+   "obs": {
+    "request_t_step": 144,
+    "n_obs_ok": 109,
+    "reference_obs_mm": -9.77,
+    "reference_obs_link": "ee_right",
+    "pick_dev": 14.13,
+    "pick_obs_mm": 0.13,
+    "pick_gt_rule1": true,
+    "pick_gt_rule2": true,
+    "agree": true
+   }
+  },
+  "neighbour/211/serving/d0": {
+   "ref_i_mm": {
+    "nbr": 20.26,
+    "obst": 50.0,
+    "table": 0.0,
+    "crate": 0.0,
+    "apple": -1.69,
+    "arm_obst": 50.0
+   },
+   "ref_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 21.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.814,
+    "open_end": 0.666,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": 0.176,
+    "hand_apple": 263.0
+   },
+   "gt_rule": 1,
+   "gt_dev_mm": 2.8,
+   "gt_dev_deg": 10.0,
+   "gt_pick_i_mm": {
+    "nbr": 27.47,
+    "obst": 50.0,
+    "table": 9.37,
+    "crate": 13.91,
+    "apple": -1.26,
+    "arm_obst": 50.0
+   },
+   "gt_pick_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 0.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.396,
+    "open_end": 0.659,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": 0.331,
+    "hand_apple": 279.0
+   },
+   "obs": {
+    "request_t_step": 160,
+    "n_obs_ok": 824,
+    "reference_obs_mm": 1.33,
+    "reference_obs_link": "ee_left",
+    "pick_dev": 0.0,
+    "pick_obs_mm": 1.33,
+    "pick_gt_rule1": false,
+    "pick_gt_rule2": true,
+    "agree": true
+   }
+  },
+  "neighbour/211/serving/d1": {
+   "ref_i_mm": {
+    "nbr": 15.46,
+    "obst": 50.0,
+    "table": 0.0,
+    "crate": 0.0,
+    "apple": 0.29,
+    "arm_obst": 50.0
+   },
+   "ref_ii": {
+    "hand_nbr": 8.0,
+    "apple_nbr": 31.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.681,
+    "open_end": 0.622,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": -0.005,
+    "hand_apple": 277.0
+   },
+   "gt_rule": 2,
+   "gt_dev_mm": 0.0,
+   "gt_dev_deg": 0.0,
+   "gt_pick_i_mm": {
+    "nbr": 15.46,
+    "obst": 50.0,
+    "table": 0.0,
+    "crate": 0.0,
+    "apple": 0.29,
+    "arm_obst": 50.0
+   },
+   "gt_pick_ii": {
+    "hand_nbr": 8.0,
+    "apple_nbr": 31.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.681,
+    "open_end": 0.622,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": -0.005,
+    "hand_apple": 277.0
+   },
+   "obs": {
+    "request_t_step": 224,
+    "n_obs_ok": 170,
+    "reference_obs_mm": -6.67,
+    "reference_obs_link": "ee_left",
+    "pick_dev": 8.65,
+    "pick_obs_mm": 0.58,
+    "pick_gt_rule1": false,
+    "pick_gt_rule2": false,
+    "agree": false
+   }
+  },
+  "occ_case1_L2/123/serving/d0": {
+   "ref_i_mm": {
+    "nbr": 50.0,
+    "obst": 50.0,
+    "table": 18.12,
+    "crate": 50.0,
+    "apple": 0.9,
+    "arm_obst": 50.0
+   },
+   "ref_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 0.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.059,
+    "open_end": 0.517,
+    "between": 1.0,
+    "grasp": 0.0,
+    "apple_rise_mm": -0.008,
+    "hand_apple": 267.0
+   },
+   "gt_rule": 1,
+   "gt_dev_mm": 6.97,
+   "gt_dev_deg": 0.0,
+   "gt_pick_i_mm": {
+    "nbr": 50.0,
+    "obst": 50.0,
+    "table": 13.22,
+    "crate": 50.0,
+    "apple": -4.4,
+    "arm_obst": 50.0
+   },
+   "gt_pick_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 0.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.059,
+    "open_end": 0.651,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": 0.893,
+    "hand_apple": 284.0
+   },
+   "obs": {
+    "request_t_step": 96,
+    "n_obs_ok": 951,
+    "reference_obs_mm": 12.32,
+    "reference_obs_link": "ee_finger_l1",
+    "pick_dev": 0.0,
+    "pick_obs_mm": 12.32,
+    "pick_gt_rule1": false,
+    "pick_gt_rule2": false,
+    "agree": false
+   }
+  },
+  "occ_case3/311/serving/d0": {
+   "ref_i_mm": {
+    "nbr": 50.0,
+    "obst": 50.0,
+    "table": 50.0,
+    "crate": 50.0,
+    "apple": 50.0,
+    "arm_obst": 50.0
+   },
+   "ref_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 0.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.031,
+    "open_end": 0.005,
+    "between": 0.0,
+    "grasp": 0.0,
+    "apple_rise_mm": -0.002,
+    "hand_apple": 0.0
+   },
+   "gt_rule": 3,
+   "gt_dev_mm": null,
+   "gt_dev_deg": null,
+   "gt_pick_i_mm": null,
+   "gt_pick_ii": null,
+   "obs": {
+    "request_t_step": 184,
+    "n_obs_ok": 1426,
+    "reference_obs_mm": 34.49,
+    "reference_obs_link": "ee_left",
+    "pick_dev": 0.0,
+    "pick_obs_mm": 34.49,
+    "pick_gt_rule1": false,
+    "pick_gt_rule2": false,
+    "agree": false
+   }
+  },
+  "orange1345/1345/serving_E4/d0": {
+   "ref_i_mm": {
+    "nbr": 5.43,
+    "obst": 50.0,
+    "table": 11.39,
+    "crate": 50.0,
+    "apple": 3.34,
+    "arm_obst": 50.0
+   },
+   "ref_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 64.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.661,
+    "open_end": 0.687,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": 0.459,
+    "hand_apple": 252.0
+   },
+   "gt_rule": 1,
+   "gt_dev_mm": 4.88,
+   "gt_dev_deg": 0.0,
+   "gt_pick_i_mm": {
+    "nbr": 8.53,
+    "obst": 50.0,
+    "table": 11.5,
+    "crate": 50.0,
+    "apple": 0.76,
+    "arm_obst": 50.0
+   },
+   "gt_pick_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 0.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.661,
+    "open_end": 0.677,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": 0.121,
+    "hand_apple": 262.0
+   },
+   "obs": {
+    "request_t_step": 120,
+    "n_obs_ok": 737,
+    "reference_obs_mm": -7.81,
+    "reference_obs_link": "ee_left",
+    "pick_dev": 8.65,
+    "pick_obs_mm": 0.59,
+    "pick_gt_rule1": true,
+    "pick_gt_rule2": true,
+    "agree": true
+   }
+  },
+  "control/250/serving/d0": {
+   "ref_i_mm": {
+    "nbr": 23.25,
+    "obst": 50.0,
+    "table": 0.0,
+    "crate": 48.22,
+    "apple": 5.06,
+    "arm_obst": 50.0
+   },
+   "ref_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 0.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.164,
+    "open_end": 0.681,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": -0.039,
+    "hand_apple": 256.0
+   },
+   "gt_rule": 1,
+   "gt_dev_mm": 0.0,
+   "gt_dev_deg": 0.0,
+   "gt_pick_i_mm": {
+    "nbr": 23.25,
+    "obst": 50.0,
+    "table": 0.0,
+    "crate": 48.22,
+    "apple": 5.06,
+    "arm_obst": 50.0
+   },
+   "gt_pick_ii": {
+    "hand_nbr": 0.0,
+    "apple_nbr": 0.0,
+    "robot_obst": 0.0,
+    "hand_table": 0.0,
+    "nbr_disp_mm": 0.164,
+    "open_end": 0.681,
+    "between": 1.0,
+    "grasp": 1.0,
+    "apple_rise_mm": -0.039,
+    "hand_apple": 256.0
+   },
+   "obs": {
+    "request_t_step": 80,
+    "n_obs_ok": 1679,
+    "reference_obs_mm": 7.98,
+    "reference_obs_link": "ee_finger_r2",
+    "pick_dev": 0.0,
+    "pick_obs_mm": 7.98,
+    "pick_gt_rule1": true,
+    "pick_gt_rule2": true,
+    "agree": true
+   }
+  }
+ },
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/GIK/scene2",
+ "view": "free camera on the apple centre, azimuth = approach azimuth + 180 deg, elevation -35 deg, 0.35 m"
+}

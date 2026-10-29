@@ -304,9 +304,16 @@ def test_no_weight_flag_changes_nothing():
 
 
 def test_the_four_weights_are_the_ones_the_objective_reads():
-    """목록이 두 곳이면 flag 를 더할 때 갈라진다."""
+    """목록이 두 곳이면 flag 를 더할 때 갈라진다.
+
+    IFG-TOA 의 두 손바닥 항 (`w_grasp_tcp` · `w_grasp_goal`) 은 weight flag 가 아니라 `--grasp-anchor W` 하나로 같이
+    들어온다 — 그 길을 여기서 같이 고정한다."""
+    anchor = {"w_grasp_tcp", "w_grasp_goal"}
     assert set(serve_safe.COST_WEIGHTS) == {
-        f for f in CostConfig().__dataclass_fields__ if f.startswith("w_")}
+        f for f in CostConfig().__dataclass_fields__ if f.startswith("w_")} - anchor
+    args = serve_safe.build_parser().parse_args(BASE_ARGV + ["--grasp-anchor", "2000"])
+    assert {k: v for k, v in serve_safe.cost_overrides(args).items() if k in anchor} == {
+        "w_grasp_tcp": 2000.0, "w_grasp_goal": 2000.0}
 
 
 @pytest.mark.parametrize("flag,field,value", [

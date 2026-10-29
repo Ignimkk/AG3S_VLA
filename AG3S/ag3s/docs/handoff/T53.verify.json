@@ -1,0 +1,1629 @@
+{
+ "_comment": "ag3s-verifier (A2). 숫자와 경로만. 해석·판정 없음.",
+ "step": "T53",
+ "date": "2026-10-13",
+ "status": "done",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f",
+ "verify_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53",
+ "scripts": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/p",
+ "runs": [
+  {
+   "id": "rollouts",
+   "launcher": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/p/launch_t53.sh",
+   "launcher_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/launch_t53.out",
+   "chain_logs": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/chain_8290.log",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/chain_8291.log"
+   ],
+   "server_dirs": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8291_20261013T010854"
+   ],
+   "venv": ".venv-openpi-live",
+   "client_flags_added_vs_CL3": "--record-ag3s RUN_D/ag3s (step npz in RUN_D/ag3s/run_0000)",
+   "server_flags": "CL3 start_server.sh FLAGS for arm C1a (unchanged), --record-constraints",
+   "placed_no_seed_certify": "off (no --placed-no-seed-certify on cmdline, no 'placed_no_seed_certify = True' log line; guarded in run_chain.sh)"
+  },
+  {
+   "id": "analysis",
+   "scripts": [
+    "p/check_run.py",
+    "p/analyze_cl.py (analyze_t42 + grasp_robust)",
+    "p/replay_contacts.py (run_replays_cl.sh, NW=2)",
+    "p/agg_cl.py"
+   ],
+   "outputs": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/analysis",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/agg.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/agg/analyze_t42.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/agg/address_check.json"
+   ]
+  }
+ ],
+ "code_state": {
+  "snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/snapshot",
+  "snapshot_git_archive": "4a540f1a18d725b92f913b3f1de54c5aa3125dca",
+  "main_tree_head_at_start": "4a540f1a18d725b92f913b3f1de54c5aa3125dca",
+  "main_tree_head_at_end": "39dfb5dc2b386421615bb00cdf9466866ecf3cf6 (docs-only commit, AG3S/ag3s/docs/handoff/T46_SESSION_HANDOFF.md)",
+  "md5_start": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/md5_start.txt",
+  "md5_start_fixed_path": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/md5_start_fixed.txt",
+  "md5_end": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/md5_end.txt",
+  "md5": {
+   "AG3S/ag3s/runtime/pipeline.py": "32c0be9040fe72473fd7b040120c66cf",
+   "AG3S/ag3s/config.py": "469fe86079a84ac670afd9c32cebb6a5",
+   "AG3S/ag3s/fields/curobo_builder.py": "ee4b2469db9cc9dd5dbefed529fb7292",
+   "AG3S/trajopt/serve_safe.py": "c0eab570b00e63ae7c25c002c1e71fda",
+   "AG3S/trajopt/wire.py": "18125618a4f5674c65e4e5f910693851",
+   "integration/rby1/bringup/pi05_infer.py": "2845eeb2cb27d3d4135f42cb4ea749b6"
+  },
+  "md5_main_tree_start_eq_end": true,
+  "md5_snapshot_eq_main_tree": true,
+  "md5_note": "md5_start.txt (01:04 UTC) used the non-existent path AG3S/ag3s/pipeline.py; the start md5 of AG3S/ag3s/runtime/pipeline.py is in p/code_md5_t53.txt (made 01:06 UTC from the snapshot, matched at both server preflights)",
+  "code_md5_full": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/p/code_md5_t53.txt",
+  "code_md5_preflight_match": [
+   true,
+   true
+  ]
+ },
+ "baseline_check": {
+  "matched": true,
+  "legacy": {
+   "start_violated": 14,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -29.031048280806342,
+   "match": true
+  },
+  "curobo": {
+   "start_violated": 10,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -9.171877401271193,
+   "match": true
+  },
+  "files": [
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/baseline/legacy.json",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/baseline/curobo_base.json"
+  ]
+ },
+ "numbers": {
+  "n_episodes": 16,
+  "seeds": "episode*10+1 (pre-registered, seeds.json)",
+  "seeds_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/seeds.json",
+  "runs_complete": 16,
+  "check_mode_full": 16,
+  "steps_per_run": 600,
+  "planning_rows_per_run": 75,
+  "ag3s_step_npz_per_run": 75,
+  "task_success": 9,
+  "success_rel": 9,
+  "success_ct": 7,
+  "success_ct_fruit": 7,
+  "grasp_final": 11,
+  "first_grasp_ok": 10,
+  "regrasp_runs": 1,
+  "slip_runs": 2,
+  "robust_grasp": 9,
+  "place": 9,
+  "failure_modes": {
+   "no_grasp": 5,
+   "ok": 9,
+   "slip_at_lift": 1,
+   "regrasp": 1
+  },
+  "hold_chunks_total": 37,
+  "hold_runs": 10,
+  "hold_chunks_per_run_max": 15,
+  "hold_kinds": {
+   "collision": 35,
+   "uncertified": 2
+  },
+  "trailing_hold_runs": 0,
+  "comms_fail_chunks": 0,
+  "disallowed_contacts": {
+   "hand-fruit_other": {
+    "runs_any": 4,
+    "contact_rows": 31,
+    "contact_substeps": 755,
+    "runs_pre_release": 4,
+    "rows_pre_release": 31,
+    "runs_keys": [
+     "ep1862_s18621",
+     "ep1849_s18491",
+     "ep1804_s18041",
+     "ep1822_s18221"
+    ]
+   },
+   "robot_other-target": {
+    "runs_any": 0,
+    "contact_rows": 0,
+    "contact_substeps": 0,
+    "runs_pre_release": 0,
+    "rows_pre_release": 0,
+    "runs_keys": []
+   },
+   "robot_other-fruit_other": {
+    "runs_any": 0,
+    "contact_rows": 0,
+    "contact_substeps": 0,
+    "runs_pre_release": 0,
+    "rows_pre_release": 0,
+    "runs_keys": []
+   }
+  },
+  "any_disallowed_class_contact_runs": 4,
+  "hand_target": {
+   "runs_any": 16,
+   "contact_rows": 1473
+  },
+  "replay_qpos_mismatch_rows_total": 0,
+  "run_wall_s": {
+   "n": 16,
+   "median": 280.5,
+   "p90": 299.5,
+   "mean": 282.5625,
+   "max": 301.0
+  },
+  "run_wall_s_sum": 4521.0,
+  "gpu": {
+   "lock_acquired_utc": "2026-10-13T01:07:46+00:00",
+   "lock_released_utc": "2026-10-13T01:56:41+00:00",
+   "lock_held_s": 2935,
+   "server_8290_utc": [
+    "2026-10-13T01:08:48+00:00",
+    "2026-10-13T01:54:25+00:00"
+   ],
+   "server_8291_utc": [
+    "2026-10-13T01:11:04+00:00",
+    "2026-10-13T01:56:40+00:00"
+   ],
+   "server_s_sum": 5473,
+   "curobo_baseline_s": 48,
+   "foreign_gpu_pids_during_rollouts": 0,
+   "gpu_apps_samples": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/gpu_apps_samples.txt",
+   "own_server_gpu_pids": [
+    1326494,
+    1336321
+   ]
+  },
+  "timing_ms": {
+   "to_ms_server_trajopt_pooled": {
+    "n": 1184,
+    "median": 191.36948138475418,
+    "p90": 634.6187861636281,
+    "mean": 314.24091427155923,
+    "max": 1320.3924912959337
+   },
+   "ag3s_ms_server_ag3s_pooled": {
+    "n": 1184,
+    "median": 297.8722187690437,
+    "p90": 453.680537454784,
+    "mean": 330.3348925837781,
+    "max": 1383.6118085309863
+   },
+   "client_round_trip_ms_pooled": {
+    "n": 1184,
+    "median": 1169.4810390472412,
+    "p90": 1718.280053138733,
+    "mean": 1249.648056320242,
+    "max": 2617.133140563965
+   },
+   "round_trip_gt_533ms_chunks": 1184,
+   "n_chunks_excl_first": 1184
+  },
+  "per_episode": [
+   {
+    "slot": 0,
+    "episode": 1840,
+    "seed": 18401,
+    "port": 8290,
+    "target": "banana",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": false,
+    "success_ct": false,
+    "success_rel": false,
+    "grasp": false,
+    "place": false,
+    "failure_mode": "no_grasp",
+    "release_t": null,
+    "n_hold_chunks": 5,
+    "hold_kinds": {
+     "collision": 5
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 44,
+    "wall_s": 301.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1840_s18401",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1840_s18401.json"
+   },
+   {
+    "slot": 1,
+    "episode": 1809,
+    "seed": 18091,
+    "port": 8291,
+    "target": "banana",
+    "arm": "left",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": true,
+    "success_ct": true,
+    "success_rel": true,
+    "grasp": true,
+    "place": true,
+    "failure_mode": "ok",
+    "release_t": 240,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 92,
+    "wall_s": 280.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1809_s18091",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1809_s18091.json"
+   },
+   {
+    "slot": 2,
+    "episode": 1842,
+    "seed": 18421,
+    "port": 8290,
+    "target": "pear",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": true,
+    "success_ct": true,
+    "success_rel": true,
+    "grasp": true,
+    "place": true,
+    "failure_mode": "ok",
+    "release_t": 252,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 115,
+    "wall_s": 266.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1842_s18421.json"
+   },
+   {
+    "slot": 3,
+    "episode": 1843,
+    "seed": 18431,
+    "port": 8291,
+    "target": "apple",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": false,
+    "success_ct": false,
+    "success_rel": false,
+    "grasp": false,
+    "place": false,
+    "failure_mode": "no_grasp",
+    "release_t": null,
+    "n_hold_chunks": 15,
+    "hold_kinds": {
+     "collision": 15
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 89,
+    "wall_s": 281.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1843_s18431",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1843_s18431.json"
+   },
+   {
+    "slot": 4,
+    "episode": 1860,
+    "seed": 18601,
+    "port": 8290,
+    "target": "orange",
+    "arm": "left",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": true,
+    "success_ct": true,
+    "success_rel": true,
+    "grasp": true,
+    "place": true,
+    "failure_mode": "ok",
+    "release_t": 215,
+    "n_hold_chunks": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 106,
+    "wall_s": 278.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1860_s18601",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1860_s18601.json"
+   },
+   {
+    "slot": 5,
+    "episode": 1845,
+    "seed": 18451,
+    "port": 8291,
+    "target": "pear",
+    "arm": "left",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": true,
+    "success_ct": true,
+    "success_rel": true,
+    "grasp": true,
+    "place": true,
+    "failure_mode": "ok",
+    "release_t": 245,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 115,
+    "wall_s": 275.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1845_s18451",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1845_s18451.json"
+   },
+   {
+    "slot": 6,
+    "episode": 1862,
+    "seed": 18621,
+    "port": 8290,
+    "target": "apple",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": true,
+    "success_ct": false,
+    "success_rel": true,
+    "grasp": true,
+    "place": true,
+    "failure_mode": "ok",
+    "release_t": 228,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 11,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 11,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 95,
+    "wall_s": 292.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1862_s18621",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1862_s18621.json"
+   },
+   {
+    "slot": 7,
+    "episode": 1815,
+    "seed": 18151,
+    "port": 8291,
+    "target": "apple",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": true,
+    "success_ct": true,
+    "success_rel": true,
+    "grasp": true,
+    "place": true,
+    "failure_mode": "ok",
+    "release_t": 235,
+    "n_hold_chunks": 3,
+    "hold_kinds": {
+     "collision": 1,
+     "uncertified": 2
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 102,
+    "wall_s": 298.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1815_s18151",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1815_s18151.json"
+   },
+   {
+    "slot": 8,
+    "episode": 1848,
+    "seed": 18481,
+    "port": 8290,
+    "target": "orange",
+    "arm": "left",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": false,
+    "success_ct": false,
+    "success_rel": false,
+    "grasp": false,
+    "place": false,
+    "failure_mode": "no_grasp",
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 13,
+    "wall_s": 301.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1848_s18481",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1848_s18481.json"
+   },
+   {
+    "slot": 9,
+    "episode": 1849,
+    "seed": 18491,
+    "port": 8291,
+    "target": "banana",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": false,
+    "success_ct": false,
+    "success_rel": false,
+    "grasp": true,
+    "place": false,
+    "failure_mode": "slip_at_lift",
+    "release_t": 478,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 13,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 13,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 33,
+    "wall_s": 281.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1849_s18491",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1849_s18491.json"
+   },
+   {
+    "slot": 10,
+    "episode": 1866,
+    "seed": 18661,
+    "port": 8290,
+    "target": "orange",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": true,
+    "success_ct": true,
+    "success_rel": true,
+    "grasp": true,
+    "place": true,
+    "failure_mode": "ok",
+    "release_t": 240,
+    "n_hold_chunks": 1,
+    "hold_kinds": {
+     "collision": 1
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 128,
+    "wall_s": 289.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1866_s18661",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1866_s18661.json"
+   },
+   {
+    "slot": 11,
+    "episode": 1851,
+    "seed": 18511,
+    "port": 8291,
+    "target": "orange",
+    "arm": "left",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": false,
+    "success_ct": false,
+    "success_rel": false,
+    "grasp": false,
+    "place": false,
+    "failure_mode": "no_grasp",
+    "release_t": null,
+    "n_hold_chunks": 2,
+    "hold_kinds": {
+     "collision": 2
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 31,
+    "wall_s": 277.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1851_s18511",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1851_s18511.json"
+   },
+   {
+    "slot": 12,
+    "episode": 1804,
+    "seed": 18041,
+    "port": 8290,
+    "target": "apple",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": true,
+    "success_ct": false,
+    "success_rel": true,
+    "grasp": true,
+    "place": true,
+    "failure_mode": "ok",
+    "release_t": 261,
+    "n_hold_chunks": 6,
+    "hold_kinds": {
+     "collision": 6
+    },
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 5,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 5,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 116,
+    "wall_s": 271.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1804_s18041",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1804_s18041.json"
+   },
+   {
+    "slot": 13,
+    "episode": 1853,
+    "seed": 18531,
+    "port": 8291,
+    "target": "pear",
+    "arm": "left",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": false,
+    "success_ct": false,
+    "success_rel": false,
+    "grasp": false,
+    "place": false,
+    "failure_mode": "no_grasp",
+    "release_t": null,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 211,
+    "wall_s": 278.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1853_s18531",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1853_s18531.json"
+   },
+   {
+    "slot": 14,
+    "episode": 1822,
+    "seed": 18221,
+    "port": 8290,
+    "target": "banana",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": false,
+    "success_ct": false,
+    "success_rel": false,
+    "grasp": true,
+    "place": false,
+    "failure_mode": "regrasp",
+    "release_t": 408,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 2,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 2,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 65,
+    "wall_s": 291.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1822_s18221",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1822_s18221.json"
+   },
+   {
+    "slot": 15,
+    "episode": 1839,
+    "seed": 18391,
+    "port": 8291,
+    "target": "orange",
+    "arm": "right",
+    "n_planning": 75,
+    "n_control": 600,
+    "ag3s_step_npz": 75,
+    "success": true,
+    "success_ct": true,
+    "success_rel": true,
+    "grasp": true,
+    "place": true,
+    "failure_mode": "ok",
+    "release_t": 245,
+    "n_hold_chunks": 0,
+    "hold_kinds": {},
+    "contact_rows_pre_release": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "contact_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hand_target_rows": 118,
+    "wall_s": 262.0,
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1839_s18391",
+    "replay_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/replay/C1a_R_C1a_ep1839_s18391.json"
+   }
+  ]
+ },
+ "deviations": [
+  "check_run.py (my T53 copy) first counted RUN_D/ag3s/*.npz non-recursively (records are in RUN_D/ag3s/run_0000/), so attempt 1 of the first run on each server (ep1840 s18401 on 8290, ep1809 s18091 on 8291) was marked incomplete and re-run by run_chain.sh (attempt 2 = the recorded run, same seed). Fixed to rglob before those attempt-2 checks. Attempt-1 dirs kept in runs/C1a/R/failed/; re-checked with the fixed script: complete, 75 step npz each (failed/*.recheck_fixed_glob.json.*).",
+  "replay_contacts server-block alignment (best effort) counts peer runs from R/*.start only; the two attempt-1 runs (in failed/) also produced server chunk blocks, so the block index of the first server's runs may be offset. analyze_cl.py pairs server segments by action equality (not affected)."
+ ],
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t53/t53-rollouts-table.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t53/t53-rollouts-table.json",
+   "kind": "table"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t53/t53-initial-layout.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t53/t53-initial-layout.json",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t53/t53-hold-contacts.png",
+   "sidecar": "AG3S/ag3s/docs/figures/t53/t53-hold-contacts.json",
+   "kind": "graph"
+  }
+ ],
+ "verdict": "기준선 일치 (legacy 14/15 · 15/15 · -29.031048280806342; cuRobo 10/15 · 15/15 · -9.171877401271193). rollout 16/16 complete.",
+ "not_measured": [
+  "T53 measurement 2 (attention / noun / phase feature extraction)",
+  "T53 measurement 3 (GT cache: per-camera visible frames, grasp state frame counts)"
+ ],
+ "extraction": {
+  "date": "2026-10-13",
+  "executor": "ag3s-verifier (part 2)",
+  "deviation": [
+   "--server-roots was given the parent server_<port>_<ts>/ dir (t53_records.locate_chunks globs **/server_constraints/run_*), not the server_constraints dir itself",
+   "--episodes-root passed to every stage = /mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R",
+   "driver script: /tmp/claude-0/-mnt-dev-AG3S-VLA-development/1d236ed5-8e5d-44e0-a962-0c8c8fcbd1b0/scratchpad/drive.sh (flock per GPU stage, nvidia-smi sampling every 2 s)"
+  ],
+  "code_head": "39dfb5dc2b386421615bb00cdf9466866ecf3cf6",
+  "wall_seconds": {
+   "attention_parity": 75.7,
+   "attention": 867.5,
+   "noun_parity": 35.2,
+   "noun": 281.3,
+   "feat_parity": 41.7,
+   "feat": 213.4,
+   "gt": 282.3,
+   "grasp": 20.2,
+   "check": 32.0,
+   "layout": 23.8
+  },
+  "gpu": {
+   "attention_parity": {
+    "nvidia_smi_total_used_mib_peak": 8802,
+    "compute_pids_before": 0
+   },
+   "attention": {
+    "nvidia_smi_total_used_mib_peak": 8802,
+    "compute_pids_before": 0
+   },
+   "noun_parity": {
+    "nvidia_smi_total_used_mib_peak": 8806,
+    "compute_pids_before": 0
+   },
+   "noun": {
+    "nvidia_smi_total_used_mib_peak": 8806,
+    "compute_pids_before": 0,
+    "jax_peak_bytes_in_use": 7595938560
+   },
+   "feat_parity": {
+    "nvidia_smi_total_used_mib_peak": 8804,
+    "compute_pids_before": 0
+   },
+   "feat": {
+    "nvidia_smi_total_used_mib_peak": 8804,
+    "compute_pids_before": 0,
+    "jax_peak_bytes_in_use": 7151628544
+   }
+  },
+  "layout": {
+   "episodes": 16,
+   "problems": 0,
+   "frames_per_episode": 75,
+   "chunks_per_episode": 75,
+   "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/layout.json"
+  },
+  "parity_ep1807": {
+   "attention": {
+    "file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/attention/parity_ep1807.json",
+    "frames": 4,
+    "argmax_patch_same_share": 0.9958847736625515,
+    "argmax_patch_same_share_d0": 0.9955632716049383,
+    "max_abs": 0.00390625,
+    "mean_abs": 8.507331585860811e-07,
+    "serving_cell_pearson_r": 0.9999977543894969,
+    "bitwise_equal": false,
+    "format_problems": 0
+   },
+   "noun": {
+    "file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/noun/parity_ep1807.json",
+    "frames": 4,
+    "target_max_abs": 0.0,
+    "basket_max_abs": 0.0,
+    "last_text_max_abs": 0.0,
+    "argmax_agree": 1.0,
+    "bitwise_equal": true,
+    "ok_mine": 4,
+    "ok_ref": 4
+   },
+   "feat": {
+    "file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/feat/parity_ep1807.json",
+    "kv_l4_rel_l2_max": 2.181220503246745e-08,
+    "kv_l4_max_abs_max": 5.960464477539063e-08,
+    "noun_v_vs_sampler_cache_max_abs": 0.0,
+    "noun_token_deterministic": true
+   }
+  },
+  "frames_total": 1200,
+  "noun_ok_failures": {
+   "frames": 1200,
+   "n_ok_total": 1200,
+   "noun_errors_total": 0,
+   "feat_noun_errors_total": 0
+  },
+  "per_episode": {
+   "ep1840": {
+    "n_frames": 75,
+    "policy_seed": 18401,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     49,
+     0,
+     66
+    ],
+    "grasp_state": {
+     "pre": 75,
+     "held": 0,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 75,
+     "held": 0,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 74,
+     "held": 0,
+     "grasping": 0,
+     "in_crate": 0,
+     "other": 1
+    },
+    "closed_loop_gt": {
+     "reach": 44,
+     "held": 31,
+     "released": 0
+    },
+    "first_held_frame": null,
+    "penetration_max_m": 0.0009663364351577552,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1809": {
+    "n_frames": 75,
+    "policy_seed": 18091,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     15,
+     75,
+     46
+    ],
+    "grasp_state": {
+     "pre": 20,
+     "held": 10,
+     "placed": 45,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 20,
+     "held": 10,
+     "placed": 45,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 19,
+     "held": 10,
+     "grasping": 1,
+     "in_crate": 45,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 19,
+     "held": 13,
+     "released": 43
+    },
+    "first_held_frame": 20,
+    "penetration_max_m": 0.0003775264924078659,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1842": {
+    "n_frames": 75,
+    "policy_seed": 18421,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     51,
+     43,
+     73
+    ],
+    "grasp_state": {
+     "pre": 20,
+     "held": 12,
+     "placed": 43,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 20,
+     "held": 12,
+     "placed": 43,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 18,
+     "held": 12,
+     "grasping": 2,
+     "in_crate": 43,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 18,
+     "held": 14,
+     "released": 43
+    },
+    "first_held_frame": 20,
+    "penetration_max_m": 0.000374519125267888,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1843": {
+    "n_frames": 75,
+    "policy_seed": 18431,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     75,
+     0,
+     74
+    ],
+    "grasp_state": {
+     "pre": 75,
+     "held": 0,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 75,
+     "held": 0,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 75,
+     "held": 0,
+     "grasping": 0,
+     "in_crate": 0,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 30,
+     "held": 45,
+     "released": 0
+    },
+    "first_held_frame": null,
+    "penetration_max_m": 0.00011782154853001714,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1860": {
+    "n_frames": 75,
+    "policy_seed": 18601,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     9,
+     33,
+     48
+    ],
+    "grasp_state": {
+     "pre": 16,
+     "held": 11,
+     "placed": 48,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 16,
+     "held": 11,
+     "placed": 48,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 14,
+     "held": 11,
+     "grasping": 2,
+     "in_crate": 48,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 14,
+     "held": 14,
+     "released": 47
+    },
+    "first_held_frame": 16,
+    "penetration_max_m": 0.0003554766565622948,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1845": {
+    "n_frames": 75,
+    "policy_seed": 18451,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     55,
+     75,
+     44
+    ],
+    "grasp_state": {
+     "pre": 20,
+     "held": 11,
+     "placed": 44,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 20,
+     "held": 11,
+     "placed": 44,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 19,
+     "held": 11,
+     "grasping": 1,
+     "in_crate": 44,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 19,
+     "held": 12,
+     "released": 44
+    },
+    "first_held_frame": 20,
+    "penetration_max_m": 0.0005088793675608314,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1862": {
+    "n_frames": 75,
+    "policy_seed": 18621,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     54,
+     0,
+     75
+    ],
+    "grasp_state": {
+     "pre": 18,
+     "held": 11,
+     "placed": 46,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 18,
+     "held": 11,
+     "placed": 46,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 17,
+     "held": 11,
+     "grasping": 1,
+     "in_crate": 46,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 17,
+     "held": 12,
+     "released": 46
+    },
+    "first_held_frame": 18,
+    "penetration_max_m": 0.00038073288709191094,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1815": {
+    "n_frames": 75,
+    "policy_seed": 18151,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     54,
+     45,
+     75
+    ],
+    "grasp_state": {
+     "pre": 19,
+     "held": 11,
+     "placed": 45,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 19,
+     "held": 11,
+     "placed": 45,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 17,
+     "held": 11,
+     "grasping": 2,
+     "in_crate": 45,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 17,
+     "held": 13,
+     "released": 45
+    },
+    "first_held_frame": 19,
+    "penetration_max_m": 0.00048641015520977174,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1848": {
+    "n_frames": 75,
+    "policy_seed": 18481,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     59,
+     27,
+     0
+    ],
+    "grasp_state": {
+     "pre": 75,
+     "held": 0,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 75,
+     "held": 0,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 74,
+     "held": 0,
+     "grasping": 1,
+     "in_crate": 0,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 46,
+     "held": 29,
+     "released": 0
+    },
+    "first_held_frame": null,
+    "penetration_max_m": 0.00025661529563142545,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1849": {
+    "n_frames": 75,
+    "policy_seed": 18491,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     45,
+     0,
+     69
+    ],
+    "grasp_state": {
+     "pre": 21,
+     "held": 1,
+     "placed": 0,
+     "post": 53,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 21,
+     "held": 1,
+     "placed": 0,
+     "post": 53,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 72,
+     "held": 1,
+     "grasping": 2,
+     "in_crate": 0,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 45,
+     "held": 30,
+     "released": 0
+    },
+    "first_held_frame": 21,
+    "penetration_max_m": 0.0014301650180086035,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1866": {
+    "n_frames": 75,
+    "policy_seed": 18661,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     21,
+     45,
+     72
+    ],
+    "grasp_state": {
+     "pre": 17,
+     "held": 13,
+     "placed": 44,
+     "post": 1,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 17,
+     "held": 12,
+     "placed": 44,
+     "post": 2,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 15,
+     "held": 13,
+     "grasping": 2,
+     "in_crate": 44,
+     "other": 1
+    },
+    "closed_loop_gt": {
+     "reach": 14,
+     "held": 21,
+     "released": 40
+    },
+    "first_held_frame": 17,
+    "penetration_max_m": 0.00027752082418246193,
+    "render_vs_qpos_disagree": 1,
+    "check_problems": 0
+   },
+   "ep1851": {
+    "n_frames": 75,
+    "policy_seed": 18511,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     58,
+     46,
+     0
+    ],
+    "grasp_state": {
+     "pre": 75,
+     "held": 0,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 75,
+     "held": 0,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 75,
+     "held": 0,
+     "grasping": 0,
+     "in_crate": 0,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 31,
+     "held": 44,
+     "released": 0
+    },
+    "first_held_frame": null,
+    "penetration_max_m": 0.00021513812373750825,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1804": {
+    "n_frames": 75,
+    "policy_seed": 18041,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     43,
+     42,
+     75
+    ],
+    "grasp_state": {
+     "pre": 21,
+     "held": 12,
+     "placed": 42,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 21,
+     "held": 12,
+     "placed": 42,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 19,
+     "held": 12,
+     "grasping": 2,
+     "in_crate": 42,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 19,
+     "held": 14,
+     "released": 42
+    },
+    "first_held_frame": 21,
+    "penetration_max_m": 0.00041590608441087923,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1853": {
+    "n_frames": 75,
+    "policy_seed": 18531,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     37,
+     52,
+     0
+    ],
+    "grasp_state": {
+     "pre": 74,
+     "held": 1,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 74,
+     "held": 1,
+     "placed": 0,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 61,
+     "held": 1,
+     "grasping": 13,
+     "in_crate": 0,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 48,
+     "held": 27,
+     "released": 0
+    },
+    "first_held_frame": 74,
+    "penetration_max_m": 0.0003683114947461661,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1822": {
+    "n_frames": 75,
+    "policy_seed": 18221,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     56,
+     0,
+     47
+    ],
+    "grasp_state": {
+     "pre": 45,
+     "held": 6,
+     "placed": 0,
+     "post": 24,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 45,
+     "held": 6,
+     "placed": 0,
+     "post": 24,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 44,
+     "held": 6,
+     "grasping": 1,
+     "in_crate": 0,
+     "other": 24
+    },
+    "closed_loop_gt": {
+     "reach": 48,
+     "held": 27,
+     "released": 0
+    },
+    "first_held_frame": 45,
+    "penetration_max_m": 0.0002693893424642324,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   },
+   "ep1839": {
+    "n_frames": 75,
+    "policy_seed": 18391,
+    "chunks": 75,
+    "noun_n_ok": 75,
+    "noun_n_frames": 75,
+    "noun_errors": 0,
+    "feat_noun_errors": 0,
+    "target_visible_ge200px_[high,left_wrist,right_wrist]": [
+     54,
+     0,
+     71
+    ],
+    "grasp_state": {
+     "pre": 17,
+     "held": 14,
+     "placed": 44,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "grasp_state_qpos": {
+     "pre": 17,
+     "held": 14,
+     "placed": 44,
+     "post": 0,
+     "held_other_hand": 0
+    },
+    "phys_state": {
+     "on_table": 16,
+     "held": 14,
+     "grasping": 1,
+     "in_crate": 44,
+     "other": 0
+    },
+    "closed_loop_gt": {
+     "reach": 16,
+     "held": 15,
+     "released": 44
+    },
+    "first_held_frame": 17,
+    "penetration_max_m": 0.0011161992553628266,
+    "render_vs_qpos_disagree": 0,
+    "check_problems": 0
+   }
+  },
+  "check": {
+   "file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/check.json",
+   "all_ok": true,
+   "problems_total": 0,
+   "notes": []
+  },
+  "paths": {
+   "attention": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/attention/",
+   "noun": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/noun/orig/",
+   "feat": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/feat/",
+   "gt": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/gt/",
+   "grasp_summary": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/gt/grasp_summary.json",
+   "gt_summary": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/gt/gt_summary.json",
+   "logs": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/extract_logs/",
+   "sizes": {
+    "attention": "1.7G",
+    "noun": "531M",
+    "feat": "47M",
+    "gt": "12M"
+   }
+  }
+ }
+}

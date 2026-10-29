@@ -1,0 +1,112 @@
+{
+ "example": {
+  "run": "회귀250_k0",
+  "request": 4,
+  "NOUN": {
+   "request": 4,
+   "has_target": true,
+   "head_visible_frac": 0.461,
+   "attention_source": {
+    "spec": "noun_target:L10H7",
+    "query": "noun_target",
+    "layer": 10,
+    "head": 7,
+    "row": "target",
+    "sigma": 0.0,
+    "k": 1,
+    "noun": "apple",
+    "noun_ok": true,
+    "noun_error": "",
+    "token_index": 6,
+    "prefix_row": 774,
+    "n_text_valid": 79,
+    "attention": "ok"
+   },
+   "precision_5mm": 0.786,
+   "majority_object": "apple",
+   "recall_5mm": 0.206,
+   "vis_centroid_mm": 26.4
+  },
+  "L8H2": {
+   "request": 4,
+   "has_target": true,
+   "head_visible_frac": 0.463,
+   "attention_source": {
+    "spec": "action:last:L8H2",
+    "query": "action",
+    "layer": 8,
+    "head": 2,
+    "agg": "last",
+    "denoise": 0,
+    "attention": "ok"
+   },
+   "precision_5mm": 0.49,
+   "majority_object": "apple",
+   "recall_5mm": 0.149,
+   "vis_centroid_mm": 24.3
+  },
+  "T61": {
+   "request": 4,
+   "has_target": true,
+   "head_visible_frac": 0.461,
+   "attention_source": {
+    "spec": "action:mean:L10H7",
+    "query": "action",
+    "layer": 10,
+    "head": 7,
+    "agg": "mean",
+    "denoise": 0,
+    "attention": "ok"
+   },
+   "precision_5mm": 0.75,
+   "majority_object": "apple",
+   "recall_5mm": 0.22,
+   "vis_centroid_mm": 26.5
+  }
+ },
+ "identical_target_scenes": [
+  "가림121",
+  "가림122",
+  "가림123",
+  "회귀119",
+  "회귀320",
+  "회귀850"
+ ],
+ "per_config": {
+  "NOUN": {
+   "n_requests": 398,
+   "precision_median": 0.882,
+   "recall_median": 0.68,
+   "vis_centroid_median_mm": 7.2,
+   "no_target_rate": 0.073,
+   "other_object_rate": 0.0
+  },
+  "L8H2": {
+   "n_requests": 435,
+   "precision_median": 0.876,
+   "recall_median": 0.664,
+   "vis_centroid_median_mm": 8.4,
+   "no_target_rate": 0.0,
+   "other_object_rate": 0.0
+  },
+  "T61": {
+   "n_requests": 360,
+   "precision_median": 0.884,
+   "recall_median": 0.692,
+   "vis_centroid_median_mm": 6.8,
+   "no_target_rate": 0.0,
+   "other_object_rate": 0.0
+  }
+ },
+ "success": {
+  "NOUN": 12,
+  "L8H2": 11,
+  "T61": 13
+ },
+ "forbidden": {
+  "NOUN": 3,
+  "L8H2": 2,
+  "T61": 2
+ },
+ "note": "closed-loop records (robot motion differs per configuration); the switch decision is the fixed-input replay T65 (session B)"
+}

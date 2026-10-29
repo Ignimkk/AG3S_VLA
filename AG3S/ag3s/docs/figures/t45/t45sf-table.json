@@ -1,0 +1,173 @@
+{
+ "cases": [
+  {
+   "chunk": "ep0_s2:13",
+   "hand": "left",
+   "target": "orange",
+   "links": "ee_finger_l1\u00d762",
+   "blocking": "154",
+   "share": "1.00/0.00",
+   "max_move": "pear 0.1",
+   "tgt_attr_med_mm": "2.9",
+   "rows": "35/35/35/34",
+   "base_gap_min": "36.9"
+  },
+  {
+   "chunk": "ep104_s1041:15 *",
+   "hand": "left",
+   "target": "pear",
+   "links": "ee_left\u00d798",
+   "blocking": "421",
+   "share": "0.91/0.09",
+   "max_move": "pear 6.1",
+   "tgt_attr_med_mm": "3.5",
+   "rows": "88/88/88/10",
+   "base_gap_min": "25.7"
+  },
+  {
+   "chunk": "ep123_s1231:11",
+   "hand": "right",
+   "target": "orange",
+   "links": "ee_right\u00d75",
+   "blocking": "18",
+   "share": "1.00/0.00",
+   "max_move": "orange 0.7",
+   "tgt_attr_med_mm": "5.2",
+   "rows": "5/5/5/3",
+   "base_gap_min": "40.7"
+  },
+  {
+   "chunk": "ep12_s121:13",
+   "hand": "left",
+   "target": "apple",
+   "links": "ee_finger_l1\u00d77",
+   "blocking": "13",
+   "share": "1.00/0.00",
+   "max_move": "apple 4.2",
+   "tgt_attr_med_mm": "1.2",
+   "rows": "0/0/0/0",
+   "base_gap_min": "33.8"
+  },
+  {
+   "chunk": "ep30_s302:14 *",
+   "hand": "right",
+   "target": "apple",
+   "links": "ee_right\u00d783",
+   "blocking": "90",
+   "share": "0.53/0.47",
+   "max_move": "apple 0.2",
+   "tgt_attr_med_mm": "1.5",
+   "rows": "71/71/71/0",
+   "base_gap_min": "25.6"
+  },
+  {
+   "chunk": "ep3_s31:28 *",
+   "hand": "right",
+   "target": "orange",
+   "links": "ee_right\u00d7216",
+   "blocking": "389",
+   "share": "0.85/0.15",
+   "max_move": "orange 68.5",
+   "tgt_attr_med_mm": "25.8",
+   "rows": "206/206/206/0",
+   "base_gap_min": "14.8"
+  },
+  {
+   "chunk": "ep12_s121:15",
+   "hand": "left",
+   "target": "apple",
+   "links": "ee_left\u00d76,ee_finger_l2\u00d73",
+   "blocking": "185",
+   "share": "0.99/0.00",
+   "max_move": "apple 4.2",
+   "tgt_attr_med_mm": "2.8",
+   "rows": "3/3/3/5",
+   "base_gap_min": "22.2"
+  },
+  {
+   "chunk": "ep54_s542:20 *",
+   "hand": "right",
+   "target": "apple",
+   "links": "ee_right\u00d775,ee_finger_r2\u00d720",
+   "blocking": "270",
+   "share": "0.86/0.14",
+   "max_move": "apple 2.6",
+   "tgt_attr_med_mm": "2.7",
+   "rows": "86/86/86/20",
+   "base_gap_min": "33.5"
+  }
+ ],
+ "sphere_models": [
+  [
+   "self-filter (587 \uad6c, inflation 0)",
+   "serve_safe.py:955; grounding_report.py:71-102",
+   "24 (collision 12 + cover 12)",
+   "26.8\u201336.8",
+   "1.2e-05 \u00b7 0.69"
+  ],
+  [
+   "\uc81c\uc57d palm cover on (466)",
+   "serve_safe.py:963-966; grounding_report.py:257-283",
+   "121",
+   "5.0\u201329.0",
+   "0.012 \u00b7 7.7"
+  ],
+  [
+   "\uc81c\uc57d palm cover off (270)",
+   "serve_safe.py:965",
+   "23",
+   "5.7\u20136.2",
+   "0.841 \u00b7 54.5"
+  ]
+ ],
+ "survey": {
+  "all": {
+   "base": {
+    "n_chunks": 1350,
+    "chunks_gap_free_lt0": 0,
+    "chunks_gap_main_lt0": 0,
+    "chunks_occ_vox_inside_palm_gt0": 0,
+    "occ_vox_inside_palm_total": 0,
+    "gap_free_mm_min": 11.502111589609177,
+    "gap_free_mm_median": 87.62390534665741
+   },
+   "PC": {
+    "n_chunks": 1350,
+    "chunks_gap_free_lt0": 35,
+    "chunks_gap_main_lt0": 91,
+    "chunks_occ_vox_inside_palm_gt0": 90,
+    "occ_vox_inside_palm_total": 6202,
+    "gap_free_mm_min": -14.449837850818994,
+    "gap_free_mm_median": 80.2005160511533
+   }
+  },
+  "pre8_close": {
+   "base": {
+    "n_chunks": 162,
+    "chunks_gap_free_lt0": 0,
+    "chunks_gap_main_lt0": 0,
+    "chunks_occ_vox_inside_palm_gt0": 0,
+    "occ_vox_inside_palm_total": 0,
+    "gap_free_mm_min": 11.502111589609177,
+    "gap_free_mm_median": 38.28104382993118
+   },
+   "PC": {
+    "n_chunks": 162,
+    "chunks_gap_free_lt0": 19,
+    "chunks_gap_main_lt0": 58,
+    "chunks_occ_vox_inside_palm_gt0": 57,
+    "occ_vox_inside_palm_total": 4583,
+    "gap_free_mm_min": -14.449837850818994,
+    "gap_free_mm_median": 25.934009921544728
+   }
+  },
+  "table": {
+   "chunks (all / pre8+close)": "1350 / 162",
+   "PC palm at q_now: occupied vox inside, chunks (all / pre8+close)": "90 / 57",
+   "base palm at q_now: occupied vox inside, chunks (all / pre8+close)": "0 / 0",
+   "PC palm d_free - r < 0 at q_now, chunks (all / pre8+close)": "35 / 19",
+   "base palm d_free - r < 0 at q_now, chunks (all / pre8+close)": "0 / 0",
+   "min d_free - r mm, PC / base (pre8+close)": "-14.4 / 11.5"
+  }
+ }
+}

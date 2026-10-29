@@ -1,0 +1,35 @@
+{
+ "source": "AG3S/ag3s/docs/handoff/AG3S-PRE-CORE-TO.verify.json#/numbers/E2_closed_occ, E2_closed_reg, E2_verdict",
+ "table": [
+  [
+   "",
+   "지금",
+   "E2"
+  ],
+  [
+   "가림: 접촉 없는 성공",
+   6,
+   6
+  ],
+  [
+   "가림: 금지 접촉 run",
+   3,
+   2
+  ],
+  [
+   "회귀: 접촉 없는 성공",
+   14,
+   14
+  ],
+  [
+   "회귀: 금지 접촉 run",
+   1,
+   1
+  ],
+  [
+   "미리 정한 기준",
+   "",
+   "미통과"
+  ]
+ ]
+}

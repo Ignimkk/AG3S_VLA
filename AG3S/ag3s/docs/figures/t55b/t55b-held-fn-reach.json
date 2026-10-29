@@ -1,0 +1,40 @@
+{
+ "source": "T55b.verify.json",
+ "instruction": {
+  "held_false_reach_mm": {
+   "n": 117,
+   "min": 162.54,
+   "median": 529.74,
+   "max": 741.84
+  },
+  "held_false_held_fruit_mm": {
+   "n": 105,
+   "min": 50.71814666041283,
+   "median": 55.863628472924766,
+   "max": 72.68176309353625
+  },
+  "held_true_reach_mm": {
+   "n": 216,
+   "min": 48.74,
+   "median": 274.85,
+   "max": 477.3
+  },
+  "reach_limit_mm": [
+   120.0
+  ],
+  "held_false_by_cause": {
+   "closing|reach|manipulated=noun": 97,
+   "closing|dropped+reach|manipulated=noun": 11,
+   "latched|-|manipulated=noun": 9
+  },
+  "n_p_grasp": 333,
+  "n_held_false": 117
+ },
+ "attach_manipulated_is": {
+  "never_held": 10,
+  "held": 18,
+  "noun": 5,
+  "no_p_grasp": 13,
+  "other": 2
+ }
+}

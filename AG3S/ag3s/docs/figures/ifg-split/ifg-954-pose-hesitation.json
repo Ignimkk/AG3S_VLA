@@ -1,0 +1,168 @@
+{
+ "episode": 954,
+ "a_to_edit": [
+  {
+   "k": 10,
+   "translation_mm": 0.8020891345762842,
+   "rotation_deg": 0.07406040182086711
+  },
+  {
+   "k": 11,
+   "translation_mm": 1.4730357476907325,
+   "rotation_deg": 0.05963190314713656
+  },
+  {
+   "k": 12,
+   "translation_mm": 17.45058514341009,
+   "rotation_deg": 1.7461840600005072
+  },
+  {
+   "k": 13,
+   "translation_mm": 18.9582029972967,
+   "rotation_deg": 1.674077484597486
+  },
+  {
+   "k": 14,
+   "translation_mm": 15.868136872859328,
+   "rotation_deg": 1.3818311068596318
+  },
+  {
+   "k": 15,
+   "translation_mm": 11.029284254402183,
+   "rotation_deg": 0.9076454242907683
+  },
+  {
+   "k": 16,
+   "translation_mm": 6.041494444640562,
+   "rotation_deg": 0.4672294187344796
+  },
+  {
+   "k": 17,
+   "translation_mm": 0.0,
+   "rotation_deg": 0.0
+  },
+  {
+   "k": 18,
+   "translation_mm": 0.0,
+   "rotation_deg": 0.0
+  },
+  {
+   "k": 19,
+   "translation_mm": 28.432046643463387,
+   "rotation_deg": 1.3519460247253547
+  }
+ ],
+ "close_orientation_diff_deg": 6.626268157612409,
+ "b_after_close": [
+  {
+   "k": 19,
+   "p_pick": 0.8969012485262433,
+   "plan_change_mm_ag3s": 112.32006337906498,
+   "plan_change_mm_vla_alone": 45.477762882782216,
+   "to_push_mm": 28.432046643463387,
+   "reference_clearance_min_mm": 5.860553123056889,
+   "latch": "closing"
+  },
+  {
+   "k": 20,
+   "p_pick": 0.12733137820499785,
+   "plan_change_mm_ag3s": 52.44438933406443,
+   "plan_change_mm_vla_alone": 8.48509775585942,
+   "to_push_mm": 19.764508319074526,
+   "reference_clearance_min_mm": 42.35159978270531,
+   "latch": "closing"
+  },
+  {
+   "k": 21,
+   "p_pick": 0.08555998773163968,
+   "plan_change_mm_ag3s": 8.64164175484924,
+   "plan_change_mm_vla_alone": 10.532289604425575,
+   "to_push_mm": 2.340272554360203,
+   "reference_clearance_min_mm": 51.545191556215286,
+   "latch": "closing"
+  },
+  {
+   "k": 22,
+   "p_pick": 0.3373721492615897,
+   "plan_change_mm_ag3s": 20.75434195953345,
+   "plan_change_mm_vla_alone": 6.820575015732947,
+   "to_push_mm": 6.912531406515007,
+   "reference_clearance_min_mm": 51.27107724547386,
+   "latch": "closing"
+  },
+  {
+   "k": 23,
+   "p_pick": 0.2898275831409492,
+   "plan_change_mm_ag3s": 43.075736301535855,
+   "plan_change_mm_vla_alone": 3.026051551962977,
+   "to_push_mm": 13.213203252832548,
+   "reference_clearance_min_mm": 50.84086209535599,
+   "latch": "closing"
+  },
+  {
+   "k": 24,
+   "p_pick": 0.17346069002052555,
+   "plan_change_mm_ag3s": 30.4590510802157,
+   "plan_change_mm_vla_alone": 9.112263584251242,
+   "to_push_mm": 13.39791364259364,
+   "reference_clearance_min_mm": 49.879033118486404,
+   "latch": "closing"
+  },
+  {
+   "k": 25,
+   "p_pick": 0.4474431362966062,
+   "plan_change_mm_ag3s": 35.729209447846436,
+   "plan_change_mm_vla_alone": 10.561544343691292,
+   "to_push_mm": 14.856426953268963,
+   "reference_clearance_min_mm": 50.870008766651154,
+   "latch": "closing"
+  },
+  {
+   "k": 26,
+   "p_pick": 0.1570488633960697,
+   "plan_change_mm_ag3s": 25.05260095700964,
+   "plan_change_mm_vla_alone": 4.831115813666351,
+   "to_push_mm": 9.945121446749882,
+   "reference_clearance_min_mm": 50.92327669262886,
+   "latch": "closing"
+  },
+  {
+   "k": 27,
+   "p_pick": 0.028652378520877087,
+   "plan_change_mm_ag3s": 5.458767952607739,
+   "plan_change_mm_vla_alone": 3.5135354861814707,
+   "to_push_mm": 2.022582679969033,
+   "reference_clearance_min_mm": 52.68058180809021,
+   "latch": "closing"
+  },
+  {
+   "k": 28,
+   "p_pick": 0.02666100380974309,
+   "plan_change_mm_ag3s": 4.905360163865234,
+   "plan_change_mm_vla_alone": 4.355754270226703,
+   "to_push_mm": 0.8386631399528637,
+   "reference_clearance_min_mm": 53.710438311100006,
+   "latch": "closing"
+  },
+  {
+   "k": 29,
+   "p_pick": 0.003413085130994241,
+   "plan_change_mm_ag3s": 20.74793245596616,
+   "plan_change_mm_vla_alone": 7.000899305254261,
+   "to_push_mm": 6.0440573941509275,
+   "reference_clearance_min_mm": 55.183377116918564,
+   "latch": "closing"
+  },
+  {
+   "k": 30,
+   "p_pick": 0.0002289336804324639,
+   "plan_change_mm_ag3s": 7.219159913331902,
+   "plan_change_mm_vla_alone": 4.179477095365257,
+   "to_push_mm": 4.536066700206644,
+   "reference_clearance_min_mm": 26.316173374652863,
+   "latch": "closing"
+  }
+ ],
+ "definitions": "IFG ep954 \u2014 (a) does TrajOpt change the grasp pose or only translate the hand? (b) why does the arm hesitate after a failed grasp?\nCPU only, read only.\n\n  MUJOCO_GL=osmesa PYTHONPATH=.:integration/rby1/manipulation/src .venv-ag3s/bin/python -m       AG3S.ag3s.experiments.studies.ifg_954_pose_hesitation --run <IFG-APPLE run> --fig AG3S/ag3s/docs/figures/ifg-split\n\n(a) target split (IFG-APPLE-SPLIT SPL) ep954, requests 10-19: max over the executed rows of the TCP translation and rotation between\n    the refined and the reference chunk (FK at the teleop keyframe, site frame).\n(b) after the first close, requests 19-30: HSR subtask probability p(pick) recorded by the server (SPL); the policy's plan change between\n    consecutive requests = max over 8 rows |TCP(chunk_k row i) - TCP(chunk_{k-1} row 8+i)| (traj.npz predicted_chunks), for SPL (failed\n    grasp) and VLA alone (IFG-APPLE E0, successful grasp); TrajOpt push (SPL) and the reference chunk's minimum clearance (SPL).\n",
+ "script": "AG3S/ag3s/experiments/studies/ifg_954_pose_hesitation.py"
+}

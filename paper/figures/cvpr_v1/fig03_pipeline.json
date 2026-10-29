@@ -1,0 +1,152 @@
+{
+ "artifact": "fig03_pipeline",
+ "pdf": "paper/figures/cvpr_v1/fig03_pipeline.pdf",
+ "png": "paper/figures/cvpr_v1/fig03_pipeline.png",
+ "size_in": [
+  6.875,
+  3.05
+ ],
+ "aspect": 2.254,
+ "textwidth_in": 6.875,
+ "raster_dpi_in_pdf": 400,
+ "png_dpi": 300,
+ "fonts": {
+  "family": "DejaVu Sans",
+  "math": "stix",
+  "pdf_fonttype": 42,
+  "min_pt": 7.0,
+  "max_pt": 7.5,
+  "n_text_items": 50,
+  "floor_pt": 7.0
+ },
+ "layout_audit": {
+  "tolerance_pt": 1.0,
+  "min_text_to_panel_border_in": 0.05,
+  "violations": {
+   "text_text": 0,
+   "text_segment": 0,
+   "panel_border": 0,
+   "badge_heights": 0
+  },
+  "n_segments_checked": 30,
+  "n_panels": 10,
+  "n_texts": 50
+ },
+ "script": "paper/tools/plotting/cvpr_v1_compose.py",
+ "generated": "2026-10-18T16:49:42+00:00",
+ "git_head": "f15e587290f6b099bb2be9b4dc137cacf62c9db5",
+ "printed_numbers": [
+  {
+   "text": "(bar)",
+   "meaning": "cosine to the remembered region, raw vs centered (R10 example frame: target vs strongest alternative)",
+   "value": 0.98,
+   "source": "paper/figures/ifg_results/exp/exp-R10-centering.json",
+   "key": "caption values of the R10 example"
+  },
+  {
+   "text": "(bar)",
+   "meaning": "cosine to the remembered region, raw vs centered (R10 example frame: target vs strongest alternative)",
+   "value": 0.975,
+   "source": "paper/figures/ifg_results/exp/exp-R10-centering.json",
+   "key": "caption values of the R10 example"
+  },
+  {
+   "text": "(bar)",
+   "meaning": "cosine to the remembered region, raw vs centered (R10 example frame: target vs strongest alternative)",
+   "value": 0.595,
+   "source": "paper/figures/ifg_results/exp/exp-R10-centering.json",
+   "key": "caption values of the R10 example"
+  },
+  {
+   "text": "(bar)",
+   "meaning": "cosine to the remembered region, raw vs centered (R10 example frame: target vs strongest alternative)",
+   "value": 0.413,
+   "source": "paper/figures/ifg_results/exp/exp-R10-centering.json",
+   "key": "caption values of the R10 example"
+  }
+ ],
+ "number_sources": {
+  "paper/figures/ifg_results/exp/exp-R10-centering.json": "9e16693f65888000edd8927aaec4700a7255c462216697289353af0636776f06"
+ },
+ "assets": {
+  "p_in_0": {
+   "file": "paper/figures/ifg_overview/assets/p_in_0.png",
+   "sha256": "eb05a13acbbdac660ddee5bff0ee3484929dc60e6c098a19d230cffcd73bf384",
+   "crops": []
+  },
+  "p_in_1": {
+   "file": "paper/figures/ifg_overview/assets/p_in_1.png",
+   "sha256": "8b8b6aff725d018661cb325b14ad0097f895bd844cff342345e34ef60e237ed7",
+   "crops": []
+  },
+  "p_in_2": {
+   "file": "paper/figures/ifg_overview/assets/p_in_2.png",
+   "sha256": "7f1f31b2ad11b3390896961ff142d03a5bca9805d17e3172d445f5c414701053",
+   "crops": []
+  },
+  "t_noun_attention": {
+   "file": "paper/figures/ifg_overview/assets/t_noun_attention.png",
+   "sha256": "d12d92397e69aaaae661d7862bfedd0a976d2fd2afdc73752b0c591fc2ce25e3",
+   "crops": [
+    [
+     0.18,
+     0.25,
+     0.86,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/t_noun_attention.json",
+   "frame": "T53_ep1842_f016",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Policy camera re-rendered at high resolution; 16x16 noun-attention map upsampled; gold = seed patches.",
+   "episode": "T53_ep1842"
+  },
+  "p_region_v2": {
+   "file": "paper/figures/cvpr_v1/assets/p_region_v2.png",
+   "sha256": "adb018b6ca546dec5c9eef02861fe9b80c890059d1ae31174b365bc06f927626",
+   "crops": [
+    [
+     0.25,
+     0.25,
+     0.8,
+     0.85
+    ]
+   ],
+   "sidecar": "paper/figures/cvpr_v1/assets/p_region_v2.json",
+   "frame": "T53_ep1842_f016",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Top-1 seed-mass region (orange nodes); neighbour surfaces (blue nodes) stay protected. object meshes tinted for legibility: target 'pear' orange, touching neighbour(s) ['orange'] light blue; overlaid nodes = recomputed 5 mm observed-surface nodes (orange = selected target surface, blue = protected neighbour)"
+  },
+  "f3_attached_object": {
+   "file": "paper/figures/paperbanana/figure3/assets/f3_attached_object.png",
+   "sha256": "38a03e69fe75526ad52b9330318074b37f0af582b350b5c59598a9e237bb4dd9",
+   "crops": [
+    [
+     0.3,
+     0.2,
+     0.82,
+     0.78
+    ]
+   ],
+   "sidecar": "paper/figures/paperbanana/figure3/assets/f3_attached_object.json",
+   "run": "T53 C1a (AG3S serving, 2026-10-13)",
+   "note": "Attached-object sphere recorded at attach (chunk 19), carried rigidly with the hand link (FK) and shown during carry.",
+   "episode": "ep1842"
+  }
+ },
+ "registration_status": "numbers copied from raw summary.json / verify.json / agg.json as listed; they are not yet registered in paper/evidence/RESULTS.md (planned EXP003 held-out locked, EXP004 closed-loop hurdle)",
+ "version": "v3 architecture diagram (2026-10-18): inputs -> frozen VLA -> ATS (+HSR) -> LTE -> CCR; replaces the ten-frame storyboard (kept as fig03_storyboard)",
+ "real_frames": {
+  "inputs": "p_in_0..2 (T53 ep1842 policy cameras)",
+  "seeds": "t_noun_attention (noun attention with seed patches, T53 ep1842)",
+  "target_surface": "p_region_v2 (selected target surface, T53 ep1842)",
+  "attached": "f3_attached_object (recorded attached sphere, T53 C1a ep1842; same attachment as ours)"
+ },
+ "schematic": {
+  "surface_graph": "illustration of depth-continuous edges, seeds (stars), support (grey) and the depth break (red dashed)",
+  "fields": "exact 2-D Euclidean distance transforms of a synthetic cross-section: d_t with target, d_t^{\\X} without; dashed = clearance margin",
+  "ccr": "illustration of reference vs refined chunk; filled = executed rows"
+ },
+ "identity_bars": "raw vs centered cosine of the R10 example frame (target 0.980 / 0.595, strongest alternative 0.975 / 0.413), as printed in the manuscript",
+ "is_measured_result": false
+}

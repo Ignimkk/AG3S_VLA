@@ -1,0 +1,14 @@
+{
+ "asset": "paper/figures/paperbanana/figure3/assets/f3_scene_esdf.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_assets.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa"
+ },
+ "note": "Recorded cuRobo main ESDF layer (5 mm, 128^3) sliced through the target; black = zero level set.",
+ "is_measured_result": false,
+ "generated": true,
+ "chunk": 17,
+ "slice_y_m": -0.3065498673915864
+}

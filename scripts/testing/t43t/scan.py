@@ -1,9 +1,9 @@
 """T43 T — per-chunk record scan of the permanent-HOLD runs (records only, no recompute)."""
-from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import rebase_legacy_paths, workspace_path as _ag3s_workspace_path
 import json, sys, ast, pathlib
 import numpy as np
 S = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T43/S/raw'))
-IX = {**json.load(open(S / "chunk_index_t42.json")), **json.load(open(S / "chunk_index_t40t41.json"))}
+IX = rebase_legacy_paths({**json.load(open(S / "chunk_index_t42.json")), **json.load(open(S / "chunk_index_t40t41.json"))})
 RUNS = {
  "T42_R1908": _ag3s_workspace_path('legacy/outputs/verify/T42/1/runs/E3b/noobs/E3b_ep1908_s19082'),
  "T42_L1992": _ag3s_workspace_path('legacy/outputs/verify/T42/1/runs/E3b/noobs/E3b_ep1992_s19922'),

@@ -1,0 +1,47 @@
+{
+ "source": [
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/LTE/final_rows.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/LTE/visual_check.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/LTE/lte_attribution_final.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/LTE/summary_whatif.json"
+ ],
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/LTE/lte_scene_fig.py",
+ "scenes": {
+  "250_req9": {
+   "seeds_drawn": 4,
+   "rows_by_class": {
+    "near_apple_8-20mm": 31,
+    "apple_stem_leaf_visual": 111
+   },
+   "t0": 72
+  },
+  "119_req11": {
+   "seeds_drawn": 11,
+   "rows_by_class": {
+    "neighbour_fruit_surface": 161,
+    "near_neighbour_8-20mm": 4
+   },
+   "t0": 88
+  },
+  "1668_req14": {
+   "seeds_drawn": 6,
+   "rows_by_class": {
+    "own_hand_surface": 112,
+    "neighbour_fruit_surface": 73
+   },
+   "t0": 112
+  }
+ },
+ "rows_by_surface_of_1663": {
+  "apple_stem_leaf_incl_near": 828,
+  "neighbour_fruit_incl_near": 519,
+  "own_hand": 316,
+  "apple_body": 0
+ },
+ "whatif_56req": {
+  "recorded": 1624,
+  "cap_in": 1329,
+  "cap_all": 835,
+  "oracle_stem": 867
+ }
+}

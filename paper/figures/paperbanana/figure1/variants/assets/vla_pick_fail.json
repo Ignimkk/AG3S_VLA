@@ -1,0 +1,14 @@
+{
+ "asset": "paper/figures/paperbanana/figure1/variants/assets/vla_pick_fail.png",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1982_s19822",
+ "profile": "t43p2_overbar",
+ "config": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/P2/configs/t43p2_ep1982_s19822.json",
+ "control_step": 197,
+ "path_from_step": 90,
+ "gripper_hurdle_distance_m": -7.893622260868836e-05,
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/W/runs/E0/H/E0_ep1982_s19822/frames.jsonl": "0fa3b0e2dbecd97bda4ab36ae0e249fc97fa8370d7fd6698a2602bee0b42442c"
+ },
+ "note": "MuJoCo replay of the recorded qpos with the run's hurdle; left tool-centre path by FK.",
+ "script": "paper/tools/plotting/paperbanana_fig1_scenes.py"
+}

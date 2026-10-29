@@ -48,8 +48,12 @@ them — with a number to justify the dependency.
 
 from __future__ import annotations
 
+import collections
 import contextlib
 import dataclasses
+import os
+import pathlib
+import sys
 import time
 from typing import Any, Optional
 
@@ -61,6 +65,114 @@ from AG3S.trajopt.problem import QpProblem
 
 #: Bounds this large are treated as infinite. OSQP wants a finite-ish number; CasADi does not care.
 _INF = 1e20
+
+# --- AG3S-PRE-CORE-TO E3-a: OSQP with the CUDA algebra (`qp.solver = "osqp-cuda"`) -------------------
+#
+# **Where the CUDA algebra lives.** `osqp-cu12 1.1.3` ships one extension module, `osqp_cuda`, that the
+# `osqp` package finds by name. Installed into a venv, osqp 1.1.3 then makes CUDA the *default* algebra
+# of every bare `osqp.OSQP()` in that venv (priority cuda > mkl > builtin) — which would silently move
+# every other process that shares the venv onto the GPU. So it is *not* installed into the venv: it sits
+# in its own directory (`pip install --no-deps --target <checkout>/.cache/osqp-cu12 osqp-cu12==1.1.3`,
+# override with `$AG3S_OSQP_CUDA_DIR`) that is appended to `sys.path` only when this backend is used.
+# Even then, the process-wide default algebra is pinned back to `builtin` (`_load_osqp_cuda`), and this
+# module always names its algebra explicitly.
+#
+# **Settings.** The configured `eps_abs` · `eps_rel` · `max_iter` · `polish` · `adaptive_rho` ·
+# `warm_starting` go to both builds as they are. The CUDA build also ships *different defaults* for
+# ADMM settings the CPU build fixes (`check_dualgap` 0 vs 1, `check_termination` 5 vs 25,
+# `adaptive_rho_tolerance` 2 vs 5, scalar vs vector rho). Left as shipped, the CUDA answer on the
+# RB-Y1 fixture QP stops at "solved" with an objective of -2226 against -29.66 at the true optimum
+# (CPU at the same eps: -29.47); with the CPU values it is -29.71, 0.035 rad from the optimum against
+# the CPU's 0.080 rad. So `_CUDA_ALIGNED` copies the CPU build's defaults onto the CUDA solver at setup.
+# What cannot be the same: the CUDA build is single precision (float32) and its linear system is solved
+# by preconditioned CG (indirect), not QDLDL; OSQP cannot polish with the indirect solver
+# (`QpConfig.validate` refuses `polish` with this backend).
+#
+# **Fallback.** A CUDA solve that the CPU path would call a failure (status other than "solved" /
+# "solved inaccurate" / an accepted max-iter iterate, non-finite x, or an exception from the CUDA
+# library) is solved again by a CPU OSQP solver kept beside it, warm-started from the same last
+# solution. Every attempt is counted process-wide (`cuda_mark` / `cuda_record_since`; the refiner puts
+# the per-chunk difference in `to.metrics.qp_backend`).
+
+#: `$AG3S_OSQP_CUDA_DIR` overrides; default `<checkout>/.cache/osqp-cu12` (git-ignored).
+OSQP_CUDA_DIR_ENV = "AG3S_OSQP_CUDA_DIR"
+_DEFAULT_OSQP_CUDA_DIR = pathlib.Path(__file__).resolve().parents[2] / ".cache" / "osqp-cu12"
+#: ADMM settings whose CUDA-build default differs from (or may differ from) the CPU build's; set on the
+#: CUDA solver to the CPU build's default (`_cpu_defaults`). Not copied: `linsys_solver` (CUDA has only
+#: the indirect one), `device`, the `cg_*` settings (used only by the indirect solver).
+_CUDA_ALIGNED = ("rho", "sigma", "alpha", "delta", "scaling", "adaptive_rho_interval", "adaptive_rho_tolerance",
+                 "adaptive_rho_fraction", "check_termination", "check_dualgap", "rho_is_vec", "eps_prim_inf",
+                 "eps_dual_inf", "scaled_termination", "time_limit", "polish_refine_iter")
+#: Process-wide counts of the CUDA backend (every `QpSolver` in the process adds to them).
+_CUDA_KEYS = ("qp_solves", "cuda_solved", "cuda_failed", "cuda_errors", "cuda_setups", "cpu_fallback_solved",
+              "cpu_fallback_failed")
+_CUDA_COUNTS: collections.Counter = collections.Counter()
+_CUDA_FAILED_STATUS: collections.Counter = collections.Counter()
+
+
+def osqp_cuda_dir() -> pathlib.Path:
+    """The directory that holds `osqp_cuda` (see the E3-a note above)."""
+    return pathlib.Path(os.environ.get(OSQP_CUDA_DIR_ENV) or _DEFAULT_OSQP_CUDA_DIR)
+
+
+def _load_osqp_cuda():
+    """Import `osqp` with the CUDA algebra reachable; returns the `osqp` module. Raises `ImportError`
+    with the install command when the extension is not there. Pins the process-wide default algebra to
+    `builtin` so that any bare `osqp.OSQP()` elsewhere in this process keeps the CPU build."""
+    import importlib
+
+    import osqp
+    import osqp.interface as interface
+
+    try:
+        importlib.import_module("osqp_cuda")
+    except ImportError:
+        path = str(osqp_cuda_dir())
+        if path not in sys.path:
+            sys.path.append(path)
+        try:
+            importlib.import_module("osqp_cuda")
+        except ImportError as exc:
+            raise ImportError(
+                f"qp.solver 'osqp-cuda' needs the osqp-cu12 extension in {path} (install: pip install --no-deps "
+                f"--target {path} osqp-cu12==1.1.3; or set ${OSQP_CUDA_DIR_ENV}): {exc}") from exc
+    if getattr(interface, "OSQP_ALGEBRA_BACKEND", None) is None:
+        interface.OSQP_ALGEBRA_BACKEND = "builtin"
+    return osqp
+
+
+def osqp_cuda_available() -> tuple[bool, str]:
+    """`(True, dir)` when the CUDA algebra can be imported (no GPU work is done), else `(False, why)`."""
+    try:
+        _load_osqp_cuda()
+    except ImportError as exc:
+        return False, str(exc)
+    return True, str(osqp_cuda_dir())
+
+
+def _cpu_defaults() -> dict[str, Any]:
+    """The CPU (builtin) build's defaults of `_CUDA_ALIGNED`, read from the build itself."""
+    import osqp.ext_builtin as ext
+
+    settings = ext.OSQPSettings()
+    ext.osqp_set_default_settings(settings)
+    return {k: getattr(settings, k) for k in _CUDA_ALIGNED if hasattr(settings, k)}
+
+
+def cuda_mark() -> tuple[dict, dict]:
+    """A snapshot of the process-wide CUDA-backend counts, for `cuda_record_since`."""
+    return dict(_CUDA_COUNTS), dict(_CUDA_FAILED_STATUS)
+
+
+def cuda_record_since(mark: tuple[dict, dict]) -> dict[str, Any]:
+    """What the CUDA backend did since `mark`: QP solves, CUDA solved / failed / raised, CUDA setups
+    (new sparsity pattern or first use), CPU fallbacks solved / failed, and the failed CUDA statuses."""
+    counts, statuses = mark
+    out: dict[str, Any] = {"backend": "osqp-cuda"}
+    out.update({k: int(_CUDA_COUNTS[k] - counts.get(k, 0)) for k in _CUDA_KEYS})
+    out["failed_statuses"] = {s: int(n - statuses.get(s, 0)) for s, n in _CUDA_FAILED_STATUS.items()
+                              if n - statuses.get(s, 0) > 0}
+    return out
 
 
 @dataclasses.dataclass(frozen=True)
@@ -101,6 +213,9 @@ class QpSolver:
         self._last_x = None
         self._last_y = None
         self.__dict__.pop("_eps_now", None)
+        fallback = self.__dict__.get("_cpu_fallback")      # E3-a (`osqp-cuda` only)
+        if fallback is not None:
+            fallback.reset()
 
     def solve(self, problem: QpProblem, *, warm_start: bool = True,
               x0: Optional[np.ndarray] = None, eps: Optional[float] = None) -> QpSolution:
@@ -114,6 +229,8 @@ class QpSolver:
                 solution = self._solve_osqp(problem, warm_start)
             else:
                 solution = self._solve_osqp(problem, warm_start, x0=x0, eps=eps)
+        elif name == "osqp-cuda":
+            solution = self._solve_osqp_cuda(problem, warm_start, x0=x0, eps=eps)
         else:
             solution = self._solve_casadi(problem, name, warm_start)
         elapsed = (time.perf_counter() - started) * 1000.0
@@ -123,16 +240,24 @@ class QpSolver:
 
     # --- OSQP -----------------------------------------------------------------------------
     def _solve_osqp(self, problem: QpProblem, warm_start: bool, *, x0: Optional[np.ndarray] = None,
-                    eps: Optional[float] = None) -> QpSolution:
-        import osqp
+                    eps: Optional[float] = None, algebra: str = "builtin") -> QpSolution:
+        if algebra == "cuda":
+            osqp = _load_osqp_cuda()
+        else:
+            import osqp
 
         signature = _signature(problem)
         l = np.clip(problem.l, -_INF, _INF)
         u = np.clip(problem.u, -_INF, _INF)
 
         if self._backend is None or self._signature != signature:
-            self._backend = osqp.OSQP()
+            # The algebra is always named (E3-a): a bare `osqp.OSQP()` takes whichever build has the
+            # highest priority among those importable, and the CUDA one outranks the CPU one.
+            self._backend = osqp.OSQP(algebra=algebra)
+            if algebra == "cuda":
+                _CUDA_COUNTS["cuda_setups"] += 1
             self._backend.setup(
+                **(_cpu_defaults() if algebra == "cuda" else {}),
                 P=sp.triu(problem.P, format="csc"),
                 q=problem.q,
                 A=problem.A,
@@ -193,6 +318,38 @@ class QpSolver:
             iterations=int(getattr(result.info, "iter", 0)),
             solve_time_ms=0.0,
         )
+
+    # --- OSQP, CUDA algebra (AG3S-PRE-CORE-TO E3-a) ------------------------------------------
+    def _solve_osqp_cuda(self, problem: QpProblem, warm_start: bool, *, x0: Optional[np.ndarray] = None,
+                         eps: Optional[float] = None) -> QpSolution:
+        """The same OSQP call on the CUDA algebra; a failed CUDA solve is solved again on the CPU
+        (see the E3-a note at the top of this module). `iterations` of a fallback = CUDA + CPU."""
+        _CUDA_COUNTS["qp_solves"] += 1
+        try:
+            cuda = self._solve_osqp(problem, warm_start, x0=x0, eps=eps, algebra="cuda")
+        except ImportError:
+            raise                                   # not installed: a configuration error, not a QP failure
+        except Exception as exc:                    # the CUDA library raised (device, memory, setup)
+            _CUDA_COUNTS["cuda_errors"] += 1
+            self._backend, self._signature = None, None      # set up again on the next solve
+            self.__dict__.pop("_eps_now", None)
+            cuda = QpSolution(np.zeros(problem.n_var), None, False,
+                              f"cuda error: {type(exc).__name__}: {exc}", 0, 0.0)
+        if cuda.success:
+            _CUDA_COUNTS["cuda_solved"] += 1
+            return cuda
+        _CUDA_COUNTS["cuda_failed"] += 1
+        _CUDA_FAILED_STATUS[cuda.status] += 1
+        fallback = self.__dict__.get("_cpu_fallback")
+        if fallback is None:
+            fallback = self._cpu_fallback = QpSolver(dataclasses.replace(self.config, solver="osqp"))
+        # Same warm start as the CUDA attempt had: this solver's last solution (the fallback's own
+        # factorization is reused while the sparsity pattern holds).
+        fallback._last_x, fallback._last_y = self._last_x, self._last_y
+        cpu = fallback.solve(problem, warm_start=warm_start, x0=x0, eps=eps)
+        _CUDA_COUNTS["cpu_fallback_solved" if cpu.success else "cpu_fallback_failed"] += 1
+        return dataclasses.replace(cpu, status=f"{cpu.status} (cpu fallback; cuda: {cuda.status})",
+                                   iterations=int(cpu.iterations) + int(cuda.iterations))
 
     # --- CasADi conic backends -------------------------------------------------------------
     def _solve_casadi(self, problem: QpProblem, name: str, warm_start: bool) -> QpSolution:
@@ -430,4 +587,5 @@ if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
 
 
-__all__ = ["QpSolution", "QpSolver", "available_solvers", "main"]
+__all__ = ["QpSolution", "QpSolver", "available_solvers", "cuda_mark", "cuda_record_since", "main",
+           "osqp_cuda_available", "osqp_cuda_dir"]

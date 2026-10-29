@@ -1,0 +1,35 @@
+{
+ "asset": "paper/figures/paperbanana/figure2/assets/f2c_ownership.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_assets.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa"
+ },
+ "note": "Serving function _ball_owned_split (T44 I1) applied on a 5 mm slice grid inside the recorded ball, with the recorded target points and non-target evidence (fused cloud - target - support). Grid cells within one voxel of an observed point stand in for TSDF seed voxels (display approximation). Serving counts for this chunk are in target_exclusion of the dump.",
+ "is_measured_result": false,
+ "generated": true,
+ "chunk": 17,
+ "owned_params": {
+  "tie_voxels": 1.0,
+  "max_dist_voxels": 3.0,
+  "unowned": "remove",
+  "n_target_points": 120,
+  "n_nontarget_points": 3529,
+  "n_nontarget_near": 410
+ },
+ "serving_counts_this_chunk": {
+  "n_seeds_in_ball": 1424,
+  "n_removed": 1115,
+  "n_kept_nontarget": 206,
+  "n_ambiguous": 103,
+  "n_unowned_removed": 485,
+  "n_target_owned": 630
+ },
+ "grid_counts": {
+  "target": 26,
+  "nontarget": 16,
+  "ambiguous": 20,
+  "unowned": 0
+ }
+}

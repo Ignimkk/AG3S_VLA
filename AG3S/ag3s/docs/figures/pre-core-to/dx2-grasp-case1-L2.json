@@ -1,0 +1,69 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/DX2/runs/grasp_case1_L2_s*.json",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/DX2/dx2_figs.py",
+ "runs": {
+  "13453": {
+   "first_mod_t": 8,
+   "close": {
+    "t_close_ag3s": 117,
+    "t_close_vla": 155,
+    "ag3s_palm_minus_apple_mm": [
+     16.149143795377796,
+     1.2473368078689817,
+     17.468087561106294
+    ],
+    "vla_palm_minus_apple_mm": [
+     -6.9660462756159225,
+     -3.9911747976619782,
+     12.193281801080591
+    ],
+    "palm_vector_gap_mm": 24.281218908148936,
+    "rot_gap_deg": 5.824126148757794,
+    "ag3s_palm_apple_mm": 23.821938994937636,
+    "vla_palm_apple_mm": 14.59902044864921
+   }
+  },
+  "23453": {
+   "first_mod_t": 8,
+   "close": {
+    "t_close_ag3s": 112,
+    "t_close_vla": 130,
+    "ag3s_palm_minus_apple_mm": [
+     14.859589544329088,
+     0.8566912651798431,
+     17.197112290448956
+    ],
+    "vla_palm_minus_apple_mm": [
+     -4.771250533900595,
+     -4.133872949656281,
+     8.663278874493919
+    ],
+    "palm_vector_gap_mm": 21.979579753277875,
+    "rot_gap_deg": 3.9695927089780434,
+    "ag3s_palm_apple_mm": 22.74383416401202,
+    "vla_palm_apple_mm": 10.719428066758004
+   }
+  },
+  "33453": {
+   "first_mod_t": 8,
+   "close": {
+    "t_close_ag3s": 96,
+    "t_close_vla": 96,
+    "ag3s_palm_minus_apple_mm": [
+     15.09058009503228,
+     -1.5219764484923348,
+     18.009877328576174
+    ],
+    "vla_palm_minus_apple_mm": [
+     -7.131957137932132,
+     -4.554148651672307,
+     8.108552968911443
+    ],
+    "palm_vector_gap_mm": 24.51675862375606,
+    "rot_gap_deg": 4.0004384169553315,
+    "ag3s_palm_apple_mm": 23.545651430884472,
+    "vla_palm_apple_mm": 11.71980007544806
+   }
+  }
+ }
+}

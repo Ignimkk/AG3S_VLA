@@ -1,0 +1,28 @@
+{
+ "panels": [
+  [
+   "ee_left",
+   "EE_BODY_L",
+   "palm (authorized)"
+  ],
+  [
+   "FT_sensor_L",
+   "FT_SENSOR_L",
+   "FT sensor (non-authorized)"
+  ],
+  [
+   "link_left_arm_5",
+   "link_left_arm_5",
+   "arm_5 (non-authorized)"
+  ]
+ ],
+ "n_spheres": {
+  "ee_left|before (arms / palm off)": 23,
+  "ee_left|final (gripper_wrist + palm on)": 121,
+  "FT_sensor_L|before (arms / palm off)": 0,
+  "FT_sensor_L|final (gripper_wrist + palm on)": 216,
+  "link_left_arm_5|before (arms / palm off)": 10,
+  "link_left_arm_5|final (gripper_wrist + palm on)": 122
+ },
+ "projection": "x-z of the URDF link frame; spheres drawn as great circles"
+}

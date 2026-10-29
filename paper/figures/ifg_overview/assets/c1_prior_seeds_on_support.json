@@ -1,0 +1,34 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/c1_prior_seeds_on_support.png",
+ "frame": "T54c_ep1856_f025",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T54c_ep1856_f025.npz": "0af2125d68f37d0bad8a88480734e6a8723e64e661dab1853608c6af143eaa3a"
+ },
+ "note": "Seed mass of the top-5 noun-attention patches when support-dominated patches are eligible (R3 rule): gold = nodes with seed mass; faint orange = target surface; resulting region empty.",
+ "is_measured_result": false,
+ "rule": "largest IoU gain of top1-only-ns:N vs top1-only:N (R5)",
+ "iou": 0.0,
+ "seeds": [
+  488,
+  487,
+  472,
+  503,
+  504
+ ],
+ "seed_nodes": 255,
+ "seed_nodes_on_support": 247,
+ "seed_nodes_on_target": 0,
+ "camera": {
+  "lookat": [
+   0.5442814165371537,
+   0.19295798605161701,
+   0.8461820670520899
+  ],
+  "dist": 0.8,
+  "az": 180,
+  "el": -72
+ }
+}

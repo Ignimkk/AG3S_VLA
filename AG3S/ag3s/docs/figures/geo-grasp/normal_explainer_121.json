@@ -1,0 +1,39 @@
+{
+ "run": "121",
+ "decision_request": 9,
+ "selection": "vla",
+ "observed_angle_deg": [
+  30.4,
+  27.9
+ ],
+ "true_angle_deg": [
+  40.2,
+  20.1
+ ],
+ "recorded_true_angle_deg": [
+  40.2,
+  20.1
+ ],
+ "contact_err_mm": [
+  1.61,
+  0.11
+ ],
+ "width_mm": 58.79,
+ "observed_sphere_radius_mm": 33.6,
+ "rho_observed_centre": 0.473,
+ "true_centre_to_contact_line_mm": 15.2,
+ "observed_vs_true_centre_mm": 1.6,
+ "normal_out_of_plane_deg": {
+  "observed": [
+   6.1,
+   0.6
+  ],
+  "true": [
+   2.6,
+   7.2
+  ]
+ },
+ "cone_deg": 38.7,
+ "generation_cone_deg": 33.7,
+ "notes": "true centre = mean of the collision-hull vertices; true normal = facet of the hull nearest each contact"
+}

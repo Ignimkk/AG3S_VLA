@@ -1,0 +1,21 @@
+{
+  "base_head": "4292882ef3054a16c67c03d3fd6261ef8644a7e7",
+  "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae",
+  "gpu_validation": "Passed serial JAX/Torch checkpoint inference then cuRobo ESDF",
+  "new_output_isolated": true,
+  "historical_policy_records_unchanged": 114,
+  "legacy_deletion_ready": false,
+  "legacy_blockers": {
+    "live_processes": 4,
+    "sibling_symlinks": 202,
+    "sibling_folders": 22,
+    "registered_worktrees": 1
+  },
+  "openpi_pip_check": "One inherited gym-aloha/MuJoCo version constraint mismatch",
+  "curobo_pip_check": "All compatible",
+  "final_cpu_tests_passed": 43,
+  "no_legacy_read_cpu_tests_passed": 23,
+  "main_and_other_branches_modified": false,
+  "push_performed": false,
+  "delete_or_process_termination_performed": false
+}

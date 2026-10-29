@@ -5,7 +5,7 @@ description: Plan or render paper figures and tables with traceable registered r
 
 # CVPR Figure and Table
 
-[공통 workflow](../../../paper/notes/CLAUDE_WORKFLOW.md)의 Evidence gate와 파일 소유권을 읽는다.
+[공통 workflow](../../../paper/notes/CLAUDE_WORKFLOW.md)의 Evidence tracking과 파일 소유권을 읽는다.
 요청: `$ARGUMENTS`. `plan Fxx 또는 Txx`, `render Fxx 또는 Txx`를 지원한다.
 기본은 [FIGURES_TABLES](../../../paper/evidence/FIGURES_TABLES.md)의 계획 검토다.
 

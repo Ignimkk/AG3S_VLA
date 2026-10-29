@@ -290,6 +290,52 @@ def _replace_horizon_limits(to_config):
     return dataclasses.replace(to_config, horizon=h, limits=lim)
 
 
+#: serve_safe options added by the AG3S final-configuration merge (main 3ff415d5, 2026-10-29) that the Panda server
+#: has not ported: this module builds its own SafePolicy / AG3S config, so most of them would be ignored or applied in
+#: part without a word. :func:`check_unported_flags` refuses any of them set away from its parser default. Allowed:
+#: ``--run-dir``, ``--blas-threads`` (applied by ``serve_safe.main`` before the Panda branch) and ``--no-roi-carve``
+#: (``profile.V11AB_PRE_MERGE_DEFAULTS``). Remove a name only together with its Panda port.
+UNPORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
+    'attention_source', 'attention_split_partition', 'attention_split_radius_mm', 'attention_split_ratio_source',
+    'confidence_gate', 'confidence_gate_threshold', 'continuity_after_grasp', 'deflection_rate_after_grasp',
+    'free_space_carve', 'free_space_carve_margin_mm', 'geo_arm_check', 'geo_carry_requests', 'geo_close_gate',
+    'geo_close_timeout', 'geo_close_tol_deg', 'geo_close_tol_mm', 'geo_continuity_off', 'geo_correct_deg',
+    'geo_correct_max_offset', 'geo_correct_mm', 'geo_goal_mode', 'geo_grasp', 'geo_grasp_mu', 'geo_grasp_selection',
+    'geo_obstacle_memory', 'geo_obstacle_source', 'geo_time_budget_ms', 'geo_track_scale', 'geo_w_pos', 'geo_w_rot',
+    'geo_wrist_check', 'grasp_anchor', 'grasp_anchor_path_weight', 'grasp_anchor_radius_mm', 'grasp_goal_box',
+    'grasp_goal_window', 'held_3d_max_m', 'held_3d_rule', 'held_permission_parent_links', 'hsr6_attach_assist',
+    'hsr6_held_gate', 'hsr6_objective', 'hsr6_probe', 'hsr6_target_exempt', 'hybrid_identity',
+    'hybrid_other_exclude_voxels', 'kept_geometry_follow', 'latch_carry_from_closing', 'latch_reach_hand_relative',
+    'latch_reach_kept_unseen', 'neighbour_contact_mm', 'neighbour_palm_contact_mm', 'nonauthorized_target_margin',
+    'nontarget_evidence', 'nontarget_shell_voxels', 'oracle_extent_identity', 'oracle_max_dist_voxels',
+    'owned_ambiguous', 'owned_max_dist_voxels', 'owned_tie_voxels', 'owned_unowned', 'palm_cover',
+    'palm_cover_overflow', 'palm_shell', 'palm_shell_margin', 'palm_shell_overflow', 'placed_no_seed_certify',
+    'profile_substages', 'qp_backend', 'recovery_retreat', 'robot_free_shrink_mm', 'robot_mask',
+    'robot_occupied_free', 'roi_carve', 'roi_carve_device', 'roi_carve_footprint', 'roi_carve_footprint_pad_px',
+    'roi_carve_footprint_robot', 'roi_pad_mm', 'split_supersedes_anchor', 'stem_cap_bottom_fit_frac',
+    'stem_cap_radius_mm', 'stem_cap_top_mm', 'target_exclusion', 'target_extent', 'target_free_coarse',
+    'target_free_coarse_sign_floor', 'target_free_coarse_support', 'target_layer', 'target_layer_reset_mm',
+    'target_layer_tol_mm', 'target_permission_strict', 'target_stem_cap', 'task_gate', 'task_gate_shadow',
+    'task_probe', 'to_gpu_seeds', 'to_gpu_seeds_check', 'to_multi_seed', 'tsdf_frustum_decay', 'tsdf_time_decay',
+    'wrist_cover_overflow', 'wrist_track_scale',
+)
+
+
+def check_unported_flags(args, ap) -> None:
+    """Refuse a final-configuration option the Panda server would not apply as the RB-Y1 server does."""
+    from AG3S.trajopt import serve_safe as ss
+
+    parser = ap if ap is not None else ss.build_parser()
+    bad = sorted(d for d in UNPORTED_FINAL_CONFIG_DESTS
+                 if hasattr(args, d) and getattr(args, d) != parser.get_default(d))
+    if bad:
+        message = ("--robot panda: not ported to the Panda server yet (AG3S final-configuration merge 2026-10-29): "
+                   + ", ".join("--" + d.replace("_", "-") for d in bad))
+        if ap is None:
+            raise ValueError(message)
+        ap.error(message)
+
+
 def check_record_flags(args) -> None:
     """``--record-constraints`` checks, before the checkpoint is loaded (same refusals as the RB-Y1 server + one).
 
@@ -460,6 +506,7 @@ def main(args, ap) -> None:
 
     from AG3S.trajopt.policy_seed import SeededPolicy, describe_rng_owner, describe_xla_determinism
 
+    check_unported_flags(args, ap)  # before the checkpoint is loaded (no-op with every new flag at its default)
     check_record_flags(args)  # SL5j: refuse before the checkpoint is loaded (no-op without --record-constraints)
     policy = _policy_config.create_trained_policy(_config.get_config(args.config), args.checkpoint,
                                                   default_prompt=args.default_prompt)

@@ -1,0 +1,40 @@
+{
+  "artifact_id": "T00",
+  "status": "DRAFT_FROM_REGISTERED_RESULTS",
+  "claim_ids": [
+    "C006"
+  ],
+  "experiment_id": "EXP001",
+  "result_ids": [
+    "R001",
+    "R002"
+  ],
+  "metric_id": "M001",
+  "source_path": "benchmark/ag3s/docs/handoff/T39.verify.json",
+  "source_sha256": "74a172b64af191f71b94557952678bb9bafc2604a43fcded14d9712832b8a78d",
+  "manifest_path": "paper/experiments/manifests/EXP001_T39_task_outcomes.json",
+  "cells": [
+    {
+      "result_id": "R001",
+      "numerator": 30,
+      "denominator": 48,
+      "numerator_pointer": "/numbers/E0/n_success",
+      "denominator_pointer": "/numbers/E0/n_runs"
+    },
+    {
+      "result_id": "R002",
+      "numerator": 29,
+      "denominator": 48,
+      "numerator_pointer": "/numbers/E3b/n_success",
+      "denominator_pointer": "/numbers/E3b/n_runs"
+    }
+  ],
+  "unit": "successful runs / recorded runs",
+  "aggregation": "source counts, no new rate/CI calculation",
+  "uncertainty": null,
+  "caption_scope": "DESCRIPTIVE_TASK_OUTCOME_ONLY; historical snapshot, no safety or non-inferiority claim",
+  "render_source": "paper/tables/table00_descriptive/table.tex",
+  "render_source_sha256": "fcda90aceb7c9ca0e1c9b43d1e437c9d96eb48a09c69d58c4e3eff14653adaaf",
+  "input_sha256": {},
+  "updated_at": "2026-10-05 20:56 KST"
+}

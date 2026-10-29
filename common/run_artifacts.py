@@ -44,7 +44,7 @@ def create_run(*, run_id: str | None = None, settings: dict | None = None,
     path.mkdir(parents=True, exist_ok=False)
     for name in ['videos', 'logs']:
         (path / name).mkdir()
-    source = json.loads((PROJECT_ROOT / 'doc/migration/source-manifest.json').read_text())
+    source = json.loads((PROJECT_ROOT / 'doc/active/migration/source-manifest.json').read_text())
     baseline = {}
     for name in ['benchmark', 'pi05_TO_hybrid']:
         ref = f'legacy/{name}/v2'

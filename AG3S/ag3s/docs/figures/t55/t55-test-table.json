@@ -1,0 +1,552 @@
+{
+ "latch_mode": "reground",
+ "rows": [
+  {
+   "condition": "natural",
+   "predicate": "p_task",
+   "hsr_counts": {
+    "neg": 1089.0,
+    "pos": 111.0,
+    "fp_s": 32.0,
+    "fp_a": 9.0,
+    "fr_s": 0.0,
+    "fr_a": 1.0,
+    "lat_sum": 1.0,
+    "lat_n": 10.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 10.0
+   },
+   "noun_counts": {
+    "neg": 1089.0,
+    "pos": 111.0,
+    "fp_s": 32.0,
+    "fp_a": 12.0,
+    "fr_s": 0.0,
+    "fr_a": 2.0,
+    "lat_sum": 0.0,
+    "lat_n": 10.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 10.0
+   }
+  },
+  {
+   "condition": "natural",
+   "predicate": "p_grasp",
+   "hsr_counts": {
+    "neg": 1089.0,
+    "pos": 111.0,
+    "fp_s": 32.0,
+    "fp_a": 9.0,
+    "fr_s": 0.0,
+    "fr_a": 1.0,
+    "lat_sum": 1.0,
+    "lat_n": 10.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 10.0
+   },
+   "noun_counts": {
+    "neg": 1089.0,
+    "pos": 111.0,
+    "fp_s": 32.0,
+    "fp_a": 12.0,
+    "fr_s": 0.0,
+    "fr_a": 2.0,
+    "lat_sum": 0.0,
+    "lat_n": 10.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 10.0
+   }
+  },
+  {
+   "condition": "instruction",
+   "predicate": "p_task",
+   "hsr_counts": {
+    "neg": 3600.0,
+    "pos": 0.0,
+    "fp_s": 282.0,
+    "fp_a": 226.0,
+    "fr_s": 0.0,
+    "fr_a": 0.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 0.0
+   },
+   "noun_counts": {
+    "neg": 3600.0,
+    "pos": 0.0,
+    "fp_s": 282.0,
+    "fp_a": 7.0,
+    "fr_s": 0.0,
+    "fr_a": 0.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 0.0
+   }
+  },
+  {
+   "condition": "instruction",
+   "predicate": "p_grasp",
+   "hsr_counts": {
+    "neg": 3267.0,
+    "pos": 333.0,
+    "fp_s": 66.0,
+    "fp_a": 14.0,
+    "fr_s": 117.0,
+    "fr_a": 121.0,
+    "lat_sum": 4.0,
+    "lat_n": 20.0,
+    "und_s": 10.0,
+    "und_a": 10.0,
+    "events": 30.0
+   },
+   "noun_counts": {
+    "neg": 3267.0,
+    "pos": 333.0,
+    "fp_s": 66.0,
+    "fp_a": 0.0,
+    "fr_s": 117.0,
+    "fr_a": 326.0,
+    "lat_sum": 24.0,
+    "lat_n": 3.0,
+    "und_s": 10.0,
+    "und_a": 27.0,
+    "events": 30.0
+   }
+  },
+  {
+   "condition": "empty",
+   "predicate": "p_task",
+   "hsr_counts": {
+    "neg": 913.0,
+    "pos": 0.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 0.0,
+    "fr_a": 0.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 0.0
+   },
+   "noun_counts": {
+    "neg": 913.0,
+    "pos": 0.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 0.0,
+    "fr_a": 0.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 0.0
+   }
+  },
+  {
+   "condition": "empty",
+   "predicate": "p_grasp",
+   "hsr_counts": {
+    "neg": 913.0,
+    "pos": 0.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 0.0,
+    "fr_a": 0.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 0.0
+   },
+   "noun_counts": {
+    "neg": 913.0,
+    "pos": 0.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 0.0,
+    "fr_a": 0.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 0.0,
+    "und_a": 0.0,
+    "events": 0.0
+   }
+  },
+  {
+   "condition": "slip ghost",
+   "predicate": "p_task",
+   "hsr_counts": {
+    "neg": 507.0,
+    "pos": 10.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 10.0,
+    "fr_a": 10.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 10.0,
+    "und_a": 10.0,
+    "events": 10.0
+   },
+   "noun_counts": {
+    "neg": 507.0,
+    "pos": 10.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 10.0,
+    "fr_a": 10.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 10.0,
+    "und_a": 10.0,
+    "events": 10.0
+   }
+  },
+  {
+   "condition": "slip ghost",
+   "predicate": "p_grasp",
+   "hsr_counts": {
+    "neg": 507.0,
+    "pos": 10.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 10.0,
+    "fr_a": 10.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 10.0,
+    "und_a": 10.0,
+    "events": 10.0
+   },
+   "noun_counts": {
+    "neg": 507.0,
+    "pos": 10.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 10.0,
+    "fr_a": 10.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 10.0,
+    "und_a": 10.0,
+    "events": 10.0
+   }
+  },
+  {
+   "condition": "slip park",
+   "predicate": "p_task",
+   "hsr_counts": {
+    "neg": 507.0,
+    "pos": 10.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 10.0,
+    "fr_a": 10.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 10.0,
+    "und_a": 10.0,
+    "events": 10.0
+   },
+   "noun_counts": {
+    "neg": 507.0,
+    "pos": 10.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 10.0,
+    "fr_a": 10.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 10.0,
+    "und_a": 10.0,
+    "events": 10.0
+   }
+  },
+  {
+   "condition": "slip park",
+   "predicate": "p_grasp",
+   "hsr_counts": {
+    "neg": 507.0,
+    "pos": 10.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 10.0,
+    "fr_a": 10.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 10.0,
+    "und_a": 10.0,
+    "events": 10.0
+   },
+   "noun_counts": {
+    "neg": 507.0,
+    "pos": 10.0,
+    "fp_s": 0.0,
+    "fp_a": 0.0,
+    "fr_s": 10.0,
+    "fr_a": 10.0,
+    "lat_sum": 0.0,
+    "lat_n": 0.0,
+    "und_s": 10.0,
+    "und_a": 10.0,
+    "events": 10.0
+   }
+  },
+  {
+   "condition": "pooled (all)",
+   "predicate": "p_task",
+   "hsr_counts": {
+    "neg": 6616.0,
+    "pos": 131.0,
+    "fp_s": 314.0,
+    "fp_a": 235.0,
+    "fr_s": 20.0,
+    "fr_a": 21.0,
+    "lat_sum": 1.0,
+    "lat_n": 10.0,
+    "und_s": 20.0,
+    "und_a": 20.0,
+    "events": 30.0
+   },
+   "noun_counts": {
+    "neg": 6616.0,
+    "pos": 131.0,
+    "fp_s": 314.0,
+    "fp_a": 19.0,
+    "fr_s": 20.0,
+    "fr_a": 22.0,
+    "lat_sum": 0.0,
+    "lat_n": 10.0,
+    "und_s": 20.0,
+    "und_a": 20.0,
+    "events": 30.0
+   }
+  },
+  {
+   "condition": "pooled (all)",
+   "predicate": "p_grasp",
+   "hsr_counts": {
+    "neg": 6283.0,
+    "pos": 464.0,
+    "fp_s": 98.0,
+    "fp_a": 23.0,
+    "fr_s": 137.0,
+    "fr_a": 142.0,
+    "lat_sum": 5.0,
+    "lat_n": 30.0,
+    "und_s": 30.0,
+    "und_a": 30.0,
+    "events": 60.0
+   },
+   "noun_counts": {
+    "neg": 6283.0,
+    "pos": 464.0,
+    "fp_s": 98.0,
+    "fp_a": 12.0,
+    "fr_s": 137.0,
+    "fr_a": 348.0,
+    "lat_sum": 24.0,
+    "lat_n": 13.0,
+    "und_s": 30.0,
+    "und_a": 47.0,
+    "events": 60.0
+   }
+  }
+ ],
+ "pooled_p_task_decision_rows": [
+  [
+   "arm",
+   "d FR rate [95% CI]",
+   "d FP rate [95% CI]",
+   "d latency [95% CI]",
+   "d undetected",
+   "FP count s -> arm",
+   "FR count s -> arm"
+  ],
+  [
+   "HSR",
+   "+0.0076 [+0.0000, +0.0238]",
+   "-0.0119 [-0.0222, -0.0043]",
+   "+0.10 [+0.00, +0.33]",
+   "0",
+   "314 -> 235",
+   "20 -> 21"
+  ],
+  [
+   "noun",
+   "+0.0153 [+0.0000, +0.0476]",
+   "-0.0446 [-0.0644, -0.0258]",
+   "+0.00 [+0.00, +0.00]",
+   "0",
+   "314 -> 19",
+   "20 -> 22"
+  ]
+ ],
+ "header": [
+  "condition",
+  "pred",
+  "frames neg/pos",
+  "strong FP",
+  "HSR FP",
+  "noun FP",
+  "strong FR",
+  "HSR FR",
+  "noun FR",
+  "undet. s/HSR/noun"
+ ],
+ "cells": [
+  [
+   "natural",
+   "P_task",
+   "1089/111",
+   "32 (0.029)",
+   "9 (0.008)",
+   "12 (0.011)",
+   "0 (0.000)",
+   "1 (0.009)",
+   "2 (0.018)",
+   "0/0/0 of 10"
+  ],
+  [
+   "natural",
+   "P_grasp",
+   "1089/111",
+   "32 (0.029)",
+   "9 (0.008)",
+   "12 (0.011)",
+   "0 (0.000)",
+   "1 (0.009)",
+   "2 (0.018)",
+   "0/0/0 of 10"
+  ],
+  [
+   "instruction",
+   "P_task",
+   "3600/0",
+   "282 (0.078)",
+   "226 (0.063)",
+   "7 (0.002)",
+   "0",
+   "0",
+   "0",
+   "0/0/0 of 0"
+  ],
+  [
+   "instruction",
+   "P_grasp",
+   "3267/333",
+   "66 (0.020)",
+   "14 (0.004)",
+   "0 (0.000)",
+   "117 (0.351)",
+   "121 (0.363)",
+   "326 (0.979)",
+   "10/10/27 of 30"
+  ],
+  [
+   "empty",
+   "P_task",
+   "913/0",
+   "0 (0.000)",
+   "0 (0.000)",
+   "0 (0.000)",
+   "0",
+   "0",
+   "0",
+   "0/0/0 of 0"
+  ],
+  [
+   "empty",
+   "P_grasp",
+   "913/0",
+   "0 (0.000)",
+   "0 (0.000)",
+   "0 (0.000)",
+   "0",
+   "0",
+   "0",
+   "0/0/0 of 0"
+  ],
+  [
+   "slip ghost",
+   "P_task",
+   "507/10",
+   "0 (0.000)",
+   "0 (0.000)",
+   "0 (0.000)",
+   "10 (1.000)",
+   "10 (1.000)",
+   "10 (1.000)",
+   "10/10/10 of 10"
+  ],
+  [
+   "slip ghost",
+   "P_grasp",
+   "507/10",
+   "0 (0.000)",
+   "0 (0.000)",
+   "0 (0.000)",
+   "10 (1.000)",
+   "10 (1.000)",
+   "10 (1.000)",
+   "10/10/10 of 10"
+  ],
+  [
+   "slip park",
+   "P_task",
+   "507/10",
+   "0 (0.000)",
+   "0 (0.000)",
+   "0 (0.000)",
+   "10 (1.000)",
+   "10 (1.000)",
+   "10 (1.000)",
+   "10/10/10 of 10"
+  ],
+  [
+   "slip park",
+   "P_grasp",
+   "507/10",
+   "0 (0.000)",
+   "0 (0.000)",
+   "0 (0.000)",
+   "10 (1.000)",
+   "10 (1.000)",
+   "10 (1.000)",
+   "10/10/10 of 10"
+  ],
+  [
+   "pooled (all)",
+   "P_task",
+   "6616/131",
+   "314 (0.047)",
+   "235 (0.036)",
+   "19 (0.003)",
+   "20 (0.153)",
+   "21 (0.160)",
+   "22 (0.168)",
+   "20/20/20 of 30"
+  ],
+  [
+   "pooled (all)",
+   "P_grasp",
+   "6283/464",
+   "98 (0.016)",
+   "23 (0.004)",
+   "12 (0.002)",
+   "137 (0.295)",
+   "142 (0.306)",
+   "348 (0.750)",
+   "30/30/47 of 60"
+  ]
+ ]
+}

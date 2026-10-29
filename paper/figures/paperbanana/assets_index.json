@@ -1,0 +1,449 @@
+{
+ "figure1/f1_keyframes": {
+  "asset": "paper/figures/paperbanana/figure1/assets/f1_keyframes.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/third_person_front.mp4": "4a3ff78ba6de3dfc5f23bb6ca24358c6d8b9943452588ba7dd8993863853f4ab"
+  },
+  "note": "Third-person keyframes of the closed-loop AG3S run (approach, grasp, carry, release).",
+  "is_measured_result": false,
+  "generated": true,
+  "frames": {
+   "approach": 84,
+   "grasp": 160,
+   "carry": 200,
+   "release": 268
+  },
+  "crop_xyxy": [
+   40,
+   32,
+   600,
+   362
+  ],
+  "grasp_state_gt": {
+   "approach": "pre",
+   "grasp": "held",
+   "carry": "held",
+   "release": "placed"
+  }
+ },
+ "figure1/f1_rgb_attention": {
+  "asset": "paper/figures/paperbanana/figure1/assets/f1_rgb_attention.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00012.npz": "77b9a74f0e88d9d9d663750e160410651330e30322015d88214e00f541447a5d",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00162.npz": "136cf446c3f80fcd4b1d8441a683998b9acc14e49f19d89042bf92fd5a491e3c"
+  },
+  "note": "Policy RGB (224x224) with the served VLA attention map (layer 8, head 2, last action query, 16x16, min-max scaled per view for display).",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 12
+ },
+ "figure1/f1_grounding_3d": {
+  "asset": "paper/figures/paperbanana/figure1/assets/f1_grounding_3d.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/gt/ep1842.npz": "da9c5f77b5b4cc505386deca501cb5bc24129ddc47837cfce1d3abf9cbbe0f9c"
+  },
+  "note": "Fused multi-view cloud near the target and the ATS target cluster. Neighbour colour uses the GT fruit centre (radius 0.045 m) for display only; the method never sees GT.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 17,
+  "n_target_points": 120,
+  "neighbour": "orange"
+ },
+ "figure1/f1_grasp_contact": {
+  "asset": "paper/figures/paperbanana/figure1/assets/f1_grasp_contact.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00168.npz": "ae80283b4a9794bcaa235e4477088975e620399fc70aa02e069440232ded2c0c",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/gt/ep1842.grasp.npz": "1ca3b47ae1f060b26c9062eabb707f8d3016dd169f1de15805cbce7b8c1c19e3"
+  },
+  "note": "Robot query spheres at the closing chunk; GT records finger contact with the pear at this step.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 18,
+  "gt_touching": "ee_finger_r1|ee_finger_r2|table",
+  "gt_finger_contact_lr": [
+   0,
+   2
+  ],
+  "latch_state": "closing"
+ },
+ "figure2/f2a_all_surfaces": {
+  "asset": "paper/figures/paperbanana/figure2/assets/f2a_all_surfaces.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa"
+  },
+  "note": "Recorded 5 mm scene ESDF (main layer) sliced at the target height. Target and neighbour are both obstacles.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 17,
+  "slice_z_m": 0.8591184830665588
+ },
+ "figure2/f2b_ball": {
+  "asset": "paper/figures/paperbanana/figure2/assets/f2b_ball.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa"
+  },
+  "note": "The recorded target ball (surface-fit centre, quantile-1.0 radius + 1 voxel) drawn on the same slice. Red x = observed non-target points inside the ball, which a plain ball exemption would erase.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 17,
+  "ball": {
+   "centre_m": [
+    0.4755280317383471,
+    -0.3117140540505152,
+    0.8595643385772348
+   ],
+   "radius_mm": 60.184,
+   "z_min_m": 0.8264846630829643,
+   "n_points": 120,
+   "radius_quantile": 1.0,
+   "radius_raw_mm": 55.184,
+   "centre_method": "surface_fit",
+   "fit": {
+    "method": "surface_fit",
+    "centre_m": [
+     0.475528,
+     -0.311714,
+     0.859564
+    ],
+    "radius_mm": 30.412,
+    "n_points": 120,
+    "residual_median_mm": 2.291,
+    "radius_capped": false,
+    "shift_from_centroid_mm": 12.068,
+    "reason": null
+   },
+   "pad_mm": 5.0,
+   "support_plane_z_m": 0.8214846630829643,
+   "voxel_mm": 5.0
+  },
+  "n_nontarget_points_in_ball": 87
+ },
+ "figure2/f2c_ownership": {
+  "asset": "paper/figures/paperbanana/figure2/assets/f2c_ownership.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa"
+  },
+  "note": "Serving function _ball_owned_split (T44 I1) applied on a 5 mm slice grid inside the recorded ball, with the recorded target points and non-target evidence (fused cloud - target - support). Grid cells within one voxel of an observed point stand in for TSDF seed voxels (display approximation). Serving counts for this chunk are in target_exclusion of the dump.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 17,
+  "owned_params": {
+   "tie_voxels": 1.0,
+   "max_dist_voxels": 3.0,
+   "unowned": "remove",
+   "n_target_points": 120,
+   "n_nontarget_points": 3529,
+   "n_nontarget_near": 410
+  },
+  "serving_counts_this_chunk": {
+   "n_seeds_in_ball": 1424,
+   "n_removed": 1115,
+   "n_kept_nontarget": 206,
+   "n_ambiguous": 103,
+   "n_unowned_removed": 485,
+   "n_target_owned": 630
+  },
+  "grid_counts": {
+   "target": 26,
+   "nontarget": 16,
+   "ambiguous": 20,
+   "unowned": 0
+  }
+ },
+ "figure2/f2c_link_queries": {
+  "asset": "paper/figures/paperbanana/figure2/assets/f2c_link_queries.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa"
+  },
+  "note": "Recorded query spheres coloured by target_permission.target_field_exclude (135 of 270 rows; links ['ee_finger_r1', 'ee_finger_r2', 'ee_right']). Evaluated scope queries gripper links of both hands only (--links gripper); arm and wrist links are not queried in this configuration.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 17,
+  "excluded_links": [
+   "ee_finger_r1",
+   "ee_finger_r2",
+   "ee_right"
+  ]
+ },
+ "figure3/f3_policy_inputs_attention": {
+  "asset": "paper/figures/paperbanana/figure3/assets/f3_policy_inputs_attention.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00012.npz": "77b9a74f0e88d9d9d663750e160410651330e30322015d88214e00f541447a5d",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00162.npz": "136cf446c3f80fcd4b1d8441a683998b9acc14e49f19d89042bf92fd5a491e3c"
+  },
+  "note": "Policy inputs (3 RGB views) and the raw 16x16 action-to-image attention per view from the extraction pass.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 12
+ },
+ "figure3/f3_lift_seed_cluster": {
+  "asset": "paper/figures/paperbanana/figure3/assets/f3_lift_seed_cluster.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa"
+  },
+  "note": "Top view of the fused cloud with normalised attention, top-5% seeds (teal rings), and the selected target cluster.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 17,
+  "n_seeds": 139,
+  "n_target_points": 120,
+  "grounding_status": "ok"
+ },
+ "figure3/f3_scene_esdf": {
+  "asset": "paper/figures/paperbanana/figure3/assets/f3_scene_esdf.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa"
+  },
+  "note": "Recorded cuRobo main ESDF layer (5 mm, 128^3) sliced through the target; black = zero level set.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 17,
+  "slice_y_m": -0.3065498673915864
+ },
+ "figure3/f3_attached_object": {
+  "asset": "paper/figures/paperbanana/figure3/assets/f3_attached_object.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00169.npz": "3e28cd45c397434566cf807a4f4e3e3a274df137aa9a1ae316f5cb590f425344"
+  },
+  "note": "After the grasp latch reaches HELD, the target becomes an attached sphere on the hand that queries the scene field.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 19,
+  "attached": [
+   {
+    "centre_m": [
+     0.47553,
+     -0.311713,
+     0.87223
+    ],
+    "radius_mm": 40.412
+   }
+  ],
+  "parent_link": "ee_right"
+ },
+ "figure3/f3_ccr_refinement": {
+  "asset": "paper/figures/paperbanana/figure3/assets/f3_ccr_refinement.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00161.npz": "2a8fca082d00e8ace2a71b25fbf71fc7d28a4472aecc34f88b7fc53b6b8fb720"
+  },
+  "note": "Right-arm joints of the policy reference chunk and the SQP-refined chunk over the planned rows (8 executed + 8 look-ahead), chunk with the largest deviation in this run.",
+  "is_measured_result": false,
+  "generated": true,
+  "chunk": 11,
+  "max_abs_deviation_rad": 0.05374312400817871,
+  "to_status": "feasible",
+  "verdict": [
+   "budget_only"
+  ]
+ },
+ "figure3/f3_state_timeline": {
+  "asset": "paper/figures/paperbanana/figure3/assets/f3_state_timeline.png",
+  "run": "T53 C1a (AG3S serving, 2026-10-13)",
+  "episode": "ep1842",
+  "script": "paper/tools/plotting/paperbanana_assets.py",
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00150.npz": "e577e4ad85867cbdbe0a8dc3cdb82c86f8e16dbccc40168d90711d74b756dd8e"
+  },
+  "note": "Per-chunk recorded grasp-latch state, sub-task probe probabilities, contact-handling source and HOLD chunks over the whole episode (all chunk dumps of this run).",
+  "is_measured_result": false,
+  "generated": true,
+  "n_chunks": 75,
+  "states": [
+   "searching",
+   "searching",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "latched",
+   "closing",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "held",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed",
+   "placed"
+  ],
+  "exclusion_source": [
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "manipulated",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "attached",
+   "manipulated",
+   "manipulated",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none",
+   "none"
+  ],
+  "hold_chunks": [
+   18
+  ]
+ }
+}

@@ -1,0 +1,22 @@
+{
+  "attention-latch-crop-f0-20": {
+    "what": "target-latch-evidence.png 의 (a) 패널을 frame 0-20 (pick -> carry -> place 완료) 로 자른 발표용 그림. 그래프 값은 원본 픽셀 그대로이며 다시 그리지 않았다",
+    "src": "AG3S/ag3s/docs/archive/14d-era-20260923/figures/target-latch-evidence.png",
+    "src_sha256": "ddf087aa4e0aea6ca8b911caa2695a758c4f8190a2d1c4de805c2a180ea6f4de",
+    "src_log": "AG3S/ag3s/docs/AG3S_REVIEW_LOG.md:3827 (14D 시기, run_0004)",
+    "removed": "frame 21-43 — 과제 완료 (t_step 152 = frame 19) 뒤의 잔여 동작 (AG3S_REVIEW_LOG.md: 352 control step 중 54.5 %)",
+    "added": [
+      "frame 19 'place 완료' 점선 (t_step 152 / 8)",
+      "새 제목",
+      "x축 label (14D 시기 기록 표기)",
+      "legend 를 아래로 이동"
+    ],
+    "frames_shown": [
+      0,
+      20
+    ],
+    "generator": "AG3S/ag3s/docs/figures/ppt-1013/crop_latch.py <src> <out>",
+    "out_sha256": "ee4b0d3e867a3170ffca283fdd55f182c1746e8a7f100799532d5de80270e05c",
+    "date_kst": "2026-10-13"
+  }
+}

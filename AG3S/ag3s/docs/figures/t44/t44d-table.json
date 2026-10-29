@@ -1,0 +1,483 @@
+{
+ "source": "/mnt/dev/work/outputs/verify/T44/CL/agg.json",
+ "rows": {
+  "task success (n/18)": {
+   "C0": "14",
+   "C1a": "15",
+   "C1b": "7",
+   "C2": "0"
+  },
+  "CT success": {
+   "C0": "13",
+   "C1a": "12",
+   "C1b": "4",
+   "C2": "0"
+  },
+  "success_rel (Z4 release)": {
+   "C0": "14",
+   "C1a": "15",
+   "C1b": "7",
+   "C2": "0"
+  },
+  "grasp final": {
+   "C0": "14",
+   "C1a": "15",
+   "C1b": "10",
+   "C2": "0"
+  },
+  "first grasp ok (no regrasp)": {
+   "C0": "12",
+   "C1a": "14",
+   "C1b": "9",
+   "C2": "0"
+  },
+  "regrasp runs": {
+   "C0": "2",
+   "C1a": "1",
+   "C1b": "1",
+   "C2": "0"
+  },
+  "slip runs (rule B)": {
+   "C0": "0",
+   "C1a": "1",
+   "C1b": "2",
+   "C2": "0"
+  },
+  "robust grasp": {
+   "C0": "12",
+   "C1a": "13",
+   "C1b": "7",
+   "C2": "0"
+  },
+  "hand-fruit_other runs / rows": {
+   "C0": "3 / 74",
+   "C1a": "5 / 50",
+   "C1b": "5 / 19",
+   "C2": "2 / 41"
+  },
+  "robot_other-target runs / rows": {
+   "C0": "0 / 0",
+   "C1a": "0 / 0",
+   "C1b": "1 / 3",
+   "C2": "0 / 0"
+  },
+  "robot_other-fruit_other runs / rows": {
+   "C0": "0 / 0",
+   "C1a": "0 / 0",
+   "C1b": "0 / 0",
+   "C2": "0 / 0"
+  },
+  "hand-target runs / rows": {
+   "C0": "18 / 2644",
+   "C1a": "18 / 2227",
+   "C1b": "18 / 1784",
+   "C2": "4 / 41"
+  },
+  "HOLD chunks / runs": {
+   "C0": "140 / 5",
+   "C1a": "54 / 14",
+   "C1b": "154 / 12",
+   "C2": "20 / 8"
+  },
+  "comms timeout/stale/error chunks": {
+   "C0": "0",
+   "C1a": "0",
+   "C1b": "0",
+   "C2": "0"
+  },
+  "TO ms median / p90": {
+   "C0": "167 / 534",
+   "C1a": "196 / 526",
+   "C1b": "195 / 533",
+   "C2": "483 / 806"
+  },
+  "AG3S ms median / p90": {
+   "C0": "310 / 548",
+   "C1a": "341 / 626",
+   "C1b": "316 / 499",
+   "C2": "352 / 561"
+  },
+  "round trip ms median / p90": {
+   "C0": "1399 / 1860",
+   "C1a": "1481 / 2003",
+   "C1b": "1390 / 1891",
+   "C2": "1783 / 2249"
+  },
+  "split fired chunks / components": {
+   "C0": "186 / 400",
+   "C1a": "239 / 544",
+   "C1b": "290 / 645",
+   "C2": "558 / 1382"
+  },
+  "n_kept_nontarget / unowned_removed": {
+   "C0": "0 / 0",
+   "C1a": "13392 / 180686",
+   "C1b": "41246 / 306822",
+   "C2": "37892 / 598626"
+  },
+  "coarse n_shared_kept (chunks)": {
+   "C0": "0 (0)",
+   "C1a": "0 (0)",
+   "C1b": "1574 (943)",
+   "C2": "4575 (1350)"
+  },
+  "target_rows_unauthorized_kept": {
+   "C0": "absent",
+   "C1a": "absent",
+   "C1b": "absent",
+   "C2": "absent"
+  }
+ },
+ "pairs": {
+  "C0_vs_C1a": {
+   "success_ct": {
+    "n_pairs": 18,
+    "both": 11,
+    "A_only": 2,
+    "B_only": 1,
+    "neither": 4,
+    "A_total": 13,
+    "B_total": 12,
+    "A": "C0",
+    "B": "C1a",
+    "mcnemar_exact_p": 1.0,
+    "A_only_keys": [
+     "ep30_s301",
+     "ep54_s541"
+    ],
+    "B_only_keys": [
+     "ep11_s111"
+    ]
+   },
+   "success": {
+    "n_pairs": 18,
+    "both": 14,
+    "A_only": 0,
+    "B_only": 1,
+    "neither": 3,
+    "A_total": 14,
+    "B_total": 15,
+    "A": "C0",
+    "B": "C1a",
+    "mcnemar_exact_p": 1.0,
+    "A_only_keys": [],
+    "B_only_keys": [
+     "ep11_s111"
+    ]
+   },
+   "robust_grasp": {
+    "n_pairs": 18,
+    "both": 11,
+    "A_only": 1,
+    "B_only": 2,
+    "neither": 4,
+    "A_total": 12,
+    "B_total": 13,
+    "A": "C0",
+    "B": "C1a",
+    "mcnemar_exact_p": 1.0,
+    "A_only_keys": [
+     "ep30_s301"
+    ],
+    "B_only_keys": [
+     "ep0_s1",
+     "ep11_s111"
+    ]
+   }
+  },
+  "C0_vs_C1b": {
+   "success_ct": {
+    "n_pairs": 18,
+    "both": 4,
+    "A_only": 9,
+    "B_only": 0,
+    "neither": 5,
+    "A_total": 13,
+    "B_total": 4,
+    "A": "C0",
+    "B": "C1b",
+    "mcnemar_exact_p": 0.00390625,
+    "A_only_keys": [
+     "ep0_s1",
+     "ep11_s112",
+     "ep12_s122",
+     "ep30_s302",
+     "ep54_s541",
+     "ep104_s1042",
+     "ep110_s1101",
+     "ep123_s1231",
+     "ep123_s1232"
+    ],
+    "B_only_keys": []
+   },
+   "success": {
+    "n_pairs": 18,
+    "both": 7,
+    "A_only": 7,
+    "B_only": 0,
+    "neither": 4,
+    "A_total": 14,
+    "B_total": 7,
+    "A": "C0",
+    "B": "C1b",
+    "mcnemar_exact_p": 0.015625,
+    "A_only_keys": [
+     "ep0_s1",
+     "ep11_s112",
+     "ep12_s122",
+     "ep104_s1042",
+     "ep110_s1101",
+     "ep123_s1231",
+     "ep123_s1232"
+    ],
+    "B_only_keys": []
+   },
+   "robust_grasp": {
+    "n_pairs": 18,
+    "both": 7,
+    "A_only": 5,
+    "B_only": 0,
+    "neither": 6,
+    "A_total": 12,
+    "B_total": 7,
+    "A": "C0",
+    "B": "C1b",
+    "mcnemar_exact_p": 0.0625,
+    "A_only_keys": [
+     "ep11_s112",
+     "ep12_s122",
+     "ep110_s1101",
+     "ep123_s1231",
+     "ep123_s1232"
+    ],
+    "B_only_keys": []
+   }
+  },
+  "C0_vs_C2": {
+   "success_ct": {
+    "n_pairs": 18,
+    "both": 0,
+    "A_only": 13,
+    "B_only": 0,
+    "neither": 5,
+    "A_total": 13,
+    "B_total": 0,
+    "A": "C0",
+    "B": "C2",
+    "mcnemar_exact_p": 0.000244140625,
+    "A_only_keys": [
+     "ep0_s1",
+     "ep11_s112",
+     "ep12_s121",
+     "ep12_s122",
+     "ep30_s301",
+     "ep30_s302",
+     "ep54_s541",
+     "ep104_s1041",
+     "ep104_s1042",
+     "ep110_s1101",
+     "ep110_s1102",
+     "ep123_s1231",
+     "ep123_s1232"
+    ],
+    "B_only_keys": []
+   },
+   "success": {
+    "n_pairs": 18,
+    "both": 0,
+    "A_only": 14,
+    "B_only": 0,
+    "neither": 4,
+    "A_total": 14,
+    "B_total": 0,
+    "A": "C0",
+    "B": "C2",
+    "mcnemar_exact_p": 0.0001220703125,
+    "A_only_keys": [
+     "ep0_s1",
+     "ep11_s112",
+     "ep12_s121",
+     "ep12_s122",
+     "ep30_s301",
+     "ep30_s302",
+     "ep54_s541",
+     "ep54_s542",
+     "ep104_s1041",
+     "ep104_s1042",
+     "ep110_s1101",
+     "ep110_s1102",
+     "ep123_s1231",
+     "ep123_s1232"
+    ],
+    "B_only_keys": []
+   },
+   "robust_grasp": {
+    "n_pairs": 18,
+    "both": 0,
+    "A_only": 12,
+    "B_only": 0,
+    "neither": 6,
+    "A_total": 12,
+    "B_total": 0,
+    "A": "C0",
+    "B": "C2",
+    "mcnemar_exact_p": 0.00048828125,
+    "A_only_keys": [
+     "ep11_s112",
+     "ep12_s121",
+     "ep12_s122",
+     "ep30_s301",
+     "ep30_s302",
+     "ep54_s541",
+     "ep54_s542",
+     "ep104_s1041",
+     "ep110_s1101",
+     "ep110_s1102",
+     "ep123_s1231",
+     "ep123_s1232"
+    ],
+    "B_only_keys": []
+   }
+  },
+  "C1a_vs_C1b": {
+   "success_ct": {
+    "n_pairs": 18,
+    "both": 3,
+    "A_only": 9,
+    "B_only": 1,
+    "neither": 5,
+    "A_total": 12,
+    "B_total": 4,
+    "A": "C1a",
+    "B": "C1b",
+    "mcnemar_exact_p": 0.021484375,
+    "A_only_keys": [
+     "ep0_s1",
+     "ep11_s111",
+     "ep11_s112",
+     "ep12_s122",
+     "ep30_s302",
+     "ep104_s1042",
+     "ep110_s1101",
+     "ep123_s1231",
+     "ep123_s1232"
+    ],
+    "B_only_keys": [
+     "ep30_s301"
+    ]
+   },
+   "success": {
+    "n_pairs": 18,
+    "both": 7,
+    "A_only": 8,
+    "B_only": 0,
+    "neither": 3,
+    "A_total": 15,
+    "B_total": 7,
+    "A": "C1a",
+    "B": "C1b",
+    "mcnemar_exact_p": 0.0078125,
+    "A_only_keys": [
+     "ep0_s1",
+     "ep11_s111",
+     "ep11_s112",
+     "ep12_s122",
+     "ep104_s1042",
+     "ep110_s1101",
+     "ep123_s1231",
+     "ep123_s1232"
+    ],
+    "B_only_keys": []
+   },
+   "robust_grasp": {
+    "n_pairs": 18,
+    "both": 6,
+    "A_only": 7,
+    "B_only": 1,
+    "neither": 4,
+    "A_total": 13,
+    "B_total": 7,
+    "A": "C1a",
+    "B": "C1b",
+    "mcnemar_exact_p": 0.0703125,
+    "A_only_keys": [
+     "ep0_s1",
+     "ep11_s111",
+     "ep11_s112",
+     "ep12_s122",
+     "ep110_s1101",
+     "ep123_s1231",
+     "ep123_s1232"
+    ],
+    "B_only_keys": [
+     "ep30_s301"
+    ]
+   }
+  },
+  "C1b_vs_C2": {
+   "success_ct": {
+    "n_pairs": 18,
+    "both": 0,
+    "A_only": 4,
+    "B_only": 0,
+    "neither": 14,
+    "A_total": 4,
+    "B_total": 0,
+    "A": "C1b",
+    "B": "C2",
+    "mcnemar_exact_p": 0.125,
+    "A_only_keys": [
+     "ep12_s121",
+     "ep30_s301",
+     "ep104_s1041",
+     "ep110_s1102"
+    ],
+    "B_only_keys": []
+   },
+   "success": {
+    "n_pairs": 18,
+    "both": 0,
+    "A_only": 7,
+    "B_only": 0,
+    "neither": 11,
+    "A_total": 7,
+    "B_total": 0,
+    "A": "C1b",
+    "B": "C2",
+    "mcnemar_exact_p": 0.015625,
+    "A_only_keys": [
+     "ep12_s121",
+     "ep30_s301",
+     "ep30_s302",
+     "ep54_s541",
+     "ep54_s542",
+     "ep104_s1041",
+     "ep110_s1102"
+    ],
+    "B_only_keys": []
+   },
+   "robust_grasp": {
+    "n_pairs": 18,
+    "both": 0,
+    "A_only": 7,
+    "B_only": 0,
+    "neither": 11,
+    "A_total": 7,
+    "B_total": 0,
+    "A": "C1b",
+    "B": "C2",
+    "mcnemar_exact_p": 0.015625,
+    "A_only_keys": [
+     "ep12_s121",
+     "ep30_s301",
+     "ep30_s302",
+     "ep54_s541",
+     "ep54_s542",
+     "ep104_s1041",
+     "ep110_s1102"
+    ],
+    "B_only_keys": []
+   }
+  }
+ }
+}

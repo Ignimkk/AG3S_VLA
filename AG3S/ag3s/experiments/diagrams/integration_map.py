@@ -1,4 +1,5 @@
 """cuRobo · attention · trajopt 가 어디서 만나고 무엇이 남았는가 — 통합 지도."""
+from common.workspace import workspace_path as _ag3s_workspace_path
 import pathlib
 import matplotlib
 matplotlib.use("Agg")
@@ -6,7 +7,7 @@ import matplotlib.font_manager as fm
 for p in ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",):
     if pathlib.Path(p).exists():
         fm.fontManager.addfont(p)
-import sys; sys.path.insert(0, "${AG3S_PROJECT_ROOT}")
+import sys; sys.path.insert(0, _ag3s_workspace_path(''))
 from AG3S.ag3s.experiments.common import figstyle
 figstyle.use_korean()
 import matplotlib.pyplot as plt

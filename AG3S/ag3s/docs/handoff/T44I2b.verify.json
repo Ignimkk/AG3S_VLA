@@ -1,0 +1,1875 @@
+{
+ "step": "T44I2b",
+ "date": "2026-10-10",
+ "split": "test (recorded V11AB H runs, episodes 1807-1995; regression check only)",
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "command": "MUJOCO_GL=osmesa JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= PYTHONPATH=/mnt/dev/work nice -n 19 .venv-openpi-live/bin/python -m benchmark.trajopt.experiments.esdf_rollout --records run_16d_ep1800 --attention benchmark/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms",
+   "venv": ".venv-openpi-live (not .venv-ag3s: forbidden this session)",
+   "raw_output": "outputs/verify/T44/I2b/baseline_legacy.json",
+   "stdout_log": "outputs/verify/T44/I2b/baseline_legacy.out"
+  },
+  {
+   "id": "V-I2b-1",
+   "command": "JAX_PLATFORMS=cpu XLA_PYTHON_CLIENT_PREALLOCATE=false CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/work nice -n 19 .venv-openpi-live/bin/python -m pytest -q -p no:cacheprovider tests/trajopt tests/ag3s",
+   "stdout_log": "outputs/verify/T44/I2b/pytest_full.out",
+   "rerun_of_4_failures": "outputs/verify/T44/I2b/pytest_rerun4.out"
+  },
+  {
+   "id": "V-I2b-2..5 main",
+   "command": "outputs/verify/T44/I2b/runner.sh (2 workers, nice 19, CPU) -> replay_i2b.py arms: off offR strict_i2 strict_i2s strict_b1 strict_b0 sw swR swS_i2 swS_i2s swS_b1 (+ --probes); then aggregate_i2b.py",
+   "raw_output": "outputs/verify/T44/I2b/raw/main_V11AB_H_*.json + .npz",
+   "aggregate": "outputs/verify/T44/I2b/agg.json",
+   "per_chunk": "outputs/verify/T44/I2b/per_chunk_main.json"
+  },
+  {
+   "id": "V-I2b supplement (--links arms model)",
+   "command": "outputs/verify/T44/I2b/runner_arms.sh -> replay_i2b.py --arms-model (held chunks only; constraint model rebuilt with --links arms so link_*_arm_6 / arm_5 carry spheres)",
+   "raw_output": "outputs/verify/T44/I2b/raw/arms_V11AB_H_*.json + .npz",
+   "per_chunk": "outputs/verify/T44/I2b/per_chunk_arms.json"
+  }
+ ],
+ "code_state": {
+  "repo": "benchmark",
+  "head": "498f713",
+  "dirty_files_relevant": [
+   "trajopt/config.py",
+   "trajopt/linearize.py",
+   "ag3s/constraints/to_adapter.py"
+  ],
+  "md5_start": "outputs/verify/T44/I2b/wt_md5_start.txt",
+  "md5_end": "outputs/verify/T44/I2b/wt_md5_end.txt",
+  "note": "trajopt/serve_safe.py and ag3s/config.py were edited by another session during the run (md5 differs start vs end; trajopt/config.py, linearize.py, to_adapter.py unchanged). Replay workers started after the serve_safe.py/ag3s/config.py edits (06:22). The pytest run (started ~06:16) straddled the edit."
+ },
+ "replay_setup": {
+  "input": "same 14 recorded V11AB H runs / 1006 chunks as V-I2 (analysis_V11AB.json), server flags from server_proc.txt",
+  "tool": "outputs/verify/T44/I2b/replay_i2b.py (copy of I2/replay_i2.py)",
+  "overrides": "sqp.time_budget_ms = 1e6 in every arm",
+  "rows_variants": {
+   "i2": "V-I2 driver rule: linearize.target_contact_rows_of(target_free_mask, None, manipulated_link_margin (policy phase from manifest = approach, hand = manifest hand), exclude_authorized)",
+   "i2s": "I2 server in carry as stated by T44b.task: manipulated_link_margin all equal -> target_contact_rows_of -> all False (held chunks only; not verified against a live server)",
+   "b1": "I2b parent=1: to_adapter._held_permission_record(builder stub: run.names, run.robot, AG3SConfig().contact; attached.parent_link = recorded held frame link) -> linearize.held_contact_rows_of(rec, 1, S)",
+   "b0": "same with parent 0"
+  },
+  "strict_wiring": "ta_offline builds SceneSnapshot directly; driver sets target_contact_rows and target_permission_strict on the snapshot (scene_from_constraint_set not exercised)",
+  "constraint_model": "main = recorded V11AB (--links gripper: 270 spheres, no link_*_arm_* spheres); supplement = --links arms (422 spheres)",
+  "n_runs": 14,
+  "n_chunks": 1006,
+  "n_held_chunks": 194
+ },
+ "numbers": {
+  "baseline_legacy": {
+   "violated_start": "14/15",
+   "frames": 15,
+   "frame0_clearance_before_mm": -29.031048280806342,
+   "feasible": 15
+  },
+  "V-I2b-1": {
+   "passed": 2582,
+   "failed": 4,
+   "skipped": 3,
+   "duration_s": 893.72,
+   "summary_line": "4 failed, 2582 passed, 3 skipped, 1422 warnings in 893.72s (0:14:53)",
+   "failed_tests": [
+    "tests/trajopt/test_subtask_wiring.py::test_build_ag3s_puts_the_gate_in_the_config",
+    "tests/trajopt/test_t43t_target_volume.py::test_server_asserts_the_ag3s_config_it_asked_for",
+    "tests/trajopt/test_to_only_policy.py::test_the_no_perception_path_builds_no_ag3s_and_no_attention_copy",
+    "tests/ag3s/test_self_filter_target_guard.py::test_build_ag3s_forwards_the_flags_into_pointcloud"
+   ],
+   "rerun_of_4_failures": {
+    "passed": 4,
+    "failed": 0
+   },
+   "failure_cause_observed": "all 4 use inspect.getsource(serve_safe.build_ag3s/main); serve_safe.py mtime 06:22:41 (another session) is inside the pytest window (~06:16-06:31), source lines shifted after import; the 4 pass when rerun alone (0.52 s)"
+  },
+  "V-I2b-2_strict_off": {
+   "head_off_vs_new_off": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   },
+   "head_off_vs_new_offR": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   },
+   "head_sw_vs_new_sw": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   },
+   "head_sw_vs_new_swR": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   },
+   "viI2wt_off_vs_new_off": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   },
+   "viI2wt_off_vs_new_offR": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   },
+   "viI2wt_sw_vs_new_sw": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   },
+   "viI2wt_sw_vs_new_swR": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   },
+   "viI2wt_strict_vs_new_strict_i2": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   },
+   "viI2wt_swS_vs_new_swS_i2": {
+    "n_chunks": 1006,
+    "own_differs": 0,
+    "traj_differs": 0,
+    "status_differs": 0,
+    "hold_differs": 0,
+    "max_joint_deg": 0.0,
+    "n_collision_rows_differs": 0
+   }
+  },
+  "V-I2b-3_main_model": {
+   "held_chunks": 194,
+   "hold_links": {
+    "ee_left": 158,
+    "ee_right": 36
+   },
+   "parent_links_found_in_model": {
+    "": 194
+   },
+   "held_side_vs_manifest_hand_mismatch_chunks": 0,
+   "permitted_rows_by_link_sum_over_held_chunks": {
+    "i2": {
+     "ee_left": 3634,
+     "ee_finger_l1": 8848,
+     "ee_finger_l2": 8848,
+     "ee_right": 828,
+     "ee_finger_r1": 2016,
+     "ee_finger_r2": 2016
+    },
+    "i2s": {},
+    "b1": {
+     "ee_left": 3634,
+     "ee_finger_l1": 8848,
+     "ee_finger_l2": 8848,
+     "ee_right": 828,
+     "ee_finger_r1": 2016,
+     "ee_finger_r2": 2016
+    },
+    "b0": {
+     "ee_left": 3634,
+     "ee_finger_l1": 8848,
+     "ee_finger_l2": 8848,
+     "ee_right": 828,
+     "ee_finger_r1": 2016,
+     "ee_finger_r2": 2016
+    }
+   },
+   "n_chunks_rows_differ_i2_vs_i2b": 0,
+   "lookahead_reference": {
+    "i2s": {
+     "n_chunks": 194,
+     "rows_changed_total": 55938,
+     "chunks_changed": 187,
+     "tail_target_unauthorized_total": 55942,
+     "chunks_tail_unauthorized_gt0": 187,
+     "changed_by_class_rows": {
+      "held_gripper": 51610,
+      "other_gripper": 4328
+     },
+     "changed_by_class_chunks": {
+      "held_gripper": 185,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "held_gripper|dropped_off": 51914,
+      "held_gripper|dropped_strict": 304,
+      "other_gripper|dropped_off": 4328,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 18,
+      "held_query|dropped_strict": 18
+     }
+    },
+    "i2": {
+     "n_chunks": 539,
+     "rows_changed_total": 4328,
+     "chunks_changed": 43,
+     "tail_target_unauthorized_total": 4328,
+     "chunks_tail_unauthorized_gt0": 43,
+     "changed_by_class_rows": {
+      "other_gripper": 4328
+     },
+     "changed_by_class_chunks": {
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "held_gripper|dropped_off": 51914,
+      "held_gripper|dropped_strict": 51914,
+      "other_gripper|dropped_off": 4328,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 18,
+      "held_query|dropped_strict": 18
+     }
+    },
+    "b1": {
+     "n_chunks": 539,
+     "rows_changed_total": 4328,
+     "chunks_changed": 43,
+     "tail_target_unauthorized_total": 4328,
+     "chunks_tail_unauthorized_gt0": 43,
+     "changed_by_class_rows": {
+      "other_gripper": 4328
+     },
+     "changed_by_class_chunks": {
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "held_gripper|dropped_off": 51914,
+      "held_gripper|dropped_strict": 51914,
+      "other_gripper|dropped_off": 4328,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 18,
+      "held_query|dropped_strict": 18
+     }
+    },
+    "b0": {
+     "n_chunks": 539,
+     "rows_changed_total": 4328,
+     "chunks_changed": 43,
+     "tail_target_unauthorized_total": 4328,
+     "chunks_tail_unauthorized_gt0": 43,
+     "changed_by_class_rows": {
+      "other_gripper": 4328
+     },
+     "changed_by_class_chunks": {
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "held_gripper|dropped_off": 51914,
+      "held_gripper|dropped_strict": 51914,
+      "other_gripper|dropped_off": 4328,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 18,
+      "held_query|dropped_strict": 18
+     }
+    }
+   },
+   "lookahead_off_refined": {
+    "i2s": {
+     "n_chunks": 194,
+     "rows_changed_total": 52463,
+     "chunks_changed": 187,
+     "tail_target_unauthorized_total": 52463,
+     "chunks_tail_unauthorized_gt0": 187,
+     "changed_by_class_rows": {
+      "held_gripper": 48291,
+      "other_gripper": 4172
+     },
+     "changed_by_class_chunks": {
+      "held_gripper": 185,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "held_gripper|dropped_off": 48590,
+      "held_gripper|dropped_strict": 299,
+      "other_gripper|dropped_off": 4172,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 12,
+      "held_query|dropped_strict": 12
+     }
+    },
+    "i2": {
+     "n_chunks": 539,
+     "rows_changed_total": 4172,
+     "chunks_changed": 43,
+     "tail_target_unauthorized_total": 4172,
+     "chunks_tail_unauthorized_gt0": 43,
+     "changed_by_class_rows": {
+      "other_gripper": 4172
+     },
+     "changed_by_class_chunks": {
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "held_gripper|dropped_off": 48590,
+      "held_gripper|dropped_strict": 48590,
+      "other_gripper|dropped_off": 4172,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 12,
+      "held_query|dropped_strict": 12
+     }
+    },
+    "b1": {
+     "n_chunks": 539,
+     "rows_changed_total": 4172,
+     "chunks_changed": 43,
+     "tail_target_unauthorized_total": 4172,
+     "chunks_tail_unauthorized_gt0": 43,
+     "changed_by_class_rows": {
+      "other_gripper": 4172
+     },
+     "changed_by_class_chunks": {
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "held_gripper|dropped_off": 48590,
+      "held_gripper|dropped_strict": 48590,
+      "other_gripper|dropped_off": 4172,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 12,
+      "held_query|dropped_strict": 12
+     }
+    },
+    "b0": {
+     "n_chunks": 539,
+     "rows_changed_total": 4172,
+     "chunks_changed": 43,
+     "tail_target_unauthorized_total": 4172,
+     "chunks_tail_unauthorized_gt0": 43,
+     "changed_by_class_rows": {
+      "other_gripper": 4172
+     },
+     "changed_by_class_chunks": {
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "held_gripper|dropped_off": 48590,
+      "held_gripper|dropped_strict": 48590,
+      "other_gripper|dropped_off": 4172,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 12,
+      "held_query|dropped_strict": 12
+     }
+    }
+   },
+   "solve": {
+    "i2": {
+     "n_chunks": 1006,
+     "refined_chunks_changed": 10,
+     "refined_joint_deg_max": 0.5848528043602833,
+     "status_changes": 0,
+     "hold_changes": 0,
+     "n_tail_target_unauthorized_total": 3721,
+     "chunks_tail_unauthorized_gt0": 33,
+     "hold_candidate_off": 8,
+     "hold_candidate_strict": 8
+    },
+    "i2s": {
+     "n_chunks": 194,
+     "refined_chunks_changed": 108,
+     "refined_joint_deg_max": 11.416079059893198,
+     "status_changes": 1,
+     "hold_changes": 1,
+     "n_tail_target_unauthorized_total": 35216,
+     "chunks_tail_unauthorized_gt0": 133,
+     "hold_candidate_off": 4,
+     "hold_candidate_strict": 5
+    },
+    "b1": {
+     "n_chunks": 1006,
+     "refined_chunks_changed": 10,
+     "refined_joint_deg_max": 0.5848528043602833,
+     "status_changes": 0,
+     "hold_changes": 0,
+     "n_tail_target_unauthorized_total": 3721,
+     "chunks_tail_unauthorized_gt0": 33,
+     "hold_candidate_off": 8,
+     "hold_candidate_strict": 8
+    },
+    "b0": {
+     "n_chunks": 194,
+     "refined_chunks_changed": 10,
+     "refined_joint_deg_max": 0.5848528043602833,
+     "status_changes": 0,
+     "hold_changes": 0,
+     "n_tail_target_unauthorized_total": 3721,
+     "chunks_tail_unauthorized_gt0": 33,
+     "hold_candidate_off": 4,
+     "hold_candidate_strict": 4
+    },
+    "b1_vs_i2": {
+     "refined_chunks_differ": 0,
+     "refined_joint_deg_max": 0.0,
+     "status_differs": 0
+    },
+    "b1_vs_i2s": {
+     "n_chunks": 194,
+     "refined_chunks_differ": 108,
+     "refined_joint_deg_max": 11.416079059893198,
+     "status_differs": 1
+    },
+    "b0_vs_b1": {
+     "n_chunks": 194,
+     "refined_chunks_differ": 0,
+     "refined_joint_deg_max": 0.0,
+     "status_differs": 0
+    }
+   }
+  },
+  "V-I2b-3_arms_model_supplement": {
+   "held_chunks": 194,
+   "parent_links_found_in_model": {
+    "link_left_arm_6|link_left_arm_5|link_left_arm_4|link_left_arm_3|link_left_arm_2|link_left_arm_1|link_left_arm_0": 158,
+    "link_right_arm_6|link_right_arm_5|link_right_arm_4|link_right_arm_3|link_right_arm_2|link_right_arm_1|link_right_arm_0": 36
+   },
+   "permitted_rows_by_link_sum_over_held_chunks": {
+    "i2": {
+     "ee_left": 3634,
+     "ee_finger_l1": 8848,
+     "ee_finger_l2": 8848,
+     "ee_right": 828,
+     "ee_finger_r1": 2016,
+     "ee_finger_r2": 2016
+    },
+    "i2s": {},
+    "b1": {
+     "link_left_arm_6": 4582,
+     "ee_left": 3634,
+     "ee_finger_l1": 8848,
+     "ee_finger_l2": 8848,
+     "link_right_arm_6": 1044,
+     "ee_right": 828,
+     "ee_finger_r1": 2016,
+     "ee_finger_r2": 2016
+    },
+    "b0": {
+     "ee_left": 3634,
+     "ee_finger_l1": 8848,
+     "ee_finger_l2": 8848,
+     "ee_right": 828,
+     "ee_finger_r1": 2016,
+     "ee_finger_r2": 2016
+    }
+   },
+   "lookahead_reference": {
+    "i2s": {
+     "n_chunks": 194,
+     "rows_changed_total": 91954,
+     "chunks_changed": 191,
+     "tail_target_unauthorized_total": 92458,
+     "chunks_tail_unauthorized_gt0": 191,
+     "changed_by_class_rows": {
+      "held_parent2plus": 8002,
+      "held_parent1": 11856,
+      "held_gripper": 51610,
+      "arm_rest_other_side": 16158,
+      "other_gripper": 4328
+     },
+     "changed_by_class_chunks": {
+      "held_parent2plus": 191,
+      "held_parent1": 144,
+      "held_gripper": 185,
+      "arm_rest_other_side": 71,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "arm_rest_other_side|dropped_off": 20694,
+      "arm_rest_other_side|dropped_strict": 4536,
+      "held_parent2plus|dropped_off": 8509,
+      "held_parent2plus|dropped_strict": 507,
+      "held_parent1|dropped_off": 12119,
+      "held_parent1|dropped_strict": 263,
+      "held_gripper|dropped_off": 51914,
+      "held_gripper|dropped_strict": 304,
+      "other_gripper|dropped_off": 4328,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 18,
+      "held_query|dropped_strict": 18
+     }
+    },
+    "i2": {
+     "n_chunks": 194,
+     "rows_changed_total": 40344,
+     "chunks_changed": 191,
+     "tail_target_unauthorized_total": 40844,
+     "chunks_tail_unauthorized_gt0": 191,
+     "changed_by_class_rows": {
+      "held_parent2plus": 8002,
+      "held_parent1": 11856,
+      "arm_rest_other_side": 16158,
+      "other_gripper": 4328
+     },
+     "changed_by_class_chunks": {
+      "held_parent2plus": 191,
+      "held_parent1": 144,
+      "arm_rest_other_side": 71,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "arm_rest_other_side|dropped_off": 20694,
+      "arm_rest_other_side|dropped_strict": 4536,
+      "held_parent2plus|dropped_off": 8509,
+      "held_parent2plus|dropped_strict": 507,
+      "held_parent1|dropped_off": 12119,
+      "held_parent1|dropped_strict": 263,
+      "held_gripper|dropped_off": 51914,
+      "held_gripper|dropped_strict": 51914,
+      "other_gripper|dropped_off": 4328,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 18,
+      "held_query|dropped_strict": 18
+     }
+    },
+    "b1": {
+     "n_chunks": 194,
+     "rows_changed_total": 28488,
+     "chunks_changed": 191,
+     "tail_target_unauthorized_total": 28988,
+     "chunks_tail_unauthorized_gt0": 191,
+     "changed_by_class_rows": {
+      "held_parent2plus": 8002,
+      "arm_rest_other_side": 16158,
+      "other_gripper": 4328
+     },
+     "changed_by_class_chunks": {
+      "held_parent2plus": 191,
+      "arm_rest_other_side": 71,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "arm_rest_other_side|dropped_off": 20694,
+      "arm_rest_other_side|dropped_strict": 4536,
+      "held_parent2plus|dropped_off": 8509,
+      "held_parent2plus|dropped_strict": 507,
+      "held_parent1|dropped_off": 12119,
+      "held_parent1|dropped_strict": 12119,
+      "held_gripper|dropped_off": 51914,
+      "held_gripper|dropped_strict": 51914,
+      "other_gripper|dropped_off": 4328,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 18,
+      "held_query|dropped_strict": 18
+     }
+    },
+    "b0": {
+     "n_chunks": 194,
+     "rows_changed_total": 40344,
+     "chunks_changed": 191,
+     "tail_target_unauthorized_total": 40844,
+     "chunks_tail_unauthorized_gt0": 191,
+     "changed_by_class_rows": {
+      "held_parent2plus": 8002,
+      "held_parent1": 11856,
+      "arm_rest_other_side": 16158,
+      "other_gripper": 4328
+     },
+     "changed_by_class_chunks": {
+      "held_parent2plus": 191,
+      "held_parent1": 144,
+      "arm_rest_other_side": 71,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "arm_rest_other_side|dropped_off": 20694,
+      "arm_rest_other_side|dropped_strict": 4536,
+      "held_parent2plus|dropped_off": 8509,
+      "held_parent2plus|dropped_strict": 507,
+      "held_parent1|dropped_off": 12119,
+      "held_parent1|dropped_strict": 263,
+      "held_gripper|dropped_off": 51914,
+      "held_gripper|dropped_strict": 51914,
+      "other_gripper|dropped_off": 4328,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 18,
+      "held_query|dropped_strict": 18
+     }
+    }
+   },
+   "lookahead_off_refined": {
+    "i2s": {
+     "n_chunks": 194,
+     "rows_changed_total": 87734,
+     "chunks_changed": 194,
+     "tail_target_unauthorized_total": 88250,
+     "chunks_tail_unauthorized_gt0": 194,
+     "changed_by_class_rows": {
+      "held_parent2plus": 7880,
+      "held_parent1": 11759,
+      "held_gripper": 47795,
+      "arm_rest_other_side": 16086,
+      "other_gripper": 4214
+     },
+     "changed_by_class_chunks": {
+      "held_parent2plus": 192,
+      "held_parent1": 146,
+      "held_gripper": 185,
+      "arm_rest_other_side": 71,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "arm_rest_other_side|dropped_off": 20606,
+      "arm_rest_other_side|dropped_strict": 4520,
+      "held_parent2plus|dropped_off": 8392,
+      "held_parent2plus|dropped_strict": 512,
+      "held_parent1|dropped_off": 11977,
+      "held_parent1|dropped_strict": 218,
+      "held_gripper|dropped_off": 48094,
+      "held_gripper|dropped_strict": 299,
+      "other_gripper|dropped_off": 4214,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 12,
+      "held_query|dropped_strict": 12
+     }
+    },
+    "i2": {
+     "n_chunks": 194,
+     "rows_changed_total": 39939,
+     "chunks_changed": 194,
+     "tail_target_unauthorized_total": 40455,
+     "chunks_tail_unauthorized_gt0": 194,
+     "changed_by_class_rows": {
+      "held_parent2plus": 7880,
+      "held_parent1": 11759,
+      "arm_rest_other_side": 16086,
+      "other_gripper": 4214
+     },
+     "changed_by_class_chunks": {
+      "held_parent2plus": 192,
+      "held_parent1": 146,
+      "arm_rest_other_side": 71,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "arm_rest_other_side|dropped_off": 20606,
+      "arm_rest_other_side|dropped_strict": 4520,
+      "held_parent2plus|dropped_off": 8392,
+      "held_parent2plus|dropped_strict": 512,
+      "held_parent1|dropped_off": 11977,
+      "held_parent1|dropped_strict": 218,
+      "held_gripper|dropped_off": 48094,
+      "held_gripper|dropped_strict": 48094,
+      "other_gripper|dropped_off": 4214,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 12,
+      "held_query|dropped_strict": 12
+     }
+    },
+    "b1": {
+     "n_chunks": 194,
+     "rows_changed_total": 28180,
+     "chunks_changed": 192,
+     "tail_target_unauthorized_total": 28696,
+     "chunks_tail_unauthorized_gt0": 192,
+     "changed_by_class_rows": {
+      "held_parent2plus": 7880,
+      "arm_rest_other_side": 16086,
+      "other_gripper": 4214
+     },
+     "changed_by_class_chunks": {
+      "held_parent2plus": 192,
+      "arm_rest_other_side": 71,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "arm_rest_other_side|dropped_off": 20606,
+      "arm_rest_other_side|dropped_strict": 4520,
+      "held_parent2plus|dropped_off": 8392,
+      "held_parent2plus|dropped_strict": 512,
+      "held_parent1|dropped_off": 11977,
+      "held_parent1|dropped_strict": 11977,
+      "held_gripper|dropped_off": 48094,
+      "held_gripper|dropped_strict": 48094,
+      "other_gripper|dropped_off": 4214,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 12,
+      "held_query|dropped_strict": 12
+     }
+    },
+    "b0": {
+     "n_chunks": 194,
+     "rows_changed_total": 39939,
+     "chunks_changed": 194,
+     "tail_target_unauthorized_total": 40455,
+     "chunks_tail_unauthorized_gt0": 194,
+     "changed_by_class_rows": {
+      "held_parent2plus": 7880,
+      "held_parent1": 11759,
+      "arm_rest_other_side": 16086,
+      "other_gripper": 4214
+     },
+     "changed_by_class_chunks": {
+      "held_parent2plus": 192,
+      "held_parent1": 146,
+      "arm_rest_other_side": 71,
+      "other_gripper": 43
+     },
+     "tail_rows_dropped_by_class": {
+      "arm_rest_other_side|dropped_off": 20606,
+      "arm_rest_other_side|dropped_strict": 4520,
+      "held_parent2plus|dropped_off": 8392,
+      "held_parent2plus|dropped_strict": 512,
+      "held_parent1|dropped_off": 11977,
+      "held_parent1|dropped_strict": 218,
+      "held_gripper|dropped_off": 48094,
+      "held_gripper|dropped_strict": 48094,
+      "other_gripper|dropped_off": 4214,
+      "other_gripper|dropped_strict": 0,
+      "held_query|dropped_off": 12,
+      "held_query|dropped_strict": 12
+     }
+    }
+   },
+   "solve": {
+    "i2": {
+     "n_chunks": 194,
+     "refined_chunks_changed": 108,
+     "refined_joint_deg_max": 13.206477378957818,
+     "status_changes": 0,
+     "hold_changes": 0,
+     "n_tail_target_unauthorized_total": 30581,
+     "chunks_tail_unauthorized_gt0": 138,
+     "hold_candidate_off": 6,
+     "hold_candidate_strict": 6
+    },
+    "i2s": {
+     "n_chunks": 194,
+     "refined_chunks_changed": 125,
+     "refined_joint_deg_max": 11.617686750996718,
+     "status_changes": 2,
+     "hold_changes": 2,
+     "n_tail_target_unauthorized_total": 62450,
+     "chunks_tail_unauthorized_gt0": 139,
+     "hold_candidate_off": 6,
+     "hold_candidate_strict": 8
+    },
+    "b1": {
+     "n_chunks": 194,
+     "refined_chunks_changed": 103,
+     "refined_joint_deg_max": 12.587463230971002,
+     "status_changes": 0,
+     "hold_changes": 0,
+     "n_tail_target_unauthorized_total": 22135,
+     "chunks_tail_unauthorized_gt0": 136,
+     "hold_candidate_off": 6,
+     "hold_candidate_strict": 6
+    },
+    "b0": {
+     "n_chunks": 194,
+     "refined_chunks_changed": 108,
+     "refined_joint_deg_max": 13.206477378957818,
+     "status_changes": 0,
+     "hold_changes": 0,
+     "n_tail_target_unauthorized_total": 30581,
+     "chunks_tail_unauthorized_gt0": 138,
+     "hold_candidate_off": 6,
+     "hold_candidate_strict": 6
+    },
+    "b1_vs_i2": {
+     "refined_chunks_differ": 78,
+     "refined_joint_deg_max": 3.658044941460681,
+     "status_differs": 0
+    },
+    "b1_vs_i2s": {
+     "n_chunks": 194,
+     "refined_chunks_differ": 125,
+     "refined_joint_deg_max": 9.810609371201904,
+     "status_differs": 2
+    },
+    "b0_vs_b1": {
+     "n_chunks": 194,
+     "refined_chunks_differ": 78,
+     "refined_joint_deg_max": 3.658044941460681,
+     "status_differs": 0
+    }
+   }
+  },
+  "V-I2b-4_parent0_vs_1": {
+   "main_model": {
+    "rows_differ_total": 0,
+    "chunks_rows_differ": 0,
+    "refined_chunks_differ": 0,
+    "refined_joint_deg_max": 0.0
+   },
+   "arms_model": {
+    "rows_differ_total": 5626,
+    "chunks_rows_differ": 194,
+    "refined_chunks_differ": 78,
+    "refined_joint_deg_max": 3.658044941460681,
+    "lookahead_reference_rows_changed_b0": 40344,
+    "lookahead_reference_rows_changed_b1": 28488
+   }
+  },
+  "V-I2b-5_sweep_main_model": {
+   "i2s": {
+    "n_chunks": 194,
+    "off_excluded_total": 9353,
+    "off_chunks_excluded": 179,
+    "strict_excluded_total": 0,
+    "strict_chunks_excluded": 0,
+    "strict_unauthorized_kept_total": 10198,
+    "strict_chunks_unauthorized_kept_gt0": 180,
+    "refined_chunks_changed": 108,
+    "refined_joint_deg_max": 16.60679515290807,
+    "status_changes": 6,
+    "hold_changes": 1,
+    "split_authorization": {
+     "off_auth": 477,
+     "off_nonauth": 68,
+     "strict_auth": 0,
+     "strict_nonauth": 0,
+     "p_off_auth": 476,
+     "p_off_nonauth": 68,
+     "p_strict_auth": 0,
+     "p_strict_nonauth": 0
+    },
+    "nonauth_links_excluded_off": {
+     "ee_left": 17,
+     "ee_finger_l1": 14,
+     "ee_right": 37
+    },
+    "chunks_with_nonauth_excluded": {
+     "off": 26
+    },
+    "same_traj": {
+     "n_chunks": 194,
+     "off_excluded_total": 9353,
+     "strict_excluded_total": 72,
+     "strict_unauth_kept_total": 9281,
+     "new_path_violations": 6,
+     "path_violations_off": 16,
+     "path_violations_strict": 22
+    },
+    "status_change_chunks": [
+     {
+      "run": "V11AB_H_V11AB_ep1807_s18071",
+      "seq": 17,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.0028883144934597326,
+       -0.011165850329273872
+      ],
+      "window_violation_mm": [
+       0.0,
+       11.165850329273871
+      ],
+      "strict_unauth_kept": 201,
+      "off_links": {
+       "ee_left": 1,
+       "ee_finger_l1": 1,
+       "ee_finger_l2": 1
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18341",
+      "seq": 16,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.0020493713879807494,
+       -0.008355344703171973
+      ],
+      "window_violation_mm": [
+       0.0,
+       8.355344703171973
+      ],
+      "strict_unauth_kept": 6,
+      "off_links": {
+       "ee_finger_r2": 1
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18341",
+      "seq": 34,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.006168686908838091,
+       0.0011217852720974697
+      ],
+      "window_violation_mm": [
+       0.0,
+       1.3660610653894874
+      ],
+      "strict_unauth_kept": 82,
+      "off_links": {
+       "ee_left": 8,
+       "ee_right": 1,
+       "ee_finger_l1": 2
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18343",
+      "seq": 16,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.0027387605088732836,
+       -0.00706272246486764
+      ],
+      "window_violation_mm": [
+       0.0,
+       11.761257346393384
+      ],
+      "strict_unauth_kept": 188,
+      "off_links": {
+       "ee_finger_r1": 1,
+       "ee_finger_r2": 1
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18343",
+      "seq": 21,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.00625761140628764,
+       0.0006110140014250649
+      ],
+      "window_violation_mm": [
+       0.0,
+       2.569775435276214
+      ],
+      "strict_unauth_kept": 116,
+      "off_links": {
+       "ee_right": 1,
+       "ee_finger_r1": 1,
+       "ee_finger_r2": 1
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1982_s19823",
+      "seq": 17,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.004812691259718534,
+       -0.012328157507876218
+      ],
+      "window_violation_mm": [
+       0.0,
+       12.328157507876218
+      ],
+      "strict_unauth_kept": 227,
+      "off_links": {
+       "ee_left": 1,
+       "ee_finger_l1": 3,
+       "ee_finger_l2": 2
+      },
+      "strict_links": {}
+     }
+    ],
+    "ep1834_s18341_seq34": {
+     "status": [
+      "feasible",
+      "violated"
+     ],
+     "hold": [
+      false,
+      false
+     ],
+     "path_clear_mm": [
+      0.006168686908838091,
+      0.0011217852720974697
+     ],
+     "window_violation_mm": [
+      0.0,
+      1.3660610653894874
+     ],
+     "held": true,
+     "strict_unauth_kept": 82,
+     "off_links": {
+      "ee_left": 8,
+      "ee_right": 1,
+      "ee_finger_l1": 2
+     },
+     "strict_links": {},
+     "off_excluded": 76,
+     "strict_excluded": 0,
+     "rows_links": {},
+     "held_record": {
+      "hold_link": "ee_right",
+      "side": "right",
+      "contact_links": [
+       "ee_finger_r1",
+       "ee_finger_r2",
+       "ee_right"
+      ],
+      "parent_links": []
+     }
+    }
+   },
+   "i2": {
+    "n_chunks": 1006,
+    "off_excluded_total": 9353,
+    "off_chunks_excluded": 179,
+    "strict_excluded_total": 8791,
+    "strict_chunks_excluded": 178,
+    "strict_unauthorized_kept_total": 552,
+    "strict_chunks_unauthorized_kept_gt0": 26,
+    "refined_chunks_changed": 4,
+    "refined_joint_deg_max": 1.593583271409581,
+    "status_changes": 1,
+    "hold_changes": 0,
+    "split_authorization": {
+     "off_auth": 477,
+     "off_nonauth": 68,
+     "strict_auth": 477,
+     "strict_nonauth": 0,
+     "p_off_auth": 476,
+     "p_off_nonauth": 68,
+     "p_strict_auth": 476,
+     "p_strict_nonauth": 0
+    },
+    "nonauth_links_excluded_off": {
+     "ee_left": 17,
+     "ee_finger_l1": 14,
+     "ee_right": 37
+    },
+    "chunks_with_nonauth_excluded": {
+     "off": 26
+    },
+    "same_traj": {
+     "n_chunks": 539,
+     "off_excluded_total": 9353,
+     "strict_excluded_total": 8789,
+     "strict_unauth_kept_total": 564,
+     "new_path_violations": 0,
+     "path_violations_off": 27,
+     "path_violations_strict": 27
+    },
+    "status_change_chunks": [
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18341",
+      "seq": 34,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.006168686908838091,
+       0.001121785162003272
+      ],
+      "window_violation_mm": [
+       0.0,
+       1.3656544288107377
+      ],
+      "strict_unauth_kept": 67,
+      "off_links": {
+       "ee_left": 8,
+       "ee_right": 1,
+       "ee_finger_l1": 2
+      },
+      "strict_links": {
+       "ee_right": 1
+      }
+     }
+    ],
+    "ep1834_s18341_seq34": {
+     "status": [
+      "feasible",
+      "violated"
+     ],
+     "hold": [
+      false,
+      false
+     ],
+     "path_clear_mm": [
+      0.006168686908838091,
+      0.001121785162003272
+     ],
+     "window_violation_mm": [
+      0.0,
+      1.3656544288107377
+     ],
+     "held": true,
+     "strict_unauth_kept": 67,
+     "off_links": {
+      "ee_left": 8,
+      "ee_right": 1,
+      "ee_finger_l1": 2
+     },
+     "strict_links": {
+      "ee_right": 1
+     },
+     "off_excluded": 76,
+     "strict_excluded": 15,
+     "rows_links": {
+      "ee_right": 23,
+      "ee_finger_r1": 56,
+      "ee_finger_r2": 56
+     },
+     "held_record": {
+      "hold_link": "ee_right",
+      "side": "right",
+      "contact_links": [
+       "ee_finger_r1",
+       "ee_finger_r2",
+       "ee_right"
+      ],
+      "parent_links": []
+     }
+    }
+   },
+   "b1": {
+    "n_chunks": 1006,
+    "off_excluded_total": 9353,
+    "off_chunks_excluded": 179,
+    "strict_excluded_total": 8791,
+    "strict_chunks_excluded": 178,
+    "strict_unauthorized_kept_total": 552,
+    "strict_chunks_unauthorized_kept_gt0": 26,
+    "refined_chunks_changed": 4,
+    "refined_joint_deg_max": 1.593583271409581,
+    "status_changes": 1,
+    "hold_changes": 0,
+    "split_authorization": {
+     "off_auth": 477,
+     "off_nonauth": 68,
+     "strict_auth": 477,
+     "strict_nonauth": 0,
+     "p_off_auth": 476,
+     "p_off_nonauth": 68,
+     "p_strict_auth": 476,
+     "p_strict_nonauth": 0
+    },
+    "nonauth_links_excluded_off": {
+     "ee_left": 17,
+     "ee_finger_l1": 14,
+     "ee_right": 37
+    },
+    "chunks_with_nonauth_excluded": {
+     "off": 26
+    },
+    "same_traj": {
+     "n_chunks": 539,
+     "off_excluded_total": 9353,
+     "strict_excluded_total": 8789,
+     "strict_unauth_kept_total": 564,
+     "new_path_violations": 0,
+     "path_violations_off": 27,
+     "path_violations_strict": 27
+    },
+    "status_change_chunks": [
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18341",
+      "seq": 34,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.006168686908838091,
+       0.001121785162003272
+      ],
+      "window_violation_mm": [
+       0.0,
+       1.3656544288107377
+      ],
+      "strict_unauth_kept": 67,
+      "off_links": {
+       "ee_left": 8,
+       "ee_right": 1,
+       "ee_finger_l1": 2
+      },
+      "strict_links": {
+       "ee_right": 1
+      }
+     }
+    ],
+    "ep1834_s18341_seq34": {
+     "status": [
+      "feasible",
+      "violated"
+     ],
+     "hold": [
+      false,
+      false
+     ],
+     "path_clear_mm": [
+      0.006168686908838091,
+      0.001121785162003272
+     ],
+     "window_violation_mm": [
+      0.0,
+      1.3656544288107377
+     ],
+     "held": true,
+     "strict_unauth_kept": 67,
+     "off_links": {
+      "ee_left": 8,
+      "ee_right": 1,
+      "ee_finger_l1": 2
+     },
+     "strict_links": {
+      "ee_right": 1
+     },
+     "off_excluded": 76,
+     "strict_excluded": 15,
+     "rows_links": {
+      "ee_right": 23,
+      "ee_finger_r1": 56,
+      "ee_finger_r2": 56
+     },
+     "held_record": {
+      "hold_link": "ee_right",
+      "side": "right",
+      "contact_links": [
+       "ee_finger_r1",
+       "ee_finger_r2",
+       "ee_right"
+      ],
+      "parent_links": []
+     }
+    }
+   }
+  },
+  "V-I2b-5_sweep_arms_model_supplement": {
+   "i2s": {
+    "n_chunks": 194,
+    "off_excluded_total": 19593,
+    "off_chunks_excluded": 194,
+    "strict_excluded_total": 0,
+    "strict_chunks_excluded": 0,
+    "strict_unauthorized_kept_total": 21048,
+    "strict_chunks_unauthorized_kept_gt0": 194,
+    "refined_chunks_changed": 118,
+    "refined_joint_deg_max": 16.623454960251106,
+    "status_changes": 6,
+    "hold_changes": 1,
+    "split_authorization": {
+     "off_auth": 771,
+     "off_nonauth": 1458,
+     "strict_auth": 0,
+     "strict_nonauth": 0,
+     "p_off_auth": 771,
+     "p_off_nonauth": 1458,
+     "p_strict_auth": 0,
+     "p_strict_nonauth": 0
+    },
+    "nonauth_links_excluded_off": {
+     "link_left_arm_5": 273,
+     "link_left_arm_4": 247,
+     "link_left_arm_3": 144,
+     "link_right_arm_1": 132,
+     "link_right_arm_5": 158,
+     "link_right_arm_3": 127,
+     "link_right_arm_6": 65,
+     "link_right_arm_4": 104,
+     "link_right_arm_0": 54,
+     "link_right_arm_2": 27,
+     "link_left_arm_6": 43,
+     "ee_left": 12,
+     "ee_finger_l1": 7,
+     "ee_right": 41,
+     "link_left_arm_2": 24
+    },
+    "chunks_with_nonauth_excluded": {
+     "off": 190
+    },
+    "same_traj": {
+     "n_chunks": 194,
+     "off_excluded_total": 19593,
+     "strict_excluded_total": 15,
+     "strict_unauth_kept_total": 19614,
+     "new_path_violations": 8,
+     "path_violations_off": 16,
+     "path_violations_strict": 24
+    },
+    "status_change_chunks": [
+     {
+      "run": "V11AB_H_V11AB_ep1807_s18071",
+      "seq": 17,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.0029137421647520267,
+       -0.011300561441922388
+      ],
+      "window_violation_mm": [
+       0.0,
+       11.300561441922389
+      ],
+      "strict_unauth_kept": 293,
+      "off_links": {
+       "link_left_arm_5": 2,
+       "link_left_arm_6": 2,
+       "ee_left": 1,
+       "ee_finger_l1": 1,
+       "ee_finger_l2": 1
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18341",
+      "seq": 16,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.0020493138055175074,
+       -0.00835537136099838
+      ],
+      "window_violation_mm": [
+       0.0,
+       8.355371360998381
+      ],
+      "strict_unauth_kept": 186,
+      "off_links": {
+       "link_right_arm_3": 4,
+       "link_right_arm_4": 1,
+       "link_right_arm_5": 1,
+       "link_right_arm_6": 1,
+       "ee_right": 2,
+       "ee_finger_r1": 5,
+       "ee_finger_r2": 2
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18341",
+      "seq": 34,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.006168686913401191,
+       0.0030319103300531225
+      ],
+      "window_violation_mm": [
+       0.0,
+       3.271983890142244
+      ],
+      "strict_unauth_kept": 226,
+      "off_links": {
+       "link_right_arm_5": 3,
+       "link_left_arm_3": 9,
+       "link_left_arm_4": 5,
+       "link_left_arm_5": 2,
+       "link_right_arm_6": 4,
+       "link_left_arm_6": 4,
+       "ee_left": 8,
+       "ee_right": 1,
+       "ee_finger_l1": 2
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18343",
+      "seq": 16,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.002738761127258533,
+       -0.007063521769990583
+      ],
+      "window_violation_mm": [
+       0.0,
+       11.767279648620159
+      ],
+      "strict_unauth_kept": 307,
+      "off_links": {
+       "link_right_arm_3": 3,
+       "link_right_arm_4": 1,
+       "link_right_arm_5": 2,
+       "link_right_arm_6": 1,
+       "ee_right": 1,
+       "ee_finger_r1": 2,
+       "ee_finger_r2": 1
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18343",
+      "seq": 21,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.0035332657598514776,
+       0.0006126029675449611
+      ],
+      "window_violation_mm": [
+       0.0,
+       2.5653638475653975
+      ],
+      "strict_unauth_kept": 161,
+      "off_links": {
+       "link_right_arm_1": 1,
+       "link_right_arm_2": 8,
+       "ee_right": 1,
+       "ee_finger_r1": 2,
+       "ee_finger_r2": 2
+      },
+      "strict_links": {}
+     },
+     {
+      "run": "V11AB_H_V11AB_ep1982_s19823",
+      "seq": 17,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.004596934696445428,
+       -0.012313275404963851
+      ],
+      "window_violation_mm": [
+       0.0,
+       12.313275404963852
+      ],
+      "strict_unauth_kept": 660,
+      "off_links": {
+       "link_left_arm_4": 1,
+       "link_left_arm_5": 12,
+       "link_left_arm_6": 18,
+       "ee_left": 2,
+       "ee_finger_l1": 4,
+       "ee_finger_l2": 7
+      },
+      "strict_links": {}
+     }
+    ],
+    "ep1834_s18341_seq34": {
+     "status": [
+      "feasible",
+      "violated"
+     ],
+     "hold": [
+      false,
+      false
+     ],
+     "path_clear_mm": [
+      0.006168686913401191,
+      0.0030319103300531225
+     ],
+     "window_violation_mm": [
+      0.0,
+      3.271983890142244
+     ],
+     "held": true,
+     "strict_unauth_kept": 226,
+     "off_links": {
+      "link_right_arm_5": 3,
+      "link_left_arm_3": 9,
+      "link_left_arm_4": 5,
+      "link_left_arm_5": 2,
+      "link_right_arm_6": 4,
+      "link_left_arm_6": 4,
+      "ee_left": 8,
+      "ee_right": 1,
+      "ee_finger_l1": 2
+     },
+     "strict_links": {},
+     "off_excluded": 237,
+     "strict_excluded": 0,
+     "rows_links": {},
+     "held_record": {
+      "hold_link": "ee_right",
+      "side": "right",
+      "contact_links": [
+       "ee_finger_r1",
+       "ee_finger_r2",
+       "ee_right"
+      ],
+      "parent_links": [
+       "link_right_arm_6",
+       "link_right_arm_5",
+       "link_right_arm_4",
+       "link_right_arm_3",
+       "link_right_arm_2",
+       "link_right_arm_1",
+       "link_right_arm_0"
+      ]
+     }
+    }
+   },
+   "i2": {
+    "n_chunks": 194,
+    "off_excluded_total": 19593,
+    "off_chunks_excluded": 194,
+    "strict_excluded_total": 11148,
+    "strict_chunks_excluded": 180,
+    "strict_unauthorized_kept_total": 8482,
+    "strict_chunks_unauthorized_kept_gt0": 194,
+    "refined_chunks_changed": 48,
+    "refined_joint_deg_max": 1.593583264921154,
+    "status_changes": 1,
+    "hold_changes": 0,
+    "split_authorization": {
+     "off_auth": 771,
+     "off_nonauth": 1458,
+     "strict_auth": 545,
+     "strict_nonauth": 0,
+     "p_off_auth": 771,
+     "p_off_nonauth": 1458,
+     "p_strict_auth": 544,
+     "p_strict_nonauth": 0
+    },
+    "nonauth_links_excluded_off": {
+     "link_left_arm_5": 273,
+     "link_left_arm_4": 247,
+     "link_left_arm_3": 144,
+     "link_right_arm_1": 132,
+     "link_right_arm_5": 158,
+     "link_right_arm_3": 127,
+     "link_right_arm_6": 65,
+     "link_right_arm_4": 104,
+     "link_right_arm_0": 54,
+     "link_right_arm_2": 27,
+     "link_left_arm_6": 43,
+     "ee_left": 12,
+     "ee_finger_l1": 7,
+     "ee_right": 41,
+     "link_left_arm_2": 24
+    },
+    "chunks_with_nonauth_excluded": {
+     "off": 190
+    },
+    "same_traj": {
+     "n_chunks": 194,
+     "off_excluded_total": 19593,
+     "strict_excluded_total": 11148,
+     "strict_unauth_kept_total": 8481,
+     "new_path_violations": 1,
+     "path_violations_off": 16,
+     "path_violations_strict": 17
+    },
+    "status_change_chunks": [
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18341",
+      "seq": 34,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.006168686913401191,
+       0.0011217851620034802
+      ],
+      "window_violation_mm": [
+       0.0,
+       2.101326955875164
+      ],
+      "strict_unauth_kept": 239,
+      "off_links": {
+       "link_right_arm_5": 3,
+       "link_left_arm_3": 9,
+       "link_left_arm_4": 5,
+       "link_left_arm_5": 2,
+       "link_right_arm_6": 4,
+       "link_left_arm_6": 4,
+       "ee_left": 8,
+       "ee_right": 1,
+       "ee_finger_l1": 2
+      },
+      "strict_links": {
+       "ee_right": 1
+      }
+     }
+    ],
+    "ep1834_s18341_seq34": {
+     "status": [
+      "feasible",
+      "violated"
+     ],
+     "hold": [
+      false,
+      false
+     ],
+     "path_clear_mm": [
+      0.006168686913401191,
+      0.0011217851620034802
+     ],
+     "window_violation_mm": [
+      0.0,
+      2.101326955875164
+     ],
+     "held": true,
+     "strict_unauth_kept": 239,
+     "off_links": {
+      "link_right_arm_5": 3,
+      "link_left_arm_3": 9,
+      "link_left_arm_4": 5,
+      "link_left_arm_5": 2,
+      "link_right_arm_6": 4,
+      "link_left_arm_6": 4,
+      "ee_left": 8,
+      "ee_right": 1,
+      "ee_finger_l1": 2
+     },
+     "strict_links": {
+      "ee_right": 1
+     },
+     "off_excluded": 237,
+     "strict_excluded": 15,
+     "rows_links": {
+      "ee_right": 23,
+      "ee_finger_r1": 56,
+      "ee_finger_r2": 56
+     },
+     "held_record": {
+      "hold_link": "ee_right",
+      "side": "right",
+      "contact_links": [
+       "ee_finger_r1",
+       "ee_finger_r2",
+       "ee_right"
+      ],
+      "parent_links": [
+       "link_right_arm_6",
+       "link_right_arm_5",
+       "link_right_arm_4",
+       "link_right_arm_3",
+       "link_right_arm_2",
+       "link_right_arm_1",
+       "link_right_arm_0"
+      ]
+     }
+    }
+   },
+   "b1": {
+    "n_chunks": 194,
+    "off_excluded_total": 19593,
+    "off_chunks_excluded": 194,
+    "strict_excluded_total": 14582,
+    "strict_chunks_excluded": 191,
+    "strict_unauthorized_kept_total": 5047,
+    "strict_chunks_unauthorized_kept_gt0": 191,
+    "refined_chunks_changed": 39,
+    "refined_joint_deg_max": 1.593583264921154,
+    "status_changes": 1,
+    "hold_changes": 0,
+    "split_authorization": {
+     "off_auth": 771,
+     "off_nonauth": 1458,
+     "strict_auth": 772,
+     "strict_nonauth": 0,
+     "p_off_auth": 771,
+     "p_off_nonauth": 1458,
+     "p_strict_auth": 771,
+     "p_strict_nonauth": 0
+    },
+    "nonauth_links_excluded_off": {
+     "link_left_arm_5": 273,
+     "link_left_arm_4": 247,
+     "link_left_arm_3": 144,
+     "link_right_arm_1": 132,
+     "link_right_arm_5": 158,
+     "link_right_arm_3": 127,
+     "link_right_arm_6": 65,
+     "link_right_arm_4": 104,
+     "link_right_arm_0": 54,
+     "link_right_arm_2": 27,
+     "link_left_arm_6": 43,
+     "ee_left": 12,
+     "ee_finger_l1": 7,
+     "ee_right": 41,
+     "link_left_arm_2": 24
+    },
+    "chunks_with_nonauth_excluded": {
+     "off": 190
+    },
+    "same_traj": {
+     "n_chunks": 194,
+     "off_excluded_total": 19593,
+     "strict_excluded_total": 14546,
+     "strict_unauth_kept_total": 5083,
+     "new_path_violations": 1,
+     "path_violations_off": 16,
+     "path_violations_strict": 17
+    },
+    "status_change_chunks": [
+     {
+      "run": "V11AB_H_V11AB_ep1834_s18341",
+      "seq": 34,
+      "status": [
+       "feasible",
+       "violated"
+      ],
+      "path_clear_mm": [
+       0.006168686913401191,
+       0.0011217851620034802
+      ],
+      "window_violation_mm": [
+       0.0,
+       2.101326955875164
+      ],
+      "strict_unauth_kept": 183,
+      "off_links": {
+       "link_right_arm_5": 3,
+       "link_left_arm_3": 9,
+       "link_left_arm_4": 5,
+       "link_left_arm_5": 2,
+       "link_right_arm_6": 4,
+       "link_left_arm_6": 4,
+       "ee_left": 8,
+       "ee_right": 1,
+       "ee_finger_l1": 2
+      },
+      "strict_links": {
+       "link_right_arm_6": 4,
+       "ee_right": 1
+      }
+     }
+    ],
+    "ep1834_s18341_seq34": {
+     "status": [
+      "feasible",
+      "violated"
+     ],
+     "hold": [
+      false,
+      false
+     ],
+     "path_clear_mm": [
+      0.006168686913401191,
+      0.0011217851620034802
+     ],
+     "window_violation_mm": [
+      0.0,
+      2.101326955875164
+     ],
+     "held": true,
+     "strict_unauth_kept": 183,
+     "off_links": {
+      "link_right_arm_5": 3,
+      "link_left_arm_3": 9,
+      "link_left_arm_4": 5,
+      "link_left_arm_5": 2,
+      "link_right_arm_6": 4,
+      "link_left_arm_6": 4,
+      "ee_left": 8,
+      "ee_right": 1,
+      "ee_finger_l1": 2
+     },
+     "strict_links": {
+      "link_right_arm_6": 4,
+      "ee_right": 1
+     },
+     "off_excluded": 237,
+     "strict_excluded": 71,
+     "rows_links": {
+      "link_right_arm_6": 29,
+      "ee_right": 23,
+      "ee_finger_r1": 56,
+      "ee_finger_r2": 56
+     },
+     "held_record": {
+      "hold_link": "ee_right",
+      "side": "right",
+      "contact_links": [
+       "ee_finger_r1",
+       "ee_finger_r2",
+       "ee_right"
+      ],
+      "parent_links": [
+       "link_right_arm_6",
+       "link_right_arm_5",
+       "link_right_arm_4",
+       "link_right_arm_3",
+       "link_right_arm_2",
+       "link_right_arm_1",
+       "link_right_arm_0"
+      ]
+     }
+    }
+   }
+  },
+  "V-I2-defect": {
+   "note": "V-I2 replay_i2.py recorded changed_links as dict keyed by link name (one column per name), so V-I2-3_phase.rows_changed_by_link_reference_traj (ee_right 234, ee_left 50, ee_finger_l1 40, ee_finger_r2 16, ee_finger_l2 7; sum 347) undercounts the 4328 total; per-link aggregation in this step uses per-column sums (dropped_off - dropped_strict, reverse_changed 0)",
+   "recorded_server_authorized_links_in_held_chunks": "outputs/verify/T44/I2b/recorded_authorized_links.txt (194 held chunks: authorized_links = holding hand ee + 2 fingers, 158 left / 36 right)"
+  }
+ },
+ "figures": [
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44i2b-scene-carry-permission.png",
+   "kind": "scene",
+   "sidecar": "t44i2b-scene-carry-permission.json"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44i2b-per-chunk-rows.png",
+   "kind": "graph",
+   "sidecar": "t44i2b-per-chunk-rows.json"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44i2b-summary-table.png",
+   "kind": "table",
+   "sidecar": "t44i2b-summary-table.json"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy: 14/15 violated at start, frame0 clearance_before -29.031048280806342 mm (equal to recorded value)"
+ },
+ "verdict": "V-I2b-1 4 failed / 2582 passed in the full run, 4 passed on rerun alone; V-I2b-2 strict-off refined/status/HOLD differences 0 of 1006 chunks vs HEAD 498f713 and vs V-I2 working tree (both configs); I2b vs V-I2 replay (I2) strict-on: refined, status, HOLD, tail rows identical on the recorded V11AB model; I2b vs I2-server (carry rows 0): tail rows changed 55938 -> 4328, refined chunks changed 108 -> 10",
+ "not_measured": [
+  "GPU field / live server path; closed loop",
+  "scene_from_constraint_set / AG3S held record produced by a live server (record built by calling to_adapter._held_permission_record on the recorded hold link)",
+  "I2-server carry rows = 0 premise (not verified against a live server; the recorded exclusion.authorized_links in held chunks equals the holding gripper)",
+  "arms-model supplement ran held chunks only (194) and with a rebuilt constraint model (not the V11AB server model); non-held chunks have identical I2/I2b scenes",
+  "B-profile V11AB runs (5 runs, 300 chunks)",
+  "HEAD-vs-HEAD determinism control"
+ ]
+}

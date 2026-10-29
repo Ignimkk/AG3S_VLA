@@ -1,0 +1,389 @@
+{
+ "artifact": "fig04_heldout",
+ "pdf": "paper/figures/cvpr_v1/fig04_heldout.pdf",
+ "png": "paper/figures/cvpr_v1/fig04_heldout.png",
+ "size_in": [
+  3.25,
+  2.3
+ ],
+ "aspect": 1.413,
+ "textwidth_in": 6.875,
+ "raster_dpi_in_pdf": 400,
+ "png_dpi": 300,
+ "fonts": {
+  "family": "DejaVu Sans",
+  "math": "stix",
+  "pdf_fonttype": 42,
+  "min_pt": 7.0,
+  "max_pt": 7.0,
+  "n_text_items": 21,
+  "floor_pt": 7.0
+ },
+ "layout_audit": {
+  "tolerance_pt": 1.0,
+  "min_text_to_panel_border_in": 0.05,
+  "violations": {
+   "text_text": 0,
+   "text_segment": 0,
+   "panel_border": 0,
+   "badge_heights": 0
+  },
+  "n_segments_checked": 0,
+  "n_panels": 0,
+  "n_texts": 21
+ },
+ "script": "paper/tools/plotting/cvpr_v1_compose.py",
+ "generated": "2026-10-18T14:31:55+00:00",
+ "git_head": "f15e587290f6b099bb2be9b4dc137cacf62c9db5",
+ "printed_numbers": [
+  {
+   "text": "32",
+   "meaning": "episodes where B better than G:N (paired)",
+   "value": 32,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/main_success/paired_iou/B - G:N/better"
+  },
+  {
+   "text": "2",
+   "meaning": "episodes where B worse than G:N (paired)",
+   "value": 2,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/main_success/paired_iou/B - G:N/worse"
+  },
+  {
+   "text": "bar Coarse / pre",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.8749510904201444,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/pre/G:N/iou/episode_mean"
+  },
+  {
+   "text": "bar Coarse / held",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.5377397793127421,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/held/G:N/iou/episode_mean"
+  },
+  {
+   "text": "bar Coarse / placed",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.7767709801403806,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/placed/G:N/iou/episode_mean"
+  },
+  {
+   "text": "bar Surface (vol. mask) / pre",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.9075024099794847,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/pre/A-fk/iou/episode_mean"
+  },
+  {
+   "text": "bar Surface (vol. mask) / held",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.64040778567183,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/held/A-fk/iou/episode_mean"
+  },
+  {
+   "text": "bar Surface (vol. mask) / placed",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.8449822910803859,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/placed/A-fk/iou/episode_mean"
+  },
+  {
+   "text": "bar Surface / pre",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.9698507944447411,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/pre/A/iou/episode_mean"
+  },
+  {
+   "text": "bar Surface / held",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.8475770155578735,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/held/A/iou/episode_mean"
+  },
+  {
+   "text": "bar Surface / placed",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.845807102001963,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/placed/A/iou/episode_mean"
+  },
+  {
+   "text": "bar Surface + ID (ours) / pre",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.9673310030050492,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/pre/B/iou/episode_mean"
+  },
+  {
+   "text": "bar Surface + ID (ours) / held",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.8411570863823252,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/held/B/iou/episode_mean"
+  },
+  {
+   "text": "bar Surface + ID (ours) / placed",
+   "meaning": "IoU episode mean by grasp state (bar height, no label printed)",
+   "value": 0.8728342906503719,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "/by_grasp_state/placed/B/iou/episode_mean"
+  },
+  {
+   "text": "(dots)",
+   "meaning": "per-episode IoU means, G:N and B, 34 success episodes",
+   "value": null,
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json",
+   "key": "recomputed from heldout_locked/frames.json + run/rounds/R6/rows/*.jsonl (arm G:N, valid flag) + run/rounds/R10b/rows/*.jsonl (arm Mem-first:prefix_L8:d0.05); asserted equal to /main_success/*/iou/episode_mean"
+  }
+ ],
+ "number_sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/summary.json": "b5fd560a7ec7c184b379734ec37a576cc6174b0d768d7725f1822e9bf4d34bdd"
+ },
+ "assets": {},
+ "registration_status": "numbers copied from raw summary.json / verify.json / agg.json as listed; they are not yet registered in paper/evidence/RESULTS.md (planned EXP003 held-out locked, EXP004 closed-loop hurdle)",
+ "layout": "single column: left paired per-episode IoU (G:N vs B, connectors), right grouped bars of IoU by grasp state for G:N / A-fk / A / B",
+ "per_episode": {
+  "episodes": [
+   "HO_adjacent_ep1725",
+   "HO_place_ep393",
+   "HO_adjacent_ep1114",
+   "HO_clear_ep773",
+   "HO_place_ep258",
+   "HO_place_ep359",
+   "HO_clear_ep583",
+   "HO_place_ep1743",
+   "HO_place_ep1698",
+   "HO_adjacent_ep1864",
+   "HO_place_ep391",
+   "HO_adjacent_ep64",
+   "HO_clear_ep195",
+   "HO_adjacent_ep1719",
+   "HO_clear_ep1893",
+   "HO_adjacent_ep161",
+   "HO_clear_ep764",
+   "HO_clear_ep1769",
+   "HO_adjacent_ep333",
+   "HO_clear_ep1419",
+   "HO_adjacent_ep301",
+   "HO_place_ep1930",
+   "HO_adjacent_ep485",
+   "HO_clear_ep1245",
+   "HO_adjacent_ep603",
+   "HO_adjacent_ep729",
+   "HO_clear_ep623",
+   "HO_clear_ep311",
+   "HO_clear_ep1534",
+   "HO_place_ep139",
+   "HO_clear_ep204",
+   "HO_adjacent_ep1017",
+   "HO_place_ep19",
+   "HO_clear_ep1761"
+  ],
+  "GN": [
+   0.45136588027944496,
+   0.48546604901458307,
+   0.48558823158373193,
+   0.5657073520617321,
+   0.598552616185846,
+   0.6163553343429359,
+   0.6299009461819871,
+   0.6658996492280906,
+   0.6727279262407173,
+   0.7245545997887839,
+   0.7465506283294914,
+   0.7814424899046046,
+   0.7832171896058834,
+   0.7889525277922861,
+   0.8007270367020474,
+   0.8034225286511141,
+   0.8092535410250518,
+   0.811001450523873,
+   0.8259404191969207,
+   0.8404696880244584,
+   0.8488765058693067,
+   0.8509987680355992,
+   0.8626467840749737,
+   0.8660473635741881,
+   0.8664065280891197,
+   0.8664674073364862,
+   0.8713045443666524,
+   0.8729668147486678,
+   0.8832138646218507,
+   0.8920819246788072,
+   0.9111365201688828,
+   0.9170942520085918,
+   0.9419644871745453,
+   0.9453241976283175
+  ],
+  "B": [
+   0.6581585104795661,
+   0.6998226155909673,
+   0.6511761035908222,
+   0.8332602877542704,
+   0.7284910992796296,
+   0.9184419635100036,
+   0.8415746673614432,
+   0.9263449213468048,
+   0.8790758121694909,
+   0.882858697504492,
+   0.9587959907513035,
+   0.9541284850463408,
+   0.8840975941921135,
+   0.9536129057045236,
+   0.9189514698470107,
+   0.9773260253757883,
+   0.9454544920197203,
+   0.9554692099315931,
+   0.7271315693326543,
+   0.9113645430246791,
+   0.9594317554186089,
+   0.9771053303506013,
+   0.9456598678480346,
+   0.9148515088881288,
+   0.957574551592585,
+   0.9593949903067577,
+   0.9072537258977436,
+   0.9575796454571378,
+   0.672669195389669,
+   0.9283555632728223,
+   0.970505370592785,
+   0.9601509729255336,
+   0.9861568682997873,
+   0.9874654032122341
+  ],
+  "A": [
+   0.5247100853647663,
+   0.6998226155909673,
+   0.5585183926975539,
+   0.7964492355970034,
+   0.7284910992796296,
+   0.7522912349314755,
+   0.7626421891046091,
+   0.9007341827536964,
+   0.8275849248164238,
+   0.8312691403003497,
+   0.9587959907513035,
+   0.9275166346522671,
+   0.817673861837701,
+   0.9523230793497834,
+   0.9437388227910842,
+   0.8179543281007574,
+   0.9454544920197203,
+   0.8775251468957819,
+   0.8520041550084472,
+   0.8986959875789013,
+   0.9594317554186089,
+   0.9771053303506013,
+   0.9456598678480346,
+   0.9148515088881288,
+   0.957574551592585,
+   0.9593949903067577,
+   0.9322545801855705,
+   0.9575796454571378,
+   0.9412203865164757,
+   0.950684562116233,
+   0.9834690103450828,
+   0.9601509729255336,
+   0.9861568682997873,
+   0.9874654032122341
+  ],
+  "A_fk": [
+   0.4782822537506863,
+   0.6430466162614763,
+   0.5316753496670882,
+   0.7448640657360903,
+   0.6878053597009105,
+   0.7052438816055331,
+   0.7348630733124629,
+   0.8365350476443508,
+   0.7842112321597703,
+   0.7717782771288224,
+   0.9150142361453112,
+   0.9077179205095874,
+   0.7893012484794804,
+   0.9015875751208726,
+   0.8520108725962483,
+   0.7651621459228098,
+   0.8770813418217568,
+   0.8378546304528758,
+   0.8079583215362751,
+   0.8654983724588838,
+   0.9115976968665899,
+   0.8844184603146777,
+   0.9022149635609154,
+   0.8677657714126521,
+   0.8871745116421785,
+   0.922504468900032,
+   0.9051194916136631,
+   0.9320670425084924,
+   0.9035835116306368,
+   0.9363474941903485,
+   0.9673644600274378,
+   0.9150442333645833,
+   0.9651152833474181,
+   0.9522733258719323
+  ],
+  "source_rows": [
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/frames.json",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/run/rounds/R6/rows",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261016T030741+0900_f15e587290f6_19ea09c7a8b8/heldout_locked/run/rounds/R10b/rows"
+  ],
+  "validity": "G:N row 'valid' flag (R10b rows carry no flag); 2523 valid frames of 34 success episodes",
+  "paired_B_minus_GN": {
+   "n_episodes": 34,
+   "diff": 0.11782546077135511,
+   "ci95": [
+    0.08271813740590676,
+    0.15130667079948473
+   ],
+   "better": 32,
+   "worse": 2
+  },
+  "paired_A_minus_GN": {
+   "n_episodes": 34,
+   "diff": 0.10304614664251237,
+   "ci95": [
+    0.08323494981427215,
+    0.12313285145943233
+   ],
+   "better": 34,
+   "worse": 0
+  }
+ },
+ "by_grasp_state": {
+  "G:N": {
+   "pre": 0.8749510904201444,
+   "held": 0.5377397793127421,
+   "placed": 0.7767709801403806
+  },
+  "A-fk": {
+   "pre": 0.9075024099794847,
+   "held": 0.64040778567183,
+   "placed": 0.8449822910803859
+  },
+  "A": {
+   "pre": 0.9698507944447411,
+   "held": 0.8475770155578735,
+   "placed": 0.845807102001963
+  },
+  "B": {
+   "pre": 0.9673310030050492,
+   "held": 0.8411570863823252,
+   "placed": 0.8728342906503719
+  }
+ },
+ "arm_labels": {
+  "G:N": "Coarse",
+  "A-fk": "Surface (vol. mask)",
+  "A": "Surface",
+  "B": "Surface + ID (ours)"
+ },
+ "note": "the connectors show B vs G:N: 32 improved / 2 worse (summary.json paired_iou); the 34/34 statement holds for A vs G:N (A - G:N better 34, worse 0), not for B",
+ "is_measured_result": true
+}

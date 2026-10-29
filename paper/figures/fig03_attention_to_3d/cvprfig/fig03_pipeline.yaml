@@ -1,0 +1,141 @@
+# F03 method pipeline (CVPR-Figure spec, draft). Claim: one frozen VLA supplies both
+# the action chunk and the attention that decides which observed geometry the contact
+# links may touch; everything else stays in the collision field.
+# Dashed outline = planned component (boundary-preserving extent, develope_PLAN 0.10).
+figure:
+  id: fig03_pipeline
+  venue: cvpr
+  width: double
+  font: times
+  pad_bottom: 10
+
+layout: row
+gap: 10
+
+panels:
+  # ------------------------------------------------------------ stage 1
+  - id: s_vla
+    title: "Frozen VLA"
+    frame: dashed
+    valign: top
+    body:
+      - col:
+          gap: 5
+          align: center
+          body:
+            - row:
+                gap: 2
+                body:
+                  - {id: im_h, shape: image, src: ../../cvprfig_assets/policy_cam_high.png, w: 24, h: 24}
+                  - {id: im_l, shape: image, src: ../../cvprfig_assets/policy_cam_left_wrist.png, w: 24, h: 24}
+                  - {id: im_r, shape: image, src: ../../cvprfig_assets/policy_cam_right_wrist.png, w: 24, h: 24}
+            - {id: lang, shape: text, text: "*instruction, state*", size: 6.2}
+            - {id: vla, shape: trapezoid, text: "VLA (frozen)", role: backbone, dir: down, w: 80, h: 20}
+            - row:
+                gap: 6
+                align: start
+                body:
+                  - col:
+                      gap: 12
+                      body:
+                        - {id: feat, text: "prefix\nfeatures", role: backbone, tint: pale, size: 6.2}
+                        - {id: probe, text: "Sub-task\nprobe", role: temporal, size: 6.2}
+                  - {id: attn, shape: image, src: ../../cvprfig_assets/attn_left_wrist.png, w: 34, h: 34, caption: "attention", caption_size: 6.0}
+            - {id: depth, shape: parallelogram, text: "depth, 3 views", role: input, size: 6.2, w: 70}
+
+  # ------------------------------------------------------------ stage 2 (ours)
+  - id: s_tgt
+    title: "Attention-grounded target"
+    frame: dashed
+    fill: gold.pale
+    valign: top
+    body:
+      - col:
+          gap: 6
+          align: center
+          body:
+            - {id: lane2, shape: spacer, w: 4, h: 14}
+            - {id: lift, text: "Multi-view lifting", role: core, tint: light, outline: match}
+            - {id: grow, text: "Seed growth +\ncandidate filtering", role: core, tint: light, outline: match}
+            - {id: confirm, text: "Target\nconfirmation", role: core, tint: light, outline: match}
+            - {id: extent, text: "**Boundary-preserving\nextent**", role: core, tint: mid, dash: true, outline: match}
+            - {id: tgt_img, shape: image, w: 62, h: 34, text: "3D target extent\n(pending)", size: 5.8}
+
+  # ------------------------------------------------------------ stage 3
+  - id: s_geo
+    title: "Contact-aware geometry"
+    frame: dashed
+    valign: top
+    body:
+      - col:
+          gap: 6
+          align: center
+          body:
+            - {id: lane3, shape: spacer, w: 4, h: 14}
+            - {id: tsdf, text: "TSDF → ESDF\n(cuRobo)", role: aux}
+            - {id: tfree, text: "Target-free\nfield", role: aux, tint: soft}
+            - {id: grasp, text: "Grasp state →\nattached object", role: temporal}
+            - {id: lsac, text: "**Link-specific\nallowed collision**", role: core, tint: mid, outline: match}
+            - {id: field_img, shape: image, src: ../../cvprfig_assets/esdf_fine_xz.png, w: 44, caption: "field slice", caption_size: 6.0}
+
+  # ------------------------------------------------------------ stage 4
+  - id: s_ref
+    title: "Constrained refinement"
+    frame: dashed
+    valign: top
+    badge: "per chunk"
+    body:
+      - col:
+          gap: 6
+          align: center
+          body:
+            - row:
+                gap: 3
+                align: center
+                body:
+                  - {id: chunk, shape: slab, n: 5, cell: 4, cellh: 12, role: backbone}
+                  - {id: chunk_t, shape: text, text: "*action chunk*", size: 6.0}
+            - {id: sqp, text: "Executed-horizon\nSQP", role: decoder}
+            - {id: cons, shape: text, text: "*d*(*x*) − *r* ≥ *m*", size: 6.6}
+            - {id: gate, shape: hexagon, text: "Post-check", role: decoder, size: 6.4}
+            - {id: out_img, shape: image, src: ../../cvprfig_assets/demo_lift.png, w: 62, caption: "execute or hold", caption_size: 6.0}
+
+edges:
+  # stage 1 internals
+  - {from: im_l.s, to: lang.n, arrow: none, lw: hairline}
+  - {from: lang.s, to: vla.n}
+  - {from: vla.s, to: attn.n, color: navy}
+  - {from: vla.s, to: feat.n, color: navy}
+  - {from: feat, to: probe, color: orange}
+  # into stage 2
+  - {from: attn.e, to: lift.w, route: hv, mid: 0.4}
+  - {from: depth.e, to: lift.w, route: hv, mid: 0.4}
+  - {from: lift, to: grow, color: gold.deep}
+  - {from: grow, to: confirm, color: gold.deep}
+  - {from: probe.e, to: confirm.w, route: hv, mid: 0.9, color: orange}
+  - {from: confirm, to: extent, color: gold.deep}
+  - {from: extent, to: tgt_img, color: gold.deep}
+  # into stage 3
+  - {from: depth.s, to: tsdf.w, via: [[50, 206], [256, 206], [256, 54.3]], color: teal}
+  - {from: tsdf, to: tfree, color: teal}
+  - {from: extent.e, to: tfree.w, route: hv, mid: 0.8, color: gold.deep}
+  - {from: tfree, to: grasp, arrow: none, lw: hairline}
+  - {from: grasp, to: lsac, color: orange}
+  - {from: lsac, to: field_img, color: gold.deep}
+  # into stage 4
+  - {from: vla.e, to: chunk.w, via: [[117, 72], [117, 29.6]], color: navy}
+  - {from: chunk_t.s, to: sqp.n, color: navy}
+  - {from: lsac.e, to: sqp.w, route: hv, color: gold.deep}
+  - {from: sqp, to: cons, arrow: none, lw: hairline}
+  - {from: cons, to: gate, color: purple}
+  - {from: gate, to: out_img, color: purple}
+  - {from: gate.w, to: grasp.e, route: hv, dash: true, color: "#7F7F7F"}
+
+legend:
+  at: [392, 192]
+  dir: col
+  size: 6.0
+  items:
+    - {text: "Our contribution", color: gold.light, kind: swatch}
+    - {text: "Planned component", color: ink, kind: dashed}
+    - {text: "Feedback", color: "#7F7F7F", kind: dashed}

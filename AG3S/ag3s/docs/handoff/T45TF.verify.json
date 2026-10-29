@@ -1,0 +1,1412 @@
+{
+ "_comment": "ag3s-verifier. numbers and paths only.",
+ "step": "T45-TF (D-TF: target surface left in the target-free layer)",
+ "date": "2026-10-12 KST",
+ "runs": [
+  {
+   "id": "baseline",
+   "command": "p/run_baseline.sh (esdf_rollout legacy, --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms; CPU, .venv-openpi-live)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/TF/baseline/legacy.json, baseline/summary.txt",
+   "stdout_log": "verify/T45/TF/logs/baseline_legacy.log"
+  },
+  {
+   "id": "rows8",
+   "command": "cd /mnt/dev/AG3S_VLA-development; JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=2 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/TF/p/tf_case.py --mode rows --name <run> --seq <seq> --out $RUN/verify/T45/TF/raw/rows  (p/run_cases.sh rows 0|1; cases p/cases_rows.txt)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/TF/raw/rows/rows_<run>_s<seq>.{json,npz}",
+   "stdout_log": "verify/T45/TF/logs/rows_<run>_<seq>.log"
+  },
+  {
+   "id": "palm57",
+   "command": "cd /mnt/dev/AG3S_VLA-development; JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=2 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/TF/p/tf_case.py --mode palm ... (p/run_cases.sh palm 0|1; cases p/cases_palm.txt = D-SF survey pre8+close chunks with occupied main voxels inside the PC palm)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/TF/raw/palm/palm_<run>_s<seq>.{json,npz}",
+   "stdout_log": "verify/T45/TF/logs/palm_<run>_<seq>.log"
+  },
+  {
+   "id": "survey1350",
+   "command": "cd /mnt/dev/AG3S_VLA-development; JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=2 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/TF/p/tf_survey.py --worker 0|1 --nworkers 2 --out $RUN/verify/T45/TF/raw/survey (p/run_survey.sh)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/TF/raw/survey/<run>.json",
+   "stdout_log": "verify/T45/TF/logs/survey{0,1}.log"
+  },
+  {
+   "id": "impact162",
+   "command": "cd /mnt/dev/AG3S_VLA-development; JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=2 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/TF/p/tf_impact.py --worker 0|1 --nworkers 2 --out $RUN/verify/T45/TF/raw/impact (p/run_impact.sh)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/TF/raw/impact/<run>.json",
+   "stdout_log": "verify/T45/TF/logs/impact{0,1}.log"
+  },
+  {
+   "id": "impact_whatif17",
+   "command": "cd /mnt/dev/AG3S_VLA-development; JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=2 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/TF/p/tf_impact_whatif.py --worker 0|1 --nworkers 2 --out $RUN/verify/T45/TF/raw/impact_whatif (p/run_impact_whatif.sh)",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/TF/raw/impact_whatif/<run>.json",
+   "stdout_log": "verify/T45/TF/logs/impact_whatif{0,1}.log"
+  },
+  {
+   "id": "ambiguous17",
+   "command": "cd /mnt/dev/AG3S_VLA-development; JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=2 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/TF/p/tf_ambig.py",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/TF/raw/ambiguous_evidence.json",
+   "stdout_log": "verify/T45/TF/logs/ambig.log"
+  },
+  {
+   "id": "clearance_crosscheck",
+   "command": "cd /mnt/dev/AG3S_VLA-development; JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=2 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/TF/p/check_clearance.py",
+   "venv": ".venv-openpi-live",
+   "raw_output": "verify/T45/TF/raw/check_clearance.json",
+   "stdout_log": "-"
+  },
+  {
+   "id": "aggregate",
+   "command": "cd /mnt/dev/AG3S_VLA-development; JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=2 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/TF/p/tf_agg.py ; python3 p/tf_final.py ; python3 p/tf_verify_json.py",
+   "venv": ".venv-openpi-live / system python3",
+   "raw_output": "verify/T45/TF/raw/agg.json, raw/final_numbers.json, raw/table_rows.json",
+   "stdout_log": "verify/T45/TF/logs/agg.log"
+  },
+  {
+   "id": "figures",
+   "command": "cd /mnt/dev/AG3S_VLA-development; JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/AG3S_VLA-development OMP_NUM_THREADS=2 nice -n 19 .venv-openpi-live/bin/python $RUN/verify/T45/TF/p/tf_figs.py [scene graph table]",
+   "venv": ".venv-openpi-live",
+   "raw_output": "AG3S/ag3s/docs/figures/t45/t45tf-{scene,graph,table}.{png,json}",
+   "stdout_log": "verify/T45/TF/logs/figs.log"
+  }
+ ],
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T110227+0900_7339fa4df065_242511982209",
+ "code_state": {
+  "repo": "/mnt/dev/AG3S_VLA-development",
+  "branch": "feature/ag3s-development",
+  "head": "07f0bfe7737db440be47965f7739044d46b4c895",
+  "dirty_files": [
+   "AG3S/ag3s/docs/handoff/T44e.task.md",
+   "AG3S/ag3s/docs/handoff/T45.task.md",
+   "untracked: figures/t45/t45sf-*, handoff/T45SF.verify.json (D-SF step)"
+  ],
+  "env": "CPU only (JAX_PLATFORMS=cpu, CUDA_VISIBLE_DEVICES=), nice 19, <= 2 workers, no GPU / ports / CL2 processes touched. Inputs read-only: results/workspace/verify/T44/CL/runs/C1a (server_constraints chunk npz, frames.jsonl, server_proc.txt), D-SF run 20261012T040704+0900_f14ae3e6b62b_a1eaf5e25786/verify/T45/SF (index_c1a.json, raw/diag npz, raw/survey.json, p/). D-SF scripts copied to verify/T45/TF/p/ (sfcommon.py, sflib.py, vt45.py) and p/from_SF/. Model XML = this checkout's model_transport.xml (as D-SF). HEAD 7339fa4 vs D-SF f14ae3e: only docs/setup files differ (git diff --stat).",
+  "scripts": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T110227+0900_7339fa4df065_242511982209/verify/T45/TF/p/{tflib,tf_case,tf_survey,tf_impact,tf_impact_whatif,tf_ambig,check_clearance,tf_agg,tf_final,tf_figs,tf_verify_json}.py"
+ },
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy esdf_rollout (CPU, .venv-openpi-live instead of .venv-ag3s per T44/T45 rule): start-violated 14/15, has_target 15/15, frame0 clearance_before -29.031048280806342 mm (= regression-baseline legacy line). cuRobo baseline not run (GPU reserved for CL2). Reproduction check: offline target-free layer reconstruction = record (rows8: 0 box voxels > 0.6 mm, trace removed/ambiguous/nontarget_kept sets equal 8/8; impact 162 chunks full grid: 1 voxel > 0.6 mm, classify_violations(rec) == classify_violations(recon) 162/162)."
+ },
+ "numbers": {
+  "baseline_legacy": {
+   "start_violated": 14,
+   "has_target": 15,
+   "frames": 15,
+   "frame0_clearance_before_mm": -29.031048280806342
+  },
+  "server_setting_C1a": {
+   "target_exclusion": "ball_owned",
+   "owned_max_dist_voxels": 3.0,
+   "owned_tie_voxels": 1.0,
+   "owned_unowned": "remove",
+   "attention_split_radius_mm": 12.0,
+   "target_ball_pad_voxels": 1.0,
+   "target_ball_quantile": 1.0,
+   "attached_sign_threshold_voxels": 1.5,
+   "fine_voxel_m": 0.005,
+   "fine_truncation_m": 0.03,
+   "tsdf_time_decay": 1.0,
+   "target_free_coarse": false,
+   "source": "results/workspace/verify/T44/CL/runs/C1a/server_8280_*/server_proc.txt + AG3S/ag3s/config.py defaults"
+  },
+  "reconstruction": {
+   "rows8_trace_match_all": true,
+   "rows8_recon_box_voxels_diff_gt_0p6mm": 0,
+   "rows8_recon_max_abs_diff_mm": 0.05950033664703369,
+   "palm57_trace_mismatch_cases": 1,
+   "palm57_trace_mismatch_detail": "C1a_ep110_s1102:16 nontarget_kept 63 vs 62 recorded (1 seed)",
+   "palm57_recon_box_voxels_diff_gt_0p6mm": 1,
+   "impact162_full_grid_recon_max_abs_diff_mm": 24.492627009749413,
+   "impact162_full_grid_voxels_diff_gt_0p6mm": 1,
+   "impact162_classify_rec_equals_recon": true
+  },
+  "rows8": {
+   "n_violated_rows_PC": 575,
+   "n_blocking_free_voxels": 797,
+   "blocking_free_voxels_by_path": {
+    "kept_ambiguous": 62,
+    "kept_nontarget": 1,
+    "neg_nonseed_not_signset": 22,
+    "outside_ball_seed": 533,
+    "sign_residual_nonseed_signset": 26,
+    "sign_residual_removed_seed": 62,
+    "outside_ball_neg": 91
+   },
+   "blocking_free_voxels_by_gt": {
+    "none": 63,
+    "target": 205,
+    "other_fruit": 214,
+    "robot": 38,
+    "afterimage": 271,
+    "crate": 6
+   },
+   "blocking_free_voxels_target_band": {
+    "inside_lt_-5mm": 69,
+    "inside_-5_0": 79,
+    "outside_0_5": 57,
+    "outside_5_10": 34,
+    "outside_gt_10": 558
+   },
+   "violated_rows_by_path_group": {
+    "a_ambiguous_kept": 60,
+    "a_outside_ball": 448,
+    "a_sign_residual": 67
+   },
+   "violated_rows_by_path_group_ncases": {
+    "a_ambiguous_kept": 5,
+    "a_outside_ball": 6,
+    "a_sign_residual": 4
+   },
+   "violated_rows_by_gt": {
+    "none": 112,
+    "target": 108,
+    "other_fruit": 115,
+    "robot": 95,
+    "afterimage": 145
+   },
+   "violated_rows_by_path_x_gt": {
+    "a_ambiguous_kept|none": 26,
+    "a_outside_ball|none": 72,
+    "a_sign_residual|target": 45,
+    "a_ambiguous_kept|target": 34,
+    "a_outside_ball|other_fruit": 107,
+    "a_sign_residual|other_fruit": 8,
+    "a_outside_ball|robot": 95,
+    "a_outside_ball|afterimage": 145,
+    "a_outside_ball|target": 29,
+    "a_sign_residual|none": 14
+   },
+   "violated_rows_by_path_x_gt_ncases": {
+    "a_ambiguous_kept|none": 3,
+    "a_outside_ball|none": 4,
+    "a_sign_residual|target": 4,
+    "a_ambiguous_kept|target": 3,
+    "a_outside_ball|other_fruit": 3,
+    "a_sign_residual|other_fruit": 1,
+    "a_outside_ball|robot": 3,
+    "a_outside_ball|afterimage": 1,
+    "a_outside_ball|target": 1,
+    "a_sign_residual|none": 1
+   },
+   "target_free_mode": {
+    "ball": 8
+   },
+   "coarse_target_free": {
+    "off": 8
+   },
+   "ball_nearest_fruit_is_target": 7,
+   "whatif_violated_rows": {
+    "W0_record": 575,
+    "W_thr0_signforce_all_signset": 575,
+    "W_amb_remove": 476,
+    "W_amb_remove_thr0": 476,
+    "W_ball_method": 476,
+    "W_ball_owned_radius+5mm": 521,
+    "W_ball_owned_radius+10mm": 510,
+    "W_ball_owned_radius+20mm": 446,
+    "W_nt_drop10mm": 476,
+    "W_nt_drop15mm": 476,
+    "W_nt_gt_oracle": 478,
+    "W_oracle_gt_target_le5mm": 503
+   },
+   "whatif_new_removed_seeds_on_other_fruit_le5mm": {
+    "W0_record": 0,
+    "W_thr0_signforce_all_signset": 0,
+    "W_amb_remove": 63,
+    "W_amb_remove_thr0": 63,
+    "W_ball_method": 63,
+    "W_ball_owned_radius+5mm": 134,
+    "W_ball_owned_radius+10mm": 336,
+    "W_ball_owned_radius+20mm": 815,
+    "W_nt_drop10mm": 63,
+    "W_nt_drop15mm": 63,
+    "W_nt_gt_oracle": 10,
+    "W_oracle_gt_target_le5mm": 0
+   },
+   "per_case": {
+    "C1a_ep0_s2:13": {
+     "violated_rows": 62,
+     "violated_rows_by_path_x_gt": {
+      "a_ambiguous_kept|none": 20,
+      "a_outside_ball|none": 32,
+      "a_sign_residual|target": 7,
+      "a_ambiguous_kept|target": 3
+     },
+     "blocking_free_voxels": 39,
+     "blocking_by_path": {
+      "kept_ambiguous": 15,
+      "kept_nontarget": 1,
+      "neg_nonseed_not_signset": 9,
+      "outside_ball_seed": 6,
+      "sign_residual_nonseed_signset": 3,
+      "sign_residual_removed_seed": 5
+     },
+     "blocking_target_band": {
+      "inside_lt_-5mm": 9,
+      "inside_-5_0": 14,
+      "outside_0_5": 9,
+      "outside_5_10": 7,
+      "outside_gt_10": 0
+     },
+     "target_category_voxels_target_vis_mm": {
+      "min": -12.37154187809493,
+      "median": -2.581022891597331,
+      "max": 4.374538277554759,
+      "n_inside": 23,
+      "n_outside": 9
+     },
+     "target_category_voxels_ball_signed_mm": {
+      "min": -18.02506477677536,
+      "median": -8.248171345204865,
+      "max": -1.191164254068934
+     },
+     "manip_state": "visible",
+     "ball_centre_to_gt_target_centre_mm": 1.2599731618775092,
+     "ball_centre_nearest_fruit": "orange",
+     "gt_target_surface_in_ball_candidates_frac": 0.8857946827091014,
+     "gt_target_surface_below_zmin_frac": 0.1142053172908985,
+     "target_max_displacement_over_episode_mm": 0.05434116018885776,
+     "nontarget_points_near_ball": {
+      "n": 4,
+      "on_target_le3mm": 4,
+      "on_other_fruit_le3mm": 0,
+      "on_table_le3mm": 0,
+      "target_vis_mm": {
+       "n": 4,
+       "min": 0.1558745445370759,
+       "p10": 0.16234869361619297,
+       "median": 0.2757681529161908,
+       "p90": 0.5378766627693071,
+       "max": 0.6080746906569036
+      }
+     },
+     "target_points_on_target_le3mm": [
+      95,
+      95
+     ],
+     "whatif_violated_rows": {
+      "W0_record": 62,
+      "W_thr0_signforce_all_signset": 62,
+      "W_amb_remove": 52,
+      "W_amb_remove_thr0": 52,
+      "W_ball_method": 52,
+      "W_ball_owned_radius+5mm": 44,
+      "W_ball_owned_radius+10mm": 44,
+      "W_ball_owned_radius+20mm": 44,
+      "W_nt_drop10mm": 52,
+      "W_nt_drop15mm": 52,
+      "W_nt_gt_oracle": 52,
+      "W_oracle_gt_target_le5mm": 58
+     },
+     "whatif_new_removed_on_other_fruit_le5mm": {
+      "W0_record": null,
+      "W_thr0_signforce_all_signset": null,
+      "W_amb_remove": 0,
+      "W_amb_remove_thr0": 0,
+      "W_ball_method": 0,
+      "W_ball_owned_radius+5mm": 0,
+      "W_ball_owned_radius+10mm": 0,
+      "W_ball_owned_radius+20mm": 0,
+      "W_nt_drop10mm": 0,
+      "W_nt_drop15mm": 0,
+      "W_nt_gt_oracle": 0,
+      "W_oracle_gt_target_le5mm": 0
+     }
+    },
+    "C1a_ep104_s1041:15": {
+     "violated_rows": 98,
+     "violated_rows_by_path_x_gt": {
+      "a_outside_ball|other_fruit": 40,
+      "a_sign_residual|target": 16,
+      "a_ambiguous_kept|target": 24,
+      "a_sign_residual|other_fruit": 8,
+      "a_outside_ball|none": 10
+     },
+     "blocking_free_voxels": 144,
+     "blocking_by_path": {
+      "kept_ambiguous": 15,
+      "neg_nonseed_not_signset": 5,
+      "outside_ball_neg": 19,
+      "outside_ball_seed": 87,
+      "sign_residual_nonseed_signset": 3,
+      "sign_residual_removed_seed": 15
+     },
+     "blocking_target_band": {
+      "inside_lt_-5mm": 8,
+      "inside_-5_0": 12,
+      "outside_0_5": 8,
+      "outside_5_10": 0,
+      "outside_gt_10": 116
+     },
+     "target_category_voxels_target_vis_mm": {
+      "min": -11.228649123212586,
+      "median": -2.7648308974911364,
+      "max": 4.8472724022937985,
+      "n_inside": 20,
+      "n_outside": 8
+     },
+     "target_category_voxels_ball_signed_mm": {
+      "min": -34.85721581944286,
+      "median": -29.018013806529567,
+      "max": -20.800537790089965
+     },
+     "manip_state": "occluded",
+     "ball_centre_to_gt_target_centre_mm": 7.391786148938808,
+     "ball_centre_nearest_fruit": "pear",
+     "gt_target_surface_in_ball_candidates_frac": 0.8643356195115698,
+     "gt_target_surface_below_zmin_frac": 0.13566438048843024,
+     "target_max_displacement_over_episode_mm": 6.4746753924755645,
+     "nontarget_points_near_ball": {
+      "n": 36,
+      "on_target_le3mm": 32,
+      "on_other_fruit_le3mm": 4,
+      "on_table_le3mm": 0,
+      "target_vis_mm": {
+       "n": 36,
+       "min": -1.3404661876699266,
+       "p10": -0.5976756667644412,
+       "median": 0.3477514530289873,
+       "p90": 25.9895831811934,
+       "max": 56.794726594229175
+      }
+     },
+     "target_points_on_target_le3mm": [
+      86,
+      137
+     ],
+     "whatif_violated_rows": {
+      "W0_record": 98,
+      "W_thr0_signforce_all_signset": 98,
+      "W_amb_remove": 58,
+      "W_amb_remove_thr0": 58,
+      "W_ball_method": 58,
+      "W_ball_owned_radius+5mm": 86,
+      "W_ball_owned_radius+10mm": 78,
+      "W_ball_owned_radius+20mm": 44,
+      "W_nt_drop10mm": 58,
+      "W_nt_drop15mm": 58,
+      "W_nt_gt_oracle": 58,
+      "W_oracle_gt_target_le5mm": 58
+     },
+     "whatif_new_removed_on_other_fruit_le5mm": {
+      "W0_record": null,
+      "W_thr0_signforce_all_signset": null,
+      "W_amb_remove": 0,
+      "W_amb_remove_thr0": 0,
+      "W_ball_method": 0,
+      "W_ball_owned_radius+5mm": 51,
+      "W_ball_owned_radius+10mm": 117,
+      "W_ball_owned_radius+20mm": 222,
+      "W_nt_drop10mm": 0,
+      "W_nt_drop15mm": 0,
+      "W_nt_gt_oracle": 0,
+      "W_oracle_gt_target_le5mm": 0
+     }
+    },
+    "C1a_ep123_s1231:11": {
+     "violated_rows": 5,
+     "violated_rows_by_path_x_gt": {
+      "a_ambiguous_kept|none": 5
+     },
+     "blocking_free_voxels": 6,
+     "blocking_by_path": {
+      "kept_ambiguous": 5,
+      "sign_residual_removed_seed": 1
+     },
+     "blocking_target_band": {
+      "inside_lt_-5mm": 0,
+      "inside_-5_0": 0,
+      "outside_0_5": 1,
+      "outside_5_10": 5,
+      "outside_gt_10": 0
+     },
+     "target_category_voxels_target_vis_mm": {
+      "min": 2.883600835976731,
+      "median": 2.883600835976731,
+      "max": 2.883600835976731,
+      "n_inside": 0,
+      "n_outside": 1
+     },
+     "target_category_voxels_ball_signed_mm": {
+      "min": -62.66803333691162,
+      "median": -62.66803333691162,
+      "max": -62.66803333691162
+     },
+     "manip_state": "visible",
+     "ball_centre_to_gt_target_centre_mm": 26.34190210696168,
+     "ball_centre_nearest_fruit": "orange",
+     "gt_target_surface_in_ball_candidates_frac": 0.8771589365418203,
+     "gt_target_surface_below_zmin_frac": 0.1228410634581797,
+     "target_max_displacement_over_episode_mm": 0.5558556643130462,
+     "nontarget_points_near_ball": {
+      "n": 7,
+      "on_target_le3mm": 6,
+      "on_other_fruit_le3mm": 1,
+      "on_table_le3mm": 0,
+      "target_vis_mm": {
+       "n": 7,
+       "min": 0.34891723129619584,
+       "p10": 0.5716836019672645,
+       "median": 2.0199859045313326,
+       "p90": 18.78684998382144,
+       "max": 43.58040190041659
+      }
+     },
+     "target_points_on_target_le3mm": [
+      92,
+      140
+     ],
+     "whatif_violated_rows": {
+      "W0_record": 5,
+      "W_thr0_signforce_all_signset": 5,
+      "W_amb_remove": 0,
+      "W_amb_remove_thr0": 0,
+      "W_ball_method": 0,
+      "W_ball_owned_radius+5mm": 5,
+      "W_ball_owned_radius+10mm": 5,
+      "W_ball_owned_radius+20mm": 5,
+      "W_nt_drop10mm": 0,
+      "W_nt_drop15mm": 0,
+      "W_nt_gt_oracle": 0,
+      "W_oracle_gt_target_le5mm": 5
+     },
+     "whatif_new_removed_on_other_fruit_le5mm": {
+      "W0_record": null,
+      "W_thr0_signforce_all_signset": null,
+      "W_amb_remove": 22,
+      "W_amb_remove_thr0": 22,
+      "W_ball_method": 22,
+      "W_ball_owned_radius+5mm": null,
+      "W_ball_owned_radius+10mm": null,
+      "W_ball_owned_radius+20mm": null,
+      "W_nt_drop10mm": 22,
+      "W_nt_drop15mm": 22,
+      "W_nt_gt_oracle": 0,
+      "W_oracle_gt_target_le5mm": 0
+     }
+    },
+    "C1a_ep12_s121:13": {
+     "violated_rows": 7,
+     "violated_rows_by_path_x_gt": {
+      "a_ambiguous_kept|target": 7
+     },
+     "blocking_free_voxels": 9,
+     "blocking_by_path": {
+      "kept_ambiguous": 9
+     },
+     "blocking_target_band": {
+      "inside_lt_-5mm": 1,
+      "inside_-5_0": 5,
+      "outside_0_5": 3,
+      "outside_5_10": 0,
+      "outside_gt_10": 0
+     },
+     "target_category_voxels_target_vis_mm": {
+      "min": -5.06696221265282,
+      "median": -1.6632760732635532,
+      "max": 1.789526522082188,
+      "n_inside": 6,
+      "n_outside": 3
+     },
+     "target_category_voxels_ball_signed_mm": {
+      "min": -22.195405962287584,
+      "median": -18.60595219593589,
+      "max": -16.499922195394028
+     },
+     "manip_state": "visible",
+     "ball_centre_to_gt_target_centre_mm": 5.5585219992506385,
+     "ball_centre_nearest_fruit": "apple",
+     "gt_target_surface_in_ball_candidates_frac": 0.8596530750168957,
+     "gt_target_surface_below_zmin_frac": 0.1403469249831043,
+     "target_max_displacement_over_episode_mm": 4.240253630478051,
+     "nontarget_points_near_ball": {
+      "n": 11,
+      "on_target_le3mm": 8,
+      "on_other_fruit_le3mm": 0,
+      "on_table_le3mm": 0,
+      "target_vis_mm": {
+       "n": 11,
+       "min": -1.356835744743573,
+       "p10": -0.9037763246844965,
+       "median": 0.2982002384534985,
+       "p90": 13.214796537005892,
+       "max": 15.910881577641295
+      }
+     },
+     "target_points_on_target_le3mm": [
+      76,
+      110
+     ],
+     "whatif_violated_rows": {
+      "W0_record": 7,
+      "W_thr0_signforce_all_signset": 7,
+      "W_amb_remove": 0,
+      "W_amb_remove_thr0": 0,
+      "W_ball_method": 0,
+      "W_ball_owned_radius+5mm": 7,
+      "W_ball_owned_radius+10mm": 7,
+      "W_ball_owned_radius+20mm": 7,
+      "W_nt_drop10mm": 0,
+      "W_nt_drop15mm": 0,
+      "W_nt_gt_oracle": 0,
+      "W_oracle_gt_target_le5mm": 0
+     },
+     "whatif_new_removed_on_other_fruit_le5mm": {
+      "W0_record": null,
+      "W_thr0_signforce_all_signset": null,
+      "W_amb_remove": 0,
+      "W_amb_remove_thr0": 0,
+      "W_ball_method": 0,
+      "W_ball_owned_radius+5mm": 18,
+      "W_ball_owned_radius+10mm": 49,
+      "W_ball_owned_radius+20mm": 130,
+      "W_nt_drop10mm": 0,
+      "W_nt_drop15mm": 0,
+      "W_nt_gt_oracle": 0,
+      "W_oracle_gt_target_le5mm": 0
+     }
+    },
+    "C1a_ep12_s121:15": {
+     "violated_rows": 9,
+     "violated_rows_by_path_x_gt": {
+      "a_outside_ball|none": 6,
+      "a_ambiguous_kept|none": 1,
+      "a_sign_residual|target": 2
+     },
+     "blocking_free_voxels": 53,
+     "blocking_by_path": {
+      "kept_ambiguous": 5,
+      "neg_nonseed_not_signset": 1,
+      "outside_ball_seed": 15,
+      "sign_residual_nonseed_signset": 16,
+      "sign_residual_removed_seed": 16
+     },
+     "blocking_target_band": {
+      "inside_lt_-5mm": 7,
+      "inside_-5_0": 11,
+      "outside_0_5": 12,
+      "outside_5_10": 7,
+      "outside_gt_10": 16
+     },
+     "target_category_voxels_target_vis_mm": {
+      "min": -9.022619313155067,
+      "median": -0.45347718978305807,
+      "max": 4.5075321695918324,
+      "n_inside": 18,
+      "n_outside": 12
+     },
+     "target_category_voxels_ball_signed_mm": {
+      "min": -35.047415358847225,
+      "median": -24.71023508910786,
+      "max": -18.593454238180215
+     },
+     "manip_state": "visible",
+     "ball_centre_to_gt_target_centre_mm": 5.567576666313094,
+     "ball_centre_nearest_fruit": "apple",
+     "gt_target_surface_in_ball_candidates_frac": 0.8602323560647508,
+     "gt_target_surface_below_zmin_frac": 0.13976764393524926,
+     "target_max_displacement_over_episode_mm": 4.252051982384314,
+     "nontarget_points_near_ball": {
+      "n": 10,
+      "on_target_le3mm": 7,
+      "on_other_fruit_le3mm": 0,
+      "on_table_le3mm": 0,
+      "target_vis_mm": {
+       "n": 10,
+       "min": -1.4311952459529764,
+       "p10": -1.3209669150801961,
+       "median": 0.11902878220276533,
+       "p90": 15.40834864991836,
+       "max": 16.633697543152042
+      }
+     },
+     "target_points_on_target_le3mm": [
+      75,
+      110
+     ],
+     "whatif_violated_rows": {
+      "W0_record": 9,
+      "W_thr0_signforce_all_signset": 9,
+      "W_amb_remove": 6,
+      "W_amb_remove_thr0": 6,
+      "W_ball_method": 6,
+      "W_ball_owned_radius+5mm": 9,
+      "W_ball_owned_radius+10mm": 9,
+      "W_ball_owned_radius+20mm": 9,
+      "W_nt_drop10mm": 6,
+      "W_nt_drop15mm": 6,
+      "W_nt_gt_oracle": 8,
+      "W_oracle_gt_target_le5mm": 8
+     },
+     "whatif_new_removed_on_other_fruit_le5mm": {
+      "W0_record": null,
+      "W_thr0_signforce_all_signset": null,
+      "W_amb_remove": 0,
+      "W_amb_remove_thr0": 0,
+      "W_ball_method": 0,
+      "W_ball_owned_radius+5mm": 18,
+      "W_ball_owned_radius+10mm": 58,
+      "W_ball_owned_radius+20mm": 143,
+      "W_nt_drop10mm": 0,
+      "W_nt_drop15mm": 0,
+      "W_nt_gt_oracle": 0,
+      "W_oracle_gt_target_le5mm": 0
+     }
+    },
+    "C1a_ep30_s302:14": {
+     "violated_rows": 83,
+     "violated_rows_by_path_x_gt": {
+      "a_outside_ball|other_fruit": 34,
+      "a_outside_ball|none": 24,
+      "a_outside_ball|robot": 25
+     },
+     "blocking_free_voxels": 54,
+     "blocking_by_path": {
+      "outside_ball_neg": 9,
+      "outside_ball_seed": 45
+     },
+     "blocking_target_band": {
+      "inside_lt_-5mm": 0,
+      "inside_-5_0": 0,
+      "outside_0_5": 0,
+      "outside_5_10": 0,
+      "outside_gt_10": 54
+     },
+     "target_category_voxels_target_vis_mm": null,
+     "target_category_voxels_ball_signed_mm": null,
+     "manip_state": "visible",
+     "ball_centre_to_gt_target_centre_mm": 1.6318277452763679,
+     "ball_centre_nearest_fruit": "apple",
+     "gt_target_surface_in_ball_candidates_frac": 0.8564348469732566,
+     "gt_target_surface_below_zmin_frac": 0.14356515302674347,
+     "target_max_displacement_over_episode_mm": 0.191921907952649,
+     "nontarget_points_near_ball": {
+      "n": 3,
+      "on_target_le3mm": 3,
+      "on_other_fruit_le3mm": 0,
+      "on_table_le3mm": 0,
+      "target_vis_mm": {
+       "n": 3,
+       "min": -0.2232734041383022,
+       "p10": -0.07056241321702039,
+       "median": 0.5402815504681069,
+       "p90": 1.7646744864981643,
+       "max": 2.0707727205056785
+      }
+     },
+     "target_points_on_target_le3mm": [
+      105,
+      114
+     ],
+     "whatif_violated_rows": {
+      "W0_record": 83,
+      "W_thr0_signforce_all_signset": 83,
+      "W_amb_remove": 83,
+      "W_amb_remove_thr0": 83,
+      "W_ball_method": 83,
+      "W_ball_owned_radius+5mm": 59,
+      "W_ball_owned_radius+10mm": 56,
+      "W_ball_owned_radius+20mm": 56,
+      "W_nt_drop10mm": 83,
+      "W_nt_drop15mm": 83,
+      "W_nt_gt_oracle": 83,
+      "W_oracle_gt_target_le5mm": 83
+     },
+     "whatif_new_removed_on_other_fruit_le5mm": {
+      "W0_record": null,
+      "W_thr0_signforce_all_signset": null,
+      "W_amb_remove": 0,
+      "W_amb_remove_thr0": 0,
+      "W_ball_method": 0,
+      "W_ball_owned_radius+5mm": 3,
+      "W_ball_owned_radius+10mm": 15,
+      "W_ball_owned_radius+20mm": 96,
+      "W_nt_drop10mm": 0,
+      "W_nt_drop15mm": 0,
+      "W_nt_gt_oracle": 0,
+      "W_oracle_gt_target_le5mm": 0
+     }
+    },
+    "C1a_ep3_s31:28": {
+     "violated_rows": 216,
+     "violated_rows_by_path_x_gt": {
+      "a_outside_ball|afterimage": 145,
+      "a_outside_ball|robot": 42,
+      "a_outside_ball|target": 29
+     },
+     "blocking_free_voxels": 365,
+     "blocking_by_path": {
+      "outside_ball_neg": 56,
+      "outside_ball_seed": 299,
+      "sign_residual_removed_seed": 10
+     },
+     "blocking_target_band": {
+      "inside_lt_-5mm": 32,
+      "inside_-5_0": 28,
+      "outside_0_5": 17,
+      "outside_5_10": 9,
+      "outside_gt_10": 279
+     },
+     "target_category_voxels_target_vis_mm": {
+      "min": -15.939873109183184,
+      "median": -4.059712254208647,
+      "max": 4.765321224809722,
+      "n_inside": 60,
+      "n_outside": 17
+     },
+     "target_category_voxels_ball_signed_mm": {
+      "min": -5.318373231425457,
+      "median": 5.989590555816695,
+      "max": 18.786853751331442
+     },
+     "manip_state": "visible",
+     "ball_centre_to_gt_target_centre_mm": 47.0641338130219,
+     "ball_centre_nearest_fruit": "banana",
+     "gt_target_surface_in_ball_candidates_frac": 0.5442784138689437,
+     "gt_target_surface_below_zmin_frac": 0.12352027944886473,
+     "target_max_displacement_over_episode_mm": 68.77069889555708,
+     "nontarget_points_near_ball": {
+      "n": 15,
+      "on_target_le3mm": 5,
+      "on_other_fruit_le3mm": 2,
+      "on_table_le3mm": 0,
+      "target_vis_mm": {
+       "n": 15,
+       "min": 0.1899129102996724,
+       "p10": 1.0731780601577139,
+       "median": 80.16756057349725,
+       "p90": 88.06140023093238,
+       "max": 90.21619052276534
+      }
+     },
+     "target_points_on_target_le3mm": [
+      43,
+      99
+     ],
+     "whatif_violated_rows": {
+      "W0_record": 216,
+      "W_thr0_signforce_all_signset": 216,
+      "W_amb_remove": 216,
+      "W_amb_remove_thr0": 216,
+      "W_ball_method": 216,
+      "W_ball_owned_radius+5mm": 216,
+      "W_ball_owned_radius+10mm": 216,
+      "W_ball_owned_radius+20mm": 216,
+      "W_nt_drop10mm": 216,
+      "W_nt_drop15mm": 216,
+      "W_nt_gt_oracle": 216,
+      "W_oracle_gt_target_le5mm": 216
+     },
+     "whatif_new_removed_on_other_fruit_le5mm": {
+      "W0_record": null,
+      "W_thr0_signforce_all_signset": null,
+      "W_amb_remove": 41,
+      "W_amb_remove_thr0": 41,
+      "W_ball_method": 41,
+      "W_ball_owned_radius+5mm": 0,
+      "W_ball_owned_radius+10mm": 0,
+      "W_ball_owned_radius+20mm": 0,
+      "W_nt_drop10mm": 41,
+      "W_nt_drop15mm": 41,
+      "W_nt_gt_oracle": 10,
+      "W_oracle_gt_target_le5mm": 0
+     }
+    },
+    "C1a_ep54_s542:20": {
+     "violated_rows": 95,
+     "violated_rows_by_path_x_gt": {
+      "a_outside_ball|other_fruit": 33,
+      "a_sign_residual|none": 14,
+      "a_outside_ball|robot": 28,
+      "a_sign_residual|target": 20
+     },
+     "blocking_free_voxels": 127,
+     "blocking_by_path": {
+      "kept_ambiguous": 13,
+      "neg_nonseed_not_signset": 7,
+      "outside_ball_neg": 7,
+      "outside_ball_seed": 81,
+      "sign_residual_nonseed_signset": 4,
+      "sign_residual_removed_seed": 15
+     },
+     "blocking_target_band": {
+      "inside_lt_-5mm": 12,
+      "inside_-5_0": 9,
+      "outside_0_5": 7,
+      "outside_5_10": 6,
+      "outside_gt_10": 93
+     },
+     "target_category_voxels_target_vis_mm": {
+      "min": -14.364312072962237,
+      "median": -3.6364516461562246,
+      "max": 4.97895571311648,
+      "n_inside": 21,
+      "n_outside": 7
+     },
+     "target_category_voxels_ball_signed_mm": {
+      "min": -33.68811010408392,
+      "median": -25.0489532081689,
+      "max": -17.015687118716066
+     },
+     "manip_state": "visible",
+     "ball_centre_to_gt_target_centre_mm": 2.3677436457594454,
+     "ball_centre_nearest_fruit": "apple",
+     "gt_target_surface_in_ball_candidates_frac": 0.8697583110739227,
+     "gt_target_surface_below_zmin_frac": 0.1302416889260773,
+     "target_max_displacement_over_episode_mm": 2.6095216413127367,
+     "nontarget_points_near_ball": {
+      "n": 7,
+      "on_target_le3mm": 7,
+      "on_other_fruit_le3mm": 0,
+      "on_table_le3mm": 0,
+      "target_vis_mm": {
+       "n": 7,
+       "min": -0.21081871626749127,
+       "p10": -0.1499817309556395,
+       "median": 0.7304663473529809,
+       "p90": 0.839128166330597,
+       "max": 0.8519486287206254
+      }
+     },
+     "target_points_on_target_le3mm": [
+      107,
+      117
+     ],
+     "whatif_violated_rows": {
+      "W0_record": 95,
+      "W_thr0_signforce_all_signset": 95,
+      "W_amb_remove": 61,
+      "W_amb_remove_thr0": 61,
+      "W_ball_method": 61,
+      "W_ball_owned_radius+5mm": 95,
+      "W_ball_owned_radius+10mm": 95,
+      "W_ball_owned_radius+20mm": 65,
+      "W_nt_drop10mm": 61,
+      "W_nt_drop15mm": 61,
+      "W_nt_gt_oracle": 61,
+      "W_oracle_gt_target_le5mm": 75
+     },
+     "whatif_new_removed_on_other_fruit_le5mm": {
+      "W0_record": null,
+      "W_thr0_signforce_all_signset": null,
+      "W_amb_remove": 0,
+      "W_amb_remove_thr0": 0,
+      "W_ball_method": 0,
+      "W_ball_owned_radius+5mm": 44,
+      "W_ball_owned_radius+10mm": 97,
+      "W_ball_owned_radius+20mm": 224,
+      "W_nt_drop10mm": 0,
+      "W_nt_drop15mm": 0,
+      "W_nt_gt_oracle": 0,
+      "W_oracle_gt_target_le5mm": 0
+     }
+    }
+   }
+  },
+  "palm57_q_now": {
+   "n_cases": 57,
+   "n_cases_blocking_gt0": 24,
+   "n_cases_query_violated_gt0": 19,
+   "n_query_violated": 151,
+   "n_blocking_free": 584,
+   "blocking_by_path": {
+    "outside_ball_seed": 551,
+    "sign_residual_removed_seed": 6,
+    "outside_ball_neg": 27
+   },
+   "blocking_gt": {
+    "other_fruit": 137,
+    "robot": 77,
+    "afterimage": 333,
+    "target": 37
+   },
+   "violated_rows_by_gt": {
+    "other_fruit": 59,
+    "robot": 41,
+    "afterimage": 51
+   },
+   "violated_rows_by_gt_ncases": {
+    "other_fruit": 15,
+    "robot": 16,
+    "afterimage": 3
+   },
+   "manip_state": {
+    "occluded": 11,
+    "visible": 46
+   }
+  },
+  "survey1350": {
+   "all": {
+    "n_chunks": 1350,
+    "has_target": 766,
+    "tf_mode": {
+     "ball": 528,
+     "none": 822
+    },
+    "coarse_mode": {
+     "off": 1350
+    },
+    "manip_state": {
+     "None": 584,
+     "occluded": 350,
+     "visible": 416
+    },
+    "ball_nearest_fruit_not_target": 131,
+    "n_with_free_layer": 528,
+    "n_with_residual": 528,
+    "residual_voxels_median": 173.0,
+    "residual_voxels_p90": 542.3,
+    "residual_voxels_max": 738.0,
+    "gap_res_now_mm": {
+     "0": -4.027764051523864,
+     "10": 12.699649890097366,
+     "50": 147.8015740774512,
+     "90": 257.617815196269
+    },
+    "gap_res_traj_mm": {
+     "0": -4.027804152928873,
+     "10": 9.91687198035227,
+     "50": 133.0932205359649,
+     "90": 251.61110349851484
+    },
+    "n_gap_res_traj_lt_10mm": 53,
+    "n_gap_res_traj_lt_0mm": 9,
+    "n_rows_lt_tol_rec_traj_chunks": 103,
+    "n_rows_lt_tol_clean_traj_chunks": 98,
+    "n_chunks_rows_rec_gt_clean": 41,
+    "n_chunks_min_clear_raised_gt_0p5mm": 32,
+    "min_clear_raised_mm": {
+     "50": -0.0008932162711642461,
+     "90": 0.015216099592550719,
+     "100": 13.246743607601172
+    },
+    "clear_rec_traj_mm": {
+     "0": -16.358051422772824,
+     "10": -5.005152842391008,
+     "50": 25.971265829896723
+    },
+    "recon_max_abs_diff_mm": 24.492627009749413,
+    "residual_by_path": {
+     "sign_residual_nonseed_signset": 9432,
+     "sign_residual_removed_seed": 32095,
+     "below_zmin": 6769,
+     "outside_ball_seed": 24335,
+     "kept_ambiguous": 16203,
+     "kept_nontarget": 6175,
+     "neg_nonseed_not_signset": 23995,
+     "in_ball_other": 1,
+     "outside_ball_neg": 4043
+    },
+    "ball_to_gt_centre_mm": {
+     "50": 25.31436349638716,
+     "90": 400.75300565381156,
+     "100": 423.5029092302607
+    },
+    "n_ball_to_gt_gt20mm": 290,
+    "target_points_on_target_frac": {
+     "0": 0.0,
+     "10": 0.0,
+     "50": 0.319620253164557
+    },
+    "n_target_points_on_target_lt_0p8": 283
+   },
+   "pre8_close": {
+    "n_chunks": 162,
+    "has_target": 162,
+    "tf_mode": {
+     "ball": 162
+    },
+    "coarse_mode": {
+     "off": 162
+    },
+    "manip_state": {
+     "occluded": 11,
+     "visible": 151
+    },
+    "ball_nearest_fruit_not_target": 3,
+    "n_with_free_layer": 162,
+    "n_with_residual": 162,
+    "residual_voxels_median": 322.5,
+    "residual_voxels_p90": 606.0000000000001,
+    "residual_voxels_max": 725.0,
+    "gap_res_now_mm": {
+     "0": -4.027764051523864,
+     "10": 6.485560972857288,
+     "50": 23.05212294351487,
+     "90": 195.45777604159332
+    },
+    "gap_res_traj_mm": {
+     "0": -4.027804152928873,
+     "10": 5.037764741348781,
+     "50": 14.728670249308768,
+     "90": 167.1126508315569
+    },
+    "n_gap_res_traj_lt_10mm": 45,
+    "n_gap_res_traj_lt_0mm": 8,
+    "n_rows_lt_tol_rec_traj_chunks": 80,
+    "n_rows_lt_tol_clean_traj_chunks": 76,
+    "n_chunks_rows_rec_gt_clean": 33,
+    "n_chunks_min_clear_raised_gt_0p5mm": 28,
+    "min_clear_raised_mm": {
+     "50": -0.00018494996565504573,
+     "90": 2.539735312051083,
+     "100": 13.246743607601172
+    },
+    "clear_rec_traj_mm": {
+     "0": -13.739844511109824,
+     "10": -6.225404279810779,
+     "50": 1.0855349346408005
+    },
+    "recon_max_abs_diff_mm": 24.492627009749413,
+    "residual_by_path": {
+     "kept_ambiguous": 11537,
+     "kept_nontarget": 507,
+     "neg_nonseed_not_signset": 12824,
+     "sign_residual_nonseed_signset": 6099,
+     "sign_residual_removed_seed": 18617,
+     "outside_ball_seed": 488,
+     "below_zmin": 2403,
+     "in_ball_other": 1,
+     "outside_ball_neg": 192
+    },
+    "ball_to_gt_centre_mm": {
+     "50": 3.0858357001471015,
+     "90": 26.099571668777088,
+     "100": 50.79616953698182
+    },
+    "n_ball_to_gt_gt20mm": 44,
+    "target_points_on_target_frac": {
+     "0": 0.2802547770700637,
+     "10": 0.36671982987772467,
+     "50": 0.9099025974025974
+    },
+    "n_target_points_on_target_lt_0p8": 68
+   }
+  },
+  "impact_pre8_close_162": {
+   "n_chunks": 162,
+   "rec": {
+    "chunks_collision_gt0": 17,
+    "recorded_hold_chunks_among_them": 14,
+    "collision_rows": 601
+   },
+   "residual_removed_gt": {
+    "chunks_collision_gt0": 11,
+    "collision_rows": 159,
+    "recorded_hold_chunks_to_zero": 6,
+    "chunks_auth_min_clearance_raised_gt_0p5mm": 37,
+    "auth_min_clearance_raised_max_mm": 14.144333363224964
+   },
+   "gap_auth_spheres_to_residual_mm": {
+    "min": -4.027804152928873,
+    "p10": 4.9938769328297035,
+    "median": 14.746673523579211,
+    "n_lt_10mm": 45,
+    "n_lt_0mm": 8
+   },
+   "recorded_hold_reasons_reproduced": "collision row count of the offline classify equals the recorded hold_reason row count in 14/14 HOLD chunks and the min depth matches to 0.1 mm (link names not compared) (e.g. C1a_ep104_s1041:17 47 rows ee_finger_l2 -4.7 mm); 3 chunks (C1a_ep0_s2:12,13,14) offline collision 2/25/4 rows but recorded safe",
+   "per_chunk": {
+    "C1a_ep0_s1:15": {
+     "rec_collision": 1,
+     "clean_collision": 0,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": 8.250690847652121
+    },
+    "C1a_ep0_s2:12": {
+     "rec_collision": 2,
+     "clean_collision": 2,
+     "recorded_safe": true,
+     "gap_auth_to_residual_mm": 11.111961772474697
+    },
+    "C1a_ep0_s2:13": {
+     "rec_collision": 25,
+     "clean_collision": 25,
+     "recorded_safe": true,
+     "gap_auth_to_residual_mm": 4.733107308236116
+    },
+    "C1a_ep0_s2:14": {
+     "rec_collision": 4,
+     "clean_collision": 4,
+     "recorded_safe": true,
+     "gap_auth_to_residual_mm": 12.483231873227806
+    },
+    "C1a_ep104_s1041:17": {
+     "rec_collision": 47,
+     "clean_collision": 0,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": -1.0508086651431465
+    },
+    "C1a_ep104_s1042:16": {
+     "rec_collision": 15,
+     "clean_collision": 0,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": -0.5482981498763396
+    },
+    "C1a_ep110_s1101:18": {
+     "rec_collision": 111,
+     "clean_collision": 31,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": -2.073960511342828
+    },
+    "C1a_ep110_s1102:17": {
+     "rec_collision": 87,
+     "clean_collision": 39,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": -0.9856494645200421
+    },
+    "C1a_ep11_s111:12": {
+     "rec_collision": 6,
+     "clean_collision": 0,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": 3.1801640062209744
+    },
+    "C1a_ep11_s112:17": {
+     "rec_collision": 15,
+     "clean_collision": 0,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": 0.0037945216220950165
+    },
+    "C1a_ep123_s1232:15": {
+     "rec_collision": 14,
+     "clean_collision": 3,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": -4.027804152928873
+    },
+    "C1a_ep12_s122:16": {
+     "rec_collision": 2,
+     "clean_collision": 2,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": 7.120923492495413
+    },
+    "C1a_ep30_s301:14": {
+     "rec_collision": 101,
+     "clean_collision": 0,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": -2.769674643314404
+    },
+    "C1a_ep3_s31:29": {
+     "rec_collision": 56,
+     "clean_collision": 17,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": 3.103744605703914
+    },
+    "C1a_ep3_s32:21": {
+     "rec_collision": 7,
+     "clean_collision": 7,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": 13.421705024627505
+    },
+    "C1a_ep3_s32:28": {
+     "rec_collision": 79,
+     "clean_collision": 24,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": -2.807701071862548
+    },
+    "C1a_ep54_s541:16": {
+     "rec_collision": 29,
+     "clean_collision": 5,
+     "recorded_safe": false,
+     "gap_auth_to_residual_mm": -0.8036697463770078
+    }
+   }
+  },
+  "impact_whatif_17": {
+   "record": {
+    "collision_rows": 601,
+    "chunks_zero": 0,
+    "recorded_hold_chunks_zero": 0,
+    "new_removed_seeds_on_other_fruit_le5mm": 0,
+    "chunks_with_other_fruit_seeds_removed": 0,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "thr0": {
+    "collision_rows": 603,
+    "chunks_zero": 0,
+    "recorded_hold_chunks_zero": 0,
+    "new_removed_seeds_on_other_fruit_le5mm": 0,
+    "chunks_with_other_fruit_seeds_removed": 0,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "amb_remove": {
+    "collision_rows": 53,
+    "chunks_zero": 10,
+    "recorded_hold_chunks_zero": 10,
+    "new_removed_seeds_on_other_fruit_le5mm": 688,
+    "chunks_with_other_fruit_seeds_removed": 7,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "amb_nt_remove": {
+    "collision_rows": 53,
+    "chunks_zero": 10,
+    "recorded_hold_chunks_zero": 10,
+    "new_removed_seeds_on_other_fruit_le5mm": 736,
+    "chunks_with_other_fruit_seeds_removed": 9,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "ball_method": {
+    "collision_rows": 53,
+    "chunks_zero": 10,
+    "recorded_hold_chunks_zero": 10,
+    "new_removed_seeds_on_other_fruit_le5mm": 736,
+    "chunks_with_other_fruit_seeds_removed": 9,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "radius+5mm": {
+    "collision_rows": 601,
+    "chunks_zero": 0,
+    "recorded_hold_chunks_zero": 0,
+    "new_removed_seeds_on_other_fruit_le5mm": 256,
+    "chunks_with_other_fruit_seeds_removed": 10,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "radius+5mm_amb_remove": {
+    "collision_rows": 53,
+    "chunks_zero": 10,
+    "recorded_hold_chunks_zero": 10,
+    "new_removed_seeds_on_other_fruit_le5mm": 949,
+    "chunks_with_other_fruit_seeds_removed": 13,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "radius+10mm": {
+    "collision_rows": 601,
+    "chunks_zero": 0,
+    "recorded_hold_chunks_zero": 0,
+    "new_removed_seeds_on_other_fruit_le5mm": 569,
+    "chunks_with_other_fruit_seeds_removed": 10,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "radius+10mm_amb_remove": {
+    "collision_rows": 53,
+    "chunks_zero": 10,
+    "recorded_hold_chunks_zero": 10,
+    "new_removed_seeds_on_other_fruit_le5mm": 1262,
+    "chunks_with_other_fruit_seeds_removed": 13,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "nt_drop10mm": {
+    "collision_rows": 225,
+    "chunks_zero": 7,
+    "recorded_hold_chunks_zero": 7,
+    "new_removed_seeds_on_other_fruit_le5mm": 636,
+    "chunks_with_other_fruit_seeds_removed": 7,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "nt_drop15mm": {
+    "collision_rows": 82,
+    "chunks_zero": 9,
+    "recorded_hold_chunks_zero": 9,
+    "new_removed_seeds_on_other_fruit_le5mm": 726,
+    "chunks_with_other_fruit_seeds_removed": 7,
+    "new_removed_seeds_on_table_le5mm": 0
+   },
+   "nt_gt_oracle": {
+    "collision_rows": 72,
+    "chunks_zero": 8,
+    "recorded_hold_chunks_zero": 8,
+    "new_removed_seeds_on_other_fruit_le5mm": 25,
+    "chunks_with_other_fruit_seeds_removed": 3,
+    "new_removed_seeds_on_table_le5mm": 0
+   }
+  },
+  "ambiguous_evidence_17": {
+   "nontarget_source": [
+    "proximity"
+   ],
+   "n_ambiguous_seeds": 2555,
+   "ambiguous_seeds_on_gt_target_le5mm": 1655,
+   "ambiguous_seeds_on_other_fruit_le5mm": 688,
+   "ambiguous_nearest_nontarget_evidence_on_gt_target_le3mm": 1785,
+   "ambiguous_nearest_nontarget_evidence_on_other_fruit_le3mm": 747,
+   "cloud_points_on_gt_target_le3mm": 667,
+   "cloud_points_on_gt_target_kept_as_nontarget": 280,
+   "target_points_total": 2136,
+   "target_points_on_gt_target_le3mm": 1249,
+   "target_points_on_other_fruit_le3mm": 278,
+   "chunks_with_target_points_on_other_fruit": 6
+  },
+  "clearance_crosscheck": {
+   "C1a_ep0_s2:13": {
+    "composite_minus_r_minus_10mm_auth_min_mm": -5.037808941860972,
+    "free_layer_minus_r_minus_10mm_auth_min_mm": -5.037808941860972,
+    "n_auth_rows_composite_lt_0": 77,
+    "linearizer_clearance_auth_min_mm": -5.028207524835196,
+    "n_auth_rows_linearizer_lt_0": 25,
+    "recorded_clearance_auth_min_mm": 2.199579728767276,
+    "n_auth_rows_recorded_clearance_lt_0": 0,
+    "linearizer_minus_freelayer_r_10mm_auth_median_mm": 10.0
+   },
+   "C1a_ep12_s121:15": {
+    "composite_minus_r_minus_10mm_auth_min_mm": -5.161758192972615,
+    "free_layer_minus_r_minus_10mm_auth_min_mm": -5.161758192972615,
+    "n_auth_rows_composite_lt_0": 35,
+    "linearizer_clearance_auth_min_mm": 0.08413951256832676,
+    "n_auth_rows_linearizer_lt_0": 0,
+    "recorded_clearance_auth_min_mm": -21.108413115143776,
+    "n_auth_rows_recorded_clearance_lt_0": 183,
+    "linearizer_minus_freelayer_r_10mm_auth_median_mm": 0.0
+   }
+  }
+ },
+ "code_paths": {
+  "target_free_fine_tier_build": "AG3S/ag3s/fields/curobo_builder.py:1041-1069 (update: OwnedEvidence :1062, _build_tiers(only='fine', tier_name='fine_no_target') :1067)",
+  "ball_candidates_radius_and_zmin": "AG3S/ag3s/fields/curobo_builder.py:1762-1781 (z >= z_min :1779)",
+  "ball_owned_split": "AG3S/ag3s/fields/curobo_builder.py:409-452 (unowned :443, ambiguous :444, removed :448, sign set :449); call :1816-1834",
+  "sign_forcing": "AG3S/ag3s/fields/curobo_builder.py:1493-1497 -> _force_sign_on_pure_voxels :1662-1710 (threshold attached_sign_threshold_voxels 1.5, AG3S/ag3s/config.py:1042)",
+  "tsdf_integration_accumulative": "AG3S/ag3s/fields/curobo_builder.py:991 (_integrate per frame; esdf.time_decay 1.0 AG3S/ag3s/config.py:951, recorded decay {'decayed': False})",
+  "coarse_target_free_tier": "AG3S/ag3s/fields/curobo_builder.py:1081 (esdf.target_free_coarse False AG3S/ag3s/config.py:1085; not in C1a server_proc.txt)",
+  "nontarget_evidence": "AG3S/ag3s/runtime/pipeline.py:1679-1685 -> _nontarget_points :2690-2733 (proximity drop radius = fine voxel 5 mm :2719-2727)",
+  "target_ball": "AG3S/ag3s/runtime/pipeline.py:2578-2601 -> _target_ball :2985-3050 (radius = max(quantile spread, fit) + pad :3031; z_min = plane + pad :3040)",
+  "identity_gate": "AG3S/ag3s/runtime/pipeline.py:1542 (_exclusion_gate), occluded -> last observed geometry :1597-1602",
+  "query_composition": "AG3S/ag3s/fields/curobo_field.py:356-445 (window: min(f, max(d, b)) :427)",
+  "config_defaults": "AG3S/ag3s/config.py:1051 target_ball_quantile 1.0, :1054 target_ball_pad_voxels 1.0, :1067 target_exclusion, :1069 owned_tie_voxels 1.0, :1071 owned_max_dist_voxels 2.0 (C1a CLI 3), :1073 owned_unowned 'remove'"
+ },
+ "answers": {
+  "Q1a_fine_ball_owned": "확인 — rows8 위반 행 575 중 최근접 막는 voxel 경로: ambiguous 보존 60 (5 chunk), 부호 잔여 67 (4 chunk), 공 밖 448 (6 chunk), kept_nontarget 0, z_min 아래 0. C1a 기록 (palm cover off) pre8+close 충돌 행 있는 17 chunk (기록 HOLD 14): ambiguous 도 제거 시 601→53 행, HOLD 14 중 10 chunk 0 행; non-target 근거에서 GT target 점 제외 시 601→72, 8/14. ambiguous 2555 중 최근접 non-target 근거 점이 GT target 위 (<=3 mm) 1785, 근거 출처 proximity 17/17, GT target 위 cloud 점 667 중 280 이 non-target 로 남음.",
+  "Q1a_sign_residual": "확인 (경로로서) / 단독 원인 반박 — 부호 잔여가 최근접인 위반 행 67 (rows8), 그러나 부호교정 임계 0 what-if: rows8 575→575, 17 chunk 601→603",
+  "Q1a_outside_ball": "확인 — rows8 공 밖 448 행: 이웃 과일 107, 잔상 145 (1 chunk), 로봇 손 hull 5 mm 안 95, target 29, 그 밖 72. 공 반지름 +5/+10/+20 mm: 521/510/446 행, 이웃 과일 seed 134/336/815 제거",
+  "Q1a_removal_vs_reintegration": "확인 1/8 (C1a_ep3_s31:28: orange 68.8 mm 이동, 잔상 145 행), 반박 7/8 (target 최대 이동 <= 6.5 mm)",
+  "Q1b_coarse_tier": "반박 (해당 없음) — coarse target-free off 1350/1350 chunk, rows8 위반 행 tier target_free 575/575",
+  "Q1c_identity": "확인 1/8 (C1a_ep3_s31:28 공 중심 최근접 과일 banana, GT orange 중심에서 47.1 mm), 17 chunk 중 target 점이 이웃 과일 위 6 chunk (278 점), pre8+close 공≠target 3/162, ball chunk 전체 131/528 (128 이 close_seq 이후)",
+  "Q1d_other": "로봇 손 hull 5 mm 안 voxel (공 밖) 이 최근접인 rows8 위반 행 95 (3 chunk); TSDF 의 로봇 depth=0 영역 갱신 없음 여부는 모름 (재적분 안 함)",
+  "Q2_distance_to_target_surface": "rows8 막는 voxel 의 GT target visual hull 대비: 안 <-5 mm 69, -5..0 79, 밖 0..5 57, 5..10 34, >10 558",
+  "Q3_offline_reconstruction": "가능 — 기록 main fine 층 (seed = 값 0) − 기록 removed trace → EDT + sign 규칙 = 기록 target-free 층 (rows8 box 0 voxel > 0.6 mm; 162 chunk 전 격자 1 voxel > 0.6 mm). GPU TSDF 재적분은 안 함",
+  "Q4_palm_cover_off_closed_loop": "pre8+close 162 chunk: 권한 link 구 (실행 8 step) → target 잔여 간격 중앙 14.7 mm, p10 5.0 mm, <10 mm 45, <0 8; 기록 실행 chunk 충돌 행 있는 chunk 17 (기록 HOLD 14, hold_reason 의 행 수 14/14 일치, 최소 깊이 일치 (link 이름은 대조 안 함)), 잔여 제거 (GT) 시 충돌 chunk 17→11, 행 601→159, 기록 HOLD 중 0 행 6"
+ },
+ "fix_candidates_not_implemented": [
+  "F1 non-target 근거에서 target 자신의 cloud 점 빼기 (pipeline.py:2712-2728: proximity 5 mm 대신 target cluster point_indices 를 이 cloud 에 맞추기 등) — offline 상한 (GT 로 뺌): 17 chunk 601→72, HOLD 8/14, 이웃 과일 seed 25 제거",
+  "F2 ambiguous seed 처리 (curobo_builder.py:444-448) — ambiguous 제거: 601→53, HOLD 10/14, 이웃 과일 seed 688 (7 chunk) 제거",
+  "F3 target 점 오염 (이웃 과일 점이 target 점에 섞임, attention split / identity) — 17 chunk 중 6 chunk",
+  "F4 TSDF 잔상 (time_decay 1.0) — rows8 1 chunk 145 행",
+  "측정상 효과 없음: 부호교정 임계 (thr 0), 공 반지름 +5/+10 mm (17 chunk 601→601)"
+ ],
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t45/t45tf-scene.png",
+   "kind": "scene",
+   "sidecar": "t45tf-scene.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t45/t45tf-graph.png",
+   "kind": "graph",
+   "sidecar": "t45tf-graph.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t45/t45tf-table.png",
+   "kind": "table",
+   "sidecar": "t45tf-table.json"
+  }
+ ],
+ "verdict": "기준선 일치 (legacy 14/15 · 15/15 · -29.031048280806342 mm). 기록 target-free 층 offline 재구성 = 기록. 항목별 확인/반박/모름은 answers. 판정은 lead 와 사용자.",
+ "not_measured": [
+  "GPU cuRobo TSDF 재적분 (target-free 층은 기록 main fine 층 seed 에서 재구성; TSDF 자체·부호를 새로 만들지 않음 — 새로 지운 seed 의 TSDF 부호는 모름, what-if 에서 음수로 둠)",
+  "what-if 의 closed-loop 효과 (기록 실행 chunk 를 고정해 classify_violations 만 다시 함; TO 재해석 안 함)",
+  "C1a_ep0_s2:12,13,14: offline 충돌 행 2/25/4 인데 기록은 safe — 차이 원인 모름",
+  "GT 범주는 visual mesh convex hull 기준 5 mm (사과 꼭지 오목부 등 hull 오차 모름); '그 밖' 범주의 voxel 정체 모름",
+  "로봇 손 hull 5 mm 안 voxel 이 왜 남는지 (self-filter 로 depth 0 인 픽셀 뒤의 옛 표면이 갱신 안 됨 가설) — 측정 안 함",
+  "palm cover on 모델로 C1a 17 chunk what-if 안 함 (rows8 은 PC, 17 chunk 는 base)"
+ ]
+}

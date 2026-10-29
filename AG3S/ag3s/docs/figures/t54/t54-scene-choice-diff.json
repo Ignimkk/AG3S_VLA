@@ -1,0 +1,349 @@
+{
+ "frames": [
+  {
+   "key": "ep1853",
+   "frame": 20,
+   "t_step": 160,
+   "grasp_state": "pre",
+   "target_px_per_camera": [
+    50,
+    7188,
+    0
+   ],
+   "arms": {
+    "L8H2": {
+     "chosen_rank": 0,
+     "identity_correct": false,
+     "chosen_cluster_purity": 0.0,
+     "coverage": 0.0,
+     "chosen__other_object": 86,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     }
+    },
+    "A": {
+     "chosen_rank": 1,
+     "identity_correct": true,
+     "chosen_cluster_purity": 1.0,
+     "coverage": 0.972972972972973,
+     "chosen__other_object": 0,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     }
+    }
+   },
+   "candidates_A": [
+    {
+     "rank": 0,
+     "n": 1788,
+     "plurality": "destination",
+     "n_target": 0,
+     "n_other_object": 0,
+     "target_score": 49.02319104527123,
+     "primary_mass": 36.806775742208174,
+     "choice_mass": 49.02319104527123
+    },
+    {
+     "rank": 1,
+     "n": 36,
+     "plurality": "target",
+     "n_target": 36,
+     "n_other_object": 0,
+     "target_score": 35.22633792459965,
+     "primary_mass": 2.2084525408863556,
+     "choice_mass": 35.22633792459965
+    },
+    {
+     "rank": 2,
+     "n": 537,
+     "plurality": "table",
+     "n_target": 0,
+     "n_other_object": 0,
+     "target_score": 33.62989069707692,
+     "primary_mass": 0.4242335046437802,
+     "choice_mass": 33.62989069707692
+    },
+    {
+     "rank": 3,
+     "n": 86,
+     "plurality": "other_object",
+     "n_target": 0,
+     "n_other_object": 86,
+     "target_score": 15.619934854097664,
+     "primary_mass": 9.118569247497362,
+     "choice_mass": 15.619934854097664
+    },
+    {
+     "rank": 4,
+     "n": 584,
+     "plurality": "table",
+     "n_target": 0,
+     "n_other_object": 0,
+     "target_score": 0.9523113568105828,
+     "primary_mass": 0.0074151933213038035,
+     "choice_mass": 0.9523113568105828
+    }
+   ]
+  },
+  {
+   "key": "ep1860",
+   "frame": 20,
+   "t_step": 160,
+   "grasp_state": "held",
+   "target_px_per_camera": [
+    25,
+    14558,
+    0
+   ],
+   "arms": {
+    "L8H2": {
+     "chosen_rank": 0,
+     "identity_correct": false,
+     "chosen_cluster_purity": 0.0,
+     "coverage": 0.0,
+     "chosen__other_object": 57,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     }
+    },
+    "A": {
+     "chosen_rank": 1,
+     "identity_correct": true,
+     "chosen_cluster_purity": 1.0,
+     "coverage": 0.8431372549019608,
+     "chosen__other_object": 0,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     }
+    }
+   },
+   "candidates_A": [
+    {
+     "rank": 0,
+     "n": 1884,
+     "plurality": "destination",
+     "n_target": 0,
+     "n_other_object": 0,
+     "target_score": 188.1209697703889,
+     "primary_mass": 350.00640930507234,
+     "choice_mass": 188.1209697703889
+    },
+    {
+     "rank": 1,
+     "n": 43,
+     "plurality": "target",
+     "n_target": 43,
+     "n_other_object": 0,
+     "target_score": 42.50397050380707,
+     "primary_mass": 4.0902915111219045,
+     "choice_mass": 42.50397050380707
+    },
+    {
+     "rank": 2,
+     "n": 57,
+     "plurality": "other_object",
+     "n_target": 0,
+     "n_other_object": 57,
+     "target_score": 16.11868553608656,
+     "primary_mass": 5.125959902070463,
+     "choice_mass": 16.11868553608656
+    },
+    {
+     "rank": 3,
+     "n": 103,
+     "plurality": "other_object",
+     "n_target": 0,
+     "n_other_object": 103,
+     "target_score": 0.23555697299161693,
+     "primary_mass": 12.571393469712348,
+     "choice_mass": 0.23555697299161693
+    }
+   ]
+  },
+  {
+   "key": "ep1851",
+   "frame": 13,
+   "t_step": 104,
+   "grasp_state": "pre",
+   "target_px_per_camera": [
+    34,
+    3782,
+    0
+   ],
+   "arms": {
+    "L8H2": {
+     "chosen_rank": 0,
+     "identity_correct": true,
+     "chosen_cluster_purity": 1.0,
+     "coverage": 0.8378378378378378,
+     "chosen__other_object": 0,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     }
+    },
+    "A": {
+     "chosen_rank": 1,
+     "identity_correct": false,
+     "chosen_cluster_purity": 0.0,
+     "coverage": 0.0,
+     "chosen__other_object": 112,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     }
+    }
+   },
+   "candidates_A": [
+    {
+     "rank": 0,
+     "n": 1974,
+     "plurality": "destination",
+     "n_target": 0,
+     "n_other_object": 0,
+     "target_score": 74.23964312566386,
+     "primary_mass": 18.473864008561577,
+     "choice_mass": 74.23964312566386
+    },
+    {
+     "rank": 1,
+     "n": 112,
+     "plurality": "other_object",
+     "n_target": 0,
+     "n_other_object": 112,
+     "target_score": 38.81994742900133,
+     "primary_mass": 21.54772302339552,
+     "choice_mass": 38.81994742900133
+    },
+    {
+     "rank": 2,
+     "n": 31,
+     "plurality": "target",
+     "n_target": 31,
+     "n_other_object": 0,
+     "target_score": 30.479211390018463,
+     "primary_mass": 27.12185068242252,
+     "choice_mass": 30.479211390018463
+    }
+   ]
+  },
+  {
+   "key": "ep1866",
+   "frame": 60,
+   "t_step": 480,
+   "grasp_state": "placed",
+   "target_px_per_camera": [
+    23,
+    1282,
+    2121
+   ],
+   "arms": {
+    "L8H2": {
+     "chosen_rank": 0,
+     "identity_correct": true,
+     "chosen_cluster_purity": 1.0,
+     "coverage": 1.0,
+     "chosen__other_object": 0,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     }
+    },
+    "A": {
+     "chosen_rank": 1,
+     "identity_correct": false,
+     "chosen_cluster_purity": 0.0,
+     "coverage": 0.0,
+     "chosen__other_object": 0,
+     "reproduces_stored_row": {
+      "chosen_rank": true,
+      "identity_correct": true,
+      "pre_split_digest": true,
+      "post_split_digest": true,
+      "has_target": true,
+      "n_candidates": true
+     }
+    }
+   },
+   "candidates_A": [
+    {
+     "rank": 0,
+     "n": 948,
+     "plurality": "destination",
+     "n_target": 0,
+     "n_other_object": 0,
+     "target_score": 248.79133660485968,
+     "primary_mass": 203.6549431313324,
+     "choice_mass": 248.79133660485968
+    },
+    {
+     "rank": 1,
+     "n": 105,
+     "plurality": "destination",
+     "n_target": 0,
+     "n_other_object": 0,
+     "target_score": 88.86486768722534,
+     "primary_mass": 4.376288756728172,
+     "choice_mass": 88.86486768722534
+    },
+    {
+     "rank": 2,
+     "n": 61,
+     "plurality": "target",
+     "n_target": 61,
+     "n_other_object": 0,
+     "target_score": 57.02448996901512,
+     "primary_mass": 44.74958401918411,
+     "choice_mass": 57.02448996901512
+    },
+    {
+     "rank": 3,
+     "n": 115,
+     "plurality": "table",
+     "n_target": 0,
+     "n_other_object": 0,
+     "target_score": 1.6930997601011768,
+     "primary_mass": 20.117814511060715,
+     "choice_mass": 1.6930997601011768
+    }
+   ]
+  }
+ ],
+ "legend": {
+  "map": "raw 16x16 map normalised to its 3-camera max (blue ramp), row 1 L8H2, row 2 noun L10H7",
+  "outlines": "GT target (green), GT neighbour fruit = other_object (orange), GT crate (purple)",
+  "right_panel": "top-down base-frame XY of fused-cloud points within 0.25 m of the GT target centre, GT point label colours; grey dashed = candidate cluster hulls (both arms share them); blue = L8H2 choice, red = A choice; star = GT target centre"
+ }
+}

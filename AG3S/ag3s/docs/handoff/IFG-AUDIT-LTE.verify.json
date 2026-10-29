@@ -1,0 +1,2090 @@
+{
+ "step": "IFG-AUDIT-LTE",
+ "written": "2026-10-21 21:34 KST",
+ "data": {
+  "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f",
+  "kit": "IFG-APPLE-SPLIT",
+  "arm": "SPL",
+  "n_episodes": 24,
+  "n_requests_total": 1800,
+  "n_requests_measured": 1800,
+  "sampling": "all searching/latched/closing/held requests + every 1th placed request (k % 1 == 0)",
+  "n_points": 2214000,
+  "n_points_by_set": {
+   "sphere_unauth": 382050,
+   "sphere_auth": 103950,
+   "probe_target": 864000,
+   "probe_neighbour": 864000
+  },
+  "episodes": [
+   {
+    "ep": 119,
+    "side": "left",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 20.6
+   },
+   {
+    "ep": 121,
+    "side": "left",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 14.2
+   },
+   {
+    "ep": 1222,
+    "side": "left",
+    "profile": "ep1222_place",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 11.7
+   },
+   {
+    "ep": 126,
+    "side": "left",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 12.9
+   },
+   {
+    "ep": 1313,
+    "side": "left",
+    "profile": "ep1313_place",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 19.7
+   },
+   {
+    "ep": 1345,
+    "side": "left",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 13.7
+   },
+   {
+    "ep": 1596,
+    "side": "left",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 11.3
+   },
+   {
+    "ep": 1668,
+    "side": "right",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 13.1
+   },
+   {
+    "ep": 1837,
+    "side": "right",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 14.6
+   },
+   {
+    "ep": 211,
+    "side": "left",
+    "profile": "ep211_place",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 17.5
+   },
+   {
+    "ep": 250,
+    "side": "right",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 13.6
+   },
+   {
+    "ep": 309,
+    "side": "right",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 13.1
+   },
+   {
+    "ep": 320,
+    "side": "right",
+    "profile": "ep320_place",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 13.7
+   },
+   {
+    "ep": 325,
+    "side": "left",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 12.8
+   },
+   {
+    "ep": 342,
+    "side": "left",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 13.5
+   },
+   {
+    "ep": 421,
+    "side": "right",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 13.0
+   },
+   {
+    "ep": 526,
+    "side": "left",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 18.2
+   },
+   {
+    "ep": 56,
+    "side": "right",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 12.3
+   },
+   {
+    "ep": 572,
+    "side": "right",
+    "profile": "ep572_place",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 21.1
+   },
+   {
+    "ep": 753,
+    "side": "right",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 14.3
+   },
+   {
+    "ep": 850,
+    "side": "left",
+    "profile": "ep850_place",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 22.5
+   },
+   {
+    "ep": 901,
+    "side": "left",
+    "profile": "ep901_place",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 19.1
+   },
+   {
+    "ep": 954,
+    "side": "right",
+    "profile": "ep954_place",
+    "target_fruit": "apple",
+    "used_arm": "right",
+    "n_selected": 75,
+    "seconds": 19.2
+   },
+   {
+    "ep": 979,
+    "side": "left",
+    "profile": "clear",
+    "target_fruit": "apple",
+    "used_arm": "left",
+    "n_selected": 75,
+    "seconds": 20.3
+   }
+  ],
+  "scene_types": {
+   "clear": 19,
+   "neighbour_any_request": 24
+  },
+  "requests_by_phase": {
+   "searching": 55,
+   "latched": 456,
+   "closing": 213,
+   "held": 240,
+   "placed": 836
+  }
+ },
+ "definitions": "IFG-AUDIT-LTE \u2014 how close is the AG3S distance field to the true geometry, and how precise is the target removal? CPU only, read only.\n\n  cd /mnt/dev/AG3S_VLA-development; MUJOCO_GL=osmesa PYTHONPATH=.:integration/rby1/manipulation/src .venv-ag3s/bin/python -m       AG3S.ag3s.experiments.studies.ifg_audit_lte --run <RUN> --fig AG3S/ag3s/docs/figures/ifg-audit [--every 3] [--cache <npz>]\n\nLTE = Link-specific Target Exemption: the cuRobo TSDF/ESDF distance field (main = 20 mm coarse -> 5 mm fine `min` composition) and the\ntarget-free fine layer that only the authorised links (grasping hand fingers + palm) query.\n\nInputs (all read only)\n  kit       : <RUN>/verify/<kit> (default IFG-APPLE-SPLIT), arm <arm> (default SPL): 24 apple scenes\n  client    : runs/<arm>/<arm>_ep<E>_s<S>/frames.jsonl planning rows (one per request: seq, t_step, MuJoCo qpos, object_poses);\n              manifest.json scene (episode_target_fruit, episode_used_arm)\n  server    : replay/runs_<arm>_<arm>_ep<E>_*.json server_chunk_alignment.block -> request k = chunk_dir/chunk_{k+offset:05d}.npz\n  field     : `fixed_input_ablation.build_field(z, outside_distance=1.0)` (the offline harness) -> `.distance` (main, coarse->fine) and\n              `.target_free_distance` (window formula min(f, max(d, b))); `.answer_tier` names the layer that answered\n  GT        : the run's MuJoCo model (snapshot_split model_transport.xml), d.qpos = planning-row qpos, mj_forward. Field frame 'base' =\n              MuJoCo world (base body at the origin, measured offset < 0.1 mm). Candidate geoms = non-robot collision geoms (contype or\n              conaffinity != 0, not under body 'base'): floor, office walls, table, crate, fruits, shelf, obstacles.\n              Signed distance: boxes and planes analytic (exact); every other geom (fruit meshes) `mj_geomDistance` against a 0.1 mm\n              probe sphere (contype=conaffinity=0, group 5) whose geom_xpos is written directly; +0.1 mm added back.\n              Mesh distance is to MuJoCo's convex hull of the collision mesh (fruits are split into convex parts).\nDefinitions\n  GT_main   : min signed distance over all candidate geoms; in the 'held' phase the held target is left out (the server frees the\n              held object from the field on purpose and models it with attached spheres)\n  GT_free   : min over candidate geoms except the target fruit\n  error     : field - GT (m); > 0 = the field says farther than reality (dangerous), < 0 = nearer (conservative)\n  layer in practice: main for every sphere whose `target_permission.target_field_exclude` row is False (unauthorised), target-free for\n              authorised rows when the request carries a target-free layer; probes are evaluated on both layers\n  query sets: (a) recorded `sphere_centres` (the server robot at refined_chunk[0], i.e. the commanded first plan step; checked 0.0 mm\n              on ep119 requests 10 and 16); (b) probes: 48 Fibonacci directions x surface offsets {3,10,17 | 25,35,45 | 60,80 | 150,250} mm\n              from the GT surface of the target fruit and of its nearest neighbour fruit (GT surface found by Newton steps on the\n              signed distance along each direction from the body's mesh AABB centre)\n  bands     : by GT distance: <0 (inside), 0-2, 2-5, 5-10, 10-30, >=30 cm\n  visible   : the GT nearest surface point of that layer lies in the frustum of at least one of zed_left (head), wrist_cam_l,\n              wrist_cam_r at the planning row (fovy from the model, 4:3 aspect assumed) and an mj_multiRay over geom groups 0-2 from 3 cm\n              in front of the lens reaches it (first hit >= length - 8 mm). Current frame only; the TSDF integrates earlier frames too.\n  scene type: 'neighbour' when the nearest non-target fruit's collision geometry is within 10 cm of the target's at that request\n  phase     : summary grasp.state (searching / latched / closing / held / placed); 'approach' in the exemption = latched\nExemption (latched and closing requests that carry a removal trace)\n  removed   : target_free_removed_ijk -> world = trace_origin + ijk * trace_voxel_size\n  precision : fraction of removed voxels with GT signed distance to the target <= 5 mm (one voxel; inside counts); the rest are\n              labelled by the nearest non-target geom class within 10 mm, else 'target 5-10 mm' or 'no surface within 10 mm'\n  surface voxel (main): fine main grid voxel with |D| <= voxel/2 (the ESDF is discrete; seeds are exactly 0)\n  target surface voxel : a surface voxel within 6 cm of the target AABB whose GT target distance <= 5 mm and <= every other geom's\n  recall    : fraction of target surface voxels whose target-free grid value F > voxel/2 (no longer a surface or interior)\n  residual  : target-free grid voxels with F <= voxel/2 (surface or still-negative interior) that are target voxels by the same GT rule\n  residual at GT surface : target-free composed distance at GT target surface points (48 dirs) whose GT_free > 15 mm; count < 5 mm\n  stale     : the removal ball's surface-fit centre (esdf_stats.target_free.ball.fit) is > 30 mm from the GT target centre (the target\n              moved or fell after its geometry was frozen); precision / recall are also given without stale requests\n  neighbour lost : at visible GT neighbour surface points where the main layer < 5 mm, fraction whose target-free value >= 5 mm\n3D geometry\n  extents   : manipulated.admissibility.extents_mm vs `principal_extents` of the GT collision-mesh vertices (same function)\n  radius    : manipulated.radius, target_free ball fit radius vs GT mean / max radial surface distance from the AABB centre\n  held      : grasp.attached.held.body_cover.body_parent_frame[0] (and spheres_parent_frame) carried by server FK of the parent link\n              at the planning-row qpos (server FK = MuJoCo EE_BODY to < 0.1 mm) vs GT target AABB centre; coverage = fraction of GT\n              target surface points inside the union of spheres_parent_frame spheres; held voxels = fine main voxels with D <= voxel/2\n              that are target voxels, and coarse voxels < 0 within 10 mm of the GT target surface\n",
+ "scripts": [
+  "AG3S/ag3s/experiments/studies/ifg_audit_lte.py"
+ ],
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-audit/ifg-audit-lte-section.png",
+  "AG3S/ag3s/docs/figures/ifg-audit/ifg-audit-lte-error-bands.png",
+  "AG3S/ag3s/docs/figures/ifg-audit/ifg-audit-lte-error-strata.png",
+  "AG3S/ag3s/docs/figures/ifg-audit/ifg-audit-lte-exemption.png",
+  "AG3S/ag3s/docs/figures/ifg-audit/ifg-audit-lte-geometry.png"
+ ],
+ "numbers": {
+  "field_vs_gt": {
+   "main@sphere_unauth": {
+    "by_band": {
+     "<0": {
+      "n": 12,
+      "median_mm": 0.92,
+      "p5_mm": -4.28,
+      "p95_mm": 3.62,
+      "rms_mm": 2.69,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.0
+     },
+     "0-2cm": {
+      "n": 169,
+      "median_mm": 8.87,
+      "p5_mm": -7.04,
+      "p95_mm": 12.13,
+      "rms_mm": 9.19,
+      "frac_over_5mm": 0.7101,
+      "frac_over_10mm": 0.3254,
+      "frac_under_10mm": 0.0296
+     },
+     "2-5cm": {
+      "n": 12805,
+      "median_mm": 0.65,
+      "p5_mm": -9.48,
+      "p95_mm": 8.98,
+      "rms_mm": 6.39,
+      "frac_over_5mm": 0.4084,
+      "frac_over_10mm": 0.0191,
+      "frac_under_10mm": 0.0363
+     },
+     "5-10cm": {
+      "n": 118560,
+      "median_mm": -0.02,
+      "p5_mm": -10.59,
+      "p95_mm": 9.22,
+      "rms_mm": 6.92,
+      "frac_over_5mm": 0.3827,
+      "frac_over_10mm": 0.0333,
+      "frac_under_10mm": 0.0645
+     },
+     "10-30cm": {
+      "n": 250497,
+      "median_mm": -2.13,
+      "p5_mm": -30.26,
+      "p95_mm": 8.43,
+      "rms_mm": 12.42,
+      "frac_over_5mm": 0.1672,
+      "frac_over_10mm": 0.0177,
+      "frac_under_10mm": 0.1376
+     },
+     ">=30cm": {
+      "n": 7,
+      "median_mm": -8.95,
+      "p5_mm": -12.25,
+      "p95_mm": -8.36,
+      "rms_mm": 9.94,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.2857
+     }
+    },
+    "all": {
+     "n": 382050,
+     "median_mm": -1.72,
+     "p5_mm": -19.11,
+     "p95_mm": 8.77,
+     "rms_mm": 10.84,
+     "frac_over_5mm": 0.2424,
+     "frac_over_10mm": 0.0227,
+     "frac_under_10mm": 0.1115
+    },
+    "gt_0_10cm": {
+     "n": 131534,
+     "median_mm": 0.18,
+     "p5_mm": -10.47,
+     "p95_mm": 9.21,
+     "rms_mm": 6.87,
+     "frac_over_5mm": 0.3856,
+     "frac_over_10mm": 0.0323,
+     "frac_under_10mm": 0.0617
+    },
+    "gt_0_10cm_visible": {
+     "n": 123978,
+     "median_mm": 1.43,
+     "p5_mm": -10.08,
+     "p95_mm": 9.31,
+     "rms_mm": 6.71,
+     "frac_over_5mm": 0.4043,
+     "frac_over_10mm": 0.0342,
+     "frac_under_10mm": 0.0518
+    },
+    "gt_0_10cm_not_visible": {
+     "n": 7556,
+     "median_mm": -8.02,
+     "p5_mm": -14.77,
+     "p95_mm": 7.02,
+     "rms_mm": 9.09,
+     "frac_over_5mm": 0.0793,
+     "frac_over_10mm": 0.0011,
+     "frac_under_10mm": 0.2243
+    },
+    "gt_0_10cm_by_phase": {
+     "searching": {
+      "n": 3042,
+      "median_mm": 5.59,
+      "p5_mm": -9.29,
+      "p95_mm": 11.1,
+      "rms_mm": 7.06,
+      "frac_over_5mm": 0.5286,
+      "frac_over_10mm": 0.0684,
+      "frac_under_10mm": 0.0368
+     },
+     "latched": {
+      "n": 23980,
+      "median_mm": 6.16,
+      "p5_mm": -9.39,
+      "p95_mm": 9.83,
+      "rms_mm": 6.99,
+      "frac_over_5mm": 0.6025,
+      "frac_over_10mm": 0.0446,
+      "frac_under_10mm": 0.0363
+     },
+     "closing": {
+      "n": 9371,
+      "median_mm": 6.2,
+      "p5_mm": -7.43,
+      "p95_mm": 8.22,
+      "rms_mm": 6.52,
+      "frac_over_5mm": 0.6535,
+      "frac_over_10mm": 0.0107,
+      "frac_under_10mm": 0.0174
+     },
+     "held": {
+      "n": 24890,
+      "median_mm": -3.95,
+      "p5_mm": -12.52,
+      "p95_mm": 9.76,
+      "rms_mm": 8.26,
+      "frac_over_5mm": 0.2529,
+      "frac_over_10mm": 0.0447,
+      "frac_under_10mm": 0.1417
+     },
+     "placed": {
+      "n": 70251,
+      "median_mm": -1.13,
+      "p5_mm": -9.93,
+      "p95_mm": 8.87,
+      "rms_mm": 6.31,
+      "frac_over_5mm": 0.3167,
+      "frac_over_10mm": 0.0251,
+      "frac_under_10mm": 0.0491
+     }
+    },
+    "gt_0_10cm_by_scene": {
+     "clear": {
+      "n": 88781,
+      "median_mm": -1.35,
+      "p5_mm": -10.49,
+      "p95_mm": 9.09,
+      "rms_mm": 6.68,
+      "frac_over_5mm": 0.3074,
+      "frac_over_10mm": 0.0301,
+      "frac_under_10mm": 0.0624
+     },
+     "neighbour": {
+      "n": 42753,
+      "median_mm": 5.7,
+      "p5_mm": -10.43,
+      "p95_mm": 9.48,
+      "rms_mm": 7.25,
+      "frac_over_5mm": 0.5481,
+      "frac_over_10mm": 0.037,
+      "frac_under_10mm": 0.0602
+     }
+    },
+    "gt_0_10cm_by_tier": {
+     "coarse": {
+      "n": 91657,
+      "median_mm": 6.01,
+      "p5_mm": -10.3,
+      "p95_mm": 9.85,
+      "rms_mm": 7.19,
+      "frac_over_5mm": 0.5531,
+      "frac_over_10mm": 0.0462,
+      "frac_under_10mm": 0.0571
+     },
+     "fine": {
+      "n": 39877,
+      "median_mm": -3.61,
+      "p5_mm": -11.05,
+      "p95_mm": -0.48,
+      "rms_mm": 6.1,
+      "frac_over_5mm": 0.0006,
+      "frac_over_10mm": 0.0004,
+      "frac_under_10mm": 0.0723
+     }
+    },
+    "gt_0_10cm_by_nearest_class": {
+     "target": {
+      "n": 63,
+      "median_mm": -9.8,
+      "p5_mm": -15.95,
+      "p95_mm": -6.49,
+      "rms_mm": 10.72,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.4444
+     },
+     "neighbour": {
+      "n": 1319,
+      "median_mm": -6.87,
+      "p5_mm": -16.89,
+      "p95_mm": 4.03,
+      "rms_mm": 9.4,
+      "frac_over_5mm": 0.0349,
+      "frac_over_10mm": 0.0152,
+      "frac_under_10mm": 0.2851
+     },
+     "fruit_other": {
+      "n": 1,
+      "median_mm": 2.22,
+      "p5_mm": 2.22,
+      "p95_mm": 2.22,
+      "rms_mm": 2.22,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.0
+     },
+     "table": {
+      "n": 1043,
+      "median_mm": -10.37,
+      "p5_mm": -20.51,
+      "p95_mm": -5.74,
+      "rms_mm": 13.13,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.5714
+     },
+     "crate": {
+      "n": 129108,
+      "median_mm": 0.62,
+      "p5_mm": -10.21,
+      "p95_mm": 9.23,
+      "rms_mm": 6.77,
+      "frac_over_5mm": 0.3925,
+      "frac_over_10mm": 0.0328,
+      "frac_under_10mm": 0.0551
+     }
+    }
+   },
+   "free@sphere_auth": {
+    "by_band": {
+     "<0": {
+      "n": 3,
+      "median_mm": 14.93,
+      "p5_mm": 13.59,
+      "p95_mm": 17.66,
+      "rms_mm": 15.56,
+      "frac_over_5mm": 1.0,
+      "frac_over_10mm": 1.0,
+      "frac_under_10mm": 0.0
+     },
+     "0-2cm": {
+      "n": 268,
+      "median_mm": -2.97,
+      "p5_mm": -6.84,
+      "p95_mm": 6.12,
+      "rms_mm": 4.6,
+      "frac_over_5mm": 0.0896,
+      "frac_over_10mm": 0.0037,
+      "frac_under_10mm": 0.0075
+     },
+     "2-5cm": {
+      "n": 10838,
+      "median_mm": -5.02,
+      "p5_mm": -22.63,
+      "p95_mm": 1.26,
+      "rms_mm": 10.24,
+      "frac_over_5mm": 0.0062,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.2369
+     },
+     "5-10cm": {
+      "n": 31456,
+      "median_mm": -7.75,
+      "p5_mm": -41.38,
+      "p95_mm": -0.6,
+      "rms_mm": 18.7,
+      "frac_over_5mm": 0.0003,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.3813
+     },
+     "10-30cm": {
+      "n": 61384,
+      "median_mm": -4.1,
+      "p5_mm": -35.72,
+      "p95_mm": -0.16,
+      "rms_mm": 14.04,
+      "frac_over_5mm": 0.0001,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.2059
+     },
+     ">=30cm": {
+      "n": 1,
+      "median_mm": -4.28,
+      "p5_mm": -4.28,
+      "p95_mm": -4.28,
+      "rms_mm": 4.28,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.0
+     }
+    },
+    "all": {
+     "n": 103950,
+     "median_mm": -5.02,
+     "p5_mm": -37.39,
+     "p95_mm": -0.13,
+     "rms_mm": 15.27,
+     "frac_over_5mm": 0.0011,
+     "frac_over_10mm": 0.0,
+     "frac_under_10mm": 0.2617
+    },
+    "gt_0_10cm": {
+     "n": 42562,
+     "median_mm": -6.91,
+     "p5_mm": -38.8,
+     "p95_mm": -0.08,
+     "rms_mm": 16.89,
+     "frac_over_5mm": 0.0024,
+     "frac_over_10mm": 0.0,
+     "frac_under_10mm": 0.3422
+    },
+    "gt_0_10cm_visible": {
+     "n": 32547,
+     "median_mm": -6.01,
+     "p5_mm": -34.91,
+     "p95_mm": 0.08,
+     "rms_mm": 15.09,
+     "frac_over_5mm": 0.0023,
+     "frac_over_10mm": 0.0,
+     "frac_under_10mm": 0.3001
+    },
+    "gt_0_10cm_not_visible": {
+     "n": 10015,
+     "median_mm": -9.68,
+     "p5_mm": -45.55,
+     "p95_mm": -0.81,
+     "rms_mm": 21.72,
+     "frac_over_5mm": 0.0026,
+     "frac_over_10mm": 0.0001,
+     "frac_under_10mm": 0.4789
+    },
+    "gt_0_10cm_by_phase": {
+     "searching": {
+      "n": 2456,
+      "median_mm": -4.23,
+      "p5_mm": -8.13,
+      "p95_mm": -0.61,
+      "rms_mm": 4.84,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.0
+     },
+     "latched": {
+      "n": 27226,
+      "median_mm": -6.47,
+      "p5_mm": -40.73,
+      "p95_mm": 0.26,
+      "rms_mm": 18.2,
+      "frac_over_5mm": 0.0021,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.3784
+     },
+     "closing": {
+      "n": 10274,
+      "median_mm": -7.76,
+      "p5_mm": -37.88,
+      "p95_mm": -0.17,
+      "rms_mm": 16.64,
+      "frac_over_5mm": 0.0044,
+      "frac_over_10mm": 0.0001,
+      "frac_under_10mm": 0.3432
+     },
+     "held": {
+      "n": 0
+     },
+     "placed": {
+      "n": 2606,
+      "median_mm": -8.78,
+      "p5_mm": -12.8,
+      "p95_mm": -5.37,
+      "rms_mm": 9.19,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.2817
+     }
+    },
+    "gt_0_10cm_by_scene": {
+     "clear": {
+      "n": 5501,
+      "median_mm": -6.87,
+      "p5_mm": -30.44,
+      "p95_mm": -0.44,
+      "rms_mm": 13.16,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.247
+     },
+     "neighbour": {
+      "n": 37061,
+      "median_mm": -6.93,
+      "p5_mm": -39.37,
+      "p95_mm": -0.01,
+      "rms_mm": 17.37,
+      "frac_over_5mm": 0.0028,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.3563
+     }
+    },
+    "gt_0_10cm_by_tier": {
+     "target_free": {
+      "n": 42562,
+      "median_mm": -6.91,
+      "p5_mm": -38.8,
+      "p95_mm": -0.08,
+      "rms_mm": 16.89,
+      "frac_over_5mm": 0.0024,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.3422
+     }
+    },
+    "gt_0_10cm_by_nearest_class": {
+     "neighbour": {
+      "n": 7627,
+      "median_mm": -12.5,
+      "p5_mm": -39.81,
+      "p95_mm": 1.6,
+      "rms_mm": 20.83,
+      "frac_over_5mm": 0.0093,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.5463
+     },
+     "fruit_other": {
+      "n": 35,
+      "median_mm": -4.84,
+      "p5_mm": -8.26,
+      "p95_mm": -2.55,
+      "rms_mm": 5.52,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.0
+     },
+     "table": {
+      "n": 10658,
+      "median_mm": -15.84,
+      "p5_mm": -46.81,
+      "p95_mm": -2.93,
+      "rms_mm": 24.43,
+      "frac_over_5mm": 0.0003,
+      "frac_over_10mm": 0.0001,
+      "frac_under_10mm": 0.5877
+     },
+     "crate": {
+      "n": 24242,
+      "median_mm": -5.46,
+      "p5_mm": -21.72,
+      "p95_mm": 0.12,
+      "rms_mm": 10.09,
+      "frac_over_5mm": 0.0012,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.1704
+     }
+    }
+   },
+   "main@probes": {
+    "by_band": {
+     "<0": {
+      "n": 304770,
+      "median_mm": -1.35,
+      "p5_mm": -17.99,
+      "p95_mm": 11.06,
+      "rms_mm": 23.69,
+      "frac_over_5mm": 0.2419,
+      "frac_over_10mm": 0.0605,
+      "frac_under_10mm": 0.2446
+     },
+     "0-2cm": {
+      "n": 652388,
+      "median_mm": -4.35,
+      "p5_mm": -23.23,
+      "p95_mm": 8.89,
+      "rms_mm": 11.23,
+      "frac_over_5mm": 0.0932,
+      "frac_over_10mm": 0.0412,
+      "frac_under_10mm": 0.2171
+     },
+     "2-5cm": {
+      "n": 393102,
+      "median_mm": -6.6,
+      "p5_mm": -30.0,
+      "p95_mm": 5.85,
+      "rms_mm": 13.26,
+      "frac_over_5mm": 0.0605,
+      "frac_over_10mm": 0.0238,
+      "frac_under_10mm": 0.2393
+     },
+     "5-10cm": {
+      "n": 199496,
+      "median_mm": -8.53,
+      "p5_mm": -45.67,
+      "p95_mm": 2.86,
+      "rms_mm": 18.68,
+      "frac_over_5mm": 0.0313,
+      "frac_over_10mm": 0.0102,
+      "frac_under_10mm": 0.3703
+     },
+     "10-30cm": {
+      "n": 176292,
+      "median_mm": -7.52,
+      "p5_mm": -47.93,
+      "p95_mm": 1.55,
+      "rms_mm": 18.91,
+      "frac_over_5mm": 0.0229,
+      "frac_over_10mm": 0.0069,
+      "frac_under_10mm": 0.3471
+     },
+     ">=30cm": {
+      "n": 1952,
+      "median_mm": -4.44,
+      "p5_mm": -34.45,
+      "p95_mm": -0.19,
+      "rms_mm": 15.14,
+      "frac_over_5mm": 0.0087,
+      "frac_over_10mm": 0.0005,
+      "frac_under_10mm": 0.1691
+     }
+    },
+    "all": {
+     "n": 1728000,
+     "median_mm": -5.35,
+     "p5_mm": -29.99,
+     "p95_mm": 8.66,
+     "rms_mm": 16.24,
+     "frac_over_5mm": 0.0976,
+     "frac_over_10mm": 0.0335,
+     "frac_under_10mm": 0.2579
+    },
+    "gt_0_10cm": {
+     "n": 1244986,
+     "median_mm": -5.73,
+     "p5_mm": -30.0,
+     "p95_mm": 7.07,
+     "rms_mm": 13.32,
+     "frac_over_5mm": 0.0729,
+     "frac_over_10mm": 0.0307,
+     "frac_under_10mm": 0.2487
+    },
+    "gt_0_10cm_visible": {
+     "n": 836094,
+     "median_mm": -4.31,
+     "p5_mm": -16.07,
+     "p95_mm": 8.08,
+     "rms_mm": 9.72,
+     "frac_over_5mm": 0.0887,
+     "frac_over_10mm": 0.0362,
+     "frac_under_10mm": 0.1342
+    },
+    "gt_0_10cm_not_visible": {
+     "n": 408892,
+     "median_mm": -10.0,
+     "p5_mm": -36.27,
+     "p95_mm": 3.77,
+     "rms_mm": 18.64,
+     "frac_over_5mm": 0.0407,
+     "frac_over_10mm": 0.0194,
+     "frac_under_10mm": 0.4828
+    },
+    "gt_0_10cm_by_phase": {
+     "searching": {
+      "n": 38992,
+      "median_mm": -5.86,
+      "p5_mm": -23.76,
+      "p95_mm": 1.24,
+      "rms_mm": 10.83,
+      "frac_over_5mm": 0.0102,
+      "frac_over_10mm": 0.0021,
+      "frac_under_10mm": 0.2089
+     },
+     "latched": {
+      "n": 323092,
+      "median_mm": -5.75,
+      "p5_mm": -27.94,
+      "p95_mm": 2.9,
+      "rms_mm": 12.04,
+      "frac_over_5mm": 0.0305,
+      "frac_over_10mm": 0.0145,
+      "frac_under_10mm": 0.2169
+     },
+     "closing": {
+      "n": 148749,
+      "median_mm": -5.43,
+      "p5_mm": -29.8,
+      "p95_mm": 13.23,
+      "rms_mm": 15.33,
+      "frac_over_5mm": 0.0961,
+      "frac_over_10mm": 0.0609,
+      "frac_under_10mm": 0.2236
+     },
+     "held": {
+      "n": 139773,
+      "median_mm": -6.14,
+      "p5_mm": -27.31,
+      "p95_mm": 4.37,
+      "rms_mm": 11.94,
+      "frac_over_5mm": 0.0437,
+      "frac_over_10mm": 0.0122,
+      "frac_under_10mm": 0.2384
+     },
+     "placed": {
+      "n": 594380,
+      "median_mm": -5.66,
+      "p5_mm": -30.0,
+      "p95_mm": 8.67,
+      "rms_mm": 13.89,
+      "frac_over_5mm": 0.1012,
+      "frac_over_10mm": 0.0382,
+      "frac_under_10mm": 0.2773
+     }
+    },
+    "gt_0_10cm_by_scene": {
+     "clear": {
+      "n": 732029,
+      "median_mm": -5.53,
+      "p5_mm": -30.0,
+      "p95_mm": 9.25,
+      "rms_mm": 14.14,
+      "frac_over_5mm": 0.1033,
+      "frac_over_10mm": 0.0446,
+      "frac_under_10mm": 0.264
+     },
+     "neighbour": {
+      "n": 512957,
+      "median_mm": -5.95,
+      "p5_mm": -28.11,
+      "p95_mm": 2.94,
+      "rms_mm": 12.07,
+      "frac_over_5mm": 0.0296,
+      "frac_over_10mm": 0.0109,
+      "frac_under_10mm": 0.2268
+     }
+    },
+    "gt_0_10cm_by_tier": {
+     "coarse": {
+      "n": 733558,
+      "median_mm": -9.29,
+      "p5_mm": -31.35,
+      "p95_mm": 8.65,
+      "rms_mm": 16.26,
+      "frac_over_5mm": 0.0897,
+      "frac_over_10mm": 0.0407,
+      "frac_under_10mm": 0.3494
+     },
+     "fine": {
+      "n": 511428,
+      "median_mm": -3.44,
+      "p5_mm": -13.91,
+      "p95_mm": 4.92,
+      "rms_mm": 7.26,
+      "frac_over_5mm": 0.0489,
+      "frac_over_10mm": 0.0164,
+      "frac_under_10mm": 0.1042
+     }
+    },
+    "gt_0_10cm_by_nearest_class": {
+     "target": {
+      "n": 273898,
+      "median_mm": -3.56,
+      "p5_mm": -17.17,
+      "p95_mm": 15.71,
+      "rms_mm": 11.34,
+      "frac_over_5mm": 0.1336,
+      "frac_over_10mm": 0.0825,
+      "frac_under_10mm": 0.1502
+     },
+     "neighbour": {
+      "n": 350284,
+      "median_mm": -2.56,
+      "p5_mm": -13.54,
+      "p95_mm": 7.77,
+      "rms_mm": 7.07,
+      "frac_over_5mm": 0.1072,
+      "frac_over_10mm": 0.0254,
+      "frac_under_10mm": 0.0924
+     },
+     "fruit_other": {
+      "n": 14714,
+      "median_mm": 0.35,
+      "p5_mm": -10.05,
+      "p95_mm": 10.04,
+      "rms_mm": 7.61,
+      "frac_over_5mm": 0.2235,
+      "frac_over_10mm": 0.0501,
+      "frac_under_10mm": 0.0504
+     },
+     "table": {
+      "n": 373661,
+      "median_mm": -10.0,
+      "p5_mm": -36.36,
+      "p95_mm": -0.51,
+      "rms_mm": 17.94,
+      "frac_over_5mm": 0.0128,
+      "frac_over_10mm": 0.0037,
+      "frac_under_10mm": 0.4172
+     },
+     "crate": {
+      "n": 226518,
+      "median_mm": -7.38,
+      "p5_mm": -30.6,
+      "p95_mm": 1.87,
+      "rms_mm": 14.18,
+      "frac_over_5mm": 0.0336,
+      "frac_over_10mm": 0.0166,
+      "frac_under_10mm": 0.3499
+     },
+     "other": {
+      "n": 5911,
+      "median_mm": -8.2,
+      "p5_mm": -10.0,
+      "p95_mm": 25.1,
+      "rms_mm": 16.22,
+      "frac_over_5mm": 0.1643,
+      "frac_over_10mm": 0.1441,
+      "frac_under_10mm": 0.0379
+     }
+    }
+   },
+   "free@probes": {
+    "by_band": {
+     "<0": {
+      "n": 134417,
+      "median_mm": 7.22,
+      "p5_mm": 0.36,
+      "p95_mm": 27.15,
+      "rms_mm": 34.39,
+      "frac_over_5mm": 0.6435,
+      "frac_over_10mm": 0.3691,
+      "frac_under_10mm": 0.0057
+     },
+     "0-2cm": {
+      "n": 215702,
+      "median_mm": -2.57,
+      "p5_mm": -9.02,
+      "p95_mm": 7.93,
+      "rms_mm": 5.67,
+      "frac_over_5mm": 0.0877,
+      "frac_over_10mm": 0.0336,
+      "frac_under_10mm": 0.0335
+     },
+     "2-5cm": {
+      "n": 192605,
+      "median_mm": -4.86,
+      "p5_mm": -27.04,
+      "p95_mm": 3.93,
+      "rms_mm": 11.52,
+      "frac_over_5mm": 0.0393,
+      "frac_over_10mm": 0.0105,
+      "frac_under_10mm": 0.1927
+     },
+     "5-10cm": {
+      "n": 132892,
+      "median_mm": -7.43,
+      "p5_mm": -51.37,
+      "p95_mm": 0.68,
+      "rms_mm": 23.7,
+      "frac_over_5mm": 0.016,
+      "frac_over_10mm": 0.0045,
+      "frac_under_10mm": 0.4232
+     },
+     "10-30cm": {
+      "n": 63576,
+      "median_mm": -7.48,
+      "p5_mm": -49.13,
+      "p95_mm": 0.21,
+      "rms_mm": 20.97,
+      "frac_over_5mm": 0.0129,
+      "frac_over_10mm": 0.0035,
+      "frac_under_10mm": 0.3884
+     },
+     ">=30cm": {
+      "n": 8,
+      "median_mm": -7.13,
+      "p5_mm": -11.33,
+      "p95_mm": 4.54,
+      "rms_mm": 8.28,
+      "frac_over_5mm": 0.125,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.125
+     }
+    },
+    "all": {
+     "n": 739200,
+     "median_mm": -3.32,
+     "p5_mm": -34.28,
+     "p95_mm": 13.24,
+     "rms_mm": 19.94,
+     "frac_over_5mm": 0.1568,
+     "frac_over_10mm": 0.0808,
+     "frac_under_10mm": 0.1705
+    },
+    "gt_0_10cm": {
+     "n": 541199,
+     "median_mm": -4.23,
+     "p5_mm": -35.4,
+     "p95_mm": 5.28,
+     "rms_mm": 14.07,
+     "frac_over_5mm": 0.0529,
+     "frac_over_10mm": 0.0182,
+     "frac_under_10mm": 0.1858
+    },
+    "gt_0_10cm_visible": {
+     "n": 346299,
+     "median_mm": -4.22,
+     "p5_mm": -30.23,
+     "p95_mm": 3.26,
+     "rms_mm": 12.17,
+     "frac_over_5mm": 0.0302,
+     "frac_over_10mm": 0.0078,
+     "frac_under_10mm": 0.1512
+    },
+    "gt_0_10cm_not_visible": {
+     "n": 194900,
+     "median_mm": -4.28,
+     "p5_mm": -43.11,
+     "p95_mm": 8.45,
+     "rms_mm": 16.93,
+     "frac_over_5mm": 0.0932,
+     "frac_over_10mm": 0.0368,
+     "frac_under_10mm": 0.2474
+    },
+    "gt_0_10cm_by_phase": {
+     "searching": {
+      "n": 38932,
+      "median_mm": -3.5,
+      "p5_mm": -22.28,
+      "p95_mm": 5.81,
+      "rms_mm": 10.29,
+      "frac_over_5mm": 0.0583,
+      "frac_over_10mm": 0.0236,
+      "frac_under_10mm": 0.096
+     },
+     "latched": {
+      "n": 322081,
+      "median_mm": -4.14,
+      "p5_mm": -33.61,
+      "p95_mm": 4.94,
+      "rms_mm": 13.43,
+      "frac_over_5mm": 0.0495,
+      "frac_over_10mm": 0.0171,
+      "frac_under_10mm": 0.1698
+     },
+     "closing": {
+      "n": 147413,
+      "median_mm": -4.6,
+      "p5_mm": -40.28,
+      "p95_mm": 5.2,
+      "rms_mm": 15.83,
+      "frac_over_5mm": 0.0522,
+      "frac_over_10mm": 0.018,
+      "frac_under_10mm": 0.2284
+     },
+     "held": {
+      "n": 0
+     },
+     "placed": {
+      "n": 32773,
+      "median_mm": -5.41,
+      "p5_mm": -37.72,
+      "p95_mm": 7.55,
+      "rms_mm": 15.63,
+      "frac_over_5mm": 0.083,
+      "frac_over_10mm": 0.0239,
+      "frac_under_10mm": 0.2592
+     }
+    },
+    "gt_0_10cm_by_scene": {
+     "clear": {
+      "n": 68342,
+      "median_mm": -5.35,
+      "p5_mm": -34.44,
+      "p95_mm": 7.06,
+      "rms_mm": 14.97,
+      "frac_over_5mm": 0.0777,
+      "frac_over_10mm": 0.0282,
+      "frac_under_10mm": 0.2421
+     },
+     "neighbour": {
+      "n": 472857,
+      "median_mm": -4.16,
+      "p5_mm": -35.55,
+      "p95_mm": 4.93,
+      "rms_mm": 13.94,
+      "frac_over_5mm": 0.0493,
+      "frac_over_10mm": 0.0168,
+      "frac_under_10mm": 0.1777
+     }
+    },
+    "gt_0_10cm_by_tier": {
+     "coarse": {
+      "n": 50236,
+      "median_mm": -10.0,
+      "p5_mm": -46.58,
+      "p95_mm": 8.36,
+      "rms_mm": 21.22,
+      "frac_over_5mm": 0.0836,
+      "frac_over_10mm": 0.0368,
+      "frac_under_10mm": 0.4143
+     },
+     "fine": {
+      "n": 719,
+      "median_mm": -21.08,
+      "p5_mm": -41.92,
+      "p95_mm": 1.1,
+      "rms_mm": 24.97,
+      "frac_over_5mm": 0.0139,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.8067
+     },
+     "target_free": {
+      "n": 483467,
+      "median_mm": -3.99,
+      "p5_mm": -32.7,
+      "p95_mm": 4.96,
+      "rms_mm": 13.02,
+      "frac_over_5mm": 0.0496,
+      "frac_over_10mm": 0.0163,
+      "frac_under_10mm": 0.1567
+     },
+     "window_edge": {
+      "n": 6777,
+      "median_mm": -10.13,
+      "p5_mm": -36.05,
+      "p95_mm": 6.17,
+      "rms_mm": 17.87,
+      "frac_over_5mm": 0.0621,
+      "frac_over_10mm": 0.0179,
+      "frac_under_10mm": 0.5038
+     }
+    },
+    "gt_0_10cm_by_nearest_class": {
+     "neighbour": {
+      "n": 191201,
+      "median_mm": -2.55,
+      "p5_mm": -25.73,
+      "p95_mm": 5.64,
+      "rms_mm": 11.01,
+      "frac_over_5mm": 0.0605,
+      "frac_over_10mm": 0.0162,
+      "frac_under_10mm": 0.1122
+     },
+     "fruit_other": {
+      "n": 1154,
+      "median_mm": -1.53,
+      "p5_mm": -15.17,
+      "p95_mm": 9.2,
+      "rms_mm": 9.65,
+      "frac_over_5mm": 0.1768,
+      "frac_over_10mm": 0.0407,
+      "frac_under_10mm": 0.0893
+     },
+     "table": {
+      "n": 274331,
+      "median_mm": -4.95,
+      "p5_mm": -39.62,
+      "p95_mm": 5.53,
+      "rms_mm": 15.42,
+      "frac_over_5mm": 0.0539,
+      "frac_over_10mm": 0.0206,
+      "frac_under_10mm": 0.2008
+     },
+     "crate": {
+      "n": 57699,
+      "median_mm": -5.6,
+      "p5_mm": -35.61,
+      "p95_mm": 1.15,
+      "rms_mm": 14.89,
+      "frac_over_5mm": 0.014,
+      "frac_over_10mm": 0.0029,
+      "frac_under_10mm": 0.3024
+     },
+     "other": {
+      "n": 16814,
+      "median_mm": -10.0,
+      "p5_mm": -37.21,
+      "p95_mm": 11.7,
+      "rms_mm": 18.59,
+      "frac_over_5mm": 0.0739,
+      "frac_over_10mm": 0.0538,
+      "frac_under_10mm": 0.3866
+     }
+    }
+   },
+   "main@sphere_auth(reference)": {
+    "by_band": {
+     "<0": {
+      "n": 75,
+      "median_mm": 0.68,
+      "p5_mm": -9.26,
+      "p95_mm": 9.22,
+      "rms_mm": 6.04,
+      "frac_over_5mm": 0.2933,
+      "frac_over_10mm": 0.0267,
+      "frac_under_10mm": 0.0533
+     },
+     "0-2cm": {
+      "n": 2894,
+      "median_mm": -2.35,
+      "p5_mm": -10.16,
+      "p95_mm": 4.86,
+      "rms_mm": 5.25,
+      "frac_over_5mm": 0.0473,
+      "frac_over_10mm": 0.0052,
+      "frac_under_10mm": 0.0536
+     },
+     "2-5cm": {
+      "n": 16493,
+      "median_mm": -4.51,
+      "p5_mm": -11.7,
+      "p95_mm": 1.28,
+      "rms_mm": 6.77,
+      "frac_over_5mm": 0.0094,
+      "frac_over_10mm": 0.0003,
+      "frac_under_10mm": 0.0821
+     },
+     "5-10cm": {
+      "n": 26716,
+      "median_mm": -7.1,
+      "p5_mm": -17.73,
+      "p95_mm": -0.67,
+      "rms_mm": 11.27,
+      "frac_over_5mm": 0.0001,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.2316
+     },
+     "10-30cm": {
+      "n": 57771,
+      "median_mm": -4.23,
+      "p5_mm": -18.61,
+      "p95_mm": -0.34,
+      "rms_mm": 10.06,
+      "frac_over_5mm": 0.0004,
+      "frac_over_10mm": 0.0001,
+      "frac_under_10mm": 0.1843
+     },
+     ">=30cm": {
+      "n": 1,
+      "median_mm": -4.28,
+      "p5_mm": -4.28,
+      "p95_mm": -4.28,
+      "rms_mm": 4.28,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.0
+     }
+    },
+    "all": {
+     "n": 103950,
+     "median_mm": -4.83,
+     "p5_mm": -17.21,
+     "p95_mm": -0.08,
+     "rms_mm": 9.84,
+     "frac_over_5mm": 0.0033,
+     "frac_over_10mm": 0.0003,
+     "frac_under_10mm": 0.1765
+    },
+    "gt_0_10cm": {
+     "n": 46103,
+     "median_mm": -5.72,
+     "p5_mm": -15.54,
+     "p95_mm": 0.37,
+     "rms_mm": 9.57,
+     "frac_over_5mm": 0.0064,
+     "frac_over_10mm": 0.0005,
+     "frac_under_10mm": 0.1669
+    },
+    "gt_0_10cm_visible": {
+     "n": 29886,
+     "median_mm": -5.24,
+     "p5_mm": -15.21,
+     "p95_mm": 0.31,
+     "rms_mm": 9.89,
+     "frac_over_5mm": 0.0042,
+     "frac_over_10mm": 0.0002,
+     "frac_under_10mm": 0.1486
+    },
+    "gt_0_10cm_not_visible": {
+     "n": 16217,
+     "median_mm": -6.51,
+     "p5_mm": -15.96,
+     "p95_mm": 0.57,
+     "rms_mm": 8.96,
+     "frac_over_5mm": 0.0104,
+     "frac_over_10mm": 0.001,
+     "frac_under_10mm": 0.2007
+    },
+    "gt_0_10cm_by_phase": {
+     "searching": {
+      "n": 2456,
+      "median_mm": -4.4,
+      "p5_mm": -9.05,
+      "p95_mm": -0.63,
+      "rms_mm": 5.33,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.0269
+     },
+     "latched": {
+      "n": 30346,
+      "median_mm": -5.06,
+      "p5_mm": -15.93,
+      "p95_mm": 0.34,
+      "rms_mm": 9.85,
+      "frac_over_5mm": 0.0029,
+      "frac_over_10mm": 0.0001,
+      "frac_under_10mm": 0.1556
+     },
+     "closing": {
+      "n": 10695,
+      "median_mm": -7.05,
+      "p5_mm": -17.04,
+      "p95_mm": 1.65,
+      "rms_mm": 9.61,
+      "frac_over_5mm": 0.0194,
+      "frac_over_10mm": 0.0017,
+      "frac_under_10mm": 0.2021
+     },
+     "held": {
+      "n": 0
+     },
+     "placed": {
+      "n": 2606,
+      "median_mm": -8.87,
+      "p5_mm": -12.82,
+      "p95_mm": -5.38,
+      "rms_mm": 9.24,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.287
+     }
+    },
+    "gt_0_10cm_by_scene": {
+     "clear": {
+      "n": 5501,
+      "median_mm": -8.6,
+      "p5_mm": -50.08,
+      "p95_mm": -0.71,
+      "rms_mm": 18.91,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.3428
+     },
+     "neighbour": {
+      "n": 40602,
+      "median_mm": -5.29,
+      "p5_mm": -13.75,
+      "p95_mm": 0.59,
+      "rms_mm": 7.46,
+      "frac_over_5mm": 0.0073,
+      "frac_over_10mm": 0.0005,
+      "frac_under_10mm": 0.1431
+     }
+    },
+    "gt_0_10cm_by_tier": {
+     "coarse": {
+      "n": 7016,
+      "median_mm": -6.88,
+      "p5_mm": -12.65,
+      "p95_mm": -0.75,
+      "rms_mm": 7.95,
+      "frac_over_5mm": 0.0041,
+      "frac_over_10mm": 0.0001,
+      "frac_under_10mm": 0.1458
+     },
+     "fine": {
+      "n": 39087,
+      "median_mm": -5.38,
+      "p5_mm": -16.13,
+      "p95_mm": 0.5,
+      "rms_mm": 9.84,
+      "frac_over_5mm": 0.0068,
+      "frac_over_10mm": 0.0005,
+      "frac_under_10mm": 0.1707
+     }
+    },
+    "gt_0_10cm_by_nearest_class": {
+     "target": {
+      "n": 20304,
+      "median_mm": -5.57,
+      "p5_mm": -15.37,
+      "p95_mm": 0.79,
+      "rms_mm": 7.99,
+      "frac_over_5mm": 0.0121,
+      "frac_over_10mm": 0.001,
+      "frac_under_10mm": 0.1831
+     },
+     "neighbour": {
+      "n": 1961,
+      "median_mm": -3.95,
+      "p5_mm": -13.66,
+      "p95_mm": 3.68,
+      "rms_mm": 7.06,
+      "frac_over_5mm": 0.0229,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.1173
+     },
+     "fruit_other": {
+      "n": 11,
+      "median_mm": -7.86,
+      "p5_mm": -8.4,
+      "p95_mm": -6.46,
+      "rms_mm": 7.67,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.0
+     },
+     "table": {
+      "n": 2744,
+      "median_mm": -8.61,
+      "p5_mm": -53.17,
+      "p95_mm": -2.33,
+      "rms_mm": 21.26,
+      "frac_over_5mm": 0.0,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.3426
+     },
+     "crate": {
+      "n": 21083,
+      "median_mm": -5.76,
+      "p5_mm": -12.23,
+      "p95_mm": -0.04,
+      "rms_mm": 8.69,
+      "frac_over_5mm": 0.0002,
+      "frac_over_10mm": 0.0,
+      "frac_under_10mm": 0.1332
+     }
+    }
+   }
+  },
+  "exemption_per_request": {
+   "precision": {
+    "latched": {
+     "n": 456,
+     "median": 0.7727,
+     "p10": 0.6301,
+     "p90": 0.8221,
+     "min": 0.0,
+     "max": 0.8684,
+     "n_stale": 15,
+     "median_nonstale": 0.7745
+    },
+    "closing": {
+     "n": 213,
+     "median": 0.643,
+     "p10": 0.0,
+     "p90": 0.7846,
+     "min": 0.0,
+     "max": 0.8076,
+     "n_stale": 53,
+     "median_nonstale": 0.6703
+    }
+   },
+   "recall": {
+    "latched": {
+     "n": 442,
+     "median": 0.7877,
+     "p10": 0.432,
+     "p90": 0.9418,
+     "min": 0.125,
+     "max": 0.9681,
+     "n_stale": 1,
+     "median_nonstale": 0.7878
+    },
+    "closing": {
+     "n": 170,
+     "median": 0.5775,
+     "p10": 0.2527,
+     "p90": 0.8109,
+     "min": 0.0,
+     "max": 0.91,
+     "n_stale": 10,
+     "median_nonstale": 0.5851
+    }
+   },
+   "residual_voxels": {
+    "latched": {
+     "n": 442,
+     "median": 250.0,
+     "p10": 60.1,
+     "p90": 750.9,
+     "min": 33.0,
+     "max": 1056.0,
+     "n_stale": 1,
+     "median_nonstale": 251.0
+    },
+    "closing": {
+     "n": 170,
+     "median": 483.0,
+     "p10": 107.0,
+     "p90": 872.2,
+     "min": 59.0,
+     "max": 1016.0,
+     "n_stale": 10,
+     "median_nonstale": 516.5
+    }
+   },
+   "residual_surface_points": {
+    "latched": {
+     "n": 456,
+     "median": 5.0,
+     "p10": 0.0,
+     "p90": 21.0,
+     "min": 0.0,
+     "max": 28.0,
+     "n_stale": 15,
+     "median_nonstale": 6.0
+    },
+    "closing": {
+     "n": 213,
+     "median": 6.0,
+     "p10": 0.0,
+     "p90": 22.0,
+     "min": 0.0,
+     "max": 29.0,
+     "n_stale": 53,
+     "median_nonstale": 12.0
+    }
+   },
+   "neighbour_lost_frac": {
+    "latched": {
+     "n": 439,
+     "median": 0.0,
+     "p10": 0.0,
+     "p90": 0.069,
+     "min": 0.0,
+     "max": 0.2667,
+     "n_stale": 15,
+     "median_nonstale": 0.0
+    },
+    "closing": {
+     "n": 201,
+     "median": 0.0,
+     "p10": 0.0,
+     "p90": 0.069,
+     "min": 0.0,
+     "max": 0.2,
+     "n_stale": 53,
+     "median_nonstale": 0.0
+    }
+   },
+   "removed_composition": {
+    "latched": {
+     "n_voxels": 452400,
+     "target<=5mm": 0.7203,
+     "target5-10mm": 0.1482,
+     "neighbour": 0.0116,
+     "fruit_other": 0.0,
+     "table": 0.0431,
+     "crate": 0.0,
+     "obstacle": 0.0,
+     "other": 0.0,
+     "no_surface<=10mm": 0.0768
+    },
+    "closing": {
+     "n_voxels": 195273,
+     "target<=5mm": 0.5194,
+     "target5-10mm": 0.1257,
+     "neighbour": 0.0072,
+     "fruit_other": 0.0,
+     "table": 0.0686,
+     "crate": 0.0,
+     "obstacle": 0.0,
+     "other": 0.0,
+     "no_surface<=10mm": 0.279
+    }
+   }
+  },
+  "exemption_summary": {
+   "latched": {
+    "n_requests_with_trace": 456,
+    "n_requests_removed_gt0": 456,
+    "n_removed_median": 1024.0,
+    "removed_free_value_le_half_voxel_median": 118.5,
+    "removed_free_value_negative_median": 118.5,
+    "main_target_surface_voxels_median": 881.5,
+    "free_residual_target_voxels": {
+     "n": 442,
+     "median": 250.0,
+     "p10": 60.1,
+     "p90": 750.9000000000001,
+     "max": 1056.0,
+     "frac_gt0": 1.0
+    },
+    "free_residual_target_voxels_negative": {
+     "n": 442,
+     "median": 167.5,
+     "p10": 38.1,
+     "p90": 528.9000000000001,
+     "max": 642.0,
+     "frac_gt0": 1.0
+    },
+    "target_surface_free_lt5": {
+     "n": 456,
+     "median": 5.0,
+     "p10": 0.0,
+     "p90": 21.0,
+     "max": 28.0,
+     "frac_gt0": 0.6184
+    },
+    "target_surface_free_lt5_visible": {
+     "n": 456,
+     "median": 3.0,
+     "p10": 0.0,
+     "p90": 16.0,
+     "max": 22.0,
+     "frac_gt0": 0.5965
+    },
+    "target_surface_free_lt5_occluded": {
+     "n": 456,
+     "median": 2.0,
+     "p10": 0.0,
+     "p90": 6.0,
+     "max": 9.0,
+     "frac_gt0": 0.5899
+    },
+    "target_surface_n_far": {
+     "n": 456,
+     "median": 35.0,
+     "p10": 33.0,
+     "p90": 35.0,
+     "max": 37.0,
+     "frac_gt0": 1.0
+    },
+    "target_surface_n_far_visible": {
+     "n": 456,
+     "median": 23.0,
+     "p10": 6.0,
+     "p90": 27.0,
+     "max": 29.0,
+     "frac_gt0": 0.9583
+    },
+    "requests_with_any_free_lt5": 282,
+    "neighbour_lost_total": 268,
+    "neighbour_visible_main_lt5_total": 11715,
+    "requests_with_neighbour_lost": 161,
+    "kept_nontarget_frac_target": {
+     "n_voxels": 10747,
+     "frac_target_le5mm": 0.5918
+    },
+    "ambiguous_frac_target": {
+     "n_voxels": 39703,
+     "frac_target_le5mm": 0.7222
+    },
+    "n_stale": 15,
+    "stale_episodes": [
+     211,
+     320
+    ],
+    "nonstale": {
+     "n": 441,
+     "precision": {
+      "n": 441,
+      "median": 0.7745,
+      "p10": 0.6444,
+      "p90": 0.8227,
+      "max": 0.8684,
+      "frac_gt0": 1.0
+     },
+     "recall": {
+      "n": 441,
+      "median": 0.7878,
+      "p10": 0.4321,
+      "p90": 0.9418,
+      "max": 0.9681,
+      "frac_gt0": 1.0
+     },
+     "residual_target_voxels": {
+      "n": 441,
+      "median": 251.0,
+      "p10": 60.0,
+      "p90": 751.0,
+      "max": 1056.0,
+      "frac_gt0": 1.0
+     },
+     "residual_target_voxels_negative": {
+      "n": 441,
+      "median": 171.0,
+      "p10": 39.0,
+      "p90": 529.0,
+      "max": 642.0,
+      "frac_gt0": 1.0
+     },
+     "removed_free_value_negative": {
+      "n": 441,
+      "median": 126.0,
+      "p10": 43.0,
+      "p90": 237.0,
+      "max": 343.0,
+      "frac_gt0": 1.0
+     },
+     "target_surface_free_lt5": {
+      "n": 441,
+      "median": 6.0,
+      "p10": 0.0,
+      "p90": 21.0,
+      "max": 28.0,
+      "frac_gt0": 0.6077
+     },
+     "composition": {
+      "n_voxels": 436598,
+      "target<=5mm": 0.7463,
+      "target<=5mm_and_other<=5mm": 0.0006,
+      "target5-10mm": 0.1535,
+      "neighbour": 0.012,
+      "fruit_other": 0.0,
+      "table": 0.0387,
+      "crate": 0.0,
+      "obstacle": 0.0,
+      "other": 0.0,
+      "no_surface<=10mm": 0.0495
+     }
+    },
+    "by_scene": {
+     "clear": {
+      "n": 14,
+      "precision_median": 0.0,
+      "recall_median": null
+     },
+     "neighbour": {
+      "n": 442,
+      "precision_median": 0.7742,
+      "recall_median": 0.7877
+     }
+    }
+   },
+   "closing": {
+    "n_requests_with_trace": 213,
+    "n_requests_removed_gt0": 213,
+    "n_removed_median": 946.0,
+    "removed_free_value_le_half_voxel_median": 148.0,
+    "removed_free_value_negative_median": 148.0,
+    "main_target_surface_voxels_median": 861.0,
+    "free_residual_target_voxels": {
+     "n": 170,
+     "median": 483.0,
+     "p10": 107.00000000000003,
+     "p90": 872.2,
+     "max": 1016.0,
+     "frac_gt0": 1.0
+    },
+    "free_residual_target_voxels_negative": {
+     "n": 170,
+     "median": 325.0,
+     "p10": 17.800000000000004,
+     "p90": 539.3,
+     "max": 751.0,
+     "frac_gt0": 0.9471
+    },
+    "target_surface_free_lt5": {
+     "n": 213,
+     "median": 6.0,
+     "p10": 0.0,
+     "p90": 22.0,
+     "max": 29.0,
+     "frac_gt0": 0.8357
+    },
+    "target_surface_free_lt5_visible": {
+     "n": 213,
+     "median": 3.0,
+     "p10": 0.0,
+     "p90": 18.0,
+     "max": 21.0,
+     "frac_gt0": 0.6385
+    },
+    "target_surface_free_lt5_occluded": {
+     "n": 213,
+     "median": 2.0,
+     "p10": 0.0,
+     "p90": 6.0,
+     "max": 10.0,
+     "frac_gt0": 0.7981
+    },
+    "target_surface_n_far": {
+     "n": 213,
+     "median": 35.0,
+     "p10": 31.0,
+     "p90": 37.0,
+     "max": 48.0,
+     "frac_gt0": 1.0
+    },
+    "target_surface_n_far_visible": {
+     "n": 213,
+     "median": 18.0,
+     "p10": 0.0,
+     "p90": 24.0,
+     "max": 30.0,
+     "frac_gt0": 0.8685
+    },
+    "requests_with_any_free_lt5": 178,
+    "neighbour_lost_total": 84,
+    "neighbour_visible_main_lt5_total": 4501,
+    "requests_with_neighbour_lost": 58,
+    "kept_nontarget_frac_target": {
+     "n_voxels": 6150,
+     "frac_target_le5mm": 0.7189
+    },
+    "ambiguous_frac_target": {
+     "n_voxels": 24851,
+     "frac_target_le5mm": 0.7194
+    },
+    "n_stale": 53,
+    "stale_episodes": [
+     211,
+     320
+    ],
+    "nonstale": {
+     "n": 160,
+     "precision": {
+      "n": 160,
+      "median": 0.6703,
+      "p10": 0.5456,
+      "p90": 0.78902,
+      "max": 0.8076,
+      "frac_gt0": 1.0
+     },
+     "recall": {
+      "n": 160,
+      "median": 0.5851,
+      "p10": 0.33736000000000005,
+      "p90": 0.82975,
+      "max": 0.91,
+      "frac_gt0": 1.0
+     },
+     "residual_target_voxels": {
+      "n": 160,
+      "median": 516.5,
+      "p10": 125.5,
+      "p90": 875.0,
+      "max": 1016.0,
+      "frac_gt0": 1.0
+     },
+     "residual_target_voxels_negative": {
+      "n": 160,
+      "median": 354.0,
+      "p10": 73.9,
+      "p90": 542.0,
+      "max": 751.0,
+      "frac_gt0": 1.0
+     },
+     "removed_free_value_negative": {
+      "n": 160,
+      "median": 182.0,
+      "p10": 105.0,
+      "p90": 262.4,
+      "max": 325.0,
+      "frac_gt0": 1.0
+     },
+     "target_surface_free_lt5": {
+      "n": 160,
+      "median": 12.0,
+      "p10": 0.0,
+      "p90": 22.0,
+      "max": 29.0,
+      "frac_gt0": 0.8063
+     },
+     "composition": {
+      "n_voxels": 150010,
+      "target<=5mm": 0.6755,
+      "target<=5mm_and_other<=5mm": 0.0012,
+      "target5-10mm": 0.1632,
+      "neighbour": 0.0089,
+      "fruit_other": 0.0,
+      "table": 0.0459,
+      "crate": 0.0,
+      "obstacle": 0.0,
+      "other": 0.0,
+      "no_surface<=10mm": 0.1064
+     }
+    },
+    "by_scene": {
+     "clear": {
+      "n": 43,
+      "precision_median": 0.0,
+      "recall_median": null
+     },
+     "neighbour": {
+      "n": 170,
+      "precision_median": 0.6653,
+      "recall_median": 0.5775
+     }
+    }
+   }
+  },
+  "geometry": {
+   "extents": {
+    "n_requests": 669,
+    "err_mm_median_by_axis": [
+     -10.9,
+     0.3,
+     4.1
+    ],
+    "err_mm_p5_by_axis": [
+     -14.9,
+     -6.56,
+     0.4
+    ],
+    "err_mm_p95_by_axis": [
+     -7.2,
+     2.2,
+     16.44
+    ],
+    "gt_mm_median": [
+     61.0,
+     66.0,
+     66.0
+    ],
+    "est_mm_median": [
+     50.1,
+     65.8,
+     70.0
+    ]
+   },
+   "radius": {
+    "manipulated_radius_mm_median": 42.69,
+    "gt_radial_mean_mm_median": 31.99,
+    "gt_radial_max_mm_median": 33.45
+   },
+   "ball": {
+    "n": 669,
+    "fit_radius_mm_median": 33.5,
+    "ball_radius_mm_median": 54.73,
+    "fit_centre_err_mm_median": 2.27,
+    "fit_centre_err_mm_p95": 830.05
+   },
+   "manipulated_centroid_err_mm": {
+    "median": 17.6,
+    "p95": 846.88,
+    "nonstale_median": 17.45,
+    "nonstale_p95": 32.55
+   },
+   "ball_fit_centre_err_mm_nonstale": {
+    "n": 601,
+    "median": 2.01,
+    "p95": 18.08
+   },
+   "held_latch_without_contact": {
+    "n_held_requests": 240,
+    "n_not_in_hand": 23,
+    "episodes": [
+     56,
+     119,
+     121,
+     126,
+     250,
+     309,
+     325,
+     342,
+     421,
+     572,
+     753,
+     850,
+     901,
+     1222,
+     1345,
+     1596,
+     1668,
+     1837
+    ],
+    "body_centre_err_mm_median_not_in_hand": 101.91,
+    "apple_hand_gap_mm_median_not_in_hand": 53.14
+   },
+   "held": {
+    "n_requests": 217,
+    "n_episodes": 19,
+    "body_centre_err_mm": {
+     "median": 9.45,
+     "p95": 18.22,
+     "max": 80.9
+    },
+    "coverage_frac_median": 1.0,
+    "coverage_frac_p5": 0.5,
+    "max_outside_mm_median": 0.0,
+    "max_outside_mm_p95": 12.39,
+    "body_radius_mm_median": 38.54
+   },
+   "held_voxels": {
+    "n_requests": 217,
+    "fine_target_voxels": {
+     "median": 0.0,
+     "max": 422,
+     "frac_requests_gt0": 0.1152
+    },
+    "coarse_neg_near_target": {
+     "median": 0.0,
+     "max": 1,
+     "frac_requests_gt0": 0.0138
+    },
+    "gt_surface_points_main_lt5": {
+     "median": 0.0,
+     "max": 17,
+     "frac_requests_gt0": 0.0323
+    }
+   }
+  }
+ },
+ "notes": [
+  "query set (a) = recorded sphere_centres = server robot FK at refined_chunk[0] (commanded first plan step), checked 0.0 mm max on ep119 requests 10 and 16; the planning-row (measured) pose differs by up to ~40 mm while the arm moves. GT objects are taken at the planning row.",
+  "field frame 'base' = MuJoCo world: base body at (-2.6e-5, -7.7e-6, 0) m; object_poses equal MuJoCo body positions; server FK ee_left = MuJoCo EE_BODY_L to 0.1 mm; finger sphere centres lie 3.9 mm (median) inside the MuJoCo finger geoms (ep119 request 10).",
+  "GT probe: 0.1 mm sphere, +0.1 mm added back; apple mesh check: +0.467 m at 0.5 m from the centre (expected 0.467), -22.2 mm at 10 mm from the centre (expected -22.6); a probe exactly at a mesh centre returns 0 (degenerate) -- deep-inside points are rare in these sets.",
+  "GT uses collision geoms; the depth cameras render the visual geoms (apple_vis half sizes 31/35/34 mm vs apple_geom 31/33/33 mm, MuJoCo geom_size), so up to ~2 mm of the error on fruit surfaces is visual-vs-collision geometry, not field error.",
+  "visibility = current frame only (the TSDF also integrates earlier frames), 4:3 image aspect assumed (fovy 90 deg from the model), ray from 3 cm in front of the lens (the camera housing is hit within 8 mm otherwise).",
+  "held phase: GT for the main layer leaves the held target out only when the apple touches the active hand's geoms (gap <= 5 mm, MuJoCo); 'held' requests without contact (latch lag after release) keep the target in GT and are reported separately.",
+  "probes may fall inside the table or a neighbour fruit (band <0); 'dangerous' fractions are reported per band so these do not mix with free space.",
+  "esdf_max_distance (main fine layer) over measured requests: median 0.595 m, min 0.444 m",
+  "tsdf_truncation values seen: [\"{\\\"coarse_m\\\": 0.06, \\\"fine_m\\\": 0.03, \\\"fine_requested_m\\\": 0.03, \\\"separate_fine_tsdf\\\": true}\"]",
+  "fine window overflow non-null in 0 of 1800 measured requests"
+ ]
+}

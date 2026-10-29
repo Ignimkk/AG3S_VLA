@@ -1,0 +1,21 @@
+{
+ "figure": "paper/figures/ifg_overview/teaser_montage.png",
+ "script": "paper/tools/plotting/ifg_teaser_pipeline_compose.py",
+ "episode": "T53_ep1842",
+ "surface_iou": {
+  "M1_approach": 1.0,
+  "M2_pre_grasp": 1.0,
+  "M3_grasp": 0.9731412833730052,
+  "M4_carry": 0.9433256555280348,
+  "M5_pre_place": 0.9640925134294491,
+  "M6_post_place": 0.9978401727861771,
+  "M7_retreat": 0.9840182648401826
+ },
+ "assets": {
+  "t_noun_attention": "Policy camera re-rendered at high resolution; 16x16 noun-attention map upsampled; gold = seed patches.",
+  "t_surface": "Observed target surface (orange) and the touching neighbour's observed surface (blue).",
+  "t_permission": "Configured contact rule, visualised: only the active-hand links (gold) may enter the target surface (faint orange); the neighbour (blue) stays an obstacle for every link. Not evaluated in closed loop."
+ },
+ "is_measured_result": false,
+ "scope": "one development episode; the permission panel illustrates the configured rule only"
+}

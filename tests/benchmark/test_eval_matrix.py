@@ -152,7 +152,7 @@ def _manifest_run(tmp_path, em, *, commit, protocol_patch=None, dirty_patch=""):
     proto.update(protocol_patch or {})
     d = tmp_path / f"run-{len(list(tmp_path.iterdir()))}"
     d.mkdir()
-    deps = json.loads((ROOT / "doc/migration/source-manifest.json").read_text())["dependencies"]
+    deps = json.loads((ROOT / "doc/active/migration/source-manifest.json").read_text())["dependencies"]
     settings = {"condition": "vla_only", "protocol": proto, "runtime_schedule": em._jsonable(lp.runtime_schedule(a)),
                 "safety_level": "I", "task_ids": [0], "episode_ids": [0, 1], "seed": 7,
                 "checkpoint": {"aggregate_sha256": "A", "norm_stats_sha256": "N"},
@@ -166,7 +166,7 @@ def _manifest_run(tmp_path, em, *, commit, protocol_patch=None, dirty_patch=""):
 
 def test_run_basis_and_apply_reuse(tmp_path, em):
     head = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
-    deps = json.loads((ROOT / "doc/migration/source-manifest.json").read_text())["dependencies"]
+    deps = json.loads((ROOT / "doc/active/migration/source-manifest.json").read_text())["dependencies"]
     now = {"checkpoint": {"aggregate_sha256": "A", "norm_stats_sha256": "N"},
            "versions": {"libero_python": {"v": 1}, "openpi_python": {"v": 2}}, "dependencies": deps, "head": head}
     good = _manifest_run(tmp_path, em, commit=head)

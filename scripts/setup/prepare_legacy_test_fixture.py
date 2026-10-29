@@ -4,7 +4,7 @@ import json
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
-MANIFEST = json.loads((ROOT / "doc/migration/source-manifest.json").read_text())
+MANIFEST = json.loads((ROOT / "doc/active/migration/source-manifest.json").read_text())
 PINS = {"pi05": MANIFEST["original_heads"]["pi05_TO_hybrid"],
         "benchmark": MANIFEST["sources"]["benchmark"]}
 

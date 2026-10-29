@@ -1,0 +1,129 @@
+{
+ "episode": 211,
+ "request": 47,
+ "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP",
+ "configuration": "B (carving off, recorded)",
+ "model_xml": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/snapshot_tdm3/robots/rby1/description/models/rby1a/mujoco/model_transport_pick_place_obstacles.xml",
+ "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/runs/server_8292_20261023T204817/server_constraints/run_0000/chunk_00076.npz",
+ "state": "latched",
+ "script": "paper/tools/plotting/fig3_v2_roi_carve.py",
+ "camera": {
+  "lookat": [
+   0.47889534177831483,
+   0.29254896995303553,
+   0.8799061125657516
+  ],
+  "dist": 0.38,
+  "az": 10.0,
+  "el": -55.0
+ },
+ "near_m": 0.12,
+ "apple_shift_from_first_pose_mm": 856.8,
+ "judgement": {
+  "function": "AG3S.ag3s.fields.curobo_builder.seen_through",
+  "margin_m": 0.035,
+  "footprint_voxel_m": 0.005,
+  "footprint_pad_px": 0,
+  "footprint_robot": "ignore",
+  "depth_range_m": [
+   0.05,
+   3.0
+  ],
+  "robot_mask": "MuJoCo segmentation of robot geoms (serving: FK-sphere depth mask)"
+ },
+ "counts": {
+  "surface_voxels_in_roi": 69666,
+  "stale": 12056,
+  "stale_at_old_apple_pose": 614,
+  "freed_by_rule": 1635,
+  "stale_old_freed": 386,
+  "non_stale_freed": 756,
+  "per_camera": {
+   "zed_left": 1402,
+   "wrist_cam_l": 298,
+   "wrist_cam_r": 264
+  },
+  "drawn_off": 10556,
+  "drawn_on": 10106
+ },
+ "rays": [
+  {
+   "camera": "zed_left",
+   "origin": [
+    0.1077,
+    0.0381,
+    1.4536
+   ],
+   "end": [
+    0.4249,
+    0.3529,
+    0.8215
+   ],
+   "depth_beyond_point_m": 0.0666
+  },
+  {
+   "camera": "zed_left",
+   "origin": [
+    0.1077,
+    0.0381,
+    1.4536
+   ],
+   "end": [
+    0.4512,
+    0.3535,
+    0.8213
+   ],
+   "depth_beyond_point_m": 0.0677
+  },
+  {
+   "camera": "zed_left",
+   "origin": [
+    0.1077,
+    0.0381,
+    1.4536
+   ],
+   "end": [
+    0.4982,
+    0.3124,
+    0.821
+   ],
+   "depth_beyond_point_m": 0.066
+  },
+  {
+   "camera": "zed_left",
+   "origin": [
+    0.1077,
+    0.0381,
+    1.4536
+   ],
+   "end": [
+    0.5012,
+    0.2893,
+    0.8209
+   ],
+   "depth_beyond_point_m": 0.0509
+  },
+  {
+   "camera": "zed_left",
+   "origin": [
+    0.1077,
+    0.0381,
+    1.4536
+   ],
+   "end": [
+    0.5178,
+    0.2811,
+    0.8214
+   ],
+   "depth_beyond_point_m": 0.0446
+  }
+ ],
+ "encoding": {
+  "blue cubes": "recorded main fine field surface voxels within near_m of the apple's first pose",
+  "red cubes": "stale voxels at a pose the apple has left (task_dynamic_map_eval definition)",
+  "grey lines": "region of interest box (evaluation definition)",
+  "yellow lines": "depth rays of one camera through freed red voxels, ending at the recorded depth (on panel)"
+ },
+ "is_measured_result": false,
+ "note": "Same recorded input for both panels; the on panel re-applies the serving judgement offline. Illustration."
+}

@@ -1,0 +1,530 @@
+{
+ "source": [
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/score/predictions_val.csv",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/score/predictions_ep1807.csv",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155229+0900_218229ac6464_2e66675de9ee/verify/T48/feat/full"
+ ],
+ "selection": "ep_001600: first C2s row per (image class, state class) in (pick,place),(place,home),(home,pick); ep1807: first (place,pick)",
+ "pairs": [
+  {
+   "set": "val",
+   "unit": "ep_001600",
+   "host_A": 1,
+   "partner_B": 30,
+   "clock_A": 6,
+   "clock_B": 180,
+   "class_A": "pick",
+   "class_B": "place",
+   "grip_A": 1.0,
+   "grip_B": 0.666973888874054,
+   "state_bins_A": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    155,
+    90,
+    74,
+    33,
+    135,
+    154,
+    104,
+    255
+   ],
+   "state_bins_B": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    60,
+    147,
+    168,
+    44,
+    129,
+    179,
+    98,
+    87
+   ],
+   "state_bins_C2s": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    60,
+    147,
+    168,
+    44,
+    129,
+    179,
+    98,
+    87
+   ],
+   "state_bins_C2i": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    155,
+    90,
+    74,
+    33,
+    135,
+    154,
+    104,
+    255
+   ],
+   "predictions": {
+    "C0(A)": {
+     "probe": "pick",
+     "rule": "pick",
+     "proxy": "pick",
+     "frame_index": "pick",
+     "p_probe": [
+      0.999649,
+      0.000177687,
+      0.000173674
+     ]
+    },
+    "C0(B)": {
+     "probe": "place",
+     "rule": "place",
+     "proxy": "place",
+     "frame_index": "place",
+     "p_probe": [
+      0.000425654,
+      0.999428,
+      0.000146321
+     ]
+    },
+    "C2s = img A + state B": {
+     "probe": "pick",
+     "rule": "place",
+     "proxy": "pick",
+     "frame_index": "pick",
+     "p_probe": [
+      0.999716,
+      0.000237165,
+      4.71937e-05
+     ]
+    },
+    "C2i = img B + state A": {
+     "probe": "place",
+     "rule": "pick",
+     "proxy": "pick",
+     "frame_index": "pick",
+     "p_probe": [
+      0.000480694,
+      0.999066,
+      0.000453249
+     ]
+    }
+   }
+  },
+  {
+   "set": "val",
+   "unit": "ep_001600",
+   "host_A": 20,
+   "partner_B": 48,
+   "clock_A": 120,
+   "clock_B": 288,
+   "class_A": "place",
+   "class_B": "home",
+   "grip_A": 0.666688084602356,
+   "grip_B": 1.0,
+   "state_bins_A": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    130,
+    99,
+    64,
+    227,
+    36,
+    6,
+    216,
+    87
+   ],
+   "state_bins_B": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    155,
+    90,
+    74,
+    33,
+    135,
+    154,
+    104,
+    255
+   ],
+   "state_bins_C2s": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    155,
+    90,
+    74,
+    33,
+    135,
+    154,
+    104,
+    255
+   ],
+   "state_bins_C2i": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    130,
+    99,
+    64,
+    227,
+    36,
+    6,
+    216,
+    87
+   ],
+   "predictions": {
+    "C0(A)": {
+     "probe": "pick",
+     "rule": "place",
+     "proxy": "place",
+     "frame_index": "place",
+     "p_probe": [
+      0.518017,
+      0.481599,
+      0.000383837
+     ]
+    },
+    "C0(B)": {
+     "probe": "home",
+     "rule": "home",
+     "proxy": "home",
+     "frame_index": "home",
+     "p_probe": [
+      0.000943089,
+      0.000355021,
+      0.998702
+     ]
+    },
+    "C2s = img A + state B": {
+     "probe": "pick",
+     "rule": "home",
+     "proxy": "pick",
+     "frame_index": "place",
+     "p_probe": [
+      0.512963,
+      0.485454,
+      0.00158283
+     ]
+    },
+    "C2i = img B + state A": {
+     "probe": "home",
+     "rule": "place",
+     "proxy": "place",
+     "frame_index": "place",
+     "p_probe": [
+      0.00393504,
+      0.00145411,
+      0.994611
+     ]
+    }
+   }
+  },
+  {
+   "set": "val",
+   "unit": "ep_001600",
+   "host_A": 36,
+   "partner_B": 6,
+   "clock_A": 216,
+   "clock_B": 36,
+   "class_A": "home",
+   "class_B": "pick",
+   "grip_A": 1.0,
+   "grip_B": 1.0,
+   "state_bins_A": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    138,
+    143,
+    206,
+    90,
+    145,
+    79,
+    104,
+    255
+   ],
+   "state_bins_B": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    109,
+    35,
+    38,
+    76,
+    67,
+    158,
+    145,
+    255
+   ],
+   "state_bins_C2s": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    109,
+    35,
+    38,
+    76,
+    67,
+    158,
+    145,
+    255
+   ],
+   "state_bins_C2i": [
+    187,
+    171,
+    193,
+    18,
+    90,
+    169,
+    136,
+    255,
+    138,
+    143,
+    206,
+    90,
+    145,
+    79,
+    104,
+    255
+   ],
+   "predictions": {
+    "C0(A)": {
+     "probe": "home",
+     "rule": "home",
+     "proxy": "home",
+     "frame_index": "home",
+     "p_probe": [
+      0.00198888,
+      0.0556509,
+      0.94236
+     ]
+    },
+    "C0(B)": {
+     "probe": "pick",
+     "rule": "pick",
+     "proxy": "pick",
+     "frame_index": "pick",
+     "p_probe": [
+      0.99839,
+      0.00144508,
+      0.000164725
+     ]
+    },
+    "C2s = img A + state B": {
+     "probe": "home",
+     "rule": "home",
+     "proxy": "home",
+     "frame_index": "home",
+     "p_probe": [
+      0.00168853,
+      0.0639334,
+      0.934378
+     ]
+    },
+    "C2i = img B + state A": {
+     "probe": "pick",
+     "rule": "home",
+     "proxy": "home",
+     "frame_index": "home",
+     "p_probe": [
+      0.998801,
+      0.00106163,
+      0.000137675
+     ]
+    }
+   }
+  },
+  {
+   "set": "ep1807",
+   "unit": "ep1807_run0000",
+   "host_A": 22,
+   "partner_B": 10,
+   "clock_A": 176,
+   "clock_B": 80,
+   "class_A": "place",
+   "class_B": "pick",
+   "grip_A": 0.7202542495108992,
+   "grip_B": 0.9999576078751666,
+   "state_bins_A": [
+    128,
+    191,
+    210,
+    154,
+    133,
+    101,
+    101,
+    114,
+    169,
+    98,
+    67,
+    46,
+    134,
+    159,
+    108,
+    255
+   ],
+   "state_bins_B": [
+    132,
+    198,
+    218,
+    83,
+    114,
+    181,
+    117,
+    255,
+    170,
+    99,
+    69,
+    43,
+    136,
+    157,
+    107,
+    255
+   ],
+   "state_bins_C2s": [
+    132,
+    198,
+    218,
+    83,
+    114,
+    181,
+    117,
+    255,
+    170,
+    99,
+    69,
+    43,
+    136,
+    157,
+    107,
+    255
+   ],
+   "state_bins_C2i": [
+    128,
+    191,
+    210,
+    154,
+    133,
+    101,
+    101,
+    114,
+    169,
+    98,
+    67,
+    46,
+    134,
+    159,
+    108,
+    255
+   ],
+   "predictions": {
+    "C0(A)": {
+     "probe": "place",
+     "rule": "place",
+     "proxy": "place",
+     "frame_index": "place",
+     "p_probe": [
+      0.000189139,
+      0.999785,
+      2.62288e-05
+     ]
+    },
+    "C0(B)": {
+     "probe": "pick",
+     "rule": "pick",
+     "proxy": "pick",
+     "frame_index": "pick",
+     "p_probe": [
+      0.994319,
+      0.00220091,
+      0.00348023
+     ]
+    },
+    "C2s = img A + state B": {
+     "probe": "place",
+     "rule": "home",
+     "proxy": "place",
+     "frame_index": "place",
+     "p_probe": [
+      0.000233939,
+      0.999705,
+      6.11227e-05
+     ]
+    },
+    "C2i = img B + state A": {
+     "probe": "pick",
+     "rule": "place",
+     "proxy": "place",
+     "frame_index": "place",
+     "p_probe": [
+      0.9942,
+      0.00358871,
+      0.00221141
+     ]
+    }
+   }
+  }
+ ]
+}

@@ -156,6 +156,14 @@ def manipulated_object(
     return None
 
 
+#: T46f A14 — link 중 **어떤 정책 · 설정에서도** target / 쥔 물체 접촉 권한을 받지 않는 것 (사용자 요구: FT sensor
+#: 비접촉, T46f §2). URDF `FT_sensor_<S>` (`--links gripper_wrist` 에서 FT sensor 덮개 구가 달린다). `authorized_links` 와
+#: 쥔 물체 권한 사슬 (`to_adapter.held_contact_depth`) 이 이 집합을 뺀다. 기본 `contact.contact_links` 에는 원래 없다 —
+#: 기본 동작은 그대로다. `exclude_all` (global exclusion) 은 target 을 **필드에서** 모두에게 빼는 정책이라 이 집합과
+#: 무관하게 그 정의대로 돈다 (DX-04 조건 ②).
+PROTECTED_LINKS: frozenset[str] = frozenset({"FT_sensor_L", "FT_sensor_R"})
+
+
 @dataclasses.dataclass(frozen=True)
 class ClearancePolicy:
     """The lookup table `d(q; link_i, candidate_j) >= m(phase, manipulators, source, link)`.
@@ -212,7 +220,7 @@ class ClearancePolicy:
         links: set[str] = set()
         for manipulator in context.active_manipulators:
             links.update(self.contact.links_for(manipulator))
-        return frozenset(links)
+        return frozenset(links) - PROTECTED_LINKS
 
     def lookup(
         self,
@@ -329,4 +337,20 @@ class ClearancePolicy:
         }
 
 
-__all__ = ["UNKNOWN_LINK", "ClearancePolicy", "resolve_link_names"]
+def target_permission_context(context: Optional[ContactPolicyContext], policy: str,
+                              attached: Any = None) -> ContactPolicyContext:
+    """T46f A14 — 쥐지 않은 target 에 대한 **권한 계산용** 문맥.
+
+    `constraint.target_field_policy == "none"` (예외 없음) 이고 쥔 것이 없으면 활성 manipulator 를 비운 문맥 —
+    `authorized_links` 가 빈 집합이 되어 어느 link 도 target 마진 완화를 받지 않는다 (모든 행이
+    `full_margin(TARGET)`). 그 밖 (다른 정책 · 쥔 뒤) 에는 `context` 그대로 (예전 계산). phase 는 바꾸지 않는다 —
+    phase 는 권한 말고도 읽는 곳이 있다. 이 문맥은 **마진 · target 권한에만** 쓴다; 기록되는 `contact_context` 와
+    손 미세 창 (pipeline) 은 원래 문맥을 쓴다."""
+    ctx = context or ContactPolicyContext()
+    if str(policy) == "none" and attached is None:
+        return dataclasses.replace(ctx, active_manipulators=frozenset())
+    return ctx
+
+
+__all__ = ["PROTECTED_LINKS", "UNKNOWN_LINK", "ClearancePolicy", "resolve_link_names",
+           "target_permission_context"]

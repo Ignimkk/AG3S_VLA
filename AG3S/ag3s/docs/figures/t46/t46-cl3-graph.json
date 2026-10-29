@@ -1,0 +1,569 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/agg.json",
+ "cl2_source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/agg.json",
+ "arm_labels": {
+  "C1a": "C1a",
+  "C1aF1": "C1a+F1",
+  "C1aF1F2": "C1a+F1F2"
+ },
+ "numbers": {
+  "outcomes": {
+   "CL2 C0": {
+    "task success": 14,
+    "CT success": 12,
+    "robust grasp": 13,
+    "first grasp ok": 14,
+    "grasp (final)": 16
+   },
+   "CL2 C1a": {
+    "task success": 14,
+    "CT success": 11,
+    "robust grasp": 14,
+    "first grasp ok": 16,
+    "grasp (final)": 17
+   },
+   "C1a": {
+    "task success": 14,
+    "CT success": 11,
+    "robust grasp": 14,
+    "first grasp ok": 16,
+    "grasp (final)": 17
+   },
+   "C1a+F1": {
+    "task success": 13,
+    "CT success": 12,
+    "robust grasp": 13,
+    "first grasp ok": 16,
+    "grasp (final)": 16
+   },
+   "C1a+F1F2": {
+    "task success": 13,
+    "CT success": 12,
+    "robust grasp": 13,
+    "first grasp ok": 15,
+    "grasp (final)": 16
+   }
+  },
+  "contact_runs_any": {
+   "CL2 C0": {
+    "hand-fruit_other": 4,
+    "robot_other-target": 1,
+    "robot_other-fruit_other": 0
+   },
+   "CL2 C1a": {
+    "hand-fruit_other": 4,
+    "robot_other-target": 1,
+    "robot_other-fruit_other": 0
+   },
+   "C1a": {
+    "hand-fruit_other": 4,
+    "robot_other-target": 1,
+    "robot_other-fruit_other": 0
+   },
+   "C1a+F1": {
+    "hand-fruit_other": 1,
+    "robot_other-target": 1,
+    "robot_other-fruit_other": 0
+   },
+   "C1a+F1F2": {
+    "hand-fruit_other": 2,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0
+   }
+  },
+  "contact_rows": {
+   "CL2 C0": {
+    "hand-fruit_other": 64,
+    "robot_other-target": 1,
+    "robot_other-fruit_other": 0
+   },
+   "CL2 C1a": {
+    "hand-fruit_other": 38,
+    "robot_other-target": 7,
+    "robot_other-fruit_other": 0
+   },
+   "C1a": {
+    "hand-fruit_other": 38,
+    "robot_other-target": 7,
+    "robot_other-fruit_other": 0
+   },
+   "C1a+F1": {
+    "hand-fruit_other": 16,
+    "robot_other-target": 7,
+    "robot_other-fruit_other": 0
+   },
+   "C1a+F1F2": {
+    "hand-fruit_other": 27,
+    "robot_other-target": 0,
+    "robot_other-fruit_other": 0
+   }
+  },
+  "hold_chunks_per_run": {
+   "C1a": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    50,
+    1,
+    1,
+    2,
+    38,
+    1,
+    1,
+    1,
+    0,
+    19,
+    1,
+    1
+   ],
+   "C1aF1": [
+    0,
+    0,
+    39,
+    0,
+    0,
+    1,
+    50,
+    1,
+    40,
+    0,
+    38,
+    15,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1
+   ],
+   "C1aF1F2": [
+    0,
+    0,
+    39,
+    0,
+    1,
+    1,
+    1,
+    1,
+    40,
+    0,
+    38,
+    2,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+   ]
+  },
+  "hold_pre8_close_per_run": {
+   "C1a": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1
+   ],
+   "C1aF1": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1
+   ],
+   "C1aF1F2": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "CL2_reference": {
+   "C0": {
+    "hold_chunks_total": 101,
+    "hold_pre8_close": 1,
+    "runs_with_hold_pre8_close": 1
+   },
+   "C1a": {
+    "hold_chunks_total": 119,
+    "hold_pre8_close": 12,
+    "runs_with_hold_pre8_close": 12
+   }
+  },
+  "timing_ms_median_p90": {
+   "TO ms": {
+    "CL2 C0": [
+     163.70715387165546,
+     504.9752562306824
+    ],
+    "CL2 C1a": [
+     166.31162259727716,
+     593.9341818913819
+    ],
+    "C1a": [
+     163.56960404664278,
+     615.2307548560203
+    ],
+    "C1a+F1": [
+     162.64901915565133,
+     601.1652162298562
+    ],
+    "C1a+F1F2": [
+     164.39032787457108,
+     515.1628685183823
+    ]
+   },
+   "AG3S ms": {
+    "CL2 C0": [
+     284.47577776387334,
+     532.9654863104224
+    ],
+    "CL2 C1a": [
+     286.9779677130282,
+     562.0578285306693
+    ],
+    "C1a": [
+     282.27345598861575,
+     511.43945762887614
+    ],
+    "C1a+F1": [
+     280.0238081254065,
+     494.70270443707716
+    ],
+    "C1a+F1F2": [
+     282.65707194805145,
+     514.6614767611028
+    ]
+   }
+  },
+  "pair_matrix_0fail_1success_noCT_2successCT": {
+   "columns": [
+    "CL2 C1a",
+    "C1a",
+    "C1a+F1",
+    "C1a+F1F2"
+   ],
+   "ep12_s121": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "ep12_s122": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "ep30_s301": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "ep30_s302": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "ep0_s1": [
+    2,
+    2,
+    0,
+    0
+   ],
+   "ep0_s2": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ep3_s31": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ep3_s32": [
+    2,
+    2,
+    2,
+    0
+   ],
+   "ep11_s111": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "ep11_s112": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "ep54_s541": [
+    1,
+    1,
+    2,
+    2
+   ],
+   "ep54_s542": [
+    1,
+    1,
+    2,
+    2
+   ],
+   "ep123_s1231": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "ep123_s1232": [
+    0,
+    0,
+    0,
+    2
+   ],
+   "ep104_s1041": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "ep104_s1042": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ep110_s1101": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "ep110_s1102": [
+    1,
+    1,
+    1,
+    1
+   ]
+  },
+  "pairs_A_only_B_only_p": {
+   "C1a_vs_C1aF1": {
+    "success": [
+     1,
+     0,
+     1.0
+    ],
+    "success_ct": [
+     1,
+     2,
+     1.0
+    ],
+    "grasp": [
+     1,
+     0,
+     1.0
+    ],
+    "robust_grasp": [
+     1,
+     0,
+     1.0
+    ],
+    "pre_release_new_contact": [
+     3,
+     0,
+     0.25
+    ]
+   },
+   "C1aF1_vs_C1aF1F2": {
+    "success": [
+     1,
+     1,
+     1.0
+    ],
+    "success_ct": [
+     1,
+     1,
+     1.0
+    ],
+    "grasp": [
+     1,
+     1,
+     1.0
+    ],
+    "robust_grasp": [
+     1,
+     1,
+     1.0
+    ],
+    "pre_release_new_contact": [
+     0,
+     1,
+     1.0
+    ]
+   },
+   "C1a_vs_C1aF1F2": {
+    "success": [
+     2,
+     1,
+     1.0
+    ],
+    "success_ct": [
+     2,
+     3,
+     1.0
+    ],
+    "grasp": [
+     1,
+     0,
+     1.0
+    ],
+    "robust_grasp": [
+     2,
+     1,
+     1.0
+    ],
+    "pre_release_new_contact": [
+     3,
+     1,
+     0.625
+    ]
+   }
+  },
+  "reproducibility_CL2_C1a_CL3_C1a": {
+   "success": [
+    14,
+    14,
+    18,
+    0,
+    0,
+    1.0
+   ],
+   "success_ct": [
+    11,
+    11,
+    18,
+    0,
+    0,
+    1.0
+   ],
+   "grasp": [
+    17,
+    17,
+    18,
+    0,
+    0,
+    1.0
+   ],
+   "robust_grasp": [
+    14,
+    14,
+    18,
+    0,
+    0,
+    1.0
+   ],
+   "first_grasp_ok": [
+    16,
+    16,
+    18,
+    0,
+    0,
+    1.0
+   ],
+   "pre_release_new_contact": [
+    4,
+    4,
+    18,
+    0,
+    0,
+    1.0
+   ]
+  },
+  "reproducibility_hold": {
+   "hold_chunks_total": {
+    "CL2": 119,
+    "CL3": 119
+   },
+   "hold_runs": {
+    "CL2": 14,
+    "CL3": 14
+   }
+  },
+  "t46_activity": {
+   "C1a": {
+    "f1_applied_chunks": 0,
+    "f1_n_dropped_sum": 0,
+    "f2_key_chunks": 0,
+    "n_ambiguous_removed_sum": 0,
+    "n_ambiguous_sum": 17288,
+    "n_kept_nontarget_sum": 7572
+   },
+   "C1aF1": {
+    "f1_applied_chunks": 396,
+    "f1_n_dropped_sum": 3003,
+    "f2_key_chunks": 0,
+    "n_ambiguous_removed_sum": 0,
+    "n_ambiguous_sum": 10024,
+    "n_kept_nontarget_sum": 5881
+   },
+   "C1aF1F2": {
+    "f1_applied_chunks": 382,
+    "f1_n_dropped_sum": 2464,
+    "f2_key_chunks": 562,
+    "n_ambiguous_removed_sum": 9232,
+    "n_ambiguous_sum": 9232,
+    "n_kept_nontarget_sum": 6866
+   }
+  }
+ }
+}

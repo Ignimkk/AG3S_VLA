@@ -1,0 +1,25 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/t_key_M1_approach.png",
+ "frame": "T53_ep1842_f010",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T53_ep1842_f010.npz": "176d1c7dda296bbb3d96a72512ad11b23f73aff221bc0387ddf4b3e18e7cfb5f"
+ },
+ "note": "Wide replay of the recorded state; orange = recomputed top-1 target surface (5 mm nodes).",
+ "is_measured_result": false,
+ "episode": "T53_ep1842",
+ "moment": "M1_approach",
+ "iou": 1.0,
+ "camera": {
+  "lookat": [
+   0.56,
+   -0.14,
+   1.06
+  ],
+  "dist": 1.28,
+  "az": 200,
+  "el": -24
+ }
+}

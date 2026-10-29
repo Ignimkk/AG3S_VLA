@@ -1,0 +1,384 @@
+{
+ "source": {
+  "지금 serving": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP-E4/agg/tdm_closed_loop_e4.json",
+  "CPU 초기값 16": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E2/closed_reg/agg/e2_closed_loop_reg.json",
+  "GPU 초기값 16\n+ 검사 줄이기": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_reg/agg/e3_closed_loop_reg.json"
+ },
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/figs/fig_e3_closed_reg.py",
+ "counts": {
+  "지금 serving": {
+   "success_without_forbidden": 14,
+   "forbidden": 1
+  },
+  "CPU 초기값 16": {
+   "success_without_forbidden": 14,
+   "forbidden": 1
+  },
+  "GPU 초기값 16 + 검사 줄이기": {
+   "success_without_forbidden": 14,
+   "forbidden": 1
+  }
+ },
+ "runs": {
+  "56": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "119": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "121": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "126": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "211": {
+   "지금 serving": {
+    "success": false,
+    "forbidden": false,
+    "groups": "",
+    "mode": "full"
+   },
+   "CPU 초기값 16": {
+    "success": false,
+    "forbidden": false,
+    "groups": "",
+    "mode": "full"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": false,
+    "forbidden": false,
+    "groups": "",
+    "mode": "full"
+   }
+  },
+  "250": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "309": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "320": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "325": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "572": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "753": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "850": {
+   "지금 serving": {
+    "success": false,
+    "forbidden": false,
+    "groups": "",
+    "mode": "full"
+   },
+   "CPU 초기값 16": {
+    "success": false,
+    "forbidden": false,
+    "groups": "",
+    "mode": "full"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": false,
+    "forbidden": false,
+    "groups": "",
+    "mode": "full"
+   }
+  },
+  "901": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "954": {
+   "지금 serving": {
+    "success": false,
+    "forbidden": false,
+    "groups": "",
+    "mode": "full"
+   },
+   "CPU 초기값 16": {
+    "success": false,
+    "forbidden": false,
+    "groups": "",
+    "mode": "full"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": false,
+    "forbidden": false,
+    "groups": "",
+    "mode": "full"
+   }
+  },
+  "1345": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": true,
+    "groups": "neighbour_fruit",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": true,
+    "groups": "neighbour_fruit",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": true,
+    "groups": "neighbour_fruit",
+    "mode": "place_stop"
+   }
+  },
+  "1596": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "1668": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  },
+  "1837": {
+   "지금 serving": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "CPU 초기값 16": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   },
+   "GPU 초기값 16 + 검사 줄이기": {
+    "success": true,
+    "forbidden": false,
+    "groups": "",
+    "mode": "place_stop"
+   }
+  }
+ }
+}

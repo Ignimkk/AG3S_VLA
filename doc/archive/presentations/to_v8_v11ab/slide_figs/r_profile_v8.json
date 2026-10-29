@@ -1,0 +1,20 @@
+{
+ "source": "doc/presentations/to_v8_v11ab/compare_figs/c_deflection_profile.json",
+ "rule": "carry_apple chunks with max_k |D| > 5 mm, hurdle 14 runs",
+ "arms": {
+  "V8": {
+   "palm_D_profile_by_k_median_mm": [
+    7.40943773532246,
+    10.401968527902351,
+    11.393080219680353,
+    13.289641964674725,
+    13.33390230671411,
+    15.607052160299016,
+    15.600270196967225,
+    15.520982592909927
+   ],
+   "n_chunks": 69,
+   "n_deflected_gt5": 58
+  }
+ }
+}

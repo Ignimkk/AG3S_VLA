@@ -1,0 +1,16 @@
+{
+ "example": {
+  "run": "\uac00\ub9bc123_k0",
+  "request": 8,
+  "palm_dev_mm": 18.7,
+  "dq_max_deg": 0.96
+ },
+ "grasp_goal_requests": 49,
+ "grasp_goal_runs": 16,
+ "grasp_goal_reduced_gt_0p5mm": 26,
+ "grasp_goal_shown_le_60mm": 45,
+ "solve_ms_median": 70.02273900434375,
+ "solve_ms_p95": 164.38340344466266,
+ "hold_requests": 9,
+ "requests": 832
+}

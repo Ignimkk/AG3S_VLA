@@ -26,6 +26,8 @@
 | `ag3s/seq` | 요청 일련번호. 응답에 그대로 돌아오고, 오래된 응답을 버리는 근거가 된다 |
 | `ag3s/exec_feedback` | **직전 청크의 실행 사실** (T18). 아래 |
 | `ag3s/policy_seed` | **선택.** 정책 RNG seed (int, T39). 서버가 이 요청의 `policy.infer` 직전에 정책 RNG 를 `jax.random.key(seed)` 로 다시 놓는다. 아래 |
+| `ag3s/oracle_seg/<cam>` | **선택 · 진단 (T46e A13).** (H, W) uint8 GT code 영상 (`runtime.oracle_segmentation` 의 표: 0 없음·로봇 · 1 GT target · 2 정적 · ≥3 다른 잡을 물체). 시뮬레이터 client 가 `oracle_target=` 일 때만 싣는다. 서버는 `esdf.target_extent = "oracle_visible"` 일 때만 읽는다 — 없으면 off |
+| `ag3s/oracle_seg_meta` | **선택 (T46e).** `{"version", "target", "codes": {물체: code}}` — `oracle_seg/<cam>` 과 함께만 |
 
 카메라마다 `robot_state` 를 따로 싣는 것이 이 형식의 핵심이다. 손목 카메라는 팔과 함께
 움직이므로 80 ms 전 프레임은 80 ms 전 자세에 놓여야 한다. 하나의 `q_now` 로 세 대를 변환하면
@@ -136,13 +138,14 @@ T16 에서 `--no-collision` 인데도 34 청크 중 25 개가 HOLD 였다. 이�
 | `budget_only` | 예산/반복 상한으로 끝났지만 최종 검사 통과 | 실행 |
 | `occluded_target` | 미인증의 이유가 target 없음(`no_target`) 하나뿐이고 manipulated 가 `occluded` 다 (T20) | 실행 |
 | `uncertified_waived` | 기하 미인증이지만 서버가 `require_certified_geometry=False` 로 떠 있다 | 실행 |
-| `subtask_no_target` | target 이 없는 이유가 **subtask gate** 다 (`grounding_status=subtask_gated` · `validity=valid` · carve 중인 대상 없음, `ag3s.types.subtask_no_target`). SUBTASK-f: gate on ∧ label `home` ∧ PLACED 도달 뒤의 `no_admissible` (잡을 것이 남지 않음) 도 같다 — evidence 의 `grounding_status` 가 둘을 가른다. 이 기하는 **인증된 것으로 본다** (`geometry_certified=True`) — 이 사유는 "target 이 없는데 왜 실행했나" 를 남기는 기록이다 (SUBTASK-e) | 실행 |
+| `subtask_no_target` | target 이 없는 이유가 **subtask gate** 다 (`grounding_status=subtask_gated` · `validity=valid` · carve 중인 대상 없음, `ag3s.types.subtask_no_target`). SUBTASK-f: gate on ∧ label `home` ∧ PLACED 도달 뒤의 `no_admissible` (잡을 것이 남지 않음) 도 같다. T46c W1 (`--placed-no-seed-certify`, 기본 off): 같은 조건의 `no_seed` 도 같다 — evidence 의 `grounding_status` 가 셋을 가른다. 이 기하는 **인증된 것으로 본다** (`geometry_certified=True`) — 이 사유는 "target 이 없는데 왜 실행했나" 를 남기는 기록이다 (SUBTASK-e) | 실행 |
 | `follow_to` | **T43 Z6** (`serve_safe --hold-follow-to N`, 기본 off): `collision` 행이 전부 margin 안쪽뿐 (ESDF − r ≥ 0) 이고 그 최소 clearance 가 현재 상태보다 작지 않으며 refined 가 정책 reference 가 아니다 — TO refined chunk 를 실행한다. 원래 `collision` 사유는 evidence `replaced` 에 | 실행 |
 | `collision` | 권한 없는 link, 또는 manipulated 가 아닌 물체와의 관통 (> tolerance) | HOLD |
 | `uncertified` | `geometry_certified=False` (위 `occluded_target` 이 아닌 것 전부. `subtask_no_target` 은 미인증이 아니다) | HOLD |
 | `unverified` | 최적화기가 검사하지 못했다 (`solver_failed` · `unconstrained`) | HOLD |
 | `comms` | **클라이언트가 만든다** — `timeout` · `stale` · `dimension` · `error` (`evidence.ipc`) | HOLD |
 | `no_perception` | 서버가 `--no-perception` 으로 떠 있다 (T27, `to_only_policy`) — AG3S·ESDF 가 없고 **아무것도 검사하지 않았다** | HOLD |
+| `task_not_ready` | **T57 단계 2** (`serve_safe --task-gate`, 기본 off): grasp latch 가 HELD 인데 명사 token probe (T55 prereg: v5 · τ 0.3 · p 1 · noun_ok 필요) 가 지시한 대상을 쥐었다고 말하지 않는다 (`SafePolicy._task_gate`). evidence `probe_p` · `tau` · `noun_ok` · `latch_state`. HELD 가 아니면 생기지 않는다. 운반 · 놓기 전이나 작업 완료의 인증이 아니다 | HOLD |
 
 **모르는 kind 는 HOLD 다** (fail closed).
 
@@ -281,6 +284,7 @@ __all__ = [
     "make_reason", "gate_decision", "unpack_verdict_reasons", "derive_verdict_reasons",
     "POLICY_SEED", "POLICY_SEED_LIMIT", "check_policy_seed", "unpack_policy_seed",
     "unpack_policy_seed_echo",
+    "ORACLE_SEG", "ORACLE_SEG_META", "ORACLE_SEG_REQUIRED", "unpack_oracle_segmentation",
 ]
 
 PREFIX = "ag3s/"
@@ -331,6 +335,13 @@ POLICY_SEED = "policy_seed"
 #: 접히는지에 기대지 않는다 — O1 의 seed 는 `10·ep + rep` (≈ 2·10⁴) 이다.
 POLICY_SEED_LIMIT = 2 ** 32
 
+#: 요청 키 (`ag3s/` 접두 뒤) — **T46e A13 GT segmentation** (진단 oracle). `oracle_seg/<cam>` = uint8 code 영상,
+#: `oracle_seg_meta` = `{"version", "target", "codes"}`. 둘 다 `pack_request(oracle_seg=...)` 를 줬을 때만 생긴다.
+ORACLE_SEG = "oracle_seg"
+ORACLE_SEG_META = "oracle_seg_meta"
+#: 서버 metadata 키 — 이 서버가 GT segmentation 을 **요구한다** (`esdf.target_extent = "oracle_visible"`). 켰을 때만 실린다.
+ORACLE_SEG_REQUIRED = "oracle_segmentation_required"
+
 #: HOLD 사유의 종류. `SafeRemoteClient.last_ipc` 의 값 중 `ok` 를 뺀 것과 같다 — 사유를 새로
 #: 지어내지 않고 로컬이 이미 쓰는 이름을 그대로 싣는다.
 HOLD_KINDS = ("unsafe", "timeout", "stale", "error")
@@ -346,7 +357,8 @@ VERDICT_REASONS = "verdict_reasons"
 #: 곳은 없고 (`GATE_DEFAULT` 가 처리를 정한다), 표와 같은 순서가 읽기 쉽다.
 REASON_KINDS = ("allowed_contact", "budget_only", "occluded_target", "uncertified_waived",
                 "subtask_no_target", "follow_to",
-                "collision", "uncertified", "unverified", "comms", "no_perception")
+                "collision", "uncertified", "unverified", "comms", "no_perception",
+                "task_not_ready")
 
 #: 게이트의 처리 두 가지. **정지(abort)는 여기 없다** — 한 청크의 사유가 아니라 연속 HOLD 수가
 #: 정하는 것이고 (`--safe-max-hold-chunks`), 그것은 제어 루프의 일이다.
@@ -371,6 +383,8 @@ GATE_DEFAULT: dict[str, str] = {
     "comms": "hold",
     # T27 — `--no-perception` 서버. 검사되지 않은 청크다. 실행하려면 로컬 `--safe-gate off`.
     "no_perception": "hold",
+    # T57 단계 2 — HELD 인데 명사 probe 가 지시한 대상을 말하지 않는다 (`SafePolicy._task_gate`, 기본 off).
+    "task_not_ready": "hold",
 }
 
 #: `comms` 사유의 하위 종류 (`evidence.ipc`). `dimension` 은 `last_ipc` 로는 `error` 로 남는다 —
@@ -422,7 +436,9 @@ def pack_request(obs: dict[str, Any], *, cameras: Sequence[str],
                  exec_feedback: Optional[dict[str, Any]] = None,
                  render_stamps: Optional[dict[str, float]] = None,
                  stamp_mode: Optional[str] = None,
-                 policy_seed: Optional[int] = None) -> dict[str, Any]:
+                 policy_seed: Optional[int] = None,
+                 oracle_seg: Optional[dict[str, np.ndarray]] = None,
+                 oracle_seg_meta: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     """정책 관측에 AG3S 가 필요한 것을 더한다. `obs` 는 제자리에서 바뀌지 않는다.
 
     `exec_feedback` 은 `make_exec_feedback` / `no_exec_feedback` 의 결과다. **`None` 이면 키를
@@ -434,6 +450,9 @@ def pack_request(obs: dict[str, Any], *, cameras: Sequence[str],
 
     `policy_seed` (T39) 도 **주었을 때만** `ag3s/policy_seed` 가 생긴다 — `None` 이면 요청이 T39 전과
     바이트까지 같다. 값은 `check_policy_seed` 로 검사한다 (보내기 전에 죽는다).
+
+    `oracle_seg` (T46e A13, 진단) — `{cam: (H, W) uint8 code 영상}` — 도 **주었을 때만** `oracle_seg/<cam>` 과
+    `oracle_seg_meta` 가 생긴다. 영상 크기가 그 카메라의 depth 와 다르면 보내기 전에 죽는다.
     """
     if stamp_mode is not None and stamp_mode not in STAMP_MODES:
         raise ValueError(f"stamp_mode must be one of {STAMP_MODES}, got {stamp_mode!r}")
@@ -459,6 +478,13 @@ def pack_request(obs: dict[str, Any], *, cameras: Sequence[str],
         out[f"{PREFIX}stamp/{cam}"] = float(stamps[cam])
         if render_stamps is not None:
             out[f"{PREFIX}render_stamp/{cam}"] = float(render_stamps[cam])
+    if oracle_seg is not None:
+        for cam in cameras:
+            lab = np.asarray(oracle_seg[cam])
+            if lab.shape != np.asarray(depth[cam]).shape:
+                raise ValueError(f"oracle_seg/{cam} {lab.shape} != depth {np.asarray(depth[cam]).shape}")
+            out[f"{PREFIX}{ORACLE_SEG}/{cam}"] = lab.astype(np.uint8)
+        out[PREFIX + ORACLE_SEG_META] = dict(oracle_seg_meta or {})
     return out
 
 
@@ -491,6 +517,25 @@ def unpack_policy_seed_echo(response: dict[str, Any]) -> Optional[int]:
     """응답의 seed 회신 (T39). 서버가 그 요청에 seed 를 **적용했을 때만** 있다. 없으면 `None`."""
     value = response.get(POLICY_SEED)
     return None if value is None else int(value)
+
+
+def unpack_oracle_segmentation(scene: dict[str, Any]) -> Optional[dict[str, Any]]:
+    """T46e A13 — the request's GT segmentation, keyed like `CameraObservation.camera_id` (the same mount table as
+    `unpack_camera_observations`): `{"labels": {camera_id value: (H, W) uint8}, "meta": {...}}`. `None` when the
+    request carries none (an old client, or a client without `oracle_target`) — the server then runs without it.
+    """
+    from AG3S.ag3s.experiments.sources.mujoco_source import CAMERA_MOUNTS
+
+    labels = {}
+    for cam in scene.get("cameras", ()) or ():
+        lab = scene.get(f"{ORACLE_SEG}/{cam}")
+        if lab is None:
+            continue
+        _, camera_id = CAMERA_MOUNTS.get(cam, (None, cam))
+        labels[str(camera_id)] = np.asarray(lab, np.uint8)
+    if not labels:
+        return None
+    return {"labels": labels, "meta": dict(scene.get(ORACLE_SEG_META) or {})}
 
 
 def unpack_stamps(scene: dict[str, Any]) -> dict[str, Any]:

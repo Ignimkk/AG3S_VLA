@@ -1,0 +1,32 @@
+{
+ "asset": "paper/figures/cvpr_v1/assets/c2_ours_surface_region_v2.png",
+ "frame": "T53_ep1849_f018",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/cvpr_v1_fig3_assets.py",
+ "replaces": "paper/figures/ifg_overview/assets/c2_ours_surface_region.json",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T53_ep1849_f018.npz": "5309d6bf7be78e7b124a93b87cad9c814abf7b4c46e6101b90b8b5b7d2918e37",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/labels/T53_ep1849_f018.npz": "abf125ced3f938fff917311a81be6c064b2db8f8f0b90676399a2b2a93514cfb"
+ },
+ "note": "Depth-continuous surface graph, top-1 seed-mass region (orange nodes); neighbour surfaces stay blue (protected). Meshes tinted: target 'banana' orange, neighbours ['apple'] light blue.",
+ "is_measured_result": false,
+ "iou": 0.9801561483409239,
+ "camera": {
+  "lookat": [
+   0.5060318281451047,
+   -0.3203170698797875,
+   0.8613438600564569
+  ],
+  "dist": 0.5,
+  "az": 180,
+  "el": -42
+ },
+ "target": "banana",
+ "tinted": {
+  "target": "banana",
+  "neighbours": [
+   "apple"
+  ]
+ }
+}

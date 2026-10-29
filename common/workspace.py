@@ -36,13 +36,35 @@ def legacy_input_path(relative: str) -> Path:
     return Path(workspace_path("legacy/" + relative))
 
 
+#: Absolute root of the retired checkout; recorded JSON/logs still name inputs under it.
+OLD_CHECKOUT_PREFIX = "/mnt/dev/work/"
+
+
+def rebase_legacy_path(value: str) -> str:
+    """Map one recorded `/mnt/dev/work/<rel>` path onto the shared legacy input root; others unchanged."""
+    if value.startswith(OLD_CHECKOUT_PREFIX):
+        return str(legacy_input_path(value.removeprefix(OLD_CHECKOUT_PREFIX)))
+    return value
+
+
+def rebase_legacy_paths(obj):
+    """Return a copy of loaded recorded JSON with old-checkout paths rebased in dict keys and string values."""
+    if isinstance(obj, str):
+        return rebase_legacy_path(obj)
+    if isinstance(obj, dict):
+        return {rebase_legacy_paths(k) if isinstance(k, str) else k: rebase_legacy_paths(v)
+                for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [rebase_legacy_paths(v) for v in obj]
+    return obj
+
+
 def bind_historical_client_inputs(client):
     """Rebase input locations after loading a frozen client, preserving its source/algorithm."""
     if hasattr(client, "RANDOMIZED_16D_DATASET"):
         client.RANDOMIZED_16D_DATASET = legacy_input_path("pi05_TO_hybrid/data/rby1_randomized_pick_place_16d_v1")
-    old_prefix = "/mnt/dev/work/"
     for model in getattr(client, "MODELS", {}).values():
         checkpoint = model.get("checkpoint")
-        if isinstance(checkpoint, str) and checkpoint.startswith(old_prefix):
-            model["checkpoint"] = str(legacy_input_path(checkpoint.removeprefix(old_prefix)))
+        if isinstance(checkpoint, str):
+            model["checkpoint"] = rebase_legacy_path(checkpoint)
     return client

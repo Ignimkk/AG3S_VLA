@@ -1,0 +1,27 @@
+% !TEX root = ../../latex/main.tex
+% T05: comparison with prior collision-avoidance layers around VLAs. Every cell is taken from
+% notes/REFERENCE_ANALYSIS_R2.md (local PDFs) or notes/REFERENCE_ANALYSIS_R3.md (arXiv HTML); no measured values.
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright}X>{\raggedright}Xlll@{}}
+\toprule
+Method & Target / obstacles from & Sub-task from & Geometry & Protected & Correction \tabularnewline
+\midrule
+VLSA~\cite{hu2026vlsa} & VLM (GLM-4.5V) + GroundingDINO & -- & ellipsoid & end effector & per-step CBF-QP \tabularnewline
+Lan-o3dp~\cite{li2025lano3dp} & GPT-4 + GroundingDINO + SAM & GPT-4 decomposition & nearest obstacle point & end effector & guided denoising \tabularnewline
+MoManipVLA~\cite{wu2025momanipvla} & promptable segmenter & -- & ESDF (nvblox) & robot surface & waypoint optimisation \tabularnewline
+KNOWS~\cite{park2026knows} & YOLOE segmentation + VLA attention & -- & ellipsoids & end effector & per-step CBF-QP \tabularnewline
+AutoMoMa~\cite{niu2026automoma} & known scene and object meshes & planning stage & ESDF & whole body + attached & offline trajectory optimisation \tabularnewline
+WBAG~\cite{zhen2026wbag} & simulator identities & grasp confirmation & BP-SDF & whole body + attached & per-step barrier \tabularnewline
+\midrule
+\sys\ (ours) & VLA attention + depth (ATS) & trained probe on frozen features & ESDF (cuRobo) & gripper links + attached & chunk-level SQP \tabularnewline
+\bottomrule
+\end{tabularx}
+\caption{Draft comparison of collision-avoidance layers around manipulation policies. \sys\ obtains target geometry from
+VLA attention and depth, and trains a separate phase probe while keeping the VLA frozen. Its current query model covers
+gripper links and attached-object approximations. ``--'': no separate sub-task signal is listed. This table is retained
+as supplementary source material and is not included in the current main paper.}
+\label{tab:prior}
+\end{table*}

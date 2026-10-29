@@ -1,0 +1,338 @@
+{
+ "episodes": [
+  56,
+  211,
+  1837,
+  320,
+  753,
+  954,
+  309,
+  250,
+  1668,
+  126
+ ],
+ "success": {
+  "E0": 10,
+  "SPL": 7,
+  "SPLW": 8,
+  "SPLT": 9
+ },
+ "table": {
+  "56": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPL": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLW": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLT": {
+    "primary": true,
+    "failure_mode": "regrasp",
+    "hold_chunks": 2,
+    "neighbour_rows": 0
+   }
+  },
+  "211": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 8
+   },
+   "SPL": {
+    "primary": false,
+    "failure_mode": "regrasp",
+    "hold_chunks": 6,
+    "neighbour_rows": 34
+   },
+   "SPLW": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 7,
+    "neighbour_rows": 8
+   },
+   "SPLT": {
+    "primary": false,
+    "failure_mode": "regrasp",
+    "hold_chunks": 2,
+    "neighbour_rows": 14
+   }
+  },
+  "1837": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "slip_in_transport",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPL": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 15,
+    "neighbour_rows": 0
+   },
+   "SPLW": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLT": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   }
+  },
+  "320": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPL": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPLW": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPLT": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   }
+  },
+  "753": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPL": {
+    "primary": true,
+    "failure_mode": "slip_at_lift",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLW": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLT": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   }
+  },
+  "954": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 17
+   },
+   "SPL": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPLW": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPLT": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 8
+   }
+  },
+  "309": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPL": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLW": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLT": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   }
+  },
+  "250": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPL": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPLW": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPLT": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   }
+  },
+  "1668": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPL": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLW": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 3,
+    "neighbour_rows": 0
+   },
+   "SPLT": {
+    "primary": true,
+    "failure_mode": "regrasp",
+    "hold_chunks": 5,
+    "neighbour_rows": 0
+   }
+  },
+  "126": {
+   "E0": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   },
+   "SPL": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLW": {
+    "primary": true,
+    "failure_mode": "slip_in_transport",
+    "hold_chunks": 1,
+    "neighbour_rows": 0
+   },
+   "SPLT": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "neighbour_rows": 0
+   }
+  }
+ },
+ "first_close": {
+  "954": {
+   "E0": {
+    "t": 144,
+    "tcp_rel_apple_t0_mm": [
+     -3.7720604521376266,
+     14.65058132752789,
+     12.315450192967425
+    ]
+   },
+   "SPLW": {
+    "t": 146,
+    "tcp_rel_apple_t0_mm": [
+     0.4500805644752637,
+     37.205597146199146,
+     21.90001479668846
+    ]
+   },
+   "SPLT": {
+    "t": 146,
+    "tcp_rel_apple_t0_mm": [
+     -7.29698966477732,
+     16.180305482836054,
+     11.356929028764728
+    ]
+   }
+  },
+  "211": {
+   "E0": {
+    "t": 184,
+    "tcp_rel_apple_t0_mm": [
+     -4.142954926877273,
+     6.092297846339467,
+     10.982749140119541
+    ]
+   },
+   "SPLW": {
+    "t": 163,
+    "tcp_rel_apple_t0_mm": [
+     66.55626871071108,
+     1.3279598665166814,
+     19.53944393910845
+    ]
+   },
+   "SPLT": {
+    "t": 163,
+    "tcp_rel_apple_t0_mm": [
+     67.46937219163097,
+     1.1759446579829302,
+     18.863896019245317
+    ]
+   }
+  }
+ },
+ "definitions": "IFG-APPLE-NBC \u2014 neighbour contact (option A) on the 10 VLA-alone-success apple scenes (CPU only, read only).\n\n  python3 -m AG3S.ag3s.experiments.studies.ifg_nbc_result --run <IFG-APPLE run> --fig AG3S/ag3s/docs/figures/ifg-split\n\nArms (same episode / seed), from the agg3.py copies in IFG-APPLE-NBC/agg4arm: VLA alone (E0), target split (SPL), + wrist-weighted\ntracking (SPLW, IFG-TOW), + neighbour contact 20 mm (SPLT, IFG-NBC). Per scene: locked contact-free success, failure mode, HOLD chunks,\nneighbour contact rows (agg `contacts.neighbour_rows`, summed; MuJoCo contacts of the robot with a non-target fruit). Grasp point at the\nfirst close = replay TCP minus the apple position at t=0, from the `ifg_goal_drift` sidecars (`-wrist-track`, `-neighbour-contact`).\n",
+ "script": "AG3S/ag3s/experiments/studies/ifg_nbc_result.py"
+}

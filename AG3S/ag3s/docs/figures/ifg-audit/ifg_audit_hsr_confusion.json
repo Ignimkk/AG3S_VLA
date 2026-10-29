@@ -1,0 +1,428 @@
+{
+ "latch": {
+  "confusion": {
+   "rows": [
+    "APPROACH",
+    "CLOSING",
+    "HELD",
+    "RELEASED",
+    "PLACED",
+    "HOME",
+    "FAILED_GRASP",
+    "DROPPED"
+   ],
+   "cols": [
+    "searching",
+    "latched",
+    "closing",
+    "held",
+    "placed"
+   ],
+   "M": [
+    [
+     55,
+     447,
+     6,
+     0,
+     0
+    ],
+    [
+     0,
+     7,
+     22,
+     17,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     195,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     3,
+     5
+    ],
+    [
+     0,
+     0,
+     0,
+     23,
+     831
+    ],
+    [
+     0,
+     1,
+     176,
+     2,
+     0
+    ],
+    [
+     0,
+     1,
+     9,
+     0,
+     0
+    ]
+   ],
+   "latch_state_outside_cols": 0
+  },
+  "accuracy_main": {
+   "def": "GT in APPROACH/CLOSING/HELD/PLACED/HOME, correct per LATCH_OK",
+   "n": 1611,
+   "correct": 1555,
+   "acc": 0.9652
+  },
+  "accuracy_all_scored": {
+   "def": "all GT stages except RELEASED",
+   "n": 1800,
+   "correct": 1742,
+   "acc": 0.9678
+  },
+  "phase_accuracy": {
+   "n": 1800,
+   "correct": 1755,
+   "acc": 0.975
+  },
+  "precision_recall": {
+   "pre-grasp (searching+latched)": {
+    "gt": [
+     "APPROACH"
+    ],
+    "tp": 502,
+    "n_pred_main": 509,
+    "n_pred_all": 511,
+    "n_true": 508,
+    "precision_main": 0.9862,
+    "precision_all": 0.9824,
+    "recall": 0.9882
+   },
+   "closing": {
+    "gt": [
+     "CLOSING"
+    ],
+    "tp": 22,
+    "n_pred_main": 28,
+    "n_pred_all": 213,
+    "n_true": 46,
+    "precision_main": 0.7857,
+    "precision_all": 0.1033,
+    "recall": 0.4783
+   },
+   "held": {
+    "gt": [
+     "HELD"
+    ],
+    "tp": 195,
+    "n_pred_main": 238,
+    "n_pred_all": 240,
+    "n_true": 195,
+    "precision_main": 0.8193,
+    "precision_all": 0.8125,
+    "recall": 1.0
+   },
+   "placed": {
+    "gt": [
+     "HOME",
+     "PLACED"
+    ],
+    "tp": 836,
+    "n_pred_main": 836,
+    "n_pred_all": 836,
+    "n_true": 862,
+    "precision_main": 1.0,
+    "precision_all": 1.0,
+    "recall": 0.9698
+   }
+  }
+ },
+ "probe_argmax": {
+  "confusion": {
+   "rows": [
+    "pick",
+    "place",
+    "home"
+   ],
+   "cols": [
+    "pick",
+    "place",
+    "home",
+    "None"
+   ],
+   "M": [
+    [
+     560,
+     153,
+     30,
+     0
+    ],
+    [
+     0,
+     195,
+     0,
+     0
+    ],
+    [
+     17,
+     40,
+     805,
+     0
+    ]
+   ]
+  },
+  "accuracy_labeled": {
+   "n": 1800,
+   "correct": 1560,
+   "acc": 0.8667
+  },
+  "accuracy_all": {
+   "n": 1800,
+   "correct": 1560,
+   "acc": 0.8667
+  },
+  "n_none": 0,
+  "per_stage_correct": {
+   "APPROACH": [
+    462,
+    508
+   ],
+   "CLOSING": [
+    32,
+    46
+   ],
+   "HELD": [
+    195,
+    195
+   ],
+   "RELEASED": [
+    0,
+    0
+   ],
+   "PLACED": [
+    0,
+    8
+   ],
+   "HOME": [
+    805,
+    854
+   ],
+   "FAILED_GRASP": [
+    60,
+    179
+   ],
+   "DROPPED": [
+    6,
+    10
+   ]
+  }
+ },
+ "probe_label": {
+  "confusion": {
+   "rows": [
+    "pick",
+    "place",
+    "home"
+   ],
+   "cols": [
+    "pick",
+    "place",
+    "home",
+    "None"
+   ],
+   "M": [
+    [
+     538,
+     130,
+     27,
+     48
+    ],
+    [
+     28,
+     167,
+     0,
+     0
+    ],
+    [
+     14,
+     76,
+     772,
+     0
+    ]
+   ]
+  },
+  "accuracy_labeled": {
+   "n": 1752,
+   "correct": 1477,
+   "acc": 0.843
+  },
+  "accuracy_all": {
+   "n": 1800,
+   "correct": 1477,
+   "acc": 0.8206
+  },
+  "n_none": 48,
+  "per_stage_correct": {
+   "APPROACH": [
+    408,
+    508
+   ],
+   "CLOSING": [
+    44,
+    46
+   ],
+   "HELD": [
+    167,
+    195
+   ],
+   "RELEASED": [
+    0,
+    0
+   ],
+   "PLACED": [
+    0,
+    8
+   ],
+   "HOME": [
+    772,
+    854
+   ],
+   "FAILED_GRASP": [
+    82,
+    179
+   ],
+   "DROPPED": [
+    4,
+    10
+   ]
+  },
+  "label_changes_per_run": {
+   "SPL_ep56_s563": 2,
+   "SPL_ep119_s1193": 2,
+   "SPL_ep121_s1213": 2,
+   "SPL_ep126_s1263": 2,
+   "SPL_ep211_s2113": 5,
+   "SPL_ep250_s2503": 2,
+   "SPL_ep309_s3093": 2,
+   "SPL_ep320_s3203": 0,
+   "SPL_ep325_s3253": 2,
+   "SPL_ep342_s3423": 2,
+   "SPL_ep421_s4213": 2,
+   "SPL_ep526_s5263": 4,
+   "SPL_ep572_s5723": 2,
+   "SPL_ep753_s7533": 2,
+   "SPL_ep850_s8503": 2,
+   "SPL_ep901_s9013": 2,
+   "SPL_ep954_s9543": 4,
+   "SPL_ep979_s9793": 5,
+   "SPL_ep1222_s12223": 2,
+   "SPL_ep1313_s13133": 4,
+   "SPL_ep1345_s13453": 2,
+   "SPL_ep1596_s15963": 2,
+   "SPL_ep1668_s16683": 2,
+   "SPL_ep1837_s18373": 5
+  },
+  "place_label_never_but_gt_lift": [],
+  "place_label_without_gt_lift": [
+   "SPL_ep526_s5263",
+   "SPL_ep954_s9543",
+   "SPL_ep979_s9793",
+   "SPL_ep1313_s13133"
+  ]
+ },
+ "memory_held": {
+  "n_gt_held_requests": 195,
+  "latch_counts": {
+   "searching": 0,
+   "latched": 0,
+   "closing": 0,
+   "held": 195,
+   "placed": 0
+  },
+  "manipulated_state_counts": {
+   "visible": 0,
+   "occluded": 195,
+   "kept": 0,
+   "None": 0
+  },
+  "manipulated_state_when_latch_held": {
+   "visible": 0,
+   "occluded": 195,
+   "kept": 0,
+   "None": 0
+  },
+  "latch_changes_inside_gt_held": [],
+  "latch_held_after_first_attach_in_run": {
+   "n": 195,
+   "held": 195
+  },
+  "manipulated_state_all_requests": {
+   "visible": 549,
+   "occluded": 461,
+   "kept": 0,
+   "None": 790
+  },
+  "manipulated_state_by_gt": {
+   "APPROACH": {
+    "visible": 435,
+    "occluded": 73,
+    "kept": 0,
+    "None": 0
+   },
+   "CLOSING": {
+    "visible": 29,
+    "occluded": 17,
+    "kept": 0,
+    "None": 0
+   },
+   "HELD": {
+    "visible": 0,
+    "occluded": 195,
+    "kept": 0,
+    "None": 0
+   },
+   "RELEASED": {
+    "visible": 0,
+    "occluded": 0,
+    "kept": 0,
+    "None": 0
+   },
+   "PLACED": {
+    "visible": 0,
+    "occluded": 8,
+    "kept": 0,
+    "None": 0
+   },
+   "HOME": {
+    "visible": 0,
+    "occluded": 64,
+    "kept": 0,
+    "None": 790
+   },
+   "FAILED_GRASP": {
+    "visible": 85,
+    "occluded": 94,
+    "kept": 0,
+    "None": 0
+   },
+   "DROPPED": {
+    "visible": 0,
+    "occluded": 10,
+    "kept": 0,
+    "None": 0
+   }
+  },
+  "manipulated_id_switch_during_held": 0
+ },
+ "definitions": "IFG-AUDIT-HSR: how accurately and how fast the AG3S stage trackers (grasp latch + sub-task probe) follow the true task\nstage on recorded closed-loop runs. CPU only, read only (inputs are never written).\n\n  cd /mnt/dev/AG3S_VLA-development; PYTHONPATH=.:integration/rby1/manipulation/src .venv-ag3s/bin/python       -m AG3S.ag3s.experiments.studies.ifg_audit_hsr --run <RUN> --fig AG3S/ag3s/docs/figures/ifg-audit\n\nInputs (24 apple scenes, arm SPL = current serving): <RUN>/verify/IFG-APPLE-SPLIT\n  replay/runs_SPL_SPL_ep*.npz   per control step (600): apple_pos, crate_pos/quat, grip_cmd (used arm, 1 = open),\n                                cnt_apple-hand, finger_open_norm, plan_index\n  replay/runs_SPL_SPL_ep*.json  server_chunk_alignment.block -> request k is chunk_dir/chunk_{k+offset:05d}.npz\n  server chunk npz summary_json  grasp (latch), subtask (probe), manipulated\n  analysis/SPL_ep*.json         success / failure_mode (cross-check only)\n  p/analyze_t42.py              in_crate rule (imported, not copied)\n\nGT definitions (per control step t, 15 Hz; request k is evaluated at its planning step t = 8k):\n  close cycle   [s, e): s = a step with grip_cmd < 0.5 (closing command), e = first later step with grip_cmd >= 0.9 (open command).\n                The carry command is ~0.58, so 0.5 cannot mark the end of a close.\n  lift onset    first step t where, for LIFT_L = 5 consecutive steps, apple z >= z0 + 10 mm AND cnt_apple-hand > 0\n                (z0 = apple z at step 0).\n  release       first step s > lift onset with cnt_apple-hand == 0 for REL_N = 8 consecutive steps (contact lost and not\n                regained within one chunk). HELD = [lift onset, release).\n  place         if the apple is in the crate (kit in_crate rule) at step 599: start of that final in-crate streak, but not\n                earlier than the last release. home onset = first step >= place with grip_cmd >= 0.9.\n  stage(t)      APPROACH      t < first closing command, or between close cycles before any lift (re-approach)\n                CLOSING       inside a close cycle that contains a lift onset, before the lift\n                FAILED_GRASP  inside a close cycle that contains no lift onset, before any lift\n                HELD          [lift onset, release)\n                RELEASED      [last release, place) when the apple ends in the crate (falling into the crate)\n                DROPPED       after a release, apple not (yet) placed and not RELEASED\n                PLACED        [place, home onset);  HOME  [home onset, end)\n  task phase    pick = APPROACH, CLOSING, FAILED_GRASP, DROPPED; place = HELD, RELEASED; home = PLACED, HOME.\n  latch phase   searching / latched / closing -> pick; held -> place; placed -> home.\nLatency: GT event at step t_e; first request able to observe it k_GT = ceil(t_e / 8); latency in requests = k_latch - k_GT,\nin seconds = (8 k_latch - t_e) / 15.\n"
+}

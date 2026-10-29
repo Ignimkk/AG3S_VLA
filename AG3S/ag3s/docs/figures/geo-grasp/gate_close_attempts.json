@@ -1,0 +1,113 @@
+{
+ "per_run": {
+  "B0 case1_L2_s23453": {
+   "attempts": 1,
+   "vla_pad_to_apple_mm_median": 33.4,
+   "planned_pad_to_apple_mm_median": 32.5,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B0 case3_L2_s13453": {
+   "attempts": 1,
+   "vla_pad_to_apple_mm_median": 256.4,
+   "planned_pad_to_apple_mm_median": 254.0,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B0 case3_L2_s33453": {
+   "attempts": 1,
+   "vla_pad_to_apple_mm_median": 221.0,
+   "planned_pad_to_apple_mm_median": 224.4,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B1 case1_L2_s13453": {
+   "attempts": 5,
+   "vla_pad_to_apple_mm_median": 19.1,
+   "planned_pad_to_apple_mm_median": 53.2,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B1 case1_L2_s23453": {
+   "attempts": 2,
+   "vla_pad_to_apple_mm_median": 265.35,
+   "planned_pad_to_apple_mm_median": 64.85,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B1 case3_L2_s13453": {
+   "attempts": 12,
+   "vla_pad_to_apple_mm_median": 188.60000000000002,
+   "planned_pad_to_apple_mm_median": 190.85,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B1 case3_L2_s23453": {
+   "attempts": 2,
+   "vla_pad_to_apple_mm_median": 168.2,
+   "planned_pad_to_apple_mm_median": 163.5,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B1 case3_L2_s33453": {
+   "attempts": 5,
+   "vla_pad_to_apple_mm_median": 244.0,
+   "planned_pad_to_apple_mm_median": 247.5,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B2 case1_L2_s13453": {
+   "attempts": 57,
+   "vla_pad_to_apple_mm_median": 206.3,
+   "planned_pad_to_apple_mm_median": 206.3,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B2 case1_L2_s23453": {
+   "attempts": 12,
+   "vla_pad_to_apple_mm_median": 147.75,
+   "planned_pad_to_apple_mm_median": 150.75,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B2 case1_L2_s33453": {
+   "attempts": 61,
+   "vla_pad_to_apple_mm_median": 80.5,
+   "planned_pad_to_apple_mm_median": 80.6,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B2 case3_L2_s13453": {
+   "attempts": 3,
+   "vla_pad_to_apple_mm_median": 244.5,
+   "planned_pad_to_apple_mm_median": 244.5,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B2 case3_L2_s23453": {
+   "attempts": 11,
+   "vla_pad_to_apple_mm_median": 209.2,
+   "planned_pad_to_apple_mm_median": 214.1,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  },
+  "B2 case3_L2_s33453": {
+   "attempts": 5,
+   "vla_pad_to_apple_mm_median": 249.3,
+   "planned_pad_to_apple_mm_median": 252.3,
+   "valid_pose_rule_closes": 0,
+   "gt_valid": 0
+  }
+ },
+ "gt_reasons": {
+  "B0 | contacts not antipodal within the friction cone": 1,
+  "B0 | no observed surface under both pads": 2,
+  "B1 | target_collision": 1,
+  "B1 | scene_collision": 1,
+  "B1 | no observed surface under pad 2": 1,
+  "B1 | no observed surface under both pads": 22,
+  "B1 | contacts not antipodal within the friction cone": 1,
+  "B2 | no observed surface under pad 1": 21,
+  "B2 | no observed surface under both pads": 128
+ }
+}

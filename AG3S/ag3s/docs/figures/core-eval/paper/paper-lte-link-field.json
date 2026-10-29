@@ -1,0 +1,90 @@
+{
+ "example": {
+  "run": "\ud68c\uadc0954_k1",
+  "request": 23,
+  "n_removed": 1209,
+  "n_hand_spheres": 303
+ },
+ "removed_by_class_total": {
+  "apple": 210443,
+  "none": 59846,
+  "apple_inside": 75771,
+  "apple_stem_leaf": 18217,
+  "robot": 9163,
+  "fruit": 6883
+ },
+ "removed_percent": {
+  "Apple surface": 55.332704043668144,
+  "Apple interior (TSDF band)": 19.922802460014253,
+  "Stem / leaf": 4.7898759738432855,
+  "Grasping hand": 2.4092679117486977,
+  "No GT surface (< 8 mm)": 15.73557213210876,
+  "Adjacent fruit": 1.80977747861686,
+  "Obstacle / table / basket": 0.0
+ },
+ "forbidden_class_removed_per_run": {
+  "\uac00\ub9bc121_k0": 0,
+  "\uac00\ub9bc121_k1": 0,
+  "\uac00\ub9bc122_k0": 0,
+  "\uac00\ub9bc122_k1": 0,
+  "\uac00\ub9bc123_k0": 0,
+  "\uac00\ub9bc123_k1": 0,
+  "\ud68c\uadc0119_k0": 2,
+  "\ud68c\uadc0119_k1": 4,
+  "\ud68c\uadc0250_k0": 884,
+  "\ud68c\uadc0250_k1": 1055,
+  "\ud68c\uadc0320_k0": 4,
+  "\ud68c\uadc0320_k1": 4,
+  "\ud68c\uadc0850_k0": 17,
+  "\ud68c\uadc0850_k1": 22,
+  "\ud68c\uadc0954_k0": 1242,
+  "\ud68c\uadc0954_k1": 422,
+  "\ud68c\uadc0211_k0": 1988,
+  "\ud68c\uadc0211_k1": 1239
+ },
+ "neighbour_removal_scenes": {
+  "\ud68c\uadc0250_k0": {
+   "gap_mm": {
+    "banana": 10.0
+   },
+   "requests_with_neighbour_removed": 12
+  },
+  "\ud68c\uadc0250_k1": {
+   "gap_mm": {
+    "banana": 10.0
+   },
+   "requests_with_neighbour_removed": 11
+  },
+  "\ud68c\uadc0954_k0": {
+   "gap_mm": {
+    "banana": 10.3
+   },
+   "requests_with_neighbour_removed": 54
+  },
+  "\ud68c\uadc0954_k1": {
+   "gap_mm": {
+    "banana": 10.3
+   },
+   "requests_with_neighbour_removed": 24
+  },
+  "\ud68c\uadc0211_k0": {
+   "gap_mm": {
+    "banana": 0.9
+   },
+   "requests_with_neighbour_removed": 37
+  },
+  "\ud68c\uadc0211_k1": {
+   "gap_mm": {
+    "banana": 0.9
+   },
+   "requests_with_neighbour_removed": 21
+  },
+  "\ud68c\uadc0850_k0": {
+   "gap_mm": {
+    "banana": 18.5
+   },
+   "requests_with_neighbour_removed": 11
+  }
+ },
+ "note": "adjacent-fruit voxels are removed only where a banana lies within ~1-10 mm of the apple (scenes 250 / 954 / 211); obstacle / table / basket voxels removed: 0 in all 18 runs"
+}

@@ -1,0 +1,45 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/c3_prior_raw_cosine.png",
+ "frame": "T53_ep1822_f019",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T53_ep1822_f019.npz": "0aea59a67daa2950fa73d1550c131de594e7779fdb80c5b5e9ad19b2f8174223"
+ },
+ "note": "Raw prefix-L8 cosine of each candidate region to the remembered region (T53_ep1822_f005); darker = more similar.",
+ "is_measured_result": false,
+ "memory_frame": "T53_ep1822_f005",
+ "scores": [
+  [
+   0.98,
+   "target"
+  ],
+  [
+   0.975,
+   "destination"
+  ],
+  [
+   0.967,
+   "other_object"
+  ],
+  [
+   0.965,
+   "destination"
+  ],
+  [
+   0.959,
+   "other_object"
+  ]
+ ],
+ "camera": {
+  "lookat": [
+   0.5256916296972438,
+   -0.2937733275655705,
+   0.852900416170427
+  ],
+  "dist": 0.58,
+  "az": 135,
+  "el": -45
+ }
+}

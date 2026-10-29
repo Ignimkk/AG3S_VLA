@@ -1,0 +1,748 @@
+{
+ "_comment": "lead (A) direct. numbers and paths only.",
+ "step": "T46f-pilot",
+ "date": "2026-10-14",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T232651+0900_6caae1c603f8_cab77c219e69",
+ "raw_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T232651+0900_6caae1c603f8_cab77c219e69/verify/T46f-pilot",
+ "code_snapshot": "git archive 6caae1c6 (client --target-offset-xy)",
+ "execution": {
+  "mode": "E0 (VLA only, serve_safe --no-safe)",
+  "servers": 2,
+  "gpu_lock": "2026-10-14T15:31:27Z - 15:47:38Z",
+  "runs": 10,
+  "runs_completed": 10
+ },
+ "definitions": {
+  "rule": "T46f.task.md 'variant pilot'; offsets from p/offsets.py (N = toward nearest fruit to 10 mm gap, C = toward crate to 20 mm gap; N skipped when shift < 5 mm)",
+  "lifted": "target z >= row-0 z + 50 mm at any control row",
+  "placed": "target centre in crate at the last row (t60_termination.in_crate)",
+  "distance": "T46f-S2 checked distance, S1 window",
+  "S2_ik": "p/s2_ik.py: demo grasp pose translated by the offset, DLS IK, straight joint path from close-30"
+ },
+ "numbers": {
+  "by_variant": {
+   "base": {
+    "n": 4,
+    "lifted": 3,
+    "placed": 3,
+    "NA_min_mm_min": 67.83126434316496,
+    "NA_contact_rows": 0
+   },
+   "N": {
+    "n": 2,
+    "lifted": 2,
+    "placed": 2,
+    "NA_min_mm_min": 67.2312650436977,
+    "NA_contact_rows": 0
+   },
+   "C": {
+    "n": 4,
+    "lifted": 0,
+    "placed": 0,
+    "NA_min_mm_min": 66.58092402161535,
+    "NA_contact_rows": 0
+   }
+  },
+  "per_run": [
+   {
+    "name": "E0_ep104_s1041_C",
+    "episode": 104,
+    "target": "pear",
+    "offset_xy": [
+     -0.0046,
+     -0.0559
+    ],
+    "row0_vs_intended_xy_mm": 0.0389186616293112,
+    "n_ctrl": 600,
+    "close_row": 141,
+    "lifted_50mm": false,
+    "placed_in_crate_last_row": false,
+    "S1win_min_mm": {
+     "FT": 66.58090441578081,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 66.58092402161535,
+     "HAND": -3.4971135138724336
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 41
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   },
+   {
+    "name": "E0_ep104_s1041_N",
+    "episode": 104,
+    "target": "pear",
+    "offset_xy": [
+     -0.0058,
+     0.001
+    ],
+    "row0_vs_intended_xy_mm": 0.05239654181063038,
+    "n_ctrl": 600,
+    "close_row": 153,
+    "lifted_50mm": true,
+    "placed_in_crate_last_row": true,
+    "S1win_min_mm": {
+     "FT": 67.23126547801081,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 67.2312650436977,
+     "HAND": -0.7571435604260464
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 20
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   },
+   {
+    "name": "E0_ep104_s1041_base",
+    "episode": 104,
+    "target": "pear",
+    "offset_xy": [
+     0.0,
+     0.0
+    ],
+    "row0_vs_intended_xy_mm": 0.03179695826014059,
+    "n_ctrl": 600,
+    "close_row": 129,
+    "lifted_50mm": false,
+    "placed_in_crate_last_row": false,
+    "S1win_min_mm": {
+     "FT": 68.10797450617218,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 68.09601146216457,
+     "HAND": -1.3879767937589917
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 20
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   },
+   {
+    "name": "E0_ep11_s111_C",
+    "episode": 11,
+    "target": "pear",
+    "offset_xy": [
+     0.0033,
+     0.0621
+    ],
+    "row0_vs_intended_xy_mm": 0.9290414340043186,
+    "n_ctrl": 600,
+    "close_row": 112,
+    "lifted_50mm": false,
+    "placed_in_crate_last_row": false,
+    "S1win_min_mm": {
+     "FT": 100.0,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 100.0,
+     "HAND": 63.79086821027036
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 0
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   },
+   {
+    "name": "E0_ep11_s111_N",
+    "episode": 11,
+    "target": "pear",
+    "offset_xy": [
+     -0.0104,
+     -0.0024
+    ],
+    "row0_vs_intended_xy_mm": 0.9561370962548227,
+    "n_ctrl": 600,
+    "close_row": 107,
+    "lifted_50mm": true,
+    "placed_in_crate_last_row": true,
+    "S1win_min_mm": {
+     "FT": 68.02477044302306,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 68.02477044302306,
+     "HAND": -1.9467993099201684
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 40
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   },
+   {
+    "name": "E0_ep11_s111_base",
+    "episode": 11,
+    "target": "pear",
+    "offset_xy": [
+     0.0,
+     0.0
+    ],
+    "row0_vs_intended_xy_mm": 0.9665443237579772,
+    "n_ctrl": 600,
+    "close_row": 95,
+    "lifted_50mm": true,
+    "placed_in_crate_last_row": true,
+    "S1win_min_mm": {
+     "FT": 67.83126434316496,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 67.83126434316496,
+     "HAND": -1.4483059539875769
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 25
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   },
+   {
+    "name": "E0_ep3_s31_C",
+    "episode": 3,
+    "target": "orange",
+    "offset_xy": [
+     0.0165,
+     0.0644
+    ],
+    "row0_vs_intended_xy_mm": 1.5425412175564441,
+    "n_ctrl": 600,
+    "close_row": 573,
+    "lifted_50mm": false,
+    "placed_in_crate_last_row": false,
+    "S1win_min_mm": {
+     "FT": 74.6471197631753,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 74.6471197631753,
+     "HAND": 5.13908823311842
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 0
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   },
+   {
+    "name": "E0_ep3_s31_base",
+    "episode": 3,
+    "target": "orange",
+    "offset_xy": [
+     0.0,
+     0.0
+    ],
+    "row0_vs_intended_xy_mm": 1.5553251237557137,
+    "n_ctrl": 600,
+    "close_row": 121,
+    "lifted_50mm": true,
+    "placed_in_crate_last_row": true,
+    "S1win_min_mm": {
+     "FT": 76.56833772643272,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 76.56833772643272,
+     "HAND": -1.9024729469039845
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 14
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   },
+   {
+    "name": "E0_ep54_s541_C",
+    "episode": 54,
+    "target": "apple",
+    "offset_xy": [
+     0.0026,
+     0.1
+    ],
+    "row0_vs_intended_xy_mm": 5.375412842718084,
+    "n_ctrl": 600,
+    "close_row": 160,
+    "lifted_50mm": false,
+    "placed_in_crate_last_row": false,
+    "S1win_min_mm": {
+     "FT": 100.0,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 100.0,
+     "HAND": 60.70208934454602
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 0
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   },
+   {
+    "name": "E0_ep54_s541_base",
+    "episode": 54,
+    "target": "apple",
+    "offset_xy": [
+     0.0,
+     0.0
+    ],
+    "row0_vs_intended_xy_mm": 0.0,
+    "n_ctrl": 600,
+    "close_row": 154,
+    "lifted_50mm": true,
+    "placed_in_crate_last_row": true,
+    "S1win_min_mm": {
+     "FT": 75.0278677520327,
+     "A5": 100.0,
+     "A6": 100.0,
+     "NA": 75.0278677520327,
+     "HAND": -2.416514014524444
+    },
+    "S1win_contact_rows": {
+     "NA": 0,
+     "FT": 0,
+     "HAND": 14
+    },
+    "post_contact_rows_NA": 0,
+    "t0_contacts": {
+     "robot_target": 0,
+     "target_otherfruit": 0,
+     "robot_anyfruit": 0
+    },
+    "inconsistent_pairs": 0
+   }
+  ],
+  "offsets": [
+   {
+    "episode": 3,
+    "target": "orange",
+    "used_arm": "right",
+    "record": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1a/R/C1a_ep3_s31",
+    "nearest_fruit": "banana",
+    "variants": {
+     "N": {
+      "toward": "banana",
+      "gap0_mm": 5.909713975814798,
+      "target_gap_mm": 10.0,
+      "shift_m": 0.0,
+      "offset_xy": [
+       0.0,
+       0.0
+      ],
+      "gap_after_mm": 5.909713975814798,
+      "contacts_nontable_at_moved_pose": 0
+     },
+     "C": {
+      "toward": "crate",
+      "gap0_mm": 67.52099125546832,
+      "target_gap_mm": 20.0,
+      "shift_m": 0.06648224872633363,
+      "offset_xy": [
+       0.016498492848740134,
+       0.06440255530202321
+      ],
+      "gap_after_mm": 20.00000000001427,
+      "contacts_nontable_at_moved_pose": 0
+     }
+    }
+   },
+   {
+    "episode": 11,
+    "target": "pear",
+    "used_arm": "right",
+    "record": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1a/R/C1a_ep11_s111",
+    "nearest_fruit": "orange",
+    "variants": {
+     "N": {
+      "toward": "orange",
+      "gap0_mm": 20.615087986847193,
+      "target_gap_mm": 10.0,
+      "shift_m": 0.010635164626819462,
+      "offset_xy": [
+       -0.010360444272354866,
+       -0.0024016496661630657
+      ],
+      "gap_after_mm": 10.000000000003645,
+      "contacts_nontable_at_moved_pose": 0
+     },
+     "C": {
+      "toward": "crate",
+      "gap0_mm": 71.49940029976307,
+      "target_gap_mm": 20.0,
+      "shift_m": 0.06215496366448862,
+      "offset_xy": [
+       0.003268054239088427,
+       0.06206898846947867
+      ],
+      "gap_after_mm": 20.000000000054918,
+      "contacts_nontable_at_moved_pose": 0
+     }
+    }
+   },
+   {
+    "episode": 54,
+    "target": "apple",
+    "used_arm": "right",
+    "record": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1a/R/C1a_ep54_s541",
+    "nearest_fruit": "orange",
+    "variants": {
+     "N": {
+      "toward": "orange",
+      "gap0_mm": 12.892341824542171,
+      "target_gap_mm": 10.0,
+      "shift_m": 0.0028928308292961447,
+      "offset_xy": [
+       -0.002662068690478606,
+       0.001132192781331758
+      ],
+      "gap_after_mm": 10.000000000070091,
+      "contacts_nontable_at_moved_pose": 0
+     },
+     "C": {
+      "toward": "crate",
+      "gap0_mm": 100.0,
+      "target_gap_mm": 20.0,
+      "shift_m": 0.09999999999990905,
+      "offset_xy": [
+       0.002648465991029866,
+       0.09996492198704589
+      ],
+      "gap_after_mm": 22.184679547304626,
+      "contacts_nontable_at_moved_pose": 0
+     }
+    }
+   },
+   {
+    "episode": 104,
+    "target": "pear",
+    "used_arm": "left",
+    "record": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1a/R/C1a_ep104_s1041",
+    "nearest_fruit": "apple",
+    "variants": {
+     "N": {
+      "toward": "apple",
+      "gap0_mm": 15.87986428730201,
+      "target_gap_mm": 10.0,
+      "shift_m": 0.005888334157771168,
+      "offset_xy": [
+       -0.005797832491557042,
+       0.001028405344900613
+      ],
+      "gap_after_mm": 10.000000000051967,
+      "contacts_nontable_at_moved_pose": 0
+     },
+     "C": {
+      "toward": "crate",
+      "gap0_mm": 66.21814366216125,
+      "target_gap_mm": 20.0,
+      "shift_m": 0.056074122505560806,
+      "offset_xy": [
+       -0.004581282321378728,
+       -0.05588666269388846
+      ],
+      "gap_after_mm": 20.000000000036337,
+      "contacts_nontable_at_moved_pose": 0
+     }
+    }
+   }
+  ],
+  "s2_ik": [
+   {
+    "episode": 3,
+    "target": "orange",
+    "used_arm": "right",
+    "demo_close_frame": 104,
+    "variants": {
+     "base": {
+      "offset_xy": [
+       0.0,
+       0.0
+      ],
+      "ik_iters": 1,
+      "pos_err_mm": 0.0,
+      "rot_err_rad": 0.0,
+      "path": [],
+      "NA_min_mm": 75.7821094748956,
+      "FT_min_mm": 75.7821094748956,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 0,
+      "hand_min_mm_at_solution": 7.328258133908557,
+      "S2_pass": true
+     },
+     "N": {
+      "offset_xy": [
+       0.0,
+       0.0
+      ],
+      "ik_iters": 1,
+      "pos_err_mm": 0.0,
+      "rot_err_rad": 0.0,
+      "path": [],
+      "NA_min_mm": 75.7821094748956,
+      "FT_min_mm": 75.7821094748956,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 0,
+      "hand_min_mm_at_solution": 7.328258133908557,
+      "S2_pass": true
+     },
+     "C": {
+      "offset_xy": [
+       0.016498492848740134,
+       0.06440255530202321
+      ],
+      "ik_iters": 4,
+      "pos_err_mm": 0.004037299659814022,
+      "rot_err_rad": 2.1749570716050307e-06,
+      "path": [],
+      "NA_min_mm": 75.7856343090877,
+      "FT_min_mm": 75.7856343090877,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 9,
+      "hand_min_mm_at_solution": 7.3319387094562485,
+      "S2_pass": false
+     }
+    }
+   },
+   {
+    "episode": 11,
+    "target": "pear",
+    "used_arm": "right",
+    "demo_close_frame": 104,
+    "variants": {
+     "base": {
+      "offset_xy": [
+       0.0,
+       0.0
+      ],
+      "ik_iters": 1,
+      "pos_err_mm": 0.0,
+      "rot_err_rad": 0.0,
+      "path": [],
+      "NA_min_mm": 69.82299690430573,
+      "FT_min_mm": 69.82299690430573,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 0,
+      "hand_min_mm_at_solution": 0.7291516135817799,
+      "S2_pass": true
+     },
+     "N": {
+      "offset_xy": [
+       -0.010360444272354866,
+       -0.0024016496661630657
+      ],
+      "ik_iters": 3,
+      "pos_err_mm": 0.0019184244235884921,
+      "rot_err_rad": 4.329037382106204e-07,
+      "path": [],
+      "NA_min_mm": 69.8248459198006,
+      "FT_min_mm": 69.8248459198006,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 0,
+      "hand_min_mm_at_solution": 0.7309391213694595,
+      "S2_pass": true
+     },
+     "C": {
+      "offset_xy": [
+       0.003268054239088427,
+       0.06206898846947867
+      ],
+      "ik_iters": 4,
+      "pos_err_mm": 0.0033264372506029557,
+      "rot_err_rad": 1.3839641476872246e-06,
+      "path": [],
+      "NA_min_mm": 69.82611860507643,
+      "FT_min_mm": 69.82611860507643,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 169,
+      "hand_min_mm_at_solution": 0.7319535729817701,
+      "S2_pass": false
+     }
+    }
+   },
+   {
+    "episode": 54,
+    "target": "apple",
+    "used_arm": "right",
+    "demo_close_frame": 104,
+    "variants": {
+     "base": {
+      "offset_xy": [
+       0.0,
+       0.0
+      ],
+      "ik_iters": 1,
+      "pos_err_mm": 0.0,
+      "rot_err_rad": 0.0,
+      "path": [],
+      "NA_min_mm": 77.4620103675329,
+      "FT_min_mm": 77.4620103675329,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 1,
+      "hand_min_mm_at_solution": 9.209904670435897,
+      "S2_pass": false
+     },
+     "N": {
+      "offset_xy": [
+       -0.002662068690478606,
+       0.001132192781331758
+      ],
+      "ik_iters": 2,
+      "pos_err_mm": 0.02161775016443517,
+      "rot_err_rad": 5.623750748420167e-05,
+      "path": [],
+      "NA_min_mm": 77.46455592222435,
+      "FT_min_mm": 77.46455592222435,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 1,
+      "hand_min_mm_at_solution": 9.21302897333117,
+      "S2_pass": false
+     },
+     "C": {
+      "offset_xy": [
+       0.002648465991029866,
+       0.09996492198704589
+      ],
+      "ik_iters": 5,
+      "pos_err_mm": 0.005098465666122864,
+      "rot_err_rad": 2.1461810931434978e-06,
+      "path": [],
+      "NA_min_mm": 77.4669541131778,
+      "FT_min_mm": 77.4669541131778,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 125,
+      "hand_min_mm_at_solution": 9.214808403608496,
+      "S2_pass": false
+     }
+    }
+   },
+   {
+    "episode": 104,
+    "target": "pear",
+    "used_arm": "left",
+    "demo_close_frame": 104,
+    "variants": {
+     "base": {
+      "offset_xy": [
+       0.0,
+       0.0
+      ],
+      "ik_iters": 1,
+      "pos_err_mm": 0.0,
+      "rot_err_rad": 0.0,
+      "path": [],
+      "NA_min_mm": 66.87250063993527,
+      "FT_min_mm": 66.87656546346483,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 2,
+      "hand_min_mm_at_solution": -1.7025298973850946,
+      "S2_pass": false
+     },
+     "N": {
+      "offset_xy": [
+       -0.005797832491557042,
+       0.001028405344900613
+      ],
+      "ik_iters": 3,
+      "pos_err_mm": 0.0039203496323543625,
+      "rot_err_rad": 8.94814419508155e-07,
+      "path": [],
+      "NA_min_mm": 66.87507431886449,
+      "FT_min_mm": 66.87923409089855,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 3,
+      "hand_min_mm_at_solution": -1.6996702320174368,
+      "S2_pass": false
+     },
+     "C": {
+      "offset_xy": [
+       -0.004581282321378728,
+       -0.05588666269388846
+      ],
+      "ik_iters": 5,
+      "pos_err_mm": 0.035875645632789985,
+      "rot_err_rad": 2.279388696357329e-05,
+      "path": [],
+      "NA_min_mm": 66.8974173666698,
+      "FT_min_mm": 66.90270358344199,
+      "NA_contact": 0,
+      "robot_other_obj_contact": 5,
+      "hand_min_mm_at_solution": -1.676846969993994,
+      "S2_pass": false
+     }
+    }
+   }
+  ]
+ },
+ "figures": [
+  "AG3S/ag3s/docs/figures/t46f/t46f-pilot-runs.png",
+  "AG3S/ag3s/docs/figures/t46f/t46f-pilot-scene.png"
+ ],
+ "not_measured": [
+  "seeds other than ep*10+1",
+  "larger N moves (N only where the rule's shift >= 5 mm)",
+  "AG3S closed-loop on variants"
+ ]
+}

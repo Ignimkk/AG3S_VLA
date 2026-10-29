@@ -1,0 +1,18 @@
+{
+ "arms": [
+  "V8",
+  "V11A",
+  "V11AB"
+ ],
+ "median_mm": [
+  3.8,
+  6.7,
+  13.6
+ ],
+ "min_mm": [
+  -6.4,
+  -0.1,
+  7.1
+ ],
+ "source": "T43V11ABC.verify.json via AG3S_T0T6_LOG.md T43 13"
+}

@@ -1,0 +1,54 @@
+{
+ "run": "121",
+ "decision_request": 9,
+ "views": [
+  "x-y (top)",
+  "x-z (side)"
+ ],
+ "n_candidates": 0,
+ "state": {
+  "request": 9,
+  "phase": "latched",
+  "target_id": 0,
+  "target_state": "visible",
+  "event": "none",
+  "valid": false,
+  "reason": "no candidate: no IK solution",
+  "n_switches": 0,
+  "n_invalidations": 0
+ },
+ "candidate_stats": {
+  "selection": "vla",
+  "n_target_points_raw": 339,
+  "n_target_points": 228,
+  "centre": [
+   0.53478,
+   0.3157,
+   0.84926
+  ],
+  "centre_method": "sphere",
+  "sphere_radius_mm": 33.6,
+  "n_points": 228,
+  "n_usable_normals": 201,
+  "n_pairs_geometric": 58,
+  "n_pairs_supported": 58,
+  "n_pairs_kept": 7,
+  "n_scene_points_near": 3120,
+  "target_completion": "sphere",
+  "n_poses": 154,
+  "n_collision_free": 5,
+  "rejected": {
+   "scene_collision": 146,
+   "target_collision": 2,
+   "approach_collision": 1
+  },
+  "pairs_ms": 6.41,
+  "n_ik_tried": 5,
+  "n_ik_failed": 5,
+  "n_candidates": 0,
+  "compute_ms": 236.82,
+  "reason": "no IK solution"
+ },
+ "selected_gt": null,
+ "n_memory_points": 339
+}

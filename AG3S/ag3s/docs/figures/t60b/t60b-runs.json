@@ -1,0 +1,630 @@
+{
+ "per_run": {
+  "CL2/C0_ep104_s1041": {
+   "t_P": 218,
+   "pred8_ref_min": 0.06930949346744875,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C0_ep104_s1042": {
+   "t_P": 247,
+   "pred8_ref_min": 0.06792147272986837,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C0_ep110_s1101": {
+   "t_P": 321,
+   "pred8_ref_min": 1.0057754982538385,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C0_ep110_s1102": {
+   "t_P": 348,
+   "pred8_ref_min": 0.8013225890502427,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C0_ep11_s111": {
+   "t_P": 246,
+   "pred8_ref_min": 0.038845462521533314,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C0_ep11_s112": {
+   "t_P": 282,
+   "pred8_ref_min": 0.04975786024462908,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C0_ep123_s1231": {
+   "t_P": 275,
+   "pred8_ref_min": 0.9061854976103394,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C0_ep123_s1232": {
+   "t_P": 270,
+   "pred8_ref_min": 0.9125626160889708,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C0_ep12_s121": {
+   "t_P": 222,
+   "pred8_ref_min": 0.043476695467091264,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C0_ep12_s122": {
+   "t_P": 235,
+   "pred8_ref_min": 0.04601607929953033,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C0_ep30_s301": {
+   "t_P": 255,
+   "pred8_ref_min": 0.032985164532299605,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C0_ep30_s302": {
+   "t_P": 248,
+   "pred8_ref_min": 0.03179077149009091,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C0_ep3_s31": {
+   "t_P": 264,
+   "pred8_ref_min": 0.2122629341587161,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C0_ep54_s542": {
+   "t_P": 276,
+   "pred8_ref_min": 0.6045640074419698,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C1a_ep0_s1": {
+   "t_P": 206,
+   "pred8_ref_min": 0.0628354196296792,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1a_ep104_s1041": {
+   "t_P": 254,
+   "pred8_ref_min": 0.06464133807714906,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C1a_ep110_s1101": {
+   "t_P": 308,
+   "pred8_ref_min": 1.0778637100286645,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C1a_ep110_s1102": {
+   "t_P": 399,
+   "pred8_ref_min": 0.8922575212821457,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C1a_ep11_s111": {
+   "t_P": 204,
+   "pred8_ref_min": 0.033389098153435715,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1a_ep11_s112": {
+   "t_P": 291,
+   "pred8_ref_min": 0.046524462500994845,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1a_ep123_s1231": {
+   "t_P": 277,
+   "pred8_ref_min": 0.9770854013846009,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C1a_ep12_s121": {
+   "t_P": 255,
+   "pred8_ref_min": 0.048737231233910494,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1a_ep12_s122": {
+   "t_P": 237,
+   "pred8_ref_min": 0.05122528683432037,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C1a_ep30_s301": {
+   "t_P": 219,
+   "pred8_ref_min": 0.050388051876659956,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C1a_ep30_s302": {
+   "t_P": 255,
+   "pred8_ref_min": 0.04581595144525841,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1a_ep3_s32": {
+   "t_P": 365,
+   "pred8_ref_min": 1.0942903521194853,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C1a_ep54_s541": {
+   "t_P": 247,
+   "pred8_ref_min": 0.03301133681084978,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C1a_ep54_s542": {
+   "t_P": 271,
+   "pred8_ref_min": 0.03437061088977866,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1bp_ep110_s1101": {
+   "t_P": 326,
+   "pred8_ref_min": 0.9486853350229425,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C1bp_ep110_s1102": {
+   "t_P": 328,
+   "pred8_ref_min": 0.966080436820852,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C1bp_ep11_s111": {
+   "t_P": 212,
+   "pred8_ref_min": 0.06741112064943866,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1bp_ep11_s112": {
+   "t_P": 244,
+   "pred8_ref_min": 0.0627810414447687,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C1bp_ep123_s1231": {
+   "t_P": 306,
+   "pred8_ref_min": 1.1617108183786957,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL2/C1bp_ep123_s1232": {
+   "t_P": 299,
+   "pred8_ref_min": 0.9929175450593077,
+   "returned": false,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1bp_ep12_s121": {
+   "t_P": 230,
+   "pred8_ref_min": 0.04000016515359944,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1bp_ep30_s301": {
+   "t_P": 230,
+   "pred8_ref_min": 0.033517946847855695,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1bp_ep30_s302": {
+   "t_P": 257,
+   "pred8_ref_min": 0.05010832033411339,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL2/C1bp_ep54_s541": {
+   "t_P": 241,
+   "pred8_ref_min": 0.042472762263430774,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C1bp_ep54_s542": {
+   "t_P": 266,
+   "pred8_ref_min": 0.0403214492171865,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL2/C2p_ep11_s112": {
+   "t_P": 586,
+   "pred8_ref_min": 0.5840711111058996,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1aF1F2_ep104_s1041": {
+   "t_P": 244,
+   "pred8_ref_min": 0.08107080118381838,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1aF1F2_ep110_s1101": {
+   "t_P": 308,
+   "pred8_ref_min": 0.9869128931589288,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1aF1F2_ep110_s1102": {
+   "t_P": 372,
+   "pred8_ref_min": 1.015370676647136,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1aF1F2_ep11_s111": {
+   "t_P": 195,
+   "pred8_ref_min": 0.044853253087024036,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1aF1F2_ep11_s112": {
+   "t_P": 274,
+   "pred8_ref_min": 0.06142086345099429,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1aF1F2_ep123_s1231": {
+   "t_P": 253,
+   "pred8_ref_min": 0.8797012465880005,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1aF1F2_ep123_s1232": {
+   "t_P": 242,
+   "pred8_ref_min": 0.6262259903697182,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1aF1F2_ep12_s121": {
+   "t_P": 224,
+   "pred8_ref_min": 0.04266491000757283,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1aF1F2_ep12_s122": {
+   "t_P": 239,
+   "pred8_ref_min": 0.0449044526744693,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1aF1F2_ep30_s301": {
+   "t_P": 255,
+   "pred8_ref_min": 0.032985164532299605,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1aF1F2_ep30_s302": {
+   "t_P": 243,
+   "pred8_ref_min": 0.03045794168668109,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1aF1F2_ep54_s541": {
+   "t_P": 234,
+   "pred8_ref_min": 0.04220123330415648,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1aF1F2_ep54_s542": {
+   "t_P": 276,
+   "pred8_ref_min": 0.035510900919583976,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1aF1_ep104_s1041": {
+   "t_P": 244,
+   "pred8_ref_min": 0.08107080118381838,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1aF1_ep110_s1101": {
+   "t_P": 308,
+   "pred8_ref_min": 1.0778637100286645,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1aF1_ep110_s1102": {
+   "t_P": 399,
+   "pred8_ref_min": 0.8922575212821457,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1aF1_ep11_s111": {
+   "t_P": 195,
+   "pred8_ref_min": 0.044853253087024036,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1aF1_ep11_s112": {
+   "t_P": 274,
+   "pred8_ref_min": 0.06142086345099429,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1aF1_ep123_s1231": {
+   "t_P": 277,
+   "pred8_ref_min": 0.9770854013846009,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1aF1_ep12_s121": {
+   "t_P": 224,
+   "pred8_ref_min": 0.04266491000757283,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1aF1_ep12_s122": {
+   "t_P": 235,
+   "pred8_ref_min": 0.04561339031942779,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1aF1_ep30_s301": {
+   "t_P": 255,
+   "pred8_ref_min": 0.032985164532299605,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1aF1_ep30_s302": {
+   "t_P": 243,
+   "pred8_ref_min": 0.03045794168668109,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1aF1_ep3_s32": {
+   "t_P": 365,
+   "pred8_ref_min": 1.0942903521194853,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1aF1_ep54_s541": {
+   "t_P": 234,
+   "pred8_ref_min": 0.04220123330415648,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1aF1_ep54_s542": {
+   "t_P": 270,
+   "pred8_ref_min": 0.03277898163094872,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1a_ep0_s1": {
+   "t_P": 206,
+   "pred8_ref_min": 0.0628354196296792,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1a_ep104_s1041": {
+   "t_P": 254,
+   "pred8_ref_min": 0.06464133807714906,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1a_ep110_s1101": {
+   "t_P": 308,
+   "pred8_ref_min": 1.0778637100286645,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1a_ep110_s1102": {
+   "t_P": 399,
+   "pred8_ref_min": 0.8922575212821457,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1a_ep11_s111": {
+   "t_P": 204,
+   "pred8_ref_min": 0.033389098153435715,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1a_ep11_s112": {
+   "t_P": 291,
+   "pred8_ref_min": 0.046524462500994845,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1a_ep123_s1231": {
+   "t_P": 277,
+   "pred8_ref_min": 0.9770854013846009,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1a_ep12_s121": {
+   "t_P": 255,
+   "pred8_ref_min": 0.048737231233910494,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1a_ep12_s122": {
+   "t_P": 237,
+   "pred8_ref_min": 0.05122528683432037,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1a_ep30_s301": {
+   "t_P": 219,
+   "pred8_ref_min": 0.050388051876659956,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1a_ep30_s302": {
+   "t_P": 255,
+   "pred8_ref_min": 0.04581595144525841,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "CL3/C1a_ep3_s32": {
+   "t_P": 365,
+   "pred8_ref_min": 1.0942903521194853,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  },
+  "CL3/C1a_ep54_s541": {
+   "t_P": 247,
+   "pred8_ref_min": 0.03301133681084978,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "CL3/C1a_ep54_s542": {
+   "t_P": 271,
+   "pred8_ref_min": 0.03437061088977866,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "T53/C1a_ep1804_s18041": {
+   "t_P": 312,
+   "pred8_ref_min": 0.027436343495723436,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "T53/C1a_ep1809_s18091": {
+   "t_P": 251,
+   "pred8_ref_min": 0.08534333055392201,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "T53/C1a_ep1815_s18151": {
+   "t_P": 255,
+   "pred8_ref_min": 0.04271850266410779,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "T53/C1a_ep1839_s18391": {
+   "t_P": 271,
+   "pred8_ref_min": 0.14466802966559203,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "T53/C1a_ep1842_s18421": {
+   "t_P": 310,
+   "pred8_ref_min": 0.04687676944378378,
+   "returned": true,
+   "category": "a_no_return_proposed"
+  },
+  "T53/C1a_ep1845_s18451": {
+   "t_P": 292,
+   "pred8_ref_min": 0.04508177353676729,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "T53/C1a_ep1860_s18601": {
+   "t_P": 247,
+   "pred8_ref_min": 0.06648630071085426,
+   "returned": true,
+   "category": "b_blocked"
+  },
+  "T53/C1a_ep1862_s18621": {
+   "t_P": 257,
+   "pred8_ref_min": 0.08164960137338095,
+   "returned": true,
+   "category": "c_retreat_elsewhere"
+  },
+  "T53/C1a_ep1866_s18661": {
+   "t_P": 279,
+   "pred8_ref_min": 0.7188112596377715,
+   "returned": false,
+   "category": "a_no_return_proposed"
+  }
+ },
+ "by_episode": {
+  "104": {
+   "returned": 6,
+   "not_returned": 0,
+   "used_arm": "left"
+  },
+  "110": {
+   "returned": 0,
+   "not_returned": 12,
+   "used_arm": "right"
+  },
+  "11": {
+   "returned": 12,
+   "not_returned": 1,
+   "used_arm": "right"
+  },
+  "123": {
+   "returned": 0,
+   "not_returned": 9,
+   "used_arm": "right"
+  },
+  "12": {
+   "returned": 11,
+   "not_returned": 0,
+   "used_arm": "left"
+  },
+  "30": {
+   "returned": 12,
+   "not_returned": 0,
+   "used_arm": "right"
+  },
+  "3": {
+   "returned": 1,
+   "not_returned": 3,
+   "used_arm": "right"
+  },
+  "54": {
+   "returned": 10,
+   "not_returned": 1,
+   "used_arm": "right"
+  },
+  "0": {
+   "returned": 2,
+   "not_returned": 0,
+   "used_arm": "left"
+  },
+  "1804": {
+   "returned": 1,
+   "not_returned": 0,
+   "used_arm": "right"
+  },
+  "1809": {
+   "returned": 1,
+   "not_returned": 0,
+   "used_arm": "left"
+  },
+  "1815": {
+   "returned": 1,
+   "not_returned": 0,
+   "used_arm": "right"
+  },
+  "1839": {
+   "returned": 1,
+   "not_returned": 0,
+   "used_arm": "right"
+  },
+  "1842": {
+   "returned": 1,
+   "not_returned": 0,
+   "used_arm": "right"
+  },
+  "1845": {
+   "returned": 1,
+   "not_returned": 0,
+   "used_arm": "left"
+  },
+  "1860": {
+   "returned": 1,
+   "not_returned": 0,
+   "used_arm": "left"
+  },
+  "1862": {
+   "returned": 1,
+   "not_returned": 0,
+   "used_arm": "right"
+  },
+  "1866": {
+   "returned": 0,
+   "not_returned": 1,
+   "used_arm": "right"
+  }
+ }
+}

@@ -1,11 +1,11 @@
 """T43 T — where is the surface the q_now collision rows see? (record field, gradient step to the surface)"""
-from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import rebase_legacy_paths, workspace_path as _ag3s_workspace_path
 import json, sys, pathlib
 import numpy as np
 sys.argv += []
 from AG3S.trajopt.experiments import fixed_input_ablation as FIA
 S = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T43/S/raw'))
-IX = {**json.load(open(S / "chunk_index_t42.json"))}
+IX = rebase_legacy_paths({**json.load(open(S / "chunk_index_t42.json"))})
 RUNS = {"T42_R1908": _ag3s_workspace_path('legacy/outputs/verify/T42/1/runs/E3b/noobs/E3b_ep1908_s19082'),
         "T42_L1992": _ag3s_workspace_path('legacy/outputs/verify/T42/1/runs/E3b/noobs/E3b_ep1992_s19922')}
 out = {}

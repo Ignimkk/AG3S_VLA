@@ -1,0 +1,370 @@
+{
+ "figure": "benchmark/ag3s/docs/figures/ppt-0930/rm-onoff-16d.png",
+ "made": "2026-09-29",
+ "shown": {
+  "erased_pct_per_camera": {
+   "zed_left": 21.049,
+   "wrist_cam_l": 3.253,
+   "wrist_cam_r": 3.253
+  },
+  "mask_px_per_camera": {
+   "zed_left": 64661,
+   "wrist_cam_l": 9992,
+   "wrist_cam_r": 9992
+  },
+  "violated_spheres": {
+   "gripper": {
+    "n_spheres": 68,
+    "off": 68,
+    "on": 16
+   },
+   "arms": {
+    "n_spheres": 144,
+    "off": 132,
+    "on": 18
+   }
+  },
+  "worst_clearance_mm": {
+   "gripper": {
+    "off": -103.71010537515133,
+    "on": -38.01303452779472,
+    "off_link": "ee_finger_l2",
+    "on_link": "ee_finger_l1"
+   },
+   "arms": {
+    "off": -133.87705914160637,
+    "on": -38.01303452779472,
+    "off_link": "link_right_arm_5",
+    "on_link": "ee_finger_l1"
+   }
+  },
+  "median_clearance_mm": {
+   "gripper": {
+    "off": -67.1539428642349,
+    "on": 56.07612970424301
+   },
+   "arms": {
+    "off": -67.94062726166223,
+    "on": 88.73362927633332
+   }
+  },
+  "slice": {
+   "plane": "x-z",
+   "y_m": 0.2651485764446764,
+   "y_rule": "median y of left-arm constraint spheres (arms model)",
+   "x_range_m": [
+    -0.1,
+    1.100000000000001
+   ],
+   "z_range_m": [
+    0.4,
+    1.600000000000001
+   ],
+   "step_m": 0.005,
+   "query": "CuroboEsdfField.distance (coarse+fine min composite)"
+  },
+  "self_filter_spheres": 587,
+  "self_filter_inflation_m": 0.0
+ },
+ "definitions": {
+  "clearance": "CuroboEsdfField.distance(sphere centre) - r - 0.05 m, spheres at the t=0 robot state (zed_left capture q; all 3 captures share q in this static replay)",
+  "OFF": "same AG3S instance config and same depth/K/T; only AG3S._robot_mask_for replaced on the instance to return None (ESDF integrates raw depth). Point-cloud self-filter (grounding path) unchanged.",
+  "ON": "pipeline as-is (_robot_mask_for, benchmark/ag3s/runtime/pipeline.py:1402)",
+  "erased_pct": "mask pixels / 480x640 image pixels (all depth pixels valid in this render)",
+  "constraint_models": "gripper = serve_safe default --links (serve_safe.py:96 DEFAULT_LINKS = 'gripper'; palms + 4 fingers, 68 spheres); arms = --links arms (14 arm links + 4 fingers, 144 spheres), shown for comparison"
+ },
+ "provenance": {
+  "record": {
+   "run": "/mnt/dev/work/outputs/live_test/20260925_ep1807/run_0000",
+   "step_file": "step_00000.npz",
+   "t_step": 0,
+   "fingerprint": "1772bedf736c667a",
+   "model_xml": "/mnt/dev/work/pi05_TO_hybrid/rby1_description/models/rby1a/mujoco/model_transport.xml",
+   "reproduction": "recorded qpos(66)/qvel(61) posed with policy_record.replay_scene+pose_scene, depth rendered 480x640 osmesa via TransportScene.capture (camera_observation)"
+  },
+  "code": {
+   "benchmark_head": "cee8f84d2ce205b445a4462d38d3ff360210d077",
+   "working_tree_modified_tracked_files": [
+    " M ag3s/config.py",
+    " M ag3s/configs/default.yaml",
+    " M ag3s/constraints/to_adapter.py",
+    " M ag3s/docs/handoff/AG3S_GRASP_FIX_PLAN.md",
+    " M ag3s/docs/handoff/SESSION_STATE.md",
+    " M ag3s/experiments/reports/grounding_report.py",
+    " M ag3s/experiments/sources/constraint_record.py",
+    " M ag3s/experiments/sources/mujoco_source.py",
+    " M ag3s/fields/curobo_field.py",
+    " M ag3s/robot_models/urdf_sphere_chain.py",
+    " M ag3s/runtime/degradation.py",
+    " M ag3s/runtime/frame_record.py",
+    " M ag3s/runtime/pipeline.py",
+    " M ag3s/stages/target_grounding.py",
+    " M ag3s/types.py",
+    " M trajopt/bringup.py",
+    " M trajopt/client.py",
+    " M trajopt/config.py",
+    " M trajopt/experiments/esdf_rollout.py",
+    " M trajopt/grasp_latch.py",
+    " M trajopt/limits.py",
+    " M trajopt/linearize.py",
+    " M trajopt/problem.py",
+    " M trajopt/safe_policy.py",
+    " M trajopt/serve_safe.py",
+    " M trajopt/sqp.py",
+    " M trajopt/wire.py"
+   ]
+  },
+  "serve_safe_defaults_used": {
+   "argv": [
+    "--config",
+    "pi05_rby1_randomized_pick_place_16d_lora",
+    "--checkpoint",
+    "/dev/null",
+    "--model-xml",
+    "/mnt/dev/work/pi05_TO_hybrid/rby1_description/models/rby1a/mujoco/model_transport.xml",
+    "--esdf-backend",
+    "curobo"
+   ],
+   "note": "build_parser() defaults + --esdf-backend curobo (serve_safe default backend is legacy, serve_safe.py:1060); build_ag3s called with the same argument mapping as serve_safe.py:1538-1551"
+  },
+  "ag3s_config": {
+   "esdf": {
+    "backend": "curobo",
+    "voxel_size": 0.02,
+    "fine_voxel_size": 0.005,
+    "tsdf_voxel_size": 0.005,
+    "max_distance": 0.4,
+    "exclude_support_surfaces": false,
+    "attached_sign_threshold_voxels": 1.5
+   },
+   "pointcloud": {
+    "self_filter": true,
+    "self_filter_inflation": 0.0,
+    "self_filter_inflation_by_link": {},
+    "self_filter_target_guard_radius": 0.0,
+    "range_max": 2.0,
+    "depth_min": 0.05,
+    "depth_max": 3.0
+   },
+   "constraint_target_field_policy": "relax"
+  },
+  "self_filter_source": {
+   "model": "grounding_report.build_robot_model (benchmark/ag3s/experiments/reports/grounding_report.py:71), called at serve_safe.py:667; 587 spheres",
+   "inflation": "PointCloudConfig.self_filter_inflation = 0.0 (benchmark/ag3s/config.py:338; configs/default.yaml:43); by_link {} ; target guard radius 0.0",
+   "effective_settings": {
+    "enabled": true,
+    "n_spheres": 587,
+    "inflation_default": 0.0,
+    "inflation_by_link": {},
+    "inflation_effective": {
+     "link_torso_0": 0.0,
+     "link_torso_1": 0.0,
+     "link_torso_2": 0.0,
+     "link_torso_4": 0.0,
+     "link_torso_5": 0.0,
+     "link_right_arm_0": 0.0,
+     "link_right_arm_1": 0.0,
+     "link_right_arm_2": 0.0,
+     "link_right_arm_3": 0.0,
+     "link_right_arm_4": 0.0,
+     "link_left_arm_0": 0.0,
+     "link_left_arm_1": 0.0,
+     "link_left_arm_2": 0.0,
+     "link_left_arm_3": 0.0,
+     "link_left_arm_4": 0.0,
+     "base": 0.0,
+     "wheel_r": 0.0,
+     "wheel_l": 0.0,
+     "link_torso_3": 0.0,
+     "link_right_arm_6": 0.0,
+     "link_left_arm_6": 0.0,
+     "ee_left": 0.0,
+     "ee_right": 0.0,
+     "ee_finger_r1": 0.0,
+     "ee_finger_r2": 0.0,
+     "ee_finger_l1": 0.0,
+     "ee_finger_l2": 0.0,
+     "link_left_arm_5": 0.0,
+     "link_right_arm_5": 0.0
+    },
+    "target_guard_radius": 0.0,
+    "target_guard_rule": "manipulated_radius_plus_voxel",
+    "target_guard_pad_m": 0.005
+   }
+  },
+  "process_multi_kwargs": {
+   "phase": "approach",
+   "active_manipulators": [
+    "left"
+   ]
+  },
+  "attention": {
+   "npz": "/mnt/dev/work/benchmark/ag3s/asset/data/attention_16d_ep1807.npz",
+   "cell": {
+    "denoise": 0,
+    "agg": "last",
+    "layer": 8,
+    "head": 2,
+    "hit_rate": 1.0,
+    "peak_on_target": 1.0,
+    "target_mass": 0.14053611912193748,
+    "target_lift": 91.8190356735539,
+    "advantage": -0.09119048258360629,
+    "hit_b0": 0.2857142857142857,
+    "hit_b0.5": 0.9285714285714286,
+    "hit_b1": 1.0,
+    "hit_worst_beta": 0.2857142857142857
+   },
+   "frame_index": 0
+  },
+  "eikonal_median_abs_grad": {
+   "on": {
+    "coarse": 0.9994867915263047,
+    "fine": 0.9999339558726755
+   },
+   "off": {
+    "coarse": 0.9992631343143463,
+    "fine": 0.9990394270317443
+   }
+  },
+  "eikonal_full": {
+   "on": {
+    "coarse": {
+     "n_free": 2076670,
+     "median": 0.9994867915263047,
+     "p05": 0.9829502997654979,
+     "p95": 1.0103116062772735,
+     "voxel_m": 0.02,
+     "shape": [
+      128,
+      128,
+      128
+     ],
+     "origin_voxel_centre_m": [
+      -0.820000011920929,
+      -1.27,
+      -0.46999998807907106
+     ],
+     "negative_fraction": 0.0011057853698730469
+    },
+    "fine": {
+     "n_free": 1770278,
+     "median": 0.9999339558726755,
+     "p05": 0.9814331661250869,
+     "p95": 1.0119327039093118,
+     "voxel_m": 0.005,
+     "shape": [
+      128,
+      128,
+      128
+     ],
+     "origin_voxel_centre_m": [
+      0.1442507755756378,
+      -0.055898790359497075,
+      0.7079479646682738
+     ],
+     "negative_fraction": 0.04245758056640625
+    }
+   },
+   "off": {
+    "coarse": {
+     "n_free": 2073495,
+     "median": 0.9992631343143463,
+     "p05": 0.9800087202910319,
+     "p95": 1.0089833163951085,
+     "voxel_m": 0.02,
+     "shape": [
+      128,
+      128,
+      128
+     ],
+     "origin_voxel_centre_m": [
+      -0.820000011920929,
+      -1.27,
+      -0.46999998807907106
+     ],
+     "negative_fraction": 0.0012974739074707031
+    },
+    "fine": {
+     "n_free": 1661541,
+     "median": 0.9990394270317443,
+     "p05": 0.952617823004232,
+     "p95": 1.0080229073827993,
+     "voxel_m": 0.005,
+     "shape": [
+      128,
+      128,
+      128
+     ],
+     "origin_voxel_centre_m": [
+      0.1442507755756378,
+      -0.055898790359497075,
+      0.7079479646682738
+     ],
+     "negative_fraction": 0.05016136169433594
+    }
+   }
+  },
+  "on_buffer_unchanged_after_off_build": [
+   true,
+   true
+  ],
+  "pipeline_status": {
+   "on": {
+    "status": "ok",
+    "n_masks_recorded": 3
+   },
+   "off": {
+    "status": "ok",
+    "n_masks_recorded": 3
+   }
+  },
+  "regression_baseline_before_measurement": {
+   "violated_start": "14/15",
+   "has_target": "15/15",
+   "frame0_clearance_before_mm": -29.031048280806342,
+   "reference": "T30/T31/T32 working-tree baseline (14/15, 15/15, -29.031048280806342, 587 filter spheres)",
+   "raw": "outputs/verify/ppt0930-rm-onoff/baseline.json"
+  }
+ },
+ "residual_on_violations_nearest_surface": {
+  "segmentation_leak_by_camera": {
+   "zed_left": {
+    "robot_px": 64659,
+    "robot_px_unmasked": 0,
+    "nonrobot_px_masked": 2,
+    "unmasked_robot_bodies": {},
+    "masked_nonrobot_bodies": {
+     "crate": 2
+    }
+   },
+   "wrist_cam_l": {
+    "robot_px": 9992,
+    "robot_px_unmasked": 0,
+    "nonrobot_px_masked": 0,
+    "unmasked_robot_bodies": {},
+    "masked_nonrobot_bodies": {}
+   },
+   "wrist_cam_r": {
+    "robot_px": 9992,
+    "robot_px_unmasked": 0,
+    "nonrobot_px_masked": 0,
+    "unmasked_robot_bodies": {},
+    "masked_nonrobot_bodies": {}
+   }
+  },
+  "nearest_unmasked_body_counts_arms": {
+   "crate": 18
+  },
+  "raw": "outputs/verify/ppt0930-rm-onoff/diag_residual.json"
+ },
+ "raw_outputs": {
+  "npz": "outputs/verify/ppt0930-rm-onoff/rm_onoff_raw.npz",
+  "numbers": "outputs/verify/ppt0930-rm-onoff/rm_onoff_numbers.json",
+  "scripts": [
+   "outputs/verify/ppt0930-rm-onoff/compute.py",
+   "outputs/verify/ppt0930-rm-onoff/plot.py",
+   "outputs/verify/ppt0930-rm-onoff/diag_residual.py"
+  ]
+ }
+}

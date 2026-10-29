@@ -1,0 +1,924 @@
+{
+ "setting": "d0_last",
+ "sigma": 0,
+ "panels": [
+  {
+   "record": "headfix",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "apple",
+   "camera": "cam_high",
+   "source": "L8H2",
+   "target_px_480x640": 550,
+   "target_mass": 0.2712373266078749,
+   "peak_patch": [
+    10,
+    5
+   ],
+   "peak_target_cov": 0.38499999046325684,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "apple",
+   "camera": "cam_high",
+   "source": "top-3 common",
+   "target_px_480x640": 550,
+   "target_mass": 0.004145950452613434,
+   "peak_patch": [
+    1,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "apple",
+   "camera": "cam_high",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 550,
+   "target_mass": 0.006461701572603701,
+   "peak_patch": [
+    0,
+    9
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "apple",
+   "camera": "cam_left_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 262,
+   "target_mass": 0.0839273381060259,
+   "peak_patch": [
+    15,
+    6
+   ],
+   "peak_target_cov": 0.05999999865889549,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "apple",
+   "camera": "cam_left_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 262,
+   "target_mass": 0.0032238916644797386,
+   "peak_patch": [
+    15,
+    7
+   ],
+   "peak_target_cov": 0.15833333134651184,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "apple",
+   "camera": "cam_left_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 262,
+   "target_mass": 0.011556179266126678,
+   "peak_patch": [
+    13,
+    5
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "apple",
+   "camera": "cam_right_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    15,
+    7
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "apple",
+   "camera": "cam_right_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    2,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "headfix",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "apple",
+   "camera": "cam_right_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    13,
+    15
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "apple",
+   "camera": "cam_high",
+   "source": "L8H2",
+   "target_px_480x640": 547,
+   "target_mass": 0.2937654417145823,
+   "peak_patch": [
+    10,
+    5
+   ],
+   "peak_target_cov": 0.38999998569488525,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "apple",
+   "camera": "cam_high",
+   "source": "top-3 common",
+   "target_px_480x640": 547,
+   "target_mass": 0.003539665287633767,
+   "peak_patch": [
+    1,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "apple",
+   "camera": "cam_high",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 547,
+   "target_mass": 0.003837202056999386,
+   "peak_patch": [
+    6,
+    1
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "apple",
+   "camera": "cam_left_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 3360,
+   "target_mass": 0.1582645110257621,
+   "peak_patch": [
+    13,
+    9
+   ],
+   "peak_target_cov": 0.028333334252238274,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "apple",
+   "camera": "cam_left_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 3360,
+   "target_mass": 0.01615760183297102,
+   "peak_patch": [
+    1,
+    4
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "apple",
+   "camera": "cam_left_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 3360,
+   "target_mass": 0.031902643390129715,
+   "peak_patch": [
+    12,
+    3
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "apple",
+   "camera": "cam_right_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    12,
+    1
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "apple",
+   "camera": "cam_right_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    2,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "headfix",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "apple",
+   "camera": "cam_right_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    13,
+    15
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1850",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "banana",
+   "camera": "cam_high",
+   "source": "L8H2",
+   "target_px_480x640": 238,
+   "target_mass": 0.09433210250441741,
+   "peak_patch": [
+    9,
+    5
+   ],
+   "peak_target_cov": 0.09749999642372131,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "banana",
+   "camera": "cam_high",
+   "source": "top-3 common",
+   "target_px_480x640": 238,
+   "target_mass": 0.000622024927206421,
+   "peak_patch": [
+    1,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "banana",
+   "camera": "cam_high",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 238,
+   "target_mass": 0.0022256157866643975,
+   "peak_patch": [
+    0,
+    9
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "banana",
+   "camera": "cam_left_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 2547,
+   "target_mass": 0.14473605349589974,
+   "peak_patch": [
+    14,
+    8
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "banana",
+   "camera": "cam_left_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 2547,
+   "target_mass": 0.01841815383923856,
+   "peak_patch": [
+    14,
+    1
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "banana",
+   "camera": "cam_left_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 2547,
+   "target_mass": 0.10950007058984093,
+   "peak_patch": [
+    12,
+    5
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "banana",
+   "camera": "cam_right_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    12,
+    1
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1850",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "banana",
+   "camera": "cam_right_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    2,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1850",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "banana",
+   "camera": "cam_right_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    13,
+    15
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "target": "banana",
+   "camera": "cam_high",
+   "source": "L8H2",
+   "target_px_480x640": 243,
+   "target_mass": 0.07578965870197862,
+   "peak_patch": [
+    9,
+    5
+   ],
+   "peak_target_cov": 0.10000000149011612,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "target": "banana",
+   "camera": "cam_high",
+   "source": "top-3 common",
+   "target_px_480x640": 243,
+   "target_mass": 0.000509404725940686,
+   "peak_patch": [
+    1,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "target": "banana",
+   "camera": "cam_high",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 243,
+   "target_mass": 0.0017453294802103508,
+   "peak_patch": [
+    0,
+    9
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "target": "banana",
+   "camera": "cam_left_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 2452,
+   "target_mass": 0.03439812382520598,
+   "peak_patch": [
+    12,
+    8
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "target": "banana",
+   "camera": "cam_left_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 2452,
+   "target_mass": 0.0065439437016813744,
+   "peak_patch": [
+    1,
+    10
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "target": "banana",
+   "camera": "cam_left_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 2452,
+   "target_mass": 0.009754149647780878,
+   "peak_patch": [
+    14,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "target": "banana",
+   "camera": "cam_right_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    12,
+    1
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "target": "banana",
+   "camera": "cam_right_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    2,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1850",
+   "frame": 6,
+   "t_step": 48,
+   "phase": "approach",
+   "target": "banana",
+   "camera": "cam_right_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    13,
+    15
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1900",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "pear",
+   "camera": "cam_high",
+   "source": "L8H2",
+   "target_px_480x640": 475,
+   "target_mass": 0.28134068971021775,
+   "peak_patch": [
+    10,
+    5
+   ],
+   "peak_target_cov": 0.335833340883255,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "pear",
+   "camera": "cam_high",
+   "source": "top-3 common",
+   "target_px_480x640": 475,
+   "target_mass": 0.0016821103159249482,
+   "peak_patch": [
+    1,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "pear",
+   "camera": "cam_high",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 475,
+   "target_mass": 0.0036622822241995302,
+   "peak_patch": [
+    0,
+    9
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "pear",
+   "camera": "cam_left_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 1759,
+   "target_mass": 0.24150332223467677,
+   "peak_patch": [
+    14,
+    6
+   ],
+   "peak_target_cov": 0.1691666692495346,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "pear",
+   "camera": "cam_left_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 1759,
+   "target_mass": 0.012355537130490282,
+   "peak_patch": [
+    15,
+    3
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "pear",
+   "camera": "cam_left_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 1759,
+   "target_mass": 0.1213618389460442,
+   "peak_patch": [
+    13,
+    5
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "pear",
+   "camera": "cam_right_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    15,
+    13
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1900",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "pear",
+   "camera": "cam_right_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    1,
+    10
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1900",
+   "frame": 1,
+   "t_step": 8,
+   "phase": "transit",
+   "target": "pear",
+   "camera": "cam_right_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    9,
+    15
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1900",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "pear",
+   "camera": "cam_high",
+   "source": "L8H2",
+   "target_px_480x640": 473,
+   "target_mass": 0.2820540657792234,
+   "peak_patch": [
+    10,
+    5
+   ],
+   "peak_target_cov": 0.33416667580604553,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "pear",
+   "camera": "cam_high",
+   "source": "top-3 common",
+   "target_px_480x640": 473,
+   "target_mass": 0.001749700210714589,
+   "peak_patch": [
+    1,
+    11
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "pear",
+   "camera": "cam_high",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 473,
+   "target_mass": 0.0035874164284898343,
+   "peak_patch": [
+    0,
+    9
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "pear",
+   "camera": "cam_left_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 2951,
+   "target_mass": 0.1411357610781634,
+   "peak_patch": [
+    13,
+    8
+   ],
+   "peak_target_cov": 0.18583333492279053,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "pear",
+   "camera": "cam_left_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 2951,
+   "target_mass": 0.015489781493878464,
+   "peak_patch": [
+    15,
+    13
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "pear",
+   "camera": "cam_left_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 2951,
+   "target_mass": 0.054978083701914746,
+   "peak_patch": [
+    13,
+    3
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": false
+  },
+  {
+   "record": "ep1900",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "pear",
+   "camera": "cam_right_wrist",
+   "source": "L8H2",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    0,
+    13
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1900",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "pear",
+   "camera": "cam_right_wrist",
+   "source": "top-3 common",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    1,
+    10
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  },
+  {
+   "record": "ep1900",
+   "frame": 5,
+   "t_step": 40,
+   "phase": "approach",
+   "target": "pear",
+   "camera": "cam_right_wrist",
+   "source": "top-3 per-camera",
+   "target_px_480x640": 0,
+   "target_mass": 0.0,
+   "peak_patch": [
+    9,
+    15
+   ],
+   "peak_target_cov": 0.0,
+   "excluded_lt_200px": true
+  }
+ ]
+}

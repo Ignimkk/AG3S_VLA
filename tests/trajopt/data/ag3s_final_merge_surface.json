@@ -1,0 +1,375 @@
+{
+ "_doc": "Keys the AG3S final-configuration merge (main 3ff415d5, 2026-10-29) added to the serve_safe surface, with their value at the merge (bare argv = parser defaults; v11ab = V11AB argv incl. profile.V11AB_PRE_MERGE_DEFAULTS). _sl5a_golden drops a key only while it has exactly this value.",
+ "bare": {
+  "build_call_added": {
+   "**14": "{'palm_shell': palm_shell_options(args)} if palm_shell_options(args) else {}",
+   "confidence_gate": "confidence_gate_from_args(args)",
+   "contact": "nonauthorized_target_margin_section(args) or None",
+   "palm_cover": "palm_cover_options(args)",
+   "target_exclusion": "{**target_exclusion_section(args), **dynamic_field_section(args), **target_free_coarse_section(args), **target_free_coarse_sign_section(args), **target_free_coarse_support_section(args)} or None",
+   "wrist_cover": "wrist_cover_options(args)"
+  },
+  "build_kwargs": {
+   "confidence_gate": null,
+   "contact": null,
+   "palm_cover": null,
+   "target_exclusion": null,
+   "wrist_cover": null
+  },
+  "namespace": {
+   "attention_source": null,
+   "attention_split_partition": false,
+   "attention_split_radius_mm": null,
+   "attention_split_ratio_source": null,
+   "blas_threads": 1,
+   "confidence_gate": "off",
+   "confidence_gate_threshold": null,
+   "continuity_after_grasp": false,
+   "deflection_rate_after_grasp": false,
+   "free_space_carve": false,
+   "free_space_carve_margin_mm": null,
+   "geo_arm_check": false,
+   "geo_carry_requests": null,
+   "geo_close_gate": null,
+   "geo_close_timeout": null,
+   "geo_close_tol_deg": null,
+   "geo_close_tol_mm": null,
+   "geo_continuity_off": false,
+   "geo_correct_deg": null,
+   "geo_correct_max_offset": null,
+   "geo_correct_mm": null,
+   "geo_goal_mode": null,
+   "geo_grasp": false,
+   "geo_grasp_mu": null,
+   "geo_grasp_selection": null,
+   "geo_obstacle_memory": false,
+   "geo_obstacle_source": null,
+   "geo_time_budget_ms": null,
+   "geo_track_scale": null,
+   "geo_w_pos": null,
+   "geo_w_rot": null,
+   "geo_wrist_check": false,
+   "grasp_anchor": null,
+   "grasp_anchor_path_weight": null,
+   "grasp_anchor_radius_mm": null,
+   "grasp_goal_box": null,
+   "grasp_goal_window": "close",
+   "held_3d_max_m": null,
+   "held_3d_rule": "off",
+   "held_permission_parent_links": null,
+   "hsr6_attach_assist": false,
+   "hsr6_held_gate": false,
+   "hsr6_objective": false,
+   "hsr6_probe": null,
+   "hsr6_target_exempt": false,
+   "hybrid_identity": null,
+   "hybrid_other_exclude_voxels": null,
+   "kept_geometry_follow": false,
+   "latch_carry_from_closing": false,
+   "latch_reach_hand_relative": false,
+   "latch_reach_kept_unseen": false,
+   "neighbour_contact_mm": null,
+   "neighbour_palm_contact_mm": null,
+   "no_roi_carve": false,
+   "nonauthorized_target_margin": null,
+   "nontarget_evidence": null,
+   "nontarget_shell_voxels": null,
+   "oracle_extent_identity": null,
+   "oracle_max_dist_voxels": null,
+   "owned_ambiguous": null,
+   "owned_max_dist_voxels": null,
+   "owned_tie_voxels": null,
+   "owned_unowned": null,
+   "palm_cover": "off",
+   "palm_cover_overflow": null,
+   "palm_shell": "off",
+   "palm_shell_margin": null,
+   "palm_shell_overflow": null,
+   "placed_no_seed_certify": false,
+   "profile_substages": false,
+   "qp_backend": "osqp",
+   "recovery_retreat": false,
+   "robot_free_shrink_mm": null,
+   "robot_mask": null,
+   "robot_occupied_free": false,
+   "roi_carve": false,
+   "roi_carve_device": null,
+   "roi_carve_footprint": false,
+   "roi_carve_footprint_pad_px": null,
+   "roi_carve_footprint_robot": null,
+   "roi_pad_mm": null,
+   "run_dir": null,
+   "split_supersedes_anchor": false,
+   "stem_cap_bottom_fit_frac": null,
+   "stem_cap_radius_mm": null,
+   "stem_cap_top_mm": null,
+   "target_exclusion": "ball",
+   "target_extent": null,
+   "target_free_coarse": false,
+   "target_free_coarse_sign_floor": null,
+   "target_free_coarse_support": null,
+   "target_layer": false,
+   "target_layer_reset_mm": null,
+   "target_layer_tol_mm": null,
+   "target_permission_strict": false,
+   "target_stem_cap": null,
+   "task_gate": false,
+   "task_gate_shadow": false,
+   "task_probe": null,
+   "to_gpu_seeds": "off",
+   "to_gpu_seeds_check": "all",
+   "to_multi_seed": 0,
+   "tsdf_frustum_decay": null,
+   "tsdf_time_decay": null,
+   "wrist_cover_overflow": null,
+   "wrist_track_scale": null
+  },
+  "trajopt_config": {
+   "collision/held_permission_parent_links": 1,
+   "collision/neighbour_contact_depth": {
+    "__float__": "0.0"
+   },
+   "collision/neighbour_contact_gate": {
+    "__float__": "0.15"
+   },
+   "collision/neighbour_contact_radius": {
+    "__float__": "0.12"
+   },
+   "collision/target_permission_strict": false,
+   "cost/deflection_rate_after_grasp": false,
+   "cost/grasp_anchor_radius": {
+    "__float__": "0.15"
+   },
+   "cost/grasp_goal_box": {
+    "__float__": "0.0"
+   },
+   "cost/grasp_goal_max_from_target": {
+    "__float__": "0.12"
+   },
+   "cost/grasp_goal_rows": 3,
+   "cost/w_grasp_goal": {
+    "__float__": "0.0"
+   },
+   "cost/w_grasp_tcp": {
+    "__float__": "0.0"
+   },
+   "cost/wrist_track_joints": [
+    4,
+    5,
+    6
+   ],
+   "cost/wrist_track_radius": {
+    "__float__": "0.15"
+   },
+   "cost/wrist_track_scale": {
+    "__float__": "1.0"
+   },
+   "safety/recovery_clear_m": {
+    "__float__": "0.12"
+   },
+   "safety/recovery_empty_streak": 2,
+   "safety/recovery_hold_streak": 3,
+   "safety/recovery_max": 2,
+   "safety/recovery_retreat": false,
+   "safety/recovery_step_rad": {
+    "__float__": "0.03"
+   },
+   "sqp/gpu_seeds": "off",
+   "sqp/gpu_seeds_check": "all",
+   "sqp/multi_seed": 0
+  }
+ },
+ "build_call_moved": {
+  "identity": {
+   "after": "{**t43t_identity_section(args), **split_identity_section(args), **placed_no_seed_section(args)} or None",
+   "before": "t43t_identity_section(args) or None"
+  },
+  "plan_horizon_steps": {
+   "after": "plan_horizon_steps",
+   "before": "horizon.planned"
+  },
+  "rows_per_step": {
+   "after": "rows_per_step",
+   "before": "to_config.reduction.rows_per_step"
+  }
+ },
+ "v11ab": {
+  "build_call_added": {
+   "**14": "{'palm_shell': palm_shell_options(args)} if palm_shell_options(args) else {}",
+   "confidence_gate": "confidence_gate_from_args(args)",
+   "contact": "nonauthorized_target_margin_section(args) or None",
+   "palm_cover": "palm_cover_options(args)",
+   "target_exclusion": "{**target_exclusion_section(args), **dynamic_field_section(args), **target_free_coarse_section(args), **target_free_coarse_sign_section(args), **target_free_coarse_support_section(args)} or None",
+   "wrist_cover": "wrist_cover_options(args)"
+  },
+  "build_kwargs": {
+   "confidence_gate": null,
+   "contact": null,
+   "palm_cover": null,
+   "target_exclusion": null,
+   "wrist_cover": null
+  },
+  "namespace": {
+   "attention_source": null,
+   "attention_split_partition": false,
+   "attention_split_radius_mm": null,
+   "attention_split_ratio_source": null,
+   "blas_threads": 0,
+   "confidence_gate": "off",
+   "confidence_gate_threshold": null,
+   "continuity_after_grasp": false,
+   "deflection_rate_after_grasp": false,
+   "free_space_carve": false,
+   "free_space_carve_margin_mm": null,
+   "geo_arm_check": false,
+   "geo_carry_requests": null,
+   "geo_close_gate": null,
+   "geo_close_timeout": null,
+   "geo_close_tol_deg": null,
+   "geo_close_tol_mm": null,
+   "geo_continuity_off": false,
+   "geo_correct_deg": null,
+   "geo_correct_max_offset": null,
+   "geo_correct_mm": null,
+   "geo_goal_mode": null,
+   "geo_grasp": false,
+   "geo_grasp_mu": null,
+   "geo_grasp_selection": null,
+   "geo_obstacle_memory": false,
+   "geo_obstacle_source": null,
+   "geo_time_budget_ms": null,
+   "geo_track_scale": null,
+   "geo_w_pos": null,
+   "geo_w_rot": null,
+   "geo_wrist_check": false,
+   "grasp_anchor": null,
+   "grasp_anchor_path_weight": null,
+   "grasp_anchor_radius_mm": null,
+   "grasp_goal_box": null,
+   "grasp_goal_window": "close",
+   "held_3d_max_m": null,
+   "held_3d_rule": "off",
+   "held_permission_parent_links": null,
+   "hsr6_attach_assist": false,
+   "hsr6_held_gate": false,
+   "hsr6_objective": false,
+   "hsr6_probe": null,
+   "hsr6_target_exempt": false,
+   "hybrid_identity": null,
+   "hybrid_other_exclude_voxels": null,
+   "kept_geometry_follow": false,
+   "latch_carry_from_closing": false,
+   "latch_reach_hand_relative": false,
+   "latch_reach_kept_unseen": false,
+   "neighbour_contact_mm": null,
+   "neighbour_palm_contact_mm": null,
+   "no_roi_carve": true,
+   "nonauthorized_target_margin": null,
+   "nontarget_evidence": null,
+   "nontarget_shell_voxels": null,
+   "oracle_extent_identity": null,
+   "oracle_max_dist_voxels": null,
+   "owned_ambiguous": null,
+   "owned_max_dist_voxels": null,
+   "owned_tie_voxels": null,
+   "owned_unowned": null,
+   "palm_cover": "off",
+   "palm_cover_overflow": null,
+   "palm_shell": "off",
+   "palm_shell_margin": null,
+   "palm_shell_overflow": null,
+   "placed_no_seed_certify": false,
+   "profile_substages": false,
+   "qp_backend": "osqp",
+   "recovery_retreat": false,
+   "robot_free_shrink_mm": null,
+   "robot_mask": null,
+   "robot_occupied_free": false,
+   "roi_carve": false,
+   "roi_carve_device": null,
+   "roi_carve_footprint": false,
+   "roi_carve_footprint_pad_px": null,
+   "roi_carve_footprint_robot": null,
+   "roi_pad_mm": null,
+   "run_dir": null,
+   "split_supersedes_anchor": false,
+   "stem_cap_bottom_fit_frac": null,
+   "stem_cap_radius_mm": null,
+   "stem_cap_top_mm": null,
+   "target_exclusion": "ball",
+   "target_extent": null,
+   "target_free_coarse": false,
+   "target_free_coarse_sign_floor": null,
+   "target_free_coarse_support": null,
+   "target_layer": false,
+   "target_layer_reset_mm": null,
+   "target_layer_tol_mm": null,
+   "target_permission_strict": false,
+   "target_stem_cap": null,
+   "task_gate": false,
+   "task_gate_shadow": false,
+   "task_probe": null,
+   "to_gpu_seeds": "off",
+   "to_gpu_seeds_check": "all",
+   "to_multi_seed": 0,
+   "tsdf_frustum_decay": null,
+   "tsdf_time_decay": null,
+   "wrist_cover_overflow": null,
+   "wrist_track_scale": null
+  },
+  "trajopt_config": {
+   "collision/held_permission_parent_links": 1,
+   "collision/neighbour_contact_depth": {
+    "__float__": "0.0"
+   },
+   "collision/neighbour_contact_gate": {
+    "__float__": "0.15"
+   },
+   "collision/neighbour_contact_radius": {
+    "__float__": "0.12"
+   },
+   "collision/target_permission_strict": false,
+   "cost/deflection_rate_after_grasp": false,
+   "cost/grasp_anchor_radius": {
+    "__float__": "0.15"
+   },
+   "cost/grasp_goal_box": {
+    "__float__": "0.0"
+   },
+   "cost/grasp_goal_max_from_target": {
+    "__float__": "0.12"
+   },
+   "cost/grasp_goal_rows": 3,
+   "cost/w_grasp_goal": {
+    "__float__": "0.0"
+   },
+   "cost/w_grasp_tcp": {
+    "__float__": "0.0"
+   },
+   "cost/wrist_track_joints": [
+    4,
+    5,
+    6
+   ],
+   "cost/wrist_track_radius": {
+    "__float__": "0.15"
+   },
+   "cost/wrist_track_scale": {
+    "__float__": "1.0"
+   },
+   "safety/recovery_clear_m": {
+    "__float__": "0.12"
+   },
+   "safety/recovery_empty_streak": 2,
+   "safety/recovery_hold_streak": 3,
+   "safety/recovery_max": 2,
+   "safety/recovery_retreat": false,
+   "safety/recovery_step_rad": {
+    "__float__": "0.03"
+   },
+   "sqp/gpu_seeds": "off",
+   "sqp/gpu_seeds_check": "all",
+   "sqp/multi_seed": 0
+  }
+ }
+}

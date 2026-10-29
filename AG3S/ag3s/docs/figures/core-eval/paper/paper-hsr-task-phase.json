@@ -1,0 +1,90 @@
+{
+ "example": "\uac00\ub9bc121_k0",
+ "keyframes": [
+  [
+   "Approach",
+   72
+  ],
+  [
+   "Grasp",
+   124
+  ],
+  [
+   "Carry",
+   168
+  ],
+  [
+   "Release",
+   216
+  ]
+ ],
+ "runs_reaching_place": 13,
+ "phase_agreement_median_all": 0.9590301003344481,
+ "phase_agreement_median_reached": 0.9655172413793104,
+ "place_delay_requests": [
+  1,
+  1,
+  1,
+  2,
+  1,
+  0,
+  2,
+  2,
+  1,
+  1,
+  1,
+  0,
+  1
+ ],
+ "held_delay_vs_two_finger": [
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  2,
+  1,
+  1,
+  1
+ ],
+ "release_delay": [
+  1,
+  2,
+  2,
+  3,
+  3,
+  2,
+  1,
+  1,
+  2,
+  1,
+  1,
+  3,
+  1
+ ],
+ "false_held_before_contact": {
+  "\uac00\ub9bc121_k0": 0,
+  "\uac00\ub9bc121_k1": 0,
+  "\uac00\ub9bc122_k0": 0,
+  "\uac00\ub9bc122_k1": 0,
+  "\uac00\ub9bc123_k0": 0,
+  "\uac00\ub9bc123_k1": 1,
+  "\ud68c\uadc0119_k0": 0,
+  "\ud68c\uadc0119_k1": 0,
+  "\ud68c\uadc0250_k0": 0,
+  "\ud68c\uadc0250_k1": 0,
+  "\ud68c\uadc0320_k0": 0,
+  "\ud68c\uadc0320_k1": 0,
+  "\ud68c\uadc0850_k0": 0,
+  "\ud68c\uadc0850_k1": 0,
+  "\ud68c\uadc0954_k0": 0,
+  "\ud68c\uadc0954_k1": 0,
+  "\ud68c\uadc0211_k0": 7,
+  "\ud68c\uadc0211_k1": 0
+ }
+}

@@ -1,0 +1,86 @@
+{
+ "source": {
+  "oracle_agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/raw/oracle_agg.json",
+  "cl3_compare": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/raw/cl3/compare.json"
+ },
+ "korean_font": true,
+ "table_set_rows": [
+  [
+   "design17 (17 collision chunks, 14 HOLD)",
+   "601 / 0/14 / 1799",
+   "387 / 6/14 / 1800",
+   "72 / 8/14 / 1824",
+   "160 / 7/14 / 321",
+   "143 / 7/14 / 1"
+  ],
+  [
+   "held-out 14 collision chunks (12 HOLD)",
+   "887 / 0/12 / 2216",
+   "401 / 5/12 / 2216",
+   "113 / 6/12 / 2221",
+   "216 / 5/12 / 6",
+   "216 / 5/12 / 6"
+  ],
+  [
+   "held-out all 162 chunks (12 HOLD)",
+   "887 / 0/12 / 20739",
+   "401 / 5/12 / 20739",
+   "113 / 6/12 / 20787",
+   "359 / 5/12 / 49",
+   "359 / 5/12 / 49"
+  ]
+ ],
+ "columns": [
+  "set",
+  "off",
+  "F1",
+  "F1GT (offline GT hull)",
+  "oracle (pipeline id)",
+  "oracle (gt id)"
+ ],
+ "criteria_rows": [
+  [
+   "1 baseline legacy CPU",
+   "14/15 · 15/15 · -29.031048280806342 mm",
+   "14/15 · 15/15 · -29.031048280806342 mm",
+   "PASS"
+  ],
+  [
+   "1 baseline cuRobo GPU",
+   "10/15 · 15/15 · -9.171877401271193 mm",
+   "10/15 · 15/15 · -9.171877401271193 mm",
+   "PASS"
+  ],
+  [
+   "2 off bit-identical vs base 15314ba3 (CL3, 3 arms)",
+   "all layers identical",
+   "1630/1630 layers identical; 1618/1630 = record (the 12 others equal at base)",
+   "PASS"
+  ],
+  [
+   "3 oracle table (held-out 14 / design17)",
+   "887 / 401 / 216 ; 601 / 387 / 160",
+   "887 / 401 / 216 ; 601 / 387 / 160 ; HOLD-zero 0,5,5 /12",
+   "PASS"
+  ],
+  [
+   "3 neighbour seeds (oracle vs F1GT)",
+   "oracle keeps neighbour fruit",
+   "removed on other fruit: oracle 6 / 321 vs F1GT 2221 / 1824",
+   "PASS"
+  ],
+  [
+   "3 extra: oracle on the 148 off-zero held-out chunks",
+   "(not pre-fixed)",
+   "ORV 143 rows in 7 chunks; off/F1/F1GT 0",
+   "REPORT"
+  ],
+  [
+   "4 pytest new file CPU / GPU subset / wire",
+   "pass",
+   "29 pass+1 skip / 181 pass / wire digest = base (17 keys)",
+   "PASS"
+  ]
+ ],
+ "note": "cells: collision rows / HOLD chunks at 0 rows / removed seeds within 5 mm of another fruit (GT hull)"
+}

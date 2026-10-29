@@ -1,0 +1,23 @@
+{
+  "status": "BUILD_PASS",
+  "scope": "CHAPTERS_1_TO_3_METHOD_DRAFT",
+  "pdf": "paper/latex/build/main.pdf",
+  "pdf_sha256": "59d300b97fe27065e2d04751253ead25923335d71bb0ebbb399ecec721ef8ec2",
+  "pages": 7,
+  "references_start_page": 6,
+  "overfull_boxes": false,
+  "unresolved_references": false,
+  "official_style_hashes_match": true,
+  "experimental_sections_included": false,
+  "experiment_evidence_revalidated": false,
+  "submission_ready": false,
+  "known_warnings": "Existing cached lineno.sty and algorithm.sty UTF-8 warnings.",
+  "source_sha256": {
+    "paper/latex/main.tex": "cfbcaf4abaf9353520846eafb3a35a4048657bd27869fecedf72902aaeef5e14",
+    "paper/latex/metadata.tex": "acf4b3619d4102b69f26e4d65c21a5998c590329810c029c6662312c3efc5462",
+    "paper/latex/sections/00_abstract.tex": "b00ec320c66159d5dfb328907abc92b3ad565cb98c09c1eefdcc3edd46285268",
+    "paper/latex/sections/01_introduction.tex": "911983aeba21b21d31766b61d079b4d0a5f1bb80c04a9acb5749ae63207193eb",
+    "paper/latex/sections/02_related_work.tex": "54d432e29ea7ac01a86e5b28d0b10aa1e605e5ce437ef1f4f4d900962a0d570d",
+    "paper/latex/sections/03_method.tex": "c16dcf5bb6a7bf940e05377e788d2991704dde4dee26e396a6aeed7eff850a85"
+  }
+}

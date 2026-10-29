@@ -1,0 +1,58 @@
+{
+ "episode": 954,
+ "instants": [
+  {
+   "k": 19,
+   "t_step": 152,
+   "latch": "closing",
+   "gt_stage": "grasp",
+   "layer": "target_free",
+   "slice_centre_m": [
+    0.5355,
+    -0.332,
+    0.8498
+   ],
+   "slice": "horizontal",
+   "gt_excludes_target": true,
+   "err_within_30mm_median_mm": -3.3282797469903236,
+   "err_within_30mm_p95_abs_mm": 11.17457684625505,
+   "n_err_points": 3687
+  },
+  {
+   "k": 33,
+   "t_step": 264,
+   "latch": "closing",
+   "gt_stage": "grasp",
+   "layer": "target_free",
+   "slice_centre_m": [
+    0.5362,
+    -0.3319,
+    0.85
+   ],
+   "slice": "horizontal",
+   "gt_excludes_target": true,
+   "err_within_30mm_median_mm": -6.730326074775892,
+   "err_within_30mm_p95_abs_mm": 9.995739824127353,
+   "n_err_points": 3551
+  },
+  {
+   "k": 65,
+   "t_step": 520,
+   "latch": "latched",
+   "gt_stage": "grasp",
+   "layer": "target_free",
+   "slice_centre_m": [
+    0.5369,
+    -0.3278,
+    0.8499
+   ],
+   "slice": "horizontal",
+   "gt_excludes_target": true,
+   "err_within_30mm_median_mm": -3.3836063287516343,
+   "err_within_30mm_p95_abs_mm": 10.179203325563662,
+   "n_err_points": 3580
+  }
+ ],
+ "definitions": "IFG audit gallery \u2014 the observation modules (ATS \u00b7 HSR \u00b7 LTE) on the real scene, 3rd-person view. CPU only, read only.\n\n  MUJOCO_GL=osmesa PYTHONPATH=.:integration/rby1/manipulation/src .venv-ag3s/bin/python -m       AG3S.ag3s.experiments.studies.ifg_audit_gallery --run <IFG-APPLE run> --fig AG3S/ag3s/docs/figures/ifg-audit --eps 250 954 56\n\nRecords: IFG-APPLE-SPLIT arm SPL (target split, current serving observation path). Per request k: the client planning row (full\nMuJoCo qpos) and the server chunk record (`chunk_dir/chunk_{k+offset}.npz`, `server_chunk_alignment`).\n\nCamera: the recording camera of `pi05_infer.py --view front` (free camera, lookat (0.45, 0, 0.85), distance 1.7 m, azimuth 180 deg,\nelevation -18 deg, fovy from the model), rendered from the planning-row qpos of request k (the state the server saw).\n\n1. `gallery-esdf-ep<E>.png` \u2014 per instant: LEFT the ESDF on the horizontal plane at the target centre height (carry: crate-wall\n   height, 4 cm above the crate origin), sampled at the pixels of the same camera (each pixel ray meets the plane; grey = no hit\n   within 0.6 m); RIGHT the real scene from the same camera. While held the target is excluded from GT (it is part of the robot).\n   Layer: target-free (what the grasping fingers query) while the latch is searching / latched / closing, else main.\n   Black line = field 0, grey dashed = 10 mm (obstacle margin), white dashed = GT 0 (probe-sphere `mj_geomDistance` to the collision\n   geoms of fruits, crate, table, shelf; the target fruit excluded for the target-free layer; robot excluded as the field's\n   self-filter does). Runtime-added obstacles (e.g. the 'place' profile crate post) are not in the base model, so not in GT.\n2. `gallery-sequence-ep<E>.png` \u2014 real-scene frames over the episode with: VLA attention (points with attention >= 0.5, colour =\n   value), the selected target cluster (green), the tracked target centre and exclusion radius (`manipulated`), the hand collision\n   spheres (cyan = links allowed to touch the target, grey = other hand); text = GT stage / HSR latch / probe label / tracked state.\n   Bottom: per request, attention share on the target and target-cluster precision (both vs the GT apple as a sphere of its\n   collision radius, 10 mm tolerance), with the GT stage, latch and probe as bands.\n",
+ "script": "AG3S/ag3s/experiments/studies/ifg_audit_gallery.py"
+}

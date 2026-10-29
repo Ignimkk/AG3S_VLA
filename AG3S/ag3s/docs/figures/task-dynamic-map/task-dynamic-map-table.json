@@ -1,0 +1,199 @@
+{
+ "judgement": {
+  "B_TL": {
+   "1_target_old_main": {
+    "value": 2142,
+    "base": 46734,
+    "reduction": 0.9542,
+    "pass": true
+   },
+   "1_target_old_hand": {
+    "value": 762,
+    "base": 23938,
+    "reduction": 0.9682,
+    "pass": true
+   },
+   "3_missed_main_visible_pp": {
+    "value": 0.365,
+    "pass": true
+   },
+   "3_missed_main_occluded_seen_before_pp": {
+    "value": 1.111,
+    "pass": false
+   },
+   "3_missed_hand_visible_pp": {
+    "value": -0.174,
+    "pass": true
+   },
+   "3_missed_hand_occluded_seen_before_pp": {
+    "value": 0.237,
+    "pass": true
+   },
+   "4_success": {
+    "value": 9,
+    "base": 7,
+    "pass": true
+   },
+   "4_forbidden_episodes": {
+    "value": 2,
+    "base": 1,
+    "pass": false
+   },
+   "adopt": false
+  },
+  "B_ROI": {
+   "2_moved_old_main": {
+    "value": 65,
+    "base": 919,
+    "reduction": 0.9293,
+    "pass": true
+   },
+   "3_missed_main_visible_pp": {
+    "value": 0.291,
+    "pass": true
+   },
+   "3_missed_main_occluded_seen_before_pp": {
+    "value": 0.846,
+    "pass": true
+   },
+   "3_missed_hand_visible_pp": {
+    "value": 0.11,
+    "pass": true
+   },
+   "3_missed_hand_occluded_seen_before_pp": {
+    "value": 0.773,
+    "pass": true
+   },
+   "4_success": {
+    "value": 9,
+    "base": 7,
+    "pass": true
+   },
+   "4_forbidden_episodes": {
+    "value": 2,
+    "base": 1,
+    "pass": false
+   },
+   "adopt": false
+  },
+  "B_TL_ROI": {
+   "1_target_old_main": {
+    "value": 8882,
+    "base": 46734,
+    "reduction": 0.8099,
+    "pass": false
+   },
+   "1_target_old_hand": {
+    "value": 5728,
+    "base": 23938,
+    "reduction": 0.7607,
+    "pass": false
+   },
+   "2_moved_old_main": {
+    "value": 37,
+    "base": 919,
+    "reduction": 0.9597,
+    "pass": true
+   },
+   "3_missed_main_visible_pp": {
+    "value": 0.351,
+    "pass": true
+   },
+   "3_missed_main_occluded_seen_before_pp": {
+    "value": 0.832,
+    "pass": true
+   },
+   "3_missed_hand_visible_pp": {
+    "value": 0.288,
+    "pass": true
+   },
+   "3_missed_hand_occluded_seen_before_pp": {
+    "value": 1.061,
+    "pass": false
+   },
+   "4_success": {
+    "value": 9,
+    "base": 7,
+    "pass": true
+   },
+   "4_forbidden_episodes": {
+    "value": 2,
+    "base": 1,
+    "pass": false
+   },
+   "adopt": false
+  }
+ },
+ "rows": [
+  [
+   "1_target_old_hand",
+   "\u2014",
+   "96.8% \u2193 \u2713",
+   "\u2014",
+   "76.1% \u2193 \u2717"
+  ],
+  [
+   "1_target_old_main",
+   "\u2014",
+   "95.4% \u2193 \u2713",
+   "\u2014",
+   "81.0% \u2193 \u2717"
+  ],
+  [
+   "2_moved_old_main",
+   "\u2014",
+   "\u2014",
+   "92.9% \u2193 \u2713",
+   "96.0% \u2193 \u2713"
+  ],
+  [
+   "3_missed_hand_occluded_seen_before_pp",
+   "\u2014",
+   "0.237 \u2713",
+   "0.773 \u2713",
+   "1.061 \u2717"
+  ],
+  [
+   "3_missed_hand_visible_pp",
+   "\u2014",
+   "-0.174 \u2713",
+   "0.11 \u2713",
+   "0.288 \u2713"
+  ],
+  [
+   "3_missed_main_occluded_seen_before_pp",
+   "\u2014",
+   "1.111 \u2717",
+   "0.846 \u2713",
+   "0.832 \u2713"
+  ],
+  [
+   "3_missed_main_visible_pp",
+   "\u2014",
+   "0.365 \u2713",
+   "0.291 \u2713",
+   "0.351 \u2713"
+  ],
+  [
+   "4_forbidden_episodes",
+   "1",
+   "2 \u2717",
+   "2 \u2717",
+   "2 \u2717"
+  ],
+  [
+   "4_success",
+   "7",
+   "9 \u2713",
+   "9 \u2713",
+   "9 \u2713"
+  ],
+  [
+   "adopt",
+   "\u2014",
+   "\ubbf8\ucc44\ud0dd",
+   "\ubbf8\ucc44\ud0dd",
+   "\ubbf8\ucc44\ud0dd"
+  ]
+ ]
+}

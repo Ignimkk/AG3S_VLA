@@ -61,11 +61,14 @@ def test_v11ab_flags_are_read_from_the_launcher_scripts():
 
 def test_build_kwargs_follow_the_serve_safe_main_call():
     src = (PROJECT_ROOT / "AG3S/trajopt/serve_safe.py").read_text()
-    main = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "main")
-    call = next(n for n in ast.walk(main) if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "build_ag3s")
-    names = [k.arg for k in call.keywords]
+    # the served build_ag3s call (in `ag3s_from_args` since the 2026-10-29 main merge); `**{...}` entries are off here
+    call = pf._main_build_call()
+    names = [k.arg for k in call.keywords if k.arg is not None]
     kw = pf.v11ab_build_kwargs(pf.parse_v11ab_args())
     assert list(kw) == [n for n in names if n not in pf.LOG_ONLY_BUILD_KEYWORDS]
+    # merge-added keywords: all off for V11AB (with profile.V11AB_PRE_MERGE_DEFAULTS pinning the ROI carve off)
+    assert {k: kw[k] for k in pf.UNPORTED_BUILD_KEYWORDS if k in kw} == {
+        "palm_cover": None, "wrist_cover": None, "target_exclusion": None, "contact": None, "confidence_gate": None}
     assert set(pf.LOG_ONLY_BUILD_KEYWORDS) <= set(names)
     # the two log-only keywords reach nothing but the start-up log line in build_ag3s
     build = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "build_ag3s")

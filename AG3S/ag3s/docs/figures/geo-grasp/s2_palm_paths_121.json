@@ -1,0 +1,73 @@
+{
+ "run": "121",
+ "requests": [
+  {
+   "seq": 12,
+   "anchor": {
+    "active": true,
+    "palm_to_pregrasp_mm": 53.5,
+    "progress_fraction": 1.0,
+    "kind": "pre-grasp",
+    "goal_m": [
+     0.45244,
+     0.37644,
+     0.99225
+    ],
+    "rows": [
+     15
+    ],
+    "grasp_id": 1,
+    "hand_to_goal_mm": 53.5
+   },
+   "B0": {
+    "kind": "pre-grasp",
+    "pos_err_mm": 64.51,
+    "rot_err_deg": 9.6
+   },
+   "B1": {
+    "kind": "pre-grasp",
+    "pos_err_mm": 6.88,
+    "rot_err_deg": 3.27
+   },
+   "B2": {
+    "kind": "pre-grasp",
+    "pos_err_mm": 5.14,
+    "rot_err_deg": 3.6
+   }
+  },
+  {
+   "seq": 13,
+   "anchor": {
+    "active": true,
+    "palm_to_pregrasp_mm": 48.7,
+    "progress_fraction": 1.0,
+    "kind": "pre-grasp",
+    "goal_m": [
+     0.45239,
+     0.37647,
+     0.99231
+    ],
+    "rows": [
+     15
+    ],
+    "grasp_id": 1,
+    "hand_to_goal_mm": 48.7
+   },
+   "B0": {
+    "kind": "pre-grasp",
+    "pos_err_mm": 71.1,
+    "rot_err_deg": 10.4
+   },
+   "B1": {
+    "kind": "pre-grasp",
+    "pos_err_mm": 8.73,
+    "rot_err_deg": 2.91
+   },
+   "B2": {
+    "kind": "pre-grasp",
+    "pos_err_mm": 6.37,
+    "rot_err_deg": 3.26
+   }
+  }
+ ]
+}

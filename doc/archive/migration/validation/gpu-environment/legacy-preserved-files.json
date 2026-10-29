@@ -1,0 +1,242 @@
+[
+  {
+    "source": "/mnt/dev/work/scripts/patch_dataset_timestamps.py",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/scripts/patch_dataset_timestamps.py",
+    "size": 4755,
+    "sha256": "c5356e6539b708552d651ea5fc3219d5ca4103b5eadb050b6e35d9d8665e02eb"
+  },
+  {
+    "source": "/mnt/dev/work/doc/곽민기_0930 발표 자료.pptx",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/doc/곽민기_0930 발표 자료.pptx",
+    "size": 1861016,
+    "sha256": "0b991d1399a57cbd49c8b1dde5b38fae33b9b54b4f3533495dbec5203a860e9f"
+  },
+  {
+    "source": "/mnt/dev/work/doc/곽민기_0930 발표 자료_draft.pptx",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/doc/곽민기_0930 발표 자료_draft.pptx",
+    "size": 7412302,
+    "sha256": "68921ba5a9cf1933f96e6f9e4a72bc92264cb54e9f6035db21e048a0949bae1c"
+  },
+  {
+    "source": "/mnt/dev/work/CLAUDE.md",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/CLAUDE.md",
+    "size": 4737,
+    "sha256": "c7125421a14c259448df177cc0b265dd99132df96facf4d019137219b3833a67"
+  },
+  {
+    "source": "/mnt/dev/work/.claude/ag3s-rules-brief.md",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/.claude/ag3s-rules-brief.md",
+    "size": 2328,
+    "sha256": "41852bb594a5c1c9c24b04bf9812f1eb6c43dd2566fa9b8e86d6c08587870f59"
+  },
+  {
+    "source": "/mnt/dev/work/MIGRATION_NOTICE.md",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/MIGRATION_NOTICE.md",
+    "size": 956,
+    "sha256": "2e22e2d1445fe50fce17768150ff3ed303e2d85c68f61e3b7cd0b6ec54f8eb34"
+  },
+  {
+    "source": "/mnt/dev/work/.vscode/settings.json",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/.vscode/settings.json",
+    "size": 568,
+    "sha256": "c1a23ee3b98c0695ac0b40dd63f915217574a27fd83655a1d84cf519f2eed081"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/artifact-preview.pdf",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/artifact-preview.pdf",
+    "size": 19046,
+    "sha256": "be4a8da40d33f07628edf4231dea3151612d8e075092b88644bb59403c24ba0b"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/cvpr.sty",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/cvpr.sty",
+    "size": 17969,
+    "sha256": "2602473285d1a7df2a445ac89b76e1afa0acab78e056f0369d19770245190153"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/main.out",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.out",
+    "size": 2258,
+    "sha256": "c0ef0bd8bf133bbde5c2c5634f4d250226e88ccc5b4a400d8eb7f62e8bbe348d"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/artifact-preview.log",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/artifact-preview.log",
+    "size": 17405,
+    "sha256": "2ff4c639a6655481deca1975ba75da95edc66dfb512455fc649758575192eaab"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/main.synctex.gz",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.synctex.gz",
+    "size": 140122,
+    "sha256": "29f40a9e41bfec3962d839dcecd8cd9fe5dc137b7c3e233a67fef7a69cb1e0a7"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/main.pdf",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.pdf",
+    "size": 105267,
+    "sha256": "8d99e3d0c05e4216be9f8ea85a08f0c9b168e73df5c6ff831545d8712e823e8e"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/compiler.log",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/compiler.log",
+    "size": 1824,
+    "sha256": "e0ff3b02c596812573b41265058b5ccc6f135d966cd1a372be7568ccebc21dee"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/main.brf",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.brf",
+    "size": 2011,
+    "sha256": "6b14a19d9616b20754c20fdd71087c5542a4fe608835b1ec3e532c2524918472"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/main.blg",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.blg",
+    "size": 202,
+    "sha256": "a69e37f9c43e2071d914797d33190d330d95ab0cdd355743124a21b178ba7299"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/main.log",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.log",
+    "size": 24904,
+    "sha256": "799acf91308c4f3af3e6e9878298af3749eb66497aae4597c01456732f81d848"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/main.aux",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.aux",
+    "size": 25904,
+    "sha256": "a2b480e88d6274a2f62a03ffaccda837cf98ab0f2468ef28636c3d54b3e0925f"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/main.bbl",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.bbl",
+    "size": 6436,
+    "sha256": "698b8601676a19af4851f2283a4cb773b6a46790a37ac66e0cd8bca7f440d264"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/artifact-preview.tex",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/artifact-preview.tex",
+    "size": 696,
+    "sha256": "1c20503ecbf2fe32bf071bb1eb924c5515609eb376d45ac6328184ea165a06f4"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/research-r1/main.out",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.out",
+    "size": 2121,
+    "sha256": "3aab55b18ebd604d64121307f614a78e8a600589cd737178206e26b702b6283d"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/research-r1/main.pdf",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.pdf",
+    "size": 39996,
+    "sha256": "ab40912458c424efc35f0c3e46b325afd1eece53eec066d0a8ed863d705bea7f"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/research-r1/compiler.log",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/compiler.log",
+    "size": 1490,
+    "sha256": "644d366d3da0ad71e534899f29499d89551753571a28efe89c837aca54d4f16d"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/research-r1/main.brf",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.brf",
+    "size": 162,
+    "sha256": "74b37f56948dd5d4b51825db2f6cc9391dc53a995e975fa64359aabdfb76de1e"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/research-r1/main.blg",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.blg",
+    "size": 202,
+    "sha256": "a69e37f9c43e2071d914797d33190d330d95ab0cdd355743124a21b178ba7299"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/research-r1/main.log",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.log",
+    "size": 17623,
+    "sha256": "e880fb4ca805fd320dc3b5428bcdb4fcd2548e86bf88a0db28165f69bcca804b"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/research-r1/main.aux",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.aux",
+    "size": 9044,
+    "sha256": "a2c32ae1d0952456aa74886b2a906b026d810ab2479ef8da8876bf9475980855"
+  },
+  {
+    "source": "/mnt/dev/work/paper/latex/build/research-r1/main.bbl",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.bbl",
+    "size": 1413,
+    "sha256": "cd290b602efd34cdfb344d06957115a342713c5d88fa5ce158c574ac12373da1"
+  },
+  {
+    "source": "/mnt/dev/work/paper/supplementary/build/research-r1/supplementary.pdf",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/supplementary.pdf",
+    "size": 16739,
+    "sha256": "fab62a2f08b8aa28522f9f75c03e03b3e8911c47d6d02df6c777f471abcac49a"
+  },
+  {
+    "source": "/mnt/dev/work/paper/supplementary/build/research-r1/supplementary.out",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/supplementary.out",
+    "size": 444,
+    "sha256": "0a1b3e0a7d2e939df56d8728028300074be74e63690294a79eb3481492fd4b04"
+  },
+  {
+    "source": "/mnt/dev/work/paper/supplementary/build/research-r1/compiler.log",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/compiler.log",
+    "size": 870,
+    "sha256": "e7c40b1d81375913bcee9ff535ad7d7c698c378b646b7d577ded88400c8a93dd"
+  },
+  {
+    "source": "/mnt/dev/work/paper/supplementary/build/research-r1/supplementary.log",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/supplementary.log",
+    "size": 17122,
+    "sha256": "85ac764e31ffe2c2e6950c64ff5fb5f5081c400acb21724a7ef699af13d0443b"
+  },
+  {
+    "source": "/mnt/dev/work/paper/supplementary/build/research-r1/supplementary.aux",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/supplementary.aux",
+    "size": 1332,
+    "sha256": "8cfb3ac69400dfa4487529ab9830672b48d9b815bc0187fcbe05232a9ad19232"
+  },
+  {
+    "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/dependency_links.txt",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/dependency_links.txt",
+    "size": 1,
+    "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  },
+  {
+    "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/scm_file_list.json",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/scm_file_list.json",
+    "size": 49759,
+    "sha256": "1b144beb2a3c1a14c20c473e72a6a15d9352d1597756cb7351e59a93b293f5c7"
+  },
+  {
+    "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/SOURCES.txt",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/SOURCES.txt",
+    "size": 43826,
+    "sha256": "ce4ac17e6abb8c5a6a8e2236b611744890239da8de4ac4638351db586c9d02d2"
+  },
+  {
+    "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/PKG-INFO",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/PKG-INFO",
+    "size": 5460,
+    "sha256": "82474f3dd8d281c68549d9c257c7ed1a4dc0899051aae61b40a03ad6712e1e3d"
+  },
+  {
+    "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/scm_version.json",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/scm_version.json",
+    "size": 161,
+    "sha256": "d8aa9f3fe219a90480a5e17de173bd885b7cb773dfe552ab4bededf66b2a8643"
+  },
+  {
+    "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/requires.txt",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/requires.txt",
+    "size": 769,
+    "sha256": "e07a251d789401320ea4ea86014113e2458413e6ed85f15a753c9aad7a5364b2"
+  },
+  {
+    "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/top_level.txt",
+    "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/top_level.txt",
+    "size": 22,
+    "sha256": "ccf2ca53f21d98c166554e8035ac834976610c368494e7961f18bc20b13e7c37"
+  }
+]

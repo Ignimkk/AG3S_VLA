@@ -1,0 +1,49 @@
+{
+ "frame": "demo_ep0030_f092",
+ "selection": "demo gt_label frame with largest T-interior negative count guard minus plane (method ball)",
+ "T_neg_ball_off_guard_plane_frame": [
+  2,
+  272,
+  2
+ ],
+ "support_plane_z_m": 0.8213259130005915,
+ "ball": [
+  0.5457183374531335,
+  -0.3398406413271942,
+  0.8492003332431187,
+  0.05267801992574476,
+  0.8263259130005915
+ ],
+ "panels": {
+  "xz|off": {
+   "n_neg_cells": 287,
+   "n_neg_cells_in_target_hull": 0,
+   "n_cells_in_target_hull": 621
+  },
+  "xz|guard": {
+   "n_neg_cells": 1520,
+   "n_neg_cells_in_target_hull": 126,
+   "n_cells_in_target_hull": 621
+  },
+  "xz|plane": {
+   "n_neg_cells": 1200,
+   "n_neg_cells_in_target_hull": 0,
+   "n_cells_in_target_hull": 621
+  },
+  "xy|off": {
+   "n_neg_cells": 205,
+   "n_neg_cells_in_target_hull": 7,
+   "n_cells_in_target_hull": 392
+  },
+  "xy|guard": {
+   "n_neg_cells": 1341,
+   "n_neg_cells_in_target_hull": 374,
+   "n_cells_in_target_hull": 392
+  },
+  "xy|plane": {
+   "n_neg_cells": 629,
+   "n_neg_cells_in_target_hull": 7,
+   "n_cells_in_target_hull": 392
+  }
+ }
+}

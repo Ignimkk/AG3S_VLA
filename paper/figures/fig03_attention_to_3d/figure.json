@@ -1,0 +1,22 @@
+{
+  "artifact_id": "F03",
+  "status": "DEVELOPMENT_EVIDENCE",
+  "claim_ids": [
+    "C008",
+    "C009"
+  ],
+  "result_ids": [
+    "R004",
+    "R005"
+  ],
+  "render_source": "paper/figures/fig03_attention_to_3d/figure.tex",
+  "render_source_sha256": "d2f4dae8bbc192a530e43c031db5f66da4a0b1ed9938ca9b82289e6632507a5b",
+  "is_measured_result": true,
+  "caption_scope": "Implemented offline surface grounding; contact integration pending. No illustrative performance values.",
+  "input_sha256": {
+    "paper/notes/IFG_REVISION_20261015_KO.md": "fe2c16eadc6a281c6eea13357c63be49c39d322863f3ec1584c3fb757659d440",
+    "paper/figures/ifg_results/results.pdf": "7f5c916298168780a8c8330889ea9e81251c0b94659058b49eb6df105dca290b",
+    "paper/experiments/summaries/EXP002_IFG_audit.json": "ca28f1a379dd05ca717474998384a7603fb77b35493a7bab6d9c214cb78be474"
+  },
+  "updated_at": "2026-10-16"
+}

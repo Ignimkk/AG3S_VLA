@@ -47,6 +47,7 @@ _LOG = logging.getLogger(__name__)
 #: **반지름 그대로** 쓴다 (`capsule_radius_scale` · 간격 inflation 을 받지 않는다) — 이미 내접 구라
 #: 키우면 mesh 밖으로 나가고, 줄이면 덮개가 아니다. 정의는 한 곳 (`urdf_sphere_chain.EXACT_SPHERE_ROLE`).
 from AG3S.ag3s.robot_models.urdf_sphere_chain import EXACT_SPHERE_ROLE as GRIPPER_COVER_ROLE  # noqa: E402
+from AG3S.ag3s.robot_models.urdf_sphere_chain import PALM_SHELL_ROLE  # noqa: E402
 
 #: 덮개 목표: 바깥 표면점에서 구 합집합까지 이 거리(m) 안. 사용자 (T43 task) "최대 틈 약 2–3 mm".
 COVER_MAX_GAP = 0.0025
@@ -319,9 +320,10 @@ def grasp_limits(robot_model, link: str):
     지금 구에서 읽으므로 **덮개 구는 이 값을 바꾸지 않는다** (덮개가 이 경계를 지키므로 max 가 그대로)
     — 덮개를 켠 모델에서 다시 물어도 같은 경계가 나온다.
     """
+    # SC: the palm outer shell (`PALM_SHELL_ROLE`) is a cover like the T43 R one — it does not move these limits.
     keep = [i for i, (name, role) in enumerate(zip(robot_model.sphere_link_names,
                                                    robot_model.sphere_roles))
-            if name == link and role != GRIPPER_COVER_ROLE]
+            if name == link and role not in (GRIPPER_COVER_ROLE, PALM_SHELL_ROLE)]
     local = [robot_model._local_spheres[i] for i in keep]
     if not local:
         return None, None
@@ -644,7 +646,9 @@ def _greedy_exact_cover(target: np.ndarray, C: np.ndarray, R: np.ndarray, *, pad
     from scipy.spatial import cKDTree
 
     tree = cKDTree(target)
-    covers = [np.asarray(tree.query_ball_point(c, float(r) + float(pad) if pad else float(r)), np.int64)
+    # T46f A14b: `pad` < 0 (inset) 이면 구 표면에서 `−pad` 넘게 안쪽인 대상만 담긴 것으로 친다 (반지름 0 아래는 0)
+    covers = [np.asarray(tree.query_ball_point(c, max(float(r) + float(pad), 0.0) if pad else float(r)),
+                         np.int64)
               for c, r in zip(C, R)]
     gain = np.array([cv.size for cv in covers])
     uncovered = np.ones(target.shape[0], bool)
@@ -749,6 +753,22 @@ def _ilp_cover(target: np.ndarray, C: np.ndarray, R: np.ndarray, *, pad: float =
     return np.flatnonzero(res.x > 0.5), info
 
 
+#: T46f A14 — `keep_out` 상한에 잘린 후보 중 반지름이 이보다 작은 것은 버린다 (m). 0.5 mm 보다 작은 구는 덮는 양이
+#: 표본 간격보다 작아 행만 늘린다.
+KEEP_OUT_MIN_RADIUS = 0.0005
+
+
+def keep_out_clearance(points: np.ndarray, keep_out) -> np.ndarray:
+    """`min_piece max_j (A_j p + b_j)` (m) — 점에서 가장 가까운 keep-out 볼록 조각의 **지지 평면 거리**.
+
+    단위 법선이면 이것은 그 조각까지 Euclid 거리의 하한이다 (안이면 ≤ 0). 그래서 반지름이 이 값 이하인 구는
+    어느 조각과도 겹치지 않는다 (`finger_body_spheres(keep_out=)`)."""
+    out = np.full(np.asarray(points).shape[0], np.inf)
+    for A, b in keep_out:
+        out = np.minimum(out, np.max(points @ np.asarray(A).T + np.asarray(b), axis=1))
+    return out
+
+
 def _covered(target: np.ndarray, C: np.ndarray, R: np.ndarray, pad: float) -> bool:
     return bool(R.size) and bool(np.all(_gap(target, C, R) <= float(pad) + 1e-12))
 
@@ -761,6 +781,9 @@ def finger_body_spheres(surface: LinkSurface, *, overflow: float = FINGER_COVER_
                         solver: str = "greedy",
                         ilp_time_limit: float = FINGER_COVER_ILP_TIME_LIMIT,
                         use_presets: bool = True,
+                        target_mask: Optional[np.ndarray] = None,
+                        keep_out: Optional[Sequence[tuple[np.ndarray, np.ndarray]]] = None,
+                        inset: float = 0.0,
                         ) -> tuple[np.ndarray, np.ndarray, dict]:
     """`(centres, radii, report)` — 손가락 collision mesh 전부를 담고 `overflow` 넘게 나가지 않는 구.
 
@@ -775,6 +798,22 @@ def finger_body_spheres(surface: LinkSurface, *, overflow: float = FINGER_COVER_
       대상 전부 `gap` 안) 은 greedy 와 같다. 미리 푼 답 (`finger_cover_presets`, 격자 index) 이 있으면
       그 중심의 반지름을 다시 계산하고 덮임을 검사해서 쓴다 (풀지 않는다). 없거나 검사에 떨어지면 그
       자리에서 푼다 (`ilp_time_limit`). greedy 보다 많으면 greedy 답을 쓴다.
+
+    T46f A14 — 손목 (비권한) link 에 쓰는 선택지 (둘 다 기본 `None` = 위 계산 그대로):
+
+    * `target_mask` (bool, `surface.points` 길이): 덮을 대상을 이것과 **AND** 한다. 손목은 강체 이웃 (손바닥 ·
+      `link_*_arm_6`) 에 묻힌 면 (`surface.hidden`) 을 빼려고 쓴다 — 아무것도 닿을 수 없는 면이다.
+    * `keep_out` (`[(A[k,3], b[k])]`, link frame, 단위 법선 · 안 ⇔ `A p + b ≤ 0`): 구가 들어가면 안 되는 볼록
+      영역 (권한 손의 MJCF collision 껍질). 반지름 상한 = `min_piece max_j (A_j c + b_j)` — 단위 법선이라
+      `|x − c| ≤ r` 인 점은 그 면의 바깥 (또는 면 위) 에 있다. 표본이 아니라 **정확한** 보장이다. 상한이
+      `KEEP_OUT_MIN_RADIUS` 보다 작은 후보는 버린다. 그래서 그 영역에 맞닿은 대상점이 안 덮일 수 있다
+      (`n_uncovered`, 보고서가 싣는다).
+
+    T46f A14b — `inset` (m, 기본 0 = 위 계산 그대로): greedy 가 대상점을 구 표면에서 `inset` 넘게 **안쪽**일 때만 담긴
+    것으로 친다. 고르는 표본 (1 mm) 사이의 조각이 구 사이 틈으로 빠지지 않게 한다 (사용자 판정 A2 — arm_6 의 0.97 mm
+    표본). 반지름 (= 깊이 + overflow, keep-out 상한) 은 그대로라 넘침 · keep-out 보장은 같다. 안쪽으로 담지 못한
+    대상 수는 `n_short_of_inset`, 구 밖 대상 수는 `n_uncovered` (보고서). `gap` · `max_spheres` · `ilp` 와는 같이
+    쓰지 않는다.
     """
     if not overflow > 0.0:
         raise ValueError(f"overflow 는 0 보다 커야 합니다 (m): {overflow}")
@@ -782,18 +821,42 @@ def finger_body_spheres(surface: LinkSurface, *, overflow: float = FINGER_COVER_
         raise ValueError(f"gap 은 0 이상이어야 합니다 (m): {gap}")
     if solver not in FINGER_COVER_SOLVERS:
         raise ValueError(f"solver 는 {FINGER_COVER_SOLVERS} 중 하나: {solver!r}")
+    if not (inset >= 0.0 and np.isfinite(inset)):
+        raise ValueError(f"inset 은 0 이상이어야 합니다 (m): {inset}")
+    if inset > 0.0 and (gap or max_spheres is not None or solver != "greedy"):
+        raise ValueError("inset 은 gap = 0 · max_spheres 없음 · solver='greedy' 에서만 씁니다")
     if max_spheres is not None:
         if int(max_spheres) < 1 or int(max_spheres) != max_spheres:
             raise ValueError(f"max_spheres 는 1 이상의 정수: {max_spheres}")
         if solver != "greedy":
             raise ValueError("max_spheres 는 solver='greedy' 에서만 씁니다 (ilp 는 전부 덮는 최소 개수)")
     outer = finger_body_targets(surface, face_probe)
+    # 깊이는 겉면 전부 (mask 전) 로 잰다 — mask 로 뺀 면 (손목: 이웃에 묻힌 면) 까지의 거리를 놓치면 그 면 너머로
+    # overflow 보다 더 나간다. mask 가 없으면 둘은 같은 배열이다 (예전 계산 그대로).
+    depth_ref = surface.points[outer]
+    if target_mask is not None:
+        outer = outer & np.asarray(target_mask, bool).reshape(-1)
     target = surface.points[outer]
     lo, hi = surface.vertices.min(0), surface.vertices.max(0)
-    G, depth, ijk = _finger_candidates(surface, target, grid, union_eps)
+    G, depth, ijk = _finger_candidates(surface, depth_ref, grid, union_eps)
     R_all = depth + float(overflow)
-    idx, n_unc = _greedy_exact_cover(target, G, R_all, pad=gap, max_count=max_spheres)
     extra: dict = {}
+    if keep_out is not None:
+        if solver != "greedy":
+            raise ValueError("keep_out 은 solver='greedy' 에서만 씁니다")
+        cap = keep_out_clearance(G, keep_out)
+        capped = cap < R_all
+        R_all = np.minimum(R_all, cap)
+        ok = R_all >= KEEP_OUT_MIN_RADIUS
+        extra.update({"keep_out_pieces": len(tuple(keep_out)),
+                      "n_candidates": int(ok.size),
+                      "n_candidates_capped": int((capped & ok).sum()),
+                      "n_candidates_dropped": int((~ok).sum()),
+                      "n_targets_excluded_by_mask": (0 if target_mask is None else int(
+                          (finger_body_targets(surface, face_probe) & ~outer).sum()))})
+        G, depth, ijk, R_all = G[ok], depth[ok], ijk[ok], R_all[ok]
+    idx, n_unc = _greedy_exact_cover(target, G, R_all, pad=(-float(inset) if inset > 0.0 else gap),
+                                     max_count=max_spheres)
     if solver == "ilp":
         extra = {"solver": "ilp", "greedy_n_spheres": int(idx.size)}
         chosen, src = None, None
@@ -833,6 +896,9 @@ def finger_body_spheres(surface: LinkSurface, *, overflow: float = FINGER_COVER_
         n_unc = int((gaps > 1e-12).sum())
         extra.update({"gap_mm": float(gap * 1e3),
                       **({"max_spheres": int(max_spheres)} if max_spheres is not None else {})})
+    if inset > 0.0:
+        extra.update({"inset_mm": float(inset * 1e3), "n_short_of_inset": int(n_unc)})
+        n_unc = int((gaps > 1e-12).sum())
     report = {
         "n_spheres": int(R.size),
         "radius_mm": [float(R.min() * 1e3), float(R.max() * 1e3)] if R.size else None,
@@ -860,6 +926,22 @@ def finger_body_capsules(model, robot_model, links: Sequence[str], *,
     link frame 에서 mesh 가 같아 한 번만 푼다 (캐시 키 = 표본 digest). `gap` · `max_spheres` · `solver`
     는 T43 FR 의 구 수 선택지 (`finger_body_spheres`; 기본값 = FC 그대로).
     """
+    return _body_capsules(
+        model, robot_model, links, role=FINGER_BODY_ROLE, spacing=grid,
+        key=("finger_body", float(overflow), float(grid), float(gap),
+             None if max_spheres is None else int(max_spheres), str(solver)),
+        solve=lambda surf: finger_body_spheres(surf, overflow=overflow, grid=grid, gap=gap,
+                                               max_spheres=max_spheres, solver=solver))
+
+
+def _body_capsules(model, robot_model, links: Sequence[str], *, role: str, spacing: float,
+                   key: tuple, solve, surface_fn=None, link_key=None) -> tuple[list, dict]:
+    """`(capsules, report)` — link 마다 `solve(link_surface(..., spacing))` 의 구를 길이 0 `UrdfCapsule`
+    (`role`) 로. 손가락 (T43 FC) · 손바닥 (T45 A10) 몸통 구가 같이 쓴다. T46f A14 손목은 `surface_fn`
+    (`wrist_surface` — 이름이 다른 MJCF body) 과 `solve(surf, link)` 를 준다 (`role` 은 callable 도 된다).
+
+    캐시 키 = `(key[0], 표본 digest, *key[1:])` — link 이름은 넣지 않는다 (왼손 · 오른손은 link frame 에서
+    mesh 가 같아 한 번만 푼다)."""
     import hashlib
 
     from AG3S.ag3s.robot_models.urdf_sphere_chain import UrdfCapsule
@@ -867,22 +949,390 @@ def finger_body_capsules(model, robot_model, links: Sequence[str], *,
     out: list = []
     report: dict = {}
     for link in links:
-        surf = link_surface(model, robot_model, link, spacing=grid)
+        if surface_fn is None:
+            surf = link_surface(model, robot_model, link, spacing=spacing)
+        else:
+            surf = surface_fn(model, robot_model, link, spacing=spacing)
         h = hashlib.sha1()
         for a in (surf.points, surf.normals):
             h.update(np.ascontiguousarray(a).tobytes())
-        key = ("finger_body", h.hexdigest(), float(overflow), float(grid), float(gap),
-               None if max_spheres is None else int(max_spheres), str(solver))
-        hit = _CACHE.get(key)
+        cache_key = (key[0], h.hexdigest(), *key[1:])
+        if surface_fn is not None:
+            # 손목: keep-out (손 껍질) 이 link 마다 다를 수 있어 link 이름도 키에 넣는다
+            cache_key = cache_key + (str(link),)
+        if link_key is not None:
+            # T46f A14b: link 마다 다른 선택지 (inset) 를 키에 넣는다
+            cache_key = cache_key + tuple(link_key(link))
+        hit = _CACHE.get(cache_key)
         if hit is None:
-            hit = finger_body_spheres(surf, overflow=overflow, grid=grid, gap=gap,
-                                      max_spheres=max_spheres, solver=solver)
-            _CACHE[key] = hit
+            hit = solve(surf) if surface_fn is None else solve(surf, link)
+            _CACHE[cache_key] = hit
         centres, radii, rep = hit
         report[link] = {**rep, "mujoco_body": surf.body}
+        link_role = role(link) if callable(role) else role
         for c, r in zip(centres, radii):
             origin = np.eye(4)
             origin[:3, 3] = c
             out.append(UrdfCapsule(link=link, origin=origin, radius=float(r), length=0.0,
-                                   role=FINGER_BODY_ROLE))
+                                   role=link_role))
     return out, report
+
+
+# =============================================================================================
+# T45 A10 — 손바닥 몸통 구 (`serve_safe --palm-cover on`, 기본 꺼짐)
+# =============================================================================================
+#
+# 사용자 판정 (2026-10-11, T45 audit 뒤): "Palm 은 5 mm cover 를 기본 off 옵션으로 구현하고, 기존 coverage
+# 생성 코드를 재사용". 손바닥 (`ee_left/right`, MJCF `EE_BODY_*`) 은 gap-filling capsule 3 개 (r 33.0 /
+# 28.4 / 32.8 mm) 의 축선 사슬 × 배율 0.05 = 반지름 5.7–6.2 mm 구 23 개라, 손바닥 collision 겉면의 93.9 %
+# 가 구 밖이다 (최대 54.4 mm, `T45.verify.json` A2). T44d 의 손바닥–이웃 과일 접촉 8 event 전부가 구 밖
+# 24–43 mm 의 손바닥 아래 모서리였다.
+#
+# 새 알고리즘은 없다: **손가락 몸통 구 (`finger_body_spheres`) 를 손바닥 겉면에 그대로** 쓴다 (후보 = mesh
+# 안 격자점, 반지름 = 깊이 + overflow, greedy set cover 로 대상 전부 담음, 넘침 ≤ overflow). 손가락과 다른
+# 것은 표본 · 격자 간격뿐이다 — 손바닥 mesh 는 손가락의 ~8 배라 0.5 mm 격자는 너무 크다. 값은 T45 audit
+# 후보 (b) (`outputs/verify/T45/p/candidates.py`) 와 같다: 겉면 1 mm · 후보 격자 2 mm · union_eps 1 mm.
+# 결과는 손바닥 gap-filling capsule 자리에 들어간다 (손가락 몸통 구처럼 **대신한다**).
+
+from AG3S.ag3s.robot_models.urdf_sphere_chain import PALM_BODY_ROLE  # noqa: E402
+
+#: 넘친 양 (m). 사용자 판정 5 mm (2.5 mm 는 손바닥 하나 445 구 — 5 mm 돌출로 실행 문제가 확인될 때만).
+PALM_COVER_OVERFLOW = 0.005
+#: 손바닥 collision 겉면 표본 간격 (m) — `link_surface(spacing=)`.
+PALM_COVER_SPACING = 0.001
+#: 후보 중심 격자 간격 (m) — `finger_body_spheres(grid=)`.
+PALM_COVER_GRID = 0.002
+#: 겉면 표본까지 거리로 잰 깊이에서 빼는 여유 (m) — 표본 간격 1 mm 를 흡수 (`finger_body_spheres(union_eps=)`).
+PALM_COVER_UNION_EPS = 0.001
+
+
+def palm_body_capsules(model, robot_model, links: Sequence[str], *,
+                       overflow: float = PALM_COVER_OVERFLOW,
+                       spacing: float = PALM_COVER_SPACING,
+                       grid: float = PALM_COVER_GRID,
+                       union_eps: float = PALM_COVER_UNION_EPS) -> tuple[list, dict]:
+    """`(capsules, report)` — 손바닥 link 마다 몸통 구 (길이 0 `UrdfCapsule`, role `PALM_BODY_ROLE`).
+
+    `finger_body_spheres` 를 손바닥 겉면 (`link_surface(..., spacing)`) 에 그대로 적용한다 (위 머리말).
+    왼손 · 오른손은 link frame 에서 mesh 가 같아 한 번만 푼다 (CPU ~25 s)."""
+    return _body_capsules(
+        model, robot_model, links, role=PALM_BODY_ROLE, spacing=spacing,
+        key=("palm_body", float(overflow), float(spacing), float(grid), float(union_eps)),
+        solve=lambda surf: finger_body_spheres(surf, overflow=overflow, grid=grid,
+                                               union_eps=union_eps))
+
+
+# =============================================================================================
+# AG3S-PRE-CORE-TO SC — 손바닥 바깥 껍질 구 (`serve_safe --palm-shell on`, 기본 꺼짐)
+# =============================================================================================
+#
+# 왜 (DX2, `AG3S-PRE-CORE-TO.verify.json` `numbers.DX2.contact_split`): 1345 가림 케이스 3 단계 3 의 손–막대 접촉 4 건은
+# 거리장 오차 · 추종 오차가 ±5 mm 안이고 형상 오차가 10–20 mm 다. 접촉점은 전부 왼손 손바닥 mesh (`EE_BODY_L`) 의 같은
+# 자리 — link frame (x 17–30, y −27.9, z −73.2) mm, 손가락 통로 안 (|x| < 47 mm) 의 −y 쪽 바닥 모서리 (법선 (0, −0.96,
+# −0.28)) — 이고, 지금 손바닥 구 (gap-filling 축선 사슬 × 0.05) 밖 17–28 mm 다.
+#
+# palm cover (T45 A10, 손바닥 겉면 전부를 담는 몸통 구) 는 그 자리를 덮지만 1345 오렌지에서 쥐기를 잃었다 (AG3S-PALM-COVER-
+# 1345). 덮개가 하는 일을 둘로 나누면:
+#   (a) 바깥을 보는 면 (옆면 · 윗면 · 모서리) 을 덮는다 — 막대 · 이웃 물체가 닿는 곳.
+#   (b) 손가락 사이 바닥면 (손끝 쪽을 보는 면) 을 덮고 그 아래로 overflow 만큼 나온다 — 사과가 들어앉는 곳.
+# 이 덮개는 (a) 만 한다. (b) 는 지금 그대로 둔다 (손바닥 축선 구가 남는다):
+#
+# * 대상 = 손바닥 collision 겉면 표본 중 **파지 면이 아닌 것** (그리고 강체 이웃 — 손목 · FT 센서 — 에 묻힌 면이 아닌 것).
+#   파지 면 = 열린 손가락 사이 통로 (`|u · p| < half`) 에서 법선이 손끝 쪽 (`n · tip > PALM_SHELL_FACE_COS`) 인 바닥면.
+#   T43 R 의 `link_surface.grasp_face` 와 다르다 — T43 R 은 통로 안에서 지금 손바닥 구보다 손끝 쪽인 점 (`p · tip > z_lim`)
+#   전부를 파지 면으로 쳐서 접촉 자리 (바닥 모서리, `n · tip` = 0.28) 를 덮지 않는다.
+# * 계산 = palm cover 와 같다 (`finger_body_spheres`: 후보 = mesh 안 격자점, 반지름 = 깊이 + overflow, greedy 로 대상 전부
+#   담음). 더한 것은 **keep-out 하나**: 통로 아래 공간 `{|u · p| ≤ half, tip · p ≥ 바닥면}` (사과 자리) 에 구가 한 점도
+#   들어가지 않는다 (`keep_out_clearance`, 지지 평면 거리 — 표본이 아닌 정확한 보장). 그래서 통로 안에서는 어떤 껍질 구도
+#   손바닥 mesh 바닥면보다 손끝 쪽으로 나오지 않는다. 옆 (±y) · 위로는 overflow 까지 나온다.
+# * 결과는 손바닥 축선 구를 **대신하지 않고 모델 맨 뒤에 붙는다** (role `PALM_SHELL_ROLE`, 반지름 그대로). 꺼진 모델은 켠
+#   모델의 정확한 앞부분이다. link 이름은 `ee_<side>` 그대로 → 접촉 권한 · target-free 조회가 palm cover 와 같이 걸린다.
+
+#: 넘친 양 (m) — palm cover 와 같은 5 mm (사용자 판정 2026-10-11 의 손바닥 값).
+PALM_SHELL_OVERFLOW = PALM_COVER_OVERFLOW
+#: 파지 면 판정: 통로 안에서 법선 · 손끝 방향이 이 코사인보다 크면 파지 면 (T43 R `INNER_FACE_COS` 와 같은 값).
+PALM_SHELL_FACE_COS = INNER_FACE_COS
+
+
+def palm_shell_parts(surface: LinkSurface, robot_model, link: str, *,
+                     face_cos: float = PALM_SHELL_FACE_COS):
+    """`(target_mask, keep_out, info)` — 손바닥 바깥 껍질의 덮을 대상과 파지 공간 keep-out (link frame).
+
+    `target_mask` = 겉면 표본 중 파지 면 (통로 안 · 법선이 손끝 쪽) 도, 이웃 강체에 묻힌 면도 아닌 것.
+    `keep_out` = `[(A[3,3], b[3])]`: `u · p ≤ half`, `−u · p ≤ half`, `−tip · p + z_bot ≤ 0` (안 ⇔ `A p + b ≤ 0`), 즉 열린
+    손가락 사이 통로에서 손바닥 mesh 바닥면 (`z_bot = max tip · v`) 보다 손끝 쪽 공간. 통로 (`u` · `half` · `tip`) 는
+    `_palm_channel` (T43 R 과 같은 정의)."""
+    ch = _palm_channel(robot_model, link)
+    if ch is None:
+        raise ValueError(f"{link!r} 는 평행 그리퍼의 손바닥이 아닙니다 (손가락 통로 없음)")
+    u, half, tip, _ = ch
+    pts, nrm = surface.points, surface.normals
+    face = (np.abs(pts @ u) < half) & (nrm @ tip > float(face_cos))
+    mask = ~face & ~surface.hidden
+    z_bot = float(np.max(surface.vertices @ tip))
+    A = np.stack([u, -u, -tip]).astype(np.float64)
+    b = np.asarray([-half, -half, z_bot], np.float64)
+    info = {"channel_half_width_mm": float(half * 1e3), "bottom_mm": float(z_bot * 1e3),
+            "face_cos": float(face_cos), "n_grasp_face": int(face.sum()),
+            "n_hidden": int(surface.hidden.sum())}
+    return mask, [(A, b)], info
+
+
+def palm_shell_spheres(surface: LinkSurface, robot_model, link: str, *,
+                       overflow: float = PALM_SHELL_OVERFLOW,
+                       grid: float = PALM_COVER_GRID,
+                       union_eps: float = PALM_COVER_UNION_EPS,
+                       face_cos: float = PALM_SHELL_FACE_COS):
+    """`(centres, radii, report)` — 손바닥 바깥 껍질 구 (link frame). 위 머리말의 규칙."""
+    mask, keep, info = palm_shell_parts(surface, robot_model, link, face_cos=face_cos)
+    C, R, rep = finger_body_spheres(surface, overflow=overflow, grid=grid, union_eps=union_eps,
+                                    target_mask=mask, keep_out=keep)
+    A, b = keep[0]
+    into = float(np.max(R - np.max(C @ A.T + b, axis=1))) if R.size else float("-inf")
+    return C, R, {**rep, **info, "keep_out_max_entry_mm": into * 1e3}
+
+
+def palm_shell_capsules(model, robot_model, links: Sequence[str], *,
+                        overflow: float = PALM_SHELL_OVERFLOW,
+                        spacing: float = PALM_COVER_SPACING,
+                        grid: float = PALM_COVER_GRID,
+                        union_eps: float = PALM_COVER_UNION_EPS,
+                        face_cos: float = PALM_SHELL_FACE_COS) -> tuple[list, dict]:
+    """`(capsules, report)` — 손바닥 link 마다 바깥 껍질 구 (길이 0 `UrdfCapsule`, role `PALM_SHELL_ROLE`).
+
+    `robot_model` = 껍질 없는 제약 모델 (통로를 읽는다). 왼손 · 오른손은 link frame 에서 mesh 와 통로가 같으면 한 번만
+    푼다 (`_body_capsules` 캐시 키 = 표본 digest + 통로, CPU ~10 s)."""
+
+    def channel_key(link):
+        ch = _palm_channel(robot_model, link)
+        if ch is None:
+            return ("no channel",)
+        u, half, tip, _ = ch
+        return tuple(np.round(np.concatenate([u, [half], tip]), 9).tolist())
+
+    return _body_capsules(
+        model, robot_model, links, role=PALM_SHELL_ROLE, spacing=spacing,
+        key=("palm_shell", float(overflow), float(spacing), float(grid), float(union_eps),
+             float(face_cos)),
+        solve=lambda surf: palm_shell_spheres(surf, robot_model, surf.link, overflow=overflow,
+                                              grid=grid, union_eps=union_eps, face_cos=face_cos),
+        link_key=channel_key)
+
+
+# =============================================================================================
+# T46f A14 — 손목 (비권한) 충돌 형상: arm_5 · arm_6 몸통 구와 FT sensor 덮개 구 (`--links gripper_wrist`)
+# =============================================================================================
+#
+# 사용자 판정 (2026-10-13, T46f §4): DX-04 link-specific exemption 비교 전에 비권한 손목 형상을 고친다.
+#
+# * **arm_5** — URDF `link_*_arm_5` capsule (r 75 mm, 축 z ∈ [−0.225, +0.025]) 은 손목 · FT sensor · 손바닥 ·
+#   손가락까지 삼킨다. 배율 0.05 의 구 10 개 (r 14.4 mm) 중 아래쪽 구가 **손 영역 안**에 놓였다 (T46d: target 50 mm
+#   안의 arm_5 구 87 개가 권한 손 구 중심에서 11–47.5 mm). 실제 MJCF arm_5 collision mesh 는 z ≥ −81.7 mm 에서 끝난다.
+#   → URDF capsule 을 빼고 MJCF `link_*_arm_5` collision mesh 의 몸통 구로 바꾼다.
+# * **arm_6** — gap-filling capsule 3 개 × 배율 0.05 = 반지름 ~5 mm 축선 사슬 (mesh 겉면 대부분이 밖). 같은 계산으로
+#   바꾼다 (T46f §4 "보정 arm_5 · arm_6 · FT sensor").
+# * **FT sensor** — URDF 에는 link `FT_sensor_<S>` (fixed joint `tool_<side>`, `link_*_arm_6` 아래 z −0.1087,
+#   `robots/rby1/description/models/rby1a/urdf/model.urdf:951-956 · 981-986`) 가 있고 collision 이 없다. MJCF 에는 같은
+#   자리에 body `FT_SENSOR_<S>` (`rby1.xml:175 · 236`, collision mesh 117 조각) 가 있다. 제약 모델에는 구가 **하나도
+#   없었다** (T46d: MJCF FT_SENSOR 가 target 50 mm 안 3–4/18 run). → 그 URDF link `FT_sensor_<S>` 에 덮개 구를 단다.
+#   link 이름이 손바닥 · 손가락과 달라서 권한 (`contact.contact_links`) 에 들지 않는다.
+#
+# 계산은 새 것이 아니다: 손바닥 (T45 A10) 과 같은 `finger_body_spheres` (후보 = mesh 안 격자점, 반지름 = 깊이 +
+# overflow, greedy 로 대상 전부 담음) 에 두 가지만 더한다.
+#   1. 대상에서 강체 이웃 (손바닥 · arm_6 · FT) 에 묻힌 면 (`LinkSurface.hidden`) 을 뺀다 — 아무것도 닿을 수 없다.
+#   2. **권한 손 (손바닥 + 손가락) 의 MJCF collision 껍질을 keep-out 으로** — 구가 손 형상 안으로 한 점도 들어가지
+#      않는다 (`keep_out_clearance`, 정확한 보장). 손가락은 prismatic 이동 전 구간의 볼록 껍질 (열림 ∪ 닫힘 의 hull =
+#      정확한 sweep). arm_5 는 손과 사이에 revolute `*_arm_6` (z 축) 가 있어 손이 z 축으로 돈다 — 손의 z 최대값
+#      아래 반공간 전체를 keep-out 으로 둔다 (어느 회전에서도 손을 담는 보수적 영역).
+#
+# MJCF → URDF 이름: `MJCF_BODY_ALIASES` (전역, self-filter 가 쓴다) 에 `FT_sensor_L` 을 더하면 self-filter 덮개
+# (`SELF_FILTER_COVER_BODIES` 의 `FT_SENSOR_L`) 가 매달리는 link 이 바뀌어 기본 모델이 달라진다. 그래서 이 표는 여기
+# 에만 둔다.
+
+from AG3S.ag3s.robot_models.urdf_sphere_chain import WRIST_BODY_ROLE, WRIST_COVER_ROLE  # noqa: E402
+
+#: 손목 link (URDF 이름) 손마다. 순서 = 제약 모델 안 순서와 무관 (보고용).
+WRIST_COVER_LINKS = {
+    "left": ("link_left_arm_5", "link_left_arm_6", "FT_sensor_L"),
+    "right": ("link_right_arm_5", "link_right_arm_6", "FT_sensor_R"),
+}
+#: URDF link → MJCF body (이름이 다른 것만).
+WRIST_MJCF_BODY = {"FT_sensor_L": "FT_SENSOR_L", "FT_sensor_R": "FT_SENSOR_R"}
+#: FT sensor 덮개 link (role `WRIST_COVER_ROLE`). 나머지 손목 link 은 `WRIST_BODY_ROLE`.
+FT_SENSOR_LINKS = ("FT_sensor_L", "FT_sensor_R")
+#: 손 (권한) — URDF 이름. 손바닥 + 손가락 둘.
+WRIST_HAND_LINKS = {
+    "left": ("ee_left", "ee_finger_l1", "ee_finger_l2"),
+    "right": ("ee_right", "ee_finger_r1", "ee_finger_r2"),
+}
+
+#: 넘친 양 (m). 손바닥 (T45 A10) 과 같은 5 mm.
+WRIST_COVER_OVERFLOW = 0.005
+#: 겉면 표본 간격 (m) — `link_surface(spacing=)` 과 같은 뜻.
+WRIST_COVER_SPACING = 0.001
+#: 후보 중심 격자 간격 (m).
+WRIST_COVER_GRID = 0.002
+#: 겉면 표본까지 거리로 잰 깊이에서 빼는 여유 (m).
+WRIST_COVER_UNION_EPS = 0.001
+#: T46f A14b (사용자 판정 A2, 2026-10-13) — link 마다 greedy inset (m, `finger_body_spheres(inset=)`). arm_6 양손만
+#: 0.5 mm. FT sensor · arm_5 는 A14 그대로 (inset 없음, 판정 A1). 여기 없는 link 은 0.
+WRIST_COVER_INSET = {"link_left_arm_6": 0.0005, "link_right_arm_6": 0.0005}
+
+
+def side_of_wrist_link(link: str) -> str:
+    for side, links in WRIST_COVER_LINKS.items():
+        if link in links:
+            return side
+    raise KeyError(f"{link!r} 는 손목 link 가 아닙니다 ({WRIST_COVER_LINKS})")
+
+
+def _urdf_chain(robot_model, top: str, bottom: str) -> list:
+    """`top` → `bottom` URDF joint 목록 (위에서 아래로). `bottom` 이 `top` 아래가 아니면 ValueError."""
+    by_child = {j.child: j for j in robot_model.model.joints}
+    chain, cursor = [], bottom
+    while cursor != top:
+        joint = by_child.get(cursor)
+        if joint is None:
+            raise ValueError(f"URDF: {bottom!r} 는 {top!r} 아래가 아닙니다")
+        chain.append(joint)
+        cursor = joint.parent
+    return chain[::-1]
+
+
+def _urdf_fixed_transform(robot_model, top: str, bottom: str) -> np.ndarray:
+    """`T_top_bottom` — 사이 joint 가 전부 fixed 일 때만."""
+    T = np.eye(4)
+    for joint in _urdf_chain(robot_model, top, bottom):
+        if joint.type != "fixed":
+            raise ValueError(f"URDF {top!r}→{bottom!r} 사이에 움직이는 joint {joint.name!r}")
+        T = T @ np.asarray(joint.origin, np.float64)
+    return T
+
+
+def _mjcf_body_in_link(model, robot_model, link: str, body: str) -> np.ndarray:
+    """`T_link_body` — MJCF `body` 를 URDF `link` frame 으로. body 의 정적 URDF 조상이 `link` 이거나, `link` 가
+    그 조상 아래 fixed joint 로 붙은 link 이면 (FT_sensor: 조상 `link_*_arm_6`, URDF fixed `tool_*`)."""
+    from AG3S.ag3s.experiments.sources.mujoco_source import static_urdf_ancestor
+
+    found, T_anc_body = static_urdf_ancestor(model, body, robot_model.model.links)
+    if found == link:
+        return np.asarray(T_anc_body, np.float64)
+    return np.linalg.inv(_urdf_fixed_transform(robot_model, found, link)) @ T_anc_body
+
+
+def wrist_surface(model, robot_model, link: str, *, spacing: float = WRIST_COVER_SPACING
+                  ) -> LinkSurface:
+    """손목 link (URDF 이름) 의 MJCF collision 겉면 (link frame). 파지 면은 없다."""
+    body = WRIST_MJCF_BODY.get(link, link)
+    T = _mjcf_body_in_link(model, robot_model, link, body)
+    pts, nrm, verts, hulls, hidden = body_collision_surface(model, body, T, spacing)
+    return LinkSurface(link=link, body=body, points=pts, normals=nrm,
+                       grasp_face=np.zeros(pts.shape[0], bool), vertices=verts, hidden=hidden,
+                       hulls=hulls)
+
+
+def _hull_eq(verts: np.ndarray):
+    from scipy.spatial import ConvexHull
+
+    eq = ConvexHull(verts).equations
+    return eq[:, :3].copy(), eq[:, 3].copy()
+
+
+def hand_pieces(model, robot_model, side: str) -> list[np.ndarray]:
+    """권한 손 (손바닥 + 손가락 둘) 의 MJCF collision 조각 정점 (`ee_<side>` frame). 손가락은 prismatic 이동 전 구간
+    (두 한계) 의 정점을 합친다 — 볼록 조각을 선분 방향으로 쓴 sweep 의 볼록 껍질이 바로 그것이다."""
+    from AG3S.ag3s.experiments.sources.mujoco_source import MJCF_BODY_ALIASES
+    from AG3S.ag3s.robot_models.urdf_sphere_chain import _joint_transform, _NumpyBackend
+    import mujoco
+
+    be = _NumpyBackend()
+    palm, *fingers = WRIST_HAND_LINKS[side]
+    out = []
+    for link in (palm, *fingers):
+        body = MJCF_BODY_ALIASES.get(link, link)
+        bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, body)
+        T_link_body = _mjcf_body_in_link(model, robot_model, link, body)
+        if link == palm:
+            poses = [np.eye(4)]
+        else:
+            joint = next(j for j in robot_model.model.joints if j.child == link)
+            if joint.parent != palm or joint.lower is None or joint.upper is None:
+                raise ValueError(f"{link!r}: 손바닥 {palm!r} 아래 한계 있는 prismatic 이 아닙니다")
+            poses = [np.asarray(_joint_transform(joint, float(q), be), np.float64)
+                     for q in (joint.lower, joint.upper)]
+        for verts in _geom_pieces(model, bid):
+            pts = [verts @ (P @ T_link_body)[:3, :3].T + (P @ T_link_body)[:3, 3] for P in poses]
+            out.append(np.vstack(pts))
+    return out
+
+
+def hand_keep_out(model, robot_model, link: str) -> list[tuple[np.ndarray, np.ndarray]]:
+    """`link` frame 의 keep-out 볼록 영역 (`[(A, b)]`) — 같은 쪽 권한 손이 차지할 수 있는 곳.
+
+    * `link` 와 손바닥 사이가 fixed 뿐 (arm_6 · FT_sensor): 손 조각마다 볼록 껍질 (손가락은 sweep).
+    * 사이에 revolute 하나 (arm_5 ↔ arm_6, 축 z): 그 축 방향 최대값 아래 반공간 하나 — 어느 회전 각에서도 손 전체를
+      담는다 (보수적).
+    """
+    side = side_of_wrist_link(link)
+    palm = WRIST_HAND_LINKS[side][0]
+    pieces = hand_pieces(model, robot_model, side)
+    chain = _urdf_chain(robot_model, link, palm)
+    moving = [j for j in chain if j.type != "fixed"]
+    if not moving:
+        T = _urdf_fixed_transform(robot_model, link, palm)
+        return [_hull_eq(v @ T[:3, :3].T + T[:3, 3]) for v in pieces]
+    if len(moving) > 1 or moving[0].type not in ("revolute", "continuous") or chain[0] is not moving[0]:
+        raise ValueError(f"{link!r}→{palm!r}: revolute 하나가 맨 위에 있는 사슬만 지원합니다 "
+                         f"({[j.name for j in chain]})")
+    joint = moving[0]
+    T_child_palm = _urdf_fixed_transform(robot_model, joint.child, palm)
+    axis = np.asarray(joint.axis, np.float64)
+    axis = axis / np.linalg.norm(axis)
+    h = max(float(np.max((v @ T_child_palm[:3, :3].T + T_child_palm[:3, 3]) @ axis)) for v in pieces)
+    O = np.asarray(joint.origin, np.float64)
+    a_link = O[:3, :3] @ axis
+    return [(a_link.reshape(1, 3), np.asarray([-(a_link @ O[:3, 3]) - h]))]
+
+
+def wrist_body_spheres(surface: LinkSurface, keep_out, *,
+                       overflow: float = WRIST_COVER_OVERFLOW,
+                       grid: float = WRIST_COVER_GRID,
+                       union_eps: float = WRIST_COVER_UNION_EPS,
+                       inset: float = 0.0):
+    """`(centres, radii, report)` — 손목 link 의 몸통 구. `finger_body_spheres` 에 숨은 면 제외 + 손 keep-out
+    (+ T46f A14b `inset`, 기본 0)."""
+    return finger_body_spheres(surface, overflow=overflow, grid=grid, union_eps=union_eps,
+                               target_mask=~surface.hidden, keep_out=keep_out, inset=inset)
+
+
+def wrist_body_capsules(model, robot_model, links: Sequence[str], *,
+                        overflow: float = WRIST_COVER_OVERFLOW,
+                        spacing: float = WRIST_COVER_SPACING,
+                        grid: float = WRIST_COVER_GRID,
+                        union_eps: float = WRIST_COVER_UNION_EPS,
+                        keep_out_hand: bool = True,
+                        inset: Optional[Mapping[str, float]] = None) -> tuple[list, dict]:
+    """`(capsules, report)` — 손목 link 마다 몸통 구 (길이 0 `UrdfCapsule`). role 은 FT sensor 가
+    `WRIST_COVER_ROLE`, arm_5 · arm_6 이 `WRIST_BODY_ROLE`. 왼손 · 오른손 mesh 가 달라 (LINK_19/12 · FT_SENSOR_L/R)
+    link 마다 푼다 (CPU 수 초–수십 초, 프로세스당 1 회 — `_CACHE`).
+
+    `inset` (T46f A14b): `{link: m}`. `None` 이면 `WRIST_COVER_INSET` (arm_6 양손 0.5 mm), `{}` 이면 모든 link 0
+    (= A14 형상). 없는 link 은 0."""
+    inset_of = dict(WRIST_COVER_INSET if inset is None else inset)
+
+    def solve(surf, link):
+        keep = hand_keep_out(model, robot_model, link) if keep_out_hand else None
+        ins = float(inset_of.get(link, 0.0))
+        C, R, rep = wrist_body_spheres(surf, keep, overflow=overflow, grid=grid, union_eps=union_eps,
+                                       inset=ins)
+        return C, R, {**rep, "n_hidden": int(surf.hidden.sum()), "keep_out_hand": bool(keep_out_hand),
+                      "inset_mm": ins * 1e3}
+
+    return _body_capsules(
+        model, robot_model, links,
+        role=lambda link: WRIST_COVER_ROLE if link in FT_SENSOR_LINKS else WRIST_BODY_ROLE,
+        spacing=spacing,
+        key=("wrist_body", float(overflow), float(spacing), float(grid), float(union_eps),
+             bool(keep_out_hand)),
+        solve=solve, surface_fn=wrist_surface,
+        link_key=lambda link: (float(inset_of.get(link, 0.0)),))

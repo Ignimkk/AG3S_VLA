@@ -1,0 +1,69 @@
+{
+ "row1": {
+  "coarse ON (C1b' served)": {
+   "lowest_refined_row": {
+    "link": "ee_finger_l1",
+    "step": 0,
+    "clear_mm": 4.151033432597912,
+    "tier": "target_free_coarse"
+   },
+   "reference_worst_mm": -8.050162412257002,
+   "refined_worst_mm": 4.151033432597912
+  },
+  "coarse OFF (C1a composition)": {
+   "lowest_refined_row": {
+    "link": "ee_finger_l1",
+    "step": 0,
+    "clear_mm": 4.305405843548438,
+    "tier": "target_free"
+   },
+   "reference_worst_mm": 2.721200817695781,
+   "refined_worst_mm": 4.305405843548438
+  },
+  "name": "C1bp_ep12_s122",
+  "seq": 16,
+  "slice_y": 0.25179013226260066,
+  "support_z": 0.8213985446611404
+ },
+ "row2": {
+  "C2p": {
+   "name": "C2p_ep104_s1041",
+   "seq": 13,
+   "slice_y": 0.32530624791762336,
+   "d_mid_target_row7_ref_mm": 22.213554272717936,
+   "d_mid_target_row7_fin_mm": 44.11114166615453,
+   "lowest_row": {
+    "link": "link_left_arm_5",
+    "step": 7,
+    "clear_mm": -8.273298047911902,
+    "group": "arm_active"
+   },
+   "n_arm_active_rows_lt_2mm": 1,
+   "refined_worst_mm": -8.273298047911902,
+   "reference_worst_mm": -22.147536347214608,
+   "d_mid_target_row7_nonauth_free_mm": 28.455676780510576,
+   "nonauth_free_status": "violated"
+  },
+  "C1bp": {
+   "name": "C1bp_ep104_s1041",
+   "seq": 13,
+   "slice_y": 0.24094065452232027,
+   "d_mid_target_row7_ref_mm": 15.00649534609659,
+   "d_mid_target_row7_fin_mm": 18.561699956500085,
+   "lowest_row": {
+    "link": "ee_finger_l1",
+    "step": 7,
+    "clear_mm": 4.895252908660703,
+    "group": "auth"
+   },
+   "n_arm_active_rows_lt_2mm": 0,
+   "refined_worst_mm": 4.895252908660703,
+   "reference_worst_mm": -7.967470736301968
+  }
+ },
+ "source": {
+  "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef",
+  "scripts": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T115801+0900_07f0bfe7737d_74d38da5091c/verify/T44/CLA/p",
+  "note": "recorded float16 grids, recon.py scene (fidelity: worst row exact on 1451/1451 non-held chunks)"
+ }
+}

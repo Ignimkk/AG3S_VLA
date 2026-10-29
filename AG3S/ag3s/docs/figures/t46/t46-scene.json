@@ -1,0 +1,237 @@
+{
+ "source": "CL2 C1a server_constraints chunks (read-only), rebuild_target_free replay; GT label = nearest visual hull <= 5 mm",
+ "cases": {
+  "C1a_ep104_s1042:14": {
+   "target": "pear",
+   "ball_centre_m": [
+    0.5330365820897665,
+    0.2954464818805822,
+    0.8608185109895014
+   ],
+   "ball_radius_m": 0.058872999999999995,
+   "variants": {
+    "off": {
+     "n_residual_voxels_in_ball_plus_20mm": 3557,
+     "by_gt": {
+      "target": 499,
+      "other_fruit": 493,
+      "other": 2565
+     },
+     "n_collision": 121,
+     "counts": {
+      "exclusion_method": "ball_owned",
+      "n_seeds_in_ball": 1119,
+      "n_removed": 1003,
+      "n_target_owned": 668,
+      "n_kept_nontarget": 4,
+      "n_ambiguous": 112,
+      "n_unowned_removed": 335,
+      "n_unowned_kept": 0,
+      "n_sign_candidates": 4627
+     },
+     "f1": null
+    },
+    "F1": {
+     "n_residual_voxels_in_ball_plus_20mm": 3194,
+     "by_gt": {
+      "target": 140,
+      "other_fruit": 493,
+      "other": 2561
+     },
+     "n_collision": 0,
+     "counts": {
+      "exclusion_method": "ball_owned",
+      "n_seeds_in_ball": 1119,
+      "n_removed": 1119,
+      "n_target_owned": 777,
+      "n_kept_nontarget": 0,
+      "n_ambiguous": 0,
+      "n_unowned_removed": 342,
+      "n_unowned_kept": 0,
+      "n_sign_candidates": 5887
+     },
+     "f1": {
+      "method": "surface",
+      "shell_mm": 10.0,
+      "tie_mm": 5.0,
+      "applied": true,
+      "n_candidates": 13,
+      "n_protected": 0,
+      "n_dropped": 13,
+      "fit_radius_mm": 29.741,
+      "limit_mm": 39.741
+     }
+    },
+    "F2": {
+     "n_residual_voxels_in_ball_plus_20mm": 3302,
+     "by_gt": {
+      "target": 248,
+      "other_fruit": 493,
+      "other": 2561
+     },
+     "n_collision": 17,
+     "counts": {
+      "exclusion_method": "ball_owned",
+      "n_seeds_in_ball": 1119,
+      "n_removed": 1115,
+      "n_target_owned": 668,
+      "n_kept_nontarget": 4,
+      "n_ambiguous": 112,
+      "n_unowned_removed": 335,
+      "n_unowned_kept": 0,
+      "n_sign_candidates": 4739,
+      "n_ambiguous_removed": 112
+     },
+     "f1": null
+    },
+    "F1F2": {
+     "n_residual_voxels_in_ball_plus_20mm": 3194,
+     "by_gt": {
+      "target": 140,
+      "other_fruit": 493,
+      "other": 2561
+     },
+     "n_collision": 0,
+     "counts": {
+      "exclusion_method": "ball_owned",
+      "n_seeds_in_ball": 1119,
+      "n_removed": 1119,
+      "n_target_owned": 777,
+      "n_kept_nontarget": 0,
+      "n_ambiguous": 0,
+      "n_unowned_removed": 342,
+      "n_unowned_kept": 0,
+      "n_sign_candidates": 5887,
+      "n_ambiguous_removed": 0
+     },
+     "f1": {
+      "method": "surface",
+      "shell_mm": 10.0,
+      "tie_mm": 5.0,
+      "applied": true,
+      "n_candidates": 13,
+      "n_protected": 0,
+      "n_dropped": 13,
+      "fit_radius_mm": 29.741,
+      "limit_mm": 39.741
+     }
+    }
+   }
+  },
+  "C1a_ep110_s1102:19": {
+   "target": "pear",
+   "ball_centre_m": [
+    0.5127448048137587,
+    -0.29803248587915987,
+    0.8653210593247285
+   ],
+   "ball_radius_m": 0.09601000000000001,
+   "variants": {
+    "off": {
+     "n_residual_voxels_in_ball_plus_20mm": 11847,
+     "by_gt": {
+      "target": 486,
+      "other_fruit": 305,
+      "other": 11056
+     },
+     "n_collision": 171,
+     "counts": {
+      "exclusion_method": "ball_owned",
+      "n_seeds_in_ball": 1604,
+      "n_removed": 1339,
+      "n_target_owned": 885,
+      "n_kept_nontarget": 54,
+      "n_ambiguous": 211,
+      "n_unowned_removed": 454,
+      "n_unowned_kept": 0,
+      "n_sign_candidates": 15195
+     },
+     "f1": null
+    },
+    "F1": {
+     "n_residual_voxels_in_ball_plus_20mm": 11847,
+     "by_gt": {
+      "target": 486,
+      "other_fruit": 305,
+      "other": 11056
+     },
+     "n_collision": 171,
+     "counts": {
+      "exclusion_method": "ball_owned",
+      "n_seeds_in_ball": 1604,
+      "n_removed": 1339,
+      "n_target_owned": 885,
+      "n_kept_nontarget": 54,
+      "n_ambiguous": 211,
+      "n_unowned_removed": 454,
+      "n_unowned_kept": 0,
+      "n_sign_candidates": 15195
+     },
+     "f1": {
+      "method": "surface",
+      "shell_mm": 10.0,
+      "tie_mm": 5.0,
+      "applied": false,
+      "n_candidates": 0,
+      "n_protected": 0,
+      "n_dropped": 0,
+      "why": "no_surface_fit (residual 8.5 mm > 4.0 mm (the surface is not a sphere))"
+     }
+    },
+    "F2": {
+     "n_residual_voxels_in_ball_plus_20mm": 11497,
+     "by_gt": {
+      "target": 291,
+      "other_fruit": 201,
+      "other": 11005
+     },
+     "n_collision": 0,
+     "counts": {
+      "exclusion_method": "ball_owned",
+      "n_seeds_in_ball": 1604,
+      "n_removed": 1550,
+      "n_target_owned": 885,
+      "n_kept_nontarget": 54,
+      "n_ambiguous": 211,
+      "n_unowned_removed": 454,
+      "n_unowned_kept": 0,
+      "n_sign_candidates": 15406,
+      "n_ambiguous_removed": 211
+     },
+     "f1": null
+    },
+    "F1F2": {
+     "n_residual_voxels_in_ball_plus_20mm": 11497,
+     "by_gt": {
+      "target": 291,
+      "other_fruit": 201,
+      "other": 11005
+     },
+     "n_collision": 0,
+     "counts": {
+      "exclusion_method": "ball_owned",
+      "n_seeds_in_ball": 1604,
+      "n_removed": 1550,
+      "n_target_owned": 885,
+      "n_kept_nontarget": 54,
+      "n_ambiguous": 211,
+      "n_unowned_removed": 454,
+      "n_unowned_kept": 0,
+      "n_sign_candidates": 15406,
+      "n_ambiguous_removed": 211
+     },
+     "f1": {
+      "method": "surface",
+      "shell_mm": 10.0,
+      "tie_mm": 5.0,
+      "applied": false,
+      "n_candidates": 0,
+      "n_protected": 0,
+      "n_dropped": 0,
+      "why": "no_surface_fit (residual 8.5 mm > 4.0 mm (the surface is not a sphere))"
+     }
+    }
+   }
+  }
+ }
+}

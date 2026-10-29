@@ -1,0 +1,20 @@
+{
+ "label": "newly adopted (3/3, LB3)",
+ "items": [
+  {
+   "group": "banana_right",
+   "episode": 1175,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep1175_s11751/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "pear_left",
+   "episode": 880,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/LB3/runs/E0/E0_ep880_s8801/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  }
+ ],
+ "source": "/mnt/dev/work/benchmark/ag3s/docs/handoff/T43LB3.verify.json"
+}

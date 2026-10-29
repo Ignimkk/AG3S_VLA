@@ -1,0 +1,26 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/c2_prior_sphere_mask.png",
+ "frame": "T54c_ep1817_f020",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T54c_ep1817_f020.npz": "d73816c42cd7bd0cdd856de092c84f6f186d7725f2f64aa3712a276cd4ab949f"
+ },
+ "note": "Target nodes kept by the serving sphere/capsule self-filter (orange); red = target nodes the rendered mask keeps but the sphere filter removes.",
+ "is_measured_result": false,
+ "rule": "R6 example frame of the paper figure",
+ "target_nodes_sphere": 149,
+ "target_nodes_render": 183,
+ "render_nodes_absent_under_sphere": 30,
+ "camera": {
+  "lookat": [
+   0.49538925518341864,
+   -0.3144876184400392,
+   0.9011736666010908
+  ],
+  "dist": 0.36,
+  "az": 180,
+  "el": -25
+ }
+}

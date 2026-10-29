@@ -1,0 +1,234 @@
+{
+ "outcomes": {
+  "가림121|VLA|k0": "성공",
+  "가림122|VLA|k0": "성공",
+  "가림123|VLA|k0": "성공",
+  "가림121|VLA|k1": "성공",
+  "가림122|VLA|k1": "성공",
+  "가림123|VLA|k1": "성공",
+  "가림121|E3|k0": "쥐지 못함",
+  "가림122|E3|k0": "들어올린 뒤 놓침",
+  "가림123|E3|k0": "쥐지 못함",
+  "가림121|E3|k1": "들어올린 뒤 놓침",
+  "가림122|E3|k1": "들어올린 뒤 놓침",
+  "가림123|E3|k1": "성공",
+  "가림121|SCM|k0": "성공",
+  "가림122|SCM|k0": "성공",
+  "가림123|SCM|k0": "쥐지 못함",
+  "가림121|SCM|k1": "성공",
+  "가림122|SCM|k1": "쥐지 못함",
+  "가림123|SCM|k1": "성공",
+  "가림121|CORE|k0": "성공",
+  "가림122|CORE|k0": "성공",
+  "가림123|CORE|k0": "성공",
+  "가림121|CORE|k1": "성공",
+  "가림122|CORE|k1": "들어올린 뒤 놓침",
+  "가림123|CORE|k1": "성공",
+  "회귀119|VLA|k0": "성공",
+  "회귀250|VLA|k0": "성공",
+  "회귀320|VLA|k0": "성공",
+  "회귀850|VLA|k0": "성공",
+  "회귀954|VLA|k0": "금지 접촉: 이웃 과일",
+  "회귀211|VLA|k0": "금지 접촉: 이웃 과일",
+  "회귀119|VLA|k1": "성공",
+  "회귀250|VLA|k1": "성공",
+  "회귀320|VLA|k1": "성공",
+  "회귀850|VLA|k1": "성공",
+  "회귀954|VLA|k1": "금지 접촉: 이웃 과일",
+  "회귀211|VLA|k1": "성공",
+  "회귀119|E3|k0": "성공",
+  "회귀250|E3|k0": "성공",
+  "회귀320|E3|k0": "성공",
+  "회귀850|E3|k0": "못 놓음",
+  "회귀954|E3|k0": "쥐지 못함",
+  "회귀211|E3|k0": "못 놓음",
+  "회귀119|E3|k1": "성공",
+  "회귀250|E3|k1": "성공",
+  "회귀320|E3|k1": "성공",
+  "회귀850|E3|k1": "성공",
+  "회귀954|E3|k1": "쥐지 못함",
+  "회귀211|E3|k1": "쥐지 못함",
+  "회귀119|SCM|k0": "성공",
+  "회귀250|SCM|k0": "성공",
+  "회귀320|SCM|k0": "성공",
+  "회귀850|SCM|k0": "성공",
+  "회귀954|SCM|k0": "금지 접촉: 이웃 과일",
+  "회귀211|SCM|k0": "금지 접촉: 이웃 과일",
+  "회귀119|SCM|k1": "쥐지 못함",
+  "회귀250|SCM|k1": "성공",
+  "회귀320|SCM|k1": "성공",
+  "회귀850|SCM|k1": "못 놓음",
+  "회귀954|SCM|k1": "금지 접촉: 이웃 과일",
+  "회귀211|SCM|k1": "쥐지 못함",
+  "회귀119|CORE|k0": "성공",
+  "회귀250|CORE|k0": "성공",
+  "회귀320|CORE|k0": "성공",
+  "회귀850|CORE|k0": "성공",
+  "회귀954|CORE|k0": "금지 접촉: 이웃 과일",
+  "회귀211|CORE|k0": "금지 접촉: 이웃 과일",
+  "회귀119|CORE|k1": "쥐지 못함",
+  "회귀250|CORE|k1": "성공",
+  "회귀320|CORE|k1": "성공",
+  "회귀850|CORE|k1": "쥐지 못함",
+  "회귀954|CORE|k1": "금지 접촉: 이웃 과일",
+  "회귀211|CORE|k1": "성공"
+ },
+ "table_or_basket": {
+  "회귀119|VLA|k0": false,
+  "회귀250|VLA|k0": true,
+  "회귀320|VLA|k0": true,
+  "회귀850|VLA|k0": false,
+  "회귀954|VLA|k0": false,
+  "회귀211|VLA|k0": false,
+  "회귀119|VLA|k1": false,
+  "회귀250|VLA|k1": true,
+  "회귀320|VLA|k1": true,
+  "회귀850|VLA|k1": false,
+  "회귀954|VLA|k1": false,
+  "회귀211|VLA|k1": true,
+  "회귀119|E3|k0": false,
+  "회귀250|E3|k0": false,
+  "회귀320|E3|k0": false,
+  "회귀850|E3|k0": false,
+  "회귀954|E3|k0": false,
+  "회귀211|E3|k0": false,
+  "회귀119|E3|k1": false,
+  "회귀250|E3|k1": false,
+  "회귀320|E3|k1": false,
+  "회귀850|E3|k1": false,
+  "회귀954|E3|k1": false,
+  "회귀211|E3|k1": false,
+  "회귀119|SCM|k0": false,
+  "회귀250|SCM|k0": false,
+  "회귀320|SCM|k0": false,
+  "회귀850|SCM|k0": false,
+  "회귀954|SCM|k0": false,
+  "회귀211|SCM|k0": false,
+  "회귀119|SCM|k1": false,
+  "회귀250|SCM|k1": false,
+  "회귀320|SCM|k1": false,
+  "회귀850|SCM|k1": false,
+  "회귀954|SCM|k1": false,
+  "회귀211|SCM|k1": false,
+  "회귀119|CORE|k0": false,
+  "회귀250|CORE|k0": false,
+  "회귀320|CORE|k0": false,
+  "회귀850|CORE|k0": false,
+  "회귀954|CORE|k0": false,
+  "회귀211|CORE|k0": false,
+  "회귀119|CORE|k1": false,
+  "회귀250|CORE|k1": false,
+  "회귀320|CORE|k1": false,
+  "회귀850|CORE|k1": false,
+  "회귀954|CORE|k1": false,
+  "회귀211|CORE|k1": false
+ },
+ "totals": {
+  "가림 기둥 (3 장면 × 2)|VLA": {
+   "k": 6,
+   "n": 6,
+   "wilson95": [
+    0.61,
+    1.0
+   ]
+  },
+  "가림 기둥 (3 장면 × 2)|E3": {
+   "k": 1,
+   "n": 6,
+   "wilson95": [
+    0.03,
+    0.564
+   ]
+  },
+  "가림 기둥 (3 장면 × 2)|SCM": {
+   "k": 4,
+   "n": 6,
+   "wilson95": [
+    0.3,
+    0.903
+   ]
+  },
+  "가림 기둥 (3 장면 × 2)|CORE": {
+   "k": 5,
+   "n": 6,
+   "wilson95": [
+    0.436,
+    0.97
+   ]
+  },
+  "장애물 없음 (6 장면 × 2)|VLA": {
+   "k": 9,
+   "n": 12,
+   "wilson95": [
+    0.468,
+    0.911
+   ]
+  },
+  "장애물 없음 (6 장면 × 2)|E3": {
+   "k": 7,
+   "n": 12,
+   "wilson95": [
+    0.32,
+    0.807
+   ]
+  },
+  "장애물 없음 (6 장면 × 2)|SCM": {
+   "k": 6,
+   "n": 12,
+   "wilson95": [
+    0.254,
+    0.746
+   ]
+  },
+  "장애물 없음 (6 장면 × 2)|CORE": {
+   "k": 7,
+   "n": 12,
+   "wilson95": [
+    0.32,
+    0.807
+   ]
+  }
+ },
+ "type_counts": {
+  "VLA": {
+   "성공": 15,
+   "금지 접촉: 이웃 과일": 3
+  },
+  "E3": {
+   "쥐지 못함": 5,
+   "들어올린 뒤 놓침": 3,
+   "성공": 8,
+   "못 놓음": 2
+  },
+  "SCM": {
+   "성공": 10,
+   "쥐지 못함": 4,
+   "못 놓음": 1,
+   "금지 접촉: 이웃 과일": 3
+  },
+  "CORE": {
+   "성공": 12,
+   "들어올린 뒤 놓침": 1,
+   "쥐지 못함": 2,
+   "금지 접촉: 이웃 과일": 3
+  }
+ },
+ "sources": {
+  "VLA|0": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/RP/agg_E3_closed_occ_VLA_rep1.json",
+  "VLA|1": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/agg_occ_VLA_k1.json",
+  "E3|0": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_occ/e3_runs.json",
+  "E3|1": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/agg_occ_E3_k1.json",
+  "SCM|0": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/agg_occ_SCM_k0.json",
+  "SCM|1": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/agg_occ_SCM_k1.json",
+  "CORE|0": "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/OCC/agg_occ_k0.json",
+  "CORE|1": "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/OCC/agg_occ_k1.json",
+  "VLA|0|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/RP/VLA_rep1/agg/e3_closed_loop_reg.json",
+  "VLA|1|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_VLA_k1/agg/e3_closed_loop_reg.json",
+  "E3|0|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_reg/agg/e3_closed_loop_reg.json",
+  "E3|1|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3_k1/agg/e3_closed_loop_reg.json",
+  "SCM|0|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_SCM_k0/agg/e3_closed_loop_reg.json",
+  "SCM|1|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_SCM_k1/agg/e3_closed_loop_reg.json",
+  "CORE|0|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/REG_k0/agg/e3_closed_loop_reg.json",
+  "CORE|1|reg": "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958/verify/AG3S-CORE-EVAL/REG_k1/agg/e3_closed_loop_reg.json"
+ }
+}

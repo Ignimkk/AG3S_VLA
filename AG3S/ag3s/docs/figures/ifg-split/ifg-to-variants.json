@@ -1,0 +1,380 @@
+{
+ "episodes": [
+  56,
+  211,
+  1837,
+  320,
+  753,
+  954,
+  309,
+  250,
+  1668,
+  126
+ ],
+ "success": {
+  "E0": 10,
+  "SPL": 7,
+  "SPLN": 7,
+  "SPLD": 7,
+  "TOA2": 7,
+  "TOA3": 7
+ },
+ "table": {
+  "E0": {
+   "56": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "211": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "1837": {
+    "primary": true,
+    "failure_mode": "slip_in_transport",
+    "hold_chunks": 0
+   },
+   "320": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "753": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "954": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "309": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "250": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "1668": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "126": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   }
+  },
+  "SPL": {
+   "56": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "211": {
+    "primary": false,
+    "failure_mode": "regrasp",
+    "hold_chunks": 6
+   },
+   "1837": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 15
+   },
+   "320": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0
+   },
+   "753": {
+    "primary": true,
+    "failure_mode": "slip_at_lift",
+    "hold_chunks": 1
+   },
+   "954": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0
+   },
+   "309": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "250": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "1668": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "126": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   }
+  },
+  "SPLN": {
+   "56": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "211": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 7
+   },
+   "1837": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0
+   },
+   "320": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 7
+   },
+   "753": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "954": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0
+   },
+   "309": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "250": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "1668": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 2
+   },
+   "126": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   }
+  },
+  "SPLD": {
+   "56": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 5
+   },
+   "211": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 9
+   },
+   "1837": {
+    "primary": true,
+    "failure_mode": "slip_in_transport",
+    "hold_chunks": 1
+   },
+   "320": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 2
+   },
+   "753": {
+    "primary": true,
+    "failure_mode": "regrasp",
+    "hold_chunks": 7
+   },
+   "954": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 4
+   },
+   "309": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "250": {
+    "primary": true,
+    "failure_mode": "slip_in_transport",
+    "hold_chunks": 7
+   },
+   "1668": {
+    "primary": false,
+    "failure_mode": "not_placed",
+    "hold_chunks": 0
+   },
+   "126": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   }
+  },
+  "TOA2": {
+   "56": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 4
+   },
+   "211": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 63
+   },
+   "1837": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 4
+   },
+   "320": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "753": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "954": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0
+   },
+   "309": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "250": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 3
+   },
+   "1668": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 8
+   },
+   "126": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   }
+  },
+  "TOA3": {
+   "56": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "211": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 49
+   },
+   "1837": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 4
+   },
+   "320": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "753": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   },
+   "954": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0
+   },
+   "309": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 0
+   },
+   "250": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 2
+   },
+   "1668": {
+    "primary": false,
+    "failure_mode": "no_grasp",
+    "hold_chunks": 2
+   },
+   "126": {
+    "primary": true,
+    "failure_mode": "ok",
+    "hold_chunks": 1
+   }
+  }
+ },
+ "toa3_fallback": {
+  "56": {
+   "plain": 1,
+   "anchored": 1
+  },
+  "211": {
+   "plain": 15,
+   "anchored": 36
+  },
+  "1837": {
+   "plain": 0,
+   "anchored": 1
+  },
+  "320": {
+   "plain": 1,
+   "anchored": 0
+  },
+  "753": {
+   "plain": 0,
+   "anchored": 1
+  },
+  "954": {
+   "plain": 0,
+   "anchored": 0
+  },
+  "309": {
+   "plain": 0,
+   "anchored": 0
+  },
+  "250": {
+   "plain": 1,
+   "anchored": 0
+  },
+  "1668": {
+   "plain": 1,
+   "anchored": 2
+  },
+  "126": {
+   "plain": 0,
+   "anchored": 1
+  }
+ },
+ "definitions": "IFG TrajOpt variants on the 10 VLA-alone-success apple scenes (CPU only, read only).\n\n  python3 -m AG3S.ag3s.experiments.studies.ifg_to_variants --run <IFG-APPLE run> --fig AG3S/ag3s/docs/figures/ifg-split\n\nConfigurations (same episode / seed): VLA alone (IFG-APPLE E0), target split (IFG-APPLE-SPLIT SPL), look-ahead off (IFG-APPLE-LOOKAHEADOFF\nSPLN), deflection-rate term only after the grasp (IFG-APPLE-TOB SPLD), grasp-goal anchor (IFG-APPLE-TOA2 SPLA), anchor + safety-first\nfallback (IFG-APPLE-TOA3 SPLA). Per run from the agg3.py copies in each kit's agg folder: locked contact-free success, failure mode,\nHOLD chunks. Per anchor run, from the server records: requests whose TrajOpt result fell back to the plain solve (TOA3).\n",
+ "script": "AG3S/ag3s/experiments/studies/ifg_to_variants.py"
+}

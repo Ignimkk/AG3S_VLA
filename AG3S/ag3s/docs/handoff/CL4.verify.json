@@ -1,0 +1,2202 @@
+{
+ "_comment": "lead (A). numbers and paths only.",
+ "step": "CL4",
+ "date": "2026-10-15",
+ "task": "handoff/CL4.task.md",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T231714+0900_150d429b86ff_17b0cec4fb97",
+ "raw_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T231714+0900_150d429b86ff_17b0cec4fb97/verify/CL4",
+ "snapshot": "git archive 150d429b",
+ "execution": {
+  "gpu": "2026-10-14T16:36:52Z - 23:40:11Z (lanes v2, 10 server starts)",
+  "runs": 90,
+  "done": 90,
+  "infra_failed": 0,
+  "cuRobo_baseline_match": true
+ },
+ "definitions": {
+  "success_ct": "task success (crate) without disallowed contact (hand-fruit_other, robot_other-target, robot_other-fruit_other) — agg_cl",
+  "P_H": "t60_termination Params defaults (user decision): P main, H mandatory",
+  "lte_ne_global": "lte_requery: non-authorized row violate flag differs between LTE and global at margin m (0 / 10 / 50 mm); field-level re-query, auxiliary",
+  "before": "CL2 C0 (V11AB) and CL3 C1a / C1aF1 — gripper geometry 270 spheres, palm cover off, no nonauthorized margin flag, no W1, different snapshots; same 18 pairs"
+ },
+ "numbers": {
+  "arms": {
+   "X1": {
+    "success": 10,
+    "success_ct": 10,
+    "P_success_ct": 10,
+    "H": {
+     "success": 4,
+     "success_ct": 4,
+     "success_ct_fruit": 4,
+     "runs_any_disallowed": 2,
+     "disallowed_rows": {
+      "hand-fruit_other": 38,
+      "robot_other-target": 0,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks": 18,
+     "hold_runs": 8,
+     "hold_kinds": {
+      "uncertified": 1,
+      "collision": 17
+     },
+     "rows_in_window": 9559,
+     "completion_s_median": 18.866666666666667,
+     "completion_s_mean": 19.316666666666666,
+     "n_completed": 4,
+     "na": {
+      "n_runs": 18,
+      "min_mm_FT": 58.54351441535769,
+      "min_mm_A5": 100.0,
+      "min_mm_A6": 100.0,
+      "min_mm_NA": 40.10929543220704,
+      "min_mm_HAND": -5.035633739985494,
+      "runs_le50_FT": 0,
+      "runs_le50_A5": 0,
+      "runs_le50_A6": 0,
+      "runs_le50_NA": 1,
+      "runs_le50_HAND": 18,
+      "runs_contact_NA": 0,
+      "runs_contact_FT": 0,
+      "runs_contact_HAND": 17,
+      "contact_rows_NA": 0,
+      "contact_rows_FT": 0,
+      "contact_rows_HAND": 2124
+     },
+     "to": {
+      "to_status": {
+       "feasible": 980,
+       "optimal": 189,
+       "violated": 27
+      },
+      "time_budget_hit": 0,
+      "run_median_to_solve_ms": {
+       "n": 18,
+       "median": 902.1067502908409,
+       "p90": 1125.3406773786992,
+       "mean": 938.9881412757354,
+       "max": 1162.379662040621
+      }
+     }
+    },
+    "robust_grasp": 10,
+    "grasp_final": 13,
+    "failure_modes": {
+     "ok": 10,
+     "no_grasp": 5,
+     "regrasp": 2,
+     "slip_in_transport": 1
+    },
+    "contact_runs": {
+     "hand-fruit_other": 2,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hold_chunks": 18,
+    "hold_runs": 8,
+    "hold_kinds": {
+     "uncertified": 1,
+     "collision": 17
+    },
+    "trailing_hold_runs": 1,
+    "run_wall_s_median": 391.0,
+    "to_status": {
+     "feasible": 1032,
+     "optimal": 291,
+     "violated": 27
+    },
+    "time_budget_hit_chunks": 0,
+    "nonauth_target_min_mm_S1": {
+     "min": 0.05854351441535769,
+     "median": 0.06802902097581379,
+     "runs_le50": 18
+    },
+    "FT_target_min_mm_S1": {
+     "min": 0.05854351441535769,
+     "median": 0.06802902097581379
+    },
+    "nonauth_target_contact_runs_any_window": 0,
+    "FT_target_contact_runs_any_window": 0,
+    "lte_active_chunks": 777,
+    "lte_ne_global_chunks": {
+     "m0": 0,
+     "m10": 0,
+     "m50": 39
+    },
+    "nonauth_rows_diff5_near_total": 14441
+   },
+   "X2": {
+    "success": 7,
+    "success_ct": 5,
+    "P_success_ct": 5,
+    "H": {
+     "success": 3,
+     "success_ct": 3,
+     "success_ct_fruit": 3,
+     "runs_any_disallowed": 3,
+     "disallowed_rows": {
+      "hand-fruit_other": 54,
+      "robot_other-target": 0,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks": 28,
+     "hold_runs": 14,
+     "hold_kinds": {
+      "collision": 28
+     },
+     "rows_in_window": 9917,
+     "completion_s_median": 20.2,
+     "completion_s_mean": 20.377777777777776,
+     "n_completed": 3,
+     "na": {
+      "n_runs": 18,
+      "min_mm_FT": 37.17263068933135,
+      "min_mm_A5": 100.0,
+      "min_mm_A6": 84.54991204069913,
+      "min_mm_NA": 13.013417918427116,
+      "min_mm_HAND": -5.504056026493429,
+      "runs_le50_FT": 2,
+      "runs_le50_A5": 0,
+      "runs_le50_A6": 0,
+      "runs_le50_NA": 3,
+      "runs_le50_HAND": 18,
+      "runs_contact_NA": 0,
+      "runs_contact_FT": 0,
+      "runs_contact_HAND": 17,
+      "contact_rows_NA": 0,
+      "contact_rows_FT": 0,
+      "contact_rows_HAND": 1502
+     },
+     "to": {
+      "to_status": {
+       "feasible": 964,
+       "violated": 39,
+       "optimal": 237
+      },
+      "time_budget_hit": 0,
+      "run_median_to_solve_ms": {
+       "n": 18,
+       "median": 976.0518376715481,
+       "p90": 1137.4407197348773,
+       "mean": 981.0912345743013,
+       "max": 1187.5013816170394
+      }
+     }
+    },
+    "robust_grasp": 4,
+    "grasp_final": 8,
+    "failure_modes": {
+     "slip_in_transport": 2,
+     "ok": 4,
+     "no_grasp": 10,
+     "slip_at_lift": 1,
+     "regrasp": 1
+    },
+    "contact_runs": {
+     "hand-fruit_other": 3,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0
+    },
+    "hold_chunks": 28,
+    "hold_runs": 14,
+    "hold_kinds": {
+     "collision": 28
+    },
+    "trailing_hold_runs": 0,
+    "run_wall_s_median": 406.5,
+    "to_status": {
+     "feasible": 1037,
+     "violated": 39,
+     "optimal": 274
+    },
+    "time_budget_hit_chunks": 0,
+    "nonauth_target_min_mm_S1": {
+     "min": 0.037172630689331104,
+     "median": 0.06802764147914847,
+     "runs_le50": 18
+    },
+    "FT_target_min_mm_S1": {
+     "min": 0.03717263068933135,
+     "median": 0.06803613021639163
+    },
+    "nonauth_target_contact_runs_any_window": 0,
+    "FT_target_contact_runs_any_window": 0,
+    "lte_active_chunks": 968,
+    "lte_ne_global_chunks": {
+     "m0": 0,
+     "m10": 1,
+     "m50": 53
+    },
+    "nonauth_rows_diff5_near_total": 16635
+   },
+   "X3": {
+    "success": 9,
+    "success_ct": 7,
+    "P_success_ct": 7,
+    "H": {
+     "success": 5,
+     "success_ct": 5,
+     "success_ct_fruit": 5,
+     "runs_any_disallowed": 4,
+     "disallowed_rows": {
+      "hand-fruit_other": 54,
+      "robot_other-target": 2,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks": 32,
+     "hold_runs": 12,
+     "hold_kinds": {
+      "collision": 32
+     },
+     "rows_in_window": 9301,
+     "completion_s_median": 19.2,
+     "completion_s_mean": 20.013333333333335,
+     "n_completed": 5,
+     "na": {
+      "n_runs": 18,
+      "min_mm_FT": 67.76924288848507,
+      "min_mm_A5": 100.0,
+      "min_mm_A6": 100.0,
+      "min_mm_NA": -9.312044284994776,
+      "min_mm_HAND": -5.901976271326041,
+      "runs_le50_FT": 0,
+      "runs_le50_A5": 0,
+      "runs_le50_A6": 0,
+      "runs_le50_NA": 2,
+      "runs_le50_HAND": 18,
+      "runs_contact_NA": 1,
+      "runs_contact_FT": 0,
+      "runs_contact_HAND": 17,
+      "contact_rows_NA": 1,
+      "contact_rows_FT": 0,
+      "contact_rows_HAND": 1845
+     },
+     "to": {
+      "to_status": {
+       "feasible": 928,
+       "optimal": 187,
+       "violated": 49
+      },
+      "time_budget_hit": 0,
+      "run_median_to_solve_ms": {
+       "n": 18,
+       "median": 985.818263143301,
+       "p90": 1239.9674841668457,
+       "mean": 1025.8415375525753,
+       "max": 1246.2405506521463
+      }
+     }
+    },
+    "robust_grasp": 7,
+    "grasp_final": 11,
+    "failure_modes": {
+     "ok": 7,
+     "no_grasp": 7,
+     "slip_at_lift": 1,
+     "regrasp": 2,
+     "slip_in_transport": 1
+    },
+    "contact_runs": {
+     "hand-fruit_other": 3,
+     "robot_other-target": 1,
+     "robot_other-fruit_other": 0
+    },
+    "hold_chunks": 33,
+    "hold_runs": 13,
+    "hold_kinds": {
+     "collision": 32,
+     "uncertified": 1
+    },
+    "trailing_hold_runs": 0,
+    "run_wall_s_median": 390.5,
+    "to_status": {
+     "feasible": 1001,
+     "optimal": 299,
+     "violated": 50
+    },
+    "time_budget_hit_chunks": 0,
+    "nonauth_target_min_mm_S1": {
+     "min": 0.06776925370937675,
+     "median": 0.06982060941208418,
+     "runs_le50": 18
+    },
+    "FT_target_min_mm_S1": {
+     "min": 0.06776924288848507,
+     "median": 0.06982060938501852
+    },
+    "nonauth_target_contact_runs_any_window": 1,
+    "FT_target_contact_runs_any_window": 0,
+    "lte_active_chunks": 865,
+    "lte_ne_global_chunks": {
+     "m0": 0,
+     "m10": 0,
+     "m50": 51
+    },
+    "nonauth_rows_diff5_near_total": 1685
+   },
+   "X4": {
+    "success": 9,
+    "success_ct": 9,
+    "P_success_ct": 9,
+    "H": {
+     "success": 4,
+     "success_ct": 4,
+     "success_ct_fruit": 4,
+     "runs_any_disallowed": 4,
+     "disallowed_rows": {
+      "hand-fruit_other": 13,
+      "robot_other-target": 12,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks": 60,
+     "hold_runs": 5,
+     "hold_kinds": {
+      "collision": 60,
+      "unverified": 6
+     },
+     "rows_in_window": 9716,
+     "completion_s_median": 21.5,
+     "completion_s_mean": 21.933333333333337,
+     "n_completed": 4,
+     "na": {
+      "n_runs": 18,
+      "min_mm_FT": 46.751434507759974,
+      "min_mm_A5": 100.0,
+      "min_mm_A6": 94.02855865324949,
+      "min_mm_NA": -54.47342904014057,
+      "min_mm_HAND": -5.316043589030633,
+      "runs_le50_FT": 1,
+      "runs_le50_A5": 0,
+      "runs_le50_A6": 0,
+      "runs_le50_NA": 3,
+      "runs_le50_HAND": 18,
+      "runs_contact_NA": 1,
+      "runs_contact_FT": 0,
+      "runs_contact_HAND": 18,
+      "contact_rows_NA": 9,
+      "contact_rows_FT": 0,
+      "contact_rows_HAND": 2438
+     },
+     "to": {
+      "to_status": {
+       "feasible": 973,
+       "optimal": 176,
+       "violated": 67
+      },
+      "time_budget_hit": 0,
+      "run_median_to_solve_ms": {
+       "n": 18,
+       "median": 887.2774308547378,
+       "p90": 1101.7667750827968,
+       "mean": 942.3397152632889,
+       "max": 1211.4555537700653
+      }
+     }
+    },
+    "robust_grasp": 7,
+    "grasp_final": 12,
+    "failure_modes": {
+     "ok": 7,
+     "slip_in_transport": 3,
+     "no_grasp": 6,
+     "regrasp": 2
+    },
+    "contact_runs": {
+     "hand-fruit_other": 2,
+     "robot_other-target": 2,
+     "robot_other-fruit_other": 0
+    },
+    "hold_chunks": 60,
+    "hold_runs": 5,
+    "hold_kinds": {
+     "collision": 60,
+     "unverified": 6
+    },
+    "trailing_hold_runs": 1,
+    "run_wall_s_median": 416.0,
+    "to_status": {
+     "feasible": 1026,
+     "optimal": 257,
+     "violated": 67
+    },
+    "time_budget_hit_chunks": 0,
+    "nonauth_target_min_mm_S1": {
+     "min": 0.04728523518609849,
+     "median": 0.06858168508325832,
+     "runs_le50": 18
+    },
+    "FT_target_min_mm_S1": {
+     "min": 0.04728523518609849,
+     "median": 0.06858168508325832
+    },
+    "nonauth_target_contact_runs_any_window": 1,
+    "FT_target_contact_runs_any_window": 0,
+    "lte_active_chunks": 840,
+    "lte_ne_global_chunks": {
+     "m0": 0,
+     "m10": 0,
+     "m50": 95
+    },
+    "nonauth_rows_diff5_near_total": 42781
+   },
+   "G4": {
+    "success": 7,
+    "success_ct": 7,
+    "P_success_ct": 7,
+    "H": {
+     "success": 4,
+     "success_ct": 4,
+     "success_ct_fruit": 4,
+     "runs_any_disallowed": 5,
+     "disallowed_rows": {
+      "hand-fruit_other": 67,
+      "robot_other-target": 555,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks": 77,
+     "hold_runs": 4,
+     "hold_kinds": {
+      "collision": 77,
+      "unverified": 45
+     },
+     "rows_in_window": 9773,
+     "completion_s_median": 22.133333333333333,
+     "completion_s_mean": 22.883333333333336,
+     "n_completed": 4,
+     "na": {
+      "n_runs": 18,
+      "min_mm_FT": 35.19058766490502,
+      "min_mm_A5": 100.0,
+      "min_mm_A6": 81.07552797440552,
+      "min_mm_NA": -15.315411143951653,
+      "min_mm_HAND": -5.489981463272002,
+      "runs_le50_FT": 1,
+      "runs_le50_A5": 0,
+      "runs_le50_A6": 0,
+      "runs_le50_NA": 4,
+      "runs_le50_HAND": 18,
+      "runs_contact_NA": 3,
+      "runs_contact_FT": 0,
+      "runs_contact_HAND": 18,
+      "contact_rows_NA": 549,
+      "contact_rows_FT": 0,
+      "contact_rows_HAND": 2253
+     },
+     "to": {
+      "to_status": {
+       "feasible": 870,
+       "violated": 98,
+       "optimal": 256
+      },
+      "time_budget_hit": 0,
+      "run_median_to_solve_ms": {
+       "n": 18,
+       "median": 914.0416991431266,
+       "p90": 1238.04731965065,
+       "mean": 966.7836765293032,
+       "max": 1291.9173720292747
+      }
+     }
+    },
+    "robust_grasp": 6,
+    "grasp_final": 12,
+    "failure_modes": {
+     "ok": 6,
+     "slip_in_transport": 3,
+     "slip_at_lift": 1,
+     "no_grasp": 6,
+     "regrasp": 2
+    },
+    "contact_runs": {
+     "hand-fruit_other": 2,
+     "robot_other-target": 3,
+     "robot_other-fruit_other": 0
+    },
+    "hold_chunks": 77,
+    "hold_runs": 4,
+    "hold_kinds": {
+     "collision": 77,
+     "unverified": 45
+    },
+    "trailing_hold_runs": 1,
+    "run_wall_s_median": 420.0,
+    "to_status": {
+     "feasible": 870,
+     "violated": 98,
+     "optimal": 382
+    },
+    "time_budget_hit_chunks": 0,
+    "nonauth_target_min_mm_S1": {
+     "min": 0.035190587664905404,
+     "median": 0.069122356090039,
+     "runs_le50": 18
+    },
+    "FT_target_min_mm_S1": {
+     "min": 0.035190587664905015,
+     "median": 0.06912236084479584
+    },
+    "nonauth_target_contact_runs_any_window": 3,
+    "FT_target_contact_runs_any_window": 0,
+    "lte_active_chunks": 835,
+    "lte_ne_global_chunks": {
+     "m0": 0,
+     "m10": 0,
+     "m50": 51
+    },
+    "nonauth_rows_diff5_near_total": 12538
+   }
+  },
+  "pairs_agg": {
+   "X1_vs_X2": {
+    "success_ct": {
+     "n_pairs": 18,
+     "both": 4,
+     "A_only": 6,
+     "B_only": 1,
+     "neither": 7,
+     "A_total": 10,
+     "B_total": 5,
+     "A": "X1",
+     "B": "X2",
+     "mcnemar_exact_p": 0.125,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep11_s111",
+      "ep30_s301",
+      "ep110_s1101",
+      "ep110_s1102",
+      "ep123_s1232"
+     ],
+     "B_only_keys": [
+      "ep3_s31"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "success": {
+     "n_pairs": 18,
+     "both": 5,
+     "A_only": 5,
+     "B_only": 2,
+     "neither": 6,
+     "A_total": 10,
+     "B_total": 7,
+     "A": "X1",
+     "B": "X2",
+     "mcnemar_exact_p": 0.453125,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep11_s111",
+      "ep30_s301",
+      "ep110_s1101",
+      "ep123_s1232"
+     ],
+     "B_only_keys": [
+      "ep3_s31",
+      "ep3_s32"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "robust_grasp": {
+     "n_pairs": 18,
+     "both": 4,
+     "A_only": 6,
+     "B_only": 0,
+     "neither": 8,
+     "A_total": 10,
+     "B_total": 4,
+     "A": "X1",
+     "B": "X2",
+     "mcnemar_exact_p": 0.03125,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep11_s111",
+      "ep12_s121",
+      "ep30_s301",
+      "ep110_s1101",
+      "ep123_s1232"
+     ],
+     "B_only_keys": [],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "first_grasp_ok": {
+     "n_pairs": 18,
+     "both": 6,
+     "A_only": 5,
+     "B_only": 1,
+     "neither": 6,
+     "A_total": 11,
+     "B_total": 7,
+     "A": "X1",
+     "B": "X2",
+     "mcnemar_exact_p": 0.21875,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep11_s111",
+      "ep30_s301",
+      "ep54_s541",
+      "ep110_s1101"
+     ],
+     "B_only_keys": [
+      "ep3_s31"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "grasp": {
+     "n_pairs": 18,
+     "both": 8,
+     "A_only": 5,
+     "B_only": 0,
+     "neither": 5,
+     "A_total": 13,
+     "B_total": 8,
+     "A": "X1",
+     "B": "X2",
+     "mcnemar_exact_p": 0.0625,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep11_s111",
+      "ep30_s301",
+      "ep54_s541",
+      "ep110_s1101"
+     ],
+     "B_only_keys": [],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "pre_release_new_contact": {
+     "n_pairs": 18,
+     "both": 1,
+     "A_only": 1,
+     "B_only": 2,
+     "neither": 14,
+     "A_total": 2,
+     "B_total": 3,
+     "A": "X1",
+     "B": "X2",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep3_s31"
+     ],
+     "B_only_keys": [
+      "ep110_s1101",
+      "ep110_s1102"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "any_new_contact": {
+     "n_pairs": 18,
+     "both": 1,
+     "A_only": 1,
+     "B_only": 2,
+     "neither": 14,
+     "A_total": 2,
+     "B_total": 3,
+     "A": "X1",
+     "B": "X2",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep3_s31"
+     ],
+     "B_only_keys": [
+      "ep110_s1101",
+      "ep110_s1102"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    }
+   },
+   "X2_vs_X3": {
+    "success_ct": {
+     "n_pairs": 18,
+     "both": 5,
+     "A_only": 0,
+     "B_only": 2,
+     "neither": 11,
+     "A_total": 5,
+     "B_total": 7,
+     "A": "X2",
+     "B": "X3",
+     "mcnemar_exact_p": 0.5,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep0_s2",
+      "ep11_s111"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "success": {
+     "n_pairs": 18,
+     "both": 7,
+     "A_only": 0,
+     "B_only": 2,
+     "neither": 9,
+     "A_total": 7,
+     "B_total": 9,
+     "A": "X2",
+     "B": "X3",
+     "mcnemar_exact_p": 0.5,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep0_s2",
+      "ep11_s111"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "robust_grasp": {
+     "n_pairs": 18,
+     "both": 4,
+     "A_only": 0,
+     "B_only": 3,
+     "neither": 11,
+     "A_total": 4,
+     "B_total": 7,
+     "A": "X2",
+     "B": "X3",
+     "mcnemar_exact_p": 0.25,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep0_s2",
+      "ep11_s111",
+      "ep12_s121"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "first_grasp_ok": {
+     "n_pairs": 18,
+     "both": 7,
+     "A_only": 0,
+     "B_only": 2,
+     "neither": 9,
+     "A_total": 7,
+     "B_total": 9,
+     "A": "X2",
+     "B": "X3",
+     "mcnemar_exact_p": 0.5,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep0_s2",
+      "ep11_s111"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "grasp": {
+     "n_pairs": 18,
+     "both": 8,
+     "A_only": 0,
+     "B_only": 3,
+     "neither": 7,
+     "A_total": 8,
+     "B_total": 11,
+     "A": "X2",
+     "B": "X3",
+     "mcnemar_exact_p": 0.25,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep0_s2",
+      "ep11_s111",
+      "ep54_s541"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "pre_release_new_contact": {
+     "n_pairs": 18,
+     "both": 3,
+     "A_only": 0,
+     "B_only": 0,
+     "neither": 15,
+     "A_total": 3,
+     "B_total": 3,
+     "A": "X2",
+     "B": "X3",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [],
+     "B_only_keys": [],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "any_new_contact": {
+     "n_pairs": 18,
+     "both": 3,
+     "A_only": 0,
+     "B_only": 1,
+     "neither": 14,
+     "A_total": 3,
+     "B_total": 4,
+     "A": "X2",
+     "B": "X3",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep54_s541"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    }
+   },
+   "X3_vs_X4": {
+    "success_ct": {
+     "n_pairs": 18,
+     "both": 3,
+     "A_only": 4,
+     "B_only": 6,
+     "neither": 5,
+     "A_total": 7,
+     "B_total": 9,
+     "A": "X3",
+     "B": "X4",
+     "mcnemar_exact_p": 0.75390625,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep3_s31",
+      "ep11_s111",
+      "ep12_s122"
+     ],
+     "B_only_keys": [
+      "ep0_s1",
+      "ep3_s32",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1101"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "success": {
+     "n_pairs": 18,
+     "both": 4,
+     "A_only": 5,
+     "B_only": 5,
+     "neither": 4,
+     "A_total": 9,
+     "B_total": 9,
+     "A": "X3",
+     "B": "X4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep3_s31",
+      "ep11_s111",
+      "ep12_s122",
+      "ep110_s1102"
+     ],
+     "B_only_keys": [
+      "ep0_s1",
+      "ep54_s541",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1101"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "robust_grasp": {
+     "n_pairs": 18,
+     "both": 3,
+     "A_only": 4,
+     "B_only": 4,
+     "neither": 7,
+     "A_total": 7,
+     "B_total": 7,
+     "A": "X3",
+     "B": "X4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep11_s111",
+      "ep12_s122",
+      "ep110_s1102"
+     ],
+     "B_only_keys": [
+      "ep3_s32",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1101"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "first_grasp_ok": {
+     "n_pairs": 18,
+     "both": 5,
+     "A_only": 4,
+     "B_only": 5,
+     "neither": 4,
+     "A_total": 9,
+     "B_total": 10,
+     "A": "X3",
+     "B": "X4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep3_s31",
+      "ep11_s111",
+      "ep110_s1102"
+     ],
+     "B_only_keys": [
+      "ep3_s32",
+      "ep30_s302",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1101"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "grasp": {
+     "n_pairs": 18,
+     "both": 7,
+     "A_only": 4,
+     "B_only": 5,
+     "neither": 2,
+     "A_total": 11,
+     "B_total": 12,
+     "A": "X3",
+     "B": "X4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep0_s2",
+      "ep3_s31",
+      "ep11_s111",
+      "ep110_s1102"
+     ],
+     "B_only_keys": [
+      "ep0_s1",
+      "ep30_s302",
+      "ep54_s542",
+      "ep104_s1041",
+      "ep110_s1101"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "pre_release_new_contact": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 3,
+     "B_only": 1,
+     "neither": 14,
+     "A_total": 3,
+     "B_total": 1,
+     "A": "X3",
+     "B": "X4",
+     "mcnemar_exact_p": 0.625,
+     "A_only_keys": [
+      "ep3_s32",
+      "ep110_s1101",
+      "ep110_s1102"
+     ],
+     "B_only_keys": [
+      "ep3_s31"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "any_new_contact": {
+     "n_pairs": 18,
+     "both": 0,
+     "A_only": 4,
+     "B_only": 4,
+     "neither": 10,
+     "A_total": 4,
+     "B_total": 4,
+     "A": "X3",
+     "B": "X4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep3_s32",
+      "ep54_s541",
+      "ep110_s1101",
+      "ep110_s1102"
+     ],
+     "B_only_keys": [
+      "ep3_s31",
+      "ep12_s122",
+      "ep30_s302",
+      "ep123_s1232"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    }
+   },
+   "X4_vs_G4": {
+    "success_ct": {
+     "n_pairs": 18,
+     "both": 5,
+     "A_only": 4,
+     "B_only": 2,
+     "neither": 7,
+     "A_total": 9,
+     "B_total": 7,
+     "A": "X4",
+     "B": "G4",
+     "mcnemar_exact_p": 0.6875,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep3_s32",
+      "ep54_s542",
+      "ep104_s1041"
+     ],
+     "B_only_keys": [
+      "ep12_s122",
+      "ep123_s1232"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "success": {
+     "n_pairs": 18,
+     "both": 5,
+     "A_only": 4,
+     "B_only": 2,
+     "neither": 7,
+     "A_total": 9,
+     "B_total": 7,
+     "A": "X4",
+     "B": "G4",
+     "mcnemar_exact_p": 0.6875,
+     "A_only_keys": [
+      "ep0_s1",
+      "ep3_s32",
+      "ep54_s542",
+      "ep104_s1041"
+     ],
+     "B_only_keys": [
+      "ep12_s122",
+      "ep123_s1232"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "robust_grasp": {
+     "n_pairs": 18,
+     "both": 4,
+     "A_only": 3,
+     "B_only": 2,
+     "neither": 9,
+     "A_total": 7,
+     "B_total": 6,
+     "A": "X4",
+     "B": "G4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep3_s32",
+      "ep54_s542",
+      "ep104_s1041"
+     ],
+     "B_only_keys": [
+      "ep54_s541",
+      "ep123_s1232"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "first_grasp_ok": {
+     "n_pairs": 18,
+     "both": 7,
+     "A_only": 3,
+     "B_only": 3,
+     "neither": 5,
+     "A_total": 10,
+     "B_total": 10,
+     "A": "X4",
+     "B": "G4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep3_s32",
+      "ep54_s542",
+      "ep104_s1041"
+     ],
+     "B_only_keys": [
+      "ep0_s1",
+      "ep30_s301",
+      "ep54_s541"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "grasp": {
+     "n_pairs": 18,
+     "both": 9,
+     "A_only": 3,
+     "B_only": 3,
+     "neither": 3,
+     "A_total": 12,
+     "B_total": 12,
+     "A": "X4",
+     "B": "G4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep3_s32",
+      "ep54_s542",
+      "ep104_s1041"
+     ],
+     "B_only_keys": [
+      "ep3_s31",
+      "ep30_s301",
+      "ep110_s1102"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "pre_release_new_contact": {
+     "n_pairs": 18,
+     "both": 1,
+     "A_only": 0,
+     "B_only": 1,
+     "neither": 16,
+     "A_total": 1,
+     "B_total": 2,
+     "A": "X4",
+     "B": "G4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [],
+     "B_only_keys": [
+      "ep3_s32"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    },
+    "any_new_contact": {
+     "n_pairs": 18,
+     "both": 2,
+     "A_only": 2,
+     "B_only": 3,
+     "neither": 11,
+     "A_total": 4,
+     "B_total": 5,
+     "A": "X4",
+     "B": "G4",
+     "mcnemar_exact_p": 1.0,
+     "A_only_keys": [
+      "ep12_s122",
+      "ep123_s1232"
+     ],
+     "B_only_keys": [
+      "ep3_s32",
+      "ep30_s301",
+      "ep110_s1102"
+     ],
+     "pairs_with_foreign_overlap_side": []
+    }
+   }
+  },
+  "pairs_t60": {
+   "X1_vs_X2": {
+    "full": {
+     "success": {
+      "A": "X1",
+      "B": "X2",
+      "both": 5,
+      "A_only": 5,
+      "B_only": 2,
+      "neither": 6,
+      "A_total": 10,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.453125,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111",
+       "ep30_s301",
+       "ep110_s1101",
+       "ep123_s1232"
+      ],
+      "B_only_keys": [
+       "ep3_s31",
+       "ep3_s32"
+      ]
+     },
+     "success_ct": {
+      "A": "X1",
+      "B": "X2",
+      "both": 4,
+      "A_only": 6,
+      "B_only": 1,
+      "neither": 7,
+      "A_total": 10,
+      "B_total": 5,
+      "mcnemar_exact_p": 0.125,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111",
+       "ep30_s301",
+       "ep110_s1101",
+       "ep110_s1102",
+       "ep123_s1232"
+      ],
+      "B_only_keys": [
+       "ep3_s31"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X1",
+      "B": "X2",
+      "both": 4,
+      "A_only": 6,
+      "B_only": 1,
+      "neither": 7,
+      "A_total": 10,
+      "B_total": 5,
+      "mcnemar_exact_p": 0.125,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111",
+       "ep30_s301",
+       "ep110_s1101",
+       "ep110_s1102",
+       "ep123_s1232"
+      ],
+      "B_only_keys": [
+       "ep3_s31"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X1",
+      "B": "X2",
+      "both": 1,
+      "A_only": 1,
+      "B_only": 2,
+      "neither": 14,
+      "A_total": 2,
+      "B_total": 3,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep3_s31"
+      ],
+      "B_only_keys": [
+       "ep110_s1101",
+       "ep110_s1102"
+      ]
+     }
+    },
+    "P": {
+     "success": {
+      "A": "X1",
+      "B": "X2",
+      "both": 5,
+      "A_only": 5,
+      "B_only": 2,
+      "neither": 6,
+      "A_total": 10,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.453125,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111",
+       "ep30_s301",
+       "ep110_s1101",
+       "ep123_s1232"
+      ],
+      "B_only_keys": [
+       "ep3_s31",
+       "ep3_s32"
+      ]
+     },
+     "success_ct": {
+      "A": "X1",
+      "B": "X2",
+      "both": 4,
+      "A_only": 6,
+      "B_only": 1,
+      "neither": 7,
+      "A_total": 10,
+      "B_total": 5,
+      "mcnemar_exact_p": 0.125,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111",
+       "ep30_s301",
+       "ep110_s1101",
+       "ep110_s1102",
+       "ep123_s1232"
+      ],
+      "B_only_keys": [
+       "ep3_s31"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X1",
+      "B": "X2",
+      "both": 4,
+      "A_only": 6,
+      "B_only": 1,
+      "neither": 7,
+      "A_total": 10,
+      "B_total": 5,
+      "mcnemar_exact_p": 0.125,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111",
+       "ep30_s301",
+       "ep110_s1101",
+       "ep110_s1102",
+       "ep123_s1232"
+      ],
+      "B_only_keys": [
+       "ep3_s31"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X1",
+      "B": "X2",
+      "both": 1,
+      "A_only": 1,
+      "B_only": 2,
+      "neither": 14,
+      "A_total": 2,
+      "B_total": 3,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep3_s31"
+      ],
+      "B_only_keys": [
+       "ep110_s1101",
+       "ep110_s1102"
+      ]
+     }
+    },
+    "H": {
+     "success": {
+      "A": "X1",
+      "B": "X2",
+      "both": 2,
+      "A_only": 2,
+      "B_only": 1,
+      "neither": 13,
+      "A_total": 4,
+      "B_total": 3,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ],
+      "B_only_keys": [
+       "ep12_s122"
+      ]
+     },
+     "success_ct": {
+      "A": "X1",
+      "B": "X2",
+      "both": 2,
+      "A_only": 2,
+      "B_only": 1,
+      "neither": 13,
+      "A_total": 4,
+      "B_total": 3,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ],
+      "B_only_keys": [
+       "ep12_s122"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X1",
+      "B": "X2",
+      "both": 2,
+      "A_only": 2,
+      "B_only": 1,
+      "neither": 13,
+      "A_total": 4,
+      "B_total": 3,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ],
+      "B_only_keys": [
+       "ep12_s122"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X1",
+      "B": "X2",
+      "both": 1,
+      "A_only": 1,
+      "B_only": 2,
+      "neither": 14,
+      "A_total": 2,
+      "B_total": 3,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep3_s31"
+      ],
+      "B_only_keys": [
+       "ep110_s1101",
+       "ep110_s1102"
+      ]
+     }
+    }
+   },
+   "X2_vs_X3": {
+    "full": {
+     "success": {
+      "A": "X2",
+      "B": "X3",
+      "both": 7,
+      "A_only": 0,
+      "B_only": 2,
+      "neither": 9,
+      "A_total": 7,
+      "B_total": 9,
+      "mcnemar_exact_p": 0.5,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ]
+     },
+     "success_ct": {
+      "A": "X2",
+      "B": "X3",
+      "both": 5,
+      "A_only": 0,
+      "B_only": 2,
+      "neither": 11,
+      "A_total": 5,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.5,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X2",
+      "B": "X3",
+      "both": 5,
+      "A_only": 0,
+      "B_only": 2,
+      "neither": 11,
+      "A_total": 5,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.5,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X2",
+      "B": "X3",
+      "both": 3,
+      "A_only": 0,
+      "B_only": 0,
+      "neither": 15,
+      "A_total": 3,
+      "B_total": 3,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [],
+      "B_only_keys": []
+     }
+    },
+    "P": {
+     "success": {
+      "A": "X2",
+      "B": "X3",
+      "both": 7,
+      "A_only": 0,
+      "B_only": 2,
+      "neither": 9,
+      "A_total": 7,
+      "B_total": 9,
+      "mcnemar_exact_p": 0.5,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ]
+     },
+     "success_ct": {
+      "A": "X2",
+      "B": "X3",
+      "both": 5,
+      "A_only": 0,
+      "B_only": 2,
+      "neither": 11,
+      "A_total": 5,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.5,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X2",
+      "B": "X3",
+      "both": 5,
+      "A_only": 0,
+      "B_only": 2,
+      "neither": 11,
+      "A_total": 5,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.5,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X2",
+      "B": "X3",
+      "both": 3,
+      "A_only": 0,
+      "B_only": 1,
+      "neither": 14,
+      "A_total": 3,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep54_s541"
+      ]
+     }
+    },
+    "H": {
+     "success": {
+      "A": "X2",
+      "B": "X3",
+      "both": 3,
+      "A_only": 0,
+      "B_only": 2,
+      "neither": 13,
+      "A_total": 3,
+      "B_total": 5,
+      "mcnemar_exact_p": 0.5,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ]
+     },
+     "success_ct": {
+      "A": "X2",
+      "B": "X3",
+      "both": 3,
+      "A_only": 0,
+      "B_only": 2,
+      "neither": 13,
+      "A_total": 3,
+      "B_total": 5,
+      "mcnemar_exact_p": 0.5,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X2",
+      "B": "X3",
+      "both": 3,
+      "A_only": 0,
+      "B_only": 2,
+      "neither": 13,
+      "A_total": 3,
+      "B_total": 5,
+      "mcnemar_exact_p": 0.5,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep0_s2",
+       "ep11_s111"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X2",
+      "B": "X3",
+      "both": 3,
+      "A_only": 0,
+      "B_only": 1,
+      "neither": 14,
+      "A_total": 3,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep54_s541"
+      ]
+     }
+    }
+   },
+   "X3_vs_X4": {
+    "full": {
+     "success": {
+      "A": "X3",
+      "B": "X4",
+      "both": 4,
+      "A_only": 5,
+      "B_only": 5,
+      "neither": 4,
+      "A_total": 9,
+      "B_total": 9,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep3_s31",
+       "ep11_s111",
+       "ep12_s122",
+       "ep110_s1102"
+      ],
+      "B_only_keys": [
+       "ep0_s1",
+       "ep54_s541",
+       "ep54_s542",
+       "ep104_s1041",
+       "ep110_s1101"
+      ]
+     },
+     "success_ct": {
+      "A": "X3",
+      "B": "X4",
+      "both": 3,
+      "A_only": 4,
+      "B_only": 6,
+      "neither": 5,
+      "A_total": 7,
+      "B_total": 9,
+      "mcnemar_exact_p": 0.75390625,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep3_s31",
+       "ep11_s111",
+       "ep12_s122"
+      ],
+      "B_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s541",
+       "ep54_s542",
+       "ep104_s1041",
+       "ep110_s1101"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X3",
+      "B": "X4",
+      "both": 3,
+      "A_only": 4,
+      "B_only": 6,
+      "neither": 5,
+      "A_total": 7,
+      "B_total": 9,
+      "mcnemar_exact_p": 0.75390625,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep3_s31",
+       "ep11_s111",
+       "ep12_s122"
+      ],
+      "B_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s541",
+       "ep54_s542",
+       "ep104_s1041",
+       "ep110_s1101"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X3",
+      "B": "X4",
+      "both": 0,
+      "A_only": 3,
+      "B_only": 1,
+      "neither": 14,
+      "A_total": 3,
+      "B_total": 1,
+      "mcnemar_exact_p": 0.625,
+      "A_only_keys": [
+       "ep3_s32",
+       "ep110_s1101",
+       "ep110_s1102"
+      ],
+      "B_only_keys": [
+       "ep3_s31"
+      ]
+     }
+    },
+    "P": {
+     "success": {
+      "A": "X3",
+      "B": "X4",
+      "both": 4,
+      "A_only": 5,
+      "B_only": 5,
+      "neither": 4,
+      "A_total": 9,
+      "B_total": 9,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep3_s31",
+       "ep11_s111",
+       "ep12_s122",
+       "ep110_s1102"
+      ],
+      "B_only_keys": [
+       "ep0_s1",
+       "ep54_s541",
+       "ep54_s542",
+       "ep104_s1041",
+       "ep110_s1101"
+      ]
+     },
+     "success_ct": {
+      "A": "X3",
+      "B": "X4",
+      "both": 3,
+      "A_only": 4,
+      "B_only": 6,
+      "neither": 5,
+      "A_total": 7,
+      "B_total": 9,
+      "mcnemar_exact_p": 0.75390625,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep3_s31",
+       "ep11_s111",
+       "ep12_s122"
+      ],
+      "B_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s541",
+       "ep54_s542",
+       "ep104_s1041",
+       "ep110_s1101"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X3",
+      "B": "X4",
+      "both": 3,
+      "A_only": 4,
+      "B_only": 6,
+      "neither": 5,
+      "A_total": 7,
+      "B_total": 9,
+      "mcnemar_exact_p": 0.75390625,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep3_s31",
+       "ep11_s111",
+       "ep12_s122"
+      ],
+      "B_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s541",
+       "ep54_s542",
+       "ep104_s1041",
+       "ep110_s1101"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X3",
+      "B": "X4",
+      "both": 0,
+      "A_only": 4,
+      "B_only": 4,
+      "neither": 10,
+      "A_total": 4,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep3_s32",
+       "ep54_s541",
+       "ep110_s1101",
+       "ep110_s1102"
+      ],
+      "B_only_keys": [
+       "ep3_s31",
+       "ep12_s122",
+       "ep30_s302",
+       "ep123_s1232"
+      ]
+     }
+    },
+    "H": {
+     "success": {
+      "A": "X3",
+      "B": "X4",
+      "both": 2,
+      "A_only": 3,
+      "B_only": 2,
+      "neither": 11,
+      "A_total": 5,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111",
+       "ep12_s122"
+      ],
+      "B_only_keys": [
+       "ep54_s542",
+       "ep104_s1041"
+      ]
+     },
+     "success_ct": {
+      "A": "X3",
+      "B": "X4",
+      "both": 2,
+      "A_only": 3,
+      "B_only": 2,
+      "neither": 11,
+      "A_total": 5,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111",
+       "ep12_s122"
+      ],
+      "B_only_keys": [
+       "ep54_s542",
+       "ep104_s1041"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X3",
+      "B": "X4",
+      "both": 2,
+      "A_only": 3,
+      "B_only": 2,
+      "neither": 11,
+      "A_total": 5,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep0_s2",
+       "ep11_s111",
+       "ep12_s122"
+      ],
+      "B_only_keys": [
+       "ep54_s542",
+       "ep104_s1041"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X3",
+      "B": "X4",
+      "both": 0,
+      "A_only": 4,
+      "B_only": 4,
+      "neither": 10,
+      "A_total": 4,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep3_s32",
+       "ep54_s541",
+       "ep110_s1101",
+       "ep110_s1102"
+      ],
+      "B_only_keys": [
+       "ep3_s31",
+       "ep12_s122",
+       "ep30_s302",
+       "ep123_s1232"
+      ]
+     }
+    }
+   },
+   "X4_vs_G4": {
+    "full": {
+     "success": {
+      "A": "X4",
+      "B": "G4",
+      "both": 5,
+      "A_only": 4,
+      "B_only": 2,
+      "neither": 7,
+      "A_total": 9,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.6875,
+      "A_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s542",
+       "ep104_s1041"
+      ],
+      "B_only_keys": [
+       "ep12_s122",
+       "ep123_s1232"
+      ]
+     },
+     "success_ct": {
+      "A": "X4",
+      "B": "G4",
+      "both": 5,
+      "A_only": 4,
+      "B_only": 2,
+      "neither": 7,
+      "A_total": 9,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.6875,
+      "A_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s542",
+       "ep104_s1041"
+      ],
+      "B_only_keys": [
+       "ep12_s122",
+       "ep123_s1232"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X4",
+      "B": "G4",
+      "both": 5,
+      "A_only": 4,
+      "B_only": 2,
+      "neither": 7,
+      "A_total": 9,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.6875,
+      "A_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s542",
+       "ep104_s1041"
+      ],
+      "B_only_keys": [
+       "ep12_s122",
+       "ep123_s1232"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X4",
+      "B": "G4",
+      "both": 1,
+      "A_only": 0,
+      "B_only": 1,
+      "neither": 16,
+      "A_total": 1,
+      "B_total": 2,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [],
+      "B_only_keys": [
+       "ep3_s32"
+      ]
+     }
+    },
+    "P": {
+     "success": {
+      "A": "X4",
+      "B": "G4",
+      "both": 5,
+      "A_only": 4,
+      "B_only": 2,
+      "neither": 7,
+      "A_total": 9,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.6875,
+      "A_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s542",
+       "ep104_s1041"
+      ],
+      "B_only_keys": [
+       "ep12_s122",
+       "ep123_s1232"
+      ]
+     },
+     "success_ct": {
+      "A": "X4",
+      "B": "G4",
+      "both": 5,
+      "A_only": 4,
+      "B_only": 2,
+      "neither": 7,
+      "A_total": 9,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.6875,
+      "A_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s542",
+       "ep104_s1041"
+      ],
+      "B_only_keys": [
+       "ep12_s122",
+       "ep123_s1232"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X4",
+      "B": "G4",
+      "both": 5,
+      "A_only": 4,
+      "B_only": 2,
+      "neither": 7,
+      "A_total": 9,
+      "B_total": 7,
+      "mcnemar_exact_p": 0.6875,
+      "A_only_keys": [
+       "ep0_s1",
+       "ep3_s32",
+       "ep54_s542",
+       "ep104_s1041"
+      ],
+      "B_only_keys": [
+       "ep12_s122",
+       "ep123_s1232"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X4",
+      "B": "G4",
+      "both": 2,
+      "A_only": 2,
+      "B_only": 3,
+      "neither": 11,
+      "A_total": 4,
+      "B_total": 5,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep12_s122",
+       "ep123_s1232"
+      ],
+      "B_only_keys": [
+       "ep3_s32",
+       "ep30_s301",
+       "ep110_s1102"
+      ]
+     }
+    },
+    "H": {
+     "success": {
+      "A": "X4",
+      "B": "G4",
+      "both": 2,
+      "A_only": 2,
+      "B_only": 2,
+      "neither": 12,
+      "A_total": 4,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep54_s542",
+       "ep104_s1041"
+      ],
+      "B_only_keys": [
+       "ep12_s122",
+       "ep54_s541"
+      ]
+     },
+     "success_ct": {
+      "A": "X4",
+      "B": "G4",
+      "both": 2,
+      "A_only": 2,
+      "B_only": 2,
+      "neither": 12,
+      "A_total": 4,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep54_s542",
+       "ep104_s1041"
+      ],
+      "B_only_keys": [
+       "ep12_s122",
+       "ep54_s541"
+      ]
+     },
+     "success_ct_fruit": {
+      "A": "X4",
+      "B": "G4",
+      "both": 2,
+      "A_only": 2,
+      "B_only": 2,
+      "neither": 12,
+      "A_total": 4,
+      "B_total": 4,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep54_s542",
+       "ep104_s1041"
+      ],
+      "B_only_keys": [
+       "ep12_s122",
+       "ep54_s541"
+      ]
+     },
+     "any_disallowed": {
+      "A": "X4",
+      "B": "G4",
+      "both": 2,
+      "A_only": 2,
+      "B_only": 3,
+      "neither": 11,
+      "A_total": 4,
+      "B_total": 5,
+      "mcnemar_exact_p": 1.0,
+      "A_only_keys": [
+       "ep12_s122",
+       "ep123_s1232"
+      ],
+      "B_only_keys": [
+       "ep3_s32",
+       "ep30_s301",
+       "ep110_s1102"
+      ]
+     }
+    }
+   }
+  },
+  "before": {
+   "CL2_C0": {
+    "success": 14,
+    "success_ct": 12,
+    "robust_grasp": 13,
+    "hold_chunks": 101,
+    "hold_runs": 5
+   },
+   "CL3_C1a": {
+    "success": 14,
+    "success_ct": 11,
+    "robust_grasp": 14,
+    "hold_chunks": 119,
+    "hold_runs": 14
+   },
+   "CL3_C1aF1": {
+    "success": 13,
+    "success_ct": 12,
+    "robust_grasp": 13,
+    "hold_chunks": 189,
+    "hold_runs": 12
+   }
+  },
+  "robot_other_target_contact_bodies": {
+   "G4_ep30_s301": {
+    "base": 723,
+    "link_torso_1": 80
+   },
+   "G4_ep30_s302": {
+    "base": 765,
+    "link_torso_1": 141
+   },
+   "G4_ep110_s1102": {
+    "base": 7
+   },
+   "X4_ep30_s302": {
+    "base": 10
+   },
+   "X3_ep54_s541": {
+    "wheel_r": 5
+   },
+   "X4_ep123_s1232": "substeps only, none at control rows",
+   "note": "all after release (runs_pre_release 0); target on the floor / robot base"
+  },
+  "FT_target_contact_runs": {
+   "X1": 0,
+   "X2": 0,
+   "X3": 0,
+   "X4": 0,
+   "G4": 0
+  }
+ },
+ "figures": [
+  "AG3S/ag3s/docs/figures/cl4/cl4-outcomes.png"
+ ],
+ "not_measured": [
+  "cause of the success drop vs CL3 (geometry / nonauthorized margin / W1 / snapshot are confounded)",
+  "per-reason failure diagnosis of no_grasp runs",
+  "real-time feasibility"
+ ]
+}

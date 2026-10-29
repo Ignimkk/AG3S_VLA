@@ -1,0 +1,5 @@
+latex/build/
+supplementary/build/
+.cache/
+**/__pycache__/
+tools/bin/

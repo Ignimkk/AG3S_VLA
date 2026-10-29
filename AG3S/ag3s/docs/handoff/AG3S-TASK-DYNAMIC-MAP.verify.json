@@ -1,0 +1,3590 @@
+{
+ "_comment": "lead 가 직접 측정 (순차 작업). 해석은 verdict 의 사실 문장만.",
+ "step": "AG3S-TASK-DYNAMIC-MAP",
+ "task": "AG3S/ag3s/docs/handoff/AG3S-TASK-DYNAMIC-MAP.task.md",
+ "date": "2026-10-24",
+ "written": "2026-10-24 07:2x KST (lead) · E2 added 2026-10-24 14:3x KST",
+ "what": "사과 VLA 단독 성공 10 장면 × 4 구성 closed-loop (기준 = NBCTS + 기존 형상 추종; + target 전용 TSDF; + 관심 영역 보이는 빈 공간 지우기; + 둘 다). 서버가 기록한 거리장(본 미세 층 esdf_distance, 손이 보는 층 esdf_free_distance)을 같은 chunk 의 MuJoCo GT 와 비교, 실제 접촉은 MuJoCo replay.",
+ "records": {
+  "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97",
+  "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP",
+  "snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/snapshot_tdm",
+  "episodes": [
+   56,
+   126,
+   211,
+   250,
+   309,
+   320,
+   753,
+   954,
+   1668,
+   1837
+  ]
+ },
+ "variants": {
+  "B": "NBCTS + --kept-geometry-follow",
+  "B_TL": "B + --target-layer",
+  "B_ROI": "B + --roi-carve",
+  "B_TL_ROI": "B + --target-layer --roi-carve"
+ },
+ "runs": [
+  {
+   "id": "closed_loop",
+   "command": "p/tdm_launch.sh (BENCH_GPU_ONLY=1): smoke B_TL_ROI ep56 → A1 B|B_TL → A2 B_ROI|B_TL_ROI",
+   "log": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/tdm_launch.out"
+  },
+  {
+   "id": "success",
+   "command": "p/address_check.py agg/address_check.json ; p/analyze_cl.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/analysis"
+  },
+  {
+   "id": "contacts",
+   "command": "p/replay_contacts_ext.py replay_ext/<conf> runs/<conf>/*",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/replay_ext"
+  },
+  {
+   "id": "aggregate",
+   "command": "tdm_agg.py agg/tdm_closed_loop.json",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/agg/tdm_closed_loop.json"
+  },
+  {
+   "id": "field",
+   "command": "python -m AG3S.ag3s.experiments.studies.task_dynamic_map_eval --configurations <conf>",
+   "raw_output": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/field_eval_A1",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/field_eval_A2"
+   ]
+  },
+  {
+   "id": "figures",
+   "command": "python -m AG3S.ag3s.experiments.studies.task_dynamic_map_figures --scene-episode 954"
+  },
+  {
+   "id": "e2",
+   "command": "p/tdm_launch_e2.sh (BENCH_GPU_ONLY=1): phase E2 B | B_ROI × 8 new scenes; analysis; replay_ext; field eval",
+   "log": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/tdm_launch_e2.out"
+  },
+  {
+   "id": "diag_missed_by_body",
+   "command": "diag_missed_by_body.py <kit> B|B_ROI <xml> <out> (every 3rd chunk)",
+   "raw_output": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/agg/diag_missed_by_body_B.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/agg/diag_missed_by_body_B_ROI.json"
+   ]
+  }
+ ],
+ "code_state": {
+  "head": "8da37119",
+  "dirty": "AG3S-DYNAMIC-FIELD + AG3S-TASK-DYNAMIC-MAP uncommitted (snapshot_tdm)",
+  "tests": "tests/ag3s/test_task_dynamic_map.py 14 passed; tests/ag3s+tests/trajopt CPU 3708 passed 7 failed (all pre-existing, task §5b); E3: tests/ag3s/test_task_dynamic_map.py 18 passed (GPU incl.); tests/ag3s+trajopt CPU 3711 passed 7 failed (same pre-existing 7); E4 + serving default: tests/ag3s/test_task_dynamic_map.py 24 passed (CPU) / 20 GPU; tests/ag3s+trajopt CPU (9 file batches) 3715 passed 7 failed (same pre-existing 7)"
+ },
+ "definitions": {
+  "field": {
+   "stale_mm": 15.0,
+   "missed_mm": 10.0,
+   "visible_mm": 10.0,
+   "roi_pad_m": 0.1,
+   "target": "apple",
+   "surface_voxel": "|recorded value| <= 0.5 voxel",
+   "moved_mm": 10.0,
+   "layers": {
+    "main": "esdf_distance",
+    "hand": "esdf_free_distance"
+   }
+  },
+  "closed_loop": "AG3S-TASK-DYNAMIC-MAP closed-loop aggregation (lead, 2026-10-24 KST). CPU only. Numbers only, no judgement.\nusage: python tdm_agg.py OUT_JSON\nPer configuration and run:\n  success / grasp      analysis/<run>.json (analyze_cl.py = analyze_t42 + grasp_robust, the locked IFG-APPLE definition)\n  end mode             runs/<conf>/<run>.check.json checks.mode (place_stop = the client's place detection ended the record)\n  forbidden contact    replay_ext/<conf>/<run>.json contact_rows (control rows with >= 1 contact substep) in the groups below;\n                       the record already ends 2.5 s after the place (client --stop-after-place 2.5)\n  esdf ms              server records profile_ms.esdf of every request of the configuration's servers (median / p95)\nGroups (the IFG-APPLE-NBC-TARGETSURFACE ts_agg.py groups): neighbour_fruit = hand-fruit_other + robot_other-fruit_other;\nbasket = hand-crate + robot_other-crate; table = hand-table + robot_other-table; post = hand-obstacle + robot_other-obstacle;\nbody_target = robot_other-target (a link without contact authority touches the apple). forbidden = any of them.",
+  "criteria": "task §5 + §5a: 1 target_old −90 % (main, hand) for ① arms; 2 moved_old −50 % (main) for ② arms; 3 missed +1 pp max (main/hand × visible/occluded); 4 success ≥ base and forbidden-contact episodes ≤ base"
+ },
+ "numbers": {
+  "closed_loop": {
+   "B": {
+    "n_runs": 10,
+    "n_success": 7,
+    "n_place_stop": 7,
+    "n_forbidden": 1,
+    "n_success_without_forbidden": 7,
+    "n_by_group": {
+     "neighbour_fruit": 1,
+     "basket": 0,
+     "table": 1,
+     "post": 0,
+     "body_target": 0
+    },
+    "rows_by_group": {
+     "neighbour_fruit": 10,
+     "basket": 0,
+     "table": 4,
+     "post": 0,
+     "body_target": 0
+    },
+    "esdf_ms": {
+     "n": 440,
+     "median": 95.5,
+     "p95": 261.94
+    }
+   },
+   "B_TL": {
+    "n_runs": 10,
+    "n_success": 9,
+    "n_place_stop": 9,
+    "n_forbidden": 2,
+    "n_success_without_forbidden": 8,
+    "n_by_group": {
+     "neighbour_fruit": 1,
+     "basket": 1,
+     "table": 0,
+     "post": 0,
+     "body_target": 0
+    },
+    "rows_by_group": {
+     "neighbour_fruit": 3,
+     "basket": 4,
+     "table": 0,
+     "post": 0,
+     "body_target": 0
+    },
+    "esdf_ms": {
+     "n": 385,
+     "median": 344.14,
+     "p95": 571.26
+    }
+   },
+   "B_ROI": {
+    "n_runs": 10,
+    "n_success": 9,
+    "n_place_stop": 9,
+    "n_forbidden": 2,
+    "n_success_without_forbidden": 8,
+    "n_by_group": {
+     "neighbour_fruit": 1,
+     "basket": 0,
+     "table": 1,
+     "post": 0,
+     "body_target": 0
+    },
+    "rows_by_group": {
+     "neighbour_fruit": 34,
+     "basket": 0,
+     "table": 3,
+     "post": 0,
+     "body_target": 0
+    },
+    "esdf_ms": {
+     "n": 352,
+     "median": 224.89,
+     "p95": 601.96
+    }
+   },
+   "B_TL_ROI": {
+    "n_runs": 10,
+    "n_success": 9,
+    "n_place_stop": 8,
+    "n_forbidden": 2,
+    "n_success_without_forbidden": 8,
+    "n_by_group": {
+     "neighbour_fruit": 2,
+     "basket": 0,
+     "table": 0,
+     "post": 0,
+     "body_target": 0
+    },
+    "rows_by_group": {
+     "neighbour_fruit": 44,
+     "basket": 0,
+     "table": 0,
+     "post": 0,
+     "body_target": 0
+    },
+    "esdf_ms": {
+     "n": 397,
+     "median": 441.4,
+     "p95": 779.78
+    }
+   }
+  },
+  "closed_loop_runs": {
+   "B": {
+    "126": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "1668": {
+     "success": false,
+     "mode": "full",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "1837": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "211": {
+     "success": false,
+     "mode": "full",
+     "contact_rows": {
+      "neighbour_fruit": 10,
+      "basket": 0,
+      "table": 4,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": true
+    },
+    "250": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "309": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "320": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "56": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "753": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "954": {
+     "success": false,
+     "mode": "full",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    }
+   },
+   "B_TL": {
+    "126": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "1668": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "1837": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "211": {
+     "success": false,
+     "mode": "full",
+     "contact_rows": {
+      "neighbour_fruit": 3,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": true
+    },
+    "250": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "309": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "320": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "56": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "753": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "954": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 4,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": true
+    }
+   },
+   "B_ROI": {
+    "126": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "1668": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "1837": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "211": {
+     "success": false,
+     "mode": "full",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 3,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": true
+    },
+    "250": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "309": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "320": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "56": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "753": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "954": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 34,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": true
+    }
+   },
+   "B_TL_ROI": {
+    "126": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "1668": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "1837": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "211": {
+     "success": true,
+     "mode": "full",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "250": {
+     "success": false,
+     "mode": "full",
+     "contact_rows": {
+      "neighbour_fruit": 13,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": true
+    },
+    "309": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "320": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "56": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "753": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 0,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": false
+    },
+    "954": {
+     "success": true,
+     "mode": "place_stop",
+     "contact_rows": {
+      "neighbour_fruit": 31,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "forbidden": true
+    }
+   }
+  },
+  "field": {
+   "B": {
+    "main": {
+     "chunks": 440,
+     "n_occupied": 21466090,
+     "residue": 2576414,
+     "target_old": 46734,
+     "moved_old": 919,
+     "missed": {
+      "visible": [
+       43642,
+       5495240
+      ],
+      "occluded_seen_before": [
+       10258,
+       1808553
+      ]
+     },
+     "missed_frac": {
+      "visible": 0.007942,
+      "occluded_seen_before": 0.005672
+     }
+    },
+    "hand": {
+     "chunks": 338,
+     "n_occupied": 15951825,
+     "residue": 1815633,
+     "target_old": 23938,
+     "moved_old": 872,
+     "missed": {
+      "visible": [
+       32675,
+       4094299
+      ],
+      "occluded_seen_before": [
+       7460,
+       1326118
+      ]
+     },
+     "missed_frac": {
+      "visible": 0.007981,
+      "occluded_seen_before": 0.005625
+     }
+    }
+   },
+   "B_TL": {
+    "main": {
+     "chunks": 385,
+     "n_occupied": 18299598,
+     "residue": 2284686,
+     "target_old": 2142,
+     "moved_old": 107044,
+     "missed": {
+      "visible": [
+       56104,
+       4841272
+      ],
+      "occluded_seen_before": [
+       23942,
+       1426977
+      ]
+     },
+     "missed_frac": {
+      "visible": 0.011589,
+      "occluded_seen_before": 0.016778
+     }
+    },
+    "hand": {
+     "chunks": 252,
+     "n_occupied": 11028646,
+     "residue": 1303948,
+     "target_old": 762,
+     "moved_old": 14127,
+     "missed": {
+      "visible": [
+       18651,
+       2987443
+      ],
+      "occluded_seen_before": [
+       6031,
+       754819
+      ]
+     },
+     "missed_frac": {
+      "visible": 0.006243,
+      "occluded_seen_before": 0.00799
+     }
+    }
+   },
+   "B_ROI": {
+    "main": {
+     "chunks": 352,
+     "n_occupied": 16049201,
+     "residue": 1837651,
+     "target_old": 2579,
+     "moved_old": 65,
+     "missed": {
+      "visible": [
+       48822,
+       4498310
+      ],
+      "occluded_seen_before": [
+       19858,
+       1405261
+      ]
+     },
+     "missed_frac": {
+      "visible": 0.010853,
+      "occluded_seen_before": 0.014131
+     }
+    },
+    "hand": {
+     "chunks": 229,
+     "n_occupied": 9746032,
+     "residue": 1062222,
+     "target_old": 539,
+     "moved_old": 2,
+     "missed": {
+      "visible": [
+       25303,
+       2785771
+      ],
+      "occluded_seen_before": [
+       10919,
+       817690
+      ]
+     },
+     "missed_frac": {
+      "visible": 0.009083,
+      "occluded_seen_before": 0.013353
+     }
+    }
+   },
+   "B_TL_ROI": {
+    "main": {
+     "chunks": 397,
+     "n_occupied": 18300256,
+     "residue": 2091124,
+     "target_old": 8882,
+     "moved_old": 37,
+     "missed": {
+      "visible": [
+       56114,
+       4900508
+      ],
+      "occluded_seen_before": [
+       21704,
+       1551277
+      ]
+     },
+     "missed_frac": {
+      "visible": 0.011451,
+      "occluded_seen_before": 0.013991
+     }
+    },
+    "hand": {
+     "chunks": 280,
+     "n_occupied": 12030417,
+     "residue": 1320913,
+     "target_old": 5728,
+     "moved_old": 30,
+     "missed": {
+      "visible": [
+       35395,
+       3259342
+      ],
+      "occluded_seen_before": [
+       15089,
+       929291
+      ]
+     },
+     "missed_frac": {
+      "visible": 0.01086,
+      "occluded_seen_before": 0.016237
+     }
+    }
+   }
+  },
+  "field_per_episode": {
+   "B": {
+    "1837": {
+     "target_old_main": 329,
+     "target_old_hand": 211,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      111,
+      84745
+     ]
+    },
+    "211": {
+     "target_old_main": 24391,
+     "target_old_hand": 15553,
+     "moved_old_main": 62,
+     "missed_occluded_main": [
+      3257,
+      406556
+     ]
+    },
+    "1668": {
+     "target_old_main": 13799,
+     "target_old_hand": 6958,
+     "moved_old_main": 857,
+     "missed_occluded_main": [
+      334,
+      378938
+     ]
+    },
+    "309": {
+     "target_old_main": 285,
+     "target_old_hand": 115,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      591,
+      99844
+     ]
+    },
+    "56": {
+     "target_old_main": 762,
+     "target_old_hand": 285,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      272,
+      103710
+     ]
+    },
+    "320": {
+     "target_old_main": 564,
+     "target_old_hand": 82,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      3023,
+      111627
+     ]
+    },
+    "954": {
+     "target_old_main": 5960,
+     "target_old_hand": 676,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      1370,
+      279981
+     ]
+    },
+    "126": {
+     "target_old_main": 147,
+     "target_old_hand": 7,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      684,
+      126022
+     ]
+    },
+    "250": {
+     "target_old_main": 39,
+     "target_old_hand": 12,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      324,
+      106310
+     ]
+    },
+    "753": {
+     "target_old_main": 458,
+     "target_old_hand": 39,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      292,
+      110820
+     ]
+    }
+   },
+   "B_TL": {
+    "309": {
+     "target_old_main": 23,
+     "target_old_hand": 11,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      563,
+      100720
+     ]
+    },
+    "126": {
+     "target_old_main": 14,
+     "target_old_hand": 14,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      652,
+      121735
+     ]
+    },
+    "1837": {
+     "target_old_main": 537,
+     "target_old_hand": 327,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      116,
+      88641
+     ]
+    },
+    "211": {
+     "target_old_main": 19,
+     "target_old_hand": 16,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      1022,
+      320864
+     ]
+    },
+    "320": {
+     "target_old_main": 83,
+     "target_old_hand": 0,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      2609,
+      116963
+     ]
+    },
+    "954": {
+     "target_old_main": 1293,
+     "target_old_hand": 301,
+     "moved_old_main": 107044,
+     "missed_occluded_main": [
+      17954,
+      260640
+     ]
+    },
+    "753": {
+     "target_old_main": 39,
+     "target_old_hand": 14,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      288,
+      101103
+     ]
+    },
+    "1668": {
+     "target_old_main": 112,
+     "target_old_hand": 70,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      90,
+      92964
+     ]
+    },
+    "56": {
+     "target_old_main": 5,
+     "target_old_hand": 0,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      432,
+      114448
+     ]
+    },
+    "250": {
+     "target_old_main": 17,
+     "target_old_hand": 9,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      216,
+      108899
+     ]
+    }
+   },
+   "B_ROI": {
+    "1837": {
+     "target_old_main": 359,
+     "target_old_hand": 180,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      264,
+      88635
+     ]
+    },
+    "211": {
+     "target_old_main": 111,
+     "target_old_hand": 4,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      6050,
+      455645
+     ]
+    },
+    "320": {
+     "target_old_main": 383,
+     "target_old_hand": 3,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      5384,
+      105219
+     ]
+    },
+    "954": {
+     "target_old_main": 486,
+     "target_old_hand": 59,
+     "moved_old_main": 65,
+     "missed_occluded_main": [
+      3298,
+      139805
+     ]
+    },
+    "1668": {
+     "target_old_main": 251,
+     "target_old_hand": 111,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      219,
+      91080
+     ]
+    },
+    "56": {
+     "target_old_main": 262,
+     "target_old_hand": 0,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      1320,
+      105728
+     ]
+    },
+    "309": {
+     "target_old_main": 180,
+     "target_old_hand": 97,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      1048,
+      98906
+     ]
+    },
+    "126": {
+     "target_old_main": 145,
+     "target_old_hand": 6,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      925,
+      125796
+     ]
+    },
+    "250": {
+     "target_old_main": 134,
+     "target_old_hand": 74,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      617,
+      100781
+     ]
+    },
+    "753": {
+     "target_old_main": 268,
+     "target_old_hand": 5,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      733,
+      93666
+     ]
+    }
+   },
+   "B_TL_ROI": {
+    "1837": {
+     "target_old_main": 164,
+     "target_old_hand": 82,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      240,
+      87652
+     ]
+    },
+    "250": {
+     "target_old_main": 4341,
+     "target_old_hand": 3570,
+     "moved_old_main": 35,
+     "missed_occluded_main": [
+      5760,
+      284389
+     ]
+    },
+    "309": {
+     "target_old_main": 60,
+     "target_old_hand": 55,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      737,
+      98527
+     ]
+    },
+    "211": {
+     "target_old_main": 4145,
+     "target_old_hand": 1958,
+     "moved_old_main": 2,
+     "missed_occluded_main": [
+      4825,
+      431023
+     ]
+    },
+    "126": {
+     "target_old_main": 0,
+     "target_old_hand": 0,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      750,
+      122936
+     ]
+    },
+    "56": {
+     "target_old_main": 10,
+     "target_old_hand": 2,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      1041,
+      105485
+     ]
+    },
+    "320": {
+     "target_old_main": 26,
+     "target_old_hand": 1,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      4678,
+      101204
+     ]
+    },
+    "1668": {
+     "target_old_main": 75,
+     "target_old_hand": 53,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      224,
+      94921
+     ]
+    },
+    "954": {
+     "target_old_main": 32,
+     "target_old_hand": 1,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      2756,
+      125511
+     ]
+    },
+    "753": {
+     "target_old_main": 29,
+     "target_old_hand": 6,
+     "moved_old_main": 0,
+     "missed_occluded_main": [
+      693,
+      99629
+     ]
+    }
+   }
+  },
+  "judgement": {
+   "B_TL": {
+    "1_target_old_main": {
+     "value": 2142,
+     "base": 46734,
+     "reduction": 0.9542,
+     "pass": true
+    },
+    "1_target_old_hand": {
+     "value": 762,
+     "base": 23938,
+     "reduction": 0.9682,
+     "pass": true
+    },
+    "3_missed_main_visible_pp": {
+     "value": 0.365,
+     "pass": true
+    },
+    "3_missed_main_occluded_seen_before_pp": {
+     "value": 1.111,
+     "pass": false
+    },
+    "3_missed_hand_visible_pp": {
+     "value": -0.174,
+     "pass": true
+    },
+    "3_missed_hand_occluded_seen_before_pp": {
+     "value": 0.237,
+     "pass": true
+    },
+    "4_success": {
+     "value": 9,
+     "base": 7,
+     "pass": true
+    },
+    "4_forbidden_episodes": {
+     "value": 2,
+     "base": 1,
+     "pass": false
+    },
+    "adopt": false
+   },
+   "B_ROI": {
+    "2_moved_old_main": {
+     "value": 65,
+     "base": 919,
+     "reduction": 0.9293,
+     "pass": true
+    },
+    "3_missed_main_visible_pp": {
+     "value": 0.291,
+     "pass": true
+    },
+    "3_missed_main_occluded_seen_before_pp": {
+     "value": 0.846,
+     "pass": true
+    },
+    "3_missed_hand_visible_pp": {
+     "value": 0.11,
+     "pass": true
+    },
+    "3_missed_hand_occluded_seen_before_pp": {
+     "value": 0.773,
+     "pass": true
+    },
+    "4_success": {
+     "value": 9,
+     "base": 7,
+     "pass": true
+    },
+    "4_forbidden_episodes": {
+     "value": 2,
+     "base": 1,
+     "pass": false
+    },
+    "adopt": false
+   },
+   "B_TL_ROI": {
+    "1_target_old_main": {
+     "value": 8882,
+     "base": 46734,
+     "reduction": 0.8099,
+     "pass": false
+    },
+    "1_target_old_hand": {
+     "value": 5728,
+     "base": 23938,
+     "reduction": 0.7607,
+     "pass": false
+    },
+    "2_moved_old_main": {
+     "value": 37,
+     "base": 919,
+     "reduction": 0.9597,
+     "pass": true
+    },
+    "3_missed_main_visible_pp": {
+     "value": 0.351,
+     "pass": true
+    },
+    "3_missed_main_occluded_seen_before_pp": {
+     "value": 0.832,
+     "pass": true
+    },
+    "3_missed_hand_visible_pp": {
+     "value": 0.288,
+     "pass": true
+    },
+    "3_missed_hand_occluded_seen_before_pp": {
+     "value": 1.061,
+     "pass": false
+    },
+    "4_success": {
+     "value": 9,
+     "base": 7,
+     "pass": true
+    },
+    "4_forbidden_episodes": {
+     "value": 2,
+     "base": 1,
+     "pass": false
+    },
+    "adopt": false
+   }
+  },
+  "smoke_B_TL_ROI_ep56": {
+   "passed": true,
+   "check_mode": "place_stop",
+   "first_chunk_max_abs_diff_vs_reference": 0.0,
+   "target_layer_ms": {
+    "median": 280.8005,
+    "max": 3712.097
+   },
+   "roi_carve_ms": {
+    "median": 35.048500000000004,
+    "max": 318.951
+   },
+   "tdm_stats": {
+    "recdir": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP/runs/server_8292_20261023T202937",
+    "arm": "B_TL_ROI",
+    "n_esdf": 30,
+    "n_tl": 30,
+    "n_tl_active": 14,
+    "n_tf_target_layer": 16,
+    "n_roi": 30,
+    "n_roi_boxes": 30,
+    "sum_roi_freed": 27423,
+    "sum_static_freed": 1102,
+    "resets": {
+     "first": 2,
+     "None": 26,
+     "held": 1,
+     "no_target": 1
+    },
+    "result": "ok"
+   }
+  },
+  "reference_trial_NBCTS_ep211": {
+   "main_target_old": 21219,
+   "hand_target_old": 38,
+   "chunks": 75,
+   "source": "scratch trial of task_dynamic_map_eval on IFG-APPLE-NBC-TARGETSURFACE (task §5a)"
+  },
+  "diagnosis_954_B_TL": {
+   "crate_max_disp_mm": 27,
+   "crate_first_over_10mm_request": 49,
+   "apple_max_disp_mm": 386,
+   "share_of_B_TL_main_moved_old": 1.0
+  },
+  "esdf_stage_ep56_smoke_vs_NBCTS_ms": {
+   "B_TL_ROI_median": 333.3,
+   "NBCTS_median": 77.0
+  },
+  "e2_18_scenes": {
+   "episodes": [
+    56,
+    119,
+    121,
+    126,
+    211,
+    250,
+    309,
+    320,
+    325,
+    572,
+    753,
+    850,
+    901,
+    954,
+    1345,
+    1596,
+    1668,
+    1837
+   ],
+   "closed_loop": {
+    "B": {
+     "n_runs": 18,
+     "n_success": 14,
+     "n_place_stop": 14,
+     "n_forbidden": 3,
+     "n_success_without_forbidden": 13,
+     "n_by_group": {
+      "neighbour_fruit": 2,
+      "basket": 1,
+      "table": 1,
+      "post": 0,
+      "body_target": 0
+     },
+     "rows_by_group": {
+      "neighbour_fruit": 37,
+      "basket": 2,
+      "table": 4,
+      "post": 0,
+      "body_target": 0
+     },
+     "esdf_ms": {
+      "n": 736,
+      "median": 109.7,
+      "p95": 265.09
+     }
+    },
+    "B_ROI": {
+     "n_runs": 18,
+     "n_success": 16,
+     "n_place_stop": 16,
+     "n_forbidden": 3,
+     "n_success_without_forbidden": 14,
+     "n_by_group": {
+      "neighbour_fruit": 2,
+      "basket": 0,
+      "table": 1,
+      "post": 0,
+      "body_target": 0
+     },
+     "rows_by_group": {
+      "neighbour_fruit": 53,
+      "basket": 0,
+      "table": 3,
+      "post": 0,
+      "body_target": 0
+     },
+     "esdf_ms": {
+      "n": 635,
+      "median": 238.51,
+      "p95": 597.44
+     }
+    }
+   },
+   "closed_loop_runs": {
+    "B": {
+     "119": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "121": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "126": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1345": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 27,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     },
+     "1596": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1668": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1837": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "211": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 10,
+       "basket": 0,
+       "table": 4,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     },
+     "250": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "309": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "320": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "325": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "56": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "572": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "753": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "850": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 2,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     },
+     "901": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "954": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     }
+    },
+    "B_ROI": {
+     "119": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "121": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "126": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1345": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 19,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     },
+     "1596": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1668": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1837": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "211": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 3,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     },
+     "250": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "309": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "320": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "325": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "56": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "572": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "753": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "850": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "901": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "954": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 34,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     }
+    }
+   },
+   "field": {
+    "B": {
+     "main": {
+      "chunks": 736,
+      "target_old": 50377,
+      "moved_old": 1277,
+      "missed": {
+       "visible": [
+        114127,
+        9433507
+       ],
+       "occluded_seen_before": [
+        16536,
+        3266007
+       ]
+      },
+      "missed_frac": {
+       "visible": 0.012098045827495543,
+       "occluded_seen_before": 0.00506306324511858
+      }
+     },
+     "hand": {
+      "chunks": 533,
+      "target_old": 26220,
+      "moved_old": 926,
+      "missed": {
+       "visible": [
+        83218,
+        6641036
+       ],
+       "occluded_seen_before": [
+        11516,
+        2116436
+       ]
+      },
+      "missed_frac": {
+       "visible": 0.01253087620666414,
+       "occluded_seen_before": 0.0054412228860215945
+      }
+     }
+    },
+    "B_ROI": {
+     "main": {
+      "chunks": 635,
+      "target_old": 6007,
+      "moved_old": 65,
+      "missed": {
+       "visible": [
+        116178,
+        8150829
+       ],
+       "occluded_seen_before": [
+        34258,
+        2689882
+       ]
+      },
+      "missed_frac": {
+       "visible": 0.014253519488631156,
+       "occluded_seen_before": 0.012735874659185794
+      }
+     },
+     "hand": {
+      "chunks": 426,
+      "target_old": 710,
+      "moved_old": 2,
+      "missed": {
+       "visible": [
+        77192,
+        5241811
+       ],
+       "occluded_seen_before": [
+        23891,
+        1598320
+       ]
+      },
+      "missed_frac": {
+       "visible": 0.01472620817499906,
+       "occluded_seen_before": 0.014947569948445868
+      }
+     }
+    }
+   },
+   "judgement": {
+    "2_moved_old_main": {
+     "base": 1277,
+     "value": 65,
+     "reduction": 0.9491,
+     "pass": true
+    },
+    "3_missed_main_visible_pp": {
+     "value": 0.216,
+     "pass": true
+    },
+    "3_missed_main_occluded_seen_before_pp": {
+     "value": 0.767,
+     "pass": true
+    },
+    "3_missed_hand_visible_pp": {
+     "value": 0.22,
+     "pass": true
+    },
+    "3_missed_hand_occluded_seen_before_pp": {
+     "value": 0.951,
+     "pass": true
+    },
+    "4_success": {
+     "base": 14,
+     "value": 16,
+     "pass": true
+    },
+    "4_forbidden_episodes": {
+     "base": 3,
+     "value": 3,
+     "pass": true
+    },
+    "adopt": true
+   }
+  },
+  "diag_954_neighbour_contact": {
+   "pair": "ee_finger_r2 ↔ banana",
+   "chunks": "13–21",
+   "B_ROI_rows": 34,
+   "B_TL_ROI_rows": 31,
+   "B_ROI_max_overlap_mm": 1.9,
+   "banana_within_60mm_missing_hand_tier_frac": {
+    "B": "0.00–0.03 (0.14 at the closing chunk)",
+    "B_ROI": "0.08–0.21",
+    "B_TL_ROI": "0.02–0.07"
+   },
+   "server_setting": "--neighbour-contact-mm 20 (fingers may overlap a neighbour obstacle by 20 mm within 120 mm)"
+  },
+  "diag_missed_by_body_every_3rd_chunk": {
+   "B": {
+    "main": {
+     "table": {
+      "visible": [
+       4,
+       758314
+      ],
+      "occluded": [
+       6,
+       191094
+      ]
+     },
+     "crate": {
+      "visible": [
+       11989,
+       1035547
+      ],
+      "occluded": [
+       2256,
+       372098
+      ]
+     },
+     "banana": {
+      "visible": [
+       1832,
+       32451
+      ],
+      "occluded": [
+       970,
+       11685
+      ]
+     },
+     "pear": {
+      "visible": [
+       8,
+       14143
+      ],
+      "occluded": [
+       23,
+       11647
+      ]
+     },
+     "orange": {
+      "visible": [
+       5,
+       3537
+      ],
+      "occluded": [
+       11,
+       1010
+      ]
+     },
+     "obstacle": {
+      "visible": [
+       196,
+       30964
+      ],
+      "occluded": [
+       29,
+       9834
+      ]
+     }
+    },
+    "hand": {
+     "table": {
+      "visible": [
+       1,
+       579165
+      ],
+      "occluded": [
+       3,
+       141580
+      ]
+     },
+     "crate": {
+      "visible": [
+       8560,
+       751199
+      ],
+      "occluded": [
+       1463,
+       267930
+      ]
+     },
+     "banana": {
+      "visible": [
+       2266,
+       26995
+      ],
+      "occluded": [
+       928,
+       8679
+      ]
+     },
+     "pear": {
+      "visible": [
+       7,
+       10604
+      ],
+      "occluded": [
+       20,
+       9067
+      ]
+     },
+     "orange": {
+      "visible": [
+       5,
+       2115
+      ],
+      "occluded": [
+       5,
+       481
+      ]
+     },
+     "obstacle": {
+      "visible": [
+       192,
+       28933
+      ],
+      "occluded": [
+       24,
+       9232
+      ]
+     }
+    }
+   },
+   "B_ROI": {
+    "main": {
+     "table": {
+      "visible": [
+       120,
+       622867
+      ],
+      "occluded": [
+       309,
+       139405
+      ]
+     },
+     "crate": {
+      "visible": [
+       12841,
+       855885
+      ],
+      "occluded": [
+       4708,
+       302284
+      ]
+     },
+     "banana": {
+      "visible": [
+       409,
+       25902
+      ],
+      "occluded": [
+       854,
+       12909
+      ]
+     },
+     "pear": {
+      "visible": [
+       37,
+       11681
+      ],
+      "occluded": [
+       75,
+       5534
+      ]
+     },
+     "orange": {
+      "visible": [
+       12,
+       3270
+      ],
+      "occluded": [
+       11,
+       928
+      ]
+     },
+     "obstacle": {
+      "visible": [
+       1993,
+       22268
+      ],
+      "occluded": [
+       1493,
+       7419
+      ]
+     }
+    },
+    "hand": {
+     "table": {
+      "visible": [
+       84,
+       416070
+      ],
+      "occluded": [
+       98,
+       79178
+      ]
+     },
+     "crate": {
+      "visible": [
+       6143,
+       541128
+      ],
+      "occluded": [
+       2398,
+       188627
+      ]
+     },
+     "banana": {
+      "visible": [
+       905,
+       20242
+      ],
+      "occluded": [
+       812,
+       9202
+      ]
+     },
+     "pear": {
+      "visible": [
+       18,
+       7269
+      ],
+      "occluded": [
+       26,
+       2458
+      ]
+     },
+     "orange": {
+      "visible": [
+       5,
+       2121
+      ],
+      "occluded": [
+       5,
+       492
+      ]
+     },
+     "obstacle": {
+      "visible": [
+       1692,
+       18796
+      ],
+      "occluded": [
+       983,
+       6115
+      ]
+     }
+    }
+   }
+  },
+  "e3_18_scenes": {
+   "closed_loop": {
+    "B_ROI_FP": {
+     "n_runs": 18,
+     "n_success": 15,
+     "n_place_stop": 15,
+     "n_forbidden": 4,
+     "n_success_without_forbidden": 13,
+     "n_by_group": {
+      "neighbour_fruit": 2,
+      "basket": 0,
+      "table": 2,
+      "post": 0,
+      "body_target": 0
+     },
+     "rows_by_group": {
+      "neighbour_fruit": 36,
+      "basket": 0,
+      "table": 83,
+      "post": 0,
+      "body_target": 0
+     },
+     "esdf_ms": {
+      "n": 704,
+      "median": 267.54,
+      "p95": 815.87
+     }
+    }
+   },
+   "closed_loop_runs": {
+    "B_ROI_FP": {
+     "119": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "121": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "126": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1345": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 27,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     },
+     "1596": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1668": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1837": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "211": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 5,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     },
+     "250": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "309": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "320": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "325": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "56": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "572": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "753": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 78,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     },
+     "850": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "901": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "954": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 9,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     }
+    }
+   },
+   "field": {
+    "B_ROI_FP": {
+     "main": {
+      "chunks": 704,
+      "target_old": 16251,
+      "moved_old": 1145,
+      "missed": {
+       "visible": [
+        82717,
+        8707828
+       ],
+       "occluded_seen_before": [
+        12588,
+        2960181
+       ]
+      },
+      "missed_frac": {
+       "visible": 0.009499,
+       "occluded_seen_before": 0.004252
+      }
+     },
+     "hand": {
+      "chunks": 475,
+      "target_old": 10864,
+      "moved_old": 870,
+      "missed": {
+       "visible": [
+        48196,
+        5588449
+       ],
+       "occluded_seen_before": [
+        7148,
+        1661701
+       ]
+      },
+      "missed_frac": {
+       "visible": 0.008624,
+       "occluded_seen_before": 0.004302
+      }
+     }
+    }
+   },
+   "diag18_missed_by_body": {
+    "B": {
+     "main": {
+      "table": {
+       "visible": [
+        16,
+        1303959
+       ],
+       "occluded": [
+        9,
+        324993
+       ]
+      },
+      "crate": {
+       "visible": [
+        32502,
+        1768996
+       ],
+       "occluded": [
+        3648,
+        698167
+       ]
+      },
+      "banana": {
+       "visible": [
+        1980,
+        54835
+       ],
+       "occluded": [
+        1166,
+        21380
+       ]
+      },
+      "pear": {
+       "visible": [
+        26,
+        18612
+       ],
+       "occluded": [
+        23,
+        12902
+       ]
+      },
+      "orange": {
+       "visible": [
+        234,
+        11534
+       ],
+       "occluded": [
+        113,
+        4403
+       ]
+      },
+      "obstacle": {
+       "visible": [
+        310,
+        50068
+       ],
+       "occluded": [
+        175,
+        14984
+       ]
+      }
+     },
+     "hand": {
+      "table": {
+       "visible": [
+        10,
+        946939
+       ],
+       "occluded": [
+        6,
+        212243
+       ]
+      },
+      "crate": {
+       "visible": [
+        21866,
+        1228508
+       ],
+       "occluded": [
+        2517,
+        456771
+       ]
+      },
+      "banana": {
+       "visible": [
+        2310,
+        44328
+       ],
+       "occluded": [
+        1060,
+        15633
+       ]
+      },
+      "pear": {
+       "visible": [
+        50,
+        13643
+       ],
+       "occluded": [
+        45,
+        9682
+       ]
+      },
+      "orange": {
+       "visible": [
+        73,
+        7118
+       ],
+       "occluded": [
+        139,
+        1700
+       ]
+      },
+      "obstacle": {
+       "visible": [
+        257,
+        44877
+       ],
+       "occluded": [
+        101,
+        13373
+       ]
+      }
+     }
+    },
+    "B_ROI": {
+     "main": {
+      "table": {
+       "visible": [
+        236,
+        1138289
+       ],
+       "occluded": [
+        451,
+        264251
+       ]
+      },
+      "crate": {
+       "visible": [
+        28813,
+        1535716
+       ],
+       "occluded": [
+        7866,
+        579468
+       ]
+      },
+      "banana": {
+       "visible": [
+        486,
+        47885
+       ],
+       "occluded": [
+        971,
+        22519
+       ]
+      },
+      "pear": {
+       "visible": [
+        62,
+        15974
+       ],
+       "occluded": [
+        81,
+        6716
+       ]
+      },
+      "orange": {
+       "visible": [
+        157,
+        10438
+       ],
+       "occluded": [
+        206,
+        3929
+       ]
+      },
+      "obstacle": {
+       "visible": [
+        4264,
+        39704
+       ],
+       "occluded": [
+        2201,
+        12477
+       ]
+      }
+     },
+     "hand": {
+      "table": {
+       "visible": [
+        156,
+        783328
+       ],
+       "occluded": [
+        181,
+        158196
+       ]
+      },
+      "crate": {
+       "visible": [
+        18552,
+        1008960
+       ],
+       "occluded": [
+        4506,
+        369191
+       ]
+      },
+      "banana": {
+       "visible": [
+        2414,
+        37999
+       ],
+       "occluded": [
+        1685,
+        16515
+       ]
+      },
+      "pear": {
+       "visible": [
+        37,
+        10122
+       ],
+       "occluded": [
+        26,
+        3036
+       ]
+      },
+      "orange": {
+       "visible": [
+        93,
+        7324
+       ],
+       "occluded": [
+        108,
+        1795
+       ]
+      },
+      "obstacle": {
+       "visible": [
+        3775,
+        33810
+       ],
+       "occluded": [
+        1551,
+        10316
+       ]
+      }
+     }
+    },
+    "B_ROI_FP": {
+     "main": {
+      "table": {
+       "visible": [
+        8,
+        1244434
+       ],
+       "occluded": [
+        9,
+        304924
+       ]
+      },
+      "crate": {
+       "visible": [
+        25706,
+        1614132
+       ],
+       "occluded": [
+        2703,
+        618220
+       ]
+      },
+      "banana": {
+       "visible": [
+        351,
+        47053
+       ],
+       "occluded": [
+        572,
+        20133
+       ]
+      },
+      "pear": {
+       "visible": [
+        26,
+        18190
+       ],
+       "occluded": [
+        29,
+        13107
+       ]
+      },
+      "orange": {
+       "visible": [
+        233,
+        12724
+       ],
+       "occluded": [
+        113,
+        4768
+       ]
+      },
+      "obstacle": {
+       "visible": [
+        312,
+        40263
+       ],
+       "occluded": [
+        193,
+        10943
+       ]
+      }
+     },
+     "hand": {
+      "table": {
+       "visible": [
+        2,
+        838092
+       ],
+       "occluded": [
+        2,
+        174058
+       ]
+      },
+      "crate": {
+       "visible": [
+        13407,
+        1020137
+       ],
+       "occluded": [
+        1429,
+        343190
+       ]
+      },
+      "banana": {
+       "visible": [
+        683,
+        35430
+       ],
+       "occluded": [
+        561,
+        12632
+       ]
+      },
+      "pear": {
+       "visible": [
+        25,
+        13232
+       ],
+       "occluded": [
+        26,
+        9879
+       ]
+      },
+      "orange": {
+       "visible": [
+        63,
+        7129
+       ],
+       "occluded": [
+        134,
+        1690
+       ]
+      },
+      "obstacle": {
+       "visible": [
+        208,
+        33031
+       ],
+       "occluded": [
+        100,
+        8356
+       ]
+      }
+     }
+    }
+   },
+   "judgement": {
+    "a2_moved_old_main": {
+     "base": 1277,
+     "value": 1145,
+     "reduction": 0.1034,
+     "pass": false
+    },
+    "a3_missed_main_visible_pp": {
+     "value": -0.26,
+     "pass": true
+    },
+    "a3_missed_main_occluded_seen_before_pp": {
+     "value": -0.081,
+     "pass": true
+    },
+    "a3_missed_hand_visible_pp": {
+     "value": -0.391,
+     "pass": true
+    },
+    "a3_missed_hand_occluded_seen_before_pp": {
+     "value": -0.114,
+     "pass": true
+    },
+    "a4_success": {
+     "base": 14,
+     "value": 15,
+     "pass": true
+    },
+    "a4_forbidden_episodes": {
+     "base": 3,
+     "value": 4,
+     "pass": false
+    },
+    "b_post_missed_occluded_main_vs_B_ROI": {
+     "base": 17.64,
+     "value": 1.764,
+     "reduction": 0.9,
+     "pass": true
+    },
+    "a_all": false,
+    "adopt_footprint": false
+   },
+   "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP-E3",
+   "snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/snapshot_tdm2",
+   "synthetic_post_test": {
+    "post_side_missing_frac": {
+     "pixel_centre_0.5": {
+      "plain": 0.1071,
+      "footprint": 0.0
+     },
+     "pixel_centre_0.0": {
+      "plain": 0.0,
+      "footprint": 0.0
+     }
+    }
+   }
+  },
+  "e4_18_scenes": {
+   "closed_loop": {
+    "B_ROI_FPR": {
+     "n_runs": 18,
+     "n_success": 15,
+     "n_place_stop": 15,
+     "n_forbidden": 1,
+     "n_success_without_forbidden": 14,
+     "n_by_group": {
+      "neighbour_fruit": 1,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "rows_by_group": {
+      "neighbour_fruit": 27,
+      "basket": 0,
+      "table": 0,
+      "post": 0,
+      "body_target": 0
+     },
+     "esdf_ms": {
+      "n": 683,
+      "median": 303.19,
+      "p95": 885.3
+     }
+    }
+   },
+   "closed_loop_runs": {
+    "B_ROI_FPR": {
+     "119": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "121": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "126": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1345": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 27,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": true
+     },
+     "1596": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1668": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "1837": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "211": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "250": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "309": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "320": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "325": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "56": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "572": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "753": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "850": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "901": {
+      "success": true,
+      "mode": "place_stop",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     },
+     "954": {
+      "success": false,
+      "mode": "full",
+      "contact_rows": {
+       "neighbour_fruit": 0,
+       "basket": 0,
+       "table": 0,
+       "post": 0,
+       "body_target": 0
+      },
+      "forbidden": false
+     }
+    }
+   },
+   "field": {
+    "B_ROI_FPR": {
+     "main": {
+      "chunks": 683,
+      "target_old": 6508,
+      "moved_old": 584,
+      "missed": {
+       "visible": [
+        89178,
+        8860357
+       ],
+       "occluded_seen_before": [
+        14765,
+        3054285
+       ]
+      },
+      "missed_frac": {
+       "visible": 0.010065,
+       "occluded_seen_before": 0.004834
+      }
+     },
+     "hand": {
+      "chunks": 463,
+      "target_old": 2298,
+      "moved_old": 85,
+      "missed": {
+       "visible": [
+        52982,
+        5829467
+       ],
+       "occluded_seen_before": [
+        9902,
+        1842493
+       ]
+      },
+      "missed_frac": {
+       "visible": 0.009089,
+       "occluded_seen_before": 0.005374
+      }
+     }
+    }
+   },
+   "diag18_missed_by_body_B_ROI_FPR": {
+    "main": {
+     "table": {
+      "visible": [
+       9,
+       1220295
+      ],
+      "occluded": [
+       33,
+       297505
+      ]
+     },
+     "crate": {
+      "visible": [
+       29601,
+       1677677
+      ],
+      "occluded": [
+       3592,
+       658171
+      ]
+     },
+     "banana": {
+      "visible": [
+       515,
+       51780
+      ],
+      "occluded": [
+       847,
+       23449
+      ]
+     },
+     "pear": {
+      "visible": [
+       30,
+       16839
+      ],
+      "occluded": [
+       11,
+       6894
+      ]
+     },
+     "orange": {
+      "visible": [
+       227,
+       10983
+      ],
+      "occluded": [
+       105,
+       4169
+      ]
+     },
+     "obstacle": {
+      "visible": [
+       569,
+       50279
+      ],
+      "occluded": [
+       326,
+       14890
+      ]
+     }
+    },
+    "hand": {
+     "table": {
+      "visible": [
+       3,
+       839286
+      ],
+      "occluded": [
+       9,
+       175591
+      ]
+     },
+     "crate": {
+      "visible": [
+       19406,
+       1105537
+      ],
+      "occluded": [
+       2389,
+       408451
+      ]
+     },
+     "banana": {
+      "visible": [
+       712,
+       40975
+      ],
+      "occluded": [
+       650,
+       16506
+      ]
+     },
+     "pear": {
+      "visible": [
+       141,
+       11000
+      ],
+      "occluded": [
+       9,
+       2495
+      ]
+     },
+     "orange": {
+      "visible": [
+       91,
+       7127
+      ],
+      "occluded": [
+       144,
+       1690
+      ]
+     },
+     "obstacle": {
+      "visible": [
+       365,
+       43341
+      ],
+      "occluded": [
+       182,
+       12630
+      ]
+     }
+    }
+   },
+   "judgement": {
+    "a2_moved_old_main": {
+     "base": 1277,
+     "value": 584,
+     "reduction": 0.5427,
+     "pass": true
+    },
+    "a3_missed_main_visible_pp": {
+     "value": -0.203,
+     "pass": true
+    },
+    "a3_missed_main_occluded_seen_before_pp": {
+     "value": -0.023,
+     "pass": true
+    },
+    "a3_missed_hand_visible_pp": {
+     "value": -0.344,
+     "pass": true
+    },
+    "a3_missed_hand_occluded_seen_before_pp": {
+     "value": -0.007,
+     "pass": true
+    },
+    "a4_success": {
+     "base": 14,
+     "value": 15,
+     "pass": true
+    },
+    "a4_forbidden_episodes": {
+     "base": 3,
+     "value": 1,
+     "pass": true
+    },
+    "b_post_missed_occluded_main_vs_B_ROI": {
+     "base": 17.64,
+     "value": 2.189,
+     "reduction": 0.8759,
+     "pass": true
+    },
+    "a_all": true,
+    "adopt_relaxed_footprint": true
+   },
+   "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP-E4",
+   "snapshot": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/snapshot_tdm3",
+   "synthetic": {
+    "post_side_missing_frac_pixel_centre_0.5": {
+     "plain": 0.1071,
+     "footprint": 0.0,
+     "relaxed": 0.0
+    },
+    "removed_neighbour_top_distance_mm": {
+     "plain_tsdf": 4.0,
+     "roi": 37.0,
+     "footprint": 30.1,
+     "relaxed": 32.5
+    }
+   },
+   "serving_default": {
+    "flags": "--roi-carve --roi-carve-footprint --roi-carve-footprint-pad-px 0 --roi-carve-footprint-robot ignore",
+    "when": "--esdf-backend curobo, AG3S on, no carve flag",
+    "off": "--no-roi-carve"
+   }
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/task-dynamic-map/task-dynamic-map-scene-ep954.png",
+   "kind": "scene"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/task-dynamic-map/task-dynamic-map-bars.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/task-dynamic-map/task-dynamic-map-table.png",
+   "kind": "table"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/task-dynamic-map/task-dynamic-map-e2-bars.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/task-dynamic-map/task-dynamic-map-e2-table.png",
+   "kind": "table"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/task-dynamic-map/task-dynamic-map-e3-bars.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/task-dynamic-map/task-dynamic-map-e3-table.png",
+   "kind": "table"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/task-dynamic-map/task-dynamic-map-e4-bars.png",
+   "kind": "graph"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/task-dynamic-map/task-dynamic-map-e4-table.png",
+   "kind": "table"
+  }
+ ],
+ "verdict": {
+  "B_TL": "미채택 — 기준 1 통과, 기준 3 (본 층 가려졌던 점 +1.11 pp) · 4 (금지 접촉 episode 2 > 1) 미달",
+  "B_ROI": "미채택 — 기준 2 · 3 통과, 기준 4 (금지 접촉 episode 2 > 1) 미달",
+  "B_TL_ROI": "미채택 — 기준 2 통과, 기준 1 (−81 % / −76 %) · 3 (손 층 가려졌던 점 +1.06 pp) · 4 (2 > 1) 미달",
+  "facts": [
+   "B_TL 의 다른 물체 옛 자리 잔상 107,044 중 954 한 장면이 전부 (954 에서 바구니 27 mm 밀림, request 49)",
+   "B_TL_ROI 의 target 옛 자리 잔상 8,882 중 211 · 250 두 장면이 8,486 — 둘 다 재파지가 이어지며 manipulated 가 occluded 로 유지되고 중심 이동이 10 mm 미만이라 target TSDF reset 이 드물었다",
+   "기준 구성은 954 · 1668 에서 사과를 잡지 못해 놓기 단계에 가지 않았다; 세 구성의 늘어난 금지 접촉 episode (954) 는 놓기 단계에서 났다",
+   "서버 거리장 단계 중앙값 95.5 / 344 / 225 / 441 ms (B / B_TL / B_ROI / B_TL_ROI)",
+   "진단: B_ROI 의 잊은 장애물 증가는 놓을 곳 기둥 (반지름 15 mm) 에 몰려 있다 — 본 층 가려졌던 점 0.29 % → 20.12 %, 보이는 점 0.63 % → 8.95 % (3 chunk 마다 표본)",
+   "진단: 954 바나나 접촉은 사과를 쥐는 chunk 13–21, 겹침 최대 1.9 mm; 손 근처 바나나 표면이 손 층에서 빠진 비율 B 0–3 % · B_ROI 8–21 % · B_TL_ROI 2–7 % (B_TL_ROI 도 닿았다)"
+  ],
+  "E2_B_ROI": "채택 (task §8) — 18 장면에서 기준 2 · 3 · 4 모두 통과. 기준 3 의 손 층 가려졌던 점은 +0.951 pp 로 한도 1 pp 에 가깝다",
+  "E3_B_ROI_FP": "가장자리 보존 미채택 (task §9) — (b) 기둥 놓친 표면 −90 % 통과, (a) 기준 2 (다른 물체 옛 자리 잔상 −10.3 %) · 기준 4 (금지 접촉 episode 4 > 3) 미달 → 관심 영역 지우기의 채택 형태는 B_ROI 유지",
+  "E4_B_ROI_FPR": "가장자리 보존 완화 채택 (task §10) — (a) 기준 2 −54.3 % (한도 −50 %) · 기준 3 네 항목 모두 B 보다 낮음 · 기준 4 성공 15 ≥ 14, 금지 접촉 1 ≤ 3; (b) 기둥 놓친 표면 −87.6 %. serving 기본값으로 켬 (--no-roi-carve 로 끔)"
+ },
+ "not_measured": [
+  "B_TL_ROI 211·250 에서 정적 TSDF 로 새어 든 사과 pixel 의 기전 (가설: 가려진 동안 추종 형상과 실제 사과가 어긋나 pixel 배정 누락) — 측정 안 함",
+  "① 단독 비용 (기록된 target_layer.ms 는 routing 시작 → 계층 합성까지)",
+  "seed 반복 · 10 episode 넘는 표본",
+  "가는 물체 가장자리가 지워지는 기전 (가설: 가장 가까운 pixel 하나로 판정해 물체 가장자리 pixel 이 배경 depth 를 본다) — 측정 안 함"
+ ],
+ "limits": [
+  "10 episode, seed 1 — 구성 간 궤적이 갈라져 거리장 지표의 분모 (chunk · 장면 상태) 가 구성마다 다르다",
+  "평가용 관심 영역은 GT 사과 · 바구니 기준 (알고리즘의 관심 영역과 다름)",
+  "표면 voxel 정의: 관측면 뒤 그림자 seed 도 잔상에 섞인다 (residue 총량은 판정에 쓰지 않음)"
+ ]
+}

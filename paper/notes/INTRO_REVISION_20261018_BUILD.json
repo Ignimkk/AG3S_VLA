@@ -1,0 +1,29 @@
+{
+  "status": "BUILD_PASS",
+  "scope": "CHAPTERS_1_TO_3_METHOD_DRAFT",
+  "pdf": "paper/latex/build/main.pdf",
+  "pdf_sha256": "1dfabbc461c32278bd8430f9d9071c8682224095cbe67bca9639f16675e01719",
+  "pages": 7,
+  "references_start_page": 6,
+  "overfull_boxes": false,
+  "unresolved_references": false,
+  "official_style_hashes_match": true,
+  "experimental_sections_included": false,
+  "experiment_evidence_revalidated": false,
+  "submission_ready": false,
+  "known_warnings": "Existing cached lineno.sty and algorithm.sty UTF-8 warnings.",
+  "source_sha256": {
+    "paper/latex/main.tex": "cfbcaf4abaf9353520846eafb3a35a4048657bd27869fecedf72902aaeef5e14",
+    "paper/latex/metadata.tex": "acf4b3619d4102b69f26e4d65c21a5998c590329810c029c6662312c3efc5462",
+    "paper/latex/sections/00_abstract.tex": "b00ec320c66159d5dfb328907abc92b3ad565cb98c09c1eefdcc3edd46285268",
+    "paper/latex/sections/01_introduction.tex": "91246a01204689fa9c21a8640bc852007f34b2e1416b6013ba0168e5b09ef827",
+    "paper/latex/sections/02_related_work.tex": "54d432e29ea7ac01a86e5b28d0b10aa1e605e5ce437ef1f4f4d900962a0d570d",
+    "paper/latex/sections/03_method.tex": "c16dcf5bb6a7bf940e05377e788d2991704dde4dee26e396a6aeed7eff850a85"
+  },
+  "revision_date_kst": "2026-10-18",
+  "separate_evidence_audit": {
+    "command": "python3 paper/tools/analysis/audit_ifg_evidence.py",
+    "status": "PASS",
+    "scope": "EXP002 offline development, 180 frames / 32 episodes; no new rollout or causal failure audit"
+  }
+}

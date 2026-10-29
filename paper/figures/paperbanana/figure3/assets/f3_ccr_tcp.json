@@ -1,0 +1,9 @@
+{
+ "asset": "paper/figures/paperbanana/figure3/assets/f3_ccr_tcp.png",
+ "chunk": 19,
+ "run": "T53 C1a",
+ "episode": "ep1842",
+ "note": "FK (site right_ee) of the recorded reference and refined chunks, 16 planned rows; target points of the chunk.",
+ "max_tcp_shift_mm": 25.240077720504612,
+ "is_measured_result": false
+}

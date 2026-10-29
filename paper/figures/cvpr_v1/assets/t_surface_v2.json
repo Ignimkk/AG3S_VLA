@@ -1,0 +1,33 @@
+{
+ "asset": "paper/figures/cvpr_v1/assets/t_surface_v2.png",
+ "frame": "T53_ep1842_f016",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/cvpr_v1_fig3_assets.py",
+ "replaces": "paper/figures/ifg_overview/assets/t_surface.json",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T53_ep1842_f016.npz": "dc07ce0ad6224444c947035dd5901f84fac0494117e0ba1275bf9b140b756a37",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/labels/T53_ep1842_f016.npz": "6da2ccaa0ad4f60f04ec45e812057d116ce23a206c8aae21ce44ad06c51a23ef"
+ },
+ "note": "Observed target surface (orange nodes) and the touching neighbour's observed surface (blue nodes). object meshes tinted for legibility: target 'pear' orange, touching neighbour(s) ['orange'] light blue; overlaid nodes = recomputed 5 mm observed-surface nodes (orange = selected target surface, blue = protected neighbour)",
+ "is_measured_result": false,
+ "iou": 1.0,
+ "neighbour_nodes": 742,
+ "camera": {
+  "lookat": [
+   0.47963297776847463,
+   -0.30540420374397725,
+   0.8790829468356353
+  ],
+  "dist": 0.42,
+  "az": 150,
+  "el": -34
+ },
+ "target": "pear",
+ "tinted": {
+  "target": "pear",
+  "neighbours": [
+   "orange"
+  ]
+ }
+}

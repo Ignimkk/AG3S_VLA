@@ -1,0 +1,5448 @@
+{
+ "step": "T44E2",
+ "date": "2026-10-10",
+ "runs": [
+  {
+   "id": "baseline_curobo",
+   "command": "MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/work XLA_PYTHON_CLIENT_PREALLOCATE=false /mnt/dev/work/.venv-openpi-live/bin/python -m benchmark.trajopt.experiments.esdf_rollout --records run_16d_ep1800 --attention benchmark/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005",
+   "venv": ".venv-openpi-live",
+   "raw_output": "outputs/verify/T44/E2/baseline/base_curobo.json",
+   "stdout_log": "outputs/verify/T44/E2/baseline/base_curobo.log"
+  },
+  {
+   "id": "e2_demo_list",
+   "command": "python outputs/verify/T44/E2/select_demo.py",
+   "raw_output": "outputs/verify/T44/E2/e2_demo_frames.json",
+   "posed_frames": "outputs/verify/T44/E2/e2_demo_posed_frames.json"
+  },
+  {
+   "id": "e2_measure",
+   "command": "outputs/verify/T44/E2/run_all.sh {0,1} (e2_measure.py --posed-frames e2_demo_posed_frames.json --sign-check ; e2_measure.py --lb-frames outputs/verify/T44/p/e2_frames.json --history 2 --sign-check), 2 shards concurrent, nice 19, OMP 4",
+   "venv": ".venv-openpi-live",
+   "raw_output": [
+    "outputs/verify/T44/E2/raw_demo/",
+    "outputs/verify/T44/E2/raw_lb/"
+   ],
+   "stdout_log": [
+    "outputs/verify/T44/E2/run_shard0.log",
+    "outputs/verify/T44/E2/run_shard1.log"
+   ],
+   "script": "outputs/verify/T44/E2/e2_measure.py (imports benchmark/ag3s/experiments/live/exclusion_e2.py read-only)"
+  },
+  {
+   "id": "e2_timing",
+   "command": "e2_timing.py --posed-frames ... ; e2_timing.py --lb-frames ... --history 2 (single process, 10 interleaved reps)",
+   "raw_output": [
+    "outputs/verify/T44/E2/timing/timing_demo.json",
+    "outputs/verify/T44/E2/timing/timing_lb.json"
+   ],
+   "stdout_log": "outputs/verify/T44/E2/timing/timing.log"
+  },
+  {
+   "id": "aggregate",
+   "command": "agg_e2.py ; agg_timing.py",
+   "raw_output": [
+    "outputs/verify/T44/E2/agg_e2.json",
+    "outputs/verify/T44/E2/timing/agg_timing.json"
+   ]
+  },
+  {
+   "id": "v_i0",
+   "command": "JAX_PLATFORMS=cpu replay_contacts.py outputs/verify/T44/E2/vi0 outputs/verify/T43/V11/runs/V11AB/H/V11AB_ep1807_s18071 ; vi0_table.py",
+   "raw_output": [
+    "outputs/verify/T44/E2/vi0/V11AB_H_V11AB_ep1807_s18071.json",
+    "outputs/verify/T44/E2/vi0/vi0_table.json"
+   ],
+   "stdout_log": "outputs/verify/T44/E2/vi0/replay.log"
+  }
+ ],
+ "code_state": {
+  "repo": "benchmark",
+  "head": "498f713",
+  "dirty_files": [
+   "ag3s/config.py",
+   "ag3s/constraints/to_adapter.py",
+   "ag3s/experiments/sources/constraint_record.py",
+   "ag3s/fields/curobo_builder.py",
+   "ag3s/runtime/pipeline.py",
+   "trajopt/config.py",
+   "trajopt/linearize.py",
+   "trajopt/serve_safe.py",
+   "trajopt/sweep.py",
+   "ag3s/experiments/live/exclusion_e2.py (untracked)"
+  ],
+  "md5": {
+   "ag3s/experiments/live/exclusion_e2.py": "10cca536686da40b62f71392a7230058",
+   "ag3s/fields/curobo_builder.py": "f090db2e08ca47bd0756e6d483ada3d9",
+   "ag3s/runtime/pipeline.py": "47fe851872c42b89089a204292a439df"
+  }
+ },
+ "split": {
+  "E2-demo": "train (episode_index < 1600 and meta split == train), success true; demonstration poses, no policy execution",
+  "E2-lb": "train; LB E0 success runs from outputs/verify/T44/p/e2_frames.json fallback (nearest other fruit 0.109-0.117 m)"
+ },
+ "numbers": {
+  "baseline_curobo": {
+   "violated_start": 10,
+   "frames": 15,
+   "has_target": 15,
+   "frame0_clearance_before_mm": -9.171877401271193
+  },
+  "e2_demo_list": {
+   "n_episodes": 16,
+   "n_frames": 64,
+   "pool_counts": {
+    "0.08_0.10": 972,
+    "lt_0.08": 231,
+    "not_train": 400
+   },
+   "groups": [
+    {
+     "target_fruit": "apple",
+     "used_arm": "left",
+     "bin": "lt_0.08",
+     "n_candidates": 31,
+     "episode": 12,
+     "nearest_other": "orange",
+     "nearest_other_xy_m": 0.07976,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "apple",
+     "used_arm": "left",
+     "bin": "0.08_0.10",
+     "n_candidates": 133,
+     "episode": 2,
+     "nearest_other": "banana",
+     "nearest_other_xy_m": 0.09162,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "apple",
+     "used_arm": "right",
+     "bin": "lt_0.08",
+     "n_candidates": 30,
+     "episode": 22,
+     "nearest_other": "orange",
+     "nearest_other_xy_m": 0.07953,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "apple",
+     "used_arm": "right",
+     "bin": "0.08_0.10",
+     "n_candidates": 104,
+     "episode": 30,
+     "nearest_other": "pear",
+     "nearest_other_xy_m": 0.08958,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "orange",
+     "used_arm": "left",
+     "bin": "lt_0.08",
+     "n_candidates": 31,
+     "episode": 67,
+     "nearest_other": "pear",
+     "nearest_other_xy_m": 0.07491,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "orange",
+     "used_arm": "left",
+     "bin": "0.08_0.10",
+     "n_candidates": 123,
+     "episode": 0,
+     "nearest_other": "apple",
+     "nearest_other_xy_m": 0.09492,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "orange",
+     "used_arm": "right",
+     "bin": "lt_0.08",
+     "n_candidates": 29,
+     "episode": 3,
+     "nearest_other": "banana",
+     "nearest_other_xy_m": 0.07718,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "orange",
+     "used_arm": "right",
+     "bin": "0.08_0.10",
+     "n_candidates": 127,
+     "episode": 15,
+     "nearest_other": "apple",
+     "nearest_other_xy_m": 0.09509,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "pear",
+     "used_arm": "left",
+     "bin": "lt_0.08",
+     "n_candidates": 24,
+     "episode": 100,
+     "nearest_other": "orange",
+     "nearest_other_xy_m": 0.0752,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "pear",
+     "used_arm": "left",
+     "bin": "0.08_0.10",
+     "n_candidates": 131,
+     "episode": 1,
+     "nearest_other": "apple",
+     "nearest_other_xy_m": 0.08689,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "pear",
+     "used_arm": "right",
+     "bin": "lt_0.08",
+     "n_candidates": 26,
+     "episode": 60,
+     "nearest_other": "apple",
+     "nearest_other_xy_m": 0.0741,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "pear",
+     "used_arm": "right",
+     "bin": "0.08_0.10",
+     "n_candidates": 126,
+     "episode": 11,
+     "nearest_other": "orange",
+     "nearest_other_xy_m": 0.08167,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "banana",
+     "used_arm": "left",
+     "bin": "lt_0.08",
+     "n_candidates": 29,
+     "episode": 27,
+     "nearest_other": "apple",
+     "nearest_other_xy_m": 0.07774,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "banana",
+     "used_arm": "left",
+     "bin": "0.08_0.10",
+     "n_candidates": 117,
+     "episode": 5,
+     "nearest_other": "apple",
+     "nearest_other_xy_m": 0.08736,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "banana",
+     "used_arm": "right",
+     "bin": "lt_0.08",
+     "n_candidates": 31,
+     "episode": 26,
+     "nearest_other": "pear",
+     "nearest_other_xy_m": 0.078,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    },
+    {
+     "target_fruit": "banana",
+     "used_arm": "right",
+     "bin": "0.08_0.10",
+     "n_candidates": 111,
+     "episode": 58,
+     "nearest_other": "orange",
+     "nearest_other_xy_m": 0.09448,
+     "frames": [
+      68,
+      80,
+      92,
+      104
+     ]
+    }
+   ]
+  },
+  "margin_m": 0.01,
+  "margin_source": "V11AB --obstacle-margin 0.010 (--esdf-margin 0)",
+  "query_model": "V11AB constraint model: links gripper, capsule_radius_scale 0.05, sphere_spacing 0.4, max_spheres_per_capsule 32, finger cover both (270 spheres); authorized = active-arm ee + 2 fingers (135 spheres)",
+  "sets": {
+   "demo": {
+    "gt": {
+     "n_frames": 64,
+     "identity_resolved_counts": {
+      "pipeline": 17,
+      "nearest_cluster": 13,
+      "gt_label": 34
+     },
+     "n_frames_ball_lost_distractor": 23,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": 0.479,
+       "(1)_pass": false,
+       "(1)_n_hit_frames": 23,
+       "(2)_recall_median": 0.935,
+       "(2)_ball_recall_median": 0.936,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 65,
+       "(3)_ball_q": 67,
+       "(3)_falsely_feasible_grid": 5804,
+       "(3)_ball_grid": 5916,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 66.553,
+       "(4)_pass": false
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": 0.9856,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 23,
+       "(2)_recall_median": 0.547,
+       "(2)_ball_recall_median": 0.936,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 5,
+       "(3)_ball_q": 67,
+       "(3)_falsely_feasible_grid": 441,
+       "(3)_ball_grid": 5916,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 9.973,
+       "(4)_pass": true
+      }
+     },
+     "merge": {
+      "n": 64,
+      "target_cluster_target_fraction_median": 0.637,
+      "n_target_cluster_target_fraction_lt_0.8": 34,
+      "n_target_cluster_with_distractor_points": 34,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 0.8701,
+     "nontarget_source_counts": {
+      "indices": 64
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.273,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.795,
+       "eikonal_median_of_frame_medians": 0.965
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.272,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.272,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9513
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.272,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9523
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.272,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 422,
+     "ball_owned_remove_distractor_lost_sum": 434,
+     "methods": {
+      "ball": {
+       "recall_median": 0.936,
+       "recall_p10": 0.698,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 833,
+       "distractor_lost_sum_on_ball_hit_frames": 833,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 0.99,
+       "nontarget_labelled_retention_roi_median": 0.997,
+       "unlabelled_seeds_roi_sum": 16545,
+       "unlabelled_removed_sum": 656,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 611,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 37554,
+       "build_ms_median": 4.766,
+       "build_ms_p90": 7.688,
+       "build_ms_n": 192,
+       "build_ms_frame_median_median": 4.758,
+       "build_ms_frame_median_p90": 5.895,
+       "classify_ms_median": 1.163,
+       "classify_ms_p90": 1.748,
+       "q_vs_oracle": {
+        "n": 3484,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.381,
+        "over_max_mm": 40.602,
+        "n_over_gt_1mm": 774,
+        "n_falsely_feasible": 67,
+        "n_falsely_infeasible": 14,
+        "n_ref_infeasible": 200
+       },
+       "grid_vs_oracle": {
+        "n": 366027,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 21.527,
+        "over_max_mm": 60.917,
+        "n_over_gt_1mm": 89658,
+        "n_falsely_feasible": 5916,
+        "n_falsely_infeasible": 5220,
+        "n_ref_infeasible": 41893
+       },
+       "q_vs_oracle_prime": {
+        "n": 3484,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 7.416,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 347,
+        "n_falsely_feasible": 60,
+        "n_falsely_infeasible": 34,
+        "n_ref_infeasible": 173
+       },
+       "grid_vs_oracle_prime": {
+        "n": 366027,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 4.797,
+        "over_max_mm": 38.937,
+        "n_over_gt_1mm": 32926,
+        "n_falsely_feasible": 2710,
+        "n_falsely_infeasible": 8895,
+        "n_ref_infeasible": 35012
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.935,
+       "recall_p10": 0.689,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 434,
+       "distractor_lost_sum_on_ball_hit_frames": 434,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 0.992,
+       "nontarget_labelled_retention_roi_median": 0.999,
+       "unlabelled_seeds_roi_sum": 16545,
+       "unlabelled_removed_sum": 653,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 611,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 61,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 15447,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 37554,
+       "build_ms_median": 7.24,
+       "build_ms_p90": 74.241,
+       "build_ms_n": 192,
+       "build_ms_frame_median_median": 6.762,
+       "build_ms_frame_median_p90": 10.511,
+       "classify_ms_median": 3.391,
+       "classify_ms_p90": 6.355,
+       "loss_reduction_pooled_on_hit_frames": 0.479,
+       "loss_reduction_frame_median": 0.727,
+       "n_hit_frames_reduction_ge_50pct": 13,
+       "build_ms_paired_diff_median": 2.086,
+       "build_ms_paired_diff_p90": 42.157,
+       "q_vs_oracle": {
+        "n": 3484,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.281,
+        "over_max_mm": 35.561,
+        "n_over_gt_1mm": 755,
+        "n_falsely_feasible": 65,
+        "n_falsely_infeasible": 14,
+        "n_ref_infeasible": 200
+       },
+       "grid_vs_oracle": {
+        "n": 366027,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 21.29,
+        "over_max_mm": 59.212,
+        "n_over_gt_1mm": 85880,
+        "n_falsely_feasible": 5804,
+        "n_falsely_infeasible": 5307,
+        "n_ref_infeasible": 41893
+       },
+       "q_vs_oracle_prime": {
+        "n": 3484,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 7.293,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 293,
+        "n_falsely_feasible": 58,
+        "n_falsely_infeasible": 34,
+        "n_ref_infeasible": 173
+       },
+       "grid_vs_oracle_prime": {
+        "n": 366027,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 3.795,
+        "over_max_mm": 38.937,
+        "n_over_gt_1mm": 25035,
+        "n_falsely_feasible": 2607,
+        "n_falsely_infeasible": 8991,
+        "n_ref_infeasible": 35012
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.547,
+       "recall_p10": 0.49,
+       "recall_min": 0.4325,
+       "distractor_lost_sum": 12,
+       "distractor_lost_sum_on_ball_hit_frames": 12,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16545,
+       "unlabelled_removed_sum": 52,
+       "shared_removed_sum": 1,
+       "support_lost_sum": 10,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 61,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 15447,
+       "n_seeds_in_ball_sum": 37554,
+       "build_ms_median": 7.227,
+       "build_ms_p90": 17.661,
+       "build_ms_n": 192,
+       "build_ms_frame_median_median": 7.098,
+       "build_ms_frame_median_p90": 10.328,
+       "classify_ms_median": 3.388,
+       "classify_ms_p90": 6.935,
+       "loss_reduction_pooled_on_hit_frames": 0.9856,
+       "loss_reduction_frame_median": 1.0,
+       "n_hit_frames_reduction_ge_50pct": 23,
+       "build_ms_paired_diff_median": 2.232,
+       "build_ms_paired_diff_p90": 11.153,
+       "q_vs_oracle": {
+        "n": 3484,
+        "over_median_mm": -2.882,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 7.484,
+        "n_over_gt_1mm": 50,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 102,
+        "n_ref_infeasible": 200
+       },
+       "grid_vs_oracle": {
+        "n": 366027,
+        "over_median_mm": -3.701,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 33.636,
+        "n_over_gt_1mm": 10632,
+        "n_falsely_feasible": 441,
+        "n_falsely_infeasible": 26204,
+        "n_ref_infeasible": 41893
+       },
+       "q_vs_oracle_prime": {
+        "n": 3484,
+        "over_median_mm": -5.09,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.566,
+        "n_over_gt_1mm": 18,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 129,
+        "n_ref_infeasible": 173
+       },
+       "grid_vs_oracle_prime": {
+        "n": 366027,
+        "over_median_mm": -8.362,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 9.065,
+        "n_over_gt_1mm": 918,
+        "n_falsely_feasible": 113,
+        "n_falsely_infeasible": 32757,
+        "n_ref_infeasible": 35012
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16545,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 111100,
+       "q_vs_oracle_prime": {
+        "n": 3484,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 27,
+        "n_ref_infeasible": 173
+       },
+       "grid_vs_oracle_prime": {
+        "n": 366027,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 4.877,
+        "n_over_gt_1mm": 80,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 6881,
+        "n_ref_infeasible": 35012
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 0.803,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16545,
+       "unlabelled_removed_sum": 16545,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 111100,
+       "q_vs_oracle": {
+        "n": 3484,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 22.248,
+        "over_max_mm": 47.026,
+        "n_over_gt_1mm": 1100,
+        "n_falsely_feasible": 27,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 200
+       },
+       "grid_vs_oracle": {
+        "n": 366027,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 25.47,
+        "over_max_mm": 68.609,
+        "n_over_gt_1mm": 131631,
+        "n_falsely_feasible": 6881,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 41893
+       }
+      }
+     }
+    },
+    "gt_label": {
+     "n_frames": 64,
+     "identity_resolved_counts": {
+      "gt_label": 64
+     },
+     "n_frames_ball_lost_distractor": 23,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": 0.479,
+       "(1)_pass": false,
+       "(1)_n_hit_frames": 23,
+       "(2)_recall_median": 0.936,
+       "(2)_ball_recall_median": 0.936,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 65,
+       "(3)_ball_q": 67,
+       "(3)_falsely_feasible_grid": 5824,
+       "(3)_ball_grid": 5936,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 3.259,
+       "(4)_pass": true
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": 0.9856,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 23,
+       "(2)_recall_median": 0.548,
+       "(2)_ball_recall_median": 0.936,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 5,
+       "(3)_ball_q": 67,
+       "(3)_falsely_feasible_grid": 441,
+       "(3)_ball_grid": 5936,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 38.284,
+       "(4)_pass": false
+      }
+     },
+     "merge": {
+      "n": 64,
+      "target_cluster_target_fraction_median": 0.637,
+      "n_target_cluster_target_fraction_lt_0.8": 34,
+      "n_target_cluster_with_distractor_points": 34,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 1.0,
+     "nontarget_source_counts": {
+      "indices": 64
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.273,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.795,
+       "eikonal_median_of_frame_medians": 0.965
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.272,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.272,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9513
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.272,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9523
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.272,
+       "n": 64,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 422,
+     "ball_owned_remove_distractor_lost_sum": 434,
+     "methods": {
+      "ball": {
+       "recall_median": 0.936,
+       "recall_p10": 0.698,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 833,
+       "distractor_lost_sum_on_ball_hit_frames": 833,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 0.99,
+       "nontarget_labelled_retention_roi_median": 0.997,
+       "unlabelled_seeds_roi_sum": 16781,
+       "unlabelled_removed_sum": 659,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 611,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 37567,
+       "build_ms_median": 4.929,
+       "build_ms_p90": 9.152,
+       "build_ms_n": 192,
+       "build_ms_frame_median_median": 4.937,
+       "build_ms_frame_median_p90": 6.114,
+       "classify_ms_median": 1.28,
+       "classify_ms_p90": 1.805,
+       "q_vs_oracle": {
+        "n": 3472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.396,
+        "over_max_mm": 40.602,
+        "n_over_gt_1mm": 775,
+        "n_falsely_feasible": 67,
+        "n_falsely_infeasible": 11,
+        "n_ref_infeasible": 200
+       },
+       "grid_vs_oracle": {
+        "n": 365106,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 21.557,
+        "over_max_mm": 60.917,
+        "n_over_gt_1mm": 89601,
+        "n_falsely_feasible": 5936,
+        "n_falsely_infeasible": 4560,
+        "n_ref_infeasible": 41881
+       },
+       "q_vs_oracle_prime": {
+        "n": 3472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 7.469,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 347,
+        "n_falsely_feasible": 60,
+        "n_falsely_infeasible": 31,
+        "n_ref_infeasible": 173
+       },
+       "grid_vs_oracle_prime": {
+        "n": 365106,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 4.812,
+        "over_max_mm": 38.937,
+        "n_over_gt_1mm": 32926,
+        "n_falsely_feasible": 2710,
+        "n_falsely_infeasible": 8215,
+        "n_ref_infeasible": 35000
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.936,
+       "recall_p10": 0.689,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 434,
+       "distractor_lost_sum_on_ball_hit_frames": 434,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 0.992,
+       "nontarget_labelled_retention_roi_median": 0.999,
+       "unlabelled_seeds_roi_sum": 16781,
+       "unlabelled_removed_sum": 656,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 611,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 39,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 15452,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 37567,
+       "build_ms_median": 7.092,
+       "build_ms_p90": 12.411,
+       "build_ms_n": 192,
+       "build_ms_frame_median_median": 7.021,
+       "build_ms_frame_median_p90": 10.618,
+       "classify_ms_median": 3.455,
+       "classify_ms_p90": 6.567,
+       "loss_reduction_pooled_on_hit_frames": 0.479,
+       "loss_reduction_frame_median": 0.727,
+       "n_hit_frames_reduction_ge_50pct": 13,
+       "build_ms_paired_diff_median": 1.865,
+       "build_ms_paired_diff_p90": 5.718,
+       "q_vs_oracle": {
+        "n": 3472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.297,
+        "over_max_mm": 35.561,
+        "n_over_gt_1mm": 756,
+        "n_falsely_feasible": 65,
+        "n_falsely_infeasible": 11,
+        "n_ref_infeasible": 200
+       },
+       "grid_vs_oracle": {
+        "n": 365106,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 21.321,
+        "over_max_mm": 59.212,
+        "n_over_gt_1mm": 85942,
+        "n_falsely_feasible": 5824,
+        "n_falsely_infeasible": 4568,
+        "n_ref_infeasible": 41881
+       },
+       "q_vs_oracle_prime": {
+        "n": 3472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 7.302,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 293,
+        "n_falsely_feasible": 58,
+        "n_falsely_infeasible": 31,
+        "n_ref_infeasible": 173
+       },
+       "grid_vs_oracle_prime": {
+        "n": 365106,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 3.819,
+        "over_max_mm": 38.937,
+        "n_over_gt_1mm": 25035,
+        "n_falsely_feasible": 2607,
+        "n_falsely_infeasible": 8232,
+        "n_ref_infeasible": 35000
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.548,
+       "recall_p10": 0.49,
+       "recall_min": 0.4325,
+       "distractor_lost_sum": 12,
+       "distractor_lost_sum_on_ball_hit_frames": 12,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16781,
+       "unlabelled_removed_sum": 52,
+       "shared_removed_sum": 1,
+       "support_lost_sum": 10,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 39,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 15452,
+       "n_seeds_in_ball_sum": 37567,
+       "build_ms_median": 7.393,
+       "build_ms_p90": 47.436,
+       "build_ms_n": 192,
+       "build_ms_frame_median_median": 7.159,
+       "build_ms_frame_median_p90": 11.199,
+       "classify_ms_median": 3.439,
+       "classify_ms_p90": 6.728,
+       "loss_reduction_pooled_on_hit_frames": 0.9856,
+       "loss_reduction_frame_median": 1.0,
+       "n_hit_frames_reduction_ge_50pct": 23,
+       "build_ms_paired_diff_median": 2.051,
+       "build_ms_paired_diff_p90": 42.899,
+       "q_vs_oracle": {
+        "n": 3472,
+        "over_median_mm": -2.846,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 7.484,
+        "n_over_gt_1mm": 50,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 99,
+        "n_ref_infeasible": 200
+       },
+       "grid_vs_oracle": {
+        "n": 365106,
+        "over_median_mm": -3.668,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 33.636,
+        "n_over_gt_1mm": 10633,
+        "n_falsely_feasible": 441,
+        "n_falsely_infeasible": 25641,
+        "n_ref_infeasible": 41881
+       },
+       "q_vs_oracle_prime": {
+        "n": 3472,
+        "over_median_mm": -5.016,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.566,
+        "n_over_gt_1mm": 18,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 126,
+        "n_ref_infeasible": 173
+       },
+       "grid_vs_oracle_prime": {
+        "n": 365106,
+        "over_median_mm": -8.307,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 9.065,
+        "n_over_gt_1mm": 918,
+        "n_falsely_feasible": 113,
+        "n_falsely_infeasible": 32194,
+        "n_ref_infeasible": 35000
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16781,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 111478,
+       "q_vs_oracle_prime": {
+        "n": 3472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 27,
+        "n_ref_infeasible": 173
+       },
+       "grid_vs_oracle_prime": {
+        "n": 365106,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 4.877,
+        "n_over_gt_1mm": 80,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 6881,
+        "n_ref_infeasible": 35000
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 833,
+       "obstacle_retention_roi_median": 0.8,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16781,
+       "unlabelled_removed_sum": 16781,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 111478,
+       "q_vs_oracle": {
+        "n": 3472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 22.256,
+        "over_max_mm": 47.026,
+        "n_over_gt_1mm": 1101,
+        "n_falsely_feasible": 27,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 200
+       },
+       "grid_vs_oracle": {
+        "n": 365106,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 25.493,
+        "over_max_mm": 68.609,
+        "n_over_gt_1mm": 131607,
+        "n_falsely_feasible": 6881,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 41881
+       }
+      }
+     }
+    },
+    "gt_cluster_only": {
+     "n_frames": 30,
+     "identity_resolved_counts": {
+      "pipeline": 17,
+      "nearest_cluster": 13
+     },
+     "n_frames_ball_lost_distractor": 3,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": 0.2951,
+       "(1)_pass": false,
+       "(1)_n_hit_frames": 3,
+       "(2)_recall_median": 0.932,
+       "(2)_ball_recall_median": 0.936,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 28,
+       "(3)_ball_q": 28,
+       "(3)_falsely_feasible_grid": 2731,
+       "(3)_ball_grid": 2731,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 32.164,
+       "(4)_pass": false
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": 1.0,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 3,
+       "(2)_recall_median": 0.524,
+       "(2)_ball_recall_median": 0.936,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 0,
+       "(3)_ball_q": 28,
+       "(3)_falsely_feasible_grid": 234,
+       "(3)_ball_grid": 2731,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 3.85,
+       "(4)_pass": true
+      }
+     },
+     "merge": {
+      "n": 30,
+      "target_cluster_target_fraction_median": 1.0,
+      "n_target_cluster_target_fraction_lt_0.8": 0,
+      "n_target_cluster_with_distractor_points": 0,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 0.8701,
+     "nontarget_source_counts": {
+      "indices": 30
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.233,
+       "n": 30,
+       "eikonal_median_of_frame_medians": 0.969,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.598,
+       "eikonal_median_of_frame_medians": 0.968
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.233,
+       "n": 30,
+       "eikonal_median_of_frame_medians": 0.969,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.233,
+       "n": 30,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9561
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.233,
+       "n": 30,
+       "eikonal_median_of_frame_medians": 0.97,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.233,
+       "n": 30,
+       "eikonal_median_of_frame_medians": 0.97,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 86,
+     "ball_owned_remove_distractor_lost_sum": 86,
+     "methods": {
+      "ball": {
+       "recall_median": 0.936,
+       "recall_p10": 0.689,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 122,
+       "distractor_lost_sum_on_ball_hit_frames": 122,
+       "distractor_in_ball_sum": 122,
+       "obstacle_retention_roi_median": 0.994,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 6962,
+       "unlabelled_removed_sum": 254,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 174,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 15850,
+       "build_ms_median": 4.646,
+       "build_ms_p90": 7.158,
+       "build_ms_n": 90,
+       "build_ms_frame_median_median": 4.643,
+       "build_ms_frame_median_p90": 5.805,
+       "classify_ms_median": 1.132,
+       "classify_ms_p90": 1.467,
+       "q_vs_oracle": {
+        "n": 1808,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.981,
+        "over_max_mm": 33.904,
+        "n_over_gt_1mm": 356,
+        "n_falsely_feasible": 28,
+        "n_falsely_infeasible": 3,
+        "n_ref_infeasible": 99
+       },
+       "grid_vs_oracle": {
+        "n": 187781,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.313,
+        "over_max_mm": 53.268,
+        "n_over_gt_1mm": 45955,
+        "n_falsely_feasible": 2731,
+        "n_falsely_infeasible": 2526,
+        "n_ref_infeasible": 19808
+       },
+       "q_vs_oracle_prime": {
+        "n": 1808,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 15.691,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 168,
+        "n_falsely_feasible": 25,
+        "n_falsely_infeasible": 14,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 187781,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 6.651,
+        "over_max_mm": 37.719,
+        "n_over_gt_1mm": 16837,
+        "n_falsely_feasible": 1157,
+        "n_falsely_infeasible": 4523,
+        "n_ref_infeasible": 16237
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.932,
+       "recall_p10": 0.689,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 86,
+       "distractor_lost_sum_on_ball_hit_frames": 86,
+       "distractor_in_ball_sum": 122,
+       "obstacle_retention_roi_median": 0.994,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 6962,
+       "unlabelled_removed_sum": 254,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 174,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 22,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 6561,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 15850,
+       "build_ms_median": 6.851,
+       "build_ms_p90": 39.322,
+       "build_ms_n": 90,
+       "build_ms_frame_median_median": 6.735,
+       "build_ms_frame_median_p90": 10.614,
+       "classify_ms_median": 3.301,
+       "classify_ms_p90": 4.827,
+       "loss_reduction_pooled_on_hit_frames": 0.2951,
+       "loss_reduction_frame_median": 0.0,
+       "n_hit_frames_reduction_ge_50pct": 0,
+       "build_ms_paired_diff_median": 1.943,
+       "build_ms_paired_diff_p90": 9.411,
+       "q_vs_oracle": {
+        "n": 1808,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.981,
+        "over_max_mm": 33.904,
+        "n_over_gt_1mm": 338,
+        "n_falsely_feasible": 28,
+        "n_falsely_infeasible": 3,
+        "n_ref_infeasible": 99
+       },
+       "grid_vs_oracle": {
+        "n": 187781,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.313,
+        "over_max_mm": 53.268,
+        "n_over_gt_1mm": 43258,
+        "n_falsely_feasible": 2731,
+        "n_falsely_infeasible": 2605,
+        "n_ref_infeasible": 19808
+       },
+       "q_vs_oracle_prime": {
+        "n": 1808,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 15.691,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 142,
+        "n_falsely_feasible": 25,
+        "n_falsely_infeasible": 14,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 187781,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 6.564,
+        "over_max_mm": 37.719,
+        "n_over_gt_1mm": 13634,
+        "n_falsely_feasible": 1157,
+        "n_falsely_infeasible": 4602,
+        "n_ref_infeasible": 16237
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.524,
+       "recall_p10": 0.488,
+       "recall_min": 0.4325,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 122,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 6962,
+       "unlabelled_removed_sum": 23,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 3,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 22,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 6561,
+       "n_seeds_in_ball_sum": 15850,
+       "build_ms_median": 6.995,
+       "build_ms_p90": 11.008,
+       "build_ms_n": 90,
+       "build_ms_frame_median_median": 7.085,
+       "build_ms_frame_median_p90": 8.463,
+       "classify_ms_median": 3.316,
+       "classify_ms_p90": 4.865,
+       "loss_reduction_pooled_on_hit_frames": 1.0,
+       "loss_reduction_frame_median": 1.0,
+       "n_hit_frames_reduction_ge_50pct": 3,
+       "build_ms_paired_diff_median": 2.023,
+       "build_ms_paired_diff_p90": 6.033,
+       "q_vs_oracle": {
+        "n": 1808,
+        "over_median_mm": -2.842,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 7.484,
+        "n_over_gt_1mm": 24,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 64,
+        "n_ref_infeasible": 99
+       },
+       "grid_vs_oracle": {
+        "n": 187781,
+        "over_median_mm": -3.936,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 33.636,
+        "n_over_gt_1mm": 5881,
+        "n_falsely_feasible": 234,
+        "n_falsely_infeasible": 14985,
+        "n_ref_infeasible": 19808
+       },
+       "q_vs_oracle_prime": {
+        "n": 1808,
+        "over_median_mm": -4.803,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.717,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 78,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 187781,
+        "over_median_mm": -8.844,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.779,
+        "n_over_gt_1mm": 239,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 18322,
+        "n_ref_infeasible": 16237
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 122,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 6962,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 44926,
+       "q_vs_oracle_prime": {
+        "n": 1808,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 14,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 187781,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 4.877,
+        "n_over_gt_1mm": 34,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 3571,
+        "n_ref_infeasible": 16237
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 122,
+       "obstacle_retention_roi_median": 0.803,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 6962,
+       "unlabelled_removed_sum": 6962,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 44926,
+       "q_vs_oracle": {
+        "n": 1808,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 23.114,
+        "over_max_mm": 47.026,
+        "n_over_gt_1mm": 624,
+        "n_falsely_feasible": 14,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 99
+       },
+       "grid_vs_oracle": {
+        "n": 187781,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 25.575,
+        "over_max_mm": 68.609,
+        "n_over_gt_1mm": 73865,
+        "n_falsely_feasible": 3571,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 19808
+       }
+      }
+     }
+    }
+   },
+   "lb": {
+    "gt": {
+     "n_frames": 48,
+     "identity_resolved_counts": {
+      "pipeline": 21,
+      "nearest_cluster": 27
+     },
+     "n_frames_ball_lost_distractor": 0,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": null,
+       "(1)_pass": null,
+       "(1)_n_hit_frames": 0,
+       "(2)_recall_median": 0.896,
+       "(2)_ball_recall_median": 0.927,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 114,
+       "(3)_ball_q": 138,
+       "(3)_falsely_feasible_grid": 10035,
+       "(3)_ball_grid": 11356,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 4.782,
+       "(4)_pass": true
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": null,
+       "(1)_pass": null,
+       "(1)_n_hit_frames": 0,
+       "(2)_recall_median": 0.4,
+       "(2)_ball_recall_median": 0.927,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 5,
+       "(3)_ball_q": 138,
+       "(3)_falsely_feasible_grid": 533,
+       "(3)_ball_grid": 11356,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 4.728,
+       "(4)_pass": true
+      }
+     },
+     "merge": {
+      "n": 48,
+      "target_cluster_target_fraction_median": 1.0,
+      "n_target_cluster_target_fraction_lt_0.8": 0,
+      "n_target_cluster_with_distractor_points": 0,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 0.0,
+     "nontarget_source_counts": {
+      "proximity": 12,
+      "indices": 36
+     },
+     "proximity_frames": {
+      "n": 12,
+      "ball_recall_median": 0.941,
+      "ball_owned_remove_recall_median": 0.839,
+      "note": "point_indices did not index the current cloud (cloud[idx] != points); completeness via indices reads 0 there"
+     },
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.854,
+       "eikonal_median_of_frame_medians": 0.96
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 0,
+     "ball_owned_remove_distractor_lost_sum": 0,
+     "methods": {
+      "ball": {
+       "recall_median": 0.927,
+       "recall_p10": 0.681,
+       "recall_min": 0.3987,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 0.986,
+       "nontarget_labelled_retention_roi_median": 0.999,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 824,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 638,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 37113,
+       "build_ms_median": 4.84,
+       "build_ms_p90": 5.971,
+       "build_ms_n": 144,
+       "build_ms_frame_median_median": 4.817,
+       "build_ms_frame_median_p90": 5.739,
+       "classify_ms_median": 1.411,
+       "classify_ms_p90": 1.865,
+       "q_vs_oracle": {
+        "n": 2722,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 27.351,
+        "over_max_mm": 41.737,
+        "n_over_gt_1mm": 1093,
+        "n_falsely_feasible": 138,
+        "n_falsely_infeasible": 20,
+        "n_ref_infeasible": 355
+       },
+       "grid_vs_oracle": {
+        "n": 295403,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 29.431,
+        "over_max_mm": 70.902,
+        "n_over_gt_1mm": 113339,
+        "n_falsely_feasible": 11356,
+        "n_falsely_infeasible": 6978,
+        "n_ref_infeasible": 48617
+       },
+       "q_vs_oracle_prime": {
+        "n": 2722,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 17.18,
+        "over_max_mm": 30.146,
+        "n_over_gt_1mm": 481,
+        "n_falsely_feasible": 118,
+        "n_falsely_infeasible": 26,
+        "n_ref_infeasible": 329
+       },
+       "grid_vs_oracle_prime": {
+        "n": 295403,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 12.698,
+        "over_max_mm": 39.295,
+        "n_over_gt_1mm": 47740,
+        "n_falsely_feasible": 4912,
+        "n_falsely_infeasible": 10740,
+        "n_ref_infeasible": 38411
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.896,
+       "recall_p10": 0.68,
+       "recall_min": 0.3987,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 0.986,
+       "nontarget_labelled_retention_roi_median": 0.999,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 818,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 636,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 1156,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 19894,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 37113,
+       "build_ms_median": 7.288,
+       "build_ms_p90": 10.753,
+       "build_ms_n": 144,
+       "build_ms_frame_median_median": 7.337,
+       "build_ms_frame_median_p90": 9.966,
+       "classify_ms_median": 3.462,
+       "classify_ms_p90": 5.989,
+       "build_ms_paired_diff_median": 2.089,
+       "build_ms_paired_diff_p90": 5.042,
+       "q_vs_oracle": {
+        "n": 2722,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 24.199,
+        "over_max_mm": 41.584,
+        "n_over_gt_1mm": 966,
+        "n_falsely_feasible": 114,
+        "n_falsely_infeasible": 56,
+        "n_ref_infeasible": 355
+       },
+       "grid_vs_oracle": {
+        "n": 295403,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 25.109,
+        "over_max_mm": 70.902,
+        "n_over_gt_1mm": 98619,
+        "n_falsely_feasible": 10035,
+        "n_falsely_infeasible": 10943,
+        "n_ref_infeasible": 48617
+       },
+       "q_vs_oracle_prime": {
+        "n": 2722,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 13.996,
+        "over_max_mm": 27.824,
+        "n_over_gt_1mm": 398,
+        "n_falsely_feasible": 94,
+        "n_falsely_infeasible": 62,
+        "n_ref_infeasible": 329
+       },
+       "grid_vs_oracle_prime": {
+        "n": 295403,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 9.544,
+        "over_max_mm": 39.295,
+        "n_over_gt_1mm": 36487,
+        "n_falsely_feasible": 3935,
+        "n_falsely_infeasible": 15049,
+        "n_ref_infeasible": 38411
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.4,
+       "recall_p10": 0.287,
+       "recall_min": 0.2452,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 56,
+       "shared_removed_sum": 1,
+       "support_lost_sum": 5,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 1156,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 19894,
+       "n_seeds_in_ball_sum": 37113,
+       "build_ms_median": 7.255,
+       "build_ms_p90": 10.699,
+       "build_ms_n": 144,
+       "build_ms_frame_median_median": 7.01,
+       "build_ms_frame_median_p90": 9.725,
+       "classify_ms_median": 3.459,
+       "classify_ms_p90": 6.286,
+       "build_ms_paired_diff_median": 2.256,
+       "build_ms_paired_diff_p90": 4.757,
+       "q_vs_oracle": {
+        "n": 2722,
+        "over_median_mm": -3.576,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 20.356,
+        "n_over_gt_1mm": 77,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 162,
+        "n_ref_infeasible": 355
+       },
+       "grid_vs_oracle": {
+        "n": 295403,
+        "over_median_mm": -3.835,
+        "over_p95_mm": 0.159,
+        "over_max_mm": 23.916,
+        "n_over_gt_1mm": 12221,
+        "n_falsely_feasible": 533,
+        "n_falsely_infeasible": 37236,
+        "n_ref_infeasible": 48617
+       },
+       "q_vs_oracle_prime": {
+        "n": 2722,
+        "over_median_mm": -9.857,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 6.795,
+        "n_over_gt_1mm": 34,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 188,
+        "n_ref_infeasible": 329
+       },
+       "grid_vs_oracle_prime": {
+        "n": 295403,
+        "over_median_mm": -12.093,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 8.438,
+        "n_over_gt_1mm": 3672,
+        "n_falsely_feasible": 174,
+        "n_falsely_infeasible": 47083,
+        "n_ref_infeasible": 38411
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 96747,
+       "q_vs_oracle_prime": {
+        "n": 2722,
+        "over_median_mm": -0.003,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.85,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 26,
+        "n_ref_infeasible": 329
+       },
+       "grid_vs_oracle_prime": {
+        "n": 295403,
+        "over_median_mm": -0.251,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 8.438,
+        "n_over_gt_1mm": 1012,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 10206,
+        "n_ref_infeasible": 38411
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 0.741,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 16616,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 96747,
+       "q_vs_oracle": {
+        "n": 2722,
+        "over_median_mm": 0.003,
+        "over_p95_mm": 29.556,
+        "over_max_mm": 50.104,
+        "n_over_gt_1mm": 1165,
+        "n_falsely_feasible": 26,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 355
+       },
+       "grid_vs_oracle": {
+        "n": 295403,
+        "over_median_mm": 0.251,
+        "over_p95_mm": 36.736,
+        "over_max_mm": 78.574,
+        "n_over_gt_1mm": 136414,
+        "n_falsely_feasible": 10206,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 48617
+       }
+      }
+     }
+    },
+    "gt_label": {
+     "n_frames": 48,
+     "identity_resolved_counts": {
+      "gt_label": 48
+     },
+     "n_frames_ball_lost_distractor": 0,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": null,
+       "(1)_pass": null,
+       "(1)_n_hit_frames": 0,
+       "(2)_recall_median": 0.927,
+       "(2)_ball_recall_median": 0.927,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 125,
+       "(3)_ball_q": 125,
+       "(3)_falsely_feasible_grid": 10403,
+       "(3)_ball_grid": 10457,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 1.862,
+       "(4)_pass": true
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": null,
+       "(1)_pass": null,
+       "(1)_n_hit_frames": 0,
+       "(2)_recall_median": 0.425,
+       "(2)_ball_recall_median": 0.927,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 9,
+       "(3)_ball_q": 125,
+       "(3)_falsely_feasible_grid": 525,
+       "(3)_ball_grid": 10457,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 4.464,
+       "(4)_pass": true
+      }
+     },
+     "merge": {
+      "n": 48,
+      "target_cluster_target_fraction_median": 1.0,
+      "n_target_cluster_target_fraction_lt_0.8": 0,
+      "n_target_cluster_with_distractor_points": 0,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 1.0,
+     "nontarget_source_counts": {
+      "indices": 48
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.851,
+       "eikonal_median_of_frame_medians": 0.96
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 0,
+     "ball_owned_remove_distractor_lost_sum": 0,
+     "methods": {
+      "ball": {
+       "recall_median": 0.927,
+       "recall_p10": 0.681,
+       "recall_min": 0.3987,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 0.986,
+       "nontarget_labelled_retention_roi_median": 0.998,
+       "unlabelled_seeds_roi_sum": 14939,
+       "unlabelled_removed_sum": 741,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 616,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 36897,
+       "build_ms_median": 4.851,
+       "build_ms_p90": 9.954,
+       "build_ms_n": 144,
+       "build_ms_frame_median_median": 4.848,
+       "build_ms_frame_median_p90": 5.926,
+       "classify_ms_median": 1.248,
+       "classify_ms_p90": 1.723,
+       "q_vs_oracle": {
+        "n": 2639,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 27.516,
+        "over_max_mm": 41.737,
+        "n_over_gt_1mm": 965,
+        "n_falsely_feasible": 125,
+        "n_falsely_infeasible": 32,
+        "n_ref_infeasible": 356
+       },
+       "grid_vs_oracle": {
+        "n": 283294,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 29.341,
+        "over_max_mm": 70.902,
+        "n_over_gt_1mm": 101282,
+        "n_falsely_feasible": 10457,
+        "n_falsely_infeasible": 9092,
+        "n_ref_infeasible": 47313
+       },
+       "q_vs_oracle_prime": {
+        "n": 2639,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 16.832,
+        "over_max_mm": 30.146,
+        "n_over_gt_1mm": 449,
+        "n_falsely_feasible": 116,
+        "n_falsely_infeasible": 49,
+        "n_ref_infeasible": 330
+       },
+       "grid_vs_oracle_prime": {
+        "n": 283294,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 12.038,
+        "over_max_mm": 39.295,
+        "n_over_gt_1mm": 44467,
+        "n_falsely_feasible": 4770,
+        "n_falsely_infeasible": 13595,
+        "n_ref_infeasible": 37123
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.927,
+       "recall_p10": 0.681,
+       "recall_min": 0.3987,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 0.986,
+       "nontarget_labelled_retention_roi_median": 0.998,
+       "unlabelled_seeds_roi_sum": 14939,
+       "unlabelled_removed_sum": 741,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 616,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 20225,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 36897,
+       "build_ms_median": 7.367,
+       "build_ms_p90": 11.816,
+       "build_ms_n": 144,
+       "build_ms_frame_median_median": 6.957,
+       "build_ms_frame_median_p90": 10.217,
+       "classify_ms_median": 3.369,
+       "classify_ms_p90": 6.699,
+       "build_ms_paired_diff_median": 1.752,
+       "build_ms_paired_diff_p90": 5.433,
+       "q_vs_oracle": {
+        "n": 2639,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 27.516,
+        "over_max_mm": 41.737,
+        "n_over_gt_1mm": 965,
+        "n_falsely_feasible": 125,
+        "n_falsely_infeasible": 32,
+        "n_ref_infeasible": 356
+       },
+       "grid_vs_oracle": {
+        "n": 283294,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 29.341,
+        "over_max_mm": 70.902,
+        "n_over_gt_1mm": 101194,
+        "n_falsely_feasible": 10403,
+        "n_falsely_infeasible": 9137,
+        "n_ref_infeasible": 47313
+       },
+       "q_vs_oracle_prime": {
+        "n": 2639,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 16.832,
+        "over_max_mm": 30.146,
+        "n_over_gt_1mm": 449,
+        "n_falsely_feasible": 116,
+        "n_falsely_infeasible": 49,
+        "n_ref_infeasible": 330
+       },
+       "grid_vs_oracle_prime": {
+        "n": 283294,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 11.999,
+        "over_max_mm": 39.295,
+        "n_over_gt_1mm": 44383,
+        "n_falsely_feasible": 4716,
+        "n_falsely_infeasible": 13640,
+        "n_ref_infeasible": 37123
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.425,
+       "recall_p10": 0.289,
+       "recall_min": 0.2452,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 14939,
+       "unlabelled_removed_sum": 52,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 6,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 20225,
+       "n_seeds_in_ball_sum": 36897,
+       "build_ms_median": 7.201,
+       "build_ms_p90": 14.418,
+       "build_ms_n": 144,
+       "build_ms_frame_median_median": 6.967,
+       "build_ms_frame_median_p90": 10.249,
+       "classify_ms_median": 3.656,
+       "classify_ms_p90": 6.803,
+       "build_ms_paired_diff_median": 2.139,
+       "build_ms_paired_diff_p90": 9.116,
+       "q_vs_oracle": {
+        "n": 2639,
+        "over_median_mm": -3.345,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 7.701,
+        "n_over_gt_1mm": 65,
+        "n_falsely_feasible": 9,
+        "n_falsely_infeasible": 149,
+        "n_ref_infeasible": 356
+       },
+       "grid_vs_oracle": {
+        "n": 283294,
+        "over_median_mm": -3.709,
+        "over_p95_mm": 0.099,
+        "over_max_mm": 21.751,
+        "n_over_gt_1mm": 11309,
+        "n_falsely_feasible": 525,
+        "n_falsely_infeasible": 37061,
+        "n_ref_infeasible": 47313
+       },
+       "q_vs_oracle_prime": {
+        "n": 2639,
+        "over_median_mm": -9.882,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 7.701,
+        "n_over_gt_1mm": 39,
+        "n_falsely_feasible": 9,
+        "n_falsely_infeasible": 175,
+        "n_ref_infeasible": 330
+       },
+       "grid_vs_oracle_prime": {
+        "n": 283294,
+        "over_median_mm": -12.306,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 8.728,
+        "n_over_gt_1mm": 4224,
+        "n_falsely_feasible": 259,
+        "n_falsely_infeasible": 46985,
+        "n_ref_infeasible": 37123
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 14939,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 92993,
+       "q_vs_oracle_prime": {
+        "n": 2639,
+        "over_median_mm": -0.006,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.85,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 26,
+        "n_ref_infeasible": 330
+       },
+       "grid_vs_oracle_prime": {
+        "n": 283294,
+        "over_median_mm": -0.344,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 6.652,
+        "n_over_gt_1mm": 850,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 10190,
+        "n_ref_infeasible": 37123
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 0.742,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 14939,
+       "unlabelled_removed_sum": 14939,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 92993,
+       "q_vs_oracle": {
+        "n": 2639,
+        "over_median_mm": 0.006,
+        "over_p95_mm": 29.66,
+        "over_max_mm": 50.104,
+        "n_over_gt_1mm": 1128,
+        "n_falsely_feasible": 26,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 356
+       },
+       "grid_vs_oracle": {
+        "n": 283294,
+        "over_median_mm": 0.344,
+        "over_p95_mm": 37.28,
+        "over_max_mm": 78.574,
+        "n_over_gt_1mm": 132724,
+        "n_falsely_feasible": 10190,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 47313
+       }
+      }
+     }
+    },
+    "gt_cluster_only": {
+     "n_frames": 48,
+     "identity_resolved_counts": {
+      "pipeline": 21,
+      "nearest_cluster": 27
+     },
+     "n_frames_ball_lost_distractor": 0,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": null,
+       "(1)_pass": null,
+       "(1)_n_hit_frames": 0,
+       "(2)_recall_median": 0.896,
+       "(2)_ball_recall_median": 0.927,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 114,
+       "(3)_ball_q": 138,
+       "(3)_falsely_feasible_grid": 10035,
+       "(3)_ball_grid": 11356,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 4.782,
+       "(4)_pass": true
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": null,
+       "(1)_pass": null,
+       "(1)_n_hit_frames": 0,
+       "(2)_recall_median": 0.4,
+       "(2)_ball_recall_median": 0.927,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 5,
+       "(3)_ball_q": 138,
+       "(3)_falsely_feasible_grid": 533,
+       "(3)_ball_grid": 11356,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 4.728,
+       "(4)_pass": true
+      }
+     },
+     "merge": {
+      "n": 48,
+      "target_cluster_target_fraction_median": 1.0,
+      "n_target_cluster_target_fraction_lt_0.8": 0,
+      "n_target_cluster_with_distractor_points": 0,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 0.0,
+     "nontarget_source_counts": {
+      "proximity": 12,
+      "indices": 36
+     },
+     "proximity_frames": {
+      "n": 12,
+      "ball_recall_median": 0.941,
+      "ball_owned_remove_recall_median": 0.839,
+      "note": "point_indices did not index the current cloud (cloud[idx] != points); completeness via indices reads 0 there"
+     },
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.854,
+       "eikonal_median_of_frame_medians": 0.96
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.341,
+       "n": 48,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 0,
+     "ball_owned_remove_distractor_lost_sum": 0,
+     "methods": {
+      "ball": {
+       "recall_median": 0.927,
+       "recall_p10": 0.681,
+       "recall_min": 0.3987,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 0.986,
+       "nontarget_labelled_retention_roi_median": 0.999,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 824,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 638,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 37113,
+       "build_ms_median": 4.84,
+       "build_ms_p90": 5.971,
+       "build_ms_n": 144,
+       "build_ms_frame_median_median": 4.817,
+       "build_ms_frame_median_p90": 5.739,
+       "classify_ms_median": 1.411,
+       "classify_ms_p90": 1.865,
+       "q_vs_oracle": {
+        "n": 2722,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 27.351,
+        "over_max_mm": 41.737,
+        "n_over_gt_1mm": 1093,
+        "n_falsely_feasible": 138,
+        "n_falsely_infeasible": 20,
+        "n_ref_infeasible": 355
+       },
+       "grid_vs_oracle": {
+        "n": 295403,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 29.431,
+        "over_max_mm": 70.902,
+        "n_over_gt_1mm": 113339,
+        "n_falsely_feasible": 11356,
+        "n_falsely_infeasible": 6978,
+        "n_ref_infeasible": 48617
+       },
+       "q_vs_oracle_prime": {
+        "n": 2722,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 17.18,
+        "over_max_mm": 30.146,
+        "n_over_gt_1mm": 481,
+        "n_falsely_feasible": 118,
+        "n_falsely_infeasible": 26,
+        "n_ref_infeasible": 329
+       },
+       "grid_vs_oracle_prime": {
+        "n": 295403,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 12.698,
+        "over_max_mm": 39.295,
+        "n_over_gt_1mm": 47740,
+        "n_falsely_feasible": 4912,
+        "n_falsely_infeasible": 10740,
+        "n_ref_infeasible": 38411
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.896,
+       "recall_p10": 0.68,
+       "recall_min": 0.3987,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 0.986,
+       "nontarget_labelled_retention_roi_median": 0.999,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 818,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 636,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 1156,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 19894,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 37113,
+       "build_ms_median": 7.288,
+       "build_ms_p90": 10.753,
+       "build_ms_n": 144,
+       "build_ms_frame_median_median": 7.337,
+       "build_ms_frame_median_p90": 9.966,
+       "classify_ms_median": 3.462,
+       "classify_ms_p90": 5.989,
+       "build_ms_paired_diff_median": 2.089,
+       "build_ms_paired_diff_p90": 5.042,
+       "q_vs_oracle": {
+        "n": 2722,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 24.199,
+        "over_max_mm": 41.584,
+        "n_over_gt_1mm": 966,
+        "n_falsely_feasible": 114,
+        "n_falsely_infeasible": 56,
+        "n_ref_infeasible": 355
+       },
+       "grid_vs_oracle": {
+        "n": 295403,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 25.109,
+        "over_max_mm": 70.902,
+        "n_over_gt_1mm": 98619,
+        "n_falsely_feasible": 10035,
+        "n_falsely_infeasible": 10943,
+        "n_ref_infeasible": 48617
+       },
+       "q_vs_oracle_prime": {
+        "n": 2722,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 13.996,
+        "over_max_mm": 27.824,
+        "n_over_gt_1mm": 398,
+        "n_falsely_feasible": 94,
+        "n_falsely_infeasible": 62,
+        "n_ref_infeasible": 329
+       },
+       "grid_vs_oracle_prime": {
+        "n": 295403,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 9.544,
+        "over_max_mm": 39.295,
+        "n_over_gt_1mm": 36487,
+        "n_falsely_feasible": 3935,
+        "n_falsely_infeasible": 15049,
+        "n_ref_infeasible": 38411
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.4,
+       "recall_p10": 0.287,
+       "recall_min": 0.2452,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 56,
+       "shared_removed_sum": 1,
+       "support_lost_sum": 5,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 1156,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 19894,
+       "n_seeds_in_ball_sum": 37113,
+       "build_ms_median": 7.255,
+       "build_ms_p90": 10.699,
+       "build_ms_n": 144,
+       "build_ms_frame_median_median": 7.01,
+       "build_ms_frame_median_p90": 9.725,
+       "classify_ms_median": 3.459,
+       "classify_ms_p90": 6.286,
+       "build_ms_paired_diff_median": 2.256,
+       "build_ms_paired_diff_p90": 4.757,
+       "q_vs_oracle": {
+        "n": 2722,
+        "over_median_mm": -3.576,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 20.356,
+        "n_over_gt_1mm": 77,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 162,
+        "n_ref_infeasible": 355
+       },
+       "grid_vs_oracle": {
+        "n": 295403,
+        "over_median_mm": -3.835,
+        "over_p95_mm": 0.159,
+        "over_max_mm": 23.916,
+        "n_over_gt_1mm": 12221,
+        "n_falsely_feasible": 533,
+        "n_falsely_infeasible": 37236,
+        "n_ref_infeasible": 48617
+       },
+       "q_vs_oracle_prime": {
+        "n": 2722,
+        "over_median_mm": -9.857,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 6.795,
+        "n_over_gt_1mm": 34,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 188,
+        "n_ref_infeasible": 329
+       },
+       "grid_vs_oracle_prime": {
+        "n": 295403,
+        "over_median_mm": -12.093,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 8.438,
+        "n_over_gt_1mm": 3672,
+        "n_falsely_feasible": 174,
+        "n_falsely_infeasible": 47083,
+        "n_ref_infeasible": 38411
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 96747,
+       "q_vs_oracle_prime": {
+        "n": 2722,
+        "over_median_mm": -0.003,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.85,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 26,
+        "n_ref_infeasible": 329
+       },
+       "grid_vs_oracle_prime": {
+        "n": 295403,
+        "over_median_mm": -0.251,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 8.438,
+        "n_over_gt_1mm": 1012,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 10206,
+        "n_ref_infeasible": 38411
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 0,
+       "obstacle_retention_roi_median": 0.741,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 16616,
+       "unlabelled_removed_sum": 16616,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 96747,
+       "q_vs_oracle": {
+        "n": 2722,
+        "over_median_mm": 0.003,
+        "over_p95_mm": 29.556,
+        "over_max_mm": 50.104,
+        "n_over_gt_1mm": 1165,
+        "n_falsely_feasible": 26,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 355
+       },
+       "grid_vs_oracle": {
+        "n": 295403,
+        "over_median_mm": 0.251,
+        "over_p95_mm": 36.736,
+        "over_max_mm": 78.574,
+        "n_over_gt_1mm": 136414,
+        "n_falsely_feasible": 10206,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 48617
+       }
+      }
+     }
+    }
+   },
+   "demo_lt_0.08": {
+    "gt": {
+     "n_frames": 32,
+     "identity_resolved_counts": {
+      "gt_label": 20,
+      "nearest_cluster": 8,
+      "pipeline": 4
+     },
+     "n_frames_ball_lost_distractor": 15,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": 0.4495,
+       "(1)_pass": false,
+       "(1)_n_hit_frames": 15,
+       "(2)_recall_median": 0.929,
+       "(2)_ball_recall_median": 0.929,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 39,
+       "(3)_ball_q": 41,
+       "(3)_falsely_feasible_grid": 2687,
+       "(3)_ball_grid": 2799,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 47.977,
+       "(4)_pass": false
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": 0.9811,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 15,
+       "(2)_recall_median": 0.545,
+       "(2)_ball_recall_median": 0.929,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 5,
+       "(3)_ball_q": 41,
+       "(3)_falsely_feasible_grid": 178,
+       "(3)_ball_grid": 2799,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 4.837,
+       "(4)_pass": true
+      }
+     },
+     "merge": {
+      "n": 32,
+      "target_cluster_target_fraction_median": 0.559,
+      "n_target_cluster_target_fraction_lt_0.8": 20,
+      "n_target_cluster_with_distractor_points": 20,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 1.0,
+     "nontarget_source_counts": {
+      "indices": 32
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.267,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.795,
+       "eikonal_median_of_frame_medians": 0.961
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.263,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.263,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.966,
+       "eikonal_min_frame_median": 0.9513
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.263,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9523
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.263,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 337,
+     "ball_owned_remove_distractor_lost_sum": 349,
+     "methods": {
+      "ball": {
+       "recall_median": 0.929,
+       "recall_p10": 0.698,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 634,
+       "distractor_lost_sum_on_ball_hit_frames": 634,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 0.984,
+       "nontarget_labelled_retention_roi_median": 0.995,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 324,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 256,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 18428,
+       "build_ms_median": 4.809,
+       "build_ms_p90": 6.61,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 4.838,
+       "build_ms_frame_median_p90": 6.065,
+       "classify_ms_median": 1.127,
+       "classify_ms_p90": 1.745,
+       "q_vs_oracle": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 15.921,
+        "over_max_mm": 40.602,
+        "n_over_gt_1mm": 322,
+        "n_falsely_feasible": 41,
+        "n_falsely_infeasible": 1,
+        "n_ref_infeasible": 106
+       },
+       "grid_vs_oracle": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 19.69,
+        "over_max_mm": 60.917,
+        "n_over_gt_1mm": 39271,
+        "n_falsely_feasible": 2799,
+        "n_falsely_infeasible": 2215,
+        "n_ref_infeasible": 22068
+       },
+       "q_vs_oracle_prime": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 6.609,
+        "over_max_mm": 27.105,
+        "n_over_gt_1mm": 184,
+        "n_falsely_feasible": 38,
+        "n_falsely_infeasible": 16,
+        "n_ref_infeasible": 88
+       },
+       "grid_vs_oracle_prime": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 4.808,
+        "over_max_mm": 38.937,
+        "n_over_gt_1mm": 17155,
+        "n_falsely_feasible": 1595,
+        "n_falsely_infeasible": 4566,
+        "n_ref_infeasible": 18513
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.929,
+       "recall_p10": 0.689,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 349,
+       "distractor_lost_sum_on_ball_hit_frames": 349,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 0.99,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 321,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 256,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 39,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 7586,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 18428,
+       "build_ms_median": 7.223,
+       "build_ms_p90": 54.587,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 6.762,
+       "build_ms_frame_median_p90": 10.542,
+       "classify_ms_median": 3.292,
+       "classify_ms_p90": 6.677,
+       "loss_reduction_pooled_on_hit_frames": 0.4495,
+       "loss_reduction_frame_median": 0.727,
+       "n_hit_frames_reduction_ge_50pct": 8,
+       "build_ms_paired_diff_median": 2.044,
+       "build_ms_paired_diff_p90": 24.28,
+       "q_vs_oracle": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 15.804,
+        "over_max_mm": 33.904,
+        "n_over_gt_1mm": 303,
+        "n_falsely_feasible": 39,
+        "n_falsely_infeasible": 1,
+        "n_ref_infeasible": 106
+       },
+       "grid_vs_oracle": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 19.182,
+        "over_max_mm": 56.782,
+        "n_over_gt_1mm": 35727,
+        "n_falsely_feasible": 2687,
+        "n_falsely_infeasible": 2223,
+        "n_ref_infeasible": 22068
+       },
+       "q_vs_oracle_prime": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 5.792,
+        "over_max_mm": 27.105,
+        "n_over_gt_1mm": 130,
+        "n_falsely_feasible": 36,
+        "n_falsely_infeasible": 16,
+        "n_ref_infeasible": 88
+       },
+       "grid_vs_oracle_prime": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 1.746,
+        "over_max_mm": 38.937,
+        "n_over_gt_1mm": 9704,
+        "n_falsely_feasible": 1492,
+        "n_falsely_infeasible": 4583,
+        "n_ref_infeasible": 18513
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.545,
+       "recall_p10": 0.488,
+       "recall_min": 0.4725,
+       "distractor_lost_sum": 12,
+       "distractor_lost_sum_on_ball_hit_frames": 12,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 30,
+       "shared_removed_sum": 1,
+       "support_lost_sum": 3,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 39,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 7586,
+       "n_seeds_in_ball_sum": 18428,
+       "build_ms_median": 7.04,
+       "build_ms_p90": 11.447,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 7.037,
+       "build_ms_frame_median_p90": 10.335,
+       "classify_ms_median": 3.385,
+       "classify_ms_p90": 6.96,
+       "loss_reduction_pooled_on_hit_frames": 0.9811,
+       "loss_reduction_frame_median": 1.0,
+       "n_hit_frames_reduction_ge_50pct": 15,
+       "build_ms_paired_diff_median": 2.245,
+       "build_ms_paired_diff_p90": 6.075,
+       "q_vs_oracle": {
+        "n": 1717,
+        "over_median_mm": -1.548,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.566,
+        "n_over_gt_1mm": 19,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 33,
+        "n_ref_infeasible": 106
+       },
+       "grid_vs_oracle": {
+        "n": 178555,
+        "over_median_mm": -2.815,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 33.636,
+        "n_over_gt_1mm": 4640,
+        "n_falsely_feasible": 178,
+        "n_falsely_infeasible": 11017,
+        "n_ref_infeasible": 22068
+       },
+       "q_vs_oracle_prime": {
+        "n": 1717,
+        "over_median_mm": -2.834,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.566,
+        "n_over_gt_1mm": 18,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 51,
+        "n_ref_infeasible": 88
+       },
+       "grid_vs_oracle_prime": {
+        "n": 178555,
+        "over_median_mm": -6.814,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 9.065,
+        "n_over_gt_1mm": 669,
+        "n_falsely_feasible": 113,
+        "n_falsely_infeasible": 14507,
+        "n_ref_infeasible": 18513
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 55288,
+       "q_vs_oracle_prime": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 18,
+        "n_ref_infeasible": 88
+       },
+       "grid_vs_oracle_prime": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 3.778,
+        "n_over_gt_1mm": 21,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 3555,
+        "n_ref_infeasible": 18513
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 0.841,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 8044,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 55288,
+       "q_vs_oracle": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 23.511,
+        "over_max_mm": 33.904,
+        "n_over_gt_1mm": 542,
+        "n_falsely_feasible": 18,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 106
+       },
+       "grid_vs_oracle": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 25.625,
+        "over_max_mm": 57.974,
+        "n_over_gt_1mm": 66232,
+        "n_falsely_feasible": 3555,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 22068
+       }
+      }
+     }
+    },
+    "gt_label": {
+     "n_frames": 32,
+     "identity_resolved_counts": {
+      "gt_label": 32
+     },
+     "n_frames_ball_lost_distractor": 15,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": 0.4495,
+       "(1)_pass": false,
+       "(1)_n_hit_frames": 15,
+       "(2)_recall_median": 0.929,
+       "(2)_ball_recall_median": 0.929,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 39,
+       "(3)_ball_q": 41,
+       "(3)_falsely_feasible_grid": 2687,
+       "(3)_ball_grid": 2799,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 1.295,
+       "(4)_pass": true
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": 0.9811,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 15,
+       "(2)_recall_median": 0.545,
+       "(2)_ball_recall_median": 0.929,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 5,
+       "(3)_ball_q": 41,
+       "(3)_falsely_feasible_grid": 178,
+       "(3)_ball_grid": 2799,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 17.14,
+       "(4)_pass": false
+      }
+     },
+     "merge": {
+      "n": 32,
+      "target_cluster_target_fraction_median": 0.559,
+      "n_target_cluster_target_fraction_lt_0.8": 20,
+      "n_target_cluster_with_distractor_points": 20,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 1.0,
+     "nontarget_source_counts": {
+      "indices": 32
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.267,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.795,
+       "eikonal_median_of_frame_medians": 0.961
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.263,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.263,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.966,
+       "eikonal_min_frame_median": 0.9513
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.263,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9523
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.263,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 337,
+     "ball_owned_remove_distractor_lost_sum": 349,
+     "methods": {
+      "ball": {
+       "recall_median": 0.929,
+       "recall_p10": 0.698,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 634,
+       "distractor_lost_sum_on_ball_hit_frames": 634,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 0.984,
+       "nontarget_labelled_retention_roi_median": 0.995,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 324,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 256,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 18428,
+       "build_ms_median": 4.888,
+       "build_ms_p90": 11.303,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 4.833,
+       "build_ms_frame_median_p90": 6.116,
+       "classify_ms_median": 1.28,
+       "classify_ms_p90": 1.968,
+       "q_vs_oracle": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 15.921,
+        "over_max_mm": 40.602,
+        "n_over_gt_1mm": 322,
+        "n_falsely_feasible": 41,
+        "n_falsely_infeasible": 1,
+        "n_ref_infeasible": 106
+       },
+       "grid_vs_oracle": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 19.69,
+        "over_max_mm": 60.917,
+        "n_over_gt_1mm": 39271,
+        "n_falsely_feasible": 2799,
+        "n_falsely_infeasible": 2215,
+        "n_ref_infeasible": 22068
+       },
+       "q_vs_oracle_prime": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 6.609,
+        "over_max_mm": 27.105,
+        "n_over_gt_1mm": 184,
+        "n_falsely_feasible": 38,
+        "n_falsely_infeasible": 16,
+        "n_ref_infeasible": 88
+       },
+       "grid_vs_oracle_prime": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 4.808,
+        "over_max_mm": 38.937,
+        "n_over_gt_1mm": 17155,
+        "n_falsely_feasible": 1595,
+        "n_falsely_infeasible": 4566,
+        "n_ref_infeasible": 18513
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.929,
+       "recall_p10": 0.689,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 349,
+       "distractor_lost_sum_on_ball_hit_frames": 349,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 0.99,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 321,
+       "shared_removed_sum": 2,
+       "support_lost_sum": 256,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 39,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 7586,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 18428,
+       "build_ms_median": 6.89,
+       "build_ms_p90": 12.598,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 6.658,
+       "build_ms_frame_median_p90": 12.092,
+       "classify_ms_median": 3.346,
+       "classify_ms_p90": 9.929,
+       "loss_reduction_pooled_on_hit_frames": 0.4495,
+       "loss_reduction_frame_median": 0.727,
+       "n_hit_frames_reduction_ge_50pct": 8,
+       "build_ms_paired_diff_median": 1.825,
+       "build_ms_paired_diff_p90": 5.239,
+       "q_vs_oracle": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 15.804,
+        "over_max_mm": 33.904,
+        "n_over_gt_1mm": 303,
+        "n_falsely_feasible": 39,
+        "n_falsely_infeasible": 1,
+        "n_ref_infeasible": 106
+       },
+       "grid_vs_oracle": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 19.182,
+        "over_max_mm": 56.782,
+        "n_over_gt_1mm": 35727,
+        "n_falsely_feasible": 2687,
+        "n_falsely_infeasible": 2223,
+        "n_ref_infeasible": 22068
+       },
+       "q_vs_oracle_prime": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 5.792,
+        "over_max_mm": 27.105,
+        "n_over_gt_1mm": 130,
+        "n_falsely_feasible": 36,
+        "n_falsely_infeasible": 16,
+        "n_ref_infeasible": 88
+       },
+       "grid_vs_oracle_prime": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 1.746,
+        "over_max_mm": 38.937,
+        "n_over_gt_1mm": 9704,
+        "n_falsely_feasible": 1492,
+        "n_falsely_infeasible": 4583,
+        "n_ref_infeasible": 18513
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.545,
+       "recall_p10": 0.488,
+       "recall_min": 0.4725,
+       "distractor_lost_sum": 12,
+       "distractor_lost_sum_on_ball_hit_frames": 12,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 30,
+       "shared_removed_sum": 1,
+       "support_lost_sum": 3,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 39,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 7586,
+       "n_seeds_in_ball_sum": 18428,
+       "build_ms_median": 7.297,
+       "build_ms_p90": 28.443,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 6.838,
+       "build_ms_frame_median_p90": 11.251,
+       "classify_ms_median": 3.211,
+       "classify_ms_p90": 7.121,
+       "loss_reduction_pooled_on_hit_frames": 0.9811,
+       "loss_reduction_frame_median": 1.0,
+       "n_hit_frames_reduction_ge_50pct": 15,
+       "build_ms_paired_diff_median": 1.954,
+       "build_ms_paired_diff_p90": 8.005,
+       "q_vs_oracle": {
+        "n": 1717,
+        "over_median_mm": -1.548,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.566,
+        "n_over_gt_1mm": 19,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 33,
+        "n_ref_infeasible": 106
+       },
+       "grid_vs_oracle": {
+        "n": 178555,
+        "over_median_mm": -2.815,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 33.636,
+        "n_over_gt_1mm": 4640,
+        "n_falsely_feasible": 178,
+        "n_falsely_infeasible": 11017,
+        "n_ref_infeasible": 22068
+       },
+       "q_vs_oracle_prime": {
+        "n": 1717,
+        "over_median_mm": -2.834,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.566,
+        "n_over_gt_1mm": 18,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 51,
+        "n_ref_infeasible": 88
+       },
+       "grid_vs_oracle_prime": {
+        "n": 178555,
+        "over_median_mm": -6.814,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 9.065,
+        "n_over_gt_1mm": 669,
+        "n_falsely_feasible": 113,
+        "n_falsely_infeasible": 14507,
+        "n_ref_infeasible": 18513
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 55288,
+       "q_vs_oracle_prime": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 18,
+        "n_ref_infeasible": 88
+       },
+       "grid_vs_oracle_prime": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 3.778,
+        "n_over_gt_1mm": 21,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 3555,
+        "n_ref_infeasible": 18513
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 634,
+       "obstacle_retention_roi_median": 0.841,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8044,
+       "unlabelled_removed_sum": 8044,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 55288,
+       "q_vs_oracle": {
+        "n": 1717,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 23.511,
+        "over_max_mm": 33.904,
+        "n_over_gt_1mm": 542,
+        "n_falsely_feasible": 18,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 106
+       },
+       "grid_vs_oracle": {
+        "n": 178555,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 25.625,
+        "over_max_mm": 57.974,
+        "n_over_gt_1mm": 66232,
+        "n_falsely_feasible": 3555,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 22068
+       }
+      }
+     }
+    },
+    "gt_cluster_only": {
+     "n_frames": 12,
+     "identity_resolved_counts": {
+      "nearest_cluster": 8,
+      "pipeline": 4
+     },
+     "n_frames_ball_lost_distractor": 2,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": 0.2975,
+       "(1)_pass": false,
+       "(1)_n_hit_frames": 2,
+       "(2)_recall_median": 0.926,
+       "(2)_ball_recall_median": 0.926,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 8,
+       "(3)_ball_q": 8,
+       "(3)_falsely_feasible_grid": 1086,
+       "(3)_ball_grid": 1086,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 4.274,
+       "(4)_pass": true
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": 1.0,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 2,
+       "(2)_recall_median": 0.537,
+       "(2)_ball_recall_median": 0.926,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 0,
+       "(3)_ball_q": 8,
+       "(3)_falsely_feasible_grid": 40,
+       "(3)_ball_grid": 1086,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 3.943,
+       "(4)_pass": true
+      }
+     },
+     "merge": {
+      "n": 12,
+      "target_cluster_target_fraction_median": 1.0,
+      "n_target_cluster_target_fraction_lt_0.8": 0,
+      "n_target_cluster_with_distractor_points": 0,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 1.0,
+     "nontarget_source_counts": {
+      "indices": 12
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.144,
+       "n": 12,
+       "eikonal_median_of_frame_medians": 0.974,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.293,
+       "eikonal_median_of_frame_medians": 0.968
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.144,
+       "n": 12,
+       "eikonal_median_of_frame_medians": 0.974,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.144,
+       "n": 12,
+       "eikonal_median_of_frame_medians": 0.973,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.144,
+       "n": 12,
+       "eikonal_median_of_frame_medians": 0.978,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.144,
+       "n": 12,
+       "eikonal_median_of_frame_medians": 0.978,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 85,
+     "ball_owned_remove_distractor_lost_sum": 85,
+     "methods": {
+      "ball": {
+       "recall_median": 0.926,
+       "recall_p10": 0.687,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 121,
+       "distractor_lost_sum_on_ball_hit_frames": 121,
+       "distractor_in_ball_sum": 121,
+       "obstacle_retention_roi_median": 0.99,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3222,
+       "unlabelled_removed_sum": 126,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 8,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 5361,
+       "build_ms_median": 4.908,
+       "build_ms_p90": 6.671,
+       "build_ms_n": 36,
+       "build_ms_frame_median_median": 4.924,
+       "build_ms_frame_median_p90": 7.026,
+       "classify_ms_median": 1.11,
+       "classify_ms_p90": 1.466,
+       "q_vs_oracle": {
+        "n": 855,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 13.788,
+        "over_max_mm": 33.904,
+        "n_over_gt_1mm": 148,
+        "n_falsely_feasible": 8,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 30
+       },
+       "grid_vs_oracle": {
+        "n": 87691,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 13.978,
+        "over_max_mm": 52.897,
+        "n_over_gt_1mm": 20707,
+        "n_falsely_feasible": 1086,
+        "n_falsely_infeasible": 639,
+        "n_ref_infeasible": 7640
+       },
+       "q_vs_oracle_prime": {
+        "n": 855,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 2.073,
+        "over_max_mm": 11.362,
+        "n_over_gt_1mm": 59,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 6,
+        "n_ref_infeasible": 21
+       },
+       "grid_vs_oracle_prime": {
+        "n": 87691,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 2.107,
+        "over_max_mm": 24.806,
+        "n_over_gt_1mm": 5749,
+        "n_falsely_feasible": 173,
+        "n_falsely_infeasible": 1522,
+        "n_ref_infeasible": 5844
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.926,
+       "recall_p10": 0.687,
+       "recall_min": 0.6197,
+       "distractor_lost_sum": 85,
+       "distractor_lost_sum_on_ball_hit_frames": 85,
+       "distractor_in_ball_sum": 121,
+       "obstacle_retention_roi_median": 0.99,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3222,
+       "unlabelled_removed_sum": 126,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 8,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 2121,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 5361,
+       "build_ms_median": 7.25,
+       "build_ms_p90": 10.945,
+       "build_ms_n": 36,
+       "build_ms_frame_median_median": 7.021,
+       "build_ms_frame_median_p90": 10.337,
+       "classify_ms_median": 3.745,
+       "classify_ms_p90": 5.394,
+       "loss_reduction_pooled_on_hit_frames": 0.2975,
+       "loss_reduction_frame_median": 0.178,
+       "n_hit_frames_reduction_ge_50pct": 0,
+       "build_ms_paired_diff_median": 1.993,
+       "build_ms_paired_diff_p90": 5.119,
+       "q_vs_oracle": {
+        "n": 855,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 13.499,
+        "over_max_mm": 33.904,
+        "n_over_gt_1mm": 130,
+        "n_falsely_feasible": 8,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 30
+       },
+       "grid_vs_oracle": {
+        "n": 87691,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 13.867,
+        "over_max_mm": 52.897,
+        "n_over_gt_1mm": 18129,
+        "n_falsely_feasible": 1086,
+        "n_falsely_infeasible": 639,
+        "n_ref_infeasible": 7640
+       },
+       "q_vs_oracle_prime": {
+        "n": 855,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.012,
+        "over_max_mm": 11.362,
+        "n_over_gt_1mm": 33,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 6,
+        "n_ref_infeasible": 21
+       },
+       "grid_vs_oracle_prime": {
+        "n": 87691,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 24.806,
+        "n_over_gt_1mm": 2546,
+        "n_falsely_feasible": 173,
+        "n_falsely_infeasible": 1522,
+        "n_ref_infeasible": 5844
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.537,
+       "recall_p10": 0.491,
+       "recall_min": 0.4733,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 121,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3222,
+       "unlabelled_removed_sum": 7,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 2121,
+       "n_seeds_in_ball_sum": 5361,
+       "build_ms_median": 7.105,
+       "build_ms_p90": 10.614,
+       "build_ms_n": 36,
+       "build_ms_frame_median_median": 7.105,
+       "build_ms_frame_median_p90": 8.743,
+       "classify_ms_median": 3.385,
+       "classify_ms_p90": 5.475,
+       "loss_reduction_pooled_on_hit_frames": 1.0,
+       "loss_reduction_frame_median": 1.0,
+       "n_hit_frames_reduction_ge_50pct": 2,
+       "build_ms_paired_diff_median": 2.25,
+       "build_ms_paired_diff_p90": 5.93,
+       "q_vs_oracle": {
+        "n": 855,
+        "over_median_mm": -2.836,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.867,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 25,
+        "n_ref_infeasible": 30
+       },
+       "grid_vs_oracle": {
+        "n": 87691,
+        "over_median_mm": -4.472,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 33.636,
+        "n_over_gt_1mm": 1396,
+        "n_falsely_feasible": 40,
+        "n_falsely_infeasible": 5746,
+        "n_ref_infeasible": 7640
+       },
+       "q_vs_oracle_prime": {
+        "n": 855,
+        "over_median_mm": -4.805,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 34,
+        "n_ref_infeasible": 21
+       },
+       "grid_vs_oracle_prime": {
+        "n": 87691,
+        "over_median_mm": -9.165,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.779,
+        "n_over_gt_1mm": 54,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 7502,
+        "n_ref_infeasible": 5844
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 121,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3222,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 17623,
+       "q_vs_oracle_prime": {
+        "n": 855,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 9,
+        "n_ref_infeasible": 21
+       },
+       "grid_vs_oracle_prime": {
+        "n": 87691,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 3.424,
+        "n_over_gt_1mm": 3,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 1796,
+        "n_ref_infeasible": 5844
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 121,
+       "obstacle_retention_roi_median": 0.788,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3222,
+       "unlabelled_removed_sum": 3222,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 17623,
+       "q_vs_oracle": {
+        "n": 855,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 23.591,
+        "over_max_mm": 33.904,
+        "n_over_gt_1mm": 291,
+        "n_falsely_feasible": 9,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 30
+       },
+       "grid_vs_oracle": {
+        "n": 87691,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 24.032,
+        "over_max_mm": 52.897,
+        "n_over_gt_1mm": 34344,
+        "n_falsely_feasible": 1796,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 7640
+       }
+      }
+     }
+    }
+   },
+   "demo_0.08_0.10": {
+    "gt": {
+     "n_frames": 32,
+     "identity_resolved_counts": {
+      "pipeline": 13,
+      "nearest_cluster": 5,
+      "gt_label": 14
+     },
+     "n_frames_ball_lost_distractor": 8,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": 0.5729,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 8,
+       "(2)_recall_median": 0.94,
+       "(2)_ball_recall_median": 0.947,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 26,
+       "(3)_ball_q": 26,
+       "(3)_falsely_feasible_grid": 3117,
+       "(3)_ball_grid": 3117,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 55.389,
+       "(4)_pass": false
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": 1.0,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 8,
+       "(2)_recall_median": 0.548,
+       "(2)_ball_recall_median": 0.947,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 0,
+       "(3)_ball_q": 26,
+       "(3)_falsely_feasible_grid": 263,
+       "(3)_ball_grid": 3117,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 32.336,
+       "(4)_pass": false
+      }
+     },
+     "merge": {
+      "n": 32,
+      "target_cluster_target_fraction_median": 1.0,
+      "n_target_cluster_target_fraction_lt_0.8": 14,
+      "n_target_cluster_with_distractor_points": 14,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 0.8701,
+     "nontarget_source_counts": {
+      "indices": 32
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.278,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.795,
+       "eikonal_median_of_frame_medians": 0.967
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.276,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.276,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9561
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.276,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.276,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 85,
+     "ball_owned_remove_distractor_lost_sum": 85,
+     "methods": {
+      "ball": {
+       "recall_median": 0.947,
+       "recall_p10": 0.698,
+       "recall_min": 0.6501,
+       "distractor_lost_sum": 199,
+       "distractor_lost_sum_on_ball_hit_frames": 199,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 0.992,
+       "nontarget_labelled_retention_roi_median": 0.998,
+       "unlabelled_seeds_roi_sum": 8501,
+       "unlabelled_removed_sum": 332,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 355,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 19126,
+       "build_ms_median": 4.696,
+       "build_ms_p90": 8.362,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 4.643,
+       "build_ms_frame_median_p90": 5.762,
+       "classify_ms_median": 1.192,
+       "classify_ms_p90": 1.715,
+       "q_vs_oracle": {
+        "n": 1767,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 23.218,
+        "over_max_mm": 35.561,
+        "n_over_gt_1mm": 452,
+        "n_falsely_feasible": 26,
+        "n_falsely_infeasible": 13,
+        "n_ref_infeasible": 94
+       },
+       "grid_vs_oracle": {
+        "n": 187472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 22.556,
+        "over_max_mm": 59.212,
+        "n_over_gt_1mm": 50387,
+        "n_falsely_feasible": 3117,
+        "n_falsely_infeasible": 3005,
+        "n_ref_infeasible": 19825
+       },
+       "q_vs_oracle_prime": {
+        "n": 1767,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 16.069,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 163,
+        "n_falsely_feasible": 22,
+        "n_falsely_infeasible": 18,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 187472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 4.789,
+        "over_max_mm": 37.719,
+        "n_over_gt_1mm": 15771,
+        "n_falsely_feasible": 1115,
+        "n_falsely_infeasible": 4329,
+        "n_ref_infeasible": 16499
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.94,
+       "recall_p10": 0.698,
+       "recall_min": 0.6303,
+       "distractor_lost_sum": 85,
+       "distractor_lost_sum_on_ball_hit_frames": 85,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 0.993,
+       "nontarget_labelled_retention_roi_median": 0.998,
+       "unlabelled_seeds_roi_sum": 8501,
+       "unlabelled_removed_sum": 332,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 355,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 22,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 7861,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 19126,
+       "build_ms_median": 7.257,
+       "build_ms_p90": 63.751,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 6.779,
+       "build_ms_frame_median_p90": 10.364,
+       "classify_ms_median": 3.402,
+       "classify_ms_p90": 6.31,
+       "loss_reduction_pooled_on_hit_frames": 0.5729,
+       "loss_reduction_frame_median": 0.815,
+       "n_hit_frames_reduction_ge_50pct": 5,
+       "build_ms_paired_diff_median": 2.176,
+       "build_ms_paired_diff_p90": 59.083,
+       "q_vs_oracle": {
+        "n": 1767,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 23.218,
+        "over_max_mm": 35.561,
+        "n_over_gt_1mm": 452,
+        "n_falsely_feasible": 26,
+        "n_falsely_infeasible": 13,
+        "n_ref_infeasible": 94
+       },
+       "grid_vs_oracle": {
+        "n": 187472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 22.553,
+        "over_max_mm": 59.212,
+        "n_over_gt_1mm": 50153,
+        "n_falsely_feasible": 3117,
+        "n_falsely_infeasible": 3084,
+        "n_ref_infeasible": 19825
+       },
+       "q_vs_oracle_prime": {
+        "n": 1767,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 16.069,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 163,
+        "n_falsely_feasible": 22,
+        "n_falsely_infeasible": 18,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 187472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 4.785,
+        "over_max_mm": 37.719,
+        "n_over_gt_1mm": 15331,
+        "n_falsely_feasible": 1115,
+        "n_falsely_infeasible": 4408,
+        "n_ref_infeasible": 16499
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.548,
+       "recall_p10": 0.493,
+       "recall_min": 0.4325,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8501,
+       "unlabelled_removed_sum": 22,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 7,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 22,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 7861,
+       "n_seeds_in_ball_sum": 19126,
+       "build_ms_median": 7.371,
+       "build_ms_p90": 40.698,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 7.173,
+       "build_ms_frame_median_p90": 10.161,
+       "classify_ms_median": 3.41,
+       "classify_ms_p90": 6.364,
+       "loss_reduction_pooled_on_hit_frames": 1.0,
+       "loss_reduction_frame_median": 1.0,
+       "n_hit_frames_reduction_ge_50pct": 8,
+       "build_ms_paired_diff_median": 2.214,
+       "build_ms_paired_diff_p90": 32.994,
+       "q_vs_oracle": {
+        "n": 1767,
+        "over_median_mm": -3.939,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 7.484,
+        "n_over_gt_1mm": 31,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 69,
+        "n_ref_infeasible": 94
+       },
+       "grid_vs_oracle": {
+        "n": 187472,
+        "over_median_mm": -4.623,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 24.688,
+        "n_over_gt_1mm": 5992,
+        "n_falsely_feasible": 263,
+        "n_falsely_infeasible": 15187,
+        "n_ref_infeasible": 19825
+       },
+       "q_vs_oracle_prime": {
+        "n": 1767,
+        "over_median_mm": -8.181,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.717,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 78,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 187472,
+        "over_median_mm": -9.737,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.548,
+        "n_over_gt_1mm": 249,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 18250,
+        "n_ref_infeasible": 16499
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8501,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 55812,
+       "q_vs_oracle_prime": {
+        "n": 1767,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 9,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 187472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 4.877,
+        "n_over_gt_1mm": 59,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 3326,
+        "n_ref_infeasible": 16499
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 0.797,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8501,
+       "unlabelled_removed_sum": 8501,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 55812,
+       "q_vs_oracle": {
+        "n": 1767,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.514,
+        "over_max_mm": 47.026,
+        "n_over_gt_1mm": 558,
+        "n_falsely_feasible": 9,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 94
+       },
+       "grid_vs_oracle": {
+        "n": 187472,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 25.001,
+        "over_max_mm": 68.609,
+        "n_over_gt_1mm": 65399,
+        "n_falsely_feasible": 3326,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 19825
+       }
+      }
+     }
+    },
+    "gt_label": {
+     "n_frames": 32,
+     "identity_resolved_counts": {
+      "gt_label": 32
+     },
+     "n_frames_ball_lost_distractor": 8,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": 0.5729,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 8,
+       "(2)_recall_median": 0.947,
+       "(2)_ball_recall_median": 0.947,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 26,
+       "(3)_ball_q": 26,
+       "(3)_falsely_feasible_grid": 3137,
+       "(3)_ball_grid": 3137,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 2.641,
+       "(4)_pass": true
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": 1.0,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 8,
+       "(2)_recall_median": 0.55,
+       "(2)_ball_recall_median": 0.947,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 0,
+       "(3)_ball_q": 26,
+       "(3)_falsely_feasible_grid": 263,
+       "(3)_ball_grid": 3137,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 69.85,
+       "(4)_pass": false
+      }
+     },
+     "merge": {
+      "n": 32,
+      "target_cluster_target_fraction_median": 1.0,
+      "n_target_cluster_target_fraction_lt_0.8": 14,
+      "n_target_cluster_with_distractor_points": 14,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 1.0,
+     "nontarget_source_counts": {
+      "indices": 32
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.278,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.795,
+       "eikonal_median_of_frame_medians": 0.967
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.276,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.276,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9561
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.276,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.276,
+       "n": 32,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 85,
+     "ball_owned_remove_distractor_lost_sum": 85,
+     "methods": {
+      "ball": {
+       "recall_median": 0.947,
+       "recall_p10": 0.698,
+       "recall_min": 0.6501,
+       "distractor_lost_sum": 199,
+       "distractor_lost_sum_on_ball_hit_frames": 199,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 0.992,
+       "nontarget_labelled_retention_roi_median": 0.998,
+       "unlabelled_seeds_roi_sum": 8737,
+       "unlabelled_removed_sum": 335,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 355,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 19139,
+       "build_ms_median": 4.938,
+       "build_ms_p90": 8.719,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 5.049,
+       "build_ms_frame_median_p90": 6.075,
+       "classify_ms_median": 1.269,
+       "classify_ms_p90": 1.69,
+       "q_vs_oracle": {
+        "n": 1755,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 23.227,
+        "over_max_mm": 35.561,
+        "n_over_gt_1mm": 453,
+        "n_falsely_feasible": 26,
+        "n_falsely_infeasible": 10,
+        "n_ref_infeasible": 94
+       },
+       "grid_vs_oracle": {
+        "n": 186551,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 22.61,
+        "over_max_mm": 59.212,
+        "n_over_gt_1mm": 50330,
+        "n_falsely_feasible": 3137,
+        "n_falsely_infeasible": 2345,
+        "n_ref_infeasible": 19813
+       },
+       "q_vs_oracle_prime": {
+        "n": 1755,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 16.447,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 163,
+        "n_falsely_feasible": 22,
+        "n_falsely_infeasible": 15,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 186551,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 4.815,
+        "over_max_mm": 37.719,
+        "n_over_gt_1mm": 15771,
+        "n_falsely_feasible": 1115,
+        "n_falsely_infeasible": 3649,
+        "n_ref_infeasible": 16487
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.947,
+       "recall_p10": 0.698,
+       "recall_min": 0.6501,
+       "distractor_lost_sum": 85,
+       "distractor_lost_sum_on_ball_hit_frames": 85,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 0.993,
+       "nontarget_labelled_retention_roi_median": 0.998,
+       "unlabelled_seeds_roi_sum": 8737,
+       "unlabelled_removed_sum": 335,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 355,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 7866,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 19139,
+       "build_ms_median": 7.168,
+       "build_ms_p90": 11.36,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 7.206,
+       "build_ms_frame_median_p90": 10.384,
+       "classify_ms_median": 3.566,
+       "classify_ms_p90": 6.085,
+       "loss_reduction_pooled_on_hit_frames": 0.5729,
+       "loss_reduction_frame_median": 0.815,
+       "n_hit_frames_reduction_ge_50pct": 5,
+       "build_ms_paired_diff_median": 1.99,
+       "build_ms_paired_diff_p90": 6.18,
+       "q_vs_oracle": {
+        "n": 1755,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 23.227,
+        "over_max_mm": 35.561,
+        "n_over_gt_1mm": 453,
+        "n_falsely_feasible": 26,
+        "n_falsely_infeasible": 10,
+        "n_ref_infeasible": 94
+       },
+       "grid_vs_oracle": {
+        "n": 186551,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 22.602,
+        "over_max_mm": 59.212,
+        "n_over_gt_1mm": 50215,
+        "n_falsely_feasible": 3137,
+        "n_falsely_infeasible": 2345,
+        "n_ref_infeasible": 19813
+       },
+       "q_vs_oracle_prime": {
+        "n": 1755,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 16.447,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 163,
+        "n_falsely_feasible": 22,
+        "n_falsely_infeasible": 15,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 186551,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 4.809,
+        "over_max_mm": 37.719,
+        "n_over_gt_1mm": 15331,
+        "n_falsely_feasible": 1115,
+        "n_falsely_infeasible": 3649,
+        "n_ref_infeasible": 16487
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.55,
+       "recall_p10": 0.493,
+       "recall_min": 0.4325,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8737,
+       "unlabelled_removed_sum": 22,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 7,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 7866,
+       "n_seeds_in_ball_sum": 19139,
+       "build_ms_median": 7.526,
+       "build_ms_p90": 78.569,
+       "build_ms_n": 96,
+       "build_ms_frame_median_median": 7.421,
+       "build_ms_frame_median_p90": 10.183,
+       "classify_ms_median": 3.557,
+       "classify_ms_p90": 6.235,
+       "loss_reduction_pooled_on_hit_frames": 1.0,
+       "loss_reduction_frame_median": 1.0,
+       "n_hit_frames_reduction_ge_50pct": 8,
+       "build_ms_paired_diff_median": 2.231,
+       "build_ms_paired_diff_p90": 74.057,
+       "q_vs_oracle": {
+        "n": 1755,
+        "over_median_mm": -3.9,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 7.484,
+        "n_over_gt_1mm": 31,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 66,
+        "n_ref_infeasible": 94
+       },
+       "grid_vs_oracle": {
+        "n": 186551,
+        "over_median_mm": -4.54,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 24.688,
+        "n_over_gt_1mm": 5993,
+        "n_falsely_feasible": 263,
+        "n_falsely_infeasible": 14624,
+        "n_ref_infeasible": 19813
+       },
+       "q_vs_oracle_prime": {
+        "n": 1755,
+        "over_median_mm": -7.828,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.717,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 75,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 186551,
+        "over_median_mm": -9.643,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.548,
+        "n_over_gt_1mm": 249,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 17687,
+        "n_ref_infeasible": 16487
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8737,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 56190,
+       "q_vs_oracle_prime": {
+        "n": 1755,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 9,
+        "n_ref_infeasible": 85
+       },
+       "grid_vs_oracle_prime": {
+        "n": 186551,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 4.877,
+        "n_over_gt_1mm": 59,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 3326,
+        "n_ref_infeasible": 16487
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 199,
+       "obstacle_retention_roi_median": 0.797,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 8737,
+       "unlabelled_removed_sum": 8737,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 56190,
+       "q_vs_oracle": {
+        "n": 1755,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.541,
+        "over_max_mm": 47.026,
+        "n_over_gt_1mm": 559,
+        "n_falsely_feasible": 9,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 94
+       },
+       "grid_vs_oracle": {
+        "n": 186551,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 25.084,
+        "over_max_mm": 68.609,
+        "n_over_gt_1mm": 65375,
+        "n_falsely_feasible": 3326,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 19813
+       }
+      }
+     }
+    },
+    "gt_cluster_only": {
+     "n_frames": 18,
+     "identity_resolved_counts": {
+      "pipeline": 13,
+      "nearest_cluster": 5
+     },
+     "n_frames_ball_lost_distractor": 1,
+     "criteria": {
+      "ball_owned_remove": {
+       "(1)_loss_reduction_pooled": 0.0,
+       "(1)_pass": false,
+       "(1)_n_hit_frames": 1,
+       "(2)_recall_median": 0.947,
+       "(2)_ball_recall_median": 0.953,
+       "(2)_pass": true,
+       "(3)_falsely_feasible_q": 20,
+       "(3)_ball_q": 20,
+       "(3)_falsely_feasible_grid": 1645,
+       "(3)_ball_grid": 1645,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 32.204,
+       "(4)_pass": false
+      },
+      "ball_owned_keep": {
+       "(1)_loss_reduction_pooled": 1.0,
+       "(1)_pass": true,
+       "(1)_n_hit_frames": 1,
+       "(2)_recall_median": 0.518,
+       "(2)_ball_recall_median": 0.953,
+       "(2)_pass": false,
+       "(3)_falsely_feasible_q": 0,
+       "(3)_ball_q": 20,
+       "(3)_falsely_feasible_grid": 194,
+       "(3)_ball_grid": 1645,
+       "(3)_pass": true,
+       "(4)_p90_increase_ms": 3.872,
+       "(4)_pass": true
+      }
+     },
+     "merge": {
+      "n": 18,
+      "target_cluster_target_fraction_median": 1.0,
+      "n_target_cluster_target_fraction_lt_0.8": 0,
+      "n_target_cluster_with_distractor_points": 0,
+      "target_cluster_share_of_gt_target_median": 1.0
+     },
+     "identity_completeness_median": 1.0,
+     "identity_completeness_min": 0.8701,
+     "nontarget_source_counts": {
+      "indices": 18
+     },
+     "proximity_frames": null,
+     "sign_check": {
+      "ball": {
+       "distractor_interior_frac_negative_median": 0.259,
+       "n": 18,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "main_layer": {
+       "distractor_interior_frac_negative_median": 0.756,
+       "eikonal_median_of_frame_medians": 0.968
+      },
+      "ball_owned_remove": {
+       "distractor_interior_frac_negative_median": 0.259,
+       "n": 18,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "ball_owned_keep": {
+       "distractor_interior_frac_negative_median": 0.259,
+       "n": 18,
+       "eikonal_median_of_frame_medians": 0.967,
+       "eikonal_min_frame_median": 0.9561
+      },
+      "oracle": {
+       "distractor_interior_frac_negative_median": 0.259,
+       "n": 18,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      },
+      "oracle_prime": {
+       "distractor_interior_frac_negative_median": 0.259,
+       "n": 18,
+       "eikonal_median_of_frame_medians": 0.968,
+       "eikonal_min_frame_median": 0.9595
+      }
+     },
+     "ball_owned_remove_distractor_lost_unowned_only_sum": 1,
+     "ball_owned_remove_distractor_lost_sum": 1,
+     "methods": {
+      "ball": {
+       "recall_median": 0.953,
+       "recall_p10": 0.721,
+       "recall_min": 0.6503,
+       "distractor_lost_sum": 1,
+       "distractor_lost_sum_on_ball_hit_frames": 1,
+       "distractor_in_ball_sum": 1,
+       "obstacle_retention_roi_median": 0.994,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3740,
+       "unlabelled_removed_sum": 128,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 166,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 10489,
+       "build_ms_median": 4.633,
+       "build_ms_p90": 7.207,
+       "build_ms_n": 54,
+       "build_ms_frame_median_median": 4.633,
+       "build_ms_frame_median_p90": 5.26,
+       "classify_ms_median": 1.154,
+       "classify_ms_p90": 1.452,
+       "q_vs_oracle": {
+        "n": 953,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 24.729,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 208,
+        "n_falsely_feasible": 20,
+        "n_falsely_infeasible": 3,
+        "n_ref_infeasible": 69
+       },
+       "grid_vs_oracle": {
+        "n": 100090,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 24.363,
+        "over_max_mm": 53.268,
+        "n_over_gt_1mm": 25248,
+        "n_falsely_feasible": 1645,
+        "n_falsely_infeasible": 1887,
+        "n_ref_infeasible": 12168
+       },
+       "q_vs_oracle_prime": {
+        "n": 953,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 24.638,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 109,
+        "n_falsely_feasible": 20,
+        "n_falsely_infeasible": 8,
+        "n_ref_infeasible": 64
+       },
+       "grid_vs_oracle_prime": {
+        "n": 100090,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.971,
+        "over_max_mm": 37.719,
+        "n_over_gt_1mm": 11088,
+        "n_falsely_feasible": 984,
+        "n_falsely_infeasible": 3001,
+        "n_ref_infeasible": 10393
+       }
+      },
+      "ball_owned_remove": {
+       "recall_median": 0.947,
+       "recall_p10": 0.721,
+       "recall_min": 0.6303,
+       "distractor_lost_sum": 1,
+       "distractor_lost_sum_on_ball_hit_frames": 1,
+       "distractor_in_ball_sum": 1,
+       "obstacle_retention_roi_median": 0.994,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3740,
+       "unlabelled_removed_sum": 128,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 166,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 22,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 4440,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 10489,
+       "build_ms_median": 6.636,
+       "build_ms_p90": 39.411,
+       "build_ms_n": 54,
+       "build_ms_frame_median_median": 6.636,
+       "build_ms_frame_median_p90": 9.992,
+       "classify_ms_median": 2.851,
+       "classify_ms_p90": 4.69,
+       "loss_reduction_pooled_on_hit_frames": 0.0,
+       "loss_reduction_frame_median": 0.0,
+       "n_hit_frames_reduction_ge_50pct": 0,
+       "build_ms_paired_diff_median": 1.943,
+       "build_ms_paired_diff_p90": 14.532,
+       "q_vs_oracle": {
+        "n": 953,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 24.729,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 208,
+        "n_falsely_feasible": 20,
+        "n_falsely_infeasible": 3,
+        "n_ref_infeasible": 69
+       },
+       "grid_vs_oracle": {
+        "n": 100090,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 24.363,
+        "over_max_mm": 53.268,
+        "n_over_gt_1mm": 25129,
+        "n_falsely_feasible": 1645,
+        "n_falsely_infeasible": 1966,
+        "n_ref_infeasible": 12168
+       },
+       "q_vs_oracle_prime": {
+        "n": 953,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 24.638,
+        "over_max_mm": 29.751,
+        "n_over_gt_1mm": 109,
+        "n_falsely_feasible": 20,
+        "n_falsely_infeasible": 8,
+        "n_ref_infeasible": 64
+       },
+       "grid_vs_oracle_prime": {
+        "n": 100090,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 20.971,
+        "over_max_mm": 37.719,
+        "n_over_gt_1mm": 11088,
+        "n_falsely_feasible": 984,
+        "n_falsely_infeasible": 3080,
+        "n_ref_infeasible": 10393
+       }
+      },
+      "ball_owned_keep": {
+       "recall_median": 0.518,
+       "recall_p10": 0.483,
+       "recall_min": 0.4325,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 1,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3740,
+       "unlabelled_removed_sum": 16,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 3,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 22,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 4440,
+       "n_seeds_in_ball_sum": 10489,
+       "build_ms_median": 6.819,
+       "build_ms_p90": 11.079,
+       "build_ms_n": 54,
+       "build_ms_frame_median_median": 6.683,
+       "build_ms_frame_median_p90": 8.214,
+       "classify_ms_median": 3.167,
+       "classify_ms_p90": 4.425,
+       "loss_reduction_pooled_on_hit_frames": 1.0,
+       "loss_reduction_frame_median": 1.0,
+       "n_hit_frames_reduction_ge_50pct": 1,
+       "build_ms_paired_diff_median": 1.967,
+       "build_ms_paired_diff_p90": 5.848,
+       "q_vs_oracle": {
+        "n": 953,
+        "over_median_mm": -2.882,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 7.484,
+        "n_over_gt_1mm": 24,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 39,
+        "n_ref_infeasible": 69
+       },
+       "grid_vs_oracle": {
+        "n": 100090,
+        "over_median_mm": -3.593,
+        "over_p95_mm": 0.407,
+        "over_max_mm": 24.688,
+        "n_over_gt_1mm": 4485,
+        "n_falsely_feasible": 194,
+        "n_falsely_infeasible": 9239,
+        "n_ref_infeasible": 12168
+       },
+       "q_vs_oracle_prime": {
+        "n": 953,
+        "over_median_mm": -4.801,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.717,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 44,
+        "n_ref_infeasible": 64
+       },
+       "grid_vs_oracle_prime": {
+        "n": 100090,
+        "over_median_mm": -8.609,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 5.548,
+        "n_over_gt_1mm": 185,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 10820,
+        "n_ref_infeasible": 10393
+       }
+      },
+      "oracle": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 1,
+       "obstacle_retention_roi_median": 1.0,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3740,
+       "unlabelled_removed_sum": 0,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 27303,
+       "q_vs_oracle_prime": {
+        "n": 953,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 0.0,
+        "n_over_gt_1mm": 0,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 5,
+        "n_ref_infeasible": 64
+       },
+       "grid_vs_oracle_prime": {
+        "n": 100090,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 0.0,
+        "over_max_mm": 4.877,
+        "n_over_gt_1mm": 31,
+        "n_falsely_feasible": 0,
+        "n_falsely_infeasible": 1775,
+        "n_ref_infeasible": 10393
+       }
+      },
+      "oracle_prime": {
+       "recall_median": 1.0,
+       "recall_p10": 1.0,
+       "recall_min": 1.0,
+       "distractor_lost_sum": 0,
+       "distractor_lost_sum_on_ball_hit_frames": 0,
+       "distractor_in_ball_sum": 1,
+       "obstacle_retention_roi_median": 0.811,
+       "nontarget_labelled_retention_roi_median": 1.0,
+       "unlabelled_seeds_roi_sum": 3740,
+       "unlabelled_removed_sum": 3740,
+       "shared_removed_sum": 0,
+       "support_lost_sum": 0,
+       "destination_lost_sum": 0,
+       "ambiguous_sum": 0,
+       "ambiguous_median": 0.0,
+       "unowned_removed_sum": 0,
+       "unowned_kept_sum": 0,
+       "n_seeds_in_ball_sum": 27303,
+       "q_vs_oracle": {
+        "n": 953,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 22.392,
+        "over_max_mm": 47.026,
+        "n_over_gt_1mm": 333,
+        "n_falsely_feasible": 5,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 69
+       },
+       "grid_vs_oracle": {
+        "n": 100090,
+        "over_median_mm": 0.0,
+        "over_p95_mm": 30.132,
+        "over_max_mm": 68.609,
+        "n_over_gt_1mm": 39521,
+        "n_falsely_feasible": 1775,
+        "n_falsely_infeasible": 0,
+        "n_ref_infeasible": 12168
+       }
+      }
+     }
+    }
+   }
+  },
+  "build_ms_measurement_pass": {
+   "note": "2 concurrent shards; see sets.*.methods.*.build_ms_*",
+   "load": {
+    "loadavg1_median": 43.785,
+    "loadavg1_max": 373.09,
+    "cgroup_throttled_s_per_frame_median": 5.462,
+    "cgroup_throttled_period_fraction_median": 0.017,
+    "gpu_util_pct_median": 0.0,
+    "gpu_util_pct_max": 100,
+    "gpu_mem_used_mib_max": 36034,
+    "wset_gib_max": 63.83,
+    "wall_s_median": 30.78,
+    "concurrency_note": "2 e2_measure.py shards of this verifier ran concurrently on the same GPU; another verifier's CPU replays and two policy servers/clients ran on the pod"
+   }
+  },
+  "build_ms_dedicated_timing_pass": {
+   "definitions": "T44 V-E2-3 timing aggregation (dedicated pass, single process). p90 over pooled runs.",
+   "n_frames": 112,
+   "reps_per_frame": 10,
+   "methods": {
+    "ball": {
+     "n": 1120,
+     "median": 4.835,
+     "p90": 6.254,
+     "p99": 36.372,
+     "max": 65.325
+    },
+    "ball_owned_remove": {
+     "n": 1120,
+     "median": 6.941,
+     "p90": 10.999,
+     "p99": 40.755,
+     "max": 91.851,
+     "p90_increase_vs_ball_ms": 4.745,
+     "paired_diff_median": 2.135,
+     "paired_diff_p90": 5.184
+    },
+    "ball_owned_keep": {
+     "n": 1120,
+     "median": 6.848,
+     "p90": 11.099,
+     "p99": 39.771,
+     "max": 46.648,
+     "p90_increase_vs_ball_ms": 4.845,
+     "paired_diff_median": 2.106,
+     "paired_diff_p90": 5.327
+    },
+    "nontarget_points_ms": {
+     "median": 0.156,
+     "p90": 0.282
+    },
+    "classify_ms_ball_owned_remove": {
+     "median": 3.349,
+     "p90": 6.88
+    },
+    "pod_load": {
+     "loadavg1_median": 32.68,
+     "loadavg1_max": 394.54,
+     "cgroup_throttled_s_per_frame_median": 0.0,
+     "throttled_period_fraction_median": 0.0,
+     "gpu_util_pct_median": 0.0,
+     "gpu_util_pct_max": 100
+    }
+   },
+   "by_set": {
+    "demo": {
+     "ball": {
+      "n": 640,
+      "median": 4.8,
+      "p90": 6.042,
+      "p99": 32.871,
+      "max": 65.325
+     },
+     "ball_owned_remove": {
+      "n": 640,
+      "median": 6.886,
+      "p90": 10.638,
+      "p99": 26.084,
+      "max": 91.851,
+      "p90_increase_vs_ball_ms": 4.596,
+      "paired_diff_median": 2.183,
+      "paired_diff_p90": 4.89
+     },
+     "ball_owned_keep": {
+      "n": 640,
+      "median": 6.848,
+      "p90": 10.653,
+      "p99": 36.771,
+      "max": 41.465,
+      "p90_increase_vs_ball_ms": 4.611,
+      "paired_diff_median": 2.156,
+      "paired_diff_p90": 5.062
+     },
+     "nontarget_points_ms": {
+      "median": 0.154,
+      "p90": 0.272
+     },
+     "classify_ms_ball_owned_remove": {
+      "median": 3.364,
+      "p90": 6.789
+     },
+     "pod_load": {
+      "loadavg1_median": 29.085,
+      "loadavg1_max": 337.69,
+      "cgroup_throttled_s_per_frame_median": 0.0,
+      "throttled_period_fraction_median": 0.0,
+      "gpu_util_pct_median": 0.0,
+      "gpu_util_pct_max": 100
+     }
+    },
+    "lb": {
+     "ball": {
+      "n": 480,
+      "median": 4.904,
+      "p90": 6.72,
+      "p99": 37.594,
+      "max": 60.333
+     },
+     "ball_owned_remove": {
+      "n": 480,
+      "median": 7.043,
+      "p90": 11.964,
+      "p99": 42.13,
+      "max": 46.384,
+      "p90_increase_vs_ball_ms": 5.244,
+      "paired_diff_median": 2.089,
+      "paired_diff_p90": 5.822
+     },
+     "ball_owned_keep": {
+      "n": 480,
+      "median": 6.855,
+      "p90": 11.761,
+      "p99": 41.451,
+      "max": 46.648,
+      "p90_increase_vs_ball_ms": 5.041,
+      "paired_diff_median": 2.06,
+      "paired_diff_p90": 5.84
+     },
+     "nontarget_points_ms": {
+      "median": 0.159,
+      "p90": 0.287
+     },
+     "classify_ms_ball_owned_remove": {
+      "median": 3.259,
+      "p90": 7.036
+     },
+     "pod_load": {
+      "loadavg1_median": 34.045,
+      "loadavg1_max": 394.54,
+      "cgroup_throttled_s_per_frame_median": 0.0,
+      "throttled_period_fraction_median": 0.0,
+      "gpu_util_pct_median": 0.0,
+      "gpu_util_pct_max": 100
+     }
+    }
+   }
+  },
+  "v_i0": {
+   "run": "outputs/verify/T43/V11/runs/V11AB/H/V11AB_ep1807_s18071",
+   "rows": [
+    {
+     "server_chunk_k": 11,
+     "file": "chunk_00011.npz",
+     "seq_local": 12,
+     "t_step_npz": 12,
+     "contacts_executing_this_chunk": {
+      "apple-table": {
+       "t_first": 88,
+       "t_last": 95,
+       "min_dist_mm": -0.02,
+       "max_force_N": 0.9
+      }
+     },
+     "manipulated": {
+      "id": 0,
+      "state": "visible"
+     },
+     "exclusion_active": true,
+     "grasp_active": false,
+     "authorized_links": [
+      "ee_finger_l1",
+      "ee_finger_l2",
+      "ee_left"
+     ],
+     "n_rows_spheres": 270,
+     "n_rows_authorized": 135,
+     "target_free_mode": "ball",
+     "ball_radius_mm": 54.239,
+     "n_ball_seeds_excluded": 1265,
+     "n_target_points": 117,
+     "carved_voxels_proxy_dfree_minus_dmain_gt_vs": 19729,
+     "carved_surface_voxels_proxy_absdmain_le_vs": 1203,
+     "clearance_min_authorized": 0.004,
+     "clearance_min_nonauthorized": 0.031,
+     "has_new_T44_keys": {
+      "target_free_removed_ijk": false,
+      "target_free_nontarget_kept_ijk": false,
+      "target_free_ambiguous_ijk": false
+     },
+     "summary_has_target_permission": false,
+     "summary_has_target_exclusion": false,
+     "verdict_reasons": []
+    },
+    {
+     "server_chunk_k": 12,
+     "file": "chunk_00012.npz",
+     "seq_local": 13,
+     "t_step_npz": 13,
+     "contacts_executing_this_chunk": {
+      "apple-table": {
+       "t_first": 96,
+       "t_last": 103,
+       "min_dist_mm": -0.02,
+       "max_force_N": 0.9
+      }
+     },
+     "manipulated": {
+      "id": 0,
+      "state": "visible"
+     },
+     "exclusion_active": true,
+     "grasp_active": false,
+     "authorized_links": [
+      "ee_finger_l1",
+      "ee_finger_l2",
+      "ee_left"
+     ],
+     "n_rows_spheres": 270,
+     "n_rows_authorized": 135,
+     "target_free_mode": "ball",
+     "ball_radius_mm": 54.239,
+     "n_ball_seeds_excluded": 1130,
+     "n_target_points": 117,
+     "carved_voxels_proxy_dfree_minus_dmain_gt_vs": 70299,
+     "carved_surface_voxels_proxy_absdmain_le_vs": 1066,
+     "clearance_min_authorized": 0.002,
+     "clearance_min_nonauthorized": 0.031,
+     "has_new_T44_keys": {
+      "target_free_removed_ijk": false,
+      "target_free_nontarget_kept_ijk": false,
+      "target_free_ambiguous_ijk": false
+     },
+     "summary_has_target_permission": false,
+     "summary_has_target_exclusion": false,
+     "verdict_reasons": []
+    },
+    {
+     "server_chunk_k": 13,
+     "file": "chunk_00013.npz",
+     "seq_local": 14,
+     "t_step_npz": 14,
+     "contacts_executing_this_chunk": {
+      "apple-table": {
+       "t_first": 104,
+       "t_last": 111,
+       "min_dist_mm": -0.02,
+       "max_force_N": 0.9
+      }
+     },
+     "manipulated": {
+      "id": 0,
+      "state": "visible"
+     },
+     "exclusion_active": true,
+     "grasp_active": false,
+     "authorized_links": [
+      "ee_finger_l1",
+      "ee_finger_l2",
+      "ee_left"
+     ],
+     "n_rows_spheres": 270,
+     "n_rows_authorized": 135,
+     "target_free_mode": "ball",
+     "ball_radius_mm": 54.239,
+     "n_ball_seeds_excluded": 1058,
+     "n_target_points": 117,
+     "carved_voxels_proxy_dfree_minus_dmain_gt_vs": 68771,
+     "carved_surface_voxels_proxy_absdmain_le_vs": 975,
+     "clearance_min_authorized": 0.0,
+     "clearance_min_nonauthorized": 0.03,
+     "has_new_T44_keys": {
+      "target_free_removed_ijk": false,
+      "target_free_nontarget_kept_ijk": false,
+      "target_free_ambiguous_ijk": false
+     },
+     "summary_has_target_permission": false,
+     "summary_has_target_exclusion": false,
+     "verdict_reasons": []
+    },
+    {
+     "server_chunk_k": 14,
+     "file": "chunk_00014.npz",
+     "seq_local": 15,
+     "t_step_npz": 15,
+     "contacts_executing_this_chunk": {
+      "apple-hand": {
+       "t_first": 117,
+       "t_last": 119,
+       "min_dist_mm": -1.93,
+       "max_force_N": 126.6
+      },
+      "apple-table": {
+       "t_first": 112,
+       "t_last": 119,
+       "min_dist_mm": -0.88,
+       "max_force_N": 26.9
+      },
+      "hand-target": {
+       "t_first": 117,
+       "t_last": 119,
+       "min_dist_mm": -1.93,
+       "max_force_N": 126.6
+      }
+     },
+     "manipulated": {
+      "id": 0,
+      "state": "visible"
+     },
+     "exclusion_active": true,
+     "grasp_active": false,
+     "authorized_links": [
+      "ee_finger_l1",
+      "ee_finger_l2",
+      "ee_left"
+     ],
+     "n_rows_spheres": 270,
+     "n_rows_authorized": 135,
+     "target_free_mode": "ball",
+     "ball_radius_mm": 54.239,
+     "n_ball_seeds_excluded": 1126,
+     "n_target_points": 117,
+     "carved_voxels_proxy_dfree_minus_dmain_gt_vs": 69510,
+     "carved_surface_voxels_proxy_absdmain_le_vs": 1055,
+     "clearance_min_authorized": -0.001,
+     "clearance_min_nonauthorized": 0.03,
+     "has_new_T44_keys": {
+      "target_free_removed_ijk": false,
+      "target_free_nontarget_kept_ijk": false,
+      "target_free_ambiguous_ijk": false
+     },
+     "summary_has_target_permission": false,
+     "summary_has_target_exclusion": false,
+     "verdict_reasons": []
+    },
+    {
+     "server_chunk_k": 15,
+     "file": "chunk_00015.npz",
+     "seq_local": 16,
+     "t_step_npz": 16,
+     "contacts_executing_this_chunk": {
+      "apple-hand": {
+       "t_first": 120,
+       "t_last": 127,
+       "min_dist_mm": -0.51,
+       "max_force_N": 27.4
+      },
+      "apple-table": {
+       "t_first": 120,
+       "t_last": 127,
+       "min_dist_mm": -0.21,
+       "max_force_N": 10.6
+      },
+      "hand-target": {
+       "t_first": 120,
+       "t_last": 127,
+       "min_dist_mm": -0.51,
+       "max_force_N": 27.4
+      }
+     },
+     "manipulated": {
+      "id": 0,
+      "state": "visible"
+     },
+     "exclusion_active": true,
+     "grasp_active": true,
+     "authorized_links": [
+      "ee_finger_l1",
+      "ee_finger_l2",
+      "ee_left"
+     ],
+     "n_rows_spheres": 270,
+     "n_rows_authorized": 135,
+     "target_free_mode": "ball",
+     "ball_radius_mm": 54.239,
+     "n_ball_seeds_excluded": 1267,
+     "n_target_points": 117,
+     "carved_voxels_proxy_dfree_minus_dmain_gt_vs": 66949,
+     "carved_surface_voxels_proxy_absdmain_le_vs": 1202,
+     "clearance_min_authorized": -0.014,
+     "clearance_min_nonauthorized": 0.03,
+     "has_new_T44_keys": {
+      "target_free_removed_ijk": false,
+      "target_free_nontarget_kept_ijk": false,
+      "target_free_ambiguous_ijk": false
+     },
+     "summary_has_target_permission": false,
+     "summary_has_target_exclusion": false,
+     "verdict_reasons": []
+    }
+   ],
+   "first_contact_per_class": {
+    "apple-crate": {
+     "plan_index": 30,
+     "seq_local": 31,
+     "server_chunk_k": 30,
+     "server_chunk_file_index": 30,
+     "t_first": 245,
+     "t_last": 247,
+     "rows": 3,
+     "substeps": 98,
+     "min_dist_m": -0.007963021266814523,
+     "max_force_N": 17.65006810816289
+    },
+    "hand-crate": null,
+    "robot_other-crate": null,
+    "apple-hand": {
+     "plan_index": 14,
+     "seq_local": 15,
+     "server_chunk_k": 14,
+     "server_chunk_file_index": 14,
+     "t_first": 117,
+     "t_last": 119,
+     "rows": 3,
+     "substeps": 72,
+     "min_dist_m": -0.0019341507525968329,
+     "max_force_N": 126.62748490456849
+    },
+    "apple-table": {
+     "plan_index": 0,
+     "seq_local": 1,
+     "server_chunk_k": 0,
+     "server_chunk_file_index": 0,
+     "t_first": 0,
+     "t_last": 7,
+     "rows": 8,
+     "substeps": 264,
+     "min_dist_m": -3.396896310758901e-05,
+     "max_force_N": 1.0116243109179681
+    },
+    "apple-fruit_other": null,
+    "apple-obstacle": null,
+    "crate-obstacle": null,
+    "hand-obstacle": null,
+    "robot_other-obstacle": null,
+    "hand-fruit_other": null,
+    "robot_other-target": null,
+    "robot_other-fruit_other": null,
+    "hand-target": {
+     "plan_index": 14,
+     "seq_local": 15,
+     "server_chunk_k": 14,
+     "server_chunk_file_index": 14,
+     "t_first": 117,
+     "t_last": 119,
+     "rows": 3,
+     "substeps": 72,
+     "min_dist_m": -0.0019341507525968329,
+     "max_force_N": 126.62748490456849
+    }
+   }
+  }
+ },
+ "figures": [
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44e2-scene.png",
+   "kind": "scene"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44e2-scatter.png",
+   "kind": "graph"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44e2-table.png",
+   "kind": "table"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "cuRobo 기준선: 위반으로 시작 10/15 · has_target 15/15 · frame0 clearance_before -9.171877401271193 mm — 기준값과 같다"
+ },
+ "verdict": "기준선 일치. 판정 ①–④ 의 통과/불통과는 numbers.sets.*.*.criteria 와 numbers.build_ms_dedicated_timing_pass 에 숫자로 있다.",
+ "not_measured": [
+  "V-I0 with T44 trace fields: V11AB record is pre-T44 (no target_free_*_ijk npz keys, no summary target_permission/target_exclusion); no server run with the T44 code was recorded. carved-surface-voxel proxy used instead.",
+  "closed-loop effect (no policy execution in E2-demo)",
+  "pipeline identity with real VLA attention (GT Gaussian attention on cameras that see the target)"
+ ],
+ "deviations": [
+  "verifier read the impl.md section 'expected results' before measuring (whole file printed at once); the list, criteria, margin and query definitions were fixed from task.md before any measurement",
+  "build ms in the measurement pass were taken with 2 own shards concurrent on the same GPU; criterion (4) is also reported from a dedicated single-process timing pass",
+  "identity 'gt' (harness) falls back to gt_label when no grounded cluster is >= 80 % GT target; 'gt_cluster_only' = gt frames resolved to pipeline/nearest_cluster",
+  "identity_completeness reads 0.0 on 12 lb gt frames where the pipeline geometry's point_indices did not index the current cloud (nontarget source 'proximity')"
+ ]
+}

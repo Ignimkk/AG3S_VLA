@@ -2,7 +2,7 @@
 (a) on the recorded refined plan — fidelity vs `clearance_min_per_step_mm` — and
 (b) on the stationary plan Q = q_now (is q_now itself feasible / certifiable?).
 Usage: qnow.py OUT.json RUNKEY SEQ0 SEQ1"""
-from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import rebase_legacy_paths, workspace_path as _ag3s_workspace_path
 import json, sys, pathlib, dataclasses, functools
 import numpy as np
 from AG3S.trajopt.experiments import fixed_input_ablation as FIA
@@ -12,7 +12,7 @@ from AG3S.trajopt.safe_policy import classify_violations
 from AG3S.ag3s.robot_models.gripper_state import FingerJointMap
 
 S = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T43/S/raw'))
-IX = {**json.load(open(S / "chunk_index_t42.json")), **json.load(open(S / "chunk_index_t40t41.json"))}
+IX = rebase_legacy_paths({**json.load(open(S / "chunk_index_t42.json")), **json.load(open(S / "chunk_index_t40t41.json"))})
 RUNS = {
  "T42_R1908": _ag3s_workspace_path('legacy/outputs/verify/T42/1/runs/E3b/noobs/E3b_ep1908_s19082'),
  "T42_L1992": _ag3s_workspace_path('legacy/outputs/verify/T42/1/runs/E3b/noobs/E3b_ep1992_s19922'),

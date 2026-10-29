@@ -1,0 +1,488 @@
+{
+ "frames": [
+  {
+   "key": "ep1839",
+   "frame": 22,
+   "t_step": 176,
+   "grasp_state": "held",
+   "event": {
+    "latch_state": "held",
+    "latch_state_before": "held",
+    "attach": false,
+    "detach": false,
+    "hand": "right",
+    "parent_link": "ee_finger_r1",
+    "hold_link": "ee_right",
+    "reach_m": 0.12
+   },
+   "serving": {
+    "has_target": true,
+    "target_n_points": 93,
+    "manip_id": 0,
+    "manip_state": "occluded",
+    "manip_centroid": [
+     0.46880008468972184,
+     -0.3298257928942239,
+     0.862068101501418
+    ],
+    "attached": true,
+    "frozen": true,
+    "decision_mode": "occluded"
+   },
+   "reproduce_stored_rows": {
+    "L8H2": {
+     "frames": 23,
+     "n_mismatch": 0
+    },
+    "N": {
+     "frames": 23,
+     "n_mismatch": 0
+    },
+    "A": {
+     "frames": 23,
+     "n_mismatch": 0
+    },
+    "B": {
+     "frames": 23,
+     "n_mismatch": 0
+    },
+    "L12H4": {
+     "frames": 23,
+     "n_mismatch": 0
+    },
+    "A-L12H4": {
+     "frames": 23,
+     "n_mismatch": 0
+    },
+    "N-k3": {
+     "frames": 23,
+     "n_mismatch": 0
+    },
+    "A-k3": {
+     "frames": 23,
+     "n_mismatch": 0
+    }
+   },
+   "arms": {
+    "L8H2": {
+     "attached": true,
+     "n_attached_pts": 57,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 94,
+     "chosen_centroid_xy": [
+      0.46842509508132935,
+      -0.3301492929458618
+     ],
+     "attached_centroid": [
+      0.4660418927669525,
+      -0.326477974653244,
+      1.1143782138824463
+     ],
+     "manip_centroid": [
+      0.4684251292020622,
+      -0.33014932150440174,
+      0.8620347807366369
+     ]
+    },
+    "N": {
+     "attached": true,
+     "n_attached_pts": 57,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 94,
+     "chosen_centroid_xy": [
+      0.46842509508132935,
+      -0.3301492929458618
+     ],
+     "attached_centroid": [
+      0.4660418927669525,
+      -0.326477974653244,
+      1.1143782138824463
+     ],
+     "manip_centroid": [
+      0.4684251292020622,
+      -0.33014932150440174,
+      0.8620347807366369
+     ]
+    },
+    "A": {
+     "attached": true,
+     "n_attached_pts": 72,
+     "has_target": true,
+     "chosen_rank": 1,
+     "identity_correct": false,
+     "n_chosen_pts": 106,
+     "chosen_centroid_xy": [
+      0.5528385043144226,
+      -0.2984503507614136
+     ],
+     "attached_centroid": [
+      0.5467686057090759,
+      -0.27638110518455505,
+      1.1131975650787354
+     ],
+     "manip_centroid": [
+      0.5528386571184466,
+      -0.29845033883366806,
+      0.8674656214409044
+     ]
+    },
+    "B": {
+     "attached": true,
+     "n_attached_pts": 57,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 94,
+     "chosen_centroid_xy": [
+      0.46842509508132935,
+      -0.3301492929458618
+     ],
+     "attached_centroid": [
+      0.4660418927669525,
+      -0.326477974653244,
+      1.1143782138824463
+     ],
+     "manip_centroid": [
+      0.4684251292020622,
+      -0.33014932150440174,
+      0.8620347807366369
+     ]
+    },
+    "L12H4": {
+     "attached": true,
+     "n_attached_pts": 57,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 94,
+     "chosen_centroid_xy": [
+      0.46842509508132935,
+      -0.3301492929458618
+     ],
+     "attached_centroid": [
+      0.4660418927669525,
+      -0.326477974653244,
+      1.1143782138824463
+     ],
+     "manip_centroid": [
+      0.4684251292020622,
+      -0.33014932150440174,
+      0.8620347807366369
+     ]
+    },
+    "A-L12H4": {
+     "attached": true,
+     "n_attached_pts": 74,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 27,
+     "chosen_centroid_xy": [
+      0.4922405183315277,
+      -0.3175983130931854
+     ],
+     "attached_centroid": [
+      0.5496686697006226,
+      -0.27477577328681946,
+      1.1105186939239502
+     ],
+     "manip_centroid": [
+      0.4922405762186001,
+      -0.31759828432244425,
+      0.8749964649669716
+     ]
+    },
+    "N-k3": {
+     "attached": true,
+     "n_attached_pts": 134,
+     "has_target": true,
+     "chosen_rank": 0,
+     "identity_correct": false,
+     "n_chosen_pts": 106,
+     "chosen_centroid_xy": [
+      0.5528385043144226,
+      -0.2984503507614136
+     ],
+     "attached_centroid": [
+      0.5116928815841675,
+      -0.2985604703426361,
+      1.1147055625915527
+     ],
+     "manip_centroid": [
+      0.5528386571184466,
+      -0.29845033883366806,
+      0.8674656214409044
+     ]
+    },
+    "A-k3": {
+     "attached": true,
+     "n_attached_pts": 72,
+     "has_target": true,
+     "chosen_rank": 1,
+     "identity_correct": false,
+     "n_chosen_pts": 106,
+     "chosen_centroid_xy": [
+      0.5528385043144226,
+      -0.2984503507614136
+     ],
+     "attached_centroid": [
+      0.5467686057090759,
+      -0.27638110518455505,
+      1.1131975650787354
+     ],
+     "manip_centroid": [
+      0.5528386571184466,
+      -0.29845033883366806,
+      0.8674656214409044
+     ]
+    }
+   }
+  },
+  {
+   "key": "ep1809",
+   "frame": 21,
+   "t_step": 168,
+   "grasp_state": "held",
+   "event": {
+    "latch_state": "held",
+    "latch_state_before": "held",
+    "attach": false,
+    "detach": false,
+    "hand": "left",
+    "parent_link": "ee_finger_l1",
+    "hold_link": "ee_left",
+    "reach_m": 0.12
+   },
+   "serving": {
+    "has_target": true,
+    "target_n_points": 69,
+    "manip_id": 0,
+    "manip_state": "occluded",
+    "manip_centroid": [
+     0.45504930163354057,
+     0.29968369417486873,
+     0.8518879307284348
+    ],
+    "attached": true,
+    "frozen": true,
+    "decision_mode": "occluded"
+   },
+   "reproduce_stored_rows": {
+    "L8H2": {
+     "frames": 22,
+     "n_mismatch": 0
+    },
+    "N": {
+     "frames": 22,
+     "n_mismatch": 0
+    },
+    "A": {
+     "frames": 22,
+     "n_mismatch": 0
+    },
+    "B": {
+     "frames": 22,
+     "n_mismatch": 0
+    },
+    "L12H4": {
+     "frames": 22,
+     "n_mismatch": 0
+    },
+    "A-L12H4": {
+     "frames": 22,
+     "n_mismatch": 0
+    },
+    "N-k3": {
+     "frames": 22,
+     "n_mismatch": 0
+    },
+    "A-k3": {
+     "frames": 22,
+     "n_mismatch": 0
+    }
+   },
+   "arms": {
+    "L8H2": {
+     "attached": true,
+     "n_attached_pts": 48,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 67,
+     "chosen_centroid_xy": [
+      0.45445218682289124,
+      0.29946550726890564
+     ],
+     "attached_centroid": [
+      0.4578839838504791,
+      0.3200574517250061,
+      0.9379103779792786
+     ],
+     "manip_centroid": [
+      0.4544521710671677,
+      0.2994654925968181,
+      0.8519748771607353
+     ]
+    },
+    "N": {
+     "attached": true,
+     "n_attached_pts": 48,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 67,
+     "chosen_centroid_xy": [
+      0.45445218682289124,
+      0.29946550726890564
+     ],
+     "attached_centroid": [
+      0.4578839838504791,
+      0.3200574517250061,
+      0.9379103779792786
+     ],
+     "manip_centroid": [
+      0.4544521710671677,
+      0.2994654925968181,
+      0.8519748771607353
+     ]
+    },
+    "A": {
+     "attached": true,
+     "n_attached_pts": 48,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 67,
+     "chosen_centroid_xy": [
+      0.45445218682289124,
+      0.29946550726890564
+     ],
+     "attached_centroid": [
+      0.4578839838504791,
+      0.3200574517250061,
+      0.9379103779792786
+     ],
+     "manip_centroid": [
+      0.4544521710671677,
+      0.2994654925968181,
+      0.8519748771607353
+     ]
+    },
+    "B": {
+     "attached": true,
+     "n_attached_pts": 48,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 67,
+     "chosen_centroid_xy": [
+      0.45445218682289124,
+      0.29946550726890564
+     ],
+     "attached_centroid": [
+      0.4578839838504791,
+      0.3200574517250061,
+      0.9379103779792786
+     ],
+     "manip_centroid": [
+      0.4544521710671677,
+      0.2994654925968181,
+      0.8519748771607353
+     ]
+    },
+    "L12H4": {
+     "attached": true,
+     "n_attached_pts": 39,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 67,
+     "chosen_centroid_xy": [
+      0.45445218682289124,
+      0.29946550726890564
+     ],
+     "attached_centroid": [
+      0.45810019969940186,
+      0.32001858949661255,
+      0.9409471154212952
+     ],
+     "manip_centroid": [
+      0.4544521710671677,
+      0.2994654925968181,
+      0.8519748771607353
+     ]
+    },
+    "A-L12H4": {
+     "attached": true,
+     "n_attached_pts": 39,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 67,
+     "chosen_centroid_xy": [
+      0.45445218682289124,
+      0.29946550726890564
+     ],
+     "attached_centroid": [
+      0.45810019969940186,
+      0.32001858949661255,
+      0.9409471154212952
+     ],
+     "manip_centroid": [
+      0.4544521710671677,
+      0.2994654925968181,
+      0.8519748771607353
+     ]
+    },
+    "N-k3": {
+     "attached": true,
+     "n_attached_pts": 48,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 67,
+     "chosen_centroid_xy": [
+      0.45445218682289124,
+      0.29946550726890564
+     ],
+     "attached_centroid": [
+      0.4578839838504791,
+      0.3200574517250061,
+      0.9379103779792786
+     ],
+     "manip_centroid": [
+      0.4544521710671677,
+      0.2994654925968181,
+      0.8519748771607353
+     ]
+    },
+    "A-k3": {
+     "attached": false,
+     "n_attached_pts": 0,
+     "has_target": true,
+     "chosen_rank": null,
+     "identity_correct": false,
+     "n_chosen_pts": 106,
+     "chosen_centroid_xy": [
+      0.5479499101638794,
+      0.3052302896976471
+     ],
+     "attached_centroid": null,
+     "manip_centroid": [
+      0.547949932372195,
+      0.3052303030297045,
+      0.8671086837500971
+     ]
+    }
+   }
+  }
+ ],
+ "legend": {
+  "cameras": "policy cameras; GT outlines: target (green), neighbour fruit (orange), crate (purple)",
+  "right_panel": "top-down base-frame XY within 0.20 m of the GT target centre (star); points = L8H2 arm's filtered cloud coloured by GT label; crosses = each arm's attached points in base (the injected attach; arms offset by 2 mm per slot for visibility only); solid hull = each arm's chosen target points (line width decreases by arm slot so coincident hulls stay visible)"
+ }
+}

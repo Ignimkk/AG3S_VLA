@@ -1,0 +1,20 @@
+{
+ "frame": "T54c_ep1856_f025",
+ "rule": "largest IoU gain of top1-only-ns vs top1-only",
+ "seeds_r3": [
+  488,
+  487,
+  472,
+  503,
+  504
+ ],
+ "seeds_r5": [
+  149,
+  471,
+  501,
+  485,
+  469
+ ],
+ "iou_r3": 0.0,
+ "iou_r5": 0.9901960784313726
+}

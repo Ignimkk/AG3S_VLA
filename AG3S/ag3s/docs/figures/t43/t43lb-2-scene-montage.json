@@ -1,0 +1,81 @@
+{
+ "items": [
+  {
+   "group": "apple_left",
+   "episode": 745,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep745_s7451/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "apple_left",
+   "episode": 1031,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1031_s10311/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "apple_right",
+   "episode": 394,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep394_s3941/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "apple_right",
+   "episode": 274,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep274_s2741/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "orange_left",
+   "episode": 418,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep418_s4181/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "orange_left",
+   "episode": 205,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep205_s2051/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "orange_right",
+   "episode": 1256,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1256_s12561/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "orange_right",
+   "episode": 482,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep482_s4821/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "pear_left",
+   "episode": 1440,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep1440_s14401/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "pear_right",
+   "episode": 375,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep375_s3751/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  },
+  {
+   "group": "pear_right",
+   "episode": 596,
+   "frame": "/mnt/dev/work/outputs/verify/T43/LB/runs/E0/E0_ep596_s5961/third_person_front.mp4",
+   "frame_index": 0,
+   "frame_read": true
+  }
+ ]
+}

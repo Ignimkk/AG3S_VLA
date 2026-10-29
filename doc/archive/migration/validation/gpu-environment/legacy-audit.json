@@ -1,0 +1,1884 @@
+{
+  "measured_at_utc": "2026-10-11T15:32:21.411774+00:00",
+  "source_head": "4292882ef3054a16c67c03d3fd6261ef8644a7e7",
+  "raw_root": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit",
+  "raw_files": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/archive-comparison.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/current-env-paths.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/legacy-env-references.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/legacy-git-refs.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/live-process-paths.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/summary.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/symlinks.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/sibling-work-paths.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/preservation-validation.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/bundle-verify.log",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-audit/bundle-heads.log"
+  ],
+  "numbers": {
+    "archive_files": 8972,
+    "archive_hash_errors": 0,
+    "legacy_files_matching_archive": 8970,
+    "legacy_files_changed_since_archive": 2,
+    "legacy_nonarchive_files": 56,
+    "legacy_nonarchive_bytes": 10764773,
+    "legacy_git_refs": 58,
+    "refs_with_missing_objects": 3,
+    "unique_missing_objects": 2,
+    "incoming_legacy_symlinks": 0,
+    "legacy_dependent_live_processes": 4,
+    "storage_cwd_processes": 2,
+    "current_environment_legacy_links": 0,
+    "current_environment_legacy_editables": 0,
+    "independent_cpu_tests_passed": 32,
+    "preserved_files_checked": 40,
+    "preserved_source_hash_errors": 0,
+    "preserved_destination_hash_errors": 0,
+    "missing_git_objects_preserved_in_bundle": 2,
+    "git_bundle_verify_returncode": 0,
+    "historical_sibling_legacy_links": 202,
+    "historical_sibling_directories": 22,
+    "registered_extra_legacy_worktrees": 1,
+    "curobo_current_environment_legacy_symlinks": 0,
+    "curobo_current_environment_legacy_editables": 0
+  },
+  "changed_files": [
+    {
+      "path": ".claude/ag3s-rules-brief.md",
+      "size": 2328,
+      "legacy_sha256": "41852bb594a5c1c9c24b04bf9812f1eb6c43dd2566fa9b8e86d6c08587870f59",
+      "archive_sha256": "2e25b2a89f0b06404dcc2f999b3f812540b66c3d48a6e791569fdf26910c3a21",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "CLAUDE.md",
+      "size": 4737,
+      "legacy_sha256": "c7125421a14c259448df177cc0b265dd99132df96facf4d019137219b3833a67",
+      "archive_sha256": "4f655428b29e69806d393908342a183dac5d65209b9d4bbb28651d22c0b03d5a",
+      "matching_checkout_paths": []
+    }
+  ],
+  "not_in_archive": [
+    {
+      "path": "develope_PLAN.md",
+      "size": 73687,
+      "sha256": "59feefb0906c9a40f7734d579dd427d028e3efdbcde07f4673d6ee2721dc0378",
+      "matching_checkout_paths": [
+        "/mnt/dev/AG3S_VLA-development/doc/plans/develope_PLAN.md"
+      ]
+    },
+    {
+      "path": "typing_extensions-4.16.0-py3-none-any.whl",
+      "size": 45571,
+      "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "MIGRATION_NOTICE.md",
+      "size": 956,
+      "sha256": "2e22e2d1445fe50fce17768150ff3ed303e2d85c68f61e3b7cd0b6ec54f8eb34",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "pypdf-6.19.0-py3-none-any.whl",
+      "size": 395480,
+      "sha256": "7e5d6e730e7dae87d560a2cee218b852f6498c8be61966f3cd02ead971e48d14",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "develope_PLAN_SUMMARY.md",
+      "size": 13884,
+      "sha256": "1bfc0235f9277462e2ceb3ebe82a4b3ea0fd96cf221ababbfc6318576d22301a",
+      "matching_checkout_paths": [
+        "/mnt/dev/AG3S_VLA-development/doc/plans/develope_PLAN_SUMMARY.md"
+      ]
+    },
+    {
+      "path": "pi05_TO_hybrid/rby1_bringup/MUJOCO_LOG.TXT",
+      "size": 118,
+      "sha256": "c954e622194431fc6f8164be205aba9b8d850c28c1c08badc74371be403cb0ad",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "pi05_TO_hybrid/openpi/.git",
+      "size": 31,
+      "sha256": "d93472a9e61966c890d7ac8bcfb81135fa8d09f20fd72009771fb797d8239d42",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "pi05_TO_hybrid/openpi/.ruff_cache/.gitignore",
+      "size": 35,
+      "sha256": "9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "pi05_TO_hybrid/openpi/.ruff_cache/CACHEDIR.TAG",
+      "size": 43,
+      "sha256": "5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "pi05_TO_hybrid/openpi/.ruff_cache/0.11.12/11160377986193288902",
+      "size": 84,
+      "sha256": "7c36251f5d73874c0057d1d878eb0fcb0f25d746777f8a656d665bc0be08dd11",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "pi05_TO_hybrid/openpi/.ruff_cache/0.11.12/4082519297172861399",
+      "size": 119,
+      "sha256": "a6c888fa43ee8938cf9812bc271c64ee73a677e75d14054c8655693eea02de03",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "pi05_TO_hybrid/openpi/.ruff_cache/0.11.12/12270016630449060934",
+      "size": 95,
+      "sha256": "632753b348f856e488a36b73dc2e1257c134037ac24510d57d232e84317906bd",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "pi05_TO_hybrid/openpi/third_party/aloha/.git",
+      "size": 63,
+      "sha256": "48292faf60f939ec43d3ca4c05814d5c80df5f00e62e0497ad70543d25e338b8",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "pi05_TO_hybrid/openpi/third_party/libero/.git",
+      "size": 64,
+      "sha256": "2003849db424d0e80729360001dc6cb39c1771c8631fd7823c8afc23a10f8a7d",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "doc/PROJECT_FOLDER_AND_GIT_MANAGEMENT_FINAL.md",
+      "size": 76783,
+      "sha256": "fe31cc77188094c65cd77af756b4aadb7c466ee2907c97e04ccd7224b0b5d20f",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "doc/pi05_rby1_lora_loss_curve.png",
+      "size": 285211,
+      "sha256": "9145f902c83f5675e8fb907afadae58e062c78b2f42b231b0bbe8e846aa28b35",
+      "matching_checkout_paths": [
+        "/mnt/dev/AG3S_VLA-development/doc/pi05_rby1_lora_loss_curve.png"
+      ]
+    },
+    {
+      "path": "doc/SHARED_STORAGE_AND_PYTHON.md",
+      "size": 7798,
+      "sha256": "b0ce6edb353b5a8a85fef4dd8887abde167fdcc45fb8ef36379025ad3df448af",
+      "matching_checkout_paths": [
+        "/mnt/dev/AG3S_VLA-development/doc/SHARED_STORAGE_AND_PYTHON.md"
+      ]
+    },
+    {
+      "path": "doc/곽민기_0930 발표 대본.md",
+      "size": 24907,
+      "sha256": "72f221ac493a5964dbedb504d4b3c6a6f11666166e72686a86b489df5938d3ed",
+      "matching_checkout_paths": [
+        "/mnt/dev/AG3S_VLA-development/doc/곽민기_0930 발표 대본.md"
+      ]
+    },
+    {
+      "path": "doc/곽민기_0930 발표 자료.pptx",
+      "size": 1861016,
+      "sha256": "0b991d1399a57cbd49c8b1dde5b38fae33b9b54b4f3533495dbec5203a860e9f",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "doc/STORAGE_IMPLEMENTATION_REPORT.md",
+      "size": 6470,
+      "sha256": "36966dfd1837ca53037cd9083c8050160fcbcd5c60cd72b5540ef45751312164",
+      "matching_checkout_paths": [
+        "/mnt/dev/AG3S_VLA-development/doc/migration/STORAGE_IMPLEMENTATION_REPORT.md"
+      ]
+    },
+    {
+      "path": "doc/곽민기_0930 발표 자료_draft.pptx",
+      "size": 7412302,
+      "sha256": "68921ba5a9cf1933f96e6f9e4a72bc92264cb54e9f6035db21e048a0949bae1c",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "curobo_src/nvidia_curobo.egg-info/dependency_links.txt",
+      "size": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "curobo_src/nvidia_curobo.egg-info/scm_file_list.json",
+      "size": 49759,
+      "sha256": "1b144beb2a3c1a14c20c473e72a6a15d9352d1597756cb7351e59a93b293f5c7",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "curobo_src/nvidia_curobo.egg-info/SOURCES.txt",
+      "size": 43826,
+      "sha256": "ce4ac17e6abb8c5a6a8e2236b611744890239da8de4ac4638351db586c9d02d2",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "curobo_src/nvidia_curobo.egg-info/PKG-INFO",
+      "size": 5460,
+      "sha256": "82474f3dd8d281c68549d9c257c7ed1a4dc0899051aae61b40a03ad6712e1e3d",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "curobo_src/nvidia_curobo.egg-info/scm_version.json",
+      "size": 161,
+      "sha256": "d8aa9f3fe219a90480a5e17de173bd885b7cb773dfe552ab4bededf66b2a8643",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "curobo_src/nvidia_curobo.egg-info/requires.txt",
+      "size": 769,
+      "sha256": "e07a251d789401320ea4ea86014113e2458413e6ed85f15a753c9aad7a5364b2",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "curobo_src/nvidia_curobo.egg-info/top_level.txt",
+      "size": 22,
+      "sha256": "ccf2ca53f21d98c166554e8035ac834976610c368494e7961f18bc20b13e7c37",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "scripts/patch_dataset_timestamps.py",
+      "size": 4755,
+      "sha256": "c5356e6539b708552d651ea5fc3219d5ca4103b5eadb050b6e35d9d8665e02eb",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/artifact-preview.pdf",
+      "size": 19046,
+      "sha256": "be4a8da40d33f07628edf4231dea3151612d8e075092b88644bb59403c24ba0b",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/main.out",
+      "size": 2258,
+      "sha256": "c0ef0bd8bf133bbde5c2c5634f4d250226e88ccc5b4a400d8eb7f62e8bbe348d",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/artifact-preview.log",
+      "size": 17405,
+      "sha256": "2ff4c639a6655481deca1975ba75da95edc66dfb512455fc649758575192eaab",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/main.synctex.gz",
+      "size": 140122,
+      "sha256": "29f40a9e41bfec3962d839dcecd8cd9fe5dc137b7c3e233a67fef7a69cb1e0a7",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/main.pdf",
+      "size": 105267,
+      "sha256": "8d99e3d0c05e4216be9f8ea85a08f0c9b168e73df5c6ff831545d8712e823e8e",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/compiler.log",
+      "size": 1824,
+      "sha256": "e0ff3b02c596812573b41265058b5ccc6f135d966cd1a372be7568ccebc21dee",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/main.brf",
+      "size": 2011,
+      "sha256": "6b14a19d9616b20754c20fdd71087c5542a4fe608835b1ec3e532c2524918472",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/main.blg",
+      "size": 202,
+      "sha256": "a69e37f9c43e2071d914797d33190d330d95ab0cdd355743124a21b178ba7299",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/main.log",
+      "size": 24904,
+      "sha256": "799acf91308c4f3af3e6e9878298af3749eb66497aae4597c01456732f81d848",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/main.aux",
+      "size": 25904,
+      "sha256": "a2b480e88d6274a2f62a03ffaccda837cf98ab0f2468ef28636c3d54b3e0925f",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/main.bbl",
+      "size": 6436,
+      "sha256": "698b8601676a19af4851f2283a4cb773b6a46790a37ac66e0cd8bca7f440d264",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/artifact-preview.tex",
+      "size": 696,
+      "sha256": "1c20503ecbf2fe32bf071bb1eb924c5515609eb376d45ac6328184ea165a06f4",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/research-r1/main.out",
+      "size": 2121,
+      "sha256": "3aab55b18ebd604d64121307f614a78e8a600589cd737178206e26b702b6283d",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/research-r1/main.pdf",
+      "size": 39996,
+      "sha256": "ab40912458c424efc35f0c3e46b325afd1eece53eec066d0a8ed863d705bea7f",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/research-r1/compiler.log",
+      "size": 1490,
+      "sha256": "644d366d3da0ad71e534899f29499d89551753571a28efe89c837aca54d4f16d",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/research-r1/main.brf",
+      "size": 162,
+      "sha256": "74b37f56948dd5d4b51825db2f6cc9391dc53a995e975fa64359aabdfb76de1e",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/research-r1/main.blg",
+      "size": 202,
+      "sha256": "a69e37f9c43e2071d914797d33190d330d95ab0cdd355743124a21b178ba7299",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/research-r1/main.log",
+      "size": 17623,
+      "sha256": "e880fb4ca805fd320dc3b5428bcdb4fcd2548e86bf88a0db28165f69bcca804b",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/research-r1/main.aux",
+      "size": 9044,
+      "sha256": "a2c32ae1d0952456aa74886b2a906b026d810ab2479ef8da8876bf9475980855",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/latex/build/research-r1/main.bbl",
+      "size": 1413,
+      "sha256": "cd290b602efd34cdfb344d06957115a342713c5d88fa5ce158c574ac12373da1",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/template/cvpr2026_official/.gitignore",
+      "size": 102,
+      "sha256": "d4d29b72015c9804722057eb16b0fec068a1b0cadd13c6eb8a527f4166a16054",
+      "matching_checkout_paths": [
+        "/mnt/dev/AG3S_VLA-development/paper/template/cvpr2026_official/.gitignore"
+      ]
+    },
+    {
+      "path": "paper/supplementary/build/research-r1/supplementary.pdf",
+      "size": 16739,
+      "sha256": "fab62a2f08b8aa28522f9f75c03e03b3e8911c47d6d02df6c777f471abcac49a",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/supplementary/build/research-r1/supplementary.out",
+      "size": 444,
+      "sha256": "0a1b3e0a7d2e939df56d8728028300074be74e63690294a79eb3481492fd4b04",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/supplementary/build/research-r1/compiler.log",
+      "size": 870,
+      "sha256": "e7c40b1d81375913bcee9ff535ad7d7c698c378b646b7d577ded88400c8a93dd",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/supplementary/build/research-r1/supplementary.log",
+      "size": 17122,
+      "sha256": "85ac764e31ffe2c2e6950c64ff5fb5f5081c400acb21724a7ef699af13d0443b",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": "paper/supplementary/build/research-r1/supplementary.aux",
+      "size": 1332,
+      "sha256": "8cfb3ac69400dfa4487529ab9830672b48d9b815bc0187fcbe05232a9ad19232",
+      "matching_checkout_paths": []
+    },
+    {
+      "path": ".vscode/settings.json",
+      "size": 568,
+      "sha256": "c1a23ee3b98c0695ac0b40dd63f915217574a27fd83655a1d84cf519f2eed081",
+      "matching_checkout_paths": []
+    }
+  ],
+  "missing_git_refs": [
+    {
+      "repo": "workspace",
+      "ref": "refs/codex/turn-diffs/captures/1791724672772/044e24f7-6268-4578-90da-3fded0f9eff5/base",
+      "object": "8597890c65035c0e05204a9be3c8b14feae8629e",
+      "object_exists_checkout": false,
+      "containing_checkout_refs": []
+    },
+    {
+      "repo": "workspace",
+      "ref": "refs/codex/turn-diffs/captures/1791732633586/c8e064e7-449c-4d4b-b184-68a6f3b6b046/base",
+      "object": "64cdac96e90995259298dbe0605d17ea8fb14979",
+      "object_exists_checkout": false,
+      "containing_checkout_refs": []
+    },
+    {
+      "repo": "workspace",
+      "ref": "refs/codex/turn-diffs/checkpoints/b2fe3808542585bacc81968a5bf64baa/17bdd58fdb19049a6319c07ec7a08245/1791732329709/61c09ece-1fef-4a07-92c9-cda84c23119d",
+      "object": "64cdac96e90995259298dbe0605d17ea8fb14979",
+      "object_exists_checkout": false,
+      "containing_checkout_refs": []
+    }
+  ],
+  "legacy_dependent_processes": [
+    {
+      "pid": 1631540,
+      "cwd": "/root/.vscode-server/extensions/ms-python.vscode-pylance-2026.4.1/dist",
+      "exe": "/mnt/dev/work/.python/cpython-3.11.16-linux-x86_64-gnu/bin/python3.11",
+      "fds": []
+    },
+    {
+      "pid": 3277586,
+      "cwd": "/root/.vscode-server/extensions/ms-python.vscode-pylance-2026.4.1/dist",
+      "exe": "/mnt/dev/work/.python/cpython-3.11.16-linux-x86_64-gnu/bin/python3.11",
+      "fds": []
+    },
+    {
+      "pid": 3496192,
+      "cwd": "/mnt/dev/work",
+      "exe": "/root/.vscode-server/cli/servers/Stable-2a59476c9bfcb90b3ddc372c36762471b7dfad1c/server/node",
+      "fds": []
+    },
+    {
+      "pid": 3580744,
+      "cwd": "/mnt/dev/work",
+      "exe": "/mnt/dev/work/.python/cpython-3.11.16-linux-x86_64-gnu/bin/python3.11",
+      "fds": []
+    }
+  ],
+  "legacy_environment_paths": [
+    {
+      "path": "/mnt/dev/work/.venv-ag3s",
+      "pyvenv_cfg": "home = /mnt/dev/work/.python/cpython-3.11-linux-x86_64-gnu/bin\nimplementation = CPython\nuv = 0.12.13\nversion_info = 3.11\ninclude-system-site-packages = false\nseed = true\n",
+      "legacy_reference_files": []
+    },
+    {
+      "path": "/mnt/dev/work/.venv-openpi-live",
+      "pyvenv_cfg": "home = /root/.local/share/uv/python/cpython-3.11-linux-x86_64-gnu/bin\nimplementation = CPython\nuv = 0.12.13\nversion_info = 3.11\ninclude-system-site-packages = false\nprompt = openpi\n",
+      "legacy_reference_files": [
+        "/mnt/dev/work/.venv-openpi-live/lib/python3.11/site-packages/_editable_impl_openpi_client.pth",
+        "/mnt/dev/work/.venv-openpi-live/lib/python3.11/site-packages/_editable_impl_openpi.pth",
+        "/mnt/dev/work/.venv-openpi-live/lib/python3.11/site-packages/openpi-0.1.0.dist-info/direct_url.json",
+        "/mnt/dev/work/.venv-openpi-live/lib/python3.11/site-packages/openpi_client-0.1.0.dist-info/direct_url.json",
+        "/mnt/dev/work/.venv-openpi-live/lib/python3.11/site-packages/nvidia_curobo-0.8.0.post1.dev43.dist-info/direct_url.json",
+        "/mnt/dev/work/.venv-openpi-live/lib/python3.11/site-packages/__editable___nvidia_curobo_0_8_0_post1_dev43_finder.py"
+      ]
+    },
+    {
+      "path": "/mnt/dev/work/.venv-curobo",
+      "pyvenv_cfg": "home = /usr/bin\ninclude-system-site-packages = true\nversion = 3.10.12\n",
+      "legacy_reference_files": [
+        "/mnt/dev/work/.venv-curobo/lib/python3.10/site-packages/nvidia_curobo-0.8.0.post1.dev43.dist-info/direct_url.json",
+        "/mnt/dev/work/.venv-curobo/lib/python3.10/site-packages/__editable___nvidia_curobo_0_8_0_post1_dev43_finder.py"
+      ]
+    },
+    {
+      "path": "/mnt/dev/work/pi05_TO_hybrid/openpi/.venv",
+      "pyvenv_cfg": "home = /root/.local/share/uv/python/cpython-3.11-linux-x86_64-gnu/bin\nimplementation = CPython\nuv = 0.12.13\nversion_info = 3.11\ninclude-system-site-packages = false\nprompt = openpi\n",
+      "legacy_reference_files": [
+        "/mnt/dev/work/pi05_TO_hybrid/openpi/.venv/lib/python3.11/site-packages/_editable_impl_openpi_client.pth",
+        "/mnt/dev/work/pi05_TO_hybrid/openpi/.venv/lib/python3.11/site-packages/_editable_impl_openpi.pth",
+        "/mnt/dev/work/pi05_TO_hybrid/openpi/.venv/lib/python3.11/site-packages/openpi-0.1.0.dist-info/direct_url.json",
+        "/mnt/dev/work/pi05_TO_hybrid/openpi/.venv/lib/python3.11/site-packages/openpi_client-0.1.0.dist-info/direct_url.json"
+      ]
+    }
+  ],
+  "current_environment_paths": [
+    {
+      "environment": "/mnt/dev/AG3S_VLA-development/.venv-openpi-live",
+      "pyvenv_cfg": "home = /mnt/dev/AG3S_VLA-development/.python/cpython-3.11.16-linux-x86_64-gnu/bin\nimplementation = CPython\nuv = 0.12.13\nversion_info = 3.11.16\ninclude-system-site-packages = false\n",
+      "legacy_links": [],
+      "legacy_editables": []
+    },
+    {
+      "environment": "/mnt/dev/AG3S_VLA-development/.venv-ag3s",
+      "pyvenv_cfg": "home = /mnt/dev/AG3S_VLA-development/.python/cpython-3.11-linux-x86_64-gnu/bin\nimplementation = CPython\nuv = 0.12.13\nversion_info = 3.11\ninclude-system-site-packages = false\n",
+      "legacy_links": [],
+      "legacy_editables": []
+    },
+    {
+      "environment": "/mnt/dev/AG3S_VLA-benchmark/.venv-ag3s",
+      "pyvenv_cfg": "home = /mnt/dev/AG3S_VLA-benchmark/.python/cpython-3.11-linux-x86_64-gnu/bin\nimplementation = CPython\nuv = 0.12.13\nversion_info = 3.11\ninclude-system-site-packages = false\n",
+      "legacy_links": [],
+      "legacy_editables": []
+    }
+  ],
+  "exclusions": [
+    ".git",
+    ".python",
+    ".cache",
+    ".pytest_cache",
+    "__pycache__",
+    ".venv*",
+    ".setup-tools",
+    "node_modules",
+    ".runtime"
+  ],
+  "skills_unavailable": [
+    "regression-baseline",
+    "make-figure"
+  ],
+  "gpu_runs_by_verifier": 0,
+  "legacy_deleted": false,
+  "processes_terminated": 0,
+  "preservation": {
+    "files": [
+      {
+        "source": "/mnt/dev/work/scripts/patch_dataset_timestamps.py",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/scripts/patch_dataset_timestamps.py",
+        "expected": "c5356e6539b708552d651ea5fc3219d5ca4103b5eadb050b6e35d9d8665e02eb",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/doc/곽민기_0930 발표 자료.pptx",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/doc/곽민기_0930 발표 자료.pptx",
+        "expected": "0b991d1399a57cbd49c8b1dde5b38fae33b9b54b4f3533495dbec5203a860e9f",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/doc/곽민기_0930 발표 자료_draft.pptx",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/doc/곽민기_0930 발표 자료_draft.pptx",
+        "expected": "68921ba5a9cf1933f96e6f9e4a72bc92264cb54e9f6035db21e048a0949bae1c",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/CLAUDE.md",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/CLAUDE.md",
+        "expected": "c7125421a14c259448df177cc0b265dd99132df96facf4d019137219b3833a67",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/.claude/ag3s-rules-brief.md",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/.claude/ag3s-rules-brief.md",
+        "expected": "41852bb594a5c1c9c24b04bf9812f1eb6c43dd2566fa9b8e86d6c08587870f59",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/MIGRATION_NOTICE.md",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/MIGRATION_NOTICE.md",
+        "expected": "2e22e2d1445fe50fce17768150ff3ed303e2d85c68f61e3b7cd0b6ec54f8eb34",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/.vscode/settings.json",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/.vscode/settings.json",
+        "expected": "c1a23ee3b98c0695ac0b40dd63f915217574a27fd83655a1d84cf519f2eed081",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/artifact-preview.pdf",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/artifact-preview.pdf",
+        "expected": "be4a8da40d33f07628edf4231dea3151612d8e075092b88644bb59403c24ba0b",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/cvpr.sty",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/cvpr.sty",
+        "expected": "2602473285d1a7df2a445ac89b76e1afa0acab78e056f0369d19770245190153",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/main.out",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.out",
+        "expected": "c0ef0bd8bf133bbde5c2c5634f4d250226e88ccc5b4a400d8eb7f62e8bbe348d",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/artifact-preview.log",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/artifact-preview.log",
+        "expected": "2ff4c639a6655481deca1975ba75da95edc66dfb512455fc649758575192eaab",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/main.synctex.gz",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.synctex.gz",
+        "expected": "29f40a9e41bfec3962d839dcecd8cd9fe5dc137b7c3e233a67fef7a69cb1e0a7",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/main.pdf",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.pdf",
+        "expected": "8d99e3d0c05e4216be9f8ea85a08f0c9b168e73df5c6ff831545d8712e823e8e",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/compiler.log",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/compiler.log",
+        "expected": "e0ff3b02c596812573b41265058b5ccc6f135d966cd1a372be7568ccebc21dee",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/main.brf",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.brf",
+        "expected": "6b14a19d9616b20754c20fdd71087c5542a4fe608835b1ec3e532c2524918472",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/main.blg",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.blg",
+        "expected": "a69e37f9c43e2071d914797d33190d330d95ab0cdd355743124a21b178ba7299",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/main.log",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.log",
+        "expected": "799acf91308c4f3af3e6e9878298af3749eb66497aae4597c01456732f81d848",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/main.aux",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.aux",
+        "expected": "a2b480e88d6274a2f62a03ffaccda837cf98ab0f2468ef28636c3d54b3e0925f",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/main.bbl",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/main.bbl",
+        "expected": "698b8601676a19af4851f2283a4cb773b6a46790a37ac66e0cd8bca7f440d264",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/artifact-preview.tex",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/artifact-preview.tex",
+        "expected": "1c20503ecbf2fe32bf071bb1eb924c5515609eb376d45ac6328184ea165a06f4",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/research-r1/main.out",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.out",
+        "expected": "3aab55b18ebd604d64121307f614a78e8a600589cd737178206e26b702b6283d",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/research-r1/main.pdf",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.pdf",
+        "expected": "ab40912458c424efc35f0c3e46b325afd1eece53eec066d0a8ed863d705bea7f",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/research-r1/compiler.log",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/compiler.log",
+        "expected": "644d366d3da0ad71e534899f29499d89551753571a28efe89c837aca54d4f16d",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/research-r1/main.brf",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.brf",
+        "expected": "74b37f56948dd5d4b51825db2f6cc9391dc53a995e975fa64359aabdfb76de1e",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/research-r1/main.blg",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.blg",
+        "expected": "a69e37f9c43e2071d914797d33190d330d95ab0cdd355743124a21b178ba7299",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/research-r1/main.log",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.log",
+        "expected": "e880fb4ca805fd320dc3b5428bcdb4fcd2548e86bf88a0db28165f69bcca804b",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/research-r1/main.aux",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.aux",
+        "expected": "a2c32ae1d0952456aa74886b2a906b026d810ab2479ef8da8876bf9475980855",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/latex/build/research-r1/main.bbl",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/latex/build/research-r1/main.bbl",
+        "expected": "cd290b602efd34cdfb344d06957115a342713c5d88fa5ce158c574ac12373da1",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/supplementary/build/research-r1/supplementary.pdf",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/supplementary.pdf",
+        "expected": "fab62a2f08b8aa28522f9f75c03e03b3e8911c47d6d02df6c777f471abcac49a",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/supplementary/build/research-r1/supplementary.out",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/supplementary.out",
+        "expected": "0a1b3e0a7d2e939df56d8728028300074be74e63690294a79eb3481492fd4b04",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/supplementary/build/research-r1/compiler.log",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/compiler.log",
+        "expected": "e7c40b1d81375913bcee9ff535ad7d7c698c378b646b7d577ded88400c8a93dd",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/supplementary/build/research-r1/supplementary.log",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/supplementary.log",
+        "expected": "85ac764e31ffe2c2e6950c64ff5fb5f5081c400acb21724a7ef699af13d0443b",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/paper/supplementary/build/research-r1/supplementary.aux",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/paper/supplementary/build/research-r1/supplementary.aux",
+        "expected": "8cfb3ac69400dfa4487529ab9830672b48d9b815bc0187fcbe05232a9ad19232",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/dependency_links.txt",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/dependency_links.txt",
+        "expected": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/scm_file_list.json",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/scm_file_list.json",
+        "expected": "1b144beb2a3c1a14c20c473e72a6a15d9352d1597756cb7351e59a93b293f5c7",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/SOURCES.txt",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/SOURCES.txt",
+        "expected": "ce4ac17e6abb8c5a6a8e2236b611744890239da8de4ac4638351db586c9d02d2",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/PKG-INFO",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/PKG-INFO",
+        "expected": "82474f3dd8d281c68549d9c257c7ed1a4dc0899051aae61b40a03ad6712e1e3d",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/scm_version.json",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/scm_version.json",
+        "expected": "d8aa9f3fe219a90480a5e17de173bd885b7cb773dfe552ab4bededf66b2a8643",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/requires.txt",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/requires.txt",
+        "expected": "e07a251d789401320ea4ea86014113e2458413e6ed85f15a753c9aad7a5364b2",
+        "source_matches": true,
+        "preserved_matches": true
+      },
+      {
+        "source": "/mnt/dev/work/curobo_src/nvidia_curobo.egg-info/top_level.txt",
+        "preserved": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/curobo_src/nvidia_curobo.egg-info/top_level.txt",
+        "expected": "ccf2ca53f21d98c166554e8035ac834976610c368494e7961f18bc20b13e7c37",
+        "source_matches": true,
+        "preserved_matches": true
+      }
+    ],
+    "numbers": {
+      "files_checked": 40,
+      "source_hash_errors": 0,
+      "preserved_hash_errors": 0
+    },
+    "bundle": {
+      "path": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T002906+0900_4292882_46c9b2ae/legacy-preservation/work-all-refs.bundle",
+      "size": 146605138,
+      "sha256": "1c4189d81d02f3a1bb5966bc2260186beebf3a575b98f6fa968287b4a8aa5a7e",
+      "verify_returncode": 0,
+      "missing_legacy_refs_preserved": [
+        {
+          "repo": "workspace",
+          "ref": "refs/codex/turn-diffs/captures/1791724672772/044e24f7-6268-4578-90da-3fded0f9eff5/base",
+          "object": "8597890c65035c0e05204a9be3c8b14feae8629e",
+          "object_exists_checkout": false,
+          "containing_checkout_refs": [],
+          "present_in_bundle_heads": true,
+          "object_present_in_bundle_heads": true
+        },
+        {
+          "repo": "workspace",
+          "ref": "refs/codex/turn-diffs/captures/1791732633586/c8e064e7-449c-4d4b-b184-68a6f3b6b046/base",
+          "object": "64cdac96e90995259298dbe0605d17ea8fb14979",
+          "object_exists_checkout": false,
+          "containing_checkout_refs": [],
+          "present_in_bundle_heads": false,
+          "object_present_in_bundle_heads": true
+        },
+        {
+          "repo": "workspace",
+          "ref": "refs/codex/turn-diffs/checkpoints/b2fe3808542585bacc81968a5bf64baa/17bdd58fdb19049a6319c07ec7a08245/1791732329709/61c09ece-1fef-4a07-92c9-cda84c23119d",
+          "object": "64cdac96e90995259298dbe0605d17ea8fb14979",
+          "object_exists_checkout": false,
+          "containing_checkout_refs": [],
+          "present_in_bundle_heads": false,
+          "object_present_in_bundle_heads": true
+        }
+      ],
+      "auxiliary_ref_names_mutated_during_session": true
+    }
+  },
+  "sibling_dependencies": {
+    "incoming_legacy_links": [
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/rby1_manipulation",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/rby1_manipulation",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/rby1_manipulation"
+      },
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/rby1_description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/rby1_description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/rby1_description"
+      },
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-sd/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-sd/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/rby1_manipulation",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/rby1_manipulation",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/rby1_manipulation"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/rby1_description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/rby1_description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/rby1_description"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-se/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-se/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-sf/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-sf/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-sf/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-sf/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-sf/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-sf/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-sf/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-sf/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-sf/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-sg/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-sg/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-sg/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-sg/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-sg/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-sg/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-sg/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-sg/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-sg/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t40/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t40/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t40/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t40/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t40/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t40/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t40/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t40/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t40/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t40h/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t40h/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t40h/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t40h/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t40h/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t40h/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t40h/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t40h/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t40h/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t41a/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t41a/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t41a/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t41a/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t41a/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t41a/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t41a/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t41a/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t41a/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t41c/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t41c/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t41c/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t41c/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t41c/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t41c/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t41c/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t41c/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t41c/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t42/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t42/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t42/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t42/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t42/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t42/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t42/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t42/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t42/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t42b/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t42b/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t42b/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t42b/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t42b/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t42b/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t42b/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t42b/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t42b/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t42c/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t42c/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t42c/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t42c/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t42c/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t42c/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t42c/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t42c/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t42c/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43b/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43b/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43b/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43b/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43b/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43b/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43b/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43b/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43b/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43v/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43v/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43v/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43v/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43v/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43v/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43v/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43v/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43v/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43v10/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43v10/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43v10/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43v10/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43v10/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43v10/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43v10/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43v10/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43v10/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43v11/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43v11/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43v11/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43v11/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43v11/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43v11/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43v11/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43v11/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43v11/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43v7/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43v7/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43v7/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43v7/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43v7/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43v7/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43v7/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43v7/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43v7/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43v8/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43v8/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43v8/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43v8/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43v8/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43v8/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43v8/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43v8/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43v8/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43w/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43w/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43w/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43w/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43w/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43w/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43w/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43w/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43w/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43w2/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43w2/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43w2/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43w2/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43w2/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43w2/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43w2/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43w2/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43w2/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43w3/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43w3/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43w3/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43w3/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43w3/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43w3/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43w3/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43w3/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43w3/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t43z3/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t43z3/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t43z3/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t43z3/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t43z3/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t43z3/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t43z3/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t43z3/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t43z3/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      },
+      {
+        "path": "/mnt/dev/work-t44cl/pi05_TO_hybrid/zed-ros2-description",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/zed-ros2-description"
+      },
+      {
+        "path": "/mnt/dev/work-t44cl/pi05_TO_hybrid/assets",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/assets",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/assets"
+      },
+      {
+        "path": "/mnt/dev/work-t44cl/pi05_TO_hybrid/openpi",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/openpi",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/openpi"
+      },
+      {
+        "path": "/mnt/dev/work-t44cl/pi05_TO_hybrid/scripts",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/scripts",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/scripts"
+      },
+      {
+        "path": "/mnt/dev/work-t44cl/pi05_TO_hybrid/realsense-ros",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/realsense-ros"
+      },
+      {
+        "path": "/mnt/dev/work-t44cl/pi05_TO_hybrid/docs",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/docs",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/docs"
+      },
+      {
+        "path": "/mnt/dev/work-t44cl/pi05_TO_hybrid/.gitignore",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitignore",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitignore"
+      },
+      {
+        "path": "/mnt/dev/work-t44cl/pi05_TO_hybrid/.gitmodules",
+        "target": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules",
+        "resolved": "/mnt/dev/work/pi05_TO_hybrid/.gitmodules"
+      },
+      {
+        "path": "/mnt/dev/work-t44cl/benchmark/ag3s/asset/data",
+        "target": "/mnt/dev/work/benchmark/ag3s/asset/data",
+        "resolved": "/mnt/dev/work/benchmark/ag3s/asset/data"
+      }
+    ],
+    "legacy_git_pointer_files": []
+  },
+  "registered_legacy_worktrees": [
+    {
+      "repository": "/mnt/dev/work/benchmark",
+      "path": "/tmp/claude-0/-mnt-dev-work/cafbdbf4-2a7d-43e4-9303-6ce2f6880a96/scratchpad/pristine8f/benchmark",
+      "head": "8d70cdd3bed55373cd94251cb6cb02dd9e6e4f16"
+    }
+  ]
+}

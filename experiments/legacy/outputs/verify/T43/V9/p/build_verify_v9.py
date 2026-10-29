@@ -1,0 +1,42 @@
+"""Builds AG3S/ag3s/docs/handoff/T43V9.verify.json (numbers and paths only)."""
+from common.workspace import workspace_path as _ag3s_workspace_path
+import json, pathlib
+V = pathlib.Path(_ag3s_workspace_path('outputs/verify/T43/V9')); a = json.load(open(V / "agg.json")); ex = json.load(open(V / "extra.json")); ct = json.load(open(V / "ct.json"))
+sv = json.load(open(V / "raw/servo_summary.json")); tk = json.load(open(V / "raw/tk_fix.json")); md = json.load(open(V / "raw/min_apple_finger_dist.json"))
+A = ("V8", "V9")
+hold = {x: {k: a["hold"][x][k] for k in ("total", "trailing", "runs_with_hold", "by_category", "by_target", "by_phase", "by_binding_link", "cells", "hold_kinds", "by_stage_total", "by_wp_block")} for x in A}
+for x in A:
+    hold["per_run_chunks_" + x] = {k: v["chunks"] for k, v in a["hold"][x]["per_run"].items() if v["n_hold"]}
+ft = {x: {k: a["follow_to"][x][k] for k in ("decision_counts", "refused_counts", "n_executed", "n_runs_with_executed", "executed")} for x in A}
+tm = {x: {s: {k: a["timing"][x][s][k] for k in ("n_chunks_excl_first", "to_solve_ms", "verdict_trajopt_ms", "verdict_total_ms", "round_trip_ms", "round_trip_gt_533_3_n", "round_trip_n", "time_budget_hit_count", "runs_with_time_budget_hit", "max_iterations_hit_count", "n_chunks_all_incl_first", "linearize_ms", "qp_ms", "check_ms")} for s in ("ALL", "H", "B")} for x in A}
+tm["per_run_to_solve_median"] = ex["per_run_to_solve_median"]; tm["loadavg_during_V9"] = ex["loadavg_during_V9"]
+srv = ex["servers"]
+out = {"_comment": "ag3s-verifier T43 V9. Numbers and paths only; tables in outputs/verify/T43/V9/{agg,ct,extra}.json. Server link names in HOLD / binding rows are URDF names (URDF ee_finger_l1 = MJCF ee_finger_l2); contact bodies are MJCF names.", "step": "T43V9", "date": "2026-10-07",
+       "runs": [{"id": "V9", "command": "outputs/verify/T43/V9/p/launch_v9.sh (2 chains, ports 8286 / 8287, EST_GB 28)", "venv": ".venv-openpi-live",
+                 "server_flags": "V8 flags (T43/V8/p/start_server.sh) + --servo-model (no --sweep-check)", "runs_dir": "outputs/verify/T43/V9/runs/V9", "n_runs": 19, "n_done": 19,
+                 "n_retries": sum(c["n_attempt2"] for c in ex["chains"].values()), "chain_rc": ex["chain_rc"], "chain_rc_lines": ex["chain_rc_lines"], "refusals": sum(len(c["refused"]) for c in ex["chains"].values()), "failed_dirs": ex["failed_dirs"],
+                 "raw_output": "outputs/verify/T43/V9/runs/V9/chain_8286.log, chain_8287.log, runs/chainE.out, chainF.out, launch.out", "servers": srv, "chains": ex["chains"], "load_samples": "outputs/verify/T43/V9/raw/load_samples.txt (sampler started ~2 min after launch)",
+                 "three_server_checks": {k: {"gate_on": v["log_gate_on"], "finger_cover_122_to_270": v["log_finger_cover_270"], "servo_model_line": v["log_servo_model_line"], "cmdline_has_servo_model": v["cmdline_has_servo_model"], "cmdline_has_sweep_check": v["cmdline_has_sweep_check"], "n_constraint_spheres_in_records": v["n_constraint_spheres_in_records"]} for k, v in srv.items()}}],
+       "code_state": {"repo": "benchmark", "head": "786cf1b", "snapshot": "${AG3S_PROJECT_ROOT}-t43v8 reused unchanged (outputs/verify/T43/V9/snapshot.txt)", "code_md5_baseline": "outputs/verify/T43/V8/p/code_md5_v8.txt == V9/p/code_md5_v9.txt (405 lines, cmp identical; == at every chain preflight)"},
+       "baseline_check": {"matched": True, "note": "snapshot md5 list identical to the V8 baseline. regression-baseline (.venv-ag3s) not run. V8 arm re-scored here from the V8 raw: H S_old 13 / S_contact 8 / pre-release contact runs 5 / obstacle stop 10 (== V8/ct.json)."},
+       "numbers": {"runs": {"n_done": 19, "H": 14, "B": 5, "n_control_lt_600": ex["n_control_lt_600"], "wall_s_median": ex["wall_s_median"]},
+                   "sgp_old_rule_by_stage": a["sgp_old_rule_by_stage"], "pairs_old_rule_V9_vs_V8": a["pairs_old_rule"], "H_totals_by_rule": ex["H_totals"], "H_pairs_z4_and_ct_V9_vs_V8": ex["H_pairs_z4_rule"],
+                   "ct_arms": ct["arms"], "ct_pairs": ct["pairs"], "ct_crosscheck_counts": a["ct"]["crosscheck_counts"],
+                   "finger_hurdle_contacts_by_phase": a["finger_contacts"], "ct_contact_table_by_phase_and_body_MJCF": ct["contact_table"], "obstacle_stop": a["obstacle_stop"],
+                   "hold": hold, "hold_only_in_one_arm": a["hold_pairs"], "follow_to": ft, "timing": tm,
+                   "servo_prediction_vs_M": {"method": "T43/HX/p method (servo.py ServoObserver + rollout over the recorded chunks), all control rows of all 19 runs per arm (p/servo_all.py); error = EE_BODY position and max active-arm joint of predicted vs M(t)", "summary": sv, "raw": ["outputs/verify/T43/V9/raw/servo_all_V9.json", "outputs/verify/T43/V9/raw/servo_all_V8.json"],
+                                            "hx_method_rows_from_grasp_t_V9": "outputs/verify/T43/V9/hx/hx_V9.json (hx_measure.py unchanged except ARM table; 5 grasped H runs)"},
+                   "verdict_kind_counts": {"V9": ex["verdict_kind_counts_V9"], "V8": ex["verdict_kind_counts_V8"]}, "hurdle_min_mm_H_per_run": a["hurdle_min_mm"], "min_apple_to_finger_mid_mm_replay_H": md},
+       "tk_correction": {"file": "AG3S/ag3s/docs/handoff/T43TK.verify.json", "mapping_MJCF_to_URDF_derived_from": "outputs/verify/T43/OC/raw/namemap_V8.json", "mapping": tk["mjcf_to_urdf"], "raw": "outputs/verify/T43/V9/raw/tk_fix.json", "backup_before": "outputs/verify/T43/V9/raw/T43TK.verify.before_fix.json",
+                         "all_old_values_reproduced_with_MJCF_name": tk["all_old_match"], "n_contacts_changed": sum(1 for r in tk["contacts"] if "new_clear_row_k_link_mm" in r), "oc_crosscheck_max_abs_diff_mm": max(abs(x["mine"] - x["oc"]) for x in tk["oc_crosscheck"] if x["oc"] is not None),
+                         "esdf_link_minus_geom_P_mm_median_old_to_new": {g: [v["old_esdf_link_minus_geom_P_mm"].get("median"), v["esdf_link_minus_geom_P_mm"].get("median")] for g, v in tk["groups"].items() if v["esdf_link_minus_geom_P_mm"].get("n", 0)},
+                         "groups": {g: {k: v[k] for k in ("n_contacts", "esdf_link_minus_geom_P_mm", "old_esdf_link_minus_geom_P_mm", "clear_row_k_link_mm", "old_clear_row_k_link_mm")} for g, v in tk["groups"].items() if v["esdf_link_minus_geom_P_mm"].get("n", 0)},
+                         "not_changed_in_file": "clear_chunk_link_mm (per-contact, same name match) left as is"},
+       "figures": [{"path": "AG3S/ag3s/docs/figures/t43/t43v9-hurdle-crossing-scene.png", "kind": "scene"}, {"path": "AG3S/ag3s/docs/figures/t43/t43v9-timing.png", "kind": "graph"}, {"path": "AG3S/ag3s/docs/figures/t43/t43v9-pairs-table.png", "kind": "table"}],
+       "scripts": ["p/launch_v9.sh", "p/run_chain.sh", "p/start_server.sh", "p/run_client.sh", "p/analyze_v9.py", "p/run_replays_v9.sh", "p/agg_ct_v9.py", "p/z4_base_v9.py", "p/agg_v9.py", "p/extra_v9.py", "p/servo_all.py", "p/servo_summary.py", "p/hx_measure_v9.py", "p/tk_fix.py", "p/fig_v9_scene.py", "p/fig_v9_graphs.py", "p/build_verify_v9.py"],
+       "raw": {"agg": "outputs/verify/T43/V9/agg.json", "ct": "outputs/verify/T43/V9/ct.json", "extra": "outputs/verify/T43/V9/extra.json", "analysis": "outputs/verify/T43/V9/analysis/analysis.json", "replay": "outputs/verify/T43/V9/replay", "snapshot": "outputs/verify/T43/V9/snapshot.txt", "V8_analysis": "outputs/verify/T43/V8/analysis/analysis.json", "V8_replay": "outputs/verify/T43/V8/replay"},
+       "verdict": "19/19 runs done, 0 retries, chain rc 0, 0 refusals; gate ON, finger cover 122 -> 270 and servo model line present in all 3 server logs; snapshot md5 == V8 baseline. (facts only)",
+       "not_measured": ["regression-baseline esdf_rollout (.venv-ag3s excluded)", "V8 and V9 come from different server sessions; first-chunk JIT time not cited; SQP iteration counts not cited (not a baseline)",
+                        "Z4 / CT rules and hurdle contacts are H-stage only (no B replays)", "scene figure = recorded control-row qpos of ep1807 s18071 at each arm's own closest apple-bar row, no sphere overlay",
+                        "server GPU TO timing: pod load during V9 median %.1f (other sessions included); servo-model online prediction in the server records not re-read (offline method only)" % ex["loadavg_during_V9"]["load1_median"]]}
+p = pathlib.Path(_ag3s_workspace_path('AG3S/ag3s/docs/handoff/T43V9.verify.json')); assert not p.exists(); p.write_text(json.dumps(out, indent=1, default=float, ensure_ascii=False)); print(p, len(p.read_text()))

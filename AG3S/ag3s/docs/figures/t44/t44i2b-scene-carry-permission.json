@@ -1,0 +1,38 @@
+{
+ "kind": "scene",
+ "model": "arms",
+ "run": "V11AB_H_V11AB_ep1834_s18341",
+ "seq": 35,
+ "hold": "ee_right",
+ "side": "right",
+ "parent_links": [
+  "link_right_arm_6",
+  "link_right_arm_5",
+  "link_right_arm_4",
+  "link_right_arm_3",
+  "link_right_arm_2",
+  "link_right_arm_1",
+  "link_right_arm_0"
+ ],
+ "n_tail_rows_kept_by_strict": 984,
+ "changed_by_link": {
+  "link_right_arm_5": 16,
+  "link_left_arm_3": 32,
+  "link_left_arm_4": 64,
+  "link_left_arm_5": 80,
+  "link_left_arm_6": 216,
+  "ee_left": 128,
+  "ee_finger_l1": 448
+ },
+ "permitted_rows_by_link": {
+  "ee_finger_r1": 56,
+  "ee_finger_r2": 56,
+  "ee_right": 23,
+  "link_right_arm_6": 29
+ },
+ "checked_rows_total": 258,
+ "held_apple_spheres": 2,
+ "figure": "t44i2b-scene-carry-permission.png",
+ "split": "test (episodes 1807-1995, recorded V11AB H runs; regression check only)",
+ "source": "outputs/verify/T44/I2b/agg.json, per_chunk_main.json, per_chunk_arms.json"
+}

@@ -24,7 +24,7 @@ settings, task/init, policy seed and reset history are identical; else rerun tha
 5. ``git diff <run commit> HEAD`` touches none of :data:`VLA_ONLY_CODE_PATHS` and the run was not started with
    uncommitted changes in them (``source.patch``); a path may be accepted only with ``--accept-diff PATH`` and is then
    listed in the basis with the commits that touched it;
-6. dependencies (``run_manifest.dependencies``) equal ``doc/migration/source-manifest.json`` now;
+6. dependencies (``run_manifest.dependencies``) equal ``doc/active/migration/source-manifest.json`` now;
 7. the episode exists, ``status != execution_error``, ``init_state_index == episode_idx`` and
    ``policy_seed == seed*100000 + task*1000 + episode``;
 8. reset history: the run's episode list for that task is identical up to and including the episode (the fixture
@@ -294,7 +294,7 @@ def now_reference(checkpoint_dir: str | None = None) -> dict:
     l0 = lp.l0
     ck = l0.checkpoint_identity(Path(checkpoint_dir or l0.default_checkpoint()), require=False)
     v = _jsonable(lp.versions())
-    deps = json.loads((PROJECT_ROOT / "doc/migration/source-manifest.json").read_text())["dependencies"]
+    deps = json.loads((PROJECT_ROOT / "doc/active/migration/source-manifest.json").read_text())["dependencies"]
     return {"checkpoint": {k: ck.get(k) for k in ("path", "aggregate_sha256", "norm_stats_sha256")},
             "versions": {k: v.get(k) for k in ("libero_python", "openpi_python")}, "dependencies": deps,
             "head": _git("rev-parse", "HEAD").strip()}

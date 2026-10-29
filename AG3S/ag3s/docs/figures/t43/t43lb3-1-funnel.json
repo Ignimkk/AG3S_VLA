@@ -1,0 +1,50 @@
+{
+ "groups": [
+  "banana_left",
+  "banana_right",
+  "pear_left"
+ ],
+ "values": {
+  "lb:tried (rep1)": [
+   10,
+   10,
+   10
+  ],
+  "lb:rep1 ok": [
+   2,
+   5,
+   1
+  ],
+  "lb:rep1+2 ok": [
+   0,
+   2,
+   1
+  ],
+  "lb:3/3 ok": [
+   0,
+   0,
+   1
+  ],
+  "combined:tried (rep1)": [
+   40,
+   40,
+   30
+  ],
+  "combined:rep1 ok": [
+   12,
+   20,
+   8
+  ],
+  "combined:rep1+2 ok": [
+   1,
+   7,
+   5
+  ],
+  "combined:3/3 ok": [
+   0,
+   1,
+   2
+  ]
+ },
+ "source": "/mnt/dev/work/benchmark/ag3s/docs/handoff/T43LB3.verify.json"
+}
