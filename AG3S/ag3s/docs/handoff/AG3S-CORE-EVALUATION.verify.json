@@ -441,10 +441,157 @@
   "neighbour_contact_vs_VLA": {
    "954": "same finger (ee_finger_r2) and banana part as VLA alone; depth 0.43 / 0.88 mm vs VLA 0.46 mm",
    "211_k0": "finger ee_finger_l2 - banana, max depth 2.13 mm (t 280-339)"
+  },
+  "final_configuration": {
+   "recorded_kst": "2026-10-29 13:15",
+   "code": "snapshot_final2 (HEAD bb85d9f8 + A6 + HSR rule 2 fix)",
+   "nine_scenes_x2": {
+    "A8": {
+     "success": 12,
+     "forbidden": 3,
+     "n": 18,
+     "mech_total": {
+      "goal_A4": 49,
+      "requests": 832,
+      "hold": 9
+     }
+    },
+    "G1": {
+     "success": 9,
+     "forbidden": 4,
+     "n": 18,
+     "mech_total": {
+      "goal_A4": 27,
+      "requests": 972,
+      "goal_GEO": 20
+     }
+    },
+    "HSR": {
+     "success": 12,
+     "forbidden": 2,
+     "n": 18,
+     "mech_total": {
+      "phase_approach": 438,
+      "hsr6_objective": 183,
+      "phase_grasp": 32,
+      "hsr6_held_gate": 14,
+      "hold": 4,
+      "phase_lift": 89,
+      "phase_transport": 107,
+      "phase_placement": 121,
+      "hsr6_target_exempt": 73,
+      "phase_retreat": 83,
+      "requests": 870,
+      "hsr6_attach_assist": 2
+     }
+    },
+    "FIN": {
+     "success": 14,
+     "forbidden": 0,
+     "n": 18,
+     "mech_total": {
+      "phase_approach": 379,
+      "hsr6_objective": 169,
+      "a6_window": 116,
+      "a6_relaxed_rows": 116,
+      "phase_grasp": 35,
+      "phase_lift": 68,
+      "phase_transport": 90,
+      "phase_placement": 93,
+      "hsr6_target_exempt": 65,
+      "phase_retreat": 83,
+      "requests": 748,
+      "hsr6_attach_assist": 1,
+      "hold": 1
+     }
+    }
+   },
+   "place_hurdle_7x2": {
+    "success": {
+     "vla": 0,
+     "ag3s": 6
+    },
+    "hurdle_contact": {
+     "vla": 12,
+     "ag3s": 2
+    },
+    "labels": {
+     "vla/119_k0": "허들접촉",
+     "vla/119_k1": "허들접촉",
+     "ag3s/119_k0": "성공",
+     "ag3s/119_k1": "성공",
+     "vla/250_k0": "허들접촉",
+     "vla/250_k1": "허들접촉",
+     "ag3s/250_k0": "허들접촉",
+     "ag3s/250_k1": "성공",
+     "vla/320_k0": "쥐지못함",
+     "vla/320_k1": "쥐지못함",
+     "ag3s/320_k0": "허들접촉",
+     "ag3s/320_k1": "성공",
+     "vla/850_k0": "허들접촉",
+     "vla/850_k1": "허들접촉",
+     "ag3s/850_k0": "성공",
+     "ag3s/850_k1": "성공",
+     "vla/954_k0": "허들접촉",
+     "vla/954_k1": "허들접촉",
+     "ag3s/954_k0": "쥐지못함",
+     "ag3s/954_k1": "쥐지못함",
+     "vla/211_k0": "허들접촉",
+     "vla/211_k1": "허들접촉",
+     "ag3s/211_k0": "이웃과일접촉",
+     "ag3s/211_k1": "못놓음",
+     "vla/1345_k0": "허들접촉",
+     "vla/1345_k1": "허들접촉",
+     "ag3s/1345_k0": "쥐지못함",
+     "ag3s/1345_k1": "못놓음"
+    },
+    "min_robot_obstacle_clearance_mm": {
+     "vla/119_k0": -1.0,
+     "vla/119_k1": -0.9,
+     "ag3s/119_k0": 34.1,
+     "ag3s/119_k1": 13.1,
+     "vla/250_k0": -0.9,
+     "vla/250_k1": -0.9,
+     "ag3s/250_k0": -0.3,
+     "ag3s/250_k1": 50.5,
+     "vla/320_k0": 60.1,
+     "vla/320_k1": 60.1,
+     "ag3s/320_k0": -0.1,
+     "ag3s/320_k1": 0.1,
+     "vla/850_k0": -0.9,
+     "vla/850_k1": -1.0,
+     "ag3s/850_k0": 14.6,
+     "ag3s/850_k1": 16.8,
+     "vla/954_k0": -0.4,
+     "vla/954_k1": -0.3,
+     "ag3s/954_k0": 5.0,
+     "ag3s/954_k1": 3.8,
+     "vla/211_k0": -0.8,
+     "vla/211_k1": -0.8,
+     "ag3s/211_k0": 8.9,
+     "ag3s/211_k1": 9.1,
+     "vla/1345_k0": -1.3,
+     "vla/1345_k1": -0.4,
+     "ag3s/1345_k0": 8.1,
+     "ag3s/1345_k1": 16.1
+    },
+    "ag3s_mech_total": {
+     "hsr6_objective": 126,
+     "a6_window": 100,
+     "a6_relaxed_rows": 100,
+     "requests": 714,
+     "hsr6_target_exempt": 76,
+     "hsr6_attach_assist": 1
+    }
+   }
   }
  },
  "figures": {
-  "report": "AG3S/ag3s/docs/figures/core-eval/core-eval-{outcomes,ats,hsr,lte,ccr}.png",
+  "report": [
+   "AG3S/ag3s/docs/figures/core-eval/core-eval-final.png",
+   "AG3S/ag3s/docs/figures/core-eval/core-eval-hurdle.png",
+   "AG3S/ag3s/docs/figures/core-eval/core-eval-{outcomes,ats,hsr,lte,ccr}.png"
+  ],
   "paper": "AG3S/ag3s/docs/figures/core-eval/paper/paper-*.{png,pdf}"
  },
  "outputs": "outputs/2026-10-28_핵심평가_모듈별_가림기둥3_회귀6_x2/"
