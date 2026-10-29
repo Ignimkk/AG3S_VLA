@@ -1,0 +1,17 @@
+Figure 2, Introduction overview, full text width (about 3:1). Follow the reference image closely; its four panels show the same recorded moment, just before the grasp, rendered with 1 cm voxels. Clean academic style: white background, equal-size photographic panels, bold panel titles, one coloured verdict line under each panel, a single colour legend row at the bottom. No icons, no shadows, no extra objects.
+
+Title line, bold and centred: "Finding the target is not enough: its boundary and the querying link decide contact".
+
+Every panel shows the same close-up: an open two-finger gripper, tinted gold, above a green pear (the target). An orange fruit (the neighbour) touches the pear, and the dark crate edge is on the right. Observed surfaces are drawn as small blue cubes (voxels of the collision field). Fruit meshes are faded so the cubes read clearly.
+
+(a) "All surfaces as obstacles": blue cubes cover both the pear and the orange, so the target itself blocks the fingers. Red verdict: "grasp blocked: target repels the fingers".
+
+(b) "Global target exclusion (ball)": a translucent red sphere is centred on the pear. Every cube inside it, including the near side of the touching orange, turns into a faint red ghost (removed for every link). Red verdict: "neighbour surface erased for every link".
+
+(c) "Ours: boundary-preserving extent": the same sphere is drawn only as a faint grey outer bound. Only cubes owned by the pear are removed (faint orange ghosts); every cube on the orange stays solid blue, giving a crisp boundary between the two fruits. Gold frame around the panel. Green verdict: "only target-owned voxels removed".
+
+(d) "Ours: link-specific queries": a front view of the whole robot at the table. The active (right) gripper's collision spheres are drawn as a gold chain and read the target-free field; the other gripper's spheres are dark grey and read the full scene field. The pear carries small orange target points. Gold frame. Green verdict: "active hand: target-free / other hand: scene".
+
+Legend row at the bottom: obstacle voxels (scene field) blue #2E75B6; removed by the ball, light red; removed, target-owned, light orange; contact links (active hand) gold #D9A406; other links grey #9E9E9E. Small grey note at the right: "same recorded frame, 1 cm voxels".
+
+Keep the four panels identical in camera and framing for (a)-(c) so that the only visible change is which cubes are removed. No numbers, no charts.

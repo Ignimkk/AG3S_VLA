@@ -1,12 +1,12 @@
 """T43 T — re-ground recorded chunks with a fresh TargetConfirm (the T30b replay method, whole run).
 Inputs per chunk: attention cloud/values/raw, support mask, freeze (exclusion.grasp_active or attached),
 subtask p, latch phase (summary grasp.state), hand spheres (recorded constraint spheres on hand links)."""
-from common.workspace import workspace_path as _ag3s_workspace_path
+from common.workspace import rebase_legacy_paths, workspace_path as _ag3s_workspace_path
 import json, pathlib, dataclasses
 import numpy as np
 
 S = pathlib.Path(_ag3s_workspace_path('legacy/outputs/verify/T43/S/raw'))
-IX = {**json.load(open(S / "chunk_index_t42.json")), **json.load(open(S / "chunk_index_t40t41.json"))}
+IX = rebase_legacy_paths({**json.load(open(S / "chunk_index_t42.json")), **json.load(open(S / "chunk_index_t40t41.json"))})
 HAND = ("ee_left", "ee_right", "ee_finger_l1", "ee_finger_l2", "ee_finger_r1", "ee_finger_r2")
 
 

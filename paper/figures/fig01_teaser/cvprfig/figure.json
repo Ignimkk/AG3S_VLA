@@ -1,0 +1,107 @@
+{
+ "artifact_id": "F01",
+ "status": "CVPRFIG_DRAFT",
+ "is_measured_result": false,
+ "numeric_values": null,
+ "engine": {
+  "repo": "https://github.com/ChizkiyahuOhayon/CVPR-Figure",
+  "commit": "c220e5de60bf9a2b6b222ac50d4a942835db0eb8",
+  "render": "scripts/render.py -f svg,pdf,png,pptx --dpi 300 (pdf/png via cairosvg)",
+  "font_note": "Times New Roman aliased to STIXGeneral via fontconfig (no Times-metric font on host)"
+ },
+ "asset_script": "paper/tools/plotting/cvprfig_assets.py",
+ "asset_manifest": "paper/figures/cvprfig_assets/assets.json",
+ "existing_storyboard_untouched": true,
+ "updated_at": "2026-10-13 KST",
+ "caption_scope": "Page-1 demo teaser. Demo frames are stand-ins from ep1807_apple.mp4 (controller configuration not registered); comparison panels are placeholders; outcome labels are the intended result, not measured.",
+ "spec": "figures/fig01_teaser/cvprfig/fig01_teaser.yaml",
+ "spec_sha256": "5bea8204f4081d7da4700df054a227cf4bdb40b1bb10dace0cf3f806dfaa907b",
+ "outputs": {
+  "svg": "36a3b10c020486c9033bf17f6a24b73e5f5c19437a748b9c9fe53e877eaebc84",
+  "pdf": "fd8d787fa06a3dd6f6d7c2697a28467a3cd1ded7f1bfda78046175a25662edfc",
+  "png": "decf9da5477033393a254784ab3c09b1ab44bb75799209fe506bf3b9805aea27",
+  "pptx": "9d76a03cc6a9658e72a8547323693ac60ec7c5e56c2e5875a4a25c98d1e267b3"
+ },
+ "assets_used": {
+  "demo_start": {
+   "source": "/mnt/dev/AG3S_VLA-storage/results/rby1/rollouts/ep1807_apple.mp4",
+   "source_sha256": "ab7c82874719caec5a5fe919df80c327fb6384681adc142bb0b75ffbeac82dc0",
+   "frame_index": 0,
+   "crop_xyxy": [
+    150,
+    0,
+    550,
+    420
+   ],
+   "note": "third-person render; controller configuration of this rollout not registered",
+   "sha256": "97a93da7aafcdcc66e8f1eefddd11e928c74a38dbb7848a0721752eb171711d9"
+  },
+  "demo_reach": {
+   "source": "/mnt/dev/AG3S_VLA-storage/results/rby1/rollouts/ep1807_apple.mp4",
+   "source_sha256": "ab7c82874719caec5a5fe919df80c327fb6384681adc142bb0b75ffbeac82dc0",
+   "frame_index": 120,
+   "crop_xyxy": [
+    150,
+    0,
+    550,
+    420
+   ],
+   "note": "third-person render; controller configuration of this rollout not registered",
+   "sha256": "3a5b8e21001066d07841371e5d5d93a59fd5358af4c92df68a093b166da01d2a"
+  },
+  "demo_lift": {
+   "source": "/mnt/dev/AG3S_VLA-storage/results/rby1/rollouts/ep1807_apple.mp4",
+   "source_sha256": "ab7c82874719caec5a5fe919df80c327fb6384681adc142bb0b75ffbeac82dc0",
+   "frame_index": 150,
+   "crop_xyxy": [
+    150,
+    0,
+    550,
+    420
+   ],
+   "note": "third-person render; controller configuration of this rollout not registered",
+   "sha256": "562d983ce26acb1ca82acdc55475ac0b2a3e1305dccd3337c82e0efbf56fd0d3"
+  },
+  "demo_place": {
+   "source": "/mnt/dev/AG3S_VLA-storage/results/rby1/rollouts/ep1807_apple.mp4",
+   "source_sha256": "ab7c82874719caec5a5fe919df80c327fb6384681adc142bb0b75ffbeac82dc0",
+   "frame_index": 210,
+   "crop_xyxy": [
+    150,
+    0,
+    550,
+    420
+   ],
+   "note": "third-person render; controller configuration of this rollout not registered",
+   "sha256": "d6afcacd643faa74f75eaead6e3f7c4b373b182657dc2f260fb2cfd21d90c812"
+  },
+  "attn_left_wrist": {
+   "source": "AG3S/ag3s/docs/figures/t47/t47-scene-overlay.png",
+   "source_sha256": "b5d6045273eb78f13f504859c289cc7d00606ef4f50d18b38921cf0c63b1c664",
+   "crop_xyxy": [
+    722,
+    349,
+    917,
+    543
+   ],
+   "sha256": "9aad86429f6ad05f144e3f94928d6d02d285598eded8e312c6829b13be772718"
+  },
+  "esdf_fine_xz": {
+   "source": "AG3S/ag3s/docs/figures/t31/t31-d4-slices-E3b_ep1807_r1-t240.png",
+   "source_sha256": "9a298cc50fc191c5786726b44c7c0b4a5b16981b7a256a929bd753fb8b546ec6",
+   "crop_xyxy": [
+    86,
+    1250,
+    558,
+    1662
+   ],
+   "sha256": "2bbba0ad5419fbeee73eeead10a09c63d4371c9f10bac9f5f9807f6f9fcd39fe"
+  }
+ },
+ "placeholders": [
+  "s_tgt",
+  "c1_img",
+  "c2_img",
+  "c3_img"
+ ]
+}

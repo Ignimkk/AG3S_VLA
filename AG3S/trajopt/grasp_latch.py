@@ -143,6 +143,17 @@ class LatchConfig:
     #: 17.6 mm (T17a) 라 여유를 두었다. verifier 가 재서 정한다. T14 의 636 mm 는 어떤 값으로도
     #: 거절돼야 한다. `AG3S.attach` 의 기본 관문(`attached.DEFAULT_ATTACH_REACH_M`)과 같은 값.
     reach: float = 0.12
+    # T46g — begin
+    #: **SL5b — 가려진 조작 대상의 reach 를 손과 함께 옮긴 centroid 로 잰다.** 기본 False = T46g 전과
+    #: 비트 동일. 이 latch 는 `reach_m` 을 받기만 하므로 이 필드는 `SafePolicy._advance_grasp` 가 읽는다:
+    #: 조작 대상이 이번에 관측되지 않았으면 (`state != visible`) 마지막 관측 centroid 를 그 관측 frame 의
+    #: 자세에서 쥔 link (hold link = 손바닥) 에 강체로 붙여 지금 자세로 옮긴 점과 parent link 원점의
+    #: 거리를 쓴다 — `c_now = T_hold(q_now) · T_hold(q_seen)⁻¹ · c_seen`. 관측된 프레임은 그대로다.
+    #: 문턱(`reach`)은 바꾸지 않는다. 근거: SL5b 진단 (`verify/T46g-SL5b/sl5b_diag.md`) — 가려진 채 손과
+    #: 함께 들린 물체의 stale centroid 로 reach 128–372 mm 가 나와 attach 가 거절됐고, 같은 call 들의
+    #: hand-relative reach 는 62.8–102.6 mm. `serve_safe --latch-reach-hand-relative`.
+    reach_hand_relative: bool = False
+    # T46g — end
     #: **측정 개도가 멈췄다** 의 문턱 (T30 F4, 정규화 개도 — 1 = 열림). 이번 요청의 측정 개도와
     #: 직전 요청의 측정 개도 차가 이보다 작아야 `settled`. 명령 스텝을 세지 않는다.
     #:
@@ -501,6 +512,8 @@ class GraspLatch:
         manipulated_state: Optional[str] = None,
         placed: bool = False,
         held_observation: Optional[dict] = None,
+        extra_checks: Optional[dict] = None,
+        attach_assist: Optional[dict] = None,
     ) -> LatchEvent:
         """직전 청크의 **실행 사실**로 닫힘 시도 · 파지 확인 · 놓임 확인을 갱신한다 (`evidence=True`).
 
@@ -516,6 +529,13 @@ class GraspLatch:
             held_observation: T34 J2 — 직전 프레임에 조작 대상이 **관측됐을 때** 쥔 구와의 비교
                 (`AG3S.held_observation()`: `centre_distance_m`, `held_radius_m`, `hand_rise_m`,
                 `object_rise_m`). 관측이 없으면 `None` — 그 두 검사는 판단하지 않는다.
+            extra_checks: IFG-S2SERVE — 닫힘 시도(CLOSING)의 파지 확인에 **AND 로 더할** 검사 `{name: bool}`
+                (`serve_safe --held-3d-rule on` 이면 `{"held_3d": …}`). attach 를 거는 조건에만 들어가고, 걸린 뒤의
+                회수 · 놓기 · slip 은 그대로다. `None` (기본) = 이전과 같다.
+            attach_assist: AG3S-CORE-EVAL-HSR6 ① — `{"phase": HSR6 단계 또는 None}` (`serve_safe --hsr6-attach-assist`).
+                닫힘 시도(CLOSING)의 파지 확인이 실패해도 단계 ∈ {lift, transport, placement} ∧ `closed` ∧ `blocked`
+                이면 attach 한다 (T64 Part C: HELD′ = strong HELD ∨ (…)). 근거는 `evidence["attach_assist"]`.
+                회수 · 놓기 · slip 은 그대로다. `None` (기본) = 이전과 같다 (키도 없다).
         """
         if not self.evidence:
             raise RuntimeError("observe_grasp needs GraspLatch(evidence=True)")
@@ -578,9 +598,29 @@ class GraspLatch:
             else:
                 checks = self._grasp_checks(opening, self._last_opening, reach_m,
                                             manipulated_id, manipulated_state)
+                if extra_checks:   # IFG-S2SERVE — AND (only given with the flag on)
+                    checks.update({str(k): bool(v) for k, v in extra_checks.items()})
                 ev["checks"] = checks
                 failed = [k for k, v in checks.items() if not v]
-                if not failed:
+                assisted = False
+                if attach_assist is not None:   # AG3S-CORE-EVAL-HSR6 ① (only given with the flag on)
+                    from AG3S.trajopt.hsr6 import attach_assist_ok
+
+                    phase6 = attach_assist.get("phase")
+                    assisted = bool(failed) and attach_assist_ok(phase6, checks)
+                    ev["attach_assist"] = {"phase": phase6, "assisted": assisted, "strong_failed": list(failed)}
+                if assisted:
+                    self.phase = GraspPhase.HELD
+                    self._open_streak = 0
+                    attach = True
+                    self._attach_opening = None if opening is None else float(opening)
+                    self._held_exec_chunks = 0
+                    self._hold_command = self._last_command
+                    self._slip_streak = 0
+                    note = (f"파지 확인 (HSR6 보완) — attach(manipulated id={manipulated_id}): strong 확인 실패 "
+                            f"{', '.join(failed)} 이지만 HSR6 {attach_assist.get('phase')} ∧ closed ∧ blocked "
+                            f"(feedback seq {signal.feedback_seq})")
+                elif not failed:
                     self.phase = GraspPhase.HELD
                     self._open_streak = 0
                     attach = True

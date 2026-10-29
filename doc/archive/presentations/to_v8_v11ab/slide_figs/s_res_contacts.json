@@ -1,0 +1,25 @@
+{
+ "arms": [
+  "V8",
+  "V11A",
+  "V11AB"
+ ],
+ "values": {
+  "V8": [
+   5,
+   9,
+   10
+  ],
+  "V11A": [
+   2,
+   4,
+   6
+  ],
+  "V11AB": [
+   0,
+   0,
+   1
+  ]
+ },
+ "source": "T43V11ABC.verify.json via AG3S_T0T6_LOG.md T43 13"
+}

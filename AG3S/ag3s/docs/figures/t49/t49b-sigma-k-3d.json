@@ -1,0 +1,161 @@
+{
+ "exploratory": true,
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T190547+0900_28b981600bf7_c39a577332fe/verify/T49b/analysis/numbers_t49b.json",
+ "aggregation": "per record (frames pooled), unweighted mean over 2 records per scene",
+ "series": {
+  "identity_correct_rate|scene=same_scene|noun_gt_s0": {
+   "k1": 0.7666666666666666,
+   "k2": 0.7666666666666666,
+   "k3": 0.7666666666666666
+  },
+  "identity_correct_rate|scene=same_scene|noun_gt_s1": {
+   "k1": 0.7333333333333334,
+   "k2": 0.7333333333333334,
+   "k3": 0.7333333333333334
+  },
+  "identity_correct_rate|scene=same_scene|noun_lf_k3_s0": 0.7333333333333334,
+  "identity_correct_rate|scene=same_scene|l8h2": 0.8666666666666667,
+  "identity_correct_rate|scene=new_scene|noun_gt_s0": {
+   "k1": 0.9333333333333333,
+   "k2": 0.9333333333333333,
+   "k3": 0.9333333333333333
+  },
+  "identity_correct_rate|scene=new_scene|noun_gt_s1": {
+   "k1": 0.8666666666666667,
+   "k2": 0.8666666666666667,
+   "k3": 0.8666666666666667
+  },
+  "identity_correct_rate|scene=new_scene|noun_lf_k3_s0": 0.8666666666666667,
+  "identity_correct_rate|scene=new_scene|l8h2": 0.9333333333333333,
+  "chosen_cluster_purity_mean|scene=same_scene|noun_gt_s0": {
+   "k1": 0.6628018127653698,
+   "k2": 0.6623816573404727,
+   "k3": 0.6626018314316146
+  },
+  "chosen_cluster_purity_mean|scene=same_scene|noun_gt_s1": {
+   "k1": 0.6290483240071394,
+   "k2": 0.6290483240071394,
+   "k3": 0.6290483240071394
+  },
+  "chosen_cluster_purity_mean|scene=same_scene|noun_lf_k3_s0": 0.6290483240071394,
+  "chosen_cluster_purity_mean|scene=same_scene|l8h2": 0.8666666666666667,
+  "chosen_cluster_purity_mean|scene=new_scene|noun_gt_s0": {
+   "k1": 1.0,
+   "k2": 1.0,
+   "k3": 1.0
+  },
+  "chosen_cluster_purity_mean|scene=new_scene|noun_gt_s1": {
+   "k1": 0.7718079891063758,
+   "k2": 0.7718079891063758,
+   "k3": 0.7718079891063758
+  },
+  "chosen_cluster_purity_mean|scene=new_scene|noun_lf_k3_s0": 0.7718079891063758,
+  "chosen_cluster_purity_mean|scene=new_scene|l8h2": 1.0,
+  "seed_nontarget_loss_per_frame|scene=same_scene|noun_gt_s0": {
+   "k1": 398.66666666666663,
+   "k2": 430.6333333333333,
+   "k3": 460.5
+  },
+  "seed_nontarget_loss_per_frame|scene=same_scene|noun_gt_s1": {
+   "k1": 333.76666666666665,
+   "k2": 324.46666666666664,
+   "k3": 342.53333333333336
+  },
+  "seed_nontarget_loss_per_frame|scene=same_scene|noun_lf_k3_s0": 582.2333333333333,
+  "seed_nontarget_loss_per_frame|scene=same_scene|l8h2": 119.93333333333334,
+  "seed_nontarget_loss_per_frame|scene=new_scene|noun_gt_s0": {
+   "k1": 626.8666666666666,
+   "k2": 699.2,
+   "k3": 706.2333333333333
+  },
+  "seed_nontarget_loss_per_frame|scene=new_scene|noun_gt_s1": {
+   "k1": 455.16666666666663,
+   "k2": 497.6,
+   "k3": 498.06666666666666
+  },
+  "seed_nontarget_loss_per_frame|scene=new_scene|noun_lf_k3_s0": 768.9333333333334,
+  "seed_nontarget_loss_per_frame|scene=new_scene|l8h2": 260.6
+ },
+ "cells": {
+  "noun_gt_k1_s0": [
+   [
+    8,
+    6
+   ]
+  ],
+  "noun_gt_k2_s0": [
+   [
+    8,
+    6
+   ],
+   [
+    5,
+    4
+   ]
+  ],
+  "noun_gt_k3_s0": [
+   [
+    8,
+    6
+   ],
+   [
+    5,
+    4
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "noun_gt_k1_s1": [
+   [
+    8,
+    6
+   ]
+  ],
+  "noun_gt_k2_s1": [
+   [
+    8,
+    6
+   ],
+   [
+    5,
+    4
+   ]
+  ],
+  "noun_gt_k3_s1": [
+   [
+    8,
+    6
+   ],
+   [
+    5,
+    4
+   ],
+   [
+    4,
+    2
+   ]
+  ],
+  "noun_lf_k3_s0": [
+   [
+    4,
+    7
+   ],
+   [
+    4,
+    6
+   ],
+   [
+    8,
+    6
+   ]
+  ],
+  "l8h2": [
+   [
+    8,
+    2
+   ]
+  ]
+ }
+}

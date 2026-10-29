@@ -1,0 +1,443 @@
+{
+ "rows": [
+  {
+   "episode": 56,
+   "seed": 563,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 13.333333333333334
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 13.333333333333334
+   }
+  },
+  {
+   "episode": 119,
+   "seed": 1193,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 14.4
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 14.4
+   }
+  },
+  {
+   "episode": 121,
+   "seed": 1213,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "completion_s": 13.333333333333334
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "completion_s": 13.333333333333334
+   }
+  },
+  {
+   "episode": 126,
+   "seed": 1263,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 13.333333333333334
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 13.333333333333334
+   }
+  },
+  {
+   "episode": 250,
+   "seed": 2503,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "fail",
+    "failure_mode": "slip_in_transport",
+    "hold_chunks": 49,
+    "completion_s": null
+   },
+   "S2": {
+    "outcome": "fail",
+    "failure_mode": "slip_in_transport",
+    "hold_chunks": 7,
+    "completion_s": null
+   }
+  },
+  {
+   "episode": 309,
+   "seed": 3093,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 15.466666666666667
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 15.466666666666667
+   }
+  },
+  {
+   "episode": 325,
+   "seed": 3253,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 15.466666666666667
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 15.466666666666667
+   }
+  },
+  {
+   "episode": 342,
+   "seed": 3423,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "completion_s": 13.333333333333334
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 0,
+    "completion_s": 13.333333333333334
+   }
+  },
+  {
+   "episode": 421,
+   "seed": 4213,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 18.133333333333333
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 18.133333333333333
+   }
+  },
+  {
+   "episode": 526,
+   "seed": 5263,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   },
+   "S2": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   }
+  },
+  {
+   "episode": 753,
+   "seed": 7533,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "slip_at_lift",
+    "hold_chunks": 1,
+    "completion_s": 15.466666666666667
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "slip_at_lift",
+    "hold_chunks": 1,
+    "completion_s": 15.466666666666667
+   }
+  },
+  {
+   "episode": 979,
+   "seed": 9793,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   },
+   "S2": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   }
+  },
+  {
+   "episode": 1345,
+   "seed": 13453,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   },
+   "S2": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   }
+  },
+  {
+   "episode": 1596,
+   "seed": 15963,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 13.333333333333334
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 13.333333333333334
+   }
+  },
+  {
+   "episode": 1668,
+   "seed": 16683,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 13.333333333333334
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 13.333333333333334
+   }
+  },
+  {
+   "episode": 1837,
+   "seed": 18373,
+   "stratum": "clear",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 15,
+    "completion_s": 11.2
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 45,
+    "completion_s": 11.2
+   }
+  },
+  {
+   "episode": 211,
+   "seed": 2113,
+   "stratum": "place",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 34,
+    "completion_s": null
+   },
+   "S2": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 34,
+    "completion_s": null
+   }
+  },
+  {
+   "episode": 320,
+   "seed": 3203,
+   "stratum": "place",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   },
+   "S2": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   }
+  },
+  {
+   "episode": 572,
+   "seed": 5723,
+   "stratum": "place",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 3,
+    "completion_s": 13.866666666666667
+   },
+   "S2": {
+    "outcome": "fail",
+    "failure_mode": "slip_at_lift",
+    "hold_chunks": 1,
+    "completion_s": null
+   }
+  },
+  {
+   "episode": 850,
+   "seed": 8503,
+   "stratum": "place",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 16.533333333333335
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 1,
+    "completion_s": 16.533333333333335
+   }
+  },
+  {
+   "episode": 901,
+   "seed": 9013,
+   "stratum": "place",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 14.4
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 14.4
+   }
+  },
+  {
+   "episode": 954,
+   "seed": 9543,
+   "stratum": "place",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   },
+   "S2": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 0,
+    "completion_s": null
+   }
+  },
+  {
+   "episode": 1222,
+   "seed": 12223,
+   "stratum": "place",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 14.933333333333334
+   },
+   "S2": {
+    "outcome": "primary",
+    "failure_mode": "ok",
+    "hold_chunks": 2,
+    "completion_s": 14.933333333333334
+   }
+  },
+  {
+   "episode": 1313,
+   "seed": 13133,
+   "stratum": "place",
+   "target_fruit": "apple",
+   "C1aN": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 1,
+    "completion_s": null
+   },
+   "S2": {
+    "outcome": "no_grasp",
+    "failure_mode": "no_grasp",
+    "hold_chunks": 1,
+    "completion_s": null
+   }
+  }
+ ],
+ "classes": {
+  "primary": "접촉 없는 성공",
+  "contact": "성공, 접촉 있음",
+  "no_grasp": "잡기 실패",
+  "fail": "그 외 실패",
+  "missing": "기록 없음"
+ }
+}

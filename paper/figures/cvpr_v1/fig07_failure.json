@@ -1,0 +1,308 @@
+{
+ "artifact": "fig07_failure",
+ "pdf": "paper/figures/cvpr_v1/fig07_failure.pdf",
+ "png": "paper/figures/cvpr_v1/fig07_failure.png",
+ "size_in": [
+  3.25,
+  2.0
+ ],
+ "aspect": 1.625,
+ "textwidth_in": 6.875,
+ "raster_dpi_in_pdf": 400,
+ "png_dpi": 300,
+ "fonts": {
+  "family": "DejaVu Sans",
+  "math": "stix",
+  "pdf_fonttype": 42,
+  "min_pt": 7.0,
+  "max_pt": 7.0,
+  "n_text_items": 14,
+  "floor_pt": 7.0
+ },
+ "script": "paper/tools/plotting/cvpr_v1_compose.py",
+ "generated": "2026-10-18T09:44:49+00:00",
+ "git_head": "f15e587290f6b099bb2be9b4dc137cacf62c9db5",
+ "printed_numbers": [
+  {
+   "text": "32 mm",
+   "meaning": "closest hand point outside the sphere union at the contact step",
+   "value": 32.12,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=55]/closest_point_outside_spheres_mm"
+  },
+  {
+   "text": "(curve point t=48)",
+   "meaning": "real_hand_post_mm",
+   "value": 26.4,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=48]/real_hand_post_mm"
+  },
+  {
+   "text": "(curve point t=48)",
+   "meaning": "sphere_union_post_mm",
+   "value": 39.1,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=48]/sphere_union_post_mm"
+  },
+  {
+   "text": "(curve point t=49)",
+   "meaning": "real_hand_post_mm",
+   "value": 23.16,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=49]/real_hand_post_mm"
+  },
+  {
+   "text": "(curve point t=49)",
+   "meaning": "sphere_union_post_mm",
+   "value": 37.81,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=49]/sphere_union_post_mm"
+  },
+  {
+   "text": "(curve point t=50)",
+   "meaning": "real_hand_post_mm",
+   "value": 18.9,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=50]/real_hand_post_mm"
+  },
+  {
+   "text": "(curve point t=50)",
+   "meaning": "sphere_union_post_mm",
+   "value": 36.98,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=50]/sphere_union_post_mm"
+  },
+  {
+   "text": "(curve point t=51)",
+   "meaning": "real_hand_post_mm",
+   "value": 14.6,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=51]/real_hand_post_mm"
+  },
+  {
+   "text": "(curve point t=51)",
+   "meaning": "sphere_union_post_mm",
+   "value": 37.01,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=51]/sphere_union_post_mm"
+  },
+  {
+   "text": "(curve point t=52)",
+   "meaning": "real_hand_post_mm",
+   "value": 11.19,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=52]/real_hand_post_mm"
+  },
+  {
+   "text": "(curve point t=52)",
+   "meaning": "sphere_union_post_mm",
+   "value": 37.81,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=52]/sphere_union_post_mm"
+  },
+  {
+   "text": "(curve point t=53)",
+   "meaning": "real_hand_post_mm",
+   "value": 7.75,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=53]/real_hand_post_mm"
+  },
+  {
+   "text": "(curve point t=53)",
+   "meaning": "sphere_union_post_mm",
+   "value": 34.29,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=53]/sphere_union_post_mm"
+  },
+  {
+   "text": "(curve point t=54)",
+   "meaning": "real_hand_post_mm",
+   "value": 3.99,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=54]/real_hand_post_mm"
+  },
+  {
+   "text": "(curve point t=54)",
+   "meaning": "sphere_union_post_mm",
+   "value": 26.9,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=54]/sphere_union_post_mm"
+  },
+  {
+   "text": "(curve point t=55)",
+   "meaning": "real_hand_post_mm",
+   "value": 0.44,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=55]/real_hand_post_mm"
+  },
+  {
+   "text": "(curve point t=55)",
+   "meaning": "sphere_union_post_mm",
+   "value": 19.44,
+   "source": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json",
+   "key": "/numbers/on_diagnosis/1830/cover_rows[t=55]/sphere_union_post_mm"
+  }
+ ],
+ "number_sources": {
+  "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/handoff/T58.verify.json": "f29e63a87cc86dae3fb763bae05711f65c525f06ccc406e878e423838825031a"
+ },
+ "assets": {
+  "t58_ep1830_contact": {
+   "file": "paper/figures/cvpr_v1/assets/t58_ep1830_contact.png",
+   "sha256": "bf06a98ff6e2dacf1b8b8e783687575b7b182772ac4e637fba9c93e537bd79ec",
+   "crops": [
+    [
+     0.2,
+     0.26,
+     0.8,
+     0.86
+    ]
+   ],
+   "sidecar": "paper/figures/cvpr_v1/assets/t58_ep1830_contact.json",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T161809+0900_cf38c9dbca7b_6ee6157e1d6c/verify/T58/runs/obs/ON_ep1830_s18301",
+   "episode": 1830,
+   "control_step": 55,
+   "arm": "ON"
+  }
+ },
+ "registration_status": "numbers copied from raw summary.json / verify.json / agg.json as listed; they are not yet registered in paper/evidence/RESULTS.md (planned EXP003 held-out locked, EXP004 closed-loop hurdle)",
+ "layout": "single column: left replay render of ON_ep1830_s18301 at the first robot-post contact step with the left-hand query spheres (gold) and the real closest hand point (red); right: hand-mesh vs sphere-union distance to the post over the cover rows",
+ "scene": {
+  "asset": "paper/figures/cvpr_v1/assets/t58_ep1830_contact.png",
+  "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T161809+0900_cf38c9dbca7b_6ee6157e1d6c/verify/T58/runs/obs/ON_ep1830_s18301",
+  "episode": 1830,
+  "seed": 18301,
+  "arm": "ON",
+  "control_step": 55,
+  "chunk_file": 16,
+  "t_plan": 48,
+  "post_geom": 1376,
+  "n_hand_spheres": 135,
+  "real_hand_post_mm": 0.43687679098371657,
+  "closest_point_outside_spheres_mm": 32.119958719805986,
+  "nearest_sphere_link": "ee_left",
+  "real_body": "EE_BODY_L",
+  "hand_point_xyz": [
+   0.40115047080310257,
+   0.31975120914222566,
+   1.080048823644572
+  ],
+  "sphere_point_xyz": [
+   0.39060907288489066,
+   0.3335253117581082,
+   1.1070829645634008
+  ],
+  "hand_point_px": [
+   700.0,
+   751.2216427353477
+  ],
+  "sphere_point_px": [
+   664.2685892452731,
+   604.2102276967656
+  ],
+  "camera": {
+   "az": 330,
+   "el": 3,
+   "dist": 0.33
+  },
+  "image_px": [
+   1400,
+   1400
+  ],
+  "cover_rows": [
+   {
+    "t": 48,
+    "real_hand_post_mm": 26.398923854258076,
+    "real_geom": 1052,
+    "real_body": "EE_BODY_L",
+    "real_geom_type": 7,
+    "sphere_union_post_mm": 39.100681533383245,
+    "sphere_link_nearest": "ee_finger_l1",
+    "closest_point_outside_spheres_mm": 31.914543481553334
+   },
+   {
+    "t": 49,
+    "real_hand_post_mm": 23.159491131592926,
+    "real_geom": 1052,
+    "real_body": "EE_BODY_L",
+    "real_geom_type": 7,
+    "sphere_union_post_mm": 37.8097947662797,
+    "sphere_link_nearest": "ee_finger_l1",
+    "closest_point_outside_spheres_mm": 32.62738128577585
+   },
+   {
+    "t": 50,
+    "real_hand_post_mm": 18.904086638362596,
+    "real_geom": 1052,
+    "real_body": "EE_BODY_L",
+    "real_geom_type": 7,
+    "sphere_union_post_mm": 36.97906010417305,
+    "sphere_link_nearest": "ee_finger_l1",
+    "closest_point_outside_spheres_mm": 34.0686880685942
+   },
+   {
+    "t": 51,
+    "real_hand_post_mm": 14.598745833748792,
+    "real_geom": 1052,
+    "real_body": "EE_BODY_L",
+    "real_geom_type": 7,
+    "sphere_union_post_mm": 37.00677738645856,
+    "sphere_link_nearest": "ee_finger_l1",
+    "closest_point_outside_spheres_mm": 35.99553692495982
+   },
+   {
+    "t": 52,
+    "real_hand_post_mm": 11.18897820694452,
+    "real_geom": 1052,
+    "real_body": "EE_BODY_L",
+    "real_geom_type": 7,
+    "sphere_union_post_mm": 37.81061248199666,
+    "sphere_link_nearest": "ee_finger_l1",
+    "closest_point_outside_spheres_mm": 38.413173906281
+   },
+   {
+    "t": 53,
+    "real_hand_post_mm": 7.753165726543076,
+    "real_geom": 1052,
+    "real_body": "EE_BODY_L",
+    "real_geom_type": 7,
+    "sphere_union_post_mm": 34.288519656224146,
+    "sphere_link_nearest": "ee_left",
+    "closest_point_outside_spheres_mm": 38.798348746420814
+   },
+   {
+    "t": 54,
+    "real_hand_post_mm": 3.9858193432075897,
+    "real_geom": 1052,
+    "real_body": "EE_BODY_L",
+    "real_geom_type": 7,
+    "sphere_union_post_mm": 26.90085743254711,
+    "sphere_link_nearest": "ee_left",
+    "closest_point_outside_spheres_mm": 36.79506072469031
+   },
+   {
+    "t": 55,
+    "real_hand_post_mm": 0.43687679098371657,
+    "real_geom": 1052,
+    "real_body": "EE_BODY_L",
+    "real_geom_type": 7,
+    "sphere_union_post_mm": 19.43998379224321,
+    "sphere_link_nearest": "ee_left",
+    "closest_point_outside_spheres_mm": 32.119958719805986
+   }
+  ],
+  "sources": {
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T161809+0900_cf38c9dbca7b_6ee6157e1d6c/verify/T58/runs/obs/ON_ep1830_s18301/frames.jsonl": "e139dd3e9fa7aa0613d1d2d9fda212681213974ba96b766fd927f373d8bf5200",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T161809+0900_cf38c9dbca7b_6ee6157e1d6c/verify/T58/runs/server_ON_8295_20261013T074151/server_constraints/run_0000/chunk_00016.npz": "096e9d7e2459cb268b2d62dd5aab5474fe3e78f5142736e14ac2b45e7da174f4",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T161809+0900_cf38c9dbca7b_6ee6157e1d6c/verify/T58/configs/t58_ep1830.json": "11e7ab840269685e46554606b27edf7677d6512131567b740b9208071b57247f",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T161809+0900_cf38c9dbca7b_6ee6157e1d6c/verify/T58/diag/cover_ON_ep1830.json": "4fd8e603a321680dede7a13f343dce3c883c8ce0aeefdd851724629090931818",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T161809+0900_cf38c9dbca7b_6ee6157e1d6c/verify/T58/raw/capture/1830.mjb": "d935092d789ccaad7c777551db8339863a0cbc1650e3fd55b5b654643485104b",
+   "/mnt/dev/AG3S_VLA-storage/results/development/20261013T161809+0900_cf38c9dbca7b_6ee6157e1d6c/verify/T58/raw/capture/1830_reset.npz": "cefb8ab5add35eb0dd1846bcc1c02a38e5a0dba8e4effeb53f58d2873a73c77b"
+  },
+  "renderer": "MuJoCo 3.11.0 replay of the recorded qpos (no re-simulation); OSMesa, CPU",
+  "method": "verify/T58/p/diag_cover_t58.py reconstruction (spheres carried rigidly with EE_BODY_L from t_plan to t)",
+  "script": "paper/tools/plotting/cvpr_v1_fig7_scene.py"
+ },
+ "provenance": "T58 (2026-10-13), AG3S ON arm = coarse-extent serving configuration C1a + F1 + W1; the adjacent-post failure also occurs with the VLA alone (E0) in all 3 T58 episodes (T58.verify.json). Sphere set and pose reconstructed exactly as verify/T58/p/diag_cover_t58.py (asserted against diag/cover_ON_ep1830.json).",
+ "is_measured_result": true
+}

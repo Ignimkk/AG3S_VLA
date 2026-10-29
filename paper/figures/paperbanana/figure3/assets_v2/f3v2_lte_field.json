@@ -1,0 +1,62 @@
+{
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f",
+ "kit": "IFG-APPLE-SPLIT",
+ "arm": "SPL",
+ "episode": 572,
+ "request": 8,
+ "state": "latched",
+ "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/server_8293_20261020T015105/server_constraints/run_0000/chunk_00758.npz",
+ "classes": [
+  "target",
+  "neighbour",
+  "fruit_other",
+  "table",
+  "crate",
+  "obstacle",
+  "other"
+ ],
+ "target_neighbour_centre_dist_m": 0.07315565697725082,
+ "pixel_m": 0.001,
+ "assets": {
+  "main": "paper/figures/paperbanana/figure3/assets_v2/f3v2_lte_field_main.png",
+  "free": "paper/figures/paperbanana/figure3/assets_v2/f3v2_lte_field_free.png",
+  "location": "paper/figures/paperbanana/figure3/assets_v2/f3v2_lte_slice_location.png"
+ },
+ "script": "paper/tools/plotting/fig3_v2_lte_slices.py",
+ "vmax_mm": 40.0,
+ "fill": "support",
+ "zmin_mm": -32.0,
+ "support_band_mm": 10.0,
+ "support_top_mm": -29.999999999999993,
+ "encoding": {
+  "background": "field distance 0..vmax mm, blue = near a surface",
+  "fill": "field <= 0, coloured by the nearest GT geom (fill=nearest) or, with fill=inside, orange / blue only inside the target / neighbour GT surface and the nearest non-fruit class elsewhere; with fill=support, nearest GT geom except that fruit-coloured pixels within support_band_mm above the support top (lowest GT target point) are drawn as the support (tan table, dark grey other)",
+  "black line": "field = 0",
+  "dashed orange (free only)": "GT target outline; the target-free field no longer treats it as an obstacle",
+  "gold circles": "query spheres of contact links (target_field_exclude = True) cut by the plane",
+  "grey circles": "other query spheres cut by the plane"
+ },
+ "is_measured_result": false,
+ "note": "Recorded field values from one closed-loop request; illustration, no metric printed.",
+ "scan": {
+  "script": "paper/tools/plotting/fig3_v2_lte_scan.py",
+  "requests_scanned": 669,
+  "selected": {
+   "ep": 572,
+   "request": 8,
+   "neighbour": "banana",
+   "gap_mm": 1.3,
+   "target_left": 0.0102,
+   "target_main": 1.0,
+   "neigh_kept": 0.9867,
+   "neigh_main": 0.9655
+  },
+  "definitions": "on the slice: target_left = GT-target-interior pixels where the target-free field <= 0; neigh_kept = GT-neighbour-interior pixels where it is <= 0"
+ },
+ "support_band_recoloured_px": {
+  "main": 482,
+  "main_target_coloured_total": 3704,
+  "free": 91,
+  "free_target_coloured_total": 112
+ }
+}

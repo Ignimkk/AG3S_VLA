@@ -1,0 +1,195 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/agg.json",
+ "blocks": {
+  "ep54_s541_C1a_C1aF1": {
+   "times": [
+    73,
+    113,
+    173,
+    599
+   ],
+   "labels": [
+    "40 steps before first hand-target contact",
+    "first hand-target contact (earlier arm)",
+    "60 steps later",
+    "end of run"
+   ],
+   "first_hand_target_t": {
+    "C1a": 113,
+    "C1aF1": 113
+   },
+   "C1a": {
+    "frame_idx_t73": 73,
+    "success": true,
+    "success_ct": false,
+    "failure_mode": "ok",
+    "n_hold_chunks": 38,
+    "contacts_rows": {
+     "hand-fruit_other": 7,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 109
+    },
+    "grasp": true,
+    "hold_pre8_close": 1,
+    "frame_idx_t113": 113,
+    "frame_idx_t173": 173,
+    "frame_idx_t599": 599
+   },
+   "C1aF1": {
+    "frame_idx_t73": 73,
+    "success": true,
+    "success_ct": true,
+    "failure_mode": "ok",
+    "n_hold_chunks": 38,
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 103
+    },
+    "grasp": true,
+    "hold_pre8_close": 0,
+    "frame_idx_t113": 113,
+    "frame_idx_t173": 173,
+    "frame_idx_t599": 599
+   }
+  },
+  "ep0_s1_C1a_C1aF1": {
+   "times": [
+    64,
+    104,
+    164,
+    599
+   ],
+   "labels": [
+    "40 steps before first hand-target contact",
+    "first hand-target contact (earlier arm)",
+    "60 steps later",
+    "end of run"
+   ],
+   "first_hand_target_t": {
+    "C1a": 104,
+    "C1aF1": 104
+   },
+   "C1a": {
+    "frame_idx_t64": 64,
+    "success": true,
+    "success_ct": true,
+    "failure_mode": "ok",
+    "n_hold_chunks": 0,
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 69
+    },
+    "grasp": true,
+    "hold_pre8_close": 0,
+    "frame_idx_t104": 104,
+    "frame_idx_t164": 164,
+    "frame_idx_t599": 599
+   },
+   "C1aF1": {
+    "frame_idx_t64": 64,
+    "success": false,
+    "success_ct": false,
+    "failure_mode": "no_grasp",
+    "n_hold_chunks": 0,
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 18
+    },
+    "grasp": false,
+    "hold_pre8_close": 0,
+    "frame_idx_t104": 104,
+    "frame_idx_t164": 164,
+    "frame_idx_t599": 599
+   }
+  },
+  "ep104_s1042_C1a_C1aF1": {
+   "times": [
+    57,
+    97,
+    157,
+    599
+   ],
+   "labels": [
+    "40 steps before first hand-target contact",
+    "first hand-target contact (earlier arm)",
+    "60 steps later",
+    "end of run"
+   ],
+   "first_hand_target_t": {
+    "C1a": 97,
+    "C1aF1": 98
+   },
+   "C1a": {
+    "frame_idx_t57": 57,
+    "success": false,
+    "success_ct": false,
+    "failure_mode": "regrasp",
+    "n_hold_chunks": 19,
+    "contacts_rows": {
+     "hand-fruit_other": 8,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 179
+    },
+    "grasp": true,
+    "hold_pre8_close": 1,
+    "frame_idx_t97": 97,
+    "frame_idx_t157": 157,
+    "frame_idx_t599": 599
+   },
+   "C1aF1": {
+    "frame_idx_t57": 57,
+    "success": false,
+    "success_ct": false,
+    "failure_mode": "slip_at_lift",
+    "n_hold_chunks": 1,
+    "contacts_rows": {
+     "hand-fruit_other": 0,
+     "robot_other-target": 0,
+     "robot_other-fruit_other": 0,
+     "hand-target": 86
+    },
+    "grasp": true,
+    "hold_pre8_close": 0,
+    "frame_idx_t97": 97,
+    "frame_idx_t157": 157,
+    "frame_idx_t599": 599
+   }
+  }
+ },
+ "run_dirs": {
+  "ep54_s541_C1a_C1aF1": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1a/R/C1a_ep54_s541",
+   "C1aF1": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1aF1/R/C1aF1_ep54_s541"
+  },
+  "ep0_s1_C1a_C1aF1": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1a/R/C1a_ep0_s1",
+   "C1aF1": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1aF1/R/C1aF1_ep0_s1"
+  },
+  "ep104_s1042_C1a_C1aF1": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1a/R/C1a_ep104_s1042",
+   "C1aF1": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/runs/C1aF1/R/C1aF1_ep104_s1042"
+  }
+ },
+ "replay_json": {
+  "ep54_s541_C1a_C1aF1": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/replay/C1a_R_C1a_ep54_s541.json",
+   "C1aF1": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/replay/C1aF1_R_C1aF1_ep54_s541.json"
+  },
+  "ep0_s1_C1a_C1aF1": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/replay/C1a_R_C1a_ep0_s1.json",
+   "C1aF1": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/replay/C1aF1_R_C1aF1_ep0_s1.json"
+  },
+  "ep104_s1042_C1a_C1aF1": {
+   "C1a": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/replay/C1a_R_C1a_ep104_s1042.json",
+   "C1aF1": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T155130+0900_218229ac6464_5fb5ff542c33/verify/T46/CL3/replay/C1aF1_R_C1aF1_ep104_s1042.json"
+  }
+ }
+}

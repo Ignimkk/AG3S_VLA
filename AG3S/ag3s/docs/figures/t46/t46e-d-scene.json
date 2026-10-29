@@ -1,0 +1,41 @@
+{
+ "chunks": [
+  "C1a_ep110_s1101:18",
+  "C1a_ep110_s1102:18"
+ ],
+ "rule": "the 2 of the 8 chunks with the most ORV collision rows",
+ "panels": {
+  "C1a_ep110_s1101:18": {
+   "n_responsible_voxels": 73,
+   "responsible_voxel_category_counts": {
+    "error_candidate": 9,
+    "preserved_neighbour_fruit": 30,
+    "preserved_table": 22,
+    "preserved_robot": 0,
+    "preserved_crate": 0,
+    "target_surface_kept": 12
+   },
+   "n_rows": 123,
+   "table_top_z_base_m": 0.8200000000000001,
+   "ball_z_min_m": 0.8265513704202719,
+   "camera": "zed_left",
+   "scene_npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/raw/scene/C1a_ep110_s1101_18.npz"
+  },
+  "C1a_ep110_s1102:18": {
+   "n_responsible_voxels": 4,
+   "responsible_voxel_category_counts": {
+    "error_candidate": 3,
+    "preserved_neighbour_fruit": 0,
+    "preserved_table": 0,
+    "preserved_robot": 1,
+    "preserved_crate": 0,
+    "target_surface_kept": 0
+   },
+   "n_rows": 50,
+   "table_top_z_base_m": 0.8200000000000001,
+   "ball_z_min_m": 0.8265288618655572,
+   "camera": "zed_left",
+   "scene_npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/raw/scene/C1a_ep110_s1102_18.npz"
+  }
+ }
+}

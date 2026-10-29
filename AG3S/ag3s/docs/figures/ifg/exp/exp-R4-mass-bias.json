@@ -1,0 +1,6 @@
+{
+ "frame": "T54c_ep1817_f032",
+ "rule": "largest IoU loss of MassTop1:N vs top1-only:N",
+ "iou_mass": 0.0,
+ "iou_top1": 1.0
+}

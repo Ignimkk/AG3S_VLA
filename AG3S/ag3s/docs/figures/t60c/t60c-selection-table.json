@@ -1,0 +1,46 @@
+{
+ "rows": [
+  [
+   "action (T51) · gt label: P4 selected (P(rank1))",
+   "last:L12H4 (0.429)",
+   "mean:L10H7 (0.701)",
+   "mean:L12H4 (0.613)"
+  ],
+  [
+   "action (T51) · self label: P4 selected (P(rank1))",
+   "last:L12H3 (0.720)",
+   "last:L12H3 (0.720)",
+   "last:L12H3 (0.720)"
+  ],
+  [
+   "noun · gt label: P4 selected (P(rank1))",
+   "noun_target:L10H7 (0.687)",
+   "noun_target:L10H7 (0.409)",
+   "noun_target:L10H7 (0.407)"
+  ],
+  [
+   "noun · self label: P4 selected (P(rank1))",
+   "noun_target:L8H6 (0.529)",
+   "noun_target:L8H6 (0.529)",
+   "noun_target:L8H6 (0.529)"
+  ],
+  [
+   "combined · gt label: P4 selected (P(rank1))",
+   "last:L12H4 (0.753)",
+   "last:L8H7 (0.555)",
+   "last:L12H4 (0.769)"
+  ],
+  [
+   "combined · self label: P4 selected (P(rank1))",
+   "noun_target:L8H6 (0.529)",
+   "noun_target:L8H6 (0.529)",
+   "noun_target:L8H6 (0.529)"
+  ],
+  [
+   "held-out identity: noun best GT / combined best GT / L8H2",
+   "0.867 / 0.911 / 0.911",
+   "0.867 / 0.911 / 0.911",
+   "0.867 / 0.911 / 0.911"
+  ]
+ ]
+}

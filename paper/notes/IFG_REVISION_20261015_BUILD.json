@@ -1,0 +1,15 @@
+{
+  "status": "BUILD_PASS",
+  "scope": "ACTIVE_IFG_DRAFT_ONLY",
+  "pdf": "paper/latex/build/main.pdf",
+  "pdf_sha256": "013d727e7f0c266a282e4de04af5ce2f30172ef6299b15a023a98c025d627083",
+  "pages": 9,
+  "references_start_page": 8,
+  "unresolved_references": false,
+  "overfull_boxes": false,
+  "known_warnings": "Cached lineno.sty and algorithm.sty UTF-8 warnings; no body font/style modifications.",
+  "legacy_EXP001": "Not used in this manuscript; legacy full-workspace helper is separate.",
+  "submission_ready": false,
+  "visual_review": "Title/abstract, native diagrams, main comparison table, result chart, qualitative example, and references inspected via rasterized PDF.",
+  "fonts": "Embedded Nimbus Roman Times-compatible body fonts; plot uses embedded DejaVu Sans."
+}

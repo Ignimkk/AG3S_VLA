@@ -1,0 +1,150 @@
+{
+ "demo|gt": {
+  "loss_reduction": [
+   0.479,
+   0.587,
+   0.7479
+  ],
+  "recall_minus_ball": [
+   -0.0010000000000000009,
+   -0.0024000000000000687,
+   -0.014000000000000012
+  ]
+ },
+ "demo|gt_label": {
+  "loss_reduction": [
+   0.479,
+   0.587,
+   0.7479
+  ],
+  "recall_minus_ball": [
+   0.0,
+   -0.0015000000000000568,
+   -0.010300000000000087
+  ]
+ },
+ "lb|gt": {
+  "loss_reduction": [
+   null,
+   null,
+   null
+  ],
+  "recall_minus_ball": [
+   -0.031000000000000028,
+   -0.041100000000000025,
+   -0.07750000000000001
+  ]
+ },
+ "lb|gt_label": {
+  "loss_reduction": [
+   null,
+   null,
+   null
+  ],
+  "recall_minus_ball": [
+   0.0,
+   0.0,
+   -0.0025000000000000577
+  ]
+ },
+ "unowned_cdf_n": {
+  "raw_depth": 422,
+  "per_camera_min": 422,
+  "fused": 422,
+  "nontarget_evidence": 422,
+  "distractor_mesh": 422
+ },
+ "unowned_raw_depth_quantiles_mm": [
+  11.56,
+  13.71,
+  16.24,
+  19.12,
+  22.13
+ ],
+ "unowned_per_camera_min_quantiles_mm": [
+  11.61,
+  13.71,
+  16.39,
+  19.09,
+  22.14
+ ],
+ "unowned_fused_quantiles_mm": [
+  11.95,
+  14.15,
+  17.02,
+  19.72,
+  22.73
+ ],
+ "unowned_nontarget_evidence_quantiles_mm": [
+  13.23,
+  15.97,
+  19.75,
+  24.19,
+  27.47
+ ],
+ "unowned_distractor_mesh_quantiles_mm": [
+  0.83,
+  1.77,
+  3.89,
+  6.36,
+  9.66
+ ],
+ "sign_composition": {
+  "labels": [
+   "demo\nnone",
+   "demo\nball",
+   "demo\nmain_fine_layer",
+   "demo\ncoarse_layer",
+   "demo\nmain_composite",
+   "demo\ncomposed_ball",
+   "lb\nnone",
+   "lb\nball",
+   "lb\nmain_fine_layer",
+   "lb\ncoarse_layer",
+   "lb\nmain_composite",
+   "lb\ncomposed_ball"
+  ],
+  "neg": [
+   0.253,
+   0.2543,
+   0.253,
+   0.631,
+   0.6841,
+   0.2543,
+   0.3481,
+   0.3481,
+   0.3481,
+   0.7543,
+   0.7891,
+   0.3481
+  ],
+  "zero": [
+   0.4181,
+   0.4118,
+   0.4181,
+   0.0047,
+   0.1534,
+   0.4118,
+   0.5525,
+   0.5525,
+   0.5525,
+   0.0007,
+   0.2014,
+   0.5525
+  ],
+  "pos": [
+   0.3289,
+   0.334,
+   0.3289,
+   0.3643,
+   0.1625,
+   0.334,
+   0.0994,
+   0.0994,
+   0.0994,
+   0.245,
+   0.0095,
+   0.0994
+  ]
+ }
+}

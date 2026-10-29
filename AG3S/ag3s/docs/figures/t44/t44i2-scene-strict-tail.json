@@ -1,0 +1,21 @@
+{
+ "kind": "scene",
+ "run": "V11AB_H_V11AB_ep1834_s18341",
+ "seq": 35,
+ "n_changed": 576,
+ "n_contact_rows": 135,
+ "changed_by_link": {
+  "ee_finger_l1": 448,
+  "ee_left": 128
+ },
+ "authorized_links": [
+  "ee_finger_r1",
+  "ee_finger_r2",
+  "ee_right"
+ ],
+ "held_apple_spheres": 2,
+ "held_apple_radius_mm": 38.471,
+ "figure": "t44i2-scene-strict-tail.png",
+ "split": "test (episodes 1807-1995, recorded V11AB H runs)",
+ "source": "outputs/verify/T44/I2/agg.json, per_chunk.json, split_auth.json"
+}

@@ -6,7 +6,7 @@ description: AG3S_VLA monorepo 커밋 규칙, 브랜치 확인, 소유 파일 st
 # AG3S_VLA 커밋 규칙
 
 커밋 전에 실제 `git rev-parse --show-toplevel`, `git branch --show-current`,
-`git remote -v`와 `doc/BRANCHES.md`를 확인한다. 이전의 다중 저장소 규칙은 폐기한다.
+`git remote -v`와 `doc/active/BRANCHES.md`를 확인한다. 이전의 다중 저장소 규칙은 폐기한다.
 
 ## 하나의 개발 저장소
 

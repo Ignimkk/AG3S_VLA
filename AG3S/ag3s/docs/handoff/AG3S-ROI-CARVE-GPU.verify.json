@@ -1,0 +1,699 @@
+{
+ "step": "AG3S-ROI-CARVE-GPU",
+ "writer": "lead (direct measurement)",
+ "written_kst": "2026-10-25 05:0x KST",
+ "task": "AG3S/ag3s/docs/handoff/AG3S-ROI-CARVE-GPU.task.md",
+ "records": {
+  "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T035831+0900_8da37119afd3_f082f20e9463",
+  "verify_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T035831+0900_8da37119afd3_f082f20e9463/verify/AG3S-ROI-CARVE-GPU",
+  "smoke_kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T035831+0900_8da37119afd3_f082f20e9463/verify/AG3S-ROI-CARVE-GPU-SMOKE",
+  "source_tdm_run": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97",
+  "snapshot_gpu": "snapshot_tdm3 (hard links) + config.py · curobo_builder.py · serve_safe.py of the GPU judgement"
+ },
+ "code_state": {
+  "base_commit": "f7c1c84c (dynamic field bundle)",
+  "this_step": "working tree on f7c1c84c: esdf.roi_carve_device, gpu_cameras / seen_through_gpu / occupied_voxels_gpu, --roi-carve-device, serving default roi_carve_device = cuda",
+  "tests": "numbers.tests"
+ },
+ "numbers": {
+  "R1_server_records": {
+   "definition": "per chunk profile_ms.esdf and esdf_stats.roi_carve.ms of the AG3S-TASK-DYNAMIC-MAP E2 / E3 / E4 closed-loop records (target-layer chunks excluded)",
+   "B": {
+    "n_chunks": 736,
+    "esdf_ms_median": 109.7,
+    "esdf_ms_p95": 265.09,
+    "esdf_ms_mean": 138.32,
+    "roi_ms_median": 0.0,
+    "roi_ms_mean": 0.0,
+    "esdf_minus_roi_ms_median": 109.7,
+    "esdf_minus_roi_ms_mean": 138.32
+   },
+   "B_ROI": {
+    "n_chunks": 635,
+    "esdf_ms_median": 238.51,
+    "esdf_ms_p95": 597.44,
+    "esdf_ms_mean": 288.47,
+    "roi_ms_median": 75.23,
+    "roi_ms_mean": 140.02,
+    "esdf_minus_roi_ms_median": 112.63,
+    "esdf_minus_roi_ms_mean": 148.45
+   },
+   "B_ROI_FP": {
+    "n_chunks": 704,
+    "esdf_ms_median": 267.54,
+    "esdf_ms_p95": 815.87,
+    "esdf_ms_mean": 390.89,
+    "roi_ms_median": 119.85,
+    "roi_ms_mean": 255.9,
+    "esdf_minus_roi_ms_median": 97.28,
+    "esdf_minus_roi_ms_mean": 134.99
+   },
+   "B_ROI_FPR": {
+    "n_chunks": 683,
+    "esdf_ms_median": 303.19,
+    "esdf_ms_p95": 885.3,
+    "esdf_ms_mean": 444.43,
+    "roi_ms_median": 144.59,
+    "roi_ms_mean": 311.6,
+    "esdf_minus_roi_ms_median": 96.83,
+    "esdf_minus_roi_ms_mean": 132.84
+   }
+  },
+  "R3_constraint_generation_contains_esdf": {
+   "pipeline": "profiler.stage('esdf') is nested inside profiler.stage('constraint_generation') (pipeline.py 8b)",
+   "constraint_generation_minus_esdf_ms_median": {
+    "B": 14.6,
+    "B_ROI": 14.5,
+    "B_ROI_FP": 14.0,
+    "B_ROI_FPR": 13.9
+   },
+   "constraint_generation_ms_median": {
+    "B": 154.43,
+    "B_ROI": 302.66,
+    "B_ROI_FP": 300.11,
+    "B_ROI_FPR": 368.04
+   },
+   "target_grounding_ms_median": {
+    "B": 78.0,
+    "B_ROI": 88.13,
+    "B_ROI_FP": 78.73,
+    "B_ROI_FPR": 89.43
+   },
+   "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T035831+0900_8da37119afd3_f082f20e9463/verify/AG3S-ROI-CARVE-GPU/server_profile_agg.txt"
+  },
+  "R2_target_pixel_judgement": {
+   "fact": "target_pixel_mask runs only in _target_layer_route; CuroboFieldBuilder.update refuses a target_layer request when esdf.target_layer is off; E4 / serving run without --target-layer",
+   "code": "AG3S/ag3s/fields/curobo_builder.py update() (target_layer check), _target_layer_route"
+  },
+  "R1_replay_cpu": {
+   "n_requests": 683,
+   "episodes": 18,
+   "n_timed_copy_checks": 154,
+   "ms": {
+    "roi_carve_total": {
+     "n": 683,
+     "median": 207.728,
+     "p95": 765.665,
+     "mean": 311.017
+    },
+    "seen_through": {
+     "n": 683,
+     "median": 178.94,
+     "p95": 703.526,
+     "mean": 271.655
+    },
+    "footprint.filter": {
+     "n": 683,
+     "median": 109.686,
+     "p95": 431.428,
+     "mean": 169.153
+    },
+    "footprint.per_camera": {
+     "n": 683,
+     "median": 178.806,
+     "p95": 703.349,
+     "mean": 271.514
+    },
+    "occupied.meta": {
+     "n": 683,
+     "median": 1.43,
+     "p95": 3.108,
+     "mean": 2.665
+    },
+    "occupied.select": {
+     "n": 683,
+     "median": 0.48,
+     "p95": 0.789,
+     "mean": 0.599
+    },
+    "occupied.d2h": {
+     "n": 683,
+     "median": 0.46,
+     "p95": 0.993,
+     "mean": 1.206
+    },
+    "occupied.host": {
+     "n": 683,
+     "median": 17.24,
+     "p95": 94.298,
+     "mean": 29.616
+    },
+    "set_free": {
+     "n": 683,
+     "median": 0.532,
+     "p95": 0.984,
+     "mean": 1.039
+    },
+    "occupied.n": {
+     "n": 683,
+     "median": 164750.0,
+     "p95": 360401.0,
+     "mean": 199997.293
+    }
+   },
+   "parts_mean_ms": {
+    "filter": 169.15,
+    "judge": 102.5,
+    "host": 29.62,
+    "other": 9.75
+   },
+   "note": "update_ms of this run includes the --compare-gpu work and is not a cost"
+  },
+  "replay_gpu": {
+   "n_requests": 683,
+   "ms": {
+    "roi_carve_total": {
+     "n": 683,
+     "median": 18.711,
+     "p95": 92.009,
+     "mean": 32.522
+    },
+    "gpu_cameras": {
+     "n": 683,
+     "median": 2.905,
+     "p95": 60.757,
+     "mean": 15.645
+    },
+    "set_free": {
+     "n": 683,
+     "median": 0.204,
+     "p95": 0.341,
+     "mean": 0.279
+    },
+    "update_ms": {
+     "n": 683,
+     "median": 120.268,
+     "p95": 205.345,
+     "mean": 146.802
+    }
+   },
+   "roi_plus_upload_ms": {
+    "median": 26.09,
+    "p95": 101.61
+   }
+  },
+  "G1_equivalence": {
+   "n_calls": 1366,
+   "n_judged_cpu": 136598151,
+   "n_judged_gpu": 136598151,
+   "n_hit_cpu": 381533,
+   "n_hit_gpu": 381533,
+   "cpu_only": 0,
+   "gpu_only": 0,
+   "verdict": "pass"
+  },
+  "G2_speed": {
+   "cpu_roi_ms": {
+    "median": 207.73,
+    "p95": 765.67
+   },
+   "gpu_roi_plus_upload_ms": {
+    "median": 26.09,
+    "p95": 101.61
+   },
+   "median_reduction": 0.8744,
+   "p95_reduction": 0.8673,
+   "verdict": "pass"
+  },
+  "G3_server_smoke": {
+   "episode": 1345,
+   "seed": 13453,
+   "n_chunks_gpu": 32,
+   "n_chunks_e4": 32,
+   "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T035831+0900_8da37119afd3_f082f20e9463/verify/AG3S-ROI-CARVE-GPU-SMOKE/runs/server_8292_20261024T192842",
+   "e4_server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261024T034606+0900_8da37119afd3_31d9b16e3c97/verify/AG3S-TASK-DYNAMIC-MAP-E4/runs/server_8293_20261024T085414/server_constraints/run_0000",
+   "device": [
+    "cuda"
+   ],
+   "identical_refined_chunk": 32,
+   "identical_esdf_distance": 32,
+   "identical_esdf_coarse_distance": 32,
+   "identical_roi_counts": 32,
+   "esdf_ms": {
+    "gpu": {
+     "median": 131.82,
+     "p95": 272.51,
+     "mean": 486.85
+    },
+    "e4_cpu": {
+     "median": 259.89,
+     "p95": 880.34,
+     "mean": 455.96
+    }
+   },
+   "roi_ms": {
+    "gpu": {
+     "median": 12.86,
+     "p95": 97.58,
+     "mean": 27.69
+    },
+    "e4_cpu": {
+     "median": 121.32,
+     "p95": 682.03,
+     "mean": 280.55
+    }
+   },
+   "client": "placed at t=211, --stop-after-place 2.5 (client log)",
+   "first_chunk_esdf_ms": {
+    "gpu": 11264.27,
+    "e4_cpu": 2220.88,
+    "note": "the smoke's 1345 was its server's first episode (CUDA / kernel start-up); in E4 it was the server's second"
+   },
+   "without_first_chunk": {
+    "esdf_ms": {
+     "gpu": {
+      "median": 127.74,
+      "p95": 227.77,
+      "mean": 139.19
+     },
+     "e4_cpu": {
+      "median": 259.12,
+      "p95": 800.72,
+      "mean": 399.03
+     }
+    },
+    "roi_ms": {
+     "gpu": {
+      "median": 12.84,
+      "p95": 96.16,
+      "mean": 24.62
+     },
+     "e4_cpu": {
+      "median": 121.56,
+      "p95": 683.72,
+      "mean": 285.77
+     }
+    }
+   },
+   "verdict": "pass"
+  },
+  "R4_ep1345_neighbour_contact": {
+   "contact_replay_E4": {
+    "pair": "EE_BODY_L geom#1052 (left hand body mesh) ↔ orange_geom",
+    "rows": 27,
+    "t": [
+     101,
+     127
+    ],
+    "chunks": [
+     12,
+     13,
+     14,
+     15
+    ],
+    "min_dist_mm": -0.569,
+    "max_force_N": 53.27
+   },
+   "same_contact_other_configs": {
+    "B": 27,
+    "B_ROI": 19,
+    "B_ROI_FP": 27,
+    "B_ROI_FPR": 27
+   },
+   "vla_alone_E0": {
+    "rows": 31,
+    "t": [
+     150,
+     180
+    ],
+    "pair": "EE_BODY_L ↔ orange",
+    "source": "IFG-APPLE/replay/runs_E0_E0_ep1345_s13453.json"
+   },
+   "per_request_E4": [
+    {
+     "request": 11,
+     "t_step": 12,
+     "geom_to_neighbour_gt_min_mm": 57.23,
+     "contact_region": {
+      "n": 60,
+      "outside_nearest_sphere_mm": [
+       12.05,
+       16.735
+      ],
+      "nearest_sphere_links": {
+       "ee_finger_l1": 60
+      },
+      "link_planned_clearance_min_mm": {
+       "ee_finger_l1": -0.158
+      }
+     },
+     "neighbour_visible_frac": 0.49,
+     "esdf_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -10.002,
+      "forgotten_frac": 0.0382,
+      "forgotten_frac_visible": 0.0
+     },
+     "esdf_free_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -7.072,
+      "forgotten_frac": 0.1279,
+      "forgotten_frac_visible": 0.0034
+     },
+     "link_planned_clearance_min_mm": 16.106,
+     "to_status": "optimal",
+     "neighbour_contact_active": false
+    },
+    {
+     "request": 12,
+     "t_step": 13,
+     "geom_to_neighbour_gt_min_mm": 26.572,
+     "contact_region": {
+      "n": 54,
+      "outside_nearest_sphere_mm": [
+       10.132,
+       16.956
+      ],
+      "nearest_sphere_links": {
+       "ee_finger_l1": 54
+      },
+      "link_planned_clearance_min_mm": {
+       "ee_finger_l1": -3.52
+      }
+     },
+     "neighbour_visible_frac": 0.4767,
+     "esdf_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -8.659,
+      "forgotten_frac": 0.0465,
+      "forgotten_frac_visible": 0.0
+     },
+     "esdf_free_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -8.659,
+      "forgotten_frac": 0.1478,
+      "forgotten_frac_visible": 0.007
+     },
+     "link_planned_clearance_min_mm": 14.694,
+     "to_status": "optimal",
+     "neighbour_contact_active": true
+    },
+    {
+     "request": 13,
+     "t_step": 14,
+     "geom_to_neighbour_gt_min_mm": 0.764,
+     "contact_region": {
+      "n": 30,
+      "outside_nearest_sphere_mm": [
+       9.272,
+       14.821
+      ],
+      "nearest_sphere_links": {
+       "ee_finger_l1": 30
+      },
+      "link_planned_clearance_min_mm": {
+       "ee_finger_l1": 0.128
+      }
+     },
+     "neighbour_visible_frac": 0.4136,
+     "esdf_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -11.177,
+      "forgotten_frac": 0.0449,
+      "forgotten_frac_visible": 0.0
+     },
+     "esdf_free_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -11.177,
+      "forgotten_frac": 0.2458,
+      "forgotten_frac_visible": 0.0201
+     },
+     "link_planned_clearance_min_mm": 17.739,
+     "to_status": "optimal",
+     "neighbour_contact_active": true
+    },
+    {
+     "request": 14,
+     "t_step": 15,
+     "geom_to_neighbour_gt_min_mm": 1.163,
+     "contact_region": {
+      "n": 27,
+      "outside_nearest_sphere_mm": [
+       9.106,
+       19.077
+      ],
+      "nearest_sphere_links": {
+       "ee_finger_l1": 27
+      },
+      "link_planned_clearance_min_mm": {
+       "ee_finger_l1": -2.462
+      }
+     },
+     "neighbour_visible_frac": 0.4003,
+     "esdf_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -8.659,
+      "forgotten_frac": 0.0349,
+      "forgotten_frac_visible": 0.0
+     },
+     "esdf_free_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -14.999,
+      "forgotten_frac": 0.2591,
+      "forgotten_frac_visible": 0.0041
+     },
+     "link_planned_clearance_min_mm": 20.036,
+     "to_status": "optimal",
+     "neighbour_contact_active": true
+    },
+    {
+     "request": 15,
+     "t_step": 16,
+     "geom_to_neighbour_gt_min_mm": 1.902,
+     "contact_region": {
+      "n": 48,
+      "outside_nearest_sphere_mm": [
+       10.744,
+       24.079
+      ],
+      "nearest_sphere_links": {
+       "ee_finger_l1": 48
+      },
+      "link_planned_clearance_min_mm": {
+       "ee_finger_l1": -0.406
+      }
+     },
+     "neighbour_visible_frac": 0.3887,
+     "esdf_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -7.072,
+      "forgotten_frac": 0.0482,
+      "forgotten_frac_visible": 0.0
+     },
+     "esdf_free_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -14.145,
+      "forgotten_frac": 0.2708,
+      "forgotten_frac_visible": 0.0171
+     },
+     "link_planned_clearance_min_mm": 19.744,
+     "to_status": "optimal",
+     "neighbour_contact_active": true
+    },
+    {
+     "request": 16,
+     "t_step": 17,
+     "geom_to_neighbour_gt_min_mm": 1.532,
+     "contact_region": {
+      "n": 11,
+      "outside_nearest_sphere_mm": [
+       13.332,
+       17.847
+      ],
+      "nearest_sphere_links": {
+       "ee_finger_l1": 11
+      },
+      "link_planned_clearance_min_mm": {
+       "ee_finger_l1": -0.843
+      }
+     },
+     "neighbour_visible_frac": 0.4236,
+     "esdf_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -8.659,
+      "forgotten_frac": 0.0399,
+      "forgotten_frac_visible": 0.0
+     },
+     "esdf_free_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -14.145,
+      "forgotten_frac": 0.2259,
+      "forgotten_frac_visible": 0.0196
+     },
+     "link_planned_clearance_min_mm": 21.445,
+     "to_status": "feasible",
+     "neighbour_contact_active": true
+    },
+    {
+     "request": 17,
+     "t_step": 18,
+     "geom_to_neighbour_gt_min_mm": 7.277,
+     "contact_region": {
+      "n": 36,
+      "outside_nearest_sphere_mm": [
+       15.338,
+       25.009
+      ],
+      "nearest_sphere_links": {
+       "ee_finger_l1": 16,
+       "ee_left": 20
+      },
+      "link_planned_clearance_min_mm": {
+       "ee_finger_l1": -2.476,
+       "ee_left": 20.233
+      }
+     },
+     "neighbour_visible_frac": 0.4718,
+     "esdf_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -7.072,
+      "forgotten_frac": 0.1329,
+      "forgotten_frac_visible": 0.1303
+     },
+     "esdf_free_at_neighbour": {
+      "n_in_grid": 602,
+      "min_mm": -8.659,
+      "forgotten_frac": 0.2691,
+      "forgotten_frac_visible": 0.169
+     },
+     "link_planned_clearance_min_mm": 20.233,
+     "to_status": "feasible",
+     "neighbour_contact_active": true
+    }
+   ],
+   "per_request_B_contact_region": [
+    {
+     "request": 11,
+     "outside_nearest_sphere_mm": [
+      12.05,
+      16.735
+     ],
+     "link_planned_clearance_min_mm": {
+      "ee_finger_l1": -0.158
+     }
+    },
+    {
+     "request": 12,
+     "outside_nearest_sphere_mm": [
+      10.132,
+      16.956
+     ],
+     "link_planned_clearance_min_mm": {
+      "ee_finger_l1": -3.52
+     }
+    },
+    {
+     "request": 13,
+     "outside_nearest_sphere_mm": [
+      9.272,
+      14.821
+     ],
+     "link_planned_clearance_min_mm": {
+      "ee_finger_l1": 0.128
+     }
+    },
+    {
+     "request": 14,
+     "outside_nearest_sphere_mm": [
+      9.106,
+      19.077
+     ],
+     "link_planned_clearance_min_mm": {
+      "ee_finger_l1": -2.462
+     }
+    },
+    {
+     "request": 15,
+     "outside_nearest_sphere_mm": [
+      10.744,
+      24.079
+     ],
+     "link_planned_clearance_min_mm": {
+      "ee_finger_l1": -0.406
+     }
+    },
+    {
+     "request": 16,
+     "outside_nearest_sphere_mm": [
+      13.328,
+      17.845
+     ],
+     "link_planned_clearance_min_mm": {
+      "ee_finger_l1": -0.845
+     }
+    },
+    {
+     "request": 17,
+     "outside_nearest_sphere_mm": [
+      15.417,
+      24.914
+     ],
+     "link_planned_clearance_min_mm": {
+      "ee_finger_l1": -2.608,
+      "ee_left": 20.319
+     }
+    }
+   ],
+   "scene_figure": {
+    "episode": 1345,
+    "request": 13,
+    "chunk": "chunk_00042.npz",
+    "geom": 1052,
+    "geom_to_orange_min_mm": 0.764,
+    "contact_region_n": 30,
+    "contact_region_centre_base_m": [
+     0.473,
+     0.2908,
+     0.87
+    ],
+    "contact_region_outside_nearest_sphere_mm": [
+     9.272,
+     14.821
+    ],
+    "sphere_radius_mm": {
+     "ee_finger_l1": [
+      2.54,
+      8.44
+     ],
+     "ee_finger_l2": [
+      2.54,
+      8.44
+     ],
+     "ee_left": [
+      5.7,
+      6.22
+     ]
+    },
+    "slice_z_m": 0.8697,
+    "field": "esdf_distance (main fine layer, recorded)"
+   },
+   "neighbour_contact_setting": "--neighbour-contact-mm 20: finger spheres (ee_finger_l1 / l2) may overlap a neighbour obstacle by 20 mm near the target (pre-grasp); active in requests 12–17",
+   "definitions": "contact region = the hand geom's samples within 2 mm of its closest approach to the orange; outside = min over all recorded AG3S spheres of |p − c| − r"
+  },
+  "tests": {
+   "cpu_regression_.venv-ag3s": {
+    "command": "pytest tests/ag3s (2 shards) + tests/trajopt, MUJOCO_GL=osmesa, on the final working tree",
+    "passed": 3724,
+    "skipped": 55,
+    "failed": 1,
+    "failed_tests": [
+     "tests/trajopt/test_t43t_replay.py::test_off_is_bit_identical_to_the_pre_fix_commit (pre-existing: fails on a clean HEAD worktree too, AG3S_TSDF_DYNAMIC_LOG §3)"
+    ],
+    "fixed_in_f7c1c84c": "6 source-string tests broken by moving AG3S construction from serve_safe.main to ag3s_from_args"
+   },
+   "gpu_.venv-openpi-live": {
+    "tests/ag3s/test_roi_carve_gpu.py": "8 passed (incl. min filter = scipy for r 0..8, seen_through_gpu = seen_through on 3 random scenes × 5 modes, builder field bit-identical cpu vs cuda)",
+    "tests/ag3s/test_task_dynamic_map.py + test_dynamic_field.py": "all passed (29) in the same session run"
+   }
+  }
+ },
+ "not_measured": [
+  "which of the two factors (sphere model gap 9–24 mm, neighbour-contact allowance 20 mm) alone would have prevented the 1345 contact (no counterfactual run)",
+  "R5: target-only TSDF leak mechanism (target layer off in serving; not measured in this step)",
+  "GPU judgement on more than one closed-loop episode (G3 is one episode; the 18-scene evidence is the offline replay)"
+ ],
+ "limits": [
+  "replay TSDF lacks the server's held-object handling and target exclusion (occupied voxel counts are close to the server's, absolute times differ)",
+  "G3 timing: the smoke's 1345 was its server's first episode — the first chunk (11.3 s) is start-up and excluded from the without_first_chunk numbers"
+ ]
+}

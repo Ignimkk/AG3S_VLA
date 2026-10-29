@@ -1,0 +1,138 @@
+{
+ "items": [
+  {
+   "label": "B0 serving L8H2 (as served)",
+   "arm": "T54region:L8H2",
+   "source": "baseline",
+   "group": "baseline",
+   "mean": 0.595570839268571,
+   "ci95": [
+    0.5393973035080362,
+    0.6543698291643842
+   ],
+   "n_episodes": 32,
+   "colour": 7
+  },
+  {
+   "label": "B0 serving noun (as served)",
+   "arm": "T54region:N",
+   "source": "baseline",
+   "group": "baseline",
+   "mean": 0.7849589542917224,
+   "ci95": [
+    0.7389858160856654,
+    0.8320294207534068
+   ],
+   "n_episodes": 32,
+   "colour": 7
+  },
+  {
+   "label": "B0 serving noun + render mask",
+   "arm": "T54region+rm:N",
+   "source": "baseline_rm",
+   "group": "baseline",
+   "mean": 0.8365522778501142,
+   "ci95": [
+    0.7848880580841133,
+    0.8802113047054992
+   ],
+   "n_episodes": 32,
+   "colour": 7
+  },
+  {
+   "label": "R0 FG (attention+feature+3D, projector)",
+   "arm": "FG:N:projector",
+   "source": "s3",
+   "group": "feature",
+   "mean": 0.5820720021336018,
+   "ci95": [
+    0.5341673655899137,
+    0.6348760866050548
+   ],
+   "n_episodes": 32,
+   "colour": 1
+  },
+  {
+   "label": "R0 G (attention+3D graph)",
+   "arm": "G:N",
+   "source": "s3",
+   "group": "ours",
+   "mean": 0.7284514932277877,
+   "ci95": [
+    0.672262507599722,
+    0.7795653495771154
+   ],
+   "n_episodes": 32,
+   "colour": 0
+  },
+  {
+   "label": "R3 + top-1 seed-mass region",
+   "arm": "top1-only:N",
+   "source": "rounds/R3",
+   "group": "ours",
+   "mean": 0.7936868210294628,
+   "ci95": [
+    0.7415884271386908,
+    0.8373610734037065
+   ],
+   "n_episodes": 32,
+   "colour": 0
+  },
+  {
+   "label": "R5 + non-support seed eligibility",
+   "arm": "top1-only-ns:N",
+   "source": "rounds/R5",
+   "group": "ours",
+   "mean": 0.8170282824687547,
+   "ci95": [
+    0.7693244817834715,
+    0.8598507171683158
+   ],
+   "n_episodes": 32,
+   "colour": 0
+  },
+  {
+   "label": "R6 + render robot mask (candidate)",
+   "arm": "top1-only-ns+rm:N",
+   "source": "rounds/R6",
+   "group": "ours",
+   "mean": 0.8931617819538672,
+   "ci95": [
+    0.8495325489284712,
+    0.9321542872075567
+   ],
+   "n_episodes": 32,
+   "colour": 0
+  },
+  {
+   "label": "R7 FG on the R6 base (prefix_L8)",
+   "arm": "FG-Q:prefix_L8+top1",
+   "source": "rounds/R7",
+   "group": "feature",
+   "mean": 0.8258450015719654,
+   "ci95": [
+    0.7797169133666861,
+    0.8674769484365848
+   ],
+   "n_episodes": 32,
+   "colour": 1
+  },
+  {
+   "label": "R7 oracle seed (diagnostic)",
+   "arm": "G-Q:O+top1",
+   "source": "rounds/R7",
+   "group": "oracle",
+   "mean": 0.9176988753598216,
+   "ci95": [
+    0.8821934866278401,
+    0.9497779858665509
+   ],
+   "n_episodes": 32,
+   "colour": 2
+  }
+ ],
+ "bootstrap": {
+  "replicates": 2000,
+  "seed": 20261015
+ }
+}

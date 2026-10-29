@@ -1,0 +1,97 @@
+{
+ "runs": {
+  "neighbour/954/serving/d2": {
+   "key": "neighbour/954/serving/d2",
+   "seq": 19,
+   "request_t_step": 144,
+   "ref_index": 1312,
+   "pick_index": 1304,
+   "n_hand_spheres": 303,
+   "check_vs_obs_stage_mm": {
+    "ref": [
+     -9.770035948404322,
+     -9.770035948404322
+    ],
+    "pick": [
+     0.13342266846854636,
+     0.13342266846854636
+    ]
+   },
+   "ref": {
+    "min_mm": -9.770035948404322,
+    "n_spheres_below_0": 13,
+    "n_below_0_by_link": {
+     "ee_finger_r1": 0,
+     "ee_finger_r2": 6,
+     "ee_right": 7
+    },
+    "n_below_0_palm_shell": 7
+   },
+   "pick": {
+    "min_mm": 0.13342266846854636,
+    "n_spheres_below_0": 0,
+    "n_below_0_by_link": {
+     "ee_finger_r1": 0,
+     "ee_finger_r2": 0,
+     "ee_right": 0
+    },
+    "n_below_0_palm_shell": 0
+   },
+   "n_field_surface_free": 24750,
+   "n_field_target": 5491,
+   "box_half_m": 0.11,
+   "grid_step_m": 0.004,
+   "field_layers": "target-free layer (hand links read it, exclude-authorized)"
+  },
+  "neighbour/211/serving/d1": {
+   "key": "neighbour/211/serving/d1",
+   "seq": 29,
+   "request_t_step": 224,
+   "ref_index": 1312,
+   "pick_index": 1333,
+   "n_hand_spheres": 303,
+   "check_vs_obs_stage_mm": {
+    "ref": [
+     -6.671246933736454,
+     -6.671246933736454
+    ],
+    "pick": [
+     0.5817424204556813,
+     0.5817424204556813
+    ]
+   },
+   "ref": {
+    "min_mm": -6.671246933736454,
+    "n_spheres_below_0": 6,
+    "n_below_0_by_link": {
+     "ee_finger_l1": 1,
+     "ee_finger_l2": 0,
+     "ee_left": 5
+    },
+    "n_below_0_palm_shell": 5
+   },
+   "pick": {
+    "min_mm": 0.5817424204556813,
+    "n_spheres_below_0": 0,
+    "n_below_0_by_link": {
+     "ee_finger_l1": 0,
+     "ee_finger_l2": 0,
+     "ee_left": 0
+    },
+    "n_below_0_palm_shell": 0
+   },
+   "n_field_surface_free": 24678,
+   "n_field_target": 5874,
+   "box_half_m": 0.11,
+   "grid_step_m": 0.004,
+   "field_layers": "target-free layer (hand links read it, exclude-authorized)"
+  }
+ },
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/GIK/field",
+ "projection": "field surface samples (4 mm grid, -6 mm < d <= 0) within 25 mm of any hand-sphere surface at either pose, projected; origin = mean hand-sphere centre at the reference",
+ "colour_norm_mm": [
+  -15,
+  0,
+  30
+ ]
+}

@@ -1,0 +1,167 @@
+{
+  "status": "PASS_WITH_LIMITED_DRAFT_SCOPE",
+  "audited_at": "2026-10-05T21:10:33+09:00",
+  "scope": "Step 5 draft scaffold, source integrity and rendering; not submission compliance or scientific review",
+  "kit_commit": "12909ae437f6dbc7435069cfdb4ca44c18e6a02f",
+  "kit_status": "PROVISIONAL_2026",
+  "compiler": {
+    "version": "0.17.0",
+    "download_url": "https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%400.17.0/tectonic-0.17.0-x86_64-unknown-linux-musl.tar.gz",
+    "archive_sha256": "8533d07f9ccbd7a65824b9e0459041bca34af1eb33daba48f59215593753a3b7",
+    "github_asset_digest": "sha256:8533d07f9ccbd7a65824b9e0459041bca34af1eb33daba48f59215593753a3b7",
+    "binary_sha256": "a98aa59ad5c1df39a6c9e56cbfc5088f2b11d6c179c0130b97998e4bd46a46da",
+    "path": "/tmp/cvpr-latex-tools/tectonic",
+    "downloaded_at": "2026-10-05T20:50:00+09:00"
+  },
+  "pdf_inspector": "PyMuPDF 1.28.2",
+  "compiler_command": "XDG_CACHE_HOME=/tmp/cvpr-latex-cache python3 paper/tools/latex/build.py --engine tectonic --compiler /tmp/cvpr-latex-tools/tectonic",
+  "pdfs": {
+    "main": {
+      "path": "paper/latex/build/main.pdf",
+      "sha256": "746a03e8d8ffe1577a7b35b47165bb8caa2123b0d74a86728dd9d1d95fd81c09",
+      "page_count": 3,
+      "page_size_pt": [
+        612,
+        792
+      ],
+      "fonts": [
+        "AKHCZK+CMSY10",
+        "BZIVMZ+NimbusSanL-Bold",
+        "IHAIZV+NimbusSanL-Regu",
+        "IXFAWU+NimbusRomNo9L-Medi",
+        "TQTHRL+NimbusRomNo9L-Regu",
+        "YEUUOC+NimbusRomNo9L-ReguItal"
+      ],
+      "all_fonts_embedded": true,
+      "author_metadata_empty": true,
+      "limited_text_scan_pass": true,
+      "text_bounds_within_page": true
+    },
+    "supplementary": {
+      "path": "paper/supplementary/build/supplementary.pdf",
+      "sha256": "15e8be0fabcc74e491b4404fe2f7ea0463420dac6a269b2db112af89b11bf41e",
+      "page_count": 1,
+      "page_size_pt": [
+        612,
+        792
+      ],
+      "fonts": [
+        "BZIVMZ+NimbusSanL-Bold",
+        "IHAIZV+NimbusSanL-Regu",
+        "IXFAWU+NimbusRomNo9L-Medi",
+        "TQTHRL+NimbusRomNo9L-Regu"
+      ],
+      "all_fonts_embedded": true,
+      "author_metadata_empty": true,
+      "limited_text_scan_pass": true,
+      "text_bounds_within_page": true
+    },
+    "optional_artifacts": {
+      "path": "paper/latex/build/artifact-preview.pdf",
+      "sha256": "be4a8da40d33f07628edf4231dea3151612d8e075092b88644bb59403c24ba0b",
+      "page_count": 7,
+      "page_size_pt": [
+        612,
+        792
+      ],
+      "fonts": [
+        "BZIVMZ+NimbusSanL-Bold",
+        "IHAIZV+NimbusSanL-Regu",
+        "IXFAWU+NimbusRomNo9L-Medi",
+        "TQTHRL+NimbusRomNo9L-Regu",
+        "YEUUOC+NimbusRomNo9L-ReguItal"
+      ],
+      "all_fonts_embedded": true,
+      "author_metadata_empty": true,
+      "limited_text_scan_pass": true,
+      "text_bounds_within_page": true
+    }
+  },
+  "visual_review": {
+    "main_pages": [
+      1,
+      2,
+      3
+    ],
+    "supplementary_pages": [
+      1
+    ],
+    "findings": "Readable columns, figures/tables/algorithm fit. Sparse third page is normal for the scaffold and not a publication layout decision."
+  },
+  "not_performed": [
+    "scientific experiment",
+    "new measured figure",
+    "bibliography content verification",
+    "author-draft full review",
+    "full submission/anonymity audit",
+    "OpenReview registration/submission",
+    "latexmk or pdfLaTeX runtime verification"
+  ],
+  "remaining_warnings": {
+    "type": "Invalid UTF-8 bytes in two upstream package comments",
+    "locations": [
+      {
+        "file": "lineno.sty",
+        "line": 296,
+        "scope": "cached third-party package comment",
+        "sha256": "6e1016e8f4d1bbe17996a36f68c46c943c94195f6b3f8f07c152b633f3582ce1"
+      },
+      {
+        "file": "algorithm.sty",
+        "line": 11,
+        "scope": "cached third-party package comment",
+        "sha256": "d63fdf24879f0efd535bc6d06bc2a008b79ae77f6d6d2bc96156ff1f35e96bd7"
+      }
+    ],
+    "pdf_replacement_char_found": false,
+    "font_substitution_after_T1": false
+  },
+  "tectonic_bundle": [
+    {
+      "index_name": "6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c.index",
+      "index_sha256": "0fb434b0fa5fdebea7f767ed9c31939c99a780d6f95cd3f540aae55910bb5697"
+    }
+  ],
+  "source_sha256": {
+    "paper/latex/preamble.tex": "6211fef1d2d59cbe500a867e6f4176472e9baee963c910936be95adde9249177",
+    "paper/latex/metadata.tex": "086642881f7699d2d1f37e139a32e4f09f9dc68a5553929ebfc30fafeb240359",
+    "paper/latex/ieeenat_fullname.bst": "e38e6166bd7b1e6d23a1b79dcdb55c656e4fcdbe91bdf6b50d827e6b5d1aacfc",
+    "paper/latex/cvpr.sty": "2602473285d1a7df2a445ac89b76e1afa0acab78e056f0369d19770245190153",
+    "paper/latex/references.bib": "8e19e95b4188793da823ce602826bb5d6a2a4cbec875755e57b4df39afc2c618",
+    "paper/latex/main.tex": "e1885da88449ffed9d672bce86da7a80780591e9477a92a419707f869ab03e9e",
+    "paper/latex/sections/00_abstract.tex": "f34cd1abdae4103635ea1505e8137a43efc7d0e17852a4210ccf1286132c2309",
+    "paper/latex/sections/05_conclusion.tex": "37eebc45c1e398d0b2dde5460686c7522d3f834db0c3ea86db485763ad0de08e",
+    "paper/latex/sections/04_experiments.tex": "bf921316f2cd4feaeabfb8d445b5f7634bd2f646fc8bf32f9f9fe9be862d9f06",
+    "paper/latex/sections/03_method.tex": "ae8a57db5526c9206e83d1697971d63f305bf0c9a5cfcfbc994707341d961ab4",
+    "paper/latex/sections/02_related_work.tex": "bcbd21a418977d8f9bb6df6989846830502b9528621f872e637f1f181db1d5d1",
+    "paper/latex/sections/06_limitations.tex": "71a41964cca1a169ee9ceb28dc843f824ace4d167b36ff8e7017e5dfba5b4733",
+    "paper/latex/sections/01_introduction.tex": "0ef2b611ad5ad76f870a6df6631c079547c95ef883ca7abc891eb9561e33ac19",
+    "paper/supplementary/ieeenat_fullname.bst": "e38e6166bd7b1e6d23a1b79dcdb55c656e4fcdbe91bdf6b50d827e6b5d1aacfc",
+    "paper/supplementary/cvpr.sty": "2602473285d1a7df2a445ac89b76e1afa0acab78e056f0369d19770245190153",
+    "paper/supplementary/supplementary.tex": "5401e4a503dac6f37147246c10df2abed5d257e47dc65b45b26e8fdc1669059a",
+    "paper/supplementary/experiments/protocol.tex": "09772d718d5e31ffe253a23d47d93b2cf9e2f885a6753f4eda1e3d331d12d728",
+    "paper/figures/fig04_qualitative/figure.tex": "3386dcd37dd9501d6582057f0ba1409f59dd5fda869773f053f4069fe29dd935",
+    "paper/figures/fig04_qualitative/figure.json": "fd1a0bcfb8775faf8d73ffd092b6fb8c1cd72f8f4aa8e459974ee38b0af32c71",
+    "paper/figures/fig03_attention_to_3d/figure.tex": "ade570bd7847965baa50bd7a0de6f32afce48d7a276dd91e858f2c8fff7161eb",
+    "paper/figures/fig03_attention_to_3d/figure.json": "1e81cf4ddab1a3f753aa9c7844b75865be01fd7b4ed2f4ea1fd6b9bec9dd349b",
+    "paper/figures/fig05_analysis/figure.tex": "8adcb808adeccb08083f043bd298d6a35e10cba6e740871a81a15ade6b643b90",
+    "paper/figures/fig05_analysis/figure.json": "2552143e9662adbd2233e767c465a872b93a7e4a7c565d96d5b8d2d0493300d0",
+    "paper/figures/fig01_teaser/figure.tex": "17f676fdce40160eb0954396c279427053bfdb0681424082c56f370fd7372f96",
+    "paper/figures/fig01_teaser/figure.json": "5bb70c073c84d8aca0535d2557345d1fc075d42a5aa260e34eeac7fa681a1582",
+    "paper/figures/fig02_overview/figure.tex": "dd97ba40dc81f7fcd4038987dd39e03bb0d69ce5678e82b292bf342e37ebc8a9",
+    "paper/figures/fig02_overview/figure.json": "1f8845812c53bb08a0b45bb7cb02359275bca39302543483464bf14faa0d7e05",
+    "paper/tables/table04_efficiency/table.json": "3c63008afe7d749c431edd774da7d95d5c52d4ea30308737cc5c38be7ce038ad",
+    "paper/tables/table04_efficiency/table.tex": "a53111c0ef6114712c2ce5c3185d964c25089ce86ef7095ced3f8098f41a3ba2",
+    "paper/tables/table01_main/table.json": "39a370fe6b8c954132907e01302a92dfff2ab757febadc5d7fb5d072ff9d4965",
+    "paper/tables/table01_main/table.tex": "974f5137431b3ee195402d915e683444e2a9ab643fc2bc1bc02f5275fc7d9b3a",
+    "paper/tables/table03_ablation/table.json": "af4f3bac71e01883e92c6000f4770518ae0681123147225d15c71eaac0db507d",
+    "paper/tables/table03_ablation/table.tex": "aacf555006bcbac1e6b1f2cd49a787bd9f97ee1636a10ba7c45a9f31df6c0c7a",
+    "paper/tables/table00_descriptive/table.json": "860ef7d5197d291365c006b266949191653fb1b4b96c32090e3d79217dbc4457",
+    "paper/tables/table00_descriptive/table.tex": "78a03676c10e54a9c8a4a678919c2943fd7fb256398b4a193dec3c3134084a31",
+    "paper/tables/table02_generalization/table.json": "086bd6b3732b541856776c489897a5a175c18a0049e4bb93b4e7b5b82ff1ef0b",
+    "paper/tables/table02_generalization/table.tex": "c60f4227fb8844dd115b13ff43c8fe2d1cd461644daf95ed137507b1eb7dbb61",
+    "paper/algorithms/algorithm01_safe_vla.tex": "d2751faabb43f5a0b077a07607c063ae35211573ac6c505f8195a754a54f8f2c",
+    "paper/algorithms/algorithm01_safe_vla.json": "9748999e30bebbc2d2c382babe6bd24808e12804d93ebea0466bdf248b036c5c",
+    "paper/tools/latex/build.py": "d3da7bc7fe0b77fb683a1ffeabf46f95c692ad120393fd4325e2cf6337365870"
+  }
+}

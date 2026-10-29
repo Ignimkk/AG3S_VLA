@@ -2315,3 +2315,39 @@ pick 을 위한 것인지 place 를 위한 것인지 알 수 있나.
 - `--obstacle-stop-distance` 0.0 (T40 G 의 값, 근거가 기록에 없다) 을 바꿀 것인가, E3b 의 `--links` 범위를 넓힐 것인가.
 - ep1828 의 허들 run 은 없다 (재측정 대기 19).
 - main (subtask gate 기본 on) 으로 같은 시연을 다시 할 것인가 — 이때는 `--no-subtask-gate` 를 명시해야 T40 과 같은 조건이다.
+
+
+## ENV_OUTPUT — 환경 · output readiness (2026-10-12 00:44 KST)
+
+독립 `.venv-openpi-live`와 별도 `.venv-curobo`에서 자기 checkout의 import origin, GPU 연산,
+기존 checkpoint inference, cuRobo Mapper ESDF와 분리된 recorder 저장을 검증했다.
+새 실행의 video · policy record · log · checkpoint는 shared storage의
+`results/development/<날짜_commit_run-id>/` 아래에 명시적으로 저장한다.
+최신 관리 문서와 이전 폴더에만 남은 필요한 artifact는 checkout과 storage에 보존했다.
+측정 수치와 figure는 [`AG3S_T0T6_LOG.md`](AG3S_T0T6_LOG.md)의 **ENV_OUTPUT** 절,
+실행 방법과 보존 목록은
+[`GPU_OUTPUT_IMPLEMENTATION_REPORT.md`](../../../doc/active/migration/GPU_OUTPUT_IMPLEMENTATION_REPORT.md)를 따른다.
+
+`/mnt/dev/work` 삭제는 live process · sibling legacy symlink · 등록된 worktree 의존성의 해소와
+read-only 재점검 뒤에 판단한다. Physical robot/camera 실행, full closed-loop rollout과 training은
+이번 environment 검증의 범위에 포함하지 않았다. 기존 algorithm 계획과 사용자 판정은 그대로 이어간다.
+
+
+## T60 — 종료 구간 (P · H) 술어와 T44–T56 재집계 (2026-10-13 ~ 14 KST)
+
+**왜.** 완료 이후 frame (놓은 뒤, 준비자세로 돌아온 뒤) 이 평균 · 실패 수 · head 선택 · 목적함수에 섞이면 연구가 재는
+대상이 바뀐다 ([`doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md`](../../../doc/archive/reviews/TERMINATION_SCOPE_AUDIT_20261013_KO.md)).
+
+**한 일.** 사용자가 정한 술어 P (placement 안정, 8 row) · H (준비자세 복귀, 관절 0.35 rad ∧ TCP 0.12 m, 8 row) 를
+구현하고, 새 rollout 없이 기존 기록을 다시 집계했다. 측정 수치와 figure 는 [`AG3S_T47_LOG.md`](AG3S_T47_LOG.md) 의
+**T60** 절, 원자료는 [`handoff/T60.verify.json`](handoff/T60.verify.json).
+
+| 단계 | 무엇 | 상태 |
+|---|---|---|
+| 1 | 142 closed-loop run 의 t_P · t_H · endpoint mask (protocol `T60-v1`) | 완료 |
+| 2 | CL2 · CL3 · T53 의 success · safe success · HOLD · 시간, T54 current / hold | 완료 (full 은 발표값 재현) |
+| 3 | T47 · T49 · T51 선택 재계산, T48a ep1807 · T52 확인 | 완료 (T51b · HSR demo · T54b–T56 은 범위 밖) |
+| 4 | runtime 종료 감지기 · 새 rollout | 하지 않음 |
+
+**남은 판정.** 기본 보고 창 (P / H / 둘 다) 과 develope_PLAN 의 "Release 뒤 retreat / terminal hold 포함" 규칙의 정합,
+H 미도달 27 run 의 처리, 창마다 바뀌는 T51 GT 선택, T54b–T56 에 mask 를 적용할지.

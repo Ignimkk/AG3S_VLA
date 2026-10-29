@@ -1,0 +1,822 @@
+{
+ "episode": 954,
+ "side": "right",
+ "field_from": "IFG-APPLE-TOW:SPLW request 18",
+ "e0_first_close_t": 144,
+ "margin_mm": 10.0,
+ "roll_joint": "right_arm_6",
+ "results": {
+  "144": {
+   "q_roll_joint_rad": -0.20391673853546224,
+   "rows": [
+    {
+     "roll_deg": -90,
+     "clearance_mm": -9.1,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -85,
+     "clearance_mm": -12.4,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -80,
+     "clearance_mm": -11.5,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -75,
+     "clearance_mm": -9.0,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -70,
+     "clearance_mm": -7.7,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -65,
+     "clearance_mm": -6.7,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -60,
+     "clearance_mm": -11.2,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -55,
+     "clearance_mm": -4.0,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -50,
+     "clearance_mm": -1.8,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -45,
+     "clearance_mm": -1.8,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -40,
+     "clearance_mm": -5.0,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -35,
+     "clearance_mm": -8.6,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -30,
+     "clearance_mm": -10.0,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -25,
+     "clearance_mm": -10.6,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -20,
+     "clearance_mm": -9.3,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -15,
+     "clearance_mm": -9.3,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -10,
+     "clearance_mm": -4.8,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -5,
+     "clearance_mm": -3.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 0,
+     "clearance_mm": -6.6,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 5,
+     "clearance_mm": -7.2,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 10,
+     "clearance_mm": -10.6,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 15,
+     "clearance_mm": -13.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 20,
+     "clearance_mm": -14.9,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 25,
+     "clearance_mm": -16.6,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 30,
+     "clearance_mm": -15.8,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 35,
+     "clearance_mm": -16.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 40,
+     "clearance_mm": -15.2,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 45,
+     "clearance_mm": -16.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 50,
+     "clearance_mm": -15.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 55,
+     "clearance_mm": -12.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 60,
+     "clearance_mm": -12.5,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 65,
+     "clearance_mm": -11.6,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 70,
+     "clearance_mm": -11.6,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 75,
+     "clearance_mm": -13.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 80,
+     "clearance_mm": -11.2,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 85,
+     "clearance_mm": -12.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 90,
+     "clearance_mm": -9.1,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    }
+   ],
+   "finger_qpos": {
+    "gripper_finger_l1": -0.04499944347441116,
+    "gripper_finger_l2": 0.04499980570404345,
+    "gripper_finger_r1": -0.04481298284263115,
+    "gripper_finger_r2": 0.04481062592512706
+   }
+  },
+  "159": {
+   "q_roll_joint_rad": -0.22571725709755713,
+   "rows": [
+    {
+     "roll_deg": -90,
+     "clearance_mm": -12.3,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -85,
+     "clearance_mm": -11.9,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -80,
+     "clearance_mm": -9.8,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -75,
+     "clearance_mm": -8.6,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -70,
+     "clearance_mm": -4.2,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -65,
+     "clearance_mm": 2.2,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -60,
+     "clearance_mm": 5.3,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -55,
+     "clearance_mm": 7.0,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -50,
+     "clearance_mm": 5.6,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -45,
+     "clearance_mm": 4.9,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -40,
+     "clearance_mm": 4.9,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -35,
+     "clearance_mm": 4.7,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -30,
+     "clearance_mm": 4.9,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -25,
+     "clearance_mm": 4.4,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -20,
+     "clearance_mm": 5.0,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -15,
+     "clearance_mm": 6.3,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -10,
+     "clearance_mm": 3.9,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -5,
+     "clearance_mm": 2.6,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 0,
+     "clearance_mm": 1.9,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 5,
+     "clearance_mm": 2.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 10,
+     "clearance_mm": 1.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 15,
+     "clearance_mm": -0.4,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 20,
+     "clearance_mm": -1.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 25,
+     "clearance_mm": -4.2,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 30,
+     "clearance_mm": -9.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 35,
+     "clearance_mm": -9.1,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 40,
+     "clearance_mm": -11.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 45,
+     "clearance_mm": -11.2,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 50,
+     "clearance_mm": -12.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 55,
+     "clearance_mm": -13.4,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 60,
+     "clearance_mm": -14.1,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 65,
+     "clearance_mm": -13.2,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 70,
+     "clearance_mm": -13.5,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 75,
+     "clearance_mm": -13.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 80,
+     "clearance_mm": -13.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 85,
+     "clearance_mm": -12.9,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 90,
+     "clearance_mm": -12.4,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    }
+   ],
+   "finger_qpos": {
+    "gripper_finger_l1": -0.04482506478084391,
+    "gripper_finger_l2": 0.044826016704917274,
+    "gripper_finger_r1": -0.03305923116231132,
+    "gripper_finger_r2": 0.033103433348836225
+   }
+  },
+  "174": {
+   "q_roll_joint_rad": -0.6547626074499207,
+   "rows": [
+    {
+     "roll_deg": -90,
+     "clearance_mm": 101.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -85,
+     "clearance_mm": 98.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -80,
+     "clearance_mm": 95.8,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -75,
+     "clearance_mm": 92.8,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -70,
+     "clearance_mm": 90.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -65,
+     "clearance_mm": 87.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -60,
+     "clearance_mm": 84.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -55,
+     "clearance_mm": 82.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -50,
+     "clearance_mm": 80.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -45,
+     "clearance_mm": 78.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -40,
+     "clearance_mm": 76.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -35,
+     "clearance_mm": 74.9,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -30,
+     "clearance_mm": 73.8,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -25,
+     "clearance_mm": 73.1,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -20,
+     "clearance_mm": 72.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -15,
+     "clearance_mm": 72.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -10,
+     "clearance_mm": 73.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": -5,
+     "clearance_mm": 72.6,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 0,
+     "clearance_mm": 72.4,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 5,
+     "clearance_mm": 72.5,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 10,
+     "clearance_mm": 73.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 15,
+     "clearance_mm": 73.9,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 20,
+     "clearance_mm": 75.1,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 25,
+     "clearance_mm": 76.6,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 30,
+     "clearance_mm": 78.4,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 35,
+     "clearance_mm": 80.5,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 40,
+     "clearance_mm": 82.8,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 45,
+     "clearance_mm": 85.3,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 50,
+     "clearance_mm": 87.9,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 55,
+     "clearance_mm": 90.7,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 60,
+     "clearance_mm": 93.6,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 65,
+     "clearance_mm": 96.5,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 70,
+     "clearance_mm": 99.4,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 75,
+     "clearance_mm": 102.2,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 80,
+     "clearance_mm": 105.0,
+     "worst_sphere": "ee_finger_r2",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 85,
+     "clearance_mm": 104.4,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    },
+    {
+     "roll_deg": 90,
+     "clearance_mm": 101.6,
+     "worst_sphere": "ee_finger_r1",
+     "palm_shift_mm": 0.0,
+     "within_limits": true
+    }
+   ],
+   "finger_qpos": {
+    "gripper_finger_l1": -0.04497944296707646,
+    "gripper_finger_l2": 0.04497984799822304,
+    "gripper_finger_r1": -0.032983701769091246,
+    "gripper_finger_r2": 0.03302717986223851
+   }
+  }
+ },
+ "definitions": "IFG option B feasibility \u2014 can a wrist roll alone keep the VLA-alone grasp point and clear the neighbour? CPU only, read only.\n\n  MUJOCO_GL=osmesa PYTHONPATH=.:integration/rby1/manipulation/src .venv-ag3s/bin/python -m       AG3S.ag3s.experiments.studies.ifg_roll_feasibility --run <IFG-APPLE run> --ep 954 --fig AG3S/ag3s/docs/figures/ifg-split\n\nQuestion (user ruling 2026-10-21: try B -- keep the neighbour-object rule, let TrajOpt take another approach pose -- and go to A if B fails):\nat the pose where VLA alone (IFG-APPLE E0) started to close, does rotating the hand about its last joint (`<side>_arm_6`, 0 mm TCP\ntranslation per degree in the IFG ep954 per-joint analysis) give a finger pose that the AG3S rule accepts?\n\nInputs\n  pose      : E0 control-row qpos (frames.jsonl) at the first step whose gripper command < 0.5 (`replay grip_cmd`), and the steps after\n              it until the fingers stop (`--after` steps), mapped to the server's robot model (`fixed_input_ablation.q_now_from_qpos`);\n              finger joints = the qpos finger joints (the model's parameter joints)\n  field     : the server record of the AG3S run (`--kit:arm`, default IFG-APPLE-TOW:SPLW) at the last request before its first close,\n              rebuilt with `fixed_input_ablation.build_field`; the scene is static before the grasp (same episode / seed)\n  robot     : the run's own server model (`ta_offline.server_args` + `build_robot`)\nPer roll offset (deg) on `<side>_arm_6`:\n  clearance = min over the hand's finger / gripper spheres of (target-free layer distance - radius), i.e. the target exempt, every\n              other object kept (the rule the run used); obstacle margin of the run (`--obstacle-margin`) drawn as the requirement\n  tcp shift = hold-link (palm) origin displacement vs roll 0 (mm)\n",
+ "script": "AG3S/ag3s/experiments/studies/ifg_roll_feasibility.py"
+}

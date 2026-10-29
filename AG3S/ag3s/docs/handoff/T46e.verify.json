@@ -1,0 +1,466 @@
+{
+ "_comment": "ag3s-verifier (V-T46e). numbers and paths only.",
+ "step": "T46e-V",
+ "date": "2026-10-13",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784",
+ "raw_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e",
+ "run_dir_note": "reused the run dir left by the cut-off previous attempt (it had only p/ env + scripts, code_state, baseline/legacy.log with an attention path error, kept as baseline/legacy_attempt1_attention_path_error.log)",
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "command": "JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=<worktree> nice -n 19 .venv-openpi-live/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention <main checkout>/AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/p/run_baseline_legacy.sh",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/baseline/legacy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/baseline/legacy.log"
+  },
+  {
+   "id": "baseline_curobo",
+   "command": "same + --esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005, under flock /tmp/ag3s-vla-gpu-validation.lock (nvidia-smi compute apps empty before)",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/p/run_baseline_curobo.sh",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/baseline/curobo.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/baseline/curobo.log"
+  },
+  {
+   "id": "cl3_off_replay_worktree_vs_base",
+   "command": "cl3_replay.py worktree|base (rebuild_target_free, CL3 3 arms, all server chunks); base = git archive 15314ba3 AG3S common -> base_tree",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/p/cl3_replay.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/raw/cl3/compare.json"
+  },
+  {
+   "id": "oracle_offline_replay",
+   "command": "t46e_vreplay.py --set heldout14|design17|heldout162 (V-T46 harness + OracleRenderer/oracle_evidence_for_chunk/rebuild_oracle_free of the worktree), 1 worker",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/p/t46e_vreplay.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/raw/oracle_agg.json"
+  },
+  {
+   "id": "pytest_cpu",
+   "command": "JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= pytest tests/ag3s/test_t46e_oracle_extent.py",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/logs/pytest_t46e_cpu.log"
+  },
+  {
+   "id": "pytest_gpu_subset",
+   "command": "under flock: pytest test_t46e_oracle_extent test_t46_target_free_residual test_t44_target_exclusion_owned tests/trajopt/test_safe_client test_t46c_placed_no_seed_certify",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/logs/pytest_gpu_subset.log"
+  },
+  {
+   "id": "wire_compat",
+   "command": "wire_compat.py worktree|base: same synthetic old-style pack_request digest",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/p/wire_compat.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T012537+0900_15314ba39dbd_8f15850f0784/verify/T46e/raw/wire/worktree.json"
+  }
+ ],
+ "code_state": {
+  "repo": "/mnt/dev/AG3S_VLA-development/.claude/worktrees/agent-a770cbc1ab3162e54",
+  "branch": "worktree-agent-a770cbc1ab3162e54",
+  "head": "15314ba39dbd2786960d95506be4f69dbec0d83c",
+  "import_check": {
+   "AG3S.ag3s.__file__": "/mnt/dev/AG3S_VLA-development/.claude/worktrees/agent-a770cbc1ab3162e54/AG3S/ag3s/__init__.py",
+   "AG3S.trajopt.__file__": "/mnt/dev/AG3S_VLA-development/.claude/worktrees/agent-a770cbc1ab3162e54/AG3S/trajopt/__init__.py"
+  },
+  "dirty_files": [
+   "AG3S/ag3s/config.py",
+   "AG3S/ag3s/fields/curobo_builder.py",
+   "AG3S/ag3s/runtime/pipeline.py",
+   "AG3S/trajopt/client.py",
+   "AG3S/trajopt/experiments/target_free_replay.py",
+   "AG3S/trajopt/safe_policy.py",
+   "AG3S/trajopt/serve_safe.py",
+   "AG3S/trajopt/wire.py",
+   "integration/rby1/bringup/pi05_infer.py"
+  ],
+  "untracked_files": [
+   "AG3S/ag3s/runtime/oracle_segmentation.py",
+   "tests/ag3s/test_t46e_oracle_extent.py",
+   "AG3S/ag3s/docs/handoff/T46e.impl.md"
+  ],
+  "md5": {
+   "AG3S/ag3s/config.py": "b8bed0376533fa6f1504fd1c9c5eb3d0",
+   "AG3S/ag3s/fields/curobo_builder.py": "86399841707af8e50c829b49b0647d13",
+   "AG3S/ag3s/runtime/oracle_segmentation.py": "870dc2fdf434cb2240d2d0a232447ca0",
+   "AG3S/ag3s/runtime/pipeline.py": "bd5c020749958c62a35bfc451c399ced",
+   "AG3S/trajopt/client.py": "74240177f8c6e2d81e608c17c39206b9",
+   "AG3S/trajopt/experiments/target_free_replay.py": "7dbe6a56aaf1e42ddb15efaf3c1c09f2",
+   "AG3S/trajopt/safe_policy.py": "ed8a80a2c6401b7332e4dbc82df45300",
+   "AG3S/trajopt/serve_safe.py": "f26343763f5686967712bc462bca5012",
+   "AG3S/trajopt/wire.py": "68416b82d277011fecedce72703bb791",
+   "integration/rby1/bringup/pi05_infer.py": "de0c508dbfe8f0fe6d5609ca8a557be6",
+   "tests/ag3s/test_t46e_oracle_extent.py": "6ad1bbf4d4834bfc9dd4cfaf90f22572"
+  },
+  "md5_unchanged_between_start_and_end_of_verification": true
+ },
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy CPU 14/15 · 15/15 · -29.031048280806342 mm; cuRobo GPU 10/15 · 15/15 · -9.171877401271193 mm — equal to the regression-baseline lines"
+ },
+ "numbers": {
+  "1_baseline": {
+   "legacy": {
+    "start_violated": 14,
+    "n": 15,
+    "has_target": 15,
+    "frame0_clearance_before_mm": "-29.031048280806342"
+   },
+   "curobo": {
+    "start_violated": 10,
+    "n": 15,
+    "has_target": 15,
+    "frame0_clearance_before_mm": "-9.171877401271193"
+   }
+  },
+  "2_off_bit_identical": {
+   "cl3_chunks": 4125,
+   "cl3_chunks_with_fine_target_free_layer": 1630,
+   "layers_identical_worktree_vs_base": 1630,
+   "layers_differ_worktree_vs_base": 0,
+   "compared": "sha256 of float32 values, removed/ambiguous/nontarget_kept ijk, counts, n_removed_not_in_record, n_record_removed_not_removed",
+   "layers_bit_equal_to_record_f16_worktree": 1618,
+   "layers_bit_equal_to_record_f16_base": 1618,
+   "layers_differing_from_record_same_set_and_same_voxel_count_at_base": true,
+   "differing_from_record_voxels": [
+    39,
+    5,
+    23,
+    39,
+    23,
+    39,
+    5,
+    191,
+    39,
+    5,
+    20,
+    23
+   ],
+   "per_arm_layers": {
+    "C1a": 506,
+    "C1aF1": 562,
+    "C1aF1F2": 562
+   }
+  },
+  "3_oracle_offline": {
+   "heldout14_collision_chunks": {
+    "n_chunks": 14,
+    "n_hold": 12,
+    "variants": {
+     "F1": {
+      "collision_rows": 401,
+      "hold_zero": "5/12",
+      "chunks_worse_than_off": 0,
+      "chunks_better_than_off": 7,
+      "removed_on_other_fruit_le5mm": 2216,
+      "removed_on_table_le5mm": 0
+     },
+     "F1GT": {
+      "collision_rows": 113,
+      "hold_zero": "6/12",
+      "chunks_worse_than_off": 0,
+      "chunks_better_than_off": 13,
+      "removed_on_other_fruit_le5mm": 2221,
+      "removed_on_table_le5mm": 0
+     },
+     "ORV": {
+      "collision_rows": 216,
+      "hold_zero": "5/12",
+      "chunks_worse_than_off": 1,
+      "chunks_better_than_off": 12,
+      "removed_on_other_fruit_le5mm": 6,
+      "removed_on_table_le5mm": 0
+     },
+     "ORV_S": {
+      "collision_rows": 201,
+      "hold_zero": "5/12",
+      "chunks_worse_than_off": 1,
+      "chunks_better_than_off": 12,
+      "removed_on_other_fruit_le5mm": 368,
+      "removed_on_table_le5mm": 0
+     },
+     "ORVgt": {
+      "collision_rows": 216,
+      "hold_zero": "5/12",
+      "chunks_worse_than_off": 1,
+      "chunks_better_than_off": 12,
+      "removed_on_other_fruit_le5mm": 6,
+      "removed_on_table_le5mm": 0
+     },
+     "off": {
+      "collision_rows": 887,
+      "hold_zero": "0/12",
+      "chunks_worse_than_off": 0,
+      "chunks_better_than_off": 0,
+      "removed_on_other_fruit_le5mm": 2216,
+      "removed_on_table_le5mm": 0
+     }
+    },
+    "oracle_applied": 14,
+    "oracle_identity_matches_gt": 14
+   },
+   "design17": {
+    "n_chunks": 17,
+    "n_hold": 14,
+    "variants": {
+     "F1": {
+      "collision_rows": 387,
+      "hold_zero": "6/14",
+      "chunks_worse_than_off": 0,
+      "chunks_better_than_off": 7,
+      "removed_on_other_fruit_le5mm": 1800,
+      "removed_on_table_le5mm": 0
+     },
+     "F1GT": {
+      "collision_rows": 72,
+      "hold_zero": "8/14",
+      "chunks_worse_than_off": 0,
+      "chunks_better_than_off": 12,
+      "removed_on_other_fruit_le5mm": 1824,
+      "removed_on_table_le5mm": 0
+     },
+     "ORV": {
+      "collision_rows": 160,
+      "hold_zero": "7/14",
+      "chunks_worse_than_off": 3,
+      "chunks_better_than_off": 11,
+      "removed_on_other_fruit_le5mm": 321,
+      "removed_on_table_le5mm": 0
+     },
+     "ORV_S": {
+      "collision_rows": 153,
+      "hold_zero": "8/14",
+      "chunks_worse_than_off": 2,
+      "chunks_better_than_off": 12,
+      "removed_on_other_fruit_le5mm": 606,
+      "removed_on_table_le5mm": 0
+     },
+     "ORVgt": {
+      "collision_rows": 143,
+      "hold_zero": "7/14",
+      "chunks_worse_than_off": 2,
+      "chunks_better_than_off": 12,
+      "removed_on_other_fruit_le5mm": 1,
+      "removed_on_table_le5mm": 0
+     },
+     "off": {
+      "collision_rows": 601,
+      "hold_zero": "0/14",
+      "chunks_worse_than_off": 0,
+      "chunks_better_than_off": 0,
+      "removed_on_other_fruit_le5mm": 1799,
+      "removed_on_table_le5mm": 0
+     }
+    },
+    "oracle_applied": 17,
+    "oracle_identity_matches_gt": 16
+   },
+   "heldout162_all_chunks": {
+    "n_chunks": 162,
+    "n_hold": 12,
+    "variants": {
+     "F1": {
+      "collision_rows": 401,
+      "hold_zero": "5/12",
+      "chunks_worse_than_off": 0,
+      "chunks_better_than_off": 7,
+      "removed_on_other_fruit_le5mm": 20739,
+      "removed_on_table_le5mm": 0
+     },
+     "F1GT": {
+      "collision_rows": 113,
+      "hold_zero": "6/12",
+      "chunks_worse_than_off": 0,
+      "chunks_better_than_off": 13,
+      "removed_on_other_fruit_le5mm": 20787,
+      "removed_on_table_le5mm": 0
+     },
+     "ORV": {
+      "collision_rows": 359,
+      "hold_zero": "5/12",
+      "chunks_worse_than_off": 8,
+      "chunks_better_than_off": 12,
+      "removed_on_other_fruit_le5mm": 49,
+      "removed_on_table_le5mm": 0
+     },
+     "ORV_S": {
+      "collision_rows": 318,
+      "hold_zero": "5/12",
+      "chunks_worse_than_off": 6,
+      "chunks_better_than_off": 12,
+      "removed_on_other_fruit_le5mm": 3627,
+      "removed_on_table_le5mm": 0
+     },
+     "ORVgt": {
+      "collision_rows": 359,
+      "hold_zero": "5/12",
+      "chunks_worse_than_off": 8,
+      "chunks_better_than_off": 12,
+      "removed_on_other_fruit_le5mm": 49,
+      "removed_on_table_le5mm": 0
+     },
+     "off": {
+      "collision_rows": 887,
+      "hold_zero": "0/12",
+      "chunks_worse_than_off": 0,
+      "chunks_better_than_off": 0,
+      "removed_on_other_fruit_le5mm": 20739,
+      "removed_on_table_le5mm": 0
+     }
+    },
+    "oracle_applied": 162,
+    "oracle_identity_matches_gt": 162,
+    "off_zero_chunks": 148,
+    "rows_on_off_zero_chunks": {
+     "F1": 0,
+     "F1GT": 0,
+     "ORV": 143,
+     "ORVgt": 143,
+     "ORV_S": 117
+    },
+    "off_zero_chunks_with_ORV_rows": [
+     [
+      "C1a_ep110_s1101:17",
+      15
+     ],
+     [
+      "C1a_ep110_s1102:16",
+      20
+     ],
+     [
+      "C1a_ep110_s1102:17",
+      30
+     ],
+     [
+      "C1a_ep110_s1102:18",
+      50
+     ],
+     [
+      "C1a_ep11_s111:12",
+      12
+     ],
+     [
+      "C1a_ep123_s1231:13",
+      14
+     ],
+     [
+      "C1a_ep3_s32:27",
+      2
+     ]
+    ]
+   },
+   "kept_vs_off_ORV": {
+    "design17": {
+     "n": 3105,
+     "target_le5mm": 498,
+     "other_fruit_le5mm": 1599,
+     "support_layer_lt10mm_above_floor": 814,
+     "rest": 194
+    },
+    "heldout14": {
+     "n": 3357,
+     "target_le5mm": 322,
+     "other_fruit_le5mm": 2174,
+     "support_layer_lt10mm_above_floor": 655,
+     "rest": 206
+    },
+    "heldout162": {
+     "n": 41432,
+     "target_le5mm": 3656,
+     "other_fruit_le5mm": 20533,
+     "support_layer_lt10mm_above_floor": 13156,
+     "rest": 4087
+    }
+   },
+   "replay_pose_error_max_mm_heldout162": 0.319,
+   "implementer_table_reproduced": {
+    "heldout14_off_F1_F1GT_ORV": [
+     887,
+     401,
+     113,
+     216
+    ],
+    "heldout14_hold_zero_off_F1_F1GT_ORV": [
+     "0/12",
+     "5/12",
+     "6/12",
+     "5/12"
+    ],
+    "design17_off_F1_F1GT_ORV": [
+     601,
+     387,
+     72,
+     160
+    ],
+    "design17_hold_zero": [
+     "0/14",
+     "6/14",
+     "8/14",
+     "7/14"
+    ],
+    "removed_on_other_fruit_le5mm_heldout14_off_F1_F1GT_ORV_ORVgt": [
+     2216,
+     2216,
+     2221,
+     6,
+     6
+    ],
+    "removed_on_other_fruit_le5mm_design17_off_F1_F1GT_ORV_ORVgt": [
+     1799,
+     1800,
+     1824,
+     321,
+     1
+    ]
+   }
+  },
+  "4_tests": {
+   "t46e_cpu": "29 passed, 1 skipped (CUDA needed) in 14.96 s",
+   "gpu_subset": "181 passed in 105.30 s (nvidia-smi compute apps empty before; includes the CUDA test of test_t46e_oracle_extent)",
+   "wire_old_request": {
+    "digest_worktree": "86512318d0ea095a0451747c8ad15730692ffc7d12c94fe960f5675dc8ef586a",
+    "digest_base": "86512318d0ea095a0451747c8ad15730692ffc7d12c94fe960f5675dc8ef586a",
+    "n_keys": 17,
+    "unpack_oracle_segmentation_on_old_request": null,
+    "test": "test_wire_is_unchanged_without_the_oracle_and_round_trips_with_it passed"
+   }
+  }
+ },
+ "pass_criteria": {
+  "1_baseline": {
+   "criterion": "legacy 14/15 · 15/15 · -29.031048280806342 ; cuRobo 10/15 · 15/15 · -9.171877401271193",
+   "measured": "equal on both",
+   "result": "PASS"
+  },
+  "2_off_bit_identical": {
+   "criterion": "CL3 replay layers with defaults identical to base 15314ba3 replay; the implementer's 12 pre-existing differing layers differ identically at base",
+   "measured": "1630/1630 identical to base; 1618/1630 equal record in both, the same 12 differ in both with the same voxel counts",
+   "result": "PASS"
+  },
+  "3_oracle_numbers": {
+   "criterion": "held-out collision rows off 887 / F1 401 / oracle 216, HOLD-zero 0,5,5 /12; design17 601/387/160; neighbour-fruit seeds removed by oracle vs F1GT",
+   "measured": "887/401/216 and 0,5,5/12 on the 14 collision chunks; 601/387/160; removed within 5 mm of another fruit: oracle 6 (held-out14) 321 (design17; ORVgt 1) vs F1GT 2221 / 1824. On all 162 held-out chunks the oracle sums to 359 rows (143 on 7 chunks where off/F1/F1GT have 0 rows)",
+   "result": "PASS (as pre-fixed: numbers on the collision chunk sets); additional finding in heldout162_all_chunks"
+  },
+  "4_tests": {
+   "criterion": "test_t46e_oracle_extent passes (+GPU subset under lock); old-client wire test passes",
+   "measured": "29 passed 1 skipped (CPU); 181 passed GPU subset; wire digest equal to base",
+   "result": "PASS"
+  }
+ },
+ "figures": [
+  {
+   "path": "AG3S/ag3s/docs/figures/t46/t46e-table.png",
+   "kind": "table",
+   "sidecar": "AG3S/ag3s/docs/figures/t46/t46e-table.json"
+  },
+  {
+   "path": "AG3S/ag3s/docs/figures/t46/t46e-graph.png",
+   "kind": "graph",
+   "sidecar": "AG3S/ag3s/docs/figures/t46/t46e-graph.json"
+  }
+ ],
+ "verdict": "baseline match (legacy, cuRobo). Off replay identical to base 15314ba3 on 1630/1630 CL3 layers. Offline oracle numbers equal the implementer's table. Tests pass.",
+ "not_measured": [
+  "closed loop (no run)",
+  "real scene figure (scene kind) not made",
+  "closed-loop memory content vs offline replay memory (replay re-renders planning rows; server requests not available)",
+  "full pytest (3088) not re-run",
+  "design162 / dsf8 sets",
+  "oracle timing (not re-measured; CPU shared, load ~12)"
+ ]
+}

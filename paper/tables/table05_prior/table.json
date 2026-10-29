@@ -1,0 +1,26 @@
+{
+  "artifact_id": "T05",
+  "status": "DRAFT_FROM_LITERATURE",
+  "claim_ids": [
+    "C002",
+    "C003"
+  ],
+  "plan_ids": [],
+  "result_ids": [],
+  "source_notes": [
+    "paper/notes/REFERENCE_ANALYSIS_R2.md",
+    "paper/notes/REFERENCE_ANALYSIS_R3.md",
+    "paper/notes/DRAFT10_REVISION.md"
+  ],
+  "render_source": "paper/tables/table05_prior/table.tex",
+  "numeric_values": null,
+  "is_measured_result": false,
+  "caption_scope": "Literature comparison retained outside the main paper; trained probe stated; no measured values.",
+  "render_source_sha256": "f72d59b073918ffe3fc03ab6946666be9a6dbd596a1587ec14604884448cf6fc",
+  "input_sha256": {
+    "paper/notes/REFERENCE_ANALYSIS_R2.md": "09145054b313006c40f691ede8b70e45a52c6768c8976f447dcb79b087e3a2ae",
+    "paper/notes/REFERENCE_ANALYSIS_R3.md": "e1b4699518fce8f9597e94aa54dce809794d574ca54dd215013388ad0b85b321",
+    "paper/notes/DRAFT10_REVISION.md": "604fa5a59dc9e02b3b8d3d149fca251338f15e055a9a5acbec89b6f5284e7182"
+  },
+  "updated_at": "2026-10-08 KST"
+}

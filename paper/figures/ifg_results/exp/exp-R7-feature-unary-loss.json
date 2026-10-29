@@ -1,0 +1,6 @@
+{
+ "frame": "T54c_ep1817_f032",
+ "rule": "largest IoU loss of FGu-Q:prefix_L8+top1 vs G-Q+top1",
+ "iou_g": 1.0,
+ "iou_fgu": 0.0
+}

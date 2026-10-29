@@ -1,0 +1,723 @@
+{
+ "pairs": [
+  {
+   "scene": "가림 121",
+   "draw": 0,
+   "serving": "쥐지 못함",
+   "render": "쥐지 못함",
+   "identical": true,
+   "first_diff_step": null,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_occ/A/runs/AG3S_case1_L2_s13453",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/OCC_E3R/k0/runs/AG3S_case1_L2_s13453"
+  },
+  {
+   "scene": "가림 122",
+   "draw": 0,
+   "serving": "들어올린 뒤 놓침",
+   "render": "OK",
+   "identical": false,
+   "first_diff_step": 128,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_occ/A/runs/AG3S_case1_L2_s23453",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/OCC_E3R/k0/runs/AG3S_case1_L2_s23453"
+  },
+  {
+   "scene": "가림 123",
+   "draw": 0,
+   "serving": "쥐지 못함",
+   "render": "쥐지 못함",
+   "identical": false,
+   "first_diff_step": 504,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_occ/A/runs/AG3S_case1_L2_s33453",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/OCC_E3R/k0/runs/AG3S_case1_L2_s33453"
+  },
+  {
+   "scene": "회귀 850",
+   "draw": 0,
+   "serving": "못 넣음",
+   "render": "못 넣음",
+   "serving_table_basket": false,
+   "render_table_basket": false,
+   "identical": true,
+   "first_diff_step": null,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_reg/runs/B_ROI_FPR/B_ROI_FPR_ep850_s8503",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3R_k0/runs/B_ROI_FPR/B_ROI_FPR_ep850_s8503"
+  },
+  {
+   "scene": "회귀 954",
+   "draw": 0,
+   "serving": "쥐지 못함",
+   "render": "쥐지 못함",
+   "serving_table_basket": false,
+   "render_table_basket": false,
+   "identical": true,
+   "first_diff_step": null,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_reg/runs/B_ROI_FPR/B_ROI_FPR_ep954_s9543",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3R_k0/runs/B_ROI_FPR/B_ROI_FPR_ep954_s9543"
+  },
+  {
+   "scene": "회귀 211",
+   "draw": 0,
+   "serving": "못 넣음",
+   "render": "못 넣음",
+   "serving_table_basket": false,
+   "render_table_basket": false,
+   "identical": false,
+   "first_diff_step": 592,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/E3/closed_reg/runs/B_ROI_FPR/B_ROI_FPR_ep211_s2113",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3R_k0/runs/B_ROI_FPR/B_ROI_FPR_ep211_s2113"
+  },
+  {
+   "scene": "가림 121",
+   "draw": 1,
+   "serving": "들어올린 뒤 놓침",
+   "render": "들어올린 뒤 놓침",
+   "identical": true,
+   "first_diff_step": null,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/OCC_E3/k1/runs/AG3S_case1_L2_s13453",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/OCC_E3R/k1/runs/AG3S_case1_L2_s13453"
+  },
+  {
+   "scene": "가림 122",
+   "draw": 1,
+   "serving": "들어올린 뒤 놓침",
+   "render": "OK",
+   "identical": false,
+   "first_diff_step": 128,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/OCC_E3/k1/runs/AG3S_case1_L2_s23453",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/OCC_E3R/k1/runs/AG3S_case1_L2_s23453"
+  },
+  {
+   "scene": "가림 123",
+   "draw": 1,
+   "serving": "OK",
+   "render": "들어올린 뒤 놓침",
+   "identical": false,
+   "first_diff_step": 104,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/OCC_E3/k1/runs/AG3S_case1_L2_s33453",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/OCC_E3R/k1/runs/AG3S_case1_L2_s33453"
+  },
+  {
+   "scene": "회귀 850",
+   "draw": 1,
+   "serving": "OK",
+   "render": "OK",
+   "serving_table_basket": false,
+   "render_table_basket": false,
+   "identical": true,
+   "first_diff_step": null,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3_k1/runs/B_ROI_FPR/B_ROI_FPR_ep850_s8503",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3R_k1/runs/B_ROI_FPR/B_ROI_FPR_ep850_s8503"
+  },
+  {
+   "scene": "회귀 954",
+   "draw": 1,
+   "serving": "쥐지 못함",
+   "render": "쥐지 못함",
+   "serving_table_basket": false,
+   "render_table_basket": false,
+   "identical": true,
+   "first_diff_step": null,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3_k1/runs/B_ROI_FPR/B_ROI_FPR_ep954_s9543",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3R_k1/runs/B_ROI_FPR/B_ROI_FPR_ep954_s9543"
+  },
+  {
+   "scene": "회귀 211",
+   "draw": 1,
+   "serving": "쥐지 못함",
+   "render": "쥐지 못함",
+   "serving_table_basket": false,
+   "render_table_basket": false,
+   "identical": true,
+   "first_diff_step": null,
+   "serving_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3_k1/runs/B_ROI_FPR/B_ROI_FPR_ep211_s2113",
+   "render_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/PT/REG_E3R_k1/runs/B_ROI_FPR/B_ROI_FPR_ep211_s2113"
+  }
+ ],
+ "series": {
+  "가림 122 · 흔들림 없음": [
+   [
+    0,
+    0,
+    0,
+    0.0
+   ],
+   [
+    1,
+    0,
+    0,
+    0.0
+   ],
+   [
+    2,
+    0,
+    0,
+    0.0
+   ],
+   [
+    3,
+    0,
+    347,
+    0.0
+   ],
+   [
+    4,
+    0,
+    0,
+    0.0
+   ],
+   [
+    5,
+    0,
+    0,
+    0.0
+   ],
+   [
+    6,
+    0,
+    0,
+    0.0
+   ],
+   [
+    7,
+    0,
+    0,
+    0.0
+   ],
+   [
+    8,
+    0,
+    0,
+    0.0
+   ],
+   [
+    9,
+    0,
+    0,
+    0.0
+   ],
+   [
+    10,
+    0,
+    0,
+    0.0
+   ],
+   [
+    11,
+    0,
+    0,
+    0.0
+   ],
+   [
+    12,
+    0,
+    0,
+    0.0
+   ],
+   [
+    13,
+    0,
+    0,
+    0.0
+   ],
+   [
+    14,
+    13,
+    0,
+    0.0
+   ],
+   [
+    15,
+    11,
+    0,
+    0.0
+   ],
+   [
+    16,
+    90,
+    470,
+    0.9572902857650146
+   ]
+  ],
+  "가림 122 · 흔들림 1": [
+   [
+    0,
+    0,
+    0,
+    0.0
+   ],
+   [
+    1,
+    0,
+    0,
+    0.0
+   ],
+   [
+    2,
+    0,
+    0,
+    0.0
+   ],
+   [
+    3,
+    0,
+    347,
+    0.0
+   ],
+   [
+    4,
+    0,
+    0,
+    0.0
+   ],
+   [
+    5,
+    0,
+    0,
+    0.0
+   ],
+   [
+    6,
+    0,
+    0,
+    0.0
+   ],
+   [
+    7,
+    0,
+    0,
+    0.0
+   ],
+   [
+    8,
+    0,
+    0,
+    0.0
+   ],
+   [
+    9,
+    0,
+    0,
+    0.0
+   ],
+   [
+    10,
+    0,
+    0,
+    0.0
+   ],
+   [
+    11,
+    0,
+    0,
+    0.0
+   ],
+   [
+    12,
+    0,
+    0,
+    0.0
+   ],
+   [
+    13,
+    0,
+    0,
+    0.0
+   ],
+   [
+    14,
+    0,
+    0,
+    0.0
+   ],
+   [
+    15,
+    0,
+    0,
+    0.0
+   ],
+   [
+    16,
+    0,
+    471,
+    0.8992541683874162
+   ]
+  ]
+ },
+ "mechanism": {
+  "AG3S_case1_L2_s23453_k1": {
+   "scene": "가림 122",
+   "draw": 1,
+   "first_diff_step": 128,
+   "requests": [
+    {
+     "request_index": 15,
+     "control_step": 120,
+     "same_field_origin": true,
+     "esdf_distance": {
+      "n_serving": 28715,
+      "n_render": 28715,
+      "only_serving": 0,
+      "only_render": 0,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": null
+     },
+     "esdf_free_distance": {
+      "n_serving": 27600,
+      "n_render": 27600,
+      "only_serving": 0,
+      "only_render": 0,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": null
+     },
+     "serving": {
+      "to_min_clearance_mm": -16.61,
+      "n_target_points": 114,
+      "target_centroid": [
+       0.5405,
+       0.3233,
+       0.8691
+      ],
+      "n_removed": 1115,
+      "n_ambiguous": 0,
+      "exclusion_source": "arrays",
+      "refined_minus_reference_deg": 0.182
+     },
+     "render": {
+      "to_min_clearance_mm": -16.61,
+      "n_target_points": 114,
+      "target_centroid": [
+       0.5405,
+       0.3233,
+       0.8691
+      ],
+      "n_removed": 1115,
+      "n_ambiguous": 0,
+      "exclusion_source": "arrays",
+      "refined_minus_reference_deg": 0.182
+     },
+     "target_points_max_shift_mm": 0.0,
+     "command_diff_deg": 0.0
+    },
+    {
+     "request_index": 16,
+     "control_step": 128,
+     "same_field_origin": true,
+     "esdf_distance": {
+      "n_serving": 27804,
+      "n_render": 27804,
+      "only_serving": 0,
+      "only_render": 0,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": null
+     },
+     "esdf_free_distance": {
+      "recorded": [
+       false,
+       false
+      ]
+     },
+     "serving": {
+      "to_min_clearance_mm": 15.55,
+      "n_target_points": 114,
+      "target_centroid": [
+       0.5405,
+       0.3233,
+       0.8691
+      ],
+      "n_removed": 0,
+      "n_ambiguous": 0,
+      "exclusion_source": "summary",
+      "refined_minus_reference_deg": 1.506
+     },
+     "render": {
+      "to_min_clearance_mm": 19.04,
+      "n_target_points": 114,
+      "target_centroid": [
+       0.5405,
+       0.3233,
+       0.8691
+      ],
+      "n_removed": 0,
+      "n_ambiguous": 0,
+      "exclusion_source": "summary",
+      "refined_minus_reference_deg": 1.002
+     },
+     "target_points_max_shift_mm": 0.0,
+     "command_diff_deg": 0.8993
+    }
+   ]
+  },
+  "AG3S_case1_L2_s23453_k0": {
+   "scene": "가림 122",
+   "draw": 0,
+   "first_diff_step": 128,
+   "requests": [
+    {
+     "request_index": 15,
+     "control_step": 120,
+     "same_field_origin": true,
+     "esdf_distance": {
+      "n_serving": 29490,
+      "n_render": 29493,
+      "only_serving": 0,
+      "only_render": 3,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": 18.3
+     },
+     "esdf_free_distance": {
+      "n_serving": 28431,
+      "n_render": 28433,
+      "only_serving": 0,
+      "only_render": 2,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": 19.5
+     },
+     "serving": {
+      "to_min_clearance_mm": -13.5,
+      "n_target_points": 113,
+      "target_centroid": [
+       0.5442,
+       0.3222,
+       0.867
+      ],
+      "n_removed": 1059,
+      "n_ambiguous": 0,
+      "exclusion_source": "arrays",
+      "refined_minus_reference_deg": 0.154
+     },
+     "render": {
+      "to_min_clearance_mm": -13.5,
+      "n_target_points": 113,
+      "target_centroid": [
+       0.5442,
+       0.3222,
+       0.867
+      ],
+      "n_removed": 1060,
+      "n_ambiguous": 0,
+      "exclusion_source": "arrays",
+      "refined_minus_reference_deg": 0.154
+     },
+     "target_points_max_shift_mm": 0.0,
+     "command_diff_deg": 0.0
+    },
+    {
+     "request_index": 16,
+     "control_step": 128,
+     "same_field_origin": true,
+     "esdf_distance": {
+      "n_serving": 28417,
+      "n_render": 28421,
+      "only_serving": 0,
+      "only_render": 4,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": 37.15
+     },
+     "esdf_free_distance": {
+      "recorded": [
+       false,
+       false
+      ]
+     },
+     "serving": {
+      "to_min_clearance_mm": 16.03,
+      "n_target_points": 113,
+      "target_centroid": [
+       0.5442,
+       0.3222,
+       0.867
+      ],
+      "n_removed": 0,
+      "n_ambiguous": 0,
+      "exclusion_source": "summary",
+      "refined_minus_reference_deg": 1.505
+     },
+     "render": {
+      "to_min_clearance_mm": 16.45,
+      "n_target_points": 113,
+      "target_centroid": [
+       0.5442,
+       0.3222,
+       0.867
+      ],
+      "n_removed": 0,
+      "n_ambiguous": 0,
+      "exclusion_source": "summary",
+      "refined_minus_reference_deg": 1.039
+     },
+     "target_points_max_shift_mm": 0.0,
+     "command_diff_deg": 0.9573
+    }
+   ]
+  },
+  "AG3S_case1_L2_s33453_k1": {
+   "scene": "가림 123",
+   "draw": 1,
+   "first_diff_step": 104,
+   "requests": [
+    {
+     "request_index": 12,
+     "control_step": 96,
+     "same_field_origin": true,
+     "esdf_distance": {
+      "n_serving": 29148,
+      "n_render": 29148,
+      "only_serving": 0,
+      "only_render": 0,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": null
+     },
+     "esdf_free_distance": {
+      "n_serving": 28125,
+      "n_render": 28125,
+      "only_serving": 0,
+      "only_render": 0,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": null
+     },
+     "serving": {
+      "to_min_clearance_mm": -13.88,
+      "n_target_points": 114,
+      "target_centroid": [
+       0.5361,
+       0.3188,
+       0.8661
+      ],
+      "n_removed": 1023,
+      "n_ambiguous": 0,
+      "exclusion_source": "arrays",
+      "refined_minus_reference_deg": 0.682
+     },
+     "render": {
+      "to_min_clearance_mm": -13.88,
+      "n_target_points": 114,
+      "target_centroid": [
+       0.5361,
+       0.3188,
+       0.8661
+      ],
+      "n_removed": 1023,
+      "n_ambiguous": 0,
+      "exclusion_source": "arrays",
+      "refined_minus_reference_deg": 0.682
+     },
+     "target_points_max_shift_mm": 0.0,
+     "command_diff_deg": 0.0
+    },
+    {
+     "request_index": 13,
+     "control_step": 104,
+     "same_field_origin": true,
+     "esdf_distance": {
+      "n_serving": 29147,
+      "n_render": 29148,
+      "only_serving": 0,
+      "only_render": 1,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": 18.3
+     },
+     "esdf_free_distance": {
+      "n_serving": 27870,
+      "n_render": 27871,
+      "only_serving": 0,
+      "only_render": 1,
+      "only_serving_to_robot_sphere_mm_p50": null,
+      "only_render_to_robot_sphere_mm_p50": 18.3
+     },
+     "serving": {
+      "to_min_clearance_mm": -16.27,
+      "n_target_points": 114,
+      "target_centroid": [
+       0.539,
+       0.3226,
+       0.8687
+      ],
+      "n_removed": 1277,
+      "n_ambiguous": 0,
+      "exclusion_source": "arrays",
+      "refined_minus_reference_deg": 0.499
+     },
+     "render": {
+      "to_min_clearance_mm": -16.27,
+      "n_target_points": 114,
+      "target_centroid": [
+       0.539,
+       0.3226,
+       0.8687
+      ],
+      "n_removed": 1277,
+      "n_ambiguous": 0,
+      "exclusion_source": "arrays",
+      "refined_minus_reference_deg": 0.499
+     },
+     "target_points_max_shift_mm": 0.0,
+     "command_diff_deg": 0.0
+    }
+   ]
+  }
+ },
+ "timing": {
+  "conf": "E3R",
+  "n_dirs": 4,
+  "n_requests": 765,
+  "applied": 765,
+  "budget_hit": 0,
+  "over_533": 14,
+  "total": {
+   "n": 765,
+   "median": 372.71177768707275,
+   "p90": 413.36391996592283,
+   "max": 6902.5176502764225,
+   "mean": 411.50144871348647
+  },
+  "render": {
+   "n": 765,
+   "median": 77.33427919447422,
+   "p90": 86.1351115629077,
+   "max": 207.76603557169437,
+   "mean": 78.98756463104993
+  },
+  "esdf": {
+   "n": 765,
+   "median": 66.5474683046341,
+   "p90": 81.22174702584745,
+   "max": 3280.658408999443,
+   "mean": 86.43197266543223
+  },
+  "recon": {
+   "n": 765,
+   "median": 45.24293728172779,
+   "p90": 51.89652740955353,
+   "max": 132.67825357615948,
+   "mean": 46.19996025062659
+  },
+  "to": {
+   "n": 765,
+   "median": 38.656873628497124,
+   "p90": 76.97716318070889,
+   "max": 254.12132777273655,
+   "mean": 49.18437672085037
+  },
+  "wrist_render_only": {
+   "n": 765,
+   "median": 12080.0,
+   "p90": 12090.0,
+   "max": 12114.0,
+   "mean": 12073.945098039216
+  },
+  "wrist_sphere": {
+   "n": 765,
+   "median": 20077.0,
+   "p90": 30079.4,
+   "max": 63435.0,
+   "mean": 22863.669281045753
+  },
+  "head_render_only": {
+   "n": 765,
+   "median": 0.0,
+   "p90": 0.0,
+   "max": 1.0,
+   "mean": 0.011764705882352941
+  }
+ }
+}

@@ -1,0 +1,51 @@
+{
+ "memory_frame": "T53_ep1822_f005",
+ "frame": "T53_ep1822_f019",
+ "rule": "an R6-failed frame (IoU 0) whose target region exists",
+ "panels": {
+  "raw cosine": [
+   [
+    0.9798646222395255,
+    "target"
+   ],
+   [
+    0.9748781229294664,
+    "destination"
+   ],
+   [
+    0.9668557807381266,
+    "other_object"
+   ],
+   [
+    0.9654261471565094,
+    "destination"
+   ],
+   [
+    0.9594888356424996,
+    "other_object"
+   ]
+  ],
+  "centered cosine": [
+   [
+    0.5953734554745611,
+    "target"
+   ],
+   [
+    0.41312170252548597,
+    "other_object"
+   ],
+   [
+    0.4046636694527107,
+    "destination"
+   ],
+   [
+    0.37545983592553367,
+    "destination"
+   ],
+   [
+    0.1891956857539417,
+    "other_object"
+   ]
+  ]
+ }
+}

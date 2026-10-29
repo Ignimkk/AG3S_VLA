@@ -1,0 +1,531 @@
+{
+ "_comment": "numbers only; Part B judged after the user's check of the physics truth (videos), 2026-10-29",
+ "step": "T64",
+ "date": "2026-10-29",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261029T013324+0900_b3b69311f948_7da63daefa49",
+ "status": "Part A/B/C measured and judged (user confirmed the truth definition 2026-10-29)",
+ "numbers": {
+  "partA": {
+   "decision": "6 phases",
+   "C": 0.03,
+   "val": {
+    "macro_f1": 0.9816002040653782,
+    "accuracy": 0.9903883121876201,
+    "per_class": {
+     "approach": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 900
+     },
+     "grasp": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 150
+     },
+     "lift": {
+      "precision": 0.9444444444444444,
+      "recall": 0.935,
+      "f1": 0.9396984924623116,
+      "support": 200
+     },
+     "transport": {
+      "precision": 0.9484126984126984,
+      "recall": 0.956,
+      "f1": 0.952191235059761,
+      "support": 250
+     },
+     "placement": {
+      "precision": 0.9966777408637874,
+      "recall": 1.0,
+      "f1": 0.9983361064891847,
+      "support": 300
+     },
+     "retreat": {
+      "precision": 1.0,
+      "recall": 0.9987515605493134,
+      "f1": 0.9993753903810119,
+      "support": 801
+     }
+    },
+    "confusion": [
+     [
+      900,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      150,
+      0,
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      0,
+      187,
+      13,
+      0,
+      0
+     ],
+     [
+      0,
+      0,
+      11,
+      239,
+      0,
+      0
+     ],
+     [
+      0,
+      0,
+      0,
+      0,
+      300,
+      0
+     ],
+     [
+      0,
+      0,
+      0,
+      0,
+      1,
+      800
+     ]
+    ],
+    "boundary_delay": {
+     "0->1": {
+      "n": 50,
+      "missed": 0,
+      "median_frames": 0.0,
+      "median_steps": 0.0,
+      "lead_frac": 0.0
+     },
+     "1->2": {
+      "n": 50,
+      "missed": 0,
+      "median_frames": 0.0,
+      "median_steps": 0.0,
+      "lead_frac": 0.0
+     },
+     "2->3": {
+      "n": 50,
+      "missed": 0,
+      "median_frames": 0.0,
+      "median_steps": 0.0,
+      "lead_frac": 0.26
+     },
+     "3->4": {
+      "n": 50,
+      "missed": 0,
+      "median_frames": 0.0,
+      "median_steps": 0.0,
+      "lead_frac": 0.0
+     },
+     "4->5": {
+      "n": 50,
+      "missed": 0,
+      "median_frames": 0.0,
+      "median_steps": 0.0,
+      "lead_frac": 0.0
+     }
+    }
+   },
+   "train_frames": 10401,
+   "val_frames": 2601
+  },
+  "partB": {
+   "macro_f1": {
+    "hsr_mean": 0.7302390817355726,
+    "rule_mean": 0.7099959257769164,
+    "diff_mean": 0.020243155958656084,
+    "diff_ci95": [
+     -0.04330412731795072,
+     0.08657725260131663
+    ],
+    "n_up_down": [
+     7,
+     8
+    ]
+   },
+   "per_class_f1": {
+    "approach": {
+     "hsr": 0.8381909547738694,
+     "rule": 0.7645788336933045,
+     "n": 557
+    },
+    "grasp": {
+     "hsr": 0.5833333333333334,
+     "rule": 0.28793774319066145,
+     "n": 59
+    },
+    "lift": {
+     "hsr": 0.6666666666666666,
+     "rule": 0.9318181818181818,
+     "n": 44
+    },
+    "transport": {
+     "hsr": 0.28888888888888886,
+     "rule": 0.8387096774193549,
+     "n": 15
+    },
+    "placement": {
+     "hsr": 0.5528455284552846,
+     "rule": 0.5733333333333334,
+     "n": 46
+    },
+    "retreat": {
+     "hsr": 0.9485294117647058,
+     "rule": 0.8614609571788413,
+     "n": 402
+    }
+   },
+   "lead": {
+    "0->1": {
+     "hsr": {
+      "n": 17,
+      "median_lead_frames": 0.0,
+      "missed": 4
+     },
+     "rule": {
+      "n": 20,
+      "median_lead_frames": 0.0,
+      "missed": 1
+     }
+    },
+    "1->2": {
+     "hsr": {
+      "n": 11,
+      "median_lead_frames": 0.0,
+      "missed": 0
+     },
+     "rule": {
+      "n": 11,
+      "median_lead_frames": 0.0,
+      "missed": 0
+     }
+    },
+    "2->3": {
+     "hsr": {
+      "n": 11,
+      "median_lead_frames": 1.0,
+      "missed": 0
+     },
+     "rule": {
+      "n": 11,
+      "median_lead_frames": 0.0,
+      "missed": 0
+     }
+    },
+    "3->4": {
+     "hsr": {
+      "n": 9,
+      "median_lead_frames": -1.0,
+      "missed": 0
+     },
+     "rule": {
+      "n": 9,
+      "median_lead_frames": 0.0,
+      "missed": 0
+     }
+    },
+    "4->5": {
+     "hsr": {
+      "n": 9,
+      "median_lead_frames": -1.0,
+      "missed": 0
+     },
+     "rule": {
+      "n": 9,
+      "median_lead_frames": -3.0,
+      "missed": 0
+     }
+    }
+   },
+   "n_failure_frames": 77,
+   "per_episode": {
+    "ep1804": {
+     "f1_hsr": 0.7979919678714859,
+     "f1_rule": 0.8641975308641975,
+     "acc_hsr": 0.9333333333333333,
+     "acc_rule": 0.9333333333333333,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "ep1809": {
+     "f1_hsr": 0.7778507571611021,
+     "f1_rule": 0.9260935143288084,
+     "acc_hsr": 0.92,
+     "acc_rule": 0.9333333333333333,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "ep1815": {
+     "f1_hsr": 0.8629421556387848,
+     "f1_rule": 0.8831417624521073,
+     "acc_hsr": 0.96,
+     "acc_rule": 0.9466666666666667,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "ep1822": {
+     "f1_hsr": 0.5648809523809524,
+     "f1_rule": 0.4568498452012384,
+     "acc_hsr": 0.6078431372549019,
+     "acc_rule": 0.7254901960784313,
+     "n_failure": 24,
+     "labels": [
+      0,
+      1,
+      2,
+      3
+     ]
+    },
+    "ep1839": {
+     "f1_hsr": 0.9314176245210728,
+     "f1_rule": 0.9683462532299741,
+     "acc_hsr": 0.9733333333333334,
+     "acc_rule": 0.9733333333333334,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "ep1840": {
+     "f1_hsr": 0.29523809523809524,
+     "f1_rule": 0.45962732919254656,
+     "acc_hsr": 0.41333333333333333,
+     "acc_rule": 0.6133333333333333,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1
+     ]
+    },
+    "ep1842": {
+     "f1_hsr": 0.8432773109243697,
+     "f1_rule": 0.9626984126984127,
+     "acc_hsr": 0.9466666666666667,
+     "acc_rule": 0.9733333333333334,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "ep1843": {
+     "f1_hsr": 0.358974358974359,
+     "f1_rule": 0.21052631578947367,
+     "acc_hsr": 0.56,
+     "acc_rule": 0.26666666666666666,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1
+     ]
+    },
+    "ep1845": {
+     "f1_hsr": 0.8167589516426726,
+     "f1_rule": 0.8814192343604108,
+     "acc_hsr": 0.9333333333333333,
+     "acc_rule": 0.9466666666666667,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "ep1848": {
+     "f1_hsr": 0.6756756756756757,
+     "f1_rule": 0.4510707508809976,
+     "acc_hsr": 0.52,
+     "acc_rule": 0.64,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1
+     ]
+    },
+    "ep1849": {
+     "f1_hsr": 1.0,
+     "f1_rule": 1.0,
+     "acc_hsr": 1.0,
+     "acc_rule": 1.0,
+     "n_failure": 53,
+     "labels": [
+      0,
+      1,
+      2
+     ]
+    },
+    "ep1851": {
+     "f1_hsr": 0.47183098591549294,
+     "f1_rule": 0.2647058823529412,
+     "acc_hsr": 0.8933333333333333,
+     "acc_rule": 0.36,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1
+     ]
+    },
+    "ep1853": {
+     "f1_hsr": 0.7771387491013659,
+     "f1_rule": 0.5155502392344498,
+     "acc_hsr": 0.6933333333333334,
+     "acc_rule": 0.29333333333333333,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1
+     ]
+    },
+    "ep1860": {
+     "f1_hsr": 0.8575650118203311,
+     "f1_rule": 0.9612903225806452,
+     "acc_hsr": 0.9466666666666667,
+     "acc_rule": 0.96,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "ep1862": {
+     "f1_hsr": 0.8854700854700854,
+     "f1_rule": 0.8765554046452922,
+     "acc_hsr": 0.96,
+     "acc_rule": 0.9466666666666667,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    },
+    "ep1866": {
+     "f1_hsr": 0.7668126254333151,
+     "f1_rule": 0.677862014619168,
+     "acc_hsr": 0.9066666666666666,
+     "acc_rule": 0.49333333333333335,
+     "n_failure": 0,
+     "labels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ]
+    }
+   }
+  },
+  "partC": {
+   "criteria": {
+    "1_recovered_frac": 0.9145299145299145,
+    "1_pass": true,
+    "2_false_hold_increase_empty_slip": 0,
+    "2_pass": true,
+    "3_natural_false_pass_increase": 0.0018365472910927456,
+    "3_pass": true
+   },
+   "all_pass": true,
+   "counts": {
+    "natural": {
+     "pg_pos": 111,
+     "missed_strong": 0,
+     "recovered": 0,
+     "false_strong": 32,
+     "false_or": 34,
+     "pt_neg": 1089,
+     "fp_task_strong": 32,
+     "fp_task_or": 34
+    },
+    "instruction": {
+     "pg_pos": 333,
+     "missed_strong": 117,
+     "recovered": 107,
+     "false_strong": 66,
+     "false_or": 78,
+     "pt_neg": 3600,
+     "fp_task_strong": 282,
+     "fp_task_or": 401
+    },
+    "empty": {
+     "pg_pos": 0,
+     "missed_strong": 0,
+     "recovered": 0,
+     "false_strong": 0,
+     "false_or": 0,
+     "pt_neg": 913,
+     "fp_task_strong": 0,
+     "fp_task_or": 0
+    },
+    "slip": {
+     "pg_pos": 20,
+     "missed_strong": 20,
+     "recovered": 0,
+     "false_strong": 0,
+     "false_or": 0,
+     "pt_neg": 1014,
+     "fp_task_strong": 0,
+     "fp_task_or": 0
+    }
+   }
+  }
+ },
+ "outputs": "outputs/2026-10-29_HSR_6단계_단계구분_학습데이터_closedloop기록",
+ "verdict": {
+  "better_phasing_ci_lower_gt_0": false,
+  "lead_value": false,
+  "complement_value_partC": true,
+  "summary": "no added value over the strong rule for phase accuracy or early boundary detection; added value for recovering missed attaches (Part C)"
+ }
+}

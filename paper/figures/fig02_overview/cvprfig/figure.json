@@ -1,0 +1,49 @@
+{
+ "artifact_id": "F02",
+ "status": "CVPRFIG_DRAFT",
+ "is_measured_result": false,
+ "numeric_values": null,
+ "engine": {
+  "repo": "https://github.com/ChizkiyahuOhayon/CVPR-Figure",
+  "commit": "c220e5de60bf9a2b6b222ac50d4a942835db0eb8",
+  "render": "scripts/render.py -f svg,pdf,png,pptx --dpi 300 (pdf/png via cairosvg)",
+  "font_note": "Times New Roman aliased to STIXGeneral via fontconfig (no Times-metric font on host)"
+ },
+ "asset_script": "paper/tools/plotting/cvprfig_assets.py",
+ "asset_manifest": "paper/figures/cvprfig_assets/assets.json",
+ "existing_storyboard_untouched": true,
+ "updated_at": "2026-10-13 KST",
+ "caption_scope": "Conceptual problem/idea overview. Row (b) image is an observed T47b frame (target merged with touching distractor, 10 cm on_target radius); outcomes are conceptual, not measured.",
+ "spec": "figures/fig02_overview/cvprfig/fig02_overview.yaml",
+ "spec_sha256": "16bcf6129c5aebb96562ffdc4c1b789aa8ce9443d5dd6256177c3d13e20084fb",
+ "outputs": {
+  "svg": "3901c2c1d22283e657bd4c8a3a08017ee9af9314a30ba85671319d6f2f3a5787",
+  "pdf": "716d65f78f1e169ef806ff1e09e29c909b38347c673d6bbd2991efe04894a530",
+  "png": "3ed18a80405bc0c342c3524a57b3226705549673c1cf605d8298c80db0e5aa9a",
+  "pptx": "46cb933329d3771861c66a725a1e462af0b10afa7113989074eb0698242800c8"
+ },
+ "assets_used": {
+  "policy_cam_left_wrist": {
+   "source": "/mnt/dev/AG3S_VLA-storage/results/workspace/live_test/20260925_headfix16d/records/run_0000/run_0000/step_00005.npz",
+   "source_sha256": "5145d78f4baacad58ec69bec884b7e95646bfde6d4e6bcf7f389e1e937df0037",
+   "key": "image_cam_left_wrist",
+   "t_step": 40,
+   "note": "224x224 policy input (headfix record, held-out, apple)",
+   "sha256": "4d9424afcf04c36f7008d1bf8728d74d0571580ef0d3d7990fb290daa45629dc"
+  },
+  "merged_cluster_topview": {
+   "source": "AG3S/ag3s/docs/figures/t47/t47b-scene-identity.png",
+   "source_sha256": "1337385a560199f4489729c3387b23cb4925c0c815d4253bb4e90d30750fa54c",
+   "crop_xyxy": [
+    950,
+    880,
+    1350,
+    1280
+   ],
+   "sha256": "a5bb3acd7889b3fd35f727ac321378280008b64701423452de41855db768f74a"
+  }
+ },
+ "placeholders": [
+  "c_img"
+ ]
+}

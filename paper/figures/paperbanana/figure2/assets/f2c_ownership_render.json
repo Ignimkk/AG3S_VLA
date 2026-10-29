@@ -1,0 +1,37 @@
+{
+ "asset": "paper/figures/paperbanana/figure2/assets/f2c_ownership_render.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_render.py",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00167.npz": "5b19cce760a1400af4d85fa69b24e02993641324c52dda75829dd495cdf042aa",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00017.npz": "fc15c4f4e9ca13ff6027fae00acb4c8531c0f1b02221884bd40c25397826f858"
+ },
+ "note": "Serving _ball_owned_split on the 1 cm voxelised observed surface inside the recorded ball: target-owned voxels removed (faint orange), neighbour-owned and ambiguous kept (blue / light blue). Non-target evidence first filtered by the serving T46 F1 function nontarget_surface_evidence (adopted method, T46c), applied offline to this recorded chunk; the T53 run itself used proximity evidence.",
+ "is_measured_result": false,
+ "chunk": 17,
+ "counts": {
+  "target": 122,
+  "nontarget": 32,
+  "ambiguous": 2,
+  "unowned": 0
+ },
+ "surface_evidence": {
+  "method": "surface",
+  "shell_mm": 10.0,
+  "tie_mm": 5.0,
+  "applied": true,
+  "n_candidates": 57,
+  "n_protected": 2,
+  "n_dropped": 55,
+  "fit_radius_mm": 30.412,
+  "limit_mm": 40.412
+ },
+ "serving_counts_this_chunk": {
+  "n_seeds_in_ball": 1424,
+  "n_removed": 1115,
+  "n_kept_nontarget": 206,
+  "n_ambiguous": 103
+ }
+}

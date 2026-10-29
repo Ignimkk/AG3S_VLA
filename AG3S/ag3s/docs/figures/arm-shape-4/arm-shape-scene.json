@@ -1,0 +1,269 @@
+{
+ "panels": [
+  {
+   "row": 0,
+   "method": "control1",
+   "file": "p2_121.npz",
+   "pose_index": 36,
+   "kind": 3,
+   "req": 8,
+   "sub": 2,
+   "link": "FT_sensor_L",
+   "gt_mm": -27.41958058887514,
+   "shape_mm": Infinity,
+   "trajopt_mm": null,
+   "n_spheres_drawn": 152,
+   "gt_fromto": [
+    0.44274485569523986,
+    0.25301423251047506,
+    0.9414984561370462,
+    0.45229489096025066,
+    0.27871696050006495,
+    0.9414984612373195
+   ]
+  },
+  {
+   "row": 0,
+   "method": "control2",
+   "file": "p2_121.npz",
+   "pose_index": 36,
+   "kind": 3,
+   "req": 8,
+   "sub": 2,
+   "link": "FT_sensor_L",
+   "gt_mm": -27.41958058887514,
+   "shape_mm": Infinity,
+   "trajopt_mm": null,
+   "n_spheres_drawn": 152,
+   "gt_fromto": [
+    0.44274485569523986,
+    0.25301423251047506,
+    0.9414984561370462,
+    0.45229489096025066,
+    0.27871696050006495,
+    0.9414984612373195
+   ]
+  },
+  {
+   "row": 0,
+   "method": "inscribed",
+   "file": "p2_121.npz",
+   "pose_index": 36,
+   "kind": 3,
+   "req": 8,
+   "sub": 2,
+   "link": "FT_sensor_L",
+   "gt_mm": -27.41958058887514,
+   "shape_mm": -23.878521117124635,
+   "trajopt_mm": null,
+   "n_spheres_drawn": 2607,
+   "gt_fromto": [
+    0.44274485569523986,
+    0.25301423251047506,
+    0.9414984561370462,
+    0.45229489096025066,
+    0.27871696050006495,
+    0.9414984612373195
+   ]
+  },
+  {
+   "row": 0,
+   "method": "morphit",
+   "file": "p2_121.npz",
+   "pose_index": 36,
+   "kind": 3,
+   "req": 8,
+   "sub": 2,
+   "link": "FT_sensor_L",
+   "gt_mm": -27.41958058887514,
+   "shape_mm": -12.13874351600983,
+   "trajopt_mm": null,
+   "n_spheres_drawn": 476,
+   "gt_fromto": [
+    0.44274485569523986,
+    0.25301423251047506,
+    0.9414984561370462,
+    0.45229489096025066,
+    0.27871696050006495,
+    0.9414984612373195
+   ]
+  },
+  {
+   "row": 1,
+   "method": "control1",
+   "file": "run_OCC_k1_AG3S_case1_L2_s23453.npz",
+   "pose_index": 231,
+   "kind": 2,
+   "req": 25,
+   "sub": 1,
+   "link": "link_left_arm_5",
+   "gt_mm": -15.785576236327138,
+   "shape_mm": 7.067092959919632,
+   "trajopt_mm": -6.83978658406062,
+   "n_spheres_drawn": 152,
+   "gt_fromto": [
+    0.44179374972508395,
+    0.26744499055462895,
+    0.9670425816557819,
+    0.43378075293116025,
+    0.2715779809183234,
+    0.9799999999999998
+   ]
+  },
+  {
+   "row": 1,
+   "method": "control2",
+   "file": "run_OCC_k1_AG3S_case1_L2_s23453.npz",
+   "pose_index": 231,
+   "kind": 2,
+   "req": 25,
+   "sub": 1,
+   "link": "link_left_arm_5",
+   "gt_mm": -15.785576236327138,
+   "shape_mm": -54.82184071260117,
+   "trajopt_mm": -68.72872025658143,
+   "n_spheres_drawn": 152,
+   "gt_fromto": [
+    0.44179374972508395,
+    0.26744499055462895,
+    0.9670425816557819,
+    0.43378075293116025,
+    0.2715779809183234,
+    0.9799999999999998
+   ]
+  },
+  {
+   "row": 1,
+   "method": "inscribed",
+   "file": "run_OCC_k1_AG3S_case1_L2_s23453.npz",
+   "pose_index": 231,
+   "kind": 2,
+   "req": 25,
+   "sub": 1,
+   "link": "link_left_arm_5",
+   "gt_mm": -15.785576236327138,
+   "shape_mm": -14.006818391831526,
+   "trajopt_mm": -15.051545506032603,
+   "n_spheres_drawn": 2607,
+   "gt_fromto": [
+    0.44179374972508395,
+    0.26744499055462895,
+    0.9670425816557819,
+    0.43378075293116025,
+    0.2715779809183234,
+    0.9799999999999998
+   ]
+  },
+  {
+   "row": 1,
+   "method": "morphit",
+   "file": "run_OCC_k1_AG3S_case1_L2_s23453.npz",
+   "pose_index": 231,
+   "kind": 2,
+   "req": 25,
+   "sub": 1,
+   "link": "link_left_arm_5",
+   "gt_mm": -15.785576236327138,
+   "shape_mm": -12.08615647380405,
+   "trajopt_mm": -14.124598550454232,
+   "n_spheres_drawn": 476,
+   "gt_fromto": [
+    0.44179374972508395,
+    0.26744499055462895,
+    0.9670425816557819,
+    0.43378075293116025,
+    0.2715779809183234,
+    0.9799999999999998
+   ]
+  },
+  {
+   "row": 2,
+   "method": "control1",
+   "file": "run_OCC_k4_AG3S_case1_L2_s33453.npz",
+   "pose_index": 810,
+   "kind": 1,
+   "req": 47,
+   "sub": 378,
+   "link": "link_left_arm_6",
+   "gt_mm": -0.1677000001132259,
+   "shape_mm": -7.855300284261008,
+   "trajopt_mm": -6.13299499494755,
+   "n_spheres_drawn": 152,
+   "gt_fromto": [
+    0.45684508580552136,
+    0.2758295634397143,
+    0.9799497581551244,
+    0.4569508063374776,
+    0.2759496559714738,
+    0.9799999999999998
+   ]
+  },
+  {
+   "row": 2,
+   "method": "control2",
+   "file": "run_OCC_k4_AG3S_case1_L2_s33453.npz",
+   "pose_index": 810,
+   "kind": 1,
+   "req": 47,
+   "sub": 378,
+   "link": "link_left_arm_6",
+   "gt_mm": -0.1677000001132259,
+   "shape_mm": -30.320538765166685,
+   "trajopt_mm": -28.598233475853224,
+   "n_spheres_drawn": 152,
+   "gt_fromto": [
+    0.45684508580552136,
+    0.2758295634397143,
+    0.9799497581551244,
+    0.4569508063374776,
+    0.2759496559714738,
+    0.9799999999999998
+   ]
+  },
+  {
+   "row": 2,
+   "method": "inscribed",
+   "file": "run_OCC_k4_AG3S_case1_L2_s33453.npz",
+   "pose_index": 810,
+   "kind": 1,
+   "req": 47,
+   "sub": 378,
+   "link": "link_left_arm_6",
+   "gt_mm": -0.1677000001132259,
+   "shape_mm": 1.223252504623601,
+   "trajopt_mm": -1.074548347050482,
+   "n_spheres_drawn": 2607,
+   "gt_fromto": [
+    0.45684508580552136,
+    0.2758295634397143,
+    0.9799497581551244,
+    0.4569508063374776,
+    0.2759496559714738,
+    0.9799999999999998
+   ]
+  },
+  {
+   "row": 2,
+   "method": "morphit",
+   "file": "run_OCC_k4_AG3S_case1_L2_s33453.npz",
+   "pose_index": 810,
+   "kind": 1,
+   "req": 47,
+   "sub": 378,
+   "link": "link_left_arm_6",
+   "gt_mm": -0.1677000001132259,
+   "shape_mm": -0.40012199787615305,
+   "trajopt_mm": -5.535578618106989,
+   "n_spheres_drawn": 476,
+   "gt_fromto": [
+    0.45684508580552136,
+    0.2758295634397143,
+    0.9799497581551244,
+    0.4569508063374776,
+    0.2759496559714738,
+    0.9799999999999998
+   ]
+  }
+ ],
+ "selection": "row 1: P2 pose-link with GT<0 & first-method shape-only>=0, nearest geom obstacle (most negative GT); row 2: same for P3 restricted to links with spheres in the first method; row 3: P1 actual pose-link with the smallest GT to an obstacle"
+}

@@ -1,0 +1,273 @@
+{
+ "figure": "t59-ppt-phase-bars-W2.png",
+ "korean_labels": true,
+ "figsize_in": [
+  16,
+  9
+ ],
+ "dpi": 150,
+ "inputs_sha256": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_frames_W2.jsonl": "5af017f3537e3de33a108fceb14c351a5828670280f100e6147638f00151dee6",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_w2_stats.json": "e1c9b1f89242aca34722a6551f27f0193a099868d7ed86509b7af060f1d50033",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/t59_w2_window.json": "9e65d7dfe27c46c0bfe20807c9b15e00bfa35dd652343d1fc9dab9c929864594",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T211142+0900_cf38c9dbca7b_c658029a568a/verify/T59/select.json": "15e0bed9a6a0df8880e49b7ffffe6a2040b00ec3a81b1afe91895fa9f4f06cc5"
+ },
+ "unit": "fraction of W2 frames; bar = episode mean (episodes with >= 1 frame of the phase, equal weight); error bar = episode bootstrap 95% CI (B 10000, seed 5407) of the target fraction, drawn at the top of the target segment",
+ "window": "no placed -> W1 end; placed -> first frame >= first placed with used-arm ready distance <= 0.2 rad (inclusive); not reached -> episode end (t59_w2_window.json)",
+ "conditions": {
+  "U": "U_class, current-frame attention, phase-unsplit",
+  "Sg": "S_class_at_geometry_frame (user decision 1)"
+ },
+ "bars": {
+  "pre": {
+   "U": {
+    "n_frames": 477,
+    "n_episodes": 16,
+    "episode_mean": {
+     "target": 0.8245010055044951,
+     "other_object": 0.1452882550685676,
+     "destination": 0.0,
+     "table": 0.006578947368421052,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.023631792058516198
+    },
+    "count": {
+     "target": 403,
+     "other_object": 59,
+     "destination": 0,
+     "table": 4,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 11
+    },
+    "target_ci95": [
+     0.6902082628944375,
+     0.9269885043570513
+    ],
+    "target_pooled": 0.8448637316561844,
+    "target_pooled_ci95": [
+     0.7188689824231993,
+     0.9342670302396968
+    ]
+   },
+   "Sg": {
+    "n_frames": 477,
+    "n_episodes": 16,
+    "episode_mean": {
+     "target": 0.8947368421052632,
+     "other_object": 0.10361842105263158,
+     "destination": 0.0,
+     "table": 0.0,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.001644736842105263
+    },
+    "count": {
+     "target": 430,
+     "other_object": 46,
+     "destination": 0,
+     "table": 0,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 1
+    },
+    "target_ci95": [
+     0.7467105263157895,
+     1.0
+    ],
+    "target_pooled": 0.9014675052410901,
+    "target_pooled_ci95": [
+     0.7506404035932969,
+     1.0
+    ]
+   }
+  },
+  "held": {
+   "U": {
+    "n_frames": 106,
+    "n_episodes": 10,
+    "episode_mean": {
+     "target": 0.590970695970696,
+     "other_object": 0.354064269064269,
+     "destination": 0.0,
+     "table": 0.0,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.054965034965034965
+    },
+    "count": {
+     "target": 69,
+     "other_object": 31,
+     "destination": 0,
+     "table": 0,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 6
+    },
+    "target_ci95": [
+     0.3924192890442891,
+     0.7624458874458875
+    ],
+    "target_pooled": 0.6509433962264151,
+    "target_pooled_ci95": [
+     0.4956482569526048,
+     0.782608695652174
+    ]
+   },
+   "Sg": {
+    "n_frames": 106,
+    "n_episodes": 10,
+    "episode_mean": {
+     "target": 0.8615384615384615,
+     "other_object": 0.13846153846153847,
+     "destination": 0.0,
+     "table": 0.0,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.0
+    },
+    "count": {
+     "target": 100,
+     "other_object": 6,
+     "destination": 0,
+     "table": 0,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 0
+    },
+    "target_ci95": [
+     0.6345784023668639,
+     1.0
+    ],
+    "target_pooled": 0.9433962264150944,
+    "target_pooled_ci95": [
+     0.8420922355393434,
+     1.0
+    ]
+   }
+  },
+  "placed": {
+   "U": {
+    "n_frames": 153,
+    "n_episodes": 9,
+    "episode_mean": {
+     "target": 0.5262345679012346,
+     "other_object": 0.17839506172839506,
+     "destination": 0.02974186307519641,
+     "table": 0.05679012345679012,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.20883838383838385
+    },
+    "count": {
+     "target": 100,
+     "other_object": 17,
+     "destination": 4,
+     "table": 5,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 27
+    },
+    "target_ci95": [
+     0.25555082070707075,
+     0.7923137626262624
+    ],
+    "target_pooled": 0.6535947712418301,
+    "target_pooled_ci95": [
+     0.3230769230769231,
+     0.841728650977523
+    ]
+   },
+   "Sg": {
+    "n_frames": 153,
+    "n_episodes": 9,
+    "episode_mean": {
+     "target": 0.31040965207631876,
+     "other_object": 0.01515151515151515,
+     "destination": 0.0,
+     "table": 0.0,
+     "robot": 0.0,
+     "other": 0.0,
+     "shared": 0.0,
+     "tie": 0.0,
+     "unlabelled": 0.0,
+     "no_target": 0.674438832772166
+    },
+    "count": {
+     "target": 28,
+     "other_object": 6,
+     "destination": 0,
+     "table": 0,
+     "robot": 0,
+     "other": 0,
+     "shared": 0,
+     "tie": 0,
+     "unlabelled": 0,
+     "no_target": 119
+    },
+    "target_ci95": [
+     0.19433107112794612,
+     0.41805555555555557
+    ],
+    "target_pooled": 0.1830065359477124,
+    "target_pooled_ci95": [
+     0.08384825444420647,
+     0.41379310344827586
+    ]
+   }
+  }
+ },
+ "S_no_target_breakdown_Sg": {
+  "pre": {
+   "released": 1
+  },
+  "held": {},
+  "post": {},
+  "placed": {
+   "released": 119
+  }
+ },
+ "check_against_inputs": {
+  "recomputed_from_t59_frames_W2_vs_t59_w2_stats.json": "count equal for every class",
+  "max_abs_episode_mean_diff": 1.1102230246251565e-16
+ },
+ "excluded_phase_post": "post unchanged from W1 (n_frames 14, n_episodes 2)",
+ "difference_from_W1_ppt": {
+  "original": "AG3S/ag3s/docs/figures/ppt-1013/t59-ppt-phase-bars.png",
+  "window": "W2",
+  "added_panel": "phase placed",
+  "layout": "1 row x 3 panels (W1: x 2)",
+  "same": "U, Sg only; target-fraction error bar; colours; 16:9; base font 13 pt"
+ }
+}

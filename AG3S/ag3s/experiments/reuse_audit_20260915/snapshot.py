@@ -1,6 +1,7 @@
+from common.workspace import workspace_path as _ag3s_workspace_path
 import hashlib,json,subprocess,datetime
 from pathlib import Path
-ROOT=Path('${AG3S_PROJECT_ROOT}'); OUT=ROOT/'AG3S/ag3s/docs/figures/reuse-audit-20260915'
+ROOT=Path(_ag3s_workspace_path('')); OUT=ROOT/'AG3S/ag3s/docs/figures/reuse-audit-20260915'
 def sha(p):
  h=hashlib.sha256()
  with p.open('rb') as f:

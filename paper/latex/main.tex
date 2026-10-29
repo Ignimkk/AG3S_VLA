@@ -1,0 +1,41 @@
+% CVPR 2027 draft on the official CVPR 2027 author kit v1 (paper/template/cvpr2027_official, PROVENANCE.json).
+% Working draft, not submission-ready.
+\documentclass[10pt,twocolumn,letterpaper]{article}
+% T1 selects the official Times font metrics with XeTeX/Tectonic as well as pdfLaTeX.
+\usepackage[T1]{fontenc}
+\usepackage[review]{cvpr}
+\input{preamble}
+\definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
+\input{metadata}
+% Full-width teaser in the title block, before the abstract.
+% Extend the local title command without modifying the pinned CVPR style.
+\makeatletter
+\g@addto@macro\@maketitle{%
+  \input{../figures/fig01_teaser/figure_ifg_textwidth}%
+}
+\makeatother
+\begin{document}
+\maketitle
+% Overview for the top of page 2.
+\input{../figures/fig02_overview/figure_cvpr_v1}
+\input{sections/00_abstract}
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+% Pipeline figure queued before the Method text so it lands on the Method's first page.
+\input{../figures/fig03_attention_to_3d/figure_cvpr_v1}
+\input{sections/03_method}
+\input{sections/04_experiments}
+\input{sections/06_limitations}
+\input{sections/05_conclusion}
+% Mandatory for CVPR 2027: after the main text, before the references; not counted toward the 8-page limit.
+\input{sections/07_llm_usage}
+\ifhasverifiedreferences
+{\small
+\bibliographystyle{ieeenat_fullname}
+\bibliography{references}}
+\else
+\section*{References}
+\textit{Verified bibliography pending. No citation entries have been fabricated.}
+\fi
+\end{document}

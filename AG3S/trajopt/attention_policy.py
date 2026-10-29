@@ -22,6 +22,12 @@ failure there is logged and leaves the key out; it never fails the policy call.
 
 **Cost.** Only Euler step 0 is sampled — the (layer, head, agg) cell `step-01-attention.json` scored
 best used `denoise=0` — so this is one prefix+suffix pass, not the full ~10-step denoising loop.
+
+**T57-A (default off).** `attention_source` names another cell (`attention_source.parse_attention_source`:
+``action:<agg>:L<l>H<h>`` or ``noun_target:L<l>H<h>``) and `task_probe` (a `NounProbe`) adds
+`result["task_probe"]` for `SafePolicy`'s HELD gate. With neither given (the default), `infer` takes the
+pre-T57 path unchanged — the extended path (`_infer_extended`) is a separate branch. With either given,
+`result["attention_source"]` / `result["task_probe"]` record what was used (noun, token, ok, reason).
 """
 
 from __future__ import annotations
@@ -63,17 +69,61 @@ class AttentionPolicy:
     """
 
     def __init__(self, policy, attn_model, *, num_denoise_steps: int = 10, noise_seed: int = 0,
-                 subtask_probe: Any = "default"):
-        from AG3S.ag3s.experiments.sources.pi05_attention import AttentionSampler
-
+                 subtask_probe: Any = "default", attention_source: Any = None,
+                 noun_tokens: Any = None, task_probe: Any = None, sampler: Any = None,
+                 backend: Any = None, default_prompt: Optional[str] = None,
+                 prefix_feature: bool = False, hsr6_probe: Any = None):
         self._policy = policy
-        self._sampler = AttentionSampler(attn_model, num_steps=num_denoise_steps)
+        if sampler is None:
+            from AG3S.ag3s.experiments.sources.pi05_attention import AttentionSampler
+
+            sampler = AttentionSampler(attn_model, num_steps=num_denoise_steps)
+        self._sampler = sampler
         self._noise_seed = int(noise_seed)
         self._subtask_probe = _load_probe(subtask_probe)
+        #: AG3S-CORE-EVAL-HSR6 (`serve_safe --hsr6-*`, default None = off): the 6-phase probe on the same `kv_L4`
+        #: feature -> `result["hsr6"]`. None: no key, and the feature is computed exactly when it was before.
+        self._hsr6_probe = hsr6_probe
+        # T57-A — begin. Default (both None) = the pre-T57 cell and path (`infer` never reaches the
+        # extended branch). `attention_source`: a SPEC string or `AttentionSource`; `task_probe`: a
+        # `NounProbe` (T55 prereg); `noun_tokens`: `NounTokens` (needed by a noun source or the probe).
+        from AG3S.trajopt.attention_source import AttentionSource, parse_attention_source
+
+        if attention_source is not None and not isinstance(attention_source, AttentionSource):
+            attention_source = parse_attention_source(attention_source)
+        self._source = attention_source
+        self._task_probe = task_probe
+        #: IFG-S2SERVE (`serve_safe --confidence-gate on`, default False): also carry the prefix layer-8 image
+        #: residual (`attention_source.IFG_PREFIX_L8_KEY`) for the confidence gate. Takes the extended path.
+        self._prefix_feature = bool(prefix_feature)
+        self._extended = attention_source is not None or task_probe is not None or self._prefix_feature
+        if self._extended and noun_tokens is None and (
+                task_probe is not None or (attention_source is not None and attention_source.is_noun)):
+            raise ValueError("a noun_target attention source / the task probe needs the prompt's noun token "
+                             "ids (noun_tokens=NounTokens.from_config(config))")
+        self._noun_tokens = noun_tokens
+        #: the prompt the policy injects when a request carries none (`create_trained_policy(default_prompt)`)
+        #: — the noun is read from the prompt that went into the policy.
+        self._default_prompt = default_prompt
+        self._backend = backend
+        if self._extended and self._backend is None:
+            from AG3S.trajopt.attention_source import JaxPrefixBackend
+
+            self._backend = JaxPrefixBackend(self._sampler, noise_seed=self._noise_seed)
+        # T57-A — end
 
     @property
     def metadata(self) -> dict[str, Any]:
-        return getattr(self._policy, "metadata", {})
+        meta = getattr(self._policy, "metadata", {})
+        if not self._extended:
+            return meta
+        # T57-A — the keys exist only when a T57 flag is on (the default metadata is the pre-T57 one).
+        meta = dict(meta or {})
+        if self._source is not None:
+            meta["attention_source"] = self._source.label
+        if self._task_probe is not None:
+            meta["task_probe"] = self._task_probe.record()
+        return meta
 
     def reset(self) -> None:
         reset = getattr(self._policy, "reset", None)
@@ -85,8 +135,42 @@ class AttentionPolicy:
         """The probe in use (`SubtaskProbe`), or None when the label is off."""
         return self._subtask_probe
 
+    @property
+    def hsr6_probe(self):
+        """AG3S-CORE-EVAL-HSR6 — the 6-phase probe in use (`SubtaskProbe`), or None (no `result["hsr6"]`)."""
+        return self._hsr6_probe
+
+    def _want_feature(self) -> bool:
+        return self._subtask_probe is not None or self._hsr6_probe is not None
+
+    def _label_feature(self, result: dict, feature) -> None:
+        """`result["subtask"]` (3-class HSR) and, with the HSR6 probe, `result["hsr6"]` from one `kv_L4` feature.
+        Each failing is logged and leaves its key out; it never fails the policy call."""
+        if self._subtask_probe is not None:
+            try:
+                result["subtask"] = self._subtask_probe.predict(feature)
+            except Exception:  # noqa: BLE001 — the label failing must not fail the policy call
+                logging.warning("subtask probe failed:\n%s", traceback.format_exc())
+        if self._hsr6_probe is not None:
+            try:
+                result["hsr6"] = self._hsr6_probe.predict(feature)
+            except Exception:  # noqa: BLE001 — HSR6 failing leaves `result["hsr6"]` out (SafePolicy: phase None)
+                logging.warning("HSR6 probe failed:\n%s", traceback.format_exc())
+
+    @property
+    def attention_source(self):
+        """The `AttentionSource` given (None = the default cell, no flag)."""
+        return self._source
+
+    @property
+    def task_probe(self):
+        """The `NounProbe` in use, or None (no `result["task_probe"]`)."""
+        return self._task_probe
+
     def infer(self, obs: dict[str, Any], **kwargs) -> dict[str, Any]:
         result = self._policy.infer(obs, **kwargs)
+        if self._extended:
+            return self._infer_extended(obs, result)
         try:
             result = dict(result)
             attention, feature = self._attention_and_feature(obs)
@@ -95,10 +179,83 @@ class AttentionPolicy:
             logging.warning("attention extraction failed:\n%s", traceback.format_exc())
             return result
         if feature is not None:
-            try:
-                result["subtask"] = self._subtask_probe.predict(feature)
-            except Exception:  # noqa: BLE001 — the label failing must not fail the policy call
-                logging.warning("subtask probe failed:\n%s", traceback.format_exc())
+            self._label_feature(result, feature)
+        return result
+
+    # --- T57-A: attention source · task probe (only with a flag) ----------------------------
+    def _infer_extended(self, obs: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
+        """One prefix pass for the cell named by `attention_source` (default cell if only the probe is on),
+        the subtask feature from the same pass, and — with the probe — the target-noun V row of the same
+        cache. Failures never fail the policy call: the attention key is left out (as the default path
+        does), and the probe record says ``ok: False`` (the HELD gate then holds — fail closed)."""
+        from AG3S.trajopt.attention_source import (
+            DEFAULT_SOURCE, cell_maps, feature_digest, noun_lookup)
+
+        result = dict(result)
+        source = self._source or DEFAULT_SOURCE
+        probe = self._task_probe
+        src_rec = None if self._source is None else source.record()
+        probe_rec = None if probe is None else {"p": None, "ok": False, "noun_ok": False, "noun": None,
+                                                 "error": "", "feature": probe.feature,
+                                                 "probe_md5": probe.md5}
+        try:
+            inputs = self._policy._input_transform(dict(obs))  # noqa: SLF001
+            need_noun = source.is_noun or probe is not None
+            prompt = obs.get("prompt") or self._default_prompt
+            look = noun_lookup(inputs, prompt, self._noun_tokens) if need_noun else None
+            rows = None if look is None or not look.ok else look.rows
+            out = self._backend.run(
+                inputs, source=source, rows=rows,
+                want_feature=self._want_feature(),
+                v_layer=None if probe is None else probe.layer,
+                # IFG-S2SERVE — only with the flag (the kwarg is absent otherwise: the T57-A call as before)
+                **({"want_resid": True} if self._prefix_feature else {}))
+        except Exception:  # noqa: BLE001 — attention failing must not fail the policy call
+            why = traceback.format_exc()
+            logging.warning("attention extraction failed (T57-A path):\n%s", why)
+            last = why.strip().splitlines()[-1] if why.strip() else "unknown"
+            if src_rec is not None:
+                result["attention_source"] = {**src_rec, "attention": "failed", "error": last}
+            if probe_rec is not None:
+                result["task_probe"] = {**probe_rec, "error": f"extraction failed: {last}"}
+            return result
+
+        if look is not None and src_rec is not None and source.is_noun:
+            src_rec.update(look.record())
+        if out.get("cell") is not None:
+            result["attention"] = cell_maps(out["cell"])
+            state = "ok"
+        else:
+            # noun not found: **no synthetic attention** — AG3S runs without a target (`attention_extractor`
+            # turns the empty dict into no maps), the reason is in `attention_source.noun_error`.
+            result["attention"] = {}
+            state = "empty"
+        if src_rec is not None:
+            src_rec["attention"] = state
+            result["attention_source"] = src_rec
+        if probe_rec is not None:
+            probe_rec.update({"noun": look.noun, "noun_ok": bool(look.ok), "token_index": look.token_index})
+            if not look.ok:
+                probe_rec["error"] = f"noun not found: {look.error}"
+            elif out.get("v") is None:
+                probe_rec["error"] = "no V row gathered"
+            else:
+                try:
+                    v = np.asarray(out["v"], np.float32)[0]  # the target row
+                    probe_rec.update({"p": probe.p(v), "ok": True, "feature_sha1": feature_digest(v)})
+                except Exception:  # noqa: BLE001 — the gate reads ok=False (fail closed)
+                    logging.warning("task probe failed:\n%s", traceback.format_exc())
+                    probe_rec["error"] = "probe evaluation failed"
+            result["task_probe"] = probe_rec
+        if self._prefix_feature and out.get("resid_l8") is not None:
+            # IFG-S2SERVE — the collector's storage rounding (float16 when finite), read back as float32.
+            from AG3S.ag3s.runtime.confidence_gate import dump_rounding
+            from AG3S.trajopt.attention_source import IFG_PREFIX_L8_KEY
+
+            result[IFG_PREFIX_L8_KEY] = dump_rounding(out["resid_l8"])
+        feature = out.get("feature")
+        if feature is not None:
+            self._label_feature(result, feature)
         return result
 
     def _attention(self, obs: dict[str, Any]) -> dict[str, np.ndarray]:
@@ -119,7 +276,7 @@ class AttentionPolicy:
         model_obs = _model.Observation.from_dict(inputs)
 
         if with_feature is None:
-            with_feature = self._subtask_probe is not None
+            with_feature = self._want_feature()
         if with_feature:
             blocks, feature = self._sampler.attention_and_subtask_feature(
                 model_obs, [_DENOISE_STEP], noise_seed=self._noise_seed)

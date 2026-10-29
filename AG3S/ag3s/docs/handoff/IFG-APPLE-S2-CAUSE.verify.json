@@ -1,0 +1,482 @@
+{
+ "step": "IFG-APPLE-S2-CAUSE",
+ "written": "2026-10-20 KST (lead; numbers from server chunk records + MuJoCo replay of client records + S2FK offline outputs; CPU, read only, no code change to serving)",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f",
+ "out": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-S2-CAUSE",
+ "script": "AG3S/ag3s/experiments/studies/ifg_apple_s2_cause.py",
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-s2-cause.png",
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-s2-cause-scene.png"
+ ],
+ "gt_phase_definition": "pre: before first lift & fingertip>0.08 m; near: before first lift & <=0.08 m; held: target >=0.02 m above start; after_release: after first lift & fingertip>0.10 m (replay GT, evaluator only)",
+ "numbers": {
+  "n_requests": 1800,
+  "n_episodes": 24,
+  "gate_score_by_gt_phase_server": {
+   "pre": {
+    "n": 565,
+    "p10_50_90": [
+     0.2558581046809435,
+     0.9624362329804225,
+     0.9973774612832347
+    ],
+    "frac_below_thr": 0.2867256637168142
+   },
+   "near": {
+    "n": 174,
+    "p10_50_90": [
+     0.14985354818014915,
+     0.9632114376546638,
+     0.9998655203255805
+    ],
+    "frac_below_thr": 0.13218390804597702
+   },
+   "held": {
+    "n": 167,
+    "p10_50_90": [
+     0.018531206890482176,
+     0.23593339870801025,
+     0.8034288289729303
+    ],
+    "frac_below_thr": 0.8203592814371258
+   },
+   "after_release": {
+    "n": 798,
+    "p10_50_90": [
+     0.18198450375850678,
+     0.4005603515427262,
+     0.550162186947926
+    ],
+    "frac_below_thr": 0.9398496240601504
+   }
+  },
+  "gate_score_by_gt_state_offline": {
+   "pre": {
+    "n": 672,
+    "p10_50_90": [
+     0.9297700468573515,
+     0.9786403141405335,
+     0.9982984970744898
+    ],
+    "frac_below_thr": 0.019345238095238096
+   },
+   "held": {
+    "n": 326,
+    "p10_50_90": [
+     0.9502467593037921,
+     0.977222876208154,
+     0.9916205064081514
+    ],
+    "frac_below_thr": 0.03987730061349693
+   },
+   "placed": {
+    "n": 1424,
+    "p10_50_90": [
+     0.346936129784423,
+     0.9983702380793578,
+     0.9998950844454264
+    ],
+    "frac_below_thr": 0.15098314606741572
+   }
+  },
+  "region_err_m_by_gt_phase_server": {
+   "pre": {
+    "n": 589,
+    "p10_50_90": [
+     0.017231657248860895,
+     0.019358539089233802,
+     0.4991465840182359
+    ]
+   },
+   "near": {
+    "n": 174,
+    "p10_50_90": [
+     0.02468157838311892,
+     0.02946952895517541,
+     0.1395391726578891
+    ]
+   },
+   "held": {
+    "n": 167,
+    "p10_50_90": [
+     0.11028731519079134,
+     0.16533011868813596,
+     0.4739195863860172
+    ]
+   },
+   "after_release": {
+    "n": 798,
+    "p10_50_90": [
+     0.013005551801244665,
+     0.017762511166117392,
+     0.09350586248630753
+    ]
+   }
+  },
+  "memory_lock_in_episodes": {
+   "n": 19,
+   "of": 24,
+   "definition": "episodes where more than half of the requests after the first memory switch are switches"
+  },
+  "region_off_target_gt_10cm": {
+   "n": 333,
+   "gate_score_at_or_above_thr": 71
+  },
+  "gate_applied_by_gt_phase": {
+   "after_release": 135,
+   "near": 5,
+   "pre": 162,
+   "held": 5
+  },
+  "filtered_cloud_points_within_4cm_of_gt_target": {
+   "attached=False,lifted=False": {
+    "n": 801,
+    "median": 103.0,
+    "frac_zero": 0.02871410736579276
+   },
+   "attached=False,lifted=True": {
+    "n": 6,
+    "median": 58.0,
+    "frac_zero": 0.0
+   },
+   "attached=True,lifted=False": {
+    "n": 22,
+    "median": 74.0,
+    "frac_zero": 0.4090909090909091
+   },
+   "attached=True,lifted=True": {
+    "n": 83,
+    "median": 0.0,
+    "frac_zero": 0.9879518072289156
+   }
+  },
+  "held_3d_target_centre_err_m_attached_lifted": {
+   "n": 165,
+   "p10_50_90": [
+    0.08802008293652014,
+    0.2551880950825217,
+    0.41550077198749263
+   ]
+  },
+  "gt_hand_d_m_attached_lifted": {
+   "n": 165,
+   "p10_50_90": [
+    0.09415007974487269,
+    0.10068425932132163,
+    0.11077834135546401
+   ]
+  },
+  "attach_decision_crosstab": {
+   "away|others_fail|3d_fail": 201,
+   "away|others_fail|3d_pass": 13,
+   "on|others_fail|3d_fail": 6,
+   "on|others_fail|3d_pass": 6,
+   "on|others_pass|3d_pass": 17
+  },
+  "attach_decision_crosstab_definition": "server requests decided from CLOSING; on = fingertip midpoint ≤ 0.06 m from GT target; others = the existing attach checks",
+  "attach_flipped_by_3d_rule": 0,
+  "first_attach_request_same": {
+   "n_same": 24,
+   "of": 24,
+   "n_attached_C1aN": 17
+  },
+  "ep572": {
+   "first_refined_divergence_k": 18,
+   "first_gate_applied_k": 18,
+   "rows": [
+    {
+     "k": 10,
+     "lift_C1aN": 1.6080323727019064e-06,
+     "lift_S2": 1.6080323727019064e-06,
+     "ref_diff": 0.0,
+     "refined_diff": 0.0,
+     "state_C1aN": "latched",
+     "state_S2": "latched",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": true,
+     "gate_score": 0.9475478316279415,
+     "gate_applied": false
+    },
+    {
+     "k": 11,
+     "lift_C1aN": 1.7805728969033652e-06,
+     "lift_S2": 1.7805728969033652e-06,
+     "ref_diff": 0.0,
+     "refined_diff": 0.0,
+     "state_C1aN": "latched",
+     "state_S2": "latched",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": true,
+     "gate_score": 0.9699567007086708,
+     "gate_applied": false
+    },
+    {
+     "k": 12,
+     "lift_C1aN": 7.900532545956906e-07,
+     "lift_S2": 7.900532545956906e-07,
+     "ref_diff": 0.0,
+     "refined_diff": 0.0,
+     "state_C1aN": "latched",
+     "state_S2": "latched",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": true,
+     "gate_score": 0.9719807727326346,
+     "gate_applied": false
+    },
+    {
+     "k": 13,
+     "lift_C1aN": 1.564260205144663e-06,
+     "lift_S2": 1.564260205144663e-06,
+     "ref_diff": 0.0,
+     "refined_diff": 0.0,
+     "state_C1aN": "latched",
+     "state_S2": "latched",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": true,
+     "gate_score": 0.8990193412955592,
+     "gate_applied": false
+    },
+    {
+     "k": 14,
+     "lift_C1aN": 0.0002340659039322679,
+     "lift_S2": 0.0002340659039322679,
+     "ref_diff": 0.0,
+     "refined_diff": 0.0,
+     "state_C1aN": "closing",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": true,
+     "gate_score": 0.9732976969686282,
+     "gate_applied": false
+    },
+    {
+     "k": 15,
+     "lift_C1aN": 9.343263382721734e-05,
+     "lift_S2": 9.343263382721734e-05,
+     "ref_diff": 0.0,
+     "refined_diff": 0.0,
+     "state_C1aN": "held",
+     "state_S2": "held",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": true,
+     "gate_score": 0.15487627335571258,
+     "gate_applied": false
+    },
+    {
+     "k": 16,
+     "lift_C1aN": 0.020960396958877525,
+     "lift_S2": 0.020960396958877525,
+     "ref_diff": 0.0,
+     "refined_diff": 0.0,
+     "state_C1aN": "held",
+     "state_S2": "held",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": true,
+     "gate_score": 0.8959245148796098,
+     "gate_applied": false
+    },
+    {
+     "k": 17,
+     "lift_C1aN": 0.08862577276695971,
+     "lift_S2": 0.08862577276695971,
+     "ref_diff": 0.0,
+     "refined_diff": 0.0,
+     "state_C1aN": "held",
+     "state_S2": "held",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": true,
+     "gate_score": 0.9061293039913553,
+     "gate_applied": false
+    },
+    {
+     "k": 18,
+     "lift_C1aN": 0.16973664156757695,
+     "lift_S2": 0.16973664156757695,
+     "ref_diff": 0.0,
+     "refined_diff": 0.0497213751077652,
+     "state_C1aN": "latched",
+     "state_S2": "latched",
+     "revoked": [
+      "not_following"
+     ],
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.1659625326341198,
+     "gate_applied": true
+    },
+    {
+     "k": 19,
+     "lift_C1aN": 0.2518176271967423,
+     "lift_S2": 0.24441459416522116,
+     "ref_diff": 0.023420214653015137,
+     "refined_diff": 0.37461936473846436,
+     "state_C1aN": "closing",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.18048695004711762,
+     "gate_applied": true
+    },
+    {
+     "k": 20,
+     "lift_C1aN": 0.244996950110004,
+     "lift_S2": 0.23772473545727202,
+     "ref_diff": 0.03754997253417969,
+     "refined_diff": 0.5497497320175171,
+     "state_C1aN": "closing",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.17720276159792075,
+     "gate_applied": true
+    },
+    {
+     "k": 21,
+     "lift_C1aN": 0.22202639736101748,
+     "lift_S2": 0.001985376223366586,
+     "ref_diff": 0.4786643981933594,
+     "refined_diff": 0.5967979431152344,
+     "state_C1aN": "closing",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.24059024670772822,
+     "gate_applied": true
+    },
+    {
+     "k": 22,
+     "lift_C1aN": 0.21792184498284706,
+     "lift_S2": 0.0004951790019461777,
+     "ref_diff": 0.4724825620651245,
+     "refined_diff": 0.4724825620651245,
+     "state_C1aN": "closing",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.18870695907392038,
+     "gate_applied": true
+    },
+    {
+     "k": 23,
+     "lift_C1aN": 0.23854727521728747,
+     "lift_S2": 0.0006440677738451805,
+     "ref_diff": 0.4635918140411377,
+     "refined_diff": 0.4635918140411377,
+     "state_C1aN": "closing",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.2188847348542676,
+     "gate_applied": true
+    },
+    {
+     "k": 24,
+     "lift_C1aN": 0.26575174865339135,
+     "lift_S2": 0.0007149850057269758,
+     "ref_diff": 0.5174751281738281,
+     "refined_diff": 0.5174751281738281,
+     "state_C1aN": "closing",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.2293511611694068,
+     "gate_applied": true
+    },
+    {
+     "k": 25,
+     "lift_C1aN": 0.259335624875932,
+     "lift_S2": 0.0004949057687617664,
+     "ref_diff": 0.5901839733123779,
+     "refined_diff": 0.5901839733123779,
+     "state_C1aN": "closing",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.2409403775439123,
+     "gate_applied": true
+    },
+    {
+     "k": 26,
+     "lift_C1aN": 0.008222856892220243,
+     "lift_S2": 0.0005288812348027694,
+     "ref_diff": 0.5852106809616089,
+     "refined_diff": 0.5852106809616089,
+     "state_C1aN": "closing",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.2512698445794891,
+     "gate_applied": true
+    },
+    {
+     "k": 27,
+     "lift_C1aN": 0.01014935134326167,
+     "lift_S2": 0.0005274967021208221,
+     "ref_diff": 0.5689784288406372,
+     "refined_diff": 0.5689784288406372,
+     "state_C1aN": "latched",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.2392704610864484,
+     "gate_applied": true
+    },
+    {
+     "k": 28,
+     "lift_C1aN": 0.009008376399258888,
+     "lift_S2": 0.0005283159568766349,
+     "ref_diff": 0.659475564956665,
+     "refined_diff": 0.659475564956665,
+     "state_C1aN": "latched",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.24076771627559182,
+     "gate_applied": true
+    },
+    {
+     "k": 29,
+     "lift_C1aN": 0.00895115081625475,
+     "lift_S2": 0.0005265339826885373,
+     "ref_diff": 0.5887500047683716,
+     "refined_diff": 0.5887500047683716,
+     "state_C1aN": "latched",
+     "state_S2": "closing",
+     "revoked": null,
+     "excl_C1aN": true,
+     "excl_S2": false,
+     "gate_score": 0.21801173840258364,
+     "gate_applied": true
+    }
+   ]
+  }
+ },
+ "code_facts": {
+  "gate_memory": "AG3S/ag3s/runtime/confidence_gate.py ConfidenceGate.step: chain memory updated every frame with a region (switched -> best candidate region, else this frame's choice)",
+  "gate_mask": "AG3S/ag3s/runtime/pipeline.py _confidence_gate_step uses cameras' robot_mask; _depth_robot_mask: the frame filter model carries the held spheres while attached (T32 H1). Offline S2FK FK mask = robot model only (ifg_s0)",
+  "gate_skip": "alarm not applied while latch attached (skip=attached); after a latch revoke it applies",
+  "held_3d_scope": "held_3d only enters the CLOSING->HELD attach checks (impl.md section 3)"
+ },
+ "not_measured": [
+  "gate behaviour with the robot-only mask or a frozen memory (no per-camera depth / L8 feature in the server records; needs held-out offline simulation or a rerun)",
+  "whether the alarm changes outcomes beyond ep572 (only discordant pair)"
+ ]
+}

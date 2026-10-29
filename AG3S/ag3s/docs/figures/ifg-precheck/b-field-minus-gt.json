@@ -1,0 +1,365 @@
+{
+ "definition": {
+  "which_contacts": "every counted contact row (link, partner geom) pair, at its deepest sub-step in that row (min dist).",
+  "query_points": "p_s = c + s * n_out for s in {0, 5, 10, 20} mm; c = MuJoCo contact position (midway between the two surfaces), n_out = unit contact normal oriented from the partner geom toward the robot geom.",
+  "field": "server constraint record chunk k (the request whose plan was executing), offline `fixed_input_ablation.build_field(z, outside_distance=1.0)`; layers evaluated separately: coarse = layers[0] (20 mm voxel, whole workspace), fine = layers[1] (5 mm voxel window; NaN where the point is outside the window's interpolation box), main = composed min(coarse, fine) = the value unauthorised TrajOpt rows read, free = target-free fine layer (where present). answer_tier = which layer answered main.",
+  "gt": "GT_main(p) = min signed distance over all non-robot collision geoms at the deepest sub-step's MuJoCo state (qpos snapshot), the target left out in 'held' rows where the active hand touches the target in that row (the server frees the held object on purpose); GT_free = same without the target; GT_partner = to the contacted partner body's geoms. Boxes / planes / cylinders analytic, fruit meshes by mj_geomDistance to a 0.1 mm probe sphere (`ifg_audit_lte.Scene`); the runtime pillar (absent from model_transport.xml) analytic from its replay pose.",
+  "error": "field - GT (mm); > 0 = field says farther than reality.",
+  "layer_gt_pairing": "coarse, fine, main vs GT_main; free vs GT_free."
+ },
+ "by_layer_offset_partner": {
+  "coarse": {
+   "0mm": {
+    "target": {
+     "n": 15,
+     "median": 39.65,
+     "min": 34.92,
+     "max": 40.37
+    },
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 8.2,
+     "min": -1.4,
+     "max": 40.27
+    },
+    "crate": {
+     "n": 24,
+     "median": 13.79,
+     "min": 13.5,
+     "max": 13.9
+    },
+    "table": {
+     "n": 28,
+     "median": 0.01,
+     "min": 0.0,
+     "max": 0.7
+    }
+   },
+   "5mm": {
+    "target": {
+     "n": 15,
+     "median": 38.16,
+     "min": 34.23,
+     "max": 38.82
+    },
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 8.55,
+     "min": -2.55,
+     "max": 38.98
+    },
+    "crate": {
+     "n": 24,
+     "median": 12.54,
+     "min": 12.29,
+     "max": 12.63
+    },
+    "table": {
+     "n": 28,
+     "median": -4.85,
+     "min": -5.0,
+     "max": -0.02
+    }
+   },
+   "10mm": {
+    "target": {
+     "n": 15,
+     "median": 37.12,
+     "min": 33.49,
+     "max": 37.71
+    },
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 8.77,
+     "min": -1.55,
+     "max": 38.13
+    },
+    "crate": {
+     "n": 24,
+     "median": 11.29,
+     "min": 11.08,
+     "max": 11.36
+    },
+    "table": {
+     "n": 28,
+     "median": -9.57,
+     "min": -10.0,
+     "max": -0.05
+    }
+   },
+   "20mm": {
+    "target": {
+     "n": 15,
+     "median": 35.5,
+     "min": 31.45,
+     "max": 36.27
+    },
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 1.29,
+     "min": -10.0,
+     "max": 37.61
+    },
+    "crate": {
+     "n": 24,
+     "median": 10.0,
+     "min": 9.82,
+     "max": 10.06
+    },
+    "table": {
+     "n": 28,
+     "median": -7.32,
+     "min": -10.0,
+     "max": 5.35
+    }
+   }
+  },
+  "fine": {
+   "0mm": {
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 4.49,
+     "min": 0.02,
+     "max": 33.63
+    },
+    "table": {
+     "n": 28,
+     "median": 0.01,
+     "min": 0.0,
+     "max": 0.7
+    }
+   },
+   "5mm": {
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 3.57,
+     "min": -4.27,
+     "max": 32.55
+    },
+    "table": {
+     "n": 28,
+     "median": -4.64,
+     "min": -5.0,
+     "max": -0.13
+    }
+   },
+   "10mm": {
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 3.13,
+     "min": -4.37,
+     "max": 31.69
+    },
+    "table": {
+     "n": 28,
+     "median": -6.02,
+     "min": -7.18,
+     "max": -0.15
+    }
+   },
+   "20mm": {
+    "neighbour_fruit": {
+     "n": 161,
+     "median": -1.2,
+     "min": -5.47,
+     "max": 30.27
+    },
+    "table": {
+     "n": 28,
+     "median": -6.17,
+     "min": -7.18,
+     "max": 6.77
+    }
+   }
+  },
+  "main": {
+   "0mm": {
+    "target": {
+     "n": 15,
+     "median": 39.65,
+     "min": 34.92,
+     "max": 40.37
+    },
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 2.67,
+     "min": -1.4,
+     "max": 33.63
+    },
+    "crate": {
+     "n": 24,
+     "median": 13.79,
+     "min": 13.5,
+     "max": 13.9
+    },
+    "table": {
+     "n": 28,
+     "median": 0.01,
+     "min": 0.0,
+     "max": 0.7
+    }
+   },
+   "5mm": {
+    "target": {
+     "n": 15,
+     "median": 38.16,
+     "min": 34.23,
+     "max": 38.82
+    },
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 2.37,
+     "min": -4.27,
+     "max": 32.55
+    },
+    "crate": {
+     "n": 24,
+     "median": 12.54,
+     "min": 12.29,
+     "max": 12.63
+    },
+    "table": {
+     "n": 28,
+     "median": -4.85,
+     "min": -5.0,
+     "max": -0.13
+    }
+   },
+   "10mm": {
+    "target": {
+     "n": 15,
+     "median": 37.12,
+     "min": 33.49,
+     "max": 37.71
+    },
+    "neighbour_fruit": {
+     "n": 161,
+     "median": 1.33,
+     "min": -4.37,
+     "max": 31.69
+    },
+    "crate": {
+     "n": 24,
+     "median": 11.29,
+     "min": 11.08,
+     "max": 11.36
+    },
+    "table": {
+     "n": 28,
+     "median": -9.57,
+     "min": -10.0,
+     "max": -0.15
+    }
+   },
+   "20mm": {
+    "target": {
+     "n": 15,
+     "median": 35.5,
+     "min": 31.45,
+     "max": 36.27
+    },
+    "neighbour_fruit": {
+     "n": 161,
+     "median": -1.78,
+     "min": -10.0,
+     "max": 30.27
+    },
+    "crate": {
+     "n": 24,
+     "median": 10.0,
+     "min": 9.82,
+     "max": 10.06
+    },
+    "table": {
+     "n": 28,
+     "median": -7.32,
+     "min": -10.0,
+     "max": 5.35
+    }
+   }
+  },
+  "free": {
+   "0mm": {
+    "target": {
+     "n": 15,
+     "median": -3.65,
+     "min": -3.76,
+     "max": -2.6
+    },
+    "neighbour_fruit": {
+     "n": 104,
+     "median": 5.83,
+     "min": 0.06,
+     "max": 10.72
+    },
+    "table": {
+     "n": 28,
+     "median": 0.01,
+     "min": 0.0,
+     "max": 0.7
+    }
+   },
+   "5mm": {
+    "target": {
+     "n": 15,
+     "median": -1.96,
+     "min": -2.15,
+     "max": 0.52
+    },
+    "neighbour_fruit": {
+     "n": 104,
+     "median": 5.76,
+     "min": -3.02,
+     "max": 8.8
+    },
+    "table": {
+     "n": 28,
+     "median": -4.43,
+     "min": -5.0,
+     "max": -0.13
+    }
+   },
+   "10mm": {
+    "target": {
+     "n": 15,
+     "median": 0.19,
+     "min": -0.11,
+     "max": 3.68
+    },
+    "neighbour_fruit": {
+     "n": 104,
+     "median": 3.54,
+     "min": -3.16,
+     "max": 6.9
+    },
+    "table": {
+     "n": 28,
+     "median": -5.65,
+     "min": -7.14,
+     "max": -0.15
+    }
+   },
+   "20mm": {
+    "target": {
+     "n": 15,
+     "median": 4.95,
+     "min": 4.78,
+     "max": 9.44
+    },
+    "neighbour_fruit": {
+     "n": 104,
+     "median": 0.08,
+     "min": -5.37,
+     "max": 5.49
+    },
+    "table": {
+     "n": 28,
+     "median": -6.28,
+     "min": -7.17,
+     "max": -0.2
+    }
+   }
+  }
+ },
+ "script": "AG3S/ag3s/experiments/studies/ifg_precheck_b.py"
+}

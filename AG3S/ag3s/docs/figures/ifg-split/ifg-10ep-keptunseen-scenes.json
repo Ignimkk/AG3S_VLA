@@ -1,0 +1,108 @@
+{
+ "frames": [
+  {
+   "episode": 423,
+   "cfg": "SPLR",
+   "t_row": 173,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-TARGETSPLIT-HANDREACH/runs/SPLR/SPLR_ep423_s4233"
+  },
+  {
+   "episode": 423,
+   "cfg": "SPLR",
+   "t_row": 233,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-TARGETSPLIT-HANDREACH/runs/SPLR/SPLR_ep423_s4233"
+  },
+  {
+   "episode": 423,
+   "cfg": "SPLK",
+   "t_row": 173,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN/runs/SPLK/SPLK_ep423_s4233"
+  },
+  {
+   "episode": 423,
+   "cfg": "SPLK",
+   "t_row": 233,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN/runs/SPLK/SPLK_ep423_s4233"
+  },
+  {
+   "episode": 1404,
+   "cfg": "SPLR",
+   "t_row": 485,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-TARGETSPLIT-HANDREACH/runs/SPLR/SPLR_ep1404_s14043"
+  },
+  {
+   "episode": 1404,
+   "cfg": "SPLR",
+   "t_row": 545,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-TARGETSPLIT-HANDREACH/runs/SPLR/SPLR_ep1404_s14043"
+  },
+  {
+   "episode": 1404,
+   "cfg": "SPLK",
+   "t_row": 485,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN/runs/SPLK/SPLK_ep1404_s14043"
+  },
+  {
+   "episode": 1404,
+   "cfg": "SPLK",
+   "t_row": 545,
+   "crop_px": [
+    280,
+    15,
+    600,
+    305
+   ],
+   "frame_found": true,
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-HSR-KEPTUNSEEN/runs/SPLK/SPLK_ep1404_s14043"
+  }
+ ]
+}

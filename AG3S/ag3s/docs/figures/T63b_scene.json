@@ -1,0 +1,144 @@
+{
+ "episode_rule": "T63b figure 1 (real scene). Episode rule (task, fixed before the runs): among the 10 episodes where CR0m and C1aN differ in the\nsuccess verdict (C1aN recounted to place + 2.5 s), the smallest episode number; if none, the CR0m episode with the most\n(obstacle + non-auth target) contact rows (ties: smallest episode number).\nFrame time rule: t_key = grasp_t of whichever of the two arms grasped when exactly one did; otherwise the first CR0m HOLD\nchunk t; otherwise CR0m's last recorded control step. Frames = third_person_front.mp4 frame t (one frame per control step).\nTrajectories: measured active-arm TCP (MuJoCo replay state 'tcp', after every control step) of E0 / C1aN (window place + 2.5 s) / CR0m.\n",
+ "rule_used": "success differs between CR0m and C1aN in episodes [126, 309, 572, 850, 901]; smallest = 126",
+ "episodes_with_success_difference": [
+  126,
+  309,
+  572,
+  850,
+  901
+ ],
+ "episode": 126,
+ "seed": 1263,
+ "stratum": "clear",
+ "t_key": 120,
+ "t_key_rule": "grasp_t of C1aN (only C1aN grasped)",
+ "frames": {
+  "E0": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep126_s1263/third_person_front.mp4 frame 120",
+  "C1aN": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep126_s1263/third_person_front.mp4 frame 120",
+  "CR0m": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/runs/CR0m/CR0m_ep126_s1263/third_person_front.mp4 frame 120"
+ },
+ "outcomes": {
+  "E0": {
+   "success": true,
+   "grasp": true,
+   "primary": true,
+   "grasp_t": 144,
+   "place_t": 216,
+   "n_hold_chunks": 0,
+   "obstacle_rows_sum": 0,
+   "nonauth_target_rows": 0,
+   "stop_t": 251
+  },
+  "C1aN": {
+   "success": true,
+   "grasp": true,
+   "primary": true,
+   "grasp_t": 120,
+   "place_t": 200,
+   "n_hold_chunks": 1,
+   "obstacle_rows_sum": 0,
+   "nonauth_target_rows": 0,
+   "stop_t": 235
+  },
+  "CR0m": {
+   "success": false,
+   "grasp": false,
+   "primary": false,
+   "grasp_t": null,
+   "place_t": null,
+   "n_hold_chunks": 3,
+   "obstacle_rows_sum": 0,
+   "nonauth_target_rows": 0,
+   "stop_t": null
+  }
+ },
+ "trajectories": {
+  "E0": {
+   "n": 252,
+   "t_last": 251,
+   "tcp_first": [
+    0.5038774866321196,
+    0.2683583739359228,
+    1.0575386307532908
+   ],
+   "tcp_last": [
+    0.492041284789403,
+    -0.04189199823354967,
+    1.0858872557099861
+   ],
+   "n_hold_rows": 0,
+   "crate_pos_first": [
+    0.518427303943349,
+    0.027670196423620463,
+    0.8799905296757148
+   ],
+   "target_pos_first": [
+    0.5405048638003496,
+    0.3223921042613488,
+    0.8500002960011941
+   ]
+  },
+  "C1aN": {
+   "n": 236,
+   "t_last": 235,
+   "tcp_first": [
+    0.5038774861985325,
+    0.26835837541154767,
+    1.057538628251129
+   ],
+   "tcp_last": [
+    0.496377540541706,
+    -0.030950353330399707,
+    1.09869364863733
+   ],
+   "n_hold_rows": 8,
+   "crate_pos_first": [
+    0.518427303943349,
+    0.027670196423620463,
+    0.8799905296757148
+   ],
+   "target_pos_first": [
+    0.5405048638003496,
+    0.3223921042613488,
+    0.8500002960011941
+   ]
+  },
+  "CR0m": {
+   "n": 600,
+   "t_last": 599,
+   "tcp_first": [
+    0.5031153178162192,
+    0.26824487387657253,
+    1.0562341946976075
+   ],
+   "tcp_last": [
+    0.47455832230784734,
+    0.23279491491247453,
+    0.9961499208577684
+   ],
+   "n_hold_rows": 24,
+   "crate_pos_first": [
+    0.518427303943349,
+    0.027670196423620463,
+    0.8799905296757148
+   ],
+   "target_pos_first": [
+    0.5405048638003496,
+    0.3223921042613488,
+    0.8500002960011941
+   ]
+  }
+ },
+ "tcp_distance_cr0m_c1an_mm": {
+  "n": 600,
+  "median": 90.77971144686099,
+  "max": 310.617942721847,
+  "at_t_key": 123.59523632211008
+ },
+ "replays": {
+  "E0": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/replay/runs_E0_E0_ep126_s1263.json",
+  "C1aN": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/replay/runs_C1aN_C1aN_ep126_s1263.json",
+  "CR0m": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/replay/runs_CR0m_CR0m_ep126_s1263.json"
+ }
+}

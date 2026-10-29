@@ -8,13 +8,15 @@ __pycache__/
 .cache/
 /outputs/
 /storage/
-.vscode/
+.vscode/*
+!.vscode/settings.json
 build/
 dist/
 *.egg-info/
 .claude/settings.local.json
 .claude/roles/*.local.settings.json
 *.pt
+*.pptx
 *.pth
 *.safetensors
 *.ckpt

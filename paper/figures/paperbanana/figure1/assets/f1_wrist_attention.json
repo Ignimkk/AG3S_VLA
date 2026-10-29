@@ -1,0 +1,14 @@
+{
+ "asset": "paper/figures/paperbanana/figure1/assets/f1_wrist_attention.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_render.py",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00010.npz": "d072c6c69754c0442d0825226e5507afd5488875558ae7479787e0cd8481b339",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00160.npz": "adcf345ff01f97c2c94b6a5c43198fc5de5855778f1008dd307f8c4b1af11d3f"
+ },
+ "note": "Active (right) wrist camera re-rendered at 1280x960 from the recorded state; the served 16x16 attention (layer 8, head 2) is bicubic-upsampled onto it (the grid maps linearly onto the 4:3 frame).",
+ "is_measured_result": false,
+ "chunk": 10
+}

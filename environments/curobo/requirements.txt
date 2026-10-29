@@ -1,3 +1,5 @@
+# Historical producer specification; current independently tested environment:
+# environments/curobo/requirements-live.txt (Python 3.11.16, no system packages).
 # cuRoboV2 전용 venv 의 의존성.
 #
 # **`requirements-ag3s.txt` 와 같은 환경에 설치하지 말 것.** curobo 는 numpy/scipy 버전을

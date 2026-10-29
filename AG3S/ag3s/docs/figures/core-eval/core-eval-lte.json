@@ -1,0 +1,69 @@
+{
+ "examples": {
+  "가림121_k0": {
+   "request": 14,
+   "removed_by_class": {
+    "none": 135,
+    "apple": 579,
+    "robot": 124,
+    "apple_inside": 212,
+    "apple_stem_leaf": 29
+   },
+   "apple_left_frac": 0.063,
+   "clearance_now_mm": {
+    "hand_body": 28.8,
+    "finger": 10.0,
+    "palm_shell": 7.2
+   },
+   "n_hand_spheres": 303
+  },
+  "회귀954_k0": {
+   "request": 61,
+   "removed_by_class": {
+    "fruit": 5,
+    "none": 250,
+    "apple": 556,
+    "robot": 131,
+    "apple_inside": 227,
+    "apple_stem_leaf": 30
+   },
+   "apple_left_frac": 0.289,
+   "clearance_now_mm": {
+    "hand_body": 43.9,
+    "finger": 5.1,
+    "palm_shell": 16.4
+   },
+   "n_hand_spheres": 303
+  }
+ },
+ "apple_left_frac_median": 0.175,
+ "removed_by_class_total": {
+  "apple": 210443,
+  "none": 59846,
+  "apple_inside": 75771,
+  "apple_stem_leaf": 18217,
+  "robot": 9163,
+  "fruit": 6883
+ },
+ "forbidden_class_removed_per_run": {
+  "가림121_k0": 0,
+  "가림121_k1": 0,
+  "가림122_k0": 0,
+  "가림122_k1": 0,
+  "가림123_k0": 0,
+  "가림123_k1": 0,
+  "회귀119_k0": 2,
+  "회귀119_k1": 4,
+  "회귀250_k0": 884,
+  "회귀250_k1": 1055,
+  "회귀320_k0": 4,
+  "회귀320_k1": 4,
+  "회귀850_k0": 17,
+  "회귀850_k1": 22,
+  "회귀954_k0": 1242,
+  "회귀954_k1": 422,
+  "회귀211_k0": 1988,
+  "회귀211_k1": 1239
+ },
+ "definition": "pre-grasp requests; apple left = GT apple samples whose main-layer value is within 1 voxel and target-free value within 1 voxel; removed voxels classed by nearest GT surface within 8 mm (stem/leaf visual meshes and robot surface included; inside the apple radius = TSDF band)"
+}

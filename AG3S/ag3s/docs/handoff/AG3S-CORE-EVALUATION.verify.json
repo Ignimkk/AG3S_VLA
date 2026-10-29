@@ -1,0 +1,598 @@
+{
+ "step": "AG3S-CORE-EVALUATION §0.1 module evaluation 1st round",
+ "recorded_kst": "2026-10-29 00:55 KST",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261028T224856+0900_b3b69311f948_8784a1265958",
+ "code": "snapshot_core = HEAD b3b69311 + working tree (snapshot_core_head.txt)",
+ "configuration": "adopted A1-A4 + A7 (E3 kit B_ROI_FPR + --palm-shell on --palm-shell-margin 5 + --grasp-anchor 2000 --grasp-anchor-path-weight 0), sphere robot mask only",
+ "scenes": "occlusion post (1345 orange removed, case1 L2) x seeds 13453/23453/33453 + regression 119/250/320/850/954/211, 2 draws each (no perturbation, 1e-6 rad seed 1) = 18 runs",
+ "numbers": {
+  "outcomes": {
+   "가림 기둥 (3 장면 × 2)|VLA": {
+    "k": 6,
+    "n": 6,
+    "wilson95": [
+     0.61,
+     1.0
+    ]
+   },
+   "가림 기둥 (3 장면 × 2)|E3": {
+    "k": 1,
+    "n": 6,
+    "wilson95": [
+     0.03,
+     0.564
+    ]
+   },
+   "가림 기둥 (3 장면 × 2)|SCM": {
+    "k": 4,
+    "n": 6,
+    "wilson95": [
+     0.3,
+     0.903
+    ]
+   },
+   "가림 기둥 (3 장면 × 2)|CORE": {
+    "k": 5,
+    "n": 6,
+    "wilson95": [
+     0.436,
+     0.97
+    ]
+   },
+   "장애물 없음 (6 장면 × 2)|VLA": {
+    "k": 9,
+    "n": 12,
+    "wilson95": [
+     0.468,
+     0.911
+    ]
+   },
+   "장애물 없음 (6 장면 × 2)|E3": {
+    "k": 7,
+    "n": 12,
+    "wilson95": [
+     0.32,
+     0.807
+    ]
+   },
+   "장애물 없음 (6 장면 × 2)|SCM": {
+    "k": 6,
+    "n": 12,
+    "wilson95": [
+     0.254,
+     0.746
+    ]
+   },
+   "장애물 없음 (6 장면 × 2)|CORE": {
+    "k": 7,
+    "n": 12,
+    "wilson95": [
+     0.32,
+     0.807
+    ]
+   }
+  },
+  "outcomes_type_counts": {
+   "VLA": {
+    "성공": 15,
+    "금지 접촉: 이웃 과일": 3
+   },
+   "E3": {
+    "쥐지 못함": 5,
+    "들어올린 뒤 놓침": 3,
+    "성공": 8,
+    "못 놓음": 2
+   },
+   "SCM": {
+    "성공": 10,
+    "쥐지 못함": 4,
+    "못 놓음": 1,
+    "금지 접촉: 이웃 과일": 3
+   },
+   "CORE": {
+    "성공": 12,
+    "들어올린 뒤 놓침": 1,
+    "쥐지 못함": 2,
+    "금지 접촉: 이웃 과일": 3
+   }
+  },
+  "paper_results": {
+   "(a) Occluded target (6 runs)|VLA": [
+    6,
+    6
+   ],
+   "(a) Occluded target (6 runs)|E3": [
+    1,
+    6
+   ],
+   "(a) Occluded target (6 runs)|SCM": [
+    4,
+    6
+   ],
+   "(a) Occluded target (6 runs)|CORE": [
+    5,
+    6
+   ],
+   "(b) Clutter, no obstacle (12 runs)|VLA": [
+    4,
+    12
+   ],
+   "(b) Clutter, no obstacle (12 runs)|E3": [
+    7,
+    12
+   ],
+   "(b) Clutter, no obstacle (12 runs)|SCM": [
+    6,
+    12
+   ],
+   "(b) Clutter, no obstacle (12 runs)|CORE": [
+    7,
+    12
+   ],
+   "support|VLA": 5,
+   "support|E3": 0,
+   "support|SCM": 0,
+   "support|CORE": 0
+  },
+  "ATS": {
+   "example": {
+    "run": "가림121_k0",
+    "request": 3,
+    "precision_5mm": 0.88,
+    "recall_5mm": 0.67,
+    "vis_centroid_mm": 5.6,
+    "head_visible_frac": 0.266
+   },
+   "occlusion_runs": {
+    "head_visible_median": 0.245,
+    "precision_median": 0.885,
+    "recall_median": 0.715,
+    "vis_centroid_median_mm": 5.2,
+    "n_runs": 6
+   },
+   "clear_runs": {
+    "head_visible_median": 0.421,
+    "precision_median": 0.87,
+    "recall_median": 0.653,
+    "vis_centroid_median_mm": 9.850000000000001,
+    "n_runs": 12
+   },
+   "precision_all_median": 0.882,
+   "recall_all_median": 0.68,
+   "vis_centroid_all_median_mm": 7.2,
+   "no_target_total": 29,
+   "wrong_object_total": 31,
+   "n_pre_requests": 369
+  },
+  "HSR": {
+   "example": "가림121_k0",
+   "keyframes": [
+    [
+     "Approach",
+     72
+    ],
+    [
+     "Grasp",
+     124
+    ],
+    [
+     "Carry",
+     168
+    ],
+    [
+     "Release",
+     216
+    ]
+   ],
+   "runs_reaching_place": 13,
+   "phase_agreement_median_all": 0.9590301003344481,
+   "phase_agreement_median_reached": 0.9655172413793104,
+   "place_delay_requests": [
+    1,
+    1,
+    1,
+    2,
+    1,
+    0,
+    2,
+    2,
+    1,
+    1,
+    1,
+    0,
+    1
+   ],
+   "held_delay_vs_two_finger": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    1,
+    1,
+    1
+   ],
+   "release_delay": [
+    1,
+    2,
+    2,
+    3,
+    3,
+    2,
+    1,
+    1,
+    2,
+    1,
+    1,
+    3,
+    1
+   ],
+   "false_held_before_contact": {
+    "가림121_k0": 0,
+    "가림121_k1": 0,
+    "가림122_k0": 0,
+    "가림122_k1": 0,
+    "가림123_k0": 0,
+    "가림123_k1": 1,
+    "회귀119_k0": 0,
+    "회귀119_k1": 0,
+    "회귀250_k0": 0,
+    "회귀250_k1": 0,
+    "회귀320_k0": 0,
+    "회귀320_k1": 0,
+    "회귀850_k0": 0,
+    "회귀850_k1": 0,
+    "회귀954_k0": 0,
+    "회귀954_k1": 0,
+    "회귀211_k0": 7,
+    "회귀211_k1": 0
+   }
+  },
+  "LTE": {
+   "example": {
+    "run": "회귀954_k1",
+    "request": 23,
+    "n_removed": 1209,
+    "n_hand_spheres": 303
+   },
+   "removed_by_class_total": {
+    "apple": 210443,
+    "none": 59846,
+    "apple_inside": 75771,
+    "apple_stem_leaf": 18217,
+    "robot": 9163,
+    "fruit": 6883
+   },
+   "removed_percent": {
+    "Apple surface": 55.332704043668144,
+    "Apple interior (TSDF band)": 19.922802460014253,
+    "Stem / leaf": 4.7898759738432855,
+    "Grasping hand": 2.4092679117486977,
+    "No GT surface (< 8 mm)": 15.73557213210876,
+    "Adjacent fruit": 1.80977747861686,
+    "Obstacle / table / basket": 0.0
+   },
+   "forbidden_class_removed_per_run": {
+    "가림121_k0": 0,
+    "가림121_k1": 0,
+    "가림122_k0": 0,
+    "가림122_k1": 0,
+    "가림123_k0": 0,
+    "가림123_k1": 0,
+    "회귀119_k0": 2,
+    "회귀119_k1": 4,
+    "회귀250_k0": 884,
+    "회귀250_k1": 1055,
+    "회귀320_k0": 4,
+    "회귀320_k1": 4,
+    "회귀850_k0": 17,
+    "회귀850_k1": 22,
+    "회귀954_k0": 1242,
+    "회귀954_k1": 422,
+    "회귀211_k0": 1988,
+    "회귀211_k1": 1239
+   },
+   "neighbour_removal_scenes": {
+    "회귀250_k0": {
+     "gap_mm": {
+      "banana": 10.0
+     },
+     "requests_with_neighbour_removed": 12
+    },
+    "회귀250_k1": {
+     "gap_mm": {
+      "banana": 10.0
+     },
+     "requests_with_neighbour_removed": 11
+    },
+    "회귀954_k0": {
+     "gap_mm": {
+      "banana": 10.3
+     },
+     "requests_with_neighbour_removed": 54
+    },
+    "회귀954_k1": {
+     "gap_mm": {
+      "banana": 10.3
+     },
+     "requests_with_neighbour_removed": 24
+    },
+    "회귀211_k0": {
+     "gap_mm": {
+      "banana": 0.9
+     },
+     "requests_with_neighbour_removed": 37
+    },
+    "회귀211_k1": {
+     "gap_mm": {
+      "banana": 0.9
+     },
+     "requests_with_neighbour_removed": 21
+    },
+    "회귀850_k0": {
+     "gap_mm": {
+      "banana": 18.5
+     },
+     "requests_with_neighbour_removed": 11
+    }
+   },
+   "note": "adjacent-fruit voxels are removed only where a banana lies within ~1-10 mm of the apple (scenes 250 / 954 / 211); obstacle / table / basket voxels removed: 0 in all 18 runs",
+   "apple_left_frac_median": 0.175,
+   "contact_vs_removed": {
+    "회귀954_k0": {
+     "contact_t": 107,
+     "request": 13,
+     "request_t": 104,
+     "pairs": [
+      [
+       "banana_geom_4",
+       "banana"
+      ],
+      [
+       "geom#765",
+       "ee_finger_r2"
+      ]
+     ],
+     "hand_body": "ee_finger_r2",
+     "banana_samples_nearest_hand_to_removed_voxel_mm_median": 24.4,
+     "frac_within_5mm_of_removed": 0.0,
+     "n_removed": 1166
+    },
+    "회귀954_k1": {
+     "contact_t": 106,
+     "request": 13,
+     "request_t": 104,
+     "pairs": [
+      [
+       "banana_geom_4",
+       "banana"
+      ],
+      [
+       "geom#765",
+       "ee_finger_r2"
+      ]
+     ],
+     "hand_body": "ee_finger_r2",
+     "banana_samples_nearest_hand_to_removed_voxel_mm_median": 28.3,
+     "frac_within_5mm_of_removed": 0.0,
+     "n_removed": 1090
+    },
+    "회귀211_k0": {
+     "contact_t": 151,
+     "request": 18,
+     "request_t": 144,
+     "pairs": [
+      [
+       "banana_geom_1",
+       "banana"
+      ],
+      [
+       "geom#1086",
+       "ee_finger_l2"
+      ],
+      [
+       "banana_geom_2",
+       "banana"
+      ],
+      [
+       "geom#1086",
+       "ee_finger_l2"
+      ]
+     ],
+     "hand_body": "ee_finger_l2",
+     "banana_samples_nearest_hand_to_removed_voxel_mm_median": 10.6,
+     "frac_within_5mm_of_removed": 0.13,
+     "n_removed": 983
+    }
+   }
+  },
+  "CCR": {
+   "example": {
+    "run": "가림123_k0",
+    "request": 8,
+    "palm_dev_mm": 18.7,
+    "dq_max_deg": 0.96
+   },
+   "grasp_goal_requests": 49,
+   "grasp_goal_runs": 16,
+   "grasp_goal_reduced_gt_0p5mm": 26,
+   "grasp_goal_shown_le_60mm": 45,
+   "solve_ms_median": 70.02273900434375,
+   "solve_ms_p95": 164.38340344466266,
+   "hold_requests": 9,
+   "requests": 832,
+   "grasp_goal": {
+    "runs_active": 16,
+    "requests_active": 49,
+    "requests_reduced_gt_0p5mm": 26,
+    "ref_err_median_mm": 9.24,
+    "res_err_median_mm": 6.07,
+    "definition": "to.metrics.grasp_anchor with non-empty goal_rows; ref / res = palm distance to the frozen goal on the goal rows for the VLA reference / the refined chunk"
+   },
+   "infer_ms_median": 731.6247224807739,
+   "infer_ms_p95": 904.4932246208191
+  },
+  "neighbour_contact_vs_VLA": {
+   "954": "same finger (ee_finger_r2) and banana part as VLA alone; depth 0.43 / 0.88 mm vs VLA 0.46 mm",
+   "211_k0": "finger ee_finger_l2 - banana, max depth 2.13 mm (t 280-339)"
+  },
+  "final_configuration": {
+   "recorded_kst": "2026-10-29 13:15",
+   "code": "snapshot_final2 (HEAD bb85d9f8 + A6 + HSR rule 2 fix)",
+   "nine_scenes_x2": {
+    "A8": {
+     "success": 12,
+     "forbidden": 3,
+     "n": 18,
+     "mech_total": {
+      "goal_A4": 49,
+      "requests": 832,
+      "hold": 9
+     }
+    },
+    "G1": {
+     "success": 9,
+     "forbidden": 4,
+     "n": 18,
+     "mech_total": {
+      "goal_A4": 27,
+      "requests": 972,
+      "goal_GEO": 20
+     }
+    },
+    "HSR": {
+     "success": 12,
+     "forbidden": 2,
+     "n": 18,
+     "mech_total": {
+      "phase_approach": 438,
+      "hsr6_objective": 183,
+      "phase_grasp": 32,
+      "hsr6_held_gate": 14,
+      "hold": 4,
+      "phase_lift": 89,
+      "phase_transport": 107,
+      "phase_placement": 121,
+      "hsr6_target_exempt": 73,
+      "phase_retreat": 83,
+      "requests": 870,
+      "hsr6_attach_assist": 2
+     }
+    },
+    "FIN": {
+     "success": 14,
+     "forbidden": 0,
+     "n": 18,
+     "mech_total": {
+      "phase_approach": 379,
+      "hsr6_objective": 169,
+      "a6_window": 116,
+      "a6_relaxed_rows": 116,
+      "phase_grasp": 35,
+      "phase_lift": 68,
+      "phase_transport": 90,
+      "phase_placement": 93,
+      "hsr6_target_exempt": 65,
+      "phase_retreat": 83,
+      "requests": 748,
+      "hsr6_attach_assist": 1,
+      "hold": 1
+     }
+    }
+   },
+   "place_hurdle_7x2": {
+    "success": {
+     "vla": 0,
+     "ag3s": 6
+    },
+    "hurdle_contact": {
+     "vla": 12,
+     "ag3s": 2
+    },
+    "labels": {
+     "vla/119_k0": "허들접촉",
+     "vla/119_k1": "허들접촉",
+     "ag3s/119_k0": "성공",
+     "ag3s/119_k1": "성공",
+     "vla/250_k0": "허들접촉",
+     "vla/250_k1": "허들접촉",
+     "ag3s/250_k0": "허들접촉",
+     "ag3s/250_k1": "성공",
+     "vla/320_k0": "쥐지못함",
+     "vla/320_k1": "쥐지못함",
+     "ag3s/320_k0": "허들접촉",
+     "ag3s/320_k1": "성공",
+     "vla/850_k0": "허들접촉",
+     "vla/850_k1": "허들접촉",
+     "ag3s/850_k0": "성공",
+     "ag3s/850_k1": "성공",
+     "vla/954_k0": "허들접촉",
+     "vla/954_k1": "허들접촉",
+     "ag3s/954_k0": "쥐지못함",
+     "ag3s/954_k1": "쥐지못함",
+     "vla/211_k0": "허들접촉",
+     "vla/211_k1": "허들접촉",
+     "ag3s/211_k0": "이웃과일접촉",
+     "ag3s/211_k1": "못놓음",
+     "vla/1345_k0": "허들접촉",
+     "vla/1345_k1": "허들접촉",
+     "ag3s/1345_k0": "쥐지못함",
+     "ag3s/1345_k1": "못놓음"
+    },
+    "min_robot_obstacle_clearance_mm": {
+     "vla/119_k0": -1.0,
+     "vla/119_k1": -0.9,
+     "ag3s/119_k0": 34.1,
+     "ag3s/119_k1": 13.1,
+     "vla/250_k0": -0.9,
+     "vla/250_k1": -0.9,
+     "ag3s/250_k0": -0.3,
+     "ag3s/250_k1": 50.5,
+     "vla/320_k0": 60.1,
+     "vla/320_k1": 60.1,
+     "ag3s/320_k0": -0.1,
+     "ag3s/320_k1": 0.1,
+     "vla/850_k0": -0.9,
+     "vla/850_k1": -1.0,
+     "ag3s/850_k0": 14.6,
+     "ag3s/850_k1": 16.8,
+     "vla/954_k0": -0.4,
+     "vla/954_k1": -0.3,
+     "ag3s/954_k0": 5.0,
+     "ag3s/954_k1": 3.8,
+     "vla/211_k0": -0.8,
+     "vla/211_k1": -0.8,
+     "ag3s/211_k0": 8.9,
+     "ag3s/211_k1": 9.1,
+     "vla/1345_k0": -1.3,
+     "vla/1345_k1": -0.4,
+     "ag3s/1345_k0": 8.1,
+     "ag3s/1345_k1": 16.1
+    },
+    "ag3s_mech_total": {
+     "hsr6_objective": 126,
+     "a6_window": 100,
+     "a6_relaxed_rows": 100,
+     "requests": 714,
+     "hsr6_target_exempt": 76,
+     "hsr6_attach_assist": 1
+    }
+   }
+  }
+ },
+ "figures": {
+  "report": [
+   "AG3S/ag3s/docs/figures/core-eval/core-eval-final.png",
+   "AG3S/ag3s/docs/figures/core-eval/core-eval-hurdle.png",
+   "AG3S/ag3s/docs/figures/core-eval/core-eval-{outcomes,ats,hsr,lte,ccr}.png"
+  ],
+  "paper": "AG3S/ag3s/docs/figures/core-eval/paper/paper-*.{png,pdf}"
+ },
+ "outputs": "outputs/2026-10-28_핵심평가_모듈별_가림기둥3_회귀6_x2/"
+}

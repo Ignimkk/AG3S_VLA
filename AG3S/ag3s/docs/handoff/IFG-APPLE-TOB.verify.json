@@ -1,0 +1,338 @@
+{
+ "step": "IFG-APPLE-TOB",
+ "written": "2026-10-21 KST (lead; CPU analysis after a 45-min GPU run)",
+ "plain_names": {
+  "E0": "VLA 단독",
+  "SPL": "기존 방식 + target 분리 (기존 기록)",
+  "SPLD": "SPL + 쥐기 전 꺾임 유지 항 끔 (--deflection-rate-after-grasp)"
+ },
+ "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-TOB",
+ "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-TOB/agg4arm",
+ "gpu_window_utc": [
+  "2026-10-20T15:16:40",
+  "2026-10-20T16:02:03"
+ ],
+ "smoke": {
+  "passed": true,
+  "first_chunk_max_abs_diff_vs_E0": 5.867937691306224e-08
+ },
+ "code": "snapshot_tob tree 3b9b3a68e0dc3abf105ac4c05fc8a9bcedf1aaa4",
+ "tests": "tests/trajopt/test_ifg_tob_deflection_rate_after_grasp.py 4 passed; related 207 passed, 3 skipped",
+ "scripts": [
+  "AG3S/ag3s/experiments/studies/ifg_goal_drift.py (--cmp IFG-APPLE-TOB:SPLD)"
+ ],
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-split/ifg-goal-drift-ep954-deflection-rate-after-grasp.png"
+ ],
+ "numbers": {
+  "success": {
+   "E0": 10,
+   "SPL": 7,
+   "SPLN": 7,
+   "SPLD": 7
+  },
+  "paired": {
+   "SPL_vs_SPLD": {
+    "both": 6,
+    "only_SPL": 1,
+    "only_SPLD": 1,
+    "neither": 2,
+    "missing": 0,
+    "n_pairs": 10,
+    "mcnemar_exact_p": 1.0,
+    "rate_SPL": 0.7,
+    "rate_SPLD": 0.7,
+    "diff_SPLD_minus_SPL": 0.0,
+    "ci95_bootstrap": [
+     -0.3,
+     0.3
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   },
+   "E0_vs_SPLD": {
+    "both": 7,
+    "only_E0": 3,
+    "only_SPLD": 0,
+    "neither": 0,
+    "missing": 0,
+    "n_pairs": 10,
+    "mcnemar_exact_p": 0.25,
+    "rate_E0": 1.0,
+    "rate_SPLD": 0.7,
+    "diff_SPLD_minus_E0": -0.3,
+    "ci95_bootstrap": [
+     -0.6,
+     0.0
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   },
+   "SPLN_vs_SPLD": {
+    "both": 6,
+    "only_SPLN": 1,
+    "only_SPLD": 1,
+    "neither": 2,
+    "missing": 0,
+    "n_pairs": 10,
+    "mcnemar_exact_p": 1.0,
+    "rate_SPLN": 0.7,
+    "rate_SPLD": 0.7,
+    "diff_SPLD_minus_SPLN": 0.0,
+    "ci95_bootstrap": [
+     -0.3,
+     0.3
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   }
+  },
+  "per_episode": {
+   "56": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "SPLD": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 5
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "211": {
+    "SPL": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6
+    },
+    "SPLD": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 9
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "1837": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 15
+    },
+    "SPLD": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 1
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 0
+    }
+   },
+   "320": {
+    "SPL": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "SPLD": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "753": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1
+    },
+    "SPLD": {
+     "primary": true,
+     "failure_mode": "regrasp",
+     "hold_chunks": 7
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "954": {
+    "SPL": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0
+    },
+    "SPLD": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 4
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "309": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "SPLD": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "250": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "SPLD": {
+     "primary": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 7
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "1668": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "SPLD": {
+     "primary": false,
+     "failure_mode": "not_placed",
+     "hold_chunks": 0
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   },
+   "126": {
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1
+    },
+    "SPLD": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    },
+    "E0": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0
+    }
+   }
+  },
+  "ep954_SPLD": {
+   "row0_deflection_mm_k13_k15": [
+    [
+     5.174645058510063,
+     4.434479334255615,
+     6.5287458858205305
+    ],
+    [
+     3.560208219345107,
+     -0.035032259947831434,
+     4.171844767873245
+    ],
+    [
+     -0.10240019105700604,
+     -0.8541330792233848,
+     0.2522182842232823
+    ]
+   ],
+   "row7_deflection_mm_k12": [
+    23.7531088401024,
+    2.693679809067595,
+    23.802195062168742
+   ],
+   "tcp_at_first_close_mm": [
+    13.13096176841022,
+    36.31161630957885,
+    21.773559942125043
+   ],
+   "E0_tcp_at_first_close_mm": [
+    -3.7720604521376266,
+    14.65058132752789,
+    12.315450192967425
+   ]
+  },
+  "ep954_SPL_reference_from_ifg_goal_drift_ep954": {
+   "row0_deflection_mm_k13_k15": [
+    [
+     10,
+     5,
+     10
+    ],
+    [
+     10,
+     6,
+     11
+    ],
+    [
+     7,
+     4,
+     8
+    ]
+   ],
+   "tcp_at_first_close_mm": [
+    12,
+    38,
+    23
+   ]
+  }
+ },
+ "diagnosis": {
+  "prediction": "partly: carried row-0 deflection shrank (not to 0); the intended grasp point drifted the same, 954 still fails",
+  "mechanism": "the carry-over is not what moves the goal: a single chunk's push (k12 end row 24 mm) displaces the hand and the policy re-plans from it; w_continuity 0.5 still carries part of the deflection",
+  "conflict": "VLA alone grasps 954 while touching the banana (contact 8.2-10.4 s, close 9.6 s): no plan that keeps the 5 mm neighbour clearance reaches that grasp"
+ }
+}

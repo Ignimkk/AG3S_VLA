@@ -1,0 +1,15 @@
+{
+ "values_mm": {
+  "obstacle": 50,
+  "target_other_links": 50,
+  "target_grasping_hand_by_phase": {
+   "이동": 50,
+   "접근": 20,
+   "파지 직전": 5,
+   "파지": 0
+  },
+  "held_vs_destination": 20,
+  "other_vs_destination": 50
+ },
+ "source": "redrawn from AG3S/ag3s/docs/figures/ppt-0930/make_adapter_margin_figs.py (same values; sources listed in its sidecar)"
+}

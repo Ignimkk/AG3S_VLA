@@ -1,0 +1,131 @@
+% !TEX root = ../main.tex
+\section{Experiments}
+\label{sec:experiments}
+We ask four questions. \textbf{Q1} Does \sys\ let a frozen VLA complete tasks it otherwise fails through contact, and at what cost elsewhere (Sec.~\ref{sec:closedloop})? \textbf{Q2} How accurately does the policy's own attention recover the target's observed surface without a segmenter (Sec.~\ref{sec:groundingresults})? \textbf{Q3} Which internal signal should decide which part of the problem (Sec.~\ref{sec:featureresults})? \textbf{Q4} What does it cost at run time (Sec.~\ref{sec:runtime})? SafeLIBERO (Sec.~\ref{sec:safelibero}) and a real robot (Sec.~\ref{sec:real}) follow.
+
+\subsection{Setup}
+\label{sec:setup}
+\paragraph{Platform and policy.}
+Our main testbed is a dual-arm RB-Y1 in MuJoCo~\cite{todorov2012mujoco} performing instructed fruit pick-and-place (``Put the pear in the basket'') among distractor fruit, with a frozen, embodiment-adapted $\pi_{0.5}$~\cite{intelligence2025pi05} (two 7-DoF arms, two gripper channels) that is never updated. \sys\ receives three calibrated RGB-D views and the robot model. Scenes come in four obstacle profiles: \emph{clear}; \emph{adjacent}, a post 10\,cm from the target in the pre-registered set and closer in the failure study of Fig.~\ref{fig:failure}; \emph{place}, a post beside the basket rim; and \emph{hurdle}, a bar across the carry path.
+
+\paragraph{Protocol and definitions.}
+Closed-loop arms run the same episode with the same policy seed; episode lists and seeds are fixed from metadata before any rollout (hash recorded), and every failure stays in the denominator. Contacts are measured by replaying recorded states in the simulator, never by the controller's own verdicts, and classed as robot--obstacle, carried-object--obstacle, hand--neighbor, non-contact-link--target, and the allowed hand--target. An episode ends at its step limit or at the first robot--obstacle contact (an \emph{obstacle stop}). \emph{Task success}: object in the basket and released. \emph{Safe success}: additionally no forbidden contact before release (hurdle set: no robot or object contact with the bar; pre-registered set: also no non-contact-link--target or neighbor contact). A \emph{hold} is one chunk in which the prefix check fails and the arm waits. Grounding uses a 5\,mm voxel grid with soft IoU, frame metrics averaged per episode and then across episodes, and 2,000 episode-paired bootstraps. \emph{Neighbor leak} is the pooled false-positive voxel mass on neighboring objects relative to radius growth (a ratio of sums). The held-out grounding set is the 34 of 43 collected episodes whose collection rollout succeeded; the 9 failures are analysed in the supplement. All parameters were fixed on development data and frozen beforehand (supplement, Tab.~S1): noun attention from prefix layer~10, head~7; identity descriptors from prefix layer~8; the probe on layer-4 key/value features; $H=50$, $J=16$, $K=8$.
+
+\paragraph{Compared configurations.}
+\emph{VLA only} runs the frozen policy without any geometric layer. \emph{Coarse} is the previous \sys\ grounding with the same noun attention: 1\,cm fusion, 3\,cm radius growth with DBSCAN~\cite{ester1996dbscan}, the sphere/capsule robot filter, and a ball-shaped exemption with ownership splitting, sharing fields, refiner, and checks with ours. \emph{Surface (vol.\ mask)} is our graph with the sphere/capsule filter; \emph{Surface} adds the rendered mask; \emph{Surface\,+\,ID (ours)} adds reassociation and the alert. Ours thus differs from Coarse in extent and robot mask at once; no closed-loop arm with our surface and the volume mask has been run. \tbd{External segmenter (Grounded-SAM / YOLOE~\cite{wang2025yoloe} masks lifted with the same depth) on the held-out set.}
+
+\subsection{Q1: closed-loop execution}
+\label{sec:closedloop}
+\begin{table}[t]
+\centering
+\caption{\textbf{Closed-loop results.} Safe = safe success; Hold = hold chunks summed over runs. Hurdle: 7 episodes with 2 seeds each. VLA-only hurdle runs were recorded on an earlier client snapshot (same episodes, seeds, and obstacles), so no discordant counts are given for that pair; ours vs.\ Coarse: both \pend{6}, Coarse only \pend{5}, ours only \pend{1}. Pre-registered: \tbd{40} scenes (clear 14, adjacent 13, place 13) chosen from metadata only.}
+\label{tab:closedloop}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llccc}
+\toprule
+Scenes & Method & Success & Safe & Hold\\
+\midrule
+Hurdle (14) & VLA only & \pend{0/14} & \pend{0/14} & --\\
+ & Coarse & \pend{11/14} & \pend{11/14} & \pend{82}\\
+ & Ours & \pend{8/14} & \pend{7/14} & \pend{11}\\
+\midrule
+Pre-reg.\ (40) & VLA only & \tbd{} & \tbd{} & --\\
+ & Coarse & \tbd{} & \tbd{} & \tbd{}\\
+ & Ours & \tbd{} & \tbd{} & \tbd{}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Where the policy cannot see geometry it collides; with \sys\ it passes.} Under a protocol that ends an episode at the first robot--obstacle contact, the frozen policy completes none of the 14 hurdle episodes: it grasps the apple in \pend{11}, but its hand meets the bar during the carry and the episode is stopped in \pend{13} (Tab.~\ref{tab:closedloop}). Nothing in the policy represents the bar, so a better target estimate would not help. With \sys\ the same policy completes \pend{7} episodes without touching the bar before release; the Coarse configuration completes \pend{11}. The carry rests on attached geometry: in the coarse-extent lineage of the same contact interface, carried spheres removed every carry-phase apple--bar contact (\pend{5} of 14 runs to \pend{0}; supplement).
+
+\textbf{The richer surface is not yet a higher success rate.} Against Coarse under the same noun attention, ours reaches safe success in \pend{7} rather than \pend{11} episodes (both \pend{6}, Coarse only \pend{5}, ours only \pend{1}; exact $p=\pend{0.22}$); five of its six failures are missed grasps, one a slip. It holds in \pend{11} chunks against \pend{82}, touches the bar in \pend{3} runs against \pend{2}, and once lets a non-contact link touch the target; fewer holds here read as less conservative, not as better. Since the arms differ in extent and robot mask at once, the records do not isolate a cause: on 34 held-out seeds chosen because Coarse had succeeded, ours retained \pend{28}, and reruns of the six failures with the simulator's visible target surface rescue \pend{2}, with the sphere mask \pend{2} others (supplement). The coarse configuration shows the symptom the surface extent targets, a hand--neighbor contact before release in \pend{4} of 16 serving-test episodes; whether the precise extent removes it without losing grasps is what the pre-registered set measures. \tbd{Fill from IFG-CL3 and the VLA-only run on the same 40 scenes; report whichever direction the result takes.} In clear scenes an earlier integrated snapshot neither helped nor hurt the policy (30 vs.\ 29 of 48; 8/7 discordant).
+
+\subsection{Q2: grounding the observed target surface}
+\label{sec:groundingresults}
+\begin{table}[t]
+\centering
+\caption{\textbf{Held-out surface grounding.} 34 episodes, 2,523 frames, all settings frozen beforehand. Gain = paired IoU gain over Coarse with 95\% CI; Surface improves 34 of 34 episodes, Surface\,+\,ID 32 of 34. Leak = neighbor leak relative to Coarse.}
+\label{tab:heldout}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lcccc}
+\toprule
+Extent & IoU & Prec. & Leak & Gain [95\% CI]\\
+\midrule
+Coarse (radius growth) & \pend{.773} & \pend{.894} & 1.00 & --\\
+Surface (vol.\ mask) & \pend{.832} & \pend{.955} & \pend{0.26} & --\\
+Surface & \pend{.876} & \pend{.949} & \pend{0.26} & \pend{+.103 [.083, .123]}\\
+Surface\,+\,ID (ours) & \textbf{\pend{.891}} & \textbf{\pend{.966}} & \textbf{\pend{0.08}} & \pend{+.118 [.083, .151]}\\
+\midrule
+External segmenter & \tbd{} & \tbd{} & \tbd{} & \tbd{}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{The surface construction improves every held-out episode.} The two registered paired gains, the surface graph (\pend{+0.103} $[\pend{+0.083},\pend{+0.123}]$ over Coarse) and the rendered robot mask on top of the same graph (\pend{+0.044} $[\pend{+0.038},\pend{+0.050}]$), both hold in 34 of 34 episodes (Tab.~\ref{tab:heldout}); with reassociation the gain is \pend{+0.118} $[\pend{+0.083},\pend{+0.151}]$, improving \pend{32} episodes and worsening \pend{2} (Fig.~\ref{fig:grounding}). The gain is largest where contact decisions are made: while the fruit is in the hand, IoU rises from \pend{0.640} under the volume mask to \pend{0.848}, because the mask no longer erases the object between the fingers; before the grasp the surface is nearly exact (\pend{0.970}).
+
+\textbf{What is removed matters more than what is kept.} Precision, not recall, carries the improvement: radius growth reaches the target but grows into whatever touches it. Surface continuity removes \pend{74\%} of the neighboring surface that radius growth would have freed, and reassociation \pend{92\%}, because a drifted selection is replaced by the remembered object instead of being carved out. Reassociation changes IoU little (\pend{+0.015} $[\pend{-0.012},\pend{+0.039}]$, 14 better, 6 worse; the two worsened episodes are wrong first references, Sec.~\ref{sec:limitations}); its value is in what it refuses to free. The development set shows the same ordering (0.837 to 0.893, 27 of 32 episodes).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{../figures/cvpr_v1/fig04_heldout.pdf}
+\caption{\textbf{Held-out grounding.} \emph{Left:} per-episode IoU of Coarse (grey) and ours (gold), one connector per episode; \pend{32} of 34 improve, \pend{2} worsen. \emph{Right:} IoU by grasp state. The rendered robot mask matters most while the fruit is in the hand, where a volume mask erases it.}
+\label{fig:grounding}
+\end{figure}
+
+\subsection{Q3: which signal decides what}
+\label{sec:featureresults}
+\textbf{Internal features do not refine a boundary.} With robot removal and seeding fixed on the development set, adding feature affinities to the graph leaves IoU unchanged across projector and prefix layers 4, 8, and 12 (0.893 to 0.893--0.894); using features as unaries lowers it to 0.79--0.83 for every representation tried, including SigLIP~\cite{zhai2023siglip}; feature-conditioned region growing (\pend{0.755}) trails geometric growing (\pend{0.832}); and shuffling the features drops the combined method to \pend{0.485} (supplement, Tab.~S3). The reason is spatial: \pend{42\%} of target nodes fall in patches that are mostly not target, and \pend{74\%} of the edges crossing a measured object boundary lie inside a single patch, so a $16\times16$ descriptor has no value change where the surface changes. The descriptors are informative, but about a different question.
+
+\textbf{They do tell whether it is still the same object.} Raw patch features score every region in a scene alike (cosine $\approx0.97$--$0.98$ to the remembered target); centered against the frame mean they separate the target from the nearest alternative (\pend{0.61} vs.\ \pend{0.42} in the frame of Fig.~\ref{fig:pipeline}). As a consistency signal on held-out frames, chain agreement flags \pend{85} of \pend{100} wrong selections at the frozen threshold (AUROC \pend{0.925}; \pend{0.924} when the failed rollouts are included); emptying flagged regions removes \pend{88\%} of wrongly selected surface mass at a \pend{6.7\%} loss of true target mass. This is the division of labour the method is built on: geometry for extent, features for identity.
+
+\textbf{Geometry also sharpens the task state.} Adding target--hand distance, height, and region size to the sub-task probe and gripper state raises leave-one-episode-out phase accuracy on simulator phase labels from 0.878 to 0.939 (paired episode gain $+0.067$ $[0.015,0.118]$), and held-state accuracy from \pend{0.828} for a gripper threshold to 0.933; the probe alone (\pend{0.783}) mostly confuses \emph{home} with \emph{place}.
+
+\subsection{Q4: run time}
+\label{sec:runtime}
+\begin{table}[t]
+\centering
+\caption{\textbf{Per-request latency (ms, median / p95)} on the 34-seed held-out closed-loop runs of Sec.~\ref{sec:closedloop}, 2,516 requests per arm; on the hurdle runs ours measures \pend{3{,}331 / 4{,}979}. The policy alone answers in \pend{199}\,ms. Chunks of 50 steps with 8 executed give a 533\,ms nominal period.}
+\label{tab:runtime}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcc}
+\toprule
+Stage & Coarse & Ours\\
+\midrule
+Client round trip & \pend{1{,}137 / 1{,}924} & \pend{2{,}858 / 3{,}623}\\
+Server total & \pend{796} & \pend{2{,}587}\\
+\quad surface graph, region, labels & -- & \pend{1{,}663}\\
+\quad rendered robot mask & -- & \pend{159}\\
+\bottomrule
+\end{tabular}
+\end{table}
+Both configurations exceed the nominal chunk period in our unoptimized prototype, and ours costs \pend{2.5$\times$} more, almost entirely in the per-request surface graph (Tab.~\ref{tab:runtime}); the graph is built on the CPU and the backbone copy is not shared, both engineering steps we have not taken.
+
+\subsection{SafeLIBERO}
+\label{sec:safelibero}
+\begin{table}[t]
+\centering
+\caption{\textbf{SafeLIBERO.} Task success (TSR) and collision-avoidance rate (CAR) following the benchmark's definitions~\cite{hu2026vlsa}; Level~I places the obstacle beside the target, Level~II across the path. Upper block: same checkpoint, our runs. Lower block: numbers as reported by each paper, with their own checkpoints and protected-link scope. \tbd{Fill from the SafeLIBERO run.}}
+\label{tab:safelibero}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{Level I} & \multicolumn{2}{c}{Level II}\\
+Method & TSR & CAR & TSR & CAR\\
+\midrule
+Frozen policy only & \tbd{} & \tbd{} & \tbd{} & \tbd{}\\
+\sys\ (ours) & \tbd{} & \tbd{} & \tbd{} & \tbd{}\\
+\midrule
+VLSA (reported)~\cite{hu2026vlsa} & \tbd{} & \tbd{} & \tbd{} & \tbd{}\\
+KNOWS (reported)~\cite{park2026knows} & \tbd{} & \tbd{} & \tbd{} & \tbd{}\\
+\bottomrule
+\end{tabular}
+\end{table}
+SafeLIBERO adds obstacles to the LIBERO suites and scores a frozen $\pi_{0.5}$ with and without a safety layer~\cite{hu2026vlsa}. We run the same checkpoint with \sys\ on \tbd{suites, levels, episodes per task}; the policy outputs end-effector displacements, which CCR refines through the robot's Jacobian, and the sub-task probe is replaced by the gripper rule because LIBERO demonstrations carry no phase labels. \tbd{Result sentences: TSR/CAR per level, protected-link scope, and how the reported methods differ in checkpoint and metric definition.}
+
+\subsection{Real robot}
+\label{sec:real}
+\tbd{Hardware (RB-Y1), cameras and calibration, tasks and object sets, number of trials per condition, success and contact outcomes, latency on the robot; pending.}

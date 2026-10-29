@@ -1,0 +1,433 @@
+{
+ "numbers": {
+  "C1aN": 4,
+  "SPL": 6,
+  "SPLR": 7,
+  "paired_current_vs_split_handreach": {
+   "both": 3,
+   "only_C1aN": 1,
+   "only_SPLR": 4,
+   "neither": 2,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 0.375,
+   "rate_C1aN": 0.4,
+   "rate_SPLR": 0.7,
+   "diff_SPLR_minus_C1aN": 0.3,
+   "ci95_bootstrap": [
+    -0.1,
+    0.7
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  },
+  "paired_split_vs_split_handreach": {
+   "both": 6,
+   "only_SPL": 0,
+   "only_SPLR": 1,
+   "neither": 3,
+   "missing": 0,
+   "n_pairs": 10,
+   "mcnemar_exact_p": 1.0,
+   "rate_SPL": 0.6,
+   "rate_SPLR": 0.7,
+   "diff_SPLR_minus_SPL": 0.1,
+   "ci95_bootstrap": [
+    0.0,
+    0.3
+   ],
+   "bootstrap": {
+    "n_resamples": 10000,
+    "seed": 20261019,
+    "unit": "episode pair",
+    "method": "percentile"
+   }
+  }
+ },
+ "rows": [
+  {
+   "episode": 250,
+   "source": "IFG-APPLE",
+   "target": "apple",
+   "cfg": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 49,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 14,
+     "first_attach": {
+      "k": 13,
+      "lift_m": -1.865478761331474e-05
+     }
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 12,
+      "lift_m": 0.0013755504145206432
+     }
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 12,
+      "lift_m": 0.0013755504145206432
+     }
+    }
+   }
+  },
+  {
+   "episode": 211,
+   "source": "IFG-APPLE",
+   "target": "apple",
+   "cfg": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 34,
+     "neighbour_rows": 4,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": null
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6,
+     "neighbour_rows": 34,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 23,
+      "lift_m": 2.8201548509021457e-05
+     }
+    },
+    "SPLR": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6,
+     "neighbour_rows": 34,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 23,
+      "lift_m": 2.8201548509021457e-05
+     }
+    }
+   }
+  },
+  {
+   "episode": 572,
+   "source": "IFG-APPLE",
+   "target": "apple",
+   "cfg": {
+    "C1aN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": {
+      "k": 15,
+      "lift_m": 9.343263382721734e-05
+     }
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 15,
+      "lift_m": 7.225873560345875e-05
+     }
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 15,
+      "lift_m": 7.225873560345875e-05
+     }
+    }
+   }
+  },
+  {
+   "episode": 1345,
+   "source": "IFG-APPLE",
+   "target": "apple",
+   "cfg": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 7,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": null
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 31,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 18,
+      "lift_m": 0.07375020709913416
+     }
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 31,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 18,
+      "lift_m": 0.07375020709913416
+     }
+    }
+   }
+  },
+  {
+   "episode": 126,
+   "source": "IFG-APPLE",
+   "target": "apple",
+   "cfg": {
+    "C1aN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 13,
+      "lift_m": 8.168230955341027e-05
+     }
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 13,
+      "lift_m": 8.168230955341027e-05
+     }
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 13,
+      "lift_m": 8.168230955341027e-05
+     }
+    }
+   }
+  },
+  {
+   "episode": 423,
+   "source": "IFG-CL3",
+   "target": "apple",
+   "cfg": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": null
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": null
+    },
+    "SPLR": {
+     "primary": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 35,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 17,
+      "lift_m": 0.19405258565386607
+     }
+    }
+   }
+  },
+  {
+   "episode": 831,
+   "source": "IFG-CL3",
+   "target": "apple",
+   "cfg": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 8,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": null
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 8,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 8,
+     "first_attach": null
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 23,
+      "lift_m": 0.1830046610934053
+     }
+    }
+   }
+  },
+  {
+   "episode": 936,
+   "source": "IFG-CL3",
+   "target": "orange",
+   "cfg": {
+    "C1aN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 31,
+      "lift_m": -2.3210060478007222e-05
+     }
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 4,
+     "first_attach": null
+    },
+    "SPLR": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 27,
+      "lift_m": 0.16834454912118368
+     }
+    }
+   }
+  },
+  {
+   "episode": 1582,
+   "source": "IFG-CL3",
+   "target": "orange",
+   "cfg": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": null
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 17,
+      "lift_m": 6.248698859290247e-05
+     }
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 0,
+     "first_attach": {
+      "k": 17,
+      "lift_m": 6.248698859290247e-05
+     }
+    }
+   }
+  },
+  {
+   "episode": 1404,
+   "source": "IFG-CL3",
+   "target": "orange",
+   "cfg": {
+    "C1aN": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 55,
+      "lift_m": 0.006669451563923068
+     }
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 55,
+      "lift_m": 0.006669451563923068
+     }
+    },
+    "SPLR": {
+     "primary": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "lifted_not_attached_chunks": 1,
+     "first_attach": {
+      "k": 55,
+      "lift_m": 0.006669451563923068
+     }
+    }
+   }
+  }
+ ],
+ "sources": {
+  "kit": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-10EP-TARGETSPLIT-HANDREACH",
+  "script": "AG3S/ag3s/experiments/studies/ifg_10ep_handreach.py"
+ }
+}

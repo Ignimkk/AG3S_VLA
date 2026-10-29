@@ -1,0 +1,993 @@
+{
+ "columns": [
+  "scene",
+  "source",
+  "stage counts\nid/seed/reg/ok/no-vis",
+  "3D identity\ncorrect",
+  "2D: any vis cam\nargmax on tgt",
+  "tgt mass\n(vis cams)",
+  "nbr mass\n(vis cams)",
+  "seed\nprecision",
+  "seed\nrecall",
+  "nbr fruit\nseeds",
+  "n seeds",
+  "purity",
+  "coverage",
+  "nbr pts\nin cluster",
+  "merged\nframes",
+  "min tgt-nbr\ndist (mm)"
+ ],
+ "rows": [
+  [
+   "scene1800",
+   "L8H2 (action)",
+   "7 / 16 / 0 / 5 / 2",
+   "26/30",
+   "0.75",
+   "0.175",
+   "0.000",
+   "0.35",
+   "1.00",
+   "30",
+   "138",
+   "1.00",
+   "1.00",
+   "0",
+   "0",
+   "22.2"
+  ],
+  [
+   "scene1800",
+   "noun L8H6 (k1 s0)",
+   "0 / 27 / 0 / 1 / 2",
+   "23/30",
+   "1.00",
+   "0.578",
+   "0.000",
+   "0.16",
+   "1.00",
+   "30",
+   "384",
+   "0.65",
+   "0.98",
+   "26",
+   "15",
+   "22.2"
+  ],
+  [
+   "scene1800",
+   "noun L10H7 (T51b)",
+   "0 / 12 / 6 / 10 / 2",
+   "22/30",
+   "1.00",
+   "0.542",
+   "0.001",
+   "0.53",
+   "1.00",
+   "29",
+   "145",
+   "0.63",
+   "0.93",
+   "28",
+   "15",
+   "22.2"
+  ],
+  [
+   "scene1850",
+   "L8H2 (action)",
+   "7 / 6 / 0 / 2 / 0",
+   "13/15",
+   "0.53",
+   "0.051",
+   "0.000",
+   "0.34",
+   "0.88",
+   "0",
+   "186",
+   "1.00",
+   "1.00",
+   "0",
+   "0",
+   "15.6"
+  ],
+  [
+   "scene1850",
+   "noun L8H6 (k1 s0)",
+   "0 / 15 / 0 / 0 / 0",
+   "13/15",
+   "1.00",
+   "0.604",
+   "0.000",
+   "0.08",
+   "1.00",
+   "30",
+   "804",
+   "1.00",
+   "1.00",
+   "0",
+   "0",
+   "15.6"
+  ],
+  [
+   "scene1850",
+   "noun L10H7 (T51b)",
+   "3 / 0 / 0 / 12 / 0",
+   "13/15",
+   "0.80",
+   "0.161",
+   "0.000",
+   "0.69",
+   "0.85",
+   "0",
+   "54",
+   "1.00",
+   "1.00",
+   "0",
+   "0",
+   "15.6"
+  ],
+  [
+   "scene1900",
+   "L8H2 (action)",
+   "2 / 12 / 0 / 1 / 0",
+   "15/15",
+   "0.87",
+   "0.214",
+   "0.006",
+   "0.37",
+   "1.00",
+   "54",
+   "285",
+   "1.00",
+   "0.94",
+   "0",
+   "0",
+   "14.2"
+  ],
+  [
+   "scene1900",
+   "noun L8H6 (k1 s0)",
+   "0 / 15 / 0 / 0 / 0",
+   "15/15",
+   "1.00",
+   "0.410",
+   "0.002",
+   "0.18",
+   "1.00",
+   "68",
+   "686",
+   "1.00",
+   "0.94",
+   "0",
+   "0",
+   "14.2"
+  ],
+  [
+   "scene1900",
+   "noun L10H7 (T51b)",
+   "0 / 5 / 0 / 10 / 0",
+   "15/15",
+   "1.00",
+   "0.374",
+   "0.004",
+   "0.56",
+   "0.98",
+   "48",
+   "184",
+   "1.00",
+   "0.94",
+   "0",
+   "0",
+   "14.2"
+  ]
+ ],
+ "numbers": {
+  "scene1800": {
+   "l8h2": {
+    "counts": {
+     "identity": 7,
+     "seed": 16,
+     "region_growing": 0,
+     "no_cluster": 0,
+     "ok": 5,
+     "no_visible_camera": 2
+    },
+    "metrics": {
+     "seed_precision": {
+      "median": 0.35477971957098414,
+      "q25": 0.2986081654294804,
+      "q75": 0.4322026657552973,
+      "n": 30
+     },
+     "seed_recall": {
+      "median": 1.0,
+      "q25": 0.9851796655075343,
+      "q75": 1.0,
+      "n": 30
+     },
+     "seed_neighbour": {
+      "median": 30.5,
+      "q25": 22.25,
+      "q75": 51.0,
+      "n": 30
+     },
+     "purity": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 30
+     },
+     "coverage": {
+      "median": 1.0,
+      "q25": 0.9557971014492754,
+      "q75": 1.0,
+      "n": 30
+     },
+     "cluster_neighbour": {
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n": 30
+     },
+     "min_neighbour_mesh_dist_m": {
+      "median": 0.022238736422539134,
+      "q25": 0.018449616487708535,
+      "q75": 0.026010142685809038,
+      "n": 30
+     },
+     "identity_2d_any_visible_cam_argmax_on_target_rate": 0.75,
+     "identity_2d_n_frames_with_visible_cam": 28,
+     "target_mass_visible_cams": {
+      "median": 0.17540480046397414,
+      "n": 39
+     },
+     "neighbour_mass_visible_cams": {
+      "median": 0.00013712327397538218,
+      "n": 39
+     },
+     "merged_frames": 0,
+     "seed_share_median": {
+      "target": 0.35477971957098414,
+      "other_object": 0.19342337324793463,
+      "table": 0.0,
+      "destination": 0.1392648015614834,
+      "robot": 0.0,
+      "other": 0.0,
+      "unlabelled": 0.0
+     },
+     "n_seeds": {
+      "median": 138.5,
+      "q25": 104.5,
+      "q75": 305.75,
+      "n": 30
+     },
+     "independent_flags": {
+      "identity_fail": 7,
+      "seed_fail": 24,
+      "region_fail_indep": 4,
+      "frames_with_neighbour_seed": 30,
+      "seed_target_ge_neighbour_and_region_fail": 1
+     },
+     "identity_correct_frames": 26,
+     "n_frames": 30
+    }
+   },
+   "noun_L8H6": {
+    "counts": {
+     "identity": 0,
+     "seed": 27,
+     "region_growing": 0,
+     "no_cluster": 0,
+     "ok": 1,
+     "no_visible_camera": 2
+    },
+    "metrics": {
+     "seed_precision": {
+      "median": 0.16411964472309298,
+      "q25": 0.14444429213729576,
+      "q75": 0.26617081595411884,
+      "n": 30
+     },
+     "seed_recall": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 30
+     },
+     "seed_neighbour": {
+      "median": 30.0,
+      "q25": 14.75,
+      "q75": 49.75,
+      "n": 30
+     },
+     "purity": {
+      "median": 0.6478571428571429,
+      "q25": 0.5559651634454784,
+      "q75": 1.0,
+      "n": 30
+     },
+     "coverage": {
+      "median": 0.9781464530892449,
+      "q25": 0.9547979797979799,
+      "q75": 1.0,
+      "n": 30
+     },
+     "cluster_neighbour": {
+      "median": 26.5,
+      "q25": 0.0,
+      "q75": 60.0,
+      "n": 30
+     },
+     "min_neighbour_mesh_dist_m": {
+      "median": 0.022238736422539134,
+      "q25": 0.018449616487708535,
+      "q75": 0.026010142685809038,
+      "n": 30
+     },
+     "identity_2d_any_visible_cam_argmax_on_target_rate": 1.0,
+     "identity_2d_n_frames_with_visible_cam": 28,
+     "target_mass_visible_cams": {
+      "median": 0.5782946732844789,
+      "n": 39
+     },
+     "neighbour_mass_visible_cams": {
+      "median": 4.3156748381361566e-05,
+      "n": 39
+     },
+     "merged_frames": 15,
+     "seed_share_median": {
+      "target": 0.16411964472309298,
+      "other_object": 0.08043197936814958,
+      "table": 0.03326612903225806,
+      "destination": 0.5628145371027122,
+      "robot": 0.0,
+      "other": 0.0,
+      "unlabelled": 0.0
+     },
+     "n_seeds": {
+      "median": 384.0,
+      "q25": 215.75,
+      "q75": 754.75,
+      "n": 30
+     },
+     "independent_flags": {
+      "identity_fail": 0,
+      "seed_fail": 29,
+      "region_fail_indep": 19,
+      "frames_with_neighbour_seed": 27,
+      "seed_target_ge_neighbour_and_region_fail": 17
+     },
+     "identity_correct_frames": 23,
+     "n_frames": 30
+    }
+   },
+   "noun_L10H7": {
+    "counts": {
+     "identity": 0,
+     "seed": 12,
+     "region_growing": 6,
+     "no_cluster": 0,
+     "ok": 10,
+     "no_visible_camera": 2
+    },
+    "metrics": {
+     "seed_precision": {
+      "median": 0.5277866292779301,
+      "q25": 0.33105983772819475,
+      "q75": 0.6910526315789474,
+      "n": 30
+     },
+     "seed_recall": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 30
+     },
+     "seed_neighbour": {
+      "median": 29.0,
+      "q25": 19.0,
+      "q75": 49.25,
+      "n": 30
+     },
+     "purity": {
+      "median": 0.6304632115080184,
+      "q25": 0.5178571428571428,
+      "q75": 1.0,
+      "n": 30
+     },
+     "coverage": {
+      "median": 0.9320107858243452,
+      "q25": 0.8682177506288178,
+      "q75": 1.0,
+      "n": 30
+     },
+     "cluster_neighbour": {
+      "median": 27.5,
+      "q25": 0.0,
+      "q75": 59.75,
+      "n": 30
+     },
+     "min_neighbour_mesh_dist_m": {
+      "median": 0.022238736422539134,
+      "q25": 0.018449616487708535,
+      "q75": 0.026010142685809038,
+      "n": 30
+     },
+     "identity_2d_any_visible_cam_argmax_on_target_rate": 1.0,
+     "identity_2d_n_frames_with_visible_cam": 28,
+     "target_mass_visible_cams": {
+      "median": 0.5421886415283333,
+      "n": 39
+     },
+     "neighbour_mass_visible_cams": {
+      "median": 0.001074993363514355,
+      "n": 39
+     },
+     "merged_frames": 15,
+     "seed_share_median": {
+      "target": 0.5277866292779301,
+      "other_object": 0.21771110372340424,
+      "table": 0.0,
+      "destination": 0.03416646639429624,
+      "robot": 0.0,
+      "other": 0.0,
+      "unlabelled": 0.0
+     },
+     "n_seeds": {
+      "median": 145.0,
+      "q25": 100.25,
+      "q75": 212.25,
+      "n": 30
+     },
+     "independent_flags": {
+      "identity_fail": 0,
+      "seed_fail": 14,
+      "region_fail_indep": 19,
+      "frames_with_neighbour_seed": 30,
+      "seed_target_ge_neighbour_and_region_fail": 14
+     },
+     "identity_correct_frames": 22,
+     "n_frames": 30
+    }
+   }
+  },
+  "scene1850": {
+   "l8h2": {
+    "counts": {
+     "identity": 7,
+     "seed": 6,
+     "region_growing": 0,
+     "no_cluster": 0,
+     "ok": 2,
+     "no_visible_camera": 0
+    },
+    "metrics": {
+     "seed_precision": {
+      "median": 0.34408602150537637,
+      "q25": 0.03260869565217391,
+      "q75": 0.4197125338429686,
+      "n": 15
+     },
+     "seed_recall": {
+      "median": 0.8769230769230769,
+      "q25": 0.275,
+      "q75": 1.0,
+      "n": 15
+     },
+     "seed_neighbour": {
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 22.0,
+      "n": 15
+     },
+     "purity": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 13
+     },
+     "coverage": {
+      "median": 1.0,
+      "q25": 0.6367647058823529,
+      "q75": 1.0,
+      "n": 15
+     },
+     "cluster_neighbour": {
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n": 15
+     },
+     "min_neighbour_mesh_dist_m": {
+      "median": 0.01564080609888912,
+      "q25": 0.015612046294190992,
+      "q75": 0.015674788671980563,
+      "n": 15
+     },
+     "identity_2d_any_visible_cam_argmax_on_target_rate": 0.5333333333333333,
+     "identity_2d_n_frames_with_visible_cam": 15,
+     "target_mass_visible_cams": {
+      "median": 0.05096547959114128,
+      "n": 24
+     },
+     "neighbour_mass_visible_cams": {
+      "median": 0.0,
+      "n": 24
+     },
+     "merged_frames": 0,
+     "seed_share_median": {
+      "target": 0.34408602150537637,
+      "other_object": 0.0,
+      "table": 0.0,
+      "destination": 0.5637583892617449,
+      "robot": 0.0,
+      "other": 0.0,
+      "unlabelled": 0.0
+     },
+     "n_seeds": {
+      "median": 186.0,
+      "q25": 152.5,
+      "q75": 523.5,
+      "n": 15
+     },
+     "independent_flags": {
+      "identity_fail": 7,
+      "seed_fail": 12,
+      "region_fail_indep": 0,
+      "frames_with_neighbour_seed": 7,
+      "seed_target_ge_neighbour_and_region_fail": 0
+     },
+     "identity_correct_frames": 13,
+     "n_frames": 15
+    }
+   },
+   "noun_L8H6": {
+    "counts": {
+     "identity": 0,
+     "seed": 15,
+     "region_growing": 0,
+     "no_cluster": 0,
+     "ok": 0,
+     "no_visible_camera": 0
+    },
+    "metrics": {
+     "seed_precision": {
+      "median": 0.07965686274509803,
+      "q25": 0.03645040105594477,
+      "q75": 0.10542676279603755,
+      "n": 15
+     },
+     "seed_recall": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 15
+     },
+     "seed_neighbour": {
+      "median": 30.0,
+      "q25": 26.5,
+      "q75": 37.0,
+      "n": 15
+     },
+     "purity": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 13
+     },
+     "coverage": {
+      "median": 1.0,
+      "q25": 0.6367647058823529,
+      "q75": 1.0,
+      "n": 15
+     },
+     "cluster_neighbour": {
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n": 15
+     },
+     "min_neighbour_mesh_dist_m": {
+      "median": 0.01564080609888912,
+      "q25": 0.015612046294190992,
+      "q75": 0.015674788671980563,
+      "n": 15
+     },
+     "identity_2d_any_visible_cam_argmax_on_target_rate": 1.0,
+     "identity_2d_n_frames_with_visible_cam": 15,
+     "target_mass_visible_cams": {
+      "median": 0.6035707637384597,
+      "n": 24
+     },
+     "neighbour_mass_visible_cams": {
+      "median": 0.0,
+      "n": 24
+     },
+     "merged_frames": 0,
+     "seed_share_median": {
+      "target": 0.07965686274509803,
+      "other_object": 0.044293015332197615,
+      "table": 0.0,
+      "destination": 0.8815461346633416,
+      "robot": 0.0,
+      "other": 0.0,
+      "unlabelled": 0.0
+     },
+     "n_seeds": {
+      "median": 804.0,
+      "q25": 593.0,
+      "q75": 935.5,
+      "n": 15
+     },
+     "independent_flags": {
+      "identity_fail": 0,
+      "seed_fail": 15,
+      "region_fail_indep": 0,
+      "frames_with_neighbour_seed": 14,
+      "seed_target_ge_neighbour_and_region_fail": 0
+     },
+     "identity_correct_frames": 13,
+     "n_frames": 15
+    }
+   },
+   "noun_L10H7": {
+    "counts": {
+     "identity": 3,
+     "seed": 0,
+     "region_growing": 0,
+     "no_cluster": 0,
+     "ok": 12,
+     "no_visible_camera": 0
+    },
+    "metrics": {
+     "seed_precision": {
+      "median": 0.6914893617021277,
+      "q25": 0.5754105090311987,
+      "q75": 0.9637212643678161,
+      "n": 15
+     },
+     "seed_recall": {
+      "median": 0.8461538461538461,
+      "q25": 0.7151785714285714,
+      "q75": 0.9605654761904762,
+      "n": 15
+     },
+     "seed_neighbour": {
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n": 15
+     },
+     "purity": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 13
+     },
+     "coverage": {
+      "median": 1.0,
+      "q25": 0.6367647058823529,
+      "q75": 1.0,
+      "n": 15
+     },
+     "cluster_neighbour": {
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n": 15
+     },
+     "min_neighbour_mesh_dist_m": {
+      "median": 0.01564080609888912,
+      "q25": 0.015612046294190992,
+      "q75": 0.015674788671980563,
+      "n": 15
+     },
+     "identity_2d_any_visible_cam_argmax_on_target_rate": 0.8,
+     "identity_2d_n_frames_with_visible_cam": 15,
+     "target_mass_visible_cams": {
+      "median": 0.161254997918343,
+      "n": 24
+     },
+     "neighbour_mass_visible_cams": {
+      "median": 0.0,
+      "n": 24
+     },
+     "merged_frames": 0,
+     "seed_share_median": {
+      "target": 0.6914893617021277,
+      "other_object": 0.0,
+      "table": 0.0,
+      "destination": 0.30851063829787234,
+      "robot": 0.0,
+      "other": 0.0,
+      "unlabelled": 0.0
+     },
+     "n_seeds": {
+      "median": 54.0,
+      "q25": 43.5,
+      "q75": 65.0,
+      "n": 15
+     },
+     "independent_flags": {
+      "identity_fail": 3,
+      "seed_fail": 2,
+      "region_fail_indep": 0,
+      "frames_with_neighbour_seed": 1,
+      "seed_target_ge_neighbour_and_region_fail": 0
+     },
+     "identity_correct_frames": 13,
+     "n_frames": 15
+    }
+   }
+  },
+  "scene1900": {
+   "l8h2": {
+    "counts": {
+     "identity": 2,
+     "seed": 12,
+     "region_growing": 0,
+     "no_cluster": 0,
+     "ok": 1,
+     "no_visible_camera": 0
+    },
+    "metrics": {
+     "seed_precision": {
+      "median": 0.36977491961414793,
+      "q25": 0.24774223174651766,
+      "q75": 0.4350661600237152,
+      "n": 15
+     },
+     "seed_recall": {
+      "median": 1.0,
+      "q25": 0.8686781609195402,
+      "q75": 1.0,
+      "n": 15
+     },
+     "seed_neighbour": {
+      "median": 54.0,
+      "q25": 45.0,
+      "q75": 65.5,
+      "n": 15
+     },
+     "purity": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 15
+     },
+     "coverage": {
+      "median": 0.9444444444444444,
+      "q25": 0.9221595108513069,
+      "q75": 1.0,
+      "n": 15
+     },
+     "cluster_neighbour": {
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n": 15
+     },
+     "min_neighbour_mesh_dist_m": {
+      "median": 0.014175325061726005,
+      "q25": 0.014159534815034684,
+      "q75": 0.014194346465218857,
+      "n": 15
+     },
+     "identity_2d_any_visible_cam_argmax_on_target_rate": 0.8666666666666667,
+     "identity_2d_n_frames_with_visible_cam": 15,
+     "target_mass_visible_cams": {
+      "median": 0.21353953325279865,
+      "n": 27
+     },
+     "neighbour_mass_visible_cams": {
+      "median": 0.005619519000463374,
+      "n": 27
+     },
+     "merged_frames": 0,
+     "seed_share_median": {
+      "target": 0.36977491961414793,
+      "other_object": 0.1724137931034483,
+      "table": 0.0,
+      "destination": 0.364,
+      "robot": 0.0,
+      "other": 0.0,
+      "unlabelled": 0.0
+     },
+     "n_seeds": {
+      "median": 285.0,
+      "q25": 263.5,
+      "q75": 359.5,
+      "n": 15
+     },
+     "independent_flags": {
+      "identity_fail": 2,
+      "seed_fail": 14,
+      "region_fail_indep": 0,
+      "frames_with_neighbour_seed": 15,
+      "seed_target_ge_neighbour_and_region_fail": 0
+     },
+     "identity_correct_frames": 15,
+     "n_frames": 15
+    }
+   },
+   "noun_L8H6": {
+    "counts": {
+     "identity": 0,
+     "seed": 15,
+     "region_growing": 0,
+     "no_cluster": 0,
+     "ok": 0,
+     "no_visible_camera": 0
+    },
+    "metrics": {
+     "seed_precision": {
+      "median": 0.17621776504297995,
+      "q25": 0.1538901051514247,
+      "q75": 0.2224360341151386,
+      "n": 15
+     },
+     "seed_recall": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 15
+     },
+     "seed_neighbour": {
+      "median": 68.0,
+      "q25": 66.0,
+      "q75": 70.0,
+      "n": 15
+     },
+     "purity": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 15
+     },
+     "coverage": {
+      "median": 0.9444444444444444,
+      "q25": 0.9221595108513069,
+      "q75": 1.0,
+      "n": 15
+     },
+     "cluster_neighbour": {
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n": 15
+     },
+     "min_neighbour_mesh_dist_m": {
+      "median": 0.014175325061726005,
+      "q25": 0.014159534815034684,
+      "q75": 0.014194346465218857,
+      "n": 15
+     },
+     "identity_2d_any_visible_cam_argmax_on_target_rate": 1.0,
+     "identity_2d_n_frames_with_visible_cam": 15,
+     "target_mass_visible_cams": {
+      "median": 0.41042051186221384,
+      "n": 27
+     },
+     "neighbour_mass_visible_cams": {
+      "median": 0.0019317665119881436,
+      "n": 27
+     },
+     "merged_frames": 0,
+     "seed_share_median": {
+      "target": 0.17621776504297995,
+      "other_object": 0.09433962264150944,
+      "table": 0.1303724928366762,
+      "destination": 0.5931232091690545,
+      "robot": 0.0,
+      "other": 0.0,
+      "unlabelled": 0.0
+     },
+     "n_seeds": {
+      "median": 686.0,
+      "q25": 526.5,
+      "q75": 764.5,
+      "n": 15
+     },
+     "independent_flags": {
+      "identity_fail": 0,
+      "seed_fail": 15,
+      "region_fail_indep": 0,
+      "frames_with_neighbour_seed": 15,
+      "seed_target_ge_neighbour_and_region_fail": 0
+     },
+     "identity_correct_frames": 15,
+     "n_frames": 15
+    }
+   },
+   "noun_L10H7": {
+    "counts": {
+     "identity": 0,
+     "seed": 5,
+     "region_growing": 0,
+     "no_cluster": 0,
+     "ok": 10,
+     "no_visible_camera": 0
+    },
+    "metrics": {
+     "seed_precision": {
+      "median": 0.5586854460093896,
+      "q25": 0.4529211571185479,
+      "q75": 0.6416462668298653,
+      "n": 15
+     },
+     "seed_recall": {
+      "median": 0.9834710743801653,
+      "q25": 0.9386934134305943,
+      "q75": 1.0,
+      "n": 15
+     },
+     "seed_neighbour": {
+      "median": 48.0,
+      "q25": 32.0,
+      "q75": 59.5,
+      "n": 15
+     },
+     "purity": {
+      "median": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "n": 15
+     },
+     "coverage": {
+      "median": 0.9444444444444444,
+      "q25": 0.9221595108513069,
+      "q75": 1.0,
+      "n": 15
+     },
+     "cluster_neighbour": {
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n": 15
+     },
+     "min_neighbour_mesh_dist_m": {
+      "median": 0.014175325061726005,
+      "q25": 0.014159534815034684,
+      "q75": 0.014194346465218857,
+      "n": 15
+     },
+     "identity_2d_any_visible_cam_argmax_on_target_rate": 1.0,
+     "identity_2d_n_frames_with_visible_cam": 15,
+     "target_mass_visible_cams": {
+      "median": 0.37401546600625835,
+      "n": 27
+     },
+     "neighbour_mass_visible_cams": {
+      "median": 0.003758686842852461,
+      "n": 27
+     },
+     "merged_frames": 0,
+     "seed_share_median": {
+      "target": 0.5586854460093896,
+      "other_object": 0.20905923344947736,
+      "table": 0.0,
+      "destination": 0.12105263157894737,
+      "robot": 0.0,
+      "other": 0.0,
+      "unlabelled": 0.0
+     },
+     "n_seeds": {
+      "median": 184.0,
+      "q25": 167.5,
+      "q75": 220.0,
+      "n": 15
+     },
+     "independent_flags": {
+      "identity_fail": 0,
+      "seed_fail": 5,
+      "region_fail_indep": 0,
+      "frames_with_neighbour_seed": 15,
+      "seed_target_ge_neighbour_and_region_fail": 0
+     },
+     "identity_correct_frames": 15,
+     "n_frames": 15
+    }
+   }
+  }
+ }
+}

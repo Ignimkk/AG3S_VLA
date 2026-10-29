@@ -1,0 +1,9 @@
+{
+ "frame": "T54c_ep1817_f032",
+ "rule": "frame with the largest recall loss of R1 FGc:N:prefix_L8 vs G:N",
+ "panels": {
+  "R1 component gate (FGc)": 0.0,
+  "R2 region gate (FGr)": 0.0,
+  "R3 top-1 seed-mass region": 1.0
+ }
+}

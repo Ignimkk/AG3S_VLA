@@ -1,0 +1,51 @@
+{
+ "arms": [
+  "V8",
+  "V11A",
+  "V11AB"
+ ],
+ "values": {
+  "success_old": [
+   13,
+   10,
+   12
+  ],
+  "success_ct": [
+   8,
+   8,
+   12
+  ],
+  "carry_apple_contact_runs": [
+   5,
+   2,
+   0
+  ],
+  "release_finger_contact_runs": [
+   9,
+   4,
+   0
+  ],
+  "obstacle_stop_runs": [
+   10,
+   6,
+   1
+  ],
+  "apple_bar_median_mm": [
+   3.8,
+   6.7,
+   13.6
+  ],
+  "apple_bar_min_mm": [
+   -6.4,
+   -0.1,
+   7.1
+  ],
+  "release_finger_bar_median_mm": [
+   -1.4,
+   3.4,
+   9.6
+  ]
+ },
+ "source": "T43V11ABC.verify.json via AG3S_T0T6_LOG.md T43 13",
+ "note": "n=14; V8 vs V11AB CT paired p=0.219"
+}

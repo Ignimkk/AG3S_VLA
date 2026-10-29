@@ -1,0 +1,70 @@
+{
+ "cases": [
+  {
+   "id": "headfix_f0_camera3_raw_sum_s1",
+   "camera": "wrist_cam_l",
+   "record": "headfix",
+   "frame": 0,
+   "source": "camera3_raw_sum_s1",
+   "phase": "transit",
+   "centroid_error_m": 0.09410710180936141,
+   "on_target": true,
+   "chosen_counts": {
+    "target": 0,
+    "distractor": 67,
+    "support": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   },
+   "membership": "indices",
+   "gt_centre": [
+    0.4568250866654387,
+    0.3267442704653418,
+    0.8499910962246523
+   ],
+   "centroid": [
+    0.5508916857203321,
+    0.3246066655687048,
+    0.8517381504623096
+   ],
+   "n_chosen_projected_in_image": 67,
+   "raw": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T141412+0900_bd778e5e3453_d7a51b456f36/verify/T47b/scene/headfix_f0_camera3_raw_sum_s1.npz"
+  },
+  {
+   "id": "ep1900_f13_oracle3_raw_sum_s1",
+   "camera": "wrist_cam_l",
+   "record": "ep1900",
+   "frame": 13,
+   "source": "oracle3_raw_sum_s1",
+   "phase": "grasp",
+   "centroid_error_m": 0.03527085389824788,
+   "on_target": true,
+   "chosen_counts": {
+    "target": 71,
+    "distractor": 85,
+    "support": 0,
+    "destination": 0,
+    "robot": 0,
+    "other": 0,
+    "shared": 0,
+    "unlabelled": 0
+   },
+   "membership": "proximity",
+   "gt_centre": [
+    0.4751041746602427,
+    0.29996005426064215,
+    0.8555721895649901
+   ],
+   "centroid": [
+    0.507822858878693,
+    0.3018139448509563,
+    0.8686138124472859
+   ],
+   "n_chosen_projected_in_image": 153,
+   "raw": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T141412+0900_bd778e5e3453_d7a51b456f36/verify/T47b/scene/ep1900_f13_oracle3_raw_sum_s1.npz"
+  }
+ ]
+}

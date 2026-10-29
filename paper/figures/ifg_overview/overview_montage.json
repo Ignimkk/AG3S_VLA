@@ -1,0 +1,88 @@
+{
+ "figure": "paper/figures/ifg_overview/overview_montage.png",
+ "script": "paper/tools/plotting/ifg_overview_compose.py",
+ "assets": {
+  "c1_prior_seeds_on_support": {
+   "frame": "T54c_ep1856_f025",
+   "iou": 0.0,
+   "rule": "largest IoU gain of top1-only-ns:N vs top1-only:N (R5)"
+  },
+  "c1_ours_seed_region": {
+   "frame": "T54c_ep1856_f025",
+   "iou": 0.9901960784313726
+  },
+  "c2_prior_radius_cluster": {
+   "frame": "T53_ep1849_f018",
+   "iou": 0.21965444339141213,
+   "rule": "max B0 neighbor_fp | B0 IoU > 0.2, candidate neighbor_fp = 0",
+   "neighbor_fp": 356.0
+  },
+  "c2_ours_surface_region": {
+   "frame": "T53_ep1849_f018",
+   "iou": 0.9801561483409239
+  },
+  "c2_prior_sphere_mask": {
+   "frame": "T54c_ep1817_f020",
+   "rule": "R6 example frame of the paper figure",
+   "render_nodes_absent_under_sphere": 30
+  },
+  "c3_prior_raw_cosine": {
+   "frame": "T53_ep1822_f019",
+   "scores": [
+    [
+     0.98,
+     "target"
+    ],
+    [
+     0.975,
+     "destination"
+    ],
+    [
+     0.967,
+     "other_object"
+    ],
+    [
+     0.965,
+     "destination"
+    ],
+    [
+     0.959,
+     "other_object"
+    ]
+   ]
+  },
+  "c3_ours_centered_cosine": {
+   "frame": "T53_ep1822_f019",
+   "scores": [
+    [
+     0.595,
+     "target"
+    ],
+    [
+     0.413,
+     "other_object"
+    ],
+    [
+     0.405,
+     "destination"
+    ],
+    [
+     0.375,
+     "destination"
+    ],
+    [
+     0.189,
+     "other_object"
+    ]
+   ]
+  },
+  "c3_ours_alert": {
+   "frame": "T54c_ep1825_f028",
+   "score": 0.0771444821397517,
+   "threshold": 0.5904207590672415,
+   "rule": "lowest centered chain score among wrong choices (R11b)"
+  }
+ },
+ "is_measured_result": false,
+ "scope": "development frames only; illustrative examples chosen by fixed rules"
+}

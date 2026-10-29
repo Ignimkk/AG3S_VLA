@@ -1,0 +1,688 @@
+{
+ "step": "IFG-CL3",
+ "task": "AG3S/ag3s/docs/handoff/IFG-CL3-run.task.md",
+ "written": "2026-10-19 KST (lead, numbers copied from agg.json; no judgement)",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3",
+ "agg_json": "/mnt/dev/AG3S_VLA-storage/results/development/20261018T135457+0900_f15e587290f6_2cd4b0b6acad/verify/IFG-CL3/agg.json",
+ "agg_sha256": "62df40772f5802ef2446f8708a6cf6a3436f1e2f80b6a7a0de623905bc1e37dc",
+ "seeds_json_sha256": "88f6b37ed2208287b1461725a19f7e104029bc6c9098a8c5fe44f7e322190f2b",
+ "arms": {
+  "C1aN": "noun attention target choice + ball extent (current serving flags + noun_target:L10H7)",
+  "SURF": "C1aN + attention-surface target extent + rendered robot mask (two changes together)"
+ },
+ "numbers": {
+  "n_episodes": 40,
+  "n_by_stratum": {
+   "clear": 14,
+   "adjacent": 13,
+   "place": 13
+  },
+  "primary_definition": "contact-free task success = success AND no non-authorised robot-target contact AND no obstacle contact (MuJoCo replay)",
+  "paired_primary": {
+   "both": 12,
+   "only_C1aN": 5,
+   "only_SURF": 7,
+   "neither": 16,
+   "missing": 0,
+   "n_pairs": 40,
+   "rate_C1aN": 0.425,
+   "rate_SURF": 0.475,
+   "diff_SURF_minus_C1aN": 0.05,
+   "ci95_bootstrap": [
+    -0.125,
+    0.225
+   ],
+   "mcnemar_exact_p": 0.7744140625
+  },
+  "paired_success": {
+   "both": 12,
+   "only_C1aN": 5,
+   "only_SURF": 7,
+   "neither": 16,
+   "missing": 0,
+   "n_pairs": 40,
+   "rate_C1aN": 0.425,
+   "rate_SURF": 0.475,
+   "diff_SURF_minus_C1aN": 0.05,
+   "ci95_bootstrap": [
+    -0.125,
+    0.225
+   ],
+   "mcnemar_exact_p": 0.7744140625
+  },
+  "paired_grasp": {
+   "both": 23,
+   "only_C1aN": 5,
+   "only_SURF": 4,
+   "neither": 8,
+   "missing": 0,
+   "n_pairs": 40,
+   "rate_C1aN": 0.7,
+   "rate_SURF": 0.675,
+   "diff_SURF_minus_C1aN": -0.025,
+   "ci95_bootstrap": [
+    -0.175,
+    0.125
+   ],
+   "mcnemar_exact_p": 1.0
+  },
+  "bootstrap": {
+   "n_resamples": 10000,
+   "seed": 20261018,
+   "unit": "episode pair",
+   "method": "percentile"
+  },
+  "by_stratum": {
+   "clear": {
+    "paired_primary": {
+     "both": 3,
+     "only_C1aN": 2,
+     "only_SURF": 1,
+     "neither": 8,
+     "missing": 0,
+     "n_pairs": 14,
+     "rate_C1aN": 0.35714285714285715,
+     "rate_SURF": 0.2857142857142857,
+     "diff_SURF_minus_C1aN": -0.07142857142857142,
+     "ci95_bootstrap": [
+      -0.2857142857142857,
+      0.14285714285714285
+     ],
+     "mcnemar_exact_p": 1.0
+    },
+    "paired_grasp": {
+     "both": 6,
+     "only_C1aN": 2,
+     "only_SURF": 2,
+     "neither": 4,
+     "missing": 0,
+     "n_pairs": 14,
+     "rate_C1aN": 0.5714285714285714,
+     "rate_SURF": 0.5714285714285714,
+     "diff_SURF_minus_C1aN": 0.0,
+     "ci95_bootstrap": [
+      -0.2857142857142857,
+      0.2857142857142857
+     ],
+     "mcnemar_exact_p": 1.0
+    }
+   },
+   "adjacent": {
+    "paired_primary": {
+     "both": 5,
+     "only_C1aN": 2,
+     "only_SURF": 4,
+     "neither": 2,
+     "missing": 0,
+     "n_pairs": 13,
+     "rate_C1aN": 0.5384615384615384,
+     "rate_SURF": 0.6923076923076923,
+     "diff_SURF_minus_C1aN": 0.15384615384615385,
+     "ci95_bootstrap": [
+      -0.23076923076923078,
+      0.5384615384615384
+     ],
+     "mcnemar_exact_p": 0.6875
+    },
+    "paired_grasp": {
+     "both": 9,
+     "only_C1aN": 1,
+     "only_SURF": 2,
+     "neither": 1,
+     "missing": 0,
+     "n_pairs": 13,
+     "rate_C1aN": 0.7692307692307693,
+     "rate_SURF": 0.8461538461538461,
+     "diff_SURF_minus_C1aN": 0.07692307692307693,
+     "ci95_bootstrap": [
+      -0.15384615384615385,
+      0.3076923076923077
+     ],
+     "mcnemar_exact_p": 1.0
+    }
+   },
+   "place": {
+    "paired_primary": {
+     "both": 4,
+     "only_C1aN": 1,
+     "only_SURF": 2,
+     "neither": 6,
+     "missing": 0,
+     "n_pairs": 13,
+     "rate_C1aN": 0.38461538461538464,
+     "rate_SURF": 0.46153846153846156,
+     "diff_SURF_minus_C1aN": 0.07692307692307693,
+     "ci95_bootstrap": [
+      -0.15384615384615385,
+      0.3076923076923077
+     ],
+     "mcnemar_exact_p": 1.0
+    },
+    "paired_grasp": {
+     "both": 8,
+     "only_C1aN": 2,
+     "only_SURF": 0,
+     "neither": 3,
+     "missing": 0,
+     "n_pairs": 13,
+     "rate_C1aN": 0.7692307692307693,
+     "rate_SURF": 0.6153846153846154,
+     "diff_SURF_minus_C1aN": -0.15384615384615385,
+     "ci95_bootstrap": [
+      -0.38461538461538464,
+      0.0
+     ],
+     "mcnemar_exact_p": 0.5
+    }
+   }
+  },
+  "per_arm": {
+   "C1aN": {
+    "all": {
+     "n_runs": 40,
+     "n_success": 17,
+     "n_primary": 17,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 12,
+     "failure_modes": {
+      "no_grasp": 12,
+      "ok": 13,
+      "regrasp": 3,
+      "slip_at_lift": 9,
+      "slip_in_transport": 3
+     },
+     "n_nonauth_target": 1,
+     "nonauth_target_rows_sum": 335,
+     "n_obstacle_contact": 0,
+     "obstacle_rows_sum": {
+      "hand-obstacle": 0,
+      "robot_other-obstacle": 0,
+      "target-obstacle": 0
+     },
+     "n_neighbour_contact": 6,
+     "neighbour_rows_sum": {
+      "hand-fruit_other": 113,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks_sum": 80,
+     "runs_with_hold": 25,
+     "hold_chunks_per_run": {
+      "median": 1.0,
+      "max": 17
+     },
+     "completion_s": {
+      "n": 17,
+      "median": 14.933333333333334,
+      "min": 12.8,
+      "max": 35.2
+     }
+    },
+    "clear": {
+     "n_runs": 14,
+     "n_success": 5,
+     "n_primary": 5,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 6,
+     "failure_modes": {
+      "no_grasp": 6,
+      "ok": 2,
+      "regrasp": 1,
+      "slip_at_lift": 3,
+      "slip_in_transport": 2
+     },
+     "n_nonauth_target": 1,
+     "nonauth_target_rows_sum": 335,
+     "n_obstacle_contact": 0,
+     "obstacle_rows_sum": {
+      "hand-obstacle": 0,
+      "robot_other-obstacle": 0,
+      "target-obstacle": 0
+     },
+     "n_neighbour_contact": 3,
+     "neighbour_rows_sum": {
+      "hand-fruit_other": 58,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks_sum": 11,
+     "runs_with_hold": 6,
+     "hold_chunks_per_run": {
+      "median": 0.0,
+      "max": 3
+     },
+     "completion_s": {
+      "n": 5,
+      "median": 13.866666666666667,
+      "min": 13.333333333333334,
+      "max": 35.2
+     }
+    },
+    "adjacent": {
+     "n_runs": 13,
+     "n_success": 7,
+     "n_primary": 7,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 3,
+     "failure_modes": {
+      "no_grasp": 3,
+      "ok": 7,
+      "slip_at_lift": 2,
+      "slip_in_transport": 1
+     },
+     "n_nonauth_target": 0,
+     "nonauth_target_rows_sum": 0,
+     "n_obstacle_contact": 0,
+     "obstacle_rows_sum": {
+      "hand-obstacle": 0,
+      "robot_other-obstacle": 0,
+      "target-obstacle": 0
+     },
+     "n_neighbour_contact": 1,
+     "neighbour_rows_sum": {
+      "hand-fruit_other": 7,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks_sum": 23,
+     "runs_with_hold": 9,
+     "hold_chunks_per_run": {
+      "median": 1.0,
+      "max": 10
+     },
+     "completion_s": {
+      "n": 7,
+      "median": 16.533333333333335,
+      "min": 13.866666666666667,
+      "max": 23.466666666666665
+     }
+    },
+    "place": {
+     "n_runs": 13,
+     "n_success": 5,
+     "n_primary": 5,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 3,
+     "failure_modes": {
+      "no_grasp": 3,
+      "ok": 4,
+      "regrasp": 2,
+      "slip_at_lift": 4
+     },
+     "n_nonauth_target": 0,
+     "nonauth_target_rows_sum": 0,
+     "n_obstacle_contact": 0,
+     "obstacle_rows_sum": {
+      "hand-obstacle": 0,
+      "robot_other-obstacle": 0,
+      "target-obstacle": 0
+     },
+     "n_neighbour_contact": 2,
+     "neighbour_rows_sum": {
+      "hand-fruit_other": 48,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks_sum": 46,
+     "runs_with_hold": 10,
+     "hold_chunks_per_run": {
+      "median": 1.0,
+      "max": 17
+     },
+     "completion_s": {
+      "n": 5,
+      "median": 14.933333333333334,
+      "min": 12.8,
+      "max": 22.933333333333334
+     }
+    }
+   },
+   "SURF": {
+    "all": {
+     "n_runs": 40,
+     "n_success": 19,
+     "n_primary": 19,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 13,
+     "failure_modes": {
+      "no_grasp": 13,
+      "ok": 18,
+      "regrasp": 4,
+      "slip_at_lift": 3,
+      "slip_in_transport": 2
+     },
+     "n_nonauth_target": 1,
+     "nonauth_target_rows_sum": 2,
+     "n_obstacle_contact": 2,
+     "obstacle_rows_sum": {
+      "hand-obstacle": 1,
+      "robot_other-obstacle": 0,
+      "target-obstacle": 1
+     },
+     "n_neighbour_contact": 4,
+     "neighbour_rows_sum": {
+      "hand-fruit_other": 19,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks_sum": 32,
+     "runs_with_hold": 12,
+     "hold_chunks_per_run": {
+      "median": 0.0,
+      "max": 15
+     },
+     "completion_s": {
+      "n": 19,
+      "median": 14.933333333333334,
+      "min": 11.2,
+      "max": 21.333333333333332
+     }
+    },
+    "clear": {
+     "n_runs": 14,
+     "n_success": 4,
+     "n_primary": 4,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 6,
+     "failure_modes": {
+      "no_grasp": 6,
+      "ok": 4,
+      "regrasp": 1,
+      "slip_at_lift": 3
+     },
+     "n_nonauth_target": 0,
+     "nonauth_target_rows_sum": 0,
+     "n_obstacle_contact": 0,
+     "obstacle_rows_sum": {
+      "hand-obstacle": 0,
+      "robot_other-obstacle": 0,
+      "target-obstacle": 0
+     },
+     "n_neighbour_contact": 2,
+     "neighbour_rows_sum": {
+      "hand-fruit_other": 7,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks_sum": 9,
+     "runs_with_hold": 5,
+     "hold_chunks_per_run": {
+      "median": 0.0,
+      "max": 5
+     },
+     "completion_s": {
+      "n": 4,
+      "median": 13.600000000000001,
+      "min": 11.2,
+      "max": 13.866666666666667
+     }
+    },
+    "adjacent": {
+     "n_runs": 13,
+     "n_success": 9,
+     "n_primary": 9,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 2,
+     "failure_modes": {
+      "no_grasp": 2,
+      "ok": 8,
+      "regrasp": 1,
+      "slip_in_transport": 2
+     },
+     "n_nonauth_target": 0,
+     "nonauth_target_rows_sum": 0,
+     "n_obstacle_contact": 2,
+     "obstacle_rows_sum": {
+      "hand-obstacle": 1,
+      "robot_other-obstacle": 0,
+      "target-obstacle": 1
+     },
+     "n_neighbour_contact": 0,
+     "neighbour_rows_sum": {
+      "hand-fruit_other": 0,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks_sum": 20,
+     "runs_with_hold": 4,
+     "hold_chunks_per_run": {
+      "median": 0.0,
+      "max": 15
+     },
+     "completion_s": {
+      "n": 9,
+      "median": 14.933333333333334,
+      "min": 12.266666666666667,
+      "max": 16.0
+     }
+    },
+    "place": {
+     "n_runs": 13,
+     "n_success": 6,
+     "n_primary": 6,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 5,
+     "failure_modes": {
+      "no_grasp": 5,
+      "ok": 6,
+      "regrasp": 2
+     },
+     "n_nonauth_target": 1,
+     "nonauth_target_rows_sum": 2,
+     "n_obstacle_contact": 0,
+     "obstacle_rows_sum": {
+      "hand-obstacle": 0,
+      "robot_other-obstacle": 0,
+      "target-obstacle": 0
+     },
+     "n_neighbour_contact": 2,
+     "neighbour_rows_sum": {
+      "hand-fruit_other": 12,
+      "robot_other-fruit_other": 0
+     },
+     "hold_chunks_sum": 3,
+     "runs_with_hold": 3,
+     "hold_chunks_per_run": {
+      "median": 0.0,
+      "max": 1
+     },
+     "completion_s": {
+      "n": 6,
+      "median": 14.933333333333334,
+      "min": 13.866666666666667,
+      "max": 21.333333333333332
+     }
+    }
+   }
+  },
+  "SURF_diagnostics": {
+   "n_runs": 40,
+   "n_chunks": 2877,
+   "n_layer_key_chunks": 2877,
+   "n_applied": 1538,
+   "applied_ratio_all_chunks": 0.5345846367744178,
+   "oracle_not_applied_why": {
+    "no_target_free_layer": 1017,
+    "attention_surface_abstained (no_region)": 11,
+    "identity_unresolved": 311
+   },
+   "n_render_records": 2877,
+   "n_render_failed": 0
+  },
+  "latency_budget_ms": 533.3333333333334,
+  "latency": {
+   "C1aN": {
+    "client_round_trip_ms": {
+     "n": 2960,
+     "median": 1253.1908750534058,
+     "p95": 2108.5217714309692,
+     "max": 3179.140329360962,
+     "n_over_533ms": 2960,
+     "frac_over_533ms": 1.0
+    },
+    "server_total_ms": {
+     "n": 2960,
+     "median": 905.3103835321963,
+     "p95": 1583.1761559005824,
+     "max": 2486.943461932242,
+     "n_over_533ms": 2925,
+     "frac_over_533ms": 0.9881756756756757
+    },
+    "server_stage_median_ms": {
+     "ag3s_unprofiled": 2.4474537931382656,
+     "constraint_other": 13.09476187452674,
+     "point_cloud": 155.41111305356026,
+     "profile_attention_lifting": 0.00908365473151207,
+     "profile_constraint_generation": 147.86536060273647,
+     "profile_esdf": 108.04157331585884,
+     "profile_robot_self_filter": 0.0,
+     "profile_scene_reconstruction": 52.84960614517331,
+     "profile_support_surface": 8.428383618593216,
+     "profile_target_grounding": 87.2217663563788,
+     "server_ag3s": 289.57007778808475,
+     "server_infer_vla_plus_attention": 223.71372766792774,
+     "server_other": 0.3880718722939491,
+     "server_trajopt": 240.41872331872582,
+     "to_solve_ms": 192.33078276738524
+    },
+    "attention_surface_ms": {
+     "profile_attention_surface": null,
+     "surface_total": null,
+     "surface_build": null,
+     "surface_solve": null,
+     "surface_codes": null
+    },
+    "render_ms": {
+     "profile_robot_render_mask": null,
+     "render_ms_record": null
+    }
+   },
+   "SURF": {
+    "client_round_trip_ms": {
+     "n": 2912,
+     "median": 3079.253315925598,
+     "p95": 4011.0814332962036,
+     "max": 8897.386074066162,
+     "n_over_533ms": 2912,
+     "frac_over_533ms": 1.0
+    },
+    "server_total_ms": {
+     "n": 2912,
+     "median": 2782.683177385479,
+     "p95": 3670.445541106164,
+     "max": 7902.095180004835,
+     "n_over_533ms": 2912,
+     "frac_over_533ms": 1.0
+    },
+    "server_stage_median_ms": {
+     "ag3s_unprofiled": 2.1830187179148197,
+     "constraint_other": 11.535611003637314,
+     "point_cloud": 145.46344708651304,
+     "profile_attention_lifting": 0.00860169529914856,
+     "profile_attention_surface": 1741.6995083913207,
+     "profile_constraint_generation": 2105.0420464016497,
+     "profile_esdf": 130.2173570729792,
+     "profile_robot_render_mask": 166.34587105363607,
+     "profile_robot_self_filter": 0.0,
+     "profile_scene_reconstruction": 51.79497553035617,
+     "profile_support_surface": 8.504507597535849,
+     "profile_target_grounding": 81.1499822884798,
+     "render_ms_record": 164.868,
+     "server_ag3s": 2258.742718026042,
+     "server_infer_vla_plus_attention": 219.0173091366887,
+     "server_other": 0.3755553625524044,
+     "server_trajopt": 191.70286506414413,
+     "surface_build": 867.2455,
+     "surface_codes": 396.048,
+     "surface_solve": 290.623,
+     "surface_total": 1538.25,
+     "to_solve_ms": 165.15840217471123
+    },
+    "attention_surface_ms": {
+     "profile_attention_surface": {
+      "n": 2838,
+      "median": 1741.6995083913207,
+      "p95": 2334.188845334575,
+      "max": 4320.042896084487
+     },
+     "surface_total": {
+      "n": 2838,
+      "median": 1538.25,
+      "p95": 2095.66835,
+      "max": 4078.193
+     },
+     "surface_build": {
+      "n": 2838,
+      "median": 867.2455,
+      "p95": 1321.4185,
+      "max": 2795.252
+     },
+     "surface_solve": {
+      "n": 2838,
+      "median": 290.623,
+      "p95": 395.08910000000003,
+      "max": 708.005
+     },
+     "surface_codes": {
+      "n": 2823,
+      "median": 396.048,
+      "p95": 521.0441999999999,
+      "max": 999.146
+     }
+    },
+    "render_ms": {
+     "profile_robot_render_mask": {
+      "n": 2838,
+      "median": 166.34587105363607,
+      "p95": 250.06560473702848,
+      "max": 823.104509152472
+     },
+     "render_ms_record": {
+      "n": 2838,
+      "median": 164.868,
+      "p95": 248.45785,
+      "max": 813.751
+     }
+    }
+   }
+  },
+  "attempts": {
+   "runs_with_retry": [
+    "C1aN_ep1034_s10343",
+    "SURF_ep1135_s11353"
+   ],
+   "per_run": {
+    "C1aN_ep1034_s10343": {
+     "attempt_lines": 3,
+     "max_attempt": 2,
+     "chain_logs": [
+      "chain_8293.log"
+     ],
+     "failed_moved": [
+      "C1aN_ep1034_s10343.client.log.20261018T143142",
+      "C1aN_ep1034_s10343.client.log.20261018T160220"
+     ],
+     "n_retries": 2
+    },
+    "SURF_ep1135_s11353": {
+     "attempt_lines": 3,
+     "max_attempt": 2,
+     "chain_logs": [
+      "chain_8292.log"
+     ],
+     "failed_moved": [
+      "SURF_ep1135_s11353.client.log.20261018T143137",
+      "SURF_ep1135_s11353.client.log.20261018T155505"
+     ],
+     "n_retries": 2
+    }
+   }
+  },
+  "reused_scene_rows": 0,
+  "skipped_geometry": []
+ },
+ "infrastructure_notes": [
+  "2 runs (SURF_ep1135_s11353, C1aN_ep1034_s10343) hung in NFS D state at client start (lstat of one server record file); re-run with the same seed after PHASE B, attempts recorded (p/LEAD_AMENDMENTS.md)",
+  "server record chunk_00720.npz of the PHASE B 8292 SURF server (SURF_ep194_s1943) moved to <RUN>__nfs_quarantine; 749 of 750 chunks hard-linked back; client records and replay of that run unaffected"
+ ],
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-cl3/ifg-cl3-paired-outcome.png",
+  "AG3S/ag3s/docs/figures/ifg-cl3/ifg-cl3-arm-metrics.png",
+  "AG3S/ag3s/docs/figures/ifg-cl3/ifg-cl3-latency.png",
+  "AG3S/ag3s/docs/figures/ifg-cl3/ifg-cl3-outcome-grid.png",
+  "AG3S/ag3s/docs/figures/ifg-cl3/ifg-cl3-discordant-scenes.png"
+ ]
+}

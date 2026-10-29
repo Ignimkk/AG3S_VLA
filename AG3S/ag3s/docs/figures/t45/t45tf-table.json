@@ -1,0 +1,68 @@
+{
+ "header": [
+  "경로",
+  "코드 위치 (file:line)",
+  "8 chunk (PC) 위반 행",
+  "C1a 기록 17 chunk 충돌 행 → what-if",
+  "그 밖의 수"
+ ],
+ "rows": [
+  [
+   "(a1) ambiguous seed 보존 (ball_owned tie 1 voxel)",
+   "fields/curobo_builder.py:443-450, 1829-1834 · runtime/pipeline.py:2712-2728 (non-target = cloud − support − target 점 5 mm 안, proximity) · config.py:1069",
+   "60 (5 chunk)",
+   "ambiguous 제거: 601→53, HOLD 0 된 chunk 10/14, 이웃 과일 seed 688 제거 (7 chunk) · non-target 근거에서 GT target 점 제외: 601→72, 8/14, 이웃 과일 seed 25",
+   "ambiguous 근거 점이 GT target 위 1785/2555 · source proximity 17/17"
+  ],
+  [
+   "(a2) 부호 잔여 (지운 seed · sign 집합, |d| ≤ 1.5 vs)",
+   "fields/curobo_builder.py:449, 1493-1497, 1662-1710 · config.py:1042",
+   "67 (4 chunk)",
+   "임계 0: 601→603",
+   "8 chunk 임계 0: 575→575"
+  ],
+  [
+   "(a3) 공 밖 seed (반지름 · 중심)",
+   "fields/curobo_builder.py:1762-1781 · runtime/pipeline.py:3017-3041",
+   "448 (6 chunk): 이웃 과일 107 · 잔상 145 · 로봇 겹침 95 · target 29 · 그 밖 72",
+   "반지름 +5/+10 mm: 601→601/601",
+   "8 chunk 반지름 +5/+10/+20 mm: 521/510/446 행, 이웃 과일 seed 134/336/815"
+  ],
+  [
+   "(a4) z_min 아래 (지원면 guard)",
+   "fields/curobo_builder.py:1779 · runtime/pipeline.py:3040",
+   "0",
+   "—",
+   "pre8+close 잔여 voxel 중 2403"
+  ],
+  [
+   "(a5) 제거 ≠ 재적분 (TSDF 누적 · 잔상)",
+   "fields/curobo_builder.py:991 (_integrate) · config.py:951 time_decay 1.0",
+   "잔상 145 (1 chunk, ep3_s31:28)",
+   "—",
+   "ep3_s31:28 orange 이동 68.8 mm"
+  ],
+  [
+   "(b) coarse 20 mm target-free tier",
+   "fields/curobo_builder.py:1081 · config.py:1085 (False) · C1a server_proc 에 --target-free-coarse 없음",
+   "tier target_free 575/575",
+   "—",
+   "coarse mode off 1350/1350"
+  ],
+  [
+   "(c) identity / target 점 오염",
+   "runtime/pipeline.py:1542 (_exclusion_gate) · 2598 (_target_ball)",
+   "공 중심 최근접 과일 ≠ target 1/8 (ep3_s31:28 banana 47.1 mm)",
+   "target 점이 이웃 과일 위: 6/17 chunk, 278 점",
+   "pre8+close 공 ≠ target 3/162 · 전체 ball chunk 131/528"
+  ],
+  [
+   "(d) 합성 min(f, max(d, b))",
+   "fields/curobo_field.py:427",
+   "window_edge/coarse 답 0",
+   "—",
+   "—"
+  ]
+ ],
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T110227+0900_7339fa4df065_242511982209/verify/T45/TF/raw/table_rows.json"
+}

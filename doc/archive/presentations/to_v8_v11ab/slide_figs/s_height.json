@@ -1,0 +1,18 @@
+{
+ "arms": [
+  "V5",
+  "V7g",
+  "V8"
+ ],
+ "command_mm": [
+  21.4,
+  18.0,
+  19.6
+ ],
+ "actual_mm": [
+  3.1,
+  2.0,
+  3.8
+ ],
+ "source": "T43XM.verify.json via AG3S_T0T6_LOG.md T43 11"
+}

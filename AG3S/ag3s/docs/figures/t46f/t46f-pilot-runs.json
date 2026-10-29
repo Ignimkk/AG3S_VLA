@@ -1,0 +1,335 @@
+{
+ "runs": [
+  {
+   "name": "E0_ep3_s31_base",
+   "episode": 3,
+   "target": "orange",
+   "offset_xy": [
+    0.0,
+    0.0
+   ],
+   "row0_vs_intended_xy_mm": 1.5553251237557137,
+   "n_ctrl": 600,
+   "close_row": 121,
+   "lifted_50mm": true,
+   "placed_in_crate_last_row": true,
+   "S1win_min_mm": {
+    "FT": 76.56833772643272,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 76.56833772643272,
+    "HAND": -1.9024729469039845
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 14
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  },
+  {
+   "name": "E0_ep3_s31_C",
+   "episode": 3,
+   "target": "orange",
+   "offset_xy": [
+    0.0165,
+    0.0644
+   ],
+   "row0_vs_intended_xy_mm": 1.5425412175564441,
+   "n_ctrl": 600,
+   "close_row": 573,
+   "lifted_50mm": false,
+   "placed_in_crate_last_row": false,
+   "S1win_min_mm": {
+    "FT": 74.6471197631753,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 74.6471197631753,
+    "HAND": 5.13908823311842
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 0
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  },
+  {
+   "name": "E0_ep11_s111_base",
+   "episode": 11,
+   "target": "pear",
+   "offset_xy": [
+    0.0,
+    0.0
+   ],
+   "row0_vs_intended_xy_mm": 0.9665443237579772,
+   "n_ctrl": 600,
+   "close_row": 95,
+   "lifted_50mm": true,
+   "placed_in_crate_last_row": true,
+   "S1win_min_mm": {
+    "FT": 67.83126434316496,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 67.83126434316496,
+    "HAND": -1.4483059539875769
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 25
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  },
+  {
+   "name": "E0_ep11_s111_N",
+   "episode": 11,
+   "target": "pear",
+   "offset_xy": [
+    -0.0104,
+    -0.0024
+   ],
+   "row0_vs_intended_xy_mm": 0.9561370962548227,
+   "n_ctrl": 600,
+   "close_row": 107,
+   "lifted_50mm": true,
+   "placed_in_crate_last_row": true,
+   "S1win_min_mm": {
+    "FT": 68.02477044302306,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 68.02477044302306,
+    "HAND": -1.9467993099201684
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 40
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  },
+  {
+   "name": "E0_ep11_s111_C",
+   "episode": 11,
+   "target": "pear",
+   "offset_xy": [
+    0.0033,
+    0.0621
+   ],
+   "row0_vs_intended_xy_mm": 0.9290414340043186,
+   "n_ctrl": 600,
+   "close_row": 112,
+   "lifted_50mm": false,
+   "placed_in_crate_last_row": false,
+   "S1win_min_mm": {
+    "FT": 100.0,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 100.0,
+    "HAND": 63.79086821027036
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 0
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  },
+  {
+   "name": "E0_ep54_s541_base",
+   "episode": 54,
+   "target": "apple",
+   "offset_xy": [
+    0.0,
+    0.0
+   ],
+   "row0_vs_intended_xy_mm": 0.0,
+   "n_ctrl": 600,
+   "close_row": 154,
+   "lifted_50mm": true,
+   "placed_in_crate_last_row": true,
+   "S1win_min_mm": {
+    "FT": 75.0278677520327,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 75.0278677520327,
+    "HAND": -2.416514014524444
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 14
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  },
+  {
+   "name": "E0_ep54_s541_C",
+   "episode": 54,
+   "target": "apple",
+   "offset_xy": [
+    0.0026,
+    0.1
+   ],
+   "row0_vs_intended_xy_mm": 5.375412842718084,
+   "n_ctrl": 600,
+   "close_row": 160,
+   "lifted_50mm": false,
+   "placed_in_crate_last_row": false,
+   "S1win_min_mm": {
+    "FT": 100.0,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 100.0,
+    "HAND": 60.70208934454602
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 0
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  },
+  {
+   "name": "E0_ep104_s1041_base",
+   "episode": 104,
+   "target": "pear",
+   "offset_xy": [
+    0.0,
+    0.0
+   ],
+   "row0_vs_intended_xy_mm": 0.03179695826014059,
+   "n_ctrl": 600,
+   "close_row": 129,
+   "lifted_50mm": false,
+   "placed_in_crate_last_row": false,
+   "S1win_min_mm": {
+    "FT": 68.10797450617218,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 68.09601146216457,
+    "HAND": -1.3879767937589917
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 20
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  },
+  {
+   "name": "E0_ep104_s1041_N",
+   "episode": 104,
+   "target": "pear",
+   "offset_xy": [
+    -0.0058,
+    0.001
+   ],
+   "row0_vs_intended_xy_mm": 0.05239654181063038,
+   "n_ctrl": 600,
+   "close_row": 153,
+   "lifted_50mm": true,
+   "placed_in_crate_last_row": true,
+   "S1win_min_mm": {
+    "FT": 67.23126547801081,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 67.2312650436977,
+    "HAND": -0.7571435604260464
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 20
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  },
+  {
+   "name": "E0_ep104_s1041_C",
+   "episode": 104,
+   "target": "pear",
+   "offset_xy": [
+    -0.0046,
+    -0.0559
+   ],
+   "row0_vs_intended_xy_mm": 0.0389186616293112,
+   "n_ctrl": 600,
+   "close_row": 141,
+   "lifted_50mm": false,
+   "placed_in_crate_last_row": false,
+   "S1win_min_mm": {
+    "FT": 66.58090441578081,
+    "A5": 100.0,
+    "A6": 100.0,
+    "NA": 66.58092402161535,
+    "HAND": -3.4971135138724336
+   },
+   "S1win_contact_rows": {
+    "NA": 0,
+    "FT": 0,
+    "HAND": 41
+   },
+   "post_contact_rows_NA": 0,
+   "t0_contacts": {
+    "robot_target": 0,
+    "target_otherfruit": 0,
+    "robot_anyfruit": 0
+   },
+   "inconsistent_pairs": 0
+  }
+ ],
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T232651+0900_6caae1c603f8_cab77c219e69/verify/T46f-pilot/pilot_analysis.json"
+}

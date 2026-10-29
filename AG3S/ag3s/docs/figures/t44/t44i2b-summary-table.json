@@ -1,0 +1,86 @@
+{
+ "kind": "table",
+ "rows": [
+  [
+   "1",
+   "\uc804\uccb4 pytest",
+   "4 failed 2582 passed 3 skipped; the 4 = concurrent serve_safe.py edit; rerun 4 passed",
+   ""
+  ],
+  [
+   "2",
+   "strict off: refined/status/HOLD \ucc28\uc774 (HEAD 498f713 \ub300 \uc0c8 tree off / offR)",
+   "0/0/0 / 0/0/0 (of 1006)",
+   ""
+  ],
+  [
+   "2",
+   "strict off: sweep \uc124\uc815; V-I2 working tree \ub300\ube44",
+   "sw 0/0/0 / swR 0/0/0; vs V-I2 wt off 0/0/0",
+   ""
+  ],
+  [
+   "3",
+   "carry \uc5d0\uc11c \ubc14\ub010 tail \ud589 (\uae30\uc900 \uada4\uc801)",
+   "i2s 55938 | i2 4328 | i2b 4328",
+   "\ud589"
+  ],
+  [
+   "3",
+   "n_tail_target_unauthorized (solve)",
+   "I2s 35216 | I2 3721 | I2b 3721",
+   "\ud589"
+  ],
+  [
+   "3",
+   "refined chunk \ubcc0\ud654 (\ucd5c\ub300 joint deg) / status / HOLD",
+   "i2s 108 (11.416) / 1 / 1 | i2 10 (0.585) / 0 / 0 | b1 10 (0.585) / 0 / 0",
+   ""
+  ],
+  [
+   "3",
+   "I2b \ud589 \ubd84\ub958 (main \ubaa8\ub378, tail \ud589: off \uac00 \ubc84\ub9bc -> strict \uac00 \ubc84\ub9bc)",
+   "held gripper 51914 -> 51914 (exempt) | other gripper 4328 -> 0 (checked)",
+   "\ud589"
+  ],
+  [
+   "3",
+   "I2b \ud589 \ubd84\ub958 (arms \ubaa8\ub378): \uad8c\ud55c \ucabd",
+   "held gripper 51914 -> 51914 | arm_6 12119 -> 12119 (exempt, tail rows dropped off -> strict)",
+   "\ud589"
+  ],
+  [
+   "3",
+   "I2b \ud589 \ubd84\ub958 (arms \ubaa8\ub378): \uac80\uc0ac \ucabd",
+   "holding-arm forearm+ 8509 -> 507 | other arm 20694 -> 4536 | other gripper 4328 -> 0",
+   "\ud589"
+  ],
+  [
+   "4",
+   "parent=0 \ub300 1: \ub2ec\ub77c\uc9c4 \ud589 / chunk",
+   "main 0 / 0; arms 5626 / 194",
+   ""
+  ],
+  [
+   "5",
+   "sweep I2b: \ube44\uad8c\ud55c \uc81c\uc678 / \uad8c\ud55c \uc81c\uc678 (off -> strict)",
+   "68 -> 0 / 477 -> 477",
+   ""
+  ],
+  [
+   "5",
+   "sweep I2b: \uc0c8 path violation / status \ubcc0\ud654",
+   "0 / 1; arms model 1 / 1",
+   ""
+  ],
+  [
+   "5",
+   "ep1834_s18341 seq 34 (hold right)",
+   "I2 feasible -> violated ; I2b feasible -> violated (window viol 1.37 mm; checked opposite gripper left)",
+   ""
+  ]
+ ],
+ "figure": "t44i2b-summary-table.png",
+ "split": "test (episodes 1807-1995, recorded V11AB H runs; regression check only)",
+ "source": "outputs/verify/T44/I2b/agg.json, per_chunk_main.json, per_chunk_arms.json"
+}

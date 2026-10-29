@@ -1,0 +1,30 @@
+{
+  "artifact_id": "A01",
+  "status": "DRAFT1_FROM_IMPLEMENTATION_AUDIT",
+  "claim_ids": [
+    "C002",
+    "C003",
+    "C004"
+  ],
+  "result_ids": [],
+  "is_implementation_audit": false,
+  "is_safety_certificate": false,
+  "render_source": "paper/algorithms/algorithm01_safe_vla.tex",
+  "source_notes": [
+    "paper/notes/PAPER_STORY.md",
+    "paper/evidence/FIGURES_TABLES.md",
+    "paper/notes/METHOD_FACTS_DRAFT1.md",
+    "paper/notes/V5_FACTS.md",
+    "paper/notes/SUBTASK_FACTS.md"
+  ],
+  "render_source_sha256": "e98931b226cdaaa0b31c60832d6b7e2406f96f4f8f5720a3c1b4f7f9a9c3006c",
+  "input_sha256": {
+    "paper/notes/PAPER_STORY.md": "2abe32df6226dbeeb6afd12fed4fda985e01212076ee182f3d02293f7365e6ac",
+    "paper/evidence/FIGURES_TABLES.md": "fc9a41403b8bcbdb73c1cbb70d550300bce902691cdab61bf43e3882153ca049",
+    "paper/notes/METHOD_FACTS_DRAFT1.md": "722b327f0fd64bb10107fb981ab821d24237b6b7c323d7420bdc0ab54c906ee6",
+    "paper/notes/V5_FACTS.md": "af4766e138d757c502150e783de32a7ce7d4005a1228d238a044c5af0348673d",
+    "paper/notes/SUBTASK_FACTS.md": "ccca2216b011a49714508e5540a81b29017f2aa5ec7ff45fabdaac17288c1131"
+  },
+  "updated_at": "2026-10-06 KST",
+  "caption_scope": "Implemented pipeline at the T39 snapshot; no measured result."
+}

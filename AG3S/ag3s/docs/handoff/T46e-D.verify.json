@@ -1,0 +1,3554 @@
+{
+  "_comment": "ag3s-verifier (T46e-D). numbers and paths only. classification_rules were written 2026-10-13 11:02 KST before any T46e-D measurement and are not changed afterwards.",
+  "step": "T46e-D",
+  "date": "2026-10-13",
+  "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5",
+  "raw_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D",
+  "classification_rules": {
+    "written_at": "2026-10-13T11:02+09:00 (before measurement)",
+    "R0_chunks": "8 chunks = heldout162 chunks where off, F1, F1GT have 0 collision rows and ORV (oracle, identity pipeline) has rows: C1a_ep110_s1101:17, C1a_ep110_s1102:16, C1a_ep110_s1102:17, C1a_ep110_s1102:18, C1a_ep11_s111:12, C1a_ep123_s1231:13, C1a_ep3_s32:27; plus C1a_ep110_s1101:18 (off 53 -> ORV 123). Variants rebuilt with the V-T46e harness (t46e_vreplay.py logic, unchanged).",
+    "R1_responsible_voxel": "for each ORV collision row (classify_violations keep_rows, class == collision): the responsible voxel = the remaining seed (main fine value == 0 and not in the variant's removed set) nearest (Euclidean, voxel centre) to the row's sphere centre, in the layer the row answered: target_free / target_free_coarse tier -> the variant's rebuilt fine target-free layer; any other tier -> the recorded main fine layer (main == 0). Plane / candidate rows are reported by block, not attributed to a voxel.",
+    "R2_gt_class": "GT scene = planning-row qpos of that seq (MuJoCo, checkout model_transport.xml). Signed surface distance from the voxel centre to: target fruit (convex hull of its _vis mesh), each other fruit (hull of _vis mesh) -> 'neighbour_fruit', crate (union of its box geoms), table (table_top + legs boxes) -> 'table', shelf (boxes), robot (convex hull of each robot mesh geom within 0.3 m; inside = 0), room (floor plane z=0 world + office box geoms). class = argmin of these signed distances; d_geom = that minimum (mm).",
+    "R3_category": "d_geom <= 5.0 mm (1 fine voxel): if class == target -> 'target_surface_kept', else 'preserved_<class>' (normal obstacle preservation). d_geom > 5.0 mm -> 'error_candidate' (sub-label = nearest class). Primary threshold 5.0 mm fixed; counts at 2.5 mm and 10.0 mm reported as sensitivity only.",
+    "R4_row_level": "every row gets the category of its responsible voxel; counts reported per chunk both per row and per unique voxel. Rows also present in off (same step, query) are flagged.",
+    "R5_error_subcauses": "for error_candidate voxels (numbers only): nearest oracle memory sample to the voxel (distance, code, update index -> planning seq, age = chunk seq - sample seq, whether that planning row was a HOLD i.e. ipc != ok or safe is False); d_t and d_o of oracle_visible_split; voxel z - z_floor; band mask bits of the voxel's band cell; for each camera of the chunk's own planning row and of the sample's planning row: rendered depth at the voxel's projection minus the voxel's camera depth (mm) and the code seen at that pixel; distance of the nearest memory sample to the GT surface of its own code's object (back-projection error, mm); pose_error_mm (renderer, per planning row and max); oracle record applied and identity_matches_gt.",
+    "R6_other_variants": "for each responsible voxel: removed by off / F1 / F1GT / ORVgt (bool). For each chunk: seeds removed by off (and by F1, F1GT) that ORV keeps, by R2 class / R3 category.",
+    "R7_B2_support_layer": "over all 162 heldout chunks: S = (off_removed AND F1GT_removed) minus ORV_removed with 0 <= z_centre - z_min < 10 mm (z_min = recorded ball z_min, base frame). S' = S minus voxels with target hull distance <= 5 mm or other-fruit hull distance <= 5 mm (V-T46e kept_vs_off definition). Reported: signed distance of S / S' voxel centres to the table geom (table_top box, mm; distribution and histogram), number of ORV collision rows whose responsible voxel is in S / S', and for those rows the sphere centre's signed distance to table_top minus sphere radius (mm).",
+    "R8_ORV_S_neighbour_seeds": "ORV_S (diagnostic variant of V-T46e, same rule) removed seeds with other-fruit hull distance <= 5 mm (V-T46e count 3,627 over 162 chunks): R2 class and d_geom of each, split by whether the seed came from the ORV_S support-layer addition or from ORV itself, plus their table distance."
+  },
+  "classification_rules_file": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/rules_fixed_before_measurement.json",
+  "classification_rules_md5": "03f1920fd79b78bedcaeeb9ac2e10c66",
+  "runs": [
+    {
+      "id": "baseline_legacy",
+      "command": "JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=<worktree> nice -n 19 .venv-openpi-live/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention <main checkout>/AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms",
+      "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/p/run_baseline_legacy.sh",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/baseline/legacy.json",
+      "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/baseline/legacy.log"
+    },
+    {
+      "id": "t46ed_diagnostic",
+      "command": "run_t46ed.sh w 4 (4 CPU workers, nice 19, OMP 2) over 18 CL2 C1a runs = 162 held-out chunks; variant rebuild copied from V-T46e t46e_vreplay.py (md5 in p/copied_from_md5.txt)",
+      "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/p/t46ed.py",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/raw/runs/*.json, /mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/raw/scene/*.npz",
+      "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/logs/t46ed_w{0..3}of4.log"
+    },
+    {
+      "id": "aggregation",
+      "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/p/t46ed_agg.py",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/raw/agg.json"
+    },
+    {
+      "id": "attribution_consistency",
+      "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/p/t46ed_consistency.py",
+      "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/raw/consistency.json"
+    },
+    {
+      "id": "figures",
+      "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/p/t46ed_fig.py"
+    }
+  ],
+  "code_state": {
+    "repo": "/mnt/dev/AG3S_VLA-development/.claude/worktrees/agent-a770cbc1ab3162e54",
+    "branch": "worktree-agent-a770cbc1ab3162e54",
+    "head": "15314ba39dbd2786960d95506be4f69dbec0d83c",
+    "uncommitted_T46e_implementation": true,
+    "md5_start": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/code_state/md5_start.txt",
+    "md5_end": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T110034+0900_39dfb5dc2b38_7016ed1e8da5/verify/T46e-D/code_state/md5_end.txt",
+    "md5_equal_to_V-T46e_and_unchanged_start_to_end": true,
+    "run_dir_commit_tag_note": "common.run_output tagged the run dir with 39dfb5dc (main checkout HEAD via env.sh); code imported from the worktree (PYTHONPATH worktree first)"
+  },
+  "baseline_check": {
+    "matched": true,
+    "note": "legacy CPU 14/15 · 15/15 · -29.031048280806342 mm (equal to the regression-baseline line). cuRobo GPU baseline not run (GPU use not allowed for this task)."
+  },
+  "numbers": {
+    "1_baseline_legacy": {
+      "start_violated": 14,
+      "n": 15,
+      "has_target": 15,
+      "frame0_clearance_before_mm": "-29.031048280806342"
+    },
+    "2_reproduction_vs_VT46e": {
+      "n_compared": 162,
+      "n_prev": 162,
+      "n_mismatch": 0,
+      "mismatch": [],
+      "collision_rows_total_162": {
+        "off": 887,
+        "F1": 401,
+        "F1GT": 113,
+        "ORV": 359,
+        "ORVgt": 359,
+        "ORV_S": 318
+      }
+    },
+    "3_eight_chunks": {
+      "C1a_ep110_s1101:17": {
+        "hold_chunk": false,
+        "n_rows": {
+          "off": 0,
+          "F1": 0,
+          "F1GT": 0,
+          "ORV": 15,
+          "ORVgt": 15,
+          "ORV_S": 15
+        },
+        "ORV_record": {
+          "applied": true,
+          "identity_matches_gt": true,
+          "object": "pear",
+          "pipeline_code": 1,
+          "n_target_samples": 1971,
+          "n_other_samples": 93728,
+          "n_band_cells": 6510,
+          "z_floor_m": 0.8265453901567731
+        },
+        "pose_error_mm_chunk_row": 0.001,
+        "pose_error_mm_max_rows_folded": 0.006,
+        "n_planning_rows_folded": 17,
+        "hold_rows_ipc_up_to_seq": [],
+        "analysis_hold_seqs": [
+          18
+        ],
+        "rows_block": {
+          "esdf": 15
+        },
+        "rows_tier": {
+          "target_free": 15
+        },
+        "rows_link": {
+          "ee_finger_r2": 15
+        },
+        "rows_also_in_off": 0,
+        "rows_by_category": {
+          "error_candidate": 15
+        },
+        "rows_by_class": {
+          "neighbour_fruit": 15
+        },
+        "rows_category_sensitivity": {
+          "le2p5mm_real": 0,
+          "le5mm_real": 0,
+          "le10mm_real": 15
+        },
+        "rows_voxel_d_geom_mm": {
+          "n": 15,
+          "min": 7.654,
+          "p10": 7.654,
+          "median": 7.654,
+          "p90": 7.654,
+          "max": 7.654
+        },
+        "rows_centre_to_voxel_mm": {
+          "n": 15,
+          "min": 14.673,
+          "p10": 14.889,
+          "median": 16.05,
+          "p90": 16.762,
+          "max": 16.81
+        },
+        "rows_clearance_mm": {
+          "n": 15,
+          "min": -1.016,
+          "p10": -0.894,
+          "median": -0.504,
+          "p90": -0.139,
+          "max": -0.1
+        },
+        "rows_voxel_removed_by": {
+          "off": 15,
+          "F1": 15,
+          "F1GT": 15,
+          "ORVgt": 0,
+          "ORV_S": 0
+        },
+        "rows_sphere_table_top_clearance_mm": {
+          "n": 15,
+          "min": 40.739,
+          "p10": 41.151,
+          "median": 42.779,
+          "p90": 45.748,
+          "max": 46.0
+        },
+        "rows_sphere_gt_clearance_min_nonrobot_mm": {
+          "n": 15,
+          "min": 16.254,
+          "p10": 16.28,
+          "median": 16.707,
+          "p90": 17.066,
+          "max": 17.079
+        },
+        "rows_sphere_gt_clearance_by_voxel_class_mm": {
+          "neighbour_fruit": {
+            "n": 15,
+            "min": 16.254,
+            "p10": 16.28,
+            "median": 16.707,
+            "p90": 17.066,
+            "max": 17.079
+          }
+        },
+        "n_unique_voxels": 1,
+        "voxels_by_category": {
+          "error_candidate": 1
+        },
+        "voxels_by_class": {
+          "neighbour_fruit": 1
+        },
+        "voxels_table_top_mm": {
+          "n": 1,
+          "min": 39.879,
+          "p10": 39.879,
+          "median": 39.879,
+          "p90": 39.879,
+          "max": 39.879
+        },
+        "voxels_z_minus_floor_mm": {
+          "n": 1,
+          "min": 33.334,
+          "p10": 33.334,
+          "median": 33.334,
+          "p90": 33.334,
+          "max": 33.334
+        },
+        "voxels_d_mm_per_class_median": {
+          "target": 29.686,
+          "neighbour_fruit": 7.654,
+          "crate": 76.34,
+          "table": 39.879,
+          "robot": 8.945
+        },
+        "error_candidates": {
+          "n_voxels": 1,
+          "n_rows": 15,
+          "nearest_class": {
+            "neighbour_fruit": 1
+          },
+          "d_geom_mm": {
+            "n": 1,
+            "min": 7.654,
+            "p10": 7.654,
+            "median": 7.654,
+            "p90": 7.654,
+            "max": 7.654
+          },
+          "table_top_mm": {
+            "n": 1,
+            "min": 39.879,
+            "p10": 39.879,
+            "median": 39.879,
+            "p90": 39.879,
+            "max": 39.879
+          },
+          "robot_mm": {
+            "n": 1,
+            "min": 8.945,
+            "p10": 8.945,
+            "median": 8.945,
+            "p90": 8.945,
+            "max": 8.945
+          },
+          "z_minus_floor_mm": {
+            "n": 1,
+            "min": 33.334,
+            "p10": 33.334,
+            "median": 33.334,
+            "p90": 33.334,
+            "max": 33.334
+          },
+          "mem_nearest_code": {
+            "4": 1
+          },
+          "mem_nearest_mm": {
+            "n": 1,
+            "min": 7.367,
+            "p10": 7.367,
+            "median": 7.367,
+            "p90": 7.367,
+            "max": 7.367
+          },
+          "mem_age_chunks": {
+            "n": 1,
+            "min": 1.0,
+            "p10": 1.0,
+            "median": 1.0,
+            "p90": 1.0,
+            "max": 1.0
+          },
+          "mem_nearest_row_hold_ipc": 0,
+          "mem_nearest_row_in_analysis_hold": 0,
+          "d_t_mm": {
+            "n": 1,
+            "min": 29.372,
+            "p10": 29.372,
+            "median": 29.372,
+            "p90": 29.372,
+            "max": 29.372
+          },
+          "d_o_mm": {
+            "n": 1,
+            "min": 7.367,
+            "p10": 7.367,
+            "median": 7.367,
+            "p90": 7.367,
+            "max": 7.367
+          },
+          "in_candidates": 1,
+          "above_floor": 1,
+          "band_nonzero": 0,
+          "band_target_bit_only": 0,
+          "band_codes": {
+            "[]": 1
+          },
+          "d_o_le_5mm": 0,
+          "d_t_lt_d_o": 0,
+          "proj_chunk_row": {
+            "zed_left": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": -32.33,
+                "p10": -32.33,
+                "median": -32.33,
+                "p90": -32.33,
+                "max": -32.33
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 1,
+              "n_within_10mm": 0,
+              "code_at_pixel": {
+                "0": 1
+              }
+            }
+          },
+          "proj_sample_row": {
+            "zed_left": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": 8.63,
+                "p10": 8.63,
+                "median": 8.63,
+                "p90": 8.63,
+                "max": 8.63
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 1,
+              "code_at_pixel": {
+                "4": 1
+              }
+            }
+          },
+          "mem_sample_to_gt_mm_sample_row": {
+            "n": 1,
+            "min": 0.694,
+            "p10": 0.694,
+            "median": 0.694,
+            "p90": 0.694,
+            "max": 0.694
+          },
+          "mem_sample_to_gt_mm_chunk_row": {
+            "n": 1,
+            "min": 0.712,
+            "p10": 0.712,
+            "median": 0.712,
+            "p90": 0.712,
+            "max": 0.712
+          },
+          "pose_error_mm_sample_row": {
+            "n": 1,
+            "min": 0.001,
+            "p10": 0.001,
+            "median": 0.001,
+            "p90": 0.001,
+            "max": 0.001
+          },
+          "removed_by": {
+            "off": 1,
+            "F1": 1,
+            "F1GT": 1,
+            "ORVgt": 0,
+            "ORV_S": 0
+          }
+        },
+        "non_error_voxels": {
+          "n": 0,
+          "mem_nearest_code": {},
+          "d_t_mm": null,
+          "d_o_mm": null,
+          "removed_by": {
+            "off": 0,
+            "F1": 0,
+            "F1GT": 0
+          }
+        },
+        "other_variant_rows": {
+          "off": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1GT": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "ORVgt": {
+            "n": 15,
+            "by_category": {
+              "error_candidate": 15
+            },
+            "by_class": {
+              "neighbour_fruit": 15
+            }
+          },
+          "ORV_S": {
+            "n": 15,
+            "by_category": {
+              "error_candidate": 15
+            },
+            "by_class": {
+              "neighbour_fruit": 15
+            }
+          }
+        },
+        "kept_vs_ORV": {
+          "off": {
+            "n": 516,
+            "by_category": {
+              "preserved_neighbour_fruit": 343,
+              "error_candidate": 159,
+              "preserved_robot": 4,
+              "target_surface_kept": 10
+            },
+            "by_class": {
+              "neighbour_fruit": 434,
+              "table": 23,
+              "crate": 39,
+              "robot": 5,
+              "target": 15
+            }
+          },
+          "F1": {
+            "n": 516,
+            "by_category": {
+              "preserved_neighbour_fruit": 343,
+              "error_candidate": 159,
+              "preserved_robot": 4,
+              "target_surface_kept": 10
+            },
+            "by_class": {
+              "neighbour_fruit": 434,
+              "table": 23,
+              "crate": 39,
+              "robot": 5,
+              "target": 15
+            }
+          },
+          "F1GT": {
+            "n": 516,
+            "by_category": {
+              "preserved_neighbour_fruit": 343,
+              "error_candidate": 159,
+              "preserved_robot": 4,
+              "target_surface_kept": 10
+            },
+            "by_class": {
+              "neighbour_fruit": 434,
+              "table": 23,
+              "crate": 39,
+              "robot": 5,
+              "target": 15
+            }
+          }
+        }
+      },
+      "C1a_ep110_s1101:18": {
+        "hold_chunk": true,
+        "n_rows": {
+          "off": 53,
+          "F1": 53,
+          "F1GT": 40,
+          "ORV": 123,
+          "ORVgt": 123,
+          "ORV_S": 111
+        },
+        "ORV_record": {
+          "applied": true,
+          "identity_matches_gt": true,
+          "object": "pear",
+          "pipeline_code": 1,
+          "n_target_samples": 2330,
+          "n_other_samples": 93892,
+          "n_band_cells": 6791,
+          "z_floor_m": 0.8265513704202719
+        },
+        "pose_error_mm_chunk_row": 0.319,
+        "pose_error_mm_max_rows_folded": 0.319,
+        "n_planning_rows_folded": 18,
+        "hold_rows_ipc_up_to_seq": [
+          18
+        ],
+        "analysis_hold_seqs": [
+          18
+        ],
+        "rows_block": {
+          "esdf": 123
+        },
+        "rows_tier": {
+          "target_free": 123
+        },
+        "rows_link": {
+          "ee_right": 1,
+          "ee_finger_r1": 26,
+          "ee_finger_r2": 96
+        },
+        "rows_also_in_off": 40,
+        "rows_by_category": {
+          "preserved_neighbour_fruit": 53,
+          "preserved_table": 26,
+          "error_candidate": 18,
+          "target_surface_kept": 26
+        },
+        "rows_by_class": {
+          "neighbour_fruit": 54,
+          "table": 40,
+          "target": 29
+        },
+        "rows_category_sensitivity": {
+          "le2p5mm_real": 73,
+          "le5mm_real": 105,
+          "le10mm_real": 112
+        },
+        "rows_voxel_d_geom_mm": {
+          "n": 123,
+          "min": -5.386,
+          "p10": -2.753,
+          "median": 1.971,
+          "p90": 7.897,
+          "max": 12.897
+        },
+        "rows_centre_to_voxel_mm": {
+          "n": 123,
+          "min": 0.888,
+          "p10": 2.151,
+          "median": 3.833,
+          "p90": 8.503,
+          "max": 16.098
+        },
+        "rows_clearance_mm": {
+          "n": 123,
+          "min": -25.772,
+          "p10": -18.046,
+          "median": -4.996,
+          "p90": -1.059,
+          "max": -0.142
+        },
+        "rows_voxel_removed_by": {
+          "off": 90,
+          "F1": 90,
+          "F1GT": 90,
+          "ORVgt": 0,
+          "ORV_S": 24
+        },
+        "rows_sphere_table_top_clearance_mm": {
+          "n": 123,
+          "min": -8.151,
+          "p10": -2.122,
+          "median": 14.389,
+          "p90": 34.319,
+          "max": 40.144
+        },
+        "rows_sphere_gt_clearance_min_nonrobot_mm": {
+          "n": 123,
+          "min": -15.817,
+          "p10": -11.236,
+          "median": -4.307,
+          "p90": 3.54,
+          "max": 20.791
+        },
+        "rows_sphere_gt_clearance_by_voxel_class_mm": {
+          "neighbour_fruit": {
+            "n": 54,
+            "min": -13.824,
+            "p10": -11.41,
+            "median": -5.158,
+            "p90": -0.145,
+            "max": 6.91
+          },
+          "table": {
+            "n": 40,
+            "min": -8.151,
+            "p10": -4.695,
+            "median": 1.211,
+            "p90": 14.033,
+            "max": 21.142
+          },
+          "target": {
+            "n": 29,
+            "min": -15.817,
+            "p10": -12.915,
+            "median": -6.83,
+            "p90": 1.132,
+            "max": 6.056
+          }
+        },
+        "n_unique_voxels": 73,
+        "voxels_by_category": {
+          "preserved_neighbour_fruit": 30,
+          "error_candidate": 9,
+          "preserved_table": 22,
+          "target_surface_kept": 12
+        },
+        "voxels_by_class": {
+          "neighbour_fruit": 31,
+          "table": 28,
+          "target": 14
+        },
+        "voxels_table_top_mm": {
+          "n": 73,
+          "min": -2.103,
+          "p10": 2.897,
+          "median": 12.897,
+          "p90": 37.897,
+          "max": 42.897
+        },
+        "voxels_z_minus_floor_mm": {
+          "n": 73,
+          "min": -8.654,
+          "p10": -3.654,
+          "median": 6.346,
+          "p90": 31.346,
+          "max": 36.346
+        },
+        "voxels_d_mm_per_class_median": {
+          "target": 10.136,
+          "neighbour_fruit": 6.861,
+          "crate": 103.57,
+          "table": 12.897,
+          "robot": 20.489
+        },
+        "error_candidates": {
+          "n_voxels": 9,
+          "n_rows": 18,
+          "nearest_class": {
+            "neighbour_fruit": 1,
+            "table": 6,
+            "target": 2
+          },
+          "d_geom_mm": {
+            "n": 9,
+            "min": 6.821,
+            "p10": 6.853,
+            "median": 7.897,
+            "p90": 12.897,
+            "max": 12.897
+          },
+          "table_top_mm": {
+            "n": 9,
+            "min": 7.897,
+            "p10": 7.897,
+            "median": 12.897,
+            "p90": 12.897,
+            "max": 12.897
+          },
+          "robot_mm": {
+            "n": 9,
+            "min": 25.892,
+            "p10": 26.775,
+            "median": 30.369,
+            "p90": 36.411,
+            "max": 37.144
+          },
+          "z_minus_floor_mm": {
+            "n": 9,
+            "min": 1.346,
+            "p10": 1.346,
+            "median": 6.346,
+            "p90": 6.346,
+            "max": 6.346
+          },
+          "mem_nearest_code": {
+            "2": 9
+          },
+          "mem_nearest_mm": {
+            "n": 9,
+            "min": 7.17,
+            "p10": 7.36,
+            "median": 12.086,
+            "p90": 12.357,
+            "max": 12.451
+          },
+          "mem_age_chunks": {
+            "n": 9,
+            "min": 3.0,
+            "p10": 5.4,
+            "median": 7.0,
+            "p90": 8.6,
+            "max": 11.0
+          },
+          "mem_nearest_row_hold_ipc": 0,
+          "mem_nearest_row_in_analysis_hold": 0,
+          "d_t_mm": {
+            "n": 9,
+            "min": 12.948,
+            "p10": 12.978,
+            "median": 21.082,
+            "p90": 24.285,
+            "max": 25.549
+          },
+          "d_o_mm": {
+            "n": 9,
+            "min": 7.17,
+            "p10": 7.36,
+            "median": 12.086,
+            "p90": 12.357,
+            "max": 12.451
+          },
+          "in_candidates": 9,
+          "above_floor": 9,
+          "band_nonzero": 5,
+          "band_target_bit_only": 0,
+          "band_codes": {
+            "[4]": 5,
+            "[]": 4
+          },
+          "d_o_le_5mm": 0,
+          "d_t_lt_d_o": 0,
+          "proj_chunk_row": {
+            "zed_left": {
+              "n_in_image": 9,
+              "depth_minus_voxel_mm": {
+                "n": 9,
+                "min": -116.91,
+                "p10": -116.494,
+                "median": -73.17,
+                "p90": -56.026,
+                "max": -50.29
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 9,
+              "n_within_10mm": 0,
+              "code_at_pixel": {
+                "0": 9
+              }
+            }
+          },
+          "proj_sample_row": {
+            "zed_left": {
+              "n_in_image": 9,
+              "depth_minus_voxel_mm": {
+                "n": 9,
+                "min": -47.7,
+                "p10": -45.724,
+                "median": -30.6,
+                "p90": -26.046,
+                "max": -23.23
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 9,
+              "n_within_10mm": 0,
+              "code_at_pixel": {
+                "4": 5,
+                "1": 4
+              }
+            },
+            "wrist_cam_r": {
+              "n_in_image": 8,
+              "depth_minus_voxel_mm": {
+                "n": 8,
+                "min": -205.9,
+                "p10": -75.945,
+                "median": 5.43,
+                "p90": 9.79,
+                "max": 9.86
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 2,
+              "n_within_10mm": 6,
+              "code_at_pixel": {
+                "2": 6,
+                "4": 1,
+                "0": 1
+              }
+            }
+          },
+          "mem_sample_to_gt_mm_sample_row": {
+            "n": 9,
+            "min": 0.397,
+            "p10": 0.454,
+            "median": 0.686,
+            "p90": 1.027,
+            "max": 1.417
+          },
+          "mem_sample_to_gt_mm_chunk_row": {
+            "n": 9,
+            "min": 0.397,
+            "p10": 0.454,
+            "median": 0.686,
+            "p90": 1.027,
+            "max": 1.417
+          },
+          "pose_error_mm_sample_row": {
+            "n": 9,
+            "min": 0.001,
+            "p10": 0.001,
+            "median": 0.002,
+            "p90": 0.003,
+            "max": 0.003
+          },
+          "removed_by": {
+            "off": 9,
+            "F1": 9,
+            "F1GT": 9,
+            "ORVgt": 0,
+            "ORV_S": 9
+          }
+        },
+        "non_error_voxels": {
+          "n": 64,
+          "mem_nearest_code": {
+            "4": 36,
+            "2": 28
+          },
+          "d_t_mm": {
+            "n": 64,
+            "min": 6.533,
+            "p10": 8.74,
+            "median": 17.814,
+            "p90": 32.977,
+            "max": 43.411
+          },
+          "d_o_mm": {
+            "n": 64,
+            "min": 0.49,
+            "p10": 1.166,
+            "median": 2.564,
+            "p90": 5.96,
+            "max": 11.564
+          },
+          "removed_by": {
+            "off": 37,
+            "F1": 37,
+            "F1GT": 37
+          }
+        },
+        "other_variant_rows": {
+          "off": {
+            "n": 53,
+            "by_category": {
+              "preserved_table": 31,
+              "target_surface_kept": 18,
+              "preserved_neighbour_fruit": 1,
+              "preserved_robot": 3
+            },
+            "by_class": {
+              "table": 31,
+              "target": 18,
+              "neighbour_fruit": 1,
+              "robot": 3
+            }
+          },
+          "F1": {
+            "n": 53,
+            "by_category": {
+              "preserved_table": 31,
+              "target_surface_kept": 18,
+              "preserved_neighbour_fruit": 1,
+              "preserved_robot": 3
+            },
+            "by_class": {
+              "table": 31,
+              "target": 18,
+              "neighbour_fruit": 1,
+              "robot": 3
+            }
+          },
+          "F1GT": {
+            "n": 40,
+            "by_category": {
+              "preserved_table": 31,
+              "target_surface_kept": 8,
+              "preserved_neighbour_fruit": 1
+            },
+            "by_class": {
+              "table": 31,
+              "target": 8,
+              "neighbour_fruit": 1
+            }
+          },
+          "ORVgt": {
+            "n": 123,
+            "by_category": {
+              "preserved_neighbour_fruit": 53,
+              "preserved_table": 26,
+              "error_candidate": 18,
+              "target_surface_kept": 26
+            },
+            "by_class": {
+              "neighbour_fruit": 54,
+              "table": 40,
+              "target": 29
+            }
+          },
+          "ORV_S": {
+            "n": 111,
+            "by_category": {
+              "preserved_neighbour_fruit": 56,
+              "preserved_table": 33,
+              "target_surface_kept": 22
+            },
+            "by_class": {
+              "neighbour_fruit": 56,
+              "table": 33,
+              "target": 22
+            }
+          }
+        },
+        "kept_vs_ORV": {
+          "off": {
+            "n": 495,
+            "by_category": {
+              "error_candidate": 122,
+              "preserved_neighbour_fruit": 348,
+              "preserved_robot": 1,
+              "target_surface_kept": 24
+            },
+            "by_class": {
+              "neighbour_fruit": 390,
+              "table": 53,
+              "crate": 16,
+              "robot": 1,
+              "target": 35
+            }
+          },
+          "F1": {
+            "n": 495,
+            "by_category": {
+              "error_candidate": 122,
+              "preserved_neighbour_fruit": 348,
+              "preserved_robot": 1,
+              "target_surface_kept": 24
+            },
+            "by_class": {
+              "neighbour_fruit": 390,
+              "table": 53,
+              "crate": 16,
+              "robot": 1,
+              "target": 35
+            }
+          },
+          "F1GT": {
+            "n": 495,
+            "by_category": {
+              "error_candidate": 122,
+              "preserved_neighbour_fruit": 348,
+              "preserved_robot": 1,
+              "target_surface_kept": 24
+            },
+            "by_class": {
+              "neighbour_fruit": 390,
+              "table": 53,
+              "crate": 16,
+              "robot": 1,
+              "target": 35
+            }
+          }
+        }
+      },
+      "C1a_ep110_s1102:16": {
+        "hold_chunk": false,
+        "n_rows": {
+          "off": 0,
+          "F1": 0,
+          "F1GT": 0,
+          "ORV": 20,
+          "ORVgt": 20,
+          "ORV_S": 20
+        },
+        "ORV_record": {
+          "applied": true,
+          "identity_matches_gt": true,
+          "object": "pear",
+          "pipeline_code": 1,
+          "n_target_samples": 1947,
+          "n_other_samples": 92911,
+          "n_band_cells": 6402,
+          "z_floor_m": 0.8264019665285206
+        },
+        "pose_error_mm_chunk_row": 0.001,
+        "pose_error_mm_max_rows_folded": 0.006,
+        "n_planning_rows_folded": 16,
+        "hold_rows_ipc_up_to_seq": [],
+        "analysis_hold_seqs": [
+          19
+        ],
+        "rows_block": {
+          "esdf": 20
+        },
+        "rows_tier": {
+          "target_free": 20
+        },
+        "rows_link": {
+          "ee_finger_r2": 20
+        },
+        "rows_also_in_off": 0,
+        "rows_by_category": {
+          "error_candidate": 20
+        },
+        "rows_by_class": {
+          "neighbour_fruit": 20
+        },
+        "rows_category_sensitivity": {
+          "le2p5mm_real": 0,
+          "le5mm_real": 0,
+          "le10mm_real": 20
+        },
+        "rows_voxel_d_geom_mm": {
+          "n": 20,
+          "min": 6.799,
+          "p10": 7.019,
+          "median": 7.846,
+          "p90": 8.301,
+          "max": 8.301
+        },
+        "rows_centre_to_voxel_mm": {
+          "n": 20,
+          "min": 9.884,
+          "p10": 10.77,
+          "median": 13.454,
+          "p90": 16.257,
+          "max": 16.857
+        },
+        "rows_clearance_mm": {
+          "n": 20,
+          "min": -6.448,
+          "p10": -6.04,
+          "median": -2.971,
+          "p90": -0.644,
+          "max": -0.106
+        },
+        "rows_voxel_removed_by": {
+          "off": 20,
+          "F1": 20,
+          "F1GT": 20,
+          "ORVgt": 0,
+          "ORV_S": 0
+        },
+        "rows_sphere_table_top_clearance_mm": {
+          "n": 20,
+          "min": 37.347,
+          "p10": 39.212,
+          "median": 46.936,
+          "p90": 53.033,
+          "max": 53.664
+        },
+        "rows_sphere_gt_clearance_min_nonrobot_mm": {
+          "n": 20,
+          "min": 9.872,
+          "p10": 10.77,
+          "median": 13.793,
+          "p90": 16.638,
+          "max": 16.998
+        },
+        "rows_sphere_gt_clearance_by_voxel_class_mm": {
+          "neighbour_fruit": {
+            "n": 20,
+            "min": 9.872,
+            "p10": 10.77,
+            "median": 13.793,
+            "p90": 16.638,
+            "max": 16.998
+          }
+        },
+        "n_unique_voxels": 5,
+        "voxels_by_category": {
+          "error_candidate": 5
+        },
+        "voxels_by_class": {
+          "neighbour_fruit": 5
+        },
+        "voxels_table_top_mm": {
+          "n": 5,
+          "min": 37.237,
+          "p10": 39.237,
+          "median": 42.237,
+          "p90": 47.237,
+          "max": 47.237
+        },
+        "voxels_z_minus_floor_mm": {
+          "n": 5,
+          "min": 30.835,
+          "p10": 32.835,
+          "median": 35.835,
+          "p90": 40.835,
+          "max": 40.835
+        },
+        "voxels_d_mm_per_class_median": {
+          "target": 32.072,
+          "neighbour_fruit": 7.548,
+          "crate": 77.345,
+          "table": 42.237,
+          "robot": 30.111
+        },
+        "error_candidates": {
+          "n_voxels": 5,
+          "n_rows": 20,
+          "nearest_class": {
+            "neighbour_fruit": 5
+          },
+          "d_geom_mm": {
+            "n": 5,
+            "min": 6.799,
+            "p10": 6.897,
+            "median": 7.548,
+            "p90": 8.119,
+            "max": 8.301
+          },
+          "table_top_mm": {
+            "n": 5,
+            "min": 37.237,
+            "p10": 39.237,
+            "median": 42.237,
+            "p90": 47.237,
+            "max": 47.237
+          },
+          "robot_mm": {
+            "n": 5,
+            "min": 27.641,
+            "p10": 28.399,
+            "median": 30.111,
+            "p90": 32.115,
+            "max": 32.935
+          },
+          "z_minus_floor_mm": {
+            "n": 5,
+            "min": 30.835,
+            "p10": 32.835,
+            "median": 35.835,
+            "p90": 40.835,
+            "max": 40.835
+          },
+          "mem_nearest_code": {
+            "4": 5
+          },
+          "mem_nearest_mm": {
+            "n": 5,
+            "min": 6.47,
+            "p10": 6.587,
+            "median": 7.263,
+            "p90": 7.879,
+            "max": 8.053
+          },
+          "mem_age_chunks": {
+            "n": 5,
+            "min": 0.0,
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 7.2,
+            "max": 8.0
+          },
+          "mem_nearest_row_hold_ipc": 0,
+          "mem_nearest_row_in_analysis_hold": 0,
+          "d_t_mm": {
+            "n": 5,
+            "min": 26.405,
+            "p10": 28.367,
+            "median": 31.802,
+            "p90": 38.993,
+            "max": 40.951
+          },
+          "d_o_mm": {
+            "n": 5,
+            "min": 6.47,
+            "p10": 6.587,
+            "median": 7.263,
+            "p90": 7.879,
+            "max": 8.053
+          },
+          "in_candidates": 1,
+          "above_floor": 5,
+          "band_nonzero": 0,
+          "band_target_bit_only": 0,
+          "band_codes": {
+            "[]": 5
+          },
+          "d_o_le_5mm": 0,
+          "d_t_lt_d_o": 0,
+          "proj_chunk_row": {
+            "zed_left": {
+              "n_in_image": 5,
+              "depth_minus_voxel_mm": {
+                "n": 5,
+                "min": 6.09,
+                "p10": 6.762,
+                "median": 7.95,
+                "p90": 10.036,
+                "max": 11.18
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 1,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 4,
+              "code_at_pixel": {
+                "4": 5
+              }
+            }
+          },
+          "proj_sample_row": {
+            "zed_left": {
+              "n_in_image": 5,
+              "depth_minus_voxel_mm": {
+                "n": 5,
+                "min": 6.09,
+                "p10": 6.762,
+                "median": 7.95,
+                "p90": 10.568,
+                "max": 11.4
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 1,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 4,
+              "code_at_pixel": {
+                "4": 5
+              }
+            },
+            "wrist_cam_r": {
+              "n_in_image": 2,
+              "depth_minus_voxel_mm": {
+                "n": 2,
+                "min": -167.26,
+                "p10": -149.689,
+                "median": -79.405,
+                "p90": -9.121,
+                "max": 8.45
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 1,
+              "n_within_10mm": 1,
+              "code_at_pixel": {
+                "0": 1,
+                "4": 1
+              }
+            }
+          },
+          "mem_sample_to_gt_mm_sample_row": {
+            "n": 5,
+            "min": 0.311,
+            "p10": 0.393,
+            "median": 0.853,
+            "p90": 1.329,
+            "max": 1.477
+          },
+          "mem_sample_to_gt_mm_chunk_row": {
+            "n": 5,
+            "min": 0.311,
+            "p10": 0.384,
+            "median": 0.853,
+            "p90": 1.318,
+            "max": 1.458
+          },
+          "pose_error_mm_sample_row": {
+            "n": 5,
+            "min": 0.001,
+            "p10": 0.001,
+            "median": 0.001,
+            "p90": 0.003,
+            "max": 0.003
+          },
+          "removed_by": {
+            "off": 5,
+            "F1": 5,
+            "F1GT": 5,
+            "ORVgt": 0,
+            "ORV_S": 0
+          }
+        },
+        "non_error_voxels": {
+          "n": 0,
+          "mem_nearest_code": {},
+          "d_t_mm": null,
+          "d_o_mm": null,
+          "removed_by": {
+            "off": 0,
+            "F1": 0,
+            "F1GT": 0
+          }
+        },
+        "other_variant_rows": {
+          "off": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1GT": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "ORVgt": {
+            "n": 20,
+            "by_category": {
+              "error_candidate": 20
+            },
+            "by_class": {
+              "neighbour_fruit": 20
+            }
+          },
+          "ORV_S": {
+            "n": 20,
+            "by_category": {
+              "error_candidate": 20
+            },
+            "by_class": {
+              "neighbour_fruit": 20
+            }
+          }
+        },
+        "kept_vs_ORV": {
+          "off": {
+            "n": 1316,
+            "by_category": {
+              "preserved_neighbour_fruit": 427,
+              "error_candidate": 870,
+              "target_surface_kept": 19
+            },
+            "by_class": {
+              "neighbour_fruit": 534,
+              "table": 699,
+              "crate": 53,
+              "target": 30
+            }
+          },
+          "F1": {
+            "n": 1316,
+            "by_category": {
+              "preserved_neighbour_fruit": 427,
+              "error_candidate": 870,
+              "target_surface_kept": 19
+            },
+            "by_class": {
+              "neighbour_fruit": 534,
+              "table": 699,
+              "crate": 53,
+              "target": 30
+            }
+          },
+          "F1GT": {
+            "n": 1316,
+            "by_category": {
+              "preserved_neighbour_fruit": 427,
+              "error_candidate": 870,
+              "target_surface_kept": 19
+            },
+            "by_class": {
+              "neighbour_fruit": 534,
+              "table": 699,
+              "crate": 53,
+              "target": 30
+            }
+          }
+        }
+      },
+      "C1a_ep110_s1102:17": {
+        "hold_chunk": false,
+        "n_rows": {
+          "off": 0,
+          "F1": 0,
+          "F1GT": 0,
+          "ORV": 30,
+          "ORVgt": 30,
+          "ORV_S": 30
+        },
+        "ORV_record": {
+          "applied": true,
+          "identity_matches_gt": true,
+          "object": "pear",
+          "pipeline_code": 1,
+          "n_target_samples": 1955,
+          "n_other_samples": 94260,
+          "n_band_cells": 6444,
+          "z_floor_m": 0.8265202889256558
+        },
+        "pose_error_mm_chunk_row": 0.001,
+        "pose_error_mm_max_rows_folded": 0.006,
+        "n_planning_rows_folded": 17,
+        "hold_rows_ipc_up_to_seq": [],
+        "analysis_hold_seqs": [
+          19
+        ],
+        "rows_block": {
+          "esdf": 30
+        },
+        "rows_tier": {
+          "target_free": 30
+        },
+        "rows_link": {
+          "ee_finger_r2": 30
+        },
+        "rows_also_in_off": 0,
+        "rows_by_category": {
+          "error_candidate": 30
+        },
+        "rows_by_class": {
+          "neighbour_fruit": 30
+        },
+        "rows_category_sensitivity": {
+          "le2p5mm_real": 0,
+          "le5mm_real": 0,
+          "le10mm_real": 30
+        },
+        "rows_voxel_d_geom_mm": {
+          "n": 30,
+          "min": 5.404,
+          "p10": 5.866,
+          "median": 6.254,
+          "p90": 6.254,
+          "max": 6.254
+        },
+        "rows_centre_to_voxel_mm": {
+          "n": 30,
+          "min": 13.192,
+          "p10": 13.71,
+          "median": 14.664,
+          "p90": 15.599,
+          "max": 16.157
+        },
+        "rows_clearance_mm": {
+          "n": 30,
+          "min": -3.606,
+          "p10": -3.294,
+          "median": -2.526,
+          "p90": -0.908,
+          "max": -0.112
+        },
+        "rows_voxel_removed_by": {
+          "off": 30,
+          "F1": 30,
+          "F1GT": 30,
+          "ORVgt": 0,
+          "ORV_S": 0
+        },
+        "rows_sphere_table_top_clearance_mm": {
+          "n": 30,
+          "min": 36.778,
+          "p10": 37.736,
+          "median": 43.002,
+          "p90": 48.136,
+          "max": 49.333
+        },
+        "rows_sphere_gt_clearance_min_nonrobot_mm": {
+          "n": 30,
+          "min": 12.258,
+          "p10": 12.429,
+          "median": 13.146,
+          "p90": 14.464,
+          "max": 15.044
+        },
+        "rows_sphere_gt_clearance_by_voxel_class_mm": {
+          "neighbour_fruit": {
+            "n": 30,
+            "min": 12.258,
+            "p10": 12.429,
+            "median": 13.146,
+            "p90": 14.464,
+            "max": 15.044
+          }
+        },
+        "n_unique_voxels": 3,
+        "voxels_by_category": {
+          "error_candidate": 3
+        },
+        "voxels_by_class": {
+          "neighbour_fruit": 3
+        },
+        "voxels_table_top_mm": {
+          "n": 3,
+          "min": 38.642,
+          "p10": 38.642,
+          "median": 38.642,
+          "p90": 42.642,
+          "max": 43.642
+        },
+        "voxels_z_minus_floor_mm": {
+          "n": 3,
+          "min": 32.122,
+          "p10": 32.122,
+          "median": 32.122,
+          "p90": 36.122,
+          "max": 37.122
+        },
+        "voxels_d_mm_per_class_median": {
+          "target": 30.975,
+          "neighbour_fruit": 5.917,
+          "crate": 78.274,
+          "table": 38.642,
+          "robot": 7.934
+        },
+        "error_candidates": {
+          "n_voxels": 3,
+          "n_rows": 30,
+          "nearest_class": {
+            "neighbour_fruit": 3
+          },
+          "d_geom_mm": {
+            "n": 3,
+            "min": 5.404,
+            "p10": 5.507,
+            "median": 5.917,
+            "p90": 6.187,
+            "max": 6.254
+          },
+          "table_top_mm": {
+            "n": 3,
+            "min": 38.642,
+            "p10": 38.642,
+            "median": 38.642,
+            "p90": 42.642,
+            "max": 43.642
+          },
+          "robot_mm": {
+            "n": 3,
+            "min": 6.928,
+            "p10": 7.129,
+            "median": 7.934,
+            "p90": 8.634,
+            "max": 8.809
+          },
+          "z_minus_floor_mm": {
+            "n": 3,
+            "min": 32.122,
+            "p10": 32.122,
+            "median": 32.122,
+            "p90": 36.122,
+            "max": 37.122
+          },
+          "mem_nearest_code": {
+            "4": 3
+          },
+          "mem_nearest_mm": {
+            "n": 3,
+            "min": 5.327,
+            "p10": 5.345,
+            "median": 5.419,
+            "p90": 6.0,
+            "max": 6.145
+          },
+          "mem_age_chunks": {
+            "n": 3,
+            "min": 1.0,
+            "p10": 1.0,
+            "median": 1.0,
+            "p90": 1.0,
+            "max": 1.0
+          },
+          "mem_nearest_row_hold_ipc": 0,
+          "mem_nearest_row_in_analysis_hold": 0,
+          "d_t_mm": {
+            "n": 3,
+            "min": 25.91,
+            "p10": 26.883,
+            "median": 30.774,
+            "p90": 34.394,
+            "max": 35.299
+          },
+          "d_o_mm": {
+            "n": 3,
+            "min": 5.327,
+            "p10": 5.345,
+            "median": 5.419,
+            "p90": 6.0,
+            "max": 6.145
+          },
+          "in_candidates": 1,
+          "above_floor": 3,
+          "band_nonzero": 0,
+          "band_target_bit_only": 0,
+          "band_codes": {
+            "[]": 3
+          },
+          "d_o_le_5mm": 0,
+          "d_t_lt_d_o": 0,
+          "proj_chunk_row": {
+            "zed_left": {
+              "n_in_image": 3,
+              "depth_minus_voxel_mm": {
+                "n": 3,
+                "min": -38.38,
+                "p10": -37.628,
+                "median": -34.62,
+                "p90": -28.948,
+                "max": -27.53
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 3,
+              "n_within_10mm": 0,
+              "code_at_pixel": {
+                "0": 3
+              }
+            }
+          },
+          "proj_sample_row": {
+            "zed_left": {
+              "n_in_image": 3,
+              "depth_minus_voxel_mm": {
+                "n": 3,
+                "min": 5.38,
+                "p10": 5.398,
+                "median": 5.47,
+                "p90": 7.19,
+                "max": 7.62
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 3,
+              "code_at_pixel": {
+                "4": 3
+              }
+            }
+          },
+          "mem_sample_to_gt_mm_sample_row": {
+            "n": 3,
+            "min": 0.311,
+            "p10": 0.315,
+            "median": 0.333,
+            "p90": 0.727,
+            "max": 0.825
+          },
+          "mem_sample_to_gt_mm_chunk_row": {
+            "n": 3,
+            "min": 0.308,
+            "p10": 0.311,
+            "median": 0.322,
+            "p90": 0.731,
+            "max": 0.833
+          },
+          "pose_error_mm_sample_row": {
+            "n": 3,
+            "min": 0.001,
+            "p10": 0.001,
+            "median": 0.001,
+            "p90": 0.001,
+            "max": 0.001
+          },
+          "removed_by": {
+            "off": 3,
+            "F1": 3,
+            "F1GT": 3,
+            "ORVgt": 0,
+            "ORV_S": 0
+          }
+        },
+        "non_error_voxels": {
+          "n": 0,
+          "mem_nearest_code": {},
+          "d_t_mm": null,
+          "d_o_mm": null,
+          "removed_by": {
+            "off": 0,
+            "F1": 0,
+            "F1GT": 0
+          }
+        },
+        "other_variant_rows": {
+          "off": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1GT": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "ORVgt": {
+            "n": 30,
+            "by_category": {
+              "error_candidate": 30
+            },
+            "by_class": {
+              "neighbour_fruit": 30
+            }
+          },
+          "ORV_S": {
+            "n": 30,
+            "by_category": {
+              "error_candidate": 30
+            },
+            "by_class": {
+              "neighbour_fruit": 30
+            }
+          }
+        },
+        "kept_vs_ORV": {
+          "off": {
+            "n": 536,
+            "by_category": {
+              "preserved_neighbour_fruit": 375,
+              "error_candidate": 145,
+              "target_surface_kept": 16
+            },
+            "by_class": {
+              "neighbour_fruit": 436,
+              "table": 38,
+              "crate": 39,
+              "target": 23
+            }
+          },
+          "F1": {
+            "n": 536,
+            "by_category": {
+              "preserved_neighbour_fruit": 375,
+              "error_candidate": 145,
+              "target_surface_kept": 16
+            },
+            "by_class": {
+              "neighbour_fruit": 436,
+              "table": 38,
+              "crate": 39,
+              "target": 23
+            }
+          },
+          "F1GT": {
+            "n": 536,
+            "by_category": {
+              "preserved_neighbour_fruit": 375,
+              "error_candidate": 145,
+              "target_surface_kept": 16
+            },
+            "by_class": {
+              "neighbour_fruit": 436,
+              "table": 38,
+              "crate": 39,
+              "target": 23
+            }
+          }
+        }
+      },
+      "C1a_ep110_s1102:18": {
+        "hold_chunk": false,
+        "n_rows": {
+          "off": 0,
+          "F1": 0,
+          "F1GT": 0,
+          "ORV": 50,
+          "ORVgt": 50,
+          "ORV_S": 50
+        },
+        "ORV_record": {
+          "applied": true,
+          "identity_matches_gt": true,
+          "object": "pear",
+          "pipeline_code": 1,
+          "n_target_samples": 1967,
+          "n_other_samples": 94455,
+          "n_band_cells": 6455,
+          "z_floor_m": 0.8265288618655572
+        },
+        "pose_error_mm_chunk_row": 0.003,
+        "pose_error_mm_max_rows_folded": 0.006,
+        "n_planning_rows_folded": 18,
+        "hold_rows_ipc_up_to_seq": [],
+        "analysis_hold_seqs": [
+          19
+        ],
+        "rows_block": {
+          "esdf": 50
+        },
+        "rows_tier": {
+          "target_free": 50
+        },
+        "rows_link": {
+          "ee_finger_r2": 50
+        },
+        "rows_also_in_off": 0,
+        "rows_by_category": {
+          "error_candidate": 45,
+          "preserved_robot": 5
+        },
+        "rows_by_class": {
+          "robot": 37,
+          "neighbour_fruit": 13
+        },
+        "rows_category_sensitivity": {
+          "le2p5mm_real": 0,
+          "le5mm_real": 5,
+          "le10mm_real": 50
+        },
+        "rows_voxel_d_geom_mm": {
+          "n": 50,
+          "min": 3.634,
+          "p10": 5.22,
+          "median": 6.244,
+          "p90": 7.069,
+          "max": 7.069
+        },
+        "rows_centre_to_voxel_mm": {
+          "n": 50,
+          "min": 10.206,
+          "p10": 11.146,
+          "median": 12.769,
+          "p90": 14.776,
+          "max": 15.716
+        },
+        "rows_clearance_mm": {
+          "n": 50,
+          "min": -6.383,
+          "p10": -5.821,
+          "median": -4.224,
+          "p90": -1.512,
+          "max": -0.22
+        },
+        "rows_voxel_removed_by": {
+          "off": 50,
+          "F1": 50,
+          "F1GT": 50,
+          "ORVgt": 0,
+          "ORV_S": 0
+        },
+        "rows_sphere_table_top_clearance_mm": {
+          "n": 50,
+          "min": 34.003,
+          "p10": 35.882,
+          "median": 44.629,
+          "p90": 51.396,
+          "max": 53.869
+        },
+        "rows_sphere_gt_clearance_min_nonrobot_mm": {
+          "n": 50,
+          "min": 9.847,
+          "p10": 10.5,
+          "median": 12.096,
+          "p90": 15.052,
+          "max": 16.145
+        },
+        "rows_sphere_gt_clearance_by_voxel_class_mm": {
+          "neighbour_fruit": {
+            "n": 13,
+            "min": 9.847,
+            "p10": 10.07,
+            "median": 11.035,
+            "p90": 12.035,
+            "max": 12.249
+          }
+        },
+        "n_unique_voxels": 4,
+        "voxels_by_category": {
+          "error_candidate": 3,
+          "preserved_robot": 1
+        },
+        "voxels_by_class": {
+          "robot": 3,
+          "neighbour_fruit": 1
+        },
+        "voxels_table_top_mm": {
+          "n": 4,
+          "min": 34.989,
+          "p10": 36.489,
+          "median": 39.989,
+          "p90": 43.489,
+          "max": 44.989
+        },
+        "voxels_z_minus_floor_mm": {
+          "n": 4,
+          "min": 28.46,
+          "p10": 29.96,
+          "median": 33.46,
+          "p90": 36.96,
+          "max": 38.46
+        },
+        "voxels_d_mm_per_class_median": {
+          "target": 31.789,
+          "neighbour_fruit": 6.821,
+          "crate": 77.395,
+          "table": 39.989,
+          "robot": 5.82
+        },
+        "error_candidates": {
+          "n_voxels": 3,
+          "n_rows": 45,
+          "nearest_class": {
+            "robot": 2,
+            "neighbour_fruit": 1
+          },
+          "d_geom_mm": {
+            "n": 3,
+            "min": 5.396,
+            "p10": 5.566,
+            "median": 6.244,
+            "p90": 6.904,
+            "max": 7.069
+          },
+          "table_top_mm": {
+            "n": 3,
+            "min": 39.989,
+            "p10": 39.989,
+            "median": 39.989,
+            "p90": 43.989,
+            "max": 44.989
+          },
+          "robot_mm": {
+            "n": 3,
+            "min": 5.396,
+            "p10": 5.566,
+            "median": 6.244,
+            "p90": 7.77,
+            "max": 8.152
+          },
+          "z_minus_floor_mm": {
+            "n": 3,
+            "min": 33.46,
+            "p10": 33.46,
+            "median": 33.46,
+            "p90": 37.46,
+            "max": 38.46
+          },
+          "mem_nearest_code": {
+            "4": 3
+          },
+          "mem_nearest_mm": {
+            "n": 3,
+            "min": 6.149,
+            "p10": 6.221,
+            "median": 6.511,
+            "p90": 6.817,
+            "max": 6.894
+          },
+          "mem_age_chunks": {
+            "n": 3,
+            "min": 2.0,
+            "p10": 2.0,
+            "median": 2.0,
+            "p90": 8.4,
+            "max": 10.0
+          },
+          "mem_nearest_row_hold_ipc": 0,
+          "mem_nearest_row_in_analysis_hold": 0,
+          "d_t_mm": {
+            "n": 3,
+            "min": 26.4,
+            "p10": 27.373,
+            "median": 31.263,
+            "p90": 34.904,
+            "max": 35.814
+          },
+          "d_o_mm": {
+            "n": 3,
+            "min": 6.149,
+            "p10": 6.221,
+            "median": 6.511,
+            "p90": 6.817,
+            "max": 6.894
+          },
+          "in_candidates": 1,
+          "above_floor": 3,
+          "band_nonzero": 0,
+          "band_target_bit_only": 0,
+          "band_codes": {
+            "[]": 3
+          },
+          "d_o_le_5mm": 0,
+          "d_t_lt_d_o": 0,
+          "proj_chunk_row": {
+            "zed_left": {
+              "n_in_image": 3,
+              "depth_minus_voxel_mm": {
+                "n": 3,
+                "min": -37.31,
+                "p10": -36.158,
+                "median": -31.55,
+                "p90": -28.278,
+                "max": -27.46
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 3,
+              "n_within_10mm": 0,
+              "code_at_pixel": {
+                "0": 3
+              }
+            }
+          },
+          "proj_sample_row": {
+            "zed_left": {
+              "n_in_image": 3,
+              "depth_minus_voxel_mm": {
+                "n": 3,
+                "min": 6.52,
+                "p10": 6.538,
+                "median": 6.61,
+                "p90": 7.538,
+                "max": 7.77
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 3,
+              "code_at_pixel": {
+                "4": 3
+              }
+            },
+            "wrist_cam_r": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": 7.42,
+                "p10": 7.42,
+                "median": 7.42,
+                "p90": 7.42,
+                "max": 7.42
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 1,
+              "code_at_pixel": {
+                "4": 1
+              }
+            }
+          },
+          "mem_sample_to_gt_mm_sample_row": {
+            "n": 3,
+            "min": 0.311,
+            "p10": 0.352,
+            "median": 0.516,
+            "p90": 0.763,
+            "max": 0.825
+          },
+          "mem_sample_to_gt_mm_chunk_row": {
+            "n": 3,
+            "min": 0.277,
+            "p10": 0.326,
+            "median": 0.521,
+            "p90": 0.806,
+            "max": 0.877
+          },
+          "pose_error_mm_sample_row": {
+            "n": 3,
+            "min": 0.001,
+            "p10": 0.001,
+            "median": 0.001,
+            "p90": 0.003,
+            "max": 0.003
+          },
+          "removed_by": {
+            "off": 3,
+            "F1": 3,
+            "F1GT": 3,
+            "ORVgt": 0,
+            "ORV_S": 0
+          }
+        },
+        "non_error_voxels": {
+          "n": 1,
+          "mem_nearest_code": {
+            "4": 1
+          },
+          "d_t_mm": {
+            "n": 1,
+            "min": 31.972,
+            "p10": 31.972,
+            "median": 31.972,
+            "p90": 31.972,
+            "max": 31.972
+          },
+          "d_o_mm": {
+            "n": 1,
+            "min": 6.413,
+            "p10": 6.413,
+            "median": 6.413,
+            "p90": 6.413,
+            "max": 6.413
+          },
+          "removed_by": {
+            "off": 1,
+            "F1": 1,
+            "F1GT": 1
+          }
+        },
+        "other_variant_rows": {
+          "off": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1GT": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "ORVgt": {
+            "n": 50,
+            "by_category": {
+              "error_candidate": 45,
+              "preserved_robot": 5
+            },
+            "by_class": {
+              "robot": 37,
+              "neighbour_fruit": 13
+            }
+          },
+          "ORV_S": {
+            "n": 50,
+            "by_category": {
+              "error_candidate": 45,
+              "preserved_robot": 5
+            },
+            "by_class": {
+              "robot": 37,
+              "neighbour_fruit": 13
+            }
+          }
+        },
+        "kept_vs_ORV": {
+          "off": {
+            "n": 523,
+            "by_category": {
+              "error_candidate": 143,
+              "preserved_neighbour_fruit": 360,
+              "preserved_robot": 7,
+              "target_surface_kept": 13
+            },
+            "by_class": {
+              "neighbour_fruit": 430,
+              "table": 28,
+              "robot": 12,
+              "crate": 34,
+              "target": 19
+            }
+          },
+          "F1": {
+            "n": 523,
+            "by_category": {
+              "error_candidate": 143,
+              "preserved_neighbour_fruit": 360,
+              "preserved_robot": 7,
+              "target_surface_kept": 13
+            },
+            "by_class": {
+              "neighbour_fruit": 430,
+              "table": 28,
+              "robot": 12,
+              "crate": 34,
+              "target": 19
+            }
+          },
+          "F1GT": {
+            "n": 523,
+            "by_category": {
+              "error_candidate": 143,
+              "preserved_neighbour_fruit": 360,
+              "preserved_robot": 7,
+              "target_surface_kept": 13
+            },
+            "by_class": {
+              "neighbour_fruit": 430,
+              "table": 28,
+              "robot": 12,
+              "crate": 34,
+              "target": 19
+            }
+          }
+        }
+      },
+      "C1a_ep11_s111:12": {
+        "hold_chunk": false,
+        "n_rows": {
+          "off": 0,
+          "F1": 0,
+          "F1GT": 0,
+          "ORV": 12,
+          "ORVgt": 12,
+          "ORV_S": 0
+        },
+        "ORV_record": {
+          "applied": true,
+          "identity_matches_gt": true,
+          "object": "pear",
+          "pipeline_code": 1,
+          "n_target_samples": 2102,
+          "n_other_samples": 76312,
+          "n_band_cells": 5790,
+          "z_floor_m": 0.8262853814630815
+        },
+        "pose_error_mm_chunk_row": 0.007,
+        "pose_error_mm_max_rows_folded": 0.016,
+        "n_planning_rows_folded": 12,
+        "hold_rows_ipc_up_to_seq": [],
+        "analysis_hold_seqs": [
+          23
+        ],
+        "rows_block": {
+          "esdf": 12
+        },
+        "rows_tier": {
+          "target_free": 12
+        },
+        "rows_link": {
+          "ee_finger_r2": 12
+        },
+        "rows_also_in_off": 0,
+        "rows_by_category": {
+          "error_candidate": 8,
+          "preserved_robot": 4
+        },
+        "rows_by_class": {
+          "robot": 12
+        },
+        "rows_category_sensitivity": {
+          "le2p5mm_real": 0,
+          "le5mm_real": 4,
+          "le10mm_real": 12
+        },
+        "rows_voxel_d_geom_mm": {
+          "n": 12,
+          "min": 3.244,
+          "p10": 3.244,
+          "median": 5.943,
+          "p90": 5.943,
+          "max": 5.943
+        },
+        "rows_centre_to_voxel_mm": {
+          "n": 12,
+          "min": 3.354,
+          "p10": 3.612,
+          "median": 5.447,
+          "p90": 6.363,
+          "max": 6.776
+        },
+        "rows_clearance_mm": {
+          "n": 12,
+          "min": -2.398,
+          "p10": -1.655,
+          "median": -0.783,
+          "p90": -0.331,
+          "max": -0.177
+        },
+        "rows_voxel_removed_by": {
+          "off": 12,
+          "F1": 12,
+          "F1GT": 12,
+          "ORVgt": 0,
+          "ORV_S": 12
+        },
+        "rows_sphere_table_top_clearance_mm": {
+          "n": 12,
+          "min": 4.335,
+          "p10": 4.57,
+          "median": 5.772,
+          "p90": 6.333,
+          "max": 6.813
+        },
+        "rows_sphere_gt_clearance_min_nonrobot_mm": {
+          "n": 12,
+          "min": 4.335,
+          "p10": 4.57,
+          "median": 5.772,
+          "p90": 6.333,
+          "max": 6.813
+        },
+        "rows_sphere_gt_clearance_by_voxel_class_mm": {},
+        "n_unique_voxels": 2,
+        "voxels_by_category": {
+          "error_candidate": 1,
+          "preserved_robot": 1
+        },
+        "voxels_by_class": {
+          "robot": 2
+        },
+        "voxels_table_top_mm": {
+          "n": 2,
+          "min": 7.259,
+          "p10": 7.259,
+          "median": 7.259,
+          "p90": 7.259,
+          "max": 7.259
+        },
+        "voxels_z_minus_floor_mm": {
+          "n": 2,
+          "min": 0.973,
+          "p10": 0.973,
+          "median": 0.973,
+          "p90": 0.973,
+          "max": 0.973
+        },
+        "voxels_d_mm_per_class_median": {
+          "target": 15.555,
+          "neighbour_fruit": 73.866,
+          "crate": 86.133,
+          "table": 7.259,
+          "robot": 4.593
+        },
+        "error_candidates": {
+          "n_voxels": 1,
+          "n_rows": 8,
+          "nearest_class": {
+            "robot": 1
+          },
+          "d_geom_mm": {
+            "n": 1,
+            "min": 5.943,
+            "p10": 5.943,
+            "median": 5.943,
+            "p90": 5.943,
+            "max": 5.943
+          },
+          "table_top_mm": {
+            "n": 1,
+            "min": 7.259,
+            "p10": 7.259,
+            "median": 7.259,
+            "p90": 7.259,
+            "max": 7.259
+          },
+          "robot_mm": {
+            "n": 1,
+            "min": 5.943,
+            "p10": 5.943,
+            "median": 5.943,
+            "p90": 5.943,
+            "max": 5.943
+          },
+          "z_minus_floor_mm": {
+            "n": 1,
+            "min": 0.973,
+            "p10": 0.973,
+            "median": 0.973,
+            "p90": 0.973,
+            "max": 0.973
+          },
+          "mem_nearest_code": {
+            "2": 1
+          },
+          "mem_nearest_mm": {
+            "n": 1,
+            "min": 6.434,
+            "p10": 6.434,
+            "median": 6.434,
+            "p90": 6.434,
+            "max": 6.434
+          },
+          "mem_age_chunks": {
+            "n": 1,
+            "min": 0.0,
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0,
+            "max": 0.0
+          },
+          "mem_nearest_row_hold_ipc": 0,
+          "mem_nearest_row_in_analysis_hold": 0,
+          "d_t_mm": {
+            "n": 1,
+            "min": 16.065,
+            "p10": 16.065,
+            "median": 16.065,
+            "p90": 16.065,
+            "max": 16.065
+          },
+          "d_o_mm": {
+            "n": 1,
+            "min": 6.434,
+            "p10": 6.434,
+            "median": 6.434,
+            "p90": 6.434,
+            "max": 6.434
+          },
+          "in_candidates": 1,
+          "above_floor": 1,
+          "band_nonzero": 0,
+          "band_target_bit_only": 0,
+          "band_codes": {
+            "[]": 1
+          },
+          "d_o_le_5mm": 0,
+          "d_t_lt_d_o": 0,
+          "proj_chunk_row": {
+            "zed_left": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": 6.89,
+                "p10": 6.89,
+                "median": 6.89,
+                "p90": 6.89,
+                "max": 6.89
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 1,
+              "code_at_pixel": {
+                "2": 1
+              }
+            },
+            "wrist_cam_r": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": -28.8,
+                "p10": -28.8,
+                "median": -28.8,
+                "p90": -28.8,
+                "max": -28.8
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 1,
+              "n_within_10mm": 0,
+              "code_at_pixel": {
+                "0": 1
+              }
+            }
+          },
+          "proj_sample_row": {
+            "zed_left": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": 6.89,
+                "p10": 6.89,
+                "median": 6.89,
+                "p90": 6.89,
+                "max": 6.89
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 1,
+              "code_at_pixel": {
+                "2": 1
+              }
+            },
+            "wrist_cam_r": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": -28.8,
+                "p10": -28.8,
+                "median": -28.8,
+                "p90": -28.8,
+                "max": -28.8
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 1,
+              "n_within_10mm": 0,
+              "code_at_pixel": {
+                "0": 1
+              }
+            }
+          },
+          "mem_sample_to_gt_mm_sample_row": {
+            "n": 1,
+            "min": 1.007,
+            "p10": 1.007,
+            "median": 1.007,
+            "p90": 1.007,
+            "max": 1.007
+          },
+          "mem_sample_to_gt_mm_chunk_row": {
+            "n": 1,
+            "min": 1.007,
+            "p10": 1.007,
+            "median": 1.007,
+            "p90": 1.007,
+            "max": 1.007
+          },
+          "pose_error_mm_sample_row": {
+            "n": 1,
+            "min": 0.007,
+            "p10": 0.007,
+            "median": 0.007,
+            "p90": 0.007,
+            "max": 0.007
+          },
+          "removed_by": {
+            "off": 1,
+            "F1": 1,
+            "F1GT": 1,
+            "ORVgt": 0,
+            "ORV_S": 1
+          }
+        },
+        "non_error_voxels": {
+          "n": 1,
+          "mem_nearest_code": {
+            "2": 1
+          },
+          "d_t_mm": {
+            "n": 1,
+            "min": 15.819,
+            "p10": 15.819,
+            "median": 15.819,
+            "p90": 15.819,
+            "max": 15.819
+          },
+          "d_o_mm": {
+            "n": 1,
+            "min": 5.808,
+            "p10": 5.808,
+            "median": 5.808,
+            "p90": 5.808,
+            "max": 5.808
+          },
+          "removed_by": {
+            "off": 1,
+            "F1": 1,
+            "F1GT": 1
+          }
+        },
+        "other_variant_rows": {
+          "off": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1GT": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "ORVgt": {
+            "n": 12,
+            "by_category": {
+              "error_candidate": 8,
+              "preserved_robot": 4
+            },
+            "by_class": {
+              "robot": 12
+            }
+          },
+          "ORV_S": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          }
+        },
+        "kept_vs_ORV": {
+          "off": {
+            "n": 218,
+            "by_category": {
+              "preserved_neighbour_fruit": 45,
+              "error_candidate": 152,
+              "target_surface_kept": 20,
+              "preserved_robot": 1
+            },
+            "by_class": {
+              "neighbour_fruit": 59,
+              "table": 130,
+              "target": 24,
+              "robot": 5
+            }
+          },
+          "F1": {
+            "n": 223,
+            "by_category": {
+              "preserved_neighbour_fruit": 45,
+              "error_candidate": 157,
+              "target_surface_kept": 20,
+              "preserved_robot": 1
+            },
+            "by_class": {
+              "neighbour_fruit": 59,
+              "table": 135,
+              "target": 24,
+              "robot": 5
+            }
+          },
+          "F1GT": {
+            "n": 223,
+            "by_category": {
+              "preserved_neighbour_fruit": 45,
+              "error_candidate": 157,
+              "target_surface_kept": 20,
+              "preserved_robot": 1
+            },
+            "by_class": {
+              "neighbour_fruit": 59,
+              "table": 135,
+              "target": 24,
+              "robot": 5
+            }
+          }
+        }
+      },
+      "C1a_ep123_s1231:13": {
+        "hold_chunk": false,
+        "n_rows": {
+          "off": 0,
+          "F1": 0,
+          "F1GT": 0,
+          "ORV": 14,
+          "ORVgt": 14,
+          "ORV_S": 0
+        },
+        "ORV_record": {
+          "applied": true,
+          "identity_matches_gt": true,
+          "object": "orange",
+          "pipeline_code": 1,
+          "n_target_samples": 1601,
+          "n_other_samples": 74245,
+          "n_band_cells": 5899,
+          "z_floor_m": 0.8263347265595221
+        },
+        "pose_error_mm_chunk_row": 0.013,
+        "pose_error_mm_max_rows_folded": 0.041,
+        "n_planning_rows_folded": 13,
+        "hold_rows_ipc_up_to_seq": [],
+        "analysis_hold_seqs": [
+          14
+        ],
+        "rows_block": {
+          "esdf": 14
+        },
+        "rows_tier": {
+          "target_free": 14
+        },
+        "rows_link": {
+          "ee_finger_r2": 14
+        },
+        "rows_also_in_off": 0,
+        "rows_by_category": {
+          "preserved_robot": 11,
+          "error_candidate": 3
+        },
+        "rows_by_class": {
+          "robot": 14
+        },
+        "rows_category_sensitivity": {
+          "le2p5mm_real": 10,
+          "le5mm_real": 11,
+          "le10mm_real": 14
+        },
+        "rows_voxel_d_geom_mm": {
+          "n": 14,
+          "min": 0.0,
+          "p10": 0.0,
+          "median": 0.0,
+          "p90": 6.131,
+          "max": 6.131
+        },
+        "rows_centre_to_voxel_mm": {
+          "n": 14,
+          "min": 3.19,
+          "p10": 3.816,
+          "median": 5.067,
+          "p90": 6.284,
+          "max": 6.824
+        },
+        "rows_clearance_mm": {
+          "n": 14,
+          "min": -2.042,
+          "p10": -1.901,
+          "median": -1.61,
+          "p90": -0.547,
+          "max": -0.382
+        },
+        "rows_voxel_removed_by": {
+          "off": 14,
+          "F1": 14,
+          "F1GT": 14,
+          "ORVgt": 0,
+          "ORV_S": 14
+        },
+        "rows_sphere_table_top_clearance_mm": {
+          "n": 14,
+          "min": 5.147,
+          "p10": 5.287,
+          "median": 5.579,
+          "p90": 6.642,
+          "max": 6.806
+        },
+        "rows_sphere_gt_clearance_min_nonrobot_mm": {
+          "n": 14,
+          "min": 5.147,
+          "p10": 5.287,
+          "median": 5.579,
+          "p90": 6.642,
+          "max": 6.806
+        },
+        "rows_sphere_gt_clearance_by_voxel_class_mm": {},
+        "n_unique_voxels": 4,
+        "voxels_by_category": {
+          "preserved_robot": 3,
+          "error_candidate": 1
+        },
+        "voxels_by_class": {
+          "robot": 4
+        },
+        "voxels_table_top_mm": {
+          "n": 4,
+          "min": 7.189,
+          "p10": 7.189,
+          "median": 7.189,
+          "p90": 7.189,
+          "max": 7.189
+        },
+        "voxels_z_minus_floor_mm": {
+          "n": 4,
+          "min": 0.855,
+          "p10": 0.855,
+          "median": 0.855,
+          "p90": 0.855,
+          "max": 0.855
+        },
+        "voxels_d_mm_per_class_median": {
+          "target": 18.146,
+          "neighbour_fruit": 55.237,
+          "crate": 101.928,
+          "table": 7.189,
+          "robot": 2.867
+        },
+        "error_candidates": {
+          "n_voxels": 1,
+          "n_rows": 3,
+          "nearest_class": {
+            "robot": 1
+          },
+          "d_geom_mm": {
+            "n": 1,
+            "min": 6.131,
+            "p10": 6.131,
+            "median": 6.131,
+            "p90": 6.131,
+            "max": 6.131
+          },
+          "table_top_mm": {
+            "n": 1,
+            "min": 7.189,
+            "p10": 7.189,
+            "median": 7.189,
+            "p90": 7.189,
+            "max": 7.189
+          },
+          "robot_mm": {
+            "n": 1,
+            "min": 6.131,
+            "p10": 6.131,
+            "median": 6.131,
+            "p90": 6.131,
+            "max": 6.131
+          },
+          "z_minus_floor_mm": {
+            "n": 1,
+            "min": 0.855,
+            "p10": 0.855,
+            "median": 0.855,
+            "p90": 0.855,
+            "max": 0.855
+          },
+          "mem_nearest_code": {
+            "2": 1
+          },
+          "mem_nearest_mm": {
+            "n": 1,
+            "min": 6.715,
+            "p10": 6.715,
+            "median": 6.715,
+            "p90": 6.715,
+            "max": 6.715
+          },
+          "mem_age_chunks": {
+            "n": 1,
+            "min": 0.0,
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0,
+            "max": 0.0
+          },
+          "mem_nearest_row_hold_ipc": 0,
+          "mem_nearest_row_in_analysis_hold": 0,
+          "d_t_mm": {
+            "n": 1,
+            "min": 15.23,
+            "p10": 15.23,
+            "median": 15.23,
+            "p90": 15.23,
+            "max": 15.23
+          },
+          "d_o_mm": {
+            "n": 1,
+            "min": 6.715,
+            "p10": 6.715,
+            "median": 6.715,
+            "p90": 6.715,
+            "max": 6.715
+          },
+          "in_candidates": 1,
+          "above_floor": 1,
+          "band_nonzero": 0,
+          "band_target_bit_only": 0,
+          "band_codes": {
+            "[]": 1
+          },
+          "d_o_le_5mm": 0,
+          "d_t_lt_d_o": 0,
+          "proj_chunk_row": {
+            "zed_left": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": -28.65,
+                "p10": -28.65,
+                "median": -28.65,
+                "p90": -28.65,
+                "max": -28.65
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 1,
+              "n_within_10mm": 0,
+              "code_at_pixel": {
+                "0": 1
+              }
+            },
+            "wrist_cam_r": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": 5.4,
+                "p10": 5.4,
+                "median": 5.4,
+                "p90": 5.4,
+                "max": 5.4
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 1,
+              "code_at_pixel": {
+                "2": 1
+              }
+            }
+          },
+          "proj_sample_row": {
+            "zed_left": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": -28.65,
+                "p10": -28.65,
+                "median": -28.65,
+                "p90": -28.65,
+                "max": -28.65
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 1,
+              "n_within_10mm": 0,
+              "code_at_pixel": {
+                "0": 1
+              }
+            },
+            "wrist_cam_r": {
+              "n_in_image": 1,
+              "depth_minus_voxel_mm": {
+                "n": 1,
+                "min": 5.4,
+                "p10": 5.4,
+                "median": 5.4,
+                "p90": 5.4,
+                "max": 5.4
+              },
+              "n_voxel_in_front_of_surface_gt_10mm": 0,
+              "n_voxel_behind_surface_gt_10mm": 0,
+              "n_within_10mm": 1,
+              "code_at_pixel": {
+                "2": 1
+              }
+            }
+          },
+          "mem_sample_to_gt_mm_sample_row": {
+            "n": 1,
+            "min": 0.643,
+            "p10": 0.643,
+            "median": 0.643,
+            "p90": 0.643,
+            "max": 0.643
+          },
+          "mem_sample_to_gt_mm_chunk_row": {
+            "n": 1,
+            "min": 0.643,
+            "p10": 0.643,
+            "median": 0.643,
+            "p90": 0.643,
+            "max": 0.643
+          },
+          "pose_error_mm_sample_row": {
+            "n": 1,
+            "min": 0.013,
+            "p10": 0.013,
+            "median": 0.013,
+            "p90": 0.013,
+            "max": 0.013
+          },
+          "removed_by": {
+            "off": 1,
+            "F1": 1,
+            "F1GT": 1,
+            "ORVgt": 0,
+            "ORV_S": 1
+          }
+        },
+        "non_error_voxels": {
+          "n": 3,
+          "mem_nearest_code": {
+            "2": 3
+          },
+          "d_t_mm": {
+            "n": 3,
+            "min": 16.573,
+            "p10": 17.016,
+            "median": 18.788,
+            "p90": 20.077,
+            "max": 20.399
+          },
+          "d_o_mm": {
+            "n": 3,
+            "min": 6.535,
+            "p10": 6.594,
+            "median": 6.831,
+            "p90": 6.869,
+            "max": 6.879
+          },
+          "removed_by": {
+            "off": 3,
+            "F1": 3,
+            "F1GT": 3
+          }
+        },
+        "other_variant_rows": {
+          "off": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1GT": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "ORVgt": {
+            "n": 14,
+            "by_category": {
+              "preserved_robot": 11,
+              "error_candidate": 3
+            },
+            "by_class": {
+              "robot": 14
+            }
+          },
+          "ORV_S": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          }
+        },
+        "kept_vs_ORV": {
+          "off": {
+            "n": 1146,
+            "by_category": {
+              "error_candidate": 692,
+              "preserved_neighbour_fruit": 410,
+              "preserved_robot": 28,
+              "target_surface_kept": 16
+            },
+            "by_class": {
+              "neighbour_fruit": 506,
+              "table": 560,
+              "robot": 42,
+              "target": 38
+            }
+          },
+          "F1": {
+            "n": 1146,
+            "by_category": {
+              "error_candidate": 692,
+              "preserved_neighbour_fruit": 410,
+              "preserved_robot": 28,
+              "target_surface_kept": 16
+            },
+            "by_class": {
+              "neighbour_fruit": 506,
+              "table": 560,
+              "robot": 42,
+              "target": 38
+            }
+          },
+          "F1GT": {
+            "n": 1146,
+            "by_category": {
+              "error_candidate": 692,
+              "preserved_neighbour_fruit": 410,
+              "preserved_robot": 28,
+              "target_surface_kept": 16
+            },
+            "by_class": {
+              "neighbour_fruit": 506,
+              "table": 560,
+              "robot": 42,
+              "target": 38
+            }
+          }
+        }
+      },
+      "C1a_ep3_s32:27": {
+        "hold_chunk": false,
+        "n_rows": {
+          "off": 0,
+          "F1": 0,
+          "F1GT": 0,
+          "ORV": 2,
+          "ORVgt": 2,
+          "ORV_S": 2
+        },
+        "ORV_record": {
+          "applied": true,
+          "identity_matches_gt": true,
+          "object": "orange",
+          "pipeline_code": 1,
+          "n_target_samples": 4550,
+          "n_other_samples": 106017,
+          "n_band_cells": 8214,
+          "z_floor_m": 0.8266224345658912
+        },
+        "pose_error_mm_chunk_row": 0.245,
+        "pose_error_mm_max_rows_folded": 0.245,
+        "n_planning_rows_folded": 27,
+        "hold_rows_ipc_up_to_seq": [],
+        "analysis_hold_seqs": [
+          28
+        ],
+        "rows_block": {
+          "esdf": 2
+        },
+        "rows_tier": {
+          "target_free": 2
+        },
+        "rows_link": {
+          "ee_finger_r2": 2
+        },
+        "rows_also_in_off": 0,
+        "rows_by_category": {
+          "target_surface_kept": 2
+        },
+        "rows_by_class": {
+          "target": 2
+        },
+        "rows_category_sensitivity": {
+          "le2p5mm_real": 2,
+          "le5mm_real": 2,
+          "le10mm_real": 2
+        },
+        "rows_voxel_d_geom_mm": {
+          "n": 2,
+          "min": -1.276,
+          "p10": -1.276,
+          "median": -1.276,
+          "p90": -1.276,
+          "max": -1.276
+        },
+        "rows_centre_to_voxel_mm": {
+          "n": 2,
+          "min": 3.746,
+          "p10": 3.768,
+          "median": 3.853,
+          "p90": 3.939,
+          "max": 3.961
+        },
+        "rows_clearance_mm": {
+          "n": 2,
+          "min": -0.393,
+          "p10": -0.373,
+          "median": -0.295,
+          "p90": -0.217,
+          "max": -0.198
+        },
+        "rows_voxel_removed_by": {
+          "off": 2,
+          "F1": 2,
+          "F1GT": 2,
+          "ORVgt": 0,
+          "ORV_S": 0
+        },
+        "rows_sphere_table_top_clearance_mm": {
+          "n": 2,
+          "min": 9.87,
+          "p10": 9.876,
+          "median": 9.898,
+          "p90": 9.921,
+          "max": 9.927
+        },
+        "rows_sphere_gt_clearance_min_nonrobot_mm": {
+          "n": 2,
+          "min": -0.318,
+          "p10": -0.299,
+          "median": -0.223,
+          "p90": -0.147,
+          "max": -0.128
+        },
+        "rows_sphere_gt_clearance_by_voxel_class_mm": {
+          "target": {
+            "n": 2,
+            "min": -0.318,
+            "p10": -0.299,
+            "median": -0.223,
+            "p90": -0.147,
+            "max": -0.128
+          }
+        },
+        "n_unique_voxels": 1,
+        "voxels_by_category": {
+          "target_surface_kept": 1
+        },
+        "voxels_by_class": {
+          "target": 1
+        },
+        "voxels_table_top_mm": {
+          "n": 1,
+          "min": 13.282,
+          "p10": 13.282,
+          "median": 13.282,
+          "p90": 13.282,
+          "max": 13.282
+        },
+        "voxels_z_minus_floor_mm": {
+          "n": 1,
+          "min": 6.66,
+          "p10": 6.66,
+          "median": 6.66,
+          "p90": 6.66,
+          "max": 6.66
+        },
+        "voxels_d_mm_per_class_median": {
+          "target": -1.276,
+          "neighbour_fruit": 23.158,
+          "crate": 91.253,
+          "table": 13.282,
+          "robot": 8.28
+        },
+        "error_candidates": {
+          "n_voxels": 0,
+          "n_rows": 0
+        },
+        "non_error_voxels": {
+          "n": 1,
+          "mem_nearest_code": {
+            "4": 1
+          },
+          "d_t_mm": {
+            "n": 1,
+            "min": 19.854,
+            "p10": 19.854,
+            "median": 19.854,
+            "p90": 19.854,
+            "max": 19.854
+          },
+          "d_o_mm": {
+            "n": 1,
+            "min": 4.132,
+            "p10": 4.132,
+            "median": 4.132,
+            "p90": 4.132,
+            "max": 4.132
+          },
+          "removed_by": {
+            "off": 1,
+            "F1": 1,
+            "F1GT": 1
+          }
+        },
+        "other_variant_rows": {
+          "off": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "F1GT": {
+            "n": 0,
+            "by_category": {},
+            "by_class": {}
+          },
+          "ORVgt": {
+            "n": 2,
+            "by_category": {
+              "target_surface_kept": 2
+            },
+            "by_class": {
+              "target": 2
+            }
+          },
+          "ORV_S": {
+            "n": 2,
+            "by_category": {
+              "target_surface_kept": 2
+            },
+            "by_class": {
+              "target": 2
+            }
+          }
+        },
+        "kept_vs_ORV": {
+          "off": {
+            "n": 322,
+            "by_category": {
+              "error_candidate": 72,
+              "preserved_crate": 1,
+              "target_surface_kept": 210,
+              "preserved_robot": 3,
+              "preserved_neighbour_fruit": 36
+            },
+            "by_class": {
+              "table": 33,
+              "crate": 2,
+              "target": 233,
+              "robot": 5,
+              "neighbour_fruit": 49
+            }
+          },
+          "F1": {
+            "n": 322,
+            "by_category": {
+              "error_candidate": 72,
+              "preserved_crate": 1,
+              "target_surface_kept": 210,
+              "preserved_robot": 3,
+              "preserved_neighbour_fruit": 36
+            },
+            "by_class": {
+              "table": 33,
+              "crate": 2,
+              "target": 233,
+              "robot": 5,
+              "neighbour_fruit": 49
+            }
+          },
+          "F1GT": {
+            "n": 332,
+            "by_category": {
+              "error_candidate": 72,
+              "preserved_crate": 1,
+              "target_surface_kept": 220,
+              "preserved_robot": 3,
+              "preserved_neighbour_fruit": 36
+            },
+            "by_class": {
+              "table": 33,
+              "crate": 2,
+              "target": 243,
+              "robot": 5,
+              "neighbour_fruit": 49
+            }
+          }
+        }
+      }
+    },
+    "3_eight_total": {
+      "ORV_rows": 266,
+      "ORV_rows_by_category": {
+        "error_candidate": 139,
+        "preserved_neighbour_fruit": 53,
+        "preserved_table": 26,
+        "target_surface_kept": 28,
+        "preserved_robot": 20
+      }
+    },
+    "3_attribution_consistency": {
+      "C1a_ep110_s1101:17": {
+        "centre_to_voxel_minus_radius_minus_clearance_mm": {
+          "min": 9.66,
+          "median": 9.745,
+          "max": 9.887
+        }
+      },
+      "C1a_ep110_s1101:18": {
+        "centre_to_voxel_minus_radius_minus_clearance_mm": {
+          "min": -0.799,
+          "median": 2.511,
+          "max": 28.706
+        }
+      },
+      "C1a_ep110_s1102:16": {
+        "centre_to_voxel_minus_radius_minus_clearance_mm": {
+          "min": 9.618,
+          "median": 9.918,
+          "max": 10.38
+        }
+      },
+      "C1a_ep110_s1102:17": {
+        "centre_to_voxel_minus_radius_minus_clearance_mm": {
+          "min": 9.651,
+          "median": 9.921,
+          "max": 10.281
+        }
+      },
+      "C1a_ep110_s1102:18": {
+        "centre_to_voxel_minus_radius_minus_clearance_mm": {
+          "min": 9.573,
+          "median": 9.863,
+          "max": 10.567
+        }
+      },
+      "C1a_ep11_s111:12": {
+        "centre_to_voxel_minus_radius_minus_clearance_mm": {
+          "min": -0.307,
+          "median": -0.092,
+          "max": 0.501
+        }
+      },
+      "C1a_ep123_s1231:13": {
+        "centre_to_voxel_minus_radius_minus_clearance_mm": {
+          "min": 0.014,
+          "median": 0.585,
+          "max": 1.768
+        }
+      },
+      "C1a_ep3_s32:27": {
+        "centre_to_voxel_minus_radius_minus_clearance_mm": {
+          "min": 1.603,
+          "median": 1.613,
+          "max": 1.623
+        }
+      }
+    },
+    "4_ORV_rows_162_by_category": {
+      "preserved_crate": 17,
+      "error_candidate": 159,
+      "preserved_neighbour_fruit": 59,
+      "preserved_table": 45,
+      "target_surface_kept": 28,
+      "preserved_robot": 51
+    },
+    "4_ORV_rows_162_by_class": {
+      "crate": 23,
+      "neighbour_fruit": 138,
+      "table": 59,
+      "target": 31,
+      "robot": 108
+    },
+    "5_B2_support_layer": {
+      "n_S": 20426,
+      "n_Sprime": 13156,
+      "S_table_top_mm": {
+        "n": 20426,
+        "min": 6.452,
+        "p10": 6.79,
+        "median": 7.681,
+        "p90": 13.68,
+        "max": 16.715
+      },
+      "Sprime_table_top_mm": {
+        "n": 13156,
+        "min": 6.452,
+        "p10": 6.583,
+        "median": 7.237,
+        "p90": 12.189,
+        "max": 16.669
+      },
+      "S_table_top_mm_hist": {
+        "edges_mm": [
+          "-inf",
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0,
+          6.0,
+          7.0,
+          8.0,
+          9.0,
+          10.0,
+          11.0,
+          12.0,
+          13.0,
+          14.0,
+          15.0,
+          "inf"
+        ],
+        "counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2955,
+          8060,
+          1695,
+          1736,
+          675,
+          683,
+          1649,
+          1166,
+          1243,
+          564
+        ]
+      },
+      "S_z_minus_floor_mm": {
+        "n": 20426,
+        "min": 0.144,
+        "p10": 0.241,
+        "median": 1.146,
+        "p90": 7.305,
+        "max": 9.994
+      },
+      "S_cls": {
+        "target": 3210,
+        "table": 10577,
+        "neighbour_fruit": 6485,
+        "robot": 154
+      },
+      "S_le5mm_from_table_top": 0,
+      "S_gt5_le10mm_from_table_top": 14446,
+      "S_gt10mm_from_table_top": 5980,
+      "n_ORV_rows_from_S": 57,
+      "n_ORV_rows_from_Sprime": 49,
+      "rows_from_S_by_chunk": {
+        "C1a_ep110_s1101:18": 24,
+        "C1a_ep11_s111:12": 12,
+        "C1a_ep123_s1231:13": 14,
+        "C1a_ep123_s1231:14": 5,
+        "C1a_ep3_s32:27": 2
+      },
+      "rows_from_S_sphere_table_top_clearance_mm": {
+        "n": 57,
+        "min": -0.892,
+        "p10": 3.105,
+        "median": 5.633,
+        "p90": 10.823,
+        "max": 21.142
+      },
+      "rows_from_S_sphere_table_top_clearance_lt0": 1,
+      "rows_from_S_links": {
+        "ee_finger_r1": 17,
+        "ee_finger_r2": 40
+      },
+      "n_ORV_rows_total_162": 359
+    },
+    "6_R8_ORV_S_neighbour_seeds": {
+      "n": 3627,
+      "by_class": {
+        "neighbour_fruit": 3607,
+        "target": 20
+      },
+      "by_class_and_category": {
+        "neighbour_fruit|le5": 3607,
+        "target|le5": 20
+      },
+      "from_support_add": 3578,
+      "from_support_add_by_class": {
+        "neighbour_fruit": 3578
+      },
+      "not_from_support_add_by_class": {
+        "neighbour_fruit": 29,
+        "target": 20
+      },
+      "neighbour_mm": {
+        "n": 3627,
+        "min": -14.264,
+        "p10": -8.228,
+        "median": -1.525,
+        "p90": 3.896,
+        "max": 4.997
+      },
+      "table_top_mm": {
+        "n": 3627,
+        "min": 6.452,
+        "p10": 7.189,
+        "median": 9.703,
+        "p90": 14.067,
+        "max": 37.36
+      },
+      "target_mm": {
+        "n": 3627,
+        "min": -0.272,
+        "p10": 24.524,
+        "median": 47.447,
+        "p90": 64.089,
+        "max": 79.283
+      },
+      "d_geom_mm": {
+        "n": 3627,
+        "min": -14.264,
+        "p10": -8.228,
+        "median": -1.525,
+        "p90": 3.861,
+        "max": 4.997
+      },
+      "table_top_le5mm": 0,
+      "table_top_le10mm": 2054
+    },
+    "representative_scene_chunks": [
+      "C1a_ep110_s1101:18",
+      "C1a_ep110_s1102:18"
+    ],
+    "representative_rule": "the 2 of the 8 chunks with the most ORV collision rows",
+    "3_new7_total": {
+      "_derived": "sum of 3_eight_chunks[*].rows_by_category over the 7 chunks with off=F1=F1GT=0 rows (lead, 2026-10-14, arithmetic only)",
+      "ORV_rows": 143,
+      "ORV_rows_by_category": {
+        "error_candidate": 121,
+        "preserved_robot": 20,
+        "target_surface_kept": 2
+      }
+    }
+  },
+  "figures": [
+    {
+      "path": "AG3S/ag3s/docs/figures/t46/t46e-d-scene.png",
+      "kind": "scene",
+      "sidecar": "AG3S/ag3s/docs/figures/t46/t46e-d-scene.json"
+    },
+    {
+      "path": "AG3S/ag3s/docs/figures/t46/t46e-d-graph.png",
+      "kind": "graph",
+      "sidecar": "AG3S/ag3s/docs/figures/t46/t46e-d-graph.json"
+    },
+    {
+      "path": "AG3S/ag3s/docs/figures/t46/t46e-d-table.png",
+      "kind": "table",
+      "sidecar": "AG3S/ag3s/docs/figures/t46/t46e-d-table.json"
+    }
+  ],
+  "verdict": "legacy baseline match. Variant collision rows on 162 held-out chunks equal V-T46e raw on 162/162 chunks (0 mismatch). Classification by the pre-fixed rules R0-R8; rules file md5 unchanged.",
+  "not_measured": [
+    "cuRobo GPU regression baseline (GPU not allowed)",
+    "closed loop (oracle arm not run; replay memory = re-rendered planning rows, not the server's received requests)",
+    "the recorded TSDF itself (only the ESDF seeds are recorded): sub-voxel zero-crossing height vs the table plane is reported via voxel centres only",
+    "per-seed TSDF origin frame (which request created a seed): the memory frame reported is that of the nearest oracle memory sample, not of the TSDF seed",
+    "depth noise model: replay depth is the MuJoCo render quantised to 1 mm (wire), the same model as the server; recorded server depth images not re-checked",
+    "design17 / design162 / dsf8 sets (only the 162 held-out chunks)",
+    "identity-mismatch chunks: none in the 8 chunks or 162 held-out chunks (identity_matches_gt True on all), so no separate handling was exercised",
+    "R3 categories with a threshold other than 5.0 mm except the 2.5 / 10 mm row counts in rows_category_sensitivity"
+  ]
+}

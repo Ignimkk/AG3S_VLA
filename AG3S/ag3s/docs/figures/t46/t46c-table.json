@@ -1,0 +1,102 @@
+{
+ "baseline": {
+  "legacy": [
+   14,
+   15,
+   15,
+   -29.031048280806342
+  ],
+  "curobo": [
+   10,
+   15,
+   15,
+   -9.171877401271193
+  ]
+ },
+ "replay": {
+  "C1a": {
+   "fid_reason": 1350,
+   "fid_certified": 1350,
+   "n": 1350,
+   "W0_hold": {
+    "total": 107,
+    "uncertified": 37
+   },
+   "W1_conv": 37,
+   "W1_hold": {
+    "total": 70,
+    "uncertified": 0
+   },
+   "conversions_by": {
+    "grounding=no_seed|phase=placed|label=home|placed_seen=True": 37
+   },
+   "t46b": [
+    37,
+    [
+     107,
+     37
+    ],
+    [
+     70,
+     0
+    ]
+   ]
+  },
+  "C1aF1": {
+   "fid_reason": 1350,
+   "fid_certified": 1350,
+   "n": 1350,
+   "W0_hold": {
+    "total": 183,
+    "uncertified": 130
+   },
+   "W1_conv": 129,
+   "W1_hold": {
+    "total": 54,
+    "uncertified": 1
+   },
+   "conversions_by": {
+    "grounding=no_seed|phase=placed|label=home|placed_seen=True": 129
+   },
+   "t46b": [
+    129,
+    [
+     183,
+     130
+    ],
+    [
+     54,
+     1
+    ]
+   ]
+  },
+  "C1aF1F2": {
+   "fid_reason": 1350,
+   "fid_certified": 1350,
+   "n": 1350,
+   "W0_hold": {
+    "total": 122,
+    "uncertified": 118
+   },
+   "W1_conv": 116,
+   "W1_hold": {
+    "total": 6,
+    "uncertified": 2
+   },
+   "conversions_by": {
+    "grounding=no_seed|phase=placed|label=home|placed_seen=True": 116
+   },
+   "t46b": [
+    116,
+    [
+     122,
+     118
+    ],
+    [
+     6,
+     2
+    ]
+   ]
+  }
+ }
+}

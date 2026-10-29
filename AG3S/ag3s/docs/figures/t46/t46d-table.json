@@ -1,0 +1,119 @@
+{
+ "header": [
+  "scope (constraint links)",
+  "added spheres\n(both sides)",
+  "spheres\ntotal",
+  "ESDF rows /\nchunk",
+  "TO solve ms\nESTIMATE",
+  "criterion 2 runs\nC1aF1 / C1a / C2'",
+  "C1aF1 chunks LTE != global\nm = 0 / 10 / 50 mm (of 162)",
+  "C1a chunks LTE != global\nm = 0 / 10 / 50 mm (of 162)",
+  "C2' chunks LTE != global\nm = 0 / 10 / 50 mm (of 162)",
+  "C2' binding chunks\npre8+close / all"
+ ],
+ "rows": [
+  [
+   "--links gripper (2 palms + 4 fingers)",
+   "0",
+   "270",
+   "4320 (1.00x)",
+   "160 (C1b' median)",
+   "0 / 0 / 0 (other hand)",
+   "0 / 0 / 0",
+   "0 / 0 / 0",
+   "0 / 0 / 0",
+   "-"
+  ],
+  [
+   "gripper + link_*_arm_6",
+   "58",
+   "328",
+   "5248 (1.21x)",
+   "253",
+   "0 / 0 / 0",
+   "0 / 0 / 0",
+   "0 / 0 / 0",
+   "0 / 0 / 0",
+   "0 / 1 (of 1350)"
+  ],
+  [
+   "gripper + link_*_arm_5",
+   "20",
+   "290",
+   "4640 (1.07x)",
+   "192",
+   "18 / 18 / 18",
+   "78 / 89 / 84",
+   "77 / 81 / 83",
+   "0 / 4 / 82",
+   "52 / 86 (of 1350)"
+  ],
+  [
+   "gripper + link_*_arm_5-6",
+   "78",
+   "348",
+   "5568 (1.29x)",
+   "285",
+   "18 / 18 / 18",
+   "78 / 89 / 84",
+   "77 / 81 / 83",
+   "0 / 4 / 82",
+   "52 / 87 (of 1350)"
+  ],
+  [
+   "gripper + link_*_arm_4-6",
+   "94",
+   "364",
+   "5824 (1.35x)",
+   "310",
+   "18 / 18 / 18",
+   "78 / 89 / 84",
+   "77 / 81 / 83",
+   "0 / 4 / 82",
+   "52 / 87 (of 1350)"
+  ],
+  [
+   "--links arms (C2')",
+   "152",
+   "422",
+   "6752 (1.56x)",
+   "403",
+   "18 / 18 / 18",
+   "78 / 89 / 84",
+   "77 / 81 / 83",
+   "0 / 4 / 82",
+   "52 / 87 (of 1350)"
+  ]
+ ],
+ "facts": [
+  [
+   "URDF capsule of link_*_arm_5",
+   "1 capsule, r 75 mm, length 250 mm (ends 225 mm from the joint); at --capsule-radius-scale 0.05: 10 spheres, effective r 14.4 mm"
+  ],
+  [
+   "arm_5 spheres <= 50 mm from the target (36 CL3 runs, closest executed step)",
+   "87 spheres; 169-225 mm from the arm_5 joint; centre 11.0-47.5 mm from the nearest authorized-hand sphere centre"
+  ],
+  [
+   "MJCF link_<used>_arm_5 geoms, pre8+close (C1aF1 / C1a)",
+   "per-run min distance to the target at the 100 mm cap (> 100 mm) in 18/18 (C1aF1) and 18/18 (C1a) runs (mj_geomDistance, distmax 100 mm)"
+  ],
+  [
+   "MJCF FT_SENSOR (child of arm_6), pre8+close",
+   "<= 50 mm in 3/18 (C1aF1), 4/18 (C1a); median 72.8 mm"
+  ],
+  [
+   "MuJoCo replay contacts robot_other-target, pre8+close",
+   "C1aF1 0 / 1296 steps, C1a 0 / 1296 steps"
+  ],
+  [
+   "gripper scope, non-authorized (other hand) rows near the target",
+   "0 of 349920 rows (C1aF1 pre8+close, planned rows 0-15); other hand min 472 mm"
+  ]
+ ],
+ "source": {
+  "agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233920+0900_392462577320_70c141f47dbe/verify/T46d/agg.json",
+  "mj_agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233920+0900_392462577320_70c141f47dbe/verify/T46d/mj_agg.json",
+  "arm5_where": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T233920+0900_392462577320_70c141f47dbe/verify/T46d/raw/arm5_where.json"
+ }
+}

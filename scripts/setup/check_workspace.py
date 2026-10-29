@@ -14,7 +14,7 @@ def git(*args):
     return subprocess.check_output(["git", "-C", str(ROOT), *args], text=True).strip()
 
 assert Path(git("rev-parse", "--show-toplevel")) == ROOT
-manifest = json.loads((ROOT / "doc/migration/source-manifest.json").read_text())
+manifest = json.loads((ROOT / "doc/active/migration/source-manifest.json").read_text())
 modules = {}
 for module in ["AG3S.ag3s", "AG3S.trajopt", "Baseline.seam_vla", "Baseline.knows_vla", "rby1_manipulation", "openpi"]:
     spec = importlib.util.find_spec(module)

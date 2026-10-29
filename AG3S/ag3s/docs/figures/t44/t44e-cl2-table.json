@@ -1,0 +1,393 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T040647+0900_f14ae3e6b62b_d600316277ef/verify/T44/CL2/agg.json",
+ "arm_labels": {
+  "C0": "C0",
+  "C1a": "C1a",
+  "C1bp": "C1b'",
+  "C2p": "C2'"
+ },
+ "rows": {
+  "task success (n/18)": {
+   "C0": "14",
+   "C1a": "14",
+   "C1bp": "11",
+   "C2p": "1"
+  },
+  "CT success": {
+   "C0": "12",
+   "C1a": "11",
+   "C1bp": "9",
+   "C2p": "0"
+  },
+  "success_rel (Z4 release)": {
+   "C0": "14",
+   "C1a": "14",
+   "C1bp": "11",
+   "C2p": "1"
+  },
+  "grasp final": {
+   "C0": "16",
+   "C1a": "17",
+   "C1bp": "13",
+   "C2p": "1"
+  },
+  "first grasp ok (no regrasp)": {
+   "C0": "14",
+   "C1a": "16",
+   "C1bp": "13",
+   "C2p": "0"
+  },
+  "regrasp runs": {
+   "C0": "2",
+   "C1a": "1",
+   "C1bp": "0",
+   "C2p": "1"
+  },
+  "slip runs (rule B)": {
+   "C0": "2",
+   "C1a": "3",
+   "C1bp": "2",
+   "C2p": "0"
+  },
+  "robust grasp": {
+   "C0": "13",
+   "C1a": "14",
+   "C1bp": "11",
+   "C2p": "0"
+  },
+  "hand-fruit_other runs / rows": {
+   "C0": "4 / 64",
+   "C1a": "4 / 38",
+   "C1bp": "4 / 30",
+   "C2p": "6 / 147"
+  },
+  "robot_other-target runs / rows": {
+   "C0": "1 / 1",
+   "C1a": "1 / 7",
+   "C1bp": "0 / 0",
+   "C2p": "0 / 0"
+  },
+  "robot_other-fruit_other runs / rows": {
+   "C0": "0 / 0",
+   "C1a": "0 / 0",
+   "C1bp": "0 / 0",
+   "C2p": "0 / 0"
+  },
+  "hand-target runs / rows": {
+   "C0": "18 / 2160",
+   "C1a": "18 / 2384",
+   "C1bp": "18 / 1970",
+   "C2p": "15 / 652"
+  },
+  "HOLD chunks / runs": {
+   "C0": "101 / 5",
+   "C1a": "119 / 14",
+   "C1bp": "87 / 13",
+   "C2p": "40 / 11"
+  },
+  "comms timeout/stale/error chunks": {
+   "C0": "0",
+   "C1a": "0",
+   "C1bp": "0",
+   "C2p": "0"
+  },
+  "TO ms median / p90": {
+   "C0": "164 / 505",
+   "C1a": "166 / 594",
+   "C1bp": "207 / 513",
+   "C2p": "502 / 801"
+  },
+  "AG3S ms median / p90": {
+   "C0": "284 / 533",
+   "C1a": "287 / 562",
+   "C1bp": "363 / 526",
+   "C2p": "410 / 556"
+  },
+  "round trip ms median / p90": {
+   "C0": "1124 / 1637",
+   "C1a": "1180 / 1810",
+   "C1bp": "1161 / 1602",
+   "C2p": "1636 / 2058"
+  },
+  "split fired chunks / components": {
+   "C0": "185 / 392",
+   "C1a": "205 / 464",
+   "C1bp": "305 / 699",
+   "C2p": "499 / 1233"
+  },
+  "n_kept_nontarget / unowned_removed": {
+   "C0": "0 / 0",
+   "C1a": "7572 / 155383",
+   "C1bp": "13055 / 218115",
+   "C2p": "57718 / 544739"
+  },
+  "coarse n_shared_kept (chunks)": {
+   "C0": "0 (0)",
+   "C1a": "0 (0)",
+   "C1bp": "1096 (706)",
+   "C2p": "4888 (1303)"
+  },
+  "target_rows_unauthorized_kept": {
+   "C0": "absent",
+   "C1a": "absent",
+   "C1bp": "absent",
+   "C2p": "absent"
+  }
+ },
+ "pairs_rows": [
+  [
+   "C0 vs C1a",
+   "CT success",
+   "12 / 11",
+   "3 / 2",
+   "1.0000"
+  ],
+  [
+   "C0 vs C1a",
+   "task success",
+   "14 / 14",
+   "3 / 3",
+   "1.0000"
+  ],
+  [
+   "C0 vs C1a",
+   "grasp final",
+   "16 / 17",
+   "0 / 1",
+   "1.0000"
+  ],
+  [
+   "C0 vs C1a",
+   "pre-release contact",
+   "4 / 4",
+   "1 / 1",
+   "1.0000"
+  ],
+  [
+   "C1a vs C1b'",
+   "CT success",
+   "11 / 9",
+   "4 / 2",
+   "0.6875"
+  ],
+  [
+   "C1a vs C1b'",
+   "task success",
+   "14 / 11",
+   "4 / 1",
+   "0.3750"
+  ],
+  [
+   "C1a vs C1b'",
+   "grasp final",
+   "17 / 13",
+   "4 / 0",
+   "0.1250"
+  ],
+  [
+   "C1a vs C1b'",
+   "pre-release contact",
+   "4 / 4",
+   "2 / 2",
+   "1.0000"
+  ],
+  [
+   "C1b' vs C2'",
+   "CT success",
+   "9 / 0",
+   "9 / 0",
+   "0.0039"
+  ],
+  [
+   "C1b' vs C2'",
+   "task success",
+   "11 / 1",
+   "10 / 0",
+   "0.0020"
+  ],
+  [
+   "C1b' vs C2'",
+   "grasp final",
+   "13 / 1",
+   "12 / 0",
+   "0.0005"
+  ],
+  [
+   "C1b' vs C2'",
+   "pre-release contact",
+   "4 / 6",
+   "3 / 5",
+   "0.7266"
+  ],
+  [
+   "C0 vs C1b'",
+   "CT success",
+   "12 / 9",
+   "4 / 1",
+   "0.3750"
+  ],
+  [
+   "C0 vs C1b'",
+   "task success",
+   "14 / 11",
+   "4 / 1",
+   "0.3750"
+  ],
+  [
+   "C0 vs C1b'",
+   "grasp final",
+   "16 / 13",
+   "4 / 1",
+   "0.3750"
+  ],
+  [
+   "C0 vs C1b'",
+   "pre-release contact",
+   "4 / 4",
+   "2 / 2",
+   "1.0000"
+  ],
+  [
+   "C0 vs C2'",
+   "CT success",
+   "12 / 0",
+   "12 / 0",
+   "0.0005"
+  ],
+  [
+   "C0 vs C2'",
+   "task success",
+   "14 / 1",
+   "13 / 0",
+   "0.0002"
+  ],
+  [
+   "C0 vs C2'",
+   "grasp final",
+   "16 / 1",
+   "15 / 0",
+   "0.0001"
+  ],
+  [
+   "C0 vs C2'",
+   "pre-release contact",
+   "4 / 6",
+   "2 / 4",
+   "0.6875"
+  ]
+ ],
+ "cross_day_rows": [
+  [
+   "T44d C0 vs CL2 C0",
+   "task success",
+   "14 / 14",
+   "2 / 2",
+   "1.0000"
+  ],
+  [
+   "T44d C0 vs CL2 C0",
+   "CT success",
+   "13 / 12",
+   "3 / 2",
+   "1.0000"
+  ],
+  [
+   "T44d C0 vs CL2 C0",
+   "grasp final",
+   "14 / 16",
+   "1 / 3",
+   "0.6250"
+  ],
+  [
+   "T44d C0 vs CL2 C0",
+   "HOLD chunks / runs",
+   "140/5  |  101/5",
+   "",
+   ""
+  ],
+  [
+   "T44d C1a vs CL2 C1a",
+   "task success",
+   "15 / 14",
+   "2 / 1",
+   "1.0000"
+  ],
+  [
+   "T44d C1a vs CL2 C1a",
+   "CT success",
+   "12 / 11",
+   "3 / 2",
+   "1.0000"
+  ],
+  [
+   "T44d C1a vs CL2 C1a",
+   "grasp final",
+   "15 / 17",
+   "0 / 2",
+   "0.5000"
+  ],
+  [
+   "T44d C1a vs CL2 C1a",
+   "HOLD chunks / runs",
+   "54/14  |  119/14",
+   "",
+   ""
+  ],
+  [
+   "T44d C1b vs CL2 C1b'",
+   "task success",
+   "7 / 11",
+   "1 / 5",
+   "0.2188"
+  ],
+  [
+   "T44d C1b vs CL2 C1b'",
+   "CT success",
+   "4 / 9",
+   "1 / 6",
+   "0.1250"
+  ],
+  [
+   "T44d C1b vs CL2 C1b'",
+   "grasp final",
+   "10 / 13",
+   "2 / 5",
+   "0.4531"
+  ],
+  [
+   "T44d C1b vs CL2 C1b'",
+   "HOLD chunks / runs",
+   "154/12  |  87/13",
+   "",
+   ""
+  ],
+  [
+   "T44d C2 vs CL2 C2'",
+   "task success",
+   "0 / 1",
+   "0 / 1",
+   "1.0000"
+  ],
+  [
+   "T44d C2 vs CL2 C2'",
+   "CT success",
+   "0 / 0",
+   "0 / 0",
+   "1.0000"
+  ],
+  [
+   "T44d C2 vs CL2 C2'",
+   "grasp final",
+   "0 / 1",
+   "0 / 1",
+   "1.0000"
+  ],
+  [
+   "T44d C2 vs CL2 C2'",
+   "HOLD chunks / runs",
+   "20/8  |  40/11",
+   "",
+   ""
+  ]
+ ]
+}

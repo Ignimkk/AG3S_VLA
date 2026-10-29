@@ -1,0 +1,193 @@
+{
+ "q1_header": [
+  "pair",
+  "outcome C1a / C1b'",
+  "first refined diff seq\n(max diff rad)",
+  "inputs equal\nat that seq",
+  "C1b' worst on / off\nthere (mm)",
+  "first > 0.01 rad seq\n(state seq)",
+  "zero level ctr C1a /\nC1b' on / off (mm)",
+  "close dz C1a / C1b'\n(mm, seq)",
+  "HOLD differs at seq\n(A / B)",
+  "follow_to re-eval\nC1b' served / coarse off"
+ ],
+ "q1_rows": [
+  [
+   "ep0_s1",
+   "ok / slip_at_lift",
+   "12 (8.0e-04)",
+   "yes",
+   "5.1 / 5.1",
+   "15 (16)",
+   "0.0 / 38.0* / 0.0",
+   "39.7 (14) / 40.0 (14)",
+   "-",
+   "-"
+  ],
+  [
+   "ep3_s32",
+   "ok / no_grasp",
+   "8 (1.1e-03)",
+   "yes",
+   "23.0 / 23.3",
+   "13 (14)",
+   "8.0 / 9.0 / 9.0",
+   "30.7 (26) / 34.9 (27)",
+   "28: H/budget",
+   "-"
+  ],
+  [
+   "ep12_s122",
+   "ok / no_grasp",
+   "2 (1.9e-05)",
+   "yes",
+   "25.7 / 30.1",
+   "5 (7)",
+   "0.0 / 29.5 / 0.0",
+   "34.3 (15) / 57.9 (26)",
+   "16: H/budget",
+   "-"
+  ],
+  [
+   "ep104_s1041",
+   "ok / no_grasp",
+   "8 (9.5e-03)",
+   "yes",
+   "43.3 / 43.3",
+   "9 (16)",
+   "0.0 / 0.0 / 0.0",
+   "34.3 (14) / 33.8 (14)",
+   "15: follow/H",
+   "15: penetration / worsens"
+  ],
+  [
+   "ep123_s1232",
+   "slip_in_transport / ok",
+   "3 (1.2e-03)",
+   "no (<3e-7)",
+   "43.5 / 45.3",
+   "6 (7)",
+   "9.0 / 8.5 / 8.5",
+   "34.2 (14) / 35.8 (14)",
+   "-",
+   "15: penetration / penetration"
+  ],
+  [
+   "ep12_s121",
+   "ok / ok",
+   "2 (9.9e-06)",
+   "yes",
+   "23.1 / 25.3",
+   "8 (12)",
+   "0.0 / 0.0 / 0.0",
+   "34.3 (15) / 33.2 (14)",
+   "15: budget/H\n16: H/budget",
+   "15: penetration / penetration"
+  ],
+  [
+   "ep123_s1231",
+   "ok / ok",
+   "2 (7.5e-05)",
+   "yes",
+   "43.5 / 43.5",
+   "9 (9)",
+   "9.5 / 11.0 / 11.0",
+   "32.5 (13) / 39.3 (14)",
+   "8: budget/H\n14: H/budget\n15: budget/H",
+   "8: worsens / worsens\n15: penetration / penetration"
+  ]
+ ],
+ "q2_rows": [
+  [
+   "window chunks (runs)",
+   "108 (18)",
+   "206 (18)"
+  ],
+  [
+   "recorded worst row = link_*_arm_5",
+   "0",
+   "62 (tier fine)"
+  ],
+  [
+   "chunks with arm_active row in active set",
+   "0",
+   "96"
+  ],
+  [
+   "chunks with authorized row in active set",
+   "108",
+   "171"
+  ],
+  [
+   "lowest arm_active row: margin applied (n)",
+   "-",
+   "10.0 mm: 197, 0.0 mm: 9"
+  ],
+  [
+   "lowest arm_active row: clear / GT gap to target (median mm)",
+   "-",
+   "7.3 / 28.8"
+  ],
+  [
+   "reference worst < 0 (served / target removed / pre-A9)",
+   "25",
+   "137 / 117 / 159"
+  ],
+  [
+   "finger-mid to target row 7: reference / recorded (median mm)",
+   "37.5 / 42.5",
+   "50.6 / 67.4"
+  ],
+  [
+   "push row 7 median / p90 (mm)",
+   "0.0 / 10.4",
+   "7.0 / 37.9"
+  ],
+  [
+   "re-solve row 7 (mm): served / target removed / pre-A9",
+   "-",
+   "69.7 / 61.9 / 101.1"
+  ],
+  [
+   "re-solve row 7 (mm): look-ahead off / + target removed",
+   "-",
+   "68.7 / 60.6"
+  ],
+  [
+   "finger GT gap <= 0 chunks: reference / served / target removed",
+   "5 / 1 / -",
+   "37 / 21 / 17"
+  ],
+  [
+   "look-ahead gate open (window chunks)",
+   "32",
+   "176"
+  ],
+  [
+   "HOLD chunks in window",
+   "1",
+   "32"
+  ],
+  [
+   "TO solve median ms (all 1350 chunks)",
+   "160.3",
+   "402.9"
+  ],
+  [
+   "  linearize / assemble / qp / check (median ms)",
+   "13.9 / 5.6 / 11.5 / 57.9",
+   "76.4 / 5.9 / 25.9 / 188.5"
+  ],
+  [
+   "  spheres / tail rows (median) / qp iterations (median)",
+   "270 / 2160 / 100",
+   "422 / 3376 / 125"
+  ],
+  [
+   "  offline cProfile ep12_s121 (8 chunks): refine / fk / field / qp (ms)",
+   "67.5 / 5.9 / 13.7 / 9.1",
+   "84.2 / 10.1 / 17.2 / 14.4"
+  ]
+ ],
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T115801+0900_07f0bfe7737d_74d38da5091c/verify/T44/CLA"
+}

@@ -1,0 +1,291 @@
+{
+ "step": "IFG-APPLE",
+ "task": "AG3S/ag3s/docs/handoff/IFG-APPLE-run.task.md",
+ "written": "2026-10-19 KST (lead; numbers from agg.json, no judgement)",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE",
+ "agg_sha256": "65f0e7d430fd08676977acd3da15f083ecfe85b8cb640bdd60c17cae0f7f6f0e",
+ "seeds_sha256": "448acbf0cfa4dea3324981af1c27643a6300c622df8975e7b2adc2c62aa2fbe9",
+ "arms": {
+  "E0": "VLA checkpoint alone (--no-safe server, client without --safe-*)",
+  "C1aN": "current serving flags + noun-attention target choice (ball extent)"
+ },
+ "numbers": {
+  "n_episodes": 24,
+  "n_by_stratum": {
+   "clear": 16,
+   "place": 8
+  },
+  "paired_primary": {
+   "both": 13,
+   "only_E0": 5,
+   "only_C1aN": 3,
+   "neither": 3,
+   "missing": 0,
+   "n_pairs": 24,
+   "rate_E0": 0.75,
+   "rate_C1aN": 0.6666666666666666,
+   "diff_C1aN_minus_E0": -0.08333333333333333,
+   "ci95_bootstrap": [
+    -0.2916666666666667,
+    0.125
+   ],
+   "mcnemar_exact_p": 0.7265625
+  },
+  "paired_grasp": {
+   "both": 14,
+   "only_E0": 5,
+   "only_C1aN": 3,
+   "neither": 2,
+   "missing": 0,
+   "n_pairs": 24,
+   "rate_E0": 0.7916666666666666,
+   "rate_C1aN": 0.7083333333333334,
+   "diff_C1aN_minus_E0": -0.08333333333333333,
+   "ci95_bootstrap": [
+    -0.3333333333333333,
+    0.125
+   ],
+   "mcnemar_exact_p": 0.7265625
+  },
+  "by_stratum": {
+   "clear": {
+    "paired_primary": {
+     "both": 10,
+     "only_E0": 2,
+     "only_C1aN": 2,
+     "neither": 2,
+     "missing": 0,
+     "n_pairs": 16,
+     "rate_E0": 0.75,
+     "rate_C1aN": 0.75,
+     "diff_C1aN_minus_E0": 0.0,
+     "ci95_bootstrap": [
+      -0.25,
+      0.25
+     ],
+     "mcnemar_exact_p": 1.0
+    }
+   },
+   "place": {
+    "paired_primary": {
+     "both": 3,
+     "only_E0": 3,
+     "only_C1aN": 1,
+     "neither": 1,
+     "missing": 0,
+     "n_pairs": 8,
+     "rate_E0": 0.75,
+     "rate_C1aN": 0.5,
+     "diff_C1aN_minus_E0": -0.25,
+     "ci95_bootstrap": [
+      -0.625,
+      0.25
+     ],
+     "mcnemar_exact_p": 0.625
+    }
+   }
+  },
+  "per_arm": {
+   "E0": {
+    "all": {
+     "n_runs": 24,
+     "n_success": 18,
+     "n_primary": 18,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 5,
+     "failure_modes": {
+      "no_grasp": 5,
+      "ok": 16,
+      "regrasp": 1,
+      "slip_in_transport": 2
+     },
+     "n_nonauth_target": 0,
+     "n_obstacle_contact": 0,
+     "n_neighbour_contact": 4,
+     "hold_chunks_sum": 0,
+     "runs_with_hold": 0,
+     "hold_chunks_per_run": {
+      "median": 0.0,
+      "max": 0
+     },
+     "completion_s": {
+      "n": 18,
+      "median": 15.2,
+      "min": 11.2,
+      "max": 29.866666666666667
+     }
+    },
+    "clear": {
+     "n_runs": 16,
+     "n_success": 12,
+     "n_primary": 12,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 3,
+     "failure_modes": {
+      "no_grasp": 3,
+      "ok": 10,
+      "regrasp": 1,
+      "slip_in_transport": 2
+     },
+     "n_nonauth_target": 0,
+     "n_obstacle_contact": 0,
+     "n_neighbour_contact": 1,
+     "hold_chunks_sum": 0,
+     "runs_with_hold": 0,
+     "hold_chunks_per_run": {
+      "median": 0.0,
+      "max": 0
+     },
+     "completion_s": {
+      "n": 12,
+      "median": 14.4,
+      "min": 11.2,
+      "max": 29.866666666666667
+     }
+    },
+    "place": {
+     "n_runs": 8,
+     "n_success": 6,
+     "n_primary": 6,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 2,
+     "failure_modes": {
+      "no_grasp": 2,
+      "ok": 6
+     },
+     "n_nonauth_target": 0,
+     "n_obstacle_contact": 0,
+     "n_neighbour_contact": 3,
+     "hold_chunks_sum": 0,
+     "runs_with_hold": 0,
+     "hold_chunks_per_run": {
+      "median": 0.0,
+      "max": 0
+     },
+     "completion_s": {
+      "n": 6,
+      "median": 16.53333333333333,
+      "min": 13.333333333333334,
+      "max": 21.866666666666667
+     }
+    }
+   },
+   "C1aN": {
+    "all": {
+     "n_runs": 24,
+     "n_success": 16,
+     "n_primary": 16,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 7,
+     "failure_modes": {
+      "no_grasp": 7,
+      "ok": 15,
+      "slip_at_lift": 1,
+      "slip_in_transport": 1
+     },
+     "n_nonauth_target": 2,
+     "n_obstacle_contact": 0,
+     "n_neighbour_contact": 4,
+     "hold_chunks_sum": 119,
+     "runs_with_hold": 17,
+     "hold_chunks_per_run": {
+      "median": 1.0,
+      "max": 49
+     },
+     "completion_s": {
+      "n": 16,
+      "median": 14.133333333333333,
+      "min": 11.2,
+      "max": 18.133333333333333
+     }
+    },
+    "clear": {
+     "n_runs": 16,
+     "n_success": 12,
+     "n_primary": 12,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 3,
+     "failure_modes": {
+      "no_grasp": 3,
+      "ok": 11,
+      "slip_at_lift": 1,
+      "slip_in_transport": 1
+     },
+     "n_nonauth_target": 1,
+     "n_obstacle_contact": 0,
+     "n_neighbour_contact": 3,
+     "hold_chunks_sum": 76,
+     "runs_with_hold": 11,
+     "hold_chunks_per_run": {
+      "median": 1.0,
+      "max": 49
+     },
+     "completion_s": {
+      "n": 12,
+      "median": 13.333333333333334,
+      "min": 11.2,
+      "max": 18.133333333333333
+     }
+    },
+    "place": {
+     "n_runs": 8,
+     "n_success": 4,
+     "n_primary": 4,
+     "n_primary_missing": 0,
+     "n_grasp_fail": 4,
+     "failure_modes": {
+      "no_grasp": 4,
+      "ok": 4
+     },
+     "n_nonauth_target": 1,
+     "n_obstacle_contact": 0,
+     "n_neighbour_contact": 1,
+     "hold_chunks_sum": 43,
+     "runs_with_hold": 6,
+     "hold_chunks_per_run": {
+      "median": 1.5,
+      "max": 34
+     },
+     "completion_s": {
+      "n": 4,
+      "median": 14.666666666666668,
+      "min": 13.866666666666667,
+      "max": 16.533333333333335
+     }
+    }
+   }
+  },
+  "smoke_first_chunk_max_abs_diff": 1.1347345285628307e-07,
+  "latency_client_round_trip_ms": {
+   "E0": {
+    "n": 1776,
+    "median": 123.05474281311035,
+    "p95": 245.41819095611572,
+    "max": 2203.234910964966,
+    "n_over_533ms": 51,
+    "frac_over_533ms": 0.028716216216216218
+   },
+   "C1aN": {
+    "n": 1776,
+    "median": 893.3110237121582,
+    "p95": 1387.855350971222,
+    "max": 1702.345371246338,
+    "n_over_533ms": 1776,
+    "frac_over_533ms": 1.0
+   }
+  },
+  "attempts": {
+   "runs_with_retry": [
+    "E0_ep979_s9793"
+   ],
+   "note": "E0 smoke attempts 1-2 failed on a configuration error (safe server ignores the plain seed); fixed (--no-safe server) before any counted rollout"
+  }
+ },
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-paired-outcome.png",
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-arm-metrics.png",
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-latency.png",
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-outcome-grid.png",
+  "AG3S/ag3s/docs/figures/ifg-apple/ifg-apple-discordant-scenes.png"
+ ]
+}

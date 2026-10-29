@@ -1,0 +1,167 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/SCM/summary_scm.json",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261025T191319+0900_35b909cf096a_cc215238f581/verify/AG3S-PRE-CORE-TO/SCM/scm_figs_lead.py",
+ "b1_total": {
+  "runs": 20,
+  "req": 59,
+  "req_PS": 22,
+  "req_whatif5": 12,
+  "req_PSM5": 12,
+  "runs_PS": 12,
+  "runs_whatif5": 7,
+  "runs_PSM5": 7,
+  "rows_PS": 1663,
+  "rows_whatif5": 613,
+  "rows_PSM5": 621,
+  "req_same_rows": 58,
+  "req_non_shell_identical": 59,
+  "req_classes_identical": 59,
+  "req_PSM5_with_old_viol": 7,
+  "band_class": {
+   "obstacle": 1042,
+   "target": 8
+  },
+  "below5_class": {
+   "obstacle": 613
+  },
+  "psm5_viol_class": {
+   "obstacle": 613,
+   "target": 8
+  },
+  "deltas": [
+   5.0
+  ],
+  "other_max_abs": 0.0,
+  "psm5_min_mm": -7.88,
+  "req_PS_sc": 22,
+  "req_whatif5_sc": 12
+ },
+ "a": {
+  "E3_AG3S_case3_L3_s13453": {
+   "t_contact": 88,
+   "grasp_state_at_tc": "latched",
+   "at_tc": {
+    "t": 88,
+    "row": 0,
+    "old_min_mm": 5.041533918508955,
+    "PS_shell_min_mm": -15.159272758233142,
+    "PSM5_shell_min_mm": -10.15927275823314,
+    "whatif5_shell_min_mm": -10.159272758233142,
+    "PS_n_shell_viol": 20,
+    "PSM5_n_shell_viol": 11,
+    "PSM5_shell_min_class": "obstacle"
+   },
+   "n_steps": 17,
+   "n_steps_PS_viol": 5,
+   "n_steps_PSM5_viol": 4,
+   "first_t_PSM5_viol": 85,
+   "steps_before_contact_PSM5": 3,
+   "window_PSM5_min_mm": -10.36,
+   "window_PS_min_mm": -15.36,
+   "all_same_rows": true,
+   "all_non_shell_identical": true,
+   "sc_a2_new_mm_raw_field": -5.16
+  },
+  "E0_AG3S_case3_L3_s13453": {
+   "t_contact": 366,
+   "grasp_state_at_tc": "latched",
+   "at_tc": {
+    "t": 366,
+    "row": 6,
+    "old_min_mm": 3.565153656340527,
+    "PS_shell_min_mm": -20.979604471549436,
+    "PSM5_shell_min_mm": -15.979604471549436,
+    "whatif5_shell_min_mm": -15.979604471549436,
+    "PS_n_shell_viol": 45,
+    "PSM5_n_shell_viol": 35,
+    "PSM5_shell_min_class": "obstacle"
+   },
+   "n_steps": 17,
+   "n_steps_PS_viol": 14,
+   "n_steps_PSM5_viol": 12,
+   "first_t_PSM5_viol": 350,
+   "steps_before_contact_PSM5": 16,
+   "window_PSM5_min_mm": -20.33,
+   "window_PS_min_mm": -25.33,
+   "all_same_rows": true,
+   "all_non_shell_identical": true,
+   "sc_a2_new_mm_raw_field": -10.98
+  },
+  "E0_AG3S_case3_L3_s23453": {
+   "t_contact": 324,
+   "grasp_state_at_tc": "latched",
+   "at_tc": {
+    "t": 324,
+    "row": 4,
+    "old_min_mm": -2.582007901286033,
+    "PS_shell_min_mm": -18.000000001568047,
+    "PSM5_shell_min_mm": -13.000000001568045,
+    "whatif5_shell_min_mm": -13.000000001568047,
+    "PS_n_shell_viol": 31,
+    "PSM5_n_shell_viol": 21,
+    "PSM5_shell_min_class": "obstacle"
+   },
+   "n_steps": 17,
+   "n_steps_PS_viol": 17,
+   "n_steps_PSM5_viol": 16,
+   "first_t_PSM5_viol": 308,
+   "steps_before_contact_PSM5": 16,
+   "window_PSM5_min_mm": -20.99,
+   "window_PS_min_mm": -25.99,
+   "all_same_rows": false,
+   "all_non_shell_identical": true,
+   "sc_a2_new_mm_raw_field": -8.0
+  },
+  "E0_AG3S_case3_L3_s33453": {
+   "t_contact": 103,
+   "grasp_state_at_tc": "latched",
+   "at_tc": {
+    "t": 103,
+    "row": 7,
+    "old_min_mm": 2.90625244723189,
+    "PS_shell_min_mm": -22.534672604747076,
+    "PSM5_shell_min_mm": -17.53467260474708,
+    "whatif5_shell_min_mm": -17.534672604747076,
+    "PS_n_shell_viol": 49,
+    "PSM5_n_shell_viol": 39,
+    "PSM5_shell_min_class": "obstacle"
+   },
+   "n_steps": 17,
+   "n_steps_PS_viol": 7,
+   "n_steps_PSM5_viol": 5,
+   "first_t_PSM5_viol": 87,
+   "steps_before_contact_PSM5": 16,
+   "window_PSM5_min_mm": -17.53,
+   "window_PS_min_mm": -22.53,
+   "all_same_rows": true,
+   "all_non_shell_identical": true,
+   "sc_a2_new_mm_raw_field": -12.53
+  }
+ },
+ "rows_drawn": [
+  [
+   "E3 s13453",
+   "-15.16",
+   "-10.16",
+   "3"
+  ],
+  [
+   "E0 s13453",
+   "-20.98",
+   "-15.98",
+   "16"
+  ],
+  [
+   "E0 s23453",
+   "-18.00",
+   "-13.00",
+   "16"
+  ],
+  [
+   "E0 s33453",
+   "-22.53",
+   "-17.53",
+   "16"
+  ]
+ ]
+}

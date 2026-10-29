@@ -256,14 +256,196 @@ class CostConfig:
     #: 10.5 → 21.0 mm from k = 0 to k = 7 in every chunk). With `w_track` the optimum ramps a
     #: needed deflection over ≈ √(w_deflection_rate / w_track) rows.
     w_deflection_rate: float = 0.0
+    #: **IFG-TOB — the deflection-rate term only from the grasp on.** `False` (default) = as above, every chunk.
+    #: `True` = the term (and its executed-boundary history) is dropped on chunks whose grasp latch is
+    #: `searching` · `latched` · `closing` (before the grasp), and kept from `held` on (carry, place, return —
+    #: where T43 added it for the hurdle). IFG ep954: an avoidance deflection of the neighbour fruit taken at
+    #: request 12 was carried over five chunks by this term while approaching a static apple, and the policy's
+    #: intended grasp point followed the pushed hand (16 mm forward, 23 mm sideways at the close). Without the
+    #: term a deflection is not carried into the next chunk's row 0.
+    deflection_rate_after_grasp: bool = False
+    #: **IFG-TOA — grasp-goal anchor** (`grasp_anchor.py`). `0.0` (default) = off, the objective is unchanged. On
+    #: pre-grasp chunks (latch `latched` / `closing`) whose palm is within `grasp_anchor_radius` of the frozen grasp
+    #: goal, ``w_grasp_tcp`` (per m^2) weights the palm-origin distance to the policy's palm path on every planned row
+    #: (avoid by turning, not by translating) and ``w_grasp_goal`` (per m^2) the palm distance to the goal from the
+    #: policy's close row on. The goal = the palm position of the policy chunk's first closing row, frozen on the first
+    #: request that plans a close (cleared when the latch leaves latched / closing or the target changes).
+    #: The terms are quadratic and the collision slack is linear (`w_slack` per m): an anchor deviation d costs
+    #: 2·w·d at the margin, so collision keeps priority only while 2·w·d < w_slack (w = 2000: d < 0.25 m; a test
+    #: fixture with w = 20000 let the anchor buy 12 mm of penetration).
+    w_grasp_tcp: float = 0.0
+    w_grasp_goal: float = 0.0
+    grasp_anchor_radius: float = 0.15
+    #: IFG-TOA — rows of the goal term from the policy's close row on (the fingers closing; the rows after lift).
+    grasp_goal_rows: int = 3
+    #: IFG-TOA — a goal is frozen only within this distance (m) of the manipulated object's centroid (sanity).
+    grasp_goal_max_from_target: float = 0.12
+    #: **AG3S-PRE-CORE-TO E1-B — grasp-goal box** (`grasp_anchor.add_goal_box`). `0.0` (default) = off. `r > 0` (m):
+    #: same gate and same frozen goal as IFG-TOA, but no palm cost — the goal rows (`grasp_goal_rows` rows from the
+    #: policy's close row) carry a soft per-axis box ``|p_k - g| <= r`` in the QP whose slack costs `w_slack / 10` per m
+    #: (collision first), the same excess in the merit, and the IFG-TOA safety-first re-solve when a violation is left.
+    #: Exclusive with the IFG-TOA weights (`w_grasp_tcp` / `w_grasp_goal` must be 0).
+    grasp_goal_box: float = 0.0
+    #: **AG3S-PRE-CORE-TO-GGW — which rows carry the frozen goal** (`GraspAnchor.goal_mask`, `serve_safe
+    #: --grasp-goal-window`). `"close"` (default) = as above: `grasp_goal_rows` rows from the policy's close row c, only
+    #: when 0 < c < H (H = the horizon actually optimised: the look-ahead plan or the execution window). `"widen"` = on
+    #: the same anchored chunks (same gate) also when the term had no rows: c is None or c >= H -> the last
+    #: `grasp_goal_rows` rows of H; c = 0 (the chunk starts closed) -> the first `grasp_goal_rows` rows. E3G records:
+    #: the goal was frozen 4-5 requests before the close but the term had no rows on those requests.
+    grasp_goal_window: str = "close"
+    #: **AG3S-PRE-CORE-TO-GGW — the continuity term only from the grasp on.** `False` (default) = every chunk as before.
+    #: `True` = the term is dropped (no previous-chunk reference, as `grasp_continuity_off`) on chunks whose grasp latch
+    #: is `searching` · `latched` · `closing` and kept from `held` on (lift, carry, place, return) — the same phases as
+    #: `deflection_rate_after_grasp` (IFG-TOB). Exclusive with `grasp_continuity_off` (T37, `closing` · `held`).
+    continuity_after_grasp: bool = False
+    #: **IFG-TOW — wrist-weighted tracking.** `1.0` (default) = off. On pre-grasp chunks (latch `latched` / `closing`)
+    #: whose palm is within `wrist_track_radius` of the manipulated object's centroid, the tracking weight of the
+    #: grasping arm's joints `wrist_track_joints` (indices within the arm, 0-6) is multiplied by this scale, so an
+    #: avoidance is cheaper by the distal joints (orientation; IFG ep954: TCP moves 3.5-4.4 mm/deg at arm_4/5, 0 at
+    #: arm_6, vs 12.6 at arm_0/1) than by the proximal ones (position). Every joint stays free; hurdles and the carry
+    #: (outside the radius, or held / placed) keep uniform weights.
+    wrist_track_scale: float = 1.0
+    wrist_track_radius: float = 0.15
+    wrist_track_joints: tuple = (4, 5, 6)
+    #: **AG3S-GEO-GRASP — geometric 6-D grasp goal** (`AG3S.ag3s.grasp`, `grasp_anchor` variant "GEO"). `False`
+    #: (default) = off: no candidate generation, no goal, nothing in the request differs. On: before the grasp
+    #: (latch `latched` / `closing`) the task state keeps one grasp built from the observed target points (antipodal
+    #: contacts, friction `geo_grasp_mu`, gripper boxes, IK); on chunks whose policy plans a close the hold link gets
+    #: that pose on `grasp_goal_rows` rows from the close row (``geo_w_pos ||p - g||^2 + geo_w_rot ||Log(R_g^T R)||^2``),
+    #: on approach chunks within `geo_approach_radius` of the pre-grasp the pre-grasp pose on the last planned row.
+    #: The close is deferred while the planned hand at the close row is outside `geo_close_tol_*`; after
+    #: `geo_close_timeout` deferred requests (or a lost goal after its one re-selection) the chunk is held and the run
+    #: recorded as a geometric-control failure. Exclusive with the IFG-TOA / E1 anchor weights.
+    geo_grasp: bool = False
+    #: candidate order: "vla" (closest to the policy's planned close pose) or "geometric" (contact alignment first).
+    geo_grasp_selection: str = "vla"
+    geo_grasp_mu: float = 0.8
+    geo_w_pos: float = 2000.0
+    geo_w_rot: float = 5.0
+    geo_approach_radius: float = 0.15
+    #: the approach goal moves at most this far (m) from the palm per planned horizon (S2 replay: a pre-grasp 100-150 mm
+    #: away forced onto the last row bent rows 0-7 by up to 40 deg from the policy).
+    geo_approach_step: float = 0.06
+    geo_close_tol_pos: float = 0.010
+    geo_close_tol_rot_deg: float = 15.0
+    geo_close_timeout: int = 8
+    #: what the close gate checks: "selected" (the planned hand within `geo_close_tol_*` of the selected grasp — the
+    #: first pilot) or "valid-pose" (that, or the planned close pose itself is a valid grasp on the observed surface,
+    #: `candidates.close_pose_check`; user ruling 2026-10-27 after the pilot).
+    geo_close_gate: str = "selected"
+    #: how the geometric grasp steers: "redirect" (the first pilot: approach toward the pre-grasp, the selected grasp
+    #: on the policy's close) or "correct" (no approach goal; on a chunk that plans a close, the valid grasp nearest to
+    #: the policy's own close pose within `geo_correct_pos` / `geo_correct_rot_deg` becomes the goal; the close gate
+    #: holds back only a corrected close the optimizer did not bring onto its grasp). User ruling 2026-10-27.
+    geo_goal_mode: str = "redirect"
+    geo_correct_pos: float = 0.040   # S2e replay: nearest valid grasp at the first policy close 27-34 mm / 5-7 deg (apple ~23 mm off the pad centre)
+    geo_correct_rot_deg: float = 20.0
+    #: centre check of the correcting grasp (task §3e, user ruling 2026-10-27 after the full validation; 0 = off): only
+    #: grasps whose contact chord passes within `geo_correct_max_offset` x radius of the observed sphere centre may
+    #: correct the close (rho = distance(centre, contact line) / radius). Off-centre chords (run 954: 56.8 mm wide)
+    #: closed beside the apple. tau from the S1d offline records by the rule fixed before computing it.
+    geo_correct_max_offset: float = 0.0
+    #: while closing, the hand is held at the grasp only within this distance (m) of it (S2b replay: closes far from
+    #: the grasp otherwise dragged the hand 100-400 mm mid-close).
+    geo_close_hold_radius: float = 0.03
+    #: **B2 — phase-wise tracking** (only with `geo_grasp`): while a geometric goal is active the joint tracking
+    #: weight is multiplied by `geo_track_scale` (1.0 = unchanged) and, with `geo_continuity_off`, the continuity term
+    #: is dropped; after the grasp is confirmed (`held`) the scale returns to 1 over `geo_carry_requests` requests.
+    geo_track_scale: float = 1.0
+    geo_continuity_off: bool = False
+    geo_carry_requests: int = 3
+    #: obstacle-aware grasp checks (task §3g-1, user ruling 2026-10-27 15:45 KST; only with `geo_grasp`, off by
+    #: default): the wrist (`link_*_arm_6` + force-torque sensor body) checked with the hand boxes; the arm links 0-5
+    #: at each candidate's IK solutions; obstacles accumulated over the episode instead of this request's cloud only.
+    #: Shapes are the MJCF collision meshes as 3 mm occupancy grids (the URDF capsules over-cover the arm, §3f).
+    geo_wrist_check: bool = False
+    geo_arm_check: bool = False
+    geo_obstacle_memory: bool = False
+    #: wall-clock budget (ms) of one full candidate generation; None = the generator's default (150 ms), 0 = none
+    #: (task §3i, user ruling 2026-10-27 17:00 KST: the closed-loop retest without it).
+    geo_time_budget_ms: Optional[float] = None
+    #: where the grasp checks read the obstacles (task §3j, user ruling 2026-10-27 22:30 KST): "points" (the request's
+    #: scene points / the obstacle memory, default) or "field" (this request's trajectory-optimizer distance field
+    #: without the target — the TSDF the optimizer itself avoids; the §3i coverage was 0.98-0.99 against 0.50-0.81).
+    geo_obstacle_source: str = "points"
 
     def validate(self) -> None:
+        if self.geo_grasp:
+            if self.geo_goal_mode not in ("redirect", "correct"):
+                raise TrajOptConfigError(f"cost.geo_goal_mode must be 'redirect' or 'correct', got {self.geo_goal_mode!r}")
+            if not 0.0 <= self.geo_correct_max_offset <= 1.0:
+                raise TrajOptConfigError(f"cost.geo_correct_max_offset must be in [0, 1], got {self.geo_correct_max_offset!r}")
+            if self.geo_close_gate not in ("selected", "valid-pose"):
+                raise TrajOptConfigError(f"cost.geo_close_gate must be 'selected' or 'valid-pose', got {self.geo_close_gate!r}")
+            if self.geo_grasp_selection not in ("vla", "geometric"):
+                raise TrajOptConfigError(f"cost.geo_grasp_selection must be 'vla' or 'geometric', got "
+                                         f"{self.geo_grasp_selection!r}")
+            # AG3S-CORE-EVAL-G1 (user ruling 2026-10-29, option (a)): G1 (`geo_goal_mode correct`) may share the slot with
+            # the E1-C grasp-goal term (A4: `w_grasp_goal > 0`, no path term, close window) — on a chunk the geometric
+            # correction fills, it replaces that anchor; on the others the E1-C anchor stays. Every other combination
+            # (IFG-TOA path term, E1-B goal box, widened window, the redirect mode) is refused as before.
+            e1c_with_g1 = (self.geo_goal_mode == "correct" and self.w_grasp_goal > 0.0 and self.w_grasp_tcp <= 0.0
+                           and self.grasp_goal_box <= 0.0 and self.grasp_goal_window == "close")
+            if (self.w_grasp_tcp > 0.0 or self.w_grasp_goal > 0.0 or self.grasp_goal_box > 0.0) and not e1c_with_g1:
+                raise TrajOptConfigError("cost.geo_grasp replaces the IFG-TOA / E1 grasp anchor: set w_grasp_tcp, "
+                                         "w_grasp_goal and grasp_goal_box to 0 (only the E1-C goal term, "
+                                         "w_grasp_tcp 0 and the close window, may be combined with geo_goal_mode "
+                                         "'correct')")
+            if not (0.0 < self.geo_track_scale <= 1.0):
+                raise TrajOptConfigError(f"cost.geo_track_scale must be in (0, 1], got {self.geo_track_scale}")
+            if self.geo_w_pos <= 0.0 or self.geo_w_rot < 0.0 or self.geo_grasp_mu <= 0.0:
+                raise TrajOptConfigError("cost.geo_w_pos > 0, geo_w_rot >= 0 and geo_grasp_mu > 0 are required")
+        elif self.geo_track_scale != 1.0 or self.geo_continuity_off:
+            raise TrajOptConfigError("cost.geo_track_scale / geo_continuity_off need cost.geo_grasp")
+        if self.geo_time_budget_ms is not None and not self.geo_time_budget_ms >= 0.0:
+            raise TrajOptConfigError(f"cost.geo_time_budget_ms must be >= 0, got {self.geo_time_budget_ms}")
+        if self.geo_obstacle_source not in ("points", "field"):
+            raise TrajOptConfigError(f"cost.geo_obstacle_source must be 'points' or 'field', got {self.geo_obstacle_source!r}")
+        if not self.geo_grasp and (self.geo_wrist_check or self.geo_arm_check or self.geo_obstacle_memory
+                                   or self.geo_time_budget_ms is not None or self.geo_obstacle_source != "points"):
+            raise TrajOptConfigError("cost.geo_wrist_check / geo_arm_check / geo_obstacle_memory / geo_time_budget_ms "
+                                     "need cost.geo_grasp")
         if not (math.isfinite(self.w_deflection_rate) and self.w_deflection_rate >= 0.0):
             raise TrajOptConfigError(
                 f"cost.w_deflection_rate must be a finite value >= 0, got {self.w_deflection_rate}")
+        for name in ("w_grasp_tcp", "w_grasp_goal"):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v >= 0.0):
+                raise TrajOptConfigError(f"cost.{name} must be a finite value >= 0, got {v}")
+        if not (isinstance(self.grasp_goal_rows, int) and not isinstance(self.grasp_goal_rows, bool)
+                and self.grasp_goal_rows >= 1):
+            raise TrajOptConfigError(f"cost.grasp_goal_rows must be an integer >= 1, got {self.grasp_goal_rows!r}")
+        if not (math.isfinite(self.wrist_track_scale) and 0.0 < self.wrist_track_scale <= 1.0):
+            raise TrajOptConfigError(f"cost.wrist_track_scale must be in (0, 1], got {self.wrist_track_scale}")
+        if not (self.wrist_track_joints and all(isinstance(j, int) and not isinstance(j, bool) and 0 <= j <= 6
+                                                for j in self.wrist_track_joints)):
+            raise TrajOptConfigError(f"cost.wrist_track_joints must be arm joint indices 0-6, got {self.wrist_track_joints!r}")
+        if not (math.isfinite(self.grasp_goal_box) and self.grasp_goal_box >= 0.0):
+            raise TrajOptConfigError(f"cost.grasp_goal_box must be a finite value >= 0, got {self.grasp_goal_box}")
+        if self.grasp_goal_box > 0.0 and (self.w_grasp_tcp > 0.0 or self.w_grasp_goal > 0.0):
+            raise TrajOptConfigError(
+                "cost.grasp_goal_box (E1-B) and cost.w_grasp_tcp / w_grasp_goal (IFG-TOA, E1-C) are exclusive, got "
+                f"grasp_goal_box={self.grasp_goal_box}, w_grasp_tcp={self.w_grasp_tcp}, w_grasp_goal={self.w_grasp_goal}")
+        for name in ("grasp_anchor_radius", "grasp_goal_max_from_target", "wrist_track_radius"):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v > 0.0):
+                raise TrajOptConfigError(f"cost.{name} must be a finite value > 0, got {v}")
+        if not isinstance(self.deflection_rate_after_grasp, bool):
+            raise TrajOptConfigError(
+                f"cost.deflection_rate_after_grasp must be a bool, got {self.deflection_rate_after_grasp!r}")
         if not isinstance(self.grasp_continuity_off, bool):
             raise TrajOptConfigError(
                 f"cost.grasp_continuity_off must be a bool, got {self.grasp_continuity_off!r}")
+        if self.grasp_goal_window not in ("close", "widen"):   # AG3S-PRE-CORE-TO-GGW
+            raise TrajOptConfigError(
+                f"cost.grasp_goal_window must be 'close' or 'widen', got {self.grasp_goal_window!r}")
+        if not isinstance(self.continuity_after_grasp, bool):
+            raise TrajOptConfigError(
+                f"cost.continuity_after_grasp must be a bool, got {self.continuity_after_grasp!r}")
+        if self.continuity_after_grasp and self.grasp_continuity_off:
+            raise TrajOptConfigError(
+                "cost.continuity_after_grasp (term off before the grasp: searching / latched / closing) and "
+                "cost.grasp_continuity_off (T37: term off while closing / held) contradict -- give one")
         for name in ("w_track", "w_smooth", "w_continuity", "w_slack"):
             if getattr(self, name) < 0.0:
                 raise TrajOptConfigError(f"cost.{name} must be >= 0, got {getattr(self, name)}")
@@ -637,8 +819,40 @@ class SqpConfig:
     #: closed gate, a HOLD, a reset or a skipped chunk — `TrajectoryOptimizer._seed_is_aligned`).
     #: Meant with fewer SQP iterations (`max_iterations`).
     warm_start_lookahead: bool = False
+    #: **AG3S-PRE-CORE-TO E2 — multi-seed TrajOpt** (`multi_seed.py`, `serve_safe --to-multi-seed N`). `0` (default) =
+    #: off. `N > 0`: when a chunk's standard solve leaves a violation above `safety.violation_tolerance`, the same SQP
+    #: (same settings, same iteration cap and budget per seed) runs again from N other first iterates — the policy
+    #: plan, stay in place, palm detours (5 / 10 cm along the field gradient at the deepest violating sphere and its
+    #: two perpendiculars), joint noise (σ 0.02 / 0.05 rad) — and the best of the N + 1 is returned (max violation →
+    #: grasp-goal error → joint path length → squared accelerations; the standard solve wins ties). Recorded in
+    #: `to.metrics.multi_seed`. Other chunks: the standard solve, unchanged.
+    multi_seed: int = 0
+    #: **AG3S-PRE-CORE-TO E3-b — the E2 seeds on the GPU** (`gpu_seeds.py`, `serve_safe --to-gpu-seeds curobo`).
+    #: `"off"` (default) = E2 as it is (each seed solved by the SQP on the CPU). `"curobo"`: when E2 triggers, the same
+    #: `multi_seed` seeds are optimized in one batched cuRobo L-BFGS (joint tracking · smoothness · limits · collision
+    #: against our field as a cuRobo world · the grasp goal when an anchor has goal rows), every result is re-checked by
+    #: `_finish` and E2's `select_moving_first` picks (the standard solve stays candidate 0). Needs `multi_seed > 0`.
+    gpu_seeds: str = "off"
+    #: **AG3S-PRE-CORE-TO E3-b — how many GPU results get our full check** (`serve_safe --to-gpu-seeds-check`).
+    #: `"all"` (default) = every one of the N results is re-checked by `_finish`, as E3-b was measured. `"first-pass"`:
+    #: the moving results within the joint-limit bound are checked in `select_moving_first`'s own order (goal error,
+    #: deviation from the policy reference, index — both read without the check) and the first that resolves the
+    #: violation is chosen; the rest stay unchecked (`checked: False` in the record). When none resolves, every
+    #: remaining result is checked and `select` decides, as with `"all"`. Same choice, fewer checks. Needs `gpu_seeds`.
+    gpu_seeds_check: str = "all"
 
     def validate(self) -> None:
+        if isinstance(self.multi_seed, bool) or not isinstance(self.multi_seed, int) or self.multi_seed < 0:
+            raise TrajOptConfigError(f"sqp.multi_seed must be an int >= 0, got {self.multi_seed!r}")
+        if self.gpu_seeds not in ("off", "curobo"):   # AG3S-PRE-CORE-TO E3-b
+            raise TrajOptConfigError(f"sqp.gpu_seeds must be 'off' or 'curobo', got {self.gpu_seeds!r}")
+        if self.gpu_seeds != "off" and self.multi_seed <= 0:
+            raise TrajOptConfigError("sqp.gpu_seeds 'curobo' solves the E2 seeds: it needs sqp.multi_seed > 0")
+        if self.gpu_seeds_check not in ("all", "first-pass"):
+            raise TrajOptConfigError(
+                f"sqp.gpu_seeds_check must be 'all' or 'first-pass', got {self.gpu_seeds_check!r}")
+        if self.gpu_seeds_check != "all" and self.gpu_seeds == "off":
+            raise TrajOptConfigError("sqp.gpu_seeds_check 'first-pass' checks the GPU results: it needs sqp.gpu_seeds")
         for name in ("fast_eval", "warm_start_lookahead"):
             if not isinstance(getattr(self, name), bool):
                 raise TrajOptConfigError(f"sqp.{name} must be a bool, got {getattr(self, name)!r}")
@@ -672,7 +886,7 @@ class QpConfig:
     timing says.
     """
 
-    solver: str = "osqp"  # osqp | proxqp | highs
+    solver: str = "osqp"  # osqp | osqp-cuda | proxqp | highs
     # 1e-3, not the 1e-5 that looks more careful. The subproblem is a *linearization* of a non-convex
     # problem, so solving the model far past the model's own fidelity buys nothing — this is the
     # standard inexact-SQP argument, and here it is also the difference between 70.7 ms and 4.6 ms
@@ -714,7 +928,9 @@ class QpConfig:
     #: (1,884 variables, 4,116 rows, 16,980 nonzeros) `qrqp` did not return inside 200 s, and `ipqp`
     #: **aborted the interpreter** with a heap corruption. A solver that can take down the control
     #: loop is not a solver this package will offer, whatever its timing would have been.
-    SOLVERS = ("osqp", "proxqp", "highs")
+    #: `osqp-cuda` (AG3S-PRE-CORE-TO E3-a, `--qp-backend osqp-cuda`): the same OSQP on its CUDA algebra, with a CPU OSQP
+    #: re-solve of any failed CUDA solve (`qp.py`, the E3-a note).
+    SOLVERS = ("osqp", "osqp-cuda", "proxqp", "highs")
 
     def validate(self) -> None:
         if self.solver not in self.SOLVERS:
@@ -725,6 +941,10 @@ class QpConfig:
             )
         if self.max_iter < 1:
             raise TrajOptConfigError(f"qp.max_iter must be >= 1, got {self.max_iter}")
+        if self.solver == "osqp-cuda" and self.polish:
+            # E3-a: the CUDA algebra solves its linear system by PCG, and OSQP polishes only with the direct solver.
+            raise TrajOptConfigError("qp.polish is not available with qp.solver 'osqp-cuda' (the CUDA algebra has only "
+                                     "the indirect linear solver; OSQP polishing needs the direct one)")
         for name in ("warm_start_iterate", "accept_max_iter"):
             if not isinstance(getattr(self, name), bool):
                 raise TrajOptConfigError(f"qp.{name} must be a bool, got {getattr(self, name)!r}")
@@ -784,6 +1004,37 @@ class CollisionBackendConfig:
     #: 지지면(테이블·바닥)도 위 여유를 받는가. 기본 `False` — 파지하려면 손가락이 테이블 가까이
     #: 가야 한다 (T40 B E3b 기록: 테이블이 최근접인 손 행 최소 3.9–5.0 mm, 6 run 중 4).
     obstacle_margin_support: bool = False
+    #: **AG3S-PRE-CORE-TO SCM — the obstacle margin of the palm-shell sphere rows only (m).** `None` (default) = those
+    #: rows get `obstacle_margin` like every other robot row (bit-identical; the key is also left out of `to_dict`).
+    #: A value = a robot row whose sphere has role `palm_shell` (`serve_safe --palm-shell`, appended after the other
+    #: spheres) and whose nearest surface is an obstacle (`_obstacle_rows`) gets `max(its margin, palm_shell_margin)`
+    #: instead of `max(its margin, obstacle_margin)`; target · support · held rows and every other sphere keep their
+    #: rules. Needs `obstacle_margin > 0` (the class table runs only then). The linearizer refuses a model without
+    #: `palm_shell` spheres (on but no effect). cuRobo seeds (`gpu_seeds`) keep `obstacle_margin` on those rows.
+    palm_shell_margin: Optional[float] = None
+    #: **IFG-NBC — light contact with a neighbour object while grasping (m).** `0.0` (default) = off. On pre-grasp
+    #: chunks (latch `latched` / `closing`) whose grasping palm is within `neighbour_contact_gate` of the manipulated
+    #: centroid, the grasping hand's finger rows whose sphere centre is within `neighbour_contact_radius` of that
+    #: centroid and whose nearest surface is an obstacle (not the target, a support plane or held) accept up to this
+    #: much overlap (margin `-depth`, `SceneSnapshot.neighbour_contact`). Palm, arm, table and the carry keep their
+    #: rules. User ruling 2026-10-21: option B (a wrist roll at the grasp point) was tried first and cannot clear the
+    #: neighbour in IFG ep211 / ep954 (`ifg_roll_feasibility`).
+    neighbour_contact_depth: float = 0.0
+    neighbour_contact_radius: float = 0.12
+    neighbour_contact_gate: float = 0.15
+    #: **AG3S-CORE-EVAL-A6 — light contact of the grasping *palm* with a neighbour object at the grasp moment (m).**
+    #: `0.0` (default) = off (bit-identical; the three keys are also left out of `to_dict`). On the "grasp moment"
+    #: (latch `latched` / `closing`, not held, and the grasping hand's hold link site — MJCF `left_ee` / `right_ee`,
+    #: `safe_policy.hold_site_position` — within `neighbour_palm_contact_gate` of the manipulated centroid) the grasping
+    #: hand's palm rows (every sphere on the hold
+    #: link `ee_<side>`: hand-body spheres + palm-shell spheres; fingers are IFG-NBC's) whose sphere centre is within
+    #: `neighbour_palm_contact_radius` of that centroid and whose nearest surface is an obstacle (not the target, a
+    #: support plane, held, or the destination label) accept up to this much overlap (margin `-depth` instead of
+    #: `palm_shell_margin` / `obstacle_margin`, `SceneSnapshot.neighbour_palm_contact`). Not withdrawn by HSR6 ④
+    #: (task `AG3S-CORE-EVAL-A6.task.md` §2). Final configuration 10 mm, gate 60 mm, radius 120 mm (= IFG-NBC's).
+    neighbour_palm_contact_depth: float = 0.0
+    neighbour_palm_contact_radius: float = 0.12
+    neighbour_palm_contact_gate: float = 0.06
     #: **T43 HM — the held object's rows get the same classification and margin as the robot's.**
     #: Once grasped the object is part of the robot (user, 2026-10-07): a held query row whose
     #: nearest field surface is an obstacle gets `max(its margin, obstacle_margin)`, exactly like a
@@ -808,6 +1059,24 @@ class CollisionBackendConfig:
     #: 32/33 obstacle runs; V3: 9/13 binding path rows nearest the apple). Nothing held only. Waypoint
     #: rows keep their own margins. False (default) = bit-identical.
     target_volume_exempt: bool = False
+    #: **T44 I2 — the target exception follows the contact permission.** True = a robot row is a
+    #: target row (look-ahead tail drop · `obstacle_margin` exemption · sweep path exclusion) only
+    #: when its link may touch the target (`SceneSnapshot.target_contact_rows`: `target_free_mask`
+    #: under `exclude_authorized`, `target_free_exempt` under `exclude_all`, the relaxed
+    #: `manipulated_link_margin` rows otherwise). Without it those three tests (`|d − d_object| ≤
+    #: voxel`, `target_volume`) carry no link filter, so a forearm next to the apple is exempted like
+    #: a finger. Also: with AG3S's `ball_owned` exclusion (`stats["target_free"]["exclusion_method"]`)
+    #: target membership is `d_free − d_main > voxel` instead of the ball. False (default) =
+    #: bit-identical.
+    target_permission_strict: bool = False
+    #: **T44b I2b — while holding, how far above the gripper the permission reaches** (read only
+    #: with `target_permission_strict`). Holding, the permitted rows are the holding hand's contact
+    #: links (palm + fingers, AG3S `ContactConfig.contact_links` of the hold link's side) plus the
+    #: first N sphere-carrying links above the gripper on the URDF hold chain (RB-Y1:
+    #: 1 = `link_<side>_arm_6`) — the held object's query spheres can reach past the gripper. 0 =
+    #: the gripper only. Before the grasp the permission is unchanged (`exclude_authorized` mask).
+    #: User verdict 2026-10-10: 1.
+    held_permission_parent_links: int = 1
     #: **충돌 제약을 최적화기에 보이는가.** `True` 가 기본이고 그것이 지금까지의 TO 다.
     #:
     #: `False` 는 사용자가 요청한 ablation 이다 (*"TO 에 가장 기본적인 jerk 목적함수만 포함하고
@@ -844,16 +1113,43 @@ class CollisionBackendConfig:
             raise ValueError(f"collision.backend must be one of {self.BACKENDS}, got {self.backend!r}")
         if self.esdf_margin < 0.0:
             raise ValueError(f"collision.esdf_margin must be >= 0, got {self.esdf_margin}")
+        for name in ("neighbour_contact_depth", "neighbour_palm_contact_depth"):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v >= 0.0):
+                raise TrajOptConfigError(f"collision.{name} must be a finite value >= 0, got {v}")
+        for name in ("neighbour_contact_radius", "neighbour_contact_gate",
+                     "neighbour_palm_contact_radius", "neighbour_palm_contact_gate"):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v > 0.0):
+                raise TrajOptConfigError(f"collision.{name} must be a finite value > 0, got {v}")
         if not self.obstacle_margin >= 0.0:
             raise ValueError(
                 f"collision.obstacle_margin must be >= 0, got {self.obstacle_margin}")
         if not isinstance(self.esdf_host_mirror, bool):
             raise ValueError(
                 f"collision.esdf_host_mirror must be a bool, got {self.esdf_host_mirror!r}")
+        if not isinstance(self.target_permission_strict, bool):
+            raise ValueError("collision.target_permission_strict must be a bool, got "
+                             f"{self.target_permission_strict!r}")
+        if (isinstance(self.held_permission_parent_links, bool)
+                or not isinstance(self.held_permission_parent_links, int)
+                or self.held_permission_parent_links < 0):
+            raise ValueError("collision.held_permission_parent_links must be an int >= 0, got "
+                             f"{self.held_permission_parent_links!r}")
         if self.held_obstacle_margin and not self.obstacle_margin > 0.0:
             raise ValueError(
                 "collision.held_obstacle_margin needs collision.obstacle_margin > 0 — it gives the "
                 "held rows that margin and does nothing on its own")
+        if self.palm_shell_margin is not None:
+            # AG3S-PRE-CORE-TO SCM
+            v = self.palm_shell_margin
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(v) and v >= 0.0):
+                raise ValueError(
+                    f"collision.palm_shell_margin must be None or a finite value >= 0 (m), got {v!r}")
+            if not self.obstacle_margin > 0.0:
+                raise ValueError(
+                    "collision.palm_shell_margin needs collision.obstacle_margin > 0 — it replaces that margin on "
+                    "the palm-shell obstacle rows, and the obstacle class table runs only with it")
 
     @property
     def wants_esdf(self) -> bool:
@@ -882,8 +1178,32 @@ class SafetyConfig:
     # Trust the constraint set only when AG3S certified the geometry behind it. A frame AG3S marked
     # INCOMPLETE can still be optimized against, but the result cannot be called safe.
     require_certified_geometry: bool = True
+    #: **IFG-REC — retreat-and-retry recovery** (`SafePolicy._recovery_*`). `False` (default) = off. Pre-grasp (latch
+    #: latched / closing) triggers: `recovery_hold_streak` consecutive requests whose previous chunk was held whole
+    #: for a collision verdict (deadlock: HOLD -> the same chunk -> HOLD, IFG-APPLE-TOA3 ep211), or
+    #: `recovery_empty_streak` consecutive closing requests whose fingers settled at the commanded opening without
+    #: being blocked (an empty grasp the policy then carries to the crate, IFG ep954). Action: the gripper opens and
+    #: the arms go back in joint space (<= `recovery_step_rad` per row, through TrajOpt) to the latest earlier pose
+    #: whose palm was >= `recovery_clear_m` from the target; then the policy has control again. At most
+    #: `recovery_max` per episode.
+    recovery_retreat: bool = False
+    recovery_hold_streak: int = 3
+    recovery_empty_streak: int = 2
+    recovery_clear_m: float = 0.12
+    recovery_step_rad: float = 0.03
+    recovery_max: int = 2
 
     def validate(self) -> None:
+        for name in ("recovery_hold_streak", "recovery_empty_streak", "recovery_max"):
+            v = getattr(self, name)
+            if not (isinstance(v, int) and not isinstance(v, bool) and v >= 1):
+                raise TrajOptConfigError(f"safety.{name} must be an integer >= 1, got {v!r}")
+        for name in ("recovery_clear_m", "recovery_step_rad"):
+            v = getattr(self, name)
+            if not (math.isfinite(v) and v > 0.0):
+                raise TrajOptConfigError(f"safety.{name} must be a finite value > 0, got {v}")
+        if not isinstance(self.recovery_retreat, bool):
+            raise TrajOptConfigError(f"safety.recovery_retreat must be a bool, got {self.recovery_retreat!r}")
         if self.violation_tolerance < 0.0:
             raise TrajOptConfigError(
                 f"safety.violation_tolerance must be >= 0, got {self.violation_tolerance}"
@@ -982,9 +1302,40 @@ class TrajOptConfig:
     def to_dict(self) -> dict[str, Any]:
         return {
             name: {f.name: getattr(getattr(self, name), f.name)
-                   for f in dataclasses.fields(getattr(self, name))}
+                   for f in dataclasses.fields(getattr(self, name))
+                   if not ((name, f.name) in _OMIT_WHEN_NONE and getattr(getattr(self, name), f.name) is None)
+                   and not _omit_default(name, f.name, getattr(getattr(self, name), f.name))}
             for name in _SECTIONS
         }
+
+
+#: `(section, field)` left out of `TrajOptConfig.to_dict` while `None` (their default), so a record that dumps the
+#: config keeps the keys it had before the field existed (AG3S-PRE-CORE-TO SCM). `from_dict` fills the default back.
+_OMIT_WHEN_NONE = frozenset({("collision", "palm_shell_margin"),
+                             ("cost", "geo_time_budget_ms")})          # AG3S-CORE-EVAL-G1 (geo-grasp merge)
+#: AG3S-PRE-CORE-TO-GGW — `(section, field)` left out of `to_dict` while at this default (same reason: a record that
+#: dumps the config keeps its keys when the option is off).
+_OMIT_WHEN_DEFAULT = {("cost", "grasp_goal_window"): "close", ("cost", "continuity_after_grasp"): False}
+#: AG3S-CORE-EVAL-A6 — the palm neighbour-contact allowance: without `--neighbour-palm-contact-mm` the config dump keeps
+#: the keys it had before the option existed.
+_OMIT_WHEN_DEFAULT.update({("collision", "neighbour_palm_contact_depth"): 0.0,
+                           ("collision", "neighbour_palm_contact_radius"): 0.12,
+                           ("collision", "neighbour_palm_contact_gate"): 0.06})
+#: AG3S-CORE-EVAL-G1 — the geometric grasp options (merged from `feature/geo-grasp`): without `--geo-*` flags the
+#: config dump (`--record-constraints` meta `trajopt_config`) keeps the keys it had before the merge.
+_OMIT_WHEN_DEFAULT.update({("cost", k): v for k, v in {
+    "geo_grasp": False, "geo_grasp_selection": "vla", "geo_grasp_mu": 0.8, "geo_w_pos": 2000.0, "geo_w_rot": 5.0,
+    "geo_approach_radius": 0.15, "geo_approach_step": 0.06, "geo_close_tol_pos": 0.010, "geo_close_tol_rot_deg": 15.0,
+    "geo_close_timeout": 8, "geo_close_gate": "selected", "geo_goal_mode": "redirect", "geo_correct_pos": 0.040,
+    "geo_correct_rot_deg": 20.0, "geo_correct_max_offset": 0.0, "geo_close_hold_radius": 0.03,
+    "geo_track_scale": 1.0, "geo_continuity_off": False, "geo_carry_requests": 3, "geo_wrist_check": False,
+    "geo_arm_check": False, "geo_obstacle_memory": False, "geo_obstacle_source": "points"}.items()})
+
+
+def _omit_default(section: str, field: str, value: Any) -> bool:
+    key = (section, field)
+    return key in _OMIT_WHEN_DEFAULT and type(value) is type(_OMIT_WHEN_DEFAULT[key]) \
+        and value == _OMIT_WHEN_DEFAULT[key]
 
 
 def _build_section(section_cls: type, name: str, raw: Any) -> Any:

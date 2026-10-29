@@ -157,17 +157,55 @@ class TrajOptChunkRefiner(DecodedChunkRefiner):
         # an absent key passes nothing.
         history = {key: context[key] for key in ("deflection_history", "command_history")
                    if context is not None and context.get(key) is not None}
-        result = self.optimizer.solve(
-            reference,
-            q_now,
-            scene,
-            previous_chunk=previous,
-            template=chunk,
-            geometry_certified=certified,
-            **({"start_at_rest": True} if at_rest else {}),
-            **({"servo_feedback": servo} if servo is not None else {}),
-            **history,
-        )
+        # IFG-TOB — `SafePolicy` asks to drop the deflection-rate term on this chunk only: solve with the weight at
+        # 0 on the optimizer (and its look-ahead window optimizer), restored right after. Absent key = as before.
+        rate_off = context.get("deflection_rate_off") if context is not None else None
+        swapped = []
+        # AG3S-PRE-CORE-TO E3-a — the CUDA QP backend's counts over this chunk's solve (standard, look-ahead window,
+        # multi-seed seeds, fall-backs), only with `qp.solver = "osqp-cuda"`; nothing otherwise.
+        qp_mark = None
+        if getattr(getattr(self.config, "qp", None), "solver", "osqp") == "osqp-cuda":
+            from AG3S.trajopt.qp import cuda_mark
+
+            qp_mark = cuda_mark()
+        if rate_off:
+            for opt in (self.optimizer, getattr(self.optimizer, "window_optimizer", None)):
+                if opt is not None and float(getattr(opt.config.cost, "w_deflection_rate", 0.0) or 0.0) > 0.0:
+                    swapped.append((opt, opt.config))
+                    opt.config = opt.config.with_overrides({"cost": {"w_deflection_rate": 0.0}})
+        try:
+            result = self.optimizer.solve(
+                reference,
+                q_now,
+                scene,
+                previous_chunk=previous,
+                template=chunk,
+                geometry_certified=certified,
+                **({"start_at_rest": True} if at_rest else {}),
+                **({"servo_feedback": servo} if servo is not None else {}),
+                **history,
+                # IFG-TOA — the grasp-goal anchor `SafePolicy` set for this chunk (absent key = as before).
+                **({"grasp_anchor": context["grasp_anchor"]}
+                   if context is not None and context.get("grasp_anchor") is not None else {}),
+                # IFG-TOW — per-joint tracking scale `SafePolicy` set for this chunk (absent key = as before).
+                **({"joint_track_scale": context["joint_track_scale"]}
+                   if context is not None and context.get("joint_track_scale") is not None else {}),
+                # AG3S-PRE-CORE-TO E2 — the seeds' RNG follows the request (`t_step`); only with `sqp.multi_seed` on.
+                **({"multi_seed_index": int(context["t_step"])}
+                   if int(getattr(self.config.sqp, "multi_seed", 0) or 0) > 0
+                   and context is not None and context.get("t_step") is not None else {}),
+            )
+        finally:
+            for opt, cfg in swapped:
+                opt.config = cfg
+        if qp_mark is not None:
+            from AG3S.trajopt.qp import cuda_record_since
+
+            result.metrics["qp_backend"] = cuda_record_since(qp_mark)
+        if rate_off:
+            result.metrics["deflection_rate_off_by"] = str(rate_off)
+        if context is not None and context.get("joint_track_scale") is not None:
+            result.metrics["joint_track_scale"] = [round(float(v), 4) for v in context["joint_track_scale"]]
         # T37 — 이 청크의 목적함수에 continuity 항이 **들어갔나**, 아니면 왜 빠졌나. `metrics` 에 싣는
         # 이유: 기록(`summary_json.to.metrics`)만 보고 청크마다 셀 수 있어야 한다.
         result.metrics["continuity_active"] = bool(self.last_continuity.get("used"))

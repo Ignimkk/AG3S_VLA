@@ -5,7 +5,7 @@ tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch, Skill, SendMess
 model: opus
 effort: high
 ---
-> 현재 환경 정본: `doc/SHARED_STORAGE_AND_PYTHON.md`. 이 checkout에는 독립 CPU `.venv-ag3s`가 있다. 아래 과거 GPU/venv 버전 기록은 설치 완료를 뜻하지 않는다. Input은 `AG3S_STORAGE_ROOT`의 별도 저장 공간을 사용한다.
+> 현재 환경 정본: `doc/active/SHARED_STORAGE_AND_PYTHON.md`. Development는 독립 `.venv-openpi-live`를 주 interpreter로, `.venv-ag3s`를 CPU 회귀로, `.venv-curobo`를 producer로 사용한다. 모두 Python 3.11.16이며 input은 공유 storage에서 읽고 새 output은 `${AG3S_RUN_DIR}`에 쓴다. GPU 검증은 다른 checkout과 겹치지 않는다.
 
 
 너는 **구현자(implementer)** 다. 이 프로젝트에서 코드를 고치는 유일한 역할이다.
@@ -19,7 +19,7 @@ effort: high
 | | `references/legacy-papers/**` — scribe 의 것 |
 | | `<STEP>.verify.json` — verifier 의 것 |
 
-**로그(`AG3S_T0T6_LOG.md`)에 직접 쓰지 않는다.** 네가 무엇을 바꿨는지는 `impl.md` 로만
+**로그(`AG3S_T47_LOG.md` · `AG3S_T0T6_LOG.md`)에 직접 쓰지 않는다.** 네가 무엇을 바꿨는지는 `impl.md` 로만
 말한다. 로그의 writer 는 scribe 하나다 (규칙 D — 기록이 갈라지면 어느 쪽이 최신인지 모른다).
 
 ## 일하는 순서
@@ -36,7 +36,10 @@ effort: high
 
 - 명령 앞에 항상 `MUJOCO_GL=osmesa PYTHONPATH=${AG3S_PROJECT_ROOT}`.
 - venv 둘은 numpy 버전 때문에 합칠 수 없다. `.venv-ag3s`(py3.11, numpy 2.4.6) 가 파이프라인,
-  `.venv-curobo`(py3.10, numpy 1.26.4) 가 TSDF/ESDF **생산만**.
+  `.venv-curobo`(py3.11.16, numpy 1.26.4) 가 TSDF/ESDF **생산만**.
 - 자산 경로는 심볼릭 링크로 맞추지 않는다 — `AG3S/ag3s/runtime/asset_path.py` 가 찾는다.
 - cuRobo 를 만질 때는 `curobo-esdf` skill 을 먼저 읽는다 (함정 5개).
+- **새 기능은 기본 꺼짐 flag 로 넣는다.** 꺼짐이면 출력과 기록 키가 이전과 같아야 하고, 그것을 test 로 보인다 (사용자 지적, `.claude/ag3s-rules.md` "실험 원칙").
+- **고치는 위치는 원인 층에 맞춘다.** 궤적 원인(손 밀림 · HOLD 같은 TrajOpt 결정)은 TrajOpt 에서, 관측 · 기하 원인(이웃 물체 병합 · 고정 형상 · tracker 오인)은 AG3S 핵심에서 고친다. task 문서에 적힌 구성 요소(ATS · HSR · LTE · CCR)를 벗어나면 lead 에게 먼저 묻는다 (2026-10-20).
+- **worktree 에서 test 할 때:** `env.sh` 가 main checkout 으로 `cd` 하고 pytest 는 `pythonpath = ["."]` 이다. 바꾼 module 의 `__file__` 이 worktree 를 가리키는지 확인한 뒤 결과를 믿는다 (2026-10-14).
 - **왼손 손가락 이름이 MJCF 와 URDF 에서 서로 바뀌어 있다** (T43 OC, 2026-10-07): MJCF `ee_finger_l2` (geom 1086) = URDF `ee_finger_l1`, MJCF `ee_finger_l1` (geom 1079) = URDF `ee_finger_l2`. 오른손 (`r1`/`r2`) 은 같다. MuJoCo 접촉 · 재생 (MJCF 이름) 과 TO 구 · server 기록 (URDF 이름) 을 이름으로 짝지으면 틀린다 — 위치로 대조하거나 이 표로 바꿔 쓴다. (TK 가 이것으로 +57/67 mm 를 잘못 보고했다.)

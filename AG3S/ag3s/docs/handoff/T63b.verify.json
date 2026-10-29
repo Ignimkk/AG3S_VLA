@@ -1,0 +1,5428 @@
+{
+ "step": "T63b",
+ "date": "2026-10-22",
+ "writer": "ag3s-verifier",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26",
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "venv": ".venv-ag3s",
+   "command": "MUJOCO_GL=osmesa PYTHONPATH=$ROOT .venv-ag3s/bin/python -m AG3S.trajopt.experiments.esdf_rollout --records $AG3S_STORAGE_ROOT/recordings/run_16d_ep1800 --attention AG3S/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms --out-json $VT/baseline/legacy.json",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/baseline/legacy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/baseline/legacy.log"
+  },
+  {
+   "id": "baseline_curobo",
+   "venv": ".venv-openpi-live (GPU lock)",
+   "command": "(same) --esdf-backend curobo --fine-voxel 0.005 --tsdf-voxel 0.005 --out-json $VT/baseline/curobo.json",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/baseline/curobo.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/baseline/curobo.log"
+  },
+  {
+   "id": "a0_b0m_rules_export",
+   "venv": ".venv-ag3s (CPU, 4 workers)",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/step0_rules.sh",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/rules"
+  },
+  {
+   "id": "a1_b0m_curobo_750",
+   "venv": ".venv-curobo (GPU lock 2026-10-21T15:48:17Z-15:51:28Z, compute apps empty at lock: nvidia_smi_at_lock.txt)",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/step1_gpu.sh",
+   "command": "t63_curobo_compare --inputs $IN --out $V/curobo --stage step3 --variants B0m --timing exact --term-window chunk --b4-mask record --b0m-rules $V/rules --b0-chunks all",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/curobo/curobo_rows.jsonl",
+   "trajectories": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/curobo/trajectories/B0m",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/curobo/run_step3_curobo.log"
+  },
+  {
+   "id": "a2_common_evaluator",
+   "venv": ".venv-ag3s (CPU, 4 workers), cwd/PYTHONPATH = IFG-APPLE snapshot f0d8046",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/step2_eval.sh",
+   "command": "step3_eval.py --curobo $T63V/curobo_merged $V/curobo --resolve saved:$T63V/eval --rows-only (4 episode groups) then --aggregate-only",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/eval/step3_eval.json",
+   "rows": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/eval/rows_ep*.json",
+   "summary": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/summary_a.json",
+   "summary_script": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/summarize_a.py"
+  },
+  {
+   "id": "a_check1_t63_certified",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/checks/check1_t63_certified.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/checks/check1_t63_certified.json"
+  },
+  {
+   "id": "a_check2_smoke_bitident",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/checks/check2_smoke_bitident.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/checks/check2_smoke_bitident.json"
+  },
+  {
+   "id": "b_chain_CR0m",
+   "venv": ".venv-openpi-live (server + client), snapshot_cr0m",
+   "launcher": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/launch_cr0m.sh",
+   "gpu_lock": "2026-10-21T15:55:15Z-16:40:55Z, compute apps empty at lock (nvidia_smi_at_lock.txt); 1 server port 8292, 1 client",
+   "command": "CL1_GPU_LOCK_HELD=1 STOP_AFTER_PLACE=2.5 EST_GB=30 $V/p/run_chain.sh CR0m 8292 $V/runs \"$LIST\" (impl.md (b) LIST, 10 episodes)",
+   "chain_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/runs/chain_8292.log",
+   "launch_out": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/cr0m_launch.out",
+   "runs": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/runs/CR0m",
+   "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/runs/server_8292_20261021T155515"
+  },
+  {
+   "id": "b_analysis_replay",
+   "venv": ".venv-openpi-live CPU (2 replay workers, nice 19)",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/run_analysis.sh",
+   "analysis": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/analysis",
+   "replay": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/replay",
+   "replay_code": "IFG-APPLE p/replay_contacts.py + hold_w.py (copied, md5 identical), CL_SNAP = snapshot_cr0m"
+  },
+  {
+   "id": "b_cr0_smoke_replay",
+   "note": "replay of the impl CR0 (B0) smoke ep126 for the reference row",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/smoke_ref/replay",
+   "log": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/smoke_ref/raw/replay_cr0_smoke.log"
+  },
+  {
+   "id": "b_aggregation",
+   "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/t63b_cl.py",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/t63b_agg.json",
+   "samples": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/t63b_agg.samples.json",
+   "truncated_frames": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/trunc",
+   "curobo_jsonl_summary": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/curobo_jsonl_summary.json",
+   "log": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/raw/t63b_cl.log"
+  },
+  {
+   "id": "b_gripper_column_checks",
+   "scripts": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/checks/gripper_columns.py",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/checks/gripper_exec_window.py"
+   ],
+   "raw_output": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/checks/gripper_columns.json",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/checks/gripper_exec_window.json"
+   ]
+  },
+  {
+   "id": "figures",
+   "venv": ".venv-openpi-live",
+   "scripts": [
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/figs/fig_scene.py",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/figs/fig_graph.py",
+    "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/figs/fig_table.py"
+   ]
+  }
+ ],
+ "progress_log": [
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/b0m_offline/progress.txt",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/progress.txt"
+ ],
+ "inputs_read": [
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261021T031207+0900_f15e587290f6_c832c14b5e2e/impl/T63/inputs",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261021T031207+0900_f15e587290f6_c832c14b5e2e/verify/T63/step3/curobo_merged",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261021T031207+0900_f15e587290f6_c832c14b5e2e/verify/T63/step3/eval",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/snapshot",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/analysis",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/replay",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/agg.json",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/obst",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/impl/T63b/b0m",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/impl/T63b/runs/CR0",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/impl/T63b/analysis",
+  "/mnt/dev/AG3S_VLA-storage/checkpoints/rby1/pi05_rby1_randomized_pick_place_16d_lora/rby1_randomized_pick_place_16d_30k_xla_retry_20260923/29999",
+  "/mnt/dev/AG3S_VLA-storage/recordings/run_16d_ep1800"
+ ],
+ "code_state": {
+  "repo": "/mnt/dev/AG3S_VLA-development",
+  "branch": "feature/ag3s-development",
+  "head": "055f2ea2f00be7bc9c71f5df6bc2e65ec38c4a3c",
+  "trajopt_curobo_v2_clean_vs_head": true,
+  "snapshot_cr0m_tree": "883cf39e94c3506021f81b102241648059d62986 (git archive == $RUN/snapshot_cr0m excl. __pycache__, verified by verifier; curobo_v2/*.py + t63_curobo_compare.py md5 == HEAD 055f2ea2)",
+  "snapshot_cr0_tree": "25982bb06213895dc17297c98cca7db2b0da7e99 (CR0 smoke, impl)",
+  "ifg_apple_snapshot_tree": "f0d8046bdf19cb08088304639f318b404a298ddc (E0 / C1aN records, offline evaluator)",
+  "chain_guard": "code md5 == snapshot baseline; import check all under snapshot_cr0m (chain_8292.log)"
+ },
+ "numbers": {
+  "_comment": "numbers only. (a) offline 750 chunks; (b) closed loop 10 episodes. clearance in mm, time in ms.",
+  "baseline": {
+   "legacy": {
+    "frames": 15,
+    "violated_start": 14,
+    "has_target": 15,
+    "frame0_clearance_before_mm": -29.031048280806342
+   },
+   "curobo": {
+    "frames": 15,
+    "violated_start": 10,
+    "has_target": 15,
+    "frame0_clearance_before_mm": -9.171877401271193
+   }
+  },
+  "a_offline": {
+   "n_chunks": 750,
+   "episodes": [
+    211,
+    320,
+    572,
+    850,
+    901,
+    954,
+    250,
+    1345,
+    126,
+    309
+   ],
+   "definitions": {
+    "cert_violation_<w>": "chunks with certified min clearance < 0 (obstacle_margin 10 mm and contact margins included) = step3_eval n_penetration_<w>",
+    "phys_penetration_<w>": "chunks with physical min clearance < 0 (all margins 0, target contact policy kept) = n_phys_penetration_<w>",
+    "windows": "exec8 = steps 0-7, plan16 = steps 0-15",
+    "solver_failure": "n_solver_failure (cuRobo success false / our TO status)",
+    "timing": "T63 candidates: timing stored in the T63 records (not re-measured); B0m: this run, warm wall / GPU"
+   },
+   "candidates_all": {
+    "reference": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 0,
+     "status_counts": {
+      "None": 750
+     },
+     "cert_violation_exec8": 129,
+     "cert_violation_plan16": 203,
+     "cert_violation_all50": 309,
+     "phys_penetration_exec8": 86,
+     "phys_penetration_plan16": 136,
+     "phys_penetration_all50": 230,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 16.713669867096982,
+     "cert_min_clr_mm_exec8_p5": -22.818617558194248,
+     "cert_min_clr_mm_exec8_min": -28.61291377405925,
+     "cert_min_clr_mm_plan16_median": 14.900574455470384,
+     "cert_min_clr_mm_plan16_p5": -23.248907949484455,
+     "cert_min_clr_mm_plan16_min": -28.61291377405925,
+     "phys_min_clr_mm_exec8_median": 26.37802140964761,
+     "phys_min_clr_mm_exec8_p5": -12.818617558194251,
+     "phys_min_clr_mm_exec8_min": -18.61291377405925,
+     "phys_min_clr_mm_plan16_median": 24.900574455470384,
+     "phys_min_clr_mm_plan16_p5": -13.248907949484455,
+     "phys_min_clr_mm_plan16_min": -18.61291377405925,
+     "tcp_disp_mean_exec8_median_mm": 0.0,
+     "acc_violation_steps_plan16": 94,
+     "timing_device": [],
+     "wall_warm_median_ms": null,
+     "wall_warm_p95_ms": null,
+     "wall_n": 0,
+     "wall_warm_n_over_66p7ms": 0,
+     "wall_warm_frac_over_66p7ms": null,
+     "gpu_solve_warm_median_ms": null
+    },
+    "to_recorded": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 101,
+     "status_counts": {
+      "feasible": 466,
+      "violated": 101,
+      "optimal": 183
+     },
+     "cert_violation_exec8": 48,
+     "cert_violation_plan16": 90,
+     "cert_violation_all50": 300,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 59,
+     "phys_penetration_all50": 219,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 17.87644180225795,
+     "cert_min_clr_mm_exec8_p5": -18.47670358243305,
+     "cert_min_clr_mm_exec8_min": -23.87734467435545,
+     "cert_min_clr_mm_plan16_median": 15.269478447410759,
+     "cert_min_clr_mm_plan16_p5": -21.642478160224456,
+     "cert_min_clr_mm_plan16_min": -24.292983219498584,
+     "phys_min_clr_mm_exec8_median": 27.318356330106454,
+     "phys_min_clr_mm_exec8_p5": -8.47670358243305,
+     "phys_min_clr_mm_exec8_min": -13.877344674355449,
+     "phys_min_clr_mm_plan16_median": 25.14011053711493,
+     "phys_min_clr_mm_plan16_p5": -11.642478160224458,
+     "phys_min_clr_mm_plan16_min": -14.292983219498582,
+     "tcp_disp_mean_exec8_median_mm": 2.6517056455778727,
+     "acc_violation_steps_plan16": 344,
+     "timing_device": [
+      "cpu (server, live; record to.solve_ms)"
+     ],
+     "wall_warm_median_ms": 162.4410399235785,
+     "wall_warm_p95_ms": 626.967145036906,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 698,
+     "wall_warm_frac_over_66p7ms": 0.9306666666666666,
+     "gpu_solve_warm_median_ms": null
+    },
+    "to_resolved": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 102,
+     "status_counts": {
+      "feasible": 426,
+      "violated": 102,
+      "optimal": 222
+     },
+     "cert_violation_exec8": 47,
+     "cert_violation_plan16": 90,
+     "cert_violation_all50": 299,
+     "phys_penetration_exec8": 45,
+     "phys_penetration_plan16": 58,
+     "phys_penetration_all50": 218,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 17.886421888254773,
+     "cert_min_clr_mm_exec8_p5": -19.163364316426033,
+     "cert_min_clr_mm_exec8_min": -25.279316664238813,
+     "cert_min_clr_mm_plan16_median": 15.282675941337585,
+     "cert_min_clr_mm_plan16_p5": -21.88926334992828,
+     "cert_min_clr_mm_plan16_min": -25.279316664238813,
+     "phys_min_clr_mm_exec8_median": 27.320616691551237,
+     "phys_min_clr_mm_exec8_p5": -9.163364316426033,
+     "phys_min_clr_mm_exec8_min": -15.279316664238815,
+     "phys_min_clr_mm_plan16_median": 25.195258980192634,
+     "phys_min_clr_mm_plan16_p5": -11.88926334992828,
+     "phys_min_clr_mm_plan16_min": -15.279316664238815,
+     "tcp_disp_mean_exec8_median_mm": 2.697097100377556,
+     "acc_violation_steps_plan16": 368,
+     "timing_device": [
+      "cpu (offline, this machine)"
+     ],
+     "wall_warm_median_ms": 119.05254516750574,
+     "wall_warm_p95_ms": 353.03889960050583,
+     "wall_n": 746,
+     "wall_warm_n_over_66p7ms": 552,
+     "wall_warm_frac_over_66p7ms": 0.739946380697051,
+     "gpu_solve_warm_median_ms": null
+    },
+    "B0": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 144,
+     "status_counts": {
+      "success": 606,
+      "fail:scene_collision": 101,
+      "fail:cspace": 13,
+      "fail:": 1,
+      "fail:cspace,scene_collision": 29
+     },
+     "cert_violation_exec8": 146,
+     "cert_violation_plan16": 161,
+     "cert_violation_all50": 289,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 44,
+     "phys_penetration_all50": 151,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.690886690993988,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -26.27929543766169,
+     "cert_min_clr_mm_plan16_median": 10.26776443633509,
+     "cert_min_clr_mm_plan16_p5": -9.886338644459345,
+     "cert_min_clr_mm_plan16_min": -26.27929543766169,
+     "phys_min_clr_mm_exec8_median": 23.277364217353103,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -16.279295437661695,
+     "phys_min_clr_mm_plan16_median": 19.949807395116128,
+     "phys_min_clr_mm_plan16_p5": -1.0986051684535878,
+     "phys_min_clr_mm_plan16_min": -16.279295437661695,
+     "tcp_disp_mean_exec8_median_mm": 11.392453997435158,
+     "acc_violation_steps_plan16": 1,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 56.71145720407367,
+     "wall_warm_p95_ms": 104.28336723707613,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 57,
+     "wall_warm_frac_over_66p7ms": 0.076,
+     "gpu_solve_warm_median_ms": 45.06689643859863
+    },
+    "B1_lam1": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 143,
+     "status_counts": {
+      "success": 607,
+      "fail:scene_collision": 105,
+      "fail:cspace": 13,
+      "fail:cspace,scene_collision": 25
+     },
+     "cert_violation_exec8": 147,
+     "cert_violation_plan16": 156,
+     "cert_violation_all50": 281,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 44,
+     "phys_penetration_all50": 152,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.770998682697952,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -26.257215524922334,
+     "cert_min_clr_mm_plan16_median": 10.252281093063662,
+     "cert_min_clr_mm_plan16_p5": -9.886338644459345,
+     "cert_min_clr_mm_plan16_min": -26.257215524922334,
+     "phys_min_clr_mm_exec8_median": 23.34665691352422,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -16.257215524922334,
+     "phys_min_clr_mm_plan16_median": 19.910498236903415,
+     "phys_min_clr_mm_plan16_p5": -1.0986051684535878,
+     "phys_min_clr_mm_plan16_min": -16.257215524922334,
+     "tcp_disp_mean_exec8_median_mm": 11.238109341227918,
+     "acc_violation_steps_plan16": 0,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 64.42835927009583,
+     "wall_warm_p95_ms": 114.81642299331723,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 125,
+     "wall_warm_frac_over_66p7ms": 0.16666666666666666,
+     "gpu_solve_warm_median_ms": 51.97785568237305
+    },
+    "B1_lam100": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 143,
+     "status_counts": {
+      "success": 607,
+      "fail:scene_collision": 111,
+      "fail:cspace": 13,
+      "fail:cspace,scene_collision": 19
+     },
+     "cert_violation_exec8": 145,
+     "cert_violation_plan16": 153,
+     "cert_violation_all50": 263,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 44,
+     "phys_penetration_all50": 151,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.95738070846372,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -26.550019434500236,
+     "cert_min_clr_mm_plan16_median": 11.645555411113532,
+     "cert_min_clr_mm_plan16_p5": -9.886338644459345,
+     "cert_min_clr_mm_plan16_min": -26.550019434500236,
+     "phys_min_clr_mm_exec8_median": 23.393838106372876,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -16.550019434500236,
+     "phys_min_clr_mm_plan16_median": 21.008498455032125,
+     "phys_min_clr_mm_plan16_p5": -1.0986051684535878,
+     "phys_min_clr_mm_plan16_min": -16.550019434500236,
+     "tcp_disp_mean_exec8_median_mm": 10.388259339057353,
+     "acc_violation_steps_plan16": 0,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 64.41684812307358,
+     "wall_warm_p95_ms": 100.273461593315,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 134,
+     "wall_warm_frac_over_66p7ms": 0.17866666666666667,
+     "gpu_solve_warm_median_ms": 51.84625434875488
+    },
+    "B1_lam10000": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 165,
+     "status_counts": {
+      "success": 585,
+      "fail:scene_collision": 102,
+      "fail:cspace": 30,
+      "fail:": 2,
+      "fail:cspace,scene_collision": 31
+     },
+     "cert_violation_exec8": 152,
+     "cert_violation_plan16": 186,
+     "cert_violation_all50": 298,
+     "phys_penetration_exec8": 43,
+     "phys_penetration_plan16": 44,
+     "phys_penetration_all50": 153,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.328013732211724,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -25.989172607787722,
+     "cert_min_clr_mm_plan16_median": 10.441957765789171,
+     "cert_min_clr_mm_plan16_p5": -10.664948125313897,
+     "cert_min_clr_mm_plan16_min": -25.989172607787722,
+     "phys_min_clr_mm_exec8_median": 23.031487351225827,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -15.989172607787719,
+     "phys_min_clr_mm_plan16_median": 20.306105649306623,
+     "phys_min_clr_mm_plan16_p5": -1.1607966646257846,
+     "phys_min_clr_mm_plan16_min": -15.989172607787719,
+     "tcp_disp_mean_exec8_median_mm": 7.533847320980857,
+     "acc_violation_steps_plan16": 2,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 64.09221095964313,
+     "wall_warm_p95_ms": 99.64956827461718,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 99,
+     "wall_warm_frac_over_66p7ms": 0.132,
+     "gpu_solve_warm_median_ms": 51.92617607116699
+    },
+    "B2_lam1": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 143,
+     "status_counts": {
+      "success": 607,
+      "fail:scene_collision": 103,
+      "fail:cspace": 13,
+      "fail:cspace,scene_collision": 27
+     },
+     "cert_violation_exec8": 146,
+     "cert_violation_plan16": 162,
+     "cert_violation_all50": 281,
+     "phys_penetration_exec8": 43,
+     "phys_penetration_plan16": 43,
+     "phys_penetration_all50": 151,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.582973282175029,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -26.257215524922334,
+     "cert_min_clr_mm_plan16_median": 10.252281093063662,
+     "cert_min_clr_mm_plan16_p5": -9.886338644459345,
+     "cert_min_clr_mm_plan16_min": -26.257215524922334,
+     "phys_min_clr_mm_exec8_median": 23.228697751408752,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -16.257215524922334,
+     "phys_min_clr_mm_plan16_median": 19.902716068792174,
+     "phys_min_clr_mm_plan16_p5": -1.0986051684535878,
+     "phys_min_clr_mm_plan16_min": -16.257215524922334,
+     "tcp_disp_mean_exec8_median_mm": 11.473005628045552,
+     "acc_violation_steps_plan16": 1,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 70.02144493162632,
+     "wall_warm_p95_ms": 133.8950899429618,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 675,
+     "wall_warm_frac_over_66p7ms": 0.9,
+     "gpu_solve_warm_median_ms": 57.48971176147461
+    },
+    "B2_lam100": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 143,
+     "status_counts": {
+      "success": 607,
+      "fail:scene_collision": 107,
+      "fail:cspace": 13,
+      "fail:cspace,scene_collision": 23
+     },
+     "cert_violation_exec8": 145,
+     "cert_violation_plan16": 153,
+     "cert_violation_all50": 264,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 44,
+     "phys_penetration_all50": 151,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.770998682697952,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -26.90331768334918,
+     "cert_min_clr_mm_plan16_median": 11.390214838756219,
+     "cert_min_clr_mm_plan16_p5": -9.886338644459345,
+     "cert_min_clr_mm_plan16_min": -26.90331768334918,
+     "phys_min_clr_mm_exec8_median": 23.277364217353103,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -16.90331768334918,
+     "phys_min_clr_mm_plan16_median": 20.966270870920233,
+     "phys_min_clr_mm_plan16_p5": -1.0986051684535878,
+     "phys_min_clr_mm_plan16_min": -16.90331768334918,
+     "tcp_disp_mean_exec8_median_mm": 10.37399894094657,
+     "acc_violation_steps_plan16": 0,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 70.20241115242243,
+     "wall_warm_p95_ms": 124.28692430257787,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 731,
+     "wall_warm_frac_over_66p7ms": 0.9746666666666667,
+     "gpu_solve_warm_median_ms": 57.58003234863281
+    },
+    "B2_lam10000": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 174,
+     "status_counts": {
+      "success": 576,
+      "fail:scene_collision": 104,
+      "fail:cspace": 35,
+      "fail:": 2,
+      "fail:cspace,scene_collision": 33
+     },
+     "cert_violation_exec8": 149,
+     "cert_violation_plan16": 187,
+     "cert_violation_all50": 300,
+     "phys_penetration_exec8": 45,
+     "phys_penetration_plan16": 47,
+     "phys_penetration_all50": 154,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.266804338723514,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -25.859898752668276,
+     "cert_min_clr_mm_plan16_median": 10.252281093063662,
+     "cert_min_clr_mm_plan16_p5": -10.664948125313897,
+     "cert_min_clr_mm_plan16_min": -25.859898752668276,
+     "phys_min_clr_mm_exec8_median": 23.031487351225827,
+     "phys_min_clr_mm_exec8_p5": -1.3325927976378298,
+     "phys_min_clr_mm_exec8_min": -15.859898752668272,
+     "phys_min_clr_mm_plan16_median": 19.93698356310756,
+     "phys_min_clr_mm_plan16_p5": -1.3491785790040332,
+     "phys_min_clr_mm_plan16_min": -15.859898752668272,
+     "tcp_disp_mean_exec8_median_mm": 8.2977870550694,
+     "acc_violation_steps_plan16": 6,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 72.77192175388336,
+     "wall_warm_p95_ms": 197.2357707098126,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 716,
+     "wall_warm_frac_over_66p7ms": 0.9546666666666667,
+     "gpu_solve_warm_median_ms": 59.14174270629883
+    },
+    "B3_lam1": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 144,
+     "status_counts": {
+      "success": 606,
+      "fail:scene_collision": 105,
+      "fail:cspace": 13,
+      "fail:cspace,scene_collision": 26
+     },
+     "cert_violation_exec8": 147,
+     "cert_violation_plan16": 160,
+     "cert_violation_all50": 284,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 44,
+     "phys_penetration_all50": 152,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.69147287013217,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -25.774539430367685,
+     "cert_min_clr_mm_plan16_median": 10.423722892987245,
+     "cert_min_clr_mm_plan16_p5": -9.886338644459345,
+     "cert_min_clr_mm_plan16_min": -25.774539430367685,
+     "phys_min_clr_mm_exec8_median": 23.328013732211723,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -15.774539430367684,
+     "phys_min_clr_mm_plan16_median": 19.949807395116128,
+     "phys_min_clr_mm_plan16_p5": -1.0986051684535878,
+     "phys_min_clr_mm_plan16_min": -15.774539430367684,
+     "tcp_disp_mean_exec8_median_mm": 11.213909267521993,
+     "acc_violation_steps_plan16": 0,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 82.76564069092274,
+     "wall_warm_p95_ms": 195.68132595159113,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 750,
+     "wall_warm_frac_over_66p7ms": 1.0,
+     "gpu_solve_warm_median_ms": 68.85590362548828
+    },
+    "B3_lam100": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 144,
+     "status_counts": {
+      "success": 606,
+      "fail:scene_collision": 105,
+      "fail:cspace": 13,
+      "fail:cspace,scene_collision": 26
+     },
+     "cert_violation_exec8": 145,
+     "cert_violation_plan16": 155,
+     "cert_violation_all50": 263,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 44,
+     "phys_penetration_all50": 150,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.770998682697952,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -25.824923560818675,
+     "cert_min_clr_mm_plan16_median": 11.922464009369685,
+     "cert_min_clr_mm_plan16_p5": -9.886338644459345,
+     "cert_min_clr_mm_plan16_min": -25.824923560818675,
+     "phys_min_clr_mm_exec8_median": 23.277364217353103,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -15.824923560818673,
+     "phys_min_clr_mm_plan16_median": 21.428418370218814,
+     "phys_min_clr_mm_plan16_p5": -1.0986051684535878,
+     "phys_min_clr_mm_plan16_min": -15.824923560818673,
+     "tcp_disp_mean_exec8_median_mm": 10.681131641680393,
+     "acc_violation_steps_plan16": 2,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 83.64104945212603,
+     "wall_warm_p95_ms": 201.4455524738878,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 750,
+     "wall_warm_frac_over_66p7ms": 1.0,
+     "gpu_solve_warm_median_ms": 68.89497756958008
+    },
+    "B3_lam10000": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 171,
+     "status_counts": {
+      "success": 579,
+      "fail:scene_collision": 108,
+      "fail:cspace": 33,
+      "fail:": 3,
+      "fail:cspace,scene_collision": 27
+     },
+     "cert_violation_exec8": 153,
+     "cert_violation_plan16": 189,
+     "cert_violation_all50": 295,
+     "phys_penetration_exec8": 45,
+     "phys_penetration_plan16": 46,
+     "phys_penetration_all50": 151,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.418443431185132,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -26.318505736887147,
+     "cert_min_clr_mm_plan16_median": 10.614956064610482,
+     "cert_min_clr_mm_plan16_p5": -10.664948125313897,
+     "cert_min_clr_mm_plan16_min": -26.318505736887147,
+     "phys_min_clr_mm_exec8_median": 23.170099900303807,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -16.318505736887147,
+     "phys_min_clr_mm_plan16_median": 20.25228109306366,
+     "phys_min_clr_mm_plan16_p5": -1.253052054690773,
+     "phys_min_clr_mm_plan16_min": -16.318505736887147,
+     "tcp_disp_mean_exec8_median_mm": 7.8526600937461914,
+     "acc_violation_steps_plan16": 4,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 82.13147427886724,
+     "wall_warm_p95_ms": 152.69263335503638,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 750,
+     "wall_warm_frac_over_66p7ms": 1.0,
+     "gpu_solve_warm_median_ms": 68.60958480834961
+    },
+    "B4_lam1": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 169,
+     "status_counts": {
+      "success": 581,
+      "fail:scene_collision": 151,
+      "fail:cspace,scene_collision": 7,
+      "fail:cspace": 11
+     },
+     "cert_violation_exec8": 149,
+     "cert_violation_plan16": 167,
+     "cert_violation_all50": 280,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 87,
+     "phys_penetration_all50": 157,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.69147287013217,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -25.835255178847536,
+     "cert_min_clr_mm_plan16_median": 10.350147773889372,
+     "cert_min_clr_mm_plan16_p5": -15.877617716554749,
+     "cert_min_clr_mm_plan16_min": -34.83280945321107,
+     "phys_min_clr_mm_exec8_median": 23.277364162719742,
+     "phys_min_clr_mm_exec8_p5": -1.2005726415909244,
+     "phys_min_clr_mm_exec8_min": -15.835255178847534,
+     "phys_min_clr_mm_plan16_median": 19.936982771117485,
+     "phys_min_clr_mm_plan16_p5": -5.717196616434059,
+     "phys_min_clr_mm_plan16_min": -24.83280945321107,
+     "tcp_disp_mean_exec8_median_mm": 9.570973915696255,
+     "acc_violation_steps_plan16": 3,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 121.35860975831747,
+     "wall_warm_p95_ms": 203.79950595088303,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 750,
+     "wall_warm_frac_over_66p7ms": 1.0,
+     "gpu_solve_warm_median_ms": 99.82331466674805
+    },
+    "B4_lam100": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 162,
+     "status_counts": {
+      "success": 588,
+      "fail:scene_collision": 126,
+      "fail:cspace,scene_collision": 25,
+      "fail:cspace": 11
+     },
+     "cert_violation_exec8": 149,
+     "cert_violation_plan16": 175,
+     "cert_violation_all50": 274,
+     "phys_penetration_exec8": 48,
+     "phys_penetration_plan16": 63,
+     "phys_penetration_all50": 163,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.770998682697952,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -25.824923560818675,
+     "cert_min_clr_mm_plan16_median": 10.889647873694898,
+     "cert_min_clr_mm_plan16_p5": -13.47805520202802,
+     "cert_min_clr_mm_plan16_min": -36.899561142412644,
+     "phys_min_clr_mm_exec8_median": 23.327997157718666,
+     "phys_min_clr_mm_exec8_p5": -1.5345409988250736,
+     "phys_min_clr_mm_exec8_min": -15.824923560818673,
+     "phys_min_clr_mm_plan16_median": 20.785070971397268,
+     "phys_min_clr_mm_plan16_p5": -4.343066604570854,
+     "phys_min_clr_mm_plan16_min": -26.89956114241264,
+     "tcp_disp_mean_exec8_median_mm": 9.864356519086577,
+     "acc_violation_steps_plan16": 8,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 111.3347033970058,
+     "wall_warm_p95_ms": 201.92548907361925,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 750,
+     "wall_warm_frac_over_66p7ms": 1.0,
+     "gpu_solve_warm_median_ms": 97.05971145629883
+    },
+    "B4_lam10000": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 175,
+     "status_counts": {
+      "success": 575,
+      "fail:scene_collision": 113,
+      "fail:cspace,scene_collision": 29,
+      "fail:cspace": 31,
+      "fail:": 2
+     },
+     "cert_violation_exec8": 152,
+     "cert_violation_plan16": 184,
+     "cert_violation_all50": 290,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 46,
+     "phys_penetration_all50": 151,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.328013732211724,
+     "cert_min_clr_mm_exec8_p5": -9.886338644459345,
+     "cert_min_clr_mm_exec8_min": -26.318505736887147,
+     "cert_min_clr_mm_plan16_median": 10.614956064610482,
+     "cert_min_clr_mm_plan16_p5": -11.047182656521795,
+     "cert_min_clr_mm_plan16_min": -26.318505736887147,
+     "phys_min_clr_mm_exec8_median": 22.90515292969257,
+     "phys_min_clr_mm_exec8_p5": -1.0986051684535878,
+     "phys_min_clr_mm_exec8_min": -16.318505736887147,
+     "phys_min_clr_mm_plan16_median": 19.949807395116128,
+     "phys_min_clr_mm_plan16_p5": -1.3377078205480601,
+     "phys_min_clr_mm_plan16_min": -16.318505736887147,
+     "tcp_disp_mean_exec8_median_mm": 7.846804076617607,
+     "acc_violation_steps_plan16": 13,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 113.7382797896862,
+     "wall_warm_p95_ms": 207.65742319636044,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 750,
+     "wall_warm_frac_over_66p7ms": 1.0,
+     "gpu_solve_warm_median_ms": 97.91876602172852
+    },
+    "B0_resample16": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 143,
+     "status_counts": {
+      "success": 607,
+      "fail:scene_collision": 107,
+      "fail:cspace": 13,
+      "fail:cspace,scene_collision": 23
+     },
+     "cert_violation_exec8": 146,
+     "cert_violation_plan16": 160,
+     "cert_violation_all50": 280,
+     "phys_penetration_exec8": 44,
+     "phys_penetration_plan16": 44,
+     "phys_penetration_all50": 151,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.77102962572273,
+     "cert_min_clr_mm_exec8_p5": -9.886311647855678,
+     "cert_min_clr_mm_exec8_min": -26.367274990324063,
+     "cert_min_clr_mm_plan16_median": 10.865337742319095,
+     "cert_min_clr_mm_plan16_p5": -9.886311647855678,
+     "cert_min_clr_mm_plan16_min": -26.367274990324063,
+     "phys_min_clr_mm_exec8_median": 23.328007809640987,
+     "phys_min_clr_mm_exec8_p5": -1.0986019846610926,
+     "phys_min_clr_mm_exec8_min": -16.36727499032406,
+     "phys_min_clr_mm_plan16_median": 20.265570549036283,
+     "phys_min_clr_mm_plan16_p5": -1.0986019846610926,
+     "phys_min_clr_mm_plan16_min": -16.36727499032406,
+     "tcp_disp_mean_exec8_median_mm": 10.658667371544363,
+     "acc_violation_steps_plan16": 0,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 55.86387775838375,
+     "wall_warm_p95_ms": 60.672734724357724,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 19,
+     "wall_warm_frac_over_66p7ms": 0.025333333333333333,
+     "gpu_solve_warm_median_ms": 42.468305587768555
+    },
+    "B0m": {
+     "n_chunks": 750,
+     "n_evaluated": 750,
+     "n_solver_failure": 252,
+     "status_counts": {
+      "success": 498,
+      "fail:scene_collision": 165,
+      "fail:cspace": 12,
+      "fail:cspace,scene_collision": 75
+     },
+     "cert_violation_exec8": 143,
+     "cert_violation_plan16": 143,
+     "cert_violation_all50": 246,
+     "phys_penetration_exec8": 48,
+     "phys_penetration_plan16": 48,
+     "phys_penetration_all50": 150,
+     "n_phys_evaluated": 750,
+     "cert_min_clr_mm_exec8_median": 13.912394407573029,
+     "cert_min_clr_mm_exec8_p5": -11.039000217982998,
+     "cert_min_clr_mm_exec8_min": -26.399020326784996,
+     "cert_min_clr_mm_plan16_median": 11.988123749907444,
+     "cert_min_clr_mm_plan16_p5": -11.039000217982998,
+     "cert_min_clr_mm_plan16_min": -26.399020326784996,
+     "phys_min_clr_mm_exec8_median": 23.545698036410286,
+     "phys_min_clr_mm_exec8_p5": -1.7503505157586334,
+     "phys_min_clr_mm_exec8_min": -16.399020326785,
+     "phys_min_clr_mm_plan16_median": 21.292744721519412,
+     "phys_min_clr_mm_plan16_p5": -1.7503505157586334,
+     "phys_min_clr_mm_plan16_min": -16.399020326785,
+     "tcp_disp_mean_exec8_median_mm": 15.47082299790274,
+     "acc_violation_steps_plan16": 4,
+     "timing_device": [
+      "gpu"
+     ],
+     "wall_warm_median_ms": 107.77112655341625,
+     "wall_warm_p95_ms": 110.62586205080152,
+     "wall_n": 750,
+     "wall_warm_n_over_66p7ms": 750,
+     "wall_warm_frac_over_66p7ms": 1.0,
+     "gpu_solve_warm_median_ms": 93.96273803710938
+    }
+   },
+   "splits_available": [
+    "all",
+    "to_active",
+    "to_inactive",
+    "box_free",
+    "box_main_fine",
+    "pre_grasp",
+    "post_grasp"
+   ],
+   "B0m_status_counts": {
+    "success": 498,
+    "fail:scene_collision": 165,
+    "fail:cspace": 12,
+    "fail:cspace,scene_collision": 75
+   },
+   "B0m_timing": {
+    "wall_warm_median_ms": 107.77112655341625,
+    "wall_warm_p95_ms": 110.62586205080152,
+    "gpu_solve_warm_median_ms": 93.96273803710938,
+    "wall_n_over_66p7": 750,
+    "init_s_and_cold_ms": "init 2.0 s, cold 5529 ms (run_step3_curobo.log; cold not in warm stats)",
+    "total_s_750": 134
+   },
+   "reproduction": {
+    "check1_t63_certified_metric_dicts_equal": "12750/12750",
+    "check2_B0m_ep126_ep211_vs_impl_smoke": {
+     "rows_equal_excluding_timing": "150/150",
+     "trajectory_arrays_bit_identical": true
+    },
+    "check3_rules_npz_byte_identical_to_impl": "10/10"
+   }
+  },
+  "b_closed_loop": {
+   "arms": {
+    "E0": "IFG-APPLE records (VLA alone)",
+    "C1aN": "IFG-APPLE records (our TO)",
+    "CR0m": "this run (C1aN argv + --to-backend curobo-b0m, snapshot_cr0m)",
+    "CR0_smoke": "impl/T63b CR0 (B0) single-episode smoke ep126 (1 episode)"
+   },
+   "window_rule": "place_detect_t = first control row with used-arm applied gripper >= 0.5 and target centre in crate (object_in_crate rule on replay state after the row); stop_t = place_detect_t + 38; E0 / C1aN recounted on t <= stop_t; no place -> 600 steps",
+   "cr0m_place_stop_fired": 0,
+   "cr0m_place_detect_consistency": [
+    {
+     "episode": 211,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    },
+    {
+     "episode": 320,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    },
+    {
+     "episode": 572,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    },
+    {
+     "episode": 850,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    },
+    {
+     "episode": 901,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    },
+    {
+     "episode": 954,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    },
+    {
+     "episode": 250,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    },
+    {
+     "episode": 1345,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    },
+    {
+     "episode": 126,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    },
+    {
+     "episode": 309,
+     "replay_rule": null,
+     "traj_place_detect_t": -1,
+     "traj_place_stop_t": -1,
+     "last_control_t": 599,
+     "equal": true
+    }
+   ],
+   "truncation_summary_E0_C1aN": {
+    "n_runs": 20,
+    "n_place_detected": 15,
+    "n_success_changed": 0,
+    "n_grasp_changed": 0,
+    "n_primary_changed": 0,
+    "n_place_t_changed": 0
+   },
+   "truncation_per_run": [
+    {
+     "episode": 211,
+     "arm": "E0",
+     "place_detect_t": 285,
+     "stop_t": 323,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 288,
+     "place_t_trunc": 288
+    },
+    {
+     "episode": 211,
+     "arm": "C1aN",
+     "place_detect_t": null,
+     "stop_t": null,
+     "success_full": false,
+     "success_trunc": false,
+     "grasp_full": false,
+     "grasp_trunc": false,
+     "primary_full": false,
+     "primary_trunc": false,
+     "place_t_full": null,
+     "place_t_trunc": null
+    },
+    {
+     "episode": 320,
+     "arm": "E0",
+     "place_detect_t": 324,
+     "stop_t": 362,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 328,
+     "place_t_trunc": 328
+    },
+    {
+     "episode": 320,
+     "arm": "C1aN",
+     "place_detect_t": null,
+     "stop_t": null,
+     "success_full": false,
+     "success_trunc": false,
+     "grasp_full": false,
+     "grasp_trunc": false,
+     "primary_full": false,
+     "primary_trunc": false,
+     "place_t_full": null,
+     "place_t_trunc": null
+    },
+    {
+     "episode": 572,
+     "arm": "E0",
+     "place_detect_t": 233,
+     "stop_t": 271,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 240,
+     "place_t_trunc": 240
+    },
+    {
+     "episode": 572,
+     "arm": "C1aN",
+     "place_detect_t": 204,
+     "stop_t": 242,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 208,
+     "place_t_trunc": 208
+    },
+    {
+     "episode": 850,
+     "arm": "E0",
+     "place_detect_t": 197,
+     "stop_t": 235,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 200,
+     "place_t_trunc": 200
+    },
+    {
+     "episode": 850,
+     "arm": "C1aN",
+     "place_detect_t": 242,
+     "stop_t": 280,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 248,
+     "place_t_trunc": 248
+    },
+    {
+     "episode": 901,
+     "arm": "E0",
+     "place_detect_t": 250,
+     "stop_t": 288,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 256,
+     "place_t_trunc": 256
+    },
+    {
+     "episode": 901,
+     "arm": "C1aN",
+     "place_detect_t": 214,
+     "stop_t": 252,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 216,
+     "place_t_trunc": 216
+    },
+    {
+     "episode": 954,
+     "arm": "E0",
+     "place_detect_t": 237,
+     "stop_t": 275,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 240,
+     "place_t_trunc": 240
+    },
+    {
+     "episode": 954,
+     "arm": "C1aN",
+     "place_detect_t": null,
+     "stop_t": null,
+     "success_full": false,
+     "success_trunc": false,
+     "grasp_full": false,
+     "grasp_trunc": false,
+     "primary_full": false,
+     "primary_trunc": false,
+     "place_t_full": null,
+     "place_t_trunc": null
+    },
+    {
+     "episode": 250,
+     "arm": "E0",
+     "place_detect_t": 193,
+     "stop_t": 231,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 200,
+     "place_t_trunc": 200
+    },
+    {
+     "episode": 250,
+     "arm": "C1aN",
+     "place_detect_t": null,
+     "stop_t": null,
+     "success_full": false,
+     "success_trunc": false,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": false,
+     "primary_trunc": false,
+     "place_t_full": null,
+     "place_t_trunc": null
+    },
+    {
+     "episode": 1345,
+     "arm": "E0",
+     "place_detect_t": 301,
+     "stop_t": 339,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 304,
+     "place_t_trunc": 304
+    },
+    {
+     "episode": 1345,
+     "arm": "C1aN",
+     "place_detect_t": null,
+     "stop_t": null,
+     "success_full": false,
+     "success_trunc": false,
+     "grasp_full": false,
+     "grasp_trunc": false,
+     "primary_full": false,
+     "primary_trunc": false,
+     "place_t_full": null,
+     "place_t_trunc": null
+    },
+    {
+     "episode": 126,
+     "arm": "E0",
+     "place_detect_t": 213,
+     "stop_t": 251,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 216,
+     "place_t_trunc": 216
+    },
+    {
+     "episode": 126,
+     "arm": "C1aN",
+     "place_detect_t": 197,
+     "stop_t": 235,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 200,
+     "place_t_trunc": 200
+    },
+    {
+     "episode": 309,
+     "arm": "E0",
+     "place_detect_t": 323,
+     "stop_t": 361,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 328,
+     "place_t_trunc": 328
+    },
+    {
+     "episode": 309,
+     "arm": "C1aN",
+     "place_detect_t": 227,
+     "stop_t": 265,
+     "success_full": true,
+     "success_trunc": true,
+     "grasp_full": true,
+     "grasp_trunc": true,
+     "primary_full": true,
+     "primary_trunc": true,
+     "place_t_full": 232,
+     "place_t_trunc": 232
+    }
+   ],
+   "per_arm": {
+    "E0": {
+     "trunc": {
+      "all": {
+       "n_runs": 10,
+       "n_success": 10,
+       "n_grasp": 10,
+       "n_primary": 10,
+       "failure_modes": {
+        "ok": 10
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 56,
+        "robot_other-fruit_other": 0,
+        "hand-target": 1202,
+        "apple-crate": 322,
+        "hand-crate": 31,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 3,
+       "hold_chunks_sum": 0,
+       "runs_with_hold": 0,
+       "hold_kinds": {},
+       "planning_chunks_sum": 373,
+       "control_rows_sum": 2946,
+       "to_status_counts": {},
+       "to_solve_ms": null,
+       "to_solve_n_over_66p7": 0,
+       "to_solve_frac_over_66p7": null,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 2946,
+        "median": 8.361237375244137,
+        "p95": 28.11643493081099,
+        "max": 36.97038932102241,
+        "mean": 11.624244305446569
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 10,
+        "median": 8.406890733982864,
+        "p95": 9.585519707247405,
+        "max": 9.624650276423223,
+        "mean": 8.472427539179971
+       },
+       "completion_s": {
+        "n": 10,
+        "median": 16.53333333333333,
+        "p95": 21.866666666666667,
+        "max": 21.866666666666667,
+        "mean": 17.333333333333336
+       }
+      },
+      "clear": {
+       "n_runs": 4,
+       "n_success": 4,
+       "n_grasp": 4,
+       "n_primary": 4,
+       "failure_modes": {
+        "ok": 4
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 31,
+        "robot_other-fruit_other": 0,
+        "hand-target": 557,
+        "apple-crate": 129,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 0,
+       "runs_with_hold": 0,
+       "hold_kinds": {},
+       "planning_chunks_sum": 150,
+       "control_rows_sum": 1186,
+       "to_status_counts": {},
+       "to_solve_ms": null,
+       "to_solve_n_over_66p7": 0,
+       "to_solve_frac_over_66p7": null,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 1186,
+        "median": 8.760079582266986,
+        "p95": 28.35046563108963,
+        "max": 34.57937666447485,
+        "mean": 12.05364097295102
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 4,
+        "median": 9.055986411230663,
+        "p95": 9.611606753364617,
+        "max": 9.624650276423223,
+        "mean": 8.905969117520813
+       },
+       "completion_s": {
+        "n": 4,
+        "median": 17.333333333333332,
+        "p95": 21.626666666666665,
+        "max": 21.866666666666667,
+        "mean": 17.46666666666667
+       }
+      },
+      "place": {
+       "n_runs": 6,
+       "n_success": 6,
+       "n_grasp": 6,
+       "n_primary": 6,
+       "failure_modes": {
+        "ok": 6
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 25,
+        "robot_other-fruit_other": 0,
+        "hand-target": 645,
+        "apple-crate": 193,
+        "hand-crate": 31,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 2,
+       "hold_chunks_sum": 0,
+       "runs_with_hold": 0,
+       "hold_kinds": {},
+       "planning_chunks_sum": 223,
+       "control_rows_sum": 1760,
+       "to_status_counts": {},
+       "to_solve_ms": null,
+       "to_solve_n_over_66p7": 0,
+       "to_solve_frac_over_66p7": null,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 1760,
+        "median": 8.12463717464343,
+        "p95": 27.842261968363893,
+        "max": 36.97038932102241,
+        "mean": 11.334889505639591
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 6,
+        "median": 8.185983672098606,
+        "p95": 8.749079421971643,
+        "max": 8.75628484363552,
+        "mean": 8.18339982028608
+       },
+       "completion_s": {
+        "n": 6,
+        "median": 16.53333333333333,
+        "p95": 21.2,
+        "max": 21.866666666666667,
+        "mean": 17.244444444444444
+       }
+      }
+     },
+     "full": {
+      "all": {
+       "n_runs": 10,
+       "n_success": 10,
+       "n_grasp": 10,
+       "n_primary": 10,
+       "failure_modes": {
+        "ok": 10
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 56,
+        "robot_other-fruit_other": 0,
+        "hand-target": 1202,
+        "apple-crate": 3376,
+        "hand-crate": 43,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 3,
+       "hold_chunks_sum": 0,
+       "runs_with_hold": 0,
+       "hold_kinds": {},
+       "planning_chunks_sum": 750,
+       "control_rows_sum": 6000,
+       "to_status_counts": {},
+       "to_solve_ms": null,
+       "to_solve_n_over_66p7": 0,
+       "to_solve_frac_over_66p7": null,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 6000,
+        "median": 7.22390901182643,
+        "p95": 26.181545621502675,
+        "max": 44.555164058139184,
+        "mean": 10.037735840002414
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 10,
+        "median": 7.2331676609060835,
+        "p95": 7.459803329075259,
+        "max": 7.488363944967705,
+        "mean": 7.232838129615848
+       },
+       "completion_s": {
+        "n": 10,
+        "median": 16.53333333333333,
+        "p95": 21.866666666666667,
+        "max": 21.866666666666667,
+        "mean": 17.333333333333336
+       }
+      },
+      "clear": {
+       "n_runs": 4,
+       "n_success": 4,
+       "n_grasp": 4,
+       "n_primary": 4,
+       "failure_modes": {
+        "ok": 4
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 31,
+        "robot_other-fruit_other": 0,
+        "hand-target": 557,
+        "apple-crate": 1343,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 0,
+       "runs_with_hold": 0,
+       "hold_kinds": {},
+       "planning_chunks_sum": 300,
+       "control_rows_sum": 2400,
+       "to_status_counts": {},
+       "to_solve_ms": null,
+       "to_solve_n_over_66p7": 0,
+       "to_solve_frac_over_66p7": null,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 2400,
+        "median": 7.283964246961758,
+        "p95": 26.472443136239665,
+        "max": 44.555164058139184,
+        "mean": 10.176894221292635
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 4,
+        "median": 7.313721220099087,
+        "p95": 7.4137762509934815,
+        "max": 7.424895909651158,
+        "mean": 7.313777449879623
+       },
+       "completion_s": {
+        "n": 4,
+        "median": 17.333333333333332,
+        "p95": 21.626666666666665,
+        "max": 21.866666666666667,
+        "mean": 17.46666666666667
+       }
+      },
+      "place": {
+       "n_runs": 6,
+       "n_success": 6,
+       "n_grasp": 6,
+       "n_primary": 6,
+       "failure_modes": {
+        "ok": 6
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 25,
+        "robot_other-fruit_other": 0,
+        "hand-target": 645,
+        "apple-crate": 2033,
+        "hand-crate": 43,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 2,
+       "hold_chunks_sum": 0,
+       "runs_with_hold": 0,
+       "hold_kinds": {},
+       "planning_chunks_sum": 450,
+       "control_rows_sum": 3600,
+       "to_status_counts": {},
+       "to_solve_ms": null,
+       "to_solve_n_over_66p7": 0,
+       "to_solve_frac_over_66p7": null,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 3600,
+        "median": 7.169986736533595,
+        "p95": 26.00330669587718,
+        "max": 42.65605759979002,
+        "mean": 9.944963585808933
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 6,
+        "median": 7.133146160538344,
+        "p95": 7.43216392676153,
+        "max": 7.488363944967705,
+        "mean": 7.178878582773332
+       },
+       "completion_s": {
+        "n": 6,
+        "median": 16.53333333333333,
+        "p95": 21.2,
+        "max": 21.866666666666667,
+        "mean": 17.244444444444444
+       }
+      }
+     }
+    },
+    "C1aN": {
+     "trunc": {
+      "all": {
+       "n_runs": 10,
+       "n_success": 5,
+       "n_grasp": 6,
+       "n_primary": 5,
+       "failure_modes": {
+        "no_grasp": 4,
+        "ok": 5,
+        "slip_in_transport": 1
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 376,
+        "hand-fruit_other": 11,
+        "robot_other-fruit_other": 0,
+        "hand-target": 1051,
+        "apple-crate": 168,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 2,
+       "nonauth_target_rows_sum": 376,
+       "n_neighbour_episodes": 2,
+       "hold_chunks_sum": 91,
+       "runs_with_hold": 7,
+       "hold_kinds": {
+        "collision": 46,
+        "uncertified": 45
+       },
+       "planning_chunks_sum": 538,
+       "control_rows_sum": 4279,
+       "to_status_counts": {
+        "feasible": 299,
+        "violated": 101,
+        "optimal": 138
+       },
+       "to_solve_ms": {
+        "n": 528,
+        "median": 204.52632755041122,
+        "p95": 643.1774148251861,
+        "max": 743.200876750052,
+        "mean": 282.1250388338795
+       },
+       "to_solve_n_over_66p7": 503,
+       "to_solve_frac_over_66p7": 0.9526515151515151,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 3551,
+        "median": 8.548091608793193,
+        "p95": 29.05467294986052,
+        "max": 149.77461712619726,
+        "mean": 12.080818053471843
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 10,
+        "median": 8.984606550354702,
+        "p95": 10.720200920576676,
+        "max": 11.17046235308197,
+        "mean": 8.975427093087266
+       },
+       "completion_s": {
+        "n": 5,
+        "median": 14.4,
+        "p95": 16.32,
+        "max": 16.533333333333335,
+        "mean": 14.720000000000002
+       }
+      },
+      "clear": {
+       "n_runs": 4,
+       "n_success": 2,
+       "n_grasp": 3,
+       "n_primary": 2,
+       "failure_modes": {
+        "no_grasp": 1,
+        "ok": 2,
+        "slip_in_transport": 1
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 361,
+        "hand-fruit_other": 7,
+        "robot_other-fruit_other": 0,
+        "hand-target": 377,
+        "apple-crate": 67,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 1,
+       "nonauth_target_rows_sum": 361,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 51,
+       "runs_with_hold": 3,
+       "hold_kinds": {
+        "collision": 6,
+        "uncertified": 45
+       },
+       "planning_chunks_sum": 214,
+       "control_rows_sum": 1702,
+       "to_status_counts": {
+        "feasible": 88,
+        "optimal": 72,
+        "violated": 54
+       },
+       "to_solve_ms": {
+        "n": 210,
+        "median": 307.2865321300924,
+        "p95": 678.936646832153,
+        "max": 743.200876750052,
+        "mean": 342.4531088742827
+       },
+       "to_solve_n_over_66p7": 205,
+       "to_solve_frac_over_66p7": 0.9761904761904762,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 1294,
+        "median": 10.691263955302817,
+        "p95": 30.131231378023323,
+        "max": 149.77461712619726,
+        "mean": 14.107309326015177
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 4,
+        "median": 9.91514455823142,
+        "p95": 11.020375208913539,
+        "max": 11.17046235308197,
+        "mean": 10.13659166034363
+       },
+       "completion_s": {
+        "n": 2,
+        "median": 14.4,
+        "p95": 15.36,
+        "max": 15.466666666666667,
+        "mean": 14.4
+       }
+      },
+      "place": {
+       "n_runs": 6,
+       "n_success": 3,
+       "n_grasp": 3,
+       "n_primary": 3,
+       "failure_modes": {
+        "no_grasp": 3,
+        "ok": 3
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 15,
+        "hand-fruit_other": 4,
+        "robot_other-fruit_other": 0,
+        "hand-target": 674,
+        "apple-crate": 101,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 1,
+       "nonauth_target_rows_sum": 15,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 40,
+       "runs_with_hold": 4,
+       "hold_kinds": {
+        "collision": 40
+       },
+       "planning_chunks_sum": 324,
+       "control_rows_sum": 2577,
+       "to_status_counts": {
+        "feasible": 211,
+        "violated": 47,
+        "optimal": 66
+       },
+       "to_solve_ms": {
+        "n": 318,
+        "median": 164.18811911717057,
+        "p95": 549.7323415707796,
+        "max": 714.7281477227807,
+        "mean": 242.2857472977642
+       },
+       "to_solve_n_over_66p7": 298,
+       "to_solve_frac_over_66p7": 0.9371069182389937,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 2257,
+        "median": 7.784353815194126,
+        "p95": 28.507903217284515,
+        "max": 125.16321858432214,
+        "mean": 10.91897502880588
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 6,
+        "median": 8.514243258614764,
+        "p95": 9.158524345465525,
+        "max": 9.332442140576346,
+        "mean": 8.201317381583022
+       },
+       "completion_s": {
+        "n": 3,
+        "median": 14.4,
+        "p95": 16.32,
+        "max": 16.533333333333335,
+        "mean": 14.933333333333335
+       }
+      }
+     },
+     "full": {
+      "all": {
+       "n_runs": 10,
+       "n_success": 5,
+       "n_grasp": 6,
+       "n_primary": 5,
+       "failure_modes": {
+        "no_grasp": 4,
+        "ok": 5,
+        "slip_in_transport": 1
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 376,
+        "hand-fruit_other": 11,
+        "robot_other-fruit_other": 0,
+        "hand-target": 1051,
+        "apple-crate": 1889,
+        "hand-crate": 0,
+        "robot_other-crate": 24,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 2,
+       "nonauth_target_rows_sum": 376,
+       "n_neighbour_episodes": 2,
+       "hold_chunks_sum": 91,
+       "runs_with_hold": 7,
+       "hold_kinds": {
+        "collision": 46,
+        "uncertified": 45
+       },
+       "planning_chunks_sum": 750,
+       "control_rows_sum": 6000,
+       "to_status_counts": {
+        "feasible": 466,
+        "violated": 101,
+        "optimal": 183
+       },
+       "to_solve_ms": {
+        "n": 740,
+        "median": 162.78795571997762,
+        "p95": 627.434797398746,
+        "max": 743.200876750052,
+        "mean": 258.64668031776876
+       },
+       "to_solve_n_over_66p7": 688,
+       "to_solve_frac_over_66p7": 0.9297297297297298,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 5272,
+        "median": 7.559941601498442,
+        "p95": 28.094632439656845,
+        "max": 149.77461712619726,
+        "mean": 10.996784670492213
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 10,
+        "median": 7.4990961731353085,
+        "p95": 10.490937770221766,
+        "max": 11.17046235308197,
+        "mean": 8.123723215319275
+       },
+       "completion_s": {
+        "n": 5,
+        "median": 14.4,
+        "p95": 16.32,
+        "max": 16.533333333333335,
+        "mean": 14.720000000000002
+       }
+      },
+      "clear": {
+       "n_runs": 4,
+       "n_success": 2,
+       "n_grasp": 3,
+       "n_primary": 2,
+       "failure_modes": {
+        "no_grasp": 1,
+        "ok": 2,
+        "slip_in_transport": 1
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 361,
+        "hand-fruit_other": 7,
+        "robot_other-fruit_other": 0,
+        "hand-target": 377,
+        "apple-crate": 765,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 1,
+       "nonauth_target_rows_sum": 361,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 51,
+       "runs_with_hold": 3,
+       "hold_kinds": {
+        "collision": 6,
+        "uncertified": 45
+       },
+       "planning_chunks_sum": 300,
+       "control_rows_sum": 2400,
+       "to_status_counts": {
+        "feasible": 169,
+        "optimal": 77,
+        "violated": 54
+       },
+       "to_solve_ms": {
+        "n": 296,
+        "median": 171.57740471884608,
+        "p95": 660.4555214289576,
+        "max": 743.200876750052,
+        "mean": 285.3164481993362
+       },
+       "to_solve_n_over_66p7": 278,
+       "to_solve_frac_over_66p7": 0.9391891891891891,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 1992,
+        "median": 7.908898957058922,
+        "p95": 28.40545140792376,
+        "max": 149.77461712619726,
+        "mean": 11.9792421152847
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 4,
+        "median": 8.501861029919949,
+        "p95": 10.943954158795234,
+        "max": 11.17046235308197,
+        "mean": 8.872403447039439
+       },
+       "completion_s": {
+        "n": 2,
+        "median": 14.4,
+        "p95": 15.36,
+        "max": 15.466666666666667,
+        "mean": 14.4
+       }
+      },
+      "place": {
+       "n_runs": 6,
+       "n_success": 3,
+       "n_grasp": 3,
+       "n_primary": 3,
+       "failure_modes": {
+        "no_grasp": 3,
+        "ok": 3
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 15,
+        "hand-fruit_other": 4,
+        "robot_other-fruit_other": 0,
+        "hand-target": 674,
+        "apple-crate": 1124,
+        "hand-crate": 0,
+        "robot_other-crate": 24,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 1,
+       "nonauth_target_rows_sum": 15,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 40,
+       "runs_with_hold": 4,
+       "hold_kinds": {
+        "collision": 40
+       },
+       "planning_chunks_sum": 450,
+       "control_rows_sum": 3600,
+       "to_status_counts": {
+        "feasible": 297,
+        "violated": 47,
+        "optimal": 106
+       },
+       "to_solve_ms": {
+        "n": 444,
+        "median": 160.075472202152,
+        "p95": 555.6780091952533,
+        "max": 714.7281477227807,
+        "mean": 240.8668350633905
+       },
+       "to_solve_n_over_66p7": 410,
+       "to_solve_frac_over_66p7": 0.9234234234234234,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 3280,
+        "median": 7.3835061949411145,
+        "p95": 27.55716901885648,
+        "max": 125.16321858432214,
+        "mean": 10.400121490606043
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 6,
+        "median": 7.459567557465181,
+        "p95": 8.608371798156469,
+        "max": 8.678940014035181,
+        "mean": 7.624603060839166
+       },
+       "completion_s": {
+        "n": 3,
+        "median": 14.4,
+        "p95": 16.32,
+        "max": 16.533333333333335,
+        "mean": 14.933333333333335
+       }
+      }
+     }
+    },
+    "CR0m": {
+     "trunc": {
+      "all": {
+       "n_runs": 10,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 10
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 7,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 148,
+       "runs_with_hold": 6,
+       "hold_kinds": {
+        "collision": 148
+       },
+       "planning_chunks_sum": 750,
+       "control_rows_sum": 6000,
+       "to_status_counts": {
+        "optimal": 597,
+        "violated": 153
+       },
+       "to_solve_ms": {
+        "n": 740,
+        "median": 213.76118063926697,
+        "p95": 244.04874797910452,
+        "max": 391.8665014207363,
+        "mean": 200.7953007000725
+       },
+       "to_solve_n_over_66p7": 740,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 4816,
+        "median": 5.342367409135251,
+        "p95": 9.681602067644311,
+        "max": 35.44525085514836,
+        "mean": 5.531378068594225
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 10,
+        "median": 5.539585542727868,
+        "p95": 6.111395146191684,
+        "max": 6.1754885135848365,
+        "mean": 5.509886198867304
+       },
+       "completion_s": null
+      },
+      "clear": {
+       "n_runs": 4,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 4
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 7,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 16,
+       "runs_with_hold": 2,
+       "hold_kinds": {
+        "collision": 16
+       },
+       "planning_chunks_sum": 300,
+       "control_rows_sum": 2400,
+       "to_status_counts": {
+        "optimal": 280,
+        "violated": 20
+       },
+       "to_solve_ms": {
+        "n": 296,
+        "median": 205.1559453830123,
+        "p95": 245.4483169130981,
+        "max": 267.2626944258809,
+        "mean": 196.62491698761949
+       },
+       "to_solve_n_over_66p7": 296,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 2272,
+        "median": 5.707482243229285,
+        "p95": 13.47048302691321,
+        "max": 33.79082895390019,
+        "mean": 6.015870293664221
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 4,
+        "median": 5.932719224852991,
+        "p95": 6.144516162340277,
+        "max": 6.1754885135848365,
+        "mean": 5.773809874797861
+       },
+       "completion_s": null
+      },
+      "place": {
+       "n_runs": 6,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 6
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 0,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 0,
+       "hold_chunks_sum": 132,
+       "runs_with_hold": 4,
+       "hold_kinds": {
+        "collision": 132
+       },
+       "planning_chunks_sum": 450,
+       "control_rows_sum": 3600,
+       "to_status_counts": {
+        "optimal": 317,
+        "violated": 133
+       },
+       "to_solve_ms": {
+        "n": 444,
+        "median": 218.66793697699904,
+        "p95": 243.34168485365808,
+        "max": 391.8665014207363,
+        "mean": 203.57555650837452
+       },
+       "to_solve_n_over_66p7": 444,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 2544,
+        "median": 5.10816676391716,
+        "p95": 8.733795110032187,
+        "max": 35.44525085514836,
+        "mean": 5.098686899034855
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 6,
+        "median": 5.373821688387919,
+        "p95": 5.919535284514916,
+        "max": 6.033058808266719,
+        "mean": 5.333937081580264
+       },
+       "completion_s": null
+      }
+     },
+     "full": {
+      "all": {
+       "n_runs": 10,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 10
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 7,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 148,
+       "runs_with_hold": 6,
+       "hold_kinds": {
+        "collision": 148
+       },
+       "planning_chunks_sum": 750,
+       "control_rows_sum": 6000,
+       "to_status_counts": {
+        "optimal": 597,
+        "violated": 153
+       },
+       "to_solve_ms": {
+        "n": 740,
+        "median": 213.76118063926697,
+        "p95": 244.04874797910452,
+        "max": 391.8665014207363,
+        "mean": 200.7953007000725
+       },
+       "to_solve_n_over_66p7": 740,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 4816,
+        "median": 5.342367409135251,
+        "p95": 9.681602067644311,
+        "max": 35.44525085514836,
+        "mean": 5.531378068594225
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 10,
+        "median": 5.539585542727868,
+        "p95": 6.111395146191684,
+        "max": 6.1754885135848365,
+        "mean": 5.509886198867304
+       },
+       "completion_s": null
+      },
+      "clear": {
+       "n_runs": 4,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 4
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 7,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 1,
+       "hold_chunks_sum": 16,
+       "runs_with_hold": 2,
+       "hold_kinds": {
+        "collision": 16
+       },
+       "planning_chunks_sum": 300,
+       "control_rows_sum": 2400,
+       "to_status_counts": {
+        "optimal": 280,
+        "violated": 20
+       },
+       "to_solve_ms": {
+        "n": 296,
+        "median": 205.1559453830123,
+        "p95": 245.4483169130981,
+        "max": 267.2626944258809,
+        "mean": 196.62491698761949
+       },
+       "to_solve_n_over_66p7": 296,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 2272,
+        "median": 5.707482243229285,
+        "p95": 13.47048302691321,
+        "max": 33.79082895390019,
+        "mean": 6.015870293664221
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 4,
+        "median": 5.932719224852991,
+        "p95": 6.144516162340277,
+        "max": 6.1754885135848365,
+        "mean": 5.773809874797861
+       },
+       "completion_s": null
+      },
+      "place": {
+       "n_runs": 6,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 6
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 0,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 0,
+       "hold_chunks_sum": 132,
+       "runs_with_hold": 4,
+       "hold_kinds": {
+        "collision": 132
+       },
+       "planning_chunks_sum": 450,
+       "control_rows_sum": 3600,
+       "to_status_counts": {
+        "optimal": 317,
+        "violated": 133
+       },
+       "to_solve_ms": {
+        "n": 444,
+        "median": 218.66793697699904,
+        "p95": 243.34168485365808,
+        "max": 391.8665014207363,
+        "mean": 203.57555650837452
+       },
+       "to_solve_n_over_66p7": 444,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 2544,
+        "median": 5.10816676391716,
+        "p95": 8.733795110032187,
+        "max": 35.44525085514836,
+        "mean": 5.098686899034855
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 6,
+        "median": 5.373821688387919,
+        "p95": 5.919535284514916,
+        "max": 6.033058808266719,
+        "mean": 5.333937081580264
+       },
+       "completion_s": null
+      }
+     }
+    },
+    "CR0_smoke": {
+     "trunc": {
+      "all": {
+       "n_runs": 1,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 1
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 0,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 0,
+       "hold_chunks_sum": 68,
+       "runs_with_hold": 1,
+       "hold_kinds": {
+        "collision": 68
+       },
+       "planning_chunks_sum": 75,
+       "control_rows_sum": 600,
+       "to_status_counts": {
+        "optimal": 6,
+        "violated": 69
+       },
+       "to_solve_ms": {
+        "n": 74,
+        "median": 145.08626703172922,
+        "p95": 167.26581174880263,
+        "max": 183.26492700725794,
+        "mean": 134.23216110095382
+       },
+       "to_solve_n_over_66p7": 74,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 56,
+        "median": 6.054808768630169,
+        "p95": 16.55100508585294,
+        "max": 25.38251927778356,
+        "mean": 6.504090891717159
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 1,
+        "median": 6.054808768630169,
+        "p95": 6.054808768630169,
+        "max": 6.054808768630169,
+        "mean": 6.054808768630169
+       },
+       "completion_s": null
+      },
+      "clear": {
+       "n_runs": 1,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 1
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 0,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 0,
+       "hold_chunks_sum": 68,
+       "runs_with_hold": 1,
+       "hold_kinds": {
+        "collision": 68
+       },
+       "planning_chunks_sum": 75,
+       "control_rows_sum": 600,
+       "to_status_counts": {
+        "optimal": 6,
+        "violated": 69
+       },
+       "to_solve_ms": {
+        "n": 74,
+        "median": 145.08626703172922,
+        "p95": 167.26581174880263,
+        "max": 183.26492700725794,
+        "mean": 134.23216110095382
+       },
+       "to_solve_n_over_66p7": 74,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 56,
+        "median": 6.054808768630169,
+        "p95": 16.55100508585294,
+        "max": 25.38251927778356,
+        "mean": 6.504090891717159
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 1,
+        "median": 6.054808768630169,
+        "p95": 6.054808768630169,
+        "max": 6.054808768630169,
+        "mean": 6.054808768630169
+       },
+       "completion_s": null
+      },
+      "place": null
+     },
+     "full": {
+      "all": {
+       "n_runs": 1,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 1
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 0,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 0,
+       "hold_chunks_sum": 68,
+       "runs_with_hold": 1,
+       "hold_kinds": {
+        "collision": 68
+       },
+       "planning_chunks_sum": 75,
+       "control_rows_sum": 600,
+       "to_status_counts": {
+        "optimal": 6,
+        "violated": 69
+       },
+       "to_solve_ms": {
+        "n": 74,
+        "median": 145.08626703172922,
+        "p95": 167.26581174880263,
+        "max": 183.26492700725794,
+        "mean": 134.23216110095382
+       },
+       "to_solve_n_over_66p7": 74,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 56,
+        "median": 6.054808768630169,
+        "p95": 16.55100508585294,
+        "max": 25.38251927778356,
+        "mean": 6.504090891717159
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 1,
+        "median": 6.054808768630169,
+        "p95": 6.054808768630169,
+        "max": 6.054808768630169,
+        "mean": 6.054808768630169
+       },
+       "completion_s": null
+      },
+      "clear": {
+       "n_runs": 1,
+       "n_success": 0,
+       "n_grasp": 0,
+       "n_primary": 0,
+       "failure_modes": {
+        "no_grasp": 1
+       },
+       "contact_rows_sum": {
+        "hand-obstacle": 0,
+        "robot_other-obstacle": 0,
+        "target-obstacle": 0,
+        "robot_other-target": 0,
+        "hand-fruit_other": 0,
+        "robot_other-fruit_other": 0,
+        "hand-target": 0,
+        "apple-crate": 0,
+        "hand-crate": 0,
+        "robot_other-crate": 0,
+        "crate-obstacle": 0,
+        "fruit_other-obstacle": 0
+       },
+       "obstacle_rows_sum": 0,
+       "n_obstacle_contact_episodes": 0,
+       "n_nonauth_target_episodes": 0,
+       "nonauth_target_rows_sum": 0,
+       "n_neighbour_episodes": 0,
+       "hold_chunks_sum": 68,
+       "runs_with_hold": 1,
+       "hold_kinds": {
+        "collision": 68
+       },
+       "planning_chunks_sum": 75,
+       "control_rows_sum": 600,
+       "to_status_counts": {
+        "optimal": 6,
+        "violated": 69
+       },
+       "to_solve_ms": {
+        "n": 74,
+        "median": 145.08626703172922,
+        "p95": 167.26581174880263,
+        "max": 183.26492700725794,
+        "mean": 134.23216110095382
+       },
+       "to_solve_n_over_66p7": 74,
+       "to_solve_frac_over_66p7": 1.0,
+       "tcp_cmd_vs_meas_mm_pooled": {
+        "n": 56,
+        "median": 6.054808768630169,
+        "p95": 16.55100508585294,
+        "max": 25.38251927778356,
+        "mean": 6.504090891717159
+       },
+       "tcp_cmd_vs_meas_run_median_mm": {
+        "n": 1,
+        "median": 6.054808768630169,
+        "p95": 6.054808768630169,
+        "max": 6.054808768630169,
+        "mean": 6.054808768630169
+       },
+       "completion_s": null
+      },
+      "place": null
+     }
+    }
+   },
+   "paired": {
+    "CR0m_vs_C1aN_C1aNwindow_trunc": {
+     "success": {
+      "all": {
+       "both": 0,
+       "only_C1aN": 5,
+       "only_CR0m": 0,
+       "neither": 5,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.0625,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8,
+        -0.2
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_C1aN": 2,
+       "only_CR0m": 0,
+       "neither": 2,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.5,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -1.0,
+        0.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_C1aN": 3,
+       "only_CR0m": 0,
+       "neither": 3,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.25,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8333333333333334,
+        -0.16666666666666666
+       ]
+      }
+     },
+     "grasp": {
+      "all": {
+       "both": 0,
+       "only_C1aN": 6,
+       "only_CR0m": 0,
+       "neither": 4,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.03125,
+       "rate_C1aN": 0.6,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.6,
+       "ci95_bootstrap": [
+        -0.9,
+        -0.3
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_C1aN": 3,
+       "only_CR0m": 0,
+       "neither": 1,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.25,
+       "rate_C1aN": 0.75,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.75,
+       "ci95_bootstrap": [
+        -1.0,
+        -0.25
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_C1aN": 3,
+       "only_CR0m": 0,
+       "neither": 3,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.25,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8333333333333334,
+        -0.16666666666666666
+       ]
+      }
+     },
+     "primary": {
+      "all": {
+       "both": 0,
+       "only_C1aN": 5,
+       "only_CR0m": 0,
+       "neither": 5,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.0625,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8,
+        -0.2
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_C1aN": 2,
+       "only_CR0m": 0,
+       "neither": 2,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.5,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -1.0,
+        0.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_C1aN": 3,
+       "only_CR0m": 0,
+       "neither": 3,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.25,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8333333333333334,
+        -0.16666666666666666
+       ]
+      }
+     }
+    },
+    "CR0m_vs_C1aN_C1aNwindow_full": {
+     "success": {
+      "all": {
+       "both": 0,
+       "only_C1aN": 5,
+       "only_CR0m": 0,
+       "neither": 5,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.0625,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8,
+        -0.2
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_C1aN": 2,
+       "only_CR0m": 0,
+       "neither": 2,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.5,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -1.0,
+        0.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_C1aN": 3,
+       "only_CR0m": 0,
+       "neither": 3,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.25,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8333333333333334,
+        -0.16666666666666666
+       ]
+      }
+     },
+     "grasp": {
+      "all": {
+       "both": 0,
+       "only_C1aN": 6,
+       "only_CR0m": 0,
+       "neither": 4,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.03125,
+       "rate_C1aN": 0.6,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.6,
+       "ci95_bootstrap": [
+        -0.9,
+        -0.3
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_C1aN": 3,
+       "only_CR0m": 0,
+       "neither": 1,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.25,
+       "rate_C1aN": 0.75,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.75,
+       "ci95_bootstrap": [
+        -1.0,
+        -0.25
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_C1aN": 3,
+       "only_CR0m": 0,
+       "neither": 3,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.25,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8333333333333334,
+        -0.16666666666666666
+       ]
+      }
+     },
+     "primary": {
+      "all": {
+       "both": 0,
+       "only_C1aN": 5,
+       "only_CR0m": 0,
+       "neither": 5,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.0625,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8,
+        -0.2
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_C1aN": 2,
+       "only_CR0m": 0,
+       "neither": 2,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.5,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -1.0,
+        0.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_C1aN": 3,
+       "only_CR0m": 0,
+       "neither": 3,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.25,
+       "rate_C1aN": 0.5,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_C1aN": -0.5,
+       "ci95_bootstrap": [
+        -0.8333333333333334,
+        -0.16666666666666666
+       ]
+      }
+     }
+    },
+    "CR0m_vs_E0_E0window_trunc": {
+     "success": {
+      "all": {
+       "both": 0,
+       "only_E0": 10,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.001953125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_E0": 4,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_E0": 6,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.03125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      }
+     },
+     "grasp": {
+      "all": {
+       "both": 0,
+       "only_E0": 10,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.001953125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_E0": 4,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_E0": 6,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.03125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      }
+     },
+     "primary": {
+      "all": {
+       "both": 0,
+       "only_E0": 10,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.001953125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_E0": 4,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_E0": 6,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.03125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      }
+     }
+    },
+    "CR0m_vs_E0_E0window_full": {
+     "success": {
+      "all": {
+       "both": 0,
+       "only_E0": 10,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.001953125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_E0": 4,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_E0": 6,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.03125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      }
+     },
+     "grasp": {
+      "all": {
+       "both": 0,
+       "only_E0": 10,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.001953125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_E0": 4,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_E0": 6,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.03125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      }
+     },
+     "primary": {
+      "all": {
+       "both": 0,
+       "only_E0": 10,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 10,
+       "mcnemar_exact_p": 0.001953125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "clear": {
+       "both": 0,
+       "only_E0": 4,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 4,
+       "mcnemar_exact_p": 0.125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      },
+      "place": {
+       "both": 0,
+       "only_E0": 6,
+       "only_CR0m": 0,
+       "neither": 0,
+       "missing": 0,
+       "n_pairs": 6,
+       "mcnemar_exact_p": 0.03125,
+       "rate_E0": 1.0,
+       "rate_CR0m": 0.0,
+       "diff_CR0m_minus_E0": -1.0,
+       "ci95_bootstrap": [
+        -1.0,
+        -1.0
+       ]
+      }
+     }
+    }
+   },
+   "cr0m_curobo_server_records_750": {
+    "file": "/mnt/dev/AG3S_VLA-storage/results/development/20261021T205721+0900_f15e587290f6_ceef1742ca26/verify/T63b/cr0m/runs/server_8292_20261021T155515/server_constraints/curobo_b0_chunks.jsonl",
+    "n": 750,
+    "curobo_success": 451,
+    "fallback": 0,
+    "reasons": {
+     "scene_collision": 181,
+     "cspace": 73,
+     "cspace,scene_collision": 45
+    },
+    "curobo_x_status": {
+     "success|optimal": 451,
+     "fail|optimal": 146,
+     "fail|violated": 153
+    },
+    "status": {
+     "optimal": 597,
+     "violated": 153
+    },
+    "wall_ms": {
+     "median": 113.13069611787796,
+     "p95": 119.16586495935917,
+     "max": 130.5555822327733,
+     "n_over_66p7": 750,
+     "n": 750
+    },
+    "solve_time_ms": {
+     "median": 97.24433517456055,
+     "p95": 100.27754631042481,
+     "max": 107.4059829711914,
+     "n_over_66p7": 750,
+     "n": 750
+    },
+    "world_load_ms": {
+     "median": 11.976336594671011,
+     "p95": 15.703546302393079,
+     "max": 18.750522285699844,
+     "n_over_66p7": 0,
+     "n": 750
+    },
+    "certify_ms": {
+     "median": 85.70918207988143,
+     "p95": 118.20383258163928,
+     "max": 249.70949906855822,
+     "n_over_66p7": 456,
+     "n": 750
+    },
+    "total_ms": {
+     "median": 215.26417741551995,
+     "p95": 244.55818636342883,
+     "max": 392.2725459560752,
+     "n_over_66p7": 750,
+     "n": 750
+    },
+    "b0m_rule_margins_m": [
+     "0.01"
+    ]
+   },
+   "cr0m_ep126_vs_impl_cr0m_smoke_ep126": "executed_actions, measured_qpos, predicted_chunks bit-identical (max abs diff 0.0)",
+   "gripper_columns": {
+    "definition": "used-arm gripper column (7 left / 15 right); refined == reference in every chunk (max abs diff 0.0) for CR0m and C1aN",
+    "per_run_reference_vs_executed": {
+     "CR0m_ep126_s1263": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": 0.9857370853424072,
+      "chunks_with_reference_gripper_lt_0p5": 0,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": 0.9857370853424072,
+      "client_executed_gripper_min": 0.9878661036491394,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0m_ep1345_s13453": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.009137838147580624,
+      "chunks_with_reference_gripper_lt_0p5": 66,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.009137838147580624,
+      "client_executed_gripper_min": 0.008276543579995632,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0m_ep211_s2113": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.005299109499901533,
+      "chunks_with_reference_gripper_lt_0p5": 36,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.005299109499901533,
+      "client_executed_gripper_min": 0.9947029948234558,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0m_ep250_s2503": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.026388637721538544,
+      "chunks_with_reference_gripper_lt_0p5": 36,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.026388637721538544,
+      "client_executed_gripper_min": 0.9957520365715027,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0m_ep309_s3093": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.015257897786796093,
+      "chunks_with_reference_gripper_lt_0p5": 52,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.015257897786796093,
+      "client_executed_gripper_min": 0.9969103932380676,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0m_ep320_s3203": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.02826819382607937,
+      "chunks_with_reference_gripper_lt_0p5": 37,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.02826819382607937,
+      "client_executed_gripper_min": 0.9952318072319031,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0m_ep572_s5723": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.024099918082356453,
+      "chunks_with_reference_gripper_lt_0p5": 54,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.024099918082356453,
+      "client_executed_gripper_min": 0.9972617626190186,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0m_ep850_s8503": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": 0.9949281215667725,
+      "chunks_with_reference_gripper_lt_0p5": 0,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": 0.9949281215667725,
+      "client_executed_gripper_min": 0.9988337159156799,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0m_ep901_s9013": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": 0.00377651397138834,
+      "chunks_with_reference_gripper_lt_0p5": 39,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": 0.00377651397138834,
+      "client_executed_gripper_min": 0.9925544261932373,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0m_ep954_s9543": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.026733441278338432,
+      "chunks_with_reference_gripper_lt_0p5": 38,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.026733441278338432,
+      "client_executed_gripper_min": 0.028420990332961082,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep119_s1193": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.008535832166671753,
+      "chunks_with_reference_gripper_lt_0p5": 8,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.008535832166671753,
+      "client_executed_gripper_min": -0.00468274112790823,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep121_s1213": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.006065710913389921,
+      "chunks_with_reference_gripper_lt_0p5": 5,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.006065710913389921,
+      "client_executed_gripper_min": 0.00442509213462472,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep1222_s12223": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.007785499095916748,
+      "chunks_with_reference_gripper_lt_0p5": 6,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.007785499095916748,
+      "client_executed_gripper_min": -0.00018241351062897593,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep126_s1263": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.013957583345472813,
+      "chunks_with_reference_gripper_lt_0p5": 7,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.013957583345472813,
+      "client_executed_gripper_min": 0.000422870391048491,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep1313_s13133": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.011673987843096256,
+      "chunks_with_reference_gripper_lt_0p5": 41,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.011673987843096256,
+      "client_executed_gripper_min": 0.07113328576087952,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep1345_s13453": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.013512782752513885,
+      "chunks_with_reference_gripper_lt_0p5": 22,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.013512782752513885,
+      "client_executed_gripper_min": -0.013512782752513885,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep1596_s15963": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.018042966723442078,
+      "chunks_with_reference_gripper_lt_0p5": 7,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.018042966723442078,
+      "client_executed_gripper_min": -0.018042966723442078,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep1668_s16683": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.007109180558472872,
+      "chunks_with_reference_gripper_lt_0p5": 6,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.007109180558472872,
+      "client_executed_gripper_min": 0.0003029101062566042,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep1837_s18373": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": 0.0008143353625200689,
+      "chunks_with_reference_gripper_lt_0p5": 5,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": 0.0008143353625200689,
+      "client_executed_gripper_min": 0.0035526237916201353,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep211_s2113": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.010925979353487492,
+      "chunks_with_reference_gripper_lt_0p5": 66,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.010925979353487492,
+      "client_executed_gripper_min": 0.011833696626126766,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep250_s2503": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.004608131013810635,
+      "chunks_with_reference_gripper_lt_0p5": 12,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.004608131013810635,
+      "client_executed_gripper_min": -0.00010309551726095378,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep309_s3093": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.010684747248888016,
+      "chunks_with_reference_gripper_lt_0p5": 8,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.010684747248888016,
+      "client_executed_gripper_min": -0.010684747248888016,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep320_s3203": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.017939632758498192,
+      "chunks_with_reference_gripper_lt_0p5": 61,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.017939632758498192,
+      "client_executed_gripper_min": -0.005543558858335018,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep325_s3253": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.008201039396226406,
+      "chunks_with_reference_gripper_lt_0p5": 9,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.008201039396226406,
+      "client_executed_gripper_min": -0.0037234763149172068,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep342_s3423": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.017268380150198936,
+      "chunks_with_reference_gripper_lt_0p5": 7,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.017268380150198936,
+      "client_executed_gripper_min": -0.0003521933394949883,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep421_s4213": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.009415719658136368,
+      "chunks_with_reference_gripper_lt_0p5": 10,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.009415719658136368,
+      "client_executed_gripper_min": -0.004178467206656933,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep526_s5263": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.008764966391026974,
+      "chunks_with_reference_gripper_lt_0p5": 43,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.008764966391026974,
+      "client_executed_gripper_min": 0.0020855090115219355,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep56_s563": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.009616845287382603,
+      "chunks_with_reference_gripper_lt_0p5": 5,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.009616845287382603,
+      "client_executed_gripper_min": 0.011339196003973484,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep572_s5723": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.00581387197598815,
+      "chunks_with_reference_gripper_lt_0p5": 23,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.00581387197598815,
+      "client_executed_gripper_min": -0.00581387197598815,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep753_s7533": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": 0.0029292237013578415,
+      "chunks_with_reference_gripper_lt_0p5": 7,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": 0.0029292237013578415,
+      "client_executed_gripper_min": 0.008306936360895634,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep850_s8503": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.007206019014120102,
+      "chunks_with_reference_gripper_lt_0p5": 9,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.007206019014120102,
+      "client_executed_gripper_min": 0.00395094184204936,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep901_s9013": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.0072051845490932465,
+      "chunks_with_reference_gripper_lt_0p5": 8,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.0072051845490932465,
+      "client_executed_gripper_min": -0.005350120831280947,
+      "grasp": true,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep954_s9543": {
+      "used_arm": "right",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.010733852162957191,
+      "chunks_with_reference_gripper_lt_0p5": 42,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.010733852162957191,
+      "client_executed_gripper_min": -0.007957066409289837,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "C1aN_ep979_s9793": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": -0.016610534861683846,
+      "chunks_with_reference_gripper_lt_0p5": 59,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": -0.016610534861683846,
+      "client_executed_gripper_min": -0.0047955503687262535,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     },
+     "CR0_ep126_s1263": {
+      "used_arm": "left",
+      "n_chunks": 75,
+      "server_reference_gripper_min": 0.9930874109268188,
+      "chunks_with_reference_gripper_lt_0p5": 0,
+      "max_abs_reference_minus_refined_gripper_cols": 0.0,
+      "client_predicted_chunks_gripper_min": 0.9930874109268188,
+      "client_executed_gripper_min": 0.9988182783126831,
+      "grasp": false,
+      "first_arm_gripper_applied_below_0p5_t": null
+     }
+    },
+    "per_run_close_command_in_steps0_7_vs_8_49": {
+     "CR0m_ep126_s1263": {
+      "chunks_grip_lt05_in_steps0_7": 0,
+      "of_which_hold": 0,
+      "first_seq": null,
+      "chunks_grip_lt05_only_steps8_49": 0,
+      "client_executed_rows_grip_lt05": 0,
+      "grasp": false
+     },
+     "CR0m_ep1345_s13453": {
+      "chunks_grip_lt05_in_steps0_7": 14,
+      "of_which_hold": 13,
+      "first_seq": 62,
+      "chunks_grip_lt05_only_steps8_49": 52,
+      "client_executed_rows_grip_lt05": 109,
+      "grasp": false
+     },
+     "CR0m_ep211_s2113": {
+      "chunks_grip_lt05_in_steps0_7": 0,
+      "of_which_hold": 0,
+      "first_seq": null,
+      "chunks_grip_lt05_only_steps8_49": 36,
+      "client_executed_rows_grip_lt05": 0,
+      "grasp": false
+     },
+     "CR0m_ep250_s2503": {
+      "chunks_grip_lt05_in_steps0_7": 0,
+      "of_which_hold": 0,
+      "first_seq": null,
+      "chunks_grip_lt05_only_steps8_49": 36,
+      "client_executed_rows_grip_lt05": 0,
+      "grasp": false
+     },
+     "CR0m_ep309_s3093": {
+      "chunks_grip_lt05_in_steps0_7": 0,
+      "of_which_hold": 0,
+      "first_seq": null,
+      "chunks_grip_lt05_only_steps8_49": 52,
+      "client_executed_rows_grip_lt05": 0,
+      "grasp": false
+     },
+     "CR0m_ep320_s3203": {
+      "chunks_grip_lt05_in_steps0_7": 0,
+      "of_which_hold": 0,
+      "first_seq": null,
+      "chunks_grip_lt05_only_steps8_49": 37,
+      "client_executed_rows_grip_lt05": 0,
+      "grasp": false
+     },
+     "CR0m_ep572_s5723": {
+      "chunks_grip_lt05_in_steps0_7": 0,
+      "of_which_hold": 0,
+      "first_seq": null,
+      "chunks_grip_lt05_only_steps8_49": 54,
+      "client_executed_rows_grip_lt05": 0,
+      "grasp": false
+     },
+     "CR0m_ep850_s8503": {
+      "chunks_grip_lt05_in_steps0_7": 0,
+      "of_which_hold": 0,
+      "first_seq": null,
+      "chunks_grip_lt05_only_steps8_49": 0,
+      "client_executed_rows_grip_lt05": 0,
+      "grasp": false
+     },
+     "CR0m_ep901_s9013": {
+      "chunks_grip_lt05_in_steps0_7": 0,
+      "of_which_hold": 0,
+      "first_seq": null,
+      "chunks_grip_lt05_only_steps8_49": 39,
+      "client_executed_rows_grip_lt05": 0,
+      "grasp": false
+     },
+     "CR0m_ep954_s9543": {
+      "chunks_grip_lt05_in_steps0_7": 2,
+      "of_which_hold": 0,
+      "first_seq": 40,
+      "chunks_grip_lt05_only_steps8_49": 36,
+      "client_executed_rows_grip_lt05": 6,
+      "grasp": false
+     },
+     "C1aN_ep126_s1263": {
+      "chunks_grip_lt05_in_steps0_7": 3,
+      "of_which_hold": 1,
+      "first_seq": 12,
+      "chunks_grip_lt05_only_steps8_49": 4,
+      "client_executed_rows_grip_lt05": 15,
+      "grasp": true
+     },
+     "C1aN_ep1345_s13453": {
+      "chunks_grip_lt05_in_steps0_7": 13,
+      "of_which_hold": 0,
+      "first_seq": 14,
+      "chunks_grip_lt05_only_steps8_49": 9,
+      "client_executed_rows_grip_lt05": 95,
+      "grasp": false
+     },
+     "C1aN_ep211_s2113": {
+      "chunks_grip_lt05_in_steps0_7": 26,
+      "of_which_hold": 0,
+      "first_seq": 50,
+      "chunks_grip_lt05_only_steps8_49": 40,
+      "client_executed_rows_grip_lt05": 202,
+      "grasp": false
+     },
+     "C1aN_ep250_s2503": {
+      "chunks_grip_lt05_in_steps0_7": 8,
+      "of_which_hold": 4,
+      "first_seq": 11,
+      "chunks_grip_lt05_only_steps8_49": 4,
+      "client_executed_rows_grip_lt05": 18,
+      "grasp": true
+     },
+     "C1aN_ep309_s3093": {
+      "chunks_grip_lt05_in_steps0_7": 3,
+      "of_which_hold": 1,
+      "first_seq": 16,
+      "chunks_grip_lt05_only_steps8_49": 5,
+      "client_executed_rows_grip_lt05": 18,
+      "grasp": true
+     },
+     "C1aN_ep320_s3203": {
+      "chunks_grip_lt05_in_steps0_7": 44,
+      "of_which_hold": 0,
+      "first_seq": 16,
+      "chunks_grip_lt05_only_steps8_49": 17,
+      "client_executed_rows_grip_lt05": 334,
+      "grasp": false
+     },
+     "C1aN_ep572_s5723": {
+      "chunks_grip_lt05_in_steps0_7": 16,
+      "of_which_hold": 0,
+      "first_seq": 14,
+      "chunks_grip_lt05_only_steps8_49": 7,
+      "client_executed_rows_grip_lt05": 122,
+      "grasp": true
+     },
+     "C1aN_ep850_s8503": {
+      "chunks_grip_lt05_in_steps0_7": 2,
+      "of_which_hold": 0,
+      "first_seq": 17,
+      "chunks_grip_lt05_only_steps8_49": 7,
+      "client_executed_rows_grip_lt05": 14,
+      "grasp": true
+     },
+     "C1aN_ep901_s9013": {
+      "chunks_grip_lt05_in_steps0_7": 4,
+      "of_which_hold": 2,
+      "first_seq": 14,
+      "chunks_grip_lt05_only_steps8_49": 4,
+      "client_executed_rows_grip_lt05": 23,
+      "grasp": true
+     },
+     "C1aN_ep954_s9543": {
+      "chunks_grip_lt05_in_steps0_7": 25,
+      "of_which_hold": 0,
+      "first_seq": 19,
+      "chunks_grip_lt05_only_steps8_49": 17,
+      "client_executed_rows_grip_lt05": 187,
+      "grasp": false
+     }
+    }
+   },
+   "replay_qpos_mismatch_rows_CR0m": {
+    "211": 0,
+    "320": 0,
+    "572": 0,
+    "850": 0,
+    "901": 0,
+    "954": 0,
+    "250": 0,
+    "1345": 0,
+    "126": 0,
+    "309": 0
+   },
+   "per_episode": [
+    {
+     "episode": 211,
+     "seed": 2113,
+     "stratum": "place",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 216,
+      "place_t": 288,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 8,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 8.239502101536917,
+      "tcp_cmd_vs_meas_mm_p95": 28.269553107876273,
+      "n_control_window": 324,
+      "n_planning_window": 41,
+      "place_detect_t_replay": 285,
+      "stop_t": 323,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 34,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 4,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 28,
+       "violated": 34,
+       "optimal": 13
+      },
+      "to_solve_ms_median": 210.1527126505971,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 7.6548780109344605,
+      "tcp_cmd_vs_meas_mm_p95": 23.348849757492445,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": false,
+       "grasp": false,
+       "primary": false,
+       "hold_chunks": 34,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 75
+      },
+      "to_solve_ms_median": 202.29015359655023,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 4.771291763067156,
+      "tcp_cmd_vs_meas_mm_p95": 7.335304997190238,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 52,
+       "curobo_fail_reasons": {
+        "scene_collision": 15,
+        "cspace": 8
+       },
+       "curobo_x_status": {
+        "success|optimal": 52,
+        "fail|optimal": 23
+       },
+       "fallback": 0,
+       "wall_ms_median": 111.3961162045598,
+       "gpu_solve_ms_median": 96.23321533203125
+      }
+     }
+    },
+    {
+     "episode": 320,
+     "seed": 3203,
+     "stratum": "place",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 256,
+      "place_t": 328,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 7.2802664033866185,
+      "tcp_cmd_vs_meas_mm_p95": 24.79967299280383,
+      "n_control_window": 363,
+      "n_planning_window": 46,
+      "place_detect_t_replay": 324,
+      "stop_t": 362,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 15,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 53,
+       "violated": 7,
+       "optimal": 15
+      },
+      "to_solve_ms_median": 142.96084316447377,
+      "to_solve_n_over_66p7": 62,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 6.555326660624745,
+      "tcp_cmd_vs_meas_mm_p95": 17.548282390910952,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": false,
+       "grasp": false,
+       "primary": false,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 15
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 20,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 55,
+       "violated": 20
+      },
+      "to_solve_ms_median": 211.06502320617437,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 5.247437004579611,
+      "tcp_cmd_vs_meas_mm_p95": 9.738534046023752,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 46,
+       "curobo_fail_reasons": {
+        "scene_collision": 3,
+        "cspace": 6,
+        "cspace,scene_collision": 20
+       },
+       "curobo_x_status": {
+        "success|optimal": 46,
+        "fail|optimal": 9,
+        "fail|violated": 20
+       },
+       "fallback": 0,
+       "wall_ms_median": 111.7576565593481,
+       "gpu_solve_ms_median": 95.95359802246094
+      }
+     }
+    },
+    {
+     "episode": 572,
+     "seed": 5723,
+     "stratum": "place",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 168,
+      "place_t": 240,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 8.727463156980017,
+      "tcp_cmd_vs_meas_mm_p95": 25.218708476131887,
+      "n_control_window": 272,
+      "n_planning_window": 34,
+      "place_detect_t_replay": 233,
+      "stop_t": 271,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 136,
+      "place_t": 208,
+      "hold_chunks": 3,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 24,
+       "optimal": 4,
+       "violated": 3
+      },
+      "to_solve_ms_median": 165.32514663413167,
+      "to_solve_n_over_66p7": 30,
+      "to_solve_n": 30,
+      "tcp_cmd_vs_meas_mm_median": 8.63677096013306,
+      "tcp_cmd_vs_meas_mm_p95": 47.53321921630513,
+      "n_control_window": 243,
+      "n_planning_window": 31,
+      "place_detect_t_replay": 204,
+      "stop_t": 242,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 3,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 27,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 47,
+       "violated": 28
+      },
+      "to_solve_ms_median": 221.56746266409755,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 5.57896471325951,
+      "tcp_cmd_vs_meas_mm_p95": 8.678139757142285,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 31,
+       "curobo_fail_reasons": {
+        "scene_collision": 27,
+        "cspace,scene_collision": 7,
+        "cspace": 10
+       },
+       "curobo_x_status": {
+        "success|optimal": 31,
+        "fail|violated": 28,
+        "fail|optimal": 16
+       },
+       "fallback": 0,
+       "wall_ms_median": 114.1479890793562,
+       "gpu_solve_ms_median": 97.75039672851562
+      }
+     }
+    },
+    {
+     "episode": 850,
+     "seed": 8503,
+     "stratum": "place",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 152,
+      "place_t": 200,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 8.132465242660295,
+      "tcp_cmd_vs_meas_mm_p95": 28.982136153822193,
+      "n_control_window": 236,
+      "n_planning_window": 30,
+      "place_detect_t_replay": 197,
+      "stop_t": 235,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 160,
+      "place_t": 248,
+      "hold_chunks": 1,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 26,
+       "optimal": 9,
+       "violated": 1
+      },
+      "to_solve_ms_median": 135.2068530395627,
+      "to_solve_n_over_66p7": 28,
+      "to_solve_n": 35,
+      "tcp_cmd_vs_meas_mm_median": 8.631819366709196,
+      "tcp_cmd_vs_meas_mm_p95": 28.58574574558613,
+      "n_control_window": 281,
+      "n_planning_window": 36,
+      "place_detect_t_replay": 242,
+      "stop_t": 280,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 1,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 67,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 8,
+       "violated": 67
+      },
+      "to_solve_ms_median": 223.61061861738563,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 5.500206372196225,
+      "tcp_cmd_vs_meas_mm_p95": 13.915999412557252,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 8,
+       "curobo_fail_reasons": {
+        "scene_collision": 63,
+        "cspace,scene_collision": 4
+       },
+       "curobo_x_status": {
+        "success|optimal": 8,
+        "fail|violated": 67
+       },
+       "fallback": 0,
+       "wall_ms_median": 114.63182605803013,
+       "gpu_solve_ms_median": 98.17657470703125
+      }
+     }
+    },
+    {
+     "episode": 901,
+     "seed": 9013,
+     "stratum": "place",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 184,
+      "place_t": 256,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 7.964417173517114,
+      "tcp_cmd_vs_meas_mm_p95": 32.35861841727768,
+      "n_control_window": 289,
+      "n_planning_window": 37,
+      "place_detect_t_replay": 250,
+      "stop_t": 288,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 144,
+      "place_t": 216,
+      "hold_chunks": 2,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 25,
+       "optimal": 5,
+       "violated": 2
+      },
+      "to_solve_ms_median": 269.0449133515358,
+      "to_solve_n_over_66p7": 30,
+      "to_solve_n": 31,
+      "tcp_cmd_vs_meas_mm_median": 9.332442140576346,
+      "tcp_cmd_vs_meas_mm_p95": 31.659289376736485,
+      "n_control_window": 253,
+      "n_planning_window": 32,
+      "place_detect_t_replay": 214,
+      "stop_t": 252,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 2,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 75
+      },
+      "to_solve_ms_median": 158.06185454130173,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 4.8726638281123655,
+      "tcp_cmd_vs_meas_mm_p95": 7.255242938284324,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 63,
+       "curobo_fail_reasons": {
+        "scene_collision": 12
+       },
+       "curobo_x_status": {
+        "success|optimal": 63,
+        "fail|optimal": 12
+       },
+       "fallback": 0,
+       "wall_ms_median": 113.72411902993917,
+       "gpu_solve_ms_median": 97.76732635498047
+      }
+     }
+    },
+    {
+     "episode": 954,
+     "seed": 9543,
+     "stratum": "place",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 168,
+      "place_t": 240,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 17,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 8.75628484363552,
+      "tcp_cmd_vs_meas_mm_p95": 27.90333497048315,
+      "n_control_window": 276,
+      "n_planning_window": 35,
+      "place_detect_t_replay": 237,
+      "stop_t": 275,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 55,
+       "optimal": 20
+      },
+      "to_solve_ms_median": 126.01419258862734,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 8.396667150520331,
+      "tcp_cmd_vs_meas_mm_p95": 28.28679761383009,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": false,
+       "grasp": false,
+       "primary": false,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 18,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 57,
+       "violated": 18
+      },
+      "to_solve_ms_median": 226.57135501503944,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 6.033058808266719,
+      "tcp_cmd_vs_meas_mm_p95": 10.148930170604295,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 39,
+       "curobo_fail_reasons": {
+        "scene_collision": 12,
+        "cspace": 10,
+        "cspace,scene_collision": 14
+       },
+       "curobo_x_status": {
+        "success|optimal": 39,
+        "fail|optimal": 18,
+        "fail|violated": 18
+       },
+       "fallback": 0,
+       "wall_ms_median": 111.46222334355116,
+       "gpu_solve_ms_median": 95.78646087646484
+      }
+     }
+    },
+    {
+     "episode": 250,
+     "seed": 2503,
+     "stratum": "clear",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 120,
+      "place_t": 200,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 9.624650276423223,
+      "tcp_cmd_vs_meas_mm_p95": 26.01299785143727,
+      "n_control_window": 232,
+      "n_planning_window": 29,
+      "place_detect_t_replay": 193,
+      "stop_t": 231,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": false,
+      "grasp": true,
+      "primary": false,
+      "failure_mode": "slip_in_transport",
+      "grasp_t": 120,
+      "place_t": null,
+      "hold_chunks": 49,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 361,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 21,
+       "optimal": 5,
+       "violated": 49
+      },
+      "to_solve_ms_median": 592.6539371721447,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 9.660407724503742,
+      "tcp_cmd_vs_meas_mm_p95": 85.11707402927799,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": false,
+       "grasp": true,
+       "primary": false,
+       "hold_chunks": 49,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 361
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 75
+      },
+      "to_solve_ms_median": 205.9372691437602,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 5.054312535900625,
+      "tcp_cmd_vs_meas_mm_p95": 8.479875477535808,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 54,
+       "curobo_fail_reasons": {
+        "scene_collision": 6,
+        "cspace": 15
+       },
+       "curobo_x_status": {
+        "success|optimal": 54,
+        "fail|optimal": 21
+       },
+       "fallback": 0,
+       "wall_ms_median": 113.55501040816307,
+       "gpu_solve_ms_median": 97.41001892089844
+      }
+     }
+    },
+    {
+     "episode": 1345,
+     "seed": 13453,
+     "stratum": "clear",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 232,
+      "place_t": 304,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 31,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 7.887253371198702,
+      "tcp_cmd_vs_meas_mm_p95": 31.721966427586608,
+      "n_control_window": 340,
+      "n_planning_window": 43,
+      "place_detect_t_replay": 301,
+      "stop_t": 339,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 7,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 19,
+       "optimal": 56
+      },
+      "to_solve_ms_median": 267.0329315587878,
+      "to_solve_n_over_66p7": 72,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 11.17046235308197,
+      "tcp_cmd_vs_meas_mm_p95": 28.937006287625902,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": false,
+       "grasp": false,
+       "primary": false,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 13,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 7,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 61,
+       "violated": 14
+      },
+      "to_solve_ms_median": 230.1364028826356,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 5.896432277751543,
+      "tcp_cmd_vs_meas_mm_p95": 16.336825095344256,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 47,
+       "curobo_fail_reasons": {
+        "scene_collision": 28
+       },
+       "curobo_x_status": {
+        "success|optimal": 47,
+        "fail|optimal": 14,
+        "fail|violated": 14
+       },
+       "fallback": 0,
+       "wall_ms_median": 114.41918183118105,
+       "gpu_solve_ms_median": 98.18505859375
+      }
+     }
+    },
+    {
+     "episode": 126,
+     "seed": 1263,
+     "stratum": "clear",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 144,
+      "place_t": 216,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 9.537693456032516,
+      "tcp_cmd_vs_meas_mm_p95": 29.30370569368697,
+      "n_control_window": 252,
+      "n_planning_window": 32,
+      "place_detect_t_replay": 213,
+      "stop_t": 251,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 120,
+      "place_t": 200,
+      "hold_chunks": 1,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 25,
+       "violated": 4,
+       "optimal": 1
+      },
+      "to_solve_ms_median": 139.01708461344242,
+      "to_solve_n_over_66p7": 29,
+      "to_solve_n": 29,
+      "tcp_cmd_vs_meas_mm_median": 9.54561517182971,
+      "tcp_cmd_vs_meas_mm_p95": 30.132521492509063,
+      "n_control_window": 236,
+      "n_planning_window": 30,
+      "place_detect_t_replay": 197,
+      "stop_t": 235,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 1,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 3,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 69,
+       "violated": 6
+      },
+      "to_solve_ms_median": 154.10413732752204,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 5.9690061719544385,
+      "tcp_cmd_vs_meas_mm_p95": 18.213265383908002,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 43,
+       "curobo_fail_reasons": {
+        "scene_collision": 15,
+        "cspace": 17
+       },
+       "curobo_x_status": {
+        "success|optimal": 43,
+        "fail|violated": 6,
+        "fail|optimal": 26
+       },
+       "fallback": 0,
+       "wall_ms_median": 112.7476692199707,
+       "gpu_solve_ms_median": 97.47273254394531
+      }
+     },
+     "CR0_smoke": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 68,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 6,
+       "violated": 69
+      },
+      "to_solve_ms_median": 145.08626703172922,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 6.054808768630169,
+      "tcp_cmd_vs_meas_mm_p95": 16.55100508585294,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 10,
+       "curobo_fail_reasons": {
+        "scene_collision": 65
+       },
+       "curobo_x_status": {
+        "success|optimal": 6,
+        "success|violated": 4,
+        "fail|violated": 65
+       },
+       "fallback": 0,
+       "wall_ms_median": 61.90975662320852,
+       "gpu_solve_ms_median": 48.098751068115234
+      }
+     }
+    },
+    {
+     "episode": 309,
+     "seed": 3093,
+     "stratum": "clear",
+     "E0": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 248,
+      "place_t": 328,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {},
+      "to_solve_ms_median": null,
+      "to_solve_n_over_66p7": 0,
+      "to_solve_n": 0,
+      "tcp_cmd_vs_meas_mm_median": 8.574279366428811,
+      "tcp_cmd_vs_meas_mm_p95": 24.972551631969008,
+      "n_control_window": 362,
+      "n_planning_window": 46,
+      "place_detect_t_replay": 323,
+      "stop_t": 361,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 0,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "C1aN": {
+      "success": true,
+      "grasp": true,
+      "primary": true,
+      "failure_mode": "ok",
+      "grasp_t": 152,
+      "place_t": 232,
+      "hold_chunks": 1,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "feasible": 23,
+       "optimal": 10,
+       "violated": 1
+      },
+      "to_solve_ms_median": 127.70216446369886,
+      "to_solve_n_over_66p7": 30,
+      "to_solve_n": 33,
+      "tcp_cmd_vs_meas_mm_median": 10.169881391959098,
+      "tcp_cmd_vs_meas_mm_p95": 26.773447135118634,
+      "n_control_window": 266,
+      "n_planning_window": 34,
+      "place_detect_t_replay": 227,
+      "stop_t": 265,
+      "qpos_mismatch_rows": 0,
+      "full_record": {
+       "success": true,
+       "grasp": true,
+       "primary": true,
+       "hold_chunks": 1,
+       "obstacle_rows_sum": 0,
+       "nonauth_target_rows": 0
+      }
+     },
+     "CR0m": {
+      "success": false,
+      "grasp": false,
+      "primary": false,
+      "failure_mode": "no_grasp",
+      "grasp_t": null,
+      "place_t": null,
+      "hold_chunks": 0,
+      "obstacle_rows": {
+       "hand-obstacle": 0,
+       "robot_other-obstacle": 0,
+       "target-obstacle": 0
+      },
+      "nonauth_target_rows": 0,
+      "neighbour_rows": {
+       "hand-fruit_other": 0,
+       "robot_other-fruit_other": 0
+      },
+      "to_status_counts": {
+       "optimal": 75
+      },
+      "to_solve_ms_median": 214.41978821530938,
+      "to_solve_n_over_66p7": 74,
+      "to_solve_n": 74,
+      "tcp_cmd_vs_meas_mm_median": 6.1754885135848365,
+      "tcp_cmd_vs_meas_mm_p95": 9.920485169786305,
+      "n_control_window": 600,
+      "n_planning_window": 75,
+      "place_detect_t_replay": null,
+      "stop_t": null,
+      "qpos_mismatch_rows": 0,
+      "full_record": null,
+      "curobo": {
+       "n_chunks": 75,
+       "curobo_success": 68,
+       "curobo_fail_reasons": {
+        "cspace": 7
+       },
+       "curobo_x_status": {
+        "success|optimal": 68,
+        "fail|optimal": 7
+       },
+       "fallback": 0,
+       "wall_ms_median": 112.58310452103615,
+       "gpu_solve_ms_median": 96.90553283691406
+      }
+     }
+    }
+   ]
+  }
+ },
+ "figures": [
+  {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/T63b_scene.png",
+   "sidecar": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/T63b_scene.json",
+   "kind": "scene"
+  },
+  {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/T63b_graph.png",
+   "sidecar": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/T63b_graph.json",
+   "kind": "graph"
+  },
+  {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/T63b_table.png",
+   "sidecar": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/T63b_table.json",
+   "kind": "table"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy 14/15 · has_target 15/15 · frame0 -29.031048280806342; curobo 10/15 · has_target 15/15 · frame0 -9.171877401271193"
+ },
+ "verdict": "facts only: regression baselines (legacy, cuRobo) equal the reference values; (a) reproduction checks 1-3 equal; (b) chain rc 0, 10/10 runs complete, fallback 0. Judgement is for the lead and the user.",
+ "not_measured": [
+  "place-stop truncation rule was not cross-checked against a real client place stop: no CR0m run reached place (place_detect_t = -1 in all 10); E0 / C1aN place_detect_t is from the replay state rule only",
+  "B0m parity (parity_b0m) at 750 chunks (optional in impl.md) not run",
+  "E0 has no TO: TO time and certification status not applicable",
+  "commanded-vs-measured TCP uses FK with non-arm joints from the control-row qpos; commanded = executed_actions[t], measured = measured_qpos[t] (state after step t)",
+  "cuRobo solve-order dependence: 10 episodes on one server / one solver in the impl LIST order (211, 320, 572, 850, 901, 954, 250, 1345, 126, 309)"
+ ],
+ "reclaim": {
+  "command": "python3 scripts/setup/reclaim_cache.py \"$RUN\" <T63 inputs> <T63 verify step3> <IFG-APPLE snapshot> <IFG-APPLE runs> <IFG-APPLE replay> <checkpoint 29999> <recordings/run_16d_ep1800>",
+  "output": "reclaim: ws 15.5->15.5 GiB | cache 14.2->0.0 GiB, 44796 files, 8 paths"
+ }
+}

@@ -1,0 +1,32 @@
+[
+ {
+  "run": "E0_ep11_s111_base",
+  "row": 95,
+  "camera": {
+   "lookat": "crate",
+   "distance": 0.9,
+   "azimuth": 180,
+   "elevation": -50
+  }
+ },
+ {
+  "run": "E0_ep11_s111_N",
+  "row": 107,
+  "camera": {
+   "lookat": "crate",
+   "distance": 0.9,
+   "azimuth": 180,
+   "elevation": -50
+  }
+ },
+ {
+  "run": "E0_ep11_s111_C",
+  "row": 112,
+  "camera": {
+   "lookat": "crate",
+   "distance": 0.9,
+   "azimuth": 180,
+   "elevation": -50
+  }
+ }
+]

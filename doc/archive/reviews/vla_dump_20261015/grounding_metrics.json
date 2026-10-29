@@ -1,0 +1,1291 @@
+{
+  "scope": "one diagnostic frame, not held-out evaluation; top-K patch masks, not tuned thresholds",
+  "seed_rule": "top5 action_last*noun, weighted normalized feature mean",
+  "seed_indices": [
+    713,
+    679,
+    695,
+    696,
+    726
+  ],
+  "seed_pixel_class_fraction": {
+    "target": 0.10699999537318945,
+    "destination": 0.0,
+    "other_object": 0.0,
+    "robot_gripper": 0.07933333069086075,
+    "robot": 0.0,
+    "support": 0.7026666671037674,
+    "background": 0.11100000143051147
+  },
+  "seed_score_weighted_class_fraction": {
+    "target": 0.19772194243005128,
+    "destination": 0.0,
+    "other_object": 0.0,
+    "robot_gripper": 0.11966456219258365,
+    "robot": 0.0,
+    "support": 0.6367421003691947,
+    "background": 0.04587137968436597
+  },
+  "source_record": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1839_s18391/ag3s/run_0000",
+  "record_fingerprint": "914b7f0573e0b2da",
+  "t_step": 176,
+  "open_loop_horizon": 8,
+  "methods": {
+    "action_last": {
+      "5": {
+        "precision": 0.10483332872390747,
+        "recall": 0.05055863474607666,
+        "iou": 0.035313270443277124,
+        "class_fraction": {
+          "target": 0.10483332872390747,
+          "destination": 0.2,
+          "other_object": 0.0,
+          "robot_gripper": 0.05933333039283752,
+          "robot": 0.0,
+          "support": 0.6358333319425583,
+          "background": 0.0
+        }
+      },
+      "10": {
+        "precision": 0.06283333105966449,
+        "recall": 0.06060605865700078,
+        "iou": 0.03183180535491777,
+        "class_fraction": {
+          "target": 0.06283333105966449,
+          "destination": 0.4,
+          "other_object": 0.0,
+          "robot_gripper": 0.13033333495259286,
+          "robot": 0.0,
+          "support": 0.3513333335518837,
+          "background": 0.05550000071525574
+        }
+      },
+      "20": {
+        "precision": 0.07916666618548333,
+        "recall": 0.15272084206264977,
+        "iou": 0.055007092746929026,
+        "class_fraction": {
+          "target": 0.07916666618548333,
+          "destination": 0.5,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.09145833402872086,
+          "robot": 0.0,
+          "support": 0.24437500014901162,
+          "background": 0.06024999916553497
+        }
+      },
+      "40": {
+        "precision": 0.11610416646581143,
+        "recall": 0.4479543455346914,
+        "iou": 0.10157104313019276,
+        "class_fraction": {
+          "target": 0.11610416646581143,
+          "destination": 0.49243749999441205,
+          "other_object": 0.012375000119209289,
+          "robot_gripper": 0.08497916758060456,
+          "robot": 0.0,
+          "support": 0.23383333432720974,
+          "background": 0.06027083285152912
+        }
+      }
+    },
+    "noun_orange": {
+      "5": {
+        "precision": 0.6203333279117942,
+        "recall": 0.2991720908653943,
+        "iou": 0.2528704376595847,
+        "class_fraction": {
+          "target": 0.6203333279117942,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.16599999815225602,
+          "robot": 0.0,
+          "support": 0.1026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.40258333189412954,
+        "recall": 0.38831283676394523,
+        "iou": 0.24635390060249066,
+        "class_fraction": {
+          "target": 0.40258333189412954,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.0905833326280117,
+          "robot": 0.05916666388511658,
+          "support": 0.2921666666865349,
+          "background": 0.15550000071525574
+        }
+      },
+      "20": {
+        "precision": 0.3255416651722044,
+        "recall": 0.6280041793738279,
+        "iou": 0.2729146279172353,
+        "class_fraction": {
+          "target": 0.3255416651722044,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.17700000181794168,
+          "robot": 0.02958333194255829,
+          "support": 0.264833333552815,
+          "background": 0.2030416674911976
+        }
+      },
+      "40": {
+        "precision": 0.25585416563553737,
+        "recall": 0.9871392974802549,
+        "iou": 0.25500415179937264,
+        "class_fraction": {
+          "target": 0.25585416563553737,
+          "destination": 0.03558333367109299,
+          "other_object": 0.0,
+          "robot_gripper": 0.22877083495259284,
+          "robot": 0.039791665971279144,
+          "support": 0.1522708340198733,
+          "background": 0.28772916698362677
+        }
+      }
+    },
+    "product": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.31099999947473406,
+        "recall": 0.2999758868839062,
+        "iou": 0.18021150232206967,
+        "class_fraction": {
+          "target": 0.31099999947473406,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.21108333691954612,
+          "robot": 0.0,
+          "support": 0.4018333334941417,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.28220833293162284,
+        "recall": 0.5444096147921039,
+        "iou": 0.22829311040829253,
+        "class_fraction": {
+          "target": 0.28220833293162284,
+          "destination": 0.15,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.16995833516120912,
+          "robot": 0.0,
+          "support": 0.3025416681775823,
+          "background": 0.07054166570305824
+        }
+      },
+      "40": {
+        "precision": 0.164062499278225,
+        "recall": 0.6329877017170095,
+        "iou": 0.1498116647199454,
+        "class_fraction": {
+          "target": 0.164062499278225,
+          "destination": 0.37927083373069764,
+          "other_object": 0.012375000119209289,
+          "robot_gripper": 0.13458333481103182,
+          "robot": 0.014791665971279145,
+          "support": 0.2073541677207686,
+          "background": 0.08756250031292438
+        }
+      }
+    },
+    "action_first8": {
+      "5": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "iou": 0.0,
+        "class_fraction": {
+          "target": 0.0,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.0,
+          "robot": 0.0,
+          "support": 0.0,
+          "background": 1.0
+        }
+      },
+      "10": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "iou": 0.0,
+        "class_fraction": {
+          "target": 0.0,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.0,
+          "robot": 0.1,
+          "support": 0.0,
+          "background": 0.9
+        }
+      },
+      "20": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "iou": 0.0,
+        "class_fraction": {
+          "target": 0.0,
+          "destination": 0.04412499964237213,
+          "other_object": 0.0,
+          "robot_gripper": 0.0,
+          "robot": 0.05,
+          "support": 0.005874999985098839,
+          "background": 0.9
+        }
+      },
+      "40": {
+        "precision": 0.01308333354536444,
+        "recall": 0.05047825839610657,
+        "iou": 0.010499389945501274,
+        "class_fraction": {
+          "target": 0.01308333354536444,
+          "destination": 0.022062499821186066,
+          "other_object": 0.0,
+          "robot_gripper": 0.05525000113993883,
+          "robot": 0.025,
+          "support": 0.04058333417633549,
+          "background": 0.8440208334475756
+        }
+      }
+    },
+    "siglip_encoded": {
+      "5": {
+        "precision": 0.12566666211932898,
+        "recall": 0.06060605865700078,
+        "iou": 0.042630178870820795,
+        "class_fraction": {
+          "target": 0.12566666211932898,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.2606666699051857,
+          "robot": 0.0,
+          "support": 0.5026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.16499999864026904,
+        "recall": 0.15915119296319846,
+        "iou": 0.08815279758962002,
+        "class_fraction": {
+          "target": 0.16499999864026904,
+          "destination": 0.0,
+          "other_object": 0.049500000476837155,
+          "robot_gripper": 0.1913333371281624,
+          "robot": 0.0,
+          "support": 0.5180833358783274,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.18491666628979148,
+        "recall": 0.35672373674329855,
+        "iou": 0.13867449916092006,
+        "class_fraction": {
+          "target": 0.18491666628979148,
+          "destination": 0.0,
+          "other_object": 0.03341666683554649,
+          "robot_gripper": 0.26562500223517416,
+          "robot": 0.0,
+          "support": 0.3996666679391637,
+          "background": 0.11637500002980232
+        }
+      },
+      "40": {
+        "precision": 0.1179791664937511,
+        "recall": 0.45518849083679447,
+        "iou": 0.10338091927453309,
+        "class_fraction": {
+          "target": 0.1179791664937511,
+          "destination": 0.000375000000349246,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.18437500186264516,
+          "robot": 0.0,
+          "support": 0.35410416767699643,
+          "background": 0.3250000007450581
+        }
+      }
+    },
+    "actionseed_siglip_encoded": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.06591666443273425,
+        "recall": 0.06358009616409888,
+        "iou": 0.03344608769435681,
+        "class_fraction": {
+          "target": 0.06591666443273425,
+          "destination": 0.0,
+          "other_object": 0.06683333367109298,
+          "robot_gripper": 0.16925000250339509,
+          "robot": 0.0,
+          "support": 0.642500002682209,
+          "background": 0.05550000071525574
+        }
+      },
+      "20": {
+        "precision": 0.10766666582785547,
+        "recall": 0.20770034484947303,
+        "iou": 0.07632099660793973,
+        "class_fraction": {
+          "target": 0.10766666582785547,
+          "destination": 0.0,
+          "other_object": 0.03633333351463079,
+          "robot_gripper": 0.19287500232458116,
+          "robot": 0.0,
+          "support": 0.5467500010738149,
+          "background": 0.11637500002980232
+        }
+      },
+      "40": {
+        "precision": 0.09297916649375111,
+        "recall": 0.358733221579382,
+        "iou": 0.07972775009882276,
+        "class_fraction": {
+          "target": 0.09297916649375111,
+          "destination": 0.0022083332616603,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.18437500186264516,
+          "robot": 0.0,
+          "support": 0.4022708346019499,
+          "background": 0.30000000074505806
+        }
+      }
+    },
+    "nounseed_siglip_encoded": {
+      "5": {
+        "precision": 0.5884999990463257,
+        "recall": 0.2838196293300017,
+        "iou": 0.23682092587426384,
+        "class_fraction": {
+          "target": 0.5884999990463257,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.1341666668653488,
+          "robot": 0.0,
+          "support": 0.2361666657961905,
+          "background": 0.04116666615009308
+        }
+      },
+      "10": {
+        "precision": 0.740666663646698,
+        "recall": 0.7144120247203163,
+        "iou": 0.5714653103372681,
+        "class_fraction": {
+          "target": 0.740666663646698,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.12066666707396508,
+          "robot": 0.0,
+          "support": 0.11808333289809525,
+          "background": 0.02058333307504654
+        }
+      },
+      "20": {
+        "precision": 0.4832499981392175,
+        "recall": 0.9322401737832462,
+        "iou": 0.46685182779362044,
+        "class_fraction": {
+          "target": 0.4832499981392175,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.2340000033378601,
+          "robot": 0.0,
+          "support": 0.19470833365339785,
+          "background": 0.08804166689515114
+        }
+      },
+      "40": {
+        "precision": 0.2566249989788048,
+        "recall": 0.990113334987353,
+        "iou": 0.2559690782215833,
+        "class_fraction": {
+          "target": 0.2566249989788048,
+          "destination": 0.0,
+          "other_object": 0.012375000119209289,
+          "robot_gripper": 0.18310416880995034,
+          "robot": 0.025,
+          "support": 0.15162500076694413,
+          "background": 0.37127083444502207
+        }
+      }
+    },
+    "projector": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.21533333165571095,
+        "recall": 0.20770034484947303,
+        "iou": 0.11822299416252681,
+        "class_fraction": {
+          "target": 0.21533333165571095,
+          "destination": 0.0,
+          "other_object": 0.049500000476837155,
+          "robot_gripper": 0.17016666978597642,
+          "robot": 0.0,
+          "support": 0.48891666722483934,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.18220833293162286,
+        "recall": 0.3514990762772789,
+        "iou": 0.1363664711199596,
+        "class_fraction": {
+          "target": 0.18220833293162286,
+          "destination": 0.0,
+          "other_object": 0.03633333351463079,
+          "robot_gripper": 0.21833333596587182,
+          "robot": 0.0,
+          "support": 0.4467500010738149,
+          "background": 0.11637500002980232
+        }
+      },
+      "40": {
+        "precision": 0.11745833314489573,
+        "recall": 0.4531790060007111,
+        "iou": 0.10287757960654766,
+        "class_fraction": {
+          "target": 0.11745833314489573,
+          "destination": 0.0022083332616603,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.1529166679829359,
+          "robot": 0.0,
+          "support": 0.4159375007613562,
+          "background": 0.29331249967217443
+        }
+      }
+    },
+    "actionseed_projector": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.16499999864026904,
+        "recall": 0.15915119296319846,
+        "iou": 0.08815279758962002,
+        "class_fraction": {
+          "target": 0.16499999864026904,
+          "destination": 0.0,
+          "other_object": 0.049500000476837155,
+          "robot_gripper": 0.17016666978597642,
+          "robot": 0.0,
+          "support": 0.5392500002402812,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.18220833293162286,
+        "recall": 0.3514990762772789,
+        "iou": 0.1363664711199596,
+        "class_fraction": {
+          "target": 0.18220833293162286,
+          "destination": 0.0,
+          "other_object": 0.03633333351463079,
+          "robot_gripper": 0.18700000271201134,
+          "robot": 0.0,
+          "support": 0.4780833343276754,
+          "background": 0.11637500002980232
+        }
+      },
+      "40": {
+        "precision": 0.11745833314489573,
+        "recall": 0.4531790060007111,
+        "iou": 0.10287757960654766,
+        "class_fraction": {
+          "target": 0.11745833314489573,
+          "destination": 0.0022083332616603,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.13281250111758708,
+          "robot": 0.0,
+          "support": 0.45410416716476903,
+          "background": 0.27525000013411044
+        }
+      }
+    },
+    "nounseed_projector": {
+      "5": {
+        "precision": 0.5884999990463257,
+        "recall": 0.2838196293300017,
+        "iou": 0.23682092587426384,
+        "class_fraction": {
+          "target": 0.5884999990463257,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.1341666668653488,
+          "robot": 0.0,
+          "support": 0.2361666657961905,
+          "background": 0.04116666615009308
+        }
+      },
+      "10": {
+        "precision": 0.640666663646698,
+        "recall": 0.6179567554629039,
+        "iou": 0.45890288128194767,
+        "class_fraction": {
+          "target": 0.640666663646698,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.12066666707396508,
+          "robot": 0.0,
+          "support": 0.21808333289809526,
+          "background": 0.02058333307504654
+        }
+      },
+      "20": {
+        "precision": 0.48374999812804165,
+        "recall": 0.9332047264542609,
+        "iou": 0.4675607086902313,
+        "class_fraction": {
+          "target": 0.48374999812804165,
+          "destination": 0.0,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.15900000222027302,
+          "robot": 0.0,
+          "support": 0.24445833361241967,
+          "background": 0.08804166689515114
+        }
+      },
+      "40": {
+        "precision": 0.25791666565928606,
+        "recall": 0.9950968572856189,
+        "iou": 0.25758931258386014,
+        "class_fraction": {
+          "target": 0.25791666565928606,
+          "destination": 0.0,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.19220833536237478,
+          "robot": 0.024583333730697633,
+          "support": 0.22372916721506045,
+          "background": 0.2833958335686475
+        }
+      }
+    },
+    "prefix_L4_out": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.2574166665785015,
+        "recall": 0.24829193886174936,
+        "iou": 0.14467028878023278,
+        "class_fraction": {
+          "target": 0.2574166665785015,
+          "destination": 0.0,
+          "other_object": 0.049500000476837155,
+          "robot_gripper": 0.17775000333786012,
+          "robot": 0.0,
+          "support": 0.4392500002402812,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.23220833293162285,
+        "recall": 0.4479543455346914,
+        "iou": 0.18054295703193493,
+        "class_fraction": {
+          "target": 0.23220833293162285,
+          "destination": 0.0004999999888241291,
+          "other_object": 0.03633333351463079,
+          "robot_gripper": 0.146666669100523,
+          "robot": 0.0,
+          "support": 0.4679166684160009,
+          "background": 0.11637500002980232
+        }
+      },
+      "40": {
+        "precision": 0.16354166592936964,
+        "recall": 0.630978216880926,
+        "iou": 0.1492650827480736,
+        "class_fraction": {
+          "target": 0.16354166592936964,
+          "destination": 0.01629166657512542,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.09606250133365393,
+          "robot": 0.0,
+          "support": 0.4698541674180888,
+          "background": 0.23608333356678485
+        }
+      }
+    },
+    "actionseed_prefix_L4_out": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.16499999864026904,
+        "recall": 0.15915119296319846,
+        "iou": 0.08815279758962002,
+        "class_fraction": {
+          "target": 0.16499999864026904,
+          "destination": 0.0,
+          "other_object": 0.049500000476837155,
+          "robot_gripper": 0.17016666978597642,
+          "robot": 0.0,
+          "support": 0.5392500002402812,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.23220833293162285,
+        "recall": 0.4479543455346914,
+        "iou": 0.18054295703193493,
+        "class_fraction": {
+          "target": 0.23220833293162285,
+          "destination": 0.0004999999888241291,
+          "other_object": 0.03633333351463079,
+          "robot_gripper": 0.13608333542943002,
+          "robot": 0.0,
+          "support": 0.4785000005969778,
+          "background": 0.11637500002980232
+        }
+      },
+      "40": {
+        "precision": 0.13854166592936962,
+        "recall": 0.5345229476235136,
+        "iou": 0.12362662836584286,
+        "class_fraction": {
+          "target": 0.13854166592936962,
+          "destination": 0.04129166657512542,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.07589583452790975,
+          "robot": 0.025,
+          "support": 0.46502083422383295,
+          "background": 0.23608333356678485
+        }
+      }
+    },
+    "nounseed_prefix_L4_out": {
+      "5": {
+        "precision": 0.5884999990463257,
+        "recall": 0.2838196293300017,
+        "iou": 0.23682092587426384,
+        "class_fraction": {
+          "target": 0.5884999990463257,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.1341666668653488,
+          "robot": 0.0,
+          "support": 0.2361666657961905,
+          "background": 0.04116666615009308
+        }
+      },
+      "10": {
+        "precision": 0.640666663646698,
+        "recall": 0.6179567554629039,
+        "iou": 0.45890288128194767,
+        "class_fraction": {
+          "target": 0.640666663646698,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.12066666707396508,
+          "robot": 0.0,
+          "support": 0.21808333289809526,
+          "background": 0.02058333307504654
+        }
+      },
+      "20": {
+        "precision": 0.45541666499339045,
+        "recall": 0.878546740925006,
+        "iou": 0.42844263118249,
+        "class_fraction": {
+          "target": 0.45541666499339045,
+          "destination": 0.0,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.1373333353549242,
+          "robot": 0.0,
+          "support": 0.2944583336124197,
+          "background": 0.08804166689515114
+        }
+      },
+      "40": {
+        "precision": 0.2560416656313464,
+        "recall": 0.9878627119835158,
+        "iou": 0.25523872713765894,
+        "class_fraction": {
+          "target": 0.2560416656313464,
+          "destination": 0.00024999999441206456,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.10839583482593299,
+          "robot": 0.049583333730697635,
+          "support": 0.2830416671349667,
+          "background": 0.28452083398588
+        }
+      }
+    },
+    "prefix_L8_out": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.2984166662208736,
+        "recall": 0.28783859891233754,
+        "iou": 0.171668264733032,
+        "class_fraction": {
+          "target": 0.2984166662208736,
+          "destination": 0.0,
+          "other_object": 0.049500000476837155,
+          "robot_gripper": 0.08708333373069763,
+          "robot": 0.0,
+          "support": 0.48891666722483934,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.3270833318587393,
+        "recall": 0.630978216880926,
+        "iou": 0.27456192398467355,
+        "class_fraction": {
+          "target": 0.3270833318587393,
+          "destination": 0.004166666511446237,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.11566666848957538,
+          "robot": 0.0,
+          "support": 0.39029166793916376,
+          "background": 0.13804166689515113
+        }
+      },
+      "40": {
+        "precision": 0.16354166592936964,
+        "recall": 0.630978216880926,
+        "iou": 0.1492650827480736,
+        "class_fraction": {
+          "target": 0.16354166592936964,
+          "destination": 0.06629166657512542,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.059770834259688856,
+          "robot": 0.0,
+          "support": 0.31797916697105394,
+          "background": 0.37424999959766864
+        }
+      }
+    },
+    "actionseed_prefix_L8_out": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.2984166662208736,
+        "recall": 0.28783859891233754,
+        "iou": 0.171668264733032,
+        "class_fraction": {
+          "target": 0.2984166662208736,
+          "destination": 0.0,
+          "other_object": 0.049500000476837155,
+          "robot_gripper": 0.08708333373069763,
+          "robot": 0.0,
+          "support": 0.48891666722483934,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.23220833293162285,
+        "recall": 0.4479543455346914,
+        "iou": 0.18054295703193493,
+        "class_fraction": {
+          "target": 0.23220833293162285,
+          "destination": 0.13233333313837647,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.11054166853427887,
+          "robot": 0.0,
+          "support": 0.4121250013122335,
+          "background": 0.08804166689515114
+        }
+      },
+      "40": {
+        "precision": 0.16354166592936964,
+        "recall": 0.630978216880926,
+        "iou": 0.1492650827480736,
+        "class_fraction": {
+          "target": 0.16354166592936964,
+          "destination": 0.29118749990302606,
+          "other_object": 0.016708333417773245,
+          "robot_gripper": 0.059770834259688856,
+          "robot": 0.0,
+          "support": 0.29454166697105394,
+          "background": 0.17424999959766865
+        }
+      }
+    },
+    "nounseed_prefix_L8_out": {
+      "5": {
+        "precision": 0.5884999990463257,
+        "recall": 0.2838196293300017,
+        "iou": 0.23682092587426384,
+        "class_fraction": {
+          "target": 0.5884999990463257,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.1341666668653488,
+          "robot": 0.0,
+          "support": 0.2361666657961905,
+          "background": 0.04116666615009308
+        }
+      },
+      "10": {
+        "precision": 0.5509166657924652,
+        "recall": 0.5313881533740816,
+        "iou": 0.37077958520428456,
+        "class_fraction": {
+          "target": 0.5509166657924652,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.11041666716337203,
+          "robot": 0.0,
+          "support": 0.31808333289809526,
+          "background": 0.02058333307504654
+        }
+      },
+      "20": {
+        "precision": 0.42708333185873926,
+        "recall": 0.823888755395751,
+        "iou": 0.39135580811586695,
+        "class_fraction": {
+          "target": 0.42708333185873926,
+          "destination": 0.0,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.11566666848957538,
+          "robot": 0.0,
+          "support": 0.2944583336124197,
+          "background": 0.13804166689515113
+        }
+      },
+      "40": {
+        "precision": 0.2560416656313464,
+        "recall": 0.9878627119835158,
+        "iou": 0.25523872713765894,
+        "class_fraction": {
+          "target": 0.2560416656313464,
+          "destination": 0.06577083363372367,
+          "other_object": 0.018166666757315396,
+          "robot_gripper": 0.09227083455771208,
+          "robot": 0.0,
+          "support": 0.293500000226777,
+          "background": 0.27424999959766866
+        }
+      }
+    },
+    "prefix_L12_out": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.3047499994747341,
+        "recall": 0.2939474325553179,
+        "iou": 0.17595265595656556,
+        "class_fraction": {
+          "target": 0.3047499994747341,
+          "destination": 0.0,
+          "other_object": 0.049500000476837155,
+          "robot_gripper": 0.13041666746139527,
+          "robot": 0.0,
+          "support": 0.4392500002402812,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.1570416664239019,
+        "recall": 0.3029499243910043,
+        "iou": 0.11535871692213126,
+        "class_fraction": {
+          "target": 0.1570416664239019,
+          "destination": 0.15049999998882413,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.11054166853427887,
+          "robot": 0.0,
+          "support": 0.3191250005969778,
+          "background": 0.23804166689515113
+        }
+      },
+      "40": {
+        "precision": 0.09110416646581143,
+        "recall": 0.3514990762772789,
+        "iou": 0.07799457789672838,
+        "class_fraction": {
+          "target": 0.09110416646581143,
+          "destination": 0.19541666700679344,
+          "other_object": 0.012375000119209289,
+          "robot_gripper": 0.05527083426713943,
+          "robot": 0.0,
+          "support": 0.3756875002407469,
+          "background": 0.27014583349227905
+        }
+      }
+    },
+    "actionseed_prefix_L12_out": {
+      "5": {
+        "precision": 0.10699999537318945,
+        "recall": 0.0516035668213144,
+        "iou": 0.03606944058905249,
+        "class_fraction": {
+          "target": 0.10699999537318945,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.07933333069086075,
+          "robot": 0.0,
+          "support": 0.7026666671037674,
+          "background": 0.11100000143051147
+        }
+      },
+      "10": {
+        "precision": 0.3047499994747341,
+        "recall": 0.2939474325553179,
+        "iou": 0.17595265595656556,
+        "class_fraction": {
+          "target": 0.3047499994747341,
+          "destination": 0.0,
+          "other_object": 0.049500000476837155,
+          "robot_gripper": 0.13041666746139527,
+          "robot": 0.0,
+          "support": 0.4392500002402812,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.1570416664239019,
+        "recall": 0.3029499243910043,
+        "iou": 0.11535871692213126,
+        "class_fraction": {
+          "target": 0.1570416664239019,
+          "destination": 0.22866666661575435,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.11054166853427887,
+          "robot": 0.0,
+          "support": 0.34095833397004754,
+          "background": 0.13804166689515113
+        }
+      },
+      "40": {
+        "precision": 0.07852083321195095,
+        "recall": 0.3029499243910043,
+        "iou": 0.06650550531333708,
+        "class_fraction": {
+          "target": 0.07852083321195095,
+          "destination": 0.3669375004916219,
+          "other_object": 0.012375000119209289,
+          "robot_gripper": 0.05527083426713943,
+          "robot": 0.0,
+          "support": 0.31674999982351437,
+          "background": 0.17014583349227905
+        }
+      }
+    },
+    "nounseed_prefix_L12_out": {
+      "5": {
+        "precision": 0.6011666655540466,
+        "recall": 0.2899284629729821,
+        "iou": 0.24315761115551127,
+        "class_fraction": {
+          "target": 0.6011666655540466,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.22083333432674407,
+          "robot": 0.0,
+          "support": 0.1368333318270743,
+          "background": 0.04116666615009308
+        }
+      },
+      "10": {
+        "precision": 0.4519999991171062,
+        "recall": 0.4359778161919069,
+        "iou": 0.2852184887558568,
+        "class_fraction": {
+          "target": 0.4519999991171062,
+          "destination": 0.0,
+          "other_object": 0.0,
+          "robot_gripper": 0.12041666731238365,
+          "robot": 0.0,
+          "support": 0.3515000004786998,
+          "background": 0.07608333379030227
+        }
+      },
+      "20": {
+        "precision": 0.37708333185873927,
+        "recall": 0.7274334861383386,
+        "iou": 0.3304004953987305,
+        "class_fraction": {
+          "target": 0.37708333185873927,
+          "destination": 0.049166667461395266,
+          "other_object": 0.024750000238418578,
+          "robot_gripper": 0.1373333353549242,
+          "robot": 0.0,
+          "support": 0.2952916669892147,
+          "background": 0.11637500002980232
+        }
+      },
+      "40": {
+        "precision": 0.22770833249669523,
+        "recall": 0.878546740925006,
+        "iou": 0.22075902248053697,
+        "class_fraction": {
+          "target": 0.22770833249669523,
+          "destination": 0.27383333444595337,
+          "other_object": 0.012375000119209289,
+          "robot_gripper": 0.084791667945683,
+          "robot": 0.0,
+          "support": 0.21310416694032028,
+          "background": 0.18818750008940696
+        }
+      }
+    }
+  },
+  "oracle_whole_patch_mask_upper_bound": {
+    "iou": 0.7087009845809131,
+    "patch_count": 14,
+    "note": "Uses GT to show 16x16 resolution ceiling only; not an algorithm result."
+  },
+  "existing_grasp_labels": {
+    "grasp_state": "held",
+    "phys_state": "held",
+    "finger_contact_lr": [
+      0,
+      2
+    ],
+    "used_gripper": 0.6818143848732708,
+    "closed_loop_gt": "held"
+  },
+  "replay_depth_diagnostic": [
+    {
+      "camera": "zed_left",
+      "rgb_mad": 0.048462744472789115,
+      "gt_patch_maxabs": 0.0,
+      "valid_points": 262108,
+      "seed_patch_geometry": []
+    },
+    {
+      "camera": "wrist_cam_l",
+      "rgb_mad": 0.01035687712585034,
+      "gt_patch_maxabs": 0.0,
+      "valid_points": 301156,
+      "seed_patch_geometry": []
+    },
+    {
+      "camera": "wrist_cam_r",
+      "rgb_mad": 0.11498857355442177,
+      "gt_patch_maxabs": 0.0,
+      "valid_points": 301154,
+      "seed_patch_geometry": [
+        {
+          "seed": 713,
+          "classes": {
+            "target": {
+              "pixels": 13,
+              "depth_median_m": 0.09653075784444809,
+              "centroid_base_m": [
+                0.5000890931304262,
+                -0.3356155824255979,
+                1.1167948853463885
+              ]
+            },
+            "robot_gripper": {
+              "pixels": 120,
+              "depth_median_m": 0.10354737192392349,
+              "centroid_base_m": [
+                0.5095104262718133,
+                -0.3494286472369261,
+                1.1162047984973253
+              ]
+            },
+            "support": {
+              "pixels": 401,
+              "depth_median_m": 0.41086915135383606,
+              "centroid_base_m": [
+                0.6411587057491068,
+                -0.48625783669553235,
+                0.8201288999631581
+              ]
+            },
+            "background": {
+              "pixels": 666,
+              "depth_median_m": 1.3072076439857483,
+              "centroid_base_m": [
+                1.0672993477699122,
+                -1.004090344603501,
+                0.0014090658585303726
+              ]
+            }
+          }
+        },
+        {
+          "seed": 679,
+          "classes": {
+            "support": {
+              "pixels": 1200,
+              "depth_median_m": 0.41965577006340027,
+              "centroid_base_m": [
+                0.656113958982391,
+                -0.3362028172780401,
+                0.8201318638066937
+              ]
+            }
+          }
+        },
+        {
+          "seed": 695,
+          "classes": {
+            "support": {
+              "pixels": 1200,
+              "depth_median_m": 0.39095252752304077,
+              "centroid_base_m": [
+                0.6136333048937334,
+                -0.3613109742097171,
+                0.8201228258028312
+              ]
+            }
+          }
+        },
+        {
+          "seed": 696,
+          "classes": {
+            "support": {
+              "pixels": 1200,
+              "depth_median_m": 0.41869041323661804,
+              "centroid_base_m": [
+                0.6539616195401071,
+                -0.4233701763502821,
+                0.8201315371324963
+              ]
+            }
+          }
+        },
+        {
+          "seed": 726,
+          "classes": {
+            "target": {
+              "pixels": 629,
+              "depth_median_m": 0.0858721137046814,
+              "centroid_base_m": [
+                0.4779109934730449,
+                -0.3070487796390355,
+                1.1100065793920781
+              ]
+            },
+            "robot_gripper": {
+              "pixels": 356,
+              "depth_median_m": 0.09898566454648972,
+              "centroid_base_m": [
+                0.4768973886988104,
+                -0.3020903931102567,
+                1.0903686295068507
+              ]
+            },
+            "support": {
+              "pixels": 215,
+              "depth_median_m": 0.3286803662776947,
+              "centroid_base_m": [
+                0.5211927165003644,
+                -0.3447390728418141,
+                0.8201030421484296
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

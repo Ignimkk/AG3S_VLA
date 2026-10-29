@@ -1,0 +1,1443 @@
+{
+ "numbers": {
+  "paired_primary": {
+   "C1aN_vs_SPL": {
+    "both": 16,
+    "only_C1aN": 0,
+    "only_SPL": 2,
+    "neither": 6,
+    "missing": 0,
+    "n_pairs": 24,
+    "mcnemar_exact_p": 0.5,
+    "rate_C1aN": 0.6666666666666666,
+    "rate_SPL": 0.75,
+    "diff_SPL_minus_C1aN": 0.08333333333333333,
+    "ci95_bootstrap": [
+     0.0,
+     0.20833333333333334
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   },
+   "E0_vs_SPL": {
+    "both": 15,
+    "only_E0": 3,
+    "only_SPL": 3,
+    "neither": 3,
+    "missing": 0,
+    "n_pairs": 24,
+    "mcnemar_exact_p": 1.0,
+    "rate_E0": 0.75,
+    "rate_SPL": 0.75,
+    "diff_SPL_minus_E0": 0.0,
+    "ci95_bootstrap": [
+     -0.20833333333333334,
+     0.20833333333333334
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   },
+   "S2_vs_SPL": {
+    "both": 15,
+    "only_S2": 0,
+    "only_SPL": 3,
+    "neither": 6,
+    "missing": 0,
+    "n_pairs": 24,
+    "mcnemar_exact_p": 0.25,
+    "rate_S2": 0.625,
+    "rate_SPL": 0.75,
+    "diff_SPL_minus_S2": 0.125,
+    "ci95_bootstrap": [
+     0.0,
+     0.2916666666666667
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   },
+   "E0_vs_C1aN": {
+    "both": 13,
+    "only_E0": 5,
+    "only_C1aN": 3,
+    "neither": 3,
+    "missing": 0,
+    "n_pairs": 24,
+    "mcnemar_exact_p": 0.7265625,
+    "rate_E0": 0.75,
+    "rate_C1aN": 0.6666666666666666,
+    "diff_C1aN_minus_E0": -0.08333333333333333,
+    "ci95_bootstrap": [
+     -0.2916666666666667,
+     0.125
+    ],
+    "bootstrap": {
+     "n_resamples": 10000,
+     "seed": 20261019,
+     "unit": "episode pair",
+     "method": "percentile"
+    }
+   }
+  },
+  "n_scenes": 24,
+  "n_identical_C1aN_SPL": 19,
+  "diverged_C1aN_SPL": [
+   1345,
+   211,
+   572,
+   250,
+   325
+  ],
+  "near_le_8.2cm": {
+   "n": 7,
+   "E0_primary": 7,
+   "C1aN_primary": 3,
+   "S2_primary": 2,
+   "SPL_primary": 5,
+   "E0_strict": 4,
+   "C1aN_strict": 3,
+   "S2_strict": 2,
+   "SPL_strict": 4
+  },
+  "far_gt_8.2cm": {
+   "n": 17,
+   "E0_primary": 11,
+   "C1aN_primary": 13,
+   "S2_primary": 13,
+   "SPL_primary": 13,
+   "E0_strict": 11,
+   "C1aN_strict": 11,
+   "S2_strict": 11,
+   "SPL_strict": 11
+  },
+  "all": {
+   "n": 24,
+   "E0_primary": 18,
+   "C1aN_primary": 16,
+   "S2_primary": 15,
+   "SPL_primary": 18,
+   "E0_strict": 15,
+   "C1aN_strict": 14,
+   "S2_strict": 13,
+   "SPL_strict": 15
+  },
+  "flips_C1aN_to_SPL": {
+   "fail_to_success": [
+    1345,
+    250
+   ],
+   "success_to_fail": []
+  },
+  "revokes_lifted_total": {
+   "C1aN": 2,
+   "SPL": 0
+  },
+  "merged_scenes": {
+   "1345": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "ext_mm_median": 136.0,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "t_close": 107,
+     "neighbour_rows": 7
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "ext_mm_median": 92.1,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "t_close": 127,
+     "neighbour_rows": 31
+    }
+   },
+   "211": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "no_grasp",
+     "ext_mm_median": 139.0,
+     "hold_near": 34,
+     "revokes_lifted_k": [],
+     "t_close": 398,
+     "neighbour_rows": 4
+    },
+    "SPL": {
+     "primary": false,
+     "failure_mode": "regrasp",
+     "ext_mm_median": 76.6,
+     "hold_near": 2,
+     "revokes_lifted_k": [],
+     "t_close": 163,
+     "neighbour_rows": 34
+    }
+   },
+   "572": {
+    "C1aN": {
+     "primary": true,
+     "failure_mode": "ok",
+     "ext_mm_median": 142.0,
+     "hold_near": 0,
+     "revokes_lifted_k": [
+      18
+     ],
+     "t_close": 107,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "ext_mm_median": 81.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "t_close": 107,
+     "neighbour_rows": 0
+    }
+   },
+   "250": {
+    "C1aN": {
+     "primary": false,
+     "failure_mode": "slip_in_transport",
+     "ext_mm_median": 149.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [
+      16
+     ],
+     "t_close": 87,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "failure_mode": "ok",
+     "ext_mm_median": 84.5,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "t_close": 81,
+     "neighbour_rows": 0
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "episode": 1345,
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.07198513735487344,
+   "first_divergence_row_C1aN_vs_SPL": 8,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 31
+    },
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 7,
+     "t_close": 107,
+     "ext_mm_median": 136.0,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1345_s13453"
+    },
+    "S2": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 7
+    },
+    "SPL": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 31,
+     "t_close": 127,
+     "ext_mm_median": 92.1,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 7,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep1345_s13453"
+    }
+   }
+  },
+  {
+   "episode": 211,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.0722717095411476,
+   "first_divergence_row_C1aN_vs_SPL": 0,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 8
+    },
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 34,
+     "neighbour_rows": 4,
+     "t_close": 398,
+     "ext_mm_median": 139.0,
+     "hold_near": 34,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep211_s2113"
+    },
+    "S2": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 34,
+     "neighbour_rows": 4
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 6,
+     "neighbour_rows": 34,
+     "t_close": 163,
+     "ext_mm_median": 76.6,
+     "hold_near": 2,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 22,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep211_s2113"
+    }
+   }
+  },
+  {
+   "episode": 572,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.07275658045840258,
+   "first_divergence_row_C1aN_vs_SPL": 8,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 3,
+     "neighbour_rows": 0,
+     "t_close": 107,
+     "ext_mm_median": 142.0,
+     "hold_near": 0,
+     "revokes_lifted_k": [
+      18
+     ],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep572_s5723"
+    },
+    "S2": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 107,
+     "ext_mm_median": 81.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 16,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep572_s5723"
+    }
+   }
+  },
+  {
+   "episode": 1837,
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.07836612788698955,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 15,
+     "neighbour_rows": 0,
+     "t_close": 74,
+     "ext_mm_median": 68.3,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1837_s18373"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 45,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 15,
+     "neighbour_rows": 0,
+     "t_close": 74,
+     "ext_mm_median": 68.3,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 1,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep1837_s18373"
+    }
+   }
+  },
+  {
+   "episode": 126,
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.08089653886292042,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 92,
+     "ext_mm_median": 67.85,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep126_s1263"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 92,
+     "ext_mm_median": 67.85,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep126_s1263"
+    }
+   }
+  },
+  {
+   "episode": 954,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.08164128857385829,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 17
+    },
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 146,
+     "ext_mm_median": 68.5,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep954_s9543"
+    },
+    "S2": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 146,
+     "ext_mm_median": 68.5,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 3,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep954_s9543"
+    }
+   }
+  },
+  {
+   "episode": 250,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.08190390711071117,
+   "first_divergence_row_C1aN_vs_SPL": 8,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 49,
+     "neighbour_rows": 0,
+     "t_close": 87,
+     "ext_mm_median": 149.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [
+      16
+     ],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep250_s2503"
+    },
+    "S2": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 7,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 81,
+     "ext_mm_median": 84.5,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 10,
+     "partitions_accepted": 10,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep250_s2503"
+    }
+   }
+  },
+  {
+   "episode": 1668,
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.08358014118198176,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 104,
+     "ext_mm_median": 71.3,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1668_s16683"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 104,
+     "ext_mm_median": 71.3,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 1,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep1668_s16683"
+    }
+   }
+  },
+  {
+   "episode": 325,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.08404028795762183,
+   "first_divergence_row_C1aN_vs_SPL": 11,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_in_transport",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "t_close": 112,
+     "ext_mm_median": 67.15,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep325_s3253"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 112,
+     "ext_mm_median": 67.6,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 3,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep325_s3253"
+    }
+   }
+  },
+  {
+   "episode": 119,
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.08660207849699683,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 5,
+     "t_close": 113,
+     "ext_mm_median": 71.4,
+     "hold_near": 1,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep119_s1193"
+    },
+    "S2": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 5
+    },
+    "SPL": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 5,
+     "t_close": 113,
+     "ext_mm_median": 71.4,
+     "hold_near": 1,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep119_s1193"
+    }
+   }
+  },
+  {
+   "episode": 342,
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.08814652573981578,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 2,
+     "t_close": 108,
+     "ext_mm_median": 66.6,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep342_s3423"
+    },
+    "S2": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 2
+    },
+    "SPL": {
+     "primary": true,
+     "strict": false,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 2,
+     "t_close": 108,
+     "ext_mm_median": 66.6,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep342_s3423"
+    }
+   }
+  },
+  {
+   "episode": 1313,
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.08882662889021517,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 152,
+     "ext_mm_median": 71.7,
+     "hold_near": 1,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1313_s13133"
+    },
+    "S2": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 152,
+     "ext_mm_median": 71.7,
+     "hold_near": 1,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 10,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep1313_s13133"
+    }
+   }
+  },
+  {
+   "episode": 850,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.09045446368200967,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 133,
+     "ext_mm_median": 72.1,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep850_s8503"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 133,
+     "ext_mm_median": 72.1,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep850_s8503"
+    }
+   }
+  },
+  {
+   "episode": 979,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.0915669154225477,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "regrasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 196,
+     "ext_mm_median": 73.5,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep979_s9793"
+    },
+    "S2": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 196,
+     "ext_mm_median": 73.5,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 11,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep979_s9793"
+    }
+   }
+  },
+  {
+   "episode": 320,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.09343618142882341,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 123,
+     "ext_mm_median": 66.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep320_s3203"
+    },
+    "S2": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 123,
+     "ext_mm_median": 66.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 5,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep320_s3203"
+    }
+   }
+  },
+  {
+   "episode": 121,
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.09469382239618383,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 108,
+     "ext_mm_median": 74.55,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep121_s1213"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 108,
+     "ext_mm_median": 74.55,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep121_s1213"
+    }
+   }
+  },
+  {
+   "episode": 309,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.096876829014992,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 120,
+     "ext_mm_median": 67.7,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep309_s3093"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 120,
+     "ext_mm_median": 67.7,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep309_s3093"
+    }
+   }
+  },
+  {
+   "episode": 1596,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.09797698709390891,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 88,
+     "ext_mm_median": 66.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1596_s15963"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 88,
+     "ext_mm_median": 66.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 1,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep1596_s15963"
+    }
+   }
+  },
+  {
+   "episode": 901,
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.10094473735663495,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "t_close": 111,
+     "ext_mm_median": 66.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep901_s9013"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "t_close": 111,
+     "ext_mm_median": 66.8,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep901_s9013"
+    }
+   }
+  },
+  {
+   "episode": 56,
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.10128622808654687,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 88,
+     "ext_mm_median": 67.5,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep56_s563"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 88,
+     "ext_mm_median": 67.5,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 3,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep56_s563"
+    }
+   }
+  },
+  {
+   "episode": 421,
+   "nearest_fruit": "pear",
+   "nearest_fruit_m": 0.10677602727204266,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "t_close": 150,
+     "ext_mm_median": 67.0,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep421_s4213"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "t_close": 150,
+     "ext_mm_median": 67.0,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 8,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep421_s4213"
+    }
+   }
+  },
+  {
+   "episode": 753,
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.10841166911361527,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 124,
+     "ext_mm_median": 66.2,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep753_s7533"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "slip_at_lift",
+     "hold_chunks": 1,
+     "neighbour_rows": 0,
+     "t_close": 124,
+     "ext_mm_median": 66.2,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep753_s7533"
+    }
+   }
+  },
+  {
+   "episode": 1222,
+   "nearest_fruit": "orange",
+   "nearest_fruit_m": 0.10955117525613313,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 9
+    },
+    "C1aN": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "t_close": 112,
+     "ext_mm_median": 68.4,
+     "hold_near": 1,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep1222_s12223"
+    },
+    "S2": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": true,
+     "strict": true,
+     "failure_mode": "ok",
+     "hold_chunks": 2,
+     "neighbour_rows": 0,
+     "t_close": 112,
+     "ext_mm_median": 68.4,
+     "hold_near": 1,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 2,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep1222_s12223"
+    }
+   }
+  },
+  {
+   "episode": 526,
+   "nearest_fruit": "banana",
+   "nearest_fruit_m": 0.11127250334202071,
+   "first_divergence_row_C1aN_vs_SPL": null,
+   "arms": {
+    "E0": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "C1aN": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 143,
+     "ext_mm_median": 70.0,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/C1aN/C1aN_ep526_s5263"
+    },
+    "S2": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0
+    },
+    "SPL": {
+     "primary": false,
+     "strict": false,
+     "failure_mode": "no_grasp",
+     "hold_chunks": 0,
+     "neighbour_rows": 0,
+     "t_close": 143,
+     "ext_mm_median": 70.0,
+     "hold_near": 0,
+     "revokes_lifted_k": [],
+     "split_superseded_chunks": 0,
+     "partitions_accepted": 0,
+     "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-SPLIT/runs/SPL/SPL_ep526_s5263"
+    }
+   }
+  }
+ ],
+ "sources": {
+  "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f",
+  "script": "AG3S/ag3s/experiments/studies/ifg_split_closedloop.py"
+ }
+}

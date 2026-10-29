@@ -1,0 +1,24 @@
+{
+ "frame_id": "T53_ep1839_f023",
+ "camera": "head (zed_left)",
+ "panels": {
+  "G:N": {
+   "iou": 0.264686578357531,
+   "precision": 0.27492168301719117,
+   "recall": 0.8766902167467776,
+   "neighbor_fp": 334.0
+  },
+  "FG:N:projector": {
+   "iou": 0.6134569780655713,
+   "precision": 0.671387689052509,
+   "recall": 0.8766902167467776,
+   "neighbor_fp": 60.0
+  },
+  "F:N:projector": {
+   "iou": 0.11920625642562743,
+   "precision": 0.12164420011716476,
+   "recall": 0.8560725060972673,
+   "neighbor_fp": 90.0
+  }
+ }
+}

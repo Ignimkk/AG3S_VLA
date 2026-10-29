@@ -1,0 +1,16 @@
+{
+ "off": {
+  "request": 25,
+  "state": "held",
+  "n_band_in_view": 30468,
+  "n_stale_memory_in_view": 247,
+  "n_stale_other_in_view": 754
+ },
+ "D1_D2": {
+  "request": 25,
+  "state": "held",
+  "n_band_in_view": 29797,
+  "n_stale_memory_in_view": 30,
+  "n_stale_other_in_view": 698
+ }
+}

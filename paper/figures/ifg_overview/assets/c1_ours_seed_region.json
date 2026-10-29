@@ -1,0 +1,32 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/c1_ours_seed_region.png",
+ "frame": "T54c_ep1856_f025",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T54c_ep1856_f025.npz": "0af2125d68f37d0bad8a88480734e6a8723e64e661dab1853608c6af143eaa3a"
+ },
+ "note": "Non-support eligible seeds -> graph-energy top-1 region (orange); nearby non-target surfaces blue.",
+ "is_measured_result": false,
+ "iou": 0.9901960784313726,
+ "seeds": [
+  149,
+  471,
+  501,
+  485,
+  469
+ ],
+ "seed_nodes": 433,
+ "seed_nodes_on_target": 75,
+ "camera": {
+  "lookat": [
+   0.5442814165371537,
+   0.19295798605161701,
+   0.8461820670520899
+  ],
+  "dist": 0.8,
+  "az": 180,
+  "el": -72
+ }
+}

@@ -1,0 +1,24 @@
+% !TEX root = ../latex/main.tex
+% A01: DRAFT 1, describes one \sys\ step as implemented at the T39 snapshot (notes/METHOD_FACTS_DRAFT1.md).
+\begin{algorithm}[t]
+\caption{One \sys\ step per requested chunk}
+\label{alg:proposed}
+\begin{algorithmic}[1]
+\Require chunk $A$ from $\pi_{0.5}$, attention maps, depth and state of 3 cameras, injected manipulator
+\State ATS: fuse attention and depth in 3D; grow clusters from the attention seeds
+\State HSR: read the sub-task from the key-value cache; apply the rule of Table~\ref{tab:subtask}
+\State Update target identity (candidate filtering, hysteresis); update grasp state
+\State Integrate masked depth into the TSDF; compute the ESDF $d$ (coarse and fine)
+\If{a target exists and nothing is attached}
+  \State Compute the target-free ESDF $f$ and define $\dfree$ by Eq.~\eqref{eq:exempt}
+\EndIf
+\If{the grasp state is \textsc{held}} \State Attach fitted spheres to the palm; free their volume in the TSDF \EndIf
+\State LTE: build clearance rows (Eq.~\eqref{eq:clearance}); $\dfree$ for contact links, $d$ otherwise
+\State CCR: solve the SQP (Eq.~\eqref{eq:qp}) for rows $0..K{-}1$; re-check on all rows at full resolution
+\If{a violation by a non-contact link or object, an uncertified field, or a solver failure}
+  \State Stop: execute no policy row; hold the measured arm pose
+\Else
+  \State Execute the refined rows $0..K{-}1$; pass rows $K..H{-}1$ and the gripper through
+\EndIf
+\end{algorithmic}
+\end{algorithm}

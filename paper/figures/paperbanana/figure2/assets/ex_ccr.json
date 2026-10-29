@@ -1,0 +1,7 @@
+{
+ "asset": "paper/figures/paperbanana/figure2/assets/ex_ccr.png",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19822",
+ "note": "Carry chunk with the largest executed-row tool-centre shift: policy reference (dashed dark) vs SQP-refined (gold), FK of the recorded chunks; attached-object sphere (purple) carried with the hand.",
+ "chunk": 20,
+ "max_tcp_shift_mm": 40.44249207853031
+}

@@ -1,0 +1,2568 @@
+{
+ "step": "IFG-S2FK",
+ "task": "AG3S/ag3s/docs/handoff/IFG-S2FK.task.md",
+ "written": "2026-10-19 KST (lead; numbers copied from run outputs, no judgement)",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T025853+0900_f15e587290f6_93594d3dffc0",
+ "numbers": {
+  "memory_gate": {
+   "fk": {
+    "iou_A": 0.8320612510959661,
+    "iou_B": 0.8453618656581814,
+    "precision_A": 0.9552711342181999,
+    "precision_B": 0.9700984677019631,
+    "recall_A": 0.8355078746336647,
+    "recall_B": 0.8488799073737594,
+    "neighbor_fp_A": 46237.61075299564,
+    "neighbor_fp_B": 13819.20763346116,
+    "paired_B_minus_A": {
+     "n_episodes": 34,
+     "diff": 0.013300614562215249,
+     "ci95": [
+      -0.012499560713138205,
+      0.03722135297929163
+     ],
+     "better": 14,
+     "worse": 6
+    },
+    "switch_frames": 123,
+    "gate_success": {
+     "threshold": 0.5904207590672415,
+     "n_frames": 2417,
+     "wrong_choices": 97,
+     "alerts": 236,
+     "alerts_on_wrong": 83,
+     "wrong_caught_ratio": 0.8556701030927835,
+     "false_alarms": 153,
+     "fp_removed_ratio": 0.9264948641526761,
+     "tp_lost_ratio": 0.06871220186101283,
+     "auroc_wrong": 0.9235380376821898
+    },
+    "gate_all": {
+     "threshold": 0.5904207590672415,
+     "n_frames": 3064,
+     "wrong_choices": 176,
+     "alerts": 408,
+     "alerts_on_wrong": 157,
+     "wrong_caught_ratio": 0.8920454545454546,
+     "false_alarms": 251,
+     "fp_removed_ratio": 0.8878023971352983,
+     "tp_lost_ratio": 0.07942665570294125,
+     "auroc_wrong": 0.9338622985394107
+    },
+    "by_stratum": {
+     "clear": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.8638190159940471,
+        "n_episodes": 13
+       },
+       "precision": {
+        "episode_mean": 0.9732621808963076,
+        "n_episodes": 13
+       },
+       "recall": {
+        "episode_mean": 0.8664508457250211,
+        "n_episodes": 13
+       },
+       "n_valid_frames": 966,
+       "neighbor_fp_sum": 6991.126015455524,
+       "support_fp_sum": 182.6533290938632,
+       "robot_fp_sum": 53.81419871955123,
+       "FP_sum": 7227.870570295963,
+       "TP_sum": 243404.12942970375
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.8571222326017179,
+        "n_episodes": 13
+       },
+       "precision": {
+        "episode_mean": 0.964696233024134,
+        "n_episodes": 13
+       },
+       "recall": {
+        "episode_mean": 0.8597716600736172,
+        "n_episodes": 13
+       },
+       "n_valid_frames": 966,
+       "neighbor_fp_sum": 6815.652119343296,
+       "support_fp_sum": 198.1081192030244,
+       "robot_fp_sum": 52.76814541602166,
+       "FP_sum": 7066.805410989363,
+       "TP_sum": 238021.19458901024
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.8638190159940471,
+        "n_episodes": 13
+       },
+       "precision": {
+        "episode_mean": 0.9732621808963076,
+        "n_episodes": 13
+       },
+       "recall": {
+        "episode_mean": 0.8664508457250211,
+        "n_episodes": 13
+       },
+       "n_valid_frames": 966,
+       "neighbor_fp_sum": 6991.126015455524,
+       "support_fp_sum": 182.6533290938632,
+       "robot_fp_sum": 53.81419871955123,
+       "FP_sum": 7227.870570295963,
+       "TP_sum": 243404.12942970375
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.8146361930179686,
+        "n_episodes": 13
+       },
+       "precision": {
+        "episode_mean": 0.9389255586517115,
+        "n_episodes": 13
+       },
+       "recall": {
+        "episode_mean": 0.8566195927035654,
+        "n_episodes": 13
+       },
+       "n_valid_frames": 966,
+       "neighbor_fp_sum": 36208.65823863604,
+       "support_fp_sum": 286.0086986373399,
+       "robot_fp_sum": 55.445914825841925,
+       "FP_sum": 36550.389879126225,
+       "TP_sum": 241582.61012087355
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 13,
+        "diff": -0.006696783392329238,
+        "ci95": [
+         -0.059294845230141,
+         0.028970723646953078
+        ],
+        "better": 5,
+        "worse": 4
+       },
+       "A - A-fk": {
+        "n_episodes": 13,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 13,
+        "diff": 0.04918282297607849,
+        "ci95": [
+         0.026657989844346405,
+         0.07746245646733611
+        ],
+        "better": 13,
+        "worse": 0
+       },
+       "B - G:N": {
+        "n_episodes": 13,
+        "diff": 0.042486039583749254,
+        "ci95": [
+         -0.01951540622408533,
+         0.0961092337816999
+        ],
+        "better": 12,
+        "worse": 1
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 13,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 13,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 49
+     },
+     "adjacent": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.8085581431642033,
+        "n_episodes": 12
+       },
+       "precision": {
+        "episode_mean": 0.93810826971829,
+        "n_episodes": 12
+       },
+       "recall": {
+        "episode_mean": 0.811396441380018,
+        "n_episodes": 12
+       },
+       "n_valid_frames": 892,
+       "neighbor_fp_sum": 21225.34321829991,
+       "support_fp_sum": 200.6061100798778,
+       "robot_fp_sum": 55.34997975550494,
+       "FP_sum": 21481.421788548294,
+       "TP_sum": 230499.57821145136
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.8367449661426538,
+        "n_episodes": 12
+       },
+       "precision": {
+        "episode_mean": 0.9729759778461018,
+        "n_episodes": 12
+       },
+       "recall": {
+        "episode_mean": 0.8397746736775913,
+        "n_episodes": 12
+       },
+       "n_valid_frames": 892,
+       "neighbor_fp_sum": 2926.8026281979533,
+       "support_fp_sum": 152.01502188824696,
+       "robot_fp_sum": 54.68595305056389,
+       "FP_sum": 3133.6260835497665,
+       "TP_sum": 233458.37391644993
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.8085581431642033,
+        "n_episodes": 12
+       },
+       "precision": {
+        "episode_mean": 0.93810826971829,
+        "n_episodes": 12
+       },
+       "recall": {
+        "episode_mean": 0.811396441380018,
+        "n_episodes": 12
+       },
+       "n_valid_frames": 892,
+       "neighbor_fp_sum": 21225.34321829991,
+       "support_fp_sum": 200.6061100798778,
+       "robot_fp_sum": 55.34997975550494,
+       "FP_sum": 21481.421788548294,
+       "TP_sum": 230499.57821145136
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.7685631795479471,
+        "n_episodes": 12
+       },
+       "precision": {
+        "episode_mean": 0.8921333370466212,
+        "n_episodes": 12
+       },
+       "recall": {
+        "episode_mean": 0.830135377725678,
+        "n_episodes": 12
+       },
+       "n_valid_frames": 892,
+       "neighbor_fp_sum": 64371.09430942632,
+       "support_fp_sum": 325.5023553340661,
+       "robot_fp_sum": 78.5717843721563,
+       "FP_sum": 64775.28625664834,
+       "TP_sum": 232733.71374335128
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 12,
+        "diff": 0.028186822978450456,
+        "ci95": [
+         -0.012565924923578489,
+         0.06950799914142705
+        ],
+        "better": 6,
+        "worse": 1
+       },
+       "A - A-fk": {
+        "n_episodes": 12,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 12,
+        "diff": 0.03999496361625637,
+        "ci95": [
+         0.015685021787563053,
+         0.0657854211977031
+        ],
+        "better": 9,
+        "worse": 3
+       },
+       "B - G:N": {
+        "n_episodes": 12,
+        "diff": 0.06818178659470682,
+        "ci95": [
+         0.019563552087956883,
+         0.11082173575274103
+        ],
+        "better": 10,
+        "worse": 2
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 12,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 12,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 48
+     },
+     "place": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.8175264012633108,
+        "n_episodes": 9
+       },
+       "precision": {
+        "episode_mean": 0.9521678861274795,
+        "n_episodes": 9
+       },
+       "recall": {
+        "episode_mean": 0.8229610496176792,
+        "n_episodes": 9
+       },
+       "n_valid_frames": 665,
+       "neighbor_fp_sum": 18021.141519240224,
+       "support_fp_sum": 119.11347364529767,
+       "robot_fp_sum": 66.00410959311715,
+       "FP_sum": 18206.410330762727,
+       "TP_sum": 173304.58966923718
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.8398638683159989,
+        "n_episodes": 9
+       },
+       "precision": {
+        "episode_mean": 0.9740650153777527,
+        "n_episodes": 9
+       },
+       "recall": {
+        "episode_mean": 0.845287687291078,
+        "n_episodes": 9
+       },
+       "n_valid_frames": 665,
+       "neighbor_fp_sum": 4076.7528859199006,
+       "support_fp_sum": 116.7518395859359,
+       "robot_fp_sum": 61.65855464059805,
+       "FP_sum": 4255.314508430524,
+       "TP_sum": 177385.68549156937
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.8175264012633108,
+        "n_episodes": 9
+       },
+       "precision": {
+        "episode_mean": 0.9521678861274795,
+        "n_episodes": 9
+       },
+       "recall": {
+        "episode_mean": 0.8229610496176792,
+        "n_episodes": 9
+       },
+       "n_valid_frames": 665,
+       "neighbor_fp_sum": 18021.141519240224,
+       "support_fp_sum": 119.11347364529767,
+       "robot_fp_sum": 66.00410959311715,
+       "FP_sum": 18206.410330762727,
+       "TP_sum": 173304.58966923718
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.7189552648034018,
+        "n_episodes": 9
+       },
+       "precision": {
+        "episode_mean": 0.8319876698848296,
+        "n_episodes": 9
+       },
+       "recall": {
+        "episode_mean": 0.8222847075103045,
+        "n_episodes": 9
+       },
+       "n_valid_frames": 665,
+       "neighbor_fp_sum": 75490.21884525575,
+       "support_fp_sum": 182.67137480988015,
+       "robot_fp_sum": 92.90069032246234,
+       "FP_sum": 75766.30324978328,
+       "TP_sum": 172217.69675021665
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 9,
+        "diff": 0.022337467052688117,
+        "ci95": [
+         -0.00283102585236012,
+         0.05878033069258996
+        ],
+        "better": 3,
+        "worse": 1
+       },
+       "A - A-fk": {
+        "n_episodes": 9,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 9,
+        "diff": 0.09857113645990896,
+        "ci95": [
+         0.061782678555128416,
+         0.1341968024354389
+        ],
+        "better": 9,
+        "worse": 0
+       },
+       "B - G:N": {
+        "n_episodes": 9,
+        "diff": 0.12090860351259708,
+        "ci95": [
+         0.07012792787339657,
+         0.1660648723844825
+        ],
+        "better": 9,
+        "worse": 0
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 9,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 9,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 26
+     }
+    },
+    "by_grasp_state": {
+     "pre": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.9075024099794847,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.986658208186655,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.9094744386256625,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 706,
+       "neighbor_fp_sum": 805.7222230710466,
+       "support_fp_sum": 408.0527705551626,
+       "robot_fp_sum": 36.74432560446744,
+       "FP_sum": 1250.519319230676,
+       "TP_sum": 189651.4806807692
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.9052018508939033,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9840958195948547,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.907173879540081,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 706,
+       "neighbor_fp_sum": 997.6722230710466,
+       "support_fp_sum": 408.1027705551627,
+       "robot_fp_sum": 36.74432560446744,
+       "FP_sum": 1442.519319230676,
+       "TP_sum": 189211.48068076922
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.9075024099794847,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.986658208186655,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.9094744386256625,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 706,
+       "neighbor_fp_sum": 805.7222230710466,
+       "support_fp_sum": 408.0527705551626,
+       "robot_fp_sum": 36.74432560446744,
+       "FP_sum": 1250.519319230676,
+       "TP_sum": 189651.4806807692
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.8749510904201444,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9505985770392618,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.9230858344341922,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 706,
+       "neighbor_fp_sum": 21789.167498199757,
+       "support_fp_sum": 495.0773748890894,
+       "robot_fp_sum": 44.16111186502818,
+       "FP_sum": 22328.767096065,
+       "TP_sum": 192298.23290393487
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 34,
+        "diff": -0.0023005590855814466,
+        "ci95": [
+         -0.005821079421787354,
+         0.0
+        ],
+        "better": 0,
+        "worse": 2
+       },
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 34,
+        "diff": 0.03255131955934029,
+        "ci95": [
+         0.010005336284524125,
+         0.05982415854505709
+        ],
+        "better": 14,
+        "worse": 10
+       },
+       "B - G:N": {
+        "n_episodes": 34,
+        "diff": 0.030250760473758846,
+        "ci95": [
+         0.006771211643325112,
+         0.058599833513859084
+        ],
+        "better": 14,
+        "worse": 10
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 2
+     },
+     "held": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.64040778567183,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9809421890048097,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.6421669177325986,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 326,
+       "neighbor_fp_sum": 2176.693119222344,
+       "support_fp_sum": 35.0847520826775,
+       "robot_fp_sum": 122.93016160319368,
+       "FP_sum": 2335.1678595414223,
+       "TP_sum": 49361.83214045859
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.6334899046046023,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9735577092822858,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.6352220558685131,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 326,
+       "neighbor_fp_sum": 1348.4899891139007,
+       "support_fp_sum": 33.12121552445346,
+       "robot_fp_sum": 120.79037335075593,
+       "FP_sum": 1502.861404622318,
+       "TP_sum": 49038.138595377684
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.64040778567183,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9809421890048097,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.6421669177325986,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 326,
+       "neighbor_fp_sum": 2176.693119222344,
+       "support_fp_sum": 35.0847520826775,
+       "robot_fp_sum": 122.93016160319368,
+       "FP_sum": 2335.1678595414223,
+       "TP_sum": 49361.83214045859
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.5377397793127421,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.7972259230810802,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.6427823735160328,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 326,
+       "neighbor_fp_sum": 42455.35923294686,
+       "support_fp_sum": 152.49239215306932,
+       "robot_fp_sum": 164.8153115832009,
+       "FP_sum": 42773.122090419165,
+       "TP_sum": 49479.87790958084
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 34,
+        "diff": -0.006917881067227723,
+        "ci95": [
+         -0.025488406148783952,
+         0.008890063957131976
+        ],
+        "better": 4,
+        "worse": 4
+       },
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 34,
+        "diff": 0.10266800635908789,
+        "ci95": [
+         0.07215714703309953,
+         0.13735581697522198
+        ],
+        "better": 28,
+        "worse": 3
+       },
+       "B - G:N": {
+        "n_episodes": 34,
+        "diff": 0.09575012529186017,
+        "ci95": [
+         0.05804614946363548,
+         0.1340345259631059
+        ],
+        "better": 27,
+        "worse": 5
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 12
+     },
+     "placed": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.8449822910803859,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9330201473765208,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.8497298362543265,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 1491,
+       "neighbor_fp_sum": 43255.195410702254,
+       "support_fp_sum": 59.235390181198355,
+       "robot_fp_sum": 15.493800860512112,
+       "FP_sum": 43330.015510834855,
+       "TP_sum": 408194.98448916484
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.8699060714667729,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9645557092914416,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.8747433134940458,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 1491,
+       "neighbor_fp_sum": 11473.045421276205,
+       "support_fp_sum": 25.6509945975909,
+       "robot_fp_sum": 11.577954151960151,
+       "FP_sum": 11510.365279116673,
+       "TP_sum": 410615.6347208831
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.8449822910803859,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9330201473765208,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.8497298362543265,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 1491,
+       "neighbor_fp_sum": 43255.195410702254,
+       "support_fp_sum": 59.235390181198355,
+       "robot_fp_sum": 15.493800860512112,
+       "FP_sum": 43330.015510834855,
+       "TP_sum": 408194.98448916484
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.7767709801403806,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.8790811608911896,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.8465681556067256,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 1491,
+       "neighbor_fp_sum": 111825.44466217149,
+       "support_fp_sum": 146.612661739127,
+       "robot_fp_sum": 17.941966072231423,
+       "FP_sum": 111990.09019907378,
+       "TP_sum": 404755.90980092593
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 34,
+        "diff": 0.02492378038638692,
+        "ci95": [
+         -0.01365826336009332,
+         0.06213584954304203
+        ],
+        "better": 12,
+        "worse": 3
+       },
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 34,
+        "diff": 0.06821131094000533,
+        "ci95": [
+         0.036522397784547404,
+         0.10132536011847083
+        ],
+        "better": 27,
+        "worse": 6
+       },
+       "B - G:N": {
+        "n_episodes": 34,
+        "diff": 0.09313509132639225,
+        "ci95": [
+         0.04390730351890767,
+         0.1430800985320735
+        ],
+        "better": 27,
+        "worse": 6
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0,
+        "ci95": [
+         0.0,
+         0.0
+        ],
+        "better": 0,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 109
+     }
+    }
+   },
+   "render_locked_reference": {
+    "iou_A": 0.876093971555441,
+    "iou_B": 0.8908732856842837,
+    "precision_A": 0.9490830942021894,
+    "precision_B": 0.9656474792528674,
+    "recall_A": 0.8838479458205702,
+    "recall_B": 0.8986232884658625,
+    "neighbor_fp_A": 46329.299182381736,
+    "neighbor_fp_B": 13581.713534193286,
+    "paired_B_minus_A": {
+     "n_episodes": 34,
+     "diff": 0.014779314128842732,
+     "ci95": [
+      -0.0116789100514432,
+      0.03944222857471973
+     ],
+     "better": 14,
+     "worse": 6
+    },
+    "switch_frames": 125,
+    "gate_success": {
+     "threshold": 0.5904207590672415,
+     "n_frames": 2420,
+     "wrong_choices": 100,
+     "alerts": 238,
+     "alerts_on_wrong": 85,
+     "wrong_caught_ratio": 0.85,
+     "false_alarms": 153,
+     "fp_removed_ratio": 0.8788327204996255,
+     "tp_lost_ratio": 0.06698843965768998,
+     "auroc_wrong": 0.9251551724137931
+    },
+    "gate_all": {
+     "threshold": 0.5904207590672415,
+     "n_frames": 3068,
+     "wrong_choices": 178,
+     "alerts": 411,
+     "alerts_on_wrong": 154,
+     "wrong_caught_ratio": 0.8651685393258427,
+     "false_alarms": 257,
+     "fp_removed_ratio": 0.8323748181830676,
+     "tp_lost_ratio": 0.07867933436480955,
+     "auroc_wrong": 0.9242758835193033
+    },
+    "by_stratum": {
+     "clear": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.9045400208022639,
+        "n_episodes": 13
+       },
+       "precision": {
+        "episode_mean": 0.9656718900611057,
+        "n_episodes": 13
+       },
+       "recall": {
+        "episode_mean": 0.9110385413495004,
+        "n_episodes": 13
+       },
+       "n_valid_frames": 966,
+       "neighbor_fp_sum": 7015.445456894295,
+       "support_fp_sum": 202.2089696662864,
+       "robot_fp_sum": 822.8395560208921,
+       "FP_sum": 8040.782637515475,
+       "TP_sum": 252272.2173624843
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.9000382395052716,
+        "n_episodes": 13
+       },
+       "precision": {
+        "episode_mean": 0.9605728175964766,
+        "n_episodes": 13
+       },
+       "recall": {
+        "episode_mean": 0.9063599924727833,
+        "n_episodes": 13
+       },
+       "n_valid_frames": 966,
+       "neighbor_fp_sum": 6827.789032128096,
+       "support_fp_sum": 217.77487088655872,
+       "robot_fp_sum": 792.9201294571308,
+       "FP_sum": 7838.772687405788,
+       "TP_sum": 247231.22731259398
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.8638190159940471,
+        "n_episodes": 13
+       },
+       "precision": {
+        "episode_mean": 0.9732621808963076,
+        "n_episodes": 13
+       },
+       "recall": {
+        "episode_mean": 0.8664508457250211,
+        "n_episodes": 13
+       },
+       "n_valid_frames": 966,
+       "neighbor_fp_sum": 6991.126015455524,
+       "support_fp_sum": 182.6533290938632,
+       "robot_fp_sum": 53.81419871955123,
+       "FP_sum": 7227.870570295963,
+       "TP_sum": 243404.12942970375
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.8146361930179686,
+        "n_episodes": 13
+       },
+       "precision": {
+        "episode_mean": 0.9389255586517115,
+        "n_episodes": 13
+       },
+       "recall": {
+        "episode_mean": 0.8566195927035654,
+        "n_episodes": 13
+       },
+       "n_valid_frames": 966,
+       "neighbor_fp_sum": 36208.65823863604,
+       "support_fp_sum": 286.0086986373399,
+       "robot_fp_sum": 55.445914825841925,
+       "FP_sum": 36550.389879126225,
+       "TP_sum": 241582.61012087355
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 13,
+        "diff": -0.004501781296992498,
+        "ci95": [
+         -0.0575492235008415,
+         0.03291471216885046
+        ],
+        "better": 5,
+        "worse": 4
+       },
+       "A - A-fk": {
+        "n_episodes": 13,
+        "diff": 0.04072100480821679,
+        "ci95": [
+         0.03133121125366255,
+         0.05220127340133929
+        ],
+        "better": 13,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 13,
+        "diff": 0.08990382778429527,
+        "ci95": [
+         0.06348211555116146,
+         0.12105723079371268
+        ],
+        "better": 13,
+        "worse": 0
+       },
+       "B - G:N": {
+        "n_episodes": 13,
+        "diff": 0.08540204648730279,
+        "ci95": [
+         0.02318090193091855,
+         0.13940344950046013
+        ],
+        "better": 12,
+        "worse": 1
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 13,
+        "diff": -0.0075902908352018135,
+        "ci95": [
+         -0.014851117396225974,
+         -0.0027655042485430948
+        ],
+        "better": 0,
+        "worse": 13
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 13,
+        "diff": 0.04458769562447916,
+        "ci95": [
+         0.034124527971394654,
+         0.057119289310890435
+        ],
+        "better": 13,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 52
+     },
+     "adjacent": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.8538756627971203,
+        "n_episodes": 12
+       },
+       "precision": {
+        "episode_mean": 0.9331153014997979,
+        "n_episodes": 12
+       },
+       "recall": {
+        "episode_mean": 0.8609559433887392,
+        "n_episodes": 12
+       },
+       "n_valid_frames": 892,
+       "neighbor_fp_sum": 21235.944513480117,
+       "support_fp_sum": 219.8498651079163,
+       "robot_fp_sum": 912.3969947825652,
+       "FP_sum": 22372.715634495886,
+       "TP_sum": 239879.28436550396
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.8822170362604757,
+        "n_episodes": 12
+       },
+       "precision": {
+        "episode_mean": 0.9679949891323442,
+        "n_episodes": 12
+       },
+       "recall": {
+        "episode_mean": 0.8894785397913486,
+        "n_episodes": 12
+       },
+       "n_valid_frames": 892,
+       "neighbor_fp_sum": 2949.4039233781596,
+       "support_fp_sum": 171.75877691628543,
+       "robot_fp_sum": 910.0662041144025,
+       "FP_sum": 4035.753165534133,
+       "TP_sum": 242877.24683446574
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.8085581431642033,
+        "n_episodes": 12
+       },
+       "precision": {
+        "episode_mean": 0.93810826971829,
+        "n_episodes": 12
+       },
+       "recall": {
+        "episode_mean": 0.811396441380018,
+        "n_episodes": 12
+       },
+       "n_valid_frames": 892,
+       "neighbor_fp_sum": 21225.34321829991,
+       "support_fp_sum": 200.6061100798778,
+       "robot_fp_sum": 55.34997975550494,
+       "FP_sum": 21481.421788548294,
+       "TP_sum": 230499.57821145136
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.7685631795479471,
+        "n_episodes": 12
+       },
+       "precision": {
+        "episode_mean": 0.8921333370466212,
+        "n_episodes": 12
+       },
+       "recall": {
+        "episode_mean": 0.830135377725678,
+        "n_episodes": 12
+       },
+       "n_valid_frames": 892,
+       "neighbor_fp_sum": 64371.09430942632,
+       "support_fp_sum": 325.5023553340661,
+       "robot_fp_sum": 78.5717843721563,
+       "FP_sum": 64775.28625664834,
+       "TP_sum": 232733.71374335128
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 12,
+        "diff": 0.0283413734633552,
+        "ci95": [
+         -0.012583517871264653,
+         0.06990406509118882
+        ],
+        "better": 6,
+        "worse": 1
+       },
+       "A - A-fk": {
+        "n_episodes": 12,
+        "diff": 0.04531751963291699,
+        "ci95": [
+         0.03823202982345721,
+         0.05233925940383132
+        ],
+        "better": 12,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 12,
+        "diff": 0.08531248324917336,
+        "ci95": [
+         0.06235906143210602,
+         0.1086693437630885
+        ],
+        "better": 12,
+        "worse": 0
+       },
+       "B - G:N": {
+        "n_episodes": 12,
+        "diff": 0.11365385671252859,
+        "ci95": [
+         0.0647926064489201,
+         0.15457561505735162
+        ],
+        "better": 11,
+        "worse": 1
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 12,
+        "diff": -0.004992968218492082,
+        "ci95": [
+         -0.006233321556541367,
+         -0.003809538031614937
+        ],
+        "better": 0,
+        "worse": 12
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 12,
+        "diff": 0.049559502008721286,
+        "ci95": [
+         0.04164108032146274,
+         0.05724119402658787
+        ],
+        "better": 12,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 48
+     },
+     "place": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.8646296454322352,
+        "n_episodes": 9
+       },
+       "precision": {
+        "episode_mean": 0.9464118904536092,
+        "n_episodes": 9
+       },
+       "recall": {
+        "episode_mean": 0.8750953110767794,
+        "n_episodes": 9
+       },
+       "n_valid_frames": 665,
+       "neighbor_fp_sum": 18077.909212007344,
+       "support_fp_sum": 130.23201056073864,
+       "robot_fp_sum": 905.1428929348646,
+       "FP_sum": 19115.6908993426,
+       "TP_sum": 181641.3091006573
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.8891766849523789,
+        "n_episodes": 9
+       },
+       "precision": {
+        "episode_mean": 0.9698475329172405,
+        "n_episodes": 9
+       },
+       "recall": {
+        "episode_mean": 0.8996410475774395,
+        "n_episodes": 9
+       },
+       "n_valid_frames": 665,
+       "neighbor_fp_sum": 3804.5205786870233,
+       "support_fp_sum": 127.87037650137684,
+       "robot_fp_sum": 901.97003110874,
+       "FP_sum": 4836.844693213711,
+       "TP_sum": 186047.15530678618
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.8175264012633108,
+        "n_episodes": 9
+       },
+       "precision": {
+        "episode_mean": 0.9521678861274795,
+        "n_episodes": 9
+       },
+       "recall": {
+        "episode_mean": 0.8229610496176792,
+        "n_episodes": 9
+       },
+       "n_valid_frames": 665,
+       "neighbor_fp_sum": 18021.141519240224,
+       "support_fp_sum": 119.11347364529767,
+       "robot_fp_sum": 66.00410959311715,
+       "FP_sum": 18206.410330762727,
+       "TP_sum": 173304.58966923718
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.7189552648034018,
+        "n_episodes": 9
+       },
+       "precision": {
+        "episode_mean": 0.8319876698848296,
+        "n_episodes": 9
+       },
+       "recall": {
+        "episode_mean": 0.8222847075103045,
+        "n_episodes": 9
+       },
+       "n_valid_frames": 665,
+       "neighbor_fp_sum": 75490.21884525575,
+       "support_fp_sum": 182.67137480988015,
+       "robot_fp_sum": 92.90069032246234,
+       "FP_sum": 75766.30324978328,
+       "TP_sum": 172217.69675021665
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 9,
+        "diff": 0.02454703952014366,
+        "ci95": [
+         -0.0021254780652728224,
+         0.06268529964726832
+        ],
+        "better": 3,
+        "worse": 1
+       },
+       "A - A-fk": {
+        "n_episodes": 9,
+        "diff": 0.04710324416892458,
+        "ci95": [
+         0.0336024272503673,
+         0.06205072622758616
+        ],
+        "better": 9,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 9,
+        "diff": 0.14567438062883353,
+        "ci95": [
+         0.10449154800900019,
+         0.1859894575761731
+        ],
+        "better": 9,
+        "worse": 0
+       },
+       "B - G:N": {
+        "n_episodes": 9,
+        "diff": 0.1702214201489772,
+        "ci95": [
+         0.11057803432395755,
+         0.22318500416109324
+        ],
+        "better": 9,
+        "worse": 0
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 9,
+        "diff": -0.005755995673870171,
+        "ci95": [
+         -0.00698855256472646,
+         -0.004550857671630956
+        ],
+        "better": 0,
+        "worse": 9
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 9,
+        "diff": 0.05213426145910021,
+        "ci95": [
+         0.03791267320372353,
+         0.068059996951985
+        ],
+        "better": 9,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 25
+     }
+    },
+    "by_grasp_state": {
+     "pre": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.9698507944447411,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9821204826833435,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.9764452103909063,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 706,
+       "neighbor_fp_sum": 805.7222230710466,
+       "support_fp_sum": 425.4268530171038,
+       "robot_fp_sum": 700.0082152043881,
+       "FP_sum": 1931.1572912925371,
+       "TP_sum": 199869.84270870755
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.9673310030050492,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9795723993990345,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.9739116043898309,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 706,
+       "neighbor_fp_sum": 997.6722230710466,
+       "support_fp_sum": 425.4768530171038,
+       "robot_fp_sum": 698.4566615538886,
+       "FP_sum": 2121.60573764204,
+       "TP_sum": 199404.39426235805
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.9075024099794847,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.986658208186655,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.9094744386256625,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 706,
+       "neighbor_fp_sum": 805.7222230710466,
+       "support_fp_sum": 408.0527705551626,
+       "robot_fp_sum": 36.74432560446744,
+       "FP_sum": 1250.519319230676,
+       "TP_sum": 189651.4806807692
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.8749510904201444,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9505985770392618,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.9230858344341922,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 706,
+       "neighbor_fp_sum": 21789.167498199757,
+       "support_fp_sum": 495.0773748890894,
+       "robot_fp_sum": 44.16111186502818,
+       "FP_sum": 22328.767096065,
+       "TP_sum": 192298.23290393487
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 34,
+        "diff": -0.00251979143969176,
+        "ci95": [
+         -0.00633941306845082,
+         0.0
+        ],
+        "better": 0,
+        "worse": 2
+       },
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.062348384465256326,
+        "ci95": [
+         0.050441865750752525,
+         0.07465795669116589
+        ],
+        "better": 34,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 34,
+        "diff": 0.0948997040245966,
+        "ci95": [
+         0.06886632304524881,
+         0.12385378275985086
+        ],
+        "better": 33,
+        "worse": 1
+       },
+       "B - G:N": {
+        "n_episodes": 34,
+        "diff": 0.09237991258490486,
+        "ci95": [
+         0.0653467041016681,
+         0.12220123357036433
+        ],
+        "better": 32,
+        "worse": 2
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": -0.004537725503311506,
+        "ci95": [
+         -0.005824365155617284,
+         -0.0033748824094251414
+        ],
+        "better": 0,
+        "worse": 34
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.06697077176524373,
+        "ci95": [
+         0.05449426084187551,
+         0.07974662256021352
+        ],
+        "better": 34,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 2
+     },
+     "held": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.8475770155578735,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9568106733703893,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.869177458066485,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 326,
+       "neighbor_fp_sum": 2216.2089151830783,
+       "support_fp_sum": 67.62860213663896,
+       "robot_fp_sum": 1863.7751155142082,
+       "FP_sum": 4154.741423641947,
+       "TP_sum": 65329.258576358035
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.8411570863823252,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9496882199094135,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.862497362123896,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 326,
+       "neighbor_fp_sum": 1365.005785074636,
+       "support_fp_sum": 67.27617668952604,
+       "robot_fp_sum": 1845.4009398524631,
+       "FP_sum": 3284.8886155015707,
+       "TP_sum": 65088.11138449841
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.64040778567183,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9809421890048097,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.6421669177325986,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 326,
+       "neighbor_fp_sum": 2176.693119222344,
+       "support_fp_sum": 35.0847520826775,
+       "robot_fp_sum": 122.93016160319368,
+       "FP_sum": 2335.1678595414223,
+       "TP_sum": 49361.83214045859
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.5377397793127421,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.7972259230810802,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.6427823735160328,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 326,
+       "neighbor_fp_sum": 42455.35923294686,
+       "support_fp_sum": 152.49239215306932,
+       "robot_fp_sum": 164.8153115832009,
+       "FP_sum": 42773.122090419165,
+       "TP_sum": 49479.87790958084
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 34,
+        "diff": -0.0064199291755483445,
+        "ci95": [
+         -0.03145337685648851,
+         0.016113347609700904
+        ],
+        "better": 4,
+        "worse": 4
+       },
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.2071692298860435,
+        "ci95": [
+         0.17353915754687624,
+         0.2444384047102516
+        ],
+        "better": 34,
+        "worse": 0
+       },
+       "A - G:N": {
+        "n_episodes": 34,
+        "diff": 0.3098372362451314,
+        "ci95": [
+         0.2644000178980781,
+         0.362159985886495
+        ],
+        "better": 34,
+        "worse": 0
+       },
+       "B - G:N": {
+        "n_episodes": 34,
+        "diff": 0.3034173070695831,
+        "ci95": [
+         0.25104210440685815,
+         0.361763211299502
+        ],
+        "better": 32,
+        "worse": 2
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": -0.02413151563442029,
+        "ci95": [
+         -0.027224634983395134,
+         -0.021217833200037013
+        ],
+        "better": 0,
+        "worse": 34
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.22701054033388648,
+        "ci95": [
+         0.1939281601660279,
+         0.2637069321573916
+        ],
+        "better": 34,
+        "worse": 0
+       }
+      },
+      "B_switch_frames": 12
+     },
+     "placed": {
+      "A": {
+       "iou": {
+        "episode_mean": 0.845807102001963,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9309475080502395,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.8508933855543761,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 1491,
+       "neighbor_fp_sum": 43307.36804412762,
+       "support_fp_sum": 59.235390181198355,
+       "robot_fp_sum": 76.5961130197272,
+       "FP_sum": 43443.29045641943,
+       "TP_sum": 408593.7095435803
+      },
+      "B": {
+       "iou": {
+        "episode_mean": 0.8728342906503719,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9650332730289349,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.8779172616493837,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 1491,
+       "neighbor_fp_sum": 11219.035526047599,
+       "support_fp_sum": 24.6509945975909,
+       "robot_fp_sum": 61.09876327392318,
+       "FP_sum": 11304.876193010028,
+       "TP_sum": 411663.1238069897
+      },
+      "A-fk": {
+       "iou": {
+        "episode_mean": 0.8449822910803859,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.9330201473765208,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.8497298362543265,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 1491,
+       "neighbor_fp_sum": 43255.195410702254,
+       "support_fp_sum": 59.235390181198355,
+       "robot_fp_sum": 15.493800860512112,
+       "FP_sum": 43330.015510834855,
+       "TP_sum": 408194.98448916484
+      },
+      "G:N": {
+       "iou": {
+        "episode_mean": 0.7767709801403806,
+        "n_episodes": 34
+       },
+       "precision": {
+        "episode_mean": 0.8790811608911896,
+        "n_episodes": 34
+       },
+       "recall": {
+        "episode_mean": 0.8465681556067256,
+        "n_episodes": 34
+       },
+       "n_valid_frames": 1491,
+       "neighbor_fp_sum": 111825.44466217149,
+       "support_fp_sum": 146.612661739127,
+       "robot_fp_sum": 17.941966072231423,
+       "FP_sum": 111990.09019907378,
+       "TP_sum": 404755.90980092593
+      },
+      "paired_iou": {
+       "B - A": {
+        "n_episodes": 34,
+        "diff": 0.027027188648408907,
+        "ci95": [
+         -0.01246489581776207,
+         0.06490118696889643
+        ],
+        "better": 12,
+        "worse": 3
+       },
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0008248109215770738,
+        "ci95": [
+         0.00036437226070946033,
+         0.0013632772732115846
+        ],
+        "better": 12,
+        "worse": 2
+       },
+       "A - G:N": {
+        "n_episodes": 34,
+        "diff": 0.0690361218615824,
+        "ci95": [
+         0.03734357291855011,
+         0.10196749267602909
+        ],
+        "better": 28,
+        "worse": 6
+       },
+       "B - G:N": {
+        "n_episodes": 34,
+        "diff": 0.09606331050999131,
+        "ci95": [
+         0.0466102922373878,
+         0.14598578140009788
+        ],
+        "better": 28,
+        "worse": 6
+       }
+      },
+      "paired_precision": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": -0.00207263932628129,
+        "ci95": [
+         -0.005729787399094682,
+         -0.00014664824610920936
+        ],
+        "better": 2,
+        "worse": 12
+       }
+      },
+      "paired_recall": {
+       "A - A-fk": {
+        "n_episodes": 34,
+        "diff": 0.0011635493000496672,
+        "ci95": [
+         0.0005890517614612589,
+         0.0017890285985416507
+        ],
+        "better": 12,
+        "worse": 2
+       }
+      },
+      "B_switch_frames": 111
+     }
+    }
+   },
+   "consistency_frames_checked": 3196,
+   "consistency_mismatch": 0
+  },
+  "phase_held": {
+   "D_hold_m": 0.1313,
+   "grip_closed": 0.9,
+   "locked_lr": {
+    "model": "LR[hsr+grip+geo]",
+    "columns": [
+     "hsr_pick",
+     "hsr_place",
+     "hsr_home",
+     "grip",
+     "hand_d",
+     "height",
+     "lognodes"
+    ]
+   },
+   "render|success": {
+    "n_frames": 2528,
+    "n_episodes": 34,
+    "region_missing_frames": 69,
+    "class_counts": {
+     "phase": [
+      706,
+      326,
+      1496
+     ],
+     "held": [
+      2202,
+      326
+     ]
+    },
+    "phase": {
+     "HSR argmax (serving)": {
+      "accuracy": 0.9295886075949367,
+      "macro_f1": 0.9020529480261161,
+      "recall": {
+       "0": 0.9291784702549575,
+       "1": 1.0,
+       "2": 0.9144385026737968
+      }
+     },
+     "rule phase_rule (no learning)": {
+      "accuracy": 0.8935917721518988,
+      "macro_f1": 0.8558796501781029,
+      "recall": {
+       "0": 0.78328611898017,
+       "1": 0.9815950920245399,
+       "2": 0.9264705882352942
+      }
+     },
+     "LR locked (dev render weights)": {
+      "accuracy": 0.9572784810126582,
+      "macro_f1": 0.9472448615447062,
+      "recall": {
+       "0": 0.9716713881019831,
+       "1": 0.9539877300613497,
+       "2": 0.9512032085561497
+      }
+     },
+     "LR LOEO on this set (reference only)": {
+      "accuracy": 0.9901107594936709,
+      "macro_f1": 0.9848570308235801,
+      "recall": {
+       "0": 0.9886685552407932,
+       "1": 1.0,
+       "2": 0.9886363636363636
+      }
+     }
+    },
+    "held": {
+     "grip<0.9 (serving)": {
+      "accuracy": 0.8983386075949367,
+      "macro_f1": 0.8276496084621725,
+      "recall": {
+       "0": 0.8832879200726612,
+       "1": 1.0
+      }
+     },
+     "rule held_rule (no learning)": {
+      "accuracy": 0.9347310126582279,
+      "macro_f1": 0.8781083296440297,
+      "recall": {
+       "0": 0.9277929155313351,
+       "1": 0.9815950920245399
+      }
+     },
+     "LR LOEO on this set (reference only)": {
+      "accuracy": 0.9806170886075949,
+      "macro_f1": 0.9579001031493695,
+      "recall": {
+       "0": 0.9845594913714805,
+       "1": 0.9539877300613497
+      }
+     },
+     "LR locked (dev render weights)": {
+      "accuracy": 0.9798259493670886,
+      "macro_f1": 0.9545637641367104,
+      "recall": {
+       "0": 0.9904632152588556,
+       "1": 0.9079754601226994
+      }
+     }
+    },
+    "paired": {
+     "phase: rule phase_rule (no learning) - HSR argmax (serving)": {
+      "diff": -0.03607417955232077,
+      "ci95": [
+       -0.05889723337897942,
+       -0.016723290966966575
+      ],
+      "better": 4,
+      "worse": 26
+     },
+     "phase: LR locked (dev render weights) - HSR argmax (serving)": {
+      "diff": 0.027595951775679625,
+      "ci95": [
+       0.0024099096734657307,
+       0.05093836947342184
+      ],
+      "better": 27,
+      "worse": 3
+     },
+     "phase: LR LOEO on this set (reference only) - HSR argmax (serving)": {
+      "diff": 0.060481212818406814,
+      "ci95": [
+       0.043466201575848074,
+       0.08147419077979819
+      ],
+      "better": 34,
+      "worse": 0
+     },
+     "phase: rule phase_rule (no learning) - LR locked (dev render weights)": {
+      "diff": -0.06367013132800041,
+      "ci95": [
+       -0.0949965635458182,
+       -0.032124803585178906
+      ],
+      "better": 2,
+      "worse": 32
+     },
+     "held: rule held_rule (no learning) - grip<0.9 (serving)": {
+      "diff": 0.03644113930411894,
+      "ci95": [
+       0.01925911248209543,
+       0.056770210711897855
+      ],
+      "better": 24,
+      "worse": 1
+     },
+     "held: LR LOEO on this set (reference only) - grip<0.9 (serving)": {
+      "diff": 0.08231999662042451,
+      "ci95": [
+       0.06086206736380808,
+       0.10690387686619217
+      ],
+      "better": 34,
+      "worse": 0
+     },
+     "held: LR locked (dev render weights) - grip<0.9 (serving)": {
+      "diff": 0.08148089737204604,
+      "ci95": [
+       0.05986500177030659,
+       0.10652246856425604
+      ],
+      "better": 34,
+      "worse": 0
+     },
+     "held: rule held_rule (no learning) - LR locked (dev render weights)": {
+      "diff": -0.0450397580679271,
+      "ci95": [
+       -0.06233236348403088,
+       -0.03203270181946655
+      ],
+      "better": 1,
+      "worse": 32
+     }
+    }
+   },
+   "render|all": {
+    "n_frames": 3196,
+    "n_episodes": 43,
+    "region_missing_frames": 71,
+    "class_counts": {
+     "phase": [
+      1319,
+      381,
+      1496
+     ],
+     "held": [
+      2815,
+      381
+     ]
+    },
+    "phase": {
+     "HSR argmax (serving)": {
+      "accuracy": 0.8654568210262829,
+      "macro_f1": 0.816901480765984,
+      "recall": {
+       "0": 0.8051554207733131,
+       "1": 0.8818897637795275,
+       "2": 0.9144385026737968
+      }
+     },
+     "rule phase_rule (no learning)": {
+      "accuracy": 0.8570087609511889,
+      "macro_f1": 0.8238859969130026,
+      "recall": {
+       "0": 0.78013646702047,
+       "1": 0.8503937007874016,
+       "2": 0.9264705882352942
+      }
+     },
+     "LR locked (dev render weights)": {
+      "accuracy": 0.9192740926157698,
+      "macro_f1": 0.8979272957365909,
+      "recall": {
+       "0": 0.9097801364670205,
+       "1": 0.8267716535433071,
+       "2": 0.9512032085561497
+      }
+     },
+     "LR LOEO on this set (reference only)": {
+      "accuracy": 0.9377346683354193,
+      "macro_f1": 0.9119135330492348,
+      "recall": {
+       "0": 0.9484457922668689,
+       "1": 0.821522309711286,
+       "2": 0.9578877005347594
+      }
+     }
+    },
+    "held": {
+     "grip<0.9 (serving)": {
+      "accuracy": 0.8138297872340425,
+      "macro_f1": 0.7067959982453584,
+      "recall": {
+       "0": 0.8049733570159858,
+       "1": 0.8792650918635171
+      }
+     },
+     "rule held_rule (no learning)": {
+      "accuracy": 0.9214643304130162,
+      "macro_f1": 0.83755318478954,
+      "recall": {
+       "0": 0.9310834813499111,
+       "1": 0.8503937007874016
+      }
+     },
+     "LR LOEO on this set (reference only)": {
+      "accuracy": 0.9596370463078848,
+      "macro_f1": 0.9024550898628616,
+      "recall": {
+       "0": 0.9793960923623446,
+       "1": 0.8136482939632546
+      }
+     },
+     "LR locked (dev render weights)": {
+      "accuracy": 0.9602628285356696,
+      "macro_f1": 0.9007305582505929,
+      "recall": {
+       "0": 0.9847246891651865,
+       "1": 0.7795275590551181
+      }
+     }
+    },
+    "paired": {
+     "phase: rule phase_rule (no learning) - HSR argmax (serving)": {
+      "diff": -0.008327493640569934,
+      "ci95": [
+       -0.05146928544033403,
+       0.04161892533234722
+      ],
+      "better": 9,
+      "worse": 29
+     },
+     "phase: LR locked (dev render weights) - HSR argmax (serving)": {
+      "diff": 0.05398652687569047,
+      "ci95": [
+       0.01720930932042561,
+       0.09961831581075171
+      ],
+      "better": 33,
+      "worse": 5
+     },
+     "phase: LR LOEO on this set (reference only) - HSR argmax (serving)": {
+      "diff": 0.07233116359430475,
+      "ci95": [
+       0.03440915258201817,
+       0.120501432501313
+      ],
+      "better": 35,
+      "worse": 4
+     },
+     "phase: rule phase_rule (no learning) - LR locked (dev render weights)": {
+      "diff": -0.06231402051626041,
+      "ci95": [
+       -0.09605927282428277,
+       -0.0267374749120388
+      ],
+      "better": 3,
+      "worse": 38
+     },
+     "held: rule held_rule (no learning) - grip<0.9 (serving)": {
+      "diff": 0.10750901454020773,
+      "ci95": [
+       0.05335476315440666,
+       0.1650645542803077
+      ],
+      "better": 31,
+      "worse": 2
+     },
+     "held: LR LOEO on this set (reference only) - grip<0.9 (serving)": {
+      "diff": 0.14561527680442832,
+      "ci95": [
+       0.08935219290875529,
+       0.20633599241165343
+      ],
+      "better": 40,
+      "worse": 1
+     },
+     "held: LR locked (dev render weights) - grip<0.9 (serving)": {
+      "diff": 0.14626916871957682,
+      "ci95": [
+       0.09357121274038668,
+       0.2041078552090357
+      ],
+      "better": 41,
+      "worse": 1
+     },
+     "held: rule held_rule (no learning) - LR locked (dev render weights)": {
+      "diff": -0.03876015417936907,
+      "ci95": [
+       -0.05420582354348212,
+       -0.026869030767033647
+      ],
+      "better": 3,
+      "worse": 37
+     }
+    }
+   },
+   "fk|success": {
+    "n_frames": 2528,
+    "n_episodes": 34,
+    "region_missing_frames": 72,
+    "class_counts": {
+     "phase": [
+      706,
+      326,
+      1496
+     ],
+     "held": [
+      2202,
+      326
+     ]
+    },
+    "phase": {
+     "HSR argmax (serving)": {
+      "accuracy": 0.9295886075949367,
+      "macro_f1": 0.9020529480261161,
+      "recall": {
+       "0": 0.9291784702549575,
+       "1": 1.0,
+       "2": 0.9144385026737968
+      }
+     },
+     "rule phase_rule (no learning)": {
+      "accuracy": 0.8935917721518988,
+      "macro_f1": 0.8558796501781029,
+      "recall": {
+       "0": 0.78328611898017,
+       "1": 0.9815950920245399,
+       "2": 0.9264705882352942
+      }
+     },
+     "LR locked (dev render weights)": {
+      "accuracy": 0.9560917721518988,
+      "macro_f1": 0.9453856487556678,
+      "recall": {
+       "0": 0.9787535410764873,
+       "1": 0.9355828220858896,
+       "2": 0.9498663101604278
+      }
+     },
+     "LR LOEO on this set (reference only)": {
+      "accuracy": 0.9901107594936709,
+      "macro_f1": 0.9848570308235801,
+      "recall": {
+       "0": 0.9886685552407932,
+       "1": 1.0,
+       "2": 0.9886363636363636
+      }
+     }
+    },
+    "held": {
+     "grip<0.9 (serving)": {
+      "accuracy": 0.8983386075949367,
+      "macro_f1": 0.8276496084621725,
+      "recall": {
+       "0": 0.8832879200726612,
+       "1": 1.0
+      }
+     },
+     "rule held_rule (no learning)": {
+      "accuracy": 0.9347310126582279,
+      "macro_f1": 0.8781083296440297,
+      "recall": {
+       "0": 0.9277929155313351,
+       "1": 0.9815950920245399
+      }
+     },
+     "LR LOEO on this set (reference only)": {
+      "accuracy": 0.9825949367088608,
+      "macro_f1": 0.9620521946080491,
+      "recall": {
+       "0": 0.9863760217983651,
+       "1": 0.9570552147239264
+      }
+     },
+     "LR locked (dev render weights)": {
+      "accuracy": 0.975870253164557,
+      "macro_f1": 0.9443166779508012,
+      "recall": {
+       "0": 0.9922797456857403,
+       "1": 0.8650306748466258
+      }
+     }
+    },
+    "paired": {
+     "phase: rule phase_rule (no learning) - HSR argmax (serving)": {
+      "diff": -0.03607417955232077,
+      "ci95": [
+       -0.05889723337897942,
+       -0.016723290966966575
+      ],
+      "better": 4,
+      "worse": 26
+     },
+     "phase: LR locked (dev render weights) - HSR argmax (serving)": {
+      "diff": 0.026463667876204338,
+      "ci95": [
+       0.0007491995512383158,
+       0.05031476982154604
+      ],
+      "better": 28,
+      "worse": 2
+     },
+     "phase: LR LOEO on this set (reference only) - HSR argmax (serving)": {
+      "diff": 0.06048651223547094,
+      "ci95": [
+       0.043750500004890766,
+       0.08113034850798864
+      ],
+      "better": 34,
+      "worse": 0
+     },
+     "phase: rule phase_rule (no learning) - LR locked (dev render weights)": {
+      "diff": -0.0625378474285251,
+      "ci95": [
+       -0.09425179877787242,
+       -0.030967217604190463
+      ],
+      "better": 2,
+      "worse": 32
+     },
+     "held: rule held_rule (no learning) - grip<0.9 (serving)": {
+      "diff": 0.03644113930411894,
+      "ci95": [
+       0.01925911248209543,
+       0.056770210711897855
+      ],
+      "better": 24,
+      "worse": 1
+     },
+     "held: LR LOEO on this set (reference only) - grip<0.9 (serving)": {
+      "diff": 0.08429137976827825,
+      "ci95": [
+       0.061870665609629116,
+       0.10951314373611391
+      ],
+      "better": 34,
+      "worse": 0
+     },
+     "held: LR locked (dev render weights) - grip<0.9 (serving)": {
+      "diff": 0.07753889400289965,
+      "ci95": [
+       0.05670026604102941,
+       0.10154920457322755
+      ],
+      "better": 34,
+      "worse": 0
+     },
+     "held: rule held_rule (no learning) - LR locked (dev render weights)": {
+      "diff": -0.04109775469878069,
+      "ci95": [
+       -0.05828514699100027,
+       -0.028058414302045913
+      ],
+      "better": 2,
+      "worse": 31
+     }
+    }
+   },
+   "fk|all": {
+    "n_frames": 3196,
+    "n_episodes": 43,
+    "region_missing_frames": 76,
+    "class_counts": {
+     "phase": [
+      1319,
+      381,
+      1496
+     ],
+     "held": [
+      2815,
+      381
+     ]
+    },
+    "phase": {
+     "HSR argmax (serving)": {
+      "accuracy": 0.8654568210262829,
+      "macro_f1": 0.816901480765984,
+      "recall": {
+       "0": 0.8051554207733131,
+       "1": 0.8818897637795275,
+       "2": 0.9144385026737968
+      }
+     },
+     "rule phase_rule (no learning)": {
+      "accuracy": 0.8570087609511889,
+      "macro_f1": 0.8238859969130026,
+      "recall": {
+       "0": 0.78013646702047,
+       "1": 0.8503937007874016,
+       "2": 0.9264705882352942
+      }
+     },
+     "LR locked (dev render weights)": {
+      "accuracy": 0.9224030037546934,
+      "macro_f1": 0.9022335087094318,
+      "recall": {
+       "0": 0.9241849886277483,
+       "1": 0.8083989501312336,
+       "2": 0.9498663101604278
+      }
+     },
+     "LR LOEO on this set (reference only)": {
+      "accuracy": 0.9392991239048811,
+      "macro_f1": 0.9151060649710185,
+      "recall": {
+       "0": 0.9499620924943138,
+       "1": 0.8241469816272966,
+       "2": 0.9592245989304813
+      }
+     }
+    },
+    "held": {
+     "grip<0.9 (serving)": {
+      "accuracy": 0.8138297872340425,
+      "macro_f1": 0.7067959982453584,
+      "recall": {
+       "0": 0.8049733570159858,
+       "1": 0.8792650918635171
+      }
+     },
+     "rule held_rule (no learning)": {
+      "accuracy": 0.9214643304130162,
+      "macro_f1": 0.83755318478954,
+      "recall": {
+       "0": 0.9310834813499111,
+       "1": 0.8503937007874016
+      }
+     },
+     "LR LOEO on this set (reference only)": {
+      "accuracy": 0.964017521902378,
+      "macro_f1": 0.9122269690124472,
+      "recall": {
+       "0": 0.983303730017762,
+       "1": 0.821522309711286
+      }
+     },
+     "LR locked (dev render weights)": {
+      "accuracy": 0.9602628285356696,
+      "macro_f1": 0.8969658000437124,
+      "recall": {
+       "0": 0.9900532859680284,
+       "1": 0.7401574803149606
+      }
+     }
+    },
+    "paired": {
+     "phase: rule phase_rule (no learning) - HSR argmax (serving)": {
+      "diff": -0.008327493640569934,
+      "ci95": [
+       -0.05146928544033403,
+       0.04161892533234722
+      ],
+      "better": 9,
+      "worse": 29
+     },
+     "phase: LR locked (dev render weights) - HSR argmax (serving)": {
+      "diff": 0.05710932048489089,
+      "ci95": [
+       0.021560063671171546,
+       0.1019599575722023
+      ],
+      "better": 34,
+      "worse": 4
+     },
+     "phase: LR LOEO on this set (reference only) - HSR argmax (serving)": {
+      "diff": 0.07390296636234835,
+      "ci95": [
+       0.035759218520846445,
+       0.12090680083555996
+      ],
+      "better": 35,
+      "worse": 4
+     },
+     "phase: rule phase_rule (no learning) - LR locked (dev render weights)": {
+      "diff": -0.06543681412546085,
+      "ci95": [
+       -0.10244831431463321,
+       -0.02725725365849727
+      ],
+      "better": 3,
+      "worse": 38
+     },
+     "held: rule held_rule (no learning) - grip<0.9 (serving)": {
+      "diff": 0.10750901454020773,
+      "ci95": [
+       0.05335476315440666,
+       0.1650645542803077
+      ],
+      "better": 31,
+      "worse": 2
+     },
+     "held: LR LOEO on this set (reference only) - grip<0.9 (serving)": {
+      "diff": 0.15000314826939437,
+      "ci95": [
+       0.09407451572165429,
+       0.2107543656872483
+      ],
+      "better": 40,
+      "worse": 1
+     },
+     "held: LR locked (dev render weights) - grip<0.9 (serving)": {
+      "diff": 0.14624009112020006,
+      "ci95": [
+       0.09114337500771572,
+       0.20496331103323776
+      ],
+      "better": 41,
+      "worse": 1
+     },
+     "held: rule held_rule (no learning) - LR locked (dev render weights)": {
+      "diff": -0.03873107657999233,
+      "ci95": [
+       -0.054740825311040346,
+       -0.025438982976870177
+      ],
+      "better": 4,
+      "worse": 36
+     }
+    }
+   }
+  }
+ },
+ "figures": [
+  "AG3S/ag3s/docs/figures/ifg-s2fk/ifg-s2fk-memory-gate.png",
+  "AG3S/ag3s/docs/figures/ifg-s2fk/ifg-s2fk-phase-held.png",
+  "AG3S/ag3s/docs/figures/ifg-s2fk/ifg-s2fk-scenes.png"
+ ],
+ "diagnosis_rule_phase": "142 GT 'pre' frames (gripper closing < 0.9, hand_d <= 0.131 m, before both fingers touch) are predicted place by phase_rule; rule not changed (task-fixed)"
+}

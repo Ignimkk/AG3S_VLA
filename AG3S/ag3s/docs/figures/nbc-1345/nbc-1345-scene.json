@@ -1,0 +1,18 @@
+{
+ "request": 13,
+ "variants": {
+  "current": {
+   "flags": "",
+   "spheres_to_orange_mm": 10.18,
+   "palm_spheres_to_apple_mm": 27.74,
+   "palm_radius_mm": 6.22
+  },
+  "palm1": {
+   "flags": "--capsule-radius-scale-link ee_left=1.0 ee_right=1.0",
+   "spheres_to_orange_mm": -2.28,
+   "palm_spheres_to_apple_mm": 0.55,
+   "palm_radius_mm": 33.53
+  }
+ },
+ "geom_to_orange_mm": 0.76
+}

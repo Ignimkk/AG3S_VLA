@@ -1,0 +1,433 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/lora/full/probe/probe_valcv.json",
+ "thresholds": {
+  "C0": 0.95,
+  "C1_instr": 0.8,
+  "applied_to": "episode median"
+ },
+ "rows": [
+  {
+   "cell": "full__counterfactual",
+   "role": "primary (\u2461)",
+   "C0": {
+    "pooled": 0.7658592848904268,
+    "k": 1992,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.7810232220609579,
+    "episode_q25": 0.6730769230769231,
+    "episode_q75": 0.8846153846153846
+   },
+   "C1_instr": {
+    "pooled": 0.6616697897147616,
+    "k": 3178,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.671875,
+    "episode_q25": 0.5703125,
+    "episode_q75": 0.7994791666666667
+   },
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.7658592848904268,
+     "C1_instr": 0.6616697897147616,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.7810232220609579,
+     "C1_instr": 0.671875,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "base": "pending T50b"
+  },
+  {
+   "cell": "full__standard",
+   "role": "reference: standard probe (C0 rows only)",
+   "C0": {
+    "pooled": 0.9784698193002691,
+    "k": 2545,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.021236727045596503,
+    "k": 102,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.0025252525252525255,
+    "episode_q75": 0.03125
+   },
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9784698193002691,
+     "C1_instr": 0.021236727045596503,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1,
+    0.01,
+    0.01,
+    0.01,
+    0.01
+   ],
+   "base": "pending T50b"
+  },
+  {
+   "cell": "full__shuffled",
+   "role": "control \u2461\u2032 label shuffle",
+   "C0": {
+    "pooled": 0.9769319492502884,
+    "k": 2541,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.027066416822819073,
+    "k": 130,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.03125,
+    "episode_q75": 0.03125
+   },
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9769319492502884,
+     "C1_instr": 0.027066416822819073,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.001,
+    0.001,
+    0.001,
+    0.001,
+    0.001
+   ],
+   "base": "pending T50b"
+  },
+  {
+   "cell": "text__counterfactual",
+   "role": "control \u2461\u2032 text half",
+   "C0": {
+    "pooled": 0.7454825067281815,
+    "k": 1939,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.75,
+    "episode_q25": 0.6201923076923077,
+    "episode_q75": 0.8461538461538461
+   },
+   "C1_instr": {
+    "pooled": 0.6502186133666459,
+    "k": 3123,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.625,
+    "episode_q25": 0.5208333333333334,
+    "episode_q75": 0.7890625
+   },
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.7454825067281815,
+     "C1_instr": 0.6502186133666459,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.75,
+     "C1_instr": 0.625,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1,
+    1.0,
+    1.0,
+    1.0,
+    0.1
+   ],
+   "base": "pending T50b"
+  },
+  {
+   "cell": "text__standard",
+   "role": "extra",
+   "C0": {
+    "pooled": 0.9780853517877739,
+    "k": 2544,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.020195711013949614,
+    "k": 97,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.0,
+    "episode_q75": 0.03125
+   },
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9780853517877739,
+     "C1_instr": 0.020195711013949614,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.01,
+    0.1,
+    0.01,
+    0.01,
+    0.01
+   ],
+   "base": "pending T50b"
+  },
+  {
+   "cell": "text__shuffled",
+   "role": "extra",
+   "C0": {
+    "pooled": 0.9761630142252979,
+    "k": 2539,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.027691026441807202,
+    "k": 133,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.030539772727272728,
+    "episode_q75": 0.03125
+   },
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9761630142252979,
+     "C1_instr": 0.027691026441807202,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.001,
+    0.001,
+    0.01,
+    0.01,
+    0.01
+   ],
+   "base": "pending T50b"
+  },
+  {
+   "cell": "image__counterfactual",
+   "role": "control \u2461\u2032 image half",
+   "C0": {
+    "pooled": 0.6147635524798154,
+    "k": 1599,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.6057692307692308,
+    "episode_q25": 0.5384615384615384,
+    "episode_q75": 0.7067307692307693
+   },
+   "C1_instr": {
+    "pooled": 0.6258588382261087,
+    "k": 3006,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.625,
+    "episode_q25": 0.4921875,
+    "episode_q75": 0.7447916666666666
+   },
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.6147635524798154,
+     "C1_instr": 0.6258588382261087,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.6057692307692308,
+     "C1_instr": 0.625,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.001,
+    0.001,
+    0.001,
+    0.001,
+    0.001
+   ],
+   "base": "pending T50b"
+  },
+  {
+   "cell": "image__standard",
+   "role": "extra",
+   "C0": {
+    "pooled": 0.9792387543252595,
+    "k": 2547,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.025817197584842806,
+    "k": 124,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.03125,
+    "episode_q75": 0.03125
+   },
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9792387543252595,
+     "C1_instr": 0.025817197584842806,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.001,
+    0.001,
+    0.001,
+    0.001,
+    0.1
+   ],
+   "base": "pending T50b"
+  },
+  {
+   "cell": "image__shuffled",
+   "role": "extra",
+   "C0": {
+    "pooled": 0.9780853517877739,
+    "k": 2544,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.028107432854465958,
+    "k": 135,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.03125,
+    "episode_q75": 0.03125
+   },
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9780853517877739,
+     "C1_instr": 0.028107432854465958,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.001,
+    0.001,
+    0.001,
+    0.001,
+    0.001
+   ],
+   "base": "pending T50b"
+  }
+ ]
+}

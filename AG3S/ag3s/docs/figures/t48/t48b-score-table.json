@@ -1,0 +1,249 @@
+{
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T170147+0900_28b981600bf7_d97d2cd2e13a/verify/T48b",
+ "source": "indep/score_indep.json, score/parity.json, extract/timing.json",
+ "rows": [
+  {
+   "item": "#0 pixel parity (E0 vs recorded)",
+   "group": "all 10 runs",
+   "probe": "MAD max 0.0, max abs 0 (3 cams, 599 frames)",
+   "simple rule": "",
+   "strong-rule proxy": "",
+   "frame-index": "",
+   "runs / scenes": "10"
+  },
+  {
+   "item": "#0 prediction agreement E0rec vs E0",
+   "group": "held-out",
+   "probe": "260/260 = 1.000",
+   "simple rule": "(state identical)",
+   "strong-rule proxy": "(state identical)",
+   "frame-index": "(state identical)",
+   "runs / scenes": "7"
+  },
+  {
+   "item": "#0 prediction agreement E0rec vs E0",
+   "group": "ep1807",
+   "probe": "75/75 = 1.000",
+   "simple rule": "(state identical)",
+   "strong-rule proxy": "(state identical)",
+   "frame-index": "(state identical)",
+   "runs / scenes": "1"
+  },
+  {
+   "item": "#0 prediction agreement E0rec vs E0",
+   "group": "train_range",
+   "probe": "339/339 = 1.000",
+   "simple rule": "(state identical)",
+   "strong-rule proxy": "(state identical)",
+   "frame-index": "(state identical)",
+   "runs / scenes": "3"
+  },
+  {
+   "item": "#0 probe p change E0rec vs E0",
+   "group": "all",
+   "probe": "max 0",
+   "simple rule": "",
+   "strong-rule proxy": "",
+   "frame-index": "",
+   "runs / scenes": ""
+  },
+  {
+   "item": "E0 accuracy vs closed_loop_gt",
+   "group": "held-out (primary)",
+   "probe": "228/260 = 0.877",
+   "simple rule": "227/260 = 0.873",
+   "strong-rule proxy": "204/260 = 0.785",
+   "frame-index": "164/260 = 0.631",
+   "runs / scenes": "7 / 4"
+  },
+  {
+   "item": "E0 accuracy vs closed_loop_gt",
+   "group": "ep1807",
+   "probe": "72/75 = 0.960",
+   "simple rule": "75/75 = 1.000",
+   "strong-rule proxy": "72/75 = 0.960",
+   "frame-index": "66/75 = 0.880",
+   "runs / scenes": "1 / 1"
+  },
+  {
+   "item": "E0 accuracy vs closed_loop_gt",
+   "group": "train_range (secondary)",
+   "probe": "325/339 = 0.959",
+   "simple rule": "339/339 = 1.000",
+   "strong-rule proxy": "332/339 = 0.979",
+   "frame-index": "296/339 = 0.873",
+   "runs / scenes": "3 / 3"
+  },
+  {
+   "item": "E0 accuracy vs contact state",
+   "group": "held-out (primary)",
+   "probe": "215/254 = 0.846",
+   "simple rule": "182/254 = 0.717",
+   "strong-rule proxy": "181/254 = 0.713",
+   "frame-index": "152/254 = 0.598",
+   "runs / scenes": "7 / 4"
+  },
+  {
+   "item": "E0 accuracy vs contact state",
+   "group": "ep1807",
+   "probe": "72/74 = 0.973",
+   "simple rule": "74/74 = 1.000",
+   "strong-rule proxy": "72/74 = 0.973",
+   "frame-index": "65/74 = 0.878",
+   "runs / scenes": "1 / 1"
+  },
+  {
+   "item": "E0 accuracy vs contact state",
+   "group": "train_range (secondary)",
+   "probe": "324/334 = 0.970",
+   "simple rule": "333/334 = 0.997",
+   "strong-rule proxy": "330/334 = 0.988",
+   "frame-index": "292/334 = 0.874",
+   "runs / scenes": "3 / 3"
+  },
+  {
+   "item": "#1 E1 empty grasp: pick",
+   "group": "held-out (primary)",
+   "probe": "1/13 = 0.077",
+   "simple rule": "0/13 = 0.000",
+   "strong-rule proxy": "1/13 = 0.077",
+   "frame-index": "2/13 = 0.154",
+   "runs / scenes": "2 / 2"
+  },
+  {
+   "item": "#1 E1 empty grasp: pick",
+   "group": "ep1807",
+   "probe": "1/11 = 0.091",
+   "simple rule": "0/11 = 0.000",
+   "strong-rule proxy": "1/11 = 0.091",
+   "frame-index": "0/11 = 0.000",
+   "runs / scenes": "1 / 1"
+  },
+  {
+   "item": "#1 E1 empty grasp: pick",
+   "group": "train_range (secondary)",
+   "probe": "5/30 = 0.167",
+   "simple rule": "0/30 = 0.000",
+   "strong-rule proxy": "0/30 = 0.000",
+   "frame-index": "0/30 = 0.000",
+   "runs / scenes": "3 / 3"
+  },
+  {
+   "item": "#1 E1s empty, state fixed: pick",
+   "group": "held-out (primary)",
+   "probe": "4/13 = 0.308",
+   "simple rule": "0/13 = 0.000",
+   "strong-rule proxy": "0/13 = 0.000",
+   "frame-index": "2/13 = 0.154",
+   "runs / scenes": "2 / 2"
+  },
+  {
+   "item": "#1 E1s empty, state fixed: pick",
+   "group": "ep1807",
+   "probe": "4/11 = 0.364",
+   "simple rule": "0/11 = 0.000",
+   "strong-rule proxy": "0/11 = 0.000",
+   "frame-index": "0/11 = 0.000",
+   "runs / scenes": "1 / 1"
+  },
+  {
+   "item": "#1 E1s empty, state fixed: pick",
+   "group": "train_range (secondary)",
+   "probe": "7/31 = 0.226",
+   "simple rule": "0/31 = 0.000",
+   "strong-rule proxy": "0/31 = 0.000",
+   "frame-index": "0/31 = 0.000",
+   "runs / scenes": "3 / 3"
+  },
+  {
+   "item": "#2 E2 slip: pick",
+   "group": "held-out (primary)",
+   "probe": "3/7 = 0.429",
+   "simple rule": "0/7 = 0.000",
+   "strong-rule proxy": "1/7 = 0.143",
+   "frame-index": "2/7 = 0.286",
+   "runs / scenes": "2 / 2"
+  },
+  {
+   "item": "#2 E2 slip: pick",
+   "group": "ep1807",
+   "probe": "3/5 = 0.600",
+   "simple rule": "0/5 = 0.000",
+   "strong-rule proxy": "1/5 = 0.200",
+   "frame-index": "0/5 = 0.000",
+   "runs / scenes": "1 / 1"
+  },
+  {
+   "item": "#2 E2 slip: pick",
+   "group": "train_range (secondary)",
+   "probe": "5/13 = 0.385",
+   "simple rule": "0/13 = 0.000",
+   "strong-rule proxy": "0/13 = 0.000",
+   "frame-index": "0/13 = 0.000",
+   "runs / scenes": "3 / 3"
+  },
+  {
+   "item": "#3 E3 phantom hold: place",
+   "group": "held-out (primary)",
+   "probe": "97/99 = 0.980",
+   "simple rule": "99/99 = 1.000",
+   "strong-rule proxy": "0/99 = 0.000",
+   "frame-index": "4/99 = 0.040",
+   "runs / scenes": "7 / 4"
+  },
+  {
+   "item": "#3 E3 phantom hold: place",
+   "group": "ep1807",
+   "probe": "17/17 = 1.000",
+   "simple rule": "17/17 = 1.000",
+   "strong-rule proxy": "0/17 = 0.000",
+   "frame-index": "2/17 = 0.118",
+   "runs / scenes": "1 / 1"
+  },
+  {
+   "item": "#3 E3 phantom hold: place",
+   "group": "train_range (secondary)",
+   "probe": "60/62 = 0.968",
+   "simple rule": "62/62 = 1.000",
+   "strong-rule proxy": "0/62 = 0.000",
+   "frame-index": "12/62 = 0.194",
+   "runs / scenes": "3 / 3"
+  },
+  {
+   "item": "E1z exploratory: pick",
+   "group": "held-out (primary)",
+   "probe": "5/13 = 0.385",
+   "simple rule": "0/13 = 0.000",
+   "strong-rule proxy": "1/13 = 0.077",
+   "frame-index": "2/13 = 0.154",
+   "runs / scenes": "2 / 2"
+  },
+  {
+   "item": "E1z exploratory: pick",
+   "group": "ep1807",
+   "probe": "3/11 = 0.273",
+   "simple rule": "0/11 = 0.000",
+   "strong-rule proxy": "1/11 = 0.091",
+   "frame-index": "0/11 = 0.000",
+   "runs / scenes": "1 / 1"
+  },
+  {
+   "item": "E1z exploratory: pick",
+   "group": "train_range (secondary)",
+   "probe": "9/31 = 0.290",
+   "simple rule": "0/31 = 0.000",
+   "strong-rule proxy": "0/31 = 0.000",
+   "frame-index": "0/31 = 0.000",
+   "runs / scenes": "3 / 3"
+  },
+  {
+   "item": "#5 prefix (batch 4)",
+   "group": "1510 inputs",
+   "probe": "14.98 ms/input (median), p90 15.04",
+   "simple rule": "call 59.9 ms",
+   "strong-rule proxy": "",
+   "frame-index": "",
+   "runs / scenes": ""
+  }
+ ]
+}

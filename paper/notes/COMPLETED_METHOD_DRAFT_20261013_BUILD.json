@@ -1,0 +1,44 @@
+{
+  "status": "PDF_BUILD_PASS_FULL_EVIDENCE_CHECK_BLOCKED",
+  "draft_status": "PROSPECTIVE_METHOD_RESULTS_PENDING",
+  "date": "2026-10-13",
+  "pdf": "paper/latex/build/main.pdf",
+  "pdf_sha256": "f8d75db52c0025bcb063a7bf5f6a25ce841ce913b5a978982c245119c6b7e9bb",
+  "pages": 9,
+  "body_ends_on_page": 8,
+  "figure_pages": [
+    2,
+    4,
+    6
+  ],
+  "visually_inspected_pages": [
+    1,
+    2,
+    4,
+    6,
+    8
+  ],
+  "artifact_hashes": "PASS",
+  "template_hashes": "PASS",
+  "undefined_references": false,
+  "box_warnings": false,
+  "full_build_blocker": "Existing EXP001 manifest references missing benchmark/ag3s/docs/handoff/T39.verify.json",
+  "package_warnings": [
+    "lineno.sty cached source UTF-8 warning",
+    "algorithm.sty cached source UTF-8 warning"
+  ],
+  "source_sha256": {
+    "paper/latex/main.tex": "c4353398687c0b38c23069657b7eef494e023f304d1b01bdad33b99a033190d9",
+    "paper/latex/metadata.tex": "f5294c1d0dc04d75f15960527122caca2728bb877de65ded12d4126378b603ac",
+    "paper/latex/preamble.tex": "7db3b0145e324700ae2eee5125e60a247d8720ab377359a5dc7246ce4626693a",
+    "paper/latex/sections/00_abstract.tex": "031c6ef458105f5c776f5986cea248812e06cc63c52aba0034d3a0ab33b52156",
+    "paper/latex/sections/01_introduction.tex": "dd8bd6be6244b71950472c44aa85dd0e1cd3e06520ecbbf3965db80b1c0b67ae",
+    "paper/latex/sections/02_related_work.tex": "fda1238462e78657680b4e5d3245d9de436ed53d6564827b4ddf83c9202c262d",
+    "paper/latex/sections/03_method.tex": "9584a663cfbf9d012fad006c68a1eaef6a4dd0e844c81fe6f5652ced5065785d",
+    "paper/latex/sections/04_experiments.tex": "5f781fdb9b8185e610d6a354bfd34f94e01289c9067045eba6780618edd67e3d",
+    "paper/latex/sections/05_conclusion.tex": "601798d1716f1951d67f45594c5eeca74a7f6798bc77e550986e3289cfefce8b",
+    "paper/latex/sections/06_limitations.tex": "f4467550dd187073dad7c782e1b5be23ec95103b3088624c96b031359172bec9"
+  },
+  "compiler_command": "cd paper/latex && /tmp/cvpr-latex-tools/tectonic --only-cached --untrusted --keep-logs --keep-intermediates --outdir build main.tex",
+  "research_experiments_run": false
+}

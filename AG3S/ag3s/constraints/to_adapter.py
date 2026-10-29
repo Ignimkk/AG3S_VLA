@@ -28,7 +28,9 @@ from typing import Any, Iterable, Optional, Sequence
 import numpy as np
 
 from AG3S.ag3s.constraints.constraint_builder import ConstraintBuilder
-from AG3S.ag3s.constraints.clearance import manipulated_object
+from AG3S.ag3s.config import TARGET_FREE_POLICIES
+from AG3S.ag3s.constraints.clearance import (
+    PROTECTED_LINKS, manipulated_object, target_permission_context)
 from AG3S.ag3s.runtime.degradation import ensure_reason, reason
 from AG3S.ag3s.types import (
     AttachedCollisionGeometry,
@@ -198,10 +200,14 @@ def build_constraint_set(
     manipulated = manipulated_object(
         manipulated_geometry, attached, robot_model=builder.robot_model, robot_state=robot_state
     )
+    target_field_policy = str(getattr(builder.constraint_config, "target_field_policy", "relax"))
+    # T46f A14 — `"none"` (예외 없음): 쥔 것이 없으면 권한을 비운 문맥으로 잰다 → 모든 행이 `full_margin(TARGET)`.
+    # 다른 정책 · 쥔 뒤에는 `ctx` 그대로다.
+    perm_ctx = target_permission_context(ctx, target_field_policy, attached)
     manipulated_link_margin = None
     if manipulated is not None and builder.n_robot_spheres:
         manipulated_link_margin = builder.clearance_policy.margin_matrix(
-            builder.sphere_link_names, [SourceType.TARGET], context=ctx, target_grounded=True,
+            builder.sphere_link_names, [SourceType.TARGET], context=perm_ctx, target_grounded=True,
         )[:, 0]
 
     # ESDF 쪽 **target 제외** — 마진이 아니라 `d` 자체를 바꾼다 (T8b, 사용자 판정).
@@ -215,7 +221,7 @@ def build_constraint_set(
     # 거리를 묻는다. 행을 끄는 것이 아니다: 그 계층도 table·crate 를 그대로 담고 있다.
     #
     # 조건이 넷이고 하나라도 어긋나면 `None`(= 지금 동작)이다.
-    # 1. 정책이 `relax`(기본)가 아니다.
+    # 1. 정책이 target-free 계층을 읽는 것이다 (`exclude_authorized` · `exclude_all`; `relax`(기본) · `none` 은 아니다).
     # 2. **쥔 것이 없다** — 쥔 뒤에는 그 물체가 attached 경로(필드에서 파임 + 로봇 쪽 질의점)로
     #    빠진다 (T26 §4: 파지 전 manipulated → 파지 후 attached, 끊김 없음). T26 전의 이유 ("쥔
     #    뒤의 target 은 crate") 는 더 이상 참이 아니다 — crate 는 admissible 이 아니어서
@@ -223,9 +229,9 @@ def build_constraint_set(
     # 3. 조작 대상이 있다 (`visible` 또는 `occluded` — T20. 예전엔 "target 이 grounding 됐다").
     #    사과가 손가락에 가려진 프레임에도 사과의 제외는 살아 있어야 한다.
     # 4. 필드가 실제로 그 계층을 들고 있다 — 없으면 켰다고 믿은 채 아무 일도 안 일어난다.
-    target_field_policy = str(getattr(builder.constraint_config, "target_field_policy", "relax"))
     target_field_exclude = None
-    if (target_field_policy != "relax" and attached is None and manipulated_geometry is not None
+    if (target_field_policy in TARGET_FREE_POLICIES and attached is None
+            and manipulated_geometry is not None
             and builder.n_robot_spheres and getattr(esdf, "has_target_free", False)):
         names = [str(n) for n in builder.sphere_link_names]
         if target_field_policy == "exclude_all":
@@ -239,6 +245,31 @@ def build_constraint_set(
             authorized = builder.clearance_policy.authorized_links(ctx)
             mask = np.asarray([n in authorized for n in names], bool)
         target_field_exclude = mask if mask.any() else None
+
+    # T44 I0 — **기록만** (값은 위에서 정해졌다): 어느 link 이 권한 집합이고, 행 (robot sphere) 마다
+    # target 이 빠진 계층을 읽었나. 권한 없는 link 이 target 예외를 받았는지 기록만 보고 셀 수 있게.
+    metrics = dict(metrics or {})
+    metrics["target_permission"] = _target_permission_record(
+        builder, perm_ctx, target_field_policy, target_field_exclude)
+    # T44b I2b — while holding: which rows belong to the holding hand (ContactConfig side of the
+    # hold link) and to its hold chain above the gripper (URDF parent relation). Record only here;
+    # trajopt reads it with `collision.target_permission_strict` (`linearize.held_contact_rows_of`).
+    metrics["target_permission"]["held"] = _held_permission_record(builder, attached)
+    # T44e A9 — 비권한 link 이 target 을 일반 obstacle 과 같은 여유로 피한다 (`"obstacle"`). 권한 집합은 위와 같은
+    # `authorized_links(ctx)` (이름 규칙 하나). 쥔 것이 있으면 (carry) 싣지 않는다. 기본 `full` 은 기록 키도 없다.
+    nonauth_margin = str(getattr(getattr(builder.clearance_policy, "contact", None),
+                                 "nonauthorized_target_margin", "full") or "full")
+    nonauthorized_target_rows = None
+    if nonauth_margin != "full":
+        if manipulated_link_margin is not None and attached is None:
+            authorized = builder.clearance_policy.authorized_links(perm_ctx)
+            nonauthorized_target_rows = np.asarray(
+                [str(n) not in authorized for n in builder.sphere_link_names], bool)
+        metrics["target_permission"]["nonauthorized_target_margin"] = {
+            "mode": nonauth_margin,
+            "n_rows": (0 if nonauthorized_target_rows is None
+                       else int(nonauthorized_target_rows.sum())),
+            "applied": nonauthorized_target_rows is not None}
 
     # **여기가 사유의 마지막 관문이다.** 이 함수가 모든 정상 경로의 `validity` 를 확정하므로,
     # degraded 인데 코드 달린 사유가 하나도 없으면 그 사실 자체를 사유로 남긴다 — 새 DEGRADED
@@ -281,7 +312,114 @@ def build_constraint_set(
         manipulated=manipulated,
         target_field_exclude=target_field_exclude,
         target_field_policy=target_field_policy,
+        nonauthorized_target_rows=nonauthorized_target_rows,
     )
+
+
+def _target_permission_record(builder, ctx, policy: str, target_field_exclude) -> dict:
+    """`metrics["target_permission"]` (T44 I0): policy · authorized links · per-row exclusion vector.
+
+    `target_field_exclude` is `None` when no row reads the target-free layer (relax, held object,
+    no manipulated geometry, no target-free layer) — recorded as `None`, not as all-False, so the
+    two stay apart. `authorized_links` is the context's set (∩ the constraint model's links).
+    """
+    names = [str(n) for n in (getattr(builder, "sphere_link_names", None) or ())]
+    try:
+        authorized = sorted(set(builder.clearance_policy.authorized_links(ctx)) & set(names))
+    except Exception:  # noqa: BLE001 — a record field; never fails the frame
+        authorized = None
+    mask = None if target_field_exclude is None else np.asarray(target_field_exclude, bool)
+    return {
+        "policy": str(policy),
+        "authorized_links": authorized,
+        "target_field_exclude": None if mask is None else [bool(v) for v in mask],
+        "n_rows": len(names),
+        "n_rows_excluded": 0 if mask is None else int(mask.sum()),
+        "excluded_links": (None if mask is None
+                           else sorted({names[i] for i in np.flatnonzero(mask) if i < len(names)})),
+    }
+
+
+def urdf_parent_of(robot_model) -> dict[str, str]:
+    """`{child_link: parent_link}` from the robot model's URDF joints (`UrdfSphereChain.model`).
+    `{}` when the model carries no URDF (mocks) — then no hold-chain link is ever found."""
+    joints = getattr(getattr(robot_model, "model", None), "joints", None) or ()
+    out: dict[str, str] = {}
+    for joint in joints:
+        child, parent = getattr(joint, "child", None), getattr(joint, "parent", None)
+        if child is not None and parent is not None:
+            out[str(child)] = str(parent)
+    return out
+
+
+def held_contact_depth(sphere_link_names: Sequence[str], hold_link: str,
+                       contact_links: Iterable[str], parent_of: dict[str, str],
+                       ) -> tuple[np.ndarray, list[str]]:
+    """T44b I2b — `(depth (S,) int, parent_links)`: each robot sphere's place on the holding hand.
+
+    | depth | rows |
+    |---|---|
+    | 0 | the holding hand's contact links (`ContactConfig.contact_links` of its side: palm + fingers) |
+    | k ≥ 1 | the k-th link **above the gripper** on the URDF chain from `hold_link` to the root |
+    | −1 | everything else (the other hand, the rest of the arm, the torso) |
+
+    The chain counts only links that carry spheres in this constraint model and are not contact
+    links — a link with no sphere (RB-Y1: the fixed `FT_sensor_L/R` frame between `ee_<side>` and
+    `link_<side>_arm_6`) has no row to permit. `parent_links` lists the counted links, nearest first.
+
+    T46f A14 — `clearance.PROTECTED_LINKS` (the FT sensors, which carry spheres under `--links gripper_wrist`)
+    are **never** permitted and not counted either: they stay −1, so `link_<side>_arm_6` keeps depth 1 exactly
+    as before the FT sensor had spheres.
+    """
+    names = [str(n) for n in sphere_link_names]
+    contact = {str(link) for link in contact_links}
+    have = set(names)
+    depth = np.full(len(names), -1, np.int64)
+    for i, name in enumerate(names):
+        if name in contact and name not in PROTECTED_LINKS:
+            depth[i] = 0
+    parents: list[str] = []
+    cursor, seen = parent_of.get(str(hold_link)), {str(hold_link)}
+    while cursor is not None and cursor not in seen:
+        seen.add(cursor)
+        if cursor in have and cursor not in contact and cursor not in PROTECTED_LINKS:
+            parents.append(cursor)
+            k = len(parents)
+            for i, name in enumerate(names):
+                if name == cursor:
+                    depth[i] = k
+        cursor = parent_of.get(cursor)
+    return depth, parents
+
+
+def _held_permission_record(builder, attached) -> Optional[dict]:
+    """`metrics["target_permission"]["held"]` (T44b I2b) — `None` when nothing is held.
+
+    The holding hand is the `ContactConfig.contact_links` side whose list holds the attachment's
+    `parent_link` (the hold link `SafePolicy` attaches to, `AG3S.attach` → `frame_link`). No side
+    holds it → `side: None` and every depth −1 (fail closed: strict then checks every row).
+    """
+    if attached is None:
+        return None
+    hold = str(getattr(attached, "parent_link", "") or "")
+    names = [str(n) for n in (getattr(builder, "sphere_link_names", None) or ())]
+    contact_cfg = getattr(getattr(builder, "clearance_policy", None), "contact", None)
+    side, links = None, ()
+    for key, side_links in (getattr(contact_cfg, "contact_links", None) or {}).items():
+        if hold in tuple(str(link) for link in side_links):
+            side, links = str(key), tuple(str(link) for link in side_links)
+            break
+    depth, parents = held_contact_depth(
+        names, hold, links, urdf_parent_of(getattr(builder, "robot_model", None)))
+    if side is None:
+        depth = np.full_like(depth, -1)    # unknown hand: no row permitted (the chain stays recorded)
+    return {
+        "hold_link": hold,
+        "side": side,
+        "contact_links": sorted(set(links) & set(names)),
+        "parent_links": parents,
+        "depth": [int(v) for v in depth],
+    }
 
 
 def refresh(
@@ -343,6 +481,8 @@ def summary(constraint_set: CollisionConstraintSet) -> dict[str, Any]:
         "notes": list(constraint_set.notes),
         "profile_ms": dict(constraint_set.profile),
         "metrics": dict(constraint_set.metrics),
+        # T44 I0: authorized links + per-row target-free permission (None when nobody reads it).
+        "target_permission": dict(constraint_set.metrics).get("target_permission"),
     }
 
 

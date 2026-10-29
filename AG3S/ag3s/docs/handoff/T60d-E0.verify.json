@@ -1,0 +1,67 @@
+{
+ "_comment": "lead (A). numbers and paths only.",
+ "step": "T60d-E0",
+ "date": "2026-10-15",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T013902+0900_df9721515aee_57f49eb3397c",
+ "raw_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T013902+0900_df9721515aee_57f49eb3397c/verify/T60d-E0",
+ "execution": {
+  "mode": "E0 VLA only (serve_safe --no-safe), seeds = TO-on CL2/CL3 seeds",
+  "gpu": "2026-10-14T23:40:17Z - 23:47:57Z",
+  "runs": 4
+ },
+ "definitions": {
+  "P_H": "t60_termination endpoints, Params defaults; replay with CL4 replay_contacts.py (CL_SNAP = this run snapshot)"
+ },
+ "numbers": {
+  "E0": {
+   "E0_ep110_s1101": {
+    "endpoints": {
+     "t_P": null,
+     "t_H": null
+    },
+    "planning_rows": 75,
+    "has_actions_reference": false,
+    "final_in_crate": false
+   },
+   "E0_ep110_s1102": {
+    "endpoints": {
+     "t_P": 338,
+     "t_H": 389
+    },
+    "planning_rows": 75,
+    "has_actions_reference": false,
+    "final_in_crate": true
+   },
+   "E0_ep123_s1231": {
+    "endpoints": {
+     "t_P": 367,
+     "t_H": 428
+    },
+    "planning_rows": 75,
+    "has_actions_reference": false,
+    "final_in_crate": true
+   },
+   "E0_ep123_s1232": {
+    "endpoints": {
+     "t_P": 288,
+     "t_H": 322
+    },
+    "planning_rows": 75,
+    "has_actions_reference": false,
+    "final_in_crate": true
+   }
+  },
+  "TO_on_same_pairs_T60b": "handoff/T60b.verify.json numbers.not_returned_runs: CL2 C0/C1a/C1bp and CL3 C1a/C1aF1/C1aF1F2 runs of ep110 s1101/s1102 and ep123 s1231/s1232 reached P and not H (category a, except CL2 C1bp ep123 s1232 = c)",
+  "summary": {
+   "E0_reached_P": 3,
+   "E0_reached_H_after_P": 3,
+   "E0_no_P": [
+    "E0_ep110_s1101"
+   ]
+  }
+ },
+ "not_measured": [
+  "actions_reference (no TO in E0, so the proposal = executed)",
+  "whether the difference comes from TO itself or from a different state reached at P (TO removal changes the whole trajectory)"
+ ]
+}

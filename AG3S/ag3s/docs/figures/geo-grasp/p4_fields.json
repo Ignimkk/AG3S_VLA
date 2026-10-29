@@ -1,0 +1,322 @@
+{
+ "A": "보정+검사(상한없음)",
+ "B": "보정(상한없음)",
+ "scenes": {
+  "121": {
+   "n_chunks": 35,
+   "divergence_t": null,
+   "max_diff_main_mm_before_divergence": 0.0,
+   "max_diff_main_mm_all": 0.0,
+   "max_diff_free_mm_all": 0.0,
+   "n_chunks_not_comparable": 0,
+   "first_not_comparable_chunk": null,
+   "divergence_chunk": null
+  },
+  "122": {
+   "n_chunks": 34,
+   "divergence_t": 128,
+   "max_diff_main_mm_before_divergence": 0.0,
+   "max_diff_main_mm_all": 0.0,
+   "max_diff_free_mm_all": 0.0,
+   "n_chunks_not_comparable": 17,
+   "first_not_comparable_chunk": 17,
+   "divergence_chunk": 16
+  },
+  "123": {
+   "n_chunks": 75,
+   "divergence_t": null,
+   "max_diff_main_mm_before_divergence": 0.0,
+   "max_diff_main_mm_all": 0.0,
+   "max_diff_free_mm_all": 0.0,
+   "n_chunks_not_comparable": 0,
+   "first_not_comparable_chunk": null,
+   "divergence_chunk": null
+  },
+  "321": {
+   "n_chunks": 75,
+   "divergence_t": null,
+   "max_diff_main_mm_before_divergence": 0.0,
+   "max_diff_main_mm_all": 0.0,
+   "max_diff_free_mm_all": 0.0,
+   "n_chunks_not_comparable": 0,
+   "first_not_comparable_chunk": null,
+   "divergence_chunk": null
+  },
+  "322": {
+   "n_chunks": 75,
+   "divergence_t": null,
+   "max_diff_main_mm_before_divergence": 0.0,
+   "max_diff_main_mm_all": 0.0,
+   "max_diff_free_mm_all": 0.0,
+   "n_chunks_not_comparable": 0,
+   "first_not_comparable_chunk": null,
+   "divergence_chunk": null
+  },
+  "323": {
+   "n_chunks": 75,
+   "divergence_t": null,
+   "max_diff_main_mm_before_divergence": 0.0,
+   "max_diff_main_mm_all": 0.0,
+   "max_diff_free_mm_all": 0.0,
+   "n_chunks_not_comparable": 0,
+   "first_not_comparable_chunk": null,
+   "divergence_chunk": null
+  }
+ },
+ "coverage": {
+  "121": {
+   "frame": 0.701,
+   "memory": 0.803,
+   "field": 0.991
+  },
+  "122": {
+   "frame": 0.703,
+   "memory": 0.807,
+   "field": 0.988
+  },
+  "123": {
+   "frame": 0.665,
+   "memory": 0.762,
+   "field": 0.986
+  },
+  "321": {
+   "frame": 0.596,
+   "memory": 0.681,
+   "field": 0.986
+  },
+  "322": {
+   "frame": 0.592,
+   "memory": 0.687,
+   "field": 0.987
+  },
+  "323": {
+   "frame": 0.503,
+   "memory": 0.594,
+   "field": 0.983
+  }
+ },
+ "coverage_memory_points_check": {
+  "121": [
+   [
+    0,
+    36091,
+    36091
+   ],
+   [
+    5,
+    60000,
+    60000
+   ],
+   [
+    10,
+    60000,
+    60000
+   ],
+   [
+    15,
+    59998,
+    60000
+   ],
+   [
+    24,
+    59998,
+    null
+   ],
+   [
+    29,
+    59998,
+    null
+   ]
+  ],
+  "122": [
+   [
+    0,
+    36091,
+    36091
+   ],
+   [
+    4,
+    60000,
+    60000
+   ],
+   [
+    8,
+    60000,
+    60000
+   ],
+   [
+    12,
+    60000,
+    60000
+   ],
+   [
+    16,
+    59995,
+    60000
+   ],
+   [
+    24,
+    59996,
+    null
+   ],
+   [
+    28,
+    59996,
+    null
+   ],
+   [
+    32,
+    59996,
+    null
+   ]
+  ],
+  "123": [
+   [
+    0,
+    36091,
+    36091
+   ],
+   [
+    12,
+    59999,
+    60000
+   ],
+   [
+    24,
+    60000,
+    60000
+   ],
+   [
+    36,
+    60000,
+    60000
+   ],
+   [
+    48,
+    60000,
+    60000
+   ],
+   [
+    60,
+    60000,
+    60000
+   ],
+   [
+    72,
+    60000,
+    60000
+   ]
+  ],
+  "321": [
+   [
+    0,
+    35969,
+    35969
+   ],
+   [
+    12,
+    60000,
+    60000
+   ],
+   [
+    24,
+    60000,
+    60000
+   ],
+   [
+    36,
+    60000,
+    60000
+   ],
+   [
+    48,
+    60000,
+    60000
+   ],
+   [
+    60,
+    60000,
+    60000
+   ],
+   [
+    72,
+    60000,
+    60000
+   ]
+  ],
+  "322": [
+   [
+    0,
+    35969,
+    35969
+   ],
+   [
+    12,
+    60000,
+    60000
+   ],
+   [
+    24,
+    60000,
+    60000
+   ],
+   [
+    36,
+    60000,
+    60000
+   ],
+   [
+    48,
+    60000,
+    60000
+   ],
+   [
+    60,
+    60000,
+    60000
+   ],
+   [
+    72,
+    60000,
+    60000
+   ]
+  ],
+  "323": [
+   [
+    0,
+    35969,
+    35969
+   ],
+   [
+    12,
+    60000,
+    60000
+   ],
+   [
+    24,
+    60000,
+    60000
+   ],
+   [
+    36,
+    60000,
+    60000
+   ],
+   [
+    48,
+    60000,
+    60000
+   ],
+   [
+    60,
+    60000,
+    60000
+   ],
+   [
+    72,
+    60000,
+    60000
+   ]
+  ]
+ }
+}

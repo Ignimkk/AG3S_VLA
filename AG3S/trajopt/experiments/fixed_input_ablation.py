@@ -321,7 +321,12 @@ def contact_policy(settings: RunSettings, link_names, *, has_target: bool, has_f
 
     config = AG3SConfig.from_dict({"collision_backend": "esdf"})
     policy = ClearancePolicy.from_config(config.contact, config.geometry, config.support_surface)
+    from AG3S.ag3s.constraints.clearance import target_permission_context
+
     ctx = ContactPolicyContext.make(settings.phase, settings.manipulators)
+    # T46f A14 — `none` (예외 없음): 쥐지 않은 target 의 권한을 비운 문맥 (`to_adapter` 와 같은 함수). 다른 정책은 ctx 그대로.
+    ctx = target_permission_context(ctx, str(settings.target_field_policy),
+                                    object() if attached else None)
     names = [str(n) for n in link_names]
     margin = None
     if has_target and not attached:
@@ -329,7 +334,8 @@ def contact_policy(settings: RunSettings, link_names, *, has_target: bool, has_f
                                       target_grounded=True)[:, 0]
     authorized = sorted(policy.authorized_links(ctx))
     mask = None
-    if (settings.target_field_policy != "relax" and not attached and has_target and has_free):
+    if (settings.target_field_policy in ("exclude_authorized", "exclude_all")
+            and not attached and has_target and has_free):
         if settings.target_field_policy == "exclude_all":
             mask = np.ones(len(names), bool)
         else:
@@ -977,7 +983,7 @@ def build_parser() -> argparse.ArgumentParser:
     # 정책·목적함수
     ap.add_argument("--esdf-margin", type=float, default=None, help="m")
     ap.add_argument("--target-field-policy", default=None,
-                    choices=("relax", "exclude-authorized", "exclude-all"))
+                    choices=("relax", "exclude-authorized", "exclude-all", "none"))  # T46f A14: none
     ap.add_argument("--phase", default=None)
     ap.add_argument("--manipulators", nargs="+", default=None)
     ap.add_argument("--hand", choices=("left", "right"), default=None,

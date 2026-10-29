@@ -1,0 +1,130 @@
+{
+ "box_px": [
+  330,
+  110,
+  530,
+  300
+ ],
+ "panels": [
+  {
+   "record": "새 비교 기준 구성",
+   "kind": "video",
+   "t": 233,
+   "video_t_s": 15.533333333333333,
+   "contacts": [
+    "손바닥–사과"
+   ],
+   "opening": 0.871,
+   "grip_cmd": 0.0,
+   "tip_mid_dist_mm": 34.0
+  },
+  {
+   "record": "새 비교 기준 구성",
+   "kind": "video",
+   "t": 247,
+   "video_t_s": 16.466666666666665,
+   "contacts": [
+    "손가락 L2–사과"
+   ],
+   "opening": 0.607,
+   "grip_cmd": 0.55,
+   "tip_mid_dist_mm": 44.1
+  },
+  {
+   "record": "새 비교 기준 구성",
+   "kind": "render",
+   "t": 238,
+   "video_t_s": null,
+   "contacts": [
+    "손가락 L1–사과",
+    "손가락 L2–사과"
+   ],
+   "opening": 0.691,
+   "grip_cmd": 0.0,
+   "tip_mid_dist_mm": 36.1
+  },
+  {
+   "record": "이전 최선 구성",
+   "kind": "video",
+   "t": 163,
+   "video_t_s": 10.866666666666667,
+   "contacts": [],
+   "opening": 0.874,
+   "grip_cmd": 0.007,
+   "tip_mid_dist_mm": 97.6
+  },
+  {
+   "record": "이전 최선 구성",
+   "kind": "video",
+   "t": 177,
+   "video_t_s": 11.8,
+   "contacts": [
+    "손가락 L1–바나나",
+    "손가락 L2–바나나"
+   ],
+   "opening": 0.52,
+   "grip_cmd": 0.402,
+   "tip_mid_dist_mm": 146.3
+  },
+  {
+   "record": "이전 최선 구성",
+   "kind": "render",
+   "t": 168,
+   "video_t_s": null,
+   "contacts": [
+    "손가락 L1–바나나",
+    "손가락 L2–바나나"
+   ],
+   "opening": 0.531,
+   "grip_cmd": 0.387,
+   "tip_mid_dist_mm": 99.0
+  },
+  {
+   "record": "VLA 단독",
+   "kind": "video",
+   "t": 184,
+   "video_t_s": 12.266666666666667,
+   "contacts": [],
+   "opening": 0.878,
+   "grip_cmd": 0.0,
+   "tip_mid_dist_mm": 22.7
+  },
+  {
+   "record": "VLA 단독",
+   "kind": "video",
+   "t": 198,
+   "video_t_s": 13.2,
+   "contacts": [
+    "손가락 L1–바나나",
+    "손가락 L1–사과",
+    "손가락 L2–사과"
+   ],
+   "opening": 0.731,
+   "grip_cmd": 0.582,
+   "tip_mid_dist_mm": 22.2
+  },
+  {
+   "record": "VLA 단독",
+   "kind": "render",
+   "t": 189,
+   "video_t_s": null,
+   "contacts": [
+    "손가락 L1–바나나",
+    "손가락 L1–사과",
+    "손가락 L2–사과"
+   ],
+   "opening": 0.729,
+   "grip_cmd": 0.0,
+   "tip_mid_dist_mm": 22.3
+  }
+ ],
+ "sources": {
+  "videos": {
+   "새 비교 기준 구성": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC-TARGETSURFACE/runs/NBCTS/NBCTS_ep211_s2113/third_person_front.mp4",
+   "이전 최선 구성": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE-NBC/runs/SPLT/SPLT_ep211_s2113/third_person_front.mp4",
+   "VLA 단독": "/mnt/dev/AG3S_VLA-storage/results/development/20261019T132719+0900_f15e587290f6_11408fd6d27f/verify/IFG-APPLE/runs/E0/E0_ep211_s2113/third_person_front.mp4"
+  },
+  "renders": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/frames",
+  "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261023T014330+0900_a6ff7dd925cb_d53f4677c82a/verify/IFG-211-GRASP/p/make_outputs.py"
+ }
+}

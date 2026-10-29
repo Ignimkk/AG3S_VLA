@@ -1,0 +1,11 @@
+% F03 (CVPR-Figure draft). Dashed box = planned component; not an execution audit.
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig03_attention_to_3d/cvprfig/out/fig03_pipeline.pdf}
+\caption{\textbf{One frozen VLA supplies both the action and the geometry it may touch.}
+Attention from the frozen policy is lifted into a 3D target extent, confirmed over frames with a
+sub-task probe, and turned into link-specific allowed collision: contact links query a target-free
+field, all other links query the full ESDF. An executed-horizon SQP refines each action chunk under
+the clearance constraint $d(x) - r \ge m$, and a post-check executes or holds it.}
+\label{fig:pipeline}
+\end{figure*}

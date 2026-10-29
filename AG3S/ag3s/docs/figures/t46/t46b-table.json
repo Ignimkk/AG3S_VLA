@@ -1,0 +1,133 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T220712+0900_de2042e9be89_ead5f3483344/verify/T46b/raw/diagnosis.json",
+ "table": [
+  [
+   "",
+   "C1a",
+   "C1aF1",
+   "C1aF1F2"
+  ],
+  [
+   "close 이후 HOLD (전체)",
+   "107",
+   "183",
+   "122"
+  ],
+  [
+   "  그중 uncertified",
+   "37",
+   "130",
+   "118"
+  ],
+  [
+   "  uncertified 의 phase = placed",
+   "37",
+   "130",
+   "118"
+  ],
+  [
+   "  uncertified 의 phase = closing/lift/carry",
+   "0",
+   "0",
+   "0"
+  ],
+  [
+   "  실패 항목: grounding=no_seed (n_clusters 0)",
+   "37",
+   "129",
+   "116"
+  ],
+  [
+   "  실패 항목: no_admissible + label pick",
+   "0",
+   "1",
+   "2"
+  ],
+  [
+   "  그 chunk 의 F1 기록 / 위반 행>0",
+   "0 / 0",
+   "0 / 0",
+   "0 / 0"
+  ],
+  [
+   "placed 도달 run · placed chunk",
+   "16 · 689",
+   "15 · 641",
+   "15 · 646"
+  ],
+  [
+   "placed no_seed run 수",
+   "1",
+   "4",
+   "4"
+  ],
+  [
+   "seed 재조회 일치 (placed chunk)",
+   "689/689",
+   "641/641",
+   "646/646"
+  ],
+  [
+   "인증 술어 재생 일치 (전 chunk)",
+   "1350/1350",
+   "1350/1350",
+   "1350/1350"
+  ],
+  [
+   "W1: no_seed 를 SUBTASK-f 에 포함 → execute",
+   "37",
+   "129",
+   "116"
+  ],
+  [
+   "W1 뒤 close 이후 uncertified (chunk 단위)",
+   "0",
+   "1",
+   "2"
+  ],
+  [
+   "phase-gated F1 (close 뒤 off) 가 바꾸는 uncertified chunk",
+   "-",
+   "0/130",
+   "0/118"
+  ],
+  [
+   "C1a 대비 첫 궤적 분기: window 안 / 분기 pair",
+   "-",
+   "12/12 (F1 applied 12)",
+   "17/18"
+  ]
+ ],
+ "hypotheses": [
+  [
+   "가설",
+   "판정",
+   "근거 (수)"
+  ],
+  [
+   "(a) F1 이 grasp 뒤 held/target 처리와 충돌",
+   "반박",
+   "uncertified in closing/lift/carry 0/0/0; F1 record in HOLD chunks 0/130"
+  ],
+  [
+   "(b) F1 이 non-target 근거를 줄여 미설명 표면",
+   "반박",
+   "failing item = grounding no_seed (seeds all on support, 129/129); field not involved"
+  ],
+  [
+   "(c) C1a 가 일찍 실패해 분모가 작음",
+   "반박",
+   "placed runs C1a 16 vs C1aF1 15; placed chunks 689 vs 641"
+  ],
+  [
+   "(d) 그 밖: placed 뒤 no_seed 인증 공백 + 고착 HOLD",
+   "확인",
+   "no_seed HOLD C1a 37 / C1aF1 129 / F1F2 116; CL2 C0 73, C1bp 70 (F1 없음); W1 replay 129/129 execute"
+  ],
+  [
+   "(d') F1 → placed no_seed run 증가가 계통적인가",
+   "모름",
+   "placed no_seed runs: F1 only 3, C1a only 0, both 1 of 15 pairs (McNemar exact p = 0.25); link only via trajectory divergence"
+  ]
+ ]
+}

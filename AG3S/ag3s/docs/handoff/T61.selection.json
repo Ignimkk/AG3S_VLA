@@ -1,0 +1,303 @@
+{
+ "step": "T61",
+ "frozen_kst": "2026-10-14T23:06:20.597423+09:00",
+ "frozen_by": "session B (ag3s-vla-development-c4) — before any held-out number was read",
+ "git_head": "903ea16764c1697361faf240ec3c986bbd0e9b51",
+ "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T183529+0900_53f3911df197_dd2fad8756a6",
+ "prereg": "AG3S/ag3s/docs/handoff/T61.task.md (commit 95b6586c)",
+ "selected": {
+  "k": 1,
+  "combo": "mean:L10H7",
+  "cells": [
+   "mean:L10H7"
+  ]
+ },
+ "serving_unit": {
+  "query": "action",
+  "denoise": 0,
+  "aggregation": "mean",
+  "cells": [
+   "mean:L10H7"
+  ],
+  "k": 1,
+  "note": "selection unit = query · denoise · aggregation · layer · head (판정 3-4); serving must implement this aggregation, not substitute `last`"
+ },
+ "rule_evidence": {
+  "k_choice": {
+   "chosen_k": 1,
+   "best_k": 1,
+   "means": {
+    "1": 0.6924545309986576,
+    "2": 0.6762383147824413,
+    "3": 0.6853452330214351
+   },
+   "se": {
+    "1": 0.052128843974631904,
+    "2": 0.0577543493805231,
+    "3": 0.0634358933298023
+   },
+   "threshold": 0.6403256870240257,
+   "tests": [],
+   "rule": "one-SE: smallest k with CV mean >= mean_best - SE_best (SE = sd ddof1 / sqrt(n units))"
+  },
+  "cv_scores_per_scene": {
+   "1": [
+    0.8533333333333334,
+    0.6486486486486487,
+    0.5806451612903226,
+    0.6060606060606061,
+    0.7735849056603774
+   ],
+   "2": [
+    0.8533333333333334,
+    0.5675675675675675,
+    0.5806451612903226,
+    0.6060606060606061,
+    0.7735849056603774
+   ],
+   "3": [
+    0.88,
+    0.5675675675675675,
+    0.5806451612903226,
+    0.6060606060606061,
+    0.7924528301886793
+   ]
+  },
+  "cv_combos_per_fold": {
+   "1": [
+    "mean:L12H4",
+    "mean:L10H7",
+    "mean:L10H7",
+    "mean:L10H7",
+    "mean:L10H7"
+   ],
+   "2": [
+    "sum[first:L12H1+mean:L12H4]",
+    "sum[last:L12H3+mean:L10H7]",
+    "sum[mean:L10H7+mean:L12H4]",
+    "sum[mean:L10H7+mean:L12H4]",
+    "sum[mean:L10H7+mean:L12H4]"
+   ],
+   "3": [
+    "sum[first:L12H1+mean:L12H4+mean:L8H2]",
+    "sum[last:L12H3+last:L8H7+mean:L10H7]",
+    "sum[last:L8H7+mean:L10H7+mean:L12H4]",
+    "sum[last:L8H7+mean:L10H7+mean:L12H4]",
+    "sum[last:L8H7+mean:L10H7+mean:L12H4]"
+   ]
+  },
+  "nested_mean": 0.6924545309986576,
+  "cv_mean_ci95": {
+   "1": [
+    0.6924545309986576,
+    0.6044120366701012,
+    0.78284601339014
+   ],
+   "2": [
+    0.6762383147824413,
+    0.5804972127552772,
+    0.7802304946455891
+   ],
+   "3": [
+    0.6853452330214351,
+    0.5804972127552772,
+    0.8000040795512493
+   ]
+  },
+  "units": [
+   "scene1800",
+   "scene1807",
+   "scene0",
+   "scene500",
+   "scene1200"
+  ],
+  "calibration_top10": [
+   "mean:L10H7",
+   "mean:L12H4",
+   "last:L8H7",
+   "mean:L12H6",
+   "last:L12H3",
+   "mean:L8H2",
+   "mean:L8H3",
+   "last:L12H4",
+   "first:L12H1",
+   "last:L10H7"
+  ]
+ },
+ "report_only": {
+  "self_label_selection": {
+   "k": 1,
+   "combo": "mean:L10H7",
+   "cells": [
+    "mean:L10H7"
+   ]
+  },
+  "bootstrap_gt": {
+   "n_boot": 1000,
+   "seed": 5103,
+   "full_sample_top1": "mean:L10H7",
+   "full_sample_top1_p_rank1": 0.731,
+   "rank1_tied_rate": 0.334,
+   "top10_by_p_rank1": [
+    {
+     "cell": "mean:L10H7",
+     "p_rank1": 0.731,
+     "p_top3": 0.848,
+     "mean": 0.6977878643319909,
+     "ci95": [
+      0.6044120366701011,
+      0.7989730906139914
+     ],
+     "full_sample_rank": 1,
+     "exact_p_rank1": 0.7392,
+     "exact_p_top3": 0.84704
+    },
+    {
+     "cell": "last:L12H3",
+     "p_rank1": 0.105,
+     "p_top3": 0.248,
+     "mean": 0.679284626960829,
+     "ci95": [
+      0.5734590895881219,
+      0.8016420811892511
+     ],
+     "full_sample_rank": 5,
+     "exact_p_rank1": 0.0992,
+     "exact_p_top3": 0.25632
+    },
+    {
+     "cell": "last:L12H4",
+     "p_rank1": 0.067,
+     "p_top3": 0.067,
+     "mean": 0.6669999855441121,
+     "ci95": [
+      0.580169612427677,
+      0.7538303586605474
+     ],
+     "full_sample_rank": 8,
+     "exact_p_rank1": 0.05952,
+     "exact_p_top3": 0.05952
+    },
+    {
+     "cell": "noun_target:L8H6",
+     "p_rank1": 0.063,
+     "p_top3": 0.16,
+     "mean": 0.6240839717601737,
+     "ci95": [
+      0.5658378378378378,
+      0.7105196492901911
+     ],
+     "full_sample_rank": 15,
+     "exact_p_rank1": 0.06144,
+     "exact_p_top3": 0.16416
+    },
+    {
+     "cell": "noun_target:L4H2",
+     "p_rank1": 0.023,
+     "p_top3": 0.159,
+     "mean": 0.6320839717601737,
+     "ci95": [
+      0.5858436501017146,
+      0.7128252686925846
+     ],
+     "full_sample_rank": 12,
+     "exact_p_rank1": 0.03072,
+     "exact_p_top3": 0.16384
+    },
+    {
+     "cell": "last:L8H7",
+     "p_rank1": 0.011,
+     "p_top3": 0.442,
+     "mean": 0.6846900323662345,
+     "ci95": [
+      0.5814800137380782,
+      0.8026195982958004
+     ],
+     "full_sample_rank": 3,
+     "exact_p_rank1": 0.00992,
+     "exact_p_top3": 0.43552
+    },
+    {
+     "cell": "last:L9H4",
+     "p_rank1": 0.0,
+     "p_top3": 0.0,
+     "mean": 0.5178967859576502,
+     "ci95": [
+      0.4027518028735314,
+      0.6761220575414124
+     ],
+     "full_sample_rank": 21,
+     "exact_p_rank1": 0.0,
+     "exact_p_top3": 0.0
+    },
+    {
+     "cell": "last:L9H5",
+     "p_rank1": 0.0,
+     "p_top3": 0.0,
+     "mean": 0.5183173625681233,
+     "ci95": [
+      0.34832369025917415,
+      0.6763412235563177
+     ],
+     "full_sample_rank": 20,
+     "exact_p_rank1": 0.0,
+     "exact_p_top3": 0.0
+    },
+    {
+     "cell": "last:L10H7",
+     "p_rank1": 0.0,
+     "p_top3": 0.0,
+     "mean": 0.653174880851083,
+     "ci95": [
+      0.5451163773744419,
+      0.7626195982958004
+     ],
+     "full_sample_rank": 10,
+     "exact_p_rank1": 0.0,
+     "exact_p_top3": 0.0
+    },
+    {
+     "cell": "mean:L8H2",
+     "p_rank1": 0.0,
+     "p_top3": 0.019,
+     "mean": 0.6774173050935073,
+     "ci95": [
+      0.5913080235660881,
+      0.7654094849566547
+     ],
+     "full_sample_rank": 6,
+     "exact_p_rank1": 0.0,
+     "exact_p_top3": 0.0224
+    }
+   ]
+  },
+  "bootstrap_deviation": "T61.task.md fixed the report-only scene bootstrap at B 10000 · seed 6101; the chain ran t51's default (B 1000 · seed 5103). Report-only, not used by the rule",
+  "query_wise_best": "not run by the chain (action-only / noun-only) — reported as missing"
+ },
+ "selection_chain_log": [
+  "2026-10-14T09:36:13+00:00 filter rc=0 wall=33",
+  "2026-10-14T09:36:25+00:00 score2d_gt rc=0 wall=12",
+  "2026-10-14T09:36:53+00:00 score2d_self rc=0 wall=12",
+  "2026-10-14T10:38:23+00:00 score3d rc=0 wall=3690",
+  "2026-10-14T12:50:10+00:00 resume after session restart (ksel_gt interrupted)",
+  "2026-10-14T13:08:07+00:00 ksel_gt rc=0 wall=1077",
+  "2026-10-14T13:34:41+00:00 ksel_self rc=0 wall=1594",
+  "2026-10-14T13:34:44+00:00 bootstrap_gt rc=0 wall=3",
+  "2026-10-14T13:34:44+00:00 chain done"
+ ],
+ "selection_files_sha256": {
+  "select/combined/filter/filter.json": "5b83a8a7e7d51b510cae145bd96bbb0b657158015e9bb9e6b97545c8ab5c6707",
+  "select/combined/gt/bootstrap/bootstrap__scene.json": "08555fca3d9cabafee2956618bb5f7f4a28ba7086e23e8c2336d3bfc6c50f905",
+  "select/combined/gt/ksel/ksel__scene.json": "e8e9a9f82e72932f9c72513b316954b63666bba5d2fd1d79c8ae42682a5de1e1",
+  "select/combined/gt/score2d/score2d__scene.json": "06996b1edcce3d58db6cb871fe23ffffa2391873e16f91de6619e6552349ed63",
+  "select/combined/gt/score3d/score3d__scene.json": "75b6fe99a484f08c38d15cf31bbfd40846c03337e89f61879bb2ed346b88e01a",
+  "select/combined/self/ksel/ksel__scene.json": "a5163b415a1748b5e7d7aa1f92e67c86d5e3a3a9c398442d412b54db23e11906",
+  "select/combined/self/score2d/score2d__scene.json": "5dbd11f7d6767c803cb71e4863e5c50085a0476486e3e544f77525b8a08627b0",
+  "select/combined/self/score3d/score3d__scene.json": "193d6b038b3e04b465c3552058df5d364886abdbf5d7ada012fad7cb19965adc",
+  "select/combined/filter/filter_arrays.npz": "0cdfedd62e8404dd7469a90a961c58ed002af3022b664acaa45bdb342ce803a9",
+  "select/combined/gt/score2d/score2d_arrays__scene.npz": "588af5d72e83419612b1767a169660bcb91a65269d3a5730843fac12958752b8",
+  "select/combined/gt/score3d/score3d_arrays__scene.npz": "92603617e0671d07105f41c0445d1d0cef8cd991e04adbe52f923cd979c3200c",
+  "select/combined/self/score2d/score2d_arrays__scene.npz": "e3ebef2bb823381fb1c442089fcd167c6afd394bf2ec3d9635f4f3065df05b7b",
+  "select/combined/self/score3d/score3d_arrays__scene.npz": "60a4ad1b4dff02f647cef16a208893c7bcc17d60ab3e692fe1c0bab58f0178da"
+ }
+}

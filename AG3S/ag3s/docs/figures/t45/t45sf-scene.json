@@ -1,0 +1,36 @@
+{
+ "C1a_ep3_s31": {
+  "seq": 28,
+  "camera": "zed_left",
+  "n_blocking": 389,
+  "dominant": {
+   "other_fruit": 49,
+   "target": 324,
+   "unattributed": 16
+  },
+  "fruit_displacement_mm": {
+   "apple": 0.21940487382357846,
+   "banana": 61.31667308355841,
+   "orange": 68.52150194192426,
+   "pear": 0.1614714218043668
+  },
+  "n_rows": 216
+ },
+ "C1a_ep104_s1041": {
+  "seq": 15,
+  "camera": "zed_left",
+  "n_blocking": 421,
+  "dominant": {
+   "other_fruit": 120,
+   "target": 212,
+   "unattributed": 89
+  },
+  "fruit_displacement_mm": {
+   "apple": 0.1005315807856954,
+   "banana": 0.02855402710306952,
+   "orange": 0.15202394369875608,
+   "pear": 6.056250631149468
+  },
+  "n_rows": 98
+ }
+}

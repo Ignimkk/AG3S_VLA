@@ -242,6 +242,31 @@ class ClusteringConfig:
     #: clusters the apple ÷ neighbour mean-attention ratio was ≥ 2.2 whenever attention was on the
     #: apple (T30b §F3-4); below 2 the cluster is left whole (`attention_not_discriminative`).
     attention_split_ratio: float = 2.0
+    #: **Which attention the split ratio reads (T44b A4).** `"normalized"` (default, T31b) = the
+    #: normalised per-point attention; `"raw"` = the attention before normalisation
+    #: (`AttentionPointCloud.raw_attention`; a cloud without one falls back to normalised and the
+    #: split record says so). The target candidate is still the largest normalised-attention mass.
+    #: Percentile normalisation saturates the top of the map, so two fruits both in the saturated
+    #: band read ~1:1 (T44M, VLA attention, 34 merged demo frames: 12 mm radius + raw ratio → 24
+    #: target-only clusters vs 20 at the default, non-merged 30/30, no wrong pick). Off by default.
+    attention_split_ratio_source: str = "normalized"
+    #: **Attention partition when the re-cluster finds one component (IFG-SPLIT, 2026-10-20).**
+    #: A neighbour fruit touching the target (apple–banana gap 4–12 mm) stays connected at the
+    #: split radius, so the T31b split ends `one_component` and the target stays merged (IFG-APPLE:
+    #: 4 of 24 scenes, 136–151 mm clusters, 3 failed). Inside those clusters the per-point raw
+    #: attention still separates the fruits (median 0.05–0.18 vs 3e-5–4e-3, AUC 0.86–0.99). True =
+    #: such a cluster is cut by attention instead (two classes of log attention, Otsu, k-NN smoothed;
+    #: the largest-mass connected high-attention part is the target), under the same ratio gate.
+    #: False (default) = the T31b decision, bit for bit.
+    attention_split_partition: bool = False
+    #: The attention partition is taken only if it shortens the cluster's largest extent by at least
+    #: this much (m) — a lone fruit with an unevenly lit side is not cut in two. **0.03**.
+    attention_partition_min_drop: float = 0.03
+    #: **A split target replaces an unsplit anchor (IFG-SPLIT).** Before a grasp, when the held
+    #: object's cluster this frame is the target component of an attention split and the anchor is
+    #: not (it was adopted merged), the split component becomes the anchor instead of counting as a
+    #: hand-occluded subset (T30 F3b `subset_kept_anchor`). False (default) = T30 F3b as is.
+    split_supersedes_anchor: bool = False
     #: **Split the anchor once when a grasp attempt ends (T32b S2).** While `TargetConfirm` is
     #: frozen the split is off and the geometry follows the observation, so the geometry standing
     #: when the freeze is released — the new anchor — can be the apple merged with its neighbour
@@ -285,6 +310,32 @@ class ClusteringConfig:
     #: is the latch's (execution feedback only). T43 W V5 1925 s19253: the apple slipped out at
     #: t 369 with the command at 0.59 and stayed attached to the end. False (default) = bit-identical.
     held_slip_detach: bool = False
+    # T46g — begin
+    #: **T46g (SL5b) — the grasp latch's reach of an unobserved manipulated object rides the hand.**
+    #: True = the caller's grasp latch (`SafePolicy` → `trajopt.grasp_latch.LatchConfig.
+    #: reach_hand_relative`) measures `reach` of an `occluded` / `lost` manipulated object from its
+    #: last observed centroid carried rigidly with the hold link from the state of the frame it was
+    #: observed in (`AG3S.manipulated_seen_state`) to the current state, and `AG3S.attach`'s reach
+    #: gate measures the same point. A `visible` object, the threshold and every other check are
+    #: unchanged. AG3S stores it; the decision is the latch's. False (default) = bit-identical.
+    latch_reach_hand_relative: bool = False
+    # T46g — end
+    #: **IFG-HSR — a closing-kept frame is not an observation for the latch reach.** While the
+    #: gripper closes, `closing_keep_geometry` keeps the pre-closing (on-table) geometry and counts
+    #: the frame as seen, so the reach of a fruit the policy already lifted is measured to the table
+    #: (IFG-CL3 423 · 831 · 936: 123–159 mm on the first lifted request, attach one request late at
+    #: 17–19 cm lift). True (needs `latch_reach_hand_relative`) = such a frame neither re-pins the seen
+    #: state nor counts as visible for the hand-relative reach: the carry starts from the last frame
+    #: that really observed the object. False (default) = T46g as is.
+    latch_reach_kept_unseen: bool = False
+    #: **IFG-HSR2 — the carry starts at the closing start.** The hand-relative reach carries the last
+    #: observed centroid with the hand from the pose of the frame that observed it. Before the fingers
+    #: close the object does not move with the hand, so a pin left during the approach (IFG-10EP 1404:
+    #: pin at request 44, closing at 54 — centre 56 mm off, attach on a wrong place, revoked) carries the
+    #: approach too. True (needs `latch_reach_hand_relative`) = when the latch entered CLOSING after the
+    #: pinned frame, the carry (and the attach snapshot pose) starts from the pose of the request that
+    #: entered CLOSING. False (default) = as before.
+    latch_carry_from_closing: bool = False
     #: **T43 Z6 — cap the held query spheres at attach.** A distance `a` (m) = at attach every held
     #: query sphere (R2 body cover in `sphere` and `segments` mode, or the H2 covering spheres) gets
     #: radius ≤ observed half-width + `a` and a centre within `a` of the observed body centre (pulled
@@ -312,6 +363,15 @@ class ClusteringConfig:
     #: ep1908 / ep1992: 114 → 33 / 112 → 34 points at the first closing chunk, carve ball 59.6 → 39.9
     #: mm, and the attach snapshot (held spheres) a 33-point cap.
     closing_keep_geometry: bool = False
+    #: **IFG-FOLLOW — a kept geometry follows the fruit it stands for.** True = while the pick target
+    #: is latched or closing and nothing is attached, a frame that returns the *kept* geometry
+    #: (`subset_kept_anchor` · `unsplit_kept_anchor` · `closing_kept_geometry` · `occluded`) first
+    #: translates it by a fixed-radius sphere fit of this frame's non-support points near it
+    #: (`TargetConfirm.follow_kept`). The kept rules assume the fruit does not move before the grasp;
+    #: IFG-211-GRASP ep211: the palm pushed the apple 22.7 mm before the closing and 36 mm during it
+    #: while the kept geometry stayed at frame 10 — the target-free layer kept the real apple as
+    #: ambiguous and the authorized finger was pushed off it. Off (default) = bit-identical.
+    kept_geometry_follow: bool = False
     #: **T43 T 3(b) — release an identity the exclusion gate keeps refusing.** An integer N = when
     #: `AG3S._exclusion_gate` refuses the manipulated object because it overlaps the destination on
     #: N consecutive grounding calls (and nothing is frozen), the identity is let go at the start of
@@ -350,6 +410,18 @@ class ClusteringConfig:
     #: `AG3S/ag3s/asset/subtask_probe/kv_L4_v1.npz`. Read by the policy side that computes the
     #: label (`trajopt/attention_policy.AttentionPolicy`); the gate itself only sees probabilities.
     subtask_probe_path: str | None = None
+    #: **T46c A12 (W1) — certify a placed / home `no_seed` frame.** True = after the latch reached
+    #: PLACED, under the confirmed label `home` with `subtask_gate` on, a frame whose grounding is
+    #: `no_seed` (every top-percentile attention seed lies on the support surface, so the
+    #: support-masked seed set is empty) is certified like SUBTASK-f's `no_admissible`: status
+    #: `no_target` ∧ validity `valid` ∧ nothing carved (`types.subtask_no_target`). Certification
+    #: only removes the `uncertified` reason — the field still holds every object at full clearance
+    #: and a violating row still holds. Before PLACED, under `pick` / `place`, with the gate off, or
+    #: with this False nothing changes. Evidence: `T46b.verify.json` (placed `no_seed` HOLD
+    #: 37 / 129 / 116 chunks in C1a / C1a+F1 / C1a+F1+F2). Carried to the certification predicate
+    #: as `metrics["subtask"]["placed_no_seed_certify"] = True` (key absent when False — the
+    #: record and every decision are then bit-identical to before). Default False.
+    placed_no_seed_certify: bool = False
     w_attention: float = 0.7
     w_geometry: float = 0.3
     max_seed_points: int = 4000  # cap on seeds fed to the connectivity search, for latency
@@ -426,6 +498,20 @@ class ClusteringConfig:
                 and math.isfinite(float(sq)) and float(sq) >= 1.0):
             raise AG3SConfigError(
                 f"clustering.attention_split_ratio must be a finite ratio >= 1, got {sq!r}")
+        if self.attention_split_ratio_source not in ("normalized", "raw"):
+            raise AG3SConfigError(
+                f"clustering.attention_split_ratio_source must be 'normalized' or 'raw', "
+                f"got {self.attention_split_ratio_source!r}")
+        for name in ("attention_split_partition", "split_supersedes_anchor", "latch_reach_kept_unseen",
+                     "latch_carry_from_closing"):
+            if not isinstance(getattr(self, name), bool):
+                raise AG3SConfigError(
+                    f"clustering.{name} must be true or false, got {getattr(self, name)!r}")
+        md = self.attention_partition_min_drop
+        if not (isinstance(md, (int, float)) and not isinstance(md, bool)
+                and math.isfinite(float(md)) and float(md) >= 0.0):
+            raise AG3SConfigError(
+                f"clustering.attention_partition_min_drop must be a finite length >= 0, got {md!r}")
         if not isinstance(self.split_anchor_on_release, bool):
             raise AG3SConfigError(
                 f"clustering.split_anchor_on_release must be true or false, "
@@ -439,10 +525,18 @@ class ClusteringConfig:
         if not isinstance(self.subtask_gate, bool):
             raise AG3SConfigError(
                 f"clustering.subtask_gate must be true or false, got {self.subtask_gate!r}")
+        if not isinstance(self.placed_no_seed_certify, bool):
+            raise AG3SConfigError(
+                f"clustering.placed_no_seed_certify must be true or false, "
+                f"got {self.placed_no_seed_certify!r}")
         if not isinstance(self.closing_keep_geometry, bool):
             raise AG3SConfigError(
                 f"clustering.closing_keep_geometry must be true or false, "
                 f"got {self.closing_keep_geometry!r}")
+        if not isinstance(self.kept_geometry_follow, bool):
+            raise AG3SConfigError(
+                f"clustering.kept_geometry_follow must be true or false, "
+                f"got {self.kept_geometry_follow!r}")
         if not isinstance(self.latched_identity_hold, bool):
             raise AG3SConfigError(
                 f"clustering.latched_identity_hold must be true or false, "
@@ -450,6 +544,10 @@ class ClusteringConfig:
         if not isinstance(self.held_slip_detach, bool):
             raise AG3SConfigError(
                 f"clustering.held_slip_detach must be true or false, got {self.held_slip_detach!r}")
+        if not isinstance(self.latch_reach_hand_relative, bool):  # T46g
+            raise AG3SConfigError(
+                f"clustering.latch_reach_hand_relative must be true or false, "
+                f"got {self.latch_reach_hand_relative!r}")
         hc = self.held_cover_cap
         if hc is not None and (isinstance(hc, bool) or not isinstance(hc, (int, float))
                                or not math.isfinite(float(hc)) or float(hc) < 0.0):
@@ -944,6 +1042,51 @@ class EsdfConfig:
     #: 가중치가 이보다 낮아진 복셀은 **다시 미관측**으로 돌린다. 감쇠를 켰을 때 "잊는다" 가
     #: 실제로 뜻하는 것.
     min_weight: float = 0.0
+    #: **AG3S-DYNAMIC-FIELD D1 — 보이는 빈 공간 비우기.** True = 적분 뒤, 각 TSDF 의 점유 voxel
+    #: (표면 띠 안 또는 음수) 을 카메라마다 투영해 그 화소의 관측 depth 가 voxel 깊이보다
+    #: `free_space_carve_margin` 넘게 멀면 (광선이 그 voxel 을 지나갔다) free 로 만든다. 로봇 mask ·
+    #: depth 무효 화소는 판단하지 않는다 (관측 없음 = 그대로). cuRobo 감쇠와 달리 depth 를 본다 —
+    #: 시야 안에서 가려진 물체는 지우지 않는다. TSDF 는 관측 표면의 truncation 띠만 갱신하므로, 그
+    #: 앞의 보이는 빈 공간에 남은 옛 표면이 지금은 지워지지 않는다 (IFG-UNKNOWN: 실패 장면 활성 제약의
+    #: 44.1%). 꺼짐(기본) = 비트 동일.
+    free_space_carve: bool = False
+    #: D1 의 여유 (m). None = 그 TSDF 의 truncation + 한 voxel.
+    free_space_carve_margin: float | None = None
+    #: **AG3S-DYNAMIC-FIELD D2 — 로봇 몸이 차지한 공간 비우기.** True = 이번 프레임 self-filter 로봇 구
+    #: (전신) 를 `robot_free_shrink` 만큼 줄인 부피 안의 TSDF voxel 을 free 로 만든다 (로봇이 지금
+    #: 거기 있으니 다른 물체는 없다). 손에 가려 다시 관측되지 않는 자리 (손이 밀어낸 물체의 옛 자리)
+    #: 를 비운다. 지지면 아래 · 목적지 근처는 빼는 `_held_free_points` 규칙을 따른다. 꺼짐 = 비트 동일.
+    robot_occupied_free: bool = False
+    #: D2 의 구 반지름 축소량 (m). 손가락이 닿은 물체 표면을 지우지 않기 위한 것.
+    robot_free_shrink: float = 0.005
+    #: **AG3S-TASK-DYNAMIC-MAP ① — target 전용 TSDF.** True = manipulated 물체의 pixel (가장 가까운 근거 점이 target
+    #: 점이고 `target_layer_pixel_tol` 안, 지지면 + 미세 voxel 위) 을 정적 TSDF 대신 따로 둔 target TSDF 에 적분한다.
+    #: 본 계층 = min(정적, target), target 없는 계층 = 정적 계층 (공 · ownership 제외 없음). 쥐면 target TSDF 를
+    #: 비우고 쓰지 않는다. 물체 중심이 마지막 reset 때보다 `target_layer_reset_m` 넘게 옮겨지면 다시 만든다 (①-b).
+    #: serving 에서는 `clustering.kept_geometry_follow` 와 함께만 켠다 (`serve_safe`). 꺼짐(기본) = 비트 동일.
+    target_layer: bool = False
+    #: ① 의 pixel · voxel 소유 거리 (m). target 점 간격 (중앙 약 5 mm, p90 약 8 mm, 2026-10-23 기록) 을 덮는 값.
+    target_layer_pixel_tol: float = 0.010
+    #: ①-b 의 이동 판정 (m).
+    target_layer_reset_m: float = 0.010
+    #: **AG3S-TASK-DYNAMIC-MAP ② — 관심 영역 안 보이는 빈 공간 지우기.** True = manipulated 점 · 목적지 점 · 권한 link
+    #: 실행 경로 상자 각각 ± `roi_pad` 안의 점유 voxel 에만 D1 (`free_space_carve`) 판정을 건다. 꺼짐(기본) = 비트 동일.
+    roi_carve: bool = False
+    roi_pad: float = 0.10
+    #: ② 의 판정을 voxel 의 화면 영역 전체로 — 투영 영역 (반 voxel + `roi_carve_footprint_pad_px`) 의 모든 pixel 이 유효하고
+    #: voxel 보다 margin 넘게 뒤를 봤을 때만 지운다. 가장 가까운 pixel 하나로는 물체 가장자리 pixel 이 배경을 보아 가는 물체
+    #: (놓을 곳 기둥 반지름 15 mm) 가장자리가 지워졌다 (task §8a 진단). 꺼짐(기본) = 비트 동일.
+    roi_carve_footprint: bool = False
+    roi_carve_footprint_pad_px: int = 1
+    #: ② 영역 판정에서 robot mask pixel 을 어떻게 셀지: ``block`` (영역에 하나라도 있으면 판정 보류, E3) · ``ignore`` (영역의 robot pixel 은
+    #: 세지 않되 가장 가까운 pixel 자체는 robot 이 아니고 뒤를 봐야 한다 — 손이 가린 것은 여전히 지우지 않는다).
+    roi_carve_footprint_robot: str = "block"
+    ROI_CARVE_FOOTPRINT_ROBOT = ("block", "ignore")
+    #: **AG3S-ROI-CARVE-GPU** — where ② judges: ``cpu`` (기본, numpy · scipy — 점유 voxel 을 host 로 내린다) 또는 ``cuda``
+    #: (같은 판정을 torch 로 GPU 에서 — 점유 voxel · 투영 · 영역 최솟값 filter 가 GPU 에 머물고 개수만 host 로 온다).
+    #: 판정 규칙은 같다 (float64 투영의 마지막 bit 차이만 가능, `roi_carve_profile --compare-gpu` 로 잰다).
+    roi_carve_device: str = "cpu"
+    ROI_CARVE_DEVICE = ("cpu", "cuda")
     #: Recompute the distance transform only inside the changed region, padded by `max_distance`.
     incremental: bool = True
     #: Side of the cube the local update works in, in voxels. Smaller blocks recompute less but
@@ -1041,6 +1184,163 @@ class EsdfConfig:
     #: 걸쳐 남는 것을 줄이고, 절단면 쪽에서는 **지원면 상판의 seed 를 지키는 쪽**으로 작용한다.
     target_ball_pad_voxels: float = 1.0
 
+    #: T44 I1 — `target_free` 계층에서 공 안의 **무엇을** 지우나.
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"ball"` (기본) | T13 그대로 — 공 안 (`z ≥ z_min`) seed 전부. 부호 교정도 공 안 voxel 전부 |
+    #: | `"ball_owned"` | 공은 **외곽 상한**으로 둔 채, 공 안 seed 마다 가장 가까운 target 점 거리 `d_t` 와 non-target 관측점 거리 `d_o` 를 비교해 non-target 쪽 seed 를 **보존** (`curobo_builder._ball_owned_split`) |
+    #:
+    #: `ball_owned` 의 분류 (seed voxel 중심 `c`, 복셀 `vs`):
+    #: `min(d_t, d_o) > owned_max_dist_voxels·vs` → unowned (`owned_unowned` 대로) ·
+    #: `|d_t − d_o| ≤ owned_tie_voxels·vs` → ambiguous (보존) · `d_t < d_o` → 제거 · 아니면 보존.
+    #: 모호·결측에서 공 밖으로 넓히지 않는다 (공이 이미 상한이다).
+    target_exclusion: str = "ball"
+    #: `ball_owned` — `|d_t − d_o|` 가 이 값 (복셀) 이하면 ambiguous (보존 · 기록).
+    owned_tie_voxels: float = 1.0
+    #: `ball_owned` — 두 거리 모두 이 값 (복셀) 보다 멀면 unowned.
+    owned_max_dist_voxels: float = 2.0
+    #: `ball_owned` — unowned seed 를 `"remove"` (기본, 공의 recall 유지) 하나 `"keep"` 하나.
+    owned_unowned: str = "remove"
+    #: **T46 F1 — `ball_owned` 미세 계층의 non-target 근거에서 target 자신의 점을 더 빼는가.**
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"proximity"` (기본) | T44 I1 그대로 — cloud − target `point_indices` (이 cloud 의 것일 때) 또는 target 점에서 미세 voxel 안의 점 − 지원면 (`AG3S._nontarget_points`). 값 비트 동일 |
+    #: | `"surface"` | 위에 더해, 공의 **표면 구 맞춤이 받아들여졌을 때만** (`centre_method == "surface_fit"`) 공 안 (`z ≥ z_min`) 이고 맞춘 구 + `nontarget_shell_voxels` 안인 근거 점을 뺀다 — 단 그 점에서 가장 가까운 target 점 거리 + tie (`owned_tie_voxels`) 가 껍질 밖 근거 점 거리보다 크면 남긴다 (이웃 보호, `curobo_builder.nontarget_surface_evidence`) |
+    #:
+    #: 왜 (`T45TF.verify.json` D-TF): grasp 중 target 기하는 옛 frame 의 anchor 라 `point_indices` 가 비고
+    #: `proximity` (반경 = 미세 voxel 5 mm) 로 떨어진다 (17/17 chunk). fused cloud 의 간격 (fusion voxel 10 mm,
+    #: 최근접 중앙 7.7 mm) 이 그 반경보다 커서 target 표면 cloud 점 667 중 280 이 non-target 근거로 남았다.
+    #: 거친 계층 (`target_free_coarse`) 은 이 값을 읽지 않는다 — 원래 근거 그대로다.
+    nontarget_evidence: str = "proximity"
+    NONTARGET_EVIDENCES = ("proximity", "surface")
+    #: T46 F1 `"surface"` — 맞춘 구 반지름 바깥으로 몇 미세 voxel 까지를 target 표면으로 보나.
+    #: 2.0 (= 10 mm @ 5 mm) 은 fused cloud 의 양자화 (fusion voxel 10 mm) 와 같다. `"proximity"` 에서는 읽지 않는다.
+    nontarget_shell_voxels: float = 2.0
+    #: **T46 F2 — `ball_owned` 의 ambiguous seed (`|d_t − d_o| ≤ tie`) 를** `"keep"` (기본, T44 I1 그대로 —
+    #: 보존) 하나 `"remove"` (target · unowned 처럼 지운다) 하나. 미세 target-free 계층에만 — 거친 계층은 keep 그대로.
+    owned_ambiguous: str = "keep"
+    OWNED_AMBIGUOUS = ("keep", "remove")
+    # AG3S-PRE-CORE-TO-STEMCAP — begin
+    #: **꼭지 덮개 (stem cap) — `ball_owned` 미세 target-free 계층에서 공 위 좁은 원기둥 안의 seed 도 target 으로 지운다**
+    #: (사용자 지시 2026-10-27 23:36 KST, 실험용). 공 (`TargetBall`) 중심 c · 맞춘 반지름 fit_r (`provenance["fit"]["radius_mm"]`) ·
+    #: 반지름 R 에서, seed voxel 중심 p 가 `‖p_xy − c_xy‖ ≤ stem_cap_radius` 이고
+    #: `c_z + stem_cap_bottom_fit_frac · fit_r ≤ p_z ≤ c_z + fit_r + stem_cap_top` (그리고 `p_z ≥ z_min`) 이면 지운다
+    #: (`curobo_builder.stem_cap_mask`).
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"off"` (기본) | 지금 그대로 — 값 · stats · 기록 키 비트 동일 |
+    #: | `"in_ball"` | 원기둥 ∩ 공 (`‖p − c‖ ≤ R`) — offline what-if `cap_in` |
+    #: | `"full"` | 원기둥 전부 (공 제한 없음) — what-if `cap_all` |
+    #:
+    #: `target_exclusion = "ball_owned"` 필수. 거친 target-free 계층 · oracle 경로에는 걸리지 않는다.
+    target_stem_cap: str = "off"
+    TARGET_STEM_CAPS = ("off", "in_ball", "full")
+    #: 꼭지 덮개 — 공 중심 수직축에서의 수평 (base x · y) 반경 (m).
+    stem_cap_radius: float = 0.020
+    #: 꼭지 덮개 — 위 끝 = `c_z + fit_r + stem_cap_top` (m).
+    stem_cap_top: float = 0.025
+    #: 꼭지 덮개 — 아래 끝 = `c_z + stem_cap_bottom_fit_frac · fit_r`.
+    stem_cap_bottom_fit_frac: float = 0.5
+    # AG3S-PRE-CORE-TO-STEMCAP — end
+    #: **T46e A13 — 미세 target-free 계층의 target 범위 (extent) 를 무엇으로 정하나** (DX-01 조건 B, DT-02 extent block).
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"estimated"` (기본) | 지금 그대로 — `target_exclusion` (`ball` · `ball_owned`, + T46 F1 · F2) 의 추정 범위. 값 비트 동일 |
+    #: | `"oracle_visible"` | **시뮬레이터 GT** — client 가 보낸 카메라별 segmentation (`wire.ORACLE_SEG`) 의 depth 점을 이 episode 동안 모은 표면 표본과 truncation 띠 (`runtime.oracle_segmentation.OracleMemory`) 로, **그 물체의 pixel 에서 온 seed** 만 지운다 (`curobo_builder.oracle_visible_split`): 가장 가까운 표본이 그 물체의 보인 표면인 seed (표면 길) ∪ 그 물체 pixel 의 광선이 보인 면 뒤 truncation 안에서만 지나간 칸의 seed (띠 길 — 물체 밑 · 안쪽의 그림자 seed). 이웃 과일 · 지지면 (공의 `z_min` 아래) · crate 의 seed 는 남는다. 공 · ownership 판정을 쓰지 않는다 |
+    #:
+    #: oracle 은 **진단 상한**이다 (제안이 아니다). target-free 계층이 만들어지는 조건 (`target_field_policy`, 지금 manipulated
+    #: 기하가 있고 쥔 것이 없음) · 공 (기록) · 창 · 권한 · 거친 target-free 계층은 그대로 `target_exclusion` 을 따른다.
+    #: segmentation 이 안 오거나 target 표본이 없으면 그 frame 은 `estimated` 로 짓고 이유를 `stats["target_free"]["oracle"]` 에 남긴다.
+    #:
+    #: **IFG-CL1 — `"attention_surface"`**: `oracle_visible` 과 같은 경로 (memory · carving · split · 계층 · 권한) 에 넣는 code 영상을
+    #: client GT 대신 **서버가 attention + depth 로 만든다** (`runtime.attention_surface`, IFG LOCK `top1-only-ns+rm:N`:
+    #: noun L10H7 top-5 seed → 표면 graph → seed 질량 최대 영역 = code 1, 나머지 유효 non-robot pixel = code 2). serve 는
+    #: `--attention-source noun_target:L10H7` 없이는 시작하지 않는다. 영역이 없는 frame (seed · 영역 없음 · 카메라 · attention 없음)
+    #: 은 `estimated` 로 짓고 이유를 `stats["target_free"]["attention_surface"]` 에 남긴다.
+    #:
+    #: **IFG-CL2 — `"attention_surface_hybrid"`**: 지우는 범위는 `ball_owned` (공 + cloud 근거, = `estimated`) 그대로, attention-surface
+    #: (같은 LOCK 선택) 는 **보호에만** 쓴다 (`runtime.attention_surface_hybrid`, `curobo_builder.surface_protect_split`): 공 안 seed 를
+    #: 같은 `ball_owned` 규칙으로 한 번 더 가른다 — target 근거 = 선택 영역 node, non-target 근거 = 선택 밖 · 비지지면 node — 그리고 두 분할
+    #: 모두 지우라는 seed 만 지운다. 선택 영역이 manipulated 물체와 맞지 않는 frame (`surface_hybrid_identity`) · 영역이 없는 frame 은 보호
+    #: 없이 (= `estimated`) 짓고 이유를 `stats["target_free"]["attention_surface_hybrid"]` 에 남긴다. `target_exclusion = "ball_owned"` 필수.
+    #: oracle memory 는 쓰지 않는다 (`oracle_*` 값은 읽지 않는다).
+    target_extent: str = "estimated"
+    TARGET_EXTENTS = ("estimated", "oracle_visible", "attention_surface", "attention_surface_hybrid")
+    #: IFG-CL2 — `attention_surface_hybrid` 의 identity 안전장치: `"both"` (기본) · `"instance"` (manipulated 기하 점의 ≥ ½ 이 선택 node
+    #: 위 — oracle 경로의 `identity_unresolved` 와 같은 규칙) · `"centre"` (선택 영역 중심이 공 안). 다른 extent 에서는 읽지 않는다.
+    surface_hybrid_identity: str = "both"
+    SURFACE_HYBRID_IDENTITIES = ("both", "instance", "centre")
+    #: IFG-CL2b — `attention_surface_hybrid` 의 "other" 근거에서 manipulated 기하 점 (identity guard 가 읽는 그 점) 에서
+    #: `V × timing.fusion_voxel_size` 안의 node 를 뺀다 (선택 영역이 과일 일부만 덮을 때 target 자신의 표면이 target seed 를
+    #: 보호하지 않게). 값은 미리 고정한 1.0 (= 10 mm). `0` = IFG-CL2 그대로 (비트 동일). manipulated 기하가 없으면 빼지 않는다.
+    #: 다른 extent 에서는 읽지 않는다.
+    surface_hybrid_other_exclude_voxels: float = 1.0
+    #: **IFG-CL1 — 로봇 pixel 을 무엇으로 정하나** (TSDF 입력 · `attention_surface` graph 입력).
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"spheres"` (기본) | 지금 그대로 — self-filter 구 (inflation · guard · 쥔 물체 구) 의 depth robot mask. 값 비트 동일 |
+    #: | `"render"` | 로봇 모델 (서버 `--model-xml`) 을 요청 관절 상태로 렌더한 robot-only depth 와 관측 depth 차 ≤ 10 mm 인 pixel (`runtime.robot_render_mask`, IFG R6). TSDF 에는 **구 mask ∪ render mask** 를 뺀다 (쥔 물체 · guard · inflation 은 구 mask 가 계속 맡는다), `attention_surface` graph 는 render mask 만 쓴다 (offline R6 와 같다). AG3S 생성에 `robot_render=` 가 필요하다 |
+    robot_mask: str = "spheres"
+    ROBOT_MASKS = ("spheres", "render")
+    #: `oracle_visible` — seed 후보 = target 표본에서 이 거리 (미세 voxel) 안의 voxel. 6 (= 30 mm @ 5 mm) 은 미세 TSDF
+    #: truncation (`fine_truncation_m` 30 mm) 과 같다 — 보인 면 뒤 음수 띠의 끝에 생기는 내부 seed 까지 닿는다.
+    oracle_max_dist_voxels: float = 6.0
+    #: `oracle_visible` — 지울 물체를 **누가 정하나**.
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"pipeline"` (기본) | 지금 manipulated 기하 (AG3S identity) 가 가리키는 물체의 GT 표본 — identity 는 다른 arm 과 같고 extent 만 GT (DX-01 조건 B) |
+    #: | `"gt"` | 늘 GT target 물체 — identity 와 extent 둘 다 GT 인 미세 target-free 계층 (상한). 공 · 창 · 권한 · 거친 계층의 identity 는 그대로 AG3S 의 것 |
+    oracle_extent_identity: str = "pipeline"
+    ORACLE_EXTENT_IDENTITIES = ("pipeline", "gt")
+
+    #: **T44c A5 — target 을 지운 거친 계층 (`coarse_no_target`) 을 한 겹 더 만들고 target-free 질의에
+    #: 합성한다.** 기본 `False` = 예전 그대로 (값 비트 동일, 계층을 만들지도 않는다).
+    #:
+    #: 왜: target-free 질의는 창 안에서 `min(f, max(d, b))` 라 거친 계층의 음수 (distractor 내부) 가
+    #: 버려진다 — 미세 TSDF (truncation 30 mm) 가 못 본 내부에서 `f ≥ 0` 이다 (`T44E2b.verify.json`).
+    #: 켜면 창 안 = `min(f, 정적, max(c_free, d), max(d, b))` (`CuroboEsdfField.target_free_distance`).
+    #: `c_free` 는 **target 을 뺀** 거친 계층이다 — main coarse 를 그대로 넣으면 target 이 다시 장애물로
+    #: 산다. 제외는 미세 계층과 같은 공 · 같은 `target_exclusion` 을 **m 단위로** 거친 복셀에 적용하고,
+    #: 거친 복셀 하나에 non-target 관측이 함께 있으면 그 seed 를 보존한다 (`curobo_builder`
+    #: `_coarse_ball_exclusion`). 공이 없는 프레임 (점 제외로 물러난 프레임) 에는 만들지 않는다.
+    target_free_coarse: bool = False
+    #: **T44c A6 — `coarse_no_target` 의 부호 교정 아래 한계** (`target_free_coarse` 가 켜졌을 때만 쓴다).
+    #:
+    #: | 값 | 뜻 |
+    #: |---|---|
+    #: | `"plane"` (기본, T44c A7) | seed guard 는 그대로 두고 (테이블 seed 보존), 부호 교정만 공의 `z_min` (미세 계층과 같은 m 값 = 지원면 + 여유) 까지 — 공유 영역 제외 · target 쪽 non-seed 만 (`curobo_builder._coarse_plane_band_sign`) |
+    #: | `"guard"` | A5 그대로 — seed 제거 guard (지원면 + max(여유, 거친 voxel) = +20 mm) 위만 부호 교정. 그 아래 target 바닥 내부가 음수로 남는다 (`T44c.verify.json` target 내부 음수 11,180 — 사용자 조건 6 위반). 비교용 선택지 |
+    #:
+    #: T44c A7 (사용자 판정 2026-10-10): coarse 를 켜면 기본이 `"plane"` 이다. `target_free_coarse` 가
+    #: off 이면 이 값은 읽히지 않는다 (거친 target-free 계층을 만들지 않는다) — off 는 비트 동일.
+    #: A5 기록 (이 키 없이 coarse on) 을 다시 돌릴 때는 `"guard"` 를 명시해야 같다.
+    target_free_coarse_sign_floor: str = "plane"
+    TARGET_FREE_COARSE_SIGN_FLOORS = ("guard", "plane")
+    #: **T44e A8 — `coarse_no_target` 에 지원면 (table) seed 를 넣는가** (`target_free_coarse` 가 켜졌을 때만 쓴다).
+    #:
+    #: | 값 | 뜻 |
+    #: |---|---|
+    #: | `"keep"` (기본) | T44c A5–A7 그대로 — 테이블 seed 가 거친 계층에 남는다 (seed guard = 지원면 + 20 mm) |
+    #: | `"exclude"` | 공 아래 지원면 (`AG3S._support_plane_z` 가 고르는 면) 의 seed 를 거친 계층에서 지운다 — 그 면의 inlier 점 근거가 있고 (`curobo_builder._coarse_support_exclusion`), 면에서 seed 띠 (0.9 · 거친 voxel) 안이며, non-target 관측점이 띠 안에 없는 seed. 공의 seed guard 는 공의 `z_min` (미세와 같은 m 값) 으로 내린다 — guard 는 테이블 seed 를 지키려던 것이다. 테이블은 미세 `f` 와 창 밖 `d` 가 답한다 |
+    #:
+    #: 왜 (사용자 판정 2026-10-11, `T44dA.verify.json` Q1): 거친 계층의 테이블 seed (표면 ±18 mm 가 값 0) 가 공 아래
+    #: target-free 거리의 zero level 을 0 → 11.5 mm 로 들어 올려 TO 가 손을 들었다 (C1b 파지 7/18).
+    #: 기본 `"keep"` 은 비트 동일이다 — `target_free_coarse` off 이거나 keep 이면 이 값은 아무것도 바꾸지 않는다.
+    #:
+    #: **T44e A8b — `"exclude_target"`** (사용자 판정 2026-10-11 "이웃 과일 아래 support 만 남김"): `"exclude"` 와 같은 지원면
+    #: seed 중 **target 발자국 안 · non-target 발자국 밖** 의 것만 지운다 (`curobo_builder._coarse_support_footprints`).
+    #: 발자국 = 지원면 위 그림자 — target 은 공 원판 (반지름 + 팽창) ∪ target 점, non-target 은 지원면 위
+    #: `support_surface.distance_threshold` 초과 관측점; 팽창은 둘 다 `√2 · 거친 voxel` (trilinear 읽기의 평면 대각 도달).
+    #: 겹치면 남긴다. 그 밖의 지원면 seed 도 남는다. A8 smoke: `"exclude"` 는 distractor 바닥 띠 (지원면 위 0–15 mm) 를 off 수준으로 풀었다.
+    target_free_coarse_support: str = "keep"
+    TARGET_FREE_COARSE_SUPPORTS = ("keep", "exclude", "exclude_target")
+
     #: 미세 창(과 target 없는 창)을 **어디에** 놓나 (T21, 지침 §5.1). cuRobo 의 ESDF 격자 shape 이
     #: 계층마다 같아서 창의 **크기**는 고정이다 (128³ × `fine_voxel_size`) — 정하는 것은 위치다.
     #:
@@ -1062,6 +1362,8 @@ class EsdfConfig:
 
     UNKNOWN_POLICIES = ("free", "occupied")
     FINE_WINDOW_PLACEMENTS = ("hand_swept", "target_centroid")
+    TARGET_EXCLUSIONS = ("ball", "ball_owned")
+    OWNED_UNOWNED = ("remove", "keep")
     EXCLUDE_TARGET = ("auto", "always", "never")
     BACKENDS = ("legacy", "curobo")
 
@@ -1092,6 +1394,101 @@ class EsdfConfig:
             raise AG3SConfigError(
                 "esdf.attached_sign_threshold_voxels 는 0 이상이어야 합니다: "
                 f"{self.attached_sign_threshold_voxels}")
+        if self.target_exclusion not in self.TARGET_EXCLUSIONS:
+            raise AG3SConfigError(
+                f"esdf.target_exclusion 는 {self.TARGET_EXCLUSIONS} 중 하나여야 합니다: "
+                f"{self.target_exclusion!r}")
+        if self.owned_unowned not in self.OWNED_UNOWNED:
+            raise AG3SConfigError(
+                f"esdf.owned_unowned 는 {self.OWNED_UNOWNED} 중 하나여야 합니다: "
+                f"{self.owned_unowned!r}")
+        if not float(self.owned_tie_voxels) >= 0.0:
+            raise AG3SConfigError(
+                f"esdf.owned_tie_voxels 는 0 이상이어야 합니다: {self.owned_tie_voxels}")
+        if not float(self.owned_max_dist_voxels) > 0.0:
+            raise AG3SConfigError(
+                f"esdf.owned_max_dist_voxels 는 양수여야 합니다: {self.owned_max_dist_voxels}")
+        # T46 F1 · F2
+        if self.nontarget_evidence not in self.NONTARGET_EVIDENCES:
+            raise AG3SConfigError(
+                f"esdf.nontarget_evidence 는 {self.NONTARGET_EVIDENCES} 중 하나여야 합니다: "
+                f"{self.nontarget_evidence!r}")
+        if not (math.isfinite(float(self.nontarget_shell_voxels))
+                and float(self.nontarget_shell_voxels) > 0.0):
+            raise AG3SConfigError(
+                f"esdf.nontarget_shell_voxels 는 유한한 양수여야 합니다: {self.nontarget_shell_voxels}")
+        if self.owned_ambiguous not in self.OWNED_AMBIGUOUS:
+            raise AG3SConfigError(
+                f"esdf.owned_ambiguous 는 {self.OWNED_AMBIGUOUS} 중 하나여야 합니다: "
+                f"{self.owned_ambiguous!r}")
+        # AG3S-PRE-CORE-TO-STEMCAP — begin
+        if self.target_stem_cap not in self.TARGET_STEM_CAPS:
+            raise AG3SConfigError(
+                f"esdf.target_stem_cap 는 {self.TARGET_STEM_CAPS} 중 하나여야 합니다: {self.target_stem_cap!r}")
+        for name, lo_ok in (("stem_cap_radius", lambda x: x > 0.0), ("stem_cap_top", lambda x: x >= 0.0),
+                            ("stem_cap_bottom_fit_frac", lambda x: True)):
+            v = getattr(self, name)
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(float(v)) \
+                    or not lo_ok(float(v)):
+                raise AG3SConfigError(f"esdf.{name} 가 올바르지 않습니다 (radius > 0 · top ≥ 0 · 유한): {v!r}")
+        if self.target_stem_cap != "off":
+            if self.target_exclusion != "ball_owned":
+                raise AG3SConfigError(
+                    "esdf.target_stem_cap 은 ball_owned 미세 target-free 계층에 거는 것입니다 — "
+                    f"esdf.target_exclusion='ball_owned' 와 함께 주십시오 (받은 값 {self.target_exclusion!r})")
+            if self.target_extent in ("oracle_visible", "attention_surface"):
+                raise AG3SConfigError(
+                    f"esdf.target_extent={self.target_extent!r} 는 미세 target-free 계층의 분할을 oracle 경로로 대신합니다 — "
+                    "꼭지 덮개 (target_stem_cap) 는 ball_owned 분할에만 걸리므로 함께 두면 효과가 없습니다")
+        # AG3S-PRE-CORE-TO-STEMCAP — end
+        # T46e A13
+        if self.target_extent not in self.TARGET_EXTENTS:
+            raise AG3SConfigError(
+                f"esdf.target_extent 는 {self.TARGET_EXTENTS} 중 하나여야 합니다: {self.target_extent!r}")
+        if not (isinstance(self.oracle_max_dist_voxels, (int, float))
+                and not isinstance(self.oracle_max_dist_voxels, bool)
+                and math.isfinite(float(self.oracle_max_dist_voxels))
+                and float(self.oracle_max_dist_voxels) > 0.0):
+            raise AG3SConfigError(
+                f"esdf.oracle_max_dist_voxels 는 유한한 양수여야 합니다: {self.oracle_max_dist_voxels!r}")
+        if self.oracle_extent_identity not in self.ORACLE_EXTENT_IDENTITIES:
+            raise AG3SConfigError(
+                f"esdf.oracle_extent_identity 는 {self.ORACLE_EXTENT_IDENTITIES} 중 하나여야 합니다: "
+                f"{self.oracle_extent_identity!r}")
+        if self.robot_mask not in self.ROBOT_MASKS:
+            raise AG3SConfigError(
+                f"esdf.robot_mask 는 {self.ROBOT_MASKS} 중 하나여야 합니다: {self.robot_mask!r}")
+        # IFG-CL2
+        if self.surface_hybrid_identity not in self.SURFACE_HYBRID_IDENTITIES:
+            raise AG3SConfigError(
+                f"esdf.surface_hybrid_identity 는 {self.SURFACE_HYBRID_IDENTITIES} 중 하나여야 합니다: "
+                f"{self.surface_hybrid_identity!r}")
+        v = self.surface_hybrid_other_exclude_voxels   # IFG-CL2b
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(float(v)) or float(v) < 0.0:
+            raise AG3SConfigError(
+                f"esdf.surface_hybrid_other_exclude_voxels 는 유한한 0 이상의 수여야 합니다: {v!r}")
+        if self.target_extent == "attention_surface_hybrid" and self.target_exclusion != "ball_owned":
+            raise AG3SConfigError(
+                "esdf.target_extent='attention_surface_hybrid' 는 ball_owned 분할에 보호를 거는 것입니다 — "
+                f"esdf.target_exclusion='ball_owned' 와 함께 주십시오 (받은 값 {self.target_exclusion!r})")
+        if self.target_extent in ("oracle_visible", "attention_surface") and (
+                self.nontarget_evidence != "proximity" or self.owned_ambiguous != "keep"):
+            # F1 · F2 바꾸는 것은 `ball_owned` 미세 계층의 분할뿐이고, oracle 이 그 분할을 대신한다 — 효과 없는 설정.
+            raise AG3SConfigError(
+                f"esdf.target_extent={self.target_extent!r} 는 미세 target-free 계층의 분할을 oracle 경로로 대신합니다 — "
+                "T46 F1 (nontarget_evidence) · F2 (owned_ambiguous) 는 그 분할에만 걸리므로 함께 두면 효과가 없습니다: "
+                f"nontarget_evidence={self.nontarget_evidence!r}, owned_ambiguous={self.owned_ambiguous!r}")
+        if not isinstance(self.target_free_coarse, bool):
+            raise AG3SConfigError(
+                f"esdf.target_free_coarse 는 true 또는 false 여야 합니다: {self.target_free_coarse!r}")
+        if self.target_free_coarse_sign_floor not in self.TARGET_FREE_COARSE_SIGN_FLOORS:
+            raise AG3SConfigError(
+                f"esdf.target_free_coarse_sign_floor 는 {self.TARGET_FREE_COARSE_SIGN_FLOORS} 중 하나여야 "
+                f"합니다: {self.target_free_coarse_sign_floor!r}")
+        if self.target_free_coarse_support not in self.TARGET_FREE_COARSE_SUPPORTS:
+            raise AG3SConfigError(
+                f"esdf.target_free_coarse_support 는 {self.TARGET_FREE_COARSE_SUPPORTS} 중 하나여야 "
+                f"합니다: {self.target_free_coarse_support!r}")
         for name in ("fine_voxel_size", "tsdf_voxel_size"):
             v = getattr(self, name)
             if v is not None and float(v) <= 0.0:
@@ -1109,6 +1506,39 @@ class EsdfConfig:
                 raise AG3SConfigError(f"esdf.{name} 는 (0, 1] 이어야 합니다: {v}")
         if self.min_weight < 0.0:
             raise AG3SConfigError(f"esdf.min_weight 는 0 이상이어야 합니다: {self.min_weight}")
+        # AG3S-DYNAMIC-FIELD D1 · D2
+        for name in ("free_space_carve", "robot_occupied_free"):
+            if not isinstance(getattr(self, name), bool):
+                raise AG3SConfigError(f"esdf.{name} 는 true 또는 false 여야 합니다: {getattr(self, name)!r}")
+        if self.free_space_carve_margin is not None and not (
+                math.isfinite(float(self.free_space_carve_margin)) and float(self.free_space_carve_margin) > 0.0):
+            raise AG3SConfigError(
+                f"esdf.free_space_carve_margin 는 양수이거나 None 이어야 합니다: {self.free_space_carve_margin}")
+        if not (math.isfinite(float(self.robot_free_shrink)) and float(self.robot_free_shrink) >= 0.0):
+            raise AG3SConfigError(f"esdf.robot_free_shrink 는 0 이상이어야 합니다: {self.robot_free_shrink}")
+        if (self.free_space_carve or self.robot_occupied_free) and self.backend != "curobo":
+            raise AG3SConfigError("esdf.free_space_carve · robot_occupied_free 는 curobo backend 의 TSDF 에만 걸린다")
+        # AG3S-TASK-DYNAMIC-MAP ① · ②
+        if not isinstance(self.roi_carve_footprint_pad_px, int) or isinstance(self.roi_carve_footprint_pad_px, bool) \
+                or self.roi_carve_footprint_pad_px < 0:
+            raise AG3SConfigError(f"esdf.roi_carve_footprint_pad_px 는 0 이상의 정수여야 합니다: {self.roi_carve_footprint_pad_px!r}")
+        if self.roi_carve_footprint_robot not in self.ROI_CARVE_FOOTPRINT_ROBOT:
+            raise AG3SConfigError(f"esdf.roi_carve_footprint_robot 는 {self.ROI_CARVE_FOOTPRINT_ROBOT} 중 하나여야 합니다: {self.roi_carve_footprint_robot!r}")
+        if self.roi_carve_footprint and not self.roi_carve:
+            raise AG3SConfigError("esdf.roi_carve_footprint 는 esdf.roi_carve 의 판정 방식이다 — roi_carve 와 함께 켠다")
+        if self.roi_carve_device not in self.ROI_CARVE_DEVICE:
+            raise AG3SConfigError(f"esdf.roi_carve_device 는 {self.ROI_CARVE_DEVICE} 중 하나여야 합니다: {self.roi_carve_device!r}")
+        if self.roi_carve_device != "cpu" and not self.roi_carve:
+            raise AG3SConfigError("esdf.roi_carve_device 는 esdf.roi_carve 의 실행 위치다 — roi_carve 와 함께 켠다")
+        for name in ("target_layer", "roi_carve", "roi_carve_footprint"):
+            if not isinstance(getattr(self, name), bool):
+                raise AG3SConfigError(f"esdf.{name} 는 true 또는 false 여야 합니다: {getattr(self, name)!r}")
+        for name in ("target_layer_pixel_tol", "target_layer_reset_m", "roi_pad"):
+            v = float(getattr(self, name))
+            if not (math.isfinite(v) and v > 0.0):
+                raise AG3SConfigError(f"esdf.{name} 는 양수여야 합니다: {getattr(self, name)!r}")
+        if (self.target_layer or self.roi_carve) and self.backend != "curobo":
+            raise AG3SConfigError("esdf.target_layer · roi_carve 는 curobo backend 의 TSDF 에만 걸린다")
         if self.voxel_size <= 0.0:
             raise AG3SConfigError(f"esdf.voxel_size must be > 0, got {self.voxel_size}")
         if self.truncation_voxels <= 0.0:
@@ -1196,8 +1626,26 @@ class ContactConfig:
     phase_rules: dict[str, PhaseRule] = dataclasses.field(
         default_factory=lambda: dict(DEFAULT_TARGET_PHASE_RULES)
     )
+    #: **T44e A9 — 접촉 권한이 없는 link 이 manipulated target 을 피하는 여유 (ESDF 경로).**
+    #:
+    #: | 값 | 뜻 |
+    #: |---|---|
+    #: | `"full"` (기본) | 지금 그대로 — 그 행의 최근접 표면이 target 이면 (`|d − d_object| ≤ voxel`) `manipulated_link_margin` 의 그 행 값 `full_margin(TARGET)` (= `geometry.safety_margin`, 50 mm) |
+    #: | `"obstacle"` | target 을 **일반 obstacle 과 같은 여유**로 피한다 — trajopt 가 그 행을 target 판정 (`is_object` · `_obstacle_rows` 의 target class) 에서 빼므로 obstacle 행과 같은 규칙 (`esdf_margin`, `obstacle_margin > 0` 이면 `max(esdf_margin, obstacle_margin)`) 을 받는다 |
+    #:
+    #: 접촉 금지는 어느 쪽이든 그대로다 (`safe_policy` verdict 의 `unauthorized_link`). 권한 link 의 phase 여유,
+    #: `collision.target_permission_strict`, 쥔 뒤 (carry) 의 규칙은 바꾸지 않는다 — 쥔 물체가 있으면 이 값은 읽히지 않는다.
+    #: primitive 경로 (`margin_matrix`) 는 이미 같다: 비권한 link 의 TARGET 칸 = `OBJECT` 칸 = `safety_margin`.
+    #: 왜 (사용자 판정 2026-10-11, `T44dA.verify.json` Q2): `--links arms` 에서 `link_*_arm_5` 가 target 앞 50 mm 를 요구해
+    #: 손이 target 에 못 갔다 (C2 0/18).
+    nonauthorized_target_margin: str = "full"
+    NONAUTHORIZED_TARGET_MARGINS = ("full", "obstacle")
 
     def validate(self) -> None:
+        if self.nonauthorized_target_margin not in self.NONAUTHORIZED_TARGET_MARGINS:
+            raise AG3SConfigError(
+                f"contact.nonauthorized_target_margin 은 {self.NONAUTHORIZED_TARGET_MARGINS} 중 하나여야 "
+                f"합니다: {self.nonauthorized_target_margin!r}")
         for name, rule in self.phase_rules.items():
             Phase.parse(name)  # raises on an unknown phase name
             rule.validate(name)
@@ -1231,7 +1679,12 @@ class ContactConfig:
 
 #: `ConstraintConfig.target_field_policy` 의 선택지. **첫 항목이 기본값이고 그것이 지금까지의
 #: 동작이다.** 문자열을 두 곳에 박으면 갈라지므로 parser 도 이 목록을 본다.
-TARGET_FIELD_POLICIES: tuple[str, ...] = ("relax", "exclude_authorized", "exclude_all")
+#: T46f A14 — `"none"` (맨 뒤 — 기본은 그대로 `relax`): **예외 없음.** 쥐지 않은 target 을 모든 link 이 일반 obstacle
+#: 로 본다 — target-free 계층도, 권한 link 의 마진 완화도 없다 (DX-04 조건 ①).
+TARGET_FIELD_POLICIES: tuple[str, ...] = ("relax", "exclude_authorized", "exclude_all", "none")
+
+#: target 이 빠진 계층 (target-free layer) 을 읽는 정책. 나머지 (`relax` · `none`) 는 그 계층을 만들지 않는다.
+TARGET_FREE_POLICIES: tuple[str, ...] = ("exclude_authorized", "exclude_all")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1278,6 +1731,7 @@ class ConstraintConfig:
     #: | `"relax"` | target 은 필드에 그대로 있고 `manipulated_link_margin` 으로 마진만 완화한다 |
     #: | `"exclude_authorized"` | 접촉 권한이 있는 link 의 구만 **target 이 빠진 계층**에 거리를 묻는다 |
     #: | `"exclude_all"` | 모든 제약 구가 target 이 빠진 계층에 묻는다 |
+    #: | `"none"` (T46f A14) | **예외 없음** — target 은 필드에 그대로, 어느 link 도 마진 완화 · target-free 조회 · verdict 의 허용 접촉을 받지 않는다 (쥐지 않은 동안). 모든 link 이 target 을 일반 obstacle 로 (여유는 `contact.nonauthorized_target_margin` 의 비권한 값) |
     #:
     #: **왜 마진으로는 안 되는가.** 제약은 `d − r ≥ m` 이고 `m ≥ 0` 이라 표면 안쪽을 허용할 수
     #: 없다. 성공한 shadow 궤적의 손끝 구는 사과 표면을 −17.96 mm 관통하므로, `margin = 0`
@@ -1297,8 +1751,8 @@ class ConstraintConfig:
 
     @property
     def excludes_target_from_field(self) -> bool:
-        """target 없는 계층이 **필요한가**. 기본 정책에서는 `False` 이고 추가 비용이 0 이다."""
-        return self.target_field_policy != TARGET_FIELD_POLICIES[0]
+        """target 없는 계층이 **필요한가**. 기본 정책 (`relax`) 과 `none` 에서는 `False` 이고 추가 비용이 0 이다."""
+        return self.target_field_policy in TARGET_FREE_POLICIES
 
     def validate(self) -> None:
         if self.target_field_policy not in TARGET_FIELD_POLICIES:
@@ -1563,5 +2017,6 @@ __all__ = [
     "ProfilingConfig",
     "SupportSurfaceConfig",
     "TARGET_FIELD_POLICIES",
+    "TARGET_FREE_POLICIES",
     "TimingConfig",
 ]

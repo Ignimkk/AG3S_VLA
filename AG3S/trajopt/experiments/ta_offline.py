@@ -31,6 +31,15 @@ with the T43 HM classification), so carry and crate-entry chunks are re-solved t
 | servo state (evaluator only) | `ServoObserver` propagated through the recorded `exec_feedback` in chunk order (`servo.py`) |
 | target (outward, evaluator only) | `target_centroid` of chunks with a target and nothing held |
 
+T46 variants `TF0` · `F1` · `F2` · `F1F2` replace only the **fine target-free layer** with the offline replay
+(`target_free_replay.rebuild_target_free`: `TF0` = the record's settings, `F1` = `nontarget_evidence surface`,
+`F2` = `owned_ambiguous remove`); they solve and are measured on that scene, and record the replay counts
+(`target_free_replay`) and the verdict rows on the recorded field (`n_collision_rows_recorded_field`).
+T46c variants `W0` · `W1` · `F1W1` hand the optimizer the certification re-asked on the chunk's record
+(`certification_replay.certified`: `W0` = the recorded rule, `W1` = `--placed-no-seed-certify`; `F1W1`
+also replays `F1`'s layer) instead of `True`, and record it (`certification`). The per-chunk verdict
+replay over a whole closed-loop directory (no TO re-solve) is `certification_replay`.
+
 Open loop: every chunk starts from the recorded state with the recorded (V8) history — a variant's
 own earlier output does not feed its next chunk (continuity · B · C history · servo state).
 
@@ -140,6 +149,13 @@ _CAP = lambda n: {"qp": {"max_iter": int(n), "accept_max_iter": True}}  # noqa: 
 _IT2 = {"sqp": {"max_iterations": 2, "min_iterations": 2}}
 _ILP = {"_server_args": ["--finger-cover-solver", "ilp"]}
 _HM = {"collision": {"esdf_host_mirror": True}}
+#: T45 A10 — palm body spheres (`--palm-cover on`) on the solver's own robot model.
+_PC = {"_server_args": ["--palm-cover", "on"]}
+#: AG3S-PRE-CORE-TO SC — palm outer shell spheres (`--palm-shell on`) on the solver's own robot model.
+_PS = {"_server_args": ["--palm-shell", "on"]}
+#: AG3S-PRE-CORE-TO SCM — palm shell + its own obstacle margin 5 mm (`--palm-shell-margin 5`): the solver's robot model
+#: (server flags, also its scene) and its config carry the same value.
+_PSM5 = {"_server_args": ["--palm-shell", "on", "--palm-shell-margin", "5"], "collision": {"palm_shell_margin": 0.005}}
 
 #: T43 TP — compute-time candidates, each on top of V11AB (`A16qB20`). `fe` (`sqp.fast_eval`) is
 #: bit-identical, so it is in every candidate below `TPfe` only to make the offline pass faster.
@@ -174,6 +190,28 @@ VARIANTS.update({
     "TPwi_e3n_cap1k_hm": _tp(_FE, _WI, _E3N, _CAP(1000), _HM),
     "TPwi_e3n_cap1k_wl2_hm": _tp(_FE, _WI, _E3N, _CAP(1000), _IT2, _HM,
                                  {"sqp": {"warm_start_lookahead": True}}),
+    # T45 A10 — the recorded server config with `--palm-cover on` (V-T45 offline TO time / grasp)
+    "PC": dict(_PC),
+    # AG3S-PRE-CORE-TO SC — the recorded server config with `--palm-shell on`
+    "PS": dict(_PS),
+    # AG3S-PRE-CORE-TO SCM — `--palm-shell on --palm-shell-margin 5`
+    "PSM5": {k: (dict(v) if isinstance(v, dict) else list(v)) for k, v in _PSM5.items()},
+    # T46 — the recorded server config with the fine target-free layer replayed offline
+    # (`target_free_replay.rebuild_target_free`): `TF0` = the record's own settings (the control: a
+    # variant minus TF0 is the option alone), `F1` = `--nontarget-evidence surface`, `F2` =
+    # `--owned-ambiguous remove`, `F1F2` = both. Chunks without a `ball_owned` layer keep the record.
+    "TF0": {"_target_free": {}},
+    "F1": {"_target_free": {"nontarget_evidence": "surface"}},
+    "F2": {"_target_free": {"owned_ambiguous": "remove"}},
+    "F1F2": {"_target_free": {"nontarget_evidence": "surface", "owned_ambiguous": "remove"}},
+    # T46c A12 — the geometry certification handed to the optimizer is re-asked on the chunk's record
+    # (`certification_replay.certified`) instead of `True`: `W0` = the recorded rule (the control),
+    # `W1` = `--placed-no-seed-certify`, `F1W1` = `F1`'s replayed target-free layer + `W1`. An
+    # uncertified chunk is demoted by the optimizer (`sqp`: safe status → violated), as online.
+    "W0": {"_certify": {"placed_no_seed_certify": None}},
+    "W1": {"_certify": {"placed_no_seed_certify": True}},
+    "F1W1": {"_target_free": {"nontarget_evidence": "surface"},
+             "_certify": {"placed_no_seed_certify": True}},
 })
 
 
@@ -223,6 +261,15 @@ def build_robot(args):
     fc = serve_safe.finger_cover_options(args)
     if fc:
         cover["finger_cover"] = fc
+    pc = serve_safe.palm_cover_options(args)            # T45 A10 (off → no key)
+    if pc:
+        cover["palm_cover"] = pc
+    wc = serve_safe.wrist_cover_options(args)          # T46f A14 (--links gripper_wrist only)
+    if wc:
+        cover["wrist_cover"] = wc
+    ps = serve_safe.palm_shell_options(args)           # AG3S-PRE-CORE-TO SC (off → no key)
+    if ps:
+        cover["palm_shell"] = ps
     robot = build_constraint_robot_model(
         scene, link_filter=serve_safe.constraint_link_filter(args.links),
         sphere_options=serve_safe.sphere_options(args), **cover)
@@ -234,6 +281,51 @@ def build_robot(args):
 def variant_server_args(name: str) -> tuple:
     """T43 TP — extra server flags of a variant (its own robot model), `()` for the recorded one."""
     return tuple(VARIANTS[name].get("_server_args", ()))
+
+
+def variant_target_free(name: str) -> Optional[dict]:
+    """T46 — a variant's `rebuild_target_free` keyword arguments, or None (the recorded layer)."""
+    tf = VARIANTS[name].get("_target_free")
+    return None if tf is None else dict(tf)
+
+
+def variant_certify(name: str) -> Optional[dict]:
+    """T46c A12 — a variant's `certification_replay.record_from_summary` keyword arguments, or None
+    (every chunk certified, the harness default since T43 TA)."""
+    c = VARIANTS[name].get("_certify")
+    return None if c is None else dict(c)
+
+
+def target_free_scenes(inp: dict, spec: dict) -> tuple[Any, Any, dict]:
+    """T46 — `(scene, hm_scene, info)` of chunk `inp` with its fine target-free layer replayed under `spec`
+    (`target_free_replay.rebuild_target_free`). The coarse / fine main layers, the destination label and
+    every other scene input are the recorded ones; a chunk without a `ball_owned` layer is returned as is
+    (`info["replayed"] = False`). `info` = the replay's counts / evidence / record differences."""
+    import dataclasses
+
+    from AG3S.ag3s.fields.curobo_field import layer_from_arrays
+    from AG3S.trajopt.experiments import target_free_replay as TFR
+
+    z, s = inp["z"], inp["summary"]
+    rep = TFR.rebuild_target_free(z, s, **spec)
+    if rep is None:
+        return inp["scene"], inp["hm_scene"], {"replayed": False}
+    base = inp["scene"].esdf
+    inner = base._field if isinstance(base, _DestinationLabels) else base
+    free = layer_from_arrays(rep["values"].astype(np.float16), rep["origin"], rep["voxel_size"])
+    # every other field input (main layers, outside distance, a recorded coarse free layer) as recorded
+    field = dataclasses.replace(inner, target_free_layers=(free,))
+    if isinstance(base, _DestinationLabels):
+        dest = inp["dest"]
+        field = _DestinationLabels(field, dest["aabb_min"], dest["aabb_max"], str(dest["label"]))
+    scene = dataclasses.replace(inp["scene"], esdf=field)
+    hm_scene = (None if inp["hm_scene"] is None
+                else dataclasses.replace(inp["hm_scene"], esdf=field))
+    info = {"replayed": True, "counts": rep["counts"], "evidence": rep["evidence"],
+            "n_removed_not_in_record": rep["n_removed_not_in_record"],
+            "n_record_removed_not_removed": rep["n_record_removed_not_removed"],
+            "record_split_equal": TFR.recorded_split_equal(z, rep)}
+    return scene, hm_scene, info
 
 
 def variant_config(base_cfg, name: str, hm: bool):
@@ -390,6 +482,13 @@ class Run:
         self.names = names
         self.margin_vec = self.policy.margin_matrix(names, [SourceType.TARGET], context=self.ctx,
                                                     target_grounded=True)[:, 0]
+        # T46f A14 — `--target-field-policy none` (예외 없음): 쥐지 않은 target 의 마진은 권한을 비운 문맥으로
+        # (`to_adapter` 와 같은 `target_permission_context`). 다른 정책에서는 쓰이지 않는다.
+        from AG3S.ag3s.constraints.clearance import target_permission_context
+
+        self.margin_vec_unheld = self.policy.margin_matrix(
+            names, [SourceType.TARGET], target_grounded=True,
+            context=target_permission_context(self.ctx, cfg_policy(self.sargs)))[:, 0]
         fl = "l" if self.hand == "left" else "r"
         self.idx = {"palm": np.asarray([i for i, n in enumerate(names) if n == f"ee_{self.hand}"]),
                     "fingers": np.asarray([i for i, n in enumerate(names)
@@ -471,8 +570,8 @@ class Run:
             tp = z["target_points"] if "target_points" in z.files else None
             if bool(s.get("has_target")) and tp is not None and len(tp):
                 kw.update(manipulated_points=np.asarray(tp, np.float64),
-                          manipulated_link_margin=self.margin_vec)
-                if (str(cfg_policy(self.sargs)) != "relax"
+                          manipulated_link_margin=self.margin_vec_unheld)
+                if (str(cfg_policy(self.sargs)) in ("exclude_authorized", "exclude_all")
                         and getattr(field, "target_free_layers", ())):
                     if cfg_policy(self.sargs) == "exclude_all":
                         mask = np.ones(len(self.names), bool)
@@ -484,6 +583,9 @@ class Run:
             kw.update(destination_label=label, destination_margin=self.dest_margin)
         om = float(cfg.collision.obstacle_margin)
         extra = {"obstacle_margin": om, "support_planes": None if plane is None else plane[None]}
+        if getattr(cfg.collision, "palm_shell_margin", None) is not None:
+            # AG3S-PRE-CORE-TO SCM — as `scene_from_constraint_set` (only when the command line gives it)
+            extra["palm_shell_margin"] = float(cfg.collision.palm_shell_margin)
         if held is not None and fit is not None:
             # read only by the HM rows and the look-ahead tail (`_held_rows_class`) — inert otherwise
             extra["held_capture_spheres"] = fit
@@ -651,6 +753,9 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
         if extra and extra not in alts:
             alts[extra] = Run(key, entry, cli, extra_server_args=extra)
     solver_run = {v: alts.get(variant_server_args(v), run) for v in variants}
+    for v in variants:
+        if variant_target_free(v) is not None and variant_server_args(v):
+            raise ValueError(f"variant {v}: `_target_free` with `_server_args` is not supported")
     keep_state = bool(getattr(cli, "keep_state", False))
     ref_variant = getattr(cli, "ref_variant", None)
     holder: dict[str, Any] = {}
@@ -711,6 +816,24 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
             if float(np.linalg.norm(gap[:2])) <= 0.08 and centre[2] <= hi[2] + 0.08:
                 rec["phase"] = phase = "crate"
         scene = inp["hm_scene"] if run.hm else inp["scene"]
+        # T46 — variants with a replayed fine target-free layer solve **and are measured** on their own
+        # scene (the field the server would have built); `n_collision_rows_recorded_field` keeps the
+        # verdict rows on the recorded field next to it.
+        tf_scenes: dict[str, Any] = {}
+        tf_info: dict[str, dict] = {}
+        for v in variants:
+            spec = variant_target_free(v)
+            if spec is not None:
+                sc, hsc, tf_info[v] = target_free_scenes(inp, spec)
+                tf_scenes[v] = hsc if run.hm else sc
+        # T46c A12 — the certification each `_certify` variant hands the optimizer.
+        certs: dict[str, bool] = {}
+        for v in variants:
+            cspec = variant_certify(v)
+            if cspec is not None:
+                from AG3S.trajopt.experiments import certification_replay as CR
+
+                certs[v] = CR.certified(s, **cspec)
         rec_traj = run.layout.chunk_to_trajectory(inp["rec_chunk"])[:, :K_EXEC]
         ref_traj_full = run.layout.chunk_to_trajectory(inp["ref_chunk"])
         # fidelity — the recorded refined chunk on the reconstructed (server-flag) scene
@@ -768,11 +891,12 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
                     v_scene = a_inp["hm_scene"] if run.hm else a_inp["scene"]
                     lin.set_joint_parameter_path(solver_run[v].finger_path(s, inp["ref_chunk"], H))
                 else:
-                    v_scene = scene
+                    v_scene = tf_scenes.get(v, scene)          # T46: replayed target-free layer
                     lin.set_joint_parameter_path(run.finger_path(s, inp["ref_chunk"], H))
                 # certified = True: geometry certification is the same for every variant and is
-                # not what is compared here (the verdict rows are, `classify_violations`).
-                holder["value"] = (v_scene, q_now, True)
+                # not what is compared here (the verdict rows are, `classify_violations`) — except
+                # the T46c variants (`_certify`), which re-ask it on the record.
+                holder["value"] = (v_scene, q_now, certs.get(v, True))
                 ctx = dict(context_base)
                 if hist is not None and cfg.limits.servo_accel != "off":
                     ctx["command_history"] = hist
@@ -804,16 +928,17 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
                 base_traj = ex
             trajs[v] = ex
             fingers8 = run.finger_path(s, inp["ref_chunk"], K_EXEC)
-            lin8, cen = states_of(run, ex, q_now, scene, fingers8)
-            gc = group_clearance(run, lin8, cen, scene, dest_box)
+            m_scene = tf_scenes.get(v, scene)                  # T46: the variant's own field
+            lin8, cen = states_of(run, ex, q_now, m_scene, fingers8)
+            gc = group_clearance(run, lin8, cen, m_scene, dest_box)
             # servo-predicted states (evaluator) — 4 sub-steps per row
             ro = run.servo.rollout(sstate.q, sstate.v, ex, sstate.tau, samples=SERVO_SAMPLES)
             qs = ro["q_samples"].reshape(ex.shape[0], -1)                # (nq, 8*4)
             fs = None if fingers8 is None else np.repeat(fingers8, len(SERVO_SAMPLES), axis=1)
-            lin32, cen32 = states_of(run, qs, q_now, scene, fs)
-            gs = group_clearance(run, lin32, cen32, scene, dest_box)
+            lin32, cen32 = states_of(run, qs, q_now, m_scene, fs)
+            gs = group_clearance(run, lin32, cen32, m_scene, dest_box)
             cls = classify_violations(
-                lin8, ex, q_now, scene, authorized_links=run.authorized,
+                lin8, ex, q_now, m_scene, authorized_links=run.authorized,
                 tolerance=float(cfg.safety.violation_tolerance),
                 manipulated=s.get("manipulated") or {}, steps=K_EXEC)
             pr = palm_path(run, ex, q_now)
@@ -859,6 +984,24 @@ def run_one(key: str, entry: dict, cli) -> dict[str, Any]:
                 vr["outward_mm"] = (d_v - d_p) * 1e3
             if v == variants[0]:
                 vr["exec_palm_path_m"] = pr.tolist()
+            if v in certs:
+                # T46c A12: what the optimizer was told, next to the recorded rule's answer
+                from AG3S.trajopt.experiments import certification_replay as CR
+
+                vr["certification"] = {
+                    "certified": bool(certs[v]), "recorded_rule": CR.certified(s),
+                    "grounding_status": s.get("grounding_status"),
+                    "geometry_certified_recorded": ((s.get("to") or {}).get("metrics")
+                                                    or {}).get("geometry_certified")}
+            if v in tf_scenes:
+                # T46: the replay's record (counts, evidence, differences from the recorded trace) and
+                # the same trajectory's verdict rows on the recorded field.
+                vr["target_free_replay"] = tf_info[v]
+                cls_rec = classify_violations(
+                    lin8, ex, q_now, scene, authorized_links=run.authorized,
+                    tolerance=float(cfg.safety.violation_tolerance),
+                    manipulated=s.get("manipulated") or {}, steps=K_EXEC)
+                vr["n_collision_rows_recorded_field"] = int(cls_rec["n_collision"])
             rec["variants"][v] = vr
         if ref_variant is not None and ref_variant in trajs:
             # T43 TP — every variant against the reference variant (V11AB), rows 0-7

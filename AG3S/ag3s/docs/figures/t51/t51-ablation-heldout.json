@@ -1,0 +1,187 @@
+{
+ "records": [
+  "headfix",
+  "ep1850",
+  "ep1900",
+  "ep1800"
+ ],
+ "random_values": [
+  0.7333333333333334,
+  0.7833333333333333,
+  0.75,
+  0.7333333333333334,
+  0.8833333333333333,
+  0.8666666666666666,
+  0.8833333333333333,
+  0.3333333333333333,
+  0.5,
+  0.9,
+  0.7833333333333333,
+  0.6666666666666666,
+  0.03333333333333333,
+  0.9166666666666666,
+  0.03333333333333333,
+  0.05,
+  0.85,
+  0.31666666666666665,
+  0.26666666666666666,
+  0.6666666666666666
+ ],
+ "random_sets": [
+  "first:L12H0",
+  "mean:L7H6",
+  "first:L7H2",
+  "first:L15H7",
+  "first:L9H5",
+  "first:L13H3",
+  "last:L8H3",
+  "first:L13H0",
+  "last:L3H5",
+  "last:L12H3",
+  "last:L15H7",
+  "mean:L17H7",
+  "last:L6H5",
+  "mean:L5H6",
+  "last:L6H5",
+  "first:L3H0",
+  "last:L9H2",
+  "mean:L3H6",
+  "first:L2H5",
+  "first:L3H3"
+ ],
+ "named": {
+  "selected (GT, record-mean*)": {
+   "source": "mean:L12H4",
+   "record_mean": 0.9,
+   "per_record": {
+    "headfix": 1.0,
+    "ep1850": 0.8666666666666667,
+    "ep1900": 1.0,
+    "ep1800": 0.7333333333333333
+   }
+  },
+  "selected (self label)": {
+   "source": "last:L12H3",
+   "record_mean": 0.9,
+   "per_record": {
+    "headfix": 1.0,
+    "ep1850": 0.8666666666666667,
+    "ep1900": 1.0,
+    "ep1800": 0.7333333333333333
+   }
+  },
+  "serving last:L8H2": {
+   "source": "last:L8H2",
+   "record_mean": 0.9,
+   "per_record": {
+    "headfix": 1.0,
+    "ep1850": 0.8666666666666667,
+    "ep1900": 1.0,
+    "ep1800": 0.7333333333333333
+   }
+  },
+  "T47 GT-oracle top-3 sum": {
+   "source": "sum[last:L10H7+last:L12H4+last:L8H3]",
+   "record_mean": 0.9,
+   "per_record": {
+    "headfix": 1.0,
+    "ep1850": 0.8666666666666667,
+    "ep1900": 1.0,
+    "ep1800": 0.7333333333333333
+   }
+  },
+  "restricted oracle (held-out best)": {
+   "source": "mean:L8H2",
+   "record_mean": 0.9,
+   "per_record": {
+    "headfix": 1.0,
+    "ep1850": 0.8666666666666667,
+    "ep1900": 1.0,
+    "ep1800": 0.7333333333333333
+   }
+  },
+  "head average (last, L2-17)": {
+   "source": "headavg_last",
+   "record_mean": 0.8666666666666667,
+   "per_record": {
+    "headfix": 1.0,
+    "ep1850": 0.8666666666666667,
+    "ep1900": 0.8666666666666667,
+    "ep1800": 0.7333333333333333
+   }
+  },
+  "paper top-3 sum, sigma 0": {
+   "source": "sum[last:L14H5+last:L2H0+last:L4H1]",
+   "record_mean": 0.0,
+   "per_record": {
+    "headfix": 0.0,
+    "ep1850": 0.0,
+    "ep1900": 0.0,
+    "ep1800": 0.0
+   }
+  },
+  "paper top-3 sum, sigma 1": {
+   "source": "paper3_s1",
+   "record_mean": 0.0,
+   "per_record": {
+    "headfix": 0.0,
+    "ep1850": 0.0,
+    "ep1900": 0.0,
+    "ep1800": 0.0
+   }
+  }
+ },
+ "random_distribution": {
+  "values": [
+   0.7333333333333334,
+   0.7833333333333333,
+   0.75,
+   0.7333333333333334,
+   0.8833333333333333,
+   0.8666666666666666,
+   0.8833333333333333,
+   0.3333333333333333,
+   0.5,
+   0.9,
+   0.7833333333333333,
+   0.6666666666666666,
+   0.03333333333333333,
+   0.9166666666666666,
+   0.03333333333333333,
+   0.05,
+   0.85,
+   0.31666666666666665,
+   0.26666666666666666,
+   0.6666666666666666
+  ],
+  "median": 0.7333333333333334,
+  "p05": 0.03333333333333333,
+  "p95": 0.9008333333333334,
+  "share_below_selected_gt": 0.9,
+  "share_at_or_above_selected_gt": 0.1
+ },
+ "oracle_restricted": {
+  "cell": "mean:L8H2",
+  "value": 0.9,
+  "all": {
+   "last:L3H1": 0.31666666666666665,
+   "last:L8H2": 0.9,
+   "last:L8H3": 0.8833333333333333,
+   "last:L8H7": 0.9,
+   "last:L9H4": 0.7000000000000001,
+   "last:L9H5": 0.8,
+   "last:L10H3": 0.85,
+   "last:L10H7": 0.9,
+   "last:L12H3": 0.9,
+   "last:L12H4": 0.9,
+   "last:L15H0": 0.85,
+   "mean:L3H1": 0.2833333333333333,
+   "mean:L8H2": 0.9,
+   "mean:L10H7": 0.8833333333333333,
+   "mean:L12H3": 0.9,
+   "mean:L12H4": 0.9,
+   "first:L3H1": 0.4
+  }
+ },
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T180318+0900_28b981600bf7_852011fdcae0/verify/T51/ablation/ablation.json"
+}

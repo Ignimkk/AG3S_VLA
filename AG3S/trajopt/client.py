@@ -104,13 +104,19 @@ class SafeRemoteClient:
             실행하고, `unsafe` 판정에 멈추지 않는다 (판정과 사유는 프레임마다 그대로 남는다).
             **서버도 `--shadow` 로 떠 있어야 한다** — 짝이 안 맞으면 생성자나 첫 왕복에서
             즉시 죽는다. 조용히 refined 를 실행하면 shadow 가 아닌데 shadow 라고 기록된다.
+        oracle_target: **T46e A13 (진단 oracle).** 이 episode 의 GT target 물체 이름 (예 `"orange"`). 주면
+            요청마다 카메라별 GT code 영상 (`wire.ORACLE_SEG`, `runtime.oracle_segmentation.label_image`) 을
+            싣는다 — `capture` 가 이미 렌더한 segmentation 이라 추가 렌더는 없다. `None` (기본) 이면 요청이
+            예전과 바이트까지 같다. 서버가 segmentation 을 요구하는데 (`wire.ORACLE_SEG_REQUIRED`) 이 값이
+            없으면 접속 즉시 죽는다 — oracle arm 이 oracle 없이 도는 run 을 막는다.
     """
 
     def __init__(self, *, policy, scene, cameras: Sequence[str] = wire.DEFAULT_CAMERAS,
                  timeout_s: float = 2.0, phase: str = "approach",
                  active_manipulators: Sequence[str] = (), trace_dir: Optional[str] = None,
                  shadow: bool = False, gate: str = "reasons",
-                 gate_table: Optional[dict[str, str]] = None):
+                 gate_table: Optional[dict[str, str]] = None,
+                 oracle_target: Optional[str] = None):
         if gate not in GATE_MODES:
             raise ValueError(f"gate must be one of {GATE_MODES}, got {gate!r}")
         if gate == "off" and shadow:
@@ -129,6 +135,12 @@ class SafeRemoteClient:
         self.phase = phase
         self.active_manipulators = tuple(active_manipulators)
         self.shadow = bool(shadow)
+        #: T46e A13 — GT target 이름과 body → code 표 (`oracle_target` 을 줬을 때만, 한 번 만든다).
+        self.oracle_target = None if oracle_target is None else str(oracle_target)
+        self._oracle_lut = None
+        self._oracle_codes: dict[str, int] = {}
+        if self.oracle_target is not None:
+            self._oracle_lut, self._oracle_codes = self._oracle_code_table(scene, self.oracle_target)
 
         self._seq = 0
         #: 확인된 것이 없으면 실행하지 않는다. 첫 청크가 오기 전에도 이 값이 읽힌다.
@@ -507,9 +519,34 @@ class SafeRemoteClient:
             meta = dict(get() or {})
         except Exception:  # noqa: BLE001 — 메타데이터를 못 읽는 것으로 죽지 않는다
             return
+        if bool(meta.get(wire.ORACLE_SEG_REQUIRED, False)) and self.oracle_target is None:
+            # T46e A13 — oracle arm 서버에 segmentation 없는 client 를 붙이면 그 run 은 oracle 이 아니다.
+            raise RuntimeError(
+                "the server runs the visible-target oracle (esdf.target_extent = oracle_visible) and needs "
+                "the GT segmentation in every request — start the client with the oracle target "
+                "(pi05_infer --safe-oracle-seg / SafeRemoteClient(oracle_target=...))")
         if bool(meta.get("shadow", False)) == self.shadow:
             return
         raise RuntimeError(self._pairing_message(server_shadow=not self.shadow))
+
+    @staticmethod
+    def _oracle_code_table(scene, target: str):
+        """T46e — `(lut, codes)` for `label_image` from the scene's MuJoCo model (`oracle_segmentation.code_table`)."""
+        from AG3S.ag3s.runtime.oracle_segmentation import code_table
+
+        model = getattr(scene, "model", None)
+        names = dict(getattr(scene, "_body_names", {}) or {})
+        root = None
+        if model is not None and hasattr(model, "body_rootid"):
+            root = {int(i): int(r) for i, r in enumerate(np.asarray(model.body_rootid))}
+        return code_table(names, target, root_of=root)
+
+    def _oracle_images(self, frames: dict[str, Any]) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+        """T46e — this request's code images from the frames `_pack` just captured, and the meta block."""
+        from AG3S.ag3s.runtime.oracle_segmentation import CODE_VERSION, label_image
+
+        seg = {cam: label_image(np.asarray(f.body_ids), self._oracle_lut) for cam, f in frames.items()}
+        return seg, {"version": CODE_VERSION, "target": self.oracle_target, "codes": dict(self._oracle_codes)}
 
     def _check_shadow_pairing(self, reference, server_shadow=None) -> None:
         """`--safe-shadow`(로컬)와 `--shadow`(서버)의 짝. **안 맞으면 즉시 죽는다.**
@@ -608,9 +645,12 @@ class SafeRemoteClient:
                 raise ValueError(
                     f"capture_time {capture_time!r} is not a past time.monotonic() instant")
         depth, K, T, state, render_stamps = {}, {}, {}, {}, {}
+        frames = {}
         with _maybe_span(self._trace, "capture"):
             for cam in self.cameras:
                 frame = self._scene.capture(cam)
+                if self.oracle_target is not None:
+                    frames[cam] = frame
                 depth[cam] = np.asarray(frame.depth, np.float64)
                 K[cam] = np.asarray(frame.camera_intrinsics, np.float64)
                 T[cam] = np.asarray(frame.T_base_cam, np.float64)
@@ -623,12 +663,17 @@ class SafeRemoteClient:
         self.last_stamps = dict(stamps)
         self.last_render_stamps = dict(render_stamps)
         self.last_stamp_mode = mode
+        oracle = {}
+        if self.oracle_target is not None:
+            seg, meta = self._oracle_images(frames)
+            oracle = {"oracle_seg": seg, "oracle_seg_meta": meta}
         return wire.pack_request(
             obs, cameras=self.cameras, depth=depth, intrinsics=K, extrinsics=T,
             robot_state=state, stamps=stamps, phase=self.phase,
             active_manipulators=self.active_manipulators, reset=reset, seq=seq,
             exec_feedback=self.last_exec_feedback,
-            render_stamps=render_stamps, stamp_mode=mode, policy_seed=policy_seed)
+            render_stamps=render_stamps, stamp_mode=mode, policy_seed=policy_seed,
+            **oracle)
 
     def _hold(self, reason: str, kind: str,
               result: Optional[dict] = None, *, comms: Optional[str] = None) -> dict[str, Any]:

@@ -1,0 +1,63 @@
+{
+  "adapter-two-maps": {
+    "src": "outputs/live_test/20260928_t17/server_constraints/run_0000/chunk_00008.npz",
+    "t_step": 9,
+    "slice_y_m": 0.31176820397377014,
+    "target_centroid_m": [
+      0.563,
+      0.3183,
+      0.8564
+    ],
+    "n_spheres_drawn": 45,
+    "representative_sphere": {
+      "link": "ee_finger_l1",
+      "centre_m": [
+        0.5757,
+        0.3102,
+        0.9386
+      ],
+      "radius_mm": 4.715148359537125,
+      "main": {
+        "distance_m": 0.03978168132453681,
+        "gradient": [
+          0.035,
+          -0.042,
+          0.998
+        ],
+        "gradient_norm": 1.0009293360762817
+      },
+      "free": {
+        "distance_m": 0.10387725194645098,
+        "gradient": [
+          -0.289,
+          -0.187,
+          0.939
+        ],
+        "gradient_norm": 0.912414342570318
+      }
+    }
+  },
+  "margin-rules": {
+    "values_mm": {
+      "obstacle": 50,
+      "target_nonauthorized": 50,
+      "target_authorized_by_phase": {
+        "TRANSIT": 50,
+        "APPROACH": 20,
+        "PRE_GRASP": 5,
+        "GRASP": 0
+      },
+      "held_vs_destination": 20,
+      "robot_vs_destination": 50
+    },
+    "sources": {
+      "esdf_margin_default": "benchmark/trajopt/serve_safe.py:903 (--esdf-margin 0.05)",
+      "phase_rules": "benchmark/ag3s/config.py:616-626 (margin_scale 1.0/0.4/0.1/0; ×0.05)",
+      "contact_links": "benchmark/ag3s/config.py:631-634",
+      "destination_margin": "benchmark/ag3s/config.py:997 (0.020), applied only to held rows benchmark/trajopt/linearize.py:717-725",
+      "target_free_exempt": "benchmark/trajopt/linearize.py:698-705 (T30 F1)",
+      "contact_margin_zero_not_off": "benchmark/ag3s/constraints/clearance.py:1-26",
+      "note": "t17 기록 실행은 --esdf-margin 10 mm 로 돌았다 (outputs/live_test/20260928_t17/serve_safe.log)"
+    }
+  }
+}

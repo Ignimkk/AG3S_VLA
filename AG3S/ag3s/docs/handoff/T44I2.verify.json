@@ -1,0 +1,236 @@
+{
+ "step": "T44I2",
+ "date": "2026-10-10",
+ "split": "test (recorded V11AB H runs, episodes 1807-1995, all >= 1600; regression check only)",
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "command": "MUJOCO_GL=osmesa JAX_PLATFORMS=cpu CUDA_VISIBLE_DEVICES= PYTHONPATH=/mnt/dev/work .venv-openpi-live/bin/python -m benchmark.trajopt.experiments.esdf_rollout --records run_16d_ep1800 --attention benchmark/ag3s/asset/data/attention_16d_ep1800.npz --frames 15 --voxel 0.020 --esdf-margin 0.05 --cameras all --support-surfaces field --constraint-links arms",
+   "venv": ".venv-openpi-live (not .venv-ag3s: forbidden this session)",
+   "raw_output": "outputs/verify/T44/I2/baseline_legacy.json",
+   "stdout_log": "outputs/verify/T44/I2/baseline_legacy.out"
+  },
+  {
+   "id": "V-I2-1",
+   "command": "JAX_PLATFORMS=cpu XLA_PYTHON_CLIENT_PREALLOCATE=false CUDA_VISIBLE_DEVICES= MUJOCO_GL=osmesa PYTHONPATH=/mnt/dev/work nice -n 19 .venv-openpi-live/bin/python -m pytest -q -p no:cacheprovider tests/trajopt tests/ag3s",
+   "venv": ".venv-openpi-live",
+   "stdout_log": "outputs/verify/T44/I2/pytest_full.out"
+  },
+  {
+   "id": "V-I2-2..4",
+   "command": "outputs/verify/T44/I2/launch.sh (replay_i2.py, 4 workers nice 19, CPU; arms wt: off offR strict sw swR swS; head: off sw), then aggregate.py, split_auth.py",
+   "venv": ".venv-openpi-live",
+   "raw_output": "outputs/verify/T44/I2/raw/{wt,head}_V11AB_H_*.json + .npz",
+   "aggregate": "outputs/verify/T44/I2/agg.json",
+   "per_chunk": "outputs/verify/T44/I2/per_chunk.json",
+   "split_auth": "outputs/verify/T44/I2/split_auth.json"
+  }
+ ],
+ "code_state": {
+  "repo": "benchmark",
+  "head": "498f713",
+  "head_copy": "outputs/verify/T44/I2/head/benchmark (git archive 498f713)",
+  "dirty_files": [
+   "ag3s/config.py",
+   "ag3s/constraints/to_adapter.py",
+   "ag3s/experiments/sources/constraint_record.py",
+   "ag3s/fields/curobo_builder.py",
+   "ag3s/runtime/pipeline.py",
+   "trajopt/config.py",
+   "trajopt/linearize.py",
+   "trajopt/serve_safe.py",
+   "trajopt/sweep.py"
+  ],
+  "note": "A1 was still editing ag3s/** while the replay and pytest ran; md5 of key files at the end of the replay: outputs/verify/T44/I2/wt_md5.txt. The replay path (trajopt + ta_offline.Run) imports ag3s.config / ClearancePolicy / robot model builder from the same working tree."
+ },
+ "replay_setup": {
+  "input": "14 recorded V11AB H runs, server chunks outputs/verify/T43/V11/runs/V11AB/server_*/server_constraints, index analysis_V11AB.json; server flags parsed from server_proc.txt (already include V11AB: plan-horizon 16, lookahead obstacles gate 20 mm, qp-eps 1e-4, w-deflection-rate 20, exclude-authorized, obstacle-margin 0.010; no sweep, no target_volume_exempt)",
+  "tool": "benchmark.trajopt.experiments.ta_offline.Run (reconstruction) + outputs/verify/T44/I2/replay_i2.py (arm driver); open loop, refiner reset per arm",
+  "overrides": "sqp.time_budget_ms = 1e6 in every arm and both trees (wall-clock budget is not a bit-reproducible input)",
+  "sweep_config": "reduction.sweep_check requires horizon.lookahead off (config.py:948 validation), so the sweep arms use lookahead off, plan_horizon = execution window (8), sweep_check on; this is NOT the V11AB look-ahead config",
+  "strict_wiring": "ta_offline builds SceneSnapshot directly; the driver sets target_contact_rows via linearize.target_contact_rows_of(target_free_mask, None, manipulated_link_margin, 'exclude_authorized') and target_permission_strict on that snapshot (scene_from_constraint_set is not in this path)",
+  "n_runs": 14,
+  "n_chunks": 1006,
+  "chunks_skipped_by_ta_offline": 0
+ },
+ "numbers": {
+  "baseline_legacy": {
+   "violated_start": "14/15",
+   "frames": 15,
+   "has_target_true_frames": 15,
+   "frame0_clearance_before_mm": -29.031048280806342,
+   "feasible": 15
+  },
+  "V-I2-1": {
+   "passed": 2569,
+   "failed": 0,
+   "skipped": 3,
+   "duration_s": 971.07
+  },
+  "V-I2-2": {
+   "n_chunks": 1006,
+   "n_runs": 14,
+   "compared": {
+    "head_off_vs_wt_off": {
+     "n_chunks": 1006,
+     "own_differs": 0,
+     "traj_differs": 0,
+     "status_differs": 0,
+     "hold_differs": 0,
+     "max_joint_deg": 0.0,
+     "n_collision_rows_differs": 0
+    },
+    "head_off_vs_wt_offR": {
+     "n_chunks": 1006,
+     "own_differs": 0,
+     "traj_differs": 0,
+     "status_differs": 0,
+     "hold_differs": 0,
+     "max_joint_deg": 0.0,
+     "n_collision_rows_differs": 0
+    },
+    "head_sw_vs_wt_sw": {
+     "n_chunks": 1006,
+     "own_differs": 0,
+     "traj_differs": 0,
+     "status_differs": 0,
+     "hold_differs": 0,
+     "max_joint_deg": 0.0,
+     "n_collision_rows_differs": 0
+    },
+    "head_sw_vs_wt_swR": {
+     "n_chunks": 1006,
+     "own_differs": 0,
+     "traj_differs": 0,
+     "status_differs": 0,
+     "hold_differs": 0,
+     "max_joint_deg": 0.0,
+     "n_collision_rows_differs": 0
+    }
+   }
+  },
+  "V-I2-3": {
+   "n_chunks": 1006,
+   "n_chunks_with_contact_rows": 539,
+   "n_chunks_tail_unauthorized_gt0": 33,
+   "tail_unauthorized_rows_total": 3721,
+   "lookahead_rows_changed_reference_total": 4328,
+   "lookahead_rows_changed_reference_chunks": 43,
+   "lookahead_rows_changed_offrefined_total": 4172,
+   "lookahead_rows_changed_offrefined_chunks": 43,
+   "refined_chunks_changed": 10,
+   "refined_joint_deg_max": 0.5848528043602833,
+   "status_changes": 0,
+   "hold_changes": 0,
+   "hold_candidate_off": 8,
+   "hold_candidate_strict": 8
+  },
+  "V-I2-3_phase": {
+   "chunks_with_changed_rows_held": 43,
+   "chunks_with_changed_rows_not_held": 0,
+   "rows_changed_by_link_reference_traj": {
+    "ee_right": 234,
+    "ee_left": 50,
+    "ee_finger_l1": 40,
+    "ee_finger_r2": 16,
+    "ee_finger_l2": 7
+   },
+   "n_tail_target_unauthorized_held": 3721,
+   "n_tail_target_unauthorized_not_held": 0,
+   "hold_candidates_off": 8,
+   "hold_candidates_strict": 8
+  },
+  "V-I2-4": {
+   "n_chunks": 1006,
+   "off_target_rows_excluded_total": 9353,
+   "off_chunks_with_excluded": 179,
+   "strict_target_rows_excluded_total": 8791,
+   "strict_chunks_with_excluded": 178,
+   "strict_unauthorized_kept_total": 552,
+   "strict_chunks_unauthorized_kept_gt0": 26,
+   "refined_chunks_changed": 4,
+   "refined_joint_deg_max": 1.593583271409581,
+   "status_changes": 1,
+   "hold_changes": 0,
+   "same_traj": {
+    "n_chunks": 539,
+    "off_excluded_total": 9353,
+    "strict_excluded_total": 8789,
+    "strict_unauth_kept_total": 564,
+    "new_path_violations": 0,
+    "path_violations_off": 27,
+    "path_violations_strict": 27
+   }
+  },
+  "V-I2-4_split_by_authorization": {
+   "totals": {
+    "off_auth": 477,
+    "off_nonauth": 68,
+    "strict_auth": 477,
+    "strict_nonauth": 0,
+    "p_off_auth": 476,
+    "p_off_nonauth": 68,
+    "p_strict_auth": 476,
+    "p_strict_nonauth": 0
+   },
+   "chunks_with_nonauthorized_excluded_off": 26,
+   "chunks_with_nonauthorized_excluded_strict": 0,
+   "all_such_chunks_held": true,
+   "nonauthorized_links_excluded_off": {
+    "ee_left": 17,
+    "ee_finger_l1": 14,
+    "ee_right": 37
+   },
+   "authorized_rows_excluded_changed_chunks_solve": 0,
+   "authorized_rows_excluded_changed_chunks_same_traj": 0,
+   "status_change_chunk": {
+    "run": "V11AB_H_V11AB_ep1834_s18341",
+    "seq": 34,
+    "off": "feasible",
+    "strict": "violated",
+    "strict_window_violation_mm": 1.3657,
+    "strict_path_clearance_mm": 1.122,
+    "off_path_clearance_mm": 6.169,
+    "n_collision_rows_both": 0,
+    "excluded_links_off": {
+     "ee_left": 8,
+     "ee_right": 1,
+     "ee_finger_l1": 2
+    },
+    "strict_unauthorized_kept": 67
+   }
+  }
+ },
+ "figures": [
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44i2-scene-strict-tail.png",
+   "kind": "scene",
+   "sidecar": "t44i2-scene-strict-tail.json"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44i2-per-chunk-rows.png",
+   "kind": "graph",
+   "sidecar": "t44i2-per-chunk-rows.json"
+  },
+  {
+   "path": "benchmark/ag3s/docs/figures/t44/t44i2-summary-table.png",
+   "kind": "table",
+   "sidecar": "t44i2-summary-table.json"
+  }
+ ],
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy: 14/15 violated at start, frame0 clearance_before -29.031048280806342 mm (equal to the recorded value to the last digit); feasible count is not a baseline"
+ },
+ "verdict": "V-I2-1 failed 0; V-I2-2 refined chunk and verdict differences 0 of 1006 chunks (both comparisons, both configs); V-I2-3 reported; V-I2-4 non-authorized excluded rows 68 -> 0, authorized-row exclusions 477 -> 477",
+ "not_measured": [
+  "GPU field / live server path (the CPU replay uses the recorded fields)",
+  "closed loop",
+  "contact-event replay",
+  "cuRobo baseline (needs GPU; legacy baseline only)",
+  "ball_owned layer_diff membership (needs A1 stats key in recorded chunks: not recorded)",
+  "P3 (target_volume_exempt + obstacle_margin) not exercised: V11AB has target_volume_exempt off",
+  "B-profile V11AB runs (5 runs, 300 chunks) not replayed",
+  "HEAD-vs-HEAD determinism control not run; bit-identity was obtained with the wall-clock budget raised"
+ ]
+}

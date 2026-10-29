@@ -1,0 +1,182 @@
+{
+ "tau": 0.37,
+ "rule": "largest tau (0.01 steps) with p90 GT normal angle <= 33.7 deg among rho <= tau (S1d, task §3e)",
+ "s1d_n": 213,
+ "s1d_rho_quantiles": {
+  "10": 0.387,
+  "25": 0.429,
+  "50": 0.462,
+  "75": 0.495,
+  "90": 0.527
+ },
+ "events": [
+  {
+   "set": "occlusion",
+   "scene": "111",
+   "chunk": 13,
+   "rho_replay": 0.485,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "occlusion",
+   "scene": "113",
+   "chunk": 12,
+   "rho_replay": 0.451,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "occlusion",
+   "scene": "122",
+   "chunk": 13,
+   "rho_replay": 0.53,
+   "B0": "들 때 미끄러짐",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "occlusion",
+   "scene": "122",
+   "chunk": 15,
+   "rho_replay": 0.53,
+   "B0": "들 때 미끄러짐",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "occlusion",
+   "scene": "122",
+   "chunk": 16,
+   "rho_replay": 0.53,
+   "B0": "들 때 미끄러짐",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "occlusion",
+   "scene": "112",
+   "chunk": 12,
+   "rho_replay": 0.489,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "occlusion",
+   "scene": "121",
+   "chunk": 14,
+   "rho_replay": 0.406,
+   "B0": "쥐지 못함",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "occlusion",
+   "scene": "132",
+   "chunk": 13,
+   "rho_replay": 0.513,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "320",
+   "chunk": 15,
+   "rho_replay": 0.461,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "753",
+   "chunk": 13,
+   "rho_replay": 0.444,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "753",
+   "chunk": 14,
+   "rho_replay": 0.444,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "954",
+   "chunk": 15,
+   "rho_replay": null,
+   "B0": "실패(full)",
+   "B2c": "금지 접촉(basket)"
+  },
+  {
+   "set": "regression",
+   "scene": "954",
+   "chunk": 16,
+   "rho_replay": null,
+   "B0": "실패(full)",
+   "B2c": "금지 접촉(basket)"
+  },
+  {
+   "set": "regression",
+   "scene": "1345",
+   "chunk": 14,
+   "rho_replay": null,
+   "B0": "금지 접촉(neighbour_fruit) · 성공",
+   "B2c": "금지 접촉(neighbour_fruit) · 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "1345",
+   "chunk": 15,
+   "rho_replay": null,
+   "B0": "금지 접촉(neighbour_fruit) · 성공",
+   "B2c": "금지 접촉(neighbour_fruit) · 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "121",
+   "chunk": 13,
+   "rho_replay": 0.484,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "901",
+   "chunk": 13,
+   "rho_replay": 0.494,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "572",
+   "chunk": 13,
+   "rho_replay": 0.416,
+   "B0": "안전한 성공",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "850",
+   "chunk": 13,
+   "rho_replay": 0.507,
+   "B0": "실패(full)",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "850",
+   "chunk": 14,
+   "rho_replay": 0.473,
+   "B0": "실패(full)",
+   "B2c": "안전한 성공"
+  },
+  {
+   "set": "regression",
+   "scene": "850",
+   "chunk": 15,
+   "rho_replay": 0.507,
+   "B0": "실패(full)",
+   "B2c": "안전한 성공"
+  }
+ ]
+}

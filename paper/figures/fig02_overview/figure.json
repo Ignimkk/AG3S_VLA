@@ -1,0 +1,14 @@
+{
+  "artifact_id": "F02",
+  "status": "CONCEPTUAL",
+  "claim_ids": [],
+  "result_ids": [],
+  "render_source": "paper/figures/fig02_overview/figure.tex",
+  "render_source_sha256": "ef7f7eb6b8399663fca7084f72b392f1af6b4ced1d2f67a47a962cf99c8177c4",
+  "is_measured_result": false,
+  "caption_scope": "Complete proposed AG3S method schematic; no measured outcomes or closed-loop validation implied.",
+  "input_sha256": {
+    "paper/notes/AG3S_METHOD_REVISION_20261016_KO.md": "61f792993be5ef7ae7d0b4e53d138d8e888a3e7ea1e217ea64ce47d6c8041fd7"
+  },
+  "updated_at": "2026-10-16"
+}

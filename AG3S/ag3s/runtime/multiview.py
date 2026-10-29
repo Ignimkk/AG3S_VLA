@@ -45,6 +45,7 @@ import numpy as np
 from AG3S.ag3s.stages.attention_lifting import lift, make_adapter, normalize_attention
 from AG3S.ag3s.config import AG3SConfig, AttentionConfig
 from AG3S.ag3s.runtime.degradation import reason
+from AG3S.ag3s.runtime import substage
 from AG3S.ag3s.stages import device_recon
 from AG3S.ag3s.stages.reconstruction import backproject, downsample_and_cap, reconstruct
 from AG3S.ag3s.stages.robot_filter import DepthRobotMask, depth_robot_mask, filter_robot_points
@@ -145,10 +146,12 @@ def process_observation(
             if q.shape[0] != int(robot_model.nq):
                 raise ValueError(f"robot_state has {q.shape[0]} entries but the robot model expects "
                                  f"nq={int(robot_model.nq)}")
-            front = device_recon.camera_front_end(
-                observation.depth, observation.camera_intrinsics, T_base_cam, pc_cfg, robot_model, q,
-                inflation=self_filter_inflation, guard_centre=self_filter_guard_centre,
-                fk_cache=fk_cache, frame_id=config.frame_id, device=dev)
+            with substage.part("recon.front_end_gpu", sync=True):
+                front = device_recon.camera_front_end(
+                    observation.depth, observation.camera_intrinsics, T_base_cam, pc_cfg,
+                    robot_model, q, inflation=self_filter_inflation,
+                    guard_centre=self_filter_guard_centre, fk_cache=fk_cache,
+                    frame_id=config.frame_id, device=dev)
     if front is not None:
         cloud, recon_stats, filter_stats = front.cloud, front.recon_stats, front.filter_stats
         depth_mask, points_device = front.depth_mask, front.points_device
@@ -195,15 +198,16 @@ def process_observation(
         # instead of using this array** (F2, `AG3S_REVIEW_LOG.md` Step 5) — otherwise the fusion
         # `max` picks the most generously scaled camera rather than the strongest evidence.
         # The per-camera array is still carried in the CSR block as provenance.
-        attention_cloud = lift(
-            cloud,
-            observation.attention_map,
-            config.attention,
-            adapter=adapter,
-            image_hw=observation.image_hw,
-            camera_intrinsics=observation.camera_intrinsics,
-            T_base_cam=T_base_cam,
-        )
+        with substage.part("recon.lift"):
+            attention_cloud = lift(
+                cloud,
+                observation.attention_map,
+                config.attention,
+                adapter=adapter,
+                image_hw=observation.image_hw,
+                camera_intrinsics=observation.camera_intrinsics,
+                T_base_cam=T_base_cam,
+            )
         attention = np.asarray(attention_cloud.attention, np.float32)
         # Both signals are carried through fusion for the reason `AttentionPointCloud` documents:
         # percentile clipping makes the normalized map comparable and, in doing so, creates hundreds
@@ -421,24 +425,26 @@ def fuse_observations(
     """
     validity, notes, metrics = check_freshness(observations, config, now=now)
     fk_cache: dict = {}   # T38 B4: sphere FK once per (model, q) for this frame's cameras
-    results = [
-        process_observation(
-            obs, config, robot_model=robot_model, attention_adapter=attention_adapter,
-            self_filter_inflation=self_filter_inflation,
-            self_filter_guard_centre=self_filter_guard_centre,
-            with_depth_mask=with_depth_mask,
-            fk_cache=fk_cache,
-        )
-        for obs in observations
-    ]
+    with substage.part("recon.per_camera"):   # the rest of `process_observation` (numpy path …)
+        results = [
+            process_observation(
+                obs, config, robot_model=robot_model, attention_adapter=attention_adapter,
+                self_filter_inflation=self_filter_inflation,
+                self_filter_guard_centre=self_filter_guard_centre,
+                with_depth_mask=with_depth_mask,
+                fk_cache=fk_cache,
+            )
+            for obs in observations
+        ]
     del fk_cache
     for result in results:
         notes.extend(result.notes)
 
-    fused, attention, raw_attention = fuse(
-        results, voxel_size=config.timing.fusion_voxel_size, frame_id=config.frame_id,
-        attention_config=config.attention,
-    )
+    with substage.part("recon.fuse"):
+        fused, attention, raw_attention = fuse(
+            results, voxel_size=config.timing.fusion_voxel_size, frame_id=config.frame_id,
+            attention_config=config.attention,
+        )
 
     n_input = sum(len(r.cloud) for r in results)
     metrics.update({

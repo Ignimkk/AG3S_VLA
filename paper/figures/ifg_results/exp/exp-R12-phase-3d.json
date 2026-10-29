@@ -1,0 +1,158 @@
+{
+ "rule": "first three 7-frame (successful) episodes",
+ "episodes": {
+  "T53_ep1804": [
+   {
+    "moment": "M1_approach",
+    "grasp_state": "pre",
+    "hand_d": 0.11287145383249522,
+    "height": 0.865866736017907,
+    "grip": 0.9995371103286743
+   },
+   {
+    "moment": "M2_pre_grasp",
+    "grasp_state": "pre",
+    "hand_d": 0.09011497823917804,
+    "height": 0.8692813377819822,
+    "grip": 0.9982499480247498
+   },
+   {
+    "moment": "M3_grasp",
+    "grasp_state": "held",
+    "hand_d": 0.0822008847737992,
+    "height": 0.8911640729050774,
+    "grip": 0.7193333506584167
+   },
+   {
+    "moment": "M4_carry",
+    "grasp_state": "held",
+    "hand_d": 0.0858226088444571,
+    "height": 1.108672057634418,
+    "grip": 0.7208582162857056
+   },
+   {
+    "moment": "M5_pre_place",
+    "grasp_state": "held",
+    "hand_d": 0.08876935730113554,
+    "height": 0.978862128771321,
+    "grip": 0.7205095291137695
+   },
+   {
+    "moment": "M6_post_place",
+    "grasp_state": "placed",
+    "hand_d": 0.18691517154528217,
+    "height": 0.871186629751487,
+    "grip": 0.9222793579101562
+   },
+   {
+    "moment": "M7_retreat",
+    "grasp_state": "placed",
+    "hand_d": 0.36213886867932477,
+    "height": 0.8681224376237283,
+    "grip": 0.9983426332473755
+   }
+  ],
+  "T53_ep1815": [
+   {
+    "moment": "M1_approach",
+    "grasp_state": "pre",
+    "hand_d": 0.16777620519493688,
+    "height": 0.8649145227147621,
+    "grip": 0.9993391633033752
+   },
+   {
+    "moment": "M2_pre_grasp",
+    "grasp_state": "pre",
+    "hand_d": 0.08346202827765783,
+    "height": 0.8684263475307895,
+    "grip": 0.999988853931427
+   },
+   {
+    "moment": "M3_grasp",
+    "grasp_state": "held",
+    "hand_d": 0.0817390154064887,
+    "height": 0.8908729542604995,
+    "grip": 0.7201852202415466
+   },
+   {
+    "moment": "M4_carry",
+    "grasp_state": "held",
+    "hand_d": 0.08462116323355885,
+    "height": 1.0904255989718772,
+    "grip": 0.7210716009140015
+   },
+   {
+    "moment": "M5_pre_place",
+    "grasp_state": "held",
+    "hand_d": 0.18741348185183945,
+    "height": 0.9391494850858488,
+    "grip": 0.7203975915908813
+   },
+   {
+    "moment": "M6_post_place",
+    "grasp_state": "placed",
+    "hand_d": 0.17848185721266632,
+    "height": 0.8746214793018628,
+    "grip": 0.9750747680664062
+   },
+   {
+    "moment": "M7_retreat",
+    "grasp_state": "placed",
+    "hand_d": 0.3150932483258286,
+    "height": 0.9339394315023989,
+    "grip": 0.9981980919837952
+   }
+  ],
+  "T53_ep1809": [
+   {
+    "moment": "M1_approach",
+    "grasp_state": "pre",
+    "hand_d": 0.20282359189399535,
+    "height": 0.8485622893333131,
+    "grip": 0.9997360706329346
+   },
+   {
+    "moment": "M2_pre_grasp",
+    "grasp_state": "pre",
+    "hand_d": 0.09899562674182201,
+    "height": 0.8493583974770088,
+    "grip": 0.9999302625656128
+   },
+   {
+    "moment": "M3_grasp",
+    "grasp_state": "held",
+    "hand_d": 0.10107013473953587,
+    "height": 0.8576783487722581,
+    "grip": 0.5064608454704285
+   },
+   {
+    "moment": "M4_carry",
+    "grasp_state": "held",
+    "hand_d": 0.10358195236967276,
+    "height": 1.0710288530136667,
+    "grip": 0.49593228101730347
+   },
+   {
+    "moment": "M5_pre_place",
+    "grasp_state": "held",
+    "hand_d": 0.12099452942869111,
+    "height": 1.0052451920617864,
+    "grip": 0.4940245747566223
+   },
+   {
+    "moment": "M6_post_place",
+    "grasp_state": "placed",
+    "hand_d": 0.1402389318979349,
+    "height": 0.9351171911886682,
+    "grip": 0.4782426357269287
+   },
+   {
+    "moment": "M7_retreat",
+    "grasp_state": "placed",
+    "hand_d": 0.29825431432977284,
+    "height": 0.8565885490957539,
+    "grip": 0.999993622303009
+   }
+  ]
+ }
+}

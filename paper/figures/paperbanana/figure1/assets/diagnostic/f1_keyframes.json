@@ -1,0 +1,30 @@
+{
+ "asset": "paper/figures/paperbanana/figure1/assets/f1_keyframes.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_assets.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/third_person_front.mp4": "4a3ff78ba6de3dfc5f23bb6ca24358c6d8b9943452588ba7dd8993863853f4ab"
+ },
+ "note": "Third-person keyframes of the closed-loop AG3S run (approach, grasp, carry, release).",
+ "is_measured_result": false,
+ "generated": true,
+ "frames": {
+  "approach": 84,
+  "grasp": 160,
+  "carry": 200,
+  "release": 268
+ },
+ "crop_xyxy": [
+  40,
+  32,
+  600,
+  362
+ ],
+ "grasp_state_gt": {
+  "approach": "pre",
+  "grasp": "held",
+  "carry": "held",
+  "release": "placed"
+ }
+}

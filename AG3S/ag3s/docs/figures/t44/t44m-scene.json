@@ -1,0 +1,136 @@
+{
+ "examples": [
+  {
+   "key": "demo_ep0012_f068",
+   "tag": "VLA split 로 해결",
+   "target": "apple",
+   "neighbour": "orange",
+   "mesh_gap_mm": 15.61,
+   "cloud_gap_mm": 25.93,
+   "parent_n": 182,
+   "parent_target_fraction": 0.6264,
+   "gt_split": {
+    "ran": true,
+    "skipped": null,
+    "triggered": true,
+    "reason": "attention_not_discriminative",
+    "ratio": 0.91,
+    "n_components": 2,
+    "parent_role": "unsplit"
+   },
+   "vla_split": {
+    "ran": true,
+    "skipped": null,
+    "triggered": true,
+    "reason": "split",
+    "ratio": 3139.306,
+    "n_components": 2,
+    "parent_role": "target"
+   },
+   "vla_pipeline_cluster": {
+    "n": 114,
+    "target_fraction": 1.0,
+    "recall": 1.0,
+    "split": {
+     "role": "target",
+     "split_index": 1,
+     "parent_n_points": 182,
+     "parent_extents_mm": [
+      51.1,
+      64.9,
+      145.6
+     ]
+    }
+   }
+  },
+  {
+   "key": "demo_ep0022_f104",
+   "tag": "VLA attention 이 이웃에",
+   "target": "apple",
+   "neighbour": "orange",
+   "mesh_gap_mm": 14.74,
+   "cloud_gap_mm": 28.53,
+   "parent_n": 123,
+   "parent_target_fraction": 0.4309,
+   "gt_split": {
+    "ran": true,
+    "skipped": null,
+    "triggered": true,
+    "reason": "attention_not_discriminative",
+    "ratio": 0.929,
+    "n_components": 2,
+    "parent_role": "unsplit"
+   },
+   "vla_split": {
+    "ran": true,
+    "skipped": null,
+    "triggered": true,
+    "reason": "attention_not_discriminative",
+    "ratio": 0.967,
+    "n_components": 2,
+    "parent_role": "unsplit"
+   },
+   "vla_pipeline_cluster": {
+    "n": 123,
+    "target_fraction": 0.4309,
+    "recall": 1.0,
+    "split": {
+     "role": "unsplit",
+     "reason": "attention_not_discriminative",
+     "split_index": 0,
+     "parent_n_points": 123,
+     "parent_extents_mm": [
+      42.2,
+      62.3,
+      128.5
+     ]
+    }
+   }
+  },
+  {
+   "key": "demo_ep0027_f068",
+   "tag": "기하: 틈 < 15 mm",
+   "target": "banana",
+   "neighbour": "apple",
+   "mesh_gap_mm": 4.63,
+   "cloud_gap_mm": 8.85,
+   "parent_n": 168,
+   "parent_target_fraction": 0.369,
+   "gt_split": {
+    "ran": true,
+    "skipped": null,
+    "triggered": true,
+    "reason": "one_component",
+    "ratio": null,
+    "n_components": 0,
+    "parent_role": "unsplit"
+   },
+   "vla_split": {
+    "ran": true,
+    "skipped": null,
+    "triggered": true,
+    "reason": "one_component",
+    "ratio": null,
+    "n_components": 0,
+    "parent_role": "unsplit"
+   },
+   "vla_pipeline_cluster": {
+    "n": 168,
+    "target_fraction": 0.369,
+    "recall": 1.0,
+    "split": {
+     "role": "unsplit",
+     "reason": "one_component",
+     "split_index": 0,
+     "parent_n_points": 168,
+     "parent_extents_mm": [
+      52.0,
+      66.5,
+      144.9
+     ]
+    }
+   }
+  }
+ ],
+ "source": "/mnt/dev/work/outputs/verify/T44/merge"
+}

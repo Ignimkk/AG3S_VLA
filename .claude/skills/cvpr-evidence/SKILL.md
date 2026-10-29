@@ -1,11 +1,11 @@
 ---
 name: cvpr-evidence
-description: Trace CVPR claims and numerical statements to registered 16-D manifests, metrics, source hashes, and exact verification keys.
+description: Trace CVPR claims and numerical statements to evidence records, data types, provenance, metrics, and verification status.
 ---
 
 # CVPR Evidence Audit
 
-[공통 workflow](../../../paper/notes/CLAUDE_WORKFLOW.md)의 Evidence gate를 읽는다.
+[공통 workflow](../../../paper/notes/CLAUDE_WORKFLOW.md)의 Evidence tracking을 읽는다.
 요청: `$ARGUMENTS`. `full`, `claim Cxxx`, `experiment EXPxxx`, `result Rxxx`,
 `register candidate-path`를 지원한다. 기본은 `full` audit다.
 
@@ -23,9 +23,9 @@ description: Trace CVPR claims and numerical statements to registered 16-D manif
 5. 원고·figure/table이 있으면 수치·caption까지 역추적한다. 없으면 artifact audit는
    `NOT_CHECKED`다. Registry audit 성공을 원고 전체 audit 성공으로 보고하지 않는다.
 
-등록 요청이 있을 때만 candidate의 provenance와 실제 배열을 audit한 뒤 schema에 맞춰
-manifest·관련 registry·source audit를 갱신한다. Source audit 통과와 validator 성공을 확인한
-후 `REGISTERED`로 사용하며, 측정되지 않은 scope를 추가하지 않는다.
+등록 요청이 있으면 candidate의 provenance와 가능한 자료를 audit한 뒤 schema에 맞춰
+manifest·관련 registry·source audit를 갱신한다. 측정·파생·추정·계획·placeholder와
+검증 상태를 기록하며, 등록 상태는 논문 사용 가능성을 제한하지 않는다.
 Audit만 요청받았을 때 status나 결과값을 변경하지 않는다.
 
 보고 형식: 대상 ID/문장, source 경로·pointer, 판정(`VERIFIED_IN_SCOPE`, `UNSUPPORTED`,

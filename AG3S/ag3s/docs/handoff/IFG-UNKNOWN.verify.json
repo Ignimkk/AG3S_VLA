@@ -1,0 +1,3600 @@
+{
+ "step": "IFG-UNKNOWN",
+ "written": "2026-10-22 02:50 KST (definitions; moved_test revised 02:55 KST) / 2026-10-22 02:57 KST (numbers)",
+ "status": "measured",
+ "definitions": {
+  "data": "Precheck-A raw rows: /mnt/dev/AG3S_VLA-storage/results/development/20261022T001543+0900_8e200ada6d53_f62e49bedd53/verify/IFG-PRECHECK-A/raw_v2/IFG-APPLE-SPLIT_ep<E>.json. Original record: run 20261019T132719+0900_f15e587290f6_11408fd6d27f, kit verify/IFG-APPLE-SPLIT, arm SPL: server chunks (server_chunk_alignment.block, chunk_{offset+k}.npz: ESDF grids, summary_json) and client frames runs/SPL/SPL_ep<E>_s<S>/ag3s/run_0000/step_<k>.npz (qpos, depth_<cam> uint16 mm, K_<cam>, T_base_cam_<cam> for zed_left, wrist_cam_l, wrist_cam_r). step k <-> planning row k <-> request k (t_step and qpos checked equal).",
+  "unknown_row": "A precheck row with traj 'ref', binding True (h < 0 on the policy chunk), in a pre-grasp request (summary grasp.state latched or closing) and R1 source 'unknown'. Fail scenes 211, 320, 526, 954, 979, 1313 (U1-U3); control scenes 250, 126, 572 (U4). Row = (request k, plan step, sphere q).",
+  "field": "Rebuilt from the chunk npz by AG3S.trajopt.experiments.fixed_input_ablation.build_field(z, outside_distance=1.0). Layer L of a row = target-free (CuroboEsdfField.target_free_distance / target_free_gradient) when the row's recorded layer is 'target_free', else the main composed layer (distance / gradient). Fidelity: |d_L(p) - precheck d_mm| <= 0.05 mm, p = the row's recorded sphere centre.",
+  "surface_point": "s = p - d_L(p) * g / |g|, g = gradient of L at p (the precheck R2 point). The surface voxel of a row = the voxel of the grid of the answering tier at p (recorded tier: 'target_free' -> esdf_free grid, 'fine' -> esdf grid, 'coarse' -> esdf_coarse grid) that contains s (nearest grid index). Reported with it: d_L(s).",
+  "observations": "The depth pixels the TSDF integrated up to request k: frames f = 0..k (checked: summary esdf_stats.frames == k + 1), all three depth cameras, depth = recorded uint16 / 1000 m, pixels with 0.05 <= depth <= 3.0 m, back-projected with the recorded K and T_base_cam (AG3S backproject convention: X = (u - cx) z / fx). Robot pixels removed by the reconstructed server self-filter mask: AG3S.ag3s.stages.robot_filter.depth_robot_mask on the full-resolution backproject (PointCloudConfig(range_max=2.0) = server --range-max default), robot model = grounding_report.build_robot_model(TransportScene of model_transport.xml) (= serve_safe.build_ag3s filter_robot), fingers by set_finger_joints_from_scene, q = scene.robot_state() at step f qpos, guard centre / radius = manipulated.centroid / radius + 5 mm of the summary of request f-1. Mask fidelity: reconstructed mask pixel count vs recorded esdf_stats.per_camera[cam].n_masked_px for every (frame, camera); reported as count of exact matches and max |diff|. Masked pixels are not supporting observations (they were integrated as unobserved); their count within r_sup is reported separately.",
+  "support": "Supporting observations O(s) of a row = unmasked observation points of frames 0..k within r_sup of s. r_sup = 10 mm when the answering tier is fine or target_free, 20 mm when coarse (the precheck R1 tolerances). Also reported: distance from s to the nearest unmasked observation point of frames 0..k (any distance up to 100 mm) and that point's label.",
+  "point_label": "Label of an observation point o of frame f: geom seen at its pixel in a MuJoCo segmentation render of model_transport_pick_place_obstacles.xml (client scene; obstacle placed by PickPlaceObstacleManager.activate(profile) from the episode's --obstacle-config/--obstacle-profile), d.qpos = step f qpos, camera pose overwritten by the recorded T_base_cam (OpenCV -> MuJoCo axes diag(1,-1,-1)), 640x480. Accepted when |recorded depth - rendered depth| <= 5 mm at that pixel; otherwise label = argmin over GT classes of the signed GT distance at frame f state if <= 5 mm (ifg_audit_ats.Scene geometry + analytic post + all collidable robot geoms), else 'unlabelled'. Geom -> label: body apple -> target; banana / orange / pear -> neighbour; crate -> crate; pick_obstacle_* -> post; table -> table; robot subtree (body 'base') -> robot_hand (geom in replay geom_sets 'hand') / robot_inactive_hand ('inactive_hand') / robot_body (other); other geoms -> room; no geom -> none.",
+  "moved_test": "v1 (pre-registered, 02:50 KST): For a point labelled target, neighbour or crate observed at frame f < k: 'current' when the GT signed distance from o to that class at the request-k state is <= 5 mm, else 'moved'. Points of frame k are current. post / table / room are static.",
+  "point_source": "robot_hand / robot_inactive_hand / robot_body -> robot_self; target current -> target_at_request_gt; neighbour current -> neighbour_fruit; crate current, post, table -> support_surface (table / crate / post); target / neighbour / crate moved -> memory_stale (shape observed earlier at a place the object no longer occupies at request k); room, none, unlabelled -> other.",
+  "row_source": "Shares of the supporting points over the point sources. Matched sources = those with share >= 0.25. No supporting point -> field_artefact (no observation point within r_sup). Exactly one matched source -> that source. Two or more -> ambiguous (counted separately, with the combination). Sub-labels kept in the numbers: robot_self by hand / inactive hand / body and by frame (f == k vs earlier); support_surface by table / crate / post.",
+  "task_category_map": "Task U1 classes -> these names: robot self body -> robot_self; held / dropped / pushed target apple at that request's GT position -> target_at_request_gt; neighbour fruit outside its GT -> neighbour_fruit; table / crate / post surface standing out from GT -> support_surface; memory shape (kept / stale) -> memory_stale; field artefact (no observation point) -> field_artefact; other -> other; several -> ambiguous.",
+  "voxel_counting": "Voxel = unique (scene, request k, answering grid, voxel index of s). Its source = the source of the most-violated row (smallest h) among the rows sharing it. Row counts and voxel counts both reported.",
+  "u2_distance": "Distance from s to the GT surface of the row's source at the request-k state, unsigned |D|: robot_self -> all collidable robot geoms (visual-only robot meshes not included); target_at_request_gt -> apple (collision + visual); neighbour_fruit -> the neighbour fruit classes; support_surface -> table, crate, post; memory_stale -> the class(es) of its moved points; field_artefact / other / ambiguous -> nearest over all GT classes including robot. Median and p95 in mm.",
+  "u2_visibility": "s is 'visible at k' when, for at least one depth camera of frame k (recorded K, T_base_cam), s projects inside the 640x480 image with camera z >= 0.05 m and the recorded depth at that pixel is >= z_s - 10 mm (line of sight not blocked; robot pixels count as blocking). 'Observed at k' additionally needs |recorded depth - z_s| <= 10 mm. Fractions over rows.",
+  "u3": "The 22 pre-grasp requests of the 6 fail scenes whose most-violated active_ref row has R1 source unknown (precheck A3 by_dominant_source_ref.unknown, recomputed with ifg_precheck_a.per_request). Per request: scene, k, state, active_ref rows, unknown rows, U1 source counts of its unknown rows, U1 source of its most-violated row, correction_mm, HOLD, penetration_to_mm, out-window worst R1 group (all from precheck raw except the U1 columns).",
+  "u4": "Same U1 rules on the unknown rows of the control scenes 250, 126, 572.",
+  "phases": "Per scene and per phase (latched / closing) as in precheck.",
+  "moved_test_revision": "v2, written 2026-10-22 02:55 KST after the v1 collection, before the v2 collection. Reason (a fact found in the v1 output, not a result preference): the v1 test compares a crate pixel's point with the crate COLLISION boxes, but the camera sees the crate VISUAL geoms, which include rims (crate_vis_rim_*, top at +0.067 m vs collision wall top +0.060 m, 2 mm wider) and slats; the crate free-joint pose was unchanged over the measured frames (ep526 k0-31, ep1313 k0-73: |dpos| <= 0.1 mm), so v1 labelled unmoved crate-rim points 'moved'. v2 rule: a point labelled target / neighbour / crate observed at frame f < k is carried with the body it was seen on (MuJoCo body of the rendered geom; for geometric-fallback labels the class body) from its frame-f pose to its request-k pose (o_k = R_k R_f^T (o - x_f) + x_k, body poses from mj_forward of the step qpos); 'moved' when |o_k - o| > 5 mm. Everything else unchanged. v1 numbers are kept under numbers.v1_moved_test_gt_distance; v1 raw = verify/IFG-UNKNOWN/raw, v1 figures = verify/IFG-UNKNOWN/v1_figures (not delivered); v2 raw = verify/IFG-UNKNOWN/raw_v2."
+ },
+ "numbers": {
+  "U1_U2_fail6_pre_grasp": {
+   "n_rows": 2573,
+   "n_voxels": 406,
+   "row_counts": {
+    "robot_self": 76,
+    "target_at_request_gt": 73,
+    "neighbour_fruit": 0,
+    "support_surface": 132,
+    "memory_stale": 1144,
+    "field_artefact": 1134,
+    "other": 0,
+    "ambiguous": 14
+   },
+   "row_fractions": {
+    "robot_self": 0.0295,
+    "target_at_request_gt": 0.0284,
+    "neighbour_fruit": 0.0,
+    "support_surface": 0.0513,
+    "memory_stale": 0.4446,
+    "field_artefact": 0.4407,
+    "other": 0.0,
+    "ambiguous": 0.0054
+   },
+   "voxel_counts": {
+    "robot_self": 2,
+    "target_at_request_gt": 38,
+    "neighbour_fruit": 0,
+    "support_surface": 13,
+    "memory_stale": 158,
+    "field_artefact": 184,
+    "other": 0,
+    "ambiguous": 11
+   },
+   "voxel_fractions": {
+    "robot_self": 0.0049,
+    "target_at_request_gt": 0.0936,
+    "neighbour_fruit": 0.0,
+    "support_surface": 0.032,
+    "memory_stale": 0.3892,
+    "field_artefact": 0.4532,
+    "other": 0.0,
+    "ambiguous": 0.0271
+   },
+   "n_requests_with_source": {
+    "robot_self": 1,
+    "target_at_request_gt": 7,
+    "neighbour_fruit": 0,
+    "support_surface": 4,
+    "memory_stale": 9,
+    "field_artefact": 19,
+    "other": 0,
+    "ambiguous": 3
+   },
+   "robot_self_detail": {
+    "by_point_label": {
+     "robot_inactive_hand": 152
+    },
+    "rows_with_support_from_frame_k": 0,
+    "rows_support_only_earlier_frames": 76
+   },
+   "support_surface_detail": {
+    "table": 169,
+    "crate": 404592
+   },
+   "ambiguous_combinations": {
+    "memory_stale+target_at_request_gt": 14
+   },
+   "field_artefact_detail": {
+    "nearest_obs_mm_median": 34.39,
+    "nearest_obs_mm_p95": 41.75,
+    "n_no_obs_within_100mm": 0,
+    "nearest_obs_label": {
+     "crate": 1065,
+     "target": 69
+    },
+    "rows_with_masked_points_within_r_sup": 865
+   },
+   "rows_with_masked_points_within_r_sup": 2033,
+   "U2": {
+    "robot_self": {
+     "n_rows": 76,
+     "gt_distance_mm_median": 3.3,
+     "gt_distance_mm_p95": 5.03,
+     "visible_k_fraction": 1.0,
+     "observed_k_fraction": 1.0,
+     "d_at_s_mm_median": 0.48
+    },
+    "target_at_request_gt": {
+     "n_rows": 73,
+     "gt_distance_mm_median": 4.26,
+     "gt_distance_mm_p95": 10.03,
+     "visible_k_fraction": 0.726,
+     "observed_k_fraction": 0.6575,
+     "d_at_s_mm_median": -1.91
+    },
+    "support_surface": {
+     "n_rows": 132,
+     "gt_distance_mm_median": 12.39,
+     "gt_distance_mm_p95": 12.5,
+     "visible_k_fraction": 0.0758,
+     "observed_k_fraction": 0.0758,
+     "d_at_s_mm_median": 0.0
+    },
+    "memory_stale": {
+     "n_rows": 1144,
+     "gt_distance_mm_median": 5.11,
+     "gt_distance_mm_p95": 10.11,
+     "visible_k_fraction": 0.0647,
+     "observed_k_fraction": 0.0017,
+     "d_at_s_mm_median": 0.42
+    },
+    "field_artefact": {
+     "n_rows": 1134,
+     "gt_distance_mm_median": 30.69,
+     "gt_distance_mm_p95": 40.13,
+     "visible_k_fraction": 0.9497,
+     "observed_k_fraction": 0.0035,
+     "d_at_s_mm_median": 0.26
+    },
+    "ambiguous": {
+     "n_rows": 14,
+     "gt_distance_mm_median": 2.04,
+     "gt_distance_mm_p95": 8.41,
+     "visible_k_fraction": 0.9286,
+     "observed_k_fraction": 0.5714,
+     "d_at_s_mm_median": 1.21
+    }
+   },
+   "p_best_gt_minus_field_mm": {
+    "n": 2573,
+    "n_gt_farther": 2459,
+    "n_gt_nearer": 114,
+    "median": 31.23
+   }
+  },
+  "U1_U2_fail6_by_phase": {
+   "latched": {
+    "n_rows": 1753,
+    "n_voxels": 271,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 40,
+     "neighbour_fruit": 0,
+     "support_surface": 1,
+     "memory_stale": 711,
+     "field_artefact": 987,
+     "other": 0,
+     "ambiguous": 14
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0228,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0006,
+     "memory_stale": 0.4056,
+     "field_artefact": 0.563,
+     "other": 0.0,
+     "ambiguous": 0.008
+    },
+    "voxel_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 25,
+     "neighbour_fruit": 0,
+     "support_surface": 1,
+     "memory_stale": 97,
+     "field_artefact": 137,
+     "other": 0,
+     "ambiguous": 11
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0923,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0037,
+     "memory_stale": 0.3579,
+     "field_artefact": 0.5055,
+     "other": 0.0,
+     "ambiguous": 0.0406
+    },
+    "n_requests_with_source": {
+     "robot_self": 0,
+     "target_at_request_gt": 6,
+     "neighbour_fruit": 0,
+     "support_surface": 1,
+     "memory_stale": 8,
+     "field_artefact": 9,
+     "other": 0,
+     "ambiguous": 3
+    },
+    "robot_self_detail": {
+     "by_point_label": {},
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 0
+    },
+    "support_surface_detail": {
+     "table": 169
+    },
+    "ambiguous_combinations": {
+     "memory_stale+target_at_request_gt": 14
+    },
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": 35.22,
+     "nearest_obs_mm_p95": 42.49,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {
+      "crate": 953,
+      "target": 34
+     },
+     "rows_with_masked_points_within_r_sup": 846
+    },
+    "rows_with_masked_points_within_r_sup": 1503,
+    "U2": {
+     "target_at_request_gt": {
+      "n_rows": 40,
+      "gt_distance_mm_median": 2.87,
+      "gt_distance_mm_p95": 9.31,
+      "visible_k_fraction": 0.825,
+      "observed_k_fraction": 0.7,
+      "d_at_s_mm_median": -1.56
+     },
+     "support_surface": {
+      "n_rows": 1,
+      "gt_distance_mm_median": 10.32,
+      "gt_distance_mm_p95": 10.32,
+      "visible_k_fraction": 0.0,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": -5.57
+     },
+     "memory_stale": {
+      "n_rows": 711,
+      "gt_distance_mm_median": 5.11,
+      "gt_distance_mm_p95": 10.11,
+      "visible_k_fraction": 0.0661,
+      "observed_k_fraction": 0.0028,
+      "d_at_s_mm_median": 0.62
+     },
+     "field_artefact": {
+      "n_rows": 987,
+      "gt_distance_mm_median": 32.74,
+      "gt_distance_mm_p95": 40.2,
+      "visible_k_fraction": 0.9625,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": 0.32
+     },
+     "ambiguous": {
+      "n_rows": 14,
+      "gt_distance_mm_median": 2.04,
+      "gt_distance_mm_p95": 8.41,
+      "visible_k_fraction": 0.9286,
+      "observed_k_fraction": 0.5714,
+      "d_at_s_mm_median": 1.21
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 1753,
+     "n_gt_farther": 1674,
+     "n_gt_nearer": 79,
+     "median": 29.77
+    }
+   },
+   "closing": {
+    "n_rows": 820,
+    "n_voxels": 135,
+    "row_counts": {
+     "robot_self": 76,
+     "target_at_request_gt": 33,
+     "neighbour_fruit": 0,
+     "support_surface": 131,
+     "memory_stale": 433,
+     "field_artefact": 147,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "row_fractions": {
+     "robot_self": 0.0927,
+     "target_at_request_gt": 0.0402,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.1598,
+     "memory_stale": 0.528,
+     "field_artefact": 0.1793,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "voxel_counts": {
+     "robot_self": 2,
+     "target_at_request_gt": 13,
+     "neighbour_fruit": 0,
+     "support_surface": 12,
+     "memory_stale": 61,
+     "field_artefact": 47,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0148,
+     "target_at_request_gt": 0.0963,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0889,
+     "memory_stale": 0.4519,
+     "field_artefact": 0.3481,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "n_requests_with_source": {
+     "robot_self": 1,
+     "target_at_request_gt": 1,
+     "neighbour_fruit": 0,
+     "support_surface": 3,
+     "memory_stale": 1,
+     "field_artefact": 10,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "robot_self_detail": {
+     "by_point_label": {
+      "robot_inactive_hand": 152
+     },
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 76
+    },
+    "support_surface_detail": {
+     "crate": 404592
+    },
+    "ambiguous_combinations": {},
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": 27.18,
+     "nearest_obs_mm_p95": 31.47,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {
+      "crate": 112,
+      "target": 35
+     },
+     "rows_with_masked_points_within_r_sup": 19
+    },
+    "rows_with_masked_points_within_r_sup": 530,
+    "U2": {
+     "robot_self": {
+      "n_rows": 76,
+      "gt_distance_mm_median": 3.3,
+      "gt_distance_mm_p95": 5.03,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 1.0,
+      "d_at_s_mm_median": 0.48
+     },
+     "target_at_request_gt": {
+      "n_rows": 33,
+      "gt_distance_mm_median": 5.81,
+      "gt_distance_mm_p95": 10.26,
+      "visible_k_fraction": 0.6061,
+      "observed_k_fraction": 0.6061,
+      "d_at_s_mm_median": -2.04
+     },
+     "support_surface": {
+      "n_rows": 131,
+      "gt_distance_mm_median": 12.39,
+      "gt_distance_mm_p95": 12.5,
+      "visible_k_fraction": 0.0763,
+      "observed_k_fraction": 0.0763,
+      "d_at_s_mm_median": 0.0
+     },
+     "memory_stale": {
+      "n_rows": 433,
+      "gt_distance_mm_median": null,
+      "gt_distance_mm_p95": null,
+      "visible_k_fraction": 0.0624,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": 0.19
+     },
+     "field_artefact": {
+      "n_rows": 147,
+      "gt_distance_mm_median": 28.64,
+      "gt_distance_mm_p95": 32.36,
+      "visible_k_fraction": 0.8639,
+      "observed_k_fraction": 0.0272,
+      "d_at_s_mm_median": 0.06
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 820,
+     "n_gt_farther": 785,
+     "n_gt_nearer": 35,
+     "median": 56.39
+    }
+   }
+  },
+  "U1_U2_fail6_by_layer": {
+   "target_free": {
+    "n_rows": 2062,
+    "n_voxels": 360,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 73,
+     "neighbour_fruit": 0,
+     "support_surface": 132,
+     "memory_stale": 709,
+     "field_artefact": 1134,
+     "other": 0,
+     "ambiguous": 14
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0354,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.064,
+     "memory_stale": 0.3438,
+     "field_artefact": 0.55,
+     "other": 0.0,
+     "ambiguous": 0.0068
+    },
+    "voxel_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 38,
+     "neighbour_fruit": 0,
+     "support_surface": 13,
+     "memory_stale": 114,
+     "field_artefact": 184,
+     "other": 0,
+     "ambiguous": 11
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.1056,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0361,
+     "memory_stale": 0.3167,
+     "field_artefact": 0.5111,
+     "other": 0.0,
+     "ambiguous": 0.0306
+    },
+    "n_requests_with_source": {
+     "robot_self": 0,
+     "target_at_request_gt": 7,
+     "neighbour_fruit": 0,
+     "support_surface": 4,
+     "memory_stale": 8,
+     "field_artefact": 19,
+     "other": 0,
+     "ambiguous": 3
+    },
+    "robot_self_detail": {
+     "by_point_label": {},
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 0
+    },
+    "support_surface_detail": {
+     "table": 169,
+     "crate": 404592
+    },
+    "ambiguous_combinations": {
+     "memory_stale+target_at_request_gt": 14
+    },
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": 34.39,
+     "nearest_obs_mm_p95": 41.75,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {
+      "crate": 1065,
+      "target": 69
+     },
+     "rows_with_masked_points_within_r_sup": 865
+    },
+    "rows_with_masked_points_within_r_sup": 1581,
+    "U2": {
+     "target_at_request_gt": {
+      "n_rows": 73,
+      "gt_distance_mm_median": 4.26,
+      "gt_distance_mm_p95": 10.03,
+      "visible_k_fraction": 0.726,
+      "observed_k_fraction": 0.6575,
+      "d_at_s_mm_median": -1.91
+     },
+     "support_surface": {
+      "n_rows": 132,
+      "gt_distance_mm_median": 12.39,
+      "gt_distance_mm_p95": 12.5,
+      "visible_k_fraction": 0.0758,
+      "observed_k_fraction": 0.0758,
+      "d_at_s_mm_median": 0.0
+     },
+     "memory_stale": {
+      "n_rows": 709,
+      "gt_distance_mm_median": 5.11,
+      "gt_distance_mm_p95": 10.11,
+      "visible_k_fraction": 0.0465,
+      "observed_k_fraction": 0.0014,
+      "d_at_s_mm_median": 0.36
+     },
+     "field_artefact": {
+      "n_rows": 1134,
+      "gt_distance_mm_median": 30.69,
+      "gt_distance_mm_p95": 40.13,
+      "visible_k_fraction": 0.9497,
+      "observed_k_fraction": 0.0035,
+      "d_at_s_mm_median": 0.26
+     },
+     "ambiguous": {
+      "n_rows": 14,
+      "gt_distance_mm_median": 2.04,
+      "gt_distance_mm_p95": 8.41,
+      "visible_k_fraction": 0.9286,
+      "observed_k_fraction": 0.5714,
+      "d_at_s_mm_median": 1.21
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 2062,
+     "n_gt_farther": 1948,
+     "n_gt_nearer": 114,
+     "median": 32.98
+    }
+   },
+   "main": {
+    "n_rows": 511,
+    "n_voxels": 46,
+    "row_counts": {
+     "robot_self": 76,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 435,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "row_fractions": {
+     "robot_self": 0.1487,
+     "target_at_request_gt": 0.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.8513,
+     "field_artefact": 0.0,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "voxel_counts": {
+     "robot_self": 2,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 44,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0435,
+     "target_at_request_gt": 0.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.9565,
+     "field_artefact": 0.0,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "n_requests_with_source": {
+     "robot_self": 1,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 1,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "robot_self_detail": {
+     "by_point_label": {
+      "robot_inactive_hand": 152
+     },
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 76
+    },
+    "support_surface_detail": {},
+    "ambiguous_combinations": {},
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": null,
+     "nearest_obs_mm_p95": null,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {},
+     "rows_with_masked_points_within_r_sup": 0
+    },
+    "rows_with_masked_points_within_r_sup": 452,
+    "U2": {
+     "robot_self": {
+      "n_rows": 76,
+      "gt_distance_mm_median": 3.3,
+      "gt_distance_mm_p95": 5.03,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 1.0,
+      "d_at_s_mm_median": 0.48
+     },
+     "memory_stale": {
+      "n_rows": 435,
+      "gt_distance_mm_median": null,
+      "gt_distance_mm_p95": null,
+      "visible_k_fraction": 0.0943,
+      "observed_k_fraction": 0.0023,
+      "d_at_s_mm_median": 0.57
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 511,
+     "n_gt_farther": 511,
+     "n_gt_nearer": 0,
+     "median": 26.23
+    }
+   }
+  },
+  "U4_control3_pre_grasp": {
+   "n_rows": 22,
+   "n_voxels": 9,
+   "row_counts": {
+    "robot_self": 0,
+    "target_at_request_gt": 12,
+    "neighbour_fruit": 0,
+    "support_surface": 0,
+    "memory_stale": 9,
+    "field_artefact": 0,
+    "other": 0,
+    "ambiguous": 1
+   },
+   "row_fractions": {
+    "robot_self": 0.0,
+    "target_at_request_gt": 0.5455,
+    "neighbour_fruit": 0.0,
+    "support_surface": 0.0,
+    "memory_stale": 0.4091,
+    "field_artefact": 0.0,
+    "other": 0.0,
+    "ambiguous": 0.0455
+   },
+   "voxel_counts": {
+    "robot_self": 0,
+    "target_at_request_gt": 4,
+    "neighbour_fruit": 0,
+    "support_surface": 0,
+    "memory_stale": 5,
+    "field_artefact": 0,
+    "other": 0,
+    "ambiguous": 0
+   },
+   "voxel_fractions": {
+    "robot_self": 0.0,
+    "target_at_request_gt": 0.4444,
+    "neighbour_fruit": 0.0,
+    "support_surface": 0.0,
+    "memory_stale": 0.5556,
+    "field_artefact": 0.0,
+    "other": 0.0,
+    "ambiguous": 0.0
+   },
+   "n_requests_with_source": {
+    "robot_self": 0,
+    "target_at_request_gt": 2,
+    "neighbour_fruit": 0,
+    "support_surface": 0,
+    "memory_stale": 1,
+    "field_artefact": 0,
+    "other": 0,
+    "ambiguous": 1
+   },
+   "robot_self_detail": {
+    "by_point_label": {},
+    "rows_with_support_from_frame_k": 0,
+    "rows_support_only_earlier_frames": 0
+   },
+   "support_surface_detail": {},
+   "ambiguous_combinations": {
+    "memory_stale+target_at_request_gt": 1
+   },
+   "field_artefact_detail": {
+    "nearest_obs_mm_median": null,
+    "nearest_obs_mm_p95": null,
+    "n_no_obs_within_100mm": 0,
+    "nearest_obs_label": {},
+    "rows_with_masked_points_within_r_sup": 0
+   },
+   "rows_with_masked_points_within_r_sup": 21,
+   "U2": {
+    "target_at_request_gt": {
+     "n_rows": 12,
+     "gt_distance_mm_median": 1.95,
+     "gt_distance_mm_p95": 4.85,
+     "visible_k_fraction": 0.9167,
+     "observed_k_fraction": 0.9167,
+     "d_at_s_mm_median": -1.0
+    },
+    "memory_stale": {
+     "n_rows": 9,
+     "gt_distance_mm_median": 1.27,
+     "gt_distance_mm_p95": 4.11,
+     "visible_k_fraction": 1.0,
+     "observed_k_fraction": 0.8889,
+     "d_at_s_mm_median": -1.66
+    },
+    "ambiguous": {
+     "n_rows": 1,
+     "gt_distance_mm_median": 7.08,
+     "gt_distance_mm_p95": 7.08,
+     "visible_k_fraction": 1.0,
+     "observed_k_fraction": 1.0,
+     "d_at_s_mm_median": -2.47
+    }
+   },
+   "p_best_gt_minus_field_mm": {
+    "n": 22,
+    "n_gt_farther": 0,
+    "n_gt_nearer": 22,
+    "median": -10.67
+   }
+  },
+  "v1_moved_test_gt_distance": {
+   "raw": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw",
+   "fail6": {
+    "n_rows": 2573,
+    "row_counts": {
+     "robot_self": 76,
+     "target_at_request_gt": 87,
+     "neighbour_fruit": 0,
+     "support_surface": 1,
+     "memory_stale": 1270,
+     "field_artefact": 1134,
+     "other": 0,
+     "ambiguous": 5
+    },
+    "row_fractions": {
+     "robot_self": 0.0295,
+     "target_at_request_gt": 0.0338,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0004,
+     "memory_stale": 0.4936,
+     "field_artefact": 0.4407,
+     "other": 0.0,
+     "ambiguous": 0.0019
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0049,
+     "target_at_request_gt": 0.1207,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0025,
+     "memory_stale": 0.4113,
+     "field_artefact": 0.4532,
+     "other": 0.0,
+     "ambiguous": 0.0074
+    }
+   },
+   "control3": {
+    "n_rows": 22,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 22,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 1.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.0,
+     "field_artefact": 0.0,
+     "other": 0.0,
+     "ambiguous": 0.0
+    }
+   },
+   "per_scene_row_counts": {
+    "126": {
+     "robot_self": 0,
+     "target_at_request_gt": 9,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "211": {
+     "robot_self": 0,
+     "target_at_request_gt": 29,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 59,
+     "other": 0,
+     "ambiguous": 5
+    },
+    "250": {
+     "robot_self": 0,
+     "target_at_request_gt": 1,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "320": {
+     "robot_self": 0,
+     "target_at_request_gt": 33,
+     "neighbour_fruit": 0,
+     "support_surface": 1,
+     "memory_stale": 1139,
+     "field_artefact": 44,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "526": {
+     "robot_self": 76,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 121,
+     "field_artefact": 3,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "572": {
+     "robot_self": 0,
+     "target_at_request_gt": 12,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "954": {
+     "robot_self": 0,
+     "target_at_request_gt": 2,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 19,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "1313": {
+     "robot_self": 0,
+     "target_at_request_gt": 23,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 10,
+     "field_artefact": 1009,
+     "other": 0,
+     "ambiguous": 0
+    }
+   }
+  },
+  "U3_requests_dominant_unknown": {
+   "n_requests": 22,
+   "n_hold": 0,
+   "worst_row_source_counts": {
+    "field_artefact": 12,
+    "memory_stale": 7,
+    "robot_self": 1,
+    "support_surface": 1,
+    "target_at_request_gt": 1
+   },
+   "correction_mm_median_by_worst_row_source": {
+    "field_artefact": 9.15,
+    "memory_stale": 12.44,
+    "robot_self": 4.82,
+    "support_surface": 14.24,
+    "target_at_request_gt": 11.52
+   },
+   "rows": [
+    {
+     "scene": 211,
+     "k": 8,
+     "state": "latched",
+     "n_active_ref": 24,
+     "n_unknown": 8,
+     "unknown_source_counts": {
+      "field_artefact": 8
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -2.95,
+     "correction_mm": 5.7,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "crate_post"
+    },
+    {
+     "scene": 211,
+     "k": 38,
+     "state": "closing",
+     "n_active_ref": 23,
+     "n_unknown": 23,
+     "unknown_source_counts": {
+      "field_artefact": 23
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -3.705,
+     "correction_mm": 6.28,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 211,
+     "k": 59,
+     "state": "latched",
+     "n_active_ref": 54,
+     "n_unknown": 9,
+     "unknown_source_counts": {
+      "memory_stale": 5,
+      "ambiguous": 4
+     },
+     "worst_row_source": "memory_stale",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -19.915,
+     "correction_mm": 14.46,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "target"
+    },
+    {
+     "scene": 320,
+     "k": 17,
+     "state": "closing",
+     "n_active_ref": 401,
+     "n_unknown": 8,
+     "unknown_source_counts": {
+      "field_artefact": 8
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_r2",
+     "worst_row_h_mm": -28.613,
+     "correction_mm": 120.51,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "table"
+    },
+    {
+     "scene": 320,
+     "k": 18,
+     "state": "closing",
+     "n_active_ref": 457,
+     "n_unknown": 457,
+     "unknown_source_counts": {
+      "memory_stale": 433,
+      "field_artefact": 24
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_r1",
+     "worst_row_h_mm": -23.612,
+     "correction_mm": 66.27,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 320,
+     "k": 19,
+     "state": "latched",
+     "n_active_ref": 108,
+     "n_unknown": 108,
+     "unknown_source_counts": {
+      "memory_stale": 108
+     },
+     "worst_row_source": "memory_stale",
+     "worst_row_link": "ee_finger_r1",
+     "worst_row_h_mm": -13.12,
+     "correction_mm": 33.54,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 320,
+     "k": 20,
+     "state": "latched",
+     "n_active_ref": 96,
+     "n_unknown": 96,
+     "unknown_source_counts": {
+      "memory_stale": 87,
+      "field_artefact": 9
+     },
+     "worst_row_source": "memory_stale",
+     "worst_row_link": "ee_finger_r1",
+     "worst_row_h_mm": -11.158,
+     "correction_mm": 14.88,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 320,
+     "k": 21,
+     "state": "latched",
+     "n_active_ref": 53,
+     "n_unknown": 50,
+     "unknown_source_counts": {
+      "memory_stale": 49,
+      "support_surface": 1
+     },
+     "worst_row_source": "memory_stale",
+     "worst_row_link": "ee_finger_r1",
+     "worst_row_h_mm": -19.972,
+     "correction_mm": 12.44,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 320,
+     "k": 32,
+     "state": "latched",
+     "n_active_ref": 22,
+     "n_unknown": 22,
+     "unknown_source_counts": {
+      "memory_stale": 22
+     },
+     "worst_row_source": "memory_stale",
+     "worst_row_link": "ee_finger_r1",
+     "worst_row_h_mm": -7.426,
+     "correction_mm": 9.24,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 320,
+     "k": 34,
+     "state": "latched",
+     "n_active_ref": 1,
+     "n_unknown": 1,
+     "unknown_source_counts": {
+      "memory_stale": 1
+     },
+     "worst_row_source": "memory_stale",
+     "worst_row_link": "ee_right",
+     "worst_row_h_mm": -0.471,
+     "correction_mm": 6.58,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 320,
+     "k": 37,
+     "state": "latched",
+     "n_active_ref": 4,
+     "n_unknown": 4,
+     "unknown_source_counts": {
+      "memory_stale": 4
+     },
+     "worst_row_source": "memory_stale",
+     "worst_row_link": "ee_right",
+     "worst_row_h_mm": -1.019,
+     "correction_mm": 5.3,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 526,
+     "k": 26,
+     "state": "closing",
+     "n_active_ref": 76,
+     "n_unknown": 76,
+     "unknown_source_counts": {
+      "robot_self": 76
+     },
+     "worst_row_source": "robot_self",
+     "worst_row_link": "ee_finger_r2",
+     "worst_row_h_mm": -7.303,
+     "correction_mm": 4.82,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "crate_post"
+    },
+    {
+     "scene": 526,
+     "k": 31,
+     "state": "closing",
+     "n_active_ref": 151,
+     "n_unknown": 99,
+     "unknown_source_counts": {
+      "support_surface": 99
+     },
+     "worst_row_source": "support_surface",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -10.198,
+     "correction_mm": 14.24,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 954,
+     "k": 31,
+     "state": "closing",
+     "n_active_ref": 15,
+     "n_unknown": 7,
+     "unknown_source_counts": {
+      "field_artefact": 7
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_r1",
+     "worst_row_h_mm": -1.933,
+     "correction_mm": 3.46,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 954,
+     "k": 32,
+     "state": "closing",
+     "n_active_ref": 13,
+     "n_unknown": 12,
+     "unknown_source_counts": {
+      "field_artefact": 12
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_r1",
+     "worst_row_h_mm": -1.836,
+     "correction_mm": 5.14,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 1313,
+     "k": 29,
+     "state": "closing",
+     "n_active_ref": 16,
+     "n_unknown": 16,
+     "unknown_source_counts": {
+      "field_artefact": 16
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -7.48,
+     "correction_mm": 3.09,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "crate_post"
+    },
+    {
+     "scene": 1313,
+     "k": 30,
+     "state": "closing",
+     "n_active_ref": 41,
+     "n_unknown": 41,
+     "unknown_source_counts": {
+      "field_artefact": 41
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -4.478,
+     "correction_mm": 9.85,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 1313,
+     "k": 31,
+     "state": "closing",
+     "n_active_ref": 10,
+     "n_unknown": 10,
+     "unknown_source_counts": {
+      "field_artefact": 10
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -2.813,
+     "correction_mm": 8.45,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 1313,
+     "k": 47,
+     "state": "latched",
+     "n_active_ref": 45,
+     "n_unknown": 45,
+     "unknown_source_counts": {
+      "field_artefact": 45
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -10.57,
+     "correction_mm": 10.6,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "crate_post"
+    },
+    {
+     "scene": 1313,
+     "k": 48,
+     "state": "latched",
+     "n_active_ref": 427,
+     "n_unknown": 417,
+     "unknown_source_counts": {
+      "field_artefact": 417
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -17.393,
+     "correction_mm": 24.88,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 1313,
+     "k": 49,
+     "state": "latched",
+     "n_active_ref": 470,
+     "n_unknown": 470,
+     "unknown_source_counts": {
+      "field_artefact": 470
+     },
+     "worst_row_source": "field_artefact",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -16.735,
+     "correction_mm": 33.76,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    },
+    {
+     "scene": 1313,
+     "k": 53,
+     "state": "latched",
+     "n_active_ref": 7,
+     "n_unknown": 4,
+     "unknown_source_counts": {
+      "target_at_request_gt": 4
+     },
+     "worst_row_source": "target_at_request_gt",
+     "worst_row_link": "ee_finger_l1",
+     "worst_row_h_mm": -0.951,
+     "correction_mm": 11.52,
+     "hold": false,
+     "penetration_to_mm": 0.0,
+     "out_worst_group": "unknown"
+    }
+   ]
+  },
+  "fidelity_pooled": {
+   "field_abs_diff_mm_max": 0.02173,
+   "mask_exact_match": [
+    "39/39",
+    "222/222",
+    "176/180",
+    "27/27",
+    "114/114",
+    "96/96",
+    "45/45",
+    "180/180",
+    null
+   ],
+   "mask_abs_diff_px_max": 2864,
+   "step_alignment_bad": 0,
+   "label_points": 161872,
+   "label_by_render": 161509,
+   "label_by_geometry": 309,
+   "unlabelled": 54
+  }
+ },
+ "per_scene": {
+  "126": {
+   "role": "control",
+   "fidelity": {
+    "n_unknown_rows": 9,
+    "field_abs_diff_mm_max": 0.00386,
+    "field_abs_diff_mm_n_over_0.05": 0,
+    "frames_eq_k_plus_1": "1/1",
+    "tier_recomputed_equal": 9,
+    "mask_exact_match": "39/39",
+    "mask_abs_diff_px_max": 0,
+    "step_alignment_bad": 0,
+    "mask_mismatches": [],
+    "moved_test": "body_pose",
+    "n_obs_points_cropped": 816336,
+    "n_obs_points_masked_cropped": 58610,
+    "label_points": 10839,
+    "label_by_render": 10828,
+    "label_by_geometry": 11,
+    "unlabelled": 0,
+    "render_depth_abs_err_mm_median": 0.248
+   },
+   "seconds": 7.5,
+   "obstacle_profile": null,
+   "all": {
+    "n_rows": 9,
+    "n_voxels": 5,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 9,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 1.0,
+     "field_artefact": 0.0,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "voxel_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 5,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 1.0,
+     "field_artefact": 0.0,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "n_requests_with_source": {
+     "robot_self": 0,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 1,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "robot_self_detail": {
+     "by_point_label": {},
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 0
+    },
+    "support_surface_detail": {},
+    "ambiguous_combinations": {},
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": null,
+     "nearest_obs_mm_p95": null,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {},
+     "rows_with_masked_points_within_r_sup": 0
+    },
+    "rows_with_masked_points_within_r_sup": 9,
+    "U2": {
+     "memory_stale": {
+      "n_rows": 9,
+      "gt_distance_mm_median": 1.27,
+      "gt_distance_mm_p95": 4.11,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 0.8889,
+      "d_at_s_mm_median": -1.66
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 9,
+     "n_gt_farther": 0,
+     "n_gt_nearer": 9,
+     "median": -10.67
+    }
+   },
+   "by_phase": {
+    "closing": {
+     "n_rows": 9,
+     "n_voxels": 5,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 9,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 1.0,
+      "field_artefact": 0.0,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 5,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 1.0,
+      "field_artefact": 0.0,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 1,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {},
+     "ambiguous_combinations": {},
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": null,
+      "nearest_obs_mm_p95": null,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {},
+      "rows_with_masked_points_within_r_sup": 0
+     },
+     "rows_with_masked_points_within_r_sup": 9,
+     "U2": {
+      "memory_stale": {
+       "n_rows": 9,
+       "gt_distance_mm_median": 1.27,
+       "gt_distance_mm_p95": 4.11,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 0.8889,
+       "d_at_s_mm_median": -1.66
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 9,
+      "n_gt_farther": 0,
+      "n_gt_nearer": 9,
+      "median": -10.67
+     }
+    }
+   }
+  },
+  "211": {
+   "role": "fail",
+   "fidelity": {
+    "n_unknown_rows": 93,
+    "field_abs_diff_mm_max": 0.01444,
+    "field_abs_diff_mm_n_over_0.05": 0,
+    "frames_eq_k_plus_1": "9/9",
+    "tier_recomputed_equal": 93,
+    "mask_exact_match": "176/180",
+    "mask_abs_diff_px_max": 2864,
+    "step_alignment_bad": 0,
+    "mask_mismatches": [
+     {
+      "frame": 23,
+      "camera": "head",
+      "reconstructed_px": 53479,
+      "recorded_px": 53823
+     },
+     {
+      "frame": 23,
+      "camera": "left_wrist",
+      "reconstructed_px": 9912,
+      "recorded_px": 12776
+     },
+     {
+      "frame": 24,
+      "camera": "head",
+      "reconstructed_px": 53458,
+      "recorded_px": 53803
+     },
+     {
+      "frame": 24,
+      "camera": "left_wrist",
+      "reconstructed_px": 9847,
+      "recorded_px": 12652
+     }
+    ],
+    "moved_test": "body_pose",
+    "n_obs_points_cropped": 8587171,
+    "n_obs_points_masked_cropped": 462186,
+    "label_points": 22287,
+    "label_by_render": 22263,
+    "label_by_geometry": 24,
+    "unlabelled": 0,
+    "render_depth_abs_err_mm_median": 0.25
+   },
+   "seconds": 28.4,
+   "obstacle_profile": "ep211_place",
+   "all": {
+    "n_rows": 93,
+    "n_voxels": 47,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 17,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 5,
+     "field_artefact": 59,
+     "other": 0,
+     "ambiguous": 12
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.1828,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.0538,
+     "field_artefact": 0.6344,
+     "other": 0.0,
+     "ambiguous": 0.129
+    },
+    "voxel_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 12,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 3,
+     "field_artefact": 22,
+     "other": 0,
+     "ambiguous": 10
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.2553,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.0638,
+     "field_artefact": 0.4681,
+     "other": 0.0,
+     "ambiguous": 0.2128
+    },
+    "n_requests_with_source": {
+     "robot_self": 0,
+     "target_at_request_gt": 4,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 1,
+     "field_artefact": 5,
+     "other": 0,
+     "ambiguous": 2
+    },
+    "robot_self_detail": {
+     "by_point_label": {},
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 0
+    },
+    "support_surface_detail": {},
+    "ambiguous_combinations": {
+     "memory_stale+target_at_request_gt": 12
+    },
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": 13.4,
+     "nearest_obs_mm_p95": 22.84,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {
+      "crate": 44,
+      "target": 15
+     },
+     "rows_with_masked_points_within_r_sup": 0
+    },
+    "rows_with_masked_points_within_r_sup": 14,
+    "U2": {
+     "target_at_request_gt": {
+      "n_rows": 17,
+      "gt_distance_mm_median": 3.03,
+      "gt_distance_mm_p95": 7.63,
+      "visible_k_fraction": 0.8235,
+      "observed_k_fraction": 0.8235,
+      "d_at_s_mm_median": -3.25
+     },
+     "memory_stale": {
+      "n_rows": 5,
+      "gt_distance_mm_median": 5.11,
+      "gt_distance_mm_p95": 10.11,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 0.2,
+      "d_at_s_mm_median": 3.9
+     },
+     "field_artefact": {
+      "n_rows": 59,
+      "gt_distance_mm_median": 14.32,
+      "gt_distance_mm_p95": 23.5,
+      "visible_k_fraction": 0.6949,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": 0.14
+     },
+     "ambiguous": {
+      "n_rows": 12,
+      "gt_distance_mm_median": 3.17,
+      "gt_distance_mm_p95": 8.46,
+      "visible_k_fraction": 0.9167,
+      "observed_k_fraction": 0.5,
+      "d_at_s_mm_median": 1.38
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 93,
+     "n_gt_farther": 49,
+     "n_gt_nearer": 44,
+     "median": 10.15
+    }
+   },
+   "by_phase": {
+    "latched": {
+     "n_rows": 70,
+     "n_voxels": 44,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 17,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 5,
+      "field_artefact": 36,
+      "other": 0,
+      "ambiguous": 12
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.2429,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0714,
+      "field_artefact": 0.5143,
+      "other": 0.0,
+      "ambiguous": 0.1714
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 12,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 3,
+      "field_artefact": 19,
+      "other": 0,
+      "ambiguous": 10
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.2727,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0682,
+      "field_artefact": 0.4318,
+      "other": 0.0,
+      "ambiguous": 0.2273
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 4,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 1,
+      "field_artefact": 4,
+      "other": 0,
+      "ambiguous": 2
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {},
+     "ambiguous_combinations": {
+      "memory_stale+target_at_request_gt": 12
+     },
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": 17.49,
+      "nearest_obs_mm_p95": 24.18,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {
+       "crate": 21,
+       "target": 15
+      },
+      "rows_with_masked_points_within_r_sup": 0
+     },
+     "rows_with_masked_points_within_r_sup": 14,
+     "U2": {
+      "target_at_request_gt": {
+       "n_rows": 17,
+       "gt_distance_mm_median": 3.03,
+       "gt_distance_mm_p95": 7.63,
+       "visible_k_fraction": 0.8235,
+       "observed_k_fraction": 0.8235,
+       "d_at_s_mm_median": -3.25
+      },
+      "memory_stale": {
+       "n_rows": 5,
+       "gt_distance_mm_median": 5.11,
+       "gt_distance_mm_p95": 10.11,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 0.2,
+       "d_at_s_mm_median": 3.9
+      },
+      "field_artefact": {
+       "n_rows": 36,
+       "gt_distance_mm_median": 15.57,
+       "gt_distance_mm_p95": 24.02,
+       "visible_k_fraction": 0.5,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": 0.35
+      },
+      "ambiguous": {
+       "n_rows": 12,
+       "gt_distance_mm_median": 3.17,
+       "gt_distance_mm_p95": 8.46,
+       "visible_k_fraction": 0.9167,
+       "observed_k_fraction": 0.5,
+       "d_at_s_mm_median": 1.38
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 70,
+      "n_gt_farther": 26,
+      "n_gt_nearer": 44,
+      "median": -10.83
+     }
+    },
+    "closing": {
+     "n_rows": 23,
+     "n_voxels": 3,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 23,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 1.0,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 3,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 1.0,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 1,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {},
+     "ambiguous_combinations": {},
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": 11.64,
+      "nearest_obs_mm_p95": 11.94,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {
+       "crate": 23
+      },
+      "rows_with_masked_points_within_r_sup": 0
+     },
+     "rows_with_masked_points_within_r_sup": 0,
+     "U2": {
+      "field_artefact": {
+       "n_rows": 23,
+       "gt_distance_mm_median": 14.31,
+       "gt_distance_mm_p95": 14.44,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": 0.1
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 23,
+      "n_gt_farther": 23,
+      "n_gt_nearer": 0,
+      "median": 13.9
+     }
+    }
+   }
+  },
+  "250": {
+   "role": "control",
+   "fidelity": {
+    "n_unknown_rows": 1,
+    "field_abs_diff_mm_max": 0.00027,
+    "field_abs_diff_mm_n_over_0.05": 0,
+    "frames_eq_k_plus_1": "1/1",
+    "tier_recomputed_equal": 1,
+    "mask_exact_match": "27/27",
+    "mask_abs_diff_px_max": 0,
+    "step_alignment_bad": 0,
+    "mask_mismatches": [],
+    "moved_test": "body_pose",
+    "n_obs_points_cropped": 486241,
+    "n_obs_points_masked_cropped": 21871,
+    "label_points": 438,
+    "label_by_render": 437,
+    "label_by_geometry": 1,
+    "unlabelled": 0,
+    "render_depth_abs_err_mm_median": 0.246
+   },
+   "seconds": 6.0,
+   "obstacle_profile": null,
+   "all": {
+    "n_rows": 1,
+    "n_voxels": 1,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 1,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 1.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.0,
+     "field_artefact": 0.0,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "voxel_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 1,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 1.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.0,
+     "field_artefact": 0.0,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "n_requests_with_source": {
+     "robot_self": 0,
+     "target_at_request_gt": 1,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "robot_self_detail": {
+     "by_point_label": {},
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 0
+    },
+    "support_surface_detail": {},
+    "ambiguous_combinations": {},
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": null,
+     "nearest_obs_mm_p95": null,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {},
+     "rows_with_masked_points_within_r_sup": 0
+    },
+    "rows_with_masked_points_within_r_sup": 0,
+    "U2": {
+     "target_at_request_gt": {
+      "n_rows": 1,
+      "gt_distance_mm_median": 3.39,
+      "gt_distance_mm_p95": 3.39,
+      "visible_k_fraction": 0.0,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": -3.43
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 1,
+     "n_gt_farther": 0,
+     "n_gt_nearer": 1,
+     "median": -10.45
+    }
+   },
+   "by_phase": {
+    "latched": {
+     "n_rows": 1,
+     "n_voxels": 1,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 1,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 1.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 0.0,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 1,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 1.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 0.0,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 1,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {},
+     "ambiguous_combinations": {},
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": null,
+      "nearest_obs_mm_p95": null,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {},
+      "rows_with_masked_points_within_r_sup": 0
+     },
+     "rows_with_masked_points_within_r_sup": 0,
+     "U2": {
+      "target_at_request_gt": {
+       "n_rows": 1,
+       "gt_distance_mm_median": 3.39,
+       "gt_distance_mm_p95": 3.39,
+       "visible_k_fraction": 0.0,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": -3.43
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 1,
+      "n_gt_farther": 0,
+      "n_gt_nearer": 1,
+      "median": -10.45
+     }
+    }
+   }
+  },
+  "320": {
+   "role": "fail",
+   "fidelity": {
+    "n_unknown_rows": 1217,
+    "field_abs_diff_mm_max": 0.01757,
+    "field_abs_diff_mm_n_over_0.05": 0,
+    "frames_eq_k_plus_1": "10/10",
+    "tier_recomputed_equal": 1217,
+    "mask_exact_match": "114/114",
+    "mask_abs_diff_px_max": 0,
+    "step_alignment_bad": 0,
+    "mask_mismatches": [],
+    "moved_test": "body_pose",
+    "n_obs_points_cropped": 3569873,
+    "n_obs_points_masked_cropped": 371057,
+    "label_points": 33671,
+    "label_by_render": 33609,
+    "label_by_geometry": 62,
+    "unlabelled": 0,
+    "render_depth_abs_err_mm_median": 0.257
+   },
+   "seconds": 28.3,
+   "obstacle_profile": "ep320_place",
+   "all": {
+    "n_rows": 1217,
+    "n_voxels": 199,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 33,
+     "neighbour_fruit": 0,
+     "support_surface": 1,
+     "memory_stale": 1139,
+     "field_artefact": 44,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0271,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0008,
+     "memory_stale": 0.9359,
+     "field_artefact": 0.0362,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "voxel_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 13,
+     "neighbour_fruit": 0,
+     "support_surface": 1,
+     "memory_stale": 155,
+     "field_artefact": 30,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0653,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.005,
+     "memory_stale": 0.7789,
+     "field_artefact": 0.1508,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "n_requests_with_source": {
+     "robot_self": 0,
+     "target_at_request_gt": 1,
+     "neighbour_fruit": 0,
+     "support_surface": 1,
+     "memory_stale": 8,
+     "field_artefact": 4,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "robot_self_detail": {
+     "by_point_label": {},
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 0
+    },
+    "support_surface_detail": {
+     "table": 169
+    },
+    "ambiguous_combinations": {},
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": 11.94,
+     "nearest_obs_mm_p95": 24.56,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {
+      "target": 44
+     },
+     "rows_with_masked_points_within_r_sup": 28
+    },
+    "rows_with_masked_points_within_r_sup": 1042,
+    "U2": {
+     "target_at_request_gt": {
+      "n_rows": 33,
+      "gt_distance_mm_median": 5.81,
+      "gt_distance_mm_p95": 10.26,
+      "visible_k_fraction": 0.6061,
+      "observed_k_fraction": 0.6061,
+      "d_at_s_mm_median": -2.04
+     },
+     "support_surface": {
+      "n_rows": 1,
+      "gt_distance_mm_median": 10.32,
+      "gt_distance_mm_p95": 10.32,
+      "visible_k_fraction": 0.0,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": -5.57
+     },
+     "memory_stale": {
+      "n_rows": 1139,
+      "gt_distance_mm_median": null,
+      "gt_distance_mm_p95": null,
+      "visible_k_fraction": 0.0606,
+      "observed_k_fraction": 0.0009,
+      "d_at_s_mm_median": 0.41
+     },
+     "field_artefact": {
+      "n_rows": 44,
+      "gt_distance_mm_median": 27.09,
+      "gt_distance_mm_p95": 40.41,
+      "visible_k_fraction": 0.4091,
+      "observed_k_fraction": 0.0909,
+      "d_at_s_mm_median": 0.22
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 1217,
+     "n_gt_farther": 1182,
+     "n_gt_nearer": 35,
+     "median": 52.58
+    }
+   },
+   "by_phase": {
+    "latched": {
+     "n_rows": 716,
+     "n_voxels": 99,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 1,
+      "memory_stale": 706,
+      "field_artefact": 9,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0014,
+      "memory_stale": 0.986,
+      "field_artefact": 0.0126,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 1,
+      "memory_stale": 94,
+      "field_artefact": 4,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0101,
+      "memory_stale": 0.9495,
+      "field_artefact": 0.0404,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 1,
+      "memory_stale": 7,
+      "field_artefact": 1,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {
+      "table": 169
+     },
+     "ambiguous_combinations": {},
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": 11.62,
+      "nearest_obs_mm_p95": 12.3,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {
+       "target": 9
+      },
+      "rows_with_masked_points_within_r_sup": 9
+     },
+     "rows_with_masked_points_within_r_sup": 629,
+     "U2": {
+      "support_surface": {
+       "n_rows": 1,
+       "gt_distance_mm_median": 10.32,
+       "gt_distance_mm_p95": 10.32,
+       "visible_k_fraction": 0.0,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": -5.57
+      },
+      "memory_stale": {
+       "n_rows": 706,
+       "gt_distance_mm_median": null,
+       "gt_distance_mm_p95": null,
+       "visible_k_fraction": 0.0595,
+       "observed_k_fraction": 0.0014,
+       "d_at_s_mm_median": 0.62
+      },
+      "field_artefact": {
+       "n_rows": 9,
+       "gt_distance_mm_median": 39.43,
+       "gt_distance_mm_p95": 40.85,
+       "visible_k_fraction": 0.0,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": -0.01
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 716,
+      "n_gt_farther": 716,
+      "n_gt_nearer": 0,
+      "median": 30.08
+     }
+    },
+    "closing": {
+     "n_rows": 501,
+     "n_voxels": 100,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 33,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 433,
+      "field_artefact": 35,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0659,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.8643,
+      "field_artefact": 0.0699,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 13,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 61,
+      "field_artefact": 26,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.13,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.61,
+      "field_artefact": 0.26,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 1,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 1,
+      "field_artefact": 3,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {},
+     "ambiguous_combinations": {},
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": 12.01,
+      "nearest_obs_mm_p95": 24.96,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {
+       "target": 35
+      },
+      "rows_with_masked_points_within_r_sup": 19
+     },
+     "rows_with_masked_points_within_r_sup": 413,
+     "U2": {
+      "target_at_request_gt": {
+       "n_rows": 33,
+       "gt_distance_mm_median": 5.81,
+       "gt_distance_mm_p95": 10.26,
+       "visible_k_fraction": 0.6061,
+       "observed_k_fraction": 0.6061,
+       "d_at_s_mm_median": -2.04
+      },
+      "memory_stale": {
+       "n_rows": 433,
+       "gt_distance_mm_median": null,
+       "gt_distance_mm_p95": null,
+       "visible_k_fraction": 0.0624,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": 0.19
+      },
+      "field_artefact": {
+       "n_rows": 35,
+       "gt_distance_mm_median": 25.8,
+       "gt_distance_mm_p95": 32.41,
+       "visible_k_fraction": 0.5143,
+       "observed_k_fraction": 0.1143,
+       "d_at_s_mm_median": 0.95
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 501,
+      "n_gt_farther": 466,
+      "n_gt_nearer": 35,
+      "median": 65.12
+     }
+    }
+   }
+  },
+  "526": {
+   "role": "fail",
+   "fidelity": {
+    "n_unknown_rows": 200,
+    "field_abs_diff_mm_max": 0.00683,
+    "field_abs_diff_mm_n_over_0.05": 0,
+    "frames_eq_k_plus_1": "3/3",
+    "tier_recomputed_equal": 200,
+    "mask_exact_match": "96/96",
+    "mask_abs_diff_px_max": 0,
+    "step_alignment_bad": 0,
+    "mask_mismatches": [],
+    "moved_test": "body_pose",
+    "n_obs_points_cropped": 3018280,
+    "n_obs_points_masked_cropped": 492721,
+    "label_points": 5036,
+    "label_by_render": 4985,
+    "label_by_geometry": 2,
+    "unlabelled": 49,
+    "render_depth_abs_err_mm_median": 0.247
+   },
+   "seconds": 14.6,
+   "obstacle_profile": null,
+   "all": {
+    "n_rows": 200,
+    "n_voxels": 13,
+    "row_counts": {
+     "robot_self": 76,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 121,
+     "memory_stale": 0,
+     "field_artefact": 3,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "row_fractions": {
+     "robot_self": 0.38,
+     "target_at_request_gt": 0.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.605,
+     "memory_stale": 0.0,
+     "field_artefact": 0.015,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "voxel_counts": {
+     "robot_self": 2,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 10,
+     "memory_stale": 0,
+     "field_artefact": 1,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "voxel_fractions": {
+     "robot_self": 0.1538,
+     "target_at_request_gt": 0.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.7692,
+     "memory_stale": 0.0,
+     "field_artefact": 0.0769,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "n_requests_with_source": {
+     "robot_self": 1,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 2,
+     "memory_stale": 0,
+     "field_artefact": 1,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "robot_self_detail": {
+     "by_point_label": {
+      "robot_inactive_hand": 152
+     },
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 76
+    },
+    "support_surface_detail": {
+     "crate": 226306
+    },
+    "ambiguous_combinations": {},
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": 16.3,
+     "nearest_obs_mm_p95": 16.66,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {
+      "crate": 3
+     },
+     "rows_with_masked_points_within_r_sup": 0
+    },
+    "rows_with_masked_points_within_r_sup": 117,
+    "U2": {
+     "robot_self": {
+      "n_rows": 76,
+      "gt_distance_mm_median": 3.3,
+      "gt_distance_mm_p95": 5.03,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 1.0,
+      "d_at_s_mm_median": 0.48
+     },
+     "support_surface": {
+      "n_rows": 121,
+      "gt_distance_mm_median": 12.4,
+      "gt_distance_mm_p95": 12.5,
+      "visible_k_fraction": 0.0,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": 0.0
+     },
+     "field_artefact": {
+      "n_rows": 3,
+      "gt_distance_mm_median": 16.84,
+      "gt_distance_mm_p95": 17.34,
+      "visible_k_fraction": 0.0,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": 0.91
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 200,
+     "n_gt_farther": 200,
+     "n_gt_nearer": 0,
+     "median": 12.47
+    }
+   },
+   "by_phase": {
+    "closing": {
+     "n_rows": 200,
+     "n_voxels": 13,
+     "row_counts": {
+      "robot_self": 76,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 121,
+      "memory_stale": 0,
+      "field_artefact": 3,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "row_fractions": {
+      "robot_self": 0.38,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.605,
+      "memory_stale": 0.0,
+      "field_artefact": 0.015,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "voxel_counts": {
+      "robot_self": 2,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 10,
+      "memory_stale": 0,
+      "field_artefact": 1,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.1538,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.7692,
+      "memory_stale": 0.0,
+      "field_artefact": 0.0769,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 1,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 2,
+      "memory_stale": 0,
+      "field_artefact": 1,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "robot_self_detail": {
+      "by_point_label": {
+       "robot_inactive_hand": 152
+      },
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 76
+     },
+     "support_surface_detail": {
+      "crate": 226306
+     },
+     "ambiguous_combinations": {},
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": 16.3,
+      "nearest_obs_mm_p95": 16.66,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {
+       "crate": 3
+      },
+      "rows_with_masked_points_within_r_sup": 0
+     },
+     "rows_with_masked_points_within_r_sup": 117,
+     "U2": {
+      "robot_self": {
+       "n_rows": 76,
+       "gt_distance_mm_median": 3.3,
+       "gt_distance_mm_p95": 5.03,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 1.0,
+       "d_at_s_mm_median": 0.48
+      },
+      "support_surface": {
+       "n_rows": 121,
+       "gt_distance_mm_median": 12.4,
+       "gt_distance_mm_p95": 12.5,
+       "visible_k_fraction": 0.0,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": 0.0
+      },
+      "field_artefact": {
+       "n_rows": 3,
+       "gt_distance_mm_median": 16.84,
+       "gt_distance_mm_p95": 17.34,
+       "visible_k_fraction": 0.0,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": 0.91
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 200,
+      "n_gt_farther": 200,
+      "n_gt_nearer": 0,
+      "median": 12.47
+     }
+    }
+   }
+  },
+  "572": {
+   "role": "control",
+   "fidelity": {
+    "n_unknown_rows": 12,
+    "field_abs_diff_mm_max": 0.00379,
+    "field_abs_diff_mm_n_over_0.05": 0,
+    "frames_eq_k_plus_1": "1/1",
+    "tier_recomputed_equal": 12,
+    "mask_exact_match": "45/45",
+    "mask_abs_diff_px_max": 0,
+    "step_alignment_bad": 0,
+    "mask_mismatches": [],
+    "moved_test": "body_pose",
+    "n_obs_points_cropped": 919604,
+    "n_obs_points_masked_cropped": 64278,
+    "label_points": 9585,
+    "label_by_render": 9585,
+    "label_by_geometry": 0,
+    "unlabelled": 0,
+    "render_depth_abs_err_mm_median": 0.247
+   },
+   "seconds": 8.1,
+   "obstacle_profile": "ep572_place",
+   "all": {
+    "n_rows": 12,
+    "n_voxels": 3,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 11,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 1
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.9167,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.0,
+     "field_artefact": 0.0,
+     "other": 0.0,
+     "ambiguous": 0.0833
+    },
+    "voxel_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 3,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 1.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.0,
+     "field_artefact": 0.0,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "n_requests_with_source": {
+     "robot_self": 0,
+     "target_at_request_gt": 1,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 0,
+     "other": 0,
+     "ambiguous": 1
+    },
+    "robot_self_detail": {
+     "by_point_label": {},
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 0
+    },
+    "support_surface_detail": {},
+    "ambiguous_combinations": {
+     "memory_stale+target_at_request_gt": 1
+    },
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": null,
+     "nearest_obs_mm_p95": null,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {},
+     "rows_with_masked_points_within_r_sup": 0
+    },
+    "rows_with_masked_points_within_r_sup": 12,
+    "U2": {
+     "target_at_request_gt": {
+      "n_rows": 11,
+      "gt_distance_mm_median": 1.81,
+      "gt_distance_mm_p95": 4.89,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 1.0,
+      "d_at_s_mm_median": -1.0
+     },
+     "ambiguous": {
+      "n_rows": 1,
+      "gt_distance_mm_median": 7.08,
+      "gt_distance_mm_p95": 7.08,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 1.0,
+      "d_at_s_mm_median": -2.47
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 12,
+     "n_gt_farther": 0,
+     "n_gt_nearer": 12,
+     "median": -10.75
+    }
+   },
+   "by_phase": {
+    "closing": {
+     "n_rows": 12,
+     "n_voxels": 3,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 11,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 1
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.9167,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 0.0,
+      "other": 0.0,
+      "ambiguous": 0.0833
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 3,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 1.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 0.0,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 1,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 1
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {},
+     "ambiguous_combinations": {
+      "memory_stale+target_at_request_gt": 1
+     },
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": null,
+      "nearest_obs_mm_p95": null,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {},
+      "rows_with_masked_points_within_r_sup": 0
+     },
+     "rows_with_masked_points_within_r_sup": 12,
+     "U2": {
+      "target_at_request_gt": {
+       "n_rows": 11,
+       "gt_distance_mm_median": 1.81,
+       "gt_distance_mm_p95": 4.89,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 1.0,
+       "d_at_s_mm_median": -1.0
+      },
+      "ambiguous": {
+       "n_rows": 1,
+       "gt_distance_mm_median": 7.08,
+       "gt_distance_mm_p95": 7.08,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 1.0,
+       "d_at_s_mm_median": -2.47
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 12,
+      "n_gt_farther": 0,
+      "n_gt_nearer": 12,
+      "median": -10.75
+     }
+    }
+   }
+  },
+  "954": {
+   "role": "fail",
+   "fidelity": {
+    "n_unknown_rows": 21,
+    "field_abs_diff_mm_max": 0.00511,
+    "field_abs_diff_mm_n_over_0.05": 0,
+    "frames_eq_k_plus_1": "3/3",
+    "tier_recomputed_equal": 21,
+    "mask_exact_match": "180/180",
+    "mask_abs_diff_px_max": 0,
+    "step_alignment_bad": 0,
+    "mask_mismatches": [],
+    "moved_test": "body_pose",
+    "n_obs_points_cropped": 6342814,
+    "n_obs_points_masked_cropped": 338820,
+    "label_points": 8999,
+    "label_by_render": 8998,
+    "label_by_geometry": 1,
+    "unlabelled": 0,
+    "render_depth_abs_err_mm_median": 0.259
+   },
+   "seconds": 24.9,
+   "obstacle_profile": "ep954_place",
+   "all": {
+    "n_rows": 21,
+    "n_voxels": 4,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 19,
+     "other": 0,
+     "ambiguous": 2
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.0,
+     "field_artefact": 0.9048,
+     "other": 0.0,
+     "ambiguous": 0.0952
+    },
+    "voxel_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 3,
+     "other": 0,
+     "ambiguous": 1
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0,
+     "memory_stale": 0.0,
+     "field_artefact": 0.75,
+     "other": 0.0,
+     "ambiguous": 0.25
+    },
+    "n_requests_with_source": {
+     "robot_self": 0,
+     "target_at_request_gt": 0,
+     "neighbour_fruit": 0,
+     "support_surface": 0,
+     "memory_stale": 0,
+     "field_artefact": 2,
+     "other": 0,
+     "ambiguous": 1
+    },
+    "robot_self_detail": {
+     "by_point_label": {},
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 0
+    },
+    "support_surface_detail": {},
+    "ambiguous_combinations": {
+     "memory_stale+target_at_request_gt": 2
+    },
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": 27.39,
+     "nearest_obs_mm_p95": 28.44,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {
+      "crate": 19
+     },
+     "rows_with_masked_points_within_r_sup": 0
+    },
+    "rows_with_masked_points_within_r_sup": 2,
+    "U2": {
+     "field_artefact": {
+      "n_rows": 19,
+      "gt_distance_mm_median": 29.05,
+      "gt_distance_mm_p95": 29.66,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": 0.0
+     },
+     "ambiguous": {
+      "n_rows": 2,
+      "gt_distance_mm_median": 1.04,
+      "gt_distance_mm_p95": 1.06,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 1.0,
+      "d_at_s_mm_median": 0.14
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 21,
+     "n_gt_farther": 19,
+     "n_gt_nearer": 2,
+     "median": 17.01
+    }
+   },
+   "by_phase": {
+    "latched": {
+     "n_rows": 2,
+     "n_voxels": 1,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 2
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 0.0,
+      "other": 0.0,
+      "ambiguous": 1.0
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 1
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 0.0,
+      "other": 0.0,
+      "ambiguous": 1.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 0,
+      "other": 0,
+      "ambiguous": 1
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {},
+     "ambiguous_combinations": {
+      "memory_stale+target_at_request_gt": 2
+     },
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": null,
+      "nearest_obs_mm_p95": null,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {},
+      "rows_with_masked_points_within_r_sup": 0
+     },
+     "rows_with_masked_points_within_r_sup": 2,
+     "U2": {
+      "ambiguous": {
+       "n_rows": 2,
+       "gt_distance_mm_median": 1.04,
+       "gt_distance_mm_p95": 1.06,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 1.0,
+       "d_at_s_mm_median": 0.14
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 2,
+      "n_gt_farther": 0,
+      "n_gt_nearer": 2,
+      "median": -10.95
+     }
+    },
+    "closing": {
+     "n_rows": 19,
+     "n_voxels": 3,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 19,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 1.0,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 3,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 1.0,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 2,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {},
+     "ambiguous_combinations": {},
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": 27.39,
+      "nearest_obs_mm_p95": 28.44,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {
+       "crate": 19
+      },
+      "rows_with_masked_points_within_r_sup": 0
+     },
+     "rows_with_masked_points_within_r_sup": 0,
+     "U2": {
+      "field_artefact": {
+       "n_rows": 19,
+       "gt_distance_mm_median": 29.05,
+       "gt_distance_mm_p95": 29.66,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": 0.0
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 19,
+      "n_gt_farther": 19,
+      "n_gt_nearer": 0,
+      "median": 17.28
+     }
+    }
+   }
+  },
+  "979": {
+   "role": "fail",
+   "fidelity": {
+    "n_unknown_rows": 0
+   },
+   "seconds": 0.1,
+   "obstacle_profile": null,
+   "all": {
+    "n_rows": 0
+   },
+   "by_phase": {}
+  },
+  "1313": {
+   "role": "fail",
+   "fidelity": {
+    "n_unknown_rows": 1042,
+    "field_abs_diff_mm_max": 0.02173,
+    "field_abs_diff_mm_n_over_0.05": 0,
+    "frames_eq_k_plus_1": "9/9",
+    "tier_recomputed_equal": 1042,
+    "mask_exact_match": "222/222",
+    "mask_abs_diff_px_max": 0,
+    "step_alignment_bad": 0,
+    "mask_mismatches": [],
+    "moved_test": "body_pose",
+    "n_obs_points_cropped": 12215689,
+    "n_obs_points_masked_cropped": 433355,
+    "label_points": 71017,
+    "label_by_render": 70804,
+    "label_by_geometry": 208,
+    "unlabelled": 5,
+    "render_depth_abs_err_mm_median": 0.252
+   },
+   "seconds": 45.2,
+   "obstacle_profile": "ep1313_place",
+   "all": {
+    "n_rows": 1042,
+    "n_voxels": 143,
+    "row_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 23,
+     "neighbour_fruit": 0,
+     "support_surface": 10,
+     "memory_stale": 0,
+     "field_artefact": 1009,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "row_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0221,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.0096,
+     "memory_stale": 0.0,
+     "field_artefact": 0.9683,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "voxel_counts": {
+     "robot_self": 0,
+     "target_at_request_gt": 13,
+     "neighbour_fruit": 0,
+     "support_surface": 2,
+     "memory_stale": 0,
+     "field_artefact": 128,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "voxel_fractions": {
+     "robot_self": 0.0,
+     "target_at_request_gt": 0.0909,
+     "neighbour_fruit": 0.0,
+     "support_surface": 0.014,
+     "memory_stale": 0.0,
+     "field_artefact": 0.8951,
+     "other": 0.0,
+     "ambiguous": 0.0
+    },
+    "n_requests_with_source": {
+     "robot_self": 0,
+     "target_at_request_gt": 2,
+     "neighbour_fruit": 0,
+     "support_surface": 1,
+     "memory_stale": 0,
+     "field_artefact": 7,
+     "other": 0,
+     "ambiguous": 0
+    },
+    "robot_self_detail": {
+     "by_point_label": {},
+     "rows_with_support_from_frame_k": 0,
+     "rows_support_only_earlier_frames": 0
+    },
+    "support_surface_detail": {
+     "crate": 178286
+    },
+    "ambiguous_combinations": {},
+    "field_artefact_detail": {
+     "nearest_obs_mm_median": 35.14,
+     "nearest_obs_mm_p95": 42.17,
+     "n_no_obs_within_100mm": 0,
+     "nearest_obs_label": {
+      "crate": 999,
+      "target": 10
+     },
+     "rows_with_masked_points_within_r_sup": 837
+    },
+    "rows_with_masked_points_within_r_sup": 858,
+    "U2": {
+     "target_at_request_gt": {
+      "n_rows": 23,
+      "gt_distance_mm_median": 2.16,
+      "gt_distance_mm_p95": 9.11,
+      "visible_k_fraction": 0.8261,
+      "observed_k_fraction": 0.6087,
+      "d_at_s_mm_median": -0.34
+     },
+     "support_surface": {
+      "n_rows": 10,
+      "gt_distance_mm_median": 10.93,
+      "gt_distance_mm_p95": 10.99,
+      "visible_k_fraction": 1.0,
+      "observed_k_fraction": 1.0,
+      "d_at_s_mm_median": 0.09
+     },
+     "field_artefact": {
+      "n_rows": 1009,
+      "gt_distance_mm_median": 32.06,
+      "gt_distance_mm_p95": 40.17,
+      "visible_k_fraction": 0.9901,
+      "observed_k_fraction": 0.0,
+      "d_at_s_mm_median": 0.28
+     }
+    },
+    "p_best_gt_minus_field_mm": {
+     "n": 1042,
+     "n_gt_farther": 1009,
+     "n_gt_nearer": 33,
+     "median": 29.75
+    }
+   },
+   "by_phase": {
+    "latched": {
+     "n_rows": 965,
+     "n_voxels": 127,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 23,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 942,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0238,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 0.9762,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 13,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 114,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.1024,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.0,
+      "memory_stale": 0.0,
+      "field_artefact": 0.8976,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 2,
+      "neighbour_fruit": 0,
+      "support_surface": 0,
+      "memory_stale": 0,
+      "field_artefact": 4,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {},
+     "ambiguous_combinations": {},
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": 35.39,
+      "nearest_obs_mm_p95": 42.72,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {
+       "crate": 932,
+       "target": 10
+      },
+      "rows_with_masked_points_within_r_sup": 837
+     },
+     "rows_with_masked_points_within_r_sup": 858,
+     "U2": {
+      "target_at_request_gt": {
+       "n_rows": 23,
+       "gt_distance_mm_median": 2.16,
+       "gt_distance_mm_p95": 9.11,
+       "visible_k_fraction": 0.8261,
+       "observed_k_fraction": 0.6087,
+       "d_at_s_mm_median": -0.34
+      },
+      "field_artefact": {
+       "n_rows": 942,
+       "gt_distance_mm_median": 33.1,
+       "gt_distance_mm_p95": 40.19,
+       "visible_k_fraction": 0.9894,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": 0.33
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 965,
+      "n_gt_farther": 932,
+      "n_gt_nearer": 33,
+      "median": 30.21
+     }
+    },
+    "closing": {
+     "n_rows": 77,
+     "n_voxels": 16,
+     "row_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 10,
+      "memory_stale": 0,
+      "field_artefact": 67,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "row_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.1299,
+      "memory_stale": 0.0,
+      "field_artefact": 0.8701,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "voxel_counts": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 2,
+      "memory_stale": 0,
+      "field_artefact": 14,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "voxel_fractions": {
+      "robot_self": 0.0,
+      "target_at_request_gt": 0.0,
+      "neighbour_fruit": 0.0,
+      "support_surface": 0.125,
+      "memory_stale": 0.0,
+      "field_artefact": 0.875,
+      "other": 0.0,
+      "ambiguous": 0.0
+     },
+     "n_requests_with_source": {
+      "robot_self": 0,
+      "target_at_request_gt": 0,
+      "neighbour_fruit": 0,
+      "support_surface": 1,
+      "memory_stale": 0,
+      "field_artefact": 3,
+      "other": 0,
+      "ambiguous": 0
+     },
+     "robot_self_detail": {
+      "by_point_label": {},
+      "rows_with_support_from_frame_k": 0,
+      "rows_support_only_earlier_frames": 0
+     },
+     "support_surface_detail": {
+      "crate": 178286
+     },
+     "ambiguous_combinations": {},
+     "field_artefact_detail": {
+      "nearest_obs_mm_median": 27.39,
+      "nearest_obs_mm_p95": 31.62,
+      "n_no_obs_within_100mm": 0,
+      "nearest_obs_label": {
+       "crate": 67
+      },
+      "rows_with_masked_points_within_r_sup": 0
+     },
+     "rows_with_masked_points_within_r_sup": 0,
+     "U2": {
+      "support_surface": {
+       "n_rows": 10,
+       "gt_distance_mm_median": 10.93,
+       "gt_distance_mm_p95": 10.99,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 1.0,
+       "d_at_s_mm_median": 0.09
+      },
+      "field_artefact": {
+       "n_rows": 67,
+       "gt_distance_mm_median": 28.79,
+       "gt_distance_mm_p95": 32.46,
+       "visible_k_fraction": 1.0,
+       "observed_k_fraction": 0.0,
+       "d_at_s_mm_median": 0.03
+      }
+     },
+     "p_best_gt_minus_field_mm": {
+      "n": 77,
+      "n_gt_farther": 77,
+      "n_gt_nearer": 0,
+      "median": 25.18
+     }
+    }
+   }
+  }
+ },
+ "scripts": [
+  "AG3S/ag3s/experiments/studies/ifg_unknown_source.py"
+ ],
+ "figures": [
+  {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/ifg-unknown/ifg-unknown-scene.png",
+   "sidecar": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/ifg-unknown/ifg-unknown-scene.json"
+  },
+  {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/ifg-unknown/ifg-unknown-sources.png",
+   "sidecar": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/ifg-unknown/ifg-unknown-sources.json"
+  },
+  {
+   "path": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/ifg-unknown/ifg-unknown-u3-table.png",
+   "sidecar": "/mnt/dev/AG3S_VLA-development/AG3S/ag3s/docs/figures/ifg-unknown/ifg-unknown-u3-table.json"
+  }
+ ],
+ "notes": [
+  "Moved test was revised once (definitions.moved_test_revision, 02:55 KST) after the v1 collection; v1 counts kept in numbers.v1_moved_test_gt_distance. v1 -> v2 changes: fail6 memory_stale 1270 -> 1144, support_surface 1 -> 132, target_at_request_gt 87 -> 73, ambiguous 5 -> 14; control3 target 22 -> 12, memory_stale 0 -> 9, ambiguous 0 -> 1.",
+  "ep979 has 0 unknown pre-grasp rows (nothing to classify). Fail-6 unknown rows: 2,573 (precheck 2,573); control-3: 22.",
+  "Self-filter mask mismatch: ep211 frames 23 and 24 (head, left_wrist), reconstructed vs recorded n_masked_px 53479/53823, 9912/12776, 53458/53803, 9847/12652; rows of ep211 requests >= 23 use frames 23-24 reconstructed with that difference.",
+  "U2 robot distance uses collidable robot geoms only (visual-only robot meshes not included). Geometric-fallback labels (309 of 161,872 labelled points) cannot split robot into hand / inactive hand / body (mapped to robot_body); 54 points unlabelled (render-vs-recorded depth > 5 mm and no GT class within 5 mm).",
+  "U3 'worst link' and precheck link names are URDF/TO names; the MJCF/URDF left-finger name swap (ee_finger_l1 <-> l2) applies when matching them to MuJoCo bodies. Point labels (robot_hand / robot_inactive_hand) come from MJCF bodies EE_BODY_*/ee_finger_* of the replay geom_sets.",
+  "Answering tiers of the unknown rows: fail 6 target_free 2,062, fine 511; control 3 target_free 22. No coarse-tier row, so r_sup 20 mm was not used.",
+  "v1 figures (not delivered) are in /mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/v1_figures; delivered figures are the v2 ones under AG3S/ag3s/docs/figures/ifg-unknown/."
+ ],
+ "runs": [
+  {
+   "id": "baseline_legacy",
+   "command": "esdf_rollout (regression-baseline skill, legacy)",
+   "venv": ".venv-ag3s",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/baseline_legacy.json",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/baseline_legacy.log"
+  },
+  {
+   "id": "ep126",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw_v2/ep126.json",
+   "seconds": 7.5
+  },
+  {
+   "id": "ep211",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw_v2/ep211.json",
+   "seconds": 28.4
+  },
+  {
+   "id": "ep250",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw_v2/ep250.json",
+   "seconds": 6.0
+  },
+  {
+   "id": "ep320",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw_v2/ep320.json",
+   "seconds": 28.3
+  },
+  {
+   "id": "ep526",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw_v2/ep526.json",
+   "seconds": 14.6
+  },
+  {
+   "id": "ep572",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw_v2/ep572.json",
+   "seconds": 8.1
+  },
+  {
+   "id": "ep954",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw_v2/ep954.json",
+   "seconds": 24.9
+  },
+  {
+   "id": "ep979",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw_v2/ep979.json",
+   "seconds": 0.1
+  },
+  {
+   "id": "ep1313",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw_v2/ep1313.json",
+   "seconds": 45.2
+  },
+  {
+   "id": "v1_collection_gt_distance_moved_test",
+   "raw_output": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/raw",
+   "note": "superseded by raw_v2 (definitions.moved_test_revision)"
+  },
+  {
+   "id": "report_v2",
+   "stdout_log": "/mnt/dev/AG3S_VLA-storage/results/development/20261022T023709+0900_055f2ea2f00b_418a15757d23/verify/IFG-UNKNOWN/report_v2.out"
+  }
+ ],
+ "code_state": {
+  "repo": "AG3S_VLA-development",
+  "branch": "feature/ag3s-development",
+  "head": "055f2ea2",
+  "new_untracked": [
+   "AG3S/ag3s/experiments/studies/ifg_unknown_source.py"
+  ]
+ },
+ "baseline_check": {
+  "matched": true,
+  "note": "legacy: start-violated 14/15, has_target 15/15, frame0 clearance_before -29.031048280806342 mm (expected values)"
+ },
+ "verdict": "baseline matched. Field rebuild |d - precheck d| <= 0.022 mm on all 2,595 rows; self-filter mask pixel counts exact on 899/903 camera-frames (ep211 frames 23-24 head / left_wrist differ, max 2,864 px); step/planning alignment 0 mismatches.",
+ "not_measured": [
+  "Per-voxel TSDF weights / values per frame (the record holds ESDF grids only), so 'which frame wrote the voxel' is inferred from observation points within r_sup, not from the integrator.",
+  "Robot visual-mesh distances in U2.",
+  "IFG-APPLE-NBC kit (not in scope)."
+ ]
+}

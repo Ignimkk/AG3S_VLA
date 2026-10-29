@@ -1,0 +1,373 @@
+{
+ "rows": {
+  "base": 1189,
+  "conn_amb": 904,
+  "all_amb": 904,
+  "cap_in": 894,
+  "cap_all": 400,
+  "oracle_stem": 432
+ },
+ "removed_by_class": {
+  "conn_amb": {
+   "apple_stem_leaf": 322,
+   "apple_body": 60,
+   "none": 28,
+   "fruit:banana": 101
+  },
+  "all_amb": {
+   "apple_stem_leaf": 322,
+   "apple_body": 60,
+   "none": 28,
+   "fruit:banana": 101
+  },
+  "cap_in": {
+   "apple_stem_leaf": 306,
+   "apple_body": 51,
+   "none": 5
+  },
+  "cap_all": {
+   "apple_stem_leaf": 311,
+   "apple_body": 51,
+   "none": 5,
+   "robot": 2
+  },
+  "oracle_stem": {
+   "apple_stem_leaf": 333,
+   "apple_body": 32,
+   "robot": 2
+  }
+ },
+ "requests": 39,
+ "ambiguous_all_connected": 39,
+ "scene": {
+  "key": "E3reg/B_ROI_FPR_ep250_s2503",
+  "request": 9,
+  "policy_step": 72,
+  "n_removed_recorded": 1094,
+  "n_ambiguous": 81,
+  "n_conn_amb": 81,
+  "conn_amb_by_gt_class_8mm": {
+   "none": 4,
+   "apple_stem_leaf": 40,
+   "apple_body": 7,
+   "fruit:banana": 30
+  },
+  "neighbour_voxels": [
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.33734318852424633,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 2.4,
+    "to_ball_centre_mm": 46.4
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.33734318852424633,
+     0.8540915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 4.1,
+    "to_ball_centre_mm": 46.8
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.3323431885242463,
+     0.8440915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 2.8,
+    "to_ball_centre_mm": 45.3
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.3323431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 1.7,
+    "to_ball_centre_mm": 45.2
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.3323431885242463,
+     0.8540915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 2.1,
+    "to_ball_centre_mm": 45.7
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.3223431885242463,
+     0.8340915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 5.7,
+    "to_ball_centre_mm": 46.4
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.3173431885242463,
+     0.8340915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 5.4,
+    "to_ball_centre_mm": 46.8
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.3173431885242463,
+     0.8390915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 2.0,
+    "to_ball_centre_mm": 45.7
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.3173431885242463,
+     0.8440915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 1.8,
+    "to_ball_centre_mm": 45.1
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.3173431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 1.6,
+    "to_ball_centre_mm": 45.0
+   },
+   {
+    "xyz": [
+     0.5137929964065552,
+     -0.3173431885242463,
+     0.8540915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 2.2,
+    "to_ball_centre_mm": 45.5
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.34234318852424633,
+     0.8390915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 4.1,
+    "to_ball_centre_mm": 53.2
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.33734318852424633,
+     0.8390915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 1.2,
+    "to_ball_centre_mm": 51.8
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.33734318852424633,
+     0.8540915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 1.4,
+    "to_ball_centre_mm": 51.6
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.33734318852424633,
+     0.8590915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 2.6,
+    "to_ball_centre_mm": 52.5
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.3323431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 4.5,
+    "to_ball_centre_mm": 50.1
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.3323431885242463,
+     0.8540915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 2.4,
+    "to_ball_centre_mm": 50.6
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.3273431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 4.9,
+    "to_ball_centre_mm": 49.6
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.3223431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 4.8,
+    "to_ball_centre_mm": 49.5
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.3173431885242463,
+     0.8340915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 1.7,
+    "to_ball_centre_mm": 51.6
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.3173431885242463,
+     0.8390915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 1.9,
+    "to_ball_centre_mm": 50.6
+   },
+   {
+    "xyz": [
+     0.5187929964065552,
+     -0.3173431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 4.4,
+    "to_ball_centre_mm": 50.0
+   },
+   {
+    "xyz": [
+     0.5237929964065552,
+     -0.3323431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 5.6,
+    "to_ball_centre_mm": 55.1
+   },
+   {
+    "xyz": [
+     0.5237929964065552,
+     -0.3323431885242463,
+     0.8540915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 3.6,
+    "to_ball_centre_mm": 55.5
+   },
+   {
+    "xyz": [
+     0.5237929964065552,
+     -0.3273431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 5.5,
+    "to_ball_centre_mm": 54.6
+   },
+   {
+    "xyz": [
+     0.5237929964065552,
+     -0.3273431885242463,
+     0.8540915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 3.7,
+    "to_ball_centre_mm": 55.0
+   },
+   {
+    "xyz": [
+     0.5237929964065552,
+     -0.3223431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 5.5,
+    "to_ball_centre_mm": 54.5
+   },
+   {
+    "xyz": [
+     0.5237929964065552,
+     -0.3223431885242463,
+     0.8540915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 3.5,
+    "to_ball_centre_mm": 54.9
+   },
+   {
+    "xyz": [
+     0.5237929964065552,
+     -0.3173431885242463,
+     0.8490915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 5.5,
+    "to_ball_centre_mm": 54.9
+   },
+   {
+    "xyz": [
+     0.5237929964065552,
+     -0.3173431885242463,
+     0.8540915393829345
+    ],
+    "class": "fruit:banana",
+    "gt_dist_mm": 3.8,
+    "to_ball_centre_mm": 55.3
+   }
+  ]
+ },
+ "keys": [
+  "E3occ/AG3S_case1_L1_s13453",
+  "E3occ/AG3S_case1_L1_s23453",
+  "E3occ/AG3S_case1_L1_s33453",
+  "E3occ/AG3S_case1_L3_s13453",
+  "E3occ/AG3S_case1_L3_s23453",
+  "E3occ/AG3S_case1_L3_s33453",
+  "E3reg/B_ROI_FPR_ep119_s1193",
+  "E3reg/B_ROI_FPR_ep121_s1213",
+  "E3reg/B_ROI_FPR_ep126_s1263",
+  "E3reg/B_ROI_FPR_ep250_s2503",
+  "E3reg/B_ROI_FPR_ep309_s3093",
+  "E3reg/B_ROI_FPR_ep325_s3253",
+  "E3reg/B_ROI_FPR_ep56_s563"
+ ]
+}

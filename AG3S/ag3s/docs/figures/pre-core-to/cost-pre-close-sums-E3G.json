@@ -1,0 +1,1558 @@
+{
+ "runs": [
+  {
+   "label": "지금 serving · 가림 121 · 흔들림 0",
+   "group": "E3",
+   "scene": "가림 121",
+   "draw": 0,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.054153140850476345,
+     "smooth": -8.081449249360333e-06,
+     "continuity": -0.10499369930784262,
+     "deflection_rate": -0.11949304134656773,
+     "violation_price": -36.27627429020541,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.054153140850476345,
+     "smooth": 1.8427548125376706e-05,
+     "continuity": 0.1164018250689564,
+     "deflection_rate": 0.15056566915503003,
+     "violation_price": 36.27627429020541,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 1,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.6098,
+    "dq_left_deg_median_modified": 0.714,
+    "palm_shift_max_mm": 14.39,
+    "palm_shift_median_mm_modified": 4.23,
+    "recorded_clearance_min_rows0_7_mm_min": -8.913853205740452,
+    "target_centroid_to_apple_mm_median": 18.08195382341863,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.054153140850476345,
+     "smooth": -8.081449249360333e-06,
+     "continuity": -0.10499369930784262,
+     "deflection_rate": -0.11949304134656773,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 121 · 흔들림 1",
+   "group": "E3",
+   "scene": "가림 121",
+   "draw": 1,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.057366357835634305,
+     "smooth": -7.396040651329318e-06,
+     "continuity": -0.1027718887302274,
+     "deflection_rate": -0.120137026468903,
+     "violation_price": -39.103107605448116,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.057366357835634305,
+     "smooth": 1.7642685894553314e-05,
+     "continuity": 0.11429053726659046,
+     "deflection_rate": 0.15006833425773936,
+     "violation_price": 39.103107605448116,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 5,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 5,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 6,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 6,
+     "deflection_rate": 7,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.6161,
+    "dq_left_deg_median_modified": 0.7273,
+    "palm_shift_max_mm": 15.14,
+    "palm_shift_median_mm_modified": 4.91,
+    "recorded_clearance_min_rows0_7_mm_min": -8.667194284498692,
+    "target_centroid_to_apple_mm_median": 18.64153409426458,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.057366357835634305,
+     "smooth": -7.396040651329318e-06,
+     "continuity": -0.1027718887302274,
+     "deflection_rate": -0.120137026468903,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 121 · 흔들림 2",
+   "group": "E3",
+   "scene": "가림 121",
+   "draw": 2,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.0563355129042868,
+     "smooth": -9.117571770909945e-06,
+     "continuity": -0.10692595900686633,
+     "deflection_rate": -0.12368409975637054,
+     "violation_price": -38.244600687440595,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.0563355129042868,
+     "smooth": 1.8881931524106228e-05,
+     "continuity": 0.11932553665353293,
+     "deflection_rate": 0.1569765025433198,
+     "violation_price": 38.244600687440595,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 1,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.6113,
+    "dq_left_deg_median_modified": 0.7641,
+    "palm_shift_max_mm": 16.22,
+    "palm_shift_median_mm_modified": 4.52,
+    "recorded_clearance_min_rows0_7_mm_min": -8.685833774507046,
+    "target_centroid_to_apple_mm_median": 17.354703694519586,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.0563355129042868,
+     "smooth": -9.117571770909945e-06,
+     "continuity": -0.10692595900686633,
+     "deflection_rate": -0.12368409975637054,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 121 · 흔들림 3",
+   "group": "E3",
+   "scene": "가림 121",
+   "draw": 3,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.05606752528460425,
+     "smooth": -9.958905479390268e-06,
+     "continuity": -0.10550126007574621,
+     "deflection_rate": -0.12075594238182726,
+     "violation_price": -34.32057073047426,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.05606752528460425,
+     "smooth": 1.974042365131198e-05,
+     "continuity": 0.1177242594894571,
+     "deflection_rate": 0.15332495924572453,
+     "violation_price": 34.32057073047426,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 3,
+     "deflection_rate": 6,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 3,
+     "deflection_rate": 6,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 7,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 9,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 4,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.6088,
+    "dq_left_deg_median_modified": 0.7071,
+    "palm_shift_max_mm": 15.95,
+    "palm_shift_median_mm_modified": 5.84,
+    "recorded_clearance_min_rows0_7_mm_min": -7.334093097597361,
+    "target_centroid_to_apple_mm_median": 18.722073416948376,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.05606752528460425,
+     "smooth": -9.958905479390268e-06,
+     "continuity": -0.10550126007574621,
+     "deflection_rate": -0.12075594238182726,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 121 · 흔들림 4",
+   "group": "E3",
+   "scene": "가림 121",
+   "draw": 4,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.05536360986767988,
+     "smooth": -8.55217197194576e-06,
+     "continuity": -0.10463672872925897,
+     "deflection_rate": -0.12378586283656352,
+     "violation_price": -37.612195276122904,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.05536360986767988,
+     "smooth": 1.9775714116574037e-05,
+     "continuity": 0.11585046081996894,
+     "deflection_rate": 0.15479677260671965,
+     "violation_price": 37.612195276122904,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 1,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.613,
+    "dq_left_deg_median_modified": 0.7693,
+    "palm_shift_max_mm": 15.34,
+    "palm_shift_median_mm_modified": 4.65,
+    "recorded_clearance_min_rows0_7_mm_min": -9.685983881354332,
+    "target_centroid_to_apple_mm_median": 18.113385237278955,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.05536360986767988,
+     "smooth": -8.55217197194576e-06,
+     "continuity": -0.10463672872925897,
+     "deflection_rate": -0.12378586283656352,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 122 · 흔들림 0",
+   "group": "E3",
+   "scene": "가림 122",
+   "draw": 0,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.06679197031717413,
+     "smooth": -1.307918194656272e-05,
+     "continuity": -0.13550445124403063,
+     "deflection_rate": -0.14757737801378823,
+     "violation_price": -35.769856216094894,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.06679197031717413,
+     "smooth": 2.0557161928406834e-05,
+     "continuity": 0.13550445124403063,
+     "deflection_rate": 0.1860016212599062,
+     "violation_price": 35.769856216094894,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 7,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 6,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 3,
+    "dq_left_deg_max": 2.6495,
+    "dq_left_deg_median_modified": 0.7527,
+    "palm_shift_max_mm": 19.0,
+    "palm_shift_median_mm_modified": 3.5,
+    "recorded_clearance_min_rows0_7_mm_min": -9.563812986016273,
+    "target_centroid_to_apple_mm_median": 17.76781738404778,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.06679197031717413,
+     "smooth": -1.307918194656272e-05,
+     "continuity": -0.13550445124403063,
+     "deflection_rate": -0.14757737801378823,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 122 · 흔들림 1",
+   "group": "E3",
+   "scene": "가림 122",
+   "draw": 1,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.06571934761911537,
+     "smooth": -1.3262299723961627e-05,
+     "continuity": -0.13426964326530483,
+     "deflection_rate": -0.14991262169419955,
+     "violation_price": -36.33402955383853,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.06571934761911537,
+     "smooth": 1.899341902070335e-05,
+     "continuity": 0.13426964326530483,
+     "deflection_rate": 0.18788573334475994,
+     "violation_price": 36.33402955383853,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 7,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 6,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 3,
+    "dq_left_deg_max": 2.6533,
+    "dq_left_deg_median_modified": 0.7855,
+    "palm_shift_max_mm": 17.16,
+    "palm_shift_median_mm_modified": 3.91,
+    "recorded_clearance_min_rows0_7_mm_min": -18.284736201167107,
+    "target_centroid_to_apple_mm_median": 18.248656152704342,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.06571934761911537,
+     "smooth": -1.3262299723961627e-05,
+     "continuity": -0.13426964326530483,
+     "deflection_rate": -0.14991262169419955,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 122 · 흔들림 2",
+   "group": "E3",
+   "scene": "가림 122",
+   "draw": 2,
+   "pre_close": {
+    "n_requests": 16,
+    "n_modified": 15,
+    "sum_diff": {
+     "track": 0.06535608940459878,
+     "smooth": -1.551489949903149e-05,
+     "continuity": -0.13475662219228454,
+     "deflection_rate": -0.15459212790023433,
+     "violation_price": -37.49422570016348,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.06535608940459878,
+     "smooth": 2.289355200686249e-05,
+     "continuity": 0.13489075825603808,
+     "deflection_rate": 0.1921408975250831,
+     "violation_price": 37.49422570016348,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 7,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 7,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 1,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 10,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 10,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 7,
+    "n_reference_violating": 4,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 5,
+    "dq_left_deg_max": 2.6554,
+    "dq_left_deg_median_modified": 0.7491,
+    "palm_shift_max_mm": 15.82,
+    "palm_shift_median_mm_modified": 3.12,
+    "recorded_clearance_min_rows0_7_mm_min": -19.769778475165367,
+    "target_centroid_to_apple_mm_median": 17.680960335985006,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.06535608940459878,
+     "smooth": -1.551489949903149e-05,
+     "continuity": -0.13475662219228454,
+     "deflection_rate": -0.15459212790023433,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 122 · 흔들림 3",
+   "group": "E3",
+   "scene": "가림 122",
+   "draw": 3,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.06441712385508204,
+     "smooth": -1.1044254741389947e-05,
+     "continuity": -0.1315054276531998,
+     "deflection_rate": -0.14746166062189492,
+     "violation_price": -35.442711150921994,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.06441712385508204,
+     "smooth": 1.8538958123164898e-05,
+     "continuity": 0.1326305718931334,
+     "deflection_rate": 0.18430410499666283,
+     "violation_price": 35.442711150921994,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 7,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 3,
+    "dq_left_deg_max": 2.653,
+    "dq_left_deg_median_modified": 0.7331,
+    "palm_shift_max_mm": 18.47,
+    "palm_shift_median_mm_modified": 3.34,
+    "recorded_clearance_min_rows0_7_mm_min": -14.180564321577549,
+    "target_centroid_to_apple_mm_median": 17.733212180369552,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.06441712385508204,
+     "smooth": -1.1044254741389947e-05,
+     "continuity": -0.1315054276531998,
+     "deflection_rate": -0.14746166062189492,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 122 · 흔들림 4",
+   "group": "E3",
+   "scene": "가림 122",
+   "draw": 4,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.06546262773795526,
+     "smooth": -1.400991155293702e-05,
+     "continuity": -0.13354254700170748,
+     "deflection_rate": -0.1505196708635793,
+     "violation_price": -37.90671962817451,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.06546262773795526,
+     "smooth": 2.205365636670872e-05,
+     "continuity": 0.1335468344366929,
+     "deflection_rate": 0.1880162986424127,
+     "violation_price": 37.90671962817451,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 5,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 5,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 6,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 6,
+     "deflection_rate": 7,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 3,
+    "dq_left_deg_max": 2.6471,
+    "dq_left_deg_median_modified": 0.7725,
+    "palm_shift_max_mm": 17.3,
+    "palm_shift_median_mm_modified": 3.66,
+    "recorded_clearance_min_rows0_7_mm_min": -14.371111989021301,
+    "target_centroid_to_apple_mm_median": 17.60613749783651,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.06546262773795526,
+     "smooth": -1.400991155293702e-05,
+     "continuity": -0.13354254700170748,
+     "deflection_rate": -0.1505196708635793,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 123 · 흔들림 0",
+   "group": "E3",
+   "scene": "가림 123",
+   "draw": 0,
+   "pre_close": {
+    "n_requests": 12,
+    "n_modified": 11,
+    "sum_diff": {
+     "track": 0.042571640588877004,
+     "smooth": -1.559563729706722e-05,
+     "continuity": -0.0960539639738935,
+     "deflection_rate": -0.0826527515382193,
+     "violation_price": -27.830629773549404,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.042571640588877004,
+     "smooth": 2.1473342552842838e-05,
+     "continuity": 0.10950399587045585,
+     "deflection_rate": 0.1142892833630163,
+     "violation_price": 27.830629773549404,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 3,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 3,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 3,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 6,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 4,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.5333,
+    "dq_left_deg_median_modified": 0.5741,
+    "palm_shift_max_mm": 11.0,
+    "palm_shift_median_mm_modified": 5.43,
+    "recorded_clearance_min_rows0_7_mm_min": -6.911633536219597,
+    "target_centroid_to_apple_mm_median": 17.482475169811146,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.042571640588877004,
+     "smooth": -1.559563729706722e-05,
+     "continuity": -0.0960539639738935,
+     "deflection_rate": -0.0826527515382193,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 123 · 흔들림 1",
+   "group": "E3",
+   "scene": "가림 123",
+   "draw": 1,
+   "pre_close": {
+    "n_requests": 12,
+    "n_modified": 11,
+    "sum_diff": {
+     "track": 0.04345562255144228,
+     "smooth": -1.6106977851249383e-05,
+     "continuity": -0.09719962456813193,
+     "deflection_rate": -0.0863749724152077,
+     "violation_price": -32.75244634558385,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.04345562255144228,
+     "smooth": 2.1924390040745435e-05,
+     "continuity": 0.11038151585377255,
+     "deflection_rate": 0.11976634778638723,
+     "violation_price": 32.75244634558385,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 4,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 4,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 5,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 6,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.5364,
+    "dq_left_deg_median_modified": 0.5829,
+    "palm_shift_max_mm": 15.59,
+    "palm_shift_median_mm_modified": 3.67,
+    "recorded_clearance_min_rows0_7_mm_min": -16.504963859915733,
+    "target_centroid_to_apple_mm_median": 18.0482043879325,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.04345562255144228,
+     "smooth": -1.6106977851249383e-05,
+     "continuity": -0.09719962456813193,
+     "deflection_rate": -0.0863749724152077,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 123 · 흔들림 2",
+   "group": "E3",
+   "scene": "가림 123",
+   "draw": 2,
+   "pre_close": {
+    "n_requests": 12,
+    "n_modified": 11,
+    "sum_diff": {
+     "track": 0.04150972250552936,
+     "smooth": -1.4343789342142863e-05,
+     "continuity": -0.09577047743503073,
+     "deflection_rate": -0.08258052933594766,
+     "violation_price": -29.400191279704813,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.04150972250552936,
+     "smooth": 2.0708406596188676e-05,
+     "continuity": 0.109145673099803,
+     "deflection_rate": 0.11446775384964462,
+     "violation_price": 29.400191279704813,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 3,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 3,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 3,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 6,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 4,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.5388,
+    "dq_left_deg_median_modified": 0.5236,
+    "palm_shift_max_mm": 11.76,
+    "palm_shift_median_mm_modified": 5.14,
+    "recorded_clearance_min_rows0_7_mm_min": -8.809690363705158,
+    "target_centroid_to_apple_mm_median": 17.819228936551696,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.04150972250552936,
+     "smooth": -1.4343789342142863e-05,
+     "continuity": -0.09577047743503073,
+     "deflection_rate": -0.08258052933594766,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 123 · 흔들림 3",
+   "group": "E3",
+   "scene": "가림 123",
+   "draw": 3,
+   "pre_close": {
+    "n_requests": 12,
+    "n_modified": 11,
+    "sum_diff": {
+     "track": 0.042448369171535535,
+     "smooth": -1.5948938803735282e-05,
+     "continuity": -0.09663133420984113,
+     "deflection_rate": -0.08342951573139509,
+     "violation_price": -27.29589015673973,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.042448369171535535,
+     "smooth": 2.1578837592388902e-05,
+     "continuity": 0.11000222895719788,
+     "deflection_rate": 0.11574913917714286,
+     "violation_price": 27.29589015673973,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 2,
+     "violation_price": 5,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 2,
+     "violation_price": 5,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 6,
+     "deflection_rate": 5,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 5,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.5534,
+    "dq_left_deg_median_modified": 0.5471,
+    "palm_shift_max_mm": 11.63,
+    "palm_shift_median_mm_modified": 5.7,
+    "recorded_clearance_min_rows0_7_mm_min": -6.851618178188801,
+    "target_centroid_to_apple_mm_median": 17.933907398631895,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.042448369171535535,
+     "smooth": -1.5948938803735282e-05,
+     "continuity": -0.09663133420984113,
+     "deflection_rate": -0.08342951573139509,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving · 가림 123 · 흔들림 4",
+   "group": "E3",
+   "scene": "가림 123",
+   "draw": 4,
+   "pre_close": {
+    "n_requests": 12,
+    "n_modified": 11,
+    "sum_diff": {
+     "track": 0.04213638081201034,
+     "smooth": -1.605293376316878e-05,
+     "continuity": -0.09570979022198198,
+     "deflection_rate": -0.08322252002703347,
+     "violation_price": -26.32639435012626,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.04213638081201034,
+     "smooth": 2.197036627636287e-05,
+     "continuity": 0.10878438983475602,
+     "deflection_rate": 0.11523920219289892,
+     "violation_price": 26.32639435012626,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 2,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 2,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 3,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 6,
+     "deflection_rate": 5,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 4,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.5437,
+    "dq_left_deg_median_modified": 0.5312,
+    "palm_shift_max_mm": 11.86,
+    "palm_shift_median_mm_modified": 5.83,
+    "recorded_clearance_min_rows0_7_mm_min": -6.949879694730043,
+    "target_centroid_to_apple_mm_median": 18.014220419023218,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.04213638081201034,
+     "smooth": -1.605293376316878e-05,
+     "continuity": -0.09570979022198198,
+     "deflection_rate": -0.08322252002703347,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving + 쥐기 목표 항 · 가림 121 · 흔들림 0",
+   "group": "E3G",
+   "scene": "가림 121",
+   "draw": 0,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.054153140850476345,
+     "smooth": -8.081449249360333e-06,
+     "continuity": -0.10499369930784262,
+     "deflection_rate": -0.11949304134656773,
+     "violation_price": -36.27627429020541,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.054153140850476345,
+     "smooth": 1.8427548125376706e-05,
+     "continuity": 0.1164018250689564,
+     "deflection_rate": 0.15056566915503003,
+     "violation_price": 36.27627429020541,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 1,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.6098,
+    "dq_left_deg_median_modified": 0.714,
+    "palm_shift_max_mm": 14.39,
+    "palm_shift_median_mm_modified": 4.23,
+    "recorded_clearance_min_rows0_7_mm_min": -8.913853205740452,
+    "target_centroid_to_apple_mm_median": 18.08195382341863,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.054153140850476345,
+     "smooth": -8.081449249360333e-06,
+     "continuity": -0.10499369930784262,
+     "deflection_rate": -0.11949304134656773,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving + 쥐기 목표 항 · 가림 121 · 흔들림 1",
+   "group": "E3G",
+   "scene": "가림 121",
+   "draw": 1,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.057366357835634305,
+     "smooth": -7.396040651329318e-06,
+     "continuity": -0.1027718887302274,
+     "deflection_rate": -0.120137026468903,
+     "violation_price": -39.103107605448116,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.057366357835634305,
+     "smooth": 1.7642685894553314e-05,
+     "continuity": 0.11429053726659046,
+     "deflection_rate": 0.15006833425773936,
+     "violation_price": 39.103107605448116,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 5,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 5,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 6,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 6,
+     "deflection_rate": 7,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.6161,
+    "dq_left_deg_median_modified": 0.7273,
+    "palm_shift_max_mm": 15.14,
+    "palm_shift_median_mm_modified": 4.91,
+    "recorded_clearance_min_rows0_7_mm_min": -8.667194284498692,
+    "target_centroid_to_apple_mm_median": 18.64153409426458,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.057366357835634305,
+     "smooth": -7.396040651329318e-06,
+     "continuity": -0.1027718887302274,
+     "deflection_rate": -0.120137026468903,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving + 쥐기 목표 항 · 가림 122 · 흔들림 0",
+   "group": "E3G",
+   "scene": "가림 122",
+   "draw": 0,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.06679197031717413,
+     "smooth": -1.307918194656272e-05,
+     "continuity": -0.13550445124403063,
+     "deflection_rate": -0.14757737801378823,
+     "violation_price": -35.769856216094894,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.06679197031717413,
+     "smooth": 2.0557161928406834e-05,
+     "continuity": 0.13550445124403063,
+     "deflection_rate": 0.1860016212599062,
+     "violation_price": 35.769856216094894,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 7,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 8,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 6,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 3,
+    "dq_left_deg_max": 2.6495,
+    "dq_left_deg_median_modified": 0.7527,
+    "palm_shift_max_mm": 19.0,
+    "palm_shift_median_mm_modified": 3.5,
+    "recorded_clearance_min_rows0_7_mm_min": -9.563812986016273,
+    "target_centroid_to_apple_mm_median": 17.76781738404778,
+    "n_grasp_anchor_applied": 1,
+    "sum_diff_modified_no_violation": {
+     "track": 0.06679197031717413,
+     "smooth": -1.307918194656272e-05,
+     "continuity": -0.13550445124403063,
+     "deflection_rate": -0.14757737801378823,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving + 쥐기 목표 항 · 가림 122 · 흔들림 1",
+   "group": "E3G",
+   "scene": "가림 122",
+   "draw": 1,
+   "pre_close": {
+    "n_requests": 14,
+    "n_modified": 13,
+    "sum_diff": {
+     "track": 0.0849763599789233,
+     "smooth": -1.2984887833602909e-05,
+     "continuity": -0.12031812295999975,
+     "deflection_rate": -0.12078003266103045,
+     "violation_price": -36.33402955383853,
+     "grasp_goal": -2.8407948215690797
+    },
+    "sum_abs_diff": {
+     "track": 0.0849763599789233,
+     "smooth": 1.8716007130344633e-05,
+     "continuity": 0.14003202429437697,
+     "deflection_rate": 0.2158325872194654,
+     "violation_price": 36.33402955383853,
+     "grasp_goal": 2.8407948215690797
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 3,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 1
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 3,
+     "deflection_rate": 6,
+     "violation_price": 3,
+     "grasp_goal": 1
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 3,
+     "deflection_rate": 7,
+     "grasp_goal": 1
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 8,
+     "grasp_goal": 1
+    },
+    "n_gate_open": 6,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 3,
+    "dq_left_deg_max": 3.3575,
+    "dq_left_deg_median_modified": 0.7961,
+    "palm_shift_max_mm": 17.16,
+    "palm_shift_median_mm_modified": 5.24,
+    "recorded_clearance_min_rows0_7_mm_min": -18.284736201167107,
+    "target_centroid_to_apple_mm_median": 18.248656152704342,
+    "n_grasp_anchor_applied": 1,
+    "sum_diff_modified_no_violation": {
+     "track": 0.0849763599789233,
+     "smooth": -1.2984887833602909e-05,
+     "continuity": -0.12031812295999975,
+     "deflection_rate": -0.12078003266103045,
+     "grasp_goal": -2.8407948215690797
+    }
+   }
+  },
+  {
+   "label": "지금 serving + 쥐기 목표 항 · 가림 123 · 흔들림 0",
+   "group": "E3G",
+   "scene": "가림 123",
+   "draw": 0,
+   "pre_close": {
+    "n_requests": 12,
+    "n_modified": 11,
+    "sum_diff": {
+     "track": 0.042571640588877004,
+     "smooth": -1.559563729706722e-05,
+     "continuity": -0.0960539639738935,
+     "deflection_rate": -0.0826527515382193,
+     "violation_price": -27.830629773549404,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.042571640588877004,
+     "smooth": 2.1473342552842838e-05,
+     "continuity": 0.10950399587045585,
+     "deflection_rate": 0.1142892833630163,
+     "violation_price": 27.830629773549404,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 3,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 3,
+     "violation_price": 4,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 3,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 4,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 6,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 4,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.5333,
+    "dq_left_deg_median_modified": 0.5741,
+    "palm_shift_max_mm": 11.0,
+    "palm_shift_median_mm_modified": 5.43,
+    "recorded_clearance_min_rows0_7_mm_min": -6.911633536219597,
+    "target_centroid_to_apple_mm_median": 17.482475169811146,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.042571640588877004,
+     "smooth": -1.559563729706722e-05,
+     "continuity": -0.0960539639738935,
+     "deflection_rate": -0.0826527515382193,
+     "grasp_goal": 0.0
+    }
+   }
+  },
+  {
+   "label": "지금 serving + 쥐기 목표 항 · 가림 123 · 흔들림 1",
+   "group": "E3G",
+   "scene": "가림 123",
+   "draw": 1,
+   "pre_close": {
+    "n_requests": 12,
+    "n_modified": 11,
+    "sum_diff": {
+     "track": 0.04345562255144228,
+     "smooth": -1.6106977851249383e-05,
+     "continuity": -0.09719962456813193,
+     "deflection_rate": -0.0863749724152077,
+     "violation_price": -32.75244634558385,
+     "grasp_goal": 0.0
+    },
+    "sum_abs_diff": {
+     "track": 0.04345562255144228,
+     "smooth": 2.1924390040745435e-05,
+     "continuity": 0.11038151585377255,
+     "deflection_rate": 0.11976634778638723,
+     "violation_price": 32.75244634558385,
+     "grasp_goal": 0.0
+    },
+    "dominant_abs_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 4,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "most_decreasing_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 4,
+     "violation_price": 3,
+     "grasp_goal": 0
+    },
+    "dominant_abs_cost_only_count": {
+     "track": 2,
+     "smooth": 0,
+     "continuity": 4,
+     "deflection_rate": 5,
+     "grasp_goal": 0
+    },
+    "most_decreasing_cost_only_count": {
+     "track": 0,
+     "smooth": 0,
+     "continuity": 5,
+     "deflection_rate": 6,
+     "grasp_goal": 0
+    },
+    "n_gate_open": 5,
+    "n_reference_violating": 3,
+    "n_refined_violating": 0,
+    "n_wrist_scale_active": 2,
+    "dq_left_deg_max": 2.5364,
+    "dq_left_deg_median_modified": 0.5829,
+    "palm_shift_max_mm": 15.59,
+    "palm_shift_median_mm_modified": 3.67,
+    "recorded_clearance_min_rows0_7_mm_min": -16.504963859915733,
+    "target_centroid_to_apple_mm_median": 18.0482043879325,
+    "n_grasp_anchor_applied": 0,
+    "sum_diff_modified_no_violation": {
+     "track": 0.04345562255144228,
+     "smooth": -1.6106977851249383e-05,
+     "continuity": -0.09719962456813193,
+     "deflection_rate": -0.0863749724152077,
+     "grasp_goal": 0.0
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,57 @@
+{
+ "frame": "demo_ep0027_f092",
+ "selection": "demo gt_label frame maximising (neighbour-hull cells with value > 0 under exclude) - (under exclude_target) at plane+10 mm, method bo_d3",
+ "cells_in_neighbour_hull_value_gt0_keep_exclude_exclude_target_total": [
+  0,
+  156,
+  0,
+  398
+ ],
+ "support_plane_z_m": 0.8215968303114395,
+ "ball": [
+  0.48330457218659045,
+  0.32827485809698054,
+  0.8324615777366685,
+  0.04081706108555262,
+  0.8265968303114395
+ ],
+ "cut_height_above_plane_mm": 10.0,
+ "panels": {
+  "off": {
+   "neighbour_hull_cells": 398,
+   "neighbour_hull_cells_value_gt0": 273,
+   "target_hull_cells": 340,
+   "target_hull_cells_value_gt0": 336,
+   "neg_cells_total": 132
+  },
+  "keep": {
+   "neighbour_hull_cells": 398,
+   "neighbour_hull_cells_value_gt0": 0,
+   "target_hull_cells": 340,
+   "target_hull_cells_value_gt0": 320,
+   "neg_cells_total": 1005
+  },
+  "exclude": {
+   "neighbour_hull_cells": 398,
+   "neighbour_hull_cells_value_gt0": 156,
+   "target_hull_cells": 340,
+   "target_hull_cells_value_gt0": 330,
+   "neg_cells_total": 407
+  },
+  "exclude_target": {
+   "neighbour_hull_cells": 398,
+   "neighbour_hull_cells_value_gt0": 0,
+   "target_hull_cells": 340,
+   "target_hull_cells_value_gt0": 320,
+   "neg_cells_total": 1005
+  },
+  "diff|exclude-exclude_target": {
+   "cells_gt_1mm": 5158,
+   "max_mm": 20.481495652347803
+  },
+  "diff|exclude_target-keep": {
+   "cells_gt_1mm": 986,
+   "max_mm": 7.202374399639666
+  }
+ }
+}

@@ -1,0 +1,23 @@
+{
+  "base_head": "4292882ef3054a16c67c03d3fd6261ef8644a7e7",
+  "dirty_during_validation": true,
+  "scope": "Final reviewed runtime and focused tests; GPU verified before additive norm output protection, latest CPU writer tests afterward.",
+  "files": {
+    "common/run_output.py": "453f5a3f6a61d1d1455d4929831804846bac71f0af18f9f2df4de97dca3ca8a5",
+    "third_party/openpi/src/openpi/policies/policy.py": "23300df611ba5d0a4e14e0d07e8cec4e98d80e6c8c2de279e37240f33e1958c4",
+    "third_party/openpi/src/openpi/training/config.py": "868063017358a20ede13e4f6eab37f7713dd86d5e30a1c239875c3bfa060a6ed",
+    "third_party/openpi/scripts/serve_policy.py": "345d5c390d03524fa7478345e637aa229fd9c2bc2926cee2cb7d493897d6e3c3",
+    "third_party/openpi/scripts/train.py": "a5a54d41e3aa51d72ce5a8df8d75258921546c3f8801dc6814aefebf241a07c0",
+    "third_party/openpi/scripts/train_pytorch.py": "9ee4515080dd867f1121d746a4ccd9132920a5c538a0403ed032fd1885cedc3b",
+    "third_party/openpi/scripts/compute_norm_stats.py": "bbb78f218b9acae7b7bed6a6803970f8f1f66eaf234c4fbd46bb50bc17cb361b",
+    "AG3S/trajopt/serve_safe.py": "d09bd70b6e809d55897a9ebe4d8faaca55aacd821a13f4538ac7f99588ef83aa",
+    "integration/rby1/bringup/pi05_infer.py": "a426509abe6384bb8684f3ab161aa82eb1687779a2b79d584ec51f0e5c7747bd",
+    "integration/rby1/bringup/pi05_ex_infer.py": "c154931ebcfc94a54068a79cde3c002f01bbab0bca6cbb64b153fdda92d31e89",
+    "scripts/setup/env.sh": "f7b3f6c1ee58bf0f709ee8a313d0036d55af8507c8bbbbb3b10fc348453de99e",
+    "scripts/setup/create_gpu_env.sh": "60530a2cebe8693377557ff2434c0ab0d88c57f5ce5b9b59a994e63fe09fbc5e",
+    "scripts/rby1/launch_train_after_norm.sh": "b1ab138806f56e0c8e390d95acfac9ec404d858d752805364fc3b9dd2070df12",
+    "scripts/rby1/launch_atomic_train_after_norm.sh": "f854db9eb1038c779bdbf2243bcd1119286aeb99e259802a7c2087267c7c1bec",
+    "tests/test_policy_record_output.py": "d4e70963537bed5a69a921d75af0198ea2c6c57e5607db1f9e066a8a3c58f99b",
+    "tests/test_run_output.py": "dc06a5b34b330a4af0f6914b1820e6ffbad7d48c4c61f5d0c69bf82fd61dad10"
+  }
+}

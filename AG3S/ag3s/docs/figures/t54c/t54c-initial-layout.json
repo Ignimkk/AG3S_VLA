@@ -1,0 +1,277 @@
+{
+ "source_agg": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/agg.json",
+ "thumbs": [
+  {
+   "slot": 0,
+   "episode": 1856,
+   "seed": 18561,
+   "target": "orange",
+   "arm": "left",
+   "success": false,
+   "success_ct": false,
+   "n_hold_chunks": 0,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1856_s18561/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 1,
+   "episode": 1825,
+   "seed": 18251,
+   "target": "apple",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 1,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1825_s18251/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 2,
+   "episode": 1826,
+   "seed": 18261,
+   "target": "banana",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 33,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1826_s18261/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 3,
+   "episode": 1811,
+   "seed": 18111,
+   "target": "pear",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 1,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1811_s18111/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 4,
+   "episode": 1844,
+   "seed": 18441,
+   "target": "apple",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 34,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1844_s18441/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 5,
+   "episode": 1813,
+   "seed": 18131,
+   "target": "pear",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 38,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1813_s18131/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 6,
+   "episode": 1814,
+   "seed": 18141,
+   "target": "pear",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 1,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1814_s18141/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 7,
+   "episode": 1831,
+   "seed": 18311,
+   "target": "pear",
+   "arm": "left",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 1,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1831_s18311/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 8,
+   "episode": 1816,
+   "seed": 18161,
+   "target": "orange",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 3,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1816_s18161/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 9,
+   "episode": 1817,
+   "seed": 18171,
+   "target": "apple",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 8,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1817_s18171/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 10,
+   "episode": 1882,
+   "seed": 18821,
+   "target": "banana",
+   "arm": "left",
+   "success": false,
+   "success_ct": false,
+   "n_hold_chunks": 0,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1882_s18821/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 11,
+   "episode": 1835,
+   "seed": 18351,
+   "target": "orange",
+   "arm": "left",
+   "success": false,
+   "success_ct": false,
+   "n_hold_chunks": 0,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1835_s18351/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 12,
+   "episode": 1820,
+   "seed": 18201,
+   "target": "banana",
+   "arm": "right",
+   "success": false,
+   "success_ct": false,
+   "n_hold_chunks": 0,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1820_s18201/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 13,
+   "episode": 1821,
+   "seed": 18211,
+   "target": "orange",
+   "arm": "left",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 0,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1821_s18211/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 14,
+   "episode": 1806,
+   "seed": 18061,
+   "target": "orange",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 30,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1806_s18061/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 15,
+   "episode": 1903,
+   "seed": 19031,
+   "target": "apple",
+   "arm": "right",
+   "success": true,
+   "success_ct": true,
+   "n_hold_chunks": 0,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261014T133115+0900_cf38c9dbca7b_5697bbdb5190/verify/T54c/runs/C1a/R/C1a_ep1903_s19031/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "asset": "paper/figures/paperbanana/figure2/assets/v2_segmenter_mask.png",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19822",
+ "note": "T53 ep1842 chunk 10: right-wrist camera re-rendered from the recorded state; the GT target label (gt/ep1842.npz label_small, class 0) stands in for an ideal external segmenter mask.",
+ "chunk": 10,
+ "episode": "T53 C1a ep1842"
+}

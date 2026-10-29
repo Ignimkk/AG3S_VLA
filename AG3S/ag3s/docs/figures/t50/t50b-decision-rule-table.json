@@ -1,0 +1,1006 @@
+{
+ "source": {
+  "sensitivity": {
+   "base": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/base/full/sensitivity/sensitivity.json",
+   "lora": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/lora/full/sensitivity/sensitivity.json"
+  },
+  "probe": {
+   "base/valcv": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/base/full/probe/probe_valcv.json",
+   "base/trainval": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/base/full/probe/probe_trainval.json",
+   "lora/valcv": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/lora/full/probe/probe_valcv.json",
+   "lora/trainval": "/mnt/dev/AG3S_VLA-storage/results/development/20261012T172032+0900_28b981600bf7_2d9c4266f2e1/verify/T50/lora/full/probe/probe_trainval.json"
+  },
+  "t48_reference": {
+   "place": 0.03958333333333333,
+   "home": 0.0,
+   "source": "AG3S/ag3s/docs/handoff/T48.verify.json numbers.sets.val.probe.C1_to_pick (kv_L4_v1 on LoRA)"
+  }
+ },
+ "thresholds": {
+  "C0": 0.95,
+  "C1_instr": 0.8,
+  "applied_to": "episode median"
+ },
+ "rows": [
+  {
+   "mode": "valcv",
+   "cell": "full__counterfactual",
+   "role": "(2) primary",
+   "model": "base",
+   "C0": {
+    "pooled": 0.7031910803537101,
+    "k": 1829,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.6730769230769231,
+    "episode_q25": 0.6009615384615384,
+    "episode_q75": 0.8221153846153846
+   },
+   "C1_instr": {
+    "pooled": 0.666874869872996,
+    "k": 3203,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.6979166666666667,
+    "episode_q25": 0.5260416666666666,
+    "episode_q75": 0.8203125
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.7031910803537101,
+     "C1_instr": 0.666874869872996,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.6730769230769231,
+     "C1_instr": 0.6979166666666667,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1
+   ]
+  },
+  {
+   "mode": "valcv",
+   "cell": "full__counterfactual",
+   "role": "(2) primary",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.7658592848904268,
+    "k": 1992,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.7810232220609579,
+    "episode_q25": 0.6730769230769231,
+    "episode_q75": 0.8846153846153846
+   },
+   "C1_instr": {
+    "pooled": 0.6616697897147616,
+    "k": 3178,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.671875,
+    "episode_q25": 0.5703125,
+    "episode_q75": 0.7994791666666667
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.7658592848904268,
+     "C1_instr": 0.6616697897147616,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.7810232220609579,
+     "C1_instr": 0.671875,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  },
+  {
+   "mode": "valcv",
+   "cell": "text__counterfactual",
+   "role": "(2)' text half",
+   "model": "base",
+   "C0": {
+    "pooled": 0.6935793925413303,
+    "k": 1804,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.6923076923076923,
+    "episode_q25": 0.5687590711175616,
+    "episode_q75": 0.8076923076923077
+   },
+   "C1_instr": {
+    "pooled": 0.6293982927337081,
+    "k": 3023,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.6614583333333333,
+    "episode_q25": 0.4869791666666667,
+    "episode_q75": 0.7937973484848485
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.6935793925413303,
+     "C1_instr": 0.6293982927337081,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.6923076923076923,
+     "C1_instr": 0.6614583333333333,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1,
+    1.0,
+    0.1,
+    0.1,
+    0.1
+   ]
+  },
+  {
+   "mode": "valcv",
+   "cell": "text__counterfactual",
+   "role": "(2)' text half",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.7454825067281815,
+    "k": 1939,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.75,
+    "episode_q25": 0.6201923076923077,
+    "episode_q75": 0.8461538461538461
+   },
+   "C1_instr": {
+    "pooled": 0.6502186133666459,
+    "k": 3123,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.625,
+    "episode_q25": 0.5208333333333334,
+    "episode_q75": 0.7890625
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.7454825067281815,
+     "C1_instr": 0.6502186133666459,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.75,
+     "C1_instr": 0.625,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1,
+    1.0,
+    1.0,
+    1.0,
+    0.1
+   ]
+  },
+  {
+   "mode": "valcv",
+   "cell": "image__counterfactual",
+   "role": "(2)' image half",
+   "model": "base",
+   "C0": {
+    "pooled": 0.6847366397539408,
+    "k": 1781,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.6826923076923077,
+    "episode_q25": 0.6153846153846154,
+    "episode_q75": 0.75
+   },
+   "C1_instr": {
+    "pooled": 0.5996252342286071,
+    "k": 2880,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.6354166666666666,
+    "episode_q25": 0.3984375,
+    "episode_q75": 0.7708333333333334
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.6847366397539408,
+     "C1_instr": 0.5996252342286071,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.6826923076923077,
+     "C1_instr": 0.6354166666666666,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    1.0,
+    0.1,
+    0.1,
+    0.1,
+    0.1
+   ]
+  },
+  {
+   "mode": "valcv",
+   "cell": "image__counterfactual",
+   "role": "(2)' image half",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.6147635524798154,
+    "k": 1599,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.6057692307692308,
+    "episode_q25": 0.5384615384615384,
+    "episode_q75": 0.7067307692307693
+   },
+   "C1_instr": {
+    "pooled": 0.6258588382261087,
+    "k": 3006,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.625,
+    "episode_q25": 0.4921875,
+    "episode_q75": 0.7447916666666666
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.6147635524798154,
+     "C1_instr": 0.6258588382261087,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.6057692307692308,
+     "C1_instr": 0.625,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.001,
+    0.001,
+    0.001,
+    0.001,
+    0.001
+   ]
+  },
+  {
+   "mode": "valcv",
+   "cell": "full__shuffled",
+   "role": "(2)' C1-label shuffle",
+   "model": "base",
+   "C0": {
+    "pooled": 0.946559015763168,
+    "k": 2462,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9615384615384616,
+    "episode_q25": 0.9423076923076923,
+    "episode_q75": 0.9615384615384616
+   },
+   "C1_instr": {
+    "pooled": 0.04580470539246304,
+    "k": 220,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.0,
+    "episode_q75": 0.057291666666666664
+   },
+   "C0_met": true,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.946559015763168,
+     "C1_instr": 0.04580470539246304,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9615384615384616,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.001,
+    0.001,
+    0.001,
+    0.001,
+    0.001
+   ]
+  },
+  {
+   "mode": "valcv",
+   "cell": "full__shuffled",
+   "role": "(2)' C1-label shuffle",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.9769319492502884,
+    "k": 2541,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.027066416822819073,
+    "k": 130,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.03125,
+    "episode_q75": 0.03125
+   },
+   "C0_met": true,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9769319492502884,
+     "C1_instr": 0.027066416822819073,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.001,
+    0.001,
+    0.001,
+    0.001,
+    0.001
+   ]
+  },
+  {
+   "mode": "valcv",
+   "cell": "full__standard",
+   "role": "reference / #6 standard",
+   "model": "base",
+   "C0": {
+    "pooled": 0.9530949634755863,
+    "k": 2479,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9615384615384616,
+    "episode_q25": 0.9423076923076923,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.04080782844055798,
+    "k": 196,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.010416666666666666,
+    "episode_q75": 0.059895833333333336
+   },
+   "C0_met": true,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9530949634755863,
+     "C1_instr": 0.04080782844055798,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9615384615384616,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1
+   ]
+  },
+  {
+   "mode": "valcv",
+   "cell": "full__standard",
+   "role": "reference / #6 standard",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.9784698193002691,
+    "k": 2545,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.021236727045596503,
+    "k": 102,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.0025252525252525255,
+    "episode_q75": 0.03125
+   },
+   "C0_met": true,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9784698193002691,
+     "C1_instr": 0.021236727045596503,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1,
+    0.01,
+    0.01,
+    0.01,
+    0.01
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "full__counterfactual",
+   "role": "(2) primary",
+   "model": "base",
+   "C0": {
+    "pooled": 0.7562475970780469,
+    "k": 1967,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.7692307692307693,
+    "episode_q25": 0.6634615384615384,
+    "episode_q75": 0.8605769230769231
+   },
+   "C1_instr": {
+    "pooled": 0.6687486987299605,
+    "k": 3212,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.65625,
+    "episode_q25": 0.5520833333333334,
+    "episode_q75": 0.8203125
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.7562475970780469,
+     "C1_instr": 0.6687486987299605,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.7692307692307693,
+     "C1_instr": 0.65625,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "full__counterfactual",
+   "role": "(2) primary",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.8250672818146867,
+    "k": 2146,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.8269230769230769,
+    "episode_q25": 0.75,
+    "episode_q75": 0.8995827285921626
+   },
+   "C1_instr": {
+    "pooled": 0.7080991047262127,
+    "k": 3401,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.7447916666666667,
+    "episode_q25": 0.6171875,
+    "episode_q75": 0.8307291666666667
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.8250672818146867,
+     "C1_instr": 0.7080991047262127,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.8269230769230769,
+     "C1_instr": 0.7447916666666667,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "text__counterfactual",
+   "role": "(2)' text half",
+   "model": "base",
+   "C0": {
+    "pooled": 0.7231833910034602,
+    "k": 1881,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.7307692307692307,
+    "episode_q25": 0.6346153846153846,
+    "episode_q75": 0.8076923076923077
+   },
+   "C1_instr": {
+    "pooled": 0.6383510306058713,
+    "k": 3066,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.6410984848484849,
+    "episode_q25": 0.4895833333333333,
+    "episode_q75": 0.8098958333333334
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.7231833910034602,
+     "C1_instr": 0.6383510306058713,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.7307692307692307,
+     "C1_instr": 0.6410984848484849,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "text__counterfactual",
+   "role": "(2)' text half",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.8027681660899654,
+    "k": 2088,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.8269230769230769,
+    "episode_q25": 0.7307692307692307,
+    "episode_q75": 0.8653846153846154
+   },
+   "C1_instr": {
+    "pooled": 0.6708307307932542,
+    "k": 3222,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.6822916666666667,
+    "episode_q25": 0.5390625,
+    "episode_q75": 0.7786458333333334
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.8027681660899654,
+     "C1_instr": 0.6708307307932542,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.8269230769230769,
+     "C1_instr": 0.6822916666666667,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    1.0
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "image__counterfactual",
+   "role": "(2)' image half",
+   "model": "base",
+   "C0": {
+    "pooled": 0.6943483275663207,
+    "k": 1806,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.6923076923076923,
+    "episode_q25": 0.6346153846153846,
+    "episode_q75": 0.7692307692307693
+   },
+   "C1_instr": {
+    "pooled": 0.5923381220070789,
+    "k": 2845,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.5885416666666667,
+    "episode_q25": 0.4401041666666667,
+    "episode_q75": 0.7447916666666666
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.6943483275663207,
+     "C1_instr": 0.5923381220070789,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.6923076923076923,
+     "C1_instr": 0.5885416666666667,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    1.0
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "image__counterfactual",
+   "role": "(2)' image half",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.6824298346789697,
+    "k": 1775,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.7019230769230769,
+    "episode_q25": 0.5817307692307692,
+    "episode_q75": 0.7692307692307693
+   },
+   "C1_instr": {
+    "pooled": 0.5044763689360816,
+    "k": 2423,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.47395833333333337,
+    "episode_q25": 0.35677083333333337,
+    "episode_q75": 0.65625
+   },
+   "C0_met": false,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.6824298346789697,
+     "C1_instr": 0.5044763689360816,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.7019230769230769,
+     "C1_instr": 0.47395833333333337,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    1.0
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "full__shuffled",
+   "role": "(2)' C1-label shuffle",
+   "model": "base",
+   "C0": {
+    "pooled": 0.9580930411380238,
+    "k": 2492,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9615384615384616,
+    "episode_q25": 0.9615384615384616,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.0341453258380179,
+    "k": 164,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.010416666666666666,
+    "episode_q75": 0.03125
+   },
+   "C0_met": true,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9580930411380238,
+     "C1_instr": 0.0341453258380179,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9615384615384616,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.001
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "full__shuffled",
+   "role": "(2)' C1-label shuffle",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.98000768935025,
+    "k": 2549,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.0231105559025609,
+    "k": 111,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.010416666666666666,
+    "episode_q75": 0.03125
+   },
+   "C0_met": true,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.98000768935025,
+     "C1_instr": 0.0231105559025609,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.01
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "full__standard",
+   "role": "reference / #6 standard",
+   "model": "base",
+   "C0": {
+    "pooled": 0.9719338715878508,
+    "k": 2528,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9615384615384616,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.024359775140537165,
+    "k": 117,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.010416666666666666,
+    "episode_q75": 0.03125
+   },
+   "C0_met": true,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9719338715878508,
+     "C1_instr": 0.024359775140537165,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.1
+   ]
+  },
+  {
+   "mode": "trainval",
+   "cell": "full__standard",
+   "role": "reference / #6 standard",
+   "model": "lora",
+   "C0": {
+    "pooled": 0.9807766243752403,
+    "k": 2551,
+    "n": 2601,
+    "n_episodes": 50,
+    "episode_median": 0.9807692307692307,
+    "episode_q25": 0.9807692307692307,
+    "episode_q75": 0.9807692307692307
+   },
+   "C1_instr": {
+    "pooled": 0.019987507807620236,
+    "k": 96,
+    "n": 4803,
+    "n_episodes": 50,
+    "episode_median": 0.03125,
+    "episode_q25": 0.0,
+    "episode_q75": 0.03125
+   },
+   "C0_met": true,
+   "C1_instr_met": false,
+   "both_met_episode_median": false,
+   "rule_check": {
+    "thresholds": {
+     "C0": 0.95,
+     "C1_instr": 0.8
+    },
+    "note": "T50.task.md does not fix pooled vs episode median; both reported, the lead decides",
+    "pooled": {
+     "C0": 0.9807766243752403,
+     "C1_instr": 0.019987507807620236,
+     "pass": false
+    },
+    "episode_median": {
+     "C0": 0.9807692307692307,
+     "C1_instr": 0.03125,
+     "pass": false
+    }
+   },
+   "fold_C": [
+    0.01
+   ]
+  }
+ ]
+}

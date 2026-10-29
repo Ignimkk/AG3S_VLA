@@ -2,12 +2,12 @@
 name: curobo-esdf
 description: cuRobo 로 ESDF/TSDF 를 만들 때의 함정 5개와 eikonal 자가진단. curobo_field, compute_esdf, VoxelGrid, esdf_origin 을 만지거나 .venv-curobo 에서 거리장을 생산할 때 쓴다.
 ---
-> 현재 환경 정본: `doc/SHARED_STORAGE_AND_PYTHON.md`. 이 checkout에는 독립 CPU `.venv-ag3s`가 있다. 아래 과거 GPU/venv 버전 기록은 설치 완료를 뜻하지 않는다. Input은 `AG3S_STORAGE_ROOT`의 별도 저장 공간을 사용한다.
+> 현재 환경 정본: `doc/active/SHARED_STORAGE_AND_PYTHON.md`. 이 checkout에는 독립 CPU `.venv-ag3s`가 있다. 아래 과거 GPU/venv 버전 기록은 설치 완료를 뜻하지 않는다. Input은 `AG3S_STORAGE_ROOT`의 별도 저장 공간을 사용한다.
 
 
 # cuRobo ESDF — 함정 다섯
 
-유래는 archive `AG3S/ag3s/docs/AG3S_REVIEW_LOG.md` 다.
+유래는 모듈 검토 국면 (14D) 의 옛 기록이다 — 그 파일은 더 이상 참고 대상이 아니다. 근거가 필요하면 `AG3S_T0T6_LOG.md` · `AG3S_T47_LOG.md` 를 본다.
 
 1. **`esdf_origin` 은 격자 코너가 아니라 중심이다.**
 2. **인덱싱을 손으로 쓰지 않는다** — `create_xyzr_tensor(transform_to_origin=True)` 를 쓴다.

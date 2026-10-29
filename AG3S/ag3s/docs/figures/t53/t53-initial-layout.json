@@ -1,0 +1,180 @@
+{
+ "thumbs": [
+  {
+   "slot": 0,
+   "episode": 1840,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1840_s18401/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 1,
+   "episode": 1809,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1809_s18091/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 2,
+   "episode": 1842,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 3,
+   "episode": 1843,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1843_s18431/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 4,
+   "episode": 1860,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1860_s18601/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 5,
+   "episode": 1845,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1845_s18451/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 6,
+   "episode": 1862,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1862_s18621/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 7,
+   "episode": 1815,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1815_s18151/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 8,
+   "episode": 1848,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1848_s18481/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 9,
+   "episode": 1849,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1849_s18491/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 10,
+   "episode": 1866,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1866_s18661/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 11,
+   "episode": 1851,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1851_s18511/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 12,
+   "episode": 1804,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1804_s18041/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 13,
+   "episode": 1853,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1853_s18531/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 14,
+   "episode": 1822,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1822_s18221/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  },
+  {
+   "slot": 15,
+   "episode": 1839,
+   "video": "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1839_s18391/third_person_front.mp4",
+   "frame_index": 0,
+   "shape": [
+    480,
+    640,
+    3
+   ]
+  }
+ ]
+}

@@ -2,9 +2,10 @@
 
 This script is used to compute the normalization statistics for a given config. It
 will compute the mean and standard deviation of the data in the dataset and save it
-to the config assets directory.
+to a separate result run assets directory.
 """
 
+from common.run_output import allocate_run_dir, configure_run_logging, resolve_output_path
 import numpy as np
 import tqdm
 import tyro
@@ -86,7 +87,11 @@ def create_rlds_dataloader(
     return data_loader, num_batches
 
 
-def main(config_name: str, max_frames: int | None = None):
+def main(config_name: str, max_frames: int | None = None, output_dir: str | None = None):
+    run = allocate_run_dir()
+    configure_run_logging("compute_norm_stats")
+    # Validate before opening a dataset; assets_dirs remains a read-only input.
+    output_base = resolve_output_path(output_dir, run_dir=run, default_name="assets")
     config = _config.get_config(config_name)
     data_config = config.data.create(config.assets_dirs, config.model)
 
@@ -108,7 +113,9 @@ def main(config_name: str, max_frames: int | None = None):
 
     norm_stats = {key: stats.get_statistics() for key, stats in stats.items()}
 
-    output_path = config.assets_dirs / data_config.repo_id
+    output_path = resolve_output_path(
+        output_base / config.name / data_config.repo_id, run_dir=run, default_name="assets"
+    )
     print(f"Writing stats to: {output_path}")
     normalize.save(output_path, norm_stats)
 
