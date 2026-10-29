@@ -1,0 +1,32 @@
+{
+  "status": "PROVISIONAL_2026",
+  "target_venue": "CVPR 2027",
+  "official_repository": "https://github.com/cvpr-org/author-kit",
+  "tag": "CVPR2026-v1(latex)",
+  "commit_sha": "12909ae437f6dbc7435069cfdb4ca44c18e6a02f",
+  "observed_main_commit": "291758547e923160eb4d37079b7b9f0dfce82355",
+  "archive_url": "https://codeload.github.com/cvpr-org/author-kit/tar.gz/12909ae437f6dbc7435069cfdb4ca44c18e6a02f",
+  "archive_sha256": "f99a09995af5b9cf0d1fb7d1e5ebf0eeb334f8a458f2b65041d87601101a76ae",
+  "downloaded_at": "2026-10-05T20:50:00+09:00",
+  "original_directory": "paper/template/cvpr2026_official",
+  "files_sha256": {
+    ".github/workflows/latex-build.yml": "0050df3e0c8f169d11624ffca077b1863b8a1f507004349c6d55879a578c0f33",
+    ".gitignore": "d4d29b72015c9804722057eb16b0fec068a1b0cadd13c6eb8a527f4166a16054",
+    "README.md": "d91116b58be33154d195012d7d2ef2be310d308ed23f3803aa6baf2aeb441a5e",
+    "cvpr.sty": "2602473285d1a7df2a445ac89b76e1afa0acab78e056f0369d19770245190153",
+    "ieeenat_fullname.bst": "e38e6166bd7b1e6d23a1b79dcdb55c656e4fcdbe91bdf6b50d827e6b5d1aacfc",
+    "main.bib": "1d6d78b4c02eae2607a40e15376f6ac96ef491e311241acd6c8a8a970ac3c1b2",
+    "main.tex": "251329b8a7ea25f1ba0f5a769f652235e13bc1f43b3e8b1d892e16a005b361f0",
+    "preamble.tex": "f666a85903f49929395951e7afb620e96d4e208334623f23135298b4d7f06228",
+    "rebuttal.tex": "29e36ddeb5f9eebe5e62c9df74a24f9f49b587ccfb3710209a22f02239b53ebb",
+    "sec/0_abstract.tex": "ac059e9cb8595bab8f7795d088d71e321ee46e8397d5cfb56957107d43c868ed",
+    "sec/1_intro.tex": "55dc0cd862ccfd3c54b63367323669ff1e23d07f76291b35949c7b914c92fbec",
+    "sec/2_formatting.tex": "bd4233b307bfe3ad791c433e021b00ed4e4017db7adde8ee8e475c267fc7191d",
+    "sec/3_finalcopy.tex": "ae261b3daaff50cf609bb3ca7dfd030bb1e835fd85aa4fda45cdaf53cc35cc1a",
+    "sec/X_suppl.tex": "594291f94cf3b925908dc127a93f3525c1998e96abf37a14f69d6077a7e58bd7"
+  },
+  "upstream_conf_year": 2026,
+  "working_conf_year": 2027,
+  "working_year_change_is_official_2027_kit": false,
+  "observed_2027_author_guidelines_http_status": 404
+}

@@ -1,0 +1,21 @@
+{
+ "asset": "paper/figures/cvpr_v1/assets/p_robot_mask_v2.png",
+ "frame": "T53_ep1842_f025",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/cvpr_v1_fig3_assets.py",
+ "replaces": "paper/figures/ifg_overview/assets/p_robot_mask.json",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T53_ep1842_f025.npz": "6d8dc3c6277fcb464c5b72e64cb2f45ec8a768aea67393a9bb792aa4b6e68d65",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/rounds/R6/robot_mask/T53_ep1842_f025.npz": "fde1ac68119106540f9234a6fac3dd4459ccbac8ece79c04d3e4b4a2727b8078",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/labels/T53_ep1842_f025.npz": "fc5160d0091c378c2c8b46eb728eb9fadfa40a327c1a4ba12fe8823cb15fa67f"
+ },
+ "note": "Active wrist camera while carrying: orange = every observed target pixel (label class 'target' outside the robot), purple = rendered robot-surface mask. The pixels a sphere/capsule volume filter would remove in addition are counted in volume_filter_extra_px but not drawn.",
+ "is_measured_result": false,
+ "moment": "M4_carry",
+ "camera": "wrist_cam_r",
+ "render_px": 70255,
+ "volume_filter_extra_px": 49023,
+ "target_px_outside_robot": 97797,
+ "target": "pear"
+}

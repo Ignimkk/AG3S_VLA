@@ -3,7 +3,6 @@
   "experiment_id": "EXP001",
   "title": "T39 paired descriptive task outcomes",
   "status": "REGISTERED",
-  "paper_eligible": true,
   "evidence_scope": "DESCRIPTIVE_TASK_OUTCOME_ONLY",
   "action_dimension": 16,
   "state_dimension": 16,

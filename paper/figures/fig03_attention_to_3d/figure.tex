@@ -1,19 +1,9 @@
-% F03: Draft 10 storyboard for the central mechanism; raw visual evidence is pending.
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\begin{tabularx}{\columnwidth}{@{}XX@{}}
-\toprule
-\textbf{(a) Target selection} & \textbf{(b) Observed extent} \\
-\tbd{Same RGB scene, two instructions; attention over each target.}
-& \tbd{Lifted seeds and grown 3D regions; target/obstacle reference.} \\
-\midrule
-\textbf{(c) Contact constraints} & \textbf{(d) Execution consequence} \\
-\tbd{Scene and target-excluded field slices; query links and removed region.}
-& \tbd{Matched-controller trajectories and contact events.} \\
-\bottomrule
-\end{tabularx}
-\caption{\textbf{Grounding must change the right constraints.} Planned visual evidence follows target identity through
-3D extent, link-specific distance queries, and execution. Controller settings are held fixed. Panels are placeholders;
-no grounding or execution result is claimed.}
+\includegraphics[width=\textwidth]{../figures/ifg_results/results.pdf}
+\caption{\textbf{Measured development evidence.}
+(a) The rendered robot mask improves both methods; the proposed extent pipeline retains an advantage when the mask is matched.
+(b) With that improved geometry fixed, prefix-layer-8 feature edges leave IoU nearly unchanged, while prototype unaries and feature-conditioned growing reduce it.
+All bars show episode-mean observed-surface IoU over 32 development episodes; they do not report held-out segmentation or physical safety.}
 \label{fig:fig03_attention_to_3d}
-\end{figure}
+\end{figure*}

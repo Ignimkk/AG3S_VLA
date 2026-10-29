@@ -813,7 +813,7 @@ find evidence later
 
 ---
 
-# 17. 16-D Experiment Whitelist
+# 17. Experiment Registry
 
 과거 14-D 결과가 섞이는 것을 막는다.
 
@@ -821,7 +821,7 @@ find evidence later
 experiments/manifests/
 ```
 
-를 논문 사용 가능 experiment whitelist로 사용한다.
+를 experiment의 provenance, dimension, scope와 검증 상태를 기록하는 registry로 사용한다.
 
 예:
 
@@ -834,10 +834,9 @@ E005_runtime.yaml
 E006_real_robot.yaml
 ```
 
-manifest에 등록되지 않은 experiment는 논문 evidence로 사용하지 않는다.
-파일이 존재하는 것만으로 whitelist 등록이 성립하지 않는다. `REGISTERED` status,
-`paper_eligible=true`, 실제 16-D array와 source audit·검증 pointer가 모두 필요하며
-등록된 evidence scope 안에서만 사용한다.
+Manifest 등록 여부는 논문 evidence의 사용 가능성을 제한하지 않는다. 등록되지 않았거나
+검증되지 않은 자료도 측정·파생·추정·계획·placeholder 여부, provenance, dimension,
+scope와 검증 상태를 명시해 사용할 수 있다.
 
 현재 활성 manifest는 `experiments/manifests/EXP001_T39_task_outcomes.json`이다.
 Schema와 candidate 예제는 `experiments/configs/`에 두며, validator는 JSON을 사용한다.
@@ -845,19 +844,13 @@ Schema와 candidate 예제는 `experiments/configs/`에 두며, validator는 JSO
 
 Claude는 파일명이 `run_0004`, `run_0005`라고 해서 임의로 현재 실험이라고 추정하면 안 된다.
 
-특히:
+특히 다음 자료는 dimension과 snapshot을 명시한다.
 
 ```text
 14-D experimental results
 ```
 
-는 읽거나 논문에 사용하지 않는다.
-
-현재 논문은:
-
-```text
-16-D experiments only
-```
+14-D와 16-D 자료를 함께 다룰 때는 서로 다른 설정임을 독자가 구분할 수 있게 표시한다.
 
 를 기본 원칙으로 한다.
 

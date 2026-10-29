@@ -225,7 +225,7 @@ perception·VLA·실시간 정제가 없다. Related Work 2문단(collision avoi
 - "While … presents …, … mitigates these concerns."
 - "Limitation. While … effectively handles …, … remains challenging."
 
-**쓰지 않을 것**: 등록되지 않은 수치, 검정 없는 "significantly", 범위 없는 "the first".
+**표시 없이 쓰지 않을 것**: 출처·자료 유형·검증 상태가 없는 수치, 검정 없는 "significantly", 범위 없는 "the first".
 
 ---
 

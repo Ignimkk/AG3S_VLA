@@ -1,28 +1,22 @@
 {
   "artifact_id": "F03",
-  "status": "PLANNED_PLACEHOLDER",
+  "status": "DEVELOPMENT_EVIDENCE",
   "claim_ids": [
-    "C002"
+    "C008",
+    "C009"
   ],
-  "plan_ids": [
-    "P002",
-    "P003"
-  ],
-  "result_ids": [],
-  "source_notes": [
-    "paper/notes/PAPER_STORY.md",
-    "paper/evidence/FIGURES_TABLES.md",
-    "paper/notes/DRAFT10_REVISION.md"
+  "result_ids": [
+    "R004",
+    "R005"
   ],
   "render_source": "paper/figures/fig03_attention_to_3d/figure.tex",
-  "numeric_values": null,
-  "is_measured_result": false,
-  "caption_scope": "Four-panel storyboard: target identity, extent, link queries, and matched-controller execution; measurements pending.",
-  "render_source_sha256": "cd03edb6a702abc3bf66f73379b3309cccce558ff2f4d9603a54e972c3fa77b3",
+  "render_source_sha256": "d2f4dae8bbc192a530e43c031db5f66da4a0b1ed9938ca9b82289e6632507a5b",
+  "is_measured_result": true,
+  "caption_scope": "Implemented offline surface grounding; contact integration pending. No illustrative performance values.",
   "input_sha256": {
-    "paper/notes/PAPER_STORY.md": "2abe32df6226dbeeb6afd12fed4fda985e01212076ee182f3d02293f7365e6ac",
-    "paper/evidence/FIGURES_TABLES.md": "fc9a41403b8bcbdb73c1cbb70d550300bce902691cdab61bf43e3882153ca049",
-    "paper/notes/DRAFT10_REVISION.md": "604fa5a59dc9e02b3b8d3d149fca251338f15e055a9a5acbec89b6f5284e7182"
+    "paper/notes/IFG_REVISION_20261015_KO.md": "fe2c16eadc6a281c6eea13357c63be49c39d322863f3ec1584c3fb757659d440",
+    "paper/figures/ifg_results/results.pdf": "7f5c916298168780a8c8330889ea9e81251c0b94659058b49eb6df105dca290b",
+    "paper/experiments/summaries/EXP002_IFG_audit.json": "ca28f1a379dd05ca717474998384a7603fb77b35493a7bab6d9c214cb78be474"
   },
-  "updated_at": "2026-10-08 KST"
+  "updated_at": "2026-10-16"
 }

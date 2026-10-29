@@ -1,5 +1,12 @@
 # CVPR Rebuttal Policy
 
+## 2026-10-23 — `CONFIRMED_2027` ([S16](SOURCES.md#s16), [S01](SOURCES.md#s01))
+
+- 1 page PDF, 2027 kit 의 `rebuttal.tex` 사용 (`paper/template/cvpr2027_official/rebuttal.tex`). 더 길면 읽지 않는다.
+- 익명, 외부 링크 (code · video) 금지. Reviewer 가 요청하지 않은 새 기여 · 실험 결과는 넣지 않는다.
+- AC 비공개 의견은 예외적인 경우만. 기간 2027-01-25 – 02-01 AoE.
+
+
 Target venue: CVPR 2027
 
 Last verified: 2026-10-05 19:21 KST

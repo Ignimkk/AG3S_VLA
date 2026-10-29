@@ -63,11 +63,11 @@ Evidence 구조·manifest·research story 작성은 Step 3에서 진행한다.
 |---|---|---|
 | `evidence/` | Claim·experiment·result·baseline·metric·artifact·log 7개 문서 | 주장부터 원자료까지 추적하고 미측정 항목 구분 |
 | `notes/` | Story·novelty·contribution·related work·reviewer question·TODO 6개 문서 | 후보·가설·검증된 결과를 혼동하지 않기 |
-| `experiments/manifests/` | EXP001과 운영 README | 검증된 16-D 자료를 제한된 scope로만 사용 |
+| `experiments/manifests/` | EXP001과 운영 README | 자료의 dimension·provenance·scope·검증 상태 기록 |
 | `experiments/configs/` | JSON Schema 2020-12와 비활성 candidate 예제 | 14-D와 provenance 없는 등록을 구조적으로 구분 |
 | `experiments/summaries/` | Source audit | 96 run의 실제 배열 header·metadata·완료 자료와 hash 기록 |
 | `tools/analysis/validate_manifests.py` | 읽기 전용 semantic validator | Source drift·짝지은 run·실제 dimension·verify key와 값 확인 |
-| 원문 §17 | 파일 존재만으로 whitelist가 되지 않음을 명시 | status·dimension·provenance·scope 확인을 필수화 |
+| 원문 §17 | whitelist를 상태 registry로 변경 | status·dimension·provenance·scope 표시 |
 | 원문 §18·§26 | Attention observation과 desired outcome을 연구 가설로 명시 | 아직 없는 safety 개선·성능 유지 결과를 주장하지 않기 |
 | README·계획·scoped rule | Step 3 완료와 Evidence 읽기 순서 반영 | 후속 작성·검증 workflow에 사용 |
 
@@ -93,7 +93,7 @@ Novelty·main safety claim·generalization·runtime·hardware 성과는 미확�
 |---|---|---|
 | `.claude/skills/` | CVPR skill 7개 생성 | 작성·Evidence·protocol·figure·인용·review·compliance의 작업 구분 |
 | `.claude/agents/` | Literature/evidence/reviewer의 3개 읽기 전용 역할 | 독립적인 보고와 parent writer의 파일 소유권 분리 |
-| `notes/CLAUDE_WORKFLOW.md` | 호출 예시·Evidence gate·역할 입력/출력·실제 audit 완료 조건 | 정의 생성과 연구/검토 수행을 혼동하지 않기 |
+| `notes/CLAUDE_WORKFLOW.md` | 호출 예시·Evidence tracking·역할 입력/출력·audit 상태 기록 | 정의 생성과 연구/검토 수행을 혼동하지 않기 |
 | Skill/agent 운영 | Tool whitelist, `model: inherit`, parent validator 결과 전달 | 연구 코드/결과 수정·실험 실행·중첩 호출 방지와 미검증 항목 명시 |
 | 정책 문서 2개 | Step 3의 Evidence·Step 4의 skill을 생성 예정에서 실제 구성 상태로 수정 | 오래된 workspace 안내 바로잡기; 공식 정책 확인 시각은 유지 |
 | 원문 §22·§23·첫머리 | 실제 7개 skill·3개 역할, audit의 NOT_CHECKED 및 현재 정책 기준 추가 | 개념 예시와 실행 가능한 정의의 차이 명시 |

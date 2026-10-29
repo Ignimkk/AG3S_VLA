@@ -36,16 +36,16 @@ Skill은 `name`/`description` frontmatter와 Markdown으로 구성하며 `/이�
 기본 discovery도 허용한다. 인자는 요청 범위이며 임의 shell 명령으로 실행하지 않는다.
 설치된 skill·agent 정의와 실제 모델 호출 결과를 구분한다.
 
-## Evidence gate
+## Evidence tracking
 
 1. [CLAIMS](../evidence/CLAIMS.md) → [EXPERIMENTS](../evidence/EXPERIMENTS.md) →
    [RESULTS](../evidence/RESULTS.md) → manifest → verify key/원자료를 연결한다.
 2. [Manifest 운영](../experiments/manifests/README.md)을 따르고, 결과 사용 전에 paper에서
    `python3 tools/analysis/validate_manifests.py`를 실행한다. 실패·미실행 범위는 미검증이다.
-3. `REGISTERED`·`paper_eligible=true`·실제 16-D·source audit·validator 통과 요건을 만족한
-   범위만 사용한다. 현재 EXP001은 T39 snapshot의 descriptive task outcome R001–R003뿐이다.
+3. 등록·검증 여부는 사용 가능성을 제한하지 않는다. 측정·파생·추정·계획·placeholder 여부와
+   source, snapshot, dimension, scope 및 검증 상태를 함께 기록한다.
 4. Task outcome은 collision/safe success가 아니며 비유의 차이는 성능 유지의 입증이 아니다.
-   Source drift면 사용을 중단하고 re-audit한다. Candidate·hypothesis·missing metric은 그대로 표시한다.
+   Source drift는 표시하고 필요하면 re-audit한다. Candidate·hypothesis·missing metric은 그대로 표시한다.
 5. Validator는 source consistency를 확인한다. Physical correctness, novelty, checkpoint/test 독립성,
    cluster 통계 타당성, current main 적용 여부를 자동 인증하지 않는다.
 

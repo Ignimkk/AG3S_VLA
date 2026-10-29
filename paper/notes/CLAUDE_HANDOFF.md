@@ -45,7 +45,7 @@ Claude Code에 전달할 첫 요청 예시:
 | 연구 목표 | [PAPER_STORY](PAPER_STORY.md), [CONTRIBUTIONS](CONTRIBUTIONS.md), [CLAIMS](../evidence/CLAIMS.md) | 근거 확보 후 가설과 최종 기여를 구분해 문장 확정 |
 | 선행연구 | [RELATED_WORK_MAP](RELATED_WORK_MAP.md), [R1 분석](REFERENCE_ANALYSIS_R1.md) | 사용자 목록 대기; 선정 전 자동 확대·최종 비교 대상 확정 금지 |
 | 구현 설명 | [BASELINES](../evidence/BASELINES.md), [원고 map](MANUSCRIPT_MAP.md), read-only research source | Version·입출력·좌표계·contact·solver·실행 범위를 확인한 뒤 method 작성 |
-| 결과·그림·표 | [RESULTS](../evidence/RESULTS.md), [EXPERIMENTS](../evidence/EXPERIMENTS.md), [FIGURES_TABLES](../evidence/FIGURES_TABLES.md) | 검증 결과만 사용; 부족한 실험은 연구 담당 workflow로 요청 |
+| 결과·그림·표 | [RESULTS](../evidence/RESULTS.md), [EXPERIMENTS](../evidence/EXPERIMENTS.md), [FIGURES_TABLES](../evidence/FIGURES_TABLES.md) | 자료 유형·출처·검증 상태를 표시; 필요한 실험은 연구 담당 workflow로 요청 |
 | 규정·template | [2027 STATUS](../guidelines/CVPR_2027_STATUS.md), [template 안내](../template/README.md) | 저장된 확인 시각·provisional/UNKNOWN 확인; 필요한 최신 규정 재확인 |
 | 제출 준비 | [FINAL_AUDIT](../submission/FINAL_AUDIT.md), [제출 checklist](../submission/SUBMISSION_CHECKLIST.md) | 최종 자료 확보 후 full audit; 초안 시작 전 환경 준비 항목과 구분 |
 

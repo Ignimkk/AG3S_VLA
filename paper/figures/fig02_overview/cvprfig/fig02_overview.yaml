@@ -1,0 +1,67 @@
+# F02 conceptual overview (CVPR-Figure spec, draft). Claim: locating the target is
+# not enough -- contact is decided by the target's 3D extent and by which links
+# may touch it. Rows share one sentence: observation -> target handling -> link
+# queries -> outcome. Row (b) uses an observed T47b frame (merged cluster);
+# row (c) extent image is a placeholder until the boundary-preserving method exists.
+figure:
+  id: fig02_overview
+  venue: cvpr
+  width: single
+  font: times
+
+layout: col
+gap: 7
+
+panels:
+  - id: pa
+    title: "(a) Geometry-only safety filter"
+    title_align: left
+    frame: none
+    body:
+      - row:
+          gap: 6
+          align: center
+          body:
+            - {id: a_img, shape: image, src: ../../cvprfig_assets/policy_cam_left_wrist.png, w: 38, h: 38}
+            - {id: a_tgt, text: "Target kept\nas obstacle", role: baseline, w: 50, size: 6.4}
+            - {id: a_q, text: "All links:\nfull field", role: aux, w: 46, size: 6.4}
+            - {id: a_out, text: "Grasp\nrefused", role: neutral, w: 52, size: 6.4, text_color: "#C00000"}
+
+  - id: pb
+    title: "(b) Target exclusion by a ball"
+    title_align: left
+    frame: none
+    body:
+      - row:
+          gap: 6
+          align: center
+          body:
+            - {id: b_img, shape: image, src: ../../cvprfig_assets/merged_cluster_topview.png, w: 38, h: 38}
+            - {id: b_tgt, text: "Ball around\nattended cluster", role: baseline, w: 50, size: 6.4}
+            - {id: b_q, text: "All links:\ntarget-free field", role: aux, w: 46, size: 6.4}
+            - {id: b_out, text: "Neighbor erased,\ncontact allowed", role: neutral, w: 52, size: 6.4, text_color: "#C00000"}
+
+  - id: pc
+    title: "(c) AG3S (ours)"
+    title_align: left
+    frame: none
+    body:
+      - row:
+          gap: 6
+          align: center
+          body:
+            - {id: c_img, shape: image, w: 38, h: 38, text: "extent\n(pending)", size: 5.6}
+            - {id: c_tgt, text: "**Boundary-\npreserving extent**", role: ours, w: 50, size: 6.4}
+            - {id: c_q, text: "**Contact links**:\ntarget-free field", role: ours, w: 46, size: 6.4}
+            - {id: c_out, text: "Grasp target,\nkeep neighbor", role: neutral, w: 52, size: 6.4, text_color: "#385723"}
+
+edges:
+  - {from: a_img, to: a_tgt}
+  - {from: a_tgt, to: a_q}
+  - {from: a_q, to: a_out}
+  - {from: b_img, to: b_tgt}
+  - {from: b_tgt, to: b_q}
+  - {from: b_q, to: b_out}
+  - {from: c_img, to: c_tgt, color: gold.deep}
+  - {from: c_tgt, to: c_q, color: gold.deep}
+  - {from: c_q, to: c_out, color: gold.deep}

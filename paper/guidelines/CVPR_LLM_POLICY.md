@@ -1,5 +1,14 @@
 # CVPR LLM Usage Policy
 
+## 2026-10-23 — `CONFIRMED_2027` (Author Guidelines [S16](SOURCES.md#s16))
+
+- 모든 제출물은 **"LLM Usage Statement"** 절을 main text 뒤 · references 앞에 둔다. page limit 에 들어가지 않으며 저자 신원을 드러내지 않는다.
+- 편집 · 문법 교정을 포함한 모든 LLM / generative AI 사용을 밝힌다: 도구 이름, 영향받은 부분, 사용 정도. 사용하지 않았으면 "No LLMs or generative AI tools were used in this work." 라고 쓴다.
+- **누락 시 desk reject 가능.** 리뷰 중 논문은 학회 승인 LLM 도구로 처리되며 opt-out 없음.
+- Reviewer 가 제출물을 외부 LLM 에 올리는 것은 misconduct. Prompt injection, 존재하지 않는 인용을 포함한 fabricated content 는 desk reject 사유.
+- 원고 반영: `paper/latex/sections/07_llm_usage.tex` (초안, 사용 범위는 저자 확인 필요).
+
+
 Target venue: CVPR 2027
 
 Last verified: 2026-10-05 19:21 KST
@@ -25,8 +34,8 @@ Reviewer나 automated tool을 조작하려는 hidden instruction은 금지된다
 
 - Claude가 citation, DOI, 결과값, statistical significance, 구현 사실을 만들지 않는다.
 - 과학적 주장은 `evidence/CLAIMS.md`, 수치는 `evidence/RESULTS.md` 및 원자료로 추적한다.
-  이 문서들은 Step 3에서 구성했다. 등록된 EXP001의 제한된 task-outcome scope만
-  사용하며, 미등록 결과나 미측정 safety·runtime 성과를 가정하지 않는다.
+  이 문서들은 Step 3에서 구성했다. 등록·검증 여부는 사용 가능성을 제한하지 않으며,
+  측정·파생·추정·계획·placeholder 여부와 scope를 명시한다.
 - 본인 원고의 내부 critique인 `/cvpr-review`는 author assistance다.
   학회에서 배정받은 타인 원고의 공식 peer review와 구분한다.
 - 저자의 draft 점검 가능 여부를 공식 reviewer service의 LLM 사용 허가로 해석하지 않는다.

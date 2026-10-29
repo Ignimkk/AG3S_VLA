@@ -1,6 +1,6 @@
 # V5 configuration and T43 option facts (read-only audit, 2026-10-06)
 
-UNREGISTERED in paper/evidence: only T39 (EXP001) is registered. Numbers here are for the authors, not for the manuscript.
+UNREGISTERED in paper/evidence: only T39 (EXP001) is registered. Numbers here may be used in the manuscript with their source and UNREGISTERED status shown.
 
 NOTE: UNREGISTERED in paper/evidence (only T39 EXP001 registered).
 

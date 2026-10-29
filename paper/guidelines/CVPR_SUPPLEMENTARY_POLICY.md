@@ -1,5 +1,12 @@
 # CVPR Supplementary Material Policy
 
+## 2026-10-23 — `CONFIRMED_2027` ([S16](SOURCES.md#s16), [S01](SOURCES.md#s01))
+
+- 선택 사항, reviewer 가 읽을 의무 없음. 영상 · 증명 · 추가 figure / table · 상세 분석 · 익명화한 동시 제출 논문 가능. Code 업로드 권장 (필수 아님).
+- 형식 자유: 읽기 쉽고 깔끔하면 됨, CVPR style 선택, single column 허용. 용량 제한은 명시 없음.
+- 마감 **2026-11-23 AoE**. 익명 유지 (영상 속 이름 등 금지).
+
+
 Target venue: CVPR 2027
 
 Last verified: 2026-10-05 19:21 KST

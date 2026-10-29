@@ -1,5 +1,13 @@
 # CVPR Paper Formatting Rules
 
+## 2026-10-23 — `CONFIRMED_2027`
+
+- 본문 **8 page** (figure · table 포함), CVPR style. 초과 허용은 cited references 와 **LLM Usage Statement** 뿐 [S16](SOURCES.md#s16).
+- 공식 template 미사용은 리뷰 없이 reject, margin · font 를 상당히 바꾸면 desk reject [S16](SOURCES.md#s16).
+- 2027 kit v1 [S17](SOURCES.md#s17): `cvpr.sty` 는 2026 대비 review copy 의 Paper ID 표기만 제거; margin · font · 2단 · 줄 번호 동일. `ieeenat_fullname.bst` · `preamble.tex` 동일.
+- Working copy: `paper/latex/cvpr.sty`, `paper/supplementary/cvpr.sty` = 2027 원본 bytes. `\paperID` 는 더 이상 쓰지 않는다.
+
+
 Target venue: CVPR 2027
 
 Last verified: 2026-10-05 19:21 KST

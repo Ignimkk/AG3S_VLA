@@ -148,7 +148,7 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
   held-body whole-body spheres, obstacle row 10 mm margin, measured-pose HOLD. [V5_FACTS](../notes/V5_FACTS.md).
 - 주의: V5는 `--no-subtask-gate`로 돌았다. 즉 최선 구성에서는 phase probe gate가 꺼져 있다. 본문은 gate를 'optional'로 쓰고 TBD로 표시했다.
 - 인용: 19 → 36 entry. 새 entry는 arXiv abstract 페이지에서 저자·제목·날짜를 다시 읽었다. [REFERENCE_ANALYSIS_R3](../notes/REFERENCE_ANALYSIS_R3.md).
-- 새 실험·새 측정 없음. V5 수치(hurdle 12/14 등)는 미등록 자료라 본문에 쓰지 않았다.
+- 새 실험·새 측정 없음. V5 수치(hurdle 12/14 등)는 당시 draft에 반영되지 않았다.
 
 ## Draft 3 — Introduction · Related Work 재구성 (사용자 지시)
 
@@ -213,7 +213,7 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 - 사용자 판정: Limitation I/II 채택 · 역할이 드러나는 모듈 이름 사용("Target grounding" 대신) · 공개 벤치마크는 추후 추가하므로 사용한 것으로 작성 ·
   gate on 실험 기준으로 작성.
 - gate on 실험 확인: V7g (V5 − `--no-subtask-gate` + `--held-slip-detach` + `--held-cover-cap-mm 10` + `--hold-follow-to 3`, 19 run) 와
-  GD (V7 off vs V7g on 19 쌍). 근거 [V7G_FACTS](../notes/V7G_FACTS.md). 수치는 미등록이라 본문에 쓰지 않음.
+  GD (V7 off vs V7g on 19 쌍). 근거 [V7G_FACTS](../notes/V7G_FACTS.md). 수치는 당시 draft에 반영되지 않음.
 - 모듈 이름: ATS (Attention-based Target Segmentation), HSR (Hidden-state Sub-task Recognition), LTE (Link-specific Target Exemption),
   CCR (Constrained Chunk Refinement). 방법 이름 매크로 \sys = "AG3S VLA".
 - 구조: Fig. 1 teaser(기존 vs 우리, schematic) · Intro(배경 → Limitation I/II → 관찰·제안 → 모듈 → 기여 3개 → 장 안내) ·
@@ -293,3 +293,106 @@ Step 4 종료 시점의 다음 구성 작업은 Step 5: 공식 template과 manus
 - 재개 시 추가된 사용자 확정 실험 구성(SafeLIBERO 주 평가, 자체 MuJoCo 비교·ablation, 실물 feasibility)을 확인하고 Experiments 골격과 표에 반영했다.
 - 공식 kit/style·manifest·artifact hash 검증, Tectonic 오프라인 빌드 통과. 참고문헌 포함 8페이지 전체를 렌더링해 시각 점검했다. 인용 19개 key와 참조가 해결되며 overfull/underfull·미해결 인용 경고가 없다.
 - 기록: [DRAFT10_REVISION](../notes/DRAFT10_REVISION.md), [DRAFT10_BUILD_AUDIT](../notes/DRAFT10_BUILD_AUDIT.json). 연구 코드 변경·추가 실험·성능 등록·사이트 배포는 수행하지 않았다.
+
+## 2026-10-13 KST — F01–F03 CVPR-Figure 약식 draft
+
+- 사용자 요청: CVPR-Figure(github.com/ChizkiyahuOhayon/CVPR-Figure, commit `c220e5d`) engine으로 Figure 1(demo teaser)·2(conceptual overview)·3(method pipeline)을 "모두 개선 성공" 가정의 약식으로 제작.
+- 산출: `figures/fig0{1,2,3}_*/cvprfig/` 아래 spec(`.yaml`)·`out/`(svg/pdf/png/pptx)·`figure.json` sidecar·`figure.tex`. 기존 storyboard `figure.tex/json`은 수정하지 않았다.
+- Raster crop: `tools/plotting/cvprfig_assets.py` → `figures/cvprfig_assets/`(10개, source sha256과 crop box는 `assets.json`). 새 수치·출력은 만들지 않았다.
+- 검증: 세 spec 모두 engine auditor FAIL 0. 남은 WARN은 의도한 placeholder(F01 4개, F02 1개, F03 1개)뿐. Host에 Times metric font가 없어 STIXGeneral alias로 렌더(PDF embed 확인).
+- 한계: F01 demo frame은 `ep1807_apple.mp4` stand-in(controller 설정 미등록)이며 비교 패널·결과 문구는 측정 전 의도다. F03의 boundary-preserving extent는 planned(점선). `is_measured_result=false`.
+
+## 2026-10-13 KST — PaperBanana용 F1–F3 자료 패키지
+
+- 사용자 요청: 실제 코드·원고·실험 결과 기준으로 PaperBanana 입력 자료(brief_en.txt·caption.md·evidence.md·assets·reference_montage.png) 준비.
+- 위치: `figures/paperbanana/figure{1,2,3}/` 및 `figures/paperbanana/README.md`(사용 방법·색 규약·상태 요약). 기존 코드·원고 파일은 수정하지 않았다.
+- 근거: 읽기 전용 audit 3건(구현 코드, 원고, 실험 결과·이미지). 수치는 verify.json key를 직접 대조했다(T53 `numbers.task_success` 9/16·`success_ct` 7/16, T46-CL3 `t1_success.task_success` 14/13/13 of 18, T46 held-out `lost_neighbour_seeds` 0/0/2463, T44 log 7056행 833→344).
+- Asset: `tools/plotting/paperbanana_assets.py`가 T53 C1a ep1842 기록(3인칭 영상, client step npz, server chunk dump, GT replay)에서 14개 PNG와 sidecar를 생성했다. F2 ownership 패널은 serving 함수 `_ball_owned_split`를 기록된 점에 호출했다(seed는 표면 1 voxel 이내 grid로 근사, sidecar에 명시).
+- 확인한 범위 제한: `ball-owned`·`exclude-authorized`는 code default off·평가 arm on; query는 gripper link만(`--links gripper`); phase는 주입값(approach); 경계 보존·LTE의 closed-loop 이득은 미확립; 이전 stand-in `ep1807_apple.mp4`는 사용하지 않았다.
+- 원고 불일치(미수정, 보고만): Method는 ball만 설명하고 ball-owned를 다루지 않음; contact 예외 용어가 혼재.
+
+## 2026-10-13 KST — PaperBanana reference montage 재제작 (사용자 피드백: 품질 개선)
+
+- 이전 montage(연구용 진단 차트 조합)를 폐기하고 `figures/paperbanana/figure*/assets/diagnostic/`으로 옮겼다.
+- 새 자료는 최신 closed-loop 기록 T53 C1a ep1842(2026-10-13)의 기록 `qpos`를 MuJoCo 3.11로 1600×1200 replay 렌더링해 만들었다(`tools/plotting/paperbanana_render.py`, CPU OSMesa). 여기에 server dump overlay(target cluster, attention cloud, query sphere, ball, ESDF voxel)와 기록 chunk의 FK(TCP 경로, attached sphere 운반)를 얹었다. 재시뮬레이션은 하지 않았다.
+- F2 (c)는 채택된 T46 F1 surface evidence를 serving 함수(`nontarget_surface_evidence` + `_ball_owned_split`)로 이 기록 chunk에 offline 적용한 결과다(target 122 제거, 이웃 32 유지, ambiguous 2). T53 run 자체는 proximity evidence였다(49/32/75). 이 as-run 버전도 asset으로 남겼다.
+- `tools/plotting/paperbanana_compose.py`가 논문 figure 형태의 reference montage 3장과 F3 차트(TCP 경로, episode timeline)를 생성한다. brief_en.txt(2,653 / 2,450 / 3,372자), evidence.md, caption.md, README를 새 asset에 맞게 갱신했다.
+
+## 2026-10-13 KST — Figure 1 두 안 (사용자 요청: 성공 가정 draft)
+
+- 위치: `figures/paperbanana/figure1/variants/`. A = 성능형(`variant_A_performance.png`), B = 한계→필요성형(`variant_B_limitation.png`). 각 안에 PaperBanana brief(2,665 / 2,481자)와 README가 있다.
+- Pick/place 장면: T40 G 허들 run(E0 = VLA 단독, E3b = AG3S)의 기록 66-D qpos(`frames.jsonl`)에 run 자체의 허들(`PickPlaceObstacleManager`)을 배치해 MuJoCo로 replay 렌더링했다. 손끝 경로는 FK, 충돌 표시는 `mj_geomDistance` 최근접점이다(`tools/plotting/paperbanana_fig1_scenes.py`).
+- 메커니즘 패널은 T53 C1a ep1842 렌더를 재사용했다. 성능 막대는 layout용 placeholder 값이며 차트에 그렇게 표시했다(`tools/plotting/paperbanana_fig1_variants.py`).
+- 2026-10-13 수정(사용자 지적: pick 환경 불일치): Figure 1 pick/place 장면 네 개를 모두 T43 ep1982 `t43p2_overbar` 한 환경으로 교체했다. pick 짝은 seed 19822, place 짝은 seed 19823이며 VLA 단독 E0와 AG3S V11AB를 비교한다. gripper–bar 거리 −0.1 / 0.6 mm는 T43 W 분석값과 일치한다.
+
+## 2026-10-13 KST — Figure 2를 overview로 재구성 (사용자 요청)
+
+- 구성: (a) End-to-end VLA, VLA + geometric safety filter, AG3S의 pipeline 비교 카드(블록 흐름 + 같은 장면의 결과). (b) 같은 장면의 ① attention → ② 3D target grounding → ③ task·link-conditioned field → ④ sub-task·grasp 상태 → ⑤ CCR.
+- 장면은 Figure 1과 같은 T43 V11AB ep1982 overbar다. ③은 같은 chunk의 기록된 target-free ESDF(`esdf_free_distance`)를 사용했다. `tools/plotting/paperbanana_fig2_overview.py`를 쓴다. 이전 개념도는 `*_v1_conceptual.*`로 보존했다.
+
+## 2026-10-13 KST — Figure 2 v2 (contribution 중심 재구성, v1 유지)
+
+- 진단: v1은 비교 대상이 약했고(가장 가까운 선행인 segmenter·global exclusion이 빠짐), 차이가 블록 수로만 보였으며, 기여 단계 표시와 link별 query 규칙이 없었다.
+- v2(`figure2/reference_montage_v2.png`, `brief_v2_en.txt` 3.6k자, `caption_v2.md`): 상단 framework는 frozen VLA의 세 출력이 link-specific contact representation 식 하나로 모여 CCR로 가는 구조다. 하단은 C1 What / C2 Who / C3 When을 각각 prior와 AG3S로 대비한다.
+- 출처: C1 prior는 T53 ep1842 GT target label로 이상적 segmenter를 대신한다. C3는 T43 V11AB ep1982 chunk 5/22/34. `tools/plotting/paperbanana_fig2_v2.py`.
+
+
+## 2026-10-15 — IFG 개발 결과와 novelty PDF를 반영한 원고 개정
+
+- 사용자 승인 범위: 지정한 두 보고서/PDF 확인 후 실제 논문 수정.
+- 제목·초록·기여·related work·method·experiments·conclusion·limitations를 현 구현과 결과에 맞췄다. 실측 표 3개, 벡터 도식 2개, 실측 그래프와 replay 예시를 연결했다. 기존 이미지 원본은 보존했다.
+- EXP002: 180 completed frames / 32 dev episodes, 실제 16-D state/action header, source code hash 확인. R9 표/paired bootstrap을 raw rows에서 재집계했고 R11b 동일 147프레임 AUROC=.997636 대 .899527을 재계산했다. Precision 결측 및 phase 집계 단위 차이를 본문에 명시했다.
+- `python3 paper/tools/latex/build_ifg.py` PASS: 활성 IFG evidence/그림 hash/공식 working style 확인, PDF 9페이지(본문 8페이지 이내, 참고문헌 8페이지에서 시작), undefined citation/reference 및 overfull box 없음. Times 계열 본문 font embedded 확인. 첫 페이지·도식·표·결과 페이지 시각 검토.
+- 기존 `build.py --check-only`는 이번 원고에서 사용하지 않는 EXP001의 이전 `benchmark/ag3s/docs/handoff/T39.verify.json` 경로 부재로 실패한다. 이를 통과했다고 보고하지 않았고, 기존 validator를 완화하지 않았다. 현재 IFG 형식용 별도 audit/build를 사용한다.
+- 남은 TeX 경고: 캐시된 lineno.sty/algorithm.sty의 기존 UTF-8 경고. 모델·serving·수집기·원자료 변경 없음. Full submission audit 또는 독립 held-out 검증을 수행한 것은 아니다.
+- 개정/문헌 판정: `paper/notes/IFG_REVISION_20261015_KO.md`; 이번 작업만의 before/after: `paper/notes/IFG_REVISION_20261015.diff`; build record: `paper/notes/IFG_REVISION_20261015_BUILD.json`.
+
+## 2026-10-16 — 기존 전체 AG3S에 개선을 통합한 1–3장 개정
+
+- 사용자 최신 지시를 반영해 IFG 개선만 중심에 둔 구성을 전체 ATS–HSR–LTE–CCR 방법론으로 재작성했다. 초록/Introduction/Related Work/Method와 개념도 2개를 정렬했다.
+- 새 surface graph, centered feature memory(B), consistency 및 3D state cue를 기존 모듈의 개선으로 배치했다. Grasp/carry/release, link-specific fields, attached geometry, chunk refinement, 실행 prefix 검사를 유지했다.
+- 새 모듈의 offline 구현과 post-switch confidence·phase gating·permission lifecycle·prefix check 통합 설계를 구분했다. 미검증 성능, 최초성 또는 안전 보장은 주장하지 않았다.
+- 실험·결과 source와 그림을 보존하고 이번 main PDF에서는 제외했다. 모델·serving·수집기·원자료 변경 없음.
+- `python3 paper/tools/latex/build_method.py` PASS. PDF 총 7페이지, 참고문헌은 6페이지 시작. 공식 style hash 일치, undefined reference/citation 및 overfull box 없음. 글꼴 포함과 첫 페이지·구조도·방법 수식 페이지 시각 검토. 기존 cached package의 UTF-8 경고만 남음.
+- 현재 범위의 빌드 검사이며 실험 evidence 재검증·독립 성능 평가·최종 제출 검증이 아니다. 이전 `build_ifg.py`는 결과 수치를 요구하는 이전 실험 원고용이므로 현 1–3장에는 적용하지 않는다.
+- 개정 기록: `paper/notes/AG3S_METHOD_REVISION_20261016_KO.md`; 빌드 기록: `paper/notes/AG3S_METHOD_REVISION_20261016_BUILD.json`.
+
+## 2026-10-18 — Introduction의 동기·문제정의·통찰·근거 연결
+
+- 사용자 요청에 따라 사례를 압축하고 핵심 구분을 첫 문단으로 옮겼다. 배경·기존 한계 다음에 입력/출력/조건을 포함한 문제정의를 독립 문단으로 명시했다.
+- 개발 관찰→정보별 역할 분리→전체 AG3S 방법→근거와 기여로 연결했다. Related/Method/실험 source와 연구 코드는 변경하지 않았다.
+- EXP002 audit 재실행 PASS. Offline 180프레임/32 dev episode의 범위만 Introduction에 사용했다. Switching 효과 미확정 및 실행 성능과의 구분을 명시했다. 최근 SURF 실패 원인에 대한 새로운 인과 주장은 하지 않았다.
+- Method draft build PASS: PDF 7페이지, 참고문헌 6페이지 시작, 공식 style hash 유지, unresolved reference/citation 및 overfull box 없음. 2–3페이지 시각 검토.
+- 기록: `paper/notes/INTRO_REVISION_20261018_KO.md`, `INTRO_REVISION_20261018.diff`, `INTRO_REVISION_20261018_BUILD.json`.
+
+## 2026-10-18 — CVPR v1 evidence registry 등록 (EXP003–EXP006, R008–R026)
+
+시각: 2026-10-18 KST (audit 실행 system clock 09:09 KST). 범위: 원고가 인용할 수치를 registry에 등록만 했다. 연구 코드·`AG3S/`·`doc/`·storage·`paper/latex/`·`paper/figures/`는 수정하지 않았고, 실험·rollout·model 실행은 없었다.
+
+- **등록 수준 = REGISTERED_SOURCE_LINKED.** 새 script `paper/tools/analysis/audit_cvpr_v1_evidence.py`가 source JSON의 기록된 JSON pointer에서 모든 등록값을 다시 읽어 대조하고(float |diff| ≤ 5e-4, count·string exact) 14개 source 파일(storage 6, handoff 7, WORKLOG 1)의 sha256을 `paper/experiments/summaries/CVPR_V1_evidence_audit.json`에 고정했다. **16-D manifest validation(NPY header·per-run 재집계·rollout 재실행)은 하지 않았다** — EXP001·EXP002의 `REGISTERED`와 다른 수준이며 EXPERIMENTS.md에 명시했다. 결과: 434 checks, **431 PASS, 0 FAIL, 3 `source=worklog`**(text-presence만). 모든 result ID PASS.
+- **EXP003 (R008–R012)** held-out locked grounding, 34 성공 rollout episode / 2,523 frame (clear 13 / adjacent 12 / place 9). arm별 IoU·precision·recall, neighbour/support/robot FP·TP sum, paired 차이(A−G:N +.10304614664251237 [.08323494981427215, .12313285145943233] 34/0; A−A-fk +.04403272045947481 34/0; B−A +.014779314128842732 [−.0116789100514432, .03944222857471973] 14/6), grasp-state IoU(pre .9698507944447411, held .8475770155578735 vs FK mask .64040778567183, placed .845807102001963), confidence alert(`/gate_success`: threshold .5904207590672415, 85/100, false alarm 153, FP 제거 .8788…, TP 손실 .0670…, AUROC .9251551724137931). **모두 `heldout_locked/summary.json`에 있어 WORKLOG 의존이 없다.** B−A의 CI는 0을 포함해 switching 효과는 미확정으로 적었다.
+- **EXP004 (R013–R018)** hurdle T43 H 14 run. E0(VLA 단독)는 `T43W.verify.json` `summary_per_arm["E0/H"]`(key에 `/` 포함 → pointer `E0~1H`) success 0 / grasp 11 / place 0 / obstacle stop 13, per_run 14행 재집계 일치, **2026-10-05 T43 W code state**. V8/V11A/V11AB `H_totals_by_rule` success_ct 8/8/12, carry-phase 사과–hurdle 접촉 run 5/2/0, **2026-10-07 T43 V11 code state**. C1a/C1aN/SURF(IFG-HURDLE, **2026-10-17 현재 구현**) S_old 11/11/8, S_contact 11/11/7, grasp 13/13/9, HOLD 86/82/11, 비권한 link–target 0/0/1; pairs C1aN vs SURF success_ct both 6 / C1aN-only 5 / SURF-only 1 / p .21875; client round trip median/p95 1256/2034, 1177/2152, 3331/4979 ms. 같은 (episode, seed)이지만 code state가 셋이라 `MIXED_CODE_STATES`로 표시했다.
+- **EXP005 (R019–R021)** held-out closed-loop C1aN vs SURF, 34 seed 쌍(collector에서 **C1a가 성공한** episode에서 선별, `/C1a_reference/n_success` 34/34). 34/34 vs 28/34, pairs 28/6/0, McNemar p .03125, SURF 실패 no_grasp 5 · not_placed 1, HOLD 50 vs 19, completion median 16.0 (n 34) vs 14.666… (n 28), neighbour 접촉 2 vs 2; latency client 1137.48/1923.85 vs 2857.69/3623.06 ms, server total 796.46 vs 2586.57, attention_surface 1663.45 (build 827.567 · solve 285.104 · codes 383.465), render mask 158.58. 상태 **EXPLORATORY_SELECTION_CONDITIONED**, 등록 해석 문장은 WORKLOG 2026-10-18 14:30 절을 그대로 영어로 옮겼다("…does not estimate the performance difference over the full set of scenes not selected by success").
+- **EXP006 (R022–R026)** Limitations context: T58 기둥 접촉 6/6 (E0 3/3, ON 3/3; hand 점 sphere 밖 12.72–38.8 mm, script가 `cover_rows`에서 min/max 계산), CL4 success_ct X1 10 / X2 5 / X3 7 / X4 9 / G4 7 of 18, X4 vs G4 p .6875, FT–target 접촉 0, T46d gripper scope 0/349,920, CL2 C0 14/18 (success_ct 12/18), T53 9/16 (7/16, HOLD 37). T39(R001–R003)와 EXP002 dev 수치(R004–R007)는 cross-reference만 했다.
+- **Claim:** C012–C020 추가(SUPPORTED_DESCRIPTIVE / EXPLORATORY_DESCRIPTIVE / EXPLORATORY_SELECTION_CONDITIONED / NOT_ESTABLISHED). C001–C005 hypothesis·C007 NOT_ESTABLISHED 유지(등록된 모든 arm이 533.3 ms budget을 넘는다).
+- **원고 위치별 번호 지도:** `paper/evidence/NUMBER_MAP_CVPR_V1.md` (Abstract · Intro · Table 1 closed-loop · Table 2 held-out grounding · Table 3 analysis · Table 4 runtime · Limitations).
+- **JSON과 WORKLOG의 불일치 2건 (JSON을 정본으로 등록, audit에 `source=worklog`로 기록):** (1) WORKLOG 2026-10-17 23:40 "C1aN만 성공 6, SURF만 성공 2"는 `IFG-HURDLE/agg.json` success_ct의 5 / 1과 다르다(p .21875는 5/1과 일치). (2) WORKLOG 03:30 "완료 시간 median (둘 다 성공 28쌍)"의 C1aN 값은 agg.json에서 n 34 기준이며 28쌍 한정값은 JSON에 없다.
+- **JSON에 없어 등록하지 않은 것:** E0 대 V11AB·대 SURF의 paired 2×2(서로 다른 code state, source에 pair 표 없음); IFG-CL3 선별 없는 재평가(실행 중); attention extraction·VLA inference 단독 시간(`not_measured`).
+- **남은 검증:** 이 등록은 source-linked 수준이다. 원고 확정 전 `/cvpr-evidence full`에서 manifest 수준(16-D array·per-run provenance) 검증 추가 여부를 판단한다. 원고(`paper/latex/`)와 figure는 이번에 바꾸지 않았다.
+
+## 2026-10-23 KST — CVPR 2027 정책 · author kit 반영, WBAG 제거
+
+- CVPR 2027 Author Guidelines 와 author kit v1 (LaTeX) 공개 확인. kit 원본을 `paper/template/cvpr2027_official/` 에 보존 (archive sha256 은 `paper/template/PROVENANCE.json`), working `cvpr.sty` 를 2027 bytes 로 교체. 2026 대비 차이는 review copy 의 Paper ID 제거뿐.
+- 필수 "LLM Usage Statement" 를 `latex/sections/07_llm_usage.tex` 로 main text 뒤 · references 앞에 추가 (저자 확인 필요).
+- 사용자 지시로 WBAG (`zhen2026wbag`) 를 bib · Related Work · SafeLIBERO 표에서 제거.
+- `paper/guidelines/` 의 2027 항목을 `CONFIRMED_2027` 로 갱신, SOURCES S16 · S17 추가.
+- 8 page 감축안: `paper/notes/CVPR2027_COMPLIANCE_AND_PAGES_20261023_KO.md` (미적용, Fig 2 처리 판정 대기).
+- 사용자 판정 (2026-10-23): Fig 1 · Fig 2 · Fig 3 모두 유지. 8 page 감축은 추후, 그림 삭제 없이 본문 압축 · supplementary 이동으로.
+
+## 2026-10-23 KST — Introduction · Related Work 검토와 참고문헌 보강
+
+- 문장 검토: Intro 2문단의 근거 없는 주장 ("exempting a volume around the detection") 을 확인 가능한 서술 ("approximate each object by an enclosing volume", VLSA · KNOWS 의 ellipsoid 표현) 로 교정; Key idea 의 attention · hidden-state 주장에 인용 추가; "We present" 문단의 콜론 나열 한 문장을 네 문장으로 분리; 1문단과 반복되던 "the apple itself must clear the post" 를 다른 표현으로; 기여 2 와 Key idea 의 중복 축소. RW 2문단의 접속 문장 분리, 3문단을 고전 (potential field · trajectory optimization · CBF · depth-fused field) → language-to-3D constraint → VLA safety layer → attached / allowed collision 순으로 재구성.
+- 철자: 원고 전체 (본문 · caption · supplementary · Fig 1–3 그림 글자) 를 American 으로 통일 (neighbour → neighbor, behaviour → behavior, modelled → modeled).
+- 참고문헌 21편 추가 (유사 논문 KNOWS · VLSA 의 참고문헌 구성 참고, 고전 포함): RT-1, RT-2, OpenVLA, Octo, Grounding DINO, SAM, DINO, normalized cuts, Felzenszwalb graph segmentation, random walker, local-global consistency, Khatib potential field, CHOMP, TrajOpt, CBF (Ames 2019), Voxblox, MoveIt, VoxPoser, ReKep, SafeVLA, LIBERO. 서지는 모두 1차 기록 (Crossref DOI, PMLR v229 · v270 목록, NeurIPS 목록, JOSER 사본) 과 대조. 기존 nvblox · Curless 1996 · YOLOE 를 본문에서 인용하도록 연결.
+- Contemporaneous 확인: agarwal2026multilink (v1 2026-09-30), guo2026nudge (v1 2026-09-28) 는 2026-09-15 이후 → 인용 · 논의로 충분.
+- 빌드: BUILD_PASS, overfull 0, 미정의 참조 0, BibTeX 경고 0.

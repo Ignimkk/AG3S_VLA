@@ -1,5 +1,12 @@
 # CVPR Double-Blind / Anonymity Policy
 
+## 2026-10-23 — `CONFIRMED_2027` ([S16](SOURCES.md#s16))
+
+- 논문 · 감사의 글 (공동 연구자, grant ID) · supplementary (영상 속 이름, 비익명 첨부 논문) 에 저자 식별 정보 금지. 저자를 드러내는 웹사이트 링크 금지.
+- 자기 동시 제출 논문은 익명판을 supplementary 에 넣고 인용하며, 본문에서 차이를 논증한다.
+- 2027 kit 은 review copy 에서 Paper ID 표기를 없앴다.
+
+
 Target venue: CVPR 2027
 
 Last verified: 2026-10-05 19:21 KST

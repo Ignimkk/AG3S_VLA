@@ -1,0 +1,211 @@
+{
+ "artifact": "fig02_overview",
+ "pdf": "paper/figures/cvpr_v1/fig02_overview.pdf",
+ "png": "paper/figures/cvpr_v1/fig02_overview.png",
+ "size_in": [
+  6.875,
+  3.25
+ ],
+ "aspect": 2.115,
+ "textwidth_in": 6.875,
+ "raster_dpi_in_pdf": 400,
+ "png_dpi": 300,
+ "fonts": {
+  "family": "DejaVu Sans",
+  "math": "stix",
+  "pdf_fonttype": 42,
+  "min_pt": 7.0,
+  "max_pt": 7.0,
+  "n_text_items": 41,
+  "floor_pt": 7.0
+ },
+ "layout_audit": {
+  "tolerance_pt": 1.0,
+  "min_text_to_panel_border_in": 0.05,
+  "violations": {
+   "text_text": 0,
+   "text_segment": 0,
+   "panel_border": 0,
+   "badge_heights": 0
+  },
+  "n_segments_checked": 26,
+  "n_panels": 9,
+  "n_texts": 41
+ },
+ "script": "paper/tools/plotting/cvpr_v1_compose.py",
+ "generated": "2026-10-23T02:55:14+00:00",
+ "git_head": "8da37119afd3b8ae1aaaa09315066c34c880857d",
+ "printed_numbers": [],
+ "number_sources": {},
+ "assets": {
+  "v2_segmenter_mask": {
+   "file": "paper/figures/paperbanana/figure2/assets/v2_segmenter_mask.png",
+   "sha256": "6e9296ef68ea6f65fba78626206f824c85e8078dbfabd68a51d1785d8e762d76",
+   "crops": [
+    [
+     0.0,
+     0.52,
+     1.0,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/paperbanana/figure2/assets/v2_segmenter_mask.json",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19822",
+   "note": "T53 ep1842 chunk 10: right-wrist camera re-rendered from the recorded state; the GT target label (gt/ep1842.npz label_small, class 0) stands in for an ideal external segmenter mask.",
+   "episode": "T53 C1a ep1842"
+  },
+  "c1_ours_seed_region": {
+   "file": "paper/figures/ifg_overview/assets/c1_ours_seed_region.png",
+   "sha256": "107fe64f49aede8081ec5e98ba81550d04c99afd31f09698ae0a3954662be4e0",
+   "crops": [
+    [
+     0.0,
+     0.0,
+     1.0,
+     0.68
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/c1_ours_seed_region.json",
+   "frame": "T54c_ep1856_f025",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Non-support eligible seeds -> graph-energy top-1 region (orange); nearby non-target surfaces blue."
+  },
+  "c3_ours_alert": {
+   "file": "paper/figures/ifg_overview/assets/c3_ours_alert.png",
+   "sha256": "0becca91a85259d24381a10545355fb4aad57711235ccb58dad4ab76178e02b7",
+   "crops": [
+    [
+     0.15,
+     0.2,
+     0.9,
+     0.9
+    ]
+   ],
+   "sidecar": "paper/figures/ifg_overview/assets/c3_ours_alert.json",
+   "frame": "T54c_ep1825_f028",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Wrong region chosen (red); centered chain score below the locked threshold -> exception withheld."
+  },
+  "f2b_ball_render": {
+   "file": "paper/figures/paperbanana/figure2/assets/f2b_ball_render.png",
+   "sha256": "da84c86be7433f5727595fde779066efa1d4ba9644769e03d3af469e89e6480d",
+   "crops": [
+    [
+     0.0,
+     0.08,
+     1.0,
+     0.75
+    ]
+   ],
+   "sidecar": "paper/figures/paperbanana/figure2/assets/f2b_ball_render.json",
+   "run": "T53 C1a (AG3S serving, 2026-10-13)",
+   "note": "Recorded ball (centre and radius from the dump) removes every voxel inside it for every link (red ghosts), including the neighbour's near side.",
+   "episode": "ep1842"
+  },
+  "c2_ours_surface_region_v2": {
+   "file": "paper/figures/cvpr_v1/assets/c2_ours_surface_region_v2.png",
+   "sha256": "9071c7afa08a808cc22b2b2837d96b4162c80c2db86be64fd9c08403c8286fc3",
+   "crops": [
+    [
+     0.1,
+     0.25,
+     0.9,
+     1.0
+    ]
+   ],
+   "sidecar": "paper/figures/cvpr_v1/assets/c2_ours_surface_region_v2.json",
+   "frame": "T53_ep1849_f018",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Depth-continuous surface graph, top-1 seed-mass region (orange nodes); neighbour surfaces stay blue (protected). Meshes tinted: target 'banana' orange, neighbours ['apple'] light blue."
+  },
+  "c2_ours_render_mask_v2": {
+   "file": "paper/figures/cvpr_v1/assets/c2_ours_render_mask_v2.png",
+   "sha256": "ac5b9302024e1039c2380ab4405998824a4c7ad726e3b1854ed78197ff38b6ca",
+   "crops": [
+    [
+     0.15,
+     0.1,
+     0.85,
+     0.9
+    ]
+   ],
+   "sidecar": "paper/figures/cvpr_v1/assets/c2_ours_render_mask_v2.json",
+   "frame": "T54c_ep1817_f020",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+   "note": "Observed target nodes left after the rendered robot-surface mask (orange nodes). Mesh tinted: target 'apple' orange."
+  },
+  "v2_role_prior": {
+   "file": "paper/figures/paperbanana/figure2/assets/v2_role_prior.png",
+   "sha256": "74880c7ff44143e01443fe1e7b4a692cd81e3a83078899af05b5c7a0d8288303",
+   "crops": [
+    [
+     0.1,
+     0.3,
+     1.0,
+     0.8
+    ]
+   ],
+   "sidecar": "paper/figures/paperbanana/figure2/assets/v2_role_prior.json",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19822",
+   "note": "Same carry state; red glow marks a held object that a fixed-role filter does not model (illustration on the recorded state)."
+  },
+  "f2c_link_render": {
+   "file": "paper/figures/paperbanana/figure2/assets/f2c_link_render.png",
+   "sha256": "a57c4ca03daf9164f06c0e64dce3a58bf8f04312ba364652a7bbbe47ed82fd8a",
+   "crops": [
+    [
+     0.1,
+     0.25,
+     0.9,
+     0.85
+    ]
+   ],
+   "sidecar": "paper/figures/paperbanana/figure2/assets/f2c_link_render.json",
+   "run": "T53 C1a (AG3S serving, 2026-10-13)",
+   "note": "Recorded query spheres: active-hand contact links (gold, query the target-free layer) vs the other hand (grey, scene field). Evaluated scope queries gripper links of both hands only.",
+   "episode": "ep1842"
+  },
+  "v2_role_attached": {
+   "file": "paper/figures/paperbanana/figure2/assets/v2_role_attached.png",
+   "sha256": "3eea88442bbbfacd08adf2b93a220255a6b74f07e9c1e79b51556f80cdc348d7",
+   "crops": [
+    [
+     0.42,
+     0.25,
+     0.75,
+     0.75
+    ]
+   ],
+   "sidecar": "paper/figures/paperbanana/figure2/assets/v2_role_attached.json",
+   "run": "/mnt/dev/AG3S_VLA-storage/results/workspace/verify/T43/V11/runs/V11AB/H/V11AB_ep1982_s19822",
+   "note": "Carry (chunk 22, latch HELD): the apple is an attached sphere on the hand (purple), so it is checked against the bar like any robot link."
+  }
+ },
+ "registration_status": "numbers copied from raw summary.json / verify.json / agg.json as listed; they are not yet registered in paper/evidence/RESULTS.md (planned EXP003 held-out locked, EXP004 closed-loop hurdle)",
+ "layout": "top: framework strip (RGB + instruction \u2192 frozen VLA \u2192 read-outs; depth + robot model \u2192 geometric layer; LTE field \u2192 CCR); bottom: three contribution cards, prior practice (top panel) vs AG3S (two panels)",
+ "cards": {
+  "1_identity": [
+   "v2_segmenter_mask",
+   "c1_ours_seed_region",
+   "c3_ours_alert"
+  ],
+  "2_extent": [
+   "f2b_ball_render",
+   "c2_ours_surface_region_v2",
+   "c2_ours_render_mask_v2"
+  ],
+  "3_permission": [
+   "v2_role_prior",
+   "f2c_link_render",
+   "v2_role_attached"
+  ]
+ },
+ "prior_provenance": {
+  "segmenter_mask": "illustration: T53 ep1842 chunk 10 right-wrist camera re-rendered from the recorded state; the simulator GT target label (gt/ep1842.npz label_small, class 0) stands in for an ideal external segmenter mask (paperbanana figure2 v2_segmenter_mask)",
+  "volume_exemption": "recorded run: T53 C1a ep1842 chunk 17, recorded ball (surface-fit centre, radius 60.2 mm) removes every voxel inside it for every link, including the neighbour's near side (paperbanana figure2 f2b_ball_render)",
+  "fixed_role": "recorded run: T43 V11AB ep1982 s19822 chunk 22 carry state; red glow marks the held object a fixed-role filter does not model (paperbanana figure2 v2_role_prior); the AG3S 'attached' panel is the same recorded state with the attached sphere"
+ },
+ "ours_assets_note": "c2 panels re-rendered by cvpr_v1_fig3_assets.py (target mesh tinted orange, neighbour blue; nodes unchanged); f2c_link_render / v2_role_attached come from the earlier serving configuration (contact-interface illustration)",
+ "is_measured_result": false,
+ "scope": "conceptual overview on real replay renders; no numbers printed"
+}

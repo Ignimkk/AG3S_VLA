@@ -217,7 +217,7 @@
 - **Q4**: 각 구성요소의 기여는? (체크마크 ablation 표 — 기존 V1→V4→V5 진행이 이 형식에 그대로 맞는다)
 - **Q5**: 계산 비용은? (단계별 latency)
 - 정성 그림: attention heatmap → 3D cluster → ESDF slice(target 허용 전/후) → 정제 전/후 궤적.
-- 결과 문단은 SaPaVe처럼 **굵은 주장 문장**으로 시작한다. 단, 주장은 등록된 수치가 지지하는 범위로만 쓴다.
+- 결과 문단은 SaPaVe처럼 **굵은 주장 문장**으로 시작한다. 수치의 자료 유형·출처·검증 상태와 scope를 함께 표시한다.
 
 ---
 
@@ -237,7 +237,7 @@
 | Ablation | "Removing X causes a drop of …, which indicates …" / "Each component alone improves over …, and their combination achieves …" |
 | 결론 전망 | "We believe that … is a critical step towards …" |
 
-**주의**: 참고 논문들은 "state-of-the-art", "the first", "significantly"를 자주 쓴다. 우리는 등록된 결과가 지지하는 범위에서만 쓰고,
+**주의**: 참고 논문들은 "state-of-the-art", "the first", "significantly"를 자주 쓴다. 우리는 근거의 유형·상태·범위를 명시하고,
 "the first"는 범위를 한정한 한 문장으로 제한한다(현재 원고의 "To our knowledge, no collision-avoidance layer for VLAs …"처럼).
 유의성 검정이 없으면 "significantly"를 쓰지 않는다.
 

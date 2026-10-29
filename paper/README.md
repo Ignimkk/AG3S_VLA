@@ -1,5 +1,14 @@
 # CVPR 2027 VLA Paper Workspace
 
+## 현재 원고 — 2026-10-15 개정
+
+사용자 요청에 따라 IFG 개발 실험을 반영한 영문 원고로 개정했다. 현재 상태는 **DEVELOPMENT_EVIDENCE_DRAFT / NOT_READY**다. 아래 workspace 구성 시점의 기록은 이력이며 현재 원고 상태를 대체하지 않는다.
+
+- [개정 내용과 PDF 검토](notes/IFG_REVISION_20261015_KO.md)
+- [현재 PDF](latex/build/main.pdf), [원고](latex/main.tex)
+- 검증: `python3 paper/tools/analysis/audit_ifg_evidence.py`
+- 현재 원고 빌드: `python3 paper/tools/latex/build_ifg.py`
+
 이곳은 Research → Evidence → Experiment → Figure/Table → Manuscript → Review →
 Submission 과정을 관리하는 논문 작업 공간이다. 현재 **Step 1–6: 논문 작성 workspace 구성**을 모두 마쳤다.
 
@@ -45,7 +54,7 @@ Safety 개선과 task-preservation 등 핵심 연구 목표는 아직 가설이�
 [Manifest 운영과 검증](experiments/manifests/README.md)을 함께 따른다.
 
 Claude Code 사용은 [CLAUDE_WORKFLOW](notes/CLAUDE_WORKFLOW.md)에서 시작한다.
-Skill의 호출 예시, Evidence gate, 검토 역할의 파일 소유권을 설명한다.
+Skill의 호출 예시, Evidence tracking, 검토 역할의 파일 소유권을 설명한다.
 Skill·역할 정의와 workspace/scaffold 검증을 완료했다. 실제 Claude 모델 호출과 세 full audit
 명령은 실행하지 않았다. 현재 최종 구성 결과는 [FINAL_AUDIT](submission/FINAL_AUDIT.md),
 실제 제출 준비 항목은 [SUBMISSION_CHECKLIST](submission/SUBMISSION_CHECKLIST.md)를 따른다.

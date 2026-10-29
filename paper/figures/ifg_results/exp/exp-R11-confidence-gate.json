@@ -1,0 +1,58 @@
+{
+ "threshold": 0.5904207590672415,
+ "rule": "6 lowest + 2 highest chain-memory scores (centered)",
+ "frames": [
+  {
+   "frame": "T54c_ep1825_f028",
+   "score": 0.0771444821397517,
+   "alert": true,
+   "wrong": true
+  },
+  {
+   "frame": "T53_ep1815_f029",
+   "score": 0.11933089997618565,
+   "alert": true,
+   "wrong": true
+  },
+  {
+   "frame": "T53_ep1815_f035",
+   "score": 0.2162834430369739,
+   "alert": true,
+   "wrong": true
+  },
+  {
+   "frame": "T54c_ep1882_f021",
+   "score": 0.2589356410169462,
+   "alert": true,
+   "wrong": true
+  },
+  {
+   "frame": "T54c_ep1856_f025",
+   "score": 0.2687564338130876,
+   "alert": true,
+   "wrong": false
+  },
+  {
+   "frame": "T54c_ep1825_f021",
+   "score": 0.2701141182880684,
+   "alert": true,
+   "wrong": true
+  },
+  {
+   "frame": "T53_ep1851_f037",
+   "score": 0.9757268560903394,
+   "alert": false,
+   "wrong": false
+  },
+  {
+   "frame": "T54c_ep1814_f022",
+   "score": 0.9771204135572026,
+   "alert": false,
+   "wrong": false
+  }
+ ],
+ "all_frames": 147,
+ "wrong_frames": 6,
+ "alerts": 15,
+ "alerts_that_are_wrong": 6
+}

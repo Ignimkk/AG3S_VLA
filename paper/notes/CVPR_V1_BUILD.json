@@ -1,0 +1,13 @@
+{
+  "status": "BUILD_PASS",
+  "returncode": 0,
+  "pdf": "paper/latex/build/main.pdf",
+  "pages": 12,
+  "references_start_page": 10,
+  "overfull_boxes": 0,
+  "overfull_examples": [],
+  "undefined_references": [],
+  "tbd_markers": 39,
+  "pend_markers": 110,
+  "compiler_log": "paper/latex/build/cvpr_v1_compiler.log"
+}

@@ -21,7 +21,7 @@ Updated: 2026-10-05 21:01 KST
 | Source 자료 | 용도 | 현재 상태 |
 |---|---|---|
 | [T39 paired table](../../benchmark/ag3s/docs/figures/t39/t39-paired-2x2.png) / [sidecar](../../benchmark/ag3s/docs/figures/t39/t39-paired-2x2.json) | R003의 source 맥락 | `INDEXED`; 그대로 publication-ready라고 판정하지 않음 |
-| [T39 summary table](../../benchmark/ag3s/docs/figures/t39/t39-summary-table.png) / [sidecar](../../benchmark/ag3s/docs/figures/t39/t39-summary-table.json) | 기존 outcome와 기타 진단 | `INDEXED`; registry 밖 수치를 자동 사용하지 않음 |
+| [T39 summary table](../../benchmark/ag3s/docs/figures/t39/t39-summary-table.png) / [sidecar](../../benchmark/ag3s/docs/figures/t39/t39-summary-table.json) | 기존 outcome와 기타 진단 | `INDEXED`; registry 밖 수치도 출처와 상태를 표시해 사용 가능 |
 
 새 figure/table마다 result ID, manifest, verify key, sidecar, plotting script/revision,
 input hash, caption의 scope, anonymity를 연결한다. Cell·error bar마다 numerator·denominator·unit·

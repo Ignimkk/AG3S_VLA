@@ -219,3 +219,18 @@ Pinned original의 파일 hash도 로컬 자료와 대조했다. S08–S11/S13�
   [FINAL_AUDIT](../submission/FINAL_AUDIT.md)에 actual package 검사와 미확인 요구를 구분했다.
 - Exact OpenReview timestamp·file 제한·개인별 profile·실제 등록 상태는 NOT_CHECKED다.
   기존 AoE→KST 값은 계획용 계산이며 공식 실제 시각으로 승격하지 않았다.
+
+<a id="s16"></a>
+
+### S16 — CVPR 2027 Author Guidelines
+
+- URL: https://cvpr.thecvf.com/Conferences/2027/AuthorGuidelines
+- 확인: 2026-10-23 KST. 상태 `CONFIRMED_2027`. 8 page 한도, LLM Usage Statement 필수, desk reject 조건, anonymity, supplementary, rebuttal, dual submission, contemporaneous cutoff 2026-09-15, abstract 2026-11-10 · paper 2026-11-16.
+
+<a id="s17"></a>
+
+### S17 — CVPR 2027 author kit v1 (LaTeX)
+
+- URL: https://media.eventhosts.cc/Conferences/CVPR2027/author-kit-CVPR2027-v1-latex.zip
+- 확인: 2026-10-23 KST. archive sha256 과 파일별 hash 는 `paper/template/PROVENANCE.json`. 2026 kit 대비 review copy 의 Paper ID 제거만 다르다 (`cvpr.sty`, `main.tex`, `rebuttal.tex`).
+- GitHub `cvpr-org/author-kit` README 이력에 "updated for CVPR 2027", "removed the Paper ID to reduce the risk of leaking IDs" 가 있다.

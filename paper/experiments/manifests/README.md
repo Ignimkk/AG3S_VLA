@@ -1,19 +1,24 @@
 # 16-D Experiment Manifest Registry
 
+## IFG 추가 등록 (2026-10-15)
+
+[EXP002](ifg/EXP002_IFG_development.json)는 `IFG_OFFLINE_1` 형식의 per-request dump 등록이다. 검증 명령: `python3 paper/tools/analysis/audit_ifg_evidence.py`. 기존 EXP001의 closed-loop trajectory schema와 분리하고 각 validator가 수행한 검사를 상태로 기록한다. REGISTERED의 범위는 offline development grounding/probing이다. [개정 기록](../../notes/IFG_REVISION_20261015_KO.md)을 참고한다.
+
 Updated: 2026-10-05 19:45 KST
 
 ## 상태와 사용 범위
 
-| 상태 | 의미 | 논문 결과로 사용 |
+| 상태 | 의미 | 논문 표기 |
 |---|---|---|
-| `PLANNED` | 예상 protocol | 불가 |
-| `CANDIDATE` | Source audit 전 자료 | 불가 |
-| `REGISTERED` | 실제 16-D 자료·provenance·검증 key와 scope를 연결한 등록 | 해당 scope만 가능 |
-| `DEPRECATED` | 대체·오염·문제 발견 자료 | 불가; 기록 삭제 대신 이유 보존 |
+| `PLANNED` | 예상 protocol | 계획값으로 표시 |
+| `CANDIDATE` | Source audit 전 자료 | candidate로 표시 |
+| `REGISTERED` | registry에 기록된 자료; 실측·검증 완료를 뜻하지 않음 | 자료 유형·검증 상태와 scope 표시 |
+| `DEPRECATED` | 대체·오염·문제 발견 자료 | deprecated 이유와 함께 표시 |
 
-파일 존재만으로 whitelist 등록이 성립하지 않는다. `paper_eligible=true`와
-`REGISTERED`, 실제 source 검증 통과가 함께 필요하다. 이 status는 모든 과학적 주장이나
-submission readiness를 승인하는 표시가 아니다.
+Manifest는 자료의 상태와 provenance를 기록하는 registry이며 논문 포함 여부를 결정하는
+whitelist가 아니다. 등록·검증 여부와 관계없이 자료를 사용할 수 있고, 그 상태를 명시한다.
+등록 수치는 `MEASURED`, `DERIVED`, `ESTIMATED`, `PLANNED`, `PLACEHOLDER`, `UNKNOWN`으로
+구분할 수 있으며 source pointer와 audit은 가능한 경우에만 연결한다.
 
 [Schema](../configs/manifest.schema.json)는 JSON Schema 2020-12를 사용하며
 state/action dimension을 16으로 제한한다. [Candidate 예제](../configs/manifest.example.json)는

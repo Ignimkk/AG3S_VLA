@@ -1,14 +1,4 @@
 % !TEX root = ../main.tex
 \begin{abstract}
-Geometric collision avoidance for vision-language-action (VLA) policies must distinguish necessary object contact
-from unwanted collision. This requires identifying the task target, recovering its spatial extent, and determining
-which robot links may contact it as manipulation proceeds. We present \sys, which connects a frozen VLA's internal
-visual signals to task-dependent geometric constraints. Action-to-image attention seeds multi-view 3D clustering,
-providing target geometry without an external detector or segmentation network. This geometry defines a local
-contact exception for selected gripper links, while other modeled links query a scene distance field containing
-the target. A lightweight probe trained on frozen features controls target-identity updates across manipulation
-phases, and a grasp state machine transfers grasped geometry into attached-object collision queries. The resulting
-constraints refine the executed portion of each action chunk. The VLA requires no additional training for collision
-avoidance. \tbd{Insert verified task success, forbidden-contact and safe-success results, plus the key
-matched-controller ablation demonstrating the contribution of target geometry and link-specific contact handling.}
+Manipulation requires selective contact: the fingers must touch the instructed object, the wrist must not, and once grasped the object itself must clear the scene. A distance-field safety layer behind a vision-language-action (VLA) policy cannot make these distinctions on its own. Every observed surface is an obstacle, and carving the target out with a ball also erases the fruit touching it. We present \sys, which constructs the collision representation a frozen VLA needs from the policy's own evidence. Noun attention decides \emph{which} object; depth continuity decides \emph{where} its observed surface ends; centered internal features decide \emph{whether} the selected surface is still the same object; a sub-task probe and physical grasp evidence decide \emph{when} the object turns from target into carried geometry and back. These answers configure link-specific distance queries, so that only designated contact links may enter the accepted target surface while every other link and every neighboring surface stays protected, and a constrained chunk refiner tracks the policy under them. On 34 pre-registered held-out episodes, the surface construction raises observed-surface IoU from \pend{0.77} to \pend{0.88} in every single episode, to \pend{0.89} with temporal reassociation, and removes \pend{92\%} of the neighboring surface that a radius-grown target would have freed, without an external segmenter or any update to the VLA. In closed loop, the same frozen policy that is stopped by contact with a bar across the carry path in \pend{13} of \pend{14} hurdle episodes and completes none, completes \pend{7} with \sys\ and no bar contact. \tbd{SafeLIBERO and real-robot sentence once results are registered.}
 \end{abstract}

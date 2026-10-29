@@ -1,0 +1,17 @@
+Figure 3, Method pipeline, full text width (about 2:1). Follow the reference image closely: five dashed stage containers left to right with bold italic titles, photographic thumbnails from the recorded run inside them, rounded boxes for operations, and orthogonal arrows. A one-episode timeline strip runs underneath. Clean academic style, sans-serif labels of at most eight words, no icons, no shadows.
+
+Stage 1 "Frozen VLA" (pale navy #DEEBF7). From top to bottom: three small camera thumbnails (head, left wrist, right wrist) with the caption "RGB-D (3 views), instruction, state"; box "VLA (frozen) / serving pass"; box "extraction pass / same checkpoint"; the same three thumbnails with a red-orange attention glow, captioned "attention, 3 x 16 x 16"; an orange box "sub-task probe / pick, place, home".
+
+A horizontal blue lane across the top of the figure carries "nominal action chunk (50 x 16)" from the VLA box directly into Stage 5.
+
+Stage 2 "Multi-view 3D grounding" (pale gold #FFF2CC; our contribution). Upper thumbnail: the table scene with the fused point cloud shown as small spheres, attention seeds in teal on the fruit, captioned "lift + fuse, attention seeds". Lower thumbnail: the same scene with the selected target cluster in orange on the pear, captioned "grow, filter, confirm (3 frames)". The attention thumbnails feed the upper image; the sub-task probe feeds the lower one.
+
+Stage 3 "Boundary-preserving extent" (pale gold; our contribution). A thumbnail of the gold gripper over the pear: faint orange cubes (removed, target-owned) and solid blue cubes on the touching orange (kept), inside a faint sphere. Caption: "ball = outer bound; keep neighbour-owned voxels". Below it, a gold box "target-free fine layer".
+
+Stage 4 "Contact-aware geometry" (pale blue #EEF4FB). Two thumbnails at the top: a blue voxel field over the table, "cuRobo TSDF -> ESDF", and the robot with gold and grey sphere chains on its two grippers, "query spheres per link". Both feed a wide gold box "link-specific allowed collision / contact links -> target-free, others -> scene field". Below: an orange box "grasp state: searching -> latched -> closing -> held -> placed (executed gripper feedback)", and a thumbnail of the hand carrying the pear inside a translucent purple sphere, "held -> attached object". Both point up into the gold box. The target-free layer from Stage 3 also enters the gold box.
+
+Stage 5 "Constrained chunk refinement" (pale purple #E4DFEC). A box "executed-horizon SQP / d(x) - r >= m, 8 executed + 8 look-ahead" receives the nominal chunk and the gold box. Below it, a small side-view plot of the tool-centre path (gold refined vs dashed reference, orange target points), then a box "post-check gate" with two outputs: "execute" in green and "hold" in red. A dashed grey "feedback" arrow returns from the gate to the grasp-state box.
+
+Bottom strip "One episode, chunk by chunk": a coloured band of grasp states (searching, latched, closing, held, placed) above three probability curves (pick, place, home) over about 75 action chunks, with a small red marker at the single hold.
+
+Colours: gold only for our contributions (Stages 2-3 and the link rule); target orange #E8711A; obstacle blue #2E75B6; attached object purple #7030A0; hold red #C00000. Use no numbers other than the sizes written here, and add no modules that are not listed.

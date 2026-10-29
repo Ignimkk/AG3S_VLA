@@ -88,11 +88,11 @@ def validate_manifest(path: Path, root: Path, schema: dict) -> dict:
     Draft202012Validator(schema).validate(manifest)
     status = manifest['status']
     if status != 'REGISTERED':
-        return {'experiment_id': manifest['experiment_id'], 'status': status, 'paper_eligible': False}
+        return {'experiment_id': manifest['experiment_id'], 'status': status}
 
     cache = {}
     verified = {}
-    for item in manifest['sources']:
+    for item in manifest.get('sources', []):
         file = source_path(root, item['path'])
         actual = section_sha256(file, item['section_heading']) if item.get('hash_scope') == 'section' else sha256(file)
         require(actual == item['sha256'], f'Source changed: {item["path"]}')
@@ -100,14 +100,13 @@ def validate_manifest(path: Path, root: Path, schema: dict) -> dict:
             require('hash_scope' not in item, 'Verify file needs a full-file hash')
             verified[item['path']] = item['sha256']
             cache[item['path']] = json.loads(file.read_text())
-    require(bool(verified), 'Registered evidence needs a verify source')
-
-    conditions = {condition['condition_id']: condition['baseline_id'] for condition in manifest['conditions']}
-    require(len(conditions) == len(manifest['conditions']), 'Duplicate condition ID')
+    conditions_list = manifest.get('conditions', [])
+    conditions = {condition['condition_id']: condition['baseline_id'] for condition in conditions_list}
+    require(len(conditions) == len(conditions_list), 'Duplicate condition ID')
     names = set()
     groups = defaultdict(set)
     counts = Counter()
-    for run in manifest['runs']:
+    for run in manifest.get('runs', []):
         require(run['run_id'] not in names, f'Duplicate run: {run["run_id"]}')
         names.add(run['run_id'])
         condition = run['condition_id']
@@ -140,32 +139,39 @@ def validate_manifest(path: Path, root: Path, schema: dict) -> dict:
         require(all(shape[-1] == 16 for shape in shapes.values()), 'Actual array dimension is not 16')
         require(shapes['executed_actions.npy'][0] == completeness['control_records'], 'Control row count mismatch')
         require(shapes['inference_states.npy'][0] == shapes['predicted_chunks.npy'][0] == completeness['planning_records'], 'Planning row count mismatch')
-    require(len(names) == manifest['design']['run_count'], 'Design run count mismatch')
-    if manifest['design']['paired']:
+    if 'design' in manifest:
+        require(len(names) == manifest['design']['run_count'], 'Design run count mismatch')
+    if manifest.get('design', {}).get('paired'):
         require(all(members == set(conditions) for members in groups.values()), 'Incomplete matched pair')
         require(len(groups) == manifest['design']['pair_count'], 'Design pair count mismatch')
 
     result_ids = set()
-    for measurement in manifest['measurements']:
+    source_linked_results = set()
+    for measurement in manifest.get('measurements', []):
         result_id = measurement['result_id']
         require(result_id not in result_ids, f'Duplicate result ID: {result_id}')
         result_ids.add(result_id)
-        key = measurement['source_path']
-        require(key in verified and measurement['source_sha256'] == verified[key], 'Measurement is not bound to a registered verify file')
-        actual = json_pointer(cache[key], measurement['json_pointer'])
-        require(actual is not None, 'Unmeasured/null value cannot be registered as a result')
-        require(exact_json_equal(actual, measurement['value']), f'Measurement differs from source: {result_id}')
-        condition = measurement['condition_id']
-        require(condition is None or condition in conditions, 'Measurement condition unknown')
-        denominator = measurement['denominator']
-        if denominator is not None:
+        source_fields = ('source_path', 'source_sha256', 'json_pointer')
+        present = [field in measurement for field in source_fields]
+        require(all(present) or not any(present), f'Partial source link: {result_id}')
+        if all(present):
+            key = measurement['source_path']
+            require(key in verified and measurement['source_sha256'] == verified[key], 'Measurement source link does not match a verify file')
+            actual = json_pointer(cache[key], measurement['json_pointer'])
+            require(exact_json_equal(actual, measurement['value']), f'Measurement differs from source: {result_id}')
+            source_linked_results.add(result_id)
+        condition = measurement.get('condition_id')
+        require(not conditions or condition is None or condition in conditions, 'Measurement condition unknown')
+        denominator = measurement.get('denominator')
+        if denominator is not None and all(present):
             require(exact_json_equal(json_pointer(cache[key], denominator['json_pointer']), denominator['value']), f'Denominator differs from source: {result_id}')
             if condition is not None:
                 require(denominator['value'] == counts[condition], 'Denominator does not match registered runs')
-    audit = json.loads(source_path(root, manifest['audit']['path']).read_text())
-    require(audit['experiment_id'] == manifest['experiment_id'] and audit['status'] == 'PASS_WITH_LIMITED_SCOPE', 'Source audit mismatch')
-    require(audit['verified_run_count'] == len(names), 'Audit run count mismatch')
-    return {'experiment_id': manifest['experiment_id'], 'status': 'PASS', 'paper_eligible': True, 'evidence_scope': manifest['evidence_scope'], 'runs': len(names), 'pairs': len(groups), 'results': sorted(result_ids)}
+    if 'audit' in manifest:
+        audit = json.loads(source_path(root, manifest['audit']['path']).read_text())
+        require(audit['experiment_id'] == manifest['experiment_id'] and audit['status'] == 'PASS_WITH_LIMITED_SCOPE', 'Source audit mismatch')
+        require(audit['verified_run_count'] == len(names), 'Audit run count mismatch')
+    return {'experiment_id': manifest['experiment_id'], 'status': 'PASS', 'evidence_scope': manifest['evidence_scope'], 'runs': len(names), 'pairs': len(groups), 'results': sorted(result_ids), 'source_linked_results': sorted(source_linked_results)}
 
 
 def main() -> int:

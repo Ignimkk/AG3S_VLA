@@ -1,0 +1,15 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/p_strip_M4_carry.png",
+ "frame": "T53_ep1842_f025",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T53_ep1842_f025.npz": "6d8dc3c6277fcb464c5b72e64cb2f45ec8a768aea67393a9bb792aa4b6e68d65"
+ },
+ "note": "Key-moment close-up with the recomputed target surface.",
+ "is_measured_result": false,
+ "episode": "T53_ep1842",
+ "moment": "M4_carry",
+ "iou": 0.9433256555280348
+}

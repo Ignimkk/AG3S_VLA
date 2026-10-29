@@ -53,7 +53,7 @@
       "status": "PASS",
       "details": {
         "source_validator_output": [
-          "{\"experiment_id\": \"EXP001\", \"status\": \"PASS\", \"paper_eligible\": true, \"evidence_scope\": \"DESCRIPTIVE_TASK_OUTCOME_ONLY\", \"runs\": 96, \"pairs\": 48, \"results\": [\"R001\", \"R002\", \"R003\"]}",
+          "{\"experiment_id\": \"EXP001\", \"status\": \"PASS\", \"evidence_scope\": \"DESCRIPTIVE_TASK_OUTCOME_ONLY\", \"runs\": 96, \"pairs\": 48, \"results\": [\"R001\", \"R002\", \"R003\"], \"source_linked_results\": [\"R001\", \"R002\", \"R003\"]}",
           "PASS kit, working styles, manifests, artifact hashes and T00 source counts"
         ],
         "registered_results": [

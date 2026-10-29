@@ -1,0 +1,26 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/c3_ours_alert.png",
+ "frame": "T54c_ep1825_f028",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T54c_ep1825_f028.npz": "6b145a039739f056854eca1a99c9d3e9f389aced8e168fce32ae873084e4b46f"
+ },
+ "note": "Wrong region chosen (red); centered chain score below the locked threshold -> exception withheld.",
+ "is_measured_result": false,
+ "rule": "lowest centered chain score among wrong choices (R11b)",
+ "score": 0.0771444821397517,
+ "threshold": 0.5904207590672415,
+ "chosen_iou": 0.0,
+ "camera": {
+  "lookat": [
+   0.47961962504289024,
+   -0.07144712968499047,
+   0.9125699493437127
+  ],
+  "dist": 0.48,
+  "az": 180,
+  "el": -50
+ }
+}

@@ -1,38 +1,14 @@
 {
   "artifact_id": "F02",
-  "status": "CONCEPTUAL_DRAFT10",
-  "claim_ids": [
-    "C002",
-    "C003",
-    "C004"
-  ],
-  "plan_ids": [
-    "P002",
-    "P003"
-  ],
+  "status": "CONCEPTUAL",
+  "claim_ids": [],
   "result_ids": [],
-  "source_notes": [
-    "paper/notes/PAPER_STORY.md",
-    "paper/evidence/FIGURES_TABLES.md",
-    "paper/notes/METHOD_FACTS_DRAFT1.md",
-    "paper/notes/V5_FACTS.md",
-    "paper/notes/SUBTASK_FACTS.md",
-    "paper/notes/DRAFT10_REVISION.md",
-    "paper/notes/V7G_FACTS.md"
-  ],
   "render_source": "paper/figures/fig02_overview/figure.tex",
-  "numeric_values": null,
+  "render_source_sha256": "ef7f7eb6b8399663fca7084f72b392f1af6b4ced1d2f67a47a962cf99c8177c4",
   "is_measured_result": false,
-  "caption_scope": "Conceptual flow with separate serving/extraction passes and a trained frozen-feature probe; not an execution audit.",
-  "render_source_sha256": "66d062044cfc647d933fb6e64d4050118df509dc7b108a2c6cae8fe0913870f0",
+  "caption_scope": "Complete proposed AG3S method schematic; no measured outcomes or closed-loop validation implied.",
   "input_sha256": {
-    "paper/notes/PAPER_STORY.md": "2abe32df6226dbeeb6afd12fed4fda985e01212076ee182f3d02293f7365e6ac",
-    "paper/evidence/FIGURES_TABLES.md": "fc9a41403b8bcbdb73c1cbb70d550300bce902691cdab61bf43e3882153ca049",
-    "paper/notes/METHOD_FACTS_DRAFT1.md": "722b327f0fd64bb10107fb981ab821d24237b6b7c323d7420bdc0ab54c906ee6",
-    "paper/notes/V5_FACTS.md": "af4766e138d757c502150e783de32a7ce7d4005a1228d238a044c5af0348673d",
-    "paper/notes/SUBTASK_FACTS.md": "ccca2216b011a49714508e5540a81b29017f2aa5ec7ff45fabdaac17288c1131",
-    "paper/notes/DRAFT10_REVISION.md": "604fa5a59dc9e02b3b8d3d149fca251338f15e055a9a5acbec89b6f5284e7182",
-    "paper/notes/V7G_FACTS.md": "e018d6ac8f98da239313b334ba19d73d831f2d7ce57b99e26e09563e32cbff7f"
+    "paper/notes/AG3S_METHOD_REVISION_20261016_KO.md": "61f792993be5ef7ae7d0b4e53d138d8e888a3e7ea1e217ea64ce47d6c8041fd7"
   },
-  "updated_at": "2026-10-08 KST"
+  "updated_at": "2026-10-16"
 }

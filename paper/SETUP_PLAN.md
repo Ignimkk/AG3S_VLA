@@ -30,8 +30,8 @@
 | 6 | Submission checklist와 전체 구성 검증 | 제출 checklist 5개·최종 audit·workspace validator·cached build 검증 | 완료 |
 
 Step 2에서 최신 공식 Author Kit을 확인한 뒤 Step 5의 template 버전을 정한다.
-Step 3에서는 16-D 여부와 provenance를 확인한 experiment만 whitelist에 등록한다.
-연구 계획·가설은 검증된 결과와 구분한다. Step 4의 역할 정의 생성 자체로 experiment나
+Step 3에서는 experiment의 dimension, provenance와 검증 상태를 registry에 기록한다.
+연구 계획·가설·측정·파생·추정·placeholder를 구분한다. Step 4의 역할 정의 생성 자체로 experiment나
 review를 실행하지 않는다. 이 계획은 논문 작성 환경 구축 계획이며, 연구 수행과 실제
 submission 완료를 의미하지 않는다.
 
@@ -101,7 +101,7 @@ Step 3 종료 시점의 다음 구성 작업은 Step 4였다.
 - `cvpr-write`, `cvpr-evidence`, `cvpr-experiment`, `cvpr-figure`,
   `cvpr-reference-analysis`, `cvpr-review`, `cvpr-compliance`의 7개 skill을 생성했다.
 - `literature-analyst`, `evidence-auditor`, `cvpr-reviewer`의 3개 읽기 전용 역할을 생성했다.
-- [CLAUDE_WORKFLOW](notes/CLAUDE_WORKFLOW.md)에 호출 예시·Evidence gate·역할 소유권·
+- [CLAUDE_WORKFLOW](notes/CLAUDE_WORKFLOW.md)에 호출 예시·Evidence tracking·역할 소유권·
   최종 audit의 완료 조건을 구성했다. Parent writer만 논문 파일 변경을 반영한다.
 - 공식 Claude Code 문서의 project skill/agent 형식을 확인했다. 로컬 CLI는 2.1.282다.
 - Skill validator 7개, agent YAML·unique name·도구 제한, 내부 참조와 whitespace를 검증했다.

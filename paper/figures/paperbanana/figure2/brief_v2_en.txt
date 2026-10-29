@@ -1,0 +1,25 @@
+Figure 2 (v2), contribution-centred overview of AG3S, full text width (about 1.5:1). Follow the reference image closely. Clean academic style: white background, rounded colour cards, a compact block diagram on top, photographic panels with thin frames, bold sans-serif titles. No icons, no shadows.
+
+Title: "AG3S: one frozen VLA decides what may be touched, by which link, and when".
+
+Top strip, the framework (light grey card). "RGB-D + instruction" -> "frozen VLA (no retraining)", which emits three outputs: "actions" (blue), "attention" (gold), "hidden state" (orange).
+- attention -> gold box "3D target from attention (no segmenter)" with a small gold tag "C1 What".
+- hidden state -> orange box "object role: target -> attached -> released" with an orange tag "C3 When".
+- Both feed one large gold box, the visual centre of the strip, tagged "C2 Who": "link-specific contact representation", with two typeset lines:
+  d_l(x) = d^free(x) if l is in L_contact(phi)
+  d_l(x) = d^scene(x) otherwise
+  and a small italic note "free = scene minus the target's own observed extent".
+- The gold box -> "CCR (SQP)" -> "execute or hold". A blue lane "nominal action chunk" runs from "actions" across the top into CCR.
+
+Bottom, three equal tall cards, one per contribution. Each card has a title, an italic one-line subtitle, a red "Prior:" row with one photo and a red badge, then a gold "AG3S:" row with two or three photos and short captions.
+C1 "What to touch" (gold card), subtitle "where the target's geometry comes from".
+  Prior: external segmenter. Photo: wrist-camera view with the target pear painted as a green segmentation mask. Badge "x extra model + class prompt".
+  AG3S: the policy's own attention -> 3D. Photos: "frozen-VLA attention" (warm heat glow on the pear) and "lifted 3D target" (pear covered by orange points; touching orange covered by blue points).
+C2 "Who may touch it" (gold card), subtitle "which surfaces are freed, and for which links".
+  Prior: global target exclusion. Photo: gold gripper over two fruits; a translucent red ball removes all voxels inside it, including part of the neighbour. Badge "x freed for every link; neighbour erased".
+  AG3S: boundary-preserving + link-specific. Photos: "only target-owned voxels" (faint orange voxels removed on the target; neighbour keeps solid blue) and "only the grasping links" (front view of the robot; the grasping hand's collision spheres gold, the other hand's grey).
+C3 "When it changes" (orange card), subtitle "the object's role follows the task phase".
+  Prior: fixed object role. Photo: the robot carrying a red apple near a red arch-shaped bar; red glow around the apple. Badge "x held object not modelled".
+  AG3S: HSR + grasp state switch the role. Three photos: "target: fingers may touch" (gold finger spheres over voxels; the apple's voxels faint orange), "attached: avoids the bar" (the apple inside a translucent purple sphere on the hand), "released: obstacle again" (the apple in the basket covered again by blue voxels).
+
+Colours: ours gold #D9A406 (pale #FFF2CC), role/phase orange #C55A11 (pale #FBE5D6), prior/failure red #C62828, target orange #E8711A, obstacle blue #2E75B6, attached purple #7030A0, VLA pale navy #C9DCF0, controller pale purple #E4DFEC. No numbers. Keep text to the phrases given.

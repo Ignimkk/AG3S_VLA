@@ -29,13 +29,13 @@ Current status: `NOT_READY`. 아래 checked 항목은 현재 workspace/scaffold 
 ## 원고·근거
 
 - [x] English section 7개·review style·원본 hash·분리된 supplementary 기반을 구성했다.
-- [x] EXP001의 실제 16-D·source/array·R001–R003 연결을 재검증했다. Task outcome scope만 허용한다.
+- [x] EXP001의 실제 16-D·source/array·R001–R003 연결을 재검증했고 task outcome scope를 표시했다.
 - [ ] Novelty·관련 연구·baseline citation과 구현 snapshot을 검증한다.
 - [ ] 주요 claim의 grounding·독립 contact/safety·ablation·generalization·runtime 결과를 확보한다.
 - [ ] Train/tuning/test 독립성·allowed contact·geometry/payload coverage를 검증한다.
 - [ ] Paired/episode-cluster 분석과 non-inferiority margin·uncertainty·exclusion 규칙을 확정한다.
 - [ ] 최종 manuscript·figure/table/caption의 모든 수치를 해당 registry·source key로 추적한다.
-- [ ] DRAFT·placeholder·미등록 paper ID·pending bibliography를 실제 검증 내용으로 대체한다.
+- [ ] DRAFT·placeholder·미등록 paper ID·pending bibliography의 상태와 출처 표시를 최종 점검한다.
 - [ ] 최종 [page](PAGE_LIMIT_CHECKLIST.md)·[anonymity](ANONYMITY_CHECKLIST.md)·
   [references](REFERENCES_CHECKLIST.md)·[supplementary](SUPPLEMENTARY_CHECKLIST.md) 검사를 완료한다.
 

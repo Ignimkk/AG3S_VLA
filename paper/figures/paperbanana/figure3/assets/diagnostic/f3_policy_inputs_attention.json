@@ -1,0 +1,14 @@
+{
+ "asset": "paper/figures/paperbanana/figure3/assets/f3_policy_inputs_attention.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_assets.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00012.npz": "77b9a74f0e88d9d9d663750e160410651330e30322015d88214e00f541447a5d",
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/server_8290_20261013T010834/server_constraints/run_0000/chunk_00162.npz": "136cf446c3f80fcd4b1d8441a683998b9acc14e49f19d89042bf92fd5a491e3c"
+ },
+ "note": "Policy inputs (3 RGB views) and the raw 16x16 action-to-image attention per view from the extraction pass.",
+ "is_measured_result": false,
+ "generated": true,
+ "chunk": 12
+}

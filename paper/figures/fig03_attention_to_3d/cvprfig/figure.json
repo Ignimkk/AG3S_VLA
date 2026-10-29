@@ -1,0 +1,89 @@
+{
+ "artifact_id": "F03",
+ "status": "CVPRFIG_DRAFT",
+ "is_measured_result": false,
+ "numeric_values": null,
+ "engine": {
+  "repo": "https://github.com/ChizkiyahuOhayon/CVPR-Figure",
+  "commit": "c220e5de60bf9a2b6b222ac50d4a942835db0eb8",
+  "render": "scripts/render.py -f svg,pdf,png,pptx --dpi 300 (pdf/png via cairosvg)",
+  "font_note": "Times New Roman aliased to STIXGeneral via fontconfig (no Times-metric font on host)"
+ },
+ "asset_script": "paper/tools/plotting/cvprfig_assets.py",
+ "asset_manifest": "paper/figures/cvprfig_assets/assets.json",
+ "existing_storyboard_untouched": true,
+ "updated_at": "2026-10-13 KST",
+ "caption_scope": "Method pipeline. Boundary-preserving extent is a planned component (develope_PLAN 0.10, dashed); diagram is not an execution audit.",
+ "spec": "figures/fig03_attention_to_3d/cvprfig/fig03_pipeline.yaml",
+ "spec_sha256": "1023e93c590035512954d9fdd40b8cc6d7a2a4e11a5bb6e8b147bd984c4bbfe2",
+ "outputs": {
+  "svg": "a789aeaa1a514653be3071ee5798bc12b7b4e0bdb55160eaed07c50ee5b13330",
+  "pdf": "34e7b7d29dd467d6d0203b4e8bab0583df25946f9ccd9f19620899b89cdb728e",
+  "png": "193bdfe25ccd03fa61fb3a846dd0f070307180ebd0ed215662ecf912694331c2",
+  "pptx": "da9ff8f493e219c9c013ed7121baf52f8f09627d7e515903edb09103a3bbdf98"
+ },
+ "assets_used": {
+  "policy_cam_high": {
+   "source": "/mnt/dev/AG3S_VLA-storage/results/workspace/live_test/20260925_headfix16d/records/run_0000/run_0000/step_00005.npz",
+   "source_sha256": "5145d78f4baacad58ec69bec884b7e95646bfde6d4e6bcf7f389e1e937df0037",
+   "key": "image_cam_high",
+   "t_step": 40,
+   "note": "224x224 policy input (headfix record, held-out, apple)",
+   "sha256": "a8a8d230b1d13a8d4d6f733118a04aa6ceea1289a10028be6d095e0f6adc66f6"
+  },
+  "policy_cam_left_wrist": {
+   "source": "/mnt/dev/AG3S_VLA-storage/results/workspace/live_test/20260925_headfix16d/records/run_0000/run_0000/step_00005.npz",
+   "source_sha256": "5145d78f4baacad58ec69bec884b7e95646bfde6d4e6bcf7f389e1e937df0037",
+   "key": "image_cam_left_wrist",
+   "t_step": 40,
+   "note": "224x224 policy input (headfix record, held-out, apple)",
+   "sha256": "4d9424afcf04c36f7008d1bf8728d74d0571580ef0d3d7990fb290daa45629dc"
+  },
+  "policy_cam_right_wrist": {
+   "source": "/mnt/dev/AG3S_VLA-storage/results/workspace/live_test/20260925_headfix16d/records/run_0000/run_0000/step_00005.npz",
+   "source_sha256": "5145d78f4baacad58ec69bec884b7e95646bfde6d4e6bcf7f389e1e937df0037",
+   "key": "image_cam_right_wrist",
+   "t_step": 40,
+   "note": "224x224 policy input (headfix record, held-out, apple)",
+   "sha256": "264d8282cfcbf305c4fa68d26a4aa9219f5dfe96269418dcdffd69acbd98e782"
+  },
+  "attn_left_wrist": {
+   "source": "AG3S/ag3s/docs/figures/t47/t47-scene-overlay.png",
+   "source_sha256": "b5d6045273eb78f13f504859c289cc7d00606ef4f50d18b38921cf0c63b1c664",
+   "crop_xyxy": [
+    722,
+    349,
+    917,
+    543
+   ],
+   "sha256": "9aad86429f6ad05f144e3f94928d6d02d285598eded8e312c6829b13be772718"
+  },
+  "esdf_fine_xz": {
+   "source": "AG3S/ag3s/docs/figures/t31/t31-d4-slices-E3b_ep1807_r1-t240.png",
+   "source_sha256": "9a298cc50fc191c5786726b44c7c0b4a5b16981b7a256a929bd753fb8b546ec6",
+   "crop_xyxy": [
+    86,
+    1250,
+    558,
+    1662
+   ],
+   "sha256": "2bbba0ad5419fbeee73eeead10a09c63d4371c9f10bac9f5f9807f6f9fcd39fe"
+  },
+  "demo_lift": {
+   "source": "/mnt/dev/AG3S_VLA-storage/results/rby1/rollouts/ep1807_apple.mp4",
+   "source_sha256": "ab7c82874719caec5a5fe919df80c327fb6384681adc142bb0b75ffbeac82dc0",
+   "frame_index": 150,
+   "crop_xyxy": [
+    150,
+    0,
+    550,
+    420
+   ],
+   "note": "third-person render; controller configuration of this rollout not registered",
+   "sha256": "562d983ce26acb1ca82acdc55475ac0b2a3e1305dccd3337c82e0efbf56fd0d3"
+  }
+ },
+ "placeholders": [
+  "tgt_img"
+ ]
+}

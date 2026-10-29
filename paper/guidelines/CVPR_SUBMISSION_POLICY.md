@@ -1,5 +1,16 @@
 # CVPR Submission Policy
 
+## 2026-10-23 — `CONFIRMED_2027` ([S16](SOURCES.md#s16), [S01](SOURCES.md#s01))
+
+- Abstract (제목 · 초록) 마감 **2026-11-10 AoE**: 모든 공저자의 OpenReview profile · enrollment · 저자 목록 완성; 이후 저자 추가 · 삭제 불가. 기관 이메일 없는 profile 은 승인에 최대 2 주.
+- Paper 마감 **2026-11-16 AoE** (연장 없음); 이후 저자 순서 확정.
+- Dual submission 금지: 20 % 이상 겹치는 작업을 리뷰 기간에 다른 곳에 제출 금지. 4 page 초과 peer-reviewed 출판물만 publication (arXiv 제외).
+- Contemporaneous: 2026-09-15 이후 공개 작업은 비교 부재로 reject 하지 않지만 인용 · 논의 필요.
+- Desk reject: 저자당 25 편 초과 · reciprocal reviewer 없이 2 편 이상, 형식 · 익명 · 행정 위반 (8 page 초과, LLM statement 누락, 불완전 profile, 내용 확장 외부 링크), dual submission · 표절 · prompt injection · fabricated content, 저자의 무책임한 리뷰, 핵심 질문 · 방법 · 설정을 전문가가 파악할 수 없는 원고. 결정은 최종이며 이의 불가.
+- 모든 저자는 reviewer 풀에 들어간다 (예외는 사전 승인).
+- 승인 전 CVPR 을 언급하는 media 와의 논의 금지. 사람 대상 데이터는 IRB 명시.
+
+
 Target venue: CVPR 2027
 
 Last verified: 2026-10-05 19:21 KST

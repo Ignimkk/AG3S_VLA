@@ -1,5 +1,18 @@
 # CVPR 2027 Important Dates
 
+## 2026-10-23 재확인 — `CONFIRMED_2027` ([S01](SOURCES.md#s01), [S16](SOURCES.md#s16))
+
+| 항목 | 날짜 (AoE) |
+|---|---|
+| Paper enrollment / abstract (제목 · 초록 · 저자 목록 · profile 완성) | 2026-11-10 23:59 |
+| Paper submission | 2026-11-16 23:59 (연장 없음) |
+| Supplementary | 2026-11-23 |
+| Reviews released | 2027-01-25 |
+| Rebuttal | 2027-01-25 – 2027-02-01 |
+| Final decisions | 2027-02-25 |
+| Contemporaneous cutoff | 2026-09-15 |
+
+
 Target venue: CVPR 2027
 
 Last verified: 2026-10-05 19:21 KST

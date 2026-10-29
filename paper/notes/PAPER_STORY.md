@@ -5,7 +5,7 @@ Updated: 2026-10-05 19:45 KST
 ## Status
 
 `WORKING_HYPOTHESIS`. 원문의 desired outcome은 입증된 conclusion이 아니다.
-검증된 결과는 [RESULTS](../evidence/RESULTS.md)에만 기록한다.
+결과와 수치의 측정·파생·추정·계획·placeholder 상태를 [RESULTS](../evidence/RESULTS.md) 또는 연결된 근거에 기록한다.
 
 ## Problem formulation
 

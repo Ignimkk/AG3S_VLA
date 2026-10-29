@@ -1,15 +1,12 @@
 # Official Author Kit provenance
 
-현재 fallback: `PROVISIONAL_2026`, tag `CVPR2026-v1(latex)`,
-commit `12909ae437f6dbc7435069cfdb4ca44c18e6a02f`.
+현재 기준: `CONFIRMED_2027`, CVPR 2027 author kit **v1 (LaTeX)**, 2026-10-23 KST 내려받음.
 
-- [공식 pinned repository](https://github.com/cvpr-org/author-kit/tree/12909ae437f6dbc7435069cfdb4ca44c18e6a02f)
-- [PROVENANCE.json](PROVENANCE.json): archive URL/hash, tag/full commit, 시각, original 파일별 SHA-256.
-- [cvpr2026_official](cvpr2026_official/): 공식 archive의 14개 파일을 원본 bytes 그대로 보존했다.
-- Working `cvpr.sty`·`.bst`는 original과 동일한 bytes다. Working manuscript/preamble만 별도로 작성한다.
+- 공식 안내: [CVPR 2027 Author Guidelines](https://cvpr.thecvf.com/Conferences/2027/AuthorGuidelines)
+- 원본 archive: [author-kit-CVPR2027-v1-latex.zip](https://media.eventhosts.cc/Conferences/CVPR2027/author-kit-CVPR2027-v1-latex.zip), 로컬 사본 `archive_zip/`, sha256은 [PROVENANCE.json](PROVENANCE.json).
+- [cvpr2027_official](cvpr2027_official/): archive의 12개 파일을 원본 bytes 그대로 보존했다.
+- Working `paper/latex/cvpr.sty` · `paper/supplementary/cvpr.sty` · `.bst` 는 2027 original과 같은 bytes다.
+- 2026 kit 대비 차이: `cvpr.sty` 에서 review copy 의 Paper ID 표기 제거 (README: "removed the Paper ID to reduce the risk of leaking IDs"), `main.tex` · `rebuttal.tex` 의 `\paperID` 제거와 `\confYear` 2027. margin · font · 2단 · 줄 번호는 같다.
+- 이전 fallback (2026 kit, `PROVISIONAL_2026`) 은 [cvpr2026_official](cvpr2026_official/) 과 [PROVENANCE_2026.json](PROVENANCE_2026.json) 에 이력으로 보존한다.
 
-2027 Guidelines URL의 404와 repository/tag의 2026 표시는 확인한 관찰이다.
-2027 kit 전체의 부재를 단정하지 않으며 확인 상태는 UNKNOWN으로 유지한다.
-Working confYear=2027은 local target 변경이며 공식 2027 kit으로 보고하지 않는다.
-새 공식 2027 kit 확인 시 별도 원본·provenance를 보존하고 working copy를 migration한다.
-검증: `python3 paper/tools/latex/build.py --check-only`.
+검증: `python3 paper/tools/latex/build.py --check-only`, 원고 빌드 `python3 paper/tools/latex/build_cvpr_v1.py`.

@@ -1,27 +1,14 @@
 {
   "artifact_id": "F01",
-  "status": "STORYBOARD_PENDING_EVIDENCE",
-  "claim_ids": [
-    "C001"
-  ],
-  "plan_ids": [
-    "P001"
-  ],
+  "status": "CONCEPTUAL",
+  "claim_ids": [],
   "result_ids": [],
-  "source_notes": [
-    "paper/notes/PAPER_STORY.md",
-    "paper/evidence/FIGURES_TABLES.md",
-    "paper/notes/DRAFT10_REVISION.md"
-  ],
   "render_source": "paper/figures/fig01_teaser/figure.tex",
-  "numeric_values": null,
+  "render_source_sha256": "30a029037ad47f6a4dfd30e88953d624cd431e3b8a81e776574874ee697b8b1d",
   "is_measured_result": false,
-  "caption_scope": "Teaser storyboard connecting observed target geometry to contact constraints; no measured panels.",
-  "render_source_sha256": "29a0b5ce2d20de2960b46399fcb86978408c30e973b280c7cc882c5037baae7d",
+  "caption_scope": "Complete proposed AG3S method schematic; no measured outcomes or closed-loop validation implied.",
   "input_sha256": {
-    "paper/notes/PAPER_STORY.md": "2abe32df6226dbeeb6afd12fed4fda985e01212076ee182f3d02293f7365e6ac",
-    "paper/evidence/FIGURES_TABLES.md": "fc9a41403b8bcbdb73c1cbb70d550300bce902691cdab61bf43e3882153ca049",
-    "paper/notes/DRAFT10_REVISION.md": "604fa5a59dc9e02b3b8d3d149fca251338f15e055a9a5acbec89b6f5284e7182"
+    "paper/notes/AG3S_METHOD_REVISION_20261016_KO.md": "61f792993be5ef7ae7d0b4e53d138d8e888a3e7ea1e217ea64ce47d6c8041fd7"
   },
-  "updated_at": "2026-10-08 KST"
+  "updated_at": "2026-10-16"
 }

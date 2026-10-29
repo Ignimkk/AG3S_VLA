@@ -1,0 +1,26 @@
+{
+ "asset": "paper/figures/ifg_overview/assets/t_surface.png",
+ "frame": "T53_ep1842_f016",
+ "run": "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos (s0/replay)",
+ "script": "paper/tools/plotting/ifg_overview_render.py",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261015T181706+0900_30955b6ca8ef_d4b3bafb79ba/s0/replay/T53_ep1842_f016.npz": "dc07ce0ad6224444c947035dd5901f84fac0494117e0ba1275bf9b140b756a37"
+ },
+ "note": "Observed target surface (orange) and the touching neighbour's observed surface (blue).",
+ "is_measured_result": false,
+ "episode": "T53_ep1842",
+ "moment": "M2_pre_grasp",
+ "iou": 1.0,
+ "neighbour_nodes": 742,
+ "camera": {
+  "lookat": [
+   0.47963297776847463,
+   -0.30540420374397725,
+   0.8790829468356353
+  ],
+  "dist": 0.42,
+  "az": 150,
+  "el": -34
+ }
+}

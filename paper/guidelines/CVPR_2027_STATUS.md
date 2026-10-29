@@ -1,5 +1,19 @@
 # CVPR 2027 Status
 
+## 2026-10-23 갱신 — 2027 Author Guidelines · author kit 공개 확인 (`CONFIRMED_2027`)
+
+| 항목 | 상태 | 내용 |
+|---|---|---|
+| 2027 Author Guidelines | `CONFIRMED_2027` | 공개됨 [S16](SOURCES.md#s16). 이전의 404 관찰은 이력이다 |
+| 2027 Author Kit | `CONFIRMED_2027` | v1 (LaTeX) [S17](SOURCES.md#s17); `paper/template/cvpr2027_official` 에 원본 보존, working copy 교체 완료 |
+| Format · page limit | `CONFIRMED_2027` | [FORMAT_RULES](CVPR_FORMAT_RULES.md) |
+| LLM 정책 | `CONFIRMED_2027` | **LLM Usage Statement 필수** — [LLM_POLICY](CVPR_LLM_POLICY.md) |
+| Anonymity · supplementary · rebuttal · desk reject | `CONFIRMED_2027` | 각 문서 상단 2026-10-23 절 |
+| Limitations 절 · checklist | 요구 없음 | Guidelines 에 언급 없음 |
+
+아래의 이전 내용은 그 시점 기록으로 보존한다. 충돌하면 이 절이 우선한다.
+
+
 Target venue: CVPR 2027
 
 Last verified: 2026-10-05 19:21 KST

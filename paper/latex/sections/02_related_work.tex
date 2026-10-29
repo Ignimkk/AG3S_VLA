@@ -1,42 +1,14 @@
 % !TEX root = ../main.tex
-% Scoped primary-source checks and remaining verification: notes/DRAFT10_REVISION.md.
 \section{Related Work}
 \label{sec:related}
+\paragraph{Vision-language-action policies and grounding.}
+VLA policies map images, language, and robot state to actions, from tokenized policies~\cite{brohan2023rt1,zitkovich2023rt2,kim2024openvla} to generalist~\cite{octo2024} and flow-matching action experts~\cite{black2024pi0,intelligence2025pi05}. Several works expose object structure to the policy: RoboGround supplies grounding masks as an intermediate representation~\cite{huang2025roboground}, OBEYED-VLA separates object-centric perception from action reasoning~\cite{vo2026obeyed}, and GuidedVLA supervises action attention toward task-relevant regions~\cite{jia2026guidedvla}. All of them change the policy's input or training. \sys\ instead keeps the VLA frozen and reads the structure it already has, turning it into an external constraint rather than a better input.
 
-\paragraph{VLA policies and geometric action refinement.}
-Flow-based VLAs generate action chunks conditioned on visual and language features~\cite{black2024pi0,intelligence2025pi05,nvidia2025gr00t}.
-Their outputs can serve as references for geometric optimization. MoManipVLA transfers VLA-generated end-effector
-trajectories to mobile manipulation through optimization with scene geometry~\cite{wu2025momanipvla}. More generally,
-cuRobo and cuRoboV2 provide GPU-accelerated motion generation, including collision queries and depth-fused distance
-fields~\cite{sundaralingam2023curobo,sundaralingam2026curobov2}. These works motivate our use of a frozen policy and a
-geometric refinement layer. Our focus is the information supplied to that layer: how a visually identified target
-changes the collision constraints of particular robot links.
+\paragraph{Attention, graphs, and target extent.}
+Self-attention in vision transformers concentrates on objects~\cite{caron2021dino}, and a few heads of a frozen vision-language model localize referred objects~\cite{kang2025fewheads}. KNOWS already uses internal VLA attention to pick the target for a safety filter and combines it with externally segmented geometry~\cite{park2026knows}, so reusing attention is not by itself our distinction. Grouping on graphs is equally established, from normalized cuts~\cite{shi2000ncut} and graph-based segmentation~\cite{felzenszwalb2004graph} to seeded random walks and label propagation~\cite{grady2006randomwalker,zhou2004consistency}; TokenCut applies normalized cuts to transformer features~\cite{wang2022tokencut}. Our graph encodes observed depth adjacency rather than feature similarity, internal features act on region identity across observations rather than on the boundary, and the contribution lies in converting coarse policy evidence into an observed 3D extent and that extent into a restricted contact exception.
 
-\paragraph{Grounding from internal visual representations.}
-Selected attention heads in frozen vision-language models can localize referred objects~\cite{kang2025fewheads}.
-KNOWS brings this idea to manipulation by using VLA attention to rank objects produced by a fine-tuned YOLOE
-segmenter, then applying an ellipsoid-based safety filter~\cite{park2026knows}. It is the closest precedent for using
-internal attention to select a contact target. Our target geometry is instead constructed by lifting attention into
-depth and growing regions in the observed 3D cloud. This avoids requiring a segmentation model to enumerate candidate
-objects and supplies a geometric region for link-specific distance queries. Attention is used as a selection cue;
-the quality of the resulting extent must be assessed separately from target identity.
+\paragraph{Geometric constraints on learned motion.}
+Collision avoidance traditionally acts on distance fields through potential fields~\cite{khatib1986potential}, trajectory optimization~\cite{ratliff2009chomp,schulman2014trajopt}, or control barrier functions~\cite{ames2019cbf}, with fields fused from depth~\cite{curless1996volumetric,oleynikova2017voxblox,millane2024nvblox} and optimized on the GPU by cuRobo~\cite{sundaralingam2023curobo,sundaralingam2026curobov2}. Language models can compose 3D value maps or keypoint constraints for a planner~\cite{huang2023voxposer,huang2024rekep}. For VLA policies, MoManipVLA refines motion by geometric optimization~\cite{wu2025momanipvla}, VLSA and KNOWS filter actions with barrier constraints~\cite{hu2026vlsa,park2026knows}, AFI intervenes with spatial affordance fields~\cite{xu2026afi}, and per-link filtering has been proposed for moving hazards~\cite{agarwal2026multilink}; generative policies can also be steered at sampling time by guidance fields, constrained flow matching, reactive avoidance, or differentiable optimization~\cite{song2026omniguide,english2026constrainedfm,guo2026nudge,xu2024leto,li2025lano3dp,zhan2026seam}. Allowed collisions between specific links and attached objects are standard in planning frameworks~\cite{coleman2014moveit}, and AutoMoMa switches an object's collision treatment between approach and manipulation, with known scene geometry and offline~\cite{niu2026automoma}. We build on these primitives rather than claiming new ones. What \sys\ adds is the representation the refiner consumes: a policy-grounded observed surface that is excluded for designated contact links while remaining an obstacle for every other link, and that changes role with the task.
 
-\paragraph{Task-dependent collision geometry.}
-VLSA uses a vision-language model and visual grounding to identify obstacles for action
-filtering~\cite{hu2026vlsa}. Lan-o3dp combines language-guided object decomposition and segmentation with
-collision-aware diffusion-policy execution~\cite{li2025lano3dp}. MoManipVLA's real-world pipeline excludes the target
-mask from ESDF construction~\cite{wu2025momanipvla}. Stage-dependent geometry is also used in AutoMoMa, which generates
-whole-body trajectories in known scenes and incorporates manipulated objects into the robot's kinematic
-representation~\cite{niu2026automoma}. WBAG explicitly models whole-body and grasp-dependent attached geometry for
-VLA filtering~\cite{zhen2026wbag}. We build on the need for such contact-dependent representations. Our distinction is
-to construct the contact target from VLA attention and observed depth, retain separate distance queries for contact
-and non-contact links, and manage these queries during chunk refinement. The current robot query model covers
-gripper links and attached-object approximations; it does not provide whole-body coverage.
-
-\paragraph{Reading task state from frozen policies.}
-$\pi_{0.5}$ and LoHoVLA incorporate sub-task prediction into their learned policy
-structure~\cite{intelligence2025pi05,yang2025lohovla}. Probing studies also recover task progress and success-related
-signals from frozen VLA representations~\cite{bhardwaj2026progress,zhang2026frozenvlas}. We use a supervised linear probe
-for three manipulation phases and apply its output to target adoption and exception termination. The probe supports
-the contact representation; it neither modifies the VLA weights nor generates the policy's action sequence.
-Its value beyond a grasp-state rule is an empirical question addressed by a matched-controller comparison.
+\paragraph{Task progress and interaction state.}
+Frozen VLA representations carry information about task progress, success, and failure~\cite{bhardwaj2026progress,zhang2026frozenvlas,gu2025safe,zhang2026probeact,jeong2026pathheads}. \sys\ uses a sub-task probe to time its contact rules and augments it with gripper state and target--hand geometry; its consistency alert is a failure signal of the same family, read from the grounding rather than from the action. We distinguish this estimate of \emph{intent} from physical \emph{attachment}: a predicted placement phase does not establish a grasp, and in our representation that difference decides whether the target is an environmental obstacle or geometry carried by the robot. Safety can also be trained into the policy~\cite{zhang2025safevla}; we leave the policy unchanged. Benchmarks such as SafeLIBERO~\cite{hu2026vlsa}, built on LIBERO~\cite{liu2023libero}, LIBERO-Safety~\cite{cui2026liberosafety}, and SafeVLA-Bench~\cite{fan2026safevlabench} measure the resulting success--safety trade-off; we report on SafeLIBERO in Sec.~\ref{sec:safelibero}.

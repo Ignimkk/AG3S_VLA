@@ -1,5 +1,22 @@
 # Experiments and Evidence Eligibility
 
+## 2026-10-18 추가: EXP003–EXP006 (REGISTERED_SOURCE_LINKED)
+
+**등록 수준의 뜻.** `REGISTERED_SOURCE_LINKED` = 등록한 모든 수치를 `python3 paper/tools/analysis/audit_cvpr_v1_evidence.py`가 source JSON의 기록된 JSON pointer에서 다시 읽어 대조하고(float tolerance 5e-4, count·string exact) source 파일 sha256을 [audit](../experiments/summaries/CVPR_V1_evidence_audit.json)에 고정했다는 뜻이다. **EXP001·EXP002의 `REGISTERED`와 달리 16-D manifest validation(NPY array header, per-run record 재집계, rollout·model 실행)은 하지 않았다.** 따라서 이 네 실험은 "source-linked number registry"이며, 원고 제출 전 `/cvpr-evidence full`에서 manifest 수준 검증을 추가할지 결정한다. WORKLOG에만 있는 항목은 `source=worklog`(text-presence만 확인)로 남긴다. 2026-10-18 audit: 434 checks, 431 PASS, 0 FAIL, 3 `source=worklog`.
+
+| ID | 범위 (population · 조건) | 상태 | 결과 |
+|---|---|---|---|
+| EXP003 | IFG held-out locked grounding. 성공 rollout **34 held-out episode, 2,523 valid frame** (clear 13 / adjacent 12 / place 9); 3,196 frame 중 s0_invalid 29 제외; 평가 전 잠근 설정(`LOCK_heldout.json`); replay depth, offline; arm G:N / A-fk / A / B | `REGISTERED_SOURCE_LINKED`, `OFFLINE_HELDOUT_GROUNDING` | R008–R012. 실행 성능·permission builder·runtime 근거 아님. 실패 9 episode는 appendix로 scope 밖 |
+| EXP004 | Hurdle closed-loop, T43 H set **7 episode × 2 seed = 14 run**, profile `t43p2_overbar`. 세 code state의 결과를 같은 (episode, seed)에서 나란히 등록: **E0 (VLA 단독) 2026-10-05, T43 W snapshot** (TW); **V8 / V11A / V11AB 2026-10-07, T43 V11 snapshot** (TV); **C1a / C1aN / SURF 2026-10-17, 현재 구현** (HA/HT) | `REGISTERED_SOURCE_LINKED`, `MIXED_CODE_STATES` | R013–R018. E0 대 V11AB·대 SURF의 paired 2×2는 source에 없어 등록하지 않음(TV pairs는 V11AB vs V8 / V11A, HA pairs는 2026-10-17 세 arm 사이만). 표본 14 |
+| EXP005 | Held-out closed-loop C1aN vs SURF (IFG-CL1), **34 seed 쌍 = collector에서 C1a가 성공한 episode에서 선별** (`/C1a_reference/n_success` 34/34); 같은 cuRobo·TrajOpt·flag; 2026-10-17 03:30 | `REGISTERED_SOURCE_LINKED`, **`EXPLORATORY_SELECTION_CONDITIONED`** | R019–R021. 등록 해석 문장은 WL 2026-10-18 14:30을 영어로 옮긴 것(RESULTS R019). 선별 없는 재평가 IFG-CL3는 미등록 |
+| EXP006 | Limitations용 context: T58 adjacent post (3 ep × E0/ON × with/without post, 2026-10-13), CL4 (18 pair, 5 arm, 2026-10-15), T46d gripper-scope degeneracy (2026-10-12), T44e-CL2 C0 (18 run, 2026-10-12), T53 test 16 (2026-10-13) | `REGISTERED_SOURCE_LINKED`, `CONTEXT_ONLY` | R022–R026. 각 결과는 자기 code state·scope에 한정되며 서로 비교하지 않는다 |
+
+EXP002 dev-set component 수치(R004–R007)는 cross-reference만 하고 중복 등록하지 않는다. 원고 위치별 지도: [NUMBER_MAP_CVPR_V1](NUMBER_MAP_CVPR_V1.md).
+
+## 2026-10-15 추가: EXP002
+
+**REGISTERED / OFFLINE_DEVELOPMENT_ONLY.** T53/T54c 180 selected frames / 32 episodes, replay depth, 실제 state/action 16-D. [Manifest](../experiments/manifests/ifg/EXP002_IFG_development.json), [audit](../experiments/summaries/EXP002_IFG_audit.json). 검증은 `python3 paper/tools/analysis/audit_ifg_evidence.py`. 기존 EXP001의 trajectory 형식을 변경하지 않고 per-request IFG 자료에 맞는 별도 validator를 사용한다. 새 rollout·held-out·permission builder·runtime 근거가 아니다.
+
 Updated: 2026-10-05 19:45 KST
 
 ## 등록된 실험
@@ -47,7 +64,7 @@ Candidate의 미등록은 결과가 틀렸다는 판정이 아니다. 이 Step�
 2. Episode·seed·condition·split·실행 command·완료 상태·raw 자료를 연결한다.
 3. Research log와 verify.json의 **정확한 key**에 결과를 연결한다.
 4. 측정 범위와 미측정 항목을 기록하고 source identity를 고정한다.
-5. Schema와 semantic validator를 통과한 `REGISTERED` 항목만 해당 evidence scope에서 사용한다.
+5. 등록·validator 상태와 무관하게 사용할 수 있으며, 자료 유형·source·scope·검증 상태를 함께 기록한다.
 
 Validator는 연구적 타당성·novelty·physical correctness를 자동으로 판정하지 않는다.
 자세한 운영은 [manifest README](../experiments/manifests/README.md)를 따른다.

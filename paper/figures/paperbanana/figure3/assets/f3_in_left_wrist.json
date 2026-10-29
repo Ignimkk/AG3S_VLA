@@ -1,0 +1,13 @@
+{
+ "asset": "paper/figures/paperbanana/figure3/assets/f3_in_left_wrist.png",
+ "run": "T53 C1a (AG3S serving, 2026-10-13)",
+ "episode": "ep1842",
+ "script": "paper/tools/plotting/paperbanana_render.py",
+ "renderer": "MuJoCo 3.11.0 replay of recorded qpos",
+ "sources": {
+  "/mnt/dev/AG3S_VLA-storage/results/development/20261013T100210+0900_4a540f1a18d7_cb037c425d2f/verify/T53/runs/C1a/R/C1a_ep1842_s18421/ag3s/run_0000/step_00010.npz": "d072c6c69754c0442d0825226e5507afd5488875558ae7479787e0cd8481b339"
+ },
+ "note": "wrist_cam_l re-rendered at 960x720 from the recorded state.",
+ "is_measured_result": false,
+ "chunk": 10
+}
