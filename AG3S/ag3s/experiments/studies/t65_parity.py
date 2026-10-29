@@ -1,7 +1,8 @@
 """T65 parity gate — the noun-source replay must reproduce the recorded core-evaluation server chunks.
 
 `handoff/T65.task.md` "parity gate": per matched request (same episode, same t_step)
-    selection   grounding_status and manipulated id / state equal  -> agreement rate (gate >= 0.99)
+    selection   grounding_status and manipulated id equal  -> agreement rate (gate >= 0.99, the pre-registered pair)
+                + manipulated state (visible / occluded / ...) also equal -> reported, not gated
     target      Chamfer (median of nearest-neighbour distances, both ways) between target point sets
                 (gate: median over requests <= 5 mm)
     attention   head-camera attention map: max |diff| and argmax-equal (reported)
@@ -93,14 +94,16 @@ def main(rep_dir: pathlib.Path, group: str, out: pathlib.Path) -> None:
             b = recd.get(t)
             if b is None:
                 continue
-            row = {"client": name, "t_step": t, "sel_equal": (a["gs"], a["id"], a["state"]) == (b["gs"], b["id"], b["state"]),
-                   "gs": [a["gs"], b["gs"]], "id": [a["id"], b["id"]], "chamfer_m": chamfer(a["tp"], b["tp"])}
+            row = {"client": name, "t_step": t, "sel_equal": (a["gs"], a["id"]) == (b["gs"], b["id"]),
+                   "state_equal": a["state"] == b["state"], "gs": [a["gs"], b["gs"]], "id": [a["id"], b["id"]],
+                   "state": [a["state"], b["state"]], "chamfer_m": chamfer(a["tp"], b["tp"])}
             if a["att"] is not None and b["att"] is not None and a["att"].shape == b["att"].shape:
                 row["att_maxabs"] = float(np.max(np.abs(a["att"] - b["att"])))
                 row["att_argmax_equal"] = bool(np.argmax(a["att"]) == np.argmax(b["att"]))
             rows.append(row)
     ch = np.array([r["chamfer_m"] for r in rows], float)
     res = {"n": len(rows), "selection_agreement": float(np.mean([r["sel_equal"] for r in rows])) if rows else None,
+           "selection_with_state_agreement": float(np.mean([r["sel_equal"] and r["state_equal"] for r in rows])) if rows else None,
            "chamfer_median_m": float(np.median(ch[np.isfinite(ch)])) if np.isfinite(ch).any() else None,
            "chamfer_inf": int((~np.isfinite(ch)).sum()),
            "att_argmax_equal": float(np.mean([r["att_argmax_equal"] for r in rows if "att_argmax_equal" in r]))
