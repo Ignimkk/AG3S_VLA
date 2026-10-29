@@ -12,12 +12,18 @@ that request (no debounce, `handoff/AG3S-CORE-EVAL-HSR6.task.md` §1).
 | # | flag | rule (this module) | where it acts |
 |---|---|---|---|
 | ① | `attach_assist` | attach = strong HELD ∨ (phase ∈ {lift, transport, placement} ∧ `closed` ∧ `blocked`) — `attach_assist_ok` | `GraspLatch.observe_grasp(attach_assist=...)` (CLOSING) via `SafePolicy._advance_grasp` |
-| ② | `held_gate` | the held-object allowance only when phase ∈ {lift, transport, placement} ∧ (`blocked` ∨ latch HELD) — `held_allowance` | `AG3S.set_held_allowance` → `_frame_held_attached` (held-body cover lift off the table / crate floor) |
+| ② | `held_gate` | the held-object allowance is withdrawn only when phase ∈ {approach, retreat} (or no label); otherwise (grasp, lift, transport, placement) it holds while `blocked` ∨ latch HELD — `held_allowance` (AG3S-CORE-EVAL-A6 §3, session B T66) | `AG3S.set_held_allowance` → `_frame_held_attached` (held-body cover lift off the table / crate floor) |
 | ③ | `target_exempt` | target exemption (target-free field view, per-link target margin, target tests) only outside retreat: in retreat the not-held target is an obstacle — `withdraw_target_exemption` | `SafePolicy._scene_fn` → `strip_target_permission` on the `SceneSnapshot` |
 | ④ | `objective` | IFG-NBC neighbour allowance, the A4 close-row goal and the G1 slot only when the existing rule ∧ phase = grasp — `objective_allowed` | `_neighbour_contact_gate`, `_scene_fn` (A4), `_geo_request` (G1) |
 
 A request without an HSR6 label (probe failed / not loaded) is ``phase None``: ① no assist, ② no allowance (the
 stricter side), ③ the current rule, ④ no objective term.
+
+**② fix (AG3S-CORE-EVAL-A6 §3, user ruling 2026-10-29 on session B T66).** The first rule (allowance only in lift ·
+transport · placement) withdrew the lift on the 1–3 requests right after the grasp, while HSR6 still read grasp (the
+apple still on the table, T64 defines grasp until a 2 cm rise): the held spheres met the table, the standard solve
+failed and the GPU multi-seed answer turned the arm 6–10° (`outputs/2026-10-29_HSR6_쥔직후_궤적급변_원인/`). Now only
+approach · retreat (a hand that is not holding by the probe's reading) withdraw it.
 """
 
 from __future__ import annotations
@@ -30,6 +36,7 @@ import numpy as np
 
 __all__ = [
     "EXEMPT_PHASES",
+    "HELD_WITHDRAW_PHASES",
     "HOLD_PHASES",
     "Hsr6Flags",
     "OBJECTIVE_PHASE",
@@ -48,8 +55,10 @@ __all__ = [
 
 #: Class order of the T64 probe (`classes` in the npz; checked on load).
 PHASES6 = ("approach", "grasp", "lift", "transport", "placement", "retreat")
-#: ① / ② — the held phases (T64 Part C `HOLD_PHASES = (2, 3, 4)`).
+#: ① — the held phases (T64 Part C `HOLD_PHASES = (2, 3, 4)`).
 HOLD_PHASES = frozenset({"lift", "transport", "placement"})
+#: ② (AG3S-CORE-EVAL-A6 §3) — the phases that withdraw the held-object allowance: the hand is not holding.
+HELD_WITHDRAW_PHASES = frozenset({"approach", "retreat"})
 #: ③ — the phases where the target-free view is the rule (task §2 ③); retreat withdraws it, the rest keep today's rule.
 EXEMPT_PHASES = frozenset({"approach", "grasp"})
 RETREAT = "retreat"
@@ -112,8 +121,18 @@ def attach_assist_ok(phase: Optional[str], checks: Mapping[str, Any]) -> bool:
 
 
 def held_allowance(phase: Optional[str], *, latch_held: bool, blocked: bool) -> bool:
-    """② : phase ∈ {lift, transport, placement} ∧ (finger `blocked` ∨ latch HELD)."""
-    return bool(phase in HOLD_PHASES and (bool(blocked) or bool(latch_held)))
+    """② (fixed, AG3S-CORE-EVAL-A6 §3): phase ∉ {approach, retreat} ∧ phase labelled ∧ (finger `blocked` ∨ latch HELD).
+
+    | phase | allowance |
+    |---|---|
+    | approach · retreat | withdrawn (the fix: only these) |
+    | grasp | `blocked` ∨ HELD — kept right after the grasp while HSR6 still reads grasp (was: withdrawn) |
+    | lift · transport · placement | `blocked` ∨ HELD (unchanged) |
+    | None (no label) | withdrawn (unchanged: the stricter side) |
+    """
+    if phase is None or phase in HELD_WITHDRAW_PHASES or phase not in PHASES6:
+        return False
+    return bool(bool(blocked) or bool(latch_held))
 
 
 def withdraw_target_exemption(phase: Optional[str]) -> bool:

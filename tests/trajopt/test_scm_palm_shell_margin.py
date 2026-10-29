@@ -118,7 +118,9 @@ def test_config_default_absent_from_to_dict_and_validated():
     assert c.collision.palm_shell_margin is None
     d = c.to_dict()
     assert "palm_shell_margin" not in d["collision"]
-    assert set(d["collision"]) == {f.name for f in dataclasses.fields(CollisionConfig)} - {"palm_shell_margin"}
+    # AG3S-CORE-EVAL-A6: the palm neighbour-contact keys are also left out while off (same rule, `_OMIT_WHEN_DEFAULT`).
+    a6 = {"neighbour_palm_contact_depth", "neighbour_palm_contact_radius", "neighbour_palm_contact_gate"}
+    assert set(d["collision"]) == {f.name for f in dataclasses.fields(CollisionConfig)} - {"palm_shell_margin"} - a6
     assert TrajOptConfig.from_dict(d) == c                                   # round trip
     on = TrajOptConfig.from_dict({"collision": {**base, "palm_shell_margin": 0.005}})
     assert on.to_dict()["collision"]["palm_shell_margin"] == 0.005

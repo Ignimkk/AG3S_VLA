@@ -1022,6 +1022,19 @@ class CollisionBackendConfig:
     neighbour_contact_depth: float = 0.0
     neighbour_contact_radius: float = 0.12
     neighbour_contact_gate: float = 0.15
+    #: **AG3S-CORE-EVAL-A6 — light contact of the grasping *palm* with a neighbour object at the grasp moment (m).**
+    #: `0.0` (default) = off (bit-identical; the three keys are also left out of `to_dict`). On the "grasp moment"
+    #: (latch `latched` / `closing`, not held, and the grasping hand's hold link site — MJCF `left_ee` / `right_ee`,
+    #: `safe_policy.hold_site_position` — within `neighbour_palm_contact_gate` of the manipulated centroid) the grasping
+    #: hand's palm rows (every sphere on the hold
+    #: link `ee_<side>`: hand-body spheres + palm-shell spheres; fingers are IFG-NBC's) whose sphere centre is within
+    #: `neighbour_palm_contact_radius` of that centroid and whose nearest surface is an obstacle (not the target, a
+    #: support plane, held, or the destination label) accept up to this much overlap (margin `-depth` instead of
+    #: `palm_shell_margin` / `obstacle_margin`, `SceneSnapshot.neighbour_palm_contact`). Not withdrawn by HSR6 ④
+    #: (task `AG3S-CORE-EVAL-A6.task.md` §2). Final configuration 10 mm, gate 60 mm, radius 120 mm (= IFG-NBC's).
+    neighbour_palm_contact_depth: float = 0.0
+    neighbour_palm_contact_radius: float = 0.12
+    neighbour_palm_contact_gate: float = 0.06
     #: **T43 HM — the held object's rows get the same classification and margin as the robot's.**
     #: Once grasped the object is part of the robot (user, 2026-10-07): a held query row whose
     #: nearest field surface is an obstacle gets `max(its margin, obstacle_margin)`, exactly like a
@@ -1100,11 +1113,12 @@ class CollisionBackendConfig:
             raise ValueError(f"collision.backend must be one of {self.BACKENDS}, got {self.backend!r}")
         if self.esdf_margin < 0.0:
             raise ValueError(f"collision.esdf_margin must be >= 0, got {self.esdf_margin}")
-        for name in ("neighbour_contact_depth",):
+        for name in ("neighbour_contact_depth", "neighbour_palm_contact_depth"):
             v = getattr(self, name)
             if not (math.isfinite(v) and v >= 0.0):
                 raise TrajOptConfigError(f"collision.{name} must be a finite value >= 0, got {v}")
-        for name in ("neighbour_contact_radius", "neighbour_contact_gate"):
+        for name in ("neighbour_contact_radius", "neighbour_contact_gate",
+                     "neighbour_palm_contact_radius", "neighbour_palm_contact_gate"):
             v = getattr(self, name)
             if not (math.isfinite(v) and v > 0.0):
                 raise TrajOptConfigError(f"collision.{name} must be a finite value > 0, got {v}")
@@ -1302,6 +1316,11 @@ _OMIT_WHEN_NONE = frozenset({("collision", "palm_shell_margin"),
 #: AG3S-PRE-CORE-TO-GGW — `(section, field)` left out of `to_dict` while at this default (same reason: a record that
 #: dumps the config keeps its keys when the option is off).
 _OMIT_WHEN_DEFAULT = {("cost", "grasp_goal_window"): "close", ("cost", "continuity_after_grasp"): False}
+#: AG3S-CORE-EVAL-A6 — the palm neighbour-contact allowance: without `--neighbour-palm-contact-mm` the config dump keeps
+#: the keys it had before the option existed.
+_OMIT_WHEN_DEFAULT.update({("collision", "neighbour_palm_contact_depth"): 0.0,
+                           ("collision", "neighbour_palm_contact_radius"): 0.12,
+                           ("collision", "neighbour_palm_contact_gate"): 0.06})
 #: AG3S-CORE-EVAL-G1 — the geometric grasp options (merged from `feature/geo-grasp`): without `--geo-*` flags the
 #: config dump (`--record-constraints` meta `trajopt_config`) keeps the keys it had before the merge.
 _OMIT_WHEN_DEFAULT.update({("cost", k): v for k, v in {

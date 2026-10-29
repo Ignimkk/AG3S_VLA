@@ -117,7 +117,7 @@ class _BufferedCall:
 #: (`sqp.fast_eval`) re-applies the ones the original call set, so readers (`_identify`,
 #: `held_rows_record`, `sqp._finish`, the held radii on `query_radii`) see what they saw before.
 _CLEARANCE_SIDE_ATTRS = ("query_radii", "_last_obstacle_class", "_last_held_rows", "_last_lookahead",
-                         "last_target_free_tiers", "_last_neighbour_contact")
+                         "last_target_free_tiers", "_last_neighbour_contact", "_last_neighbour_palm_contact")
 _MISSING = object()
 
 
@@ -285,6 +285,15 @@ class SceneSnapshot:
     #: VLA alone touches a neighbouring fruit while it grasps (IFG ep211 / ep954) and no wrist roll at its grasp pose
     #: clears the neighbour by the obstacle margin (`ifg_roll_feasibility`).
     neighbour_contact: Optional[dict] = None
+    #: **AG3S-CORE-EVAL-A6 — light contact of the grasping palm with a neighbour object at the grasp moment.** `None`
+    #: (default) = as before. A dict `{"links_mask": (S,) bool, "depth": m, "centre": (3,), "radius": m}` set by
+    #: `SafePolicy._neighbour_palm_contact_gate` (latch `latched` / `closing`, palm within the gate of the target): a
+    #: robot row whose link is in `links_mask` (the grasping hand's hold link `ee_<side>`: hand-body + palm-shell
+    #: spheres), whose sphere centre is within `radius` of `centre` and whose nearest surface is an **obstacle**
+    #: (`_obstacle_rows`: not the target, not a support plane, not held) **and not the destination label** (crate /
+    #: basket) gets the margin `-depth` instead of its palm-shell / obstacle margin. Scene 119 (task §1): the 5 mm
+    #: palm-shell margin against an orange 22 mm from the apple moved the palm 6–10 mm off the VLA grasp.
+    neighbour_palm_contact: Optional[dict] = None
 
     @property
     def has_esdf(self) -> bool:
@@ -1040,6 +1049,11 @@ class CollisionLinearizer:
             sel = (cls_nb == _OBSTACLE) & cols[None, :] & near
             margin = np.where(sel, -float(nb["depth"]), margin)
             self._last_neighbour_contact = {"n_rows": int(sel.sum())}
+        npc = getattr(scene, "neighbour_palm_contact", None)
+        if npc is not None and float(npc.get("depth", 0.0)) > 0.0:
+            # AG3S-CORE-EVAL-A6 — the grasping palm may overlap a neighbour obstacle near the target by up to `depth`.
+            margin = self._neighbour_palm_contact(npc, d, flat, centres, radii, margin, scene, d_object,
+                                                  is_dest_flat, obstacle_margin, n_query)
         clear = d - radii[None, :] - margin
         start = getattr(self, "lookahead_from", None)
         if start is not None and 0 < int(start) < clear.shape[0]:
@@ -1063,6 +1077,62 @@ class CollisionLinearizer:
                 # not touch the target: not dropped for the target.
                 self._last_lookahead["n_tail_target_unauthorized"] = kept
         return clear[..., None]
+
+    def _neighbour_palm_contact(self, npc: dict, d: np.ndarray, flat: np.ndarray, centres: np.ndarray,
+                                radii: np.ndarray, margin: np.ndarray, scene: SceneSnapshot,
+                                d_object: Optional[np.ndarray], is_dest_flat, obstacle_margin: float,
+                                n_query: int) -> np.ndarray:
+        """AG3S-CORE-EVAL-A6 — `margin` with the palm rows of `scene.neighbour_palm_contact` relaxed to `-depth`.
+
+        | row condition | why |
+        |---|---|
+        | robot row (not held) whose link is in `links_mask` | the grasping hand's palm (hand body + palm shell); fingers are IFG-NBC's |
+        | sphere centre within `radius` of `centre` (target centroid) | IFG-NBC's scope rule (same 120 mm) |
+        | `_obstacle_rows` class `obstacle` | not the target, not a support plane (table), not held |
+        | nearest label is not `scene.destination_label` | the crate / basket keeps its rule (task §2) |
+
+        A destination label that the field cannot read relaxes **nothing** (fail-closed: the crate could not be told
+        apart). Record `self._last_neighbour_palm_contact` (read by `sqp._finish` into `to.metrics`) on the rows of this
+        evaluation: relaxed rows (step × sphere), distinct spheres, rows whose old margin they would have violated, and
+        the smallest sphere-surface distance `d − r` (m → mm, negative = overlap) over the relaxed rows; with a
+        look-ahead the executed window's numbers too.
+        """
+        depth = float(npc["depth"])
+        if d_object is None and (scene.manipulated_points is not None or scene.manipulated_spheres is not None):
+            d_object = self._manipulated_distance(flat, scene)
+            if d_object is not None:
+                d_object = d_object.reshape(d.shape)
+        cls = (self._last_obstacle_class if obstacle_margin > 0.0
+               else self._obstacle_rows(d, flat, scene, d_object))
+        cols = np.zeros(n_query, bool)
+        lm = np.asarray(npc["links_mask"], bool).reshape(-1)[:min(n_query, self.n_spheres)]
+        cols[:lm.shape[0]] = lm
+        near = np.linalg.norm(centres - np.asarray(npc["centre"], np.float64).reshape(1, 1, 3), axis=2) \
+            <= float(npc["radius"])
+        cand = (cls == _OBSTACLE) & cols[None, :] & near
+        rec: dict[str, Any] = {"depth_mm": round(depth * 1000.0, 3)}
+        label = getattr(scene, "destination_label", None)
+        if label:
+            if getattr(scene.esdf, "has_labels", False):
+                is_dest = np.asarray(scene.esdf.is_label(flat, label) if is_dest_flat is None else is_dest_flat,
+                                     bool).reshape(d.shape)
+                rec["n_destination_excluded"] = int((cand & is_dest).sum())
+                cand = cand & ~is_dest
+            else:
+                rec.update(n_destination_excluded=int(cand.sum()), reason="destination label unreadable")
+                cand = np.zeros_like(cand)
+        surf = d - radii[None, :]
+        rec.update(n_rows=int(cand.sum()), n_spheres=int(cand.any(axis=0).sum()),
+                   n_rows_below_old_margin=int((cand & (surf < margin)).sum()),
+                   min_clearance_mm=(round(float(surf[cand].min()) * 1000.0, 3) if cand.any() else None))
+        start = getattr(self, "lookahead_from", None)
+        if start is not None and 0 < int(start) < d.shape[0]:
+            w = cand[:int(start)]
+            rec.update(window_steps=int(start), n_rows_window=int(w.sum()),
+                       min_clearance_window_mm=(round(float(surf[:int(start)][w].min()) * 1000.0, 3)
+                                                if w.any() else None))
+        self._last_neighbour_palm_contact = rec
+        return np.where(cand, -depth, margin)
 
     def _lookahead_keep(self, d: np.ndarray, centres: np.ndarray, scene: SceneSnapshot,
                         d_object: Optional[np.ndarray]) -> np.ndarray:

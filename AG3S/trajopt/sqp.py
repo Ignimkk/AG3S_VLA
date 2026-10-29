@@ -1477,6 +1477,11 @@ class TrajectoryOptimizer:
                                          or {}).items() if key != "from"}}
         else:
             clearance, worst_pair = self.linearizer.worst_row(trajectory, q_now, scene, states)
+        # AG3S-CORE-EVAL-A6 — the relaxed palm rows of what is returned (read before the path check re-evaluates the
+        # field). `None` unless the scene carries the palm allowance this chunk: the metrics keys as before.
+        palm_record = (dict(getattr(self.linearizer, "_last_neighbour_palm_contact", None) or {})
+                       if getattr(scene, "neighbour_palm_contact", None) is not None
+                       and getattr(scene, "esdf", None) is not None else None)
         # T43 HM — the held rows' classes on what is returned (read before the path check
         # re-evaluates the field). `None` unless `held_obstacle_margin` is on and something is held.
         held_rows = (self.linearizer.held_rows_record()
@@ -1578,6 +1583,7 @@ class TrajectoryOptimizer:
                 **(selection if selection is not None else _no_selection()),
                 **({"path_check": path_record} if path_record is not None else {}),
                 **({"held_rows": held_rows} if held_rows is not None else {}),
+                **({"neighbour_palm_contact": palm_record} if palm_record is not None else {}),
                 **({"lookahead": lookahead_record} if lookahead_record is not None else {}),
                 **self._ta_record(trajectory, reference),
                 **self._scm_record(),

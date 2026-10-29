@@ -70,6 +70,29 @@ def hold_links_for(grasp_links: Optional[dict] = None,
     return {str(h): str(hold.get(h) or v[0]) for h, v in links.items()}
 
 
+#: AG3S-CORE-EVAL-A6 — the hold link's **site** (MJCF `left_ee` / `right_ee`, `pos="0 0 -0.1"` in `EE_BODY_L/R`, whose
+#: frame is the URDF hold link `ee_<side>` exactly — checked by test): the point the "grasp moment" window measures from
+#: the target centre. It is the point the scene-119 diagnosis measured (palm – apple 30–55 mm on the constrained
+#: requests 11–14, task §2 basis of 60 mm); the hold link origin is 100 mm behind it (97–132 mm on the same requests).
+HOLD_LINK_SITE_OFFSET_M = (0.0, 0.0, -0.100)
+
+
+def hold_site_position(robot_model, q: np.ndarray, hold_link: str) -> np.ndarray:
+    """AG3S-CORE-EVAL-A6 — `(3,)` the hold link site (`HOLD_LINK_SITE_OFFSET_M` in the hold link frame) at `q`."""
+    from AG3S.ag3s.constraints.attached import _link_pose_numeric
+
+    T = np.asarray(_link_pose_numeric(robot_model, q, hold_link), np.float64)
+    return T[:3, :3] @ np.asarray(HOLD_LINK_SITE_OFFSET_M, np.float64) + T[:3, 3]
+
+
+def palm_contact_rows(robot_model, hold_link: str) -> np.ndarray:
+    """AG3S-CORE-EVAL-A6 — `(S,)` bool: the spheres on the grasping hand's hold link (`ee_<side>`). That link carries
+    the palm's hand-body spheres and (with `--palm-shell`) the palm-shell spheres (`gripper_cover.palm_shell_capsules`
+    puts them on the palm link); the fingers are separate links (`ee_finger_*`, IFG-NBC)."""
+    names = [str(n) for n in getattr(robot_model, "sphere_link_names", ())]
+    return np.asarray([n == str(hold_link) for n in names], bool)
+
+
 def grasp_parent_links(grasp_links: Optional[dict] = None,
                        hold_links: Optional[dict] = None) -> tuple[str, ...]:
     """AG3S 를 지을 때 `attached_parent_links=` 로 넘겨야 하는 링크들.
@@ -144,6 +167,8 @@ class SafePolicy:
     #: AG3S-CORE-EVAL-HSR6 — class defaults so objects built without `__init__` (test doubles) read "off".
     hsr6: Any = None
     _last_hsr6: dict = {}
+    #: AG3S-CORE-EVAL-A6 — same reason (test doubles built without `__init__` read "no palm allowance record").
+    _last_neighbour_palm_contact: dict = {}
 
     def __init__(self, policy, *, ag3s, to_config: Optional[TrajOptConfig] = None,
                  attention_fn: Optional[Callable[[dict, dict], dict]] = None,
@@ -357,6 +382,7 @@ class SafePolicy:
         self._last_grasp_anchor: dict[str, Any] = {}
         self._last_wrist_track: dict[str, Any] = {}   # IFG-TOW
         self._last_neighbour_contact: dict[str, Any] = {}   # IFG-NBC
+        self._last_neighbour_palm_contact: dict[str, Any] = {}   # AG3S-CORE-EVAL-A6
         #: IFG-REC — retreat-and-retry recovery state (`_recovery_observe` / `_recovery_chunk`).
         self._recovery: Optional[dict[str, Any]] = None
         self._recovery_count = 0
@@ -490,6 +516,7 @@ class SafePolicy:
         self._last_grasp_anchor = {}
         self._last_wrist_track = {}  # IFG-TOW
         self._last_neighbour_contact = {}  # IFG-NBC
+        self._last_neighbour_palm_contact = {}  # AG3S-CORE-EVAL-A6
         self._recovery = None        # IFG-REC
         self._recovery_count = 0
         self._recovery_hist = []
@@ -602,6 +629,8 @@ class SafePolicy:
         t = time.monotonic()
         refined = self.refiner.refine(chunk, context)
         timing["trajopt"] = (time.monotonic() - t) * 1000.0 - timing.get("ag3s", 0.0)
+        if self._last_neighbour_palm_contact:
+            self._neighbour_palm_contact_result()   # AG3S-CORE-EVAL-A6 (off: the record is {} and this never runs)
         refined = np.asarray(refined, np.float64)
         self._last_continuity.update(
             {k: v for k, v in (getattr(self.refiner, "last_continuity", None) or {}).items()})
@@ -1100,6 +1129,14 @@ class SafePolicy:
 
             snapshot = _dc.replace(snapshot, neighbour_contact=nbc)
             self._last_snapshot = snapshot
+        # AG3S-CORE-EVAL-A6: the grasping palm's light contact with a neighbour object at the grasp moment. The verdict
+        # reads `_last_snapshot` (the same scene the optimizer and its final check saw).
+        npc = self._neighbour_palm_contact_gate(q_now, manipulators)
+        if npc is not None and snapshot is not None:
+            import dataclasses as _dc
+
+            snapshot = _dc.replace(snapshot, neighbour_palm_contact=npc)
+            self._last_snapshot = snapshot
         return snapshot, q_now, certified
 
     def _geo_request(self, q_now: np.ndarray, manipulators, context: dict, constraint_set, debug) -> None:
@@ -1210,8 +1247,9 @@ class SafePolicy:
         return snapshot
 
     def _hsr6_held_gate(self) -> None:
-        """② — the held-object allowance for this request, before AG3S builds the frame: HSR6 ∈ {lift, transport,
-        placement} ∧ (finger `blocked` this request ∨ latch HELD)."""
+        """② — the held-object allowance for this request, before AG3S builds the frame: HSR6 ∉ {approach, retreat}
+        (labelled) ∧ (finger `blocked` this request ∨ latch HELD) — `hsr6.held_allowance` (fixed AG3S-CORE-EVAL-A6 §3:
+        HSR6 = grasp ∧ HELD keeps it)."""
         from AG3S.trajopt.hsr6 import held_allowance
 
         checks = (((self._last_grasp_record or {}).get("evidence") or {}).get("checks") or {})
@@ -1962,6 +2000,65 @@ class SafePolicy:
             return None
         rec.update(active=True, links=sorted({n for n, m in zip(names, mask) if m}), n_spheres=int(mask.sum()))
         return {"links_mask": mask, "depth": depth, "centre": centre, "radius": float(col.neighbour_contact_radius)}
+
+    def _neighbour_palm_contact_gate(self, q_now: np.ndarray, manipulators) -> Optional[dict]:
+        """AG3S-CORE-EVAL-A6 — this chunk's `SceneSnapshot.neighbour_palm_contact`, or None. Only with
+        `collision.neighbour_palm_contact_depth` > 0 (`--neighbour-palm-contact-mm`).
+
+        The "grasp moment" window (task §2, fixed before results): latch `latched` / `closing` (not held), a
+        manipulated object, no revoked attach, and the grasping hand's hold link **site** (`hold_site_position`, MJCF
+        `left_ee` / `right_ee`) at `q_now` within `collision.neighbour_palm_contact_gate` (60 mm) of the object's
+        centroid. The same conditions as IFG-NBC with
+        a narrower gate; **HSR6 ④ does not withdraw it** (the window is its own). The rows: every sphere on the hold
+        link (`ee_<side>`: hand-body spheres + palm-shell spheres). Record: `self._last_neighbour_palm_contact`, also
+        `grasp.neighbour_palm_contact` in the chunk record (`active` = window on, `reason` when off; after the solve
+        `rows` = what the returned trajectory's final check relaxed, `_neighbour_palm_contact_result`).
+        """
+        col = self.to_config.collision
+        depth = float(getattr(col, "neighbour_palm_contact_depth", 0.0) or 0.0)
+        self._last_neighbour_palm_contact = {}
+        if depth <= 0.0:
+            return None
+        rec: dict[str, Any] = {"active": False, "depth_mm": round(depth * 1000.0, 1),
+                               "gate_mm": round(float(col.neighbour_palm_contact_gate) * 1000.0, 1)}
+        self._last_neighbour_palm_contact = rec
+        if isinstance(self._last_grasp_record, dict) and self._last_grasp_record:
+            self._last_grasp_record["neighbour_palm_contact"] = rec
+        phase = self._latch.phase
+        manip = getattr(self.ag3s, "manipulated", None)
+        if phase not in (GraspPhase.LATCHED, GraspPhase.CLOSING) or manip is None:
+            rec["reason"] = "phase " + phase.value if manip is not None else "no target"
+            return None
+        if bool((self._last_grasp_record or {}).get("attach_revoked")):
+            rec["reason"] = "revoked"
+            return None
+        hand, parent_link, _ = self._grasp_hand(manipulators)
+        link = self.hold_links.get(hand, parent_link)
+        centre = np.asarray(manip.centroid, np.float64).reshape(3)
+        site = hold_site_position(self.constraint_robot_model, q_now, link)
+        dist = float(np.linalg.norm(site - centre))
+        rec.update(hand=hand, link=str(link), site_to_target_mm=round(dist * 1000.0, 1))
+        if dist > float(col.neighbour_palm_contact_gate):
+            rec["reason"] = "palm outside the gate"
+            return None
+        mask = palm_contact_rows(self.constraint_robot_model, link)
+        if not mask.any():
+            rec["reason"] = f"no sphere on the link {link}"
+            return None
+        rec.update(active=True, n_spheres=int(mask.sum()))
+        return {"links_mask": mask, "depth": depth, "centre": centre,
+                "radius": float(col.neighbour_palm_contact_radius)}
+
+    def _neighbour_palm_contact_result(self) -> None:
+        """AG3S-CORE-EVAL-A6 — after the solve: what the returned trajectory's final check relaxed
+        (`to.metrics.neighbour_palm_contact`, `sqp._finish`) into the gate record as `rows`."""
+        rec = self._last_neighbour_palm_contact
+        if not rec.get("active"):
+            return
+        result = getattr(self.refiner, "last_result", None)
+        rows = ((getattr(result, "metrics", None) or {}).get("neighbour_palm_contact")
+                if result is not None else None)
+        rec["rows"] = dict(rows) if isinstance(rows, dict) else None
 
     def _wrist_track_gate(self, q_now: np.ndarray, manipulators) -> Optional[np.ndarray]:
         """IFG-TOW — this chunk's per-joint tracking scale `(nq_opt,)`, or None. Only with `cost.wrist_track_scale` < 1.

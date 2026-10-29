@@ -209,7 +209,10 @@ def test_safe_policy_off_gives_no_kwarg_no_key():
 @pytest.mark.parametrize("phase,held,blocked,want", [
     ("lift", True, None, True), ("transport", False, True, True), ("placement", True, False, True),
     ("transport", False, False, False),                       # no physical evidence
-    ("grasp", True, True, False), ("approach", True, True, False), ("retreat", True, True, False),
+    # AG3S-CORE-EVAL-A6 §3 (② fix, session B T66): grasp ∧ HELD keeps the allowance (was False); only approach ·
+    # retreat (and no label) withdraw it. The fix's own cases are in tests/trajopt/test_core_eval_a6.py.
+    ("grasp", True, None, True), ("grasp", False, False, False),
+    ("approach", True, True, False), ("retreat", True, True, False),
     (None, True, True, False)])
 def test_held_allowance_rule(phase, held, blocked, want):
     assert H6.held_allowance(phase, latch_held=held, blocked=bool(blocked)) is want
@@ -220,7 +223,8 @@ def test_safe_policy_tells_ag3s_the_allowance():
     got = []
     sp.ag3s.set_held_allowance = got.append
     for phase, latch_phase, blocked, want in (("transport", GraspPhase.HELD, None, True),
-                                              ("grasp", GraspPhase.HELD, None, False),
+                                              ("grasp", GraspPhase.HELD, None, True),   # A6 §3 fix (was False)
+                                              ("approach", GraspPhase.HELD, None, False),
                                               ("lift", GraspPhase.CLOSING, True, True),
                                               ("lift", GraspPhase.CLOSING, False, False)):
         sp._pending = {}

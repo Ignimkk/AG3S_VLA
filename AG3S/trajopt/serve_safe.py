@@ -1714,6 +1714,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="IFG-NBC — 쥐기 전(latched · closing) 손바닥이 target 중심 150 mm 안이면, 쥐는 손의 손가락 구가 "
                          "target 120 mm 안에서 이웃 물체(target · 지지면 · 쥔 물체가 아닌 장애물)와 MM 까지 겹치는 것을 "
                          "허용한다 (가볍게 밀면서 잡기). 손바닥 · 팔 · 탁자 · 운반은 그대로. 기본 off")
+    ap.add_argument("--neighbour-palm-contact-mm", type=float, default=None, metavar="MM",
+                    help="AG3S-CORE-EVAL-A6 — 쥐는 순간 (latch latched · closing, HELD 아님, 손바닥 site (left_ee · "
+                         "right_ee) 가 target 중심 60 mm 안) 쥐는 손의 손바닥 구 (ee_<side> 손 몸체 구 + 손바닥 껍질 구) 가 target 120 mm 안에서 이웃 "
+                         "장애물 (target · 지지면 · 쥔 물체 · 목적지 바구니가 아닌 것) 과 MM 까지 겹치는 것을 허용한다. "
+                         "HSR6 ④ 로 거두지 않는다. 최종 구성 10. 기본 off")
     ap.add_argument("--held-obstacle-margin", action="store_true",
                     help="T43 HM — 쥔 물체(사과) 행도 손 구 행과 같은 분류 · 여유를 받는다: 최근접 "
                          "표면이 장애물이면 max(그 행의 여유, --obstacle-margin). 지지면(테이블)은 늘 "
@@ -1935,8 +1940,9 @@ def build_parser() -> argparse.ArgumentParser:
                          "placement} ∧ closed ∧ blocked) (T64 Part C). AG3S.attach 의 reach 관문은 그대로. 기본 off")
     ap.add_argument("--hsr6-held-gate", action="store_true",
                     help="AG3S-CORE-EVAL-HSR6 ② — 쥔 물체 허용 (held-body cover 의 지지면 (탁자 · 바구니 바닥) 들어올림) 을 "
-                         "HSR6 ∈ {lift, transport, placement} ∧ (blocked ∨ latch HELD) 일 때만 준다. 아니면 들어올리지 않은 "
-                         "몸통 구. 허용이 줄기만 한다. --held-body-cover 와 함께만. 기본 off")
+                         "HSR6 ∉ {approach, retreat} (label 있음) ∧ (blocked ∨ latch HELD) 일 때 준다 (AG3S-CORE-EVAL-A6 §3 "
+                         "수정: HSR6 = grasp ∧ HELD 면 유지). 아니면 들어올리지 않은 몸통 구. 허용이 줄기만 한다. "
+                         "--held-body-cover 와 함께만. 기본 off")
     ap.add_argument("--hsr6-target-exempt", action="store_true",
                     help="AG3S-CORE-EVAL-HSR6 ③ — HSR6 = retreat 이고 쥔 것이 없으면 target 권한 (target 없는 거리장 · 권한 link "
                          "target 마진 · target 판정) 을 모두 거둔다: 놓은 사과도 장애물. approach · grasp · lift · transport · "
@@ -3334,6 +3340,12 @@ def obstacle_overrides(args) -> dict:
         if not float(nbc) > 0.0:
             raise SystemExit(f"--neighbour-contact-mm 은 0 보다 커야 합니다: {nbc}")
         out["neighbour_contact_depth"] = float(nbc) / 1000.0
+    npc = getattr(args, "neighbour_palm_contact_mm", None)
+    if npc is not None:
+        # AG3S-CORE-EVAL-A6 — light contact of the grasping palm with a neighbour object at the grasp moment.
+        if not float(npc) > 0.0:
+            raise SystemExit(f"--neighbour-palm-contact-mm 은 0 보다 커야 합니다: {npc}")
+        out["neighbour_palm_contact_depth"] = float(npc) / 1000.0
     return out
 
 
@@ -3923,6 +3935,14 @@ def main() -> None:
                 "TO neighbour contact (IFG-NBC): fingers may overlap a neighbour obstacle by %.0f mm within %.0f mm of "
                 "the target, palm within %.0f mm, pre-grasp only", c_.neighbour_contact_depth * 1000,
                 c_.neighbour_contact_radius * 1000, c_.neighbour_contact_gate * 1000)
+        if float(getattr(to_config.collision, "neighbour_palm_contact_depth", 0.0)) > 0.0:
+            c_ = to_config.collision
+            logging.warning(
+                "TO neighbour palm contact (AG3S-CORE-EVAL-A6): the grasping palm (hand body + palm shell) may overlap a "
+                "neighbour obstacle (not target / support / held / destination) by %.0f mm within %.0f mm of the "
+                "target, palm within %.0f mm, latch latched / closing only (not withdrawn by HSR6 objective)",
+                c_.neighbour_palm_contact_depth * 1000, c_.neighbour_palm_contact_radius * 1000,
+                c_.neighbour_palm_contact_gate * 1000)
         if getattr(to_config.collision, "held_obstacle_margin", False):
             logging.warning(
                 "TO held_obstacle_margin: ON — 쥔 물체 행도 같은 분류: 장애물이 최근접이면 %.1f mm "
