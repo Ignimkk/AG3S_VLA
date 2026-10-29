@@ -3,9 +3,9 @@
 현재 작업 경로는 이 파일이 속한 독립 checkout이다. `git rev-parse --show-toplevel`,
 `git branch --show-current`, `git rev-parse HEAD`, `git remote -v`를 먼저 확인한다.
 `doc/active/BRANCHES.md`와 `doc/active/migration/source-manifest.json`에서 branch 목적·source 기준을 읽는다.
-main은 paired v2 기반 V11AB, feature/panda-benchmark는 그 benchmark 평가,
+main은 2026-10-29부터 AG3S 최종 구성 기준(V11AB는 tag base/v11ab-monorepo), feature/panda-benchmark는 그 benchmark 평가,
 feature/ag3s-development는 v2 이후 전체 개선 이력과 현재 WIP를 포함한다.
-개선 branch 전체를 benchmark branch에 merge하면 V11AB 평가 대상이 바뀐다.
+개선 branch 전체를 benchmark branch에 merge하면 V11AB 평가 대상이 바뀐다 (2026-10-29 사용자 판정으로 의도적으로 merge — `doc/active/BRANCHES.md` "main 갱신").
 기존 /mnt/dev/work의 Claude session은 새 코드 작업에 resume하지 말고 새 세션을 시작한다.
 공유 input은 별도 AG3S_VLA-storage에 있다. 기존 /mnt/dev/work는 현재 실행에 필요하지 않은 이전 checkout이다.
 새 코드는 자기 checkout에서 수정한다. 새 output은 별도 storage의 results/development/<날짜_commit_run-id>/에 생성한다. source scripts/setup/env.sh로 경로를 설정한다.

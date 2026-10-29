@@ -2,7 +2,7 @@
 
 | Branch | 출발점 | 목적 |
 |---|---|---|
-| `main` | `legacy/benchmark/v2` + `legacy/pi05_TO_hybrid/v2` + 당시 pinned OpenPI | V11AB 통합 기준; 구조·경로·운영 규칙 변경만 적용 |
+| `main` | `legacy/benchmark/v2` + `legacy/pi05_TO_hybrid/v2` + 당시 pinned OpenPI | 2026-10-29 부터 AG3S 최종 구성 기준 (아래 "main 갱신"). V11AB 통합 기준은 tag `base/v11ab-monorepo` 로 보존 |
 | `feature/panda-benchmark` | 통합 `main` | Panda adapter 및 LIBERO → SafeLIBERO → LIBERO-Safety 평가 |
 | `feature/ag3s-development` | 통합 `main` + 기존 최신 이력 + migration checkpoint | v2 이후 AG3S 개선과 현재 WIP 계속 개발 |
 
@@ -18,6 +18,17 @@
 기준이 바뀐다. V11AB 평가 기간에는 구조·경로 공통 수정만 작은 commit으로 전달하고,
 기능 개선은 명시적인 새 실험 버전으로 평가한다. 원본 이력 이관에는 squash/rebase를
 사용하지 않았다. 이후 작은 개발 수정의 cherry-pick은 가능하며 적용 SHA를 기록한다.
+
+## main 갱신 — AG3S 최종 구성 (2026-10-29, 사용자 판정)
+
+- 사용자 판정 (2026-10-29): 핵심 평가로 확정한 AG3S 최종 구성을 main 으로 올리고, benchmark branch 로 보내 benchmark · baseline 비교를 한다.
+- 방식: `feature/ag3s-development` 를 `main` 에 `merge --no-ff`. 이어서 benchmark checkout 에서 `main` 을 `feature/panda-benchmark` 에 `merge --no-ff`.
+- 그래서 위의 "개선 branch 전체 merge 금지" 는 이 merge 로 의도적으로 해제했다. 이 merge 이후 main 의 기능 기준은 V11AB 가 아니라 AG3S 최종 구성이다.
+- V11AB 비교가 필요하면 tag `base/v11ab-monorepo` (`d99ae7c8`) 또는 merge 직전 main tag `base/v11ab-main-20261029` (`8b4df07b`, storage 분리 2 commit 포함) 를 쓴다.
+- 최종 구성의 정본 spec: `doc/active/reviews/AG3S_decision/ADOPTED_KO.md` §A8 "A8 최종 구성 확정" 6.
+  - 서버 인자: `AG3S/ag3s/docs/handoff/AG3S-CORE-EVAL-A6.impl.md` §3.
+  - 코드 commit: `cc0d527f`.
+- merge 전 main 의 2 commit (`8bd5ec7d` · `8b4df07b`) 은 개발 branch 의 `cbcdf91e` · `4292882e` 와 같은 작업이다. 충돌은 개발 branch 쪽으로 풀었다.
 
 ## Merge 전에 확인
 
