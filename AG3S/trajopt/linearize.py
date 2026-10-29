@@ -229,6 +229,11 @@ class SceneSnapshot:
     #: 지지면도 위 여유를 받는가. 기본 `False` — 파지하려면 손가락이 테이블 가까이 가야 한다
     #: (T40 B E3b: 테이블이 최근접인 손 행이 3.9–5.0 mm 까지 간다, `T41a.impl.md`).
     obstacle_margin_support: bool = False
+    #: **AG3S-PRE-CORE-TO SCM** — `collision.palm_shell_margin` (m), set by `scene_from_constraint_set` only when it
+    #: is given (with `obstacle_margin > 0`). `None` (default) = every obstacle row gets `obstacle_margin`, as before.
+    #: A value = obstacle rows of the robot's `palm_shell` spheres (`CollisionLinearizer._palm_shell_cols`) get
+    #: `max(margin, palm_shell_margin)` instead.
+    palm_shell_margin: Optional[float] = None
     #: `(K, 4)` — AG3S 지지면 `[n_x, n_y, n_z, offset]` (`SupportSurface.normal`·`offset`, 단위 법선,
     #: 자유쪽 `n·p ≥ offset`). **기하 그대로** — `plane_offset` 과 달리 `safety_margin` 을 더하지
     #: 않았고, `use_support_planes=False` 가 끄는 `plane_active` 와도 무관하다. 위 여유가 "최근접
@@ -1008,7 +1013,13 @@ class CollisionLinearizer:
             # E1 의 `is_object` 행은 여기서 target 이고, 목적지 규칙은 쥔 물체 행에만 붙는다.
             cls = self._obstacle_rows(d, flat, scene, d_object)
             self._last_obstacle_class = cls
-            margin = np.where(cls == _OBSTACLE, np.maximum(margin, obstacle_margin), margin)
+            shell_margin = getattr(scene, "palm_shell_margin", None)
+            if shell_margin is None:
+                margin = np.where(cls == _OBSTACLE, np.maximum(margin, obstacle_margin), margin)
+            else:
+                # AG3S-PRE-CORE-TO SCM — the palm-shell rows' own obstacle margin; every other row as above.
+                per_row = np.where(self._palm_shell_cols(n_query), float(shell_margin), obstacle_margin)
+                margin = np.where(cls == _OBSTACLE, np.maximum(margin, per_row[None, :]), margin)
             if getattr(scene, "held_obstacle_margin", False):
                 # T43 HM — the held rows' classes and clearances for the record (`held_rows_record`).
                 self._last_held_rows = self._held_rows_record(cls, d - radii[None, :] - margin)
@@ -1122,6 +1133,31 @@ class CollisionLinearizer:
             from scipy.spatial import cKDTree
             return cKDTree(scene.manipulated_points).query(flat)[0]
         return None
+
+    def _palm_shell_cols(self, n_query: int) -> np.ndarray:
+        """AG3S-PRE-CORE-TO SCM — `(n_query,)` bool: the query rows of this robot model's `palm_shell` spheres
+        (`UrdfSphereChain.sphere_roles`, same order as the FK); held query rows are `False`. Read only with
+        `scene.palm_shell_margin`. **Refuses a model without such spheres** — the margin would silently do nothing
+        (the server refuses `--palm-shell-margin` without `--palm-shell`; this is the same rule one layer down)."""
+        cols = self.__dict__.get("_palm_shell_mask")
+        if cols is None:
+            from AG3S.ag3s.robot_models.urdf_sphere_chain import PALM_SHELL_ROLE
+
+            roles = tuple(getattr(self.robot_model, "sphere_roles", ()) or ())
+            if len(roles) != self.n_spheres:
+                raise ValueError(
+                    f"palm_shell_margin: the robot model names {len(roles)} sphere roles for {self.n_spheres} "
+                    "spheres — cannot tell which rows are palm-shell rows")
+            cols = np.asarray([str(r) == PALM_SHELL_ROLE for r in roles], bool)
+            if not cols.any():
+                raise ValueError(
+                    "palm_shell_margin is set but this robot model has no palm_shell sphere — build it with "
+                    "--palm-shell on/left/right (the margin would change nothing)")
+            self.__dict__["_palm_shell_mask"] = cols
+        out = np.zeros(int(n_query), bool)
+        k = min(int(n_query), cols.shape[0])
+        out[:k] = cols[:k]
+        return out
 
     def _obstacle_rows(self, d: np.ndarray, flat: np.ndarray, scene: SceneSnapshot,
                        d_object: Optional[np.ndarray]) -> np.ndarray:
@@ -1528,6 +1564,12 @@ class CollisionLinearizer:
                 if getattr(scene, "held_obstacle_margin", False):
                     # T43 HM — the class of a held row was made by `_held_rows_class`.
                     out["held_obstacle_margin"] = True
+                if getattr(scene, "palm_shell_margin", None) is not None:
+                    # AG3S-PRE-CORE-TO SCM — only when on: is the worst row a palm-shell row, and the margin it got.
+                    shell = bool(self._palm_shell_cols(cls.shape[1])[query])
+                    out["palm_shell_row"] = shell
+                    if shell:
+                        out["palm_shell_margin_m"] = float(scene.palm_shell_margin)
         return out
 
     @staticmethod
@@ -2235,6 +2277,10 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
             obstacle_margin=obstacle_margin,
             obstacle_margin_support=bool(getattr(collision_cfg, "obstacle_margin_support", False)),
             support_planes=support_planes_of(constraint_set))
+        shell_margin = getattr(collision_cfg, "palm_shell_margin", None)
+        if shell_margin is not None:
+            # AG3S-PRE-CORE-TO SCM — only when given (default `None`: no key, the snapshot as before).
+            obstacle["palm_shell_margin"] = float(shell_margin)
         if bool(getattr(collision_cfg, "held_obstacle_margin", False)):
             # T43 HM — the held rows are classified too; the capture volume only while holding.
             obstacle["held_obstacle_margin"] = True

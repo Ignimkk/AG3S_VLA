@@ -237,9 +237,16 @@ WRIST_BODY_ROLE = "wrist_body"
 #: link is never a contact link (`contact.contact_links`), so the target is an obstacle for it. Exact radius.
 WRIST_COVER_ROLE = "wrist_cover"
 
+#: AG3S-PRE-CORE-TO SC — `UrdfCapsule.role` of the **palm outer shell spheres** (`gripper_cover.palm_shell_capsules`,
+#: `serve_safe --palm-shell on`). Built like `PALM_BODY_ROLE` (centre depth + overflow) but only on the palm's outer
+#: surface minus the grasp face (the bottom face inside the finger channel), and kept out of the grasp volume below
+#: that face. They are **appended** after every other sphere (the palm's gap-filling chain stays), so the model
+#: without them is an exact prefix. Exact radius for the same reason as the other body spheres.
+PALM_SHELL_ROLE = "palm_shell"
+
 #: Roles whose sphere radius is used as is (no `capsule_radius_scale`, no spacing inflation).
 EXACT_SPHERE_ROLES = frozenset({EXACT_SPHERE_ROLE, FINGER_BODY_ROLE, PALM_BODY_ROLE,
-                                WRIST_BODY_ROLE, WRIST_COVER_ROLE})
+                                WRIST_BODY_ROLE, WRIST_COVER_ROLE, PALM_SHELL_ROLE})
 
 
 @dataclasses.dataclass(frozen=True)

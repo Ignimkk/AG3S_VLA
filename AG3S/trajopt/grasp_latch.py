@@ -513,6 +513,7 @@ class GraspLatch:
         placed: bool = False,
         held_observation: Optional[dict] = None,
         extra_checks: Optional[dict] = None,
+        attach_assist: Optional[dict] = None,
     ) -> LatchEvent:
         """직전 청크의 **실행 사실**로 닫힘 시도 · 파지 확인 · 놓임 확인을 갱신한다 (`evidence=True`).
 
@@ -531,6 +532,10 @@ class GraspLatch:
             extra_checks: IFG-S2SERVE — 닫힘 시도(CLOSING)의 파지 확인에 **AND 로 더할** 검사 `{name: bool}`
                 (`serve_safe --held-3d-rule on` 이면 `{"held_3d": …}`). attach 를 거는 조건에만 들어가고, 걸린 뒤의
                 회수 · 놓기 · slip 은 그대로다. `None` (기본) = 이전과 같다.
+            attach_assist: AG3S-CORE-EVAL-HSR6 ① — `{"phase": HSR6 단계 또는 None}` (`serve_safe --hsr6-attach-assist`).
+                닫힘 시도(CLOSING)의 파지 확인이 실패해도 단계 ∈ {lift, transport, placement} ∧ `closed` ∧ `blocked`
+                이면 attach 한다 (T64 Part C: HELD′ = strong HELD ∨ (…)). 근거는 `evidence["attach_assist"]`.
+                회수 · 놓기 · slip 은 그대로다. `None` (기본) = 이전과 같다 (키도 없다).
         """
         if not self.evidence:
             raise RuntimeError("observe_grasp needs GraspLatch(evidence=True)")
@@ -597,7 +602,25 @@ class GraspLatch:
                     checks.update({str(k): bool(v) for k, v in extra_checks.items()})
                 ev["checks"] = checks
                 failed = [k for k, v in checks.items() if not v]
-                if not failed:
+                assisted = False
+                if attach_assist is not None:   # AG3S-CORE-EVAL-HSR6 ① (only given with the flag on)
+                    from AG3S.trajopt.hsr6 import attach_assist_ok
+
+                    phase6 = attach_assist.get("phase")
+                    assisted = bool(failed) and attach_assist_ok(phase6, checks)
+                    ev["attach_assist"] = {"phase": phase6, "assisted": assisted, "strong_failed": list(failed)}
+                if assisted:
+                    self.phase = GraspPhase.HELD
+                    self._open_streak = 0
+                    attach = True
+                    self._attach_opening = None if opening is None else float(opening)
+                    self._held_exec_chunks = 0
+                    self._hold_command = self._last_command
+                    self._slip_streak = 0
+                    note = (f"파지 확인 (HSR6 보완) — attach(manipulated id={manipulated_id}): strong 확인 실패 "
+                            f"{', '.join(failed)} 이지만 HSR6 {attach_assist.get('phase')} ∧ closed ∧ blocked "
+                            f"(feedback seq {signal.feedback_seq})")
+                elif not failed:
                     self.phase = GraspPhase.HELD
                     self._open_streak = 0
                     attach = True

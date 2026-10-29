@@ -812,6 +812,78 @@ def _ball_owned_split(centres: np.ndarray, is_seed: np.ndarray, ball: "TargetBal
             "d_t": d_t, "d_o": d_o, "n_nontarget_near": int(len(nt))}
 
 
+# AG3S-PRE-CORE-TO-STEMCAP — begin
+#: 꼭지 덮개가 실제로 지우는 방식 (`EsdfConfig.TARGET_STEM_CAPS` 에서 `"off"` 를 뺀 것).
+STEM_CAP_MODES = ("in_ball", "full")
+
+
+@dataclasses.dataclass(frozen=True)
+class StemCapSpec:
+    """꼭지 덮개 (stem cap) — `ball_owned` 미세 target-free 계층에서 공 위 좁은 원기둥 안의 seed 도 지운다.
+
+    seed voxel 중심 `p` (첫 voxel 중심 + ijk · vs, `_ball_candidates` 와 같은 규약), 공 중심 `c`, 맞춘 반지름 `fit_r`:
+
+    | 조건 | 식 |
+    |---|---|
+    | 수평 | `‖p_xy − c_xy‖ ≤ radius_m` (base x · y) |
+    | 높이 | `c_z + bottom_fit_frac · fit_r ≤ p_z ≤ c_z + fit_r + top_m`, 그리고 `p_z ≥ ball.z_min` (지원면 보호) |
+    | `in_ball` | 위에 더해 `‖p − c‖ ≤ R` (공 반지름) — offline what-if `cap_in` |
+    | `full` | 공 제한 없음 — what-if `cap_all` |
+    """
+
+    mode: str
+    radius_m: float = 0.020
+    top_m: float = 0.025
+    bottom_fit_frac: float = 0.5
+
+    def __post_init__(self) -> None:
+        if self.mode not in STEM_CAP_MODES:
+            raise ValueError(f"StemCapSpec.mode 는 {STEM_CAP_MODES} 중 하나여야 합니다: {self.mode!r}")
+        if not float(self.radius_m) > 0.0 or not float(self.top_m) >= 0.0 \
+                or not np.isfinite(float(self.bottom_fit_frac)):
+            raise ValueError("StemCapSpec: radius_m > 0 · top_m ≥ 0 · bottom_fit_frac 유한")
+
+    def record(self) -> dict:
+        return {"mode": self.mode, "radius_mm": round(float(self.radius_m) * 1e3, 3),
+                "top_mm": round(float(self.top_m) * 1e3, 3),
+                "bottom_fit_frac": float(self.bottom_fit_frac)}
+
+
+def stem_cap_fit_radius(ball: "TargetBall") -> tuple[Optional[float], str]:
+    """`(fit_r m | None, fit method)` — 공의 `provenance["fit"]["radius_mm"]` (pipeline `_target_ball` 의 `fit.record()`).
+
+    what-if 와 같이 맞춤 방식 (`surface_fit` · `centroid`) 과 무관하게 그 값을 쓴다. 없거나 유한한 양수가 아니면 `None`
+    (호출자는 덮개를 건너뛰고 이유를 남긴다)."""
+    fit = (ball.provenance or {}).get("fit") or {}
+    method = str(fit.get("method", "unknown"))
+    r = fit.get("radius_mm")
+    try:
+        r = float(r) / 1e3
+    except (TypeError, ValueError):
+        return None, method
+    return (r if np.isfinite(r) and r > 0.0 else None), method
+
+
+def stem_cap_bounds(ball: "TargetBall", spec: StemCapSpec, fit_r: float) -> tuple[float, float]:
+    """덮개의 `(z 아래 끝, z 위 끝)` (m). 아래 끝은 `ball.z_min` 아래로 내려가지 않는다."""
+    cz = float(ball.centre[2])
+    lo = max(cz + float(spec.bottom_fit_frac) * float(fit_r), float(ball.z_min))
+    return lo, cz + float(fit_r) + float(spec.top_m)
+
+
+def stem_cap_mask(centres: np.ndarray, ball: "TargetBall", spec: StemCapSpec, fit_r: float) -> np.ndarray:
+    """`centres` (voxel 중심, m) 중 덮개 안인 것 — 순수 numpy (CPU 단위 검증 · offline 재현이 이것을 본다)."""
+    p = np.asarray(centres, np.float64).reshape(-1, 3)
+    c = ball.centre
+    lo, hi = stem_cap_bounds(ball, spec, fit_r)
+    m = np.linalg.norm(p[:, :2] - c[None, :2], axis=1) <= float(spec.radius_m)
+    m &= (p[:, 2] >= lo) & (p[:, 2] <= hi)
+    if spec.mode == "in_ball":
+        m &= np.linalg.norm(p - c[None, :], axis=1) <= float(ball.radius)
+    return m
+# AG3S-PRE-CORE-TO-STEMCAP — end
+
+
 #: T46 F1 — `esdf.nontarget_evidence` 의 선택지 (config 의 목록을 그대로 쓴다).
 NONTARGET_EVIDENCES = EsdfConfig.NONTARGET_EVIDENCES
 
@@ -2318,6 +2390,8 @@ class CuroboFieldBuilder:
                 out["oracle_split"] = dict(ex["oracle"])
             if "surface_protect" in ex:   # IFG-CL2 (attention_surface_hybrid 이고 보호가 걸린 frame 만)
                 out["surface_protect"] = dict(ex["surface_protect"])
+            if "stem_cap" in ex:   # AG3S-PRE-CORE-TO-STEMCAP (target_stem_cap 이 켜졌을 때만)
+                out["stem_cap"] = dict(ex["stem_cap"])
             out["classify_ms"] = round(out.get("classify_ms", 0.0) + float(ex.get("classify_ms", 0.0)), 3)
         return out
 
@@ -2380,6 +2454,12 @@ class CuroboFieldBuilder:
                 if ex.get("n_ambiguous_removed") is not None:
                     log.warning("    T46 F2 owned_ambiguous = **remove** — ambiguous seed %d 개도 지웠다 "
                                 "(제거 수에 포함).", int(ex["n_ambiguous_removed"]))
+                if ex.get("stem_cap") is not None:   # AG3S-PRE-CORE-TO-STEMCAP
+                    sc = ex["stem_cap"]
+                    log.warning("    !!! 꼭지 덮개 (stem cap) = **%s** — 공 위 원기둥 (수평 %.1f mm · z %s–%s m) 안 seed %d 개를 "
+                                "더 지웠다 (ball_owned 제거 수와 따로, 공 밖 %d) !!!", sc.get("mode"), sc.get("radius_mm"),
+                                sc.get("z_bottom_m"), sc.get("z_top_m"), int(sc.get("n_removed", 0)),
+                                int(sc.get("n_removed_outside_ball", 0)))
 
     @staticmethod
     def occupied_voxels(itg, *, band_voxels: float = CUROBO_SEED_BAND_VOXELS, surface_only: bool = False,
@@ -2970,8 +3050,84 @@ class CuroboFieldBuilder:
             }
             trace["nontarget_kept_ijk"] = cand[split["nontarget"] | prot]
             trace["protected_ijk"] = cand[prot]
+        cap = self._stem_cap_spec()   # AG3S-PRE-CORE-TO-STEMCAP (None = off: nothing below runs, bit-identical)
+        if cap is not None:
+            # 덮개는 ball_owned 가 지운 **뒤에** 남은 seed 만 지운다 (`n_removed` · `removed_ijk` 는 ball_owned 그대로,
+            # 덮개 몫은 `stem_cap` · `stem_cap_ijk` 로 따로). 지운 덮개 seed 는 부호 교정 집합에도 넣는다 (`sign` ⊇ removed 와 같은 규칙).
+            cap_counts, cap_ijk = self._stem_cap_exclusion(itg, ball, cap, origin, voxel_size, shape, removed)
+            counts["stem_cap"] = cap_counts
+            trace["stem_cap_ijk"] = cap_ijk
+            if len(cap_ijk):
+                sign_idx = np.vstack([sign_idx, cap_ijk])
         counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
         return n, (sign_idx if len(sign_idx) else None), {"counts": counts, "trace": trace}
+
+    # AG3S-PRE-CORE-TO-STEMCAP — begin
+    def _stem_cap_spec(self) -> Optional[StemCapSpec]:
+        """`esdf.target_stem_cap` 이 켜졌으면 `StemCapSpec`, `"off"` (기본) 면 `None`."""
+        cfg = self.config
+        mode = str(getattr(cfg, "target_stem_cap", "off"))
+        if mode == "off":
+            return None
+        return StemCapSpec(mode=mode, radius_m=float(getattr(cfg, "stem_cap_radius", 0.020)),
+                           top_m=float(getattr(cfg, "stem_cap_top", 0.025)),
+                           bottom_fit_frac=float(getattr(cfg, "stem_cap_bottom_fit_frac", 0.5)))
+
+    def _stem_cap_exclusion(self, itg, ball: "TargetBall", spec: StemCapSpec, origin: np.ndarray,
+                            voxel_size: float, shape, removed: np.ndarray) -> tuple[dict, np.ndarray]:
+        """덮개 안의 **아직 남은** seed 를 지운다. `(counts, 지운 seed ijk (K, 3) int64)`.
+
+        후보 = 덮개 원기둥의 AABB 안 voxel 중 `stem_cap_mask` 인 것 (중심 = `origin` (첫 voxel 중심) + ijk · vs). seed =
+        `site_index ≥ 0` (cuRobo seed, `_seed_mask`) — `removed` (ball_owned 가 방금 지운 것) 는 이미 seed 가 아니다.
+        """
+        t0 = time.monotonic()
+        empty = np.zeros((0, 3), np.int64)
+        fit_r, method = stem_cap_fit_radius(ball)
+        rec = {**spec.record(), "fit_radius_mm": None if fit_r is None else round(fit_r * 1e3, 3),
+               "fit_method": method, "ball_radius_mm": round(float(ball.radius) * 1e3, 3),
+               "applied": False, "n_cap_voxels": 0, "n_cap_seeds": 0, "n_already_removed": 0,
+               "n_removed": 0, "n_removed_outside_ball": 0}
+        if fit_r is None:
+            rec["reason"] = "no_fit_radius"
+            rec["ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return rec, empty
+        lo_z, hi_z = stem_cap_bounds(ball, spec, fit_r)
+        rec["z_bottom_m"], rec["z_top_m"] = float(lo_z), float(hi_z)
+        vs = float(voxel_size)
+        dims = np.array([int(v) for v in shape])
+        c = ball.centre
+        lo_m = np.array([c[0] - spec.radius_m, c[1] - spec.radius_m, lo_z])
+        hi_m = np.array([c[0] + spec.radius_m, c[1] + spec.radius_m, hi_z])
+        lo = np.maximum(np.floor((lo_m - origin) / vs).astype(np.int64), 0)
+        hi = np.minimum(np.ceil((hi_m - origin) / vs).astype(np.int64) + 1, dims)
+        rec["applied"] = True
+        if np.any(hi <= lo):
+            rec["ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return rec, empty
+        ax = [np.arange(int(lo[i]), int(hi[i]), dtype=np.int64) for i in range(3)]
+        grid = np.stack(np.meshgrid(*ax, indexing="ij"), axis=-1).reshape(-1, 3)
+        centres = origin[None, :] + grid.astype(np.float64) * vs
+        cand = grid[stem_cap_mask(centres, ball, spec, fit_r)]
+        rec["n_cap_voxels"] = int(len(cand))
+        if not len(cand):
+            rec["ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return rec, empty
+        seed = self._seed_mask(itg, cand)
+        cap_ijk = cand[seed]
+        if len(removed):
+            lin = lambda a: (a[:, 0] * dims[1] + a[:, 1]) * dims[2] + a[:, 2]   # noqa: E731
+            rec["n_already_removed"] = int(np.isin(lin(cand), lin(np.asarray(removed, np.int64))).sum())
+        n = 0
+        if len(cap_ijk):
+            n, _ = self._clear_seeds(itg, cap_ijk, shape)
+            out = np.linalg.norm(origin[None, :] + cap_ijk.astype(np.float64) * vs - c[None, :], axis=1) \
+                > float(ball.radius)
+            rec["n_removed_outside_ball"] = int(out.sum())
+        rec["n_removed"] = int(n)
+        rec["n_cap_seeds"] = int(n) + rec["n_already_removed"]
+        rec["ms"] = round((time.monotonic() - t0) * 1e3, 3)
+        return rec, cap_ijk
+    # AG3S-PRE-CORE-TO-STEMCAP — end
 
     def _oracle_exclusion(self, itg, oracle: OracleVisibleEvidence, origin: np.ndarray,
                           voxel_size: float, shape):

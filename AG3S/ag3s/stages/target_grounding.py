@@ -99,6 +99,7 @@ from typing import Any, Optional
 import numpy as np
 
 from AG3S.ag3s.config import KDTREE_WORKERS, ClusteringConfig
+from AG3S.ag3s.runtime import substage
 from AG3S.ag3s.stages.admissibility import (
     Admissibility,
     Association,
@@ -1153,7 +1154,8 @@ class TargetConfirm:
             self._release_if_refused()
         self._latched_hold = False
         self._hand_occluded, self._hand_gap = False, self._take_hand()
-        adm = self._assess_frame(clusters, points)
+        with substage.part("grounding.confirm_admissibility"):
+            adm = self._assess_frame(clusters, points)
         candidates = (list(range(len(clusters))) if adm is None
                       else [i for i, a in enumerate(adm) if a.admissible])
         # SUBTASK-c: a confirmed place / home label means no new manipulated object. Not while a
@@ -1188,7 +1190,8 @@ class TargetConfirm:
             # Before a grasp the object has not moved, so the nearest cluster is it only if it sits
             # within the object's own radius and has its size (T30 F3). A rejected cluster is not
             # the held object this frame; it may still be a challenger under the T26 switch rule.
-            self._association = self._associate(clusters[held_rank], points)
+            with substage.part("grounding.confirm_association"):
+                self._association = self._associate(clusters[held_rank], points)
             if self._association is not None and not self._association.accepted:
                 reason, held_rank = ASSOCIATION_REJECTED, None
             elif (self._association is not None and self._association.subset
@@ -1792,7 +1795,8 @@ def ground_target(
         usable &= ~np.asarray(exclude_mask, bool).reshape(-1)
 
     seed_mask = np.zeros(n, bool)
-    seed_mask[extract_seeds(attention, cfg, seed_percentile, seed_threshold)] = True
+    with substage.part("grounding.seeds"):
+        seed_mask[extract_seeds(attention, cfg, seed_percentile, seed_threshold)] = True
     seed_mask &= usable
     seeds = np.nonzero(seed_mask)[0]
     if seeds.size == 0:
@@ -1809,17 +1813,20 @@ def ground_target(
     else:
         candidate_idx = np.nonzero(usable)[0]
         local_seed = np.searchsorted(candidate_idx, seeds)
-        grown_local = grow_region(points[candidate_idx], local_seed, cfg.eps)
+        with substage.part("grounding.grow"):
+            grown_local = grow_region(points[candidate_idx], local_seed, cfg.eps)
         grown = candidate_idx[grown_local]
         if grown.size == 0:
             _unseen(confirm)
             return GroundingResult(None, GroundingStatus.NO_CLUSTER, seed_indices=seeds,
                                    attention_peak_index=peak_index)
 
-        if cfg.method == "dbscan":
-            labels = dbscan(points[grown], cfg.eps, cfg.min_points)
-        else:
-            labels = connected_components_3d(points[grown], cfg.region_growing_radius or cfg.eps)
+        with substage.part("grounding.components"):
+            if cfg.method == "dbscan":
+                labels = dbscan(points[grown], cfg.eps, cfg.min_points)
+            else:
+                labels = connected_components_3d(points[grown],
+                                                 cfg.region_growing_radius or cfg.eps)
 
         groups = {}
         for label in np.unique(labels):
@@ -1837,18 +1844,20 @@ def ground_target(
 
     # T31b: a cluster that may be several objects is split by attention before anything is scored,
     # so the components compete — and are excluded or kept — as the separate objects they are.
-    members, splits = _split_groups(
-        [idx for _, idx in sorted(groups.items())], points, attention, cfg, confirm,
-        enabled=cfg.use_3d_connectivity,
-        # T44b A4: the ratio gate on the pre-normalisation attention (`raw` only; default None).
-        ratio_attention=(attention_cloud.raw_attention
-                         if cfg.attention_split_ratio_source == "raw" else None))
+    with substage.part("grounding.split"):
+        members, splits = _split_groups(
+            [idx for _, idx in sorted(groups.items())], points, attention, cfg, confirm,
+            enabled=cfg.use_3d_connectivity,
+            # T44b A4: the ratio gate on the pre-normalisation attention (`raw` only; default None).
+            ratio_attention=(attention_cloud.raw_attention
+                             if cfg.attention_split_ratio_source == "raw" else None))
 
-    clusters = [
-        dataclasses.replace(
-            _score_cluster(i, idx, member_points, member_attention, peak_point, cfg), split=info)
-        for i, (idx, info) in enumerate(members)
-    ]
+    with substage.part("grounding.score"):
+        clusters = [
+            dataclasses.replace(
+                _score_cluster(i, idx, member_points, member_attention, peak_point, cfg), split=info)
+            for i, (idx, info) in enumerate(members)
+        ]
     # Deterministic ordering: score descending, ties broken by the lowest member index.
     clusters.sort(key=lambda c: (-c.target_score, int(c.point_indices[0])))
     best = clusters[0]
@@ -1869,7 +1878,8 @@ def ground_target(
     # Which candidate wins. Without a `confirm` this is rank 1 and the frame stands alone, which is
     # what every direct caller gets and what makes this function reproducible from one frame. With
     # one, a challenger has to lead `target_confirm_frames` frames running before the target moves.
-    decision = confirm.select(clusters, points=points) if confirm is not None else None
+    with substage.part("grounding.confirm"):
+        decision = confirm.select(clusters, points=points) if confirm is not None else None
     if decision is not None and decision.mode == NO_ADMISSIBLE:
         # Nothing held yet and no cluster may become the manipulated object (T26) — e.g. the crate
         # is all attention found. The leader is not named, whatever its score.
@@ -1883,14 +1893,16 @@ def ground_target(
     if decision is not None and decision.cluster is None:
         # The manipulated object is not among this frame's clusters (T20). The leader is *not*
         # named in its place: a hand in front of the apple does not make the crate the object.
-        confirm.follow_kept(points, usable)   # IFG-FOLLOW (off: returns at once)
+        with substage.part("grounding.confirm"):
+            confirm.follow_kept(points, usable)   # IFG-FOLLOW (off: returns at once)
         return dataclasses.replace(
             _unobserved_result(decision, confirm, tuple(clusters), seeds, peak_index,
                                best.target_score), splits=splits)
     if decision is not None and decision.reason in (SUBSET_KEPT_ANCHOR, UNSPLIT_KEPT_ANCHOR,
                                                     CLOSING_KEPT_GEOMETRY):
         # The object was seen, but only part of it: its anchor geometry stands in (T30 F3b).
-        confirm.follow_kept(points, usable)   # IFG-FOLLOW (off: returns at once)
+        with substage.part("grounding.confirm"):
+            confirm.follow_kept(points, usable)   # IFG-FOLLOW (off: returns at once)
         return dataclasses.replace(
             _anchor_result(decision, confirm, tuple(clusters), seeds, peak_index,
                            best.target_score, ts), splits=splits)
@@ -1948,7 +1960,8 @@ def ground_target(
     )
     if confirm is not None:
         # The manipulated object's latest observation — what an `occluded` frame falls back on.
-        confirm.observe(target, attention=attention[chosen.point_indices])
+        with substage.part("grounding.confirm"):
+            confirm.observe(target, attention=attention[chosen.point_indices])
     return GroundingResult(
         target, GroundingStatus.OK, tuple(clusters), seeds, peak_index, best.target_score,
         splits=splits,

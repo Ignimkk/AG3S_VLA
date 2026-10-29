@@ -1222,6 +1222,29 @@ class EsdfConfig:
     #: 보존) 하나 `"remove"` (target · unowned 처럼 지운다) 하나. 미세 target-free 계층에만 — 거친 계층은 keep 그대로.
     owned_ambiguous: str = "keep"
     OWNED_AMBIGUOUS = ("keep", "remove")
+    # AG3S-PRE-CORE-TO-STEMCAP — begin
+    #: **꼭지 덮개 (stem cap) — `ball_owned` 미세 target-free 계층에서 공 위 좁은 원기둥 안의 seed 도 target 으로 지운다**
+    #: (사용자 지시 2026-10-27 23:36 KST, 실험용). 공 (`TargetBall`) 중심 c · 맞춘 반지름 fit_r (`provenance["fit"]["radius_mm"]`) ·
+    #: 반지름 R 에서, seed voxel 중심 p 가 `‖p_xy − c_xy‖ ≤ stem_cap_radius` 이고
+    #: `c_z + stem_cap_bottom_fit_frac · fit_r ≤ p_z ≤ c_z + fit_r + stem_cap_top` (그리고 `p_z ≥ z_min`) 이면 지운다
+    #: (`curobo_builder.stem_cap_mask`).
+    #:
+    #: | 값 | 규칙 |
+    #: |---|---|
+    #: | `"off"` (기본) | 지금 그대로 — 값 · stats · 기록 키 비트 동일 |
+    #: | `"in_ball"` | 원기둥 ∩ 공 (`‖p − c‖ ≤ R`) — offline what-if `cap_in` |
+    #: | `"full"` | 원기둥 전부 (공 제한 없음) — what-if `cap_all` |
+    #:
+    #: `target_exclusion = "ball_owned"` 필수. 거친 target-free 계층 · oracle 경로에는 걸리지 않는다.
+    target_stem_cap: str = "off"
+    TARGET_STEM_CAPS = ("off", "in_ball", "full")
+    #: 꼭지 덮개 — 공 중심 수직축에서의 수평 (base x · y) 반경 (m).
+    stem_cap_radius: float = 0.020
+    #: 꼭지 덮개 — 위 끝 = `c_z + fit_r + stem_cap_top` (m).
+    stem_cap_top: float = 0.025
+    #: 꼭지 덮개 — 아래 끝 = `c_z + stem_cap_bottom_fit_frac · fit_r`.
+    stem_cap_bottom_fit_frac: float = 0.5
+    # AG3S-PRE-CORE-TO-STEMCAP — end
     #: **T46e A13 — 미세 target-free 계층의 target 범위 (extent) 를 무엇으로 정하나** (DX-01 조건 B, DT-02 extent block).
     #:
     #: | 값 | 규칙 |
@@ -1398,6 +1421,26 @@ class EsdfConfig:
             raise AG3SConfigError(
                 f"esdf.owned_ambiguous 는 {self.OWNED_AMBIGUOUS} 중 하나여야 합니다: "
                 f"{self.owned_ambiguous!r}")
+        # AG3S-PRE-CORE-TO-STEMCAP — begin
+        if self.target_stem_cap not in self.TARGET_STEM_CAPS:
+            raise AG3SConfigError(
+                f"esdf.target_stem_cap 는 {self.TARGET_STEM_CAPS} 중 하나여야 합니다: {self.target_stem_cap!r}")
+        for name, lo_ok in (("stem_cap_radius", lambda x: x > 0.0), ("stem_cap_top", lambda x: x >= 0.0),
+                            ("stem_cap_bottom_fit_frac", lambda x: True)):
+            v = getattr(self, name)
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(float(v)) \
+                    or not lo_ok(float(v)):
+                raise AG3SConfigError(f"esdf.{name} 가 올바르지 않습니다 (radius > 0 · top ≥ 0 · 유한): {v!r}")
+        if self.target_stem_cap != "off":
+            if self.target_exclusion != "ball_owned":
+                raise AG3SConfigError(
+                    "esdf.target_stem_cap 은 ball_owned 미세 target-free 계층에 거는 것입니다 — "
+                    f"esdf.target_exclusion='ball_owned' 와 함께 주십시오 (받은 값 {self.target_exclusion!r})")
+            if self.target_extent in ("oracle_visible", "attention_surface"):
+                raise AG3SConfigError(
+                    f"esdf.target_extent={self.target_extent!r} 는 미세 target-free 계층의 분할을 oracle 경로로 대신합니다 — "
+                    "꼭지 덮개 (target_stem_cap) 는 ball_owned 분할에만 걸리므로 함께 두면 효과가 없습니다")
+        # AG3S-PRE-CORE-TO-STEMCAP — end
         # T46e A13
         if self.target_extent not in self.TARGET_EXTENTS:
             raise AG3SConfigError(

@@ -44,6 +44,7 @@ from AG3S.ag3s.constraints.clearance import ClearancePolicy
 from AG3S.ag3s.stages.collision_candidates import CandidateTracker, generate_candidates
 from AG3S.ag3s.config import AG3SConfig
 from AG3S.ag3s.runtime.profiler import StageProfiler
+from AG3S.ag3s.runtime import substage
 from AG3S.ag3s.stages.reconstruction import reconstruct
 from AG3S.ag3s.stages.robot_filter import (
     depth_robot_mask,
@@ -205,6 +206,9 @@ class AG3S:
         #: SUBTASK-c: this request's subtask probabilities (`set_subtask`), handed to
         #: `TargetConfirm.note_subtask` by the next grounding call and consumed by it.
         self._subtask_p: Optional[dict[str, float]] = None
+        #: AG3S-CORE-EVAL-HSR6 ② (`set_held_allowance`): None (default) = the held-body cover's lift off the support
+        #: is decided as before; False = withdrawn this frame (the unlifted body spheres); True = as before.
+        self._held_allowance: Optional[bool] = None
         #: T46e A13: this request's GT segmentation (`set_oracle_segmentation`), consumed by the next
         #: `_run`, and the episode's labelled surface samples. Both stay None unless
         #: `esdf.target_extent == "oracle_visible"` (then the memory is made on first use).
@@ -446,6 +450,7 @@ class AG3S:
         self._grasp_active = False
         self._grasp_latched = False
         self._subtask_p = None
+        self._held_allowance = None   # AG3S-CORE-EVAL-HSR6 ②
         # T46e A13: the oracle samples are per episode, like the TSDF.
         self._oracle_pending = None
         self._oracle_frame = None
@@ -532,6 +537,12 @@ class AG3S:
         if p is not None and isinstance(p.get("p"), Mapping):
             p = p["p"]
         self._subtask_p = None if p is None else {str(k): float(v) for k, v in p.items()}
+
+    def set_held_allowance(self, allowed: Optional[bool]) -> None:
+        """AG3S-CORE-EVAL-HSR6 ② — the caller's held-object allowance for this request (`SafePolicy`, only with
+        `serve_safe --hsr6-held-gate`). False withdraws the held-body cover's lift off the support (table / crate
+        floor) in `_frame_held_attached`: the frame uses the unlifted body spheres. None (never called) = as before."""
+        self._held_allowance = None if allowed is None else bool(allowed)
 
     # --- IFG-S2SERVE: the confidence gate -----------------------------------------------------------------
     def set_gate_feature(self, feature: Optional[np.ndarray]) -> None:
@@ -1536,6 +1547,10 @@ class AG3S:
                                  "offset_m": round(float(found[1]), 6)}
                 if n_i and not near:
                     near, near_row = True, i
+        # AG3S-CORE-EVAL-HSR6 ② — the lift is an allowance (the held body may sit on the support); withdrawn = unlifted.
+        withdrawn = bool(near and self._held_allowance is False)
+        if withdrawn:
+            near = False
         chosen = query["lifted"] if near else body
         extra_mm = None
         if near and query.get("lift_dir") is not None:
@@ -1574,7 +1589,10 @@ class AG3S:
                     "extra_lift_mm": extra_mm,
                     "min_bottom_gap_mm": None if gap is None else round(gap * 1000.0, 3),
                     "bottom_gap_now_mm": None if gap_now is None else round(gap_now * 1000.0, 3),
-                    "plane": plane_rec}},
+                    "plane": plane_rec,
+                    # AG3S-CORE-EVAL-HSR6 ② — only when the caller set an allowance (off: the keys above only).
+                    **({} if self._held_allowance is None else {
+                        "held_allowance": bool(self._held_allowance), "hsr6_lift_withdrawn": withdrawn})}},
                 # The TO's query spheres this frame (what the pre-T43 key always meant).
                 "spheres_parent_frame": [
                     {"centre_m": [round(float(v), 6) for v in c],
@@ -1792,6 +1810,7 @@ class AG3S:
         context = contact_context or ContactPolicyContext.make(phase, active_manipulators)
         ts = time.time() if timestamp is None else float(timestamp)
         profiler = self.profiler
+        substage.pop()   # AG3S-GPU-STAGES M1: nothing left over from an earlier frame that returned early
         notes: list[str] = []
         # T19 target guard: the manipulated object's centroid *before* this frame (T20 — the object
         # being grasped, not whatever attention led with), frozen for the whole frame so the cloud
@@ -2333,7 +2352,10 @@ class AG3S:
             constraint_set.metrics["confidence_gate"] = dict(self._gate_frame or {})
         profiler.end_frame()
         self.frame_index += 1
-        object.__setattr__(constraint_set, "profile", profiler.last_frame_ms())
+        profile = profiler.last_frame_ms()
+        if substage.ENABLED:   # AG3S-GPU-STAGES M1 (`--profile-substages`; off: no key)
+            profile.update({f"sub.{k}": v for k, v in substage.pop().items()})
+        object.__setattr__(constraint_set, "profile", profile)
         object.__setattr__(
             constraint_set,
             "notes",

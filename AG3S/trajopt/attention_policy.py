@@ -72,7 +72,7 @@ class AttentionPolicy:
                  subtask_probe: Any = "default", attention_source: Any = None,
                  noun_tokens: Any = None, task_probe: Any = None, sampler: Any = None,
                  backend: Any = None, default_prompt: Optional[str] = None,
-                 prefix_feature: bool = False):
+                 prefix_feature: bool = False, hsr6_probe: Any = None):
         self._policy = policy
         if sampler is None:
             from AG3S.ag3s.experiments.sources.pi05_attention import AttentionSampler
@@ -81,6 +81,9 @@ class AttentionPolicy:
         self._sampler = sampler
         self._noise_seed = int(noise_seed)
         self._subtask_probe = _load_probe(subtask_probe)
+        #: AG3S-CORE-EVAL-HSR6 (`serve_safe --hsr6-*`, default None = off): the 6-phase probe on the same `kv_L4`
+        #: feature -> `result["hsr6"]`. None: no key, and the feature is computed exactly when it was before.
+        self._hsr6_probe = hsr6_probe
         # T57-A — begin. Default (both None) = the pre-T57 cell and path (`infer` never reaches the
         # extended branch). `attention_source`: a SPEC string or `AttentionSource`; `task_probe`: a
         # `NounProbe` (T55 prereg); `noun_tokens`: `NounTokens` (needed by a noun source or the probe).
@@ -133,6 +136,28 @@ class AttentionPolicy:
         return self._subtask_probe
 
     @property
+    def hsr6_probe(self):
+        """AG3S-CORE-EVAL-HSR6 — the 6-phase probe in use (`SubtaskProbe`), or None (no `result["hsr6"]`)."""
+        return self._hsr6_probe
+
+    def _want_feature(self) -> bool:
+        return self._subtask_probe is not None or self._hsr6_probe is not None
+
+    def _label_feature(self, result: dict, feature) -> None:
+        """`result["subtask"]` (3-class HSR) and, with the HSR6 probe, `result["hsr6"]` from one `kv_L4` feature.
+        Each failing is logged and leaves its key out; it never fails the policy call."""
+        if self._subtask_probe is not None:
+            try:
+                result["subtask"] = self._subtask_probe.predict(feature)
+            except Exception:  # noqa: BLE001 — the label failing must not fail the policy call
+                logging.warning("subtask probe failed:\n%s", traceback.format_exc())
+        if self._hsr6_probe is not None:
+            try:
+                result["hsr6"] = self._hsr6_probe.predict(feature)
+            except Exception:  # noqa: BLE001 — HSR6 failing leaves `result["hsr6"]` out (SafePolicy: phase None)
+                logging.warning("HSR6 probe failed:\n%s", traceback.format_exc())
+
+    @property
     def attention_source(self):
         """The `AttentionSource` given (None = the default cell, no flag)."""
         return self._source
@@ -154,10 +179,7 @@ class AttentionPolicy:
             logging.warning("attention extraction failed:\n%s", traceback.format_exc())
             return result
         if feature is not None:
-            try:
-                result["subtask"] = self._subtask_probe.predict(feature)
-            except Exception:  # noqa: BLE001 — the label failing must not fail the policy call
-                logging.warning("subtask probe failed:\n%s", traceback.format_exc())
+            self._label_feature(result, feature)
         return result
 
     # --- T57-A: attention source · task probe (only with a flag) ----------------------------
@@ -184,7 +206,7 @@ class AttentionPolicy:
             rows = None if look is None or not look.ok else look.rows
             out = self._backend.run(
                 inputs, source=source, rows=rows,
-                want_feature=self._subtask_probe is not None,
+                want_feature=self._want_feature(),
                 v_layer=None if probe is None else probe.layer,
                 # IFG-S2SERVE — only with the flag (the kwarg is absent otherwise: the T57-A call as before)
                 **({"want_resid": True} if self._prefix_feature else {}))
@@ -233,10 +255,7 @@ class AttentionPolicy:
             result[IFG_PREFIX_L8_KEY] = dump_rounding(out["resid_l8"])
         feature = out.get("feature")
         if feature is not None:
-            try:
-                result["subtask"] = self._subtask_probe.predict(feature)
-            except Exception:  # noqa: BLE001 — the label failing must not fail the policy call
-                logging.warning("subtask probe failed:\n%s", traceback.format_exc())
+            self._label_feature(result, feature)
         return result
 
     def _attention(self, obs: dict[str, Any]) -> dict[str, np.ndarray]:
@@ -257,7 +276,7 @@ class AttentionPolicy:
         model_obs = _model.Observation.from_dict(inputs)
 
         if with_feature is None:
-            with_feature = self._subtask_probe is not None
+            with_feature = self._want_feature()
         if with_feature:
             blocks, feature = self._sampler.attention_and_subtask_feature(
                 model_obs, [_DENOISE_STEP], noise_seed=self._noise_seed)

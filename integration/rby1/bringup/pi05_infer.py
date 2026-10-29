@@ -643,6 +643,58 @@ def oracle_target_of(randomized_episode, ap):
     return str(target)
 
 
+# AG3S-PRE-CORE-TO PT — first-chunk perturbation (default off). Rolls the same scene / seed out as
+# nearby draws: a fixed 7-vector (uniform ±R from its own `default_rng(K)`; no other RNG is touched)
+# is added to the used arm's joint targets of the action applied in control steps 0..7.
+#: 16-D action slices of each arm's 7 joint targets (grippers 7 / 15 are not in them).
+PERTURB_ARM_SLICES_16D = {"left": slice(0, 7), "right": slice(8, 15)}
+#: Control steps 0..PERTURB_STEPS-1 are perturbed = the first chunk's executed rows.
+PERTURB_STEPS = OPEN_LOOP_HORIZON
+
+
+def first_chunk_perturb_error(radius, seed):
+    """Argument check for `--first-chunk-perturb-rad R --perturb-seed K`; returns a message or None."""
+    if radius is None and seed is None:
+        return None
+    if radius is None:
+        return "--perturb-seed only does something together with --first-chunk-perturb-rad"
+    if seed is None:
+        return "--first-chunk-perturb-rad requires --perturb-seed"
+    if not (np.isfinite(radius) and radius > 0.0):
+        return f"--first-chunk-perturb-rad must be a finite value > 0, got {radius}"
+    if seed < 0:
+        return f"--perturb-seed must be >= 0, got {seed}"
+    return None
+
+
+def first_chunk_perturb_vector(radius, seed):
+    """The 7 joint offsets (rad): uniform in [-radius, radius) from a private `default_rng(seed)`."""
+    return np.random.default_rng(int(seed)).uniform(-float(radius), float(radius), size=7)
+
+
+def make_first_chunk_perturb(radius, seed, used_arm):
+    """The perturbation spec (None = off). `used_arm` must be 'left' or 'right'."""
+    if radius is None:
+        return None
+    if used_arm not in PERTURB_ARM_SLICES_16D:
+        raise ValueError(f"used arm must be 'left' or 'right', got {used_arm!r}")
+    return {"radius": float(radius), "seed": int(seed), "arm": str(used_arm),
+            "vector": first_chunk_perturb_vector(radius, seed)}
+
+
+def perturb_first_chunk_action(action, t_step, perturb):
+    """`action` + the perturbation on the used arm's 7 joints for `t_step` < PERTURB_STEPS.
+
+    Off (`perturb` None) or later steps: returns `action` itself (same object, untouched). On: a new
+    float64 array; `action` (possibly a row view of the chunk) is never written.
+    """
+    if perturb is None or t_step >= PERTURB_STEPS:
+        return action
+    out = np.array(action, dtype=np.float64, copy=True)
+    out[PERTURB_ARM_SLICES_16D[perturb["arm"]]] += perturb["vector"]
+    return out
+
+
 def validate_rby1_observation(obs, *, log=False):
     """Validate the raw 14-D/three-camera interface sent to the policy."""
     state = np.asarray(obs.get("state"))
@@ -773,6 +825,15 @@ def main():
              "episode's target fruit centre is inside the crate (rby1_manipulation.evaluation.transport.object_in_crate, "
              "the analysis rule) and the used arm's applied gripper is open (>= 0.5). Logs '[place] stop after place'. "
              "Off (default): run to --max-steps. Needs a randomized 16D episode.")
+    ap.add_argument(
+        "--first-chunk-perturb-rad", type=float, default=None, metavar="R",
+        help="AG3S-PRE-CORE-TO PT — add a fixed 7-vector (each entry uniform in ±R rad, drawn once from "
+             "numpy default_rng(--perturb-seed)) to the used arm's 7 joint targets of the action applied in "
+             "control steps 0-7 (the first chunk's executed rows; grippers and the other arm untouched). The "
+             "perturbed action goes to ctrl and to executed_actions. Off (default). Needs a randomized 16D episode.")
+    ap.add_argument(
+        "--perturb-seed", type=int, default=None, metavar="K",
+        help="AG3S-PRE-CORE-TO PT — seed of the --first-chunk-perturb-rad vector (required with it)")
     ap.add_argument("--headless", action="store_true")
     ap.add_argument(
         "--view",
@@ -1014,6 +1075,9 @@ def main():
         ap.error(f"--warmup-steps must be >= 0, got {args.warmup_steps}")
     if args.policy_seed is not None and not 0 <= args.policy_seed < POLICY_SEED_LIMIT:
         ap.error(f"--policy-seed must be in [0, 2**32), got {args.policy_seed}")
+    _perturb_err = first_chunk_perturb_error(args.first_chunk_perturb_rad, args.perturb_seed)
+    if _perturb_err is not None:
+        ap.error(_perturb_err)
     if args.speed < 0:
         ap.error("--speed must be non-negative (0 = unlimited)")
     if args.obstacle_stop_distance < 0:
@@ -1821,6 +1885,18 @@ def main():
         print(f"[place] --stop-after-place {args.stop_after_place:.1f} s: {place_stop['fruit']} in the crate with the "
               f"{place_stop['arm']} gripper open ends the episode {place_stop['after_steps']} steps later")
 
+    #: AG3S-PRE-CORE-TO PT `--first-chunk-perturb-rad` — None = off (the loop leaves `action` untouched).
+    first_chunk_perturb = None
+    if args.first_chunk_perturb_rad is not None:
+        if (mcfg["action_format"] != "rby1_16d" or randomized_episode is None
+                or randomized_episode.get("used_arm") not in PERTURB_ARM_SLICES_16D):
+            ap.error("--first-chunk-perturb-rad needs a randomized 16D episode (used arm, 16-D action)")
+        first_chunk_perturb = make_first_chunk_perturb(args.first_chunk_perturb_rad, args.perturb_seed,
+                                                       str(randomized_episode["used_arm"]))
+        print(f"[perturb] first chunk: steps 0-{PERTURB_STEPS - 1} {first_chunk_perturb['arm']} arm joints "
+              f"+= v (R={first_chunk_perturb['radius']:g} rad, seed={first_chunk_perturb['seed']}) "
+              f"v={np.array2string(first_chunk_perturb['vector'], precision=3, max_line_width=10**6)}")
+
     def loop_body():
         chunk = None
         chunk_step = 0
@@ -2116,6 +2192,9 @@ def main():
                     print(f"[shadow] t={t_step} verdict UNSAFE, executing the reference chunk "
                           f"anyway — {safe_client.last_reason}")
                 action = np.asarray(chunk[chunk_step], dtype=np.float64)
+            # AG3S-PRE-CORE-TO PT — off: `action` is returned as is. On (steps 0..7): a perturbed copy,
+            # which is what goes to ctrl and to executed_actions (bare policy, safe client, or HOLD alike).
+            action = perturb_first_chunk_action(action, t_step, first_chunk_perturb)
             apply_action(mcfg["action_format"], action, d, idx, act)
             # **실제로 `d.ctrl` 에 들어간 값** (T18). HOLD 면 청크가 아니라 `rby1_state()` 다.
             # 청크의 행(`planned_row`)은 HOLD 여도 함께 남긴다 — "제안됐으나 실행 안 됨" 을
@@ -2330,6 +2409,12 @@ def main():
                     "place_stop_t": np.asarray(-1 if place_stop["stop_t"] is None else place_stop["stop_t"],
                                                dtype=np.int64)}
                    if place_stop is not None else {}),
+                # AG3S-PRE-CORE-TO PT — only when on.
+                **({"perturb_rad": np.asarray(first_chunk_perturb["radius"], dtype=np.float64),
+                    "perturb_seed": np.asarray(first_chunk_perturb["seed"], dtype=np.int64),
+                    "perturb_vector": np.asarray(first_chunk_perturb["vector"], dtype=np.float64),
+                    "perturb_arm": np.asarray(first_chunk_perturb["arm"])}
+                   if first_chunk_perturb is not None else {}),
             )
             print(f"saving trajectory ({len(executed_actions)} executed steps) -> {trajectory_path}")
 

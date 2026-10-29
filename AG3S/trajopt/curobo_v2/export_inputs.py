@@ -57,7 +57,7 @@ CUROBO_BASE_LINK = "link_torso_5"
 
 # server flags that change the constraint sphere model; the ones this exporter rebuilds are parsed,
 # the rest must be absent (otherwise the rebuilt model is not the served one).
-_UNSUPPORTED_MODEL_FLAGS = ("--gripper-cover", "--palm-cover", "--wrist-cover", "--exclude-links",
+_UNSUPPORTED_MODEL_FLAGS = ("--gripper-cover", "--palm-cover", "--palm-shell", "--wrist-cover", "--exclude-links",
                             "--capsule-radius-scale-link", "--capsule-extent-link",
                             "--finger-cover-overflow", "--finger-cover-gap",
                             "--finger-cover-max-spheres", "--finger-cover-solver")

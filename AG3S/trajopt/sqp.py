@@ -123,6 +123,8 @@ class TrajectoryOptimizer:
                 {"horizon": {"horizon": k, "execution_length": k, "plan_horizon": None,
                              "lookahead": "off"}})
             self.window_optimizer = TrajectoryOptimizer(robot_model, layout, limits, window_cfg)
+            # AG3S-PRE-CORE-TO E2: the window optimizer runs its multi-seed only when this one hands it a chunk index.
+            self.window_optimizer._ms_is_window = True
         #: T43 TA (C) — `a_C` per optimized joint (rad/row²), or None when `limits.servo_accel` is off.
         self.servo_accel_bound = None
         self.servo_accel_record = None
@@ -132,6 +134,12 @@ class TrajectoryOptimizer:
         self._history: dict[str, Any] = {}
         #: IFG-TOA — this solve's grasp-anchor state (`_anchor_setup`), `None` outside a solve or without an anchor.
         self._anchor_state: Optional[dict[str, Any]] = None
+        #: AG3S-PRE-CORE-TO E2 — `sqp.multi_seed` (0 = off: `solve` is the standard solve, nothing below is read).
+        self.multi_seed = int(getattr(self.config.sqp, "multi_seed", 0) or 0)
+        #: AG3S-PRE-CORE-TO E3-b — `sqp.gpu_seeds` ("off" = E2's seeds on the CPU SQP; "curobo" = `gpu_seeds.py`).
+        self.gpu_seeds = str(getattr(self.config.sqp, "gpu_seeds", "off") or "off")
+        #: E3-b — `sqp.gpu_seeds_check` ("all" = every GPU result re-checked; "first-pass" = in the choosing order).
+        self.gpu_seeds_check = str(getattr(self.config.sqp, "gpu_seeds_check", "all") or "all")
 
     def _build_path(self, robot_model) -> None:
         """T43 Q — the servo (from the controlled MJCF) and the path checker. Only when on."""
@@ -190,9 +198,23 @@ class TrajectoryOptimizer:
         anchor = self.__dict__.get("_anchor_state")
         if anchor is not None and np.asarray(trajectory).shape[1] == anchor["horizon"]:
             # IFG-TOA: the anchor terms, exactly (palm FK), so step acceptance sees what the QP optimises.
-            from AG3S.trajopt.grasp_anchor import anchor_cost
+            from AG3S.trajopt.grasp_anchor import anchor_cost, goal_box_excess
 
-            value += anchor_cost(anchor["fk"](trajectory, anchor["q_now"])[0], anchor["weights"], anchor["targets"])
+            rot = anchor.get("rot")
+            if rot is not None:
+                # AG3S-GEO-GRASP: position and rotation of the hold link, exactly (same Log map as the QP terms)
+                from AG3S.trajopt.grasp_anchor import rotation_cost
+
+                p, _, R, _ = anchor["fk"].pose(trajectory, anchor["q_now"])
+                value += rotation_cost(R, rot["rows"], rot["Rg"], rot["w"])
+            else:
+                p = anchor["fk"](trajectory, anchor["q_now"])[0]
+            if anchor["cost_on"]:
+                value += anchor_cost(p, anchor["weights"], anchor["targets"])
+            box = anchor.get("box")
+            if box is not None:
+                # E1-B: the goal-box slack's exact value at this trajectory, at the QP's price (w_slack / 10 per m).
+                value += box["weight"] * float(goal_box_excess(p, box["rows"], box["goal"], box["r"]).sum())
         return value
 
     def reset(self) -> None:
@@ -206,7 +228,46 @@ class TrajectoryOptimizer:
             self.window_optimizer.reset()
 
     # ------------------------------------------------------------------------------------
+    #: AG3S-PRE-CORE-TO E2 — multi-seed bookkeeping (class defaults; only read with `sqp.multi_seed > 0`).
+    #: `_ms_is_window`: this is a look-ahead window optimizer (multi-seed only with a chunk index from its owner);
+    #: `_ms_depth`: nesting of `solve` (the IFG-TOA safety-first re-solve calls it again); `_ms_count`: top-level
+    #: solves so far (the chunk index when the caller gives none); `_ms_child_index`: the index the current top-level
+    #: solve hands its window optimizer (`_solve_window`), `None` inside the IFG-TOA3 safety-first re-solve.
+    _ms_is_window = False
+    _ms_depth = 0
+    _ms_count = 0
+    _ms_child_index: Optional[int] = None
+
     def solve(self, reference, q_now, scene, **kwargs) -> TrajOptResult:
+        """The standard solve (`_solve_standard`) and, with `sqp.multi_seed = N > 0` (AG3S-PRE-CORE-TO E2), the
+        multi-seed re-solve when it leaves a violation (`_multi_seed`). Off (default), this is `_solve_standard`.
+
+        `multi_seed_index` (keyword, optional): the chunk index the seeds' RNG uses (the refiner passes the request's
+        `t_step`); without it a count of this optimizer's solves. Ignored when off."""
+        if self.multi_seed <= 0:
+            kwargs.pop("multi_seed_index", None)
+            return self._solve_standard(reference, q_now, scene, **kwargs)
+        index = kwargs.pop("multi_seed_index", None)
+        run = self._ms_depth == 0 and (index is not None or not self._ms_is_window)
+        if run:
+            if index is None:
+                index = self._ms_count
+            self._ms_count += 1
+        saved_child = self._ms_child_index
+        # a nested solve keeps the index (E1's `_solve_plain_recorded` nests the standard solve itself); the IFG-TOA3
+        # safety-first re-solve clears it (`_solve_standard`), so a window optimizer runs its seeds once per chunk
+        self._ms_child_index = int(index) if run else saved_child
+        self._ms_depth += 1
+        try:
+            result = self._solve_standard(reference, q_now, scene, **kwargs)
+            if run:
+                result = self._multi_seed(result, int(index), reference, q_now, scene, kwargs)
+            return result
+        finally:
+            self._ms_depth -= 1
+            self._ms_child_index = saved_child
+
+    def _solve_standard(self, reference, q_now, scene, **kwargs) -> TrajOptResult:
         """See `_solve`. With `sqp.fast_eval` (T43 TP) the linearizer's per-solve memo lives exactly
         as long as this call; off, this is `_solve` itself."""
         if getattr(self.config.collision, "esdf_host_mirror", False):
@@ -216,6 +277,11 @@ class TrajectoryOptimizer:
                 mirror()
         anchor = kwargs.get("grasp_anchor")
         self._anchor_state = self._anchor_setup(anchor, reference, q_now)
+        if (anchor is not None and self._anchor_state is None
+                and getattr(anchor, "variant", "TOA") != "TOA"):
+            # E1-B / E1-C: an anchor was given but nothing applies on this horizon (no goal rows) — the solve is
+            # the plain one; say so in the record (IFG-TOA keeps its earlier record: none).
+            return self._solve_plain_recorded(anchor, reference, q_now, scene, **kwargs)
         scale = kwargs.pop("joint_track_scale", None)
         self._track_scale = None if scale is None else np.asarray(scale, np.float64).reshape(-1)   # IFG-TOW
         if scale is not None and self.window_optimizer is not None:
@@ -233,26 +299,42 @@ class TrajectoryOptimizer:
             if st is not None and np.asarray(result.trajectory).shape[1] >= st["horizon"]:
                 from AG3S.trajopt.grasp_anchor import anchor_record
 
-                p_out = st["fk"](np.asarray(result.trajectory, np.float64)[:, :st["horizon"]], st["q_now"])[0]
-                rec = anchor_record(anchor, st["p_ref"], p_out)
+                p_out, R_out = self._anchor_pose(st, result.trajectory)
+                rec = anchor_record(anchor, st["p_ref"], p_out, st.get("R_ref"), R_out)
                 tol = float(self.config.safety.violation_tolerance)
-                inner = (result.metrics.get("grasp_anchor") or {}).get("fallback")
+                inner_rec = result.metrics.get("grasp_anchor")
+                inner = (inner_rec or {}).get("fallback")
+                if getattr(anchor, "goal_window", "close") != "close":
+                    # AG3S-PRE-CORE-TO-GGW: the rows actually optimised — the window solve's (closed look-ahead gate:
+                    # only the execution window was solved, with its own goal rows) or this horizon's.
+                    rec.update(self._applied_goal_rows(rec, inner_rec, result, st["horizon"]))
+                if anchor.variant != "TOA":
+                    # E1: whether the safety-first re-solve below ran and won (IFG-TOA keeps its earlier record).
+                    rec["fallback_used"] = bool(inner is not None and inner.get("used") == "plain")
                 if inner is None and float(result.max_violation) > tol:
                     # IFG-TOA safety first: the anchored solve left a violation (IFG-APPLE-TOA2 ep211: the anchor priced
                     # the translation the obstacle needs, every candidate was rejected, HOLD for ~50 chunks). Solve
                     # again without the anchor and keep the result with the smaller violation (the anchored one on a tie).
                     kw = {k: v for k, v in kwargs.items() if k != "grasp_anchor"}
                     self._anchor_state = None
-                    plain = self.solve(reference, q_now, scene, **kw)
+                    child, self._ms_child_index = self._ms_child_index, None   # E2: no seeds inside the re-solve
+                    try:
+                        plain = self.solve(reference, q_now, scene, **kw)
+                    finally:
+                        self._ms_child_index = child
                     use_plain = float(plain.max_violation) < float(result.max_violation)
                     fb = {"anchored_violation_mm": round(float(result.max_violation) * 1000.0, 2),
                           "plain_violation_mm": round(float(plain.max_violation) * 1000.0, 2),
                           "used": "plain" if use_plain else "anchored"}
                     rec["fallback"] = fb
                     if use_plain:
-                        p_plain = st["fk"](np.asarray(plain.trajectory, np.float64)[:, :st["horizon"]], st["q_now"])[0]
-                        rec = anchor_record(anchor, st["p_ref"], p_plain)
+                        p_plain, R_plain = self._anchor_pose(st, plain.trajectory)
+                        rec = anchor_record(anchor, st["p_ref"], p_plain, st.get("R_ref"), R_plain)
                         rec["fallback"] = fb
+                        if getattr(anchor, "goal_window", "close") != "close":
+                            rec.update(applied_horizon=int(st["horizon"]), goal_rows_applied=[])   # GGW: plain won
+                        if anchor.variant != "TOA":
+                            rec["fallback_used"] = True
                         plain.metrics["grasp_anchor"] = rec
                         return plain
                 elif inner is not None:
@@ -262,27 +344,416 @@ class TrajectoryOptimizer:
         finally:
             self._anchor_state = None
 
+    @staticmethod
+    def _anchor_pose(st: dict[str, Any], trajectory) -> tuple[np.ndarray, Optional[np.ndarray]]:
+        """Hold-link positions (and rotations for a 6-D goal, AG3S-GEO-GRASP) of `trajectory`'s first rows."""
+        traj = np.asarray(trajectory, np.float64)[:, :st["horizon"]]
+        if st.get("R_ref") is not None:
+            p, _, R, _ = st["fk"].pose(traj, st["q_now"])
+            return p, R
+        return st["fk"](traj, st["q_now"])[0], None
+
     def _anchor_setup(self, anchor, reference, q_now) -> Optional[dict[str, Any]]:
         """IFG-TOA — this solve's anchor state (palm FK, per-row weights and targets), or `None` (no anchor given, or
-        nothing switched on). The FK is built once per link."""
+        nothing switched on). The FK is built once per link.
+
+        AG3S-PRE-CORE-TO E1-B: with `anchor.goal_box > 0` the state also carries `box` (goal rows, goal, half-width,
+        slack price `w_slack * GOAL_BOX_SLACK_SCALE`); `cost_on` says whether any palm cost term is on."""
         if anchor is None:
             return None
         reference = np.asarray(reference, np.float64)
         H = int(reference.shape[1])
-        if H != self.horizon or not (anchor.w_tcp > 0.0 or anchor.w_goal > 0.0):
+        box_r = float(getattr(anchor, "goal_box", 0.0) or 0.0)
+        if H != self.horizon or not (anchor.w_tcp > 0.0 or anchor.w_goal > 0.0 or box_r > 0.0):
             return None
-        from AG3S.trajopt.grasp_anchor import LinkPointFK, anchor_targets
+        from AG3S.trajopt.grasp_anchor import GOAL_BOX_SLACK_SCALE, LinkPointFK, LinkPoseFK, anchor_targets
+
+        cache = self.__dict__.setdefault("_anchor_fk", {})
+        six_d = getattr(anchor, "goal_R", None) is not None
+        key = (anchor.link, "pose") if six_d else anchor.link
+        fk = cache.get(key)
+        if fk is None:
+            fk = cache[key] = (LinkPoseFK if six_d else LinkPointFK)(self.linearizer.robot_model, self.layout, H,
+                                                                     anchor.link)
+        q_now = np.asarray(q_now, np.float64).reshape(-1)
+        R_ref = None
+        if six_d:
+            p_ref, _, R_ref, _ = fk.pose(reference, q_now)
+        else:
+            p_ref = fk(reference, q_now)[0]
+        weights, targets = anchor_targets(anchor, p_ref)
+        cost_on = bool(np.any(weights > 0.0))
+        rot = None
+        if six_d and float(anchor.w_rot) > 0.0:
+            rows = np.flatnonzero(anchor.goal_mask(H))
+            if rows.size:
+                rot = {"rows": rows, "Rg": np.asarray(anchor.goal_R, np.float64), "w": float(anchor.w_rot)}
+        box = None
+        if box_r > 0.0:
+            rows = np.flatnonzero(anchor.goal_mask(H))
+            if rows.size:
+                box = {"rows": rows, "goal": np.asarray(anchor.goal, np.float64).reshape(3), "r": box_r,
+                       "weight": float(self.config.cost.w_slack) * GOAL_BOX_SLACK_SCALE}
+        if not cost_on and box is None and rot is None:
+            return None
+        return {"fk": fk, "q_now": q_now, "p_ref": p_ref, "weights": weights, "targets": targets, "horizon": H,
+                "cost_on": cost_on, "box": box, "rot": rot, "R_ref": R_ref}
+
+    @staticmethod
+    def _applied_goal_rows(rec, inner_rec, result, horizon: int) -> dict[str, Any]:
+        """AG3S-PRE-CORE-TO-GGW — `{applied_horizon, goal_rows_applied[, window]}` for the anchor record: with a closed
+        look-ahead gate the window optimizer solved the first rows only, with its own anchor record (`window`)."""
+        gate = (result.metrics.get("lookahead") or {}).get("gate")
+        if gate == "closed" and isinstance(inner_rec, dict):
+            applied = inner_rec.get("goal_rows_applied", inner_rec.get("goal_rows"))   # [] when its plain re-solve won
+            return {"applied_horizon": inner_rec.get("horizon"), "goal_rows_applied": list(applied or []),
+                    "window": dict(inner_rec)}
+        return {"applied_horizon": int(horizon), "goal_rows_applied": list(rec.get("goal_rows") or [])}
+
+    def _solve_plain_recorded(self, anchor, reference, q_now, scene, **kwargs) -> TrajOptResult:
+        """E1 — an anchor with nothing to apply on this horizon: the plain solve plus a record saying so."""
+        kw = {k: v for k, v in kwargs.items() if k != "grasp_anchor"}
+        result = self.solve(reference, q_now, scene, **kw)
+        H = int(np.asarray(reference).shape[1])
+        result.metrics["grasp_anchor"] = {
+            "variant": anchor.variant, "link": anchor.link, "close_row": anchor.close_row, "n_goal_rows": 0,
+            "goal_rows": [], "applied": False,
+            "reason": ("no goal" if anchor.goal is None else "no close planned" if anchor.close_row is None
+                       else "starts closed (close row 0)" if int(anchor.close_row) <= 0
+                       else "close row beyond this horizon" if int(anchor.close_row) >= H else "no goal rows"),
+            **({"goal_box_mm": round(float(anchor.goal_box) * 1000.0, 3)} if anchor.goal_box > 0.0 else {}),
+            "fallback_used": False}
+        if getattr(anchor, "goal_window", "close") != "close":   # AG3S-PRE-CORE-TO-GGW (close: the record as before)
+            result.metrics["grasp_anchor"].update(goal_window=anchor.goal_window,
+                                                  goal_window_rule=anchor.goal_window_rule(H), horizon=H,
+                                                  applied_horizon=H, goal_rows_applied=[])
+        return result
+
+    # --- AG3S-PRE-CORE-TO E2: multi-seed -------------------------------------------------
+    def _multi_seed(self, result: TrajOptResult, index: int, reference, q_now, scene,
+                    kwargs: dict[str, Any]) -> TrajOptResult:
+        """E2 — re-solve from `sqp.multi_seed` other first iterates when the standard `result` leaves a violation, and
+        return the best of the standard and the seeds (`multi_seed.select`). Records `metrics["multi_seed"]`.
+
+        Not triggered (the standard result returned as it is, plus `{"triggered": False}`): violation within
+        `safety.violation_tolerance`, nothing to avoid, or a closed look-ahead gate (the window optimizer's solve is
+        the standard one and runs its own multi-seed). The seeds use their own QP solver object, so the standard
+        solver's factorization and warm start carry to the next chunk as without E2; `_previous` and `frame_index`
+        end as if only the chosen trajectory had been solved."""
+        if "multi_seed" in result.metrics:          # the window optimizer's (gate closed)
+            return result
+        tol = float(self.config.safety.violation_tolerance)
+        n = int(self.multi_seed)
+        record: dict[str, Any] = {"triggered": False, "n_seeds": n, "index": int(index),
+                                  "standard_violation_mm": round(float(result.max_violation) * 1000.0, 3),
+                                  "tolerance_mm": round(tol * 1000.0, 3)}
+        gate = (result.metrics.get("lookahead") or {}).get("gate")
+        if gate == "closed":
+            record["reason"] = "look-ahead gate closed: the window solve is the standard one"
+        elif result.status == TrajOptStatus.UNCONSTRAINED:
+            record["reason"] = "nothing to avoid"
+        elif float(result.max_violation) <= tol:
+            record["reason"] = "standard solve within tolerance"
+        else:
+            return self._run_seeds(result, index, reference, q_now, scene, kwargs, record)
+        result.metrics["multi_seed"] = record
+        return result
+
+    def _run_seeds(self, result, index, reference, q_now, scene, kwargs, record) -> TrajOptResult:
+        from AG3S.trajopt import multi_seed as MS
+
+        started = time.perf_counter()
+        reference = np.asarray(reference, np.float64)
+        q_now = np.asarray(q_now, np.float64).reshape(-1)
+        q0 = q_now[self.layout.q_indices]
+        H = int(reference.shape[1])
+        tol = float(self.config.safety.violation_tolerance)
+        anchor = kwargs.get("grasp_anchor")
+        scale = kwargs.get("joint_track_scale")
+        kw = {k: v for k, v in kwargs.items() if k not in ("grasp_anchor", "joint_track_scale")}
+        envelope = (rest_start_envelope(self.limits, self.horizon,
+                                        getattr(self.config.limits, "rest_start_tolerance", None))
+                    if kw.get("start_at_rest") else None)
+        geometry = self._seed_geometry(result, reference, q_now, scene, anchor)
+        seeds = self._build_seeds(MS.seed_specs(int(self.multi_seed)), index, reference, q0, geometry)
+        goal = self._goal_probe(anchor, H)
+        record.update(triggered=True, geometry=geometry["record"],
+                      goal_rows=None if goal is None else [int(k) for k in goal["rows"]])
+
+        limit_bound = [MS.LIMIT_SLACK]
+
+        def describe(kind, detail, res, ms, is_seed: bool):
+            traj = np.asarray(res.trajectory, np.float64)
+            g = None if goal is None else self._goal_error_mm(goal, traj, q_now)
+            length, acc = MS.path_length(traj, q0), MS.accel_sq(traj, q0)
+            over = float(max(self._limit_overshoot(traj, q_now, envelope).values()))
+            if not is_seed:
+                limit_bound[0] = max(MS.LIMIT_SLACK, over)
+            # a seed may not end further outside the joint limits than the standard solve (or LIMIT_SLACK)
+            eligible = bool(not is_seed or (over <= limit_bound[0] and res.status != TrajOptStatus.SOLVER_FAILED))
+            rec = {"kind": kind, **({"detail": detail} if detail else {}),
+                   "max_violation_mm": round(float(res.max_violation) * 1000.0, 3),
+                   "goal_err_mm": None if g is None else round(g, 2),
+                   "status": res.status.value, "eligible": eligible,
+                   "path_length_rad": round(length, 5), "accel_sq": round(acc, 7),
+                   "limit_overshoot": round(over, 6), "cost": round(float(res.cost), 6),
+                   "reference_deviation": round(float(res.reference_deviation), 6),
+                   "solve_ms": round(float(ms), 2), "sqp_iterations": int(res.metrics.get("sqp_iterations", 0) or 0)}
+            key = MS.selection_key(res.max_violation, tol, g, length, acc) if eligible else None
+            return rec, key
+
+        std_rec, std_key = describe("standard", None, result, float(result.solve_time_ms), False)
+        records, keys, results = [std_rec], [std_key], [result]
+        frame_after_standard = self.frame_index
+        main_solver = self.solver
+        seed_solver = self.__dict__.get("_ms_solver")
+        if seed_solver is None:
+            seed_solver = self._ms_solver = QpSolver(self.config.qp)
+        self.solver = seed_solver
+        gpu = None
+        try:
+            if self.gpu_seeds != "off":
+                # AG3S-PRE-CORE-TO E3-b: the same seeds in one batched cuRobo L-BFGS (`gpu_seeds.py`), each result
+                # re-checked by `_finish` (cost with this chunk's anchor / IFG-TOW scale, as a seed solve has it).
+                from AG3S.trajopt import gpu_seeds as GS
+
+                self._anchor_state = self._anchor_setup(anchor, reference, q_now) if anchor is not None else None
+                self._track_scale = None if scale is None else np.asarray(scale, np.float64).reshape(-1)
+                first_pass = None
+                if self.gpu_seeds_check == "first-pass":
+                    # `select_moving_first`'s order read without the check: (goal error, reference deviation, index)
+                    # with `describe`'s rounding, over the moving results inside the joint-limit bound. The first
+                    # checked one that resolves is the one the full check would choose.
+                    def order_key(i, Q):
+                        if seeds[i][0] == "stay":
+                            return None
+                        traj = np.asarray(Q, np.float64)
+                        if float(max(self._limit_overshoot(traj, q_now, envelope).values())) > limit_bound[0]:
+                            return None
+                        g = None if goal is None else round(self._goal_error_mm(goal, traj, q_now), 2)
+                        return (0 if g is None else int(round(float(g) * 10.0)),
+                                round(float(np.linalg.norm(traj - reference)), 6), i + 1)
+
+                    def resolves(res):
+                        return (res.status != TrajOptStatus.SOLVER_FAILED
+                                and round(float(res.max_violation) * 1000.0, 3) <= tol * 1000.0)
+
+                    first_pass = (order_key, resolves)
+                try:
+                    gpu = GS.solve_seeds(self, seeds, reference, q_now, scene, kw, anchor, scale, envelope, result,
+                                         goal, first_pass=first_pass)
+                finally:
+                    self._anchor_state = None
+                record.update(backend=gpu["backend"], gpu=gpu["record"])
+                if getattr(anchor, "goal_R", None) is not None:
+                    # AG3S-GEO-GRASP: said, not silently dropped — the batched cuRobo cost has no rotation term
+                    record["gpu_goal_note"] = ("6-D goal: the cuRobo seed cost carries the position term only (rotation "
+                                               "not supported there); every seed is re-checked with the rotation in the "
+                                               "CPU merit")
+                for (kind, detail, _), item in zip(seeds, gpu["results"] or ()):
+                    if item is None:            # first-pass: not checked (a resolving result came first)
+                        records.append({"kind": kind, **({"detail": detail} if detail else {}), "checked": False,
+                                        "max_violation_mm": None, "goal_err_mm": None, "status": None,
+                                        "eligible": False, "reference_deviation": None})
+                        keys.append(None)
+                        results.append(None)
+                        continue
+                    res, ms = item
+                    rec, key = describe(kind, detail, res, ms, True)
+                    records.append(rec)
+                    keys.append(key)
+                    results.append(res)
+            # E2's CPU seeds (always without E3-b; with it only when the GPU path failed — `record["gpu"]["error"]`)
+            for kind, detail, Q0 in (seeds if gpu is None or gpu["results"] is None else ()):
+                t0 = time.perf_counter()
+                self._anchor_state = self._anchor_setup(anchor, reference, q_now) if anchor is not None else None
+                self._track_scale = None if scale is None else np.asarray(scale, np.float64).reshape(-1)
+                try:
+                    if self.fast_eval:
+                        self.linearizer.begin_memo()
+                    try:
+                        res = self._solve(reference, q_now, scene, initial_iterate=Q0, **kw)
+                    finally:
+                        if self.fast_eval:
+                            self.linearizer.end_memo()
+                finally:
+                    self._anchor_state = None
+                rec, key = describe(kind, detail, res, (time.perf_counter() - t0) * 1000.0, True)
+                records.append(rec)
+                keys.append(key)
+                results.append(res)
+        finally:
+            self.solver = main_solver
+        chosen = MS.select_moving_first([r["kind"] for r in records], keys,
+                                        [r["max_violation_mm"] for r in records], tol * 1000.0,
+                                        [r["goal_err_mm"] for r in records],
+                                        [r["reference_deviation"] for r in records])
+        total_ms = (time.perf_counter() - started) * 1000.0
+        out = results[chosen]
+        metrics = dict(out.metrics)
+        if chosen > 0:
+            if anchor is not None and "grasp_anchor" in result.metrics:
+                # the anchor record of the returned trajectory (the standard's record described the standard one)
+                metrics["grasp_anchor"] = self._seed_anchor_record(anchor, reference, q_now, out.trajectory,
+                                                                   result.metrics["grasp_anchor"])
+            notes = list(out.notes) + [
+                f"multi-seed (E2): seed {chosen} ({records[chosen]['kind']}) of {len(seeds)} replaced the standard "
+                f"solve ({record['standard_violation_mm']:.2f} mm -> {records[chosen]['max_violation_mm']:.2f} mm)"]
+        else:
+            notes = list(out.notes)
+        self.frame_index = frame_after_standard
+        metrics["frame_index"] = frame_after_standard
+        self._previous = np.asarray(out.trajectory, np.float64)
+        record.update(candidates=records, chosen=int(chosen), chosen_kind=records[chosen]["kind"],
+                      chosen_violation_mm=records[chosen]["max_violation_mm"],
+                      chosen_goal_err_mm=records[chosen]["goal_err_mm"],
+                      n_resolved=int(sum(1 for r in records if r["eligible"]
+                                         and r["max_violation_mm"] <= tol * 1000.0)),
+                      standard_ms=round(float(result.solve_time_ms), 2), total_ms=round(total_ms, 2))
+        metrics["multi_seed"] = record
+        return dataclasses.replace(out, metrics=metrics, notes=notes,
+                                   solve_time_ms=float(result.solve_time_ms) + total_ms)
+
+    def _seed_geometry(self, result, reference, q_now, scene, anchor) -> dict[str, Any]:
+        """E2 — the deepest violating sphere of the standard result, the direction away from what it violates, its
+        perpendicular frame, and the palm (hold link) to push: `{"away", "e1", "e2", "peak", "palm", "joints",
+        "palm_jac", "record"}`; `away` is `None` when no direction can be read (the detour slots become noise)."""
+        from AG3S.trajopt import multi_seed as MS
+        from AG3S.trajopt.grasp_anchor import LinkPointFK
+
+        H = int(reference.shape[1])
+        pair = result.metrics.get("max_violation_pair") or {}
+        out: dict[str, Any] = {"away": None, "e1": None, "e2": None, "peak": H // 2, "palm": None,
+                               "joints": np.arange(self.layout.nq_opt), "palm_jac": None}
+        rec: dict[str, Any] = {"block": pair.get("block"), "link": pair.get("link"), "step": pair.get("step")}
+        traj = np.asarray(result.trajectory, np.float64)[:, :H]
+        sphere_cols = None
+        away = None
+        try:
+            if pair and pair.get("point_m") is not None:
+                point = np.asarray(pair["point_m"], np.float64)
+                query, step = int(pair["query"]), int(pair["step"])
+                out["peak"] = step
+                states = self.linearizer.sphere_states(traj, q_now)
+                sphere_cols = np.flatnonzero(np.abs(np.asarray(states[1][step, query])).sum(axis=0) > 1e-12)
+                if pair.get("block") == "esdf" and getattr(scene, "esdf", None) is not None:
+                    away = self.linearizer._esdf_directions(point.reshape(1, 3), np.array([query]), scene,
+                                                            int(states[0].shape[1]))[0]
+                elif pair.get("block") == "candidate" and pair.get("slot") is not None:
+                    away = point - np.asarray(scene.candidate_pos, np.float64)[int(pair["slot"])]
+                elif pair.get("block") == "plane" and pair.get("slot") is not None:
+                    away = np.asarray(scene.plane_normal, np.float64)[int(pair["slot"])]
+        except Exception as exc:  # noqa: BLE001 - a seed direction is a heuristic; the noise seeds remain
+            rec["direction_error"] = f"{type(exc).__name__}: {exc}"
+            away = None
+        if away is not None and np.all(np.isfinite(away)) and float(np.linalg.norm(away)) > 1e-9:
+            away = np.asarray(away, np.float64) / float(np.linalg.norm(away))
+        else:
+            away = None
+        # the palm: the hold link whose chain shares the most joints with the violating sphere's (the anchor's first)
+        names = ([anchor.link] if anchor is not None else []) + [l for l in MS.PALM_LINKS
+                                                                  if anchor is None or l != anchor.link]
+        cache = self.__dict__.setdefault("_anchor_fk", {})
+        best = None
+        for name in names:
+            try:
+                fk = cache.get(name)
+                if fk is None:
+                    fk = cache[name] = LinkPointFK(self.linearizer.robot_model, self.layout, H, name)
+                if fk.horizon != H:
+                    continue
+                _, J = fk(reference, q_now)
+            except Exception:  # noqa: BLE001 - a model without this link
+                continue
+            cols = np.flatnonzero(np.abs(J).sum(axis=(0, 1)) > 1e-12)
+            score = 0 if sphere_cols is None else int(np.intersect1d(cols, sphere_cols).size)
+            if best is None or score > best[0]:
+                best = (score, name, cols, J)
+        if best is not None and sphere_cols is not None and best[0] > 0:
+            out.update(palm=best[1], joints=best[2], palm_jac=best[3])
+        if away is not None and out["palm_jac"] is not None:
+            e1, e2 = MS.perpendicular_frame(away)
+            out.update(away=away, e1=e1, e2=e2)
+        rec.update(palm=out["palm"], peak_step=int(out["peak"]), n_joints=int(np.asarray(out["joints"]).size),
+                   away=None if out["away"] is None else [round(float(v), 4) for v in out["away"]],
+                   e1=None if out["e1"] is None else [round(float(v), 4) for v in out["e1"]],
+                   e2=None if out["e2"] is None else [round(float(v), 4) for v in out["e2"]])
+        out["record"] = rec
+        return out
+
+    def _build_seeds(self, specs, index, reference, q0, geometry) -> list[tuple[str, dict, np.ndarray]]:
+        """E2 — `[(kind, detail, first iterate)]` for `specs`, clipped to the position limits."""
+        from AG3S.trajopt import multi_seed as MS
+
+        H = int(reference.shape[1])
+        lo = np.asarray(self.limits.lower, np.float64)[:, None]
+        hi = np.asarray(self.limits.upper, np.float64)[:, None]
+        joints = np.asarray(geometry["joints"], int)
+        profile = MS.bump(H, int(geometry["peak"]))
+        away = geometry["away"]
+        out = []
+        for slot, spec in enumerate(specs):
+            detail: dict[str, Any] = {}
+            kind = spec.kind
+            if kind == "policy":
+                Q = reference.copy()
+            elif kind == "stay":
+                Q = np.tile(np.asarray(q0, np.float64)[:, None], (1, H))
+            elif kind == "detour" and away is not None:
+                if spec.weights is None:
+                    d = MS.random_direction(away, MS.chunk_rng(index, MS.RANDOM_DIRECTION_STREAM + spec.draw))
+                else:
+                    w = spec.weights
+                    d = w[0] * away + w[1] * geometry["e1"] + w[2] * geometry["e2"]
+                d = d / max(float(np.linalg.norm(d)), 1e-12)
+                Q = MS.detour_seed(reference, geometry["palm_jac"], d, spec.magnitude, profile, joints)
+                detail = {"direction": spec.direction, "cm": round(spec.magnitude * 100.0, 1),
+                          "d": [round(float(v), 4) for v in d]}
+            else:
+                # noise, or a detour slot without a direction (the noise of the same slot instead)
+                sigma = spec.sigma if kind == "noise" else MS.NOISE_SIGMAS[slot % len(MS.NOISE_SIGMAS)]
+                if kind != "noise":
+                    detail["no_direction"] = spec.direction
+                kind = "noise"
+                Q = MS.noise_seed(reference, sigma, MS.chunk_rng(index, slot), joints)
+                detail["sigma_rad"] = sigma
+            out.append((kind, detail, np.clip(Q, lo, hi)))
+        return out
+
+    def _goal_probe(self, anchor, H: int) -> Optional[dict[str, Any]]:
+        """E2 — the frozen grasp goal and its rows on this horizon, or `None` (no anchor, no goal, no goal rows)."""
+        if anchor is None or getattr(anchor, "goal", None) is None:
+            return None
+        rows = np.flatnonzero(anchor.goal_mask(H))
+        if not rows.size:
+            return None
+        from AG3S.trajopt.grasp_anchor import LinkPointFK
 
         cache = self.__dict__.setdefault("_anchor_fk", {})
         fk = cache.get(anchor.link)
         if fk is None:
             fk = cache[anchor.link] = LinkPointFK(self.linearizer.robot_model, self.layout, H, anchor.link)
-        q_now = np.asarray(q_now, np.float64).reshape(-1)
-        p_ref = fk(reference, q_now)[0]
-        weights, targets = anchor_targets(anchor, p_ref)
-        if not np.any(weights > 0.0):
-            return None
-        return {"fk": fk, "q_now": q_now, "p_ref": p_ref, "weights": weights, "targets": targets, "horizon": H}
+        return {"rows": rows, "goal": np.asarray(anchor.goal, np.float64).reshape(1, 3), "fk": fk}
+
+    @staticmethod
+    def _goal_error_mm(goal: dict[str, Any], trajectory: np.ndarray, q_now: np.ndarray) -> float:
+        p = goal["fk"](np.asarray(trajectory, np.float64)[:, :goal["fk"].horizon], q_now)[0]
+        return float(np.max(np.linalg.norm(p[goal["rows"]] - goal["goal"], axis=1)) * 1000.0)
+
+    def _seed_anchor_record(self, anchor, reference, q_now, trajectory, standard_record) -> dict[str, Any]:
+        from AG3S.trajopt.grasp_anchor import anchor_record
+
+        st = self._anchor_setup(anchor, reference, q_now)
+        if st is None:
+            return {**standard_record, "multi_seed": "the standard solve's record (no anchor terms on the seeds)"}
+        p_out, R_out = self._anchor_pose(st, trajectory)
+        rec = anchor_record(anchor, st["p_ref"], p_out, st.get("R_ref"), R_out)
+        if anchor.variant != "TOA":
+            rec["fallback_used"] = False
+        rec["multi_seed"] = "seed result (no safety-first re-solve on seeds)"
+        if getattr(anchor, "goal_window", "close") != "close":   # AG3S-PRE-CORE-TO-GGW: the seeds carry this horizon's rows
+            rec.update(applied_horizon=int(st["horizon"]), goal_rows_applied=list(rec.get("goal_rows") or []))
+        return rec
 
     def _solve(
         self,
@@ -299,6 +770,7 @@ class TrajectoryOptimizer:
         command_history: Optional[np.ndarray] = None,
         grasp_anchor: Optional[Any] = None,
         window_track_scale: Optional[np.ndarray] = None,
+        initial_iterate: Optional[np.ndarray] = None,
     ) -> TrajOptResult:
         """Make `reference` safe against `scene`, or report how far short it fell.
 
@@ -326,6 +798,11 @@ class TrajectoryOptimizer:
                 (`cost.w_deflection_rate`); `None` = no boundary term.
             command_history: T43 TA (C). ``(nq_opt, 2)`` the two last executed commands, oldest
                 first (`limits.servo_accel`); `None` = the C rows stay inside the chunk.
+            initial_iterate: AG3S-PRE-CORE-TO E2. ``(nq_opt, H)`` a multi-seed first iterate
+                (`_multi_seed`): it replaces the reference / warm-start blend as the first iterate, the
+                stay start is not tried, and the servo observer is not stepped again (the standard
+                solve of this chunk already did). The cost still tracks `reference`. `None` (default)
+                = as before.
         """
         started = time.perf_counter()
         cfg = self.config
@@ -353,9 +830,15 @@ class TrajectoryOptimizer:
 
         servo_state = None
         if self.observer is not None:
-            fb = (servo_feedback or {}).get("feedback")
-            seq = (servo_feedback or {}).get("seq")
-            servo_state = self.observer.update(q_now[self.layout.q_indices], fb, seq)
+            if initial_iterate is not None and self.__dict__.get("_ms_servo_state") is not None:
+                # E2: a seed of this chunk — the observer was stepped by the standard solve (not idempotent).
+                servo_state = self._ms_servo_state
+            else:
+                fb = (servo_feedback or {}).get("feedback")
+                seq = (servo_feedback or {}).get("seq")
+                servo_state = self.observer.update(q_now[self.layout.q_indices], fb, seq)
+                if self.multi_seed > 0:
+                    self._ms_servo_state = servo_state
 
         if scene is None or scene.is_empty:
             return self._passthrough(
@@ -378,12 +861,13 @@ class TrajectoryOptimizer:
 
         n_path = self.path.n_slack if self.path is not None else 0
         n_slack = self.block.n_rows + n_path
-        iterate = reference.copy()
+        seeded = initial_iterate is not None   # E2: a multi-seed first iterate (False = as before)
+        iterate = reference.copy() if not seeded else np.asarray(initial_iterate, np.float64).copy()
         warm_lookahead = (self.lookahead_from is not None
                           and getattr(cfg.sqp, "warm_start_lookahead", False)
                           and self._previous is not None
                           and self._seed_is_aligned(continuity_full))
-        if (cfg.sqp.warm_start and self._previous is not None
+        if (not seeded and cfg.sqp.warm_start and self._previous is not None
                 and cfg.horizon.execution_length < self.horizon
                 and (self.lookahead_from is None or warm_lookahead)):
             # Seed from the previous chunk shifted by the steps that have executed since. The tail is
@@ -445,7 +929,9 @@ class TrajectoryOptimizer:
         # `best_unaccepted` 는 **초기 iterate 가 부적격일 때만** 나온다. `returned` 는 이 성질을
         # 가정하지 않고 후보 기록에서 읽어 싣는다.
         start_record = None
-        if self.path is not None:
+        if self.path is not None and seeded:
+            start_record = {"source": "multi-seed", "stay_merit": None, "stay_violation_m": None}
+        elif self.path is not None:
             # T43 Q — **a second starting point: stay where the robot is.** With the path rows a
             # reference that runs through an obstacle is a poor place to linearize: the waypoint rows
             # push the commands across the obstacle while the lagging path rows pull the robot back,
@@ -537,11 +1023,25 @@ class TrajectoryOptimizer:
             st = self.__dict__.get("_anchor_state")
             if st is not None:
                 # IFG-TOA: the palm terms linearised at this iterate, on the joint block of P / q.
-                from AG3S.trajopt.grasp_anchor import add_to_problem, anchor_qp_terms
+                from AG3S.trajopt.grasp_anchor import add_goal_box, add_to_problem, anchor_qp_terms
 
                 mark = time.perf_counter()
-                p_it, J_it = st["fk"](iterate, st["q_now"])
-                problem = add_to_problem(problem, *anchor_qp_terms(iterate, p_it, J_it, st["weights"], st["targets"]))
+                if st.get("rot") is not None:
+                    # AG3S-GEO-GRASP: the rotation term on the goal rows, linearised at this iterate
+                    from AG3S.trajopt.grasp_anchor import rotation_qp_terms
+
+                    p_it, J_it, R_it, Jw_it = st["fk"].pose(iterate, st["q_now"])
+                    r = st["rot"]
+                    problem = add_to_problem(problem, *rotation_qp_terms(iterate, R_it, Jw_it, r["rows"], r["Rg"], r["w"]))
+                else:
+                    p_it, J_it = st["fk"](iterate, st["q_now"])
+                if st["cost_on"]:
+                    problem = add_to_problem(problem, *anchor_qp_terms(iterate, p_it, J_it, st["weights"],
+                                                                       st["targets"]))
+                if st["box"] is not None:
+                    # E1-B: the soft per-axis goal box on the goal rows (its own slack, after every other variable).
+                    b = st["box"]
+                    problem = add_goal_box(problem, iterate, p_it, J_it, b["rows"], b["goal"], b["r"], b["weight"])
                 timing["anchor"] = timing.get("anchor", 0.0) + (time.perf_counter() - mark) * 1000.0
 
             mark = time.perf_counter()
@@ -702,7 +1202,10 @@ class TrajectoryOptimizer:
             start_at_rest=start_at_rest, servo_feedback=servo_feedback,
             deflection_history=deflection_history, command_history=command_history,
             **({} if grasp_anchor is None else {"grasp_anchor": grasp_anchor}),
-            **({} if window_track_scale is None else {"joint_track_scale": window_track_scale}))
+            **({} if window_track_scale is None else {"joint_track_scale": window_track_scale}),
+            # E2: the window solve is this chunk's standard solve — its multi-seed runs there (top-level solves only).
+            **({"multi_seed_index": self._ms_child_index}
+               if self.multi_seed > 0 and self._ms_child_index is not None else {}))
         trajectory = np.concatenate([np.asarray(result.trajectory, np.float64),
                                      np.asarray(reference, np.float64)[:, k:]], axis=1)
         result = dataclasses.replace(result, trajectory=trajectory)
@@ -934,7 +1437,8 @@ class TrajectoryOptimizer:
                      "collision_enabled": bool(self.config.collision.enabled),
                      # 후보 선택 키도 같게 둔다 (T24). 풀지 않았으므로 후보는 없고, 나간 것은
                      # reference 그 자체다.
-                     **_no_selection()},
+                     **_no_selection(),
+                     **self._scm_record()},
         )
 
     def _chunk_from(self, trajectory: np.ndarray, template: Optional[np.ndarray]) -> np.ndarray:
@@ -1076,8 +1580,18 @@ class TrajectoryOptimizer:
                 **({"held_rows": held_rows} if held_rows is not None else {}),
                 **({"lookahead": lookahead_record} if lookahead_record is not None else {}),
                 **self._ta_record(trajectory, reference),
+                **self._scm_record(),
             },
         )
+
+    def _scm_record(self) -> dict[str, Any]:
+        """AG3S-PRE-CORE-TO SCM — `{"palm_shell_margin_m": m, "obstacle_margin_m": m}` when
+        `collision.palm_shell_margin` is set, `{}` otherwise (the metrics keys as before)."""
+        col = self.config.collision
+        m = getattr(col, "palm_shell_margin", None)
+        if m is None:
+            return {}
+        return {"palm_shell_margin_m": float(m), "obstacle_margin_m": float(col.obstacle_margin)}
 
     def _ta_record(self, trajectory, reference) -> dict[str, Any]:
         """T43 TA (B, C) — what the returned trajectory does to the new terms. `{}` when off."""

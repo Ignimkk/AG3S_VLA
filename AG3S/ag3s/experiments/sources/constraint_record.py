@@ -514,7 +514,10 @@ class ConstraintRecordWriter:
     #: T44 I0 — chunk npz keys of the target-free exclusion trace (`field.exclusion_trace`).
     EXCLUSION_TRACE_KEYS = ("removed_ijk", "nontarget_kept_ijk", "ambiguous_ijk", "unowned_kept_ijk",
                             # IFG-CL2: only with `attention_surface_hybrid` and the protection on that frame.
-                            "protected_ijk")
+                            "protected_ijk",
+                            # AG3S-PRE-CORE-TO-STEMCAP: only with `esdf.target_stem_cap` on (seeds the cap removed,
+                            # apart from `removed_ijk` = the ball_owned removal).
+                            "stem_cap_ijk")
 
     @classmethod
     def _write_exclusion_trace(cls, field, payload: dict[str, Any]) -> dict[str, Any]:
@@ -540,7 +543,9 @@ class ConstraintRecordWriter:
                     "attention_surface",
                     # IFG-CL2 (present only with `target_extent == "attention_surface_hybrid"`): the protection record
                     # (identity guard · why) and the builder's protection counts.
-                    "attention_surface_hybrid", "surface_protect")
+                    "attention_surface_hybrid", "surface_protect",
+                    # AG3S-PRE-CORE-TO-STEMCAP (present only with `esdf.target_stem_cap` on): mode · parameters · counts.
+                    "stem_cap")
             if "attention_surface" in tf:
                 keep = keep + ("oracle",)
             info["target_exclusion"] = json.loads(json.dumps(

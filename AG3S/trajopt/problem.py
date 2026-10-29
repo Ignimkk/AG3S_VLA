@@ -65,10 +65,12 @@ class QpProblem:
     horizon: int
     row_blocks: dict[str, tuple[int, int]] = dataclasses.field(default_factory=dict)
     n_kinematic_slack: int = 0
+    #: AG3S-PRE-CORE-TO E1-B — goal-box slacks (`grasp_anchor.add_goal_box`), after every other variable. 0 = none.
+    n_goal_slack: int = 0
 
     @property
     def n_var(self) -> int:
-        return self.n_q + self.n_slack + self.n_kinematic_slack
+        return self.n_q + self.n_slack + self.n_kinematic_slack + self.n_goal_slack
 
     def split(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """``z -> (Q[nq, H], s[n_slack])``. Kinematic slacks are diagnostics, read by `kinematic_slack`."""
@@ -79,13 +81,19 @@ class QpProblem:
     def kinematic_slack(self, z: np.ndarray) -> np.ndarray:
         """How far the solution had to break the robot's own velocity/acceleration limits."""
         z = np.asarray(z, np.float64).reshape(-1)
-        return z[self.n_q + self.n_slack :]
+        return z[self.n_q + self.n_slack : self.n_q + self.n_slack + self.n_kinematic_slack]
+
+    def goal_slack(self, z: np.ndarray) -> np.ndarray:
+        """E1-B — the goal-box slacks (m), empty without a goal box."""
+        z = np.asarray(z, np.float64).reshape(-1)
+        start = self.n_q + self.n_slack + self.n_kinematic_slack
+        return z[start : start + self.n_goal_slack]
 
     def flatten(self, Q: np.ndarray, slack: Optional[np.ndarray] = None) -> np.ndarray:
         """``(Q[nq, H], s) -> z``. The inverse of `split`, for warm starts."""
         Q = np.asarray(Q, np.float64)
         s = np.zeros(self.n_slack) if slack is None else np.asarray(slack, np.float64).reshape(-1)
-        return np.concatenate([Q.T.reshape(-1), s, np.zeros(self.n_kinematic_slack)])
+        return np.concatenate([Q.T.reshape(-1), s, np.zeros(self.n_kinematic_slack + self.n_goal_slack)])
 
 
 def difference_operator(nq: int, horizon: int, order: int) -> sp.csr_matrix:

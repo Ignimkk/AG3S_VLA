@@ -151,6 +151,11 @@ _ILP = {"_server_args": ["--finger-cover-solver", "ilp"]}
 _HM = {"collision": {"esdf_host_mirror": True}}
 #: T45 A10 — palm body spheres (`--palm-cover on`) on the solver's own robot model.
 _PC = {"_server_args": ["--palm-cover", "on"]}
+#: AG3S-PRE-CORE-TO SC — palm outer shell spheres (`--palm-shell on`) on the solver's own robot model.
+_PS = {"_server_args": ["--palm-shell", "on"]}
+#: AG3S-PRE-CORE-TO SCM — palm shell + its own obstacle margin 5 mm (`--palm-shell-margin 5`): the solver's robot model
+#: (server flags, also its scene) and its config carry the same value.
+_PSM5 = {"_server_args": ["--palm-shell", "on", "--palm-shell-margin", "5"], "collision": {"palm_shell_margin": 0.005}}
 
 #: T43 TP — compute-time candidates, each on top of V11AB (`A16qB20`). `fe` (`sqp.fast_eval`) is
 #: bit-identical, so it is in every candidate below `TPfe` only to make the offline pass faster.
@@ -187,6 +192,10 @@ VARIANTS.update({
                                  {"sqp": {"warm_start_lookahead": True}}),
     # T45 A10 — the recorded server config with `--palm-cover on` (V-T45 offline TO time / grasp)
     "PC": dict(_PC),
+    # AG3S-PRE-CORE-TO SC — the recorded server config with `--palm-shell on`
+    "PS": dict(_PS),
+    # AG3S-PRE-CORE-TO SCM — `--palm-shell on --palm-shell-margin 5`
+    "PSM5": {k: (dict(v) if isinstance(v, dict) else list(v)) for k, v in _PSM5.items()},
     # T46 — the recorded server config with the fine target-free layer replayed offline
     # (`target_free_replay.rebuild_target_free`): `TF0` = the record's own settings (the control: a
     # variant minus TF0 is the option alone), `F1` = `--nontarget-evidence surface`, `F2` =
@@ -258,6 +267,9 @@ def build_robot(args):
     wc = serve_safe.wrist_cover_options(args)          # T46f A14 (--links gripper_wrist only)
     if wc:
         cover["wrist_cover"] = wc
+    ps = serve_safe.palm_shell_options(args)           # AG3S-PRE-CORE-TO SC (off → no key)
+    if ps:
+        cover["palm_shell"] = ps
     robot = build_constraint_robot_model(
         scene, link_filter=serve_safe.constraint_link_filter(args.links),
         sphere_options=serve_safe.sphere_options(args), **cover)
@@ -571,6 +583,9 @@ class Run:
             kw.update(destination_label=label, destination_margin=self.dest_margin)
         om = float(cfg.collision.obstacle_margin)
         extra = {"obstacle_margin": om, "support_planes": None if plane is None else plane[None]}
+        if getattr(cfg.collision, "palm_shell_margin", None) is not None:
+            # AG3S-PRE-CORE-TO SCM — as `scene_from_constraint_set` (only when the command line gives it)
+            extra["palm_shell_margin"] = float(cfg.collision.palm_shell_margin)
         if held is not None and fit is not None:
             # read only by the HM rows and the look-ahead tail (`_held_rows_class`) — inert otherwise
             extra["held_capture_spheres"] = fit

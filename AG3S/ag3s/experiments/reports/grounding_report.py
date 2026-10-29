@@ -151,6 +151,10 @@ PALM_COVER_HANDS = {
 }
 
 
+#: AG3S-PRE-CORE-TO SC — `palm_shell={"hands": ...}` 이 바깥 껍질 구를 붙일 손바닥 link.
+PALM_SHELL_HANDS = PALM_COVER_HANDS
+
+
 #: T46f A14 — 손목 (비권한) link: arm_5 · arm_6 · FT sensor (URDF 이름). `wrist_cover={"hands": ...}` 이 고칠 link.
 WRIST_LINKS_BY_SIDE = {
     "left": ("link_left_arm_5", "link_left_arm_6", "FT_sensor_L"),
@@ -228,7 +232,7 @@ def _apply_wrist_cover(urdf, gap: list, body: list) -> tuple:
 
 def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options=None,
                                  gripper_cover=None, finger_cover=None, palm_cover=None,
-                                 wrist_cover=None):
+                                 wrist_cover=None, palm_shell=None):
     """제약에 쓰는 모델. 자기 필터 모델과 **일부러 다르다**.
 
     제약 행은 최적화기가 실제로 움직일 수 있는 구에만 의미가 있다. RB-Y1 의 결정 변수는 양팔
@@ -282,7 +286,19 @@ def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options
     의 gap-filling capsule 사슬을 대신하고, URDF link `FT_sensor_<S>` (지금까지 구 없음) 에 덮개 구를 단다. 구는 권한 손
     (손바닥 + 손가락) 의 MJCF collision 껍질 안으로 들어가지 않는다. link_filter 에 손목 link 이 하나도 없으면
     ValueError. 결과는 `model.wrist_cover_report`.
+
+    `palm_shell` (AG3S-PRE-CORE-TO SC, 기본 `None` = 꺼짐): `None`/`False`/`{}` 면 위 모델 그대로 (이 인자가 없던 때와 글자
+    그대로 같다). `True` 또는 `dict` (`hands` = `PALM_SHELL_HANDS` 의 키, `overflow` = m (기본 `gripper_cover.
+    PALM_SHELL_OVERFLOW` 5 mm), `face_cos` (기본 `PALM_SHELL_FACE_COS` 0.5)) 이면 손바닥 link 에 **바깥 껍질 구**
+    (`gripper_cover.palm_shell_capsules`) 를 **모델 맨 뒤에 붙인다**: 손바닥 collision 겉면 중 파지 면 (열린 손가락 사이
+    통로에서 손끝 쪽을 보는 바닥면) 을 뺀 곳을 palm cover 와 같은 계산 (깊이 + overflow) 으로 담고, 통로 아래 파지 공간에는
+    한 점도 들어가지 않는다. 손바닥 축선 구 · 다른 link 의 구는 순서 · 값 그대로라 꺼진 모델이 켠 모델의 정확한 앞부분이다.
+    link 이름은 `ee_<side>` 그대로 (접촉 권한 · target-free 조회 그대로). `palm_cover` (같은 손바닥을 통째로 바꾼다) ·
+    `gripper_cover` (덮개가 껍질을 다시 덮는다) 와는 같이 쓰지 않는다 (ValueError). 결과는 `model.palm_shell_report`.
     """
+    if palm_shell and (palm_cover or gripper_cover):
+        raise ValueError("palm_shell 은 palm_cover · gripper_cover 와 같이 쓰지 않습니다 — palm_cover 는 같은 손바닥 구를 "
+                         "통째로 바꾸고, gripper_cover 는 껍질 위에 덮개를 또 만듭니다")
     from AG3S.ag3s.experiments.sources.mujoco_source import HEAD_JOINTS, gap_filling_capsules
     from AG3S.ag3s.robot_models import RBY1_URDF, UrdfSphereChain, parse_urdf
 
@@ -402,6 +418,40 @@ def build_constraint_robot_model(scene, link_filter=ARM_LINKS, *, sphere_options
             model.finger_cover_report = finger_report
         if palm_report is not None:
             model.palm_cover_report = palm_report
+    if palm_shell:
+        import math
+
+        from AG3S.ag3s.experiments.sources.gripper_cover import (
+            PALM_SHELL_FACE_COS, PALM_SHELL_OVERFLOW, palm_shell_capsules)
+
+        s_opts = dict(palm_shell) if isinstance(palm_shell, dict) else {}
+        s_hands = str(s_opts.pop("hands", "both"))
+        if s_hands not in PALM_SHELL_HANDS:
+            raise ValueError(f"palm_shell hands 는 {sorted(PALM_SHELL_HANDS)} 중 하나: {s_hands!r}")
+        s_overflow = float(s_opts.pop("overflow", PALM_SHELL_OVERFLOW))
+        if not (math.isfinite(s_overflow) and s_overflow > 0.0):
+            raise ValueError(f"palm_shell overflow 는 0 보다 커야 합니다 (m): {s_overflow}")
+        s_cos = float(s_opts.pop("face_cos", PALM_SHELL_FACE_COS))
+        if not (math.isfinite(s_cos) and -1.0 < s_cos < 1.0):
+            raise ValueError(f"palm_shell face_cos 는 (−1, 1) 안이어야 합니다: {s_cos}")
+        if s_opts:
+            raise ValueError(f"palm_shell 의 모르는 키: {sorted(s_opts)}")
+        s_links = [n for n in PALM_SHELL_HANDS[s_hands] if n in set(model.sphere_link_names)]
+        if not s_links:
+            raise ValueError(f"palm_shell 을 켰지만 이 모델에 손바닥 link ({PALM_SHELL_HANDS[s_hands]}) 가 없습니다")
+        shell, per_link = palm_shell_capsules(scene.model, model, s_links, overflow=s_overflow,
+                                              face_cos=s_cos)
+        n_before = model.n_spheres
+        # 맨 뒤에 붙인다 — 앞의 구 (손바닥 축선 구 포함) 순서 · 값은 꺼진 모델 그대로.
+        model = UrdfSphereChain(urdf, extra_capsules=list(gap) + list(shell),
+                                fixed_joint_values=head, link_filter=link_filter,
+                                **dict(sphere_options or {}))
+        model.palm_shell_report = {"options": {"hands": s_hands, "overflow": s_overflow, "face_cos": s_cos},
+                                   "n_spheres_before": n_before, "n_spheres_after": model.n_spheres,
+                                   "links": per_link}
+        for attr, rep in (("finger_cover_report", finger_report), ("wrist_cover_report", wrist_report)):
+            if rep is not None:
+                setattr(model, attr, rep)
     if not gripper_cover:
         return model
     from AG3S.ag3s.experiments.sources.gripper_cover import outer_cover_capsules
