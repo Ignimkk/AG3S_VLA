@@ -89,7 +89,7 @@
 | G0 | SL6-A 후 Panda V11AB-pb7 · 역변환 C, LIBERO task 0–9 init 0 10 episode → merge 검증 (3) 의 run 과 npz array bit 동일 | 독점 |
 | G1 | B5 noun attention 추출 (873 요청) | 공유 |
 | G2 | Panda 최종 구성 1 episode 기동 확인 (SafeLIBERO Level I dev t0e0 — smoke 장면이 아닌 것). gpu seed robot 이 Panda 로 지어졌는지, 요청 시간 | 독점 |
-| G3 | §6 smoke 22 episode (2 판 × 11) | 독점 |
+| G3 | §6 smoke 22 episode (2 판 × 11). **동시 1 job** (`run_parallel_gpu.sh --max-parallel 1`): 최종 구성은 TrajOpt 시간 마감 · GPU 초기값을 써서 GPU 를 나눠 쓰면 결과가 바뀔 수 있다 (V11AB 의 2 job bit 동일 근거를 옮기지 않는다) | 독점 |
 
 ## 6. G1 · A4 포함 / 제거 smoke (결과 전 고정, 사용자 판정 2026-10-29)
 
