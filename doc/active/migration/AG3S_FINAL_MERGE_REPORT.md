@@ -103,8 +103,12 @@ merge 로 고친 test: `tests/benchmark/test_panda_sl4.py` (served build call �
   - `tests/`: `tests/trajopt` 전체 로그.
   - `smoke/`: jobs 파일, batch 로그, 비교 결과 `cmp_*.json`, `summary.json`.
 
-## 다음 (최종 구성을 Panda 에서 실험하기 전에 사용자 판정 필요)
+## 다음 — Panda 이식 판정 (사용자 2026-10-29)
 
-1. HSR6 probe 는 RB-Y1 checkpoint 전용이다. Panda VLA 에서 재학습할지, 끌지. 끄면 HSR ④ 도 꺼져서 기하 grasp 보정 (G1) 과 쥐기 목표 항 (A4) 이 처음으로 작동하게 된다 (RB-Y1 최종 구성에서는 0 요청).
-2. attention head `L10H7` 을 Panda VLA (`pi05_libero`) 에서 다시 고를지.
-3. A6 손바닥 위치 (`left_ee` site, hold link 원점에서 100 mm 앞) · 손바닥 껍질 구를 Panda 손 (`panda_hand` · finger) 에 어떻게 대응시킬지.
+| 항목 | 판정 | 이식할 때 지킬 것 |
+|---|---|---|
+| HSR6 6 단계 probe (RB-Y1 checkpoint 전용) | **Panda 용으로 재학습** | LIBERO dev 데이터로 학습. 통과 기준은 결과 전에 task 문서에 고정. 그래서 HSR ④ 가 유지되어 G1 · A4 는 RB-Y1 처럼 꺼진 상태로 남는다 (RB-Y1 측정 구성과 같은 구성) |
+| attention head `L10H7` | **Panda VLA (`pi05_libero`) 에서 다시 고름** | dev episode 만 쓰고 test episode 로 고르지 않는다. 선택 기준은 결과 전에 고정 |
+| A6 손바닥 위치 · 손바닥 껍질 구 | **Panda 기하로 다시 정의** | 기준점 · 허용 대상 구를 Panda 손 (`panda_hand` · grip site) 에 맞추어 결과 전에 task 문서에 고정. 허용 거리 · 창 · 단계 · 금지 접촉 정의는 RB-Y1 값을 유지 |
+
+- 이식 전까지 `--robot panda` 는 최종 구성 flag 를 거절한다. 이식한 flag 만 `UNPORTED_FINAL_CONFIG_DESTS` 에서 빼고, 그때마다 V11AB 계열 bit 동일성을 다시 확인한다.
