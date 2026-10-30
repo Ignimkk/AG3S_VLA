@@ -20,6 +20,7 @@
 | 2026-10-30 (~01:30 KST) | **target 신호를 action attention (`action:last:L8H2`, pb7 과 같은 기본 경로) 으로 되돌린다.** 명사 attention L8H6 은 §6 장면에서 같은 bowl 둘을 구분하지 못했다 (50 mm 안 3/11, 못 찾음 2 vs pb7 5/11 · 0) |
 | 2026-10-30 (~07:00 KST, §8 결과 · task 1 충돌 진단 뒤) | §8 2판 미채택 (안전 성공 1 = pb7, 충돌 6 > 5). 진단 (`outputs/2026-10-30_task1충돌진단_Panda최종구성2판/`): t1e1 · t1e4 충돌은 TrajOpt 수정이 conversion C 에서 ±1 포화 action 이 된 직후였고, 2판 충돌 6 개 중 4 개는 팔 링크 (link6 · 7) 접촉이었다. **2판에는 pb7 누적판의 pb2–pb5 가 빠져 있었다** (lead 의 정의 실수: pb7 고유 flag 만 넣음) → **3판 = pb7 의 flag 9 개 전체를 넣는다** |
 | 2026-10-30 (~07:00 KST) | **연속성 항과 꺾임 변화율 항을 전 구간에서 끈다** (`--w-continuity 0 --w-deflection-rate 0`, after-grasp flag 2 개는 뺀다). t1e1 의 20 mm 수정은 HELD 가 되어 두 항이 켜진 첫 call 에서 나왔다. 3판에 함께 넣고 한 번의 smoke 로 본다 (두 변경의 효과는 분리하지 않는다) |
+| 2026-10-30 (~10:10 KST, §9 smoke 진행 중) | §9 다음에 **TrajOpt 를 E0 버전으로 한 smoke** 를 한다 (§10). "E0" = AG3S-PRE-CORE-TO 의 현재 TO 기준선 (E1–E3 이전). 정의 (사용자): 3판에서 **TO 설정 전체를 E0 때로** — GPU 여러 초기값 (A2) 과 최소 개입 gate (pb2) 를 빼고, **연속성 항 · 꺾임 변화율 항은 쥔 뒤에만** 쓴다 (`--continuity-after-grasp --deflection-rate-after-grasp`, 무게는 기본 0.5 · 20). 판정은 3판 대비 |
 
 ## 1. Panda 최종 구성 (이식 대상) 의 정의
 
@@ -192,6 +193,23 @@
 - 아니면 실패 원인 층을 다시 적고 사용자에게 묻는다.
 - **함께 보고 (판정에 쓰지 않음):** 공식 성공 · HOLD call, 처음 닫는 시점 target 정답 수, "쥔 bowl 미인식" episode 수, **포화 action step 수**, **충돌마다 장애물에 닿은 몸체** (기록 재생), 2판 · pb7 대비 전이표, 실패 원인 층.
 - 결과 보기: `outputs/2026-10-30_Panda최종구성3판_pb7전체_연속성꺾임끔_SafeLIBERO-LI-dev11/`.
+
+## 10. SL6-F — 3판 + TrajOpt E0 smoke (결과 전 고정, 사용자 판정 2026-10-30 ~10:10 KST)
+
+**E0판의 정의:** profile key `AG3S-final-panda-v3-e0to`.
+- = 3판 (§9) 에서 TO 설정만 E0 때로 바꾼다.
+  - 뺀다: `--to-multi-seed 16 --to-gpu-seeds curobo --to-gpu-seeds-check first-pass` (A2 GPU 여러 초기값), `--minimal-intervention-mm 10` (pb2), `--w-continuity 0 --w-deflection-rate 0`.
+  - 더한다: `--continuity-after-grasp --deflection-rate-after-grasp` (두 항은 HELD 부터만; 무게는 V11AB 기본 연속성 0.5 · 꺾임 변화율 20).
+- 그대로: 로봇 충돌 모델 (팔 link1–7 + 손 + 손바닥 껍질 구), 쥠 판단 · 접촉 규칙 (pb1 · pb4–pb7, HSR6), 거리장 · target 제외, action attention, 변환 C. 시간만 바꾸는 `--to-fast-eval` · `--blas-threads 1` 도 그대로 (명령 bit 동일).
+
+**구현 · CPU 확인 (lead):** §9 E1–E4 와 같은 꼴 (등록, 기존 판 argv 불변 test, CPU 기동에서 multi-seed 0 · gpu seeds off · minimal intervention 없음 · after-grasp 두 항 켜짐 확인, launcher dry-run).
+
+**smoke (lead, GPU 독점, 동시 1 job):** §6 · §8 · §9 와 같은 11 episode. E0판만 새로 돌린다.
+- **판정 (결과 전 고정):** 아래 둘을 모두 만족하면 E0 TO 설정을 Panda 구성에 채택한다 (같으면 더 단순한 TO 를 고른다). 아니면 3판의 TO 설정을 유지한다.
+  - E0판 safe success ≥ 3판.
+  - E0판 충돌 episode ≤ 3판.
+- **함께 보고 (판정에 쓰지 않음):** 공식 성공 · HOLD call, 포화 action step 수, 충돌마다 장애물에 닿은 몸체, TrajOpt 가 고치지 않은 call 수, 3판 대비 전이표, 실패 원인 층.
+- 결과 보기: `outputs/2026-10-30_Panda최종구성3판_TO-E0_SafeLIBERO-LI-dev11/`.
 
 ## 7. 산출물
 

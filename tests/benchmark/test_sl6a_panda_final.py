@@ -520,3 +520,43 @@ def test_v3_builds_on_cpu(gpu_ok, monkeypatch):
     assert info["ag3s"]["n_constraint_spheres"] == 133 + 37
     assert safe.to_config.horizon.planned == 10 and safe.to_config.horizon.execution_length == 5
     json.dumps(info, default=str)
+
+
+def test_v3_e0to_flags_are_v3_with_e0_trajopt(gpu_ok):
+    from AG3S.adapters.panda import profile as pf
+
+    e0 = list(pf.AG3S_VERSIONS["AG3S-final-panda-v3-e0to"])
+    v3 = list(pf.AG3S_VERSIONS["AG3S-final-panda-v3"])
+    assert pf.AG3S_VERSIONS["AG3S-final-panda-v3"] == pf.FINAL_CONFIG_V3_FLAGS            # 3판 unchanged
+    dropped = ("--to-multi-seed", "--to-gpu-seeds", "--to-gpu-seeds-check", "--minimal-intervention-mm",
+               "--w-continuity", "--w-deflection-rate")
+    names = lambda flags: [t for t in flags if t.startswith("--")]
+    assert names(e0) == [t for t in names(v3) if t not in dropped] + ["--continuity-after-grasp",
+                                                                       "--deflection-rate-after-grasp"]
+    args = _final_args("AG3S-final-panda-v3-e0to")
+    assert args.to_multi_seed in (0, None) and args.to_gpu_seeds in ("off", None)
+    assert args.minimal_intervention_mm is None
+    assert args.w_continuity is None and float(args.w_deflection_rate) == 20.0            # V11AB defaults
+    assert args.continuity_after_grasp and args.deflection_rate_after_grasp
+    assert args.links == "arms" and args.held_hand_exempt and args.latch_phase and args.closing_hand_exempt
+    assert pf.match_ag3s_version(args) == "AG3S-final-panda-v3-e0to"
+
+
+def test_v3_e0to_builds_on_cpu(gpu_ok, monkeypatch):
+    from AG3S.adapters.panda import server as ps
+
+    monkeypatch.setenv("AG3S_PANDA_CONVERSION", "C")
+    args = _final_args("AG3S-final-panda-v3-e0to")
+    ps.check_unported_flags(args, None)
+    served, info = ps.build_safe_server(_Stub(), args, gpu_warm_up=False)
+    safe = served._policy
+    assert info["final_config"]["version"] == "AG3S-final-panda-v3-e0to"
+    sqp, cost = safe.to_config.sqp, safe.to_config.cost
+    assert not (getattr(sqp, "multi_seed", 0) or 0) and getattr(sqp, "gpu_seeds", "off") == "off"
+    assert getattr(sqp, "minimal_intervention", None) is None
+    assert cost.w_continuity > 0 and cost.w_deflection_rate == 20.0
+    assert cost.continuity_after_grasp and cost.deflection_rate_after_grasp
+    # robot model and grasp rules as 3판
+    assert info["ag3s"]["n_constraint_spheres"] == 133 + 37
+    assert safe.latch_phase and safe.held_hand_exempt and safe.closing_hand_exempt and safe.ag3s.reach_at_capture
+    json.dumps(info, default=str)

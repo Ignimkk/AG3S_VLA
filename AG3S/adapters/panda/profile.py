@@ -294,13 +294,33 @@ _v2_kept = tuple(t for t in FINAL_CONFIG_V2_FLAGS if t not in _after + GRASP_REC
 #: "Panda 최종 구성 3판" = 2판 − the two after-grasp flags + the nine V11AB-pb7 flags + both terms off.
 FINAL_CONFIG_V3_FLAGS: tuple[str, ...] = _v2_kept + AG3S_VERSIONS["V11AB-pb7"] + CONTINUITY_DEFLECTION_OFF_FLAGS
 del _after, _v2_kept
+#: SL6-F (user ruling 2026-10-30 ~10:10 KST, task SL6 §0 / §10): 3판 with the TrajOpt settings of AG3S-PRE-CORE-TO E0
+#: (the TO baseline before E1-E3): no GPU multi-seed (A2), no minimal intervention gate (pb2), continuity and
+#: deflection-rate terms from HELD only at the V11AB weights (0.5 / 20). Robot model, grasp rules, field unchanged.
+_E0_DROPPED = {"--to-multi-seed": 1, "--to-gpu-seeds": 1, "--to-gpu-seeds-check": 1, "--minimal-intervention-mm": 1,
+               "--w-continuity": 1, "--w-deflection-rate": 1}            # flag -> number of value tokens
+
+
+def _drop_flags(flags, dropped):
+    out, i = [], 0
+    while i < len(flags):
+        if flags[i] in dropped:
+            i += 1 + dropped[flags[i]]
+        else:
+            out.append(flags[i]); i += 1
+    return tuple(out)
+
+
+FINAL_CONFIG_V3_E0TO_FLAGS: tuple[str, ...] = _drop_flags(FINAL_CONFIG_V3_FLAGS, _E0_DROPPED) + (
+    "--continuity-after-grasp", "--deflection-rate-after-grasp")
 #: Versions that are the final configuration (no `V11AB_PRE_MERGE_DEFAULTS`, the Panda HSR6 probe required).
 FINAL_CONFIG_VERSIONS: tuple[str, ...] = ("AG3S-final-panda", "AG3S-final-panda-g1a4", "AG3S-final-panda-v2",
-                                          "AG3S-final-panda-v3")
+                                          "AG3S-final-panda-v3", "AG3S-final-panda-v3-e0to")
 AG3S_VERSIONS["AG3S-final-panda"] = FINAL_CONFIG_FLAGS                       # G1 · A4 removed ("제거판")
 AG3S_VERSIONS["AG3S-final-panda-g1a4"] = FINAL_CONFIG_FLAGS + G1A4_FLAGS     # G1 · A4 kept ("작동판")
 AG3S_VERSIONS["AG3S-final-panda-v2"] = FINAL_CONFIG_V2_FLAGS                 # "2판" (SL6-C)
 AG3S_VERSIONS["AG3S-final-panda-v3"] = FINAL_CONFIG_V3_FLAGS                 # "3판" (SL6-E)
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to"] = FINAL_CONFIG_V3_E0TO_FLAGS       # "3판 + TO E0" (SL6-F)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 PANDA_HSR6_PROBE = ("/mnt/dev/AG3S_VLA-storage/results/benchmark/20261029T192223_5ea56af44722_sl6b-hsr6-panda-labels/"
