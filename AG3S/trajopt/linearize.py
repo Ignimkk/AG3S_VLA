@@ -118,7 +118,7 @@ class _BufferedCall:
 #: `held_rows_record`, `sqp._finish`, the held radii on `query_radii`) see what they saw before.
 _CLEARANCE_SIDE_ATTRS = ("query_radii", "_last_obstacle_class", "_last_held_rows", "_last_lookahead",
                          "last_target_free_tiers", "_last_grasp_contact", "_last_neighbour_contact",
-                         "_last_neighbour_palm_contact")
+                         "_last_neighbour_palm_contact", "_last_placement_contact")
 _MISSING = object()
 
 
@@ -308,6 +308,15 @@ class SceneSnapshot:
     #: basket) gets the margin `-depth` instead of its palm-shell / obstacle margin. Scene 119 (task §1): the 5 mm
     #: palm-shell margin against an orange 22 mm from the apple moved the palm 6–10 mm off the VLA grasp.
     neighbour_palm_contact: Optional[dict] = None
+    #: **SL6-H — the held object may touch the surfaces beneath it (HSR6 ⑤ `placement_contact`).** `None` (default) =
+    #: as before. A dict `{"cos_min": c, "footprint_tol_m": m | None}` set by `SafePolicy._hsr6_placement_contact` on a
+    #: call with HSR6 = placement ∧ (latch HELD ∨ (CLOSING ∧ closed ∧ blocked)): a **held** query row (`n_spheres` on)
+    #: whose nearest field surface is **beneath** it -- the unit field gradient at the sphere centre has `ĝ_z ≥ c` and the
+    #: nearest surface point `p − d·ĝ` lies within the held object's xy footprint at that step (union of its spheres' xy
+    #: discs, + `footprint_tol_m`, default one voxel) -- gets the margin −1 m (the row cannot bind, as the pb4 held
+    #: exemption). Robot rows (hand · fingers · arm) never change; a held row whose nearest surface is beside or above it
+    #: keeps its margin. `CollisionLinearizer._placement_contact_margin`.
+    placement_contact: Optional[dict] = None
 
     @property
     def has_esdf(self) -> bool:
@@ -1049,6 +1058,10 @@ class CollisionLinearizer:
         gc = getattr(scene, "grasp_contact", None)
         if gc:
             margin = self._grasp_contact_margin(gc, margin, d, flat, scene, d_object, centres.shape[:2], n_query)
+        pc = getattr(scene, "placement_contact", None)
+        if pc is not None:
+            # SL6-H (HSR6 ⑤) — held rows only: a surface beneath the held object does not block it.
+            margin = self._placement_contact_margin(pc, margin, d, centres, radii, scene, n_query)
         nb = getattr(scene, "neighbour_contact", None)
         if nb is not None and float(nb.get("depth", 0.0)) > 0.0:
             # IFG-NBC — the grasping fingers may overlap a neighbour obstacle near the target by up to `depth`.
@@ -1129,6 +1142,59 @@ class CollisionLinearizer:
             rec["zone_rows"] = int(zone.sum())
         self._last_grasp_contact = rec
         return margin
+    def _placement_contact_margin(self, pc: dict, margin: np.ndarray, d: np.ndarray, centres: np.ndarray,
+                                  radii: np.ndarray, scene: SceneSnapshot, n_query: int) -> np.ndarray:
+        """SL6-H (HSR6 ⑤) — `margin` with the **held** rows whose nearest surface is beneath the held object set to −1 m.
+
+        | row | condition | margin |
+        |---|---|---|
+        | robot (`< n_spheres`): hand, fingers, arm | — | unchanged |
+        | held (`≥ n_spheres`) | unit gradient `ĝ` at the centre `p` has `ĝ_z ≥ cos_min` (nearest surface in the downward cone; centre inside a body: the way out is up) **and** the nearest surface point `s = p − d·ĝ` is inside the held object's xy footprint at this step (`min_j |s_xy − c_j,xy| − r_j ≤ tol`) | −1 m (cannot bind) |
+        | held | otherwise (surface beside / above, outside the footprint, flat field `|∇d| ≈ 0`) | unchanged |
+
+        The test is geometric only: what lies beneath may be the table, the destination (plate) or any other object under
+        the footprint. A row has one nearest surface: while the beneath surface is nearest, a farther obstacle beside the
+        same sphere is not seen by that row (it is again once it is the nearest). Record `self._last_placement_contact`
+        (a new dict per call; read by `sqp._finish` into `to.metrics.placement_contact`)."""
+        n = int(self.n_spheres)
+        horizon = centres.shape[0]
+        n_held = int(n_query) - n
+        rec: dict[str, Any] = {"n_held_rows": max(0, n_held), "steps": int(horizon), "rows_released": 0,
+                               "held_rows_released": 0}
+        if n_held <= 0 or scene.esdf is None:
+            rec["reason"] = "no held rows"
+            self._last_placement_contact = rec
+            return margin
+        cos_min = float(pc.get("cos_min", np.cos(np.deg2rad(45.0))))
+        tol = pc.get("footprint_tol_m")
+        tol = float(scene.esdf.grid.voxel_size) if tol is None else float(tol)
+        held_c = np.asarray(centres[:, n:, :], np.float64)                      # (H, Nh, 3)
+        held_r = np.asarray(radii[n:], np.float64).reshape(-1)                  # (Nh,)
+        pts = held_c.reshape(-1, 3)
+        dh = np.asarray(d[:, n:], np.float64).reshape(-1)
+        g = np.asarray(scene.esdf.gradient(pts), np.float64).reshape(-1, 3)
+        norm = np.linalg.norm(g, axis=1)
+        ok = norm > _EPS
+        u = np.where(ok[:, None], g / np.maximum(norm, _EPS)[:, None], 0.0)
+        up = ok & (u[:, 2] >= cos_min)
+        surf = (pts - dh[:, None] * u).reshape(horizon, n_held, 3)
+        # xy footprint of the held object at each step: the union of its spheres' xy discs
+        gap = (np.linalg.norm(surf[:, :, None, :2] - held_c[:, None, :, :2], axis=3)
+               - held_r[None, None, :]).min(axis=2)                              # (H, Nh)
+        sel = up.reshape(horizon, n_held) & (gap <= tol)
+        if sel.any():
+            margin = margin.copy()
+            block = margin[:, n:]
+            before = d[:, n:] - held_r[None, :] - block
+            rec["min_clearance_released_m"] = float(before[sel].min())
+            margin[:, n:] = np.where(sel, -1.0, block)
+        rec["rows_released"] = int(sel.sum())
+        rec["held_rows_released"] = int(sel.any(axis=0).sum())
+        rec["cos_min"] = round(cos_min, 6)
+        rec["footprint_tol_m"] = tol
+        self._last_placement_contact = rec
+        return margin
+
     def _neighbour_palm_contact(self, npc: dict, d: np.ndarray, flat: np.ndarray, centres: np.ndarray,
                                 radii: np.ndarray, margin: np.ndarray, scene: SceneSnapshot,
                                 d_object: Optional[np.ndarray], is_dest_flat, obstacle_margin: float,

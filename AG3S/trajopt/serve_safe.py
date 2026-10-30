@@ -1974,6 +1974,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--hsr6-objective", action="store_true",
                     help="AG3S-CORE-EVAL-HSR6 ④ — 손가락 이웃 접촉 허용 (--neighbour-contact-mm) 과 닫는 행 목표 (A4 "
                          "--grasp-anchor · G1 --geo-grasp) 를 지금 규칙 ∧ HSR6 = grasp 일 때만 준다. 기본 off")
+    ap.add_argument("--hsr6-placement-contact", action="store_true",
+                    help="SL6-H (HSR6 ⑤) — HSR6 = placement ∧ (latch HELD ∨ (CLOSING ∧ closed ∧ blocked)) 이고 쥔 물체가 "
+                         "attach 되어 있으면, 쥔 물체의 질의 구 행만 그 아래 표면 (지지면 · 발자국 아래 물체, 예: plate) 에 "
+                         "막히지 않는다 (거리장 기울기가 위로 45° 안 ∧ 최근접 표면점이 쥔 물체 xy 발자국 안). 손 · 손가락 · 팔 행과 "
+                         "옆 · 위 표면은 그대로. 기본 off")
     ap.add_argument("--hsr6-objective-scope", choices=("all", "nbc"), default="all",
                     help="SL6-A A9 — --hsr6-objective 가 거두는 범위. all (기본, AG3S-CORE-EVAL-HSR6 그대로) = 손가락 이웃 접촉 "
                          "허용 · A4 · G1 닫는 행 목표 모두 HSR6 = grasp 일 때만. nbc = 손가락 이웃 접촉 허용에만 적용하고 A4 · "
@@ -2759,13 +2764,14 @@ def ifg_s2serve_record_meta(args) -> dict:
 
 
 def hsr6_flags_from_args(args):
-    """AG3S-CORE-EVAL-HSR6 — `Hsr6Flags` of the four `--hsr6-*` flags, or None when all are off."""
+    """AG3S-CORE-EVAL-HSR6 — `Hsr6Flags` of the `--hsr6-*` use flags (four + SL6-H ⑤), or None when all are off."""
     from AG3S.trajopt.hsr6 import Hsr6Flags
 
     flags = Hsr6Flags(attach_assist=bool(getattr(args, "hsr6_attach_assist", False)),
                       held_gate=bool(getattr(args, "hsr6_held_gate", False)),
                       target_exempt=bool(getattr(args, "hsr6_target_exempt", False)),
-                      objective=bool(getattr(args, "hsr6_objective", False)))
+                      objective=bool(getattr(args, "hsr6_objective", False)),
+                      placement_contact=bool(getattr(args, "hsr6_placement_contact", False)))
     return flags if flags.on else None
 
 

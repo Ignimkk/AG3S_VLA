@@ -292,7 +292,22 @@ class PandaSafeServer:
 
         response["panda/grasp"] = _jsonable(getattr(self._policy, "_last_grasp_record", None) or {})
         response["panda/latch_signal"] = _jsonable(getattr(self._policy, "_last_latch_signal", None) or {})
+        hsr6 = hsr6_call_record(self._policy)
+        if hsr6 is not None:   # SL6-H H2 — key only with an HSR6 use flag on (V11AB / pb responses unchanged)
+            response["panda/hsr6"] = hsr6
         return response
+
+
+def hsr6_call_record(safe) -> Optional[dict]:
+    """SL6-H H2 — this call's HSR6 record for the client's ``*_calls.jsonl`` (logging only, read after the solve):
+    ``phase`` (raw argmax), ``p`` (probabilities), ``probe``, ``flags``, ``changed`` per use flag and ``detail`` --
+    with ⑤ on, ``detail.placement_contact`` = ``on`` / ``attached`` / ``applied`` / ``rows_released`` /
+    ``held_rows_released`` (``SafePolicy._hsr6_placement_contact``). ``None`` when HSR6 is off (no key)."""
+    if getattr(safe, "hsr6", None) is None:
+        return None
+    from AG3S.trajopt.safe_policy import _jsonable
+
+    return _jsonable(getattr(safe, "_last_hsr6", None) or {})
 
 
 def _replace_horizon_limits(to_config):
@@ -326,11 +341,13 @@ UNPORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'task_gate', 'task_gate_shadow', 'task_probe', 'tsdf_frustum_decay', 'tsdf_time_decay', 'wrist_cover_overflow',
 )
 #: SL6-A A10 — the final-configuration options this server now applies (A1-A9, A12); listed for the record and the test.
+#: SL6-H: + ``hsr6_placement_contact`` (HSR6 ⑤, an HSR6 use flag: refused without ``--hsr6-probe`` like the others).
 PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'attention_source', 'attention_split_partition', 'attention_split_radius_mm', 'attention_split_ratio_source',
     'continuity_after_grasp', 'deflection_rate_after_grasp', 'geo_continuity_off', 'geo_goal_mode', 'geo_grasp',
     'geo_track_scale', 'grasp_anchor', 'grasp_anchor_path_weight', 'hsr6_attach_assist', 'hsr6_held_gate',
-    'hsr6_objective', 'hsr6_probe', 'hsr6_target_exempt', 'kept_geometry_follow', 'neighbour_contact_mm',
+    'hsr6_objective', 'hsr6_placement_contact', 'hsr6_probe', 'hsr6_target_exempt', 'kept_geometry_follow',
+    'neighbour_contact_mm',
     'neighbour_palm_contact_mm', 'nontarget_evidence', 'owned_max_dist_voxels', 'palm_shell', 'palm_shell_margin',
     'placed_no_seed_certify', 'roi_carve', 'roi_carve_device', 'roi_carve_footprint', 'roi_carve_footprint_pad_px',
     'roi_carve_footprint_robot', 'split_supersedes_anchor', 'target_exclusion', 'target_permission_strict',

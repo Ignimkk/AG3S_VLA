@@ -1505,6 +1505,11 @@ class TrajectoryOptimizer:
         palm_record = (dict(getattr(self.linearizer, "_last_neighbour_palm_contact", None) or {})
                        if getattr(scene, "neighbour_palm_contact", None) is not None
                        and getattr(scene, "esdf", None) is not None else None)
+        # SL6-H (HSR6 ⑤) — the held rows the returned trajectory's final check released (same read point). `None` unless
+        # the scene carries the placement allowance this chunk: the metrics keys as before.
+        placement_record = (dict(getattr(self.linearizer, "_last_placement_contact", None) or {})
+                            if getattr(scene, "placement_contact", None) is not None
+                            and getattr(scene, "esdf", None) is not None else None)
         # T43 HM — the held rows' classes on what is returned (read before the path check
         # re-evaluates the field). `None` unless `held_obstacle_margin` is on and something is held.
         held_rows = (self.linearizer.held_rows_record()
@@ -1607,6 +1612,7 @@ class TrajectoryOptimizer:
                 **({"path_check": path_record} if path_record is not None else {}),
                 **({"held_rows": held_rows} if held_rows is not None else {}),
                 **({"neighbour_palm_contact": palm_record} if palm_record is not None else {}),
+                **({"placement_contact": placement_record} if placement_record is not None else {}),
                 **({"lookahead": lookahead_record} if lookahead_record is not None else {}),
                 **self._ta_record(trajectory, reference),
                 **self._scm_record(),

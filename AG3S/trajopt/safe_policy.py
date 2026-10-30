@@ -182,6 +182,8 @@ class SafePolicy:
     _last_hsr6: dict = {}
     #: AG3S-CORE-EVAL-A6 — same reason (test doubles built without `__init__` read "no palm allowance record").
     _last_neighbour_palm_contact: dict = {}
+    #: SL6-H (HSR6 ⑤) — same reason: no placement-contact record.
+    _last_placement_contact: dict = {}
     #: SL6-A — robot injections, class defaults = the RB-Y1 behaviour (test doubles built without `__init__` too):
     #: HSR6 ④ scope (`"all"`: NBC, A4 and G1 withheld unless HSR6 = grasp), the arm joints by hand (None = the
     #: `{hand}_arm_{j}` rule), the NBC finger links by hand (None = grasp link minus trailing digits), the A6 site
@@ -466,6 +468,7 @@ class SafePolicy:
         self._last_wrist_track: dict[str, Any] = {}   # IFG-TOW
         self._last_neighbour_contact: dict[str, Any] = {}   # IFG-NBC
         self._last_neighbour_palm_contact: dict[str, Any] = {}   # AG3S-CORE-EVAL-A6
+        self._last_placement_contact: dict[str, Any] = {}        # SL6-H (HSR6 ⑤)
         #: IFG-REC — retreat-and-retry recovery state (`_recovery_observe` / `_recovery_chunk`).
         self._recovery: Optional[dict[str, Any]] = None
         self._recovery_count = 0
@@ -611,6 +614,7 @@ class SafePolicy:
         self._last_wrist_track = {}  # IFG-TOW
         self._last_neighbour_contact = {}  # IFG-NBC
         self._last_neighbour_palm_contact = {}  # AG3S-CORE-EVAL-A6
+        self._last_placement_contact = {}       # SL6-H (HSR6 ⑤)
         self._recovery = None        # IFG-REC
         self._recovery_count = 0
         self._recovery_hist = []
@@ -725,6 +729,8 @@ class SafePolicy:
         timing["trajopt"] = (time.monotonic() - t) * 1000.0 - timing.get("ag3s", 0.0)
         if self._last_neighbour_palm_contact:
             self._neighbour_palm_contact_result()   # AG3S-CORE-EVAL-A6 (off: the record is {} and this never runs)
+        if self._last_placement_contact:
+            self._hsr6_placement_contact_result()   # SL6-H (HSR6 ⑤; off: the record is {} and this never runs)
         refined = np.asarray(refined, np.float64)
         self._last_continuity.update(
             {k: v for k, v in (getattr(self.refiner, "last_continuity", None) or {}).items()})
@@ -1220,6 +1226,8 @@ class SafePolicy:
             snapshot = dataclasses.replace(snapshot, grasp_contact=gc)
         if snapshot is not None and self.hsr6 is not None and self.hsr6.target_exempt:
             snapshot = self._hsr6_target_gate(snapshot, constraint_set)   # AG3S-CORE-EVAL-HSR6 ③ (off: never called)
+        if snapshot is not None and self.hsr6 is not None and self.hsr6.placement_contact:
+            snapshot = self._hsr6_placement_contact(snapshot)   # SL6-H (HSR6 ⑤; off: never called)
         # 판정이 위반 행을 **최적화기가 본 것과 같은 씬으로** 다시 분류한다 (T23, `_verdict`).
         self._last_snapshot = snapshot
         # 촬영 시점 중 **가장 최신** 자세가 TO 가 계획을 시작하는 곳이다. AG3S 도 같은 규칙을
@@ -1299,6 +1307,7 @@ class SafePolicy:
         from AG3S.trajopt.hsr6 import phase_of
 
         self._pending["hsr6"] = record
+        self._last_placement_contact = {}    # SL6-H (HSR6 ⑤) — this request's record is set in `_scene_fn`
         p = record.get("p") if isinstance(record, dict) else None
         self._last_hsr6 = {
             "phase": phase_of(record),
@@ -1379,6 +1388,58 @@ class SafePolicy:
         if self._last_hsr6:
             self._last_hsr6["detail"].setdefault("held_gate", {}).update(
                 allowed=allowed, latch_held=held, blocked=checks.get("blocked"))
+
+    def _hsr6_placement_contact(self, snapshot):
+        """⑤ (SL6-H, task SL6 §11 H1) — on this request's final latch state: HSR6 = placement ∧ (latch HELD ∨ (CLOSING ∧
+        evidence `closed` ∧ `blocked`)) (`hsr6.placement_contact_ok`) **and** an attached held object in the snapshot →
+        the snapshot with `placement_contact` (the optimizer releases the held rows whose nearest surface is beneath the
+        held object, `CollisionLinearizer._placement_contact_margin`). Otherwise the snapshot as built. Every call is
+        recorded (`hsr6.detail.placement_contact`): `on` (the condition), `attached`, `applied` (= on ∧ attached), and
+        after the solve the released rows (`_hsr6_placement_contact_result`). On without an attached object (CLOSING,
+        nothing attached yet): nothing changes and the record says so."""
+        from AG3S.trajopt.hsr6 import placement_contact_ok, placement_contact_spec
+
+        phase = self._hsr6_phase()
+        latch = getattr(self._latch.phase, "value", str(self._latch.phase))
+        ev = getattr(self._latch.last_grasp, "evidence", None) or {}
+        checks = ev.get("checks") or {}
+        on = placement_contact_ok(phase, latch=latch, checks=checks)
+        pts = getattr(snapshot, "attached_points", None)
+        attached = pts is not None and len(pts) > 0
+        applied = bool(on and attached and getattr(snapshot, "esdf", None) is not None)
+        rec: dict[str, Any] = {"on": bool(on), "phase": phase, "latch": latch, "closed": checks.get("closed"),
+                               "blocked": checks.get("blocked"), "attached": bool(attached), "applied": applied,
+                               "n_held_rows": int(len(pts)) if attached else 0,
+                               "rows_released": 0, "held_rows_released": 0}
+        if on and not attached:
+            rec["reason"] = "no attached held object: no held rows to release"
+        elif on and not applied:
+            rec["reason"] = "no field"
+        self._last_placement_contact = rec
+        if self._last_hsr6:
+            self._last_hsr6["detail"]["placement_contact"] = rec
+        if not applied:
+            return snapshot
+        return dataclasses.replace(snapshot, placement_contact=placement_contact_spec())
+
+    def _hsr6_placement_contact_result(self) -> None:
+        """⑤ — after the solve: the held rows the returned trajectory's final check released
+        (`to.metrics.placement_contact`, `sqp._finish`) into the record; `changed` when at least one row was released."""
+        rec = self._last_placement_contact
+        if not rec.get("applied"):
+            self._hsr6_changed("placement_contact", False)
+            return
+        result = getattr(self.refiner, "last_result", None)
+        rows = ((getattr(result, "metrics", None) or {}).get("placement_contact")
+                if result is not None else None)
+        rows = dict(rows) if isinstance(rows, dict) else None
+        rec["final_check"] = rows
+        if rows is not None:
+            rec["rows_released"] = int(rows.get("rows_released", 0) or 0)
+            rec["held_rows_released"] = int(rows.get("held_rows_released", 0) or 0)
+            if rows.get("min_clearance_released_m") is not None:
+                rec["min_clearance_released_m"] = float(rows["min_clearance_released_m"])
+        self._hsr6_changed("placement_contact", rec["rows_released"] > 0)
 
     def _hsr6_held_gate_result(self) -> None:
         """② — whether this frame's held spheres lost the support lift because of the gate (`AG3S.held_record`)."""

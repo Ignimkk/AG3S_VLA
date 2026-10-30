@@ -16,7 +16,8 @@ response: ``actions`` (EE deltas, already converted by the server in V11AB mode)
 ``safe == False`` executes **HOLD** rows (zero arm delta, last gripper command), as the V11AB client holds.
 
 Per episode it writes ``episodes/<stem>_calls.jsonl`` (one row per policy call: mode, safe, verdict reasons, AG3S /
-TrajOpt status, conversion record, max action change, timings) and ``episodes/<stem>_calls.npz`` (per call:
+TrajOpt status, conversion record, max action change, timings; ``hsr6`` only when the server sends ``panda/hsr6``,
+SL6-H) and ``episodes/<stem>_calls.npz`` (per call:
 policy chunk, executed rows, refined/reference joint chunks when present).
 """
 from __future__ import annotations
@@ -335,6 +336,10 @@ class SafeClient(object):
                "timing_ms": base._jsonable(resp.get("timing_ms")), "policy_seed": resp.get("policy_seed"),
                "feedback_sent": self.feedback_log[-1] if (self.feedback_log and "ag3s/exec_feedback" in req) else None,
                "feedback_server": base._jsonable(resp.get("panda/feedback"))}
+        if "panda/hsr6" in resp:
+            # SL6-H H2 — the server's HSR6 record of this call (phase, p, per-flag changes, placement contact);
+            # logging only. Absent (V11AB / pb servers, HSR6 off): the row keeps its keys.
+            row["hsr6"] = base._jsonable(resp.get("panda/hsr6"))
         if "panda/actions_policy" in resp:
             pol = np.asarray(resp["panda/actions_policy"], np.float64)
             row["max_abs_action_change_executed"] = float(np.max(np.abs(executed.astype(np.float64) - pol[:n]))) if n else 0.0

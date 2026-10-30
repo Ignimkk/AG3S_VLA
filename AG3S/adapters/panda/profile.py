@@ -313,14 +313,22 @@ def _drop_flags(flags, dropped):
 
 FINAL_CONFIG_V3_E0TO_FLAGS: tuple[str, ...] = _drop_flags(FINAL_CONFIG_V3_FLAGS, _E0_DROPPED) + (
     "--continuity-after-grasp", "--deflection-rate-after-grasp")
+#: SL6-H (user ruling 2026-10-30 ~12:00 KST, task SL6 §0 / §11): E0판 + HSR6 ⑤ placement contact -- on a call with
+#: HSR6 = placement ∧ (latch HELD ∨ (CLOSING ∧ closed ∧ blocked)) the attached held object's query rows are not blocked
+#: by the surfaces beneath them (support, the object under the held object's footprint, e.g. the plate); hand / finger
+#: / arm rows and surfaces beside or above stay constrained. Diagnosis: 5 of E0판's 10 failures were TrajOpt turning
+#: the VLA's descent over the plate upwards.
+FINAL_CONFIG_V3_E0TO_PC_FLAGS: tuple[str, ...] = FINAL_CONFIG_V3_E0TO_FLAGS + ("--hsr6-placement-contact",)
 #: Versions that are the final configuration (no `V11AB_PRE_MERGE_DEFAULTS`, the Panda HSR6 probe required).
 FINAL_CONFIG_VERSIONS: tuple[str, ...] = ("AG3S-final-panda", "AG3S-final-panda-g1a4", "AG3S-final-panda-v2",
-                                          "AG3S-final-panda-v3", "AG3S-final-panda-v3-e0to")
+                                          "AG3S-final-panda-v3", "AG3S-final-panda-v3-e0to",
+                                          "AG3S-final-panda-v3-e0to-pc")
 AG3S_VERSIONS["AG3S-final-panda"] = FINAL_CONFIG_FLAGS                       # G1 · A4 removed ("제거판")
 AG3S_VERSIONS["AG3S-final-panda-g1a4"] = FINAL_CONFIG_FLAGS + G1A4_FLAGS     # G1 · A4 kept ("작동판")
 AG3S_VERSIONS["AG3S-final-panda-v2"] = FINAL_CONFIG_V2_FLAGS                 # "2판" (SL6-C)
 AG3S_VERSIONS["AG3S-final-panda-v3"] = FINAL_CONFIG_V3_FLAGS                 # "3판" (SL6-E)
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to"] = FINAL_CONFIG_V3_E0TO_FLAGS       # "3판 + TO E0" (SL6-F)
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS  # "E0판 + placement 접촉 허용" (SL6-H)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 PANDA_HSR6_PROBE = ("/mnt/dev/AG3S_VLA-storage/results/benchmark/20261029T192223_5ea56af44722_sl6b-hsr6-panda-labels/"

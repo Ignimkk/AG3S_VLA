@@ -15,9 +15,10 @@ that request (no debounce, `handoff/AG3S-CORE-EVAL-HSR6.task.md` §1).
 | ② | `held_gate` | the held-object allowance is withdrawn only when phase ∈ {approach, retreat} (or no label); otherwise (grasp, lift, transport, placement) it holds while `blocked` ∨ latch HELD — `held_allowance` (AG3S-CORE-EVAL-A6 §3, session B T66) | `AG3S.set_held_allowance` → `_frame_held_attached` (held-body cover lift off the table / crate floor) |
 | ③ | `target_exempt` | target exemption (target-free field view, per-link target margin, target tests) only outside retreat: in retreat the not-held target is an obstacle — `withdraw_target_exemption` | `SafePolicy._scene_fn` → `strip_target_permission` on the `SceneSnapshot` |
 | ④ | `objective` | IFG-NBC neighbour allowance, the A4 close-row goal and the G1 slot only when the existing rule ∧ phase = grasp — `objective_allowed` | `_neighbour_contact_gate`, `_scene_fn` (A4), `_geo_request` (G1) |
+| ⑤ | `placement_contact` | (SL6-H, Panda) phase = placement ∧ (latch HELD ∨ (latch CLOSING ∧ `closed` ∧ `blocked`)) — `placement_contact_ok`: the held object's own query rows are not blocked by a surface **beneath** them (`placement_contact_spec`) | `SafePolicy._hsr6_placement_contact` → `SceneSnapshot.placement_contact` → `CollisionLinearizer._placement_contact_margin` |
 
 A request without an HSR6 label (probe failed / not loaded) is ``phase None``: ① no assist, ② no allowance (the
-stricter side), ③ the current rule, ④ no objective term.
+stricter side), ③ the current rule, ④ no objective term, ⑤ no placement contact.
 
 **② fix (AG3S-CORE-EVAL-A6 §3, user ruling 2026-10-29 on session B T66).** The first rule (allowance only in lift ·
 transport · placement) withdrew the lift on the 1–3 requests right after the grasp, while HSR6 still read grasp (the
@@ -52,7 +53,12 @@ __all__ = [
     "is_ordered_subset",
     "load_hsr6_probe",
     "objective_allowed",
+    "PLACEMENT",
+    "PLACEMENT_BENEATH_COS",
+    "PLACEMENT_CONTACT_CHECKS",
     "phase_of",
+    "placement_contact_ok",
+    "placement_contact_spec",
     "strip_target_permission",
     "withdraw_target_exemption",
 ]
@@ -68,6 +74,13 @@ EXEMPT_PHASES = frozenset({"approach", "grasp"})
 RETREAT = "retreat"
 #: ④ — the only phase in which the close-row goal (A4 / G1) and the neighbour allowance stay on.
 OBJECTIVE_PHASE = "grasp"
+#: ⑤ (SL6-H) — the only phase in which the held object may touch the surfaces beneath it.
+PLACEMENT = "placement"
+#: ⑤ — the CLOSING evidence that counts as "held" for ⑤ (task SL6 §11 H1: `closed` ∧ `blocked`, as ① uses them).
+PLACEMENT_CONTACT_CHECKS = ("closed", "blocked")
+#: ⑤ — "beneath": the field's unit gradient at the held sphere's centre points up within 45° (``ĝ_z ≥ cos 45°``),
+#: i.e. the nearest surface lies in the downward 45° cone (or, centre inside a body, the way out is up).
+PLACEMENT_BENEATH_COS = float(np.cos(np.deg2rad(45.0)))
 PROBE_NAME = "hsr6_t64_kv_L4"
 
 
@@ -130,10 +143,13 @@ class Hsr6Flags:
     held_gate: bool = False
     target_exempt: bool = False
     objective: bool = False
+    #: ⑤ SL6-H (`--hsr6-placement-contact`) — last field, so the four flags above keep their order in `names()`.
+    placement_contact: bool = False
 
     @property
     def on(self) -> bool:
-        return bool(self.attach_assist or self.held_gate or self.target_exempt or self.objective)
+        return bool(self.attach_assist or self.held_gate or self.target_exempt or self.objective
+                    or self.placement_contact)
 
     def names(self) -> list[str]:
         return [f.name for f in dataclasses.fields(self) if getattr(self, f.name)]
@@ -182,6 +198,34 @@ def withdraw_target_exemption(phase: Optional[str]) -> bool:
 def objective_allowed(phase: Optional[str]) -> bool:
     """④ : the close-row goal and the neighbour allowance only in grasp (no label: off)."""
     return phase == OBJECTIVE_PHASE
+
+
+def placement_contact_ok(phase: Optional[str], *, latch: Optional[str], checks: Mapping[str, Any]) -> bool:
+    """⑤ (SL6-H, task SL6 §11 H1, fixed before results): phase = placement ∧ (latch HELD ∨ (latch CLOSING ∧ the
+    CLOSING evidence `closed` ∧ `blocked`)). `latch` is the `GraspPhase` value (``"held"`` · ``"closing"`` · …).
+
+    | phase | latch | evidence | ⑤ |
+    |---|---|---|---|
+    | placement | held | any | on |
+    | placement | closing | closed ∧ blocked | on |
+    | placement | closing | otherwise | off |
+    | placement | searching · latched · placed | any | off |
+    | anything else / None | any | any | off |
+    """
+    if phase != PLACEMENT:
+        return False
+    if latch == "held":
+        return True
+    return bool(latch == "closing" and all(checks.get(k) is True for k in PLACEMENT_CONTACT_CHECKS))
+
+
+def placement_contact_spec(voxel_m: Optional[float] = None) -> dict:
+    """⑤ — the `SceneSnapshot.placement_contact` the optimizer reads (`CollisionLinearizer._placement_contact_margin`).
+
+    ``cos_min``: the "beneath" cone (`PLACEMENT_BENEATH_COS`). ``footprint_tol_m``: how far outside the held object's xy
+    footprint (the union of its spheres' xy discs at the same step) the nearest surface point may lie — ``None`` = one
+    voxel of the field the row reads."""
+    return {"cos_min": PLACEMENT_BENEATH_COS, "footprint_tol_m": None if voxel_m is None else float(voxel_m)}
 
 
 def strip_target_permission(snapshot) -> tuple[Any, dict]:

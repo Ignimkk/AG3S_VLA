@@ -21,6 +21,8 @@
 | 2026-10-30 (~07:00 KST, §8 결과 · task 1 충돌 진단 뒤) | §8 2판 미채택 (안전 성공 1 = pb7, 충돌 6 > 5). 진단 (`outputs/2026-10-30_task1충돌진단_Panda최종구성2판/`): t1e1 · t1e4 충돌은 TrajOpt 수정이 conversion C 에서 ±1 포화 action 이 된 직후였고, 2판 충돌 6 개 중 4 개는 팔 링크 (link6 · 7) 접촉이었다. **2판에는 pb7 누적판의 pb2–pb5 가 빠져 있었다** (lead 의 정의 실수: pb7 고유 flag 만 넣음) → **3판 = pb7 의 flag 9 개 전체를 넣는다** |
 | 2026-10-30 (~07:00 KST) | **연속성 항과 꺾임 변화율 항을 전 구간에서 끈다** (`--w-continuity 0 --w-deflection-rate 0`, after-grasp flag 2 개는 뺀다). t1e1 의 20 mm 수정은 HELD 가 되어 두 항이 켜진 첫 call 에서 나왔다. 3판에 함께 넣고 한 번의 smoke 로 본다 (두 변경의 효과는 분리하지 않는다) |
 | 2026-10-30 (~10:10 KST, §9 smoke 진행 중) | §9 다음에 **TrajOpt 를 E0 버전으로 한 smoke** 를 한다 (§10). "E0" = AG3S-PRE-CORE-TO 의 현재 TO 기준선 (E1–E3 이전). 정의 (사용자): 3판에서 **TO 설정 전체를 E0 때로** — GPU 여러 초기값 (A2) 과 최소 개입 gate (pb2) 를 빼고, **연속성 항 · 꺾임 변화율 항은 쥔 뒤에만** 쓴다 (`--continuity-after-grasp --deflection-rate-after-grasp`, 무게는 기본 0.5 · 20). 판정은 3판 대비 |
+| 2026-10-30 (~12:00 KST, §10 결과 · 성공률 진단 뒤) | §10 판정대로 **E0 TrajOpt 채택** (E0판 안전 1 · 충돌 5 vs 3판 1 · 7). 성공률 진단 (`outputs/2026-10-30_작업성공률저하_원인진단_Panda/`): 실패 10 개 중 5 개는 놓기 단계에서 TrajOpt 가 하강을 막음, 4 개 (task 3) 는 target 을 다른 bowl · plate 로 고름. 사용자 판정: **(1) placement 단계 접촉 허용 = HSR6 placement ∧ 쥐고 있음 일 때 쥔 물체 행만 지지면 · 바로 아래 물체 (plate) 와의 접촉 허용, 손 · 팔 · 주변 장애물은 그대로** (§11). **(2) task 3 target 오류는 원인 분리 (attention 대 grounding) 를 먼저** 한다 (lead, CPU) |
+| 2026-10-30 (~15:40 KST, task 3 원인 분리 뒤) | 원인 분리 (`outputs/2026-10-30_task3_target오류_원인분리/`): 첫 call (frame 20–30) 에는 진짜 bowl 이 손목 화면 밖이라 L8H2 가 plate · 다른 bowl 을 보고, frame 35–45 에 attention 90–99 % 가 진짜 bowl 로 옮겨 가도 target 이 바뀌지 않는다 (LATCHED 잠금 · grounding 유지). 사용자 판정: **target 교체를 넣는다** (§12). 사용자 질문 "입력 이미지 몇 장" → 2 장 (head · 손목, 세 번째 자리는 mask False) |
 
 ## 1. Panda 최종 구성 (이식 대상) 의 정의
 
@@ -210,6 +212,48 @@
   - E0판 충돌 episode ≤ 3판.
 - **함께 보고 (판정에 쓰지 않음):** 공식 성공 · HOLD call, 포화 action step 수, 충돌마다 장애물에 닿은 몸체, TrajOpt 가 고치지 않은 call 수, 3판 대비 전이표, 실패 원인 층.
 - 결과 보기: `outputs/2026-10-30_Panda최종구성3판_TO-E0_SafeLIBERO-LI-dev11/`.
+
+## 11. SL6-H — placement 단계 쥔 물체 접촉 허용 (기본 꺼짐 flag, 사용자 판정 2026-10-30 ~12:00 KST)
+
+**근거:** 진단 §0 마지막 행. E0판 t1e1 · t1e4 · t2e0 · t2e2 · t2e4 에서 bowl 이 plate 위 0.08–0.44 m (VLA 0.10–0.15 m) 에 머물고, 하강 명령이 위로 바뀐 row 14–66. pb7 t2e4: 쥔 bowl 모델 바닥 여유 34 → −10 mm 에서 VLA z −1.7 → 실행 +5. Panda 에는 목적지 (plate) 처리 기록이 없다.
+
+**H1 — flag (implementer):** `--hsr6-placement-contact` (기본 꺼짐; 꺼지면 모든 판 bit 동일).
+- 켜지는 call: HSR6 argmax = `placement` **∧** (latch HELD **∨** (latch CLOSING ∧ evidence `closed` ∧ `blocked`)).
+- 허용 대상: **쥔 물체 (attached held object) 의 질의 구 행만.** 그 행이 **아래에 있는 표면** — 지지면 (탁자) 과 쥔 물체의 xy 발자국 아래에 있는 물체 표면 (plate) — 과 닿는 것을 막지 않는다.
+- 그대로 막는 것: 손 · 손가락 · 팔 행 전부, 쥔 물체 행이라도 옆이나 위에 있는 표면 (발자국 밖의 장애물).
+- 쥔 물체가 attach 되지 않은 call (CLOSING 미인식 등) 에서는 바꿀 행이 없다 — 아무것도 바꾸지 않고 그 사실을 기록한다.
+- "아래 표면" 의 정확한 판정 (거리장 label, 최근접점이 구 중심 아래이고 발자국 반경 안, 지지면 band 등) 은 기존 구조 (held-body cover · support band · `hsr6_held_gate`) 를 읽고 implementer 가 정해 impl.md 에 쓴다. 판정이 장애물을 함께 풀 수 있는 경우가 있으면 그 경우를 적는다.
+
+**H2 — 기록 (implementer):** call 마다 `hsr6` phase (argmax · 확률) 와 placement 접촉 허용의 on/off · 풀린 행 수를 Panda call 기록 (`_calls.jsonl`) 에 남긴다 (지금은 HSR6 phase 가 call 기록에 없다).
+
+**H3 — profile (implementer):** `AG3S-final-panda-v3-e0to-pc` = E0판 (`AG3S-final-panda-v3-e0to`) + `--hsr6-placement-contact`. 기존 판 argv 불변.
+
+**H4 — test (implementer, CPU):**
+- 합성 장면: 쥔 구가 판 모양 물체 위로 내려갈 때 그 표면 때문에 생기던 제약 / 위반이 flag on + placement + HELD 에서 사라지고, flag off · phase ≠ placement · latch 미충족에서는 그대로.
+- 같은 쥔 구 옆에 세운 장애물은 flag on 에서도 제약된다.
+- 손 · 손가락 행은 flag on 에서도 바뀌지 않는다.
+- flag off 회귀: 기존 판 (V11AB-pb7 · 2판 · 3판 · E0판) argv · CPU 기동 결과 불변, tests/benchmark 전체 통과.
+- Panda 서버가 flag 를 probe 와 함께 받아들이고 (probe 없이는 거절), CPU 기동에서 켜진 것을 확인.
+
+**smoke (lead, GPU 독점, 결과 전 고정):** 같은 11 episode, `AG3S-final-panda-v3-e0to-pc` 만 새로 돌린다.
+- **판정:** pc판 safe success ≥ E0판 (1) **이고** 충돌 ≤ E0판 (5) 이면 placement 접촉 허용을 Panda 구성에 채택한다. 아니면 원인 층을 다시 적고 사용자에게 묻는다.
+- **함께 보고:** 공식 성공, 도달 단계 (진단과 같은 정의), plate 위 높이, 하강이 뒤집힌 row, placement 허용이 켜진 call · 풀린 행, 충돌마다 닿은 몸체, E0판 대비 전이표.
+- 결과 보기: `outputs/2026-10-30_Panda_placement접촉허용_SafeLIBERO-LI-dev11/`.
+
+## 12. SL6-I — 쥐기 전 attention 이 옮겨 가면 target 교체 (기본 꺼짐 flag, 사용자 판정 2026-10-30 ~15:40 KST)
+
+**I1 — flag (implementer, §11 구현이 끝난 뒤):** `--attention-target-switch` (기본 꺼짐; 꺼지면 모든 판 bit 동일). 부속 값은 결과 전에 고정한다: 연속 call 수 N = 2, 몫 기준 0.5.
+- 대상 단계: latch 가 SEARCHING · LATCHED 일 때만. CLOSING · HELD · 놓은 뒤에는 바꾸지 않는다.
+- 조건: 지금 target 이 아닌 후보 하나가 **연속 N call 동안** 그 call 의 target 후보 attention 질량 (grounding 이 후보를 고를 때 쓰는 정규화 질량) 의 **0.5 이상** 을 가져간다.
+- 동작: target 을 그 후보로 바꾼다. LATCHED 였으면 latch 를 그 후보로 다시 잡는다 (`--latched-identity-hold` 의 잠금을 이 경우에만 푼다). 이전 target 은 다른 물체와 같이 장애물로 돌아간다.
+- 기록: call 마다 후보별 질량 몫 (상위 3 개), 연속 count, 교체 여부 · 이전 / 새 target.
+- grounding 이 SEARCHING 중에도 target 을 유지하는 규칙 (t3e2) 이 무엇인지 implementer 가 찾아 impl.md 에 쓰고, 이 flag 가 그 경우에도 작동하게 한다.
+
+**I2 — profile · test:** 새 판 = 그때 채택된 판 (§11 판정 결과: 채택이면 `…-pc`, 아니면 E0판) + `--attention-target-switch`. 합성 test: 교체 (N 연속 · 0.5 이상) / 비교체 (1 call 만, 0.5 미만, CLOSING 이후), 잠금 해제, flag off 회귀 (tests/benchmark 전체).
+
+**smoke (lead, GPU 독점, 결과 전 고정):** 같은 11 episode, 새 판만 새로 돌린다.
+- **판정:** 새 판 safe success ≥ 기준판 **이고** 충돌 ≤ 기준판 이면 target 교체를 Panda 구성에 채택한다. 기준판 = 위 I2 의 바탕 판. 아니면 원인 층을 다시 적고 사용자에게 묻는다.
+- **함께 보고:** task 3 의 처음 닫는 시점 target 정답 수 (기준판 0 / 4), 교체가 일어난 call · episode, task 1 · 2 에서 교체로 나빠진 episode, 도달 단계, 충돌마다 닿은 몸체.
 
 ## 7. 산출물
 

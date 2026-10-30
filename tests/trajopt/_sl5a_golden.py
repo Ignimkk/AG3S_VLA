@@ -403,7 +403,9 @@ PB_DEFAULT_OFF = {"reach_at_capture": False, "minimal_intervention_mm": None, "l
                   # V11AB-pb6 / pb7 (SL5i)
                   "grasp_reach_sticky": False, "grasp_drop_from_open": False, "closing_hand_exempt": False,
                   # SL6-A A9 (2026-10-29): --hsr6-objective-scope, default `all` = AG3S-CORE-EVAL-HSR6 as before
-                  "hsr6_objective_scope": "all"}
+                  "hsr6_objective_scope": "all",
+                  # SL6-H (2026-10-30): --hsr6-placement-contact (HSR6 ⑤), default off
+                  "hsr6_placement_contact": False}
 
 
 def _drop_sqp_default_off(cfg: dict) -> dict:
