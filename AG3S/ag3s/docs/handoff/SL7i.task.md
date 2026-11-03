@@ -1,6 +1,6 @@
 # SL7i — call마다 표면 상태 기록 + 표면 추출 · 기권 시 공 판 LIBERO 9 재실행
 
-> writer: lead (benchmark checkout), 2026-11-04 07:3x KST. **결과를 보기 전에 고정.** 판정 주체: lead 자율 판정 D9 (`doc/active/experiments/SL7_AUTONOMOUS_DECISIONS_20261104_KO.md`).
+> writer: lead (benchmark checkout), 2026-11-04 07:2x KST. **결과를 보기 전에 고정.** 판정 주체: lead 자율 판정 D9 (`doc/active/experiments/SL7_AUTONOMOUS_DECISIONS_20261104_KO.md`).
 > 앞 단계: SL7g — `-pc-surface-fb` 5/9. 서버 log에는 episode마다 첫 거리장의 제외 방식만 한 줄 남는다. 그래서 call마다 표면이 쓰였는지 공으로 물러났는지는 셀 수 없었다.
 
 ## 변경 (기록 전용, 행동 불변)
