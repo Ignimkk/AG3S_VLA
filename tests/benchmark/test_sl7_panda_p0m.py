@@ -29,6 +29,7 @@ from tests.benchmark.test_sl6a_panda_final import _Stub, _final_args, gpu_ok  # 
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 P0M, NOHULL, NBC = "AG3S-final-panda-p0m", "AG3S-final-panda-p0m-nohull", "AG3S-final-panda-p0m-nbc"
+TERMSOFF, PANDAFIX = "AG3S-final-panda-p0m-termsoff", "AG3S-final-panda-p0m-pandafix"   # SL7b
 OLD_FINAL = ("AG3S-final-panda", "AG3S-final-panda-g1a4", "AG3S-final-panda-v2", "AG3S-final-panda-v3",
              "AG3S-final-panda-v3-e0to", "AG3S-final-panda-v3-e0to-pc")
 
@@ -112,7 +113,7 @@ def test_nohull_and_nbc_differ_from_p0m_exactly(gpu_ok):
     assert not a1.surface_hull_fill and a1.surface_contact_allowance_mm is None
 
 
-@pytest.mark.parametrize("version", [P0M, NOHULL, NBC])
+@pytest.mark.parametrize("version", [P0M, NOHULL, NBC, TERMSOFF, PANDAFIX])
 def test_p0m_versions_parse_and_have_no_forbidden_option(version, gpu_ok):
     args = _args(version)
     # 0.1 / 0.5: HSR6, hsr5, G1, A4, multi-seed, nontarget evidence, split / crease / sticky / corridor / pass-through off
@@ -235,7 +236,7 @@ def test_ported_and_still_refused_dests():
     assert not set(ps.UNPORTED_FINAL_CONFIG_DESTS) & set(ps.PORTED_FINAL_CONFIG_DESTS)
 
 
-@pytest.mark.parametrize("version", [P0M, NOHULL, NBC])
+@pytest.mark.parametrize("version", [P0M, NOHULL, NBC, TERMSOFF, PANDAFIX])
 def test_p0m_passes_check_unported_flags_without_a_probe(version, gpu_ok):
     from AG3S.adapters.panda import server as ps
 
@@ -269,7 +270,7 @@ def test_hsr6_still_needs_a_probe_and_hidden_probe_is_refused(gpu_ok):
         ps.check_unported_flags(args, None)
 
 
-@pytest.mark.parametrize("version", [P0M, NOHULL, NBC])
+@pytest.mark.parametrize("version", [P0M, NOHULL, NBC, TERMSOFF, PANDAFIX])
 def test_p0m_builds_on_cpu(version, gpu_ok, monkeypatch):
     from AG3S.adapters.panda import server as ps
     from AG3S.trajopt.grasp_latch import GraspPhase
@@ -307,7 +308,10 @@ def test_p0m_builds_on_cpu(version, gpu_ok, monkeypatch):
     assert {k.value: v for k, v in LATCH_SUBTASK.items()} == {"searching": "pick", "latched": "pick", "closing": "pick",
                                                               "held": "place", "placed": "home"}
     # the A12 terms stay (the Panda value, task 0.6), after-grasp only
-    assert cost.continuity_after_grasp and cost.deflection_rate_after_grasp
+    if version == TERMSOFF:                       # SL7b (c): both terms off in every phase
+        assert cost.w_continuity == 0.0 and not cost.continuity_after_grasp and not cost.deflection_rate_after_grasp
+    else:
+        assert cost.continuity_after_grasp and cost.deflection_rate_after_grasp
     # Panda cameras: the surface selection pads the missing right wrist
     assert safe.ag3s.surface_pad_missing_cameras is True and info["ag3s"]["surface_pad_missing_cameras"] is True
     # config dump
@@ -509,3 +513,21 @@ def test_hsr6_probe_is_found_under_the_storage_root():
     assert out == "/tmp/sl7-other-storage/" + pf.PANDA_HSR6_PROBE_REL
     # the SHA-256 check stays where it was (the sl6a tests read the file when present)
     assert len(pf.PANDA_HSR6_PROBE_SHA256) == 64
+
+def test_sl7b_termsoff_and_pandafix_differ_from_p0m_exactly(gpu_ok):
+    """SL7b — (c) termsoff = P0m with the continuity / deflection-rate terms off in every phase; (b) pandafix = P0m + the
+    Panda corrections of pc판 beyond P0m (V11AB-pb7 minus the pb2 gate), HSR6 still off."""
+    from AG3S.adapters.panda import profile as pf
+
+    p0m, off, fix = (list(pf.AG3S_VERSIONS[v]) for v in (P0M, TERMSOFF, PANDAFIX))
+    after = ("--continuity-after-grasp", "--deflection-rate-after-grasp")
+    assert off == [t for t in p0m if t not in after] + ["--w-continuity", "0", "--w-deflection-rate", "0"]
+    pb7 = list(pf.AG3S_VERSIONS["V11AB-pb7"])
+    i = pb7.index("--minimal-intervention-mm")
+    assert fix == p0m + pb7[:i] + pb7[i + 2:]
+    a_off, a_fix = _args(TERMSOFF), _args(PANDAFIX)
+    assert a_off.w_continuity == 0.0 and a_off.w_deflection_rate == 0.0 and not a_off.continuity_after_grasp
+    assert a_fix.reach_at_capture and a_fix.links == "arms" and a_fix.minimal_intervention_mm is None
+    assert not a_fix.hsr6_placement_contact and a_fix.hsr6_probe is None
+    for a in (a_off, a_fix):                                       # target extent and phase labels stay P0m's
+        assert a.target_extent == "attention-surface" and a.subtask_from_latch and a.surface_hull_fill

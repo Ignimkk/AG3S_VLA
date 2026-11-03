@@ -39,6 +39,19 @@ def physical_state(opening, executed_gripper):
     return closed, settled, holding
 
 
+def surface_summary(ag3s):
+    """SL7b — the attention-surface record of this call (`AG3S._surface_frame`), scalars only: was a region applied, why
+    not (`grasp_hold` / `not_ats_target` / the selection's own reason), node count, target-check numbers. None when the
+    version does not use the surface extent."""
+    surf = getattr(ag3s, "_surface_frame", None)
+    if not isinstance(surf, dict):
+        return None
+    t78 = surf.get("t78") or {}
+    keep = lambda d: {k: v for k, v in (d or {}).items() if isinstance(v, (bool, int, float, str)) or v is None}
+    return {**keep(surf), "region": keep(t78.get("region")), "target_check": keep(t78.get("target_check")),
+            "hold": keep(t78.get("hold")), "hull": keep(t78.get("hull"))}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--noun-run', type=Path, required=True)
@@ -118,7 +131,7 @@ def main():
                        'physical': {'opening': float(openings[k]), 'closed_cmd': bool(closed[k]), 'settled': bool(settled[k]), 'holding': bool(holding[k])},
                        'grasp_signal_used': a.grasp == 'physical' and bool(closed[k]), 'wall_s': wall,
                        'target_cluster': S.score_points(fr, pts, gb)['3d'], 'erased_extent': S.score_points(fr, ext, gb)['3d'],
-                       'meta': S.frame_meta(fr, gb[1])}
+                       'meta': S.frame_meta(fr, gb[1]), 'surface': surface_summary(ag3s)}
                 out.write(json.dumps(row, allow_nan=False, default=str)+'\n'); out.flush()
                 kept.append(np.zeros((0, 3), np.float32) if pts is None else pts.astype(np.float32))
                 kept_ext.append(np.zeros((0, 3), np.float32) if ext is None else ext.astype(np.float32))

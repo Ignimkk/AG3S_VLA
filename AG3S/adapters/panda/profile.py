@@ -365,11 +365,27 @@ P0M_NOHULL_FLAGS: tuple[str, ...] = (_drop_flags(FINAL_CONFIG_FLAGS, P0M_REMOVED
 #: the D1 control: P0m + the neighbour allowances that D1 switched off (development MuJoCo demo profile before D1;
 #: measures what the D1 switch-off costs on LIBERO).
 P0M_NBC_FLAGS: tuple[str, ...] = P0M_FLAGS + ("--neighbour-contact-mm", "20", "--neighbour-palm-contact-mm", "10")
+#: SL7b (user ruling 2026-11-04 via development d2, task SL7b): the LIBERO pilot's P0m 0/9 came with saturated executed
+#: actions; the TrajOpt side is split in two versions, target extent and phase labels stay P0m's.
+#: (c) "termsoff": the continuity / deflection-rate terms off in every phase (as 3판 SL6-E), not only before the grasp.
+P0M_TERMSOFF_FLAGS: tuple[str, ...] = (tuple(t for t in P0M_FLAGS if t not in ("--continuity-after-grasp",
+                                                                               "--deflection-rate-after-grasp"))
+                                       + CONTINUITY_DEFLECTION_OFF_FLAGS)
+#: (b) "pandafix": the Panda corrections pc판 carries beyond P0m (V11AB-pb7 without the pb2 minimal-intervention gate that
+#: E0 dropped): pb1 reach at capture, arm links in the collision model, held / closing hand exemptions, latch phase,
+#: grasp zone, pb6 sticky reach and drop from open. pc판's HSR6 placement contact is not taken (HSR6 is off in P0m).
+P0M_PANDA_FIX_FLAGS: tuple[str, ...] = (
+    "--reach-at-capture", "--links", "arms", "--held-hand-exempt", "--latch-phase", "--grasp-zone-mm", "10",
+    "--grasp-reach-sticky", "--grasp-drop-from-open", "--closing-hand-exempt")
+P0M_PANDAFIX_FLAGS: tuple[str, ...] = P0M_FLAGS + P0M_PANDA_FIX_FLAGS
 #: P0m versions: final-configuration base argv (no ``V11AB_PRE_MERGE_DEFAULTS``), **no** HSR6 probe.
-P0M_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-p0m", "AG3S-final-panda-p0m-nohull", "AG3S-final-panda-p0m-nbc")
+P0M_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-p0m", "AG3S-final-panda-p0m-nohull", "AG3S-final-panda-p0m-nbc",
+                                 "AG3S-final-panda-p0m-termsoff", "AG3S-final-panda-p0m-pandafix")
 AG3S_VERSIONS["AG3S-final-panda-p0m"] = P0M_FLAGS                       # P0m (hull fill + contact allowance 10 mm)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nohull"] = P0M_NOHULL_FLAGS         # P0m without hull fill / allowance (T92b control)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nbc"] = P0M_NBC_FLAGS               # P0m + neighbour allowances (D1 control)
+AG3S_VERSIONS["AG3S-final-panda-p0m-termsoff"] = P0M_TERMSOFF_FLAGS     # (c) P0m + continuity / deflection terms off
+AG3S_VERSIONS["AG3S-final-panda-p0m-pandafix"] = P0M_PANDAFIX_FLAGS     # (b) P0m + pc판 Panda corrections (no HSR6)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
