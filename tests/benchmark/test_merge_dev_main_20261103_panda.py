@@ -14,11 +14,12 @@ from tests.benchmark.test_sl6a_panda_final import _final_args, gpu_ok  # noqa: F
 #: checks, the GPU surface selection, hull fill, contact allowance, and the gate label from the grasp latch (T92).
 PORTED_MERGE_DESTS = (
     'attention_surface_device', 'surface_contact_allowance_mm', 'surface_grasp_hold', 'surface_hull_fill',
-    'surface_keep_last', 'surface_no_ball', 'surface_target_check', 'subtask_from_latch', 'target_extent')
+    'surface_keep_last', 'surface_no_ball', 'surface_target_check', 'subtask_from_latch', 'target_extent',
+    'passthrough_when_clear')   # SL7b
 MERGE_DESTS = (
     'grasp_corridor_ahead_mm', 'grasp_corridor_allow', 'grasp_corridor_min_target_points',
     'grasp_set_budget_ms', 'grasp_set_field_only', 'grasp_set_full_horizon', 'grasp_set_gate_mm', 'grasp_set_to',
-    'grasp_set_track_scale', 'hsr_gt_stage', 'hsr5', 'hsr6_objective_window', 'passthrough_when_clear',
+    'grasp_set_track_scale', 'hsr_gt_stage', 'hsr5', 'hsr6_objective_window',
     'support_surface_offset_mm', 'surface_crease_angle_deg', 'surface_crease_cut',
     'surface_crease_reattach_ratio', 'surface_crease_voxel_mm', 'surface_memory_target_sticky', 'surface_reattach_hull',
     'surface_split', 'target_vacancy_delta_mm', 'target_vacancy_min_points', 'target_vacancy_p_empty',

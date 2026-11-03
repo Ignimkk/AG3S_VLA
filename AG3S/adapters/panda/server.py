@@ -342,13 +342,13 @@ UNPORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
 ) + (
     # main 02fe59e6 merge (2026-11-03, user ruling): every option it adds is refused until its Panda port. SL7 ported the
     # P0m ones (attention-surface extent + its checks with the Panda head, GPU surface selection, pre-grasp hull fill,
-    # contact allowance, --subtask-from-latch: see PORTED_FINAL_CONFIG_DESTS); still refused: pass-through when clear,
-    # target memory sticky, surface split / crease cut / reattach (dropped or not adopted in P0m). Refused for good:
+    # contact allowance, --subtask-from-latch: see PORTED_FINAL_CONFIG_DESTS; SL7b: pass-through when clear); still
+    # refused: target memory sticky, surface split / crease cut / reattach (dropped or not adopted in P0m). Refused for good:
     # RB-Y1-trained assets (hsr5, hidden probe), MuJoCo ground-truth stage, RB-Y1 gripper geometry (grasp set, grasp
     # corridor), dropped / not adopted options.
     'grasp_corridor_ahead_mm', 'grasp_corridor_allow', 'grasp_corridor_min_target_points',
     'grasp_set_budget_ms', 'grasp_set_field_only', 'grasp_set_full_horizon', 'grasp_set_gate_mm', 'grasp_set_to',
-    'grasp_set_track_scale', 'hsr_gt_stage', 'hsr5', 'hsr6_objective_window', 'passthrough_when_clear',
+    'grasp_set_track_scale', 'hsr_gt_stage', 'hsr5', 'hsr6_objective_window',
     'support_surface_offset_mm', 'surface_crease_angle_deg', 'surface_crease_cut',
     'surface_crease_reattach_ratio', 'surface_crease_voxel_mm',
     'surface_memory_target_sticky', 'surface_reattach_hull', 'surface_split',
@@ -376,6 +376,9 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # see check_unported_flags), GPU surface selection, hull fill, contact allowance, the gate label from the latch (T92)
     'attention_surface_device', 'subtask_from_latch', 'surface_contact_allowance_mm', 'surface_grasp_hold',
     'surface_hull_fill', 'surface_keep_last', 'surface_no_ball', 'surface_target_check', 'target_extent',
+    # SL7b (user ruling 2026-11-04): pass-through when the VLA reference is clear (T88) -- applied through
+    # serve_safe.trajopt_config_from_args (sqp.passthrough_when_clear), which this server already calls
+    'passthrough_when_clear',
 )
 
 

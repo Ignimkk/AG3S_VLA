@@ -379,13 +379,19 @@ P0M_PANDA_FIX_FLAGS: tuple[str, ...] = (
     "--grasp-reach-sticky", "--grasp-drop-from-open", "--closing-hand-exempt")
 P0M_PANDAFIX_FLAGS: tuple[str, ...] = P0M_FLAGS + P0M_PANDA_FIX_FLAGS
 #: P0m versions: final-configuration base argv (no ``V11AB_PRE_MERGE_DEFAULTS``), **no** HSR6 probe.
+#: (d) the chosen TrajOpt side + pass-through when the VLA reference is clear (T88, SL7b): both bases registered, the
+#: SL7b rule picks the one that runs ((c) on a tie).
+P0M_PASS_FLAGS: tuple[str, ...] = ("--passthrough-when-clear",)
 P0M_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-p0m", "AG3S-final-panda-p0m-nohull", "AG3S-final-panda-p0m-nbc",
-                                 "AG3S-final-panda-p0m-termsoff", "AG3S-final-panda-p0m-pandafix")
+                                 "AG3S-final-panda-p0m-termsoff", "AG3S-final-panda-p0m-pandafix",
+                                 "AG3S-final-panda-p0m-termsoff-pass", "AG3S-final-panda-p0m-pandafix-pass")
 AG3S_VERSIONS["AG3S-final-panda-p0m"] = P0M_FLAGS                       # P0m (hull fill + contact allowance 10 mm)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nohull"] = P0M_NOHULL_FLAGS         # P0m without hull fill / allowance (T92b control)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nbc"] = P0M_NBC_FLAGS               # P0m + neighbour allowances (D1 control)
 AG3S_VERSIONS["AG3S-final-panda-p0m-termsoff"] = P0M_TERMSOFF_FLAGS     # (c) P0m + continuity / deflection terms off
 AG3S_VERSIONS["AG3S-final-panda-p0m-pandafix"] = P0M_PANDAFIX_FLAGS     # (b) P0m + pc판 Panda corrections (no HSR6)
+AG3S_VERSIONS["AG3S-final-panda-p0m-termsoff-pass"] = P0M_TERMSOFF_FLAGS + P0M_PASS_FLAGS   # (d) on (c)
+AG3S_VERSIONS["AG3S-final-panda-p0m-pandafix-pass"] = P0M_PANDAFIX_FLAGS + P0M_PASS_FLAGS   # (d) on (b)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling

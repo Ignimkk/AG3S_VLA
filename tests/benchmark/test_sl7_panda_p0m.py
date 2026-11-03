@@ -221,11 +221,12 @@ def test_ported_and_still_refused_dests():
     from AG3S.trajopt import serve_safe as ss
 
     ported = ("target_extent", "surface_target_check", "surface_keep_last", "surface_grasp_hold", "surface_no_ball",
-              "attention_surface_device", "surface_hull_fill", "surface_contact_allowance_mm", "subtask_from_latch")
+              "attention_surface_device", "surface_hull_fill", "surface_contact_allowance_mm", "subtask_from_latch",
+              "passthrough_when_clear")   # SL7b
     refused = ("surface_split", "surface_crease_cut", "surface_crease_voxel_mm", "surface_crease_angle_deg",
                "surface_crease_reattach_ratio", "surface_memory_target_sticky", "surface_reattach_hull",
                "target_vacancy_release", "grasp_corridor_allow", "grasp_set_to", "hsr_gt_stage", "hsr5",
-               "hsr6_objective_window", "passthrough_when_clear", "support_surface_offset_mm",
+               "hsr6_objective_window", "support_surface_offset_mm",
                "subtask_from_phase_machine", "fm_guide", "robot_mask", "oracle_extent_identity",
                "oracle_max_dist_voxels", "hybrid_identity", "hybrid_other_exclude_voxels", "target_free_coarse")
     dests = {a.dest for a in ss.build_parser()._actions}
@@ -245,7 +246,7 @@ def test_p0m_passes_check_unported_flags_without_a_probe(version, gpu_ok):
 
 @pytest.mark.parametrize("dest, value", [
     ("surface_split", True), ("surface_crease_cut", True), ("surface_memory_target_sticky", True),
-    ("passthrough_when_clear", True), ("hsr_gt_stage", True), ("subtask_from_phase_machine", True),
+    ("hsr_gt_stage", True), ("subtask_from_phase_machine", True),
     ("robot_mask", "render"), ("target_free_coarse", True), ("grasp_corridor_allow", True),
     ("target_extent", "oracle-visible"), ("target_extent", "attention-surface-hybrid")])
 def test_p0m_still_refuses_what_is_not_ported(dest, value, gpu_ok):
@@ -531,3 +532,19 @@ def test_sl7b_termsoff_and_pandafix_differ_from_p0m_exactly(gpu_ok):
     assert not a_fix.hsr6_placement_contact and a_fix.hsr6_probe is None
     for a in (a_off, a_fix):                                       # target extent and phase labels stay P0m's
         assert a.target_extent == "attention-surface" and a.subtask_from_latch and a.surface_hull_fill
+
+
+@pytest.mark.parametrize("version,base", [("AG3S-final-panda-p0m-termsoff-pass", TERMSOFF),
+                                          ("AG3S-final-panda-p0m-pandafix-pass", PANDAFIX)])
+def test_sl7b_pass_versions_apply_passthrough_on_the_panda(version, base, gpu_ok, monkeypatch):
+    """SL7b (d) — base + `--passthrough-when-clear`; the Panda server accepts it and its TrajOpt config carries
+    `sqp.passthrough_when_clear` (serve_safe.trajopt_config_from_args, the call the Panda server makes)."""
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.adapters.panda import server as ps
+    from AG3S.trajopt import serve_safe as ss
+
+    assert list(pf.AG3S_VERSIONS[version]) == list(pf.AG3S_VERSIONS[base]) + ["--passthrough-when-clear"]
+    args = _args(version)
+    ps.check_unported_flags(args, None)
+    assert ss.trajopt_config_from_args(args).sqp.passthrough_when_clear is True
+    assert ss.trajopt_config_from_args(_args(base)).sqp.passthrough_when_clear is False
