@@ -1,6 +1,6 @@
 # SL7h — 표면 추출 + 기권 시 공 판의 SafeLIBERO 11 episode closed loop
 
-> writer: lead (benchmark checkout), 2026-11-04 07:3x KST. **결과를 보기 전에 고정** (closed loop은 07:19 UTC+9에 시작했고, 이 문서를 쓰는 시점에는 첫 launcher 호출이 돌고 있으며 결과는 아직 보지 않았다). 판정 주체: lead 자율 판정 (`doc/active/experiments/SL7_AUTONOMOUS_DECISIONS_20261104_KO.md` D7 · D8).
+> writer: lead (benchmark checkout), 2026-11-04 07:2x KST. **결과를 보기 전에 고정** (closed loop은 07:19 KST에 시작했고, 이 문서를 쓰는 시점에는 첫 launcher 호출이 돌고 있으며 결과는 아직 보지 않았다). 판정 주체: lead 자율 판정 (`doc/active/experiments/SL7_AUTONOMOUS_DECISIONS_20261104_KO.md` D7 · D8).
 > 앞 단계: SL7g — `AG3S-final-panda-v3-e0to-pc-surface-fb` LIBERO 9 5/9, 포화 10.4% (pc판 6/9, 10.0%).
 
 ## 판 · 장면
