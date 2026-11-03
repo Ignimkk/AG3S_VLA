@@ -295,6 +295,9 @@ class PandaSafeServer:
         hsr6 = hsr6_call_record(self._policy)
         if hsr6 is not None:   # SL6-H H2 — key only with an HSR6 use flag on (V11AB / pb responses unchanged)
             response["panda/hsr6"] = hsr6
+        surface = surface_call_record(self._policy)
+        if surface is not None:   # SL7i — key only with the attention-surface extent on (V11AB / pb / pc responses unchanged)
+            response["panda/surface"] = surface
         return response
 
 
@@ -308,6 +311,32 @@ def hsr6_call_record(safe) -> Optional[dict]:
     from AG3S.trajopt.safe_policy import _jsonable
 
     return _jsonable(getattr(safe, "_last_hsr6", None) or {})
+
+
+def surface_call_record(safe) -> Optional[dict]:
+    """SL7i — this call's attention-surface record for the client's ``*_calls.jsonl`` (logging only, read after the
+    solve): the scalars of ``AG3S._surface_frame`` (``applied``, ``why``, ...) and of its ``t78`` ``region`` /
+    ``target_check`` / ``hold`` / ``hull`` / ``seed_ats_gate`` parts. ``state`` = ``"surface"`` (a region was applied
+    this frame) / ``"fallback"`` (no region: the version's fallback -- ball with keep-last off, nothing with keep-last +
+    no-ball) / ``"none"`` (no surface record yet this episode). ``None`` when the version does not use the
+    attention-surface extent (no key)."""
+    ag3s = getattr(safe, "ag3s", None)
+    esdf = getattr(getattr(ag3s, "config", None), "esdf", None)
+    if ag3s is None or getattr(esdf, "target_extent", None) != "attention_surface":
+        return None
+    from AG3S.trajopt.safe_policy import _jsonable
+
+    keep = lambda d: {k: v for k, v in (d or {}).items()
+                      if isinstance(v, (bool, int, float, str)) or v is None} if isinstance(d, dict) else None
+    surf = getattr(ag3s, "_surface_frame", None)
+    if not isinstance(surf, dict):
+        return {"state": "none"}
+    t78 = surf.get("t78") or {}
+    rec = {**keep(surf), "state": "surface" if surf.get("applied") else "fallback"}
+    for part in ("region", "target_check", "hold", "hull", "seed_ats_gate"):
+        if isinstance(t78.get(part), dict):
+            rec[part] = keep(t78[part])
+    return _jsonable(rec)
 
 
 def _replace_horizon_limits(to_config):
