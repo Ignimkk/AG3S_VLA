@@ -1,0 +1,275 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261101T212251+0900_8ab3c7ef7757_7d4bbf78ee5a/verify/T84/fail_reason/spec_T78_S3.json",
+ "vmax_mm": 40.0,
+ "panels": {
+  "회귀211_k0": {
+   "request": 65,
+   "camera": "wrist_cam_l",
+   "n_apple_px": 14471,
+   "n_left": 84,
+   "frac_left": 0.0058,
+   "palm_apple_mm": 47.3,
+   "hold": true,
+   "row": {
+    "link": "ee_finger_l1",
+    "tier": "target_free",
+    "why": "answer_excludes_target",
+    "label": "target",
+    "step": 1,
+    "clearance_mm": -20.5,
+    "sphere_centre_m": [
+     0.47,
+     0.2611,
+     0.8496
+    ],
+    "sphere_radius_mm": 5.0,
+    "touched_voxel_m": [
+     0.4709,
+     0.264,
+     0.8488
+    ],
+    "touched_dist_from_centre_mm": 3.1,
+    "touched_gt": "apple",
+    "touched_gt_dist_mm": 4.1,
+    "touched_voxel_apple_surface": "사과 표면 voxel 아님"
+   },
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 420,
+    "n_apple_voxels_visible_wrist": 109,
+    "n_left": 156,
+    "frac_left": 0.3714,
+    "n_left_visible": 2,
+    "n_left_hidden": 154,
+    "n_left_1voxel": 156,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "다른 표면 표본이 더 가까움": 13,
+     "제거 목록에 있으나 손 층 값 <= 0": 49,
+     "target 표본에서 멂 (제거 후보 아님)": 49,
+     "이번 frame 에 안 보임 (기억만)": 22,
+     "지지면 guard 아래": 23
+    },
+    "left_causes_visible": {
+     "제거 목록에 있으나 손 층 값 <= 0": 2
+    },
+    "left_causes_hidden": {
+     "다른 표면 표본이 더 가까움": 13,
+     "제거 목록에 있으나 손 층 값 <= 0": 47,
+     "target 표본에서 멂 (제거 후보 아님)": 49,
+     "이번 frame 에 안 보임 (기억만)": 22,
+     "지지면 guard 아래": 23
+    }
+   }
+  },
+  "회귀119_k1": {
+   "request": 14,
+   "camera": "wrist_cam_l",
+   "n_apple_px": 7191,
+   "n_left": 35,
+   "frac_left": 0.0049,
+   "palm_apple_mm": 27.4,
+   "hold": false,
+   "row": null,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 410,
+    "n_apple_voxels_visible_wrist": 37,
+    "n_left": 77,
+    "frac_left": 0.1878,
+    "n_left_visible": 0,
+    "n_left_hidden": 77,
+    "n_left_1voxel": 77,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "제거 목록에 있으나 손 층 값 <= 0": 26,
+     "target 표본에서 멂 (제거 후보 아님)": 13,
+     "지지면 guard 아래": 36,
+     "이번 frame 에 안 보임 (기억만)": 2
+    },
+    "left_causes_visible": {},
+    "left_causes_hidden": {
+     "제거 목록에 있으나 손 층 값 <= 0": 26,
+     "target 표본에서 멂 (제거 후보 아님)": 13,
+     "지지면 guard 아래": 36,
+     "이번 frame 에 안 보임 (기억만)": 2
+    }
+   }
+  },
+  "허들954_k0": {
+   "request": 21,
+   "camera": "wrist_cam_r",
+   "n_apple_px": 7820,
+   "n_left": 2,
+   "frac_left": 0.0003,
+   "palm_apple_mm": 22.1,
+   "hold": false,
+   "row": null,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 419,
+    "n_apple_voxels_visible_wrist": 36,
+    "n_left": 124,
+    "frac_left": 0.2959,
+    "n_left_visible": 0,
+    "n_left_hidden": 124,
+    "n_left_1voxel": 124,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "이번 frame 에 안 보임 (기억만)": 29,
+     "target 표본에서 멂 (제거 후보 아님)": 15,
+     "제거 목록에 있으나 손 층 값 <= 0": 14,
+     "지지면 guard 아래": 66
+    },
+    "left_causes_visible": {},
+    "left_causes_hidden": {
+     "이번 frame 에 안 보임 (기억만)": 29,
+     "target 표본에서 멂 (제거 후보 아님)": 15,
+     "제거 목록에 있으나 손 층 값 <= 0": 14,
+     "지지면 guard 아래": 66
+    }
+   }
+  },
+  "허들1345_k0": {
+   "request": 46,
+   "camera": "wrist_cam_l",
+   "n_apple_px": 18172,
+   "n_left": 11488,
+   "frac_left": 0.6322,
+   "palm_apple_mm": 11.1,
+   "hold": true,
+   "row": {
+    "link": "ee_finger_l2",
+    "tier": "target_free",
+    "why": "answer_excludes_target",
+    "label": null,
+    "step": 2,
+    "clearance_mm": -7.9,
+    "sphere_centre_m": [
+     0.5655,
+     0.3383,
+     0.8723
+    ],
+    "sphere_radius_mm": 5.0,
+    "touched_voxel_m": [
+     0.562,
+     0.3401,
+     0.8724
+    ],
+    "touched_dist_from_centre_mm": 3.8,
+    "touched_gt": "none",
+    "touched_gt_dist_mm": 8.3,
+    "touched_voxel_apple_surface": "사과 표면 voxel 아님"
+   },
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 405,
+    "n_apple_voxels_visible_wrist": 65,
+    "n_left": 158,
+    "frac_left": 0.3901,
+    "n_left_visible": 47,
+    "n_left_hidden": 111,
+    "n_left_1voxel": 158,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "제거 목록에 있으나 손 층 값 <= 0": 90,
+     "target 표본에서 멂 (제거 후보 아님)": 39,
+     "이번 frame 에 안 보임 (기억만)": 9,
+     "지지면 guard 아래": 12,
+     "다른 표면 표본이 더 가까움": 8
+    },
+    "left_causes_visible": {
+     "제거 목록에 있으나 손 층 값 <= 0": 31,
+     "다른 표면 표본이 더 가까움": 7,
+     "target 표본에서 멂 (제거 후보 아님)": 8,
+     "이번 frame 에 안 보임 (기억만)": 1
+    },
+    "left_causes_hidden": {
+     "제거 목록에 있으나 손 층 값 <= 0": 59,
+     "target 표본에서 멂 (제거 후보 아님)": 31,
+     "이번 frame 에 안 보임 (기억만)": 8,
+     "지지면 guard 아래": 12,
+     "다른 표면 표본이 더 가까움": 1
+    }
+   }
+  },
+  "허들211_k0": {
+   "request": 22,
+   "camera": "wrist_cam_l",
+   "n_apple_px": 707,
+   "n_left": 72,
+   "frac_left": 0.1018,
+   "palm_apple_mm": 102.8,
+   "hold": false,
+   "row": null,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 413,
+    "n_apple_voxels_visible_wrist": 8,
+    "n_left": 188,
+    "frac_left": 0.4552,
+    "n_left_visible": 1,
+    "n_left_hidden": 187,
+    "n_left_1voxel": 188,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "이번 frame 에 안 보임 (기억만)": 51,
+     "지지면 guard 아래": 49,
+     "target 표본에서 멂 (제거 후보 아님)": 37,
+     "제거 목록에 있으나 손 층 값 <= 0": 51
+    },
+    "left_causes_visible": {
+     "이번 frame 에 안 보임 (기억만)": 1
+    },
+    "left_causes_hidden": {
+     "이번 frame 에 안 보임 (기억만)": 50,
+     "지지면 guard 아래": 49,
+     "target 표본에서 멂 (제거 후보 아님)": 37,
+     "제거 목록에 있으나 손 층 값 <= 0": 51
+    }
+   }
+  },
+  "회귀954_k0": {
+   "request": 54,
+   "camera": "wrist_cam_r",
+   "n_apple_px": 13039,
+   "n_left": 3,
+   "frac_left": 0.0002,
+   "palm_apple_mm": 14.9,
+   "hold": false,
+   "row": null,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 420,
+    "n_apple_voxels_visible_wrist": 63,
+    "n_left": 139,
+    "frac_left": 0.331,
+    "n_left_visible": 1,
+    "n_left_hidden": 138,
+    "n_left_1voxel": 139,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "이번 frame 에 안 보임 (기억만)": 38,
+     "제거 목록에 있으나 손 층 값 <= 0": 38,
+     "target 표본에서 멂 (제거 후보 아님)": 14,
+     "지지면 guard 아래": 49
+    },
+    "left_causes_visible": {
+     "제거 목록에 있으나 손 층 값 <= 0": 1
+    },
+    "left_causes_hidden": {
+     "이번 frame 에 안 보임 (기억만)": 38,
+     "제거 목록에 있으나 손 층 값 <= 0": 37,
+     "target 표본에서 멂 (제거 후보 아님)": 14,
+     "지지면 guard 아래": 49
+    }
+   }
+  }
+ }
+}

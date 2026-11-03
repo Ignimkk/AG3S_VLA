@@ -2,7 +2,7 @@
 name: ag3s-implementer
 description: AG3S/trajopt 코드를 고친다. 문서·figure·논문은 건드리지 않는다. 한 STEP 의 task.md 를 받아 코드를 바꾸고 impl.md 로 넘긴다.
 tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch, Skill, SendMessage, ListAgents
-model: opus
+model: sonnet
 effort: high
 ---
 > 현재 환경 정본: `doc/active/SHARED_STORAGE_AND_PYTHON.md`. Development는 독립 `.venv-openpi-live`를 주 interpreter로, `.venv-ag3s`를 CPU 회귀로, `.venv-curobo`를 producer로 사용한다. 모두 Python 3.11.16이며 input은 공유 storage에서 읽고 새 output은 `${AG3S_RUN_DIR}`에 쓴다. GPU 검증은 다른 checkout과 겹치지 않는다.

@@ -1,0 +1,115 @@
+{
+ "회귀211_k0": {
+  "request": 15,
+  "desc": "사과–바나나 맞닿음",
+  "zed_left": {
+   "BALL": {
+    "apple_px": 511,
+    "removed_px": 511,
+    "left_px": 0,
+    "removed_pct": 100.0,
+    "neighbour_px": 1114,
+    "neighbour_removed_px": 7
+   },
+   "SURF": {
+    "apple_px": 511,
+    "removed_px": 510,
+    "left_px": 1,
+    "removed_pct": 99.8,
+    "neighbour_px": 1114,
+    "neighbour_removed_px": 200
+   },
+   "S2": {
+    "apple_px": 511,
+    "removed_px": 463,
+    "left_px": 48,
+    "removed_pct": 90.6,
+    "neighbour_px": 1114,
+    "neighbour_removed_px": 0
+   }
+  },
+  "wrist_cam_l": {
+   "BALL": {
+    "apple_px": 3463,
+    "removed_px": 3463,
+    "left_px": 0,
+    "removed_pct": 100.0,
+    "neighbour_px": 1624,
+    "neighbour_removed_px": 136
+   },
+   "SURF": {
+    "apple_px": 3463,
+    "removed_px": 3463,
+    "left_px": 0,
+    "removed_pct": 100.0,
+    "neighbour_px": 1624,
+    "neighbour_removed_px": 1516
+   },
+   "S2": {
+    "apple_px": 3463,
+    "removed_px": 3285,
+    "left_px": 178,
+    "removed_pct": 94.9,
+    "neighbour_px": 1624,
+    "neighbour_removed_px": 15
+   }
+  }
+ },
+ "허들119_k0": {
+  "request": 15,
+  "desc": "이웃 과일 20 mm 떨어짐",
+  "zed_left": {
+   "BALL": {
+    "apple_px": 25,
+    "removed_px": 24,
+    "left_px": 1,
+    "removed_pct": 96.0,
+    "neighbour_px": 1258,
+    "neighbour_removed_px": 0
+   },
+   "SURF": {
+    "apple_px": 25,
+    "removed_px": 24,
+    "left_px": 1,
+    "removed_pct": 96.0,
+    "neighbour_px": 1258,
+    "neighbour_removed_px": 0
+   },
+   "S2": {
+    "apple_px": 25,
+    "removed_px": 24,
+    "left_px": 1,
+    "removed_pct": 96.0,
+    "neighbour_px": 1258,
+    "neighbour_removed_px": 0
+   }
+  },
+  "skipped_zed_left": "apple only 25 px",
+  "wrist_cam_l": {
+   "BALL": {
+    "apple_px": 12504,
+    "removed_px": 10755,
+    "left_px": 1749,
+    "removed_pct": 86.0,
+    "neighbour_px": 0,
+    "neighbour_removed_px": 0
+   },
+   "SURF": {
+    "apple_px": 12504,
+    "removed_px": 11346,
+    "left_px": 1158,
+    "removed_pct": 90.7,
+    "neighbour_px": 0,
+    "neighbour_removed_px": 0
+   },
+   "S2": {
+    "apple_px": 12504,
+    "removed_px": 12101,
+    "left_px": 403,
+    "removed_pct": 96.8,
+    "neighbour_px": 0,
+    "neighbour_removed_px": 0
+   }
+  }
+ }
+}

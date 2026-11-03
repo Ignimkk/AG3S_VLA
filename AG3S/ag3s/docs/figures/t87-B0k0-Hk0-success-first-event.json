@@ -1,0 +1,32 @@
+{
+ "B0_k0": {
+  "plain_success": 6,
+  "adjusted_success": 7,
+  "n_runs": 10,
+  "first_event_adjusted": {
+   "a": 1,
+   "b": 1,
+   "c-target": 0,
+   "c-other": 0,
+   "d": 0,
+   "e1": 0,
+   "e2": 1,
+   "e3": 0
+  }
+ },
+ "H_k0": {
+  "plain_success": 4,
+  "adjusted_success": 5,
+  "n_runs": 10,
+  "first_event_adjusted": {
+   "a": 1,
+   "b": 2,
+   "c-target": 0,
+   "c-other": 0,
+   "d": 0,
+   "e1": 0,
+   "e2": 2,
+   "e3": 0
+  }
+ }
+}

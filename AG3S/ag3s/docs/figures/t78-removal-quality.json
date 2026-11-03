@@ -1,0 +1,101 @@
+{
+ "BALL|전체": {
+  "n": 358,
+  "removed_pct": 77.4,
+  "left_pct": 22.6,
+  "tgt": 226382,
+  "nb": 7995,
+  "oth": 0,
+  "none": 68852,
+  "robot": 8789,
+  "prec": 96.6
+ },
+ "BALL|떨어진 이웃": {
+  "n": 118,
+  "removed_pct": 82.2,
+  "left_pct": 17.8,
+  "tgt": 103136,
+  "nb": 56,
+  "oth": 0,
+  "none": 13192,
+  "robot": 2261,
+  "prec": 99.9
+ },
+ "BALL|맞닿은 이웃": {
+  "n": 240,
+  "removed_pct": 50.0,
+  "left_pct": 50.0,
+  "tgt": 123246,
+  "nb": 7939,
+  "oth": 0,
+  "none": 55660,
+  "robot": 6528,
+  "prec": 93.9
+ },
+ "SURF|전체": {
+  "n": 358,
+  "removed_pct": 73.7,
+  "left_pct": 26.3,
+  "tgt": 214394,
+  "nb": 34933,
+  "oth": 29191,
+  "none": 77573,
+  "robot": 9101,
+  "prec": 77.0
+ },
+ "SURF|떨어진 이웃": {
+  "n": 118,
+  "removed_pct": 78.4,
+  "left_pct": 21.6,
+  "tgt": 101230,
+  "nb": 0,
+  "oth": 0,
+  "none": 10250,
+  "robot": 2185,
+  "prec": 100.0
+ },
+ "SURF|맞닿은 이웃": {
+  "n": 240,
+  "removed_pct": 39.9,
+  "left_pct": 60.1,
+  "tgt": 113164,
+  "nb": 34933,
+  "oth": 29191,
+  "none": 67323,
+  "robot": 6916,
+  "prec": 63.8
+ },
+ "S2|전체": {
+  "n": 358,
+  "removed_pct": 62.5,
+  "left_pct": 37.5,
+  "tgt": 212314,
+  "nb": 6382,
+  "oth": 0,
+  "none": 56001,
+  "robot": 8485,
+  "prec": 97.1
+ },
+ "S2|떨어진 이웃": {
+  "n": 118,
+  "removed_pct": 78.4,
+  "left_pct": 21.6,
+  "tgt": 101188,
+  "nb": 0,
+  "oth": 0,
+  "none": 10236,
+  "robot": 2179,
+  "prec": 100.0
+ },
+ "S2|맞닿은 이웃": {
+  "n": 240,
+  "removed_pct": 33.6,
+  "left_pct": 66.4,
+  "tgt": 111126,
+  "nb": 6382,
+  "oth": 0,
+  "none": 45765,
+  "robot": 6306,
+  "prec": 94.6
+ }
+}

@@ -1,0 +1,82 @@
+[
+ {
+  "conf": "B0_k0",
+  "label": "회귀119_k1",
+  "first_event": "b",
+  "request": 48,
+  "camera": "wrist_cam_l",
+  "palm_apple_mm": 134.3,
+  "n_left_samples_in_image": 0,
+  "npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/agg/fail_reason/B0_k0/scene_B0_k0_회귀119_k1.npz"
+ },
+ {
+  "conf": "B0_k0",
+  "label": "허들211_k0",
+  "first_event": "a",
+  "request": 12,
+  "camera": "wrist_cam_l",
+  "palm_apple_mm": 141.7,
+  "n_left_samples_in_image": 27,
+  "npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/agg/fail_reason/B0_k0/scene_B0_k0_허들211_k0.npz"
+ },
+ {
+  "conf": "B0_k0",
+  "label": "허들850_k0",
+  "first_event": "e2",
+  "request": 14,
+  "camera": "wrist_cam_l",
+  "palm_apple_mm": 19.0,
+  "n_left_samples_in_image": 75,
+  "npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/agg/fail_reason/B0_k0/scene_B0_k0_허들850_k0.npz"
+ },
+ {
+  "conf": "H_k0",
+  "label": "회귀954_k0",
+  "first_event": "b",
+  "request": 55,
+  "camera": "wrist_cam_r",
+  "palm_apple_mm": 9.6,
+  "n_left_samples_in_image": 114,
+  "npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/agg/fail_reason/H_k0/scene_H_k0_회귀954_k0.npz"
+ },
+ {
+  "conf": "H_k0",
+  "label": "회귀119_k1",
+  "first_event": "e2",
+  "request": 13,
+  "camera": "wrist_cam_l",
+  "palm_apple_mm": 24.0,
+  "n_left_samples_in_image": 45,
+  "npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/agg/fail_reason/H_k0/scene_H_k0_회귀119_k1.npz"
+ },
+ {
+  "conf": "H_k0",
+  "label": "허들954_k0",
+  "first_event": "b",
+  "request": 20,
+  "camera": "wrist_cam_r",
+  "palm_apple_mm": 80.8,
+  "n_left_samples_in_image": 20,
+  "npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/agg/fail_reason/H_k0/scene_H_k0_허들954_k0.npz"
+ },
+ {
+  "conf": "H_k0",
+  "label": "허들211_k0",
+  "first_event": "a",
+  "request": 11,
+  "camera": "wrist_cam_l",
+  "palm_apple_mm": 67.0,
+  "n_left_samples_in_image": 84,
+  "npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/agg/fail_reason/H_k0/scene_H_k0_허들211_k0.npz"
+ },
+ {
+  "conf": "H_k0",
+  "label": "허들850_k0",
+  "first_event": "e2",
+  "request": 14,
+  "camera": "wrist_cam_l",
+  "palm_apple_mm": 19.0,
+  "n_left_samples_in_image": 75,
+  "npz": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/agg/fail_reason/H_k0/scene_H_k0_허들850_k0.npz"
+ }
+]

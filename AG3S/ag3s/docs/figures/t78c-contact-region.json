@@ -1,0 +1,107 @@
+{
+ "summary": {
+  "separated|BALL": {
+   "n": 27,
+   "region_left_frac_median": 0.0,
+   "region_left_frac_mean": 0.0546,
+   "requests_with_any_left": 5,
+   "hand_layer_at_contact_mm_median": 20.0,
+   "region_left_total": 18,
+   "region_left_below_zfloor": 0,
+   "contact_height_mm_median": 30.1,
+   "z_floor_above_bottom_mm_median": NaN
+  },
+  "separated|S2": {
+   "n": 27,
+   "region_left_frac_median": 0.0909,
+   "region_left_frac_mean": 0.1513,
+   "requests_with_any_left": 15,
+   "hand_layer_at_contact_mm_median": 12.25,
+   "region_left_total": 47,
+   "region_left_below_zfloor": 0,
+   "contact_height_mm_median": 30.1,
+   "z_floor_above_bottom_mm_median": 6.4
+  },
+  "separated|S4": {
+   "n": 27,
+   "region_left_frac_median": 0.0909,
+   "region_left_frac_mean": 0.1513,
+   "requests_with_any_left": 15,
+   "hand_layer_at_contact_mm_median": 12.25,
+   "region_left_total": 47,
+   "region_left_below_zfloor": 0,
+   "contact_height_mm_median": 30.1,
+   "z_floor_above_bottom_mm_median": 6.4
+  },
+  "separated|S5": {
+   "n": 27,
+   "region_left_frac_median": 0.0909,
+   "region_left_frac_mean": 0.1513,
+   "requests_with_any_left": 15,
+   "hand_layer_at_contact_mm_median": 12.25,
+   "region_left_total": 47,
+   "region_left_below_zfloor": 0,
+   "contact_height_mm_median": 30.1,
+   "z_floor_above_bottom_mm_median": 6.4
+  },
+  "touching|BALL": {
+   "n": 17,
+   "region_left_frac_median": 0.0,
+   "region_left_frac_mean": 0.0,
+   "requests_with_any_left": 0,
+   "hand_layer_at_contact_mm_median": 16.59,
+   "region_left_total": 0,
+   "region_left_below_zfloor": 0,
+   "contact_height_mm_median": 30.0,
+   "z_floor_above_bottom_mm_median": NaN
+  },
+  "touching|S2": {
+   "n": 17,
+   "region_left_frac_median": 0.0556,
+   "region_left_frac_mean": 0.1479,
+   "requests_with_any_left": 10,
+   "hand_layer_at_contact_mm_median": 8.66,
+   "region_left_total": 47,
+   "region_left_below_zfloor": 0,
+   "contact_height_mm_median": 30.0,
+   "z_floor_above_bottom_mm_median": 6.4
+  },
+  "touching|S4": {
+   "n": 17,
+   "region_left_frac_median": 0.0,
+   "region_left_frac_mean": 0.0724,
+   "requests_with_any_left": 8,
+   "hand_layer_at_contact_mm_median": 11.18,
+   "region_left_total": 25,
+   "region_left_below_zfloor": 0,
+   "contact_height_mm_median": 30.0,
+   "z_floor_above_bottom_mm_median": 6.4
+  },
+  "touching|S5": {
+   "n": 17,
+   "region_left_frac_median": 0.0,
+   "region_left_frac_mean": 0.0724,
+   "requests_with_any_left": 8,
+   "hand_layer_at_contact_mm_median": 11.18,
+   "region_left_total": 25,
+   "region_left_below_zfloor": 0,
+   "contact_height_mm_median": 30.0,
+   "z_floor_above_bottom_mm_median": 6.4
+  },
+  "verdict_separated": {
+   "S5_left_frac_median": 0.0909,
+   "BALL_left_frac_median": 0.0,
+   "not_a_contact_problem": false
+  }
+ },
+ "reasons": {
+  "이전 frame 에 본 표면 · 다른 표본이 더 가까움": 36,
+  "target 표본에서 멀어 후보 아님 (이전 frame)": 9,
+  "이번 frame 분류 문제": 2
+ },
+ "example": {
+  "run": "허들1345_k0",
+  "request": 19,
+  "n_left_in_region": 6
+ }
+}

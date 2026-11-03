@@ -1,0 +1,63 @@
+{
+ "selection": "행 1 = 쥐기 창 요청 중 hull 채우기 + 유지 기억 (HS) 의 추가로 지운 voxel 수 최대, 행 2 = hull 채우기 (H) 최대 (같으면 생략). 쥐는 손 손목 카메라 (요청 qpos 의 MuJoCo 렌더) 에 기록 K · T_base_cam 으로 voxel 중심을 투영",
+ "rows": [
+  {
+   "run": "REG_ep211_s2113",
+   "label": "회귀211",
+   "request": 21,
+   "palm_apple_mm": 25.8,
+   "picked_by": "HS",
+   "panels": {
+    "H": {},
+    "S": {
+     "apple": 77,
+     "fruit": 437,
+     "none": 1
+    },
+    "A": {
+     "apple": 90,
+     "fruit": 322,
+     "none": 1
+    },
+    "HS": {
+     "apple": 77,
+     "fruit": 437,
+     "none": 1
+    }
+   }
+  },
+  {
+   "run": "REG_ep211_s2113",
+   "label": "회귀211",
+   "request": 22,
+   "palm_apple_mm": 16.9,
+   "picked_by": "H",
+   "panels": {
+    "H": {
+     "apple": 10,
+     "fruit": 230,
+     "robot": 1,
+     "none": 4
+    },
+    "S": {
+     "apple": 72,
+     "fruit": 266,
+     "robot": 3,
+     "none": 4
+    },
+    "A": {
+     "apple": 83,
+     "fruit": 218,
+     "robot": 3,
+     "none": 4
+    },
+    "HS": {
+     "apple": 72,
+     "fruit": 298,
+     "robot": 3,
+     "none": 4
+    }
+   }
+  }
+ ]
+}

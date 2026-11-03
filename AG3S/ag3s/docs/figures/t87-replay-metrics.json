@@ -1,0 +1,127 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/replay/metrics/replay_metrics.json",
+ "definitions": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/replay/metrics/README_definitions.md",
+ "values": {
+  "remaining_CL": {
+   "median_pct": 14.12,
+   "n": 84
+  },
+  "remaining_B0p": {
+   "median_pct": 13.54,
+   "n": 84
+  },
+  "remaining_H": {
+   "median_pct": 13.15,
+   "n": 84
+  },
+  "remaining_S": {
+   "median_pct": 11.95,
+   "n": 84
+  },
+  "remaining_A": {
+   "median_pct": 11.54,
+   "n": 84
+  },
+  "remaining_HS": {
+   "median_pct": 11.95,
+   "n": 84
+  },
+  "freed_CL": {
+   "n": 503869,
+   "by_class": {
+    "obstacle": 363267,
+    "none": 120148,
+    "crate": 11057,
+    "table": 6916,
+    "apple": 2198,
+    "fruit": 211,
+    "robot": 72
+   },
+   "share_neighbour_table_crate": 0.0361
+  },
+  "freed_H": {
+   "n": 3554,
+   "by_class": {
+    "apple": 2657,
+    "fruit": 836,
+    "robot": 34,
+    "none": 27
+   },
+   "share_neighbour_table_crate": 0.2352
+  },
+  "freed_S": {
+   "n": 8990,
+   "by_class": {
+    "apple": 5954,
+    "fruit": 2375,
+    "none": 463,
+    "robot": 198
+   },
+   "share_neighbour_table_crate": 0.2642
+  },
+  "freed_A": {
+   "n": 9063,
+   "by_class": {
+    "apple": 6487,
+    "fruit": 1914,
+    "none": 463,
+    "robot": 199
+   },
+   "share_neighbour_table_crate": 0.2112
+  },
+  "freed_HS": {
+   "n": 11246,
+   "by_class": {
+    "apple": 8054,
+    "fruit": 2526,
+    "none": 467,
+    "robot": 199
+   },
+   "share_neighbour_table_crate": 0.2246
+  },
+  "flips_B0p HOLD -> execute": {
+   "CL": {
+    "all": 1,
+    "window": 1
+   },
+   "H": {
+    "all": 0,
+    "window": 0
+   },
+   "S": {
+    "all": 1,
+    "window": 1
+   },
+   "A": {
+    "all": 1,
+    "window": 1
+   },
+   "HS": {
+    "all": 1,
+    "window": 1
+   }
+  },
+  "flips_B0p execute -> HOLD": {
+   "CL": {
+    "all": 1,
+    "window": 1
+   },
+   "H": {
+    "all": 1,
+    "window": 1
+   },
+   "S": {
+    "all": 0,
+    "window": 0
+   },
+   "A": {
+    "all": 2,
+    "window": 2
+   },
+   "HS": {
+    "all": 1,
+    "window": 1
+   }
+  }
+ }
+}

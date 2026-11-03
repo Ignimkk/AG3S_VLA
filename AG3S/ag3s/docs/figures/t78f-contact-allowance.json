@@ -1,0 +1,177 @@
+{
+ "contact_separated": {
+  "BALL": {
+   "n": 27,
+   "region_left_frac_median": 0.0,
+   "region_left_frac_mean": 0.0546,
+   "requests_with_any_left": 5,
+   "region_left_total": 18,
+   "hand_layer_at_contact_mm_median": 20.0
+  },
+  "S5": {
+   "n": 27,
+   "region_left_frac_median": 0.0909,
+   "region_left_frac_mean": 0.1513,
+   "requests_with_any_left": 15,
+   "region_left_total": 47,
+   "hand_layer_at_contact_mm_median": 12.25
+  },
+  "S7": {
+   "n": 27,
+   "region_left_frac_median": 0.0,
+   "region_left_frac_mean": 0.1159,
+   "requests_with_any_left": 10,
+   "region_left_total": 35,
+   "hand_layer_at_contact_mm_median": 15.0
+  },
+  "S9": {
+   "n": 27,
+   "region_left_frac_median": 0.0,
+   "region_left_frac_mean": 0.0901,
+   "requests_with_any_left": 10,
+   "region_left_total": 28,
+   "hand_layer_at_contact_mm_median": 15.81
+  },
+  "S10": {
+   "n": 27,
+   "region_left_frac_median": 0.0,
+   "region_left_frac_mean": 0.0901,
+   "requests_with_any_left": 10,
+   "region_left_total": 28,
+   "hand_layer_at_contact_mm_median": 15.81
+  }
+ },
+ "separated": {
+  "BALL": {
+   "n": 35,
+   "apple_removed_pct_median": 82.9,
+   "neighbour_voxels": 29,
+   "table_voxels": 0,
+   "robot_voxels": 2261,
+   "none_voxels": 4327,
+   "apple_voxels": 25329,
+   "precision_pct": 99.9,
+   "requests_with_table": 0
+  },
+  "S5": {
+   "n": 35,
+   "apple_removed_pct_median": 77.0,
+   "neighbour_voxels": 0,
+   "table_voxels": 0,
+   "robot_voxels": 2180,
+   "none_voxels": 3098,
+   "apple_voxels": 24864,
+   "precision_pct": 100.0,
+   "requests_with_table": 0
+  },
+  "S7": {
+   "n": 35,
+   "apple_removed_pct_median": 78.2,
+   "neighbour_voxels": 0,
+   "table_voxels": 0,
+   "robot_voxels": 2227,
+   "none_voxels": 3105,
+   "apple_voxels": 24941,
+   "precision_pct": 100.0,
+   "requests_with_table": 0
+  },
+  "S9": {
+   "n": 35,
+   "apple_removed_pct_median": 79.6,
+   "neighbour_voxels": 0,
+   "table_voxels": 0,
+   "robot_voxels": 2235,
+   "none_voxels": 3111,
+   "apple_voxels": 25017,
+   "precision_pct": 100.0,
+   "requests_with_table": 0
+  },
+  "S10": {
+   "n": 35,
+   "apple_removed_pct_median": 79.8,
+   "neighbour_voxels": 0,
+   "table_voxels": 0,
+   "robot_voxels": 2244,
+   "none_voxels": 3184,
+   "apple_voxels": 25089,
+   "precision_pct": 100.0,
+   "requests_with_table": 0
+  }
+ },
+ "touching": {
+  "BALL": {
+   "n": 57,
+   "apple_removed_pct_median": 74.0,
+   "neighbour_voxels": 2055,
+   "table_voxels": 0,
+   "robot_voxels": 6528,
+   "none_voxels": 8849,
+   "apple_voxels": 40102,
+   "precision_pct": 95.1,
+   "requests_with_table": 0
+  },
+  "S5": {
+   "n": 57,
+   "apple_removed_pct_median": 65.6,
+   "neighbour_voxels": 11925,
+   "table_voxels": 0,
+   "robot_voxels": 6894,
+   "none_voxels": 12123,
+   "apple_voxels": 38592,
+   "precision_pct": 76.4,
+   "requests_with_table": 0
+  },
+  "S7": {
+   "n": 57,
+   "apple_removed_pct_median": 68.7,
+   "neighbour_voxels": 13675,
+   "table_voxels": 0,
+   "robot_voxels": 7098,
+   "none_voxels": 12521,
+   "apple_voxels": 39165,
+   "precision_pct": 74.1,
+   "requests_with_table": 0
+  },
+  "S9": {
+   "n": 57,
+   "apple_removed_pct_median": 73.4,
+   "neighbour_voxels": 14231,
+   "table_voxels": 0,
+   "robot_voxels": 7165,
+   "none_voxels": 12575,
+   "apple_voxels": 39453,
+   "precision_pct": 73.5,
+   "requests_with_table": 0
+  },
+  "S10": {
+   "n": 57,
+   "apple_removed_pct_median": 74.2,
+   "neighbour_voxels": 14504,
+   "table_voxels": 0,
+   "robot_voxels": 7168,
+   "none_voxels": 12778,
+   "apple_voxels": 39621,
+   "precision_pct": 73.2,
+   "requests_with_table": 0
+  }
+ },
+ "criteria": {
+  "S9": {
+   "1_contact_median_0_and_mean<=BALL": false,
+   "2_neighbour<=BALL": true,
+   "3_table<=BALL": true,
+   "pass": false
+  },
+  "S10": {
+   "1_contact_median_0_and_mean<=BALL": false,
+   "2_neighbour<=BALL": true,
+   "3_table<=BALL": true,
+   "pass": false
+  }
+ },
+ "scene_left_points": {
+  "분할 없음 + hull": 6,
+  "+ target 유지 기억": 6,
+  "+ 접촉 여유 10 mm": 5
+ }
+}
