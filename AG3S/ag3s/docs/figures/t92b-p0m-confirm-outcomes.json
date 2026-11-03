@@ -1,0 +1,168 @@
+{
+ "rows": [
+  {
+   "run": "회귀211_k0",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "이웃접촉",
+   "no-hull seed2 (k1)": "성공"
+  },
+  {
+   "run": "회귀954_k0",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "성공",
+   "no-hull seed2 (k1)": "성공"
+  },
+  {
+   "run": "회귀119_k1",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "쥐지못함",
+   "no-hull seed1 (k0)": "쥐지못함",
+   "no-hull seed2 (k1)": "쥐지못함"
+  },
+  {
+   "run": "가림121_k0",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "성공",
+   "no-hull seed2 (k1)": "성공"
+  },
+  {
+   "run": "가림122_k0",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "성공",
+   "no-hull seed2 (k1)": "쥐지못함"
+  },
+  {
+   "run": "허들119_k0",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "성공",
+   "no-hull seed2 (k1)": "성공"
+  },
+  {
+   "run": "허들954_k0",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "성공",
+   "no-hull seed2 (k1)": "못놓음"
+  },
+  {
+   "run": "허들1345_k0",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "못놓음",
+   "no-hull seed2 (k1)": "성공"
+  },
+  {
+   "run": "허들850_k0",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "쥐지못함",
+   "no-hull seed2 (k1)": "성공"
+  },
+  {
+   "run": "허들119_k1",
+   "P0m seed1 (k0)": "허들접촉",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "못놓음",
+   "no-hull seed2 (k1)": "성공"
+  },
+  {
+   "run": "허들250_k0",
+   "P0m seed1 (k0)": "허들접촉",
+   "P0m seed2 (k1)": "쥐지못함",
+   "no-hull seed1 (k0)": "못놓음",
+   "no-hull seed2 (k1)": "못놓음"
+  },
+  {
+   "run": "허들250_k1",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "쥐지못함",
+   "no-hull seed1 (k0)": "못놓음",
+   "no-hull seed2 (k1)": "못놓음"
+  },
+  {
+   "run": "허들320_k0",
+   "P0m seed1 (k0)": "못놓음",
+   "P0m seed2 (k1)": "못놓음",
+   "no-hull seed1 (k0)": "못놓음",
+   "no-hull seed2 (k1)": "못놓음"
+  },
+  {
+   "run": "허들320_k1",
+   "P0m seed1 (k0)": "쥐지못함",
+   "P0m seed2 (k1)": "못놓음",
+   "no-hull seed1 (k0)": "쥐지못함",
+   "no-hull seed2 (k1)": "못놓음"
+  },
+  {
+   "run": "허들850_k1",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "성공",
+   "no-hull seed2 (k1)": "성공"
+  },
+  {
+   "run": "허들954_k1",
+   "P0m seed1 (k0)": "성공",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "성공",
+   "no-hull seed2 (k1)": "못놓음"
+  },
+  {
+   "run": "허들1345_k1",
+   "P0m seed1 (k0)": "못놓음",
+   "P0m seed2 (k1)": "성공",
+   "no-hull seed1 (k0)": "성공",
+   "no-hull seed2 (k1)": "성공"
+  }
+ ],
+ "set9": {
+  "P0m seed1 (k0)": 9,
+  "P0m seed2 (k1)": 8,
+  "no-hull seed1 (k0)": 5,
+  "no-hull seed2 (k1)": 6
+ },
+ "unique_success": {
+  "P0m seed1 (k0)": 12,
+  "P0m seed2 (k1)": 8,
+  "no-hull seed1 (k0)": 8,
+  "no-hull seed2 (k1)": 6
+ },
+ "unique_n": {
+  "P0m seed1 (k0)": 17,
+  "P0m seed2 (k1)": 11,
+  "no-hull seed1 (k0)": 17,
+  "no-hull seed2 (k1)": 11
+ },
+ "forbidden_runs_new_def": {
+  "P0m seed1 (k0)": 2,
+  "P0m seed2 (k1)": 0,
+  "no-hull seed1 (k0)": 1,
+  "no-hull seed2 (k1)": 0
+ },
+ "forbidden_9run": {
+  "P0m seed1 (k0)": 0,
+  "P0m seed2 (k1)": 0,
+  "no-hull seed1 (k0)": 1,
+  "no-hull seed2 (k1)": 0
+ },
+ "table_basket_runs": {
+  "P0m seed1 (k0)": 0,
+  "P0m seed2 (k1)": 0,
+  "no-hull seed1 (k0)": 0,
+  "no-hull seed2 (k1)": 0
+ },
+ "k1_duplicates": [
+  "허들119_k1",
+  "허들1345_k1",
+  "허들250_k1",
+  "허들320_k1",
+  "허들850_k1",
+  "허들954_k1"
+ ],
+ "note": "k1 used perturb seed 2 for every item, so each hurdle 'no jitter' / 'jitter 1' pair is the same run in k1; unique counts drop the jitter-1 twin."
+}

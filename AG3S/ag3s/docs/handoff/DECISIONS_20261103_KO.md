@@ -17,6 +17,11 @@
 4. **미채택 4 건 이견 없음:** P1 (충돌 없으면 통과) 은 1 번 (P0m 채택) 뒤 재시험, T93 은 T93b 로, T90 은 seed 가 아니라 "후보 중 prompt 물체 확인자" 역할로 나중에 재설계, T91c 는 benchmark 선택지.
 5. **확정 문서 수정:** P0_FINAL_CONFIG · ADOPTED A9 — 옛 3 단계 gate 는 P0 에서 켜져 있었고 P0m 에서 latch 로 대체, A9.2 HSR 5 단계 채택 철회 (`--hsr5` 끔), ball-owned 인자 무효 · `--nontarget-evidence surface` 금지, 바닥 띠 guard 5 mm 와 잔여 측정 제외 6 mm 는 다른 값, 평가 정의의 "붙은 (10 mm)" 조건은 D2 로 뺌, 코드 기준 HEAD f964439d (코드 63e98cc8) · main 32a45fb8 · 새 flag 기본 꺼짐. → 반영함 (18:4x KST).
 
+## 0.2 사용자 판정 (2026-11-04 00:xx KST)
+
+1. **T92b → hull 채우기 · 접촉 여유 10 mm 포함을 최종으로 확정.** 단, 껐다 켰다 할 수 있게 둔다 — 이미 각각 독립 기본 꺼짐 flag (`--surface-hull-fill`, `--surface-contact-allowance-mm M`), benchmark 는 `p0m` · `p0m-nohull` 판. "32 run 전 확정 안 함" 문장은 T92b 로 닫는다.
+2. **Panda P0m 의 TrajOpt 정의:** 제안대로 — benchmark 가 같은 LIBERO 9 episode 로 (c) 연속성 · 꺾임 변화율 항만 끈 판, (b) pc판의 Panda 보정을 얹은 판 (target 범위 · 단계 판정은 P0m 그대로, HSR6 끔), (d) 충돌 없으면 VLA 그대로 통과 (`--passthrough-when-clear`) 를 붙인 판을 돌려 포화 원인을 가른다. 성공이 비슷하면 보정이 적은 쪽. SafeLIBERO closed loop 전에 "지운 voxel 0 call 41 %" 원인을 기록으로 확인.
+
 ## 1. 판정 목록
 
 | # | 판정 | 왜 | 다른 선택지 | 틀렸으면 다시 돌릴 것 |

@@ -1,7 +1,7 @@
 # P0 최종 구성 — benchmark checkout 으로 옮길 때 알아야 할 모든 것
 
 > writer: lead (development 세션 ce) · 2026-11-03 KST · 읽는 쪽: benchmark checkout 세션 (Panda · SafeLIBERO · LIBERO-safety)
-> 상태: **사용자가 P0 를 최종 구성으로 두는 데 찬성 (2026-11-03 오전).** **갱신 (2026-11-03 18:2x KST, 사용자 판정): 최종 구성 = P0m = P0 + `--subtask-from-latch` (T92).** 최종 확정은 T92b (seed 반복 + hull · 접촉 여유 짝 비교) 결과로 한다 — T92b 에서 hull 채우기 · 접촉 여유 10 mm 를 뺀 구성이 차이 ≤ 2 run 이면 그 구성이 최종이다 (`T92b.task.md`).
+> 상태: **사용자가 P0 를 최종 구성으로 두는 데 찬성 (2026-11-03 오전).** **갱신 (2026-11-03 18:2x KST, 사용자 판정): 최종 구성 = P0m = P0 + `--subtask-from-latch` (T92).** **최종 확정 (2026-11-04 사용자 판정, T92b): hull 채우기 · 접촉 여유 10 mm 포함.** T92b: P0m 9 run 17 / 18 · 금지 0 · 탁자 0 (확정 조건 충족), 뺀 구성 11 / 18. **두 기능은 각각 독립 flag 로 끄고 켤 수 있다** — 켜기 `--surface-hull-fill` · `--surface-contact-allowance-mm 10`, 끄기 = 그 flag 를 명령줄에서 뺀다 (코드 기본 꺼짐). benchmark 는 `p0m` (포함) · `p0m-nohull` (뺌) 판으로 같은 전환을 한다 (`AG3S/adapters/panda/profile.py` `P0M_HULL_FLAGS`).
 > 코드 기준: development HEAD `f964439d` (코드 `63e98cc8`), main `32a45fb8` (+ 이식 지시 문서 merge `a0b16d0a`). **모든 새 flag 는 기본 꺼짐.**
 > 근거: `outputs/2026-11-03_T88_P0_HSR끔_G1끔_단순구성_closedloop/README.md` (RB-Y1 MuJoCo 같은 10 run: 옛 정의 7 / 10, 새 정의 9 / 10, 금지 접촉 0; 허들 211 제외 9 run 으로는 7 / 9 · 9 / 9).
 
@@ -20,8 +20,8 @@
 | **target 범위 (최종)** | **표면 추출 (T78): depth 연속 graph (5 mm node, jump 10 mm) 위에서 attention seed 로 영역을 고름. 공 (ball) 은 끔** | `--target-extent attention-surface --surface-no-ball --attention-surface-device cuda` |
 | 영역 검사 · 유지 | 영역이 ATS target 점과 10 mm 안에서 50 % 이상 겹쳐야 채택 · 영역이 없는 요청은 직전 채택 영역 유지 · 쥐는 동안 영역 고정 | `--surface-target-check overlap --surface-keep-last --surface-grasp-hold` |
 | 영역 분할 (그리퍼 폭 · attention) | **쓰지 않음 (폐기)** | `--surface-split` 금지 |
-| 쥐기 직전 hull 채우기 | latch latched · closing 또는 손바닥이 영역 중심 80 mm 안: 마지막 영역 convex hull + 5 mm 안 seed 를 손 층에서 지움 | `--surface-hull-fill` |
-| 손 층 target 접촉 여유 | target 표본 10 mm 안 · 지지면 guard 위 seed 를 지움 (구간 제한 없음) | `--surface-contact-allowance-mm 10` |
+| 쥐기 직전 hull 채우기 **(최종 포함, 끄고 켜기 가능)** | latch latched · closing 또는 손바닥이 영역 중심 80 mm 안: 마지막 영역 convex hull + 5 mm 안 seed 를 손 층에서 지움 | `--surface-hull-fill` (빼면 꺼짐) |
+| 손 층 target 접촉 여유 **(최종 포함, 끄고 켜기 가능)** | target 표본 10 mm 안 · 지지면 guard 위 seed 를 지움 (구간 제한 없음) | `--surface-contact-allowance-mm 10` (빼면 꺼짐, 값으로 여유 조정) |
 | 지지면 guard (바닥 띠) | 사과 바닥 + 1 미세 voxel (5 mm) 아래는 **일부러 남김** (탁자를 지우지 않으려고). **주의: 이 guard 5 mm 와 잔여 voxel 측정에서 빼는 띠 (바닥 + 6 mm 이하) 는 다른 값이다** — 6 mm 는 평가 정의 (사용자 2026-11-02) | 코드 기본 (LTE-16) |
 | 기존 ball-owned 인자 | 명령줄에 남아 있으나 **무효** — `--target-extent attention-surface` + `--surface-no-ball` 이면 target 범위는 표면 추출이 정하고 공은 쓰지 않는다 | `--target-exclusion ball-owned --owned-max-dist-voxels 3` (명령줄에만 남음) |
 | 비 target 증거 (`--nontarget-evidence surface`) | **쓰지 않음** — T46c 에서 채택했던 것을 표면 추출이 대체 | **금지** |
