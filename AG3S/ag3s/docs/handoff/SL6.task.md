@@ -23,6 +23,7 @@
 | 2026-10-30 (~10:10 KST, §9 smoke 진행 중) | §9 다음에 **TrajOpt 를 E0 버전으로 한 smoke** 를 한다 (§10). "E0" = AG3S-PRE-CORE-TO 의 현재 TO 기준선 (E1–E3 이전). 정의 (사용자): 3판에서 **TO 설정 전체를 E0 때로** — GPU 여러 초기값 (A2) 과 최소 개입 gate (pb2) 를 빼고, **연속성 항 · 꺾임 변화율 항은 쥔 뒤에만** 쓴다 (`--continuity-after-grasp --deflection-rate-after-grasp`, 무게는 기본 0.5 · 20). 판정은 3판 대비 |
 | 2026-10-30 (~12:00 KST, §10 결과 · 성공률 진단 뒤) | §10 판정대로 **E0 TrajOpt 채택** (E0판 안전 1 · 충돌 5 vs 3판 1 · 7). 성공률 진단 (`outputs/2026-10-30_작업성공률저하_원인진단_Panda/`): 실패 10 개 중 5 개는 놓기 단계에서 TrajOpt 가 하강을 막음, 4 개 (task 3) 는 target 을 다른 bowl · plate 로 고름. 사용자 판정: **(1) placement 단계 접촉 허용 = HSR6 placement ∧ 쥐고 있음 일 때 쥔 물체 행만 지지면 · 바로 아래 물체 (plate) 와의 접촉 허용, 손 · 팔 · 주변 장애물은 그대로** (§11). **(2) task 3 target 오류는 원인 분리 (attention 대 grounding) 를 먼저** 한다 (lead, CPU) |
 | 2026-10-30 (~15:40 KST, task 3 원인 분리 뒤) | 원인 분리 (`outputs/2026-10-30_task3_target오류_원인분리/`): 첫 call (frame 20–30) 에는 진짜 bowl 이 손목 화면 밖이라 L8H2 가 plate · 다른 bowl 을 보고, frame 35–45 에 attention 90–99 % 가 진짜 bowl 로 옮겨 가도 target 이 바뀌지 않는다 (LATCHED 잠금 · grounding 유지). 사용자 판정: **target 교체를 넣는다** (§12). 사용자 질문 "입력 이미지 몇 장" → 2 장 (head · 손목, 세 번째 자리는 mask False) |
+| 2026-10-30 (~17:15 KST, §11 smoke 뒤) | §11 pc판: 안전 1 · 공식 1 · 충돌 5 = E0판 → 규칙상 채택이지만 11 episode 결과가 E0판과 같다 (8 개 action bit 동일). 규칙이 3 episode · 10 call 에서만 행을 풀었다 (HSR6 가 plate 위를 transport 로 판정, latch 미인식, 쥔 물체 행 밖의 제약이 하강을 막음). `outputs/2026-10-30_Panda_placement접촉허용_SafeLIBERO-LI-dev11/`. 사용자 판정: **다음 단계 (제약 기록 진단 · §12 target 교체) 는 보류** |
 
 ## 1. Panda 최종 구성 (이식 대상) 의 정의
 
