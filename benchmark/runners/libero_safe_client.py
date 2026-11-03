@@ -340,6 +340,10 @@ class SafeClient(object):
             # SL6-H H2 — the server's HSR6 record of this call (phase, p, per-flag changes, placement contact);
             # logging only. Absent (V11AB / pb servers, HSR6 off): the row keeps its keys.
             row["hsr6"] = base._jsonable(resp.get("panda/hsr6"))
+        if "panda/surface" in resp:
+            # SL7i — the server's attention-surface record of this call (surface applied / fallback / why);
+            # logging only. Absent (versions without the attention-surface extent): the row keeps its keys.
+            row["surface"] = base._jsonable(resp.get("panda/surface"))
         if "panda/actions_policy" in resp:
             pol = np.asarray(resp["panda/actions_policy"], np.float64)
             row["max_abs_action_change_executed"] = float(np.max(np.abs(executed.astype(np.float64) - pol[:n]))) if n else 0.0
