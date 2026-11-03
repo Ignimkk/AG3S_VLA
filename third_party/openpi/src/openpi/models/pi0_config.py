@@ -36,6 +36,11 @@ class Pi0Config(_model.BaseModelConfig):
     # pass. Adds no parameters, so the same checkpoints load either way. `sample_actions` is not
     # supported while this is on -- drive the prefix/suffix passes directly instead.
     return_attn_probs: bool = False
+    # Inference-only (T73). When True the LLM additionally returns the PaliGemma (expert 0) hidden
+    # states of every layer, [depth + 1, B, T, width] (h_0 = input embedding). Adds no parameters;
+    # `sample_actions` / `compute_loss` are not supported while this is on -- drive the prefix pass
+    # directly (see `AG3S/ag3s/experiments/sources/pi05_hidden.py`).
+    return_hidden_states: bool = False
 
     pytorch_compile_mode: str | None = "max-autotune"
 

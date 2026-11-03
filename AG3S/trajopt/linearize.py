@@ -118,7 +118,8 @@ class _BufferedCall:
 #: `held_rows_record`, `sqp._finish`, the held radii on `query_radii`) see what they saw before.
 _CLEARANCE_SIDE_ATTRS = ("query_radii", "_last_obstacle_class", "_last_held_rows", "_last_lookahead",
                          "last_target_free_tiers", "_last_grasp_contact", "_last_neighbour_contact",
-                         "_last_neighbour_palm_contact", "_last_placement_contact")
+                         "_last_neighbour_palm_contact", "_last_placement_contact",
+                         "_last_support_surface_offset", "_last_support_offset_rows")
 _MISSING = object()
 
 
@@ -317,6 +318,11 @@ class SceneSnapshot:
     #: exemption). Robot rows (hand · fingers · arm) never change; a held row whose nearest surface is beside or above it
     #: keeps its margin. `CollisionLinearizer._placement_contact_margin`.
     placement_contact: Optional[dict] = None
+    #: **T67 ① — support-surface offset of the fine layers (m).** `0.0` (default) = as before. `> 0`: a robot row whose
+    #: nearest surface `_obstacle_rows` classes `support` and whose distance a fine tier answered (`answer_tier` ∈
+    #: {`fine`, `target_free`}) reads `d + offset` (`_support_surface_offset`); gradient unchanged. Set by
+    #: `scene_from_constraint_set` from `collision.support_surface_offset`.
+    support_surface_offset: float = 0.0
 
     @property
     def has_esdf(self) -> bool:
@@ -886,6 +892,12 @@ class CollisionLinearizer:
             full = np.full(out.shape[:2], _OBSTACLE, np.int8)
             full[steps] = cls
             self._last_obstacle_class = full
+        sup = self.__dict__.get("_last_support_offset_rows")
+        if sup is not None and sup.shape == sub.shape[:2]:
+            # T67 ① record only (`_identify` reads the worst row's offset; a skipped step is never worst)
+            full_sup = np.zeros(out.shape[:2], bool)
+            full_sup[steps] = sup
+            self._last_support_offset_rows = full_sup
         last = self.__dict__.get("_last_lookahead")
         if isinstance(last, dict):
             self._last_lookahead = {**last, "stride": stride,
@@ -1063,8 +1075,9 @@ class CollisionLinearizer:
             # SL6-H (HSR6 ⑤) — held rows only: a surface beneath the held object does not block it.
             margin = self._placement_contact_margin(pc, margin, d, centres, radii, scene, n_query)
         nb = getattr(scene, "neighbour_contact", None)
-        if nb is not None and float(nb.get("depth", 0.0)) > 0.0:
+        if nb is not None and (float(nb.get("depth", 0.0)) > 0.0 or bool(nb.get("at_zero", False))):
             # IFG-NBC — the grasping fingers may overlap a neighbour obstacle near the target by up to `depth`.
+            # T67 ③: `at_zero` (`--neighbour-contact-mm 0`) = on with depth 0 — those rows require `d − r ≥ 0`.
             if d_object is None and (scene.manipulated_points is not None or scene.manipulated_spheres is not None):
                 d_object = self._manipulated_distance(flat, scene)
                 if d_object is not None:
@@ -1085,6 +1098,11 @@ class CollisionLinearizer:
             margin = self._neighbour_palm_contact(npc, d, flat, centres, radii, margin, scene, d_object,
                                                   is_dest_flat, obstacle_margin, n_query)
         clear = d - radii[None, :] - margin
+        offset = float(getattr(scene, "support_surface_offset", 0.0) or 0.0)
+        if offset > 0.0:
+            # T67 ① — the fine layers' table top stands ~5 mm above the real one: support rows read `d + offset`.
+            sel = self._support_surface_offset(offset, d, flat, scene, d_object, obstacle_margin, n_query)
+            clear = np.where(sel, clear + offset, clear)
         start = getattr(self, "lookahead_from", None)
         if start is not None and 0 < int(start) < clear.shape[0]:
             # T43 TA (A): the look-ahead tail keeps only obstacle rows (`_lookahead_keep`).
@@ -1250,6 +1268,60 @@ class CollisionLinearizer:
                                                 if w.any() else None))
         self._last_neighbour_palm_contact = rec
         return np.where(cand, -depth, margin)
+
+    #: T67 ① — the tiers whose answer is the fine (5 mm) TSDF layer: the main fine layer and the target-free one.
+    SUPPORT_OFFSET_TIERS = ("fine", "target_free")
+
+    def _support_surface_offset(self, offset: float, d: np.ndarray, flat: np.ndarray, scene: SceneSnapshot,
+                                d_object: Optional[np.ndarray], obstacle_margin: float, n_query: int) -> np.ndarray:
+        """T67 ① — `(H, n_query)` bool: the rows that read `d + offset` (`scene.support_surface_offset`).
+
+        | row condition | why |
+        |---|---|
+        | robot row (not held) | the held object's rows keep their rule (task §2) |
+        | `_obstacle_rows` class `support` | the table / floor plane (`|d − s| ≤ 2` fine voxels); obstacle and target rows keep `d` |
+        | `answer_tier` ∈ `SUPPORT_OFFSET_TIERS` (`fine` · `target_free`) | the measured bias is the fine layers' (T67 §1); the coarse 20 mm layer, the window edge bound, the analytic channel and outside the grid keep `d` |
+
+        The class is decided on the uncorrected `d` (the same class table the obstacle margin uses). The tier is asked
+        on the support rows only, with the row's own target-free flag (`_target_free_rows`) — the same composite that
+        gave `d`. A field that cannot name its tiers is refused (the offset would silently do nothing or everything).
+        Record `self._last_support_surface_offset` (read by `sqp._finish` into `to.metrics`) and the row mask
+        `self._last_support_offset_rows` (read by `_identify`).
+        """
+        if getattr(scene, "obstacle_margin_support", False):
+            raise ValueError("support_surface_offset: obstacle_margin_support classes no row `support` — the offset "
+                             "would change nothing (serve_safe refuses the pair)")
+        tier_of = getattr(scene.esdf, "answer_tier", None)
+        if tier_of is None:
+            raise ValueError("support_surface_offset needs a field that names the tier of each answer "
+                             "(`answer_tier`, CuroboEsdfField) — it applies to the fine layers only")
+        if d_object is None and (scene.manipulated_points is not None or scene.manipulated_spheres is not None):
+            d_object = self._manipulated_distance(flat, scene)
+            if d_object is not None:
+                d_object = d_object.reshape(d.shape)
+        cls = (self._last_obstacle_class if obstacle_margin > 0.0
+               else self._obstacle_rows(d, flat, scene, d_object))
+        support = cls == _SUPPORT
+        support[:, self.n_spheres:] = False
+        sel = np.zeros(d.shape, bool)
+        idx = np.flatnonzero(support.reshape(-1))
+        by_tier: dict[str, int] = {}
+        if idx.size:
+            free_rows = self._target_free_rows(scene, n_query)
+            flags = (False if free_rows is None
+                     else np.broadcast_to(free_rows[None, :], d.shape).reshape(-1)[idx])
+            tiers = np.asarray(tier_of(flat[idx], target_free=flags)).reshape(-1).astype(str)
+            names, counts = np.unique(tiers, return_counts=True)
+            by_tier = {str(k): int(v) for k, v in zip(names, counts)}
+            sel.reshape(-1)[idx[np.isin(tiers, self.SUPPORT_OFFSET_TIERS)]] = True
+        rec: dict[str, Any] = {"offset_mm": round(offset * 1000.0, 3), "n_support_rows": int(support.sum()),
+                               "n_rows": int(sel.sum()), "support_rows_by_tier": by_tier}
+        start = getattr(self, "lookahead_from", None)
+        if start is not None and 0 < int(start) < d.shape[0]:
+            rec.update(window_steps=int(start), n_rows_window=int(sel[:int(start)].sum()))
+        self._last_support_surface_offset = rec
+        self._last_support_offset_rows = sel
+        return sel
 
     def _lookahead_keep(self, d: np.ndarray, centres: np.ndarray, scene: SceneSnapshot,
                         d_object: Optional[np.ndarray]) -> np.ndarray:
@@ -1757,6 +1829,14 @@ class CollisionLinearizer:
                     out["palm_shell_row"] = shell
                     if shell:
                         out["palm_shell_margin_m"] = float(scene.palm_shell_margin)
+            offset = float(getattr(scene, "support_surface_offset", 0.0) or 0.0)
+            sup = getattr(self, "_last_support_offset_rows", None)
+            if sup is not None and esdf_block is not None and sup.shape[1:] == esdf_block.shape[1:2]:
+                sup = sup[:esdf_block.shape[0]]            # `worst_row(steps=…)` certifies the executed window
+            if (offset > 0.0 and sup is not None and esdf_block is not None
+                    and sup.shape == esdf_block.shape[:2]):
+                # T67 ① — only when on: the offset the worst row read (0 = not a fine-tier support row).
+                out["support_surface_offset_m"] = offset if bool(sup[step, query]) else 0.0
         return out
 
     @staticmethod
@@ -2468,6 +2548,10 @@ def scene_from_constraint_set(constraint_set, robot_radii: np.ndarray,
         if shell_margin is not None:
             # AG3S-PRE-CORE-TO SCM — only when given (default `None`: no key, the snapshot as before).
             obstacle["palm_shell_margin"] = float(shell_margin)
+        offset = float(getattr(collision_cfg, "support_surface_offset", 0.0) or 0.0)
+        if offset > 0.0:
+            # T67 ① — only when given (default 0: no key, the snapshot as before).
+            obstacle["support_surface_offset"] = offset
         if bool(getattr(collision_cfg, "held_obstacle_margin", False)):
             # T43 HM — the held rows are classified too; the capture volume only while holding.
             obstacle["held_obstacle_margin"] = True

@@ -116,7 +116,8 @@ class SafeRemoteClient:
                  active_manipulators: Sequence[str] = (), trace_dir: Optional[str] = None,
                  shadow: bool = False, gate: str = "reasons",
                  gate_table: Optional[dict[str, str]] = None,
-                 oracle_target: Optional[str] = None):
+                 oracle_target: Optional[str] = None,
+                 gt_stage: Any = None):
         if gate not in GATE_MODES:
             raise ValueError(f"gate must be one of {GATE_MODES}, got {gate!r}")
         if gate == "off" and shadow:
@@ -139,6 +140,9 @@ class SafeRemoteClient:
         self.oracle_target = None if oracle_target is None else str(oracle_target)
         self._oracle_lut = None
         self._oracle_codes: dict[str, int] = {}
+        #: T85 — `gt_stage.GtStageSource` (analysis only): this request's MuJoCo ground-truth stage rides on the
+        #: request (`wire.GT_STAGE`). None (default) = nothing is measured or sent, the request is as before.
+        self.gt_stage = gt_stage
         if self.oracle_target is not None:
             self._oracle_lut, self._oracle_codes = self._oracle_code_table(scene, self.oracle_target)
 
@@ -525,6 +529,15 @@ class SafeRemoteClient:
                 "the server runs the visible-target oracle (esdf.target_extent = oracle_visible) and needs "
                 "the GT segmentation in every request — start the client with the oracle target "
                 "(pi05_infer --safe-oracle-seg / SafeRemoteClient(oracle_target=...))")
+        # --- T85 — begin
+        if bool(meta.get(wire.GT_STAGE_REQUIRED, False)) != (self.gt_stage is not None):
+            # the stage source must be the same on both ends: a server that waits for the ground truth fed by a
+            # client that sends none would silently run "no label" requests, and the reverse sends a stage nobody reads
+            raise RuntimeError(
+                "gt-stage pairing: the server " + ("runs" if meta.get(wire.GT_STAGE_REQUIRED) else "does not run")
+                + " --hsr-gt-stage but this client " + ("sends" if self.gt_stage is not None else "does not send")
+                + " the MuJoCo ground-truth stage (pi05_infer --safe-gt-stage). Start both or neither.")
+        # --- T85 — end
         if bool(meta.get("shadow", False)) == self.shadow:
             return
         raise RuntimeError(self._pairing_message(server_shadow=not self.shadow))
@@ -667,6 +680,14 @@ class SafeRemoteClient:
         if self.oracle_target is not None:
             seg, meta = self._oracle_images(frames)
             oracle = {"oracle_seg": seg, "oracle_seg_meta": meta}
+        # --- T85 — begin (off: not even measured)
+        if self.gt_stage is not None:
+            if reset:
+                self.gt_stage.reset()
+            stage = self.gt_stage.next_stage()
+            if stage is not None:
+                oracle["gt_stage"] = stage
+        # --- T85 — end
         return wire.pack_request(
             obs, cameras=self.cameras, depth=depth, intrinsics=K, extrinsics=T,
             robot_state=state, stamps=stamps, phase=self.phase,

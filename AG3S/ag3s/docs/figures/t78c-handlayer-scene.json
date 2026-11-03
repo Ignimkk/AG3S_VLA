@@ -1,0 +1,25 @@
+{
+ "run": "허들119_k0",
+ "request": 13,
+ "palm_apple_mm": 22.0,
+ "S5": {
+  "apple_seen": 408,
+  "apple_left": 94,
+  "left_z_rel_centre_mm_median": -21.0,
+  "left_toward_head_cam_frac": 0.117,
+  "finger_to_nearest_left_mm": [
+   31.9,
+   58.9
+  ]
+ },
+ "BALL": {
+  "apple_seen": 408,
+  "apple_left": 64,
+  "left_z_rel_centre_mm_median": -23.6,
+  "left_toward_head_cam_frac": 0.078,
+  "finger_to_nearest_left_mm": [
+   74.4,
+   63.4
+  ]
+ }
+}

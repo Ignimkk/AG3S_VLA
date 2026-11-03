@@ -1,0 +1,53 @@
+{
+ "A2_ep56_left": {
+  "requested": "apple_2",
+  "target_class_counts": {
+   "apple_2": 22,
+   "none": 15
+  },
+  "agreement": {
+   "n_judged": 8,
+   "n_agree": 8,
+   "rate": 1.0,
+   "first_disagreement_request": null
+  },
+  "first_gt_held_request": 21,
+  "held_apple": {
+   "apple_2": "left"
+  },
+  "min_palm_mm": {
+   "left": {
+    "apple": 274.6,
+    "apple_2": 13.9
+   },
+   "right": {
+    "apple": 190.6,
+    "apple_2": 194.9
+   }
+  }
+ },
+ "A2_ep56_right": {
+  "requested": "apple",
+  "target_class_counts": {
+   "apple_2": 75
+  },
+  "agreement": {
+   "n_judged": 10,
+   "n_agree": 6,
+   "rate": 0.6,
+   "first_disagreement_request": 17
+  },
+  "first_gt_held_request": null,
+  "held_apple": null,
+  "min_palm_mm": {
+   "left": {
+    "apple": 542.3,
+    "apple_2": 97.1
+   },
+   "right": {
+    "apple": 176.6,
+    "apple_2": 582.2
+   }
+  }
+ }
+}

@@ -1,0 +1,206 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-development/outputs/2026-11-01_T84_접촉여유_closedloop_쥐지못한이유/summary.json",
+ "vmax_mm": 40.0,
+ "panels": {
+  "T84off/회귀954_k0": {
+   "request": 20,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 419,
+    "n_apple_voxels_visible_wrist": 10,
+    "n_left": 122,
+    "frac_left": 0.2912,
+    "n_left_visible": 0,
+    "n_left_hidden": 122,
+    "n_left_1voxel": 122,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "이번 frame 에 안 보임 (기억만)": 31,
+     "target 표본에서 멂 (제거 후보 아님)": 16,
+     "제거 목록에 있으나 손 층 값 <= 0": 21,
+     "지지면 guard 아래": 54
+    },
+    "left_causes_visible": {},
+    "left_causes_hidden": {
+     "이번 frame 에 안 보임 (기억만)": 31,
+     "target 표본에서 멂 (제거 후보 아님)": 16,
+     "제거 목록에 있으나 손 층 값 <= 0": 21,
+     "지지면 guard 아래": 54
+    }
+   },
+   "n_apple_px": 421,
+   "n_left_px": 0,
+   "frac_left_px": 0.0,
+   "hold": false,
+   "row": null
+  },
+  "T84on/회귀954_k0": {
+   "request": 19,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 403,
+    "n_apple_voxels_visible_wrist": 33,
+    "n_left": 105,
+    "frac_left": 0.2605,
+    "n_left_visible": 0,
+    "n_left_hidden": 105,
+    "n_left_1voxel": 105,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "이번 frame 에 안 보임 (기억만)": 24,
+     "target 표본에서 멂 (제거 후보 아님)": 13,
+     "제거 목록에 있으나 손 층 값 <= 0": 11,
+     "지지면 guard 아래": 57
+    },
+    "left_causes_visible": {},
+    "left_causes_hidden": {
+     "이번 frame 에 안 보임 (기억만)": 24,
+     "target 표본에서 멂 (제거 후보 아님)": 13,
+     "제거 목록에 있으나 손 층 값 <= 0": 11,
+     "지지면 guard 아래": 57
+    }
+   },
+   "n_apple_px": 6250,
+   "n_left_px": 0,
+   "frac_left_px": 0.0,
+   "hold": false,
+   "row": null
+  },
+  "T84off/허들954_k0": {
+   "request": 21,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 410,
+    "n_apple_voxels_visible_wrist": 31,
+    "n_left": 116,
+    "frac_left": 0.2829,
+    "n_left_visible": 0,
+    "n_left_hidden": 116,
+    "n_left_1voxel": 116,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "이번 frame 에 안 보임 (기억만)": 25,
+     "target 표본에서 멂 (제거 후보 아님)": 15,
+     "제거 목록에 있으나 손 층 값 <= 0": 12,
+     "지지면 guard 아래": 64
+    },
+    "left_causes_visible": {},
+    "left_causes_hidden": {
+     "이번 frame 에 안 보임 (기억만)": 25,
+     "target 표본에서 멂 (제거 후보 아님)": 15,
+     "제거 목록에 있으나 손 층 값 <= 0": 12,
+     "지지면 guard 아래": 64
+    }
+   },
+   "n_apple_px": 5823,
+   "n_left_px": 0,
+   "frac_left_px": 0.0,
+   "hold": false,
+   "row": null
+  },
+  "T84on/허들954_k0": {
+   "request": 20,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 415,
+    "n_apple_voxels_visible_wrist": 33,
+    "n_left": 82,
+    "frac_left": 0.1976,
+    "n_left_visible": 0,
+    "n_left_hidden": 82,
+    "n_left_1voxel": 82,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "이번 frame 에 안 보임 (기억만)": 9,
+     "제거 목록에 있으나 손 층 값 <= 0": 21,
+     "target 표본에서 멂 (제거 후보 아님)": 8,
+     "지지면 guard 아래": 44
+    },
+    "left_causes_visible": {},
+    "left_causes_hidden": {
+     "이번 frame 에 안 보임 (기억만)": 9,
+     "제거 목록에 있으나 손 층 값 <= 0": 21,
+     "target 표본에서 멂 (제거 후보 아님)": 8,
+     "지지면 guard 아래": 44
+    }
+   },
+   "n_apple_px": 6192,
+   "n_left_px": 27,
+   "frac_left_px": 0.0044,
+   "hold": false,
+   "row": null
+  },
+  "T84off/허들211_k0": {
+   "request": 12,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 417,
+    "n_apple_voxels_visible_wrist": 74,
+    "n_left": 79,
+    "frac_left": 0.1894,
+    "n_left_visible": 0,
+    "n_left_hidden": 79,
+    "n_left_1voxel": 79,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "다른 표면 표본이 더 가까움": 8,
+     "제거 목록에 있으나 손 층 값 <= 0": 19,
+     "target 표본에서 멂 (제거 후보 아님)": 19,
+     "지지면 guard 아래": 33
+    },
+    "left_causes_visible": {},
+    "left_causes_hidden": {
+     "다른 표면 표본이 더 가까움": 8,
+     "제거 목록에 있으나 손 층 값 <= 0": 19,
+     "target 표본에서 멂 (제거 후보 아님)": 19,
+     "지지면 guard 아래": 33
+    }
+   },
+   "n_apple_px": 12613,
+   "n_left_px": 40,
+   "frac_left_px": 0.0032,
+   "hold": false,
+   "row": null
+  },
+  "T84on/허들211_k0": {
+   "request": 18,
+   "voxels": {
+    "n_apple_samples": 674,
+    "n_samples_outside_hand_layer": 0,
+    "n_apple_voxels": 398,
+    "n_apple_voxels_visible_wrist": 44,
+    "n_left": 103,
+    "frac_left": 0.2588,
+    "n_left_visible": 0,
+    "n_left_hidden": 103,
+    "n_left_1voxel": 103,
+    "hand_layer_voxel_mm": 5.0,
+    "left_causes": {
+     "target 표본에서 멂 (제거 후보 아님)": 49,
+     "다른 표면 표본이 더 가까움": 1,
+     "제거 목록에 있으나 손 층 값 <= 0": 21,
+     "이번 frame 에 안 보임 (기억만)": 7,
+     "지지면 guard 아래": 25
+    },
+    "left_causes_visible": {},
+    "left_causes_hidden": {
+     "target 표본에서 멂 (제거 후보 아님)": 49,
+     "다른 표면 표본이 더 가까움": 1,
+     "제거 목록에 있으나 손 층 값 <= 0": 21,
+     "이번 frame 에 안 보임 (기억만)": 7,
+     "지지면 guard 아래": 25
+    }
+   },
+   "n_apple_px": 9736,
+   "n_left_px": 5,
+   "frac_left_px": 0.0005,
+   "hold": false,
+   "row": null
+  }
+ }
+}

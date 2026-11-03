@@ -48,6 +48,7 @@ attach 는 "물체가 손에 붙어 함께 움직인다" 는 충돌 모델의 �
     LATCHED   ─(실행된 닫힘 명령)───► CLOSING  닫힘 시도       attach 안 함
     CLOSING   ─(파지 증거 전부)─────► HELD     파지 확인       attach
     CLOSING   ─(명령·개도 다시 열림)► LATCHED  시도 포기
+    CLOSING   ─(T82 · --hsr5 만: HSR5 ∉ {carry, place} ∧ 실행 명령 ≥ 닫힘 문턱, 2 요청 연속)► LATCHED  시도 풀기
     HELD      ─(개도 열림 N 프레임 · 또는 placed ∧ 열림)─► PLACED  놓임 확인  detach
     HELD      ─(attach 뒤 N 실행 청크 안의 반증, T34)─► LATCHED  attach_revoked  detach
     HELD      ─(닫힌 채 개도가 명령까지 닫힘 N 요청, T43 Z3 · 기본 off)─► PLACED  slipped  detach
@@ -541,6 +542,7 @@ class GraspLatch:
         reach_context: Optional[dict] = None,
         extra_checks: Optional[dict] = None,
         attach_assist: Optional[dict] = None,
+        closing_release: Optional[dict] = None,
     ) -> LatchEvent:
         """직전 청크의 **실행 사실**로 닫힘 시도 · 파지 확인 · 놓임 확인을 갱신한다 (`evidence=True`).
 
@@ -565,6 +567,12 @@ class GraspLatch:
                 닫힘 시도(CLOSING)의 파지 확인이 실패해도 단계 ∈ {lift, transport, placement} ∧ `closed` ∧ `blocked`
                 이면 attach 한다 (T64 Part C: HELD′ = strong HELD ∨ (…)). 근거는 `evidence["attach_assist"]`.
                 회수 · 놓기 · slip 은 그대로다. `None` (기본) = 이전과 같다 (키도 없다).
+            closing_release: T82 — `{"stage": HSR5 단계 또는 None, "frames": N}` (`serve_safe --hsr5`). 닫힘 시도
+                (CLOSING) 중 단계 ∉ {carry, place} (단계 있음) ∧ 마지막 **실행** gripper 명령 ≥ `gripper_closed_below`
+                (닫힘 명령으로 세는 문턱 = 닫기 시작 개도) 인 요청이 N 번 연속이면 LATCHED 로 되돌린다 (attach 없음,
+                대상 잠금 유지; 기존 `reopened` 와 같은 처리). 단계 없음 · carry · place · 실행 명령 없음 (HOLD 청크) ·
+                명령 < 문턱 이면 연속 수가 0 으로 돌아간다. 근거는 `evidence["closing_release"]`. `None` (기본) =
+                이전과 같다 (키도 없다).
         """
         if not self.evidence:
             raise RuntimeError("observe_grasp needs GraspLatch(evidence=True)")
@@ -611,6 +619,7 @@ class GraspLatch:
                     self._drop_basis["source"] = "last_open"
             self._settled_steps = 0
             self._reach_pass = None      # V11AB-pb6 — 새 닫힘 시도: sticky reach 를 비운다
+            self._reopen_streak = 0      # T82 — a new closing attempt starts its own release count
             note = (f"닫힘 시도: 실행된 닫힘 명령 {signal.closing_steps} 스텝 "
                     f"(feedback seq {signal.feedback_seq})")
         elif self.phase in (GraspPhase.SEARCHING, GraspPhase.PLACED) and signal.closing_steps > 0:
@@ -629,10 +638,20 @@ class GraspLatch:
             reopened = (signal.last_command is not None
                         and signal.last_command >= cfg.gripper_closed_below
                         and opening is not None and opening >= cfg.gripper_closed_below)
+            released = False
+            if closing_release is not None and not reopened:   # T82 (only given with --hsr5)
+                released = self._closing_release_check(signal, closing_release, ev)
             if reopened:
                 self.phase = GraspPhase.LATCHED
                 note = (f"닫힘 시도 포기: 명령 {signal.last_command:.3f} · 개도 {opening:.3f} 가 "
                         "다시 열렸다 — attach 없음")
+                self._reset_grasp(keep_opening=True)
+            elif released:
+                cr = ev["closing_release"]
+                self.phase = GraspPhase.LATCHED
+                note = (f"닫힘 시도 풀기 (HSR5 {cr['stage']}): 실행 명령 {cr['command']:.3f} ≥ {cr['threshold']:g} 가 "
+                        f"{cr['streak']}/{cr['frames']} 요청 연속 (개도 "
+                        f"{'?' if opening is None else format(opening, '.3f')}) — attach 없음, LATCHED 로")
                 self._reset_grasp(keep_opening=True)
             else:
                 checks = self._grasp_checks(opening, self._last_opening, reach_m,
@@ -776,6 +795,31 @@ class GraspLatch:
         return {"now": now, "now_mm": None if reach_m is None else round(float(reach_m) * 1000.0, 2),
                 "passed": None if self._reach_pass is None else dict(self._reach_pass),
                 "same_object": bool(held), "used": used}
+    def _closing_release_check(self, signal: GraspSignal, spec: dict, ev: dict) -> bool:
+        """T82 — one CLOSING request of the closing release (`observe_grasp(closing_release=...)`): counts the streak
+        and writes `ev["closing_release"]`. True when it reached `frames`."""
+        from AG3S.trajopt.hsr5 import CLOSING_KEEP_STAGES
+
+        stage = spec.get("stage")
+        frames = int(spec.get("frames", 2))
+        thr = float(self.config.gripper_closed_below)
+        cmd = signal.last_command if signal.n_exec > 0 else None
+        if stage is None:
+            why = "no stage"
+        elif stage in CLOSING_KEEP_STAGES:
+            why = f"stage {stage}"
+        elif cmd is None:
+            why = "no executed command"
+        elif float(cmd) < thr:
+            why = "command below threshold"
+        else:
+            why = None
+        self._reopen_streak = 0 if why is not None else self._reopen_streak + 1
+        released = self._reopen_streak >= frames
+        ev["closing_release"] = {"stage": stage, "command": None if cmd is None else float(cmd), "threshold": thr,
+                                 "streak": int(self._reopen_streak), "frames": frames, "released": bool(released),
+                                 **({"reset": why} if why is not None else {})}
+        return released
 
     def revert_attach(self, reason: str) -> LatchEvent:
         """`observe_grasp` 가 attach 를 냈는데 **마지막 관문**(`AG3S.attach` 의 reach 검사)이 거절했다.
@@ -932,6 +976,8 @@ class GraspLatch:
         self._reach_pass: Optional[dict] = None
         #: V11AB-pb6 (`drop_from_open`): 이 닫힘 시도의 `opening_before` 가 어디서 왔나 (기록용).
         self._drop_basis: Optional[dict] = None
+        #: T82: 닫힘 시도 풀기 (`closing_release`) 의 연속 요청 수.
+        self._reopen_streak = 0
         if not keep_opening:
             #: 직전 요청의 측정 개도.
             self._last_opening: Optional[float] = None

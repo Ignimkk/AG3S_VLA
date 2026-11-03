@@ -1,0 +1,269 @@
+{
+ "n_requests": 487,
+ "n_pick": 358,
+ "n_place": 129,
+ "pick_nontouch": {
+  "boundary_err": {
+   "BALL": 56,
+   "SURF": 0,
+   "S2": 0
+  },
+  "by_class": {
+   "BALL": {
+    "apple": 71583,
+    "none": 13192,
+    "apple_inside": 24193,
+    "apple_stem_leaf": 7360,
+    "robot": 2261,
+    "fruit": 56
+   },
+   "SURF": {
+    "apple": 70115,
+    "none": 10250,
+    "apple_inside": 23632,
+    "apple_stem_leaf": 7483,
+    "robot": 2185
+   },
+   "S2": {
+    "apple": 70075,
+    "none": 10236,
+    "apple_inside": 23621,
+    "apple_stem_leaf": 7492,
+    "robot": 2179
+   }
+  },
+  "requests_neighbour": {
+   "BALL": 21,
+   "SURF": 0,
+   "S2": 0
+  }
+ },
+ "pick_touch": {
+  "boundary_err": {
+   "BALL": 7939,
+   "SURF": 64124,
+   "S2": 6382
+  },
+  "by_class": {
+   "BALL": {
+    "apple": 84656,
+    "apple_inside": 32611,
+    "none": 55660,
+    "apple_stem_leaf": 5979,
+    "fruit": 7939,
+    "robot": 6528
+   },
+   "SURF": {
+    "apple": 77788,
+    "apple_inside": 29143,
+    "none": 67323,
+    "apple_stem_leaf": 6233,
+    "fruit": 34933,
+    "robot": 6916,
+    "crate": 29191
+   },
+   "S2": {
+    "apple": 75256,
+    "apple_inside": 29699,
+    "none": 45765,
+    "apple_stem_leaf": 6171,
+    "fruit": 6382,
+    "robot": 6306
+   }
+  },
+  "requests_neighbour": {
+   "BALL": 234,
+   "SURF": 188,
+   "S2": 163
+  }
+ },
+ "place": {
+  "boundary_err": {
+   "BALL": 134,
+   "SURF": 9632,
+   "S2": 132
+  },
+  "by_class": {
+   "BALL": {
+    "none": 933,
+    "fruit": 134
+   },
+   "SURF": {
+    "none": 6691,
+    "crate": 8204,
+    "apple": 765,
+    "apple_inside": 72,
+    "apple_stem_leaf": 64,
+    "fruit": 1428
+   },
+   "S2": {
+    "none": 129,
+    "fruit": 132
+   }
+  },
+  "requests_neighbour": {
+   "BALL": 8,
+   "SURF": 11,
+   "S2": 2
+  }
+ },
+ "wrong_object_requests": {
+  "BALL": {
+   "all": 58,
+   "pick": 50
+  },
+  "SURF": {
+   "all": 81,
+   "pick": 68
+  },
+  "S2": {
+   "all": 39,
+   "pick": 37
+  }
+ },
+ "apple_left_pick": {
+  "n": 345,
+  "BALL_median": 0.226,
+  "S2_median": 0.375
+ },
+ "time_ms": {
+  "stage_profile": {
+   "n": 487,
+   "median": 70.9261354058981,
+   "p95": 109.64800119400024,
+   "max": 298.4394207596779
+  },
+  "select_total": {
+   "median": 41.733000000000004,
+   "p95": 70.39679999999996
+  },
+  "t78_total": {
+   "median": 38.722
+  },
+  "SURF_T76_select_total": {
+   "median": 697.273,
+   "p95": 767.5521
+  }
+ },
+ "s2_surface": {
+  "applied": 219,
+  "why": {
+   "grasp_hold": 217,
+   "not_ats_target": 49,
+   "no_region": 2
+  }
+ },
+ "criteria": {
+  "1": true,
+  "2": false,
+  "3": true,
+  "4": true,
+  "5": false,
+  "6": true
+ },
+ "pass": false,
+ "per_run_pick": {
+  "가림121_k0": {
+   "BALL": 0,
+   "SURF": 0,
+   "S2": 0
+  },
+  "가림122_k0": {
+   "BALL": 0,
+   "SURF": 0,
+   "S2": 0
+  },
+  "허들119_k0": {
+   "BALL": 19,
+   "SURF": 0,
+   "S2": 0
+  },
+  "허들211_k0": {
+   "BALL": 3001,
+   "SURF": 16014,
+   "S2": 4352
+  },
+  "허들850_k0": {
+   "BALL": 25,
+   "SURF": 0,
+   "S2": 0
+  },
+  "허들954_k0": {
+   "BALL": 1920,
+   "SURF": 8151,
+   "S2": 77
+  },
+  "허들1345_k0": {
+   "BALL": 0,
+   "SURF": 0,
+   "S2": 0
+  },
+  "회귀119_k1": {
+   "BALL": 12,
+   "SURF": 0,
+   "S2": 0
+  },
+  "회귀211_k0": {
+   "BALL": 1848,
+   "SURF": 10340,
+   "S2": 1920
+  },
+  "회귀954_k0": {
+   "BALL": 1170,
+   "SURF": 29619,
+   "S2": 33
+  }
+ },
+ "per_run_wrong": {
+  "가림121_k0": {
+   "BALL": 0,
+   "SURF": 0,
+   "S2": 0
+  },
+  "가림122_k0": {
+   "BALL": 0,
+   "SURF": 2,
+   "S2": 0
+  },
+  "허들119_k0": {
+   "BALL": 2,
+   "SURF": 2,
+   "S2": 0
+  },
+  "허들211_k0": {
+   "BALL": 0,
+   "SURF": 0,
+   "S2": 0
+  },
+  "허들850_k0": {
+   "BALL": 0,
+   "SURF": 3,
+   "S2": 0
+  },
+  "허들954_k0": {
+   "BALL": 50,
+   "SURF": 37,
+   "S2": 37
+  },
+  "허들1345_k0": {
+   "BALL": 0,
+   "SURF": 0,
+   "S2": 0
+  },
+  "회귀119_k1": {
+   "BALL": 4,
+   "SURF": 4,
+   "S2": 0
+  },
+  "회귀211_k0": {
+   "BALL": 2,
+   "SURF": 2,
+   "S2": 2
+  },
+  "회귀954_k0": {
+   "BALL": 0,
+   "SURF": 31,
+   "S2": 0
+  }
+ }
+}

@@ -1,0 +1,491 @@
+{
+ "vla_alone_hurdle_peak_vz_mm_s": {
+  "119": 199.2,
+  "850": 185.8,
+  "1345": 185.9,
+  "954": 187.1,
+  "211": 170.9
+ },
+ "per_run": {
+  "R0/회귀211_k0": {
+   "label": "쥐지못함"
+  },
+  "R0/회귀954_k0": {
+   "label": "쥐지못함"
+  },
+  "R0/회귀119_k1": {
+   "label": "성공",
+   "t_held": 128,
+   "arm_speed_peak_rad_s_held2s": 0.955,
+   "arm_speed_peak_rad_s_pre2s": 0.352,
+   "D_max_last_pre_held_deg": 0.63,
+   "D_max_first_held_deg": 0.44,
+   "D_max_held_chunks_deg": [
+    0.44,
+    0.57,
+    0.4,
+    0.44
+   ],
+   "apple_vz_peak_mm_s_held2s": 194.4,
+   "apple_rise_mm_held2s": 236.4
+  },
+  "R0/가림121_k0": {
+   "label": "성공",
+   "t_held": 128,
+   "arm_speed_peak_rad_s_held2s": 1.01,
+   "arm_speed_peak_rad_s_pre2s": 0.504,
+   "D_max_last_pre_held_deg": 2.33,
+   "D_max_first_held_deg": 3.7,
+   "D_max_held_chunks_deg": [
+    3.7,
+    3.99,
+    2.66,
+    0.65
+   ],
+   "apple_vz_peak_mm_s_held2s": 206.4,
+   "apple_rise_mm_held2s": 223.9
+  },
+  "R0/가림122_k0": {
+   "label": "쥐지못함"
+  },
+  "R0/허들954_k0": {
+   "label": "쥐지못함"
+  },
+  "R0/허들1345_k0": {
+   "label": "쥐지못함"
+  },
+  "R0/허들211_k0": {
+   "label": "이웃과일접촉",
+   "t_held": 240,
+   "arm_speed_peak_rad_s_held2s": 0.914,
+   "arm_speed_peak_rad_s_pre2s": 0.268,
+   "D_max_last_pre_held_deg": 0.32,
+   "D_max_first_held_deg": 3.4,
+   "D_max_held_chunks_deg": [
+    3.4,
+    3.54,
+    0.65,
+    0.76
+   ],
+   "apple_vz_peak_mm_s_held2s": 0.1,
+   "apple_rise_mm_held2s": -0.0
+  },
+  "R0/허들119_k0": {
+   "label": "성공",
+   "t_held": 128,
+   "arm_speed_peak_rad_s_held2s": 0.968,
+   "arm_speed_peak_rad_s_pre2s": 0.306,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 0.71,
+   "D_max_held_chunks_deg": [
+    0.71,
+    0.54,
+    0.4,
+    3.39
+   ],
+   "apple_vz_peak_mm_s_held2s": 186.4,
+   "apple_rise_mm_held2s": 242.5
+  },
+  "R0/허들850_k0": {
+   "label": "성공",
+   "t_held": 136,
+   "arm_speed_peak_rad_s_held2s": 0.81,
+   "arm_speed_peak_rad_s_pre2s": 0.763,
+   "D_max_last_pre_held_deg": 2.51,
+   "D_max_first_held_deg": 1.85,
+   "D_max_held_chunks_deg": [
+    1.85,
+    0.27,
+    1.35,
+    0.0
+   ],
+   "apple_vz_peak_mm_s_held2s": 174.9,
+   "apple_rise_mm_held2s": 193.0
+  },
+  "R1/회귀211_k0": {
+   "label": "쥐지못함",
+   "t_held": 200,
+   "arm_speed_peak_rad_s_held2s": 1.204,
+   "arm_speed_peak_rad_s_pre2s": 0.896,
+   "D_max_last_pre_held_deg": 0.88,
+   "D_max_first_held_deg": 11.67,
+   "D_max_held_chunks_deg": [
+    11.67
+   ],
+   "apple_vz_peak_mm_s_held2s": 614.1,
+   "apple_rise_mm_held2s": 3.4
+  },
+  "R1/회귀954_k0": {
+   "label": "이웃접촉",
+   "t_held": 176,
+   "arm_speed_peak_rad_s_held2s": 1.074,
+   "arm_speed_peak_rad_s_pre2s": 0.433,
+   "D_max_last_pre_held_deg": 3.29,
+   "D_max_first_held_deg": 10.48,
+   "D_max_held_chunks_deg": [
+    10.48
+   ],
+   "apple_vz_peak_mm_s_held2s": 22.3,
+   "apple_rise_mm_held2s": -0.0
+  },
+  "R1/회귀119_k1": {
+   "label": "성공",
+   "t_held": 128,
+   "arm_speed_peak_rad_s_held2s": 1.005,
+   "arm_speed_peak_rad_s_pre2s": 0.304,
+   "D_max_last_pre_held_deg": 0.11,
+   "D_max_first_held_deg": 1.26,
+   "D_max_held_chunks_deg": [
+    1.26,
+    0.72,
+    0.5,
+    0.53
+   ],
+   "apple_vz_peak_mm_s_held2s": 192.8,
+   "apple_rise_mm_held2s": 237.5
+  },
+  "R1/가림121_k0": {
+   "label": "성공",
+   "t_held": 176,
+   "arm_speed_peak_rad_s_held2s": 1.217,
+   "arm_speed_peak_rad_s_pre2s": 0.993,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 8.59,
+   "D_max_held_chunks_deg": [
+    8.59,
+    5.58,
+    2.73,
+    0.83
+   ],
+   "apple_vz_peak_mm_s_held2s": 469.9,
+   "apple_rise_mm_held2s": 295.5
+  },
+  "R1/가림122_k0": {
+   "label": "성공",
+   "t_held": 136,
+   "arm_speed_peak_rad_s_held2s": 0.937,
+   "arm_speed_peak_rad_s_pre2s": 0.488,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 1.83,
+   "D_max_held_chunks_deg": [
+    1.83,
+    1.13,
+    0.7,
+    0.32
+   ],
+   "apple_vz_peak_mm_s_held2s": 183.2,
+   "apple_rise_mm_held2s": 233.2
+  },
+  "R1/허들954_k0": {
+   "label": "못놓음"
+  },
+  "R1/허들1345_k0": {
+   "label": "성공",
+   "t_held": 176,
+   "arm_speed_peak_rad_s_held2s": 0.947,
+   "arm_speed_peak_rad_s_pre2s": 0.38,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 0.97,
+   "D_max_held_chunks_deg": [
+    0.97,
+    0.48,
+    0.26,
+    0.32
+   ],
+   "apple_vz_peak_mm_s_held2s": 187.6,
+   "apple_rise_mm_held2s": 231.7
+  },
+  "R1/허들211_k0": {
+   "label": "쥐지못함"
+  },
+  "R1/허들119_k0": {
+   "label": "성공",
+   "t_held": 128,
+   "arm_speed_peak_rad_s_held2s": 0.962,
+   "arm_speed_peak_rad_s_pre2s": 0.427,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 0.68,
+   "D_max_held_chunks_deg": [
+    0.68,
+    0.78,
+    0.55,
+    0.0
+   ],
+   "apple_vz_peak_mm_s_held2s": 195.8,
+   "apple_rise_mm_held2s": 241.5
+  },
+  "R1/허들850_k0": {
+   "label": "성공",
+   "t_held": 136,
+   "arm_speed_peak_rad_s_held2s": 0.868,
+   "arm_speed_peak_rad_s_pre2s": 0.369,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 3.11,
+   "D_max_held_chunks_deg": [
+    3.11,
+    2.14,
+    0.82,
+    0.41
+   ],
+   "apple_vz_peak_mm_s_held2s": 217.6,
+   "apple_rise_mm_held2s": 235.9
+  },
+  "R2/회귀211_k0": {
+   "label": "쥐지못함",
+   "t_held": 200,
+   "arm_speed_peak_rad_s_held2s": 1.351,
+   "arm_speed_peak_rad_s_pre2s": 0.958,
+   "D_max_last_pre_held_deg": 0.88,
+   "D_max_first_held_deg": 11.88,
+   "D_max_held_chunks_deg": [
+    11.88
+   ],
+   "apple_vz_peak_mm_s_held2s": 618.9,
+   "apple_rise_mm_held2s": 2.6
+  },
+  "R2/회귀954_k0": {
+   "label": "쥐지못함",
+   "t_held": 176,
+   "arm_speed_peak_rad_s_held2s": 0.967,
+   "arm_speed_peak_rad_s_pre2s": 0.524,
+   "D_max_last_pre_held_deg": 3.29,
+   "D_max_first_held_deg": 7.87,
+   "D_max_held_chunks_deg": [
+    7.87,
+    7.26
+   ],
+   "apple_vz_peak_mm_s_held2s": 338.4,
+   "apple_rise_mm_held2s": 0.0
+  },
+  "R2/회귀119_k1": {
+   "label": "성공",
+   "t_held": 128,
+   "arm_speed_peak_rad_s_held2s": 0.969,
+   "arm_speed_peak_rad_s_pre2s": 0.304,
+   "D_max_last_pre_held_deg": 0.11,
+   "D_max_first_held_deg": 1.79,
+   "D_max_held_chunks_deg": [
+    1.79,
+    1.38,
+    0.57,
+    0.88
+   ],
+   "apple_vz_peak_mm_s_held2s": 191.7,
+   "apple_rise_mm_held2s": 237.4
+  },
+  "R2/가림121_k0": {
+   "label": "성공",
+   "t_held": 176,
+   "arm_speed_peak_rad_s_held2s": 1.203,
+   "arm_speed_peak_rad_s_pre2s": 1.0,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 8.6,
+   "D_max_held_chunks_deg": [
+    8.6,
+    7.15,
+    2.77,
+    0.88
+   ],
+   "apple_vz_peak_mm_s_held2s": 481.8,
+   "apple_rise_mm_held2s": 276.6
+  },
+  "R2/가림122_k0": {
+   "label": "성공",
+   "t_held": 136,
+   "arm_speed_peak_rad_s_held2s": 0.927,
+   "arm_speed_peak_rad_s_pre2s": 0.488,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 1.99,
+   "D_max_held_chunks_deg": [
+    1.99,
+    2.15,
+    1.26,
+    0.47
+   ],
+   "apple_vz_peak_mm_s_held2s": 184.0,
+   "apple_rise_mm_held2s": 228.8
+  },
+  "R2/허들954_k0": {
+   "label": "못놓음"
+  },
+  "R2/허들1345_k0": {
+   "label": "성공",
+   "t_held": 176,
+   "arm_speed_peak_rad_s_held2s": 0.919,
+   "arm_speed_peak_rad_s_pre2s": 0.38,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 1.73,
+   "D_max_held_chunks_deg": [
+    1.73,
+    1.28,
+    0.84,
+    0.42
+   ],
+   "apple_vz_peak_mm_s_held2s": 183.7,
+   "apple_rise_mm_held2s": 230.2
+  },
+  "R2/허들211_k0": {
+   "label": "쥐지못함"
+  },
+  "R2/허들119_k0": {
+   "label": "성공",
+   "t_held": 128,
+   "arm_speed_peak_rad_s_held2s": 0.962,
+   "arm_speed_peak_rad_s_pre2s": 0.404,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 1.02,
+   "D_max_held_chunks_deg": [
+    1.02,
+    1.39,
+    0.38,
+    0.0
+   ],
+   "apple_vz_peak_mm_s_held2s": 200.4,
+   "apple_rise_mm_held2s": 240.9
+  },
+  "R2/허들850_k0": {
+   "label": "성공",
+   "t_held": 136,
+   "arm_speed_peak_rad_s_held2s": 0.816,
+   "arm_speed_peak_rad_s_pre2s": 0.369,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 3.52,
+   "D_max_held_chunks_deg": [
+    3.52,
+    2.24,
+    1.21,
+    0.53
+   ],
+   "apple_vz_peak_mm_s_held2s": 188.5,
+   "apple_rise_mm_held2s": 229.9
+  },
+  "R3/회귀211_k0": {
+   "label": "못놓음",
+   "t_held": 200,
+   "arm_speed_peak_rad_s_held2s": 1.327,
+   "arm_speed_peak_rad_s_pre2s": 0.955,
+   "D_max_last_pre_held_deg": 0.88,
+   "D_max_first_held_deg": 11.95,
+   "D_max_held_chunks_deg": [
+    11.95
+   ],
+   "apple_vz_peak_mm_s_held2s": 625.6,
+   "apple_rise_mm_held2s": 1.8
+  },
+  "R3/회귀954_k0": {
+   "label": "쥐지못함",
+   "t_held": 176,
+   "arm_speed_peak_rad_s_held2s": 1.066,
+   "arm_speed_peak_rad_s_pre2s": 0.422,
+   "D_max_last_pre_held_deg": 3.29,
+   "D_max_first_held_deg": 6.33,
+   "D_max_held_chunks_deg": [
+    6.33
+   ],
+   "apple_vz_peak_mm_s_held2s": 21.3,
+   "apple_rise_mm_held2s": 0.5
+  },
+  "R3/회귀119_k1": {
+   "label": "성공",
+   "t_held": 128,
+   "arm_speed_peak_rad_s_held2s": 0.97,
+   "arm_speed_peak_rad_s_pre2s": 0.313,
+   "D_max_last_pre_held_deg": 0.11,
+   "D_max_first_held_deg": 0.0,
+   "D_max_held_chunks_deg": [
+    0.0,
+    0.07,
+    0.07,
+    0.05
+   ],
+   "apple_vz_peak_mm_s_held2s": 199.1,
+   "apple_rise_mm_held2s": 238.1
+  },
+  "R3/가림121_k0": {
+   "label": "성공",
+   "t_held": 176,
+   "arm_speed_peak_rad_s_held2s": 1.22,
+   "arm_speed_peak_rad_s_pre2s": 1.011,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 8.6,
+   "D_max_held_chunks_deg": [
+    8.6,
+    0.05,
+    0.0,
+    0.04
+   ],
+   "apple_vz_peak_mm_s_held2s": 482.2,
+   "apple_rise_mm_held2s": 294.9
+  },
+  "R3/가림122_k0": {
+   "label": "성공",
+   "t_held": 136,
+   "arm_speed_peak_rad_s_held2s": 0.888,
+   "arm_speed_peak_rad_s_pre2s": 0.488,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 1.9,
+   "D_max_held_chunks_deg": [
+    1.9,
+    0.42,
+    0.0,
+    0.04
+   ],
+   "apple_vz_peak_mm_s_held2s": 189.5,
+   "apple_rise_mm_held2s": 237.2
+  },
+  "R3/허들954_k0": {
+   "label": "못놓음"
+  },
+  "R3/허들1345_k0": {
+   "label": "성공",
+   "t_held": 176,
+   "arm_speed_peak_rad_s_held2s": 0.916,
+   "arm_speed_peak_rad_s_pre2s": 0.38,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 1.02,
+   "D_max_held_chunks_deg": [
+    1.02,
+    0.0,
+    0.04,
+    0.07
+   ],
+   "apple_vz_peak_mm_s_held2s": 196.9,
+   "apple_rise_mm_held2s": 222.8
+  },
+  "R3/허들211_k0": {
+   "label": "쥐지못함"
+  },
+  "R3/허들119_k0": {
+   "label": "성공",
+   "t_held": 128,
+   "arm_speed_peak_rad_s_held2s": 0.972,
+   "arm_speed_peak_rad_s_pre2s": 0.438,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 0.0,
+   "D_max_held_chunks_deg": [
+    0.0,
+    0.0,
+    0.05,
+    0.0
+   ],
+   "apple_vz_peak_mm_s_held2s": 202.1,
+   "apple_rise_mm_held2s": 240.0
+  },
+  "R3/허들850_k0": {
+   "label": "성공",
+   "t_held": 136,
+   "arm_speed_peak_rad_s_held2s": 0.825,
+   "arm_speed_peak_rad_s_pre2s": 0.369,
+   "D_max_last_pre_held_deg": 0.0,
+   "D_max_first_held_deg": 2.93,
+   "D_max_held_chunks_deg": [
+    2.93,
+    0.0,
+    0.07,
+    0.05
+   ],
+   "apple_vz_peak_mm_s_held2s": 192.1,
+   "apple_rise_mm_held2s": 235.8
+  }
+ }
+}

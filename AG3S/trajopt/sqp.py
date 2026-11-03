@@ -392,8 +392,11 @@ class TrajectoryOptimizer:
         if box_r > 0.0:
             rows = np.flatnonzero(anchor.goal_mask(H))
             if rows.size:
+                # E1-B: w_slack / 10 per m; T72's reach box: `anchor.goal_box_slack_scale` = 1 (the same w_slack)
                 box = {"rows": rows, "goal": np.asarray(anchor.goal, np.float64).reshape(3), "r": box_r,
-                       "weight": float(self.config.cost.w_slack) * GOAL_BOX_SLACK_SCALE}
+                       "weight": float(self.config.cost.w_slack) * (
+                           GOAL_BOX_SLACK_SCALE if getattr(anchor, "goal_box_slack_scale", None) is None
+                           else float(anchor.goal_box_slack_scale))}
         if not cost_on and box is None and rot is None:
             return None
         return {"fk": fk, "q_now": q_now, "p_ref": p_ref, "weights": weights, "targets": targets, "horizon": H,
@@ -479,6 +482,13 @@ class TrajectoryOptimizer:
         goal = self._goal_probe(anchor, H)
         record.update(triggered=True, geometry=geometry["record"],
                       goal_rows=None if goal is None else [int(k) for k in goal["rows"]])
+        # T72 — the grasp-set reach box (`GraspAnchor.reach_constraint`): the selection counts its excess at full
+        # resolution as a violation, whichever path (standard, GPU seed, CPU seed) produced the trajectory. None (every
+        # other anchor, or no anchor) = the selection as before.
+        reach = self._reach_probe(anchor, goal)
+        if reach is not None:
+            record["reach_selection"] = ("T72: the reach-box excess (per axis, m) counts as a violation in the seed "
+                                         "selection: max(collision, reach excess)")
 
         limit_bound = [MS.LIMIT_SLACK]
 
@@ -491,15 +501,22 @@ class TrajectoryOptimizer:
                 limit_bound[0] = max(MS.LIMIT_SLACK, over)
             # a seed may not end further outside the joint limits than the standard solve (or LIMIT_SLACK)
             eligible = bool(not is_seed or (over <= limit_bound[0] and res.status != TrajOptStatus.SOLVER_FAILED))
+            violation = float(res.max_violation)
+            reach_rec = {}
+            if reach is not None:
+                excess = self._reach_excess(reach, traj, q_now)
+                violation = max(violation, excess)
+                reach_rec = {"reach_excess_mm": round(excess * 1000.0, 3),
+                             "selection_violation_mm": round(violation * 1000.0, 3)}
             rec = {"kind": kind, **({"detail": detail} if detail else {}),
-                   "max_violation_mm": round(float(res.max_violation) * 1000.0, 3),
+                   "max_violation_mm": round(float(res.max_violation) * 1000.0, 3), **reach_rec,
                    "goal_err_mm": None if g is None else round(g, 2),
                    "status": res.status.value, "eligible": eligible,
                    "path_length_rad": round(length, 5), "accel_sq": round(acc, 7),
                    "limit_overshoot": round(over, 6), "cost": round(float(res.cost), 6),
                    "reference_deviation": round(float(res.reference_deviation), 6),
                    "solve_ms": round(float(ms), 2), "sqp_iterations": int(res.metrics.get("sqp_iterations", 0) or 0)}
-            key = MS.selection_key(res.max_violation, tol, g, length, acc) if eligible else None
+            key = MS.selection_key(violation, tol, g, length, acc) if eligible else None
             return rec, key
 
         std_rec, std_key = describe("standard", None, result, float(result.solve_time_ms), False)
@@ -535,8 +552,11 @@ class TrajectoryOptimizer:
                                 round(float(np.linalg.norm(traj - reference)), 6), i + 1)
 
                     def resolves(res):
+                        v = float(res.max_violation)
+                        if reach is not None:   # T72: the reach box must hold too
+                            v = max(v, self._reach_excess(reach, np.asarray(res.trajectory, np.float64), q_now))
                         return (res.status != TrajOptStatus.SOLVER_FAILED
-                                and round(float(res.max_violation) * 1000.0, 3) <= tol * 1000.0)
+                                and round(v * 1000.0, 3) <= tol * 1000.0)
 
                     first_pass = (order_key, resolves)
                 try:
@@ -550,11 +570,18 @@ class TrajectoryOptimizer:
                     record["gpu_goal_note"] = ("6-D goal: the cuRobo seed cost carries the position term only (rotation "
                                                "not supported there); every seed is re-checked with the rotation in the "
                                                "CPU merit")
+                if reach is not None:
+                    # T72 (option b): the cuRobo seed cost has neither the reach box nor the rotation term; the
+                    # selection below counts the reach-box excess of every checked result as a violation
+                    record["gpu_goal_note"] = ("T72 reach box: not in the cuRobo seed cost (position goal weight 0, "
+                                               "no rotation); every seed is re-checked and the selection counts the "
+                                               "reach-box excess as a violation")
                 for (kind, detail, _), item in zip(seeds, gpu["results"] or ()):
                     if item is None:            # first-pass: not checked (a resolving result came first)
                         records.append({"kind": kind, **({"detail": detail} if detail else {}), "checked": False,
                                         "max_violation_mm": None, "goal_err_mm": None, "status": None,
-                                        "eligible": False, "reference_deviation": None})
+                                        "eligible": False, "reference_deviation": None,
+                                        **({"selection_violation_mm": None} if reach is not None else {})})
                         keys.append(None)
                         results.append(None)
                         continue
@@ -584,8 +611,9 @@ class TrajectoryOptimizer:
                 results.append(res)
         finally:
             self.solver = main_solver
+        vkey = "max_violation_mm" if reach is None else "selection_violation_mm"   # T72: collision + reach excess
         chosen = MS.select_moving_first([r["kind"] for r in records], keys,
-                                        [r["max_violation_mm"] for r in records], tol * 1000.0,
+                                        [r[vkey] for r in records], tol * 1000.0,
                                         [r["goal_err_mm"] for r in records],
                                         [r["reference_deviation"] for r in records])
         total_ms = (time.perf_counter() - started) * 1000.0
@@ -608,7 +636,7 @@ class TrajectoryOptimizer:
                       chosen_violation_mm=records[chosen]["max_violation_mm"],
                       chosen_goal_err_mm=records[chosen]["goal_err_mm"],
                       n_resolved=int(sum(1 for r in records if r["eligible"]
-                                         and r["max_violation_mm"] <= tol * 1000.0)),
+                                         and r[vkey] <= tol * 1000.0)),
                       standard_ms=round(float(result.solve_time_ms), 2), total_ms=round(total_ms, 2))
         metrics["multi_seed"] = record
         return dataclasses.replace(out, metrics=metrics, notes=notes,
@@ -736,6 +764,24 @@ class TrajectoryOptimizer:
         if fk is None:
             fk = cache[anchor.link] = LinkPointFK(self.linearizer.robot_model, self.layout, H, anchor.link)
         return {"rows": rows, "goal": np.asarray(anchor.goal, np.float64).reshape(1, 3), "fk": fk}
+
+    @staticmethod
+    def _reach_probe(anchor, goal: Optional[dict[str, Any]]) -> Optional[dict[str, Any]]:
+        """T72 — the reach box of a grasp-set anchor on this horizon (`goal` = `_goal_probe`'s rows / FK), or None
+        (no anchor, not a reach constraint, no box, no goal rows)."""
+        if (anchor is None or goal is None or not getattr(anchor, "reach_constraint", False)
+                or not float(getattr(anchor, "goal_box", 0.0) or 0.0) > 0.0):
+            return None
+        return {**goal, "r": float(anchor.goal_box)}
+
+    @staticmethod
+    def _reach_excess(reach: dict[str, Any], trajectory: np.ndarray, q_now: np.ndarray) -> float:
+        """T72 — the largest per-axis excess (m, >= 0) of the hold link outside the reach box on its rows."""
+        from AG3S.trajopt.grasp_anchor import goal_box_excess
+
+        p = reach["fk"](np.asarray(trajectory, np.float64)[:, :reach["fk"].horizon], q_now)[0]
+        ex = goal_box_excess(p, reach["rows"], reach["goal"].reshape(3), reach["r"])
+        return float(ex.max(initial=0.0))
 
     @staticmethod
     def _goal_error_mm(goal: dict[str, Any], trajectory: np.ndarray, q_now: np.ndarray) -> float:
@@ -871,6 +917,9 @@ class TrajectoryOptimizer:
                 return result
         if self.window_optimizer is not None:
             gate = self._lookahead_gate(reference, q_now, scene)
+            if (not gate["open"] and grasp_anchor is not None and getattr(grasp_anchor, "reach_constraint", False)
+                    and getattr(self.config.cost, "grasp_set_full_horizon", False)):
+                gate = dict(gate, open=True, forced="grasp-set reach box")   # T72b ①: solve all planned rows
             self._gate_record = {x: v for x, v in gate.items() if x != "open"}
             if not gate["open"]:
                 return self._solve_window(
@@ -920,6 +969,16 @@ class TrajectoryOptimizer:
         if self.path is not None:
             # T43 Q — floors at `q_now` and the servo state, once per chunk (before any merit).
             self.path.begin(q_now, scene, servo_state)
+        # --- T88 — begin ---
+        passthrough_record = None
+        if getattr(cfg.sqp, "passthrough_when_clear", False) and initial_iterate is None:
+            passed, passthrough_record = self._clear_passthrough(
+                reference, q_now, scene, reference_violation, envelope, geometry_certified)
+            if passed:
+                return self._finish_passthrough(
+                    reference, q_now, scene, template, reference_violation, previous_chunk, notes, started,
+                    geometry_certified, envelope, passthrough_record)
+        # --- T88 — end ---
         # Forward kinematics for a whole chunk is the most expensive thing left in the loop, so each
         # trajectory's sphere states are computed once and carried: the iterate's states feed both
         # the linearization and its merit, and an accepted candidate hands its states to the next
@@ -1173,7 +1232,59 @@ class TrajectoryOptimizer:
         if envelope is not None:
             result.metrics["rest_start"] = self._rest_start_record(
                 best, reference, q_now, envelope)
+        if passthrough_record is not None:   # T88: the switch is on and this chunk was optimized
+            result.metrics["passthrough_clear"] = passthrough_record
         return result
+
+    # --- T88 — begin ---
+    def _clear_passthrough(self, reference, q_now, scene, reference_violation, envelope, geometry_certified):
+        """T88 — may the policy chunk go out as it is? `(passed, record)`; `record` is `to.metrics.passthrough_clear`.
+
+        Yes only when the reference itself (a) has no violation at the floors the solve uses (`reference_violation`,
+        the caller's number: the executed window with look-ahead, else the whole chunk; the rows between waypoints
+        too when the path rows are on), (b) is inside the joint limits and the first-step anchor (`_limit_overshoot`),
+        (c) is not an uncertified geometry that `safety.require_certified_geometry` would refuse to call safe, and
+        (d) collision is on (with it off nothing was measured by the optimizer, so 'clear' would mean nothing).
+        `reason` says which failed first (`clear` = passed)."""
+        record: dict[str, Any] = {"applied": False,
+                                  "reference_violation_m": max(0.0, float(reference_violation))}   # as TrajOptResult
+        cfg = self.config
+        if not cfg.collision.enabled:
+            record["reason"] = "collision off"
+        elif cfg.safety.require_certified_geometry and not geometry_certified:
+            record["reason"] = "geometry not certified"
+        elif reference_violation > 0.0:
+            record["reason"] = "collision"
+        elif self.path is not None and self._path_violation(reference, scene) > 0.0:
+            record["reason"] = "path"
+        elif max(self._limit_overshoot(reference, q_now, envelope).values()) > _LIMIT_TOLERANCE:
+            record["reason"] = "limit"
+        else:
+            record.update(applied=True, reason="clear")
+        return record["applied"], record
+
+    def _finish_passthrough(self, reference, q_now, scene, template, reference_violation, previous_chunk, notes,
+                            started, geometry_certified, envelope, record) -> TrajOptResult:
+        """T88 — `_finish` on the reference with zero iterations: the measured numbers and the metrics keys of an
+        optimized chunk (the trajectory is the reference itself, so `reference_deviation` is 0), `_previous` and
+        `frame_index` as after a solve."""
+        result = self._finish(
+            np.array(reference, np.float64), reference, q_now, scene, template, 0, 0.0, reference_violation, previous_chunk,
+            notes + ["T88: the policy chunk has no violation and is inside the limits; passed through unchanged"],
+            started, geometry_certified)
+        if envelope is not None:
+            result.metrics["rest_start"] = self._rest_start_record(reference, reference, q_now, envelope)
+        # the seam to the previous refined plan (the caller's continuity reference, aligned to the executed steps):
+        # how far the passed policy chunk starts from where the plan before it would be (max over joints, rad).
+        # Measured, not limited (task §1); `None` = no previous plan. `plan_join_discontinuity_rad` (refiner) is the
+        # planned-window-to-tail step inside this chunk and is 0 for a passed chunk.
+        prev = None if previous_chunk is None else np.asarray(previous_chunk, np.float64)
+        record["previous_plan_seam_rad"] = (
+            None if prev is None or prev.ndim != 2 or prev.shape[1] < 1 or prev.shape[0] != reference.shape[0]
+            else float(np.abs(reference[:, 0] - prev[:, 0]).max(initial=0.0)))
+        result.metrics["passthrough_clear"] = record
+        return result
+    # --- T88 — end ---
 
     def _seed_is_aligned(self, continuity) -> bool:
         """T43 TP (`warm_start_lookahead`) — is shifting the last plan by `execution_length` this
@@ -1510,6 +1621,11 @@ class TrajectoryOptimizer:
         placement_record = (dict(getattr(self.linearizer, "_last_placement_contact", None) or {})
                             if getattr(scene, "placement_contact", None) is not None
                             and getattr(scene, "esdf", None) is not None else None)
+        # T67 ① — the support rows that read the fine-layer offset on what is returned (same place, same reason).
+        # `None` unless the scene carries the offset: the metrics keys as before.
+        support_record = (dict(getattr(self.linearizer, "_last_support_surface_offset", None) or {})
+                          if float(getattr(scene, "support_surface_offset", 0.0) or 0.0) > 0.0
+                          and getattr(scene, "esdf", None) is not None else None)
         # T43 HM — the held rows' classes on what is returned (read before the path check
         # re-evaluates the field). `None` unless `held_obstacle_margin` is on and something is held.
         held_rows = (self.linearizer.held_rows_record()
@@ -1613,6 +1729,7 @@ class TrajectoryOptimizer:
                 **({"held_rows": held_rows} if held_rows is not None else {}),
                 **({"neighbour_palm_contact": palm_record} if palm_record is not None else {}),
                 **({"placement_contact": placement_record} if placement_record is not None else {}),
+                **({"support_surface_offset": support_record} if support_record is not None else {}),
                 **({"lookahead": lookahead_record} if lookahead_record is not None else {}),
                 **self._ta_record(trajectory, reference),
                 **self._scm_record(),

@@ -1,0 +1,23 @@
+{
+ "counts": {
+  "지지면 guard 아래 (z_floor)": 1288,
+  "이전 frame 에 본 표면 · 다른 표본이 더 가까움": 954,
+  "이번 frame 에서 다른 표면으로 분류": 24,
+  "target 표본에서 멀어 후보 아님": 172
+ },
+ "n_left_points": 2438,
+ "n_requests": 27,
+ "scene": {
+  "run": "허들119_k0",
+  "request": 13,
+  "counts": {
+   "지지면 guard 아래 (z_floor)": 45,
+   "이전 frame 에 본 표면 · 다른 표본이 더 가까움": 43,
+   "이번 frame 에서 다른 표면으로 분류": 1,
+   "target 표본에서 멀어 후보 아님": 5
+  },
+  "z_floor_m": 0.8263338800793304,
+  "apple_bottom_m": 0.8199860313616841
+ },
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261101T014536+0900_8ab3c7ef7757_9e8fe50aaca6/verify/T78c/t78c_left_why.json"
+}

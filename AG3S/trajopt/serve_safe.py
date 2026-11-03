@@ -291,6 +291,18 @@ def cost_overrides(args) -> dict[str, float]:
         out["grasp_anchor_radius"] = float(args.grasp_anchor_radius_mm) / 1000.0
     if getattr(args, "wrist_track_scale", None) is not None:
         out["wrist_track_scale"] = float(args.wrist_track_scale)   # IFG-TOW
+    if getattr(args, "grasp_set_to", False):
+        out["grasp_set"] = True   # T72 (off: no key; the fixed values stay in `CostConfig.grasp_set_*`)
+        if getattr(args, "grasp_set_track_scale", None) is not None:
+            out["grasp_set_track_scale"] = float(args.grasp_set_track_scale)   # T72 step 1
+        if getattr(args, "grasp_set_full_horizon", False):
+            out["grasp_set_full_horizon"] = True   # T72b ①
+        if getattr(args, "grasp_set_field_only", False):
+            out["grasp_set_field_only"] = True   # T72b ②
+        if getattr(args, "grasp_set_gate_mm", None) is not None:
+            out["grasp_set_gate"] = float(args.grasp_set_gate_mm) / 1000.0   # T72b ③
+        if getattr(args, "grasp_set_budget_ms", None) is not None:
+            out["grasp_set_time_budget_ms"] = float(args.grasp_set_budget_ms)   # T72b ④
     if getattr(args, "geo_grasp", False):
         # AG3S-GEO-GRASP: B1 = --geo-grasp; B2 = + --geo-track-scale S --geo-continuity-off
         out["geo_grasp"] = True
@@ -986,6 +998,28 @@ def assert_ag3s_config(config, *, collision_backend: str, esdf_backend: str,
         raise RuntimeError("AG3S config is not what the server asked for: " + "; ".join(problems))
 
 
+# T81 — begin
+#: `--target-vacancy-*` threshold flag → (`clustering` key, scale to the config unit).
+_T81_THRESHOLDS = {"target_vacancy_delta_mm": ("target_vacancy_delta", 1e-3),
+                   "target_vacancy_p_empty": ("target_vacancy_p_empty", None),
+                   "target_vacancy_p_present": ("target_vacancy_p_present", None),
+                   "target_vacancy_min_points": ("target_vacancy_min_points", None),
+                   "target_vacancy_samples": ("target_vacancy_samples", None)}
+
+
+def target_vacancy_section(args) -> dict:
+    """T81 — `clustering.target_vacancy_*` for `--target-vacancy-release` and its threshold flags (none = `{}`)."""
+    if not getattr(args, "target_vacancy_release", False):
+        return {}
+    out = {"target_vacancy_release": True}
+    for flag, (key, scale) in _T81_THRESHOLDS.items():
+        val = getattr(args, flag, None)
+        if val is not None:
+            out[key] = float(val) * scale if scale is not None else val
+    return out
+# T81 — end
+
+
 def t43t_identity_section(args) -> dict:
     """T43 T fix 3 — `clustering` keys for the given flags only (none given = `{}`, config as is)."""
     out = {}
@@ -995,6 +1029,7 @@ def t43t_identity_section(args) -> dict:
         out["kept_geometry_follow"] = True   # IFG-FOLLOW
     if getattr(args, "latched_identity_hold", False):
         out["latched_identity_hold"] = True
+    out.update(target_vacancy_section(args))   # T81 (off: {})
     if getattr(args, "refused_identity_release", None) is not None:
         out["refused_identity_release_frames"] = int(args.refused_identity_release)
     if getattr(args, "supported_max_bottom_mm", None) is not None:
@@ -1049,6 +1084,28 @@ def target_exclusion_section(args) -> dict:
         out["target_extent"] = str(args.target_extent).replace("-", "_")
     if getattr(args, "robot_mask", None) not in (None, "spheres"):   # IFG-CL1 (given flag only)
         out["robot_mask"] = str(args.robot_mask)
+    # T78 갈래 A (given flags only: absent = config default off, bit-identical)
+    for flag, key in (("surface_split", "surface_split"), ("surface_keep_last", "surface_keep_last"),
+                      ("surface_grasp_hold", "surface_grasp_hold"), ("surface_no_ball", "surface_no_ball")):
+        if getattr(args, flag, False):
+            out[key] = True
+    if getattr(args, "surface_target_check", None) not in (None, "off"):
+        out["surface_target_check"] = str(args.surface_target_check)
+    if getattr(args, "surface_reattach_hull", None) is not None:   # T78b (given flag only)
+        out["surface_reattach_hull_mm"] = float(args.surface_reattach_hull)
+    if getattr(args, "surface_hull_fill", False):   # T78b (given flag only)
+        out["surface_hull_fill"] = True
+    # --- T78d — begin (given flags only)
+    out.update(_t78d_esdf_keys(args))
+    # --- T78d — end
+    # --- T78e — begin (given flag only)
+    if getattr(args, "surface_memory_target_sticky", False):
+        out["surface_memory_target_sticky"] = True
+    # --- T78e — end
+    # --- T78f — begin (given flag only)
+    if getattr(args, "surface_contact_allowance_mm", None) is not None:
+        out["surface_contact_allowance_mm"] = float(args.surface_contact_allowance_mm)
+    # --- T78f — end
     if getattr(args, "hybrid_identity", None) is not None:   # IFG-CL2 (given flag only)
         out["surface_hybrid_identity"] = str(args.hybrid_identity)
     if getattr(args, "hybrid_other_exclude_voxels", None) is not None:   # IFG-CL2b (given flag only)
@@ -1534,6 +1591,37 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
             if e.target_free_coarse:
                 logging.warning("AG3S IFG-CL1 — target_free_coarse 도 켜져 있다: 거친 target-free 계층은 attention-surface "
                                 "가 아니라 target_exclusion = %s 그대로다", e.target_exclusion)
+            if (e.surface_split or e.surface_keep_last or e.surface_grasp_hold or e.surface_no_ball
+                    or e.surface_target_check != "off"):   # T78 갈래 A
+                logging.warning("!!! AG3S T78 — attention-surface 영역 후처리: A1 split %s · A2 target check %s · A3 keep "
+                                "last %s (영역 없는 요청 = 지난 채택 영역, 없으면 지우지 않음 — 공 · estimated 로 물러나지 "
+                                "않는다) · A4 grasp hold %s · A5 no ball %s !!!", e.surface_split, e.surface_target_check,
+                                e.surface_keep_last, e.surface_grasp_hold, e.surface_no_ball)
+            if e.surface_reattach_hull_mm is not None or e.surface_hull_fill:   # T78b
+                logging.warning("!!! AG3S T78b — 분할 조각 다시 붙이기 %s mm (target hull + MM 안 중심) · 쥐기 직전 hull "
+                                "채우기 %s (latched · closing 또는 손바닥 %.0f mm 안, +1 미세 voxel, 버린 덩어리 voxel · "
+                                "지지면 guard 보존) !!!", e.surface_reattach_hull_mm, e.surface_hull_fill,
+                                e.surface_hull_fill_palm_mm)
+            # --- T78d — begin
+            if getattr(e, "surface_crease_cut", False):
+                logging.warning("!!! AG3S T78d — 표면 graph %.2f mm node + seed ROI 안 오목 꺾임 (반경 PCA normal, 카메라 쪽) "
+                                "%.1f° 이상 edge 끊기 · 작은 조각 다시 붙이기 R = %s (끊긴 edge 로만 이웃한 성분, 영역 × R "
+                                "이하, 한 번) !!!", e.surface_crease_voxel_mm, e.surface_crease_angle_deg,
+                                e.surface_crease_reattach_ratio)
+            # --- T78d — end
+            # --- T78e — begin
+            if getattr(e, "surface_memory_target_sticky", False):
+                logging.warning("!!! AG3S T78e — 표본 기억 target 우선: 한 번 target 인 칸 (2.5 mm) 은 깎이기 전까지 "
+                                "target 표본을 유지한다 (다른 표면 · 다른 물체 표본이 덮어쓰지 못함, 기록 "
+                                "oracle.memory.n_sticky_kept) !!!")
+            # --- T78e — end
+            # --- T78f — begin
+            if getattr(e, "surface_contact_allowance_mm", None) is not None:
+                logging.warning("!!! AG3S T78f — 손 층 target 접촉 여유 %.1f mm: target 표본 %.1f mm 안 · 지지면 guard 위 seed 를 "
+                                "다른 표본과 상관없이 지운다 (d_t < d_o 규칙과 합집합, 기록 oracle.allowance_mm · "
+                                "oracle.n_allowance_extra). 가정: 쥐는 순간 target 주변에 장애물이 없다 !!!",
+                                e.surface_contact_allowance_mm, e.surface_contact_allowance_mm)
+            # --- T78f — end
         if e.target_extent == "attention_surface_hybrid":
             # IFG-CL2 — ball_owned range, attention-surface protection.
             logging.warning("!!! AG3S IFG-CL2 — target_extent = attention_surface_hybrid (identity %s): 미세 target-free "
@@ -1571,6 +1659,13 @@ def build_ag3s(model_xml: str, *, voxel: float, range_max: float, links: str,
         # V11AB-pb1 — grasp reach gate at the manipulated geometry's capture state (pipeline.reach_at_capture).
         ag3s.reach_at_capture = True
         logging.warning("AG3S reach gate at the capture state (V11AB-pb1)")
+    if ag3s.config.clustering.target_vacancy_release:   # T81
+        c_ = ag3s.config.clustering
+        logging.warning("AG3S T81 target vacancy release: ON — delta %.1f mm, empty >= %.2f, present <= %.2f, "
+                        ">= %d judged points, <= %d samples, %d consecutive requests, re-pick near %.0f mm "
+                        "(record manipulated.vacancy)", c_.target_vacancy_delta * 1000.0, c_.target_vacancy_p_empty,
+                        c_.target_vacancy_p_present, c_.target_vacancy_min_points, c_.target_vacancy_samples,
+                        c_.target_vacancy_frames, c_.target_vacancy_near * 1000.0)
     if ag3s.config.clustering.placed_no_seed_certify:
         # T46c A12 (W1) — 인증 규칙이 바뀐 서버다. 기록 (`subtask.placed_no_seed_certify`) 과 함께 크게.
         logging.warning("AG3S T46c W1 — placed_no_seed_certify = True: PLACED 뒤 home (gate on) 의 "
@@ -1737,12 +1832,24 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--neighbour-contact-mm", type=float, default=None, metavar="MM",
                     help="IFG-NBC — 쥐기 전(latched · closing) 손바닥이 target 중심 150 mm 안이면, 쥐는 손의 손가락 구가 "
                          "target 120 mm 안에서 이웃 물체(target · 지지면 · 쥔 물체가 아닌 장애물)와 MM 까지 겹치는 것을 "
-                         "허용한다 (가볍게 밀면서 잡기). 손바닥 · 팔 · 탁자 · 운반은 그대로. 기본 off")
+                         "허용한다 (가볍게 밀면서 잡기). 손바닥 · 팔 · 탁자 · 운반은 그대로. MM ≥ 0: 0 = 켜짐, 그 행의 요구가 "
+                         "d − r ≥ 0 (겹침 허용 0 · 여유 0, T67 ③). 끄려면 flag 를 생략한다. 기본 off")
     ap.add_argument("--neighbour-palm-contact-mm", type=float, default=None, metavar="MM",
                     help="AG3S-CORE-EVAL-A6 — 쥐는 순간 (latch latched · closing, HELD 아님, 손바닥 site (left_ee · "
                          "right_ee) 가 target 중심 60 mm 안) 쥐는 손의 손바닥 구 (ee_<side> 손 몸체 구 + 손바닥 껍질 구) 가 target 120 mm 안에서 이웃 "
                          "장애물 (target · 지지면 · 쥔 물체 · 목적지 바구니가 아닌 것) 과 MM 까지 겹치는 것을 허용한다. "
                          "HSR6 ④ 로 거두지 않는다. 최종 구성 10. 기본 off")
+    ap.add_argument("--grasp-corridor-allow", action="store_true",
+                    help="T83 — grasp corridor carve: 쥐기 전 (latch held · placed 아님) 쥐는 손의 grasp corridor (두 손가락 "
+                         "패드 안쪽 면 사이 − 3 mm, |y| ≤ pad 반폭 + 5 mm, 손가락 끝 앞 --grasp-corridor-ahead-mm 부터 손바닥 "
+                         "면까지) 를 q_now 와 VLA 참조 chunk 계획 행마다 계산해 AG3S 에 넘긴다. q_now corridor 에 이번 frame "
+                         "의 ATS target 점이 --grasp-corridor-min-target-points 개 이상이면 그 합집합 안의 장애물 seed 를 "
+                         "미세 target-free 층 (쥐는 손 gripper 구가 읽는 층) 에서만 지우고 거리장을 만든다. 지지면 3 mm "
+                         "안 · 아래 seed 는 남긴다. 다른 층 · TrajOpt 행은 그대로. 기본 off")
+    ap.add_argument("--grasp-corridor-ahead-mm", type=float, default=None, metavar="MM",
+                    help="T83 — corridor 를 손가락 끝 앞으로 늘리는 길이 (기본 60). --grasp-corridor-allow 와 함께")
+    ap.add_argument("--grasp-corridor-min-target-points", type=int, default=None, metavar="K",
+                    help="T83 — corridor 를 켜는 ATS target 점 수 하한 (기본 5). --grasp-corridor-allow 와 함께")
     ap.add_argument("--held-obstacle-margin", action="store_true",
                     help="T43 HM — 쥔 물체(사과) 행도 손 구 행과 같은 분류 · 여유를 받는다: 최근접 "
                          "표면이 장애물이면 max(그 행의 여유, --obstacle-margin). 지지면(테이블)은 늘 "
@@ -1958,6 +2065,24 @@ def build_parser() -> argparse.ArgumentParser:
                     help="AG3S-GEO-GRASP — 닫기를 미룬 요청이 N 을 넘으면 안전 정지 (기본 8)")
     ap.add_argument("--geo-close-tol-mm", type=float, default=None, metavar="MM", help="AG3S-GEO-GRASP — 닫기 허용 위치 오차 (기본 10)")
     ap.add_argument("--geo-close-tol-deg", type=float, default=None, metavar="DEG", help="AG3S-GEO-GRASP — 닫기 허용 회전 오차 (기본 15)")
+    ap.add_argument("--grasp-set-to", action="store_true",
+                    help="T72 — 충돌 고려 기하 grasp 후보 집합 (관측 점 접촉 · 마찰 0.8 · 최대 8 · IK · 손 상자 점 검사 + TrajOpt 와 "
+                         "같은 손 · 손가락 구 거리장 검사) 에서 grasp quality 와 VLA 쥐기 의도와의 차이로 고른 grasp 를, A6 창 "
+                         "(latched · closing, 손바닥 site 60 mm) 안에서 닫는 행부터 3 행의 축별 ±5 mm 도달 상자 (slack = w_slack) "
+                         "+ 회전 항 (무게 5) 으로 TrajOpt 에 넣는다. HSR6 ④ 로 거두지 않는다. 고정값은 config cost.grasp_set_*. "
+                         "--grasp-anchor · --grasp-goal-box · --geo-grasp 와 함께 줄 수 없다. 기본 off")
+    ap.add_argument("--grasp-set-track-scale", type=float, default=None, metavar="S",
+                    help="T72 1단계 — grasp 후보 도달 상자가 켜진 요청에서 쥐는 팔 관절의 VLA 추종 무게를 S 배 (0 < S ≤ 1). "
+                         "--grasp-set-to 와 함께만. 기본 1 (그대로)")
+    ap.add_argument("--grasp-set-full-horizon", action="store_true",
+                    help="T72b ① — 도달 상자가 켜진 요청은 look-ahead gate 를 열어 계획 16 행 전체를 푼다. --grasp-set-to 와 함께만. 기본 off")
+    ap.add_argument("--grasp-set-field-only", action="store_true",
+                    help="T72b ② — 후보 충돌 검사를 TrajOpt 거리장 (손 · 손가락 구, grasp · pre-grasp) 으로만 한다 (생성기의 장면 점 "
+                         "손 상자 검사를 끈다. target 관통 검사는 그대로). --grasp-set-to 와 함께만. 기본 off")
+    ap.add_argument("--grasp-set-gate-mm", type=float, default=None, metavar="MM",
+                    help="T72b ③ — 작동 창 (손바닥 site–target 중심, mm). --grasp-set-to 와 함께만. 기본 60")
+    ap.add_argument("--grasp-set-budget-ms", type=float, default=None, metavar="MS",
+                    help="T72b ④ — 후보 생성 시간 예산 (ms). --grasp-set-to 와 함께만. 기본 150")
     # AG3S-CORE-EVAL-HSR6 — the 6-phase probe (T64) on the serving kv_L4 feature; four default-off uses (task §2).
     ap.add_argument("--hsr6-attach-assist", action="store_true",
                     help="AG3S-CORE-EVAL-HSR6 ① — 닫힘 시도(CLOSING)의 attach = strong 파지 확인 ∨ (HSR6 ∈ {lift, transport, "
@@ -1983,9 +2108,37 @@ def build_parser() -> argparse.ArgumentParser:
                     help="SL6-A A9 — --hsr6-objective 가 거두는 범위. all (기본, AG3S-CORE-EVAL-HSR6 그대로) = 손가락 이웃 접촉 "
                          "허용 · A4 · G1 닫는 행 목표 모두 HSR6 = grasp 일 때만. nbc = 손가락 이웃 접촉 허용에만 적용하고 A4 · "
                          "G1 목표는 막지 않는다 (막혔을 요청은 hsr6.detail.objective.<a4|g1>_kept_by_scope 로 기록)")
+    ap.add_argument("--hsr6-objective-window", action="store_true",
+                    help="T67 ② — --hsr6-objective 가 손가락 이웃 허용 · A4 · G1 을 허락하는 조건을 'HSR6 = grasp' 에서 "
+                         "'HSR6 = grasp, 또는 HSR6 = approach ∧ latch latched · closing ∧ 쥐는 손 손바닥 site (left_ee · "
+                         "right_ee) 가 target 중심 60 mm 안 (A6 와 같은 창)' 으로 넓힌다. 기록 hsr6.detail.objective.window. "
+                         "--hsr6-objective 와 함께만. 기본 off")
+    ap.add_argument("--support-surface-offset-mm", type=float, default=None, metavar="B",
+                    help="T67 ① — TrajOpt 가 지지면 (탁자 · 바닥) 으로 분류한 로봇 행에서, 정밀 계층 (esdf 5 mm · "
+                         "target-free 5 mm) 이 답한 거리에 B mm 를 더한다 (기울기 그대로). 장애물 · target · 쥔 물체 행과 "
+                         "거친 계층 (2 cm) 은 그대로. B > 0, --obstacle-margin M (> 0) 과 함께, --obstacle-margin-support "
+                         "와는 함께 못 준다. 기록 to.metrics.support_surface_offset. 최종 실험값 4. 기본 off")
     ap.add_argument("--hsr6-probe", default=None, metavar="NPZ",
                     help="AG3S-CORE-EVAL-HSR6 — 6 단계 probe (안 주면 동봉 AG3S/ag3s/asset/subtask_probe/hsr6_t64_kv_L4.npz "
                          "= T64 partA probe_6.npz). --hsr6-* 와 함께만")
+    # T82 — the 5-stage HSR (T77 hidden layer 4) in serving; default off.
+    ap.add_argument("--hsr5", nargs="?", const="default", default=None, metavar="NPZ",
+                    help="T82 — 5 단계 HSR (접근 · 쥐기 · 운반 · 놓기 · 물러남; T77 VLM hidden layer 4 [카메라 3 평균 · 마지막 "
+                         "유효 token], 같은 noun prefix pass 에서 return_hidden 을 그 pass 에만 켬). NPZ 를 안 주면 동봉 "
+                         "AG3S/ag3s/asset/subtask_probe/hsr5_t77_h4_img3_last.npz. 켜면 요청마다 raw argmax 로: 새 조작 대상 "
+                         "gate (접근 · 쥐기 → pick, 운반 · 놓기 → place, 물러남 → home), --hsr6-* 네 규칙의 단계 (운반 → "
+                         "transport, 놓기 → placement), --deflection-rate-after-grasp · --continuity-after-grasp (운반 · 놓기 · "
+                         "물러남에서 켬), 그리고 closing 풀기 (latch closing ∧ 단계 ∉ {운반, 놓기} ∧ 실행 gripper 명령 ≥ "
+                         "닫힘 문턱 0.85 가 연속 2 요청 → latched). 예측 없음 = 지금 규칙의 label 없음. noun attention source "
+                         "(--attention-source noun_target:…) 와 함께만. 기본 off")
+    # --- T85 — begin
+    ap.add_argument("--hsr-gt-stage", action="store_true",
+                    help="T85 (분석용 · 시스템 규칙 아님) — 5 단계 (접근 · 쥐기 · 운반 · 놓기 · 물러남) 를 분류기 대신 client 가 "
+                         "요청마다 보내는 MuJoCo 정답 단계로 정한다 (client 는 --safe-gt-stage). 그 뒤는 --hsr5 와 같은 코드: "
+                         "새 조작 대상 gate · --hsr6-* 네 규칙의 단계 · --deflection-rate/continuity-after-grasp · closing 풀기. "
+                         "HSR6 · HSR5 probe 는 읽지 않는다. 기록 summary_json.hsr5 (probe=gt, stage_source=gt). "
+                         "--hsr6-* 중 하나 이상과 함께만, --hsr5 와는 함께 못 준다. 기본 off")
+    # --- T85 — end
     ap.add_argument("--deflection-rate-after-grasp", action="store_true",
                     help="IFG-TOB — --w-deflection-rate 항을 쥐기 전(latch searching · latched · closing) chunk 에서는 "
                          "빼고 쥔 뒤(held 부터)만 쓴다. 접근 중 회피 꺾임이 다음 chunk 로 이어져 정지한 target 의 "
@@ -2086,6 +2239,13 @@ def build_parser() -> argparse.ArgumentParser:
                          "모두 (E3-b 측정 그대로). first-pass: E2 의 고르는 순서 (목표 오차 → 정책 이탈 → 번호, 둘 다 검사 "
                          "없이 계산) 로 검사하다 처음 침범을 푼 결과에서 멈춘다 — 고르는 결과는 all 과 같고, 해소 결과가 없으면 "
                          "나머지를 모두 검사한다. 기록 to.metrics.multi_seed.gpu.first_pass. --to-gpu-seeds curobo 가 필요하다")
+    # --- T88 — begin ---
+    ap.add_argument("--passthrough-when-clear", action="store_true",
+                    help="T88 — 충돌이 없으면 VLA chunk 를 그대로 낸다. 꺼짐 (기본) = 모든 chunk 를 최적화 (예전 그대로). 켜면: "
+                         "VLA reference 자체의 충돌 위반 (lookahead 이면 실행 구간, 아니면 chunk 전체) 이 0 이하이고 관절 한계 "
+                         "초과가 없으면 최적화 없이 reference 를 그대로 낸다 (gripper 열 포함). 위반이 있으면 지금과 같은 최적화. "
+                         "기록 to.metrics.passthrough_clear = {applied, reference_violation_m, reason}. TO 가 있어야 한다")
+    # --- T88 — end ---
     ap.add_argument("--no-limit-projection", action="store_true",
                     help="T31 G2-ii 를 끈다: limit 만 어긴 reference 에 받아들여진 후보가 없을 때 "
                          "최소 투영 대신 T24 규칙대로 거절된 QP 후보(best_unaccepted)를 반환한다 "
@@ -2243,6 +2403,13 @@ def build_parser() -> argparse.ArgumentParser:
                          "esdf.surface_hybrid_other_exclude_voxels, 미리 고정한 값), 0 = IFG-CL2 그대로. "
                          "--target-extent attention-surface-hybrid 와 함께만")
     # IFG-CL2 — end
+    # T78 갈래 B — begin
+    ap.add_argument("--attention-surface-device", choices=("cpu", "cuda"), default=None,
+                    help="T78 B — --target-extent attention-surface 의 표면 선택 (surface graph · seed · solve · code 영상) 을 "
+                         "어디서 계산하나. cpu (기본: config ATTENTION_SURFACE_DEVICE) = 고정된 study 코드 그대로 · cuda = "
+                         "runtime.attention_surface_gpu (같은 계산을 torch CUDA 로, 합의 순서만 다르다 — 동등성은 "
+                         "docs/handoff/T78B.impl.md). --target-extent attention-surface 와 함께만")
+    # T78 갈래 B — end
     # IFG-CL1 — begin
     ap.add_argument("--robot-mask", choices=("spheres", "render"), default=None,
                     help="IFG-CL1 — 로봇 pixel 을 무엇으로 정하나. spheres (기본: config esdf.robot_mask) = 지금 그대로 "
@@ -2251,6 +2418,58 @@ def build_parser() -> argparse.ArgumentParser:
                          "--target-extent attention-surface 의 graph 에는 render mask. MUJOCO_GL 렌더러가 필요하다 "
                          "(시작할 때 한 번 렌더해 확인한다)")
     # IFG-CL1 — end
+    # T78 갈래 A — begin (attention-surface region post-processing; all off by default, --target-extent attention-surface only)
+    ap.add_argument("--surface-split", action="store_true",
+                    help="T78 A1 — attention-surface 영역을 cluster 분할 규칙 (attention_split: 좁은 폭 <= 최대 개도 < 긴 폭이면 "
+                         "--attention-split-radius-mm 재군집 + raw attention 비율 2.0, --attention-split-partition 이면 attention "
+                         "분할) 으로 한 번 더 잘라 target 쪽 성분만 남긴다. 성립하지 않으면 영역 그대로. 기본 off")
+    ap.add_argument("--surface-target-check", choices=("off", "overlap"), default=None,
+                    help="T78 A2 — 영역 (A1 뒤) 이 이번 요청의 ATS target (manipulated 기하 점) 과 겹치지 않으면 그 요청은 기권 "
+                         "(why = not_ats_target). overlap 규칙은 attention_surface_post.target_check. 기본 off")
+    ap.add_argument("--surface-keep-last", action="store_true",
+                    help="T78 A3 — 영역이 없는 요청 (기권 · A2 · A4) 은 지난 채택 영역의 표본 (oracle memory, 이 요청은 carve 만) "
+                         "을 지운다. 처음부터 없으면 손 층에서 아무것도 지우지 않는다 (공 · 점으로 물러나지 않는다). 기본 off")
+    ap.add_argument("--surface-grasp-hold", action="store_true",
+                    help="T78 A4 — grasp closing · held (또는 attach) 동안 표면 선택을 새로 하지 않는다 (memory 그대로). "
+                         "--surface-keep-last 와 함께만. 기본 off")
+    ap.add_argument("--surface-no-ball", action="store_true",
+                    help="T78 A5 — target-free 계층에 공을 만들지 않는다. 지지면 guard = 영역 표본 중심 아래 지지면 + 1 미세 voxel. "
+                         "--surface-keep-last 와 함께만, --target-free-coarse 와 함께 줄 수 없다. 기본 off")
+    # T78 갈래 A — end
+    # T78b — begin (default off)
+    ap.add_argument("--surface-reattach-hull", type=float, default=None, metavar="MM",
+                    help="T78b — A1 분할이 target 덩어리를 고른 뒤, 버리려는 다른 덩어리의 중심이 target 덩어리 convex hull 을 "
+                         "MM 만큼 넓힌 부피 안이면 다시 붙인다 (기록 split.reattach). --surface-split 과 함께만. 기본 off")
+    ap.add_argument("--surface-hull-fill", action="store_true",
+                    help="T78b — 쥐기 직전 (latch latched · closing, 또는 쥐는 손바닥이 영역 중심 80 mm 안) 손 층 (미세 "
+                         "target-free 계층) 에서 마지막 채택 영역 convex hull (+1 미세 voxel) 안 seed 를 모두 지운다. 버린 덩어리 "
+                         "표본 voxel · 지지면 guard 아래는 남긴다. --surface-keep-last · --surface-no-ball 과 함께만. 기본 off")
+    # T78b — end
+    # --- T78d — begin (default off)
+    ap.add_argument("--surface-crease-cut", action="store_true",
+                    help="T78d — attention-surface 표면 graph 를 2.5 mm node 로 만들고, seed 관심 영역 안에서 두 node 의 "
+                         "반경 PCA normal (카메라 쪽) 이 오목하게 20° 이상 꺾이는 edge 를 끊은 뒤 선택한다 (T78c §8). "
+                         "--target-extent attention-surface 와 함께만. 기본 off")
+    ap.add_argument("--surface-crease-voxel-mm", type=float, default=None, metavar="MM",
+                    help="T78d — 오목 끊기 graph 의 node 크기 (기본 config 2.5). --surface-crease-cut 과 함께만")
+    ap.add_argument("--surface-crease-angle-deg", type=float, default=None, metavar="DEG",
+                    help="T78d — 끊는 오목 꺾임 각 (기본 config 20). --surface-crease-cut 과 함께만")
+    ap.add_argument("--surface-crease-reattach-ratio", type=float, default=None, metavar="R",
+                    help="T78d — 선택 뒤, 끊긴 edge 로만 선택 영역과 이웃한 성분 (지지면 아님) 의 node 수가 선택 영역의 R 배 "
+                         "이하이면 그 성분 전체를 붙인다 (한 번). 권장 0.25. --surface-crease-cut 과 함께만. 기본 off")
+    # --- T78d — end
+    # --- T78e — begin (default off)
+    ap.add_argument("--surface-memory-target-sticky", action="store_true",
+                    help="T78e — 표본 기억 (OracleMemory, 2.5 mm 칸) 에서 한 번 target (code 1) 인 칸은 깎이기 (광선이 그 "
+                         "너머를 봄) 전까지 target 표본을 유지한다. 나중 frame 의 다른 표면 · 다른 물체 표본이 덮어쓰지 "
+                         "못한다. --target-extent attention-surface · --surface-keep-last 와 함께만. 기본 off")
+    # --- T78e — end
+    # --- T78f — begin (default off)
+    ap.add_argument("--surface-contact-allowance-mm", type=float, default=None, metavar="M",
+                    help="T78f — 손 층 (미세 target-free 계층) 에서 target 표본 M mm 안 · 지지면 guard 위 seed 를 다른 표본과 "
+                         "상관없이 지운다 (지금 d_t < d_o 규칙과 합집합). 0 < M ≤ 후보 거리 (oracle-max-dist-voxels × "
+                         "fine voxel, 기본 30 mm). --target-extent attention-surface · --surface-keep-last 와 함께만. 기본 off")
+    # --- T78f — end
     # T44c A5 — begin
     ap.add_argument("--target-free-coarse", action="store_true",
                     help="T44c — target 을 지운 거친 계층 (coarse_no_target) 을 한 겹 더 만들어 target-free "
@@ -2386,6 +2605,43 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--subtask-probe", default=None, metavar="NPZ",
                     help="subtask probe asset (`clustering.subtask_probe_path`). 안 주면 동봉 "
                          "AG3S/ag3s/asset/subtask_probe/kv_L4_v1.npz")
+    # --- T92 — begin
+    ap.add_argument("--subtask-from-latch", action="store_true",
+                    help="T92 — 3 단계 gate 의 label (pick · place · home) 을 kv_L4_v1 probe 대신 이번 요청의 grasp latch phase 에서 "
+                         "만든다 (SEARCHING · LATCHED · CLOSING → pick, HELD → place, PLACED → home; phase 를 모르면 label 없음). "
+                         "학습한 분류기 없이 물리 신호 (측정 개도 · 실행 feedback) 로만 단계가 정해진다. AG3S 의 debounce 는 그대로. "
+                         "probe 는 계속 계산돼도 gate 에는 안 들어간다. 기록 summary_json.subtask_source=\"latch\". "
+                         "--no-subtask-gate · --hsr5 · --hsr-gt-stage 와는 함께 못 준다. 기본 off")
+    # --- T92 — end
+    # --- T91c — begin
+    ap.add_argument("--subtask-from-phase-machine", action="store_true",
+                    help="T91c — 3 단계 gate 의 label (pick · place · home) 을 T91b 단계 인식기 (PhaseMachine) 의 5 단계에서 만든다 "
+                         "(approach · grasp → pick, carry · place → place, retreat → home). 입력은 물리 신호뿐이다: 쥐는 손의 측정 개도 · "
+                         "손 EE site · ATS target / 목적지 중심 (직전 요청 값) · VLA chunk 의 gripper 열 · 손목 카메라 depth 의 손가락 사이 "
+                         "표면 비율 (요청의 ag3s/depth/wrist_cam_l|r). 빈손으로 닫은 것은 carry 로 읽지 않는다. 학습한 분류기 없음, "
+                         "AG3S 의 debounce 는 그대로. 기록 summary_json.subtask_source=\"phase_machine\" + phase_machine. "
+                         "--subtask-from-latch · --hsr5 · --hsr-gt-stage · --no-subtask-gate 와는 함께 못 준다. 기본 off")
+    # --- T91c — end
+    # --- T93 — begin
+    ap.add_argument("--fm-guide", action="store_true",
+                    help="T93 — VLA (pi0.5) flow-matching 샘플링을 TrajOpt 와 같은 거리장 충돌 비용으로 유도한다. 요청마다 VLA 를 한 번 "
+                         "샘플링해 (noise 를 명시적으로 기록) TrajOpt reference 의 위반 > 0 이면 같은 관측 · 같은 noise 로 다시 샘플링하되 "
+                         "flow 단계마다 x0 예측의 충돌 비용 gradient 로 밀고, 유도 chunk 의 위반이 더 낮으면 그것을 reference 로 쓴다 "
+                         "(TrajOpt · HOLD 판정 · gripper 열은 그대로). 위반 ≤ 0 인 요청은 꺼진 서버와 bit 동일. "
+                         "기록 to.metrics.fm_guide. --no-safe · --no-perception 과는 함께 못 준다. 기본 off")
+    ap.add_argument("--fm-guide-scale", type=float, default=None, metavar="LAMBDA",
+                    help="T93 — x_next -= LAMBDA * g (g = 비용 gradient 를 x 공간으로 되돌린 것). 기본 "
+                         f"{FM_GUIDE_DEFAULTS['scale']}. --fm-guide 와 함께만")
+    ap.add_argument("--fm-guide-steps", type=int, default=None, metavar="N",
+                    help="T93 — 유도하는 flow 단계 = 마지막 N 개 (전체 단계 수 이상이면 전부). 기본 "
+                         f"{FM_GUIDE_DEFAULTS['steps']}. --fm-guide 와 함께만")
+    ap.add_argument("--fm-guide-max-step-rad", type=float, default=None, metavar="RAD",
+                    help="T93 — 한 flow 단계에서 한 관절 열이 유도로 바뀌는 상한 (rad, 물리 공간). 기본 "
+                         f"{FM_GUIDE_DEFAULTS['max_step_rad']}. --fm-guide 와 함께만")
+    ap.add_argument("--fm-guide-sweep", default=None, metavar="SCALE:STEPS:MAXSTEP[,...]",
+                    help="T93 smoke 전용 (기본 off) — 위반 > 0 인 요청을 이 설정들로도 다시 샘플링하고 pure_callback 변형의 지연도 재서 "
+                         "to.metrics.fm_guide.sweep 에만 기록한다. 쓰는 chunk 는 바뀌지 않는다. --fm-guide 와 함께만")
+    # --- T93 — end
     # T46c A12 (W1) — begin
     ap.add_argument("--placed-no-seed-certify", action="store_true",
                     help="T46c W1 — PLACED 뒤 확정 label home (subtask gate on) 에서 grounding 이 "
@@ -2446,6 +2702,22 @@ def build_parser() -> argparse.ArgumentParser:
                          "정체는 '안 보임' 만으로 바뀌지 않는다: 물체가 사라졌다는 증거 (제자리 cluster 가 "
                          "다르고 손이 비켜 있음) 나 손이 도전자로 간 증거가 있을 때만 switch 를 센다. "
                          "기본 off")
+    # T81 — begin
+    ap.add_argument("--target-vacancy-release", action="store_true",
+                    help="T81 — 쥐기 전 (latch searching · latched · closing, attach 없음) 조작 대상의 옛 점을 이번 요청 depth "
+                         "에 투영해 비어 있음 (광선이 옛 위치를 지나 뒤에 닿음) 이 연속 2 요청이면 target 을 놓고 같은 요청에서 "
+                         "다시 고른다 (옛 위치 200 mm 안 후보 먼저). 손 가림 · 쥐는 중 고정 · 잠근 정체 유지보다 먼저. 기본 off")
+    ap.add_argument("--target-vacancy-delta-mm", type=float, default=None, metavar="MM",
+                    help="T81 δ — |관측 depth − 점 depth| ≤ δ 이면 있음 (기본 config 값)")
+    ap.add_argument("--target-vacancy-p-empty", type=float, default=None, metavar="P",
+                    help="T81 — 비어 있음 비율 ≥ P 일 때만 그 요청이 '비어 있음' (기본 config 값)")
+    ap.add_argument("--target-vacancy-p-present", type=float, default=None, metavar="P",
+                    help="T81 — 있음 비율 ≤ P 일 때만 그 요청이 '비어 있음' (기본 config 값)")
+    ap.add_argument("--target-vacancy-min-points", type=int, default=None, metavar="M",
+                    help="T81 — 판정 가능한 점이 M 개 미만이면 판단 불가 (기본 config 값)")
+    ap.add_argument("--target-vacancy-samples", type=int, default=None, metavar="N",
+                    help="T81 — 옛 위치 표본 점 수 상한 (기본 config 값)")
+    # T81 — end
     ap.add_argument("--refused-identity-release", type=int, default=None, metavar="N",
                     help="T43 T 3(b) — exclusion 관문이 조작 대상을 목적지 겹침으로 N 프레임 연속 "
                          "거절하면 그 정체를 놓고 first 로 다시 고른다. 기본 off")
@@ -2481,7 +2753,14 @@ def build_parser() -> argparse.ArgumentParser:
                          "query, Euler step 0) 또는 noun_target:L<l>H<h> (prompt 의 target 명사 token 행, prefix "
                          "pass, raw σ0 k1 — T57 단계 1 N 은 noun_target:L10H7; T61 선택은 action:mean:L10H7). "
                          "명사를 못 찾은 요청은 attention 이 비고 (합성하지 않는다) 사유가 기록된다. 응답 · "
-                         "summary_json 에 attention_source. 기본 (안 줌) = action:last:L8H2, T57 전과 같다")
+                         "summary_json 에 attention_source. 기본 (안 줌) = action:last:L8H2, T57 전과 같다. "
+                         # --- T90 — begin
+                         "T90: hidden_probe[:NPZ] — T86 hidden image-patch probe (카메라별 layer 의 image token hidden → "
+                         "p(target), 같은 prefix forward · 추가 forward 없음) 를 attention 지도 자리에 넣는다. NPZ 를 안 주면 "
+                         "AG3S/ag3s/asset/target_probe/t86_hidden_probe.npz. prompt 는 hidden 으로만 본다 (명사 lookup 은 "
+                         "target 이 있는지만 정한다). 기록 attention_source: spec · layers · asset_md5 · ms · max_score"
+                         # --- T90 — end
+                         )
     gate = ap.add_mutually_exclusive_group()
     gate.add_argument("--task-gate", action="store_true",
                       help="T57 단계 2 — HELD 중 task-aware 실행 gate: grasp latch 가 HELD 인데 명사 token probe "
@@ -2658,6 +2937,76 @@ def held_3d_from_args(args):
     return rule
 
 
+# --- T78d — begin: concave-crease cut flags (`--surface-crease-*`, default off)
+def _t78d_esdf_keys(args) -> dict:
+    """T78d — the `esdf.surface_crease_*` keys of the given flags only (absent = `{}` = config defaults, off)."""
+    out: dict = {}
+    if getattr(args, "surface_crease_cut", False):
+        out["surface_crease_cut"] = True
+    for flag, key in (("surface_crease_voxel_mm", "surface_crease_voxel_mm"),
+                      ("surface_crease_angle_deg", "surface_crease_angle_deg"),
+                      ("surface_crease_reattach_ratio", "surface_crease_reattach_ratio")):
+        v = getattr(args, flag, None)
+        if v is not None:
+            out[key] = float(v)
+    return out
+
+
+def _t78d_reject(ap, args, extent) -> None:
+    """T78d — fail loudly: crease flags without `--target-extent attention-surface`, value flags without
+    `--surface-crease-cut`, values ≤ 0 / NaN / inf, angle ≥ 180."""
+    cut = bool(getattr(args, "surface_crease_cut", False))
+    given = [f"--{k.replace('_', '-')}" for k in ("surface_crease_voxel_mm", "surface_crease_angle_deg",
+                                                    "surface_crease_reattach_ratio")
+             if getattr(args, k, None) is not None]
+    if (cut or given) and extent != "attention-surface":
+        ap.error(f"{', '.join((['--surface-crease-cut'] if cut else []) + given)} 는 --target-extent attention-surface 의 "
+                 f"표면 graph 를 바꿉니다 (받은 --target-extent {extent!r}) — 그대로 띄우면 효과가 있었다고 믿게 됩니다")
+    if given and not cut:
+        ap.error(f"{', '.join(given)} 는 --surface-crease-cut 과 함께만 줄 수 있습니다")
+    for k in ("surface_crease_voxel_mm", "surface_crease_angle_deg", "surface_crease_reattach_ratio"):
+        v = getattr(args, k, None)
+        if v is not None and not (math.isfinite(float(v)) and float(v) > 0.0):
+            ap.error(f"--{k.replace('_', '-')} 는 0 보다 큰 유한한 수여야 합니다: {v}")
+    v = getattr(args, "surface_crease_angle_deg", None)
+    if v is not None and float(v) >= 180.0:
+        ap.error(f"--surface-crease-angle-deg 는 180 보다 작아야 합니다: {v}")
+
+
+def _t78d_crease(args):
+    """T78d — the `CreaseParams` of the flags (config defaults for the absent value flags), or None when off."""
+    if not getattr(args, "surface_crease_cut", False):
+        return None
+    from AG3S.ag3s.config import EsdfConfig
+    from AG3S.ag3s.runtime.attention_surface_crease import CreaseParams
+
+    k = _t78d_esdf_keys(args)
+    return CreaseParams(voxel_mm=float(k.get("surface_crease_voxel_mm", EsdfConfig.surface_crease_voxel_mm)),
+                        angle_deg=float(k.get("surface_crease_angle_deg", EsdfConfig.surface_crease_angle_deg)),
+                        reattach_ratio=k.get("surface_crease_reattach_ratio", EsdfConfig.surface_crease_reattach_ratio))
+# --- T78d — end
+
+
+def apply_attention_surface_device(args, *, warm: bool = True) -> str | None:
+    """T78 갈래 B — `--attention-surface-device`: set `config.ATTENTION_SURFACE_DEVICE` (read by
+    `attention_surface.select_target_surface`) and, for cuda, compile / warm the GPU path once so the first request is
+    not the slow one. Not given → nothing (the config default "cpu"). Returns the device set, or None."""
+    dev = getattr(args, "attention_surface_device", None)
+    if dev is None:
+        return None
+    from AG3S.ag3s import config as ag3s_config
+
+    ag3s_config.ATTENTION_SURFACE_DEVICE = str(dev)
+    if dev == "cuda":
+        msg = "AG3S T78 B — attention-surface 표면 선택을 GPU (runtime.attention_surface_gpu) 에서 계산한다"
+        if warm:
+            from AG3S.ag3s.runtime.attention_surface_gpu import warmup
+
+            msg += f" (warm-up {warmup(crease=_t78d_crease(args)):.1f} s)"   # T78d: crease None = the T78 B warm-up
+        logging.warning("!!! %s !!!", msg)
+    return str(dev)
+
+
 def ifg_cl1_record_meta(args) -> dict:
     """IFG-CL1 constraint-record meta — only for the flags that are on (the default meta is unchanged)."""
     out: dict = {}
@@ -2674,6 +3023,29 @@ def ifg_cl1_record_meta(args) -> dict:
         out["surface_hybrid_other_exclude_voxels"] = float(v)
     if getattr(args, "robot_mask", None) == "render":
         out["robot_mask"] = "render"
+    if getattr(args, "attention_surface_device", None) == "cuda":   # T78 갈래 B (only when on)
+        out["attention_surface_device"] = "cuda"
+    # T78 갈래 A (only the flags that are on)
+    for flag in ("surface_split", "surface_keep_last", "surface_grasp_hold", "surface_no_ball"):
+        if getattr(args, flag, False):
+            out[flag] = True
+    if getattr(args, "surface_target_check", None) not in (None, "off"):
+        out["surface_target_check"] = str(args.surface_target_check)
+    if getattr(args, "surface_reattach_hull", None) is not None:   # T78b (only when on)
+        out["surface_reattach_hull_mm"] = float(args.surface_reattach_hull)
+    if getattr(args, "surface_hull_fill", False):   # T78b (only when on)
+        out["surface_hull_fill"] = True
+    # --- T78d — begin (only when on)
+    out.update(_t78d_esdf_keys(args))
+    # --- T78d — end
+    # --- T78e — begin (only when on)
+    if getattr(args, "surface_memory_target_sticky", False):
+        out["surface_memory_target_sticky"] = True
+    # --- T78e — end
+    # --- T78f — begin (only when on)
+    if getattr(args, "surface_contact_allowance_mm", None) is not None:
+        out["surface_contact_allowance_mm"] = float(args.surface_contact_allowance_mm)
+    # --- T78f — end
     return out
 
 
@@ -2694,9 +3066,18 @@ def reject_t57a_flags(ap: argparse.ArgumentParser, args) -> None:
                  "(--no-safe · --no-attention · --no-perception 은 그것을 안 만듭니다) — 빼고 띄우십시오")
     if spec is not None:
         try:
-            parse_attention_source(spec)
+            parsed_source = parse_attention_source(spec)
         except ValueError as exc:
             ap.error(f"--attention-source: {exc}")
+        # --- T90 — begin: a hidden_probe asset that cannot be read stops the server at start, not on request 1
+        if getattr(parsed_source, "query", None) == "hidden_probe":
+            from AG3S.trajopt.hidden_probe import load_hidden_probe
+
+            try:
+                load_hidden_probe(parsed_source.asset_path())
+            except (OSError, ValueError, KeyError) as exc:
+                ap.error(f"--attention-source hidden_probe: asset 을 쓸 수 없습니다 — {exc}")
+        # --- T90 — end
     if getattr(args, "task_probe", None) is not None and mode == "off":
         ap.error("--task-probe 는 --task-gate · --task-gate-shadow 에서만 읽힙니다 — 그대로 띄우면 효과가 "
                  "있었다고 믿게 됩니다")
@@ -2738,7 +3119,11 @@ def reject_ifg_s2serve_flags(ap: argparse.ArgumentParser, args) -> None:
             src = None if spec is None else parse_attention_source(spec)
         except ValueError:
             src = None
-        if src is None or src.label != "noun_target:L10H7":
+        # --- T90 — begin: the hidden probe replaces the seed map (`seed_map_source_ok`)
+        from AG3S.trajopt.attention_source import seed_map_source_ok
+
+        if not seed_map_source_ok(src):
+        # --- T90 — end
             ap.error("--confidence-gate on 의 영역은 IFG LOCK 의 seed 지도 (noun L10H7) 로 고른다 — "
                      f"--attention-source noun_target:L10H7 와 함께 주십시오 (받은 값 {spec!r})")
 
@@ -2771,7 +3156,8 @@ def hsr6_flags_from_args(args):
                       held_gate=bool(getattr(args, "hsr6_held_gate", False)),
                       target_exempt=bool(getattr(args, "hsr6_target_exempt", False)),
                       objective=bool(getattr(args, "hsr6_objective", False)),
-                      placement_contact=bool(getattr(args, "hsr6_placement_contact", False)))
+                      placement_contact=bool(getattr(args, "hsr6_placement_contact", False)),
+                      objective_window=bool(getattr(args, "hsr6_objective_window", False)))
     return flags if flags.on else None
 
 
@@ -2799,6 +3185,12 @@ def reject_hsr6_flags(ap: argparse.ArgumentParser, args) -> None:
     if _label_unavailable(args):
         ap.error("--hsr6-* 는 attention 서버가 싣는 kv_L4 feature 와 SafePolicy 가 필요합니다 (--no-safe · "
                  "--no-attention · --no-perception 과 함께 줄 수 없습니다)")
+    if flags.objective_window and not flags.objective:
+        ap.error("--hsr6-objective-window 는 --hsr6-objective (④) 의 시점을 넓힙니다 — 함께 주십시오")
+    if flags.objective_window and getattr(args, "hsr6_objective_scope", "all") != "all":
+        # merge 2026-11-03 (사용자 판정): SL6-A A9 scope 와 T67 ② window 를 함께 쓰는 규칙은 정해지지 않았다
+        ap.error("--hsr6-objective-window 와 --hsr6-objective-scope nbc 는 함께 줄 수 없습니다 (둘을 합친 ④ 규칙은 "
+                 "정해지지 않았습니다)")
     if flags.held_gate and not getattr(args, "held_body_cover", False):
         ap.error("--hsr6-held-gate 가 거두는 허용 (쥔 몸통 구의 지지면 들어올림) 은 --held-body-cover 의 것입니다 — "
                  "함께 주십시오")
@@ -2810,6 +3202,247 @@ def reject_hsr6_flags(ap: argparse.ArgumentParser, args) -> None:
                                 or getattr(args, "geo_grasp", False)):
         ap.error("--hsr6-objective 가 거둘 것이 없습니다 (--neighbour-contact-mm · --grasp-anchor · --grasp-goal-box · "
                  "--geo-grasp 중 하나와 함께)")
+
+
+def hsr_gt_stage_on(args) -> bool:
+    """T85 — `--hsr-gt-stage` given."""
+    return bool(getattr(args, "hsr_gt_stage", False))
+
+
+# --- T92 — begin
+def subtask_from_latch_on(args) -> bool:
+    """T92 — `--subtask-from-latch` given."""
+    return bool(getattr(args, "subtask_from_latch", False))
+
+
+def reject_subtask_from_latch(ap: argparse.ArgumentParser, args) -> None:
+    """T92 — `--subtask-from-latch` that would do nothing, or collide with another source of the gate label, is refused."""
+    if not subtask_from_latch_on(args):
+        return
+    if getattr(args, "subtask_gate", None) is False:
+        ap.error("--subtask-from-latch 는 3 단계 gate 의 label 출처입니다 — gate 를 끄는 --no-subtask-gate 와 함께 줄 수 없습니다")
+    if getattr(args, "hsr5", None) is not None or getattr(args, "hsr_gt_stage", False):
+        ap.error("--subtask-from-latch 와 --hsr5 (또는 --hsr-gt-stage) 는 둘 다 gate label 의 출처입니다 — 하나만 주십시오")
+    if _label_unavailable(args):
+        ap.error("--subtask-from-latch 는 SafePolicy 와 AG3S 의 gate 가 필요합니다 (--no-safe · --no-attention · "
+                 "--no-perception 은 그 중 하나를 끕니다) — 그대로 띄우면 gate 가 꺼진 서버가 뜹니다")
+
+
+def subtask_from_latch_kwargs(args) -> dict:
+    """T92 — `SafePolicy(**...)`: `{"subtask_from_latch": True}` only when on (off: no kwarg, the call as before)."""
+    return {"subtask_from_latch": True} if subtask_from_latch_on(args) else {}
+
+
+def subtask_from_latch_record_meta(args) -> dict:
+    """T92 — keys added to the server record's `subtask` section, only when on."""
+    return {"source": "latch"} if subtask_from_latch_on(args) else {}
+
+
+def announce_subtask_from_latch(args) -> None:
+    """T92 — one start line when on."""
+    if subtask_from_latch_on(args):
+        logging.warning("subtask gate label from grasp latch (T92): ON (SEARCHING·LATCHED·CLOSING→pick, HELD→place, "
+                        "PLACED→home; the kv_L4_v1 probe does not feed the gate)")
+# --- T92 — end
+
+
+# --- T91c — begin
+def subtask_from_phase_machine_on(args) -> bool:
+    """T91c — `--subtask-from-phase-machine` given."""
+    return bool(getattr(args, "subtask_from_phase_machine", False))
+
+
+def reject_subtask_from_phase_machine(ap: argparse.ArgumentParser, args) -> None:
+    """T91c — `--subtask-from-phase-machine` that collides with another source of the gate label, or would do nothing, is refused."""
+    if not subtask_from_phase_machine_on(args):
+        return
+    if getattr(args, "subtask_gate", None) is False:
+        ap.error("--subtask-from-phase-machine 은 3 단계 gate 의 label 출처입니다 — gate 를 끄는 --no-subtask-gate 와 함께 줄 수 없습니다")
+    if getattr(args, "subtask_from_latch", False):
+        ap.error("--subtask-from-phase-machine 과 --subtask-from-latch 는 둘 다 gate label 의 출처입니다 — 하나만 주십시오")
+    if getattr(args, "hsr5", None) is not None or getattr(args, "hsr_gt_stage", False):
+        ap.error("--subtask-from-phase-machine 과 --hsr5 (또는 --hsr-gt-stage) 는 둘 다 gate label 의 출처입니다 — 하나만 주십시오")
+    if _label_unavailable(args):
+        ap.error("--subtask-from-phase-machine 은 SafePolicy 와 AG3S 의 gate 가 필요합니다 (--no-safe · --no-attention · "
+                 "--no-perception 은 그 중 하나를 끕니다) — 그대로 띄우면 gate 가 꺼진 서버가 뜹니다")
+
+
+def subtask_from_phase_machine_kwargs(args) -> dict:
+    """T91c — `SafePolicy(**...)`: `{"subtask_from_phase_machine": True}` only when on (off: no kwarg, the call as before)."""
+    return {"subtask_from_phase_machine": True} if subtask_from_phase_machine_on(args) else {}
+
+
+def subtask_from_phase_machine_record_meta(args) -> dict:
+    """T91c — keys added to the server record's `subtask` section, only when on."""
+    return {"source": "phase_machine"} if subtask_from_phase_machine_on(args) else {}
+
+
+def announce_subtask_from_phase_machine(args) -> None:
+    """T91c — one start line when on."""
+    if subtask_from_phase_machine_on(args):
+        logging.warning("subtask gate label from the T91b phase machine (T91c): ON (approach·grasp→pick, carry·place→place, "
+                        "retreat→home; wrist depth between the fingertips decides carry; the kv_L4_v1 probe and the latch do not "
+                        "feed the gate)")
+# --- T91c — end
+
+
+# --- T93 — begin
+#: T93 — defaults of `--fm-guide-*`, fixed from the T93 smoke (single source: `fm_guide.py`).
+from AG3S.trajopt.fm_guide import DEFAULT_MAX_STEP_RAD as _FM_MAX_STEP, DEFAULT_SCALE as _FM_SCALE, DEFAULT_STEPS as _FM_STEPS
+
+FM_GUIDE_DEFAULTS = {"scale": _FM_SCALE, "steps": _FM_STEPS, "max_step_rad": _FM_MAX_STEP}
+
+
+def fm_guide_on(args) -> bool:
+    """T93 — `--fm-guide` given."""
+    return bool(getattr(args, "fm_guide", False))
+
+
+def reject_fm_guide(ap: argparse.ArgumentParser, args) -> None:
+    """T93 — the tuning flags without `--fm-guide`, and `--fm-guide` where there is nothing to guide, are refused."""
+    tuning = [n for n in ("fm_guide_scale", "fm_guide_steps", "fm_guide_max_step_rad", "fm_guide_sweep")
+              if getattr(args, n, None) is not None]
+    if not fm_guide_on(args):
+        if tuning:
+            ap.error("--fm-guide-scale · --fm-guide-steps · --fm-guide-max-step-rad · --fm-guide-sweep 는 --fm-guide 의 인자입니다 — "
+                     "함께 주십시오")
+        return
+    if getattr(args, "no_safe", False) or getattr(args, "no_perception", False):
+        ap.error("--fm-guide 는 SafePolicy 의 TrajOpt 거리장 비용을 씁니다 (--no-safe · --no-perception 은 그것을 안 만듭니다)")
+    if getattr(args, "fm_guide_scale", None) is not None and not (
+            math.isfinite(args.fm_guide_scale) and args.fm_guide_scale >= 0.0):
+        ap.error(f"--fm-guide-scale 는 0 이상의 수입니다 (받은 값 {args.fm_guide_scale})")
+    if getattr(args, "fm_guide_steps", None) is not None and args.fm_guide_steps < 1:
+        ap.error(f"--fm-guide-steps 는 1 이상입니다 (받은 값 {args.fm_guide_steps})")
+    if getattr(args, "fm_guide_max_step_rad", None) is not None and not (
+            math.isfinite(args.fm_guide_max_step_rad) and args.fm_guide_max_step_rad > 0.0):
+        ap.error(f"--fm-guide-max-step-rad 는 0 보다 큰 rad 입니다 (받은 값 {args.fm_guide_max_step_rad})")
+
+
+def fm_guide_record_meta(args) -> dict:
+    """T93 — `{"fm_guide": {...config}}` for the server record's meta, only when on (off: `{}`, the meta as before)."""
+    cfg = fm_guide_config_from_args(args)
+    return {} if cfg is None else {"fm_guide": cfg.record()}
+
+
+def fm_guide_sweep_from_args(args) -> tuple:
+    """T93 smoke — `--fm-guide-sweep SCALE:STEPS:MAXSTEP,...` -> a tuple of `FmGuideConfig` (empty when not given)."""
+    spec = getattr(args, "fm_guide_sweep", None)
+    if not spec:
+        return ()
+    from AG3S.trajopt.fm_guide import FmGuideConfig
+
+    out = []
+    for item in str(spec).split(","):
+        scale, steps, cap = item.split(":")
+        out.append(FmGuideConfig(scale=float(scale), steps=int(steps), max_step_rad=float(cap)))
+    return tuple(out)
+
+
+def fm_guide_config_from_args(args):
+    """T93 — the `FmGuideConfig` of the flags (None = off)."""
+    if not fm_guide_on(args):
+        return None
+    from AG3S.trajopt.fm_guide import FmGuideConfig
+
+    given = {k: v for k, v in (("scale", args.fm_guide_scale), ("steps", args.fm_guide_steps),
+                               ("max_step_rad", args.fm_guide_max_step_rad)) if v is not None}
+    return FmGuideConfig(**given)
+
+
+def fm_guide_build(args, served_policy, model_config=None):
+    """T93 — `{"fm_guide": FlowGuide}` for `SafePolicy(**...)`, only when on (off: `{}`, no kwarg, the call as before).
+    The jitted sampler is compiled here (a fake observation of the model's shapes) so request 1 does not pay for it."""
+    cfg = fm_guide_config_from_args(args)
+    if cfg is None:
+        return {}
+    from AG3S.trajopt.fm_guide import FlowGuide
+
+    guide = FlowGuide(served_policy, cfg, sweep=fm_guide_sweep_from_args(args))
+    logging.warning("VLA flow guidance (T93): ON scale=%g steps=%d (of %d flow steps) max_step=%g rad · violation > 0 requests "
+                    "are resampled with the same observation and noise; the guided chunk is the TrajOpt reference only if "
+                    "its violation is lower", cfg.scale, min(cfg.steps, guide.num_steps), guide.num_steps, cfg.max_step_rad)
+    if model_config is not None:
+        try:
+            logging.warning("VLA flow guidance (T93): sampler compiled in %.1f s", guide.warm_up(model_config))
+        except Exception:  # noqa: BLE001 — first guided request compiles instead
+            import traceback
+
+            logging.warning("VLA flow guidance (T93): warm-up failed; the first guided request compiles:\n%s",
+                            traceback.format_exc())
+    return {"fm_guide": guide}
+# --- T93 — end
+
+
+def hsr5_config_from_args(args):
+    """T82 — `hsr5.Hsr5Config` for `--hsr5 [NPZ]`, or None when off."""
+    spec = getattr(args, "hsr5", None)
+    # --- T85 — begin
+    if getattr(args, "hsr_gt_stage", False):
+        from AG3S.trajopt.hsr5 import GT_PROBE_NAME, Hsr5Config
+
+        return Hsr5Config(probe=GT_PROBE_NAME, gt_stage=True)
+    # --- T85 — end
+    if spec is None:
+        return None
+    from AG3S.trajopt.hsr5 import PROBE_NAME, Hsr5Config
+
+    return Hsr5Config(probe=("shipped:" + PROBE_NAME) if spec == "default" else str(spec))
+
+
+def hsr5_record_meta(args) -> dict:
+    """T82 constraint-record meta — only when on (the default meta is unchanged)."""
+    cfg = hsr5_config_from_args(args)
+    return {} if cfg is None else {"hsr5": cfg.record()}
+
+
+def reject_hsr5_flags(ap: argparse.ArgumentParser, args) -> None:
+    """T82 — `--hsr5` that would do nothing (or could not get its feature) is refused at start."""
+    # --- T85 — begin
+    if getattr(args, "hsr_gt_stage", False):
+        if getattr(args, "hsr5", None) is not None:
+            ap.error("--hsr-gt-stage 와 --hsr5 는 둘 다 5 단계의 출처입니다 (정답 / 분류기) — 하나만 주십시오")
+        if _label_unavailable(args):
+            ap.error("--hsr-gt-stage 는 SafePolicy 가 필요합니다 (--no-safe · --no-perception 과 함께 줄 수 없습니다)")
+        if hsr6_flags_from_args(args) is None:
+            ap.error("--hsr-gt-stage 는 --hsr6-* 네 규칙의 단계 출처입니다 — --hsr6-* 중 하나 이상과 함께 주십시오")
+        return
+    # --- T85 — end
+    if getattr(args, "hsr5", None) is None:
+        return
+    if _label_unavailable(args):
+        ap.error("--hsr5 는 attention 서버의 prefix pass 와 SafePolicy 가 필요합니다 (--no-safe · --no-attention · "
+                 "--no-perception 과 함께 줄 수 없습니다)")
+    src = getattr(args, "attention_source", None)
+    if not src or not (str(src).startswith("noun_target:") or str(src).split(":", 1)[0] == "hidden_probe"):   # T90
+        ap.error("--hsr5 의 hidden feature 는 noun attention source 의 prefix pass 에서만 나옵니다 — "
+                 "--attention-source noun_target:L<l>H<h> 와 함께 주십시오")
+    if args.hsr5 != "default":
+        import pathlib
+
+        if not pathlib.Path(args.hsr5).is_file():
+            ap.error(f"--hsr5 {args.hsr5}: 파일이 없습니다")
+
+
+def announce_hsr5(args, t57a: dict) -> None:
+    """T82 — load the probe into `t57a["hsr5_probe"]` and say at start what it replaces (one WARNING line)."""
+    import hashlib
+
+    from AG3S.trajopt.hsr5 import HIDDEN_LAYER, PROBE_MD5, default_probe_path, load_hsr5_probe
+
+    path = default_probe_path() if args.hsr5 == "default" else args.hsr5
+    probe = load_hsr5_probe(path)
+    md5 = hashlib.md5(open(path, "rb").read()).hexdigest()
+    t57a["hsr5_probe"] = probe
+    flags = hsr6_flags_from_args(args)
+    logging.warning(
+        "HSR5 (T82): probe %s (%s, md5 %s%s) · hidden h_%d [cam_high · left · right mean | last valid token] %d-D from "
+        "the noun prefix pass · raw argmax per request · replaces: subtask gate input (approach/grasp→pick, "
+        "carry/place→place, retreat→home), HSR6 phase of %s, after-grasp deflection-rate/continuity (on in "
+        "carry/place/retreat; no stage → latch rule), + closing release (closing ∧ stage ∉ {carry, place} ∧ executed "
+        "gripper command ≥ gripper_closed_below, 2 requests → latched)",
+        probe.name, path, md5, "" if md5 == PROBE_MD5 else " ≠ shipped T77 md5", HIDDEN_LAYER, probe.dim,
+        flags.names() if flags is not None else "[] (no --hsr6-* flag)")
 
 
 def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
@@ -2961,6 +3594,15 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
             ap.error("--target-extent attention-surface-hybrid 는 AG3S 의 거리장을 고치는 flag 입니다 "
                      "(--no-safe · --no-perception 은 그것을 안 만듭니다)")
     # IFG-CL2 — end
+    # T78 갈래 B — begin
+    if getattr(args, "attention_surface_device", None) == "cuda":
+        if extent != "attention-surface":
+            ap.error("--attention-surface-device cuda 는 --target-extent attention-surface 의 표면 선택에만 걸립니다 "
+                     f"(받은 --target-extent {extent!r}) — 그대로 띄우면 효과가 있었다고 믿게 됩니다")
+        if args.no_safe or getattr(args, "no_perception", False):
+            ap.error("--attention-surface-device cuda 는 AG3S 의 표면 선택을 옮기는 flag 입니다 "
+                     "(--no-safe · --no-perception 은 그것을 안 만듭니다)")
+    # T78 갈래 B — end
     # IFG-CL1 — begin
     if extent in ("attention-surface", "attention-surface-hybrid"):   # IFG-CL2: the same locked source
         from AG3S.trajopt.attention_source import parse_attention_source
@@ -2970,7 +3612,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
             src = None if spec is None else parse_attention_source(spec)
         except ValueError:
             src = None
-        if src is None or src.label != "noun_target:L10H7":
+        # --- T90 — begin: the hidden probe replaces the seed map (`seed_map_source_ok`)
+        from AG3S.trajopt.attention_source import seed_map_source_ok
+
+        if not seed_map_source_ok(src):
+        # --- T90 — end
             ap.error(f"--target-extent {extent} 는 IFG LOCK 의 seed 지도 (noun L10H7) 로 고정된 방법입니다 — "
                      f"--attention-source noun_target:L10H7 와 함께 주십시오 (받은 값 {spec!r})")
         if args.no_attention:
@@ -2979,6 +3625,66 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ap.error("--robot-mask render 는 AG3S 의 depth mask 를 고치는 flag 입니다 "
                  "(--no-safe · --no-perception 은 그것을 안 만듭니다)")
     # IFG-CL1 — end
+    # T78 갈래 A — begin
+    t78 = [f for f, on in (("--surface-split", getattr(args, "surface_split", False)),
+                           ("--surface-target-check", getattr(args, "surface_target_check", None) not in (None, "off")),
+                           ("--surface-keep-last", getattr(args, "surface_keep_last", False)),
+                           ("--surface-grasp-hold", getattr(args, "surface_grasp_hold", False)),
+                           ("--surface-no-ball", getattr(args, "surface_no_ball", False)),
+                           ("--surface-reattach-hull", getattr(args, "surface_reattach_hull", None) is not None),   # T78b
+                           ("--surface-hull-fill", getattr(args, "surface_hull_fill", False))) if on]   # T78b
+    if t78 and extent != "attention-surface":
+        ap.error(f"{', '.join(t78)} 는 --target-extent attention-surface 의 영역 후처리입니다 — 그대로 띄우면 효과가 있었다고 "
+                 "믿게 됩니다")
+    if (getattr(args, "surface_grasp_hold", False) or getattr(args, "surface_no_ball", False)) \
+            and not getattr(args, "surface_keep_last", False):
+        ap.error("--surface-grasp-hold · --surface-no-ball 은 --surface-keep-last 와 함께만 줄 수 있습니다")
+    if getattr(args, "surface_no_ball", False) and getattr(args, "target_free_coarse", False):
+        ap.error("--surface-no-ball 은 공을 만들지 않습니다 — --target-free-coarse (공으로만 짓는 거친 계층) 와 함께 줄 수 없습니다")
+    if getattr(args, "surface_split", False) and getattr(args, "attention_split_radius_mm", None) is None:
+        from AG3S.ag3s.config import ClusteringConfig
+
+        if ClusteringConfig.attention_split_radius is None:
+            ap.error("--surface-split 은 --attention-split-radius-mm 의 재군집 반경을 씁니다")
+    # T78b
+    if getattr(args, "surface_reattach_hull", None) is not None:
+        v = float(args.surface_reattach_hull)
+        if not (math.isfinite(v) and v >= 0.0):
+            ap.error(f"--surface-reattach-hull 은 0 이상의 유한한 mm 여야 합니다: {v}")
+        if not getattr(args, "surface_split", False):
+            ap.error("--surface-reattach-hull 은 --surface-split 이 버리려는 덩어리를 다시 붙입니다 — 함께만 줄 수 있습니다")
+    if getattr(args, "surface_hull_fill", False) and not (getattr(args, "surface_keep_last", False)
+                                                          and getattr(args, "surface_no_ball", False)):
+        ap.error("--surface-hull-fill 은 --surface-keep-last · --surface-no-ball 과 함께만 줄 수 있습니다")
+    # --- T78d — begin
+    _t78d_reject(ap, args, extent)
+    # --- T78d — end
+    # --- T78e — begin
+    if getattr(args, "surface_memory_target_sticky", False):
+        if extent != "attention-surface":
+            ap.error("--surface-memory-target-sticky 는 --target-extent attention-surface 의 표본 기억 규칙입니다 — "
+                     "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+        if not getattr(args, "surface_keep_last", False):
+            ap.error("--surface-memory-target-sticky 는 --surface-keep-last 와 함께만 줄 수 있습니다")
+    # --- T78e — end
+    # --- T78f — begin
+    if getattr(args, "surface_contact_allowance_mm", None) is not None:
+        v = float(args.surface_contact_allowance_mm)
+        if extent != "attention-surface":
+            ap.error("--surface-contact-allowance-mm 는 --target-extent attention-surface 의 손 층 지우기 규칙입니다 — "
+                     "그대로 띄우면 효과가 있었다고 믿게 됩니다")
+        if not getattr(args, "surface_keep_last", False):
+            ap.error("--surface-contact-allowance-mm 는 --surface-keep-last 와 함께만 줄 수 있습니다")
+        from AG3S.ag3s.config import EsdfConfig
+
+        md = getattr(args, "oracle_max_dist_voxels", None)
+        reach = (float(EsdfConfig.oracle_max_dist_voxels if md is None else md)
+                 * float(getattr(args, "fine_voxel", None) or getattr(args, "voxel", 0.0)) * 1e3)
+        if not (math.isfinite(v) and 0.0 < v <= reach + 1e-9):
+            ap.error(f"--surface-contact-allowance-mm 는 0 < M ≤ 후보 거리 ({reach:g} mm = oracle-max-dist-voxels × "
+                     f"fine voxel) 여야 합니다: {v}")
+    # --- T78f — end
+    # T78 갈래 A — end
     if oracle_on:
         # T46f A14c — `none` (예외 없음, T46f A14) 도 `relax` 처럼 target-free 계층을 만들지 않는다: oracle 이 바꿀
         # 계층이 없다. `--links` (gripper_wrist 포함) 와는 무관하다 — 형상은 제약 모델, oracle 은 거리장이다.
@@ -3058,6 +3764,29 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ap.error("--wrist-track-scale 은 0 과 1 사이 (끝 제외) 값이어야 합니다")   # IFG-TOW
     if getattr(args, "grasp_anchor", None) is not None and not float(args.grasp_anchor) > 0.0:
         ap.error("--grasp-anchor W 는 0 보다 커야 합니다")   # IFG-TOA
+    _t72b = [f for f, on in (("--grasp-set-track-scale", getattr(args, "grasp_set_track_scale", None) is not None),
+                              ("--grasp-set-full-horizon", bool(getattr(args, "grasp_set_full_horizon", False))),
+                              ("--grasp-set-field-only", bool(getattr(args, "grasp_set_field_only", False))),
+                              ("--grasp-set-gate-mm", getattr(args, "grasp_set_gate_mm", None) is not None),
+                              ("--grasp-set-budget-ms", getattr(args, "grasp_set_budget_ms", None) is not None)) if on]
+    if _t72b and not getattr(args, "grasp_set_to", False):
+        ap.error(f"{', '.join(_t72b)} 은 --grasp-set-to 와 함께만 줄 수 있습니다")   # T72 step 1 · T72b
+    for flag, v in (("--grasp-set-gate-mm", getattr(args, "grasp_set_gate_mm", None)),
+                    ("--grasp-set-budget-ms", getattr(args, "grasp_set_budget_ms", None))):
+        if v is not None and not (math.isfinite(float(v)) and float(v) > 0.0):
+            ap.error(f"{flag} 는 0 보다 큰 값이어야 합니다")
+    if getattr(args, "grasp_set_to", False):   # T72
+        clash = [f for f, on in (("--grasp-anchor", getattr(args, "grasp_anchor", None) is not None),
+                                 ("--grasp-goal-box", getattr(args, "grasp_goal_box", None) is not None),
+                                 ("--geo-grasp", bool(getattr(args, "geo_grasp", False)))) if on]
+        if clash:
+            ap.error(f"--grasp-set-to (T72 grasp 후보 집합 도달 제약) 은 {', '.join(clash)} 를 대신합니다 — 함께 줄 수 "
+                     "없습니다")
+        if getattr(args, "grasp_set_track_scale", None) is not None and not 0.0 < float(args.grasp_set_track_scale) <= 1.0:
+            ap.error("--grasp-set-track-scale S 는 0 < S ≤ 1 이어야 합니다")
+        if getattr(args, "no_safe", False) or getattr(args, "no_perception", False):
+            ap.error("--grasp-set-to 는 SafePolicy 의 AG3S target 점군 · grasp latch 가 필요합니다 (--no-safe · "
+                     "--no-perception 과 함께 줄 수 없습니다)")
     if (getattr(args, "grasp_goal_window", None) or "close") != "close" and getattr(args, "grasp_anchor", None) is None \
             and getattr(args, "grasp_goal_box", None) is None:
         ap.error("--grasp-goal-window widen 은 쥐기 목표 항 (--grasp-anchor) 또는 목표 상자 (--grasp-goal-box) 의 목표 행을 "
@@ -3077,6 +3806,7 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
          bool(dynamic_field_section(args))),  # AG3S-DYNAMIC-FIELD · AG3S-TASK-DYNAMIC-MAP
         ("--target-volume-exempt", getattr(args, "target_volume_exempt", False)),
         ("--latched-identity-hold", getattr(args, "latched_identity_hold", False)),
+        ("--target-vacancy-release", getattr(args, "target_vacancy_release", False)),   # T81
         ("--refused-identity-release", getattr(args, "refused_identity_release", None) is not None),
         ("--supported-max-bottom-mm", getattr(args, "supported_max_bottom_mm", None) is not None),
         ("--held-slip-detach", getattr(args, "held_slip_detach", False)),
@@ -3087,6 +3817,10 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         ("--hold-follow-to", getattr(args, "hold_follow_to", None) is not None),
         ("--held-free-observed-mm", getattr(args, "held_free_observed_mm", None) is not None))
         if on]
+    if not getattr(args, "target_vacancy_release", False) and any(
+            getattr(args, f, None) is not None for f in _T81_THRESHOLDS):   # T81
+        ap.error("--target-vacancy-delta-mm · -p-empty · -p-present · -min-points · -samples 는 "
+                 "--target-vacancy-release 의 문턱입니다 — 함께 주십시오")
     if t43t_ag3s and (args.no_safe or getattr(args, "no_perception", False)):
         ap.error(f"{', '.join(t43t_ag3s)} 는 AG3S / SafePolicy 의 flag 입니다 (--no-safe · "
                  "--no-perception 은 그것을 안 만듭니다) — 빼고 띄우십시오")
@@ -3094,6 +3828,10 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
     reject_t57a_flags(ap, args)
     # T57-A — end
     reject_hsr6_flags(ap, args)   # AG3S-CORE-EVAL-HSR6
+    reject_hsr5_flags(ap, args)   # T82
+    reject_subtask_from_latch(ap, args)   # T92
+    reject_subtask_from_phase_machine(ap, args)   # T91c
+    reject_fm_guide(ap, args)   # T93
     if getattr(args, "held_cover_cap_mm", None) is not None and not (
             args.held_cover_cap_mm >= 0.0 and math.isfinite(args.held_cover_cap_mm)):
         ap.error(f"--held-cover-cap-mm 는 0 이상의 mm 입니다 (받은 값 {args.held_cover_cap_mm})")
@@ -3233,6 +3971,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
                         ("--sqp-max-iterations", getattr(args, "sqp_max_iterations", None))):
         if value is not None and value < 1:
             ap.error(f"{flag} 는 1 이상이어야 합니다 (got {value})")
+    if getattr(args, "passthrough_when_clear", False) and args.no_safe:   # T88
+        ap.error("--passthrough-when-clear 는 TO 를 고치는 flag 입니다 (--no-safe 는 TO 를 아예 안 돌립니다). "
+                 "그대로 띄우면 효과가 있었다고 믿게 됩니다")
     if int(getattr(args, "to_multi_seed", 0) or 0) < 0:
         ap.error(f"--to-multi-seed N 은 0 (꺼짐) 이상이어야 합니다 (got {args.to_multi_seed})")   # AG3S-PRE-CORE-TO E2
     if getattr(args, "to_gpu_seeds", "off") != "off":   # AG3S-PRE-CORE-TO E3-b
@@ -3335,6 +4076,13 @@ def sqp_overrides(args) -> dict:
     if getattr(args, "to_gpu_seeds_check", "all") != "all":
         out["gpu_seeds_check"] = str(args.to_gpu_seeds_check)   # E3-b first-pass (all: no key)
     return out
+
+
+# --- T88 — begin ---
+def passthrough_overrides(args) -> dict:
+    """T88 — `--passthrough-when-clear` → `sqp.passthrough_when_clear`. Not given (default) → `{}`: no key."""
+    return {"passthrough_when_clear": True} if getattr(args, "passthrough_when_clear", False) else {}
+# --- T88 — end ---
 
 
 def announce_joint_limits(robot_model, layout, limits_config) -> dict:
@@ -3444,15 +4192,47 @@ def obstacle_overrides(args) -> dict:
     nbc = getattr(args, "neighbour_contact_mm", None)
     if nbc is not None:
         # IFG-NBC — light contact of the grasping fingers with a neighbour object near the target.
-        if not float(nbc) > 0.0:
-            raise SystemExit(f"--neighbour-contact-mm 은 0 보다 커야 합니다: {nbc}")
+        if not float(nbc) >= 0.0:
+            raise SystemExit(f"--neighbour-contact-mm 은 0 이상이어야 합니다: {nbc}")
         out["neighbour_contact_depth"] = float(nbc) / 1000.0
+        if float(nbc) == 0.0:
+            # T67 ③ — 0 is "on, no overlap allowed" (not "off": off is the flag left out).
+            out["neighbour_contact_at_zero"] = True
     npc = getattr(args, "neighbour_palm_contact_mm", None)
     if npc is not None:
         # AG3S-CORE-EVAL-A6 — light contact of the grasping palm with a neighbour object at the grasp moment.
         if not float(npc) > 0.0:
             raise SystemExit(f"--neighbour-palm-contact-mm 은 0 보다 커야 합니다: {npc}")
         out["neighbour_palm_contact_depth"] = float(npc) / 1000.0
+    if getattr(args, "grasp_corridor_allow", False):
+        # T83 — the grasp corridor contact allowance.
+        out["grasp_corridor_allow"] = True
+        ahead = getattr(args, "grasp_corridor_ahead_mm", None)
+        if ahead is not None:
+            if not (math.isfinite(float(ahead)) and float(ahead) >= 0.0):
+                raise SystemExit(f"--grasp-corridor-ahead-mm 은 0 이상이어야 합니다: {ahead}")
+            out["grasp_corridor_ahead"] = float(ahead) / 1000.0
+        k = getattr(args, "grasp_corridor_min_target_points", None)
+        if k is not None:
+            if int(k) < 1:
+                raise SystemExit(f"--grasp-corridor-min-target-points 는 1 이상이어야 합니다: {k}")
+            out["grasp_corridor_min_target_points"] = int(k)
+    elif (getattr(args, "grasp_corridor_ahead_mm", None) is not None
+          or getattr(args, "grasp_corridor_min_target_points", None) is not None):
+        raise SystemExit("--grasp-corridor-ahead-mm · --grasp-corridor-min-target-points 는 --grasp-corridor-allow 와 "
+                         "함께 줘야 합니다 — 혼자서는 아무 일도 하지 않습니다")
+    sso = getattr(args, "support_surface_offset_mm", None)
+    if sso is not None:
+        # T67 ① — the fine layers' support-surface offset.
+        if not (math.isfinite(float(sso)) and float(sso) > 0.0):
+            raise SystemExit(f"--support-surface-offset-mm 은 0 보다 커야 합니다: {sso}")
+        if margin <= 0.0:
+            raise SystemExit("--support-surface-offset-mm 은 --obstacle-margin M (> 0) 과 함께 줘야 합니다 — 지지면 분류 "
+                             "(_obstacle_rows) 가 그때만 돈다")
+        if getattr(args, "obstacle_margin_support", False):
+            raise SystemExit("--support-surface-offset-mm 은 --obstacle-margin-support 와 함께 줄 수 없습니다 — 그때는 "
+                             "어느 행도 지지면으로 분류되지 않아 아무 일도 하지 않습니다")
+        out["support_surface_offset"] = float(sso) / 1000.0
     return out
 
 
@@ -3647,6 +4427,10 @@ def announce_ta(to_config) -> None:
                     "0.02/0.05 rad) re-solved only on chunks whose standard solve leaves a violation > %.2f mm; "
                     "recorded in to.metrics.multi_seed", to_config.sqp.multi_seed,
                     to_config.safety.violation_tolerance * 1000.0)
+    # --- T88 — begin ---
+    if getattr(to_config.sqp, "passthrough_when_clear", False):
+        log.warning("TO passthrough when clear (T88): ON")
+    # --- T88 — end ---
     if getattr(to_config.sqp, "gpu_seeds", "off") != "off":
         log.warning("TO GPU seeds (AG3S-PRE-CORE-TO E3-b): the %d seeds are optimized in one batched cuRobo L-BFGS "
                     "(joint tracking, smoothness, limits, collision on our field as a cuRobo world, grasp goal when an "
@@ -3712,7 +4496,7 @@ def trajopt_config_from_args(args):
         getattr(args, "no_perception", False))
     limits = limits_overrides(args)
     tp_horizon, tp_sqp, tp_qp = tp_overrides(args)
-    sqp = {**sqp_overrides(args), **tp_sqp}
+    sqp = {**sqp_overrides(args), **tp_sqp, **passthrough_overrides(args)}   # T88: passthrough_overrides is {} unless given
     qp = {**qp_overrides(args), **tp_qp}
     path_limits, path_reduction = path_overrides(args)
     return TrajOptConfig.from_dict({
@@ -3842,6 +4626,7 @@ def main() -> None:
         logging.warning("AG3S blas_threads: %s", limit_blas_threads(args.blas_threads))
     else:
         logging.warning("AG3S blas_threads: library default (--blas-threads 0)")
+    apply_attention_surface_device(args)   # T78 갈래 B (no-op unless --attention-surface-device is given)
     try:
         prepare_run_outputs(args, {"record_constraints": "constraints"})
         configure_run_logging("serve_safe")
@@ -3908,7 +4693,12 @@ def main() -> None:
                 if getattr(args, "confidence_gate", "off") == "on":
                     # IFG-S2SERVE — the prefix layer-8 image residual rides on the result (never on the wire).
                     t57a["prefix_feature"] = True
-            if hsr6_flags_from_args(args) is not None:
+            if hsr_gt_stage_on(args):
+                # T85 — the stage is the client's MuJoCo truth: no HSR6 / HSR5 probe is loaded (classifier off).
+                logging.warning("HSR-GT-STAGE (T85, analysis only): the 5 stages come from the client's MuJoCo ground truth "
+                                "(pi05_infer --safe-gt-stage) · no HSR6 / HSR5 probe loaded · uses %s",
+                                hsr6_flags_from_args(args).names())
+            elif hsr6_flags_from_args(args) is not None:
                 # AG3S-CORE-EVAL-HSR6 — the 6-phase probe on the same feature (off: no kwarg, AttentionPolicy as before).
                 from AG3S.trajopt.hsr6 import load_hsr6_probe
 
@@ -3916,6 +4706,9 @@ def main() -> None:
                 logging.warning("HSR6: probe %s (%s) · uses %s · raw argmax per request", t57a["hsr6_probe"].name,
                                 getattr(args, "hsr6_probe", None) or "shipped asset",
                                 hsr6_flags_from_args(args).names())
+            if hsr5_config_from_args(args) is not None and not hsr_gt_stage_on(args):   # T85: gt = no probe
+                # T82 — the 5-stage probe on the hidden h_4 of the same noun prefix pass (off: no kwarg).
+                announce_hsr5(args, t57a)
             served_policy = AttentionPolicy(policy, attn_model,
                                             subtask_probe=args.subtask_probe or "default", **t57a)
             probe = served_policy.subtask_probe
@@ -3986,9 +4779,14 @@ def main() -> None:
                       # SUBTASK-c — **항상 남긴다**: 이 키가 없는 기록은 SUBTASK-c 전이다.
                       "subtask": {"gate": bool(args.subtask_gate),
                                   "probe": args.subtask_probe or "shipped:kv_L4_v1",
+                                  **subtask_from_latch_record_meta(args),   # T92 — only when on
+                                  **subtask_from_phase_machine_record_meta(args),   # T91c — only when on
                                   # T46c A12 (W1) — 켰을 때만 키가 생긴다.
                                   **({"placed_no_seed_certify": True}
                                      if getattr(args, "placed_no_seed_certify", False) else {})},
+                      # --- T93 — begin: 켰을 때만 키가 생긴다.
+                      **fm_guide_record_meta(args),
+                      # --- T93 — end
                       # T57-A — 켰을 때만 키가 생긴다.
                       **t57a_record_meta(args),
                       # IFG-CL1 — 켰을 때만 키가 생긴다.
@@ -3996,7 +4794,9 @@ def main() -> None:
                       # IFG-S2SERVE — 켰을 때만 키가 생긴다.
                       **ifg_s2serve_record_meta(args),
                       # AG3S-CORE-EVAL-HSR6 — 켰을 때만 키가 생긴다.
-                      **hsr6_record_meta(args)})
+                      **hsr6_record_meta(args),
+                      # T82 — 켰을 때만 키가 생긴다.
+                      **hsr5_record_meta(args)})
             # **시작할 때 거절한다.** 기록기가 이 backend 의 거리장을 실을 수 없으면 청크마다
             # 예외가 나고, 예전에는 그것이 `print` 한 줄이라 75 chunk 를 돌리고도 빈 디렉토리가
             # 남았다 (2026-09-28). 여기서 죽으면 체크포인트를 올리기 전이다.
@@ -4048,6 +4848,31 @@ def main() -> None:
                 "TO neighbour contact (IFG-NBC): fingers may overlap a neighbour obstacle by %.0f mm within %.0f mm of "
                 "the target, palm within %.0f mm, pre-grasp only", c_.neighbour_contact_depth * 1000,
                 c_.neighbour_contact_radius * 1000, c_.neighbour_contact_gate * 1000)
+        if getattr(to_config.collision, "neighbour_contact_at_zero", False):
+            logging.warning(
+                "TO neighbour contact (IFG-NBC, T67 ③): ON at depth 0 — the window's finger–neighbour rows require "
+                "d − r ≥ 0 (no overlap, no clearance) instead of the obstacle margin")
+        if float(getattr(to_config.collision, "support_surface_offset", 0.0)) > 0.0:
+            logging.warning(
+                "TO support surface offset (T67 ①): +%.1f mm on robot rows classed support (table / floor) whose "
+                "distance a fine tier answered (fine · target_free); gradient unchanged; obstacle / target / held rows "
+                "and the coarse layer unchanged", to_config.collision.support_surface_offset * 1000)
+        if getattr(to_config.cost, "grasp_set", False):
+            k_ = to_config.cost
+            logging.warning(
+                "TO grasp set (T72): collision-aware grasp candidates (mu %.2f, <= %d, %.0f ms, IK, point checks + the "
+                "TrajOpt's own hand / finger rows) scored J = track/sigma_q^2 (%.2f rad) + intent (%.0f mm, %.0f deg) + "
+                "(1 - Q); eligible within %.0f mm / %.0f deg, switch below %.2f x J; reach box +-%.0f mm on %d rows "
+                "from the close row (slack = w_slack), rotation weight %g; window = latched / closing with the palm "
+                "site within %.0f mm (not withdrawn by HSR6 objective); recorded in grasp.grasp_set",
+                k_.grasp_set_mu, k_.grasp_set_max_candidates, k_.grasp_set_time_budget_ms, k_.grasp_set_sigma_q,
+                k_.grasp_set_sigma_p * 1000, k_.grasp_set_sigma_theta_deg, k_.grasp_set_max_pos * 1000,
+                k_.grasp_set_max_rot_deg, k_.grasp_set_switch_ratio, k_.grasp_set_box * 1000, k_.grasp_set_rows,
+                k_.grasp_set_w_rot, k_.grasp_set_gate * 1000)
+            if k_.grasp_set_track_scale < 1.0 or k_.grasp_set_full_horizon or k_.grasp_set_field_only:
+                logging.warning("TO grasp set step 1 / T72b: grasping-arm tracking x %.2f while the reach box is on, full "
+                                "horizon %s, TrajOpt-field-only candidate check %s", k_.grasp_set_track_scale,
+                                k_.grasp_set_full_horizon, k_.grasp_set_field_only)
         if float(getattr(to_config.collision, "neighbour_palm_contact_depth", 0.0)) > 0.0:
             c_ = to_config.collision
             logging.warning(
@@ -4056,6 +4881,16 @@ def main() -> None:
                 "target, palm within %.0f mm, latch latched / closing only (not withdrawn by HSR6 objective)",
                 c_.neighbour_palm_contact_depth * 1000, c_.neighbour_palm_contact_radius * 1000,
                 c_.neighbour_palm_contact_gate * 1000)
+        if getattr(to_config.collision, "grasp_corridor_allow", False):
+            c_ = to_config.collision
+            logging.warning(
+                "TO grasp corridor carve (T83): pre-grasp (latch not held / placed), q_now corridor holds >= %d ATS "
+                "target points -> obstacle seeds in the union of the q_now + planned-row corridors (pads' inner faces "
+                "- %.0f mm, |y| <= pad + %.0f mm, %.0f mm past the tips .. palm face) are removed from the fine "
+                "target-free tier only; seeds within %.0f mm of a support plane or below stay",
+                c_.grasp_corridor_min_target_points, c_.grasp_corridor_margin_in * 1000,
+                c_.grasp_corridor_margin_y * 1000, c_.grasp_corridor_ahead * 1000,
+                c_.grasp_corridor_support_band * 1000)
         if getattr(to_config.collision, "held_obstacle_margin", False):
             logging.warning(
                 "TO held_obstacle_margin: ON — 쥔 물체 행도 같은 분류: 장애물이 최근접이면 %.1f mm "
@@ -4106,8 +4941,15 @@ def main() -> None:
             # SL6-A A9 — 기본 (all) 이 아닐 때만.
             **({"hsr6_objective_scope": args.hsr6_objective_scope}
                if getattr(args, "hsr6_objective_scope", "all") != "all" else {}),
+            # T82 — 켰을 때만 (기본 off = 인자 없음).
+            **({"hsr5": hsr5_config_from_args(args)} if hsr5_config_from_args(args) is not None else {}),
+            **subtask_from_latch_kwargs(args),   # T92 — only when on (default off = no kwarg)
+            **subtask_from_phase_machine_kwargs(args),   # T91c — only when on (default off = no kwarg)
+            **fm_guide_build(args, served_policy, _config.get_config(args.config).model),   # T93 — only when on (default off = no kwarg)
         )
         apply_grasp_contact_flags(served, args)
+        announce_subtask_from_latch(args)   # T92
+        announce_subtask_from_phase_machine(args)   # T91c
         # **어느 모드로 떠 있는지 시작할 때 크게 말한다.** legacy backend 경고와 같은 이유다 —
         # 조용히 shadow 로 떠 있으면(또는 shadow 가 아닌 채로) 로그를 읽는 사람이 그 실행이
         # 로봇을 움직였는지 아닌지 알 방법이 없다.

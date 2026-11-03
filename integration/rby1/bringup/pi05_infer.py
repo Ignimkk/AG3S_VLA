@@ -352,6 +352,80 @@ def apply_target_offset_xy(record, offset_xy):
 # T46f pilot — end
 
 
+# T80 — begin
+def t80_option_error(args):
+    """Validation of `--extra-apple` / `--move-target-*` (T80). `None` = fine (always when both are off)."""
+    extra = getattr(args, "extra_apple", None)
+    move_d = getattr(args, "move_target_when_palm_mm", None)
+    move_dxy = getattr(args, "move_target_dxy", None)
+    if extra is None and move_d is None and move_dxy is None:
+        return None
+    if args.model != "rby1_randomized_pick_place_16d":
+        return "--extra-apple / --move-target-* require --model rby1_randomized_pick_place_16d"
+    if extra is not None and not all(np.isfinite(v) for v in extra):
+        return "--extra-apple values must be finite (world x y, metres)"
+    if (move_d is None) != (move_dxy is None):
+        return "--move-target-when-palm-mm and --move-target-dxy go together"
+    if move_d is not None:
+        if not (np.isfinite(move_d) and move_d > 0):
+            return "--move-target-when-palm-mm must be a finite distance > 0 mm"
+        if not all(np.isfinite(v) and abs(v) <= 0.10 for v in move_dxy):
+            return "--move-target-dxy values must be finite and within ±0.10 m"
+    return None
+
+
+def t80_on(args):
+    return (getattr(args, "extra_apple", None) is not None
+            or getattr(args, "move_target_when_palm_mm", None) is not None)
+
+
+def t80_manifest(args, extra_pose):
+    """The T80 options of this run, for the manifest / policy record (only when a T80 option is on)."""
+    return {"extra_apple_world_xy": (None if args.extra_apple is None else [float(v) for v in args.extra_apple]),
+            "extra_apple_pose": (None if extra_pose is None else [float(v) for v in extra_pose]),
+            "extra_apple_body": (None if args.extra_apple is None else "apple_2"),
+            "move_target_when_palm_mm": args.move_target_when_palm_mm,
+            "move_target_dxy_m": (None if args.move_target_dxy is None
+                                  else [float(v) for v in args.move_target_dxy]),
+            "palm_point": "<used_arm>_ee site", "target_point": "target body origin (xpos)"}
+
+
+def t80_move_summary(mover):
+    """The one-shot move as one JSON-able dict (`moved` False when the palm never came close)."""
+    if mover is None:
+        return None
+    return {"moved": mover.moved, "record": mover.record,
+            "min_palm_distance_m": (None if not np.isfinite(mover.min_distance_m) else mover.min_distance_m),
+            "threshold_m": mover.threshold_m, "dxy_m": list(mover.dxy), "arm": mover.arm, "body": mover.body}
+
+
+def t80_trajectory_arrays(args, extra_pose, apple_qpos, apple2_qpos, mover, place_stop):
+    """traj.npz keys of a T80 run (per executed step: apple / apple_2 free-joint qpos after the step's physics)."""
+    out = {"t80_json": np.asarray(json.dumps({"options": t80_manifest(args, extra_pose),
+                                              "target_move": t80_move_summary(mover),
+                                              "placed_bodies": (None if place_stop is None
+                                                                else place_stop.get("t80_placed_bodies"))})),
+           "t80_apple_qpos": np.asarray(apple_qpos, dtype=np.float64).reshape(-1, 7)}
+    if args.extra_apple is not None:
+        out["t80_apple_2_qpos"] = np.asarray(apple2_qpos, dtype=np.float64).reshape(-1, 7)
+    if mover is not None:
+        rec = mover.record
+        out["t80_move_t"] = np.asarray(-1 if rec is None else rec["t_step"], dtype=np.int64)
+        out["t80_move_qpos_before"] = np.asarray(np.full(7, np.nan) if rec is None else rec["qpos_before"])
+        out["t80_move_qpos_after"] = np.asarray(np.full(7, np.nan) if rec is None else rec["qpos_after"])
+    return out
+
+
+def t80_scene_ops():
+    """`t80_scene_ops` (same directory) — imported only when a T80 option is on."""
+    bringup_dir = str(pathlib.Path(__file__).resolve().parent)
+    if bringup_dir not in sys.path:
+        sys.path.insert(0, bringup_dir)
+    import t80_scene_ops as ops
+    return ops
+# T80 — end
+
+
 def reset_randomized_scene(m, d, record, settle_seconds=1.5):
     """Restore the exact initial state the recorded episode started from.
 
@@ -643,6 +717,18 @@ def oracle_target_of(randomized_episode, ap):
     return str(target)
 
 
+# --- T85 — begin
+def gt_stage_source_of(scene, args, randomized_episode):
+    """T85 — `--safe-gt-stage`: the MuJoCo ground-truth stage source of the running simulation. The grasping hand is the
+    first of `--safe-manipulators` (default left, as T77); the target body is the randomized episode's `target_fruit` (T77's definition uses
+    the apple; a scene without a randomized episode keeps that default)."""
+    from AG3S.trajopt.gt_stage import GtStageSource
+
+    target = (randomized_episode or {}).get("target_fruit")
+    return GtStageSource(scene, side=(args.safe_manipulators or ("left",))[0], target_body=str(target) if target else None)
+# --- T85 — end
+
+
 # AG3S-PRE-CORE-TO PT — first-chunk perturbation (default off). Rolls the same scene / seed out as
 # nearby draws: a fixed 7-vector (uniform ±R from its own `default_rng(K)`; no other RNG is touched)
 # is added to the used arm's joint targets of the action applied in control steps 0..7.
@@ -873,6 +959,14 @@ def main():
                          "(이 episode 의 target_fruit = code 1, 다른 과일 · 정적 물체 · 로봇을 구별; capture 가 이미 "
                          "렌더한 것이라 추가 렌더 없음). 서버가 --target-extent oracle-visible 일 때 필요하다 — 그 "
                          "서버에 이 flag 없이 붙으면 접속 즉시 죽는다. --safe-remote 와 randomized 16-D episode 에서만")
+    # --- T85 — begin
+    ap.add_argument("--safe-gt-stage", action="store_true",
+                    help="T85 (분석용 · 시스템 규칙 아님) — 요청마다 MuJoCo 정답 5 단계 (접근 · 쥐기 · 운반 · 놓기 · 물러남; "
+                         "T77 t77_labels 의 정의, 요청 순서대로 인과적으로: 쥔 손 두 손가락이 target 에 닿고 target 이 요청 0 보다 "
+                         "20 mm 이상 올랐으면 held, held 이면 바구니 바닥 위 = 놓기 · 아니면 운반, 한 번 held 였다 아니면 물러남, "
+                         "아직이면 손바닥 – target ≤ 60 mm = 쥐기 · 아니면 접근) 를 싣는다. 서버가 --hsr-gt-stage 로 떠 있어야 "
+                         "하고 짝이 안 맞으면 접속 즉시 죽는다. 쥔 손은 --safe-manipulators 의 첫 번째. --safe-remote 와만")
+    # --- T85 — end
     ap.add_argument("--safe-timeout", type=float, default=2.0, metavar="SEC",
                     help="서버 응답 제한 시간. 넘으면 hold")
     # T23 — 실행 게이트와 HOLD. 세 flag 모두 기본값이 새 동작이고, `legacy` 가 T23 전 동작이다.
@@ -1023,6 +1117,20 @@ def main():
              "--model rby1_randomized_pick_place_16d 에서만",
     )
     # T46f pilot — end
+    # T80 — begin (both off by default; off = the shipped XML and every record exactly as before)
+    ap.add_argument(
+        "--extra-apple", type=float, nargs=2, default=None, metavar=("X", "Y"),
+        help="T80 — add a second apple `apple_2` (MjSpec copy of the `apple` body: same mesh, inertial, friction, "
+             "colour) at WORLD x, y metres; z and orientation = the settled episode apple. Placed after the reset "
+             "(and after --remove-objects), settled by the warm-up. --model rby1_randomized_pick_place_16d only")
+    ap.add_argument(
+        "--move-target-when-palm-mm", type=float, default=None, metavar="D",
+        help="T80 — at the first control step after which |<used_arm>_ee site - target body| < D mm, move the "
+             "target's free joint by --move-target-dxy (world, metres) with velocity 0. Once per run")
+    ap.add_argument(
+        "--move-target-dxy", type=float, nargs=2, default=None, metavar=("DX", "DY"),
+        help="T80 — world xy displacement of the one-shot target move (needs --move-target-when-palm-mm)")
+    # T80 — end
     ap.add_argument(
         "--seed",
         type=int,
@@ -1091,6 +1199,11 @@ def main():
         if not all(np.isfinite(v) and abs(v) <= 0.10 for v in args.target_offset_xy):
             ap.error("--target-offset-xy values must be finite and within ±0.10 m")
     # T46f pilot — end
+    # T80 — begin
+    _t80_err = t80_option_error(args)
+    if _t80_err is not None:
+        ap.error(_t80_err)
+    # T80 — end
     if args.fruit_layout_index is not None and args.model != "rby1_transport_14d":
         ap.error("--fruit-layout-index requires --model rby1_transport_14d")
     if args.fruit_layout_index is None and (
@@ -1193,6 +1306,8 @@ def main():
                  "REFERENCE chunk. They are different experiments — pick one")
     if args.safe_oracle_seg and not args.safe_remote:
         ap.error("--safe-oracle-seg only does something together with --safe-remote (the server reads it)")
+    if args.safe_gt_stage and not args.safe_remote:        # T85
+        ap.error("--safe-gt-stage only does something together with --safe-remote (the server reads it)")
     if args.safe_shadow and not args.safe_remote:
         ap.error("--safe-shadow requires --safe-remote: shadow means the server runs the whole "
                  "pipeline and the robot executes the policy's own chunk. Without the server "
@@ -1245,7 +1360,12 @@ def main():
         model_xml = MODEL_XML_TRANSPORT_PICK_PLACE_OBSTACLES
     else:
         model_xml = MODEL_XML_PICK_PLACE_OBSTACLES
-    m = mujoco.MjModel.from_xml_path(model_xml)
+    if args.extra_apple is not None:
+        # T80 — the shipped XML through MjSpec plus `apple_2` (appended: every original id / qpos address unchanged).
+        m = t80_scene_ops().build_model_with_extra_apple(model_xml)
+        print(f"  [T80] extra apple: model {model_xml} + apple_2 (MjSpec copy of apple), nq {m.nq}")
+    else:
+        m = mujoco.MjModel.from_xml_path(model_xml)
     d = mujoco.MjData(m)
     key = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_KEY, "teleop")
     mujoco.mj_resetDataKeyframe(m, d, key)
@@ -1311,6 +1431,8 @@ def main():
         )
 
     randomized_episode = None
+    #: T80 — apple_2's placed pose (None = no --extra-apple).
+    t80_extra_pose = None
     if mcfg["obs_format"] == "rby1_16d":
         try:
             randomized_episode = load_randomized_episode(args.episode_index)
@@ -1337,6 +1459,16 @@ def main():
                 d.qvel[va:va + 6] = 0.0
             mujoco.mj_forward(m, d)
             print(f"  removed    : {list(args.remove_objects)} parked on the floor (off the table)")
+        if args.extra_apple is not None:
+            # T80 — apple_2 at world (X, Y) with the settled apple's z and orientation, velocity 0. The warm-up settles it.
+            _ops = t80_scene_ops()
+            _qa, _ = _ops.free_qpos_adr(m, "apple_free")
+            t80_extra_pose = [float(args.extra_apple[0]), float(args.extra_apple[1]),
+                              *[float(v) for v in d.qpos[_qa + 2:_qa + 7]]]
+            _ops.place_free_body(m, d, _ops.EXTRA_JOINT, t80_extra_pose)
+            mujoco.mj_forward(m, d)
+            print(f"  [T80] apple_2 placed at world ({t80_extra_pose[0]:+.4f}, {t80_extra_pose[1]:+.4f}, "
+                  f"{t80_extra_pose[2]:.4f}) (apple at ({d.qpos[_qa]:+.4f}, {d.qpos[_qa + 1]:+.4f}))")
         split = randomized_split_of(args.episode_index)
         print(
             f"  scene      : episode {args.episode_index} ({split}) "
@@ -1532,6 +1664,9 @@ def main():
             # T46e A13 — the episode's GT target for the oracle segmentation (only with --safe-oracle-seg).
             **({"oracle_target": oracle_target_of(randomized_episode, ap)}
                if args.safe_oracle_seg else {}),
+            # T85 — the MuJoCo ground-truth stage (only with --safe-gt-stage; off: no kwarg, nothing measured or sent).
+            **({"gt_stage": gt_stage_source_of(TransportScene.attach(m, d), args, randomized_episode)}
+               if args.safe_gt_stage else {}),
         )
         hold_ctl = HoldController(mode=args.safe_hold_mode,
                                   max_hold_chunks=args.safe_max_hold_chunks)
@@ -1563,12 +1698,14 @@ def main():
         if str(workspace_root) not in sys.path:
             sys.path.insert(0, str(workspace_root))
         from AG3S.ag3s.runtime.frame_record import FrameRecorder, collect_manifest
-        from AG3S.ag3s.runtime.scene_truth import ObjectPoseProbe, joint_positions
+        from AG3S.ag3s.runtime.scene_truth import DEFAULT_OBJECT_BODIES, ObjectPoseProbe, joint_positions
 
         # body id 를 **한 번** 찾는다. 매 프레임 `mj_name2id` 를 물으면 없는 이름의 `-1` 이
         # 프레임마다 다시 나타나, "이 프레임에 사과가 없었다" 와 "이 모델에 사과가 처음부터
         # 없다" 가 구별되지 않는다.
-        scene_truth = ObjectPoseProbe(m)
+        # T80 — with --extra-apple apple_2 is measured too (off: no `bodies` argument = the default list, as before).
+        scene_truth = ObjectPoseProbe(m, **({} if args.extra_apple is None
+                                            else {"bodies": (*DEFAULT_OBJECT_BODIES, "apple_2")}))
 
         # manifest 는 **불변 설정**이다. 한 번 쓰고 프레임들이 참조한다 (T0).
         manifest = collect_manifest(
@@ -1605,6 +1742,9 @@ def main():
                    # T46f pilot — only when on (off: the manifest is the one from before).
                    **({"episode_target_offset_xy": [float(v) for v in args.target_offset_xy]}
                       if args.target_offset_xy is not None else {}),
+                   # T80 — only when on (off: the manifest is the one from before).
+                   **({"t80": t80_manifest(args, t80_extra_pose)}
+                      if t80_on(args) else {}),
                    "fruit_layout_index": args.fruit_layout_index,
                    "fruit_slot_order": list(args.fruit_slot_order or ()),
                    "fruit_preloaded": list(args.fruit_preloaded or ()),
@@ -1622,7 +1762,8 @@ def main():
                     "safe_hold_mode": args.safe_hold_mode,
                     "safe_max_hold_chunks": args.safe_max_hold_chunks,
                     # T46e A13 — 켰을 때만 키가 생긴다 (GT segmentation 을 실은 run).
-                    **({"safe_oracle_seg": True} if args.safe_oracle_seg else {})},
+                    **({"safe_oracle_seg": True} if args.safe_oracle_seg else {}),
+                    **({"safe_gt_stage": True} if args.safe_gt_stage else {})},   # T85
             # 거리장 설정은 **서버가** 들고 있다. 여기서는 클라이언트가 아는 것만 적고,
             # 서버가 실제로 무엇을 썼는지는 프레임마다 응답의 `field.backend` 가 답한다 —
             # 그쪽이 T0 의 "실제로 사용된 backend provenance" 다.
@@ -1768,6 +1909,8 @@ def main():
                 "fruit_layout_index": args.fruit_layout_index,
                 "fruit_slot_order": args.fruit_slot_order,
                 "argv": sys.argv,
+                # T80 — only when on.
+                **({"t80": t80_manifest(args, t80_extra_pose)} if t80_on(args) else {}),
             },
         )
     executed_actions = []
@@ -1882,6 +2025,11 @@ def main():
         place_stop = {"fruit": str(randomized_episode["target_fruit"]), "arm": str(randomized_episode["used_arm"]),
                       "grip_index": 0 if randomized_episode["used_arm"] == "left" else 1,
                       "after_steps": int(round(args.stop_after_place * CTRL_HZ)), "placed_t": None, "stop_t": None}
+        if args.extra_apple is not None:
+            # T80 — with two apples either one may be the requested one, and the other side's apple is picked with the
+            # other hand: placed = apple or apple_2 in the crate with BOTH grippers open (>= 0.5).
+            place_stop["t80_bodies"] = [OBJECT_BODIES[place_stop["fruit"]], "apple_2"]
+            print(f"[place] T80: either of {place_stop['t80_bodies']} in the crate with both grippers open counts")
         print(f"[place] --stop-after-place {args.stop_after_place:.1f} s: {place_stop['fruit']} in the crate with the "
               f"{place_stop['arm']} gripper open ends the episode {place_stop['after_steps']} steps later")
 
@@ -1896,6 +2044,22 @@ def main():
         print(f"[perturb] first chunk: steps 0-{PERTURB_STEPS - 1} {first_chunk_perturb['arm']} arm joints "
               f"+= v (R={first_chunk_perturb['radius']:g} rad, seed={first_chunk_perturb['seed']}) "
               f"v={np.array2string(first_chunk_perturb['vector'], precision=3, max_line_width=10**6)}")
+
+    #: T80 `--move-target-when-palm-mm` — None = off (the loop never measures the palm distance).
+    target_mover = None
+    #: T80 — the move record waiting for the next control frame (frames.jsonl `extra`), then kept for the files.
+    t80_pending = {}
+    #: T80 — per executed step, the free-joint qpos of apple (and apple_2) after the step's physics (traj.npz).
+    t80_apple_qpos, t80_apple2_qpos = [], []
+    if args.move_target_when_palm_mm is not None:
+        if randomized_episode is None or randomized_episode.get("used_arm") not in ("left", "right"):
+            ap.error("--move-target-when-palm-mm needs a randomized 16D episode (target fruit and used arm)")
+        _tgt = str(randomized_episode["target_fruit"])
+        target_mover = t80_scene_ops().TargetMover(
+            arm=str(randomized_episode["used_arm"]), body=OBJECT_BODIES[_tgt], joint=OBJECT_JOINTS[_tgt],
+            threshold_m=args.move_target_when_palm_mm / 1000.0, dxy=args.move_target_dxy)
+        print(f"[T80] target move: {_tgt} by ({args.move_target_dxy[0]:+.3f}, {args.move_target_dxy[1]:+.3f}) m "
+              f"at the first step with |{target_mover.arm}_ee - {_tgt}| < {args.move_target_when_palm_mm:g} mm")
 
     def loop_body():
         chunk = None
@@ -2233,9 +2397,14 @@ def main():
                     # **무엇을 실행했는지**는 shadow 에서만 애매하다 (판정이 unsafe 인데
                     # 움직였다). 그래서 shadow 일 때만 키를 더한다 — T0 기록의 키 집합을
                     # 그대로 두면서, 있으면 그 자체로 "이 실행은 shadow" 라는 표시가 된다.
-                    extra=({"executed_chunk": safe_client.last_executed_chunk,
-                            "shadow": True}
-                           if safe_client is not None and safe_client.shadow else None))
+                    extra=(({"executed_chunk": safe_client.last_executed_chunk,
+                             "shadow": True}
+                            if safe_client is not None and safe_client.shadow else None)
+                           if not t80_pending.get("frame") else
+                           # T80 — the first control frame after the target move carries the move record once.
+                           {**({"executed_chunk": safe_client.last_executed_chunk, "shadow": True}
+                               if safe_client is not None and safe_client.shadow else {}),
+                            "t80_target_move": t80_pending.pop("frame")}))
 
             obstacle_stopped = False
             for sim_step in range(steps_per_action):
@@ -2251,6 +2420,16 @@ def main():
                             obstacle_manager.hold_robot()
                             obstacle_stopped = True
                             break
+            if target_mover is not None:
+                # T80 — after this step's physics; the next observation / control frame sees the moved target.
+                _moved = target_mover.step(m, d, t_step)
+                if _moved is not None:
+                    t80_pending["frame"] = _moved
+                    t80_pending["record"] = _moved
+                    print(f"[T80] t={t_step} target moved: palm distance {_moved['palm_distance_m'] * 1e3:.1f} mm "
+                          f"< {target_mover.threshold_m * 1e3:g} mm; xy ({_moved['qpos_before'][0]:+.4f}, "
+                          f"{_moved['qpos_before'][1]:+.4f}) -> ({_moved['qpos_after'][0]:+.4f}, "
+                          f"{_moved['qpos_after'][1]:+.4f})")
             arrow_overlay = None
             if arrow_viz is not None and safe_client is not None:
                 # T42 — visual only: reads `d` and the client's last chunks, writes nothing back.
@@ -2292,6 +2471,13 @@ def main():
             if args.trajectory_out:
                 executed_actions.append(action.copy())
                 measured_states.append(rby1_state())
+                if t80_on(args):
+                    # T80 — free-joint qpos of the apples after this step's physics (only when a T80 option is on).
+                    _qa = int(m.jnt_qposadr[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, "apple_free")])
+                    t80_apple_qpos.append(np.asarray(d.qpos[_qa:_qa + 7], dtype=np.float64).copy())
+                    if args.extra_apple is not None:
+                        _qb = int(m.jnt_qposadr[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, "apple_2_free")])
+                        t80_apple2_qpos.append(np.asarray(d.qpos[_qb:_qb + 7], dtype=np.float64).copy())
 
             if obstacle_stopped:
                 print(
@@ -2305,12 +2491,24 @@ def main():
                 # IFG — the task is done at the place; what follows (return home) is not recorded.
                 if place_stop["placed_t"] is None:
                     grip = None if _applied is None else float(_applied["gripper"][place_stop["grip_index"]])
-                    if (grip is not None and grip >= 0.5
-                            and object_in_crate(m, d, OBJECT_BODIES[place_stop["fruit"]])):
+                    if "t80_bodies" in place_stop:
+                        # T80 — either apple, both grippers open.
+                        grip = None if _applied is None else float(min(_applied["gripper"]))
+                        _in = [b for b in place_stop["t80_bodies"] if object_in_crate(m, d, b)]
+                        _placed = grip is not None and grip >= 0.5 and bool(_in)
+                        if _placed:
+                            place_stop["t80_placed_bodies"] = _in
+                    else:
+                        _placed = (grip is not None and grip >= 0.5
+                                   and object_in_crate(m, d, OBJECT_BODIES[place_stop["fruit"]]))
+                    if _placed:
                         place_stop["placed_t"] = t_step
                         print(f"[place] placed at t={t_step} ({place_stop['fruit']} in the crate, "
                               f"{place_stop['arm']} gripper {grip:.2f}); stopping after "
-                              f"{place_stop['after_steps']} more steps")
+                              f"{place_stop['after_steps']} more steps"
+                              if "t80_bodies" not in place_stop else
+                              f"[place] T80 placed at t={t_step} ({place_stop['t80_placed_bodies']} in the crate, "
+                              f"both grippers >= {grip:.2f}); stopping after {place_stop['after_steps']} more steps")
                 if (place_stop["placed_t"] is not None
                         and t_step >= place_stop["placed_t"] + place_stop["after_steps"]):
                     place_stop["stop_t"] = t_step
@@ -2343,6 +2541,15 @@ def main():
                 print("(imageio not installed, saved as PNG sequence)")
         if args.record_inputs:
             save_policy_input_videos(args.record_inputs, input_frame_buffers)
+        if frame_recorder is not None and t80_on(args):
+            # T80 — the outcome of the options next to the manifest (t80.json) and in manifest.json["t80_result"].
+            _t80 = {"options": t80_manifest(args, t80_extra_pose), "target_move": t80_move_summary(target_mover),
+                    "placed_bodies": None if place_stop is None else place_stop.get("t80_placed_bodies")}
+            _rd = pathlib.Path(args.record_frames)
+            (_rd / "t80.json").write_text(json.dumps(_t80, indent=1, default=float))
+            _man = json.loads((_rd / "manifest.json").read_text())
+            _man["t80_result"] = _t80
+            (_rd / "manifest.json").write_text(json.dumps(_man, ensure_ascii=False, indent=1, default=str))
         if frame_recorder is not None:
             table = frame_recorder.close(
                 ipc_stats=(dict(safe_client.stats) if safe_client is not None else None))
@@ -2415,6 +2622,9 @@ def main():
                     "perturb_vector": np.asarray(first_chunk_perturb["vector"], dtype=np.float64),
                     "perturb_arm": np.asarray(first_chunk_perturb["arm"])}
                    if first_chunk_perturb is not None else {}),
+                # T80 — only when on.
+                **(t80_trajectory_arrays(args, t80_extra_pose, t80_apple_qpos, t80_apple2_qpos,
+                                         target_mover, place_stop) if t80_on(args) else {}),
             )
             print(f"saving trajectory ({len(executed_actions)} executed steps) -> {trajectory_path}")
 

@@ -1,0 +1,216 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/analysis/t8182_on_off.json",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/analysis/t8182_fig.py",
+ "runs": {
+  "REG211": {
+   "on": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/runs/REG211",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/server_ag3s_8298_20261031T155600",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 75,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "failed": 75
+    },
+    "has_target_requests": 0,
+    "palm_apple_min_mm": 196.6,
+    "palm_max_disp_mm": 6.6
+   },
+   "off": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T170909+0900_8ab3c7ef7757_9e05cdff58b9/verify/T78/S3/REG_S3_k0/runs/B_ROI_FPR/B_ROI_FPR_ep211_s2113",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T170909+0900_8ab3c7ef7757_9e05cdff58b9/verify/T78/S3/REG_S3_k0/runs/server_8292_20261031T121751",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 55,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "ok": 75
+    },
+    "has_target_requests": 75,
+    "palm_apple_min_mm": 47.1,
+    "palm_max_disp_mm": 158.4
+   },
+   "off_record_label": "쥐지못함"
+  },
+  "REG954": {
+   "on": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/runs/REG954",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/server_ag3s_8298_20261031T155600",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 75,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "failed": 75
+    },
+    "has_target_requests": 0,
+    "palm_apple_min_mm": 203.4,
+    "palm_max_disp_mm": 7.1
+   },
+   "off": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T170909+0900_8ab3c7ef7757_9e05cdff58b9/verify/T78/S3/REG_S3_k0/runs/B_ROI_FPR/B_ROI_FPR_ep954_s9543",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T170909+0900_8ab3c7ef7757_9e05cdff58b9/verify/T78/S3/REG_S3_k0/runs/server_8292_20261031T121751",
+    "n_planning": 69,
+    "n_control": 548,
+    "hold_planning_rows": 0,
+    "grasp": true,
+    "place": true,
+    "success": true,
+    "attention": {
+     "ok": 69
+    },
+    "has_target_requests": 68,
+    "palm_apple_min_mm": 11.5,
+    "palm_max_disp_mm": 210.2
+   },
+   "off_record_label": "성공"
+  },
+  "REG119k1": {
+   "on": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/runs/REG119k1",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/server_ag3s_8298_20261031T155600",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 75,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "failed": 75
+    },
+    "has_target_requests": 0,
+    "palm_apple_min_mm": 214.6,
+    "palm_max_disp_mm": 6.7
+   },
+   "off": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T170909+0900_8ab3c7ef7757_9e05cdff58b9/verify/T78/S3/REG_S3_k1/runs/B_ROI_FPR/B_ROI_FPR_ep119_s1193",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T170909+0900_8ab3c7ef7757_9e05cdff58b9/verify/T78/S3/REG_S3_k1/runs/server_8292_20261031T122858",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 0,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "ok": 75
+    },
+    "has_target_requests": 75,
+    "palm_apple_min_mm": 23.6,
+    "palm_max_disp_mm": 358.9
+   },
+   "off_record_label": "쥐지못함"
+  },
+  "OCC122": {
+   "on": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/runs/OCC122",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/server_ag3s_8298_20261031T155600",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 75,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "failed": 75
+    },
+    "has_target_requests": 0,
+    "palm_apple_min_mm": 201.4,
+    "palm_max_disp_mm": 6.6
+   },
+   "off": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T170909+0900_8ab3c7ef7757_9e05cdff58b9/verify/T78/S3/OCC_S3/k0/runs/AG3S_case1_L2_s23453",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T170909+0900_8ab3c7ef7757_9e05cdff58b9/verify/T78/S3/OCC_S3/k0/server_ag3s_8296_20261031T121620",
+    "n_planning": 34,
+    "n_control": 269,
+    "hold_planning_rows": 0,
+    "grasp": true,
+    "place": true,
+    "success": true,
+    "attention": {
+     "ok": 34
+    },
+    "has_target_requests": 30,
+    "palm_apple_min_mm": 11.9,
+    "palm_max_disp_mm": 373.0
+   },
+   "off_record_label": "성공"
+  },
+  "C_ep56_forward": {
+   "on": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/runs/C_ep56_forward",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/server_ag3s_8298_20261031T155600",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 75,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "failed": 75
+    },
+    "has_target_requests": 0,
+    "palm_apple_min_mm": 203.0,
+    "palm_max_disp_mm": 7.1
+   },
+   "off": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T80/CL/ag3s/r1/runs/C_ep56_forward",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T80/CL/ag3s/r1/server_ag3s_8298_20261031T133627",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 0,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "ok": 75
+    },
+    "has_target_requests": 75,
+    "palm_apple_min_mm": 72.6,
+    "palm_max_disp_mm": 198.1
+   },
+   "off_record_label": "쥐지못함"
+  },
+  "C_ep56_back": {
+   "on": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/runs/C_ep56_back",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/CL/ag3s/r1/server_ag3s_8298_20261031T155600",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 75,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "failed": 75
+    },
+    "has_target_requests": 0,
+    "palm_apple_min_mm": 203.0,
+    "palm_max_disp_mm": 7.1
+   },
+   "off": {
+    "run_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T80/CL/ag3s/r1/runs/C_ep56_back",
+    "server_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T80/CL/ag3s/r1/server_ag3s_8298_20261031T133627",
+    "n_planning": 75,
+    "n_control": 600,
+    "hold_planning_rows": 2,
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "attention": {
+     "ok": 75
+    },
+    "has_target_requests": 75,
+    "palm_apple_min_mm": 30.5,
+    "palm_max_disp_mm": 193.6
+   },
+   "off_record_label": "쥐지못함"
+  }
+ }
+}

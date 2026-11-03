@@ -1,0 +1,93 @@
+{
+ "region_on_apple_gap_ge5": {
+  "S2": {
+   "cover_median": 1.0,
+   "cover_mean": 0.9753,
+   "precision_median": 1.0,
+   "precision_mean": 0.9671,
+   "other_nodes": 0,
+   "other_by_class": {
+    "fruit": 0,
+    "obstacle": 0,
+    "crate": 0,
+    "table": 0
+   },
+   "apple_nodes_in_region": 65404
+  },
+  "T78b": {
+   "cover_median": 1.0,
+   "cover_mean": 0.9753,
+   "precision_median": 1.0,
+   "precision_mean": 0.9671,
+   "other_nodes": 0,
+   "other_by_class": {
+    "fruit": 0,
+    "obstacle": 0,
+    "crate": 0,
+    "table": 0
+   },
+   "apple_nodes_in_region": 65404
+  },
+  "D10": {
+   "cover_median": 1.0,
+   "cover_mean": 0.9753,
+   "precision_median": 1.0,
+   "precision_mean": 0.9671,
+   "other_nodes": 0,
+   "other_by_class": {
+    "fruit": 0,
+    "obstacle": 0,
+    "crate": 0,
+    "table": 0
+   },
+   "apple_nodes_in_region": 65404
+  },
+  "D4": {
+   "cover_median": 0.9455,
+   "cover_mean": 0.9121,
+   "precision_median": 1.0,
+   "precision_mean": 0.9661,
+   "other_nodes": 0,
+   "other_by_class": {
+    "fruit": 0,
+    "obstacle": 0,
+    "crate": 0,
+    "table": 0
+   },
+   "apple_nodes_in_region": 61268
+  }
+ },
+ "split_applied_on_apple": 0,
+ "touching_gap_lt5": {
+  "S2": {
+   "target_cover_median": 0.8606,
+   "precision_median": 0.961,
+   "other_object_nodes": 1321
+  },
+  "T78b": {
+   "target_cover_median": 0.9355,
+   "precision_median": 0.9629,
+   "other_object_nodes": 1321
+  },
+  "D10": {
+   "target_cover_median": 0.9985,
+   "precision_median": 0.6256,
+   "other_object_nodes": 14819
+  },
+  "D4": {
+   "target_cover_median": 0.9516,
+   "precision_median": 0.6952,
+   "other_object_nodes": 7983
+  }
+ },
+ "region_on_other_object": {
+  "n": 54,
+  "split_applied": 40,
+  "runs": {
+   "가림122_k0": 3,
+   "허들954_k0": 9,
+   "허들211_k0": 42
+  }
+ },
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261101T014536+0900_8ab3c7ef7757_9e8fe50aaca6/T78c"
+}

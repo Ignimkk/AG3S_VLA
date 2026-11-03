@@ -339,6 +339,24 @@ UNPORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'stem_cap_top_mm', 'target_extent', 'target_free_coarse', 'target_free_coarse_sign_floor',
     'target_free_coarse_support', 'target_layer', 'target_layer_reset_mm', 'target_layer_tol_mm', 'target_stem_cap',
     'task_gate', 'task_gate_shadow', 'task_probe', 'tsdf_frustum_decay', 'tsdf_time_decay', 'wrist_cover_overflow',
+) + (
+    # main 02fe59e6 merge (2026-11-03, user ruling): every option it adds is refused until its Panda port. To be ported
+    # first (user ruling): attention-surface extent + its checks with the Panda head, GPU surface selection, pre-grasp
+    # hull fill, pass-through when clear, target memory sticky. Refused for good: RB-Y1-trained assets (hsr5, hidden
+    # probe), MuJoCo ground-truth stage, RB-Y1 gripper geometry (grasp set, grasp corridor), dropped / not adopted options.
+    'attention_surface_device', 'grasp_corridor_ahead_mm', 'grasp_corridor_allow', 'grasp_corridor_min_target_points',
+    'grasp_set_budget_ms', 'grasp_set_field_only', 'grasp_set_full_horizon', 'grasp_set_gate_mm', 'grasp_set_to',
+    'grasp_set_track_scale', 'hsr_gt_stage', 'hsr5', 'hsr6_objective_window', 'passthrough_when_clear',
+    'support_surface_offset_mm', 'surface_contact_allowance_mm', 'surface_crease_angle_deg', 'surface_crease_cut',
+    'surface_crease_reattach_ratio', 'surface_crease_voxel_mm', 'surface_grasp_hold', 'surface_hull_fill',
+    'surface_keep_last', 'surface_memory_target_sticky', 'surface_no_ball', 'surface_reattach_hull', 'surface_split',
+    'surface_target_check', 'target_vacancy_delta_mm', 'target_vacancy_min_points', 'target_vacancy_p_empty',
+    'target_vacancy_p_present', 'target_vacancy_release', 'target_vacancy_samples',
+    # main a0b16d0a (T91-T93, 2026-11-03): refused until each STEP's Panda port (development transfer note
+    # BENCHMARK_T90_T93_TRANSFER_20261103_KO.md): phase from the grasp latch (T92), wrist-depth phase machine (T91c),
+    # VLA flow-matching guidance (T93, needs an EE-delta -> IK Jacobian map on the Panda).
+    'subtask_from_latch', 'subtask_from_phase_machine', 'fm_guide', 'fm_guide_scale', 'fm_guide_steps',
+    'fm_guide_max_step_rad', 'fm_guide_sweep',
 )
 #: SL6-A A10 — the final-configuration options this server now applies (A1-A9, A12); listed for the record and the test.
 #: SL6-H: + ``hsr6_placement_contact`` (HSR6 ⑤, an HSR6 use flag: refused without ``--hsr6-probe`` like the others).
@@ -353,6 +371,12 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'roi_carve_footprint_robot', 'split_supersedes_anchor', 'target_exclusion', 'target_permission_strict',
     'to_gpu_seeds', 'to_gpu_seeds_check', 'to_multi_seed', 'wrist_track_scale',
 )
+
+
+def _hidden_probe_source(args) -> bool:
+    """main 02fe59e6 merge — whether ``--attention-source`` names the hidden-probe target map (``hidden_probe[:NPZ]``)."""
+    spec = getattr(args, "attention_source", None)
+    return spec is not None and str(spec).strip().split(":", 1)[0] == "hidden_probe"
 
 
 def check_unported_flags(args, ap) -> None:
@@ -371,6 +395,10 @@ def check_unported_flags(args, ap) -> None:
     elif ss.hsr6_flags_from_args(args) is not None and not getattr(args, "hsr6_probe", None):
         message = ("--robot panda: --hsr6-* needs --hsr6-probe FILE (the Panda probe, SL6-B B4); the default probe is "
                    "the RB-Y1 one (kv_L4 of another policy and robot)")
+    elif _hidden_probe_source(args):
+        # main 02fe59e6 merge: the hidden-probe target map is a probe trained on RB-Y1 16D hidden states (3 cameras)
+        message = ("--robot panda: --attention-source hidden_probe is an RB-Y1-trained probe (not ported; needs a "
+                   "Panda probe)")
     elif getattr(args, "palm_shell", "off") not in (None, "off", "on", "left"):
         message = f"--robot panda: --palm-shell {args.palm_shell} (the Panda is the single left hand; use on / left)"
     if message:

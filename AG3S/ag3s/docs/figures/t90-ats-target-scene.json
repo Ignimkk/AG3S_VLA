@@ -1,0 +1,28 @@
+{
+ "T87 기준 구성: 명사 attention (noun_target L10H7)": {
+  "label": "회귀954_k0",
+  "request": 40,
+  "t_step": 320,
+  "precision": 0.9112903225806451,
+  "majority": "apple",
+  "label_counts": {
+   "apple": 113,
+   "robot": 3,
+   "none": 8
+  },
+  "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000257+0900_8ab3c7ef7757_905ff913aad2/verify/T87/CL/B0/k0/server_B0_8298_20261102T151229/server_constraints/run_0000/chunk_00078.npz"
+ },
+ "T90: hidden patch probe": {
+  "label": "회귀954_k0",
+  "request": 40,
+  "t_step": 320,
+  "precision": 0.9112903225806451,
+  "majority": "apple",
+  "label_counts": {
+   "apple": 113,
+   "robot": 3,
+   "none": 8
+  },
+  "chunk": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T125521+0900_ed0145a692ad_47f74feee80d/verify/T90/CL/P/k0/server_P_8298_20261103T040054/server_constraints/run_0000/chunk_00092.npz"
+ }
+}

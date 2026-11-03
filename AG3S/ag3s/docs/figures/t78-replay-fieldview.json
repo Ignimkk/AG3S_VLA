@@ -1,0 +1,65 @@
+{
+ "회귀211_k0|zed_left": {
+  "request": 15,
+  "apple_px": 511,
+  "apple_in_main_field_px": 446,
+  "apple_missing_px": 65,
+  "BALL": {
+   "apple_removed_pct_of_field": 100.0,
+   "apple_left_px": 0,
+   "neighbour_removed_px": 7
+  },
+  "SURF": {
+   "apple_removed_pct_of_field": 99.8,
+   "apple_left_px": 1,
+   "neighbour_removed_px": 205
+  },
+  "S2": {
+   "apple_removed_pct_of_field": 89.2,
+   "apple_left_px": 48,
+   "neighbour_removed_px": 0
+  }
+ },
+ "회귀211_k0|wrist_cam_l": {
+  "request": 15,
+  "apple_px": 3463,
+  "apple_in_main_field_px": 3359,
+  "apple_missing_px": 104,
+  "BALL": {
+   "apple_removed_pct_of_field": 100.0,
+   "apple_left_px": 0,
+   "neighbour_removed_px": 142
+  },
+  "SURF": {
+   "apple_removed_pct_of_field": 100.0,
+   "apple_left_px": 0,
+   "neighbour_removed_px": 1553
+  },
+  "S2": {
+   "apple_removed_pct_of_field": 94.7,
+   "apple_left_px": 178,
+   "neighbour_removed_px": 15
+  }
+ },
+ "허들119_k0|wrist_cam_l": {
+  "request": 15,
+  "apple_px": 12504,
+  "apple_in_main_field_px": 8189,
+  "apple_missing_px": 4315,
+  "BALL": {
+   "apple_removed_pct_of_field": 78.6,
+   "apple_left_px": 1749,
+   "neighbour_removed_px": 0
+  },
+  "SURF": {
+   "apple_removed_pct_of_field": 85.9,
+   "apple_left_px": 1158,
+   "neighbour_removed_px": 0
+  },
+  "S2": {
+   "apple_removed_pct_of_field": 95.1,
+   "apple_left_px": 403,
+   "neighbour_removed_px": 0
+  }
+ }
+}

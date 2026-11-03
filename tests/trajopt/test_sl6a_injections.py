@@ -194,9 +194,9 @@ def _phase(p, phase):
 def test_objective_scope(scope, panda_model):
     p = _panda_policy(panda_model, hsr6=H6.Hsr6Flags(objective=True), scope=scope)
     _phase(p, "approach")
-    assert p._hsr6_objective_ok("nbc") is False                                          # NBC: both scopes
-    assert p._hsr6_objective_ok("a4") is (scope == "nbc")
-    assert p._hsr6_objective_ok("g1") is (scope == "nbc")
+    assert p._hsr6_objective_ok(term="nbc") is False                                          # NBC: both scopes
+    assert p._hsr6_objective_ok(term="a4") is (scope == "nbc")
+    assert p._hsr6_objective_ok(term="g1") is (scope == "nbc")
     rec = p._last_hsr6
     if scope == "nbc":
         assert rec["objective_scope"] == "nbc"
@@ -205,7 +205,7 @@ def test_objective_scope(scope, panda_model):
     else:
         assert "objective_scope" not in rec and "objective" not in rec["detail"]
     _phase(p, "grasp")
-    assert all(p._hsr6_objective_ok(t) for t in ("nbc", "a4", "g1"))
+    assert all(p._hsr6_objective_ok(term=t) for t in ("nbc", "a4", "g1"))
     anchor = object()
     _phase(p, "lift")
     p._last_grasp_anchor = {"active": True}

@@ -331,7 +331,9 @@ def generate_candidates(target_points: np.ndarray, scene_points: Optional[np.nda
                         ik_seed: Optional[np.ndarray] = None,
                         selection: Optional[str] = None, recheck_only: bool = False,
                         arm_fn: Optional[Callable[[np.ndarray, np.ndarray], dict]] = None,
-                        field_fn: Optional[Callable[[np.ndarray], np.ndarray]] = None) -> CandidateSet:
+                        field_fn: Optional[Callable[[np.ndarray], np.ndarray]] = None,
+                        config_check_fn: Optional[Callable[["GraspCandidate", np.ndarray, np.ndarray],
+                                                           tuple[bool, dict]]] = None) -> CandidateSet:
     """Candidates for grasping the object observed as `target_points` (base frame, m) among `scene_points`
     (every other observed point: obstacles, support surface — base frame). `vla_pose`: the policy's planned hold-link
     pose at its close row (4x4) — the preference of rule ``"vla"`` and the tie-break of ``"geometric"``.
@@ -343,6 +345,9 @@ def generate_candidates(target_points: np.ndarray, scene_points: Optional[np.nda
     With `cfg.wrist_check` the wrist parts of `gripper` are checked with the hand boxes.
     `field_fn(points) -> (N,)` (with `cfg.obstacle_source == "field"`): the obstacles are this distance function, not
     `scene_points` (task §3j).
+    `config_check_fn(g, q_grasp, q_pre) -> (ok, info)` (T72, only with `ik_fn`): a check of the candidate at its IK
+    solutions after every other check (the trajectory optimizer's own sphere rows, `grasp_set.field_check`); a
+    candidate it rejects is not returned (`stats["n_config_rejected"]`, only when given). None = as before.
     """
     t0 = time.perf_counter()
     sel = str(selection or cfg.selection)
@@ -488,7 +493,7 @@ def generate_candidates(target_points: np.ndarray, scene_points: Optional[np.nda
     raw.sort(key=lambda g: (g.key, -g.alignment, g.depth))
     # IK on the best-ordered candidates until max_candidates pass (at most max_ik tried)
     out: list[GraspCandidate] = []
-    n_ik, n_ik_fail, n_arm = 0, 0, 0
+    n_ik, n_ik_fail, n_arm, n_cfg = 0, 0, 0, 0
     ik_log: list[dict[str, Any]] = []
     seen: set[tuple[int, float]] = set()
     for g in raw:
@@ -527,6 +532,13 @@ def generate_candidates(target_points: np.ndarray, scene_points: Optional[np.nda
                 if a["hits"] or ap["hits"]:
                     n_arm += 1
                     continue
+            if config_check_fn is not None:
+                ok_cfg, info_cfg = config_check_fn(g, q, qp)
+                g.checks["config"] = info_cfg
+                ik_log[-1]["config_ok"] = bool(ok_cfg)
+                if not ok_cfg:
+                    n_cfg += 1
+                    continue
             g.q_grasp, g.q_pre = q, qp
         seen.add((g.pair, round(g.roll, 6)))
         g.checks["valid"] = True
@@ -536,10 +548,14 @@ def generate_candidates(target_points: np.ndarray, scene_points: Optional[np.nda
                  n_ik_tried=n_ik, n_ik_failed=n_ik_fail, ik_log=ik_log, n_candidates=len(out), compute_ms=_ms(t0))
     if arm_fn is not None:
         stats["n_arm_rejected"] = n_arm
+    if config_check_fn is not None:
+        stats["n_config_rejected"] = n_cfg
     if not out:
         stats["reason"] = ("no antipodal pair" if not pairs else f"time budget spent in {budget_hit}" if budget_hit
                            else "every pose collides" if not raw
                            else "every IK solution puts the arm in an obstacle" if n_arm and n_arm + n_ik_fail >= n_ik
+                           else "every IK solution violates the configuration check"
+                           if n_cfg and n_cfg + n_arm + n_ik_fail >= n_ik
                            else "no IK solution")
     return CandidateSet(out, surf, stats, scene, shell, scene_arm, field)
 

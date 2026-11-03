@@ -1,0 +1,108 @@
+{
+ "summary": {
+  "touching_gap<5": {
+   "n": 100,
+   "v5": {
+    "cover_median": 0.9985,
+    "cover_mean": 0.8575,
+    "precision_median": 0.6256,
+    "precision_mean": 0.5181,
+    "other_nodes": 14819,
+    "by_class": {
+     "fruit": 14357,
+     "robot": 1734,
+     "crate": 462,
+     "none": 375
+    }
+   },
+   "v25_cut": {
+    "cover_median": 0.955,
+    "cover_mean": 0.8361,
+    "precision_median": 0.9988,
+    "precision_mean": 0.785,
+    "other_nodes": 11036,
+    "by_class": {
+     "robot": 3059,
+     "fruit": 8764,
+     "crate": 2272,
+     "none": 3543
+    }
+   },
+   "serve_C1": {
+    "cover_median": 0.988,
+    "cover_mean": 0.8471,
+    "precision_median": 0.9985,
+    "precision_mean": 0.7841,
+    "other_nodes": 11233,
+    "by_class": {
+     "fruit": 8785,
+     "robot": 3258,
+     "crate": 2448,
+     "none": 3555
+    }
+   }
+  },
+  "separated_on_apple": {
+   "n": 204,
+   "v5": {
+    "cover_median": 1.0,
+    "cover_mean": 0.9753,
+    "precision_median": 1.0,
+    "precision_mean": 0.9671,
+    "other_nodes": 0,
+    "by_class": {
+     "robot": 2168
+    }
+   },
+   "v25_cut": {
+    "cover_median": 0.9749,
+    "cover_mean": 0.9504,
+    "precision_median": 1.0,
+    "precision_mean": 0.9802,
+    "other_nodes": 0,
+    "by_class": {
+     "robot": 3854
+    }
+   },
+   "serve_C1": {
+    "cover_median": 0.9921,
+    "cover_mean": 0.9634,
+    "precision_median": 1.0,
+    "precision_mean": 0.9795,
+    "other_nodes": 0,
+    "by_class": {
+     "robot": 4099
+    }
+   }
+  },
+  "criteria": {
+   "1_touch_precision>=0.95": true,
+   "2_touch_cover>=0.90": true,
+   "3_sep_cover>=v5-0.02": true,
+   "4_sep_other==0": true,
+   "pass": true
+  }
+ },
+ "examples": {
+  "_ep211_s2113_15|v25": {
+   "apple_sel": 1259,
+   "other_sel": 706,
+   "apple_missed": 2
+  },
+  "_ep211_s2113_15|serve_C1": {
+   "apple_sel": 1256,
+   "other_sel": 0,
+   "apple_missed": 5
+  },
+  "_ep119_s1193_9|v25_cut": {
+   "apple_sel": 807,
+   "other_sel": 0,
+   "apple_missed": 144
+  },
+  "_ep119_s1193_9|serve_C1": {
+   "apple_sel": 872,
+   "other_sel": 0,
+   "apple_missed": 79
+  }
+ }
+}

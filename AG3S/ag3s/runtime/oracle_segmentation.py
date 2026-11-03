@@ -144,11 +144,23 @@ class OracleMemory:
 
     def __init__(self, *, cell: float = 0.0025, roi_margin: float = 0.065, carve_tol: float = 0.010,
                  carve_window: int = 5, depth_min: float = 0.0, depth_max: float = np.inf,
-                 band_depth: float = 0.030, band_stride: int = 2, band_cell: Optional[float] = None):
+                 band_depth: float = 0.030, band_stride: int = 2, band_cell: Optional[float] = None,
+                 target_sticky: bool = False):
         if not (cell > 0 and roi_margin >= 0 and carve_tol > 0 and int(carve_window) >= 1
                 and band_depth >= 0 and int(band_stride) >= 1):
             raise ValueError("cell > 0, roi_margin >= 0, carve_tol > 0, carve_window >= 1, band_depth >= 0, "
                              "band_stride >= 1")
+        # --- T78e — begin
+        #: **T78e — target-sticky cells** (`esdf.surface_memory_target_sticky`). False (default) = newest wins per cell
+        #: (bit-identical to before). True = a cell whose stored sample is code 1 (target) keeps that sample (point ·
+        #: code · frame) when this frame's sample there is not code 1 (static 2 · other object ≥ 3); every other case
+        #: is unchanged (target → target and other → other update, other → target: target wins). Carving
+        #: (`_carve`) still drops target samples, so a moved object's memory empties as before. Why: the hand hides the
+        #: target's side just before the grasp and a later frame labels the same cell "other surface" (T78c §7 진단 2).
+        if not isinstance(target_sticky, bool):
+            raise ValueError(f"target_sticky must be a bool, got {target_sticky!r}")
+        self.target_sticky = target_sticky
+        # --- T78e — end
         #: the truncation band behind each object pixel (m) — the fine TSDF's truncation — and the pixel stride
         self.band_depth = float(band_depth)
         self.band_stride = int(band_stride)
@@ -260,6 +272,11 @@ class OracleMemory:
         all_c = np.concatenate([new_c, self.codes])
         all_f = np.concatenate([np.full(len(k_new), self.n_updates, np.int64), self.frame])
         uk, first = np.unique(all_k, return_index=True)      # first occurrence = this frame's sample
+        # --- T78e — begin
+        n_sticky = 0
+        if self.target_sticky:
+            first, n_sticky = self._sticky_target(uk, first, len(k_new), all_c)
+        # --- T78e — end
         self.keys, self.points = uk, all_p[first]
         self.codes, self.frame = all_c[first].astype(np.uint8), all_f[first]
         n_band_new = self._update_band(views, lo if len(obj) else None, hi if len(obj) else None)
@@ -268,7 +285,44 @@ class OracleMemory:
                      "n_target_samples_this_frame": int((self.frame == self.n_updates)[self.codes == CODE_TARGET].sum()),
                      "n_band_cells": int(len(self.band_keys)), "n_band_points_this_frame": n_band_new,
                      "update": int(self.n_updates)}
+        if self.target_sticky:   # T78e (key present only when on)
+            self.last["n_sticky_kept"] = int(n_sticky)
         return dict(self.last)
+
+    # --- T78e — begin
+    def _sticky_target(self, uk: np.ndarray, first: np.ndarray, n_new: int,
+                       all_c: np.ndarray) -> tuple[np.ndarray, int]:
+        """T78e — `(first, n_kept)`: in the cells where this frame's sample (index `< n_new`) won with a code ≠ 1 and the
+        memory (still `self.keys` / `self.codes`, sorted unique keys after carving and ROI) holds a code-1 sample, point
+        `first` at the memory's sample instead (its index in the concatenation = `n_new` + its memory index)."""
+        if not n_new or not len(self.keys):
+            return first, 0
+        idx = np.flatnonzero((first < n_new) & (all_c[first] != CODE_TARGET))
+        if not len(idx):
+            return first, 0
+        j = np.searchsorted(self.keys, uk[idx])
+        inb = j < len(self.keys)
+        hit = np.zeros(len(idx), bool)
+        hit[inb] = (self.keys[j[inb]] == uk[idx[inb]]) & (self.codes[j[inb]] == CODE_TARGET)
+        if not hit.any():
+            return first, 0
+        first = first.copy()
+        first[idx[hit]] = n_new + j[hit]
+        return first, int(hit.sum())
+    # --- T78e — end
+
+    def carve_only(self, views: Sequence[OracleView]) -> dict:
+        """T78 A3 — a request whose code image is not trusted: drop the samples its depth saw through (the TSDF's
+        free-space update, `_carve`) and add nothing. `n_updates` does not advance (no labelled fold). Only the
+        attention-surface `esdf.surface_keep_last` path calls this; `update` is unchanged."""
+        carved = self._carve(views)
+        n_carved = int(carved.sum())
+        if n_carved:
+            keep = ~carved
+            self.keys, self.points = self.keys[keep], self.points[keep]
+            self.codes, self.frame = self.codes[keep], self.frame[keep]
+        return {"n_carved": n_carved, "n_samples": int(len(self)),
+                "n_target_samples": int((self.codes == CODE_TARGET).sum()), "update": int(self.n_updates)}
 
     def _update_band(self, views: Sequence[OracleView], lo, hi) -> int:
         """Fold this request's object pixels' truncation band (behind the visible surface, `band_depth` along the ray,
