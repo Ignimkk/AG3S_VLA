@@ -78,7 +78,9 @@ PI05_LIBERO_TOKEN_BLOCKS: tuple[TokenBlock, ...] = (
 )
 #: SL7 -- the seed-map head the Panda attention-surface extent accepts (``serve_safe`` accepts only RB-Y1's
 #: ``noun_target:L10H7`` for ``--target-extent attention-surface``): the Panda noun head of SL6-B (``L8H6``).
-PANDA_SEED_MAP_LABELS: tuple[str, ...] = ("noun_target:L8H6",)
+#: SL7d (user ruling 2026-11-04): also the action cell ``action:last:L8H2`` (the Panda ATS signal since SL6-C, user
+#: ruling 2026-10-30) -- version ``AG3S-final-panda-p0m-l8h2`` gives it to both the ATS and the surface seed map.
+PANDA_SEED_MAP_LABELS: tuple[str, ...] = ("noun_target:L8H6", "action:last:L8H2")
 #: Wire cameras with attention (adapter ``camera.CAMERA_TABLE`` order).
 WIRE_CAMERAS: tuple[str, ...] = tuple(b.wire_camera for b in PI05_LIBERO_TOKEN_BLOCKS if b.used)
 

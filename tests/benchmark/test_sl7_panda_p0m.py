@@ -191,7 +191,7 @@ def test_seed_map_label_is_panda_only():
     from AG3S.trajopt import attention_source as asrc
     from AG3S.trajopt import serve_safe as ss
 
-    assert PANDA_SEED_MAP_LABELS == ("noun_target:L8H6",)
+    assert PANDA_SEED_MAP_LABELS == ("noun_target:L8H6", "action:last:L8H2")   # SL7d adds the action cell
     L10, L8 = asrc.parse_attention_source("noun_target:L10H7"), asrc.parse_attention_source("noun_target:L8H6")
     assert asrc.seed_map_source_ok(L10) and not asrc.seed_map_source_ok(L8) and not asrc.seed_map_source_ok(None)
     assert asrc.seed_map_source_ok(L8, PANDA_SEED_MAP_LABELS) and not asrc.seed_map_source_ok(
@@ -594,3 +594,57 @@ def _args_argv_final():
     argv = pf.version_server_argv("AG3S-final-panda")
     argv[argv.index("--config") + 1] = "pi05_libero"
     return argv + ["--robot", "panda"] + pf.version_server_flags("AG3S-final-panda")
+
+
+L8H2, PCLATCH = "AG3S-final-panda-p0m-l8h2", "AG3S-final-panda-v3-e0to-pc-latch"   # SL7d
+
+
+def test_sl7d_versions_differ_by_exactly_one_change(gpu_ok):
+    """SL7d — (가) = P0m with `--attention-source action:last:L8H2`; (나) = pc판 + `--subtask-from-latch`."""
+    from AG3S.adapters.panda import profile as pf
+
+    p0m, l8 = list(pf.AG3S_VERSIONS[P0M]), list(pf.AG3S_VERSIONS[L8H2])
+    i = p0m.index("--attention-source")
+    assert p0m[i + 1] == "noun_target:L8H6" and l8 == p0m[:i + 1] + ["action:last:L8H2"] + p0m[i + 2:]
+    pc = list(pf.AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"])
+    assert list(pf.AG3S_VERSIONS[PCLATCH]) == pc + ["--subtask-from-latch"] and "--attention-source" not in pc
+    assert L8H2 in pf.P0M_VERSIONS and "--hsr6-probe" not in pf.version_server_flags(L8H2)
+    fl = pf.version_server_flags(PCLATCH)
+    assert pf.is_final_version(PCLATCH) and fl[-2:] == ["--hsr6-probe", pf.PANDA_HSR6_PROBE]
+    assert PCLATCH not in pf.FINAL_CONFIG_VERSIONS and PCLATCH not in pf.P0M_VERSIONS
+
+
+def test_sl7d_l8h2_builds_with_the_action_cell_as_seed_map(gpu_ok, monkeypatch):
+    from AG3S.adapters.panda import server as ps
+
+    monkeypatch.setenv("AG3S_PANDA_CONVERSION", "C")
+    args = _args(L8H2)
+    ps.check_unported_flags(args, None)
+    served, info = ps.build_safe_server(_Stub(), args, gpu_warm_up=False)
+    safe = served._policy
+    e = safe.ag3s.config.esdf
+    assert e.target_extent == "attention_surface" and e.surface_hull_fill and e.surface_contact_allowance_mm == 10.0
+    assert safe.subtask_from_latch is True and safe.hsr6 is None
+    fc = info["final_config"]
+    assert fc["attention_surface"]["seed_map"] == "action:last:L8H2"
+    kw, rec = ps.attention_policy_kwargs(args, tokenizer=False)
+    assert rec["attention_source"] == "action:last:L8H2" and "noun_rule" not in rec
+
+
+def test_sl7d_pc_latch_builds_with_hsr6_and_the_latch_gate(gpu_ok, monkeypatch):
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.adapters.panda import server as ps
+
+    if not pathlib.Path(pf.PANDA_HSR6_PROBE).exists():
+        pytest.skip("Panda HSR6 probe not in this storage root")
+    monkeypatch.setenv("AG3S_PANDA_CONVERSION", "C")
+    argv = pf.version_server_argv(PCLATCH)
+    argv[argv.index("--config") + 1] = "pi05_libero"
+    args = pf.parse_v11ab_args(argv=argv + ["--robot", "panda"] + pf.version_server_flags(PCLATCH))
+    assert args.subtask_from_latch and args.hsr6_placement_contact and args.attention_source is None
+    ps.check_unported_flags(args, None)
+    served, info = ps.build_safe_server(_Stub(), args, gpu_warm_up=False)
+    safe = served._policy
+    assert safe.subtask_from_latch is True and safe.ag3s.config.clustering.subtask_gate is True
+    assert safe.ag3s.config.esdf.target_extent != "attention_surface"
+    assert info["final_config"]["subtask_from_latch"]["source"] == "latch"

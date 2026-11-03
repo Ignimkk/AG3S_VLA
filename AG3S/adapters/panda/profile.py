@@ -391,7 +391,7 @@ P0M_BALL_FLAGS: tuple[str, ...] = (_drop_flags(FINAL_CONFIG_FLAGS, {k: n for k, 
 P0M_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-p0m", "AG3S-final-panda-p0m-nohull", "AG3S-final-panda-p0m-nbc",
                                  "AG3S-final-panda-p0m-termsoff", "AG3S-final-panda-p0m-pandafix",
                                  "AG3S-final-panda-p0m-termsoff-pass", "AG3S-final-panda-p0m-pandafix-pass",
-                                 "AG3S-final-panda-p0m-ball")
+                                 "AG3S-final-panda-p0m-ball", "AG3S-final-panda-p0m-l8h2")
 AG3S_VERSIONS["AG3S-final-panda-p0m"] = P0M_FLAGS                       # P0m (hull fill + contact allowance 10 mm)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nohull"] = P0M_NOHULL_FLAGS         # P0m without hull fill / allowance (T92b control)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nbc"] = P0M_NBC_FLAGS               # P0m + neighbour allowances (D1 control)
@@ -400,6 +400,16 @@ AG3S_VERSIONS["AG3S-final-panda-p0m-pandafix"] = P0M_PANDAFIX_FLAGS     # (b) P0
 AG3S_VERSIONS["AG3S-final-panda-p0m-termsoff-pass"] = P0M_TERMSOFF_FLAGS + P0M_PASS_FLAGS   # (d) on (c)
 AG3S_VERSIONS["AG3S-final-panda-p0m-pandafix-pass"] = P0M_PANDAFIX_FLAGS + P0M_PASS_FLAGS   # (d) on (b)
 AG3S_VERSIONS["AG3S-final-panda-p0m-ball"] = P0M_BALL_FLAGS                 # SL7c ① ball extent (diagnostic)
+#: SL7d (user ruling 2026-11-04, task SL7d): (가) P0m with the attention cell back to the Panda ATS signal of pc판
+#: (``action:last:L8H2``, SL6-C user ruling 2026-10-30) -- P0m's ATS and surface seed map share it; everything else P0m's.
+_i = P0M_FLAGS.index("--attention-source")
+P0M_L8H2_FLAGS: tuple[str, ...] = P0M_FLAGS[:_i + 1] + ("action:last:L8H2",) + P0M_FLAGS[_i + 2:]
+del _i
+AG3S_VERSIONS["AG3S-final-panda-p0m-l8h2"] = P0M_L8H2_FLAGS               # SL7d (가)
+#: (나) pc판 + the latch label as the 3-stage gate label (T92); HSR6 rules and probe unchanged.
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-latch"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS + P0M_SUBTASK_FLAGS   # SL7d (나)
+#: final-configuration base argv + the HSR6 probe like :data:`FINAL_CONFIG_VERSIONS` (kept apart so that list stays the SL6 one)
+PC_LATCH_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-latch",)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -415,7 +425,8 @@ FINAL_RUN_PARAMETERS: tuple[str, ...] = ("hsr6_probe", "attention_source")
 
 def is_final_version(version: str) -> bool:
     """A version on the final-configuration base argv: the SL6 final versions and (SL7) the P0m versions."""
-    return str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS
+    return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS
+            or str(version) in PC_LATCH_VERSIONS)   # SL7d
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
