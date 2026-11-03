@@ -44,6 +44,12 @@
   (`AG3S/adapters/panda/server.py` `UNPORTED_FINAL_CONFIG_DESTS`, `profile.UNPORTED_BUILD_KEYWORDS`).
 - 상세 · 검증: `doc/active/migration/AG3S_FINAL_MERGE_REPORT.md`.
 
+## feature/panda-benchmark 에 development main 반영 (2026-11-03, benchmark checkout)
+
+- development main `a0b16d0a` (P0 최종 구성 후보 · T67–T93) 를 `merge --no-ff` → `93e2ae8d`. merge 직전 tag `pre-dev-main-merge-20261103` (`76568b60`).
+- 기존 Panda 판 (V11AB 계열 · AG3S-final-panda 1판 ~ pc판) 은 동작이 그대로다. merge 가 가져온 option 41 개와 hidden probe attention 은 `--robot panda` 에서 이식 전까지 거절한다.
+- 상세 · 이전/변경 후 구성 · 검증: `doc/active/migration/DEV_MAIN_MERGE_20261103_REPORT_KO.md`.
+
 ## Merge 전에 확인
 
 1. `git branch --show-current`와 두 branch의 `git merge-base`를 확인한다.
