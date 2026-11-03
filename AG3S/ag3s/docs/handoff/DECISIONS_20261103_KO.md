@@ -21,6 +21,7 @@
 
 1. **T92b → hull 채우기 · 접촉 여유 10 mm 포함을 최종으로 확정.** 단, 껐다 켰다 할 수 있게 둔다 — 이미 각각 독립 기본 꺼짐 flag (`--surface-hull-fill`, `--surface-contact-allowance-mm M`), benchmark 는 `p0m` · `p0m-nohull` 판. "32 run 전 확정 안 함" 문장은 T92b 로 닫는다.
 2. **Panda P0m 의 TrajOpt 정의:** 제안대로 — benchmark 가 같은 LIBERO 9 episode 로 (c) 연속성 · 꺾임 변화율 항만 끈 판, (b) pc판의 Panda 보정을 얹은 판 (target 범위 · 단계 판정은 P0m 그대로, HSR6 끔), (d) 충돌 없으면 VLA 그대로 통과 (`--passthrough-when-clear`) 를 붙인 판을 돌려 포화 원인을 가른다. 성공이 비슷하면 보정이 적은 쪽. SafeLIBERO closed loop 전에 "지운 voxel 0 call 41 %" 원인을 기록으로 확인.
+3. **(03:2x KST) SL7b 결과 (c) · (b) · (d) 모두 1/9 → TrajOpt 는 원인 아님, 표면 영역 채택 call 10 % (기각 영역은 ATS target 점에서 약 150 mm) → 다음 진단 승인:** ① P0m 에서 target 범위만 공 방식으로 되돌린 판을 같은 LIBERO 9 episode 로 돌린다 — **원인 확인용만, 채택 후보 아님** (표면 추출은 최종에 반드시 포함). ② SafeLIBERO 재생 기록의 기각 call 을 카메라 영상 위에 표면 영역 · ATS target 점 · attention · 정답 윤곽으로 겹쳐, 어긋남이 attention head (L8H6) · 가짜 세 번째 view · 표면 graph 값 중 어디서 오는지 가른다 (offline, ① 과 동시). 둘 다 benchmark-78 이 수행, SafeLIBERO closed loop 은 표면 추출을 고친 뒤. 결과 · 출처: `/mnt/dev/AG3S_VLA-benchmark/outputs/2026-11-04_SL7b_P0m_TrajOpt대조_LIBERO_표면기각/README.md`.
 
 ## 1. 판정 목록
 
