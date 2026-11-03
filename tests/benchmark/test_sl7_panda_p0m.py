@@ -648,3 +648,46 @@ def test_sl7d_pc_latch_builds_with_hsr6_and_the_latch_gate(gpu_ok, monkeypatch):
     assert safe.subtask_from_latch is True and safe.ag3s.config.clustering.subtask_gate is True
     assert safe.ag3s.config.esdf.target_extent != "attention_surface"
     assert info["final_config"]["subtask_from_latch"]["source"] == "latch"
+
+
+PCSURF, PCNOHSR6 = "AG3S-final-panda-v3-e0to-pc-surface", "AG3S-final-panda-v3-e0to-pc-nohsr6"   # SL7e
+
+
+def _pc_args(version):
+    from AG3S.adapters.panda import profile as pf
+
+    argv = pf.version_server_argv(version)
+    argv[argv.index("--config") + 1] = "pi05_libero"
+    return pf.parse_v11ab_args(argv=argv + ["--robot", "panda"] + pf.version_server_flags(version))
+
+
+def test_sl7e_pc_variants_flags(gpu_ok):
+    from AG3S.adapters.panda import profile as pf
+
+    pc = list(pf.AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"])
+    surf, nh = list(pf.AG3S_VERSIONS[PCSURF]), list(pf.AG3S_VERSIONS[PCNOHSR6])
+    j = pc.index("--nontarget-evidence")
+    assert surf == pc[:j] + pc[j + 2:] + ["--attention-source", "action:last:L8H2"] + list(pf.P0M_SURFACE_FLAGS) + list(pf.P0M_HULL_FLAGS)
+    assert not any(t.startswith("--hsr6") for t in nh)
+    assert [t for t in pc if not t.startswith("--hsr6") and t != "nbc"] == [t for t in nh if t != "nbc"]
+    assert pf.version_server_flags(PCSURF)[-2] == "--hsr6-probe" and "--hsr6-probe" not in pf.version_server_flags(PCNOHSR6)
+
+
+def test_sl7e_pc_variants_build(gpu_ok, monkeypatch):
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.adapters.panda import server as ps
+
+    if not pathlib.Path(pf.PANDA_HSR6_PROBE).exists():
+        pytest.skip("Panda HSR6 probe not in this storage root")
+    monkeypatch.setenv("AG3S_PANDA_CONVERSION", "C")
+    a = _pc_args(PCSURF)
+    ps.check_unported_flags(a, None)
+    served, info = ps.build_safe_server(_Stub(), a, gpu_warm_up=False)
+    safe = served._policy
+    e = safe.ag3s.config.esdf
+    assert e.target_extent == "attention_surface" and e.surface_hull_fill and e.nontarget_evidence == "proximity"
+    assert safe.hsr6 is not None and info["final_config"]["attention_surface"]["seed_map"] == "action:last:L8H2"
+    b = _pc_args(PCNOHSR6)
+    ps.check_unported_flags(b, None)
+    served, info = ps.build_safe_server(_Stub(), b, gpu_warm_up=False)
+    assert served._policy.hsr6 is None and served._policy.ag3s.config.esdf.target_extent != "attention_surface"

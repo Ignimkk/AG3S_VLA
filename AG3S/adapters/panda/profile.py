@@ -410,6 +410,24 @@ AG3S_VERSIONS["AG3S-final-panda-p0m-l8h2"] = P0M_L8H2_FLAGS               # SL7d
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-latch"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS + P0M_SUBTASK_FLAGS   # SL7d (나)
 #: final-configuration base argv + the HSR6 probe like :data:`FINAL_CONFIG_VERSIONS` (kept apart so that list stays the SL6 one)
 PC_LATCH_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-latch",)
+#: SL7e (lead self-ruling 2026-11-04 in the user's autonomous window, task SL7e):
+#: (C) "pc-surface" = pc판 + the P0 surface-extraction target extent (with hull fill / contact allowance, as P0m) on the
+#: Panda ATS cell made explicit (``--attention-source action:last:L8H2``, the seed map); ``--nontarget-evidence`` is
+#: removed (the config refuses it with the surface extent). HSR6 rules and probe stay. Candidate, not adopted.
+_pc = list(FINAL_CONFIG_V3_E0TO_PC_FLAGS)
+_j = _pc.index("--nontarget-evidence")
+PC_SURFACE_FLAGS: tuple[str, ...] = (tuple(_pc[:_j] + _pc[_j + 2:]) + ("--attention-source", "action:last:L8H2")
+                                     + P0M_SURFACE_FLAGS + P0M_HULL_FLAGS)
+#: (A) "pc-nohsr6" = pc판 minus every HSR6 rule (attach assist, held gate, target exempt, objective + scope,
+#: placement contact) -- diagnostic only; no probe.
+PC_HSR6_FLAGS: dict[str, int] = {"--hsr6-attach-assist": 0, "--hsr6-held-gate": 0, "--hsr6-target-exempt": 0,
+                                 "--hsr6-objective": 0, "--hsr6-objective-scope": 1, "--hsr6-placement-contact": 0}
+PC_NOHSR6_FLAGS: tuple[str, ...] = _drop_flags(FINAL_CONFIG_V3_E0TO_PC_FLAGS, PC_HSR6_FLAGS)
+del _pc, _j
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface"] = PC_SURFACE_FLAGS     # SL7e (C) candidate
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-nohsr6"] = PC_NOHSR6_FLAGS       # SL7e (A) diagnostic
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-surface",)   # probe-taking pc variants
+PC_NOPROBE_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-nohsr6",)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
@@ -426,7 +444,7 @@ FINAL_RUN_PARAMETERS: tuple[str, ...] = ("hsr6_probe", "attention_source")
 def is_final_version(version: str) -> bool:
     """A version on the final-configuration base argv: the SL6 final versions and (SL7) the P0m versions."""
     return (str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS
-            or str(version) in PC_LATCH_VERSIONS)   # SL7d
+            or str(version) in PC_LATCH_VERSIONS or str(version) in PC_NOPROBE_VERSIONS)   # SL7d / SL7e
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -440,7 +458,7 @@ def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
         if hsr6_probe is not None or attention_source is not None:
             raise ValueError(f"{version}: --hsr6-probe / --attention-source apply to {list(FINAL_CONFIG_VERSIONS)} only")
         return flags
-    if version in P0M_VERSIONS:      # SL7: no HSR6 rule -> no probe (a probe given is a mistake, not ignored)
+    if version in P0M_VERSIONS or version in PC_NOPROBE_VERSIONS:   # SL7 / SL7e: no HSR6 rule -> no probe
         if hsr6_probe is not None:
             raise ValueError(f"{version}: the P0m versions use no HSR6 rule, so --hsr6-probe has nothing to feed")
         if attention_source is not None:
