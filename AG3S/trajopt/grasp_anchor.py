@@ -87,6 +87,13 @@ class GraspAnchor:
     #: AG3S-CORE-EVAL-G1 (option (a)) — the variant of the anchor this geometric one replaced on this chunk (the E1-C
     #: grasp-goal term, "E1-C"); None = nothing replaced (record key only when set).
     replaced_variant: Optional[str] = None
+    #: T72 — price of the goal-box slack as a fraction of `cost.w_slack`. None (default) = the module's
+    #: `GOAL_BOX_SLACK_SCALE` read at solve time (E1-B, collision first, as before); T72's reach constraint: 1.0, the same
+    #: `w_slack` as every other constraint.
+    goal_box_slack_scale: Optional[float] = None
+    #: T72 — the goal box is the grasp-set reach constraint (`grasp_set.py`): the multi-seed selection counts its
+    #: excess as a violation (`sqp._run_seeds`), the record says so. False = E1-B / G1 as before.
+    reach_constraint: bool = False
 
     @property
     def variant(self) -> str:
@@ -366,6 +373,9 @@ def anchor_record(anchor: GraspAnchor, p_ref: np.ndarray, p_out: np.ndarray, R_r
                            "palm_dev_from_reference_max_mm": round(float(np.max(np.linalg.norm(p_out - p_ref, axis=1)) * 1000), 2)}
     if anchor.goal_box > 0.0:
         rec["goal_box_mm"] = round(float(anchor.goal_box) * 1000.0, 3)
+    if getattr(anchor, "reach_constraint", False):   # T72: the grasp-set reach box (absent otherwise)
+        rec["reach_constraint"] = True
+        rec["goal_box_slack_scale"] = float(anchor.goal_box_slack_scale)
     if getattr(anchor, "replaced_variant", None) is not None:   # AG3S-CORE-EVAL-G1: G1 filled the A4 slot
         rec["replaced_by_geo"] = True
         rec["replaced_variant"] = str(anchor.replaced_variant)

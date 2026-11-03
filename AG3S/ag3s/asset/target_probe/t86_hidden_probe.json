@@ -1,0 +1,62 @@
+{
+ "step": "T90",
+ "asset": "AG3S/ag3s/asset/target_probe/t86_hidden_probe.npz",
+ "md5": "77af9472d1bdc46460aad34c8a93090d",
+ "variant": "raw",
+ "classes": [
+  "other",
+  "target"
+ ],
+ "score": "p(target) = sigmoid(logit); logit = standardised hidden of one image token @ (coef[1]-coef[0]) + (b1-b0)",
+ "source": {
+  "samples": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000950+0900_8ab3c7ef7757_67e71a9db264/samples_t020s/t86_samples.json",
+  "patches_dir": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000950+0900_8ab3c7ef7757_67e71a9db264/hidden_t86s",
+  "selection": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T000950+0900_8ab3c7ef7757_67e71a9db264/probe_t86s/t86_probe.json",
+  "selection_md5": "ecd5712ffba218796416af6ead48d08f",
+  "git": "8ab3c7ef"
+ },
+ "protocol": {
+  "fit": "all train forwards of the camera (>=1 target token, noun found); positives = target tokens, negatives = seeded sample of neg_per_image other tokens per forward (t86_probe.fit_final)",
+  "neg_per_image": 64,
+  "seed": 0,
+  "max_iter": 300
+ },
+ "cameras": {
+  "cam_high": {
+   "layer": 8,
+   "C": 0.01,
+   "cv_selected": 0.9921259842519685,
+   "cv_auroc": 0.9999245852187029,
+   "forwards": 508,
+   "eligible": 508,
+   "rows": 33020,
+   "missing_files": 0,
+   "converged": true,
+   "n_iter": 37
+  },
+  "cam_left_wrist": {
+   "layer": 12,
+   "C": 0.01,
+   "cv_selected": 0.9303482587064676,
+   "cv_auroc": 0.9936104613163901,
+   "forwards": 508,
+   "eligible": 201,
+   "rows": 13504,
+   "missing_files": 0,
+   "converged": true,
+   "n_iter": 98
+  },
+  "cam_right_wrist": {
+   "layer": 8,
+   "C": 0.01,
+   "cv_selected": 0.8870967741935484,
+   "cv_auroc": 0.9910973784456504,
+   "forwards": 508,
+   "eligible": 186,
+   "rows": 13051,
+   "missing_files": 0,
+   "converged": true,
+   "n_iter": 113
+  }
+ }
+}

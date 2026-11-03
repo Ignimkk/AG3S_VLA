@@ -27,6 +27,7 @@
 | `ag3s/exec_feedback` | **직전 청크의 실행 사실** (T18). 아래 |
 | `ag3s/policy_seed` | **선택.** 정책 RNG seed (int, T39). 서버가 이 요청의 `policy.infer` 직전에 정책 RNG 를 `jax.random.key(seed)` 로 다시 놓는다. 아래 |
 | `ag3s/oracle_seg/<cam>` | **선택 · 진단 (T46e A13).** (H, W) uint8 GT code 영상 (`runtime.oracle_segmentation` 의 표: 0 없음·로봇 · 1 GT target · 2 정적 · ≥3 다른 잡을 물체). 시뮬레이터 client 가 `oracle_target=` 일 때만 싣는다. 서버는 `esdf.target_extent = "oracle_visible"` 일 때만 읽는다 — 없으면 off |
+| `ag3s/gt_stage` | **선택 · 분석용 (T85).** MuJoCo 정답 5 단계 문자열 (approach · grasp · carry · place · retreat). 시뮬레이터 client 가 `--safe-gt-stage` 일 때만 싣는다. 서버는 `--hsr-gt-stage` 일 때만 읽는다 |
 | `ag3s/oracle_seg_meta` | **선택 (T46e).** `{"version", "target", "codes": {물체: code}}` — `oracle_seg/<cam>` 과 함께만 |
 
 카메라마다 `robot_state` 를 따로 싣는 것이 이 형식의 핵심이다. 손목 카메라는 팔과 함께
@@ -285,6 +286,7 @@ __all__ = [
     "POLICY_SEED", "POLICY_SEED_LIMIT", "check_policy_seed", "unpack_policy_seed",
     "unpack_policy_seed_echo",
     "ORACLE_SEG", "ORACLE_SEG_META", "ORACLE_SEG_REQUIRED", "unpack_oracle_segmentation",
+    "GT_STAGE", "GT_STAGE_REQUIRED", "unpack_gt_stage",   # T85
 ]
 
 PREFIX = "ag3s/"
@@ -341,6 +343,15 @@ ORACLE_SEG = "oracle_seg"
 ORACLE_SEG_META = "oracle_seg_meta"
 #: 서버 metadata 키 — 이 서버가 GT segmentation 을 **요구한다** (`esdf.target_extent = "oracle_visible"`). 켰을 때만 실린다.
 ORACLE_SEG_REQUIRED = "oracle_segmentation_required"
+
+# --- T85 — begin
+#: 요청 키 (`ag3s/` 접두 뒤) — **MuJoCo 정답 단계** (분석용, T85). `"approach" | "grasp" | "carry" | "place" |
+#: "retreat"` 문자열 하나. `pack_request(gt_stage=...)` 를 줬을 때만 생긴다 (`None` 이면 요청이 T85 전과 같다).
+#: 서버는 `--hsr-gt-stage` 일 때만 읽는다.
+GT_STAGE = "gt_stage"
+#: 서버 metadata 키 — 이 서버가 정답 단계를 **요구한다** (`serve_safe --hsr-gt-stage`). 켰을 때만 실린다.
+GT_STAGE_REQUIRED = "gt_stage_required"
+# --- T85 — end
 
 #: HOLD 사유의 종류. `SafeRemoteClient.last_ipc` 의 값 중 `ok` 를 뺀 것과 같다 — 사유를 새로
 #: 지어내지 않고 로컬이 이미 쓰는 이름을 그대로 싣는다.
@@ -438,7 +449,8 @@ def pack_request(obs: dict[str, Any], *, cameras: Sequence[str],
                  stamp_mode: Optional[str] = None,
                  policy_seed: Optional[int] = None,
                  oracle_seg: Optional[dict[str, np.ndarray]] = None,
-                 oracle_seg_meta: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+                 oracle_seg_meta: Optional[dict[str, Any]] = None,
+                 gt_stage: Optional[str] = None) -> dict[str, Any]:
     """정책 관측에 AG3S 가 필요한 것을 더한다. `obs` 는 제자리에서 바뀌지 않는다.
 
     `exec_feedback` 은 `make_exec_feedback` / `no_exec_feedback` 의 결과다. **`None` 이면 키를
@@ -485,6 +497,8 @@ def pack_request(obs: dict[str, Any], *, cameras: Sequence[str],
                 raise ValueError(f"oracle_seg/{cam} {lab.shape} != depth {np.asarray(depth[cam]).shape}")
             out[f"{PREFIX}{ORACLE_SEG}/{cam}"] = lab.astype(np.uint8)
         out[PREFIX + ORACLE_SEG_META] = dict(oracle_seg_meta or {})
+    if gt_stage is not None:       # T85 — only when given (off: the request is the one from before, byte for byte)
+        out[PREFIX + GT_STAGE] = str(gt_stage)
     return out
 
 
@@ -536,6 +550,12 @@ def unpack_oracle_segmentation(scene: dict[str, Any]) -> Optional[dict[str, Any]
     if not labels:
         return None
     return {"labels": labels, "meta": dict(scene.get(ORACLE_SEG_META) or {})}
+
+
+def unpack_gt_stage(scene: dict[str, Any]) -> Optional[str]:
+    """T85 — the request's MuJoCo ground-truth stage, or None (the client sent none, or it was not measurable)."""
+    value = scene.get(GT_STAGE)
+    return None if value is None else str(value)
 
 
 def unpack_stamps(scene: dict[str, Any]) -> dict[str, Any]:

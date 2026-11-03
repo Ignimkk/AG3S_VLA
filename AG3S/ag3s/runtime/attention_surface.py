@@ -155,8 +155,47 @@ def _pixel_nodes(views, cfg, node_pos: np.ndarray):
     return out, how
 
 
+# --- T78d — begin
+def _crease_reattach_cpu(geo, sub, sel_sub, crease_state, crease, rec) -> np.ndarray:
+    """T78d — the re-attach (`attention_surface_crease.reattach`) on `g_and_top1`'s ROI sub-graph `sub` (local ids).
+    Returns the added sub nodes (bool); writes `rec["crease"]["reattach"]`."""
+    from AG3S.ag3s.runtime import attention_surface_crease as CR
+
+    t = time.perf_counter()
+    roi = crease_state["roi"]
+    loc = np.full(len(geo.pos), -1, np.int64)
+    loc[np.flatnonzero(roi)] = np.arange(int(roi.sum()))
+    cut = loc[crease_state["cut"]]
+    if len(cut) and (cut < 0).any():
+        raise RuntimeError("T78d: a cut edge lies outside the solve ROI")
+    if int(roi.sum()) != len(sub.pos):
+        raise RuntimeError(f"T78d: crease ROI {int(roi.sum())} nodes, solve ROI {len(sub.pos)}")
+    add, rr = CR.reattach(len(sub.pos), sub.edges, cut.reshape(-1, 2), sub.support, sel_sub, sub.pos,
+                          float(crease.reattach_ratio))
+    rr["ms"] = round((time.perf_counter() - t) * 1e3, 3)
+    rec["crease"]["reattach"] = rr
+    return add & ~sel_sub
+# --- T78d — end
+
+
+#: T78 B — the devices `select_target_surface(device=…)` / `config.ATTENTION_SURFACE_DEVICE` accept.
+DEVICES = ("cpu", "cuda")
+
+
+def _resolve_device(device: Optional[str]) -> str:
+    if device is None:
+        from AG3S.ag3s import config as _config
+
+        device = getattr(_config, "ATTENTION_SURFACE_DEVICE", "cpu")
+    device = str(device).lower()
+    if device not in DEVICES:
+        raise ValueError(f"attention-surface device must be one of {DEVICES}, got {device!r}")
+    return device
+
+
 def select_target_surface(views: Sequence[SurfaceView], *, cfg=None, class_map=None, classes=None,
-                          keep_debug: bool = False, arm: str = ARM_RENDER, codes: bool = True) -> SurfaceResult:
+                          keep_debug: bool = False, arm: str = ARM_RENDER, codes: bool = True,
+                          device: Optional[str] = None, crease=None) -> SurfaceResult:
     """The LOCK `candidate_extent` on one request (`CAMERA_ORDER` views). See the module docstring.
 
     `class_map` / `classes` default to the dummy (zeros, `("target",)`); they are evaluator inputs of
@@ -165,6 +204,16 @@ def select_target_surface(views: Sequence[SurfaceView], *, cfg=None, class_map=N
     `codes=False` (IFG-S2SERVE confidence gate only): the selection is made exactly as above, but the pixel → node
     mapping and the code images are skipped — `codes` stays None while `record["applied"]` is True and
     `record["codes_skipped"]` is True. Default True = unchanged.
+
+    `device` (T78 B): ``"cpu"`` = the locked chain above · ``"cuda"`` = `runtime.attention_surface_gpu` (the same
+    computation on the GPU; the record gains ``device`` and ``ms_detail``). None (default) = `config.ATTENTION_SURFACE_DEVICE`
+    (default ``"cpu"``: this function is unchanged, no new record key). `keep_debug=True` and a given `class_map`
+    stay on the CPU chain (they need the full `FrameGeometry`); with ``"cuda"`` the record then says
+    ``device = "cpu"`` and ``device_fallback``.
+
+    `crease` (T78d, `attention_surface_crease.CreaseParams`; None = default = everything above unchanged, no new
+    record key): the graph is built at `crease.voxel_mm` and its concave creases inside the seed ROI are cut before
+    the selection; `crease.reattach_ratio` re-attaches small cut-off components. The record gains ``crease``.
     """
     from AG3S.ag3s.experiments.studies import ifg_graph as G
     from AG3S.ag3s.experiments.studies import ifg_round_ns as RNS
@@ -184,6 +233,23 @@ def select_target_surface(views: Sequence[SurfaceView], *, cfg=None, class_map=N
         rec["why"] = why
         rec["ms"]["total"] = round((time.perf_counter() - t0) * 1e3, 3)
         return SurfaceResult(None, rec)
+    # T78 B — device branch (default "cpu": nothing below changes)
+    dev = _resolve_device(device)
+    if dev == "cuda":
+        if keep_debug or class_map is not None:
+            rec["device"] = "cpu"
+            rec["device_fallback"] = "keep_debug" if keep_debug else "class_map"
+        else:
+            from AG3S.ag3s.runtime import attention_surface_gpu as GPU
+
+            if crease is not None:   # T78d
+                return GPU.select(views, crease.graph_config(cfg), smap, arm=arm, codes=codes, rec=rec, t0=t0,
+                                  crease=crease)
+            return GPU.select(views, cfg, smap, arm=arm, codes=codes, rec=rec, t0=t0)
+    # --- T78d — begin: 2.5 mm nodes (the graph config, also the pixel → node map below)
+    if crease is not None:
+        cfg = crease.graph_config(cfg)
+    # --- T78d — end
     depth = [np.asarray(v.depth_m, np.float64) for v in views]
     rmask = [np.asarray(v.robot_mask, bool) for v in views]
     if class_map is None:
@@ -205,6 +271,15 @@ def select_target_surface(views: Sequence[SurfaceView], *, cfg=None, class_map=N
     vp = RNS.eligible(geo, cfg, True)
     rec["n_eligible_patches"] = int(vp.sum())
     t = time.perf_counter()
+    # --- T78d — begin: concave-crease cut inside the seed ROI (the solve below runs on the cut graph)
+    crease_state = None
+    if crease is not None:
+        from AG3S.ag3s.runtime import attention_surface_crease as CR
+
+        geo, crease_state = CR.cut_cpu(views, geo, cfg, smap, vp, crease)
+        rec["crease"] = {**crease.record(), **crease_state["record"],
+                         "ms": round((time.perf_counter() - t) * 1e3, 3)}
+    # --- T78d — end
     res = RNS.g_and_top1(geo, cfg, smap, vp) if len(geo.pos) else None
     rec["ms"]["solve"] = round((time.perf_counter() - t) * 1e3, 3)
     if res is None:
@@ -219,6 +294,11 @@ def select_target_surface(views: Sequence[SurfaceView], *, cfg=None, class_map=N
     sel_sub = np.isfinite(mt) & (mt >= TAU)
     # sub → graph node ids: `subset` keeps `node_eval` (strictly increasing over the graph's nodes)
     sel = np.searchsorted(geo.node_eval, sub.node_eval[sel_sub])
+    # --- T78d — begin: re-attach small components cut off by a crease (one pass, whole components)
+    if crease is not None and crease.reattach_ratio is not None and len(sel):
+        add = _crease_reattach_cpu(geo, sub, sel_sub, crease_state, crease, rec)
+        sel = np.concatenate([sel, np.searchsorted(geo.node_eval, sub.node_eval[add])])
+    # --- T78d — end
     rec["n_selected_nodes"] = int(len(sel))
     if not len(sel):
         rec["why"] = "no_region"
@@ -258,5 +338,5 @@ def select_target_surface(views: Sequence[SurfaceView], *, cfg=None, class_map=N
                          pixel_nodes=pix if keep_debug else None, solve=res if keep_debug else None)
 
 
-__all__ = ["ARM_RENDER", "ARM_SPHERES", "CAMERA_ORDER", "SurfaceResult", "SurfaceView", "TAU",
+__all__ = ["ARM_RENDER", "ARM_SPHERES", "CAMERA_ORDER", "DEVICES", "SurfaceResult", "SurfaceView", "TAU",
            "attention_vector", "graph_config", "select_target_surface"]

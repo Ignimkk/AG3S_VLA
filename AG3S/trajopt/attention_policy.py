@@ -28,6 +28,11 @@ best used `denoise=0` — so this is one prefix+suffix pass, not the full ~10-st
 `result["task_probe"]` for `SafePolicy`'s HELD gate. With neither given (the default), `infer` takes the
 pre-T57 path unchanged — the extended path (`_infer_extended`) is a separate branch. With either given,
 `result["attention_source"]` / `result["task_probe"]` record what was used (noun, token, ok, reason).
+
+**T82 (default off).** `hsr5_probe` (`hsr5.load_hsr5_probe`, `serve_safe --hsr5`) takes the extended path and asks the
+backend for the hidden h_4 feature of the same noun prefix pass (`want_hsr5`; gemma `return_hidden` is turned on for
+that pass only, `attention_source.llm_with_hidden`) -> `result["hsr5"] = {"p", "argmax", "probe", "ms"}`. Without it
+the backend call has no `want_hsr5` kwarg and the result has no key.
 """
 
 from __future__ import annotations
@@ -72,7 +77,7 @@ class AttentionPolicy:
                  subtask_probe: Any = "default", attention_source: Any = None,
                  noun_tokens: Any = None, task_probe: Any = None, sampler: Any = None,
                  backend: Any = None, default_prompt: Optional[str] = None,
-                 prefix_feature: bool = False, hsr6_probe: Any = None):
+                 prefix_feature: bool = False, hsr6_probe: Any = None, hsr5_probe: Any = None):
         self._policy = policy
         if sampler is None:
             from AG3S.ag3s.experiments.sources.pi05_attention import AttentionSampler
@@ -84,19 +89,27 @@ class AttentionPolicy:
         #: AG3S-CORE-EVAL-HSR6 (`serve_safe --hsr6-*`, default None = off): the 6-phase probe on the same `kv_L4`
         #: feature -> `result["hsr6"]`. None: no key, and the feature is computed exactly when it was before.
         self._hsr6_probe = hsr6_probe
+        #: T82 (`serve_safe --hsr5`, default None = off): the 5-stage probe on the hidden h_4 feature of the same noun
+        #: prefix pass -> `result["hsr5"]`. None: no key, the backend is called exactly as before (no `want_hsr5`).
+        self._hsr5_probe = hsr5_probe
         # T57-A — begin. Default (both None) = the pre-T57 cell and path (`infer` never reaches the
         # extended branch). `attention_source`: a SPEC string or `AttentionSource`; `task_probe`: a
         # `NounProbe` (T55 prereg); `noun_tokens`: `NounTokens` (needed by a noun source or the probe).
         from AG3S.trajopt.attention_source import AttentionSource, parse_attention_source
 
-        if attention_source is not None and not isinstance(attention_source, AttentionSource):
+        # --- T90 — begin: a parsed `HiddenProbeSource` is a source as well
+        from AG3S.trajopt.attention_source import HiddenProbeSource
+
+        if attention_source is not None and not isinstance(attention_source, (AttentionSource, HiddenProbeSource)):
             attention_source = parse_attention_source(attention_source)
+        # --- T90 — end
         self._source = attention_source
         self._task_probe = task_probe
         #: IFG-S2SERVE (`serve_safe --confidence-gate on`, default False): also carry the prefix layer-8 image
         #: residual (`attention_source.IFG_PREFIX_L8_KEY`) for the confidence gate. Takes the extended path.
         self._prefix_feature = bool(prefix_feature)
-        self._extended = attention_source is not None or task_probe is not None or self._prefix_feature
+        self._extended = (attention_source is not None or task_probe is not None or self._prefix_feature
+                          or hsr5_probe is not None)
         if self._extended and noun_tokens is None and (
                 task_probe is not None or (attention_source is not None and attention_source.is_noun)):
             raise ValueError("a noun_target attention source / the task probe needs the prompt's noun token "
@@ -110,6 +123,15 @@ class AttentionPolicy:
             from AG3S.trajopt.attention_source import JaxPrefixBackend
 
             self._backend = JaxPrefixBackend(self._sampler, noise_seed=self._noise_seed)
+        # --- T90 — begin: `--attention-source hidden_probe[:NPZ]` — load the asset now (a bad file stops the server at start)
+        self._hidden_probe = None
+        if isinstance(attention_source, HiddenProbeSource):
+            from AG3S.trajopt.hidden_probe import load_hidden_probe
+
+            self._hidden_probe = load_hidden_probe(attention_source.asset_path())
+            if hasattr(self._backend, "set_hidden_probe"):
+                self._backend.set_hidden_probe(self._hidden_probe)
+        # --- T90 — end
         # T57-A — end
 
     @property
@@ -134,6 +156,11 @@ class AttentionPolicy:
     def subtask_probe(self):
         """The probe in use (`SubtaskProbe`), or None when the label is off."""
         return self._subtask_probe
+
+    @property
+    def hsr5_probe(self):
+        """T82 — the 5-stage probe in use (`SubtaskProbe`), or None (no `result["hsr5"]`)."""
+        return self._hsr5_probe
 
     @property
     def hsr6_probe(self):
@@ -209,7 +236,9 @@ class AttentionPolicy:
                 want_feature=self._want_feature(),
                 v_layer=None if probe is None else probe.layer,
                 # IFG-S2SERVE — only with the flag (the kwarg is absent otherwise: the T57-A call as before)
-                **({"want_resid": True} if self._prefix_feature else {}))
+                **({"want_resid": True} if self._prefix_feature else {}),
+                # T82 — only with the HSR5 probe (absent otherwise: the call as before)
+                **({"want_hsr5": True} if self._hsr5_probe is not None else {}))
         except Exception:  # noqa: BLE001 — attention failing must not fail the policy call
             why = traceback.format_exc()
             logging.warning("attention extraction failed (T57-A path):\n%s", why)
@@ -222,6 +251,10 @@ class AttentionPolicy:
 
         if look is not None and src_rec is not None and source.is_noun:
             src_rec.update(look.record())
+        # --- T90 — begin: what the hidden probe read / how long it took (only this source adds keys)
+        if self._hidden_probe is not None and src_rec is not None:
+            src_rec.update(self._hidden_probe_record(out))
+        # --- T90 — end
         if out.get("cell") is not None:
             result["attention"] = cell_maps(out["cell"])
             state = "ok"
@@ -256,7 +289,47 @@ class AttentionPolicy:
         feature = out.get("feature")
         if feature is not None:
             self._label_feature(result, feature)
+        if self._hsr5_probe is not None:
+            self._label_hsr5(result, out)
         return result
+
+    # --- T90 — begin
+    def _hidden_probe_record(self, out: dict) -> dict:
+        """T90 — per-request keys of `result["attention_source"]` for the hidden probe: ``ms`` (the pass incl. the probe
+        scoring + device-to-host copy, the same prefix forward the noun source runs), ``max_score`` per camera and
+        overall (p(target)), ``argmax_patch`` (camera, row, col of the overall maximum). No scores (noun not found / a
+        backend without them) → only ``ms``."""
+        from AG3S.trajopt.hidden_probe import CAMERAS, GRID, camera_probabilities
+
+        rec: dict = {}
+        if out.get("probe_ms") is not None:
+            rec["ms"] = float(out["probe_ms"])
+        lg = out.get("probe_logits")
+        if lg is not None and out.get("cell") is not None:
+            p = camera_probabilities(lg).reshape(len(CAMERAS), GRID * GRID)
+            rec["max_score"] = {c: round(float(p[i].max()), 6) for i, c in enumerate(CAMERAS)}
+            ci = int(np.argmax(p.max(axis=1)))
+            pi = int(np.argmax(p[ci]))
+            rec["max"] = round(float(p[ci, pi]), 6)
+            rec["argmax_patch"] = {"camera": CAMERAS[ci], "row": pi // GRID, "col": pi % GRID}
+        return rec
+    # --- T90 — end
+
+    def _label_hsr5(self, result: dict, out: dict) -> None:
+        """T82 — `result["hsr5"]` from the backend's `hsr5_feature` (`SubtaskProbe.predict` + `ms` of the pass). No
+        feature or a failing probe leaves the key out (logged): `SafePolicy` reads that as "no stage"."""
+        feat = out.get("hsr5_feature")
+        if feat is None:
+            logging.warning("HSR5: no feature on this request (%s)", out.get("hsr5_error") or "not returned")
+            return
+        try:
+            rec = self._hsr5_probe.predict(feat)
+        except Exception:  # noqa: BLE001 — HSR5 failing leaves `result["hsr5"]` out (SafePolicy: stage None)
+            logging.warning("HSR5 probe failed:\n%s", traceback.format_exc())
+            return
+        if out.get("hsr5_ms") is not None:
+            rec["ms"] = out["hsr5_ms"]
+        result["hsr5"] = rec
 
     def _attention(self, obs: dict[str, Any]) -> dict[str, np.ndarray]:
         return self._attention_and_feature(obs, with_feature=False)[0]

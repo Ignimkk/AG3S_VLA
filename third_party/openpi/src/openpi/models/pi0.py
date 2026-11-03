@@ -77,6 +77,7 @@ class Pi0(_model.BaseModel):
                 embed_dtype=config.dtype,
                 adarms=config.pi05,
                 return_probs=config.return_attn_probs,
+                return_hidden=config.return_hidden_states,
             )
         )
         llm.lazy_init(rngs=rngs, method="init", use_adarms=[False, True] if config.pi05 else [False, False])

@@ -122,7 +122,10 @@ def test_config_default_absent_from_to_dict_and_validated():
     a6 = {"neighbour_palm_contact_depth", "neighbour_palm_contact_radius", "neighbour_palm_contact_gate"}
     # T67: IFG-NBC at depth 0 and the support-surface offset too (same rule).
     t67 = {"neighbour_contact_at_zero", "support_surface_offset"}
-    assert set(d["collision"]) == {f.name for f in dataclasses.fields(CollisionConfig)} - {"palm_shell_margin"} - a6 - t67
+    # T83: the grasp corridor carve keys too (same rule).
+    t83 = {"grasp_corridor_allow", "grasp_corridor_ahead", "grasp_corridor_min_target_points", "grasp_corridor_margin_in",
+           "grasp_corridor_margin_y", "grasp_corridor_support_band"}
+    assert set(d["collision"]) == {f.name for f in dataclasses.fields(CollisionConfig)} - {"palm_shell_margin"} - a6 - t67 - t83
     assert TrajOptConfig.from_dict(d) == c                                   # round trip
     on = TrajOptConfig.from_dict({"collision": {**base, "palm_shell_margin": 0.005}})
     assert on.to_dict()["collision"]["palm_shell_margin"] == 0.005

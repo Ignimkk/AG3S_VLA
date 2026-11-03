@@ -87,6 +87,15 @@ RECON_DEVICE: str = "auto"
 #: 같고, 수는 정수다. 폭 1 짜리 블록(numpy 가 gemv 로 가는 모양)은 CPU 로 센다. 값은 위와 같다.
 SUPPORT_RANSAC_DEVICE: str = "auto"
 
+#: T78 B — attention-surface target extent (`runtime.attention_surface.select_target_surface`, `esdf.target_extent =
+#: "attention_surface"`) 를 어디서 계산하나. ``"cpu"`` (기본) = 고정된 study 코드 (`ifg_graph.build_geometry` +
+#: `ifg_round_ns.g_and_top1`) 그대로 · ``"cuda"`` = `runtime.attention_surface_gpu` (같은 계산을 torch CUDA 로; 필수 —
+#: CUDA 가 없으면 예외). 위 세 장치와 달리 **"auto" 가 없다**: GPU 경로는 합의 순서 (voxel 중심 · 1-ring 합 · 지지면
+#: refit) 가 달라 비트 단위로 같지 않다 — 같은 node 를 고른다는 것은 측정한 사실이다 (T78 B 동등성: 선택 node IoU ·
+#: code 영상 pixel 일치, `docs/handoff/T78B.impl.md`). 그래서 기본은 꺼짐이고 serve_safe `--attention-surface-device cuda`
+#: 가 켠다. 켜진 요청의 기록에는 ``device = "cuda"`` 가 남는다.
+ATTENTION_SURFACE_DEVICE: str = "cpu"
+
 
 # ------------------------------------------------------------------------------------ sections
 
@@ -372,6 +381,27 @@ class ClusteringConfig:
     #: while the kept geometry stayed at frame 10 — the target-free layer kept the real apple as
     #: ambiguous and the authorized finger was pushed off it. Off (default) = bit-identical.
     kept_geometry_follow: bool = False
+    # T81 — begin
+    #: **T81 — the old place is empty: let the target go and pick again.** True = while nothing is held
+    #: (latch not HELD, nothing attached; searching · latched · closing), each request projects the
+    #: manipulated object's standing geometry (`TargetConfirm` `_geometry`, ≤ `target_vacancy_samples`
+    #: points) into the cameras the pipeline gives (`TargetConfirm.note_views`) and classes every point by
+    #: the measured depth: empty (> point + δ), occluded (< point − δ or a robot pixel), present (|·| ≤ δ)
+    #: (`stages.target_vacancy`). `target_vacancy_frames` consecutive requests with empty ≥ `p_empty` ∧
+    #: present ≤ `p_present` (on the camera with the most judged points, ≥ `min_points` of them) release
+    #: the identity before the hand-occlusion · frozen · latched-hold rules; the same request re-picks
+    #: only among admissible candidates within `target_vacancy_near` of the old centroid (none = no target,
+    #: and the near-only re-pick stays pending; the subtask gate does not block it). Never after PLACED. Thresholds below are placeholders until the lead fixes them
+    #: (T81.task §4). False (default) = not read anywhere, bit-identical.
+    target_vacancy_release: bool = False
+    target_vacancy_delta: float = 0.02
+    target_vacancy_p_empty: float = 0.5
+    target_vacancy_p_present: float = 0.2
+    target_vacancy_min_points: int = 10
+    target_vacancy_samples: int = 200
+    target_vacancy_frames: int = 2
+    target_vacancy_near: float = 0.2
+    # T81 — end
     #: **T43 T 3(b) — release an identity the exclusion gate keeps refusing.** An integer N = when
     #: `AG3S._exclusion_gate` refuses the manipulated object because it overlaps the destination on
     #: N consecutive grounding calls (and nothing is frozen), the identity is let go at the start of
@@ -541,6 +571,23 @@ class ClusteringConfig:
             raise AG3SConfigError(
                 f"clustering.latched_identity_hold must be true or false, "
                 f"got {self.latched_identity_hold!r}")
+        # T81
+        if not isinstance(self.target_vacancy_release, bool):
+            raise AG3SConfigError(
+                f"clustering.target_vacancy_release must be true or false, got {self.target_vacancy_release!r}")
+        for name in ("target_vacancy_delta", "target_vacancy_near"):
+            val = getattr(self, name)
+            if isinstance(val, bool) or not (isinstance(val, (int, float)) and math.isfinite(float(val))
+                                             and float(val) > 0.0):
+                raise AG3SConfigError(f"clustering.{name} must be a finite length > 0 in metres, got {val!r}")
+        for name in ("target_vacancy_p_empty", "target_vacancy_p_present"):
+            val = getattr(self, name)
+            if isinstance(val, bool) or not (isinstance(val, (int, float)) and 0.0 <= float(val) <= 1.0):
+                raise AG3SConfigError(f"clustering.{name} must be a fraction in [0, 1], got {val!r}")
+        for name in ("target_vacancy_min_points", "target_vacancy_samples", "target_vacancy_frames"):
+            val = getattr(self, name)
+            if isinstance(val, bool) or not isinstance(val, int) or val < 1:
+                raise AG3SConfigError(f"clustering.{name} must be an integer >= 1, got {val!r}")
         if not isinstance(self.held_slip_detach, bool):
             raise AG3SConfigError(
                 f"clustering.held_slip_detach must be true or false, got {self.held_slip_detach!r}")
@@ -1298,6 +1345,75 @@ class EsdfConfig:
     #: | `"gt"` | 늘 GT target 물체 — identity 와 extent 둘 다 GT 인 미세 target-free 계층 (상한). 공 · 창 · 권한 · 거친 계층의 identity 는 그대로 AG3S 의 것 |
     oracle_extent_identity: str = "pipeline"
     ORACLE_EXTENT_IDENTITIES = ("pipeline", "gt")
+    # T78 갈래 A — begin: post-processing of the `attention_surface` region (`runtime.attention_surface_post`,
+    # `runtime.pipeline.AG3S._attention_surface_update`). All off by default = IFG-CL1 / T76 as is (same calls, same
+    # record keys); each is read only with `target_extent == "attention_surface"` (refused otherwise).
+    #: **A1** — cut a merged region with the cluster split rule (`stages.attention_split.split_by_attention` on the region's
+    #: 5 mm nodes, raw node attention; `clustering.attention_split_radius` · `_ratio` · `_partition` ·
+    #: `attention_partition_min_drop`, trigger = narrowest ≤ max opening < largest) and keep the target component.
+    #: Not triggered / not split → the region is left whole. Needs `clustering.attention_split_radius`.
+    surface_split: bool = False
+    #: **A2** — the region (after A1) must be this request's ATS target, else the request abstains
+    #: (`why = "not_ats_target"`). `"off"` (default) · `"overlap"` (rule: `attention_surface_post.target_check`).
+    surface_target_check: str = "off"
+    SURFACE_TARGET_CHECKS = ("off", "overlap")
+    #: **A3** — a request without an accepted region (abstain · A2 · A4) removes from the hand layer only the episode's
+    #: code-1 samples of the last accepted regions (the oracle memory, not folded this request); none yet → removes
+    #: nothing. Never the ball / estimated extent.
+    surface_keep_last: bool = False
+    #: **A4** — while a grasp is in progress (closing · held, `set_grasp_active`) or an object is attached, no new
+    #: selection is made (no graph, no fold — carve only): the memory of the last accepted region stands. Needs
+    #: `surface_keep_last`.
+    surface_grasp_hold: bool = False
+    #: **A5** — the target ball is not built for the target-free layer (record `ball: None`); the support guard of the
+    #: oracle split (`z_floor`) = support plane under the region samples' centroid + `target_ball_pad_voxels` fine
+    #: voxels (the ball's `z_min` rule at the region). Needs `surface_keep_last`; refuses `target_free_coarse`.
+    surface_no_ball: bool = False
+    # T78 갈래 A — end
+    # T78b — begin (both off by default = T78 as is; `attention_surface` only)
+    #: **re-attach** — after A1 picks the target component, every other component whose centroid lies inside the target
+    #: component's convex hull dilated by this many mm is kept with the target (`attention_surface_post.
+    #: reattach_components`). None (default) = A1 as is. Needs `surface_split`.
+    surface_reattach_hull_mm: Optional[float] = None
+    #: **hull fill** — just before the grasp (latch latched · closing, or the grasping palm within
+    #: `surface_hull_fill_palm_mm` of the region centroid) the fine target-free tier also loses every seed inside the
+    #: last accepted region's convex hull (+1 fine voxel), above the support guard, except voxels holding samples of the
+    #: components A1 dropped (`curobo_builder.HullFill`). No ball. Needs `surface_keep_last` and `surface_no_ball`.
+    surface_hull_fill: bool = False
+    #: the palm-distance half of the hull-fill window (mm, T78b task §1: 80).
+    surface_hull_fill_palm_mm: float = 80.0
+    # T78b — end
+    # --- T78d — begin (off by default = the 5 mm LOCK graph as is; `attention_surface` only)
+    #: **crease cut** — the surface graph is built at `surface_crease_voxel_mm` and, inside the seed ROI, an edge whose
+    #: two radius-PCA normals (r = max(2 node, 7.5 mm), oriented to the cameras) fold inward (concave) by
+    #: ≥ `surface_crease_angle_deg` is cut before the selection (`runtime.attention_surface_crease`, T78c §8 study
+    #: `run_variant(0.0025, cut=True)`). The record gains `attention_surface.crease`.
+    surface_crease_cut: bool = False
+    #: node size of the crease graph (mm). Read only with `surface_crease_cut`.
+    surface_crease_voxel_mm: float = 2.5
+    #: concave crease angle (deg). Read only with `surface_crease_cut`.
+    surface_crease_angle_deg: float = 20.0
+    #: **re-attach** — after the top-1 region is chosen, every component of the cut ROI graph (non-support) that touches
+    #: the region only through cut edges is added whole when its node count ≤ R × the region's (one pass). None
+    #: (default) = off. Needs `surface_crease_cut`. Limit: a touching neighbour smaller than R × the region is added too.
+    surface_crease_reattach_ratio: Optional[float] = None
+    # --- T78d — end
+    # --- T78e — begin (off by default = newest-wins memory as is; `attention_surface` + `surface_keep_last` only)
+    #: **target-sticky memory** — a memory cell (`runtime.oracle_segmentation.OracleMemory`, 2.5 mm) once holding a
+    #: code-1 (target) sample keeps it until carving drops it: a later frame's code ≠ 1 sample in that cell does not
+    #: overwrite it (other → target still lets target win). Record `oracle.memory.n_sticky_kept`. Needs
+    #: `target_extent == "attention_surface"` and `surface_keep_last`.
+    surface_memory_target_sticky: bool = False
+    # --- T78e — end
+    # --- T78f — begin (off by default = the oracle split as is; `attention_surface` + `surface_keep_last` only)
+    #: **target contact allowance** (mm) — the hand layer (fine target-free tier, `curobo_builder.
+    #: oracle_visible_split`) also removes every seed within this distance of a target sample and above the support
+    #: guard (`z_floor`), whatever the nearest other sample (union with the `d_t < d_o` rule). Range
+    #: 0 < M ≤ `oracle_max_dist_voxels` × fine voxel (the candidate reach). Record `oracle.allowance_mm` ·
+    #: `oracle.n_allowance_extra`. Scenario assumption: no obstacle within M of the target at the grasp — a touching
+    #: neighbour · thin wall within M is removed too. None (default) = off.
+    surface_contact_allowance_mm: Optional[float] = None
+    # --- T78f — end
 
     #: **T44c A5 — target 을 지운 거친 계층 (`coarse_no_target`) 을 한 겹 더 만들고 target-free 질의에
     #: 합성한다.** 기본 `False` = 예전 그대로 (값 비트 동일, 계층을 만들지도 않는다).
@@ -1458,6 +1574,94 @@ class EsdfConfig:
         if self.robot_mask not in self.ROBOT_MASKS:
             raise AG3SConfigError(
                 f"esdf.robot_mask 는 {self.ROBOT_MASKS} 중 하나여야 합니다: {self.robot_mask!r}")
+        # T78 갈래 A
+        if self.surface_target_check not in self.SURFACE_TARGET_CHECKS:
+            raise AG3SConfigError(
+                f"esdf.surface_target_check 는 {self.SURFACE_TARGET_CHECKS} 중 하나여야 합니다: "
+                f"{self.surface_target_check!r}")
+        for name in ("surface_split", "surface_keep_last", "surface_grasp_hold", "surface_no_ball"):
+            if not isinstance(getattr(self, name), bool):
+                raise AG3SConfigError(f"esdf.{name} 는 true 또는 false 여야 합니다: {getattr(self, name)!r}")
+        t78_on = [n for n in ("surface_split", "surface_keep_last", "surface_grasp_hold", "surface_no_ball")
+                  if getattr(self, n)] + (["surface_target_check"] if self.surface_target_check != "off" else [])
+        if t78_on and self.target_extent != "attention_surface":
+            raise AG3SConfigError(
+                f"esdf.{', '.join(t78_on)} 는 target_extent='attention_surface' 의 영역 후처리입니다 — "
+                f"target_extent={self.target_extent!r} 에서는 효과가 없습니다")
+        if (self.surface_grasp_hold or self.surface_no_ball) and not self.surface_keep_last:
+            raise AG3SConfigError(
+                "esdf.surface_grasp_hold · surface_no_ball 은 영역이 없는 요청을 memory 로 짓는 규칙 "
+                "(surface_keep_last) 위에서만 정의됩니다 — 함께 켜십시오")
+        if self.surface_no_ball and self.target_free_coarse:
+            raise AG3SConfigError(
+                "esdf.surface_no_ball 은 공을 만들지 않습니다 — 거친 target-free 계층 (target_free_coarse) 은 공으로만 "
+                "지어지므로 함께 켤 수 없습니다 (T78 A5: 표면 영역으로 짓는 거친 계층은 구현하지 않았다)")
+        # T78b
+        if self.surface_reattach_hull_mm is not None:
+            v = self.surface_reattach_hull_mm
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) >= 0.0):
+                raise AG3SConfigError(f"esdf.surface_reattach_hull_mm 는 0 이상의 유한한 mm 여야 합니다: {v!r}")
+            if not self.surface_split:
+                raise AG3SConfigError("esdf.surface_reattach_hull_mm 은 A1 분할 (surface_split) 이 버리려는 덩어리를 다시 "
+                                      "붙이는 규칙입니다 — surface_split 과 함께 켜십시오")
+        if not isinstance(self.surface_hull_fill, bool):
+            raise AG3SConfigError(f"esdf.surface_hull_fill 는 true 또는 false 여야 합니다: {self.surface_hull_fill!r}")
+        v = self.surface_hull_fill_palm_mm
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) >= 0.0):
+            raise AG3SConfigError(f"esdf.surface_hull_fill_palm_mm 는 0 이상의 유한한 mm 여야 합니다: {v!r}")
+        t78b_on = (["surface_reattach_hull_mm"] if self.surface_reattach_hull_mm is not None else []) + (
+            ["surface_hull_fill"] if self.surface_hull_fill else [])
+        if t78b_on and self.target_extent != "attention_surface":
+            raise AG3SConfigError(
+                f"esdf.{', '.join(t78b_on)} 는 target_extent='attention_surface' 의 영역 후처리입니다 — "
+                f"target_extent={self.target_extent!r} 에서는 효과가 없습니다")
+        if self.surface_hull_fill and not (self.surface_keep_last and self.surface_no_ball):
+            raise AG3SConfigError("esdf.surface_hull_fill 은 마지막 채택 영역 (surface_keep_last) 과 공 없는 지지면 guard "
+                                  "(surface_no_ball) 위에서 정의됩니다 — 함께 켜십시오")
+        # --- T78d — begin
+        if not isinstance(self.surface_crease_cut, bool):
+            raise AG3SConfigError(f"esdf.surface_crease_cut 는 true 또는 false 여야 합니다: {self.surface_crease_cut!r}")
+        for name in ("surface_crease_voxel_mm", "surface_crease_angle_deg"):
+            v = getattr(self, name)
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) > 0.0):
+                raise AG3SConfigError(f"esdf.{name} 는 0 보다 큰 유한한 수여야 합니다: {v!r}")
+        if float(self.surface_crease_angle_deg) >= 180.0:
+            raise AG3SConfigError(f"esdf.surface_crease_angle_deg 는 180 보다 작아야 합니다: {self.surface_crease_angle_deg!r}")
+        v = self.surface_crease_reattach_ratio
+        if v is not None:
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) > 0.0):
+                raise AG3SConfigError(f"esdf.surface_crease_reattach_ratio 는 0 보다 큰 유한한 수여야 합니다: {v!r}")
+            if not self.surface_crease_cut:
+                raise AG3SConfigError("esdf.surface_crease_reattach_ratio 는 오목 꺾임 끊기 (surface_crease_cut) 가 떼어 낸 "
+                                      "조각을 다시 붙이는 규칙입니다 — surface_crease_cut 과 함께 켜십시오")
+        if self.surface_crease_cut and self.target_extent != "attention_surface":
+            raise AG3SConfigError("esdf.surface_crease_cut 는 target_extent='attention_surface' 의 표면 graph 를 바꿉니다 — "
+                                  f"target_extent={self.target_extent!r} 에서는 효과가 없습니다")
+        # --- T78d — end
+        # --- T78e — begin
+        if not isinstance(self.surface_memory_target_sticky, bool):
+            raise AG3SConfigError(f"esdf.surface_memory_target_sticky 는 true 또는 false 여야 합니다: "
+                                  f"{self.surface_memory_target_sticky!r}")
+        if self.surface_memory_target_sticky and not (self.target_extent == "attention_surface"
+                                                      and self.surface_keep_last):
+            raise AG3SConfigError("esdf.surface_memory_target_sticky 는 target_extent='attention_surface' 의 표본 기억 "
+                                  "규칙이며 마지막 채택 영역 (surface_keep_last) 위에서 정의됩니다 — 함께 켜십시오 "
+                                  f"(target_extent={self.target_extent!r}, surface_keep_last={self.surface_keep_last!r})")
+        # --- T78e — end
+        # --- T78f — begin
+        v = self.surface_contact_allowance_mm
+        if v is not None:
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) > 0.0):
+                raise AG3SConfigError(f"esdf.surface_contact_allowance_mm 는 0 보다 큰 유한한 mm 여야 합니다 (끔 = None): {v!r}")
+            if not (self.target_extent == "attention_surface" and self.surface_keep_last):
+                raise AG3SConfigError("esdf.surface_contact_allowance_mm 는 target_extent='attention_surface' 의 손 층 "
+                                      "지우기 규칙이며 마지막 채택 영역 (surface_keep_last) 위에서 정의됩니다 — 함께 켜십시오 "
+                                      f"(target_extent={self.target_extent!r}, surface_keep_last={self.surface_keep_last!r})")
+            reach_mm = float(self.oracle_max_dist_voxels) * float(self.fine_voxel_size or self.voxel_size) * 1e3
+            if float(v) > reach_mm + 1e-9:
+                raise AG3SConfigError(f"esdf.surface_contact_allowance_mm ({v}) 가 후보 거리 (oracle_max_dist_voxels × fine "
+                                      f"voxel = {reach_mm:g} mm) 보다 큽니다 — 후보 밖 seed 는 보지 않습니다")
+        # --- T78f — end
         # IFG-CL2
         if self.surface_hybrid_identity not in self.SURFACE_HYBRID_IDENTITIES:
             raise AG3SConfigError(
