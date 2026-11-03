@@ -548,3 +548,49 @@ def test_sl7b_pass_versions_apply_passthrough_on_the_panda(version, base, gpu_ok
     ps.check_unported_flags(args, None)
     assert ss.trajopt_config_from_args(args).sqp.passthrough_when_clear is True
     assert ss.trajopt_config_from_args(_args(base)).sqp.passthrough_when_clear is False
+
+
+BALL = "AG3S-final-panda-p0m-ball"   # SL7c ①
+
+
+def test_sl7c_ball_version_is_p0m_with_the_ball_extent(gpu_ok, monkeypatch):
+    """SL7c ① — diagnostic version: P0m minus the surface-extraction / hull-fill / contact-allowance flags plus 1판's
+    `--nontarget-evidence surface`; the AG3S config keeps the ball extent, the rest (latch gate, no HSR6, E0, D1) is P0m's."""
+    from AG3S.adapters.panda import profile as pf
+    from AG3S.adapters.panda import server as ps
+
+    ball, p0m = list(pf.AG3S_VERSIONS[BALL]), list(pf.AG3S_VERSIONS[P0M])
+    final = list(pf.FINAL_CONFIG_FLAGS)
+    i = final.index("--nontarget-evidence")
+    assert final[i:i + 2] == ["--nontarget-evidence", "surface"] and "--roi-carve-device" in ball
+    assert ball[ball.index("--roi-carve-device") + 1] == "cuda"
+    assert not ({"--target-extent", "--surface-hull-fill", "--surface-contact-allowance-mm", "--surface-no-ball"} & set(ball))
+    # same as P0m apart from the extent: remove both surface blocks from P0m and add back the nontarget evidence
+    j = p0m.index("--target-extent")
+    p0m_wo = p0m[:j] + p0m[j + len(pf.P0M_SURFACE_FLAGS) + len(pf.P0M_HULL_FLAGS):]
+    assert sorted(ball) == sorted(p0m_wo + ["--nontarget-evidence", "surface"])
+    assert BALL in pf.P0M_VERSIONS and "--hsr6-probe" not in pf.version_server_flags(BALL)
+    monkeypatch.setenv("AG3S_PANDA_CONVERSION", "C")
+    args = _args(BALL)
+    ps.check_unported_flags(args, None)
+    served, info = ps.build_safe_server(_Stub(), args, gpu_warm_up=False)
+    safe = served._policy
+    e = safe.ag3s.config.esdf
+    assert e.target_extent != "attention_surface" and e.target_exclusion == "ball_owned"
+    assert not e.surface_hull_fill and e.surface_contact_allowance_mm is None
+    assert safe.subtask_from_latch is True and safe.hsr6 is None and safe._geo is None
+    col = safe.to_config.collision
+    assert (float(col.neighbour_contact_depth), float(col.neighbour_palm_contact_depth)) == (0.0, 0.0)
+    assert int(getattr(safe.to_config.sqp, "multi_seed", 0) or 0) <= 1
+    assert safe.to_config.cost.continuity_after_grasp and safe.to_config.cost.deflection_rate_after_grasp
+    # the build of the 1판 nontarget evidence is the same option as 1판's
+    assert args.nontarget_evidence == pf.parse_v11ab_args(argv=_args_argv_final()).nontarget_evidence
+    json.dumps(info, default=str)
+
+
+def _args_argv_final():
+    from AG3S.adapters.panda import profile as pf
+
+    argv = pf.version_server_argv("AG3S-final-panda")
+    argv[argv.index("--config") + 1] = "pi05_libero"
+    return argv + ["--robot", "panda"] + pf.version_server_flags("AG3S-final-panda")

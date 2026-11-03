@@ -382,9 +382,16 @@ P0M_PANDAFIX_FLAGS: tuple[str, ...] = P0M_FLAGS + P0M_PANDA_FIX_FLAGS
 #: (d) the chosen TrajOpt side + pass-through when the VLA reference is clear (T88, SL7b): both bases registered, the
 #: SL7b rule picks the one that runs ((c) on a tie).
 P0M_PASS_FLAGS: tuple[str, ...] = ("--passthrough-when-clear",)
+#: SL7c ① (user approval 2026-11-04 via development d2, task SL7c): diagnostic only, **not an adoption candidate** -- P0m
+#: with the target extent back to 1판's ball (``--target-exclusion ball-owned`` + ``--nontarget-evidence surface``): the
+#: surface-extraction flags and hull fill / contact allowance (both surface-only) are removed, everything else is P0m's.
+P0M_BALL_FLAGS: tuple[str, ...] = (_drop_flags(FINAL_CONFIG_FLAGS, {k: n for k, n in P0M_REMOVED_FLAGS.items()
+                                                                     if k != "--nontarget-evidence"})
+                                   + P0M_SUBTASK_FLAGS)
 P0M_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-p0m", "AG3S-final-panda-p0m-nohull", "AG3S-final-panda-p0m-nbc",
                                  "AG3S-final-panda-p0m-termsoff", "AG3S-final-panda-p0m-pandafix",
-                                 "AG3S-final-panda-p0m-termsoff-pass", "AG3S-final-panda-p0m-pandafix-pass")
+                                 "AG3S-final-panda-p0m-termsoff-pass", "AG3S-final-panda-p0m-pandafix-pass",
+                                 "AG3S-final-panda-p0m-ball")
 AG3S_VERSIONS["AG3S-final-panda-p0m"] = P0M_FLAGS                       # P0m (hull fill + contact allowance 10 mm)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nohull"] = P0M_NOHULL_FLAGS         # P0m without hull fill / allowance (T92b control)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nbc"] = P0M_NBC_FLAGS               # P0m + neighbour allowances (D1 control)
@@ -392,6 +399,7 @@ AG3S_VERSIONS["AG3S-final-panda-p0m-termsoff"] = P0M_TERMSOFF_FLAGS     # (c) P0
 AG3S_VERSIONS["AG3S-final-panda-p0m-pandafix"] = P0M_PANDAFIX_FLAGS     # (b) P0m + pc판 Panda corrections (no HSR6)
 AG3S_VERSIONS["AG3S-final-panda-p0m-termsoff-pass"] = P0M_TERMSOFF_FLAGS + P0M_PASS_FLAGS   # (d) on (c)
 AG3S_VERSIONS["AG3S-final-panda-p0m-pandafix-pass"] = P0M_PANDAFIX_FLAGS + P0M_PASS_FLAGS   # (d) on (b)
+AG3S_VERSIONS["AG3S-final-panda-p0m-ball"] = P0M_BALL_FLAGS                 # SL7c ① ball extent (diagnostic)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
