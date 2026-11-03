@@ -98,6 +98,31 @@ def graph_config():
     return G.GraphConfig()
 
 
+def dummy_view(name: str, like: SurfaceView) -> SurfaceView:
+    """SL7 -- a camera the robot does not have, as the view `select_target_surface` still requires: the depth image of
+    `like` (the shape) with one valid pixel (the graph's back-projection needs at least one) that the robot mask covers
+    (all pixels masked, so no node), `like`'s `K` / `T_base_cam` and a zero (16, 16) attention map. The pi05_libero
+    right-wrist token block (512..767) is a zero image with its image mask off (`adapters/panda/attention.py`), the
+    same dummy the offline study adapter used (`experiments/segmentation/surface_pilot.py`)."""
+    depth = np.zeros(np.shape(like.depth_m), np.float64)
+    depth[0, 0] = 1.0
+    return SurfaceView(name=name, depth_m=depth, K=np.asarray(like.K, np.float64),
+                       T_base_cam=np.asarray(like.T_base_cam, np.float64),
+                       robot_mask=np.ones(depth.shape, bool), attention=np.zeros((GRID, GRID), np.float32))
+
+
+def pad_missing_views(views: Sequence[SurfaceView]) -> tuple[list[SurfaceView], list[str]]:
+    """SL7 -- `views` in `CAMERA_ORDER`, a camera the request lacks filled by `dummy_view` (shaped like the first real
+    view). Returns ``(views, names of the dummies)``. Nothing to pad (or no real view at all) -> the input list, ``[]``."""
+    views = list(views)
+    have = {v.name: v for v in views}
+    missing = [n for n in CAMERA_ORDER if n not in have]
+    if not missing or not views:
+        return views, []
+    like = views[0]
+    return [have[n] if n in have else dummy_view(n, like) for n in CAMERA_ORDER], missing
+
+
 def attention_vector(views: Sequence[SurfaceView]) -> tuple[Optional[np.ndarray], Optional[str]]:
     """`(768,) float64` in `CAMERA_ORDER` token order, or `(None, why)`."""
     out = []
@@ -338,5 +363,5 @@ def select_target_surface(views: Sequence[SurfaceView], *, cfg=None, class_map=N
                          pixel_nodes=pix if keep_debug else None, solve=res if keep_debug else None)
 
 
-__all__ = ["ARM_RENDER", "ARM_SPHERES", "CAMERA_ORDER", "DEVICES", "SurfaceResult", "SurfaceView", "TAU",
+__all__ = ["ARM_RENDER", "ARM_SPHERES", "CAMERA_ORDER", "DEVICES", "dummy_view", "pad_missing_views", "SurfaceResult", "SurfaceView", "TAU",
            "attention_vector", "graph_config", "select_target_surface"]

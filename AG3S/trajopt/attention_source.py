@@ -180,12 +180,16 @@ class HiddenProbeSource:
         return out
 
 
-def seed_map_source_ok(src: Any) -> bool:
+def seed_map_source_ok(src: Any, extra_labels: Sequence[str] = ()) -> bool:
     """T90 — whether `src` is a seed-map source the attention-surface extent / confidence gate accept: the IFG LOCK's
-    ``noun_target:L10H7`` or the T90 hidden probe (which replaces that map). None → False."""
+    ``noun_target:L10H7`` or the T90 hidden probe (which replaces that map). None → False.
+
+    `extra_labels` (SL7, default ``()`` = the check as before): further labels the caller accepts -- the Panda server
+    passes its own head (``AG3S/adapters/panda/attention.py`` ``PANDA_SEED_MAP_LABELS``); the RB-Y1 server passes none."""
     if src is None:
         return False
-    return src.label == "noun_target:L10H7" or getattr(src, "query", None) == "hidden_probe"
+    return (src.label == "noun_target:L10H7" or getattr(src, "query", None) == "hidden_probe"
+            or src.label in tuple(extra_labels))
 # --- T90 — end
 
 

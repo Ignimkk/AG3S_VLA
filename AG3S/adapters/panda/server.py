@@ -336,26 +336,28 @@ UNPORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'owned_ambiguous', 'owned_tie_voxels', 'owned_unowned', 'palm_cover', 'palm_cover_overflow',
     'palm_shell_overflow', 'profile_substages', 'qp_backend', 'recovery_retreat', 'robot_free_shrink_mm',
     'robot_mask', 'robot_occupied_free', 'roi_pad_mm', 'stem_cap_bottom_fit_frac', 'stem_cap_radius_mm',
-    'stem_cap_top_mm', 'target_extent', 'target_free_coarse', 'target_free_coarse_sign_floor',
+    'stem_cap_top_mm', 'target_free_coarse', 'target_free_coarse_sign_floor',
     'target_free_coarse_support', 'target_layer', 'target_layer_reset_mm', 'target_layer_tol_mm', 'target_stem_cap',
     'task_gate', 'task_gate_shadow', 'task_probe', 'tsdf_frustum_decay', 'tsdf_time_decay', 'wrist_cover_overflow',
 ) + (
-    # main 02fe59e6 merge (2026-11-03, user ruling): every option it adds is refused until its Panda port. To be ported
-    # first (user ruling): attention-surface extent + its checks with the Panda head, GPU surface selection, pre-grasp
-    # hull fill, pass-through when clear, target memory sticky. Refused for good: RB-Y1-trained assets (hsr5, hidden
-    # probe), MuJoCo ground-truth stage, RB-Y1 gripper geometry (grasp set, grasp corridor), dropped / not adopted options.
-    'attention_surface_device', 'grasp_corridor_ahead_mm', 'grasp_corridor_allow', 'grasp_corridor_min_target_points',
+    # main 02fe59e6 merge (2026-11-03, user ruling): every option it adds is refused until its Panda port. SL7 ported the
+    # P0m ones (attention-surface extent + its checks with the Panda head, GPU surface selection, pre-grasp hull fill,
+    # contact allowance, --subtask-from-latch: see PORTED_FINAL_CONFIG_DESTS); still refused: pass-through when clear,
+    # target memory sticky, surface split / crease cut / reattach (dropped or not adopted in P0m). Refused for good:
+    # RB-Y1-trained assets (hsr5, hidden probe), MuJoCo ground-truth stage, RB-Y1 gripper geometry (grasp set, grasp
+    # corridor), dropped / not adopted options.
+    'grasp_corridor_ahead_mm', 'grasp_corridor_allow', 'grasp_corridor_min_target_points',
     'grasp_set_budget_ms', 'grasp_set_field_only', 'grasp_set_full_horizon', 'grasp_set_gate_mm', 'grasp_set_to',
     'grasp_set_track_scale', 'hsr_gt_stage', 'hsr5', 'hsr6_objective_window', 'passthrough_when_clear',
-    'support_surface_offset_mm', 'surface_contact_allowance_mm', 'surface_crease_angle_deg', 'surface_crease_cut',
-    'surface_crease_reattach_ratio', 'surface_crease_voxel_mm', 'surface_grasp_hold', 'surface_hull_fill',
-    'surface_keep_last', 'surface_memory_target_sticky', 'surface_no_ball', 'surface_reattach_hull', 'surface_split',
-    'surface_target_check', 'target_vacancy_delta_mm', 'target_vacancy_min_points', 'target_vacancy_p_empty',
+    'support_surface_offset_mm', 'surface_crease_angle_deg', 'surface_crease_cut',
+    'surface_crease_reattach_ratio', 'surface_crease_voxel_mm',
+    'surface_memory_target_sticky', 'surface_reattach_hull', 'surface_split',
+    'target_vacancy_delta_mm', 'target_vacancy_min_points', 'target_vacancy_p_empty',
     'target_vacancy_p_present', 'target_vacancy_release', 'target_vacancy_samples',
     # main a0b16d0a (T91-T93, 2026-11-03): refused until each STEP's Panda port (development transfer note
-    # BENCHMARK_T90_T93_TRANSFER_20261103_KO.md): phase from the grasp latch (T92), wrist-depth phase machine (T91c),
-    # VLA flow-matching guidance (T93, needs an EE-delta -> IK Jacobian map on the Panda).
-    'subtask_from_latch', 'subtask_from_phase_machine', 'fm_guide', 'fm_guide_scale', 'fm_guide_steps',
+    # BENCHMARK_T90_T93_TRANSFER_20261103_KO.md): wrist-depth phase machine (T91c), VLA flow-matching guidance (T93,
+    # needs an EE-delta -> IK Jacobian map on the Panda). The phase from the grasp latch (T92) is ported (SL7).
+    'subtask_from_phase_machine', 'fm_guide', 'fm_guide_scale', 'fm_guide_steps',
     'fm_guide_max_step_rad', 'fm_guide_sweep',
 )
 #: SL6-A A10 — the final-configuration options this server now applies (A1-A9, A12); listed for the record and the test.
@@ -370,6 +372,10 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     'placed_no_seed_certify', 'roi_carve', 'roi_carve_device', 'roi_carve_footprint', 'roi_carve_footprint_pad_px',
     'roi_carve_footprint_robot', 'split_supersedes_anchor', 'target_exclusion', 'target_permission_strict',
     'to_gpu_seeds', 'to_gpu_seeds_check', 'to_multi_seed', 'wrist_track_scale',
+    # SL7 (P0m, 2026-11-03): attention-surface extent and its post-processing (`--target-extent attention-surface` only,
+    # see check_unported_flags), GPU surface selection, hull fill, contact allowance, the gate label from the latch (T92)
+    'attention_surface_device', 'subtask_from_latch', 'surface_contact_allowance_mm', 'surface_grasp_hold',
+    'surface_hull_fill', 'surface_keep_last', 'surface_no_ball', 'surface_target_check', 'target_extent',
 )
 
 
@@ -395,6 +401,11 @@ def check_unported_flags(args, ap) -> None:
     elif ss.hsr6_flags_from_args(args) is not None and not getattr(args, "hsr6_probe", None):
         message = ("--robot panda: --hsr6-* needs --hsr6-probe FILE (the Panda probe, SL6-B B4); the default probe is "
                    "the RB-Y1 one (kv_L4 of another policy and robot)")
+    elif getattr(args, "target_extent", None) not in (None, "estimated", "attention-surface"):
+        # SL7: the extent flag itself is ported, but only the attention-surface one (oracle-visible reads the client's
+        # GT segmentation, the hybrid needs the RB-Y1 ball-owned split protection and a rendered-robot mask)
+        message = (f"--robot panda: --target-extent {args.target_extent} is not ported (SL7 ported attention-surface "
+                   "only; oracle-visible needs the client's GT segmentation, attention-surface-hybrid is RB-Y1's)")
     elif _hidden_probe_source(args):
         # main 02fe59e6 merge: the hidden-probe target map is a probe trained on RB-Y1 16D hidden states (3 cameras)
         message = ("--robot panda: --attention-source hidden_probe is an RB-Y1-trained probe (not ported; needs a "
@@ -457,13 +468,17 @@ def recorder_meta(args, to_config, *, conversion: str, ag3s_info: dict) -> dict:
             **({"finger_cover": ss.finger_cover_options(args)} if ss.finger_cover_options(args) else {}),
             **({"self_filter": ss.self_filter_options(args)} if ss.self_filter_options(args) else {}),
             "subtask": {"gate": bool(args.subtask_gate), "probe": None,
-                        # SL6-A A11 — key only when on (as the RB-Y1 meta); inert on the Panda (no `home` label)
-                        **({"placed_no_seed_certify": True, "placed_no_seed_certify_inert_on_panda": True}
+                        **ss.subtask_from_latch_record_meta(args),   # SL7 (T92) — only when on
+                        # SL6-A A11 — key only when on (as the RB-Y1 meta); inert on the Panda (no `home` label) unless
+                        # the gate label comes from the latch (SL7: PLACED -> `home`, the rule can fire)
+                        **({"placed_no_seed_certify": True,
+                            **({} if ss.subtask_from_latch_on(args) else {"placed_no_seed_certify_inert_on_panda": True})}
                            if getattr(args, "placed_no_seed_certify", False) else {})},
             # SL6-A — the RB-Y1 meta keys of the final configuration, only when on (V11AB / pb meta unchanged)
             **({"palm_shell": ss.palm_shell_options(args)} if ss.palm_shell_options(args) else {}),
             **ss.t57a_record_meta(args),
             **ss.hsr6_record_meta(args),
+            **ss.ifg_cl1_record_meta(args),   # SL7 — attention-surface extent flags, only the ones on
             # --- Panda (SL5j) ---
             "robot": "panda", "robot_urdf": str(pm.PANDA_URDF),
             "ag3s_version": profile.match_ag3s_version(args),
@@ -666,7 +681,8 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     # SL6-A — SafePolicy's Panda geometry + the HSR6 arguments only with a final-configuration option on: a V11AB / pb
     # server constructs SafePolicy with exactly the pre-SL6 arguments (tests/benchmark/test_panda_sl5j_recorder.py).
     final_kw = ({**safe_policy_injections(), **({"hsr6": hsr6} if hsr6 is not None else {}),
-                 **({"hsr6_objective_scope": scope} if scope != "all" else {})}
+                 **({"hsr6_objective_scope": scope} if scope != "all" else {}),
+                 **ss.subtask_from_latch_kwargs(args)}   # SL7 (T92): {} unless --subtask-from-latch
                 if final_options_on(args) else {})
     safe = SafePolicy(chunk_policy, ag3s=ag3s, to_config=to_config, attention_fn=attention_fn, latch=panda_latch_config(),
                       grasp_links=dict(profile.PANDA_GRASP_LINKS), hold_links=dict(profile.PANDA_HOLD_LINKS),
@@ -677,7 +693,9 @@ def build_safe_server(policy, args, *, attention_model=None, gpu_warm_up: bool =
     grasp_contact = ss.apply_grasp_contact_flags(safe, args)  # V11AB-pb4 / pb5 (all off = V11AB)
     gpu = gpu_seeds_setup(safe, to_config, warm_up=gpu_warm_up)
     inert = []
-    if getattr(args, "placed_no_seed_certify", False):
+    ss.announce_subtask_from_latch(args)   # SL7 (T92): one start line when on
+    if getattr(args, "placed_no_seed_certify", False) and not ss.subtask_from_latch_on(args):
+        # with --subtask-from-latch the gate label has `home` (latch PLACED), so the rule is not inert (SL7)
         inert.append({"flag": "--placed-no-seed-certify", "why": PLACED_NO_SEED_INERT})
         logging.warning("!!! %s !!!", PLACED_NO_SEED_INERT)
     info = {"ag3s": ag3s_info, "horizon": PANDA_HORIZON, "grasp_contact": grasp_contact, "conversion_mode": {"mode": mode, "name": pa.CONVERSION_MODES[mode]},
@@ -715,6 +733,40 @@ def final_options_on(args) -> list[str]:
     parser = ss.build_parser()
     return sorted(d for d in PORTED_FINAL_CONFIG_DESTS + ("hsr6_objective_scope",)
                   if getattr(args, d, None) != parser.get_default(d))
+
+
+def surface_record(args, ag3s) -> dict:
+    """SL7 -- what the Panda applies of the P0 target extent (attention-surface): the AG3S config keys, the camera
+    handling (head + left_wrist real, right_wrist a dummy), the robot mask (FK spheres) and the hull-fill palm point."""
+    from AG3S.ag3s import config as ag3s_config
+    from AG3S.ag3s.runtime import attention_surface as asurf
+
+    e = ag3s.config.esdf
+    return {"target_extent": e.target_extent, "seed_map": getattr(args, "attention_source", None),
+            "surface_target_check": e.surface_target_check, "surface_keep_last": bool(e.surface_keep_last),
+            "surface_grasp_hold": bool(e.surface_grasp_hold), "surface_no_ball": bool(e.surface_no_ball),
+            "surface_hull_fill": bool(e.surface_hull_fill), "surface_hull_fill_palm_mm": float(e.surface_hull_fill_palm_mm),
+            "surface_contact_allowance_mm": e.surface_contact_allowance_mm,
+            "device_requested": getattr(args, "attention_surface_device", None),
+            "device_in_effect": ag3s_config.ATTENTION_SURFACE_DEVICE,
+            "camera_order": list(asurf.CAMERA_ORDER), "real_cameras": list(ATTENTION_CAMERAS),
+            "dummy_cameras": [n for n in asurf.CAMERA_ORDER if n not in ATTENTION_CAMERAS],
+            "pad_missing_cameras": bool(ag3s.surface_pad_missing_cameras),
+            "robot_mask": e.robot_mask, "arm": asurf.ARM_SPHERES if e.robot_mask != "render" else asurf.ARM_RENDER,
+            "hull_fill_palm_point": "mean of the grasping gripper's finger-link constraint spheres "
+                                    "(pipeline._grasp_palm_points; the A6 hold site is not used here)"}
+
+
+def subtask_latch_record(safe) -> dict:
+    """SL7 -- the 3-stage gate label comes from the grasp latch (T92): searching / latched / closing -> pick, held ->
+    place, placed -> home; the gate (``clustering.subtask_gate``) and its debounce as the config has them."""
+    from AG3S.trajopt.safe_policy import LATCH_SUBTASK
+
+    c = safe.ag3s.config.clustering
+    return {"source": "latch", "subtask_gate": bool(c.subtask_gate), "confirm_frames": c.subtask_confirm_frames,
+            "target_confirm_frames": c.target_confirm_frames,
+            "label_of_phase": {getattr(k, "value", str(k)): v for k, v in LATCH_SUBTASK.items()},
+            "kv_L4_v1_probe": None}
 
 
 def final_config_record(args, safe, to_config, attn_rec: dict, gpu: Optional[dict], inert: list) -> dict:
@@ -770,6 +822,10 @@ def final_config_record(args, safe, to_config, attn_rec: dict, gpu: Optional[dic
             "geo_continuity_off": bool(getattr(to_config.cost, "geo_continuity_off", False))},
         "grasp_anchor": None if float(getattr(to_config.cost, "w_grasp_goal", 0.0) or 0.0) <= 0.0 else {
             "w_grasp_goal": float(to_config.cost.w_grasp_goal), "gripper_column": int(pa.GRIPPER_COLUMN)},
+        # SL7 (P0m) — keys only with the option on (the earlier versions' dump is unchanged)
+        **({"attention_surface": surface_record(args, safe.ag3s)} if getattr(args, "target_extent", None) == "attention-surface"
+           else {}),
+        **({"subtask_from_latch": subtask_latch_record(safe)} if ss.subtask_from_latch_on(args) else {}),
         "inert_on_panda": inert,
         "request_count_rules_unchanged": "hold_follow_to / geo_close_timeout / geo_carry_requests / HSR6 raw argmax are "
                                          "request counts; Panda requests are 0.25 s apart (RB-Y1 0.53 s)",

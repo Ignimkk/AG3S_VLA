@@ -70,6 +70,7 @@ from typing import Any, Mapping, Optional, Sequence
 import numpy as np
 
 from AG3S.adapters.panda import model as pm
+from common.workspace import shared_storage_root
 
 PROJECT_ROOT = pm.PROJECT_ROOT
 V11AB_SCRIPT_DIR = PROJECT_ROOT / "scripts/benchmark/v11ab"
@@ -329,17 +330,62 @@ AG3S_VERSIONS["AG3S-final-panda-v2"] = FINAL_CONFIG_V2_FLAGS                 # "
 AG3S_VERSIONS["AG3S-final-panda-v3"] = FINAL_CONFIG_V3_FLAGS                 # "3판" (SL6-E)
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to"] = FINAL_CONFIG_V3_E0TO_FLAGS       # "3판 + TO E0" (SL6-F)
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS  # "E0판 + placement 접촉 허용" (SL6-H)
+# --- SL7: the development final configuration "P0m" on the Panda (task SL7, user ruling 2026-11-03) --------------------
+#: Development's final configuration P0m (``P0_FINAL_CONFIG_FOR_BENCHMARK_20261103_KO.md``) = P0 target extent from the
+#: ATS surface extraction + the grasp latch as the 3-stage gate label (T92). On the Panda it is built from the
+#: final-configuration flags (:data:`FINAL_CONFIG_FLAGS`) by *removing* what P0m does not use and *adding* the P0 flags:
+#:   removed  HSR6 rules ``--hsr6-attach-assist --hsr6-held-gate --hsr6-target-exempt --hsr6-objective
+#:            --hsr6-objective-scope nbc`` (no ``--hsr6-probe`` either), ``--nontarget-evidence surface`` (the surface
+#:            extraction replaces it), TrajOpt multi-seed ``--to-multi-seed 16 --to-gpu-seeds curobo
+#:            --to-gpu-seeds-check first-pass`` (E0), and (D1, user 2026-11-03) ``--neighbour-contact-mm 20`` /
+#:            ``--neighbour-palm-contact-mm 10`` (finger / palm neighbour allowance);
+#:   added    ``--target-extent attention-surface --surface-target-check overlap --surface-keep-last
+#:            --surface-grasp-hold --surface-no-ball --attention-surface-device cuda`` (+ ``--surface-hull-fill
+#:            --surface-contact-allowance-mm 10`` in :data:`P0M_FLAGS`), ``--subtask-from-latch``.
+#: Everything else is the Panda final version's value (finger cover, palm shell 5 mm, ROI carve, obstacle margin, wrist
+#: tracking 0.1, after-grasp continuity / deflection-rate, hold-follow ...): task SL7 0.6, a change of those is a user
+#: ruling. The attention head stays the Panda head ``noun_target:L8H6`` (SL7 0.2).
+P0M_REMOVED_FLAGS: dict[str, int] = {      # flag -> number of value tokens
+    "--hsr6-attach-assist": 0, "--hsr6-held-gate": 0, "--hsr6-target-exempt": 0, "--hsr6-objective": 0,
+    "--hsr6-objective-scope": 1, "--nontarget-evidence": 1, "--to-multi-seed": 1, "--to-gpu-seeds": 1,
+    "--to-gpu-seeds-check": 1, "--neighbour-contact-mm": 1, "--neighbour-palm-contact-mm": 1}
+#: P0 target extent: ATS surface extraction on the GPU, no ball (T78 / T78b / T78f of development).
+P0M_SURFACE_FLAGS: tuple[str, ...] = (
+    "--target-extent", "attention-surface", "--surface-target-check", "overlap", "--surface-keep-last",
+    "--surface-grasp-hold", "--surface-no-ball", "--attention-surface-device", "cuda")
+#: pre-grasp hull fill + the 10 mm target contact allowance of the hand layer (development P0m; the "nohull" version
+#: leaves them out -- development T92b).
+P0M_HULL_FLAGS: tuple[str, ...] = ("--surface-hull-fill", "--surface-contact-allowance-mm", "10")
+#: the 3-stage gate label from the grasp latch (T92); the kv_L4_v1 probe does not exist on the Panda.
+P0M_SUBTASK_FLAGS: tuple[str, ...] = ("--subtask-from-latch",)
+P0M_FLAGS: tuple[str, ...] = (_drop_flags(FINAL_CONFIG_FLAGS, P0M_REMOVED_FLAGS) + P0M_SURFACE_FLAGS + P0M_HULL_FLAGS
+                              + P0M_SUBTASK_FLAGS)
+P0M_NOHULL_FLAGS: tuple[str, ...] = (_drop_flags(FINAL_CONFIG_FLAGS, P0M_REMOVED_FLAGS) + P0M_SURFACE_FLAGS
+                                     + P0M_SUBTASK_FLAGS)
+#: the D1 control: P0m + the neighbour allowances that D1 switched off (development MuJoCo demo profile before D1;
+#: measures what the D1 switch-off costs on LIBERO).
+P0M_NBC_FLAGS: tuple[str, ...] = P0M_FLAGS + ("--neighbour-contact-mm", "20", "--neighbour-palm-contact-mm", "10")
+#: P0m versions: final-configuration base argv (no ``V11AB_PRE_MERGE_DEFAULTS``), **no** HSR6 probe.
+P0M_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-p0m", "AG3S-final-panda-p0m-nohull", "AG3S-final-panda-p0m-nbc")
+AG3S_VERSIONS["AG3S-final-panda-p0m"] = P0M_FLAGS                       # P0m (hull fill + contact allowance 10 mm)
+AG3S_VERSIONS["AG3S-final-panda-p0m-nohull"] = P0M_NOHULL_FLAGS         # P0m without hull fill / allowance (T92b control)
+AG3S_VERSIONS["AG3S-final-panda-p0m-nbc"] = P0M_NBC_FLAGS               # P0m + neighbour allowances (D1 control)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
-PANDA_HSR6_PROBE = ("/mnt/dev/AG3S_VLA-storage/results/benchmark/20261029T192223_5ea56af44722_sl6b-hsr6-panda-labels/"
-                    "probe/hsr6_panda_kv_L4.npz")
+#: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling
+#: ``AG3S_VLA-storage`` -- ``common.workspace.shared_storage_root``), not at a fixed path; with the default root the
+#: string is the one the earlier versions recorded.
+PANDA_HSR6_PROBE_REL = ("results/benchmark/20261029T192223_5ea56af44722_sl6b-hsr6-panda-labels/"
+                        "probe/hsr6_panda_kv_L4.npz")
+PANDA_HSR6_PROBE = str(shared_storage_root() / PANDA_HSR6_PROBE_REL)
 PANDA_HSR6_PROBE_SHA256 = "e2bdd1290f5770ce16ad0235ff261a1d343757e37a321047708cd85ded498029"
 #: Options a final version takes per run (not part of the version's identity in :func:`match_ag3s_version`).
 FINAL_RUN_PARAMETERS: tuple[str, ...] = ("hsr6_probe", "attention_source")
 
 
 def is_final_version(version: str) -> bool:
-    return str(version) in FINAL_CONFIG_VERSIONS
+    """A version on the final-configuration base argv: the SL6 final versions and (SL7) the P0m versions."""
+    return str(version) in FINAL_CONFIG_VERSIONS or str(version) in P0M_VERSIONS
 
 
 def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
@@ -352,6 +398,12 @@ def version_server_flags(version: str, *, hsr6_probe: Optional[str] = None,
     if not is_final_version(version):
         if hsr6_probe is not None or attention_source is not None:
             raise ValueError(f"{version}: --hsr6-probe / --attention-source apply to {list(FINAL_CONFIG_VERSIONS)} only")
+        return flags
+    if version in P0M_VERSIONS:      # SL7: no HSR6 rule -> no probe (a probe given is a mistake, not ignored)
+        if hsr6_probe is not None:
+            raise ValueError(f"{version}: the P0m versions use no HSR6 rule, so --hsr6-probe has nothing to feed")
+        if attention_source is not None:
+            flags[flags.index("--attention-source") + 1] = str(attention_source)
         return flags
     hsr6_probe = PANDA_HSR6_PROBE if hsr6_probe is None else hsr6_probe
     if not hsr6_probe:
@@ -387,6 +439,7 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     family = [n for n in AG3S_VERSIONS if not is_final_version(n)]
     dests = _version_dests(family)
     final = [d for d in _version_dests(FINAL_CONFIG_VERSIONS) if d not in set(dests)]
+    p0m = [d for d in _version_dests(P0M_VERSIONS) if d not in set(dests) | set(final)]   # SL7: P0m-only options
     parser = ss.build_parser()
     actions = parser._option_string_actions
     pinned = {actions[t].dest for t in V11AB_PRE_MERGE_DEFAULTS if t.startswith("--")}   # set on every V11AB argv
@@ -395,6 +448,10 @@ def version_flag_values(args: argparse.Namespace) -> dict[str, Any]:
     pinned |= {actions[t].dest for t in v11ab_server_argv(pre_merge=False) if t in actions}
     if any(getattr(args, d, None) != parser.get_default(d) for d in final if d not in pinned):
         dests = sorted(set(dests) | set(final))
+    # SL7: the P0m-only options (surface extent, latch gate label) join only when one is set -- every earlier version's
+    # record keeps exactly the keys it had
+    if any(getattr(args, d, None) != parser.get_default(d) for d in p0m):
+        dests = sorted(set(dests) | set(final) | set(p0m))
     return {d: _jsonable(getattr(args, d, None)) for d in dests}
 
 
@@ -438,9 +495,12 @@ def parse_v11ab_args(arm: str = V11AB_ARM, argv: Optional[Sequence[str]] = None)
     """serve_safe's parser + its own flag checks + its subtask-gate resolution, as ``main`` runs them."""
     from AG3S.trajopt import serve_safe as ss
 
+    from AG3S.adapters.panda.attention import PANDA_SEED_MAP_LABELS
+
     ap = ss.build_parser()
     args = ap.parse_args(list(argv) if argv is not None else v11ab_server_argv(arm))
-    ss.reject_bad_flag_combinations(ap, args)
+    # SL7: this is the Panda profile -- the attention-surface extent takes the Panda head (L8H6) as its seed map
+    ss.reject_bad_flag_combinations(ap, args, seed_map_labels=PANDA_SEED_MAP_LABELS)
     ss.resolve_subtask_gate(args)
     return args
 
@@ -710,6 +770,10 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
         ag3s.held_free_observed_pad = float(kw["held_free_observed_pad"])
     if kw.get("reach_at_capture"):
         ag3s.reach_at_capture = True
+    if getattr(ag3s.config.esdf, "target_extent", "estimated") == "attention_surface":
+        # SL7 -- the surface selection needs head / left_wrist / right_wrist views; the Panda has no right wrist
+        # (pi05_libero's third image is a masked zero image), so that view is a dummy (attention_surface.dummy_view).
+        ag3s.surface_pad_missing_cameras = True
     info = {"esdf_bounds": esdf_bounds, "extra_overrides": _jsonable(dict(extra_overrides or {})),
             "n_self_filter_spheres": int(models.self_filter.n_spheres),
             "n_constraint_spheres": int(models.constraint.n_spheres),
@@ -722,6 +786,8 @@ def build_panda_ag3s(*, esdf_bounds: str = "panda", extra_overrides: Optional[Ma
     # SL6-A — keys only when on (the V11AB / pb panda_server_config.json is unchanged)
     if target_exclusion:
         info["target_exclusion"] = _jsonable(target_exclusion)
+    if ag3s.surface_pad_missing_cameras:   # SL7 -- key only with the attention-surface extent
+        info["surface_pad_missing_cameras"] = True
     if getattr(models.constraint, "palm_shell_report", None) is not None:
         info["palm_shell"] = _jsonable(models.constraint.palm_shell_report)
     return ag3s, info
@@ -762,6 +828,7 @@ __all__ = [
     "panda_esdf_bounds", "panda_overrides", "parse_v11ab_args", "ta_flags", "v11ab_ag3s_config", "v11ab_build_call_source",
     "v11ab_build_kwargs", "v11ab_client_phase", "v11ab_config_dict", "v11ab_required_args", "v11ab_server_argv",
     "v11ab_server_flags", "match_ag3s_version", "version_flag_values",
-    "FINAL_CONFIG_FLAGS", "FINAL_CONFIG_VERSIONS", "G1A4_FLAGS", "PANDA_HSR6_PROBE", "PANDA_HSR6_PROBE_SHA256", "is_final_version", "version_server_argv",
+    "FINAL_CONFIG_FLAGS", "FINAL_CONFIG_VERSIONS", "G1A4_FLAGS", "P0M_FLAGS", "P0M_NBC_FLAGS", "P0M_NOHULL_FLAGS",
+    "P0M_VERSIONS", "PANDA_HSR6_PROBE", "PANDA_HSR6_PROBE_REL", "PANDA_HSR6_PROBE_SHA256", "is_final_version", "version_server_argv",
     "version_server_flags",
 ]

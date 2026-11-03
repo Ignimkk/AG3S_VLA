@@ -291,6 +291,12 @@ class AG3S:
         #: geometry was captured at (the same ``_snapshot_state`` the held snapshot already uses, T32 H2),
         #: and that frame's state is kept in ``_state_by_frame`` as long as it is the last-seen one.
         self.reach_at_capture: bool = False
+        #: SL7 (benchmark branch, 2026-11-03) -- the attention-surface selection needs the three views of
+        #: `attention_surface.CAMERA_ORDER` (head, left_wrist, right_wrist). ``False`` (default) = the views of the
+        #: cameras the request has (a robot with two cameras abstains, `missing_camera`). ``True`` = a missing camera is
+        #: filled with `attention_surface.dummy_view` (the pi05_libero right-wrist token block is a zero image with its
+        #: image mask off: no depth, zero attention). Set by `AG3S/adapters/panda/profile.build_panda_ag3s`.
+        self.surface_pad_missing_cameras: bool = False
         # T46g — begin
         #: SL5b: the robot state at the last grounding frame that observed the manipulated object
         #: (`last_seen_frame`) — `{"frame", "id", "centroid", "state"}` or None. Kept apart
@@ -996,7 +1002,7 @@ class AG3S:
         that is not the ATS target `ats_points` (the manipulated geometry the caller passes), A3 carves (does not fold)
         the memory on a request without an accepted region. The record is `self._surface_frame["t78"]`."""
         from AG3S.ag3s.runtime.attention_surface import (
-            ARM_RENDER, ARM_SPHERES, CAMERA_ORDER, SurfaceView, select_target_surface)
+            ARM_RENDER, ARM_SPHERES, CAMERA_ORDER, SurfaceView, pad_missing_views, select_target_surface)
 
         if self._t78_on():
             return self._attention_surface_update_t78(observations, cameras, sphere_masks, render_masks, ats_points)
@@ -1023,6 +1029,9 @@ class AG3S:
                                      T_base_cam=np.asarray(cam.T_base_cam, np.float64),
                                      robot_mask=np.asarray(mk, bool),
                                      attention=getattr(obs, "attention_map", None)))
+        if self.surface_pad_missing_cameras:   # SL7 (off: the views as they are)
+            views, padded = pad_missing_views(views)
+            mask_src.update({name: "dummy" for name in padded})
         res = select_target_surface(views, arm=ARM_RENDER if render_on else ARM_SPHERES,
                                     device=_ag3s_config.ATTENTION_SURFACE_DEVICE,   # T78 B
                                     **self._surface_crease_kwargs())   # T78d (off: no kwarg, the T78 B call)
@@ -1041,7 +1050,7 @@ class AG3S:
     # --- T78 갈래 A: attention-surface region post-processing (`esdf.surface_*`) ------------------------------
     def _surface_views(self, observations, cameras, sphere_masks, render_masks):
         """The `SurfaceView`s (`CAMERA_ORDER`) and robot-mask sources of `_attention_surface_update` (same rule)."""
-        from AG3S.ag3s.runtime.attention_surface import CAMERA_ORDER, SurfaceView
+        from AG3S.ag3s.runtime.attention_surface import CAMERA_ORDER, SurfaceView, pad_missing_views
 
         render_on = getattr(self.config.esdf, "robot_mask", "spheres") == "render"
         obs_by = {}
@@ -1066,6 +1075,9 @@ class AG3S:
                                      T_base_cam=np.asarray(cam.T_base_cam, np.float64),
                                      robot_mask=np.asarray(mk, bool),
                                      attention=getattr(obs, "attention_map", None)))
+        if self.surface_pad_missing_cameras:   # SL7 (off: the views as they are)
+            views, padded = pad_missing_views(views)
+            mask_src.update({name: "dummy" for name in padded})
         return views, mask_src, render_on
 
     def _oracle_carve(self, observations) -> dict[str, Any]:

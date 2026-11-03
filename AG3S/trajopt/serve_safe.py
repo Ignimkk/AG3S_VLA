@@ -3445,11 +3445,26 @@ def announce_hsr5(args, t57a: dict) -> None:
         flags.names() if flags is not None else "[] (no --hsr6-* flag)")
 
 
-def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
+def panda_seed_map_labels(args) -> tuple[str, ...]:
+    """SL7 — the extra seed-map heads this server accepts for `--target-extent attention-surface`: the Panda head
+    (`AG3S.adapters.panda.attention.PANDA_SEED_MAP_LABELS`) on `--robot panda`, none (= `noun_target:L10H7` only) otherwise."""
+    if getattr(args, "robot", "rby1") != "panda":
+        return ()
+    from AG3S.adapters.panda.attention import PANDA_SEED_MAP_LABELS
+
+    return tuple(PANDA_SEED_MAP_LABELS)
+
+
+def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_labels=None) -> None:
     """안전 계층을 끈 채 그 계층의 flag 를 준 조합을 시작할 때 막는다.
 
     아무 일도 안 하는 flag 를 받아 놓고 뜨면, 로그를 읽는 사람은 그것이 효과가 있었다고 믿는다.
+
+    `seed_map_labels` (SL7): `--target-extent attention-surface` 가 받는 seed 지도의 추가 head. None (기본) = `--robot` 에서
+    정한다 (`panda_seed_map_labels`: panda 는 Panda head, rby1 은 없음 = L10H7 만).
     """
+    if seed_map_labels is None:
+        seed_map_labels = panda_seed_map_labels(args)
     reject_ifg_s2serve_flags(ap, args)   # IFG-S2SERVE
     if getattr(args, "reach_at_capture", False) and getattr(args, "latch_reach_hand_relative", False):
         # V11AB-pb1 (benchmark) and T46g (development) are two separate fixes of the same SL5b reach failure;
@@ -3615,10 +3630,11 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
         # --- T90 — begin: the hidden probe replaces the seed map (`seed_map_source_ok`)
         from AG3S.trajopt.attention_source import seed_map_source_ok
 
-        if not seed_map_source_ok(src):
+        if not seed_map_source_ok(src, seed_map_labels):
         # --- T90 — end
             ap.error(f"--target-extent {extent} 는 IFG LOCK 의 seed 지도 (noun L10H7) 로 고정된 방법입니다 — "
-                     f"--attention-source noun_target:L10H7 와 함께 주십시오 (받은 값 {spec!r})")
+                     f"--attention-source noun_target:L10H7 와 함께 주십시오 (받은 값 {spec!r})"
+                     + (f" (--robot panda: {', '.join(seed_map_labels)} 도 받습니다)" if seed_map_labels else ""))
         if args.no_attention:
             ap.error(f"--target-extent {extent} 는 attention 이 필요합니다 (--no-attention 과 함께 줄 수 없습니다)")
     if getattr(args, "robot_mask", None) == "render" and (args.no_safe or getattr(args, "no_perception", False)):
