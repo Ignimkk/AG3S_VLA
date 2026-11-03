@@ -391,7 +391,8 @@ P0M_BALL_FLAGS: tuple[str, ...] = (_drop_flags(FINAL_CONFIG_FLAGS, {k: n for k, 
 P0M_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-p0m", "AG3S-final-panda-p0m-nohull", "AG3S-final-panda-p0m-nbc",
                                  "AG3S-final-panda-p0m-termsoff", "AG3S-final-panda-p0m-pandafix",
                                  "AG3S-final-panda-p0m-termsoff-pass", "AG3S-final-panda-p0m-pandafix-pass",
-                                 "AG3S-final-panda-p0m-ball", "AG3S-final-panda-p0m-l8h2")
+                                 "AG3S-final-panda-p0m-ball", "AG3S-final-panda-p0m-l8h2",
+                                 "AG3S-final-panda-p0m-gate")
 AG3S_VERSIONS["AG3S-final-panda-p0m"] = P0M_FLAGS                       # P0m (hull fill + contact allowance 10 mm)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nohull"] = P0M_NOHULL_FLAGS         # P0m without hull fill / allowance (T92b control)
 AG3S_VERSIONS["AG3S-final-panda-p0m-nbc"] = P0M_NBC_FLAGS               # P0m + neighbour allowances (D1 control)
@@ -406,6 +407,7 @@ _i = P0M_FLAGS.index("--attention-source")
 P0M_L8H2_FLAGS: tuple[str, ...] = P0M_FLAGS[:_i + 1] + ("action:last:L8H2",) + P0M_FLAGS[_i + 2:]
 del _i
 AG3S_VERSIONS["AG3S-final-panda-p0m-l8h2"] = P0M_L8H2_FLAGS               # SL7d (가)
+AG3S_VERSIONS["AG3S-final-panda-p0m-gate"] = P0M_FLAGS + ("--surface-seed-ats-gate",)   # SL7f offline (L8H6 rows)
 #: (나) pc판 + the latch label as the 3-stage gate label (T92); HSR6 rules and probe unchanged.
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-latch"] = FINAL_CONFIG_V3_E0TO_PC_FLAGS + P0M_SUBTASK_FLAGS   # SL7d (나)
 #: final-configuration base argv + the HSR6 probe like :data:`FINAL_CONFIG_VERSIONS` (kept apart so that list stays the SL6 one)
@@ -428,6 +430,11 @@ AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface"] = PC_SURFACE_FLAGS     # SL
 AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-nohsr6"] = PC_NOHSR6_FLAGS       # SL7e (A) diagnostic
 PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-surface",)   # probe-taking pc variants
 PC_NOPROBE_VERSIONS: tuple[str, ...] = ("AG3S-final-panda-v3-e0to-pc-nohsr6",)
+#: SL7f (lead self-ruling D4, 2026-11-04): the surface seed map kept on the ATS target's patches (`--surface-seed-ats-gate`)
+#: -- on pc-surface (candidate) and on P0m (offline SafeLIBERO replay with the stored L8H6 rows).
+SEED_GATE_FLAGS: tuple[str, ...] = ("--surface-seed-ats-gate",)
+AG3S_VERSIONS["AG3S-final-panda-v3-e0to-pc-surface-gate"] = PC_SURFACE_FLAGS + SEED_GATE_FLAGS   # SL7f candidate
+PC_LATCH_VERSIONS = PC_LATCH_VERSIONS + ("AG3S-final-panda-v3-e0to-pc-surface-gate",)
 #: SL6-B B4 — the Panda HSR6 probe (5 classes, no retreat; labels approved by the user 2026-10-29), the default
 #: ``--hsr6-probe`` of the final versions, and its SHA-256 (recorded by the server, checked by the test when present).
 #: SL7 (0.7): found under the shared storage root (``AG3S_STORAGE_ROOT``, default the checkout's sibling

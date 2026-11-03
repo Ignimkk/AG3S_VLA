@@ -1,5 +1,5 @@
 {
- "_doc": "Keys the AG3S final-configuration merge (main 3ff415d5, 2026-10-29) added to the serve_safe surface, with their value at the merge (bare argv = parser defaults; v11ab = V11AB argv incl. profile.V11AB_PRE_MERGE_DEFAULTS). _sl5a_golden drops a key only while it has exactly this value. Merge of development main a0b16d0a (02fe59e6 + T67-T93, 2026-11-03) added 41 more namespace keys at their parser default (values as recorded at that merge).",
+ "_doc": "Keys the AG3S final-configuration merge (main 3ff415d5, 2026-10-29) added to the serve_safe surface, with their value at the merge (bare argv = parser defaults; v11ab = V11AB argv incl. profile.V11AB_PRE_MERGE_DEFAULTS). _sl5a_golden drops a key only while it has exactly this value. Merge of development main a0b16d0a (02fe59e6 + T67-T93, 2026-11-03) added 41 more namespace keys at their parser default (values as recorded at that merge). SL7f (benchmark, 2026-11-04) added surface_seed_ats_gate (default False).",
  "bare": {
   "build_call_added": {
    "**14": "{'palm_shell': palm_shell_options(args)} if palm_shell_options(args) else {}",
@@ -136,6 +136,7 @@
    "surface_memory_target_sticky": false,
    "surface_no_ball": false,
    "surface_reattach_hull": null,
+   "surface_seed_ats_gate": false,
    "surface_split": false,
    "surface_target_check": null,
    "target_exclusion": "ball",
@@ -370,6 +371,7 @@
    "surface_memory_target_sticky": false,
    "surface_no_ball": false,
    "surface_reattach_hull": null,
+   "surface_seed_ats_gate": false,
    "surface_split": false,
    "surface_target_check": null,
    "target_exclusion": "ball",

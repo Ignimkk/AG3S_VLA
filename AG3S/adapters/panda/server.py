@@ -379,6 +379,9 @@ PORTED_FINAL_CONFIG_DESTS: tuple[str, ...] = (
     # SL7b (user ruling 2026-11-04): pass-through when the VLA reference is clear (T88) -- applied through
     # serve_safe.trajopt_config_from_args (sqp.passthrough_when_clear), which this server already calls
     'passthrough_when_clear',
+    # SL7f (lead self-ruling 2026-11-04, user autonomous window): ATS gate of the surface seed map (esdf key via
+    # serve_safe.target_exclusion_section, like the other surface flags)
+    'surface_seed_ats_gate',
 )
 
 

@@ -302,3 +302,46 @@ def extent_record(region: Region) -> dict:
 __all__ = ["OVERLAP_MIN_FRACTION", "OVERLAP_RADIUS", "Region", "convex_hull", "extent_record", "hull_offset_distance",
            "pixel_points", "reattach_components", "region_from_codes", "restrict_codes", "split_region", "subset",
            "target_check"]
+
+
+# --- SL7f — begin: ATS gate of the surface seed map (`esdf.surface_seed_ats_gate`, default off)
+def ats_gate_views(views: Sequence[Any], ats_points: Optional[np.ndarray], *, grid: int = 16) -> tuple[list, dict]:
+    """SL7f — the views with each camera's attention map kept only on the patches the ATS target points project into
+    (OpenCV pinhole `K`, `T_base_cam` camera → base; a (grid, grid) patch of an (H, W) image is (H/grid, W/grid) px),
+    zero elsewhere. The surface selection then seeds only inside the ATS target. A view without attention, or none of
+    whose patches the points reach, is left as it is. No ATS points → every view as it is (`why = "no_ats_points"`)."""
+    pts = None if ats_points is None else np.asarray(ats_points, np.float64).reshape(-1, 3)
+    rec: dict = {"applied": False, "n_ats_points": 0 if pts is None else int(len(pts)), "cameras": {}}
+    if pts is None or not len(pts):
+        rec["why"] = "no_ats_points"
+        return list(views), rec
+    out = []
+    for v in views:
+        att = getattr(v, "attention", None)
+        if att is None or not np.any(np.asarray(att) > 0):
+            out.append(v)
+            continue
+        h, w = np.shape(v.depth_m)
+        Tc = np.linalg.inv(np.asarray(v.T_base_cam, np.float64))
+        pc = pts @ Tc[:3, :3].T + Tc[:3, 3]
+        front = pc[:, 2] > 1e-6
+        K = np.asarray(v.K, np.float64)
+        uv = pc[front, :2] / pc[front, 2:3] @ K[:2, :2].T + K[:2, 2]
+        inside = (uv[:, 0] >= 0) & (uv[:, 0] < w) & (uv[:, 1] >= 0) & (uv[:, 1] < h)
+        uv = uv[inside]
+        mask = np.zeros((grid, grid), bool)
+        if len(uv):
+            r = np.minimum((uv[:, 1] * grid / h).astype(int), grid - 1)
+            c = np.minimum((uv[:, 0] * grid / w).astype(int), grid - 1)
+            mask[r, c] = True
+        a = np.asarray(att, np.float64).reshape(grid, grid)
+        kept = float(a[mask].sum() / max(a.sum(), 1e-12))
+        rec["cameras"][v.name] = {"n_points_in_view": int(len(uv)), "n_patches": int(mask.sum()),
+                                  "attention_mass_kept": round(kept, 4)}
+        if not mask.any():
+            out.append(v)
+            continue
+        out.append(dataclasses.replace(v, attention=np.where(mask, a, 0.0).astype(np.float32).reshape(np.shape(att))))
+        rec["applied"] = True
+    return out, rec
+# --- SL7f — end

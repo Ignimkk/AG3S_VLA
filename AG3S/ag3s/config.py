@@ -1414,6 +1414,12 @@ class EsdfConfig:
     #: neighbour · thin wall within M is removed too. None (default) = off.
     surface_contact_allowance_mm: Optional[float] = None
     # --- T78f — end
+    # --- SL7f — begin
+    #: **SL7f (benchmark, default off)** — keep the surface selection's seed map (attention) only on the patches the ATS
+    #: target points project into (`attention_surface_post.ats_gate_views`); the region then grows from the ATS target.
+    #: Needs `target_extent = "attention_surface"`. Record `t78.seed_ats_gate`.
+    surface_seed_ats_gate: bool = False
+    # --- SL7f — end
 
     #: **T44c A5 — target 을 지운 거친 계층 (`coarse_no_target`) 을 한 겹 더 만들고 target-free 질의에
     #: 합성한다.** 기본 `False` = 예전 그대로 (값 비트 동일, 계층을 만들지도 않는다).
@@ -1649,6 +1655,11 @@ class EsdfConfig:
                                   f"(target_extent={self.target_extent!r}, surface_keep_last={self.surface_keep_last!r})")
         # --- T78e — end
         # --- T78f — begin
+        if not isinstance(self.surface_seed_ats_gate, bool):   # SL7f
+            raise AG3SConfigError(f"esdf.surface_seed_ats_gate 는 true 또는 false 여야 합니다: {self.surface_seed_ats_gate!r}")
+        if self.surface_seed_ats_gate and self.target_extent != "attention_surface":
+            raise AG3SConfigError("esdf.surface_seed_ats_gate 는 target_extent='attention_surface' 의 seed 지도를 거릅니다 — "
+                                  f"다른 범위 ({self.target_extent!r}) 에서는 효과가 없습니다")
         v = self.surface_contact_allowance_mm
         if v is not None:
             if isinstance(v, bool) or not isinstance(v, (int, float)) or not (math.isfinite(float(v)) and float(v) > 0.0):

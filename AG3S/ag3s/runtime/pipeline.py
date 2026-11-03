@@ -1127,6 +1127,8 @@ class AG3S:
             post["ms"]["total"] = round((time.perf_counter() - t0) * 1e3, 3)
             return rec
         views, mask_src, render_on = self._surface_views(observations, cameras, sphere_masks, render_masks)
+        if bool(getattr(e, "surface_seed_ats_gate", False)):   # SL7f (off: the views as they are)
+            views, post["seed_ats_gate"] = post_mod.ats_gate_views(views, ats_points)
         res = select_target_surface(views, arm=ARM_RENDER if render_on else ARM_SPHERES,
                                     device=_ag3s_config.ATTENTION_SURFACE_DEVICE,   # T78 B
                                     **self._surface_crease_kwargs())   # T78d (off: no kwarg, the T78 B call)

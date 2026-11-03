@@ -1095,6 +1095,8 @@ def target_exclusion_section(args) -> dict:
         out["surface_reattach_hull_mm"] = float(args.surface_reattach_hull)
     if getattr(args, "surface_hull_fill", False):   # T78b (given flag only)
         out["surface_hull_fill"] = True
+    if getattr(args, "surface_seed_ats_gate", False):   # SL7f (given flag only)
+        out["surface_seed_ats_gate"] = True
     # --- T78d — begin (given flags only)
     out.update(_t78d_esdf_keys(args))
     # --- T78d — end
@@ -2440,6 +2442,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--surface-reattach-hull", type=float, default=None, metavar="MM",
                     help="T78b — A1 분할이 target 덩어리를 고른 뒤, 버리려는 다른 덩어리의 중심이 target 덩어리 convex hull 을 "
                          "MM 만큼 넓힌 부피 안이면 다시 붙인다 (기록 split.reattach). --surface-split 과 함께만. 기본 off")
+    ap.add_argument("--surface-seed-ats-gate", action="store_true",   # SL7f (benchmark)
+                    help="SL7f — attention-surface 선택의 seed 지도 (attention) 를 ATS target 점이 투영되는 patch 에만 남긴다 "
+                         "(나머지 0). 표면 영역이 ATS target 에서 자란다. --target-extent attention-surface 와 함께만. 기본 off")
     ap.add_argument("--surface-hull-fill", action="store_true",
                     help="T78b — 쥐기 직전 (latch latched · closing, 또는 쥐는 손바닥이 영역 중심 80 mm 안) 손 층 (미세 "
                          "target-free 계층) 에서 마지막 채택 영역 convex hull (+1 미세 voxel) 안 seed 를 모두 지운다. 버린 덩어리 "
@@ -3035,6 +3040,8 @@ def ifg_cl1_record_meta(args) -> dict:
         out["surface_reattach_hull_mm"] = float(args.surface_reattach_hull)
     if getattr(args, "surface_hull_fill", False):   # T78b (only when on)
         out["surface_hull_fill"] = True
+    if getattr(args, "surface_seed_ats_gate", False):   # SL7f (only when on)
+        out["surface_seed_ats_gate"] = True
     # --- T78d — begin (only when on)
     out.update(_t78d_esdf_keys(args))
     # --- T78d — end
@@ -3648,7 +3655,8 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args, *, seed_map_
                            ("--surface-grasp-hold", getattr(args, "surface_grasp_hold", False)),
                            ("--surface-no-ball", getattr(args, "surface_no_ball", False)),
                            ("--surface-reattach-hull", getattr(args, "surface_reattach_hull", None) is not None),   # T78b
-                           ("--surface-hull-fill", getattr(args, "surface_hull_fill", False))) if on]   # T78b
+                           ("--surface-hull-fill", getattr(args, "surface_hull_fill", False)),   # T78b
+                           ("--surface-seed-ats-gate", getattr(args, "surface_seed_ats_gate", False))) if on]   # SL7f
     if t78 and extent != "attention-surface":
         ap.error(f"{', '.join(t78)} 는 --target-extent attention-surface 의 영역 후처리입니다 — 그대로 띄우면 효과가 있었다고 "
                  "믿게 됩니다")
