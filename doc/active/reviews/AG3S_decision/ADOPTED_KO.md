@@ -24,6 +24,7 @@
 | A7 | 로봇 지우기 = 구 mask 만 (렌더 로봇 mask 끔) | ATS 입력 (ESDF 로봇 자기 제거) | `--robot-mask render` 를 넣지 않음 | **최종 채택** (사용자 2026-10-28 22:05) |
 
 | **A8** | **논문 방법론 = A1–A4 + A7 (최종 구성)** | 전체 | 아래 A8 절의 서버 flag 전부 | **채택** (사용자 2026-10-29 01:05, 핵심 평가 1차 근거) |
+| **A9** | **수정 최종 구성 (benchmark 로 보낼 구성) — 모듈별 전체 방법** | ATS · HSR · LTE · CCR 전체 | 아래 A9 절 | **P0m 채택 (사용자 2026-11-03 18:2x KST)** = P0 + `--subtask-from-latch`. 최종 확정은 T92b (seed 반복 + hull · 접촉 여유 짝 비교). benchmark 로 보냄 (main `a0b16d0a` → benchmark merge `93e2ae8d`) |
 
 A5 · A6 은 사용자가 채택을 정했지만 아직 closed-loop 근거가 없다. 남은 일은 [OPEN_ISSUES_KO.md](OPEN_ISSUES_KO.md) O1 · O2 에 있다.
 
@@ -255,3 +256,112 @@ python -m AG3S.trajopt.serve_safe --config pi05_rby1_randomized_pick_place_16d_l
    - 서버 인자는 `AG3S-CORE-EVAL-A6.impl.md` §3 의 한 줄 그대로다. 코드는 commit `cc0d527f` (= `snapshot_final2`).
    - 기하 보정 · 쥐기 목표 항 flag 는 남기되 ④ 때문에 작동하지 않는다. 논문에서 그 기여를 주장하지 않는다.
    - 이 구성으로 main → benchmark branch 에 보내고 benchmark · baseline 비교를 한다. 방식: merge --no-ff 2 단계 (사용자).
+
+## A9. 수정 최종 구성 — benchmark 로 보낼 구성 (모듈별 전체 방법)
+
+> **갱신 (2026-11-03 18:3x KST, 사용자 판정): 최종 구성 = P0m = P0 + `--subtask-from-latch`.** 아래 A9.1 · A9.2 의 2026-10-31 계획 (HSR 5 단계 분류기 채택, 규칙 ①–④ 재연결, `--nontarget-evidence surface`, 표면 분할, G1) 은 P0 · P0m 에서 바뀌었다. 바뀐 줄은 각 행에 **[P0m]** 으로 적었다. 전체 flag · 명령줄 정본: `AG3S/ag3s/docs/handoff/P0_FINAL_CONFIG_FOR_BENCHMARK_20261103_KO.md`. 최종 확정은 T92b (seed 반복 + hull 채우기 · 접촉 여유 짝 비교, `T92b.task.md`) 로 한다.
+> 코드 기준: development HEAD `f964439d` (코드 `63e98cc8`), main `32a45fb8`. 모든 새 flag 기본 꺼짐.
+
+- **왜 이 절:** 지금까지 이 문서는 새로 채택한 항목만 적었다. 그래서 최종 구성에 무엇이 들어 있고 무엇이 빠졌는지 한 곳에서 보이지 않았다 (예: 논문 방법의 depth 연속 표면 추출이 최종 구성에 없다는 것을 놓쳤다 — 지금 target 제외는 공 방식). 이 절은 **AG3S 가 실제로 쓰는 방법 전부** 를 모듈별로 적는다. 방법 설명 (어떻게 동작하나 · 논문 설명과 다른 점) 은 [METHOD_STATUS_KO.md](METHOD_STATUS_KO.md).
+- **기준:** A8 최종 구성 (`AG3S-CORE-EVAL-A6.impl.md` §3 서버 argv, 코드 `cc0d527f`) 에서 아래 "바뀜 · 추가" 를 적용한 것. 상태 열: 그대로 / 바뀜 (확정) / 추가 예정 (진행 중) / 빠짐.
+- **보내는 시점 (사용자 2026-10-31):** ATS 두 hidden 실험 (시간 추적 T79 · target 찾기) 이 끝난 뒤 이 구성으로 benchmark checkout 에 보낸다.
+
+### A9.1 모듈별 방법과 상태
+
+**ATS — 목표 물체 찾기 · 추적**
+
+| 방법 | 서버 flag | 상태 | 근거 |
+|---|---|---|---|
+| target 명사 attention (prompt 의 target 명사 token 행, layer 10 head 7) | `--attention-source noun_target:L10H7` | 그대로 | T57 · A8 |
+| target cluster 선택 + attention 으로 붙은 덩어리 다시 가르기 (재군집 12 mm, raw attention 비율) · 쥐기 전 split 조각이 anchor 대체 | `--attention-split-radius-mm 12 --attention-split-ratio-source raw --attention-split-partition --split-supersedes-anchor` | 그대로 | T44 · IFG-SPLIT |
+| 받침면 위로 뜬 후보 제외 (가장 낮은 점이 받침면 위 60 mm 넘으면) | `--supported-max-bottom-mm 60` | 그대로 | T43 |
+| 잠근 target 정체 유지 · 닫는 동안 기하 고정 · 밀린 과일 따라가기 | `--latched-identity-hold --closing-keep-geometry --kept-geometry-follow` | 그대로 | T43 · IFG-FOLLOW |
+| 놓은 뒤 home 에서 seed 없음 인증 | `--placed-no-seed-certify` | 그대로 | T46c |
+| 로봇 지우기 = 로봇 구 mask (렌더 mask 안 씀) | (`--robot-mask` 없음) | 그대로 | A7 |
+| **target 범위 = 공 + 소유 비교 (ball-owned)** | `--target-exclusion ball-owned --owned-max-dist-voxels 3 --nontarget-evidence surface` | **[P0m] 바뀜:** ball-owned 인자는 명령줄에 남지만 **무효** (표면 추출이 대신함). `--nontarget-evidence surface` (T46c 채택) 는 표면 추출로 대체 → **금지** | T44 · T46 · T78 |
+| **depth · point 연속 표면 추출 (attention seed → 연속 표면) + 맞닿은 물체 attention 분할 + target 겹침 검사 + 기권 시 직전 영역 유지 + 쥔 뒤 고정 + 공 제거 + GPU** | `--target-extent attention-surface --surface-target-check overlap --surface-keep-last --surface-grasp-hold --surface-no-ball --attention-surface-device cuda` + 쥐기 직전 hull 채우기 `--surface-hull-fill` + 손 층 target 접촉 여유 `--surface-contact-allowance-mm 10` | **[P0m] 채택.** 맞닿은 물체 분할 (`--surface-split`) 은 **폐기** (사용자 2026-11-01). hull 채우기 · 접촉 여유는 T92b 에서 뺀 구성과 비교해 차이 ≤ 2 run 이면 뺀다 | T76 · T78 · T78b · T78f |
+| 시간 추적: 밀리거나 가려진 target 을 VLM hidden patch 특징으로 다시 찾기 | (offline 실험, flag 없음) | **실험 중** (T79) | T75 회귀 211 |
+| target 찾기: hidden patch 특징 | — | **다음 실험** | — |
+
+**HSR — 작업 단계 · 쥠 상태**
+
+| 방법 | 서버 flag | 상태 | 근거 |
+|---|---|---|---|
+| 3 단계 gate (pick · place · home) — 새 조작 대상 gate | P0: (기본 on) `kv_L4_v1` 분류기. **[P0m] `--subtask-from-latch`** | **[P0m] 바뀜:** label 을 학습 분류기 대신 grasp latch 에서 (searching · latched · closing → pick, held → place, placed → home). T92: 9 run 9 / 9, 놓기 전 막음 0. serving 의 학습 요소는 VLA 뿐 | T92 |
+| 6 단계 분류기 HSR6 (layer 4 KV, 시연 라벨) + 규칙 ① 쥠 인정 보조 · ② 쥔 물체 허용 · ③ 물러남에서 target 권한 거둠 · ④ 쥐기 단계에서만 이웃 접촉 · 목표 항 | `--hsr6-attach-assist --hsr6-held-gate --hsr6-target-exempt --hsr6-objective` | **[P0m] 끔 (금지)** — 정답 단계를 넣어도 규칙이 해를 냄 (T85), 끈 P0 가 9 / 9 (T88) | T85 · T88 |
+| 5 단계 분류기 (접근 · 쥐기 · 운반 · 놓기 · 물러남), VLM hidden layer 4, 물리 정답 라벨 | `--hsr5` (T82 구현) | **[P0m] 끔** — 2026-10-31 채택을 철회 (A9.2 참고). 단계 결정은 "최소 구성" (사용자 2026-11-03) | T77 · T82 · T92 |
+| 손목 depth 단계 인식 (T91 · T91b) 을 gate label 출처로 | `--subtask-from-phase-machine` | **[P0m] 기본 꺼짐** — latch 대비 이점 없음 (T91c), 손목 카메라가 있는 benchmark 의 선택지 | T91c |
+| 쥠 상태 latch (규칙: searching → latched → closing → held → placed), 닫힌 채 빠지면 놓음 | `--held-slip-detach` | 그대로 | T43 |
+
+**LTE — 링크별 거리장 · target 제외**
+
+| 방법 | 서버 flag | 상태 |
+|---|---|---|
+| cuRobo ESDF 3 계층 (거친 20 mm · 미세 5 mm · TSDF 5 mm), GPU 거리장을 요청마다 host 로 한 번 복사 | `--esdf-backend curobo --voxel 0.020 --fine-voxel 0.005 --tsdf-voxel 0.005 --esdf-host-mirror` | 그대로 |
+| 제약 링크 = 양손 손바닥 + 손가락 넷 (팔 · 몸통은 제약 밖) | `--links gripper --no-self-collision` | 그대로 |
+| 쥐는 손 link 는 target 이 빠진 거리장을 봄 · target 예외는 권한 link 행에만 | `--target-field-policy exclude-authorized --target-permission-strict --esdf-margin 0` | 그대로 (지우는 범위는 ATS 의 target 범위를 따름 → 표면 추출로 바뀜 예정) |
+| 로봇 구 모델: capsule 반지름 0.05 배 · 간격 0.4 · 최대 32 + 손가락별 몸통 구 + 손바닥 껍질 구 | `--capsule-radius-scale 0.05 --sphere-spacing 0.4 --max-spheres-per-capsule 32 --finger-cover both --palm-shell on` | 그대로 |
+| 여유: 장애물 10 mm, 손바닥 껍질 행 5 mm | `--obstacle-margin 0.010 --palm-shell-margin 5` | 그대로 (A3) |
+| 쥔 물체 = 손의 일부 (몸통 전체 덮개, 반지름 상한 +10 mm) | `--held-body-cover --held-cover-cap-mm 10` | 그대로 |
+| 이웃 가벼운 접촉 허용: 쥐기 전 손가락 20 mm · 쥐는 순간 손바닥 10 mm | `--neighbour-contact-mm 20 --neighbour-palm-contact-mm 10` | **[P0m] 그대로 (MuJoCo 데모 profile)**, 켜는 창 = latch · 손바닥–target 거리. **benchmark profile 은 둘 다 끄고 평가의 이웃 과일 면제도 끈다 — 접촉 허용은 target (쥘 때) · 목적지 (놓을 때) 만** (D1, 사용자 확인 2026-11-03) |
+| 관심 영역 안 TSDF 를 이번 depth 로 비우기 (GPU, 가장자리 보존) | `--roi-carve --roi-carve-footprint --roi-carve-footprint-pad-px 0 --roi-carve-footprint-robot ignore --roi-carve-device cuda` | 그대로 |
+
+**CCR — action chunk 수정 · 검증 (TrajOpt)**
+
+| 방법 | 서버 flag | 상태 | 근거 |
+|---|---|---|---|
+| SQP + OSQP (정확도 1e-4), 계획 16 행 중 장애물 20 mm 안일 때만 뒤 8 행까지 풂 (look-ahead) | `--plan-horizon 16 --lookahead obstacles --lookahead-gate-mm 20 --qp-eps 1e-4` | 그대로 | T43 |
+| 목적함수: VLA 추종 (손목 관절 0.1 배, 쥐기 전 target 150 mm 안) + 부드러움 | `--wrist-track-scale 0.1` (w_track 1 · w_smooth 0.05 기본) | 그대로 | IFG-TOW |
+| **꺾임 변화율 (w 20) · 연속성 (w 0.5) 항: 쥐기 전에는 끄고, 쥔 뒤 (운반 · 놓기 · 돌아오기) 에만 켬** | `--w-deflection-rate 20 --deflection-rate-after-grasp --continuity-after-grasp` | **바뀜 (확정, T74 Q1)** | T74 |
+| **E0 = chunk 마다 표준 SQP 풀이 하나 (여러 초기값 · GPU 초기값 batch 없음)** | `--to-multi-seed 16 --to-gpu-seeds curobo --to-gpu-seeds-check first-pass` **를 뺌** | **바뀜 (확정, T74 Q1)** | T74 |
+| 쥐기 목표 항 A4 (닫는 행) | `--grasp-anchor 2000 --grasp-anchor-path-weight 0` **를 뺌** | **빠짐** (T68: 실제 작동 0, T74 에서 뺌) | T68 · T74 |
+| 기하 grasp 보정 G1 | `--geo-grasp --geo-goal-mode correct --geo-track-scale 0.25 --geo-continuity-off` | **[P0m] 끔 (금지)** — 사용자 2026-11-02 "켜라고 할 때까지 끔". 쥐기 구간 강제 시 해로움 (T89) | T85 · T89 |
+| 충돌만 남은 HOLD 대신 수정 chunk 실행 (인증 조건) | `--hold-follow-to 3` | 그대로 | T43 |
+| 계산 옵션 (결과 bit 동일): 한 번씩 평가 · BLAS thread 1 | `--to-fast-eval --blas-threads 1` | 그대로 | T43 · A1 |
+| grasp 후보 + 도달 제약 (T72b) | `--grasp-set-to …` | **채택 안 함** (T74 Q3 와 결과 같음) | T72b |
+
+- **T74 Q1 결과 (세션 A, 10 run · 같은 seed):** 금지 접촉 없는 성공 최종 구성 4 / 10 → Q1 8 / 10, 금지 접촉 run 1 → 0, 탁자 · 바구니 접촉 0. 회귀 211 · 954 · 가림 122 · 허들 1345 가 성공으로 바뀜 (`outputs/2026-10-30_T74_E0TrajOpt_목적함수조합/`).
+- **사용자 표현과 실제 동작:** "시작할 때는 꺾임 · 연속성을 끄고 place 할 때만 잠깐 켜기" — 실제 flag 는 latch 가 held 가 된 뒤 (들기 · 운반 · 놓기 · 돌아오기) 켠다. HSR 5 단계로 바꾸면 이 판정을 "운반 · 놓기" 단계에 묶을지 정해야 한다.
+
+### A9.2 HSR — 5 단계 분류기 (VLM hidden layer 4 + 물리 정답 라벨, 사용자 판정 2026-10-31)
+
+> **[P0m] 이 절의 "HSR 5 단계 채택" 은 철회되었다 (`--hsr5` 끔).** 단계 결정은 grasp latch 하나로 한다: 쥠 상태 (접촉 허용 창) 와 3 단계 gate label 모두 latch (T92, 사용자 2026-11-03 "단계 결정은 최소 구성"). 근거: T85 에서 정답 단계를 넣어도 단계 규칙이 해를 냈고, 규칙을 끈 P0 · P0m 이 9 / 9 였다. 아래는 2026-10-31 판정 당시의 기록으로 남긴다. 평가 정의의 "붙은 이웃 (사과 10 mm 안)" 조건은 D2 로 뺐다 (쥐는 순간 쥐는 손–이웃 과일 접촉은 거리와 상관없이 면제, 기둥 · 허들은 금지). 바닥 띠: 지지면 guard 5 mm (코드) 와 잔여 측정에서 빼는 6 mm (평가) 는 다른 값이다.
+
+- **결정:** HSR 의 작업 단계 판단을 5 단계 (접근 · 쥐기 · 운반 · 놓기 · 물러남) 분류기 하나로 바꾸고, 입력을 VLM hidden layer 4 로 한다. ATS 두 실험 (시간 추적 · target 찾기) 을 마친 뒤 수정한 최종 구성으로 benchmark checkout 에 보낸다.
+- **기존 방식 (최종 구성):**
+  - 입력: VLM prefix pass 의 layer 4 V cache (head 1 개, [text 평균 | image 평균] 512 차원).
+  - 분류기 두 개: 3 단계 (pick · place · home, `kv_L4_v1`, 새 조작 대상 gate) + 6 단계 (접근 · 쥐기 · 들기 · 운반 · 놓기 · 물러남, `hsr6_t64_kv_L4`, 규칙 ①–④). 쥠 상태는 따로 규칙 latch.
+  - 라벨: 전문가 시연의 phase index. 시연에서는 닫음 = 쥠이라 "닫았지만 비었음" 예가 없다.
+- **새 방식 (T77):**
+  - 단계 수 = 제약 묶음이 갈리는 수 = 5 (들기 · 운반은 제약이 같아 합침). 3 단계 · 6 단계 두 분류기를 하나로.
+  - 입력: VLM hidden layer 4 (block 4 출력 residual stream, 2048 차원) 의 카메라 3 대 image token 평균 + 마지막 유효 text token = 8192 차원. 같은 forward 에서 꺼내므로 추가 forward 없음.
+  - 라벨: 전문가 시연 + **closed-loop 기록 427 run 의 MuJoCo 물리 정답** (실제로 들지 않았으면 운반 아님, 빈손 닫기 = 쥐기).
+  - 분류기: 표준화 + 로지스틱 회귀 (기존과 같은 꼴). 층 · pooling · 규제 강도는 train 교차 검증만으로 고름.
+- **결과 (학습에 쓰지 않은 장면 211 · 954 · 122 · 119 의 closed-loop 기록):**
+
+| | 기존 (HSR6 → 5 단계) | layer 4 KV + 물리 정답 재학습 | **hidden layer 4 + 물리 정답 (채택)** |
+|---|---|---|---|
+| 빈손인데 운반 · 놓기 (위험한 오판) | 28 % | 1.5 % | 2.2 % |
+| 5 단계 정확도 (test 전체 12,356 요청) | 0.47 | 0.64 | 0.72 |
+| 정확도 — 성공 run (기존 기록 있는 44 run) | 0.69 | 0.90 | 0.92 |
+| 쥐기 · 놓기 · 물러남 재현율 (성공 44 run) | 0.33 · 0.45 · 0.42 | 0.84 · 0.93 · 0.95 | 0.89 · 0.94 · 0.93 |
+| 단계 전환 지연 중앙값 (성공 run, 요청) | 2–3 | 0 | 0–1 |
+| 전문가 val 정확도 | — | 0.993 | 0.999 |
+
+- **두 방법의 차이:**
+  - 위험한 오판 (빈손 → 쥔 뒤) 을 없앤 것은 **물리 정답 라벨** 이다. 같은 layer 4 KV 로도 다시 배우면 28 % → 1.5 %.
+  - hidden layer 4 는 그 위에 접근 ↔ 물러남 (쥐기 실패 뒤 멀어진 손) 과 접근 ↔ 쥐기 구분을 더 잘해 정확도가 3–8 %p 높다.
+  - 미리 정한 "hidden 이 낫다" 기준 (거짓 운반률이 layer 4 KV 의 절반 이하) 은 미달이다 (0.263 대 0.333). 채택은 정확도 · 성공 run 결과를 보고 사용자가 정했다.
+- **한계 · 남은 일:**
+  - offline 평가만 했다. serving 구현 (VLA forward 에서 hidden layer 4 pooling, 5 단계 분류기 asset) 과 단계별 규칙 (3 단계 gate · HSR6 ①–④) 을 5 단계에 다시 잇는 일, closed-loop 확인이 남았다.
+  - 분류기는 이 VLA checkpoint (RBY1 16D 30k) 의 hidden 공간과 이 시뮬레이터의 물리 정답에 묶여 있다. benchmark 에서 다른 checkpoint 를 쓰면 그 모델의 feature · 정답으로 다시 학습해야 한다.
+  - 라벨 정의: closed-loop 의 쥐기 = 손바닥 60 mm 안, 놓기 = 사과가 바구니 바닥 위. 전문가 시연의 쥐기 (phase index) 와 정의가 다르다.
+- **출처:** `AG3S/ag3s/docs/handoff/T77.task.md` · `T77.impl.md`, 결과 폴더 `outputs/2026-10-30_T77_HSR5단계_hidden_vs_kvL4/` · `outputs/2026-10-31_T77b_HSR5단계_성공run정확도/`, 원시 `$AG3S_STORAGE_ROOT/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T77/` (`probe/t77_probe.json`, `success_runs_eval.json`).
+
+### A9.3 benchmark 로 보내기 전에 남은 일
+
+1. T78 (세션 A): 표면 추출 재생 평가 → closed-loop → 최종 구성 반영.
+2. T79 → target 찾기 실험 (hidden). 채택 여부는 사용자 판정.
+3. HSR 5 단계 serving 구현: VLA forward 에서 hidden layer 4 pooling, 5 단계 분류기 asset, 3 단계 gate · 규칙 ①–④ · 꺾임 변화율 / 연속성 켜는 시점을 5 단계에 다시 연결.
+4. 위를 모두 켠 수정 최종 구성 closed-loop 확인 (최종 구성 · T74 Q1 과 같은 장면).
+5. benchmark checkpoint 가 다르면 HSR 분류기 다시 학습 (A9.2 한계).
