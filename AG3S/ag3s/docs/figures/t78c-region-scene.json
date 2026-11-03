@@ -1,0 +1,43 @@
+{
+ "req15": {
+  "split_method": "attention_partition",
+  "components": [
+   {
+    "n": 355,
+    "apple": 354,
+    "fruit": 1,
+    "mean_attention": 0.1631
+   },
+   {
+    "n": 236,
+    "apple": 18,
+    "fruit": 218,
+    "mean_attention": 0.0021
+   },
+   {
+    "n": 40,
+    "apple": 40,
+    "fruit": 0,
+    "mean_attention": 0.0051
+   }
+  ],
+  "n_region": 631
+ },
+ "depth graph 10 mm (no split)": {
+  "apple_cover": 1.0,
+  "n_selected": 349,
+  "apple_nodes": 349,
+  "other_in_region": 0
+ },
+ "depth graph 4 mm (no split)": {
+  "apple_cover": 0.9398,
+  "n_selected": 328,
+  "apple_nodes": 349,
+  "other_in_region": 0
+ },
+ "example_request": {
+  "group": "HURDLE_A",
+  "client": "HURDLE_ep119_s1193",
+  "k": 8
+ }
+}

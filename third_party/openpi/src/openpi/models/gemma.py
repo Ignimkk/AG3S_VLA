@@ -297,6 +297,11 @@ class Block(nn.Module):
     # tracer, and a tracer cannot drive the Python branch that decides whether to materialize the
     # attention probabilities. See papers/KNOWS/06-repro-plan.md.
     return_probs: bool = False
+    # Static flag, same reasoning as `return_probs` (T73). When True the scan output also carries this
+    # block's expert-0 output (the residual stream after attention + FFN, before any final norm), so
+    # `Module` can stack per-layer hidden states. False (the default) leaves the scan output -- and
+    # hence the computation -- exactly as before.
+    return_hidden: bool = False
 
     @nn.compact
     def __call__(self, xs, kv_cache, positions, attn_mask, adarms_cond, deterministic=True):  # noqa: FBT002
@@ -339,6 +344,8 @@ class Block(nn.Module):
         xs = [_gated_residual(x, y, gate) for x, y, gate in zip(xs, out, gates, strict=True)]
         xs = sharding.activation_sharding_constraint(xs)
 
+        if self.return_hidden:
+            return xs, (kv_cache, probs, xs[0])
         return xs, (kv_cache, probs)
 
 
@@ -359,6 +366,12 @@ class Module(nn.Module):
     # probabilities stacked over layers, shape [L, B, K, G, T, S]. Default False adds no parameters,
     # materializes nothing, and leaves the 2-tuple contract untouched, so checkpoints are shared.
     return_probs: bool = False
+    # Inference-only (T73). When True, `__call__` additionally returns the expert-0 (PaliGemma) hidden
+    # states, HF `output_hidden_states` convention: h_0 = the input embedding, h_l = output of block l
+    # (residual stream, before `final_norm`), stacked to shape [L + 1, B, T, D]; None if expert 0 was not
+    # run (e.g. the suffix pass). Default False adds no parameters and leaves the return contract and
+    # the computation untouched.
+    return_hidden: bool = False
 
     def setup(self):
         # all experts must have the same depth
@@ -392,6 +405,7 @@ class Module(nn.Module):
             dropout=self.dropout,
             dropout_bdims=self.dropout_bdims,
             return_probs=self.return_probs,
+            return_hidden=self.return_hidden,
         )
         self.final_norms = [RMSNorm(name=_name("final_norm", i)) for i in range(len(self.configs))]
 
@@ -413,23 +427,34 @@ class Module(nn.Module):
     ) -> (
         tuple[Sequence[at.Float[at.Array, "b _t _d"] | None], KVCache]
         | tuple[Sequence[at.Float[at.Array, "b _t _d"] | None], KVCache, at.Array]
+        | tuple[Sequence[at.Float[at.Array, "b _t _d"] | None], KVCache, at.Array | None]
+        | tuple[Sequence[at.Float[at.Array, "b _t _d"] | None], KVCache, at.Array, at.Array | None]
     ):
-        # Returns a 3-tuple (with stacked attention probabilities) iff this module was constructed
-        # with `return_probs=True`; otherwise the original 2-tuple. See the class field.
+        # Returns `(normed, kv_cache)` plus, in this order, the stacked attention probabilities iff
+        # `return_probs=True` and the stacked expert-0 hidden states iff `return_hidden=True`. With
+        # both flags False (the default) this is the original 2-tuple. See the class fields.
         embedded = jax.tree.map(lambda e: e.astype(self.embed_dtype), embedded)
         mask = jnp.asarray(mask)[:, None, :, :]
         if adarms_cond is None:
             adarms_cond = [None] * len(self.configs)
 
-        embedded, (kv_cache, probs) = self.layers(embedded, kv_cache, positions, mask, adarms_cond, deterministic)
+        if self.return_hidden:
+            h0 = embedded[0]
+            embedded, (kv_cache, probs, hidden) = self.layers(
+                embedded, kv_cache, positions, mask, adarms_cond, deterministic
+            )
+            hidden = None if h0 is None else jnp.concatenate([h0[None], hidden], axis=0)
+        else:
+            embedded, (kv_cache, probs) = self.layers(embedded, kv_cache, positions, mask, adarms_cond, deterministic)
 
         assert all(e.dtype == jnp.dtype(self.embed_dtype) for e in embedded if e is not None)
 
         normed = [
             f(e, a)[0] if e is not None else e for f, e, a in zip(self.final_norms, embedded, adarms_cond, strict=True)
         ]
-        if self.return_probs:
-            return normed, kv_cache, probs
+        extra = ((probs,) if self.return_probs else ()) + ((hidden,) if self.return_hidden else ())
+        if extra:
+            return (normed, kv_cache, *extra)
         return normed, kv_cache
 
     def init(self, use_adarms: Sequence[bool]):

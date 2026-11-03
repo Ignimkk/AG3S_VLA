@@ -16,6 +16,12 @@ that request (no debounce, `handoff/AG3S-CORE-EVAL-HSR6.task.md` §1).
 | ③ | `target_exempt` | target exemption (target-free field view, per-link target margin, target tests) only outside retreat: in retreat the not-held target is an obstacle — `withdraw_target_exemption` | `SafePolicy._scene_fn` → `strip_target_permission` on the `SceneSnapshot` |
 | ④ | `objective` | IFG-NBC neighbour allowance, the A4 close-row goal and the G1 slot only when the existing rule ∧ phase = grasp — `objective_allowed` | `_neighbour_contact_gate`, `_scene_fn` (A4), `_geo_request` (G1) |
 
+**T67 ② — the ④ window (`objective_window`, `--hsr6-objective-window`, default off).** With it ④ also lets the three
+objective terms stay when HSR6 = approach **and** the A6 "grasp moment" window is open (latch latched / closing, no
+revoked attach, the grasping hand's palm site within `collision.neighbour_palm_contact_gate` = 60 mm of the target —
+`SafePolicy._grasp_moment_window`, the same computation as A6). The last approach requests before the close are
+labelled approach (T66b): ④ withdrew the finger allowance, A4 and G1 exactly there. Off: ④ as above.
+
 A request without an HSR6 label (probe failed / not loaded) is ``phase None``: ① no assist, ② no allowance (the
 stricter side), ③ the current rule, ④ no objective term.
 
@@ -40,6 +46,7 @@ __all__ = [
     "HOLD_PHASES",
     "Hsr6Flags",
     "OBJECTIVE_PHASE",
+    "OBJECTIVE_WINDOW_PHASE",
     "PHASES6",
     "PROBE_NAME",
     "RETREAT",
@@ -64,6 +71,8 @@ EXEMPT_PHASES = frozenset({"approach", "grasp"})
 RETREAT = "retreat"
 #: ④ — the only phase in which the close-row goal (A4 / G1) and the neighbour allowance stay on.
 OBJECTIVE_PHASE = "grasp"
+#: T67 ② — the phase in which the ④ window (`Hsr6Flags.objective_window`) may keep the objective terms.
+OBJECTIVE_WINDOW_PHASE = "approach"
 PROBE_NAME = "hsr6_t64_kv_L4"
 
 
@@ -86,16 +95,23 @@ def load_hsr6_probe(path: Optional[str | pathlib.Path] = None):
 
 @dataclasses.dataclass(frozen=True)
 class Hsr6Flags:
-    """The four uses (task §2). All False = off (`SafePolicy(hsr6=None)` is the same)."""
+    """The four uses (task §2). All False = off (`SafePolicy(hsr6=None)` is the same).
+
+    `objective_window` (T67 ②) is not a use of its own: it widens ④ (`objective`) and is refused without it
+    (`serve_safe.reject_hsr6_flags`). It is listed by `names()` only when on (the record of a run without it is as
+    before)."""
 
     attach_assist: bool = False
     held_gate: bool = False
     target_exempt: bool = False
     objective: bool = False
+    objective_window: bool = False
 
     @property
     def on(self) -> bool:
-        return bool(self.attach_assist or self.held_gate or self.target_exempt or self.objective)
+        # `objective_window` alone is refused at start (`reject_hsr6_flags`); it counts here so that check sees it
+        return bool(self.attach_assist or self.held_gate or self.target_exempt or self.objective
+                    or self.objective_window)
 
     def names(self) -> list[str]:
         return [f.name for f in dataclasses.fields(self) if getattr(self, f.name)]
@@ -141,9 +157,14 @@ def withdraw_target_exemption(phase: Optional[str]) -> bool:
     return phase == RETREAT
 
 
-def objective_allowed(phase: Optional[str]) -> bool:
-    """④ : the close-row goal and the neighbour allowance only in grasp (no label: off)."""
-    return phase == OBJECTIVE_PHASE
+def objective_allowed(phase: Optional[str], *, window: Optional[bool] = None) -> bool:
+    """④ : the close-row goal and the neighbour allowance only in grasp (no label: off).
+
+    T67 ② — `window` is the A6 "grasp moment" window of this request when `--hsr6-objective-window` is on (`None` =
+    the flag is off): then approach ∧ window open also keeps them. Any other phase is unaffected by the window."""
+    if phase == OBJECTIVE_PHASE:
+        return True
+    return bool(window) if (window is not None and phase == OBJECTIVE_WINDOW_PHASE) else False
 
 
 def strip_target_permission(snapshot) -> tuple[Any, dict]:

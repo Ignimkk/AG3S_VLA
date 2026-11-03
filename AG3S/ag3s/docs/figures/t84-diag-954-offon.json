@@ -1,0 +1,34 @@
+{
+ "회귀 954": {
+  "off": {
+   "steps": 600,
+   "two_finger_contact_steps": 117,
+   "first_two_finger_contact": 149,
+   "lift20_step": 484,
+   "min_palm_apple_mm_from_100": 12.8
+  },
+  "on": {
+   "steps": 600,
+   "two_finger_contact_steps": 11,
+   "first_two_finger_contact": 150,
+   "lift20_step": null,
+   "min_palm_apple_mm_from_100": 24.7
+  }
+ },
+ "허들 954": {
+  "off": {
+   "steps": 317,
+   "two_finger_contact_steps": 22,
+   "first_two_finger_contact": 161,
+   "lift20_step": null,
+   "min_palm_apple_mm_from_100": 23.7
+  },
+  "on": {
+   "steps": 600,
+   "two_finger_contact_steps": 10,
+   "first_two_finger_contact": 162,
+   "lift20_step": null,
+   "min_palm_apple_mm_from_100": 24.9
+  }
+ }
+}

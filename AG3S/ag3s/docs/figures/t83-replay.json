@@ -1,0 +1,185 @@
+{
+ "per_run": {
+  "가림121_k0": {
+   "n": 58,
+   "n_win": 24,
+   "hold_win_off": 0,
+   "hold_win_on": 0,
+   "min_clr_win_off": -26.369847357273102,
+   "min_clr_win_on": -26.369847357273102,
+   "n_cor_active": 5,
+   "n_cor_active_win": 5,
+   "carved_by_class": {
+    "apple": 261,
+    "none": 679
+   }
+  },
+  "가림122_k0": {
+   "n": 34,
+   "n_win": 8,
+   "hold_win_off": 1,
+   "hold_win_on": 1,
+   "min_clr_win_off": -15.147094614803791,
+   "min_clr_win_on": -15.147094614803791,
+   "n_cor_active": 5,
+   "n_cor_active_win": 5,
+   "carved_by_class": {
+    "apple": 266,
+    "none": 562,
+    "robot": 5
+   }
+  },
+  "허들119_k0": {
+   "n": 32,
+   "n_win": 8,
+   "hold_win_off": 0,
+   "hold_win_on": 0,
+   "min_clr_win_off": -7.856103591620922,
+   "min_clr_win_on": -8.584095165133476,
+   "n_cor_active": 5,
+   "n_cor_active_win": 5,
+   "carved_by_class": {
+    "none": 528,
+    "apple": 319,
+    "robot": 22,
+    "table": 144
+   }
+  },
+  "허들1345_k0": {
+   "n": 75,
+   "n_win": 60,
+   "hold_win_off": 11,
+   "hold_win_on": 4,
+   "min_clr_win_off": -18.58048141002655,
+   "min_clr_win_on": -19.510313868522644,
+   "n_cor_active": 58,
+   "n_cor_active_win": 58,
+   "carved_by_class": {
+    "apple": 13406,
+    "table": 608,
+    "none": 8148,
+    "robot": 310
+   }
+  },
+  "허들211_k0": {
+   "n": 48,
+   "n_win": 16,
+   "hold_win_off": 1,
+   "hold_win_on": 1,
+   "min_clr_win_off": -25.64336732029915,
+   "min_clr_win_on": -24.676017463207245,
+   "n_cor_active": 2,
+   "n_cor_active_win": 2,
+   "carved_by_class": {
+    "apple": 144,
+    "fruit": 28,
+    "none": 10
+   }
+  },
+  "허들850_k0": {
+   "n": 32,
+   "n_win": 7,
+   "hold_win_off": 0,
+   "hold_win_on": 0,
+   "min_clr_win_off": -13.780100271105766,
+   "min_clr_win_on": -8.829287253320217,
+   "n_cor_active": 5,
+   "n_cor_active_win": 5,
+   "carved_by_class": {
+    "apple": 322,
+    "none": 482,
+    "fruit": 598,
+    "robot": 5
+   }
+  },
+  "허들954_k0": {
+   "n": 75,
+   "n_win": 20,
+   "hold_win_off": 0,
+   "hold_win_on": 0,
+   "min_clr_win_off": -14.769167639315128,
+   "min_clr_win_on": -14.769167639315128,
+   "n_cor_active": 17,
+   "n_cor_active_win": 17,
+   "carved_by_class": {
+    "apple": 535,
+    "none": 1282,
+    "fruit": 1,
+    "table": 857,
+    "robot": 9
+   }
+  },
+  "회귀119_k1": {
+   "n": 75,
+   "n_win": 7,
+   "hold_win_off": 0,
+   "hold_win_on": 0,
+   "min_clr_win_off": -0.20183721790090203,
+   "min_clr_win_on": -0.23519796377513558,
+   "n_cor_active": 4,
+   "n_cor_active_win": 4,
+   "carved_by_class": {
+    "apple": 181,
+    "none": 249,
+    "robot": 30
+   }
+  },
+  "회귀211_k0": {
+   "n": 75,
+   "n_win": 57,
+   "hold_win_off": 53,
+   "hold_win_on": 52,
+   "min_clr_win_off": -27.20123715698719,
+   "min_clr_win_on": -34.401241689920425,
+   "n_cor_active": 57,
+   "n_cor_active_win": 57,
+   "carved_by_class": {
+    "apple": 4911,
+    "none": 2685,
+    "fruit": 12893,
+    "table": 660
+   }
+  },
+  "회귀954_k0": {
+   "n": 69,
+   "n_win": 16,
+   "hold_win_off": 0,
+   "hold_win_on": 0,
+   "min_clr_win_off": -19.457636401057243,
+   "min_clr_win_on": -19.457636401057243,
+   "n_cor_active": 13,
+   "n_cor_active_win": 13,
+   "carved_by_class": {
+    "none": 971,
+    "apple": 893,
+    "fruit": 3,
+    "table": 188,
+    "robot": 6
+   }
+  }
+ },
+ "scenes": [
+  {
+   "lab": "허들1345_k0",
+   "req": 18,
+   "carved": {
+    "apple": 15,
+    "fruit": 0,
+    "table": 197,
+    "robot": 0,
+    "none": 29
+   }
+  },
+  {
+   "lab": "허들850_k0",
+   "req": 12,
+   "carved": {
+    "apple": 44,
+    "fruit": 199,
+    "table": 0,
+    "robot": 0,
+    "none": 154
+   }
+  }
+ ]
+}

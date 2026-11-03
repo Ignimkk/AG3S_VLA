@@ -96,6 +96,7 @@ __all__ = ["CuroboFieldBuilder", "TargetBall", "OwnedEvidence", "OWNED_CLASSES",
            "FineWindowRequest", "FineWindow", "place_fine_window", "WINDOW_BASES",
            "WINDOW_PLACEMENTS", "NONTARGET_EVIDENCES", "nontarget_surface_evidence",
            "OracleVisibleEvidence", "oracle_candidates", "oracle_visible_split", "oracle_cell_keys",
+           "HullFill", "hull_fill_split",   # T78b
            "SurfaceProtectEvidence", "surface_protect_split",   # IFG-CL2
            "oracle_band_masks",
            "TargetLayerRequest", "target_owned", "target_pixel_mask", "roi_boxes", "in_boxes"]   # TASK-DYNAMIC-MAP
@@ -971,6 +972,14 @@ class OracleVisibleEvidence:
     band_masks: Optional[np.ndarray] = None
     surface_protect_voxels: float = 1.0
     z_floor: Optional[float] = None
+    #: T78b (`esdf.surface_hull_fill`): also remove every remaining seed inside the accepted region's convex hull
+    #: (`HullFill`, `hull_fill_split`). None (default) = the oracle split as before.
+    hull_fill: Optional["HullFill"] = None
+    # --- T78f — begin: target contact allowance of the surface path (`esdf.surface_contact_allowance_mm`)
+    #: (m) also remove every seed within this distance of a target sample and above `z_floor`, whatever `d_o` is
+    #: (union with the `d_t < d_o` rule; `oracle_visible_split`). None (default) = the oracle split as before.
+    contact_allowance_m: Optional[float] = None
+    # --- T78f — end
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "target_points",
@@ -992,6 +1001,89 @@ class OracleVisibleEvidence:
             raise ValueError("band_keys 가 있으면 band_cell > 0 이어야 합니다")
         if not 0 <= int(self.code) < 32:
             raise ValueError(f"code 는 0..31 (band mask 의 bit): {self.code}")
+        # --- T78f — begin
+        a = self.contact_allowance_m
+        if a is not None and (isinstance(a, bool) or not (np.isfinite(float(a)) and float(a) > 0.0)):
+            raise ValueError(f"contact_allowance_m 는 0 보다 큰 유한한 m 여야 합니다 (끔 = None): {a!r}")
+        # --- T78f — end
+
+
+# --- T78b — begin: hull fill of the fine target-free tier (`esdf.surface_hull_fill`) ---------------------------------
+@dataclasses.dataclass(frozen=True)
+class HullFill:
+    """T78b — the accepted surface region's convex hull, filled in the fine target-free tier just before the grasp.
+
+    | 필드 | 무엇 |
+    |---|---|
+    | `equations` | hull facet (F, 4): `n · x + b ≤ 0` 안, `|n| = 1` (`attention_surface_post.convex_hull`) |
+    | `lo` · `hi` | hull 점의 AABB (m) — 후보 voxel 범위 |
+    | `pad_m` | facet 을 이만큼 밀어낸 부피 안 (+1 미세 voxel) |
+    | `protect_points` | 분할이 버린 덩어리 (hull 밖 다른 물체) 의 표본 — 그 표본이 든 voxel 은 지우지 않는다 |
+    | `z_floor` | 이 z (m) 아래는 지우지 않는다 (지지면 + pad, A5 의 guard). None = oracle 의 `z_floor` |
+    | `info` | 기록에 그대로 실린다 |
+    """
+
+    equations: np.ndarray
+    lo: np.ndarray
+    hi: np.ndarray
+    pad_m: float
+    protect_points: Optional[np.ndarray] = None
+    z_floor: Optional[float] = None
+    info: dict = dataclasses.field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "equations", np.asarray(self.equations, np.float64).reshape(-1, 4))
+        object.__setattr__(self, "lo", np.asarray(self.lo, np.float64).reshape(3))
+        object.__setattr__(self, "hi", np.asarray(self.hi, np.float64).reshape(3))
+        pp = self.protect_points
+        object.__setattr__(self, "protect_points",
+                           np.zeros((0, 3)) if pp is None else np.asarray(pp, np.float64).reshape(-1, 3))
+        if not len(self.equations):
+            raise ValueError("HullFill: hull facet 이 없습니다")
+        if not (np.isfinite(float(self.pad_m)) and float(self.pad_m) >= 0.0):
+            raise ValueError(f"HullFill.pad_m 는 0 이상의 유한한 값이어야 합니다: {self.pad_m!r}")
+
+
+def hull_fill_split(hull: HullFill, origin: np.ndarray, voxel_size: float, shape,
+                    z_floor: Optional[float] = None) -> dict:
+    """T78b — 격자 voxel 중 hull (+`pad_m`) 안 (중심 기준) 인 것 (순수 numpy; server · 단위 검증이 같이 쓴다).
+
+    `{"cand" (K, 3) int64 — hull 안 voxel, "fill" (K,) bool — 지울 수 있는 것 (z_floor 위 ∧ 보호 아님),
+    "protected" (K,) bool — 버린 덩어리 표본이 든 voxel, "above" (K,) bool}`. 표본이 든 voxel = 그 표본에 가장 가까운
+    voxel 중심 (`round((p − origin) / vs)`, 격자 중심 = origin + ijk · vs). `z_floor` = `hull.z_floor`, 없으면 인자."""
+    vs = float(voxel_size)
+    nx, ny, nz = (int(v) for v in shape)
+    org = np.asarray(origin, np.float64).reshape(3)
+    pad = float(hull.pad_m)
+    empty = {"cand": np.zeros((0, 3), np.int64), "fill": np.zeros(0, bool), "protected": np.zeros(0, bool),
+             "above": np.zeros(0, bool)}
+    lo = np.maximum(np.floor((hull.lo - pad - org) / vs).astype(np.int64), 0)
+    hi = np.minimum(np.ceil((hull.hi + pad - org) / vs).astype(np.int64) + 1, np.array([nx, ny, nz]))
+    if np.any(hi <= lo):
+        return empty
+    ax = [np.arange(int(lo[i]), int(hi[i]), dtype=np.int64) for i in range(3)]
+    grid = np.stack(np.meshgrid(*ax, indexing="ij"), axis=-1).reshape(-1, 3)
+    centres = org[None, :] + grid.astype(np.float64) * vs
+    eq = hull.equations
+    inside = np.zeros(len(centres), bool)
+    for i in range(0, len(centres), 8192):   # blocks bound the (block × facets) temporary (≤ 8192 × F doubles)
+        blk = centres[i:i + 8192]
+        inside[i:i + 8192] = (blk @ eq[:, :3].T + eq[:, 3][None, :]).max(axis=1) <= pad
+    cand = grid[inside]
+    if not len(cand):
+        return empty
+    c = centres[inside]
+    zf = hull.z_floor if hull.z_floor is not None else z_floor
+    above = np.ones(len(c), bool) if zf is None else c[:, 2] >= float(zf)
+    protected = np.zeros(len(c), bool)
+    pp = hull.protect_points
+    if len(pp):
+        pk = np.floor((pp - org) / vs + 0.5).astype(np.int64)
+        key = lambda a: (a[:, 0] * ny + a[:, 1]) * nz + a[:, 2]   # noqa: E731 — linear index of the grid
+        ok = np.all((pk >= 0) & (pk < np.array([nx, ny, nz])), axis=1)
+        protected = np.isin(key(cand), np.unique(key(pk[ok])))
+    return {"cand": cand, "fill": above & ~protected, "protected": protected, "above": above}
+# --- T78b — end
 
 
 def oracle_cell_keys(points: np.ndarray, cell: float) -> np.ndarray:
@@ -1046,6 +1138,7 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
     |---|---|---|
     | 표면 | `d_t ≤ max_dist` ∧ `d_t < d_o` | 보인 표면의 seed — 이 episode 에 본 모든 표본 중 그 물체가 가장 가깝다 |
     | 띠 | 그 칸을 지나간 띠가 **그 물체 것뿐** (`band_masks`) ∧ `d_o > surface_protect·vs` ∧ `d_t ≤ max_dist` | 보인 면 **뒤** truncation 띠의 seed — TSDF 가 그 물체 pixel 의 광선으로 만든 음수 띠의 경계 (물체 밑 · 안쪽의 그림자 seed). 표면 표본에서 멀어 표면 길이 못 잡는다 (실측 C1a_ep54_s541 seq 16: 425 개, 앞 frame 광선의 것이 많아 이 요청의 카메라만으로는 설명되지 않는다 — 그래서 띠도 episode 동안 모은다) |
+    | 여유 (T78f, `contact_allowance_m` = M 일 때만) | `d_t ≤ M` ∧ `z_floor` 위 (`d_o` 와 상관없이) | 쥐는 순간 target 근처의 애매한 seed (옛 표면 · 손가락 mask 누락 표본이 더 가까운 것). 시나리오 가정: 쥐는 순간 target M mm 안에는 장애물이 없다 — 붙어 있는 이웃 · 얇은 벽도 지운다 |
     | 그 밖 | | 보존 (이웃 · table · crate 표면, 두 물체의 띠가 겹친 칸, 동률 — 보수 쪽) |
 
     부호 교정 후보 (`sign`) = 지운 seed ∪ 표면 길의 non-seed (그 물체 안쪽). 띠 길은 non-seed 의 부호를 바꾸지 않는다 —
@@ -1074,9 +1167,21 @@ def oracle_visible_split(centres: np.ndarray, is_seed: np.ndarray, oracle: Oracl
         band = ((m == bit) & seed & (d_t <= max_d) & above
                 & (d_o > float(oracle.surface_protect_voxels) * vs) & ~surface)
     removed = seed & (surface | band)
-    return {"removed": removed, "kept_other": seed & ~removed, "sign": surface | removed,
-            "surface": seed & surface, "band": band,
-            "d_t": d_t, "d_o": d_o, "n_other_near": int(len(op))}
+    # --- T78f — begin: contact allowance (None = the two paths above as is). Seeds `d_t ≤ M` above `z_floor` go,
+    # whatever `d_o` (union; `surface` · `band` keep their meaning). They join `sign` through `removed`; a non-seed is
+    # never added (its negative distance may be the neighbour's inside). `allowance_extra` = removed only by this rule.
+    allowance_extra = None
+    if oracle.contact_allowance_m is not None:
+        allow = seed & (d_t <= float(oracle.contact_allowance_m)) & above
+        allowance_extra = allow & ~removed
+        removed = removed | allow
+    # --- T78f — end
+    out = {"removed": removed, "kept_other": seed & ~removed, "sign": surface | removed,
+           "surface": seed & surface, "band": band,
+           "d_t": d_t, "d_o": d_o, "n_other_near": int(len(op))}
+    if allowance_extra is not None:   # T78f (the key exists only when on)
+        out["allowance_extra"] = allowance_extra
+    return out
 
 
 # --- IFG-CL2 — begin: `esdf.target_extent == "attention_surface_hybrid"` (ball_owned + attention-surface protection)
@@ -1619,8 +1724,13 @@ class CuroboFieldBuilder:
                surface_protect: Optional[SurfaceProtectEvidence] = None,
                robot_free_spheres: Optional[dict] = None,
                target_layer: Optional[TargetLayerRequest] = None,
-               roi_points: Optional[Sequence[Optional[np.ndarray]]] = None) -> CuroboEsdfField:
+               roi_points: Optional[Sequence[Optional[np.ndarray]]] = None,
+               grasp_corridor: Optional[Any] = None) -> CuroboEsdfField:
         """`EsdfBuilder.update` 와 같은 계약. 돌려주는 것은 `CuroboEsdfField` 다.
+
+        `grasp_corridor` (T83, `grasp.corridor.CorridorCarve`) 가 오면 **미세 target-free 계층에서만** 그 corridor 합집합
+        안의 seed 를 지운다 (지지면 band 안 · 아래 seed 는 남긴다, `_corridor_carve`). 본 계층 · 거친 계층은 그대로.
+        `None` (기본) 이면 예전 호출과 같다. 기록 `stats["target_free"]["grasp_corridor"]`.
 
         `exclude_target` 는 **지원하지 않는다.** E1 이 그것을 폐기했다 — 필드는 익명이라
         아직 안 쥔 target 을 파내면 손끝뿐 아니라 전신에게 사라진다. 지금 코드는 항상
@@ -1871,6 +1981,8 @@ class CuroboFieldBuilder:
             free_tiers = self._build_tiers(itg, remove, dev, torch, only="fine",
                                            tier_name="fine_no_target",
                                            ball=target_free_ball, itg_fine=itg_fine,
+                                           # T83: only with a grasp corridor this frame (None = the call as before).
+                                           **({} if grasp_corridor is None else {"corridor": grasp_corridor}),
                                            # T46e: oracle 이 오면 미세 계층의 분할은 그것이다 (owned 는 거친 계층만).
                                            owned=None if oracle_evidence is not None else owned_fine,
                                            **({} if oracle_evidence is None
@@ -2044,6 +2156,10 @@ class CuroboFieldBuilder:
             # T44c A5: target 을 지운 거친 계층 (`mode`: off · skipped_no_ball · ball · ball_owned).
             "coarse": coarse_stats,
         }
+        if grasp_corridor is not None:   # T83 (absent when no corridor came)
+            rec = next((dict(t.extra["grasp_corridor"]) for t in free_tiers if "grasp_corridor" in t.extra), None)
+            stats["target_free"]["grasp_corridor"] = rec if rec is not None else {
+                "applied": False, "why": ("target_layer path" if tl_active else "no fine target-free tier")}
         if probe is not None:
             lower, upper = self._bounds
             # 정보용이다 — 인증에 쓰지 않는다. `stride` 를 함께 싣는 것이 추정값임을 밝히는 것.
@@ -2265,7 +2381,8 @@ class CuroboFieldBuilder:
                      owned: Optional["OwnedEvidence"] = None,
                      coarse_free: Optional[CoarseFreeSpec] = None,
                      oracle: Optional[OracleVisibleEvidence] = None,
-                     surface_protect: Optional[SurfaceProtectEvidence] = None) -> list[_Tier]:
+                     surface_protect: Optional[SurfaceProtectEvidence] = None,
+                     corridor: Optional[Any] = None) -> list[_Tier]:
         """계층마다 seed -> (제외) -> propagate -> 복사.
 
         `Mapper.compute_esdf` 를 부르지 않는다 — 그쪽은 CUDA graph 로 seed·propagate·distance
@@ -2323,6 +2440,9 @@ class CuroboFieldBuilder:
             elif oracle is not None:
                 # T46e A13: 미세 target-free 계층의 제외를 GT 표본으로 (공 · ownership 대신). 공은 기록에만.
                 n_ball, ball_idx, excl = self._oracle_exclusion(itg, oracle, org, vs, shape)
+                if oracle.hull_fill is not None:   # T78b (None = the call as before)
+                    n_ball, ball_idx, excl = self._hull_fill_exclusion(itg, oracle, org, vs, shape,
+                                                                       n_ball, ball_idx, excl)
                 if ball_idx is not None:
                     att_idx = (ball_idx if att_idx is None
                                else np.unique(np.vstack([att_idx, ball_idx]), axis=0))
@@ -2339,6 +2459,14 @@ class CuroboFieldBuilder:
                 if ball_idx is not None:
                     att_idx = (ball_idx if att_idx is None
                                else np.unique(np.vstack([att_idx, ball_idx]), axis=0))
+
+            corridor_rec = None
+            if corridor is not None:
+                # T83: after the target exclusion, before the distance transform — the grasp corridor's seeds.
+                corridor_rec, c_idx = self._corridor_carve(itg, corridor, org, vs, shape)
+                if c_idx is not None:
+                    att_idx = (c_idx if att_idx is None
+                               else np.unique(np.vstack([att_idx, c_idx]), axis=0))
 
             itg._propagate_and_distance_impl(origin, itg._esdf_voxel_size)
             vg = itg.get_voxel_grid()
@@ -2364,8 +2492,48 @@ class CuroboFieldBuilder:
                 tier.extra["exclusion"] = excl["counts"]
                 tier.extra["exclusion_trace"] = excl["trace"]
             tier.extra.update(sign)
+            if corridor_rec is not None:
+                tier.extra["grasp_corridor"] = corridor_rec
             tiers.append(tier)
         return tiers
+
+    #: T83 — at most this many carved voxel indices go into the record (`carved_ijk`).
+    CORRIDOR_RECORD_VOXELS = 4000
+
+    def _corridor_carve(self, itg, corridor, origin: np.ndarray, voxel_size: float, shape):
+        """T83 — clear the seeds inside the union of the grasp corridors (`grasp.corridor.corridor_voxels`) except those
+        within `support_band` of a support plane or below it. Returns `(record, sign_idx | None)`: the corridor voxels
+        that are not support (seed or not) join the sign correction (`_force_sign_on_pure_voxels` flips only voxels
+        with nothing else near — the hull-fill rule, T78b). Record: `applied`, `n_poses`, `n_corridor_voxels`,
+        `n_support_voxels`, `n_seeds_in_corridor`, `n_seeds_carved`, `n_support_seeds_kept`, `ms`; the carved voxel
+        indices (`carved_ijk`) with `origin` / `voxel_size` for the replay analysis."""
+        from AG3S.ag3s.grasp.corridor import corridor_voxels, near_or_below_support
+
+        t0 = time.monotonic()
+        req = corridor.request
+        vs = float(voxel_size)
+        cand = corridor_voxels(req, origin, vs, shape)
+        rec = {"applied": True, "n_poses": int(req.n_poses), "n_corridor_voxels": int(len(cand)),
+               "n_support_voxels": 0, "n_seeds_in_corridor": 0, "n_seeds_carved": 0, "n_support_seeds_kept": 0,
+               "origin": [float(v) for v in np.asarray(origin, np.float64).reshape(3)], "voxel_size": vs,
+               "carved_ijk": []}
+        if not len(cand):
+            rec["ms"] = round((time.monotonic() - t0) * 1e3, 3)
+            return rec, None
+        centres = np.asarray(origin, np.float64)[None, :] + cand.astype(np.float64) * vs
+        support = near_or_below_support(centres, corridor.planes, float(req.support_band))
+        seed = self._seed_mask(itg, cand)
+        carve = cand[seed & ~support]
+        n = 0
+        if len(carve):
+            n, _ = self._clear_seeds(itg, carve, shape)
+        free = cand[~support]
+        rec.update(n_support_voxels=int(support.sum()), n_seeds_in_corridor=int(seed.sum()), n_seeds_carved=int(n),
+                   n_support_seeds_kept=int((seed & support).sum()),
+                   carved_ijk=np.asarray(carve, np.int64).reshape(-1, 3)[:self.CORRIDOR_RECORD_VOXELS].tolist(),
+                   carved_ijk_truncated=bool(len(carve) > self.CORRIDOR_RECORD_VOXELS),
+                   ms=round((time.monotonic() - t0) * 1e3, 3))
+        return rec, (free if len(free) else None)
 
     @staticmethod
     def _exclusion_counts(free_tiers) -> dict:
@@ -2388,6 +2556,8 @@ class CuroboFieldBuilder:
                 out["owned"] = dict(ex["owned"])
             if "oracle" in ex:   # T46e A13 (oracle_visible 일 때만 있다)
                 out["oracle_split"] = dict(ex["oracle"])
+            if "hull_fill" in ex:   # T78b (surface_hull_fill 이 걸린 frame 만)
+                out["hull_fill"] = dict(ex["hull_fill"])
             if "surface_protect" in ex:   # IFG-CL2 (attention_surface_hybrid 이고 보호가 걸린 frame 만)
                 out["surface_protect"] = dict(ex["surface_protect"])
             if "stem_cap" in ex:   # AG3S-PRE-CORE-TO-STEMCAP (target_stem_cap 이 켜졌을 때만)
@@ -3151,6 +3321,10 @@ class CuroboFieldBuilder:
                 "n_other_points": int(len(oracle.other_points)), "n_candidates": 0,
                 "n_band_cells": int(len(oracle.band_keys)),
                 "z_floor_m": None if oracle.z_floor is None else float(oracle.z_floor)}
+        # --- T78f — begin (keys only when on; the count is filled below when there are candidates)
+        if oracle.contact_allowance_m is not None:
+            info.update({"allowance_mm": round(float(oracle.contact_allowance_m) * 1e3, 6), "n_allowance_extra": 0})
+        # --- T78f — end
         cand = oracle_candidates(oracle.target_points, origin, vs, shape, max_d)
         if cand is None:
             counts["oracle"] = info
@@ -3167,6 +3341,8 @@ class CuroboFieldBuilder:
         info.update({"n_candidates": int(len(cand)), "n_other_near": split["n_other_near"],
                      "n_removed_surface": int(split["surface"].sum()),
                      "n_removed_band": int(split["band"].sum())})
+        if oracle.contact_allowance_m is not None:   # T78f — the seeds only the allowance removed
+            info["n_allowance_extra"] = int(split["allowance_extra"].sum())
         counts.update({
             "n_seeds_in_ball": int(seed.sum()),
             "n_removed": int(n),
@@ -3180,6 +3356,51 @@ class CuroboFieldBuilder:
         trace["nontarget_kept_ijk"] = cand[split["kept_other"]]
         counts["classify_ms"] = round((time.monotonic() - t0) * 1e3, 3)
         return n, (sign_idx if len(sign_idx) else None), {"counts": counts, "trace": trace}
+
+    def _hull_fill_exclusion(self, itg, oracle: OracleVisibleEvidence, origin: np.ndarray, voxel_size: float, shape,
+                             n_removed: int, sign_idx, excl):
+        """T78b — after `_oracle_exclusion`: clear every seed still inside the hull (`hull_fill_split`: + pad, above
+        `z_floor`, not a voxel holding a dropped component's sample), and add the hull's fill voxels to the sign
+        correction set (`_force_sign_on_pure_voxels` flips only voxels with nothing else near). Same contract
+        `(n_removed, sign_idx | None, excl)`; the extra seeds join `trace["removed_ijk"]` and `counts["n_removed"]`;
+        `counts["hull_fill"]` says how many."""
+        t0 = time.monotonic()
+        hull = oracle.hull_fill
+        split = hull_fill_split(hull, origin, voxel_size, shape, z_floor=oracle.z_floor)
+        cand = split["cand"]
+        zf = hull.z_floor if hull.z_floor is not None else oracle.z_floor
+        rec = {**dict(hull.info), "pad_mm": round(float(hull.pad_m) * 1e3, 3),
+               "z_floor_m": None if zf is None else float(zf),
+               "n_hull_voxels": int(len(cand)), "n_below_floor": int((~split["above"]).sum()),
+               "n_protected": int(split["protected"].sum()), "n_protect_points": int(len(hull.protect_points)),
+               "n_seeds_left_in_hull": 0, "n_extra_removed": 0, "n_sign_extra": 0}
+        counts, trace = excl["counts"], excl["trace"]
+        if len(cand):
+            seed = self._seed_mask(itg, cand)          # seeds `_oracle_exclusion` left (it cleared its own already)
+            rec["n_seeds_left_in_hull"] = int(seed.sum())
+            extra = cand[seed & split["fill"]]
+            n = 0
+            if len(extra):
+                n, _ = self._clear_seeds(itg, extra, shape)
+            rec["n_extra_removed"] = int(n)
+            rec["n_seeds_kept_protected"] = int((seed & split["protected"]).sum())
+            rec["n_seeds_kept_below_floor"] = int((seed & ~split["above"]).sum())
+            fill = cand[split["fill"]]
+            if len(fill):
+                old = np.zeros((0, 3), np.int64) if sign_idx is None else np.asarray(sign_idx, np.int64)
+                merged = np.unique(np.vstack([old, fill]), axis=0)
+                rec["n_sign_extra"] = int(len(merged) - len(old))
+                sign_idx = merged
+            n_removed = int(n_removed) + int(n)
+            counts["n_removed"] = int(counts.get("n_removed", 0)) + int(n)
+            if len(extra):
+                trace["removed_ijk"] = np.vstack([np.asarray(trace["removed_ijk"], np.int64).reshape(-1, 3), extra])
+            counts["n_sign_candidates"] = int(0 if sign_idx is None else len(sign_idx))
+        rec["ms"] = round((time.monotonic() - t0) * 1e3, 3)
+        counts["hull_fill"] = rec
+        counts["classify_ms"] = round(float(counts.get("classify_ms", 0.0)) + rec["ms"], 3)
+        return n_removed, (sign_idx if sign_idx is not None and len(sign_idx) else None), {"counts": counts,
+                                                                                             "trace": trace}
 
     def _coarse_ball_exclusion(self, itg, ball: "TargetBall", origin: np.ndarray,
                                voxel_size: float, shape, spec: CoarseFreeSpec):

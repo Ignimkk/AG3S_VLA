@@ -1,0 +1,720 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/r2_analysis/t8182_r2.json",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/r2_analysis/t8182_r2_fig.py",
+ "outcome": {
+  "REG211": {
+   "off": {
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "forbidden": false,
+    "label": "쥐지못함",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 600,
+    "n_planning": 75,
+    "sim_s": 40.0,
+    "completeness": {}
+   },
+   "on": {
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "forbidden": false,
+    "label": "쥐지못함",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 600,
+    "n_planning": 75,
+    "sim_s": 40.0,
+    "completeness": {}
+   }
+  },
+  "REG954": {
+   "off": {
+    "grasp": true,
+    "place": true,
+    "success": true,
+    "forbidden": false,
+    "label": "성공",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 548,
+    "n_planning": 69,
+    "sim_s": 36.53,
+    "completeness": {}
+   },
+   "on": {
+    "grasp": true,
+    "place": true,
+    "success": true,
+    "forbidden": false,
+    "label": "성공",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 445,
+    "n_planning": 56,
+    "sim_s": 29.67,
+    "completeness": {}
+   }
+  },
+  "REG119k1": {
+   "off": {
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "forbidden": false,
+    "label": "쥐지못함",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 600,
+    "n_planning": 75,
+    "sim_s": 40.0,
+    "completeness": {}
+   },
+   "on": {
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "forbidden": false,
+    "label": "쥐지못함",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 600,
+    "n_planning": 75,
+    "sim_s": 40.0,
+    "completeness": {}
+   }
+  },
+  "OCC122": {
+   "off": {
+    "grasp": true,
+    "place": true,
+    "success": true,
+    "forbidden": false,
+    "label": "성공",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 269,
+    "n_planning": 34,
+    "sim_s": 17.93,
+    "completeness": {}
+   },
+   "on": {
+    "grasp": true,
+    "place": true,
+    "success": true,
+    "forbidden": false,
+    "label": "성공",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 276,
+    "n_planning": 35,
+    "sim_s": 18.4,
+    "completeness": {}
+   }
+  },
+  "C_ep56_forward": {
+   "off": {
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "forbidden": false,
+    "label": "쥐지못함",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 600,
+    "n_planning": 75,
+    "sim_s": 40.0,
+    "completeness": {}
+   },
+   "on": {
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "forbidden": false,
+    "label": "쥐지못함",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 600,
+    "n_planning": 75,
+    "sim_s": 40.0,
+    "completeness": {}
+   }
+  },
+  "C_ep56_back": {
+   "off": {
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "forbidden": false,
+    "label": "쥐지못함",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 600,
+    "n_planning": 75,
+    "sim_s": 40.0,
+    "completeness": {}
+   },
+   "on": {
+    "grasp": false,
+    "place": false,
+    "success": false,
+    "forbidden": false,
+    "label": "쥐지못함",
+    "contact_rows": {
+     "neighbour_fruit": 0,
+     "body_target": 0,
+     "post": 0,
+     "basket": 0,
+     "table": 0
+    },
+    "contact_first_row": {},
+    "n_control": 600,
+    "n_planning": 75,
+    "sim_s": 40.0,
+    "completeness": {}
+   }
+  }
+ },
+ "t81": {
+  "REG211": {
+   "off": {
+    "event_request": null,
+    "event_kind": null,
+    "old_centre": null,
+    "releases": [],
+    "n_vacancy_records": 0,
+    "vacancy_verdicts": {}
+   },
+   "on": {
+    "event_request": null,
+    "event_kind": null,
+    "old_centre": null,
+    "releases": [],
+    "n_vacancy_records": 75,
+    "vacancy_verdicts": {
+     "null": 1,
+     "kept": 74
+    }
+   }
+  },
+  "REG954": {
+   "off": {
+    "event_request": null,
+    "event_kind": null,
+    "old_centre": null,
+    "releases": [],
+    "n_vacancy_records": 0,
+    "vacancy_verdicts": {}
+   },
+   "on": {
+    "event_request": 19,
+    "event_kind": "push",
+    "old_centre": [
+     0.533866300109586,
+     -0.3397383972459442,
+     0.8504785127471941
+    ],
+    "requests_to_follow": 0,
+    "requests_to_clear_old": 35,
+    "n_after": 37,
+    "apple_disp_at_event_mm": 20.9,
+    "new_grasp": true,
+    "first_held": 41,
+    "releases": [],
+    "n_vacancy_records": 56,
+    "vacancy_verdicts": {
+     "null": 18,
+     "kept": 38
+    }
+   }
+  },
+  "REG119k1": {
+   "off": {
+    "event_request": null,
+    "event_kind": null,
+    "old_centre": null,
+    "releases": [],
+    "n_vacancy_records": 0,
+    "vacancy_verdicts": {}
+   },
+   "on": {
+    "event_request": null,
+    "event_kind": null,
+    "old_centre": null,
+    "releases": [],
+    "n_vacancy_records": 75,
+    "vacancy_verdicts": {
+     "null": 1,
+     "kept": 65,
+     "undecidable": 9
+    }
+   }
+  },
+  "OCC122": {
+   "off": {
+    "event_request": 18,
+    "event_kind": "push",
+    "old_centre": [
+     0.5336878770973313,
+     0.3146506806400303,
+     0.8500021091888648
+    ],
+    "requests_to_follow": "못 따라감",
+    "requests_to_clear_old": 15,
+    "n_after": 16,
+    "apple_disp_at_event_mm": 25.0,
+    "new_grasp": true,
+    "first_held": 19,
+    "releases": [],
+    "n_vacancy_records": 0,
+    "vacancy_verdicts": {}
+   },
+   "on": {
+    "event_request": 18,
+    "event_kind": "push",
+    "old_centre": [
+     0.5336878770973313,
+     0.3146506806400303,
+     0.8500021091888648
+    ],
+    "requests_to_follow": "못 따라감",
+    "requests_to_clear_old": 14,
+    "n_after": 17,
+    "apple_disp_at_event_mm": 20.4,
+    "new_grasp": true,
+    "first_held": 19,
+    "releases": [],
+    "n_vacancy_records": 35,
+    "vacancy_verdicts": {
+     "null": 18,
+     "kept": 17
+    }
+   }
+  },
+  "C_ep56_forward": {
+   "off": {
+    "event_request": 14,
+    "event_kind": "move",
+    "old_centre": [
+     0.5123199063826878,
+     -0.34863973938464904,
+     0.8500006196556708
+    ],
+    "requests_to_follow": 49,
+    "requests_to_clear_old": "못 지움",
+    "n_after": 61,
+    "apple_disp_at_event_mm": 60.0,
+    "new_grasp": false,
+    "first_held": null,
+    "releases": [],
+    "n_vacancy_records": 0,
+    "vacancy_verdicts": {}
+   },
+   "on": {
+    "event_request": 11,
+    "event_kind": "move",
+    "old_centre": [
+     0.512358994473641,
+     -0.3486422526351777,
+     0.8500018677405792
+    ],
+    "requests_to_follow": 1,
+    "requests_to_clear_old": "못 지움",
+    "n_after": 64,
+    "apple_disp_at_event_mm": 60.0,
+    "new_grasp": false,
+    "first_held": null,
+    "releases": [
+     {
+      "request": 12,
+      "prev_target_on_apple_frac": 0.018,
+      "wrong": false,
+      "apple_disp_from_req0_mm": 60.1,
+      "vacancy": {
+       "applies": true,
+       "why": null,
+       "latch": "open",
+       "camera": "right_wrist",
+       "n_judged": 100,
+       "n_valid": 100,
+       "n_robot": 0,
+       "empty": 0.84,
+       "occluded": 0.03,
+       "present": 0.13,
+       "verdict": "empty",
+       "streak": 2,
+       "decision": "release",
+       "released_id": 0,
+       "repick": {
+        "rank": 0,
+        "near": true,
+        "distance_mm": 57.1,
+        "centroid": [
+         0.5684424795404325,
+         -0.342527658945058,
+         0.8669062577037627
+        ],
+        "score": 0.8909936385870976,
+        "n_near": 1,
+        "n_candidates": 1
+       },
+       "reselect_pending": null
+      },
+      "decision": {
+       "mode": "first",
+       "reason": "vacancy_released",
+       "frozen": false,
+       "latched": true
+      },
+      "n_target_after": 114,
+      "target_to_vis_mm_after": 5.0
+     }
+    ],
+    "n_vacancy_records": 75,
+    "vacancy_verdicts": {
+     "null": 1,
+     "kept": 68,
+     "empty": 2,
+     "undecidable": 4
+    }
+   }
+  },
+  "C_ep56_back": {
+   "off": {
+    "event_request": 14,
+    "event_kind": "move",
+    "old_centre": [
+     0.5123199063826878,
+     -0.34863973938464904,
+     0.8500006196556708
+    ],
+    "requests_to_follow": 48,
+    "requests_to_clear_old": "못 지움",
+    "n_after": 61,
+    "apple_disp_at_event_mm": 60.0,
+    "new_grasp": false,
+    "first_held": null,
+    "releases": [],
+    "n_vacancy_records": 0,
+    "vacancy_verdicts": {}
+   },
+   "on": {
+    "event_request": 11,
+    "event_kind": "move",
+    "old_centre": [
+     0.512358994473641,
+     -0.3486422526351777,
+     0.8500018677405792
+    ],
+    "requests_to_follow": 1,
+    "requests_to_clear_old": "못 지움",
+    "n_after": 64,
+    "apple_disp_at_event_mm": 60.1,
+    "new_grasp": false,
+    "first_held": null,
+    "releases": [
+     {
+      "request": 12,
+      "prev_target_on_apple_frac": 0.088,
+      "wrong": false,
+      "apple_disp_from_req0_mm": 59.9,
+      "vacancy": {
+       "applies": true,
+       "why": null,
+       "latch": "open",
+       "camera": "right_wrist",
+       "n_judged": 88,
+       "n_valid": 88,
+       "n_robot": 0,
+       "empty": 0.8864,
+       "occluded": 0.0682,
+       "present": 0.0455,
+       "verdict": "empty",
+       "streak": 2,
+       "decision": "release",
+       "released_id": 0,
+       "repick": {
+        "rank": 0,
+        "near": true,
+        "distance_mm": 63.3,
+        "centroid": [
+         0.4502993881711469,
+         -0.33779633186692937,
+         0.8668685449938067
+        ],
+        "score": 0.7096222377931612,
+        "n_near": 1,
+        "n_candidates": 3
+       },
+       "reselect_pending": null
+      },
+      "decision": {
+       "mode": "first",
+       "reason": "vacancy_released",
+       "frozen": false,
+       "latched": true
+      },
+      "n_target_after": 99,
+      "target_to_vis_mm_after": 7.0
+     }
+    ],
+    "n_vacancy_records": 75,
+    "vacancy_verdicts": {
+     "null": 2,
+     "kept": 71,
+     "empty": 2
+    }
+   }
+  }
+ },
+ "t82": {
+  "켜짐 6 run 합계": {
+   "matrix": [
+    [
+     162,
+     13,
+     5,
+     6,
+     85,
+     0
+    ],
+    [
+     58,
+     31,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     9,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     2,
+     11,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     9,
+     0
+    ]
+   ],
+   "rows": [
+    "approach",
+    "grasp",
+    "carry",
+    "place",
+    "retreat"
+   ],
+   "cols": [
+    "approach",
+    "grasp",
+    "carry",
+    "place",
+    "retreat",
+    "none"
+   ],
+   "accuracy": 0.568
+  },
+  "회귀 · 가림 4 run": {
+   "matrix": [
+    [
+     123,
+     0,
+     0,
+     0,
+     11,
+     0
+    ],
+    [
+     58,
+     18,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     9,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     2,
+     11,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     9,
+     0
+    ]
+   ],
+   "rows": [
+    "approach",
+    "grasp",
+    "carry",
+    "place",
+    "retreat"
+   ],
+   "cols": [
+    "approach",
+    "grasp",
+    "carry",
+    "place",
+    "retreat",
+    "none"
+   ],
+   "accuracy": 0.705
+  },
+  "사과 옮김 2 run": {
+   "matrix": [
+    [
+     39,
+     13,
+     5,
+     6,
+     74,
+     0
+    ],
+    [
+     0,
+     13,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   "rows": [
+    "approach",
+    "grasp",
+    "carry",
+    "place",
+    "retreat"
+   ],
+   "cols": [
+    "approach",
+    "grasp",
+    "carry",
+    "place",
+    "retreat",
+    "none"
+   ],
+   "accuracy": 0.347
+  }
+ }
+}

@@ -368,8 +368,79 @@ class CostConfig:
     #: scene points / the obstacle memory, default) or "field" (this request's trajectory-optimizer distance field
     #: without the target — the TSDF the optimizer itself avoids; the §3i coverage was 0.98-0.99 against 0.50-0.81).
     geo_obstacle_source: str = "points"
+    #: **T72 — collision-aware grasp set as a reach constraint** (`grasp_set.py`, `serve_safe --grasp-set-to`).
+    #: `False` (default) = off: no candidate, no reach box, every request and every record key as before. On: in the
+    #: A6 "grasp moment" window (latch `latched` / `closing`, palm site within `grasp_set_gate` of the target, the
+    #: policy chunk closes at 0 < c < H or the latch is closing; HSR6 ④ does not withdraw it) the candidates of
+    #: `generate_candidates` (mu `grasp_set_mu`, at most `grasp_set_max_candidates`, `grasp_set_time_budget_ms`, IK
+    #: required) that also clear the TrajOpt's own sphere rows at the grasp and pre-grasp IK (d - r - margin >= 0) are
+    #: scored ``J = dq' W dq / sigma_q^2 + lambda_I [(dp / sigma_p)^2 + (dtheta / sigma_theta)^2] + lambda_Q (1 - Q)``
+    #: (task §2c) and the argmin (hysteresis `grasp_set_switch_ratio`) becomes a per-axis `grasp_set_box` reach box on
+    #: `grasp_set_rows` rows from the close row (closing: rows 1.., only within `grasp_set_closing_radius` of the grasp)
+    #: with the box slack at `w_slack` and a `grasp_set_w_rot` rotation term. Fixed values (task §2b-c, not on the CLI).
+    #: Exclusive with the IFG-TOA / E1 anchor and `geo_grasp`.
+    grasp_set: bool = False
+    grasp_set_mu: float = 0.8
+    grasp_set_max_candidates: int = 8
+    grasp_set_time_budget_ms: float = 150.0
+    grasp_set_sigma_q: float = 0.1               # rad
+    grasp_set_sigma_p: float = 0.020             # m (E3 close: apple - pad centre 20-22 mm)
+    grasp_set_sigma_theta_deg: float = 15.0
+    grasp_set_lambda_intent: float = 1.0
+    grasp_set_lambda_quality: float = 1.0
+    grasp_set_max_pos: float = 0.060             # eligibility: |p_i - p_v| (m)
+    grasp_set_max_rot_deg: float = 30.0          # eligibility: theta(R_i, R_v), finger swap = same grasp
+    grasp_set_switch_ratio: float = 0.8          # hysteresis: switch only when J_new < ratio * J_kept
+    grasp_set_same_pos: float = 0.006            # "the same grasp": hold-link position within (m) ...
+    grasp_set_same_axis_deg: float = 15.0        # ... and closing axis within (deg, sign-agnostic)
+    grasp_set_box: float = 0.005                 # reach box half-width per axis (m)
+    grasp_set_rows: int = 3                      # reach rows from the close row (closing: rows 1..)
+    grasp_set_w_rot: float = 5.0                 # rotation term weight (per rad^2), G1's value
+    grasp_set_closing_radius: float = 0.020      # closing: the box only while the palm is within this of the grasp
+    grasp_set_gate: float = 0.060                # the A6 window: palm site - target centre (m)
+    #: T72 step 1 (user 2026-10-30): while the grasp-set reach box is active, the grasping arm's VLA tracking weight
+    #: is multiplied by this (`serve_safe --grasp-set-track-scale`, G1's B2 pattern). 1.0 = unchanged (bit identical).
+    grasp_set_track_scale: float = 1.0
+    #: T72b ① — while the reach box is on, open the look-ahead gate so all planned rows are solved (the close row
+    #: is usually past the 8-row execution window). `serve_safe --grasp-set-full-horizon`. False = unchanged.
+    grasp_set_full_horizon: bool = False
+    #: T72b ② — candidates are collision-checked only by the TrajOpt model (the distance field on the solver's hand /
+    #: finger rows, grasp and pre-grasp pose); the generator's scene-point hand-box check is skipped (its target
+    #: check stays). `serve_safe --grasp-set-field-only`. False = unchanged.
+    grasp_set_field_only: bool = False
 
     def validate(self) -> None:
+        if not isinstance(self.grasp_set, bool):
+            raise TrajOptConfigError(f"cost.grasp_set must be a bool, got {self.grasp_set!r}")
+        if self.grasp_set:   # T72
+            if self.w_grasp_tcp > 0.0 or self.w_grasp_goal > 0.0 or self.grasp_goal_box > 0.0 or self.geo_grasp:
+                raise TrajOptConfigError(
+                    "cost.grasp_set (T72 grasp-set reach constraint) replaces the IFG-TOA / E1 grasp anchor and "
+                    "geo_grasp (G1): set w_grasp_tcp, w_grasp_goal, grasp_goal_box to 0 and geo_grasp off")
+            for name in ("grasp_set_mu", "grasp_set_sigma_q", "grasp_set_sigma_p", "grasp_set_sigma_theta_deg",
+                         "grasp_set_max_pos", "grasp_set_max_rot_deg", "grasp_set_same_pos",
+                         "grasp_set_same_axis_deg", "grasp_set_box", "grasp_set_closing_radius", "grasp_set_gate"):
+                v = getattr(self, name)
+                if not (math.isfinite(v) and v > 0.0):
+                    raise TrajOptConfigError(f"cost.{name} must be a finite value > 0, got {v}")
+            for name in ("grasp_set_lambda_intent", "grasp_set_lambda_quality", "grasp_set_w_rot",
+                         "grasp_set_time_budget_ms"):
+                v = getattr(self, name)
+                if not (math.isfinite(v) and v >= 0.0):
+                    raise TrajOptConfigError(f"cost.{name} must be a finite value >= 0, got {v}")
+            for name in ("grasp_set_full_horizon", "grasp_set_field_only"):
+                if not isinstance(getattr(self, name), bool):
+                    raise TrajOptConfigError(f"cost.{name} must be a bool, got {getattr(self, name)!r}")
+            if not 0.0 < self.grasp_set_track_scale <= 1.0:
+                raise TrajOptConfigError(
+                    f"cost.grasp_set_track_scale must be in (0, 1], got {self.grasp_set_track_scale}")
+            if not 0.0 < self.grasp_set_switch_ratio <= 1.0:
+                raise TrajOptConfigError(
+                    f"cost.grasp_set_switch_ratio must be in (0, 1], got {self.grasp_set_switch_ratio}")
+            for name in ("grasp_set_max_candidates", "grasp_set_rows"):
+                v = getattr(self, name)
+                if not (isinstance(v, int) and not isinstance(v, bool) and v >= 1):
+                    raise TrajOptConfigError(f"cost.{name} must be an integer >= 1, got {v!r}")
         if self.geo_grasp:
             if self.geo_goal_mode not in ("redirect", "correct"):
                 raise TrajOptConfigError(f"cost.geo_goal_mode must be 'redirect' or 'correct', got {self.geo_goal_mode!r}")
@@ -840,8 +911,19 @@ class SqpConfig:
     #: violation is chosen; the rest stay unchecked (`checked: False` in the record). When none resolves, every
     #: remaining result is checked and `select` decides, as with `"all"`. Same choice, fewer checks. Needs `gpu_seeds`.
     gpu_seeds_check: str = "all"
+    # --- T88 — begin (task `handoff/T88.task.md` §1; `serve_safe --passthrough-when-clear`) ---
+    #: **T88 — pass the policy chunk through when it is already clear.** `False` (default) = as before: every chunk is
+    #: optimized. `True`: when the VLA reference chunk itself has no collision violation (the executed window with
+    #: look-ahead, else the whole chunk, at the same clearance floors the solve uses; the rows between waypoints too
+    #: when `reduction.sweep_check` is on) and no joint-limit overshoot, the reference is returned as it is
+    #: (`TrajectoryOptimizer._finish` still measures it; `to.metrics.passthrough_clear`). A chunk with a violation, an
+    #: uncertified geometry (when certification is required) or collision off is optimized as before.
+    passthrough_when_clear: bool = False
+    # --- T88 — end ---
 
     def validate(self) -> None:
+        if not isinstance(self.passthrough_when_clear, bool):   # T88
+            raise TrajOptConfigError(f"sqp.passthrough_when_clear must be a bool, got {self.passthrough_when_clear!r}")
         if isinstance(self.multi_seed, bool) or not isinstance(self.multi_seed, int) or self.multi_seed < 0:
             raise TrajOptConfigError(f"sqp.multi_seed must be an int >= 0, got {self.multi_seed!r}")
         if self.gpu_seeds not in ("off", "curobo"):   # AG3S-PRE-CORE-TO E3-b
@@ -1035,6 +1117,38 @@ class CollisionBackendConfig:
     neighbour_palm_contact_depth: float = 0.0
     neighbour_palm_contact_radius: float = 0.12
     neighbour_palm_contact_gate: float = 0.06
+    #: **T67 ③ — IFG-NBC on at depth 0** (`serve_safe --neighbour-contact-mm 0`). `False` (default) = IFG-NBC is on
+    #: iff `neighbour_contact_depth > 0` (the rule before T67, bit-identical; the key is also left out of `to_dict`).
+    #: `True` = IFG-NBC is on with `neighbour_contact_depth` as given, including 0: the window's finger–neighbour rows
+    #: then require `d − r ≥ 0` (no overlap allowed, no clearance asked) instead of `obstacle_margin`.
+    neighbour_contact_at_zero: bool = False
+    #: **T67 ① — support-surface offset of the fine layers (m).** `0.0` (default) = off (bit-identical; the key is also
+    #: left out of `to_dict`). On, a robot row (not held) that `_obstacle_rows` classes `support` (table / floor plane)
+    #: and whose distance was answered by a fine tier (`answer_tier` ∈ {`fine`, `target_free`}: the 5 mm main layer or
+    #: the 5 mm target-free layer) reads `d + offset`; the gradient is unchanged. Obstacle, target and held rows, and
+    #: rows answered by the coarse (20 mm) layer, the window edge, the analytic channel or outside the grid keep `d`.
+    #: Every step, every robot row; the solver's merit, final check and look-ahead read the same `_esdf_clearance`.
+    #: Why: the fine field's table top stands ~5 mm above the real one (`handoff/T67.bias.json`, median 4.95 mm over
+    #: 191 frames). Needs `obstacle_margin > 0` (the class table) and not `obstacle_margin_support` (no support class).
+    #: Final experiment value 0.004 (`--support-surface-offset-mm 4`).
+    support_surface_offset: float = 0.0
+    #: **T83 — grasp corridor carve** (`serve_safe --grasp-corridor-allow`, task `handoff/T83.task.md` §1 · §1b, fixed
+    #: before results). `False` (default) = off (bit-identical; the six keys are also left out of `to_dict`, and AG3S is
+    #: never told). On, before the grasp (latch not `held` / `placed`), `SafePolicy` hands AG3S the grasp corridor of the
+    #: grasping hand at `q_now` and at every planned row of the VLA reference chunk (`AG3S/ag3s/grasp/corridor.py`:
+    #: hold-link frame, `x` between the pads' inner faces minus `grasp_corridor_margin_in`, `|y| <= pad_half_y +
+    #: grasp_corridor_margin_y`, `z` from the pad tip minus `grasp_corridor_ahead` up to the palm face). When the
+    #: `q_now` corridor holds at least `grasp_corridor_min_target_points` points of this frame's manipulated (ATS target)
+    #: geometry, AG3S removes the obstacle seeds inside the union of those corridors from the **fine target-free tier
+    #: only** (the layer the grasping gripper's spheres read) before the distance transform; seeds within
+    #: `grasp_corridor_support_band` of a support plane or below it stay (the table stays an obstacle). Every other
+    #: layer, the TrajOpt rows and the final check are unchanged (they read the carved field as it is).
+    grasp_corridor_allow: bool = False
+    grasp_corridor_ahead: float = 0.060
+    grasp_corridor_min_target_points: int = 5
+    grasp_corridor_margin_in: float = 0.003
+    grasp_corridor_margin_y: float = 0.005
+    grasp_corridor_support_band: float = 0.003
     #: **T43 HM — the held object's rows get the same classification and margin as the robot's.**
     #: Once grasped the object is part of the robot (user, 2026-10-07): a held query row whose
     #: nearest field surface is an obstacle gets `max(its margin, obstacle_margin)`, exactly like a
@@ -1113,7 +1227,7 @@ class CollisionBackendConfig:
             raise ValueError(f"collision.backend must be one of {self.BACKENDS}, got {self.backend!r}")
         if self.esdf_margin < 0.0:
             raise ValueError(f"collision.esdf_margin must be >= 0, got {self.esdf_margin}")
-        for name in ("neighbour_contact_depth", "neighbour_palm_contact_depth"):
+        for name in ("neighbour_contact_depth", "neighbour_palm_contact_depth", "support_surface_offset"):
             v = getattr(self, name)
             if not (math.isfinite(v) and v >= 0.0):
                 raise TrajOptConfigError(f"collision.{name} must be a finite value >= 0, got {v}")
@@ -1125,6 +1239,20 @@ class CollisionBackendConfig:
         if not self.obstacle_margin >= 0.0:
             raise ValueError(
                 f"collision.obstacle_margin must be >= 0, got {self.obstacle_margin}")
+        if not isinstance(self.grasp_corridor_allow, bool):
+            raise TrajOptConfigError(
+                f"collision.grasp_corridor_allow must be a bool, got {self.grasp_corridor_allow!r}")
+        for name in ("grasp_corridor_ahead", "grasp_corridor_margin_in", "grasp_corridor_margin_y",
+                     "grasp_corridor_support_band"):
+            v = getattr(self, name)
+            if not (isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and v >= 0.0):
+                raise TrajOptConfigError(f"collision.{name} must be a finite value >= 0, got {v!r}")
+        k = self.grasp_corridor_min_target_points
+        if isinstance(k, bool) or not isinstance(k, int) or k < 1:
+            raise TrajOptConfigError(f"collision.grasp_corridor_min_target_points must be an int >= 1, got {k!r}")
+        if not isinstance(self.neighbour_contact_at_zero, bool):
+            raise TrajOptConfigError(
+                f"collision.neighbour_contact_at_zero must be a bool, got {self.neighbour_contact_at_zero!r}")
         if not isinstance(self.esdf_host_mirror, bool):
             raise ValueError(
                 f"collision.esdf_host_mirror must be a bool, got {self.esdf_host_mirror!r}")
@@ -1321,6 +1449,17 @@ _OMIT_WHEN_DEFAULT = {("cost", "grasp_goal_window"): "close", ("cost", "continui
 _OMIT_WHEN_DEFAULT.update({("collision", "neighbour_palm_contact_depth"): 0.0,
                            ("collision", "neighbour_palm_contact_radius"): 0.12,
                            ("collision", "neighbour_palm_contact_gate"): 0.06})
+#: T67 — IFG-NBC at depth 0 and the support-surface offset: without `--neighbour-contact-mm 0` /
+#: `--support-surface-offset-mm` the config dump keeps the keys it had before the options existed.
+_OMIT_WHEN_DEFAULT.update({("collision", "neighbour_contact_at_zero"): False,
+                           ("collision", "support_surface_offset"): 0.0})
+#: T83 — the grasp corridor carve: without `--grasp-corridor-allow` the config dump keeps the keys it had before.
+_OMIT_WHEN_DEFAULT.update({("collision", "grasp_corridor_allow"): False,
+                           ("collision", "grasp_corridor_ahead"): 0.060,
+                           ("collision", "grasp_corridor_min_target_points"): 5,
+                           ("collision", "grasp_corridor_margin_in"): 0.003,
+                           ("collision", "grasp_corridor_margin_y"): 0.005,
+                           ("collision", "grasp_corridor_support_band"): 0.003})
 #: AG3S-CORE-EVAL-G1 — the geometric grasp options (merged from `feature/geo-grasp`): without `--geo-*` flags the
 #: config dump (`--record-constraints` meta `trajopt_config`) keeps the keys it had before the merge.
 _OMIT_WHEN_DEFAULT.update({("cost", k): v for k, v in {
@@ -1330,6 +1469,19 @@ _OMIT_WHEN_DEFAULT.update({("cost", k): v for k, v in {
     "geo_correct_rot_deg": 20.0, "geo_correct_max_offset": 0.0, "geo_close_hold_radius": 0.03,
     "geo_track_scale": 1.0, "geo_continuity_off": False, "geo_carry_requests": 3, "geo_wrist_check": False,
     "geo_arm_check": False, "geo_obstacle_memory": False, "geo_obstacle_source": "points"}.items()})
+# --- T88 — begin ---
+#: T88 — the pass-through-when-clear switch: without `--passthrough-when-clear` the config dump keeps the keys it had before.
+_OMIT_WHEN_DEFAULT.update({("sqp", "passthrough_when_clear"): False})
+# --- T88 — end ---
+#: T72 — the grasp-set reach constraint: without `--grasp-set-to` the config dump keeps the keys it had before.
+_OMIT_WHEN_DEFAULT.update({("cost", k): v for k, v in {
+    "grasp_set": False, "grasp_set_mu": 0.8, "grasp_set_max_candidates": 8, "grasp_set_time_budget_ms": 150.0,
+    "grasp_set_sigma_q": 0.1, "grasp_set_sigma_p": 0.020, "grasp_set_sigma_theta_deg": 15.0,
+    "grasp_set_lambda_intent": 1.0, "grasp_set_lambda_quality": 1.0, "grasp_set_max_pos": 0.060,
+    "grasp_set_max_rot_deg": 30.0, "grasp_set_switch_ratio": 0.8, "grasp_set_same_pos": 0.006,
+    "grasp_set_same_axis_deg": 15.0, "grasp_set_box": 0.005, "grasp_set_rows": 3, "grasp_set_w_rot": 5.0,
+    "grasp_set_closing_radius": 0.020, "grasp_set_gate": 0.060, "grasp_set_track_scale": 1.0,
+    "grasp_set_full_horizon": False, "grasp_set_field_only": False}.items()})
 
 
 def _omit_default(section: str, field: str, value: Any) -> bool:

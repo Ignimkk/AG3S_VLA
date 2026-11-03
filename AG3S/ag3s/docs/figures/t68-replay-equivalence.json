@@ -1,0 +1,39 @@
+{
+ "replay_groups": [
+  {
+   "group": "9 장면 흔들림 없음",
+   "replayed": 125,
+   "bit_identical": 125,
+   "last60": 50,
+   "last60_identical": 50
+  },
+  {
+   "group": "9 장면 흔들림 1",
+   "replayed": 128,
+   "bit_identical": 128,
+   "last60": 40,
+   "last60_identical": 40
+  },
+  {
+   "group": "가림 기둥",
+   "replayed": 109,
+   "bit_identical": 109,
+   "last60": 26,
+   "last60_identical": 26
+  },
+  {
+   "group": "허들",
+   "replayed": 195,
+   "bit_identical": 195,
+   "last60": 100,
+   "last60_identical": 100
+  }
+ ],
+ "record": {
+  "쥐기 목표 항\ngate 기록": 334,
+  "④ 가 거둠": 295,
+  "④ 가 남김": 39,
+  "목표 행을 넣은\n요청 (쥐기 목표 항)": 0,
+  "목표 행을 넣은\n요청 (기하 보정)": 0
+ }
+}

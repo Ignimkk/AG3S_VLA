@@ -1,0 +1,35 @@
+{
+ "회귀211_k0": {
+  "request": 15,
+  "desc": "사과–바나나 맞닿음 (간격 ~1 mm)",
+  "BALL": {
+   "none": 464,
+   "apple": 692,
+   "apple_inside": 215,
+   "fruit": 103
+  },
+  "SURF": {
+   "none": 235,
+   "apple": 683,
+   "apple_inside": 211,
+   "fruit": 530
+  }
+ },
+ "허들119_k0": {
+  "request": 15,
+  "desc": "이웃 과일 ~20 mm 떨어짐",
+  "BALL": {
+   "fruit": 6,
+   "apple": 452,
+   "apple_inside": 231,
+   "robot": 269,
+   "none": 132
+  },
+  "SURF": {
+   "apple": 451,
+   "apple_inside": 229,
+   "robot": 261,
+   "none": 141
+  }
+ }
+}

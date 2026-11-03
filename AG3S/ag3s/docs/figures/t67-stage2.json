@@ -1,0 +1,25 @@
+{
+ "totals": {
+  "FIN": {
+   "success": 20,
+   "forbidden": 3,
+   "table_basket": 0,
+   "nine": 14,
+   "hurdle": 6
+  },
+  "C2": {
+   "success": 21,
+   "forbidden": 3,
+   "table_basket": 2,
+   "nine": 14,
+   "hurdle": 7
+  }
+ },
+ "rules": {
+  "1_success_ge_23": false,
+  "2_forbidden_le_3": true,
+  "3_table_basket_not_more": false,
+  "4_nine_ge_14_hurdle_ge_6": true
+ },
+ "verdict": "keep final configuration"
+}

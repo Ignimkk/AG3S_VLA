@@ -160,6 +160,9 @@ CLOSING_KEPT_GEOMETRY = "closing_kept_geometry"
 #: `ConfirmDecision.mode` (and `reason`) when nothing is held, a cluster is admissible, and the
 #: subtask gate is on with a confirmed `place` / `home` label — no first target (SUBTASK-c).
 SUBTASK_GATED = "subtask_gated"
+#: T81 (`clustering.target_vacancy_release`): `ConfirmDecision.reason` of the request whose vacancy
+#: evidence released the manipulated object (the old place is empty) — the re-pick's mode is `first`.
+VACANCY_RELEASED = "vacancy_released"
 
 
 # ----------------------------------------------------------------------------- clustering
@@ -432,6 +435,8 @@ class ManipulatedIdentity:
     #: IFG-FOLLOW: this frame's `TargetConfirm.follow_kept` record — `{applied, reason, radius_mm,
     #: n_points, residual_mm, shift_mm}` — or None when it did not run (always None with the flag off).
     follow: Optional[dict] = None
+    #: T81: this request's vacancy record (`TargetConfirm.vacancy_record`) — None with the flag off.
+    vacancy: Optional[dict] = None
 
     @property
     def usable(self) -> bool:
@@ -470,6 +475,8 @@ class ManipulatedIdentity:
             "hand": None if self.hand is None else dict(self.hand),
             # IFG-FOLLOW: only when it ran (off = the record keys of before).
             **({} if self.follow is None else {"follow": dict(self.follow)}),
+            # T81: only with the flag on (off = the record keys of before).
+            **({} if self.vacancy is None else {"vacancy": dict(self.vacancy)}),
         }
 
 
@@ -738,6 +745,24 @@ class TargetConfirm:
         self._refused_release_pending = False
         #: The id released by the latest call under 3(b), with its refusal count; None otherwise.
         self._refused_released: Optional[dict] = None
+        # --- T81 vacancy release (off by default; off = not read anywhere) ---
+        self.vacancy_release = bool(getattr(cfg, "target_vacancy_release", False))
+        self.vacancy_delta = float(getattr(cfg, "target_vacancy_delta", 0.02))
+        self.vacancy_p_empty = float(getattr(cfg, "target_vacancy_p_empty", 0.5))
+        self.vacancy_p_present = float(getattr(cfg, "target_vacancy_p_present", 0.2))
+        self.vacancy_min_points = int(getattr(cfg, "target_vacancy_min_points", 10))
+        self.vacancy_samples = int(getattr(cfg, "target_vacancy_samples", 200))
+        self.vacancy_frames = int(getattr(cfg, "target_vacancy_frames", 2))
+        self.vacancy_near = float(getattr(cfg, "target_vacancy_near", 0.2))
+        #: The cameras for the next grounding call (`note_views`); consumed by it.
+        self._views: Optional[list] = None
+        #: Consecutive requests whose old place read empty.
+        self._vacancy_streak = 0
+        #: Set by a release, cleared by the next adoption: `{id, centroid}` of the released object —
+        #: the re-pick looks near it first and is not blocked by the subtask gate.
+        self._vacancy_reselect: Optional[dict] = None
+        #: This call's record (`ManipulatedIdentity.vacancy`); None with the flag off.
+        self.vacancy_record: Optional[dict[str, Any]] = None
         # --- T43 T 3(c) ---
         smb = getattr(cfg, "supported_max_bottom", None)
         self.supported_max_bottom: Optional[float] = None if smb is None else float(smb)
@@ -841,6 +866,7 @@ class TargetConfirm:
             split=self._split_snapshot(),
             hand=None if self._hand_record is None else dict(self._hand_record),
             follow=None if self.follow_record is None else dict(self.follow_record),
+            vacancy=None if self.vacancy_record is None else dict(self.vacancy_record),
         )
 
     @property
@@ -905,6 +931,8 @@ class TargetConfirm:
         self._refused_streak, self._refused_release_pending = 0, False
         self._refused_released = None
         self._support, self.last_support = None, None
+        self._views, self._vacancy_streak, self._vacancy_reselect = None, 0, None   # T81
+        self.vacancy_record = None
         self.destinations.reset(destination_points)
 
     def inject_destination(self, points: np.ndarray) -> None:
@@ -935,6 +963,74 @@ class TargetConfirm:
         """T43 T 3(a): the caller's grasp latch has the pick target locked or is closing. Given
         before each grounding call (as `freeze`); read only with `clustering.latched_identity_hold`."""
         self._latched = bool(on)
+
+    def note_views(self, views: Optional[Sequence[Any]]) -> None:
+        """T81: this request's cameras (`stages.target_vacancy.VacancyView`: depth m, K, camera → base,
+        robot pixels), given before the grounding call (as `note_hand`) and consumed by it. Read only with
+        `clustering.target_vacancy_release`; None / empty = no evidence (nothing is released)."""
+        self._views = list(views) if views else None
+
+    def _vacancy_step(self) -> None:
+        """T81 §1: judge the standing geometry's place on this request's depth; release the manipulated
+        object after `vacancy_frames` consecutive empty requests (see `clustering.target_vacancy_release`).
+
+        Applies while nothing is physically held: not frozen (searching · latched), or frozen only by a
+        closing grasp (`_pre_attach_grasp` ∧ `_latched` — the latch is CLOSING, nothing attached). Not
+        once the latch has reached PLACED this episode (the object was carried; its old place is not
+        this rule's question)."""
+        views, self._views = self._views, None
+        rec: dict[str, Any] = {"applies": False}
+        self.vacancy_record = rec
+        geom = self._geometry
+        closing = self.frozen and self._pre_attach_grasp and self._latched
+        why = ("nothing_held" if self._held is None or geom is None
+               else "placed" if self._placed_seen
+               else "held" if self.frozen and not closing else None)
+        if why is not None:
+            self._vacancy_streak = 0
+            rec["why"] = why
+            if self._vacancy_reselect is not None:   # released earlier, no re-pick yet
+                rec["reselect_pending"] = self._vacancy_reselect["id"]
+            return
+        from AG3S.ag3s.stages.target_vacancy import judge, sample_points, vacant
+
+        pts = sample_points(np.asarray(geom.points, np.float64), self.vacancy_samples)
+        ev = judge(pts, views or (), delta=self.vacancy_delta, min_points=self.vacancy_min_points)
+        hit = vacant(ev, p_empty=self.vacancy_p_empty, p_present=self.vacancy_p_present)
+        self._vacancy_streak = self._vacancy_streak + 1 if hit else 0
+        release = self._vacancy_streak >= self.vacancy_frames
+        rec.update({"applies": True, "latch": "closing" if closing else "open", "n_samples": int(len(pts)),
+                    **{k: ev[k] for k in ("camera", "n_judged", "n_valid", "n_robot", "empty", "occluded",
+                                          "present")},
+                    "verdict": (ev.get("why") if not ev["decidable"] else "empty" if hit else "kept"),
+                    "per_camera": ev["per_camera"], "streak": int(self._vacancy_streak),
+                    "decision": "release" if release else "keep"})
+        if release:
+            self._vacancy_reselect = {"id": None if self._id is None else int(self._id),
+                                      "centroid": np.asarray(self._held, np.float64).reshape(3).copy()}
+            rec["released_id"], rec["repick"] = self._vacancy_reselect["id"], None
+            self._vacancy_streak = 0
+            self._forget_manipulated()
+
+    def _vacancy_pick(self, clusters, candidates: list) -> Optional[int]:
+        """T81 §1.5: the re-pick after a release — the best-scored admissible candidate within
+        `vacancy_near` of the released centroid; None when there is none (no target — never a far
+        candidate: a duplicate apple elsewhere is not the pushed one). Records it."""
+        old = self._vacancy_reselect["centroid"]
+        near = [i for i in candidates
+                if float(np.linalg.norm(np.asarray(clusters[i].centroid, np.float64).reshape(3) - old))
+                <= self.vacancy_near]
+        pick = near[0] if near else None
+        if self.vacancy_record is not None:
+            self.vacancy_record["repick"] = {"near": False, "n_near": 0, "n_candidates": len(candidates)} \
+                if pick is None else {
+                "rank": int(pick), "near": bool(near),
+                "distance_mm": round(float(np.linalg.norm(
+                    np.asarray(clusters[pick].centroid, np.float64).reshape(3) - old)) * 1000.0, 1),
+                "centroid": [float(x) for x in np.asarray(clusters[pick].centroid, np.float64).reshape(3)],
+                "score": float(clusters[pick].target_score), "n_near": len(near),
+                "n_candidates": len(candidates)}
+        return pick
 
     def note_support(self, planes: Optional[np.ndarray]) -> None:
         """T43 T 3(c): this frame's support planes `(K, 4)` = `[n_x, n_y, n_z, offset]` (free side
@@ -1152,6 +1248,10 @@ class TargetConfirm:
         self._release_if_placed_home()
         if self.refused_release_frames is not None:
             self._release_if_refused()
+        if self.vacancy_release:
+            # T81: before the hand-occlusion / frozen / latched-hold rules — an empty old place is not
+            # an occluded object.
+            self._vacancy_step()
         self._latched_hold = False
         self._hand_occluded, self._hand_gap = False, self._take_hand()
         with substage.part("grounding.confirm_admissibility"):
@@ -1166,15 +1266,25 @@ class TargetConfirm:
             self._challenger, self._streak = None, 0
             if not candidates:
                 return self._record(None, -1, NO_ADMISSIBLE, reason=NO_ADMISSIBLE)
+            # T81: a re-pick after a vacancy release (always None with the flag off).
+            reselect = self._vacancy_reselect
             if subtask_gated:
                 self._subtask_would = "first"
-                if self.subtask_gate:
+                if self.subtask_gate and reselect is None:
                     # The leader is not adopted: nothing becomes the manipulated object, so nothing
                     # is carved. The admissibility and the destination registry above still ran.
+                    # (T81: not for the re-pick after a vacancy release — nothing was grasped yet.)
                     self._subtask_blocked = "first"
                     return self._record(None, -1, SUBTASK_GATED, reason=SUBTASK_GATED)
-            first = candidates[0]
+            first = candidates[0] if reselect is None else self._vacancy_pick(clusters, candidates)
+            if first is None:
+                # T81: no admissible candidate near the released place — no target (nothing excluded);
+                # the near-only re-pick stays pending for the next requests.
+                return self._record(None, -1, NO_ADMISSIBLE, reason=VACANCY_RELEASED)
             self._adopt(clusters[first], switched_from=None, adm=_at(adm, first))
+            if reselect is not None:
+                self._vacancy_reselect = None
+                return self._record(clusters[first], first, "first", reason=VACANCY_RELEASED)
             return self._record(clusters[first], first, "first")
 
         held_rank = self._nearest(clusters, self._held)
@@ -1298,6 +1408,8 @@ class TargetConfirm:
         self._release_if_placed_home()
         if self.refused_release_frames is not None:
             self._release_if_refused()
+        if self.vacancy_release:
+            self._vacancy_step()   # T81 (a release here leaves no target this call; the re-pick waits)
         self._latched_hold = False
         self._hand_occluded, self._hand_gap = False, self._take_hand()
         if self._held is None:

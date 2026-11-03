@@ -1,0 +1,166 @@
+{
+ "쥐기 직전 (손바닥 ≤ 80 mm)": {
+  "BALL": {
+   "n": 92,
+   "apple_removed_pct": 78.3,
+   "nb_other_voxels": 2084,
+   "precision_pct": 96.9
+  },
+  "SURF": {
+   "n": 92,
+   "apple_removed_pct": 72.2,
+   "nb_other_voxels": 12701,
+   "precision_pct": 83.3
+  },
+  "S2": {
+   "n": 92,
+   "apple_removed_pct": 67.9,
+   "nb_other_voxels": 1746,
+   "precision_pct": 97.2
+  },
+  "S4": {
+   "n": 92,
+   "apple_removed_pct": 71.1,
+   "nb_other_voxels": 1870,
+   "precision_pct": 97.1
+  },
+  "S5": {
+   "n": 92,
+   "apple_removed_pct": 71.1,
+   "nb_other_voxels": 11925,
+   "precision_pct": 84.2
+  }
+ },
+ "쥐기 전 전체": {
+  "BALL": {
+   "n": 358,
+   "apple_removed_pct": 77.4,
+   "nb_other_voxels": 7995,
+   "precision_pct": 96.6
+  },
+  "SURF": {
+   "n": 358,
+   "apple_removed_pct": 73.7,
+   "nb_other_voxels": 64124,
+   "precision_pct": 77.0
+  },
+  "S2": {
+   "n": 358,
+   "apple_removed_pct": 62.5,
+   "nb_other_voxels": 6382,
+   "precision_pct": 97.1
+  },
+  "S4": {
+   "n": 358,
+   "apple_removed_pct": 72.2,
+   "nb_other_voxels": 6698,
+   "precision_pct": 97.0
+  },
+  "S5": {
+   "n": 358,
+   "apple_removed_pct": 73.7,
+   "nb_other_voxels": 48289,
+   "precision_pct": 82.1
+  }
+ },
+ "떨어진 이웃": {
+  "BALL": {
+   "n": 118,
+   "apple_removed_pct": 82.2,
+   "nb_other_voxels": 56,
+   "precision_pct": 99.9
+  },
+  "SURF": {
+   "n": 118,
+   "apple_removed_pct": 78.3,
+   "nb_other_voxels": 0,
+   "precision_pct": 100.0
+  },
+  "S2": {
+   "n": 118,
+   "apple_removed_pct": 78.3,
+   "nb_other_voxels": 0,
+   "precision_pct": 100.0
+  },
+  "S4": {
+   "n": 118,
+   "apple_removed_pct": 78.7,
+   "nb_other_voxels": 0,
+   "precision_pct": 100.0
+  },
+  "S5": {
+   "n": 118,
+   "apple_removed_pct": 78.7,
+   "nb_other_voxels": 0,
+   "precision_pct": 100.0
+  }
+ },
+ "맞닿은 이웃": {
+  "BALL": {
+   "n": 240,
+   "apple_removed_pct": 50.0,
+   "nb_other_voxels": 7939,
+   "precision_pct": 93.9
+  },
+  "SURF": {
+   "n": 240,
+   "apple_removed_pct": 39.9,
+   "nb_other_voxels": 64124,
+   "precision_pct": 63.8
+  },
+  "S2": {
+   "n": 240,
+   "apple_removed_pct": 33.6,
+   "nb_other_voxels": 6382,
+   "precision_pct": 94.6
+  },
+  "S4": {
+   "n": 240,
+   "apple_removed_pct": 34.4,
+   "nb_other_voxels": 6698,
+   "precision_pct": 94.4
+  },
+  "S5": {
+   "n": 240,
+   "apple_removed_pct": 47.1,
+   "nb_other_voxels": 48289,
+   "precision_pct": 71.2
+  }
+ },
+ "time_ms_S4_stage": {
+  "median": 67.4892021343112,
+  "p95": 112.33032522723079
+ },
+ "time_ms_S5_stage": {
+  "median": 64.05251286923885,
+  "p95": 105.71663565933704
+ },
+ "criteria": {
+  "S4": {
+   "1_apple_removed_ge_ball": false,
+   "2_nb_other_le_1.1xS2": true,
+   "3_precision_ge_95": true
+  },
+  "S5": {
+   "1_apple_removed_ge_ball": false,
+   "2_nb_other_le_1.1xS2": false,
+   "3_precision_ge_95": false
+  }
+ },
+ "pass": {
+  "S4": false,
+  "S5": false
+ },
+ "parity": {
+  "BALL": {
+   "n": 30,
+   "n_ref": 30,
+   "identical": 30
+  },
+  "S2": {
+   "n": 30,
+   "n_ref": 30,
+   "identical": 30
+  }
+ }
+}

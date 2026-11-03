@@ -1,0 +1,15 @@
+{
+ "name": "hsr5_t77_h4_img3_last",
+ "created": "2026-10-30",
+ "writer": "AG3S/ag3s/experiments/studies/t77_probe.py (T77, lead), copied unchanged for serving by T82 (ag3s-implementer, 2026-11-01)",
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T77/probe/models/h4_img3_last.npz",
+ "md5": "985be91854b46ee354449025b2ae1885",
+ "classes": ["approach", "grasp", "carry", "place", "retreat"],
+ "labels": "T77 task 1: expert phase_index 0-2 / 20-22 approach, 3-4 grasp, 5-6 carry, 7-9 place, 10-13 retreat; closed-loop MuJoCo ground truth (held = both fingers on the apple and the apple 20 mm up)",
+ "feature": {"key": "h4_img3+last", "dim": 8192,
+             "definition": "PaliGemma hidden state h_4 (HF output_hidden_states numbering: h_0 = embedding, h_4 = output of the 4th block, residual stream before the final norm), prefix pass, batch 0, float32: [cam_high mean | left_wrist mean | right_wrist mean | last valid prefix token], each 2048 = pi05_hidden.summary_rows rows (0, 1, 2, 4)",
+             "runtime_source": "AG3S/trajopt/attention_source.py JaxPrefixBackend noun prefix pass with gemma return_hidden on for that pass only (T82, no extra forward)"},
+ "model": {"pipeline": "StandardScaler + multinomial LogisticRegression (t64_phase6.fit)", "C": 0.03,
+           "apply": "p = softmax(((x - mean) / scale) @ coef.T + intercept), float64 (SubtaskProbe.proba)"},
+ "decision": "raw argmax per request (no debounce), as HSR6"
+}

@@ -1,0 +1,363 @@
+{
+ "source": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/r2_analysis/t8182_r2.json",
+ "script": "/mnt/dev/AG3S_VLA-storage/results/development/20261030T004052+0900_8ab3c7ef7757_1c61eaabd79c/verify/T8182/r2_analysis/t8182_r2_fig.py",
+ "panels": {
+  "REG211": {
+   "off": [
+    {
+     "request": 10,
+     "event_offset": null,
+     "n_target": 133,
+     "target_to_vis_mm": 9.3,
+     "target_dist_to_apple_mm_median": 2.8009201456966752,
+     "vacancy": {},
+     "grasp_state": "latched"
+    },
+    {
+     "request": 30,
+     "event_offset": null,
+     "n_target": 118,
+     "target_to_vis_mm": 6.0,
+     "target_dist_to_apple_mm_median": 2.600990403908336,
+     "vacancy": {},
+     "grasp_state": "latched"
+    },
+    {
+     "request": 74,
+     "event_offset": null,
+     "n_target": 118,
+     "target_to_vis_mm": 5.2,
+     "target_dist_to_apple_mm_median": 2.507757793903813,
+     "vacancy": {},
+     "grasp_state": "latched"
+    }
+   ],
+   "on": [
+    {
+     "request": 10,
+     "event_offset": null,
+     "n_target": 133,
+     "target_to_vis_mm": 9.3,
+     "target_dist_to_apple_mm_median": 2.8009201456966752,
+     "vacancy": {
+      "applies": true,
+      "why": null,
+      "latch": "open",
+      "camera": "head",
+      "n_judged": 135,
+      "n_valid": 135,
+      "n_robot": 0,
+      "empty": 0.0296,
+      "occluded": 0.0815,
+      "present": 0.8889,
+      "verdict": "kept",
+      "streak": 0,
+      "decision": "keep",
+      "released_id": null,
+      "repick": null,
+      "reselect_pending": null
+     },
+     "grasp_state": "latched"
+    },
+    {
+     "request": 30,
+     "event_offset": null,
+     "n_target": 118,
+     "target_to_vis_mm": 6.0,
+     "target_dist_to_apple_mm_median": 2.600990403908336,
+     "vacancy": {
+      "applies": true,
+      "why": null,
+      "latch": "open",
+      "camera": "left_wrist",
+      "n_judged": 79,
+      "n_valid": 96,
+      "n_robot": 17,
+      "empty": 0.1146,
+      "occluded": 0.25,
+      "present": 0.6354,
+      "verdict": "kept",
+      "streak": 0,
+      "decision": "keep",
+      "released_id": null,
+      "repick": null,
+      "reselect_pending": null
+     },
+     "grasp_state": "latched"
+    },
+    {
+     "request": 74,
+     "event_offset": null,
+     "n_target": 118,
+     "target_to_vis_mm": 5.2,
+     "target_dist_to_apple_mm_median": 2.507757793903813,
+     "vacancy": {
+      "applies": true,
+      "why": null,
+      "latch": "open",
+      "camera": "left_wrist",
+      "n_judged": 76,
+      "n_valid": 94,
+      "n_robot": 18,
+      "empty": 0.0532,
+      "occluded": 0.2766,
+      "present": 0.6702,
+      "verdict": "kept",
+      "streak": 0,
+      "decision": "keep",
+      "released_id": null,
+      "repick": null,
+      "reselect_pending": null
+     },
+     "grasp_state": "latched"
+    }
+   ]
+  },
+  "C_ep56_forward": {
+   "off": [
+    {
+     "request": 13,
+     "event_offset": -1,
+     "n_target": 110,
+     "target_to_vis_mm": 6.3,
+     "target_dist_to_apple_mm_median": 2.8325979765631963,
+     "vacancy": {},
+     "grasp_state": "latched"
+    },
+    {
+     "request": 16,
+     "event_offset": 2,
+     "n_target": 110,
+     "target_to_vis_mm": 55.7,
+     "target_dist_to_apple_mm_median": 46.049462776172945,
+     "vacancy": {},
+     "grasp_state": "latched"
+    },
+    {
+     "request": 22,
+     "event_offset": 8,
+     "n_target": 110,
+     "target_to_vis_mm": 55.9,
+     "target_dist_to_apple_mm_median": 47.472071556824126,
+     "vacancy": {},
+     "grasp_state": "latched"
+    }
+   ],
+   "on": [
+    {
+     "request": 10,
+     "event_offset": -1,
+     "n_target": 113,
+     "target_to_vis_mm": 6.8,
+     "target_dist_to_apple_mm_median": 2.543382116554906,
+     "vacancy": {
+      "applies": true,
+      "why": null,
+      "latch": "open",
+      "camera": "head",
+      "n_judged": 113,
+      "n_valid": 113,
+      "n_robot": 0,
+      "empty": 0.0,
+      "occluded": 0.1062,
+      "present": 0.8938,
+      "verdict": "kept",
+      "streak": 0,
+      "decision": "keep",
+      "released_id": null,
+      "repick": null,
+      "reselect_pending": null
+     },
+     "grasp_state": "latched"
+    },
+    {
+     "request": 12,
+     "event_offset": 1,
+     "n_target": 114,
+     "target_to_vis_mm": 5.0,
+     "target_dist_to_apple_mm_median": 2.9008075881231092,
+     "vacancy": {
+      "applies": true,
+      "why": null,
+      "latch": "open",
+      "camera": "right_wrist",
+      "n_judged": 100,
+      "n_valid": 100,
+      "n_robot": 0,
+      "empty": 0.84,
+      "occluded": 0.03,
+      "present": 0.13,
+      "verdict": "empty",
+      "streak": 2,
+      "decision": "release",
+      "released_id": 0,
+      "repick": {
+       "rank": 0,
+       "near": true,
+       "distance_mm": 57.1,
+       "centroid": [
+        0.5684424795404325,
+        -0.342527658945058,
+        0.8669062577037627
+       ],
+       "score": 0.8909936385870976,
+       "n_near": 1,
+       "n_candidates": 1
+      },
+      "reselect_pending": null
+     },
+     "grasp_state": "latched"
+    },
+    {
+     "request": 19,
+     "event_offset": 8,
+     "n_target": 114,
+     "target_to_vis_mm": 8.6,
+     "target_dist_to_apple_mm_median": 2.8138778782073617,
+     "vacancy": {
+      "applies": true,
+      "why": null,
+      "latch": "open",
+      "camera": "head",
+      "n_judged": 104,
+      "n_valid": 114,
+      "n_robot": 10,
+      "empty": 0.1754,
+      "occluded": 0.1579,
+      "present": 0.6667,
+      "verdict": "kept",
+      "streak": 0,
+      "decision": "keep",
+      "released_id": null,
+      "repick": null,
+      "reselect_pending": null
+     },
+     "grasp_state": "latched"
+    }
+   ]
+  },
+  "C_ep56_back": {
+   "off": [
+    {
+     "request": 13,
+     "event_offset": -1,
+     "n_target": 110,
+     "target_to_vis_mm": 6.3,
+     "target_dist_to_apple_mm_median": 2.8325979765631963,
+     "vacancy": {},
+     "grasp_state": "latched"
+    },
+    {
+     "request": 16,
+     "event_offset": 2,
+     "n_target": 110,
+     "target_to_vis_mm": 67.4,
+     "target_dist_to_apple_mm_median": 35.185340149710356,
+     "vacancy": {},
+     "grasp_state": "latched"
+    },
+    {
+     "request": 22,
+     "event_offset": 8,
+     "n_target": 110,
+     "target_to_vis_mm": 63.6,
+     "target_dist_to_apple_mm_median": 32.91280251926692,
+     "vacancy": {},
+     "grasp_state": "closing"
+    }
+   ],
+   "on": [
+    {
+     "request": 10,
+     "event_offset": -1,
+     "n_target": 113,
+     "target_to_vis_mm": 6.8,
+     "target_dist_to_apple_mm_median": 2.543382116554906,
+     "vacancy": {
+      "applies": true,
+      "why": null,
+      "latch": "open",
+      "camera": "head",
+      "n_judged": 113,
+      "n_valid": 113,
+      "n_robot": 0,
+      "empty": 0.0,
+      "occluded": 0.1062,
+      "present": 0.8938,
+      "verdict": "kept",
+      "streak": 0,
+      "decision": "keep",
+      "released_id": null,
+      "repick": null,
+      "reselect_pending": null
+     },
+     "grasp_state": "latched"
+    },
+    {
+     "request": 12,
+     "event_offset": 1,
+     "n_target": 99,
+     "target_to_vis_mm": 7.0,
+     "target_dist_to_apple_mm_median": 2.947352440284086,
+     "vacancy": {
+      "applies": true,
+      "why": null,
+      "latch": "open",
+      "camera": "right_wrist",
+      "n_judged": 88,
+      "n_valid": 88,
+      "n_robot": 0,
+      "empty": 0.8864,
+      "occluded": 0.0682,
+      "present": 0.0455,
+      "verdict": "empty",
+      "streak": 2,
+      "decision": "release",
+      "released_id": 0,
+      "repick": {
+       "rank": 0,
+       "near": true,
+       "distance_mm": 63.3,
+       "centroid": [
+        0.4502993881711469,
+        -0.33779633186692937,
+        0.8668685449938067
+       ],
+       "score": 0.7096222377931612,
+       "n_near": 1,
+       "n_candidates": 3
+      },
+      "reselect_pending": null
+     },
+     "grasp_state": "latched"
+    },
+    {
+     "request": 19,
+     "event_offset": 8,
+     "n_target": 99,
+     "target_to_vis_mm": 15.6,
+     "target_dist_to_apple_mm_median": 3.1834807944453702,
+     "vacancy": {
+      "applies": true,
+      "why": null,
+      "latch": "open",
+      "camera": "head",
+      "n_judged": 31,
+      "n_valid": 99,
+      "n_robot": 68,
+      "empty": 0.0808,
+      "occluded": 0.6869,
+      "present": 0.2323,
+      "verdict": "kept",
+      "streak": 0,
+      "decision": "keep",
+      "released_id": null,
+      "repick": null,
+      "reselect_pending": null
+     },
+     "grasp_state": "latched"
+    }
+   ]
+  }
+ }
+}

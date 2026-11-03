@@ -42,6 +42,7 @@ import numpy as np
 from AG3S.ag3s.stages.attention_lifting import lift, make_adapter
 from AG3S.ag3s.constraints.clearance import ClearancePolicy
 from AG3S.ag3s.stages.collision_candidates import CandidateTracker, generate_candidates
+from AG3S.ag3s import config as _ag3s_config   # T78 B: ATTENTION_SURFACE_DEVICE
 from AG3S.ag3s.config import AG3SConfig
 from AG3S.ag3s.runtime.profiler import StageProfiler
 from AG3S.ag3s.runtime import substage
@@ -209,6 +210,10 @@ class AG3S:
         #: AG3S-CORE-EVAL-HSR6 ② (`set_held_allowance`): None (default) = the held-body cover's lift off the support
         #: is decided as before; False = withdrawn this frame (the unlifted body spheres); True = as before.
         self._held_allowance: Optional[bool] = None
+        #: T83 — this request's grasp corridor (`set_grasp_corridor`, `grasp.corridor.GraspCorridorRequest`) and the
+        #: record of what the last frame did with it. None / {} = never told (flag off): the frame as before.
+        self._grasp_corridor_request = None
+        self._grasp_corridor_record: dict[str, Any] = {}
         #: T46e A13: this request's GT segmentation (`set_oracle_segmentation`), consumed by the next
         #: `_run`, and the episode's labelled surface samples. Both stay None unless
         #: `esdf.target_extent == "oracle_visible"` (then the memory is made on first use).
@@ -451,6 +456,8 @@ class AG3S:
         self._grasp_latched = False
         self._subtask_p = None
         self._held_allowance = None   # AG3S-CORE-EVAL-HSR6 ②
+        self._grasp_corridor_request = None   # T83
+        self._grasp_corridor_record = {}
         # T46e A13: the oracle samples are per episode, like the TSDF.
         self._oracle_pending = None
         self._oracle_frame = None
@@ -460,6 +467,7 @@ class AG3S:
         self._surface_codes = None
         self._render_frame = None
         self._surface_hybrid = None   # IFG-CL2
+        self._surface_hull = None   # T78b: the last accepted region's hull is per episode
         if self.confidence_gate is not None:   # IFG-S2SERVE: the chain memory is per episode
             self.confidence_gate.reset()
             self._gate_feature_pending = None
@@ -543,6 +551,47 @@ class AG3S:
         `serve_safe --hsr6-held-gate`). False withdraws the held-body cover's lift off the support (table / crate
         floor) in `_frame_held_attached`: the frame uses the unlifted body spheres. None (never called) = as before."""
         self._held_allowance = None if allowed is None else bool(allowed)
+
+    def set_grasp_corridor(self, request) -> None:
+        """T83 — the caller's grasp corridor for this request (`SafePolicy`, only with `--grasp-corridor-allow`):
+        `grasp.corridor.GraspCorridorRequest` (pose 0 = `q_now`, then the planned rows) or None (not this request:
+        held / placed / no hand geometry). Consumed by this request's frame (`_grasp_corridor_carve`); never called =
+        the frame as before."""
+        self._grasp_corridor_request = request
+        self._grasp_corridor_record = {}
+
+    @property
+    def grasp_corridor_record(self) -> dict[str, Any]:
+        """T83 — what the last frame did with the corridor (`{}` when none was given)."""
+        return self._grasp_corridor_record
+
+    def _grasp_corridor_carve(self, points, target_free_points, support_surfaces, cfg):
+        """T83 — `(CorridorCarve | None)` for this frame's builder call, and `self._grasp_corridor_record`.
+
+        On only when a corridor came (`set_grasp_corridor`), the fine target-free tier is built this frame (cuRobo
+        backend, nothing held, a manipulated geometry: `target_free_points`) and the `q_now` corridor (pose 0) holds
+        at least `min_target_points` of this frame's manipulated (ATS target) points. The carve itself is the
+        builder's (`CuroboFieldBuilder._corridor_carve`); its numbers join the record after the build."""
+        from AG3S.ag3s.grasp.corridor import CorridorCarve, support_planes
+
+        req = self._grasp_corridor_request
+        self._grasp_corridor_request = None   # one request, one frame
+        if req is None:
+            return None
+        rec: dict[str, Any] = {"active": False, "reason": None, "n_target_in": None,
+                               "n_rows_swept": int(req.n_poses) - 1, "n_seeds_carved": None, **req.summary()}
+        self._grasp_corridor_record = rec
+        if cfg.backend != "curobo" or target_free_points is None or points is None or not len(points):
+            rec["reason"] = "no fine target-free tier this frame (held, no target or not curobo)"
+            return None
+        n_in = int(req.contains(np.asarray(points, np.float64).reshape(-1, 3), poses=[0]).sum())
+        rec["n_target_in"] = n_in
+        rec["n_target_points"] = int(len(points))
+        if n_in < int(req.min_target_points):
+            rec["reason"] = f"target points in the q_now corridor {n_in} < {int(req.min_target_points)}"
+            return None
+        rec.update(active=True, reason="on")
+        return CorridorCarve(request=req, planes=support_planes(support_surfaces))
 
     # --- IFG-S2SERVE: the confidence gate -----------------------------------------------------------------
     def set_gate_feature(self, feature: Optional[np.ndarray]) -> None:
@@ -648,13 +697,16 @@ class AG3S:
         if self._oracle_memory is None:
             fine = float(getattr(cfg, "fine_voxel_size", 0.0) or cfg.voxel_size)
             max_d = float(getattr(cfg, "oracle_max_dist_voxels", 6.0)) * fine
+            # --- T78e — begin: target-sticky memory cells (`esdf.surface_memory_target_sticky`, off = newest wins)
+            t78e = ({"target_sticky": True} if bool(getattr(cfg, "surface_memory_target_sticky", False)) else {})
+            # --- T78e — end
             # cell = half a fine voxel; ROI margin ≥ 2 × the candidate reach (`oracle_visible_split`); carving
             # tolerance = two fine voxels (a sample is dropped only when a ray clearly passed beyond it).
             self._oracle_memory = OracleMemory(cell=0.5 * fine, roi_margin=2.0 * max_d + fine,
                                                carve_tol=2.0 * fine, depth_min=float(cfg.depth_min),
                                                depth_max=float(cfg.depth_max),
                                                # the truncation band of the TSDF the fine tiers read
-                                               band_depth=float(cfg.fine_truncation))
+                                               band_depth=float(cfg.fine_truncation), **t78e)
         return self._oracle_memory
 
     def _oracle_fold(self, observations, labels: Mapping[str, Any], meta: Mapping[str, Any],
@@ -702,6 +754,151 @@ class AG3S:
             # the support guard = the ball's z_min (the same table protection as `ball` / `ball_owned`)
             z_floor=None if ball is None else float(ball.z_min))
         return ev, {**dict(self._oracle_frame or {}), **rec}
+
+    def _surface_memory_evidence(self, geometry, support_surfaces, ball):
+        """T78 A3 (`esdf.surface_keep_last`) — `(OracleVisibleEvidence, record)` from the memory's code-1 samples.
+
+        The memory holds only accepted regions (abstained / rejected requests are carved, not folded), so the samples
+        to remove are **all** code-1 samples (identity = the accepted surface regions, `oracle_evidence(identity="gt")`;
+        the pipeline identity — which object the manipulated points lie on — is computed and recorded only). This
+        request's region if it was accepted, else the last accepted ones. No sample yet → an **empty** evidence: the
+        hand layer removes nothing (never the ball, never the points).
+
+        Support guard (`z_floor`): the ball's `z_min` (as `_oracle_evidence`), or with `esdf.surface_no_ball` the
+        support plane under the code-1 samples' centroid + `target_ball_pad_voxels` fine voxels (`_target_ball`'s
+        rule, at the region instead of the ball centre; None when no plane lies below the centroid)."""
+        from AG3S.ag3s.fields.curobo_builder import OracleVisibleEvidence
+        from AG3S.ag3s.runtime.oracle_segmentation import CODE_TARGET, oracle_evidence
+
+        cfg = self.config.esdf
+        mem = self._oracle_memory_or_new()
+        tp, op = mem.evidence(CODE_TARGET)
+        z_floor, z_src = (None, "none")
+        if bool(getattr(cfg, "surface_no_ball", False)):
+            if len(tp):
+                c = tp.mean(axis=0)
+                plane_z = self._support_plane_z(support_surfaces, c)
+                if plane_z is not None and np.isfinite(plane_z) and plane_z < float(c[2]):
+                    voxel = float(getattr(cfg, "fine_voxel_size", 0.0) or cfg.voxel_size)
+                    z_floor = float(plane_z) + float(getattr(cfg, "target_ball_pad_voxels", 1.0)) * voxel
+                    z_src = "support_plane_under_region"
+        elif ball is not None:
+            z_floor, z_src = float(ball.z_min), "ball_z_min"
+        ev, rec = oracle_evidence(
+            mem, np.zeros((0, 3)) if geometry is None else geometry.points,
+            radius=float(self.config.timing.fusion_voxel_size), identity="gt",
+            max_dist_voxels=float(getattr(cfg, "oracle_max_dist_voxels", 6.0)), z_floor=z_floor)
+        surf = self._surface_frame or {}
+        rec = {**dict(self._oracle_frame or {}), **rec, "identity_mode": "surface_memory",
+               "z_floor_source": z_src, "z_floor_m": z_floor,
+               "region_source": ("this_request" if surf.get("applied")
+                                 else "last_accepted" if len(tp) else "none_yet"),
+               "n_target_samples": int(len(tp))}
+        if ev is None:
+            # No accepted region yet (or no manipulated geometry — the record says which): remove nothing.
+            ev = OracleVisibleEvidence(target_points=np.zeros((0, 3)), other_points=op,
+                                       max_dist_voxels=float(getattr(cfg, "oracle_max_dist_voxels", 6.0)),
+                                       info={"code": int(CODE_TARGET), "empty": True}, code=int(CODE_TARGET),
+                                       z_floor=z_floor)
+            rec.update({"applied": False, "removes_nothing": True,
+                        "why": f"keep_last_no_region ({rec.get('why')})"})
+        return ev, rec
+
+    # --- T78b — begin: hull fill of the hand layer just before the grasp (`esdf.surface_hull_fill`) -----------------
+    def _surface_hull_store(self, region, dropped) -> dict:
+        """T78b — keep this request's accepted region as the hull the fill uses (`self._surface_hull`, per episode; a
+        request without an accepted region — abstain · A2 · A4 hold — keeps the last one). Returns the record."""
+        from AG3S.ag3s.runtime.attention_surface_post import convex_hull
+
+        hull, why = convex_hull(region.pos)
+        if hull is None:
+            return {"stored": False, "why": why, "n_nodes": int(len(region))}
+        hull["dropped_points"] = np.asarray(dropped, np.float64).reshape(-1, 3)
+        hull["frame_index"] = int(self.frame_index)
+        self._surface_hull = hull
+        return {"stored": True, "n_nodes": hull["n_points"], "n_vertices": hull["n_vertices"],
+                "volume_cm3": round(hull["volume"] * 1e6, 3), "n_dropped_points": int(len(hull["dropped_points"]))}
+
+    def _grasp_palm_points(self, robot_state, contact_context) -> tuple[list, str]:
+        """T78b — the grasping palm point of each gripper whose finger is contact-authorized this frame: the mean of the
+        two finger links' constraint spheres at `robot_state` (≈ the MJCF `<side>_ee` site between the fingers), else the
+        mean of the finger link origins. `([points], source)`; no model / state / authorized finger → `([], why)`."""
+        model = self.constraint_robot_model
+        if model is None or robot_state is None:
+            return [], "no_robot_state"
+        links = self._authorized_links(contact_context)
+        pairs_fn = getattr(model, "gripper_joint_pairs", None)
+        if not links or not callable(pairs_fn):
+            return [], "no_authorized_gripper"
+        q = np.asarray(robot_state, np.float64).reshape(-1)
+        names = [str(n) for n in getattr(model, "sphere_link_names", ()) or ()]
+        centres = None
+        out, src = [], "finger_spheres"
+        for pair in pairs_fn():
+            kids = tuple(str(c) for c in pair.get("children", ()))
+            if not (set(kids) & links or str(pair.get("parent_link")) in links):
+                continue
+            idx = [i for i, n in enumerate(names) if n in kids]
+            if idx:
+                if centres is None:
+                    centres = np.asarray(model.sphere_centers_numeric(q)[0], np.float64)
+                out.append(centres[idx].mean(axis=0))
+            elif callable(getattr(model, "link_pose", None)):
+                out.append(np.mean([np.asarray(model.link_pose(q, k), np.float64)[:3, 3] for k in kids], axis=0))
+                src = "finger_origins"
+        return out, (src if out else "no_authorized_gripper")
+
+    def _surface_hull_fill(self, ev, rec, support_surfaces, robot_state, contact_context):
+        """T78b (`esdf.surface_hull_fill`) — `(evidence, record)`: in the window just before the grasp (latch latched ·
+        closing — `set_grasp_latched` / `set_grasp_active` — or the grasping palm within `surface_hull_fill_palm_mm` of
+        the hull centroid) the evidence carries the last accepted region's hull (`curobo_builder.HullFill`, +1 fine
+        voxel; protected = voxels holding the dropped components' samples; guard = the A5 `z_floor`, else the support
+        plane under the hull centroid + pad). Outside the window, or with no hull / guard, the evidence is unchanged.
+        Record `oracle["hull_fill"]` (applied / why, window, palm distance, hull volume, age); the builder adds the voxel
+        counts (`stats["target_free"]["hull_fill"]`)."""
+        from AG3S.ag3s.fields.curobo_builder import HullFill
+
+        cfg = self.config.esdf
+        t0 = time.perf_counter()
+        hull = getattr(self, "_surface_hull", None)
+        fine = float(getattr(cfg, "fine_voxel_size", 0.0) or cfg.voxel_size)
+        hf: dict[str, Any] = {"applied": False, "latched": bool(self._grasp_latched),
+                              "grasp_active": bool(self._grasp_active)}
+        if hull is None:
+            hf["why"] = "no_accepted_region"
+        else:
+            hf.update({"hull_source": ("this_request" if hull["frame_index"] == int(self.frame_index)
+                                       else "last_accepted"),
+                       "hull_age_frames": int(self.frame_index) - int(hull["frame_index"]),
+                       "volume_cm3": round(hull["volume"] * 1e6, 3)})
+            palms, hf["palm_source"] = self._grasp_palm_points(robot_state, contact_context)
+            palm_mm = (None if not palms else
+                       float(min(np.linalg.norm(p - hull["centroid"]) for p in palms)) * 1e3)
+            hf["palm_mm"] = None if palm_mm is None else round(palm_mm, 1)
+            near = palm_mm is not None and palm_mm <= float(cfg.surface_hull_fill_palm_mm)
+            hf["window"] = ("latched" if self._grasp_latched else "grasp_active" if self._grasp_active
+                            else "palm_near" if near else None)
+            z_floor, z_src = ev.z_floor, "oracle_z_floor"
+            if z_floor is None:
+                plane_z = self._support_plane_z(support_surfaces, hull["centroid"])
+                z_floor, z_src = ((None, "none") if plane_z is None or not np.isfinite(plane_z) else
+                                  (float(plane_z) + float(getattr(cfg, "target_ball_pad_voxels", 1.0)) * fine,
+                                   "support_plane_under_hull"))
+            hf["z_floor_source"] = z_src
+            if hf["window"] is None:
+                hf["why"] = "outside_window"
+            elif z_floor is None:
+                hf["why"] = "no_support_guard"
+            else:
+                ev = dataclasses.replace(ev, hull_fill=HullFill(
+                    equations=hull["equations"], lo=hull["lo"], hi=hull["hi"], pad_m=fine,
+                    protect_points=hull["dropped_points"], z_floor=float(z_floor),
+                    info={"window": hf["window"], "hull_source": hf["hull_source"],
+                          "volume_cm3": hf["volume_cm3"]}))
+                hf["applied"] = True
+        hf["ms"] = round((time.perf_counter() - t0) * 1e3, 3)
+        return ev, {**rec, "hull_fill": hf}
+    # --- T78b — end
 
     # --- IFG-CL1: rendered-robot mask · attention-surface code images --------------------------------
     def _apply_render_mask(self, observations, cameras):
@@ -756,12 +953,86 @@ class AG3S:
         self._render_frame = rec
         return out, spheres, render
 
-    def _attention_surface_update(self, observations, cameras, sphere_masks, render_masks) -> dict[str, Any]:
+    def _t78_on(self) -> bool:
+        """T78 갈래 A — is any attention-surface post-processing flag on (`esdf.surface_*`)? Off = IFG-CL1 as is."""
+        e = self.config.esdf
+        return bool(getattr(e, "surface_split", False) or getattr(e, "surface_keep_last", False)
+                    or getattr(e, "surface_grasp_hold", False) or getattr(e, "surface_no_ball", False)
+                    or str(getattr(e, "surface_target_check", "off")) != "off")
+
+    # --- T78d — begin
+    def _surface_crease_params(self):
+        """T78d — `attention_surface_crease.CreaseParams` of `esdf.surface_crease_*`, or None (`surface_crease_cut` off:
+        `select_target_surface` gets `crease=None`, the LOCK graph as is)."""
+        if not bool(getattr(self.config.esdf, "surface_crease_cut", False)):
+            return None
+        from AG3S.ag3s.runtime.attention_surface_crease import from_esdf
+
+        return from_esdf(self.config.esdf)
+
+    def _surface_crease_kwargs(self) -> dict:
+        """T78d — `{}` when off (the `select_target_surface` call is the T78 B call), else `{"crease": params}`."""
+        p = self._surface_crease_params()
+        return {} if p is None else {"crease": p}
+    # --- T78d — end
+
+    def _attention_surface_update(self, observations, cameras, sphere_masks, render_masks,
+                                  ats_points=None) -> dict[str, Any]:
         """IFG-CL1 (`esdf.target_extent == "attention_surface"`) — this request's code images from attention + depth
         (`runtime.attention_surface.select_target_surface`), folded into the oracle memory. Returns the oracle record
-        (`segmentation` = whether a code image was made). The surface record is `self._surface_frame`."""
+        (`segmentation` = whether a code image was made). The surface record is `self._surface_frame`.
+
+        T78 갈래 A (`esdf.surface_*`, all off by default — then this is IFG-CL1 call for call): A4 skips the selection
+        while a grasp is in progress, A1 cuts the region (`attention_surface_post.split_region`), A2 rejects a region
+        that is not the ATS target `ats_points` (the manipulated geometry the caller passes), A3 carves (does not fold)
+        the memory on a request without an accepted region. The record is `self._surface_frame["t78"]`."""
         from AG3S.ag3s.runtime.attention_surface import (
             ARM_RENDER, ARM_SPHERES, CAMERA_ORDER, SurfaceView, select_target_surface)
+
+        if self._t78_on():
+            return self._attention_surface_update_t78(observations, cameras, sphere_masks, render_masks, ats_points)
+        render_on = getattr(self.config.esdf, "robot_mask", "spheres") == "render"
+        obs_by = {}
+        for obs in observations or ():
+            cam_id = getattr(obs, "camera_id", None)
+            obs_by[cam_id.value if cam_id is not None else str(getattr(obs, "name", ""))] = obs
+        cam_by = {c.name: c for c in cameras}
+        views, mask_src = [], {}
+        for name in CAMERA_ORDER:
+            cam, obs = cam_by.get(name), obs_by.get(name)
+            if cam is None or obs is None:
+                continue
+            mk = render_masks.get(name) if render_on else None
+            mask_src[name] = "render" if mk is not None else "spheres"
+            if mk is None:
+                mk = sphere_masks.get(name)
+            if mk is None:
+                mk = np.zeros(np.shape(cam.depth), bool)
+                mask_src[name] = "none"
+            views.append(SurfaceView(name=name, depth_m=np.asarray(cam.depth, np.float64),
+                                     K=np.asarray(cam.camera_intrinsics, np.float64),
+                                     T_base_cam=np.asarray(cam.T_base_cam, np.float64),
+                                     robot_mask=np.asarray(mk, bool),
+                                     attention=getattr(obs, "attention_map", None)))
+        res = select_target_surface(views, arm=ARM_RENDER if render_on else ARM_SPHERES,
+                                    device=_ag3s_config.ATTENTION_SURFACE_DEVICE,   # T78 B
+                                    **self._surface_crease_kwargs())   # T78d (off: no kwarg, the T78 B call)
+        surf = dict(res.record)
+        surf["robot_mask_source"] = mask_src
+        self._surface_frame = surf
+        self._surface_codes = res.codes
+        rec: dict[str, Any] = {"segmentation": res.codes is not None, "source": "attention_surface"}
+        if res.codes is None:
+            mem = self._oracle_memory_or_new()
+            rec["memory"] = {"n_samples": len(mem), "update": mem.n_updates, "updated": False}
+            return rec
+        return self._oracle_fold(observations, res.codes,
+                                 {"target": None, "codes": {"attention_surface": 1}}, rec)
+
+    # --- T78 갈래 A: attention-surface region post-processing (`esdf.surface_*`) ------------------------------
+    def _surface_views(self, observations, cameras, sphere_masks, render_masks):
+        """The `SurfaceView`s (`CAMERA_ORDER`) and robot-mask sources of `_attention_surface_update` (same rule)."""
+        from AG3S.ag3s.runtime.attention_surface import CAMERA_ORDER, SurfaceView
 
         render_on = getattr(self.config.esdf, "robot_mask", "spheres") == "render"
         obs_by = {}
@@ -786,18 +1057,108 @@ class AG3S:
                                      T_base_cam=np.asarray(cam.T_base_cam, np.float64),
                                      robot_mask=np.asarray(mk, bool),
                                      attention=getattr(obs, "attention_map", None)))
-        res = select_target_surface(views, arm=ARM_RENDER if render_on else ARM_SPHERES)
+        return views, mask_src, render_on
+
+    def _oracle_carve(self, observations) -> dict[str, Any]:
+        """T78 A3 — carve (not fold) the oracle memory with this request's depth (`OracleMemory.carve_only`)."""
+        from AG3S.ag3s.runtime.oracle_segmentation import OracleView
+
+        mem = self._oracle_memory_or_new()
+        scale = float(self.config.pointcloud.depth_scale)
+        views = []
+        for obs in observations or ():
+            if getattr(obs, "depth", None) is None:
+                continue
+            T = (np.asarray(obs.resolve_T_base_cam(self.robot_model), np.float64)
+                 if hasattr(obs, "resolve_T_base_cam") else np.asarray(obs.T_base_cam, np.float64))
+            d = np.asarray(obs.depth, np.float64) * scale
+            views.append(OracleView(depth_m=d, K=np.asarray(obs.camera_intrinsics, np.float64), T_base_cam=T,
+                                    labels=np.zeros(d.shape, np.uint8)))
+        t0 = time.monotonic()
+        out = mem.carve_only(views) if views else {"n_carved": 0, "n_samples": len(mem), "update": mem.n_updates}
+        return {**out, "updated": False, "carved": True, "carve_ms": round((time.monotonic() - t0) * 1e3, 3)}
+
+    def _attention_surface_update_t78(self, observations, cameras, sphere_masks, render_masks,
+                                      ats_points) -> dict[str, Any]:
+        """T78 갈래 A — `_attention_surface_update` with the `esdf.surface_*` steps (see there and
+        `runtime.attention_surface_post`). Accepted region → folded into the memory as before. No accepted region
+        (abstain, A2 `not_ats_target`): `surface_keep_last` carves the memory (no fold), otherwise nothing changes
+        (IFG-CL1). A4 hold: nothing is selected, nothing is folded; the memory is carved only."""
+        from AG3S.ag3s.runtime.attention_surface import ARM_RENDER, ARM_SPHERES, graph_config, select_target_surface
+        from AG3S.ag3s.runtime import attention_surface_post as post_mod
+
+        e = self.config.esdf
+        t0 = time.perf_counter()
+        post: dict[str, Any] = {"surface_split": bool(e.surface_split),
+                                "surface_target_check": str(e.surface_target_check),
+                                "surface_keep_last": bool(e.surface_keep_last),
+                                "surface_grasp_hold": bool(e.surface_grasp_hold),
+                                "surface_no_ball": bool(e.surface_no_ball), "ms": {}}
+        mem = self._oracle_memory_or_new()
+        rec: dict[str, Any] = {"segmentation": False, "source": "attention_surface"}
+        if e.surface_grasp_hold and (self._grasp_active or self._attached is not None):
+            # A4: no selection, no fold — the last accepted region stands. The memory is still carved (only samples
+            # this request's depth sees through go, the TSDF's own free-space rule: a pushed object's old surface).
+            post["hold"] = {"grasp_active": bool(self._grasp_active), "attached": self._attached is not None}
+            self._surface_frame = {"applied": False, "why": "grasp_hold", "t78": post}
+            self._surface_codes = None
+            rec["memory"] = {**self._oracle_carve(observations), "frozen": True}
+            post["ms"]["total"] = round((time.perf_counter() - t0) * 1e3, 3)
+            return rec
+        views, mask_src, render_on = self._surface_views(observations, cameras, sphere_masks, render_masks)
+        res = select_target_surface(views, arm=ARM_RENDER if render_on else ARM_SPHERES,
+                                    device=_ag3s_config.ATTENTION_SURFACE_DEVICE,   # T78 B
+                                    **self._surface_crease_kwargs())   # T78d (off: no kwarg, the T78 B call)
         surf = dict(res.record)
         surf["robot_mask_source"] = mask_src
+        codes = res.codes
+        hull_fill = bool(getattr(e, "surface_hull_fill", False))   # T78b
+        dropped = np.zeros((0, 3))                                  # T78b: samples of the components A1 dropped
+        if codes is not None and (e.surface_split or str(e.surface_target_check) != "off" or hull_fill):
+            t1 = time.perf_counter()
+            region = post_mod.region_from_codes(views, codes, voxel=float(graph_config().voxel))
+            post["region"] = post_mod.extent_record(region)
+            if e.surface_split:   # A1
+                c = self.config.clustering
+                if c.attention_split_radius is None:
+                    raise ValueError("esdf.surface_split 는 clustering.attention_split_radius 의 재군집 반경을 씁니다 — "
+                                     "split 이 꺼진 설정 (null) 에서는 켤 수 없습니다")
+                mo = self._max_opening
+                keep, post["split"] = post_mod.split_region(
+                    region, max_opening=mo.value_m if mo.known else None, radius=float(c.attention_split_radius),
+                    min_points=int(c.min_points), min_ratio=float(c.attention_split_ratio),
+                    partition=bool(c.attention_split_partition),
+                    partition_min_drop=float(c.attention_partition_min_drop),
+                    **({} if getattr(e, "surface_reattach_hull_mm", None) is None      # T78b
+                       else {"reattach_hull": float(e.surface_reattach_hull_mm) * 1e-3}))
+                if post["split"]["applied"]:
+                    if hull_fill:   # T78b
+                        dropped = post_mod.pixel_points(views, region, ~keep)
+                    codes = post_mod.restrict_codes(codes, region, keep)
+                    region = post_mod.subset(region, keep)
+                    post["region_after_split"] = post_mod.extent_record(region)
+            if str(e.surface_target_check) != "off":   # A2
+                ok, post["target_check"] = post_mod.target_check(region, ats_points)
+                if not ok:
+                    codes = None
+                    surf["selection_applied"] = bool(surf.get("applied"))
+                    surf["applied"] = False
+                    surf["why"] = "not_ats_target"
+            if hull_fill and codes is not None:   # T78b: this request's accepted region → the hull the fill uses
+                post["hull"] = self._surface_hull_store(region, dropped)
+            post["ms"]["post"] = round((time.perf_counter() - t1) * 1e3, 3)
+        post["ms"]["total"] = round((time.perf_counter() - t0) * 1e3, 3)
+        surf["t78"] = post
         self._surface_frame = surf
-        self._surface_codes = res.codes
-        rec: dict[str, Any] = {"segmentation": res.codes is not None, "source": "attention_surface"}
-        if res.codes is None:
-            mem = self._oracle_memory_or_new()
-            rec["memory"] = {"n_samples": len(mem), "update": mem.n_updates, "updated": False}
+        self._surface_codes = codes
+        if codes is None:
+            if e.surface_keep_last:
+                rec["memory"] = self._oracle_carve(observations)
+            else:
+                rec["memory"] = {"n_samples": len(mem), "update": mem.n_updates, "updated": False}
             return rec
-        return self._oracle_fold(observations, res.codes,
-                                 {"target": None, "codes": {"attention_surface": 1}}, rec)
+        rec["segmentation"] = True
+        return self._oracle_fold(observations, codes, {"target": None, "codes": {"attention_surface": 1}}, rec)
 
     # --- IFG-CL2: attention-surface protection of the `ball_owned` split ---------------------------------------
     def _attention_surface_hybrid_update(self, observations, cameras, sphere_masks, render_masks) -> None:
@@ -1962,6 +2323,8 @@ class AG3S:
         # T32b S3: the hands at this frame's state — challengers do not count while the manipulated
         # object is hidden by the hand (`TargetConfirm.note_hand`, consumed by this grounding call).
         self._target_confirm.note_hand(self._hand_for_grounding(robot_state))
+        if self._target_confirm.vacancy_release:   # T81: this request's depth for the vacancy rule (off: not called)
+            self._target_confirm.note_views(self._vacancy_views(observations, depth, camera_intrinsics, T_base_cam))
         with profiler.stage("target_grounding"):
             grounding = ground_target(
                 attention_cloud,
@@ -2142,7 +2505,10 @@ class AG3S:
                         self._oracle_frame = self._attention_surface_update(
                             observations, cameras,
                             sphere_masks if sphere_masks is not None else {c.name: c.robot_mask for c in cameras},
-                            render_masks)
+                            render_masks,
+                            # T78 A2: the ATS target the region is checked against (only with `esdf.surface_*`).
+                            **({"ats_points": None if manipulated_geometry is None else manipulated_geometry.points}
+                               if self._t78_on() else {}))
                 elif extent == "attention_surface_hybrid":
                     # IFG-CL2: the same selection; its graph nodes protect the `ball_owned` split (no oracle memory).
                     with profiler.stage("attention_surface"):
@@ -2310,7 +2676,10 @@ class AG3S:
                     # T20 §3: `{id, state, age_frames, centroid, radius, n_points,
                     # last_seen_frame, switched_from, frame}` or None. The only way to tell,
                     # after the fact, whether contact permission was alive on an occluded frame.
-                    "manipulated": None if manipulated is None else manipulated.record(),
+                    "manipulated": (None if manipulated is None else manipulated.record())
+                    if self._target_confirm.vacancy_record is None else   # T81 (off: the line above)
+                    (manipulated.record() if manipulated is not None else
+                     {"id": None, "state": "none", "vacancy": dict(self._target_confirm.vacancy_record)}),
                     # T26: this frame's admissibility (per cluster, score order), the destination
                     # and the exclusion-gate verdict. `exclusion` is added after the set is built.
                     "admissibility": self._admissibility_frame_record(),
@@ -2762,6 +3131,34 @@ class AG3S:
                 return getattr(result, "depth_mask", None)
         return None
 
+    def _vacancy_views(self, observations, depth, camera_intrinsics, T_base_cam) -> list:
+        """T81: this request's cameras for `TargetConfirm.note_views` — depth in metres (`pointcloud.depth_scale`),
+        K, camera → base (wrist cameras by FK, as `_depth_cameras_from`) and the robot pixels the scene
+        reconstruction already decided (T38 B2, looked at — not taken; None when there are none)."""
+        from AG3S.ag3s.stages.target_vacancy import VacancyView
+
+        scale = float(self.config.pointcloud.depth_scale)
+        if not observations:
+            if depth is None or camera_intrinsics is None or T_base_cam is None:
+                return []
+            return [VacancyView("camera", np.asarray(depth, np.float64) * scale,
+                                np.asarray(camera_intrinsics, np.float64), np.asarray(T_base_cam, np.float64))]
+        pre = {id(seen): getattr(result, "depth_mask", None) for seen, result in self._frame_depth_masks}
+        out = []
+        for obs in observations:
+            if getattr(obs, "depth", None) is None:
+                continue
+            T = (np.asarray(obs.resolve_T_base_cam(self.robot_model), np.float64)
+                 if hasattr(obs, "resolve_T_base_cam") else np.asarray(obs.T_base_cam, np.float64))
+            mask = getattr(obs, "robot_mask", None)
+            if mask is None and pre.get(id(obs)) is not None:
+                mask = pre[id(obs)].mask
+            cam_id = getattr(obs, "camera_id", None)
+            out.append(VacancyView(cam_id.value if cam_id is not None else str(getattr(obs, "name", "camera")),
+                                   np.asarray(obs.depth, np.float64) * scale,
+                                   np.asarray(obs.camera_intrinsics, np.float64), T, mask))
+        return out
+
     def _hand_for_grounding(self, robot_state):
         """`HandSpheres` for T32b S3 at `robot_state`, or None (S3 then suppresses nothing).
 
@@ -3096,7 +3493,8 @@ class AG3S:
             # **점이 아니라 기하 범위로 지운다** (T13, 사용자 판정 "중심 + 반지름, 다만 테이블 면
             # 위로만"). 점으로는 사과를 **한 voxel도 지우지 못했다** — 표본점 112 개(그중 seed
             # 72 개)에 표면이 2,203 voxel 이고, 거리장은 성긴 제거에 꿈쩍하지 않는다.
-            target_free_ball = self._target_ball(
+            # T78 A5 (`esdf.surface_no_ball`, attention_surface only): no ball — the surface region is the extent.
+            target_free_ball = None if bool(getattr(cfg, "surface_no_ball", False)) else self._target_ball(
                 target_free_points, support_surfaces,
                 voxel=float(getattr(cfg, "fine_voxel_size", 0.0) or cfg.voxel_size))
         # 쥔 물체는 **양쪽에 동시에 있으면 안 된다** (A2). 파지가 닫히는 순간 그 물체는
@@ -3163,6 +3561,19 @@ class AG3S:
             if target_free_points is None:
                 oracle_record = {**dict(self._oracle_frame or {}), "applied": False,
                                  "why": "no_target_free_layer"}
+            elif extent == "attention_surface" and bool(getattr(cfg, "surface_keep_last", False)):
+                # T78 A3: the accepted regions' samples (this request's, else the last ones); none → nothing removed.
+                oracle_evidence, oracle_record = self._surface_memory_evidence(
+                    target, support_surfaces, target_free_ball)
+                if bool(getattr(cfg, "surface_hull_fill", False)):   # T78b
+                    oracle_evidence, oracle_record = self._surface_hull_fill(
+                        oracle_evidence, oracle_record, support_surfaces, robot_state, contact_context)
+                # --- T78f — begin: target contact allowance of the hand layer (None = off, the evidence as is)
+                if getattr(cfg, "surface_contact_allowance_mm", None) is not None and oracle_evidence is not None:
+                    allow_mm = float(cfg.surface_contact_allowance_mm)
+                    oracle_evidence = dataclasses.replace(oracle_evidence, contact_allowance_m=allow_mm * 1e-3)
+                    oracle_record = {**oracle_record, "allowance_mm": allow_mm, "n_allowance_extra": None}
+                # --- T78f — end
             elif extent == "attention_surface" and not (self._surface_frame or {}).get("applied"):
                 # IFG-CL1: no region this frame → the estimated extent (the memory is not used either).
                 oracle_record = {**dict(self._oracle_frame or {}), "applied": False,
@@ -3190,7 +3601,11 @@ class AG3S:
                         if cfg.backend == "curobo" and bool(getattr(cfg, "target_layer", False)) else None)
         roi_points = ([points, destination_points]
                       if cfg.backend == "curobo" and bool(getattr(cfg, "roi_carve", False)) else None)
+        # T83 — the grasp corridor carve of the fine target-free tier (None unless the caller gave a corridor).
+        corridor = (self._grasp_corridor_carve(points, target_free_points, support_surfaces, cfg)
+                    if self._grasp_corridor_request is not None else None)
         field = self._esdf_builder.update(depth_cameras, target_points=points,
+                                          **({} if corridor is None else {"grasp_corridor": corridor}),
                                           **({} if target_layer is None else {"target_layer": target_layer}),
                                           **({} if roi_points is None else {"roi_points": roi_points}),
                                           exclude_target=False,
@@ -3242,12 +3657,26 @@ class AG3S:
                                           **({"surface_protect": hybrid_protect}
                                              if hybrid_protect is not None else {}))
         self._record_geometry_version(field, target, frame_index, nontarget)
+        if corridor is not None:   # T83 — the builder's carve numbers into the corridor record
+            stats = getattr(field, "stats", None)
+            carve = ((stats.get("target_free") or {}).get("grasp_corridor")
+                     if isinstance(stats, dict) else None) or {}
+            self._grasp_corridor_record.update(
+                n_seeds_carved=carve.get("n_seeds_carved"), carve={k: v for k, v in carve.items()
+                                                                   if k not in ("carved_ijk", "origin")})
         if oracle_record is not None:
             stats = getattr(field, "stats", None)
             if isinstance(stats, dict) and isinstance(stats.get("target_free"), dict):
                 stats["target_free"]["oracle"] = oracle_record
                 if extent == "attention_surface":   # IFG-CL1
                     stats["target_free"]["attention_surface"] = dict(self._surface_frame or {})
+        # --- T78f — begin: the builder's allowance count into `target_exclusion.oracle` (only when on)
+        if oracle_record is not None and "allowance_mm" in oracle_record:
+            stats = getattr(field, "stats", None)
+            split = (((stats.get("target_free") or {}).get("oracle_split") if isinstance(stats, dict) else None)
+                     or {})
+            oracle_record["n_allowance_extra"] = split.get("n_allowance_extra")   # None = the builder did not split
+        # --- T78f — end
         if hybrid_record is not None:   # IFG-CL2
             stats = getattr(field, "stats", None)
             if isinstance(stats, dict) and isinstance(stats.get("target_free"), dict):

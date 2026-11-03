@@ -1,0 +1,52 @@
+{
+ "회귀211_k0": {
+  "request": 15,
+  "desc": "사과–바나나 맞닿음 (간격 ~1 mm)",
+  "BALL": {
+   "must_remove": 381,
+   "removed": 323,
+   "left": 58,
+   "removed_pct": 84.8,
+   "neighbour_removed_voxels": 103
+  },
+  "SURF": {
+   "must_remove": 381,
+   "removed": 318,
+   "left": 63,
+   "removed_pct": 83.5,
+   "neighbour_removed_voxels": 530
+  },
+  "S2": {
+   "must_remove": 381,
+   "removed": 283,
+   "left": 98,
+   "removed_pct": 74.3,
+   "neighbour_removed_voxels": 61
+  }
+ },
+ "허들119_k0": {
+  "request": 15,
+  "desc": "이웃 과일 ~20 mm 떨어짐",
+  "BALL": {
+   "must_remove": 313,
+   "removed": 223,
+   "left": 90,
+   "removed_pct": 71.2,
+   "neighbour_removed_voxels": 6
+  },
+  "SURF": {
+   "must_remove": 313,
+   "removed": 227,
+   "left": 86,
+   "removed_pct": 72.5,
+   "neighbour_removed_voxels": 0
+  },
+  "S2": {
+   "must_remove": 313,
+   "removed": 216,
+   "left": 97,
+   "removed_pct": 69.0,
+   "neighbour_removed_voxels": 0
+  }
+ }
+}

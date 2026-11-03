@@ -1,0 +1,525 @@
+{
+ "pick": {
+  "n_requests": 358,
+  "boundary_err": {
+   "BALL": 7995,
+   "SURF": 64124
+  },
+  "by_class": {
+   "BALL": {
+    "apple": 156239,
+    "none": 68852,
+    "apple_inside": 56804,
+    "apple_stem_leaf": 13339,
+    "robot": 8789,
+    "fruit": 7995
+   },
+   "SURF": {
+    "apple": 147903,
+    "none": 77573,
+    "apple_inside": 52775,
+    "apple_stem_leaf": 13716,
+    "robot": 9101,
+    "fruit": 34933,
+    "crate": 29191
+   }
+  },
+  "requests_with_neighbour_removed": {
+   "BALL": 255,
+   "SURF": 188
+  },
+  "n_removed": {
+   "BALL": 312018,
+   "SURF": 365192
+  },
+  "apple_left_frac_median": {
+   "BALL": 0.226,
+   "SURF": 0.263,
+   "n": 345,
+   "median_paired_diff_SURF_minus_BALL": 0.031
+  }
+ },
+ "pick_adjacent": {
+  "n_requests": 242,
+  "boundary_err": {
+   "BALL": 6521,
+   "SURF": 55982
+  },
+  "by_class": {
+   "BALL": {
+    "none": 32741,
+    "apple": 117302,
+    "apple_inside": 42841,
+    "apple_stem_leaf": 9390,
+    "fruit": 6521,
+    "robot": 7709
+   },
+   "SURF": {
+    "apple": 106899,
+    "none": 43631,
+    "apple_inside": 38929,
+    "apple_stem_leaf": 9641,
+    "robot": 8054,
+    "fruit": 34254,
+    "crate": 21728
+   }
+  },
+  "requests_with_neighbour_removed": {
+   "BALL": 205,
+   "SURF": 150
+  },
+  "n_removed": {
+   "BALL": 216504,
+   "SURF": 263136
+  },
+  "apple_left_frac_median": {
+   "BALL": 0.232,
+   "SURF": 0.2655,
+   "n": 234,
+   "median_paired_diff_SURF_minus_BALL": 0.03949999999999999
+  }
+ },
+ "place": {
+  "n_requests": 129,
+  "boundary_err": {
+   "BALL": 134,
+   "SURF": 9632
+  },
+  "by_class": {
+   "BALL": {
+    "none": 933,
+    "fruit": 134
+   },
+   "SURF": {
+    "none": 6691,
+    "crate": 8204,
+    "apple": 765,
+    "apple_inside": 72,
+    "apple_stem_leaf": 64,
+    "fruit": 1428
+   }
+  },
+  "requests_with_neighbour_removed": {
+   "BALL": 8,
+   "SURF": 11
+  },
+  "n_removed": {
+   "BALL": 1067,
+   "SURF": 17224
+  },
+  "apple_left_frac_median": {
+   "BALL": 1.0,
+   "SURF": 1.0,
+   "n": 16,
+   "median_paired_diff_SURF_minus_BALL": 0.0
+  }
+ },
+ "surface": {
+  "applied": 468,
+  "n": 487,
+  "why": {
+   "no_region": 19
+  },
+  "ms_median": 697.273,
+  "ms_p95": 767.5521,
+  "selected_extent_max_mm_median": 68.0
+ },
+ "parity_ball_vs_recorded": {
+  "n_matched": 487,
+  "n_requests": 487,
+  "equal": 161,
+  "median_abs_rel_diff": 0.004251700680272109
+ },
+ "verdict": {
+  "c1_boundary_half": false,
+  "c2_neighbour_requests": true,
+  "c3_apple_left": true,
+  "ball_boundary_lt_10": false,
+  "result": "not_better"
+ },
+ "per_run_pick": {
+  "가림121_k0": {
+   "n_requests": 23,
+   "boundary_err": {
+    "BALL": 0,
+    "SURF": 0
+   },
+   "by_class": {
+    "BALL": {
+     "apple": 14024,
+     "none": 2215,
+     "apple_inside": 5002,
+     "apple_stem_leaf": 1416,
+     "robot": 357
+    },
+    "SURF": {
+     "apple": 13826,
+     "none": 1901,
+     "apple_inside": 4875,
+     "apple_stem_leaf": 1422,
+     "robot": 361
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 0,
+    "SURF": 0
+   },
+   "n_removed": {
+    "BALL": 23014,
+    "SURF": 22385
+   },
+   "apple_left_frac_median": {
+    "BALL": 0.1925,
+    "SURF": 0.2185,
+    "n": 22,
+    "median_paired_diff_SURF_minus_BALL": 0.025999999999999995
+   }
+  },
+  "가림122_k0": {
+   "n_requests": 19,
+   "boundary_err": {
+    "BALL": 0,
+    "SURF": 0
+   },
+   "by_class": {
+    "BALL": {
+     "apple": 10993,
+     "apple_inside": 3894,
+     "none": 2083,
+     "apple_stem_leaf": 1176,
+     "robot": 276
+    },
+    "SURF": {
+     "apple": 10813,
+     "apple_inside": 3794,
+     "none": 1595,
+     "apple_stem_leaf": 1167,
+     "robot": 252
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 0,
+    "SURF": 0
+   },
+   "n_removed": {
+    "BALL": 18422,
+    "SURF": 17621
+   },
+   "apple_left_frac_median": {
+    "BALL": 0.186,
+    "SURF": 0.211,
+    "n": 17,
+    "median_paired_diff_SURF_minus_BALL": 0.032
+   }
+  },
+  "허들119_k0": {
+   "n_requests": 17,
+   "boundary_err": {
+    "BALL": 19,
+    "SURF": 0
+   },
+   "by_class": {
+    "BALL": {
+     "none": 2108,
+     "apple": 10642,
+     "apple_inside": 3456,
+     "apple_stem_leaf": 1127,
+     "fruit": 19,
+     "robot": 416
+    },
+    "SURF": {
+     "apple": 10444,
+     "none": 1573,
+     "apple_inside": 3379,
+     "apple_stem_leaf": 1127,
+     "robot": 402
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 5,
+    "SURF": 0
+   },
+   "n_removed": {
+    "BALL": 17768,
+    "SURF": 16925
+   },
+   "apple_left_frac_median": {
+    "BALL": 0.163,
+    "SURF": 0.2065,
+    "n": 16,
+    "median_paired_diff_SURF_minus_BALL": 0.033
+   }
+  },
+  "허들211_k0": {
+   "n_requests": 75,
+   "boundary_err": {
+    "BALL": 3001,
+    "SURF": 16014
+   },
+   "by_class": {
+    "BALL": {
+     "apple": 35091,
+     "apple_inside": 15731,
+     "none": 14745,
+     "apple_stem_leaf": 1177,
+     "fruit": 3001,
+     "robot": 3401
+    },
+    "SURF": {
+     "apple": 26804,
+     "apple_inside": 12718,
+     "none": 16626,
+     "apple_stem_leaf": 1212,
+     "fruit": 16014,
+     "robot": 3824
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 75,
+    "SURF": 75
+   },
+   "n_removed": {
+    "BALL": 73146,
+    "SURF": 77198
+   },
+   "apple_left_frac_median": {
+    "BALL": 0.483,
+    "SURF": 0.566,
+    "n": 75,
+    "median_paired_diff_SURF_minus_BALL": 0.10699999999999998
+   }
+  },
+  "허들850_k0": {
+   "n_requests": 18,
+   "boundary_err": {
+    "BALL": 25,
+    "SURF": 0
+   },
+   "by_class": {
+    "BALL": {
+     "apple": 11465,
+     "apple_inside": 3341,
+     "none": 2143,
+     "apple_stem_leaf": 1216,
+     "fruit": 25,
+     "robot": 281
+    },
+    "SURF": {
+     "apple": 11175,
+     "apple_inside": 3258,
+     "none": 1582,
+     "apple_stem_leaf": 1216,
+     "robot": 276
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 13,
+    "SURF": 0
+   },
+   "n_removed": {
+    "BALL": 18471,
+    "SURF": 17507
+   },
+   "apple_left_frac_median": {
+    "BALL": 0.175,
+    "SURF": 0.219,
+    "n": 17,
+    "median_paired_diff_SURF_minus_BALL": 0.05300000000000002
+   }
+  },
+  "허들954_k0": {
+   "n_requests": 75,
+   "boundary_err": {
+    "BALL": 1920,
+    "SURF": 8151
+   },
+   "by_class": {
+    "BALL": {
+     "none": 32671,
+     "fruit": 1920,
+     "apple": 15849,
+     "apple_inside": 5824,
+     "apple_stem_leaf": 1650,
+     "robot": 1585
+    },
+    "SURF": {
+     "apple": 18274,
+     "none": 31345,
+     "apple_inside": 5840,
+     "apple_stem_leaf": 1767,
+     "fruit": 688,
+     "robot": 1591,
+     "crate": 7463
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 74,
+    "SURF": 47
+   },
+   "n_removed": {
+    "BALL": 59499,
+    "SURF": 66968
+   },
+   "apple_left_frac_median": {
+    "BALL": 1.0,
+    "SURF": 0.755,
+    "n": 75,
+    "median_paired_diff_SURF_minus_BALL": 0.0
+   }
+  },
+  "허들1345_k0": {
+   "n_requests": 24,
+   "boundary_err": {
+    "BALL": 0,
+    "SURF": 0
+   },
+   "by_class": {
+    "BALL": {
+     "apple": 13920,
+     "none": 2672,
+     "apple_inside": 5067,
+     "apple_stem_leaf": 1357,
+     "robot": 447
+    },
+    "SURF": {
+     "apple": 13581,
+     "none": 2025,
+     "apple_inside": 4970,
+     "apple_stem_leaf": 1427,
+     "robot": 434
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 0,
+    "SURF": 0
+   },
+   "n_removed": {
+    "BALL": 23463,
+    "SURF": 22437
+   },
+   "apple_left_frac_median": {
+    "BALL": 0.185,
+    "SURF": 0.227,
+    "n": 22,
+    "median_paired_diff_SURF_minus_BALL": 0.043
+   }
+  },
+  "회귀119_k1": {
+   "n_requests": 17,
+   "boundary_err": {
+    "BALL": 12,
+    "SURF": 0
+   },
+   "by_class": {
+    "BALL": {
+     "apple": 10539,
+     "apple_inside": 3433,
+     "none": 1971,
+     "apple_stem_leaf": 1068,
+     "fruit": 12,
+     "robot": 484
+    },
+    "SURF": {
+     "apple": 10276,
+     "apple_inside": 3356,
+     "none": 1574,
+     "apple_stem_leaf": 1124,
+     "robot": 460
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 3,
+    "SURF": 0
+   },
+   "n_removed": {
+    "BALL": 17507,
+    "SURF": 16790
+   },
+   "apple_left_frac_median": {
+    "BALL": 0.168,
+    "SURF": 0.2115,
+    "n": 16,
+    "median_paired_diff_SURF_minus_BALL": 0.03599999999999999
+   }
+  },
+  "회귀211_k0": {
+   "n_requests": 26,
+   "boundary_err": {
+    "BALL": 1848,
+    "SURF": 10340
+   },
+   "by_class": {
+    "BALL": {
+     "apple": 16271,
+     "apple_inside": 5169,
+     "none": 3013,
+     "apple_stem_leaf": 1698,
+     "fruit": 1848,
+     "robot": 256
+    },
+    "SURF": {
+     "apple": 16047,
+     "apple_inside": 5034,
+     "none": 3166,
+     "apple_stem_leaf": 1740,
+     "fruit": 10340,
+     "robot": 243
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 25,
+    "SURF": 25
+   },
+   "n_removed": {
+    "BALL": 28255,
+    "SURF": 36570
+   },
+   "apple_left_frac_median": {
+    "BALL": 0.181,
+    "SURF": 0.194,
+    "n": 25,
+    "median_paired_diff_SURF_minus_BALL": 0.013000000000000012
+   }
+  },
+  "회귀954_k0": {
+   "n_requests": 64,
+   "boundary_err": {
+    "BALL": 1170,
+    "SURF": 29619
+   },
+   "by_class": {
+    "BALL": {
+     "none": 5231,
+     "fruit": 1170,
+     "apple": 17445,
+     "apple_inside": 5887,
+     "apple_stem_leaf": 1454,
+     "robot": 1286
+    },
+    "SURF": {
+     "apple": 16663,
+     "none": 16186,
+     "apple_inside": 5551,
+     "apple_stem_leaf": 1514,
+     "fruit": 7891,
+     "robot": 1258,
+     "crate": 21728
+    }
+   },
+   "requests_with_neighbour_removed": {
+    "BALL": 60,
+    "SURF": 41
+   },
+   "n_removed": {
+    "BALL": 32473,
+    "SURF": 70791
+   },
+   "apple_left_frac_median": {
+    "BALL": 0.6835,
+    "SURF": 0.73,
+    "n": 60,
+    "median_paired_diff_SURF_minus_BALL": 0.030000000000000027
+   }
+  }
+ }
+}

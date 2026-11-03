@@ -586,6 +586,9 @@ class Run:
         if getattr(cfg.collision, "palm_shell_margin", None) is not None:
             # AG3S-PRE-CORE-TO SCM — as `scene_from_constraint_set` (only when the command line gives it)
             extra["palm_shell_margin"] = float(cfg.collision.palm_shell_margin)
+        if float(getattr(cfg.collision, "support_surface_offset", 0.0) or 0.0) > 0.0:
+            # T67 ① — as `scene_from_constraint_set` (only when the command line / variant gives it)
+            extra["support_surface_offset"] = float(cfg.collision.support_surface_offset)
         if held is not None and fit is not None:
             # read only by the HM rows and the look-ahead tail (`_held_rows_class`) — inert otherwise
             extra["held_capture_spheres"] = fit
