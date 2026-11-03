@@ -27,7 +27,8 @@
 2. **T90 hidden probe 는 RB-Y1 checkpoint 의 hidden state 로 학습했다.** pi05_libero 에는 그대로 쓸 수 없다. T86 절차 (시뮬레이터 정답 target mask 로 patch probe 학습) 를 LIBERO 계열 기록으로 다시 해야 한다. 같은 날 사용자 판정 "Panda 표면 추출은 Panda 용 head · layer 사용" 과 같은 맥락이다.
 3. **T91c 의 손가락 사이 ROI 와 문턱 (gap_tau 0.3, d 0.03–0.09 m) 은 RB-Y1 손목 카메라 · 그리퍼 기준이다.** Panda 손목 카메라 (eye-in-hand) 의 depth · 그리퍼 폭에 맞춰 ROI 를 다시 정한다. T91b SafeLIBERO offline 은 위험한 오판 4.3 % (기준 2 %) 로 미통과였고, 오판 21/24 는 VLA 가 다른 bowl 을 쥔 2 episode 였다 (`outputs/2026-11-03_T91b_…`).
 4. **T92 는 로봇 독립이다** (측정 개도 · 실행 feedback 만). 다만 benchmark 의 지금 최종 구성은 HSR6 규칙 · `--hsr5` 계열을 쓰므로, `--subtask-from-latch` 는 `--hsr5` · `--hsr-gt-stage` · `--no-subtask-gate` 와 같이 줄 수 없다 (argparse 거절). 비교 구성을 짤 때 이 조합을 정리한다.
-5. 접촉 허용 범위는 앞선 이식 문서 D1 대로 벤치마크에서는 target (쥘 때) 과 목적지 (놓을 때) 로만 좁힌다.
+5. **접촉 허용 (D1, 사용자 확인 2026-11-03 18:2x KST):** benchmark profile 은 `--neighbour-contact-mm` · `--neighbour-palm-contact-mm` 와 평가의 이웃 과일 면제를 **모두 끈다.** 접촉 허용은 target (쥘 때) · 목적지 (놓을 때) 만 — MuJoCo 데모 profile 과 다른 점으로 명시한다. 이 두 허용이 RB-Y1 쥐기를 7 → 9 / 10 으로 올렸으므로 **LIBERO (장애물 없음) pilot 에서 끈 비용을 먼저 잰다.**
+6. **최종 구성 갱신 (사용자 2026-11-03 18:2x KST): P0m 채택** — T92 (`--subtask-from-latch`) 가 benchmark 단계 출처의 기본이다 (`kv_L4_v1` 없음). hull 채우기 · 접촉 여유 10 mm 는 development T92b 결과에 따라 빠질 수 있다 (차이 ≤ 2 run 이면 뺌) — 결과가 나오면 알린다.
 
 ## 3. 시험 설계 (benchmark 세션이 정하고 결과 전에 고정)
 
