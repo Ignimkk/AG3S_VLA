@@ -1,0 +1,122 @@
+{
+ "source": {
+  "P0m": "/mnt/dev/AG3S_VLA-storage/results/development/20261103T133225+0900_ed0145a692ad_6e6100ee51f4/verify/T92/agg/rescore_p0m.json",
+  "P0": "verify/T88/agg/rescore2.json (P0)",
+  "final_1029": "outputs/2026-10-29_바구니위허들7장면_VLA단독대AG3S최종구성_closedloop/README.md table"
+ },
+ "definition": "new definition (DECISIONS_20261103 D2): grasping-hand neighbour-fruit contact before GT held with palm-apple <= 60 mm excused",
+ "rows": [
+  {
+   "run": "회귀211_k0",
+   "P0": "성공",
+   "P0m": "성공",
+   "final_1029": null
+  },
+  {
+   "run": "회귀954_k0",
+   "P0": "성공",
+   "P0m": "성공",
+   "final_1029": null
+  },
+  {
+   "run": "회귀119_k1",
+   "P0": "성공",
+   "P0m": "성공",
+   "final_1029": null
+  },
+  {
+   "run": "가림121_k0",
+   "P0": "성공",
+   "P0m": "성공",
+   "final_1029": null
+  },
+  {
+   "run": "가림122_k0",
+   "P0": "성공",
+   "P0m": "성공",
+   "final_1029": null
+  },
+  {
+   "run": "허들119_k0",
+   "P0": "성공",
+   "P0m": "성공",
+   "final_1029": "성공"
+  },
+  {
+   "run": "허들954_k0",
+   "P0": "성공",
+   "P0m": "성공",
+   "final_1029": "쥐지못함"
+  },
+  {
+   "run": "허들1345_k0",
+   "P0": "성공",
+   "P0m": "성공",
+   "final_1029": "쥐지못함"
+  },
+  {
+   "run": "허들850_k0",
+   "P0": "성공",
+   "P0m": "성공",
+   "final_1029": "성공"
+  },
+  {
+   "run": "허들119_k1",
+   "P0": null,
+   "P0m": "허들접촉",
+   "final_1029": "성공"
+  },
+  {
+   "run": "허들250_k0",
+   "P0": null,
+   "P0m": "허들접촉",
+   "final_1029": "허들 스침"
+  },
+  {
+   "run": "허들250_k1",
+   "P0": null,
+   "P0m": "성공",
+   "final_1029": "성공"
+  },
+  {
+   "run": "허들320_k0",
+   "P0": null,
+   "P0m": "못놓음",
+   "final_1029": "허들 스침"
+  },
+  {
+   "run": "허들320_k1",
+   "P0": null,
+   "P0m": "쥐지못함",
+   "final_1029": "성공"
+  },
+  {
+   "run": "허들850_k1",
+   "P0": null,
+   "P0m": "성공",
+   "final_1029": "성공"
+  },
+  {
+   "run": "허들954_k1",
+   "P0": null,
+   "P0m": "성공",
+   "final_1029": "쥐지못함"
+  },
+  {
+   "run": "허들1345_k1",
+   "P0": null,
+   "P0m": "못놓음",
+   "final_1029": "놓침"
+  }
+ ],
+ "counts": {
+  "set9": {
+   "P0": 9,
+   "P0m": 9
+  },
+  "hurdle12": {
+   "P0m": 7,
+   "final_1029": 6
+  }
+ }
+}
