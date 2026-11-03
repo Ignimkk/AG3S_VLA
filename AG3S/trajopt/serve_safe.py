@@ -2572,6 +2572,43 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--subtask-probe", default=None, metavar="NPZ",
                     help="subtask probe asset (`clustering.subtask_probe_path`). 안 주면 동봉 "
                          "AG3S/ag3s/asset/subtask_probe/kv_L4_v1.npz")
+    # --- T92 — begin
+    ap.add_argument("--subtask-from-latch", action="store_true",
+                    help="T92 — 3 단계 gate 의 label (pick · place · home) 을 kv_L4_v1 probe 대신 이번 요청의 grasp latch phase 에서 "
+                         "만든다 (SEARCHING · LATCHED · CLOSING → pick, HELD → place, PLACED → home; phase 를 모르면 label 없음). "
+                         "학습한 분류기 없이 물리 신호 (측정 개도 · 실행 feedback) 로만 단계가 정해진다. AG3S 의 debounce 는 그대로. "
+                         "probe 는 계속 계산돼도 gate 에는 안 들어간다. 기록 summary_json.subtask_source=\"latch\". "
+                         "--no-subtask-gate · --hsr5 · --hsr-gt-stage 와는 함께 못 준다. 기본 off")
+    # --- T92 — end
+    # --- T91c — begin
+    ap.add_argument("--subtask-from-phase-machine", action="store_true",
+                    help="T91c — 3 단계 gate 의 label (pick · place · home) 을 T91b 단계 인식기 (PhaseMachine) 의 5 단계에서 만든다 "
+                         "(approach · grasp → pick, carry · place → place, retreat → home). 입력은 물리 신호뿐이다: 쥐는 손의 측정 개도 · "
+                         "손 EE site · ATS target / 목적지 중심 (직전 요청 값) · VLA chunk 의 gripper 열 · 손목 카메라 depth 의 손가락 사이 "
+                         "표면 비율 (요청의 ag3s/depth/wrist_cam_l|r). 빈손으로 닫은 것은 carry 로 읽지 않는다. 학습한 분류기 없음, "
+                         "AG3S 의 debounce 는 그대로. 기록 summary_json.subtask_source=\"phase_machine\" + phase_machine. "
+                         "--subtask-from-latch · --hsr5 · --hsr-gt-stage · --no-subtask-gate 와는 함께 못 준다. 기본 off")
+    # --- T91c — end
+    # --- T93 — begin
+    ap.add_argument("--fm-guide", action="store_true",
+                    help="T93 — VLA (pi0.5) flow-matching 샘플링을 TrajOpt 와 같은 거리장 충돌 비용으로 유도한다. 요청마다 VLA 를 한 번 "
+                         "샘플링해 (noise 를 명시적으로 기록) TrajOpt reference 의 위반 > 0 이면 같은 관측 · 같은 noise 로 다시 샘플링하되 "
+                         "flow 단계마다 x0 예측의 충돌 비용 gradient 로 밀고, 유도 chunk 의 위반이 더 낮으면 그것을 reference 로 쓴다 "
+                         "(TrajOpt · HOLD 판정 · gripper 열은 그대로). 위반 ≤ 0 인 요청은 꺼진 서버와 bit 동일. "
+                         "기록 to.metrics.fm_guide. --no-safe · --no-perception 과는 함께 못 준다. 기본 off")
+    ap.add_argument("--fm-guide-scale", type=float, default=None, metavar="LAMBDA",
+                    help="T93 — x_next -= LAMBDA * g (g = 비용 gradient 를 x 공간으로 되돌린 것). 기본 "
+                         f"{FM_GUIDE_DEFAULTS['scale']}. --fm-guide 와 함께만")
+    ap.add_argument("--fm-guide-steps", type=int, default=None, metavar="N",
+                    help="T93 — 유도하는 flow 단계 = 마지막 N 개 (전체 단계 수 이상이면 전부). 기본 "
+                         f"{FM_GUIDE_DEFAULTS['steps']}. --fm-guide 와 함께만")
+    ap.add_argument("--fm-guide-max-step-rad", type=float, default=None, metavar="RAD",
+                    help="T93 — 한 flow 단계에서 한 관절 열이 유도로 바뀌는 상한 (rad, 물리 공간). 기본 "
+                         f"{FM_GUIDE_DEFAULTS['max_step_rad']}. --fm-guide 와 함께만")
+    ap.add_argument("--fm-guide-sweep", default=None, metavar="SCALE:STEPS:MAXSTEP[,...]",
+                    help="T93 smoke 전용 (기본 off) — 위반 > 0 인 요청을 이 설정들로도 다시 샘플링하고 pure_callback 변형의 지연도 재서 "
+                         "to.metrics.fm_guide.sweep 에만 기록한다. 쓰는 chunk 는 바뀌지 않는다. --fm-guide 와 함께만")
+    # --- T93 — end
     # T46c A12 (W1) — begin
     ap.add_argument("--placed-no-seed-certify", action="store_true",
                     help="T46c W1 — PLACED 뒤 확정 label home (subtask gate on) 에서 grounding 이 "
@@ -3092,6 +3129,171 @@ def hsr_gt_stage_on(args) -> bool:
     return bool(getattr(args, "hsr_gt_stage", False))
 
 
+# --- T92 — begin
+def subtask_from_latch_on(args) -> bool:
+    """T92 — `--subtask-from-latch` given."""
+    return bool(getattr(args, "subtask_from_latch", False))
+
+
+def reject_subtask_from_latch(ap: argparse.ArgumentParser, args) -> None:
+    """T92 — `--subtask-from-latch` that would do nothing, or collide with another source of the gate label, is refused."""
+    if not subtask_from_latch_on(args):
+        return
+    if getattr(args, "subtask_gate", None) is False:
+        ap.error("--subtask-from-latch 는 3 단계 gate 의 label 출처입니다 — gate 를 끄는 --no-subtask-gate 와 함께 줄 수 없습니다")
+    if getattr(args, "hsr5", None) is not None or getattr(args, "hsr_gt_stage", False):
+        ap.error("--subtask-from-latch 와 --hsr5 (또는 --hsr-gt-stage) 는 둘 다 gate label 의 출처입니다 — 하나만 주십시오")
+    if _label_unavailable(args):
+        ap.error("--subtask-from-latch 는 SafePolicy 와 AG3S 의 gate 가 필요합니다 (--no-safe · --no-attention · "
+                 "--no-perception 은 그 중 하나를 끕니다) — 그대로 띄우면 gate 가 꺼진 서버가 뜹니다")
+
+
+def subtask_from_latch_kwargs(args) -> dict:
+    """T92 — `SafePolicy(**...)`: `{"subtask_from_latch": True}` only when on (off: no kwarg, the call as before)."""
+    return {"subtask_from_latch": True} if subtask_from_latch_on(args) else {}
+
+
+def subtask_from_latch_record_meta(args) -> dict:
+    """T92 — keys added to the server record's `subtask` section, only when on."""
+    return {"source": "latch"} if subtask_from_latch_on(args) else {}
+
+
+def announce_subtask_from_latch(args) -> None:
+    """T92 — one start line when on."""
+    if subtask_from_latch_on(args):
+        logging.warning("subtask gate label from grasp latch (T92): ON (SEARCHING·LATCHED·CLOSING→pick, HELD→place, "
+                        "PLACED→home; the kv_L4_v1 probe does not feed the gate)")
+# --- T92 — end
+
+
+# --- T91c — begin
+def subtask_from_phase_machine_on(args) -> bool:
+    """T91c — `--subtask-from-phase-machine` given."""
+    return bool(getattr(args, "subtask_from_phase_machine", False))
+
+
+def reject_subtask_from_phase_machine(ap: argparse.ArgumentParser, args) -> None:
+    """T91c — `--subtask-from-phase-machine` that collides with another source of the gate label, or would do nothing, is refused."""
+    if not subtask_from_phase_machine_on(args):
+        return
+    if getattr(args, "subtask_gate", None) is False:
+        ap.error("--subtask-from-phase-machine 은 3 단계 gate 의 label 출처입니다 — gate 를 끄는 --no-subtask-gate 와 함께 줄 수 없습니다")
+    if getattr(args, "subtask_from_latch", False):
+        ap.error("--subtask-from-phase-machine 과 --subtask-from-latch 는 둘 다 gate label 의 출처입니다 — 하나만 주십시오")
+    if getattr(args, "hsr5", None) is not None or getattr(args, "hsr_gt_stage", False):
+        ap.error("--subtask-from-phase-machine 과 --hsr5 (또는 --hsr-gt-stage) 는 둘 다 gate label 의 출처입니다 — 하나만 주십시오")
+    if _label_unavailable(args):
+        ap.error("--subtask-from-phase-machine 은 SafePolicy 와 AG3S 의 gate 가 필요합니다 (--no-safe · --no-attention · "
+                 "--no-perception 은 그 중 하나를 끕니다) — 그대로 띄우면 gate 가 꺼진 서버가 뜹니다")
+
+
+def subtask_from_phase_machine_kwargs(args) -> dict:
+    """T91c — `SafePolicy(**...)`: `{"subtask_from_phase_machine": True}` only when on (off: no kwarg, the call as before)."""
+    return {"subtask_from_phase_machine": True} if subtask_from_phase_machine_on(args) else {}
+
+
+def subtask_from_phase_machine_record_meta(args) -> dict:
+    """T91c — keys added to the server record's `subtask` section, only when on."""
+    return {"source": "phase_machine"} if subtask_from_phase_machine_on(args) else {}
+
+
+def announce_subtask_from_phase_machine(args) -> None:
+    """T91c — one start line when on."""
+    if subtask_from_phase_machine_on(args):
+        logging.warning("subtask gate label from the T91b phase machine (T91c): ON (approach·grasp→pick, carry·place→place, "
+                        "retreat→home; wrist depth between the fingertips decides carry; the kv_L4_v1 probe and the latch do not "
+                        "feed the gate)")
+# --- T91c — end
+
+
+# --- T93 — begin
+#: T93 — defaults of `--fm-guide-*`, fixed from the T93 smoke (single source: `fm_guide.py`).
+from AG3S.trajopt.fm_guide import DEFAULT_MAX_STEP_RAD as _FM_MAX_STEP, DEFAULT_SCALE as _FM_SCALE, DEFAULT_STEPS as _FM_STEPS
+
+FM_GUIDE_DEFAULTS = {"scale": _FM_SCALE, "steps": _FM_STEPS, "max_step_rad": _FM_MAX_STEP}
+
+
+def fm_guide_on(args) -> bool:
+    """T93 — `--fm-guide` given."""
+    return bool(getattr(args, "fm_guide", False))
+
+
+def reject_fm_guide(ap: argparse.ArgumentParser, args) -> None:
+    """T93 — the tuning flags without `--fm-guide`, and `--fm-guide` where there is nothing to guide, are refused."""
+    tuning = [n for n in ("fm_guide_scale", "fm_guide_steps", "fm_guide_max_step_rad", "fm_guide_sweep")
+              if getattr(args, n, None) is not None]
+    if not fm_guide_on(args):
+        if tuning:
+            ap.error("--fm-guide-scale · --fm-guide-steps · --fm-guide-max-step-rad · --fm-guide-sweep 는 --fm-guide 의 인자입니다 — "
+                     "함께 주십시오")
+        return
+    if getattr(args, "no_safe", False) or getattr(args, "no_perception", False):
+        ap.error("--fm-guide 는 SafePolicy 의 TrajOpt 거리장 비용을 씁니다 (--no-safe · --no-perception 은 그것을 안 만듭니다)")
+    if getattr(args, "fm_guide_scale", None) is not None and not (
+            math.isfinite(args.fm_guide_scale) and args.fm_guide_scale >= 0.0):
+        ap.error(f"--fm-guide-scale 는 0 이상의 수입니다 (받은 값 {args.fm_guide_scale})")
+    if getattr(args, "fm_guide_steps", None) is not None and args.fm_guide_steps < 1:
+        ap.error(f"--fm-guide-steps 는 1 이상입니다 (받은 값 {args.fm_guide_steps})")
+    if getattr(args, "fm_guide_max_step_rad", None) is not None and not (
+            math.isfinite(args.fm_guide_max_step_rad) and args.fm_guide_max_step_rad > 0.0):
+        ap.error(f"--fm-guide-max-step-rad 는 0 보다 큰 rad 입니다 (받은 값 {args.fm_guide_max_step_rad})")
+
+
+def fm_guide_record_meta(args) -> dict:
+    """T93 — `{"fm_guide": {...config}}` for the server record's meta, only when on (off: `{}`, the meta as before)."""
+    cfg = fm_guide_config_from_args(args)
+    return {} if cfg is None else {"fm_guide": cfg.record()}
+
+
+def fm_guide_sweep_from_args(args) -> tuple:
+    """T93 smoke — `--fm-guide-sweep SCALE:STEPS:MAXSTEP,...` -> a tuple of `FmGuideConfig` (empty when not given)."""
+    spec = getattr(args, "fm_guide_sweep", None)
+    if not spec:
+        return ()
+    from AG3S.trajopt.fm_guide import FmGuideConfig
+
+    out = []
+    for item in str(spec).split(","):
+        scale, steps, cap = item.split(":")
+        out.append(FmGuideConfig(scale=float(scale), steps=int(steps), max_step_rad=float(cap)))
+    return tuple(out)
+
+
+def fm_guide_config_from_args(args):
+    """T93 — the `FmGuideConfig` of the flags (None = off)."""
+    if not fm_guide_on(args):
+        return None
+    from AG3S.trajopt.fm_guide import FmGuideConfig
+
+    given = {k: v for k, v in (("scale", args.fm_guide_scale), ("steps", args.fm_guide_steps),
+                               ("max_step_rad", args.fm_guide_max_step_rad)) if v is not None}
+    return FmGuideConfig(**given)
+
+
+def fm_guide_build(args, served_policy, model_config=None):
+    """T93 — `{"fm_guide": FlowGuide}` for `SafePolicy(**...)`, only when on (off: `{}`, no kwarg, the call as before).
+    The jitted sampler is compiled here (a fake observation of the model's shapes) so request 1 does not pay for it."""
+    cfg = fm_guide_config_from_args(args)
+    if cfg is None:
+        return {}
+    from AG3S.trajopt.fm_guide import FlowGuide
+
+    guide = FlowGuide(served_policy, cfg, sweep=fm_guide_sweep_from_args(args))
+    logging.warning("VLA flow guidance (T93): ON scale=%g steps=%d (of %d flow steps) max_step=%g rad · violation > 0 requests "
+                    "are resampled with the same observation and noise; the guided chunk is the TrajOpt reference only if "
+                    "its violation is lower", cfg.scale, min(cfg.steps, guide.num_steps), guide.num_steps, cfg.max_step_rad)
+    if model_config is not None:
+        try:
+            logging.warning("VLA flow guidance (T93): sampler compiled in %.1f s", guide.warm_up(model_config))
+        except Exception:  # noqa: BLE001 — first guided request compiles instead
+            import traceback
+
+            logging.warning("VLA flow guidance (T93): warm-up failed; the first guided request compiles:\n%s",
+                            traceback.format_exc())
+    return {"fm_guide": guide}
+# --- T93 — end
+
+
 def hsr5_config_from_args(args):
     """T82 — `hsr5.Hsr5Config` for `--hsr5 [NPZ]`, or None when off."""
     spec = getattr(args, "hsr5", None)
@@ -3542,6 +3744,9 @@ def reject_bad_flag_combinations(ap: argparse.ArgumentParser, args) -> None:
     # T57-A — end
     reject_hsr6_flags(ap, args)   # AG3S-CORE-EVAL-HSR6
     reject_hsr5_flags(ap, args)   # T82
+    reject_subtask_from_latch(ap, args)   # T92
+    reject_subtask_from_phase_machine(ap, args)   # T91c
+    reject_fm_guide(ap, args)   # T93
     if getattr(args, "held_cover_cap_mm", None) is not None and not (
             args.held_cover_cap_mm >= 0.0 and math.isfinite(args.held_cover_cap_mm)):
         ap.error(f"--held-cover-cap-mm 는 0 이상의 mm 입니다 (받은 값 {args.held_cover_cap_mm})")
@@ -4457,9 +4662,14 @@ def main() -> None:
                       # SUBTASK-c — **항상 남긴다**: 이 키가 없는 기록은 SUBTASK-c 전이다.
                       "subtask": {"gate": bool(args.subtask_gate),
                                   "probe": args.subtask_probe or "shipped:kv_L4_v1",
+                                  **subtask_from_latch_record_meta(args),   # T92 — only when on
+                                  **subtask_from_phase_machine_record_meta(args),   # T91c — only when on
                                   # T46c A12 (W1) — 켰을 때만 키가 생긴다.
                                   **({"placed_no_seed_certify": True}
                                      if getattr(args, "placed_no_seed_certify", False) else {})},
+                      # --- T93 — begin: 켰을 때만 키가 생긴다.
+                      **fm_guide_record_meta(args),
+                      # --- T93 — end
                       # T57-A — 켰을 때만 키가 생긴다.
                       **t57a_record_meta(args),
                       # IFG-CL1 — 켰을 때만 키가 생긴다.
@@ -4613,7 +4823,12 @@ def main() -> None:
             **({"hsr6": hsr6_flags_from_args(args)} if hsr6_flags_from_args(args) is not None else {}),
             # T82 — 켰을 때만 (기본 off = 인자 없음).
             **({"hsr5": hsr5_config_from_args(args)} if hsr5_config_from_args(args) is not None else {}),
+            **subtask_from_latch_kwargs(args),   # T92 — only when on (default off = no kwarg)
+            **subtask_from_phase_machine_kwargs(args),   # T91c — only when on (default off = no kwarg)
+            **fm_guide_build(args, served_policy, _config.get_config(args.config).model),   # T93 — only when on (default off = no kwarg)
         )
+        announce_subtask_from_latch(args)   # T92
+        announce_subtask_from_phase_machine(args)   # T91c
         # **어느 모드로 떠 있는지 시작할 때 크게 말한다.** legacy backend 경고와 같은 이유다 —
         # 조용히 shadow 로 떠 있으면(또는 shadow 가 아닌 채로) 로그를 읽는 사람이 그 실행이
         # 로봇을 움직였는지 아닌지 알 방법이 없다.

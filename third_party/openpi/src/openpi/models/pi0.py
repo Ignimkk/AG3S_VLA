@@ -225,6 +225,9 @@ class Pi0(_model.BaseModel):
         num_steps: int | at.Int[at.Array, ""] = 10,
         noise: at.Float[at.Array, "b ah ad"] | None = None,
         guidance_fn: Callable[[at.Array, at.Array], at.Array] | None = None,
+        # --- T93 — begin
+        guidance_xv_fn: Callable[[at.Array, at.Array, at.Array, at.Array, at.Array], at.Array] | None = None,
+        # --- T93 — end
     ) -> _model.Actions:
         # `guidance_fn` is an OPTIONAL, inference-only, post-Euler denoising hook. When provided, it is
         # called with (candidate, t_next) after each standard Euler update and must return a corrected
@@ -279,6 +282,13 @@ class Pi0(_model.BaseModel):
 
             x_next = x_t + dt * v_t
             time_next = time + dt
+            # --- T93 — begin
+            if guidance_xv_fn is not None:
+                # Second OPTIONAL hook (flow-matching guidance, AG3S/trajopt/fm_guide.py): sees the velocity too, so it can form
+                # the x0 prediction x_hat0 = x_t - t * v_t (t = 1 is noise). Returns the corrected x_next. None (default) = this
+                # block is not traced and the loop is byte-for-byte the one above.
+                x_next = guidance_xv_fn(x_t, v_t, time, x_next, time_next)
+            # --- T93 — end
             if guidance_fn is not None:
                 # Post-Euler guidance hook (e.g. SEAM/VLS). Identity when guidance_fn is None.
                 x_next = guidance_fn(x_next, time_next)
@@ -291,3 +301,36 @@ class Pi0(_model.BaseModel):
 
         x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
         return x_0
+
+    # --- T93 — begin
+    # The same denoising loop split in two jit-able pieces, so a caller can run it step by step from Python and put host-side
+    # work (a collision cost on the x0 prediction) between the steps without a callback inside the compiled loop. `sample_actions`
+    # above is untouched; AG3S/trajopt/fm_guide.py checks that driving these two reproduces it.
+    def sample_prefix(self, observation: _model.Observation):
+        """`(preprocessed observation, prefix_mask, kv_cache)` — the one prefix pass of `sample_actions`."""
+        observation = _model.preprocess_observation(None, observation, train=False)
+        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        positions = jnp.cumsum(prefix_mask, axis=1) - 1
+        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        return observation, prefix_mask, kv_cache
+
+    def sample_velocity(self, observation: _model.Observation, prefix_mask, kv_cache, x_t, time):
+        """`v_t` — the body of `sample_actions`' `step` (`observation` is `sample_prefix`'s preprocessed one)."""
+        batch_size = observation.state.shape[0]
+        suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
+            observation, x_t, jnp.broadcast_to(time, batch_size)
+        )
+        suffix_attn_mask = make_attn_mask(suffix_mask, suffix_ar_mask)
+        prefix_attn_mask = einops.repeat(prefix_mask, "b p -> b s p", s=suffix_tokens.shape[1])
+        full_attn_mask = jnp.concatenate([prefix_attn_mask, suffix_attn_mask], axis=-1)
+        positions = jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
+        (prefix_out, suffix_out), _ = self.PaliGemma.llm(
+            [None, suffix_tokens],
+            mask=full_attn_mask,
+            positions=positions,
+            kv_cache=kv_cache,
+            adarms_cond=[None, adarms_cond],
+        )
+        return self.action_out_proj(suffix_out[:, -self.action_horizon :])
+    # --- T93 — end

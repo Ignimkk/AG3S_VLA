@@ -141,6 +141,16 @@ class TrajOptChunkRefiner(DecodedChunkRefiner):
                 + traceback.format_exc(limit=6))
             return chunk
 
+        # --- T93 — begin: `serve_safe --fm-guide` — a request whose chunk violates is resampled from the VLA with the collision
+        # cost steering the flow (`fm_guide.guide_reference`); the guided chunk replaces `chunk` only when its violation is lower.
+        # No `fm_resample` in the context (the default) = this block does nothing.
+        fm_record = None
+        fm_resample = None if context is None else context.get("fm_resample")
+        if fm_resample is not None:
+            from AG3S.trajopt.fm_guide import guide_reference
+
+            chunk, fm_record = guide_reference(fm_resample, self.optimizer, self.layout, chunk, q_now, scene, planned)
+        # --- T93 — end
         reference = self.layout.chunk_to_trajectory(chunk)[:, :planned]
         previous = self._continuity_reference(context, planned)
 
@@ -204,6 +214,8 @@ class TrajOptChunkRefiner(DecodedChunkRefiner):
             result.metrics["qp_backend"] = cuda_record_since(qp_mark)
         if rate_off:
             result.metrics["deflection_rate_off_by"] = str(rate_off)
+        if fm_record is not None:   # T93 (the key exists only with --fm-guide)
+            result.metrics["fm_guide"] = fm_record
         if context is not None and context.get("joint_track_scale") is not None:
             result.metrics["joint_track_scale"] = [round(float(v), 4) for v in context["joint_track_scale"]]
         # T37 — 이 청크의 목적함수에 continuity 항이 **들어갔나**, 아니면 왜 빠졌나. `metrics` 에 싣는
